@@ -1,214 +1,456 @@
 # ChatGPT Drop File (dm2)
 
-The target is the `d = 11` quartic obstruction:
+## Question
 
-```lean
-theorem quartic_no_sol_d11 (s t : ℤ) (hcop : Int.gcd s 11 = 1) :
-    s ^ 4 + 121 * s ^ 2 - 14641 = t ^ 2 → False
-```
-
-For `d = 11`, a compact proof comes from the same Pellian factorization that appears naturally for the quartic:
+For the curve
 
 ```text
-(2*s^2 + d^2)^2 - (2*t)^2 = 5*d^4.
+E : y² = x³ + x² - x = x(x² + x - 1)
 ```
 
-With `d = 11`, this gives
+with the 2-isogeny
 
 ```text
-(2*s^2 + 121 - 2*t) * (2*s^2 + 121 + 2*t) = 73205 = 5*11^4.
+φ : E  → E'    with kernel {(O), (0,0)}
+φ̂ : E' → E    with kernel {(O), (0,0)},
 ```
 
-Both factors are positive.  Taking the smaller factor, it is at most `271`, so a finite divisor check leaves only
+we want to connect the explicit 2-isogeny descent computation
 
 ```text
-A = 1, 5, 11, 55, 121.
+Sel^φ    = {1, -1}
+Sel^φ̂   = {1, 5}
 ```
 
-The corresponding values of `s^2` are respectively
+to a Lean proof that rational points on `E` have integer `x`-coordinate, and ultimately to `rank(E)=0`.
+
+The practical question is whether one must formalize abstract Galois cohomology
 
 ```text
-18241, 3601, 1606, 286, 121.
+H¹(Q, E[φ])
 ```
 
-The first four are not squares, each by a small consecutive-squares squeeze.  The last forces `s = ±11`, contradicting `Int.gcd s 11 = 1`.
+or whether a direct construction from rational points to explicit homogeneous spaces is enough.
 
-```lean
-import Mathlib
+## Short answer
 
-/-!
-# The `d = 11` quartic obstruction
+Yes: for the rational-point/integrality part, you can avoid formalizing Galois cohomology entirely.
 
-We prove that `s^4 + 121*s^2 - 14641 = t^2` has no integer solution when
-`Int.gcd s 11 = 1`.
--/
+The minimal useful formal interface is not the abstract statement
 
-private lemma lt_neg_of_sq_lt_sq_of_nonneg_of_neg {a t : ℤ}
-    (ha : 0 ≤ a) (ht : t < 0) (h : a ^ 2 < t ^ 2) : a < -t := by
-  by_contra hnot
-  have hta_nonneg : 0 ≤ t + a := by omega
-  have htm_nonpos : t - a ≤ 0 := by omega
-  have hprod : (t - a) * (t + a) ≤ 0 :=
-    mul_nonpos_of_nonpos_of_nonneg htm_nonpos hta_nonneg
-  have hdiff : t ^ 2 - a ^ 2 ≤ 0 := by
-    calc
-      t ^ 2 - a ^ 2 = (t - a) * (t + a) := by ring
-      _ ≤ 0 := hprod
-  nlinarith
-
-private lemma lt_of_sq_lt_sq_of_nonneg_of_pos {a t : ℤ}
-    (ha : 0 ≤ a) (ht : 0 < t) (h : a ^ 2 < t ^ 2) : a < t := by
-  by_contra hnot
-  have htm_nonpos : t - a ≤ 0 := by omega
-  have htp_nonneg : 0 ≤ t + a := by omega
-  have hprod : (t - a) * (t + a) ≤ 0 :=
-    mul_nonpos_of_nonpos_of_nonneg htm_nonpos htp_nonneg
-  have hdiff : t ^ 2 - a ^ 2 ≤ 0 := by
-    calc
-      t ^ 2 - a ^ 2 = (t - a) * (t + a) := by ring
-      _ ≤ 0 := hprod
-  nlinarith
-
-private lemma neg_lt_of_sq_lt_sq_of_nonneg_of_neg {b t : ℤ}
-    (hb : 0 ≤ b) (ht : t < 0) (h : t ^ 2 < b ^ 2) : -t < b := by
-  by_contra hnot
-  have htb_nonpos : t + b ≤ 0 := by omega
-  have htm_nonpos : t - b ≤ 0 := by omega
-  have hprod : 0 ≤ (t - b) * (t + b) :=
-    mul_nonneg_of_nonpos_of_nonpos htm_nonpos htb_nonpos
-  have hdiff : 0 ≤ t ^ 2 - b ^ 2 := by
-    calc
-      0 ≤ (t - b) * (t + b) := hprod
-      _ = t ^ 2 - b ^ 2 := by ring
-  nlinarith
-
-private lemma lt_of_sq_lt_sq_of_nonneg_of_pos_upper {b t : ℤ}
-    (hb : 0 ≤ b) (ht : 0 < t) (h : t ^ 2 < b ^ 2) : t < b := by
-  by_contra hnot
-  have htm_nonneg : 0 ≤ t - b := by omega
-  have htp_nonneg : 0 ≤ t + b := by omega
-  have hprod : 0 ≤ (t - b) * (t + b) :=
-    mul_nonneg htm_nonneg htp_nonneg
-  have hdiff : 0 ≤ t ^ 2 - b ^ 2 := by
-    calc
-      0 ≤ (t - b) * (t + b) := hprod
-      _ = t ^ 2 - b ^ 2 := by ring
-  nlinarith
-
-private lemma no_sq_between_consecutive (t a : ℤ) (ha : 0 ≤ a)
-    (hlow : a ^ 2 < t ^ 2) (hhigh : t ^ 2 < (a + 1) ^ 2) : False := by
-  have ht_sq_pos : 0 < t ^ 2 := by
-    nlinarith [sq_nonneg a]
-  have ht_ne : t ≠ 0 := by
-    intro ht0
-    simp [ht0] at ht_sq_pos
-  have ha1 : 0 ≤ a + 1 := by omega
-  rcases lt_or_gt_of_ne ht_ne with ht_neg | ht_pos
-  · have h1 : a < -t := lt_neg_of_sq_lt_sq_of_nonneg_of_neg ha ht_neg hlow
-    have h2 : -t < a + 1 := neg_lt_of_sq_lt_sq_of_nonneg_of_neg ha1 ht_neg hhigh
-    omega
-  · have h1 : a < t := lt_of_sq_lt_sq_of_nonneg_of_pos ha ht_pos hlow
-    have h2 : t < a + 1 := lt_of_sq_lt_sq_of_nonneg_of_pos_upper ha1 ht_pos hhigh
-    omega
-
-private lemma not_sq_18241 (s : ℤ) (h : s ^ 2 = 18241) : False := by
-  exact no_sq_between_consecutive s 135 (by norm_num) (by nlinarith) (by nlinarith)
-
-private lemma not_sq_3601 (s : ℤ) (h : s ^ 2 = 3601) : False := by
-  exact no_sq_between_consecutive s 60 (by norm_num) (by nlinarith) (by nlinarith)
-
-private lemma not_sq_1606 (s : ℤ) (h : s ^ 2 = 1606) : False := by
-  exact no_sq_between_consecutive s 40 (by norm_num) (by nlinarith) (by nlinarith)
-
-private lemma not_sq_286 (s : ℤ) (h : s ^ 2 = 286) : False := by
-  exact no_sq_between_consecutive s 16 (by norm_num) (by nlinarith) (by nlinarith)
-
-private lemma sq_eq_121_gcd_contra (s : ℤ) (hcop : Int.gcd s 11 = 1)
-    (h : s ^ 2 = 121) : False := by
-  have hbound : -11 ≤ s ∧ s ≤ 11 :=
-    ⟨by nlinarith [sq_nonneg (s + 11)],
-     by nlinarith [sq_nonneg (s - 11)]⟩
-  interval_cases s <;> norm_num at h hcop
-
-private lemma pos_factors_of_pos_prod_pos_sum {A B : ℤ}
-    (hprod : A * B = 73205) (hsum : 0 < A + B) : 0 < A ∧ 0 < B := by
-  have hprod_pos : 0 < A * B := by
-    rw [hprod]
-    norm_num
-  by_cases hA : 0 < A
-  · by_cases hB : 0 < B
-    · exact ⟨hA, hB⟩
-    · have hBle : B ≤ 0 := by omega
-      have hprod_nonpos : A * B ≤ 0 :=
-        mul_nonpos_of_nonneg_of_nonpos (le_of_lt hA) hBle
-      nlinarith
-  · have hAle : A ≤ 0 := by omega
-    by_cases hB : 0 < B
-    · have hprod_nonpos : A * B ≤ 0 :=
-        mul_nonpos_of_nonpos_of_nonneg hAle (le_of_lt hB)
-      nlinarith
-    · have hBle : B ≤ 0 := by omega
-      have hsum_nonpos : A + B ≤ 0 := by omega
-      nlinarith
-
-private lemma smaller_factor_contra (A B s : ℤ)
-    (hApos : 0 < A) (hBpos : 0 < B) (hAleB : A ≤ B)
-    (hprod : A * B = 73205) (hsum : A + B = 4 * s ^ 2 + 242)
-    (hcop : Int.gcd s 11 = 1) : False := by
-  have hA_ge_one : 1 ≤ A := by omega
-  have hA_le_271 : A ≤ 271 := by
-    by_contra hnot
-    have hA272 : (272 : ℤ) ≤ A := by omega
-    have hB272 : (272 : ℤ) ≤ B := by omega
-    have hprod_ge : (272 : ℤ) * 272 ≤ A * B := by
-      exact mul_le_mul hA272 hB272 (by norm_num) (by omega)
-    nlinarith
-  interval_cases A <;> norm_num at hprod hsum ⊢
-  all_goals try omega
-  · have hs_sq : s ^ 2 = 18241 := by omega
-    exact not_sq_18241 s hs_sq
-  · have hs_sq : s ^ 2 = 3601 := by omega
-    exact not_sq_3601 s hs_sq
-  · have hs_sq : s ^ 2 = 1606 := by omega
-    exact not_sq_1606 s hs_sq
-  · have hs_sq : s ^ 2 = 286 := by omega
-    exact not_sq_286 s hs_sq
-  · have hs_sq : s ^ 2 = 121 := by omega
-    exact sq_eq_121_gcd_contra s hcop hs_sq
-
-theorem quartic_no_sol_d11 (s t : ℤ) (hcop : Int.gcd s 11 = 1) :
-    s ^ 4 + 121 * s ^ 2 - 14641 = t ^ 2 → False := by
-  intro h
-  let X : ℤ := 2 * s ^ 2 + 121
-  let A : ℤ := X - 2 * t
-  let B : ℤ := X + 2 * t
-  have hfac : A * B = 73205 := by
-    dsimp [A, B, X]
-    calc
-      (2 * s ^ 2 + 121 - 2 * t) * (2 * s ^ 2 + 121 + 2 * t)
-          = (2 * s ^ 2 + 121) ^ 2 - (2 * t) ^ 2 := by ring
-      _ = 73205 := by nlinarith
-  have hsum : A + B = 4 * s ^ 2 + 242 := by
-    dsimp [A, B, X]
-    ring
-  have hsum_pos : 0 < A + B := by
-    rw [hsum]
-    nlinarith [sq_nonneg s]
-  have hpos := pos_factors_of_pos_prod_pos_sum hfac hsum_pos
-  by_cases ht : 0 ≤ t
-  · have hAleB : A ≤ B := by
-      dsimp [A, B]
-      omega
-    exact smaller_factor_contra A B s hpos.1 hpos.2 hAleB hfac hsum hcop
-  · have hB_le_A : B ≤ A := by
-      dsimp [A, B]
-      omega
-    exact smaller_factor_contra B A s hpos.2 hpos.1 hB_le_A
-      (by
-        rw [mul_comm]
-        exact hfac)
-      (by
-        rw [add_comm]
-        exact hsum)
-      hcop
+```text
+Sel^φ has size 2.
 ```
+
+Instead, formalize the explicit descent map and the explicit covering curves directly:
+
+```text
+rational point P on E
+        ↓ explicit algebra
+squareclass d = x(P) in Q*/Q*²
+        ↓ explicit algebra
+rational point on the φ-cover C_d
+        ↓ local obstruction / finite Selmer enumeration
+allowed squareclass d ∈ {1, -1}
+        ↓ denominator obstruction
+x(P) is integral.
+```
+
+This is a completely concrete replacement for the cohomological connecting map.  It proves the same fact needed for point classification, but it does not require defining `H¹`, torsors, cocycles, or Galois actions.
+
+## Important caveat
+
+The statement
+
+```text
+Sel^φ = {1, -1}
+```
+
+by itself does **not** imply that every rational point has integral `x`-coordinate.
+
+It only implies that the squareclass of `x(P)` is one of the allowed classes, namely `1` or `-1`, after the descent map is constructed.  A rational number can have squareclass `1` and still be nonintegral, for example
+
+```text
+x = (s/q)²,    q ≥ 2.
+```
+
+So after the Selmer image has been reduced to `{1,-1}`, one still needs a separate denominator argument.  In this curve, that denominator argument is exactly the quartic obstruction that has been appearing in the drop-file tasks.
+
+## The direct descent map
+
+For a curve with rational 2-torsion
+
+```text
+E : y² = x³ + a*x² + b*x = x(x² + a*x + b),
+```
+
+the explicit 2-isogeny descent map on `E(Q)` may be written concretely as
+
+```text
+α_E(O)       = 1,
+α_E((0,0))   = b,
+α_E((x,y))   = x mod Q*²     for x ≠ 0.
+```
+
+For the curve
+
+```text
+E : y² = x³ + x² - x,
+```
+
+we have `a = 1`, `b = -1`, so
+
+```text
+α_E((0,0)) = -1,
+α_E((x,y)) = x mod Q*².
+```
+
+This map is the concrete version of the cohomological connecting map.  In Lean, it is enough to define it as a squareclass-valued function, or even more minimally as a predicate saying that `x(P)` has one of finitely many squareclasses.
+
+## The explicit cover attached to a squareclass
+
+Suppose `x = d*u²`, where `d` represents the squareclass of `x`.  Substitute into
+
+```text
+y² = x³ + x² - x.
+```
+
+Then
+
+```text
+y² = d*u² * (d²*u⁴ + d*u² - 1).
+```
+
+Writing `y = d*u*v` gives the homogeneous space
+
+```text
+C_d : d*v² = d²*u⁴ + d*u² - 1.
+```
+
+Thus the key direct-construction theorem is:
+
+```text
+point_to_cover_E :
+  If P ∈ E(Q), P ≠ O, P ≠ (0,0), and α_E(P) = d,
+  then C_d has a rational point.
+```
+
+This theorem is just algebra.  It does not need cohomology.
+
+Conversely, for the parts of the descent where one needs exactness, one can also prove the reverse algebraic construction:
+
+```text
+cover_to_point_E :
+  A rational point on C_d produces a rational point on E
+  whose x-coordinate has squareclass d.
+```
+
+For proving integrality, usually only `point_to_cover_E` is needed.
+
+## Minimal formal statements I would use
+
+The cleanest Lean architecture is the following.
+
+### 1. Define the concrete covers
+
+For `d : ℚ` or for integer representatives `d : ℤ`, define:
+
+```text
+HasPointC(d) : Prop :=
+  ∃ u v : ℚ, d*v² = d²*u⁴ + d*u² - 1
+```
+
+with the expected nontriviality conditions if needed, for example `u ≠ 0` and `d ≠ 0`.
+
+If you are avoiding rational-heavy algebra, use integer-cleared versions of the same curves.
+
+### 2. Prove the direct descent construction
+
+A minimal theorem is:
+
+```text
+point_to_C_squareclass :
+  ∀ P ∈ E(Q),
+    P ≠ O → P ≠ (0,0) →
+    ∀ d, x(P) = d*u² for some u : ℚ →
+      HasPointC(d).
+```
+
+Equivalently, if you introduce a squareclass type:
+
+```text
+point_to_C_alpha :
+  ∀ P ∈ E(Q), P ≠ O → P ≠ (0,0) → HasPointC(α_E(P)).
+```
+
+This is the direct replacement for the cohomological connecting map.
+
+### 3. Encode the Selmer computation concretely
+
+Instead of defining an abstract Selmer group, define a finite squareclass universe.  For this curve, after the usual local restrictions, the candidates are represented by
+
+```text
+{1, -1, 2, -2, 5, -5, 10, -10}.
+```
+
+Then prove:
+
+```text
+bad_C_empty :
+  ∀ d ∈ {2, -2, 5, -5, 10, -10}, ¬ HasPointC(d).
+```
+
+Together with `point_to_C_alpha`, this yields:
+
+```text
+alpha_E_image_small :
+  ∀ P ∈ E(Q), α_E(P) = 1 ∨ α_E(P) = -1.
+```
+
+This is the concrete meaning of
+
+```text
+Sel^φ = {1, -1}
+```
+
+for the purpose of rational points.
+
+### 4. Add the denominator obstruction
+
+Now take a rational point on `E` and write its `x`-coordinate in normalized form
+
+```text
+x = p / q²,
+q ≥ 1,
+gcd(p,q) = 1.
+```
+
+The descent result says `p` has squareclass `1` or `-1`.
+
+#### Positive squareclass
+
+If `p = s²`, then
+
+```text
+x = s² / q².
+```
+
+Writing `y = s*t/q³`, the curve equation becomes
+
+```text
+t² = s⁴ + s²*q² - q⁴.
+```
+
+So a nonintegral point with `q ≥ 2` gives an integer solution of
+
+```text
+s⁴ + s²*d² - d⁴ = t²,
+gcd(s,d) = 1,
+d = q ≥ 2.
+```
+
+This is the quartic obstruction already being formalized.
+
+#### Negative squareclass
+
+If `p = -s²`, then
+
+```text
+x = -s² / q².
+```
+
+The same substitution gives the companion quartic
+
+```text
+t² = -s⁴ + s²*q² + q⁴.
+```
+
+For a complete integrality theorem, this negative-squareclass denominator case should also be ruled out, unless it has already been eliminated by another descent branch or by a separate real/inequality argument.
+
+The integral point `x = -1` corresponds to the allowed class `-1`, so the class `-1` itself cannot be discarded.  What must be discarded is the nonintegral case `x = -(s/q)²` with `q ≥ 2`.
+
+Thus the minimal denominator theorem is something like:
+
+```text
+no_nonintegral_pm_square_x :
+  If P ∈ E(Q), x(P) = ±(s/q)² with q ≥ 2 and gcd(s,q)=1,
+  then False.
+```
+
+Or, split into two lemmas:
+
+```text
+no_positive_squareclass_denominator :
+  ¬ ∃ s q t : ℤ,
+    2 ≤ q ∧ gcd(s,q)=1 ∧ t² = s⁴ + s²*q² - q⁴.
+
+no_negative_squareclass_denominator :
+  ¬ ∃ s q t : ℤ,
+    2 ≤ q ∧ gcd(s,q)=1 ∧ t² = -s⁴ + s²*q² + q⁴.
+```
+
+Then you get:
+
+```text
+rational_points_have_integer_x :
+  ∀ P ∈ E(Q), ∃ n : ℤ, x(P) = n.
+```
+
+## About the proposed statement with `d ∈ {±2, ±5, ±10}`
+
+The proposed direct statement was:
+
+```text
+If x = p/q² with q ≥ 2, then a bad cover C_d for some
+ d ∈ {±2, ±5, ±10} has a nontrivial solution.
+```
+
+I would not make this the primary formal statement.
+
+The reason is that a nonintegral rational number may still have squareclass `1` or `-1`, for example
+
+```text
+x = (s/q)²
+or
+x = -(s/q)².
+```
+
+Those cases do not naturally produce a bad squareclass `±2`, `±5`, or `±10`; they produce the allowed squareclasses `1` and `-1`.  They are killed only after using the denominator quartic obstruction.
+
+So the robust structure is:
+
+```text
+nonintegral point
+  → squareclass d has a cover C_d
+  → d ∈ {1,-1} by local obstructions to the bad covers
+  → denominator quartic contradiction for the allowed classes
+```
+
+rather than:
+
+```text
+nonintegral point
+  → bad cover directly.
+```
+
+The latter might be true only after smuggling in the denominator contradiction, in which case it is less transparent and less modular.
+
+## How this relates to rank zero
+
+There are two possible routes.
+
+### Route A: avoid cohomology and avoid the rank formula
+
+For the goal `rank(E)=0`, the most Lean-friendly route may be:
+
+1. Prove every rational point has integer `x`.
+2. Use the existing integer-point theorem, for example the `Descent20a4.lean` style result, to classify integral points.
+3. Conclude that `E(Q)` is finite.
+4. Conclude that the Mordell-Weil rank is zero.
+
+This avoids Galois cohomology entirely and also avoids formalizing the full isogeny Selmer exact sequence.
+
+The final finite list should be the torsion points:
+
+```text
+O,
+(0,0),
+(1,1),
+(1,-1),
+(-1,1),
+(-1,-1).
+```
+
+Once this finite list is proved, rank zero is immediate mathematically.  In Lean, the exact final statement depends on how `rank(E)` is represented, but the arithmetic content is just finiteness of `E(Q)`.
+
+### Route B: use the 2-isogeny rank formula without H¹
+
+If you specifically want the rank formula
+
+```text
+rank(E)
+  = dim_F2 Sel^φ + dim_F2 Sel^φ̂
+    - dim_F2 E[φ] - dim_F2 E'[φ̂],
+```
+
+then some exact-sequence formalization is unavoidable.  But it still does not need to mention Galois cohomology.
+
+You can instead formalize the explicit finite quotients:
+
+```text
+E'(Q) / φ(E(Q))
+E(Q)  / φ̂(E'(Q))
+```
+
+and prove explicit injections into your concrete Selmer sets via the direct descent maps.  Since each Selmer set has two elements and each quotient has a visible nontrivial kernel point, both quotients have dimension exactly `1`.  Then use the elementary isogeny exact sequence relating these two quotients to `E(Q)/2E(Q)`.
+
+This is still more work than Route A, but it avoids `H¹`.
+
+## Recommended minimal theorem package
+
+For the current project, I would aim for the following theorem package.
+
+### Concrete descent-image theorem
+
+```text
+alpha_E_image_subset_pm_one :
+  ∀ P ∈ E(Q), α_E(P) = 1 ∨ α_E(P) = -1.
+```
+
+This theorem is proved from:
+
+```text
+point_to_C_alpha
+bad_C_empty for d ∈ {±2, ±5, ±10}
+```
+
+No cohomology is needed.
+
+### Denominator theorem
+
+```text
+pm_square_squareclass_has_integral_x :
+  ∀ P ∈ E(Q),
+    (α_E(P) = 1 ∨ α_E(P) = -1) →
+    ∃ n : ℤ, x(P) = n.
+```
+
+This is where the quartic obstruction enters.
+
+### Rational integrality theorem
+
+```text
+E_rational_x_integral :
+  ∀ P ∈ E(Q), ∃ n : ℤ, x(P) = n.
+```
+
+### Integral classification theorem
+
+Use the existing integer descent/squeeze theorem to prove:
+
+```text
+E_integral_points_classified :
+  ∀ P ∈ E(Q), x(P) ∈ {-1, 0, 1}.
+```
+
+Then finish the point list by checking `y² = x³ + x² - x` for `x = -1,0,1`.
+
+## Bottom line
+
+You can absolutely formalize the descent as a direct construction
+
+```text
+rational point → explicit homogeneous-space solution
+```
+
+and avoid `H¹(Q,E[φ])` entirely for the rational-point and integrality theorem.
+
+However, the minimal statement should not be phrased as “nonintegral point directly gives a bad class `±2, ±5, ±10`.”  The cleaner and more reliable statement is:
+
+```text
+Every rational point maps by the explicit descent map to an allowed squareclass.
+The only allowed squareclasses are 1 and -1.
+Nonintegral points in those allowed squareclasses are ruled out by the denominator quartic obstruction.
+```
+
+That is the smallest formal bridge from the concrete Selmer computation to “every rational point on `E` has integer `x`,” without formalizing cohomology.
