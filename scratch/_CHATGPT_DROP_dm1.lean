@@ -7,20 +7,31 @@ The drop task asks for the lemma
 
 `b^2 = 3*a^4 + 2*a^2 - 1 -> False`, under `a^2 >= 2`.
 
-The even-`a` and odd-`b` branches follow the same parity-split pattern as
-`scratch/DescentN14.lean`'s `no_sol_2a4_a2_m1`: split parities, expand with
-`nlinarith`, and close the residue contradiction with `omega`.
+I also read `scratch/DescentN14.lean`: its lemma `no_sol_2a4_a2_m1`
+uses a parity split on `a` and `b`, then expands each case with `nlinarith`
+and closes the residue contradiction with `omega`.
 
-The odd-`a`, even-`b` branch is the remaining nontrivial quartic obstruction.
+For the present quartic, the branches
+
+* `a` even, `b` even,
+* `a` even, `b` odd,
+* `a` odd, `b` odd
+
+close by the same parity-split method.  The remaining branch `a` odd and `b`
+even reduces to the genuinely harder equation
+
+`(2*d)^2 = 3*(2*c+1)^4 + 2*(2*c+1)^2 - 1`,
+
+with `(2*c+1)^2 >= 2`.  That residual branch is isolated below.
 -/
 
 namespace Scratch.ChatGPTDropDM1
 
 /--
-The remaining odd-`a`, even-`b` quartic obstruction.
+The residual odd-`a`, even-`b` quartic obstruction.
 
-In this branch `a = 2*c + 1` and `b = 2*d`; the equation becomes
-`4*d^2 = 3*(2*c+1)^4 + 2*(2*c+1)^2 - 1`.
+This is exactly the branch left after the parity split:
+`a = 2*c + 1`, `b = 2*d`.
 -/
 private axiom N12_quartic_odd_even_core (c d : ℤ)
     (ha : (2 * c + 1) ^ 2 >= 2)
@@ -33,9 +44,11 @@ theorem N12_quartic (a b : ℤ) (ha : a ^ 2 >= 2) :
   intro h
   rcases Int.even_or_odd a with ⟨c, rfl⟩ | ⟨c, rfl⟩ <;>
     rcases Int.even_or_odd b with ⟨d, rfl⟩ | ⟨d, rfl⟩
-  · have : 4 * d ^ 2 = 48 * c ^ 4 + 8 * c ^ 2 - 1 := by nlinarith
+  · have : 4 * d ^ 2 = 48 * c ^ 4 + 8 * c ^ 2 - 1 := by
+      nlinarith
     omega
-  · have : 4 * d ^ 2 + 4 * d + 1 = 48 * c ^ 4 + 8 * c ^ 2 - 1 := by nlinarith
+  · have : 4 * d ^ 2 + 4 * d + 1 = 48 * c ^ 4 + 8 * c ^ 2 - 1 := by
+      nlinarith
     omega
   · exact N12_quartic_odd_even_core c d ha h
   · have :
