@@ -13,3 +13,5 @@ This file provides the clean interface needed by the Mazur skeleton:
 The main arithmetic input is already proved in
 `FLT.Assumptions.MazurProof.RootsOfUnity` as
 
+`isPrimitiveRoot_rat_order_le_two`.
+-/

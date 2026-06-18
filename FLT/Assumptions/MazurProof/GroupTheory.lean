@@ -177,8 +177,6 @@ theorem zmod_one_prod_addEquiv_exists (n : ℕ) :
     Nonempty (ZMod 1 × ZMod n ≃+ ZMod n) :=
   ⟨zmod_one_prod_addEquiv n⟩
 
-end MazurProof
-
 /-- Cardinality of ZMod m × ZMod n is m * n. -/
 theorem card_zmod_prod (m n : ℕ) [NeZero m] [NeZero n] :
     Fintype.card (ZMod m × ZMod n) = m * n := by
@@ -188,3 +186,5 @@ theorem card_zmod_prod (m n : ℕ) [NeZero m] [NeZero n] :
 theorem zmod_prod_embed (m n : ℕ) (hm : 0 < m) (hn : 0 < n) (hmn : m ∣ n) :
     ∃ f : ZMod m × ZMod m →+ ZMod m × ZMod n, Function.Injective f :=
   zmod_prod_contains_square m n hm hn hmn
+
+end MazurProof
