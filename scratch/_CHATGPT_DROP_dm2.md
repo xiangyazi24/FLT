@@ -7,13 +7,15 @@ theorem quartic_no_sol_d10 (s t : ℤ) (hcop : Int.gcd s 10 = 1) :
     s ^ 4 + 100 * s ^ 2 - 10000 = t ^ 2 → False
 ```
 
-There is a shorter proof than the large-case squeeze.  The hypothesis `Int.gcd s 10 = 1` excludes even `s`, so `s` is odd.  For odd `s`, write `s = 2*a + 1`.  Then
+There is a shorter proof than a large-case squeeze.  The hypothesis `Int.gcd s 10 = 1` excludes even `s`, so `s` is odd.  Since `Int.even_or_odd` gives representatives as `a + a` and `a + a + 1`, the proof below first normalizes these forms to `2 * a` and `2 * a + 1` with `omega`.
+
+In the odd branch, substituting `s = 2*a + 1` gives
 
 ```text
 s^4 + 100*s^2 - 10000 = 8*(2*a^4 + 4*a^3 + 53*a^2 + 51*a - 1238) + 5.
 ```
 
-Thus `t^2 ≡ 5 mod 8`, impossible because squares modulo `8` are only `0`, `1`, and `4`.  The Lean proof below implements this in the same integer-residue style used in the earlier descent files: split `t` into even/odd cases, expand with `nlinarith`, then close the linear modular contradiction with `omega`.
+Thus `t^2 ≡ 5 mod 8`, impossible because an even square is `0 mod 4` and an odd square is `1 mod 4`, hence no square is `5 mod 8`.  The Lean proof implements this with the same integer-residue style used in the descent files: split `t` by parity, expand with `nlinarith`, then close with `omega`.
 
 ```lean
 import Mathlib
@@ -44,13 +46,17 @@ private lemma square_not_eight_mul_add_five (t K : ℤ)
 theorem quartic_no_sol_d10 (s t : ℤ) (hcop : Int.gcd s 10 = 1) :
     s ^ 4 + 100 * s ^ 2 - 10000 = t ^ 2 → False := by
   intro h
-  rcases Int.even_or_odd s with ⟨a, rfl⟩ | ⟨a, rfl⟩
-  · have h2g : (2 : ℕ) ∣ Int.gcd (2 * a) 10 := two_dvd_Int_gcd_even_ten a
+  rcases Int.even_or_odd s with ⟨a, hs⟩ | ⟨a, hs⟩
+  · have hs2 : s = 2 * a := by omega
+    have h2g : (2 : ℕ) ∣ Int.gcd s 10 := by
+      rw [hs2]
+      exact two_dvd_Int_gcd_even_ten a
     rw [hcop] at h2g
     norm_num at h2g
-  · have hmod :
+  · have hs2 : s = 2 * a + 1 := by omega
+    have hmod :
         t ^ 2 = 8 * (2 * a ^ 4 + 4 * a ^ 3 + 53 * a ^ 2 + 51 * a - 1238) + 5 := by
-      rw [← h]
+      rw [← h, hs2]
       ring
     exact square_not_eight_mul_add_five t _ hmod
 ```
