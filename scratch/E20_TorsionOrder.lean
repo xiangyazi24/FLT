@@ -47,7 +47,9 @@ theorem P0_ne_zero : P0 ≠ 0 := by
 /-- Doubling `(0,0)` gives the point at infinity. -/
 theorem P0_add_self : P0 + P0 = 0 := by
   dsimp [P0]
-  exact WeierstrassCurve.Affine.Point.add_self_of_Y_eq (W := E20) (by simp [E20])
+  exact WeierstrassCurve.Affine.Point.add_self_of_Y_eq
+    (W := E20) (x₁ := (0 : ℚ)) (y₁ := (0 : ℚ)) (h₁ := P0_nonsingular)
+    (by simp [E20])
 
 /-- The known rational point `(0,0)` has additive order `2`. -/
 theorem addOrderOf_P0 : addOrderOf P0 = 2 := by
