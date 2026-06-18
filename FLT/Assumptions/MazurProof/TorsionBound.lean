@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.RootsOfUnity
 import FLT.Assumptions.MazurProof.Axioms
+import FLT.Assumptions.MazurProof.TorsionFinite
 
 /-!
 # Mazur torsion-bound proof scaffold
@@ -39,7 +40,7 @@ axioms in this scaffold.
 -/
 theorem mazur_torsion_bound (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     (AddCommGroup.torsion (E⁄ℚ).Point : Set (E⁄ℚ).Point).ncard ≤ 16 := by
-  have _hfinite := rational_torsion_finite E
+  have _hfinite := rational_torsion_finite_alias E
   let d := rational_torsion_two_invariant_factors E
   have hm_le : d.m ≤ 2 :=
     full_rational_torsion_order_le_two E d.m_pos
