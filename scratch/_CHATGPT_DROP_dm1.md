@@ -1,262 +1,187 @@
-# Can the denominator descent be reduced to `not_fermat_42`?
+# `ℤ[φ]` formalization and square extraction lemma
 
-Short answer: not directly.  The intermediate equation
-
-\[
-p^2=m^4+r^2
-\]
-
-is **not** impossible by itself.  For example,
+Here is a self-contained Lean module for the concrete order
 
 \[
-5^2=2^4+3^2.
+\mathbb Z[\phi],\qquad \phi=\frac{1+\sqrt 5}{2},\qquad \phi^2=\phi+1.
 \]
 
-So it cannot be reduced directly to Mathlib’s `not_fermat_42 : a^4+b^4\ne c^2`, because the second summand here is only a square, not a fourth power.  The missing information is the extra relation
+An element is represented as a pair `(a,b)` meaning `a + b φ`.  Multiplication uses `φ² = φ + 1`, conjugation sends `φ` to `1 - φ`, and the norm is
 
 \[
-r=\frac{n^2-m^2}{2}
+N(a+b\phi)=a^2+ab-b^2.
 \]
 
-coming from the Pellian factor split.  With that extra relation, the right route is not an immediate application of `not_fermat_42`; it is a **self-descent back to the same quartic equation**.
+The UFD/class-number-one input is isolated as the axiom `square_extraction_of_coprime_norm_square`: if `α * conj α` is an integer square and `α` is coprime to its conjugate in `ℤ[φ]`, then `α` is a unit times a square.  The final theorem applies this to
 
-A tiny Lean sanity check for the obstruction to a direct route is:
+\[
+\alpha=p^2+q^2\phi,
+\]
+
+whose norm is exactly
+
+\[
+p^4+p^2q^2-q^4.
+\]
 
 ```lean
 import Mathlib
 
-example : (5 : ℤ) ^ 2 = (2 : ℤ) ^ 4 + (3 : ℤ) ^ 2 := by
-  norm_num
-```
+/-!
+# A concrete model of `ℤ[φ]`, where `φ = (1 + √5) / 2`
 
-This shows that any proposed theorem of the form
+Elements are represented as pairs `(a,b) : ℤ × ℤ`, interpreted as
+`a + b φ`, with `φ^2 = φ + 1`.
 
-```lean
--- false
--- theorem no_x4_plus_y2_eq_z2 (m r p : ℤ)
---     (hm : m ≠ 0) (hr : r ≠ 0) :
---     p ^ 2 = m ^ 4 + r ^ 2 → False
-```
-
-is simply false.
-
-## 1. What the Pellian factor split really gives
-
-Starting from
-
-\[
-t^2=p^4+p^2q^2-q^4,
-\]
-
-the factorization is
-
-\[
-(2p^2+q^2-2t)(2p^2+q^2+2t)=5q^4.
-\]
-
-In the odd-`q` coprime case, the expected factor split is, up to swapping the two factors,
-
-\[
-A=5m^4,\qquad B=n^4,\qquad q=mn.
-\]
-
-Using
-
-\[
-A+B=2(2p^2+q^2)
-\]
-
-we get
-
-\[
-5m^4+n^4=4p^2+2m^2n^2.
-\]
-
-Rearranging gives
-
-\[
-4p^2=(n^2-m^2)^2+4m^4.
-\]
-
-Since `m,n` are odd in this branch, `n²-m²` is even.  Put
-
-\[
-r=\frac{n^2-m^2}{2}.
-\]
-
-Then
-
-\[
-p^2=m^4+r^2. \tag{★}
-\]
-
-This is the equation that looked like a Fermat right-triangle obstruction.  But, as noted above, `(★)` alone has nontrivial solutions.
-
-## 2. The extra relation gives a self-descent
-
-The key is to use not only `(★)`, but also
-
-\[
-r=\frac{n^2-m^2}{2}.
-\]
-
-Assume the Pythagorean triple in `(★)` is primitive; this follows from the coprimality conditions in the factor split.  Since the square leg is `m²`, the usual primitive Pythagorean parametrization gives coprime integers `a,b` such that
-
-\[
-m^2=X^2-Y^2=(X-Y)(X+Y),
-\]
-
-and because `X-Y` and `X+Y` are coprime, both are squares:
-
-\[
-X+Y=a^2,\qquad X-Y=b^2.
-\]
-
-Thus
-
-\[
-m=ab,\qquad
-X=\frac{a^2+b^2}{2},\qquad
-Y=\frac{a^2-b^2}{2}.
-\]
-
-The even leg is
-
-\[
-r=2XY=\frac{a^4-b^4}{2}.
-\]
-
-But from the factor split we also have
-
-\[
-r=\frac{n^2-m^2}{2}=\frac{n^2-a^2b^2}{2}.
-\]
-
-Equating the two expressions for `r` gives
-
-\[
-n^2-a^2b^2=a^4-b^4.
-\]
-
-Therefore
-
-\[
-n^2=a^4+a^2b^2-b^4. \tag{†}
-\]
-
-This is exactly the **same denominator quartic** again, with a new solution
-
-\[
-(t',p',q')=(n,a,b).
-\]
-
-So the branch does not reduce to `a^4+b^4=c^2`; it reduces to a **smaller solution of the original quartic**.  This is the infinite descent.
-
-In Lean-skeleton form, the descent step one wants is something like:
-
-```lean
-import Mathlib
+The class-number-one/UFD step is deliberately isolated as an axiom:
+if `α` and `conj α` are coprime and `α * conj α` is an integer square,
+then `α` is a unit times a square.
+-/
 
 namespace Scratch.ChatGPTDropDM1
 
-/-- Algebraic heart of the self-descent after the coprime factor split.
-The variables here are schematic: `m,n` come from the factor split, and
-`a,b` come from parametrizing the primitive Pythagorean triple
-`p^2 = m^4 + ((n^2-m^2)/2)^2`. -/
-lemma denominator_self_descent_identity (a b n : ℤ)
-    (h : n ^ 2 - a ^ 2 * b ^ 2 = a ^ 4 - b ^ 4) :
-    n ^ 2 = a ^ 4 + a ^ 2 * b ^ 2 - b ^ 4 := by
-  nlinarith
+/-- The order `ℤ[φ]`, with `φ^2 = φ + 1`. -/
+@[ext]
+structure ZPhi where
+  a : ℤ
+  b : ℤ
+deriving DecidableEq, Repr
+
+namespace ZPhi
+
+/-- The element `n + 0φ`. -/
+def ofInt (n : ℤ) : ZPhi :=
+  ⟨n, 0⟩
+
+/-- Addition in the basis `1, φ`. -/
+protected def add (x y : ZPhi) : ZPhi :=
+  ⟨x.a + y.a, x.b + y.b⟩
+
+/-- Negation in the basis `1, φ`. -/
+protected def neg (x : ZPhi) : ZPhi :=
+  ⟨-x.a, -x.b⟩
+
+/-- Multiplication in the basis `1, φ`, using `φ^2 = φ + 1`. -/
+protected def mul (x y : ZPhi) : ZPhi :=
+  ⟨x.a * y.a + x.b * y.b,
+    x.a * y.b + x.b * y.a + x.b * y.b⟩
+
+instance : Zero ZPhi := ⟨ofInt 0⟩
+instance : One ZPhi := ⟨ofInt 1⟩
+instance : Add ZPhi := ⟨ZPhi.add⟩
+instance : Neg ZPhi := ⟨ZPhi.neg⟩
+instance : Sub ZPhi := ⟨fun x y => x + -y⟩
+instance : Mul ZPhi := ⟨ZPhi.mul⟩
+
+@[simp] theorem ofInt_a (n : ℤ) : (ofInt n).a = n := rfl
+@[simp] theorem ofInt_b (n : ℤ) : (ofInt n).b = 0 := rfl
+
+/-- Conjugation: `φ ↦ 1 - φ`.  Thus `a + bφ ↦ (a+b) - bφ`. -/
+def conj (x : ZPhi) : ZPhi :=
+  ⟨x.a + x.b, -x.b⟩
+
+/-- The algebraic norm `N(a+bφ)=a²+ab-b²`. -/
+def norm (x : ZPhi) : ℤ :=
+  x.a ^ 2 + x.a * x.b - x.b ^ 2
+
+/-- Square of an element, avoiding the need for a full ring instance. -/
+def sq (x : ZPhi) : ZPhi :=
+  x * x
+
+/-- Divisibility in the multiplicative monoid of `ℤ[φ]`. -/
+def Divides (d x : ZPhi) : Prop :=
+  ∃ z : ZPhi, x = d * z
+
+/-- Units in the concrete order. -/
+def IsUnitZPhi (u : ZPhi) : Prop :=
+  ∃ v : ZPhi, u * v = 1 ∧ v * u = 1
+
+/-- Coprimality in `ℤ[φ]`: every common divisor is a unit. -/
+def CoprimeZPhi (x y : ZPhi) : Prop :=
+  ∀ d : ZPhi, Divides d x → Divides d y → IsUnitZPhi d
+
+@[simp] theorem mul_a (x y : ZPhi) :
+    (x * y).a = x.a * y.a + x.b * y.b := rfl
+
+@[simp] theorem mul_b (x y : ZPhi) :
+    (x * y).b = x.a * y.b + x.b * y.a + x.b * y.b := rfl
+
+@[simp] theorem conj_a (x : ZPhi) : (conj x).a = x.a + x.b := rfl
+@[simp] theorem conj_b (x : ZPhi) : (conj x).b = -x.b := rfl
+
+/-- Conjugation is involutive. -/
+theorem conj_conj (x : ZPhi) : conj (conj x) = x := by
+  ext <;> simp [conj]
+
+/-- Conjugation is multiplicative. -/
+theorem conj_mul (x y : ZPhi) : conj (x * y) = conj x * conj y := by
+  ext <;> simp [conj, ZPhi.mul] <;> ring
+
+/-- `α * conj α` is the norm, embedded as an integer. -/
+theorem mul_conj (x : ZPhi) : x * conj x = ofInt (norm x) := by
+  ext <;> simp [conj, norm, ofInt, ZPhi.mul] <;> ring
+
+/-- The norm is invariant under conjugation. -/
+theorem norm_conj (x : ZPhi) : norm (conj x) = norm x := by
+  simp [conj, norm]
+  ring
+
+/-- The norm is multiplicative. -/
+theorem norm_mul (x y : ZPhi) : norm (x * y) = norm x * norm y := by
+  simp [norm, ZPhi.mul]
+  ring
+
+/--
+UFD/class-number-one square extraction axiom for `ℤ[φ]`.
+
+Mathematically, this follows because `ℤ[(1+√5)/2]` is a UFD.  If `α` and
+`conj α` are coprime and their product is an ordinary integer square, then
+`α` is a unit times a square.
+-/
+axiom square_extraction_of_coprime_norm_square
+    {α : ZPhi} {t : ℤ}
+    (hsq : α * conj α = ofInt (t ^ 2))
+    (hcop : CoprimeZPhi α (conj α)) :
+    ∃ ε β : ZPhi, IsUnitZPhi ε ∧ α = ε * sq β
+
+/-- The element `p² + q² φ`. -/
+def alphaPQ (p q : ℤ) : ZPhi :=
+  ⟨p ^ 2, q ^ 2⟩
+
+/-- Norm of `p² + q² φ` is `p⁴ + p²q² - q⁴`. -/
+theorem norm_alphaPQ (p q : ℤ) :
+    norm (alphaPQ p q) = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4 := by
+  simp [alphaPQ, norm]
+  ring
+
+/-- Product with the conjugate for `p² + q² φ`. -/
+theorem alphaPQ_mul_conj (p q : ℤ) :
+    alphaPQ p q * conj (alphaPQ p q) =
+      ofInt (p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) := by
+  calc
+    alphaPQ p q * conj (alphaPQ p q) = ofInt (norm (alphaPQ p q)) :=
+      mul_conj (alphaPQ p q)
+    _ = ofInt (p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) := by
+      rw [norm_alphaPQ]
+
+/--
+Application to the denominator quartic:
+if `t² = p⁴+p²q²-q⁴` and `p²+q²φ` is coprime to its conjugate, then
+`p²+q²φ` is a unit times a square in `ℤ[φ]`.
+-/
+theorem extract_square_for_alphaPQ
+    (p q t : ℤ)
+    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4)
+    (hcop : CoprimeZPhi (alphaPQ p q) (conj (alphaPQ p q))) :
+    ∃ ε β : ZPhi, IsUnitZPhi ε ∧ alphaPQ p q = ε * sq β := by
+  refine square_extraction_of_coprime_norm_square ?_ hcop
+  calc
+    alphaPQ p q * conj (alphaPQ p q) =
+        ofInt (p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) := alphaPQ_mul_conj p q
+    _ = ofInt (t ^ 2) := by
+      rw [← h]
+
+end ZPhi
 
 end Scratch.ChatGPTDropDM1
 ```
-
-That identity is trivial; the hard part is producing `a,b` with the correct properties and proving that `|b|` is a strictly smaller positive denominator than the original `q=mn`.
-
-## 3. Why `not_fermat_42` is the wrong endpoint
-
-Mathlib’s `not_fermat_42` rules out
-
-\[
-a^4+b^4=c^2.
-\]
-
-That corresponds to a right triangle whose **two legs are both squares**: `a²` and `b²`.
-
-Here, after the factor split, we only get a right triangle with one square leg:
-
-\[
-p^2=m^4+r^2.
-\]
-
-The other leg `r` is not a square in general.  Indeed the example
-
-\[
-5^2=2^4+3^2
-\]
-
-shows that such triangles exist.
-
-The additional special form of `r` does not make `r` a square.  It makes the Pythagorean parametrization regenerate the original quartic with smaller denominator.  Thus the natural proof is a **minimal-denominator infinite descent**, not a one-shot appeal to `not_fermat_42`.
-
-## 4. Possible indirect use of Mathlib’s FLT4 file
-
-Although `not_fermat_42` itself does not directly solve this denominator step, the file `NumberTheory/FLT/Four.lean` may contain useful supporting lemmas around primitive Pythagorean triples or Fermat descent.  The relevant theorem to look for would not be `a^4+b^4≠c^2`, but rather a parametrization/descent lemma for a primitive right triangle with one square leg.
-
-If Mathlib only exposes `not_fermat_42`, then it is probably not enough by itself.  One would still need to formalize the self-descent described above.
-
-The useful abstract package would be:
-
-```lean
-namespace Scratch.ChatGPTDropDM1
-
-/-- Desired descent step for the odd-denominator case.
-Given a primitive odd-denominator solution with `q > 1`, construct another
-primitive solution with strictly smaller positive denominator. -/
--- theorem denom_quartic_descent_step
---     (p q t : ℤ)
---     (hpq : IsCoprime p q)
---     (hq_pos : 2 ≤ q)
---     (hq_odd : ¬ (2 : ℤ) ∣ q)
---     (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
---     ∃ p' q' t' : ℤ,
---       1 ≤ q' ∧ q' < q ∧ IsCoprime p' q' ∧
---       t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4
-
-/-- Once the descent step is available, the no-denominator theorem follows by
-well-founded descent/minimal counterexample on positive `q`. -/
--- theorem no_denom_quartic_odd_q
---     (p q t : ℤ)
---     (hpq : IsCoprime p q)
---     (hq_pos : 2 ≤ q)
---     (hq_odd : ¬ (2 : ℤ) ∣ q)
---     (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
---     False := by
---   -- choose a minimal positive denominator counterexample and apply
---   -- `denom_quartic_descent_step` to contradict minimality
---   admit
-
-end Scratch.ChatGPTDropDM1
-```
-
-## 5. Bottom line
-
-I do not see a sound reduction from the Pellian factorization to Mathlib’s
-
-```lean
-not_fermat_42 : a^4 + b^4 ≠ c^2
-```
-
-because the intermediate right-triangle equation is `m^4 + r^2 = p^2`, and that equation has nontrivial solutions.
-
-The promising route is instead:
-
-1. perform the coprime factor split of
-   `(2p²+q²-2t)(2p²+q²+2t)=5q⁴`;
-2. derive `p²=m⁴+((n²-m²)/2)²`;
-3. parametrize this primitive Pythagorean triple;
-4. use the special relation `r=(n²-m²)/2` to produce a smaller solution
-   `n²=a⁴+a²b²-b⁴`;
-5. finish by infinite descent on the positive denominator.
-
-This is a viable elementary route, but it is not a direct application of `not_fermat_42`.  It is the same descent mechanism reappearing in quartic form.
