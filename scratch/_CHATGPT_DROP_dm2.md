@@ -2,455 +2,318 @@
 
 ## Question
 
-For the curve
+For
 
 ```text
-E : y² = x³ + x² - x = x(x² + x - 1)
+E  : y² = x³ + x² - x
+E' : Y² = X³ - 2X² + 5X,
 ```
 
 with the 2-isogeny
 
 ```text
-φ : E  → E'    with kernel {(O), (0,0)}
-φ̂ : E' → E    with kernel {(O), (0,0)},
+φ  : E  → E'
+φ̂ : E' → E,
 ```
 
-we want to connect the explicit 2-isogeny descent computation
+we have explicit descent data
 
 ```text
 Sel^φ    = {1, -1}
-Sel^φ̂   = {1, 5}
+Sel^φ̂   = {1, 5}.
 ```
 
-to a Lean proof that rational points on `E` have integer `x`-coordinate, and ultimately to `rank(E)=0`.
+The question is whether the two explicit descents together can force `x(P)` to be integral directly, without passing through the abstract rank-zero statement.
 
-The practical question is whether one must formalize abstract Galois cohomology
+## 1. The dual prime-support trick
+
+The dual cover is
 
 ```text
-H¹(Q, E[φ])
+d*W² = d²*T⁴ - 2*d*T²*S² + 5*S⁴.
 ```
 
-or whether a direct construction from rational points to explicit homogeneous spaces is enough.
-
-## Short answer
-
-Yes: for the rational-point/integrality part, you can avoid formalizing Galois cohomology entirely.
-
-The minimal useful formal interface is not the abstract statement
+For a prime `p ∣ d`, reducing modulo `p` gives
 
 ```text
-Sel^φ has size 2.
+0 = 5*S⁴ mod p.
 ```
 
-Instead, formalize the explicit descent map and the explicit covering curves directly:
+So if `p ≠ 5` and `p ∤ S`, contradiction.  Therefore the simple one-line argument works provided the cover solution is already normalized so that
 
 ```text
-rational point P on E
-        ↓ explicit algebra
-squareclass d = x(P) in Q*/Q*²
-        ↓ explicit algebra
-rational point on the φ-cover C_d
-        ↓ local obstruction / finite Selmer enumeration
-allowed squareclass d ∈ {1, -1}
-        ↓ denominator obstruction
-x(P) is integral.
+gcd(S,d) = 1.
 ```
 
-This is a completely concrete replacement for the cohomological connecting map.  It proves the same fact needed for point classification, but it does not require defining `H¹`, torsors, cocycles, or Galois actions.
-
-## Important caveat
-
-The statement
+With that primitive condition, the conclusion is:
 
 ```text
-Sel^φ = {1, -1}
+p ∣ d  →  p = 5.
 ```
 
-by itself does **not** imply that every rational point has integral `x`-coordinate.
+So the dual analogue of `cover_forces_unit` is not literally “unit”; it is:
 
-It only implies that the squareclass of `x(P)` is one of the allowed classes, namely `1` or `-1`, after the descent map is constructed.  A rational number can have squareclass `1` and still be nonintegral, for example
+```text
+cover_forces_five_unit:
+  every prime divisor of d divides 5.
+```
+
+Equivalently, for squarefree `d`, the only possible prime support is `{5}`.  This gives
+
+```text
+d ∈ {±1, ±5}
+```
+
+before imposing the real/local sign conditions.  Then the real obstruction removes the negative classes:
+
+```text
+d = -1 :  -W² = T⁴ + 2T²S² + 5S⁴,
+d = -5 :  -5W² = 25T⁴ + 10T²S² + 5S⁴,
+```
+
+which have no nontrivial real/rational solutions.  Thus the dual Selmer candidates reduce to
+
+```text
+{1, 5}.
+```
+
+If `gcd(S,d)=1` is not already part of the cover construction, then one needs a primitive-solution normalization lemma.  The usual argument is still elementary: if `p ∣ d` and `p ∣ S`, then the equation forces `p ∣ W`, and then another reduction forces `p ∣ T`, contradicting primitivity.  But the cleanest formal interface is to have the descent construction output a primitive solution with `gcd(S,d)=1` from the start.
+
+## 2. The key obstruction to using both descents directly
+
+For a point `P = (x,y) ∈ E(Q)` with `x ≠ 0`, the isogeny formula gives
+
+```text
+X(φ(P)) = y² / x².
+```
+
+Equivalently, using the curve equation,
+
+```text
+X(φ(P)) = x + 1 - 1/x = (x² + x - 1)/x = y²/x².
+```
+
+Therefore `X(φ(P))` is automatically a rational square.
+
+So the dual descent value of `φ(P)` is always trivial:
+
+```text
+α_{φ̂}(φ(P)) = 1.
+```
+
+This is not an accident; it is the concrete exactness statement
+
+```text
+image(φ) ⊆ kernel(dual descent map).
+```
+
+Thus the dual Selmer computation
+
+```text
+Sel^φ̂ = {1, 5}
+```
+
+does not add a new denominator constraint on a point that has already come from `E` and is then pushed forward by `φ`.  The second coordinate in the proposed pair
+
+```text
+P ↦ (α_φ(P), α_{φ̂}(φ(P)))
+```
+
+is always `1` for non-special `P`.
+
+This means the two descents do **not** directly imply integrality by simply evaluating both descent maps on `P` and `φ(P)`.
+
+## 3. Why `Sel^φ = {1,-1}` alone is not enough
+
+The φ-side tells us that for a non-special rational point `P ∈ E(Q)`, the squareclass of `x(P)` lies in
+
+```text
+{1, -1}.
+```
+
+But that does not imply `x(P)` is an integer.  For example, a rational number can have squareclass `1` while being nonintegral:
 
 ```text
 x = (s/q)²,    q ≥ 2.
 ```
 
-So after the Selmer image has been reduced to `{1,-1}`, one still needs a separate denominator argument.  In this curve, that denominator argument is exactly the quartic obstruction that has been appearing in the drop-file tasks.
-
-## The direct descent map
-
-For a curve with rational 2-torsion
+Likewise it can have squareclass `-1` while being nonintegral:
 
 ```text
-E : y² = x³ + a*x² + b*x = x(x² + a*x + b),
+x = -(s/q)²,   q ≥ 2.
 ```
 
-the explicit 2-isogeny descent map on `E(Q)` may be written concretely as
+So after the φ-descent, the remaining problem is exactly a denominator problem in the allowed squareclasses.
+
+For the positive squareclass case, write
 
 ```text
-α_E(O)       = 1,
-α_E((0,0))   = b,
-α_E((x,y))   = x mod Q*²     for x ≠ 0.
+x = s²/q²,
+q ≥ 2,
+gcd(s,q)=1.
 ```
 
-For the curve
+Then, after clearing denominators in
 
 ```text
-E : y² = x³ + x² - x,
+y² = x³ + x² - x,
 ```
 
-we have `a = 1`, `b = -1`, so
-
-```text
-α_E((0,0)) = -1,
-α_E((x,y)) = x mod Q*².
-```
-
-This map is the concrete version of the cohomological connecting map.  In Lean, it is enough to define it as a squareclass-valued function, or even more minimally as a predicate saying that `x(P)` has one of finitely many squareclasses.
-
-## The explicit cover attached to a squareclass
-
-Suppose `x = d*u²`, where `d` represents the squareclass of `x`.  Substitute into
-
-```text
-y² = x³ + x² - x.
-```
-
-Then
-
-```text
-y² = d*u² * (d²*u⁴ + d*u² - 1).
-```
-
-Writing `y = d*u*v` gives the homogeneous space
-
-```text
-C_d : d*v² = d²*u⁴ + d*u² - 1.
-```
-
-Thus the key direct-construction theorem is:
-
-```text
-point_to_cover_E :
-  If P ∈ E(Q), P ≠ O, P ≠ (0,0), and α_E(P) = d,
-  then C_d has a rational point.
-```
-
-This theorem is just algebra.  It does not need cohomology.
-
-Conversely, for the parts of the descent where one needs exactness, one can also prove the reverse algebraic construction:
-
-```text
-cover_to_point_E :
-  A rational point on C_d produces a rational point on E
-  whose x-coordinate has squareclass d.
-```
-
-For proving integrality, usually only `point_to_cover_E` is needed.
-
-## Minimal formal statements I would use
-
-The cleanest Lean architecture is the following.
-
-### 1. Define the concrete covers
-
-For `d : ℚ` or for integer representatives `d : ℤ`, define:
-
-```text
-HasPointC(d) : Prop :=
-  ∃ u v : ℚ, d*v² = d²*u⁴ + d*u² - 1
-```
-
-with the expected nontriviality conditions if needed, for example `u ≠ 0` and `d ≠ 0`.
-
-If you are avoiding rational-heavy algebra, use integer-cleared versions of the same curves.
-
-### 2. Prove the direct descent construction
-
-A minimal theorem is:
-
-```text
-point_to_C_squareclass :
-  ∀ P ∈ E(Q),
-    P ≠ O → P ≠ (0,0) →
-    ∀ d, x(P) = d*u² for some u : ℚ →
-      HasPointC(d).
-```
-
-Equivalently, if you introduce a squareclass type:
-
-```text
-point_to_C_alpha :
-  ∀ P ∈ E(Q), P ≠ O → P ≠ (0,0) → HasPointC(α_E(P)).
-```
-
-This is the direct replacement for the cohomological connecting map.
-
-### 3. Encode the Selmer computation concretely
-
-Instead of defining an abstract Selmer group, define a finite squareclass universe.  For this curve, after the usual local restrictions, the candidates are represented by
-
-```text
-{1, -1, 2, -2, 5, -5, 10, -10}.
-```
-
-Then prove:
-
-```text
-bad_C_empty :
-  ∀ d ∈ {2, -2, 5, -5, 10, -10}, ¬ HasPointC(d).
-```
-
-Together with `point_to_C_alpha`, this yields:
-
-```text
-alpha_E_image_small :
-  ∀ P ∈ E(Q), α_E(P) = 1 ∨ α_E(P) = -1.
-```
-
-This is the concrete meaning of
-
-```text
-Sel^φ = {1, -1}
-```
-
-for the purpose of rational points.
-
-### 4. Add the denominator obstruction
-
-Now take a rational point on `E` and write its `x`-coordinate in normalized form
-
-```text
-x = p / q²,
-q ≥ 1,
-gcd(p,q) = 1.
-```
-
-The descent result says `p` has squareclass `1` or `-1`.
-
-#### Positive squareclass
-
-If `p = s²`, then
-
-```text
-x = s² / q².
-```
-
-Writing `y = s*t/q³`, the curve equation becomes
+one obtains the quartic obstruction
 
 ```text
 t² = s⁴ + s²*q² - q⁴.
 ```
 
-So a nonintegral point with `q ≥ 2` gives an integer solution of
+For the negative squareclass case, write
 
 ```text
-s⁴ + s²*d² - d⁴ = t²,
-gcd(s,d) = 1,
-d = q ≥ 2.
+x = -s²/q²,
+q ≥ 2,
+gcd(s,q)=1.
 ```
 
-This is the quartic obstruction already being formalized.
-
-#### Negative squareclass
-
-If `p = -s²`, then
-
-```text
-x = -s² / q².
-```
-
-The same substitution gives the companion quartic
+Then one obtains the companion obstruction
 
 ```text
 t² = -s⁴ + s²*q² + q⁴.
 ```
 
-For a complete integrality theorem, this negative-squareclass denominator case should also be ruled out, unless it has already been eliminated by another descent branch or by a separate real/inequality argument.
+Thus the φ-descent reduces integrality to explicit denominator quartics.  The dual descent does not remove those denominator cases, because `φ(P)` has trivial dual descent class automatically.
 
-The integral point `x = -1` corresponds to the allowed class `-1`, so the class `-1` itself cannot be discarded.  What must be discarded is the nonintegral case `x = -(s/q)²` with `q ≥ 2`.
+## 4. Can both descents force integrality without rank?
 
-Thus the minimal denominator theorem is something like:
+There are two different meanings of “using both descents.”
+
+### 4.1 Evaluating both descent maps on `P` and `φ(P)`
+
+This does **not** force integrality.
+
+The reason is exactly the identity
 
 ```text
-no_nonintegral_pm_square_x :
-  If P ∈ E(Q), x(P) = ±(s/q)² with q ≥ 2 and gcd(s,q)=1,
-  then False.
+X(φ(P)) = (y/x)².
 ```
 
-Or, split into two lemmas:
+So the dual descent value of `φ(P)` is always `1`.  It cannot distinguish integral from nonintegral `x(P)`.
+
+In this sense, the answer is no: the two Selmer inclusions, used in this naive direct way, do not prove integrality.
+
+### 4.2 Using both descents as explicit exactness / divisibility tools
+
+There is a possible direct proof that avoids Galois cohomology, but it is not just a denominator argument.  It would be an explicit infinite descent on the Mordell-Weil group.
+
+The rough shape is:
 
 ```text
-no_positive_squareclass_denominator :
+α_φ(P) ∈ {1,-1}
+α_{φ̂}(Q) ∈ {1,5}
+```
+
+plus explicit kernel/image criteria show that points in certain descent classes are images under `φ` or `φ̂`, possibly after adding the visible 2-torsion point.  Then one proves directly, using the explicit isogeny formulas, that a non-torsion point would be repeatedly divisible by `2` or by alternating isogenies, with decreasing height or denominator.  That gives a contradiction.
+
+This can avoid formalizing `H¹(Q,E[φ])`, but it is still an abstract descent proof in another form: one must formalize explicit exactness statements for the isogenies and a height/denominator descent.  It is likely more work than proving the denominator quartics directly.
+
+## 5. Recommended Lean route for integrality
+
+For the specific goal
+
+```text
+∀ P ∈ E(Q), x(P) is integral,
+```
+
+the cleanest direct route is:
+
+### Step A: φ-descent image
+
+Formalize the concrete φ-descent map
+
+```text
+α_φ(P) = squareclass(x(P))
+```
+
+with the special values for `O` and `(0,0)`, and prove
+
+```text
+α_φ(P) ∈ {1, -1}.
+```
+
+This uses the explicit covers and the local obstructions for bad classes.
+
+### Step B: denominator obstruction for the allowed classes
+
+Prove:
+
+```text
+no_positive_squareclass_denominator:
   ¬ ∃ s q t : ℤ,
-    2 ≤ q ∧ gcd(s,q)=1 ∧ t² = s⁴ + s²*q² - q⁴.
+    2 ≤ q ∧ gcd(s,q)=1 ∧
+    t² = s⁴ + s²*q² - q⁴.
+```
 
-no_negative_squareclass_denominator :
+and, if the negative squareclass is not already handled elsewhere,
+
+```text
+no_negative_squareclass_denominator:
   ¬ ∃ s q t : ℤ,
-    2 ≤ q ∧ gcd(s,q)=1 ∧ t² = -s⁴ + s²*q² + q⁴.
+    2 ≤ q ∧ gcd(s,q)=1 ∧
+    t² = -s⁴ + s²*q² + q⁴.
 ```
 
-Then you get:
+Then conclude:
 
 ```text
-rational_points_have_integer_x :
-  ∀ P ∈ E(Q), ∃ n : ℤ, x(P) = n.
+x(P) ∈ ℤ.
 ```
 
-## About the proposed statement with `d ∈ {±2, ±5, ±10}`
+This route uses the φ-descent and explicit quartic obstructions.  It does not require the dual descent.
 
-The proposed direct statement was:
+## 6. Recommended Lean route for rank zero
+
+For rank zero, the dual descent is important.  But if the goal is to avoid cohomology, the better statement is not “both descents force integrality.”  Instead, use explicit quotient/image statements:
 
 ```text
-If x = p/q² with q ≥ 2, then a bad cover C_d for some
- d ∈ {±2, ±5, ±10} has a nontrivial solution.
+E(Q)  / φ̂(E'(Q)) injects into Sel^φ,
+E'(Q) / φ(E(Q))  injects into Sel^φ̂.
 ```
 
-I would not make this the primary formal statement.
+These injections can be implemented by direct descent maps and explicit covers, without constructing `H¹`.  Then prove exactness of the isogeny sequence directly using formulas for `φ` and `φ̂`.  This is enough to recover the usual rank bound.
 
-The reason is that a nonintegral rational number may still have squareclass `1` or `-1`, for example
+But if the immediate target is only integrality and point classification, it is simpler to avoid the dual descent and rank formula:
 
 ```text
-x = (s/q)²
-or
-x = -(s/q)².
+φ-descent image {1,-1}
+  + denominator quartic obstruction
+  → x(P) integral
+  + integral point classification
+  → finite point list
+  → rank zero, if needed.
 ```
-
-Those cases do not naturally produce a bad squareclass `±2`, `±5`, or `±10`; they produce the allowed squareclasses `1` and `-1`.  They are killed only after using the denominator quartic obstruction.
-
-So the robust structure is:
-
-```text
-nonintegral point
-  → squareclass d has a cover C_d
-  → d ∈ {1,-1} by local obstructions to the bad covers
-  → denominator quartic contradiction for the allowed classes
-```
-
-rather than:
-
-```text
-nonintegral point
-  → bad cover directly.
-```
-
-The latter might be true only after smuggling in the denominator contradiction, in which case it is less transparent and less modular.
-
-## How this relates to rank zero
-
-There are two possible routes.
-
-### Route A: avoid cohomology and avoid the rank formula
-
-For the goal `rank(E)=0`, the most Lean-friendly route may be:
-
-1. Prove every rational point has integer `x`.
-2. Use the existing integer-point theorem, for example the `Descent20a4.lean` style result, to classify integral points.
-3. Conclude that `E(Q)` is finite.
-4. Conclude that the Mordell-Weil rank is zero.
-
-This avoids Galois cohomology entirely and also avoids formalizing the full isogeny Selmer exact sequence.
-
-The final finite list should be the torsion points:
-
-```text
-O,
-(0,0),
-(1,1),
-(1,-1),
-(-1,1),
-(-1,-1).
-```
-
-Once this finite list is proved, rank zero is immediate mathematically.  In Lean, the exact final statement depends on how `rank(E)` is represented, but the arithmetic content is just finiteness of `E(Q)`.
-
-### Route B: use the 2-isogeny rank formula without H¹
-
-If you specifically want the rank formula
-
-```text
-rank(E)
-  = dim_F2 Sel^φ + dim_F2 Sel^φ̂
-    - dim_F2 E[φ] - dim_F2 E'[φ̂],
-```
-
-then some exact-sequence formalization is unavoidable.  But it still does not need to mention Galois cohomology.
-
-You can instead formalize the explicit finite quotients:
-
-```text
-E'(Q) / φ(E(Q))
-E(Q)  / φ̂(E'(Q))
-```
-
-and prove explicit injections into your concrete Selmer sets via the direct descent maps.  Since each Selmer set has two elements and each quotient has a visible nontrivial kernel point, both quotients have dimension exactly `1`.  Then use the elementary isogeny exact sequence relating these two quotients to `E(Q)/2E(Q)`.
-
-This is still more work than Route A, but it avoids `H¹`.
-
-## Recommended minimal theorem package
-
-For the current project, I would aim for the following theorem package.
-
-### Concrete descent-image theorem
-
-```text
-alpha_E_image_subset_pm_one :
-  ∀ P ∈ E(Q), α_E(P) = 1 ∨ α_E(P) = -1.
-```
-
-This theorem is proved from:
-
-```text
-point_to_C_alpha
-bad_C_empty for d ∈ {±2, ±5, ±10}
-```
-
-No cohomology is needed.
-
-### Denominator theorem
-
-```text
-pm_square_squareclass_has_integral_x :
-  ∀ P ∈ E(Q),
-    (α_E(P) = 1 ∨ α_E(P) = -1) →
-    ∃ n : ℤ, x(P) = n.
-```
-
-This is where the quartic obstruction enters.
-
-### Rational integrality theorem
-
-```text
-E_rational_x_integral :
-  ∀ P ∈ E(Q), ∃ n : ℤ, x(P) = n.
-```
-
-### Integral classification theorem
-
-Use the existing integer descent/squeeze theorem to prove:
-
-```text
-E_integral_points_classified :
-  ∀ P ∈ E(Q), x(P) ∈ {-1, 0, 1}.
-```
-
-Then finish the point list by checking `y² = x³ + x² - x` for `x = -1,0,1`.
 
 ## Bottom line
 
-You can absolutely formalize the descent as a direct construction
+The dual prime-support argument works, but with the expected modification:
 
 ```text
-rational point → explicit homogeneous-space solution
+p ∣ d  →  p = 5,
 ```
 
-and avoid `H¹(Q,E[φ])` entirely for the rational-point and integrality theorem.
+assuming the dual cover solution is primitive with `gcd(S,d)=1`.
 
-However, the minimal statement should not be phrased as “nonintegral point directly gives a bad class `±2, ±5, ±10`.”  The cleaner and more reliable statement is:
+However, the φ and φ̂ descents do not directly force integrality by evaluating the dual descent on `φ(P)`, because
 
 ```text
-Every rational point maps by the explicit descent map to an allowed squareclass.
-The only allowed squareclasses are 1 and -1.
-Nonintegral points in those allowed squareclasses are ruled out by the denominator quartic obstruction.
+X(φ(P)) = y²/x²
 ```
 
-That is the smallest formal bridge from the concrete Selmer computation to “every rational point on `E` has integer `x`,” without formalizing cohomology.
+is always a square.  The dual descent is therefore trivial on points coming from `E` via `φ`.
+
+So the minimal direct proof of integrality should be:
+
+```text
+φ-descent ⇒ squareclass(x) ∈ {1,-1}
+allowed squareclass + nonintegral denominator ⇒ explicit quartic solution
+quartic obstruction ⇒ contradiction.
+```
+
+This avoids Galois cohomology completely.  The dual descent is still useful for a rank-zero proof, but it does not by itself replace the denominator quartic argument for integrality.
