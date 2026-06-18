@@ -1,187 +1,136 @@
-# `ℤ[φ]` formalization and square extraction lemma
+# `zphi_descent_step`: structured Lean reduction
 
-Here is a self-contained Lean module for the concrete order
+I read `scratch/DenominatorQuartic.lean` on `ai-scratch`.  The exact target there is the top-level axiom:
 
-\[
-\mathbb Z[\phi],\qquad \phi=\frac{1+\sqrt 5}{2},\qquad \phi^2=\phi+1.
-\]
+```lean
+axiom zphi_descent_step (p q t : ℤ) (hq : 2 ≤ q) (hcop : Int.gcd p q = 1)
+    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
+    ∃ p' q' t' : ℤ, 2 ≤ q' ∧ Int.gcd p' q' = 1 ∧
+      t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧ q'.natAbs < q.natAbs
+```
 
-An element is represented as a pair `(a,b)` meaning `a + b φ`.  Multiplication uses `φ² = φ + 1`, conjugation sends `φ` to `1 - φ`, and the norm is
+The file comments say this theorem packages the `ℤ[φ]` UFD/class-number-one step, coprimality of conjugate factors, coefficient comparison, and the Pythagorean square-leg descent.  The following Lean block gives the sound proof structure matching that signature: it proves the Pellian identities and the final case wrapper, and isolates the genuinely hard odd/even descent cores as named obligations.
 
-\[
-N(a+b\phi)=a^2+ab-b^2.
-\]
-
-The UFD/class-number-one input is isolated as the axiom `square_extraction_of_coprime_norm_square`: if `α * conj α` is an integer square and `α` is coprime to its conjugate in `ℤ[φ]`, then `α` is a unit times a square.  The final theorem applies this to
-
-\[
-\alpha=p^2+q^2\phi,
-\]
-
-whose norm is exactly
-
-\[
-p^4+p^2q^2-q^4.
-\]
+I am not pretending that the core descent is routine gcd work.  The odd case still needs two nontrivial formal packages: a coprime factor split for `A * B = 5*q^4`, and the Pythagorean/self-descent producing the smaller denominator.  The even case is analogous after extracting the 2-adic content.
 
 ```lean
 import Mathlib
 
 /-!
-# A concrete model of `ℤ[φ]`, where `φ = (1 + √5) / 2`
+# Structured proof skeleton for `zphi_descent_step`
 
-Elements are represented as pairs `(a,b) : ℤ × ℤ`, interpreted as
-`a + b φ`, with `φ^2 = φ + 1`.
-
-The class-number-one/UFD step is deliberately isolated as an axiom:
-if `α` and `conj α` are coprime and `α * conj α` is an integer square,
-then `α` is a unit times a square.
+This file matches the signature in `scratch/DenominatorQuartic.lean`.
+The final wrapper is complete once the two core descent lemmas are supplied.
 -/
 
-namespace Scratch.ChatGPTDropDM1
+/-- Left Pellian factor. -/
+private def zphiA (p q t : ℤ) : ℤ :=
+  2 * p ^ 2 + q ^ 2 - 2 * t
 
-/-- The order `ℤ[φ]`, with `φ^2 = φ + 1`. -/
-@[ext]
-structure ZPhi where
-  a : ℤ
-  b : ℤ
-deriving DecidableEq, Repr
+/-- Right Pellian factor. -/
+private def zphiB (p q t : ℤ) : ℤ :=
+  2 * p ^ 2 + q ^ 2 + 2 * t
 
-namespace ZPhi
+/-- Pellian product identity. -/
+private lemma zphi_AB_eq_5q4 (p q t : ℤ)
+    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
+    zphiA p q t * zphiB p q t = 5 * q ^ 4 := by
+  dsimp [zphiA, zphiB]
+  nlinarith
 
-/-- The element `n + 0φ`. -/
-def ofInt (n : ℤ) : ZPhi :=
-  ⟨n, 0⟩
-
-/-- Addition in the basis `1, φ`. -/
-protected def add (x y : ZPhi) : ZPhi :=
-  ⟨x.a + y.a, x.b + y.b⟩
-
-/-- Negation in the basis `1, φ`. -/
-protected def neg (x : ZPhi) : ZPhi :=
-  ⟨-x.a, -x.b⟩
-
-/-- Multiplication in the basis `1, φ`, using `φ^2 = φ + 1`. -/
-protected def mul (x y : ZPhi) : ZPhi :=
-  ⟨x.a * y.a + x.b * y.b,
-    x.a * y.b + x.b * y.a + x.b * y.b⟩
-
-instance : Zero ZPhi := ⟨ofInt 0⟩
-instance : One ZPhi := ⟨ofInt 1⟩
-instance : Add ZPhi := ⟨ZPhi.add⟩
-instance : Neg ZPhi := ⟨ZPhi.neg⟩
-instance : Sub ZPhi := ⟨fun x y => x + -y⟩
-instance : Mul ZPhi := ⟨ZPhi.mul⟩
-
-@[simp] theorem ofInt_a (n : ℤ) : (ofInt n).a = n := rfl
-@[simp] theorem ofInt_b (n : ℤ) : (ofInt n).b = 0 := rfl
-
-/-- Conjugation: `φ ↦ 1 - φ`.  Thus `a + bφ ↦ (a+b) - bφ`. -/
-def conj (x : ZPhi) : ZPhi :=
-  ⟨x.a + x.b, -x.b⟩
-
-/-- The algebraic norm `N(a+bφ)=a²+ab-b²`. -/
-def norm (x : ZPhi) : ℤ :=
-  x.a ^ 2 + x.a * x.b - x.b ^ 2
-
-/-- Square of an element, avoiding the need for a full ring instance. -/
-def sq (x : ZPhi) : ZPhi :=
-  x * x
-
-/-- Divisibility in the multiplicative monoid of `ℤ[φ]`. -/
-def Divides (d x : ZPhi) : Prop :=
-  ∃ z : ZPhi, x = d * z
-
-/-- Units in the concrete order. -/
-def IsUnitZPhi (u : ZPhi) : Prop :=
-  ∃ v : ZPhi, u * v = 1 ∧ v * u = 1
-
-/-- Coprimality in `ℤ[φ]`: every common divisor is a unit. -/
-def CoprimeZPhi (x y : ZPhi) : Prop :=
-  ∀ d : ZPhi, Divides d x → Divides d y → IsUnitZPhi d
-
-@[simp] theorem mul_a (x y : ZPhi) :
-    (x * y).a = x.a * y.a + x.b * y.b := rfl
-
-@[simp] theorem mul_b (x y : ZPhi) :
-    (x * y).b = x.a * y.b + x.b * y.a + x.b * y.b := rfl
-
-@[simp] theorem conj_a (x : ZPhi) : (conj x).a = x.a + x.b := rfl
-@[simp] theorem conj_b (x : ZPhi) : (conj x).b = -x.b := rfl
-
-/-- Conjugation is involutive. -/
-theorem conj_conj (x : ZPhi) : conj (conj x) = x := by
-  ext <;> simp [conj]
-
-/-- Conjugation is multiplicative. -/
-theorem conj_mul (x y : ZPhi) : conj (x * y) = conj x * conj y := by
-  ext <;> simp [conj, ZPhi.mul] <;> ring
-
-/-- `α * conj α` is the norm, embedded as an integer. -/
-theorem mul_conj (x : ZPhi) : x * conj x = ofInt (norm x) := by
-  ext <;> simp [conj, norm, ofInt, ZPhi.mul] <;> ring
-
-/-- The norm is invariant under conjugation. -/
-theorem norm_conj (x : ZPhi) : norm (conj x) = norm x := by
-  simp [conj, norm]
+/-- Sum of the two Pellian factors. -/
+private lemma zphi_A_add_B (p q t : ℤ) :
+    zphiA p q t + zphiB p q t = 2 * (2 * p ^ 2 + q ^ 2) := by
+  dsimp [zphiA, zphiB]
   ring
 
-/-- The norm is multiplicative. -/
-theorem norm_mul (x y : ZPhi) : norm (x * y) = norm x * norm y := by
-  simp [norm, ZPhi.mul]
+/-- Difference of the two Pellian factors. -/
+private lemma zphi_B_sub_A (p q t : ℤ) :
+    zphiB p q t - zphiA p q t = 4 * t := by
+  dsimp [zphiA, zphiB]
   ring
 
-/--
-UFD/class-number-one square extraction axiom for `ℤ[φ]`.
+/-- `q.natAbs` is nonzero under the denominator hypothesis. -/
+private lemma zphi_q_natAbs_pos {q : ℤ} (hq : 2 ≤ q) : 0 < q.natAbs := by
+  have hqpos : 0 < q := by omega
+  exact Int.natAbs_pos.mpr (by omega)
 
-Mathematically, this follows because `ℤ[(1+√5)/2]` is a UFD.  If `α` and
-`conj α` are coprime and their product is an ordinary integer square, then
-`α` is a unit times a square.
--/
-axiom square_extraction_of_coprime_norm_square
-    {α : ZPhi} {t : ℤ}
-    (hsq : α * conj α = ofInt (t ^ 2))
-    (hcop : CoprimeZPhi α (conj α)) :
-    ∃ ε β : ZPhi, IsUnitZPhi ε ∧ α = ε * sq β
+/-- Odd `q` core.
 
-/-- The element `p² + q² φ`. -/
-def alphaPQ (p q : ℤ) : ZPhi :=
-  ⟨p ^ 2, q ^ 2⟩
+Mathematical content intended here:
+* from `h` and `Int.gcd p q = 1`, prove `Int.gcd t q = 1`;
+* prove the Pellian factors `A,B` are positive and coprime;
+* split coprime positive factors of `5*q^4` as `{5*m^4,n^4}` with `m*n=q`;
+* compare coefficients to obtain `p^2 = m^4 + ((n^2-m^2)/2)^2`;
+* parametrize the primitive Pythagorean triple;
+* produce a new denominator `q'` with `2 ≤ q'` and `q'.natAbs < q.natAbs`.
 
-/-- Norm of `p² + q² φ` is `p⁴ + p²q² - q⁴`. -/
-theorem norm_alphaPQ (p q : ℤ) :
-    norm (alphaPQ p q) = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4 := by
-  simp [alphaPQ, norm]
-  ring
-
-/-- Product with the conjugate for `p² + q² φ`. -/
-theorem alphaPQ_mul_conj (p q : ℤ) :
-    alphaPQ p q * conj (alphaPQ p q) =
-      ofInt (p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) := by
-  calc
-    alphaPQ p q * conj (alphaPQ p q) = ofInt (norm (alphaPQ p q)) :=
-      mul_conj (alphaPQ p q)
-    _ = ofInt (p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) := by
-      rw [norm_alphaPQ]
-
-/--
-Application to the denominator quartic:
-if `t² = p⁴+p²q²-q⁴` and `p²+q²φ` is coprime to its conjugate, then
-`p²+q²φ` is a unit times a square in `ℤ[φ]`.
--/
-theorem extract_square_for_alphaPQ
+This is the hard algebraic-number-theory/Pythagorean descent package, not a
+routine linear-arithmetic lemma. -/
+private lemma zphi_descent_step_odd_core
     (p q t : ℤ)
-    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4)
-    (hcop : CoprimeZPhi (alphaPQ p q) (conj (alphaPQ p q))) :
-    ∃ ε β : ZPhi, IsUnitZPhi ε ∧ alphaPQ p q = ε * sq β := by
-  refine square_extraction_of_coprime_norm_square ?_ hcop
-  calc
-    alphaPQ p q * conj (alphaPQ p q) =
-        ofInt (p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) := alphaPQ_mul_conj p q
-    _ = ofInt (t ^ 2) := by
-      rw [← h]
+    (hq : 2 ≤ q)
+    (hqodd : ¬ (2 : ℤ) ∣ q)
+    (hcop : Int.gcd p q = 1)
+    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
+    ∃ p' q' t' : ℤ,
+      2 ≤ q' ∧
+      Int.gcd p' q' = 1 ∧
+      t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧
+      q'.natAbs < q.natAbs := by
+  -- Pellian setup available to the descent core:
+  have hAB : zphiA p q t * zphiB p q t = 5 * q ^ 4 :=
+    zphi_AB_eq_5q4 p q t h
+  have hsum : zphiA p q t + zphiB p q t = 2 * (2 * p ^ 2 + q ^ 2) :=
+    zphi_A_add_B p q t
+  have hdiff : zphiB p q t - zphiA p q t = 4 * t :=
+    zphi_B_sub_A p q t
+  -- The remaining proof is the actual odd-denominator descent described above.
+  -- It should consume `hAB`, `hsum`, `hdiff`, `hqodd`, and `hcop`.
+  sorry
 
-end ZPhi
+/-- Even `q` core.
 
-end Scratch.ChatGPTDropDM1
+Mathematical content intended here:
+extract the exact 2-adic content of the equation, divide to a primitive odd
+case or construct a smaller denominator directly. -/
+private lemma zphi_descent_step_even_core
+    (p q t : ℤ)
+    (hq : 2 ≤ q)
+    (hqeven : (2 : ℤ) ∣ q)
+    (hcop : Int.gcd p q = 1)
+    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
+    ∃ p' q' t' : ℤ,
+      2 ≤ q' ∧
+      Int.gcd p' q' = 1 ∧
+      t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧
+      q'.natAbs < q.natAbs := by
+  -- The even case is analogous but requires a 2-adic normalization before
+  -- the coprime factor split.
+  sorry
+
+/-- The hard descent step used by `scratch/DenominatorQuartic.lean`. -/
+theorem zphi_descent_step (p q t : ℤ)
+    (hq : 2 ≤ q)
+    (hcop : Int.gcd p q = 1)
+    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
+    ∃ p' q' t' : ℤ,
+      2 ≤ q' ∧
+      Int.gcd p' q' = 1 ∧
+      t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧
+      q'.natAbs < q.natAbs := by
+  by_cases hqodd : ¬ (2 : ℤ) ∣ q
+  · exact zphi_descent_step_odd_core p q t hq hqodd hcop h
+  · have hqeven : (2 : ℤ) ∣ q := by
+      exact Classical.not_not.mp hqodd
+    exact zphi_descent_step_even_core p q t hq hqeven hcop h
 ```
+
+## What remains to make this a genuine replacement for the axiom
+
+The wrapper above has the right theorem statement and case structure, and the Pellian algebra is formalized.  The remaining obligations are exactly the ones the comments in `DenominatorQuartic.lean` identify as hard:
+
+1. odd `q`: prove the coprime split of `A*B=5*q^4`, compare coefficients, and run the Pythagorean square-leg descent;
+2. even `q`: do the corresponding 2-adic normalization and then descend.
+
+I did not mark these as “routine coprimality sublemmas” because they are not routine; they are the core descent content.  The two `sorry`s above are therefore honest placeholders for the hard odd/even cores rather than a fake completed proof.
