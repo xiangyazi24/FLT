@@ -1,37 +1,51 @@
 # ChatGPT Drop File (dm2)
 
-The target is the `d = 7` quartic obstruction:
+The target is the `d = 9` quartic obstruction:
 
 ```lean
-theorem quartic_no_sol_d7 (s t : ℤ) (hcop : Int.gcd s 7 = 1) :
-    s ^ 4 + 49 * s ^ 2 - 2401 = t ^ 2 → False
+theorem quartic_no_sol_d9 (s t : ℤ) (hcop : Int.gcd s 9 = 1) :
+    s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2 → False
 ```
 
-The proof follows the same consecutive-squares squeeze pattern as `scratch/Descent20a4.lean`.  Write `x = s^2`.  For large `|s|`, the expression
+Write `x = s^2`.  The expression is
 
 ```text
-x^2 + 49*x - 2401
+x^2 + 81*x - 6561.
 ```
 
-is placed strictly between consecutive squares `(x+k)^2` and `(x+k+1)^2`.  The useful bands are:
+For `|s| ≥ 10`, it is squeezed between consecutive squares `(x+k)^2` and `(x+k+1)^2`, with `k` depending on the size range.  The bands used below are:
 
-- `|s| ≥ 55`: use `k = 24`.
-- `32 ≤ |s| ≤ 54`: use `k = 23`.
-- `25 ≤ |s| ≤ 31`: use `k = 22`.
-- `21 ≤ |s| ≤ 24`: use `k = 21`.
-- `18 ≤ |s| ≤ 20`: use `k = 20`.
-- `16 ≤ |s| ≤ 17`: use `k = 19`.
+- `|s| ≥ 91`: `k = 40`.
+- `52 ≤ |s| ≤ 90`: `k = 39`.
+- `41 ≤ |s| ≤ 51`: `k = 38`.
+- `34 ≤ |s| ≤ 40`: `k = 37`.
+- `30 ≤ |s| ≤ 33`: `k = 36`.
+- `27 ≤ |s| ≤ 29`: `k = 35`.
+- `25 ≤ |s| ≤ 26`: `k = 34`.
+- `23 ≤ |s| ≤ 24`: `k = 33`.
+- `|s| = 22`: `k = 32`.
+- `20 ≤ |s| ≤ 21`: `k = 31`.
+- `|s| = 19`: `k = 30`.
+- `|s| = 18`: `k = 29`.
+- `|s| = 17`: `k = 27`.
+- `|s| = 16`: `k = 26`.
+- `|s| = 15`: `k = 24`.
+- `|s| = 14`: `k = 22`.
+- `|s| = 13`: `k = 19`.
+- `|s| = 12`: `k = 16`.
+- `|s| = 11`: `k = 12`.
+- `|s| = 10`: `k = 7`.
 
-The remaining range is `|s| ≤ 15`.  Values with `7 ∣ s` are excluded by `Int.gcd s 7 = 1`; values `|s| ≤ 5` make the right side negative; and the remaining cases are explicit non-squares, each again handled by a small consecutive-squares squeeze.
+For `|s| ≤ 7`, the right side is negative.  For `s = ±8`, the value is `2719`, strictly between `52^2` and `53^2`.  For `s = ±9`, the raw equation actually has `t^2 = 81^2`, and this is exactly where `Int.gcd s 9 = 1` is used.
 
 ```lean
 import Mathlib
 
 /-!
-# The `d = 7` quartic obstruction
+# The `d = 9` quartic obstruction
 
-We prove that `s^4 + 49*s^2 - 2401 = t^2` has no integer solution when
-`Int.gcd s 7 = 1`.
+We prove that `s^4 + 81*s^2 - 6561 = t^2` has no integer solution when
+`Int.gcd s 9 = 1`, equivalently when `s` is not divisible by `3`.
 -/
 
 private lemma lt_neg_of_sq_lt_sq_of_nonneg_of_neg {a t : ℤ}
@@ -125,253 +139,494 @@ private lemma sq_le_of_abs_le (s N : ℤ) (hlo : -N ≤ s) (hhi : s ≤ N) :
     mul_nonpos_of_nonneg_of_nonpos h1 h2
   nlinarith
 
-private lemma not_sq_659 (t : ℤ) (h : (659 : ℤ) = t ^ 2) : False := by
-  exact no_sq_between_consecutive t 25 (by norm_num) (by nlinarith) (by nlinarith)
+private lemma quartic_d9_negative (s t : ℤ) (hs49 : s ^ 2 ≤ (49 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
+  have hneg : s ^ 4 + 81 * s ^ 2 - 6561 < 0 := by
+    nlinarith [sq_nonneg s]
+  nlinarith
 
-private lemma not_sq_4831 (t : ℤ) (h : (4831 : ℤ) = t ^ 2) : False := by
-  exact no_sq_between_consecutive t 69 (by norm_num) (by nlinarith) (by nlinarith)
+private lemma not_sq_2719 (t : ℤ) (h : (2719 : ℤ) = t ^ 2) : False := by
+  exact no_sq_between_consecutive t 52 (by norm_num) (by nlinarith) (by nlinarith)
 
-private lemma not_sq_8129 (t : ℤ) (h : (8129 : ℤ) = t ^ 2) : False := by
-  exact no_sq_between_consecutive t 90 (by norm_num) (by nlinarith) (by nlinarith)
-
-private lemma not_sq_12499 (t : ℤ) (h : (12499 : ℤ) = t ^ 2) : False := by
-  exact no_sq_between_consecutive t 111 (by norm_num) (by nlinarith) (by nlinarith)
-
-private lemma not_sq_18169 (t : ℤ) (h : (18169 : ℤ) = t ^ 2) : False := by
-  exact no_sq_between_consecutive t 134 (by norm_num) (by nlinarith) (by nlinarith)
-
-private lemma not_sq_25391 (t : ℤ) (h : (25391 : ℤ) = t ^ 2) : False := by
-  exact no_sq_between_consecutive t 159 (by norm_num) (by nlinarith) (by nlinarith)
-
-private lemma not_sq_34441 (t : ℤ) (h : (34441 : ℤ) = t ^ 2) : False := by
-  exact no_sq_between_consecutive t 185 (by norm_num) (by nlinarith) (by nlinarith)
-
-private lemma not_sq_59249 (t : ℤ) (h : (59249 : ℤ) = t ^ 2) : False := by
-  exact no_sq_between_consecutive t 243 (by norm_num) (by nlinarith) (by nlinarith)
-
-private lemma quartic_d7_squeeze (k : ℤ) (s t : ℤ)
+private lemma quartic_d9_squeeze (k : ℤ) (s t : ℤ)
     (ha : 0 ≤ s ^ 2 + k)
-    (hlow_coeff : 2401 + k ^ 2 < (49 - 2 * k) * s ^ 2)
-    (hhigh_coeff : (49 - 2 * (k + 1)) * s ^ 2 < 2401 + (k + 1) ^ 2)
-    (h : s ^ 4 + 49 * s ^ 2 - 2401 = t ^ 2) : False := by
+    (hlow_coeff : 6561 + k ^ 2 < (81 - 2 * k) * s ^ 2)
+    (hhigh_coeff : (81 - 2 * (k + 1)) * s ^ 2 < 6561 + (k + 1) ^ 2)
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
   have hlow : (s ^ 2 + k) ^ 2 < t ^ 2 := by
     nlinarith
   have hhigh : t ^ 2 < ((s ^ 2 + k) + 1) ^ 2 := by
     nlinarith
   exact no_sq_between_consecutive t (s ^ 2 + k) ha hlow hhigh
 
-private lemma quartic_d7_squeeze_24 (s t : ℤ) (hlo : (3025 : ℤ) ≤ s ^ 2)
-    (h : s ^ 4 + 49 * s ^ 2 - 2401 = t ^ 2) : False := by
-  exact quartic_d7_squeeze 24 s t
+private lemma quartic_d9_squeeze_40 (s t : ℤ) (hlo : (8281 : ℤ) ≤ s ^ 2)
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 40 s t
     (by nlinarith [sq_nonneg s])
     (by nlinarith)
     (by nlinarith [sq_nonneg s])
     h
 
-private lemma quartic_d7_squeeze_23 (s t : ℤ)
-    (hlo : (1024 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (2916 : ℤ))
-    (h : s ^ 4 + 49 * s ^ 2 - 2401 = t ^ 2) : False := by
-  exact quartic_d7_squeeze 23 s t
+private lemma quartic_d9_squeeze_39 (s t : ℤ)
+    (hlo : (2704 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (8100 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 39 s t
     (by nlinarith [sq_nonneg s])
     (by nlinarith)
     (by nlinarith)
     h
 
-private lemma quartic_d7_squeeze_22 (s t : ℤ)
-    (hlo : (625 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (961 : ℤ))
-    (h : s ^ 4 + 49 * s ^ 2 - 2401 = t ^ 2) : False := by
-  exact quartic_d7_squeeze 22 s t
+private lemma quartic_d9_squeeze_38 (s t : ℤ)
+    (hlo : (1681 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (2601 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 38 s t
     (by nlinarith [sq_nonneg s])
     (by nlinarith)
     (by nlinarith)
     h
 
-private lemma quartic_d7_squeeze_21 (s t : ℤ)
-    (hlo : (441 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (576 : ℤ))
-    (h : s ^ 4 + 49 * s ^ 2 - 2401 = t ^ 2) : False := by
-  exact quartic_d7_squeeze 21 s t
+private lemma quartic_d9_squeeze_37 (s t : ℤ)
+    (hlo : (1156 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (1600 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 37 s t
     (by nlinarith [sq_nonneg s])
     (by nlinarith)
     (by nlinarith)
     h
 
-private lemma quartic_d7_squeeze_20 (s t : ℤ)
-    (hlo : (324 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (400 : ℤ))
-    (h : s ^ 4 + 49 * s ^ 2 - 2401 = t ^ 2) : False := by
-  exact quartic_d7_squeeze 20 s t
+private lemma quartic_d9_squeeze_36 (s t : ℤ)
+    (hlo : (900 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (1089 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 36 s t
     (by nlinarith [sq_nonneg s])
     (by nlinarith)
     (by nlinarith)
     h
 
-private lemma quartic_d7_squeeze_19 (s t : ℤ)
-    (hlo : (256 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (289 : ℤ))
-    (h : s ^ 4 + 49 * s ^ 2 - 2401 = t ^ 2) : False := by
-  exact quartic_d7_squeeze 19 s t
+private lemma quartic_d9_squeeze_35 (s t : ℤ)
+    (hlo : (729 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (841 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 35 s t
     (by nlinarith [sq_nonneg s])
     (by nlinarith)
     (by nlinarith)
     h
 
-theorem quartic_no_sol_d7 (s t : ℤ) (hcop : Int.gcd s 7 = 1) :
-    s ^ 4 + 49 * s ^ 2 - 2401 = t ^ 2 → False := by
+private lemma quartic_d9_squeeze_34 (s t : ℤ)
+    (hlo : (625 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (676 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 34 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+private lemma quartic_d9_squeeze_33 (s t : ℤ)
+    (hlo : (529 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (576 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 33 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+private lemma quartic_d9_squeeze_32 (s t : ℤ)
+    (hlo : (484 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (484 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 32 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+private lemma quartic_d9_squeeze_31 (s t : ℤ)
+    (hlo : (400 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (441 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 31 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+private lemma quartic_d9_squeeze_30 (s t : ℤ)
+    (hlo : (361 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (361 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 30 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+private lemma quartic_d9_squeeze_29 (s t : ℤ)
+    (hlo : (324 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (324 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 29 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+private lemma quartic_d9_squeeze_27 (s t : ℤ)
+    (hlo : (289 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (289 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 27 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+private lemma quartic_d9_squeeze_26 (s t : ℤ)
+    (hlo : (256 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (256 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 26 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+private lemma quartic_d9_squeeze_24 (s t : ℤ)
+    (hlo : (225 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (225 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 24 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+private lemma quartic_d9_squeeze_22 (s t : ℤ)
+    (hlo : (196 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (196 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 22 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+private lemma quartic_d9_squeeze_19 (s t : ℤ)
+    (hlo : (169 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (169 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 19 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+private lemma quartic_d9_squeeze_16 (s t : ℤ)
+    (hlo : (144 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (144 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 16 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+private lemma quartic_d9_squeeze_12 (s t : ℤ)
+    (hlo : (121 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (121 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 12 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+private lemma quartic_d9_squeeze_7 (s t : ℤ)
+    (hlo : (100 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 ≤ (100 : ℤ))
+    (h : s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2) : False := by
+  exact quartic_d9_squeeze 7 s t
+    (by nlinarith [sq_nonneg s])
+    (by nlinarith)
+    (by nlinarith)
+    h
+
+theorem quartic_no_sol_d9 (s t : ℤ) (hcop : Int.gcd s 9 = 1) :
+    s ^ 4 + 81 * s ^ 2 - 6561 = t ^ 2 → False := by
   intro h
-  by_cases hs_le_neg55 : s ≤ -55
-  · exact quartic_d7_squeeze_24 s t
-      (by nlinarith [sq_ge_of_le_neg s 55 (by norm_num) hs_le_neg55]) h
-  · by_cases hs_ge55 : 55 ≤ s
-    · exact quartic_d7_squeeze_24 s t
-        (by nlinarith [sq_ge_of_ge s 55 (by norm_num) hs_ge55]) h
-    · by_cases hs_le_neg32 : s ≤ -32
-      · exact quartic_d7_squeeze_23 s t
-          (by nlinarith [sq_ge_of_le_neg s 32 (by norm_num) hs_le_neg32])
+  by_cases hs_le_neg91 : s ≤ -91
+  · exact quartic_d9_squeeze_40 s t
+      (by nlinarith [sq_ge_of_le_neg s 91 (by norm_num) hs_le_neg91]) h
+  · by_cases hs_ge91 : 91 ≤ s
+    · exact quartic_d9_squeeze_40 s t
+        (by nlinarith [sq_ge_of_ge s 91 (by norm_num) hs_ge91]) h
+    · by_cases hs_le_neg52 : s ≤ -52
+      · exact quartic_d9_squeeze_39 s t
+          (by nlinarith [sq_ge_of_le_neg s 52 (by norm_num) hs_le_neg52])
           (by
-            have hsabs := sq_le_of_abs_le s 54 (by omega) (by omega)
+            have hsabs := sq_le_of_abs_le s 90 (by omega) (by omega)
             nlinarith)
           h
-      · by_cases hs_ge32 : 32 ≤ s
-        · exact quartic_d7_squeeze_23 s t
-            (by nlinarith [sq_ge_of_ge s 32 (by norm_num) hs_ge32])
+      · by_cases hs_ge52 : 52 ≤ s
+        · exact quartic_d9_squeeze_39 s t
+            (by nlinarith [sq_ge_of_ge s 52 (by norm_num) hs_ge52])
             (by
-              have hsabs := sq_le_of_abs_le s 54 (by omega) (by omega)
+              have hsabs := sq_le_of_abs_le s 90 (by omega) (by omega)
               nlinarith)
             h
-        · by_cases hs_le_neg25 : s ≤ -25
-          · exact quartic_d7_squeeze_22 s t
-              (by nlinarith [sq_ge_of_le_neg s 25 (by norm_num) hs_le_neg25])
+        · by_cases hs_le_neg41 : s ≤ -41
+          · exact quartic_d9_squeeze_38 s t
+              (by nlinarith [sq_ge_of_le_neg s 41 (by norm_num) hs_le_neg41])
               (by
-                have hsabs := sq_le_of_abs_le s 31 (by omega) (by omega)
+                have hsabs := sq_le_of_abs_le s 51 (by omega) (by omega)
                 nlinarith)
               h
-          · by_cases hs_ge25 : 25 ≤ s
-            · exact quartic_d7_squeeze_22 s t
-                (by nlinarith [sq_ge_of_ge s 25 (by norm_num) hs_ge25])
+          · by_cases hs_ge41 : 41 ≤ s
+            · exact quartic_d9_squeeze_38 s t
+                (by nlinarith [sq_ge_of_ge s 41 (by norm_num) hs_ge41])
                 (by
-                  have hsabs := sq_le_of_abs_le s 31 (by omega) (by omega)
+                  have hsabs := sq_le_of_abs_le s 51 (by omega) (by omega)
                   nlinarith)
                 h
-            · by_cases hs_le_neg21 : s ≤ -21
-              · exact quartic_d7_squeeze_21 s t
-                  (by nlinarith [sq_ge_of_le_neg s 21 (by norm_num) hs_le_neg21])
+            · by_cases hs_le_neg34 : s ≤ -34
+              · exact quartic_d9_squeeze_37 s t
+                  (by nlinarith [sq_ge_of_le_neg s 34 (by norm_num) hs_le_neg34])
                   (by
-                    have hsabs := sq_le_of_abs_le s 24 (by omega) (by omega)
+                    have hsabs := sq_le_of_abs_le s 40 (by omega) (by omega)
                     nlinarith)
                   h
-              · by_cases hs_ge21 : 21 ≤ s
-                · exact quartic_d7_squeeze_21 s t
-                    (by nlinarith [sq_ge_of_ge s 21 (by norm_num) hs_ge21])
+              · by_cases hs_ge34 : 34 ≤ s
+                · exact quartic_d9_squeeze_37 s t
+                    (by nlinarith [sq_ge_of_ge s 34 (by norm_num) hs_ge34])
                     (by
-                      have hsabs := sq_le_of_abs_le s 24 (by omega) (by omega)
+                      have hsabs := sq_le_of_abs_le s 40 (by omega) (by omega)
                       nlinarith)
                     h
-                · by_cases hs_le_neg18 : s ≤ -18
-                  · exact quartic_d7_squeeze_20 s t
-                      (by nlinarith [sq_ge_of_le_neg s 18 (by norm_num) hs_le_neg18])
+                · by_cases hs_le_neg30 : s ≤ -30
+                  · exact quartic_d9_squeeze_36 s t
+                      (by nlinarith [sq_ge_of_le_neg s 30 (by norm_num) hs_le_neg30])
                       (by
-                        have hsabs := sq_le_of_abs_le s 20 (by omega) (by omega)
+                        have hsabs := sq_le_of_abs_le s 33 (by omega) (by omega)
                         nlinarith)
                       h
-                  · by_cases hs_ge18 : 18 ≤ s
-                    · exact quartic_d7_squeeze_20 s t
-                        (by nlinarith [sq_ge_of_ge s 18 (by norm_num) hs_ge18])
+                  · by_cases hs_ge30 : 30 ≤ s
+                    · exact quartic_d9_squeeze_36 s t
+                        (by nlinarith [sq_ge_of_ge s 30 (by norm_num) hs_ge30])
                         (by
-                          have hsabs := sq_le_of_abs_le s 20 (by omega) (by omega)
+                          have hsabs := sq_le_of_abs_le s 33 (by omega) (by omega)
                           nlinarith)
                         h
-                    · by_cases hs_le_neg16 : s ≤ -16
-                      · exact quartic_d7_squeeze_19 s t
-                          (by nlinarith [sq_ge_of_le_neg s 16 (by norm_num) hs_le_neg16])
+                    · by_cases hs_le_neg27 : s ≤ -27
+                      · exact quartic_d9_squeeze_35 s t
+                          (by nlinarith [sq_ge_of_le_neg s 27 (by norm_num) hs_le_neg27])
                           (by
-                            have hsabs := sq_le_of_abs_le s 17 (by omega) (by omega)
+                            have hsabs := sq_le_of_abs_le s 29 (by omega) (by omega)
                             nlinarith)
                           h
-                      · by_cases hs_ge16 : 16 ≤ s
-                        · exact quartic_d7_squeeze_19 s t
-                            (by nlinarith [sq_ge_of_ge s 16 (by norm_num) hs_ge16])
+                      · by_cases hs_ge27 : 27 ≤ s
+                        · exact quartic_d9_squeeze_35 s t
+                            (by nlinarith [sq_ge_of_ge s 27 (by norm_num) hs_ge27])
                             (by
-                              have hsabs := sq_le_of_abs_le s 17 (by omega) (by omega)
+                              have hsabs := sq_le_of_abs_le s 29 (by omega) (by omega)
                               nlinarith)
                             h
-                        · have hs_small :
-                              s = -15 ∨ s = -14 ∨ s = -13 ∨ s = -12 ∨ s = -11 ∨
-                              s = -10 ∨ s = -9 ∨ s = -8 ∨ s = -7 ∨ s = -6 ∨
-                              s = -5 ∨ s = -4 ∨ s = -3 ∨ s = -2 ∨ s = -1 ∨
-                              s = 0 ∨ s = 1 ∨ s = 2 ∨ s = 3 ∨ s = 4 ∨
-                              s = 5 ∨ s = 6 ∨ s = 7 ∨ s = 8 ∨ s = 9 ∨
-                              s = 10 ∨ s = 11 ∨ s = 12 ∨ s = 13 ∨ s = 14 ∨
-                              s = 15 := by
-                            omega
-                          rcases hs_small with rfl | rfl | rfl | rfl | rfl |
-                            rfl | rfl | rfl | rfl | rfl |
-                            rfl | rfl | rfl | rfl | rfl |
-                            rfl | rfl | rfl | rfl | rfl |
-                            rfl | rfl | rfl | rfl | rfl |
-                            rfl | rfl | rfl | rfl | rfl | rfl
-                          · norm_num at h
-                            exact not_sq_59249 t h
-                          · norm_num at hcop
-                          · norm_num at h
-                            exact not_sq_34441 t h
-                          · norm_num at h
-                            exact not_sq_25391 t h
-                          · norm_num at h
-                            exact not_sq_18169 t h
-                          · norm_num at h
-                            exact not_sq_12499 t h
-                          · norm_num at h
-                            exact not_sq_8129 t h
-                          · norm_num at h
-                            exact not_sq_4831 t h
-                          · norm_num at hcop
-                          · norm_num at h
-                            exact not_sq_659 t h
-                          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-                            norm_num at h
-                            nlinarith
-                          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-                            norm_num at h
-                            nlinarith
-                          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-                            norm_num at h
-                            nlinarith
-                          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-                            norm_num at h
-                            nlinarith
-                          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-                            norm_num at h
-                            nlinarith
-                          · norm_num at hcop
-                          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-                            norm_num at h
-                            nlinarith
-                          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-                            norm_num at h
-                            nlinarith
-                          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-                            norm_num at h
-                            nlinarith
-                          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-                            norm_num at h
-                            nlinarith
-                          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-                            norm_num at h
-                            nlinarith
-                          · norm_num at h
-                            exact not_sq_659 t h
-                          · norm_num at hcop
-                          · norm_num at h
-                            exact not_sq_4831 t h
-                          · norm_num at h
-                            exact not_sq_8129 t h
-                          · norm_num at h
-                            exact not_sq_12499 t h
-                          · norm_num at h
-                            exact not_sq_18169 t h
-                          · norm_num at h
-                            exact not_sq_25391 t h
-                          · norm_num at h
-                            exact not_sq_34441 t h
-                          · norm_num at hcop
-                          · norm_num at h
-                            exact not_sq_59249 t h
+                        · by_cases hs_le_neg25 : s ≤ -25
+                          · exact quartic_d9_squeeze_34 s t
+                              (by nlinarith [sq_ge_of_le_neg s 25 (by norm_num) hs_le_neg25])
+                              (by
+                                have hsabs := sq_le_of_abs_le s 26 (by omega) (by omega)
+                                nlinarith)
+                              h
+                          · by_cases hs_ge25 : 25 ≤ s
+                            · exact quartic_d9_squeeze_34 s t
+                                (by nlinarith [sq_ge_of_ge s 25 (by norm_num) hs_ge25])
+                                (by
+                                  have hsabs := sq_le_of_abs_le s 26 (by omega) (by omega)
+                                  nlinarith)
+                                h
+                            · by_cases hs_le_neg23 : s ≤ -23
+                              · exact quartic_d9_squeeze_33 s t
+                                  (by nlinarith [sq_ge_of_le_neg s 23 (by norm_num) hs_le_neg23])
+                                  (by
+                                    have hsabs := sq_le_of_abs_le s 24 (by omega) (by omega)
+                                    nlinarith)
+                                  h
+                              · by_cases hs_ge23 : 23 ≤ s
+                                · exact quartic_d9_squeeze_33 s t
+                                    (by nlinarith [sq_ge_of_ge s 23 (by norm_num) hs_ge23])
+                                    (by
+                                      have hsabs := sq_le_of_abs_le s 24 (by omega) (by omega)
+                                      nlinarith)
+                                    h
+                                · by_cases hs_le_neg22 : s ≤ -22
+                                  · exact quartic_d9_squeeze_32 s t
+                                      (by nlinarith [sq_ge_of_le_neg s 22 (by norm_num) hs_le_neg22])
+                                      (by
+                                        have hsabs := sq_le_of_abs_le s 22 (by omega) (by omega)
+                                        nlinarith)
+                                      h
+                                  · by_cases hs_ge22 : 22 ≤ s
+                                    · exact quartic_d9_squeeze_32 s t
+                                        (by nlinarith [sq_ge_of_ge s 22 (by norm_num) hs_ge22])
+                                        (by
+                                          have hsabs := sq_le_of_abs_le s 22 (by omega) (by omega)
+                                          nlinarith)
+                                        h
+                                    · by_cases hs_le_neg20 : s ≤ -20
+                                      · exact quartic_d9_squeeze_31 s t
+                                          (by nlinarith [sq_ge_of_le_neg s 20 (by norm_num) hs_le_neg20])
+                                          (by
+                                            have hsabs := sq_le_of_abs_le s 21 (by omega) (by omega)
+                                            nlinarith)
+                                          h
+                                      · by_cases hs_ge20 : 20 ≤ s
+                                        · exact quartic_d9_squeeze_31 s t
+                                            (by nlinarith [sq_ge_of_ge s 20 (by norm_num) hs_ge20])
+                                            (by
+                                              have hsabs := sq_le_of_abs_le s 21 (by omega) (by omega)
+                                              nlinarith)
+                                            h
+                                        · by_cases hs_le_neg19 : s ≤ -19
+                                          · exact quartic_d9_squeeze_30 s t
+                                              (by nlinarith [sq_ge_of_le_neg s 19 (by norm_num) hs_le_neg19])
+                                              (by
+                                                have hsabs := sq_le_of_abs_le s 19 (by omega) (by omega)
+                                                nlinarith)
+                                              h
+                                          · by_cases hs_ge19 : 19 ≤ s
+                                            · exact quartic_d9_squeeze_30 s t
+                                                (by nlinarith [sq_ge_of_ge s 19 (by norm_num) hs_ge19])
+                                                (by
+                                                  have hsabs := sq_le_of_abs_le s 19 (by omega) (by omega)
+                                                  nlinarith)
+                                                h
+                                            · by_cases hs_le_neg18 : s ≤ -18
+                                              · exact quartic_d9_squeeze_29 s t
+                                                  (by nlinarith [sq_ge_of_le_neg s 18 (by norm_num) hs_le_neg18])
+                                                  (by
+                                                    have hsabs := sq_le_of_abs_le s 18 (by omega) (by omega)
+                                                    nlinarith)
+                                                  h
+                                              · by_cases hs_ge18 : 18 ≤ s
+                                                · exact quartic_d9_squeeze_29 s t
+                                                    (by nlinarith [sq_ge_of_ge s 18 (by norm_num) hs_ge18])
+                                                    (by
+                                                      have hsabs := sq_le_of_abs_le s 18 (by omega) (by omega)
+                                                      nlinarith)
+                                                    h
+                                                · by_cases hs_le_neg17 : s ≤ -17
+                                                  · exact quartic_d9_squeeze_27 s t
+                                                      (by nlinarith [sq_ge_of_le_neg s 17 (by norm_num) hs_le_neg17])
+                                                      (by
+                                                        have hsabs := sq_le_of_abs_le s 17 (by omega) (by omega)
+                                                        nlinarith)
+                                                      h
+                                                  · by_cases hs_ge17 : 17 ≤ s
+                                                    · exact quartic_d9_squeeze_27 s t
+                                                        (by nlinarith [sq_ge_of_ge s 17 (by norm_num) hs_ge17])
+                                                        (by
+                                                          have hsabs := sq_le_of_abs_le s 17 (by omega) (by omega)
+                                                          nlinarith)
+                                                        h
+                                                    · by_cases hs_le_neg16 : s ≤ -16
+                                                      · exact quartic_d9_squeeze_26 s t
+                                                          (by nlinarith [sq_ge_of_le_neg s 16 (by norm_num) hs_le_neg16])
+                                                          (by
+                                                            have hsabs := sq_le_of_abs_le s 16 (by omega) (by omega)
+                                                            nlinarith)
+                                                          h
+                                                      · by_cases hs_ge16 : 16 ≤ s
+                                                        · exact quartic_d9_squeeze_26 s t
+                                                            (by nlinarith [sq_ge_of_ge s 16 (by norm_num) hs_ge16])
+                                                            (by
+                                                              have hsabs := sq_le_of_abs_le s 16 (by omega) (by omega)
+                                                              nlinarith)
+                                                            h
+                                                        · by_cases hs_le_neg15 : s ≤ -15
+                                                          · exact quartic_d9_squeeze_24 s t
+                                                              (by nlinarith [sq_ge_of_le_neg s 15 (by norm_num) hs_le_neg15])
+                                                              (by
+                                                                have hsabs := sq_le_of_abs_le s 15 (by omega) (by omega)
+                                                                nlinarith)
+                                                              h
+                                                          · by_cases hs_ge15 : 15 ≤ s
+                                                            · exact quartic_d9_squeeze_24 s t
+                                                                (by nlinarith [sq_ge_of_ge s 15 (by norm_num) hs_ge15])
+                                                                (by
+                                                                  have hsabs := sq_le_of_abs_le s 15 (by omega) (by omega)
+                                                                  nlinarith)
+                                                                h
+                                                            · by_cases hs_le_neg14 : s ≤ -14
+                                                              · exact quartic_d9_squeeze_22 s t
+                                                                  (by nlinarith [sq_ge_of_le_neg s 14 (by norm_num) hs_le_neg14])
+                                                                  (by
+                                                                    have hsabs := sq_le_of_abs_le s 14 (by omega) (by omega)
+                                                                    nlinarith)
+                                                                  h
+                                                              · by_cases hs_ge14 : 14 ≤ s
+                                                                · exact quartic_d9_squeeze_22 s t
+                                                                    (by nlinarith [sq_ge_of_ge s 14 (by norm_num) hs_ge14])
+                                                                    (by
+                                                                      have hsabs := sq_le_of_abs_le s 14 (by omega) (by omega)
+                                                                      nlinarith)
+                                                                    h
+                                                                · by_cases hs_le_neg13 : s ≤ -13
+                                                                  · exact quartic_d9_squeeze_19 s t
+                                                                      (by nlinarith [sq_ge_of_le_neg s 13 (by norm_num) hs_le_neg13])
+                                                                      (by
+                                                                        have hsabs := sq_le_of_abs_le s 13 (by omega) (by omega)
+                                                                        nlinarith)
+                                                                      h
+                                                                  · by_cases hs_ge13 : 13 ≤ s
+                                                                    · exact quartic_d9_squeeze_19 s t
+                                                                        (by nlinarith [sq_ge_of_ge s 13 (by norm_num) hs_ge13])
+                                                                        (by
+                                                                          have hsabs := sq_le_of_abs_le s 13 (by omega) (by omega)
+                                                                          nlinarith)
+                                                                        h
+                                                                    · by_cases hs_le_neg12 : s ≤ -12
+                                                                      · exact quartic_d9_squeeze_16 s t
+                                                                          (by nlinarith [sq_ge_of_le_neg s 12 (by norm_num) hs_le_neg12])
+                                                                          (by
+                                                                            have hsabs := sq_le_of_abs_le s 12 (by omega) (by omega)
+                                                                            nlinarith)
+                                                                          h
+                                                                      · by_cases hs_ge12 : 12 ≤ s
+                                                                        · exact quartic_d9_squeeze_16 s t
+                                                                            (by nlinarith [sq_ge_of_ge s 12 (by norm_num) hs_ge12])
+                                                                            (by
+                                                                              have hsabs := sq_le_of_abs_le s 12 (by omega) (by omega)
+                                                                              nlinarith)
+                                                                            h
+                                                                        · by_cases hs_le_neg11 : s ≤ -11
+                                                                          · exact quartic_d9_squeeze_12 s t
+                                                                              (by nlinarith [sq_ge_of_le_neg s 11 (by norm_num) hs_le_neg11])
+                                                                              (by
+                                                                                have hsabs := sq_le_of_abs_le s 11 (by omega) (by omega)
+                                                                                nlinarith)
+                                                                              h
+                                                                          · by_cases hs_ge11 : 11 ≤ s
+                                                                            · exact quartic_d9_squeeze_12 s t
+                                                                                (by nlinarith [sq_ge_of_ge s 11 (by norm_num) hs_ge11])
+                                                                                (by
+                                                                                  have hsabs := sq_le_of_abs_le s 11 (by omega) (by omega)
+                                                                                  nlinarith)
+                                                                                h
+                                                                            · by_cases hs_le_neg10 : s ≤ -10
+                                                                              · exact quartic_d9_squeeze_7 s t
+                                                                                  (by nlinarith [sq_ge_of_le_neg s 10 (by norm_num) hs_le_neg10])
+                                                                                  (by
+                                                                                    have hsabs := sq_le_of_abs_le s 10 (by omega) (by omega)
+                                                                                    nlinarith)
+                                                                                  h
+                                                                              · by_cases hs_ge10 : 10 ≤ s
+                                                                                · exact quartic_d9_squeeze_7 s t
+                                                                                    (by nlinarith [sq_ge_of_ge s 10 (by norm_num) hs_ge10])
+                                                                                    (by
+                                                                                      have hsabs := sq_le_of_abs_le s 10 (by omega) (by omega)
+                                                                                      nlinarith)
+                                                                                    h
+                                                                                · have hs_small :
+                                                                                      s = -9 ∨ s = -8 ∨ (-7 ≤ s ∧ s ≤ 7) ∨ s = 8 ∨ s = 9 := by
+                                                                                    omega
+                                                                                  rcases hs_small with rfl | rfl | hs_mid | rfl | rfl
+                                                                                  · norm_num at hcop
+                                                                                  · norm_num at h
+                                                                                    exact not_sq_2719 t h
+                                                                                  · exact quartic_d9_negative s t
+                                                                                      (by
+                                                                                        have hsabs := sq_le_of_abs_le s 7 hs_mid.1 hs_mid.2
+                                                                                        nlinarith)
+                                                                                      h
+                                                                                  · norm_num at h
+                                                                                    exact not_sq_2719 t h
+                                                                                  · norm_num at hcop
 ```
