@@ -1,178 +1,262 @@
-# Denominator quartic via Pellian factorization: exact reduction and missing theorem
+# Can the denominator descent be reduced to `not_fermat_42`?
 
-The requested theorem was:
-
-```lean
-theorem no_denom_quartic_odd_q
-    (p q t : ℤ)
-    (hpq : IsCoprime p q)
-    (hq_pos : 2 ≤ q)
-    (hq_odd : ¬ (2 : ℤ) ∣ q)
-    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
-    False
-```
-
-I cannot honestly provide a complete `0 sorry` Lean proof of this theorem from the proposed ingredients alone.  The Pellian factorization is correct and very useful, but after the coprime factor split it reduces to Fermat’s right-triangle / exponent-4 infinite descent.  That classical theorem is the genuinely missing ingredient, not a Lean syntax issue.
-
-Below is the Lean-oriented reduction and the precise missing lemma.
-
-## 1. The algebraic factorization
-
-From
+Short answer: not directly.  The intermediate equation
 
 \[
-t^2=p^4+p^2q^2-q^4
+p^2=m^4+r^2
+\]
+
+is **not** impossible by itself.  For example,
+
+\[
+5^2=2^4+3^2.
+\]
+
+So it cannot be reduced directly to Mathlib’s `not_fermat_42 : a^4+b^4\ne c^2`, because the second summand here is only a square, not a fourth power.  The missing information is the extra relation
+
+\[
+r=\frac{n^2-m^2}{2}
+\]
+
+coming from the Pellian factor split.  With that extra relation, the right route is not an immediate application of `not_fermat_42`; it is a **self-descent back to the same quartic equation**.
+
+A tiny Lean sanity check for the obstruction to a direct route is:
+
+```lean
+import Mathlib
+
+example : (5 : ℤ) ^ 2 = (2 : ℤ) ^ 4 + (3 : ℤ) ^ 2 := by
+  norm_num
+```
+
+This shows that any proposed theorem of the form
+
+```lean
+-- false
+-- theorem no_x4_plus_y2_eq_z2 (m r p : ℤ)
+--     (hm : m ≠ 0) (hr : r ≠ 0) :
+--     p ^ 2 = m ^ 4 + r ^ 2 → False
+```
+
+is simply false.
+
+## 1. What the Pellian factor split really gives
+
+Starting from
+
+\[
+t^2=p^4+p^2q^2-q^4,
+\]
+
+the factorization is
+
+\[
+(2p^2+q^2-2t)(2p^2+q^2+2t)=5q^4.
+\]
+
+In the odd-`q` coprime case, the expected factor split is, up to swapping the two factors,
+
+\[
+A=5m^4,\qquad B=n^4,\qquad q=mn.
+\]
+
+Using
+
+\[
+A+B=2(2p^2+q^2)
 \]
 
 we get
 
 \[
-(2p^2+q^2)^2-4t^2=5q^4,
-\]
-
-hence
-
-\[
-A B=5q^4,
-\quad
-A=2p^2+q^2-2t,
-\quad
-B=2p^2+q^2+2t.
-\]
-
-The basic Lean algebra is short:
-
-```lean
-import Mathlib
-
-namespace Scratch.ChatGPTDropDM1
-
-lemma denom_pell_identity (p q t : ℤ)
-    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
-    (2 * p ^ 2 + q ^ 2 - 2 * t) * (2 * p ^ 2 + q ^ 2 + 2 * t) = 5 * q ^ 4 := by
-  nlinarith
-
-lemma denom_pell_sum (p q t : ℤ) :
-    (2 * p ^ 2 + q ^ 2 - 2 * t) + (2 * p ^ 2 + q ^ 2 + 2 * t) =
-      2 * (2 * p ^ 2 + q ^ 2) := by
-  ring
-
-lemma denom_pell_diff (p q t : ℤ) :
-    (2 * p ^ 2 + q ^ 2 + 2 * t) - (2 * p ^ 2 + q ^ 2 - 2 * t) = 4 * t := by
-  ring
-
-end Scratch.ChatGPTDropDM1
-```
-
-## 2. What the odd-`q` coprime split should prove
-
-For odd `q`, `gcd(p,q)=1`, and a solution, one should show:
-
-1. `gcd(t,q)=1`, since reducing the equation modulo `q` gives `t² ≡ p⁴ mod q`;
-2. `p` is odd, because if `p` is even and `q` is odd then the right side is `7 mod 8`;
-3. the factors `A` and `B` are odd;
-4. `gcd(A,B)=1`.
-
-Then from `A*B=5*q^4`, positivity, and coprimality, the factor split has the shape
-
-\[
-(A,B)=(5m^4,n^4)
-\quad\text{or}\quad
-(A,B)=(m^4,5n^4),
-\]
-
-with `mn = q` up to signs/absolute values.
-
-This factor split is already nontrivial in Lean: it requires a lemma saying that coprime factors of a fourth power times a single prime are fourth powers up to the prime factor.  This is not just `omega`; it is a prime-factorization/UFD lemma over `ℤ` or `ℕ`.
-
-## 3. The split reduces to Fermat’s right-triangle theorem
-
-In one branch, say
-
-\[
-A=5m^4,
-\quad
-B=n^4,
-\quad
-q=mn,
-\]
-
-the sum identity gives
-
-\[
 5m^4+n^4=4p^2+2m^2n^2.
 \]
 
-Rearranging:
+Rearranging gives
 
 \[
-4p^2=n^4-2m^2n^2+5m^4=(n^2-m^2)^2+4m^4.
+4p^2=(n^2-m^2)^2+4m^4.
 \]
 
-Since the parity conditions force `n²-m²` even, put
+Since `m,n` are odd in this branch, `n²-m²` is even.  Put
 
 \[
-r=(n^2-m^2)/2.
+r=\frac{n^2-m^2}{2}.
 \]
 
 Then
 
 \[
-p^2=r^2+m^4. \tag{★}
+p^2=m^4+r^2. \tag{★}
 \]
 
-This is a right triangle with legs `r` and `m²`, hypotenuse `p`.  The nontrivial theorem needed is Fermat’s right-triangle theorem / exponent-4 descent: there is no nontrivial integer solution to
+This is the equation that looked like a Fermat right-triangle obstruction.  But, as noted above, `(★)` alone has nontrivial solutions.
+
+## 2. The extra relation gives a self-descent
+
+The key is to use not only `(★)`, but also
 
 \[
-p^2=r^2+m^4
+r=\frac{n^2-m^2}{2}.
 \]
 
-with `m ≠ 0` and `r ≠ 0` in the primitive case.  Equivalently, no nonzero fourth power plus a nonzero square is a square in a primitive right triangle.  The other branch gives the same kind of equation after swapping the `5`.
+Assume the Pythagorean triple in `(★)` is primitive; this follows from the coprimality conditions in the factor split.  Since the square leg is `m²`, the usual primitive Pythagorean parametrization gives coprime integers `a,b` such that
 
-This is the classical infinite descent.  Unless that theorem is already available in the local Mathlib environment under a usable name, it still has to be formalized.
+\[
+m^2=X^2-Y^2=(X-Y)(X+Y),
+\]
 
-## 4. Conditional Lean wrapper once Fermat’s descent theorem is available
+and because `X-Y` and `X+Y` are coprime, both are squares:
 
-The following is the shape of the final wrapper.  It is not the requested theorem yet; it shows exactly what external theorem the proof still needs.
+\[
+X+Y=a^2,\qquad X-Y=b^2.
+\]
+
+Thus
+
+\[
+m=ab,\qquad
+X=\frac{a^2+b^2}{2},\qquad
+Y=\frac{a^2-b^2}{2}.
+\]
+
+The even leg is
+
+\[
+r=2XY=\frac{a^4-b^4}{2}.
+\]
+
+But from the factor split we also have
+
+\[
+r=\frac{n^2-m^2}{2}=\frac{n^2-a^2b^2}{2}.
+\]
+
+Equating the two expressions for `r` gives
+
+\[
+n^2-a^2b^2=a^4-b^4.
+\]
+
+Therefore
+
+\[
+n^2=a^4+a^2b^2-b^4. \tag{†}
+\]
+
+This is exactly the **same denominator quartic** again, with a new solution
+
+\[
+(t',p',q')=(n,a,b).
+\]
+
+So the branch does not reduce to `a^4+b^4=c^2`; it reduces to a **smaller solution of the original quartic**.  This is the infinite descent.
+
+In Lean-skeleton form, the descent step one wants is something like:
 
 ```lean
 import Mathlib
 
 namespace Scratch.ChatGPTDropDM1
 
-/-- Placeholder type of the classical Fermat right-triangle obstruction needed here.
-A production proof should replace this hypothesis by the actual Mathlib theorem or by a
-formalized infinite descent. -/
-def FermatRightTriangleObstruction : Prop :=
-  ∀ (m r p : ℤ),
-    m ≠ 0 → r ≠ 0 → IsCoprime m r →
-      p ^ 2 = m ^ 4 + r ^ 2 → False
+/-- Algebraic heart of the self-descent after the coprime factor split.
+The variables here are schematic: `m,n` come from the factor split, and
+`a,b` come from parametrizing the primitive Pythagorean triple
+`p^2 = m^4 + ((n^2-m^2)/2)^2`. -/
+lemma denominator_self_descent_identity (a b n : ℤ)
+    (h : n ^ 2 - a ^ 2 * b ^ 2 = a ^ 4 - b ^ 4) :
+    n ^ 2 = a ^ 4 + a ^ 2 * b ^ 2 - b ^ 4 := by
+  nlinarith
 
-/-- The exact target, conditional on the missing Fermat descent and the factor-split package. -/
-def OddQFactorSplitPackage : Prop :=
-  ∀ (p q t : ℤ),
-    IsCoprime p q → 2 ≤ q → ¬ (2 : ℤ) ∣ q →
-      t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4 → False
+end Scratch.ChatGPTDropDM1
+```
 
-/-- Once the full factor split plus Fermat descent are formalized, this is the theorem wanted. -/
-theorem no_denom_quartic_odd_q_from_package
-    (H : OddQFactorSplitPackage)
-    (p q t : ℤ)
-    (hpq : IsCoprime p q)
-    (hq_pos : 2 ≤ q)
-    (hq_odd : ¬ (2 : ℤ) ∣ q)
-    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
-    False :=
-  H p q t hpq hq_pos hq_odd h
+That identity is trivial; the hard part is producing `a,b` with the correct properties and proving that `|b|` is a strictly smaller positive denominator than the original `q=mn`.
+
+## 3. Why `not_fermat_42` is the wrong endpoint
+
+Mathlib’s `not_fermat_42` rules out
+
+\[
+a^4+b^4=c^2.
+\]
+
+That corresponds to a right triangle whose **two legs are both squares**: `a²` and `b²`.
+
+Here, after the factor split, we only get a right triangle with one square leg:
+
+\[
+p^2=m^4+r^2.
+\]
+
+The other leg `r` is not a square in general.  Indeed the example
+
+\[
+5^2=2^4+3^2
+\]
+
+shows that such triangles exist.
+
+The additional special form of `r` does not make `r` a square.  It makes the Pythagorean parametrization regenerate the original quartic with smaller denominator.  Thus the natural proof is a **minimal-denominator infinite descent**, not a one-shot appeal to `not_fermat_42`.
+
+## 4. Possible indirect use of Mathlib’s FLT4 file
+
+Although `not_fermat_42` itself does not directly solve this denominator step, the file `NumberTheory/FLT/Four.lean` may contain useful supporting lemmas around primitive Pythagorean triples or Fermat descent.  The relevant theorem to look for would not be `a^4+b^4≠c^2`, but rather a parametrization/descent lemma for a primitive right triangle with one square leg.
+
+If Mathlib only exposes `not_fermat_42`, then it is probably not enough by itself.  One would still need to formalize the self-descent described above.
+
+The useful abstract package would be:
+
+```lean
+namespace Scratch.ChatGPTDropDM1
+
+/-- Desired descent step for the odd-denominator case.
+Given a primitive odd-denominator solution with `q > 1`, construct another
+primitive solution with strictly smaller positive denominator. -/
+-- theorem denom_quartic_descent_step
+--     (p q t : ℤ)
+--     (hpq : IsCoprime p q)
+--     (hq_pos : 2 ≤ q)
+--     (hq_odd : ¬ (2 : ℤ) ∣ q)
+--     (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
+--     ∃ p' q' t' : ℤ,
+--       1 ≤ q' ∧ q' < q ∧ IsCoprime p' q' ∧
+--       t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4
+
+/-- Once the descent step is available, the no-denominator theorem follows by
+well-founded descent/minimal counterexample on positive `q`. -/
+-- theorem no_denom_quartic_odd_q
+--     (p q t : ℤ)
+--     (hpq : IsCoprime p q)
+--     (hq_pos : 2 ≤ q)
+--     (hq_odd : ¬ (2 : ℤ) ∣ q)
+--     (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
+--     False := by
+--   -- choose a minimal positive denominator counterexample and apply
+--   -- `denom_quartic_descent_step` to contradict minimality
+--   admit
 
 end Scratch.ChatGPTDropDM1
 ```
 
 ## 5. Bottom line
 
-The proposed Pellian factorization is the correct start, but the requested `0 sorry` Lean theorem requires two substantial ingredients that are not present in the prompt:
+I do not see a sound reduction from the Pellian factorization to Mathlib’s
 
-1. a formal coprime factor-splitting theorem for `A*B = 5*q^4`;
-2. Fermat’s right-triangle / exponent-4 infinite descent for `p² = r² + m⁴`.
+```lean
+not_fermat_42 : a^4 + b^4 ≠ c^2
+```
 
-If Mathlib in this repo already contains a theorem for Fermat’s right triangle theorem, then the next step is to identify its exact name and statement and connect it to `(★)`.  I did not find such a theorem by the obvious names, so I do not want to fake a `0 sorry` proof.  The mathematically honest path is to either import/formalize that classical descent theorem, or proceed with the dual-isogeny descent package where this squareclass bookkeeping is handled more naturally.
+because the intermediate right-triangle equation is `m^4 + r^2 = p^2`, and that equation has nontrivial solutions.
+
+The promising route is instead:
+
+1. perform the coprime factor split of
+   `(2p²+q²-2t)(2p²+q²+2t)=5q⁴`;
+2. derive `p²=m⁴+((n²-m²)/2)²`;
+3. parametrize this primitive Pythagorean triple;
+4. use the special relation `r=(n²-m²)/2` to produce a smaller solution
+   `n²=a⁴+a²b²-b⁴`;
+5. finish by infinite descent on the positive denominator.
+
+This is a viable elementary route, but it is not a direct application of `not_fermat_42`.  It is the same descent mechanism reappearing in quartic form.
