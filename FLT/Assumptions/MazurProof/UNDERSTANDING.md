@@ -1,0 +1,122 @@
+# UNDERSTANDING.md — Mazur |T| ≤ 16 Proof Framework
+
+## Goal
+
+Prove `(AddCommGroup.torsion (E⁄ℚ).Point : Set).ncard ≤ 16` for any
+elliptic curve `E` over `ℚ`, replacing the axiom in `FLT/Assumptions/Mazur.lean`.
+
+## Proof Structure
+
+```
+                    ┌─────────────────────┐
+                    │  |T| = m * n ≤ 16   │
+                    └──────────┬──────────┘
+                               │
+                 ┌─────────────┴─────────────┐
+                 │                           │
+          m = 1: |T| = n              m = 2: |T| = 2n
+          need n ≤ 16                 need n ≤ 8
+                 │                           │
+                 │                    ┌──────┴──────┐
+                 │                    │             │
+              Axiom 3:            Axiom 3:      Axiom 4:
+           n ≤ 16 from         n ≤ 16 from    n ≤ 8 from
+          "no order ≥17"      "no order ≥17"  "no ℤ/2×ℤ/n
+                                               n∈{10,12,14,16}"
+
+          ┌──────────────────────────────────────────┐
+          │        Weil pairing → m ≤ 2              │
+          │                                          │
+          │  Axiom 1: full m-torsion → prim root     │
+          │  RootsOfUnity: prim root in ℚ → m ≤ 2   │  ← PROVED
+          └──────────────────────────────────────────┘
+
+          ┌──────────────────────────────────────────┐
+          │      Torsion structure: T ≅ ℤ/m × ℤ/n   │
+          │                                          │
+          │  Axiom 2a: T is finite                   │
+          │  Axiom 2b: T has rank ≤ 2                │
+          │  Axiom 2c: first factor gives full tors  │
+          └──────────────────────────────────────────┘
+```
+
+## Dependency Graph (discharge order)
+
+```
+Level 0 (DONE):
+  RootsOfUnity.lean  ← real proof, no axioms
+
+Level 1 (pure group theory, ~1000 LOC):
+  Axiom 2c (first_invariant_factor_full)
+    depends on: finite abelian group structure theorem (Mathlib)
+  
+Level 2 (EC arithmetic, ~5000 LOC each):
+  Axiom 2a (rational_torsion_finite)
+    depends on: good reduction injection (EC reduction API)
+  Axiom 2b (rational_torsion_two_generated)
+    depends on: E[N] ≅ (ℤ/N)² over algebraic closure
+  Axiom 1 (weil_pairing_primitive_root)
+    depends on: Weil pairing construction, divisor theory
+
+Level 3 (explicit certificates, ~10000 LOC):
+  Axiom 4 (no_Z2_cross_Zn_forbidden)
+    depends on: Kubert/Tate normal form parametrization
+    discharge via: obstruction curve rational points
+      N=10: LMFDB 20.a4, rank 0, MW = ℤ/6ℤ
+      N=12, 14, 16: similar obstruction curves (Sage certificates)
+
+Level 4 (deep Mazur, ~100000 LOC):
+  Axiom 3 (no_rational_point_of_order_ge_17)
+    depends on: modular curves X₁(n), Jacobians, Eisenstein ideal,
+                OR explicit X₁(n) certificates for n = 17..28 + formal immersion for p ≥ 29
+```
+
+## Files
+
+```
+FLT/Assumptions/MazurProof/
+  RootsOfUnity.lean     ← PROVED: ℚ roots of unity = {±1}
+  Axioms.lean           ← All axiom declarations (Groups A-D)
+  TorsionBound.lean     ← Main theorem: |T| ≤ 16 from axioms
+  MazurProof.lean       ← Module import file
+
+Future (as axioms are discharged):
+  TorsionStructure.lean ← Axiom 2 discharge
+  WeilPairing.lean      ← Axiom 1 discharge
+  NoncyclicCert.lean    ← Axiom 4 discharge (+ Sage certificates)
+  CyclicBound.lean      ← Axiom 3 discharge (the big one)
+```
+
+## Key Design Decisions
+
+1. **Axioms as seams, not sorry.** Each axiom is a self-contained mathematical
+   theorem that can be independently proved and tested. This matches Buzzard's
+   own FLT methodology (see FLT/Assumptions/README.md).
+
+2. **Opaque predicates.** `HasFullRationalTorsion`, `HasRationalPointOfOrder`,
+   etc. are opaque Props. This prevents the skeleton proof from depending on
+   implementation details of the torsion API, which is still developing.
+
+3. **Card = m * n in the structure axiom.** Without this, converting between
+   the group-theoretic structure and `Set.ncard` requires substantial API work.
+   It's a mathematical consequence of the structure theorem, not an extra
+   assumption.
+
+4. **Weil pairing returns a primitive root, not directly m ≤ 2.** This is the
+   natural mathematical seam — the Weil pairing produces the root, and the
+   ordered-field argument (already proved) gives m ≤ 2. Bundling them would
+   make the axiom harder to discharge.
+
+## Noncyclic Certificate Details (Axiom 4)
+
+For each n ∈ {10, 12, 14, 16}, the proof that ℤ/2 × ℤ/n ⊄ E(ℚ)_tors follows:
+
+1. Parametrize all E/ℚ with full 2-torsion + order n/gcd(2,n) point
+   (Kubert family / Tate normal form)
+2. The parametrization gives a one-parameter family over ℚ
+3. Full 2-torsion imposes a discriminant-square condition
+4. This defines an obstruction curve C over ℚ
+5. Show C(ℚ) consists only of degenerate/cuspidal points
+
+For N=10: obstruction curve is LMFDB 20.a4 (y² = x³ + x² - x),
+MW group = ℤ/6ℤ (rank 0), rational points u ∈ {-1, 1, 3} are all cusps.
