@@ -140,13 +140,23 @@ MW group = ℤ/6ℤ (rank 0), rational points u ∈ {-1, 1, 3} are all cusps.
 ### Axiom seams remaining:
 - mordell_weil_fg (standard, in TorsionFinite.lean)
 - weil_pairing_primitive_root (needs EC Weil pairing or det = χ_m)
-- rational_torsion_two_invariant_factors (needs E[m] ≅ (ℤ/m)²)
-- cyclic_order_allowed (needs Mazur cyclic classification or X_1(n) certificates)
+- no_triple_two_torsion (2-rank ≤ 2; needs E[2] ≅ (ℤ/2)²)
+- no_rational_point_of_order_ge_17 (Mazur cyclic classification or X_1(n))
 - no_Z2_cross_Z10 (needs obstruction curve 20.a4 rank-0 certificate)
 - no_Z2_cross_Z12 (needs obstruction curve rank-0 certificate)
+
+### Sorry seams remaining:
+- finite_abelian_two_invariant_factors (pure group theory, now a def with sorry)
+  Statement is mathematically correct. Proof needs: primary decomposition →
+  CRT combination → invariant factor form. ~500 LOC estimated.
 
 ### Key design decisions:
 - Refactored cyclic bound to Mazur classification (n ∈ {1..10,12}) — eliminates N=14, N=16 noncyclic cases
 - Weil pairing axiom seam at the primitive-root level (not m ≤ 2 directly)
 - TorsionFinite discharge: mordell_weil_fg → Noetherian → f.g. torsion → finite (real proof)
 - N=10 descent: LMFDB 20.a4, MW = ℤ/6ℤ, rank 0, local obstructions mod 125
+- **2026-06-18**: Fixed false axiom `finite_abelian_two_invariant_factors`.
+  Original hypothesis only constrained odd primes (2 < p), leaving 2-rank
+  unconstrained → FALSE for (ℤ/2)³. Added `h_two_rank` parameter and new
+  axiom `no_triple_two_torsion` for the EC application. Net axiom count
+  unchanged but mathematical correctness restored.

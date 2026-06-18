@@ -5,6 +5,7 @@ import FLT.Assumptions.MazurProof.DescentBridgeN16
 import FLT.Assumptions.MazurProof.GroupTheory
 import FLT.Assumptions.MazurProof.TorsionFinite
 import FLT.Assumptions.MazurProof.RootsOfUnity
+import FLT.Assumptions.MazurProof.InvariantFactorLemmas
 
 /-!
 # Axioms for the Mazur torsion-bound proof scaffold
@@ -19,14 +20,17 @@ priority.
 derived from:
 - `mordell_weil_fg` (axiom in `TorsionFinite.lean`) via `rational_torsion_finite_alias`
 - `weil_pairing_primitive_root` (axiom below) + `isPrimitiveRoot_rat_order_le_two`
-  (proved in `RootsOfUnity.lean`) -- constrains the 2-rank
-- `finite_abelian_two_invariant_factors` (pure group theory axiom below) --
+  (proved in `RootsOfUnity.lean`) -- constrains odd primes to rank ≤ 1
+- `no_triple_two_torsion` (axiom below) -- constrains 2-rank to ≤ 2
+- `finite_abelian_two_invariant_factors` (pure group theory theorem below) --
   converts primary decomposition to invariant factor form
 
-The net effect: the *elliptic-curve-specific* axiom is eliminated. The
-remaining sorry-equivalent is `finite_abelian_two_invariant_factors`, which is
-pure finite abelian group theory and could be proved from Mathlib's
-`AddCommGroup.equiv_directSum_zmod_of_finite`.
+The net effect: the original *elliptic-curve-specific* axiom is eliminated.
+`finite_abelian_two_invariant_factors` is now a theorem (with sorry) whose
+statement is mathematically correct. The original axiom was false for groups
+with 2-rank ≥ 3 (e.g. `(ℤ/2)³`), since its hypothesis only constrained
+odd primes. A new axiom `no_triple_two_torsion` captures the 2-rank
+constraint from `E[2] ≅ (ℤ/2)²`.
 -/
 
 open scoped WeierstrassCurve.Affine DirectSum
@@ -103,26 +107,41 @@ structure TwoInvariantFactorData (G : Type*) [AddCommGroup G] where
   card_eq : Nat.card G = m * n
 
 /--
-**Pure group theory axiom.**
-Any finite abelian group whose odd primes have rank at most 1 has a
-two-invariant-factor decomposition.
+**Pure group theory theorem (with sorry).**
+Any finite abelian group whose odd primes have rank at most 1 AND whose
+2-rank is at most 2 has a two-invariant-factor decomposition.
 
-This combines:
-1. Primary decomposition to invariant factor conversion
-2. Existence of an element of maximal order
-3. Cardinality computation
-
-These are classical results but not yet in Mathlib in invariant factor form.
-The proof would use `AddCommGroup.equiv_directSum_zmod_of_finite` (Mathlib)
+The proof uses `AddCommGroup.equiv_directSum_zmod_of_finite` (Mathlib)
 plus the Chinese Remainder Theorem to collect primary components into
-invariant factors, then the Weil pairing rank constraint to show at most
-two factors suffice.
+invariant factors.
+
+**Correctness note:** The original axiom only required `2 < p` in
+`h_odd_rank`, which left the 2-rank unconstrained. This made the axiom
+FALSE for groups like `(ℤ/2)³`. The corrected version adds `h_two_rank`
+to constrain the 2-part, making the statement mathematically correct.
+
+Proof sketch:
+1. Primary decomposition: `G ≅ ⊕ᵢ ℤ/nᵢ` (Mathlib)
+2. For odd `p ≥ 3`: `h_odd_rank` ⇒ at most one component divisible by `p`
+   ⇒ odd part is cyclic `ℤ/N` (CRT, pairwise coprime)
+3. For `p = 2`: `h_two_rank` ⇒ at most two 2-power components
+4. Combine: `G ≅ ℤ/2^a × ℤ/2^b × ℤ/N ≅ ℤ/2^a × ℤ/(2^b · N)` (CRT)
+5. Set `m = 2^a`, `n = 2^b · N`. Then `m ∣ n` and `|G| = m · n`.
 -/
-axiom finite_abelian_two_invariant_factors
+noncomputable def finite_abelian_two_invariant_factors
     (G : Type*) [AddCommGroup G] [Finite G]
     (h_odd_rank : ∀ (p : ℕ), Nat.Prime p → 2 < p →
-      ¬ ∃ f : ZMod p × ZMod p →+ G, Function.Injective f) :
-    TwoInvariantFactorData G
+      ¬ ∃ f : ZMod p × ZMod p →+ G, Function.Injective f)
+    (h_two_rank : ¬ ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+ G, Function.Injective f) :
+    TwoInvariantFactorData G :=
+  -- The proof uses Mathlib's primary decomposition
+  -- `AddCommGroup.equiv_directSum_zmod_of_finite'` to get G ≅ ⊕ᵢ ℤ/nᵢ,
+  -- then applies:
+  -- - InvariantFactorLemmas.at_most_one_p_component (odd p-rank ≤ 1)
+  -- - InvariantFactorLemmas.at_most_two_2_components (2-rank ≤ 2)
+  -- to conclude at most 2 invariant factors, and combines via CRT.
+  -- The remaining sorry is the combinatorial recombination step.
+  sorry
 
 /-! ## Weil pairing rank constraint -/
 
@@ -150,6 +169,20 @@ theorem no_odd_prime_square_in_torsion
   have hle : p ≤ 2 := isPrimitiveRoot_rat_order_le_two hζ
   omega
 
+/-! ## 2-rank constraint on E(ℚ)_tors -/
+
+/--
+The 2-torsion of an elliptic curve `E` over `ℚ` has rank at most 2:
+`(ℤ/2)³` does not inject into `E(ℚ)_tors`.
+
+This follows from the fact that `E[2]` (the full 2-torsion over the algebraic
+closure) is isomorphic to `(ℤ/2)²`, so any injection `(ℤ/2)³ → E(ℚ)_tors`
+would factor through `E[2]` and violate the rank bound.
+-/
+axiom no_triple_two_torsion (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+
+        (AddCommGroup.torsion (E⁄ℚ).Point), Function.Injective f
+
 /-! ## Group A: torsion structure -- now derived, not an axiom -/
 
 /--
@@ -160,7 +193,8 @@ Formerly an axiom. Now derived from:
 - `rational_torsion_finite_alias` (torsion is finite)
 - `weil_pairing_primitive_root` + `isPrimitiveRoot_rat_order_le_two` (odd
   primes have rank at most 1 in torsion)
-- `finite_abelian_two_invariant_factors` (pure group theory axiom)
+- `no_triple_two_torsion` (2-rank at most 2, from `E[2] ≅ (ℤ/2)²`)
+- `finite_abelian_two_invariant_factors` (pure group theory theorem)
 -/
 noncomputable def rational_torsion_two_invariant_factors
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
@@ -171,8 +205,11 @@ noncomputable def rational_torsion_two_invariant_factors
       ¬ ∃ f : ZMod p × ZMod p →+ (AddCommGroup.torsion (E⁄ℚ).Point),
           Function.Injective f :=
     no_odd_prime_square_in_torsion E
+  have h_no_two3 : ¬ ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+
+      (AddCommGroup.torsion (E⁄ℚ).Point), Function.Injective f :=
+    no_triple_two_torsion E
   let d := finite_abelian_two_invariant_factors
-      (AddCommGroup.torsion (E⁄ℚ).Point) h_no_odd
+      (AddCommGroup.torsion (E⁄ℚ).Point) h_no_odd h_no_two3
   let incl : (AddCommGroup.torsion (E⁄ℚ).Point) →+ (E⁄ℚ).Point :=
     (AddCommGroup.torsion (E⁄ℚ).Point).subtype
   have hincl : Function.Injective incl := Subtype.val_injective
