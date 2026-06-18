@@ -1,450 +1,419 @@
 # ChatGPT Drop File (dm2)
 
-## Goal
+## Question
 
-For
-
-```text
-E  : y² = x³ + x² - x
-E' : Y² = X³ - 2X² + 5X,
-```
-
-with the 2-isogeny
+Can the factorization
 
 ```text
-φ  : E  → E'
-φ̂ : E' → E,
+p⁴ + p²q² - q⁴
+  = (p² + φ q²)(p² + φ̄ q²),
+φ = (1 + √5)/2,
 ```
 
-we want the smallest Lean formalization that connects the concrete descent facts
+in the UFD
 
 ```text
-α(E(Q))     ⊆ {1, -1}
-α'(E'(Q))   ⊆ {1, 5}
+ℤ[φ] = 𝓞_{ℚ(√5)}
 ```
 
-and the known rational torsion list
+prove that
 
 ```text
-O,
-(0,0),
-(1,1),
-(1,-1),
-(-1,1),
-(-1,-1)
+t² = p⁴ + p²q² - q⁴
 ```
 
-to the conclusion
+has no primitive solution with
 
 ```text
-E(Q) = these six points.
+q ≥ 2,
+gcd(p,q)=1?
 ```
 
-The requested route is “Route B”: no Galois cohomology, but allow explicit exactness statements for the isogenies.
+## Short answer
 
-## Executive summary
+Yes, this approach can prove it, but not by a one-shot coefficient comparison.  The UFD argument gives the same infinite descent hidden in the 2-isogeny descent.
 
-The facts
+The right structure is:
 
 ```text
-α(P) ∈ {1,-1}
+1. Work in R = ℤ[φ].
+2. Let α = p² + φ q².
+3. Prove gcd(α, ᾱ) is a unit.
+4. Since Norm(α)=t² and R is a UFD, prove α = unit * β².
+5. Since α is totally positive and every totally positive unit in ℤ[φ] is a square, absorb the unit and get α = β².
+6. Write β = a + bφ and compare coefficients:
+     p² = a² + b²,
+     q² = b(2a+b).
+7. Use these two equations to construct a smaller primitive solution of the same quartic.
+8. Conclude by infinite descent on q.natAbs.
 ```
 
-and the existence of the six torsion points are **not enough by themselves** to prove that all rational points are those six.  The missing ingredient is an exactness/rank bridge.
-
-The minimal bridge can be isolated into two framework lemmas:
-
-1. **Concrete 2-isogeny exact sequence cardinal formula**:
-
-   ```text
-   |E(Q)/2E(Q)|
-     = |E'(Q)/φ(E(Q))| * |E(Q)/φ̂(E'(Q))| / 2.
-   ```
-
-   The divisor `2` is the correction term
-
-   ```text
-   |E'[φ̂](Q) / φ(E[2](Q))| = 2,
-   ```
-
-   because `E'[φ̂](Q) = {O', (0,0)}` and `φ(E[2](Q)) = {O'}`.
-
-2. **Finitely generated abelian group mod-2 rank formula**:
-
-   ```text
-   |E(Q)/2E(Q)| = 2^rank(E) * |E(Q)[2]|.
-   ```
-
-   Since `E(Q)[2] = {O,(0,0)}` has size `2`, a bound
-
-   ```text
-   |E(Q)/2E(Q)| ≤ 2
-   ```
-
-   forces `rank(E)=0`.
-
-Everything else can be concrete and cohomology-free.
-
-## Minimal theorem package
-
-The smallest useful package is this.
-
-### A. Concrete quotient relations
-
-Define three quotient relations directly from the point groups and the explicit isogenies:
-
-```lean
--- P,Q : E(Q)
-def SameModDualPhi (P Q : EPoint) : Prop :=
-  ∃ R : EpPoint, P - Q = phihat R
-
--- P,Q : E'(Q)
-def SameModPhi (P Q : EpPoint) : Prop :=
-  ∃ R : EPoint, P - Q = phi R
-
--- P,Q : E(Q)
-def SameModTwo (P Q : EPoint) : Prop :=
-  ∃ R : EPoint, P - Q = 2 • R
-```
-
-These are the concrete versions of
+So the `ℤ[φ]` proof is viable, but the critical remaining step is still a descent step from
 
 ```text
-E(Q)/φ̂(E'(Q)),
-E'(Q)/φ(E(Q)),
-E(Q)/2E(Q).
+p² = a² + b²,
+q² = b(2a+b)
 ```
 
-No `H¹` occurs.
+to a smaller solution.  This is essentially Fermat's descent for a primitive Pythagorean triple with a square leg.
 
-### B. Descent maps and kernel exactness
+## Why the gcd of the conjugate factors is a unit
 
-For the φ-descent, define the concrete squareclass map
+Let
 
 ```text
-α(P) = x(P) mod squares
+α  = p² + φ q²,
+ᾱ = p² + φ̄ q².
 ```
 
-with the standard special values at `O` and `(0,0)`.  Then prove or assume as the isolated exactness theorem:
-
-```lean
-theorem alpha_kernel_exact :
-  ∀ P Q : EPoint,
-    alpha P = alpha Q ↔ SameModDualPhi P Q := by
-  -- explicit algebra using the dual-isogeny formula
-  sorry
-```
-
-Similarly for the dual descent:
-
-```lean
-theorem alpha_dual_kernel_exact :
-  ∀ P Q : EpPoint,
-    alphaDual P = alphaDual Q ↔ SameModPhi P Q := by
-  -- explicit algebra using the φ-isogeny formula
-  sorry
-```
-
-These two lemmas are the concrete replacement for the cohomological exactness of the connecting maps.
-
-### C. Image bounds from explicit Selmer computations
-
-From the already-proved local obstruction work, state:
-
-```lean
-theorem alpha_image_subset :
-  ∀ P : EPoint, alpha P = sqOne ∨ alpha P = sqNegOne := by
-  -- cover_forces_unit + local obstruction package
-  sorry
-
-theorem alpha_dual_image_subset :
-  ∀ P : EpPoint, alphaDual P = sqOne ∨ alphaDual P = sqFive := by
-  -- dual cover_forces_five_unit + local obstruction package
-  sorry
-```
-
-Then the quotient cardinal bounds are purely formal:
-
-```lean
-theorem card_E_mod_dualPhi_le_two :
-    Fintype.card (Quot sameModDualPhiSetoid) ≤ 2 := by
-  -- define [P] ↦ alpha P into the two-element set {1,-1}
-  -- well-defined by alpha_kernel_exact, injective by the reverse implication
-  -- image_subset gives the two-element codomain bound
-  sorry
-
-theorem card_Ep_mod_phi_le_two :
-    Fintype.card (Quot sameModPhiSetoid) ≤ 2 := by
-  -- same proof with alphaDual and {1,5}
-  sorry
-```
-
-This is the first major “provable from current descent data” layer.
-
-## The exact sequence layer
-
-The explicit isogeny identities are:
-
-```lean
-theorem phihat_phi_eq_two :
-  ∀ P : EPoint, phihat (phi P) = 2 • P := by
-  -- explicit formula check
-  sorry
-
-theorem phi_phihat_eq_two :
-  ∀ Q : EpPoint, phi (phihat Q) = 2 • Q := by
-  -- explicit formula check
-  sorry
-```
-
-From these, define the two maps on quotients:
-
-```lean
--- E'(Q)/φ(E(Q)) → E(Q)/2E(Q), induced by φ̂
-def map_left : Quot sameModPhiSetoid → Quot sameModTwoSetoid :=
-  Quot.map phihat sorry
-
--- E(Q)/2E(Q) → E(Q)/φ̂(E'(Q)), the natural quotient map
-def map_right : Quot sameModTwoSetoid → Quot sameModDualPhiSetoid :=
-  Quot.map id sorry
-```
-
-The concrete exactness statement is:
-
-```lean
-theorem explicit_isogeny_exact :
-  Exact map_left map_right ∧
-  Fintype.card (ker map_left) = 2 := by
-  -- Exactness means:
-  --   P is zero in E/φ̂(E') iff P = φ̂(Q) modulo 2E.
-  -- The kernel of map_left is E'[φ̂](Q) / φ(E[2](Q)).
-  -- For this curve: E'[φ̂](Q) = {O',(0,0)} and φ(E[2](Q)) = {O'}.
-  sorry
-```
-
-For the final rank-zero argument, it is cleaner to expose only the cardinal consequence:
-
-```lean
-theorem card_E_mod_two_le_two
-    (h1 : Fintype.card (Quot sameModDualPhiSetoid) ≤ 2)
-    (h2 : Fintype.card (Quot sameModPhiSetoid) ≤ 2) :
-    Fintype.card (Quot sameModTwoSetoid) ≤ 2 := by
-  -- Use the exact cardinal formula:
-  -- |E/2E| = |E'/φE| * |E/φ̂E'| / 2.
-  -- With both factors ≤ 2, get |E/2E| ≤ 2.
-  sorry
-```
-
-This theorem is the minimal exact-sequence framework.  It does not mention `H¹`.
-
-## The rank/torsion layer
-
-Now isolate the group-theoretic Mordell-Weil input.
-
-First, the rational 2-torsion is exactly:
+Then
 
 ```text
-E(Q)[2] = {O, (0,0)}.
+α - ᾱ = (φ - φ̄) q² = √5 q².
 ```
 
-State it as:
+If a prime element `π` divides both `α` and `ᾱ`, then `π` divides `√5 q²`.
 
-```lean
-theorem E_two_torsion_card :
-    Fintype.card ETwoTorsion = 2 := by
-  -- y=0 and x(x²+x-1)=0; only rational root is x=0
-  sorry
-```
+There are two cases.
 
-Then use the finitely generated abelian group formula:
+### Case 1: `π` lies over a prime divisor of `q`
 
-```lean
-theorem rank_zero_of_card_mod_two_le_two
-    (hmod2 : Fintype.card (Quot sameModTwoSetoid) ≤ 2) :
-    MordellWeilRank EPoint = 0 := by
-  -- For a finitely generated abelian group G:
-  -- |G/2G| = 2^rank(G) * |G[2]|.
-  -- Here |E(Q)[2]| = 2, so |E(Q)/2E(Q)| ≤ 2 forces rank = 0.
-  sorry
-```
-
-Finally, connect rank zero to the complete torsion list.
-
-The torsion list theorem should be stated as a **complete** torsion classification, not merely existence of six torsion points:
-
-```lean
-def torsionSix : Finset EPoint :=
-  {O, T00, P11, P1m1, Pneg11, Pneg1m1}
-
-theorem torsionSix_complete :
-    ∀ P : EPoint, IsTorsion P ↔ P ∈ torsionSix := by
-  -- Use Nagell-Lutz or direct torsion computation already available.
-  sorry
-```
-
-Then:
-
-```lean
-theorem all_points_torsion_of_rank_zero
-    (hrank : MordellWeilRank EPoint = 0) :
-    ∀ P : EPoint, IsTorsion P := by
-  -- finitely generated abelian group: rank zero means every point is torsion
-  sorry
-```
-
-And the desired point classification follows:
-
-```lean
-theorem E_points_are_exactly_torsionSix :
-    ∀ P : EPoint, P ∈ torsionSix := by
-  have hquot1 : Fintype.card (Quot sameModDualPhiSetoid) ≤ 2 :=
-    card_E_mod_dualPhi_le_two
-  have hquot2 : Fintype.card (Quot sameModPhiSetoid) ≤ 2 :=
-    card_Ep_mod_phi_le_two
-  have hmod2 : Fintype.card (Quot sameModTwoSetoid) ≤ 2 :=
-    card_E_mod_two_le_two hquot1 hquot2
-  have hrank : MordellWeilRank EPoint = 0 :=
-    rank_zero_of_card_mod_two_le_two hmod2
-  intro P
-  exact (torsionSix_complete P).mp (all_points_torsion_of_rank_zero hrank P)
-```
-
-This is the minimal Route B endpoint.
-
-## What is genuinely proved by the descent data?
-
-The following is genuinely concrete and does not need Mordell-Weil rank or cohomology:
-
-```lean
-theorem descent_bounds_only :
-    Fintype.card (EPoint ⧸ φ̂(EpPoint)) ≤ 2 ∧
-    Fintype.card (EpPoint ⧸ φ(EPoint)) ≤ 2 := by
-  constructor
-  · exact card_E_mod_dualPhi_le_two
-  · exact card_Ep_mod_phi_le_two
-```
-
-This follows from:
+Modulo such a `π`, since `π ∣ q`, the element `α` reduces to
 
 ```text
-image α ⊆ {1,-1},
-ker α = image φ̂,
-image α' ⊆ {1,5},
-ker α' = image φ.
+α ≡ p².
 ```
 
-The following does **not** follow without framework:
+So `π ∣ α` implies `π ∣ p`.  Hence the underlying rational prime divides both `p` and `q`, contradicting `gcd(p,q)=1`.
+
+### Case 2: `π` is the ramified prime over `5`
+
+Modulo the ramified prime `(√5)`, we have
 
 ```text
-E(Q) is finite,
-rank(E)=0,
-E(Q) equals the six torsion points.
+φ = (1+√5)/2 ≡ 1/2 ≡ 3 mod 5.
 ```
 
-For those, one must add either:
+So
 
-1. the concrete isogeny exact sequence plus the finitely generated abelian group rank formula, or
-2. a direct integrality theorem plus integral point classification.
+```text
+α ≡ p² + 3q² mod 5.
+```
 
-## Minimal “sorry budget”
+If `5 ∣ q`, then this is `p²`, and `gcd(p,q)=1` prevents it from vanishing.  If `5 ∤ q`, then vanishing would imply
 
-If the goal is to keep the hard framework isolated, use exactly these `sorry` boundaries:
+```text
+(p/q)² ≡ -3 ≡ 2 mod 5,
+```
 
-### Algebraic descent exactness
+but `2` is not a quadratic residue mod `5`.  Therefore the prime above `5` does not divide `α` either.
+
+Thus
+
+```text
+gcd(α, ᾱ) = 1
+```
+
+up to units.
+
+## From UFD to a square
+
+Since
+
+```text
+Norm(α) = α ᾱ = t²
+```
+
+and `α` and `ᾱ` are coprime in the UFD `ℤ[φ]`, every prime exponent in the factorization of `α` is even.  Hence
+
+```text
+α = u β²
+```
+
+for some unit `u` and some `β ∈ ℤ[φ]`.
+
+The units are
+
+```text
+±φⁿ.
+```
+
+But `α` is totally positive: under the real embedding `φ ↦ (1+√5)/2`, it is positive; and because `Norm(α)=t² ≥ 0`, the conjugate embedding is also nonnegative, and in a nonzero primitive solution it is positive.  In `ℤ[φ]`, every totally positive unit is a square, since the fundamental unit `φ` has norm `-1`.  Therefore the unit `u` may be absorbed into `β²`, giving
+
+```text
+α = β².
+```
+
+## Coefficient comparison
+
+Write
+
+```text
+β = a + bφ.
+```
+
+Using
+
+```text
+φ² = φ + 1,
+```
+
+we get
+
+```text
+β² = (a + bφ)²
+   = a² + 2abφ + b²φ²
+   = a² + 2abφ + b²(φ+1)
+   = (a²+b²) + b(2a+b)φ.
+```
+
+Thus `α = β²` gives
+
+```text
+p² = a² + b²,
+q² = b(2a+b).
+```
+
+This is not yet a contradiction.  It is the descent input.
+
+The equation `p² = a² + b²` gives a primitive Pythagorean triple.  The equation `q² = b(2a+b)` forces the two factors `b` and `2a+b` to be squares, up to the usual factor `2` in the even case.  Parametrizing the resulting primitive Pythagorean triple produces a new solution
+
+```text
+t'² = p'⁴ + p'² q'² - q'⁴
+```
+
+with
+
+```text
+2 ≤ q' < q.
+```
+
+That contradicts minimality of `q`.
+
+## What to formalize in Lean
+
+I would not start by trying to use Mathlib's full algebraic-number-theory stack.  The most Lean-friendly route is to define a concrete ring of pairs representing `ℤ[φ]`:
+
+```text
+(a,b) represents a + bφ,
+φ² = φ + 1,
+conj(a,b) = (a+b, -b),
+Norm(a,b) = a² + a*b - b².
+```
+
+All arithmetic identities can then be proved by `ring_nf` or `nlinarith`.  The only genuinely heavy theorem is the UFD/class-number-one step.  Isolate it as one theorem first.
+
+## Lean skeleton
+
+The following Lean file isolates the hard `ℤ[φ]` and Pythagorean-descent parts behind one descent-step theorem.  Once that descent step is available, the final no-solution theorem is a short strong induction.
 
 ```lean
-theorem alpha_kernel_exact :
-  ∀ P Q : EPoint, alpha P = alpha Q ↔ SameModDualPhi P Q := by
-  sorry
+import Mathlib
 
-theorem alpha_dual_kernel_exact :
-  ∀ P Q : EpPoint, alphaDual P = alphaDual Q ↔ SameModPhi P Q := by
-  sorry
+/-!
+# Denominator quartic via `ℤ[φ]`
+
+This file shows the intended formal shape of the `ℤ[φ]` proof.
+
+The hard algebraic-number-theory and Pythagorean-descent content is isolated in
+`zphi_descent_step`.  Once that theorem is proved, the final contradiction is an
+ordinary infinite descent on `q.natAbs`.
+-/
+
+/-- The one hard theorem produced by the `ℤ[φ]` argument.
+
+Mathematically, this packages:
+* the UFD/class-number-one argument in `ℤ[(1+√5)/2]`,
+* the proof that `gcd(p²+φq², p²+φ̄q²)` is a unit,
+* the reduction `p²+φq² = β²`,
+* coefficient comparison `p² = a²+b²`, `q² = b(2a+b)`, and
+* the Pythagorean square-leg descent producing a smaller denominator.
+-/
+axiom zphi_descent_step (p q t : ℤ)
+    (hq : 2 ≤ q)
+    (hcop : Int.gcd p q = 1)
+    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
+    ∃ p' q' t' : ℤ,
+      2 ≤ q' ∧
+      Int.gcd p' q' = 1 ∧
+      t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧
+      q'.natAbs < q.natAbs
+
+private theorem no_denominator_quartic_aux :
+    ∀ n : ℕ, ∀ p q t : ℤ,
+      q.natAbs ≤ n →
+      2 ≤ q →
+      Int.gcd p q = 1 →
+      t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4 →
+      False := by
+  intro n
+  induction n using Nat.strong_induction_on with
+  | h n ih =>
+      intro p q t hqn hq hcop h
+      obtain ⟨p', q', t', hq', hcop', h', hdrop⟩ :=
+        zphi_descent_step p q t hq hcop h
+      exact ih q'.natAbs (by omega) p' q' t' le_rfl hq' hcop' h'
+
+theorem no_denominator_quartic (p q t : ℤ) (hq : 2 ≤ q)
+    (hcop : Int.gcd p q = 1) :
+    t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4 → False := by
+  intro h
+  exact no_denominator_quartic_aux q.natAbs p q t le_rfl hq hcop h
 ```
 
-These are concrete formula checks.
+## More granular Lean theorem boundaries
 
-### Isogeny exact sequence cardinal formula
+Instead of one large axiom, the eventual proof should split `zphi_descent_step` into the following lemmas.
 
 ```lean
-theorem card_E_mod_two_le_two
-    (h1 : Fintype.card (Quot sameModDualPhiSetoid) ≤ 2)
-    (h2 : Fintype.card (Quot sameModPhiSetoid) ≤ 2) :
-    Fintype.card (Quot sameModTwoSetoid) ≤ 2 := by
-  sorry
+/- A concrete type for `ℤ[φ]`, e.g. pairs `(a,b)` representing `a + bφ`. -/
+structure ZPhi where
+  re : ℤ
+  im : ℤ
+
+namespace ZPhi
+
+-- Multiplication is defined using `φ² = φ + 1`.
+def mul (x y : ZPhi) : ZPhi :=
+  { re := x.re * y.re + x.im * y.im,
+    im := x.re * y.im + x.im * y.re + x.im * y.im }
+
+def conj (x : ZPhi) : ZPhi :=
+  { re := x.re + x.im, im := -x.im }
+
+def norm (x : ZPhi) : ℤ :=
+  x.re ^ 2 + x.re * x.im - x.im ^ 2
+
+def alpha (p q : ℤ) : ZPhi :=
+  { re := p ^ 2, im := q ^ 2 }
+
+end ZPhi
 ```
 
-This is the no-`H¹` exact-sequence theorem.
-
-### Mordell-Weil group theory
+Then isolate the algebraic facts as theorem statements:
 
 ```lean
-theorem rank_zero_of_card_mod_two_le_two
-    (hmod2 : Fintype.card (Quot sameModTwoSetoid) ≤ 2) :
-    MordellWeilRank EPoint = 0 := by
+/-- Primitive `(p,q)` implies `alpha p q` and its conjugate are coprime in `ℤ[φ]`. -/
+theorem zphi_alpha_coprime_conj (p q : ℤ)
+    (hcop : Int.gcd p q = 1) :
+    IsCoprime (ZPhi.alpha p q) (ZPhi.conj (ZPhi.alpha p q)) := by
+  -- Prime-divisor proof; the ramified prime above `5` is excluded because
+  -- `2` is not a square modulo `5`.
   sorry
 
-theorem all_points_torsion_of_rank_zero
-    (hrank : MordellWeilRank EPoint = 0) :
-    ∀ P : EPoint, IsTorsion P := by
+/-- Norm identity for the denominator quartic. -/
+theorem zphi_norm_alpha (p q : ℤ) :
+    ZPhi.norm (ZPhi.alpha p q) = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4 := by
+  -- This should be `ring`/`ring_nf` after unfolding `norm` and `alpha`.
+  sorry
+
+/-- Class number one / UFD step: a coprime factor of a square norm is a square up to unit. -/
+theorem zphi_alpha_eq_unit_mul_square (p q t : ℤ)
+    (hcop : Int.gcd p q = 1)
+    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
+    ∃ u β : ZPhi, IsUnit u ∧ ZPhi.alpha p q = ZPhi.mul u (ZPhi.mul β β) := by
+  -- This is where UFD/PID/class number one enters.
+  sorry
+
+/-- In `ℤ[φ]`, every totally positive unit is a square. -/
+theorem zphi_totally_positive_unit_square
+    (u : ZPhi) (hu : IsUnit u) (hpos : True) :
+    ∃ γ : ZPhi, u = ZPhi.mul γ γ := by
+  -- Units are `±φ^n`; totally positive forces `n` even and sign positive.
+  sorry
+
+/-- Therefore the unit can be absorbed. -/
+theorem zphi_alpha_eq_square (p q t : ℤ)
+    (hcop : Int.gcd p q = 1)
+    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
+    ∃ a b : ℤ,
+      p ^ 2 = a ^ 2 + b ^ 2 ∧
+      q ^ 2 = b * (2 * a + b) := by
+  -- Combine the previous theorem with coefficient comparison.
+  sorry
+
+/-- The elementary descent from the coefficient equations. -/
+theorem pythagorean_square_leg_descent
+    (p q a b : ℤ)
+    (hq : 2 ≤ q)
+    (hcop : Int.gcd p q = 1)
+    (hp : p ^ 2 = a ^ 2 + b ^ 2)
+    (hqeq : q ^ 2 = b * (2 * a + b)) :
+    ∃ p' q' t' : ℤ,
+      2 ≤ q' ∧
+      Int.gcd p' q' = 1 ∧
+      t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧
+      q'.natAbs < q.natAbs := by
+  -- Primitive Pythagorean triple parameterization plus the square-factor split
+  -- of `q² = b(2a+b)`.
   sorry
 ```
 
-This is the finitely generated abelian group layer.
-
-### Torsion classification
+With these pieces, the actual descent step is:
 
 ```lean
-theorem torsionSix_complete :
-    ∀ P : EPoint, IsTorsion P ↔ P ∈ torsionSix := by
+theorem zphi_descent_step_from_pieces (p q t : ℤ)
+    (hq : 2 ≤ q)
+    (hcop : Int.gcd p q = 1)
+    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
+    ∃ p' q' t' : ℤ,
+      2 ≤ q' ∧
+      Int.gcd p' q' = 1 ∧
+      t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧
+      q'.natAbs < q.natAbs := by
+  obtain ⟨a, b, hp, hqeq⟩ := zphi_alpha_eq_square p q t hcop h
+  exact pythagorean_square_leg_descent p q a b hq hcop hp hqeq
+```
+
+## Negative denominator quartic
+
+Once the positive theorem is proved, the negative version is a wrapper.  The equation
+
+```text
+t² = -p⁴ + p²q² + q⁴
+```
+
+is the positive equation with `p` and `q` swapped:
+
+```text
+t² = q⁴ + q²p² - p⁴.
+```
+
+So if `|p| ≥ 2`, apply the positive theorem to `(q, |p|, t)`.  The small cases are elementary:
+
+* `p = 0` contradicts `gcd(p,q)=1` and `q ≥ 2`.
+* `p = ±1` gives
+
+  ```text
+  t² = q⁴ + q² - 1,
+  ```
+
+  and for `q ≥ 2`,
+
+  ```text
+  q⁴ < q⁴ + q² - 1 < (q² + 1)².
+  ```
+
+A Lean wrapper can be stated like this:
+
+```lean
+theorem no_denominator_quartic_neg (p q t : ℤ) (hq : 2 ≤ q)
+    (hcop : Int.gcd p q = 1) :
+    t ^ 2 = -p ^ 4 + p ^ 2 * q ^ 2 + q ^ 4 → False := by
+  intro h
+  -- Case split on `p = 0`, `p = 1`, `p = -1`, and `2 ≤ |p|`.
+  -- In the large case, swap `p` and `q` and use `no_denominator_quartic`.
+  -- In the `p = ±1` cases, squeeze between `q⁴` and `(q²+1)²`.
   sorry
-```
-
-This is arithmetic but independent of the descent exact sequence.
-
-## Important warning
-
-Do not try to conclude
-
-```text
-E(Q) = torsionSix
-```
-
-from only
-
-```text
-α(P) ∈ {1,-1}
-```
-
-and the existence of the six torsion points.  That implication is false as a piece of group theory.  The descent image bound only controls a quotient of `E(Q)`.  To rule out infinite-order points, one needs either:
-
-```text
-quotient bounds + exact sequence + finite-generation/rank formula,
-```
-
-or
-
-```text
-integrality + integral point classification.
 ```
 
 ## Bottom line
 
-The minimal cohomology-free Route B formalization is:
+The `ℤ[φ]` method is mathematically sound and probably the cleanest conceptual proof of the positive denominator quartic.  However, the coefficient comparison does not directly contradict anything; it produces the descent data.  The true hard Lean work is split between:
 
 ```text
-1. α-image bound gives |E/φ̂E'| ≤ 2.
-2. α'-image bound gives |E'/φE| ≤ 2.
-3. Concrete isogeny exact sequence gives |E/2E| ≤ 2.
-4. Since |E[2]| = 2, the finitely generated abelian group formula gives rank(E)=0.
-5. Rank zero plus complete torsion classification gives E(Q) = torsionSix.
+1. the UFD/class-number-one square extraction in ℤ[φ], and
+2. the primitive Pythagorean square-leg descent.
 ```
 
-The only non-concrete framework needed is the final finitely generated abelian group fact about `G/2G`.  The isogeny part itself can be formalized directly from the explicit maps `φ`, `φ̂`, their kernels, and the identities
-
-```text
-φ̂ ∘ φ = [2],
-φ ∘ φ̂ = [2].
-```
-
-No formalization of `H¹(Q,E[φ])` is necessary for this route.
+If those are isolated as lemmas, the final no-solution theorem is only a short strong induction on `q.natAbs`, as shown above.
