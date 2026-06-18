@@ -11,7 +11,7 @@ def E_N12_AffineEquation (u w : ℚ) : Prop :=
   w ^ 2 = u ^ 3 - u ^ 2 - 4 * u + 4
 
 def E_N12_DegenerateParameter (u : ℚ) : Prop :=
-  u = -2 ∨ u = 1 ∨ u = 2
+  u = -2 ∨ u = 0 ∨ u = 1 ∨ u = 2 ∨ u = 4
 
 axiom obstruction_curve_N12_points_degenerate :
     ∀ u w : ℚ, E_N12_AffineEquation u w → E_N12_DegenerateParameter u
