@@ -1,319 +1,375 @@
 # ChatGPT Drop File (dm2)
 
-## Question
+## Task
 
-For
+Prove the denominator quartics:
 
-```text
-E  : y² = x³ + x² - x
-E' : Y² = X³ - 2X² + 5X,
+```lean
+theorem no_denominator_quartic (s q t : ℤ) (hq : 2 ≤ q) (hcop : Int.gcd s q = 1) :
+    t ^ 2 = s ^ 4 + s ^ 2 * q ^ 2 - q ^ 4 → False
 ```
 
-with the 2-isogeny
+and
 
-```text
-φ  : E  → E'
-φ̂ : E' → E,
+```lean
+theorem no_denominator_quartic_neg (s q t : ℤ) (hq : 2 ≤ q) (hcop : Int.gcd s q = 1) :
+    t ^ 2 = -s ^ 4 + s ^ 2 * q ^ 2 + q ^ 4 → False
 ```
 
-we have explicit descent data
+This is hard.  I do not think the `t² + q⁴ = s²(s²+q²)` line is the right formal proof route: it does not give a coprime product of squares directly, because the left side is a sum of two fourth/square terms.  The better route is the Pellian factorization
 
 ```text
-Sel^φ    = {1, -1}
-Sel^φ̂   = {1, 5}.
+(2*s² + q²)² - (2*t)² = 5*q⁴.
 ```
 
-The question is whether the two explicit descents together can force `x(P)` to be integral directly, without passing through the abstract rank-zero statement.
+That factorization gives the infinite descent.
 
-## 1. The dual prime-support trick
+## First reduction: the negative theorem follows from the positive theorem
 
-The dual cover is
+The negative equation is the positive equation with `s` and `q` swapped:
 
 ```text
-d*W² = d²*T⁴ - 2*d*T²*S² + 5*S⁴.
+t² = -s⁴ + s²*q² + q⁴
+   = q⁴ + q²*s² - s⁴.
 ```
 
-For a prime `p ∣ d`, reducing modulo `p` gives
+So if `|s| ≥ 2`, then `no_denominator_quartic q |s| t` kills it.
+
+The only remaining cases are `s = 0, ±1`:
+
+* `s = 0` contradicts `Int.gcd s q = 1` and `2 ≤ q`, because `gcd(0,q)=q`.
+* `s = ±1` gives
 
 ```text
-0 = 5*S⁴ mod p.
+t² = q⁴ + q² - 1.
 ```
 
-So if `p ≠ 5` and `p ∤ S`, contradiction.  Therefore the simple one-line argument works provided the cover solution is already normalized so that
+For `q ≥ 2`, this lies strictly between consecutive squares:
 
 ```text
-gcd(S,d) = 1.
+(q²)² < q⁴ + q² - 1 < (q² + 1)².
 ```
 
-With that primitive condition, the conclusion is:
+Thus the negative theorem should be proved only after the positive theorem, by a short wrapper.  The real hard theorem is the positive one.
+
+## Correct hard core: positive quartic by infinite descent
+
+Assume a primitive positive solution:
 
 ```text
-p ∣ d  →  p = 5.
-```
-
-So the dual analogue of `cover_forces_unit` is not literally “unit”; it is:
-
-```text
-cover_forces_five_unit:
-  every prime divisor of d divides 5.
-```
-
-Equivalently, for squarefree `d`, the only possible prime support is `{5}`.  This gives
-
-```text
-d ∈ {±1, ±5}
-```
-
-before imposing the real/local sign conditions.  Then the real obstruction removes the negative classes:
-
-```text
-d = -1 :  -W² = T⁴ + 2T²S² + 5S⁴,
-d = -5 :  -5W² = 25T⁴ + 10T²S² + 5S⁴,
-```
-
-which have no nontrivial real/rational solutions.  Thus the dual Selmer candidates reduce to
-
-```text
-{1, 5}.
-```
-
-If `gcd(S,d)=1` is not already part of the cover construction, then one needs a primitive-solution normalization lemma.  The usual argument is still elementary: if `p ∣ d` and `p ∣ S`, then the equation forces `p ∣ W`, and then another reduction forces `p ∣ T`, contradicting primitivity.  But the cleanest formal interface is to have the descent construction output a primitive solution with `gcd(S,d)=1` from the start.
-
-## 2. The key obstruction to using both descents directly
-
-For a point `P = (x,y) ∈ E(Q)` with `x ≠ 0`, the isogeny formula gives
-
-```text
-X(φ(P)) = y² / x².
-```
-
-Equivalently, using the curve equation,
-
-```text
-X(φ(P)) = x + 1 - 1/x = (x² + x - 1)/x = y²/x².
-```
-
-Therefore `X(φ(P))` is automatically a rational square.
-
-So the dual descent value of `φ(P)` is always trivial:
-
-```text
-α_{φ̂}(φ(P)) = 1.
-```
-
-This is not an accident; it is the concrete exactness statement
-
-```text
-image(φ) ⊆ kernel(dual descent map).
-```
-
-Thus the dual Selmer computation
-
-```text
-Sel^φ̂ = {1, 5}
-```
-
-does not add a new denominator constraint on a point that has already come from `E` and is then pushed forward by `φ`.  The second coordinate in the proposed pair
-
-```text
-P ↦ (α_φ(P), α_{φ̂}(φ(P)))
-```
-
-is always `1` for non-special `P`.
-
-This means the two descents do **not** directly imply integrality by simply evaluating both descent maps on `P` and `φ(P)`.
-
-## 3. Why `Sel^φ = {1,-1}` alone is not enough
-
-The φ-side tells us that for a non-special rational point `P ∈ E(Q)`, the squareclass of `x(P)` lies in
-
-```text
-{1, -1}.
-```
-
-But that does not imply `x(P)` is an integer.  For example, a rational number can have squareclass `1` while being nonintegral:
-
-```text
-x = (s/q)²,    q ≥ 2.
-```
-
-Likewise it can have squareclass `-1` while being nonintegral:
-
-```text
-x = -(s/q)²,   q ≥ 2.
-```
-
-So after the φ-descent, the remaining problem is exactly a denominator problem in the allowed squareclasses.
-
-For the positive squareclass case, write
-
-```text
-x = s²/q²,
+t² = s⁴ + s²*q² - q⁴,
 q ≥ 2,
 gcd(s,q)=1.
 ```
 
-Then, after clearing denominators in
+First prove the elementary gcd lemma:
 
 ```text
-y² = x³ + x² - x,
+gcd(t,q)=1.
 ```
 
-one obtains the quartic obstruction
+Indeed, if a prime `p` divides both `t` and `q`, then reducing the equation modulo `p` gives
 
 ```text
-t² = s⁴ + s²*q² - q⁴.
+0 = s⁴ mod p,
 ```
 
-For the negative squareclass case, write
+so `p ∣ s`, contradicting `gcd(s,q)=1`.
+
+Now define
 
 ```text
-x = -s²/q²,
-q ≥ 2,
-gcd(s,q)=1.
+U = 2*s² + q²,
+A = U - 2*t,
+B = U + 2*t.
 ```
 
-Then one obtains the companion obstruction
+Then
 
 ```text
-t² = -s⁴ + s²*q² + q⁴.
+A*B = 5*q⁴,
+A+B = 4*s² + 2*q².
 ```
 
-Thus the φ-descent reduces integrality to explicit denominator quartics.  The dual descent does not remove those denominator cases, because `φ(P)` has trivial dual descent class automatically.
+Both `A` and `B` are positive: the product is positive and the sum is positive.
 
-## 4. Can both descents force integrality without rank?
+This is the key place where the proof should branch by parity of `q`.
 
-There are two different meanings of “using both descents.”
+## Odd denominator branch
 
-### 4.1 Evaluating both descent maps on `P` and `φ(P)`
-
-This does **not** force integrality.
-
-The reason is exactly the identity
+If `q` is odd, then the mod-4 obstruction first forces `s` odd.  If `s` were even, then
 
 ```text
-X(φ(P)) = (y/x)².
+t² = 0 + 0 - 1 = 3 mod 4,
 ```
 
-So the dual descent value of `φ(P)` is always `1`.  It cannot distinguish integral from nonintegral `x(P)`.
+impossible.
 
-In this sense, the answer is no: the two Selmer inclusions, used in this naive direct way, do not prove integrality.
+So `s,q,t` are all odd.  Hence `A` and `B` are odd.  Also `gcd(A,B)=1`: any odd prime dividing both `A` and `B` divides both their sum and difference, hence divides `q` and `t`, contradicting `gcd(t,q)=1`; the prime `2` does not divide either factor.
 
-### 4.2 Using both descents as explicit exactness / divisibility tools
-
-There is a possible direct proof that avoids Galois cohomology, but it is not just a denominator argument.  It would be an explicit infinite descent on the Mordell-Weil group.
-
-The rough shape is:
+Since
 
 ```text
-α_φ(P) ∈ {1,-1}
-α_{φ̂}(Q) ∈ {1,5}
+A*B = 5*q⁴
 ```
 
-plus explicit kernel/image criteria show that points in certain descent classes are images under `φ` or `φ̂`, possibly after adding the visible 2-torsion point.  Then one proves directly, using the explicit isogeny formulas, that a non-torsion point would be repeatedly divisible by `2` or by alternating isogenies, with decreasing height or denominator.  That gives a contradiction.
-
-This can avoid formalizing `H¹(Q,E[φ])`, but it is still an abstract descent proof in another form: one must formalize explicit exactness statements for the isogenies and a height/denominator descent.  It is likely more work than proving the denominator quartics directly.
-
-## 5. Recommended Lean route for integrality
-
-For the specific goal
+and the factors are coprime, after possibly replacing `t` by `-t` so that `A ≤ B`, there are two cases:
 
 ```text
-∀ P ∈ E(Q), x(P) is integral,
+A = m⁴,     B = 5*n⁴,    q = m*n,
 ```
 
-the cleanest direct route is:
-
-### Step A: φ-descent image
-
-Formalize the concrete φ-descent map
+or
 
 ```text
-α_φ(P) = squareclass(x(P))
+A = 5*m⁴,   B = n⁴,      q = m*n.
 ```
 
-with the special values for `O` and `(0,0)`, and prove
+Consider the first case.  From `A+B = 4*s² + 2*q²`, we get
 
 ```text
-α_φ(P) ∈ {1, -1}.
+m⁴ + 5*n⁴ = 4*s² + 2*m²*n²,
 ```
 
-This uses the explicit covers and the local obstructions for bad classes.
-
-### Step B: denominator obstruction for the allowed classes
-
-Prove:
+hence
 
 ```text
-no_positive_squareclass_denominator:
-  ¬ ∃ s q t : ℤ,
-    2 ≤ q ∧ gcd(s,q)=1 ∧
-    t² = s⁴ + s²*q² - q⁴.
+4*s² = (m² - n²)² + 4*n⁴.
 ```
 
-and, if the negative squareclass is not already handled elsewhere,
+Since `m,n` are odd, this becomes
 
 ```text
-no_negative_squareclass_denominator:
-  ¬ ∃ s q t : ℤ,
-    2 ≤ q ∧ gcd(s,q)=1 ∧
-    t² = -s⁴ + s²*q² + q⁴.
+s² = ((m² - n²)/2)² + n⁴.
 ```
 
-Then conclude:
+So we have a primitive Pythagorean triple
 
 ```text
-x(P) ∈ ℤ.
+((m² - n²)/2)² + (n²)² = s².
 ```
 
-This route uses the φ-descent and explicit quartic obstructions.  It does not require the dual descent.
-
-## 6. Recommended Lean route for rank zero
-
-For rank zero, the dual descent is important.  But if the goal is to avoid cohomology, the better statement is not “both descents force integrality.”  Instead, use explicit quotient/image statements:
+Parameterizing this primitive triple gives coprime positive integers `a,b` with
 
 ```text
-E(Q)  / φ̂(E'(Q)) injects into Sel^φ,
-E'(Q) / φ(E(Q))  injects into Sel^φ̂.
+n = a*b,
 ```
 
-These injections can be implemented by direct descent maps and explicit covers, without constructing `H¹`.  Then prove exactness of the isogeny sequence directly using formulas for `φ` and `φ̂`.  This is enough to recover the usual rank bound.
-
-But if the immediate target is only integrality and point classification, it is simpler to avoid the dual descent and rank formula:
+and
 
 ```text
-φ-descent image {1,-1}
-  + denominator quartic obstruction
-  → x(P) integral
-  + integral point classification
-  → finite point list
-  → rank zero, if needed.
+m² = b⁴ + a²*b² - a⁴.
 ```
+
+Therefore `(b, a, m)` is a new solution of the same positive denominator quartic:
+
+```text
+m² = b⁴ + b²*a² - a⁴.
+```
+
+The new denominator is `a`, and `a < q = m*n`, except for the base case `a = 1`.  If `a = 1`, then
+
+```text
+m² = b⁴ + b² - 1,
+```
+
+which is the already-proved `d = 1` squeeze from `scratch/Descent20a4.lean` after setting `u = b²`.  That forces `b² = 1`, hence `q = 1`, contradiction.
+
+The second case `A = 5*m⁴`, `B = n⁴` is symmetric and gives the same descent.
+
+This is the main infinite descent proof for odd `q`.
+
+## Even denominator branch
+
+If `q` is even, then `s` is odd.  Modulo `16`, if `q ≡ 2 mod 4`, then
+
+```text
+s⁴ + s²*q² - q⁴ ≡ 1 + 4 - 0 = 5 mod 16,
+```
+
+which is not a square.  Therefore any even-denominator solution must have
+
+```text
+4 ∣ q.
+```
+
+Now `t` is odd and both `A` and `B` are divisible by `4`.  Write
+
+```text
+A = 4*A₁,
+B = 4*B₁,
+q = 2*r.
+```
+
+Then
+
+```text
+A₁*B₁ = 5*r⁴,
+A₁+B₁ = s² + 2*r².
+```
+
+The same gcd argument shows
+
+```text
+gcd(A₁,B₁)=1.
+```
+
+Thus, again after ordering the factors, either
+
+```text
+A₁ = m⁴,     B₁ = 5*n⁴,    r = m*n,
+```
+
+or
+
+```text
+A₁ = 5*m⁴,   B₁ = n⁴,      r = m*n.
+```
+
+In the first case,
+
+```text
+m⁴ + 5*n⁴ = s² + 2*m²*n²,
+```
+
+so
+
+```text
+s² = (m² - n²)² + (2*n²)².
+```
+
+This is again a primitive Pythagorean triple.  Parameterization gives coprime positive integers `a,b` with
+
+```text
+n = a*b,
+```
+
+and
+
+```text
+m² = b⁴ + a²*b² - a⁴.
+```
+
+So we again get a smaller positive-quartic solution `(b,a,m)`.  The new denominator `a` is smaller than the old denominator `q = 2*m*n`.  The base case `a = 1` is killed by the `d = 1` squeeze.
+
+Thus the even branch also descends.
+
+## Minimal Lean architecture
+
+I would not try to prove the whole theorem in one block.  The manageable decomposition is:
+
+```lean
+-- 1. gcd transport from the original quartic
+lemma denom_quartic_gcd_t_q
+    (s q t : ℤ) (hcop : Int.gcd s q = 1)
+    (h : t ^ 2 = s ^ 4 + s ^ 2 * q ^ 2 - q ^ 4) :
+    Int.gcd t q = 1 := ...
+
+-- 2. Pellian factorization
+lemma denom_quartic_factorization
+    (s q t : ℤ)
+    (h : t ^ 2 = s ^ 4 + s ^ 2 * q ^ 2 - q ^ 4) :
+    (2 * s ^ 2 + q ^ 2 - 2 * t) *
+      (2 * s ^ 2 + q ^ 2 + 2 * t) = 5 * q ^ 4 := by
+  nlinarith
+
+-- 3. Positivity of the two factors
+lemma denom_quartic_factors_pos ... :
+    0 < 2*s^2 + q^2 - 2*t ∧ 0 < 2*s^2 + q^2 + 2*t := ...
+
+-- 4. Odd-q coprime-factor classification
+lemma denom_quartic_odd_factor_fourth_powers ... :
+    ∃ m n : ℤ,
+      q = m*n ∧
+      ((A = m^4 ∧ B = 5*n^4) ∨ (A = 5*m^4 ∧ B = n^4)) := ...
+
+-- 5. Even-q normalized factor classification
+lemma denom_quartic_even_factor_fourth_powers ... :
+    ∃ m n : ℤ,
+      q = 2*m*n ∧
+      ((A/4 = m^4 ∧ B/4 = 5*n^4) ∨ (A/4 = 5*m^4 ∧ B/4 = n^4)) := ...
+
+-- 6. Pythagorean square-leg descent
+lemma pythagorean_square_leg_descent_odd_case ... :
+    ∃ a b : ℤ,
+      1 ≤ a ∧
+      a < q.natAbs ∧
+      m ^ 2 = b ^ 4 + b ^ 2 * a ^ 2 - a ^ 4 := ...
+
+-- 7. Strong induction on q.natAbs
+```
+
+The Pythagorean-square-leg lemma is probably the largest local formalization step.  It is standard Fermat descent material: a primitive Pythagorean triple with a square leg forces a smaller solution of the same quartic.
+
+## Useful theorem split
+
+The final proof should be structured as:
+
+```lean
+theorem no_denominator_quartic_pos_by_descent :
+    ∀ n : ℕ, ∀ s q t : ℤ,
+      q.natAbs ≤ n →
+      2 ≤ q →
+      Int.gcd s q = 1 →
+      t ^ 2 = s ^ 4 + s ^ 2 * q ^ 2 - q ^ 4 →
+      False := by
+  intro n
+  induction n with
+  | zero => ...
+  | succ n ih =>
+      -- factorization, parity branch, produce smaller (s',q',t')
+      -- with q'.natAbs ≤ n, then exact ih s' q' t' ...
+```
+
+Then expose the requested theorem as:
+
+```lean
+theorem no_denominator_quartic (s q t : ℤ) (hq : 2 ≤ q)
+    (hcop : Int.gcd s q = 1) :
+    t ^ 2 = s ^ 4 + s ^ 2 * q ^ 2 - q ^ 4 → False := by
+  intro h
+  exact no_denominator_quartic_pos_by_descent q.natAbs s q t le_rfl hq hcop h
+```
+
+For the negative theorem:
+
+```lean
+theorem no_denominator_quartic_neg (s q t : ℤ) (hq : 2 ≤ q)
+    (hcop : Int.gcd s q = 1) :
+    t ^ 2 = -s ^ 4 + s ^ 2 * q ^ 2 + q ^ 4 → False := by
+  -- If |s| ≥ 2, swap s and q and use no_denominator_quartic.
+  -- If s = 0, contradict gcd.
+  -- If s = ±1, squeeze q⁴ < t² < (q²+1)².
+```
+
+## Why this is better than the `t²+q⁴` product idea
+
+The identity
+
+```text
+t² + q⁴ = s²(s²+q²)
+```
+
+is true, and `gcd(s², s²+q²)=1`, but it does not make the left side a square product.  It is a sum of a square and a fourth power.  So `Int.sq_of_isCoprime` does not apply directly.
+
+The factorization
+
+```text
+(2*s² + q² - 2*t)(2*s² + q² + 2*t)=5*q⁴
+```
+
+is the right one because its right side is a constant times a fourth power.  After proving the two factors are coprime, each factor must be a fourth power up to the single factor `5`, and that is exactly what opens the Pythagorean descent.
 
 ## Bottom line
 
-The dual prime-support argument works, but with the expected modification:
+I do not recommend trying to prove the two denominator quartics independently.
+
+Prove only the positive quartic by strong infinite descent using
 
 ```text
-p ∣ d  →  p = 5,
+(2*s²+q²-2t)(2*s²+q²+2t)=5*q⁴.
 ```
 
-assuming the dual cover solution is primitive with `gcd(S,d)=1`.
+Then derive the negative theorem by swapping `s` and `q` plus the small cases `s=0, ±1`.
 
-However, the φ and φ̂ descents do not directly force integrality by evaluating the dual descent on `φ(P)`, because
-
-```text
-X(φ(P)) = y²/x²
-```
-
-is always a square.  The dual descent is therefore trivial on points coming from `E` via `φ`.
-
-So the minimal direct proof of integrality should be:
-
-```text
-φ-descent ⇒ squareclass(x) ∈ {1,-1}
-allowed squareclass + nonintegral denominator ⇒ explicit quartic solution
-quartic obstruction ⇒ contradiction.
-```
-
-This avoids Galois cohomology completely.  The dual descent is still useful for a rank-zero proof, but it does not by itself replace the denominator quartic argument for integrality.
+The decisive missing formal lemma is the primitive Pythagorean square-leg descent.  Once that lemma exists, the rest of the positive-quartic proof is a finite sequence of gcd, factorization, parity, and strong-induction steps.
