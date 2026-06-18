@@ -1,66 +1,57 @@
 # ChatGPT Drop File (dm2)
 
-## Task
+## Goal
 
-Formalize the Pythagorean square-leg descent step arising from the coefficient equations
+Formalize the elementary replacement for the old `zphi_descent_step`.
 
-```text
-p² = a² + b²,
-q² = b(2a+b),
-```
-
-which come from the `ℤ[φ]` square extraction
+Input:
 
 ```text
-p² + φ q² = ε(a+bφ)².
+t² = p⁴ + p²q² - q⁴,
+q ≥ 2,
+gcd(p,q)=1.
 ```
 
-The goal is to isolate the elementary descent step:
+Output:
 
 ```text
-(p,q,t) solving t² = p⁴ + p²q² - q⁴, q ≥ 2, gcd(p,q)=1
-        ↓
-(p',q',t') solving the same equation with 2 ≤ q' and q'.natAbs < q.natAbs.
+∃ p' q' t',
+  2 ≤ q' ∧
+  gcd(p',q')=1 ∧
+  t'² = p'⁴ + p'²q'² - q'⁴ ∧
+  q'.natAbs < q.natAbs.
 ```
 
-Then strong induction on `q.natAbs` proves no such solution exists.
+The proof is elementary.  It starts from the Pellian factorization
 
-## Key design choice
+```text
+A = 2p² + q² - 2t,
+B = 2p² + q² + 2t,
+AB = 5q⁴.
+```
 
-The Lean statement should not try to prove the `ℤ[φ]` square extraction and the Pythagorean descent in the same theorem.  The clean split is:
+Then one splits into odd and even `q` cases.
 
-1. `zphi_coeff_matching`: from a primitive quartic solution, obtain primitive coefficient data
-   ```text
-   p² = a² + b²,
-   q² = b(2a+b),
-   gcd(a,b)=1,
-   0 < b,
-   0 < 2a+b.
-   ```
-   This packages the `ℤ[φ]` UFD step.
+For odd `q`, the factors are coprime, hence one is `5α⁴` and the other is `β⁴`, with `αβ=q`.  The identity from `A+B` gives a Pythagorean triple with a square leg and produces a smaller solution.
 
-2. `pythagorean_square_leg_descent_step`: from those coefficient equations, produce a smaller quartic solution.  This packages the factor split of `q² = b(2a+b)` and the primitive Pythagorean triple descent.
+For even `q`, one first proves the normalized factorization after dividing the two factors by `4`, and then performs the same Pythagorean square-leg descent.
 
-3. `quartic_descent_step`: combine the two.
+The code below gives a compiling structure with exactly two hard `sorry` boundaries:
 
-4. `no_denominator_quartic`: strong induction on `q.natAbs`.
+1. the odd normalized factor-split plus square-leg descent;
+2. the even normalized factor-split plus square-leg descent.
 
-The code below has exactly two isolated `sorry`s: one for the `ℤ[φ]` coefficient extraction and one for the Pythagorean square-leg descent.  The induction skeleton itself is complete.
+Everything else, including the final `zphi_descent_step`, is elementary Lean.
 
 ```lean
 import Mathlib
 
 /-!
-# Denominator quartic: descent skeleton
+# Elementary denominator-quartic descent step
 
-This file isolates the two genuinely hard ingredients:
-
-1. `zphi_coeff_matching`, the `ℤ[φ]` square-extraction step.
-2. `pythagorean_square_leg_descent_step`, the elementary square-leg descent from
-   `p² = a²+b²` and `q² = b(2a+b)`.
-
-Once those two steps are available, the final no-solution theorem is a short
-strong induction on `q.natAbs`.
+This file proves the final `zphi_descent_step` from two explicitly isolated
+Pellian/Pythagorean descent sublemmas.  No `Z[φ]` or algebraic number theory is
+used in the statement of the step.
 -/
 
 namespace DenominatorQuartic
@@ -69,98 +60,191 @@ namespace DenominatorQuartic
 def PosQuartic (p q t : ℤ) : Prop :=
   t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4
 
-/--
-The algebraic-number-theory input from `ℤ[φ]`.
+/-- The smaller-solution output used by the descent. -/
+def SmallerSolution (p q t p' q' t' : ℤ) : Prop :=
+  2 ≤ q' ∧
+  Int.gcd p' q' = 1 ∧
+  PosQuartic p' q' t' ∧
+  q'.natAbs < q.natAbs
 
-Mathematically this packages:
+private def pellA (p q t : ℤ) : ℤ :=
+  2 * p ^ 2 + q ^ 2 - 2 * t
 
-* factorization of `p⁴+p²q²-q⁴` as `(p²+φq²)(p²+φ̄q²)`,
-* coprimality of the two conjugate factors using `gcd(p,q)=1`,
-* UFD/class-number-one square extraction in `ℤ[φ]`,
-* absorption of the totally positive unit, and
-* coefficient comparison after writing the square as `(a+bφ)²`.
+private def pellB (p q t : ℤ) : ℤ :=
+  2 * p ^ 2 + q ^ 2 + 2 * t
 
-The positivity assumptions `0 < b` and `0 < 2*a+b` are harmless normalization
-choices: since `q² = b(2a+b)` and `q ≠ 0`, the two factors have the same sign;
-changing the square root by a unit/sign lets one choose the positive orientation.
--/
-theorem zphi_coeff_matching (p q t : ℤ)
-    (hq : 2 ≤ q)
-    (hcop : Int.gcd p q = 1)
+/-- The Pellian factorization
+`(2p²+q²-2t)(2p²+q²+2t)=5q⁴`. -/
+private lemma pellian_factorization (p q t : ℤ)
     (h : PosQuartic p q t) :
-    ∃ a b : ℤ,
-      Int.gcd a b = 1 ∧
-      0 < b ∧
-      0 < 2 * a + b ∧
-      p ^ 2 = a ^ 2 + b ^ 2 ∧
-      q ^ 2 = b * (2 * a + b) := by
-  -- HARD `ℤ[φ]` / UFD step.
-  -- This is the first isolated `sorry` boundary.
+    pellA p q t * pellB p q t = 5 * q ^ 4 := by
+  unfold pellA pellB PosQuartic at *
+  calc
+    (2 * p ^ 2 + q ^ 2 - 2 * t) * (2 * p ^ 2 + q ^ 2 + 2 * t)
+        = (2 * p ^ 2 + q ^ 2) ^ 2 - (2 * t) ^ 2 := by ring
+    _ = 5 * q ^ 4 := by nlinarith
+
+private lemma pellian_sum (p q t : ℤ) :
+    pellA p q t + pellB p q t = 2 * (2 * p ^ 2 + q ^ 2) := by
+  unfold pellA pellB
+  ring
+
+private lemma pellian_diff (p q t : ℤ) :
+    pellB p q t - pellA p q t = 4 * t := by
+  unfold pellA pellB
+  ring
+
+/-- Positivity of the Pellian factors.
+
+This is useful for the eventual factor split.  It is not needed by
+`zphi_descent_step` below because the two parity sublemmas take the raw factor
+identities as hypotheses. -/
+private lemma pellian_factors_pos (p q t : ℤ)
+    (hq : 2 ≤ q)
+    (h : PosQuartic p q t) :
+    0 < pellA p q t ∧ 0 < pellB p q t := by
+  have hprod := pellian_factorization p q t h
+  have hsum := pellian_sum p q t
+  have hsum_pos : 0 < pellA p q t + pellB p q t := by
+    rw [hsum]
+    nlinarith [sq_nonneg p, sq_nonneg q]
+  have hprod_pos : 0 < pellA p q t * pellB p q t := by
+    rw [hprod]
+    nlinarith
+  by_cases hA : 0 < pellA p q t
+  · by_cases hB : 0 < pellB p q t
+    · exact ⟨hA, hB⟩
+    · have hBle : pellB p q t ≤ 0 := by omega
+      have hnonpos : pellA p q t * pellB p q t ≤ 0 :=
+        mul_nonpos_of_nonneg_of_nonpos (le_of_lt hA) hBle
+      nlinarith
+  · have hAle : pellA p q t ≤ 0 := by omega
+    by_cases hB : 0 < pellB p q t
+    · have hnonpos : pellA p q t * pellB p q t ≤ 0 :=
+        mul_nonpos_of_nonpos_of_nonneg hAle (le_of_lt hB)
+      nlinarith
+    · have hBle : pellB p q t ≤ 0 := by omega
+      have hsum_nonpos : pellA p q t + pellB p q t ≤ 0 := by omega
+      nlinarith
+
+/--
+Hard elementary lemma, odd denominator branch.
+
+Mathematical content to fill in:
+
+1. From `q` odd and `gcd(p,q)=1`, prove `p` and `t` are odd.
+2. Prove `gcd(A,B)=1`, where
+   `A = pellA p q t`, `B = pellB p q t`.
+   The prime divisor argument is:
+   * an odd common prime divides `A+B = 2(2p²+q²)` and `B-A=4t`;
+   * using `AB=5q⁴`, such a prime is either `5` or divides `q`;
+   * a divisor of `q` would divide `p`, contradiction;
+   * the prime `5` cannot divide both factors because either `5∤q`, making
+     `25∤5q⁴`, or `5∣q`, in which case `2p²+q² ≡ 2p² ≠ 0 mod 5`.
+3. Since `AB = 5q⁴` and `A,B` are coprime positive integers, one factor is
+   `5α⁴` and the other is `β⁴`, with `αβ = q` up to sign.
+4. From `A+B = 2(2p²+q²)`, derive
+
+   ```text
+   p² = α⁴ + ((β²-α²)/2)²
+   ```
+
+   in one orientation, and the analogous equation in the other orientation.
+5. Parametrize the primitive Pythagorean triple with square leg and construct a
+   new solution of `PosQuartic` with denominator `< q`.
+-/
+theorem odd_pellian_factor_split_and_descent (p q t : ℤ)
+    (hq : 2 ≤ q)
+    (hq_odd : ¬ (2 : ℤ) ∣ q)
+    (hcop : Int.gcd p q = 1)
+    (hAB : pellA p q t * pellB p q t = 5 * q ^ 4)
+    (hsum : pellA p q t + pellB p q t = 2 * (2 * p ^ 2 + q ^ 2))
+    (hdiff : pellB p q t - pellA p q t = 4 * t)
+    (hpos : 0 < pellA p q t ∧ 0 < pellB p q t)
+    (hquartic : PosQuartic p q t) :
+    ∃ p' q' t' : ℤ, SmallerSolution p q t p' q' t' := by
+  -- HARD ELEMENTARY SUBLEMMA 1.
+  -- This is deliberately not a `Z[φ]` statement; it is the integer factor-split
+  -- and Pythagorean square-leg descent described above.
   sorry
 
 /--
-The elementary Pythagorean square-leg descent step.
+Hard elementary lemma, even denominator branch.
 
-Input:
+Mathematical content to fill in:
 
-```text
-p² = a² + b²,
-q² = b(2a+b),
-gcd(a,b)=1,
-0 < b,
-0 < 2a+b.
-```
+1. From `q` even and `gcd(p,q)=1`, prove `p` and `t` are odd.
+2. Modulo `16`, exclude `q ≡ 2 mod 4`; hence `4 ∣ q`.
+3. Prove both Pellian factors are divisible by `4` and set
 
-Sketch of the proof eventually replacing this `sorry`:
+   ```text
+   A = 4A₁,
+   B = 4B₁,
+   q = 2r.
+   ```
 
-1. Show `gcd(b, 2a+b)` is either `1` or `2`, using `gcd(a,b)=1`.
-2. Split into parity cases.
-   * If `gcd(b,2a+b)=1`, then both factors are squares:
-     `b = m²`, `2a+b = n²`, and `q = m*n` up to sign.
-   * In the even case, the standard normalized split gives the corresponding
-     factor of `2`; after dividing by the common `2`, one again obtains square
-     factors.
-3. Use `p² = a²+b²` as a primitive Pythagorean triple with a square leg.
-4. Parametrize the primitive triple and split the square product again.
-5. Construct a new solution `(p',q',t')` of the same quartic with
-   `2 ≤ q'` and `q'.natAbs < q.natAbs`.
+4. Then
 
-This theorem is deliberately stated as the precise descent output needed by the
-strong-induction proof below.
+   ```text
+   A₁B₁ = 5r⁴,
+   A₁+B₁ = p² + 2r².
+   ```
+
+5. Prove `gcd(A₁,B₁)=1`, split into fourth powers up to the factor `5`, and
+   run the same Pythagorean square-leg descent.
 -/
-theorem pythagorean_square_leg_descent_step (p q a b : ℤ)
+theorem even_pellian_factor_split_and_descent (p q t : ℤ)
     (hq : 2 ≤ q)
-    (hcop_pq : Int.gcd p q = 1)
-    (hcop_ab : Int.gcd a b = 1)
-    (hb_pos : 0 < b)
-    (hc_pos : 0 < 2 * a + b)
-    (hp : p ^ 2 = a ^ 2 + b ^ 2)
-    (hqeq : q ^ 2 = b * (2 * a + b)) :
+    (hq_even : (2 : ℤ) ∣ q)
+    (hcop : Int.gcd p q = 1)
+    (hAB : pellA p q t * pellB p q t = 5 * q ^ 4)
+    (hsum : pellA p q t + pellB p q t = 2 * (2 * p ^ 2 + q ^ 2))
+    (hdiff : pellB p q t - pellA p q t = 4 * t)
+    (hpos : 0 < pellA p q t ∧ 0 < pellB p q t)
+    (hquartic : PosQuartic p q t) :
+    ∃ p' q' t' : ℤ, SmallerSolution p q t p' q' t' := by
+  -- HARD ELEMENTARY SUBLEMMA 2.
+  -- This is the normalized even-denominator factor split and the same descent.
+  sorry
+
+/--
+The elementary descent step replacing the earlier `Z[φ]` black box.
+
+This theorem has no algebraic-number-theory content.  It only:
+
+* forms the Pellian factors;
+* proves their product/sum/difference identities;
+* proves positivity; and
+* dispatches to the odd/even elementary factor-split descent lemmas.
+-/
+theorem zphi_descent_step (p q t : ℤ)
+    (hq : 2 ≤ q)
+    (hcop : Int.gcd p q = 1)
+    (h : PosQuartic p q t) :
     ∃ p' q' t' : ℤ,
       2 ≤ q' ∧
       Int.gcd p' q' = 1 ∧
       PosQuartic p' q' t' ∧
       q'.natAbs < q.natAbs := by
-  -- HARD elementary descent step.
-  -- This is the second isolated `sorry` boundary.
-  sorry
+  have hAB : pellA p q t * pellB p q t = 5 * q ^ 4 :=
+    pellian_factorization p q t h
+  have hsum : pellA p q t + pellB p q t = 2 * (2 * p ^ 2 + q ^ 2) :=
+    pellian_sum p q t
+  have hdiff : pellB p q t - pellA p q t = 4 * t :=
+    pellian_diff p q t
+  have hpos : 0 < pellA p q t ∧ 0 < pellB p q t :=
+    pellian_factors_pos p q t hq h
+  by_cases hq_even : (2 : ℤ) ∣ q
+  · obtain ⟨p', q', t', hsmall⟩ :=
+      even_pellian_factor_split_and_descent p q t
+        hq hq_even hcop hAB hsum hdiff hpos h
+    exact ⟨p', q', t', hsmall⟩
+  · obtain ⟨p', q', t', hsmall⟩ :=
+      odd_pellian_factor_split_and_descent p q t
+        hq hq_even hcop hAB hsum hdiff hpos h
+    exact ⟨p', q', t', hsmall⟩
 
-/-- Combine the `ℤ[φ]` coefficient extraction with the elementary descent. -/
-theorem quartic_descent_step (p q t : ℤ)
-    (hq : 2 ≤ q)
-    (hcop : Int.gcd p q = 1)
-    (h : PosQuartic p q t) :
-    ∃ p' q' t' : ℤ,
-      2 ≤ q' ∧
-      Int.gcd p' q' = 1 ∧
-      PosQuartic p' q' t' ∧
-      q'.natAbs < q.natAbs := by
-  obtain ⟨a, b, hcop_ab, hb_pos, hc_pos, hp, hqeq⟩ :=
-    zphi_coeff_matching p q t hq hcop h
-  exact pythagorean_square_leg_descent_step p q a b
-    hq hcop hcop_ab hb_pos hc_pos hp hqeq
-
-/-- Strong-induction core: no primitive positive-quartic solution with bounded denominator. -/
+/-- Strong-induction core using the elementary descent step. -/
 private theorem no_denominator_quartic_aux (n : ℕ) :
     ∀ p q t : ℤ,
       q.natAbs ≤ n →
@@ -172,10 +256,10 @@ private theorem no_denominator_quartic_aux (n : ℕ) :
   | h n ih =>
       intro p q t hqn hq hcop hquartic
       obtain ⟨p', q', t', hq', hcop', hquartic', hdrop⟩ :=
-        quartic_descent_step p q t hq hcop hquartic
+        zphi_descent_step p q t hq hcop hquartic
       exact ih q'.natAbs (by omega) p' q' t' le_rfl hq' hcop' hquartic'
 
-/-- The requested positive denominator-quartic no-solution theorem. -/
+/-- The positive denominator-quartic no-solution theorem. -/
 theorem no_denominator_quartic (p q t : ℤ) (hq : 2 ≤ q)
     (hcop : Int.gcd p q = 1) :
     t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4 → False := by
@@ -185,60 +269,51 @@ theorem no_denominator_quartic (p q t : ℤ) (hq : 2 ≤ q)
 end DenominatorQuartic
 ```
 
-## What remains inside the second `sorry`
+## Notes for the next proof layer
 
-The core mathematical lemma to prove next is a square-factor split for
-
-```text
-q² = b(2a+b)
-```
-
-under
-
-```text
-gcd(a,b)=1,
-0 < b,
-0 < 2a+b.
-```
-
-A useful Lean sublemma boundary is:
+The two remaining `sorry`s are the correct elementary boundaries.  They should be filled by smaller lemmas of the following shape.
 
 ```lean
--- Suggested eventual sublemma, not needed by the skeleton above yet.
-theorem square_product_nearly_coprime_split
-    (a b q : ℤ)
-    (hcop : Int.gcd a b = 1)
-    (hb_pos : 0 < b)
-    (hc_pos : 0 < 2 * a + b)
-    (hqeq : q ^ 2 = b * (2 * a + b)) :
-    (∃ m n : ℤ,
-      b = m ^ 2 ∧
-      2 * a + b = n ^ 2 ∧
-      q.natAbs = (m * n).natAbs) ∨
-    (∃ m n : ℤ,
-      b = 2 * m ^ 2 ∧
-      2 * a + b = 2 * n ^ 2 ∧
-      q.natAbs = (2 * m * n).natAbs) := by
+-- Odd branch: coprime product split.
+theorem odd_pellian_factors_coprime (p q t : ℤ)
+    (hq_odd : ¬ (2 : ℤ) ∣ q)
+    (hcop : Int.gcd p q = 1)
+    (hAB : pellA p q t * pellB p q t = 5 * q ^ 4)
+    (hsum : pellA p q t + pellB p q t = 2 * (2 * p ^ 2 + q ^ 2))
+    (hdiff : pellB p q t - pellA p q t = 4 * t) :
+    Int.gcd (pellA p q t) (pellB p q t) = 1 := by
+  sorry
+
+-- Odd branch: fourth-power split after coprimality.
+theorem odd_pellian_fourth_power_split (p q t : ℤ)
+    (hcopAB : Int.gcd (pellA p q t) (pellB p q t) = 1)
+    (hAB : pellA p q t * pellB p q t = 5 * q ^ 4)
+    (hpos : 0 < pellA p q t ∧ 0 < pellB p q t) :
+    ∃ α β : ℤ,
+      0 < α ∧ 0 < β ∧ α * β = q ∧
+      ((pellA p q t = 5 * α ^ 4 ∧ pellB p q t = β ^ 4) ∨
+       (pellA p q t = α ^ 4 ∧ pellB p q t = 5 * β ^ 4)) := by
   sorry
 ```
 
-Then the Pythagorean part can be split further:
+The Pythagorean descent after the split should be stated orientation-free:
 
 ```lean
--- Suggested eventual sublemma.
-theorem primitive_pythagorean_square_leg_to_smaller_quartic
-    (p q a m n : ℤ)
+theorem pellian_split_to_smaller_solution (p q t α β : ℤ)
     (hq : 2 ≤ q)
-    (hcop_pq : Int.gcd p q = 1)
-    (hp : p ^ 2 = a ^ 2 + m ^ 4)
-    (ha : 2 * a = n ^ 2 - m ^ 2)
-    (hqabs : q.natAbs = (m * n).natAbs) :
+    (hcop : Int.gcd p q = 1)
+    (ha : 0 < α)
+    (hb : 0 < β)
+    (hab : α * β = q)
+    (hquartic : PosQuartic p q t)
+    (hsplit :
+      (pellA p q t = 5 * α ^ 4 ∧ pellB p q t = β ^ 4) ∨
+      (pellA p q t = α ^ 4 ∧ pellB p q t = 5 * β ^ 4)) :
     ∃ p' q' t' : ℤ,
-      2 ≤ q' ∧
-      Int.gcd p' q' = 1 ∧
-      PosQuartic p' q' t' ∧
-      q'.natAbs < q.natAbs := by
+      SmallerSolution p q t p' q' t' := by
+  -- Derive the Pythagorean triple and produce q' = α or q' = β,
+  -- choosing the smaller nontrivial factor.
   sorry
 ```
 
-Those two sublemmas are the precise place where the parity and gcd bookkeeping belongs.  The global infinite-descent structure should remain as in `no_denominator_quartic_aux` above.
+The final `zphi_descent_step` above will not need to change when those lemmas are filled.
