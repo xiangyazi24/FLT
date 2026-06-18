@@ -1,53 +1,32 @@
 # ChatGPT Drop File (dm2)
 
-The Markdown task file contained only the placeholder header, not a separate theorem statement. Based on the current drop workflow, the target is the `d = 3` quartic obstruction:
+The target is the `d = 5` quartic obstruction:
 
 ```lean
-theorem quartic_no_sol_d3 (s t : ℤ) (hcop : Int.gcd s 3 = 1) :
-    s ^ 4 + s ^ 2 * 9 - 81 = t ^ 2 → False
+theorem quartic_no_sol_d5 (s t : ℤ) (hcop : Int.gcd s 5 = 1) :
+    s ^ 4 + 25 * s ^ 2 - 625 = t ^ 2 → False
 ```
 
-The proof follows the same squeeze strategy as `scratch/Descent20a4.lean`. For large `|s|`, specifically `s^2 ≥ 100`, we have
+The proof is a consecutive-squares squeeze plus a finite check.  The two useful squeeze bands are:
 
-```text
-(s^2 + 4)^2 < s^4 + 9*s^2 - 81 < (s^2 + 5)^2.
-```
+- If `249 ≤ s^2 < 769`, then
+  `(s^2 + 11)^2 < s^4 + 25*s^2 - 625 < (s^2 + 12)^2`.
+  This covers `16 ≤ |s| ≤ 27`.
+- If `784 ≤ s^2`, then
+  `(s^2 + 12)^2 < s^4 + 25*s^2 - 625 < (s^2 + 13)^2`.
+  This covers `|s| ≥ 28`.
 
-So if the middle term is `t^2`, then `t^2` lies strictly between two consecutive integer squares, impossible. The remaining range `-9 ≤ s ≤ 9` is finite. The gcd hypothesis excludes `s = 0, ±3, ±6, ±9`; the other small cases are either negative or one of the explicit non-squares `319`, `769`, `2761`, and `4591`.
+The remaining range is `|s| ≤ 15`.  The gcd hypothesis excludes the multiples of `5`; the cases `|s| ≤ 3` have a negative right side; and the remaining small values are checked by placing the resulting constants strictly between consecutive squares.
 
 ```lean
 import Mathlib
 
 /-!
-# The `d = 3` quartic obstruction
+# The `d = 5` quartic obstruction
 
-Task theorem:
-
-```
-theorem quartic_no_sol_d3 (s t : ℤ) (hcop : Int.gcd s 3 = 1) :
-    s ^ 4 + s ^ 2 * 9 - 81 = t ^ 2 → False
-```
-
-For `|s| ≥ 10`, use the same consecutive-squares squeeze pattern as
-`scratch/Descent20a4.lean`:
-
-```
-(s^2 + 4)^2 < t^2 < (s^2 + 5)^2.
-```
-
-The remaining values `-9 ≤ s ≤ 9` are finite.  The gcd hypothesis excludes the
-multiples of `3`, including the genuine `s = ±3` exceptional cases for the raw
-equation; the other small values are either negative right sides or lie strictly
-between consecutive squares.
+We prove that `s^4 + 25*s^2 - 625 = t^2` has no integer solution when
+`Int.gcd s 5 = 1`.
 -/
-
-private lemma sq_ge_hundred_of_le_neg_ten (s : ℤ) (hs : s ≤ -10) :
-    (100 : ℤ) ≤ s ^ 2 := by
-  nlinarith [sq_nonneg (s + 10)]
-
-private lemma sq_ge_hundred_of_ten_le (s : ℤ) (hs : 10 ≤ s) :
-    (100 : ℤ) ≤ s ^ 2 := by
-  nlinarith [sq_nonneg (s - 10)]
 
 private lemma lt_neg_of_sq_lt_sq_of_nonneg_of_neg {a t : ℤ}
     (ha : 0 ≤ a) (ht : t < 0) (h : a ^ 2 < t ^ 2) : a < -t := by
@@ -117,83 +96,175 @@ private lemma no_sq_between_consecutive (t a : ℤ) (ha : 0 ≤ a)
     have h2 : t < a + 1 := lt_of_sq_lt_sq_of_nonneg_of_pos_upper ha1 ht_pos hhigh
     omega
 
-private lemma not_sq_319 (t : ℤ) (h : (319 : ℤ) = t ^ 2) : False := by
-  exact no_sq_between_consecutive t 17 (by norm_num) (by nlinarith) (by nlinarith)
+private lemma not_sq_31 (t : ℤ) (h : (31 : ℤ) = t ^ 2) : False := by
+  exact no_sq_between_consecutive t 5 (by norm_num) (by nlinarith) (by nlinarith)
 
-private lemma not_sq_769 (t : ℤ) (h : (769 : ℤ) = t ^ 2) : False := by
-  exact no_sq_between_consecutive t 27 (by norm_num) (by nlinarith) (by nlinarith)
+private lemma not_sq_1571 (t : ℤ) (h : (1571 : ℤ) = t ^ 2) : False := by
+  exact no_sq_between_consecutive t 39 (by norm_num) (by nlinarith) (by nlinarith)
 
-private lemma not_sq_2761 (t : ℤ) (h : (2761 : ℤ) = t ^ 2) : False := by
-  exact no_sq_between_consecutive t 52 (by norm_num) (by nlinarith) (by nlinarith)
+private lemma not_sq_3001 (t : ℤ) (h : (3001 : ℤ) = t ^ 2) : False := by
+  exact no_sq_between_consecutive t 54 (by norm_num) (by nlinarith) (by nlinarith)
 
-private lemma not_sq_4591 (t : ℤ) (h : (4591 : ℤ) = t ^ 2) : False := by
-  exact no_sq_between_consecutive t 67 (by norm_num) (by nlinarith) (by nlinarith)
+private lemma not_sq_5071 (t : ℤ) (h : (5071 : ℤ) = t ^ 2) : False := by
+  exact no_sq_between_consecutive t 71 (by norm_num) (by nlinarith) (by nlinarith)
 
-private lemma quartic_d3_squeeze (s t : ℤ) (hs100 : (100 : ℤ) ≤ s ^ 2)
-    (h : s ^ 4 + s ^ 2 * 9 - 81 = t ^ 2) : False := by
-  have hlow : (s ^ 2 + 4) ^ 2 < t ^ 2 := by
+private lemma not_sq_7961 (t : ℤ) (h : (7961 : ℤ) = t ^ 2) : False := by
+  exact no_sq_between_consecutive t 89 (by norm_num) (by nlinarith) (by nlinarith)
+
+private lemma not_sq_17041 (t : ℤ) (h : (17041 : ℤ) = t ^ 2) : False := by
+  exact no_sq_between_consecutive t 130 (by norm_num) (by nlinarith) (by nlinarith)
+
+private lemma not_sq_23711 (t : ℤ) (h : (23711 : ℤ) = t ^ 2) : False := by
+  exact no_sq_between_consecutive t 153 (by norm_num) (by nlinarith) (by nlinarith)
+
+private lemma not_sq_32161 (t : ℤ) (h : (32161 : ℤ) = t ^ 2) : False := by
+  exact no_sq_between_consecutive t 179 (by norm_num) (by nlinarith) (by nlinarith)
+
+private lemma not_sq_42691 (t : ℤ) (h : (42691 : ℤ) = t ^ 2) : False := by
+  exact no_sq_between_consecutive t 206 (by norm_num) (by nlinarith) (by nlinarith)
+
+private lemma sq_ge_249_of_le_neg_sixteen (s : ℤ) (hs : s ≤ -16) :
+    (249 : ℤ) ≤ s ^ 2 := by
+  nlinarith [sq_nonneg (s + 16)]
+
+private lemma sq_ge_249_of_sixteen_le (s : ℤ) (hs : 16 ≤ s) :
+    (249 : ℤ) ≤ s ^ 2 := by
+  nlinarith [sq_nonneg (s - 16)]
+
+private lemma sq_lt_769_of_neg27_le_of_le_neg16 (s : ℤ)
+    (hlo : -27 ≤ s) (hhi : s ≤ -16) : s ^ 2 < (769 : ℤ) := by
+  have h1 : 0 ≤ s + 27 := by omega
+  have h2 : s + 16 ≤ 0 := by omega
+  have hprod : (s + 27) * (s + 16) ≤ 0 :=
+    mul_nonpos_of_nonneg_of_nonpos h1 h2
+  nlinarith
+
+private lemma sq_lt_769_of_sixteen_le_of_le27 (s : ℤ)
+    (hlo : 16 ≤ s) (hhi : s ≤ 27) : s ^ 2 < (769 : ℤ) := by
+  have h1 : 0 ≤ s - 16 := by omega
+  have h2 : s - 27 ≤ 0 := by omega
+  have hprod : (s - 16) * (s - 27) ≤ 0 :=
+    mul_nonpos_of_nonneg_of_nonpos h1 h2
+  nlinarith
+
+private lemma sq_ge_784_of_le_neg_twentyeight (s : ℤ) (hs : s ≤ -28) :
+    (784 : ℤ) ≤ s ^ 2 := by
+  nlinarith [sq_nonneg (s + 28)]
+
+private lemma sq_ge_784_of_twentyeight_le (s : ℤ) (hs : 28 ≤ s) :
+    (784 : ℤ) ≤ s ^ 2 := by
+  nlinarith [sq_nonneg (s - 28)]
+
+private lemma quartic_d5_mid_squeeze (s t : ℤ)
+    (hlo : (249 : ℤ) ≤ s ^ 2) (hhi : s ^ 2 < (769 : ℤ))
+    (h : s ^ 4 + 25 * s ^ 2 - 625 = t ^ 2) : False := by
+  have hlow : (s ^ 2 + 11) ^ 2 < t ^ 2 := by
     nlinarith
-  have hhigh : t ^ 2 < ((s ^ 2 + 4) + 1) ^ 2 := by
-    nlinarith [sq_nonneg s]
-  exact no_sq_between_consecutive t (s ^ 2 + 4)
+  have hhigh : t ^ 2 < ((s ^ 2 + 11) + 1) ^ 2 := by
+    nlinarith
+  exact no_sq_between_consecutive t (s ^ 2 + 11)
     (by nlinarith [sq_nonneg s]) hlow hhigh
 
-theorem quartic_no_sol_d3 (s t : ℤ) (hcop : Int.gcd s 3 = 1) :
-    s ^ 4 + s ^ 2 * 9 - 81 = t ^ 2 → False := by
-  intro h
-  by_cases hs_neg : s ≤ -10
-  · exact quartic_d3_squeeze s t (sq_ge_hundred_of_le_neg_ten s hs_neg) h
-  · by_cases hs_pos : 10 ≤ s
-    · exact quartic_d3_squeeze s t (sq_ge_hundred_of_ten_le s hs_pos) h
-    · have hs_small :
-          s = -9 ∨ s = -8 ∨ s = -7 ∨ s = -6 ∨ s = -5 ∨
-          s = -4 ∨ s = -3 ∨ s = -2 ∨ s = -1 ∨ s = 0 ∨
-          s = 1 ∨ s = 2 ∨ s = 3 ∨ s = 4 ∨ s = 5 ∨
-          s = 6 ∨ s = 7 ∨ s = 8 ∨ s = 9 := by
-        omega
-      rcases hs_small with rfl | rfl | rfl | rfl | rfl |
-        rfl | rfl | rfl | rfl | rfl |
-        rfl | rfl | rfl | rfl | rfl |
-        rfl | rfl | rfl | rfl
-      · norm_num at hcop
-      · norm_num at h
-        exact not_sq_4591 t h
-      · norm_num at h
-        exact not_sq_2761 t h
-      · norm_num at hcop
-      · norm_num at h
-        exact not_sq_769 t h
-      · norm_num at h
-        exact not_sq_319 t h
-      · norm_num at hcop
-      · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-        norm_num at h
-        nlinarith
-      · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-        norm_num at h
-        nlinarith
-      · norm_num at hcop
-      · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-        norm_num at h
-        nlinarith
-      · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
-        norm_num at h
-        nlinarith
-      · norm_num at hcop
-      · norm_num at h
-        exact not_sq_319 t h
-      · norm_num at h
-        exact not_sq_769 t h
-      · norm_num at hcop
-      · norm_num at h
-        exact not_sq_2761 t h
-      · norm_num at h
-        exact not_sq_4591 t h
-      · norm_num at hcop
+private lemma quartic_d5_large_squeeze (s t : ℤ)
+    (hs784 : (784 : ℤ) ≤ s ^ 2)
+    (h : s ^ 4 + 25 * s ^ 2 - 625 = t ^ 2) : False := by
+  have hlow : (s ^ 2 + 12) ^ 2 < t ^ 2 := by
+    nlinarith
+  have hhigh : t ^ 2 < ((s ^ 2 + 12) + 1) ^ 2 := by
+    nlinarith [sq_nonneg s]
+  exact no_sq_between_consecutive t (s ^ 2 + 12)
+    (by nlinarith [sq_nonneg s]) hlow hhigh
 
-/-- Same result in the commuted `9 * s^2` spelling. -/
-theorem quartic_no_sol_d3_left_mul (s t : ℤ) (hcop : Int.gcd s 3 = 1) :
-    s ^ 4 + 9 * s ^ 2 - 81 = t ^ 2 → False := by
+theorem quartic_no_sol_d5 (s t : ℤ) (hcop : Int.gcd s 5 = 1) :
+    s ^ 4 + 25 * s ^ 2 - 625 = t ^ 2 → False := by
   intro h
-  exact quartic_no_sol_d3 s t hcop (by nlinarith)
+  by_cases hs_le_neg28 : s ≤ -28
+  · exact quartic_d5_large_squeeze s t
+      (sq_ge_784_of_le_neg_twentyeight s hs_le_neg28) h
+  · by_cases hs_ge_28 : 28 ≤ s
+    · exact quartic_d5_large_squeeze s t
+        (sq_ge_784_of_twentyeight_le s hs_ge_28) h
+    · by_cases hs_le_neg16 : s ≤ -16
+      · exact quartic_d5_mid_squeeze s t
+          (sq_ge_249_of_le_neg_sixteen s hs_le_neg16)
+          (sq_lt_769_of_neg27_le_of_le_neg16 s (by omega) hs_le_neg16) h
+      · by_cases hs_ge_16 : 16 ≤ s
+        · exact quartic_d5_mid_squeeze s t
+            (sq_ge_249_of_sixteen_le s hs_ge_16)
+            (sq_lt_769_of_sixteen_le_of_le27 s hs_ge_16 (by omega)) h
+        · have hs_small :
+              s = -15 ∨ s = -14 ∨ s = -13 ∨ s = -12 ∨ s = -11 ∨
+              s = -10 ∨ s = -9 ∨ s = -8 ∨ s = -7 ∨ s = -6 ∨
+              s = -5 ∨ s = -4 ∨ s = -3 ∨ s = -2 ∨ s = -1 ∨
+              s = 0 ∨ s = 1 ∨ s = 2 ∨ s = 3 ∨ s = 4 ∨
+              s = 5 ∨ s = 6 ∨ s = 7 ∨ s = 8 ∨ s = 9 ∨
+              s = 10 ∨ s = 11 ∨ s = 12 ∨ s = 13 ∨ s = 14 ∨ s = 15 := by
+            omega
+          rcases hs_small with rfl | rfl | rfl | rfl | rfl |
+            rfl | rfl | rfl | rfl | rfl |
+            rfl | rfl | rfl | rfl | rfl |
+            rfl | rfl | rfl | rfl | rfl |
+            rfl | rfl | rfl | rfl | rfl |
+            rfl | rfl | rfl | rfl | rfl | rfl
+          · norm_num at hcop
+          · norm_num at h
+            exact not_sq_42691 t h
+          · norm_num at h
+            exact not_sq_32161 t h
+          · norm_num at h
+            exact not_sq_23711 t h
+          · norm_num at h
+            exact not_sq_17041 t h
+          · norm_num at hcop
+          · norm_num at h
+            exact not_sq_7961 t h
+          · norm_num at h
+            exact not_sq_5071 t h
+          · norm_num at h
+            exact not_sq_3001 t h
+          · norm_num at h
+            exact not_sq_1571 t h
+          · norm_num at hcop
+          · norm_num at h
+            exact not_sq_31 t h
+          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
+            norm_num at h
+            nlinarith
+          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
+            norm_num at h
+            nlinarith
+          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
+            norm_num at h
+            nlinarith
+          · norm_num at hcop
+          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
+            norm_num at h
+            nlinarith
+          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
+            norm_num at h
+            nlinarith
+          · have ht_nonneg : 0 ≤ t ^ 2 := sq_nonneg t
+            norm_num at h
+            nlinarith
+          · norm_num at h
+            exact not_sq_31 t h
+          · norm_num at hcop
+          · norm_num at h
+            exact not_sq_1571 t h
+          · norm_num at h
+            exact not_sq_3001 t h
+          · norm_num at h
+            exact not_sq_5071 t h
+          · norm_num at h
+            exact not_sq_7961 t h
+          · norm_num at hcop
+          · norm_num at h
+            exact not_sq_17041 t h
+          · norm_num at h
+            exact not_sq_23711 t h
+          · norm_num at h
+            exact not_sq_32161 t h
+          · norm_num at h
+            exact not_sq_42691 t h
+          · norm_num at hcop
 ```
