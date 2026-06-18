@@ -44,7 +44,7 @@ theorem mazur_torsion_bound (E : WeierstrassCurve ℚ) [E.IsElliptic] :
   let d := rational_torsion_two_invariant_factors E
   have hm_le : d.m ≤ 2 :=
     full_rational_torsion_order_le_two E d.m_pos
-      (first_invariant_factor_full_torsion E d.has_structure)
+      (first_invariant_factor_full_torsion E d.m_pos d.n_pos d.dvd_mn d.has_structure)
   have hn_le : d.n ≤ 16 := n_le_sixteen_of_structure E d
   have hm_ge_one : 1 ≤ d.m := d.m_pos
   have hm_cases : d.m = 1 ∨ d.m = 2 := by omega

@@ -1,4 +1,5 @@
 import FLT.EllipticCurve.Torsion
+import FLT.Assumptions.MazurProof.GroupTheory
 
 /-!
 # Axioms for the Mazur torsion-bound proof scaffold
@@ -17,16 +18,19 @@ abbrev torsionSet (E : WeierstrassCurve ℚ) : Set (E⁄ℚ).Point :=
   AddCommGroup.torsion (E⁄ℚ).Point
 
 /-- Placeholder for "all `m`-torsion points of `E` are rational". -/
-axiom HasFullRationalTorsion (E : WeierstrassCurve ℚ) [E.IsElliptic] (m : ℕ) : Prop
+def HasFullRationalTorsion (E : WeierstrassCurve ℚ) [E.IsElliptic] (m : ℕ) : Prop :=
+  ∃ f : ZMod m × ZMod m →+ (E⁄ℚ).Point, Function.Injective f
 
 /-- Placeholder for "there is a rational point of exact order `n` on `E`". -/
-axiom HasRationalPointOfOrder (E : WeierstrassCurve ℚ) [E.IsElliptic] (n : ℕ) : Prop
+def HasRationalPointOfOrder (E : WeierstrassCurve ℚ) [E.IsElliptic] (n : ℕ) : Prop :=
+  ∃ P : (E⁄ℚ).Point, addOrderOf P = n
 
 /--
 Placeholder for the structure-theorem assertion
 `E(ℚ)_tors ≃ ℤ/mℤ × ℤ/nℤ`, with `m ∣ n`.
 -/
-axiom HasTorsionStructure (E : WeierstrassCurve ℚ) [E.IsElliptic] (m n : ℕ) : Prop
+def HasTorsionStructure (E : WeierstrassCurve ℚ) [E.IsElliptic] (m n : ℕ) : Prop :=
+  ∃ f : ZMod m × ZMod n →+ (E⁄ℚ).Point, Function.Injective f
 
 /-- Placeholder for `E(ℚ)_tors` containing a subgroup `ℤ/2ℤ × ℤ/nℤ`. -/
 abbrev ContainsZ2xZn (E : WeierstrassCurve ℚ) [E.IsElliptic] (n : ℕ) : Prop :=
@@ -67,10 +71,14 @@ axiom rational_torsion_two_invariant_factors
 If the first invariant factor of the rational torsion subgroup is `m`, then
 the full `m`-torsion is rational.
 -/
-axiom first_invariant_factor_full_torsion
+theorem first_invariant_factor_full_torsion
     (E : WeierstrassCurve ℚ) [E.IsElliptic] {m n : ℕ}
+    (hm : 0 < m) (hn : 0 < n) (hmn : m ∣ n)
     (hstruct : HasTorsionStructure E m n) :
-    HasFullRationalTorsion E m
+    HasFullRationalTorsion E m := by
+  obtain ⟨embed, hembed⟩ := zmod_prod_contains_square m n hm hn hmn
+  obtain ⟨f, hf⟩ := hstruct
+  exact ⟨f.comp embed, hf.comp hembed⟩
 
 /-! ## Group B: Weil pairing -/
 
