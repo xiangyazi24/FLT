@@ -120,3 +120,33 @@ For each n ∈ {10, 12, 14, 16}, the proof that ℤ/2 × ℤ/n ⊄ E(ℚ)_tors f
 
 For N=10: obstruction curve is LMFDB 20.a4 (y² = x³ + x² - x),
 MW group = ℤ/6ℤ (rank 0), rational points u ∈ {-1, 1, 3} are all cusps.
+
+## Progress Log (2026-06-17 automode session)
+
+### Proved (0 sorry, 0 axiom — real Lean theorems):
+1. **RootsOfUnity.lean**: isPrimitiveRoot_rat_order_le_two, rat_root_of_unity_eq_one_or_neg_one
+2. **TorsionFinite.lean**: torsion_set_finite_of_fg (Noetherian ℤ-module → torsion submodule f.g. → finite)
+3. **GroupTheory.lean**: zmod_prod_contains_square ((ℤ/m)² ↪ ℤ/m × ℤ/n when m|n)
+4. **CyclotomicLayer.lean**: primitive_root_forces_le_two interface
+5. **ZModEmbedding.lean** (scratch): same as GroupTheory content
+
+### Proved from axioms (skeleton):
+6. **TorsionBound.lean**: mazur_torsion_bound (|T| ≤ 16 from 6 axiom seams)
+
+### Verified computation:
+7. **DescentObstruction.lean**: N=10 2-isogeny local obstructions via native_decide
+8. **ObstructionN10Complete.lean**: curve 20.a4 rational point verification
+
+### Axiom seams remaining:
+- mordell_weil_fg (standard, in TorsionFinite.lean)
+- weil_pairing_primitive_root (needs EC Weil pairing or det = χ_m)
+- rational_torsion_two_invariant_factors (needs E[m] ≅ (ℤ/m)²)
+- cyclic_order_allowed (needs Mazur cyclic classification or X_1(n) certificates)
+- no_Z2_cross_Z10 (needs obstruction curve 20.a4 rank-0 certificate)
+- no_Z2_cross_Z12 (needs obstruction curve rank-0 certificate)
+
+### Key design decisions:
+- Refactored cyclic bound to Mazur classification (n ∈ {1..10,12}) — eliminates N=14, N=16 noncyclic cases
+- Weil pairing axiom seam at the primitive-root level (not m ≤ 2 directly)
+- TorsionFinite discharge: mordell_weil_fg → Noetherian → f.g. torsion → finite (real proof)
+- N=10 descent: LMFDB 20.a4, MW = ℤ/6ℤ, rank 0, local obstructions mod 125
