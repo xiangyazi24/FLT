@@ -1,29 +1,25 @@
-import Mathlib
-
-theorem not_sq_three : ∀ n : ℤ, n ^ 2 ≠ 3 := by
-  intro n hn
-  have hupper : n ≤ 2 := by
-    by_contra h
-    have h3 : (3 : ℤ) ≤ n := by omega
-    have hn0 : (0 : ℤ) ≤ n := by omega
-    have hsq : (9 : ℤ) ≤ n * n := by
-      simpa using (mul_le_mul h3 h3 (by norm_num : (0 : ℤ) ≤ 3) hn0)
-    have hbad : (9 : ℤ) ≤ 3 := by
-      calc
-        (9 : ℤ) ≤ n * n := hsq
-        _ = n ^ 2 := by ring
-        _ = 3 := hn
-    norm_num at hbad
-  have hlower : -2 ≤ n := by
-    by_contra h
-    have h3 : (3 : ℤ) ≤ -n := by omega
-    have hn0 : (0 : ℤ) ≤ -n := by omega
-    have hsq : (9 : ℤ) ≤ (-n) * (-n) := by
-      simpa using (mul_le_mul h3 h3 (by norm_num : (0 : ℤ) ≤ 3) hn0)
-    have hbad : (9 : ℤ) ≤ 3 := by
-      calc
-        (9 : ℤ) ≤ (-n) * (-n) := hsq
-        _ = n ^ 2 := by ring
-        _ = 3 := hn
-    norm_num at hbad
-  interval_cases n <;> norm_num at hn
+-- TASK: Prove that s^4 + s^2*d^2 - d^4 = t^2 has no integer solution
+-- with gcd(s,d)=1 and d >= 2.
+--
+-- REFERENCE: READ scratch/Descent20a4.lean and scratch/Selmer20a4.lean.
+-- Descent20a4 proves the d=1 case via squeeze: a^4 < a^4+a^2-1 < (a^2+1)^2.
+-- Selmer20a4 proves the 5-adic local obstruction for curve 20.a4.
+--
+-- This quartic is the KEY missing piece for proving
+-- obstruction_curve_20a4_points_degenerate over Q (not just Z).
+--
+-- Proof approaches:
+-- 1. Mod 4: if s even (d odd since gcd=1), then s^4+s^2*d^2-d^4 = 0+0-1 = 3 mod 4. Not a QR.
+-- 2. Mod 3: if 3|s (and 3 nmid d), then result = 0+0-d^4 = -d^4 = 2 mod 3. Not a QR.
+-- 3. For s odd, 3 nmid s, d=1: the squeeze from Descent20a4 works.
+-- 4. For s odd, 3 nmid s, d >= 2: this is the hard case. Try:
+--    - Mod 7 analysis (f is QR mod 7 only when s = +/-d mod 7)
+--    - Or: use the Pellian structure (2s^2+d^2)^2 - (2t)^2 = 5d^4
+--    - Or: infinite descent via the curve group law
+--
+-- Name: no_quartic_solution
+-- Signature: (s d t : Z) -> (hd : 2 <= d) -> (hcop : Int.gcd s d = 1) ->
+--            s^4 + s^2*d^2 - d^4 = t^2 -> False
+--
+-- Even a PARTIAL result (e.g. proving for d=2,3,4,5 by computation + squeeze
+-- for d >= 6) would be valuable. Write complete Lean 4, import Mathlib.
