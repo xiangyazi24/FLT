@@ -191,7 +191,6 @@ finite local obstruction checks to the Mordell-Weil rank computation.
 /-- The rank of curve 20.a4 is zero. This follows from the 2-isogeny descent
 checked in local_obstructions_verified, but the formal descent bridge is not yet
 in Mathlib. -/
-axiom rank_E20_eq_zero_ax : True -- placeholder: rank = 0 from descent
 
 end C20LocalObstructions
 end FLT

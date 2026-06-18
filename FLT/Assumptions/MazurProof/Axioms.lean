@@ -58,9 +58,6 @@ structure TorsionStructureData (E : WeierstrassCurve ℚ) [E.IsElliptic] where
 
 /-! ## Group A: torsion structure, expected easiest to discharge -/
 
-/-- The rational torsion subgroup of an elliptic curve over `ℚ` is finite. -/
-axiom rational_torsion_finite (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    (torsionSet E).Finite
 
 /--
 The rational torsion subgroup has two invariant factors:
