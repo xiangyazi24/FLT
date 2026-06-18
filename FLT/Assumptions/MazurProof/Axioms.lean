@@ -1,4 +1,5 @@
 import FLT.EllipticCurve.Torsion
+import FLT.Assumptions.MazurProof.NoncyclicN10
 import FLT.Assumptions.MazurProof.GroupTheory
 
 /-!
@@ -94,10 +95,23 @@ axiom weil_pairing_primitive_root (E : WeierstrassCurve ℚ) [E.IsElliptic] {m :
 
 /-- No elliptic curve over `ℚ` has rational torsion containing `ℤ/2ℤ × ℤ/nℤ`
 for `n ∈ {10, 12, 14, 16}`. -/
-axiom no_Z2_cross_Zn_forbidden
+axiom no_Z2_cross_Z14
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ ContainsZ2xZn E 14
+
+axiom no_Z2_cross_Z16
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ ContainsZ2xZn E 16
+
+theorem no_Z2_cross_Zn_forbidden
     (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ}
     (hn : n = 10 ∨ n = 12 ∨ n = 14 ∨ n = 16) :
-    ¬ ContainsZ2xZn E n
+    ¬ ContainsZ2xZn E n := by
+  rcases hn with rfl | rfl | rfl | rfl
+  · exact no_Z2_cross_Z10 E
+  · exact no_Z2_cross_Z12 E
+  · exact no_Z2_cross_Z14 E
+  · exact no_Z2_cross_Z16 E
 
 /-! ## Group D: cyclic order bound, the hard Mazur core -/
 
