@@ -1,5 +1,7 @@
 import FLT.EllipticCurve.Torsion
 import FLT.Assumptions.MazurProof.NoncyclicN10
+import FLT.Assumptions.MazurProof.DescentBridgeN14
+import FLT.Assumptions.MazurProof.DescentBridgeN16
 import FLT.Assumptions.MazurProof.GroupTheory
 
 /-!
@@ -95,13 +97,15 @@ axiom weil_pairing_primitive_root (E : WeierstrassCurve ℚ) [E.IsElliptic] {m :
 
 /-- No elliptic curve over `ℚ` has rational torsion containing `ℤ/2ℤ × ℤ/nℤ`
 for `n ∈ {10, 12, 14, 16}`. -/
-axiom no_Z2_cross_Z14
+theorem no_Z2_cross_Z14
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    ¬ ContainsZ2xZn E 14
+    ¬ ContainsZ2xZn E 14 :=
+  no_Z2_cross_Z14_from_descent E
 
-axiom no_Z2_cross_Z16
+theorem no_Z2_cross_Z16
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    ¬ ContainsZ2xZn E 16
+    ¬ ContainsZ2xZn E 16 :=
+  no_Z2_cross_Z16_from_descent E
 
 theorem no_Z2_cross_Zn_forbidden
     (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ}
