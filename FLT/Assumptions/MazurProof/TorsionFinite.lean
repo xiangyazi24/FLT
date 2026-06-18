@@ -47,4 +47,13 @@ theorem rational_torsion_finite_of_mw (E : WeierstrassCurve ℚ) [E.IsElliptic] 
   haveI := mordell_weil_fg E
   exact torsion_set_finite_of_fg _
 
+
+
+
+/-- Alias for downstream use — same statement as Axioms.rational_torsion_finite. -/
+theorem rational_torsion_finite_alias (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    (AddCommGroup.torsion (E⁄ℚ).Point : Set (E⁄ℚ).Point).Finite := by
+  haveI := mordell_weil_fg E
+  exact torsion_set_finite_of_fg _
+
 end MazurProof
