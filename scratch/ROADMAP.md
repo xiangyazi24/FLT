@@ -1,132 +1,60 @@
-# Mazur |T| ≤ 16 Formalization Roadmap
+# Mazur |T|≤16 Formalization — Progress Report
 
-## Target
+## Status: 0 sorry, 12 axioms, 30+ commits
 
-Replace the axiom in `FLT/Assumptions/Mazur.lean`:
-```lean
-axiom Mazur_statement (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    (AddCommGroup.torsion (E⁄ℚ).Point : Set (E⁄ℚ).Point).ncard ≤ 16
-```
+### Infrastructure Built (all 0 sorry)
 
-## Proof Architecture
+#### Integer Descent Proofs
+- **Descent20a4.lean**: y²=x³+x²-x has integer solutions only at x∈{-1,0,1}
+- **DescentN16.lean**: y²=x³-x²-x has integer solutions only at x∈{-1,0,1}
 
-```
-|T| = m × n  where  T ≅ ℤ/m × ℤ/n,  m | n
+#### 2-Descent Selmer Computation for Curve 20.a4 (COMPLETE)
+φ-direction (E→E', 6 obstructions):
+- **SelmerD2.lean**: C_2 trivial (2-adic descent)
+- **Selmer20a4.lean**: C_5 trivial (5-adic descent)
+- **SelmerNeg.lean**: C_{-2}, C_{-5} trivial (p-adic descent)
+- **SelmerD10.lean**: C_{10} trivial (5-adic + coprimality)
+- **SelmerNeg10Phi.lean**: C_{-10} trivial (5-adic + coprimality)
+Result: Sel^φ = {1,-1}, dim = 1
 
-Step 1: Weil pairing → m ≤ 2
-Step 2: Cyclic bound → n ≤ 16
-Step 3: If m = 1: |T| = n ≤ 16  ✓
-Step 4: If m = 2: noncyclic bound → n ≤ 8 → |T| = 2n ≤ 16  ✓
-```
+φ̂-direction (E'→E, 6 obstructions):
+- **SelmerDual.lean**: C'_{-1}, C'_{-5}, C'_{-2}, C'_{-10} trivial (real obstruction)
+- **SelmerDualD2.lean**: C'_2 trivial (2-adic descent)
+- **SelmerDualD10.lean**: C'_{10} trivial (2-adic + coprimality)
+Result: Sel^{φ̂} = {1,5}, dim = 1
 
-## Axiom Seams (4 + 3 sub-axioms)
+Rank formula: rank = 1+1-1-1 = 0 ■
 
-### Top-level axioms
+#### Isogeny Infrastructure
+- **Isogeny20a4.lean**: Forward + dual 2-isogeny with affine equation proofs
+- **E20GoodReduction.lean**: |E(F_3)|=6, |E(F_7)|=6, discriminant checks
 
-| # | Axiom | Mathematical content | LOC estimate |
-|---|-------|---------------------|-------------|
-| 1 | `weil_pairing_primitive_root` | Full m-torsion rational → ∃ primitive m-th root in ℚ | 3000-10000 |
-| 2 | `torsion_structure` | T ≅ ℤ/m × ℤ/n, card = mn | 500-1500 |
-| 3 | `no_rational_point_of_order_ge_17` | No E(ℚ) point of order ≥ 17 | 50000-150000 |
-| 4 | `no_Z2_cross_Zn_forbidden` | No ℤ/2 × ℤ/n for n ∈ {10,12,14,16} | 5000-20000 |
+#### Group Theory
+- **GroupTheory.lean**: ZMod embedding, card, square containment
+- **RootsOfUnity.lean**: Only roots of unity in Q are ±1
 
-### Sub-axioms of Axiom 2
+#### Modular Curve Point Counts
+- **X1_13_PointCount.lean**, **X1_17_PointCount.lean**: native_decide
 
-| Sub | Content | Discharge route |
-|-----|---------|----------------|
-| 2a | `rational_torsion_finite` | Good reduction at 2 primes |
-| 2b | `rational_torsion_two_generated` | E[N] ≅ (ℤ/N)² over ℚ̄ |
-| 2c | `first_invariant_factor_full` | Structure theorem consequence |
+#### Bug Fix
+- **DescentBridgeN12.lean**: Degenerate set {-2,1,2}→{-2,0,1,2,4} (old version was FALSE)
 
-## What Exists Now
+### Gap to Axiom Discharge
 
-| File | Status | Content |
-|------|--------|---------|
-| `scratch/RootsOfUnityQ.lean` | ✅ Compiled | Only roots of unity in ℚ are ±1 |
-| `scratch/MazurSkeleton.lean` | ✅ Compiled | Full |T| ≤ 16 from 4 axioms |
+The 12 remaining axioms all require algebraic geometry infrastructure not in Mathlib:
 
-Key Mathlib infrastructure:
-- `LinearOrderedRing.orderOf_le_two`: finite order in ℚ → order ≤ 2
-- `IsPrimitiveRoot`, `rootsOfUnity`, cyclotomic polynomials
-- `WeierstrassCurve`, affine/projective points, group law
-- `HasGoodReduction`, `HasMultiplicativeReduction`, reduction predicates
-- Division polynomials (basic + degree)
-- Finite abelian group structure theorem
-- Modular forms (analytic): Eisenstein, q-expansions, cusps
+1. **Descent exact sequence**: connecting Selmer groups to Mordell-Weil rank
+   (would enable: Selmer computation → rank 0 → integrality → axiom 5)
 
-Key MISSING:
-- Weil pairing for elliptic curves
-- Isogenies
-- Modular curves X₀(N), X₁(N) as schemes
-- Jacobians of curves
-- Néron models
-- Tate module
+2. **Weil pairing**: e_m: E[m]×E[m]→μ_m non-degenerate and Galois-equivariant
+   (would enable: axiom 3)
 
-## Implementation Phases
+3. **Tate normal form + Kubert table**: parametrization of curves with torsion
+   (would enable: axioms 9-12)
 
-### Phase 1: Skeleton (DONE)
-- [x] `RootsOfUnityQ.lean` — real proof
-- [x] `MazurSkeleton.lean` — 4 axiom seams, compiles
+4. **Structure theorem for E[n]**: rank(E[n]) = 2 over algebraic closure
+   (would enable: axiom 2 from axiom 1)
 
-### Phase 2: Axiom 2 decomposition (~1000 LOC)
-- [ ] Decompose `torsion_structure` into 3 sub-axioms
-- [ ] Prove `card_eq` from structure + Mathlib finite group API
-- [ ] Prove `full_m_torsion` from structure (pure group theory)
-- [ ] Prove `has_point_of_order_n` from structure
+5. **Mordell-Weil theorem**: E(Q) finitely generated (axiom 1)
 
-### Phase 3: Axiom 4 — noncyclic certificates (~5000 LOC)
-- [ ] Generate Sage certificates for n = 10, 12, 14, 16
-  - n=10: obstruction curve is genus-1, rank 0, only cusps
-  - n=12, 14, 16: similar parametric obstructions
-- [ ] Formalize in Lean 4:
-  - Kubert/Tate normal form for marked torsion
-  - Polynomial identity certificates
-  - Verified rational-point enumeration on obstruction curves
-- [ ] Alternatively: import as axioms with Sage-generated evidence
-
-### Phase 4: Axiom 1 — Weil pairing (~5000 LOC)
-- [ ] Define Weil pairing e_n : E[n] × E[n] → μ_n
-  - Via Miller's algorithm or divisor theory
-  - Need: divisors on elliptic curves, evaluation maps
-- [ ] Prove nondegeneracy
-- [ ] Prove Galois equivariance
-- [ ] Derive: full m-torsion rational → μ_m ⊂ ℚ*
-
-### Phase 5: Axiom 3 — the Mazur core (long-term)
-- [ ] This is the full Mazur theorem for cyclic orders
-- [ ] Routes: Mazur 1977 (154 pages), or explicit X₁(n) certificates for each n
-- [ ] Likely a multi-year project requiring modular curve infrastructure
-- [ ] Can be decomposed:
-  - Large primes p ≥ 29: formal immersion / Eisenstein ideal argument
-  - Medium composites (18-28 with small prime factors): explicit curve certificates
-
-## Dependencies
-
-```
-Phase 1 ← nothing (DONE)
-Phase 2 ← Mathlib finite abelian group API
-Phase 3 ← Phase 2 (need structure to state noncyclic)
-Phase 4 ← Mathlib EC point group, divisor theory
-Phase 5 ← Phase 4 (Weil pairing), modular curve infrastructure
-```
-
-## Risks
-
-1. **Axiom 3 may be infeasible in < 3 years.** The modular-curve infrastructure
-   needed (X₀(N) as scheme, Jacobian, Eisenstein ideal, Néron models) is a
-   foundational project comparable to building a new Mathlib subdirectory.
-
-2. **Axiom 4 certificates depend on verified arithmetic.** The Sage-generated
-   certificates need Lean-side checkers for polynomial identities and
-   rational-point enumeration.
-
-3. **FLT project may solve this independently.** Buzzard's team or other
-   contributors may tackle Mazur through a different route. Coordinate via
-   the FLT Zulip.
-
-## First 30 Days
-
-Week 1-2: Phase 2 (decompose Axiom 2, pure group theory)
-Week 3-4: Phase 3 (Sage certificates for Axiom 4, start Lean formalization)
-
-Parallel: engage FLT Zulip to check if others are working on Mazur.
+6. **Mazur cyclic bound**: no rational point of order ≥ 17 (axiom 4 — the hardest)
