@@ -1,184 +1,85 @@
-# `zphi_descent_step_odd_core`: focused proof structure
+# `coprime_fourth_power_factor`
 
-I read `scratch/ZPhiDescentStep.lean` on `ai-scratch`.  The sorry at line 74 occurs after the Pellian setup has already produced
+Here is a Lean proof of the requested factor-splitting lemma, with the unique-factorization step isolated as one explicit axiom.  I include the hypothesis `0 < q`: without it, the requested conclusion with `0 < m`, `0 < n`, and `m*n=q` is false for negative `q`.  In the descent application this is available from `2 ≤ q`.
 
-```lean
-hAB   : zphiA p q t * zphiB p q t = 5 * q ^ 4
-hsum  : zphiA p q t + zphiB p q t = 2 * (2 * p ^ 2 + q ^ 2)
-hdiff : zphiB p q t - zphiA p q t = 4 * t
-```
+The proof is organized as follows.
 
-The block below is the drop-in structure for the odd-`q` core.  It keeps the gcd/factor-splitting and Pythagorean descent packages explicit.  The algebra after the split is written out: from the branch `A = 5m⁴`, `B = n⁴`, `q = mn`, it derives
-
-\[
-4p^2=(n^2-m^2)^2+4m^4,
-\]
-
-and hands the resulting square-leg Pythagorean configuration to a descent lemma which constructs the smaller solution.
-
-I am being explicit about the remaining proof obligations: the gcd/factor split and the primitive Pythagorean descent are not syntax-only; they are the real arithmetic content.  This is the sound structure to replace the line-74 `sorry` once those lemmas are filled.
+1. From `5 ∣ A`, write `A = 5*X`.
+2. Positivity of `A` gives `0 < X`.
+3. From `A*B = 5*q^4`, obtain `X*B = q^4`.
+4. From `IsCoprime A B`, obtain `IsCoprime X B`, since `A = 5*X`.
+5. Apply the one UFD/prime-factorization axiom: if `X` and `Y` are coprime positive integers and `X*Y=q^4`, then `X=m^4`, `Y=n^4`, and `m*n=q`.
+6. Substitute back to get `A=5*m^4`, `B=n^4`.
 
 ```lean
 import Mathlib
 
-/-- Left Pellian factor. -/
-private def zphiA (p q t : ℤ) : ℤ :=
-  2 * p ^ 2 + q ^ 2 - 2 * t
+/-!
+# Coprime factors of `5*q^4`
 
-/-- Right Pellian factor. -/
-private def zphiB (p q t : ℤ) : ℤ :=
-  2 * p ^ 2 + q ^ 2 + 2 * t
+The only non-elementary input is the UFD/factorization fact that coprime
+positive factors of a fourth power are themselves fourth powers.
+-/
 
-/-- Pellian product identity. -/
-private lemma zphi_AB_eq_5q4 (p q t : ℤ)
-    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
-    zphiA p q t * zphiB p q t = 5 * q ^ 4 := by
-  dsimp [zphiA, zphiB]
-  nlinarith
-
-/-- Sum of the two Pellian factors. -/
-private lemma zphi_A_add_B (p q t : ℤ) :
-    zphiA p q t + zphiB p q t = 2 * (2 * p ^ 2 + q ^ 2) := by
-  dsimp [zphiA, zphiB]
-  ring
-
-/-- Difference of the two Pellian factors. -/
-private lemma zphi_B_sub_A (p q t : ℤ) :
-    zphiB p q t - zphiA p q t = 4 * t := by
-  dsimp [zphiA, zphiB]
-  ring
-
-/-- One of the two coprime fourth-power split branches. -/
-private inductive FiveFourthSplit (A B q : ℤ) : Prop
-  | left5 (m n : ℤ)
-      (hmpos : 1 ≤ m) (hnpos : 1 ≤ n)
-      (hq : q = m * n)
-      (hA : A = 5 * m ^ 4)
-      (hB : B = n ^ 4) : FiveFourthSplit A B q
-  | right5 (m n : ℤ)
-      (hmpos : 1 ≤ m) (hnpos : 1 ≤ n)
-      (hq : q = m * n)
-      (hA : A = m ^ 4)
-      (hB : B = 5 * n ^ 4) : FiveFourthSplit A B q
+namespace Scratch.ChatGPTDropDM1
 
 /--
-Odd denominator coprime-factor package.
+UFD / prime-factorization input over `ℤ`.
 
-This packages steps 1 and 2 from the outline:
-`gcd(A,B)=1`, positivity, and the split of coprime positive factors of
-`5*q^4` into one fourth power and one `5` times a fourth power.
+If two positive coprime integers multiply to a positive fourth power, then each
+factor is a fourth power, with compatible positive roots.
 -/
-private lemma odd_coprime_five_fourth_split
-    (p q t : ℤ)
-    (hq : 2 ≤ q)
-    (hqodd : ¬ (2 : ℤ) ∣ q)
-    (hcop : Int.gcd p q = 1)
-    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4)
-    (hAB : zphiA p q t * zphiB p q t = 5 * q ^ 4)
-    (hsum : zphiA p q t + zphiB p q t = 2 * (2 * p ^ 2 + q ^ 2))
-    (hdiff : zphiB p q t - zphiA p q t = 4 * t) :
-    FiveFourthSplit (zphiA p q t) (zphiB p q t) q := by
-  -- Routine but verbose arithmetic package requested in step 1:
-  -- * prove `Int.gcd (zphiA p q t) (zphiB p q t) = 1`;
-  -- * use `hAB` and unique prime-factor exponents to split coprime factors.
-  sorry
+axiom coprime_product_eq_fourth_power
+    (X Y q : ℤ)
+    (hXpos : 0 < X)
+    (hYpos : 0 < Y)
+    (hqpos : 0 < q)
+    (hcop : IsCoprime X Y)
+    (hXY : X * Y = q ^ 4) :
+    ∃ m n : ℤ,
+      X = m ^ 4 ∧
+      Y = n ^ 4 ∧
+      m * n = q ∧
+      0 < m ∧
+      0 < n
 
 /--
-The square-leg Pythagorean descent package for the branch
-`A = 5m^4`, `B = n^4`, `q = mn`.
-
-The hypotheses include the coefficient identity
-`4*p^2 = (n^2-m^2)^2 + 4*m^4`, derived below from `A+B`.
-The conclusion is exactly the smaller-denominator witness required by
-`zphi_descent_step_odd_core`.
+If `A` and `B` are coprime positive integers, `5 ∣ A`, and
+`A * B = 5 * q^4` with `q > 0`, then `A = 5*m^4`, `B = n^4`, and `m*n=q`.
 -/
-private lemma pythagorean_descent_from_left5
-    (p q t m n : ℤ)
-    (hq : 2 ≤ q)
-    (hcop : Int.gcd p q = 1)
-    (hmpos : 1 ≤ m) (hnpos : 1 ≤ n)
-    (hqmn : q = m * n)
-    (hcoeff : 4 * p ^ 2 = (n ^ 2 - m ^ 2) ^ 2 + 4 * m ^ 4) :
-    ∃ p' q' t' : ℤ,
-      2 ≤ q' ∧
-      Int.gcd p' q' = 1 ∧
-      t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧
-      q'.natAbs < q.natAbs := by
-  -- Step 4: set `r = (n^2-m^2)/2`, parametrize
-  -- `p^2 = m^4 + r^2`, and produce the smaller solution.
-  -- This is the primitive Pythagorean square-leg descent.
-  sorry
+theorem coprime_fourth_power_factor
+    (A B q : ℤ)
+    (hAB : A * B = 5 * q ^ 4)
+    (hcop : IsCoprime A B)
+    (hApos : 0 < A)
+    (hBpos : 0 < B)
+    (hqpos : 0 < q)
+    (h5A : (5 : ℤ) ∣ A) :
+    ∃ m n : ℤ,
+      A = 5 * m ^ 4 ∧
+      B = n ^ 4 ∧
+      m * n = q ∧
+      0 < m ∧
+      0 < n := by
+  rcases h5A with ⟨X, hAX⟩
+  have hXpos : 0 < X := by
+    rw [hAX] at hApos
+    nlinarith
+  have hXY : X * B = q ^ 4 := by
+    rw [hAX] at hAB
+    nlinarith
+  have hcopXB : IsCoprime X B := by
+    rcases hcop with ⟨r, s, hbez⟩
+    refine ⟨5 * r, s, ?_⟩
+    rw [hAX] at hbez
+    nlinarith
+  obtain ⟨m, n, hm, hn, hmn, hmpos, hnpos⟩ :=
+    coprime_product_eq_fourth_power X B q hXpos hBpos hqpos hcopXB hXY
+  refine ⟨m, n, ?_, hn, hmn, hmpos, hnpos⟩
+  rw [hAX, hm]
+  ring
 
-/-- Symmetric branch, where `A = m^4`, `B = 5n^4`. -/
-private lemma pythagorean_descent_from_right5
-    (p q t m n : ℤ)
-    (hq : 2 ≤ q)
-    (hcop : Int.gcd p q = 1)
-    (hmpos : 1 ≤ m) (hnpos : 1 ≤ n)
-    (hqmn : q = m * n)
-    (hcoeff : 4 * p ^ 2 = (m ^ 2 - n ^ 2) ^ 2 + 4 * n ^ 4) :
-    ∃ p' q' t' : ℤ,
-      2 ≤ q' ∧
-      Int.gcd p' q' = 1 ∧
-      t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧
-      q'.natAbs < q.natAbs := by
-  -- Same Pythagorean descent after swapping `m` and `n`.
-  sorry
-
-/-- Odd `q` core for the denominator descent. -/
-private lemma zphi_descent_step_odd_core
-    (p q t : ℤ)
-    (hq : 2 ≤ q)
-    (hqodd : ¬ (2 : ℤ) ∣ q)
-    (hcop : Int.gcd p q = 1)
-    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
-    ∃ p' q' t' : ℤ,
-      2 ≤ q' ∧
-      Int.gcd p' q' = 1 ∧
-      t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧
-      q'.natAbs < q.natAbs := by
-  have hAB : zphiA p q t * zphiB p q t = 5 * q ^ 4 :=
-    zphi_AB_eq_5q4 p q t h
-  have hsum : zphiA p q t + zphiB p q t = 2 * (2 * p ^ 2 + q ^ 2) :=
-    zphi_A_add_B p q t
-  have hdiff : zphiB p q t - zphiA p q t = 4 * t :=
-    zphi_B_sub_A p q t
-
-  obtain hsplit := odd_coprime_five_fourth_split p q t hq hqodd hcop h hAB hsum hdiff
-  rcases hsplit with
-    ⟨m, n, hmpos, hnpos, hqmn, hA, hB⟩ |
-    ⟨m, n, hmpos, hnpos, hqmn, hA, hB⟩
-  · -- Branch `A = 5m^4`, `B = n^4`.
-    have hcoeff : 4 * p ^ 2 = (n ^ 2 - m ^ 2) ^ 2 + 4 * m ^ 4 := by
-      -- From `A+B = 2(2p²+q²)` and `q=mn`:
-      -- `5m⁴+n⁴ = 4p²+2m²n²`, hence the displayed identity.
-      have hsum' : 5 * m ^ 4 + n ^ 4 = 2 * (2 * p ^ 2 + (m * n) ^ 2) := by
-        calc
-          5 * m ^ 4 + n ^ 4 = zphiA p q t + zphiB p q t := by
-            rw [hA, hB]
-          _ = 2 * (2 * p ^ 2 + q ^ 2) := hsum
-          _ = 2 * (2 * p ^ 2 + (m * n) ^ 2) := by rw [hqmn]
-      nlinarith
-    exact pythagorean_descent_from_left5 p q t m n hq hcop hmpos hnpos hqmn hcoeff
-  · -- Branch `A = m^4`, `B = 5n^4`.
-    have hcoeff : 4 * p ^ 2 = (m ^ 2 - n ^ 2) ^ 2 + 4 * n ^ 4 := by
-      -- From `A+B = 2(2p²+q²)` and `q=mn`:
-      -- `m⁴+5n⁴ = 4p²+2m²n²`, hence the displayed identity.
-      have hsum' : m ^ 4 + 5 * n ^ 4 = 2 * (2 * p ^ 2 + (m * n) ^ 2) := by
-        calc
-          m ^ 4 + 5 * n ^ 4 = zphiA p q t + zphiB p q t := by
-            rw [hA, hB]
-          _ = 2 * (2 * p ^ 2 + q ^ 2) := hsum
-          _ = 2 * (2 * p ^ 2 + (m * n) ^ 2) := by rw [hqmn]
-      nlinarith
-    exact pythagorean_descent_from_right5 p q t m n hq hcop hmpos hnpos hqmn hcoeff
+end Scratch.ChatGPTDropDM1
 ```
 
-## Notes on the remaining `sorry`s
-
-The line-74 `sorry` in `scratch/ZPhiDescentStep.lean` cannot be eliminated by only the three identities `hAB`, `hsum`, and `hdiff`; it also needs two arithmetic packages:
-
-1. **Coprime factor split**: prove `gcd(A,B)=1` for odd `q`, then split coprime factors of `5*q^4` into `5m^4` and `n^4`.
-2. **Square-leg Pythagorean descent**: from `4p²=(n²-m²)²+4m⁴`, construct a smaller solution of the original denominator quartic.
-
-The code above isolates those packages and fills the coefficient-matching algebra for steps 2–3.  It is the intended replacement shape for the odd core once those two packages are available.
+A symmetric version with `5 ∣ B` follows by swapping `A` and `B`; in the descent proof this is the other branch of the same split.
