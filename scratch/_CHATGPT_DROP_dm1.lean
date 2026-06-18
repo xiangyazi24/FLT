@@ -1,31 +1,13 @@
-import Mathlib
-
-/-!
-# Two is not an integer square
-
-A direct bounds proof: if `n ≤ -2` or `2 ≤ n`, then `n² ≥ 4`; otherwise
-`n ∈ {-1,0,1}` and the equality is checked directly.
--/
-
-/-- There is no integer whose square is `2`. -/
-theorem not_sq_two : ∀ n : ℤ, n ^ 2 ≠ 2 := by
-  intro n hn
-  have hcases : n ≤ -2 ∨ n = -1 ∨ n = 0 ∨ n = 1 ∨ 2 ≤ n := by
-    omega
-  rcases hcases with hle | hnegone | hzero | hone | hge
-  · have hsq : (4 : ℤ) ≤ n ^ 2 := by
-      have hnonneg : (0 : ℤ) ≤ (n + 2) ^ 2 := sq_nonneg (n + 2)
-      nlinarith
-    rw [hn] at hsq
-    norm_num at hsq
-  · subst n
-    norm_num at hn
-  · subst n
-    norm_num at hn
-  · subst n
-    norm_num at hn
-  · have hsq : (4 : ℤ) ≤ n ^ 2 := by
-      have hnonneg : (0 : ℤ) ≤ (n - 2) ^ 2 := sq_nonneg (n - 2)
-      nlinarith
-    rw [hn] at hsq
-    norm_num at hsq
+-- TASK: Prove int_solutions_N12 for the curve w² = (u-1)(u-2)(u+2).
+-- Degenerate set: {-2, 0, 1, 2, 4}.
+--
+-- REFERENCE: see scratch/Descent20a4.lean in this repo for the pattern.
+-- That file proves int_solutions_20a4 for w² = u(u²+u-1) using:
+--   1. IsCoprime via Bezout witness
+--   2. Int.sq_of_isCoprime to decompose coprime product = square
+--   3. Squeeze between consecutive squares (nlinarith [sq_nonneg ...])
+--
+-- For N=12: three rational roots, so split on gcd(u-1, -3).
+-- Small cases u in {-2,-1,0,1,2,3,4} check directly.
+-- u <= -3: product of three negatives < 0.
+-- u >= 5: coprime descent.
