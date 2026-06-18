@@ -178,3 +178,8 @@ theorem zmod_one_prod_addEquiv_exists (n : ℕ) :
   ⟨zmod_one_prod_addEquiv n⟩
 
 end MazurProof
+
+/-- Cardinality of ZMod m × ZMod n is m * n. -/
+theorem card_zmod_prod (m n : ℕ) [NeZero m] [NeZero n] :
+    Fintype.card (ZMod m × ZMod n) = m * n := by
+  simp [Fintype.card_prod]
