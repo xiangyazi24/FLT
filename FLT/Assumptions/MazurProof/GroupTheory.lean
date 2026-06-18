@@ -183,3 +183,8 @@ end MazurProof
 theorem card_zmod_prod (m n : ℕ) [NeZero m] [NeZero n] :
     Fintype.card (ZMod m × ZMod n) = m * n := by
   simp [Fintype.card_prod]
+
+/-- If m | n, there is an injective hom ZMod m × ZMod m →+ ZMod m × ZMod n. -/
+theorem zmod_prod_embed (m n : ℕ) (hm : 0 < m) (hn : 0 < n) (hmn : m ∣ n) :
+    ∃ f : ZMod m × ZMod m →+ ZMod m × ZMod n, Function.Injective f :=
+  zmod_prod_contains_square m n hm hn hmn
