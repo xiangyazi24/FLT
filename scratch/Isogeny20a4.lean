@@ -55,7 +55,7 @@ def dualPhiX (x y : ℚ) : ℚ :=
   y ^ 2 / (4 * x ^ 2)
 
 def dualPhiY (x y : ℚ) : ℚ :=
-  y * (x ^ 2 - 5) / (8 * x ^ 2)
+  y * (5 - x ^ 2) / (8 * x ^ 2)
 
 /--
 The affine formula for the 2-isogeny sends points on
@@ -80,5 +80,29 @@ theorem phi_affine_equation_of_Equation {x y : ℚ}
   have hraw : y ^ 2 = x ^ 3 + x ^ 2 - x := by
     simpa [sub_eq_add_neg] using h
   simpa [sub_eq_add_neg] using phi_affine_equation hraw hx
+
+/--
+The dual affine formula sends points on
+`Y² = X³ - 2X² + 5X`, away from the kernel point `X = 0`, back to points on
+`y² = x³ + x² - x`.
+-/
+theorem dual_phi_affine_equation (X Y : ℚ) (hX : X ≠ 0)
+    (hE' : Y ^ 2 = X ^ 3 - 2 * X ^ 2 + 5 * X) :
+    (dualPhiY X Y) ^ 2 =
+      (dualPhiX X Y) ^ 3 + (dualPhiX X Y) ^ 2 - (dualPhiX X Y) := by
+  dsimp [dualPhiX, dualPhiY]
+  field_simp [hX]
+  rw [hE']
+  ring
+
+/-- The dual formula phrased using Mathlib's affine equation predicate. -/
+theorem dual_phi_affine_equation_of_Equation {X Y : ℚ}
+    (h : WeierstrassCurve.Affine.Equation E20' X Y) (hX : X ≠ 0) :
+    WeierstrassCurve.Affine.Equation E20 (dualPhiX X Y) (dualPhiY X Y) := by
+  rw [WeierstrassCurve.Affine.equation_iff] at h ⊢
+  norm_num [E20, E20'] at h ⊢
+  have hraw : Y ^ 2 = X ^ 3 - 2 * X ^ 2 + 5 * X := by
+    simpa [sub_eq_add_neg] using h
+  simpa [sub_eq_add_neg] using dual_phi_affine_equation X Y hX hraw
 
 end Isogeny20a4
