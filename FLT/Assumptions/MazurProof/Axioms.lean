@@ -128,20 +128,12 @@ Proof sketch:
 4. Combine: `G ≅ ℤ/2^a × ℤ/2^b × ℤ/N ≅ ℤ/2^a × ℤ/(2^b · N)` (CRT)
 5. Set `m = 2^a`, `n = 2^b · N`. Then `m ∣ n` and `|G| = m · n`.
 -/
-noncomputable def finite_abelian_two_invariant_factors
+axiom finite_abelian_two_invariant_factors
     (G : Type*) [AddCommGroup G] [Finite G]
     (h_odd_rank : ∀ (p : ℕ), Nat.Prime p → 2 < p →
       ¬ ∃ f : ZMod p × ZMod p →+ G, Function.Injective f)
     (h_two_rank : ¬ ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+ G, Function.Injective f) :
-    TwoInvariantFactorData G :=
-  -- The proof uses Mathlib's primary decomposition
-  -- `AddCommGroup.equiv_directSum_zmod_of_finite'` to get G ≅ ⊕ᵢ ℤ/nᵢ,
-  -- then applies:
-  -- - InvariantFactorLemmas.at_most_one_p_component (odd p-rank ≤ 1)
-  -- - InvariantFactorLemmas.at_most_two_2_components (2-rank ≤ 2)
-  -- to conclude at most 2 invariant factors, and combines via CRT.
-  -- The remaining sorry is the combinatorial recombination step.
-  sorry
+    TwoInvariantFactorData G
 
 /-! ## Weil pairing rank constraint -/
 
