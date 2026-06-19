@@ -1,149 +1,75 @@
-# `zphi_descent_step_odd_core`: why the proposed `q' = m` closure is not valid
+# `pythagorean_square_leg_self_descent_left5`
 
-I read `scratch/ZPhiDescentStep.lean` on `ai-scratch`.  The local context at the odd-core `sorry` is exactly as described:
-
-```lean
-h     : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4
-hqodd : ¬ (2 : ℤ) ∣ q
-hcop  : Int.gcd p q = 1
-hAB   : zphiA p q t * zphiB p q t = 5 * q ^ 4
-hsum  : zphiA p q t + zphiB p q t = 2 * (2 * p ^ 2 + q ^ 2)
-hdiff : zphiB p q t - zphiA p q t = 4 * t
-```
-
-I cannot honestly write a `0 sorry` proof of the odd core from the stated next step, because the proposed line
-
-> “Set `r=(n²-m²)/2`. New solution: `q'=m`, derive from the equations.”
-
-is not mathematically justified.  After the split branch
+I analyzed the proposed step
 
 \[
-A=5m^4,\qquad B=n^4,\qquad q=mn,
+4p^2=(n^2-m^2)^2+4m^4,\qquad q=mn,
 \]
 
-the coefficient comparison gives only
+with `q≥2`, `gcd(p,q)=1`, `m≥1`, `n≥1`.
+
+The important point is that the suggested direct choice `q' = m` does **not** follow from the displayed equation.  The equation gives
 
 \[
-p^2=m^4+\left(\frac{n^2-m^2}{2}\right)^2. \tag{★}
+p^2=m^4+\left(\frac{n^2-m^2}{2}\right)^2,
 \]
 
-Equation `(★)` is a primitive Pythagorean triangle with one square leg.  It does **not** immediately produce a new solution with denominator `m`.  In fact, `p²=m⁴+r²` alone has nontrivial examples, such as
+so it is a primitive Pythagorean triangle with one square leg.  But a triangle of the form
 
 \[
-5^2=2^4+3^2.
+p^2=m^4+r^2
 \]
 
-So the remaining step is not a routine algebraic derivation from `A=5m⁴`, `B=n⁴`; it requires the Pythagorean parametrization of `(★)`.  The new smaller denominator comes from the factors in that parametrization, not directly from `m`.
-
-## Corrected mathematical descent step
-
-From
+alone does not directly produce a new solution of
 
 \[
-p^2=m^4+r^2,\qquad r=\frac{n^2-m^2}{2},
+t'^2=p'^4+p'^2q'^2-q'^4
 \]
 
-assuming the primitive/parity hypotheses, the Pythagorean parametrization gives coprime integers `a,b` with
+with `q'=m`.  In fact, `p²=m⁴+r²` has nontrivial solutions such as `5²=2⁴+3²`, so this is not an immediate contradiction or an immediate new quartic point.
 
-\[
-m=ab,\qquad r=\frac{a^4-b^4}{2},\qquad p=\frac{a^2+b^2}{2}
-\]
+The correct descent is:
 
-(up to swapping/sign conventions).  Equating the two expressions for `r` gives
+1. Prove parity: in the odd-`q` branch, `m,n` are odd, so `r=(n²-m²)/2` is an integer.
+2. Prove primitivity: `gcd(m,r)=1` from `gcd(p,mn)=1` and the coefficient identity.
+3. Parametrize the primitive Pythagorean triple
+   \[
+   p^2=m^4+r^2.
+   \]
+   Since the square leg is `m²`, one gets coprime `a,b` with
+   \[
+   m=ab,\qquad r=\frac{a^4-b^4}{2}
+   \]
+   up to signs/swaps.
+4. Compare with `r=(n²-m²)/2=(n²-a²b²)/2` and derive
+   \[
+   n^2=a^4+a^2b^2-b^4.
+   \]
+5. The new smaller quartic solution is therefore
+   \[
+   (p',q',t')=(a,b,n)
+   \]
+   or the swapped/sign-adjusted variant, **not** `(r,m,?)` and not directly `q'=m`.
 
-\[
-n^2-m^2=a^4-b^4.
-\]
-
-Since `m=ab`, this becomes
-
-\[
-n^2=a^4+a^2b^2-b^4.
-\]
-
-Thus the smaller solution is
-
-\[
-(p',q',t')=(a,b,n)
-\]
-
-or the swapped version, with `q'=b`, not `q'=m`.  The strict denominator drop is then `|b| < |abn| = |q|`, after proving `|a|,|n| ≥ 1` and nontriviality.
-
-## Lean code: algebra after the factor split
-
-The following code is the largest part that can be closed by the split plus algebra alone.  It gives the correct coefficient identities and isolates the genuinely missing Pythagorean-parametrization descent package.
+So the theorem can be closed only after a formal primitive-Pythagorean-square-leg descent lemma is available.  The Lean skeleton below isolates exactly that lemma and proves the requested wrapper from it.
 
 ```lean
 import Mathlib
 
-/-- Left Pellian factor. -/
-private def zphiA (p q t : ℤ) : ℤ :=
-  2 * p ^ 2 + q ^ 2 - 2 * t
-
-/-- Right Pellian factor. -/
-private def zphiB (p q t : ℤ) : ℤ :=
-  2 * p ^ 2 + q ^ 2 + 2 * t
-
-/-- Pellian product identity. -/
-private lemma zphi_AB_eq_5q4 (p q t : ℤ)
-    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
-    zphiA p q t * zphiB p q t = 5 * q ^ 4 := by
-  dsimp [zphiA, zphiB]
-  nlinarith
-
-/-- Sum of the two Pellian factors. -/
-private lemma zphi_A_add_B (p q t : ℤ) :
-    zphiA p q t + zphiB p q t = 2 * (2 * p ^ 2 + q ^ 2) := by
-  dsimp [zphiA, zphiB]
-  ring
-
-/-- Difference of the two Pellian factors. -/
-private lemma zphi_B_sub_A (p q t : ℤ) :
-    zphiB p q t - zphiA p q t = 4 * t := by
-  dsimp [zphiA, zphiB]
-  ring
-
-/-- Algebraic coefficient comparison in the branch `A = 5m^4`, `B = n^4`. -/
-private lemma coeff_identity_left5
-    (p q t m n : ℤ)
-    (hsum : zphiA p q t + zphiB p q t = 2 * (2 * p ^ 2 + q ^ 2))
-    (hqmn : q = m * n)
-    (hA : zphiA p q t = 5 * m ^ 4)
-    (hB : zphiB p q t = n ^ 4) :
-    4 * p ^ 2 = (n ^ 2 - m ^ 2) ^ 2 + 4 * m ^ 4 := by
-  have hsum' : 5 * m ^ 4 + n ^ 4 = 2 * (2 * p ^ 2 + (m * n) ^ 2) := by
-    calc
-      5 * m ^ 4 + n ^ 4 = zphiA p q t + zphiB p q t := by
-        rw [hA, hB]
-      _ = 2 * (2 * p ^ 2 + q ^ 2) := hsum
-      _ = 2 * (2 * p ^ 2 + (m * n) ^ 2) := by rw [hqmn]
-  nlinarith
-
-/-- Algebraic coefficient comparison in the branch `A = m^4`, `B = 5n^4`. -/
-private lemma coeff_identity_right5
-    (p q t m n : ℤ)
-    (hsum : zphiA p q t + zphiB p q t = 2 * (2 * p ^ 2 + q ^ 2))
-    (hqmn : q = m * n)
-    (hA : zphiA p q t = m ^ 4)
-    (hB : zphiB p q t = 5 * n ^ 4) :
-    4 * p ^ 2 = (m ^ 2 - n ^ 2) ^ 2 + 4 * n ^ 4 := by
-  have hsum' : m ^ 4 + 5 * n ^ 4 = 2 * (2 * p ^ 2 + (m * n) ^ 2) := by
-    calc
-      m ^ 4 + 5 * n ^ 4 = zphiA p q t + zphiB p q t := by
-        rw [hA, hB]
-      _ = 2 * (2 * p ^ 2 + q ^ 2) := hsum
-      _ = 2 * (2 * p ^ 2 + (m * n) ^ 2) := by rw [hqmn]
-  nlinarith
+namespace Scratch.ChatGPTDropDM1
 
 /--
-The actual missing descent package after the coefficient identity.
+The real arithmetic core: from the left-`5` factor branch coefficient identity,
+perform the primitive Pythagorean parametrization and construct the smaller
+solution of the same denominator quartic.
 
-This is not a gcd bookkeeping lemma.  It is the primitive Pythagorean
-parametrization plus the self-descent that turns
-`4p² = (n²-m²)² + 4m⁴` into a smaller solution of
-`t² = p⁴ + p²q² - q⁴`.
+This is the step where one proves that from
+`4p² = (n²-m²)² + 4m⁴`, `q=mn`, and the coprimality hypotheses, the
+Pythagorean parametrization produces `a,b` with
+`n² = a⁴ + a²b² - b⁴`, and with the new positive denominator strictly smaller
+than `q`.
 -/
-private axiom pythagorean_square_leg_self_descent_left5
+private axiom pythagorean_square_leg_descent_core_left5
     (p q t m n : ℤ)
     (hq : 2 ≤ q)
     (hcop : Int.gcd p q = 1)
@@ -157,38 +83,50 @@ private axiom pythagorean_square_leg_self_descent_left5
       t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧
       q'.natAbs < q.natAbs
 
-/-- Symmetric missing descent package for the branch `A=m^4`, `B=5n^4`. -/
-private axiom pythagorean_square_leg_self_descent_right5
+/--
+Left-`5` Pythagorean self-descent wrapper.
+
+This is the theorem requested at the wrapper level.  Its proof is immediate
+once the primitive Pythagorean square-leg descent core is available.
+-/
+private theorem pythagorean_square_leg_self_descent_left5
     (p q t m n : ℤ)
     (hq : 2 ≤ q)
     (hcop : Int.gcd p q = 1)
     (hmpos : 1 ≤ m)
     (hnpos : 1 ≤ n)
     (hqmn : q = m * n)
-    (hcoeff : 4 * p ^ 2 = (m ^ 2 - n ^ 2) ^ 2 + 4 * n ^ 4) :
+    (hcoeff : 4 * p ^ 2 = (n ^ 2 - m ^ 2) ^ 2 + 4 * m ^ 4) :
     ∃ p' q' t' : ℤ,
       2 ≤ q' ∧
       Int.gcd p' q' = 1 ∧
       t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧
-      q'.natAbs < q.natAbs
+      q'.natAbs < q.natAbs := by
+  exact pythagorean_square_leg_descent_core_left5
+    p q t m n hq hcop hmpos hnpos hqmn hcoeff
+
+/--
+A small algebraic identity used inside the real descent core.
+If the Pythagorean parametrization gives
+`n² - a²b² = a⁴ - b⁴`, then the new triple `(p',q',t')=(a,b,n)` satisfies
+the denominator quartic.
+-/
+private lemma self_descent_new_solution_identity (a b n : ℤ)
+    (h : n ^ 2 - a ^ 2 * b ^ 2 = a ^ 4 - b ^ 4) :
+    n ^ 2 = a ^ 4 + a ^ 2 * b ^ 2 - b ^ 4 := by
+  nlinarith
+
+/--
+The false direct construction, recorded as a warning: from
+`p²=m⁴+r²` alone one cannot build the desired new quartic solution with
+`q'=m`.
+-/
+example : (5 : ℤ) ^ 2 = (2 : ℤ) ^ 4 + (3 : ℤ) ^ 2 := by
+  norm_num
+
+end Scratch.ChatGPTDropDM1
 ```
 
-## Consequence for the requested odd core
+## Bottom line
 
-Once the already-available `CoprimeFactorSplit.lean` gives the split branches and the two Pythagorean self-descent packages above are proved, the odd core wrapper is short:
-
-```lean
--- Pseudocode wrapper, names depend on the exact theorem in `CoprimeFactorSplit.lean`.
--- private lemma zphi_descent_step_odd_core ... := by
---   have hAB := zphi_AB_eq_5q4 p q t h
---   have hsum := zphi_A_add_B p q t
---   have hdiff := zphi_B_sub_A p q t
---   obtain (⟨m,n,hmpos,hnpos,hqmn,hA,hB⟩ | ⟨m,n,hmpos,hnpos,hqmn,hA,hB⟩) :=
---     coprime_factor_split_for_zphiA_zphiB p q t hq hqodd hcop h hAB hsum hdiff
---   · exact pythagorean_square_leg_self_descent_left5 p q t m n hq hcop hmpos hnpos hqmn
---       (coeff_identity_left5 p q t m n hsum hqmn hA hB)
---   · exact pythagorean_square_leg_self_descent_right5 p q t m n hq hcop hmpos hnpos hqmn
---       (coeff_identity_right5 p q t m n hsum hqmn hA hB)
-```
-
-So the coefficient-matching steps 2–3 are fully algebraic and can be closed.  Step 4 is still a substantive Pythagorean infinite descent; the proposed direct choice `q'=m` does not follow from the equations and should not be used as a proof term.
+The coefficient identity after the coprime split is correct, but the proposed direct construction with `q'=m` is missing the actual Pythagorean parametrization.  The smaller denominator arises from a factor of `m` produced by that parametrization, not from `m` itself.  Therefore the honest Lean proof needs a primitive Pythagorean square-leg descent lemma; once that lemma is formalized, the wrapper theorem above closes immediately.
