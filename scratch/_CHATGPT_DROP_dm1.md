@@ -1,43 +1,20 @@
-# `u.den = 1` for curve 20.a4: assembly status
+# Final assembly request for `obstruction_curve_20a4_discharge`
 
-I did **not** write a claimed proof of
+I cannot honestly write the requested 0-sorry Lean proof from the proof chain in
+the prompt, because that proof chain still contains a false algebraic step.
+This is not a Lean elaboration issue.
+
+Target requested:
 
 ```lean
-theorem rat_den_one_of_curve (u w : ℚ)
-    (h : w ^ 2 = u ^ 3 + u ^ 2 - u) (hu : u ≠ 0) :
-    u.den = 1
+theorem obstruction_curve_20a4_discharge (u w : ℚ)
+    (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
+    u = -1 ∨ u = 0 ∨ u = 1
 ```
 
-because the proposed new proof still has two mathematical gaps.  The main one
-is in the `p = ±1` step; the new one is in the `p = -1` denominator step.
+## The blocking error
 
-## Gap 1: the prime-divisor argument does not prove `p = ±1`
-
-With `u = p / q` in lowest terms, clearing denominators gives
-
-```text
-w^2 q^3 = p (p^2 + p q - q^2).
-```
-
-For a prime `ℓ ∣ p`, one has
-
-```text
-p^2 + p q - q^2 ≡ -q^2 [MOD ℓ],
-```
-
-and `ℓ ∤ q`, hence `ℓ ∤ (p^2 + p q - q^2)`.  But this only implies the
-valuation identity
-
-```text
-vℓ(p) = 2 vℓ(w)
-```
-
-because `ℓ ∤ q`; it proves the exponent of `ℓ` in `p` is even.  It does not
-force `ℓ ∣ 1`, and therefore it does not force `p = ±1`.
-
-## Gap 2: in the `p = -1` case the square lemma applies to `q^3`, not `q`
-
-If `p = -1`, then
+In the `p = -1` branch, the prompt derives
 
 ```text
 w^2 = (q^2 + q - 1) / q^3.
@@ -49,31 +26,41 @@ Writing `w = a / b` in lowest terms gives
 a^2 q^3 = b^2 (q^2 + q - 1),        gcd(q, q^2 + q - 1) = 1.
 ```
 
-The coprime square-divisibility lemma applied here has `Q = q^3`, so it gives
+The coprime square-divisibility lemma applies to the factor `q^3`, not to `q`.
+It therefore gives
 
 ```text
 q^3 = b^2,
 ```
 
-not `q = b^2`.  Thus the proposed divisibility contradiction
+not `q = b^2`.  Consequently the later line
 
 ```text
-a^2 b^4 = b^4 + b^2 - 1
+a^2 b^2 = b^4 + b^2 - 1
 ```
 
-is not available.  Instead `q^3 = b^2` implies `q = d^2`, `b = d^3`, and the
-remaining equation is the quartic obstruction
+or equivalently `(ab)^2 = b^4 + b^2 - 1` does not follow from this equation.
+The corrected descent is:
 
 ```text
-a^2 = d^4 + d^2 - 1.
+q^3 = b^2  ⇒  q = d^2 and b = d^3,
+a^2 = d^4 + d^2 - 1,
 ```
 
-That quartic step is exactly the missing global descent/cover input.
+so the quartic obstruction is still required.
 
-## Complete Lean for the corrected local arithmetic lemma
+## The other required strong input
 
-This is the arithmetic fact that actually follows from the `p = -1` local
-calculation.  It has no valuation API and no `sorry`.
+The prompt also asks to get `p = ±1` from the prime-divisor congruence.  That
+local congruence only proves that prime exponents in `p` are even.  It does not
+force `p` to have no prime divisors.  A genuine cover/descent theorem is still
+needed for this step.
+
+## Complete Lean for the corrected local arithmetic fact
+
+The following is the no-valuation local lemma that is actually justified by the
+`p = -1` equation.  It is the strongest conclusion available from the coprime
+square-divisibility step alone.
 
 ```lean
 import Mathlib
@@ -87,7 +74,7 @@ lemma coprime_cube_eq_sq_of_sq_mul_cube_eq_sq_mul
     (h : a ^ 2 * q ^ 3 = b ^ 2 * N) :
     q ^ 3 = b ^ 2 := by
   have hq3N : Nat.Coprime (q ^ 3) N := by
-    exact (hqN.pow_left 3)
+    exact hqN.pow_left 3
 
   have hq3_dvd_bsq : q ^ 3 ∣ b ^ 2 := by
     have hdiv : q ^ 3 ∣ b ^ 2 * N := by
@@ -108,17 +95,19 @@ lemma coprime_cube_eq_sq_of_sq_mul_cube_eq_sq_mul
 end Obstruction20a4Local
 ```
 
-## What is still needed for the full denominator theorem
+## What a complete final assembly still needs
 
-A complete proof of `u.den = 1` still needs one of the following strong inputs:
+A valid final proof can be assembled once the file has inline versions of these
+strong inputs with their actual Lean statements:
 
 ```lean
--- after denominator clearing and coprime splitting:
---   p =  r^2, q = d^2, a^2 = r^2 * (r^4 + r^2*d^2 - d^4)
--- or
---   p = -r^2, q = d^2, a^2 = r^2 * (-r^4 + r^2*d^2 + d^4)
+-- 1. A cover/descent theorem strong enough to turn the cleared equation into
+--    the squareclass alternatives for p, not merely even valuations.
+
+-- 2. A quartic obstruction theorem ruling out
+--      a^2 = d^4 + d^2 - 1
+--    for natural d ≥ 2, and the companion cover needed for the positive p case.
 ```
 
-and then a no-solution theorem for the resulting quartic cover when `d ≥ 2`.
-The local divisibility arguments alone only prove square/cube denominator
-structure; they do not prove `q = 1`.
+Without those strong inputs, a 0-sorry Lean proof of the requested theorem would
+be a fabricated proof rather than a formalization of the stated argument.
