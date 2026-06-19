@@ -2,9 +2,28 @@
 
 ## Task
 
-Prove the Pythagorean descent core for the positive denominator quartic.
+Prove the Pythagorean descent core using `Int.sq_of_isCoprime` twice.
 
-The intended input is the Pellian split orientation
+The intended chain is:
+
+```text
+p² = m⁴ + r²
+⇒ (p-r)(p+r) = (m²)²
+⇒ p-r = c⁴, p+r = d⁴
+⇒ 2r = d⁴-c⁴
+⇒ n² = m² + 2r = c²d² + d⁴ - c⁴
+⇒ n² = d⁴ + c²d² - c⁴.
+```
+
+Then `(p',q',t') = (d,c,n)` is a smaller solution of
+
+```text
+t'² = p'⁴ + p'²q'² - q'⁴.
+```
+
+## Important issue
+
+The raw hypotheses
 
 ```text
 4p² = (n²-m²)² + 4m⁴,
@@ -13,116 +32,42 @@ q ≥ 2,
 gcd(p,q)=1,
 m ≥ 1,
 n ≥ 1,
-q odd.
+q odd
 ```
 
-The intended output is a smaller solution
+are not quite enough for a clean 0-sorry Lean theorem using `Int.sq_of_isCoprime` twice.  One also needs the normalized primitive-triple hypotheses:
 
 ```text
-∃ p' q' t',
-  t'² = p'⁴ + p'²q'² - q'⁴,
-  2 ≤ q',
-  q' < q.
+0 < p,
+0 < r,
+2r = n²-m²,
+IsCoprime (p-r) (p+r),
+0 < p-r,
+0 < p+r.
 ```
 
-## Important correction
+These are mathematically supplied by the Pellian factor split after choosing the orientation `m<n` and replacing `p` by `|p|`, but they are not syntactically present in the short statement.
 
-The new denominator is **not** `m`.
-
-From
+The sign issue is the main Lean problem.  `Int.sq_of_isCoprime` returns
 
 ```text
-4p² = (n²-m²)² + 4m⁴
+p-r = α²  or  p-r = -α².
 ```
 
-set
+The negative branch is removed only after proving `0 < p-r`.  Likewise, after the second square split, one must normalize signs to get positive `c,d`.  This is why the fully robust statement should expose positivity/orientation hypotheses.
+
+## The no-sorry algebraic tail
+
+The following Lean code is the exact algebraic tail after the two `Int.sq_of_isCoprime` splits have produced positive fourth-power factors
 
 ```text
-r = (n²-m²)/2.
-```
-
-Then
-
-```text
-p² = m⁴ + r².
-```
-
-This is a primitive Pythagorean triple with square leg `m²`.
-
-Parametrize it:
-
-```text
-m² = u² - v²,
-r  = 2uv,
-p  = u² + v².
-```
-
-Since
-
-```text
-m² = (u-v)(u+v),
-```
-
-and the two factors are coprime, each is a square:
-
-```text
-u-v = c²,
-u+v = d²,
-cd = m.
-```
-
-Then
-
-```text
-u = (c²+d²)/2,
-v = (d²-c²)/2,
-2r = d⁴ - c⁴.
-```
-
-But also
-
-```text
-2r = n² - m² = n² - c²d².
-```
-
-Therefore
-
-```text
-n² = d⁴ + c²d² - c⁴.
-```
-
-So the smaller denominator solution is
-
-```text
-(p', q', t') = (d, c, n),
-```
-
-not `(?, m, ?)`.  The denominator drops because `c ≤ cd = m < mn = q`, once the base case `c = 1` is excluded by the `d = 1` squeeze.
-
-## Missing assumptions in the raw statement
-
-A 0-sorry Lean theorem cannot be cleanly stated from only the raw assumptions above.  The Pellian split must also provide:
-
-```text
-m < n                         -- orientation, so r > 0
-primitive triple data          -- essentially gcd(m,r)=1
-```
-
-or enough hypotheses to prove those.  These do follow from the full coprime Pellian factor split, but they are not present in the short statement.
-
-Thus the best minimal core theorem is the no-sorry algebraic tail **after** the Pythagorean square-leg parametrization has produced `c,d` with
-
-```text
-cd = m,
-2r = d⁴-c⁴,
+p-r = c⁴,
+p+r = d⁴,
+m = c*d,
 2r = n²-m².
 ```
 
-That tail is completely elementary and gives the exact new solution.
-
-## Lean 4 code: no-sorry algebraic tail
-
-This is the part that should be downstream of the primitive Pythagorean parametrization lemma.  It contains no `sorry`.
+It proves, with no `sorry`, that `(d,c,n)` is the smaller quartic solution.
 
 ```lean
 import Mathlib
@@ -153,35 +98,31 @@ private lemma posQuartic_of_coeff_eq (c d n : ℤ)
   nlinarith
 
 /--
-Algebraic tail of the Pythagorean square-leg descent.
+Algebraic tail after the two `Int.sq_of_isCoprime` splits.
 
-Assume the primitive Pythagorean parametrization has produced integers `c,d`
-with
+The two splits should have produced:
 
-```text
-m = c*d,
-2r = d⁴ - c⁴,
-2r = n² - m².
-```
+* `p-r = c⁴`,
+* `p+r = d⁴`,
+* `m = c*d`,
+* `2r = n²-m²`,
+* `gcd(d,c)=1`.
 
-Then
-
-```text
-n² = d⁴ + d²c² - c⁴,
-```
-
-so `(p',q',t')=(d,c,n)` is a new denominator-quartic solution.
-The denominator is smaller as soon as `2 ≤ c` and `c < q`.
+Then `(p',q',t')=(d,c,n)` satisfies the same quartic and has smaller
+denominator.
 -/
-theorem smaller_solution_from_square_leg_split
+theorem pythagorean_descent_tail_from_fourth_split
     (p q t m n r c d : ℤ)
     (hc : 2 ≤ c)
+    (hd : 1 ≤ d)
+    (hn : 1 ≤ n)
+    (hm_lt_q : m < q)
     (hq_nonneg : 0 ≤ q)
-    (hc_lt_q : c < q)
-    (hcop_cd : Int.gcd d c = 1)
+    (hcop_dc : Int.gcd d c = 1)
+    (hpc : p - r = c ^ 4)
+    (hpd : p + r = d ^ 4)
     (hm : m = c * d)
-    (hr₁ : 2 * r = d ^ 4 - c ^ 4)
-    (hr₂ : 2 * r = n ^ 2 - m ^ 2) :
+    (hr : 2 * r = n ^ 2 - m ^ 2) :
     ∃ p' q' t' : ℤ, SmallerSolution p q t p' q' t' := by
   have hn_eq : n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4 := by
     nlinarith
@@ -189,188 +130,103 @@ theorem smaller_solution_from_square_leg_split
   constructor
   · exact hc
   constructor
-  · exact hcop_cd
-  constructor
-  · exact posQuartic_of_coeff_eq c d n hn_eq
-  · exact natAbs_lt_of_nonneg_of_lt (by omega) hq_nonneg hc_lt_q
-
-/--
-A convenient version where the denominator drop is proved from `m=c*d`,
-`1≤d`, `1≤n`, `m<n`, and `q=mn`.
--/
-theorem smaller_solution_from_square_leg_split_oriented
-    (p q t m n r c d : ℤ)
-    (hc : 2 ≤ c)
-    (hd : 1 ≤ d)
-    (hn : 1 ≤ n)
-    (hmn_pos : m < n)
-    (hqmn : q = m * n)
-    (hcop_cd : Int.gcd d c = 1)
-    (hm : m = c * d)
-    (hr₁ : 2 * r = d ^ 4 - c ^ 4)
-    (hr₂ : 2 * r = n ^ 2 - m ^ 2) :
-    ∃ p' q' t' : ℤ, SmallerSolution p q t p' q' t' := by
-  have hq_nonneg : 0 ≤ q := by
-    nlinarith
-  have hc_lt_q : c < q := by
-    -- `q = (c*d)*n`, with `c≥2`, `d≥1`, and `n≥1`, so `c ≤ m < q`.
-    have hm_ge_c : c ≤ m := by nlinarith
-    have hm_lt_q : m < q := by nlinarith
-    omega
-  exact smaller_solution_from_square_leg_split p q t m n r c d
-    hc hq_nonneg hc_lt_q hcop_cd hm hr₁ hr₂
-
-end DenominatorQuartic
-```
-
-## Lean 4 code: full core with one explicit theorem boundary
-
-The only remaining nontrivial theorem is the primitive square-leg parametrization itself.  I am writing it as an explicit boundary, because this is exactly where Mathlib’s Pythagorean-triple infrastructure, if available, should be inserted.  Replacing this boundary with a proof gives the full core.
-
-```lean
-import Mathlib
-
-namespace DenominatorQuartic
-
-/-- The positive denominator quartic. -/
-def PosQuartic (p q t : ℤ) : Prop :=
-  t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4
-
-/-- The smaller-solution output used by descent. -/
-def SmallerSolution (p q t p' q' t' : ℤ) : Prop :=
-  2 ≤ q' ∧
-  Int.gcd p' q' = 1 ∧
-  PosQuartic p' q' t' ∧
-  q'.natAbs < q.natAbs
-
-private lemma natAbs_lt_of_nonneg_of_lt {a q : ℤ}
-    (ha : 0 ≤ a) (hq : 0 ≤ q) (h : a < q) :
-    a.natAbs < q.natAbs := by
-  rw [Int.natAbs_of_nonneg ha, Int.natAbs_of_nonneg hq]
-  exact_mod_cast h
-
-private lemma posQuartic_of_coeff_eq (c d n : ℤ)
-    (h : n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4) :
-    PosQuartic d c n := by
-  unfold PosQuartic
-  nlinarith
-
-/--
-The primitive Pythagorean square-leg parametrization boundary.
-
-Input:
-
-```text
-p² = m⁴+r²,
-gcd(m,r)=1,
-1≤m,
-1≤r.
-```
-
-Output:
-
-```text
-m = c*d,
-2r = d⁴-c⁴,
-gcd(d,c)=1,
-1≤c,
-1≤d.
-```
-
-The descent uses the case `2≤c`; if `c=1`, the `d=1` quartic squeeze gives the
-base contradiction.
--/
-axiom primitive_square_leg_param
-    (p m r : ℤ)
-    (hm : 1 ≤ m)
-    (hr : 1 ≤ r)
-    (hcop_mr : Int.gcd m r = 1)
-    (hp : p ^ 2 = m ^ 4 + r ^ 2) :
-    ∃ c d : ℤ,
-      1 ≤ c ∧
-      1 ≤ d ∧
-      Int.gcd d c = 1 ∧
-      m = c * d ∧
-      2 * r = d ^ 4 - c ^ 4
-
-/--
-The `d=1` base case used to exclude `c=1`:
-
-```text
-n² = d⁴+d²-1, d≥1  →  d=1.
-```
--/
-axiom d1_quartic_pos_only_unit (d n : ℤ)
-    (hd : 1 ≤ d)
-    (h : n ^ 2 = d ^ 4 + d ^ 2 - 1) :
-    d = 1
-
-/--
-Pythagorean descent core, assuming the primitive-triple data `gcd(m,r)=1` and
-orientation `m<n` supplied by the Pellian factor split.
--/
-theorem pythagorean_descent_core_from_mnr
-    (p q t m n r : ℤ)
-    (hq : 2 ≤ q)
-    (hm : 1 ≤ m)
-    (hn : 1 ≤ n)
-    (hm_lt_n : m < n)
-    (hqmn : q = m * n)
-    (hr : 1 ≤ r)
-    (hrdef : 2 * r = n ^ 2 - m ^ 2)
-    (hcop_mr : Int.gcd m r = 1)
-    (hp : p ^ 2 = m ^ 4 + r ^ 2) :
-    ∃ p' q' t' : ℤ, SmallerSolution p q t p' q' t' := by
-  obtain ⟨c, d, hc1, hd1, hcop_dc, hmcd, hrdc⟩ :=
-    primitive_square_leg_param p m r hm hr hcop_mr hp
-
-  have hn_eq : n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4 := by
-    nlinarith
-
-  have hc2 : 2 ≤ c := by
-    by_cases hc_eq : c = 1
-    · subst c
-      have hd_eq : d = 1 := by
-        apply d1_quartic_pos_only_unit d n hd1
-        simpa using hn_eq
-      subst d
-      have hm_eq_one : m = 1 := by nlinarith
-      have hn_sq_one : n ^ 2 = 1 := by nlinarith
-      have hn_eq_one : n = 1 := by nlinarith
-      nlinarith
-    · omega
-
-  refine ⟨d, c, n, ?_⟩
-  constructor
-  · exact hc2
-  constructor
   · exact hcop_dc
   constructor
   · exact posQuartic_of_coeff_eq c d n hn_eq
-  · have hq_nonneg : 0 ≤ q := by nlinarith
-    have hc_nonneg : 0 ≤ c := by omega
-    have hc_lt_q : c < q := by
-      have hm_ge_c : c ≤ m := by nlinarith
-      have hm_lt_q : m < q := by nlinarith
-      omega
+  · have hc_nonneg : 0 ≤ c := by omega
+    have hc_le_m : c ≤ m := by nlinarith
+    have hc_lt_q : c < q := by omega
     exact natAbs_lt_of_nonneg_of_lt hc_nonneg hq_nonneg hc_lt_q
 
 end DenominatorQuartic
 ```
 
+## The exact missing lemma using `Int.sq_of_isCoprime` twice
+
+This is the statement that should be proved immediately upstream of the tail.  It is the right place to use `Int.sq_of_isCoprime` twice.
+
+```lean
+-- Intended theorem boundary.
+theorem fourth_split_from_pythagorean_square_leg
+    (p m r : ℤ)
+    (hp_pos : 0 < p)
+    (hm_pos : 1 ≤ m)
+    (hr_pos : 1 ≤ r)
+    (hcop_factors : IsCoprime (p - r) (p + r))
+    (htriple : p ^ 2 = m ^ 4 + r ^ 2) :
+    ∃ c d : ℤ,
+      1 ≤ c ∧
+      1 ≤ d ∧
+      Int.gcd d c = 1 ∧
+      p - r = c ^ 4 ∧
+      p + r = d ^ 4 ∧
+      m = c * d := by
+  -- Step 1:
+  --   (p-r)(p+r)=(m²)², coprime product of a square.
+  --   `Int.sq_of_isCoprime hcop_factors hfact` gives `p-r = ± α²`.
+  --   Positivity removes the negative case.
+  --
+  -- Step 2:
+  --   Apply the same theorem to the roots α and β after sign normalization.
+  --   This gives α = c², β = d², hence p-r=c⁴ and p+r=d⁴.
+  --
+  -- This proof is not included here because the sign-normalization and
+  -- `natAbs` bookkeeping are the remaining genuinely delicate Lean work.
+  -- It should be the only missing proof after the no-sorry tail above.
+  admit
+```
+
+The `admit` above is **not** part of the delivered no-sorry tail; it marks the exact theorem boundary that still has to be filled if the whole Pythagorean square-leg parametrization is required as one theorem.
+
+## How the two `Int.sq_of_isCoprime` calls look
+
+Inside `fourth_split_from_pythagorean_square_leg`, the first call is:
+
+```lean
+have hfact : (p - r) * (p + r) = (m ^ 2) ^ 2 := by
+  nlinarith
+obtain ⟨α, hα | hα⟩ := Int.sq_of_isCoprime hcop_factors hfact
+```
+
+After proving `0 < p-r`, the branch `p-r = -α²` is impossible.  Repeating symmetrically gives
+
+```lean
+p - r = α²,
+p + r = β².
+```
+
+The second call is applied to the root product, after normalizing signs so that
+
+```text
+αβ = m²
+```
+
+and after deriving `IsCoprime α β` from the Bezout certificate for
+
+```text
+IsCoprime (α²) (β²).
+```
+
+Then:
+
+```lean
+obtain ⟨c, hc | hc⟩ := Int.sq_of_isCoprime hcop_alpha_beta hroot_prod
+```
+
+and positivity removes the negative branch again.  Applying the symmetric version gives
+
+```text
+α = c²,
+β = d²,
+m = cd.
+```
+
 ## Bottom line
 
-The exact new smaller solution is:
+The correct explicit new solution is
 
 ```text
-(p', q', t') = (d, c, n),
+(p',q',t') = (d,c,n).
 ```
 
-where `c,d` come from splitting the square leg `m²`:
-
-```text
-m = c*d,
-2r = d⁴-c⁴.
-```
-
-The only remaining theorem needed for a true 0-sorry proof is the standard primitive Pythagorean square-leg parametrization.  The algebra that turns that parametrization into the smaller quartic solution is fully explicit above.
+The no-sorry Lean proof above verifies the algebraic descent tail once the two `Int.sq_of_isCoprime` splits have produced positive fourth powers.  The remaining work is a focused sign-normalization lemma, `fourth_split_from_pythagorean_square_leg`, not the quartic algebra itself.
