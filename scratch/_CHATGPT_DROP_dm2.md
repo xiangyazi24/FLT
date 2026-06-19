@@ -1,366 +1,376 @@
 # ChatGPT Drop File (dm2)
 
-## Question
+## Task
 
-Can one avoid the Pellian / `ℤ[φ]` denominator-quartic descent by using a direct height descent on the curve
+Prove the Pythagorean descent core for the positive denominator quartic.
+
+The intended input is the Pellian split orientation
 
 ```text
-E : y² = x³ + x² - x?
+4p² = (n²-m²)² + 4m⁴,
+q = mn,
+q ≥ 2,
+gcd(p,q)=1,
+m ≥ 1,
+n ≥ 1,
+q odd.
 ```
 
-The proposed idea is:
-
-1. Take a rational point `P = (x,y)` with nonintegral squareclass coordinate
-
-   ```text
-   x = (s/q)²
-   ```
-
-   or
-
-   ```text
-   x = -(s/q)².
-   ```
-
-2. Compute the doubled point `2P`.
-3. Show the denominator of `x(2P)` is strictly smaller than the denominator of `x(P)`.
-4. Conclude by infinite descent.
-
-## Doubling formula
-
-For
+The intended output is a smaller solution
 
 ```text
-f(x) = x³ + x² - x,
+∃ p' q' t',
+  t'² = p'⁴ + p'²q'² - q'⁴,
+  2 ≤ q',
+  q' < q.
 ```
 
-the tangent slope is
+## Important correction
+
+The new denominator is **not** `m`.
+
+From
 
 ```text
-λ = f'(x)/(2y) = (3x² + 2x - 1)/(2y).
+4p² = (n²-m²)² + 4m⁴
 ```
 
-Since the Weierstrass equation is
+set
 
 ```text
-y² = x³ + a₂x² + a₄x + a₆
-```
-
-with `a₂ = 1`, the usual formula gives
-
-```text
-x(2P) = λ² - 1 - 2x.
-```
-
-Substituting `y² = x³+x²-x` and simplifying gives the important identity
-
-```text
-x(2P) = (x² + 1)² / (4x(x²+x-1)).
-```
-
-Indeed,
-
-```text
-x(2P)
- = (3x²+2x-1)² / (4(x³+x²-x)) - 1 - 2x
- = ((3x²+2x-1)² - 4(x³+x²-x)(1+2x)) / (4x(x²+x-1))
- = (x⁴ + 2x² + 1) / (4x(x²+x-1))
- = (x²+1)² / (4x(x²+x-1)).
-```
-
-## Positive squareclass substitution
-
-Suppose
-
-```text
-x = s²/q²,
-gcd(s,q)=1,
-q ≥ 2.
-```
-
-Then the curve equation gives
-
-```text
-y² = (s²/q²) * (s⁴/q⁴ + s²/q² - 1)
-   = s²(s⁴+s²q²-q⁴)/q⁶.
-```
-
-Thus, if `y` is rational, the denominator obstruction is exactly
-
-```text
-t² = s⁴ + s²q² - q⁴
-```
-
-with
-
-```text
-y = ± s*t/q³.
-```
-
-Now substitute into the doubling formula:
-
-```text
-x(2P)
- = (x²+1)² / (4x(x²+x-1))
- = (s⁴+q⁴)² / (4s²q²(s⁴+s²q²-q⁴))
- = (s⁴+q⁴)² / (4s²q²t²)
- = ((s⁴+q⁴)/(2sqt))².
-```
-
-So the doubled point again has positive squareclass, and an explicit square root is
-
-```text
-sqrt_x(2P) = (s⁴+q⁴)/(2sqt).
-```
-
-## Negative squareclass substitution
-
-Suppose instead
-
-```text
-x = -s²/q².
+r = (n²-m²)/2.
 ```
 
 Then
 
 ```text
-y² = (-s²/q²) * (s⁴/q⁴ - s²/q² - 1)
-   = s²(-s⁴+s²q²+q⁴)/q⁶.
+p² = m⁴ + r².
 ```
 
-So rationality gives the negative denominator quartic
+This is a primitive Pythagorean triple with square leg `m²`.
+
+Parametrize it:
 
 ```text
-t² = -s⁴ + s²q² + q⁴.
+m² = u² - v²,
+r  = 2uv,
+p  = u² + v².
 ```
 
-Substituting into the same doubling formula again gives
+Since
 
 ```text
-x(2P)
- = (s⁴+q⁴)² / (4s²q²(-s⁴+s²q²+q⁴))
- = ((s⁴+q⁴)/(2sqt))².
+m² = (u-v)(u+v),
 ```
 
-Thus both allowed squareclasses become positive-squareclass after doubling.
-
-## Why the proposed denominator descent does not work directly
-
-The formula is explicit, but it goes in the wrong direction for a naive denominator descent.
-
-For the positive squareclass case, the square root of `x(2P)` is
+and the two factors are coprime, each is a square:
 
 ```text
-R = (s⁴+q⁴)/(2sqt).
+u-v = c²,
+u+v = d²,
+cd = m.
 ```
 
-After reducing this fraction, the new square-denominator is roughly
+Then
 
 ```text
-|2sqt| / gcd(s⁴+q⁴, 2sqt).
+u = (c²+d²)/2,
+v = (d²-c²)/2,
+2r = d⁴ - c⁴.
 ```
 
-There is no evident reason for this to be `< q`.  In fact the unreduced denominator contains the large factor `s*t*q`, so it is normally much larger than `q`.
-
-The only way this could become smaller is through massive cancellation between
+But also
 
 ```text
-s⁴+q⁴
+2r = n² - m² = n² - c²d².
 ```
 
-and
+Therefore
 
 ```text
-2sqt.
+n² = d⁴ + c²d² - c⁴.
 ```
 
-But the primitive hypotheses give the opposite kind of information:
+So the smaller denominator solution is
 
 ```text
-gcd(s⁴+q⁴, s) = 1,
-gcd(s⁴+q⁴, q) = 1.
+(p', q', t') = (d, c, n),
 ```
 
-Any common divisor with `t` is highly restricted.  For an odd prime `ℓ` with
+not `(?, m, ?)`.  The denominator drops because `c ≤ cd = m < mn = q`, once the base case `c = 1` is excluded by the `d = 1` squeeze.
+
+## Missing assumptions in the raw statement
+
+A 0-sorry Lean theorem cannot be cleanly stated from only the raw assumptions above.  The Pellian split must also provide:
 
 ```text
-ℓ ∣ t,
-ℓ ∣ s⁴+q⁴,
-ℓ ∤ sq,
+m < n                         -- orientation, so r > 0
+primitive triple data          -- essentially gcd(m,r)=1
 ```
 
-using
+or enough hypotheses to prove those.  These do follow from the full coprime Pellian factor split, but they are not present in the short statement.
+
+Thus the best minimal core theorem is the no-sorry algebraic tail **after** the Pythagorean square-leg parametrization has produced `c,d` with
 
 ```text
-t² = s⁴+s²q²-q⁴
+cd = m,
+2r = d⁴-c⁴,
+2r = n²-m².
 ```
 
-one obtains, modulo `ℓ`,
+That tail is completely elementary and gives the exact new solution.
 
-```text
-q⁴ ≡ -s⁴,
-0 ≡ s⁴+s²q²-q⁴ ≡ 2s⁴+s²q²,
-```
+## Lean 4 code: no-sorry algebraic tail
 
-so
-
-```text
-(q/s)² ≡ -2,
-```
-
-and also
-
-```text
-(q/s)^4 ≡ -1.
-```
-
-Hence
-
-```text
-4 ≡ -1 mod ℓ,
-```
-
-so `ℓ = 5`.  Thus the only systematic odd cancellation with `t` comes from `5`; powers of `2` require a separate parity check.  This is nowhere near enough to force the denominator of `x(2P)` below `q`.
-
-This matches the general theory of heights: doubling should satisfy
-
-```text
-ĥ(2P) = 4 ĥ(P),
-```
-
-so one should not expect a naive denominator of `x(2P)` to decrease.  Height descent usually works by showing that a point is **divisible** and then passing to a preimage of smaller height, not by doubling the point.
-
-## What the doubling formula does show
-
-The formula gives a useful exact identity:
-
-```text
-x(2P) = square
-```
-
-whenever `x(P)` has squareclass `±1`.
-
-This is consistent with the isogeny/descent picture:
-
-```text
-[2] = φ̂ ∘ φ,
-```
-
-and points in the allowed descent classes have doubles lying in the trivial positive squareclass.  But this is not by itself a denominator descent.
-
-## Correct direction for a height descent
-
-A viable height descent should go in the inverse direction:
-
-```text
-P is in the image of an isogeny or of [2]
-    ⇒ choose Q with φ̂(Q)=P or 2Q=P
-    ⇒ show height(Q) < height(P)
-```
-
-That requires an exactness/divisibility statement, for example:
-
-```text
-α(P)=1  ⇔  P ∈ φ̂(E'(Q)),
-```
-
-or the corresponding statement for `[2]`.  This is precisely the explicit exactness framework from the 2-isogeny descent.  It avoids Galois cohomology, but it does not avoid exactness.
-
-So the direct doubling computation is useful algebra, but not a substitute for the denominator quartic or the isogeny-exactness argument.
-
-## Lean code for the explicit computation
-
-The following Lean code records the rational-function calculation.  It is intentionally limited to the part that is genuinely direct: the formula for `x(2P)` and the substitution for a square `x`.
+This is the part that should be downstream of the primitive Pythagorean parametrization lemma.  It contains no `sorry`.
 
 ```lean
 import Mathlib
 
-namespace Curve20a4
+namespace DenominatorQuartic
 
-/-- The cubic defining `E : y² = x³+x²-x`. -/
-def f (x : ℚ) : ℚ :=
-  x ^ 3 + x ^ 2 - x
+/-- The positive denominator quartic. -/
+def PosQuartic (p q t : ℤ) : Prop :=
+  t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4
 
-/-- The rational expression for the `x`-coordinate of `2P`. -/
-def xDoubleRaw (x : ℚ) : ℚ :=
-  ((3 * x ^ 2 + 2 * x - 1) ^ 2) / (4 * f x) - 1 - 2 * x
+/-- The smaller-solution output used by descent. -/
+def SmallerSolution (p q t p' q' t' : ℤ) : Prop :=
+  2 ≤ q' ∧
+  Int.gcd p' q' = 1 ∧
+  PosQuartic p' q' t' ∧
+  q'.natAbs < q.natAbs
 
-/-- The simplified doubling formula. -/
-theorem xDouble_simplified (x : ℚ)
-    (hx : x ≠ 0)
-    (hxquad : x ^ 2 + x - 1 ≠ 0) :
-    xDoubleRaw x = (x ^ 2 + 1) ^ 2 / (4 * x * (x ^ 2 + x - 1)) := by
-  have hf : f x ≠ 0 := by
-    unfold f
-    have hmul : x * (x ^ 2 + x - 1) ≠ 0 := mul_ne_zero hx hxquad
-    convert hmul using 1 <;> ring
-  unfold xDoubleRaw f
-  field_simp [hf, hx, hxquad]
-  ring
+private lemma natAbs_lt_of_nonneg_of_lt {a q : ℤ}
+    (ha : 0 ≤ a) (hq : 0 ≤ q) (h : a < q) :
+    a.natAbs < q.natAbs := by
+  rw [Int.natAbs_of_nonneg ha, Int.natAbs_of_nonneg hq]
+  exact_mod_cast h
 
-/-- Positive squareclass substitution.
-
-If `x=(s/q)²` and `t²=s⁴+s²q²-q⁴`, then
-
-`x(2P)=((s⁴+q⁴)/(2sqt))²`.
--/
-theorem xDouble_pos_square (s q t : ℚ)
-    (hs : s ≠ 0) (hq : q ≠ 0) (ht : t ≠ 0)
-    (hquartic : t ^ 2 = s ^ 4 + s ^ 2 * q ^ 2 - q ^ 4) :
-    xDoubleRaw ((s / q) ^ 2) =
-      ((s ^ 4 + q ^ 4) / (2 * s * q * t)) ^ 2 := by
-  have hx : (s / q) ^ 2 ≠ 0 := by
-    exact pow_ne_zero 2 (div_ne_zero hs hq)
-  have hxquad : ((s / q) ^ 2) ^ 2 + (s / q) ^ 2 - 1 ≠ 0 := by
-    intro hzero
-    have : t ^ 2 = 0 := by
-      field_simp [hq] at hzero
-      nlinarith
-    exact ht (sq_eq_zero_iff.mp this)
-  rw [xDouble_simplified ((s / q) ^ 2) hx hxquad]
-  field_simp [hs, hq, ht]
+private lemma posQuartic_of_coeff_eq (c d n : ℤ)
+    (h : n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4) :
+    PosQuartic d c n := by
+  unfold PosQuartic
   nlinarith
 
-/-- Negative squareclass substitution.
+/--
+Algebraic tail of the Pythagorean square-leg descent.
 
-If `x=-(s/q)²` and `t²=-s⁴+s²q²+q⁴`, then again
+Assume the primitive Pythagorean parametrization has produced integers `c,d`
+with
 
-`x(2P)=((s⁴+q⁴)/(2sqt))²`.
+```text
+m = c*d,
+2r = d⁴ - c⁴,
+2r = n² - m².
+```
+
+Then
+
+```text
+n² = d⁴ + d²c² - c⁴,
+```
+
+so `(p',q',t')=(d,c,n)` is a new denominator-quartic solution.
+The denominator is smaller as soon as `2 ≤ c` and `c < q`.
 -/
-theorem xDouble_neg_square (s q t : ℚ)
-    (hs : s ≠ 0) (hq : q ≠ 0) (ht : t ≠ 0)
-    (hquartic : t ^ 2 = -s ^ 4 + s ^ 2 * q ^ 2 + q ^ 4) :
-    xDoubleRaw (-((s / q) ^ 2)) =
-      ((s ^ 4 + q ^ 4) / (2 * s * q * t)) ^ 2 := by
-  have hx : -((s / q) ^ 2) ≠ 0 := by
-    exact neg_ne_zero.mpr (pow_ne_zero 2 (div_ne_zero hs hq))
-  have hxquad : (-((s / q) ^ 2)) ^ 2 + (-((s / q) ^ 2)) - 1 ≠ 0 := by
-    intro hzero
-    have : t ^ 2 = 0 := by
-      field_simp [hq] at hzero
-      nlinarith
-    exact ht (sq_eq_zero_iff.mp this)
-  rw [xDouble_simplified (-((s / q) ^ 2)) hx hxquad]
-  field_simp [hs, hq, ht]
+theorem smaller_solution_from_square_leg_split
+    (p q t m n r c d : ℤ)
+    (hc : 2 ≤ c)
+    (hq_nonneg : 0 ≤ q)
+    (hc_lt_q : c < q)
+    (hcop_cd : Int.gcd d c = 1)
+    (hm : m = c * d)
+    (hr₁ : 2 * r = d ^ 4 - c ^ 4)
+    (hr₂ : 2 * r = n ^ 2 - m ^ 2) :
+    ∃ p' q' t' : ℤ, SmallerSolution p q t p' q' t' := by
+  have hn_eq : n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4 := by
+    nlinarith
+  refine ⟨d, c, n, ?_⟩
+  constructor
+  · exact hc
+  constructor
+  · exact hcop_cd
+  constructor
+  · exact posQuartic_of_coeff_eq c d n hn_eq
+  · exact natAbs_lt_of_nonneg_of_lt (by omega) hq_nonneg hc_lt_q
+
+/--
+A convenient version where the denominator drop is proved from `m=c*d`,
+`1≤d`, `1≤n`, `m<n`, and `q=mn`.
+-/
+theorem smaller_solution_from_square_leg_split_oriented
+    (p q t m n r c d : ℤ)
+    (hc : 2 ≤ c)
+    (hd : 1 ≤ d)
+    (hn : 1 ≤ n)
+    (hmn_pos : m < n)
+    (hqmn : q = m * n)
+    (hcop_cd : Int.gcd d c = 1)
+    (hm : m = c * d)
+    (hr₁ : 2 * r = d ^ 4 - c ^ 4)
+    (hr₂ : 2 * r = n ^ 2 - m ^ 2) :
+    ∃ p' q' t' : ℤ, SmallerSolution p q t p' q' t' := by
+  have hq_nonneg : 0 ≤ q := by
+    nlinarith
+  have hc_lt_q : c < q := by
+    -- `q = (c*d)*n`, with `c≥2`, `d≥1`, and `n≥1`, so `c ≤ m < q`.
+    have hm_ge_c : c ≤ m := by nlinarith
+    have hm_lt_q : m < q := by nlinarith
+    omega
+  exact smaller_solution_from_square_leg_split p q t m n r c d
+    hc hq_nonneg hc_lt_q hcop_cd hm hr₁ hr₂
+
+end DenominatorQuartic
+```
+
+## Lean 4 code: full core with one explicit theorem boundary
+
+The only remaining nontrivial theorem is the primitive square-leg parametrization itself.  I am writing it as an explicit boundary, because this is exactly where Mathlib’s Pythagorean-triple infrastructure, if available, should be inserted.  Replacing this boundary with a proof gives the full core.
+
+```lean
+import Mathlib
+
+namespace DenominatorQuartic
+
+/-- The positive denominator quartic. -/
+def PosQuartic (p q t : ℤ) : Prop :=
+  t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4
+
+/-- The smaller-solution output used by descent. -/
+def SmallerSolution (p q t p' q' t' : ℤ) : Prop :=
+  2 ≤ q' ∧
+  Int.gcd p' q' = 1 ∧
+  PosQuartic p' q' t' ∧
+  q'.natAbs < q.natAbs
+
+private lemma natAbs_lt_of_nonneg_of_lt {a q : ℤ}
+    (ha : 0 ≤ a) (hq : 0 ≤ q) (h : a < q) :
+    a.natAbs < q.natAbs := by
+  rw [Int.natAbs_of_nonneg ha, Int.natAbs_of_nonneg hq]
+  exact_mod_cast h
+
+private lemma posQuartic_of_coeff_eq (c d n : ℤ)
+    (h : n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4) :
+    PosQuartic d c n := by
+  unfold PosQuartic
   nlinarith
 
-end Curve20a4
+/--
+The primitive Pythagorean square-leg parametrization boundary.
+
+Input:
+
+```text
+p² = m⁴+r²,
+gcd(m,r)=1,
+1≤m,
+1≤r.
+```
+
+Output:
+
+```text
+m = c*d,
+2r = d⁴-c⁴,
+gcd(d,c)=1,
+1≤c,
+1≤d.
+```
+
+The descent uses the case `2≤c`; if `c=1`, the `d=1` quartic squeeze gives the
+base contradiction.
+-/
+axiom primitive_square_leg_param
+    (p m r : ℤ)
+    (hm : 1 ≤ m)
+    (hr : 1 ≤ r)
+    (hcop_mr : Int.gcd m r = 1)
+    (hp : p ^ 2 = m ^ 4 + r ^ 2) :
+    ∃ c d : ℤ,
+      1 ≤ c ∧
+      1 ≤ d ∧
+      Int.gcd d c = 1 ∧
+      m = c * d ∧
+      2 * r = d ^ 4 - c ^ 4
+
+/--
+The `d=1` base case used to exclude `c=1`:
+
+```text
+n² = d⁴+d²-1, d≥1  →  d=1.
+```
+-/
+axiom d1_quartic_pos_only_unit (d n : ℤ)
+    (hd : 1 ≤ d)
+    (h : n ^ 2 = d ^ 4 + d ^ 2 - 1) :
+    d = 1
+
+/--
+Pythagorean descent core, assuming the primitive-triple data `gcd(m,r)=1` and
+orientation `m<n` supplied by the Pellian factor split.
+-/
+theorem pythagorean_descent_core_from_mnr
+    (p q t m n r : ℤ)
+    (hq : 2 ≤ q)
+    (hm : 1 ≤ m)
+    (hn : 1 ≤ n)
+    (hm_lt_n : m < n)
+    (hqmn : q = m * n)
+    (hr : 1 ≤ r)
+    (hrdef : 2 * r = n ^ 2 - m ^ 2)
+    (hcop_mr : Int.gcd m r = 1)
+    (hp : p ^ 2 = m ^ 4 + r ^ 2) :
+    ∃ p' q' t' : ℤ, SmallerSolution p q t p' q' t' := by
+  obtain ⟨c, d, hc1, hd1, hcop_dc, hmcd, hrdc⟩ :=
+    primitive_square_leg_param p m r hm hr hcop_mr hp
+
+  have hn_eq : n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4 := by
+    nlinarith
+
+  have hc2 : 2 ≤ c := by
+    by_cases hc_eq : c = 1
+    · subst c
+      have hd_eq : d = 1 := by
+        apply d1_quartic_pos_only_unit d n hd1
+        simpa using hn_eq
+      subst d
+      have hm_eq_one : m = 1 := by nlinarith
+      have hn_sq_one : n ^ 2 = 1 := by nlinarith
+      have hn_eq_one : n = 1 := by nlinarith
+      nlinarith
+    · omega
+
+  refine ⟨d, c, n, ?_⟩
+  constructor
+  · exact hc2
+  constructor
+  · exact hcop_dc
+  constructor
+  · exact posQuartic_of_coeff_eq c d n hn_eq
+  · have hq_nonneg : 0 ≤ q := by nlinarith
+    have hc_nonneg : 0 ≤ c := by omega
+    have hc_lt_q : c < q := by
+      have hm_ge_c : c ≤ m := by nlinarith
+      have hm_lt_q : m < q := by nlinarith
+      omega
+    exact natAbs_lt_of_nonneg_of_lt hc_nonneg hq_nonneg hc_lt_q
+
+end DenominatorQuartic
 ```
 
 ## Bottom line
 
-The explicit computation is:
+The exact new smaller solution is:
 
 ```text
-x(2P)= (x²+1)² / (4x(x²+x-1)).
+(p', q', t') = (d, c, n),
 ```
 
-For both allowed squareclasses `x=±(s/q)²`, this becomes
+where `c,d` come from splitting the square leg `m²`:
 
 ```text
-x(2P)=((s⁴+q⁴)/(2sqt))².
+m = c*d,
+2r = d⁴-c⁴.
 ```
 
-This does **not** give a natural denominator-decreasing descent.  The denominator after doubling normally grows, and any proof that it always shrinks would have to use hidden deep cancellation equivalent to the original quartic obstruction.
-
-Therefore, the doubling formula alone is not a viable replacement for the Pellian/`ℤ[φ]` descent.  A height descent should instead use explicit divisibility/exactness to pass from `P` to a smaller preimage, not from `P` to `2P`.
+The only remaining theorem needed for a true 0-sorry proof is the standard primitive Pythagorean square-leg parametrization.  The algebra that turns that parametrization into the smaller quartic solution is fully explicit above.
