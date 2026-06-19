@@ -1,58 +1,45 @@
-# `sq_of_cube_div_sq`
+# `coprime_sq_dvd_implies_sq`
 
 ```lean
 import Mathlib
 
 /--
-If `b ^ 2` divides `q ^ 3` and the quotient is coprime to `q`, then `q` is a
-square.  The proof first shows the quotient is actually `1`, so
-`q ^ 3 = b ^ 2`; then it applies the standard coprime-exponent power lemma.
+From `a^2 * q = b^2 * N`, with `(a,b)=1` and `(q,N)=1`, both `q ∣ b^2`
+and `b^2 ∣ q`; hence `q = b^2`.
 -/
-theorem perfect_sq_of_valuation (q b : ℕ) (hq : 2 ≤ q)
-    (hdvd : b ^ 2 ∣ q ^ 3)
-    (hN_coprime_q : Nat.Coprime (q ^ 3 / b ^ 2) q) :
-    IsSquare q := by
-  let N : ℕ := q ^ 3 / b ^ 2
+theorem coprime_sq_dvd_implies_sq (q b : ℕ) (a N : ℤ)
+    (hq : 2 ≤ q) (hab : Int.gcd a b = 1) (hqN : Nat.Coprime q N.natAbs)
+    (heq : a ^ 2 * (q : ℤ) = b ^ 2 * N) : IsSquare q := by
+  have hnat : a.natAbs ^ 2 * q = b ^ 2 * N.natAbs := by
+    simpa [pow_two, mul_assoc, mul_left_comm, mul_comm] using congrArg Int.natAbs heq
 
-  have hN_dvd_q3 : N ∣ q ^ 3 := by
-    dsimp [N]
-    exact ⟨b ^ 2, (Nat.div_mul_cancel hdvd).symm⟩
+  have habNat : Nat.Coprime a.natAbs b := by
+    rw [Nat.coprime_iff_gcd_eq_one]
+    cases a <;> simpa using hab
 
-  have hN_coprime_q3 : Nat.Coprime N (q ^ 3) := by
-    dsimp [N]
+  have habSq : Nat.Coprime (a.natAbs ^ 2) (b ^ 2) :=
+    Nat.Coprime.pow 2 2 habNat
+
+  have hb2_dvd_q : b ^ 2 ∣ q := by
+    have hdiv : b ^ 2 ∣ a.natAbs ^ 2 * q := by
+      rw [hnat]
+      exact dvd_mul_right _ _
     exact
-      ((Nat.coprime_pow_right_iff (n := 3) (by norm_num)
-        (q ^ 3 / b ^ 2) q).2 hN_coprime_q)
+      (Nat.Coprime.dvd_mul_left
+        (m := a.natAbs ^ 2) (n := q) (k := b ^ 2) habSq.symm).1 hdiv
 
-  have hN_one : N = 1 := by
-    exact Nat.eq_one_of_dvd_coprimes hN_coprime_q3 dvd_rfl hN_dvd_q3
+  have hq_dvd_b2 : q ∣ b ^ 2 := by
+    have hdiv : q ∣ b ^ 2 * N.natAbs := by
+      rw [← hnat]
+      exact dvd_mul_of_dvd_right dvd_rfl (a.natAbs ^ 2)
+    exact
+      (Nat.Coprime.dvd_mul_right
+        (m := b ^ 2) (n := N.natAbs) (k := q) hqN).1 hdiv
 
-  have hq3_eq_b2 : q ^ 3 = b ^ 2 := by
-    have hmul : N * b ^ 2 = q ^ 3 := by
-      dsimp [N]
-      exact Nat.div_mul_cancel hdvd
-    rw [hN_one, one_mul] at hmul
-    exact hmul.symm
+  have hq_eq_b2 : q = b ^ 2 := Nat.dvd_antisymm hq_dvd_b2 hb2_dvd_q
 
-  have h32 : Nat.Coprime 3 2 := by
-    decide
-
-  obtain ⟨c, hq_eq, _hb_eq⟩ :=
-    Nat.exists_eq_pow_of_exponent_coprime_of_pow_eq_pow
-      (a := q) (b := b) (m := 3) (n := 2) h32 hq3_eq_b2
-
-  refine ⟨c, ?_⟩
+  refine ⟨b, ?_⟩
   first
-  | simpa [pow_two] using hq_eq
-  | simpa [pow_two] using hq_eq.symm
-
-/-- Prime-divisibility formulation of `perfect_sq_of_valuation`. -/
-theorem sq_of_cube_div_sq (q b : ℕ) (hq : 2 ≤ q) (hb : 0 < b)
-    (hdvd : b ^ 2 ∣ q ^ 3)
-    (hcop_rhs : ∀ (ℓ : ℕ), Nat.Prime ℓ → ℓ ∣ q → ¬(ℓ ∣ (q ^ 3 / b ^ 2))) :
-    IsSquare q := by
-  apply perfect_sq_of_valuation q b hq hdvd
-  exact Nat.coprime_of_dvd' (by
-    intro ℓ hℓ hℓN hℓq
-    exact False.elim ((hcop_rhs ℓ hℓ hℓq) hℓN))
+  | simpa [pow_two] using hq_eq_b2
+  | simpa [pow_two] using hq_eq_b2.symm
 ```
