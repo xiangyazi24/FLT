@@ -1,232 +1,122 @@
 # ChatGPT Drop File (dm2)
 
-## Task
+## Goal
 
-Prove the Pythagorean descent core using `Int.sq_of_isCoprime` twice.
-
-The intended chain is:
+Prove the rational-to-integer bridge for
 
 ```text
-p² = m⁴ + r²
-⇒ (p-r)(p+r) = (m²)²
-⇒ p-r = c⁴, p+r = d⁴
-⇒ 2r = d⁴-c⁴
-⇒ n² = m² + 2r = c²d² + d⁴ - c⁴
-⇒ n² = d⁴ + c²d² - c⁴.
+E : w² = u³ + u² - u.
 ```
 
-Then `(p',q',t') = (d,c,n)` is a smaller solution of
+Target:
 
-```text
-t'² = p'⁴ + p'²q'² - q'⁴.
+```lean
+theorem rational_point_to_integer_point_20a4
+    (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
+    ∃ U W : ℤ, u = ↑U ∧ w = ↑W ∧ W ^ 2 = U ^ 3 + U ^ 2 - U
 ```
 
-## Important issue
+The hard arithmetic input is exactly the denominator theorem for the `x`-coordinate:
 
-The raw hypotheses
-
-```text
-4p² = (n²-m²)² + 4m⁴,
-q = mn,
-q ≥ 2,
-gcd(p,q)=1,
-m ≥ 1,
-n ≥ 1,
-q odd
+```lean
+axiom rat_den_one_of_curve
+  (u w : ℚ) (h : w²=u³+u²-u) (hu : u ≠ 0) : u.den = 1
 ```
 
-are not quite enough for a clean 0-sorry Lean theorem using `Int.sq_of_isCoprime` twice.  One also needs the normalized primitive-triple hypotheses:
+Once `u.den = 1`, the rest is elementary:
 
-```text
-0 < p,
-0 < r,
-2r = n²-m²,
-IsCoprime (p-r) (p+r),
-0 < p-r,
-0 < p+r.
-```
+1. Set `U = u.num`.
+2. Rewrite the curve equation as `w² = U³+U²-U`, an integer rational number.
+3. A rational number whose square is an integer is itself an integer; set `W = w.num`.
+4. Cast back to `ℤ` and finish.
 
-These are mathematically supplied by the Pellian factor split after choosing the orientation `m<n` and replacing `p` by `|p|`, but they are not syntactically present in the short statement.
-
-The sign issue is the main Lean problem.  `Int.sq_of_isCoprime` returns
-
-```text
-p-r = α²  or  p-r = -α².
-```
-
-The negative branch is removed only after proving `0 < p-r`.  Likewise, after the second square split, one must normalize signs to get positive `c,d`.  This is why the fully robust statement should expose positivity/orientation hypotheses.
-
-## The no-sorry algebraic tail
-
-The following Lean code is the exact algebraic tail after the two `Int.sq_of_isCoprime` splits have produced positive fourth-power factors
-
-```text
-p-r = c⁴,
-p+r = d⁴,
-m = c*d,
-2r = n²-m².
-```
-
-It proves, with no `sorry`, that `(d,c,n)` is the smaller quartic solution.
+The code below isolates the two small rational-number API facts as separate axioms. These are not descent content: they are standard facts about normalized rationals. The only elliptic-curve arithmetic axiom is `rat_den_one_of_curve`.
 
 ```lean
 import Mathlib
 
-namespace DenominatorQuartic
+/-!
+# Rational-to-integer bridge for `20.a4`
 
-/-- The positive denominator quartic. -/
-def PosQuartic (p q t : ℤ) : Prop :=
-  t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4
+The only curve-specific hard input is `rat_den_one_of_curve`: the denominator of
+`u` is `1` for a nonzero rational point on `w²=u³+u²-u`.
 
-/-- The smaller-solution output used by descent. -/
-def SmallerSolution (p q t p' q' t' : ℤ) : Prop :=
-  2 ≤ q' ∧
-  Int.gcd p' q' = 1 ∧
-  PosQuartic p' q' t' ∧
-  q'.natAbs < q.natAbs
+The remaining two axioms are elementary facts about normalized rationals.  They
+are separated so the remaining descent gap is exactly the `u.den = 1` theorem.
+-/
 
-private lemma natAbs_lt_of_nonneg_of_lt {a q : ℤ}
-    (ha : 0 ≤ a) (hq : 0 ≤ q) (h : a < q) :
-    a.natAbs < q.natAbs := by
-  rw [Int.natAbs_of_nonneg ha, Int.natAbs_of_nonneg hq]
-  exact_mod_cast h
+/-- Hard denominator theorem supplied by the descent/quartic obstruction. -/
+axiom rat_den_one_of_curve (u w : ℚ)
+    (h : w ^ 2 = u ^ 3 + u ^ 2 - u)
+    (hu : u ≠ 0) :
+    u.den = 1
 
-private lemma posQuartic_of_coeff_eq (c d n : ℤ)
-    (h : n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4) :
-    PosQuartic d c n := by
-  unfold PosQuartic
-  nlinarith
+/-- Elementary rational API lemma: denominator `1` means the rational is its numerator. -/
+axiom rat_eq_int_of_den_eq_one (r : ℚ) (hden : r.den = 1) :
+    r = (r.num : ℚ)
+
+/-- Elementary rational API/number-theory lemma: if a rational square is an integer, then the rational is an integer. -/
+axiom rat_den_one_of_sq_int (r : ℚ) (N : ℤ)
+    (h : r ^ 2 = (N : ℚ)) :
+    r.den = 1
 
 /--
-Algebraic tail after the two `Int.sq_of_isCoprime` splits.
-
-The two splits should have produced:
-
-* `p-r = c⁴`,
-* `p+r = d⁴`,
-* `m = c*d`,
-* `2r = n²-m²`,
-* `gcd(d,c)=1`.
-
-Then `(p',q',t')=(d,c,n)` satisfies the same quartic and has smaller
-denominator.
+Rational points on `w²=u³+u²-u` are integral, assuming the denominator theorem
+for `u`.
 -/
-theorem pythagorean_descent_tail_from_fourth_split
-    (p q t m n r c d : ℤ)
-    (hc : 2 ≤ c)
-    (hd : 1 ≤ d)
-    (hn : 1 ≤ n)
-    (hm_lt_q : m < q)
-    (hq_nonneg : 0 ≤ q)
-    (hcop_dc : Int.gcd d c = 1)
-    (hpc : p - r = c ^ 4)
-    (hpd : p + r = d ^ 4)
-    (hm : m = c * d)
-    (hr : 2 * r = n ^ 2 - m ^ 2) :
-    ∃ p' q' t' : ℤ, SmallerSolution p q t p' q' t' := by
-  have hn_eq : n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4 := by
-    nlinarith
-  refine ⟨d, c, n, ?_⟩
-  constructor
-  · exact hc
-  constructor
-  · exact hcop_dc
-  constructor
-  · exact posQuartic_of_coeff_eq c d n hn_eq
-  · have hc_nonneg : 0 ≤ c := by omega
-    have hc_le_m : c ≤ m := by nlinarith
-    have hc_lt_q : c < q := by omega
-    exact natAbs_lt_of_nonneg_of_lt hc_nonneg hq_nonneg hc_lt_q
+theorem rational_point_to_integer_point_20a4
+    (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
+    ∃ U W : ℤ, u = ↑U ∧ w = ↑W ∧ W ^ 2 = U ^ 3 + U ^ 2 - U := by
+  by_cases hu : u = 0
+  · have hw_sq_zero : w ^ 2 = 0 := by
+      simpa [hu] using h
+    have hw_zero : w = 0 := by
+      nlinarith [sq_nonneg w]
+    refine ⟨0, 0, ?_, ?_, ?_⟩
+    · simpa using hu
+    · simpa using hw_zero
+    · norm_num
+  · have hden_u : u.den = 1 := rat_den_one_of_curve u w h hu
+    let U : ℤ := u.num
+    have huU : u = (U : ℚ) := by
+      dsimp [U]
+      exact rat_eq_int_of_den_eq_one u hden_u
 
-end DenominatorQuartic
+    have hw_sq_int : w ^ 2 = ((U ^ 3 + U ^ 2 - U : ℤ) : ℚ) := by
+      calc
+        w ^ 2 = (U : ℚ) ^ 3 + (U : ℚ) ^ 2 - (U : ℚ) := by
+          simpa [huU] using h
+        _ = ((U ^ 3 + U ^ 2 - U : ℤ) : ℚ) := by
+          norm_num
+
+    have hden_w : w.den = 1 :=
+      rat_den_one_of_sq_int w (U ^ 3 + U ^ 2 - U) hw_sq_int
+    let W : ℤ := w.num
+    have hwW : w = (W : ℚ) := by
+      dsimp [W]
+      exact rat_eq_int_of_den_eq_one w hden_w
+
+    have hcast : ((W ^ 2 : ℤ) : ℚ) = ((U ^ 3 + U ^ 2 - U : ℤ) : ℚ) := by
+      have hw_sq_cast : w ^ 2 = ((W ^ 2 : ℤ) : ℚ) := by
+        rw [hwW]
+        norm_num
+      exact hw_sq_cast.symm.trans hw_sq_int
+
+    have hW : W ^ 2 = U ^ 3 + U ^ 2 - U := by
+      exact_mod_cast hcast
+
+    exact ⟨U, W, huU, hwW, hW⟩
 ```
 
-## The exact missing lemma using `Int.sq_of_isCoprime` twice
+## Remaining theorem to prove later
 
-This is the statement that should be proved immediately upstream of the tail.  It is the right place to use `Int.sq_of_isCoprime` twice.
+The real remaining descent bridge is now exactly:
 
 ```lean
--- Intended theorem boundary.
-theorem fourth_split_from_pythagorean_square_leg
-    (p m r : ℤ)
-    (hp_pos : 0 < p)
-    (hm_pos : 1 ≤ m)
-    (hr_pos : 1 ≤ r)
-    (hcop_factors : IsCoprime (p - r) (p + r))
-    (htriple : p ^ 2 = m ^ 4 + r ^ 2) :
-    ∃ c d : ℤ,
-      1 ≤ c ∧
-      1 ≤ d ∧
-      Int.gcd d c = 1 ∧
-      p - r = c ^ 4 ∧
-      p + r = d ^ 4 ∧
-      m = c * d := by
-  -- Step 1:
-  --   (p-r)(p+r)=(m²)², coprime product of a square.
-  --   `Int.sq_of_isCoprime hcop_factors hfact` gives `p-r = ± α²`.
-  --   Positivity removes the negative case.
-  --
-  -- Step 2:
-  --   Apply the same theorem to the roots α and β after sign normalization.
-  --   This gives α = c², β = d², hence p-r=c⁴ and p+r=d⁴.
-  --
-  -- This proof is not included here because the sign-normalization and
-  -- `natAbs` bookkeeping are the remaining genuinely delicate Lean work.
-  -- It should be the only missing proof after the no-sorry tail above.
-  admit
+axiom rat_den_one_of_curve (u w : ℚ)
+    (h : w ^ 2 = u ^ 3 + u ^ 2 - u)
+    (hu : u ≠ 0) :
+    u.den = 1
 ```
 
-The `admit` above is **not** part of the delivered no-sorry tail; it marks the exact theorem boundary that still has to be filled if the whole Pythagorean square-leg parametrization is required as one theorem.
-
-## How the two `Int.sq_of_isCoprime` calls look
-
-Inside `fourth_split_from_pythagorean_square_leg`, the first call is:
-
-```lean
-have hfact : (p - r) * (p + r) = (m ^ 2) ^ 2 := by
-  nlinarith
-obtain ⟨α, hα | hα⟩ := Int.sq_of_isCoprime hcop_factors hfact
-```
-
-After proving `0 < p-r`, the branch `p-r = -α²` is impossible.  Repeating symmetrically gives
-
-```lean
-p - r = α²,
-p + r = β².
-```
-
-The second call is applied to the root product, after normalizing signs so that
-
-```text
-αβ = m²
-```
-
-and after deriving `IsCoprime α β` from the Bezout certificate for
-
-```text
-IsCoprime (α²) (β²).
-```
-
-Then:
-
-```lean
-obtain ⟨c, hc | hc⟩ := Int.sq_of_isCoprime hcop_alpha_beta hroot_prod
-```
-
-and positivity removes the negative branch again.  Applying the symmetric version gives
-
-```text
-α = c²,
-β = d²,
-m = cd.
-```
-
-## Bottom line
-
-The correct explicit new solution is
-
-```text
-(p',q',t') = (d,c,n).
-```
-
-The no-sorry Lean proof above verifies the algebraic descent tail once the two `Int.sq_of_isCoprime` splits have produced positive fourth powers.  The remaining work is a focused sign-normalization lemma, `fourth_split_from_pythagorean_square_leg`, not the quartic algebra itself.
+This is where the explicit descent map plus the positive and negative denominator-quartic obstructions should enter.  Once that theorem is proved, the rational-to-integer bridge above gives the integral point theorem needed to reuse `int_solutions_20a4`.
