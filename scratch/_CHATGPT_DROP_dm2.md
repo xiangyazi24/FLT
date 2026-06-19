@@ -1,6 +1,7 @@
-# Lean drop: coprime square equation forces square denominator
+# Lean drop: square denominator from coprime square equation
 
-The key lemma is `nat_isSquare_of_sq_mul_eq_sq_mul`.  It uses no valuations or multiplicities: the equation plus the two coprimality assumptions give both divisibilities `q ∣ b^2` and `b^2 ∣ q`, hence `q = b^2`.
+All proofs below are complete.  The natural-number core is the key argument:
+from `a^2 * q = b^2 * N`, coprimality gives both `q ∣ b^2` and `b^2 ∣ q`, hence `q = b^2`.
 
 ```lean
 import Mathlib
@@ -11,8 +12,7 @@ namespace ScratchDenominator
 Natural-number core.
 
 If `a^2 * q = b^2 * N`, `gcd(a,b)=1`, and `gcd(q,N)=1`, then `q` is a
-square.  The hypothesis `2 ≤ q` is included to match the denominator use case,
-but the proof itself does not need it.
+square.  No valuation or multiplicity argument is used.
 -/
 lemma nat_isSquare_of_sq_mul_eq_sq_mul
     {a b q N : ℕ}
@@ -39,7 +39,7 @@ lemma nat_isSquare_of_sq_mul_eq_sq_mul
   rw [hq_eq]
   exact ⟨b, by simp [pow_two]⟩
 
-/-- Same lemma with `Nat.gcd = 1` hypotheses instead of `Nat.Coprime`. -/
+/-- Same lemma, with `Nat.gcd = 1` hypotheses instead of `Nat.Coprime`. -/
 lemma nat_isSquare_of_sq_mul_eq_sq_mul_gcd
     {a b q N : ℕ}
     (hq : 2 ≤ q)
@@ -55,10 +55,10 @@ lemma nat_isSquare_of_sq_mul_eq_sq_mul_gcd
     h
 
 /--
-Integer numerator/denominator wrapper.
+Integer wrapper for a cleared rational equation.
 
-This is the version closest to a cleared rational equation:
-`a^2 * q = b^2 * N`, with `a b N : ℤ`, `q : ℕ`, and coprimality stated as
+This is the direct form for `a b N : ℤ`, `q : ℕ`:
+`a^2 * q = b^2 * N`, with coprimality stated as
 `gcd(|a|,|b|)=1` and `gcd(q,|N|)=1`.
 -/
 lemma int_isSquare_of_sq_mul_eq_sq_mul
@@ -93,8 +93,7 @@ lemma int_isSquare_of_sq_mul_eq_sq_mul_gcd
     h
 
 /--
-Variant for the common rational-denominator normalization where the denominator
-`b` is already a natural number.
+Variant where the denominator `b` is already a natural number, as for `Rat.den`.
 -/
 lemma int_natDen_isSquare_of_sq_mul_eq_sq_mul
     {a N : ℤ} {b q : ℕ}
