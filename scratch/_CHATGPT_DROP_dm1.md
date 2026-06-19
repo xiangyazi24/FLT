@@ -1,6 +1,6 @@
-# `primitive_square_leg_descent_from_pythagoreanTriple`
+# `primitive_square_leg_descent_from_pythagoreanTriple`: exact descent reduction
 
-I read `scratch/PythagoreanDescentCore.lean` on `ai-scratch`.  The exact axiom there is:
+I read `scratch/PythagoreanDescentCore.lean`.  The target axiom asks for the following theorem:
 
 ```lean
 private axiom primitive_square_leg_descent_from_pythagoreanTriple
@@ -19,50 +19,27 @@ private axiom primitive_square_leg_descent_from_pythagoreanTriple
       a.natAbs < q.natAbs
 ```
 
-The mathematical route is correct, but the theorem is not a direct one-line consequence of `PythagoreanTriple.even_odd_of_coprime`.  That Mathlib lemma gives the parity orientation of a primitive triple; it does not, by itself, produce the full parametrization and the square-factor split of `(s-t)(s+t)=m²` needed here.
+The proposed scratch proof from
 
-The proof needs the following package:
+\[
+p^2-r^2=m^4,\qquad (p-r)(p+r)=m^4
+\]
 
-1. derive that `m,n` are odd from `hr`, `hqmn`, `hcop`, and `hq`;
-2. derive primitivity of the triple `(m²,r,p)` from `hcop`;
-3. apply or prove primitive Pythagorean parametrization:
+is the right idea, but the full theorem still needs a substantial primitive-square-leg descent package.  The direct use of `Int.sq_of_isCoprime` works only after proving all of the following:
+
+1. `m` is odd, `r` is even, and `p` is odd;
+2. `gcd(p,r)=1`, hence `gcd(p-r,p+r)=1` because both factors are odd;
+3. after splitting `(p-r)(p+r)=m⁴`, the signs are oriented correctly, typically by replacing `p` with `|p|`;
+4. the fourth-power split gives `p-r=c⁴`, `p+r=d⁴`, and `cd=m` up to signs;
+5. combining `2r=d⁴-c⁴` with `2r=n²-m²` gives
    \[
-   m^2 = S^2-T^2,\qquad r=2ST,\qquad p=S^2+T^2;
+   n²=d⁴+c²d²-c⁴;
    \]
-4. split
-   \[
-   m^2=(S-T)(S+T)
-   \]
-   into two coprime squares:
-   \[
-   S-T=c^2,\qquad S+T=d^2,\qquad cd=m;
-   \]
-5. compare
-   \[
-   2r=n^2-m^2=d^4-c^4
-   \]
-   and conclude
-   \[
-   n^2=d^4+c^2d^2-c^4.
-   \]
+6. the chosen denominator `c` satisfies `2 ≤ c` and `c.natAbs < q.natAbs`.
 
-Thus the witness is `(a,b)=(c,d)` in the axiom’s convention, so the quartic equation appears as
+The last item is not automatic from `cd=m` and `mn=q`: if `c=±1`, the new denominator would be `1`, and one must rule out that terminal case separately or choose the other factor.  So the denominator-drop part is not just algebra; it is part of the descent theorem.
 
-```lean
-n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4
-```
-
-which is exactly
-
-```lean
-n ^ 2 = b ^ 4 + b ^ 2 * a ^ 2 - a ^ 4
-```
-
-with `a=c`, `b=d`.
-
-## Lean code: exact wrapper around the missing parametrization package
-
-The following code gives the cleanest Lean structure I can write from the available local signature.  The remaining axiom is the exact strengthened Pythagorean-parametrization theorem needed to close the proof.  It is stronger than `PythagoreanTriple.even_odd_of_coprime`: it includes parametrization, the square split, and the denominator drop.
+Below is the Lean code for the exact algebraic core and a wrapper.  It uses no `sorry`, but it isolates the true missing theorem as one named axiom.  This is the precise theorem that must be proved by the `Int.sq_of_isCoprime` factorization argument if we want to remove the axiom.
 
 ```lean
 import Mathlib
@@ -70,18 +47,35 @@ import Mathlib
 namespace Scratch.ChatGPTDropDM1
 
 #check PythagoreanTriple
-#check PythagoreanTriple.even_odd_of_coprime
+#check Int.sq_of_isCoprime
 
 /--
-The actual primitive square-leg parametrization/descent package needed here.
+The algebraic identity at the end of the square-leg descent.
 
-It packages:
-* parity/primitivity of `(m²,r,p)`,
-* primitive Pythagorean parametrization,
-* the coprime square split of `(S-T)(S+T)=m²`, and
-* the strict denominator drop.
+If the fourth-power split gives `m = c*d` and the two expressions for `2r`
+are `2r = n²-m²` and `2r = d⁴-c⁴`, then the new triple `(p',q',t')=(d,c,n)`
+satisfies the same denominator quartic.
 -/
-private axiom primitive_square_leg_param_and_drop
+private lemma quartic_identity_from_fourth_power_split
+    (c d m n r : ℤ)
+    (hm : m = c * d)
+    (hr_old : 2 * r = n ^ 2 - m ^ 2)
+    (hr_new : 2 * r = d ^ 4 - c ^ 4) :
+    n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4 := by
+  subst m
+  nlinarith
+
+/--
+The real primitive square-leg descent package.
+
+This is what the suggested proof by factoring `(p-r)(p+r)=m⁴` must establish.
+It packages:
+* parity and primitivity of the factors;
+* the coprime fourth-power split using `Int.sq_of_isCoprime` twice;
+* sign normalization;
+* denominator nontriviality and strict drop.
+-/
+private axiom primitive_square_leg_factor_descent
     (p q m n r : ℤ)
     (hq : 2 ≤ q)
     (hcop : Int.gcd p q = 1)
@@ -93,12 +87,13 @@ private axiom primitive_square_leg_param_and_drop
     ∃ c d : ℤ,
       2 ≤ c ∧
       Int.gcd d c = 1 ∧
-      n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4 ∧
-      c.natAbs < q.natAbs
+      c.natAbs < q.natAbs ∧
+      m = c * d ∧
+      2 * r = d ^ 4 - c ^ 4
 
 /--
-The algebraic final step: the parametrization package already returns the
-quartic identity in the form needed by `PythagoreanDescentCore.lean`.
+The target theorem from `scratch/PythagoreanDescentCore.lean`, reduced to the
+primitive square-leg factor descent package.
 -/
 private theorem primitive_square_leg_descent_from_pythagoreanTriple
     (p q m n r : ℤ)
@@ -114,47 +109,26 @@ private theorem primitive_square_leg_descent_from_pythagoreanTriple
       Int.gcd b a = 1 ∧
       n ^ 2 = b ^ 4 + b ^ 2 * a ^ 2 - a ^ 4 ∧
       a.natAbs < q.natAbs := by
-  obtain ⟨c, d, hc, hcopdc, hquartic, hdrop⟩ :=
-    primitive_square_leg_param_and_drop
+  obtain ⟨c, d, hc_ge, hcopdc, hdrop, hmcd, hrdc⟩ :=
+    primitive_square_leg_factor_descent
       p q m n r hq hcop hmpos hnpos hqmn hr htriple
-  exact ⟨c, d, hc, hcopdc, hquartic, hdrop⟩
+  refine ⟨c, d, hc_ge, hcopdc, ?_, hdrop⟩
+  exact quartic_identity_from_fourth_power_split c d m n r hmcd hr hrdc
 
 /--
-The core algebra identity used inside the parametrization package.
-If `m=c*d` and `2r=d⁴-c⁴`, while also `2r=n²-m²`, then the new quartic
-identity follows.
+A small sanity check: the last algebraic identity is exactly the desired quartic
+with `(p',q',t') = (d,c,n)`.
 -/
-private lemma quartic_identity_from_square_leg_params
-    (c d m n r : ℤ)
-    (hm : m = c * d)
-    (hr1 : 2 * r = n ^ 2 - m ^ 2)
-    (hr2 : 2 * r = d ^ 4 - c ^ 4) :
+example (c d n : ℤ)
+    (h : n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4) :
     n ^ 2 = d ^ 4 + d ^ 2 * c ^ 2 - c ^ 4 := by
-  subst m
-  nlinarith
-
-/--
-The parametrized formula for `r`: if
-`S=(c²+d²)/2`, `T=(d²-c²)/2`, then
-`2*S*T = (d⁴-c⁴)/2`, equivalently `4*S*T=d⁴-c⁴`.
-This is the algebra one uses after the Pythagorean parametrization.
--/
-private lemma square_leg_param_r_identity (c d S T : ℤ)
-    (hS : 2 * S = c ^ 2 + d ^ 2)
-    (hT : 2 * T = d ^ 2 - c ^ 2) :
-    4 * S * T = d ^ 4 - c ^ 4 := by
-  nlinarith
+  exact h
 
 end Scratch.ChatGPTDropDM1
 ```
 
-## Why I did not claim a `0 sorry` proof
+## Why this is the honest final shape
 
-The requested theorem is the hard part of Fermat’s square-leg descent, not just an application of the parity lemma.  In particular:
+The requested “prove it from scratch with `Int.sq_of_isCoprime` twice” is mathematically plausible, but it is still a full primitive square-leg descent.  In Lean, that descent is not just the four-line algebra at the end; it includes sign handling, parity, factor coprimality, extracting fourth roots from coprime factors, and proving `2 ≤ c` plus `c.natAbs < q.natAbs`.
 
-* `PythagoreanTriple.even_odd_of_coprime` is a parity/orientation lemma, not the full parametrization theorem.
-* The proof still needs a theorem that a primitive Pythagorean triple is parametrized by `S,T`.
-* It also needs the coprime square split of `(S-T)(S+T)=m²`.
-* Finally, it must prove the strict denominator drop.
-
-Those steps are exactly the contents of `primitive_square_leg_param_and_drop` above.  Once that package is available, the exact axiom in `scratch/PythagoreanDescentCore.lean` closes immediately with the wrapper shown.
+The code above closes the target once the genuine factor-descent theorem is available and identifies exactly what that theorem must state.  I did not replace it with a fake proof, because the denominator nontriviality and sign-normalization steps are substantive and cannot be inferred from the displayed equations alone without additional lemmas.
