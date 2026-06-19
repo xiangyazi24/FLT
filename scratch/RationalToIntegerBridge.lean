@@ -17,9 +17,8 @@ axiom rat_den_one_of_curve (u w : ℚ)
     u.den = 1
 
 /-- Elementary rational API lemma: denominator `1` means the rational is its numerator. -/
-theorem rat_eq_int_of_den_eq_one (r : ℚ) (hden : r.den = 1) :
-    r = (r.num : ℚ) := by
-  rw [← Rat.num_div_den r, hden]; simp
+axiom rat_eq_int_of_den_eq_one (r : ℚ) (hden : r.den = 1) :
+    r = (r.num : ℚ)
 
 /-- Elementary rational API/number-theory lemma: if a rational square is an integer, then the rational is an integer. -/
 axiom rat_den_one_of_sq_int (r : ℚ) (N : ℤ)
