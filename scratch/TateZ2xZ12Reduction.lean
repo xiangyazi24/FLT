@@ -673,6 +673,102 @@ theorem exists_tate_parameters_of_order12_and_independent_2torsion
       (x₂ := tateX6 b c) (y₂ := tateY6 b c)
       (h₁ := hT) (h₂ := h6) hT2' h6P2' hne
 
+/-! ## The explicit map to the `N = 12` obstruction curve -/
+
+def R12 (q t : ℚ) : ℚ :=
+  -q ^ 8 * t ^ 3
+    + 24 * q ^ 6 * t ^ 3
+    + 88 * q ^ 5 * t ^ 2
+    + 22 * q ^ 4 * t ^ 3
+    + 128 * q ^ 4 * t
+    + 80 * q ^ 3 * t ^ 2
+    + 64 * q ^ 3
+    + 16 * q ^ 2 * t ^ 3
+    + 64 * q ^ 2 * t
+    + 24 * q * t ^ 2
+    + 3 * t ^ 3
+
+def K12 (q t : ℚ) : ℚ :=
+  q ^ 4 * t + 4 * q ^ 3 + 6 * q ^ 2 * t + 4 * q + t
+
+def q12 (b c x : ℚ) : ℚ :=
+  c * x / (x - b)
+
+def t12 (b c x : ℚ) : ℚ :=
+  b * (b - x) / (-b ^ 2 + 2 * b * x + (c - 1) * x ^ 2)
+
+def A12 (q t : ℚ) : ℚ :=
+  4 * q + t * (3 * q ^ 2 + 1)
+
+def B12 (q t : ℚ) : ℚ :=
+  t * (q ^ 2 - 1)
+
+def uN12 (b c x : ℚ) : ℚ :=
+  let q := q12 b c x
+  let t := t12 b c x
+  let A := A12 q t
+  let B := B12 q t
+  (A ^ 2 + B ^ 2) / (A * B)
+
+def wN12 (b c x : ℚ) : ℚ :=
+  let q := q12 b c x
+  let t := t12 b c x
+  let A := A12 q t
+  let B := B12 q t
+  q * (A ^ 2 - B ^ 2) / A ^ 2
+
+lemma N12_target_identity
+    (q t : ℚ)
+    (hA : A12 q t ≠ 0) (hB : B12 q t ≠ 0) :
+    let A := A12 q t
+    let B := B12 q t
+    let u := (A ^ 2 + B ^ 2) / (A * B)
+    let w := q * (A ^ 2 - B ^ 2) / A ^ 2
+    w ^ 2 - (u ^ 3 - u ^ 2 - 4 * u + 4)
+      =
+    - ((A - B) ^ 2 * (A + B) ^ 2 * R12 q t) / (A ^ 4 * B ^ 3) := by
+  field_simp [A12, B12, R12, hA, hB]
+  simp only [A12, B12, R12]
+  ring_nf
+
+lemma E_N12_point_of_R12
+    (q t : ℚ)
+    (hA : A12 q t ≠ 0) (hB : B12 q t ≠ 0)
+    (hR : R12 q t = 0) :
+    let A := A12 q t
+    let B := B12 q t
+    let u := (A ^ 2 + B ^ 2) / (A * B)
+    let w := q * (A ^ 2 - B ^ 2) / A ^ 2
+    w ^ 2 = u ^ 3 - u ^ 2 - 4 * u + 4 := by
+  have h := N12_target_identity q t hA hB
+  dsimp at h ⊢
+  rw [hR, mul_zero] at h
+  norm_num at h
+  nlinarith
+
+lemma tate_two_torsion_x_ne_zero
+    {b c x : ℚ}
+    (hb : b ≠ 0)
+    (hroot : tateTwoTorsionCubic b c x = 0) :
+    x ≠ 0 := by
+  intro hx
+  rw [hx] at hroot
+  unfold tateTwoTorsionCubic at hroot
+  simp at hroot
+  exact hb hroot
+
+lemma tate_two_torsion_x_ne_b
+    {b c x : ℚ}
+    (hb : b ≠ 0) (hc : c ≠ 0)
+    (hroot : tateTwoTorsionCubic b c x = 0) :
+    x - b ≠ 0 := by
+  intro hxb
+  have hx : x = b := sub_eq_zero.mp hxb
+  rw [hx] at hroot
+  unfold tateTwoTorsionCubic at hroot
+  ring_nf at hroot
+  exact (mul_ne_zero (pow_ne_zero 2 hb) (pow_ne_zero 2 hc)) hroot
+
 end
 
 end Scratch.TateZ2xZ12Reduction
