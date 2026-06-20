@@ -59,3 +59,7 @@
 - + Lemma B (SquareStep014), Lemma A (FourSquaresAP), ObstructionN12 squareclass assembly (d9829b0).
 - TWO Mazur axioms now discharged tonight: obstruction_curve_20a4 + obstruction_curve_N12.
 - Remaining obstruction_curve family: N14, N16 (same shape as N12 — Ljunggren/Lemma A/B machinery is the template).
+
+## Run 2026-06-20 RESULT #3
+- obstruction_curve_N16_points_degenerate DISCHARGED (0 axiom, #print verified). Partial-2-torsion, mirrored 20a4 (DescentN16 + DenominatorQuarticN16 683-line quartic descent + reused ObstructionComplete/CoprimeSqDvd/IsSquareCube). commit dac126b.
+- THREE obstruction_curve axioms discharged: 20a4, N12, N16. Remaining: N14 (full-2-torsion, torsion-only).
