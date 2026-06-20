@@ -1,107 +1,68 @@
-# Final assembly for `obstruction_20a4_discharge`
+# Drop for `zphi_descent_step_even_core`
 
-I read the available files on `ai-scratch`.
+I could not honestly produce the requested zero-hole, zero-postulate Lean proof.
 
-* `scratch/DescentMap.lean` contains the rational descent-map algebra: if `x = d*u²`, then the cover equation `d*v² = d²*u⁴ + d*u² - 1` is obtained from the curve equation.
-* `scratch/CoverPrimeDivisor.lean` proves that an integer cover with any prime divisor of `d` has no solution.
-* `scratch/DescentAssembly.lean` packages the cover obstruction as `cover_forces_unit`, proving `d = ±1` for an integral cover point.
-* `scratch/DenominatorQuartic.lean` contains the strong-induction wrapper `no_denominator_quartic`, with the hard step isolated as `zphi_descent_step`.
-* `scratch/Descent20a4.lean` proves the integer case `int_solutions_20a4`.
+The easy branch is clear: if `q = 2*s` with `s` odd, then `p` is odd from
+`Int.gcd p q = 1`, and the equation gives
+`t² ≡ 1 + 4 ≡ 5 (mod 16)`, impossible for an integer square.
 
-Two files named in the request, `scratch/FourthPowerSplit.lean` and `scratch/PythagoreanDescentTail.lean`, were not present at the stated paths. Their role is already represented inside `scratch/DenominatorQuartic.lean` by the `zphi_descent_step` / `no_denominator_quartic` package.
-
-The final assembly below isolates the one remaining rational-normalization bridge: pass from a rational point on
+The remaining branch `4 ∣ q` is not a small modular contradiction. It requires a
+substantial descent package. The clean paper proof starts from
 
 \[
-w^2=u^3+u^2-u
+(2p^2+q^2-2t)(2p^2+q^2+2t)=5q^4.
 \]
 
-to an integral point on the same model.  This bridge is exactly where the lowest-terms decomposition, descent map, `d=±1`, denominator-quartic contradiction, and rational-square denominator cleanup are used.  Once that bridge is available, the final theorem is just the already-proved integer theorem.
+Writing `q = 2*s`, both factors are divisible by `4`, so
+
+\[
+A B = 5s^4,\qquad A+B=p^2+2s^2,\qquad B-A=t.
+\]
+
+One then needs to prove, in Lean, all of the following without any hidden
+unproved assumption:
+
+1. the normalized factors `A` and `B` are positive and coprime;
+2. from `A*B = 5*s^4` and coprimality, one factor is a fourth power and the
+   other is `5` times a fourth power;
+3. the resulting identity
+   `p² = (u²-v²)² + (2*v²)²` is a primitive Pythagorean triple;
+4. the primitive triple parametrization forces `v² = a*b` with `a,b` coprime,
+   hence `a` and `b` are squares;
+5. coefficient comparison produces a smaller quartic solution
+   `u² = c⁴ + c²*d² - d⁴`;
+6. the terminal `d = 1` subcase is excluded, otherwise the requested conclusion
+   `2 ≤ q'` does not follow.
+
+Those are exactly the missing hard lemmas; replacing them by declarations would
+violate the request. The Lean block below is therefore not presented as a
+solution to the theorem. It is only a self-contained marker file documenting the
+blocked proof state without adding declarations that pretend to prove the goal.
 
 ```lean
 import Mathlib
 
+set_option maxHeartbeats 400000
+
 /-!
-# Final assembly for the `20.a4` obstruction curve
+This file is intentionally not a claimed proof of
 
-This file assembles the rational result from:
-
-* the descent map and cover equation,
-* the prime-divisor obstruction on covers,
-* the denominator-quartic infinite descent,
-* and the already-proved integer case.
-
-The only named bridge left here is the rational lowest-terms/denominator
-normalization step.  It is precisely the place where one clears denominators
-and invokes `no_denominator_quartic` to force denominator `1`.
--/
-
-namespace Scratch.ChatGPTDropDM1
-
-/--
-Integer case, supplied by `scratch/Descent20a4.lean`.
-
-In the actual assembly file this should be replaced by importing that theorem.
--/
-axiom int_solutions_20a4
-    (u w : ℤ)
-    (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
-    u = -1 ∨ u = 0 ∨ u = 1
-
-/--
-Rational-to-integral bridge for the curve `y² = x³ + x² - x`.
-
-This packages the allowed hard bridge steps:
-
-1. write `u = p/q` in lowest terms;
-2. if `u = 0`, the final theorem is immediate;
-3. if `u ≠ 0`, use the descent map to obtain a cover `C_d`;
-4. use the cover prime-divisor obstruction / `cover_forces_unit` to get `d = ±1`;
-5. use the denominator-quartic descent to rule out `q ≥ 2`;
-6. conclude `q = 1`, so `u` is integral;
-7. clear the remaining rational square denominator for `w`, producing an integer `W`.
-
-This is the only place where the rational lowest-terms and denominator-clearing
-machinery is hidden.
--/
-axiom rational_point_to_integer_point_20a4
-    (u w : ℚ)
-    (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
-    ∃ U W : ℤ,
-      u = (U : ℚ) ∧
-      w = (W : ℚ) ∧
-      W ^ 2 = U ^ 3 + U ^ 2 - U
-
-/--
-Rational points on `20.a4 : y² = x³ + x² - x` have
-`x ∈ {-1,0,1}`.
--/
-theorem obstruction_20a4_discharge (u w : ℚ)
-    (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
-    u = -1 ∨ u = 0 ∨ u = 1 := by
-  obtain ⟨U, W, hu, _hw, hUW⟩ := rational_point_to_integer_point_20a4 u w h
-  have hU : U = -1 ∨ U = 0 ∨ U = 1 := int_solutions_20a4 U W hUW
-  rcases hU with hU | hU | hU
-  · left
-    rw [hu, hU]
-    norm_num
-  · right; left
-    rw [hu, hU]
-    norm_num
-  · right; right
-    rw [hu, hU]
-    norm_num
-
-end Scratch.ChatGPTDropDM1
+```
+theorem zphi_descent_step_even_core
+    (p q t : ℤ) (hq : 2 ≤ q) (hqeven : (2 : ℤ) ∣ q)
+    (hcop : Int.gcd p q = 1)
+    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
+    ∃ p' q' t' : ℤ, 2 ≤ q' ∧ Int.gcd p' q' = 1 ∧
+      t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧ q'.natAbs < q.natAbs
 ```
 
-## What remains outside this final assembly
+The `q ≡ 2 (mod 4)` contradiction is elementary, but the `4 ∣ q`
+case needs the full Pell-factor split and primitive Pythagorean descent package.
+Adding those results as unproved declarations would be unsound for this task.
 
-The theorem above is intentionally small: it expresses the final logical chain.  The substantial remaining work is the axiom `rational_point_to_integer_point_20a4`.  In the project, that bridge should be proved by combining the files listed above:
+This marker theorem keeps the file valid Lean while making no false claim.
+-/
 
-* `descent_map` to build the cover,
-* `cover_no_solution_of_prime_dvd` / `cover_forces_unit` to force `d = ±1`,
-* `no_denominator_quartic` to eliminate nontrivial denominators,
-* and the elementary rational-square denominator argument to make `w` integral once `u` is integral.
-
-After that bridge is proved, `obstruction_20a4_discharge` is axiom-free except for the imported integer theorem.
+theorem zphi_descent_step_even_core_drop_status : True := by
+  trivial
+```
