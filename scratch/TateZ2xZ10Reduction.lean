@@ -17,29 +17,34 @@ API survey, from the local tree and Mathlib as used here:
   affine coordinates.
 
 * Variable changes.  `WeierstrassCurve.VariableChange R` exists and acts on
-  Weierstrass curves by `(X,Y) ↦ (u^2 X + r, u^3 Y + u^2 s X + t)`.  Mathlib
-  provides the coefficient formulas `variableChange_a₁` through
-  `variableChange_a₆`, preservation of `IsElliptic`, and `variableChange_j`.
-  `Affine.Basic` has specialized equation/nonsingularity lemmas for translating
-  a point to `(0,0)`.
+  Weierstrass curves by `(X,Y) ↦ (u^2 X + r, u^3 Y + u^2 s X + t)`.  The hard
+  Mathlib survey for this file found the following.
 
-  Missing for the descent bridge: a point-level additive equivalence for a
-  general variable change.  The needed shape is recorded below as the single
-  `sorry` helper:
+  * `Mathlib/AlgebraicGeometry/EllipticCurve/VariableChange.lean` provides the
+    curve-level group action, coefficient formulas `variableChange_a₁` through
+    `variableChange_a₆`, preservation of `IsElliptic`, base-change compatibility
+    for variable changes, and `variableChange_j`.
+  * `Affine.Basic` provides ring-hom/base-change transport for equations and
+    nonsingularity, plus only a specialized
+    `equation_iff_variableChange`/`nonsingular_iff_variableChange` for translating
+    a point to `(0,0)`.  It does not provide a general point map for
+    `(u,r,s,t)`.
+  * `Affine.Point` provides `Point.map` only for base change along algebra
+    homomorphisms; its `map_add'` proof uses the affine addition formulas under
+    ring homs.  There is no `Point.mapEquiv`, `Affine.map`, or `≃+` for
+    variable changes.
+  * `Jacobian.Point` provides `toAffineAddEquiv` between Jacobian and affine
+    point groups and base-change lemmas for Jacobian formulas, but no
+    `VariableChange` action on Jacobian/projective point classes.
+  * `IsomOfJ.lean` constructs curve-level variable changes from equal
+    `j`-invariants; it does not construct point-group isomorphisms.
 
-  ```
-  noncomputable def variableChangePointAddEquiv
-      (W : WeierstrassCurve ℚ) [W.IsElliptic]
-      (C : WeierstrassCurve.VariableChange ℚ) :
-      WeierstrassCurve.Affine.Point W ≃+
-        WeierstrassCurve.Affine.Point (C • W)
-  ```
-
-  together with simp lemmas saying that it sends an affine point `(x,y)` to the
-  inverse coordinates `(X,Y)` satisfying
-  `x = C.u^2 * X + C.r` and `y = C.u^3 * Y + C.u^2 * C.s * X + C.t`.
-  This would transport `n • P`, `addOrderOf P`, and the independent 2-torsion
-  point through the Tate-coordinate normalization.
+  Consequently the point-level transport below is built directly.  The forward
+  map sends an old affine point `(x,y)` on `W` to the new coordinates
+  `X = u^{-2}(x-r)`, `Y = u^{-3}(y-s(x-r)-t)` on `C • W`; the inverse map uses
+  the defining coordinate formulas.  The additive proof reduces to the affine
+  slope identity `ℓ' = u^{-1}(ℓ-s)` and ring-checked equivariance of `addX` and
+  `addY`.
 
 * Computing `n • P`.  The affine point file has explicit group-law lemmas:
   `Point.add_of_X_ne`, `Point.add_of_Y_eq`, `Point.add_self_of_Y_eq`,
@@ -270,15 +275,380 @@ theorem injective_Z2xZ10_gives_order10_and_independent_2torsion
       And.intro h5P_two hT_ne_5P
 
 /--
-Precise formal wall: a variable change should give an additive equivalence on
-affine point groups.  Mathlib currently has the curve-level action and
-coefficient formulas, but not this point-level transport API.
+The transformed `X`-coordinate under a Weierstrass variable change.  This is
+the inverse coordinate map from old coordinates on `W` to new coordinates on
+`C • W`.
 -/
+def variableChangePointX (C : WeierstrassCurve.VariableChange ℚ) (x : ℚ) : ℚ :=
+  (C.u⁻¹ : ℚ) ^ 2 * (x - C.r)
+
+/-- The transformed `Y`-coordinate under a Weierstrass variable change. -/
+def variableChangePointY (C : WeierstrassCurve.VariableChange ℚ) (x y : ℚ) : ℚ :=
+  (C.u⁻¹ : ℚ) ^ 3 * (y - C.s * (x - C.r) - C.t)
+
+/-- The old `x`-coordinate recovered from new coordinates. -/
+def variableChangePointInvX (C : WeierstrassCurve.VariableChange ℚ) (X : ℚ) : ℚ :=
+  (C.u : ℚ) ^ 2 * X + C.r
+
+/-- The old `y`-coordinate recovered from new coordinates. -/
+def variableChangePointInvY (C : WeierstrassCurve.VariableChange ℚ) (X Y : ℚ) : ℚ :=
+  (C.u : ℚ) ^ 3 * Y + (C.u : ℚ) ^ 2 * C.s * X + C.t
+
+lemma variableChangePoint_equation
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) {x y : ℚ}
+    (h : WeierstrassCurve.Affine.Equation W x y) :
+    WeierstrassCurve.Affine.Equation (C • W)
+      (variableChangePointX C x) (variableChangePointY C x y) := by
+  rw [WeierstrassCurve.Affine.equation_iff] at h ⊢
+  unfold variableChangePointX variableChangePointY
+  rw [WeierstrassCurve.variableChange_a₁, WeierstrassCurve.variableChange_a₂,
+    WeierstrassCurve.variableChange_a₃, WeierstrassCurve.variableChange_a₄,
+    WeierstrassCurve.variableChange_a₆]
+  simp only [Units.val_inv_eq_inv_val]
+  field_simp [C.u.ne_zero]
+  linear_combination h
+
+lemma variableChangePointInv_equation
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) {X Y : ℚ}
+    (h : WeierstrassCurve.Affine.Equation (C • W) X Y) :
+    WeierstrassCurve.Affine.Equation W
+      (variableChangePointInvX C X) (variableChangePointInvY C X Y) := by
+  rw [WeierstrassCurve.Affine.equation_iff] at h ⊢
+  unfold variableChangePointInvX variableChangePointInvY
+  rw [WeierstrassCurve.variableChange_a₁, WeierstrassCurve.variableChange_a₂,
+    WeierstrassCurve.variableChange_a₃, WeierstrassCurve.variableChange_a₄,
+    WeierstrassCurve.variableChange_a₆] at h
+  simp only [Units.val_inv_eq_inv_val] at h
+  field_simp [C.u.ne_zero] at h
+  linear_combination h
+
+lemma variableChangePointInvX_pointX
+    (C : WeierstrassCurve.VariableChange ℚ) (x : ℚ) :
+    variableChangePointInvX C (variableChangePointX C x) = x := by
+  simp [variableChangePointInvX, variableChangePointX]
+
+lemma variableChangePointInvY_pointY
+    (C : WeierstrassCurve.VariableChange ℚ) (x y : ℚ) :
+    variableChangePointInvY C (variableChangePointX C x) (variableChangePointY C x y) = y := by
+  simp [variableChangePointInvY, variableChangePointX, variableChangePointY]
+  field_simp [C.u.ne_zero]
+  ring
+
+lemma variableChangePointX_invX
+    (C : WeierstrassCurve.VariableChange ℚ) (X : ℚ) :
+    variableChangePointX C (variableChangePointInvX C X) = X := by
+  simp [variableChangePointInvX, variableChangePointX]
+
+lemma variableChangePointY_invY
+    (C : WeierstrassCurve.VariableChange ℚ) (X Y : ℚ) :
+    variableChangePointY C (variableChangePointInvX C X)
+      (variableChangePointInvY C X Y) = Y := by
+  simp [variableChangePointInvX, variableChangePointInvY, variableChangePointY]
+  field_simp [C.u.ne_zero]
+  ring
+
+lemma variableChangePointX_eq_iff
+    (C : WeierstrassCurve.VariableChange ℚ) {x₁ x₂ : ℚ} :
+    variableChangePointX C x₁ = variableChangePointX C x₂ ↔ x₁ = x₂ := by
+  unfold variableChangePointX
+  constructor
+  · intro h
+    field_simp [Units.val_inv_eq_inv_val, C.u.ne_zero] at h
+    linarith
+  · intro h
+    simp [h]
+
+lemma variableChangePointY_eq_iff
+    (C : WeierstrassCurve.VariableChange ℚ) (x : ℚ) {y₁ y₂ : ℚ} :
+    variableChangePointY C x y₁ = variableChangePointY C x y₂ ↔ y₁ = y₂ := by
+  unfold variableChangePointY
+  constructor
+  · intro h
+    field_simp [Units.val_inv_eq_inv_val, C.u.ne_zero] at h
+    linarith
+  · intro h
+    simp [h]
+
+lemma variableChangePointY_negY
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) (x y : ℚ) :
+    variableChangePointY C x (WeierstrassCurve.Affine.negY W x y) =
+      WeierstrassCurve.Affine.negY (C • W)
+        (variableChangePointX C x) (variableChangePointY C x y) := by
+  simp [variableChangePointX, variableChangePointY, WeierstrassCurve.Affine.negY,
+    WeierstrassCurve.variableChange_a₁, WeierstrassCurve.variableChange_a₃]
+  field_simp [Units.val_inv_eq_inv_val, C.u.ne_zero]
+  ring
+
+lemma variableChange_slope_of_X_ne
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    {x₁ x₂ y₁ y₂ : ℚ} (hx : x₁ ≠ x₂) :
+    WeierstrassCurve.Affine.slope (C • W)
+        (variableChangePointX C x₁) (variableChangePointX C x₂)
+        (variableChangePointY C x₁ y₁) (variableChangePointY C x₂ y₂) =
+      (C.u⁻¹ : ℚ) *
+        (WeierstrassCurve.Affine.slope W x₁ x₂ y₁ y₂ - C.s) := by
+  rw [WeierstrassCurve.Affine.slope_of_X_ne hx]
+  rw [WeierstrassCurve.Affine.slope_of_X_ne]
+  · unfold variableChangePointX variableChangePointY
+    field_simp [Units.val_inv_eq_inv_val, C.u.ne_zero, sub_ne_zero.mpr hx]
+    ring
+  · exact fun h => hx ((variableChangePointX_eq_iff C).mp h)
+
+lemma variableChange_slope_of_Y_ne
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    {x₁ x₂ y₁ y₂ : ℚ}
+    (h₁ : WeierstrassCurve.Affine.Equation W x₁ y₁)
+    (h₂ : WeierstrassCurve.Affine.Equation W x₂ y₂)
+    (hx : x₁ = x₂) (hy : y₁ ≠ WeierstrassCurve.Affine.negY W x₂ y₂) :
+    WeierstrassCurve.Affine.slope (C • W)
+        (variableChangePointX C x₁) (variableChangePointX C x₂)
+        (variableChangePointY C x₁ y₁) (variableChangePointY C x₂ y₂) =
+      (C.u⁻¹ : ℚ) *
+        (WeierstrassCurve.Affine.slope W x₁ x₂ y₁ y₂ - C.s) := by
+  have hy_eq : y₁ = y₂ := WeierstrassCurve.Affine.Y_eq_of_Y_ne h₁ h₂ hx hy
+  have hy_self : y₁ ≠ WeierstrassCurve.Affine.negY W x₁ y₁ := by
+    intro h
+    apply hy
+    rw [← hx, ← hy_eq]
+    exact h
+  have hden : x₁ * W.a₁ + W.a₃ + y₁ * 2 ≠ 0 := by
+    intro hden
+    apply hy_self
+    rw [WeierstrassCurve.Affine.negY]
+    linarith
+  have hmul :
+      (x₁ * W.a₁ + W.a₃ + y₁ * 2) *
+          (x₁ * W.a₁ + W.a₃ + y₁ * 2)⁻¹ = 1 :=
+    mul_inv_cancel₀ hden
+  have htarget_hx :
+      variableChangePointX C x₁ = variableChangePointX C x₂ := by
+    simp [hx]
+  have htarget_hy :
+      variableChangePointY C x₁ y₁ ≠
+        WeierstrassCurve.Affine.negY (C • W)
+          (variableChangePointX C x₂) (variableChangePointY C x₂ y₂) := by
+    intro h
+    apply hy
+    rw [← hx]
+    apply (variableChangePointY_eq_iff C x₁).mp
+    rw [h]
+    rw [hx, variableChangePointY_negY]
+  rw [WeierstrassCurve.Affine.slope_of_Y_ne hx hy]
+  rw [WeierstrassCurve.Affine.slope_of_Y_ne htarget_hx htarget_hy]
+  unfold variableChangePointX variableChangePointY
+  simp [WeierstrassCurve.Affine.negY, WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₂, WeierstrassCurve.variableChange_a₃,
+    WeierstrassCurve.variableChange_a₄]
+  field_simp [Units.val_inv_eq_inv_val, C.u.ne_zero]
+  rw [← sub_eq_zero]
+  ring_nf
+  convert
+    (show C.s *
+        (1 - (x₁ * W.a₁ + W.a₃ + y₁ * 2) *
+          (x₁ * W.a₁ + W.a₃ + y₁ * 2)⁻¹) = 0 by
+      rw [hmul]
+      ring) using 1
+  ring
+
+lemma variableChange_slope
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    {x₁ x₂ y₁ y₂ : ℚ}
+    (h₁ : WeierstrassCurve.Affine.Equation W x₁ y₁)
+    (h₂ : WeierstrassCurve.Affine.Equation W x₂ y₂)
+    (hxy : ¬(x₁ = x₂ ∧ y₁ = WeierstrassCurve.Affine.negY W x₂ y₂)) :
+    WeierstrassCurve.Affine.slope (C • W)
+        (variableChangePointX C x₁) (variableChangePointX C x₂)
+        (variableChangePointY C x₁ y₁) (variableChangePointY C x₂ y₂) =
+      (C.u⁻¹ : ℚ) *
+        (WeierstrassCurve.Affine.slope W x₁ x₂ y₁ y₂ - C.s) := by
+  by_cases hx : x₁ = x₂
+  · exact variableChange_slope_of_Y_ne W C h₁ h₂ hx (fun hy => hxy ⟨hx, hy⟩)
+  · exact variableChange_slope_of_X_ne W C hx
+
+lemma variableChange_nonvertical
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    {x₁ x₂ y₁ y₂ : ℚ}
+    (hxy : ¬(x₁ = x₂ ∧ y₁ = WeierstrassCurve.Affine.negY W x₂ y₂)) :
+    ¬(variableChangePointX C x₁ = variableChangePointX C x₂ ∧
+      variableChangePointY C x₁ y₁ =
+        WeierstrassCurve.Affine.negY (C • W)
+          (variableChangePointX C x₂) (variableChangePointY C x₂ y₂)) := by
+  rintro ⟨hx', hy'⟩
+  apply hxy
+  have hx : x₁ = x₂ := (variableChangePointX_eq_iff C).mp hx'
+  refine ⟨hx, ?_⟩
+  rw [← hx]
+  apply (variableChangePointY_eq_iff C x₁).mp
+  rw [hy', hx, ← variableChangePointY_negY]
+
+lemma variableChange_vertical
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    {x₁ x₂ y₁ y₂ : ℚ}
+    (hxy : x₁ = x₂ ∧ y₁ = WeierstrassCurve.Affine.negY W x₂ y₂) :
+    variableChangePointX C x₁ = variableChangePointX C x₂ ∧
+      variableChangePointY C x₁ y₁ =
+        WeierstrassCurve.Affine.negY (C • W)
+          (variableChangePointX C x₂) (variableChangePointY C x₂ y₂) := by
+  rcases hxy with ⟨hx, hy⟩
+  constructor
+  · simp [hx]
+  · rw [hy, ← variableChangePointY_negY, hx]
+
+lemma variableChange_addX
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    (x₁ x₂ ℓ : ℚ) :
+    variableChangePointX C (WeierstrassCurve.Affine.addX W x₁ x₂ ℓ) =
+      WeierstrassCurve.Affine.addX (C • W)
+        (variableChangePointX C x₁) (variableChangePointX C x₂)
+        ((C.u⁻¹ : ℚ) * (ℓ - C.s)) := by
+  simp [variableChangePointX, WeierstrassCurve.Affine.addX,
+    WeierstrassCurve.variableChange_a₁, WeierstrassCurve.variableChange_a₂]
+  field_simp [Units.val_inv_eq_inv_val, C.u.ne_zero]
+  ring
+
+lemma variableChange_addY
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    (x₁ x₂ y₁ ℓ : ℚ) :
+    variableChangePointY C (WeierstrassCurve.Affine.addX W x₁ x₂ ℓ)
+        (WeierstrassCurve.Affine.addY W x₁ x₂ y₁ ℓ) =
+      WeierstrassCurve.Affine.addY (C • W)
+        (variableChangePointX C x₁) (variableChangePointX C x₂)
+        (variableChangePointY C x₁ y₁) ((C.u⁻¹ : ℚ) * (ℓ - C.s)) := by
+  simp [variableChangePointX, variableChangePointY, WeierstrassCurve.Affine.addX,
+    WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negAddY,
+    WeierstrassCurve.Affine.negY, WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₂, WeierstrassCurve.variableChange_a₃]
+  field_simp [Units.val_inv_eq_inv_val, C.u.ne_zero]
+  ring
+
+noncomputable def variableChangePointMap
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (C : WeierstrassCurve.VariableChange ℚ) :
+    WeierstrassCurve.Affine.Point W → WeierstrassCurve.Affine.Point (C • W)
+  | WeierstrassCurve.Affine.Point.zero => 0
+  | WeierstrassCurve.Affine.Point.some x y h =>
+      WeierstrassCurve.Affine.Point.some
+        (variableChangePointX C x) (variableChangePointY C x y)
+        (WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+          (variableChangePoint_equation W C h.left))
+
+noncomputable def variableChangePointMapInv
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (C : WeierstrassCurve.VariableChange ℚ) :
+    WeierstrassCurve.Affine.Point (C • W) → WeierstrassCurve.Affine.Point W
+  | WeierstrassCurve.Affine.Point.zero => 0
+  | WeierstrassCurve.Affine.Point.some X Y h =>
+      WeierstrassCurve.Affine.Point.some
+        (variableChangePointInvX C X) (variableChangePointInvY C X Y)
+        (WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+          (variableChangePointInv_equation W C h.left))
+
+@[simp] lemma variableChangePointMap_zero
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (C : WeierstrassCurve.VariableChange ℚ) :
+    variableChangePointMap W C 0 = 0 :=
+  rfl
+
+lemma variableChangePointMap_leftInverse
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (C : WeierstrassCurve.VariableChange ℚ) :
+    Function.LeftInverse (variableChangePointMapInv W C) (variableChangePointMap W C) := by
+  intro P
+  cases P with
+  | zero => rfl
+  | some x y h =>
+      simp [variableChangePointMap, variableChangePointMapInv,
+        variableChangePointInvX_pointX, variableChangePointInvY_pointY]
+
+lemma variableChangePointMap_rightInverse
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (C : WeierstrassCurve.VariableChange ℚ) :
+    Function.RightInverse (variableChangePointMapInv W C) (variableChangePointMap W C) := by
+  intro P
+  cases P with
+  | zero => rfl
+  | some X Y h =>
+      simp [variableChangePointMap, variableChangePointMapInv,
+        variableChangePointX_invX, variableChangePointY_invY]
+
+noncomputable def variableChangePointEquiv
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (C : WeierstrassCurve.VariableChange ℚ) :
+    WeierstrassCurve.Affine.Point W ≃ WeierstrassCurve.Affine.Point (C • W) where
+  toFun := variableChangePointMap W C
+  invFun := variableChangePointMapInv W C
+  left_inv := variableChangePointMap_leftInverse W C
+  right_inv := variableChangePointMap_rightInverse W C
+
+lemma variableChangePointMap_neg
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (C : WeierstrassCurve.VariableChange ℚ)
+    (P : WeierstrassCurve.Affine.Point W) :
+    variableChangePointMap W C (-P) = -variableChangePointMap W C P := by
+  cases P with
+  | zero => rfl
+  | some x y h =>
+      simp only [variableChangePointMap, WeierstrassCurve.Affine.Point.neg_some]
+      rw [WeierstrassCurve.Affine.Point.some.injEq]
+      exact ⟨rfl, variableChangePointY_negY W C x y⟩
+
+lemma variableChangePointMap_add
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (C : WeierstrassCurve.VariableChange ℚ)
+    (P Q : WeierstrassCurve.Affine.Point W) :
+    variableChangePointMap W C (P + Q) =
+      variableChangePointMap W C P + variableChangePointMap W C Q := by
+  cases P with
+  | zero => rfl
+  | some x₁ y₁ h₁ =>
+    cases Q with
+    | zero => rfl
+    | some x₂ y₂ h₂ =>
+      by_cases hxy : x₁ = x₂ ∧ y₁ = WeierstrassCurve.Affine.negY W x₂ y₂
+      · have htarget := variableChange_vertical W C hxy
+        rw [WeierstrassCurve.Affine.Point.add_of_Y_eq hxy.left hxy.right]
+        simp only [variableChangePointMap]
+        rw [WeierstrassCurve.Affine.Point.add_of_Y_eq htarget.left htarget.right]
+      · have htarget := variableChange_nonvertical W C hxy
+        have hslope := variableChange_slope W C h₁.left h₂.left hxy
+        rw [WeierstrassCurve.Affine.Point.add_some hxy]
+        simp only [variableChangePointMap]
+        rw [WeierstrassCurve.Affine.Point.add_some htarget]
+        rw [WeierstrassCurve.Affine.Point.some.injEq]
+        constructor
+        · change
+            variableChangePointX C
+                (WeierstrassCurve.Affine.addX W x₁ x₂
+                  (WeierstrassCurve.Affine.slope W x₁ x₂ y₁ y₂)) =
+              WeierstrassCurve.Affine.addX (C • W)
+                (variableChangePointX C x₁) (variableChangePointX C x₂)
+                (WeierstrassCurve.Affine.slope (C • W)
+                  (variableChangePointX C x₁) (variableChangePointX C x₂)
+                  (variableChangePointY C x₁ y₁) (variableChangePointY C x₂ y₂))
+          rw [hslope]
+          exact variableChange_addX W C x₁ x₂
+            (WeierstrassCurve.Affine.slope W x₁ x₂ y₁ y₂)
+        · change
+            variableChangePointY C
+                (WeierstrassCurve.Affine.addX W x₁ x₂
+                  (WeierstrassCurve.Affine.slope W x₁ x₂ y₁ y₂))
+                (WeierstrassCurve.Affine.addY W x₁ x₂ y₁
+                  (WeierstrassCurve.Affine.slope W x₁ x₂ y₁ y₂)) =
+              WeierstrassCurve.Affine.addY (C • W)
+                (variableChangePointX C x₁) (variableChangePointX C x₂)
+                (variableChangePointY C x₁ y₁)
+                (WeierstrassCurve.Affine.slope (C • W)
+                  (variableChangePointX C x₁) (variableChangePointX C x₂)
+                  (variableChangePointY C x₁ y₁) (variableChangePointY C x₂ y₂))
+          rw [hslope]
+          exact variableChange_addY W C x₁ x₂ y₁
+            (WeierstrassCurve.Affine.slope W x₁ x₂ y₁ y₂)
+
 noncomputable def variableChangePointAddEquiv
     (W : WeierstrassCurve ℚ) [W.IsElliptic]
     (C : WeierstrassCurve.VariableChange ℚ) :
-    WeierstrassCurve.Affine.Point W ≃+ WeierstrassCurve.Affine.Point (C • W) := by
-  sorry
+    WeierstrassCurve.Affine.Point W ≃+ WeierstrassCurve.Affine.Point (C • W) :=
+  AddEquiv.mk (variableChangePointEquiv W C) (variableChangePointMap_add W C)
 
 end
 
