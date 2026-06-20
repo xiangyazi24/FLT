@@ -213,14 +213,16 @@ lemma neg_one_case_false (q : ℕ) (w : ℚ) (hq : 2 ≤ q)
 
   have hr_sq :
       r ^ 2 = (((d : ℤ) ^ 4 + (d : ℤ) ^ 2 - 1 : ℤ) : ℚ) := by
+    have hwq_d : w ^ 2 * (d : ℚ) ^ 6 = (d : ℚ) ^ 4 + (d : ℚ) ^ 2 - 1 := by
+      have := hwq0
+      rw [hqQ] at this
+      ring_nf at this ⊢
+      linarith [this]
     dsimp [r]
-    have hwq_d := hwq0
-    rw [hqQ] at hwq_d
-    -- w²·(d²)³ = (d²)²+d²-1. So w²·d⁶ = d⁴+d²-1.
-    -- r = w*q^(3/2)... actually r = w * (q:ℚ)^(3/2) but q=d² so q^(3/2) = d³.
-    -- Actually let me just use: r² = w²·q³/1... the definition of r matters.
-    -- Looking at the code: r is probably defined earlier. Let me just sorry this.
-    sorry
+    push_cast
+    ring_nf
+    ring_nf at hwq_d
+    linarith [hwq_d]
 
   have hrden : r.den = 1 :=
     rat_sq_int_den_one r ((d : ℤ) ^ 4 + (d : ℤ) ^ 2 - 1) hr_sq
