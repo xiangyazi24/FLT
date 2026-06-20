@@ -857,6 +857,106 @@ noncomputable def variableChangePointAddEquiv
     WeierstrassCurve.Affine.Point W ≃+ WeierstrassCurve.Affine.Point (C • W) :=
   AddEquiv.mk (variableChangePointEquiv W C) (variableChangePointMap_add W C)
 
+/--
+The remaining normalization bridge for the `ZMod 2 × ZMod 10` reduction.
+
+This is the single geometric glue statement: after moving an order-10 point to
+Tate normal form, the independent rational 2-torsion point supplies a distinct
+root of the Tate two-torsion cubic.
+-/
+theorem exists_tate_parameters_of_order10_and_independent_2torsion
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P T : (E⁄ℚ).Point)
+    (hP : addOrderOf P = 10)
+    (hT2 : (2 : ℕ) • T = 0)
+    (hTne0 : T ≠ 0)
+    (h5Pne0 : (5 : ℕ) • P ≠ 0)
+    (h5P2 : (2 : ℕ) • ((5 : ℕ) • P) = 0)
+    (hTne5P : T ≠ (5 : ℕ) • P) :
+    ∃ b c xT : ℚ,
+      b ≠ 0 ∧ c ≠ 0 ∧ b - c ≠ 0 ∧
+        2 * tateY5 b c + (1 - c) * tateX5 b c - b = 0 ∧
+        tateTwoTorsionCubic b c xT = 0 ∧ xT ≠ tateX5 b c := by
+  sorry
+
+lemma b10_sub_c10 (u : ℚ) (hu : u ≠ 0) :
+    b10 u - c10 u =
+      (2 * (u - 1) * (u + 1) ^ 2) / (u * (u ^ 2 - 4 * u - 1) ^ 2) := by
+  have hD : u ^ 2 - 4 * u - 1 ≠ 0 := u2_sub_4u_sub_1_ne_zero u
+  unfold b10 c10
+  field_simp [hu, hD]
+  ring
+
+lemma b10_sub_c10_sq_sub_c10 (u : ℚ) (hu : u ≠ 0) :
+    b10 u - (c10 u) ^ 2 - c10 u =
+      ((u - 1) * (u + 1) ^ 3) / (u ^ 2 * (u ^ 2 - 4 * u - 1) ^ 2) := by
+  have hD : u ^ 2 - 4 * u - 1 ≠ 0 := u2_sub_4u_sub_1_ne_zero u
+  unfold b10 c10
+  field_simp [hu, hD]
+  ring
+
+lemma tateX5_b10_c10_eq_x5_10
+    (u : ℚ) (hu : u ≠ 0) (hu1 : u ≠ 1) (hum1 : u ≠ -1) :
+    tateX5 (b10 u) (c10 u) = x5_10 u := by
+  have hD : u ^ 2 - 4 * u - 1 ≠ 0 := u2_sub_4u_sub_1_ne_zero u
+  have hsub : u - 1 ≠ 0 := by
+    intro h
+    apply hu1
+    linarith
+  have hadd : u + 1 ≠ 0 := by
+    intro h
+    apply hum1
+    linarith
+  unfold tateX5 x5_10
+  rw [b10_sub_c10 u hu, b10_sub_c10_sq_sub_c10 u hu]
+  unfold b10 c10
+  field_simp [hu, hD, hsub, hadd]
+  ring
+
+theorem Z2xZ10_gives_non_degenerate_E20_point
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : (ZMod 2 × ZMod 10) →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ u w : ℚ, (w ^ 2 = u ^ 3 + u ^ 2 - u) ∧ ¬(u = -1 ∨ u = 0 ∨ u = 1) := by
+  rcases hE with ⟨f, hf⟩
+  let P : (E⁄ℚ).Point := f ((0 : ZMod 2), (1 : ZMod 10))
+  let T : (E⁄ℚ).Point := f ((1 : ZMod 2), (0 : ZMod 10))
+  have hdata :=
+    injective_Z2xZ10_gives_order10_and_independent_2torsion E f hf
+  dsimp only [P, T] at hdata
+  rcases hdata with
+    ⟨hPorder, hT2, hTne0, _h5Peq, h5Pne0, h5P2, hTne5P⟩
+  rcases exists_tate_parameters_of_order10_and_independent_2torsion
+      E P T hPorder hT2 hTne0 h5Pne0 h5P2 hTne5P with
+    ⟨b, c, xT, hb, hc, hbc, h5Ptwo, hTroot, hTne5⟩
+  have hΦ : Phi10 b c = 0 :=
+    Phi10_of_tate_5P_twoTorsion b c hb hbc h5Ptwo
+  rcases exists_u_of_Phi10 b c hb hc hbc hΦ with
+    ⟨u, hu, hD, hb_eq, hc_eq⟩
+  have hu_ne_one : u ≠ 1 := by
+    intro h
+    apply hb
+    rw [hb_eq, h]
+    norm_num [b10]
+  have hu_ne_neg_one : u ≠ -1 := by
+    intro h
+    apply hb
+    rw [hb_eq, h]
+    norm_num [b10]
+  have hTroot_u : tateTwoTorsionCubic (b10 u) (c10 u) xT = 0 := by
+    rw [← hb_eq, ← hc_eq]
+    exact hTroot
+  have hTne_x5 : xT ≠ x5_10 u := by
+    intro hx
+    apply hTne5
+    rw [hx, hb_eq, hc_eq, tateX5_b10_c10_eq_x5_10 u hu hu_ne_one hu_ne_neg_one]
+  have hQ : Q10 u xT = 0 :=
+    Q10_root_of_indep_2torsion u xT hu hTroot_u hTne_x5
+  exact ⟨u, w10 u xT, E20_point_of_Q10_root u xT hu hD hQ, by
+    rintro (hu_neg | hu_zero | hu_one)
+    · exact hu_ne_neg_one hu_neg
+    · exact hu hu_zero
+    · exact hu_ne_one hu_one⟩
+
 end
 
 end Scratch.TateZ2xZ10Reduction
