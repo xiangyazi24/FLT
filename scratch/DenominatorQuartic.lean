@@ -1,4 +1,5 @@
 import Mathlib
+import scratch.ZPhiDescentStep
 
 /-!
 # Denominator quartic via `ℤ[φ]`
@@ -10,24 +11,7 @@ The hard algebraic-number-theory and Pythagorean-descent content is isolated in
 ordinary infinite descent on `q.natAbs`.
 -/
 
-/-- The one hard theorem produced by the `ℤ[φ]` argument.
-
-Mathematically, this packages:
-* the UFD/class-number-one argument in `ℤ[(1+√5)/2]`,
-* the proof that `gcd(p²+φq², p²+φ̄q²)` is a unit,
-* the reduction `p²+φq² = β²`,
-* coefficient comparison `p² = a²+b²`, `q² = b(2a+b)`, and
-* the Pythagorean square-leg descent producing a smaller denominator.
--/
-axiom zphi_descent_step (p q t : ℤ)
-    (hq : 2 ≤ q)
-    (hcop : Int.gcd p q = 1)
-    (h : t ^ 2 = p ^ 4 + p ^ 2 * q ^ 2 - q ^ 4) :
-    ∃ p' q' t' : ℤ,
-      2 ≤ q' ∧
-      Int.gcd p' q' = 1 ∧
-      t' ^ 2 = p' ^ 4 + p' ^ 2 * q' ^ 2 - q' ^ 4 ∧
-      q'.natAbs < q.natAbs
+-- `zphi_descent_step` now comes from `scratch.ZPhiDescentStep` (fully proven, 0 custom axiom).
 
 private theorem no_denominator_quartic_aux :
     ∀ n : ℕ, ∀ p q t : ℤ,
