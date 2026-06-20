@@ -52,3 +52,10 @@
 - #print axioms at every node = [propext, Classical.choice, Quot.sound].
 - Caveat: scratch oleans not yet in lake globs; verified via lake env lean w/ prebuilt oleans.
 - Next: fold scratch into build graph; remaining 11/12 Mazur axioms.
+
+## Run 2026-06-20 RESULT #2
+- obstruction_curve_N12_points_degenerate DISCHARGED (theorem, 0 custom axiom, #print verified).
+- Crux was not_ljunggren_14 (z²=x⁴+14x²y²+y⁴ no nontrivial sol) — fresh Pellian descent (48y⁴), 1104 lines (a134637).
+- + Lemma B (SquareStep014), Lemma A (FourSquaresAP), ObstructionN12 squareclass assembly (d9829b0).
+- TWO Mazur axioms now discharged tonight: obstruction_curve_20a4 + obstruction_curve_N12.
+- Remaining obstruction_curve family: N14, N16 (same shape as N12 — Ljunggren/Lemma A/B machinery is the template).
