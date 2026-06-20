@@ -1,21 +1,18 @@
 import Mathlib
+import scratch.Descent20a4
+import scratch.CoprimeSqDvd
+import scratch.IsSquareCube
+import scratch.NumAbsLeOne
 
 -- Already proved pieces (axiomatized here for modularity)
-axiom int_solutions_20a4 (u w : ℤ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
-  u = -1 ∨ u = 0 ∨ u = 1
+-- (axiom discharged: now imported as a proven theorem)
 
-axiom coprime_sq_dvd (q : ℕ) (b : ℕ) (a N : ℤ) (hab : Int.gcd a b = 1)
-    (hqN : Nat.Coprime q N.natAbs)
-    (heq : a ^ 2 * (q : ℤ) = (b : ℤ) ^ 2 * N) :
-  IsSquare q
+-- (axiom discharged: now imported as a proven theorem)
 
-axiom isSquare_of_isSquare_cube (q : ℕ) (h : IsSquare (q ^ 3)) :
-  IsSquare q
+-- (axiom discharged: now imported as a proven theorem)
 
 -- Valuation/descent case: rules out |u.num| ≥ 2 when u.den ≠ 1.
-axiom num_abs_le_one (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u)
-    (hden : u.den ≠ 1) :
-  |u.num| ≤ 1
+-- (axiom discharged: now imported as a proven theorem)
 
 -- Helper: r² ∈ ℤ → r.den = 1
 theorem rat_sq_int_den_one (r : ℚ) (N : ℤ) (h : (r : ℚ) ^ 2 = (N : ℚ)) :
@@ -180,7 +177,7 @@ lemma neg_one_case_false (q : ℕ) (w : ℚ) (hq : 2 ≤ q)
     exact coprime_pow_three_qsq_q_sub_one q hq
 
   have hsq_q3 : IsSquare (q ^ 3) := by
-    refine coprime_sq_dvd (q ^ 3) b a (Nn : ℤ) hab ?_ ?_
+    refine coprime_sq_dvd_implies_sq (q ^ 3) b a (Nn : ℤ) hab ?_ ?_
     · have hnat : ((Nn : ℤ).natAbs) = Nn := by
         simp
       simpa [hnat] using hcop
