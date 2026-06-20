@@ -1,5 +1,6 @@
 import Mathlib
 import FLT.EllipticCurve.Torsion
+import scratch.ObstructionN12
 
 /-! # N=12 descent bridge — same pattern as N=10 -/
 
@@ -13,8 +14,10 @@ def E_N12_AffineEquation (u w : ℚ) : Prop :=
 def E_N12_DegenerateParameter (u : ℚ) : Prop :=
   u = -2 ∨ u = 0 ∨ u = 1 ∨ u = 2 ∨ u = 4
 
-axiom obstruction_curve_N12_points_degenerate :
-    ∀ u w : ℚ, E_N12_AffineEquation u w → E_N12_DegenerateParameter u
+theorem obstruction_curve_N12_points_degenerate :
+    ∀ u w : ℚ, E_N12_AffineEquation u w → E_N12_DegenerateParameter u := by
+  intro u w h
+  exact _root_.obstruction_N12 u w h
 
 axiom Z2xZ12_gives_non_degenerate_N12_point
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
