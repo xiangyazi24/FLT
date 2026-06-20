@@ -212,6 +212,213 @@ lemma Phi10_b10_c10_eq_zero (u : ℚ) (hu : u ≠ 0)
   field_simp [hu, _hD]
   ring
 
+private def reverseUNum (b c : ℚ) : ℚ :=
+  5 * b ^ 2 - 2 * b * c ^ 2 - 6 * b * c - 2 * c ^ 3 + c ^ 2
+
+private def reverseUDen (b c : ℚ) : ℚ :=
+  (b - c) ^ 2
+
+private def reverseDNum (b c : ℚ) : ℚ :=
+  reverseUNum b c ^ 2 - 4 * reverseUNum b c * reverseUDen b c - reverseUDen b c ^ 2
+
+private def uNumBezoutA (b c : ℚ) : ℚ :=
+  -4 * c ^ 3 + 11 * c ^ 4 - 13 * c ^ 5 - 2 * c ^ 6
+    + b * (20 * c ^ 2 + 5 * c ^ 3 + 5 * c ^ 4)
+
+private def uNumBezoutB (b c : ℚ) : ℚ :=
+  4 * c ^ 6 - 7 * c ^ 7 - c ^ 8
+    + b * (4 * c ^ 3 + 9 * c ^ 4 + 6 * c ^ 5 + 3 * c ^ 6)
+    + b ^ 2 * (-4 * c ^ 2 - c ^ 3 - c ^ 4)
+
+private lemma c_pow_nine_of_Phi10_and_reverseUNum_eq_zero
+    (b c : ℚ) (hΦ : Phi10 b c = 0) (hN : reverseUNum b c = 0) :
+    c ^ 9 = 0 := by
+  have hcomb :
+      uNumBezoutA b c * Phi10 b c + uNumBezoutB b c * reverseUNum b c =
+        -4 * c ^ 9 := by
+    simp only [uNumBezoutA, uNumBezoutB, reverseUNum, Phi10]
+    ring_nf
+  rw [hΦ, hN] at hcomb
+  nlinarith
+
+private lemma uOfTateParameters_ne_zero_of_Phi10
+    (b c : ℚ) (hc : c ≠ 0) (hbc : b - c ≠ 0) (hΦ : Phi10 b c = 0) :
+    uOfTateParameters b c ≠ 0 := by
+  intro hu
+  have hden : (b - c) ^ 2 ≠ 0 := pow_ne_zero 2 hbc
+  have hN : reverseUNum b c = 0 := by
+    unfold uOfTateParameters at hu
+    rw [div_eq_zero_iff] at hu
+    rcases hu with hnum | hden0
+    · simpa [reverseUNum] using hnum
+    · exact False.elim (hden hden0)
+  have hc9 : c ^ 9 = 0 := c_pow_nine_of_Phi10_and_reverseUNum_eq_zero b c hΦ hN
+  have hc0 : c = 0 := (pow_eq_zero_iff (by norm_num : (9 : ℕ) ≠ 0)).mp hc9
+  exact hc hc0
+
+private def reverseBQuotient (b c : ℚ) : ℚ :=
+  128 * b ^ 2 * c ^ 5 - 896 * b ^ 3 * c ^ 4 + 2304 * b ^ 4 * c ^ 3
+    - 2816 * b ^ 5 * c ^ 2 + 1664 * b ^ 6 * c - 384 * b ^ 7
+    + 16 * c ^ 8 - 64 * b * c ^ 7 + 64 * b ^ 2 * c ^ 6
+    - 512 * b ^ 3 * c ^ 5 + 928 * b ^ 4 * c ^ 4 + 192 * b ^ 5 * c ^ 3
+    - 1088 * b ^ 6 * c ^ 2 + 384 * b ^ 7 * c + 80 * b ^ 8
+    - 16 * c ^ 9 + 48 * b * c ^ 8 - 304 * b ^ 2 * c ^ 7
+    - 368 * b ^ 3 * c ^ 6 + 656 * b ^ 4 * c ^ 5 + 592 * b ^ 5 * c ^ 4
+    - 336 * b ^ 6 * c ^ 3 - 272 * b ^ 7 * c ^ 2 - 48 * b * c ^ 9
+    - 272 * b ^ 2 * c ^ 8 - 352 * b ^ 3 * c ^ 7 + 96 * b ^ 4 * c ^ 6
+    + 400 * b ^ 5 * c ^ 5 + 176 * b ^ 6 * c ^ 4 - 32 * b * c ^ 10
+    - 128 * b ^ 2 * c ^ 9 - 192 * b ^ 3 * c ^ 8 - 128 * b ^ 4 * c ^ 7
+    - 32 * b ^ 5 * c ^ 6
+
+private def reverseCQuotient (b c : ℚ) : ℚ :=
+  8 * c ^ 3 - 40 * b * c ^ 2 + 56 * b ^ 2 * c - 24 * b ^ 3
+    - 4 * c ^ 4 - 20 * b * c ^ 3 + 4 * b ^ 2 * c ^ 2 + 20 * b ^ 3 * c
+    - 8 * c ^ 5 - 16 * b * c ^ 4 - 8 * b ^ 2 * c ^ 3
+
+private lemma reverse_b_poly (b c : ℚ) (hΦ : Phi10 b c = 0) :
+    b * reverseUNum b c * reverseDNum b c ^ 2 =
+      reverseUDen b c * (reverseUNum b c - reverseUDen b c) ^ 3 *
+        (reverseUNum b c + reverseUDen b c) := by
+  have hmul :
+      b * reverseUNum b c * reverseDNum b c ^ 2 -
+          reverseUDen b c * (reverseUNum b c - reverseUDen b c) ^ 3 *
+            (reverseUNum b c + reverseUDen b c) =
+        Phi10 b c * reverseBQuotient b c := by
+    simp only [reverseUNum, reverseUDen, reverseDNum, reverseBQuotient, Phi10]
+    ring_nf
+  have hzero :
+      b * reverseUNum b c * reverseDNum b c ^ 2 -
+          reverseUDen b c * (reverseUNum b c - reverseUDen b c) ^ 3 *
+            (reverseUNum b c + reverseUDen b c) = 0 := by
+    simpa [hΦ] using hmul
+  nlinarith
+
+private lemma reverse_c_poly (b c : ℚ) (hΦ : Phi10 b c = 0) :
+    c * reverseUNum b c * reverseDNum b c =
+      reverseUDen b c * (reverseUNum b c - reverseUDen b c) *
+        (reverseUNum b c + reverseUDen b c) := by
+  have hmul :
+      c * reverseUNum b c * reverseDNum b c -
+          reverseUDen b c * (reverseUNum b c - reverseUDen b c) *
+            (reverseUNum b c + reverseUDen b c) =
+        Phi10 b c * reverseCQuotient b c := by
+    simp only [reverseUNum, reverseUDen, reverseDNum, reverseCQuotient, Phi10]
+    ring_nf
+  have hzero :
+      c * reverseUNum b c * reverseDNum b c -
+          reverseUDen b c * (reverseUNum b c - reverseUDen b c) *
+            (reverseUNum b c + reverseUDen b c) = 0 := by
+    simpa [hΦ] using hmul
+  nlinarith
+
+private lemma b_eq_b10_uOfTateParameters
+    (b c : ℚ) (hbc : b - c ≠ 0) (hΦ : Phi10 b c = 0)
+    (hu : uOfTateParameters b c ≠ 0) :
+    b = b10 (uOfTateParameters b c) := by
+  set u := uOfTateParameters b c with hu_def
+  have hD : u ^ 2 - 4 * u - 1 ≠ 0 := by
+    simpa [hu_def] using u2_sub_4u_sub_1_ne_zero (uOfTateParameters b c)
+  have hD' : u * (u - 4) - 1 ≠ 0 := by
+    intro h
+    apply hD
+    ring_nf at h ⊢
+    exact h
+  have hpoly := reverse_b_poly b c hΦ
+  unfold b10
+  field_simp [hu, hD']
+  rw [hu_def]
+  unfold uOfTateParameters
+  field_simp [hbc]
+  simp only [reverseUNum, reverseUDen, reverseDNum] at hpoly
+  ring_nf at hpoly ⊢
+  exact hpoly
+
+private lemma c_eq_c10_uOfTateParameters
+    (b c : ℚ) (hbc : b - c ≠ 0) (hΦ : Phi10 b c = 0)
+    (hu : uOfTateParameters b c ≠ 0) :
+    c = c10 (uOfTateParameters b c) := by
+  set u := uOfTateParameters b c with hu_def
+  have hD : u ^ 2 - 4 * u - 1 ≠ 0 := by
+    simpa [hu_def] using u2_sub_4u_sub_1_ne_zero (uOfTateParameters b c)
+  have hD' : u * (u - 4) - 1 ≠ 0 := by
+    intro h
+    apply hD
+    ring_nf at h ⊢
+    exact h
+  have hpoly := reverse_c_poly b c hΦ
+  unfold c10
+  field_simp [hu, hD']
+  rw [hu_def]
+  unfold uOfTateParameters
+  field_simp [hbc]
+  simp only [reverseUNum, reverseUDen, reverseDNum] at hpoly
+  ring_nf at hpoly ⊢
+  exact hpoly
+
+lemma exists_u_of_Phi10 (b c : ℚ) (_hb : b ≠ 0) (hc : c ≠ 0)
+    (hbc : b - c ≠ 0) (hΦ : Phi10 b c = 0) :
+    ∃ u : ℚ, u ≠ 0 ∧ u ^ 2 - 4 * u - 1 ≠ 0 ∧ b = b10 u ∧ c = c10 u := by
+  refine ⟨uOfTateParameters b c, ?_, ?_, ?_, ?_⟩
+  · exact uOfTateParameters_ne_zero_of_Phi10 b c hc hbc hΦ
+  · exact u2_sub_4u_sub_1_ne_zero (uOfTateParameters b c)
+  · exact b_eq_b10_uOfTateParameters b c hbc hΦ
+      (uOfTateParameters_ne_zero_of_Phi10 b c hc hbc hΦ)
+  · exact c_eq_c10_uOfTateParameters b c hbc hΦ
+      (uOfTateParameters_ne_zero_of_Phi10 b c hc hbc hΦ)
+
+def tateX5 (b c : ℚ) : ℚ :=
+  -b * c * (b - c ^ 2 - c) / (b - c) ^ 2
+
+def tateY5 (b c : ℚ) : ℚ :=
+  b * c ^ 2 * (b ^ 2 - b * c - c ^ 3) / (b - c) ^ 3
+
+lemma Phi10_of_tate_5P_twoTorsion (b c : ℚ) (hb : b ≠ 0) (hbc : b - c ≠ 0)
+    (h5P2 : 2 * tateY5 b c + (1 - c) * tateX5 b c - b = 0) :
+    Phi10 b c = 0 := by
+  unfold tateX5 tateY5 at h5P2
+  field_simp [hb, hbc] at h5P2
+  ring_nf at h5P2
+  have hprod : b * Phi10 b c = 0 := by
+    unfold Phi10
+    ring_nf
+    linear_combination -h5P2
+  exact (mul_eq_zero.mp hprod).resolve_left hb
+
+private lemma tateTwoTorsionCubic_factor_aux
+    (u D B C A X : ℚ) (hu : u ≠ 0) (hD : D ≠ 0)
+    (hC : C = (u - 1) * (u + 1))
+    (hB : B = (u - 1) ^ 3 * (u + 1))
+    (hA : A = u ^ 3 - 3 * u ^ 2 - u + 1)
+    (hDdef : D = u ^ 2 - 4 * u - 1) :
+    tateTwoTorsionCubic (B / (u * D ^ 2)) (C / (u * D)) X =
+      (X - (-(B / (4 * u ^ 2 * D)))) *
+        (4 * X ^ 2 - (8 * A / D ^ 2) * X + 4 * B / D ^ 3) := by
+  subst C
+  subst B
+  subst A
+  unfold tateTwoTorsionCubic
+  field_simp [hu, hD]
+  subst D
+  ring_nf
+
+lemma tateTwoTorsionCubic_b10_c10_factor (u X : ℚ) (hu : u ≠ 0)
+    (hD : u ^ 2 - 4 * u - 1 ≠ 0) :
+    tateTwoTorsionCubic (b10 u) (c10 u) X = (X - x5_10 u) * Q10 u X := by
+  unfold b10 c10 x5_10 Q10
+  have h := tateTwoTorsionCubic_factor_aux u (u ^ 2 - 4 * u - 1)
+    ((u - 1) ^ 3 * (u + 1)) ((u - 1) * (u + 1))
+    (u ^ 3 - 3 * u ^ 2 - u + 1) X hu hD rfl rfl rfl rfl
+  simpa [div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm] using h
+
+lemma Q10_root_of_indep_2torsion (u xT : ℚ) (hu : u ≠ 0)
+    (hT2 : tateTwoTorsionCubic (b10 u) (c10 u) xT = 0)
+    (hne : xT ≠ x5_10 u) :
+    Q10 u xT = 0 := by
+  have hD : u ^ 2 - 4 * u - 1 ≠ 0 := u2_sub_4u_sub_1_ne_zero u
+  have hfactor := tateTwoTorsionCubic_b10_c10_factor u xT hu hD
+  rw [hfactor] at hT2
+  exact (mul_eq_zero.mp hT2).resolve_left (sub_ne_zero.mpr hne)
+
 /--
 Pure group-theory extraction from an injective `ZMod 2 × ZMod 10`.
 
