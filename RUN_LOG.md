@@ -39,3 +39,16 @@
   - ZPhiDescentStep: 2 sorry (odd/even core wiring)
 - Dispatched: ChatGPT pipe (left5), Codex (right5 + UFD axiom)
 - KEY: FourthPowerSplit + PythagoreanDescentTail both 0-sorry → left5/right5 are pure assembly
+
+## Run 2026-06-20 (automode)
+- goal: close odd_core last sorry → discharge obstruction_curve_20a4
+- starting avenue: (a) Codex session 019ee381
+- approval: explicit /automode launch (do-not-ask)
+- end: TBD
+
+## Run 2026-06-20 RESULT
+- obstruction_curve_20a4_points_degenerate DISCHARGED (theorem, 0 custom axiom).
+- Chain: odd_core(b61d0ab) -> W1 DenominatorQuartic(d222a81) -> W2+W3 ObstructionComplete(141582b) -> W4 DescentBridge(5e6a0a2). left5 earlier d271fa6.
+- #print axioms at every node = [propext, Classical.choice, Quot.sound].
+- Caveat: scratch oleans not yet in lake globs; verified via lake env lean w/ prebuilt oleans.
+- Next: fold scratch into build graph; remaining 11/12 Mazur axioms.
