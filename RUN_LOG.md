@@ -26,3 +26,16 @@
 - Codex: stdin-not-a-terminal issue with nohup exec. Not usable.
 - Avenue (a) partially successful: cover trick + coprime_sq_dvd bypass most complexity
 - Remaining work: ~50 lines of Rat API cast plumbing to close the last sorry
+
+## Status update 2026-06-19 21:35 (Opus 4.8)
+- ObstructionComplete: 0 sorry, 4 axioms (3 now PROVEN separately):
+  - int_solutions_20a4 ✓ (Descent20a4.lean)
+  - coprime_sq_dvd ✓ (ChatGPT: q|b² ∧ b²|q → q=b²)
+  - isSquare_of_isSquare_cube ✓ (ChatGPT: Nat.exists_eq_pow_of_exponent_coprime_of_pow_eq_pow)
+  - num_abs_le_one ⬜ = the full quartic descent (= no_denominator_quartic)
+- Descent chain gaps remaining:
+  - ZPhiDescentOddFinal: 2 pythagorean axioms (left5/right5) — closeable via FourthPowerSplit+PythagoreanDescentTail (both proven)
+  - CoprimeFactorSplit: 1 UFD axiom (coprime product = 4th power)
+  - ZPhiDescentStep: 2 sorry (odd/even core wiring)
+- Dispatched: ChatGPT pipe (left5), Codex (right5 + UFD axiom)
+- KEY: FourthPowerSplit + PythagoreanDescentTail both 0-sorry → left5/right5 are pure assembly
