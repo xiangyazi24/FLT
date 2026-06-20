@@ -9,12 +9,10 @@ This file builds the forward-direction reduction up to the current formal wall.
 API survey, from the local tree and Mathlib as used here:
 
 * Nonzero affine coordinates.  `WeierstrassCurve.Affine.Point W` is the
-  inductive type `zero | some x y h`.  For elliptic curves, Mathlib also has
-  `WeierstrassCurve.Affine.Point.pointEquiv`, sending a point to
-  `WithZero {xy : R × R // W.Equation xy.1 xy.2}`, plus `Point.mk`,
-  `Point.some_ne_zero`, and `Point.xRep`.  There is no extra abstraction needed
-  to extract `(x,y)` from a proof `P ≠ 0`: case-splitting on `P` gives the
-  affine coordinates.
+  inductive type `zero | some x y h`.  Mathlib provides `Point.mk`,
+  `Point.some_ne_zero`, and `Point.xRep`; there is no `Point.pointEquiv` in the
+  local Mathlib checkout.  No extra abstraction is needed to extract `(x,y)`
+  from a proof `P ≠ 0`: case-splitting on `P` gives the affine coordinates.
 
 * Variable changes.  `WeierstrassCurve.VariableChange R` exists and acts on
   Weierstrass curves by `(X,Y) ↦ (u^2 X + r, u^3 Y + u^2 s X + t)`.  The hard
@@ -53,6 +51,16 @@ API survey, from the local tree and Mathlib as used here:
   obstruction files.  Mathlib does not provide Tate normal form, Kubert's
   order-10 table, or a canned theorem that a point of order `10` can be
   normalized to `(0,0)` with the roadmap's `b,c` formulas.
+
+* Division polynomials.  `DivisionPolynomial/Basic.lean` defines
+  `ψ₂`, `Ψ₂Sq`, `Ψ₃`, `preΨ₄`, `preΨ`, `ΨSq`, `Ψ`, `ψ`, `Φ`, and `φ`, with
+  map/base-change lemmas; `DivisionPolynomial/Degree.lean` proves degree and
+  leading-coefficient facts.  The only direct bridge to the 2-torsion cubic is
+  `Ψ₂Sq_eq : W.Ψ₂Sq = W.twoTorsionPolynomial.toPoly`.  The survey found no
+  theorem connecting `P` satisfying `n • P = 0` or `addOrderOf P = n` to
+  evaluating `ψ n`, `Ψ n`, `preΨ n`, or `Φ n` at the coordinates of `P`.
+  Thus division polynomials do not currently avoid the explicit `5P`
+  group-law computation needed for order `10`.
 
 The proven content below is split accordingly:
 
@@ -99,6 +107,79 @@ def Phi10 (b c : ℚ) : ℚ :=
 /-- The two-torsion cubic specialized to Tate normal form. -/
 def tateTwoTorsionCubic (b c X : ℚ) : ℚ :=
   4 * X ^ 3 + ((1 - c) ^ 2 - 4 * b) * X ^ 2 + 2 * b * (c - 1) * X + b ^ 2
+
+lemma tate_linear_relation_of_two_torsion
+    {b c x y : ℚ} [WeierstrassCurve.IsElliptic (tateNormalFormCurve b c)]
+    {h : WeierstrassCurve.Affine.Nonsingular (tateNormalFormCurve b c) x y}
+    (h2 : (2 : ℕ) •
+        (WeierstrassCurve.Affine.Point.some x y h :
+          WeierstrassCurve.Affine.Point (tateNormalFormCurve b c)) = 0) :
+    2 * y + (1 - c) * x - b = 0 := by
+  have h2add :
+      (WeierstrassCurve.Affine.Point.some x y h :
+          WeierstrassCurve.Affine.Point (tateNormalFormCurve b c)) +
+        WeierstrassCurve.Affine.Point.some x y h = 0 := by
+    simpa [two_nsmul] using h2
+  have hy : y = WeierstrassCurve.Affine.negY (tateNormalFormCurve b c) x y := by
+    by_contra hy
+    have hs :
+        (WeierstrassCurve.Affine.Point.some x y h :
+            WeierstrassCurve.Affine.Point (tateNormalFormCurve b c)) +
+          WeierstrassCurve.Affine.Point.some x y h =
+            WeierstrassCurve.Affine.Point.some _ _
+              (WeierstrassCurve.Affine.nonsingular_add h h (fun hxy => hy hxy.right)) := by
+      exact WeierstrassCurve.Affine.Point.add_self_of_Y_ne hy
+    rw [h2add] at hs
+    exact WeierstrassCurve.Affine.Point.some_ne_zero _ hs.symm
+  rw [WeierstrassCurve.Affine.negY] at hy
+  simp [tateNormalFormCurve] at hy
+  nlinarith
+
+lemma tate_cubic_of_two_torsion
+    {b c x y : ℚ} [WeierstrassCurve.IsElliptic (tateNormalFormCurve b c)]
+    {h : WeierstrassCurve.Affine.Nonsingular (tateNormalFormCurve b c) x y}
+    (h2 : (2 : ℕ) •
+        (WeierstrassCurve.Affine.Point.some x y h :
+          WeierstrassCurve.Affine.Point (tateNormalFormCurve b c)) = 0) :
+    tateTwoTorsionCubic b c x = 0 := by
+  have h2add :
+      (WeierstrassCurve.Affine.Point.some x y h :
+          WeierstrassCurve.Affine.Point (tateNormalFormCurve b c)) +
+        WeierstrassCurve.Affine.Point.some x y h = 0 := by
+    simpa [two_nsmul] using h2
+  have heq : WeierstrassCurve.Affine.Equation (tateNormalFormCurve b c) x y := h.1
+  have hrel := tate_linear_relation_of_two_torsion
+    (b := b) (c := c) (x := x) (y := y) (h := h) h2
+  rw [WeierstrassCurve.Affine.equation_iff] at heq
+  unfold tateTwoTorsionCubic at *
+  simp at heq hrel ⊢
+  nlinarith
+
+lemma tate_two_torsion_x_ne_of_point_ne
+    {b c x₁ y₁ x₂ y₂ : ℚ} [WeierstrassCurve.IsElliptic (tateNormalFormCurve b c)]
+    {h₁ : WeierstrassCurve.Affine.Nonsingular (tateNormalFormCurve b c) x₁ y₁}
+    {h₂ : WeierstrassCurve.Affine.Nonsingular (tateNormalFormCurve b c) x₂ y₂}
+    (ht₁ : (2 : ℕ) •
+        (WeierstrassCurve.Affine.Point.some x₁ y₁ h₁ :
+          WeierstrassCurve.Affine.Point (tateNormalFormCurve b c)) = 0)
+    (ht₂ : (2 : ℕ) •
+        (WeierstrassCurve.Affine.Point.some x₂ y₂ h₂ :
+          WeierstrassCurve.Affine.Point (tateNormalFormCurve b c)) = 0)
+    (hne :
+      (WeierstrassCurve.Affine.Point.some x₁ y₁ h₁ :
+          WeierstrassCurve.Affine.Point (tateNormalFormCurve b c)) ≠
+        WeierstrassCurve.Affine.Point.some x₂ y₂ h₂) :
+    x₁ ≠ x₂ := by
+  intro hx
+  apply hne
+  have hr₁ := tate_linear_relation_of_two_torsion
+    (b := b) (c := c) (x := x₁) (y := y₁) (h := h₁) ht₁
+  have hr₂ := tate_linear_relation_of_two_torsion
+    (b := b) (c := c) (x := x₂) (y := y₂) (h := h₂) ht₂
+  subst x₂
+  have hy : y₁ = y₂ := by nlinarith
+  rw [WeierstrassCurve.Affine.Point.some.injEq]
+  exact ⟨rfl, hy⟩
 
 /-- The rational `u` parameter recovered from Tate parameters `b,c`. -/
 def uOfTateParameters (b c : ℚ) : ℚ :=
@@ -858,6 +939,45 @@ noncomputable def variableChangePointAddEquiv
   AddEquiv.mk (variableChangePointEquiv W C) (variableChangePointMap_add W C)
 
 /--
+The remaining explicit geometric computation.
+
+Starting from an order-10 point and an independent rational 2-torsion point,
+one must normalize the curve to Tate form with the order-10 point at `(0,0)`,
+prove the non-degeneracy conditions `b ≠ 0`, `c ≠ 0`, `b - c ≠ 0`, compute the
+coordinate of `5P` as `(tateX5 b c, tateY5 b c)`, and transport the independent
+2-torsion point to a distinct affine 2-torsion point `(xT,yT)`.
+
+All downstream algebra from these normalized coordinate facts is proved below.
+The unproved part is now just this bounded group-law/normalization calculation,
+not the final extraction of the Tate two-torsion cubic root.
+-/
+theorem exists_tate_normalized_order10_coordinate_data
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P T : (E⁄ℚ).Point)
+    (hP : addOrderOf P = 10)
+    (hT2 : (2 : ℕ) • T = 0)
+    (hTne0 : T ≠ 0)
+    (h5Pne0 : (5 : ℕ) • P ≠ 0)
+    (h5P2 : (2 : ℕ) • ((5 : ℕ) • P) = 0)
+    (hTne5P : T ≠ (5 : ℕ) • P) :
+    ∃ b c xT yT : ℚ,
+      ∃ hEll : WeierstrassCurve.IsElliptic (tateNormalFormCurve b c),
+      ∃ hT : WeierstrassCurve.Affine.Nonsingular (tateNormalFormCurve b c) xT yT,
+      ∃ h5 : WeierstrassCurve.Affine.Nonsingular
+          (tateNormalFormCurve b c) (tateX5 b c) (tateY5 b c),
+        b ≠ 0 ∧ c ≠ 0 ∧ b - c ≠ 0 ∧
+          (2 : ℕ) •
+              (WeierstrassCurve.Affine.Point.some xT yT hT :
+                WeierstrassCurve.Affine.Point (tateNormalFormCurve b c)) = 0 ∧
+          (2 : ℕ) •
+              (WeierstrassCurve.Affine.Point.some (tateX5 b c) (tateY5 b c) h5 :
+                WeierstrassCurve.Affine.Point (tateNormalFormCurve b c)) = 0 ∧
+          (WeierstrassCurve.Affine.Point.some xT yT hT :
+                WeierstrassCurve.Affine.Point (tateNormalFormCurve b c)) ≠
+            WeierstrassCurve.Affine.Point.some (tateX5 b c) (tateY5 b c) h5 := by
+  sorry
+
+/--
 The remaining normalization bridge for the `ZMod 2 × ZMod 10` reduction.
 
 This is the single geometric glue statement: after moving an order-10 point to
@@ -877,7 +997,19 @@ theorem exists_tate_parameters_of_order10_and_independent_2torsion
       b ≠ 0 ∧ c ≠ 0 ∧ b - c ≠ 0 ∧
         2 * tateY5 b c + (1 - c) * tateX5 b c - b = 0 ∧
         tateTwoTorsionCubic b c xT = 0 ∧ xT ≠ tateX5 b c := by
-  sorry
+  rcases exists_tate_normalized_order10_coordinate_data
+      E P T hP hT2 hTne0 h5Pne0 h5P2 hTne5P with
+    ⟨b, c, xT, yT, hEll, hT, h5, hb, hc, hbc, hT2', h5P2', hne⟩
+  haveI : WeierstrassCurve.IsElliptic (tateNormalFormCurve b c) := hEll
+  refine ⟨b, c, xT, hb, hc, hbc, ?_, ?_, ?_⟩
+  · exact tate_linear_relation_of_two_torsion
+      (b := b) (c := c) (x := tateX5 b c) (y := tateY5 b c) (h := h5) h5P2'
+  · exact tate_cubic_of_two_torsion
+      (b := b) (c := c) (x := xT) (y := yT) (h := hT) hT2'
+  · exact tate_two_torsion_x_ne_of_point_ne
+      (b := b) (c := c) (x₁ := xT) (y₁ := yT)
+      (x₂ := tateX5 b c) (y₂ := tateY5 b c)
+      (h₁ := hT) (h₂ := h5) hT2' h5P2' hne
 
 lemma b10_sub_c10 (u : ℚ) (hu : u ≠ 0) :
     b10 u - c10 u =
