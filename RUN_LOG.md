@@ -63,3 +63,8 @@
 ## Run 2026-06-20 RESULT #3
 - obstruction_curve_N16_points_degenerate DISCHARGED (0 axiom, #print verified). Partial-2-torsion, mirrored 20a4 (DescentN16 + DenominatorQuarticN16 683-line quartic descent + reused ObstructionComplete/CoprimeSqDvd/IsSquareCube). commit dac126b.
 - THREE obstruction_curve axioms discharged: 20a4, N12, N16. Remaining: N14 (full-2-torsion, torsion-only).
+
+## Run 2026-06-20 RESULT #4 — obstruction_curve FAMILY COMPLETE
+- obstruction_curve_N14_points_degenerate DISCHARGED (0 axiom, #print verified). Full-2-torsion, reused Lemma A/B (SquareStep014+FourSquaresAP), 1924-line case analysis. commit 1ac9661.
+- ALL FOUR obstruction_curve axioms discharged tonight: 20a4, N12, N16, N14. #print clean each.
+- Remaining Mazur axioms: Z2xZ10/12/14/16_gives_non_degenerate_*_point (group-theory side), + Axioms.lean trio (rational_torsion_two_invariant_factors, weil_pairing_primitive_root, no_rational_point_of_order_ge_17).
