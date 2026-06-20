@@ -1,6 +1,6 @@
 # ChatGPT Drop File (dm2)
 
-Below is a self-contained Lean file. The quartic obstruction is passed as an explicit theorem hypothesis, as requested when the cross-file import is awkward. If the project exports `no_denominator_quartic` globally, the first argument of `num_abs_le_one` can be specialized to that theorem.
+Corrected Lean file for the `num_abs_le_one` descent bound. The quartic obstruction remains an explicit hypothesis of the theorem.
 
 ```lean
 import Mathlib
@@ -42,14 +42,13 @@ private lemma eq_neg_sq_of_nonpos_associated_sq {x z : ℤ}
   · have hz_nonneg : 0 ≤ z ^ 2 := by nlinarith [sq_nonneg z]
     have hz20 : z ^ 2 = 0 := by nlinarith
     rw [hpos, hz20]
+    simp
   · exact hneg
 
 private lemma associated_square_left_of_coprime_square_mul
     {a b r : ℤ} (hab : IsCoprime a b) (h : a * b = r ^ 2) :
     ∃ z : ℤ, Associated a (z ^ 2) := by
-  simpa using
-    (exists_associated_pow_of_mul_eq_pow'
-      (a := a) (b := b) (c := r) (k := 2) hab h)
+  exact (exists_associated_pow_of_mul_eq_pow' hab h).imp (fun d hd => hd.symm)
 
 private lemma nat_coprime_of_int_gcd_eq_one {a b : ℤ}
     (h : Int.gcd a b = 1) :
@@ -67,7 +66,8 @@ private lemma nat_coprime_curve_M_den
   have hpqI : IsCoprime p q := by
     rw [Int.isCoprime_iff_gcd_eq_one]
     exact int_gcd_eq_one_of_nat_coprime hpq
-  have hp2qI : IsCoprime (p ^ 2) q := hpqI.pow_left 2
+  have hp2qI : IsCoprime (p ^ 2) q := by
+    simpa using (hpqI.pow_left : IsCoprime (p ^ 2) q)
   have hM :
       p ^ 2 + p * q - q ^ 2 = p ^ 2 + q * (p - q) := by ring
   have hI : IsCoprime (p ^ 2 + p * q - q ^ 2) q := by
@@ -83,7 +83,8 @@ private lemma nat_coprime_curve_p_M
   have hpqI : IsCoprime p q := by
     rw [Int.isCoprime_iff_gcd_eq_one]
     exact int_gcd_eq_one_of_nat_coprime hpq
-  have hpq2I : IsCoprime p (q ^ 2) := hpqI.pow_right 2
+  have hpq2I : IsCoprime p (q ^ 2) := by
+    simpa using (hpqI.pow_right : IsCoprime p (q ^ 2))
   have hM :
       p ^ 2 + p * q - q ^ 2 = -(q ^ 2) + p * (p + q) := by ring
   rw [hM]
@@ -103,7 +104,9 @@ private lemma rat_curve_rhs_num_den (u : ℚ) :
   let q : ℤ := qN
   let M : ℤ := p ^ 2 + p * q - q ^ 2
   have hqposN : 0 < qN := u.pos
-  have hqpos : 0 < q := by exact_mod_cast hqposN
+  have hqpos : 0 < q := by
+    dsimp [q]
+    exact Int.natCast_pos.mpr hqposN
   have hq_ne : (q : ℚ) ≠ 0 := by exact_mod_cast (ne_of_gt hqpos)
   have hu : u = (p : ℚ) / (q : ℚ) := by
     dsimp [p, q, qN]
@@ -114,7 +117,7 @@ private lemma rat_curve_rhs_num_den (u : ℚ) :
     rw [hu]
     field_simp [hq_ne]
     dsimp [M]
-    ring
+    ring_nf
   have hpq : Nat.Coprime p.natAbs q.natAbs := by
     dsimp [p, q, qN]
     simpa [Int.natAbs_natCast] using u.reduced
@@ -136,6 +139,7 @@ private lemma rat_curve_rhs_num_den (u : ℚ) :
     have hden :=
       Rat.den_div_eq_of_coprime
         (a := p * M) (b := q ^ 3) hq3pos hcop_den
+    apply Int.ofNat_inj.1
     simpa [q, qN, Int.natAbs_pow, Int.natAbs_natCast] using hden
 
 private lemma gcd_abs_square_root_of_coprime_square_square
@@ -153,7 +157,7 @@ private lemma gcd_abs_square_root_of_coprime_square_square
   have hab : Nat.Coprime a.natAbs b.natAbs := by
     exact (Nat.coprime_pow_right_iff (by norm_num : 0 < 2) a.natAbs b.natAbs).mp hab1
   have h_abs_nat : (|a| : ℤ).natAbs = a.natAbs := by
-    simp
+    cases a <;> simp
   simpa [Int.gcd_def, h_abs_nat, Nat.Coprime] using hab
 
 private lemma abs_root_ge_two_of_large_square
@@ -173,9 +177,9 @@ private lemma abs_root_ge_two_of_large_square
   have ha_ne_one : |a| ≠ 1 := by
     intro ha1
     have ha_sq1 : a ^ 2 = 1 := by
-      have : a = 1 ∨ a = -1 := by
-        exact abs_eq (a := a) |>.mp ha1
-      rcases this with rfl | rfl <;> norm_num
+      have hsq_abs : |a| ^ 2 = a ^ 2 := by
+        simpa [pow_two] using sq_abs a
+      nlinarith
     rcases hp with hp | hp
     · have : |p| = 1 := by simp [hp, ha_sq1]
       omega
@@ -185,11 +189,8 @@ private lemma abs_root_ge_two_of_large_square
 
 private lemma den_root_ge_two
     {q b : ℤ} {qN : ℕ} (hqN : q = qN) (hden : qN ≠ 1)
-    (hqpos : 0 < q) (hq : q = b ^ 2) :
+    (hb_nonneg : 0 ≤ b) (hqpos : 0 < q) (hq : q = b ^ 2) :
     2 ≤ b := by
-  have hb_nonneg : 0 ≤ b := by
-    have hb2_nonneg : 0 ≤ b ^ 2 := by nlinarith [sq_nonneg b]
-    nlinarith
   have hb_ne_zero : b ≠ 0 := by
     intro hb0
     have hq0 : q = 0 := by simp [hq, hb0]
@@ -199,8 +200,10 @@ private lemma den_root_ge_two
     intro hb1
     have hq1 : q = 1 := by simp [hq, hb1]
     have hqN1 : qN = 1 := by
-      have : (qN : ℤ) = 1 := by simpa [hqN] using hq1
-      exact_mod_cast this
+      apply Int.ofNat_inj.1
+      calc
+        (qN : ℤ) = q := hqN.symm
+        _ = 1 := hq1
     exact hden hqN1
   omega
 
@@ -215,7 +218,12 @@ private lemma curve_point_gives_quartic
   let q : ℤ := qN
   let M : ℤ := p ^ 2 + p * q - q ^ 2
   have hqposN : 0 < qN := u.pos
-  have hqpos : 0 < q := by exact_mod_cast hqposN
+  have hqpos : 0 < q := by
+    dsimp [q]
+    exact Int.natCast_pos.mpr hqposN
+  have hp_large : 1 < |p| := by simpa [p] using hlarge
+  have hp_abs_pos : 0 < |p| := lt_trans (by norm_num : (0 : ℤ) < 1) hp_large
+  have hp_abs_ne_zero : |p| ≠ 0 := ne_of_gt hp_abs_pos
   have hpq : Nat.Coprime p.natAbs q.natAbs := by
     dsimp [p, q, qN]
     simpa [Int.natAbs_natCast] using u.reduced
@@ -234,10 +242,14 @@ private lemma curve_point_gives_quartic
   obtain ⟨bN, hbN⟩ := isSquare_of_isSquare_cube qN hs_q3
   let b : ℤ := bN
   have hbq : q = b ^ 2 := by
-    dsimp [q, qN, b]
-    exact_mod_cast hbN
+    have hbNpow : qN = bN ^ 2 := by simpa [pow_two] using hbN
+    change (qN : ℤ) = (bN : ℤ) ^ 2
+    exact_mod_cast hbNpow
+  have hb_nonneg : 0 ≤ b := by
+    dsimp [b]
+    exact Int.natCast_nonneg bN
   have hbge2 : 2 ≤ b := by
-    exact den_root_ge_two (q := q) (b := b) (qN := qN) rfl hden hqpos hbq
+    exact den_root_ge_two (q := q) (b := b) (qN := qN) rfl hden hb_nonneg hqpos hbq
   have hpM_coprime : IsCoprime p M := by
     dsimp [M]
     exact nat_coprime_curve_p_M p q hpq
@@ -259,8 +271,7 @@ private lemma curve_point_gives_quartic
       have hp_nonneg : 0 ≤ p := by rw [hp_eq]; nlinarith [sq_nonneg a]
       have hp_ne : p ≠ 0 := by
         intro hp0
-        have : |p| = 0 := by simp [hp0]
-        omega
+        exact hp_abs_ne_zero (by simp [hp0])
       exact lt_of_le_of_ne hp_nonneg (Ne.symm hp_ne)
     have hM_nonneg : 0 ≤ M := by
       have hr_nonneg : 0 ≤ r ^ 2 := by nlinarith [sq_nonneg r]
@@ -286,8 +297,7 @@ private lemma curve_point_gives_quartic
       have hp_nonpos : p ≤ 0 := by rw [hp_eq]; nlinarith [sq_nonneg a]
       have hp_ne : p ≠ 0 := by
         intro hp0
-        have : |p| = 0 := by simp [hp0]
-        omega
+        exact hp_abs_ne_zero (by simp [hp0])
       exact lt_of_le_of_ne hp_nonpos hp_ne
     have hM_nonpos : M ≤ 0 := by
       have hr_nonneg : 0 ≤ r ^ 2 := by nlinarith [sq_nonneg r]
@@ -296,7 +306,12 @@ private lemma curve_point_gives_quartic
       eq_neg_sq_of_nonpos_associated_sq hM_nonpos hM_assoc
     have ha_ge2 : 2 ≤ a := by
       have hp_or : p = a ^ 2 ∨ p = -(a ^ 2) := Or.inr hp_eq
-      exact abs_root_ge_two_of_large_square (p := p) (a := a) (by simpa [p] using hlarge) hp_or
+      have ha_abs_ge2 : 2 ≤ |a| :=
+        abs_root_ge_two_of_large_square (p := p) (a := a) hp_large hp_or
+      have ha_nonneg : 0 ≤ a := by
+        dsimp [a]
+        exact abs_nonneg a0
+      simpa [abs_of_nonneg ha_nonneg] using ha_abs_ge2
     have hquart : T0 ^ 2 = b ^ 4 + b ^ 2 * a ^ 2 - a ^ 4 := by
       have hnegM : -(M) = T0 ^ 2 := by linarith
       rw [← hnegM]
@@ -308,7 +323,7 @@ private lemma curve_point_gives_quartic
       simpa [a] using gcd_abs_square_root_of_coprime_square_square hpq hp_or hbq
     have hcop_ba : Int.gcd b a = 1 := by
       simpa [Int.gcd_comm] using hcop_ab
-    exact ⟨b, a, T0, ha_ge2, hcop_ba, by simpa [mul_comm] using hquart⟩
+    exact ⟨b, a, T0, ha_ge2, hcop_ba, hquart⟩
 
 theorem num_abs_le_one
     (no_denominator_quartic :
