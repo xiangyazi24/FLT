@@ -1,5 +1,6 @@
 import Mathlib
 import FLT.EllipticCurve.Torsion
+import scratch.ObstructionComplete
 
 /-!
 # N=10 descent bridge (placeholder)
@@ -22,8 +23,10 @@ def E20AffineEquation (u w : ℚ) : Prop :=
 def E20DegenerateParameter (u : ℚ) : Prop :=
   u = -1 ∨ u = 0 ∨ u = 1
 
-axiom obstruction_curve_20a4_points_degenerate :
-    ∀ u w : ℚ, E20AffineEquation u w → E20DegenerateParameter u
+theorem obstruction_curve_20a4_points_degenerate :
+    ∀ u w : ℚ, E20AffineEquation u w → E20DegenerateParameter u := by
+  intro u w h
+  exact _root_.obstruction_20a4 u w h
 
 axiom Z2xZ10_gives_non_degenerate_E20_point
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
