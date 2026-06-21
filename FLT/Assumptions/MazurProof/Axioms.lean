@@ -5,6 +5,7 @@ import FLT.Assumptions.MazurProof.DescentBridgeN16
 import FLT.Assumptions.MazurProof.GroupTheory
 import FLT.Assumptions.MazurProof.InvariantFactors
 import FLT.Assumptions.MazurProof.TorsionFinite
+import scratch.DischargeA2
 
 /-!
 # Axioms for the Mazur torsion-bound proof scaffold
@@ -252,9 +253,14 @@ theorem first_invariant_factor_full_torsion
 Weil pairing consequence: if all `m`-torsion points are rational, then `ℚ`
 contains a primitive `m`-th root of unity.
 -/
-axiom weil_pairing_primitive_root (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+theorem weil_pairing_primitive_root (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
     (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
+  exact
+    WeierstrassCurve.full_rational_torsion_has_primitive_root
+      (E := E) (m := m)
+      (WeierstrassCurve.rationalWeilPairingPackage E m)
+      hm hfull
 
 /-! ## Group C: noncyclic exclusions -/
 
