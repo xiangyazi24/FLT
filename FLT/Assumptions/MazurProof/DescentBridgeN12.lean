@@ -1,6 +1,7 @@
 import Mathlib
 import FLT.EllipticCurve.Torsion
 import scratch.ObstructionN12
+import scratch.TateZ2xZ12Reduction
 
 /-! # N=12 descent bridge — same pattern as N=10 -/
 
@@ -19,10 +20,12 @@ theorem obstruction_curve_N12_points_degenerate :
   intro u w h
   exact _root_.obstruction_N12 u w h
 
-axiom Z2xZ12_gives_non_degenerate_N12_point
+theorem Z2xZ12_gives_non_degenerate_N12_point
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     (hE : ∃ f : ZMod 2 × ZMod 12 →+ (E⁄ℚ).Point, Function.Injective f) :
-    ∃ u w : ℚ, E_N12_AffineEquation u w ∧ ¬ E_N12_DegenerateParameter u
+    ∃ u w : ℚ, E_N12_AffineEquation u w ∧ ¬ E_N12_DegenerateParameter u := by
+  simpa [E_N12_AffineEquation, E_N12_DegenerateParameter] using
+    Scratch.TateZ2xZ12Reduction.Z2xZ12_gives_non_degenerate_N12_point E hE
 
 theorem no_Z2_cross_Z12_from_descent
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :

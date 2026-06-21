@@ -769,6 +769,61 @@ lemma tate_two_torsion_x_ne_b
   ring_nf at hroot
   exact (mul_ne_zero (pow_ne_zero 2 hb) (pow_ne_zero 2 hc)) hroot
 
+lemma tate_two_torsion_b_add_cx_sub_x_ne_zero
+    {b c x : ℚ}
+    (hc : c ≠ 0) (hx : x ≠ 0)
+    (hroot : tateTwoTorsionCubic b c x = 0) :
+    b + c * x - x ≠ 0 := by
+  intro hF
+  unfold tateTwoTorsionCubic at hroot
+  ring_nf at hroot
+  have hcx3 : c * x ^ 3 = 0 := by
+    nlinarith
+  exact (mul_ne_zero hc (pow_ne_zero 3 hx)) hcx3
+
+/--
+The remaining pure algebraic branch step for the `N = 12` bridge.
+
+This is the exact residual statement after the group-law and normalization
+work above: `b,c` are nondegenerate Tate parameters, `x` is the independent
+two-torsion root, `Phi12` is the order-12 condition, and `x` is not the known
+root `x(6P)`.  The roadmap proves this by the `q,t` map, the `R12/K12` branch
+split, and finite bad-`u` eliminations.
+-/
+theorem N12_tate_algebra_bridge
+    (b c x : ℚ)
+    (hb : b ≠ 0) (hc : c ≠ 0) (hbc : b - c ≠ 0)
+    (hD : b - c ^ 2 - c ≠ 0)
+    (hPhi : Phi12 b c = 0)
+    (hroot : tateTwoTorsionCubic b c x = 0)
+    (hxne : x ≠ tateX6 b c) :
+    ∃ u w : ℚ,
+      w ^ 2 = u ^ 3 - u ^ 2 - 4 * u + 4 ∧
+        ¬(u = -2 ∨ u = 0 ∨ u = 1 ∨ u = 2 ∨ u = 4) := by
+  -- Remaining wall: the `R12/K12` branch and the five bad-parameter
+  -- eliminations.  All elliptic-curve and Tate-normal-form work is proved
+  -- above; this theorem is deliberately only rational polynomial algebra.
+  sorry
+
+theorem Z2xZ12_gives_non_degenerate_N12_point
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : (ZMod 2 × ZMod 12) →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ u w : ℚ,
+      w ^ 2 = u ^ 3 - u ^ 2 - 4 * u + 4 ∧
+        ¬(u = -2 ∨ u = 0 ∨ u = 1 ∨ u = 2 ∨ u = 4) := by
+  rcases hE with ⟨f, hf⟩
+  let P : (E⁄ℚ).Point := f ((0 : ZMod 2), (1 : ZMod 12))
+  let T : (E⁄ℚ).Point := f ((1 : ZMod 2), (0 : ZMod 12))
+  have hdata :=
+    injective_Z2xZ12_gives_order12_and_independent_2torsion E f hf
+  dsimp only [P, T] at hdata
+  rcases hdata with
+    ⟨hPorder, hT2, hTne0, _h6Peq, h6Pne0, h6P2, hTne6P⟩
+  rcases exists_tate_parameters_of_order12_and_independent_2torsion
+      E P T hPorder hT2 hTne0 h6Pne0 h6P2 hTne6P with
+    ⟨b, c, xT, hb, hc, hbc, hD, hPhi, hroot, hxne⟩
+  exact N12_tate_algebra_bridge b c xT hb hc hbc hD hPhi hroot hxne
+
 end
 
 end Scratch.TateZ2xZ12Reduction
