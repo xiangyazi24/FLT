@@ -4,12 +4,12 @@ Goal: discharge all 6 remaining custom axioms → only [propext, Classical.choic
 Status: ✅ done sorry-free + #print axioms clean · 🟡 partial/in-work (what's open) · ⬜ open.
 Last verified: 2026-06-21.
 
-## TOP-LEVEL AXIOMS — scoreboard 3/6 discharged (3 custom axioms remain; A1+A2+A4 ✅ fresh-rebuild verified)
+## TOP-LEVEL AXIOMS — scoreboard 4/6 discharged (2 custom axioms remain; A1+A2+A4+A5 ✅ fresh-rebuild verified). Remaining = the 2 deep pillars.
 - ✅ **A1 `rational_torsion_two_invariant_factors`** — DISCHARGED (axiom→theorem, 6→5; residual=keystone seam sorryAx). — needs: keystone rank-2 (K) + finiteness (C2 ✓avail) + invariant-factor algebra (C1 ✅). Closest to dischargeable.
 - ✅ **A2 `weil_pairing_primitive_root`** — DISCHARGED (axiom→theorem, 5→4; residual=rationalWeilPairingPackage Miller seam). — needs: keystone rank-2 (K) + WeilPairingPackage Stage-1 + Miller Stage-3 (SEAM 3).
 - ⬜ **A3 `no_rational_point_of_order_ge_17`** — Mazur core, deepest. Separate later campaign.
 - ✅ **A4 `Z2xZ14_gives_non_degenerate_N14_point`** — DISCHARGED ex-falso (4→3; residual=order14_point_obstructed_by_X14_rank_zero seam, the 14a4 rank-0 work). — genus-4 forward restructure.
-- ⬜ **A5 `Z2xZ16_gives_non_degenerate_N16_point`** — genus-5 forward restructure.
+- ✅ **A5 `Z2xZ16_gives_non_degenerate_N16_point`** — RESTRUCTURED ex-falso (3→2; residual=2 named genus-2 X1(16) seams, DEEP gap). — genus-5 forward restructure.
 - 🟡 **A6 `mordell_weil_fg`** — full Mordell-Weil. Currently USED (legit strong axiom) to supply
   finiteness; the THOROUGH finish is to prove it (cornerstone, max reuse). Mountain, not permanent.
 
