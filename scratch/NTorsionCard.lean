@@ -135,6 +135,192 @@ private abbrev TwoKernel (n : ℕ) : Type _ :=
 private abbrev TwoTorsionKernel : Type _ :=
   {P : (W⁄k).Point // 2 • P = 0}
 
+private lemma four_ne_zero_of_two_ne_zero (h₂ : (2 : k) ≠ 0) : (4 : k) ≠ 0 := by
+  have h : (2 : k) * (2 : k) ≠ 0 := mul_ne_zero h₂ h₂
+  simpa [show (4 : k) = (2 : k) * (2 : k) by norm_num] using h
+
+private lemma affine_two_torsion_y_eq_negY {x y : k} {h : (W⁄k).Nonsingular x y}
+    (h2 : 2 • (Point.some x y h : (W⁄k).Point) = 0) :
+    y = (W⁄k).negY x y := by
+  rw [two_nsmul] at h2
+  by_contra hy
+  have hs :
+      (Point.some x y h : (W⁄k).Point) + Point.some x y h =
+        Point.some _ _ (nonsingular_add h h (fun hxy => hy hxy.right)) :=
+    Point.add_self_of_Y_ne hy
+  rw [h2] at hs
+  exact Point.some_ne_zero _ hs.symm
+
+private lemma affine_two_torsion_linear_relation {x y : k} {h : (W⁄k).Nonsingular x y}
+    (h2 : 2 • (Point.some x y h : (W⁄k).Point) = 0) :
+    2 * y + (W⁄k).a₁ * x + (W⁄k).a₃ = 0 := by
+  have hy := affine_two_torsion_y_eq_negY (W := W) h2
+  rw [negY] at hy
+  linear_combination hy
+
+private noncomputable def twoTorsionY (h₂ : (2 : k) ≠ 0) (x : k) : k :=
+  -((W⁄k).a₁ * x + (W⁄k).a₃) / 2
+
+private lemma twoTorsionY_linear_relation (h₂ : (2 : k) ≠ 0) (x : k) :
+    2 * twoTorsionY (W := W) h₂ x + (W⁄k).a₁ * x + (W⁄k).a₃ = 0 := by
+  unfold twoTorsionY
+  field_simp [h₂]
+  ring
+
+private lemma twoTorsionY_eq_negY (h₂ : (2 : k) ≠ 0) (x : k) :
+    twoTorsionY (W := W) h₂ x = (W⁄k).negY x (twoTorsionY (W := W) h₂ x) := by
+  have hlin := twoTorsionY_linear_relation (W := W) h₂ x
+  rw [negY]
+  linear_combination hlin
+
+private lemma equation_of_Ψ₂Sq_eval_eq_zero_of_linear {x y : k}
+    (hroot : (W⁄k).Ψ₂Sq.eval x = 0)
+    (hlin : 2 * y + (W⁄k).a₁ * x + (W⁄k).a₃ = 0) (h₂ : (2 : k) ≠ 0) :
+    (W⁄k).Equation x y := by
+  rw [equation_iff']
+  have h4 : (4 : k) ≠ 0 := four_ne_zero_of_two_ne_zero h₂
+  let q :=
+    y ^ 2 + (W⁄k).a₁ * x * y + (W⁄k).a₃ * y -
+      (x ^ 3 + (W⁄k).a₂ * x ^ 2 + (W⁄k).a₄ * x + (W⁄k).a₆)
+  have h4q : (4 : k) * q = 0 := by
+    calc
+      (4 : k) * q =
+          (2 * y + (W⁄k).a₁ * x + (W⁄k).a₃) ^ 2 - (W⁄k).Ψ₂Sq.eval x := by
+            simp [q, WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+              WeierstrassCurve.b₆]
+            ring
+      _ = 0 := by
+            rw [hlin, hroot]
+            ring
+  exact (mul_eq_zero.mp h4q).resolve_left h4
+
+private lemma twoTorsionY_nonsingular_of_Ψ₂Sq_eval_eq_zero (h₂ : (2 : k) ≠ 0) {x : k}
+    (hroot : (W⁄k).Ψ₂Sq.eval x = 0) :
+    (W⁄k).Nonsingular x (twoTorsionY (W := W) h₂ x) := by
+  haveI : (W⁄k).IsElliptic := by
+    change (W.map (algebraMap k k)).IsElliptic
+    infer_instance
+  exact (equation_iff_nonsingular (W := W⁄k)).mp
+    (equation_of_Ψ₂Sq_eval_eq_zero_of_linear (W := W) hroot
+      (twoTorsionY_linear_relation (W := W) h₂ x) h₂)
+
+private lemma twoTorsionY_two_nsmul_eq_zero (h₂ : (2 : k) ≠ 0) {x : k}
+    (hroot : (W⁄k).Ψ₂Sq.eval x = 0) :
+    2 • (Point.some x (twoTorsionY (W := W) h₂ x)
+        (twoTorsionY_nonsingular_of_Ψ₂Sq_eval_eq_zero (W := W) h₂ hroot) :
+      (W⁄k).Point) = 0 := by
+  rw [two_nsmul]
+  exact Point.add_self_of_Y_eq (twoTorsionY_eq_negY (W := W) h₂ x)
+
+private lemma cubic_toPoly_discr_eq {P : Cubic k} (ha : P.a ≠ 0) :
+    P.toPoly.discr = P.discr := by
+  rw [Polynomial.discr_of_degree_eq_three (Cubic.degree_of_a_ne_zero ha)]
+  simp [Cubic.discr]
+
+private lemma cubic_toPoly_separable_of_discr_ne_zero {P : Cubic k} (ha : P.a ≠ 0)
+    (hdisc : P.discr ≠ 0) : P.toPoly.Separable := by
+  rw [Polynomial.separable_def]
+  by_contra hcop
+  let f := P.toPoly
+  have hf0 : f ≠ 0 := Cubic.ne_zero_of_a_ne_zero ha
+  have hres0 : Polynomial.resultant f f.derivative = 0 := by
+    rw [Polynomial.resultant_eq_zero_iff]
+    exact ⟨Or.inl hf0, hcop⟩
+  have hpos : 0 < f.degree := by
+    rw [show f = P.toPoly by rfl, Cubic.degree_of_a_ne_zero ha]
+    norm_num
+  have hraw_ne : Polynomial.resultant f f.derivative f.natDegree (f.natDegree - 1) ≠ 0 := by
+    rw [Polynomial.resultant_deriv hpos]
+    have hlc : f.leadingCoeff = P.a := Cubic.leadingCoeff_of_a_ne_zero ha
+    have hdisc' : f.discr = P.discr := cubic_toPoly_discr_eq ha
+    rw [hlc, hdisc']
+    exact mul_ne_zero (mul_ne_zero (pow_ne_zero _ (neg_ne_zero.mpr one_ne_zero)) ha) hdisc
+  have hle : f.derivative.natDegree ≤ f.natDegree - 1 := Polynomial.natDegree_derivative_le f
+  let r := f.natDegree - 1 - f.derivative.natDegree
+  have hraw_eq : Polynomial.resultant f f.derivative f.natDegree (f.natDegree - 1) =
+      f.coeff f.natDegree ^ r * Polynomial.resultant f f.derivative := by
+    have hr : f.natDegree - 1 = f.derivative.natDegree + r := by
+      exact (Nat.add_sub_of_le hle).symm
+    rw [hr]
+    exact Polynomial.resultant_add_right_deg (f := f) (g := f.derivative)
+      (m := f.natDegree) (n := f.derivative.natDegree) r (le_refl _)
+  have hraw_zero : Polynomial.resultant f f.derivative f.natDegree (f.natDegree - 1) = 0 := by
+    rw [hraw_eq, hres0, mul_zero]
+  exact hraw_ne hraw_zero
+
+private lemma twoTorsion_Ψ₂Sq_rootSet_card [IsSepClosed k] (h₂ : (2 : k) ≠ 0) :
+    Fintype.card (((W⁄k).Ψ₂Sq).rootSet k) = 3 := by
+  haveI : (W⁄k).IsElliptic := by
+    change (W.map (algebraMap k k)).IsElliptic
+    infer_instance
+  let P := (W⁄k).twoTorsionPolynomial
+  have ha : P.a ≠ 0 := by
+    change (4 : k) ≠ 0
+    exact four_ne_zero_of_two_ne_zero h₂
+  have hdisc : P.discr ≠ 0 := by
+    exact (W⁄k).twoTorsionPolynomial_discr_ne_zero_of_isElliptic
+      (isUnit_iff_ne_zero.mpr h₂)
+  have hsep : P.toPoly.Separable := cubic_toPoly_separable_of_discr_ne_zero ha hdisc
+  have hsplit : (P.toPoly.map (algebraMap k k)).Splits :=
+    IsSepClosed.splits_domain P.toPoly hsep
+  have hcubic : (Cubic.map (algebraMap k k) P).roots.toFinset.card = 3 :=
+    Cubic.card_roots_of_discr_ne_zero (P := P) (φ := algebraMap k k) ha hsplit hdisc
+  rw [Set.fintypeCard_eq_ncard]
+  rw [WeierstrassCurve.Ψ₂Sq_eq]
+  rw [Polynomial.rootSet_def, Polynomial.aroots_def, Set.ncard_coe_finset]
+  simpa [P, Cubic.map_roots] using hcubic
+
+private noncomputable def twoTorsionKernelEquivRootOption (h₂ : (2 : k) ≠ 0) :
+    TwoTorsionKernel (W := W) ≃ Option (((W⁄k).Ψ₂Sq).rootSet k) where
+  toFun P :=
+    match P with
+    | ⟨Point.zero, _⟩ => none
+    | ⟨Point.some x y h, hP⟩ =>
+        haveI : (W⁄k).IsElliptic := by
+          change (W.map (algebraMap k k)).IsElliptic
+          infer_instance
+        have h4 : (4 : k) ≠ 0 := four_ne_zero_of_two_ne_zero h₂
+        some ⟨x, (Polynomial.mem_rootSet_of_ne ((W⁄k).Ψ₂Sq_ne_zero h4)).mpr <| by
+          simpa using (two_nsmul_eq_zero_iff_Ψ₂Sq_eval_eq_zero (W := W⁄k) h).mp hP⟩
+  invFun
+    | none => ⟨0, by simp⟩
+    | some xr =>
+        have h4 : (4 : k) ≠ 0 := four_ne_zero_of_two_ne_zero h₂
+        let hroot : (W⁄k).Ψ₂Sq.eval xr.1 = 0 :=
+          (Polynomial.mem_rootSet_of_ne ((W⁄k).Ψ₂Sq_ne_zero h4)).mp xr.2
+        ⟨Point.some xr.1 (twoTorsionY (W := W) h₂ xr.1)
+            (twoTorsionY_nonsingular_of_Ψ₂Sq_eval_eq_zero (W := W) h₂ hroot),
+          twoTorsionY_two_nsmul_eq_zero (W := W) h₂ hroot⟩
+  left_inv P := by
+    rcases P with ⟨P, hP⟩
+    cases P with
+    | zero =>
+        ext
+        rfl
+    | some x y h =>
+        haveI : (W⁄k).IsElliptic := by
+          change (W.map (algebraMap k k)).IsElliptic
+          infer_instance
+        dsimp
+        have hlin := affine_two_torsion_linear_relation (W := W) hP
+        have hlin' := twoTorsionY_linear_relation (W := W) h₂ x
+        have hy : y = twoTorsionY (W := W) h₂ x := by
+          have hmul : (2 : k) * (y - twoTorsionY (W := W) h₂ x) = 0 := by
+            linear_combination hlin - hlin'
+          exact sub_eq_zero.mp ((mul_eq_zero.mp hmul).resolve_left h₂)
+        subst hy
+        ext
+        rfl
+  right_inv xr := by
+    cases xr with
+    | none => rfl
+    | some xr =>
+        have h4 : (4 : k) ≠ 0 := four_ne_zero_of_two_ne_zero h₂
+        have hroot : (W⁄k).Ψ₂Sq.eval xr.1 = 0 :=
+          (Polynomial.mem_rootSet_of_ne ((W⁄k).Ψ₂Sq_ne_zero h4)).mp xr.2
+        ext
+        rfl
+
 private noncomputable def signedRootPoint [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0)
     (x : (W.preΨ' n).rootSet k) : Bool → NonTwoKernel (W := W) n
   | false =>
@@ -243,9 +429,17 @@ lemma nonTwoKernel_card [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
 
 theorem twoTorsionKernel_card [IsSepClosed k] (h₂ : (2 : k) ≠ 0) :
     Nat.card (TwoTorsionKernel (W := W)) = 4 := by
-  -- TODO: count the three roots of `Ψ₂Sq = twoTorsionPolynomial.toPoly`, with the unique
-  -- affine point above each root in characteristic different from two, plus `0`.
-  sorry
+  classical
+  calc
+    Nat.card (TwoTorsionKernel (W := W))
+        = Nat.card (Option (((W⁄k).Ψ₂Sq).rootSet k)) :=
+          Nat.card_congr (twoTorsionKernelEquivRootOption (W := W) h₂)
+    _ = Fintype.card (Option (((W⁄k).Ψ₂Sq).rootSet k)) := by
+          rw [Nat.card_eq_fintype_card]
+    _ = Fintype.card (((W⁄k).Ψ₂Sq).rootSet k) + 1 := by
+          rw [Fintype.card_option]
+    _ = 4 := by
+          rw [twoTorsion_Ψ₂Sq_rootSet_card (W := W) h₂]
 
 omit [DecidableEq k] in
 private lemma two_ne_zero_of_even_natCast_ne_zero {n : ℕ} (hn : (n : k) ≠ 0) (hn_even : Even n) :
