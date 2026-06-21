@@ -18,3 +18,11 @@
   * scratch/NTorsionCard.lean -- KEYSTONE n_torsion_card=n^2 modulo the 2 core-1 seams.
 - Baseline: 6 axioms; campaign targets 3 (rational_torsion_two_invariant_factors,
   weil_pairing_primitive_root, and mordell_weil_fg feeds the first).
+
+## Run 2026-06-21 (/automode formally invoked — keystone campaign continues)
+- Doctrine = MAZUR_AXIOM_CHECKLIST.md (avenues = board atoms) + Keystone_MasterDesign.md (design).
+- Approval = Xiang repeated "自主执行/继续/不要问我" + /automode invocation. No re-handshake (mid-run).
+- Live threads: codex (K1 sub-D + sub-E2), dm1 (SEAM1 E1 formal group), dm2 (K2 rank-2), dm3 (A1 discharge).
+- Landed this session: C1 invariant-factor 0-axiom (13265dd); K1 n_torsion_card 0-custom-axiom modulo
+  2 seams+2 sub-steps (76cbc48); full axiom ledger preserved (552e603); lean skill checklist-default (e04a4ee).
+- Grind order: close K1 sub-steps → K2 rank-2 → discharge A1 (6→5) → A2 (Weil) → SEAM1/SEAM2 → A4/A5/A6/A3.
