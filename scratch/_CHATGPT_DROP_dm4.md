@@ -1,63 +1,41 @@
-# Q96 dm4 — Slim Weil-pairing interface for Mazur torsion bound
+# Q100 dm4 — Build-ready slim Weil-pairing scaffold
 
-This note scopes the A2 residual seam
+This is the round-2 version of the A2 residual interface.  The goal is to make the downstream Mazur primitive-root argument depend on the smallest stable API, while leaving the construction of the Weil pairing as a named deep seam.
 
-```lean
-rationalWeilPairingPackage
-```
+The important design choice is:
 
-for the Mazur torsion-finiteness / primitive-root step.  The key point is that the downstream primitive-root argument does **not** need the full geometric Weil-pairing construction if the package already produces a pairing valued in rational roots of unity:
+*The downstream primitive-root argument does not need Galois equivariance if the pairing is already rational-valued.*
+
+So the seam should provide
 
 ```lean
 E[n] × E[n] → rootsOfUnity n ℚ
 ```
 
-Galois equivariance is construction-side infrastructure, not downstream proof-side infrastructure, once the codomain is already `ℚ`.
+with bilinearity, alternating/self-triviality, and nondegeneracy on the chosen full rational grid.  Galois equivariance is only needed behind the seam if the construction is first carried out over `AlgebraicClosure ℚ`.
 
 ---
 
-## 1. Minimal downstream interface
+## 1. Minimal Lean interface
 
-Assume `E/ℚ` has full rational `n`-torsion, packaged as an additive equivalence
+In the FLT repo this should live after importing the existing torsion file, which defines
 
 ```lean
-(ZMod n × ZMod n) ≃+ E.nTorsion n.
+WeierstrassCurve.nTorsion
 ```
 
-The primitive-root argument uses only the following facts about a pairing `e`:
-
-1. `e P Q ∈ μ_n(ℚ)`, i.e. the value is a member of `rootsOfUnity n ℚ`.
-2. Additivity in the left variable.
-3. Additivity in the right variable.
-4. Alternating/self-triviality: `e P P = 1`.
-5. Nondegeneracy restricted to the full rational grid:
-   if `e (grid z) (grid w) = 1` for all grid points `w`, then `z = 0`.
-
-It does **not** consume the following, provided the pairing already lands in `rootsOfUnity n ℚ`:
+as
 
 ```lean
-σ (e P Q) = e (σ P) (σ Q)
+Submodule.torsionBy ℤ (E⁄K).Point n
 ```
 
-and it does not use a special relation of the form `e(P, σP)`.  That relation is relevant only in variants where one works over `AlgebraicClosure ℚ` first and then descends the value to `ℚ` using rationality of torsion points.
-
-The absolute minimum could be made even slimmer: for a fixed full grid it is enough to know that
+The exact minimal package is this:
 
 ```lean
-ζ := e (grid (1, 0)) (grid (0, 1))
-```
-
-has exact order `n`.  But that would hide all the mathematics in a single field.  The useful slim package is the alternating bimultiplicative pairing plus grid nondegeneracy.
-
----
-
-## 2. Suggested Lean interface
-
-This is the interface I would keep downstream.  It deliberately omits Galois equivariance.
-
-```lean
+import FLT.EllipticCurve.Torsion
 import Mathlib.RingTheory.RootsOfUnity.Basic
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import Mathlib.GroupTheory.OrderOfElement
 import Mathlib.Topology.Instances.ZMod
 
 open scoped Classical
@@ -66,335 +44,271 @@ namespace WeierstrassCurve
 
 variable (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℚ]
 
-/-- Local abbreviation if the project does not already import `FLT.EllipticCurve.Torsion`. -/
-abbrev nTorsion (n : ℕ) : Type :=
-  Submodule.torsionBy ℤ (E⁄ℚ).Point n
+/-- A chosen full rational `n`-torsion grid.  This is the preferred downstream shape.
+It is deliberately an additive equivalence, not merely an injection into points. -/
+abbrev FullRationalTorsionGrid (n : ℕ) : Type :=
+  (ZMod n × ZMod n) ≃+ E.nTorsion n
 
-/-- Full rational `n`-torsion as a chosen grid.  This is stronger and cleaner than merely
-storing an injection into points. -/
-structure HasFullRationalTorsion (n : ℕ) where
-  gridEquiv : (ZMod n × ZMod n) ≃+ E.nTorsion n
+/-- Minimal rational Weil-pairing package consumed by the Mazur primitive-root argument.
 
-namespace HasFullRationalTorsion
-
-variable {E} {n : ℕ} (H : E.HasFullRationalTorsion n)
-
-@[simp] def grid (z : ZMod n × ZMod n) : E.nTorsion n :=
-  H.gridEquiv z
-
-lemma grid_injective : Function.Injective H.grid :=
-  H.gridEquiv.injective
-
-lemma grid_surjective : Function.Surjective H.grid :=
-  H.gridEquiv.surjective
-
-end HasFullRationalTorsion
-
-/-- Slim rational Weil-pairing package sufficient for the primitive-root argument. -/
+No Galois-equivariance field appears here: the codomain is already `rootsOfUnity n ℚ`.
+If the construction is geometric over `AlgebraicClosure ℚ`, Galois equivariance belongs in the
+construction layer that descends the geometric pairing to this rational-valued package. -/
 structure WeilPairingPackage (n : ℕ) [NeZero n] where
+  /-- The rational-valued `n`-Weil pairing. -/
   pairing : E.nTorsion n → E.nTorsion n → rootsOfUnity n ℚ
-  map_add_left : ∀ P P' Q,
-    pairing (P + P') Q = pairing P Q * pairing P' Q
-  map_add_right : ∀ P Q Q',
-    pairing P (Q + Q') = pairing P Q * pairing P Q'
-  alternating : ∀ P,
-    pairing P P = 1
+
+  /-- Additivity in the first variable. -/
+  map_add_left :
+    ∀ P P' Q : E.nTorsion n,
+      pairing (P + P') Q = pairing P Q * pairing P' Q
+
+  /-- Additivity in the second variable. -/
+  map_add_right :
+    ∀ P Q Q' : E.nTorsion n,
+      pairing P (Q + Q') = pairing P Q * pairing P Q'
+
+  /-- Alternating in the only form needed downstream. -/
+  alternating :
+    ∀ P : E.nTorsion n,
+      pairing P P = 1
+
+  /-- Nondegeneracy restricted to a full rational torsion grid.
+
+  This is weaker than global nondegeneracy but exactly what the primitive-root proof consumes. -/
   nondeg_left_on_full_grid :
-    ∀ H : E.HasFullRationalTorsion n,
+    ∀ grid : E.FullRationalTorsionGrid n,
     ∀ z : ZMod n × ZMod n,
       (∀ w : ZMod n × ZMod n,
-        pairing (H.grid z) (H.grid w) = 1) →
+        pairing (grid z) (grid w) = 1) →
       z = 0
 
 namespace WeilPairingPackage
 
-variable {E} {n : ℕ} [NeZero n]
+variable {E : WeierstrassCurve ℚ} [E.IsElliptic] [DecidableEq ℚ]
+variable {n : ℕ} [NeZero n]
 variable (W : E.WeilPairingPackage n)
 
-/-- The value that should become a primitive rational `n`-th root of unity. -/
-noncomputable def gridZeta (H : E.HasFullRationalTorsion n) : rootsOfUnity n ℚ :=
-  W.pairing (H.grid (1, 0)) (H.grid (0, 1))
+@[simp] theorem pairing_zero_left (Q : E.nTorsion n) :
+    W.pairing 0 Q = 1 := by
+  have h := W.map_add_left 0 0 Q
+  have h1 : (1 : rootsOfUnity n ℚ) = W.pairing 0 Q := by
+    simpa [mul_assoc] using congrArg (fun x => (W.pairing 0 Q)⁻¹ * x) h
+  exact h1.symm
 
-/-- Additivity gives the usual natural-scalar law in the left variable. -/
-theorem map_nsmul_left (k : ℕ) (P Q : E.nTorsion n) :
+@[simp] theorem pairing_zero_right (P : E.nTorsion n) :
+    W.pairing P 0 = 1 := by
+  have h := W.map_add_right P 0 0
+  have h1 : (1 : rootsOfUnity n ℚ) = W.pairing P 0 := by
+    simpa [mul_assoc] using congrArg (fun x => (W.pairing P 0)⁻¹ * x) h
+  exact h1.symm
+
+/-- Natural-scalar law in the first variable. -/
+theorem pairing_nsmul_left (k : ℕ) (P Q : E.nTorsion n) :
     W.pairing (k • P) Q = W.pairing P Q ^ k := by
   induction k with
-  | zero =>
-      -- needs `pairing 0 Q = 1`, derived from `0 + 0 = 0` and cancellation in `rootsOfUnity`.
-      -- Prove once as a helper lemma:
-      --   pairing_zero_left : W.pairing 0 Q = 1
-      sorry
+  | zero => simp
   | succ k ih =>
-      rw [succ_nsmul, W.map_add_left, ih, pow_succ]
+      rw [Nat.succ_eq_add_one, add_nsmul, one_nsmul, W.map_add_left, ih, pow_succ]
 
-/-- Additivity gives the usual natural-scalar law in the right variable. -/
-theorem map_nsmul_right (k : ℕ) (P Q : E.nTorsion n) :
+/-- Natural-scalar law in the second variable. -/
+theorem pairing_nsmul_right (k : ℕ) (P Q : E.nTorsion n) :
     W.pairing P (k • Q) = W.pairing P Q ^ k := by
   induction k with
-  | zero =>
-      -- analogous helper:
-      --   pairing_zero_right : W.pairing P 0 = 1
-      sorry
+  | zero => simp
   | succ k ih =>
-      rw [succ_nsmul, W.map_add_right, ih, pow_succ]
+      rw [Nat.succ_eq_add_one, add_nsmul, one_nsmul, W.map_add_right, ih, pow_succ]
 
-/-- Downstream primitive-root statement in order-of-units form.
+/-- The distinguished pairing value attached to a full torsion grid. -/
+noncomputable def gridZeta (grid : E.FullRationalTorsionGrid n) : rootsOfUnity n ℚ :=
+  W.pairing (grid (1, 0)) (grid (0, 1))
 
-This is the exact theorem consumed by the rational-root obstruction.  In Mathlib one can then
-convert to `IsPrimitiveRoot (((W.gridZeta H : ℚˣ) : ℚ)) n` using the local primitive-root API. -/
-theorem orderOf_gridZeta
-    (H : E.HasFullRationalTorsion n) :
-    orderOf (W.gridZeta H : ℚˣ) = n := by
+/-- This is the exact downstream primitive-root extraction target.
+
+This theorem is closeable from the package plus elementary `ZMod` algebra.  It is separated from
+the package so the package stays minimal. -/
+theorem exists_rootOfUnity_of_full_grid
+    (grid : E.FullRationalTorsionGrid n) :
+    ∃ ζ : rootsOfUnity n ℚ, orderOf (ζ : ℚˣ) = n := by
   classical
-  -- Skeleton:
-  -- 1. `orderOf ζ ∣ n` because `ζ ∈ rootsOfUnity n ℚ`, i.e. `ζ ^ n = 1`.
-  -- 2. For the reverse divisibility, let `k = orderOf ζ`.
-  -- 3. Since `ζ ^ k = 1`, bilinearity implies
-  --      e (k • grid (1,0)) (grid (a,b)) = 1
-  --    for every `(a,b)`:
-  --      e(kP, aP + bQ) = e(kP,aP) * e(kP,bQ)
-  --                      = 1 * (e(P,Q)^k)^b = 1.
-  --    Here `e(kP,aP)=1` follows from alternating plus bilinearity.
-  -- 4. Grid nondegeneracy gives `k • (1,0) = 0` in `ZMod n × ZMod n`.
-  -- 5. Hence `(k : ZMod n) = 0`, so `n ∣ k`.
-  -- 6. Combine both divisibilities by `Nat.dvd_antisymm`.
+  refine ⟨W.gridZeta grid, ?_⟩
+  /-
+  Proof skeleton, all downstream and not part of the package fields.
+
+  Let `P = grid (1,0)`, `Q = grid (0,1)`, and `ζ = e P Q`.
+
+  1. `orderOf (ζ : ℚˣ) ∣ n` because `ζ ∈ rootsOfUnity n ℚ`.
+     This uses `mem_rootsOfUnity` / the subtype property of `rootsOfUnity` and
+     `orderOf_dvd_of_pow_eq_one`.
+
+  2. Put `k = orderOf (ζ : ℚˣ)`.  Then `ζ^k = 1`.
+
+  3. Prove
+       `∀ w, e (grid ((k : ℕ) • (1,0))) (grid w) = 1`.
+     Decompose `w : ZMod n × ZMod n` as `(a,0) + (0,b)`.
+     Use `grid.map_add`, `map_add_right`, `map_add_left`, `alternating`, and
+     the scalar lemmas above.  The `(a,0)` contribution is killed by alternating;
+     the `(0,b)` contribution is killed by `ζ^k = 1`.
+
+  4. Apply `nondeg_left_on_full_grid` to get
+       `(k : ℕ) • (1,0) = 0` in `ZMod n × ZMod n`.
+
+  5. Read off the first coordinate to get `(k : ZMod n) = 0`, hence `n ∣ k`.
+
+  6. Combine `k ∣ n` and `n ∣ k` by `Nat.dvd_antisymm`.
+
+  Possible helper declarations to close before this theorem:
+
+    theorem zmod_natCast_eq_zero_iff_dvd
+      {n k : ℕ} : (k : ZMod n) = 0 ↔ n ∣ k
+
+    theorem fullGrid_apply_pair
+      (grid : E.FullRationalTorsionGrid n) (a b : ZMod n) :
+        grid (a,b) = grid (a,0) + grid (0,b)
+
+    theorem fullGrid_apply_first_zmod_smul
+      (grid : E.FullRationalTorsionGrid n) (a : ZMod n) :
+        grid (a,0) = a • grid (1,0)
+
+    theorem fullGrid_apply_second_zmod_smul
+      (grid : E.FullRationalTorsionGrid n) (b : ZMod n) :
+        grid (0,b) = b • grid (0,1)
+  -/
   sorry
 
 end WeilPairingPackage
 end WeierstrassCurve
 ```
 
-### Why `nondeg_left_on_full_grid` is enough
+### Why this is minimal
 
-A full global statement
-
-```lean
-∀ P : E.nTorsion n, (∀ Q, e P Q = 1) → P = 0
-```
-
-is stronger than necessary.  The primitive-root proof only needs to apply nondegeneracy to elements already known to lie in the chosen full rational grid.  Therefore this restricted field is enough:
+The package omits all of the following because the primitive-root argument does not consume them once the pairing is rational-valued:
 
 ```lean
-nondeg_left_on_full_grid :
-  ∀ H : E.HasFullRationalTorsion n,
-  ∀ z : ZMod n × ZMod n,
-    (∀ w : ZMod n × ZMod n,
-      pairing (H.grid z) (H.grid w) = 1) →
-    z = 0
+-- not needed downstream
+pairing_galois_equivariant :
+  ∀ σ P Q, σ (pairing P Q) = pairing (σ • P) (σ • Q)
+
+-- not needed downstream
+skew_symm : ∀ P Q, pairing Q P = (pairing P Q)⁻¹
+
+-- not needed downstream if `nondeg_left_on_full_grid` is present
+nondeg_left : ∀ P, (∀ Q, pairing P Q = 1) → P = 0
+nondeg_right : ∀ Q, (∀ P, pairing P Q = 1) → Q = 0
 ```
 
-If a construction proves full nondegeneracy, the restricted version is a two-line wrapper:
+The absolute logical minimum for the Mazur obstruction would be even smaller:
+
+```lean
+structure PrimitiveRootFromFullTorsion (n : ℕ) [NeZero n] where
+  zeta : rootsOfUnity n ℚ
+  orderOf_zeta : orderOf (zeta : ℚˣ) = n
+```
+
+But that would no longer be recognizably a Weil-pairing seam.  The `WeilPairingPackage` above is the minimal mathematically transparent interface.
+
+---
+
+## 2. Closeable-now downstream helpers
+
+These are not construction of the Weil pairing.  They are package-consumer lemmas and should be discharged before touching Miller functions.
+
+### CLOSEABLE-NOW: full-grid nondegeneracy wrapper
+
+If a future construction proves full left nondegeneracy, this converts it to the package field.
 
 ```lean
 theorem nondeg_left_on_full_grid_of_nondeg_left
     {E : WeierstrassCurve ℚ} [E.IsElliptic] [DecidableEq ℚ]
     {n : ℕ} [NeZero n]
     (e : E.nTorsion n → E.nTorsion n → rootsOfUnity n ℚ)
-    (hnd : ∀ P : E.nTorsion n, (∀ Q, e P Q = 1) → P = 0)
-    (H : E.HasFullRationalTorsion n)
+    (hnd : ∀ P : E.nTorsion n, (∀ Q : E.nTorsion n, e P Q = 1) → P = 0)
+    (grid : E.FullRationalTorsionGrid n)
     (z : ZMod n × ZMod n)
-    (hz : ∀ w : ZMod n × ZMod n, e (H.grid z) (H.grid w) = 1) :
+    (hz : ∀ w : ZMod n × ZMod n, e (grid z) (grid w) = 1) :
     z = 0 := by
-  have hP : H.grid z = 0 := by
+  have hzP : grid z = 0 := by
     apply hnd
     intro Q
-    rcases H.grid_surjective Q with ⟨w, rfl⟩
+    rcases grid.surjective Q with ⟨w, rfl⟩
     exact hz w
-  exact H.grid_injective (by simpa using hP)
+  exact grid.injective (by simpa using hzP)
+```
+
+### CLOSEABLE-NOW: zero and scalar lemmas
+
+Already included above:
+
+```lean
+WeilPairingPackage.pairing_zero_left
+WeilPairingPackage.pairing_zero_right
+WeilPairingPackage.pairing_nsmul_left
+WeilPairingPackage.pairing_nsmul_right
+```
+
+### CLOSEABLE-NOW: primitive-root extraction
+
+The theorem
+
+```lean
+WeilPairingPackage.exists_rootOfUnity_of_full_grid
+```
+
+is closeable after the following elementary `ZMod`/grid helpers are added locally if not already available:
+
+```lean
+theorem zmod_natCast_eq_zero_iff_dvd
+    {n k : ℕ} : (k : ZMod n) = 0 ↔ n ∣ k := by
+  -- likely already available under a nearby `ZMod` name;
+  -- otherwise prove from `ZMod.natCast_eq_natCast_iff` with the RHS specialized to `0`.
+  sorry
+
+theorem fullGrid_apply_pair
+    {E : WeierstrassCurve ℚ} [E.IsElliptic] [DecidableEq ℚ]
+    {n : ℕ} (grid : E.FullRationalTorsionGrid n) (a b : ZMod n) :
+    grid (a,b) = grid (a,0) + grid (0,b) := by
+  simpa using grid.map_add (a,0) (0,b)
+```
+
+The two `ZMod`-scalar grid lemmas are also elementary, but exact proof names depend on the imported module structure:
+
+```lean
+theorem fullGrid_apply_first_zmod_smul
+    {E : WeierstrassCurve ℚ} [E.IsElliptic] [DecidableEq ℚ]
+    {n : ℕ} (grid : E.FullRationalTorsionGrid n) (a : ZMod n) :
+    grid (a,0) = a • grid (1,0) := by
+  -- close with `map_smul` once both sides are seen as `ZMod n` modules,
+  -- or prove by induction/quotient on `a : ZMod n`.
+  sorry
+
+theorem fullGrid_apply_second_zmod_smul
+    {E : WeierstrassCurve ℚ} [E.IsElliptic] [DecidableEq ℚ]
+    {n : ℕ} (grid : E.FullRationalTorsionGrid n) (b : ZMod n) :
+    grid (0,b) = b • grid (0,1) := by
+  sorry
 ```
 
 ---
 
-## 3. Does current Mathlib have Weil-pairing infrastructure?
+## 3. Route comparison: Miller vs Galois-cohomology/Kummer
 
-I would treat the answer as **no** for the purposes of this project.
+### More feasible route: Miller / explicit rational functions
 
-Current nearby API:
+Use Miller.  It is closer to current Mathlib because Mathlib has explicit Weierstrass curves, affine points, and the group law.  It still lacks divisor/reciprocity infrastructure, but the missing pieces are local and nameable.
 
-```lean
-rootsOfUnity n R
-mem_rootsOfUnity
-rootsOfUnity.mkOfPowEq
-rootsOfUnity.coe_mkOfPowEq
-rootsOfUnity.coe_injective
-restrictRootsOfUnity
-MulEquiv.restrictRootsOfUnity
-```
+### Less feasible route: Galois cohomology / Kummer
 
-from
-
-```lean
-Mathlib.RingTheory.RootsOfUnity.Basic
-```
-
-Mathlib also has the affine elliptic-curve point group and explicit group law:
-
-```lean
-Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
-```
-
-with important names such as:
-
-```lean
-WeierstrassCurve.Affine.Point
-WeierstrassCurve.Affine.Point.instAddCommGroup
-WeierstrassCurve.Affine.Point.map
-WeierstrassCurve.Affine.negY
-WeierstrassCurve.Affine.slope
-WeierstrassCurve.Affine.addX
-```
-
-The FLT repo already adds or can add the natural torsion abbreviation:
-
-```lean
-abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type :=
-  Submodule.torsionBy ℤ (E⁄k).Point n
-```
-
-and a `ZMod n` module structure on `E.nTorsion n` via `AddCommGroup.zmodModule`.
-
-There is field-theoretic Kummer-extension infrastructure in Mathlib, but not an elliptic-curve Kummer sequence / Selmer group / Weil pairing on abelian varieties package sufficient to get the Weil pairing for `WeierstrassCurve`.  I also would not assume any abelian-variety-level Weil-pairing API is available for this use.
-
-The closest reusable ingredients are therefore:
-
-```lean
--- roots of unity
-rootsOfUnity
-rootsOfUnity.mkOfPowEq
-restrictRootsOfUnity
-
--- elliptic points
-WeierstrassCurve.Affine.Point
-WeierstrassCurve.Affine.Point.map
-WeierstrassCurve.Affine.Point.instAddCommGroup
-
--- torsion as algebra
-Submodule.torsionBy
-AddCommGroup.zmodModule
-ZMod
-
--- explicit formulas
-WeierstrassCurve.Affine.slope
-WeierstrassCurve.Affine.addX
-WeierstrassCurve.Affine.negY
-```
-
-Missing for the Weil pairing:
-
-```lean
--- divisor theory on `WeierstrassCurve` points/function field
-Divisor of rational functions on an elliptic curve
-principal divisor API for explicit line/vertical functions
-function evaluation on degree-zero divisors with disjoint support
-Miller functions `f_{n,P}` with `div f = n[P] - n[O]`
-tame symbols on the curve
-Weil reciprocity for those functions
-nondegeneracy of the constructed pairing
-Galois-equivariance/descent if constructing over `AlgebraicClosure ℚ`
-```
+The Kummer route would be elegant on paper but is currently too infrastructure-heavy.  It requires elliptic Kummer sequences, Galois cohomology, cup products, and identification of the cup-product pairing with the Weil pairing.  That is broader than the A2 seam.
 
 ---
 
-## 4. Miller construction vs cohomological construction
+## 4. Miller route: build-ready scaffold with milestone status
 
-### Route A: Miller / rational functions with prescribed divisors
+### M1. Formal point divisors
 
-This is the more feasible route in current Mathlib because it can be built directly on the explicit Weierstrass-curve point API.  It is still substantial, but it is locally structured.
+**Status: CLOSEABLE-NOW**
 
-Milestones:
-
-```lean
--- A. purely syntactic divisors on points
-abbrev DivExpr := ((E⁄K).Point →₀ ℤ)
-
--- B. syntactic rational functions used by Miller
-inductive MillerExpr
-  | one
-  | const : Kˣ → MillerExpr
-  | line : Point → Point → MillerExpr
-  | vertical : Point → MillerExpr
-  | mul : MillerExpr → MillerExpr → MillerExpr
-  | inv : MillerExpr → MillerExpr
-
--- C. divisor expression attached to a Miller expression
-MillerExpr.divExpr : MillerExpr → DivExpr
-
--- D. evaluation on degree-zero divisors with disjoint support
-MillerExpr.evalDiv :
-  (f : MillerExpr) →
-  (D : DivExpr) →
-  degree D = 0 →
-  Disjoint (divExpr f).support D.support →
-  Kˣ
-
--- E. Miller recurrence
-millerNat : ℕ → Point → MillerExpr
-
-theorem divExpr_millerNat_torsion
-  (P : E.nTorsion n) :
-  divExpr (millerNat n P.1) =
-    (n : ℤ) • [P] - (n : ℤ) • [O]
-
--- F. Weil reciprocity for Miller expressions
-theorem weil_reciprocity_millerExpr :
-  evalDiv f (divExpr g) _ _ = evalDiv g (divExpr f) _ _
-
--- G. pairing and proofs
-rationalWeilPairing : E.nTorsion n → E.nTorsion n → rootsOfUnity n ℚ
-```
-
-The hard primitives are:
-
-```lean
--- line and vertical divisor formulae
-div(line(P,Q)) = [P] + [Q] + [-(P+Q)] - 3[O]
-div(vertical(P)) = [P] + [-P] - 2[O]
-
--- Weil reciprocity, usually via tame symbols
-weil_reciprocity_millerExpr
-
--- nondegeneracy of the pairing
-rationalWeilPairing_nondeg_left
-```
-
-This is where the earlier “multi-week” estimate is accurate.  The syntactic wrapper files are not hard; the divisor formulae, tame-symbol reciprocity, and nondegeneracy are the real cost.
-
-A realistic focused estimate:
-
-```text
-DivExpr/MillerExpr/evalDiv bookkeeping:        days to 1 week
-line/vertical divisor formulae:                1+ week, coordinate-heavy
-Miller recurrence divisor theorem:             days after divisor formulae
-Weil reciprocity/tame symbols:                 1–2+ weeks
-nondegeneracy/cardinality/perfectness:          1–2+ weeks, depending on torsion-cardinality API
-rational descent / Galois equivariance:         days if point-map/Galois action is in place
-```
-
-Total: multi-week, plausibly 4–8 focused weeks, not a local seam discharge.
-
-### Route B: Galois-cohomological / cup-product construction
-
-This is less feasible in current Mathlib for this project.  It wants substantially more global infrastructure:
-
-```lean
-finite flat / étale group schemes or at least finite Galois modules
-elliptic Kummer sequence
-connecting homomorphism E(K)/nE(K) → H¹(K,E[n])
-μ_n and cup products
-Weil pairing as a perfect alternating pairing of finite group schemes
-compatibility with torsion and Galois action
-```
-
-Even if some general group-cohomology or field-theoretic Kummer files exist, this route does not avoid the need to identify the elliptic curve’s `n`-torsion dual with `μ_n` through the Weil pairing.  For the present goal, it is a research-level infrastructure route, not the shortest path.
-
-Conclusion: use the Miller route if the package is to be constructed; otherwise keep the full construction as a named seam and expose the slim rational package downstream.
-
----
-
-## 5. Construction skeleton for the feasible Miller route
-
-The construction should not be placed directly in the Mazur proof file.  Build the following layers.
+This is pure `Finsupp` bookkeeping.
 
 ```lean
 namespace WeierstrassCurve
@@ -402,7 +316,7 @@ namespace WeierstrassCurve
 variable {K : Type*} [Field K]
 variable (E : WeierstrassCurve K) [E.IsElliptic] [DecidableEq K]
 
-/-- Formal divisors supported on affine nonsingular points. -/
+/-- Formal divisors supported on rational affine nonsingular points. -/
 abbrev DivExpr : Type _ :=
   ((E⁄K).Point →₀ ℤ)
 
@@ -417,9 +331,32 @@ def point (P : (E⁄K).Point) : E.DivExpr :=
 def disjoint (D₁ D₂ : E.DivExpr) : Prop :=
   Disjoint D₁.support D₂.support
 
-end DivExpr
+@[simp] theorem degree_zero : degree (E := E) 0 = 0 := by
+  simp [degree]
 
-/-- Syntactic expressions for the rational functions used in Miller's algorithm. -/
+@[simp] theorem degree_point (P : (E⁄K).Point) :
+    degree (E := E) (point (E := E) P) = 1 := by
+  classical
+  simp [degree, point]
+
+end DivExpr
+end WeierstrassCurve
+```
+
+Missing declarations: none.  This is local project code.
+
+---
+
+### M2. Syntactic Miller expressions and formal divisors
+
+**Status: CLOSEABLE-NOW for syntax; MISSING-MATHLIB-API for semantic divisor correctness**
+
+```lean
+namespace WeierstrassCurve
+
+variable {K : Type*} [Field K]
+variable (E : WeierstrassCurve K) [E.IsElliptic] [DecidableEq K]
+
 inductive MillerExpr : Type _
   | one : MillerExpr
   | const : Kˣ → MillerExpr
@@ -434,22 +371,164 @@ noncomputable def divExpr : E.MillerExpr → E.DivExpr
   | one => 0
   | const _ => 0
   | line P Q =>
-      -- [P] + [Q] + [-(P+Q)] - 3[O]
-      sorry
+      DivExpr.point (E := E) P +
+      DivExpr.point (E := E) Q +
+      DivExpr.point (E := E) (-(P + Q)) -
+      (3 : ℤ) • DivExpr.point (E := E) 0
   | vertical P =>
-      -- [P] + [-P] - 2[O]
-      sorry
+      DivExpr.point (E := E) P +
+      DivExpr.point (E := E) (-P) -
+      (2 : ℤ) • DivExpr.point (E := E) 0
   | mul f g => divExpr f + divExpr g
   | inv f => - divExpr f
+
+end MillerExpr
+end WeierstrassCurve
+```
+
+Missing Mathlib/API declarations for the semantic layer:
+
+```lean
+-- proposed names; not currently available as Mathlib API
+WeierstrassCurve.FunctionField
+WeierstrassCurve.RationalFunction.divisor
+WeierstrassCurve.RationalFunction.line
+WeierstrassCurve.RationalFunction.vertical
+WeierstrassCurve.divisor_line
+WeierstrassCurve.divisor_vertical
+```
+
+Required statements:
+
+```lean
+theorem divisor_line
+    (P Q : (E⁄K).Point) :
+    divisor (lineFunction E P Q) =
+      [P] + [Q] + [-(P+Q)] - 3 • [0] := by
+  sorry
+
+theorem divisor_vertical
+    (P : (E⁄K).Point) :
+    divisor (verticalFunction E P) =
+      [P] + [-P] - 2 • [0] := by
+  sorry
+```
+
+---
+
+### M3. Evaluation on degree-zero divisors
+
+**Status: CLOSEABLE-NOW for formal product algebra if `evalUnitAt` is abstracted; MISSING-MATHLIB-API for actual rational-function evaluation**
+
+```lean
+namespace WeierstrassCurve.MillerExpr
+
+variable {K : Type*} [Field K]
+variable (E : WeierstrassCurve K) [E.IsElliptic] [DecidableEq K]
+
+/-- Evaluation of a syntactic Miller expression at a point outside its divisor support. -/
+noncomputable def evalUnitAt
+    (f : E.MillerExpr) (P : (E⁄K).Point)
+    (hP : P ∉ (divExpr (E := E) f).support) : Kˣ :=
+  sorry
 
 /-- Evaluation of a Miller expression on a degree-zero divisor with disjoint support. -/
 noncomputable def evalDiv
     (f : E.MillerExpr) (D : E.DivExpr)
-    (hdeg : E.DivExpr.degree D = 0)
+    (hdeg : DivExpr.degree (E := E) D = 0)
     (hdisj : Disjoint (divExpr (E := E) f).support D.support) : Kˣ :=
   sorry
 
-/-- The hard reciprocity primitive. -/
+end WeierstrassCurve.MillerExpr
+```
+
+Missing Mathlib/API declarations:
+
+```lean
+WeierstrassCurve.RationalFunction.evalAtPoint
+WeierstrassCurve.RationalFunction.evalAtPoint_ne_zero_of_not_mem_support
+WeierstrassCurve.evalDiv
+WeierstrassCurve.evalDiv_add
+WeierstrassCurve.evalDiv_mul
+WeierstrassCurve.evalDiv_principal
+```
+
+Local closeable lemmas once `evalUnitAt` is available:
+
+```lean
+MillerExpr.evalDiv_zero
+MillerExpr.evalDiv_add
+MillerExpr.evalDiv_mul
+MillerExpr.evalDiv_inv
+MillerExpr.evalDiv_const_of_degree_zero
+```
+
+---
+
+### M4. Miller recurrence
+
+**Status: CLOSEABLE-NOW once M2 is in place**
+
+The recurrence itself is formal algebra on the syntactic divisors.
+
+```lean
+namespace WeierstrassCurve.MillerExpr
+
+variable {K : Type*} [Field K]
+variable (E : WeierstrassCurve K) [E.IsElliptic] [DecidableEq K]
+
+noncomputable def addStepExpr
+    (P Q : (E⁄K).Point) : E.MillerExpr :=
+  .mul (.line P Q) (.inv (.vertical (P + Q)))
+
+theorem divExpr_addStepExpr
+    (P Q : (E⁄K).Point) :
+    divExpr (E := E) (addStepExpr (E := E) P Q) =
+      DivExpr.point (E := E) P +
+      DivExpr.point (E := E) Q -
+      DivExpr.point (E := E) (P + Q) -
+      DivExpr.point (E := E) 0 := by
+  -- pure simplification from `divExpr`; some `Finsupp` abelian-group cleanup.
+  sorry
+
+noncomputable def millerNat
+    (m : ℕ) (P : (E⁄K).Point) : E.MillerExpr :=
+  match m with
+  | 0 => .one
+  | 1 => .one
+  | k + 2 =>
+      .mul (millerNat (E := E) (k + 1) P)
+        (addStepExpr (E := E) ((k + 1 : ℕ) • P) P)
+
+theorem divExpr_millerNat_torsion
+    {m : ℕ} [NeZero m] (P : E.nTorsion m) :
+    divExpr (E := E) (millerNat (E := E) m P.1) =
+      (m : ℤ) • DivExpr.point (E := E) P.1 -
+      (m : ℤ) • DivExpr.point (E := E) 0 := by
+  -- induction on `m`; use `P.property : m • P.1 = 0`.
+  sorry
+
+end WeierstrassCurve.MillerExpr
+```
+
+Missing declarations: none beyond the torsion API already in FLT.  This is a local formal proof after M2.
+
+---
+
+### M5. Weil reciprocity for Miller expressions
+
+**Status: MISSING-MATHLIB-API**
+
+This is one of the deepest missing pieces.
+
+Proposed declaration:
+
+```lean
+namespace WeierstrassCurve.MillerExpr
+
+variable {K : Type*} [Field K]
+variable (E : WeierstrassCurve K) [E.IsElliptic] [DecidableEq K]
+
 theorem weil_reciprocity_millerExpr
     (f g : E.MillerExpr)
     (hfg : Disjoint (divExpr (E := E) f).support (divExpr (E := E) g).support) :
@@ -457,24 +536,28 @@ theorem weil_reciprocity_millerExpr
     evalDiv (E := E) g (divExpr (E := E) f) (by sorry) hfg.symm := by
   sorry
 
-/-- Miller function `f_{n,P}`. -/
-noncomputable def millerNat
-    (n : ℕ) (P : (E⁄K).Point) : E.MillerExpr :=
-  sorry
-
-/-- Divisor of the Miller function for a torsion point. -/
-theorem divExpr_millerNat_torsion
-    {n : ℕ} [NeZero n] (P : E.nTorsion n) :
-    divExpr (E := E) (millerNat (E := E) n P.1) =
-      (n : ℤ) • DivExpr.point (E := E) P.1
-        - (n : ℤ) • DivExpr.point (E := E) 0 := by
-  sorry
-
-end MillerExpr
-end WeierstrassCurve
+end WeierstrassCurve.MillerExpr
 ```
 
-Then the rational pairing layer:
+Missing Mathlib/API declarations needed to prove it semantically:
+
+```lean
+WeierstrassCurve.localParameter
+WeierstrassCurve.orderAt
+WeierstrassCurve.tameSymbol
+WeierstrassCurve.tameSymbol_finite_support
+WeierstrassCurve.product_tameSymbol_eq_one
+WeierstrassCurve.weil_reciprocity
+WeierstrassCurve.MillerExpr.weil_reciprocity_millerExpr
+```
+
+This is not closeable from current elliptic-curve point formulas alone.
+
+---
+
+### M6. Pairing construction and package wrapper
+
+**Status: CLOSEABLE-NOW as a wrapper after M3–M5; MISSING-MATHLIB-API for nondegeneracy**
 
 ```lean
 namespace WeierstrassCurve
@@ -482,7 +565,6 @@ namespace WeierstrassCurve
 variable (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℚ]
 variable (n : ℕ) [NeZero n]
 
-/-- Raw Miller-Weil value before packaging as a root of unity. -/
 noncomputable def millerWeilValue
     (P Q : E.nTorsion n) : ℚˣ :=
   sorry
@@ -490,7 +572,7 @@ noncomputable def millerWeilValue
 theorem millerWeilValue_pow_eq_one
     (P Q : E.nTorsion n) :
     ((millerWeilValue (E := E) n P Q : ℚˣ) : ℚ) ^ n = 1 := by
-  -- Uses Miller divisor theorem and Weil reciprocity.
+  -- uses Miller divisor theorem and `weil_reciprocity_millerExpr`
   sorry
 
 noncomputable def rationalWeilPairing
@@ -522,14 +604,25 @@ theorem rationalWeilPairing_alternating
   apply rootsOfUnity.coe_injective
   sorry
 
+/-- Preferred strong construction theorem; package uses only the full-grid corollary. -/
+theorem rationalWeilPairing_nondeg_left
+    (P : E.nTorsion n)
+    (hP : ∀ Q : E.nTorsion n,
+      rationalWeilPairing (E := E) n P Q = 1) :
+    P = 0 := by
+  sorry
+
 theorem rationalWeilPairing_nondeg_left_on_full_grid
-    (H : E.HasFullRationalTorsion n)
+    (grid : E.FullRationalTorsionGrid n)
     (z : ZMod n × ZMod n)
     (hz : ∀ w : ZMod n × ZMod n,
-      rationalWeilPairing (E := E) n (H.grid z) (H.grid w) = 1) :
-    z = 0 := by
-  -- Either prove directly from the Miller pairing's nondegeneracy or wrap full nondegeneracy.
-  sorry
+      rationalWeilPairing (E := E) n (grid z) (grid w) = 1) :
+    z = 0 :=
+  nondeg_left_on_full_grid_of_nondeg_left
+    (E := E) (n := n)
+    (rationalWeilPairing (E := E) n)
+    (rationalWeilPairing_nondeg_left (E := E) n)
+    grid z hz
 
 noncomputable def rationalWeilPairingPackage :
     E.WeilPairingPackage n where
@@ -542,43 +635,90 @@ noncomputable def rationalWeilPairingPackage :
 end WeierstrassCurve
 ```
 
----
-
-## 6. If constructing first over `AlgebraicClosure ℚ`
-
-If the first available construction is geometric,
+Missing Mathlib/API declarations:
 
 ```lean
-Ē[n] × Ē[n] → rootsOfUnity n (AlgebraicClosure ℚ),
+WeierstrassCurve.rationalWeilPairing
+WeierstrassCurve.rationalWeilPairing_map_add_left
+WeierstrassCurve.rationalWeilPairing_map_add_right
+WeierstrassCurve.rationalWeilPairing_alternating
+WeierstrassCurve.rationalWeilPairing_nondeg_left
+WeierstrassCurve.rationalWeilPairingPackage
 ```
 
-then the package needs an extra construction-side descent lemma:
+The first four are construction-level after reciprocity; nondegeneracy is a separate deep theorem.
+
+---
+
+## 5. Galois/Kummer route scaffold and why it is not the preferred path
+
+**Status: MISSING-MATHLIB-API at almost every step**
+
+A cohomological construction would want declarations like these:
 
 ```lean
-theorem geometricWeilPairing_galois_equivariant
-    (σ : AlgebraicClosure ℚ ≃ₐ[ℚ] AlgebraicClosure ℚ)
-    (P Q : Ebar.nTorsion n) :
-    restrictRootsOfUnity (σ : AlgebraicClosure ℚ →+* AlgebraicClosure ℚ) n
-      (geometricPairing P Q)
-    = geometricPairing (σ • P) (σ • Q) := by
+namespace WeierstrassCurve
+
+variable (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℚ]
+variable (n : ℕ) [NeZero n]
+
+-- proposed API, not current usable Mathlib API for this target
+abbrev GeometricNTorsion : Type :=
+  ((E.map (algebraMap ℚ (AlgebraicClosure ℚ))).nTorsion n)
+
+/-- Kummer connecting map for the exact sequence `0 → E[n] → E → E → 0`. -/
+noncomputable def kummerConnecting :
+    sorry :=
   sorry
 
-theorem geometricPairing_of_rational_torsion_is_rational
+/-- Cup product pairing in Galois cohomology. -/
+noncomputable def galoisCupProduct :
+    sorry :=
+  sorry
+
+/-- Weil pairing as the perfect pairing identifying `E[n]` with the Cartier dual. -/
+noncomputable def cohomologicalWeilPairing :
+    GeometricNTorsion (E := E) n →
+    GeometricNTorsion (E := E) n →
+    rootsOfUnity n (AlgebraicClosure ℚ) :=
+  sorry
+
+/-- Galois equivariance needed to descend rational torsion values. -/
+theorem cohomologicalWeilPairing_galois_equivariant :
+    sorry := by
+  sorry
+
+/-- Descent of the geometric value to a rational root of unity when both torsion points are rational. -/
+theorem cohomologicalWeilPairing_descends_to_rat
     (P Q : E.nTorsion n) :
     ∃ ζ : rootsOfUnity n ℚ,
-      mapRootsToAlgebraicClosure ζ =
-        geometricPairing (baseChangeTors P) (baseChangeTors Q) := by
-  -- rationality of P,Q plus Galois equivariance plus fixed-field theorem
+      sorry = cohomologicalWeilPairing (E := E) n sorry sorry := by
   sorry
+
+end WeierstrassCurve
 ```
 
-That descent layer is avoidable downstream if `rationalWeilPairingPackage` is taken as the seam.
+Exact missing declarations/packages for the Kummer route:
+
+```lean
+GaloisCohomology.H1
+GaloisCohomology.cupProduct
+GaloisCohomology.kummerConnecting
+WeierstrassCurve.kummerExactSequence
+WeierstrassCurve.kummerConnecting
+WeierstrassCurve.nTorsionCartierDual
+WeierstrassCurve.cohomologicalWeilPairing
+WeierstrassCurve.cohomologicalWeilPairing_galois_equivariant
+WeierstrassCurve.cohomologicalWeilPairing_descends_to_rat
+```
+
+Even if some general cohomology files exist under different names, the elliptic-curve-specific Kummer sequence and duality statements above are not available as a ready API for this project.  Therefore this route is not the shortest way to discharge A2.
 
 ---
 
-## 7. Recommended seam boundary
+## 6. Final recommendation
 
-Use this as the named A2 residual seam:
+Use the slim package as the downstream seam:
 
 ```lean
 noncomputable def rationalWeilPairingPackage
@@ -588,7 +728,7 @@ noncomputable def rationalWeilPairingPackage
   sorry
 ```
 
-Do **not** put Miller/tame-symbol/nondegeneracy details in the Mazur proof file.  The Mazur file should consume only:
+Downstream Mazur should only consume:
 
 ```lean
 W.pairing
@@ -598,13 +738,20 @@ W.alternating
 W.nondeg_left_on_full_grid
 ```
 
-and then prove:
+and the closeable helper theorem:
 
 ```lean
-full rational n-torsion on E/ℚ
-  ⟹ ∃ ζ : rootsOfUnity n ℚ, orderOf (ζ : ℚˣ) = n
-  ⟹ ℚ contains a primitive n-th root of unity
-  ⟹ n ≤ 2, or the appropriate rational-root obstruction used in the torsion bound.
+W.exists_rootOfUnity_of_full_grid
 ```
 
-This keeps the formal dependency honest and makes the future construction route clear.
+The construction route should be Miller/Route-B.  The current honest hard seams are exactly:
+
+```lean
+WeierstrassCurve.divisor_line
+WeierstrassCurve.divisor_vertical
+WeierstrassCurve.MillerExpr.evalUnitAt
+WeierstrassCurve.MillerExpr.weil_reciprocity_millerExpr
+WeierstrassCurve.rationalWeilPairing_nondeg_left
+```
+
+Everything else is either package-wrapper work or `Finsupp`/`ZMod` algebra and is closeable now.
