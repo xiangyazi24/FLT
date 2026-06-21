@@ -289,19 +289,223 @@ noncomputable def dup_bezout_affine (W : WeierstrassCurve ℚ) : DupBezoutAffine
 noncomputable def naiveLogHeightP1Q (X Z : ℚ) : ℝ :=
   Real.log (max |(X : ℝ)| |(Z : ℝ)|)
 
-/--
-Named seam for the remaining projective height layer.
+private def dupNumHReal (W : WeierstrassCurve ℚ) (X Z : ℝ) : ℝ :=
+  X ^ 4 - (W.b₄ : ℝ) * X ^ 2 * Z ^ 2
+    - 2 * (W.b₆ : ℝ) * X * Z ^ 3 - (W.b₈ : ℝ) * Z ^ 4
 
-The affine Bezout certificate above is landed. The full lower bound still needs
-the homogenized X/Z-chart Bezout identities, primitive normalization, and the
-bounded-cancellation/gcd bookkeeping for rational projective height.
+private def dupDenHReal (W : WeierstrassCurve ℚ) (X Z : ℝ) : ℝ :=
+  4 * X ^ 3 * Z + (W.b₂ : ℝ) * X ^ 2 * Z ^ 2
+    + 2 * (W.b₄ : ℝ) * X * Z ^ 3 + (W.b₆ : ℝ) * Z ^ 4
+
+private def dupHeightRawReal (W : WeierstrassCurve ℚ) (P : ℝ × ℝ) : ℝ :=
+  max |dupNumHReal W P.1 P.2| |dupDenHReal W P.1 P.2|
+
+private def p1SupUnit : Set (ℝ × ℝ) :=
+  {P | max |P.1| |P.2| = 1}
+
+private lemma ratCast_dupNumH (W : WeierstrassCurve ℚ) (X Z : ℚ) :
+    ((dupNumH W X Z : ℚ) : ℝ) = dupNumHReal W (X : ℝ) (Z : ℝ) := by
+  simp [dupNumH, dupNumHReal]
+
+private lemma ratCast_dupDenH (W : WeierstrassCurve ℚ) (X Z : ℚ) :
+    ((dupDenH W X Z : ℚ) : ℝ) = dupDenHReal W (X : ℝ) (Z : ℝ) := by
+  simp [dupDenH, dupDenHReal]
+
+private lemma continuous_dupHeightRawReal (W : WeierstrassCurve ℚ) :
+    Continuous (dupHeightRawReal W) := by
+  unfold dupHeightRawReal dupNumHReal dupDenHReal
+  continuity
+
+private lemma p1SupUnit_isCompact : IsCompact p1SupUnit := by
+  let box : Set (ℝ × ℝ) := Set.Icc (-1 : ℝ) 1 ×ˢ Set.Icc (-1 : ℝ) 1
+  have hbox : IsCompact box := isCompact_Icc.prod isCompact_Icc
+  have hclosed : IsClosed p1SupUnit := by
+    unfold p1SupUnit
+    exact isClosed_eq
+      ((continuous_fst.abs).max continuous_snd.abs)
+      continuous_const
+  have hsubset : p1SupUnit ⊆ box := by
+    intro P hP
+    change max |P.1| |P.2| = (1 : ℝ) at hP
+    have hX : |P.1| ≤ (1 : ℝ) := by
+      rw [← hP]
+      exact le_max_left |P.1| |P.2|
+    have hZ : |P.2| ≤ (1 : ℝ) := by
+      rw [← hP]
+      exact le_max_right |P.1| |P.2|
+    exact ⟨abs_le.mp hX, abs_le.mp hZ⟩
+  exact hbox.of_isClosed_subset hclosed hsubset
+
+private lemma dupNumHReal_affine_eval
+    (W : WeierstrassCurve ℚ) {X Z : ℝ} (hZ : Z ≠ 0) :
+    dupNumHReal W X Z =
+      Z ^ 4 * ((dupNumPoly W).map (algebraMap ℚ ℝ)).eval (X / Z) := by
+  simp [dupNumHReal, dupNumPoly]
+  field_simp [hZ]
+
+private lemma dupDenHReal_affine_eval
+    (W : WeierstrassCurve ℚ) {X Z : ℝ} (hZ : Z ≠ 0) :
+    dupDenHReal W X Z =
+      Z ^ 4 * ((dupDenPoly W).map (algebraMap ℚ ℝ)).eval (X / Z) := by
+  simp [dupDenHReal, dupDenPoly]
+  field_simp [hZ]
+
+private lemma dupHeightRawReal_ne_zero_on_unit
+    (W : WeierstrassCurve ℚ) [W.IsElliptic] {P : ℝ × ℝ}
+    (hP : P ∈ p1SupUnit) :
+    dupHeightRawReal W P ≠ 0 := by
+  intro hheight
+  have hmaxle : dupHeightRawReal W P ≤ 0 := by
+    simp [hheight]
+  have hFabs_le : |dupNumHReal W P.1 P.2| ≤ 0 := (max_le_iff.mp hmaxle).1
+  have hGabs_le : |dupDenHReal W P.1 P.2| ≤ 0 := (max_le_iff.mp hmaxle).2
+  have hF : dupNumHReal W P.1 P.2 = 0 :=
+    abs_eq_zero.mp (le_antisymm hFabs_le (abs_nonneg _))
+  have hG : dupDenHReal W P.1 P.2 = 0 :=
+    abs_eq_zero.mp (le_antisymm hGabs_le (abs_nonneg _))
+  by_cases hZ : P.2 = 0
+  · have hXabs : |P.1| = (1 : ℝ) := by
+      simpa [p1SupUnit, hZ] using hP
+    have hXne : P.1 ≠ 0 := by
+      intro hX
+      norm_num [hX] at hXabs
+    have hX4 : P.1 ^ 4 = 0 := by
+      simpa [dupNumHReal, hZ] using hF
+    exact (pow_ne_zero 4 hXne) hX4
+  · let t : ℝ := P.1 / P.2
+    have hF_eval :
+        ((dupNumPoly W).map (algebraMap ℚ ℝ)).eval t = 0 := by
+      have hscale := dupNumHReal_affine_eval (W := W) (X := P.1) (Z := P.2) hZ
+      have hmul : P.2 ^ 4 *
+          ((dupNumPoly W).map (algebraMap ℚ ℝ)).eval t = 0 := by
+        simpa [t, hscale] using hF
+      exact (mul_eq_zero.mp hmul).resolve_left (pow_ne_zero 4 hZ)
+    have hG_eval :
+        ((dupDenPoly W).map (algebraMap ℚ ℝ)).eval t = 0 := by
+      have hscale := dupDenHReal_affine_eval (W := W) (X := P.1) (Z := P.2) hZ
+      have hmul : P.2 ^ 4 *
+          ((dupDenPoly W).map (algebraMap ℚ ℝ)).eval t = 0 := by
+        simpa [t, hscale] using hG
+      exact (mul_eq_zero.mp hmul).resolve_left (pow_ne_zero 4 hZ)
+    let cert := dup_bezout_affine W
+    have hbezR :
+        ((dupNumPoly W).map (algebraMap ℚ ℝ)) * (cert.A.map (algebraMap ℚ ℝ))
+          + ((dupDenPoly W).map (algebraMap ℚ ℝ)) * (cert.B.map (algebraMap ℚ ℝ))
+            = Polynomial.C (((W.Δ ^ 2 : ℚ) : ℝ)) := by
+      have hmap := congrArg (Polynomial.map (algebraMap ℚ ℝ)) cert.bezout
+      simpa using hmap
+    have hzeroDelta : (((W.Δ ^ 2 : ℚ) : ℝ)) = 0 := by
+      have hEval := congrArg (fun p : Polynomial ℝ => p.eval t) hbezR
+      simpa [hF_eval, hG_eval] using hEval.symm
+    have hDelta_ne : (((W.Δ ^ 2 : ℚ) : ℝ)) ≠ 0 := by
+      exact_mod_cast (pow_ne_zero 2 W.isUnit_Δ.ne_zero)
+    exact hDelta_ne hzeroDelta
+
+private lemma dupHeightRawReal_pos_on_unit
+    (W : WeierstrassCurve ℚ) [W.IsElliptic] {P : ℝ × ℝ}
+    (hP : P ∈ p1SupUnit) :
+    0 < dupHeightRawReal W P := by
+  refine lt_of_le_of_ne ?_ ?_
+  · exact le_trans (abs_nonneg _) (le_max_left _ _)
+  · exact (dupHeightRawReal_ne_zero_on_unit (W := W) hP).symm
+
+private lemma dupHeightRawReal_uniform_lower
+    (W : WeierstrassCurve ℚ) [W.IsElliptic] :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ P ∈ p1SupUnit, δ ≤ dupHeightRawReal W P := by
+  have hnonempty : p1SupUnit.Nonempty := by
+    exact ⟨(1, 0), by norm_num [p1SupUnit]⟩
+  obtain ⟨P₀, hP₀, hmin⟩ :=
+    p1SupUnit_isCompact.exists_isMinOn hnonempty
+      (continuous_dupHeightRawReal W).continuousOn
+  exact ⟨dupHeightRawReal W P₀, dupHeightRawReal_pos_on_unit (W := W) hP₀,
+    fun P hP => (isMinOn_iff.mp hmin) P hP⟩
+
+private lemma dupNumHReal_scale
+    (W : WeierstrassCurve ℚ) {M X Z : ℝ} (hM : M ≠ 0) :
+    dupNumHReal W X Z =
+      M ^ 4 * dupNumHReal W (X / M) (Z / M) := by
+  simp [dupNumHReal]
+  field_simp [hM]
+
+private lemma dupDenHReal_scale
+    (W : WeierstrassCurve ℚ) {M X Z : ℝ} (hM : M ≠ 0) :
+    dupDenHReal W X Z =
+      M ^ 4 * dupDenHReal W (X / M) (Z / M) := by
+  simp [dupDenHReal]
+  field_simp [hM]
+
+private lemma dupHeightRawReal_scale
+    (W : WeierstrassCurve ℚ) {M X Z : ℝ} (hMnonneg : 0 ≤ M) (hM : M ≠ 0) :
+    dupHeightRawReal W (X, Z) =
+      M ^ 4 * dupHeightRawReal W (X / M, Z / M) := by
+  have hM4nonneg : 0 ≤ M ^ 4 := pow_nonneg hMnonneg 4
+  rw [dupHeightRawReal, dupHeightRawReal,
+    dupNumHReal_scale (W := W) (M := M) (X := X) (Z := Z) hM,
+    dupDenHReal_scale (W := W) (M := M) (X := X) (Z := Z) hM]
+  simp only [abs_mul]
+  rw [abs_of_nonneg hM4nonneg, ← mul_max_of_nonneg _ _ hM4nonneg]
+
+/--
+Current raw `max |X| |Z|` height lower bound for the duplication binary forms.
+
+The proof uses the affine Bezout certificate to rule out common zeros on the
+real sup-unit boundary, extracts a positive minimum by compactness, and scales
+back by homogeneity.
 -/
 theorem dup_projective_height_lower_height_api_seam
     (W : WeierstrassCurve ℚ) [W.IsElliptic] :
     ∃ C0 : ℝ, ∀ X Z : ℚ, (X, Z) ≠ (0, 0) →
       naiveLogHeightP1Q (dupNumH W X Z) (dupDenH W X Z) ≥
         4 * naiveLogHeightP1Q X Z - C0 := by
-  sorry
+  obtain ⟨δ, hδpos, hδlower⟩ := dupHeightRawReal_uniform_lower W
+  refine ⟨-Real.log δ, ?_⟩
+  intro X Z hXZ
+  let x : ℝ := X
+  let z : ℝ := Z
+  let M : ℝ := max |x| |z|
+  have hxz_ne : x ≠ 0 ∨ z ≠ 0 := by
+    by_contra h
+    push Not at h
+    apply hXZ
+    ext <;> exact_mod_cast (by simp [x, z] at h ⊢; tauto)
+  have hMpos : 0 < M := by
+    rcases hxz_ne with hx | hz
+    · exact lt_of_lt_of_le (abs_pos.mpr hx) (le_max_left |x| |z|)
+    · exact lt_of_lt_of_le (abs_pos.mpr hz) (le_max_right |x| |z|)
+  have hMnonneg : 0 ≤ M := le_of_lt hMpos
+  have hMne : M ≠ 0 := ne_of_gt hMpos
+  have hunit : (x / M, z / M) ∈ p1SupUnit := by
+    have hMabs : |M| = M := abs_of_nonneg hMnonneg
+    simp [p1SupUnit, M, abs_div, hMabs, max_div_div_right hMnonneg, hMne]
+  have hscale :
+      dupHeightRawReal W (x, z) =
+        M ^ 4 * dupHeightRawReal W (x / M, z / M) :=
+    dupHeightRawReal_scale (W := W) hMnonneg hMne
+  have hM4nonneg : 0 ≤ M ^ 4 := pow_nonneg hMnonneg 4
+  have hraw_lower : M ^ 4 * δ ≤ dupHeightRawReal W (x, z) := by
+    rw [hscale]
+    exact mul_le_mul_of_nonneg_left (hδlower (x / M, z / M) hunit) hM4nonneg
+  have hpos_lower : 0 < M ^ 4 * δ :=
+    mul_pos (pow_pos hMpos 4) hδpos
+  have hlog_lower :
+      Real.log (M ^ 4 * δ) ≤ Real.log (dupHeightRawReal W (x, z)) :=
+    Real.log_le_log hpos_lower hraw_lower
+  have hheight_eq :
+      naiveLogHeightP1Q (dupNumH W X Z) (dupDenH W X Z) =
+        Real.log (dupHeightRawReal W (x, z)) := by
+    simp [naiveLogHeightP1Q, dupHeightRawReal, x, z,
+      ratCast_dupNumH, ratCast_dupDenH]
+  have hbase_eq :
+      naiveLogHeightP1Q X Z = Real.log M := by
+    simp [naiveLogHeightP1Q, M, x, z]
+  rw [hheight_eq, hbase_eq]
+  calc
+    Real.log (dupHeightRawReal W (x, z)) ≥ Real.log (M ^ 4 * δ) := hlog_lower
+    _ = 4 * Real.log M + Real.log δ := by
+      rw [Real.log_mul (pow_ne_zero 4 hMne) (ne_of_gt hδpos), Real.log_pow]
+      norm_num
+    _ = 4 * Real.log M - -Real.log δ := by
+      ring
 
 end
 
