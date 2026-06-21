@@ -1,76 +1,67 @@
-# Q94: `preΨ'_separable` design — formal group vs resultant
+# Q99: Round-2 scaffold for `preΨ'_separable`
 
-## Executive verdict
-
-The cleanest honest route to
+This is a build-ready dependency plan for the most feasible route to
 
 ```lean
 (W.preΨ' n).Separable
 ```
 
-for an elliptic Weierstrass curve `W/k` and `(n : k) ≠ 0` is **formal/local**, not a global resultant computation.
+for a Weierstrass elliptic curve `W/k`, assuming `(n : k) ≠ 0`.
 
-The mathematical primitive is:
-
-```text
-multiplication-by-n on E has invertible differential when (n : k) ≠ 0.
-```
-
-In local coordinates at the origin, with the standard formal parameter
+The recommended route is the **formal/local route**:
 
 ```text
-t = -x / y,
+Weierstrass formal group
+→ linear coefficient of [n](T) is n
+→ [n] is étale when (n : k) ≠ 0
+→ E[n] is reduced
+→ the x-coordinate map is unramified away from 2-torsion
+→ the reduced/non-2 x-coordinate factor preΨ'_n has simple roots
+→ preΨ'_n is separable.
 ```
 
-this is the statement that the formal `[n]`-series has linear coefficient `n`:
+The resultant/discriminant route is kept as a fallback interface, but it is not recommended unless one first proves the exact normalized `preΨ'` discriminant formula.
+
+## Status legend
 
 ```text
-[n](T) = n T + higher order terms.
+CLOSEABLE-NOW
+  Uses existing Mathlib polynomial / finite / root API, possibly with routine local glue.
+
+MISSING-MATHLIB-API
+  Requires genuinely new formal geometry / formal group / local ring / divisor-order API.
+
+SEAM
+  The narrow theorem downstream code should depend on while the missing API is being built.
 ```
 
-When `(n : k) ≠ 0`, the linear coefficient is a unit, so `[n]` is étale at the origin. Translation moves this to every point, so the kernel `E[n]` is reduced. Since the `x`-map is unramified away from the two-torsion ramification points, and `preΨ'` is exactly the reduced/non-two-torsion `x`-factor of the division polynomial, the roots of `preΨ'` are simple.
+## Dependency order
 
-The previous dual-number/projective-addition attempt failed for the right reason: the projective addition formula is not a good local coordinate at `(O,O)`. The formal group works in the completed local ring and avoids the basepoint indeterminacy.
+```text
+0. Polynomial glue lemmas                                      CLOSEABLE-NOW
+1. Weierstrass formal group construction                       MISSING-MATHLIB-API
+2. Generic formal-group [n]-series linear coefficient          MISSING-MATHLIB-API, but algebraic and local
+3. Specialize to Weierstrass: coeff_T([n]) = n                 MISSING-MATHLIB-API
+4. [n] is étale when (n:k) ≠ 0                                 MISSING-MATHLIB-API
+5. Geometric kernel E[n] is reduced                            MISSING-MATHLIB-API
+6. x-map is unramified away from 2-torsion                     MISSING-MATHLIB-API
+7. roots of preΨ'_n are exactly non-2 n-torsion x-coordinates  partially available / project seam
+8. local multiplicity bridge: reduced kernel + unramified x    MISSING-MATHLIB-API
+9. derivative nonzero at each preΨ'_n root                     MISSING-MATHLIB-API, follows from 4-8
+10. preΨ'_n separable                                          CLOSEABLE-NOW after 9
+```
 
-## Current Mathlib status
-
-Mathlib has:
+The downstream theorem should depend only on the final seam:
 
 ```lean
-Polynomial.Separable
-Polynomial.separable_def
-Polynomial.separable_map       -- or closely related map/descent lemmas
-Polynomial.resultant
-Polynomial.resultant_eq_zero_iff
-Polynomial.isUnit_resultant_iff_isCoprime
-Polynomial.discr
-Polynomial.resultant_deriv
+WeierstrassCurve.preΨ'_separable
 ```
 
-Mathlib also has a generic one-dimensional formal group API:
+Everything above it is the implementation plan for discharging that seam.
 
-```lean
-FormalGroup
-FormalGroup.Point
-```
+---
 
-in `Mathlib.RingTheory.FormalGroup.Basic`.
-
-What Mathlib does **not** appear to have yet is:
-
-```lean
-WeierstrassCurve.formalGroup
-WeierstrassCurve.formalParameter
-WeierstrassCurve.nsmul_formal_linearCoeff
-WeierstrassCurve.nsmul_etale_of_natCast_ne_zero
-WeierstrassCurve.preΨ'_separable_of_nsmul_etale
-```
-
-So the right architecture is to keep `preΨ'_separable` as a named seam now, and discharge it later by building the Weierstrass formal group and the local transfer to the division polynomial.
-
-## The downstream seam to expose now
-
-This is the theorem downstream torsion-counting code should depend on.
+# Lean scaffold
 
 ```lean
 import Mathlib
@@ -79,240 +70,19 @@ noncomputable section
 
 open Polynomial
 open WeierstrassCurve
-
-namespace WeierstrassCurve
-
-universe u
-
-/--
-Main separability seam for the reduced/odd part of the division polynomial.
-
-This is the exact theorem needed for the geometric `n`-torsion count.  It should eventually be
-proved from formal étaleness of multiplication-by-`n` on the Weierstrass formal group.
--/
-theorem preΨ'_separable
-    {k : Type u} [Field k]
-    (W : WeierstrassCurve k) [W.IsElliptic]
-    {n : ℕ} (hn : (n : k) ≠ 0) :
-    (W.preΨ' n).Separable := by
-  -- Future proof route:
-  -- 1. Base-change to `AlgebraicClosure k`.
-  -- 2. Prove every geometric root of `W.preΨ' n` is simple.
-  -- 3. Use `Polynomial.separable_map` / descent along the injective algebra map.
-  --
-  -- The currently missing primitive is the Weierstrass formal-group/local-divisor package.
-  -- This theorem is intentionally the single named seam.
-  admit
-
-end WeierstrassCurve
-```
-
-For the geometric count over a separably closed field, a slightly more direct version is also useful:
-
-```lean
-namespace WeierstrassCurve
-
-universe u
-
-/-- Geometric version, usually the one used inside `n_torsion_card`. -/
-theorem preΨ'_separable_geometric
-    {k : Type u} [Field k] [IsSepClosed k]
-    (W : WeierstrassCurve k) [W.IsElliptic]
-    {n : ℕ} (hn : (n : k) ≠ 0) :
-    (W.preΨ' n).Separable := by
-  -- Future proof avoids descent/base-change and works directly with geometric roots.
-  -- It still needs formal étaleness of `[n]` and the local transfer to the x-coordinate factor.
-  admit
-
-end WeierstrassCurve
-```
-
-## Formal-group route: theorem chain
-
-The formal route should be built in layers. The following declarations are the intended API.
-
-```lean
-import Mathlib
-
-noncomputable section
-
-open Polynomial
-open WeierstrassCurve
-
-namespace WeierstrassCurve
-
-universe u
-
-variable {k : Type u} [Field k]
-variable (W : WeierstrassCurve k) [W.IsElliptic]
-
-/--
-The Weierstrass formal group attached to `W`, using the standard parameter `t = -x/y` at `O`.
-
-Missing Mathlib API.
--/
--- noncomputable def formalGroup : FormalGroup k := ...
-
-/--
-The formal `[n]`-series on the Weierstrass formal group has linear coefficient `n`.
-
-This is the key local calculation.  It should ultimately be a generic formal-group lemma once
-`W.formalGroup` is constructed and shown to have linear part `X + Y`.
--/
-theorem formal_nsmul_linearCoeff
-    (n : ℕ) :
-    -- placeholder for: coefficient of `T` in the formal `[n]`-series equals `(n : k)`
-    True := by
-  -- Proof idea:
-  -- * For any commutative one-dimensional formal group law `F(X,Y) = X + Y + terms of degree ≥ 2`,
-  --   prove by induction that `[n]_F(T) = n*T + terms of degree ≥ 2`.
-  -- * Specialize to the Weierstrass formal group.
-  trivial
-
-/-- Multiplication by `n` is étale when `(n : k) ≠ 0`. -/
-theorem nsmul_etale_of_natCast_ne_zero
-    {n : ℕ} (hn : (n : k) ≠ 0) :
-    -- placeholder for: the morphism `[n] : E → E` is étale / has invertible differential
-    True := by
-  -- Proof idea:
-  -- * At `O`, use `formal_nsmul_linearCoeff` and `hn`.
-  -- * At arbitrary `P`, conjugate by translation: `[n]` commutes with translations up to a translate,
-  --   so the differential has the same determinant.
-  trivial
-
-/-- The kernel of `[n]` is geometrically reduced when `(n : k) ≠ 0`. -/
-theorem n_torsion_reduced_of_natCast_ne_zero
-    {n : ℕ} (hn : (n : k) ≠ 0) :
-    -- placeholder for: no nontrivial tangent vector lies in the scheme-theoretic kernel
-    True := by
-  -- Proof idea: reducedness of the fiber over `O` follows from étaleness of `[n]`.
-  trivial
-
-/--
-The x-coordinate map is unramified away from two-torsion.
-
-This is the local fact that the quotient map `E → E/{±1} ≃ P¹` ramifies exactly at the fixed
-points of negation, i.e. the 2-torsion points.
--/
-theorem x_unramified_of_not_two_torsion
-    -- schematic arguments: a point `P`, hypothesis `(2 : ℕ) • P ≠ 0`
-    : True := by
-  -- Proof idea:
-  -- * In affine coordinates, the two points over an x-coordinate are `P` and `-P`.
-  -- * Ramification occurs precisely when `P = -P`, equivalently `2 • P = 0`.
-  trivial
-
-/--
-Simple-root statement for `preΨ'`: each geometric root has nonzero derivative.
-
-This is the concrete bridge from formal étaleness to polynomial separability.
--/
-theorem derivative_preΨ'_eval_ne_zero_of_eval_eq_zero
-    [IsSepClosed k]
-    {n : ℕ} (hn : (n : k) ≠ 0) {x : k}
-    (hx : (W.preΨ' n).eval x = 0) :
-    (Polynomial.derivative (W.preΨ' n)).eval x ≠ 0 := by
-  -- Proof skeleton:
-  -- 1. Use the root-realization theorem to choose a point `P` with x-coordinate `x`,
-  --    `n • P = 0`, and `2 • P ≠ 0`.
-  -- 2. `n_torsion_reduced_of_natCast_ne_zero hn` says the kernel is reduced at `P`.
-  -- 3. `x_unramified_of_not_two_torsion` says the local x-coordinate is an étale parameter at `P`.
-  -- 4. Therefore the local equation in the x-line cuts transversely, so the derivative of
-  --    `preΨ' n` at `x` is nonzero.
-  --
-  -- Missing API: local rings / order of vanishing / divisor-to-polynomial multiplicity bridge
-  -- specialized to Weierstrass curves.
-  admit
-
-/-- Separability from the simple-root derivative criterion over a separably closed field. -/
-theorem preΨ'_separable_of_derivative_ne_zero_at_roots
-    [IsSepClosed k]
-    {n : ℕ} (hn : (n : k) ≠ 0) :
-    (W.preΨ' n).Separable := by
-  -- Standard polynomial API route:
-  -- `Polynomial.Separable` is `IsCoprime f f.derivative`.
-  -- Over a splitting/separably closed field, nonzero derivative at every root gives coprimality.
-  -- Use existing `Polynomial.separable_def` and root-set/cardinality lemmas, or add a small helper:
-  -- `Polynomial.separable_of_derivative_ne_zero_at_roots`.
-  admit
-
-end WeierstrassCurve
-```
-
-## Transfer from formal étaleness to `preΨ'` separability
-
-The most delicate bridge is not the linear coefficient itself. It is the local-to-polynomial transfer:
-
-```text
-[n] étale + x unramified at non-2 torsion
-⇒ the x-coordinate divisor of non-2 n-torsion has multiplicity one
-⇒ every root of preΨ'_n is simple.
-```
-
-A good explicit seam is:
-
-```lean
-import Mathlib
-
-noncomputable section
-
-open Polynomial
-open WeierstrassCurve
-
-namespace WeierstrassCurve
-
-universe u
-
-variable {k : Type u} [Field k] [IsSepClosed k]
-variable (W : WeierstrassCurve k) [W.IsElliptic]
-
-/--
-Local multiplicity bridge from reduced geometric torsion to squarefreeness of `preΨ'`.
-
-This theorem is independent of the proof of étaleness. It only says that, once the geometric kernel
-is reduced and `preΨ'` is known to be the non-2-torsion x-coordinate factor, roots of `preΨ'` have
-multiplicity one.
--/
-theorem preΨ'_simple_roots_of_n_torsion_reduced
-    {n : ℕ} (hn : (n : k) ≠ 0) :
-    ∀ x : k,
-      (W.preΨ' n).eval x = 0 →
-      (Polynomial.derivative (W.preΨ' n)).eval x ≠ 0 := by
-  -- Needed ingredients:
-  -- * root-realization for `preΨ'` roots;
-  -- * no-common-root with `Ψ₂Sq` so roots are non-2-torsion;
-  -- * reducedness of `E[n]` from `[n]` étale;
-  -- * x-map unramified at non-2 torsion;
-  -- * local multiplicity = polynomial derivative multiplicity for a root in A¹.
-  admit
-
-end WeierstrassCurve
-```
-
-This is the precise location where the earlier dual-number/projective attempt failed: it tried to compute the differential of `[n]` with a global addition formula instead of using the completed local group law.
-
-## Resultant/discriminant route
-
-The alternative is to prove a closed formula such as
-
-```lean
-resultant (W.preΨ' n) (Polynomial.derivative (W.preΨ' n))
-  = unit * (n : k)^a * W.Δ^b * maybe powers of 2 and leading-coefficient factors
-```
-
-and then use Mathlib's generic resultant API.
-
-The generic bridge is short:
-
-```lean
-import Mathlib
-
-open Polynomial
 
 namespace Polynomial
 
+universe u
+
+/--
+CLOSEABLE-NOW.
+
+If the resultant of `f` and `f.derivative` is nonzero, then `f` is separable.
+This is the clean generic bridge for a possible resultant proof.
+-/
 lemma separable_of_resultant_derivative_ne_zero
-    {k : Type*} [Field k] {f : k[X]}
+    {k : Type u} [Field k] {f : k[X]}
     (hf : f ≠ 0)
     (hres : f.resultant f.derivative ≠ 0) :
     f.Separable := by
@@ -323,12 +93,34 @@ lemma separable_of_resultant_derivative_ne_zero
     exact ⟨Or.inl hf, hcop⟩
   exact hres hz
 
+/--
+CLOSEABLE-NOW, but may require minor API adaptation.
+
+Over a separably closed / algebraically closed field, if every root of `f` has nonzero derivative,
+then `f` is separable. This is often the most convenient final bridge for the formal route.
+
+Implementation options:
+* use `Polynomial.separable_def` and show `IsCoprime f f.derivative`;
+* if `¬ IsCoprime`, take a common irreducible factor and use `IsSepClosed` to get a root;
+* or use root multiplicities / `rootSet` API if the polynomial is known to split.
+-/
+lemma separable_of_forall_root_derivative_ne_zero
+    {k : Type u} [Field k] [IsSepClosed k] {f : k[X]}
+    (hf : f ≠ 0)
+    (hroot : ∀ x : k, f.eval x = 0 → f.derivative.eval x ≠ 0) :
+    f.Separable := by
+  -- CLOSEABLE-NOW polynomial lemma.
+  -- Suggested proof:
+  -- 1. `rw [Polynomial.separable_def]`.
+  -- 2. Suppose `¬ IsCoprime f f.derivative`.
+  -- 3. Extract a common nonconstant factor over the field.
+  -- 4. Since `k` is separably closed, get a root `x` of that factor.
+  -- 5. Then `f.eval x = 0` and `f.derivative.eval x = 0`, contradiction.
+  -- Exact low-level API names may vary; this is pure polynomial algebra, no EC geometry.
+  sorry
+
 end Polynomial
-```
 
-Then the desired theorem would be:
-
-```lean
 namespace WeierstrassCurve
 
 universe u
@@ -336,62 +128,384 @@ universe u
 variable {k : Type u} [Field k]
 variable (W : WeierstrassCurve k) [W.IsElliptic]
 
-/-- Resultant seam for the reduced division polynomial. -/
+/-!
+## 1. Formal group API
+-/
+
+/--
+MISSING-MATHLIB-API.
+
+The Weierstrass formal group of `W` at the identity, using the standard local parameter
+`t = -x / y`.
+
+Expected target declaration to add to Mathlib/FLT:
+
+```lean
+noncomputable def WeierstrassCurve.formalGroup
+    {k : Type u} [Field k]
+    (W : WeierstrassCurve k) [W.IsElliptic] : FormalGroup k
+```
+
+Current Mathlib has generic `FormalGroup`, but no `WeierstrassCurve.formalGroup`.
+-/
+-- noncomputable def formalGroup : FormalGroup k := ...
+
+/--
+MISSING-MATHLIB-API.
+
+The formal parameter `t = -x/y` at `O`.  The final implementation may represent this as an element
+of a completed local ring, not as a global rational function.
+
+Expected declaration name:
+
+```lean
+noncomputable def WeierstrassCurve.formalParameter
+    (W : WeierstrassCurve k) [W.IsElliptic] : ...
+```
+-/
+-- noncomputable def formalParameter : ... := ...
+
+/-!
+## 2. Formal `[n]`-series
+-/
+
+/--
+MISSING-MATHLIB-API, but algebraically straightforward once generic formal groups are usable.
+
+For any one-dimensional commutative formal group law, the linear coefficient of its formal
+`[n]`-series is `(n : k)`.
+
+Expected generic declaration name:
+
+```lean
+theorem FormalGroup.linearCoeff_nsmul
+    (F : FormalGroup k) (n : ℕ) :
+    -- coeff of `T` in `[n]_F(T)` equals `(n : k)`
+```
+
+The exact coefficient expression depends on the power-series API chosen for formal groups.
+-/
+theorem formalGroup_linearCoeff_nsmul_placeholder
+    (n : ℕ) : True := by
+  -- Proof once API exists:
+  -- induction on `n`; use that `F(X,Y) = X + Y + higher order terms`.
+  trivial
+
+/--
+MISSING-MATHLIB-API.
+
+Specialization of the generic formal-group statement to the Weierstrass formal group.
+
+Expected final declaration:
+
+```lean
+theorem WeierstrassCurve.formal_nsmul_linearCoeff
+    (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) :
+    -- coeff_T ([n]_{W.formalGroup}) = (n : k)
+```
+-/
+theorem formal_nsmul_linearCoeff_placeholder
+    (n : ℕ) : True := by
+  -- Use `FormalGroup.linearCoeff_nsmul W.formalGroup n`.
+  trivial
+
+/-!
+## 3. Étaleness of multiplication by n
+-/
+
+/--
+MISSING-MATHLIB-API.
+
+Multiplication by `n` has invertible differential at the identity when `(n : k) ≠ 0`.
+
+Expected declaration name:
+
+```lean
+theorem WeierstrassCurve.nsmul_differential_at_origin_isUnit
+    (W : WeierstrassCurve k) [W.IsElliptic]
+    {n : ℕ} (hn : (n : k) ≠ 0) :
+    IsUnit (differential_of_[n]_at_O)
+```
+
+This is the local formal-group use of `formal_nsmul_linearCoeff`.
+-/
+theorem nsmul_differential_at_origin_isUnit_placeholder
+    {n : ℕ} (hn : (n : k) ≠ 0) : True := by
+  trivial
+
+/--
+MISSING-MATHLIB-API.
+
+Multiplication by `n` is étale on the Weierstrass curve when `(n : k) ≠ 0`.
+
+Expected declaration name:
+
+```lean
+theorem WeierstrassCurve.nsmul_etale_of_natCast_ne_zero
+    (W : WeierstrassCurve k) [W.IsElliptic]
+    {n : ℕ} (hn : (n : k) ≠ 0) :
+    -- `[n] : E → E` is étale
+```
+
+Reason:
+* at `O`, use the formal group linear coefficient;
+* at any point, use translation to move the assertion to `O`.
+-/
+theorem nsmul_etale_of_natCast_ne_zero_placeholder
+    {n : ℕ} (hn : (n : k) ≠ 0) : True := by
+  trivial
+
+/--
+MISSING-MATHLIB-API.
+
+The geometric kernel `E[n]` is reduced when `(n : k) ≠ 0`.
+
+Expected declaration name:
+
+```lean
+theorem WeierstrassCurve.n_torsion_reduced_of_natCast_ne_zero
+    (W : WeierstrassCurve k) [W.IsElliptic]
+    {n : ℕ} (hn : (n : k) ≠ 0) :
+    -- scheme-theoretic kernel of `[n]` is reduced
+```
+
+This follows from étaleness of `[n]` and stability under base change.
+-/
+theorem n_torsion_reduced_of_natCast_ne_zero_placeholder
+    {n : ℕ} (hn : (n : k) ≠ 0) : True := by
+  trivial
+
+/-!
+## 4. x-coordinate local behavior
+-/
+
+/--
+MISSING-MATHLIB-API.
+
+The x-coordinate map is unramified at a point that is not 2-torsion.
+
+Concrete intended theorem, stated using Mathlib affine points.  The conclusion is schematic because
+Mathlib currently lacks the needed local-ring/order-of-vanishing API for this curve model.
+-/
+theorem xCoord_unramified_of_two_nsmul_ne_zero
+    {x y : k} (hxy : (W⁄k).Nonsingular x y)
+    (h2 : (2 : ℕ) • Affine.Point.some x y hxy ≠ 0) :
+    True := by
+  -- Future proof:
+  -- * The involution `P ↦ -P` fixes exactly 2-torsion.
+  -- * The quotient by this involution is the x-line.
+  -- * Therefore the quotient map is unramified away from fixed points.
+  trivial
+
+/--
+PROJECT SEAM / partially closeable from existing division polynomial and coordinate formula work.
+
+Root realization for `preΨ'`: over a separably closed field, a root of `preΨ'_n` is the x-coordinate
+of a non-2-torsion `n`-torsion point.
+
+This depends on the coordinate formula for `[n]P` and the non-circular coprimality
+`preΨ'_n ⟂ Ψ₂Sq`.
+-/
+theorem preΨ'_root_realization_non_two_torsion
+    [IsSepClosed k]
+    {n : ℕ} (hn : (n : k) ≠ 0) {x : k}
+    (hx : (W.preΨ' n).eval x = 0) :
+    ∃ y (hxy : (W⁄k).Nonsingular x y),
+      (2 : ℕ) • Affine.Point.some x y hxy ≠ 0 ∧
+      n • Affine.Point.some x y hxy = 0 := by
+  -- Status: PROJECT SEAM.
+  -- Required dependencies:
+  -- * x-coordinate formula for `[n]P` using `Φ` and `ΨSq`;
+  -- * non-circular proof that `preΨ'_n` and `Ψ₂Sq` have no common root;
+  -- * existence of a y-coordinate over `IsSepClosed k`.
+  sorry
+
+/-!
+## 5. Local multiplicity bridge
+-/
+
+/--
+MISSING-MATHLIB-API.
+
+Local bridge: if `E[n]` is reduced at a non-2-torsion point and the x-map is unramified there,
+then the corresponding x-coordinate root of `preΨ'_n` is simple.
+
+This is the exact location where the naive dual-number/projective-addition proof degenerates.
+It should be proved using local rings / completed local rings / order of vanishing.
+-/
+theorem derivative_preΨ'_eval_ne_zero_of_eval_eq_zero
+    [IsSepClosed k]
+    {n : ℕ} (hn : (n : k) ≠ 0) {x : k}
+    (hx : (W.preΨ' n).eval x = 0) :
+    (Polynomial.derivative (W.preΨ' n)).eval x ≠ 0 := by
+  -- Dependency order inside this proof:
+  -- 1. `preΨ'_root_realization_non_two_torsion W hn hx` gives a point `P` above `x`.
+  -- 2. `n_torsion_reduced_of_natCast_ne_zero W hn` says the kernel is reduced at `P`.
+  -- 3. `xCoord_unramified_of_two_nsmul_ne_zero W hxy h2` says x is an étale local parameter at P.
+  -- 4. Therefore the local x-cut has multiplicity one.
+  -- 5. Translate local multiplicity one into derivative nonzero of the x-polynomial `preΨ' n`.
+  --
+  -- Missing exact declarations:
+  -- * `WeierstrassCurve.localRingAtPoint` or equivalent;
+  -- * `WeierstrassCurve.completedLocalRingAtPoint`;
+  -- * `WeierstrassCurve.orderOfVanishing_xMinus`;
+  -- * `WeierstrassCurve.multiplicity_root_eq_local_length`;
+  -- * `WeierstrassCurve.preΨ'_divisor_non_two_torsion`.
+  sorry
+
+/-!
+## 6. Final separability theorem
+-/
+
+/--
+CLOSEABLE-NOW after `derivative_preΨ'_eval_ne_zero_of_eval_eq_zero`.
+
+Geometric separability over a separably closed field.
+-/
+theorem preΨ'_separable_geometric
+    [IsSepClosed k]
+    {n : ℕ} (hn : (n : k) ≠ 0) :
+    (W.preΨ' n).Separable := by
+  -- Use the polynomial helper above.
+  refine Polynomial.separable_of_forall_root_derivative_ne_zero ?hf ?hroot
+  · -- Existing degree/nonzero API should provide this as `WeierstrassCurve.preΨ'_ne_zero W hn`.
+    exact WeierstrassCurve.preΨ'_ne_zero W hn
+  · intro x hx
+    exact W.derivative_preΨ'_eval_ne_zero_of_eval_eq_zero hn hx
+
+/--
+SEAM: final theorem downstream code should import/use.
+
+For a general field, the final proof should base-change to a separable/algebraic closure, prove the
+geometric statement, and descend separability.  If the consuming code only works over an algebraic
+or separably closed field, use `preΨ'_separable_geometric` directly.
+-/
+theorem preΨ'_separable
+    {n : ℕ} (hn : (n : k) ≠ 0) :
+    (W.preΨ' n).Separable := by
+  -- Future proof plan:
+  -- 1. Let `Kbar := AlgebraicClosure k`.
+  -- 2. Use `map_preΨ'` to identify `(W.preΨ' n).map (algebraMap k Kbar)` with
+  --    `(W.map (algebraMap k Kbar)).preΨ' n`.
+  -- 3. Use `preΨ'_separable_geometric` over `Kbar`.
+  -- 4. Descend separability along the injective field map.
+  --
+  -- Missing / to confirm exact API:
+  -- * `WeierstrassCurve.map_preΨ'` for division polynomials under base change;
+  -- * `Polynomial.Separable.of_map` or corresponding descent lemma.
+  sorry
+
+end WeierstrassCurve
+```
+
+---
+
+# Resultant fallback scaffold
+
+This route is formally possible but not recommended as the primary build target.
+
+```lean
+import Mathlib
+
+noncomputable section
+
+open Polynomial
+open WeierstrassCurve
+
+namespace WeierstrassCurve
+
+universe u
+
+variable {k : Type u} [Field k]
+variable (W : WeierstrassCurve k) [W.IsElliptic]
+
+/--
+MISSING-MATHLIB-API / MISSING-MATH.
+
+Exact nonvanishing of the resultant of `preΨ'_n` and its derivative.
+This would follow from a closed discriminant formula for Mathlib's exact normalized `preΨ'`.
+-/
 theorem resultant_preΨ'_derivative_ne_zero
     {n : ℕ} (hn : (n : k) ≠ 0) :
     (W.preΨ' n).resultant (Polynomial.derivative (W.preΨ' n)) ≠ 0 := by
-  -- This would require a closed discriminant/resultant formula for Mathlib's exact `preΨ'`
-  -- normalization, including parity split and removed `Ψ₂Sq` factor.
-  admit
+  -- Needed formula shape:
+  -- `resultant = unit * (n : k)^a * W.Δ^b * parity/leading-coeff factors`.
+  -- Hard part: proving the exact formula for the reduced odd part `preΨ'`, whose normalization
+  -- removes the `Ψ₂Sq` factor in even level.
+  sorry
 
+/--
+CLOSEABLE-NOW after the resultant nonvanishing seam.
+-/
 theorem preΨ'_separable_via_resultant
     {n : ℕ} (hn : (n : k) ≠ 0) :
     (W.preΨ' n).Separable := by
   exact Polynomial.separable_of_resultant_derivative_ne_zero
-    (by
-      -- existing degree API should provide this:
-      -- `WeierstrassCurve.preΨ'_ne_zero W hn`
-      exact WeierstrassCurve.preΨ'_ne_zero W hn)
+    (WeierstrassCurve.preΨ'_ne_zero W hn)
     (W.resultant_preΨ'_derivative_ne_zero hn)
 
 end WeierstrassCurve
 ```
 
-This route is formally viable because Mathlib has `Polynomial.resultant`, `Polynomial.discr`, `Polynomial.resultant_deriv`, and `Polynomial.resultant_eq_zero_iff`. But it is not actually shorter unless one already has the exact normalized division-polynomial discriminant formula. Proving that formula from the EDS recursion is likely long and brittle: it must track the parity normalization of `preΨ'`, the removed `Ψ₂Sq` factor, powers of the discriminant, leading coefficients, and small exceptional indices.
+## Why the formal route is preferred
 
-## Recommendation
-
-For the FLT/Mazur torsion work, the best scoping decision is:
-
-1. Keep the downstream theorem named and narrow:
-
-```lean
-theorem WeierstrassCurve.preΨ'_separable
-    {k : Type u} [Field k]
-    (W : WeierstrassCurve k) [W.IsElliptic]
-    {n : ℕ} (hn : (n : k) ≠ 0) :
-    (W.preΨ' n).Separable
-```
-
-2. Use this seam to finish `n_torsion_card = n^2` and the rank-two geometric torsion structure.
-
-3. Discharge the seam later through the formal group route:
-
-```lean
-WeierstrassCurve.formalGroup
-→ formal_nsmul_linearCoeff
-→ nsmul_etale_of_natCast_ne_zero
-→ n_torsion_reduced_of_natCast_ne_zero
-→ preΨ'_simple_roots_of_n_torsion_reduced
-→ preΨ'_separable
-```
-
-4. Avoid the resultant route unless someone first produces a reliable paper formula for the exact `preΨ'` normalization used by Mathlib.
-
-The single hardest missing Mathlib primitive is therefore:
+The resultant route depends on a large closed formula for the discriminant/resultant of Mathlib's exact `preΨ'` normalization. Proving that formula from the EDS recursion is likely brittle because it must track:
 
 ```text
-Weierstrass formal group + local order-of-vanishing bridge to the division polynomial.
+* parity of n,
+* the removed Ψ₂Sq factor for even n,
+* leading coefficients of preΨ',
+* powers of the curve discriminant Δ,
+* small exceptional n,
+* possible powers of 2.
 ```
 
-Not the abstract polynomial separability API; that part is already available.
+The formal route proves the underlying reason directly: `[n]` is étale when `(n : k) ≠ 0`. It also supports future Weil pairing, torsion group scheme, and Galois-representation work.
+
+## Exact missing declarations to create
+
+```lean
+-- Formal group and local parameter
+WeierstrassCurve.formalGroup
+WeierstrassCurve.formalParameter
+
+-- Generic formal-group n-series API
+FormalGroup.nsmulSeries
+FormalGroup.linearCoeff_nsmul
+
+-- Weierstrass specialization
+WeierstrassCurve.formal_nsmul_linearCoeff
+WeierstrassCurve.nsmul_differential_at_origin_isUnit
+WeierstrassCurve.nsmul_etale_of_natCast_ne_zero
+WeierstrassCurve.n_torsion_reduced_of_natCast_ne_zero
+
+-- x-map local behavior
+WeierstrassCurve.xCoord_unramified_of_two_nsmul_ne_zero
+
+-- local ring / divisor / multiplicity bridge
+WeierstrassCurve.localRingAtPoint
+WeierstrassCurve.completedLocalRingAtPoint
+WeierstrassCurve.orderOfVanishing_xMinus
+WeierstrassCurve.preΨ'_divisor_non_two_torsion
+WeierstrassCurve.multiplicity_root_eq_local_length
+WeierstrassCurve.derivative_preΨ'_eval_ne_zero_of_eval_eq_zero
+
+-- base change/descent convenience
+WeierstrassCurve.map_preΨ'
+Polynomial.Separable.of_injective_map   -- or equivalent existing/renamed lemma
+```
+
+## Minimal thing to implement first
+
+The single most useful first new theorem is the local derivative statement:
+
+```lean
+theorem WeierstrassCurve.derivative_preΨ'_eval_ne_zero_of_eval_eq_zero
+    {k : Type u} [Field k] [IsSepClosed k]
+    (W : WeierstrassCurve k) [W.IsElliptic]
+    {n : ℕ} (hn : (n : k) ≠ 0) {x : k}
+    (hx : (W.preΨ' n).eval x = 0) :
+    (Polynomial.derivative (W.preΨ' n)).eval x ≠ 0
+```
+
+Once that theorem exists, the final separability proof is short and purely polynomial.
