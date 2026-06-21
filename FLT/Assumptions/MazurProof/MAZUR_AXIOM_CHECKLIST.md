@@ -4,8 +4,8 @@ Goal: discharge all 6 remaining custom axioms → only [propext, Classical.choic
 Status: ✅ done sorry-free + #print axioms clean · 🟡 partial/in-work (what's open) · ⬜ open.
 Last verified: 2026-06-21.
 
-## TOP-LEVEL AXIOMS (6) — scoreboard 0/6 discharged
-- ⬜ **A1 `rational_torsion_two_invariant_factors`** — needs: keystone rank-2 (K) + finiteness (C2 ✓avail) + invariant-factor algebra (C1 ✅). Closest to dischargeable.
+## TOP-LEVEL AXIOMS — scoreboard 1/6 discharged (5 custom axioms remain; A1 ✅ on fresh rebuild a8d5b35)
+- ✅ **A1 `rational_torsion_two_invariant_factors`** — DISCHARGED (axiom→theorem, 6→5; residual=keystone seam sorryAx). — needs: keystone rank-2 (K) + finiteness (C2 ✓avail) + invariant-factor algebra (C1 ✅). Closest to dischargeable.
 - ⬜ **A2 `weil_pairing_primitive_root`** — needs: keystone rank-2 (K) + WeilPairingPackage Stage-1 + Miller Stage-3 (SEAM 3).
 - ⬜ **A3 `no_rational_point_of_order_ge_17`** — Mazur core, deepest. Separate later campaign.
 - ⬜ **A4 `Z2xZ14_gives_non_degenerate_N14_point`** — genus-4 forward restructure.
