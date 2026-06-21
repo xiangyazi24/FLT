@@ -122,11 +122,18 @@ dm3 critical catch: `Finite (E(ℚ)_tors)` CANNOT be recovered from per-level E[
 The whole campaign reduces to four isolated primitives. Build ALL structure around them to
 0-axiom-modulo-seam; grind each seam separately. This is the same discipline that worked for the
 N10/N12 cases (axiom = self-contained math seam, not sorry-escape).
-- **SEAM 1** `preΨ'_separable_of_natCast_ne_zero` — [n] étaleness (core 1). **GRIND VIA E1 (Weierstrass
-  formal group) — DECIDED per Xiang's "彻底+复用" criterion** (2026-06-20). Build `WeierstrassCurve.formalGroup`
-  (Mathlib has only generic `FormalGroup`, lacks the elliptic instance): t=−x/y, formal group-law expansion,
-  `[n]*t = n·t + h.o.t.` ⇒ étale ⇒ simple roots. Reusable infra: feeds Weil pairing, Galois reps,
-  det=cyclotomic. NOT E2 (discriminant identity — narrow, proves only this polynomial's separability).
+- **SEAM 1** `preΨ'_separable_of_natCast_ne_zero` — [n] étaleness (core 1). Via E1 formal-group route
+  (per "彻底+复用"). **dm1 SEAM1 design (scratch/SEAM1_FormalGroup_ROADMAP.md):** full
+  `WeierstrassCurve.formalGroup` = thousands of lines (sigma + formalAddSeries + assoc) — DON'T build it
+  just for the seam. **Shortcut: DualNumber first-jet** (R[ε], ε²=0): `tangentOPoint W a = [-aε:1:0]`,
+  prove `d[n]_O(a) = n·a` by induction on the projective add formula — gives the tangent fact without
+  sigma/assoc. Reusable generic piece: `FormalGroup.formalNsmul_coeff_one : coeff 1 ([n]_F) = n`.
+  **The real hard primitive = the local-order bridge `preΨ'_order_one_at_non2_kernel`** (d[n]_O≠0 + x has
+  double pole at O + ΨSq=preΨ'²·(2-tors factor) ⇒ preΨ' has simple zeros), then
+  `preΨ'_derivative_ne_zero_at_root` → `separable_of_derivative_ne_zero_at_roots`.
+  ⚠ **SEAM 1 DEPENDS ON SEAM 2**: the bridge needs `xCoord_nsmul_eq_Φ_div_ΨSq` (the x([n]) formula) +
+  the root characterization. So SEAM 2 is the shared foundation — build it FIRST. Keep full formalGroup as
+  a later reusable library artifact. Final assembly via `Polynomial.separable_map` from AlgebraicClosure.
 - **SEAM 2** `xRep_zsmul_some_eq_divisionPolynomial` — [n]P x-coord via Φ/ΨSq (core 1). NOT really a
   seam: provable by EDS strong induction + group-law lemmas, no MISSING Mathlib primitive — HARD but
   mechanical. The first real keystone GRIND target.
