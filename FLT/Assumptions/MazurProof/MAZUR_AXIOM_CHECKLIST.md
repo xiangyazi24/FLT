@@ -60,3 +60,12 @@ These were custom MazurProof axioms that are now THEOREMS / removed:
 6 custom axioms remain in the |T|≤16 proof (MazurProof). The keystone infra we spun off
 (n_torsion_card, geomNTorsion rank-2, invariant-factor algebra ✅, Weil pairing) exists to
 discharge A1 + A2 (and A6 feeds A1). A3/A4/A5 are separate. C1 already landed 0-axiom (13265dd).
+
+## KEYSTONE SEAM LOCATIONS (corrected 2026-06-21 — A1 wiring moved them into Torsion.lean)
+Live keystone n_torsion_card + seams now in FLT/EllipticCurve/Torsion.lean (namespace KeystoneNTorsion),
+NOT scratch/NTorsionCard.lean (removed, stale duplicate). Seam sorries:
+- SEAM 1 prePsi'_separable — Torsion.lean L75
+- SEAM 2 nsmul_eq_zero_iff_PsiSq_eval — Torsion.lean L81 (SEAM2 codex building scratch/Seam2.lean, wire in)
+- sub-D realization — Torsion.lean L117 (HARDER than first thought: needs prePsi'_n coprime Psi2Sq /
+  resultant != 0; for even n the group-theory route fails). Defer as sorryAx residual.
+Plus David untouched: n_torsion_finite L50, Module.Finite L1004, galoisRep L1065.
