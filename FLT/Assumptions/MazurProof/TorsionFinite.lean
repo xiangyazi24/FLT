@@ -1,5 +1,6 @@
 import Mathlib
 import FLT.EllipticCurve.Torsion
+import scratch.A6TorsionFinite
 
 /-!
 # Torsion finiteness via Mordell-Weil finite generation
@@ -11,9 +12,6 @@ The group theory step uses Module.Finite over ℤ (a PID) + torsion structure th
 open scoped WeierstrassCurve.Affine
 
 namespace MazurProof
-
-axiom mordell_weil_fg (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    AddGroup.FG (E⁄ℚ).Point
 
 /-- The torsion part of a finitely generated ℤ-module is finite.
 This follows from the structure theorem for f.g. modules over PIDs. -/
@@ -44,8 +42,7 @@ theorem torsion_set_finite_of_fg
 
 theorem rational_torsion_finite_of_mw (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     (AddCommGroup.torsion (E⁄ℚ).Point : Set (E⁄ℚ).Point).Finite := by
-  haveI := mordell_weil_fg E
-  exact torsion_set_finite_of_fg _
+  exact rational_torsion_finite_height E
 
 
 
@@ -53,7 +50,6 @@ theorem rational_torsion_finite_of_mw (E : WeierstrassCurve ℚ) [E.IsElliptic] 
 /-- Alias for downstream use — same statement as Axioms.rational_torsion_finite. -/
 theorem rational_torsion_finite_alias (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     (AddCommGroup.torsion (E⁄ℚ).Point : Set (E⁄ℚ).Point).Finite := by
-  haveI := mordell_weil_fg E
-  exact torsion_set_finite_of_fg _
+  exact rational_torsion_finite_height E
 
 end MazurProof
