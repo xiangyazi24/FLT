@@ -948,16 +948,141 @@ end XOnly
 def xPair (W : WeierstrassCurve k) (n : ℤ) (x : k) : Fin 2 → k :=
   ![(W.Φ n).eval x, (W.ΨSq n).eval x]
 
-/-- Irreducible remaining EDS recurrence seam: the corrected Montgomery-pair ladder agrees
-with the `[Φₙ, ΨSqₙ]` division-polynomial representative. -/
-theorem xPair_same_xLadderRep_seam_EDS_core (W : WeierstrassCurve k) (n : ℕ) (x : k) :
+/-- Sanity check: the EDS representative agrees with the ladder at `n = 0`. -/
+theorem xPair_same_xLadderRep_zero (W : WeierstrassCurve k) (x : k) :
+    SameP1Vec
+      (XOnly.xLadderRep (E := W⁄k) x 0)
+      (xPair W (0 : ℤ) x) := by
+  simpa [xPair, XOnly.xInfVec] using SameP1Vec.refl (![1, 0] : Fin 2 → k)
+
+/-- Sanity check: the EDS representative agrees with the ladder at `n = 1`. -/
+theorem xPair_same_xLadderRep_one (W : WeierstrassCurve k) (x : k) :
+    SameP1Vec
+      (XOnly.xLadderRep (E := W⁄k) x 1)
+      (xPair W (1 : ℤ) x) := by
+  simpa [xPair, XOnly.xAffVec] using SameP1Vec.refl (![x, 1] : Fin 2 → k)
+
+/-- Sanity check: the EDS representative agrees with the ladder at `n = 2`. -/
+theorem xPair_same_xLadderRep_two (W : WeierstrassCurve k) (x : k) :
+    SameP1Vec
+      (XOnly.xLadderRep (E := W⁄k) x 2)
+      (xPair W (2 : ℤ) x) := by
+  simpa [xPair, XOnly.doubleVec, XOnly.dupNumH, XOnly.dupDenH, XOnly.xAffVec,
+    WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.baseChange]
+    using SameP1Vec.refl (XOnly.doubleVec (E := W⁄k) (XOnly.xAffVec x))
+
+/-- Missing Mathlib/repo EDS fact: for an elliptic curve, the univariate division-polynomial
+representative has no zero-vector specialization and agrees with the corrected Montgomery-pair
+ladder.  The first conjunct is the no-common-root/coprimality statement for `Φₙ` and `ΨSqₙ`;
+the second conjunct is the EDS recurrence compatibility with `doubleVec` and `diffAddOrInfVec`. -/
+theorem xPair_ne_zero_and_same_xLadderRep_EDS
+    (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) (x : k) :
+    xPair W (n : ℤ) x ≠ 0 ∧
     SameP1Vec
       (XOnly.xLadderRep (E := W⁄k) x n)
       (xPair W (n : ℤ) x) := by
   sorry
 
+/-- No common root for the two coordinates of the division-polynomial x-representative. -/
+theorem xPair_ne_zero_of_isElliptic
+    (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) (x : k) :
+    xPair W (n : ℤ) x ≠ 0 :=
+  (xPair_ne_zero_and_same_xLadderRep_EDS (W := W) n x).1
+
+/-- Evaluation form of coprimality: `Φₙ(x)` and `ΨSqₙ(x)` do not vanish together on an
+elliptic curve. -/
+theorem Φ_ΨSq_no_common_eval_zero
+    (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) (x : k) :
+    ¬ ((W.Φ (n : ℤ)).eval x = 0 ∧ (W.ΨSq (n : ℤ)).eval x = 0) := by
+  intro h
+  exact xPair_ne_zero_of_isElliptic (W := W) n x (by
+    ext i <;> fin_cases i
+    · simpa only [xPair, Fin.zero_eta, Matrix.cons_val_zero, Pi.zero_apply] using h.1
+    · simpa only [xPair, Fin.mk_one, Matrix.cons_val_one, Matrix.cons_val_zero,
+        Pi.zero_apply] using h.2)
+
+/-- Sanity check: the EDS representative agrees with the ladder at `n = 3`.  The
+`δ = 0` branch uses the elliptic no-common-root statement for `Φ₃` and `ΨSq₃`; the
+non-degenerate branch is a direct polynomial identity. -/
+theorem xPair_same_xLadderRep_three
+    (W : WeierstrassCurve k) [W.IsElliptic] (x : k) :
+    SameP1Vec
+      (XOnly.xLadderRep (E := W⁄k) x 3)
+      (xPair W (3 : ℤ) x) := by
+  classical
+  let A : Fin 2 → k := XOnly.xAffVec x
+  let B : Fin 2 → k := XOnly.doubleVec (E := W⁄k) A
+  have hdelta : XOnly.deltaVec A B = W.Ψ₃.eval x := by
+    simp [A, B, XOnly.deltaVec, XOnly.doubleVec, XOnly.dupNumH, XOnly.dupDenH,
+      XOnly.xAffVec, WeierstrassCurve.Ψ₃, WeierstrassCurve.Ψ₂Sq,
+      WeierstrassCurve.baseChange]
+    ring
+  rw [XOnly.xLadderRep_three]
+  change SameP1Vec (XOnly.diffAddOrInfVec (W⁄k) A B A) (xPair W (3 : ℤ) x)
+  unfold XOnly.diffAddOrInfVec
+  by_cases hδ : XOnly.deltaVec A B = 0
+  · simp [hδ]
+    have hψ3 : W.Ψ₃.eval x = 0 := by
+      simpa [hdelta] using hδ
+    have hsecond : (W.ΨSq (3 : ℤ)).eval x = 0 := by
+      rw [WeierstrassCurve.ΨSq_three]
+      simp [hψ3]
+    have hfirst : (W.Φ (3 : ℤ)).eval x ≠ 0 := by
+      intro hfirst
+      exact Φ_ΨSq_no_common_eval_zero (W := W) 3 x
+        ⟨by simpa using hfirst, by simpa using hsecond⟩
+    refine SameP1Vec.mk_vec
+      (u := XOnly.xInfVec) (v := xPair W (3 : ℤ) x)
+      (c := (W.Φ (3 : ℤ)).eval x) hfirst ?_ ?_
+    · simp [xPair, XOnly.xInfVec]
+    · simpa [xPair, XOnly.xInfVec] using hsecond
+  · simp [hδ]
+    refine SameP1Vec.mk_vec
+      (u := XOnly.diffAddVec (W⁄k) A B A) (v := xPair W (3 : ℤ) x)
+      (c := 1) one_ne_zero ?_ ?_
+    · simp [A, B, xPair, XOnly.diffAddVec, XOnly.sumNumVec, XOnly.deltaVec,
+        XOnly.doubleVec, XOnly.dupNumH, XOnly.dupDenH, XOnly.xAffVec,
+        WeierstrassCurve.Φ_three, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+        WeierstrassCurve.b₆, WeierstrassCurve.b₈, WeierstrassCurve.baseChange]
+      ring
+    · simp [A, B, xPair, XOnly.diffAddVec, XOnly.deltaVec, XOnly.doubleVec,
+        XOnly.dupNumH, XOnly.dupDenH, XOnly.xAffVec, WeierstrassCurve.ΨSq_three,
+        WeierstrassCurve.Ψ₃, WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.baseChange]
+      ring
+
+/-- Sanity check: the EDS representative agrees with the ladder at `n = 4`. -/
+theorem xPair_same_xLadderRep_four (W : WeierstrassCurve k) (x : k) :
+    SameP1Vec
+      (XOnly.xLadderRep (E := W⁄k) x 4)
+      (xPair W (4 : ℤ) x) := by
+  rw [XOnly.xLadderRep_four]
+  refine SameP1Vec.mk_vec
+    (u := XOnly.doubleVec (W⁄k) (XOnly.doubleVec (W⁄k) (XOnly.xAffVec x)))
+    (v := xPair W (4 : ℤ) x) (c := 1) one_ne_zero ?_ ?_
+  · simp [xPair, XOnly.doubleVec, XOnly.dupNumH, XOnly.dupDenH, XOnly.xAffVec,
+      WeierstrassCurve.Φ_four, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+      WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+      WeierstrassCurve.b₆, WeierstrassCurve.b₈, WeierstrassCurve.baseChange]
+    ring
+  · simp [xPair, XOnly.doubleVec, XOnly.dupNumH, XOnly.dupDenH, XOnly.xAffVec,
+      WeierstrassCurve.ΨSq_four, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+      WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+      WeierstrassCurve.b₆, WeierstrassCurve.b₈, WeierstrassCurve.baseChange]
+    ring
+
+/-- Irreducible remaining EDS recurrence seam: the corrected Montgomery-pair ladder agrees
+with the `[Φₙ, ΨSqₙ]` division-polynomial representative. -/
+theorem xPair_same_xLadderRep_seam_EDS_core
+    (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) (x : k) :
+    SameP1Vec
+      (XOnly.xLadderRep (E := W⁄k) x n)
+      (xPair W (n : ℤ) x) :=
+  (xPair_ne_zero_and_same_xLadderRep_EDS (W := W) n x).2
+
 /-- SEAM: the EDS/division-polynomial compatibility of the raw x-only ladder. -/
-theorem xPair_same_xLadderRep_seam (W : WeierstrassCurve k) (n : ℕ) (x : k) :
+theorem xPair_same_xLadderRep_seam
+    (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) (x : k) :
     SameP1Vec
       (XOnly.xLadderRep (E := W⁄k) x n)
       (xPair W (n : ℤ) x) :=
