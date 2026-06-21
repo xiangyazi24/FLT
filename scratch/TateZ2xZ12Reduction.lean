@@ -16,6 +16,7 @@ open scoped WeierstrassCurve.Affine
 namespace Scratch.TateZ2xZ12Reduction
 
 open Scratch.TateZ2xZ10Reduction
+open Polynomial
 
 noncomputable section
 
@@ -781,6 +782,528 @@ lemma tate_two_torsion_b_add_cx_sub_x_ne_zero
     nlinarith
   exact (mul_ne_zero hc (pow_ne_zero 3 hx)) hcx3
 
+private def N12den (b c x : ℚ) : ℚ :=
+  -b ^ 2 + 2 * b * x + (c - 1) * x ^ 2
+
+private def N12J (b c : ℚ) : ℚ :=
+  16 * b ^ 2 - 8 * b * c ^ 2 - 24 * b * c + c ^ 4 - 3 * c ^ 3 + 3 * c ^ 2 - c
+
+private def N12P1 (c : ℚ) : ℚ :=
+  c ^ 2 + 6 * c + 1
+
+private def N12P2 (c : ℚ) : ℚ :=
+  c ^ 4 - 24 * c ^ 3 - 22 * c ^ 2 - 16 * c - 3
+
+private lemma N12P1_ne_zero (c : ℚ) : N12P1 c ≠ 0 := by
+  intro h
+  have h' : c ^ 2 + 6 * c + 1 = 0 := by
+    simpa [N12P1] using h
+  let p : ℤ[X] := X ^ 2 + C 6 * X + C 1
+  have hpmonic : p.Monic := by
+    dsimp [p]
+    monicity!
+  have hroot : aeval c p = 0 := by
+    simp [p, aeval_def]
+    ring_nf at h' ⊢
+    exact h'
+  rcases exists_integer_of_is_root_of_monic (A := ℤ) (K := ℚ) hpmonic hroot with
+    ⟨z, hcz, hzdiv⟩
+  have hzdiv1 : z ∣ (1 : ℤ) := by
+    simpa [p] using hzdiv
+  have hunit : IsUnit z := isUnit_of_dvd_one hzdiv1
+  rcases Int.isUnit_iff.mp hunit with hz | hz
+  · rw [hcz, hz] at h
+    norm_num [N12P1] at h
+  · rw [hcz, hz] at h
+    norm_num [N12P1] at h
+
+private lemma N12P2_ne_zero (c : ℚ) : N12P2 c ≠ 0 := by
+  intro h
+  have h' : c ^ 4 - 24 * c ^ 3 - 22 * c ^ 2 - 16 * c - 3 = 0 := by
+    simpa [N12P2] using h
+  let p : ℤ[X] := X ^ 4 - C 24 * X ^ 3 - C 22 * X ^ 2 - C 16 * X - C 3
+  have hpmonic : p.Monic := by
+    dsimp [p]
+    monicity!
+  have hroot : aeval c p = 0 := by
+    simp [p, aeval_def]
+    ring_nf at h' ⊢
+    exact h'
+  rcases exists_integer_of_is_root_of_monic (A := ℤ) (K := ℚ) hpmonic hroot with
+    ⟨z, hcz, hzdiv⟩
+  have hzdiv3 : z ∣ (-3 : ℤ) := by
+    simpa [p] using hzdiv
+  have hzabs : z.natAbs ∣ 3 := (Int.natAbs_dvd_natAbs).mpr hzdiv3
+  have hzabs_cases : z.natAbs = 1 ∨ z.natAbs = 3 :=
+    (Nat.dvd_prime (by norm_num : Nat.Prime 3)).mp hzabs
+  have hzcases : z = 1 ∨ z = -1 ∨ z = 3 ∨ z = -3 := by
+    rcases hzabs_cases with h1 | h3
+    · have hsq : z ^ 2 = (1 : ℤ) ^ 2 :=
+        Int.natAbs_eq_iff_sq_eq.mp (by simpa using h1)
+      have hzsq : z ^ 2 = 1 := by
+        simpa using hsq
+      rw [sq_eq_one_iff] at hzsq
+      rcases hzsq with hz | hz
+      · exact Or.inl hz
+      · exact Or.inr (Or.inl hz)
+    · have hsq : z ^ 2 = (3 : ℤ) ^ 2 :=
+        Int.natAbs_eq_iff_sq_eq.mp (by simpa using h3)
+      have hzsq : z ^ 2 = 9 := by
+        simpa using hsq
+      have hzmod :
+          z % 7 = 0 ∨ z % 7 = 1 ∨ z % 7 = 2 ∨ z % 7 = 3 ∨
+            z % 7 = 4 ∨ z % 7 = 5 ∨ z % 7 = 6 := by
+        omega
+      omega
+  rcases hzcases with hz | hz | hz | hz <;>
+    rw [hcz, hz] at h <;>
+    norm_num [N12P2] at h
+
+private lemma N12J_of_root_and_den_zero
+    {b c x : ℚ}
+    (hroot : tateTwoTorsionCubic b c x = 0)
+    (hden : N12den b c x = 0) :
+    b ^ 2 * c * N12J b c = 0 := by
+  unfold tateTwoTorsionCubic at hroot
+  unfold N12den at hden
+  unfold N12J
+  ring_nf at hroot hden ⊢
+  linear_combination
+    (-4 * b * c ^ 2 - 24 * b * c - 4 * b + c ^ 4 - 3 * c ^ 3
+      - 12 * c ^ 2 * x + 3 * c ^ 2 + 8 * c * x - c + 4 * x) * hroot +
+    (-16 * b ^ 2 * c + 8 * b * c ^ 3 + 20 * b * c ^ 2 - 32 * b * c * x
+      - 24 * b * c - 4 * b - c ^ 5 + 4 * c ^ 4 + 8 * c ^ 3 * x
+      - 6 * c ^ 3 - 12 * c ^ 2 * x + 4 * c ^ 2 + 48 * c * x ^ 2 - c
+      + 16 * x ^ 2 + 4 * x) * hden
+
+private lemma N12P1P2_of_Phi_and_J
+    {b c : ℚ}
+    (hPhi : Phi12 b c = 0)
+    (hJ : N12J b c = 0) :
+    c ^ 2 * N12P1 c * N12P2 c = 0 := by
+  unfold Phi12 at hPhi
+  unfold N12J at hJ
+  unfold N12P1 N12P2
+  ring_nf at hPhi hJ ⊢
+  linear_combination
+    (-256) * hPhi +
+    (48 * b ^ 2 + 8 * b * c ^ 2 - 72 * b * c + c ^ 4 - 15 * c ^ 3
+      + 43 * c ^ 2 + 3 * c) * hJ
+
+private lemma N12den_ne_zero
+    {b c x : ℚ}
+    (hb : b ≠ 0) (hc : c ≠ 0)
+    (hPhi : Phi12 b c = 0)
+    (hroot : tateTwoTorsionCubic b c x = 0) :
+    N12den b c x ≠ 0 := by
+  intro hden
+  have hJprod : b ^ 2 * c * N12J b c = 0 :=
+    N12J_of_root_and_den_zero hroot hden
+  have hb2c : b ^ 2 * c ≠ 0 :=
+    mul_ne_zero (pow_ne_zero 2 hb) hc
+  have hJ : N12J b c = 0 :=
+    (mul_eq_zero.mp hJprod).resolve_left hb2c
+  have hprod : c ^ 2 * N12P1 c * N12P2 c = 0 :=
+    N12P1P2_of_Phi_and_J hPhi hJ
+  rcases mul_eq_zero.mp hprod with hc2p1 | hp2
+  · rcases mul_eq_zero.mp hc2p1 with hc2 | hp1
+    · exact (pow_ne_zero 2 hc) hc2
+    · exact N12P1_ne_zero c hp1
+  · exact N12P2_ne_zero c hp2
+
+private lemma q12_sub_one_eq
+    {b c x : ℚ}
+    (hxb : x - b ≠ 0) :
+    q12 b c x - 1 = (b + c * x - x) / (x - b) := by
+  unfold q12
+  field_simp [hxb]
+  ring
+
+private lemma t12_add_one_eq
+    {b c x : ℚ}
+    (hden : N12den b c x ≠ 0) :
+    t12 b c x + 1 = x * (b + c * x - x) / N12den b c x := by
+  have hone : (1 : ℚ) = N12den b c x / N12den b c x := by
+    rw [div_self hden]
+  calc
+    t12 b c x + 1 =
+        b * (b - x) / N12den b c x + N12den b c x / N12den b c x := by
+      rw [hone]
+      rfl
+    _ = (b * (b - x) + N12den b c x) / N12den b c x := by
+      rw [add_div]
+    _ = x * (b + c * x - x) / N12den b c x := by
+      congr 1
+      unfold N12den
+      ring
+
+private lemma q12_mul_t12_add_one_eq
+    {b c x : ℚ}
+    (hxb : x - b ≠ 0) (hden : N12den b c x ≠ 0) :
+    q12 b c x * t12 b c x + 1 =
+      (x - b) * (b + c * x - x) / N12den b c x := by
+  have hqt : q12 b c x * t12 b c x = -(b * c * x) / N12den b c x := by
+    unfold q12 t12 N12den
+    field_simp [hxb]
+    ring
+  have hone : (1 : ℚ) = N12den b c x / N12den b c x := by
+    rw [div_self hden]
+  calc
+    q12 b c x * t12 b c x + 1 =
+        -(b * c * x) / N12den b c x + N12den b c x / N12den b c x := by
+      rw [hqt, hone]
+    _ = (-(b * c * x) + N12den b c x) / N12den b c x := by
+      rw [add_div]
+    _ = (x - b) * (b + c * x - x) / N12den b c x := by
+      congr 1
+      unfold N12den
+      ring
+
+private lemma q12_ne_zero
+    {b c x : ℚ}
+    (hc : c ≠ 0) (hx : x ≠ 0) (hxb : x - b ≠ 0) :
+    q12 b c x ≠ 0 := by
+  unfold q12
+  exact div_ne_zero (mul_ne_zero hc hx) hxb
+
+private lemma q12_ne_one
+    {b c x : ℚ}
+    (hxb : x - b ≠ 0) (hF : b + c * x - x ≠ 0) :
+    q12 b c x ≠ 1 := by
+  intro hq
+  have hsub := q12_sub_one_eq (b := b) (c := c) (x := x) hxb
+  rw [hq] at hsub
+  norm_num at hsub
+  have hdiv : (b + c * x - x) / (x - b) = 0 := by
+    exact hsub.symm
+  rcases div_eq_zero_iff.mp hdiv with hnum | hden0
+  · exact hF hnum
+  · exact hxb hden0
+
+private lemma q12_ne_neg_one
+    {b c x : ℚ}
+    (hc : c ≠ 0) (hx : x ≠ 0) (hxb : x - b ≠ 0)
+    (hPhi : Phi12 b c = 0)
+    (hroot : tateTwoTorsionCubic b c x = 0) :
+    q12 b c x ≠ -1 := by
+  intro hq
+  have hg : -b + c * x + x = 0 := by
+    unfold q12 at hq
+    field_simp [hxb] at hq
+    nlinarith
+  have hbexpr : b = (c + 1) * x := by
+    nlinarith
+  have hx_eq_c : x = c := by
+    have hroot' := hroot
+    unfold tateTwoTorsionCubic at hroot'
+    rw [hbexpr] at hroot'
+    ring_nf at hroot'
+    have hprod : c * x ^ 2 * (x - c) = 0 := by
+      nlinarith
+    rcases mul_eq_zero.mp hprod with hcx2 | hxc
+    · rcases mul_eq_zero.mp hcx2 with hc0 | hx20
+      · exact False.elim (hc hc0)
+      · exact False.elim ((pow_ne_zero 2 hx) hx20)
+    · exact sub_eq_zero.mp hxc
+  have hPhi' := hPhi
+  rw [hbexpr, hx_eq_c] at hPhi'
+  unfold Phi12 at hPhi'
+  ring_nf at hPhi'
+  have hc8 : c ^ 8 = 0 := by
+    nlinarith
+  exact (pow_ne_zero 8 hc) hc8
+
+private lemma t12_add_one_ne_zero
+    {b c x : ℚ}
+    (hx : x ≠ 0) (hF : b + c * x - x ≠ 0)
+    (hden : N12den b c x ≠ 0) :
+    t12 b c x + 1 ≠ 0 := by
+  rw [t12_add_one_eq (b := b) (c := c) (x := x) hden]
+  exact div_ne_zero (mul_ne_zero hx hF) hden
+
+private lemma q12_mul_t12_add_one_ne_zero
+    {b c x : ℚ}
+    (hxb : x - b ≠ 0) (hF : b + c * x - x ≠ 0)
+    (hden : N12den b c x ≠ 0) :
+    q12 b c x * t12 b c x + 1 ≠ 0 := by
+  rw [q12_mul_t12_add_one_eq (b := b) (c := c) (x := x) hxb hden]
+  exact div_ne_zero (mul_ne_zero hxb hF) hden
+
+private lemma t12_ne_zero
+    {b c x : ℚ}
+    (hb : b ≠ 0) (hxb : x - b ≠ 0) (hden : N12den b c x ≠ 0) :
+    t12 b c x ≠ 0 := by
+  have hbx : b - x ≠ 0 := by
+    intro h
+    apply hxb
+    linarith
+  unfold t12 N12den at *
+  exact div_ne_zero (mul_ne_zero hb hbx) hden
+
+private def bQT (q t : ℚ) : ℚ :=
+  t * (q - 1) ^ 3 * (q * t + 1) / (4 * (t + 1) ^ 2)
+
+private def cQT (q t : ℚ) : ℚ :=
+  q * (q * t + 1) / (t + 1)
+
+private def xQT (q t : ℚ) : ℚ :=
+  -((q - 1) ^ 2 * (q * t + 1)) / (4 * (t + 1))
+
+private lemma bQT_simpl_field
+    {b x F D : ℚ}
+    (hxb : x - b ≠ 0) (hD : D ≠ 0) (hx : x ≠ 0) (hF : F ≠ 0) :
+    (b * (b - x) / D) * (F / (x - b)) ^ 3 * ((x - b) * F / D) /
+        (4 * (x * F / D) ^ 2)
+      =
+    -b * F ^ 2 / (4 * x ^ 2 * (x - b)) := by
+  field_simp [hxb, hD, hx, hF]
+  ring
+
+private lemma cQT_simpl_field
+    {b c x F D : ℚ}
+    (hxb : x - b ≠ 0) (hD : D ≠ 0) (hx : x ≠ 0) (hF : F ≠ 0) :
+    (c * x / (x - b)) * ((x - b) * F / D) / (x * F / D) = c := by
+  field_simp [hxb, hD, hx, hF]
+
+private lemma xQT_simpl_field
+    {b x F D : ℚ}
+    (hxb : x - b ≠ 0) (hD : D ≠ 0) (hx : x ≠ 0) (hF : F ≠ 0) :
+    -((F / (x - b)) ^ 2 * ((x - b) * F / D)) / (4 * (x * F / D))
+      =
+    -F ^ 2 / (4 * x * (x - b)) := by
+  field_simp [hxb, hD, hx, hF]
+
+private lemma b_eq_bQT_q12_t12
+    {b c x : ℚ}
+    (hxb : x - b ≠ 0) (hden : N12den b c x ≠ 0)
+    (hx : x ≠ 0) (hF : b + c * x - x ≠ 0)
+    (hroot : tateTwoTorsionCubic b c x = 0) :
+    b = bQT (q12 b c x) (t12 b c x) := by
+  have hq1 := q12_sub_one_eq (b := b) (c := c) (x := x) hxb
+  have ht := t12_add_one_eq (b := b) (c := c) (x := x) hden
+  have hqt := q12_mul_t12_add_one_eq (b := b) (c := c) (x := x) hxb hden
+  have hs :
+      bQT (q12 b c x) (t12 b c x) =
+        -b * (b + c * x - x) ^ 2 / (4 * x ^ 2 * (x - b)) := by
+    unfold bQT
+    rw [hq1, hqt, ht]
+    unfold t12
+    simpa [N12den] using
+      (bQT_simpl_field
+        (b := b) (x := x) (F := b + c * x - x) (D := N12den b c x)
+        hxb hden hx hF)
+  have hback :
+      -b * (b + c * x - x) ^ 2 / (4 * x ^ 2 * (x - b)) = b := by
+    field_simp [hx, hxb]
+    unfold tateTwoTorsionCubic at hroot
+    ring_nf at hroot ⊢
+    linear_combination (-b) * hroot
+  exact (hs.trans hback).symm
+
+private lemma c_eq_cQT_q12_t12
+    {b c x : ℚ}
+    (hxb : x - b ≠ 0) (hden : N12den b c x ≠ 0)
+    (hx : x ≠ 0) (hF : b + c * x - x ≠ 0) :
+    c = cQT (q12 b c x) (t12 b c x) := by
+  have ht := t12_add_one_eq (b := b) (c := c) (x := x) hden
+  have hqt := q12_mul_t12_add_one_eq (b := b) (c := c) (x := x) hxb hden
+  unfold cQT
+  rw [hqt, ht]
+  exact
+    (cQT_simpl_field
+      (b := b) (c := c) (x := x) (F := b + c * x - x) (D := N12den b c x)
+      hxb hden hx hF).symm
+
+private lemma x_eq_xQT_q12_t12
+    {b c x : ℚ}
+    (hxb : x - b ≠ 0) (hden : N12den b c x ≠ 0)
+    (hx : x ≠ 0) (hF : b + c * x - x ≠ 0)
+    (hroot : tateTwoTorsionCubic b c x = 0) :
+    x = xQT (q12 b c x) (t12 b c x) := by
+  have hq1 := q12_sub_one_eq (b := b) (c := c) (x := x) hxb
+  have ht := t12_add_one_eq (b := b) (c := c) (x := x) hden
+  have hqt := q12_mul_t12_add_one_eq (b := b) (c := c) (x := x) hxb hden
+  have hs :
+      xQT (q12 b c x) (t12 b c x) =
+        -(b + c * x - x) ^ 2 / (4 * x * (x - b)) := by
+    unfold xQT
+    rw [hq1, hqt, ht]
+    simpa using
+      (xQT_simpl_field
+        (b := b) (x := x) (F := b + c * x - x) (D := N12den b c x)
+        hxb hden hx hF)
+  have hback :
+      -(b + c * x - x) ^ 2 / (4 * x * (x - b)) = x := by
+    field_simp [hx, hxb]
+    unfold tateTwoTorsionCubic at hroot
+    ring_nf at hroot ⊢
+    linear_combination (-1) * hroot
+  exact (hs.trans hback).symm
+
+private lemma Phi12_bQT_cQT
+    (q t : ℚ) (ht1 : t + 1 ≠ 0) :
+    Phi12 (bQT q t) (cQT q t) =
+      ((q * t + 1) ^ 4 * R12 q t * K12 q t) / (256 * (t + 1) ^ 8) := by
+  unfold Phi12 bQT cQT R12 K12
+  field_simp [ht1]
+  ring
+
+private lemma D_bQT_cQT
+    (q t : ℚ) (ht1 : t + 1 ≠ 0) :
+    bQT q t - cQT q t ^ 2 - cQT q t =
+      -((q + 1) * (q * t + 1) * A12 q t) / (4 * (t + 1) ^ 2) := by
+  unfold bQT cQT A12
+  field_simp [ht1]
+  ring
+
+private def N12P1qt (q t : ℚ) : ℚ :=
+  q ^ 3 * t - 3 * q ^ 2 * t - q * t - 4 * q - t
+
+private def N12P2qt (q t : ℚ) : ℚ :=
+  q ^ 6 * t ^ 2 - 6 * q ^ 5 * t ^ 2 - 5 * q ^ 4 * t ^ 2 - 20 * q ^ 4 * t
+    - 8 * q ^ 3 * t ^ 2 - 4 * q ^ 3 * t - 16 * q ^ 3 + 3 * q ^ 2 * t ^ 2
+    - 12 * q ^ 2 * t - 2 * q * t ^ 2 + 4 * q * t + t ^ 2
+
+private lemma bQT_sub_cQT
+    (q t : ℚ) (ht1 : t + 1 ≠ 0) :
+    bQT q t - cQT q t =
+      (q * t + 1) * N12P1qt q t / (4 * (t + 1) ^ 2) := by
+  unfold bQT cQT N12P1qt
+  field_simp [ht1]
+  ring
+
+private lemma bQT_num2
+    (q t : ℚ) (ht1 : t + 1 ≠ 0) :
+    (bQT q t) ^ 2 - bQT q t * cQT q t - (cQT q t) ^ 3 =
+      (q * t + 1) ^ 2 * N12P2qt q t / (16 * (t + 1) ^ 4) := by
+  unfold bQT cQT N12P2qt
+  field_simp [ht1]
+  ring
+
+private lemma N12P1P2qt_identity (q t : ℚ) :
+    N12P1qt q t * N12P2qt q t
+      + (q - 1) ^ 2 * (q + 1) ^ 2 * (t + 1) * (A12 q t) ^ 2
+      =
+    (q * t + 1) * (K12 q t) ^ 2 := by
+  unfold N12P1qt N12P2qt A12 K12
+  ring
+
+private lemma K12_zero_forces_xQT_eq_tateX6
+    (q t : ℚ)
+    (hqplus : q + 1 ≠ 0) (hqt1 : q * t + 1 ≠ 0)
+    (ht1 : t + 1 ≠ 0) (hA : A12 q t ≠ 0)
+    (hK : K12 q t = 0) :
+    xQT q t = tateX6 (bQT q t) (cQT q t) := by
+  have hpoly := N12P1P2qt_identity q t
+  rw [hK] at hpoly
+  norm_num at hpoly
+  have hPprod :
+      N12P1qt q t * N12P2qt q t =
+        -((q - 1) ^ 2 * (q + 1) ^ 2 * (t + 1) * (A12 q t) ^ 2) := by
+    nlinarith
+  have hx6 :
+      tateX6 (bQT q t) (cQT q t) =
+        (q * t + 1) * N12P1qt q t * N12P2qt q t /
+          (4 * (q + 1) ^ 2 * (t + 1) ^ 2 * (A12 q t) ^ 2) := by
+    unfold tateX6
+    rw [bQT_sub_cQT q t ht1, bQT_num2 q t ht1, D_bQT_cQT q t ht1]
+    field_simp [hqplus, hqt1, ht1, hA]
+    ring
+  rw [hx6]
+  rw [show (q * t + 1) * N12P1qt q t * N12P2qt q t =
+      (q * t + 1) * (N12P1qt q t * N12P2qt q t) by ring]
+  rw [hPprod]
+  unfold xQT
+  field_simp [hqplus, hqt1, ht1, hA]
+
+private lemma rat_sq_ne_three (r : ℚ) : r ^ 2 ≠ 3 := by
+  intro h
+  have hs : IsSquare (3 : ℚ) := ⟨r, by simpa [sq] using h.symm⟩
+  have hs_nat : IsSquare (3 : ℕ) :=
+    Rat.isSquare_natCast_iff.mp (by simpa using hs)
+  norm_num [IsSquare] at hs_nat
+
+private lemma N12_u_two_false
+    {q t : ℚ}
+    (hR : R12 q t = 0)
+    (hq0 : q ≠ 0) (hq1 : q ≠ 1) (hqm1 : q ≠ -1)
+    (hrel : q ^ 2 * t + 2 * q + t = 0) :
+    False := by
+  have hq2 : q ^ 2 + 1 ≠ 0 := by
+    nlinarith [sq_nonneg q]
+  have ht : t = -2 * q / (q ^ 2 + 1) := by
+    field_simp [hq2] at hrel ⊢
+    linarith
+  rw [ht] at hR
+  unfold R12 at hR
+  field_simp [hq2] at hR
+  ring_nf at hR
+  have hprod : q ^ 3 * (q - 1) ^ 4 * (q + 1) ^ 4 = 0 := by
+    nlinarith
+  rcases mul_eq_zero.mp hprod with hleft | hplus
+  · rcases mul_eq_zero.mp hleft with hq3 | hq1p
+    · exact (pow_ne_zero 3 hq0) hq3
+    · have hq1sub : q - 1 ≠ 0 := by
+        intro h
+        exact hq1 (sub_eq_zero.mp h)
+      exact (pow_ne_zero 4 hq1sub) hq1p
+  · have hqplus_ne : q + 1 ≠ 0 := by
+      intro h
+      exact hqm1 (eq_neg_of_add_eq_zero_left h)
+    exact (pow_ne_zero 4 hqplus_ne) hplus
+
+private lemma N12_bad_u_false
+    (q t : ℚ)
+    (hA : A12 q t ≠ 0) (hB : B12 q t ≠ 0)
+    (hR : R12 q t = 0)
+    (hq0 : q ≠ 0) (hq1 : q ≠ 1) (hqm1 : q ≠ -1)
+    (hqt1 : q * t + 1 ≠ 0) :
+    let A := A12 q t
+    let B := B12 q t
+    let u := (A ^ 2 + B ^ 2) / (A * B)
+    ¬(u = -2 ∨ u = 0 ∨ u = 1 ∨ u = 2 ∨ u = 4) := by
+  dsimp
+  intro hbad
+  rcases hbad with hneg2 | hzero | hone | htwo | hfour
+  · have hsum : A12 q t + B12 q t = 0 := by
+      field_simp [hA, hB] at hneg2
+      nlinarith
+    have hAB : A12 q t + B12 q t = 4 * q * (q * t + 1) := by
+      unfold A12 B12
+      ring
+    rw [hAB] at hsum
+    exact (mul_ne_zero (by norm_num : (4 : ℚ) ≠ 0) (mul_ne_zero hq0 hqt1))
+      (by simpa [mul_assoc] using hsum)
+  · have hrel : (A12 q t) ^ 2 + (B12 q t) ^ 2 = 0 := by
+      field_simp [hA, hB] at hzero
+      nlinarith
+    have hAzero : A12 q t = 0 := by
+      nlinarith [sq_nonneg (A12 q t), sq_nonneg (B12 q t)]
+    exact hA hAzero
+  · have hrel : (A12 q t) ^ 2 + (B12 q t) ^ 2 = A12 q t * B12 q t := by
+      field_simp [hA, hB] at hone
+      exact hone
+    have hzero :
+        (2 * A12 q t - B12 q t) ^ 2 + 3 * (B12 q t) ^ 2 = 0 := by
+      nlinarith
+    have hBzero : B12 q t = 0 := by
+      nlinarith [sq_nonneg (2 * A12 q t - B12 q t), sq_nonneg (B12 q t)]
+    exact hB hBzero
+  · have hdiff : A12 q t - B12 q t = 0 := by
+      field_simp [hA, hB] at htwo
+      nlinarith
+    have hrel : q ^ 2 * t + 2 * q + t = 0 := by
+      unfold A12 B12 at hdiff
+      nlinarith
+    exact N12_u_two_false hR hq0 hq1 hqm1 hrel
+  · have hsq : (A12 q t - 2 * B12 q t) ^ 2 = 3 * (B12 q t) ^ 2 := by
+      field_simp [hA, hB] at hfour
+      nlinarith
+    have hthree : ((A12 q t - 2 * B12 q t) / B12 q t) ^ 2 = 3 := by
+      field_simp [hB]
+      nlinarith
+    exact rat_sq_ne_three ((A12 q t - 2 * B12 q t) / B12 q t) hthree
+
 /--
 The remaining pure algebraic branch step for the `N = 12` bridge.
 
@@ -792,7 +1315,7 @@ split, and finite bad-`u` eliminations.
 -/
 theorem N12_tate_algebra_bridge
     (b c x : ℚ)
-    (hb : b ≠ 0) (hc : c ≠ 0) (hbc : b - c ≠ 0)
+    (hb : b ≠ 0) (hc : c ≠ 0) (_hbc : b - c ≠ 0)
     (hD : b - c ^ 2 - c ≠ 0)
     (hPhi : Phi12 b c = 0)
     (hroot : tateTwoTorsionCubic b c x = 0)
@@ -800,10 +1323,95 @@ theorem N12_tate_algebra_bridge
     ∃ u w : ℚ,
       w ^ 2 = u ^ 3 - u ^ 2 - 4 * u + 4 ∧
         ¬(u = -2 ∨ u = 0 ∨ u = 1 ∨ u = 2 ∨ u = 4) := by
-  -- Remaining wall: the `R12/K12` branch and the five bad-parameter
-  -- eliminations.  All elliptic-curve and Tate-normal-form work is proved
-  -- above; this theorem is deliberately only rational polynomial algebra.
-  sorry
+  let q := q12 b c x
+  let t := t12 b c x
+  have hx : x ≠ 0 := tate_two_torsion_x_ne_zero hb hroot
+  have hxb : x - b ≠ 0 := tate_two_torsion_x_ne_b hb hc hroot
+  have hF : b + c * x - x ≠ 0 :=
+    tate_two_torsion_b_add_cx_sub_x_ne_zero hc hx hroot
+  have hden : N12den b c x ≠ 0 := N12den_ne_zero hb hc hPhi hroot
+  have hq0 : q ≠ 0 := by
+    dsimp [q]
+    exact q12_ne_zero hc hx hxb
+  have hq1 : q ≠ 1 := by
+    dsimp [q]
+    exact q12_ne_one hxb hF
+  have hqm1 : q ≠ -1 := by
+    dsimp [q]
+    exact q12_ne_neg_one hc hx hxb hPhi hroot
+  have hqplus : q + 1 ≠ 0 := by
+    intro h
+    apply hqm1
+    linarith
+  have ht1 : t + 1 ≠ 0 := by
+    dsimp [t]
+    exact t12_add_one_ne_zero hx hF hden
+  have hqt1 : q * t + 1 ≠ 0 := by
+    dsimp [q, t]
+    exact q12_mul_t12_add_one_ne_zero hxb hF hden
+  have ht0 : t ≠ 0 := by
+    dsimp [t]
+    exact t12_ne_zero hb hxb hden
+  have hbq : b = bQT q t := by
+    dsimp [q, t]
+    exact b_eq_bQT_q12_t12 hxb hden hx hF hroot
+  have hcq : c = cQT q t := by
+    dsimp [q, t]
+    exact c_eq_cQT_q12_t12 hxb hden hx hF
+  have hxq : x = xQT q t := by
+    dsimp [q, t]
+    exact x_eq_xQT_q12_t12 hxb hden hx hF hroot
+  have hA : A12 q t ≠ 0 := by
+    have hDqt := D_bQT_cQT q t ht1
+    rw [← hbq, ← hcq] at hDqt
+    intro hAzero
+    apply hD
+    rw [hDqt, hAzero]
+    ring
+  have hB : B12 q t ≠ 0 := by
+    have hq2m1 : q ^ 2 - 1 ≠ 0 := by
+      intro h
+      have hfac : (q - 1) * (q + 1) = 0 := by
+        nlinarith
+      rcases mul_eq_zero.mp hfac with hqsub | hqadd
+      · exact hq1 (sub_eq_zero.mp hqsub)
+      · exact hqplus hqadd
+    unfold B12
+    exact mul_ne_zero ht0 hq2m1
+  have hKne : K12 q t ≠ 0 := by
+    intro hK
+    have hxqt := K12_zero_forces_xQT_eq_tateX6 q t hqplus hqt1 ht1 hA hK
+    apply hxne
+    calc
+      x = xQT q t := hxq
+      _ = tateX6 (bQT q t) (cQT q t) := hxqt
+      _ = tateX6 b c := by
+        rw [← hbq, ← hcq]
+  have hPhiqt : Phi12 (bQT q t) (cQT q t) = 0 := by
+    rw [← hbq, ← hcq]
+    exact hPhi
+  have hfrac :
+      ((q * t + 1) ^ 4 * R12 q t * K12 q t) / (256 * (t + 1) ^ 8) = 0 := by
+    rw [← Phi12_bQT_cQT q t ht1]
+    exact hPhiqt
+  have hnum : (q * t + 1) ^ 4 * R12 q t * K12 q t = 0 := by
+    have hdenom : (256 : ℚ) * (t + 1) ^ 8 ≠ 0 :=
+      mul_ne_zero (by norm_num) (pow_ne_zero 8 ht1)
+    rcases div_eq_zero_iff.mp hfrac with hnum | hdenzero
+    · exact hnum
+    · exact False.elim (hdenom hdenzero)
+  have hRK : R12 q t * K12 q t = 0 := by
+    apply mul_left_cancel₀ (pow_ne_zero 4 hqt1)
+    simpa [mul_assoc] using hnum
+  have hR : R12 q t = 0 := by
+    rcases mul_eq_zero.mp hRK with hR | hK
+    · exact hR
+    · exact False.elim (hKne hK)
+  refine ⟨uN12 b c x, wN12 b c x, ?_, ?_⟩
+  · have hcurve := E_N12_point_of_R12 q t hA hB hR
+    simpa [uN12, wN12, q, t] using hcurve
+  · have hbad := N12_bad_u_false q t hA hB hR hq0 hq1 hqm1 hqt1
+    simpa [uN12, q, t] using hbad
 
 theorem Z2xZ12_gives_non_degenerate_N12_point
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
