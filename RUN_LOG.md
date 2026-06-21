@@ -68,3 +68,10 @@
 - obstruction_curve_N14_points_degenerate DISCHARGED (0 axiom, #print verified). Full-2-torsion, reused Lemma A/B (SquareStep014+FourSquaresAP), 1924-line case analysis. commit 1ac9661.
 - ALL FOUR obstruction_curve axioms discharged tonight: 20a4, N12, N16, N14. #print clean each.
 - Remaining Mazur axioms: Z2xZ10/12/14/16_gives_non_degenerate_*_point (group-theory side), + Axioms.lean trio (rational_torsion_two_invariant_factors, weil_pairing_primitive_root, no_rational_point_of_order_ge_17).
+
+## Run 2026-06-20 RESULT #7 — N=12 CASE COMPLETE
+- Z2xZ12_gives_non_degenerate_N12_point DISCHARGED (0 axiom, fresh-olean #print verified). Tate order-12 normalization (6P group law) + explicit 2-isogeny E_X(24a4)→E_N12 + R12/K12 branch + 5 non-degeneracy eliminations. commit 61df088.
+- no_Z2_cross_Z12_from_descent now 0 custom axiom → COMPLETE N=12 case (both halves).
+- TALLY: 7 axioms discharged (13→6). TWO complete cases: N=10 + N=12.
+- Remaining 6: Z2xZ14/16 forward (genus 4/5 obstruction, our curves to restructure to the elliptic quotient), rational_torsion + weil_pairing (KEYSTONE: n-torsion + Weil pairing via FLT/EllipticCurve/Torsion.lean 10 sorries + Route C), mordell_weil_fg (Mordell-Weil thm), no_rational_point_of_order_ge_17 (Mazur core).
+- NEXT: keystone (Torsion.lean).
