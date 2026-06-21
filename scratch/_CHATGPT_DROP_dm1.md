@@ -1,178 +1,145 @@
-# Q93-dm1: scoping `no_rational_point_of_order_ge_17`
+# Q98-dm1: per-prime module structure for `no_rational_point_of_order_ge_17`
 
-## Verdict
+## Executive verdict
 
-There is no Lean/Mathlib-feasible short route to
+There are **no closeable-now primes** for the direct `X_1(p)` route once `p ≥ 17`.
 
-```lean
-no_rational_point_of_order_ge_17
-```
-
-short of importing a theorem essentially equivalent to the prime-order part of Mazur's torsion theorem.  This is not like the A4 `Z2×Z14` ex-falso discharge, where the obstruction reduced to a genus-1 rank-zero enumeration on `X_1(14) = 14a4`.  For prime order `p ≥ 17`, the direct modular curve is `X_1(p)`, and all such curves have genus at least `5`.
-
-The smallest honest seam is therefore the theorem itself, or a semantically equivalent modular-curve rational-points theorem.  I would keep the high-level torsion theorem as the named seam, because the repo does not currently have a modular-curve object hierarchy for `X_1(p)`.
-
-```lean
-/-- Prime-order part of Mazur's torsion theorem, kept as the final named seam. -/
-axiom no_rational_point_of_prime_order_ge_17
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {p : ℕ} (hp : Nat.Prime p) (hp17 : 17 ≤ p)
-    (P : (E⧸ℚ).Point)
-    (hP : addOrderOf P = p) :
-    False
-```
-
-A version closer to the existing axiom name could be:
-
-```lean
-axiom no_rational_point_of_order_ge_17
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⧸ℚ).Point)
-    (hp : Nat.Prime (addOrderOf P))
-    (hp17 : 17 ≤ addOrderOf P) :
-    False
-```
-
-The second is often more convenient if the surrounding code already computes `addOrderOf P`.
-
----
-
-## 1. Reduction to modular curves
-
-A rational point `P ∈ E(ℚ)` of exact order `p` gives a non-cuspidal rational point on `X_1(p)`.  Forgetting the generator gives a rational cyclic subgroup of order `p`, hence a rational point on `X_0(p)`.
-
-```lean
--- Idealized modular-curve statement, not presently backed by Mathlib objects.
-axiom order_p_point_gives_X1p_point
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {p : ℕ} (hp : Nat.Prime p)
-    (P : (E⧸ℚ).Point)
-    (hP : addOrderOf P = p) :
-    ∃ x : X1 p ℚ, ¬ IsCusp x
-
-axiom X1_prime_ge17_rational_points_are_cusps
-    {p : ℕ} (hp : Nat.Prime p) (hp17 : 17 ≤ p)
-    (x : X1 p ℚ) :
-    IsCusp x
-```
-
-These two axioms would imply `no_rational_point_of_prime_order_ge_17`.  But in the current repo, this is not a smaller seam: it requires modular curves, rational cusps, and the moduli interpretation of `X_1(p)`.
-
-The `X_0(p)` route is also not a shortcut by itself.  A rational point of order `p` implies a rational `p`-isogeny, but Mazur's rational isogeny theorem is itself deep.  It says that prime-degree rational isogenies can occur only for
-
-```text
-{2, 3, 5, 7, 11, 13, 17, 19, 37, 43, 67, 163}.
-```
-
-So `X_0(p)` plus Mazur's isogeny theorem would reduce `p ≥ 17` to the finite set
-
-```text
-{17, 19, 37, 43, 67, 163}.
-```
-
-But this reduction has merely moved the deep theorem: formalizing Mazur's isogeny theorem is comparable in difficulty to formalizing the relevant part of Mazur's torsion theorem.
-
----
-
-## 2. Genus of `X_1(p)`
-
-For prime `p ≥ 5`, the genus of `X_1(p)` is
+For prime `p ≥ 5`,
 
 ```text
 g(X_1(p)) = (p - 5) * (p - 7) / 24.
 ```
 
-Consequences:
+Thus
 
-| prime `p` | `g(X_1(p))` | Lean tractability |
-|---:|---:|---|
-| 5 | 0 | genus 0, parametrized |
-| 7 | 0 | genus 0, parametrized |
-| 11 | 1 | elliptic curve case |
-| 13 | 2 | genus 2, already beyond current Mathlib automation |
-| 17 | 5 | high-genus curve |
-| 19 | 7 | high-genus curve |
-| 23 | 12 | high-genus curve |
-| 29 | 22 | high-genus curve |
-| 31 | 26 | high-genus curve |
-| 37 | 40 | high-genus curve |
-| 41 | 51 | high-genus curve |
-| 43 | 57 | high-genus curve |
-| 47 | 70 | high-genus curve |
-| 53 | 92 | high-genus curve |
-| 59 | 117 | high-genus curve |
-| 61 | 126 | high-genus curve |
-| 67 | 155 | high-genus curve |
-| 71 | 176 | high-genus curve |
-| 73 | 187 | high-genus curve |
-| 163 | 1027 | completely out of reach by curve enumeration |
-
-Thus there are **no genus ≤ 1 curves among `X_1(p)` for `p ≥ 17`**.  The first problematic prime in the requested range, `p = 17`, already gives a genus-5 curve.
-
-For comparison, the `X_0(p)` route has smaller genus, and `X_0(17)` and `X_0(19)` are genus-1 curves.  LMFDB lists `X_0(17)` in isogeny class `17.a`; the `Γ_0(N)`-optimal curve is `17.a3` with coefficients `[1, -1, 1, -1, -14]`.  But `X_0(p)` classifies rational cyclic subgroups, not rational generators.  Non-cuspidal rational points on `X_0(17)` and `X_0(19)` do exist; they correspond to rational isogenies, not rational torsion points.
-
-Approximate useful `X_0` status for the exceptional isogeny primes:
-
-| `p` | `g(X_0(p))` | comment |
-|---:|---:|---|
-| 17 | 1 | LMFDB isogeny class `17.a`; rational 17-isogenies exist |
-| 19 | 1 | LMFDB isogeny class `19.a`; rational 19-isogenies exist |
-| 37 | 2 | rational 37-isogenies exist; still not rational 37-torsion |
-| 43 | 3 | exceptional rational isogeny prime |
-| 67 | 5 | exceptional rational isogeny prime |
-| 163 | 13 | exceptional rational isogeny prime |
-
-This is why `X_0` does not give an A4-style rank-zero contradiction for the torsion problem.
-
----
-
-## 3. Uniform Mazur method vs curve-by-curve
-
-A curve-by-curve proof on `X_1(p)` is not near-term feasible.  It would require infinitely many primes unless one first proves a finite reduction such as Mazur's isogeny theorem or another uniform boundedness theorem.  The finite `X_0` exceptional list is itself produced by Mazur's method.
-
-The actual uniform proof uses the arithmetic of modular curves and their Jacobians: Eisenstein ideals, cuspidal subgroups, Hecke algebras, winding quotients, reduction at primes, and formal immersion arguments.  This is more elegant mathematically than enumerating rational points on huge `X_1(p)`, but it is **not** currently more formalizable in Mathlib.  It would require a large modular-curves/Jacobians/Hecke-algebra infrastructure that the repo does not have.
-
-A stylized Lean target for the uniform method would look like:
-
-```lean
--- Not currently realistic without a substantial modular-curves library.
-axiom Mazur_Eisenstein_prime_torsion_obstruction
-    {p : ℕ} (hp : Nat.Prime p) (hp17 : 17 ≤ p)
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⧸ℚ).Point)
-    (hP : addOrderOf P = p) :
-    False
+```text
+g(X_1(17)) = 5,
 ```
 
-This is intentionally almost identical to the high-level seam, because exposing the internal modular-curve proof structure would create many deeper seams rather than fewer.
+and the genus only increases from there.  So the A4-style pattern
+
+```text
+order point → genus 1 modular curve → rank-zero rational-point enumeration → contradiction
+```
+
+has **no prime-order analogue for p ≥ 17** using `X_1(p)`.
+
+The per-prime module structure should therefore have an empty `CloseableNow` group and one deferred genus-≥2 cluster seam.
 
 ---
 
-## 4. True Mathlib blockers
+## Important split: direct `X_1(p)` route vs isogeny-reduced finite route
 
-The blockers are not small polynomial identities.  They are foundational arithmetic geometry components:
+There are two logically different reductions.
 
-1. **Modular curves as objects over `ℚ`**: definitions of `X_1(N)`, `X_0(N)`, cusps, rational points, and moduli interpretations.
-2. **Maps from elliptic torsion data to modular curves**: a formal construction turning `P : E(ℚ)` with `addOrderOf P = p` into a noncuspidal point on `X_1(p)(ℚ)`.
-3. **High-genus rational point tools**: models, divisors, Jacobians, Abel-Jacobi maps, Mordell-Weil groups, Chabauty-Coleman, Mordell-Weil sieve, or equivalent certified rational-point enumeration.
-4. **Mazur's uniform method**: Jacobians `J_0(p)`, Hecke algebras, Eisenstein ideals, cuspidal subgroup calculations, formal immersion at cusps, and reduction arguments.
+### Route A: direct torsion route
 
-Mathlib has strong algebra, finite group theory, polynomial/resultant infrastructure, and growing elliptic-curve Weierstrass APIs.  It does not currently have enough of the above to make this seam closeable.
+A rational point of exact order `p` gives a non-cuspidal rational point on `X_1(p)`.  This applies to **every prime `p ≥ 17`**, so it is an infinite family.  It has no genus≤1 cases.
+
+### Route B: use Mazur's rational-isogeny theorem first
+
+A rational point of exact order `p` also gives a rational cyclic subgroup of order `p`, hence a rational point on `X_0(p)`.  Mazur's isogeny theorem reduces rational prime isogeny degrees to
+
+```text
+{2, 3, 5, 7, 11, 13, 17, 19, 37, 43, 67, 163}.
+```
+
+Then the prime-order torsion problem for `p ≥ 17` is reduced to the finite list
+
+```text
+{17, 19, 37, 43, 67, 163}.
+```
+
+But using this finite list imports a theorem essentially as deep as Mazur's method.  It is not a lightweight reduction.  Also, the actual torsion obstruction still lives naturally on `X_1(p)`, not merely on `X_0(p)`: `X_0(17)` and `X_0(19)` are genus 1, but they have non-cuspidal rational points corresponding to rational 17- and 19-isogenies.  That does **not** imply rational 17- or 19-torsion.
 
 ---
 
-## 5. Recommended seam shape in `flt-ai`
+## Per-prime genus table for the direct `X_1(p)` route
 
-Keep the seam at the theorem level:
+The table below lists the primes most relevant to the discussion.  The verdict column is about the direct `X_1(p)` curve, not `X_0(p)`.
+
+| prime `p` | `g(X_1(p))` | closeable now? | module status |
+|---:|---:|---|---|
+| 17 | 5 | no | deferred genus≥2/high-genus seam |
+| 19 | 7 | no | deferred genus≥2/high-genus seam |
+| 23 | 12 | no | deferred genus≥2/high-genus seam |
+| 29 | 22 | no | deferred genus≥2/high-genus seam |
+| 31 | 26 | no | deferred genus≥2/high-genus seam |
+| 37 | 40 | no | deferred genus≥2/high-genus seam |
+| 41 | 51 | no | deferred genus≥2/high-genus seam |
+| 43 | 57 | no | deferred genus≥2/high-genus seam |
+| 47 | 70 | no | deferred genus≥2/high-genus seam |
+| 53 | 92 | no | deferred genus≥2/high-genus seam |
+| 59 | 117 | no | deferred genus≥2/high-genus seam |
+| 61 | 126 | no | deferred genus≥2/high-genus seam |
+| 67 | 155 | no | deferred genus≥2/high-genus seam |
+| 71 | 176 | no | deferred genus≥2/high-genus seam |
+| 73 | 187 | no | deferred genus≥2/high-genus seam |
+| 79 | 222 | no | deferred genus≥2/high-genus seam |
+| 83 | 247 | no | deferred genus≥2/high-genus seam |
+| 89 | 287 | no | deferred genus≥2/high-genus seam |
+| 97 | 345 | no | deferred genus≥2/high-genus seam |
+| 101 | 376 | no | deferred genus≥2/high-genus seam |
+| 103 | 392 | no | deferred genus≥2/high-genus seam |
+| 107 | 425 | no | deferred genus≥2/high-genus seam |
+| 109 | 442 | no | deferred genus≥2/high-genus seam |
+| 113 | 477 | no | deferred genus≥2/high-genus seam |
+| 127 | 610 | no | deferred genus≥2/high-genus seam |
+| 131 | 651 | no | deferred genus≥2/high-genus seam |
+| 137 | 715 | no | deferred genus≥2/high-genus seam |
+| 139 | 737 | no | deferred genus≥2/high-genus seam |
+| 149 | 852 | no | deferred genus≥2/high-genus seam |
+| 151 | 876 | no | deferred genus≥2/high-genus seam |
+| 157 | 950 | no | deferred genus≥2/high-genus seam |
+| 163 | 1027 | no | deferred genus≥2/high-genus seam |
+
+For all larger primes, the same formula gives even larger genus.  So a literal per-prime `X_1(p)` plan is not a finite Lean plan unless it is preceded by a deep finite-reduction theorem.
+
+---
+
+## Finite exceptional-isogeny list, if that theorem is imported
+
+If the repo is willing to import the rational-isogeny prime list as a seam, then the only prime-order torsion candidates with `p ≥ 17` to exclude are:
+
+| `p` | `g(X_1(p))` | `g(X_0(p))` | closeable via rank-zero elliptic enumeration? | note |
+|---:|---:|---:|---|---|
+| 17 | 5 | 1 | no | `X_0(17)` has noncuspidal rational points/isogenies |
+| 19 | 7 | 1 | no | `X_0(19)` has noncuspidal rational points/isogenies |
+| 37 | 40 | 2 | no | genus 2 `X_0`; rational 37-isogenies exist |
+| 43 | 57 | 3 | no | exceptional isogeny prime |
+| 67 | 155 | 5 | no | exceptional isogeny prime |
+| 163 | 1027 | 13 | no | exceptional isogeny prime |
+
+This table is useful for documentation, but it does not produce immediate Lean discharges.  The fact that `X_0(17)` and `X_0(19)` are genus 1 does **not** help the torsion problem in the same way `X_1(14)` helped A4, because `X_0(p)` forgets the generator and only remembers a cyclic subgroup.
+
+---
+
+## Proposed Lean module structure
+
+Recommended layout:
+
+```text
+FLT/Mazur/PrimeTorsion/Basic.lean
+FLT/Mazur/PrimeTorsion/GenusTable.lean
+FLT/Mazur/PrimeTorsion/ModularCurveInterface.lean
+FLT/Mazur/PrimeTorsion/DeferredHighGenus.lean
+FLT/Mazur/PrimeTorsion/Assembly.lean
+```
+
+### `Basic.lean`
+
+This file has only the public seam and convenience wrappers.
 
 ```lean
-namespace FLT.MazurPrimeTorsion
+import Mathlib
+
+namespace FLT.Mazur.PrimeTorsion
 
 /--
 Final named seam: prime-order part of Mazur's torsion theorem over `ℚ`.
 
-This is deliberately stronger than any modular-curve-specific statement, because the
-current repo does not have `X_1(p)`/`X_0(p)` as formal objects.
+This is intentionally stated directly for elliptic curves because the current repo does not
+have a formal modular-curve hierarchy for `X_1(p)`.
 -/
 axiom no_rational_point_of_prime_order_ge_17
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
@@ -181,7 +148,7 @@ axiom no_rational_point_of_prime_order_ge_17
     (hP : addOrderOf P = p) :
     False
 
-/-- Convenience wrapper if the order is already known to be prime. -/
+/-- Wrapper matching code that already reasons through `addOrderOf`. -/
 theorem no_prime_order_ge_17_of_addOrderOf
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     (P : (E⧸ℚ).Point)
@@ -191,31 +158,254 @@ theorem no_prime_order_ge_17_of_addOrderOf
   exact no_rational_point_of_prime_order_ge_17
     E hp hp17 P rfl
 
-end FLT.MazurPrimeTorsion
+end FLT.Mazur.PrimeTorsion
 ```
 
-Depending on how your current axiom is stated, you may want the axiom itself in the `addOrderOf` form to avoid rewriting through a separate prime parameter.
+### `GenusTable.lean`
+
+This file records the arithmetic table used for scoping.  It is not needed by the proof if the high-level seam is kept.
+
+```lean
+import Mathlib
+
+namespace FLT.Mazur.PrimeTorsion
+
+/-- Genus of `X_1(p)` for prime `p ≥ 5`, as a natural-number formula. -/
+def X1PrimeGenus (p : ℕ) : ℕ :=
+  ((p - 5) * (p - 7)) / 24
+
+example : X1PrimeGenus 17 = 5 := by native_decide
+example : X1PrimeGenus 19 = 7 := by native_decide
+example : X1PrimeGenus 23 = 12 := by native_decide
+example : X1PrimeGenus 29 = 22 := by native_decide
+example : X1PrimeGenus 31 = 26 := by native_decide
+example : X1PrimeGenus 37 = 40 := by native_decide
+example : X1PrimeGenus 43 = 57 := by native_decide
+example : X1PrimeGenus 67 = 155 := by native_decide
+example : X1PrimeGenus 163 = 1027 := by native_decide
+
+/-- There are no genus ≤ 1 direct `X_1(p)` cases for primes `p ≥ 17`. -/
+theorem X1PrimeGenus_ge_five_of_ge17
+    {p : ℕ} (hp17 : 17 ≤ p) :
+    5 ≤ X1PrimeGenus p := by
+  unfold X1PrimeGenus
+  -- Arithmetic only.  Since `p ≥ 17`, `(p-5) ≥ 12` and `(p-7) ≥ 10`.
+  -- The product is at least 120, and `120 / 24 = 5`.
+  omega
+
+end FLT.Mazur.PrimeTorsion
+```
+
+The `omega` proof may need a small helper about division monotonicity if it does not solve directly.  This file is documentation-oriented; it is not intended to replace the modular-curve theorem.
+
+### `ModularCurveInterface.lean`
+
+Only add this if you want to expose the intended modular-curve theorem without building actual modular curves yet.
+
+```lean
+import Mathlib
+
+namespace FLT.Mazur.PrimeTorsion.ModularInterface
+
+/-- Placeholder type for rational points of `X_1(p)`.  Do not use in final code unless a real
+modular-curve hierarchy exists. -/
+opaque X1Point : ℕ → Type
+
+opaque IsCusp {p : ℕ} : X1Point p → Prop
+
+axiom order_p_point_gives_X1_non_cusp
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {p : ℕ} (hp : Nat.Prime p)
+    (P : (E⧸ℚ).Point)
+    (hP : addOrderOf P = p) :
+    ∃ x : X1Point p, ¬ IsCusp x
+
+end FLT.Mazur.PrimeTorsion.ModularInterface
+```
+
+### `DeferredHighGenus.lean`
+
+This is the single modular-curve cluster seam, if you want a modular phrasing.
+
+```lean
+import Mathlib
+import FLT.Mazur.PrimeTorsion.ModularCurveInterface
+
+namespace FLT.Mazur.PrimeTorsion.ModularInterface
+
+/--
+High-genus modular-curve seam: for every prime `p ≥ 17`, every rational point of
+`X_1(p)` is cuspidal.
+
+This bundles all genus≥2/high-genus rational-point determinations and Mazur's
+uniform method into one named seam.
+-/
+axiom X1_prime_ge17_rational_points_are_cusps
+    {p : ℕ} (hp : Nat.Prime p) (hp17 : 17 ≤ p)
+    (x : X1Point p) :
+    IsCusp x
+
+end FLT.Mazur.PrimeTorsion.ModularInterface
+```
+
+### `Assembly.lean`
+
+This shows how the modular seam would imply the direct elliptic-curve seam.
+
+```lean
+import Mathlib
+import FLT.Mazur.PrimeTorsion.ModularCurveInterface
+import FLT.Mazur.PrimeTorsion.DeferredHighGenus
+
+namespace FLT.Mazur.PrimeTorsion.ModularInterface
+
+/-- If the modular-curve interface and high-genus cusp seam are available, the prime-order
+elliptic-curve obstruction follows immediately. -/
+theorem no_rational_point_of_prime_order_ge_17_from_X1
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {p : ℕ} (hp : Nat.Prime p) (hp17 : 17 ≤ p)
+    (P : (E⧸ℚ).Point)
+    (hP : addOrderOf P = p) :
+    False := by
+  rcases order_p_point_gives_X1_non_cusp E hp P hP with ⟨x, hnoncusp⟩
+  exact hnoncusp (X1_prime_ge17_rational_points_are_cusps hp hp17 x)
+
+end FLT.Mazur.PrimeTorsion.ModularInterface
+```
 
 ---
 
-## 6. Ranking against the other hard seams
+## Per-prime theorem signatures
 
-This seam is deeper than the previous named seams:
+Since there are no genus≤1 direct `X_1(p)` cases for `p ≥ 17`, there are **no closeable-now per-prime theorem signatures** of the A4 rank-zero-elliptic kind.
+
+For documentation only, if you want per-prime wrappers after importing the single high-genus seam, use:
+
+```lean
+namespace FLT.Mazur.PrimeTorsion
+
+-- These are wrappers, not independent closeable-now proofs.
+
+theorem no_order17
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P : (E⧸ℚ).Point)
+    (hP : addOrderOf P = 17) :
+    False := by
+  exact no_rational_point_of_prime_order_ge_17
+    E (by decide : Nat.Prime 17) (by decide : 17 ≤ 17) P hP
+
+theorem no_order19
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P : (E⧸ℚ).Point)
+    (hP : addOrderOf P = 19) :
+    False := by
+  exact no_rational_point_of_prime_order_ge_17
+    E (by decide : Nat.Prime 19) (by decide : 17 ≤ 19) P hP
+
+theorem no_order23
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P : (E⧸ℚ).Point)
+    (hP : addOrderOf P = 23) :
+    False := by
+  exact no_rational_point_of_prime_order_ge_17
+    E (by decide : Nat.Prime 23) (by decide : 17 ≤ 23) P hP
+
+theorem no_order37
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P : (E⧸ℚ).Point)
+    (hP : addOrderOf P = 37) :
+    False := by
+  exact no_rational_point_of_prime_order_ge_17
+    E (by decide : Nat.Prime 37) (by decide : 17 ≤ 37) P hP
+
+theorem no_order43
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P : (E⧸ℚ).Point)
+    (hP : addOrderOf P = 43) :
+    False := by
+  exact no_rational_point_of_prime_order_ge_17
+    E (by decide : Nat.Prime 43) (by decide : 17 ≤ 43) P hP
+
+theorem no_order67
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P : (E⧸ℚ).Point)
+    (hP : addOrderOf P = 67) :
+    False := by
+  exact no_rational_point_of_prime_order_ge_17
+    E (by decide : Nat.Prime 67) (by decide : 17 ≤ 67) P hP
+
+theorem no_order163
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P : (E⧸ℚ).Point)
+    (hP : addOrderOf P = 163) :
+    False := by
+  exact no_rational_point_of_prime_order_ge_17
+    E (by decide : Nat.Prime 163) (by decide : 17 ≤ 163) P hP
+
+end FLT.Mazur.PrimeTorsion
+```
+
+If the repo has a finite-isogeny reduction theorem, you can use just the wrappers for
 
 ```text
-SEAM2 x-coordinate formula: hard but algebraic/closeable.
-SEAM1 division-polynomial separability: deep local/formal geometry seam.
-X1(16) rational points: genus-2 rational-points seam.
-Prime p ≥ 17 torsion exclusion: heart of Mazur; deeper than all of the above.
+17, 19, 37, 43, 67, 163.
 ```
 
-So the right engineering decision is to keep `no_rational_point_of_order_ge_17` as the single named Mazur-prime seam and move on.  Splitting it into modular-curve pieces would be mathematically cleaner only after the repo has a real modular-curve/Jacobian layer.
+Without that reduction, the theorem must remain uniform in `p`.
 
 ---
 
-## References checked
+## Concrete module recommendation
 
-* Mazur isogeny theorem prime list: Philippe Michaud-Jacobs, *Mazur's isogeny theorem*, arXiv:2209.03153.
-* Genus formulas for modular curves including `X_1(N)`: Hamakiotes--Lau, *Genus formulas for families of modular curves*, arXiv:2501.10883.
-* LMFDB isogeny class `17.a`, including the `Γ_0(N)`-optimal curve `17.a3` with coefficients `[1,-1,1,-1,-14]`.
-* Standard modular-curve genus summaries: tables for `X_0(N)` genus-one cases and the genus-zero list for `X_1(n)`.
+Use this now:
+
+```text
+FLT/Mazur/PrimeTorsion/Basic.lean
+```
+
+with exactly one seam:
+
+```lean
+axiom no_rational_point_of_prime_order_ge_17
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {p : ℕ} (hp : Nat.Prime p) (hp17 : 17 ≤ p)
+    (P : (E⧸ℚ).Point)
+    (hP : addOrderOf P = p) :
+    False
+```
+
+Keep the modular-curve files as design notes until there is real support for `X_1(p)`/`X_0(p)`.
+
+The answer to “which primes are closeable now?” is:
+
+```text
+none.
+```
+
+The answer to “what is the single genus≥2 cluster seam?” is:
+
+```lean
+axiom X1_prime_ge17_rational_points_are_cusps
+    {p : ℕ} (hp : Nat.Prime p) (hp17 : 17 ≤ p)
+    (x : X1Point p) :
+    IsCusp x
+```
+
+or, preferably for the current repo:
+
+```lean
+axiom no_rational_point_of_prime_order_ge_17
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {p : ℕ} (hp : Nat.Prime p) (hp17 : 17 ≤ p)
+    (P : (E⧸ℚ).Point)
+    (hP : addOrderOf P = p) :
+    False
+```
+
+---
+
+## References / facts used
+
+* Genus formula for prime-level `X_1(p)`: `g = (p - 5)(p - 7)/24` for prime `p ≥ 5`.
+* Mazur isogeny theorem prime-degree list: `{2,3,5,7,11,13,17,19,37,43,67,163}`.
+* `X_0(17)` and `X_0(19)` are genus 1 but classify rational cyclic subgroups/isogenies, not rational torsion generators; hence they do not supply an A4-style torsion contradiction.
