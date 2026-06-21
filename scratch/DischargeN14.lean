@@ -1,5 +1,6 @@
 import Mathlib
 import FLT.EllipticCurve.Torsion
+import scratch.ObstructionQ14
 import scratch.TateZ2xZ10Reduction
 
 /-!
@@ -25,6 +26,99 @@ def X14Equation (t s : ℚ) : Prop :=
 
 def X14DegenerateParameter (t : ℚ) : Prop :=
   t = -1 ∨ t = 0 ∨ t = 1
+
+private lemma mem_triple_m1_0_1 {t : ℚ} :
+    t ∈ ({-1, 0, 1} : Finset ℚ) ↔ X14DegenerateParameter t := by
+  norm_num [Finset.mem_insert, Finset.mem_singleton, X14DegenerateParameter]
+
+private lemma mem_triple_m7_0_1 {v : ℚ} :
+    v ∈ ({-7, 0, 1} : Finset ℚ) ↔ v = -7 ∨ v = 0 ∨ v = 1 := by
+  norm_num [Finset.mem_insert, Finset.mem_singleton]
+
+private lemma C14_affine_x_mem
+    {u w : ℚ}
+    (hC : w ^ 2 = u ^ 3 - 11 * u ^ 2 + 32 * u) :
+    u ∈ ({0, 4, 8} : Finset ℚ) := by
+  classical
+  by_cases hu : u = 0
+  · subst hu
+    norm_num
+  let v : ℚ := w ^ 2 / u ^ 2
+  let z : ℚ := w * (32 - u ^ 2) / u ^ 2
+  have hQ : z ^ 2 = v ^ 3 + 22 * v ^ 2 - 7 * v := by
+    dsimp [v, z]
+    field_simp [hu]
+    rw [hC]
+    ring
+  have hv := ObstructionQ14.obstruction_Q14 v z hQ
+  rw [mem_triple_m7_0_1] at hv
+  rcases hv with hv | hv | hv
+  · exfalso
+    have hw : w ^ 2 = -7 * u ^ 2 := by
+      dsimp [v] at hv
+      field_simp [hu] at hv
+      nlinarith
+    have hu2 : 0 < u ^ 2 := sq_pos_of_ne_zero hu
+    have hw0 : 0 ≤ w ^ 2 := sq_nonneg w
+    nlinarith
+  · exfalso
+    have hw2 : w ^ 2 = 0 := by
+      dsimp [v] at hv
+      field_simp [hu] at hv
+      nlinarith
+    have hw : w = 0 := sq_eq_zero_iff.mp hw2
+    have hquad : u ^ 2 - 11 * u + 32 = 0 := by
+      have h0 : u ^ 3 - 11 * u ^ 2 + 32 * u = 0 := by
+        simpa [hw] using hC.symm
+      have hmul : u * (u ^ 2 - 11 * u + 32) = 0 := by
+        ring_nf
+        ring_nf at h0
+        exact h0
+      exact (mul_eq_zero.mp hmul).resolve_left hu
+    have hsq : (2 * u - 11) ^ 2 + 7 = 0 := by
+      nlinarith
+    nlinarith [sq_nonneg (2 * u - 11)]
+  · have hw2 : w ^ 2 = u ^ 2 := by
+      dsimp [v] at hv
+      field_simp [hu] at hv
+      nlinarith
+    have hquad : u ^ 2 - 12 * u + 32 = 0 := by
+      have h0 : u ^ 2 = u ^ 3 - 11 * u ^ 2 + 32 * u := by
+        simpa [hw2] using hC
+      have hmul : u * (u ^ 2 - 12 * u + 32) = 0 := by
+        ring_nf
+        nlinarith
+      exact (mul_eq_zero.mp hmul).resolve_left hu
+    have hfac : (u - 4) * (u - 8) = 0 := by
+      ring_nf
+      nlinarith
+    rcases mul_eq_zero.mp hfac with h4 | h8
+    · rw [sub_eq_zero.mp h4]
+      norm_num
+    · rw [sub_eq_zero.mp h8]
+      norm_num
+
+theorem X14_rational_points_degenerate
+    {t s : ℚ}
+    (hX : X14Equation t s) :
+    X14DegenerateParameter t := by
+  classical
+  let u : ℚ := 4 * (t + 1)
+  let w : ℚ := 4 * (2 * s + t + 1)
+  have hC : w ^ 2 = u ^ 3 - 11 * u ^ 2 + 32 * u := by
+    dsimp [u, w]
+    ring_nf
+    unfold X14Equation at hX
+    nlinarith [hX]
+  have hu := C14_affine_x_mem hC
+  rw [Finset.mem_insert, Finset.mem_insert, Finset.mem_singleton] at hu
+  rcases hu with hu | hu | hu
+  · left
+    nlinarith
+  · right; left
+    nlinarith
+  · right; right
+    nlinarith
 
 /-- Denominator in Kubert's `X_1(14)` parametrization. -/
 def D14 (t : ℚ) : ℚ :=
@@ -79,6 +173,23 @@ theorem order14_of_injective_Z2xZ14
   simpa [p0] using addOrderOf_injective f hf p0 |>.trans hp0_order
 
 /--
+Tate/Kubert forward bridge for an exact order-14 rational point.
+
+This is the remaining explicit normalization/elimination step: move `(E,R)` to
+Tate normal form with `R ↦ (0,0)`, use the order-14 multiple relations, and
+map the resulting Tate parameters to the cyclic model
+`X_1(14) : s^2 + ts + s = t^3 - t`.
+-/
+theorem order14_gives_X14_point
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (R : (E⁄ℚ).Point)
+    (hR : addOrderOf R = 14) :
+    ∃ t s : ℚ, X14Equation t s ∧ ¬ X14DegenerateParameter t := by
+  -- TODO: port the N10/N12 Tate-normal-form calculation and Kubert's
+  -- order-14 elimination into this named bridge.
+  sorry
+
+/--
 The cyclic `X_1(14)` obstruction.
 
 Mathematically this is the standard route:
@@ -91,10 +202,8 @@ theorem order14_point_obstructed_by_X14_rank_zero
     (R : (E⁄ℚ).Point)
     (hR : addOrderOf R = 14) :
     False := by
-  -- This is the single remaining arithmetic-geometry wall: formalize the
-  -- Tate/Kubert map to `X_1(14)` and the rank-zero rational-point enumeration
-  -- on `14a4`.
-  sorry
+  rcases order14_gives_X14_point E R hR with ⟨t, s, hX, hnondeg⟩
+  exact hnondeg (X14_rational_points_degenerate hX)
 
 theorem no_order14_point_over_Q
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
