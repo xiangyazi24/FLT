@@ -44,3 +44,21 @@ No Mathlib shortcut (DivisionPolynomial has only defs + mk lemmas).
 NEXT for doubling: inductive proof on m via normEDSRec; even/odd recurrence steps each a cofactor certificate
 (same machinery as WardSomos oddStep/evenStepScaled but for the phi/PsiSq doubling). Substantial fresh effort.
 Foundation delivered this session: WardSomos + PsiSomos bridge + prePsi_adjacent_somos, all 0 custom axioms.
+
+## FINAL: doubling = Ward's full EllSequence theorem (Mathlib TODO)
+Triple-confirmed by CAS:
+- Curve relation IS necessary: in the {1,Y}-basis (a,b)-pair model (Y^2 -> curve), the Y-component B==0
+  is confirmed (the curve reduction makes mk(C dupCrossDiff) pure-R[X], as required).
+- But the R[X] A-component does NOT reduce mod adjacent Somos at any small radius (naive r<=4; curve-aware
+  (a,b) model r<=2) — even with the curve relation fully baked in.
+- Root cause (clinched): even the EllSeq(m,3,1) instance for normEDS does NOT reduce to the adjacent
+  (m,2,1) Somos via finite Groebner (r<=1 tested). Ward's theorem holds because the EDS is the SPECIFIC
+  sequence determined by base values W(1)=1,W(2)=b,W(3)=c,W(4)=d — NOT for free values with only the
+  adjacent relation. So the full EllSequence (and the doubling, which needs it) is a GLOBAL induction from
+  base, not a finite ideal-membership certificate.
+CONCLUSION: the keystone EDS-core doubling = the division-poly duplication formula = Ward's theorem
+(normEDS satisfies IsEllDivSequence) = the open Mathlib TODO. This is the irreducible deep content of the
+keystone seam. Options: (a) prove Ward's net induction (Mathlib-TODO-scale project), or (b) isolate it as a
+clearly-named seam — campaign-consistent (cf. no_rational_point_of_order_ge_17), honestly isolating the one
+hard theorem. Adjacent Somos (the (m,2,1) BASE of Ward's induction) is DONE this session, 0 axioms — that is
+the genuine reusable contribution toward Ward.
