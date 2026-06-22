@@ -114,4 +114,41 @@ lemma gapRel_diag (b c d : R) (k : ℤ) : GapRel b c d (k + 1) k := by
   rw [hodd, show (-1 : ℤ) = -(1) by ring, normEDS_neg, normEDS_one]
   ring
 
+/-- **G-step (cancelled).** For `m ≠ ±k`, `GapRel (k+1) m` follows from `gStep_mul` by cancelling the
+nonzero factor `b²·W(m+k)·W(m-k)`. -/
+lemma gStep [IsDomain R] (b c d : R) (hc : c ≠ 0)
+    (hne : ∀ j : ℤ, j ≠ 0 → normEDS b c d j ≠ 0) (k m : ℤ)
+    (hmk1 : m + k ≠ 0) (hmk2 : m - k ≠ 0)
+    (hG : GapRel b c d k m) (hO : OffRel b c d k m) (hO1 : OffRel b c d k (m - 1)) :
+    GapRel b c d (k + 1) m := by
+  have key := gStep_mul b c d hc hne k m hG hO hO1
+  have hb : b ≠ 0 := by have := hne 2 (by norm_num); rwa [normEDS_two] at this
+  have hfac : b ^ 2 * normEDS b c d (m + k) * normEDS b c d (m - k) ≠ 0 :=
+    mul_ne_zero (mul_ne_zero (pow_ne_zero 2 hb) (hne (m + k) hmk1)) (hne (m - k) hmk2)
+  have hres := (mul_eq_zero.mp key).resolve_left hfac
+  unfold GapRel AddRel
+  linear_combination hres
+
+/-- Diagonal twin `GapRel (k+1) (-k)` (the other zero of the G-step factor, `m=-k ⇒ W(0)=0`). -/
+lemma gapRel_diag_neg (b c d : R) (k : ℤ) : GapRel b c d (k + 1) (-k) := by
+  unfold GapRel AddRel
+  have hodd := normEDS_odd b c d k
+  simp only [show -k + (k + 1) = 1 by ring, show -k - (k + 1) = -(2 * k + 1) by ring,
+    show (k + 1) + 1 = k + 2 by ring, show (k + 1) - 1 = k by ring,
+    show (-k) + 1 = -(k - 1) by ring, show (-k) - 1 = -(k + 1) by ring,
+    normEDS_neg, normEDS_one, hodd]
+  ring
+
+/-- `GapRel (k+1)` for ALL `m`: `gStep` off the diagonal, `gapRel_diag`/`gapRel_diag_neg` on it. -/
+lemma gapRel_succ [IsDomain R] (b c d : R) (hc : c ≠ 0)
+    (hne : ∀ j : ℤ, j ≠ 0 → normEDS b c d j ≠ 0) (k : ℤ)
+    (hG : ∀ m, GapRel b c d k m) (hO : ∀ m, OffRel b c d k m) :
+    ∀ m, GapRel b c d (k + 1) m := by
+  intro m
+  by_cases h1 : m = k
+  · rw [h1]; exact gapRel_diag b c d k
+  · by_cases h2 : m = -k
+    · rw [h2]; exact gapRel_diag_neg b c d k
+    · exact gStep b c d hc hne k m (by omega) (by omega) (hG m) (hO m) (hO (m - 1))
+
 end FLT.EDS
