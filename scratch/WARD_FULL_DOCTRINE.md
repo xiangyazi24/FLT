@@ -33,3 +33,26 @@ This is the right ChatGPT use (not the serial-wait anti-pattern of lesson-0067).
 
 ## Terminal condition
 `IsEllSequence (normEDS b c d)` proven, 0 custom axioms, #print axioms standard-only.
+
+## PROGRESS 2026-06-22 (Step 1 DONE)
+- **Step 1 PROVEN** (scratch/WardEllSequence.lean, committed): IsEllSequence reduces to 2-var AddRel.
+  CAS-verified exact reduction (8 sign combos, unique match): `IsEllSequence(m,n,r) = -W(n)²·AddRel(m,r)
+  + W(m)²·AddRel(n,r) + W(r)²·AddRel(m,n)`. `isEllSequence_of_addRel` proven (pure linear_combination, no
+  induction, no W(1)=1 needed). The Mathlib TODO now = ONE sorry: `normEDS_addRel`.
+- AddRel(normEDS,m,n) numerically CONFIRMED true for all tested m,n (it IS the addition formula).
+- **AddRel def**: `W(m+n)W(m-n) = W(m+1)W(m-1)W(n)² − W(n+1)W(n-1)W(m)²` (= IsEllSequence at r=1, W(1)=1).
+
+## Step 2 PLAN (normEDS_addRel by gap induction on n)
+Predicate P(n) := ∀ m, AddRel (normEDS …) m n.  Prove via normEDSRec (the doubling recursion on n):
+- Base: n=0 (W(0)=0 trivial), n=1 (B(1)=W(2)W(0)=0 trivial), n=2 (= normEDS_adjacent_somos, DONE), n=3,4.
+- **Even gap step** (P(2k) from P(k-2..k+2)): the tautology `W(m)²·S(m,2n) = S(m+n,n)·S(m-n,n)` (S(a,b):=W(a+b)W(a-b)),
+  substitute AddRel at centers (m+n,n),(m-n,n) and gaps (m,n-1),(m,n),(m,n+1), the mixed product
+  B(m+n)B(m-n)=S(m,n+1)S(m,n-1), then `normEDS_even`/`normEDS_odd` for W(2n),W(2n±1); get W(m)²·AddRel(m,2n)=0,
+  cancel W(m)² over the universal domain, transport via map_normEDS.  [VERIFYING this identity via CAS now.]
+- **Odd gap step** (P(2k+1)): analogous.
+- Cofactors for the linear_combination: sympy Gröbner (same machinery as WardSomos oddStep/evenStepScaled).
+- Universal ring MvPolynomial (Fin 3) ℤ for the W(m)² (and any b) cancellation; map_normEDS transport.
+
+## Collaboration note
+Step 1 reduction came from a ChatGPT round (its signs were WRONG; I CAS-corrected to -,+,+). Verify-don't-transcribe
+caught it. This is the right ChatGPT use for a hard theorem (Xiang 06-22): drive + verify + iterate rounds.
