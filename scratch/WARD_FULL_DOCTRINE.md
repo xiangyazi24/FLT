@@ -56,3 +56,14 @@ Predicate P(n) := ∀ m, AddRel (normEDS …) m n.  Prove via normEDSRec (the do
 ## Collaboration note
 Step 1 reduction came from a ChatGPT round (its signs were WRONG; I CAS-corrected to -,+,+). Verify-don't-transcribe
 caught it. This is the right ChatGPT use for a hard theorem (Xiang 06-22): drive + verify + iterate rounds.
+
+## Step 2 even-step: ChatGPT sketch INCOMPLETE (CAS-caught), refining
+- CAS-verified: the n→2n even step does NOT close with ChatGPT's 5 AddRel hyps. After substituting
+  S(m±n,n) via AddRel, the product has CROSS terms `B(m+n)·W(m-n)²` + `W(m+n)²·B(m-n)` that the 5 hyps
+  cannot reduce (B(m+n)=W(m+n+1)W(m+n-1) is a SAME-center product; the hyps only give MIXED-center
+  products like W(m+n+1)W(m-n-1)). Gröbner leaves 5 residual terms with p1·pm1 and q².
+- The naive n→n+1 step also fails: S(m,n+1),S(m,n),S(m,n-1) satisfy no simple linear recurrence (EDS nonlinear).
+- This is the genuine Ward-induction difficulty (why it's the open TODO). Correct step needs the right finite
+  instance set — round 2 with ChatGPT in flight (asked for the exact Shipsey/Ward step identity + the precise
+  ideal-membership instances). I CAS-verify everything before building (caught ChatGPT's sign error + this gap).
+- Step 1 (3→2 reduction) is SOLID and committed — the genuine structural breakthrough that halves the problem.
