@@ -1,58 +1,65 @@
-# Q325-dm1: division-polynomial x-doubling identity — Mathlib status and formal route
+# Q329-dm1: division-polynomial x-doubling certificate
 
 ## Executive answer
 
-Current Mathlib does **not** appear to contain the desired multiplication-by-`n` / x-coordinate composition API for division polynomials.  The files currently give definitions and recurrence/degree/map lemmas for `preΨ`, `ΨSq`, `Ψ`, `Φ`, `ψ`, and `φ`, but not a theorem of the shape
+The missing closer is **not** `Adj/Inv` at shifted indices.  The correct local statement is a `Ψ₃`-saturated certificate.
 
-```lean
-W.Φ (2*n) = dupNumH W (W.Φ n) (W.ΨSq n)
-W.ΨSq (2*n) = dupDenH W (W.Φ n) (W.ΨSq n)
+For each parity of `m`, with the notation below,
+
+```text
+c3 * ΔDen = ADen * Adj + IDen * Inv + BDen * bRel
+c3 * ΔNum = ANum * Adj + INum * Inv + BNum * bRel
 ```
 
-nor a projective version
+where
 
-```lean
-W.Φ (2*n) * dupDenH W (W.Φ n) (W.ΨSq n)
-  = W.ΨSq (2*n) * dupNumH W (W.Φ n) (W.ΨSq n)
+```text
+c3 = Ψ₃,
+ΔDen = ΨSq(2m) - dupDenH(Φm, ΨSqm),
+ΔNum = Φ(2m)   - dupNumH(Φm, ΨSqm),
+bRel = b₂*b₆ - b₄^2 - 4*b₈.
 ```
 
-The cleanest route is to prove the **stronger exact composition identities** first:
+So the finite relation list is exactly
 
-```lean
-lemma ΨSq_two_mul (m : ℤ) :
-    W.ΨSq (2*m) = dupDenH W (W.Φ m) (W.ΨSq m)
-
-lemma Φ_two_mul (m : ℤ) :
-    W.Φ (2*m) = dupNumH W (W.Φ m) (W.ΨSq m)
+```text
+Adj(m), Inv(m), bRel,
 ```
 
-Then the requested projective equality is immediate by rewriting.
+plus universal-domain cancellation of `c3 = Ψ₃`.  There are **no shifted `Adj(m±1)` or `Inv(m±1)` instances** in the clean certificate, and no `preΨ(m±3)` variables are needed.
 
-The local proof is parity-split.  After expanding `W.preΨ (2*m)`, `W.preΨ (2*m±1)`, `W.ΨSq (2*m)`, and `W.Φ (2*m)`, the certificate is not best stated as an uncancelled identity in the local ideal.  The good `linear_combination` target is the identity **multiplied by `W.Ψ₃`**.  Over the universal polynomial ring, `W.Ψ₃ ≠ 0`, so cancel there and transport the resulting polynomial identity to arbitrary coefficient rings.
+This also explains your CAS result: the unmultiplied `ΔDen` and `ΔNum` need not reduce to zero in the free local ring modulo `<Adj(m), Inv(m)>`.  The polynomial belongs to the saturation
+
+```text
+<Adj(m), Inv(m), bRel> : c3
+```
+
+not to the unsaturated ideal in free `P_{m-2},...,P_{m+2}` variables.
+
+For Lean, prove the saturated identity over the universal domain, prove `Ψ₃ ≠ 0` there, cancel, and then transport the resulting unsaturated polynomial identity to arbitrary coefficient rings by the existing `map_ΨSq` / `map_Φ` lemmas.
 
 ---
 
-## 1. Real Mathlib API currently relevant
+## Current Mathlib status
 
-The useful current Mathlib names are these.
-
-From `Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Basic.lean`:
+I still do **not** find a Mathlib theorem that directly states division-polynomial x-coordinate composition/doubling, such as
 
 ```lean
-WeierstrassCurve.Ψ₂Sq
-WeierstrassCurve.Ψ₃
-WeierstrassCurve.preΨ₄
-WeierstrassCurve.preΨ
+W.ΨSq (2*m) = dupDenH W (W.Φ m) (W.ΨSq m)
+W.Φ   (2*m) = dupNumH W (W.Φ m) (W.ΨSq m)
+```
+
+or the projective cross-product version.  The relevant available API is:
+
+```lean
 WeierstrassCurve.preΨ_even
 WeierstrassCurve.preΨ_odd
-WeierstrassCurve.ΨSq
 WeierstrassCurve.ΨSq_even
 WeierstrassCurve.ΨSq_odd
 WeierstrassCurve.Φ
 WeierstrassCurve.Φ_two
-WeierstrassCurve.Φ_four
-WeierstrassCurve.ψ
-WeierstrassCurve.φ
+WeierstrassCurve.ΨSq_two
+WeierstrassCurve.Affine.CoordinateRing.mk_ψ
 WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
 WeierstrassCurve.Affine.CoordinateRing.mk_φ
 WeierstrassCurve.map_preΨ
@@ -60,339 +67,389 @@ WeierstrassCurve.map_ΨSq
 WeierstrassCurve.map_Φ
 ```
 
-In particular Mathlib has exactly these definition/recurrence facts:
-
-```lean
-W.preΨ_even (m : ℤ) :
-  W.preΨ (2*m)
-    = W.preΨ (m-1)^2 * W.preΨ m * W.preΨ (m+2)
-      - W.preΨ (m-2) * W.preΨ m * W.preΨ (m+1)^2
-
-W.preΨ_odd (m : ℤ) :
-  W.preΨ (2*m+1)
-    = W.preΨ (m+2) * W.preΨ m^3
-        * (if Even m then W.Ψ₂Sq^2 else 1)
-      - W.preΨ (m-1) * W.preΨ (m+1)^3
-        * (if Even m then 1 else W.Ψ₂Sq^2)
-
-W.ΨSq_even (m : ℤ) :
-  W.ΨSq (2*m)
-    = (W.preΨ (m-1)^2 * W.preΨ m * W.preΨ (m+2)
-       - W.preΨ (m-2) * W.preΨ m * W.preΨ (m+1)^2)^2
-      * W.Ψ₂Sq
-
-W.ΨSq_odd (m : ℤ) :
-  W.ΨSq (2*m+1)
-    = (W.preΨ (m+2) * W.preΨ m^3
-        * (if Even m then W.Ψ₂Sq^2 else 1)
-       - W.preΨ (m-1) * W.preΨ (m+1)^3
-        * (if Even m then 1 else W.Ψ₂Sq^2))^2
-```
-
-`Φ_two` is already the base x-duplication numerator:
-
-```lean
-@[simp] lemma WeierstrassCurve.Φ_two :
-  W.Φ 2 = X^4 - C W.b₄ * X^2 - C (2 * W.b₆) * X - C W.b₈
-```
-
-and `ΨSq_two` is already the denominator:
-
-```lean
-@[simp] lemma WeierstrassCurve.ΨSq_two :
-  W.ΨSq 2 = W.Ψ₂Sq
-```
-
-From `Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Degree.lean`, the relevant facts are degree/leading coefficient facts only, e.g.
-
-```lean
-WeierstrassCurve.natDegree_preΨ
-WeierstrassCurve.leadingCoeff_preΨ
-WeierstrassCurve.natDegree_ΨSq
-WeierstrassCurve.leadingCoeff_ΨSq
-WeierstrassCurve.natDegree_Φ
-WeierstrassCurve.leadingCoeff_Φ
-```
-
-These do not prove the duplication identity.
-
-From `Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Formula.lean`, Mathlib has affine group-law formulae:
+Mathlib also has the affine group-law lemma
 
 ```lean
 WeierstrassCurve.Affine.addX_eq_addX_negY_sub
-WeierstrassCurve.Affine.addY_sub_negY_addY
 ```
 
-The first is the affine differential-addition formula
-
-```text
-x(P₁+P₂) = x(P₁-P₂)
-           - ψ(P₁)ψ(P₂)/(x(P₂)-x(P₁))²,
-ψ(x,y) = 2y + a₁x + a₃.
-```
-
-But Mathlib does not currently connect this to `W.Φ n / W.ΨSq n` for division polynomials.  So it is useful later, but it does not shortcut the division-polynomial theorem in one or two rewrites.
+but there is not currently a ready bridge from that affine formula to `Φ n / ΨSq n` for division polynomials.
 
 ---
 
-## 2. Definitions for the projective x-doubling map
+## 1. Local notation
 
-Use these univariate homogeneous polynomials:
+Use the following local variables.
 
-```lean
-noncomputable def dupNumH (W : WeierstrassCurve R) (Xc Zc : R[X]) : R[X] :=
-  Xc^4 - C W.b₄ * Xc^2 * Zc^2
-    - C (2 * W.b₆) * Xc * Zc^3
-    - C W.b₈ * Zc^4
+```text
+x  := X
+s  := Ψ₂Sq = 4*x^3 + b2*x^2 + 2*b4*x + b6
+c3 := Ψ₃   = 3*x^4 + b2*x^3 + 3*b4*x^2 + 3*b6*x + b8
+d4 := preΨ₄
+   = 2*x^6 + b2*x^5 + 5*b4*x^4 + 10*b6*x^3 + 10*b8*x^2
+     + (b2*b8 - b4*b6)*x + (b4*b8 - b6^2)
 
-noncomputable def dupDenH (W : WeierstrassCurve R) (Xc Zc : R[X]) : R[X] :=
-  C (4 : R) * Xc^3 * Zc
-    + C W.b₂ * Xc^2 * Zc^2
-    + C (2 * W.b₄) * Xc * Zc^3
-    + C W.b₆ * Zc^4
+ell := 6*x^2 + b2*x + b4
+eta := b6 + b4*x - 2*x^3
+
+rho0 := 9*x^4 + 2*b2*x^3 + 4*b4*x^2 + 3*b6*x + b8
+rho1 := 5*x^4 + b2*x^3 + 2*b4*x^2 + 2*b6*x + b8
+
+Pm2 := preΨ(m-2)
+Pm1 := preΨ(m-1)
+P0  := preΨ(m)
+P1  := preΨ(m+1)
+P2  := preΨ(m+2)
 ```
 
-Then:
+The curve b-invariant relation is oriented as
 
-```lean
-@[simp] lemma dupNumH_X_one :
-    dupNumH W X 1 = W.Φ 2 := by
-  simp [dupNumH]
-  rw [W.Φ_two]
-  ring
-
-@[simp] lemma dupDenH_X_one :
-    dupDenH W X 1 = W.ΨSq 2 := by
-  simp [dupDenH, WeierstrassCurve.Ψ₂Sq]
+```text
+bRel := b2*b6 - b4^2 - 4*b8.
 ```
 
-The curve invariant relation needed in polynomial form is:
+For parity, set
+
+```text
+m even: E2 = s^2, O2 = 1
+m odd:  E2 = 1,   O2 = s^2
+```
+
+The local relations are
+
+```text
+Adj := Pm2*P2 - O2*Pm1*P1 + c3*P0^2.
+
+Inv := c3*(P2*Pm1^2 + P1^2*Pm2 + E2*P0^3)
+       - (d4 + s^2)*P1*P0*Pm1.
+```
+
+The local expansions are
+
+```text
+Z := ΨSq(m)
+F := Φ(m)
+
+m even: Z = P0^2*s,  F = x*Z - P1*Pm1
+m odd:  Z = P0^2,    F = x*Z - P1*Pm1*s
+
+L := Pm1^2*P2 - Pm2*P1^2
+ΨSq(2m) = s*P0^2*L^2
+
+Aplus  := P2*P0^3*E2 - Pm1*P1^3*O2
+Aminus := P1*Pm1^3*O2 - Pm2*P0^3*E2
+Φ(2m)  = x*s*P0^2*L^2 - Aplus*Aminus
+```
+
+The homogeneous doubling polynomials are
+
+```text
+dupDenH(F,Z) = 4*F^3*Z + b2*F^2*Z^2 + 2*b4*F*Z^3 + b6*Z^4
+
+dupNumH(F,Z) = F^4 - b4*F^2*Z^2 - 2*b6*F*Z^3 - b8*Z^4
+```
+
+and the residuals are
+
+```text
+ΔDen := s*P0^2*L^2 - dupDenH(F,Z)
+ΔNum := (x*s*P0^2*L^2 - Aplus*Aminus) - dupNumH(F,Z).
+```
+
+---
+
+## 2. Denominator certificate, `m` even
+
+For `m` even, use `E2=s^2`, `O2=1`, so
+
+```text
+Adj_even := Pm2*P2 - Pm1*P1 + c3*P0^2
+
+Inv_even := c3*(P2*Pm1^2 + P1^2*Pm2 + s^2*P0^3)
+            - (d4+s^2)*P1*P0*Pm1.
+```
+
+The exact certificate is
+
+```text
+c3 * ΔDen_even
+= ADen_even * Adj_even + IDen_even * Inv_even + BDen_even * bRel
+```
+
+with
+
+```text
+ADen_even := -4*P0^2*P1^2*Pm1^2*s*c3
+
+IDen_even := -P0^2*s*(P0^3*s^2 - P0*P1*Pm1*ell - P1^2*Pm2)
+             + P0^2*Pm1^2*s*P2
+
+BDen_even := P0^3*P1*Pm1*s
+              *(P0^3*s^2*x^2
+                - P0*P1*Pm1*rho0
+                - P1^2*Pm2*x^2
+                - P2*Pm1^2*x^2)
+```
+
+This is a direct `ring` identity after expanding the definitions of `s,c3,d4,ell,rho0`.
+
+---
+
+## 3. Numerator certificate, `m` even
+
+For `m` even, the exact certificate is
+
+```text
+c3 * ΔNum_even
+= ANum_even * Adj_even + INum_even * Inv_even + BNum_even * bRel
+```
+
+with
+
+```text
+ANum_even := P0^2*s*c3*(P0^4*s^3 - 4*P1^2*Pm1^2*x)
+
+INum_even := -P0^2*s*(P0^3*s^2*x
+                       + P0*P1*Pm1*eta
+                       - P1^2*Pm2*x)
+             + P0^2*Pm1^2*x*s*P2
+
+BNum_even := P0^3*P1*Pm1*x*s
+              *(P0^3*s^2*x^2
+                - P0*P1*Pm1*rho1
+                - P1^2*Pm2*x^2
+                - P2*Pm1^2*x^2)
+```
+
+Again, this is a literal polynomial identity.
+
+---
+
+## 4. Denominator certificate, `m` odd
+
+For `m` odd, use `E2=1`, `O2=s^2`, so
+
+```text
+Adj_odd := Pm2*P2 - s^2*Pm1*P1 + c3*P0^2
+
+Inv_odd := c3*(P2*Pm1^2 + P1^2*Pm2 + P0^3)
+           - (d4+s^2)*P1*P0*Pm1.
+```
+
+The exact certificate is
+
+```text
+c3 * ΔDen_odd
+= ADen_odd * Adj_odd + IDen_odd * Inv_odd + BDen_odd * bRel
+```
+
+with
+
+```text
+ADen_odd := -4*P0^2*P1^2*Pm1^2*s*c3
+
+IDen_odd := P0^2*s*(-P0^3 + P0*P1*Pm1*ell + P1^2*Pm2)
+            + P0^2*Pm1^2*s*P2
+
+BDen_odd := P0^3*P1*Pm1*s
+             *(P0^3*x^2
+               - P0*P1*Pm1*rho0
+               - P1^2*Pm2*x^2
+               - P2*Pm1^2*x^2)
+```
+
+---
+
+## 5. Numerator certificate, `m` odd
+
+The exact certificate is
+
+```text
+c3 * ΔNum_odd
+= ANum_odd * Adj_odd + INum_odd * Inv_odd + BNum_odd * bRel
+```
+
+with
+
+```text
+ANum_odd := P0^2*c3*(P0^4 - 4*P1^2*Pm1^2*x*s)
+
+INum_odd := P0^2*s*(-P0^3*x
+                     - P0*P1*Pm1*eta
+                     + P1^2*Pm2*x)
+            + P0^2*Pm1^2*x*s*P2
+
+BNum_odd := P0^3*P1*Pm1*x*s
+             *(P0^3*x^2
+               - P0*P1*Pm1*rho1
+               - P1^2*Pm2*x^2
+               - P2*Pm1^2*x^2)
+```
+
+---
+
+## 6. One-file CAS check
+
+This is the exact Sympy check I used for the four certificates above.  It uses the same orientations as the displayed formulas.
+
+```python
+import sympy as sp
+
+x,b2,b4,b6,b8 = sp.symbols('x b2 b4 b6 b8')
+Pm2,Pm1,P0,P1,P2 = sp.symbols('Pm2 Pm1 P0 P1 P2')
+
+s  = 4*x**3 + b2*x**2 + 2*b4*x + b6
+c3 = 3*x**4 + b2*x**3 + 3*b4*x**2 + 3*b6*x + b8
+d4 = (2*x**6 + b2*x**5 + 5*b4*x**4 + 10*b6*x**3 + 10*b8*x**2
+      + (b2*b8 - b4*b6)*x + (b4*b8 - b6**2))
+ell  = 6*x**2 + b2*x + b4
+eta  = b6 + b4*x - 2*x**3
+rho0 = 9*x**4 + 2*b2*x**3 + 4*b4*x**2 + 3*b6*x + b8
+rho1 = 5*x**4 + b2*x**3 + 2*b4*x**2 + 2*b6*x + b8
+bRel = b2*b6 - b4**2 - 4*b8
+
+for parity in ['even','odd']:
+    E2 = s**2 if parity == 'even' else 1
+    O2 = 1    if parity == 'even' else s**2
+    E  = s    if parity == 'even' else 1
+    O  = 1    if parity == 'even' else s
+
+    Z = P0**2 * E
+    F = x*Z - P1*Pm1*O
+    L = Pm1**2*P2 - Pm2*P1**2
+
+    Psi2 = s*P0**2*L**2
+    dupDen = 4*F**3*Z + b2*F**2*Z**2 + 2*b4*F*Z**3 + b6*Z**4
+    dupNum = F**4 - b4*F**2*Z**2 - 2*b6*F*Z**3 - b8*Z**4
+
+    Aplus  = P2*P0**3*E2 - Pm1*P1**3*O2
+    Aminus = P1*Pm1**3*O2 - Pm2*P0**3*E2
+    Phi2   = x*Psi2 - Aplus*Aminus
+
+    Adj = Pm2*P2 - O2*Pm1*P1 + c3*P0**2
+    Inv = c3*(P2*Pm1**2 + P1**2*Pm2 + E2*P0**3) - (d4+s**2)*P1*P0*Pm1
+
+    if parity == 'even':
+        ADen = -4*P0**2*P1**2*Pm1**2*s*c3
+        IDen = -P0**2*s*(P0**3*s**2 - P0*P1*Pm1*ell - P1**2*Pm2) + P0**2*Pm1**2*s*P2
+        BDen = P0**3*P1*Pm1*s*(P0**3*s**2*x**2 - P0*P1*Pm1*rho0 - P1**2*Pm2*x**2 - P2*Pm1**2*x**2)
+
+        ANum = P0**2*s*c3*(P0**4*s**3 - 4*P1**2*Pm1**2*x)
+        INum = -P0**2*s*(P0**3*s**2*x + P0*P1*Pm1*eta - P1**2*Pm2*x) + P0**2*Pm1**2*x*s*P2
+        BNum = P0**3*P1*Pm1*x*s*(P0**3*s**2*x**2 - P0*P1*Pm1*rho1 - P1**2*Pm2*x**2 - P2*Pm1**2*x**2)
+    else:
+        ADen = -4*P0**2*P1**2*Pm1**2*s*c3
+        IDen = P0**2*s*(-P0**3 + P0*P1*Pm1*ell + P1**2*Pm2) + P0**2*Pm1**2*s*P2
+        BDen = P0**3*P1*Pm1*s*(P0**3*x**2 - P0*P1*Pm1*rho0 - P1**2*Pm2*x**2 - P2*Pm1**2*x**2)
+
+        ANum = P0**2*c3*(P0**4 - 4*P1**2*Pm1**2*x*s)
+        INum = P0**2*s*(-P0**3*x - P0*P1*Pm1*eta + P1**2*Pm2*x) + P0**2*Pm1**2*x*s*P2
+        BNum = P0**3*P1*Pm1*x*s*(P0**3*x**2 - P0*P1*Pm1*rho1 - P1**2*Pm2*x**2 - P2*Pm1**2*x**2)
+
+    assert sp.expand(c3*(Psi2 - dupDen) - (ADen*Adj + IDen*Inv + BDen*bRel)) == 0
+    assert sp.expand(c3*(Phi2 - dupNum) - (ANum*Adj + INum*Inv + BNum*bRel)) == 0
+
+print('all certificates verified')
+```
+
+---
+
+## 7. Lean encoding shape
+
+Use a parity split.  The local polynomial lemmas should be stated as saturated identities first.
+
+```lean
+lemma Ψ₃_mul_ΨSq_two_mul_sub_dupDen_even
+    (hm : Even m) :
+    W.Ψ₃ *
+      (W.ΨSq (2*m) - dupDenH W (W.Φ m) (W.ΨSq m)) = 0 := by
+  -- rewrite by:
+  --   W.ΨSq_even m
+  --   W.preΨ_odd m
+  --   W.preΨ_odd (m-1)
+  --   W.Φ
+  --   parity facts from hm
+  -- then use linear_combination with:
+  --   ADen_even * Adj_even
+  --   IDen_even * Inv_even
+  --   BDen_even * bRel
+  -- and close by ring_nf.
+  sorry
+
+lemma Ψ₃_mul_Φ_two_mul_sub_dupNum_even
+    (hm : Even m) :
+    W.Ψ₃ *
+      (W.Φ (2*m) - dupNumH W (W.Φ m) (W.ΨSq m)) = 0 := by
+  -- same expansion, with ANum_even / INum_even / BNum_even
+  sorry
+
+lemma Ψ₃_mul_ΨSq_two_mul_sub_dupDen_odd
+    (hm : ¬ Even m) :
+    W.Ψ₃ *
+      (W.ΨSq (2*m) - dupDenH W (W.Φ m) (W.ΨSq m)) = 0 := by
+  -- same expansion, with ADen_odd / IDen_odd / BDen_odd
+  sorry
+
+lemma Ψ₃_mul_Φ_two_mul_sub_dupNum_odd
+    (hm : ¬ Even m) :
+    W.Ψ₃ *
+      (W.Φ (2*m) - dupNumH W (W.Φ m) (W.ΨSq m)) = 0 := by
+  -- same expansion, with ANum_odd / INum_odd / BNum_odd
+  sorry
+```
+
+The relation `Adj` comes from the already-proved adjacent Somos/AddRel for the `preΨ` EDS.  The relation `Inv` is the invariant relation for that same `preΨ` EDS with parameters
+
+```text
+b^2 := s^2,
+c   := c3,
+d   := d4.
+```
+
+For `bRel`, either use a lemma
 
 ```lean
 lemma b_relation (W : WeierstrassCurve R) :
-    W.b₂ * W.b₆ - W.b₄^2 = 4 * W.b₈ := by
-  -- name may already exist near the b-invariant API;
-  -- otherwise unfold b₂ b₄ b₆ b₈ and `ring`.
+    W.b₂ * W.b₆ - W.b₄^2 - 4 * W.b₈ = 0 := by
   rw [WeierstrassCurve.b₂, WeierstrassCurve.b₄,
       WeierstrassCurve.b₆, WeierstrassCurve.b₈]
   ring
 ```
 
-In polynomial form, the relation is:
+or simply unfold `b₂ b₄ b₆ b₈` and let `ring_nf` discharge it.
 
-```lean
-C W.b₂ * C W.b₆ - C W.b₄^2 - C (4 : R) * C W.b₈ = 0
-```
-
-or, after `C_simp`,
-
-```text
-b₂*b₆ - b₄² - 4*b₈ = 0.
-```
-
----
-
-## 3. Parity-careful local expansion for the doubling theorem
-
-Set the following abbreviations in a local polynomial proof:
-
-```lean
-let s  : R[X] := W.Ψ₂Sq
-let c3 : R[X] := W.Ψ₃
-let d4 : R[X] := W.preΨ₄
-
-let Pm2 : R[X] := W.preΨ (m - 2)
-let Pm1 : R[X] := W.preΨ (m - 1)
-let P0  : R[X] := W.preΨ m
-let P1  : R[X] := W.preΨ (m + 1)
-let P2  : R[X] := W.preΨ (m + 2)
-
-let E : R[X] := if Even m then s else 1
-let O : R[X] := if Even m then 1 else s
-```
-
-Then:
-
-```text
-E * O = s
-E² = if Even m then s² else 1
-O² = if Even m then 1 else s²
-```
-
-The local forms of the current point are:
-
-```text
-Z := ΨSq(m) = P0² * E
-F := Φ(m)   = X * Z - P1*Pm1 * O
-```
-
-The even recurrence gives:
-
-```text
-L := Pm1²*P2 - Pm2*P1²
-preΨ(2m) = P0 * L
-ΨSq(2m) = s * P0² * L²
-```
-
-The odd recurrences around `2m±1` give:
-
-```text
-Aplus  := P2*P0³*E² - Pm1*P1³*O²
-Aminus := P1*Pm1³*O² - Pm2*P0³*E²
-
-preΨ(2m+1) = Aplus
-preΨ(2m-1) = Aminus
-```
-
-Since `2m` is even, the definition of `Φ` gives:
-
-```text
-Φ(2m) = X * ΨSq(2m) - preΨ(2m+1)*preΨ(2m-1)
-      = X * s * P0² * L² - Aplus*Aminus.
-```
-
-These are the exact expansions to use before the polynomial certificate.
-
-Lean skeleton:
-
-```lean
-lemma ΨSq_two_mul_expand (m : ℤ) :
-    W.ΨSq (2*m)
-      = W.Ψ₂Sq
-        * W.preΨ m^2
-        * (W.preΨ (m-1)^2 * W.preΨ (m+2)
-             - W.preΨ (m-2) * W.preΨ (m+1)^2)^2 := by
-  rw [W.ΨSq_even m]
-  ring
-
-lemma Φ_two_mul_expand (m : ℤ) :
-    W.Φ (2*m)
-      = X * W.Ψ₂Sq
-          * W.preΨ m^2
-          * (W.preΨ (m-1)^2 * W.preΨ (m+2)
-               - W.preΨ (m-2) * W.preΨ (m+1)^2)^2
-        - (W.preΨ (2*m+1) * W.preΨ (2*m-1)) := by
-  rw [WeierstrassCurve.Φ]
-  rw [W.ΨSq_even m]
-  simp [show Even (2*m) from even_two_mul m]
-  ring
-```
-
-For `preΨ (2m±1)`, use `W.preΨ_odd m` and `W.preΨ_odd (m-1)`, plus:
-
-```lean
-have hm1 : Even (m - 1) ↔ ¬ Even m := by omega
-```
-
-or prove the parity rewrite directly by `omega` / existing `Int.even_sub` simp lemmas.
-
----
-
-## 4. Local EDS relations needed for the doubling certificate
-
-The local identities needed are the translated `GapRel(m,2)` and the invariant relation for the actual bivariate `ψ` sequence, rewritten in the `preΨ` variables.
-
-With the abbreviations above:
-
-```text
-Adj(m):
-Pm2*P2 - O²*Pm1*P1 + c3*P0² = 0.
-```
-
-Check by parity:
-
-```text
-m even: Pm2*P2 - Pm1*P1 + c3*P0² = 0
-m odd:  Pm2*P2 - s²*Pm1*P1 + c3*P0² = 0
-```
-
-The invariant relation is:
-
-```text
-Inv(m):
-c3 * (P2*Pm1² + P1²*Pm2 + E²*P0³)
-  - (d4 + s²) * P1*P0*Pm1 = 0.
-```
-
-Check by parity:
-
-```text
-m even:
-c3 * (P2*Pm1² + P1²*Pm2 + s²*P0³)
-  - (d4+s²)*P1*P0*Pm1 = 0
-
-m odd:
-c3 * (P2*Pm1² + P1²*Pm2 + P0³)
-  - (d4+s²)*P1*P0*Pm1 = 0
-```
-
-The curve relation is:
-
-```text
-bRel:
-b₂*b₆ - b₄² - 4*b₈ = 0.
-```
-
-Important saturation/cancellation point: the clean local polynomial certificate is:
-
-```text
-c3 * (dupDenH(F,Z) - s*P0²*L²) ∈ ideal(Adj(m), Inv(m), bRel)
-```
-
-and
-
-```text
-c3 * (dupNumH(F,Z) - (X*s*P0²*L² - Aplus*Aminus))
-  ∈ ideal(Adj(m), Inv(m), bRel).
-```
-
-I verified this algebraically with the parity split.  In Lean, state these as two universal local `ring_nf` / `linear_combination` lemmas after `by_cases hm : Even m`.  Do **not** try to prove the uncancelled local identity directly from `Adj`, `Inv`, and `bRel`; the ideal membership target wants the extra multiplier `c3 = W.Ψ₃`.  After proving the multiplied identity over the universal polynomial ring, cancel `W.Ψ₃ ≠ 0` there and transport to arbitrary rings by the existing map lemmas.
-
-A Lean-facing theorem shape:
-
-```lean
-lemma Ψ₃_mul_dupDenH_sub_ΨSq2m_local
-    (hm : Even m) :
-    W.Ψ₃ *
-      (dupDenH W (W.Φ m) (W.ΨSq m) - W.ΨSq (2*m)) = 0 := by
-  -- 1. expand `Φ`, `ΨSq`, `preΨ_even`, `preΨ_odd`
-  -- 2. rewrite `Adj(m)`, `Inv(m)`, and `b_relation W`
-  -- 3. `ring_nf`
-  sorry
-
-lemma Ψ₃_mul_dupNumH_sub_Φ2m_local
-    (hm : Even m) :
-    W.Ψ₃ *
-      (dupNumH W (W.Φ m) (W.ΨSq m) - W.Φ (2*m)) = 0 := by
-  -- same parity split and same three relations
-  sorry
-```
-
-Over a universal domain:
+Then cancel only in the universal domain:
 
 ```lean
 lemma Ψ₃_ne_zero_universal : Wuniv.Ψ₃ ≠ 0 := by
-  -- easiest: unfold `Ψ₃`; coefficient of X^4 is 3.
-  -- Over ℤ[...] this coefficient is nonzero.
-  -- Alternatively use degree/leading coefficient facts if your universal curve is set up for them.
+  -- Either unfold Ψ₃ and inspect the X^4 coefficient, or use degree/leading coefficient lemmas.
+  -- Over the universal integral domain, the leading coefficient is 3, hence nonzero.
   sorry
+
+lemma ΨSq_two_mul_universal (m : ℤ) :
+    Wuniv.ΨSq (2*m) = dupDenH Wuniv (Wuniv.Φ m) (Wuniv.ΨSq m) := by
+  have hsat : Wuniv.Ψ₃ *
+      (Wuniv.ΨSq (2*m) - dupDenH Wuniv (Wuniv.Φ m) (Wuniv.ΨSq m)) = 0 := by
+    by_cases hm : Even m
+    · exact Ψ₃_mul_ΨSq_two_mul_sub_dupDen_even (W := Wuniv) hm
+    · exact Ψ₃_mul_ΨSq_two_mul_sub_dupDen_odd (W := Wuniv) hm
+  have hsub : Wuniv.ΨSq (2*m) - dupDenH Wuniv (Wuniv.Φ m) (Wuniv.ΨSq m) = 0 :=
+    mul_left_cancel₀ Ψ₃_ne_zero_universal hsat
+  exact sub_eq_zero.mp hsub
+
+lemma Φ_two_mul_universal (m : ℤ) :
+    Wuniv.Φ (2*m) = dupNumH Wuniv (Wuniv.Φ m) (Wuniv.ΨSq m) := by
+  have hsat : Wuniv.Ψ₃ *
+      (Wuniv.Φ (2*m) - dupNumH Wuniv (Wuniv.Φ m) (Wuniv.ΨSq m)) = 0 := by
+    by_cases hm : Even m
+    · exact Ψ₃_mul_Φ_two_mul_sub_dupNum_even (W := Wuniv) hm
+    · exact Ψ₃_mul_Φ_two_mul_sub_dupNum_odd (W := Wuniv) hm
+  have hsub : Wuniv.Φ (2*m) - dupNumH Wuniv (Wuniv.Φ m) (Wuniv.ΨSq m) = 0 :=
+    mul_left_cancel₀ Ψ₃_ne_zero_universal hsat
+  exact sub_eq_zero.mp hsub
 ```
 
-Then:
-
-```lean
-lemma dupDenH_eq_ΨSq_two_mul_universal (m : ℤ) :
-    dupDenH Wuniv (Wuniv.Φ m) (Wuniv.ΨSq m) = Wuniv.ΨSq (2*m) := by
-  have h := Ψ₃_mul_dupDenH_sub_ΨSq2m_local (W := Wuniv) m
-  exact sub_eq_zero.mp <| mul_left_cancel₀ Ψ₃_ne_zero_universal h
-
-lemma dupNumH_eq_Φ_two_mul_universal (m : ℤ) :
-    dupNumH Wuniv (Wuniv.Φ m) (Wuniv.ΨSq m) = Wuniv.Φ (2*m) := by
-  have h := Ψ₃_mul_dupNumH_sub_Φ2m_local (W := Wuniv) m
-  exact sub_eq_zero.mp <| mul_left_cancel₀ Ψ₃_ne_zero_universal h
-```
-
-Finally map to arbitrary `R` using:
+Finally transport by the existing map lemmas:
 
 ```lean
 WeierstrassCurve.map_Ψ₂Sq
@@ -403,169 +460,73 @@ WeierstrassCurve.map_ΨSq
 WeierstrassCurve.map_Φ
 ```
 
-This is the same universal-polynomial transport pattern as your unconditional Ward theorem.
+The arbitrary-ring/field theorem should be obtained by mapping from the universal theorem; do not cancel `Ψ₃` in the target ring.
 
 ---
 
-## 5. Resulting projective equality
+## 8. Coordinate-ring route
 
-Once the two exact identities are proved, the projective equality is just:
+The coordinate-ring route is useful for sanity checks but is not currently shorter in Mathlib.
+
+Available lemmas:
 
 ```lean
-lemma Φ_ΨSq_two_mul_projective (m : ℤ) :
+WeierstrassCurve.Affine.CoordinateRing.mk_ψ
+WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
+WeierstrassCurve.Affine.CoordinateRing.mk_φ
+```
+
+These let you rewrite in `R[W]` as
+
+```text
+mk(W.ψ n)^2 = mk(C (W.ΨSq n))
+mk(W.φ n)   = mk(C (W.Φ n))
+```
+
+and your unconditional Ward theorem applies directly to the bivariate sequence
+
+```lean
+W.ψ n = normEDS W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) n.
+```
+
+A denominator proof in the coordinate ring would have the conceptual form
+
+```text
+mk(C (dupDenH(Φm,ΨSqm)))
+= mk(W.ψ (2*m)^2)
+= mk(C (W.ΨSq (2*m))).
+```
+
+The numerator proof would similarly target
+
+```text
+mk(C (dupNumH(Φm,ΨSqm)))
+= mk(W.φ (2*m))
+= mk(C (W.Φ (2*m))).
+```
+
+However, to make the middle equalities rigorous from affine duplication, Mathlib would need either:
+
+```text
+ω_n / y-coordinate division-polynomial API,
+```
+
+or a homogeneous Kummer-line duplication theorem already stated in the coordinate ring.  The Basic file still marks `ωₙ` as TODO, and the available affine formula `Affine.addX_eq_addX_negY_sub` is not connected to the division-polynomial `Φ/ΨSq` API.
+
+So the coordinate-ring path does avoid some `preΨ` parity bookkeeping only after building new infrastructure.  For the current repo, the saturated local certificate above is the most direct path.
+
+---
+
+## 9. Final projective equality
+
+After the exact identities are proved and transported,
+
+```lean
+lemma divisionPolynomial_x_doubling_projective (m : ℤ) :
     W.Φ (2*m) * dupDenH W (W.Φ m) (W.ΨSq m)
       = W.ΨSq (2*m) * dupNumH W (W.Φ m) (W.ΨSq m) := by
-  rw [dupDenH_eq_ΨSq_two_mul, dupNumH_eq_Φ_two_mul]
+  rw [ΨSq_two_mul, Φ_two_mul]
   ring
 ```
 
-Here the exact identities show the scalar `c` in the projective equality is actually `1`.
-
----
-
-## 6. Differential-addition companion
-
-Mathlib has the affine differential-addition lemma
-
-```lean
-WeierstrassCurve.Affine.addX_eq_addX_negY_sub
-```
-
-but it does **not** have the corresponding division-polynomial / Kummer-line composition theorem.
-
-There is, however, a very clean EDS-core denominator identity for consecutive indices.  Define:
-
-```text
-Z0 := ΨSq(m)
-F0 := Φ(m)
-Z1 := ΨSq(m+1)
-F1 := Φ(m+1)
-Δ  := F1*Z0 - F0*Z1.
-```
-
-With the same `P_i`, `E`, `O` as above:
-
-```text
-Z0 = P0² * E
-F0 = X*Z0 - P1*Pm1*O
-
-Z1 = P1² * O
-F1 = X*Z1 - P2*P0*E
-```
-
-Therefore:
-
-```text
-Δ = F1*Z0 - F0*Z1
-  = -P2*P0³*E² + Pm1*P1³*O²
-  = -preΨ(2m+1).
-```
-
-Hence the denominator identity is exact and needs no curve relation:
-
-```lean
-lemma ΨSq_two_mul_add_one_diffDen (m : ℤ) :
-    W.ΨSq (2*m + 1)
-      = (W.Φ (m+1) * W.ΨSq m - W.Φ m * W.ΨSq (m+1))^2 := by
-  -- expand `Φ`, `ΨSq`, and `preΨ_odd m`; split on `Even m`; ring
-  sorry
-```
-
-The numerator has the exact formal expansion:
-
-```text
-Φ(2m+1)
-= X * Δ² - s * preΨ(2m) * preΨ(2m+2).
-```
-
-Using even recurrences:
-
-```text
-preΨ(2m) = P0 * (Pm1²*P2 - Pm2*P1²),
-preΨ(2m+2) = P1 * (P0²*P3 - Pm1*P2²),
-```
-
-so
-
-```text
-Φ(2m+1)
-= X*Δ²
-  - s * P0*P1
-      * (Pm1²*P2 - Pm2*P1²)
-      * (P0²*P3 - Pm1*P2²).
-```
-
-This is the exact EDS formal identity:
-
-```lean
-lemma Φ_two_mul_add_one_diff_formal (m : ℤ) :
-    W.Φ (2*m + 1)
-      = X * (W.Φ (m+1) * W.ΨSq m - W.Φ m * W.ΨSq (m+1))^2
-        - W.Ψ₂Sq * W.preΨ (2*m) * W.preΨ (2*m+2) := by
-  rw [WeierstrassCurve.Φ]
-  rw [ΨSq_two_mul_add_one_diffDen]
-  simp [show ¬ Even (2*m+1) from Int.not_even_two_mul_add_one m]
-  ring
-```
-
-This numerator identity still contains the signed product
-
-```text
-s * preΨ(2m) * preΨ(2m+2),
-```
-
-which is the x-only Kummer differential-addition sign data.  If you want a formula using only the three projective x-pairs
-
-```text
-[Φ_m, ΨSq_m], [Φ_{m+1}, ΨSq_{m+1}], [X,1],
-```
-
-then you need to formalize the generalized Weierstrass Kummer differential-addition biquadratic.  Mathlib's affine lemma `addX_eq_addX_negY_sub` is the right source, but the homogeneous Kummer formula is not currently exposed as a ready-to-use theorem.
-
-So the practical companion sequence is:
-
-```lean
--- easy denominator, EDS-only:
-ΨSq(2*m+1)
-  = (Φ(m+1)*ΨSq(m) - Φ(m)*ΨSq(m+1))^2
-
--- exact numerator, still carrying the signed product:
-Φ(2*m+1)
-  = X*(Φ(m+1)*ΨSq(m) - Φ(m)*ΨSq(m+1))^2
-    - Ψ₂Sq * preΨ(2*m) * preΨ(2*m+2)
-```
-
-Do not claim a pure two-pair x-only numerator until the Kummer biquadratic has been separately stated and CAS-checked.
-
----
-
-## 7. Recommended implementation order
-
-1. Add `dupNumH` and `dupDenH`.
-2. Prove the base simp lemmas:
-
-   ```lean
-   dupNumH W X 1 = W.Φ 2
-   dupDenH W X 1 = W.ΨSq 2
-   ```
-
-3. Prove local parity expansion lemmas for `Φ m`, `ΨSq m`, `preΨ(2m)`, `preΨ(2m±1)`.
-4. Prove translated local relations `Adj(m)` and `Inv(m)` for `preΨ` from your Ward/invariant infrastructure for the actual `ψ`/EDS sequence.
-5. Prove the multiplied local certificates:
-
-   ```lean
-   W.Ψ₃ * (dupDenH W (W.Φ m) (W.ΨSq m) - W.ΨSq (2*m)) = 0
-   W.Ψ₃ * (dupNumH W (W.Φ m) (W.ΨSq m) - W.Φ (2*m)) = 0
-   ```
-
-6. Over the universal curve polynomial ring, cancel `W.Ψ₃ ≠ 0`.
-7. Transport the exact identities to arbitrary rings via the existing `map_...` lemmas.
-8. Derive the requested projective cross-multiplication by rewriting.
-9. Separately add the odd/consecutive denominator identity:
-
-   ```lean
-   W.ΨSq (2*m+1)
-     = (W.Φ (m+1)*W.ΨSq m - W.Φ m*W.ΨSq (m+1))^2
-   ```
-
-10. For a fully x-only differential-addition numerator, first formalize the generalized Weierstrass Kummer biquadratic from `Affine.addX_eq_addX_negY_sub`; it is not currently a Mathlib division-polynomial theorem.
+The projective scalar is `1`; the `Ψ₃` only appears internally as the saturation/cancellation device for proving the exact identities.
