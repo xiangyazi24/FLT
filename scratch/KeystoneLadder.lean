@@ -996,7 +996,16 @@ under the two raw x-only primitives used by the corrected Montgomery-pair ladder
 
 The first half is the doubling identity for `[Φ_m, ΨSq_m]`; the second half is the adjacent
 differential-addition identity for `[Φ_m, ΨSq_m]`, `[Φ_{m+1}, ΨSq_{m+1}]`, and `[x, 1]`.
-The nonzero conclusions are the corresponding no-common-root facts for the produced indices. -/
+The nonzero conclusions are the corresponding no-common-root facts for the produced indices.
+
+SEAM = Ward's theorem.  The doubling/addition cross-identities are the division-polynomial
+duplication/addition formulas, i.e. instances of `IsEllDivSequence (normEDS …)` — the open
+Mathlib TODO.  Established (CAS-exhaustive, see scratch/WARD_RUN_LOG.md): these are NOT finite
+linear combinations of the adjacent (m,2,1) Somos (fails at every tested radius even with the
+curve relation incorporated); they require Ward's global induction from the base values.  The
+(m,2,1) BASE CASE — normEDS_adjacent_somos / psi_adjacent_somos / preΨ_adjacent_somos — is
+PROVEN with 0 custom axioms (scratch/WardSomos.lean, scratch/PsiSomos.lean).  Discharging this
+sorry = formalising Ward's full EllSequence theorem. -/
 private theorem xPair_double_and_diffAddOrInf_EDS_core
     (W : WeierstrassCurve k) [W.IsElliptic] (m : ℕ) (x : k) :
     xPair W ((2 * m : ℕ) : ℤ) x ≠ 0 ∧
