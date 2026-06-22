@@ -1,416 +1,380 @@
-# Q228: EDS / Somos relation search and derivation for Mathlib division polynomials
+# Q311 (dm2): EDS nonvanishing by specialization
 
-## Short verdict
+## Recommended path
 
-Mathlib **does have the general Somos / EDS relation as a definition**:
-
-```lean
-def IsEllSequence (W : ℤ → R) : Prop :=
-  ∀ m n r : ℤ,
-    W (m + n) * W (m - n) * W r ^ 2 =
-      W (m + r) * W (m - r) * W n ^ 2 -
-        W (n + r) * W (n - r) * W m ^ 2
-```
-
-This is exactly the desired identity
+Use the specialization
 
 ```text
-W_{m+n} W_{m-n} W_r²
-  = W_{m+r} W_{m-r} W_n² − W_{n+r} W_{n-r} W_m².
+(b, c, d) = (2, 3, 2).
 ```
 
-But Mathlib **does not currently prove** that the canonical normalized sequence
+For Mathlib's `normEDS`, this specialization is the identity sequence:
 
 ```lean
-normEDS b c d : ℤ → R
+normEDS (2 : ℤ) 3 2 j = j
 ```
 
-satisfies `IsEllSequence`. The file itself lists this as TODO:
-
-```text
-TODO: prove that `normEDS` satisfies `IsEllDivSequence`.
-```
-
-So there is no theorem such as
+for every `j : ℤ`. Therefore, if `j ≠ 0`, the universal polynomial
 
 ```lean
-normEDS_isEllSequence
-normEDS_isEllDivSequence
-preNormEDS_isEllSequence
-WeierstrassCurve.ψ_isEllSequence
-WeierstrassCurve.preΨ_isEllSequence
+normEDS B C D j ∈ ℤ[B,C,D]
 ```
 
-in current Mathlib.
+is nonzero, because evaluation at `B ↦ 2`, `C ↦ 3`, `D ↦ 2` sends it to `j ≠ 0`.
 
-What Mathlib **does have** are the defining even/odd recurrences:
+This is Approach (a), but with a much simpler specialization than a genuine elliptic curve. It is degenerate as an elliptic-curve specialization, but that is irrelevant: to prove a universal polynomial is nonzero, any ring homomorphism to any ring under which it has nonzero image is enough.
 
-```lean
-preNormEDS'_even
-preNormEDS'_odd
-preNormEDS_even
-preNormEDS_odd
-normEDS_even
-normEDS_odd
-WeierstrassCurve.preΨ'_even
-WeierstrassCurve.preΨ'_odd
-WeierstrassCurve.preΨ_even
-WeierstrassCurve.preΨ_odd
-```
-
-For the adjacent differential-addition case, the needed Somos instance is exactly the `r = 1`, `m = a`, `n = b` specialization with adjacent indices, and it is already present as `normEDS_odd` / `preΨ_odd` after the normalization factors are accounted for. Therefore the immediate adjacent identity should be proved from `W.preΨ_odd`; the fully general EDS relation remains a deeper missing theorem.
+The important consequence is that Ward's theorem can be made unconditional without proving a Mordell-Weil/non-torsion theorem or a curve-to-EDS dictionary.
 
 ---
 
-## Exact declarations found in `Mathlib/NumberTheory/EllipticDivisibilitySequence.lean`
+## Why `(2,3,2)` works
+
+The identity sequence `W j = j` has
+
+```text
+W(0)=0,  W(1)=1,  W(2)=2,  W(3)=3,  W(4)=4 = 2*2.
+```
+
+Thus it has Mathlib/Ward parameters
+
+```text
+b = 2,  c = 3,  d = 2.
+```
+
+It also satisfies the adjacent normalized EDS recurrences used to define `normEDS`:
+
+```text
+(2*m) * 2
+  = (m-1)^2*m*(m+2) - (m-2)*m*(m+1)^2,
+
+2*m + 1
+  = (m+2)*m^3 - (m-1)*(m+1)^3.
+```
+
+Those are just polynomial identities. Hence `normEDS (2 : ℤ) 3 2` is forced by `normEDSRec` to equal the identity sequence.
+
+The Somos recurrence also checks directly:
+
+```text
+(m+2)(m-2) = 4(m+1)(m-1) - 3m^2.
+```
+
+---
+
+## Lean proof of the integer specialization
+
+This is the core Lean lemma. It uses only the current EDS API: `normEDSRec`, `normEDS_even`, `normEDS_odd`, and `normEDS_neg`.
 
 ```lean
 import Mathlib
 
 noncomputable section
 
-open Polynomial
+lemma normEDS_232_nat (n : ℕ) :
+    normEDS (2 : ℤ) 3 2 (n : ℤ) = (n : ℤ) := by
+  induction n using normEDSRec with
+  | zero =>
+      simp
+  | one =>
+      simp
+  | two =>
+      simp
+  | three =>
+      simp
+  | four =>
+      norm_num
+  | even m h1 h2 h3 h4 h5 =>
+      let t : ℤ := (m : ℤ) + 3
+      have H1 : normEDS (2 : ℤ) 3 2 (t - 2) = t - 2 := by
+        convert h1 using 1 <;> dsimp [t] <;> omega
+      have H2 : normEDS (2 : ℤ) 3 2 (t - 1) = t - 1 := by
+        convert h2 using 1 <;> dsimp [t] <;> omega
+      have H3 : normEDS (2 : ℤ) 3 2 t = t := by
+        convert h3 using 1 <;> dsimp [t] <;> omega
+      have H4 : normEDS (2 : ℤ) 3 2 (t + 1) = t + 1 := by
+        convert h4 using 1 <;> dsimp [t] <;> omega
+      have H5 : normEDS (2 : ℤ) 3 2 (t + 2) = t + 2 := by
+        convert h5 using 1 <;> dsimp [t] <;> omega
+      have he := normEDS_even (b := (2 : ℤ)) (c := 3) (d := 2) t
+      have hmul :
+          normEDS (2 : ℤ) 3 2 (2 * t) * 2 = (2 * t) * 2 := by
+        calc
+          normEDS (2 : ℤ) 3 2 (2 * t) * 2
+              = (t - 1) ^ 2 * t * (t + 2) -
+                  (t - 2) * t * (t + 1) ^ 2 := by
+                    simpa [H1, H2, H3, H4, H5] using he
+          _ = (2 * t) * 2 := by
+                    ring
+      have hcast : ((2 * (m + 3) : ℕ) : ℤ) = 2 * t := by
+        dsimp [t]
+        omega
+      rw [hcast]
+      nlinarith [hmul]
+  | odd m h1 h2 h3 h4 =>
+      let t : ℤ := (m : ℤ) + 2
+      have H1 : normEDS (2 : ℤ) 3 2 (t - 1) = t - 1 := by
+        convert h1 using 1 <;> dsimp [t] <;> omega
+      have H2 : normEDS (2 : ℤ) 3 2 t = t := by
+        convert h2 using 1 <;> dsimp [t] <;> omega
+      have H3 : normEDS (2 : ℤ) 3 2 (t + 1) = t + 1 := by
+        convert h3 using 1 <;> dsimp [t] <;> omega
+      have H4 : normEDS (2 : ℤ) 3 2 (t + 2) = t + 2 := by
+        convert h4 using 1 <;> dsimp [t] <;> omega
+      have ho := normEDS_odd (b := (2 : ℤ)) (c := 3) (d := 2) t
+      have hcast : ((2 * (m + 2) + 1 : ℕ) : ℤ) = 2 * t + 1 := by
+        dsimp [t]
+        omega
+      rw [hcast]
+      calc
+        normEDS (2 : ℤ) 3 2 (2 * t + 1)
+            = (t + 2) * t ^ 3 - (t - 1) * (t + 1) ^ 3 := by
+                simpa [H1, H2, H3, H4] using ho
+        _ = 2 * t + 1 := by
+                ring
 
-universe u
+lemma normEDS_232_int (j : ℤ) :
+    normEDS (2 : ℤ) 3 2 j = j := by
+  induction j using Int.negInduction with
+  | nat n =>
+      exact normEDS_232_nat n
+  | neg ih n =>
+      simp [normEDS_neg, normEDS_232_nat]
+```
 
-variable {R : Type u} [CommRing R]
+If the final `Int.negInduction` branch is brittle under a local Mathlib version, replace it by a constructor split on `j` and use `normEDS_neg`; the mathematical content is only oddness of `normEDS`:
 
-/-- Already in Mathlib: the general elliptic/Somos relation, as a Prop. -/
-#check IsEllSequence
+```lean
+-- Alternative shape if desired:
+-- cases j with
+-- | ofNat n => exact normEDS_232_nat n
+-- | negSucc n =>
+--     simp [Int.negSucc_eq, normEDS_neg, normEDS_232_nat]
+```
 
-/-- Already in Mathlib: divisibility-sequence predicate. -/
-#check IsDivSequence
+---
 
-/-- Already in Mathlib: conjunction of the two predicates. -/
-#check IsEllDivSequence
+## Universal nonvanishing in `ℤ[B,C,D]`
 
-/-- Already in Mathlib: identity sequence is elliptic. -/
-#check isEllSequence_id
-#check isDivSequence_id
-#check isEllDivSequence_id
+Here is a self-contained version using `MvPolynomial (Fin 3) ℤ` for the universal ring.
 
-/-- Already in Mathlib: scalar multiples preserve the predicates. -/
-#check IsEllSequence.smul
-#check IsDivSequence.smul
-#check IsEllDivSequence.smul
+```lean
+import Mathlib
 
-/-- Already in Mathlib: auxiliary normalized EDS and its even/odd recurrences. -/
-#check preNormEDS'
-#check preNormEDS'_even
-#check preNormEDS'_odd
-#check preNormEDS
-#check preNormEDS_even
-#check preNormEDS_odd
+noncomputable section
 
-/-- Already in Mathlib: normalized EDS and its even/odd recurrences. -/
-#check normEDS
+namespace Q311
+
+abbrev U : Type := MvPolynomial (Fin 3) ℤ
+
+abbrev B : U := MvPolynomial.X (0 : Fin 3)
+abbrev C : U := MvPolynomial.X (1 : Fin 3)
+abbrev D : U := MvPolynomial.X (2 : Fin 3)
+
+abbrev univW (j : ℤ) : U :=
+  normEDS B C D j
+
+abbrev val232 : Fin 3 → ℤ :=
+  ![2, 3, 2]
+
+abbrev eval232 : U →+* ℤ :=
+  MvPolynomial.eval₂Hom (RingHom.id ℤ) val232
+
+@[simp] lemma eval232_B : eval232 B = 2 := by
+  simp [eval232, val232, B]
+
+@[simp] lemma eval232_C : eval232 C = 3 := by
+  simp [eval232, val232, C]
+
+@[simp] lemma eval232_D : eval232 D = 2 := by
+  simp [eval232, val232, D]
+
+@[simp] lemma eval232_univW (j : ℤ) :
+    eval232 (univW j) = normEDS (2 : ℤ) 3 2 j := by
+  simp [univW]
+
+theorem univW_ne_zero {j : ℤ} (hj : j ≠ 0) :
+    univW j ≠ 0 := by
+  intro hzero
+  have hmap : eval232 (univW j) = 0 := by
+    simpa [hzero]
+  have : j = 0 := by
+    calc
+      j = normEDS (2 : ℤ) 3 2 j := (normEDS_232_int j).symm
+      _ = eval232 (univW j) := (eval232_univW j).symm
+      _ = 0 := hmap
+  exact hj this
+
+theorem universal_normEDS_ne_zero {j : ℤ} (hj : j ≠ 0) :
+    normEDS (MvPolynomial.X (0 : Fin 3) : U)
+      (MvPolynomial.X (1 : Fin 3) : U)
+      (MvPolynomial.X (2 : Fin 3) : U) j ≠ 0 := by
+  simpa [univW, B, C, D] using univW_ne_zero (j := j) hj
+
+end Q311
+```
+
+The essential lemma behind the last theorem is the trivial ring-hom argument:
+
+```lean
+lemma ne_zero_of_map_ne_zero
+    {A B : Type*} [Semiring A] [Semiring B]
+    (f : A →+* B) {x : A} (hx : f x ≠ 0) : x ≠ 0 := by
+  intro hx0
+  exact hx (by simp [hx0])
+```
+
+I wrote the proof inline above rather than using this helper, because the inline version leaves the evaluated value `j` visible.
+
+---
+
+## Answers to the three questions
+
+### 1. A genuine elliptic-curve specialization
+
+Yes, the classical curve suggested in the prompt works:
+
+```text
+E : y^2 + y = x^3 - x,
+P = (0,0).
+```
+
+For the long Weierstrass model
+
+```text
+y^2 + a1*x*y + a3*y = x^3 + a2*x^2 + a4*x + a6
+```
+
+this has
+
+```text
+a1 = 0,  a2 = 0,  a3 = 1,  a4 = -1,  a6 = 0.
+```
+
+The standard invariants are
+
+```text
+b2 = a1^2 + 4*a2 = 0,
+b4 = 2*a4 + a1*a3 = -2,
+b6 = a3^2 + 4*a6 = 1,
+b8 = a1^2*a6 + 4*a2*a6 - a1*a3*a4 + a2*a3^2 - a4^2 = -1.
+```
+
+At `P=(0,0)`, the standard division-polynomial values are
+
+```text
+ψ2(P) = 2*y + a1*x + a3 = 1,
+ψ3(P) = 3*x^4 + b2*x^3 + 3*b4*x^2 + 3*b6*x + b8 = -1.
+```
+
+The reduced fourth value, i.e. the factor `ψ4/ψ2`, is
+
+```text
+2*x^6 + b2*x^5 + 5*b4*x^4 + 10*b6*x^3 + 10*b8*x^2
+  + (b2*b8 - b4*b6)*x + (b4*b8 - b6^2),
+```
+
+which evaluates to
+
+```text
+b4*b8 - b6^2 = (-2)*(-1) - 1 = 1.
+```
+
+Thus, in Mathlib's `normEDS` parametrization, where
+
+```lean
+normEDS b c d 2 = b
+normEDS b c d 3 = c
+normEDS b c d 4 = d * b
+```
+
+the curve-point example corresponds to
+
+```text
+(b,c,d) = (1,-1,1).
+```
+
+The usual mathematical proof that all terms are nonzero is:
+
+```text
+ψ_n(P)=0  ⇔  [n]P = O,
+```
+
+and `P` is non-torsion. One elementary non-torsion proof is by good reduction: for this curve, the reductions at `3` and `5` have respectively `7` and `8` points; torsion over `ℚ` injects into both good reductions, so the rational torsion order divides `gcd(7,8)=1`. Hence rational torsion is trivial, and `P ≠ O` is non-torsion.
+
+This is mathematically clean but not the Lean path I recommend.
+
+### 2. Most Lean-tractable proof
+
+The most Lean-tractable proof is not the curve proof, not a primitive-divisor theorem, and not a valuation argument. It is the direct identity-specialization proof above.
+
+It requires only:
+
+```lean
+#check normEDSRec
 #check normEDS_even
 #check normEDS_odd
-
-/-- Already in Mathlib: complement sequence/divisibility infrastructure. -/
-#check complEDS₂
-#check preNormEDS_mul_complEDS₂
-#check normEDS_mul_complEDS₂
-#check normEDS_dvd_normEDS_two_mul
-#check complEDS₂_mul_b
-#check complEDS'
-#check complEDS'_even
-#check complEDS'_odd
-#check complEDS
-#check complEDS_even
-#check complEDS_odd
-
-/-- Already in Mathlib: recursion principles for proving properties by the defining recurrence. -/
-#check normEDSRec'
-#check normEDSRec
-#check complEDSRec'
-#check complEDSRec
-
-/-- Already in Mathlib: map compatibility. -/
-#check map_preNormEDS'
-#check map_preNormEDS
-#check map_complEDS₂
+#check normEDS_neg
 #check map_normEDS
-#check map_complEDS'
-#check map_complEDS
+#check MvPolynomial.eval₂Hom
+#check MvPolynomial.X
 ```
 
-Expected missing checks:
+plus ordinary tactics:
 
 ```lean
--- These names are intentionally commented out: they are not in current Mathlib.
--- #check normEDS_isEllSequence
--- #check normEDS_isEllDivSequence
--- #check preNormEDS_isEllSequence
--- #check WeierstrassCurve.preΨ_isEllSequence
--- #check WeierstrassCurve.ψ_isEllSequence
+ring
+norm_num
+omega
+nlinarith
+simp
 ```
 
----
-
-## If you already have an abstract `IsEllSequence` hypothesis
-
-If somewhere in your development you have
-
-```lean
-hW : IsEllSequence W
-```
-
-then the desired relation is literally:
-
-```lean
-example {R : Type u} [CommRing R] {W : ℤ → R}
-    (hW : IsEllSequence W) (i j k : ℤ) :
-    W (i + j) * W (i - j) * W k ^ 2 =
-      W (i + k) * W (i - k) * W j ^ 2 -
-        W (j + k) * W (j - k) * W i ^ 2 := by
-  exact hW i j k
-```
-
-The adjacent specialization used in differential addition is obtained by taking
+It does **not** require:
 
 ```text
-i = m + 1,   j = m,   k = 1.
+Mordell-Weil,
+Lutz-Nagell,
+finite-field reduction of elliptic curves,
+division-polynomial vanishing criteria,
+primitive divisors,
+valuation theory,
+or `normEDS_isEllSequence`.
 ```
 
-Then `i+j = 2m+1`, `i-j = 1`, and `W 1 = 1` for a normalized EDS, so it becomes
+This is a major advantage: current Mathlib's EDS file defines `IsEllSequence` and `normEDS`, and gives the even/odd recurrences and map lemma, but the fully general theorem that `normEDS` satisfies `IsEllDivSequence` is still listed as missing/TODO. The direct proof above avoids that missing theorem.
+
+### 3. Simpler non-curve specialization
+
+Yes. The specialization `(2,3,2)` is the simplest one.
+
+If one insists on a polynomial-family specialization rather than an integer specialization, use for example
 
 ```text
-W(2m+1)
-= W(m+2) W(m)^3 − W(m+1) W(m−1) W(m+1)^2
-= W(m+2) W(m)^3 − W(m−1) W(m+1)^3.
+(b,c,d) = (2, 3 + T, 2) ∈ ℤ[T].
 ```
 
-This is exactly `normEDS_odd`.
+Every term is nonzero in `ℤ[T]`, because evaluating `T ↦ 0` gives the already-proved nonzero integer value `j`. This gives a one-parameter family whose nonvanishing still reduces to the identity specialization.
 
-```lean
-example {R : Type u} [CommRing R]
-    (b c d : R) (m : ℤ) :
-    normEDS b c d (2 * m + 1) =
-      normEDS b c d (m + 2) * normEDS b c d m ^ 3 -
-        normEDS b c d (m - 1) * normEDS b c d (m + 1) ^ 3 := by
-  exact normEDS_odd b c d m
+But for the universal nonvanishing theorem, even that is unnecessary. The direct integer evaluation
+
+```text
+B ↦ 2, C ↦ 3, D ↦ 2
 ```
+
+is already sufficient.
 
 ---
 
-## Specialization to `WeierstrassCurve.preΨ`
+## Final recommendation
 
-For Mathlib's univariate reduced/auxiliary division polynomial sequence,
-
-```lean
-W.preΨ : ℤ → R[X]
-```
-
-there is no theorem saying it is an abstract `IsEllSequence`. Instead Mathlib provides the parity-normalized recurrences directly:
+Implement the two lemmas
 
 ```lean
-WeierstrassCurve.preΨ_even
-WeierstrassCurve.preΨ_odd
+normEDS_232_int : ∀ j : ℤ, normEDS (2 : ℤ) 3 2 j = j
+universal_normEDS_ne_zero : ∀ {j : ℤ}, j ≠ 0 → normEDS B C D j ≠ 0
 ```
 
-The adjacent Somos relation for `preΨ` is precisely `preΨ_odd`.
+and use `universal_normEDS_ne_zero` wherever Ward's theorem needs the unconditional nonvanishing of the universal `normEDS` term.
 
-```lean
-import Mathlib
-
-noncomputable section
-
-open Polynomial
-open WeierstrassCurve
-
-namespace WeierstrassCurve
-
-universe u
-
-variable {R : Type u} [CommRing R]
-variable (W : WeierstrassCurve R)
-
-/--
-Adjacent Somos relation for Mathlib's reduced univariate auxiliary sequence `preΨ`.
-
-This is exactly `W.preΨ_odd m`.  The factors of `Ψ₂Sq²` are the normalization correction between
-`preΨ` and the full normalized EDS/`ψ` sequence.
--/
-theorem preΨ_adjacent_somos (m : ℤ) :
-    W.preΨ (2 * m + 1) =
-      W.preΨ (m + 2) * W.preΨ m ^ 3 *
-          (if Even m then W.Ψ₂Sq ^ 2 else 1) -
-        W.preΨ (m - 1) * W.preΨ (m + 1) ^ 3 *
-          (if Even m then 1 else W.Ψ₂Sq ^ 2) := by
-  exact W.preΨ_odd m
-
-/--
-Even duplication recurrence for `preΨ`, also already in Mathlib.
--/
-theorem preΨ_even_somos_like (m : ℤ) :
-    W.preΨ (2 * m) =
-      W.preΨ (m - 1) ^ 2 * W.preΨ m * W.preΨ (m + 2) -
-        W.preΨ (m - 2) * W.preΨ m * W.preΨ (m + 1) ^ 2 := by
-  exact W.preΨ_even m
-
-end WeierstrassCurve
-```
-
-This is the lemma to use inside the raw/Kummer adjacent differential-addition identity. In particular, if the coordinate-ring calculation needs the expression
-
-```lean
-W.preΨ (m + 2) * W.preΨ m ^ 3 * correction
-  - W.preΨ (m - 1) * W.preΨ (m + 1) ^ 3 * correction
-```
-
-then rewrite it with
-
-```lean
-rw [← W.preΨ_adjacent_somos m]
-```
-
-or simply
-
-```lean
-rw [← W.preΨ_odd m]
-```
-
-after arranging the sides.
-
----
-
-## Specialization to the full `ψ` / `Ψ` sequence
-
-For the full bivariate division polynomial sequence, what you really want in the coordinate ring is a theorem of this shape:
-
-```lean
-namespace WeierstrassCurve
-
-open Polynomial
-open scoped Polynomial.Bivariate
-
-universe u
-
-variable {R : Type u} [CommRing R]
-variable (W : WeierstrassCurve R)
-
-namespace Affine.CoordinateRing
-
-/--
-MISSING-MATHLIB-API.
-
-The bivariate division-polynomial sequence satisfies the general EDS/Somos relation in the affine
-coordinate ring.
--/
-theorem mk_ψ_isEllSequence :
-    IsEllSequence (fun n : ℤ => mk W (W.ψ n)) := by
-  -- This is not currently exposed by Mathlib.
-  -- It should follow once `normEDS_isEllSequence` is proved and `W.ψ` is connected to `normEDS`,
-  -- or by direct induction using the `normEDSRec` recursion principle.
-  sorry
-
-/-- The immediately usable relation after `mk_ψ_isEllSequence`. -/
-theorem mk_ψ_somos
-    (i j k : ℤ) :
-    mk W (W.ψ (i + j)) * mk W (W.ψ (i - j)) * mk W (W.ψ k) ^ 2 =
-      mk W (W.ψ (i + k)) * mk W (W.ψ (i - k)) * mk W (W.ψ j) ^ 2 -
-        mk W (W.ψ (j + k)) * mk W (W.ψ (j - k)) * mk W (W.ψ i) ^ 2 := by
-  exact (mk_ψ_isEllSequence (W := W)) i j k
-
-/-- Adjacent specialization for differential addition. -/
-theorem mk_ψ_adjacent_somos
-    (m : ℤ) :
-    mk W (W.ψ (2 * m + 1)) =
-      mk W (W.ψ (m + 2)) * mk W (W.ψ m) ^ 3 -
-        mk W (W.ψ (m - 1)) * mk W (W.ψ (m + 1)) ^ 3 := by
-  have h := mk_ψ_somos (W := W) (m + 1) m 1
-  -- Normalize `ψ_1 = 1`, arithmetic, and multiplication order.
-  -- Expected proof:
-  --   simpa [mul_comm, mul_left_comm, mul_assoc, add_comm, add_left_comm, add_assoc,
-  --          sub_eq_add_neg, two_mul] using h
-  sorry
-
-end Affine.CoordinateRing
-end WeierstrassCurve
-```
-
-This is the exact missing coordinate-ring theorem for the bivariate route. The univariate `preΨ_odd` relation is already available, but the bivariate `ψ` relation in the coordinate ring is not exposed as a general `IsEllSequence` theorem.
-
----
-
-## If you really need the fully general theorem
-
-The clean theorem to add to `EllipticDivisibilitySequence.lean` is:
-
-```lean
-/--
-MISSING-MATHLIB-API.
-The canonical normalized EDS satisfies the elliptic/Somos relation.
--/
-theorem normEDS_isEllSequence
-    {R : Type u} [CommRing R] (b c d : R) :
-    IsEllSequence (normEDS b c d) := by
-  -- Substantial proof.
-  -- The file currently marks this as TODO.
-  sorry
-```
-
-Then the general relation becomes:
-
-```lean
-theorem normEDS_somos
-    {R : Type u} [CommRing R] (b c d : R) (i j k : ℤ) :
-    normEDS b c d (i + j) * normEDS b c d (i - j) * normEDS b c d k ^ 2 =
-      normEDS b c d (i + k) * normEDS b c d (i - k) * normEDS b c d j ^ 2 -
-        normEDS b c d (j + k) * normEDS b c d (j - k) * normEDS b c d i ^ 2 := by
-  exact normEDS_isEllSequence b c d i j k
-```
-
-### Is `normEDS_isEllSequence` just `ring` after expanding `normEDS_even/odd`?
-
-No, not globally. The recurrences `normEDS_even` and `normEDS_odd` are **two special Somos recurrences** used to define/compute the sequence. The full three-index identity for arbitrary `i j k` is a deeper consistency theorem for the normalized EDS. It would normally be proved by a strong induction using `normEDSRec`, reducing arbitrary triples to the defining even/odd recurrences. That is a real proof, not a single `ring` call.
-
-### Is the adjacent instance a `ring` proof from `preΨ_even/odd`?
-
-Yes, for the adjacent differential-addition case you should not prove the full theorem. Use the already-existing recurrence:
-
-```lean
-W.preΨ_odd m
-```
-
-That is exactly the `i=m+1, j=m, k=1` Somos relation after accounting for the `preΨ` normalization. Any remaining algebra in the Kummer differential-addition formula is `ring`/`ring_nf` after rewriting by `W.preΨ_odd m`, `W.Φ`, and `W.ΨSq`.
-
----
-
-## Recommended implementation path
-
-1. For the immediate adjacent differential-addition identity, use:
-
-```lean
-rw [W.preΨ_odd m]
-```
-
-or the wrapper:
-
-```lean
-rw [W.preΨ_adjacent_somos m]
-```
-
-2. Do **not** attempt to prove the full `normEDS_isEllSequence` unless you need arbitrary `i,j,k`.
-
-3. If you need the bivariate coordinate-ring route, add the missing theorem:
-
-```lean
-Affine.CoordinateRing.mk_ψ_isEllSequence
-```
-
-and derive:
-
-```lean
-Affine.CoordinateRing.mk_ψ_adjacent_somos
-```
-
-4. For the x-only raw polynomial proof, the relevant Somos content is already available through:
-
-```lean
-WeierstrassCurve.preΨ_odd
-WeierstrassCurve.preΨ_even
-```
-
-The remaining failures are formula orientation, parity normalization, or `b`-relation issues, not lack of the adjacent EDS recurrence.
+Do **not** spend effort formalizing the curve `y^2+y=x^3-x` or the non-torsion point `(0,0)` for this specific purpose. That route is mathematically fine, but it requires APIs and theorems far beyond what the EDS nonvanishing argument actually needs.
