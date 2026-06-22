@@ -18,3 +18,10 @@ FALLBACK: if preΨ-certificate parity bookkeeping too painful → coordinate-rin
 - starting avenue: (a) doubling encoding
 - relations: Adj=preΨ_adjacent_somos (PsiSomos.lean), Inv=Ward InvarRel→preΨ (to establish)
 - end: <fill>
+
+### Avenue (a) progress 2026-06-22
+- chunk1 BUILT+committed: dupNumP/dupDenP poly defs, dupNumP_X_one (=Φ 2), ΨSq_two_mul_expand. (KeystoneDoubling.lean)
+- Pieces located: Adj=preΨ_adjacent_somos (parity, [IsDomain]+(4≠0)); bRel=W.b_relation (4b₈=b₂b₆−b₄², Mathlib); Ψ₂Sq/Ψ₃/preΨ₄ explicit X-poly defs (Basic.lean 117/142/147); ΨSq_even/odd, Φ, ΨSq_two, Φ_two.
+- Inv=preΨ_invariant: dispatched to ChatGPT dm1 (Q341, derivation mirroring preΨ_adjacent_somos: invarRel_all on ψ → coord-ring descent → cancel ψ₂). Pending.
+- Certificate-core ENCODING DECISION: expand Ψ₂Sq/Ψ₃/preΨ₄ to X-forms in goal+hAdj+hInv, then `linear_combination` with banked cofactors (KEYSTONE_DOUBLING_CERT.md, all 4 CAS-verified) over hAdj+hInv+hb, by_cases parity. Heavy ring but verified. Alt if too heavy: re-CAS with s/c3/d4 as relation-hyps for cleaner cofactors.
+- NEXT: harvest preΨ_invariant → build ΨSq_two_mul/Φ_two_mul cert (both parities) → cancel Ψ₃ → SameP1Vec doubling.
