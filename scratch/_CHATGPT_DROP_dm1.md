@@ -1,208 +1,260 @@
-# Q236-dm1: `normEDS_adjacent_somos` — honest build boundary
+# Q246-dm4: `scratch/WardSomos.lean` — exact base case and generated recurrence-step certificates
 
-## Executive answer
-
-I cannot honestly provide a 0-sorry, paste-and-build proof of Ward's adjacent Somos theorem from the current Mathlib file alone.  The file `Mathlib.NumberTheory.EllipticDivisibilitySequence` defines `IsEllSequence`, `normEDS`, `normEDS_even`, `normEDS_odd`, and the recursion principles `normEDSRec'` / `normEDSRec`, but its own docs still list as TODO the theorem that `normEDS` satisfies `IsEllDivSequence`.
-
-The tightest single missing sub-step is not the `ℤ` symmetry, the base cases, or the use of `normEDSRec`; those are routine.  The one missing sub-step is the generated algebraic certificate for the **two recurrence steps** in `normEDSRec`:
+I could not fetch `scratch/WardSomos.lean` from the connected repo/branch: GitHub returned `404 Not Found` for `scratch/WardSomos.lean` on branch `scratch`.  So I cannot truthfully claim that the following snippets were pasted into the exact local skeleton and build-checked against its local helper names.  The Mathlib `normEDS` API used below is current: `normEDS_even` has the form
 
 ```lean
-AdjRel(m+1),...,AdjRel(m+5) ⟹ AdjRel(2*(m+3))
-AdjRel(m+1),...,AdjRel(m+4) ⟹ AdjRel(2*(m+2)+1)
+normEDS b c d (2 * m) * b =
+  normEDS b c d (m - 1)^2 * normEDS b c d m * normEDS b c d (m + 2) -
+    normEDS b c d (m - 2) * normEDS b c d m * normEDS b c d (m + 1)^2
 ```
 
-I have isolated that as one named theorem/axiom, `adjRelRecSteps`.  Everything else is shown in Lean shape below.  This is the smallest honest boundary: once those two recurrence-step certificates are generated, the target theorem is obtained by the code below.
+and `normEDS_odd` has the form
+
+```lean
+normEDS b c d (2 * m + 1) =
+  normEDS b c d (m + 2) * normEDS b c d m^3 -
+    normEDS b c d (m - 1) * normEDS b c d (m + 1)^3
+```
+
+Also, `normEDS_four = d * b` and `normEDS_five = d * b^4 - c^3` follows from `normEDS_odd b c d 2`.
 
 ---
 
-## Lean module
+## SORRY 1: base case `adjRel_four`
+
+This is the safest replacement.  It uses `normEDS_even b c d 3`, because `AdjRel 4` is exactly the `W₆ * W₂` recurrence:
 
 ```lean
-import Mathlib.NumberTheory.EllipticDivisibilitySequence
-import Mathlib.Tactic
-
-namespace FLT.EDS
-
-variable {R : Type*} [CommRing R]
-
-/-- The adjacent Somos relation at an integer index. -/
-def AdjRel (b c d : R) (m : ℤ) : Prop :=
-  normEDS b c d (m + 2) * normEDS b c d (m - 2)
-    = b ^ 2 * normEDS b c d (m + 1) * normEDS b c d (m - 1)
-        - c * normEDS b c d m ^ 2
-
-lemma adjRel_zero (b c d : R) : AdjRel b c d 0 := by
-  unfold AdjRel
-  simp [normEDS_zero, normEDS_one, normEDS_two, normEDS_neg]
-  ring
-
-lemma adjRel_one (b c d : R) : AdjRel b c d 1 := by
-  unfold AdjRel
-  simp [normEDS_zero, normEDS_one, normEDS_two, normEDS_three, normEDS_neg]
-  ring
-
-lemma adjRel_two (b c d : R) : AdjRel b c d 2 := by
-  unfold AdjRel
-  simp [normEDS_zero, normEDS_one, normEDS_two, normEDS_three, normEDS_four]
-  ring
-
-lemma adjRel_three (b c d : R) : AdjRel b c d 3 := by
-  unfold AdjRel
-  -- This is only the small case `W_5 * W_1 = b^2 * W_4 * W_2 - c * W_3^2`.
-  -- `normEDS_odd b c d 2` expands `W_5`.
-  have h5 : normEDS b c d 5 = d * b ^ 3 - c ^ 3 := by
-    have h := normEDS_odd b c d 2
-    -- `2*2+1 = 5`, and the right hand side uses W₄,W₂,W₁,W₃.
-    simpa [normEDS_one, normEDS_two, normEDS_three, normEDS_four] using h
-  simp [normEDS_one, normEDS_two, normEDS_three, normEDS_four, h5]
-  ring
-
 lemma adjRel_four (b c d : R) : AdjRel b c d 4 := by
   unfold AdjRel
-  -- This base case is finite.  If the following unfold does not close in the local checkout,
-  -- replace it by a generated base-case certificate.  It is not part of the conceptual seam.
-  simp [normEDS, preNormEDS, preNormEDS_ofNat,
-    preNormEDS'_zero, preNormEDS'_one, preNormEDS'_two,
-    preNormEDS'_three, preNormEDS'_four]
-  ring
+  have h5_eq : normEDS b c d 5 = d * b ^ 4 - c ^ 3 := by
+    have h := normEDS_odd b c d 2
+    norm_num at h
+    simpa [normEDS_one, normEDS_two, normEDS_three, normEDS_four,
+      mul_assoc, mul_left_comm, mul_comm] using h
+  have h6b := normEDS_even b c d 3
+  norm_num at h6b ⊢
+  simpa [normEDS_one, normEDS_two, normEDS_three, normEDS_four, h5_eq,
+    mul_assoc, mul_left_comm, mul_comm] using h6b
+```
 
-/--
-The one genuine missing algebraic certificate.
+If the file already has `h5_eq` in scope, the body can be shortened to:
 
-This packages the two recurrence steps needed by `normEDSRec`.  These are concrete finite polynomial
-identities obtained by expanding `normEDS_even`/`normEDS_odd` and reducing by the lower adjacent relations.
-They should be generated once by `linear_combination (norm := ring_nf)`.
--/
-structure AdjRelRecSteps (b c d : R) : Prop where
-  even : ∀ m : ℕ,
-    AdjRel b c d ((m + 1 : ℕ) : ℤ) →
-    AdjRel b c d ((m + 2 : ℕ) : ℤ) →
-    AdjRel b c d ((m + 3 : ℕ) : ℤ) →
-    AdjRel b c d ((m + 4 : ℕ) : ℤ) →
-    AdjRel b c d ((m + 5 : ℕ) : ℤ) →
-    AdjRel b c d ((2 * (m + 3) : ℕ) : ℤ)
-  odd : ∀ m : ℕ,
-    AdjRel b c d ((m + 1 : ℕ) : ℤ) →
-    AdjRel b c d ((m + 2 : ℕ) : ℤ) →
-    AdjRel b c d ((m + 3 : ℕ) : ℤ) →
-    AdjRel b c d ((m + 4 : ℕ) : ℤ) →
-    AdjRel b c d ((2 * (m + 2) + 1 : ℕ) : ℤ)
-
-/--
-Smallest missing sub-step.  Prove this by generated `linear_combination` certificates.
-
-This is intentionally the *only* axiom in this file.  It is strictly smaller than the full Ward theorem
-`IsEllSequence (normEDS b c d)` and exactly matches the two recursive cases of `normEDSRec`.
--/
-axiom adjRelRecSteps (b c d : R) : AdjRelRecSteps b c d
-
-/-- Natural-index adjacent Somos relation, derived from the five base cases and the recurrence-step certificate. -/
-theorem normEDS_adjacent_somos_nat (b c d : R) (n : ℕ) :
-    AdjRel b c d (n : ℤ) := by
-  classical
-  let P : ℕ → Prop := fun n => AdjRel b c d (n : ℤ)
-  change P n
-  refine normEDSRec
-    (P := P)
-    ?h0 ?h1 ?h2 ?h3 ?h4
-    ?heven ?hodd n
-  · exact adjRel_zero b c d
-  · exact adjRel_one b c d
-  · exact adjRel_two b c d
-  · exact adjRel_three b c d
-  · exact adjRel_four b c d
-  · intro m h1 h2 h3 h4 h5
-    exact (adjRelRecSteps b c d).even m h1 h2 h3 h4 h5
-  · intro m h1 h2 h3 h4
-    exact (adjRelRecSteps b c d).odd m h1 h2 h3 h4
-
-/-- Adjacent Somos is invariant under `m ↦ -m`. -/
-lemma adjRel_neg_iff (b c d : R) (m : ℤ) :
-    AdjRel b c d (-m) ↔ AdjRel b c d m := by
+```lean
+lemma adjRel_four (b c d : R) : AdjRel b c d 4 := by
   unfold AdjRel
-  simp [normEDS_neg]
-  ring_nf
+  have h6b := normEDS_even b c d 3
+  norm_num at h6b ⊢
+  simpa [normEDS_one, normEDS_two, normEDS_three, normEDS_four, h5_eq,
+    mul_assoc, mul_left_comm, mul_comm] using h6b
+```
 
-/-- Full integer-index adjacent Somos relation, conditional only on the recurrence-step certificate above. -/
-theorem normEDS_adjacent_somos (b c d : R) (m : ℤ) :
-    normEDS b c d (m + 2) * normEDS b c d (m - 2)
-      = b ^ 2 * normEDS b c d (m + 1) * normEDS b c d (m - 1)
-          - c * normEDS b c d m ^ 2 := by
-  change AdjRel b c d m
-  rcases le_total 0 m with hm | hm
-  · have hnat : AdjRel b c d ((m.toNat : ℕ) : ℤ) :=
-      normEDS_adjacent_somos_nat b c d m.toNat
-    have hcast : ((m.toNat : ℕ) : ℤ) = m := Int.toNat_of_nonneg hm
-    simpa [hcast] using hnat
-  · have hneg_nonneg : 0 ≤ -m := by omega
-    have hnat : AdjRel b c d (((-m).toNat : ℕ) : ℤ) :=
-      normEDS_adjacent_somos_nat b c d (-m).toNat
-    have hcast : (((-m).toNat : ℕ) : ℤ) = -m := Int.toNat_of_nonneg hneg_nonneg
-    have hneg : AdjRel b c d (-m) := by
-      simpa [hcast] using hnat
-    exact (adjRel_neg_iff b c d m).mp hneg
+The key point is: do **not** try to solve for `normEDS 6`.  `normEDS_even` gives `normEDS 6 * b`, and `AdjRel 4` has the left side `normEDS 6 * normEDS 2 = normEDS 6 * b`.
 
-end FLT.EDS
+---
+
+## SORRY 2/3: recurrence steps
+
+I do not recommend hand-writing the cofactors.  They are large and brittle.  The reliable route is to generate the `linear_combination` certificate in a polynomial ring, paste the resulting cofactors, and let Lean check them with `ring_nf`/`ring1`.
+
+There is no magic single Lean tactic that I would expect to close both recurrence steps without the explicit cofactors.  `ring`, `ring_nf`, and `polyrith` do not know the recurrence hypotheses as rewrite/ideal generators unless you give the generated ideal certificate.  The target residual is in the ideal generated by the local adjacent relations `h1..h5` plus the recurrence equations for the doubled terms.
+
+Below is the exact generator I would use.
+
+---
+
+## Sage generator for the EVEN step
+
+This generator treats the values
+
+```text
+W_{m-1}, W_m, W_{m+1}, W_{m+2}, W_{m+3}, W_{m+4}, W_{m+5}, W_{m+6}, W_{m+7}
+```
+
+as variables.  The hypotheses `h1..h5` are the adjacent relations at `m+1..m+5`.  The doubled terms are expanded using the two Mathlib recurrences.  For even doubled indices, use variables `E0,Eplus,Eminus` for the **unmultiplied** doubled terms and include the Mathlib equations `E*b = ...` as ideal generators.  This avoids illegal division by `b`.
+
+```python
+# SageMath script: even recurrence certificate for AdjRel(2*(m+3))
+
+R.<b,c,wm1,w0,w1,w2,w3,w4,w5,w6,w7,Eminus,E0,Eplus,Ominus,Oplus> = \
+    PolynomialRing(QQ, order='degrevlex')
+
+# Adjacent relations h1..h5 at k=m+1,...,m+5.
+# AdjRel(k): W_{k+2} W_{k-2} = b^2 W_{k+1} W_{k-1} - c W_k^2.
+h1 = w3*wm1 - (b^2*w2*w0 - c*w1^2)   # k=m+1
+h2 = w4*w0  - (b^2*w3*w1 - c*w2^2)   # k=m+2
+h3 = w5*w1  - (b^2*w4*w2 - c*w3^2)   # k=m+3
+h4 = w6*w2  - (b^2*w5*w3 - c*w4^2)   # k=m+4
+h5 = w7*w3  - (b^2*w6*w4 - c*w5^2)   # k=m+5
+
+# Mathlib recurrence expansions for target N=2*(m+3).
+# N-2 = 2*(m+2): Eminus*b = W_{m+1}^2 W_{m+2} W_{m+4} - W_m W_{m+2} W_{m+3}^2
+rEminus = Eminus*b - (w1^2*w2*w4 - w0*w2*w3^2)
+
+# N   = 2*(m+3): E0*b = W_{m+2}^2 W_{m+3} W_{m+5} - W_{m+1} W_{m+3} W_{m+4}^2
+rE0 = E0*b - (w2^2*w3*w5 - w1*w3*w4^2)
+
+# N+2 = 2*(m+4): Eplus*b = W_{m+3}^2 W_{m+4} W_{m+6} - W_{m+2} W_{m+4} W_{m+5}^2
+rEplus = Eplus*b - (w3^2*w4*w6 - w2*w4*w5^2)
+
+# N-1 = 2*(m+2)+1: Ominus = W_{m+4} W_{m+2}^3 - W_{m+1} W_{m+3}^3
+rOminus = Ominus - (w4*w2^3 - w1*w3^3)
+
+# N+1 = 2*(m+3)+1: Oplus = W_{m+5} W_{m+3}^3 - W_{m+2} W_{m+4}^3
+rOplus = Oplus - (w5*w3^3 - w2*w4^3)
+
+# Target AdjRel(N), multiplied by b^2 to avoid cancellation of even recurrences.
+# This is valid if your Lean goal has first been converted to this multiplied target;
+# in Lean, prove the multiplied target by certificate and then check that the local skeleton
+# is actually asking for this multiplied form. If it asks for unmultiplied AdjRel directly,
+# use the preNormEDS version instead.
+Target = b^2*(Eplus*Eminus - (b^2*Oplus*Ominus - c*E0^2))
+
+G = [h1,h2,h3,h4,h5,rEminus,rE0,rEplus,rOminus,rOplus]
+I = ideal(G)
+GB = I.groebner_basis()
+assert Target.reduce(GB) == 0
+
+# Cofactors against the original generators.
+# Singular's lift returns a matrix L such that matrix(G)*L = Target.
+S = singular
+singR = S.ring(0, '(b,c,wm1,w0,w1,w2,w3,w4,w5,w6,w7,Eminus,E0,Eplus,Ominus,Oplus)', 'dp')
+# Easiest in practice: run the same definitions directly in Singular and use:
+#   matrix Gm[1][10] = h1,h2,h3,h4,h5,rEminus,rE0,rEplus,rOminus,rOplus;
+#   matrix Tm[1][1] = Target;
+#   print(lift(Gm,Tm));
+print('GB verified; now run Singular lift(Gm,Tm) to obtain cofactors.')
+```
+
+### Lean template for EVEN step
+
+Paste the cofactors from Singular as `C1..C10`.  The first five multiply `h1..h5`; the last five multiply the recurrence equations introduced locally.
+
+```lean
+  even := by
+    intro m h1 h2 h3 h4 h5
+    unfold AdjRel at *
+    push_cast at *
+
+    -- Introduce recurrence equations for the five doubled terms.
+    have rEminus := normEDS_even b c d (((m + 2 : ℕ) : ℤ))
+    have rE0     := normEDS_even b c d (((m + 3 : ℕ) : ℤ))
+    have rEplus  := normEDS_even b c d (((m + 4 : ℕ) : ℤ))
+    have rOminus := normEDS_odd  b c d (((m + 2 : ℕ) : ℤ))
+    have rOplus  := normEDS_odd  b c d (((m + 3 : ℕ) : ℤ))
+
+    -- Normalize all casts and integer arithmetic.
+    -- These `simpa`/`norm_num` normalizations may need local `show` lemmas depending on the skeleton.
+    norm_num at rEminus rE0 rEplus rOminus rOplus ⊢
+
+    -- Generated certificate.  Replace `C1`...`C10` by the Singular lift output.
+    -- Use `ring_nf` if `ring1` is too weak after `push_cast`.
+    linear_combination (norm := ring_nf)
+      C1 * h1 + C2 * h2 + C3 * h3 + C4 * h4 + C5 * h5 +
+      C6 * rEminus + C7 * rE0 + C8 * rEplus + C9 * rOminus + C10 * rOplus
+```
+
+If the local file has already rewritten the doubled terms rather than retaining recurrence equations, then the generator should be run with `Eminus,E0,Eplus,Ominus,Oplus` substituted away and the Lean certificate uses only `h1..h5`.
+
+---
+
+## Sage generator for the ODD step
+
+For the odd target `N = 2*(m+2)+1`, all target positions `N±2,N±1,N` have the following parity:
+
+```text
+N-2 = 2*(m+1)+1   odd
+N-1 = 2*(m+2)     even
+N   = 2*(m+2)+1   odd
+N+1 = 2*(m+3)     even
+N+2 = 2*(m+3)+1   odd
+```
+
+Use this generator.
+
+```python
+# SageMath script: odd recurrence certificate for AdjRel(2*(m+2)+1)
+
+R.<b,c,wm1,w0,w1,w2,w3,w4,w5,w6,Ominus,O0,Oplus,Eminus,Eplus> = \
+    PolynomialRing(QQ, order='degrevlex')
+
+# Adjacent relations h1..h4 at k=m+1,...,m+4.
+h1 = w3*wm1 - (b^2*w2*w0 - c*w1^2)   # k=m+1
+h2 = w4*w0  - (b^2*w3*w1 - c*w2^2)   # k=m+2
+h3 = w5*w1  - (b^2*w4*w2 - c*w3^2)   # k=m+3
+h4 = w6*w2  - (b^2*w5*w3 - c*w4^2)   # k=m+4
+
+# Odd target expansions.
+# N-2 = 2*(m+1)+1
+rOminus = Ominus - (w3*w1^3 - w0*w2^3)
+
+# N = 2*(m+2)+1
+rO0 = O0 - (w4*w2^3 - w1*w3^3)
+
+# N+2 = 2*(m+3)+1
+rOplus = Oplus - (w5*w3^3 - w2*w4^3)
+
+# N-1 = 2*(m+2): Eminus*b = W_{m+1}^2 W_{m+2} W_{m+4} - W_m W_{m+2} W_{m+3}^2
+rEminus = Eminus*b - (w1^2*w2*w4 - w0*w2*w3^2)
+
+# N+1 = 2*(m+3): Eplus*b = W_{m+2}^2 W_{m+3} W_{m+5} - W_{m+1} W_{m+3} W_{m+4}^2
+rEplus = Eplus*b - (w2^2*w3*w5 - w1*w3*w4^2)
+
+# Target AdjRel(N), multiplied by b^2 because the RHS has Eplus*Eminus.
+Target = b^2*(Oplus*Ominus - (b^2*Eplus*Eminus - c*O0^2))
+
+G = [h1,h2,h3,h4,rOminus,rO0,rOplus,rEminus,rEplus]
+I = ideal(G)
+GB = I.groebner_basis()
+assert Target.reduce(GB) == 0
+print('GB verified; run Singular lift(Gm,Tm) for cofactors C1..C9.')
+```
+
+### Lean template for ODD step
+
+```lean
+  odd := by
+    intro m h1 h2 h3 h4
+    unfold AdjRel at *
+    push_cast at *
+
+    have rOminus := normEDS_odd  b c d (((m + 1 : ℕ) : ℤ))
+    have rO0     := normEDS_odd  b c d (((m + 2 : ℕ) : ℤ))
+    have rOplus  := normEDS_odd  b c d (((m + 3 : ℕ) : ℤ))
+    have rEminus := normEDS_even b c d (((m + 2 : ℕ) : ℤ))
+    have rEplus  := normEDS_even b c d (((m + 3 : ℕ) : ℤ))
+
+    norm_num at rOminus rO0 rOplus rEminus rEplus ⊢
+
+    -- Generated certificate. Replace `C1`...`C9` by the Singular lift output.
+    linear_combination (norm := ring_nf)
+      C1 * h1 + C2 * h2 + C3 * h3 + C4 * h4 +
+      C5 * rOminus + C6 * rO0 + C7 * rOplus + C8 * rEminus + C9 * rEplus
 ```
 
 ---
 
-## What remains to prove inside `adjRelRecSteps`
+## If the skeleton insists on the unmultiplied `AdjRel` goal
 
-The even recurrence step is:
+Because `normEDS_even` exposes only `normEDS (2*m) * b = ...`, the recurrence-equation certificate above proves the target after multiplying by `b^2`.  Over an arbitrary commutative ring, that does **not** allow cancellation of `b^2`.
 
-```lean
-AdjRel(k+1), AdjRel(k+2), AdjRel(k+3), AdjRel(k+4), AdjRel(k+5)
-  ⟹ AdjRel(2*(k+3)).
-```
-
-The odd recurrence step is:
+So if the current skeleton really has the unmultiplied target and no extra assumptions on `b`, the fully noncircular algebraic proof should be done at the `preNormEDS` level, where even terms have direct recurrences and no multiplication by `b` is needed.  Then transfer to `normEDS` by unfolding
 
 ```lean
-AdjRel(k+1), AdjRel(k+2), AdjRel(k+3), AdjRel(k+4)
-  ⟹ AdjRel(2*(k+2)+1).
+normEDS b c d n = preNormEDS (b ^ 4) c d n * if Even n then b else 1
 ```
 
-Each step is a finite polynomial identity.  The intended proof shape is:
+and splitting parity.  This is the reason I do not give a fake three-line `linear_combination` for SORRY 2/3: a certificate using only `normEDS_even` cannot soundly cancel the exposed `b` factors in arbitrary `R`.
 
-```lean
-lemma AdjRelRecSteps.even_generated (b c d : R) (m : ℕ)
-    (h1 : AdjRel b c d ((m+1:ℕ):ℤ))
-    (h2 : AdjRel b c d ((m+2:ℕ):ℤ))
-    (h3 : AdjRel b c d ((m+3:ℕ):ℤ))
-    (h4 : AdjRel b c d ((m+4:ℕ):ℤ))
-    (h5 : AdjRel b c d ((m+5:ℕ):ℤ)) :
-    AdjRel b c d ((2*(m+3):ℕ):ℤ) := by
-  unfold AdjRel at *
-  -- Rewrite every `normEDS` at indices around `2*(m+3)` using `normEDS_even`/`normEDS_odd`.
-  -- Then close with a generated ideal certificate:
-  linear_combination (norm := ring_nf)
-    C1 * h1 + C2 * h2 + C3 * h3 + C4 * h4 + C5 * h5
-```
+The exact robust plan is therefore:
 
-and similarly:
-
-```lean
-lemma AdjRelRecSteps.odd_generated (b c d : R) (m : ℕ)
-    (h1 : AdjRel b c d ((m+1:ℕ):ℤ))
-    (h2 : AdjRel b c d ((m+2:ℕ):ℤ))
-    (h3 : AdjRel b c d ((m+3:ℕ):ℤ))
-    (h4 : AdjRel b c d ((m+4:ℕ):ℤ)) :
-    AdjRel b c d ((2*(m+2)+1:ℕ):ℤ) := by
-  unfold AdjRel at *
-  linear_combination (norm := ring_nf)
-    C1 * h1 + C2 * h2 + C3 * h3 + C4 * h4
-```
-
-The coefficients `Ci` are large but mechanical.  Generate them in Sage or a small Lean-side polynomial-normalisation script; do not hand-derive them.  This single generated-certificate theorem is the only remaining obstacle.
+1. Close `adjRel_four` with the code above.
+2. For recurrence steps, either:
+   * generate a preNormEDS-level certificate and paste it, or
+   * if the skeleton has internally multiplied the goals by the required `b` powers, use the Sage scripts above directly.
 
 ---
 
-## Why this is the right boundary
+## Practical recommendation
 
-The target theorem is not a local consequence of `normEDS_even`/`normEDS_odd` by `ring` alone.  Those recurrences define the sequence; Ward's theorem says that all resulting terms satisfy a much larger elliptic-sequence relation.  The adjacent relation is the first nontrivial addition law.  A 0-sorry proof requires either:
-
-1. the two generated recurrence-step certificates above, or
-2. a full formalisation of Ward's EDS-net proof.
-
-The code above proves all bookkeeping around the missing algebraic certificate: base cases, natural recursion, negative-index symmetry, and the final `ℤ` theorem.  The one exact missing sub-step is `adjRelRecSteps`.
+Run the Sage scripts, inspect whether the generated certificate is for the multiplied or unmultiplied target, and align the Lean skeleton accordingly.  The base case is paste-ready; the recurrence steps need the generated `Cᵢ` output because Mathlib currently does not expose `normEDS` as an `IsEllSequence`.
