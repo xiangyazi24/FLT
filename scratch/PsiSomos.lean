@@ -41,4 +41,13 @@ lemma mk_C_injective (W : WeierstrassCurve R) :
     rw [zero_smul, add_zero, Affine.CoordinateRing.smul, mul_one]; exact hsub
   exact sub_eq_zero.mp (Affine.CoordinateRing.smul_basis_eq_zero hsmul).1
 
+/-- ψ ↔ preΨ in the coordinate ring: `mk(ψ n) = mk(C preΨ n) · (ψ₂ if n even else 1)`.
+From `mk_ψ` and the definition `Ψ n = C(preΨ n)·(ψ₂ if even else 1)`. -/
+lemma mk_ψ_eq (W : WeierstrassCurve R) (n : ℤ) :
+    Affine.CoordinateRing.mk W (W.ψ n)
+      = Affine.CoordinateRing.mk W (Polynomial.C (W.preΨ n))
+          * (if Even n then Affine.CoordinateRing.mk W W.ψ₂ else 1) := by
+  rw [Affine.CoordinateRing.mk_ψ, WeierstrassCurve.Ψ, map_mul, apply_ite (Affine.CoordinateRing.mk W),
+    map_one]
+
 end FLT.EDS
