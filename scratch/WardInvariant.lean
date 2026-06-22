@@ -94,4 +94,17 @@ lemma invarRel_all [IsDomain R] (b c d : R)
     linear_combination -hsym
   · exact hpos n h
 
+/-- **Double-off relation** `N_k D_m = N_m D_k` (i.e. `T_{k,m} = 0`): the conserved ratio is
+index-independent. From `invarRel_all` (`c N = (d+b⁴) D`) by cancelling `c`. -/
+lemma Trel_zero [IsDomain R] (b c d : R) (hc : c ≠ 0)
+    (hne : ∀ k : ℤ, k ≠ 0 → normEDS b c d k ≠ 0) (k m : ℤ) :
+    Nseq b c d k * Dseq b c d m = Nseq b c d m * Dseq b c d k := by
+  have hk := invarRel_all b c d hne k
+  have hm := invarRel_all b c d hne m
+  unfold InvarRel at hk hm
+  have hcT : c * (Nseq b c d k * Dseq b c d m - Nseq b c d m * Dseq b c d k) = 0 := by
+    linear_combination Dseq b c d m * hk - Dseq b c d k * hm
+  have := (mul_eq_zero.mp hcT).resolve_left hc
+  linear_combination this
+
 end FLT.EDS
