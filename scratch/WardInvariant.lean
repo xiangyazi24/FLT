@@ -41,4 +41,15 @@ lemma invarRel_two (b c d : R) : InvarRel b c d 2 := by
   norm_num [normEDS_zero, normEDS_one, normEDS_two, normEDS_three, normEDS_four]
   ring
 
+/-- Inductive step (multiplied form, holds over any `CommRing`): from `InvarRel n`,
+`D_n · (InvarRel n+1)` vanishes. Cofactors `c · conservation + D_{n+1} · (IH)`, an atom-level ring
+identity (no unfolding of `Nseq`/`Dseq` needed). The final `InvarRel (n+1)` is got by cancelling
+`D_n` over a domain where `D_n ≠ 0` (e.g. the division-polynomial setting, `preΨ` nonvanishing via
+`Mathlib …DivisionPolynomial.Degree`). -/
+lemma invarRel_step_mul (b c d : R) (n : ℤ) (hn : InvarRel b c d n) :
+    Dseq b c d n * (c * Nseq b c d (n+1) - (d + b ^ 4) * Dseq b c d (n+1)) = 0 := by
+  have hcons := normEDS_conservation b c d n
+  unfold InvarRel at hn
+  linear_combination c * hcons + Dseq b c d (n+1) * hn
+
 end FLT.EDS
