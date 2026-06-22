@@ -100,3 +100,32 @@ CHAIN: normEDS_adjacent_somos (DONE) → conservation lemma (clean linear_combin
  induction) → IsEllSequence (Step 1, DONE).  Remaining build: conservation lemma, single-index induction,
  G-step + H-step assembly (H-step needs its own residual analysis, likely closes the same way).
 This turns the open Mathlib TODO into a concrete mechanizable build — all over adjacent Somos + clean inductions.
+
+---
+
+## VERIFIED 2026-06-22 — OffRel form + full G-step cofactors (sympy, free W, exact 0)
+
+**OffRel closed form (CAS-confirmed at many (k,m) on a generic EDS, b=2,c=3,d=5):**
+```
+V_k(m) := W(2)·W(m+k+1)·W(m-k)
+        = W(m+2)W(m-1)·W(k+1)W(k)  −  W(k+2)W(k-1)·W(m+1)W(m)
+```
+
+**G-step (multiplied form), cancellation factor b²·U_k(m) = W(2)²·W(m+k)W(m-k):**
+```
+b²·U_k(m)·( U_{k+1}(m) − Gkp1 )  =  Σ cofactor · hyp   [sympy expand = 0, with combined symbols]
+```
+where U_{k+1}(m)=W(m+k+1)W(m-k-1), Gkp1 = W(m+1)W(m-1)·W(k+1)² − W(k+2)W(k)·W(m)², and:
+| hyp (=0 on EDS)                                  | cofactor                                  |
+|--------------------------------------------------|-------------------------------------------|
+| GapRel(k,m):  U_k − Gk                            | −b²·Gkp1                                   |
+| OffRel(k,m):  W(2)W(m+k+1)W(m-k) − Hkm            | b·W(m+k)·W(m-k-1)                          |
+| OffRel(k,m-1): W(2)W(m+k)W(m-k-1) − Hk,m-1        | Hkm = W(m+2)W(m-1)W(k+1)W(k) − W(k+2)W(k-1)W(m+1)W(m) |
+| Somos@m:  W(m+2)W(m-2) − (b²W(m+1)W(m-1)−cW(m)²)  | W(k)²W(k+1)²·W(m+1)W(m-1)                  |
+| Somos@k:  W(k+2)W(k-2) − (b²W(k+1)W(k-1)−cW(k)²)  | −W(m)²W(k+1)²·W(m+1)W(m-1)                 |
+| Trel:  N_k D_m − N_m D_k                          | W(m)·W(k+2)                                |
+
+Residual sub-identity (local only, CAS=0):
+`Hkm·Hk,m-1 − b²·Gk·Gkp1 = W(k)²W(k+1)²W(m+1)W(m-1)·Somos@m + W(m)W(k+2)·Trel − W(m)²W(k+1)²W(m+1)W(m-1)·Somos@k`.
+
+H-step (OffRel(k+1)) + base cases k=0,1,2: pending (ChatGPT dm1 + own search).
