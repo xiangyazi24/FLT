@@ -25,4 +25,20 @@ lemma mk_psi_adjacent_somos (W : WeierstrassCurve R) (m : ℤ) :
   have h := congrArg (Affine.CoordinateRing.mk W) (psi_adjacent_somos W m)
   simpa only [map_mul, map_sub, map_pow, Affine.CoordinateRing.mk_ψ₂_sq] using h
 
+/-- Descent: `mk ∘ C : R[X] → CoordinateRing` is injective (the rank-1 component of the free
+rank-2 basis `{1, mk Y}`).  Lets us check any `R[X]` polynomial identity in the coordinate ring. -/
+lemma mk_C_injective (W : WeierstrassCurve R) :
+    Function.Injective (fun p : R[X] => Affine.CoordinateRing.mk W (Polynomial.C p)) := by
+  intro p q hpq
+  simp only at hpq
+  have hsub : Affine.CoordinateRing.mk W (Polynomial.C (p - q)) = 0 := by
+    have h : Affine.CoordinateRing.mk W (Polynomial.C (p - q))
+        = Affine.CoordinateRing.mk W (Polynomial.C p) - Affine.CoordinateRing.mk W (Polynomial.C q) := by
+      rw [map_sub, map_sub]
+    rw [h, hpq, sub_self]
+  have hsmul : (p - q) • (1 : Affine.CoordinateRing W)
+      + (0 : R[X]) • Affine.CoordinateRing.mk W Polynomial.X = 0 := by
+    rw [zero_smul, add_zero, Affine.CoordinateRing.smul, mul_one]; exact hsub
+  exact sub_eq_zero.mp (Affine.CoordinateRing.smul_basis_eq_zero hsmul).1
+
 end FLT.EDS
