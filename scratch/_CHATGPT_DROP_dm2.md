@@ -1,30 +1,68 @@
-# Q224: differential-addition identity for division-polynomial representatives
+# Q228: EDS / Somos relation search and derivation for Mathlib division polynomials
 
-## Executive answer
+## Short verdict
 
-I do **not** think the requested raw differential-addition cross identity is currently provable from public Mathlib by only rewriting `mk_φ`, `mk_ψ`, and `mk_Ψ_sq`.
-
-The precise missing theorem is not `mk_φ`/`mk_ψ`; those are the transport lemmas. The missing theorem is the **bivariate division-polynomial differential-addition identity in the affine coordinate ring**, equivalently the EDS addition law for the bivariate `ψ` sequence plus the corresponding x-coordinate addition identity.
-
-The smallest missing lemma to add is:
+Mathlib **does have the general Somos / EDS relation as a definition**:
 
 ```lean
-WeierstrassCurve.Affine.CoordinateRing.mk_psi_add_sub
+def IsEllSequence (W : ℤ → R) : Prop :=
+  ∀ m n r : ℤ,
+    W (m + n) * W (m - n) * W r ^ 2 =
+      W (m + r) * W (m - r) * W n ^ 2 -
+        W (n + r) * W (n - r) * W m ^ 2
 ```
 
-or, more directly for this goal:
+This is exactly the desired identity
+
+```text
+W_{m+n} W_{m-n} W_r²
+  = W_{m+r} W_{m-r} W_n² − W_{n+r} W_{n-r} W_m².
+```
+
+But Mathlib **does not currently prove** that the canonical normalized sequence
 
 ```lean
-WeierstrassCurve.Affine.CoordinateRing.mk_diffAdd_phi_psi_adjacent_cross
+normEDS b c d : ℤ → R
 ```
 
-Once that lemma exists, the descent to the raw `R[X]` identity is routine using the rank-two coordinate-ring basis over `R[X]` and injectivity of constants/univariate polynomials into the coordinate ring.
+satisfies `IsEllSequence`. The file itself lists this as TODO:
 
-Below is the full scaffold, with the missing lemmas isolated by exact signatures. The only parts marked `sorry` are the genuinely missing Mathlib/repo API lemmas and routine expansion lemmas whose proof is a finite `rw`/`ring` once the missing coordinate-ring identity exists.
+```text
+TODO: prove that `normEDS` satisfies `IsEllDivSequence`.
+```
+
+So there is no theorem such as
+
+```lean
+normEDS_isEllSequence
+normEDS_isEllDivSequence
+preNormEDS_isEllSequence
+WeierstrassCurve.ψ_isEllSequence
+WeierstrassCurve.preΨ_isEllSequence
+```
+
+in current Mathlib.
+
+What Mathlib **does have** are the defining even/odd recurrences:
+
+```lean
+preNormEDS'_even
+preNormEDS'_odd
+preNormEDS_even
+preNormEDS_odd
+normEDS_even
+normEDS_odd
+WeierstrassCurve.preΨ'_even
+WeierstrassCurve.preΨ'_odd
+WeierstrassCurve.preΨ_even
+WeierstrassCurve.preΨ_odd
+```
+
+For the adjacent differential-addition case, the needed Somos instance is exactly the `r = 1`, `m = a`, `n = b` specialization with adjacent indices, and it is already present as `normEDS_odd` / `preΨ_odd` after the normalization factors are accounted for. Therefore the immediate adjacent identity should be proved from `W.preΨ_odd`; the fully general EDS relation remains a deeper missing theorem.
 
 ---
 
-## Lean scaffold
+## Exact declarations found in `Mathlib/NumberTheory/EllipticDivisibilitySequence.lean`
 
 ```lean
 import Mathlib
@@ -32,7 +70,153 @@ import Mathlib
 noncomputable section
 
 open Polynomial
-open scoped Polynomial.Bivariate
+
+universe u
+
+variable {R : Type u} [CommRing R]
+
+/-- Already in Mathlib: the general elliptic/Somos relation, as a Prop. -/
+#check IsEllSequence
+
+/-- Already in Mathlib: divisibility-sequence predicate. -/
+#check IsDivSequence
+
+/-- Already in Mathlib: conjunction of the two predicates. -/
+#check IsEllDivSequence
+
+/-- Already in Mathlib: identity sequence is elliptic. -/
+#check isEllSequence_id
+#check isDivSequence_id
+#check isEllDivSequence_id
+
+/-- Already in Mathlib: scalar multiples preserve the predicates. -/
+#check IsEllSequence.smul
+#check IsDivSequence.smul
+#check IsEllDivSequence.smul
+
+/-- Already in Mathlib: auxiliary normalized EDS and its even/odd recurrences. -/
+#check preNormEDS'
+#check preNormEDS'_even
+#check preNormEDS'_odd
+#check preNormEDS
+#check preNormEDS_even
+#check preNormEDS_odd
+
+/-- Already in Mathlib: normalized EDS and its even/odd recurrences. -/
+#check normEDS
+#check normEDS_even
+#check normEDS_odd
+
+/-- Already in Mathlib: complement sequence/divisibility infrastructure. -/
+#check complEDS₂
+#check preNormEDS_mul_complEDS₂
+#check normEDS_mul_complEDS₂
+#check normEDS_dvd_normEDS_two_mul
+#check complEDS₂_mul_b
+#check complEDS'
+#check complEDS'_even
+#check complEDS'_odd
+#check complEDS
+#check complEDS_even
+#check complEDS_odd
+
+/-- Already in Mathlib: recursion principles for proving properties by the defining recurrence. -/
+#check normEDSRec'
+#check normEDSRec
+#check complEDSRec'
+#check complEDSRec
+
+/-- Already in Mathlib: map compatibility. -/
+#check map_preNormEDS'
+#check map_preNormEDS
+#check map_complEDS₂
+#check map_normEDS
+#check map_complEDS'
+#check map_complEDS
+```
+
+Expected missing checks:
+
+```lean
+-- These names are intentionally commented out: they are not in current Mathlib.
+-- #check normEDS_isEllSequence
+-- #check normEDS_isEllDivSequence
+-- #check preNormEDS_isEllSequence
+-- #check WeierstrassCurve.preΨ_isEllSequence
+-- #check WeierstrassCurve.ψ_isEllSequence
+```
+
+---
+
+## If you already have an abstract `IsEllSequence` hypothesis
+
+If somewhere in your development you have
+
+```lean
+hW : IsEllSequence W
+```
+
+then the desired relation is literally:
+
+```lean
+example {R : Type u} [CommRing R] {W : ℤ → R}
+    (hW : IsEllSequence W) (i j k : ℤ) :
+    W (i + j) * W (i - j) * W k ^ 2 =
+      W (i + k) * W (i - k) * W j ^ 2 -
+        W (j + k) * W (j - k) * W i ^ 2 := by
+  exact hW i j k
+```
+
+The adjacent specialization used in differential addition is obtained by taking
+
+```text
+i = m + 1,   j = m,   k = 1.
+```
+
+Then `i+j = 2m+1`, `i-j = 1`, and `W 1 = 1` for a normalized EDS, so it becomes
+
+```text
+W(2m+1)
+= W(m+2) W(m)^3 − W(m+1) W(m−1) W(m+1)^2
+= W(m+2) W(m)^3 − W(m−1) W(m+1)^3.
+```
+
+This is exactly `normEDS_odd`.
+
+```lean
+example {R : Type u} [CommRing R]
+    (b c d : R) (m : ℤ) :
+    normEDS b c d (2 * m + 1) =
+      normEDS b c d (m + 2) * normEDS b c d m ^ 3 -
+        normEDS b c d (m - 1) * normEDS b c d (m + 1) ^ 3 := by
+  exact normEDS_odd b c d m
+```
+
+---
+
+## Specialization to `WeierstrassCurve.preΨ`
+
+For Mathlib's univariate reduced/auxiliary division polynomial sequence,
+
+```lean
+W.preΨ : ℤ → R[X]
+```
+
+there is no theorem saying it is an abstract `IsEllSequence`. Instead Mathlib provides the parity-normalized recurrences directly:
+
+```lean
+WeierstrassCurve.preΨ_even
+WeierstrassCurve.preΨ_odd
+```
+
+The adjacent Somos relation for `preΨ` is precisely `preΨ_odd`.
+
+```lean
+import Mathlib
+
+noncomputable section
+
+open Polynomial
 open WeierstrassCurve
 
 namespace WeierstrassCurve
@@ -42,295 +226,58 @@ universe u
 variable {R : Type u} [CommRing R]
 variable (W : WeierstrassCurve R)
 
-/-!
-## Homogeneous x-only differential-addition forms
+/--
+Adjacent Somos relation for Mathlib's reduced univariate auxiliary sequence `preΨ`.
 
-All of these are univariate homogeneous forms in the two Kummer representatives
-`A = [XA : ZA]`, `B = [XB : ZB]`, and the known difference `D = [XD : ZD]`.
+This is exactly `W.preΨ_odd m`.  The factors of `Ψ₂Sq²` are the normalization correction between
+`preΨ` and the full normalized EDS/`ψ` sequence.
 -/
-
-/-- `XA*ZB - XB*ZA`. -/
-def diffAddDeltaP (XA ZA XB ZB : R[X]) : R[X] :=
-  XA * ZB - XB * ZA
+theorem preΨ_adjacent_somos (m : ℤ) :
+    W.preΨ (2 * m + 1) =
+      W.preΨ (m + 2) * W.preΨ m ^ 3 *
+          (if Even m then W.Ψ₂Sq ^ 2 else 1) -
+        W.preΨ (m - 1) * W.preΨ (m + 1) ^ 3 *
+          (if Even m then 1 else W.Ψ₂Sq ^ 2) := by
+  exact W.preΨ_odd m
 
 /--
-The symmetric numerator appearing in the x-only differential-addition formula.
+Even duplication recurrence for `preΨ`, also already in Mathlib.
 -/
-def diffAddSumNumP (XA ZA XB ZB : R[X]) : R[X] :=
-  C 2 * XA * XB * (XA * ZB + XB * ZA)
-    + C W.b₂ * XA * XB * ZA * ZB
-    + C W.b₄ * ZA * ZB * (XA * ZB + XB * ZA)
-    + C W.b₆ * ZA ^ 2 * ZB ^ 2
-
-/-- Numerator of differential addition, with difference representative `[XD:ZD]`. -/
-def diffAddNumP (XA ZA XB ZB XD ZD : R[X]) : R[X] :=
-  W.diffAddSumNumP XA ZA XB ZB * ZD
-    - (W.diffAddDeltaP XA ZA XB ZB) ^ 2 * XD
-
-/-- Denominator of differential addition, with difference representative `[XD:ZD]`. -/
-def diffAddDenP (XA ZA XB ZB XD ZD : R[X]) : R[X] :=
-  (W.diffAddDeltaP XA ZA XB ZB) ^ 2 * ZD
-
-/-- Raw target numerator for adjacent differential addition. -/
-def diffAddAdjacentNum (m : ℤ) : R[X] :=
-  W.diffAddNumP
-    (W.Φ m) (W.ΨSq m)
-    (W.Φ (m + 1)) (W.ΨSq (m + 1))
-    X 1
-
-/-- Raw target denominator for adjacent differential addition. -/
-def diffAddAdjacentDen (m : ℤ) : R[X] :=
-  W.diffAddDenP
-    (W.Φ m) (W.ΨSq m)
-    (W.Φ (m + 1)) (W.ΨSq (m + 1))
-    X 1
-
-/-- The raw univariate cross-polynomial whose vanishing is desired. -/
-def diffAddAdjacentCrossResidual (m : ℤ) : R[X] :=
-  W.diffAddAdjacentNum m * W.ΨSq (2 * m + 1)
-    - W.Φ (2 * m + 1) * W.diffAddAdjacentDen m
-
-/-!
-## Coordinate-ring bivariate forms
-
-These are the same forms but in `R[X][Y]`.  They allow us to state the coordinate-ring theorem in
-terms of bivariate `φ` and `ψ` before transporting to `Φ` and `ΨSq`.
--/
-
-/-- Bivariate version of `diffAddDeltaP`. -/
-def diffAddDeltaBiv (XA ZA XB ZB : R[X][Y]) : R[X][Y] :=
-  XA * ZB - XB * ZA
-
-/-- Bivariate version of `diffAddSumNumP`. -/
-def diffAddSumNumBiv (XA ZA XB ZB : R[X][Y]) : R[X][Y] :=
-  C (C (2 : R)) * XA * XB * (XA * ZB + XB * ZA)
-    + C (C W.b₂) * XA * XB * ZA * ZB
-    + C (C W.b₄) * ZA * ZB * (XA * ZB + XB * ZA)
-    + C (C W.b₆) * ZA ^ 2 * ZB ^ 2
-
-/-- Bivariate differential-addition numerator. -/
-def diffAddNumBiv (XA ZA XB ZB XD ZD : R[X][Y]) : R[X][Y] :=
-  W.diffAddSumNumBiv XA ZA XB ZB * ZD
-    - (W.diffAddDeltaBiv XA ZA XB ZB) ^ 2 * XD
-
-/-- Bivariate differential-addition denominator. -/
-def diffAddDenBiv (XA ZA XB ZB XD ZD : R[X][Y]) : R[X][Y] :=
-  (W.diffAddDeltaBiv XA ZA XB ZB) ^ 2 * ZD
-
-/-- Bivariate adjacent numerator built from `[φ_m : ψ_m²]`, `[φ_{m+1} : ψ_{m+1}²]`, `[X:1]`. -/
-def diffAddAdjacentNumBiv (m : ℤ) : R[X][Y] :=
-  W.diffAddNumBiv
-    (W.φ m) (W.ψ m ^ 2)
-    (W.φ (m + 1)) (W.ψ (m + 1) ^ 2)
-    (C X) 1
-
-/-- Bivariate adjacent denominator built from `[φ_m : ψ_m²]`, `[φ_{m+1} : ψ_{m+1}²]`, `[X:1]`. -/
-def diffAddAdjacentDenBiv (m : ℤ) : R[X][Y] :=
-  W.diffAddDenBiv
-    (W.φ m) (W.ψ m ^ 2)
-    (W.φ (m + 1)) (W.ψ (m + 1) ^ 2)
-    (C X) 1
-
-/-!
-## Missing coordinate-ring theorem
-
-This is the genuinely missing theorem.  It is the x-coordinate adjacent differential-addition
-identity expressed with bivariate division polynomials.
-
-Mathematically it follows from:
-
-* the EDS addition recurrence
-  `ψ_{a+b} ψ_{a-b} = ψ_{a+1} ψ_{a-1} ψ_b^2 - ψ_{b+1} ψ_{b-1} ψ_a^2`,
-* the definition `φ_n = X ψ_n^2 - ψ_{n+1} ψ_{n-1}`,
-* the Weierstrass curve relation, equivalently `ψ₂_sq`, inside the coordinate ring.
-
-For the adjacent case `a=m+1`, `b=m`, `a-b=1`, so the denominator identity is essentially
-
-```text
-φ_m ψ_{m+1}² - φ_{m+1} ψ_m² = ψ_{2m+1}
-```
-
-in the coordinate ring, with sign determined by the convention for `ψ_{-1}`.
--/
-namespace Affine.CoordinateRing
-
-/--
-MISSING-MATHLIB-API.
-
-Bivariate adjacent differential-addition cross identity in the affine coordinate ring.
-This is the smallest theorem that makes the raw univariate identity routine.
--/
-theorem mk_diffAddAdjacent_phi_psi_cross
-    (m : ℤ) :
-    mk W
-      (W.diffAddAdjacentNumBiv m * W.ψ (2 * m + 1) ^ 2
-        - W.φ (2 * m + 1) * W.diffAddAdjacentDenBiv m) = 0 := by
-  -- Missing proof outline:
-  -- 1. Prove denominator identity in the coordinate ring:
-  --      mk W (W.diffAddDeltaBiv (W.φ m) (W.ψ m^2)
-  --        (W.φ (m+1)) (W.ψ (m+1)^2)) = mk W (W.ψ (2*m+1)).
-  --    This is the EDS addition recurrence with `(a,b)=(m+1,m)` plus `φ` definition.
-  --
-  -- 2. Prove numerator identity in the coordinate ring:
-  --      mk W (W.diffAddSumNumBiv ...)
-  --        = mk W (C X * W.ψ (2*m+1)^2 + W.φ (2*m+1)).
-  --    Equivalently, after subtracting `X*delta^2`, the numerator is `φ_{2m+1}`.
-  --
-  -- 3. Use `ψ₂_sq` / `mk_ψ₂_sq` to eliminate every `Y^2` term by the curve relation.
-  --
-  -- 4. Finish by `ring_nf` in the coordinate ring.
-  --
-  -- This theorem is not currently exposed by Mathlib's division-polynomial API.
-  sorry
-
-end Affine.CoordinateRing
-
-/-!
-## Transport from bivariate `φ,ψ` to univariate `Φ,ΨSq`
-
-These lemmas are routine once the exact Mathlib names are available:
-
-* `Affine.CoordinateRing.mk_φ`
-* `Affine.CoordinateRing.mk_ψ`
-* `Affine.CoordinateRing.mk_Ψ_sq`
-* `Affine.CoordinateRing.mk_ψ₂_sq`
-
-The names may need namespace adjustment depending on imports.
--/
-
-namespace Affine.CoordinateRing
-
-/--
-Transport the adjacent differential-addition numerator from bivariate `φ,ψ` to univariate `Φ,ΨSq`.
--/
-theorem mk_diffAddAdjacentNumBiv_eq_mk_C_diffAddAdjacentNum
-    (m : ℤ) :
-    mk W (W.diffAddAdjacentNumBiv m) = mk W (C (W.diffAddAdjacentNum m)) := by
-  -- Expected proof:
-  --   simp [WeierstrassCurve.diffAddAdjacentNumBiv,
-  --         WeierstrassCurve.diffAddAdjacentNum,
-  --         WeierstrassCurve.diffAddNumBiv,
-  --         WeierstrassCurve.diffAddNumP,
-  --         WeierstrassCurve.diffAddSumNumBiv,
-  --         WeierstrassCurve.diffAddSumNumP,
-  --         WeierstrassCurve.diffAddDeltaBiv,
-  --         WeierstrassCurve.diffAddDeltaP,
-  --         mk_φ, mk_ψ, mk_Ψ_sq]
-  --
-  -- Main issue: exact namespace/name of `mk_Ψ_sq` in current Mathlib.
-  sorry
-
-/--
-Transport the adjacent differential-addition denominator from bivariate `φ,ψ` to univariate `Φ,ΨSq`.
--/
-theorem mk_diffAddAdjacentDenBiv_eq_mk_C_diffAddAdjacentDen
-    (m : ℤ) :
-    mk W (W.diffAddAdjacentDenBiv m) = mk W (C (W.diffAddAdjacentDen m)) := by
-  -- Same proof pattern as numerator transport.
-  sorry
-
-/-- Transport `ψ_{2m+1}²` to `ΨSq_{2m+1}`. -/
-theorem mk_psi_sq_adjacent_eq_mk_C_ΨSq
-    (m : ℤ) :
-    mk W (W.ψ (2 * m + 1) ^ 2) = mk W (C (W.ΨSq (2 * m + 1))) := by
-  -- Expected one-liner from `mk_ψ` and `mk_Ψ_sq`.
-  -- If `mk_Ψ_sq` is not present, prove from `mk_ψ` plus the parity definition of `Ψ`/`ΨSq`.
-  sorry
-
-end Affine.CoordinateRing
-
-/-!
-## Coordinate-ring vanishing of the raw univariate residual
--/
-
-/--
-Coordinate-ring vanishing of the raw adjacent differential-addition residual.
--/
-theorem mk_C_diffAddAdjacentCrossResidual_eq_zero
-    (m : ℤ) :
-    Affine.CoordinateRing.mk W (C (W.diffAddAdjacentCrossResidual m)) = 0 := by
-  -- Proof after the missing theorem and transport lemmas:
-  --
-  -- 1. Start from `Affine.CoordinateRing.mk_diffAddAdjacent_phi_psi_cross W m`.
-  -- 2. Rewrite `mk` of bivariate numerator/denominator via
-  --    `mk_diffAddAdjacentNumBiv_eq_mk_C_diffAddAdjacentNum` and denominator version.
-  -- 3. Rewrite `mk ψ²` by `mk_psi_sq_adjacent_eq_mk_C_ΨSq`.
-  -- 4. Rewrite `mk φ` by `mk_φ`.
-  -- 5. Use ring hom properties to collect as `mk W (C residual) = 0`.
-  have h := Affine.CoordinateRing.mk_diffAddAdjacent_phi_psi_cross (W := W) m
-  -- The following is the expected final proof shape, modulo exact names of `mk_φ` and `mk_Ψ_sq`:
-  --   simpa [diffAddAdjacentCrossResidual, map_sub, map_mul,
-  --          Affine.CoordinateRing.mk_diffAddAdjacentNumBiv_eq_mk_C_diffAddAdjacentNum,
-  --          Affine.CoordinateRing.mk_diffAddAdjacentDenBiv_eq_mk_C_diffAddAdjacentDen,
-  --          Affine.CoordinateRing.mk_psi_sq_adjacent_eq_mk_C_ΨSq,
-  --          Affine.CoordinateRing.mk_φ] using h
-  sorry
-
-/-!
-## Descent from coordinate ring to `R[X]`
-
-For fields this is easiest: the coordinate ring is a domain/free rank two over `R[X]`, and the
-constant/univariate inclusion is injective. For a general `CommRing R`, this injectivity may require
-nontriviality/domain hypotheses. Since the target elliptic-curve applications are over a field, state
-the final raw theorem over a field.
--/
-
-namespace Affine.CoordinateRing
-
-/--
-MISSING/TO-CONFIRM API.
-
-Injectivity of the univariate polynomial inclusion `R[X] -> R[W]`, expressed as `mk W (C f)`.
-For fields/nontrivial rings this follows from the free `R[X]`-basis `{1,Y}` of the coordinate ring.
--/
-theorem mk_C_injective
-    {F : Type u} [Field F]
-    (W : WeierstrassCurve F)
-    {f g : F[X]} :
-    mk W (C f) = mk W (C g) → f = g := by
-  -- Small proof sketch:
-  -- 1. `mk W (C f) = mk W (C g)` implies `(f-g) • 1 + 0 • Y = 0` in the coordinate ring.
-  -- 2. Apply `CoordinateRing.smul_basis_eq_zero`.
-  -- 3. Extract `f-g=0`.
-  -- Existing relevant API:
-  --   CoordinateRing.basis
-  --   CoordinateRing.smul_basis_eq_zero
-  --   CoordinateRing.smul
-  sorry
-
-end Affine.CoordinateRing
-
-/--
-Raw univariate adjacent differential-addition cross identity.
-
-This is the desired final theorem, over a field where `mk W (C ·)` is injective.
--/
-theorem diffAddAdjacentCrossResidual_eq_zero
-    {F : Type u} [Field F]
-    (W : WeierstrassCurve F)
-    (m : ℤ) :
-    W.diffAddAdjacentCrossResidual m = 0 := by
-  apply Affine.CoordinateRing.mk_C_injective W
-  simpa using W.mk_C_diffAddAdjacentCrossResidual_eq_zero m
-
-/-- Final cross-multiplied raw identity in the requested orientation. -/
-theorem diffAddAdjacent_cross_identity
-    {F : Type u} [Field F]
-    (W : WeierstrassCurve F)
-    (m : ℤ) :
-    W.diffAddAdjacentNum m * W.ΨSq (2 * m + 1)
-      = W.Φ (2 * m + 1) * W.diffAddAdjacentDen m := by
-  have h := W.diffAddAdjacentCrossResidual_eq_zero m
-  simpa [diffAddAdjacentCrossResidual, sub_eq_zero] using h
+theorem preΨ_even_somos_like (m : ℤ) :
+    W.preΨ (2 * m) =
+      W.preΨ (m - 1) ^ 2 * W.preΨ m * W.preΨ (m + 2) -
+        W.preΨ (m - 2) * W.preΨ m * W.preΨ (m + 1) ^ 2 := by
+  exact W.preΨ_even m
 
 end WeierstrassCurve
 ```
 
+This is the lemma to use inside the raw/Kummer adjacent differential-addition identity. In particular, if the coordinate-ring calculation needs the expression
+
+```lean
+W.preΨ (m + 2) * W.preΨ m ^ 3 * correction
+  - W.preΨ (m - 1) * W.preΨ (m + 1) ^ 3 * correction
+```
+
+then rewrite it with
+
+```lean
+rw [← W.preΨ_adjacent_somos m]
+```
+
+or simply
+
+```lean
+rw [← W.preΨ_odd m]
+```
+
+after arranging the sides.
+
 ---
 
-## The smallest missing proof: bivariate EDS addition
+## Specialization to the full `ψ` / `Ψ` sequence
 
-If you want to split the missing coordinate-ring identity into smaller lemmas, add these first.
+For the full bivariate division polynomial sequence, what you really want in the coordinate ring is a theorem of this shape:
 
 ```lean
 namespace WeierstrassCurve
@@ -348,128 +295,122 @@ namespace Affine.CoordinateRing
 /--
 MISSING-MATHLIB-API.
 
-The EDS addition recurrence for bivariate division polynomials in the affine coordinate ring.
-This is the direct analogue of `IsEllSequence` for the sequence `n ↦ mk W (W.ψ n)`.
+The bivariate division-polynomial sequence satisfies the general EDS/Somos relation in the affine
+coordinate ring.
 -/
-theorem mk_ψ_add_sub
-    (a b : ℤ) :
-    mk W (W.ψ (a + b) * W.ψ (a - b)) =
-      mk W
-        (W.ψ (a + 1) * W.ψ (a - 1) * W.ψ b ^ 2
-          - W.ψ (b + 1) * W.ψ (b - 1) * W.ψ a ^ 2) := by
+theorem mk_ψ_isEllSequence :
+    IsEllSequence (fun n : ℤ => mk W (W.ψ n)) := by
   -- This is not currently exposed by Mathlib.
-  -- Smallest proof route:
-  -- * prove the sequence `fun n => mk W (W.ψ n)` satisfies `IsEllSequence`;
-  -- * specialize the EDS identity with `r = 1` and `ψ_1 = 1`;
-  -- * use `ring` for the coordinate-ring rearrangement.
+  -- It should follow once `normEDS_isEllSequence` is proved and `W.ψ` is connected to `normEDS`,
+  -- or by direct induction using the `normEDSRec` recursion principle.
   sorry
 
-/-- Adjacent denominator identity. -/
-theorem mk_adjacent_delta_eq_ψ
-    (m : ℤ) :
-    mk W
-      (W.diffAddDeltaBiv
-        (W.φ m) (W.ψ m ^ 2)
-        (W.φ (m + 1)) (W.ψ (m + 1) ^ 2)) =
-      mk W (W.ψ (2 * m + 1)) := by
-  -- Expand `φ_n = X ψ_n² - ψ_{n+1} ψ_{n-1}`.
-  -- Use `mk_ψ_add_sub` with `(a,b)=(m+1,m)` and sign convention for `ψ (-1)`.
-  sorry
+/-- The immediately usable relation after `mk_ψ_isEllSequence`. -/
+theorem mk_ψ_somos
+    (i j k : ℤ) :
+    mk W (W.ψ (i + j)) * mk W (W.ψ (i - j)) * mk W (W.ψ k) ^ 2 =
+      mk W (W.ψ (i + k)) * mk W (W.ψ (i - k)) * mk W (W.ψ j) ^ 2 -
+        mk W (W.ψ (j + k)) * mk W (W.ψ (j - k)) * mk W (W.ψ i) ^ 2 := by
+  exact (mk_ψ_isEllSequence (W := W)) i j k
 
-/-- Adjacent sum-numerator identity. -/
-theorem mk_adjacent_sumNum_eq_phi_add_Xψsq
+/-- Adjacent specialization for differential addition. -/
+theorem mk_ψ_adjacent_somos
     (m : ℤ) :
-    mk W
-      (W.diffAddSumNumBiv
-        (W.φ m) (W.ψ m ^ 2)
-        (W.φ (m + 1)) (W.ψ (m + 1) ^ 2)) =
-      mk W (W.φ (2 * m + 1) + C X * W.ψ (2 * m + 1) ^ 2) := by
-  -- This is the heavier companion.  It is the actual x-only differential-addition formula in
-  -- bivariate division-polynomial representatives.
-  -- Proof route:
-  -- * expand `diffAddSumNumBiv`, `φ`;
-  -- * use `mk_adjacent_delta_eq_ψ` and `mk_ψ_add_sub` for the required EDS identities;
-  -- * use `ψ₂_sq` / curve relation for all `Y²` reductions;
-  -- * finish by `ring` in the coordinate ring.
+    mk W (W.ψ (2 * m + 1)) =
+      mk W (W.ψ (m + 2)) * mk W (W.ψ m) ^ 3 -
+        mk W (W.ψ (m - 1)) * mk W (W.ψ (m + 1)) ^ 3 := by
+  have h := mk_ψ_somos (W := W) (m + 1) m 1
+  -- Normalize `ψ_1 = 1`, arithmetic, and multiplication order.
+  -- Expected proof:
+  --   simpa [mul_comm, mul_left_comm, mul_assoc, add_comm, add_left_comm, add_assoc,
+  --          sub_eq_add_neg, two_mul] using h
   sorry
 
 end Affine.CoordinateRing
-
 end WeierstrassCurve
 ```
 
-Once these three lemmas exist, `mk_diffAddAdjacent_phi_psi_cross` is just algebra:
-
-```text
-diffNum = sumNum - delta² * X
-        = (φ_{2m+1} + X ψ_{2m+1}²) - X ψ_{2m+1}²
-        = φ_{2m+1}
-
-diffDen = delta² = ψ_{2m+1}².
-```
+This is the exact missing coordinate-ring theorem for the bivariate route. The univariate `preΨ_odd` relation is already available, but the bivariate `ψ` relation in the coordinate ring is not exposed as a general `IsEllSequence` theorem.
 
 ---
 
-## Nonzero/no-common-root conjunct
+## If you really need the fully general theorem
 
-The nonzero target vector
-
-```lean
-![(W.Φ (2*m+1)).eval x, (W.ΨSq (2*m+1)).eval x]
-```
-
-under `[W.IsElliptic]` does **not** fall out from the coordinate-ring cross identity alone. It needs a separate no-simultaneous-vanishing theorem:
+The clean theorem to add to `EllipticDivisibilitySequence.lean` is:
 
 ```lean
-theorem Φ_ΨSq_no_common_eval_root
-    {F : Type u} [Field F]
-    (W : WeierstrassCurve F) [W.IsElliptic]
-    (n : ℤ) (x : F) :
-    ¬ ((W.Φ n).eval x = 0 ∧ (W.ΨSq n).eval x = 0)
+/--
+MISSING-MATHLIB-API.
+The canonical normalized EDS satisfies the elliptic/Somos relation.
+-/
+theorem normEDS_isEllSequence
+    {R : Type u} [CommRing R] (b c d : R) :
+    IsEllSequence (normEDS b c d) := by
+  -- Substantial proof.
+  -- The file currently marks this as TODO.
+  sorry
 ```
 
-For the division-polynomial application, this is usually proved from the point-coordinate theorem:
-`[Φ_n:ΨSq_n]` is the x-coordinate representative of `[n]P`; the vector cannot be `[0:0]`. Purely polynomial proofs are possible but require resultant/no-common-factor facts. Therefore I recommend keeping this as a separate lemma; do not expect it from the cross identity.
+Then the general relation becomes:
+
+```lean
+theorem normEDS_somos
+    {R : Type u} [CommRing R] (b c d : R) (i j k : ℤ) :
+    normEDS b c d (i + j) * normEDS b c d (i - j) * normEDS b c d k ^ 2 =
+      normEDS b c d (i + k) * normEDS b c d (i - k) * normEDS b c d j ^ 2 -
+        normEDS b c d (j + k) * normEDS b c d (j - k) * normEDS b c d i ^ 2 := by
+  exact normEDS_isEllSequence b c d i j k
+```
+
+### Is `normEDS_isEllSequence` just `ring` after expanding `normEDS_even/odd`?
+
+No, not globally. The recurrences `normEDS_even` and `normEDS_odd` are **two special Somos recurrences** used to define/compute the sequence. The full three-index identity for arbitrary `i j k` is a deeper consistency theorem for the normalized EDS. It would normally be proved by a strong induction using `normEDSRec`, reducing arbitrary triples to the defining even/odd recurrences. That is a real proof, not a single `ring` call.
+
+### Is the adjacent instance a `ring` proof from `preΨ_even/odd`?
+
+Yes, for the adjacent differential-addition case you should not prove the full theorem. Use the already-existing recurrence:
+
+```lean
+W.preΨ_odd m
+```
+
+That is exactly the `i=m+1, j=m, k=1` Somos relation after accounting for the `preΨ` normalization. Any remaining algebra in the Kummer differential-addition formula is `ring`/`ring_nf` after rewriting by `W.preΨ_odd m`, `W.Φ`, and `W.ΨSq`.
 
 ---
 
-## Feasibility verdict
+## Recommended implementation path
 
-### More feasible now
-
-Use the raw polynomial identity if your `ring_nf` can close after:
+1. For the immediate adjacent differential-addition identity, use:
 
 ```lean
-simp [b₂, b₄, b₆, b₈]
-ring_nf
+rw [W.preΨ_odd m]
 ```
 
-or after one `linear_combination` with `W.b_relation`. That is fastest if the formulas are correct.
-
-### More robust but missing one theorem
-
-Use the coordinate-ring route, but first add:
+or the wrapper:
 
 ```lean
-Affine.CoordinateRing.mk_diffAddAdjacent_phi_psi_cross
+rw [W.preΨ_adjacent_somos m]
 ```
 
-or its smaller components:
+2. Do **not** attempt to prove the full `normEDS_isEllSequence` unless you need arbitrary `i,j,k`.
+
+3. If you need the bivariate coordinate-ring route, add the missing theorem:
 
 ```lean
-Affine.CoordinateRing.mk_ψ_add_sub
-Affine.CoordinateRing.mk_adjacent_delta_eq_ψ
-Affine.CoordinateRing.mk_adjacent_sumNum_eq_phi_add_Xψsq
+Affine.CoordinateRing.mk_ψ_isEllSequence
 ```
 
-This is the conceptually correct theorem, but it is not currently exposed by Mathlib.
+and derive:
 
-## Connected proof strategy after adding missing lemma
+```lean
+Affine.CoordinateRing.mk_ψ_adjacent_somos
+```
 
-1. Prove `mk_ψ_add_sub` for bivariate division polynomials in the coordinate ring.
-2. Derive `mk_adjacent_delta_eq_ψ`.
-3. Derive `mk_adjacent_sumNum_eq_phi_add_Xψsq`.
-4. Prove `mk_diffAddAdjacent_phi_psi_cross`.
-5. Transport through `mk_φ`, `mk_ψ`, `mk_Ψ_sq` to univariate `Φ`, `ΨSq`.
-6. Descend by `mk_C_injective`.
-7. Use the resulting raw cross identity in the Kummer ladder proof.
+4. For the x-only raw polynomial proof, the relevant Somos content is already available through:
+
+```lean
+WeierstrassCurve.preΨ_odd
+WeierstrassCurve.preΨ_even
+```
+
+The remaining failures are formula orientation, parity normalization, or `b`-relation issues, not lack of the adjacent EDS recurrence.
