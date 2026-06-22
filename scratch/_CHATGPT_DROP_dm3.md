@@ -1,549 +1,447 @@
-# Q112 (dm3): SEAM2 project-local glue for x-only differential addition
+# Q185 (dm3): Mathlib survey for `n • P = 0 ↔ ΨSqₙ(x(P)) = 0`
 
-This is the project-local glue layer around the already-build-ready Kummer algebra.  The polynomial identities are no longer the risky part.  The seam is now:
-
-```lean
-xRep : (W⁄ℚ).Point → P1Q
-```
-
-plus enough simp lemmas to rewrite Mathlib's `Point.add` into the affine formulae `W.slope`, `W.addX`, and `W.negY`.
-
-The Mathlib declarations used here are the current affine elliptic-curve declarations:
+Bottom line: current Mathlib has a useful **definition layer** for elliptic divisibility sequences and Weierstrass division polynomials, but I do **not** see a shortcut theorem connecting those polynomials to the actual affine point group law.  In particular, I do not see an existing declaration of the form
 
 ```lean
-WeierstrassCurve.Affine.Point.zero
-WeierstrassCurve.Affine.Point.some
-WeierstrassCurve.Affine.Point.neg_some
-WeierstrassCurve.Affine.Point.add_of_X_ne
-WeierstrassCurve.Affine.Point.add_of_Y_eq
-WeierstrassCurve.Affine.Y_eq_of_X_eq
-WeierstrassCurve.Affine.slope_of_X_ne
-WeierstrassCurve.Affine.addX
-WeierstrassCurve.Affine.negY
-WeierstrassCurve.Affine.nonsingular_neg
-WeierstrassCurve.Affine.nonsingular_add
+x (n • P) = Φₙ(x P) / ΨSqₙ(x P)
 ```
 
-Status legend:
+or
+
+```lean
+n • P = 0 ↔ IsRoot (W.ΨSq n) (x P)
+```
+
+or
+
+```lean
+n • P = 0 ↔ eval₂ ... (W.ψ n) x y = 0
+```
+
+So the hand-rolled x-only ladder remains the shortest route unless a new bridge theorem is built.
+
+## 1. What Mathlib has
+
+The relevant imports are:
+
+```lean
+import Mathlib.NumberTheory.EllipticDivisibilitySequence
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+```
+
+### EDS layer
+
+Mathlib has the EDS recurrence infrastructure:
+
+```lean
+#check IsEllSequence
+#check IsDivSequence
+#check IsEllDivSequence
+
+#check preNormEDS'
+#check preNormEDS
+#check preNormEDS'_zero
+#check preNormEDS'_one
+#check preNormEDS'_two
+#check preNormEDS'_three
+#check preNormEDS'_four
+#check preNormEDS'_even
+#check preNormEDS'_odd
+#check preNormEDS_zero
+#check preNormEDS_one
+#check preNormEDS_two
+#check preNormEDS_three
+#check preNormEDS_four
+#check preNormEDS_even
+#check preNormEDS_odd
+
+#check complEDS₂
+#check preNormEDS_mul_complEDS₂
+
+#check normEDS
+#check normEDS_zero
+#check normEDS_one
+#check normEDS_two
+#check normEDS_three
+#check normEDS_four
+#check normEDS_neg
+#check normEDS_even
+#check normEDS_odd
+#check normEDSRec'
+#check normEDSRec
+```
+
+Important caveat: the file documentation still says the main EDS theorem is TODO:
 
 ```text
-CLOSEABLE-NOW          = should compile once names are imported and project aliases are aligned.
-MISSING-PROJECT-API    = not Mathlib-missing; needs local `P1Q`/normalization/xRep namespace choices.
-MISSING-MATHLIB-API    = genuinely absent from Mathlib.  I do not see any such blocker here.
+TODO: prove that `normEDS` satisfies `IsEllDivSequence`.
+TODO: prove that a normalised sequence satisfying `IsEllDivSequence` can be given by `normEDS`.
 ```
 
-## 1. Projective x-coordinate type and `xRep`
+So this is recurrence infrastructure, not a completed arithmetic theory of EDSs.
 
-Use a tiny projective line type first.  If the repo already has `RatHat`, `QHat`, or a projective line type, replace this with that type.  For the Kummer seam, all that is needed is equality by cross multiplication.
+### Weierstrass division-polynomial layer
+
+Mathlib has the following Weierstrass division-polynomial declarations:
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.Tactic
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
 
-noncomputable section
+open Polynomial
+open scoped Polynomial.Bivariate
 
-open WeierstrassCurve
-open WeierstrassCurve.Affine
+#check WeierstrassCurve.ψ₂
+#check WeierstrassCurve.Ψ₂Sq
+#check WeierstrassCurve.C_Ψ₂Sq
+#check WeierstrassCurve.ψ₂_sq
+#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ₂_sq
+#check WeierstrassCurve.Ψ₂Sq_eq
 
-/-- Minimal projective rational x-coordinate. -/
-structure P1Q where
-  X : ℚ
-  Z : ℚ
-  not_both_zero : X ≠ 0 ∨ Z ≠ 0
+#check WeierstrassCurve.Ψ₃
+#check WeierstrassCurve.preΨ₄
 
-namespace P1Q
+#check WeierstrassCurve.preΨ'
+#check WeierstrassCurve.preΨ'_zero
+#check WeierstrassCurve.preΨ'_one
+#check WeierstrassCurve.preΨ'_two
+#check WeierstrassCurve.preΨ'_three
+#check WeierstrassCurve.preΨ'_four
+#check WeierstrassCurve.preΨ'_even
+#check WeierstrassCurve.preΨ'_odd
 
-/-- Equality in `ℙ¹(ℚ)`. -/
-def SameQ (A B : P1Q) : Prop :=
-  A.X * B.Z = B.X * A.Z
+#check WeierstrassCurve.preΨ
+#check WeierstrassCurve.preΨ_zero
+#check WeierstrassCurve.preΨ_one
+#check WeierstrassCurve.preΨ_two
+#check WeierstrassCurve.preΨ_three
+#check WeierstrassCurve.preΨ_four
+#check WeierstrassCurve.preΨ_neg
+#check WeierstrassCurve.preΨ_even
+#check WeierstrassCurve.preΨ_odd
 
-@[simp] lemma sameQ_refl (A : P1Q) : SameQ A A := by
-  dsimp [SameQ]
+#check WeierstrassCurve.ΨSq
+#check WeierstrassCurve.ΨSq_zero
+#check WeierstrassCurve.ΨSq_one
+#check WeierstrassCurve.ΨSq_two
+#check WeierstrassCurve.ΨSq_three
+#check WeierstrassCurve.ΨSq_four
+#check WeierstrassCurve.ΨSq_neg
+#check WeierstrassCurve.ΨSq_even
+#check WeierstrassCurve.ΨSq_odd
 
-@[simp] lemma sameQ_mk_iff {A B : P1Q} :
-    SameQ A B ↔ A.X * B.Z = B.X * A.Z := Iff.rfl
+#check WeierstrassCurve.Ψ
+#check WeierstrassCurve.Ψ_zero
+#check WeierstrassCurve.Ψ_one
+#check WeierstrassCurve.Ψ_two
+#check WeierstrassCurve.Ψ_three
+#check WeierstrassCurve.Ψ_four
+#check WeierstrassCurve.Ψ_neg
+#check WeierstrassCurve.Ψ_even
+#check WeierstrassCurve.Ψ_odd
+#check WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
 
-end P1Q
+#check WeierstrassCurve.Φ
+#check WeierstrassCurve.Φ_zero
+#check WeierstrassCurve.Φ_one
+#check WeierstrassCurve.Φ_two
+#check WeierstrassCurve.Φ_three
+#check WeierstrassCurve.Φ_four
+#check WeierstrassCurve.Φ_neg
 
-namespace KummerDiffAdd
+#check WeierstrassCurve.ψ
+#check WeierstrassCurve.ψ_zero
+#check WeierstrassCurve.ψ_one
+#check WeierstrassCurve.ψ_two
+#check WeierstrassCurve.ψ_three
+#check WeierstrassCurve.ψ_four
+#check WeierstrassCurve.ψ_neg
+#check WeierstrassCurve.ψ_even
+#check WeierstrassCurve.ψ_odd
+#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ
 
-variable (W : WeierstrassCurve ℚ)
+#check WeierstrassCurve.φ
+#check WeierstrassCurve.φ_zero
+#check WeierstrassCurve.φ_one
+#check WeierstrassCurve.φ_two
+#check WeierstrassCurve.φ_three
+#check WeierstrassCurve.φ_four
+#check WeierstrassCurve.φ_neg
+#check WeierstrassCurve.Affine.CoordinateRing.mk_φ
 
-/-- The point at infinity on the Kummer line. -/
-def xInf : P1Q :=
-  { X := 1, Z := 0, not_both_zero := Or.inl one_ne_zero }
-
-/-- The affine x-coordinate `[x:1]`. -/
-def xAff (x : ℚ) : P1Q :=
-  { X := x, Z := 1, not_both_zero := Or.inr one_ne_zero }
-
-/-- Projective x-coordinate.  The group identity maps to `[1:0]`. -/
-def xRep : (W⁄ℚ).Point → P1Q
-  | .zero => xInf
-  | .some x _ _ => xAff x
-
-@[simp] lemma xRep_zero :
-    xRep W (0 : (W⁄ℚ).Point) = xInf := rfl
-
-@[simp] lemma xRep_some {x y : ℚ} (h : (W⁄ℚ).Nonsingular x y) :
-    xRep W (.some x y h : (W⁄ℚ).Point) = xAff x := rfl
-
-@[simp] lemma xRep_some_X {x y : ℚ} (h : (W⁄ℚ).Nonsingular x y) :
-    (xRep W (.some x y h : (W⁄ℚ).Point)).X = x := rfl
-
-@[simp] lemma xRep_some_Z {x y : ℚ} (h : (W⁄ℚ).Nonsingular x y) :
-    (xRep W (.some x y h : (W⁄ℚ).Point)).Z = 1 := rfl
-
-@[simp] lemma xInf_X : (xInf : P1Q).X = 1 := rfl
-@[simp] lemma xInf_Z : (xInf : P1Q).Z = 0 := rfl
-@[simp] lemma xAff_X (x : ℚ) : (xAff x).X = x := rfl
-@[simp] lemma xAff_Z (x : ℚ) : (xAff x).Z = 1 := rfl
+#check WeierstrassCurve.map_ΨSq
+#check WeierstrassCurve.map_Φ
+#check WeierstrassCurve.map_ψ
+#check WeierstrassCurve.map_φ
+#check WeierstrassCurve.baseChange_ΨSq
+#check WeierstrassCurve.baseChange_Φ
+#check WeierstrassCurve.baseChange_ψ
+#check WeierstrassCurve.baseChange_φ
 ```
 
-Status: `CLOSEABLE-NOW`.  The only local decision is whether to reuse an existing repo projective-line type.
-
-## 2. Negation preserves x-coordinate
-
-Mathlib's point negation is definitional on affine points:
+The definitions are exactly the ones we want to target:
 
 ```lean
-WeierstrassCurve.Affine.Point.neg_some
+-- schematic types
+WeierstrassCurve.ΨSq (W : WeierstrassCurve R) (n : ℤ) : R[X]
+WeierstrassCurve.Φ   (W : WeierstrassCurve R) (n : ℤ) : R[X]
+WeierstrassCurve.Ψ   (W : WeierstrassCurve R) (n : ℤ) : R[X][Y]
+WeierstrassCurve.ψ   (W : WeierstrassCurve R) (n : ℤ) : R[X][Y]
+WeierstrassCurve.φ   (W : WeierstrassCurve R) (n : ℤ) : R[X][Y]
 ```
 
-It sends `(x,y)` to `(x, W.negY x y)`, so `xRep` is unchanged up to projective equality.  With the above definition it is literally the same affine representative.
+The strongest current congruence lemmas I found are coordinate-ring congruences:
 
 ```lean
-@[simp] lemma xRep_neg_some_same {x y : ℚ} (h : (W⁄ℚ).Nonsingular x y) :
-    P1Q.SameQ
-      (xRep W (-(.some x y h : (W⁄ℚ).Point)))
-      (xRep W (.some x y h : (W⁄ℚ).Point)) := by
-  simp [xRep, xAff, P1Q.SameQ]
+#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ₂_sq
+-- (mk W W.ψ₂)^2 = mk W (C W.Ψ₂Sq)
 
-lemma xRep_neg_same (P : (W⁄ℚ).Point) :
-    P1Q.SameQ (xRep W (-P)) (xRep W P) := by
-  cases P with
-  | zero =>
-      simp [xRep, xInf, P1Q.SameQ]
-  | some x y h =>
-      simpa using xRep_neg_some_same (W := W) h
+#check WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
+-- mk W (W.Ψ n)^2 = mk W (C (W.ΨSq n))
+
+#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ
+-- mk W (W.ψ n) = mk W (W.Ψ n)
+
+#check WeierstrassCurve.Affine.CoordinateRing.mk_φ
+-- mk W (W.φ n) = mk W (C (W.Φ n))
 ```
 
-Status: `CLOSEABLE-NOW`.
+These are useful, but they stop inside the coordinate ring.  They do **not** say anything like `n • P = 0`, `x(nP)`, or roots of `ΨSq`.
 
-## 3. The Kummer forms
+## 2. What Mathlib does not appear to have
 
-These are the same forms from the algebra layer.
+I do not see declarations with any of the following intended shapes:
 
 ```lean
-/-- `δ = X₁Z₂ - X₂Z₁`. -/
-def delta (A B : P1Q) : ℚ :=
-  A.X * B.Z - B.X * A.Z
-
-/-- Homogeneous numerator for `x₊ + x₋`. -/
-def sumNum (A B : P1Q) : ℚ :=
-    2 * A.X * B.X * (A.X * B.Z + B.X * A.Z)
-  + W.b₂ * A.X * B.X * A.Z * B.Z
-  + W.b₄ * A.Z * B.Z * (A.X * B.Z + B.X * A.Z)
-  + W.b₆ * A.Z^2 * B.Z^2
-
-/-- Homogeneous numerator for `x₊ * x₋`. -/
-def prodNum (A B : P1Q) : ℚ :=
-    A.X^2 * B.X^2
-  - W.b₄ * A.X * B.X * A.Z * B.Z
-  - W.b₆ * (A.X * B.Z + B.X * A.Z) * A.Z * B.Z
-  - W.b₈ * A.Z^2 * B.Z^2
-
-lemma delta_eq_zero_of_same {A B : P1Q} (h : P1Q.SameQ A B) :
-    delta A B = 0 := by
-  dsimp [delta, P1Q.SameQ] at h ⊢
-  linear_combination h
+-- Not found / not current Mathlib API:
+#check WeierstrassCurve.Affine.Point.x_nsmul_eq_Φ_div_ΨSq
+#check WeierstrassCurve.Affine.Point.nsmul_eq_zero_iff_ψ_eval_eq_zero
+#check WeierstrassCurve.Affine.Point.nsmul_eq_zero_iff_ΨSq_eval_eq_zero
+#check WeierstrassCurve.Affine.Point.divisionPolynomial_eval_eq_zero_iff
+#check WeierstrassCurve.ΨSq_roots_eq_xCoords_nTorsion
+#check WeierstrassCurve.ψ_roots_eq_nTorsion
+#check WeierstrassCurve.Φ_ΨSq_x_nsmul
 ```
 
-Status: `CLOSEABLE-NOW`.
-
-## 4. Point.add to addX/slope rewrites
-
-Mathlib's affine point addition is defined by cases:
+Also, I do not see an elliptic subgroup-scheme API that would bypass coordinates and give:
 
 ```lean
-Point.add : W.Point → W.Point → W.Point
-| 0, P => P
-| P, 0 => P
-| some x₁ y₁ h₁, some x₂ y₂ h₂ =>
-    if hxy : x₁ = x₂ ∧ y₁ = W.negY x₂ y₂ then 0
-    else some _ _ <| nonsingular_add h₁ h₂ hxy
+E[n] cut out by ψₙ
 ```
 
-For the nonvertical secant case, Mathlib already has:
+or
 
 ```lean
-WeierstrassCurve.Affine.Point.add_of_X_ne
+E[n](K) = zeros of division polynomial on affine chart plus infinity
 ```
 
-which rewrites the sum to an affine `some` whose x-coordinate is definitionally
+The current affine point group API has `Point`, `Point.add`, `Point.neg`, `Point.instAddCommGroup`, etc., but not a torsion/division-polynomial bridge.
+
+## 3. Repo-local FLT status
+
+The repo has `FLT/EllipticCurve/Torsion.lean`, with the abstract type
 
 ```lean
-(W⁄ℚ).addX x₁ x₂ ((W⁄ℚ).slope x₁ x₂ y₁ y₂)
+abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u :=
+  Submodule.torsionBy ℤ (E⁄k).Point n
 ```
 
-The local wrappers should be:
+and then theorem-shaped placeholders such as:
 
 ```lean
-@[simp] lemma xRep_add_some_of_X_ne
-    {x₁ y₁ x₂ y₂ : ℚ}
-    {h₁ : (W⁄ℚ).Nonsingular x₁ y₁}
-    {h₂ : (W⁄ℚ).Nonsingular x₂ y₂}
-    (hx : x₁ ≠ x₂) :
-    xRep W
-      ((.some x₁ y₁ h₁ : (W⁄ℚ).Point) + (.some x₂ y₂ h₂ : (W⁄ℚ).Point))
-      = xAff ((W⁄ℚ).addX x₁ x₂ ((W⁄ℚ).slope x₁ x₂ y₁ y₂)) := by
-  rw [WeierstrassCurve.Affine.Point.add_of_X_ne (W := W⁄ℚ) hx]
-  rfl
-
-@[simp] lemma xRep_add_some_X_of_X_ne
-    {x₁ y₁ x₂ y₂ : ℚ}
-    {h₁ : (W⁄ℚ).Nonsingular x₁ y₁}
-    {h₂ : (W⁄ℚ).Nonsingular x₂ y₂}
-    (hx : x₁ ≠ x₂) :
-    (xRep W
-      ((.some x₁ y₁ h₁ : (W⁄ℚ).Point) + (.some x₂ y₂ h₂ : (W⁄ℚ).Point))).X
-      = (W⁄ℚ).addX x₁ x₂ ((W⁄ℚ).slope x₁ x₂ y₁ y₂) := by
-  simp [xRep_add_some_of_X_ne (W := W) hx]
-
-@[simp] lemma xRep_add_some_Z_of_X_ne
-    {x₁ y₁ x₂ y₂ : ℚ}
-    {h₁ : (W⁄ℚ).Nonsingular x₁ y₁}
-    {h₂ : (W⁄ℚ).Nonsingular x₂ y₂}
-    (hx : x₁ ≠ x₂) :
-    (xRep W
-      ((.some x₁ y₁ h₁ : (W⁄ℚ).Point) + (.some x₂ y₂ h₂ : (W⁄ℚ).Point))).Z
-      = 1 := by
-  simp [xRep_add_some_of_X_ne (W := W) hx]
+#check WeierstrassCurve.n_torsion_finite
+#check WeierstrassCurve.n_torsion_card
+#check WeierstrassCurve.n_torsion_dimension
 ```
 
-Status: `CLOSEABLE-NOW`.  No missing Mathlib API: `Point.add_of_X_ne` exists.
+Those are the geometric `E[n]` API direction, but they do not provide a division-polynomial root characterization either.  The comments explicitly point toward division polynomials as the future proof route, not as an already available theorem.
 
-## 5. Rewriting `P - Q`
+## 4. Roots / separability / degree information
 
-Use `sub_eq_add_neg`, `Point.neg_some`, and then `Point.add_of_X_ne`.  Negation keeps the same x-coordinate and replaces `y₂` by `(W⁄ℚ).negY x₂ y₂`.
+Current Mathlib exposes only limited root-adjacent information for this topic.
+
+For `n = 2`, there is:
 
 ```lean
-@[simp] lemma xRep_sub_some_of_X_ne
-    {x₁ y₁ x₂ y₂ : ℚ}
-    {h₁ : (W⁄ℚ).Nonsingular x₁ y₁}
-    {h₂ : (W⁄ℚ).Nonsingular x₂ y₂}
-    (hx : x₁ ≠ x₂) :
-    xRep W
-      ((.some x₁ y₁ h₁ : (W⁄ℚ).Point) - (.some x₂ y₂ h₂ : (W⁄ℚ).Point))
-      = xAff ((W⁄ℚ).addX x₁ x₂
-          ((W⁄ℚ).slope x₁ x₂ y₁ ((W⁄ℚ).negY x₂ y₂))) := by
-  rw [sub_eq_add_neg]
-  rw [WeierstrassCurve.Affine.Point.neg_some]
-  rw [WeierstrassCurve.Affine.Point.add_of_X_ne (W := W⁄ℚ) hx]
-  rfl
-
-@[simp] lemma xRep_sub_some_X_of_X_ne
-    {x₁ y₁ x₂ y₂ : ℚ}
-    {h₁ : (W⁄ℚ).Nonsingular x₁ y₁}
-    {h₂ : (W⁄ℚ).Nonsingular x₂ y₂}
-    (hx : x₁ ≠ x₂) :
-    (xRep W
-      ((.some x₁ y₁ h₁ : (W⁄ℚ).Point) - (.some x₂ y₂ h₂ : (W⁄ℚ).Point))).X
-      = (W⁄ℚ).addX x₁ x₂
-          ((W⁄ℚ).slope x₁ x₂ y₁ ((W⁄ℚ).negY x₂ y₂)) := by
-  simp [xRep_sub_some_of_X_ne (W := W) hx]
-
-@[simp] lemma xRep_sub_some_Z_of_X_ne
-    {x₁ y₁ x₂ y₂ : ℚ}
-    {h₁ : (W⁄ℚ).Nonsingular x₁ y₁}
-    {h₂ : (W⁄ℚ).Nonsingular x₂ y₂}
-    (hx : x₁ ≠ x₂) :
-    (xRep W
-      ((.some x₁ y₁ h₁ : (W⁄ℚ).Point) - (.some x₂ y₂ h₂ : (W⁄ℚ).Point))).Z
-      = 1 := by
-  simp [xRep_sub_some_of_X_ne (W := W) hx]
+#check WeierstrassCurve.twoTorsionPolynomial
+#check WeierstrassCurve.twoTorsionPolynomial_discr
+#check WeierstrassCurve.twoTorsionPolynomial_discr_isUnit
+#check WeierstrassCurve.twoTorsionPolynomial_discr_ne_zero
+#check WeierstrassCurve.twoTorsionPolynomial_discr_ne_zero_of_isElliptic
+#check WeierstrassCurve.Ψ₂Sq_eq
 ```
 
-Status: `CLOSEABLE-NOW`.  If `rw [Point.neg_some]` does not infer `h₂`, use:
+The docstring of `twoTorsionPolynomial` says that over a field of characteristic different from `2`, its roots over a splitting field are precisely the `X`-coordinates of nonzero 2-torsion points.  But I do not see that root characterization as a formal theorem; the formal theorem is about the discriminant:
 
 ```lean
-rw [WeierstrassCurve.Affine.Point.neg_some (W' := W⁄ℚ) h₂]
+WeierstrassCurve.twoTorsionPolynomial_discr :
+  W.twoTorsionPolynomial.discr = 16 * W.Δ
 ```
 
-or simply:
+For general `n`, I do not see:
 
 ```lean
-simp [sub_eq_add_neg, xRep, WeierstrassCurve.Affine.Point.add_of_X_ne (W := W⁄ℚ) hx]
+#check WeierstrassCurve.ΨSq_natDegree
+#check WeierstrassCurve.ΨSq_degree
+#check WeierstrassCurve.ΨSq_monic
+#check WeierstrassCurve.ΨSq_separable
+#check WeierstrassCurve.ΨSq_roots
+#check WeierstrassCurve.ψ_separable
+#check WeierstrassCurve.ψ_roots
 ```
 
-## 6. Nondegeneracy: from `delta ≠ 0` to `(xRep(P-Q)).Z ≠ 0`
+The `DivisionPolynomial.Basic` file defines recurrences and proves base-change/congruence lemmas; it does not appear to prove root counts, separability, degree formulas, or the root/torsion equivalence.
 
-The proof is by point cases.  If either point is infinity, it is immediate unless both are infinity, in which case `delta = 0`.  If both are affine, `delta ≠ 0` reduces to `x₁ ≠ x₂`, and the previous `xRep_sub_some_Z_of_X_ne` gives `Z = 1`.
+## 5. Can we avoid the x-only ladder?
+
+I do not see a current Mathlib path that avoids a group-law coordinate proof.
+
+The desired theorem is essentially:
 
 ```lean
-lemma xRep_sub_Z_ne_zero_of_delta_ne_zero
-    (P Q : (W⁄ℚ).Point)
-    (hδ : delta (xRep W P) (xRep W Q) ≠ 0) :
-    (xRep W (P - Q)).Z ≠ 0 := by
-  classical
-  cases P with
-  | zero =>
-      cases Q with
-      | zero =>
-          simp [xRep, xInf, delta] at hδ
-      | some x₂ y₂ h₂ =>
-          -- `0 - Q = -Q`, affine, so Z = 1.
-          simp [xRep, xInf, xAff, delta, sub_eq_add_neg] at hδ ⊢
-  | some x₁ y₁ h₁ =>
-      cases Q with
-      | zero =>
-          -- `P - 0 = P`, affine, so Z = 1.
-          simp [xRep, xInf, xAff, delta] at hδ ⊢
-      | some x₂ y₂ h₂ =>
-          have hx : x₁ ≠ x₂ := by
-            intro hx
-            apply hδ
-            simp [xRep, xAff, delta, hx]
-          simp [xRep_sub_some_of_X_ne (W := W) (h₁ := h₁) (h₂ := h₂) hx]
+namespace WeierstrassCurve
+namespace Affine
+
+-- target shape, not existing Mathlib
+lemma Point.nsmul_eq_zero_iff_ΨSq_eval_eq_zero
+    {K : Type*} [Field K]
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    (n : ℕ)
+    {x y : K} (hP : (W⁄K).Nonsingular x y) :
+    n • (.some x y hP : (W⁄K).Point) = 0
+      ↔ Polynomial.eval x (W.ΨSq (n : ℤ)) = 0 := by
+  sorry
+
+end Affine
+end WeierstrassCurve
 ```
 
-Status: `CLOSEABLE-NOW`.
+Possible proof routes:
 
-This lemma is enough to prove the denominator nonzero in the functional differential-addition theorem:
+### Route A: x-only ladder / Kummer recurrence
 
-```lean
-lemma addFromSub_not_both_zero
-    (P Q : (W⁄ℚ).Point)
-    (hδ : delta (xRep W P) (xRep W Q) ≠ 0) :
-    (sumNum W (xRep W P) (xRep W Q) * (xRep W (P - Q)).Z
-        - (delta (xRep W P) (xRep W Q))^2 * (xRep W (P - Q)).X ≠ 0)
-    ∨
-    ((delta (xRep W P) (xRep W Q))^2 * (xRep W (P - Q)).Z ≠ 0) := by
-  right
-  exact mul_ne_zero (sq_ne_zero_iff.mpr hδ)
-    (xRep_sub_Z_ne_zero_of_delta_ne_zero (W := W) P Q hδ)
+This is the current hand-rolled route:
+
+```text
+Point.add/neg/double  →  projective x-only differential addition
+                     →  ladder for x(nP)
+                     →  identify ladder polynomials with Φₙ/ΨSqₙ recurrences
+                     →  nP = 0 iff denominator/numerator projective output is [1:0]
+                     →  ΨSqₙ(x(P)) = 0.
 ```
 
-Status: `CLOSEABLE-NOW`.
+This route matches the existing Mathlib objects `Φ`, `ΨSq`, `preΨ`, and the EDS recurrences.  It is still work, but it uses the definitions Mathlib actually has.
 
-## 7. Degenerate `x₁ = x₂` branch
+### Route B: coordinate-ring division polynomial action theorem
 
-Mathlib gives:
-
-```lean
-WeierstrassCurve.Affine.Y_eq_of_X_eq
-```
-
-For nonsingular affine points this yields:
+One could try to prove a stronger coordinate-ring theorem:
 
 ```lean
-y₁ = y₂ ∨ y₁ = (W⁄ℚ).negY x₂ y₂
-```
-
-If `y₁ = y₂`, then `P = Q`, hence `P-Q=0`, so `Z₋ = 0`.  If `y₁ = negY x₂ y₂`, then `P = -Q`, hence `P+Q=0`, so `Z₊ = 0`.  Since `delta = 0`, both projective Kummer identities become `0 = 0`.
-
-Useful local equalities:
-
-```lean
-lemma some_ext_of_xy_eq
-    {x₁ y₁ x₂ y₂ : ℚ}
-    {h₁ : (W⁄ℚ).Nonsingular x₁ y₁}
-    {h₂ : (W⁄ℚ).Nonsingular x₂ y₂}
-    (hx : x₁ = x₂) (hy : y₁ = y₂) :
-    (.some x₁ y₁ h₁ : (W⁄ℚ).Point) = .some x₂ y₂ h₂ := by
-  subst hx
-  subst hy
-  congr
-
-lemma xRep_add_zero_of_Y_eq
-    {x₁ y₁ x₂ y₂ : ℚ}
-    {h₁ : (W⁄ℚ).Nonsingular x₁ y₁}
-    {h₂ : (W⁄ℚ).Nonsingular x₂ y₂}
-    (hx : x₁ = x₂) (hy : y₁ = (W⁄ℚ).negY x₂ y₂) :
-    xRep W ((.some x₁ y₁ h₁ : (W⁄ℚ).Point) + .some x₂ y₂ h₂) = xInf := by
-  rw [WeierstrassCurve.Affine.Point.add_of_Y_eq (W := W⁄ℚ) hx hy]
-  rfl
-
-lemma xRep_sub_zero_of_same_xy
-    {x₁ y₁ x₂ y₂ : ℚ}
-    {h₁ : (W⁄ℚ).Nonsingular x₁ y₁}
-    {h₂ : (W⁄ℚ).Nonsingular x₂ y₂}
-    (hx : x₁ = x₂) (hy : y₁ = y₂) :
-    xRep W ((.some x₁ y₁ h₁ : (W⁄ℚ).Point) - .some x₂ y₂ h₂) = xInf := by
-  have hPQ : (.some x₁ y₁ h₁ : (W⁄ℚ).Point) = .some x₂ y₂ h₂ :=
-    some_ext_of_xy_eq (W := W) hx hy
-  subst hPQ
-  simp [xRep]
-```
-
-Status: `CLOSEABLE-NOW`.  If `congr` in `some_ext_of_xy_eq` does not close the proof field, replace the body after `subst`s with:
-
-```lean
-have hh : h₁ = h₂ := Subsingleton.elim _ _
-subst hh
-rfl
-```
-
-## 8. Global biquadratic theorem: case split skeleton
-
-Assume the algebra layer has already proved the affine nondegenerate theorem:
-
-```lean
-lemma xRep_add_sub_kummer_affine_ne_x
-    {x₁ y₁ x₂ y₂ : ℚ}
-    (h₁ : (W⁄ℚ).Equation x₁ y₁)
-    (h₂ : (W⁄ℚ).Equation x₂ y₂)
-    (hx : x₁ ≠ x₂) :
-    let Y₁ := YsqCoord W x₁ y₁
-    let Y₂ := YsqCoord W x₂ y₂
-    let xp := (W⁄ℚ).addX x₁ x₂ ((W⁄ℚ).slope x₁ x₂ y₁ y₂)
-    let xm := (W⁄ℚ).addX x₁ x₂
-      ((W⁄ℚ).slope x₁ x₂ y₁ ((W⁄ℚ).negY x₂ y₂))
-    (x₁ - x₂)^2 * (xp + xm) = sumAff W x₁ x₂
-    ∧
-    (x₁ - x₂)^2 * xp * xm = prodAff W x₁ x₂ := by
-  -- already designed in Round 2
+-- not existing, possible new theorem
+lemma mk_X_of_nsmul_eq_Φ_ΨSq
+    (P : (W⁄K).Point) :
+    P1Q.SameQ (xRep W (n • P))
+      { X := Polynomial.eval (x P) (W.Φ n)
+        Z := Polynomial.eval (x P) (W.ΨSq n) } := by
   sorry
 ```
 
-Then the global proof skeleton is:
+But proving this still requires induction through the group law or a Kummer addition formula.  This is basically the ladder route in coordinate-ring clothing.
+
+### Route C: subgroup scheme / roots theorem
+
+This would be ideal:
 
 ```lean
-theorem xRep_add_sub_kummer_biquadratic
-    (P Q : (W⁄ℚ).Point) :
-    let A  := xRep W P
-    let B  := xRep W Q
-    let Xp := xRep W (P + Q)
-    let Xm := xRep W (P - Q)
-    let D  := (delta A B)^2
-    D * (Xp.X * Xm.Z + Xm.X * Xp.Z)
-      = sumNum W A B * Xp.Z * Xm.Z
-    ∧
-    D * Xp.X * Xm.X
-      = prodNum W A B * Xp.Z * Xm.Z := by
-  classical
-  cases P with
-  | zero =>
-      -- `0 + Q = Q`, `0 - Q = -Q`, `x(-Q) = x(Q)`.
-      cases Q with
-      | zero =>
-          simp [xRep, xInf, delta, sumNum, prodNum]
-      | some x₂ y₂ h₂ =>
-          simp [xRep, xInf, xAff, delta, sumNum, prodNum,
-            P1Q.SameQ, sub_eq_add_neg]
-  | some x₁ y₁ h₁ =>
-      cases Q with
-      | zero =>
-          -- `P + 0 = P`, `P - 0 = P`.
-          simp [xRep, xInf, xAff, delta, sumNum, prodNum]
-      | some x₂ y₂ h₂ =>
-          by_cases hx : x₁ = x₂
-          · have hY := WeierstrassCurve.Affine.Y_eq_of_X_eq
-                (W := W⁄ℚ) h₁.left h₂.left hx
-            rcases hY with hy_same | hy_neg
-            · -- P = Q, so P-Q = 0 and delta = 0.
-              have hsub0 :
-                  xRep W
-                    ((.some x₁ y₁ h₁ : (W⁄ℚ).Point) - .some x₂ y₂ h₂) = xInf :=
-                xRep_sub_zero_of_same_xy (W := W) hx hy_same
-              simp [xRep, xAff, xInf, delta, sumNum, prodNum, hx, hsub0]
-            · -- P = -Q, so P+Q = 0 and delta = 0.
-              have hadd0 :
-                  xRep W
-                    ((.some x₁ y₁ h₁ : (W⁄ℚ).Point) + .some x₂ y₂ h₂) = xInf :=
-                xRep_add_zero_of_Y_eq (W := W) hx hy_neg
-              simp [xRep, xAff, xInf, delta, sumNum, prodNum, hx, hadd0]
-          · -- affine nondegenerate branch
-            have hcore := xRep_add_sub_kummer_affine_ne_x
-              (W := W) h₁.left h₂.left hx
-            rcases hcore with ⟨hsum, hprod⟩
-            -- Rewrite `P+Q` and `P-Q` xReps using the local wrappers.
-            simp [xRep_add_some_of_X_ne (W := W) (h₁ := h₁) (h₂ := h₂) hx,
-                  xRep_sub_some_of_X_ne (W := W) (h₁ := h₁) (h₂ := h₂) hx,
-                  xRep, xAff, delta, sumNum, prodNum] at hsum hprod ⊢
-            constructor
-            · exact hsum
-            · exact hprod
+-- not existing
+E[n] = V(ψₙ)
 ```
 
-Status:
+But Mathlib does not currently expose an elliptic-curve finite subgroup scheme API or a theorem that `ψₙ` cuts out `E[n]`.  Building this route would be much larger than the ladder.
+
+### Route D: use only cardinality/root counts
+
+Even if Mathlib had degree and separability lemmas, root counts alone would not prove the exact pointwise equivalence without a map from torsion points to roots and back.  The missing bridge remains the coordinate formula or subgroup-scheme theorem.
+
+## 6. Concrete useful Mathlib facts for the ladder route
+
+Even though there is no shortcut, Mathlib's definitions are valuable targets.  The ladder should aim to prove statements like:
+
+```lean
+-- project local statement, not existing Mathlib
+lemma xRep_nsmul_same_Φ_ΨSq
+    {K : Type*} [Field K]
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    (n : ℕ) (P : (W⁄K).Point) :
+    P1.Same
+      (xRep W (n • P))
+      (P1.mk
+        (Polynomial.eval (xRep W P).x (W.Φ (n : ℤ)))
+        (Polynomial.eval (xRep W P).x (W.ΨSq (n : ℤ)))) := by
+  -- prove by ladder + recurrence matching
+  sorry
+```
+
+Then derive:
+
+```lean
+-- project local statement
+lemma nsmul_eq_zero_iff_ΨSq_eval_eq_zero
+    {K : Type*} [Field K]
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    (n : ℕ) {x y : K} (hP : (W⁄K).Nonsingular x y)
+    (hn_nonzero_output : (* handle n=0 / projective numerator cases *)) :
+    n • (.some x y hP : (W⁄K).Point) = 0
+      ↔ Polynomial.eval x (W.ΨSq (n : ℤ)) = 0 := by
+  sorry
+```
+
+The exact theorem should special-case `n = 0` and `P = 0` carefully.  For affine nonzero points and positive `n`, the denominator-zero characterization is the intended form.
+
+## 7. Bottom line
+
+There is no existing Mathlib theorem that gives the keystone directly.
+
+What Mathlib gives:
 
 ```text
-CLOSEABLE-NOW after the affine algebra lemma is in namespace and the exact simp normal forms are aligned.
-No MISSING-MATHLIB-API.
+✅ EDS recurrence definitions: preNormEDS, normEDS.
+✅ Weierstrass division polynomial definitions: ψ₂, Ψ₂Sq, preΨ, ΨSq, Ψ, Φ, ψ, φ.
+✅ initial values and recurrence lemmas for those sequences.
+✅ coordinate-ring congruences: mk_ψ, mk_φ, mk_Ψ_sq.
+✅ base-change/map lemmas for the polynomials.
+✅ 2-torsion polynomial discriminant and equality Ψ₂Sq = twoTorsionPolynomial.toPoly.
 ```
 
-## 9. Functional differential addition theorem
-
-Once the global theorem exists, the exported functional seam is short.
-
-```lean
-theorem xRep_add_of_xRep_sub
-    (P Q : (W⁄ℚ).Point)
-    (hδ : delta (xRep W P) (xRep W Q) ≠ 0) :
-    P1Q.SameQ
-      (xRep W (P + Q))
-      { X := sumNum W (xRep W P) (xRep W Q) * (xRep W (P - Q)).Z
-              - (delta (xRep W P) (xRep W Q))^2 * (xRep W (P - Q)).X
-        Z := (delta (xRep W P) (xRep W Q))^2 * (xRep W (P - Q)).Z
-        not_both_zero := addFromSub_not_both_zero (W := W) P Q hδ } := by
-  classical
-  rcases xRep_add_sub_kummer_biquadratic (W := W) P Q with ⟨hsum, _hprod⟩
-  dsimp [P1Q.SameQ]
-  ring_nf at hsum ⊢
-  linear_combination hsum
-```
-
-Status: `CLOSEABLE-NOW`.
-
-## 10. Exact dependency list
+What Mathlib does not appear to give:
 
 ```text
-CLOSEABLE-NOW / Mathlib already has:
-  Point.zero
-  Point.some
-  Point.neg_some
-  Point.add_of_X_ne
-  Point.add_of_Y_eq
-  Affine.Y_eq_of_X_eq
-  Affine.slope_of_X_ne
-  Affine.addX
-  Affine.negY
-  Affine.nonsingular_neg
-  Affine.nonsingular_add
-
-MISSING-PROJECT-API:
-  P1Q if not already present;
-  xRep namespace and simp tags;
-  affine algebra lemma name alignment;
-  optional raw-pair normalization if projective coordinates are normalized.
-
-MISSING-MATHLIB-API:
-  none identified.
+❌ x(nP) = Φₙ(x(P)) / ΨSqₙ(x(P)).
+❌ n • P = 0 ↔ ψₙ(P) = 0.
+❌ n • P = 0 ↔ ΨSqₙ(x(P)) = 0.
+❌ roots of ΨSqₙ are exactly x-coordinates of n-torsion.
+❌ degree/separability/root-count theorem for ΨSqₙ.
+❌ subgroup-scheme theorem saying E[n] is cut out by ψₙ.
 ```
 
-## 11. First prototype order
+Therefore the Montgomery/Kummer x-only ladder is not redundant.  It is the practical bridge from Mathlib's point group law to Mathlib's division-polynomial definitions.  The shortest path remains:
 
-Prototype these in this order:
+```text
+1. Prove x-only differential addition from Mathlib Point.add.
+2. Build the Montgomery/Kummer ladder on xRep.
+3. Match the ladder recurrence to Mathlib's `preΨ`, `Φ`, `ΨSq` recurrences.
+4. Derive `n • P = 0 ↔ ΨSqₙ(x(P)) = 0`.
+```
+
+If a shortcut is desired later, the most reusable theorem to upstream would be the coordinate formula:
 
 ```lean
-xRep
-xRep_zero
-xRep_some
-xRep_neg_same
-xRep_add_some_of_X_ne
-xRep_sub_some_of_X_ne
-xRep_sub_Z_ne_zero_of_delta_ne_zero
-xRep_add_sub_kummer_biquadratic
-xRep_add_of_xRep_sub
+theorem WeierstrassCurve.Affine.Point.x_nsmul_same_Φ_ΨSq
+    {K : Type*} [Field K]
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    (n : ℕ) (P : (W⁄K).Point) :
+    P1.Same (xRep W (n • P))
+      (P1.mk (evalX P (W.Φ (n : ℤ))) (evalX P (W.ΨSq (n : ℤ)))) := by
+  sorry
 ```
 
-The only place I expect elaboration friction is the exact namespace arguments for:
-
-```lean
-WeierstrassCurve.Affine.Point.neg_some
-WeierstrassCurve.Affine.Point.add_of_X_ne
-WeierstrassCurve.Affine.Point.add_of_Y_eq
-```
-
-If named rewriting fails, `simp [WeierstrassCurve.Affine.Point.add_def, WeierstrassCurve.Affine.Point.add, hx]` is the fallback, because the definitions are by cases and the nonvertical branch is definitionally the `some (addX ...) (addY ...) (nonsingular_add ...)` constructor.
+But proving that theorem is exactly the ladder/differential-addition project.
