@@ -153,3 +153,24 @@ H-residual sub-identity (CAS=0): b²Gkp1(m+1)Gkp1(m)−Hkm·H_{k+1,m} = W(m+2)W(
 - GapRel(2,m) = adjacent Somos (already PROVEN, normEDS_adjacent_somos).
 
 **COMPLETE RECIPE (Ward = normEDS_addRel):** base {GapRel(0),OffRel(0)} ∀m [trivial] → mutual induction k→k+1 {G-step, H-step} [CAS-verified] ⟹ GapRel(k,m) ∀k≥0,m. AddRel(m,n)=GapRel(n,m) for n≥0; n<0 by AddRel(m,-n)=AddRel(m,n) [W(-n)=-W(n)]. Cancellations: b²U_k(m), b·W(m+k+1)W(m-k), all nonzero over a domain with normEDS nonvanishing. EVERY cofactor sympy-verified free-W exact 0. Remaining: Lean encoding only.
+
+## Lean status 2026-06-22 (cont) — both gap-step cores + diagonal BUILT; remaining = cancellation assembly
+
+BUILT + committed, 0 custom axioms (verified #print axioms):
+- WardConservation: normEDS_conservation
+- WardInvariant: InvarRel base/step/all + Trel_zero  (conditional: [IsDomain] + hne nonvanishing)
+- WardGapStep: Useq/Vseq + Vseq_mul_Vseq tautology
+- WardGapInduction: GapRel/OffRel defs, gapRel_zero/offRel_zero base, gStep_mul, hStep_mul (both 6-cofactor
+  multiplied forms), gapRel_diag (odd-recurrence diagonal via normEDS_odd)
+
+REMAINING Lean assembly (all CAS-verified; conditional on [IsDomain R] + hne : ∀ j≠0, normEDS..j ≠ 0 — for
+Mazur discharge via preΨ degree lemmas; full-generality version would need universal-ring nonvanishing):
+1. gStep: GapRel(k+1,m) for m≠±k by cancelling b²W(m+k)W(m-k) from gStep_mul; combine with gapRel_diag
+   (m=k) + its −k twin ⇒ ∀m GapRel(k+1,m).
+2. OffRel diagonals: OffRel(k+1,m) edge cases m=k (W(m-k)=W(0)=0) and m=-k-1 (W(m+k+1)=W(0)=0) — prove
+   directly (normEDS_odd/even or base values), like gapRel_diag.
+3. hStep: OffRel(k+1,m) for non-edge m by cancelling V_k(m)=b·W(m+k+1)W(m-k) from hStep_mul; + diagonals ⇒
+   ∀m OffRel(k+1,m).
+4. Mutual induction on k≥0 carrying (∀m GapRel k m) ∧ (∀m OffRel k m); base k=0 = gapRel_zero/offRel_zero.
+5. AddRel(m,n): n≥0 ⇒ GapRel(n,m); n<0 ⇒ AddRel(m,-n)=AddRel(m,n) [W(-n)=-W(n)]. Fills normEDS_addRel sorry.
+6. normEDS_isEllSequence via Step 1 (isEllSequence_of_addRel, already proven).
