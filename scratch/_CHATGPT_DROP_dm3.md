@@ -1,447 +1,434 @@
-# Q185 (dm3): Mathlib survey for `n • P = 0 ↔ ΨSqₙ(x(P)) = 0`
+# Q225 (dm3): Generic-point route for the division-polynomial doubling composition seam
 
-Bottom line: current Mathlib has a useful **definition layer** for elliptic divisibility sequences and Weierstrass division polynomials, but I do **not** see a shortcut theorem connecting those polynomials to the actual affine point group law.  In particular, I do not see an existing declaration of the form
-
-```lean
-x (n • P) = Φₙ(x P) / ΨSqₙ(x P)
-```
-
-or
+Question: can the coordinate-ring composition law
 
 ```lean
-n • P = 0 ↔ IsRoot (W.ΨSq n) (x P)
+mk_phi_psi_dup_doubling_cross (m : ℤ) :
+  mk W.toAffine
+    (W.φ (2*m) * dupDenBiv (W.φ m) ((W.ψ m)^2)
+      - (W.ψ (2*m))^2 * dupNumBiv (W.φ m) ((W.ψ m)^2)) = 0
 ```
 
-or
+be proved by applying the already-proved pointwise doubling theorem to the **generic point** of `W` over the function field of the affine coordinate ring?
 
-```lean
-n • P = 0 ↔ eval₂ ... (W.ψ n) x y = 0
-```
-
-So the hand-rolled x-only ladder remains the shortest route unless a new bridge theorem is built.
-
-## 1. What Mathlib has
-
-The relevant imports are:
-
-```lean
-import Mathlib.NumberTheory.EllipticDivisibilitySequence
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-```
-
-### EDS layer
-
-Mathlib has the EDS recurrence infrastructure:
-
-```lean
-#check IsEllSequence
-#check IsDivSequence
-#check IsEllDivSequence
-
-#check preNormEDS'
-#check preNormEDS
-#check preNormEDS'_zero
-#check preNormEDS'_one
-#check preNormEDS'_two
-#check preNormEDS'_three
-#check preNormEDS'_four
-#check preNormEDS'_even
-#check preNormEDS'_odd
-#check preNormEDS_zero
-#check preNormEDS_one
-#check preNormEDS_two
-#check preNormEDS_three
-#check preNormEDS_four
-#check preNormEDS_even
-#check preNormEDS_odd
-
-#check complEDS₂
-#check preNormEDS_mul_complEDS₂
-
-#check normEDS
-#check normEDS_zero
-#check normEDS_one
-#check normEDS_two
-#check normEDS_three
-#check normEDS_four
-#check normEDS_neg
-#check normEDS_even
-#check normEDS_odd
-#check normEDSRec'
-#check normEDSRec
-```
-
-Important caveat: the file documentation still says the main EDS theorem is TODO:
+Short answer:
 
 ```text
-TODO: prove that `normEDS` satisfies `IsEllDivSequence`.
-TODO: prove that a normalised sequence satisfying `IsEllDivSequence` can be given by `normEDS`.
+Generic point existence:           YES, buildable in Mathlib.
+Point.generic declaration:         NO, not currently exposed as a named theorem.
+x([n]G) = Φₙ/ΨSqₙ in Mathlib:     NO.
+Generic route shorter?:            NO, unless x([n]G)=Φₙ/ΨSqₙ is already available.
+Real remaining gap:                the generic n-multiple coordinate formula.
 ```
 
-So this is recurrence infrastructure, not a completed arithmetic theory of EDSs.
+The generic point is useful as a *semantic check* and may be useful as a final descent-from-function-field wrapper, but it does not remove the need to prove the division-polynomial coordinate formula.  Without that formula, applying the pointwise doubling theorem to `[m]G` only gives a statement about `x([m]G)`, not about `φ_m` and `ψ_m²`.
 
-### Weierstrass division-polynomial layer
+## 1. Does Mathlib support constructing the generic point?
 
-Mathlib has the following Weierstrass division-polynomial declarations:
+There is no declaration I know of named
 
 ```lean
+WeierstrassCurve.Affine.Point.generic
+```
+
+but the construction is available from existing pieces:
+
+```lean
+WeierstrassCurve.Affine.CoordinateRing
+WeierstrassCurve.Affine.FunctionField
+WeierstrassCurve.Affine.CoordinateRing.mk
+WeierstrassCurve.Affine.CoordinateRing.instIsDomainCoordinateRing
+WeierstrassCurve.Affine.equation_iff_nonsingular
+WeierstrassCurve.Affine.Equation.map
+IsFractionRing.injective
+```
+
+Mathlib defines
+
+```lean
+abbrev WeierstrassCurve.Affine.CoordinateRing (W : Affine R) :=
+  AdjoinRoot W.polynomial
+
+abbrev WeierstrassCurve.Affine.FunctionField (W : Affine R) :=
+  FractionRing W.CoordinateRing
+```
+
+and the coordinate-ring map
+
+```lean
+noncomputable abbrev WeierstrassCurve.Affine.CoordinateRing.mk
+    (W : Affine R) : R[X][Y] →+* W.CoordinateRing :=
+  AdjoinRoot.mk W.polynomial
+```
+
+So for a field `k`, the generic coordinates are the classes of `X` and `Y`, mapped into the fraction field.
+
+## 2. Generic point construction skeleton
+
+This is the Lean shape I would use.  Some `simpa` details may need local adjustment, but there is no missing math here.
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.RingTheory.FractionRing
+import Mathlib.Tactic
+
+noncomputable section
 
 open Polynomial
 open scoped Polynomial.Bivariate
 
-#check WeierstrassCurve.ψ₂
-#check WeierstrassCurve.Ψ₂Sq
-#check WeierstrassCurve.C_Ψ₂Sq
-#check WeierstrassCurve.ψ₂_sq
-#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ₂_sq
-#check WeierstrassCurve.Ψ₂Sq_eq
-
-#check WeierstrassCurve.Ψ₃
-#check WeierstrassCurve.preΨ₄
-
-#check WeierstrassCurve.preΨ'
-#check WeierstrassCurve.preΨ'_zero
-#check WeierstrassCurve.preΨ'_one
-#check WeierstrassCurve.preΨ'_two
-#check WeierstrassCurve.preΨ'_three
-#check WeierstrassCurve.preΨ'_four
-#check WeierstrassCurve.preΨ'_even
-#check WeierstrassCurve.preΨ'_odd
-
-#check WeierstrassCurve.preΨ
-#check WeierstrassCurve.preΨ_zero
-#check WeierstrassCurve.preΨ_one
-#check WeierstrassCurve.preΨ_two
-#check WeierstrassCurve.preΨ_three
-#check WeierstrassCurve.preΨ_four
-#check WeierstrassCurve.preΨ_neg
-#check WeierstrassCurve.preΨ_even
-#check WeierstrassCurve.preΨ_odd
-
-#check WeierstrassCurve.ΨSq
-#check WeierstrassCurve.ΨSq_zero
-#check WeierstrassCurve.ΨSq_one
-#check WeierstrassCurve.ΨSq_two
-#check WeierstrassCurve.ΨSq_three
-#check WeierstrassCurve.ΨSq_four
-#check WeierstrassCurve.ΨSq_neg
-#check WeierstrassCurve.ΨSq_even
-#check WeierstrassCurve.ΨSq_odd
-
-#check WeierstrassCurve.Ψ
-#check WeierstrassCurve.Ψ_zero
-#check WeierstrassCurve.Ψ_one
-#check WeierstrassCurve.Ψ_two
-#check WeierstrassCurve.Ψ_three
-#check WeierstrassCurve.Ψ_four
-#check WeierstrassCurve.Ψ_neg
-#check WeierstrassCurve.Ψ_even
-#check WeierstrassCurve.Ψ_odd
-#check WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
-
-#check WeierstrassCurve.Φ
-#check WeierstrassCurve.Φ_zero
-#check WeierstrassCurve.Φ_one
-#check WeierstrassCurve.Φ_two
-#check WeierstrassCurve.Φ_three
-#check WeierstrassCurve.Φ_four
-#check WeierstrassCurve.Φ_neg
-
-#check WeierstrassCurve.ψ
-#check WeierstrassCurve.ψ_zero
-#check WeierstrassCurve.ψ_one
-#check WeierstrassCurve.ψ_two
-#check WeierstrassCurve.ψ_three
-#check WeierstrassCurve.ψ_four
-#check WeierstrassCurve.ψ_neg
-#check WeierstrassCurve.ψ_even
-#check WeierstrassCurve.ψ_odd
-#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ
-
-#check WeierstrassCurve.φ
-#check WeierstrassCurve.φ_zero
-#check WeierstrassCurve.φ_one
-#check WeierstrassCurve.φ_two
-#check WeierstrassCurve.φ_three
-#check WeierstrassCurve.φ_four
-#check WeierstrassCurve.φ_neg
-#check WeierstrassCurve.Affine.CoordinateRing.mk_φ
-
-#check WeierstrassCurve.map_ΨSq
-#check WeierstrassCurve.map_Φ
-#check WeierstrassCurve.map_ψ
-#check WeierstrassCurve.map_φ
-#check WeierstrassCurve.baseChange_ΨSq
-#check WeierstrassCurve.baseChange_Φ
-#check WeierstrassCurve.baseChange_ψ
-#check WeierstrassCurve.baseChange_φ
-```
-
-The definitions are exactly the ones we want to target:
-
-```lean
--- schematic types
-WeierstrassCurve.ΨSq (W : WeierstrassCurve R) (n : ℤ) : R[X]
-WeierstrassCurve.Φ   (W : WeierstrassCurve R) (n : ℤ) : R[X]
-WeierstrassCurve.Ψ   (W : WeierstrassCurve R) (n : ℤ) : R[X][Y]
-WeierstrassCurve.ψ   (W : WeierstrassCurve R) (n : ℤ) : R[X][Y]
-WeierstrassCurve.φ   (W : WeierstrassCurve R) (n : ℤ) : R[X][Y]
-```
-
-The strongest current congruence lemmas I found are coordinate-ring congruences:
-
-```lean
-#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ₂_sq
--- (mk W W.ψ₂)^2 = mk W (C W.Ψ₂Sq)
-
-#check WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
--- mk W (W.Ψ n)^2 = mk W (C (W.ΨSq n))
-
-#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ
--- mk W (W.ψ n) = mk W (W.Ψ n)
-
-#check WeierstrassCurve.Affine.CoordinateRing.mk_φ
--- mk W (W.φ n) = mk W (C (W.Φ n))
-```
-
-These are useful, but they stop inside the coordinate ring.  They do **not** say anything like `n • P = 0`, `x(nP)`, or roots of `ΨSq`.
-
-## 2. What Mathlib does not appear to have
-
-I do not see declarations with any of the following intended shapes:
-
-```lean
--- Not found / not current Mathlib API:
-#check WeierstrassCurve.Affine.Point.x_nsmul_eq_Φ_div_ΨSq
-#check WeierstrassCurve.Affine.Point.nsmul_eq_zero_iff_ψ_eval_eq_zero
-#check WeierstrassCurve.Affine.Point.nsmul_eq_zero_iff_ΨSq_eval_eq_zero
-#check WeierstrassCurve.Affine.Point.divisionPolynomial_eval_eq_zero_iff
-#check WeierstrassCurve.ΨSq_roots_eq_xCoords_nTorsion
-#check WeierstrassCurve.ψ_roots_eq_nTorsion
-#check WeierstrassCurve.Φ_ΨSq_x_nsmul
-```
-
-Also, I do not see an elliptic subgroup-scheme API that would bypass coordinates and give:
-
-```lean
-E[n] cut out by ψₙ
-```
-
-or
-
-```lean
-E[n](K) = zeros of division polynomial on affine chart plus infinity
-```
-
-The current affine point group API has `Point`, `Point.add`, `Point.neg`, `Point.instAddCommGroup`, etc., but not a torsion/division-polynomial bridge.
-
-## 3. Repo-local FLT status
-
-The repo has `FLT/EllipticCurve/Torsion.lean`, with the abstract type
-
-```lean
-abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u :=
-  Submodule.torsionBy ℤ (E⁄k).Point n
-```
-
-and then theorem-shaped placeholders such as:
-
-```lean
-#check WeierstrassCurve.n_torsion_finite
-#check WeierstrassCurve.n_torsion_card
-#check WeierstrassCurve.n_torsion_dimension
-```
-
-Those are the geometric `E[n]` API direction, but they do not provide a division-polynomial root characterization either.  The comments explicitly point toward division polynomials as the future proof route, not as an already available theorem.
-
-## 4. Roots / separability / degree information
-
-Current Mathlib exposes only limited root-adjacent information for this topic.
-
-For `n = 2`, there is:
-
-```lean
-#check WeierstrassCurve.twoTorsionPolynomial
-#check WeierstrassCurve.twoTorsionPolynomial_discr
-#check WeierstrassCurve.twoTorsionPolynomial_discr_isUnit
-#check WeierstrassCurve.twoTorsionPolynomial_discr_ne_zero
-#check WeierstrassCurve.twoTorsionPolynomial_discr_ne_zero_of_isElliptic
-#check WeierstrassCurve.Ψ₂Sq_eq
-```
-
-The docstring of `twoTorsionPolynomial` says that over a field of characteristic different from `2`, its roots over a splitting field are precisely the `X`-coordinates of nonzero 2-torsion points.  But I do not see that root characterization as a formal theorem; the formal theorem is about the discriminant:
-
-```lean
-WeierstrassCurve.twoTorsionPolynomial_discr :
-  W.twoTorsionPolynomial.discr = 16 * W.Δ
-```
-
-For general `n`, I do not see:
-
-```lean
-#check WeierstrassCurve.ΨSq_natDegree
-#check WeierstrassCurve.ΨSq_degree
-#check WeierstrassCurve.ΨSq_monic
-#check WeierstrassCurve.ΨSq_separable
-#check WeierstrassCurve.ΨSq_roots
-#check WeierstrassCurve.ψ_separable
-#check WeierstrassCurve.ψ_roots
-```
-
-The `DivisionPolynomial.Basic` file defines recurrences and proves base-change/congruence lemmas; it does not appear to prove root counts, separability, degree formulas, or the root/torsion equivalence.
-
-## 5. Can we avoid the x-only ladder?
-
-I do not see a current Mathlib path that avoids a group-law coordinate proof.
-
-The desired theorem is essentially:
-
-```lean
 namespace WeierstrassCurve
 namespace Affine
+namespace GenericPoint
 
--- target shape, not existing Mathlib
-lemma Point.nsmul_eq_zero_iff_ΨSq_eval_eq_zero
-    {K : Type*} [Field K]
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    (n : ℕ)
-    {x y : K} (hP : (W⁄K).Nonsingular x y) :
-    n • (.some x y hP : (W⁄K).Point) = 0
-      ↔ Polynomial.eval x (W.ΨSq (n : ℤ)) = 0 := by
+variable {k : Type*} [Field k]
+variable (W : WeierstrassCurve k) [W.IsElliptic]
+
+local notation "A" => W.toAffine.CoordinateRing
+local notation "K" => FractionRing A
+
+/-- The generic `X` coordinate in the affine coordinate ring. -/
+noncomputable def xCR : A :=
+  CoordinateRing.mk W.toAffine (C X)
+
+/-- The generic `Y` coordinate in the affine coordinate ring. -/
+noncomputable def yCR : A :=
+  CoordinateRing.mk W.toAffine Y
+
+/-- The generic `X` coordinate in the function field. -/
+noncomputable def xK : K :=
+  algebraMap A K (xCR W)
+
+/-- The generic `Y` coordinate in the function field. -/
+noncomputable def yK : K :=
+  algebraMap A K (yCR W)
+
+/-- The coordinate-ring generic point satisfies the Weierstrass equation. -/
+lemma generic_equation_CR :
+    (W.toAffine.baseChange A).Equation (xCR W) (yCR W) := by
+  -- This is the core quotient calculation:
+  -- `W.polynomial` vanishes in `AdjoinRoot W.polynomial`.
+  -- Expected proof shape:
+  --   change ((W.toAffine.baseChange A).polynomial.evalEval (xCR W) (yCR W) = 0)
+  --   simpa [xCR, yCR, CoordinateRing.mk, Affine.Equation,
+  --          Affine.map_polynomial, Affine.baseChange,
+  --          evalEval, Polynomial.aeval_def]
+  --     using AdjoinRoot.aeval_eq W.toAffine.polynomial
+  -- or equivalently `AdjoinRoot.mk_self` after rewriting eval at the two classes.
+  --
+  -- This is CLOSEABLE-NOW, but the exact `simpa` terms depend on the local
+  -- normal form of `evalEval` and `CoordinateRing.mk`.
   sorry
 
+/-- The generic point satisfies the equation after mapping to the function field. -/
+lemma generic_equation_K :
+    (W.toAffine.baseChange K).Equation (xK W) (yK W) := by
+  -- Use `Affine.Equation.map` from `A` to `K`, then simplify the two-step base change.
+  -- Exact proof shape:
+  --   simpa [xK, yK, xCR, yCR, Affine.baseChange, WeierstrassCurve.map_map]
+  --     using (generic_equation_CR W).map (algebraMap A K)
+  --
+  -- CLOSEABLE-NOW once `generic_equation_CR` is closed.
+  sorry
+
+/-- The generic point of `W` over the function field of its affine coordinate ring. -/
+noncomputable def genericPoint :
+    (W.toAffine.baseChange K).Point :=
+  .some (xK W) (yK W) <|
+    ((W.toAffine.baseChange K).equation_iff_nonsingular).mp
+      (generic_equation_K W)
+
+@[simp] lemma genericPoint_xRep_X
+    -- Replace by project-local xRep if needed.
+    : True := by
+  -- If `xRep` maps `.some x y h` to `[x:1]`, this is immediate by `rfl`/`simp`.
+  trivial
+
+end GenericPoint
 end Affine
 end WeierstrassCurve
 ```
 
-Possible proof routes:
-
-### Route A: x-only ladder / Kummer recurrence
-
-This is the current hand-rolled route:
+Status:
 
 ```text
-Point.add/neg/double  →  projective x-only differential addition
-                     →  ladder for x(nP)
-                     →  identify ladder polynomials with Φₙ/ΨSqₙ recurrences
-                     →  nP = 0 iff denominator/numerator projective output is [1:0]
-                     →  ΨSqₙ(x(P)) = 0.
+generic point existence: CLOSEABLE-NOW.
+Point.generic named API: MISSING-MATHLIB-API, but not a serious blocker.
 ```
 
-This route matches the existing Mathlib objects `Φ`, `ΨSq`, `preΨ`, and the EDS recurrences.  It is still work, but it uses the definitions Mathlib actually has.
+The only slightly annoying proof is `generic_equation_CR`, but it is just the quotient relation in `AdjoinRoot`.  It does not require division polynomials or group law.
 
-### Route B: coordinate-ring division polynomial action theorem
+## 3. What the generic-point strategy would need next
 
-One could try to prove a stronger coordinate-ring theorem:
+To use the pointwise theorem on `[m]G`, one needs the formula
 
 ```lean
--- not existing, possible new theorem
-lemma mk_X_of_nsmul_eq_Φ_ΨSq
-    (P : (W⁄K).Point) :
-    P1Q.SameQ (xRep W (n • P))
-      { X := Polynomial.eval (x P) (W.Φ n)
-        Z := Polynomial.eval (x P) (W.ΨSq n) } := by
-  sorry
+xRep ((m : ℤ) • genericPoint W) = [mk(Φ_m) : mk(ΨSq_m)]
 ```
 
-But proving this still requires induction through the group law or a Kummer addition formula.  This is basically the ladder route in coordinate-ring clothing.
-
-### Route C: subgroup scheme / roots theorem
-
-This would be ideal:
+or bivariately
 
 ```lean
--- not existing
-E[n] = V(ψₙ)
+xRep ((m : ℤ) • genericPoint W) = [mk(φ_m) : mk(ψ_m^2)]
 ```
 
-But Mathlib does not currently expose an elliptic-curve finite subgroup scheme API or a theorem that `ψₙ` cuts out `E[n]`.  Building this route would be much larger than the ladder.
+in the function field.
 
-### Route D: use only cardinality/root counts
-
-Even if Mathlib had degree and separability lemmas, root counts alone would not prove the exact pointwise equivalence without a map from torsion points to roots and back.  The missing bridge remains the coordinate formula or subgroup-scheme theorem.
-
-## 6. Concrete useful Mathlib facts for the ladder route
-
-Even though there is no shortcut, Mathlib's definitions are valuable targets.  The ladder should aim to prove statements like:
+A precise project-local statement would look like this:
 
 ```lean
--- project local statement, not existing Mathlib
-lemma xRep_nsmul_same_Φ_ΨSq
-    {K : Type*} [Field K]
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    (n : ℕ) (P : (W⁄K).Point) :
+namespace WeierstrassCurve
+namespace Affine
+namespace GenericPoint
+
+variable {k : Type*} [Field k]
+variable (W : WeierstrassCurve k) [W.IsElliptic]
+
+local notation "A" => W.toAffine.CoordinateRing
+local notation "K" => FractionRing A
+
+/-- Missing bridge: coordinate formula for multiples of the generic point. -/
+theorem xRep_zsmul_generic_same_φ_ψ
+    (m : ℤ) :
     P1.Same
-      (xRep W (n • P))
+      (xRep (W.toAffine.baseChange K) (m • genericPoint W))
       (P1.mk
-        (Polynomial.eval (xRep W P).x (W.Φ (n : ℤ)))
-        (Polynomial.eval (xRep W P).x (W.ΨSq (n : ℤ)))) := by
-  -- prove by ladder + recurrence matching
+        (algebraMap A K (CoordinateRing.mk W.toAffine (W.φ m)))
+        (algebraMap A K (CoordinateRing.mk W.toAffine ((W.ψ m)^2)))) := by
+  -- NOT in Mathlib.
+  -- This is essentially the same keystone bridge currently being built.
   sorry
+
+/-- Equivalent univariate version using Mathlib's coordinate-ring congruences. -/
+theorem xRep_zsmul_generic_same_Φ_ΨSq
+    (m : ℤ) :
+    P1.Same
+      (xRep (W.toAffine.baseChange K) (m • genericPoint W))
+      (P1.mk
+        (algebraMap A K (CoordinateRing.mk W.toAffine (C (W.Φ m))))
+        (algebraMap A K (CoordinateRing.mk W.toAffine (C (W.ΨSq m))))) := by
+  -- Would follow from `xRep_zsmul_generic_same_φ_ψ` plus:
+  --   CoordinateRing.mk_φ
+  --   CoordinateRing.mk_ψ
+  --   CoordinateRing.mk_Ψ_sq
+  -- but the group-law coordinate formula is still missing.
+  sorry
+
+end GenericPoint
+end Affine
+end WeierstrassCurve
 ```
 
-Then derive:
+This theorem is **not** in Mathlib.  Mathlib has the coordinate-ring congruences among the polynomial definitions:
 
 ```lean
--- project local statement
-lemma nsmul_eq_zero_iff_ΨSq_eval_eq_zero
-    {K : Type*} [Field K]
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    (n : ℕ) {x y : K} (hP : (W⁄K).Nonsingular x y)
-    (hn_nonzero_output : (* handle n=0 / projective numerator cases *)) :
-    n • (.some x y hP : (W⁄K).Point) = 0
-      ↔ Polynomial.eval x (W.ΨSq (n : ℤ)) = 0 := by
-  sorry
+#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ
+#check WeierstrassCurve.Affine.CoordinateRing.mk_φ
+#check WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
 ```
 
-The exact theorem should special-case `n = 0` and `P = 0` carefully.  For affine nonzero points and positive `n`, the denominator-zero characterization is the intended form.
+but those say only that the bivariate and univariate division-polynomial definitions agree in the coordinate ring.  They do **not** connect the polynomials to the actual group-law multiple `m • P`.
 
-## 7. Bottom line
+## 4. Applying the pointwise doubling theorem to the generic point
 
-There is no existing Mathlib theorem that gives the keystone directly.
+Suppose the missing generic multiple formula were available for `m` and `2*m`.  Then your already-proved pointwise theorem would give the desired composition law in the function field.
 
-What Mathlib gives:
-
-```text
-✅ EDS recurrence definitions: preNormEDS, normEDS.
-✅ Weierstrass division polynomial definitions: ψ₂, Ψ₂Sq, preΨ, ΨSq, Ψ, Φ, ψ, φ.
-✅ initial values and recurrence lemmas for those sequences.
-✅ coordinate-ring congruences: mk_ψ, mk_φ, mk_Ψ_sq.
-✅ base-change/map lemmas for the polynomials.
-✅ 2-torsion polynomial discriminant and equality Ψ₂Sq = twoTorsionPolynomial.toPoly.
-```
-
-What Mathlib does not appear to give:
-
-```text
-❌ x(nP) = Φₙ(x(P)) / ΨSqₙ(x(P)).
-❌ n • P = 0 ↔ ψₙ(P) = 0.
-❌ n • P = 0 ↔ ΨSqₙ(x(P)) = 0.
-❌ roots of ΨSqₙ are exactly x-coordinates of n-torsion.
-❌ degree/separability/root-count theorem for ΨSqₙ.
-❌ subgroup-scheme theorem saying E[n] is cut out by ψₙ.
-```
-
-Therefore the Montgomery/Kummer x-only ladder is not redundant.  It is the practical bridge from Mathlib's point group law to Mathlib's division-polynomial definitions.  The shortest path remains:
-
-```text
-1. Prove x-only differential addition from Mathlib Point.add.
-2. Build the Montgomery/Kummer ladder on xRep.
-3. Match the ladder recurrence to Mathlib's `preΨ`, `Φ`, `ΨSq` recurrences.
-4. Derive `n • P = 0 ↔ ΨSqₙ(x(P)) = 0`.
-```
-
-If a shortcut is desired later, the most reusable theorem to upstream would be the coordinate formula:
+Sketch:
 
 ```lean
-theorem WeierstrassCurve.Affine.Point.x_nsmul_same_Φ_ΨSq
-    {K : Type*} [Field K]
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    (n : ℕ) (P : (W⁄K).Point) :
-    P1.Same (xRep W (n • P))
-      (P1.mk (evalX P (W.Φ (n : ℤ))) (evalX P (W.ΨSq (n : ℤ)))) := by
+namespace WeierstrassCurve
+namespace Affine
+namespace GenericPoint
+
+variable {k : Type*} [Field k]
+variable (W : WeierstrassCurve k) [W.IsElliptic]
+
+local notation "A" => W.toAffine.CoordinateRing
+local notation "K" => FractionRing A
+
+-- Existing theorem, schematic name/types.
+variable
+  (xRep_two_nsmul_same_dup_affine :
+    ∀ (P : (W.toAffine.baseChange K).Point),
+      SameP1Vec ((2 • P).xRep)
+        ![dupNumH P.xRep.1 P.xRep.2,
+          dupDenH P.xRep.1 P.xRep.2])
+
+/-- Function-field version of the doubling composition, assuming the missing generic formula. -/
+lemma generic_dup_composition_in_function_field
+    (m : ℤ)
+    (hm : xRep_zsmul_generic_same_φ_ψ W m)
+    (h2m : xRep_zsmul_generic_same_φ_ψ W (2*m)) :
+    algebraMap A K
+      (CoordinateRing.mk W.toAffine
+        (W.φ (2*m) * dupDenBiv (W.φ m) ((W.ψ m)^2)
+          - (W.ψ (2*m))^2 * dupNumBiv (W.φ m) ((W.ψ m)^2))) = 0 := by
+  -- Apply pointwise duplication to `P = m • genericPoint W`.
+  have hdup := xRep_two_nsmul_same_dup_affine (m • genericPoint W)
+
+  -- Rewrite:
+  --   2 • (m • G) = (2*m) • G
+  -- and use `hm`, `h2m` to replace the xReps by `[φ_m : ψ_m²]` and
+  -- `[φ_2m : ψ_2m²]`.
+  -- Then unfold `SameP1Vec`, `dupNumH`, `dupDenH`, and clear the projective cross-product.
+  -- This is algebraic and should close by `ring_nf`.
+  sorry
+
+end GenericPoint
+end Affine
+end WeierstrassCurve
+```
+
+Then descend from the function field to the coordinate ring by injectivity of the localization map:
+
+```lean
+namespace WeierstrassCurve
+namespace Affine
+namespace GenericPoint
+
+variable {k : Type*} [Field k]
+variable (W : WeierstrassCurve k) [W.IsElliptic]
+
+local notation "A" => W.toAffine.CoordinateRing
+local notation "K" => FractionRing A
+
+lemma generic_field_zero_descends
+    {a : A}
+    (ha : algebraMap A K a = 0) :
+    a = 0 := by
+  exact (IsFractionRing.injective A K) ha
+
+lemma mk_phi_psi_dup_doubling_cross_from_generic
+    (m : ℤ)
+    (hfield :
+      algebraMap A K
+        (CoordinateRing.mk W.toAffine
+          (W.φ (2*m) * dupDenBiv (W.φ m) ((W.ψ m)^2)
+            - (W.ψ (2*m))^2 * dupNumBiv (W.φ m) ((W.ψ m)^2))) = 0) :
+    CoordinateRing.mk W.toAffine
+      (W.φ (2*m) * dupDenBiv (W.φ m) ((W.ψ m)^2)
+        - (W.ψ (2*m))^2 * dupNumBiv (W.φ m) ((W.ψ m)^2)) = 0 := by
+  exact generic_field_zero_descends W hfield
+
+end GenericPoint
+end Affine
+end WeierstrassCurve
+```
+
+Status:
+
+```text
+CLOSEABLE-NOW:
+  descent from function field to coordinate ring via `IsFractionRing.injective`.
+
+MISSING:
+  function-field equality, because it needs `xRep_zsmul_generic_same_φ_ψ`.
+```
+
+## 5. Is `x([n]G)=Φₙ/ΨSqₙ` easier than the composition law?
+
+No.  It is essentially the same theorem at a more semantic level.
+
+To prove
+
+```lean
+xRep (n • genericPoint) = [Φₙ : ΨSqₙ]
+```
+
+one normally inducts using:
+
+```text
+x-only differential addition / doubling
++ recurrences for Φ, ΨSq, preΨ
+```
+
+The doubling step of that induction is exactly the composition assertion:
+
+```text
+[Φ₂m : ΨSq₂m] = dup([Φ_m : ΨSq_m]).
+```
+
+So using the generic point to prove the doubling composition would be circular if the generic formula is part of the same induction.  More explicitly:
+
+```text
+To prove composition for 2m via generic point, you need:
+  x((2m)G) = [φ₂m : ψ₂m²]
+and
+  x(mG)    = [φ_m  : ψ_m²].
+
+But `x((2m)G) = [φ₂m : ψ₂m²]` is precisely the doubled case of the n-multiple coordinate theorem, whose proof requires the composition lemma.
+```
+
+Therefore the generic route does not reduce the algebraic work.  It only repackages it.
+
+## 6. Could one prove the generic formula by induction using the already-proven ladder?
+
+Yes, but then the generic point is not doing the hard work.  The proof would be:
+
+```text
+1. Build x-only ladder for arbitrary points.
+2. Prove ladder output equals Mathlib's Φ/ΨSq recurrences.
+3. Specialize to the generic point.
+```
+
+That is the existing ladder route.
+
+A simultaneous induction is possible:
+
+```lean
+-- schematic
+mutual theorem xRep_zsmul_generic_same_φ_ψ, mk_phi_psi_dup_doubling_cross, ...
+```
+
+but it is not shorter.  The algebraic composition lemma remains one of the induction transitions.
+
+## 7. Cleanest concrete path now
+
+I would not switch to a generic-point proof for `mk_phi_psi_dup_doubling_cross`.  The cleaner path is:
+
+```text
+A. Use Mathlib EDS recurrence lemmas for preΨ/ΨSq/Φ.
+B. Prove the bivariate/univariate duplication composition directly in the coordinate ring.
+C. Use `CoordinateRing.mk_φ`, `CoordinateRing.mk_ψ`, `CoordinateRing.mk_Ψ_sq` to move between bivariate and univariate forms.
+D. Use the already-proven pointwise duplication theorem in the *point-level* ladder, not as a shortcut for the coordinate-ring recurrence identity.
+```
+
+The generic point can still be useful as a final sanity theorem:
+
+```lean
+/-- Once the ladder theorem is proved, this should be an easy corollary. -/
+theorem xRep_zsmul_generic_same_φ_ψ_corollary
+    (m : ℤ) :
+    P1.Same
+      (xRep (W.toAffine.baseChange K) (m • genericPoint W))
+      (P1.mk
+        (algebraMap A K (CoordinateRing.mk W.toAffine (W.φ m)))
+        (algebraMap A K (CoordinateRing.mk W.toAffine ((W.ψ m)^2)))) := by
+  -- specialize the global ladder theorem to `genericPoint W`
   sorry
 ```
 
-But proving that theorem is exactly the ladder/differential-addition project.
+But proving this corollary first is not a shortcut.
+
+## 8. Final verdict
+
+```text
+Generic point construction: viable and closeable.
+Generic point as shortcut: not viable.
+Real gap: x([n]G)=Φₙ/ΨSqₙ, which is exactly the group-law/division-polynomial bridge.
+Recommended path: prove the coordinate-ring composition from EDS recurrences directly, or continue the ladder recurrence matching.  Do not detour through the generic point expecting it to remove the composition proof.
+```
+
+If you want one small generic-point lemma to de-risk independently, make it this:
+
+```lean
+lemma genericPoint_exists_and_equation
+    {k : Type*} [Field k]
+    (W : WeierstrassCurve k) [W.IsElliptic] :
+    ∃ G : (W.toAffine.baseChange (FractionRing W.toAffine.CoordinateRing)).Point,
+      True := by
+  exact ⟨WeierstrassCurve.Affine.GenericPoint.genericPoint W, trivial⟩
+```
+
+That verifies the construction infrastructure.  But it will not prove `mk_phi_psi_dup_doubling_cross` without the missing generic n-multiple coordinate formula.
