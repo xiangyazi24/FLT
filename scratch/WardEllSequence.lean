@@ -31,13 +31,4 @@ theorem isEllSequence_of_addRel {W : ℤ → R} (hAdd : ∀ m n : ℤ, AddRel W 
   unfold AddRel at hmr hnr hmn
   linear_combination (- W n ^ 2) * hmr + (W m ^ 2) * hnr + (W r ^ 2) * hmn
 
-/-- **Step 2 (remaining).** `normEDS` satisfies the two-variable addition formula.
-Gap induction on `n`; base case `n = 2` is `normEDS_adjacent_somos`. -/
-theorem normEDS_addRel (b c d : R) (m n : ℤ) : AddRel (normEDS b c d) m n := by
-  sorry
-
-/-- **Ward's theorem** (the Mathlib TODO): `normEDS` is an elliptic sequence. -/
-theorem normEDS_isEllSequence (b c d : R) : IsEllSequence (normEDS b c d) :=
-  isEllSequence_of_addRel (normEDS_addRel b c d)
-
 end FLT.EDS
