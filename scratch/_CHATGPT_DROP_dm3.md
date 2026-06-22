@@ -1,434 +1,824 @@
-# Q225 (dm3): Generic-point route for the division-polynomial doubling composition seam
+# Q312 (dm3): `normEDS` nonvanishing by a weighted/lex leading term
 
-Question: can the coordinate-ring composition law
+This is the concrete approach I would use for
 
 ```lean
-mk_phi_psi_dup_doubling_cross (m : ℤ) :
-  mk W.toAffine
-    (W.φ (2*m) * dupDenBiv (W.φ m) ((W.ψ m)^2)
-      - (W.ψ (2*m))^2 * dupNumBiv (W.φ m) ((W.ψ m)^2)) = 0
+normEDS b c d j ≠ 0
 ```
 
-be proved by applying the already-proved pointwise doubling theorem to the **generic point** of `W` over the function field of the affine coordinate ring?
+in `ℤ[b,c,d] = MvPolynomial (Fin 3) ℤ`, with
 
-Short answer:
+```lean
+W 0 = 0,  W 1 = 1,  W 2 = b,  W 3 = c,  W 4 = b*d
+```
+
+and Ward recurrences
+
+```lean
+normEDS_even :
+  W (2*m) * b =
+    W (m-1)^2 * W m * W (m+2)
+      - W (m-2) * W m * W (m+1)^2
+
+normEDS_odd :
+  W (2*m+1) =
+    W (m+2) * W m^3
+      - W (m-1) * W (m+1)^3
+```
+
+The right answer is **not** a plain scalar weight.  Use the natural scalar weight only as the first component, then break ties lexicographically.
+
+## 1. Term order / grading choice
+
+Give the variables the primary weights
 
 ```text
-Generic point existence:           YES, buildable in Mathlib.
-Point.generic declaration:         NO, not currently exposed as a named theorem.
-x([n]G) = Φₙ/ΨSqₙ in Mathlib:     NO.
-Generic route shorter?:            NO, unless x([n]G)=Φₙ/ΨSqₙ is already available.
-Real remaining gap:                the generic n-multiple coordinate formula.
+wt₀(b) = 3,   wt₀(c) = 8,   wt₀(d) = 12.
 ```
 
-The generic point is useful as a *semantic check* and may be useful as a final descent-from-function-field wrapper, but it does not remove the need to prove the division-polynomial coordinate formula.  Without that formula, applying the pointwise doubling theorem to `[m]G` only gives a statement about `x([m]G)`, not about `φ_m` and `ψ_m²`.
+For a monomial `b^β c^γ d^δ`, define
 
-## 1. Does Mathlib support constructing the generic point?
-
-There is no declaration I know of named
-
-```lean
-WeierstrassCurve.Affine.Point.generic
+```text
+wt₀(β,γ,δ) = 3β + 8γ + 12δ.
 ```
 
-but the construction is available from existing pieces:
+Then refine this by the lexicographic key
 
-```lean
-WeierstrassCurve.Affine.CoordinateRing
-WeierstrassCurve.Affine.FunctionField
-WeierstrassCurve.Affine.CoordinateRing.mk
-WeierstrassCurve.Affine.CoordinateRing.instIsDomainCoordinateRing
-WeierstrassCurve.Affine.equation_iff_nonsingular
-WeierstrassCurve.Affine.Equation.map
-IsFractionRing.injective
+```text
+K(β,γ,δ) = (wt₀(β,γ,δ), -β, -γ, -δ),
 ```
 
-Mathlib defines
+ordered lexicographically, with larger `K` better.  Equivalently:
 
-```lean
-abbrev WeierstrassCurve.Affine.CoordinateRing (W : Affine R) :=
-  AdjoinRoot W.polynomial
+1. maximize the primary weight `wt₀`;
+2. among equal primary weights, minimize the `b`-exponent;
+3. among those, minimize the `c`-exponent;
+4. among those, minimize the `d`-exponent.
 
-abbrev WeierstrassCurve.Affine.FunctionField (W : Affine R) :=
-  FractionRing W.CoordinateRing
+This is the important point: the scalar weight `(3,8,12)` makes the polynomials homogeneous, so it does **not** by itself separate the two recurrence summands.  The lex refinement is what prevents cancellation.
+
+For finite supports, this key is enough.  It is additive/translation-invariant:
+
+```text
+K(u) < K(v)  ⇒  K(u+w) < K(v+w),
 ```
 
-and the coordinate-ring map
+so the selected term of a product is the product of the selected terms, provided both selected terms are unique.
 
-```lean
-noncomputable abbrev WeierstrassCurve.Affine.CoordinateRing.mk
-    (W : Affine R) : R[X][Y] →+* W.CoordinateRing :=
-  AdjoinRoot.mk W.polynomial
+## 2. Main leading-term statement
+
+For `n ≥ 1`, the `K`-leading term of `W n` is as follows.
+
+For odd indices, with `n = 2r+1`, `r ≥ 0`:
+
+```text
+LT_K(W(2r+1)) = (-1)^(⌊r/2⌋) · c^(r(r+1)/2).
 ```
 
-So for a field `k`, the generic coordinates are the classes of `X` and `Y`, mapped into the fraction field.
+For even indices, with `n = 2r`, `r ≥ 1`:
 
-## 2. Generic point construction skeleton
+```text
+LT_K(W(2r)) = (-1)^(⌊(r-1)/2⌋) · b · c^((r-1)(r-2)/2) · d^(r-1).
+```
 
-This is the Lean shape I would use.  Some `simpa` details may need local adjustment, but there is no missing math here.
+Equivalently, if
+
+```text
+ε_n = (-1)^(⌊(n-1)/4⌋),
+```
+
+then the coefficient is always `ε_n`, and the exponent vector is
+
+```text
+E(2r+1) = (0, r(r+1)/2, 0),
+E(2r)   = (1, (r-1)(r-2)/2, r-1).
+```
+
+The primary top degree is
+
+```text
+wt₀(E(n)) = n^2 - 1.
+```
+
+Indeed:
+
+```text
+wt₀(E(2r+1)) = 8 · r(r+1)/2 = 4r(r+1) = (2r+1)^2 - 1,
+
+wt₀(E(2r)) = 3 + 8 · (r-1)(r-2)/2 + 12(r-1)
+            = 4r^2 - 1
+            = (2r)^2 - 1.
+```
+
+Small checks:
+
+```text
+W5 = b^4 d - c^3,
+LT_K(W5) = -c^3.
+
+W6 = b^5 c d - b c^4 - b c d^2,
+LT_K(W6) = -b c d^2.
+
+W7 = b^4 c^3 d - b^4 d^3 - c^6,
+LT_K(W7) = -c^6.
+
+W8 = -b^9 d^3 + 3b^5 c^3 d^2 - 2b c^6 d - b c^3 d^3,
+LT_K(W8) = -b c^3 d^3.
+```
+
+All four examples have primary degree `n^2-1`; the lex tie-breaker picks the displayed term.
+
+## 3. Why pure scalar weights tie
+
+The weight `(3,8,12)` is forced if one wants the expected quadratic degree and the base values
+
+```text
+deg W2 = deg b = 3,
+deg W3 = deg c = 8,
+deg W4 = deg(bd) = 15.
+```
+
+It gives `deg Wn = n^2-1`.  But then both products in each Ward recurrence have the same primary degree.
+
+Odd recurrence:
+
+```text
+wt₀(W(m+2) W(m)^3)
+  = ((m+2)^2-1) + 3(m^2-1)
+  = 4m^2 + 4m,
+
+wt₀(W(m-1) W(m+1)^3)
+  = ((m-1)^2-1) + 3((m+1)^2-1)
+  = 4m^2 + 4m.
+```
+
+Even recurrence, before division by `b`:
+
+```text
+wt₀(W(m-1)^2 W(m) W(m+2))
+  = 2((m-1)^2-1) + (m^2-1) + ((m+2)^2-1)
+  = 4m^2 + 2,
+
+wt₀(W(m-2) W(m) W(m+1)^2)
+  = ((m-2)^2-1) + (m^2-1) + 2((m+1)^2-1)
+  = 4m^2 + 2.
+```
+
+Since multiplying by `b` adds primary degree `3`, this is exactly
+
+```text
+((2m)^2 - 1) + 3.
+```
+
+So the scalar weight gives the right degree but cannot prove noncancellation.  The lex tie-breaker is essential.
+
+## 4. Induction proof of the leading term
+
+Write
+
+```text
+M_n = E(n),
+λ_n = ε_n.
+```
+
+The induction hypothesis is:
+
+```text
+W_n has unique K-leading monomial b^(M_n.b) c^(M_n.c) d^(M_n.d)
+with coefficient λ_n = ±1.
+```
+
+The product lemma says that, if `p` and `q` have unique `K`-leading exponents `u` and `v` with coefficients `a` and `b`, then `p*q` has unique `K`-leading exponent `u+v` with coefficient `a*b`.  This is where additivity of `K` is used.
+
+The sum/difference lemma says that, if the leading exponents of two terms have strictly different `K`-keys, then the larger one remains the unique leading term of the sum or difference.
+
+### Odd recurrence
+
+Let `n = 2m+1`.
+
+#### Case `m = 2r`, so `n = 4r+1`
+
+The two candidate leading exponents are
+
+```text
+A = M_(2r+2) + 3 M_(2r),
+B = M_(2r-1) + 3 M_(2r+1).
+```
+
+They have the same primary weight, but their `b`-exponents are
+
+```text
+A.b = 4,
+B.b = 0.
+```
+
+Because the tie-breaker minimizes the `b`-exponent, `B` is strictly larger in the `K` order.  Thus the leading term comes from the second recurrence summand, with the minus sign:
+
+```text
+LT_K(W(4r+1))
+  = - LT_K(W(2r-1)) · LT_K(W(2r+1))^3
+  = (-1)^r · c^(r(2r+1)).
+```
+
+This agrees with the formula for `2s+1 = 4r+1`, namely `s=2r` and
+
+```text
+s(s+1)/2 = (2r)(2r+1)/2 = r(2r+1).
+```
+
+The sign check is
+
+```text
+- ε_(2r-1) ε_(2r+1)^3 = ε_(4r+1),
+```
+
+which reduces to
+
+```text
+1 + ⌊(r-1)/2⌋ + ⌊r/2⌋ = r.
+```
+
+#### Case `m = 2r+1`, so `n = 4r+3`
+
+The two candidate leading exponents are
+
+```text
+A = M_(2r+3) + 3 M_(2r+1),
+B = M_(2r)   + 3 M_(2r+2).
+```
+
+Again the primary weights tie, but now
+
+```text
+A.b = 0,
+B.b = 4.
+```
+
+So `A` is strictly larger.  The leading term comes from the first recurrence summand:
+
+```text
+LT_K(W(4r+3))
+  = LT_K(W(2r+3)) · LT_K(W(2r+1))^3
+  = (-1)^r · c^((r+1)(2r+1)).
+```
+
+This agrees with `2s+1 = 4r+3`, where `s=2r+1`:
+
+```text
+s(s+1)/2 = (2r+1)(2r+2)/2 = (2r+1)(r+1).
+```
+
+The sign check is
+
+```text
+ε_(2r+3) ε_(2r+1)^3 = ε_(4r+3),
+```
+
+using
+
+```text
+⌊(r+1)/2⌋ + ⌊r/2⌋ = r.
+```
+
+### Even recurrence
+
+Let `n = 2m`.  The recurrence gives the leading term of `W(2m) * b`.  After finding it, subtract one `b` from the exponent vector to get the leading term of `W(2m)`.
+
+#### Case `m = 2r`, so `n = 4r`, `r ≥ 2`
+
+The two candidate leading exponents before division by `b` are
+
+```text
+A = 2 M_(2r-1) + M_(2r) + M_(2r+2),
+B = M_(2r-2) + M_(2r) + 2 M_(2r+1).
+```
+
+Their primary weights tie and their `b`-exponents tie:
+
+```text
+A.b = B.b = 2.
+```
+
+The `c`-exponents are
+
+```text
+A.c = (r-1)(2r-1),
+B.c = (r-1)(2r-1) + 3.
+```
+
+So `A` is strictly larger because the tie-breaker minimizes the `c`-exponent.  Hence
+
+```text
+LT_K(W(4r) * b)
+  = LT_K(W(2r-1))^2 · LT_K(W(2r)) · LT_K(W(2r+2)).
+```
+
+The exponent of this term is
+
+```text
+(2, (r-1)(2r-1), 2r-1).
+```
+
+Dividing by the extra `b` gives
+
+```text
+M_(4r) = (1, (r-1)(2r-1), 2r-1),
+```
+
+which is the even formula with `4r = 2s`, `s=2r`:
+
+```text
+((s-1)(s-2)/2, s-1)
+  = ((2r-1)(2r-2)/2, 2r-1)
+  = ((r-1)(2r-1), 2r-1).
+```
+
+The sign check is
+
+```text
+ε_(2r-1)^2 ε_(2r) ε_(2r+2) = ε_(4r),
+```
+
+using
+
+```text
+⌊(2r-1)/4⌋ + ⌊(2r+1)/4⌋ = r-1.
+```
+
+#### Case `m = 2r+1`, so `n = 4r+2`, `r ≥ 1`
+
+The two candidate leading exponents before division by `b` are
+
+```text
+A = 2 M_(2r) + M_(2r+1) + M_(2r+3),
+B = M_(2r-1) + M_(2r+1) + 2 M_(2r+2).
+```
+
+Again the primary weights tie and the `b`-exponents tie:
+
+```text
+A.b = B.b = 2.
+```
+
+The `c`-exponents are
+
+```text
+A.c = 2r^2 - r + 3,
+B.c = 2r^2 - r.
+```
+
+So `B` is strictly larger.  Since `B` comes from the second recurrence summand, the recurrence contributes the extra minus sign:
+
+```text
+LT_K(W(4r+2) * b)
+  = - LT_K(W(2r-1)) · LT_K(W(2r+1)) · LT_K(W(2r+2))^2.
+```
+
+The exponent before division by `b` is
+
+```text
+(2, 2r^2-r, 2r).
+```
+
+Dividing by `b` gives
+
+```text
+M_(4r+2) = (1, 2r^2-r, 2r),
+```
+
+which is the even formula with `4r+2 = 2s`, `s=2r+1`:
+
+```text
+((s-1)(s-2)/2, s-1)
+  = ((2r)(2r-1)/2, 2r)
+  = (2r^2-r, 2r).
+```
+
+The sign check is
+
+```text
+- ε_(2r-1) ε_(2r+1) ε_(2r+2)^2 = ε_(4r+2),
+```
+
+using
+
+```text
+1 + ⌊(r-1)/2⌋ + ⌊r/2⌋ = r.
+```
+
+This completes the positive-index induction.  Since every displayed leading coefficient is `±1`, each `W n` for `n ≥ 1` is nonzero.  Negative indices then follow from the usual oddness lemma for Ward EDS:
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.RingTheory.FractionRing
+-- expected shape; use the actual theorem name in the file
+normEDS_neg : W (-n) = - W n
+```
+
+so `W j ≠ 0` for every integer `j ≠ 0`.
+
+## 5. Lean formalization skeleton
+
+I would not start with `MvPolynomial.degrees` or `totalDegree`.  They lose exactly the tie-breaker that matters here.  The most direct route is a small custom leading-term predicate using `MvPolynomial.support` and `MvPolynomial.coeff`.
+
+### Basic setup
+
+```lean
+import Mathlib.Data.MvPolynomial.Basic
+import Mathlib.Data.MvPolynomial.CommRing
+import Mathlib.Data.Finsupp.Basic
 import Mathlib.Tactic
 
-noncomputable section
+open scoped BigOperators
+open MvPolynomial
 
-open Polynomial
-open scoped Polynomial.Bivariate
+abbrev R := MvPolynomial (Fin 3) ℤ
+abbrev Exp := (Fin 3 →₀ ℕ)
 
-namespace WeierstrassCurve
-namespace Affine
-namespace GenericPoint
+-- variable indices: 0=b, 1=c, 2=d
+noncomputable abbrev bVar : R := X (0 : Fin 3)
+noncomputable abbrev cVar : R := X (1 : Fin 3)
+noncomputable abbrev dVar : R := X (2 : Fin 3)
 
-variable {k : Type*} [Field k]
-variable (W : WeierstrassCurve k) [W.IsElliptic]
+abbrev eb : Exp := Finsupp.single (0 : Fin 3) 1
+abbrev ec : Exp := Finsupp.single (1 : Fin 3) 1
+abbrev ed : Exp := Finsupp.single (2 : Fin 3) 1
+```
 
-local notation "A" => W.toAffine.CoordinateRing
-local notation "K" => FractionRing A
+### The key order
 
-/-- The generic `X` coordinate in the affine coordinate ring. -/
-noncomputable def xCR : A :=
-  CoordinateRing.mk W.toAffine (C X)
+It is simpler to define the comparison predicate directly than to instantiate a global monomial order.
 
-/-- The generic `Y` coordinate in the affine coordinate ring. -/
-noncomputable def yCR : A :=
-  CoordinateRing.mk W.toAffine Y
+```lean
+def wt0 (e : Exp) : ℕ :=
+  3 * e (0 : Fin 3) + 8 * e (1 : Fin 3) + 12 * e (2 : Fin 3)
 
-/-- The generic `X` coordinate in the function field. -/
-noncomputable def xK : K :=
-  algebraMap A K (xCR W)
+/-- `KeyLE u v` means `u` is no better than `v` for the key
+`(wt0, -bExp, -cExp, -dExp)`. -/
+def KeyLE (u v : Exp) : Prop :=
+  wt0 u < wt0 v ∨
+  wt0 u = wt0 v ∧
+    (v (0 : Fin 3) < u (0 : Fin 3) ∨
+     v (0 : Fin 3) = u (0 : Fin 3) ∧
+       (v (1 : Fin 3) < u (1 : Fin 3) ∨
+        v (1 : Fin 3) = u (1 : Fin 3) ∧
+          v (2 : Fin 3) ≤ u (2 : Fin 3)))
 
-/-- The generic `Y` coordinate in the function field. -/
-noncomputable def yK : K :=
-  algebraMap A K (yCR W)
+def KeyLT (u v : Exp) : Prop := KeyLE u v ∧ ¬ KeyLE v u
 
-/-- The coordinate-ring generic point satisfies the Weierstrass equation. -/
-lemma generic_equation_CR :
-    (W.toAffine.baseChange A).Equation (xCR W) (yCR W) := by
-  -- This is the core quotient calculation:
-  -- `W.polynomial` vanishes in `AdjoinRoot W.polynomial`.
-  -- Expected proof shape:
-  --   change ((W.toAffine.baseChange A).polynomial.evalEval (xCR W) (yCR W) = 0)
-  --   simpa [xCR, yCR, CoordinateRing.mk, Affine.Equation,
-  --          Affine.map_polynomial, Affine.baseChange,
-  --          evalEval, Polynomial.aeval_def]
-  --     using AdjoinRoot.aeval_eq W.toAffine.polynomial
-  -- or equivalently `AdjoinRoot.mk_self` after rewriting eval at the two classes.
-  --
-  -- This is CLOSEABLE-NOW, but the exact `simpa` terms depend on the local
-  -- normal form of `evalEval` and `CoordinateRing.mk`.
+lemma KeyLE_refl (u : Exp) : KeyLE u u := by
+  unfold KeyLE
+  right
+  constructor · rfl
+  right
+  constructor · rfl
+  right
+  constructor · rfl
+  exact le_rfl
+
+lemma KeyLE_add_right {u v w : Exp} (h : KeyLE u v) :
+    KeyLE (u + w) (v + w) := by
+  -- Unfold `KeyLE`; use `simp [wt0, Finsupp.add_apply]` and `omega`.
+  -- This is the translation-invariance of the key.
   sorry
 
-/-- The generic point satisfies the equation after mapping to the function field. -/
-lemma generic_equation_K :
-    (W.toAffine.baseChange K).Equation (xK W) (yK W) := by
-  -- Use `Affine.Equation.map` from `A` to `K`, then simplify the two-step base change.
-  -- Exact proof shape:
-  --   simpa [xK, yK, xCR, yCR, Affine.baseChange, WeierstrassCurve.map_map]
-  --     using (generic_equation_CR W).map (algebraMap A K)
-  --
-  -- CLOSEABLE-NOW once `generic_equation_CR` is closed.
-  sorry
-
-/-- The generic point of `W` over the function field of its affine coordinate ring. -/
-noncomputable def genericPoint :
-    (W.toAffine.baseChange K).Point :=
-  .some (xK W) (yK W) <|
-    ((W.toAffine.baseChange K).equation_iff_nonsingular).mp
-      (generic_equation_K W)
-
-@[simp] lemma genericPoint_xRep_X
-    -- Replace by project-local xRep if needed.
-    : True := by
-  -- If `xRep` maps `.some x y h` to `[x:1]`, this is immediate by `rfl`/`simp`.
-  trivial
-
-end GenericPoint
-end Affine
-end WeierstrassCurve
-```
-
-Status:
-
-```text
-generic point existence: CLOSEABLE-NOW.
-Point.generic named API: MISSING-MATHLIB-API, but not a serious blocker.
-```
-
-The only slightly annoying proof is `generic_equation_CR`, but it is just the quotient relation in `AdjoinRoot`.  It does not require division polynomials or group law.
-
-## 3. What the generic-point strategy would need next
-
-To use the pointwise theorem on `[m]G`, one needs the formula
-
-```lean
-xRep ((m : ℤ) • genericPoint W) = [mk(Φ_m) : mk(ΨSq_m)]
-```
-
-or bivariately
-
-```lean
-xRep ((m : ℤ) • genericPoint W) = [mk(φ_m) : mk(ψ_m^2)]
-```
-
-in the function field.
-
-A precise project-local statement would look like this:
-
-```lean
-namespace WeierstrassCurve
-namespace Affine
-namespace GenericPoint
-
-variable {k : Type*} [Field k]
-variable (W : WeierstrassCurve k) [W.IsElliptic]
-
-local notation "A" => W.toAffine.CoordinateRing
-local notation "K" => FractionRing A
-
-/-- Missing bridge: coordinate formula for multiples of the generic point. -/
-theorem xRep_zsmul_generic_same_φ_ψ
-    (m : ℤ) :
-    P1.Same
-      (xRep (W.toAffine.baseChange K) (m • genericPoint W))
-      (P1.mk
-        (algebraMap A K (CoordinateRing.mk W.toAffine (W.φ m)))
-        (algebraMap A K (CoordinateRing.mk W.toAffine ((W.ψ m)^2)))) := by
-  -- NOT in Mathlib.
-  -- This is essentially the same keystone bridge currently being built.
-  sorry
-
-/-- Equivalent univariate version using Mathlib's coordinate-ring congruences. -/
-theorem xRep_zsmul_generic_same_Φ_ΨSq
-    (m : ℤ) :
-    P1.Same
-      (xRep (W.toAffine.baseChange K) (m • genericPoint W))
-      (P1.mk
-        (algebraMap A K (CoordinateRing.mk W.toAffine (C (W.Φ m))))
-        (algebraMap A K (CoordinateRing.mk W.toAffine (C (W.ΨSq m))))) := by
-  -- Would follow from `xRep_zsmul_generic_same_φ_ψ` plus:
-  --   CoordinateRing.mk_φ
-  --   CoordinateRing.mk_ψ
-  --   CoordinateRing.mk_Ψ_sq
-  -- but the group-law coordinate formula is still missing.
-  sorry
-
-end GenericPoint
-end Affine
-end WeierstrassCurve
-```
-
-This theorem is **not** in Mathlib.  Mathlib has the coordinate-ring congruences among the polynomial definitions:
-
-```lean
-#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ
-#check WeierstrassCurve.Affine.CoordinateRing.mk_φ
-#check WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
-```
-
-but those say only that the bivariate and univariate division-polynomial definitions agree in the coordinate ring.  They do **not** connect the polynomials to the actual group-law multiple `m • P`.
-
-## 4. Applying the pointwise doubling theorem to the generic point
-
-Suppose the missing generic multiple formula were available for `m` and `2*m`.  Then your already-proved pointwise theorem would give the desired composition law in the function field.
-
-Sketch:
-
-```lean
-namespace WeierstrassCurve
-namespace Affine
-namespace GenericPoint
-
-variable {k : Type*} [Field k]
-variable (W : WeierstrassCurve k) [W.IsElliptic]
-
-local notation "A" => W.toAffine.CoordinateRing
-local notation "K" => FractionRing A
-
--- Existing theorem, schematic name/types.
-variable
-  (xRep_two_nsmul_same_dup_affine :
-    ∀ (P : (W.toAffine.baseChange K).Point),
-      SameP1Vec ((2 • P).xRep)
-        ![dupNumH P.xRep.1 P.xRep.2,
-          dupDenH P.xRep.1 P.xRep.2])
-
-/-- Function-field version of the doubling composition, assuming the missing generic formula. -/
-lemma generic_dup_composition_in_function_field
-    (m : ℤ)
-    (hm : xRep_zsmul_generic_same_φ_ψ W m)
-    (h2m : xRep_zsmul_generic_same_φ_ψ W (2*m)) :
-    algebraMap A K
-      (CoordinateRing.mk W.toAffine
-        (W.φ (2*m) * dupDenBiv (W.φ m) ((W.ψ m)^2)
-          - (W.ψ (2*m))^2 * dupNumBiv (W.φ m) ((W.ψ m)^2))) = 0 := by
-  -- Apply pointwise duplication to `P = m • genericPoint W`.
-  have hdup := xRep_two_nsmul_same_dup_affine (m • genericPoint W)
-
-  -- Rewrite:
-  --   2 • (m • G) = (2*m) • G
-  -- and use `hm`, `h2m` to replace the xReps by `[φ_m : ψ_m²]` and
-  -- `[φ_2m : ψ_2m²]`.
-  -- Then unfold `SameP1Vec`, `dupNumH`, `dupDenH`, and clear the projective cross-product.
-  -- This is algebraic and should close by `ring_nf`.
-  sorry
-
-end GenericPoint
-end Affine
-end WeierstrassCurve
-```
-
-Then descend from the function field to the coordinate ring by injectivity of the localization map:
-
-```lean
-namespace WeierstrassCurve
-namespace Affine
-namespace GenericPoint
-
-variable {k : Type*} [Field k]
-variable (W : WeierstrassCurve k) [W.IsElliptic]
-
-local notation "A" => W.toAffine.CoordinateRing
-local notation "K" => FractionRing A
-
-lemma generic_field_zero_descends
-    {a : A}
-    (ha : algebraMap A K a = 0) :
-    a = 0 := by
-  exact (IsFractionRing.injective A K) ha
-
-lemma mk_phi_psi_dup_doubling_cross_from_generic
-    (m : ℤ)
-    (hfield :
-      algebraMap A K
-        (CoordinateRing.mk W.toAffine
-          (W.φ (2*m) * dupDenBiv (W.φ m) ((W.ψ m)^2)
-            - (W.ψ (2*m))^2 * dupNumBiv (W.φ m) ((W.ψ m)^2))) = 0) :
-    CoordinateRing.mk W.toAffine
-      (W.φ (2*m) * dupDenBiv (W.φ m) ((W.ψ m)^2)
-        - (W.ψ (2*m))^2 * dupNumBiv (W.φ m) ((W.ψ m)^2)) = 0 := by
-  exact generic_field_zero_descends W hfield
-
-end GenericPoint
-end Affine
-end WeierstrassCurve
-```
-
-Status:
-
-```text
-CLOSEABLE-NOW:
-  descent from function field to coordinate ring via `IsFractionRing.injective`.
-
-MISSING:
-  function-field equality, because it needs `xRep_zsmul_generic_same_φ_ψ`.
-```
-
-## 5. Is `x([n]G)=Φₙ/ΨSqₙ` easier than the composition law?
-
-No.  It is essentially the same theorem at a more semantic level.
-
-To prove
-
-```lean
-xRep (n • genericPoint) = [Φₙ : ΨSqₙ]
-```
-
-one normally inducts using:
-
-```text
-x-only differential addition / doubling
-+ recurrences for Φ, ΨSq, preΨ
-```
-
-The doubling step of that induction is exactly the composition assertion:
-
-```text
-[Φ₂m : ΨSq₂m] = dup([Φ_m : ΨSq_m]).
-```
-
-So using the generic point to prove the doubling composition would be circular if the generic formula is part of the same induction.  More explicitly:
-
-```text
-To prove composition for 2m via generic point, you need:
-  x((2m)G) = [φ₂m : ψ₂m²]
-and
-  x(mG)    = [φ_m  : ψ_m²].
-
-But `x((2m)G) = [φ₂m : ψ₂m²]` is precisely the doubled case of the n-multiple coordinate theorem, whose proof requires the composition lemma.
-```
-
-Therefore the generic route does not reduce the algebraic work.  It only repackages it.
-
-## 6. Could one prove the generic formula by induction using the already-proven ladder?
-
-Yes, but then the generic point is not doing the hard work.  The proof would be:
-
-```text
-1. Build x-only ladder for arbitrary points.
-2. Prove ladder output equals Mathlib's Φ/ΨSq recurrences.
-3. Specialize to the generic point.
-```
-
-That is the existing ladder route.
-
-A simultaneous induction is possible:
-
-```lean
--- schematic
-mutual theorem xRep_zsmul_generic_same_φ_ψ, mk_phi_psi_dup_doubling_cross, ...
-```
-
-but it is not shorter.  The algebraic composition lemma remains one of the induction transitions.
-
-## 7. Cleanest concrete path now
-
-I would not switch to a generic-point proof for `mk_phi_psi_dup_doubling_cross`.  The cleaner path is:
-
-```text
-A. Use Mathlib EDS recurrence lemmas for preΨ/ΨSq/Φ.
-B. Prove the bivariate/univariate duplication composition directly in the coordinate ring.
-C. Use `CoordinateRing.mk_φ`, `CoordinateRing.mk_ψ`, `CoordinateRing.mk_Ψ_sq` to move between bivariate and univariate forms.
-D. Use the already-proven pointwise duplication theorem in the *point-level* ladder, not as a shortcut for the coordinate-ring recurrence identity.
-```
-
-The generic point can still be useful as a final sanity theorem:
-
-```lean
-/-- Once the ladder theorem is proved, this should be an easy corollary. -/
-theorem xRep_zsmul_generic_same_φ_ψ_corollary
-    (m : ℤ) :
-    P1.Same
-      (xRep (W.toAffine.baseChange K) (m • genericPoint W))
-      (P1.mk
-        (algebraMap A K (CoordinateRing.mk W.toAffine (W.φ m)))
-        (algebraMap A K (CoordinateRing.mk W.toAffine ((W.ψ m)^2)))) := by
-  -- specialize the global ladder theorem to `genericPoint W`
+lemma KeyLT_add_right {u v w : Exp} (h : KeyLT u v) :
+    KeyLT (u + w) (v + w) := by
+  -- From `KeyLE_add_right` in both directions.
   sorry
 ```
 
-But proving this corollary first is not a shortcut.
-
-## 8. Final verdict
-
-```text
-Generic point construction: viable and closeable.
-Generic point as shortcut: not viable.
-Real gap: x([n]G)=Φₙ/ΨSqₙ, which is exactly the group-law/division-polynomial bridge.
-Recommended path: prove the coordinate-ring composition from EDS recurrences directly, or continue the ladder recurrence matching.  Do not detour through the generic point expecting it to remove the composition proof.
-```
-
-If you want one small generic-point lemma to de-risk independently, make it this:
+In practice I would add symmetric `add_left` lemmas and an `nsmul` version:
 
 ```lean
-lemma genericPoint_exists_and_equation
-    {k : Type*} [Field k]
-    (W : WeierstrassCurve k) [W.IsElliptic] :
-    ∃ G : (W.toAffine.baseChange (FractionRing W.toAffine.CoordinateRing)).Point,
-      True := by
-  exact ⟨WeierstrassCurve.Affine.GenericPoint.genericPoint W, trivial⟩
+lemma KeyLE_add_left {u v w : Exp} (h : KeyLE u v) :
+    KeyLE (w + u) (w + v) := by
+  simpa [add_comm, add_left_comm, add_assoc] using KeyLE_add_right (w := w) h
+
+lemma KeyLT_add_left {u v w : Exp} (h : KeyLT u v) :
+    KeyLT (w + u) (w + v) := by
+  simpa [add_comm, add_left_comm, add_assoc] using KeyLT_add_right (w := w) h
 ```
 
-That verifies the construction infrastructure.  But it will not prove `mk_phi_psi_dup_doubling_cross` without the missing generic n-multiple coordinate formula.
+### Leading-term predicate
+
+```lean
+/-- `HasLead p e a` says that the unique `K`-leading monomial of `p`
+has exponent `e` and coefficient `a`. -/
+def HasLead (p : R) (e : Exp) (a : ℤ) : Prop :=
+  coeff e p = a ∧
+  a ≠ 0 ∧
+  ∀ f : Exp, coeff f p ≠ 0 → f ≠ e → KeyLT f e
+
+lemma HasLead.ne_zero {p : R} {e : Exp} {a : ℤ}
+    (h : HasLead p e a) : p ≠ 0 := by
+  intro hp
+  rcases h with ⟨hcoeff, hane, _⟩
+  have : coeff e p = 0 := by simp [hp]
+  exact hane (by simpa [hcoeff] using this.symm)
+
+lemma HasLead_C_one : HasLead (1 : R) 0 1 := by
+  -- `simp [HasLead]`; for the last field use `coeff f 1 ≠ 0` implies `f=0`.
+  sorry
+
+lemma HasLead_X (i : Fin 3) :
+    HasLead (X i : R) (Finsupp.single i 1) 1 := by
+  -- `simp [HasLead]` plus `coeff_X`/support facts.
+  sorry
+
+lemma HasLead_monomial {e : Exp} {a : ℤ} (ha : a ≠ 0) :
+    HasLead (monomial e a : R) e a := by
+  -- Useful for `b*d` if you prefer not to multiply the two `X` leads.
+  sorry
+```
+
+The important algebraic lemmas are the following.
+
+```lean
+lemma HasLead_neg {p : R} {e : Exp} {a : ℤ}
+    (hp : HasLead p e a) : HasLead (-p) e (-a) := by
+  -- coefficients are negated; support/key comparison unchanged.
+  sorry
+
+lemma HasLead_mul {p q : R} {ep eq : Exp} {ap aq : ℤ}
+    (hp : HasLead p ep ap) (hq : HasLead q eq aq) :
+    HasLead (p * q) (ep + eq) (ap * aq) := by
+  -- Use `coeff_mul`, or the support-of-product API.
+  -- If a product monomial has maximal key, both factors must have maximal key;
+  -- uniqueness then forces `ep` and `eq`.
+  -- Coefficient at `ep+eq` is therefore `ap*aq`.
+  sorry
+
+lemma HasLead_pow {p : R} {e : Exp} {a : ℤ} (hp : HasLead p e a) :
+    ∀ k : ℕ, HasLead (p^k) (k • e) (a^k)
+  | 0 => by simpa using HasLead_C_one
+  | k+1 => by
+      simpa [pow_succ, Nat.succ_nsmul] using HasLead_mul hp (HasLead_pow hp k)
+
+lemma HasLead_sub_of_left {p q : R} {ep eq : Exp} {ap aq : ℤ}
+    (hp : HasLead p ep ap) (hq : HasLead q eq aq)
+    (hkey : KeyLT eq ep) :
+    HasLead (p - q) ep ap := by
+  -- The top key of `q` is strictly below the top key of `p`, so no cancellation.
+  -- Use `coeff_sub`.
+  sorry
+
+lemma HasLead_sub_of_right {p q : R} {ep eq : Exp} {ap aq : ℤ}
+    (hp : HasLead p ep ap) (hq : HasLead q eq aq)
+    (hkey : KeyLT ep eq) :
+    HasLead (p - q) eq (-aq) := by
+  -- Same, but the dominant term comes from `-q`.
+  sorry
+```
+
+For the even recurrence, add the shift lemma for multiplication by `b`.
+
+```lean
+lemma HasLead_mul_b_iff {p : R} {e : Exp} {a : ℤ} :
+    HasLead (p * bVar) (e + eb) a ↔ HasLead p e a := by
+  -- Coefficients of `p * X 0` are coefficients of `p` with the exponent shifted by `eb`.
+  -- This is just the monomial multiplication coefficient formula.
+  sorry
+```
+
+If the available API makes the iff annoying, prove only the direction needed:
+
+```lean
+lemma HasLead_of_mul_b {p : R} {e : Exp} {a : ℤ}
+    (h : HasLead (p * bVar) (e + eb) a) : HasLead p e a := by
+  sorry
+```
+
+### Closed-form exponent and sign
+
+```lean
+def tri (r : ℕ) : ℕ := r * (r + 1) / 2
+
+def eOdd (r : ℕ) : Exp :=
+  Finsupp.single (1 : Fin 3) (tri r)
+
+def eEven (r : ℕ) : Exp :=
+  Finsupp.single (0 : Fin 3) 1 +
+  Finsupp.single (1 : Fin 3) ((r - 1) * (r - 2) / 2) +
+  Finsupp.single (2 : Fin 3) (r - 1)
+
+def epsNat (n : ℕ) : ℤ :=
+  (-1 : ℤ) ^ ((n - 1) / 4)
+
+lemma eps_odd (r : ℕ) : epsNat (2*r+1) = (-1 : ℤ) ^ (r / 2) := by
+  unfold epsNat
+  -- arithmetic: `(2*r+1-1)/4 = r/2`
+  congr
+  omega
+
+lemma eps_even (r : ℕ) (hr : 1 ≤ r) :
+    epsNat (2*r) = (-1 : ℤ) ^ ((r - 1) / 2) := by
+  unfold epsNat
+  -- arithmetic: `(2*r-1)/4 = (r-1)/2` for `r ≥ 1`
+  congr
+  omega
+```
+
+Top primary degree lemmas:
+
+```lean
+lemma wt0_eOdd (r : ℕ) : wt0 (eOdd r) = (2*r+1)^2 - 1 := by
+  unfold wt0 eOdd tri
+  -- Use `omega`/`nlinarith` after clearing the `/2`; this is elementary.
+  sorry
+
+lemma wt0_eEven (r : ℕ) (hr : 1 ≤ r) : wt0 (eEven r) = (2*r)^2 - 1 := by
+  unfold wt0 eEven
+  -- Again elementary arithmetic.
+  sorry
+```
+
+The exact arithmetic lemmas that separate the recurrence terms are best written as four small named lemmas.
+
+```lean
+lemma odd_even_m_dominates_second (r : ℕ) (hr : 1 ≤ r) :
+    KeyLT (eEven (r+1) + 3 • eEven r)
+          (eOdd (r-1) + 3 • eOdd r) := by
+  -- This is the `m=2r`, `n=4r+1` case.
+  -- Both primary degrees tie; b-exponents are `4` and `0`.
+  sorry
+
+lemma odd_odd_m_dominates_first (r : ℕ) (hr : 1 ≤ r) :
+    KeyLT (eEven r + 3 • eEven (r+1))
+          (eOdd (r+1) + 3 • eOdd r) := by
+  -- This is the `m=2r+1`, `n=4r+3` case.
+  -- Both primary degrees tie; b-exponents are `4` and `0`.
+  sorry
+
+lemma even_even_m_dominates_first (r : ℕ) (hr : 2 ≤ r) :
+    KeyLT (eEven (r-1) + eEven r + 2 • eOdd r)
+          (2 • eOdd (r-1) + eEven r + eEven (r+1)) := by
+  -- This is the `m=2r`, `n=4r` case.
+  -- Primary and b-exponents tie; c-exponents differ by `3`.
+  sorry
+
+lemma even_odd_m_dominates_second (r : ℕ) (hr : 1 ≤ r) :
+    KeyLT (2 • eEven r + eOdd r + eOdd (r+1))
+          (eOdd (r-1) + eOdd r + 2 • eEven (r+1)) := by
+  -- This is the `m=2r+1`, `n=4r+2` case.
+  -- Primary and b-exponents tie; c-exponents differ by `3`.
+  sorry
+```
+
+Depending on how you normalize `nsmul` and addition of `Finsupp`s, you may want to state these with the terms expanded exactly as they appear in the recurrence.  They should all reduce to `omega`/`nlinarith` after unfolding `eOdd`, `eEven`, `tri`, `wt0`, and `KeyLE`.
+
+### Induction theorem
+
+The cleanest statement is a positive-index theorem, then a wrapper for integers.
+
+```lean
+-- Replace this with the actual local abbreviation for `normEDS b c d`.
+noncomputable abbrev W (n : ℤ) : R :=
+  normEDS bVar cVar dVar n
+
+def topExp : ℕ → Exp
+  | 0 => 0
+  | n+1 =>
+      if h : ∃ r, n+1 = 2*r+1 then
+        eOdd (Nat.find h)
+      else
+        -- In production, avoid this awkward definition; prove separate odd/even theorems.
+        0
+```
+
+In practice I would avoid a single `topExp` definition and prove separate mutually convenient theorem shapes:
+
+```lean
+theorem hasLead_odd_even :
+    (∀ r : ℕ, HasLead (W (Int.ofNat (2*r+1)))
+        (eOdd r) ((-1 : ℤ) ^ (r / 2))) ∧
+    (∀ r : ℕ, 1 ≤ r → HasLead (W (Int.ofNat (2*r)))
+        (eEven r) ((-1 : ℤ) ^ ((r - 1) / 2))) := by
+  -- Use strong induction on `n`, or two theorems proved by strong induction on the index.
+  -- Base cases:
+  --   W1 = 1      -> eOdd 0, coeff +1
+  --   W2 = b      -> eEven 1, coeff +1
+  --   W3 = c      -> eOdd 1, coeff +1
+  --   W4 = b*d    -> eEven 2, coeff +1
+  -- Inductive cases:
+  --   n=4r+1: `normEDS_odd` with m=2r, use `HasLead_sub_of_right`.
+  --   n=4r+3: `normEDS_odd` with m=2r+1, use `HasLead_sub_of_left`.
+  --   n=4r:   `normEDS_even` with m=2r, prove lead of RHS, then `HasLead_of_mul_b`.
+  --   n=4r+2: `normEDS_even` with m=2r+1, prove lead of RHS, then `HasLead_of_mul_b`.
+  sorry
+```
+
+A more explicit sketch of the `4r+1` branch:
+
+```lean
+-- n = 4*r+1, r ≥ 1
+have hA : HasLead
+    (W (Int.ofNat (2*r+2)) * W (Int.ofNat (2*r))^3)
+    (eEven (r+1) + 3 • eEven r)
+    (((-1 : ℤ) ^ (r / 2)) * (((-1 : ℤ) ^ ((r-1)/2))^3)) := by
+  -- `HasLead_mul`, `HasLead_pow`, induction hypotheses.
+  sorry
+
+have hB : HasLead
+    (W (Int.ofNat (2*r-1)) * W (Int.ofNat (2*r+1))^3)
+    (eOdd (r-1) + 3 • eOdd r)
+    (((-1 : ℤ) ^ ((r-1)/2)) * (((-1 : ℤ) ^ (r/2))^3)) := by
+  sorry
+
+have hdom : KeyLT (eEven (r+1) + 3 • eEven r)
+                  (eOdd (r-1) + 3 • eOdd r) :=
+  odd_even_m_dominates_second r ‹1 ≤ r›
+
+have hlead : HasLead
+    (W (Int.ofNat (2*r+2)) * W (Int.ofNat (2*r))^3
+      - W (Int.ofNat (2*r-1)) * W (Int.ofNat (2*r+1))^3)
+    (eOdd (r-1) + 3 • eOdd r)
+    (- (((-1 : ℤ) ^ ((r-1)/2)) * (((-1 : ℤ) ^ (r/2))^3))) := by
+  exact HasLead_sub_of_right hA hB hdom
+
+-- Rewrite the left side by `normEDS_odd` with `m = 2*r`.
+-- Then normalize exponent and sign:
+--   eOdd (r-1) + 3 • eOdd r = eOdd (2*r)
+--   - ε_(2r-1) ε_(2r+1)^3 = ε_(4r+1)
+```
+
+The other three branches are identical in structure, differing only in which dominance lemma is used and whether the final result is obtained directly (`odd`) or via `HasLead_of_mul_b` (`even`).
+
+### Nonvanishing wrapper
+
+Once `HasLead` is proved, nonvanishing is immediate.
+
+```lean
+theorem normEDS_ne_zero_nat_pos (n : ℕ) (hn : 0 < n) :
+    W (Int.ofNat n) ≠ 0 := by
+  -- Get the relevant odd/even `HasLead` theorem.
+  -- Then use `HasLead.ne_zero`.
+  sorry
+
+theorem normEDS_ne_zero_int (j : ℤ) (hj : j ≠ 0) :
+    W j ≠ 0 := by
+  rcases lt_or_gt_of_ne hj with hjneg | hjpos
+  · have hpos : W (-j) ≠ 0 := by
+      -- `-j` is positive; reduce to `normEDS_ne_zero_nat_pos`.
+      sorry
+    -- Use the actual oddness theorem for `normEDS`.
+    -- `W (-j) = - W j`, or equivalently `W j = - W (-j)`.
+    intro hz
+    apply hpos
+    -- rewrite by oddness and `hz`.
+    sorry
+  · -- positive integer case
+    -- convert `j` to `Int.ofNat j.natAbs` and use `normEDS_ne_zero_nat_pos`.
+    sorry
+```
+
+## 6. API recommendation
+
+Use this route:
+
+```lean
+MvPolynomial.support
+MvPolynomial.coeff
+MvPolynomial.monomial
+MvPolynomial.X
+MvPolynomial.coeff_mul      -- or the available coefficient-of-product lemma
+MvPolynomial.coeff_add
+MvPolynomial.coeff_sub
+MvPolynomial.coeff_neg
+```
+
+The proof should be driven by a custom predicate like `HasLead`.  This avoids fighting `degrees`/`totalDegree`, which only see the scalar part `(3,8,12)` and therefore cannot distinguish the recurrence summands.
+
+A one-variable `Polynomial.natDegree` route is possible only with an additional bounded encoding of the lex refinement.  For example, for a fixed target bound `N`, choose `M > N^2` and specialize
+
+```lean
+b ↦ t^(3*M^3 - M^2),
+c ↦ t^(8*M^3 - M),
+d ↦ t^(12*M^3 - 1).
+```
+
+Then the degree of `b^β c^γ d^δ` is
+
+```text
+M^3 wt₀(β,γ,δ) - M^2 β - M γ - δ,
+```
+
+which encodes the key `K` for exponent differences bounded by `M`.  But this introduces a bound parameter and extra exponent estimates, so it is more painful in Lean than the direct `MvPolynomial.support` proof.
+
+## 7. Final theorem shape
+
+The final reusable theorem should look like this.
+
+```lean
+theorem normEDS_hasLead_pos :
+    (∀ r : ℕ, HasLead (W (Int.ofNat (2*r+1)))
+        (eOdd r) ((-1 : ℤ) ^ (r / 2))) ∧
+    (∀ r : ℕ, 1 ≤ r → HasLead (W (Int.ofNat (2*r)))
+        (eEven r) ((-1 : ℤ) ^ ((r - 1) / 2))) := by
+  sorry
+
+theorem normEDS_ne_zero_of_ne_zero (j : ℤ) (hj : j ≠ 0) :
+    W j ≠ 0 := by
+  -- positive case from `normEDS_hasLead_pos`, negative case from `normEDS_neg`.
+  sorry
+```
+
+This makes Ward's theorem unconditional: every nonzero index has a Ward polynomial with an explicitly exhibited nonzero coefficient, in fact coefficient `±1`, at a uniquely selected monomial.
