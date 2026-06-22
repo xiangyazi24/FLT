@@ -129,3 +129,27 @@ Residual sub-identity (local only, CAS=0):
 `Hkm·Hk,m-1 − b²·Gk·Gkp1 = W(k)²W(k+1)²W(m+1)W(m-1)·Somos@m + W(m)W(k+2)·Trel − W(m)²W(k+1)²W(m+1)W(m-1)·Somos@k`.
 
 H-step (OffRel(k+1)) + base cases k=0,1,2: pending (ChatGPT dm1 + own search).
+
+## VERIFIED 2026-06-22 (cont) — H-step + base cases → COMPLETE Ward recipe
+
+**H-tautology (ring identity):**  V_{k+1}(m)·V_k(m) = b²·U_{k+1}(m+1)·U_{k+1}(m).
+
+**H-step (multiplied form), cancellation factor V_k(m) = b·W(m+k+1)W(m-k) = Hkm:**
+`V_k(m)·( V_{k+1}(m) − H_{k+1,m} ) = Σ cofactor·hyp`  [sympy expand = 0]
+| hyp (=0 on EDS)                | cofactor                                     |
+|--------------------------------|----------------------------------------------|
+| GapRel(k+1,m+1)                | b²·Gkp1(m) = b²(W(m+1)W(m-1)W(k+1)²−W(k+2)W(k)W(m)²) |
+| GapRel(k+1,m)                  | b²·U_{k+1}(m+1) = b²·W(m+k+2)W(m-k)          |
+| OffRel(k,m)                    | −H_{k+1,m}                                    |
+| Trel(k+1,m)                    | W(m+2)·W(k+1)                                 |
+| Somos@m                        | W(k)W(k+1)²W(k+2)·W(m+1)²                      |
+| Somos@(k+1)                    | −W(k)W(k+2)·W(m)²W(m+1)²                       |
+where H_{k+1,m}=W(m+2)W(m-1)W(k+2)W(k+1)−W(k+3)W(k)W(m+1)W(m), Gkp1(m)=W(m+1)W(m-1)W(k+1)²−W(k+2)W(k)W(m)².
+H-residual sub-identity (CAS=0): b²Gkp1(m+1)Gkp1(m)−Hkm·H_{k+1,m} = W(m+2)W(k+1)·Trel(k+1,m) + W(k)W(k+1)²W(k+2)W(m+1)²·Somos@m − W(k)W(k+2)W(m)²W(m+1)²·Somos@(k+1).
+
+**BASE CASES (both trivial via W(0)=0, W(1)=1, W(-1)=-1):**
+- GapRel(0,m): U_0=W(m)², Gk(0)=−B(0)W(m)²=W(m)² (B(0)=W(1)W(-1)=-1). Identity W(m)²=W(m)².
+- OffRel(0,m): V_0=W(2)W(m+1)W(m); H_{0,m}=−W(2)W(-1)W(m+1)W(m)=W(2)W(m+1)W(m). Identity holds.
+- GapRel(2,m) = adjacent Somos (already PROVEN, normEDS_adjacent_somos).
+
+**COMPLETE RECIPE (Ward = normEDS_addRel):** base {GapRel(0),OffRel(0)} ∀m [trivial] → mutual induction k→k+1 {G-step, H-step} [CAS-verified] ⟹ GapRel(k,m) ∀k≥0,m. AddRel(m,n)=GapRel(n,m) for n≥0; n<0 by AddRel(m,-n)=AddRel(m,n) [W(-n)=-W(n)]. Cancellations: b²U_k(m), b·W(m+k+1)W(m-k), all nonzero over a domain with normEDS nonvanishing. EVERY cofactor sympy-verified free-W exact 0. Remaining: Lean encoding only.
