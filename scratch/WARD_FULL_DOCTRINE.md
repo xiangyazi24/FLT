@@ -67,3 +67,18 @@ caught it. This is the right ChatGPT use for a hard theorem (Xiang 06-22): drive
   instance set — round 2 with ChatGPT in flight (asked for the exact Shipsey/Ward step identity + the precise
   ideal-membership instances). I CAS-verify everything before building (caught ChatGPT's sign error + this gap).
 - Step 1 (3→2 reduction) is SOLID and committed — the genuine structural breakthrough that halves the problem.
+
+## Round 2 (companion-induction) — structure SOUND, step still open
+- ChatGPT round 2 (self-corrected, removed the bad even-step): carry a COMPANION OffRel(k,m) alongside
+  GapRel(k,m)=AddRel, induct on gap k STEP-BY-STEP (k→k+1) via (G_k,H_k)⟹(G_{k+1},H_{k+1}). Cites
+  van der Poorten–Swart (Somos-4 ⟹ all larger-gap relations).
+  · GapRel(k,m): W(m+k)W(m-k) = W(k)²B(m) − B(k)W(m)²,  B(i):=W(i+1)W(i-1).
+  · OffRel(k,m): W(2)W(m+k+1)W(m-k) = W(m+2)W(m-1)W(k+1)W(k) − W(k+2)W(k-1)W(m+1)W(m).
+  · BOTH numerically VERIFIED to hold for normEDS (all tested k,m). The two driving tautologies are
+    genuine regroupings (verified by hand).
+- BUT the G-step is NOT a clean formal identity: `H_k(m)·H_k(m-1) − W(2)²·G_{k+1}·G_k` ≠ 0 in free W
+  (8-term residual), and that residual does NOT reduce mod {Somos_m, Somos_k} (6 terms remain). So
+  ChatGPT's "follows after cancellation" glosses a real gap (its 3rd imprecision; all CAS-caught).
+- OPEN: the exact finite relation package that closes the k→k+1 step. Likely needs OffRel/Somos at more
+  indices, OR the full Stange 4-term recurrence (s general), OR the diagonal (m=±k) handling interwoven.
+  This is the genuine Ward core — the long grind. Step 1 (the 3→2 reduction) remains the solid won ground.
