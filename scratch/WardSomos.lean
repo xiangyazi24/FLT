@@ -32,9 +32,11 @@ lemma adjRel_three (b c d : R) : AdjRel b c d 3 := by
   unfold AdjRel
   norm_num [normEDS_one, normEDS_two, normEDS_three, normEDS_four, h5_eq] <;> ring
 
--- Routine finite base case (needs normEDS 6); ChatGPT to fill the W6 closed form.
 lemma adjRel_four (b c d : R) : AdjRel b c d 4 := by
-  sorry
+  unfold AdjRel
+  have e6 := normEDS_even b c d 3
+  norm_num [normEDS_one, normEDS_two, normEDS_three, normEDS_four, h5_eq] at e6 ⊢
+  linear_combination e6
 
 /-- Packages the two recurrence steps needed by `normEDSRec`. -/
 structure AdjRelRecSteps (b c d : R) : Prop where
