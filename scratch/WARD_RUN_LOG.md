@@ -32,3 +32,15 @@ Then EDS core ⇒ keystone nsmul_eq_zero_iff_ΨSq_eval. Above: SEAM1, no_rationa
     via Y²=X³+a₂X²+a₄X+a₆-a₁XY-a₃Y, then the ψ Somos + curve closes it. OR do it in Lean directly (ChatGPT R3).
 - NEXT: coord-ring doubling via full quotient (ChatGPT R3 dispatched on the Lean cofactor with curve relation).
   Then addition + 2 nonzeros → EDS core → keystone.
+
+## CONCLUSIVE doubling diagnosis (CAS exhaustive + ChatGPT R3 converged)
+dupCrossDiff=0 is NOT in the ideal of adjacent preΨ/ψ Somos at ANY tested finite radius
+(R[X] r<=4; coord-ring free-g r<=4), even with all curve-coefficient relations baked in.
+ChatGPT R3 independently: curve relation necessary but not sufficient with only the single adjacent Somos.
+{1,Y}-basis model (Y^2 -> curve) too heavy for sympy (degree ~30, timed out).
+CONCLUSION: the duplication formula is a GLOBAL EDS property, provable by INDUCTION (normEDSRec / Ward net
+argument), NOT by a finite linear_combination of local Somos. Mirrors how WardSomos itself needed normEDSRec.
+No Mathlib shortcut (DivisionPolynomial has only defs + mk lemmas).
+NEXT for doubling: inductive proof on m via normEDSRec; even/odd recurrence steps each a cofactor certificate
+(same machinery as WardSomos oddStep/evenStepScaled but for the phi/PsiSq doubling). Substantial fresh effort.
+Foundation delivered this session: WardSomos + PsiSomos bridge + prePsi_adjacent_somos, all 0 custom axioms.
