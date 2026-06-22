@@ -82,3 +82,21 @@ caught it. This is the right ChatGPT use for a hard theorem (Xiang 06-22): drive
 - OPEN: the exact finite relation package that closes the k→k+1 step. Likely needs OffRel/Somos at more
   indices, OR the full Stange 4-term recurrence (s general), OR the diagonal (m=±k) handling interwoven.
   This is the genuine Ward core — the long grind. Step 1 (the 3→2 reduction) remains the solid won ground.
+
+## *** BREAKTHROUGH (round-3 patch, CAS-verified): Ward path is now CONCRETE ***
+After feeding ChatGPT the exact 8-term residual, it gave the correct closure (verify-don't-transcribe:
+its first 4 attempts were wrong; this one CAS-checks). The whole Ward proof reduces to adjacent Somos +
+clean inductions. Verified pieces:
+1. **Residual decomposition (FORMAL identity, free W — CAS-exact):**
+   R = K₀²K₁²M₁M₋₁·Somos_m + M₀·(K₂·T_{k,m} − K₁²M₁M₀M₋₁·Somos_k),  so R ∈ ⟨Somos_m, Somos_k, T_{k,m}⟩.
+2. **Double-off relation** T_{k,m} := N_k·D_m − N_m·D_k = 0, where
+   N_n := W(n+2)W(n-1)² + W(n+1)²W(n-2) + b²W(n)³,  D_n := W(n+1)W(n)W(n-1).
+   This factors through the **single-index** relation N_n = λ·D_n (λ = (d+b⁴)/c, the Somos-4 conserved quantity).
+3. **Conservation step is Somos-reducible (CAS, remainder 0):**
+   N_{n+1}·D_n − N_n·D_{n+1} = (−W(n)·W(n+1)³)·adjSomos@n + (W(n)³·W(n+1))·adjSomos@(n+1).
+   ⟹ N_n/D_n is index-independent ⟹ N_n = λD_n by a trivial induction (conservation + base n=2).
+CHAIN: normEDS_adjacent_somos (DONE) → conservation lemma (clean linear_combination, cofactors above)
+ → N_n=λD_n (induction) → T_{k,m}=0 → residual R=0 (decomposition) → G-step (AddRel k+1) → AddRel (gap
+ induction) → IsEllSequence (Step 1, DONE).  Remaining build: conservation lemma, single-index induction,
+ G-step + H-step assembly (H-step needs its own residual analysis, likely closes the same way).
+This turns the open Mathlib TODO into a concrete mechanizable build — all over adjacent Somos + clean inductions.
