@@ -104,4 +104,14 @@ lemma hStep_mul [IsDomain R] (b c d : R) (hc : c ≠ 0)
     + (normEDS b c d k * normEDS b c d (k + 1) ^ 2 * normEDS b c d (k + 2) * normEDS b c d (m + 1) ^ 2) * hsm
     + (-(normEDS b c d k * normEDS b c d (k + 2) * normEDS b c d m ^ 2 * normEDS b c d (m + 1) ^ 2)) * hsk1
 
+/-- **Diagonal** `GapRel (k+1) k` (= `AddRel k (k+1)`): the odd-index recurrence, where the G-step
+cancellation factor `b²W(m+k)W(m-k)` vanishes (`m=k ⇒ W(0)=0`). Direct from Mathlib `normEDS_odd`. -/
+lemma gapRel_diag (b c d : R) (k : ℤ) : GapRel b c d (k + 1) k := by
+  unfold GapRel AddRel
+  have hodd := normEDS_odd b c d k
+  simp only [show k + (k + 1) = 2 * k + 1 by ring, show k - (k + 1) = -1 by ring,
+    show (k + 1) + 1 = k + 2 by ring, show (k + 1) - 1 = k by ring]
+  rw [hodd, show (-1 : ℤ) = -(1) by ring, normEDS_neg, normEDS_one]
+  ring
+
 end FLT.EDS
