@@ -25,3 +25,13 @@ FALLBACK: if preΨ-certificate parity bookkeeping too painful → coordinate-rin
 - Inv=preΨ_invariant: dispatched to ChatGPT dm1 (Q341, derivation mirroring preΨ_adjacent_somos: invarRel_all on ψ → coord-ring descent → cancel ψ₂). Pending.
 - Certificate-core ENCODING DECISION: expand Ψ₂Sq/Ψ₃/preΨ₄ to X-forms in goal+hAdj+hInv, then `linear_combination` with banked cofactors (KEYSTONE_DOUBLING_CERT.md, all 4 CAS-verified) over hAdj+hInv+hb, by_cases parity. Heavy ring but verified. Alt if too heavy: re-CAS with s/c3/d4 as relation-hyps for cleaner cofactors.
 - NEXT: harvest preΨ_invariant → build ΨSq_two_mul/Φ_two_mul cert (both parities) → cancel Ψ₃ → SameP1Vec doubling.
+
+### Avenue (a) progress 2026-06-22 (cont)
+- preΨ_invariant (Inv = Ward InvarRel→preΨ): BUILT modulo 2 named sorries (PsiInvariant.lean, committed).
+  ChatGPT-derived proof; fixed namespace(open FLT.EDS)/Y(→Polynomial(Polynomial R))/parity(Int.even_add_one,
+  even_sub_one, parity_simps)/type-mismatch(InvarRel in simpa). 2 sorries = coord-ring ψ→preΨ normalization
+  (hq_mul even / hq2_mul odd); STATEMENT CAS-verified. Norm fix dispatched to ChatGPT dm1.
+- NEXT push (on norm return): complete preΨ_invariant → build ΨSq_two_mul/Φ_two_mul certificate
+  (Ψ₃-mult linear_combination over Adj=preΨ_adjacent_somos + Inv=preΨ_invariant + bRel=b_relation, banked
+  cofactors KEYSTONE_DOUBLING_CERT.md, by_cases parity, expand Ψ₂Sq/Ψ₃/preΨ₄ X-forms) → cancel Ψ₃ →
+  ΨSq_two_mul/Φ_two_mul → SameP1Vec doubling (c=1, by eval). Then (b)diff-add (c)nonzero (d)assemble.
