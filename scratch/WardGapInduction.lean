@@ -72,4 +72,36 @@ lemma gStep_mul [IsDomain R] (b c d : R) (hc : c ≠ 0)
         * normEDS b c d (m - 1))) * hsk
     + (normEDS b c d m * normEDS b c d (k + 2)) * htrel
 
+/-- **H-step (multiplied form).** `V_k(m)·(OffRel(k+1,m) residual) = 0`, the sympy-verified linear
+combination of `GapRel (k+1) m`, `GapRel (k+1) (m+1)`, `OffRel k m`, `Trel (k+1) m`, and the two Somos
+(`@m`, `@(k+1)`). Cancelling `V_k(m) = b·W(m+k+1)W(m-k)` (nonzero) gives `OffRel (k+1) m`. -/
+lemma hStep_mul [IsDomain R] (b c d : R) (hc : c ≠ 0)
+    (hne : ∀ j : ℤ, j ≠ 0 → normEDS b c d j ≠ 0) (k m : ℤ)
+    (hG1 : GapRel b c d (k + 1) m) (hG2 : GapRel b c d (k + 1) (m + 1)) (hO : OffRel b c d k m) :
+    (b * normEDS b c d (m + k + 1) * normEDS b c d (m - k)) *
+      (b * normEDS b c d (m + k + 2) * normEDS b c d (m - k - 1)
+        - (normEDS b c d (m + 2) * normEDS b c d (m - 1) * normEDS b c d (k + 2) * normEDS b c d (k + 1)
+           - normEDS b c d (k + 3) * normEDS b c d k * normEDS b c d (m + 1) * normEDS b c d m)) = 0 := by
+  unfold GapRel AddRel at hG1 hG2
+  unfold OffRel at hO
+  have hsm := normEDS_adjacent_somos b c d m
+  have hsk1 := normEDS_adjacent_somos b c d (k + 1)
+  have htrel := Trel_zero b c d hc hne (k + 1) m
+  unfold Nseq Dseq at htrel
+  simp only [show m + (k + 1) + 1 = m + k + 2 by ring, show m - (k + 1) = m - k - 1 by ring,
+    show m + (k + 1) = m + k + 1 by ring, show k + 1 + 1 = k + 2 by ring, show k + 1 - 1 = k by ring,
+    show (m + 1) + (k + 1) = m + k + 2 by ring, show (m + 1) - (k + 1) = m - k by ring,
+    show (m + 1) + 1 = m + 2 by ring, show (m + 1) - 1 = m by ring,
+    show (k + 1) + 2 = k + 3 by ring, show (k + 1) - 2 = k - 1 by ring,
+    show (k + 1) + 1 = k + 2 by ring, show (k + 1) - 1 = k by ring] at hG1 hG2 hO hsm hsk1 htrel ⊢
+  linear_combination
+    (b ^ 2 * (normEDS b c d (m + 1) * normEDS b c d (m - 1) * normEDS b c d (k + 1) ^ 2
+        - normEDS b c d (k + 2) * normEDS b c d k * normEDS b c d m ^ 2)) * hG2
+    + (b ^ 2 * normEDS b c d (m + k + 2) * normEDS b c d (m - k)) * hG1
+    + (-(normEDS b c d (m + 2) * normEDS b c d (m - 1) * normEDS b c d (k + 2) * normEDS b c d (k + 1)
+        - normEDS b c d (k + 3) * normEDS b c d k * normEDS b c d (m + 1) * normEDS b c d m)) * hO
+    + (normEDS b c d (m + 2) * normEDS b c d (k + 1)) * htrel
+    + (normEDS b c d k * normEDS b c d (k + 1) ^ 2 * normEDS b c d (k + 2) * normEDS b c d (m + 1) ^ 2) * hsm
+    + (-(normEDS b c d k * normEDS b c d (k + 2) * normEDS b c d m ^ 2 * normEDS b c d (m + 1) ^ 2)) * hsk1
+
 end FLT.EDS
