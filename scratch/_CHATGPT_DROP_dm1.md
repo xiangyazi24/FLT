@@ -1,386 +1,274 @@
-# Q341-dm1: deriving the `preΨ` invariant from Ward `invarRel_all`
+# Q344-dm1: closing the `preΨ_invariant` coordinate-ring normalization steps
 
-## Executive answer
+## The issue
 
-The exact nonvanishing hypothesis needed is the ψ-level one in the bivariate polynomial ring:
-
-```lean
-hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0
-```
-
-This is used only to invoke your already-proved Ward invariant
+The failing step is not algebraic; it is normalization.  Do **not** put the local definitions
 
 ```lean
-invarRel_all
-  (R := R[X][Y])
-  (b := W.ψ₂)
-  (c := C W.Ψ₃)
-  (d := C W.preΨ₄)
+mkC : R[X] →+* CoordinateRing := (mk W).comp C
+q   : CoordinateRing := mk W W.ψ₂
 ```
 
-for the bivariate sequence
+in the simp set as `[mkC, q]`.  That unfolds them and leaves the normalized theorem in terms of `mk W (C f)` and `mk W W.ψ₂`, while the target and `hq4` are in terms of `mkC f` and `q`.
+
+Instead, add two local **folding** lemmas:
 
 ```lean
-W.ψ n = normEDS W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) n.
+have hmkC_apply (f : R[X]) : mk W (C f) = mkC f := rfl
+have hq_apply : mk W W.ψ₂ = q := rfl
 ```
 
-The descent to `preΨ` then uses exactly the same mechanism as your adjacent-Somos proof:
-
-```lean
-Affine.CoordinateRing.mk_ψ
-Affine.CoordinateRing.mk_ψ₂_sq
-mk_C_injective
-Ψ₂Sq_ne_zero h4
-```
-
-The parity translations are:
-
-```text
-q := mk W W.ψ₂,
-s := W.Ψ₂Sq,
-mkC(f) := mk W (C f).
-```
-
-If `Even m`, then
-
-```text
-mk(Nseq ψ₂ (C Ψ₃) (C preΨ₄) m)
-= q * mkC( preΨ(m+2) preΨ(m-1)^2
-           + preΨ(m+1)^2 preΨ(m-2)
-           + s^2 preΨ(m)^3 ),
-
-mk(Dseq ψ₂ (C Ψ₃) (C preΨ₄) m)
-= q * mkC( preΨ(m+1) preΨ(m) preΨ(m-1) ).
-```
-
-If `¬ Even m`, then
-
-```text
-mk(Nseq ψ₂ (C Ψ₃) (C preΨ₄) m)
-= q^2 * mkC( preΨ(m+2) preΨ(m-1)^2
-             + preΨ(m+1)^2 preΨ(m-2)
-             + preΨ(m)^3 ),
-
-mk(Dseq ψ₂ (C Ψ₃) (C preΨ₄) m)
-= q^2 * mkC( preΨ(m+1) preΨ(m) preΨ(m-1) ).
-```
-
-In both cases,
-
-```text
-mkC(preΨ₄) + q^4 = mkC(preΨ₄ + Ψ₂Sq^2),
-```
-
-because `q^2 = mkC(Ψ₂Sq)`.
-
-So the even branch cancels `q`, and the odd branch cancels `q^2`.
+Then use those in `simp`.  This rewrites `mk W (C f)` to `mkC f` and `mk W W.ψ₂` to `q`, so the later `← hq4` rewrite sees exactly `mkC (W.Ψ₂Sq^2)`.
 
 ---
 
-## Lean code
+## Even branch: replacement for `hq_mul`
 
-This is the complete proof shape.  It assumes your repository already has the following names, as in your message:
+Use this block exactly in the even branch, after you have:
 
 ```lean
-invarRel_all
-Nseq
-Dseq
-mk_C_injective
-Ψ₂Sq_ne_zero
+hm      : Even m
+hm_p2   : Even (m + 2)
+hm_m2   : Even (m - 2)
+hm_p1   : ¬ Even (m + 1)
+hm_m1   : ¬ Even (m - 1)
+hMk     : mk W (C W.Ψ₃ *
+              (W.ψ (m + 2) * W.ψ (m - 1)^2
+                + W.ψ (m + 1)^2 * W.ψ (m - 2)
+                + W.ψ₂^2 * W.ψ m^3))
+            = mk W ((C W.preΨ₄ + W.ψ₂^4)
+                * (W.ψ (m + 1) * W.ψ m * W.ψ (m - 1)))
+hq4     : q^4 = mkC (W.Ψ₂Sq^2)
 ```
 
-If your `mk_C_injective` theorem is namespaced, replace the two calls marked below by your local theorem name.  Current Mathlib names used here are `Affine.CoordinateRing.mk_ψ`, `Affine.CoordinateRing.mk_ψ₂_sq`, and `WeierstrassCurve.Ψ`.
+The target is:
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.Tactic
+q * mkC (W.Ψ₃ * preΨInvN W m)
+  = q * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m)
+```
 
-open Polynomial
-open scoped Polynomial
+Tactic block:
 
-namespace WeierstrassCurve
+```lean
+  have hq_mul :
+      q * mkC (W.Ψ₃ * preΨInvN W m)
+        = q * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) := by
+    -- Fold coordinate-ring constants back to the local names used by the goal.
+    have hmkC_apply (f : R[X]) : mk W (C f) = mkC f := rfl
+    have hq_apply : mk W W.ψ₂ = q := rfl
 
-noncomputable section
+    -- Normalize the mapped Ward invariant into q/mkC form.
+    have hMk' := hMk
+    simp [
+      FLT.EDS.mk_ψ_eq,
+      hmkC_apply, hq_apply,
+      hm, hm_p2, hm_m2, hm_p1, hm_m1
+    ] at hMk'
 
-variable {R : Type*} [CommRing R]
+    -- Compare the normalized hMk' with the desired q-multiplied statement.
+    -- Use `← hq4` so `mkC (Ψ₂Sq^2)` is converted to `q^4`; then `ring_nf`
+    -- sees the common leftover factor q on both sides.
+    linear_combination (norm :=
+      (simp [preΨInvN, preΨInvD, hm, hmkC_apply, hq_apply, ← hq4]; ring_nf)) hMk'
+```
 
-private def preΨInvN (W : WeierstrassCurve R) (m : ℤ) : R[X] :=
-  W.preΨ (m + 2) * W.preΨ (m - 1)^2
-    + W.preΨ (m + 1)^2 * W.preΨ (m - 2)
-    + (if Even m then W.Ψ₂Sq^2 else 1) * W.preΨ m^3
+What this produces internally is exactly:
 
-private def preΨInvD (W : WeierstrassCurve R) (m : ℤ) : R[X] :=
-  W.preΨ (m + 1) * W.preΨ m * W.preΨ (m - 1)
+```text
+hMk' :
+mkC Ψ₃ *
+  ((mkC preΨ(m+2) * q) * mkC preΨ(m-1)^2
+   + mkC preΨ(m+1)^2 * (mkC preΨ(m-2) * q)
+   + q^2 * (mkC preΨ(m) * q)^3)
+=
+(mkC preΨ₄ + q^4)
+  * (mkC preΨ(m+1) * (mkC preΨ(m) * q) * mkC preΨ(m-1)).
+```
 
-private lemma preΨ_invariant_even
-    [IsDomain R]
-    (W : WeierstrassCurve R)
-    (h4 : (4 : R) ≠ 0)
-    (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
-    {m : ℤ} (hm : Even m) :
-    W.Ψ₃ * preΨInvN W m
-      = (W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m := by
-  classical
+After expanding `preΨInvN` in the even branch,
 
-  let mkC : R[X] →+* _ := (Affine.CoordinateRing.mk W).comp Polynomial.C
-  let q : _ := Affine.CoordinateRing.mk W W.ψ₂
+```text
+preΨInvN W m
+= preΨ(m+2)preΨ(m-1)^2
+  + preΨ(m+1)^2preΨ(m-2)
+  + Ψ₂Sq^2 preΨ(m)^3,
+```
 
-  have hmkC : Function.Injective mkC := by
-    -- Replace this line by your exact local lemma if namespaced differently.
-    simpa [mkC, Function.comp_def] using (mk_C_injective (W := W))
+and rewriting `mkC(Ψ₂Sq^2)` as `q^4`, this is ring-identical to the target multiplied by `q`.
 
-  have hs_ne : W.Ψ₂Sq ≠ 0 := Ψ₂Sq_ne_zero (W := W) h4
+---
 
-  have hq2 : q^2 = mkC W.Ψ₂Sq := by
-    simpa [q, mkC, sq] using (Affine.CoordinateRing.mk_ψ₂_sq (W := W))
+## Odd branch: replacement for `hq2_mul`
 
-  have hmkCs_ne : mkC W.Ψ₂Sq ≠ 0 := by
-    intro h
-    apply hs_ne
-    apply hmkC
-    simpa [mkC] using h
+Use this block exactly in the odd branch, after you have:
 
-  have hq2_ne : q^2 ≠ 0 := by
-    simpa [hq2] using hmkCs_ne
+```lean
+hm      : ¬ Even m
+hm_p2   : ¬ Even (m + 2)
+hm_m2   : ¬ Even (m - 2)
+hm_p1   : Even (m + 1)
+hm_m1   : Even (m - 1)
+hMk     : mk W (C W.Ψ₃ *
+              (W.ψ (m + 2) * W.ψ (m - 1)^2
+                + W.ψ (m + 1)^2 * W.ψ (m - 2)
+                + W.ψ₂^2 * W.ψ m^3))
+            = mk W ((C W.preΨ₄ + W.ψ₂^4)
+                * (W.ψ (m + 1) * W.ψ m * W.ψ (m - 1)))
+hq4     : q^4 = mkC (W.Ψ₂Sq^2)
+```
 
-  have hq_ne : q ≠ 0 := by
-    intro hq
-    apply hq2_ne
-    simp [hq]
+The target is:
 
-  have hq4 : q^4 = mkC (W.Ψ₂Sq^2) := by
-    calc
-      q^4 = (q^2)^2 := by ring
-      _ = (mkC W.Ψ₂Sq)^2 := by rw [hq2]
-      _ = mkC (W.Ψ₂Sq^2) := by simp [mkC]
+```lean
+q^2 * mkC (W.Ψ₃ * preΨInvN W m)
+  = q^2 * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m)
+```
 
-  have hne_norm :
-      ∀ k : ℤ, k ≠ 0 → normEDS W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) k ≠ 0 := by
-    intro k hk
-    simpa [WeierstrassCurve.ψ] using hψ_ne k hk
+Tactic block:
 
-  have hWard :=
-    invarRel_all
-      (R := R[X][Y])
-      (b := W.ψ₂)
-      (c := C W.Ψ₃)
-      (d := C W.preΨ₄)
-      hne_norm m
+```lean
+  have hq2_mul :
+      q^2 * mkC (W.Ψ₃ * preΨInvN W m)
+        = q^2 * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) := by
+    -- Fold coordinate-ring constants back to the local names used by the goal.
+    have hmkC_apply (f : R[X]) : mk W (C f) = mkC f := rfl
+    have hq_apply : mk W W.ψ₂ = q := rfl
 
-  have hWardψ :
-      C W.Ψ₃ *
-          (W.ψ (m + 2) * W.ψ (m - 1)^2
-            + W.ψ (m + 1)^2 * W.ψ (m - 2)
-            + W.ψ₂^2 * W.ψ m^3)
-        = (C W.preΨ₄ + W.ψ₂^4)
-          * (W.ψ (m + 1) * W.ψ m * W.ψ (m - 1)) := by
-    simpa [Nseq, Dseq, WeierstrassCurve.ψ] using hWard
+    -- Normalize the mapped Ward invariant into q/mkC form.
+    have hMk' := hMk
+    simp [
+      FLT.EDS.mk_ψ_eq,
+      hmkC_apply, hq_apply,
+      hm, hm_p2, hm_m2, hm_p1, hm_m1
+    ] at hMk'
 
-  have hMk := congrArg (Affine.CoordinateRing.mk W) hWardψ
+    -- Odd branch: the common leftover factor is q^2.  Again rewrite
+    -- `mkC (Ψ₂Sq^2)` backward to `q^4` before `ring_nf`.
+    linear_combination (norm :=
+      (simp [preΨInvN, preΨInvD, hm, hmkC_apply, hq_apply, ← hq4]; ring_nf)) hMk'
+```
 
-  have hm_p2 : Even (m + 2) := by omega
-  have hm_m2 : Even (m - 2) := by omega
-  have hm_p1 : ¬ Even (m + 1) := by omega
-  have hm_m1 : ¬ Even (m - 1) := by omega
+Internally this produces:
 
-  -- ψ-to-preΨ parity normalization.  In this even branch both Nseq and Dseq
-  -- carry exactly one factor `q = mk ψ₂`.
+```text
+hMk' :
+mkC Ψ₃ *
+  (mkC preΨ(m+2) * (mkC preΨ(m-1) * q)^2
+   + (mkC preΨ(m+1) * q)^2 * mkC preΨ(m-2)
+   + q^2 * mkC preΨ(m)^3)
+=
+(mkC preΨ₄ + q^4)
+  * ((mkC preΨ(m+1) * q) * mkC preΨ(m) * (mkC preΨ(m-1) * q)).
+```
+
+Since in the odd branch
+
+```text
+preΨInvN W m
+= preΨ(m+2)preΨ(m-1)^2
+  + preΨ(m+1)^2preΨ(m-2)
+  + preΨ(m)^3,
+```
+
+this is ring-identical to the target multiplied by `q^2`.
+
+---
+
+## If `simp` does not rewrite `mk W (W.ψ n)` under powers
+
+If your local `mk_ψ_eq` is not tagged or not found under powers, use an explicit `simp only` variant.  This is noisier but more deterministic.
+
+Even branch:
+
+```lean
+  have hq_mul :
+      q * mkC (W.Ψ₃ * preΨInvN W m)
+        = q * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) := by
+    have hmkC_apply (f : R[X]) : mk W (C f) = mkC f := rfl
+    have hq_apply : mk W W.ψ₂ = q := rfl
+    have hMk' := hMk
+    simp only [
+      map_mul, map_add, map_pow,
+      FLT.EDS.mk_ψ_eq,
+      hmkC_apply, hq_apply,
+      if_pos hm, if_pos hm_p2, if_pos hm_m2,
+      if_neg hm_p1, if_neg hm_m1,
+      one_mul, mul_one
+    ] at hMk'
+    linear_combination (norm :=
+      (simp [preΨInvN, preΨInvD, hm, hmkC_apply, hq_apply, ← hq4]; ring_nf)) hMk'
+```
+
+Odd branch:
+
+```lean
+  have hq2_mul :
+      q^2 * mkC (W.Ψ₃ * preΨInvN W m)
+        = q^2 * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) := by
+    have hmkC_apply (f : R[X]) : mk W (C f) = mkC f := rfl
+    have hq_apply : mk W W.ψ₂ = q := rfl
+    have hMk' := hMk
+    simp only [
+      map_mul, map_add, map_pow,
+      FLT.EDS.mk_ψ_eq,
+      hmkC_apply, hq_apply,
+      if_neg hm, if_neg hm_p2, if_neg hm_m2,
+      if_pos hm_p1, if_pos hm_m1,
+      one_mul, mul_one
+    ] at hMk'
+    linear_combination (norm :=
+      (simp [preΨInvN, preΨInvD, hm, hmkC_apply, hq_apply, ← hq4]; ring_nf)) hMk'
+```
+
+---
+
+## Why `← hq4` and not `hq4`
+
+The goal contains `mkC (W.Ψ₂Sq^2)` after `mkC.map_mul/map_add/map_pow` normalization.  The normalized `hMk'` contains `q^4`, coming from `mk W (W.ψ₂^4)`.  Rewriting with
+
+```lean
+← hq4
+```
+
+changes
+
+```text
+mkC (W.Ψ₂Sq^2)  ↦  q^4,
+```
+
+so both sides live in the same coordinate-ring polynomial language.  Rewriting in the other direction leaves the ψ-products with powers such as `q^2 * (P0*q)^3`, and `simp` will not reliably discover the needed `q^5 = q * mkC(Ψ₂Sq^2)` normalization before `ring_nf`.
+
+---
+
+## Drop-in location in the previous proof
+
+In the previous `preΨ_invariant_even` proof, replace only this block:
+
+```lean
   have hq_mul :
       q * mkC (W.Ψ₃ * preΨInvN W m)
         = q * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) := by
     linear_combination (norm :=
       (simp [mkC, q, preΨInvN, preΨInvD,
-        Affine.CoordinateRing.mk_ψ, WeierstrassCurve.Ψ,
-        hm, hm_p2, hm_m2, hm_p1, hm_m1,
+        FLT.EDS.mk_ψ_eq, hm, hm_p2, hm_m2, hm_p1, hm_m1,
         hq2, hq4]; ring_nf)) hMk
+```
+
+by the even block above.
+
+In `preΨ_invariant_odd`, replace only the analogous `hq2_mul` block by the odd block above.  The following cancellation lines remain unchanged:
+
+```lean
+  have hmk_eq :
+      mkC (W.Ψ₃ * preΨInvN W m)
+        = mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) :=
+    mul_left_cancel₀ hq_ne hq_mul       -- even branch
 
   have hmk_eq :
       mkC (W.Ψ₃ * preΨInvN W m)
         = mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) :=
-    mul_left_cancel₀ hq_ne hq_mul
-
-  exact hmkC hmk_eq
-
-private lemma preΨ_invariant_odd
-    [IsDomain R]
-    (W : WeierstrassCurve R)
-    (h4 : (4 : R) ≠ 0)
-    (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
-    {m : ℤ} (hm : ¬ Even m) :
-    W.Ψ₃ * preΨInvN W m
-      = (W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m := by
-  classical
-
-  let mkC : R[X] →+* _ := (Affine.CoordinateRing.mk W).comp Polynomial.C
-  let q : _ := Affine.CoordinateRing.mk W W.ψ₂
-
-  have hmkC : Function.Injective mkC := by
-    -- Replace this line by your exact local lemma if namespaced differently.
-    simpa [mkC, Function.comp_def] using (mk_C_injective (W := W))
-
-  have hs_ne : W.Ψ₂Sq ≠ 0 := Ψ₂Sq_ne_zero (W := W) h4
-
-  have hq2 : q^2 = mkC W.Ψ₂Sq := by
-    simpa [q, mkC, sq] using (Affine.CoordinateRing.mk_ψ₂_sq (W := W))
-
-  have hmkCs_ne : mkC W.Ψ₂Sq ≠ 0 := by
-    intro h
-    apply hs_ne
-    apply hmkC
-    simpa [mkC] using h
-
-  have hq2_ne : q^2 ≠ 0 := by
-    simpa [hq2] using hmkCs_ne
-
-  have hq4 : q^4 = mkC (W.Ψ₂Sq^2) := by
-    calc
-      q^4 = (q^2)^2 := by ring
-      _ = (mkC W.Ψ₂Sq)^2 := by rw [hq2]
-      _ = mkC (W.Ψ₂Sq^2) := by simp [mkC]
-
-  have hne_norm :
-      ∀ k : ℤ, k ≠ 0 → normEDS W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) k ≠ 0 := by
-    intro k hk
-    simpa [WeierstrassCurve.ψ] using hψ_ne k hk
-
-  have hWard :=
-    invarRel_all
-      (R := R[X][Y])
-      (b := W.ψ₂)
-      (c := C W.Ψ₃)
-      (d := C W.preΨ₄)
-      hne_norm m
-
-  have hWardψ :
-      C W.Ψ₃ *
-          (W.ψ (m + 2) * W.ψ (m - 1)^2
-            + W.ψ (m + 1)^2 * W.ψ (m - 2)
-            + W.ψ₂^2 * W.ψ m^3)
-        = (C W.preΨ₄ + W.ψ₂^4)
-          * (W.ψ (m + 1) * W.ψ m * W.ψ (m - 1)) := by
-    simpa [Nseq, Dseq, WeierstrassCurve.ψ] using hWard
-
-  have hMk := congrArg (Affine.CoordinateRing.mk W) hWardψ
-
-  have hm_p2 : ¬ Even (m + 2) := by omega
-  have hm_m2 : ¬ Even (m - 2) := by omega
-  have hm_p1 : Even (m + 1) := by omega
-  have hm_m1 : Even (m - 1) := by omega
-
-  -- ψ-to-preΨ parity normalization.  In this odd branch both Nseq and Dseq
-  -- carry exactly `q^2 = mkC Ψ₂Sq`.
-  have hq2_mul :
-      q^2 * mkC (W.Ψ₃ * preΨInvN W m)
-        = q^2 * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) := by
-    linear_combination (norm :=
-      (simp [mkC, q, preΨInvN, preΨInvD,
-        Affine.CoordinateRing.mk_ψ, WeierstrassCurve.Ψ,
-        hm, hm_p2, hm_m2, hm_p1, hm_m1,
-        hq2, hq4]; ring_nf)) hMk
-
-  have hmk_eq :
-      mkC (W.Ψ₃ * preΨInvN W m)
-        = mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) :=
-    mul_left_cancel₀ hq2_ne hq2_mul
-
-  exact hmkC hmk_eq
-
-/-- The invariant relation for the univariate auxiliary division-polynomial sequence `preΨ`.
-
-This is Ward's invariant for the bivariate division-polynomial EDS `ψ`, descended through the
-affine coordinate ring.  The only cancellation is by `mk ψ₂` in the even case and by
-`mk ψ₂ ^ 2` in the odd case; both are justified by `mk_ψ₂_sq` and `Ψ₂Sq_ne_zero h4`.
--/
-lemma preΨ_invariant
-    [IsDomain R]
-    (W : WeierstrassCurve R)
-    (h4 : (4 : R) ≠ 0)
-    (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
-    (m : ℤ) :
-    W.Ψ₃ *
-        (W.preΨ (m + 2) * W.preΨ (m - 1)^2
-          + W.preΨ (m + 1)^2 * W.preΨ (m - 2)
-          + (if Even m then W.Ψ₂Sq^2 else 1) * W.preΨ m^3)
-      = (W.preΨ₄ + W.Ψ₂Sq^2)
-          * (W.preΨ (m + 1) * W.preΨ m * W.preΨ (m - 1)) := by
-  by_cases hm : Even m
-  · simpa [preΨInvN, preΨInvD, hm] using
-      preΨ_invariant_even (W := W) h4 hψ_ne (m := m) hm
-  · simpa [preΨInvN, preΨInvD, hm] using
-      preΨ_invariant_odd (W := W) h4 hψ_ne (m := m) hm
-
-end
-
-end WeierstrassCurve
+    mul_left_cancel₀ hq2_ne hq2_mul     -- odd branch
 ```
 
----
-
-## What to check if Lean does not accept the proof verbatim
-
-The only likely name/normalization differences are these:
-
-1. Your adjacent-Somos proof apparently uses a local lemma named
-
-   ```lean
-   mk_ψ_eq
-   ```
-
-   while current Mathlib exposes the pair
-
-   ```lean
-   Affine.CoordinateRing.mk_ψ
-   WeierstrassCurve.Ψ
-   ```
-
-   as the corresponding rewrite.  If your lemma is already the expanded form
-
-   ```lean
-   mk W (W.ψ n)
-     = mk W (C (W.preΨ n)) * (if Even n then mk W W.ψ₂ else 1)
-   ```
-
-   then replace
-
-   ```lean
-   Affine.CoordinateRing.mk_ψ, WeierstrassCurve.Ψ
-   ```
-
-   in the two `simp` normalizers by your `mk_ψ_eq`.
-
-2. If your `mk_C_injective` is not a ring-hom injectivity theorem for
-
-   ```lean
-   let mkC : R[X] →+* _ := (Affine.CoordinateRing.mk W).comp Polynomial.C
-   ```
-
-   then replace the two `hmkC` blocks by the exact theorem you used in
-   `preΨ_adjacent_somos`.
-
-3. If your `Ψ₂Sq_ne_zero` is namespaced as a method, replace
-
-   ```lean
-   Ψ₂Sq_ne_zero (W := W) h4
-   ```
-
-   by
-
-   ```lean
-   W.Ψ₂Sq_ne_zero h4
-   ```
-
-   or your local lemma name.
-
-The algebraic content of the proof is fixed by the two branch normalizations:
-
-```text
-Even m:
-  mk(Nseq ψ m) = q * mkC(preΨInvN m),
-  mk(Dseq ψ m) = q * mkC(preΨInvD m).
-
-Odd m:
-  mk(Nseq ψ m) = q^2 * mkC(preΨInvN m),
-  mk(Dseq ψ m) = q^2 * mkC(preΨInvD m).
-```
-
-After those rewrites, both branches are one `linear_combination ... hMk` followed by one cancellation and one `mk_C_injective` application.
+For the even branch, the cancellation line uses `hq_ne`; for the odd branch, it uses `hq2_ne`.
