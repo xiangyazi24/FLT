@@ -1,757 +1,498 @@
-# Q100 dm4 — Build-ready slim Weil-pairing scaffold
+# Q310 (dm4): EDS nonvanishing by specialization to division polynomials
 
-This is the round-2 version of the A2 residual interface.  The goal is to make the downstream Mazur primitive-root argument depend on the smallest stable API, while leaving the construction of the Weil pairing as a named deep seam.
+## Bottom line
 
-The important design choice is:
+Approach (c) is viable, but the right formulation is slightly different from the
+phrasing “injective specialization” or “algebraically independent enough”.
 
-*The downstream primitive-root argument does not need Galois equivariance if the pairing is already rational-valued.*
-
-So the seam should provide
+For the universal normalized EDS polynomial
 
 ```lean
-E[n] × E[n] → rootsOfUnity n ℚ
+normEDS b c d j : ℤ[b,c,d]
 ```
 
-with bilinearity, alternating/self-triviality, and nondegeneracy on the chosen full rational grid.  Galois equivariance is only needed behind the seam if the construction is first carried out over `AlgebraicClosure ℚ`.
+it is enough to exhibit **one** specialization to a ring in which its image is
+nonzero.  No global injectivity of the specialization is needed.
+
+Indeed, for any ring homomorphism `φ`, if `φ x ≠ 0`, then `x ≠ 0`, because
+`x = 0` would imply `φ x = 0`.  Thus the only Lean obligations are:
+
+1. define a specialization
+   `φ : ℤ[b,c,d] → Polynomial (Polynomial ℤ)` with
+   `b ↦ W.ψ₂`, `c ↦ C W.Ψ₃`, `d ↦ C W.preΨ₄`;
+2. prove
+   `φ (normEDS b c d j) = W.ψ j`, which is exactly `map_normEDS` plus the
+   Mathlib definition of `W.ψ`;
+3. prove `W.ψ j ≠ 0` over one characteristic-zero base, for example `ℤ`.
+
+The subtle point is item 3.  Mathlib’s degree file gives very strong nonzero
+results for `preΨ` and especially `ΨSq`; it does not appear to give a direct
+ready-made theorem named `ψ_ne_zero`.  The shortest robust bridge is:
+
+```text
+ΨSq_ne_zero
+  ⇒ C(ΨSq) has nonzero image in the affine coordinate ring
+  ⇒ image(Ψ)^2 ≠ 0
+  ⇒ image(Ψ) ≠ 0
+  ⇒ image(ψ) ≠ 0 by mk_ψ
+  ⇒ ψ ≠ 0.
+```
+
+Equivalently, prove `ψ_ne_zero` by contradiction using the coordinate-ring
+lemmas `mk_ψ` and `mk_Ψ_sq`.
+
+This avoids all algebraic-independence questions.
 
 ---
 
-## 1. Minimal Lean interface
+## 1. Existing Mathlib facts to use
 
-In the FLT repo this should live after importing the existing torsion file, which defines
+The relevant imports are already very concentrated:
 
 ```lean
-WeierstrassCurve.nTorsion
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
+import Mathlib.Data.MvPolynomial.Basic
 ```
 
-as
+Useful checks:
 
 ```lean
-Submodule.torsionBy ℤ (E⁄K).Point n
+#check normEDS
+#check map_normEDS
+
+#check WeierstrassCurve.ψ
+#check WeierstrassCurve.preΨ_ne_zero
+#check WeierstrassCurve.ΨSq_ne_zero
+
+#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ
+#check WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
+#check WeierstrassCurve.Affine.CoordinateRing.smul_basis_eq_zero
 ```
 
-The exact minimal package is this:
+The core definition is this shape:
 
 ```lean
-import FLT.EllipticCurve.Torsion
-import Mathlib.RingTheory.RootsOfUnity.Basic
-import Mathlib.GroupTheory.OrderOfElement
-import Mathlib.Topology.Instances.ZMod
+-- In Mathlib:
+-- noncomputable def WeierstrassCurve.ψ (W : WeierstrassCurve R) (n : ℤ) : R[X][Y] :=
+--   normEDS W.ψ₂ (Polynomial.C W.Ψ₃) (Polynomial.C W.preΨ₄) n
+```
 
-open scoped Classical
+And the EDS map lemma is this shape:
+
+```lean
+-- In Mathlib:
+-- theorem map_normEDS
+--     (b c d : R) (f : R →+* S) (n : ℤ) :
+--     f (normEDS b c d n) = normEDS (f b) (f c) (f d) n
+```
+
+The degree/nonzero file gives, among other things:
+
+```lean
+-- In Mathlib:
+-- theorem WeierstrassCurve.preΨ_ne_zero
+--     {R : Type*} [CommRing R]
+--     (W : WeierstrassCurve R) [Nontrivial R]
+--     {n : ℤ} (h : (n : R) ≠ 0) :
+--     W.preΨ n ≠ 0
+--
+-- theorem WeierstrassCurve.ΨSq_ne_zero
+--     {R : Type*} [CommRing R] [NoZeroDivisors R]
+--     (W : WeierstrassCurve R)
+--     {n : ℤ} (h : (n : R) ≠ 0) :
+--     W.ΨSq n ≠ 0
+```
+
+For the normalized bivariate `ψ`, the cleanest chain uses `ΨSq_ne_zero`, not
+just `preΨ_ne_zero`.
+
+---
+
+## 2. The specialization map from `ℤ[b,c,d]`
+
+A convenient model of `ℤ[b,c,d]` is `MvPolynomial (Fin 3) ℤ`.
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
+import Mathlib.Data.MvPolynomial.Basic
+
+open Polynomial
+
+abbrev UniversalEDSRing : Type := MvPolynomial (Fin 3) ℤ
+
+namespace UniversalEDSRing
+
+noncomputable abbrev b : UniversalEDSRing := MvPolynomial.X 0
+noncomputable abbrev c : UniversalEDSRing := MvPolynomial.X 1
+noncomputable abbrev d : UniversalEDSRing := MvPolynomial.X 2
+
+end UniversalEDSRing
 
 namespace WeierstrassCurve
 
-variable (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℚ]
-
-/-- A chosen full rational `n`-torsion grid.  This is the preferred downstream shape.
-It is deliberately an additive equivalence, not merely an injection into points. -/
-abbrev FullRationalTorsionGrid (n : ℕ) : Type :=
-  (ZMod n × ZMod n) ≃+ E.nTorsion n
-
-/-- Minimal rational Weil-pairing package consumed by the Mazur primitive-root argument.
-
-No Galois-equivariance field appears here: the codomain is already `rootsOfUnity n ℚ`.
-If the construction is geometric over `AlgebraicClosure ℚ`, Galois equivariance belongs in the
-construction layer that descends the geometric pairing to this rational-valued package. -/
-structure WeilPairingPackage (n : ℕ) [NeZero n] where
-  /-- The rational-valued `n`-Weil pairing. -/
-  pairing : E.nTorsion n → E.nTorsion n → rootsOfUnity n ℚ
-
-  /-- Additivity in the first variable. -/
-  map_add_left :
-    ∀ P P' Q : E.nTorsion n,
-      pairing (P + P') Q = pairing P Q * pairing P' Q
-
-  /-- Additivity in the second variable. -/
-  map_add_right :
-    ∀ P Q Q' : E.nTorsion n,
-      pairing P (Q + Q') = pairing P Q * pairing P Q'
-
-  /-- Alternating in the only form needed downstream. -/
-  alternating :
-    ∀ P : E.nTorsion n,
-      pairing P P = 1
-
-  /-- Nondegeneracy restricted to a full rational torsion grid.
-
-  This is weaker than global nondegeneracy but exactly what the primitive-root proof consumes. -/
-  nondeg_left_on_full_grid :
-    ∀ grid : E.FullRationalTorsionGrid n,
-    ∀ z : ZMod n × ZMod n,
-      (∀ w : ZMod n × ZMod n,
-        pairing (grid z) (grid w) = 1) →
-      z = 0
-
-namespace WeilPairingPackage
-
-variable {E : WeierstrassCurve ℚ} [E.IsElliptic] [DecidableEq ℚ]
-variable {n : ℕ} [NeZero n]
-variable (W : E.WeilPairingPackage n)
-
-@[simp] theorem pairing_zero_left (Q : E.nTorsion n) :
-    W.pairing 0 Q = 1 := by
-  have h := W.map_add_left 0 0 Q
-  have h1 : (1 : rootsOfUnity n ℚ) = W.pairing 0 Q := by
-    simpa [mul_assoc] using congrArg (fun x => (W.pairing 0 Q)⁻¹ * x) h
-  exact h1.symm
-
-@[simp] theorem pairing_zero_right (P : E.nTorsion n) :
-    W.pairing P 0 = 1 := by
-  have h := W.map_add_right P 0 0
-  have h1 : (1 : rootsOfUnity n ℚ) = W.pairing P 0 := by
-    simpa [mul_assoc] using congrArg (fun x => (W.pairing P 0)⁻¹ * x) h
-  exact h1.symm
-
-/-- Natural-scalar law in the first variable. -/
-theorem pairing_nsmul_left (k : ℕ) (P Q : E.nTorsion n) :
-    W.pairing (k • P) Q = W.pairing P Q ^ k := by
-  induction k with
-  | zero => simp
-  | succ k ih =>
-      rw [Nat.succ_eq_add_one, add_nsmul, one_nsmul, W.map_add_left, ih, pow_succ]
-
-/-- Natural-scalar law in the second variable. -/
-theorem pairing_nsmul_right (k : ℕ) (P Q : E.nTorsion n) :
-    W.pairing P (k • Q) = W.pairing P Q ^ k := by
-  induction k with
-  | zero => simp
-  | succ k ih =>
-      rw [Nat.succ_eq_add_one, add_nsmul, one_nsmul, W.map_add_right, ih, pow_succ]
-
-/-- The distinguished pairing value attached to a full torsion grid. -/
-noncomputable def gridZeta (grid : E.FullRationalTorsionGrid n) : rootsOfUnity n ℚ :=
-  W.pairing (grid (1, 0)) (grid (0, 1))
-
-/-- This is the exact downstream primitive-root extraction target.
-
-This theorem is closeable from the package plus elementary `ZMod` algebra.  It is separated from
-the package so the package stays minimal. -/
-theorem exists_rootOfUnity_of_full_grid
-    (grid : E.FullRationalTorsionGrid n) :
-    ∃ ζ : rootsOfUnity n ℚ, orderOf (ζ : ℚˣ) = n := by
-  classical
-  refine ⟨W.gridZeta grid, ?_⟩
-  /-
-  Proof skeleton, all downstream and not part of the package fields.
-
-  Let `P = grid (1,0)`, `Q = grid (0,1)`, and `ζ = e P Q`.
-
-  1. `orderOf (ζ : ℚˣ) ∣ n` because `ζ ∈ rootsOfUnity n ℚ`.
-     This uses `mem_rootsOfUnity` / the subtype property of `rootsOfUnity` and
-     `orderOf_dvd_of_pow_eq_one`.
-
-  2. Put `k = orderOf (ζ : ℚˣ)`.  Then `ζ^k = 1`.
-
-  3. Prove
-       `∀ w, e (grid ((k : ℕ) • (1,0))) (grid w) = 1`.
-     Decompose `w : ZMod n × ZMod n` as `(a,0) + (0,b)`.
-     Use `grid.map_add`, `map_add_right`, `map_add_left`, `alternating`, and
-     the scalar lemmas above.  The `(a,0)` contribution is killed by alternating;
-     the `(0,b)` contribution is killed by `ζ^k = 1`.
-
-  4. Apply `nondeg_left_on_full_grid` to get
-       `(k : ℕ) • (1,0) = 0` in `ZMod n × ZMod n`.
-
-  5. Read off the first coordinate to get `(k : ZMod n) = 0`, hence `n ∣ k`.
-
-  6. Combine `k ∣ n` and `n ∣ k` by `Nat.dvd_antisymm`.
-
-  Possible helper declarations to close before this theorem:
-
-    theorem zmod_natCast_eq_zero_iff_dvd
-      {n k : ℕ} : (k : ZMod n) = 0 ↔ n ∣ k
-
-    theorem fullGrid_apply_pair
-      (grid : E.FullRationalTorsionGrid n) (a b : ZMod n) :
-        grid (a,b) = grid (a,0) + grid (0,b)
-
-    theorem fullGrid_apply_first_zmod_smul
-      (grid : E.FullRationalTorsionGrid n) (a : ZMod n) :
-        grid (a,0) = a • grid (1,0)
-
-    theorem fullGrid_apply_second_zmod_smul
-      (grid : E.FullRationalTorsionGrid n) (b : ZMod n) :
-        grid (0,b) = b • grid (0,1)
-  -/
-  sorry
-
-end WeilPairingPackage
-end WeierstrassCurve
-```
-
-### Why this is minimal
-
-The package omits all of the following because the primitive-root argument does not consume them once the pairing is rational-valued:
-
-```lean
--- not needed downstream
-pairing_galois_equivariant :
-  ∀ σ P Q, σ (pairing P Q) = pairing (σ • P) (σ • Q)
-
--- not needed downstream
-skew_symm : ∀ P Q, pairing Q P = (pairing P Q)⁻¹
-
--- not needed downstream if `nondeg_left_on_full_grid` is present
-nondeg_left : ∀ P, (∀ Q, pairing P Q = 1) → P = 0
-nondeg_right : ∀ Q, (∀ P, pairing P Q = 1) → Q = 0
-```
-
-The absolute logical minimum for the Mazur obstruction would be even smaller:
-
-```lean
-structure PrimitiveRootFromFullTorsion (n : ℕ) [NeZero n] where
-  zeta : rootsOfUnity n ℚ
-  orderOf_zeta : orderOf (zeta : ℚˣ) = n
-```
-
-But that would no longer be recognizably a Weil-pairing seam.  The `WeilPairingPackage` above is the minimal mathematically transparent interface.
-
----
-
-## 2. Closeable-now downstream helpers
-
-These are not construction of the Weil pairing.  They are package-consumer lemmas and should be discharged before touching Miller functions.
-
-### CLOSEABLE-NOW: full-grid nondegeneracy wrapper
-
-If a future construction proves full left nondegeneracy, this converts it to the package field.
-
-```lean
-theorem nondeg_left_on_full_grid_of_nondeg_left
-    {E : WeierstrassCurve ℚ} [E.IsElliptic] [DecidableEq ℚ]
-    {n : ℕ} [NeZero n]
-    (e : E.nTorsion n → E.nTorsion n → rootsOfUnity n ℚ)
-    (hnd : ∀ P : E.nTorsion n, (∀ Q : E.nTorsion n, e P Q = 1) → P = 0)
-    (grid : E.FullRationalTorsionGrid n)
-    (z : ZMod n × ZMod n)
-    (hz : ∀ w : ZMod n × ZMod n, e (grid z) (grid w) = 1) :
-    z = 0 := by
-  have hzP : grid z = 0 := by
-    apply hnd
-    intro Q
-    rcases grid.surjective Q with ⟨w, rfl⟩
-    exact hz w
-  exact grid.injective (by simpa using hzP)
-```
-
-### CLOSEABLE-NOW: zero and scalar lemmas
-
-Already included above:
-
-```lean
-WeilPairingPackage.pairing_zero_left
-WeilPairingPackage.pairing_zero_right
-WeilPairingPackage.pairing_nsmul_left
-WeilPairingPackage.pairing_nsmul_right
-```
-
-### CLOSEABLE-NOW: primitive-root extraction
-
-The theorem
-
-```lean
-WeilPairingPackage.exists_rootOfUnity_of_full_grid
-```
-
-is closeable after the following elementary `ZMod`/grid helpers are added locally if not already available:
-
-```lean
-theorem zmod_natCast_eq_zero_iff_dvd
-    {n k : ℕ} : (k : ZMod n) = 0 ↔ n ∣ k := by
-  -- likely already available under a nearby `ZMod` name;
-  -- otherwise prove from `ZMod.natCast_eq_natCast_iff` with the RHS specialized to `0`.
-  sorry
-
-theorem fullGrid_apply_pair
-    {E : WeierstrassCurve ℚ} [E.IsElliptic] [DecidableEq ℚ]
-    {n : ℕ} (grid : E.FullRationalTorsionGrid n) (a b : ZMod n) :
-    grid (a,b) = grid (a,0) + grid (0,b) := by
-  simpa using grid.map_add (a,0) (0,b)
-```
-
-The two `ZMod`-scalar grid lemmas are also elementary, but exact proof names depend on the imported module structure:
-
-```lean
-theorem fullGrid_apply_first_zmod_smul
-    {E : WeierstrassCurve ℚ} [E.IsElliptic] [DecidableEq ℚ]
-    {n : ℕ} (grid : E.FullRationalTorsionGrid n) (a : ZMod n) :
-    grid (a,0) = a • grid (1,0) := by
-  -- close with `map_smul` once both sides are seen as `ZMod n` modules,
-  -- or prove by induction/quotient on `a : ZMod n`.
-  sorry
-
-theorem fullGrid_apply_second_zmod_smul
-    {E : WeierstrassCurve ℚ} [E.IsElliptic] [DecidableEq ℚ]
-    {n : ℕ} (grid : E.FullRationalTorsionGrid n) (b : ZMod n) :
-    grid (0,b) = b • grid (0,1) := by
-  sorry
-```
-
----
-
-## 3. Route comparison: Miller vs Galois-cohomology/Kummer
-
-### More feasible route: Miller / explicit rational functions
-
-Use Miller.  It is closer to current Mathlib because Mathlib has explicit Weierstrass curves, affine points, and the group law.  It still lacks divisor/reciprocity infrastructure, but the missing pieces are local and nameable.
-
-### Less feasible route: Galois cohomology / Kummer
-
-The Kummer route would be elegant on paper but is currently too infrastructure-heavy.  It requires elliptic Kummer sequences, Galois cohomology, cup products, and identification of the cup-product pairing with the Weil pairing.  That is broader than the A2 seam.
-
----
-
-## 4. Miller route: build-ready scaffold with milestone status
-
-### M1. Formal point divisors
-
-**Status: CLOSEABLE-NOW**
-
-This is pure `Finsupp` bookkeeping.
-
-```lean
-namespace WeierstrassCurve
-
-variable {K : Type*} [Field K]
-variable (E : WeierstrassCurve K) [E.IsElliptic] [DecidableEq K]
-
-/-- Formal divisors supported on rational affine nonsingular points. -/
-abbrev DivExpr : Type _ :=
-  ((E⁄K).Point →₀ ℤ)
-
-namespace DivExpr
-
-noncomputable def degree (D : E.DivExpr) : ℤ :=
-  D.sum fun _ n => n
-
-def point (P : (E⁄K).Point) : E.DivExpr :=
-  Finsupp.single P 1
-
-def disjoint (D₁ D₂ : E.DivExpr) : Prop :=
-  Disjoint D₁.support D₂.support
-
-@[simp] theorem degree_zero : degree (E := E) 0 = 0 := by
-  simp [degree]
-
-@[simp] theorem degree_point (P : (E⁄K).Point) :
-    degree (E := E) (point (E := E) P) = 1 := by
-  classical
-  simp [degree, point]
-
-end DivExpr
-end WeierstrassCurve
-```
-
-Missing declarations: none.  This is local project code.
-
----
-
-### M2. Syntactic Miller expressions and formal divisors
-
-**Status: CLOSEABLE-NOW for syntax; MISSING-MATHLIB-API for semantic divisor correctness**
-
-```lean
-namespace WeierstrassCurve
-
-variable {K : Type*} [Field K]
-variable (E : WeierstrassCurve K) [E.IsElliptic] [DecidableEq K]
-
-inductive MillerExpr : Type _
-  | one : MillerExpr
-  | const : Kˣ → MillerExpr
-  | line : (E⁄K).Point → (E⁄K).Point → MillerExpr
-  | vertical : (E⁄K).Point → MillerExpr
-  | mul : MillerExpr → MillerExpr → MillerExpr
-  | inv : MillerExpr → MillerExpr
-
-namespace MillerExpr
-
-noncomputable def divExpr : E.MillerExpr → E.DivExpr
-  | one => 0
-  | const _ => 0
-  | line P Q =>
-      DivExpr.point (E := E) P +
-      DivExpr.point (E := E) Q +
-      DivExpr.point (E := E) (-(P + Q)) -
-      (3 : ℤ) • DivExpr.point (E := E) 0
-  | vertical P =>
-      DivExpr.point (E := E) P +
-      DivExpr.point (E := E) (-P) -
-      (2 : ℤ) • DivExpr.point (E := E) 0
-  | mul f g => divExpr f + divExpr g
-  | inv f => - divExpr f
-
-end MillerExpr
-end WeierstrassCurve
-```
-
-Missing Mathlib/API declarations for the semantic layer:
-
-```lean
--- proposed names; not currently available as Mathlib API
-WeierstrassCurve.FunctionField
-WeierstrassCurve.RationalFunction.divisor
-WeierstrassCurve.RationalFunction.line
-WeierstrassCurve.RationalFunction.vertical
-WeierstrassCurve.divisor_line
-WeierstrassCurve.divisor_vertical
-```
-
-Required statements:
-
-```lean
-theorem divisor_line
-    (P Q : (E⁄K).Point) :
-    divisor (lineFunction E P Q) =
-      [P] + [Q] + [-(P+Q)] - 3 • [0] := by
-  sorry
-
-theorem divisor_vertical
-    (P : (E⁄K).Point) :
-    divisor (verticalFunction E P) =
-      [P] + [-P] - 2 • [0] := by
-  sorry
-```
-
----
-
-### M3. Evaluation on degree-zero divisors
-
-**Status: CLOSEABLE-NOW for formal product algebra if `evalUnitAt` is abstracted; MISSING-MATHLIB-API for actual rational-function evaluation**
-
-```lean
-namespace WeierstrassCurve.MillerExpr
-
-variable {K : Type*} [Field K]
-variable (E : WeierstrassCurve K) [E.IsElliptic] [DecidableEq K]
-
-/-- Evaluation of a syntactic Miller expression at a point outside its divisor support. -/
-noncomputable def evalUnitAt
-    (f : E.MillerExpr) (P : (E⁄K).Point)
-    (hP : P ∉ (divExpr (E := E) f).support) : Kˣ :=
-  sorry
-
-/-- Evaluation of a Miller expression on a degree-zero divisor with disjoint support. -/
-noncomputable def evalDiv
-    (f : E.MillerExpr) (D : E.DivExpr)
-    (hdeg : DivExpr.degree (E := E) D = 0)
-    (hdisj : Disjoint (divExpr (E := E) f).support D.support) : Kˣ :=
-  sorry
-
-end WeierstrassCurve.MillerExpr
-```
-
-Missing Mathlib/API declarations:
-
-```lean
-WeierstrassCurve.RationalFunction.evalAtPoint
-WeierstrassCurve.RationalFunction.evalAtPoint_ne_zero_of_not_mem_support
-WeierstrassCurve.evalDiv
-WeierstrassCurve.evalDiv_add
-WeierstrassCurve.evalDiv_mul
-WeierstrassCurve.evalDiv_principal
-```
-
-Local closeable lemmas once `evalUnitAt` is available:
-
-```lean
-MillerExpr.evalDiv_zero
-MillerExpr.evalDiv_add
-MillerExpr.evalDiv_mul
-MillerExpr.evalDiv_inv
-MillerExpr.evalDiv_const_of_degree_zero
-```
-
----
-
-### M4. Miller recurrence
-
-**Status: CLOSEABLE-NOW once M2 is in place**
-
-The recurrence itself is formal algebra on the syntactic divisors.
-
-```lean
-namespace WeierstrassCurve.MillerExpr
-
-variable {K : Type*} [Field K]
-variable (E : WeierstrassCurve K) [E.IsElliptic] [DecidableEq K]
-
-noncomputable def addStepExpr
-    (P Q : (E⁄K).Point) : E.MillerExpr :=
-  .mul (.line P Q) (.inv (.vertical (P + Q)))
-
-theorem divExpr_addStepExpr
-    (P Q : (E⁄K).Point) :
-    divExpr (E := E) (addStepExpr (E := E) P Q) =
-      DivExpr.point (E := E) P +
-      DivExpr.point (E := E) Q -
-      DivExpr.point (E := E) (P + Q) -
-      DivExpr.point (E := E) 0 := by
-  -- pure simplification from `divExpr`; some `Finsupp` abelian-group cleanup.
-  sorry
-
-noncomputable def millerNat
-    (m : ℕ) (P : (E⁄K).Point) : E.MillerExpr :=
-  match m with
-  | 0 => .one
-  | 1 => .one
-  | k + 2 =>
-      .mul (millerNat (E := E) (k + 1) P)
-        (addStepExpr (E := E) ((k + 1 : ℕ) • P) P)
-
-theorem divExpr_millerNat_torsion
-    {m : ℕ} [NeZero m] (P : E.nTorsion m) :
-    divExpr (E := E) (millerNat (E := E) m P.1) =
-      (m : ℤ) • DivExpr.point (E := E) P.1 -
-      (m : ℤ) • DivExpr.point (E := E) 0 := by
-  -- induction on `m`; use `P.property : m • P.1 = 0`.
-  sorry
-
-end WeierstrassCurve.MillerExpr
-```
-
-Missing declarations: none beyond the torsion API already in FLT.  This is a local formal proof after M2.
-
----
-
-### M5. Weil reciprocity for Miller expressions
-
-**Status: MISSING-MATHLIB-API**
-
-This is one of the deepest missing pieces.
-
-Proposed declaration:
-
-```lean
-namespace WeierstrassCurve.MillerExpr
-
-variable {K : Type*} [Field K]
-variable (E : WeierstrassCurve K) [E.IsElliptic] [DecidableEq K]
-
-theorem weil_reciprocity_millerExpr
-    (f g : E.MillerExpr)
-    (hfg : Disjoint (divExpr (E := E) f).support (divExpr (E := E) g).support) :
-    evalDiv (E := E) f (divExpr (E := E) g) (by sorry) hfg =
-    evalDiv (E := E) g (divExpr (E := E) f) (by sorry) hfg.symm := by
-  sorry
-
-end WeierstrassCurve.MillerExpr
-```
-
-Missing Mathlib/API declarations needed to prove it semantically:
-
-```lean
-WeierstrassCurve.localParameter
-WeierstrassCurve.orderAt
-WeierstrassCurve.tameSymbol
-WeierstrassCurve.tameSymbol_finite_support
-WeierstrassCurve.product_tameSymbol_eq_one
-WeierstrassCurve.weil_reciprocity
-WeierstrassCurve.MillerExpr.weil_reciprocity_millerExpr
-```
-
-This is not closeable from current elliptic-curve point formulas alone.
-
----
-
-### M6. Pairing construction and package wrapper
-
-**Status: CLOSEABLE-NOW as a wrapper after M3–M5; MISSING-MATHLIB-API for nondegeneracy**
-
-```lean
-namespace WeierstrassCurve
-
-variable (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℚ]
-variable (n : ℕ) [NeZero n]
-
-noncomputable def millerWeilValue
-    (P Q : E.nTorsion n) : ℚˣ :=
-  sorry
-
-theorem millerWeilValue_pow_eq_one
-    (P Q : E.nTorsion n) :
-    ((millerWeilValue (E := E) n P Q : ℚˣ) : ℚ) ^ n = 1 := by
-  -- uses Miller divisor theorem and `weil_reciprocity_millerExpr`
-  sorry
-
-noncomputable def rationalWeilPairing
-    (P Q : E.nTorsion n) : rootsOfUnity n ℚ :=
-  rootsOfUnity.mkOfPowEq
-    ((millerWeilValue (E := E) n P Q : ℚˣ) : ℚ)
-    (millerWeilValue_pow_eq_one (E := E) n P Q)
-
-theorem rationalWeilPairing_map_add_left
-    (P P' Q : E.nTorsion n) :
-    rationalWeilPairing (E := E) n (P + P') Q =
-      rationalWeilPairing (E := E) n P Q *
-      rationalWeilPairing (E := E) n P' Q := by
-  apply rootsOfUnity.coe_injective
-  -- reduce to `millerWeilValue_map_add_left`
-  sorry
-
-theorem rationalWeilPairing_map_add_right
-    (P Q Q' : E.nTorsion n) :
-    rationalWeilPairing (E := E) n P (Q + Q') =
-      rationalWeilPairing (E := E) n P Q *
-      rationalWeilPairing (E := E) n P Q' := by
-  apply rootsOfUnity.coe_injective
-  sorry
-
-theorem rationalWeilPairing_alternating
-    (P : E.nTorsion n) :
-    rationalWeilPairing (E := E) n P P = 1 := by
-  apply rootsOfUnity.coe_injective
-  sorry
-
-/-- Preferred strong construction theorem; package uses only the full-grid corollary. -/
-theorem rationalWeilPairing_nondeg_left
-    (P : E.nTorsion n)
-    (hP : ∀ Q : E.nTorsion n,
-      rationalWeilPairing (E := E) n P Q = 1) :
-    P = 0 := by
-  sorry
-
-theorem rationalWeilPairing_nondeg_left_on_full_grid
-    (grid : E.FullRationalTorsionGrid n)
-    (z : ZMod n × ZMod n)
-    (hz : ∀ w : ZMod n × ZMod n,
-      rationalWeilPairing (E := E) n (grid z) (grid w) = 1) :
-    z = 0 :=
-  nondeg_left_on_full_grid_of_nondeg_left
-    (E := E) (n := n)
-    (rationalWeilPairing (E := E) n)
-    (rationalWeilPairing_nondeg_left (E := E) n)
-    grid z hz
-
-noncomputable def rationalWeilPairingPackage :
-    E.WeilPairingPackage n where
-  pairing := rationalWeilPairing (E := E) n
-  map_add_left := rationalWeilPairing_map_add_left (E := E) n
-  map_add_right := rationalWeilPairing_map_add_right (E := E) n
-  alternating := rationalWeilPairing_alternating (E := E) n
-  nondeg_left_on_full_grid := rationalWeilPairing_nondeg_left_on_full_grid (E := E) n
+open UniversalEDSRing
+
+/--
+The division-polynomial specialization
+
+  `ℤ[b,c,d] → ℤ[X][Y]`
+
+sending
+
+  `b ↦ W.ψ₂`, `c ↦ C W.Ψ₃`, `d ↦ C W.preΨ₄`.
+
+Here `Polynomial (Polynomial ℤ)` is Mathlib's `ℤ[X][Y]` convention for the
+bivariate polynomial ring in `Y` over `ℤ[X]`.
+-/
+noncomputable def divPolySpec (W : WeierstrassCurve ℤ) :
+    UniversalEDSRing →+* Polynomial (Polynomial ℤ) :=
+  MvPolynomial.eval₂Hom
+    (Int.castRingHom (Polynomial (Polynomial ℤ)))
+    ![W.ψ₂, Polynomial.C W.Ψ₃, Polynomial.C W.preΨ₄]
+
+@[simp] theorem divPolySpec_b (W : WeierstrassCurve ℤ) :
+    divPolySpec W b = W.ψ₂ := by
+  simp [divPolySpec, UniversalEDSRing.b]
+
+@[simp] theorem divPolySpec_c (W : WeierstrassCurve ℤ) :
+    divPolySpec W c = Polynomial.C W.Ψ₃ := by
+  simp [divPolySpec, UniversalEDSRing.c]
+
+@[simp] theorem divPolySpec_d (W : WeierstrassCurve ℤ) :
+    divPolySpec W d = Polynomial.C W.preΨ₄ := by
+  simp [divPolySpec, UniversalEDSRing.d]
+
+/--
+The defining specialization identity.  This is the exact formal content of
+“division polynomials are the normalized EDS specialized at
+`(ψ₂, Ψ₃, preΨ₄)`”.
+-/
+theorem divPolySpec_normEDS (W : WeierstrassCurve ℤ) (j : ℤ) :
+    divPolySpec W (normEDS b c d j) = W.ψ j := by
+  rw [map_normEDS b c d (divPolySpec W) j]
+  simp [WeierstrassCurve.ψ]
 
 end WeierstrassCurve
 ```
 
-Missing Mathlib/API declarations:
-
-```lean
-WeierstrassCurve.rationalWeilPairing
-WeierstrassCurve.rationalWeilPairing_map_add_left
-WeierstrassCurve.rationalWeilPairing_map_add_right
-WeierstrassCurve.rationalWeilPairing_alternating
-WeierstrassCurve.rationalWeilPairing_nondeg_left
-WeierstrassCurve.rationalWeilPairingPackage
-```
-
-The first four are construction-level after reciprocity; nondegeneracy is a separate deep theorem.
+If your local universal ring is an iterated polynomial ring rather than an
+`MvPolynomial`, replace `MvPolynomial.eval₂Hom` by the corresponding iterated
+`Polynomial.aeval`/`eval₂` map.  The proof is unchanged: `map_normEDS` is the
+only EDS-specific lemma needed.
 
 ---
 
-## 5. Galois/Kummer route scaffold and why it is not the preferred path
+## 3. The missing bridge: `ψ_n ≠ 0`
 
-**Status: MISSING-MATHLIB-API at almost every step**
+The important distinction:
 
-A cohomological construction would want declarations like these:
+* `preΨ_ne_zero` is already in the degree file.
+* `ΨSq_ne_zero` is already in the degree file.
+* A direct theorem `W.ψ n ≠ 0` may not be exported under that name.
+
+The bridge below proves it from existing coordinate-ring lemmas.
+
+The coordinate ring has basis `{1, Y}` over `R[X]`; Mathlib exposes this through
+`smul_basis_eq_zero`.  Therefore a nonzero `p : R[X]` remains nonzero after
+embedding as the constant-in-`Y` polynomial `C p` and passing to the affine
+coordinate ring.
 
 ```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
+
+open Polynomial
+
 namespace WeierstrassCurve
+namespace Affine
+namespace CoordinateRing
 
-variable (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℚ]
-variable (n : ℕ) [NeZero n]
+/--
+A nonzero polynomial `p : R[X]` remains nonzero in the affine coordinate ring
+when embedded as the bivariate polynomial `C p`.
 
--- proposed API, not current usable Mathlib API for this target
-abbrev GeometricNTorsion : Type :=
-  ((E.map (algebraMap ℚ (AlgebraicClosure ℚ))).nTorsion n)
+This is the small zero-detection fact needed for constants in `Y`; it is much
+weaker than injectivity of an arbitrary specialization from `ℤ[b,c,d]`.
+-/
+theorem mk_C_ne_zero
+    {R : Type*} [CommRing R]
+    (W : WeierstrassCurve.Affine R)
+    {p : Polynomial R} (hp : p ≠ 0) :
+    (mk W) (Polynomial.C p) ≠ 0 := by
+  intro hp0
+  apply hp
 
-/-- Kummer connecting map for the exact sequence `0 → E[n] → E → E → 0`. -/
-noncomputable def kummerConnecting :
-    sorry :=
-  sorry
+  have hp1 : p • (1 : W.CoordinateRing) = 0 := by
+    calc
+      p • (1 : W.CoordinateRing)
+          = (mk W) (Polynomial.C p) * 1 := by
+              simpa using smul (W' := W) p (1 : W.CoordinateRing)
+      _ = 0 := by
+              simpa [hp0]
 
-/-- Cup product pairing in Galois cohomology. -/
-noncomputable def galoisCupProduct :
-    sorry :=
-  sorry
+  have hbasis :
+      p • (1 : W.CoordinateRing)
+        + (0 : Polynomial R) • (mk W) Polynomial.X = 0 := by
+    simpa [hp1]
 
-/-- Weil pairing as the perfect pairing identifying `E[n]` with the Cartier dual. -/
-noncomputable def cohomologicalWeilPairing :
-    GeometricNTorsion (E := E) n →
-    GeometricNTorsion (E := E) n →
-    rootsOfUnity n (AlgebraicClosure ℚ) :=
-  sorry
+  exact (smul_basis_eq_zero (W' := W) (p := p) (q := 0) hbasis).1
 
-/-- Galois equivariance needed to descend rational torsion values. -/
-theorem cohomologicalWeilPairing_galois_equivariant :
-    sorry := by
-  sorry
+end CoordinateRing
+end Affine
 
-/-- Descent of the geometric value to a rational root of unity when both torsion points are rational. -/
-theorem cohomologicalWeilPairing_descends_to_rat
-    (P Q : E.nTorsion n) :
-    ∃ ζ : rootsOfUnity n ℚ,
-      sorry = cohomologicalWeilPairing (E := E) n sorry sorry := by
-  sorry
+/--
+Division-polynomial nonvanishing in characteristic not dividing `n`.
+
+This is the theorem that Approach (c) really wants.  It is not a new degree
+calculation: it is just `ΨSq_ne_zero` plus the coordinate-ring comparison between
+`ψ`, `Ψ`, and `ΨSq`.
+-/
+theorem psi_ne_zero_of_natCast_ne_zero
+    {R : Type*} [CommRing R] [NoZeroDivisors R]
+    (W : WeierstrassCurve R)
+    {n : ℤ} (hn : (n : R) ≠ 0) :
+    W.ψ n ≠ 0 := by
+  intro hψ
+
+  have hmkψ :
+      (Affine.CoordinateRing.mk W) (W.ψ n) = 0 := by
+    simpa [hψ]
+
+  have hmkΨ :
+      (Affine.CoordinateRing.mk W) (W.Ψ n) = 0 := by
+    simpa [Affine.CoordinateRing.mk_ψ W n] using hmkψ
+
+  have hmkΨSq :
+      (Affine.CoordinateRing.mk W) (Polynomial.C (W.ΨSq n)) = 0 := by
+    rw [← Affine.CoordinateRing.mk_Ψ_sq W n]
+    simpa [hmkΨ]
+
+  exact (Affine.CoordinateRing.mk_C_ne_zero W (W.ΨSq_ne_zero hn)) hmkΨSq
 
 end WeierstrassCurve
 ```
 
-Exact missing declarations/packages for the Kummer route:
+Notes on this bridge:
 
-```lean
-GaloisCohomology.H1
-GaloisCohomology.cupProduct
-GaloisCohomology.kummerConnecting
-WeierstrassCurve.kummerExactSequence
-WeierstrassCurve.kummerConnecting
-WeierstrassCurve.nTorsionCartierDual
-WeierstrassCurve.cohomologicalWeilPairing
-WeierstrassCurve.cohomologicalWeilPairing_galois_equivariant
-WeierstrassCurve.cohomologicalWeilPairing_descends_to_rat
-```
-
-Even if some general cohomology files exist under different names, the elliptic-curve-specific Kummer sequence and duality statements above are not available as a ready API for this project.  Therefore this route is not the shortest way to discharge A2.
+* The proof does not require `W` to be nonsingular.  These division-polynomial
+  definitions and coordinate-ring identities are attached to a Weierstrass curve
+  object, not to an elliptic-curve group law assumption.
+* The assumption `(n : R) ≠ 0` is essential.  In characteristic `p`, the degree
+  theorem is not available when `p ∣ n`; choosing `R = ℤ` avoids the issue.
+* This bridge uses `ΨSq_ne_zero`, not only positive `natDegree_preΨ`.  Positive
+  degree is also awkward at small indices (`±1`, `±2`), while `ΨSq_ne_zero`
+  handles all nonzero `n` uniformly.
 
 ---
 
-## 6. Final recommendation
+## 4. Universal nonvanishing theorem
 
-Use the slim package as the downstream seam:
-
-```lean
-noncomputable def rationalWeilPairingPackage
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℚ]
-    (n : ℕ) [NeZero n] :
-    E.WeilPairingPackage n :=
-  sorry
-```
-
-Downstream Mazur should only consume:
+Now choose any Weierstrass curve over `ℤ`.  The coefficient values do not matter;
+all that matters is that `ℤ` is a domain and `(j : ℤ) ≠ 0` when `j ≠ 0`.
 
 ```lean
-W.pairing
-W.map_add_left
-W.map_add_right
-W.alternating
-W.nondeg_left_on_full_grid
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
+import Mathlib.Data.MvPolynomial.Basic
+
+open Polynomial
+
+abbrev UniversalEDSRing : Type := MvPolynomial (Fin 3) ℤ
+
+namespace UniversalEDSRing
+
+noncomputable abbrev b : UniversalEDSRing := MvPolynomial.X 0
+noncomputable abbrev c : UniversalEDSRing := MvPolynomial.X 1
+noncomputable abbrev d : UniversalEDSRing := MvPolynomial.X 2
+
+end UniversalEDSRing
+
+namespace WeierstrassCurve
+
+open UniversalEDSRing
+
+noncomputable def divPolySpec (W : WeierstrassCurve ℤ) :
+    UniversalEDSRing →+* Polynomial (Polynomial ℤ) :=
+  MvPolynomial.eval₂Hom
+    (Int.castRingHom (Polynomial (Polynomial ℤ)))
+    ![W.ψ₂, Polynomial.C W.Ψ₃, Polynomial.C W.preΨ₄]
+
+@[simp] theorem divPolySpec_b (W : WeierstrassCurve ℤ) :
+    divPolySpec W b = W.ψ₂ := by
+  simp [divPolySpec, UniversalEDSRing.b]
+
+@[simp] theorem divPolySpec_c (W : WeierstrassCurve ℤ) :
+    divPolySpec W c = Polynomial.C W.Ψ₃ := by
+  simp [divPolySpec, UniversalEDSRing.c]
+
+@[simp] theorem divPolySpec_d (W : WeierstrassCurve ℤ) :
+    divPolySpec W d = Polynomial.C W.preΨ₄ := by
+  simp [divPolySpec, UniversalEDSRing.d]
+
+theorem divPolySpec_normEDS (W : WeierstrassCurve ℤ) (j : ℤ) :
+    divPolySpec W (normEDS b c d j) = W.ψ j := by
+  rw [map_normEDS b c d (divPolySpec W) j]
+  simp [WeierstrassCurve.ψ]
+
+/-- A dummy Weierstrass curve over `ℤ`.  No nonsingularity is needed here. -/
+def Wzero : WeierstrassCurve ℤ where
+  a₁ := 0
+  a₂ := 0
+  a₃ := 0
+  a₄ := 0
+  a₆ := 0
+
+/--
+Universal normalized EDS nonvanishing over `ℤ[b,c,d]`.
+
+This is the desired unconditional Ward nonvanishing statement.
+-/
+theorem universal_normEDS_ne_zero
+    {j : ℤ} (hj : j ≠ 0) :
+    normEDS b c d j ≠ 0 := by
+  intro hzero
+
+  let W : WeierstrassCurve ℤ := Wzero
+
+  have hψ : W.ψ j = 0 := by
+    have hmap := congrArg (divPolySpec W) hzero
+    simpa [divPolySpec_normEDS W j] using hmap
+
+  exact (psi_ne_zero_of_natCast_ne_zero W (by simpa using hj)) hψ
+
+end WeierstrassCurve
 ```
 
-and the closeable helper theorem:
+This proof has exactly the desired logical form:
+
+```text
+assume universal polynomial is zero
+⇒ every specialization is zero
+⇒ the division-polynomial specialization is zero
+⇒ ψ_j = 0
+⇒ contradiction with ψ_ne_zero.
+```
+
+Again, no injectivity of `divPolySpec` is used.
+
+---
+
+## 5. Pitfall check: algebraic independence is not needed
+
+The specialization
 
 ```lean
-W.exists_rootOfUnity_of_full_grid
+b ↦ W.ψ₂,
+c ↦ Polynomial.C W.Ψ₃,
+d ↦ Polynomial.C W.preΨ₄
 ```
 
-The construction route should be Miller/Route-B.  The current honest hard seams are exactly:
+may well satisfy algebraic relations in `ℤ[X][Y]`; that is irrelevant.
+
+What would require algebraic independence is the biconditional
 
 ```lean
-WeierstrassCurve.divisor_line
-WeierstrassCurve.divisor_vertical
-WeierstrassCurve.MillerExpr.evalUnitAt
-WeierstrassCurve.MillerExpr.weil_reciprocity_millerExpr
-WeierstrassCurve.rationalWeilPairing_nondeg_left
+normEDS b c d j = 0 ↔ W.ψ j = 0
 ```
 
-Everything else is either package-wrapper work or `Finsupp`/`ZMod` algebra and is closeable now.
+or a statement that the specialization is globally zero-reflecting on all of
+`ℤ[b,c,d]`.  We do not need either one.
+
+The actual implication used is only the contrapositive of `map_zero`:
+
+```lean
+φ x ≠ 0 → x ≠ 0
+```
+
+which is valid for every ring homomorphism.  Therefore a single nonzero image is
+sufficient.
+
+So the correct answer to the “zero-detecting map” question is:
+
+* No, you do not need to prove that the map is injective.
+* No, you do not need algebraic independence of `ψ₂`, `Ψ₃`, `preΨ₄`.
+* Yes, the specialization detects nonvanishing of this specific element once you
+  prove its image is nonzero.
+
+---
+
+## 6. Recommended implementation order
+
+1. Add the small coordinate-ring constant-in-`Y` lemma:
+
+   ```lean
+   WeierstrassCurve.Affine.CoordinateRing.mk_C_ne_zero
+   ```
+
+2. Add the division-polynomial nonzero bridge:
+
+   ```lean
+   WeierstrassCurve.psi_ne_zero_of_natCast_ne_zero
+   ```
+
+3. Define the universal `MvPolynomial (Fin 3) ℤ` variables `b c d`.
+
+4. Define `divPolySpec` by `MvPolynomial.eval₂Hom`.
+
+5. Prove `divPolySpec_normEDS` by `map_normEDS` and `simp [WeierstrassCurve.ψ]`.
+
+6. Prove the universal theorem by specializing to `Wzero : WeierstrassCurve ℤ`.
+
+The only proof fragility is exact namespace/simp spelling around
+`CoordinateRing.smul` and `smul_basis_eq_zero`; mathematically, that lemma is
+precisely the `{1,Y}` coordinate-ring basis statement already present in
+Mathlib.
+
+---
+
+## 7. Answer to the three questions
+
+### Q1. Can universal nonvanishing be concluded by pulling back?
+
+Yes, but do not formulate it as requiring an injective pullback.  Define
+
+```lean
+φ := divPolySpec W : MvPolynomial (Fin 3) ℤ →+* Polynomial (Polynomial ℤ)
+```
+
+and prove
+
+```lean
+φ (normEDS b c d j) = W.ψ j.
+```
+
+If `W.ψ j ≠ 0`, then `normEDS b c d j ≠ 0`, because otherwise applying `φ` to
+`0 = normEDS b c d j` would force `0 = W.ψ j`.
+
+### Q2. What does Mathlib give for `ψ_n ≠ 0`?
+
+The degree file gives nonzero results for `preΨ` and `ΨSq`, including:
+
+```lean
+W.preΨ_ne_zero : (n : R) ≠ 0 → W.preΨ n ≠ 0
+W.ΨSq_ne_zero : (n : R) ≠ 0 → W.ΨSq n ≠ 0
+```
+
+For `ψ` itself, the robust chain is:
+
+```text
+W.ΨSq_ne_zero hn
++ CoordinateRing.mk_Ψ_sq
++ CoordinateRing.mk_ψ
++ constants-in-Y inject into the coordinate ring
+⇒ W.ψ n ≠ 0.
+```
+
+This works over any `[CommRing R] [NoZeroDivisors R]` with `(n : R) ≠ 0`, and
+in particular over `R = ℤ` for every integer `n ≠ 0`.
+
+### Q3. Could algebraic relations in the specialization break the proof?
+
+No.  Algebraic relations would matter if the proof needed the specialization to
+be injective on all of `ℤ[b,c,d]`.  This proof only needs one fact:
+
+```lean
+φ (normEDS b c d j) = W.ψ j ≠ 0.
+```
+
+That single nonzero image already implies the source element is nonzero.  The
+map can have a huge kernel; it just cannot contain this particular element,
+because its image has been proved nonzero.
