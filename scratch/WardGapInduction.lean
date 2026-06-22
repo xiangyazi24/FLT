@@ -151,4 +151,58 @@ lemma gapRel_succ [IsDomain R] (b c d : R) (hc : c ≠ 0)
     · rw [h2]; exact gapRel_diag_neg b c d k
     · exact gStep b c d hc hne k m (by omega) (by omega) (hG m) (hO m) (hO (m - 1))
 
+/-- OffRel diagonal `OffRel (k+1) k` (where `V_k(m)` vanishes, `m=k ⇒ W(0)=0`): via `normEDS_even`. -/
+lemma offRel_diag (b c d : R) (k : ℤ) : OffRel b c d (k + 1) k := by
+  unfold OffRel
+  have heven := normEDS_even b c d (k + 1)
+  have h1 : normEDS b c d (-1) = -1 := by rw [show (-1 : ℤ) = -(1) by ring, normEDS_neg, normEDS_one]
+  simp only [show k + (k + 1) + 1 = 2 * (k + 1) by ring, show k - (k + 1) = -1 by ring,
+    show (k + 1) + 1 = k + 2 by ring, show (k + 1) + 2 = k + 3 by ring,
+    show (k + 1) - 1 = k by ring, show (k + 1) - 2 = k - 1 by ring, h1] at heven ⊢
+  linear_combination -heven
+
+/-- OffRel diagonal twin `OffRel (k+1) (-k-1)` (the other zero, `m=-k-1 ⇒ W(0)=0`): via `normEDS_even`. -/
+lemma offRel_diag_neg (b c d : R) (k : ℤ) : OffRel b c d (k + 1) (-k - 1) := by
+  unfold OffRel
+  have heven := normEDS_even b c d (k + 1)
+  have e1 : normEDS b c d (-k - 1) = -normEDS b c d (k + 1) := by
+    rw [show -k - 1 = -(k + 1) by ring, normEDS_neg]
+  simp only [show (-k - 1) + (k + 1) + 1 = 1 by ring,
+    show (-k - 1) - (k + 1) = -(2 * (k + 1)) by ring,
+    show (-k - 1) + 2 = -(k - 1) by ring, show (-k - 1) - 1 = -(k + 2) by ring,
+    show (-k - 1) + 1 = -k by ring,
+    show (k + 1) + 1 = k + 2 by ring, show (k + 1) + 2 = k + 3 by ring,
+    show (k + 1) - 1 = k by ring, show (k + 1) - 2 = k - 1 by ring,
+    e1, normEDS_neg, normEDS_one] at heven ⊢
+  linear_combination -heven
+
+/-- **H-step (cancelled).** For `m ≠ k` and `m ≠ -k-1`, `OffRel (k+1) m` follows from `hStep_mul`. -/
+lemma hStep [IsDomain R] (b c d : R) (hc : c ≠ 0)
+    (hne : ∀ j : ℤ, j ≠ 0 → normEDS b c d j ≠ 0) (k m : ℤ)
+    (hmk1 : m + k + 1 ≠ 0) (hmk2 : m - k ≠ 0)
+    (hG1 : GapRel b c d (k + 1) m) (hG2 : GapRel b c d (k + 1) (m + 1)) (hO : OffRel b c d k m) :
+    OffRel b c d (k + 1) m := by
+  have key := hStep_mul b c d hc hne k m hG1 hG2 hO
+  have hb : b ≠ 0 := by have := hne 2 (by norm_num); rwa [normEDS_two] at this
+  have hfac : b * normEDS b c d (m + k + 1) * normEDS b c d (m - k) ≠ 0 :=
+    mul_ne_zero (mul_ne_zero hb (hne (m + k + 1) hmk1)) (hne (m - k) hmk2)
+  have hres := (mul_eq_zero.mp key).resolve_left hfac
+  unfold OffRel
+  simp only [show m + (k + 1) + 1 = m + k + 2 by ring, show m - (k + 1) = m - k - 1 by ring,
+    show (k + 1) + 1 = k + 2 by ring, show (k + 1) + 2 = k + 3 by ring,
+    show (k + 1) - 1 = k by ring] at hres ⊢
+  linear_combination hres
+
+/-- `OffRel (k+1)` for ALL `m`: `hStep` off the diagonal, `offRel_diag`/`offRel_diag_neg` on it. -/
+lemma offRel_succ [IsDomain R] (b c d : R) (hc : c ≠ 0)
+    (hne : ∀ j : ℤ, j ≠ 0 → normEDS b c d j ≠ 0) (k : ℤ)
+    (hG : ∀ m, GapRel b c d (k + 1) m) (hO : ∀ m, OffRel b c d k m) :
+    ∀ m, OffRel b c d (k + 1) m := by
+  intro m
+  by_cases h1 : m = k
+  · rw [h1]; exact offRel_diag b c d k
+  · by_cases h2 : m = -k - 1
+    · rw [h2]; exact offRel_diag_neg b c d k
+    · exact hStep b c d hc hne k m (by omega) (by omega) (hG m) (hG (m + 1)) (hO m)
+
 end FLT.EDS
