@@ -484,6 +484,26 @@ lemma diffAddVec_congr
     mul_ne_zero (mul_ne_zero (pow_ne_zero 2 ha) (pow_ne_zero 2 hb)) hd, ?_⟩
   exact diffAddVec_smul_smul_smul (E := E) A B D a b d
 
+lemma diffAddOrInfVec_congr
+    {A A' B B' D D' : Fin 2 → k}
+    (hA : SameP1Vec A A') (hB : SameP1Vec B B') (hD : SameP1Vec D D') :
+    SameP1Vec (diffAddOrInfVec E A B D) (diffAddOrInfVec E A' B' D') := by
+  classical
+  rcases hA with ⟨a, ha, rfl⟩
+  rcases hB with ⟨b, hb, rfl⟩
+  rcases hD with ⟨d, hd, rfl⟩
+  unfold diffAddOrInfVec
+  by_cases hδ : deltaVec A B = 0
+  · have hδ' : deltaVec (a • A) (b • B) = 0 := by
+      simp [deltaVec_smul_smul, hδ]
+    simp [hδ, hδ', SameP1Vec.refl]
+  · have hδ' : deltaVec (a • A) (b • B) ≠ 0 := by
+      simpa [deltaVec_smul_smul] using mul_ne_zero (mul_ne_zero ha hb) hδ
+    simp [hδ, hδ']
+    refine ⟨a ^ 2 * b ^ 2 * d,
+      mul_ne_zero (mul_ne_zero (pow_ne_zero 2 ha) (pow_ne_zero 2 hb)) hd, ?_⟩
+    exact diffAddVec_smul_smul_smul (E := E) A B D a b d
+
 lemma dupNumH_smul (A : Fin 2 → k) (c : k) :
     dupNumH E (X (c • A)) (Z (c • A)) = c ^ 4 * dupNumH E (X A) (Z A) := by
   simp [dupNumH, X, Z, Pi.smul_apply]
@@ -971,17 +991,172 @@ theorem xPair_same_xLadderRep_two (W : WeierstrassCurve k) (x : k) :
     WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.baseChange]
     using SameP1Vec.refl (XOnly.doubleVec (E := W⁄k) (XOnly.xAffVec x))
 
+/-- The remaining primitive EDS algebra: the division-polynomial representative is stable
+under the two raw x-only primitives used by the corrected Montgomery-pair ladder.
+
+The first half is the doubling identity for `[Φ_m, ΨSq_m]`; the second half is the adjacent
+differential-addition identity for `[Φ_m, ΨSq_m]`, `[Φ_{m+1}, ΨSq_{m+1}]`, and `[x, 1]`.
+The nonzero conclusions are the corresponding no-common-root facts for the produced indices. -/
+private theorem xPair_double_and_diffAddOrInf_EDS_core
+    (W : WeierstrassCurve k) [W.IsElliptic] (m : ℕ) (x : k) :
+    xPair W ((2 * m : ℕ) : ℤ) x ≠ 0 ∧
+    SameP1Vec
+      (XOnly.doubleVec (E := W⁄k) (xPair W (m : ℤ) x))
+      (xPair W ((2 * m : ℕ) : ℤ) x) ∧
+    xPair W ((2 * m + 1 : ℕ) : ℤ) x ≠ 0 ∧
+    SameP1Vec
+      (XOnly.diffAddOrInfVec (E := W⁄k)
+        (xPair W (m : ℤ) x)
+        (xPair W ((m + 1 : ℕ) : ℤ) x)
+        (xPair W (1 : ℤ) x))
+      (xPair W ((2 * m + 1 : ℕ) : ℤ) x) := by
+  sorry
+
+private theorem xLadderPair_same_xPair_EDS
+    (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) (x : k) :
+    xPair W (n : ℤ) x ≠ 0 ∧
+    xPair W ((n + 1 : ℕ) : ℤ) x ≠ 0 ∧
+    SameP1Vec
+      (XOnly.xLadderPair (E := W⁄k) x n).1
+      (xPair W (n : ℤ) x) ∧
+    SameP1Vec
+      (XOnly.xLadderPair (E := W⁄k) x n).2
+      (xPair W ((n + 1 : ℕ) : ℤ) x) := by
+    classical
+    have hD :
+        SameP1Vec (XOnly.xAffVec x) (xPair W (1 : ℤ) x) := by
+      simpa [xPair, XOnly.xAffVec] using SameP1Vec.refl (![x, 1] : Fin 2 → k)
+    induction n using Nat.strong_induction_on with
+    | h n IH =>
+        rcases n with _ | n
+        · constructor
+          · simp [xPair]
+          · constructor
+            · simp [xPair]
+            · constructor
+              · simpa [XOnly.xLadderPair, xPair, XOnly.xInfVec] using
+                  SameP1Vec.refl (![1, 0] : Fin 2 → k)
+              · simpa [XOnly.xLadderPair] using hD
+        · rcases n with _ | n
+          · have hcore := xPair_double_and_diffAddOrInf_EDS_core (W := W) 1 x
+            have hdouble :
+                SameP1Vec
+                  (XOnly.doubleVec (E := W⁄k) (XOnly.xAffVec x))
+                  (xPair W (2 : ℤ) x) := by
+              exact SameP1Vec.trans (XOnly.doubleVec_congr (E := W⁄k) hD) hcore.2.1
+            constructor
+            · simp [xPair]
+            · constructor
+              · simpa using hcore.1
+              · constructor
+                · simpa [XOnly.xLadderPair] using hD
+                · simpa [XOnly.xLadderPair] using hdouble
+          · let N : ℕ := n + 2
+            let m : ℕ := N / 2
+            change
+              xPair W (N : ℤ) x ≠ 0 ∧
+              xPair W ((N + 1 : ℕ) : ℤ) x ≠ 0 ∧
+              SameP1Vec
+                (XOnly.xLadderPair (E := W⁄k) x N).1
+                (xPair W (N : ℤ) x) ∧
+              SameP1Vec
+                (XOnly.xLadderPair (E := W⁄k) x N).2
+                (xPair W ((N + 1 : ℕ) : ℤ) x)
+            have hm_lt : m < N := by
+              dsimp [m, N]
+              omega
+            have IHm := IH m (by
+              dsimp [m, N]
+              omega)
+            have hcore_m := xPair_double_and_diffAddOrInf_EDS_core (W := W) m x
+            have hcore_ms := xPair_double_and_diffAddOrInf_EDS_core (W := W) (m + 1) x
+            have hdouble₀ :
+                SameP1Vec
+                  (XOnly.doubleVec (E := W⁄k) (XOnly.xLadderPair (E := W⁄k) x m).1)
+                  (xPair W ((2 * m : ℕ) : ℤ) x) := by
+              exact SameP1Vec.trans
+                (XOnly.doubleVec_congr (E := W⁄k) IHm.2.2.1)
+                hcore_m.2.1
+            have hadd :
+                SameP1Vec
+                  (XOnly.diffAddOrInfVec (E := W⁄k)
+                    (XOnly.xLadderPair (E := W⁄k) x m).1
+                    (XOnly.xLadderPair (E := W⁄k) x m).2
+                    (XOnly.xAffVec x))
+                  (xPair W ((2 * m + 1 : ℕ) : ℤ) x) := by
+              exact SameP1Vec.trans
+                (XOnly.diffAddOrInfVec_congr (E := W⁄k) IHm.2.2.1 IHm.2.2.2 hD)
+                hcore_m.2.2.2
+            have hdouble₁ :
+                SameP1Vec
+                  (XOnly.doubleVec (E := W⁄k) (XOnly.xLadderPair (E := W⁄k) x m).2)
+                  (xPair W ((2 * (m + 1) : ℕ) : ℤ) x) := by
+              exact SameP1Vec.trans
+                (XOnly.doubleVec_congr (E := W⁄k) IHm.2.2.2)
+                hcore_ms.2.1
+            by_cases hEven : Even N
+            · have hN : N = 2 * m := by
+                simpa [m] using (Nat.two_mul_div_two_of_even hEven).symm
+              have hN1 : N + 1 = 2 * m + 1 := by omega
+              constructor
+              · simpa [hN] using hcore_m.1
+              · constructor
+                · simpa [hN1] using hcore_m.2.2.1
+                · constructor
+                  · have hfirst :
+                      SameP1Vec
+                        (XOnly.doubleVec (E := W⁄k)
+                          (XOnly.xLadderPair (E := W⁄k) x m).1)
+                        (xPair W (N : ℤ) x) := by
+                      simpa [hN] using hdouble₀
+                    simpa [XOnly.xLadderPair, N, m, hEven] using hfirst
+                  · have hsecond :
+                      SameP1Vec
+                        (XOnly.diffAddOrInfVec (E := W⁄k)
+                          (XOnly.xLadderPair (E := W⁄k) x m).1
+                          (XOnly.xLadderPair (E := W⁄k) x m).2
+                          (XOnly.xAffVec x))
+                        (xPair W ((N + 1 : ℕ) : ℤ) x) := by
+                      simpa [hN1] using hadd
+                    simpa [XOnly.xLadderPair, N, m, hEven] using hsecond
+            · have hOdd : Odd N := Nat.not_even_iff_odd.mp hEven
+              have hN : N = 2 * m + 1 := by
+                simpa [m] using (Nat.two_mul_div_two_add_one_of_odd hOdd).symm
+              have hN1 : N + 1 = 2 * (m + 1) := by omega
+              constructor
+              · simpa [hN] using hcore_m.2.2.1
+              · constructor
+                · simpa [hN1] using hcore_ms.1
+                · constructor
+                  · have hfirst :
+                      SameP1Vec
+                        (XOnly.diffAddOrInfVec (E := W⁄k)
+                          (XOnly.xLadderPair (E := W⁄k) x m).1
+                          (XOnly.xLadderPair (E := W⁄k) x m).2
+                          (XOnly.xAffVec x))
+                        (xPair W (N : ℤ) x) := by
+                      simpa [hN] using hadd
+                    simpa [XOnly.xLadderPair, N, m, hEven] using hfirst
+                  · have hsecond :
+                      SameP1Vec
+                        (XOnly.doubleVec (E := W⁄k)
+                          (XOnly.xLadderPair (E := W⁄k) x m).2)
+                        (xPair W ((N + 1 : ℕ) : ℤ) x) := by
+                      simpa [hN1] using hdouble₁
+                    simpa [XOnly.xLadderPair, N, m, hEven] using hsecond
+
 /-- Missing Mathlib/repo EDS fact: for an elliptic curve, the univariate division-polynomial
 representative has no zero-vector specialization and agrees with the corrected Montgomery-pair
 ladder.  The first conjunct is the no-common-root/coprimality statement for `Φₙ` and `ΨSqₙ`;
 the second conjunct is the EDS recurrence compatibility with `doubleVec` and `diffAddOrInfVec`. -/
 theorem xPair_ne_zero_and_same_xLadderRep_EDS
     (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) (x : k) :
-    xPair W (n : ℤ) x ≠ 0 ∧
-    SameP1Vec
-      (XOnly.xLadderRep (E := W⁄k) x n)
-      (xPair W (n : ℤ) x) := by
-  sorry
+      xPair W (n : ℤ) x ≠ 0 ∧
+      SameP1Vec
+        (XOnly.xLadderRep (E := W⁄k) x n)
+        (xPair W (n : ℤ) x) := by
+    have h := xLadderPair_same_xPair_EDS (W := W) n x
+    exact ⟨h.1, by simpa [XOnly.xLadderRep] using h.2.2.1⟩
 
 /-- No common root for the two coordinates of the division-polynomial x-representative. -/
 theorem xPair_ne_zero_of_isElliptic
