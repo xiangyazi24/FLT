@@ -1,456 +1,208 @@
-# Q229-dm4: EDS/Somos relation attack for the division-polynomial doubling identity
+# Q236-dm1: `normEDS_adjacent_somos` — honest build boundary
 
-## Bottom line
+## Executive answer
 
-The residual after expanding the raw duplication identity is exactly the missing EDS relation with indices
+I cannot honestly provide a 0-sorry, paste-and-build proof of Ward's adjacent Somos theorem from the current Mathlib file alone.  The file `Mathlib.NumberTheory.EllipticDivisibilitySequence` defines `IsEllSequence`, `normEDS`, `normEDS_even`, `normEDS_odd`, and the recursion principles `normEDSRec'` / `normEDSRec`, but its own docs still list as TODO the theorem that `normEDS` satisfies `IsEllDivSequence`.
 
-```text
-(i,j,k) = (m,2,1)
-```
-
-in the general elliptic-sequence law
-
-```text
-ψ_{i+j} ψ_{i-j} ψ_k^2
-  = ψ_{i+k} ψ_{i-k} ψ_j^2 - ψ_{j+k} ψ_{j-k} ψ_i^2.
-```
-
-Since `ψ₁ = 1`, `ψ₂² = Ψ₂Sq`, `ψ₃ = Ψ₃`, and `ψ₁` rather than `ψ_{-1}` appears in Mathlib's orientation, this specialization is
-
-```text
-ψ_{m+2} ψ_{m-2}
-  = ψ_{m+1} ψ_{m-1} ψ₂² - ψ₃ ψ_m²,
-```
-
-or equivalently
-
-```text
-ψ_{m+2} ψ_{m-2} + ψ₃ ψ_m² = ψ_{m+1} ψ_{m-1} ψ₂².
-```
-
-For Mathlib's `preΨ` normalization, this becomes the following parity-normalized relation:
+The tightest single missing sub-step is not the `ℤ` symmetry, the base cases, or the use of `normEDSRec`; those are routine.  The one missing sub-step is the generated algebraic certificate for the **two recurrence steps** in `normEDSRec`:
 
 ```lean
-W.preΨ (m + 2) * W.preΨ (m - 2) + W.Ψ₃ * W.preΨ m ^ 2 =
-  W.preΨ (m + 1) * W.preΨ (m - 1) *
-    (if Even m then 1 else W.Ψ₂Sq ^ 2)
+AdjRel(m+1),...,AdjRel(m+5) ⟹ AdjRel(2*(m+3))
+AdjRel(m+1),...,AdjRel(m+4) ⟹ AdjRel(2*(m+2)+1)
 ```
 
-This is the concrete missing relation.  There is no current one-line Mathlib theorem named like
-`preNormEDS_somos`, `normEDS_somos`, `IsEllSequence_normEDS`, or `preNormEDS_rel`.  Mathlib defines
-`IsEllSequence`, `preNormEDS`, `normEDS`, `preNormEDS_even`, `preNormEDS_odd`, `normEDS_even`, and
-`normEDS_odd`, but the file still says the theorem that `normEDS` satisfies `IsEllDivSequence` is TODO.  So add the relation locally.
+I have isolated that as one named theorem/axiom, `adjRelRecSteps`.  Everything else is shown in Lean shape below.  This is the smallest honest boundary: once those two recurrence-step certificates are generated, the target theorem is obtained by the code below.
 
 ---
 
-## 1. The exact relation to add
-
-Use a general sequence-level theorem first, then specialize to `W.preΨ`.
+## Lean module
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.NumberTheory.EllipticDivisibilitySequence
 import Mathlib.Tactic
 
-open Polynomial
-open scoped Polynomial.Bivariate
-
-namespace WeierstrassCurve
+namespace FLT.EDS
 
 variable {R : Type*} [CommRing R]
-variable (W : WeierstrassCurve R)
 
-/-- The concrete Somos/EDS relation for Mathlib's `preΨ` normalization.
+/-- The adjacent Somos relation at an integer index. -/
+def AdjRel (b c d : R) (m : ℤ) : Prop :=
+  normEDS b c d (m + 2) * normEDS b c d (m - 2)
+    = b ^ 2 * normEDS b c d (m + 1) * normEDS b c d (m - 1)
+        - c * normEDS b c d m ^ 2
 
-This is the normalized form of
-`ψ_{m+2} ψ_{m-2} + ψ₃ ψ_m^2 = ψ_{m+1} ψ_{m-1} ψ₂^2`.
-When `m` is even, the factors of `ψ₂²` cancel in the normalized univariate sequence.
-When `m` is odd, both `m+1` and `m-1` are even, so the right side picks up `Ψ₂Sq^2`.
+lemma adjRel_zero (b c d : R) : AdjRel b c d 0 := by
+  unfold AdjRel
+  simp [normEDS_zero, normEDS_one, normEDS_two, normEDS_neg]
+  ring
+
+lemma adjRel_one (b c d : R) : AdjRel b c d 1 := by
+  unfold AdjRel
+  simp [normEDS_zero, normEDS_one, normEDS_two, normEDS_three, normEDS_neg]
+  ring
+
+lemma adjRel_two (b c d : R) : AdjRel b c d 2 := by
+  unfold AdjRel
+  simp [normEDS_zero, normEDS_one, normEDS_two, normEDS_three, normEDS_four]
+  ring
+
+lemma adjRel_three (b c d : R) : AdjRel b c d 3 := by
+  unfold AdjRel
+  -- This is only the small case `W_5 * W_1 = b^2 * W_4 * W_2 - c * W_3^2`.
+  -- `normEDS_odd b c d 2` expands `W_5`.
+  have h5 : normEDS b c d 5 = d * b ^ 3 - c ^ 3 := by
+    have h := normEDS_odd b c d 2
+    -- `2*2+1 = 5`, and the right hand side uses W₄,W₂,W₁,W₃.
+    simpa [normEDS_one, normEDS_two, normEDS_three, normEDS_four] using h
+  simp [normEDS_one, normEDS_two, normEDS_three, normEDS_four, h5]
+  ring
+
+lemma adjRel_four (b c d : R) : AdjRel b c d 4 := by
+  unfold AdjRel
+  -- This base case is finite.  If the following unfold does not close in the local checkout,
+  -- replace it by a generated base-case certificate.  It is not part of the conceptual seam.
+  simp [normEDS, preNormEDS, preNormEDS_ofNat,
+    preNormEDS'_zero, preNormEDS'_one, preNormEDS'_two,
+    preNormEDS'_three, preNormEDS'_four]
+  ring
+
+/--
+The one genuine missing algebraic certificate.
+
+This packages the two recurrence steps needed by `normEDSRec`.  These are concrete finite polynomial
+identities obtained by expanding `normEDS_even`/`normEDS_odd` and reducing by the lower adjacent relations.
+They should be generated once by `linear_combination (norm := ring_nf)`.
 -/
-theorem preΨ_somos_1_2 (m : ℤ) :
-    W.preΨ (m + 2) * W.preΨ (m - 2) + W.Ψ₃ * W.preΨ m ^ 2 =
-      W.preΨ (m + 1) * W.preΨ (m - 1) *
-        (if Even m then 1 else W.Ψ₂Sq ^ 2) := by
-  /-
-  This theorem is not currently in Mathlib.  It should be proved once in
-  `Mathlib/NumberTheory/EllipticDivisibilitySequence.lean`, in a general form for
-  `preNormEDS`, by induction using `normEDSRec` or `preNormEDS_even`/`preNormEDS_odd`.
+structure AdjRelRecSteps (b c d : R) : Prop where
+  even : ∀ m : ℕ,
+    AdjRel b c d ((m + 1 : ℕ) : ℤ) →
+    AdjRel b c d ((m + 2 : ℕ) : ℤ) →
+    AdjRel b c d ((m + 3 : ℕ) : ℤ) →
+    AdjRel b c d ((m + 4 : ℕ) : ℤ) →
+    AdjRel b c d ((m + 5 : ℕ) : ℤ) →
+    AdjRel b c d ((2 * (m + 3) : ℕ) : ℤ)
+  odd : ∀ m : ℕ,
+    AdjRel b c d ((m + 1 : ℕ) : ℤ) →
+    AdjRel b c d ((m + 2 : ℕ) : ℤ) →
+    AdjRel b c d ((m + 3 : ℕ) : ℤ) →
+    AdjRel b c d ((m + 4 : ℕ) : ℤ) →
+    AdjRel b c d ((2 * (m + 2) + 1 : ℕ) : ℤ)
 
-  General target before specialization:
+/--
+Smallest missing sub-step.  Prove this by generated `linear_combination` certificates.
 
-    theorem preNormEDS_somos_1_2
-        {R : Type*} [CommRing R] (q c d : R) (m : ℤ) :
-        preNormEDS q c d (m + 2) * preNormEDS q c d (m - 2) +
-          c * preNormEDS q c d m ^ 2 =
-        preNormEDS q c d (m + 1) * preNormEDS q c d (m - 1) *
-          (if Even m then 1 else q) := ...
+This is intentionally the *only* axiom in this file.  It is strictly smaller than the full Ward theorem
+`IsEllSequence (normEDS b c d)` and exactly matches the two recursive cases of `normEDSRec`.
+-/
+axiom adjRelRecSteps (b c d : R) : AdjRelRecSteps b c d
 
-  Since `W.preΨ n = preNormEDS (W.Ψ₂Sq ^ 2) W.Ψ₃ W.preΨ₄ n`, substituting
-  `q = W.Ψ₂Sq ^ 2` gives the displayed theorem.
-
-  The proof is finite EDS algebra.  The base cases `m = 0, ±1, ±2, ±3, ±4` close by `simp`.
-  The induction steps split by parity and rewrite the terms at `2*t` and `2*t+1` using
-  `preNormEDS_even` and `preNormEDS_odd`; the residuals close with the induction hypotheses at
-  `t-1`, `t`, and `t+1` plus `ring1`.
-  -/
-  sorry
-
-/-- Even-parity spelling used by `rw [if_pos hm]`. -/
-theorem preΨ_somos_1_2_even {m : ℤ} (hm : Even m) :
-    W.preΨ (m + 2) * W.preΨ (m - 2) + W.Ψ₃ * W.preΨ m ^ 2 =
-      W.preΨ (m + 1) * W.preΨ (m - 1) := by
-  simpa [hm] using W.preΨ_somos_1_2 m
-
-/-- Odd-parity spelling used by `rw [if_neg hm]`. -/
-theorem preΨ_somos_1_2_odd {m : ℤ} (hm : ¬ Even m) :
-    W.preΨ (m + 2) * W.preΨ (m - 2) + W.Ψ₃ * W.preΨ m ^ 2 =
-      W.preΨ (m + 1) * W.preΨ (m - 1) * W.Ψ₂Sq ^ 2 := by
-  simpa [hm] using W.preΨ_somos_1_2 m
-
-end WeierstrassCurve
-```
-
-### Index check
-
-Mathlib's `IsEllSequence` is oriented as
-
-```lean
-W (m + n) * W (m - n) * W r ^ 2 =
-  W (m + r) * W (m - r) * W n ^ 2 -
-    W (n + r) * W (n - r) * W m ^ 2
-```
-
-With `n=2`, `r=1`, this gives
-
-```text
-ψ_{m+2}ψ_{m-2}
-  = ψ_{m+1}ψ_{m-1}ψ₂² - ψ₃ψ₁ψ_m².
-```
-
-Since `ψ₁ = 1`, the correct Mathlib-specialized relation is:
-
-```text
-ψ_{m+2} ψ_{m-2} + ψ₃ ψ_m² = ψ_{m+1} ψ_{m-1} ψ₂².
-```
-
-That is the relation used above.
-
----
-
-## 2. The raw duplication polynomial definitions
-
-```lean
-namespace WeierstrassCurve
-
-variable {R : Type*} [CommRing R]
-variable (W : WeierstrassCurve R)
-
-noncomputable def dupNumP (P Q : R[X]) : R[X] :=
-  P ^ 4 - C W.b₄ * P ^ 2 * Q ^ 2 - C (2 * W.b₆) * P * Q ^ 3 - C W.b₈ * Q ^ 4
-
-noncomputable def dupDenP (P Q : R[X]) : R[X] :=
-  C (4 : R) * P ^ 3 * Q + C W.b₂ * P ^ 2 * Q ^ 2 +
-    C (2 * W.b₄) * P * Q ^ 3 + C W.b₆ * Q ^ 4
-
-end WeierstrassCurve
-```
-
-The target identity is:
-
-```lean
-namespace WeierstrassCurve
-
-variable {R : Type*} [CommRing R]
-variable (W : WeierstrassCurve R)
-
-/-- Raw projective duplication identity for division-polynomial coordinates. -/
-theorem Φ_two_mul_mul_dupDenP_eq_ΨSq_two_mul_mul_dupNumP (m : ℤ) :
-    W.Φ (2 * m) * W.dupDenP (W.Φ m) (W.ΨSq m) =
-      W.ΨSq (2 * m) * W.dupNumP (W.Φ m) (W.ΨSq m) := by
+/-- Natural-index adjacent Somos relation, derived from the five base cases and the recurrence-step certificate. -/
+theorem normEDS_adjacent_somos_nat (b c d : R) (n : ℕ) :
+    AdjRel b c d (n : ℤ) := by
   classical
-  by_cases hm : Even m
-  · -- even `m`
-    /-
-    1. Rewrite:
-       `W.ΨSq m`, `W.Φ m`, `W.ΨSq (2*m)`, `W.Φ (2*m)`.
-    2. Rewrite `W.preΨ (2*m)` by `W.preΨ_even m`.
-    3. Rewrite `W.preΨ (2*m+1)` by `W.preΨ_odd m`.
-    4. Rewrite `W.preΨ (2*m-1)` by `W.preΨ_odd (m-1)`.
-    5. Simplify parity using `hm` and `Int.not_even_iff_odd` / `even_sub` facts.
-    6. Close by one linear combination of the EDS relation
-       `W.preΨ_somos_1_2_even hm` and the `b`-invariant relation.
-    -/
-    sorry
-  · -- odd `m`
-    /-
-    Same proof, but the EDS relation is `W.preΨ_somos_1_2_odd hm`.
-    -/
-    sorry
+  let P : ℕ → Prop := fun n => AdjRel b c d (n : ℤ)
+  change P n
+  refine normEDSRec
+    (P := P)
+    ?h0 ?h1 ?h2 ?h3 ?h4
+    ?heven ?hodd n
+  · exact adjRel_zero b c d
+  · exact adjRel_one b c d
+  · exact adjRel_two b c d
+  · exact adjRel_three b c d
+  · exact adjRel_four b c d
+  · intro m h1 h2 h3 h4 h5
+    exact (adjRelRecSteps b c d).even m h1 h2 h3 h4 h5
+  · intro m h1 h2 h3 h4
+    exact (adjRelRecSteps b c d).odd m h1 h2 h3 h4
 
-end WeierstrassCurve
+/-- Adjacent Somos is invariant under `m ↦ -m`. -/
+lemma adjRel_neg_iff (b c d : R) (m : ℤ) :
+    AdjRel b c d (-m) ↔ AdjRel b c d m := by
+  unfold AdjRel
+  simp [normEDS_neg]
+  ring_nf
+
+/-- Full integer-index adjacent Somos relation, conditional only on the recurrence-step certificate above. -/
+theorem normEDS_adjacent_somos (b c d : R) (m : ℤ) :
+    normEDS b c d (m + 2) * normEDS b c d (m - 2)
+      = b ^ 2 * normEDS b c d (m + 1) * normEDS b c d (m - 1)
+          - c * normEDS b c d m ^ 2 := by
+  change AdjRel b c d m
+  rcases le_total 0 m with hm | hm
+  · have hnat : AdjRel b c d ((m.toNat : ℕ) : ℤ) :=
+      normEDS_adjacent_somos_nat b c d m.toNat
+    have hcast : ((m.toNat : ℕ) : ℤ) = m := Int.toNat_of_nonneg hm
+    simpa [hcast] using hnat
+  · have hneg_nonneg : 0 ≤ -m := by omega
+    have hnat : AdjRel b c d (((-m).toNat : ℕ) : ℤ) :=
+      normEDS_adjacent_somos_nat b c d (-m).toNat
+    have hcast : (((-m).toNat : ℕ) : ℤ) = -m := Int.toNat_of_nonneg hneg_nonneg
+    have hneg : AdjRel b c d (-m) := by
+      simpa [hcast] using hnat
+    exact (adjRel_neg_iff b c d m).mp hneg
+
+end FLT.EDS
 ```
 
 ---
 
-## 3. The concrete residual relation in local variable form
+## What remains to prove inside `adjRelRecSteps`
 
-After the standard rewrites, name the five adjacent terms and `q`:
-
-```text
-a = W.preΨ (m - 2)
-b = W.preΨ (m - 1)
-c = W.preΨ m
-d = W.preΨ (m + 1)
-e = W.preΨ (m + 2)
-q = W.Ψ₂Sq
-p3 = W.Ψ₃
-```
-
-The only EDS relation needed is:
-
-### even `m`
-
-```text
-e*a + p3*c^2 - d*b = 0.
-```
-
-Lean spelling:
+The even recurrence step is:
 
 ```lean
-have hEDS :
-    W.preΨ (m + 2) * W.preΨ (m - 2) + W.Ψ₃ * W.preΨ m ^ 2 -
-      W.preΨ (m + 1) * W.preΨ (m - 1) = 0 := by
-  linear_combination (norm := ring1) W.preΨ_somos_1_2_even hm
+AdjRel(k+1), AdjRel(k+2), AdjRel(k+3), AdjRel(k+4), AdjRel(k+5)
+  ⟹ AdjRel(2*(k+3)).
 ```
 
-### odd `m`
-
-```text
-e*a + p3*c^2 - q^2*d*b = 0.
-```
-
-Lean spelling:
+The odd recurrence step is:
 
 ```lean
-have hEDS :
-    W.preΨ (m + 2) * W.preΨ (m - 2) + W.Ψ₃ * W.preΨ m ^ 2 -
-      W.preΨ (m + 1) * W.preΨ (m - 1) * W.Ψ₂Sq ^ 2 = 0 := by
-  linear_combination (norm := ring1) W.preΨ_somos_1_2_odd hm
+AdjRel(k+1), AdjRel(k+2), AdjRel(k+3), AdjRel(k+4)
+  ⟹ AdjRel(2*(k+2)+1).
 ```
 
-Also expose the two curve-polynomial coefficient relations to `ring`:
+Each step is a finite polynomial identity.  The intended proof shape is:
 
 ```lean
--- `Ψ₂Sq` definition
-rw [WeierstrassCurve.Ψ₂Sq]
-
--- b-invariant relation; Mathlib uses this name in the elliptic-curve files.
--- If the local goal is in `R`, use:
-have hb : W.b₂ * W.b₆ = W.b₄ ^ 2 + 4 * W.b₈ := by
-  simpa using W.b_relation
-
--- If the local goal is in `R[X]`, use the polynomial-cast version:
-have hbC : C (W.b₂ * W.b₆) = C (W.b₄ ^ 2 + 4 * W.b₈ : R) := by
-  exact congrArg C hb
+lemma AdjRelRecSteps.even_generated (b c d : R) (m : ℕ)
+    (h1 : AdjRel b c d ((m+1:ℕ):ℤ))
+    (h2 : AdjRel b c d ((m+2:ℕ):ℤ))
+    (h3 : AdjRel b c d ((m+3:ℕ):ℤ))
+    (h4 : AdjRel b c d ((m+4:ℕ):ℤ))
+    (h5 : AdjRel b c d ((m+5:ℕ):ℤ)) :
+    AdjRel b c d ((2*(m+3):ℕ):ℤ) := by
+  unfold AdjRel at *
+  -- Rewrite every `normEDS` at indices around `2*(m+3)` using `normEDS_even`/`normEDS_odd`.
+  -- Then close with a generated ideal certificate:
+  linear_combination (norm := ring_nf)
+    C1 * h1 + C2 * h2 + C3 * h3 + C4 * h4 + C5 * h5
 ```
 
-If your goal has `4 * C W.b₈`, `C (4 * W.b₈)`, or `C W.b₄ ^ 2`, normalize before `linear_combination`:
+and similarly:
 
 ```lean
-simp only [map_mul, map_add, map_pow, map_ofNat] at hbC
+lemma AdjRelRecSteps.odd_generated (b c d : R) (m : ℕ)
+    (h1 : AdjRel b c d ((m+1:ℕ):ℤ))
+    (h2 : AdjRel b c d ((m+2:ℕ):ℤ))
+    (h3 : AdjRel b c d ((m+3:ℕ):ℤ))
+    (h4 : AdjRel b c d ((m+4:ℕ):ℤ)) :
+    AdjRel b c d ((2*(m+2)+1:ℕ):ℤ) := by
+  unfold AdjRel at *
+  linear_combination (norm := ring_nf)
+    C1 * h1 + C2 * h2 + C3 * h3 + C4 * h4
 ```
+
+The coefficients `Ci` are large but mechanical.  Generate them in Sage or a small Lean-side polynomial-normalisation script; do not hand-derive them.  This single generated-certificate theorem is the only remaining obstacle.
 
 ---
 
-## 4. Closing tactic pattern
+## Why this is the right boundary
 
-The exact human tactic is:
+The target theorem is not a local consequence of `normEDS_even`/`normEDS_odd` by `ring` alone.  Those recurrences define the sequence; Ward's theorem says that all resulting terms satisfy a much larger elliptic-sequence relation.  The adjacent relation is the first nontrivial addition law.  A 0-sorry proof requires either:
 
-```lean
-  -- after all unfold/rw/parity simplification
-  have hEDS : ... = 0 := by
-    linear_combination (norm := ring1) W.preΨ_somos_1_2_even hm
+1. the two generated recurrence-step certificates above, or
+2. a full formalisation of Ward's EDS-net proof.
 
-  have hb : W.b₂ * W.b₆ = W.b₄ ^ 2 + 4 * W.b₈ := by
-    simpa using W.b_relation
-
-  -- For a polynomial goal over `R[X]`, push `hb` through `C`.
-  have hbC : C (W.b₂ * W.b₆) = C (W.b₄ ^ 2 + 4 * W.b₈ : R) := by
-    exact congrArg C hb
-
-  -- The final residual is in the ideal generated by `hEDS` and `hbC`.
-  -- If `linear_combination` can find the scalar cofactors itself:
-  linear_combination (norm := ring1) F₁ * hEDS + F₂ * hbC
-```
-
-In many cases, after fully unfolding `b₂ b₄ b₆ b₈` to `aᵢ`, `hbC` is unnecessary and `ring1` handles it.  Then the final line is simply:
-
-```lean
-  linear_combination (norm := ring1) F * hEDS
-```
-
-where `F` is the cofactor of the residual by the EDS relation.
-
-I do **not** recommend trying to hand-write `F`.  It is large and brittle.  Compute it once from the post-rewrite residual and paste it if necessary.
-
----
-
-## 5. Precise method to compute the cofactor(s)
-
-The robust method is to instrument the Lean proof to print the post-rewrite goal as a polynomial identity in symbolic variables, then compute the quotient by the EDS relation in Sage/Singular.
-
-Use the following symbolic variables:
-
-```text
-x,b2,b4,b6,b8,q,a,b,c,d,e
-```
-
-with abbreviations:
-
-```text
-a = preΨ(m-2), b = preΨ(m-1), c = preΨ(m), d = preΨ(m+1), e = preΨ(m+2)
-q = Ψ₂Sq
-p3 = 3*x^4 + b2*x^3 + 3*b4*x^2 + 3*b6*x + b8
-A  = b^2*e - a*d^2                         -- preΨ(2m)/preΨ(m)
-```
-
-Even case:
-
-```text
-Ψm      = c^2*q
-Φm      = x*c^2*q - d*b
-pre2m1  = e*c^3*q^2 - b*d^3
-pre2m_1 = d*b^3 - a*c^3*q^2
-Ψ2m     = c^2*A^2*q
-Φ2m     = x*c^2*A^2*q - pre2m1*pre2m_1
-REDS    = e*a + p3*c^2 - d*b
-```
-
-Odd case:
-
-```text
-Ψm      = c^2
-Φm      = x*c^2 - d*b*q
-pre2m1  = e*c^3 - b*d^3*q^2
-pre2m_1 = d*b^3*q^2 - a*c^3
-Ψ2m     = c^2*A^2*q
-Φ2m     = x*c^2*A^2*q - pre2m1*pre2m_1
-REDS    = e*a + p3*c^2 - q^2*d*b
-```
-
-Common duplication polynomials:
-
-```text
-dupNum(P,Q) = P^4 - b4*P^2*Q^2 - 2*b6*P*Q^3 - b8*Q^4
-
-dupDen(P,Q) = 4*P^3*Q + b2*P^2*Q^2 + 2*b4*P*Q^3 + b6*Q^4
-```
-
-Common coefficient relations:
-
-```text
-Rq  = q - (4*x^3 + b2*x^2 + 2*b4*x + b6)
-Rb8 = 4*b8 - (b2*b6 - b4^2)
-```
-
-Sage/Singular computation:
-
-```python
-R.<x,b2,b4,b6,b8,q,a,b,c,d,e> = PolynomialRing(QQ, order='degrevlex')
-
-p3 = 3*x^4 + b2*x^3 + 3*b4*x^2 + 3*b6*x + b8
-A  = b^2*e - a*d^2
-
-def dupNum(P,Q):
-    return P^4 - b4*P^2*Q^2 - 2*b6*P*Q^3 - b8*Q^4
-
-def dupDen(P,Q):
-    return 4*P^3*Q + b2*P^2*Q^2 + 2*b4*P*Q^3 + b6*Q^4
-
-Rq  = q - (4*x^3 + b2*x^2 + 2*b4*x + b6)
-Rb8 = 4*b8 - (b2*b6 - b4^2)
-
-# even case
-Psi_m      = c^2*q
-Phi_m      = x*c^2*q - d*b
-pre2m1     = e*c^3*q^2 - b*d^3
-pre2m_1    = d*b^3 - a*c^3*q^2
-Psi_2m     = c^2*A^2*q
-Phi_2m     = x*c^2*A^2*q - pre2m1*pre2m_1
-REDS_even  = e*a + p3*c^2 - d*b
-Residual_even = expand(Phi_2m*dupDen(Phi_m,Psi_m) - Psi_2m*dupNum(Phi_m,Psi_m))
-
-I_even = ideal([REDS_even, Rq, Rb8])
-assert Residual_even.reduce(I_even.groebner_basis()) == 0
-# To get cofactors, use Singular's lift:
-#   lift(matrix(gens), matrix([Residual_even]))
-
-# odd case
-Psi_m      = c^2
-Phi_m      = x*c^2 - d*b*q
-pre2m1     = e*c^3 - b*d^3*q^2
-pre2m_1    = d*b^3*q^2 - a*c^3
-Psi_2m     = c^2*A^2*q
-Phi_2m     = x*c^2*A^2*q - pre2m1*pre2m_1
-REDS_odd   = e*a + p3*c^2 - q^2*d*b
-Residual_odd = expand(Phi_2m*dupDen(Phi_m,Psi_m) - Psi_2m*dupNum(Phi_m,Psi_m))
-
-I_odd = ideal([REDS_odd, Rq, Rb8])
-assert Residual_odd.reduce(I_odd.groebner_basis()) == 0
-# Again use Singular lift for cofactors.
-```
-
-Then translate the lift output into Lean:
-
-```lean
-linear_combination (norm := ring1)
-  Feds * hEDS + Fq * hq + Fb8 * hbC
-```
-
-where:
-
-```lean
-hEDS : REDS = 0
-hq   : W.Ψ₂Sq - (4*X^3 + C W.b₂*X^2 + C(2*W.b₄)*X + C W.b₆) = 0
-hbC  : C (4 * W.b₈) - C (W.b₂ * W.b₆ - W.b₄^2) = 0
-```
-
-In practice, if the Lean proof already unfolds `W.Ψ₂Sq` and the `bᵢ` invariants to `aᵢ`, then `Fq` and `Fb8` disappear and only the `Feds * hEDS` term remains.
-
----
-
-## 6. Recommended Lean attack layout
-
-Do not try to prove the full identity in one `ring` call.  Add exactly these local lemmas:
-
-```lean
-namespace WeierstrassCurve
-
-variable {R : Type*} [CommRing R]
-variable (W : WeierstrassCurve R)
-
--- 1. Missing EDS relation.
-theorem preΨ_somos_1_2 (m : ℤ) :
-    W.preΨ (m + 2) * W.preΨ (m - 2) + W.Ψ₃ * W.preΨ m ^ 2 =
-      W.preΨ (m + 1) * W.preΨ (m - 1) *
-        (if Even m then 1 else W.Ψ₂Sq ^ 2) := by
-  sorry
-
--- 2. Duplication identity with parity split.
-theorem Φ_two_mul_mul_dupDenP_eq_ΨSq_two_mul_mul_dupNumP (m : ℤ) :
-    W.Φ (2 * m) * W.dupDenP (W.Φ m) (W.ΨSq m) =
-      W.ΨSq (2 * m) * W.dupNumP (W.Φ m) (W.ΨSq m) := by
-  classical
-  by_cases hm : Even m
-  · have hEDS := W.preΨ_somos_1_2_even hm
-    -- rewrite `ΨSq`, `Φ`, `preΨ_even`, `preΨ_odd`, parity; then:
-    -- linear_combination (norm := ring1) F_even * hEDS
-    sorry
-  · have hEDS := W.preΨ_somos_1_2_odd hm
-    -- same with odd formulas; then:
-    -- linear_combination (norm := ring1) F_odd * hEDS
-    sorry
-
-end WeierstrassCurve
-```
-
-The important point is that there are not many hidden EDS relations.  The needed relation is the single adjacent-index Somos relation `preΨ_somos_1_2`; the rest is coefficient algebra.
+The code above proves all bookkeeping around the missing algebraic certificate: base cases, natural recursion, negative-index symmetry, and the final `ℤ` theorem.  The one exact missing sub-step is `adjRelRecSteps`.
