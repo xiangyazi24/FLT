@@ -35,3 +35,14 @@ FALLBACK: if preΨ-certificate parity bookkeeping too painful → coordinate-rin
   (Ψ₃-mult linear_combination over Adj=preΨ_adjacent_somos + Inv=preΨ_invariant + bRel=b_relation, banked
   cofactors KEYSTONE_DOUBLING_CERT.md, by_cases parity, expand Ψ₂Sq/Ψ₃/preΨ₄ X-forms) → cancel Ψ₃ →
   ΨSq_two_mul/Φ_two_mul → SameP1Vec doubling (c=1, by eval). Then (b)diff-add (c)nonzero (d)assemble.
+
+### Avenue (a) state 2026-06-22 (cont 2)
+- preΨ_invariant: clean buildable WIP committed (2 named sorries on hq_mul/hq2_mul coord-ring norm). Statement
+  + full structure built. Norm-fix attempt (ChatGPT f1c0642ca refined approach: hmkC_apply/hq_apply rfl-folds
+  + simp[mk_ψ_eq]+linear_combination(←hq4)) hit polynomial-tower COERCION issues: let-bound mkC=(mk W).comp C
+  & q=mk ψ₂ dont reduce by rfl, and `C f` ambiguous in the R[X]→R[X][Y] tower. Reverted to buildable. The norm
+  is the single remaining hard sub-grind (needs careful tower-coercion handling / `RingHom.comp_apply` + explicit
+  Polynomial.C, possibly a fresh ChatGPT round with the exact type-mismatch).
+- Both load-bearing walls are now Lean lemmas: Adj=preΨ_adjacent_somos (0-sorry), Inv=preΨ_invariant (2 norm sorries).
+- NEXT: (i) finish 2 norm sorries; (ii) build ΨSq_two_mul/Φ_two_mul certificate against preΨ_invariant (heavy
+  Ψ₃-mult linear_combination, banked cofactors) — buildable now (sorries inside Inv dont block its use as a lemma).
