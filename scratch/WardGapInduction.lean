@@ -205,4 +205,39 @@ lemma offRel_succ [IsDomain R] (b c d : R) (hc : c ≠ 0)
     · rw [h2]; exact offRel_diag_neg b c d k
     · exact hStep b c d hc hne k m (by omega) (by omega) (hG m) (hG (m + 1)) (hO m)
 
+/-- **Mutual induction.** For every `k ≥ 0`, both `GapRel k` and `OffRel k` hold for all `m`.
+Base `k=0` is the trivial pair; the step is `gapRel_succ` then `offRel_succ`. -/
+lemma gap_off_all [IsDomain R] (b c d : R) (hc : c ≠ 0)
+    (hne : ∀ j : ℤ, j ≠ 0 → normEDS b c d j ≠ 0) :
+    ∀ k : ℤ, 0 ≤ k → (∀ m, GapRel b c d k m) ∧ (∀ m, OffRel b c d k m) := by
+  intro k hk
+  induction k, hk using Int.le_induction with
+  | base => exact ⟨gapRel_zero b c d, offRel_zero b c d⟩
+  | succ n _ ih =>
+    have hG := gapRel_succ b c d hc hne n ih.1 ih.2
+    exact ⟨hG, offRel_succ b c d hc hne n hG ih.2⟩
+
+/-- **Ward addition formula for `normEDS`** (conditional on a domain with non-vanishing values —
+e.g. division polynomials). `AddRel (normEDS b c d) m n` for all `m n`. -/
+theorem normEDS_addRel_of_nonvanishing [IsDomain R] (b c d : R) (hc : c ≠ 0)
+    (hne : ∀ j : ℤ, j ≠ 0 → normEDS b c d j ≠ 0) (m n : ℤ) :
+    AddRel (normEDS b c d) m n := by
+  rcases lt_or_ge n 0 with hn | hn
+  · have h := (gap_off_all b c d hc hne (-n) (by omega)).1 m
+    unfold GapRel AddRel at h
+    unfold AddRel
+    rw [show m + (-n) = m - n by ring, show m - (-n) = m + n by ring,
+        show (-n) + 1 = -(n - 1) by ring, show (-n) - 1 = -(n + 1) by ring] at h
+    simp only [normEDS_neg] at h
+    linear_combination h
+  · exact (gap_off_all b c d hc hne n hn).1 m
+
+/-- **Ward's theorem** (conditional form): `normEDS` is an elliptic sequence over a domain where its
+values do not vanish. Combines `normEDS_addRel_of_nonvanishing` with the `isEllSequence_of_addRel`
+reduction (`WardEllSequence`). -/
+theorem normEDS_isEllSequence_of_nonvanishing [IsDomain R] (b c d : R) (hc : c ≠ 0)
+    (hne : ∀ j : ℤ, j ≠ 0 → normEDS b c d j ≠ 0) :
+    IsEllSequence (normEDS b c d) :=
+  isEllSequence_of_addRel (fun m n => normEDS_addRel_of_nonvanishing b c d hc hne m n)
+
 end FLT.EDS
