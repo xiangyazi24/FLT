@@ -1,4 +1,4 @@
-# Q12 (dm1): Keystone diff-add numerator cofactors — EVEN branch
+# Q17 (dm1): Keystone diff-add numerator cofactors — EVEN branch
 
 ## Result
 
