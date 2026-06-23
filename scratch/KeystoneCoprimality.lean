@@ -76,6 +76,37 @@ private lemma preΨ_next_zero_of_adjacent_zero
   have hsq : (pe W x (r + 2)) ^ 2 = 0 := (mul_eq_zero.mp hsquare).resolve_left hc3x
   exact pow_eq_zero_iff (by norm_num) |>.mp hsq
 
+
+
+/-- On the `Ψ₃.eval x ≠ 0` stratum, no two adjacent `preΨ` vanish at `x`: the adjacent-zero
+pair would propagate (both directions) to index `1`, contradicting `preΨ 1 = 1`. -/
+private lemma no_adjacent_preΨ_zero_of_Ψ₃_eval_ne
+    (W : WeierstrassCurve k) (x : k) (h4 : (4 : k) ≠ 0)
+    (hc3x : c3x W x ≠ 0) (r : ℤ) :
+    ¬ (pe W x r = 0 ∧ pe W x (r + 1) = 0) := by
+  rintro ⟨hr, hr1⟩
+  have hup : ∀ n, r ≤ n → (pe W x n = 0 ∧ pe W x (n + 1) = 0) := by
+    intro n hn
+    induction n, hn using Int.le_induction with
+    | base => exact ⟨hr, hr1⟩
+    | succ m _ ih =>
+        refine ⟨ih.2, ?_⟩
+        rw [show m + 1 + 1 = m + 2 by ring]
+        exact preΨ_next_zero_of_adjacent_zero W x h4 hc3x ih.1 ih.2
+  have hdown : ∀ n, n ≤ r → (pe W x n = 0 ∧ pe W x (n + 1) = 0) := by
+    intro n hn
+    induction n, hn using Int.leInductionDown with
+    | base => exact ⟨hr, hr1⟩
+    | pred m _ ih =>
+        refine ⟨preΨ_prev_zero_of_adjacent_zero W x h4 hc3x ih.1 ih.2, ?_⟩
+        rw [show m - 1 + 1 = m by ring]; exact ih.1
+  have h1 : pe W x 1 = 0 := by
+    rcases le_total r 1 with h | h
+    · exact (hup 1 h).1
+    · exact (hdown 1 h).1
+  rw [pe, preΨ_one, eval_one] at h1
+  exact one_ne_zero h1
+
 end
 
 end WeierstrassCurve
