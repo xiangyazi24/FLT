@@ -1,4 +1,4 @@
-# Q13 (dm2): Keystone diff-add numerator cofactors — ODD branch
+# Q18 (dm2): Keystone diff-add numerator cofactors — ODD branch
 
 This is for the ODD branch with generators ordered as
 
