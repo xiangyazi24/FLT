@@ -80,6 +80,15 @@ lemma preΨ_invariant [IsDomain R] (W : WeierstrassCurve R) (h4 : (4 : R) ≠ 0)
   · exact preΨ_invariant_even W h4 hψ_ne hm
   · exact preΨ_invariant_odd W h4 hψ_ne hm
 
+/-- Public raw form of `preΨ_invariant` (unfolded `preΨInvN`/`preΨInvD`) for downstream use. -/
+lemma preΨ_invariant_raw [IsDomain R] (W : WeierstrassCurve R) (h4 : (4 : R) ≠ 0)
+    (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0) (m : ℤ) :
+    W.Ψ₃ * (W.preΨ (m + 2) * W.preΨ (m - 1) ^ 2 + W.preΨ (m + 1) ^ 2 * W.preΨ (m - 2)
+            + (if Even m then W.Ψ₂Sq ^ 2 else 1) * W.preΨ m ^ 3)
+      = (W.preΨ₄ + W.Ψ₂Sq ^ 2) * (W.preΨ (m + 1) * W.preΨ m * W.preΨ (m - 1)) := by
+  simpa [preΨInvN, preΨInvD] using preΨ_invariant W h4 hψ_ne m
+
+
 end
 
 end WeierstrassCurve
