@@ -61,3 +61,26 @@ Non-circular `Φ_ΨSq_no_common_eval_zero_odd` built in KeystoneCoprimality.lean
 - GPT-job/git-drop: keystone source pushed to xiangyazi24/FLT main (connector reads default branch); chatgpt skill updated (GPT-job = default, read source from repo, do not paste). Future dispatches: short prompts by file path.
 - dm4 v2 (Q60) in-flight: full avenue-d relocation L1009-1316 -> new top file KeystoneEDS.lean + thread (h4,hpsi_ne,hc3). hpsi_ne is POLYNOMIAL non-vanishing (psi_n not identically 0), derivable over CharZero via natDegree_prePsi; hc3 from hpsi_ne at 3.
 - Temp file scratch/_KCLogicTest.lean = the sorry-stubbed logic test (DELETE before commit).
+
+## UPDATE 2 — avenue-c DONE + avenue-d CORE done (both 0-axiom, committed)
+- Avenue-c COMPLETE: commit b83fd89. KeystoneCoprimality + certs built (42MB olean cached), KeystoneSameP1 0 sorry. #print axioms clean.
+- Avenue-d CORE: commit after. KeystoneEDS.lean = helper + xPair_double_and_diffAddOrInf_EDS_core PROVEN (0 custom axioms) from no-common-root(odd+even) + SameP1 wiring, explicit (h4,hψ_ne,hc3).
+- STAGE 2 REMAINING (mechanical relocation, build-guided fast loop, deps cached):
+  1. Relocate WHOLE KeystoneLadder L1024-1316 (10 theorems: xLadderPair_same_xPair_EDS, xPair_ne_zero_and_same_xLadderRep_EDS, xPair_ne_zero_of_isElliptic, Φ_ΨSq_no_common_eval_zero, xPair_same_xLadderRep_three/four/seam_EDS_core/seam, xRep_nsmul_same_xPair, nsmul_eq_zero_iff_ΨSq_eval) into KeystoneEDS, AFTER the core.
+  2. Thread (h4,hψ_ne,hc3): add to each theorem sig; append " h4 hψ_ne hc3" to every intra-block call of the core + xLadderPair + the other relocated theorems. (Build errors pinpoint each call needing it — fast loop.) ALTERNATIVE: add [CharZero k] instance instead (auto-propagates, no call-site threading) BUT needs a non-circular hψ_ne (ψ_n≢0) derivation from CharZero via natDegree_preΨ — defer to consumer if explicit-thread chosen.
+  3. Re-prove the formerly-circular Φ_ΨSq_no_common_eval_zero (L1178) from avenue-c lemmas; xPair_ne_zero_of_isElliptic becomes genuinely non-circular.
+  4. TRUNCATE KeystoneLadder.lean at L1008 (delete L1009-1316 incl. the core sorry). Boundary: keep through xPair_same_xLadderRep_two (~L985); core sorry starts ~L998.
+  5. Redirect consumers: NTorsionCard.lean, Seam2.lean import scratch.KeystoneEDS for nsmul_eq_zero_iff_ΨSq_eval (they currently have own copies — reconcile).
+  6. Verify: lake build scratch.KeystoneEDS green + #print axioms nsmul_eq_zero_iff_ΨSq_eval = [propext,Classical.choice,Quot.sound].
+- xLadderPair extract gotcha: L1024-1155 is the theorem; L1156-1160 is the NEXT theorem docstring — cut at the real theorem boundary, not a fixed line offset.
+
+## Stage-2 NAMESPACE note (critical)
+- `namespace XOnly` is L412-965 in KeystoneLadder.lean; the core (L998) + downstream (L1024-1315) are in `namespace KeystoneLadder` (NOT XOnly), after XOnly closed.
+- Stage-1 KeystoneEDS put the core in `KeystoneLadder.XOnly` — built in isolation (XOnly.doubleVec resolves via open KeystoneLadder), but the downstream uses `XOnly.`-qualified refs + calls `xPair_double_sameP1` (which lives in KeystoneLadder.XOnly).
+- For Stage-2 relocation use: `namespace KeystoneLadder` + `open XOnly`. Then: my core/helper calls `xPair_double_sameP1` (unqualified, via open) resolve; downstream `XOnly.doubleVec`/`XOnly.xLadderPair` (qualified) resolve; relocated `xLadderPair_same_xPair_EDS` (now in KeystoneLadder) resolves to the new threaded one.
+- Extract the ORIGINAL block L998-1315 (core sorry + downstream) AS-IS to preserve namespace structure; replace the core `sorry` with the proven body (Q55 block 9) + extended sig; prepend the helper; thread (h4,hψ_ne,hc3); end at `end KeystoneLadder`. Build-guided fix of call sites (deps cached, fast).
+
+## Stage-2 BUILD FINDING (cross-file refactor required)
+- Relocating L1024-1316 into KeystoneEDS while they STILL exist in KeystoneLadder ⇒ "already declared" (KeystoneEDS imports KeystoneSameP1 → KeystoneLadder). So Stage-2 MUST: (1) TRUNCATE KeystoneLadder at L1008 (delete core sorry + L1024-1316) in the SAME change, then (2) KeystoneEDS provides the relocated+threaded versions, then (3) redirect any consumer of the removed exports to import KeystoneEDS. NOT an isolated append.
+- Also: the Q55 helper block (block_8) needs its leading `namespace KeystoneLadder / namespace XOnly` stripped cleanly before insertion (parse errors at the helper site otherwise).
+- Construction script /tmp/build_eds_stage2.py does core-replace + helper + xLadderPair threading; remaining = truncate Ladder + downstream call-site threading (build-guided) + consumer redirect.
