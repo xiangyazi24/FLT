@@ -35,4 +35,18 @@ lemma ΨSq_two_mul_expand (m : ℤ) :
         (W.preΨ (m - 1) ^ 2 * W.preΨ (m + 2) - W.preΨ (m - 2) * W.preΨ (m + 1) ^ 2) ^ 2 := by
   rw [W.ΨSq_even m]; ring
 
+/-- Eval bridge: `dupNumP` evaluated is the value-level doubling numerator (in `W.b_i`). -/
+lemma dupNumP_eval (W : WeierstrassCurve R) (Xc Zc : R[X]) (x : R) :
+    (W.dupNumP Xc Zc).eval x
+      = (Xc.eval x) ^ 4 - W.b₄ * (Xc.eval x) ^ 2 * (Zc.eval x) ^ 2
+        - 2 * W.b₆ * (Xc.eval x) * (Zc.eval x) ^ 3 - W.b₈ * (Zc.eval x) ^ 4 := by
+  simp only [dupNumP, eval_sub, eval_mul, eval_pow, eval_C]
+
+/-- Eval bridge: `dupDenP` evaluated is the value-level doubling denominator. -/
+lemma dupDenP_eval (W : WeierstrassCurve R) (Xc Zc : R[X]) (x : R) :
+    (W.dupDenP Xc Zc).eval x
+      = 4 * (Xc.eval x) ^ 3 * (Zc.eval x) + W.b₂ * (Xc.eval x) ^ 2 * (Zc.eval x) ^ 2
+        + 2 * W.b₄ * (Xc.eval x) * (Zc.eval x) ^ 3 + W.b₆ * (Zc.eval x) ^ 4 := by
+  simp only [dupDenP, eval_add, eval_mul, eval_pow, eval_C, eval_ofNat]
+
 end WeierstrassCurve
