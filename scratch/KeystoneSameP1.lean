@@ -266,5 +266,33 @@ theorem xPair_diffAdd_sameP1
   exact xPair_odd_phi_eval_ne_zero_of_delta_zero
     (W := W) (m := m) (x := x) h4 hψ_ne hc3 hδ
 
+/-- `diffAddOrInfVec` is symmetric in its first two (x-only) arguments: `sumNumVec` is
+symmetric and `deltaVec` only enters squared / through its vanishing. -/
+theorem diffAddOrInfVec_comm (E : WeierstrassCurve k) (A B D : Fin 2 → k) :
+    diffAddOrInfVec E A B D = diffAddOrInfVec E B A D := by
+  have hδ : deltaVec A B = 0 ↔ deltaVec B A = 0 := by
+    have : deltaVec A B = - deltaVec B A := by simp only [deltaVec]; ring
+    rw [this, neg_eq_zero]
+  unfold diffAddOrInfVec
+  by_cases h : deltaVec A B = 0
+  · rw [if_pos h, if_pos (hδ.mp h)]
+  · rw [if_neg h, if_neg (fun hba => h (hδ.mpr hba))]
+    funext i
+    fin_cases i <;>
+      simp only [diffAddVec, sumNumVec, deltaVec, X, Z, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.head_cons] <;> ring
+
+/-- Core-order (A = xPair m, B = xPair (m+1)) differential-addition wiring, obtained from
+`xPair_diffAdd_sameP1` by the symmetry above. -/
+theorem xPair_diffAdd_sameP1_core_order
+    (W : WeierstrassCurve k) (m : ℤ) (x : k)
+    (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0) :
+    SameP1Vec
+      (diffAddOrInfVec (E := W⁄k)
+        (xPair W m x) (xPair W (m + 1) x) (xPair W 1 x))
+      (xPair W (2 * m + 1) x) := by
+  rw [diffAddOrInfVec_comm]
+  exact xPair_diffAdd_sameP1 (W := W) (m := m) (x := x) h4 hψ_ne hc3
+
 end XOnly
 end KeystoneLadder
