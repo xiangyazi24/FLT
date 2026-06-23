@@ -1,52 +1,77 @@
-# Q20 (dm4): Keystone final assembly — nonzero facts and core assembly
+# Q45 (dm4): Keystone avenue (d) — core assembly discharge
 
-## What I could and could not inspect
+## Investigation result
 
-I re-checked the requested repository/branch before writing this answer.  The connector still returns `404` for
+I attempted to inspect the requested source locations before writing the patch:
 
 ```text
-scratch/KeystoneLadder.lean
+scratch/KeystoneLadder.lean   L960–1090 and L1160–1200
 ```
 
-on `xiangyazi24/FLT@scratch`.  Code search for the concrete names
+on `xiangyazi24/FLT@scratch`.  The GitHub contents API still returns `404` for that path.  Code search for the concrete names
 
 ```text
 KeystoneLadder.lean
 xPair_double_and_diffAddOrInf_EDS_core
 xPair_double_sameP1
+xPair_diffAdd_sameP1_core_order
 ```
 
-also returned no results, and PR search for those names returned no results.  A local `git clone` was not possible from this environment because DNS resolution for `github.com` failed.  So I could not literally read L960–1060 or L1160–1200, nor compile this patch in the branch.
+returns no hits in the accessible repository index, and `main...scratch` lists only the four `scratch/_CHATGPT_DROP_*.md` files as changed.  A local clone was also not possible here because DNS resolution for `github.com` fails in the execution container.
 
-The Lean below is therefore written in the exact shape needed by the prompt, but with one expected local adjustment: replace the placeholder no-common-root lemma at the call site by the actual theorem name already present around L1180.
+So the code below is the exact avenue-(d) assembly patch for the theorem shape in the prompt, but I could not verify local line numbers or compile against the unavailable `KeystoneLadder.lean` file.
 
-## Hypotheses the core lemma should carry
+## Decision on the core signature
 
-The core assembly itself should carry these hypotheses:
+The original core signature
+
+```lean
+private theorem xPair_double_and_diffAddOrInf_EDS_core
+    (W : WeierstrassCurve k) [W.IsElliptic] (m : ℕ) (x : k) : ...
+```
+
+is not strong enough to call the two proven `SameP1Vec` lemmas.  The core must carry the hypotheses required by those lemmas:
 
 ```lean
 (h4 : (4 : k) ≠ 0)
 (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0)
 (hc3 : W.Ψ₃ ≠ 0)
-(hNoCommon : ∀ n : ℤ,
-  ¬ ((W.Φ n).eval x = 0 ∧ (W.ΨSq n).eval x = 0))
 ```
 
-Reason:
+`[W.IsElliptic]` alone does **not** provide these.  In particular, nonsingular Weierstrass curves exist in characteristic `2`, so `h4` cannot follow from ellipticity.  The global nonvanishing of all `W.ψ n` is also stronger than nonsingularity in positive characteristic.  Therefore the clean correct interface is to add these three hypotheses to the private core and propagate them to the surrounding theorem, unless the surrounding theorem is already in a stronger context that explicitly proves them, such as a characteristic-zero/division-polynomial-nonzero section.
 
-* `h4`, `hψ_ne`, and `hc3` are exactly the hypotheses requested by the two projective lemmas `xPair_double_sameP1` and `xPair_diffAdd_sameP1`.
-* `hNoCommon` is exactly what proves the two vector nonzero facts.
-* Do **not** silently derive `h4 : (4 : k) ≠ 0` from `IsElliptic W`.  Nonsingularity alone does not exclude characteristic `2`.
-* `hc3` may be derivable from `hψ_ne` by specializing `hψ_ne 3`, if the local simplifier unfolds `W.ψ 3` to `Polynomial.C W.Ψ₃`.  Since the two SameP1 lemmas currently ask for `hc3`, the safest core interface keeps it explicit and lets the call site derive it if desired.
+The `[W.IsElliptic]` instance is still needed for the avenue-(c) coprimality lemmas proving the nonzero vector conjuncts non-circularly.
 
-The surrounding theorem should derive `hNoCommon` from the existing L1180/preΨ'-based no-common-root lemma, likely using its `IsElliptic W` hypothesis.  That keeps this core lemma purely an assembly lemma.
+## Required avenue-(c) no-common-root inputs
 
-## Helper: no common vanishing implies the `Fin 2` vector is nonzero
-
-Paste this inside `namespace KeystoneLadder` / `namespace XOnly`, near `xPair` and before the core lemma.  This version assumes `xPair` is integer-indexed, which is the most likely local declaration because Mathlib's `Φ` and `ΨSq` are integer-indexed.
+Do **not** use the repo's `xPair_ne_zero_of_isElliptic` if, as reported, it is proved through this core.  The nonzero conjuncts must come directly from the avenue-(c) no-common-root facts:
 
 ```lean
-private lemma xPair_ne_zero_of_noCommon
+Φ_ΨSq_no_common_eval_zero_odd
+    (W : WeierstrassCurve k) (x : k) [W.IsElliptic]
+    (h4 : (4 : k) ≠ 0) (m : ℕ) :
+    ¬ ((W.Φ (((2*m+1 : ℕ) : ℤ))).eval x = 0 ∧
+       (W.ΨSq (((2*m+1 : ℕ) : ℤ))).eval x = 0)
+```
+
+and the analogous even statement, which should be exported from the same avenue-(c) machinery:
+
+```lean
+Φ_ΨSq_no_common_eval_zero_even
+    (W : WeierstrassCurve k) (x : k) [W.IsElliptic]
+    (h4 : (4 : k) ≠ 0) (m : ℕ) :
+    ¬ ((W.Φ (((2*m : ℕ) : ℤ))).eval x = 0 ∧
+       (W.ΨSq (((2*m : ℕ) : ℤ))).eval x = 0)
+```
+
+The even proof is mathematically the same no-adjacent-`preΨ` argument: `ΨSq (2*m)` expands as a square of the relevant `preΨ` factor times `Ψ₂Sq`, and common vanishing with `Φ (2*m)` would force the forbidden adjacent/preΨ vanishing plus the `2`-torsion factor ruled out by ellipticity and `h4`.
+
+## Lean patch
+
+Paste this in `namespace KeystoneLadder` / `namespace XOnly`, near `xPair` and before the core theorem.  It assumes `xPair` is the integer-indexed definition from the prompt:
+
+```lean
+private lemma xPair_ne_zero_of_Φ_ΨSq_no_common
     (W : WeierstrassCurve k) (n : ℤ) (x : k)
     (h : ¬ ((W.Φ n).eval x = 0 ∧
             (W.ΨSq n).eval x = 0)) :
@@ -58,160 +83,203 @@ private lemma xPair_ne_zero_of_noCommon
     simpa [xPair] using h0
   · have h1 := congrFun hv (1 : Fin 2)
     simpa [xPair] using h1
+
+private lemma xPair_even_ne_zero_of_avenueC
+    (W : WeierstrassCurve k) [W.IsElliptic]
+    (h4 : (4 : k) ≠ 0) (m : ℕ) (x : k) :
+    xPair W (((2*m : ℕ) : ℤ)) x ≠ 0 := by
+  exact
+    xPair_ne_zero_of_Φ_ΨSq_no_common
+      (W := W) (n := (((2*m : ℕ) : ℤ))) (x := x)
+      (Φ_ΨSq_no_common_eval_zero_even
+        (W := W) (x := x) (h4 := h4) (m := m))
+
+private lemma xPair_odd_ne_zero_of_avenueC
+    (W : WeierstrassCurve k) [W.IsElliptic]
+    (h4 : (4 : k) ≠ 0) (m : ℕ) (x : k) :
+    xPair W (((2*m+1 : ℕ) : ℤ)) x ≠ 0 := by
+  exact
+    xPair_ne_zero_of_Φ_ΨSq_no_common
+      (W := W) (n := (((2*m+1 : ℕ) : ℤ))) (x := x)
+      (Φ_ΨSq_no_common_eval_zero_odd
+        (W := W) (x := x) (h4 := h4) (m := m))
 ```
 
-If the actual file declares `xPair` with `n : ℕ`, use this Nat-indexed helper instead:
+Now replace the core theorem by this strengthened version:
 
 ```lean
-private lemma xPair_ne_zero_of_noCommon
-    (W : WeierstrassCurve k) (n : ℕ) (x : k)
-    (h : ¬ ((W.Φ (n : ℤ)).eval x = 0 ∧
-            (W.ΨSq (n : ℤ)).eval x = 0)) :
-    xPair W n x ≠ 0 := by
-  intro hv
-  apply h
-  constructor
-  · have h0 := congrFun hv (0 : Fin 2)
-    simpa [xPair] using h0
-  · have h1 := congrFun hv (1 : Fin 2)
-    simpa [xPair] using h1
-```
-
-The proof is just coordinate extraction from the function equality `xPair W n x = 0`: evaluating at `(0 : Fin 2)` gives `(W.Φ n).eval x = 0`, and evaluating at `(1 : Fin 2)` gives `(W.ΨSq n).eval x = 0`.
-
-## Finished core lemma: integer-indexed `xPair` version
-
-Use this if the local `xPair` has second argument `n : ℤ`.
-
-```lean
-theorem xPair_double_and_diffAddOrInf_EDS_core
-    (W : WeierstrassCurve k) (m : ℕ) (x : k)
+private theorem xPair_double_and_diffAddOrInf_EDS_core
+    (W : WeierstrassCurve k) [W.IsElliptic] (m : ℕ) (x : k)
     (h4 : (4 : k) ≠ 0)
     (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0)
-    (hc3 : W.Ψ₃ ≠ 0)
-    (hNoCommon : ∀ n : ℤ,
-      ¬ ((W.Φ n).eval x = 0 ∧ (W.ΨSq n).eval x = 0)) :
-      xPair W (2*m) x ≠ 0
-    ∧ SameP1Vec (XOnly.doubleVec (E:=W⁄k) (xPair W m x))
-        (xPair W (2*m) x)
-    ∧ xPair W (2*m+1) x ≠ 0
-    ∧ SameP1Vec
-        (XOnly.diffAddOrInfVec (E:=W⁄k)
-          (xPair W (m+1) x) (xPair W m x) (xPair W 1 x))
-        (xPair W (2*m+1) x) := by
-  have h2m_ne' : xPair W ((2 : ℤ) * (m : ℤ)) x ≠ 0 :=
-    xPair_ne_zero_of_noCommon
-      (W := W) (n := (2 : ℤ) * (m : ℤ)) (x := x)
-      (hNoCommon ((2 : ℤ) * (m : ℤ)))
-  have h2m_ne : xPair W (2*m) x ≠ 0 := by
-    simpa using h2m_ne'
+    (hc3 : W.Ψ₃ ≠ 0) :
+    xPair W (((2*m : ℕ) : ℤ)) x ≠ 0 ∧
+    SameP1Vec
+      (XOnly.doubleVec (E := W⁄k) (xPair W (m : ℤ) x))
+      (xPair W (((2*m : ℕ) : ℤ)) x) ∧
+    xPair W (((2*m+1 : ℕ) : ℤ)) x ≠ 0 ∧
+    SameP1Vec
+      (XOnly.diffAddOrInfVec (E := W⁄k)
+        (xPair W (m : ℤ) x)
+        (xPair W (((m+1 : ℕ) : ℤ)) x)
+        (xPair W (1 : ℤ) x))
+      (xPair W (((2*m+1 : ℕ) : ℤ)) x) := by
+  have h2m_ne : xPair W (((2*m : ℕ) : ℤ)) x ≠ 0 :=
+    xPair_even_ne_zero_of_avenueC
+      (W := W) (h4 := h4) (m := m) (x := x)
 
-  have h2m1_ne' : xPair W ((2 : ℤ) * (m : ℤ) + 1) x ≠ 0 :=
-    xPair_ne_zero_of_noCommon
-      (W := W) (n := (2 : ℤ) * (m : ℤ) + 1) (x := x)
-      (hNoCommon ((2 : ℤ) * (m : ℤ) + 1))
-  have h2m1_ne : xPair W (2*m+1) x ≠ 0 := by
-    simpa using h2m1_ne'
+  have h2m1_ne : xPair W (((2*m+1 : ℕ) : ℤ)) x ≠ 0 :=
+    xPair_odd_ne_zero_of_avenueC
+      (W := W) (h4 := h4) (m := m) (x := x)
 
-  exact ⟨
-    h2m_ne,
-    xPair_double_sameP1
-      (W := W) (m := m) (x := x)
-      (h4 := h4) (hψ_ne := hψ_ne) (hc3 := hc3),
-    h2m1_ne,
-    xPair_diffAdd_sameP1
-      (W := W) (m := m) (x := x)
-      (h4 := h4) (hψ_ne := hψ_ne) (hc3 := hc3)
-  ⟩
+  have hdouble_int :
+      SameP1Vec
+        (XOnly.doubleVec (E := W⁄k) (xPair W (m : ℤ) x))
+        (xPair W (2 * (m : ℤ)) x) := by
+    exact
+      xPair_double_sameP1
+        (W := W) (m := (m : ℤ)) (x := x)
+        (h4 := h4) (hψ_ne := hψ_ne) (hc3 := hc3)
+
+  have hdouble :
+      SameP1Vec
+        (XOnly.doubleVec (E := W⁄k) (xPair W (m : ℤ) x))
+        (xPair W (((2*m : ℕ) : ℤ)) x) := by
+    simpa using hdouble_int
+
+  have hdiff_int :
+      SameP1Vec
+        (XOnly.diffAddOrInfVec (E := W⁄k)
+          (xPair W (m : ℤ) x)
+          (xPair W ((m : ℤ) + 1) x)
+          (xPair W (1 : ℤ) x))
+        (xPair W (2 * (m : ℤ) + 1) x) := by
+    exact
+      xPair_diffAdd_sameP1_core_order
+        (W := W) (m := (m : ℤ)) (x := x)
+        (h4 := h4) (hψ_ne := hψ_ne) (hc3 := hc3)
+
+  have hdiff :
+      SameP1Vec
+        (XOnly.diffAddOrInfVec (E := W⁄k)
+          (xPair W (m : ℤ) x)
+          (xPair W (((m+1 : ℕ) : ℤ)) x)
+          (xPair W (1 : ℤ) x))
+        (xPair W (((2*m+1 : ℕ) : ℤ)) x) := by
+    simpa using hdiff_int
+
+  exact ⟨h2m_ne, hdouble, h2m1_ne, hdiff⟩
 ```
 
-If the SameP1 lemmas live in namespace `XOnly`, qualify them as `XOnly.xPair_double_sameP1` and `XOnly.xPair_diffAdd_sameP1`.  If their hypotheses are positional rather than named, the last two fields become:
+The `simpa` steps are the cast reconciliation.  They use the standard simp lemmas
 
 ```lean
-    xPair_double_sameP1 W m x h4 hψ_ne hc3,
-    h2m1_ne,
-    xPair_diffAdd_sameP1 W m x h4 hψ_ne hc3
+Nat.cast_mul
+Nat.cast_add
+Nat.cast_one
+Nat.cast_ofNat
 ```
 
-## Finished core lemma: Nat-indexed `xPair` version
-
-Use this only if the local declaration is `xPair W (n : ℕ) x`.
+to identify
 
 ```lean
-theorem xPair_double_and_diffAddOrInf_EDS_core
-    (W : WeierstrassCurve k) (m : ℕ) (x : k)
-    (h4 : (4 : k) ≠ 0)
-    (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0)
-    (hc3 : W.Ψ₃ ≠ 0)
-    (hNoCommon : ∀ n : ℤ,
-      ¬ ((W.Φ n).eval x = 0 ∧ (W.ΨSq n).eval x = 0)) :
-      xPair W (2*m) x ≠ 0
-    ∧ SameP1Vec (XOnly.doubleVec (E:=W⁄k) (xPair W m x))
-        (xPair W (2*m) x)
-    ∧ xPair W (2*m+1) x ≠ 0
-    ∧ SameP1Vec
-        (XOnly.diffAddOrInfVec (E:=W⁄k)
-          (xPair W (m+1) x) (xPair W m x) (xPair W 1 x))
-        (xPair W (2*m+1) x) := by
-  have h2m_ne : xPair W (2*m) x ≠ 0 :=
-    xPair_ne_zero_of_noCommon (W := W) (n := 2*m) (x := x) <| by
-      simpa using hNoCommon (((2*m : ℕ) : ℤ))
-
-  have h2m1_ne : xPair W (2*m+1) x ≠ 0 :=
-    xPair_ne_zero_of_noCommon (W := W) (n := 2*m+1) (x := x) <| by
-      simpa using hNoCommon (((2*m+1 : ℕ) : ℤ))
-
-  exact ⟨
-    h2m_ne,
-    xPair_double_sameP1
-      (W := W) (m := m) (x := x)
-      (h4 := h4) (hψ_ne := hψ_ne) (hc3 := hc3),
-    h2m1_ne,
-    xPair_diffAdd_sameP1
-      (W := W) (m := m) (x := x)
-      (h4 := h4) (hψ_ne := hψ_ne) (hc3 := hc3)
-  ⟩
+(((2*m : ℕ) : ℤ))     = 2 * (m : ℤ)
+(((2*m+1 : ℕ) : ℤ))   = 2 * (m : ℤ) + 1
+(((m+1 : ℕ) : ℤ))     = (m : ℤ) + 1
 ```
 
-## Call-site wiring from the no-common-root lemma
-
-At the theorem around L1160–1200, derive the no-common statement once and pass it into the core.  The placeholder below is the only expected local-name substitution.
+If the local simplifier does not close one of these cast goals, make the casts explicit:
 
 ```lean
-  have hNoCommon : ∀ n : ℤ,
-      ¬ ((W.Φ n).eval x = 0 ∧ (W.ΨSq n).eval x = 0) := by
-    intro n
-    -- Replace this with the actual theorem already present around L1180.
-    -- It is the preΨ'-based / `xPair_ne_zero_of_isElliptic` no-common-root fact.
-    exact xPair_no_common_vanishing_of_isElliptic
-      (W := W) (hW := hW) (n := n) (x := x)
+  have h2m_cast : (((2*m : ℕ) : ℤ)) = 2 * (m : ℤ) := by
+    simp
+  have h2m1_cast : (((2*m+1 : ℕ) : ℤ)) = 2 * (m : ℤ) + 1 := by
+    simp [Nat.cast_add, Nat.cast_mul]
+  have hm1_cast : (((m+1 : ℕ) : ℤ)) = (m : ℤ) + 1 := by
+    simp
+```
 
+and then use `simpa [h2m_cast, h2m1_cast, hm1_cast] using ...`.
+
+## If the local diff-add goal has the opposite input order
+
+The theorem statement in this Q45 prompt already has the same order as `xPair_diffAdd_sameP1_core_order`:
+
+```lean
+(xPair W (m : ℤ) x), (xPair W (((m+1 : ℕ) : ℤ)) x)
+```
+
+so `diffAddOrInfVec_comm` is not needed.  If the actual local file still has the older order `(m+1), m`, replace the `hdiff` proof with:
+
+```lean
+  have hdiff :
+      SameP1Vec
+        (XOnly.diffAddOrInfVec (E := W⁄k)
+          (xPair W (((m+1 : ℕ) : ℤ)) x)
+          (xPair W (m : ℤ) x)
+          (xPair W (1 : ℤ) x))
+        (xPair W (((2*m+1 : ℕ) : ℤ)) x) := by
+    simpa [XOnly.diffAddOrInfVec_comm] using hdiff_int
+```
+
+If `diffAddOrInfVec_comm` is in the current `XOnly` namespace, the unqualified name also works:
+
+```lean
+    simpa [diffAddOrInfVec_comm] using hdiff_int
+```
+
+## Propagating the new hypotheses
+
+Every call of the old core must now pass the three extra hypotheses:
+
+```lean
   exact xPair_double_and_diffAddOrInf_EDS_core
     (W := W) (m := m) (x := x)
     (h4 := h4) (hψ_ne := hψ_ne) (hc3 := hc3)
-    (hNoCommon := hNoCommon)
 ```
 
-If the existing L1180 result is named `xPair_ne_zero_of_isElliptic` and returns vector nonzero rather than the raw pair of equations, then it is better to leave this core lemma with explicit nonzero parameters instead:
+If the surrounding theorem currently has only `[W.IsElliptic]`, its signature must be strengthened as well.  The correct propagation is either explicit:
 
 ```lean
-(h2m_ne  : xPair W (2*m) x ≠ 0)
-(h2m1_ne : xPair W (2*m+1) x ≠ 0)
+(h4 : (4 : k) ≠ 0)
+(hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0)
+(hc3 : W.Ψ₃ ≠ 0)
 ```
 
-But if the file truly already contains the raw no-common-vanishing statement described in the prompt, the `hNoCommon` version above is the direct implementation requested.
+or through a stronger section assumption plus lemmas that genuinely provide them.  For a characteristic-zero field, `h4` is immediate:
 
-## Optional: derive `hc3` from `hψ_ne`
+```lean
+  have h4 : (4 : k) ≠ 0 := by norm_num
+```
 
-If the call site has `hψ_ne` but not `hc3`, this is the expected local proof shape:
+but `hψ_ne` should still come from an actual division-polynomial nonvanishing theorem in the file/Mathlib, not from ellipticity alone.  If that theorem is present, the call-site shape is:
+
+```lean
+  have hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0 := by
+    intro n hn
+    exact WeierstrassCurve.ψ_ne_zero (W := W) hn
+```
+
+adjusting the theorem name/arguments to the local API.  Then `hc3` can either be passed separately or derived from `hψ_ne`:
 
 ```lean
   have hc3 : W.Ψ₃ ≠ 0 := by
     intro hzero
     have hψ3 : W.ψ (3 : ℤ) ≠ 0 := hψ_ne 3 (by norm_num)
     apply hψ3
-    -- Depending on local simp lemmas, this may be just `simpa [WeierstrassCurve.ψ, hzero]`.
     simpa [WeierstrassCurve.ψ, hzero]
 ```
 
-If that `simpa` is too weak, keep `hc3` explicit.  The core lemma above does not need to know how `hc3` was obtained.
+If this last `simpa` does not unfold `W.ψ 3` far enough in the local Mathlib version, keep `hc3` explicit; the core proof above does not depend on how `hc3` is obtained.
+
+## Summary of the non-circularity
+
+The core proof uses only:
+
+1. `Φ_ΨSq_no_common_eval_zero_even` for the `2*m` vector nonzero conjunct;
+2. `Φ_ΨSq_no_common_eval_zero_odd` for the `2*m+1` vector nonzero conjunct;
+3. `xPair_double_sameP1` for the doubling projective equality;
+4. `xPair_diffAdd_sameP1_core_order` for the differential-addition projective equality;
+5. `simpa` to reconcile the `ℕ → ℤ` casts.
+
+It does **not** use `xPair_ne_zero_of_isElliptic`, so it avoids the circular dependency through the ladder theorem.
