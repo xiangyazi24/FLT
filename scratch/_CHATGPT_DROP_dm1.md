@@ -1,410 +1,323 @@
-# Q53 (dm1): corrected rank-3 apparition strong induction
+# Q80 (dm1): `preΨ'` separability for division polynomials
 
-Below is the corrected replacement for the Q35 main strong-induction block.  The changes are:
+## Executive answer
 
-* the even branch is treated as the Nat index `M + M`, with explicit cast normalizers to `2 * (M : ℤ)` at every final use;
-* the `M ≡ 0 mod 3` placeholder is replaced by `three_dvd_two_mul_iff.mpr h0`;
-* the nonzero branches avoid fragile `simp [hsecond_ne]` / `simp [hfirst_ne]` goals and instead derive a contradiction by turning a zero of the whole recurrence into a zero of the explicitly nonzero surviving factor.
+The target theorem
+
+```lean
+theorem preΨ'_separable_of_natCast_ne_zero {n : ℕ} (hn : (n : k) ≠ 0) :
+    (W.preΨ' n).Separable
+```
+
+is mathematically true under the stated hypotheses, but current Mathlib does **not** already contain the elliptic-curve brick that proves it.  The polynomial infrastructure is present; the missing part is the elliptic-curve/simple-root theorem for division polynomials.
+
+The most tractable route in the present API is **E2**, but not as a variable-`n` CAS resultant.  The clean Mathlib-facing form is a single structural lemma saying that `preΨ' n` has no repeated algebraic roots when `(n : k) ≠ 0`.  Once that lemma is available, the desired theorem is a short wrapper using `Polynomial.nodup_aroots_iff_of_splits` or, equivalently, `Polynomial.separable_def`.
+
+The **E1** route (`[n]` is étale, kernel reduced) is mathematically best, but current Mathlib/FLT does not expose enough scheme/isogeny API for elliptic curves to make it the short proof.  In `FLT/EllipticCurve/Torsion.lean`, even `n_torsion_finite` and `n_torsion_card` are still placeholders; using those to prove separability would be circular for the torsion development.
+
+---
+
+## API currently available and useful
+
+From `Mathlib.FieldTheory.Separable`:
+
+```lean
+Polynomial.Separable f = IsCoprime f (Polynomial.derivative f)
+Polynomial.separable_def
+Polynomial.separable_def'
+Polynomial.separable_map
+Polynomial.nodup_aroots_iff_of_splits
+Polynomial.card_rootSet_eq_natDegree_iff_of_splits
+Polynomial.Separable.map
+Polynomial.Separable.ne_zero
+Polynomial.Separable.squarefree
+```
+
+The most important exact facts are:
+
+```lean
+#check Polynomial.separable_def
+-- p.Separable ↔ IsCoprime p (derivative p)
+
+#check Polynomial.separable_def'
+-- p.Separable ↔ ∃ a b, a * p + b * derivative p = 1
+
+#check Polynomial.separable_map
+-- (map f p).Separable ↔ p.Separable
+
+#check Polynomial.nodup_aroots_iff_of_splits
+-- f ≠ 0 → (map (algebraMap F K) f).Splits →
+--   (f.aroots K).Nodup ↔ f.Separable
+```
+
+From `Mathlib.FieldTheory.IsAlgClosed.Basic`:
+
+```lean
+#check IsAlgClosed.splits
+#check IsAlgClosed.splits_codomain
+```
+
+The deprecated `IsAlgClosed.splits_codomain` is still exactly the shape one wants for algebraic closures:
+
+```lean
+(map (algebraMap k (AlgebraicClosure k)) p).Splits
+```
+
+but the non-deprecated form
+
+```lean
+IsAlgClosed.splits (Polynomial.map (algebraMap k (AlgebraicClosure k)) p)
+```
+
+also works.
+
+From `Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic`:
+
+```lean
+#check WeierstrassCurve.preΨ'
+#check WeierstrassCurve.preΨ'_zero
+#check WeierstrassCurve.preΨ'_one
+#check WeierstrassCurve.preΨ'_two
+#check WeierstrassCurve.preΨ'_three
+#check WeierstrassCurve.preΨ'_four
+#check WeierstrassCurve.preΨ'_even
+#check WeierstrassCurve.preΨ'_odd
+#check WeierstrassCurve.map_preΨ'
+#check WeierstrassCurve.baseChange_preΨ'
+```
+
+From `Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree`:
+
+```lean
+#check WeierstrassCurve.natDegree_preΨ'_le
+#check WeierstrassCurve.coeff_preΨ'
+#check WeierstrassCurve.coeff_preΨ'_ne_zero
+#check WeierstrassCurve.natDegree_preΨ'
+#check WeierstrassCurve.leadingCoeff_preΨ'
+#check WeierstrassCurve.preΨ'_ne_zero
+```
+
+These prove that `preΨ' n` has the expected degree and is nonzero when `(n : k) ≠ 0`, but they do not prove squarefreeness/separability.
+
+---
+
+## What is missing
+
+There is no current Mathlib theorem of the following kind:
+
+```lean
+theorem Isogeny.mul_separable_of_natCast_ne_zero ...
+theorem WeierstrassCurve.mul_by_n_etale ...
+theorem WeierstrassCurve.nTorsion_reduced ...
+theorem WeierstrassCurve.preΨ'_separable_of_natCast_ne_zero ...
+theorem WeierstrassCurve.preΨ'_isCoprime_derivative_of_natCast_ne_zero ...
+```
+
+The minimal useful missing lemma can be stated in either of the following two equivalent styles.
+
+### Missing brick A: direct Bézout / derivative coprimality
+
+```lean
+namespace WeierstrassCurve
+
+open Polynomial
+
+variable {k : Type*} [Field k] [DecidableEq k]
+variable (W : WeierstrassCurve k) [W.IsElliptic]
+
+/-- Missing structural theorem: division polynomials have no repeated roots when `char k ∤ n`. -/
+theorem preΨ'_isCoprime_derivative_of_natCast_ne_zero
+    {n : ℕ} (hn : (n : k) ≠ 0) :
+    IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n)) := by
+  -- Missing in current Mathlib/FLT.
+  -- Mathematical proof: `[n] : E → E` is separable/étale because `(n : k) ≠ 0`;
+  -- therefore the finite kernel is reduced.  Passing to the quotient by `P ~ -P`
+  -- gives that the univariate `x`-coordinate division polynomial has simple roots.
+  -- Algebraic proof: construct a Bezout identity
+  --   A_n * preΨ' n + B_n * derivative (preΨ' n) = 1
+  -- over the universal nonsingular Weierstrass ring after inverting `n`.
+  sorry
+
+end WeierstrassCurve
+```
+
+With this brick, the target theorem is literally just `Polynomial.separable_def`:
+
+```lean
+namespace WeierstrassCurve
+
+open Polynomial
+
+variable {k : Type*} [Field k] [DecidableEq k]
+variable (W : WeierstrassCurve k) [W.IsElliptic]
+
+theorem preΨ'_separable_of_natCast_ne_zero_via_coprime
+    {n : ℕ} (hn : (n : k) ≠ 0) :
+    (W.preΨ' n).Separable := by
+  rw [Polynomial.separable_def]
+  exact W.preΨ'_isCoprime_derivative_of_natCast_ne_zero hn
+
+end WeierstrassCurve
+```
+
+### Missing brick B: no repeated algebraic roots
+
+This form is often easier to connect to the geometric proof over an algebraic closure:
+
+```lean
+namespace WeierstrassCurve
+
+open Polynomial
+
+variable {k : Type*} [Field k] [DecidableEq k]
+variable (W : WeierstrassCurve k) [W.IsElliptic]
+
+/-- Missing structural theorem, root form. -/
+theorem preΨ'_aroots_nodup_of_natCast_ne_zero
+    {n : ℕ} (hn : (n : k) ≠ 0) :
+    ((W.preΨ' n).aroots (AlgebraicClosure k)).Nodup := by
+  -- Missing in current Mathlib/FLT.
+  -- Equivalent content: every algebraic root of `preΨ' n` is a simple root.
+  -- This is the `x`-coordinate shadow of the reducedness of `ker [n]`.
+  sorry
+
+end WeierstrassCurve
+```
+
+Given this root-form brick, the wrapper theorem is:
 
 ```lean
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
+import Mathlib.FieldTheory.AlgebraicClosure
+import Mathlib.FieldTheory.IsAlgClosed.Basic
+import Mathlib.FieldTheory.Separable
 import Mathlib.Tactic
 
 open Polynomial
-open scoped Polynomial
 
 namespace WeierstrassCurve
 
 noncomputable section
 
-variable {k : Type*} [Field k]
+variable {k : Type*} [Field k] [DecidableEq k]
+variable (W : WeierstrassCurve k) [W.IsElliptic]
 
-private abbrev pe (W : WeierstrassCurve k) (x : k) (i : ℤ) : k :=
-  (W.preΨ i).eval x
-
-private abbrev sx (W : WeierstrassCurve k) (x : k) : k :=
-  W.Ψ₂Sq.eval x
-
-private lemma coeff_left_ne_zero
-    (W : WeierstrassCurve k) (x : k)
-    (hs2 : sx W x ≠ 0) (m : ℤ) :
-    (if Even m then (sx W x)^2 else 1) ≠ 0 := by
-  by_cases hm : Even m
-  · simp [hm, pow_ne_zero 2 hs2]
-  · simp [hm]
-
-private lemma coeff_right_ne_zero
-    (W : WeierstrassCurve k) (x : k)
-    (hs2 : sx W x ≠ 0) (m : ℤ) :
-    (if Even m then 1 else (sx W x)^2) ≠ 0 := by
-  by_cases hm : Even m
-  · simp [hm]
-  · simp [hm, pow_ne_zero 2 hs2]
-
-private lemma eval_preΨ_odd
-    (W : WeierstrassCurve k) (x : k) (m : ℤ) :
-    pe W x (2*m + 1)
-      = pe W x (m + 2) * (pe W x m)^3 *
-          (if Even m then (sx W x)^2 else 1)
-        - pe W x (m - 1) * (pe W x (m + 1))^3 *
-          (if Even m then 1 else (sx W x)^2) := by
-  have h := congrArg (fun p : k[X] => p.eval x) (W.preΨ_odd m)
-  simp only [pe, sx, eval_mul, eval_sub, eval_add, eval_pow,
-    apply_ite (fun p : k[X] => p.eval x), eval_one] at h ⊢
-  linear_combination h
-
-private lemma eval_preΨ_even
-    (W : WeierstrassCurve k) (x : k) (m : ℤ) :
-    pe W x (2*m)
-      = (pe W x (m - 1))^2 * pe W x m * pe W x (m + 2)
-        - pe W x (m - 2) * pe W x m * (pe W x (m + 1))^2 := by
-  have h := congrArg (fun p : k[X] => p.eval x) (W.preΨ_even m)
-  simp only [pe, eval_mul, eval_sub, eval_add, eval_pow] at h ⊢
-  linear_combination h
-
-private lemma mod3_trichotomy (z : ℤ) :
-    (3 : ℤ) ∣ z ∨ (3 : ℤ) ∣ z - 1 ∨ (3 : ℤ) ∣ z + 1 := by
-  omega
-
-private lemma not_three_dvd_of_three_dvd_sub_one {z : ℤ}
-    (h : (3 : ℤ) ∣ z - 1) : ¬ (3 : ℤ) ∣ z := by
-  omega
-
-private lemma not_three_dvd_of_three_dvd_add_one {z : ℤ}
-    (h : (3 : ℤ) ∣ z + 1) : ¬ (3 : ℤ) ∣ z := by
-  omega
-
-private lemma three_dvd_two_mul_add_one_iff_sub_one {m : ℤ} :
-    ((3 : ℤ) ∣ 2*m + 1) ↔ (3 : ℤ) ∣ m - 1 := by
-  omega
-
-private lemma three_dvd_two_mul_iff {m : ℤ} :
-    ((3 : ℤ) ∣ 2*m) ↔ (3 : ℤ) ∣ m := by
-  omega
-
-private lemma not_three_dvd_two_mul_add_one_of_three_dvd {m : ℤ}
-    (hm : (3 : ℤ) ∣ m) : ¬ (3 : ℤ) ∣ 2*m + 1 := by
-  omega
-
-private lemma not_three_dvd_two_mul_add_one_of_three_dvd_add_one {m : ℤ}
-    (hm : (3 : ℤ) ∣ m + 1) : ¬ (3 : ℤ) ∣ 2*m + 1 := by
-  omega
-
-private lemma not_three_dvd_two_mul_of_three_dvd_sub_one {m : ℤ}
-    (hm : (3 : ℤ) ∣ m - 1) : ¬ (3 : ℤ) ∣ 2*m := by
-  omega
-
-private lemma not_three_dvd_two_mul_of_three_dvd_add_one {m : ℤ}
-    (hm : (3 : ℤ) ∣ m + 1) : ¬ (3 : ℤ) ∣ 2*m := by
-  omega
-
-private lemma nat_even_cast_to_int (M : ℕ) :
-    ((M + M : ℕ) : ℤ) = 2 * (M : ℤ) := by
-  omega
-
-private lemma nat_even_mul_cast_to_int (M : ℕ) :
-    ((2 * M : ℕ) : ℤ) = 2 * (M : ℤ) := by
-  omega
-
-private lemma nat_odd_cast_to_int (M : ℕ) :
-    ((M + M + 1 : ℕ) : ℤ) = 2 * (M : ℤ) + 1 := by
-  omega
-
-private lemma nat_odd_mul_cast_to_int (M : ℕ) :
-    ((2 * M + 1 : ℕ) : ℤ) = 2 * (M : ℤ) + 1 := by
-  omega
-
-private lemma nat_sub_one_cast (M : ℕ) (hM : 1 ≤ M) :
-    ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 := by
-  omega
-
-private lemma nat_sub_two_cast (M : ℕ) (hM : 2 ≤ M) :
-    ((M - 2 : ℕ) : ℤ) = (M : ℤ) - 2 := by
-  omega
-
-/-- Nat-indexed rank-3 apparition on the `Ψ₃.eval x = 0` stratum. -/
-private lemma preΨ_eval_zero_iff_three_dvd_nat_of_Ψ₃_eval_zero
-    (W : WeierstrassCurve k) (x : k)
-    (h4 : (4 : k) ≠ 0)
-    (hc3 : W.Ψ₃.eval x = 0)
-    (hs2 : sx W x ≠ 0)
-    (hd4 : (W.preΨ 4).eval x ≠ 0) :
-    ∀ N : ℕ, pe W x (N : ℤ) = 0 ↔ (3 : ℤ) ∣ (N : ℤ) := by
-  intro N
-  induction N using Nat.strong_induction_on with
-  | h N IH =>
-    by_cases hsmall : N ≤ 4
-    · interval_cases N
-      · constructor
-        · intro _; norm_num
-        · intro _
-          simpa [pe] using congrArg (fun p : k[X] => p.eval x) (W.preΨ_zero)
-      · constructor
-        · intro h
-          have h1 : (1 : k) = 0 := by simpa [pe] using h
-          exact (one_ne_zero h1).elim
-        · intro h; omega
-      · constructor
-        · intro h
-          have h2 : (1 : k) = 0 := by simpa [pe] using h
-          exact (one_ne_zero h2).elim
-        · intro h; omega
-      · constructor
-        · intro _; norm_num
-        · intro _
-          simpa [pe] using hc3
-      · constructor
-        · intro h
-          exact (hd4 (by simpa [pe] using h)).elim
-        · intro h; omega
-    · have hN5 : 5 ≤ N := by omega
-      rcases Nat.even_or_odd N with hEven | hOdd
-      · rcases hEven with ⟨M, rfl⟩
-        have hM3 : 3 ≤ M := by omega
-        have hM1 : 1 ≤ M := by omega
-        have hM2 : 2 ≤ M := by omega
-        have hMlt : M < M + M := by omega
-        have hMm1lt : M - 1 < M + M := by omega
-        have hMm2lt : M - 2 < M + M := by omega
-        have hMp1lt : M + 1 < M + M := by omega
-        have hMp2lt : M + 2 < M + M := by omega
-        have IHm   := IH M hMlt
-        have IHm1  := IH (M - 1) hMm1lt
-        have IHm2  := IH (M - 2) hMm2lt
-        have IHp1  := IH (M + 1) hMp1lt
-        have IHp2  := IH (M + 2) hMp2lt
-        have hev := eval_preΨ_even W x (M : ℤ)
-        have hcastEven : ((M + M : ℕ) : ℤ) = 2 * (M : ℤ) := nat_even_cast_to_int M
-        have hcastEvenMul : ((2 * M : ℕ) : ℤ) = 2 * (M : ℤ) := nat_even_mul_cast_to_int M
-        rcases mod3_trichotomy (M : ℤ) with h0 | hrest
-        · -- M ≡ 0: A(M) is the common factor, so A(2M)=0.
-          have hAm : pe W x (M : ℤ) = 0 := IHm.mpr h0
-          have hA : pe W x (2 * (M : ℤ)) = 0 := by
-            simpa [hAm, mul_assoc, mul_left_comm, mul_comm] using hev
-          constructor
-          · intro _
-            have hdiv : (3 : ℤ) ∣ 2 * (M : ℤ) :=
-              (three_dvd_two_mul_iff (m := (M : ℤ))).mpr h0
-            simpa [hcastEven, hcastEvenMul] using hdiv
-          · intro _
-            simpa [hcastEven, hcastEvenMul] using hA
-        · rcases hrest with hm1 | hp1
-          · -- M ≡ 1: first summand zero, second summand nonzero.
-            have hcast_m1 : ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 :=
-              nat_sub_one_cast M hM1
-            have hcast_m2 : ((M - 2 : ℕ) : ℤ) = (M : ℤ) - 2 :=
-              nat_sub_two_cast M hM2
-            have hcast_p1 : ((M + 1 : ℕ) : ℤ) = (M : ℤ) + 1 := by omega
-            have hAm1 : pe W x ((M : ℤ) - 1) = 0 := by
-              have hraw : pe W x ((M - 1 : ℕ) : ℤ) = 0 :=
-                IHm1.mpr (by simpa [hcast_m1] using hm1)
-              simpa [hcast_m1] using hraw
-            have hAm_ne : pe W x (M : ℤ) ≠ 0 := by
-              intro h
-              exact not_three_dvd_of_three_dvd_sub_one hm1 (IHm.mp h)
-            have hAm2_ne : pe W x ((M : ℤ) - 2) ≠ 0 := by
-              intro h
-              have hraw : pe W x ((M - 2 : ℕ) : ℤ) = 0 := by simpa [hcast_m2] using h
-              have hdvd := IHm2.mp hraw
-              omega
-            have hAp1_ne : pe W x ((M : ℤ) + 1) ≠ 0 := by
-              intro h
-              have hraw : pe W x ((M + 1 : ℕ) : ℤ) = 0 := by simpa [hcast_p1] using h
-              have hdvd := IHp1.mp hraw
-              omega
-            have hsecond_ne :
-                pe W x ((M : ℤ) - 2) * pe W x (M : ℤ) *
-                    (pe W x ((M : ℤ) + 1))^2 ≠ 0 := by
-              exact mul_ne_zero (mul_ne_zero hAm2_ne hAm_ne) (pow_ne_zero 2 hAp1_ne)
-            have hAne : pe W x (2 * (M : ℤ)) ≠ 0 := by
-              intro hz
-              apply hsecond_ne
-              have hneg :
-                  - (pe W x ((M : ℤ) - 2) * pe W x (M : ℤ) *
-                      (pe W x ((M : ℤ) + 1))^2) = 0 := by
-                simpa [hev, hAm1, sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
-                  using hz
-              exact neg_eq_zero.mp hneg
-            constructor
-            · intro h
-              have hz : pe W x (2 * (M : ℤ)) = 0 := by
-                simpa [hcastEven, hcastEvenMul] using h
-              exact (hAne hz).elim
-            · intro hdvd
-              have hdvd' : (3 : ℤ) ∣ 2 * (M : ℤ) := by
-                simpa [hcastEven, hcastEvenMul] using hdvd
-              exact (not_three_dvd_two_mul_of_three_dvd_sub_one hm1 hdvd').elim
-          · -- M ≡ 2: second summand zero, first summand nonzero.
-            have hcast_m1 : ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 :=
-              nat_sub_one_cast M hM1
-            have hcast_p1 : ((M + 1 : ℕ) : ℤ) = (M : ℤ) + 1 := by omega
-            have hcast_p2 : ((M + 2 : ℕ) : ℤ) = (M : ℤ) + 2 := by omega
-            have hAp1 : pe W x ((M : ℤ) + 1) = 0 := by
-              have hraw : pe W x ((M + 1 : ℕ) : ℤ) = 0 :=
-                IHp1.mpr (by simpa [hcast_p1] using hp1)
-              simpa [hcast_p1] using hraw
-            have hAm1_ne : pe W x ((M : ℤ) - 1) ≠ 0 := by
-              intro h
-              have hraw : pe W x ((M - 1 : ℕ) : ℤ) = 0 := by simpa [hcast_m1] using h
-              have hdvd := IHm1.mp hraw
-              omega
-            have hAm_ne : pe W x (M : ℤ) ≠ 0 := by
-              intro h
-              exact not_three_dvd_of_three_dvd_add_one hp1 (IHm.mp h)
-            have hAp2_ne : pe W x ((M : ℤ) + 2) ≠ 0 := by
-              intro h
-              have hraw : pe W x ((M + 2 : ℕ) : ℤ) = 0 := by simpa [hcast_p2] using h
-              have hdvd := IHp2.mp hraw
-              omega
-            have hfirst_ne :
-                (pe W x ((M : ℤ) - 1))^2 * pe W x (M : ℤ) *
-                    pe W x ((M : ℤ) + 2) ≠ 0 := by
-              exact mul_ne_zero (mul_ne_zero (pow_ne_zero 2 hAm1_ne) hAm_ne) hAp2_ne
-            have hAne : pe W x (2 * (M : ℤ)) ≠ 0 := by
-              intro hz
-              apply hfirst_ne
-              simpa [hev, hAp1, sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
-                using hz
-            constructor
-            · intro h
-              have hz : pe W x (2 * (M : ℤ)) = 0 := by
-                simpa [hcastEven, hcastEvenMul] using h
-              exact (hAne hz).elim
-            · intro hdvd
-              have hdvd' : (3 : ℤ) ∣ 2 * (M : ℤ) := by
-                simpa [hcastEven, hcastEvenMul] using hdvd
-              exact (not_three_dvd_two_mul_of_three_dvd_add_one hp1 hdvd').elim
-      · rcases hOdd with ⟨M, rfl⟩
-        have hM2 : 2 ≤ M := by omega
-        have hM1 : 1 ≤ M := by omega
-        have hMlt : M < M + M + 1 := by omega
-        have hMm1lt : M - 1 < M + M + 1 := by omega
-        have hMp1lt : M + 1 < M + M + 1 := by omega
-        have hMp2lt : M + 2 < M + M + 1 := by omega
-        have IHm   := IH M hMlt
-        have IHm1  := IH (M - 1) hMm1lt
-        have IHp1  := IH (M + 1) hMp1lt
-        have IHp2  := IH (M + 2) hMp2lt
-        have hodd := eval_preΨ_odd W x (M : ℤ)
-        have hcleft := coeff_left_ne_zero W x hs2 (M : ℤ)
-        have hcright := coeff_right_ne_zero W x hs2 (M : ℤ)
-        have hcastOdd : ((M + M + 1 : ℕ) : ℤ) = 2 * (M : ℤ) + 1 :=
-          nat_odd_cast_to_int M
-        have hcastOddMul : ((2 * M + 1 : ℕ) : ℤ) = 2 * (M : ℤ) + 1 :=
-          nat_odd_mul_cast_to_int M
-        rcases mod3_trichotomy (M : ℤ) with h0 | hrest
-        · -- M ≡ 0: first summand zero, second summand nonzero.
-          have hcast_m1 : ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 :=
-            nat_sub_one_cast M hM1
-          have hcast_p1 : ((M + 1 : ℕ) : ℤ) = (M : ℤ) + 1 := by omega
-          have hAm : pe W x (M : ℤ) = 0 := IHm.mpr h0
-          have hAm1_ne : pe W x ((M : ℤ) - 1) ≠ 0 := by
-            intro h
-            have hraw : pe W x ((M - 1 : ℕ) : ℤ) = 0 := by simpa [hcast_m1] using h
-            have hdvd := IHm1.mp hraw
-            omega
-          have hAp1_ne : pe W x ((M : ℤ) + 1) ≠ 0 := by
-            intro h
-            have hraw : pe W x ((M + 1 : ℕ) : ℤ) = 0 := by simpa [hcast_p1] using h
-            have hdvd := IHp1.mp hraw
-            omega
-          have hsecond_ne :
-              pe W x ((M : ℤ) - 1) * (pe W x ((M : ℤ) + 1))^3 *
-                  (if Even (M : ℤ) then 1 else (sx W x)^2) ≠ 0 := by
-            exact mul_ne_zero (mul_ne_zero hAm1_ne (pow_ne_zero 3 hAp1_ne)) hcright
-          have hAne : pe W x (2 * (M : ℤ) + 1) ≠ 0 := by
-            intro hz
-            apply hsecond_ne
-            have hneg :
-                - (pe W x ((M : ℤ) - 1) * (pe W x ((M : ℤ) + 1))^3 *
-                    (if Even (M : ℤ) then 1 else (sx W x)^2)) = 0 := by
-              simpa [hodd, hAm, sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
-                using hz
-            exact neg_eq_zero.mp hneg
-          constructor
-          · intro h
-            have hz : pe W x (2 * (M : ℤ) + 1) = 0 := by
-              simpa [hcastOdd, hcastOddMul] using h
-            exact (hAne hz).elim
-          · intro hdvd
-            have hdvd' : (3 : ℤ) ∣ 2 * (M : ℤ) + 1 := by
-              simpa [hcastOdd, hcastOddMul] using hdvd
-            exact (not_three_dvd_two_mul_add_one_of_three_dvd h0 hdvd').elim
-        · rcases hrest with hm1 | hp1
-          · -- M ≡ 1: both summands vanish, so A(2M+1)=0.
-            have hcast_m1 : ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 :=
-              nat_sub_one_cast M hM1
-            have hcast_p2 : ((M + 2 : ℕ) : ℤ) = (M : ℤ) + 2 := by omega
-            have hAm1 : pe W x ((M : ℤ) - 1) = 0 := by
-              have hraw : pe W x ((M - 1 : ℕ) : ℤ) = 0 :=
-                IHm1.mpr (by simpa [hcast_m1] using hm1)
-              simpa [hcast_m1] using hraw
-            have hAp2 : pe W x ((M : ℤ) + 2) = 0 := by
-              have hraw : pe W x ((M + 2 : ℕ) : ℤ) = 0 :=
-                IHp2.mpr (by omega)
-              simpa [hcast_p2] using hraw
-            have hA : pe W x (2 * (M : ℤ) + 1) = 0 := by
-              simpa [hodd, hAm1, hAp2, sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
-            constructor
-            · intro _
-              have hdiv : (3 : ℤ) ∣ 2 * (M : ℤ) + 1 :=
-                (three_dvd_two_mul_add_one_iff_sub_one (m := (M : ℤ))).mpr hm1
-              simpa [hcastOdd, hcastOddMul] using hdiv
-            · intro _
-              simpa [hcastOdd, hcastOddMul] using hA
-          · -- M ≡ 2: second summand zero, first summand nonzero.
-            have hcast_p1 : ((M + 1 : ℕ) : ℤ) = (M : ℤ) + 1 := by omega
-            have hcast_p2 : ((M + 2 : ℕ) : ℤ) = (M : ℤ) + 2 := by omega
-            have hAp1 : pe W x ((M : ℤ) + 1) = 0 := by
-              have hraw : pe W x ((M + 1 : ℕ) : ℤ) = 0 :=
-                IHp1.mpr (by simpa [hcast_p1] using hp1)
-              simpa [hcast_p1] using hraw
-            have hAp2_ne : pe W x ((M : ℤ) + 2) ≠ 0 := by
-              intro h
-              have hraw : pe W x ((M + 2 : ℕ) : ℤ) = 0 := by simpa [hcast_p2] using h
-              have hdvd := IHp2.mp hraw
-              omega
-            have hAm_ne : pe W x (M : ℤ) ≠ 0 := by
-              intro h
-              exact not_three_dvd_of_three_dvd_add_one hp1 (IHm.mp h)
-            have hfirst_ne :
-                pe W x ((M : ℤ) + 2) * (pe W x (M : ℤ))^3 *
-                    (if Even (M : ℤ) then (sx W x)^2 else 1) ≠ 0 := by
-              exact mul_ne_zero (mul_ne_zero hAp2_ne (pow_ne_zero 3 hAm_ne)) hcleft
-            have hAne : pe W x (2 * (M : ℤ) + 1) ≠ 0 := by
-              intro hz
-              apply hfirst_ne
-              simpa [hodd, hAp1, sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
-                using hz
-            constructor
-            · intro h
-              have hz : pe W x (2 * (M : ℤ) + 1) = 0 := by
-                simpa [hcastOdd, hcastOddMul] using h
-              exact (hAne hz).elim
-            · intro hdvd
-              have hdvd' : (3 : ℤ) ∣ 2 * (M : ℤ) + 1 := by
-                simpa [hcastOdd, hcastOddMul] using hdvd
-              exact (not_three_dvd_two_mul_add_one_of_three_dvd_add_one hp1 hdvd').elim
+/-- This is the desired theorem, assuming the missing simple-root brick above. -/
+theorem preΨ'_separable_of_natCast_ne_zero
+    {n : ℕ} (hn : (n : k) ≠ 0) :
+    (W.preΨ' n).Separable := by
+  classical
+  let K := AlgebraicClosure k
+  let i : k →+* K := algebraMap k K
+  have hne : W.preΨ' n ≠ 0 := W.preΨ'_ne_zero hn
+  have hsplit : (Polynomial.map i (W.preΨ' n)).Splits := by
+    -- `K` is algebraically closed, so every polynomial over `K` splits.
+    exact IsAlgClosed.splits (Polynomial.map i (W.preΨ' n))
+  exact (Polynomial.nodup_aroots_iff_of_splits
+    (K := K) hne hsplit).mp
+      (W.preΨ'_aroots_nodup_of_natCast_ne_zero hn)
 
 end
 
 end WeierstrassCurve
 ```
 
-## Two notes if Lean still complains
+This proof uses only the general polynomial API and `preΨ'_ne_zero`; all elliptic content is isolated in `preΨ'_aroots_nodup_of_natCast_ne_zero`.
 
-1. If your local `Nat.even_or_odd` rewrites the even case to `2 * M` instead of `M + M`, keep the same proof body and replace the final casts with `hcastEvenMul`.  Both normalizers are included above on purpose.
+---
 
-2. If `simp` does not turn the surviving recurrence into the exact negated factor in the nonzero branches, replace the relevant `simpa [...] using hz` by:
+## A more geometric statement of the missing brick
 
-```lean
-linear_combination (norm := ring_nf) hz - hodd
-```
-
-or, in the even branch,
+If you want the missing theorem to line up with the standard `[n]`-étale proof, use this shape over an arbitrary algebraically closed extension.  It avoids hard-coding `AlgebraicClosure k` and is reusable for torsion counting.
 
 ```lean
-linear_combination (norm := ring_nf) hz - hev
+namespace WeierstrassCurve
+
+open Polynomial
+
+variable {k K : Type*} [Field k] [Field K]
+variable [Algebra k K] [IsScalarTower k k K]
+variable [DecidableEq k] [DecidableEq K]
+variable (W : WeierstrassCurve k) [W.IsElliptic]
+
+/-- Preferred geometric missing lemma: after base change to an algebraically closed field,
+`preΨ' n` has simple roots if `(n : K) ≠ 0`. -/
+theorem baseChange_preΨ'_aroots_nodup_of_natCast_ne_zero
+    [IsAlgClosed K]
+    {n : ℕ} (hnK : (n : K) ≠ 0) :
+    (((W.baseChange K).preΨ' n).aroots K).Nodup := by
+  -- Missing geometric proof.
+  -- Outline:
+  -- 1. Interpret roots of `(W.baseChange K).preΨ' n` as `x`-coordinates of nonzero
+  --    `n`-torsion points, excluding the pure `2`-torsion factor in the even case.
+  -- 2. Prove `[n]` has differential multiplication by `(n : K)` on the tangent space at `O`.
+  -- 3. Since `(n : K) ≠ 0`, `[n]` is étale, so `ker [n]` is reduced.
+  -- 4. The quotient by `P ↦ -P` is unramified away from 2-torsion; the normalized `preΨ'`
+  --    has removed the `ψ₂` factor in the even case, so every remaining `x`-root is simple.
+  sorry
+
+end WeierstrassCurve
 ```
 
-The important change is that the proof now proves nonzero by contradiction from the recurrence, rather than asking `simp` to prove a `sub ≠ 0` goal directly.
+Then specialize to `K = AlgebraicClosure k`.  The base-change relation is already available:
+
+```lean
+#check WeierstrassCurve.baseChange_preΨ'
+#check WeierstrassCurve.map_preΨ'
+```
+
+---
+
+## Why a pure resultant proof is not currently the best route
+
+For a fixed small `n`, a CAS-generated Bezout certificate
+
+```text
+A_n * preΨ' n + B_n * derivative (preΨ' n) = 1
+```
+
+is practical.  For variable `n`, this is not a single finite polynomial identity; it is a theorem about the multiplication-by-`n` morphism or about the universal division-polynomial recurrence.  Mathlib has `Polynomial.resultant` and the separability/coprimality API, but it does not contain a universal formula
+
+```text
+Res(preΨ' n, (preΨ' n)') = unit * Δ^e * n^a
+```
+
+nor the formal group/isogeny result from which it follows.  Proving that resultant formula for all `n` would be at least as hard as proving the simple-root theorem directly.
+
+---
+
+## Extra hypotheses
+
+No extra field hypothesis is mathematically needed.
+
+* No `[PerfectField k]` is needed.  Separability of this particular polynomial follows from `char k ∤ n`, not from all finite extensions of `k` being separable.
+* No `[IsSepClosed k]` or algebraic-closedness hypothesis is needed in the final theorem.  It is fine to pass temporarily to `AlgebraicClosure k` because `Polynomial.separable_map` and `Polynomial.nodup_aroots_iff_of_splits` are designed for this.
+* No `[CharZero k]` is needed.  Positive characteristic is allowed as long as `(n : k) ≠ 0`.
+* `[DecidableEq k]` is not mathematically needed for `Polynomial.Separable`, but it is harmless in the surrounding `Torsion.lean` namespace and is often needed by the elliptic-curve point API.
+* `[W.IsElliptic]` is genuinely needed.  On singular Weierstrass cubics, division polynomials can acquire multiple roots even when the relevant integer is nonzero in the field.
+
+---
+
+## Recommendation for FLT
+
+Add the missing theorem in the direct form first:
+
+```lean
+theorem WeierstrassCurve.preΨ'_isCoprime_derivative_of_natCast_ne_zero
+    {k : Type*} [Field k] [DecidableEq k]
+    (W : WeierstrassCurve k) [W.IsElliptic]
+    {n : ℕ} (hn : (n : k) ≠ 0) :
+    IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n))
+```
+
+Then the target theorem in `FLT/EllipticCurve/Torsion.lean` is stable and tiny:
+
+```lean
+theorem preΨ'_separable_of_natCast_ne_zero {n : ℕ} (hn : (n : k) ≠ 0) :
+    (W.preΨ' n).Separable := by
+  rw [Polynomial.separable_def]
+  exact W.preΨ'_isCoprime_derivative_of_natCast_ne_zero hn
+```
+
+If the proof is developed geometrically, first prove the algebraic-root nodup statement over `AlgebraicClosure k`, then derive the direct coprimality theorem using `Polynomial.nodup_aroots_iff_of_splits`.  If the proof is developed algebraically, prove the direct `IsCoprime`/Bezout theorem and skip roots entirely.
