@@ -1,274 +1,350 @@
-# Q344-dm1: closing the `preΨ_invariant` coordinate-ring normalization steps
+# Q358-dm1: Lean encoding of the division-polynomial x-doubling certificate
 
-## The issue
+## Executive answer
 
-The failing step is not algebraic; it is normalization.  Do **not** put the local definitions
+The clean Lean shape is:
+
+1. Prove four saturated lemmas:
+
+   ```lean
+   W.Ψ₃ * (W.ΨSq (2*m) - dupDenP W (W.Φ m) (W.ΨSq m)) = 0
+   W.Ψ₃ * (W.Φ   (2*m) - dupNumP W (W.Φ m) (W.ΨSq m)) = 0
+   ```
+
+   split by `Even m`.
+
+2. In the public lemmas, cancel `W.Ψ₃` using the hypothesis `hc3 : W.Ψ₃ ≠ 0`.
+
+The certificate uses only:
 
 ```lean
-mkC : R[X] →+* CoordinateRing := (mk W).comp C
-q   : CoordinateRing := mk W W.ψ₂
+preΨ_adjacent_somos W h4 m
+preΨ_invariant_raw W h4 hψ_ne m
+b_relation W
 ```
 
-in the simp set as `[mkC, q]`.  That unfolds them and leaves the normalized theorem in terms of `mk W (C f)` and `mk W W.ψ₂`, while the target and `hq4` are in terms of `mkC f` and `q`.
+and then `linear_combination` with the cofactors below.
 
-Instead, add two local **folding** lemmas:
-
-```lean
-have hmkC_apply (f : R[X]) : mk W (C f) = mkC f := rfl
-have hq_apply : mk W W.ψ₂ = q := rfl
-```
-
-Then use those in `simp`.  This rewrites `mk W (C f)` to `mkC f` and `mk W W.ψ₂` to `q`, so the later `← hq4` rewrite sees exactly `mkC (W.Ψ₂Sq^2)`.
+The code below is written to avoid relying on shifted `preΨ` relations.  It expands `Ψ₂Sq`, `Ψ₃`, and `preΨ₄` inside the `ring_nf` normalizer, as required by the CAS certificate.
 
 ---
 
-## Even branch: replacement for `hq_mul`
-
-Use this block exactly in the even branch, after you have:
+## Lean code
 
 ```lean
-hm      : Even m
-hm_p2   : Even (m + 2)
-hm_m2   : Even (m - 2)
-hm_p1   : ¬ Even (m + 1)
-hm_m1   : ¬ Even (m - 1)
-hMk     : mk W (C W.Ψ₃ *
-              (W.ψ (m + 2) * W.ψ (m - 1)^2
-                + W.ψ (m + 1)^2 * W.ψ (m - 2)
-                + W.ψ₂^2 * W.ψ m^3))
-            = mk W ((C W.preΨ₄ + W.ψ₂^4)
-                * (W.ψ (m + 1) * W.ψ m * W.ψ (m - 1)))
-hq4     : q^4 = mkC (W.Ψ₂Sq^2)
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.Tactic
+
+open Polynomial
+open scoped Polynomial
+
+namespace WeierstrassCurve
+
+noncomputable section
+
+variable {R : Type*} [CommRing R] [IsDomain R]
+
+-- Assumed already defined in your file:
+-- def dupDenP (W : WeierstrassCurve R) (Xc Zc : R[X]) : R[X] := ...
+-- def dupNumP (W : WeierstrassCurve R) (Xc Zc : R[X]) : R[X] := ...
+
+private lemma bRel_poly (W : WeierstrassCurve R) :
+    C W.b₂ * C W.b₆ - (C W.b₄)^2 - C (4 : R) * C W.b₈ = (0 : R[X]) := by
+  have hb0 : W.b₂ * W.b₆ - W.b₄^2 - (4 : R) * W.b₈ = 0 := by
+    have hb := b_relation (W := W)
+    -- hb : 4 * W.b₈ = W.b₂ * W.b₆ - W.b₄^2
+    rw [← hb]
+    ring
+  have hbC := congrArg (fun z : R => (C z : R[X])) hb0
+  linear_combination (norm := ring_nf) hbC
+
+private lemma preΨ_adjacent_somos_res
+    (W : WeierstrassCurve R) (h4 : (4 : R) ≠ 0) (m : ℤ) :
+    W.preΨ (m - 2) * W.preΨ (m + 2)
+      - (if Even m then 1 else W.Ψ₂Sq^2) *
+          (W.preΨ (m - 1) * W.preΨ (m + 1))
+      + W.Ψ₃ * W.preΨ m^2 = 0 := by
+  have h := preΨ_adjacent_somos W h4 m
+  linear_combination (norm := ring_nf) h
+
+private lemma preΨ_invariant_res
+    (W : WeierstrassCurve R)
+    (h4 : (4 : R) ≠ 0)
+    (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
+    (m : ℤ) :
+    W.Ψ₃ *
+        (W.preΨ (m + 2) * W.preΨ (m - 1)^2
+          + W.preΨ (m + 1)^2 * W.preΨ (m - 2)
+          + (if Even m then W.Ψ₂Sq^2 else 1) * W.preΨ m^3)
+      - (W.preΨ₄ + W.Ψ₂Sq^2) *
+          (W.preΨ (m + 1) * W.preΨ m * W.preΨ (m - 1)) = 0 := by
+  have h := preΨ_invariant_raw W h4 hψ_ne m
+  linear_combination (norm := ring_nf) h
+
+private lemma preΨ_2m_add_one_even
+    (W : WeierstrassCurve R) {m : ℤ} (hm : Even m) :
+    W.preΨ (2*m + 1)
+      = W.preΨ (m + 2) * W.preΨ m^3 * W.Ψ₂Sq^2
+        - W.preΨ (m - 1) * W.preΨ (m + 1)^3 := by
+  simpa [hm] using W.preΨ_odd m
+
+private lemma preΨ_2m_sub_one_even
+    (W : WeierstrassCurve R) {m : ℤ} (hm_m1 : ¬ Even (m - 1)) :
+    W.preΨ (2*m - 1)
+      = W.preΨ (m + 1) * W.preΨ (m - 1)^3
+        - W.preΨ (m - 2) * W.preΨ m^3 * W.Ψ₂Sq^2 := by
+  have h := W.preΨ_odd (m - 1)
+  rw [show 2 * (m - 1) + 1 = 2*m - 1 by ring] at h
+  simpa [hm_m1, add_assoc, add_comm, add_left_comm, sub_eq_add_neg] using h
+
+private lemma preΨ_2m_add_one_odd
+    (W : WeierstrassCurve R) {m : ℤ} (hm : ¬ Even m) :
+    W.preΨ (2*m + 1)
+      = W.preΨ (m + 2) * W.preΨ m^3
+        - W.preΨ (m - 1) * W.preΨ (m + 1)^3 * W.Ψ₂Sq^2 := by
+  simpa [hm] using W.preΨ_odd m
+
+private lemma preΨ_2m_sub_one_odd
+    (W : WeierstrassCurve R) {m : ℤ} (hm_m1 : Even (m - 1)) :
+    W.preΨ (2*m - 1)
+      = W.preΨ (m + 1) * W.preΨ (m - 1)^3 * W.Ψ₂Sq^2
+        - W.preΨ (m - 2) * W.preΨ m^3 := by
+  have h := W.preΨ_odd (m - 1)
+  rw [show 2 * (m - 1) + 1 = 2*m - 1 by ring] at h
+  simpa [hm_m1, add_assoc, add_comm, add_left_comm, sub_eq_add_neg] using h
+
+private lemma ΨSq_two_mul_sat_even
+    (W : WeierstrassCurve R)
+    (h4 : (4 : R) ≠ 0)
+    (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
+    {m : ℤ} (hm : Even m) :
+    W.Ψ₃ * (W.ΨSq (2*m) - dupDenP W (W.Φ m) (W.ΨSq m)) = 0 := by
+  have hAdj := preΨ_adjacent_somos_res W h4 m
+  have hInv := preΨ_invariant_res W h4 hψ_ne m
+  have hb := bRel_poly W
+  have h2m : Even (2*m) := by omega
+
+  let Pm2 : R[X] := W.preΨ (m - 2)
+  let Pm1 : R[X] := W.preΨ (m - 1)
+  let P0  : R[X] := W.preΨ m
+  let P1  : R[X] := W.preΨ (m + 1)
+  let P2  : R[X] := W.preΨ (m + 2)
+  let s   : R[X] := W.Ψ₂Sq
+  let c3  : R[X] := W.Ψ₃
+  let d4  : R[X] := W.preΨ₄
+  let ell : R[X] := (6 : R[X]) * X^2 + C W.b₂ * X + C W.b₄
+  let rho0 : R[X] :=
+    (9 : R[X]) * X^4 + (2 : R[X]) * C W.b₂ * X^3
+      + (4 : R[X]) * C W.b₄ * X^2 + (3 : R[X]) * C W.b₆ * X + C W.b₈
+
+  rw [W.ΨSq_even m]
+  linear_combination (norm :=
+    (simp [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+      WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+      Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm, h2m]; ring_nf))
+      (-(4 : R[X]) * P0^2 * P1^2 * Pm1^2 * s * c3) * hAdj
+    + ((-P0^2 * s * (P0^3 * s^2 - P0 * P1 * Pm1 * ell - P1^2 * Pm2)
+          + P0^2 * Pm1^2 * s * P2) * hInv)
+    + ((P0^3 * P1 * Pm1 * s
+          * (P0^3 * s^2 * X^2
+              - P0 * P1 * Pm1 * rho0
+              - P1^2 * Pm2 * X^2
+              - P2 * Pm1^2 * X^2)) * hb)
+
+private lemma Φ_two_mul_sat_even
+    (W : WeierstrassCurve R)
+    (h4 : (4 : R) ≠ 0)
+    (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
+    {m : ℤ} (hm : Even m) :
+    W.Ψ₃ * (W.Φ (2*m) - dupNumP W (W.Φ m) (W.ΨSq m)) = 0 := by
+  have hAdj := preΨ_adjacent_somos_res W h4 m
+  have hInv := preΨ_invariant_res W h4 hψ_ne m
+  have hb := bRel_poly W
+  have h2m : Even (2*m) := by omega
+  have hm_m1 : ¬ Even (m - 1) := by omega
+  have hp := preΨ_2m_add_one_even W hm
+  have hm' := preΨ_2m_sub_one_even W hm_m1
+
+  let Pm2 : R[X] := W.preΨ (m - 2)
+  let Pm1 : R[X] := W.preΨ (m - 1)
+  let P0  : R[X] := W.preΨ m
+  let P1  : R[X] := W.preΨ (m + 1)
+  let P2  : R[X] := W.preΨ (m + 2)
+  let s   : R[X] := W.Ψ₂Sq
+  let c3  : R[X] := W.Ψ₃
+  let d4  : R[X] := W.preΨ₄
+  let eta : R[X] := C W.b₆ + C W.b₄ * X - (2 : R[X]) * X^3
+  let rho1 : R[X] :=
+    (5 : R[X]) * X^4 + C W.b₂ * X^3
+      + (2 : R[X]) * C W.b₄ * X^2 + (2 : R[X]) * C W.b₆ * X + C W.b₈
+
+  rw [WeierstrassCurve.Φ]
+  rw [W.ΨSq_even m]
+  rw [hp, hm']
+  linear_combination (norm :=
+    (simp [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+      WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+      Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm, h2m]; ring_nf))
+      (P0^2 * s * c3 * (P0^4 * s^3 - (4 : R[X]) * P1^2 * Pm1^2 * X)) * hAdj
+    + ((-P0^2 * s * (P0^3 * s^2 * X + P0 * P1 * Pm1 * eta - P1^2 * Pm2 * X)
+          + P0^2 * Pm1^2 * X * s * P2) * hInv)
+    + ((P0^3 * P1 * Pm1 * X * s
+          * (P0^3 * s^2 * X^2
+              - P0 * P1 * Pm1 * rho1
+              - P1^2 * Pm2 * X^2
+              - P2 * Pm1^2 * X^2)) * hb)
+
+private lemma ΨSq_two_mul_sat_odd
+    (W : WeierstrassCurve R)
+    (h4 : (4 : R) ≠ 0)
+    (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
+    {m : ℤ} (hm : ¬ Even m) :
+    W.Ψ₃ * (W.ΨSq (2*m) - dupDenP W (W.Φ m) (W.ΨSq m)) = 0 := by
+  have hAdj := preΨ_adjacent_somos_res W h4 m
+  have hInv := preΨ_invariant_res W h4 hψ_ne m
+  have hb := bRel_poly W
+  have h2m : Even (2*m) := by omega
+
+  let Pm2 : R[X] := W.preΨ (m - 2)
+  let Pm1 : R[X] := W.preΨ (m - 1)
+  let P0  : R[X] := W.preΨ m
+  let P1  : R[X] := W.preΨ (m + 1)
+  let P2  : R[X] := W.preΨ (m + 2)
+  let s   : R[X] := W.Ψ₂Sq
+  let c3  : R[X] := W.Ψ₃
+  let d4  : R[X] := W.preΨ₄
+  let ell : R[X] := (6 : R[X]) * X^2 + C W.b₂ * X + C W.b₄
+  let rho0 : R[X] :=
+    (9 : R[X]) * X^4 + (2 : R[X]) * C W.b₂ * X^3
+      + (4 : R[X]) * C W.b₄ * X^2 + (3 : R[X]) * C W.b₆ * X + C W.b₈
+
+  rw [W.ΨSq_even m]
+  linear_combination (norm :=
+    (simp [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+      WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+      Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm, h2m]; ring_nf))
+      (-(4 : R[X]) * P0^2 * P1^2 * Pm1^2 * s * c3) * hAdj
+    + ((P0^2 * s * (-P0^3 + P0 * P1 * Pm1 * ell + P1^2 * Pm2)
+          + P0^2 * Pm1^2 * s * P2) * hInv)
+    + ((P0^3 * P1 * Pm1 * s
+          * (P0^3 * X^2
+              - P0 * P1 * Pm1 * rho0
+              - P1^2 * Pm2 * X^2
+              - P2 * Pm1^2 * X^2)) * hb)
+
+private lemma Φ_two_mul_sat_odd
+    (W : WeierstrassCurve R)
+    (h4 : (4 : R) ≠ 0)
+    (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
+    {m : ℤ} (hm : ¬ Even m) :
+    W.Ψ₃ * (W.Φ (2*m) - dupNumP W (W.Φ m) (W.ΨSq m)) = 0 := by
+  have hAdj := preΨ_adjacent_somos_res W h4 m
+  have hInv := preΨ_invariant_res W h4 hψ_ne m
+  have hb := bRel_poly W
+  have h2m : Even (2*m) := by omega
+  have hm_m1 : Even (m - 1) := by omega
+  have hp := preΨ_2m_add_one_odd W hm
+  have hm' := preΨ_2m_sub_one_odd W hm_m1
+
+  let Pm2 : R[X] := W.preΨ (m - 2)
+  let Pm1 : R[X] := W.preΨ (m - 1)
+  let P0  : R[X] := W.preΨ m
+  let P1  : R[X] := W.preΨ (m + 1)
+  let P2  : R[X] := W.preΨ (m + 2)
+  let s   : R[X] := W.Ψ₂Sq
+  let c3  : R[X] := W.Ψ₃
+  let d4  : R[X] := W.preΨ₄
+  let eta : R[X] := C W.b₆ + C W.b₄ * X - (2 : R[X]) * X^3
+  let rho1 : R[X] :=
+    (5 : R[X]) * X^4 + C W.b₂ * X^3
+      + (2 : R[X]) * C W.b₄ * X^2 + (2 : R[X]) * C W.b₆ * X + C W.b₈
+
+  rw [WeierstrassCurve.Φ]
+  rw [W.ΨSq_even m]
+  rw [hp, hm']
+  linear_combination (norm :=
+    (simp [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+      WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+      Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm, h2m]; ring_nf))
+      (P0^2 * c3 * (P0^4 - (4 : R[X]) * P1^2 * Pm1^2 * X * s)) * hAdj
+    + ((P0^2 * s * (-P0^3 * X - P0 * P1 * Pm1 * eta + P1^2 * Pm2 * X)
+          + P0^2 * Pm1^2 * X * s * P2) * hInv)
+    + ((P0^3 * P1 * Pm1 * X * s
+          * (P0^3 * X^2
+              - P0 * P1 * Pm1 * rho1
+              - P1^2 * Pm2 * X^2
+              - P2 * Pm1^2 * X^2)) * hb)
+
+/-- Denominator part of x-coordinate doubling for division polynomials. -/
+lemma ΨSq_two_mul
+    (W : WeierstrassCurve R)
+    (h4 : (4 : R) ≠ 0)
+    (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
+    (hc3 : W.Ψ₃ ≠ 0)
+    (m : ℤ) :
+    W.ΨSq (2*m) = dupDenP W (W.Φ m) (W.ΨSq m) := by
+  apply sub_eq_zero.mp
+  have hsat : W.Ψ₃ * (W.ΨSq (2*m) - dupDenP W (W.Φ m) (W.ΨSq m)) = 0 := by
+    by_cases hm : Even m
+    · exact ΨSq_two_mul_sat_even W h4 hψ_ne hm
+    · exact ΨSq_two_mul_sat_odd W h4 hψ_ne hm
+  exact mul_left_cancel₀ hc3 hsat
+
+/-- Numerator part of x-coordinate doubling for division polynomials. -/
+lemma Φ_two_mul
+    (W : WeierstrassCurve R)
+    (h4 : (4 : R) ≠ 0)
+    (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
+    (hc3 : W.Ψ₃ ≠ 0)
+    (m : ℤ) :
+    W.Φ (2*m) = dupNumP W (W.Φ m) (W.ΨSq m) := by
+  apply sub_eq_zero.mp
+  have hsat : W.Ψ₃ * (W.Φ (2*m) - dupNumP W (W.Φ m) (W.ΨSq m)) = 0 := by
+    by_cases hm : Even m
+    · exact Φ_two_mul_sat_even W h4 hψ_ne hm
+    · exact Φ_two_mul_sat_odd W h4 hψ_ne hm
+  exact mul_left_cancel₀ hc3 hsat
+
+end
+
+end WeierstrassCurve
 ```
-
-The target is:
-
-```lean
-q * mkC (W.Ψ₃ * preΨInvN W m)
-  = q * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m)
-```
-
-Tactic block:
-
-```lean
-  have hq_mul :
-      q * mkC (W.Ψ₃ * preΨInvN W m)
-        = q * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) := by
-    -- Fold coordinate-ring constants back to the local names used by the goal.
-    have hmkC_apply (f : R[X]) : mk W (C f) = mkC f := rfl
-    have hq_apply : mk W W.ψ₂ = q := rfl
-
-    -- Normalize the mapped Ward invariant into q/mkC form.
-    have hMk' := hMk
-    simp [
-      FLT.EDS.mk_ψ_eq,
-      hmkC_apply, hq_apply,
-      hm, hm_p2, hm_m2, hm_p1, hm_m1
-    ] at hMk'
-
-    -- Compare the normalized hMk' with the desired q-multiplied statement.
-    -- Use `← hq4` so `mkC (Ψ₂Sq^2)` is converted to `q^4`; then `ring_nf`
-    -- sees the common leftover factor q on both sides.
-    linear_combination (norm :=
-      (simp [preΨInvN, preΨInvD, hm, hmkC_apply, hq_apply, ← hq4]; ring_nf)) hMk'
-```
-
-What this produces internally is exactly:
-
-```text
-hMk' :
-mkC Ψ₃ *
-  ((mkC preΨ(m+2) * q) * mkC preΨ(m-1)^2
-   + mkC preΨ(m+1)^2 * (mkC preΨ(m-2) * q)
-   + q^2 * (mkC preΨ(m) * q)^3)
-=
-(mkC preΨ₄ + q^4)
-  * (mkC preΨ(m+1) * (mkC preΨ(m) * q) * mkC preΨ(m-1)).
-```
-
-After expanding `preΨInvN` in the even branch,
-
-```text
-preΨInvN W m
-= preΨ(m+2)preΨ(m-1)^2
-  + preΨ(m+1)^2preΨ(m-2)
-  + Ψ₂Sq^2 preΨ(m)^3,
-```
-
-and rewriting `mkC(Ψ₂Sq^2)` as `q^4`, this is ring-identical to the target multiplied by `q`.
 
 ---
 
-## Odd branch: replacement for `hq2_mul`
+## Notes on likely local-name adjustments
 
-Use this block exactly in the odd branch, after you have:
-
-```lean
-hm      : ¬ Even m
-hm_p2   : ¬ Even (m + 2)
-hm_m2   : ¬ Even (m - 2)
-hm_p1   : Even (m + 1)
-hm_m1   : Even (m - 1)
-hMk     : mk W (C W.Ψ₃ *
-              (W.ψ (m + 2) * W.ψ (m - 1)^2
-                + W.ψ (m + 1)^2 * W.ψ (m - 2)
-                + W.ψ₂^2 * W.ψ m^3))
-            = mk W ((C W.preΨ₄ + W.ψ₂^4)
-                * (W.ψ (m + 1) * W.ψ m * W.ψ (m - 1)))
-hq4     : q^4 = mkC (W.Ψ₂Sq^2)
-```
-
-The target is:
+The proof above assumes these exact names from your message:
 
 ```lean
-q^2 * mkC (W.Ψ₃ * preΨInvN W m)
-  = q^2 * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m)
+preΨ_adjacent_somos
+preΨ_invariant_raw
+b_relation
+dupDenP
+dupNumP
 ```
 
-Tactic block:
+If `b_relation` is not a theorem with named argument `(W := W)`, replace the line
 
 ```lean
-  have hq2_mul :
-      q^2 * mkC (W.Ψ₃ * preΨInvN W m)
-        = q^2 * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) := by
-    -- Fold coordinate-ring constants back to the local names used by the goal.
-    have hmkC_apply (f : R[X]) : mk W (C f) = mkC f := rfl
-    have hq_apply : mk W W.ψ₂ = q := rfl
-
-    -- Normalize the mapped Ward invariant into q/mkC form.
-    have hMk' := hMk
-    simp [
-      FLT.EDS.mk_ψ_eq,
-      hmkC_apply, hq_apply,
-      hm, hm_p2, hm_m2, hm_p1, hm_m1
-    ] at hMk'
-
-    -- Odd branch: the common leftover factor is q^2.  Again rewrite
-    -- `mkC (Ψ₂Sq^2)` backward to `q^4` before `ring_nf`.
-    linear_combination (norm :=
-      (simp [preΨInvN, preΨInvD, hm, hmkC_apply, hq_apply, ← hq4]; ring_nf)) hMk'
+have hb := b_relation (W := W)
 ```
 
-Internally this produces:
+inside `bRel_poly` by the exact local theorem call.
 
-```text
-hMk' :
-mkC Ψ₃ *
-  (mkC preΨ(m+2) * (mkC preΨ(m-1) * q)^2
-   + (mkC preΨ(m+1) * q)^2 * mkC preΨ(m-2)
-   + q^2 * mkC preΨ(m)^3)
-=
-(mkC preΨ₄ + q^4)
-  * ((mkC preΨ(m+1) * q) * mkC preΨ(m) * (mkC preΨ(m-1) * q)).
-```
-
-Since in the odd branch
-
-```text
-preΨInvN W m
-= preΨ(m+2)preΨ(m-1)^2
-  + preΨ(m+1)^2preΨ(m-2)
-  + preΨ(m)^3,
-```
-
-this is ring-identical to the target multiplied by `q^2`.
-
----
-
-## If `simp` does not rewrite `mk W (W.ψ n)` under powers
-
-If your local `mk_ψ_eq` is not tagged or not found under powers, use an explicit `simp only` variant.  This is noisier but more deterministic.
-
-Even branch:
+If `W.preΨ_odd m` is not method notation in your namespace, replace it by the theorem-call form used in your file.  The only required shapes are:
 
 ```lean
-  have hq_mul :
-      q * mkC (W.Ψ₃ * preΨInvN W m)
-        = q * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) := by
-    have hmkC_apply (f : R[X]) : mk W (C f) = mkC f := rfl
-    have hq_apply : mk W W.ψ₂ = q := rfl
-    have hMk' := hMk
-    simp only [
-      map_mul, map_add, map_pow,
-      FLT.EDS.mk_ψ_eq,
-      hmkC_apply, hq_apply,
-      if_pos hm, if_pos hm_p2, if_pos hm_m2,
-      if_neg hm_p1, if_neg hm_m1,
-      one_mul, mul_one
-    ] at hMk'
-    linear_combination (norm :=
-      (simp [preΨInvN, preΨInvD, hm, hmkC_apply, hq_apply, ← hq4]; ring_nf)) hMk'
+W.preΨ_odd m
+W.preΨ_odd (m - 1)
 ```
 
-Odd branch:
+The `rw [WeierstrassCurve.Φ]` line unfolds `Φ` everywhere in the numerator saturated lemmas.  If your local environment treats `Φ` as a projection with a differently named definition theorem, replace it by the exact definitional lemma you used elsewhere.  The denominator saturated lemmas only need `W.ΨSq_even m` plus the definitions of `Φ` and `ΨSq m` in the `simp` normalizer.
+
+The public lemmas do no target-ring cancellation other than the explicit hypothesis
 
 ```lean
-  have hq2_mul :
-      q^2 * mkC (W.Ψ₃ * preΨInvN W m)
-        = q^2 * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) := by
-    have hmkC_apply (f : R[X]) : mk W (C f) = mkC f := rfl
-    have hq_apply : mk W W.ψ₂ = q := rfl
-    have hMk' := hMk
-    simp only [
-      map_mul, map_add, map_pow,
-      FLT.EDS.mk_ψ_eq,
-      hmkC_apply, hq_apply,
-      if_neg hm, if_neg hm_p2, if_neg hm_m2,
-      if_pos hm_p1, if_pos hm_m1,
-      one_mul, mul_one
-    ] at hMk'
-    linear_combination (norm :=
-      (simp [preΨInvN, preΨInvD, hm, hmkC_apply, hq_apply, ← hq4]; ring_nf)) hMk'
+hc3 : W.Ψ₃ ≠ 0
 ```
 
----
-
-## Why `← hq4` and not `hq4`
-
-The goal contains `mkC (W.Ψ₂Sq^2)` after `mkC.map_mul/map_add/map_pow` normalization.  The normalized `hMk'` contains `q^4`, coming from `mk W (W.ψ₂^4)`.  Rewriting with
-
-```lean
-← hq4
-```
-
-changes
-
-```text
-mkC (W.Ψ₂Sq^2)  ↦  q^4,
-```
-
-so both sides live in the same coordinate-ring polynomial language.  Rewriting in the other direction leaves the ψ-products with powers such as `q^2 * (P0*q)^3`, and `simp` will not reliably discover the needed `q^5 = q * mkC(Ψ₂Sq^2)` normalization before `ring_nf`.
-
----
-
-## Drop-in location in the previous proof
-
-In the previous `preΨ_invariant_even` proof, replace only this block:
-
-```lean
-  have hq_mul :
-      q * mkC (W.Ψ₃ * preΨInvN W m)
-        = q * mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) := by
-    linear_combination (norm :=
-      (simp [mkC, q, preΨInvN, preΨInvD,
-        FLT.EDS.mk_ψ_eq, hm, hm_p2, hm_m2, hm_p1, hm_m1,
-        hq2, hq4]; ring_nf)) hMk
-```
-
-by the even block above.
-
-In `preΨ_invariant_odd`, replace only the analogous `hq2_mul` block by the odd block above.  The following cancellation lines remain unchanged:
-
-```lean
-  have hmk_eq :
-      mkC (W.Ψ₃ * preΨInvN W m)
-        = mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) :=
-    mul_left_cancel₀ hq_ne hq_mul       -- even branch
-
-  have hmk_eq :
-      mkC (W.Ψ₃ * preΨInvN W m)
-        = mkC ((W.preΨ₄ + W.Ψ₂Sq^2) * preΨInvD W m) :=
-    mul_left_cancel₀ hq2_ne hq2_mul     -- odd branch
-```
-
-For the even branch, the cancellation line uses `hq_ne`; for the odd branch, it uses `hq2_ne`.
+so the final arbitrary-ring transport pattern remains safe: prove these over a domain with `hc3`, then transport any already-established universal identity to the intended target ring without cancelling there.
