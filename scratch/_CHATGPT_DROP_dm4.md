@@ -1,498 +1,236 @@
-# Q310 (dm4): EDS nonvanishing by specialization to division polynomials
+# Q15 (dm4): Keystone final assembly — nonzero facts and core assembly
 
-## Bottom line
+## Repository check
 
-Approach (c) is viable, but the right formulation is slightly different from the
-phrasing “injective specialization” or “algebraically independent enough”.
-
-For the universal normalized EDS polynomial
-
-```lean
-normEDS b c d j : ℤ[b,c,d]
-```
-
-it is enough to exhibit **one** specialization to a ring in which its image is
-nonzero.  No global injectivity of the specialization is needed.
-
-Indeed, for any ring homomorphism `φ`, if `φ x ≠ 0`, then `x ≠ 0`, because
-`x = 0` would imply `φ x = 0`.  Thus the only Lean obligations are:
-
-1. define a specialization
-   `φ : ℤ[b,c,d] → Polynomial (Polynomial ℤ)` with
-   `b ↦ W.ψ₂`, `c ↦ C W.Ψ₃`, `d ↦ C W.preΨ₄`;
-2. prove
-   `φ (normEDS b c d j) = W.ψ j`, which is exactly `map_normEDS` plus the
-   Mathlib definition of `W.ψ`;
-3. prove `W.ψ j ≠ 0` over one characteristic-zero base, for example `ℤ`.
-
-The subtle point is item 3.  Mathlib’s degree file gives very strong nonzero
-results for `preΨ` and especially `ΨSq`; it does not appear to give a direct
-ready-made theorem named `ψ_ne_zero`.  The shortest robust bridge is:
+I attempted to inspect the requested source path on `xiangyazi24/FLT@scratch` before writing this note.  The GitHub contents API returned `404` for
 
 ```text
-ΨSq_ne_zero
-  ⇒ C(ΨSq) has nonzero image in the affine coordinate ring
-  ⇒ image(Ψ)^2 ≠ 0
-  ⇒ image(Ψ) ≠ 0
-  ⇒ image(ψ) ≠ 0 by mk_ψ
-  ⇒ ψ ≠ 0.
+scratch/KeystoneLadder.lean
 ```
 
-Equivalently, prove `ψ_ne_zero` by contradiction using the coordinate-ring
-lemmas `mk_ψ` and `mk_Ψ_sq`.
+on branch `scratch`, and the short commit `c83f6c6` mentioned in the prompt was not resolvable in this repository.  The branch head before this update was `a3191d161f94bd246992d13757f4ee372b808dde`, and `main...scratch` only listed the scratch drop-note files as changed.  So I could not verify the real line numbers or compile this inside the repository checkout.
 
-This avoids all algebraic-independence questions.
+What follows is therefore the exact Lean patch shape I would use in the described file.  The only identifier that may need adjustment is the existing no-common-vanishing lemma name from around L1180.
 
----
+## Hypotheses the core should carry
 
-## 1. Existing Mathlib facts to use
+The assembly lemma has two logically separate jobs.
 
-The relevant imports are already very concentrated:
+1. The two `SameP1Vec` conjuncts need exactly the hypotheses already required by the proved/projected projective lemmas:
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
-import Mathlib.Data.MvPolynomial.Basic
+h4     : (4 : k) ≠ 0
+hψ_ne  : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0
+hc3    : W.Ψ₃ ≠ 0
 ```
 
-Useful checks:
+2. The two vector nonzero conjuncts need the no-common-vanishing statement at the evaluation point `x`:
 
 ```lean
-#check normEDS
-#check map_normEDS
-
-#check WeierstrassCurve.ψ
-#check WeierstrassCurve.preΨ_ne_zero
-#check WeierstrassCurve.ΨSq_ne_zero
-
-#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ
-#check WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
-#check WeierstrassCurve.Affine.CoordinateRing.smul_basis_eq_zero
+hNoCommon : ∀ n : ℤ,
+  ¬ ((W.Φ n).eval x = 0 ∧ (W.ΨSq n).eval x = 0)
 ```
 
-The core definition is this shape:
+This is the cleanest core interface.  It does not force `IsElliptic W` into the core; the surrounding theorem can derive `hNoCommon` from `IsElliptic W` using the already-existing L1180/preΨ' argument.
+
+I would **not** assume that `IsElliptic W` alone supplies `h4`, `hψ_ne`, or `hc3` in the file's apparent generality.  Elliptic curves exist in characteristic `2`, so `h4 : (4 : k) ≠ 0` cannot follow from `IsElliptic W` alone.  The division-polynomial nonvanishing hypothesis `hψ_ne` is also stronger than nonsingularity in positive characteristic.  Therefore either the caller must already have these hypotheses, or the caller must be in a stronger context such as a characteristic-zero/nondegenerate-division-polynomial section that proves them separately.
+
+## Fin 2 vector helper
+
+For a Nat-indexed `xPair`, paste this helper before the core lemma.  It is deliberately independent of elliptic-curve facts; it only converts the no-common-zero statement into vector nonzero.
 
 ```lean
--- In Mathlib:
--- noncomputable def WeierstrassCurve.ψ (W : WeierstrassCurve R) (n : ℤ) : R[X][Y] :=
---   normEDS W.ψ₂ (Polynomial.C W.Ψ₃) (Polynomial.C W.preΨ₄) n
+private lemma xPair_ne_zero_of_noCommon
+    (W : WeierstrassCurve k) (n : ℕ) (x : k)
+    (h : ¬ ((W.Φ (n : ℤ)).eval x = 0 ∧
+            (W.ΨSq (n : ℤ)).eval x = 0)) :
+    xPair W n x ≠ 0 := by
+  intro hv
+  apply h
+  constructor
+  · have h0 := congrFun hv (0 : Fin 2)
+    simpa [xPair] using h0
+  · have h1 := congrFun hv (1 : Fin 2)
+    simpa [xPair] using h1
 ```
 
-And the EDS map lemma is this shape:
+If the file's `xPair` is integer-indexed instead, use this version instead:
 
 ```lean
--- In Mathlib:
--- theorem map_normEDS
---     (b c d : R) (f : R →+* S) (n : ℤ) :
---     f (normEDS b c d n) = normEDS (f b) (f c) (f d) n
+private lemma xPair_ne_zero_of_noCommon
+    (W : WeierstrassCurve k) (n : ℤ) (x : k)
+    (h : ¬ ((W.Φ n).eval x = 0 ∧
+            (W.ΨSq n).eval x = 0)) :
+    xPair W n x ≠ 0 := by
+  intro hv
+  apply h
+  constructor
+  · have h0 := congrFun hv (0 : Fin 2)
+    simpa [xPair] using h0
+  · have h1 := congrFun hv (1 : Fin 2)
+    simpa [xPair] using h1
 ```
 
-The degree/nonzero file gives, among other things:
+The proof is just the contrapositive of `![a,b] ≠ 0`: if `xPair W n x = 0`, evaluating the function equality at `(0 : Fin 2)` and `(1 : Fin 2)` gives the two coordinate equalities.
+
+## Finished core lemma, Nat-indexed `xPair` version
+
+This is the version I expect from the statement in the prompt, where the core lemma has `m : ℕ` and the division-polynomial indices in the no-common lemma are reached by casting to `ℤ`.
 
 ```lean
--- In Mathlib:
--- theorem WeierstrassCurve.preΨ_ne_zero
---     {R : Type*} [CommRing R]
---     (W : WeierstrassCurve R) [Nontrivial R]
---     {n : ℤ} (h : (n : R) ≠ 0) :
---     W.preΨ n ≠ 0
---
--- theorem WeierstrassCurve.ΨSq_ne_zero
---     {R : Type*} [CommRing R] [NoZeroDivisors R]
---     (W : WeierstrassCurve R)
---     {n : ℤ} (h : (n : R) ≠ 0) :
---     W.ΨSq n ≠ 0
+theorem xPair_double_and_diffAddOrInf_EDS_core
+    (W : WeierstrassCurve k) (m : ℕ) (x : k)
+    (h4 : (4 : k) ≠ 0)
+    (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0)
+    (hc3 : W.Ψ₃ ≠ 0)
+    (hNoCommon : ∀ n : ℤ,
+      ¬ ((W.Φ n).eval x = 0 ∧ (W.ΨSq n).eval x = 0)) :
+      xPair W (2*m) x ≠ 0
+    ∧ SameP1Vec (XOnly.doubleVec (E:=W⁄k) (xPair W m x))
+        (xPair W (2*m) x)
+    ∧ xPair W (2*m+1) x ≠ 0
+    ∧ SameP1Vec
+        (XOnly.diffAddOrInfVec (E:=W⁄k)
+          (xPair W (m+1) x) (xPair W m x) (xPair W 1 x))
+        (xPair W (2*m+1) x) := by
+  have h2m_ne : xPair W (2*m) x ≠ 0 :=
+    xPair_ne_zero_of_noCommon (W := W) (n := 2*m) (x := x) <| by
+      simpa using hNoCommon (((2*m : ℕ) : ℤ))
+
+  have h2m1_ne : xPair W (2*m+1) x ≠ 0 :=
+    xPair_ne_zero_of_noCommon (W := W) (n := 2*m+1) (x := x) <| by
+      simpa using hNoCommon (((2*m+1 : ℕ) : ℤ))
+
+  exact ⟨
+    h2m_ne,
+    xPair_double_sameP1
+      (W := W) (m := m) (x := x)
+      (h4 := h4) (hψ_ne := hψ_ne) (hc3 := hc3),
+    h2m1_ne,
+    xPair_diffAdd_sameP1
+      (W := W) (m := m) (x := x)
+      (h4 := h4) (hψ_ne := hψ_ne) (hc3 := hc3)
+  ⟩
 ```
 
-For the normalized bivariate `ψ`, the cleanest chain uses `ΨSq_ne_zero`, not
-just `preΨ_ne_zero`.
+Two minor style variants may be needed depending on local declarations.
 
----
-
-## 2. The specialization map from `ℤ[b,c,d]`
-
-A convenient model of `ℤ[b,c,d]` is `MvPolynomial (Fin 3) ℤ`.
+First, if Lean does not like the compact arithmetic/cast term in the two `hNoCommon` calls, split it out:
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
-import Mathlib.Data.MvPolynomial.Basic
-
-open Polynomial
-
-abbrev UniversalEDSRing : Type := MvPolynomial (Fin 3) ℤ
-
-namespace UniversalEDSRing
-
-noncomputable abbrev b : UniversalEDSRing := MvPolynomial.X 0
-noncomputable abbrev c : UniversalEDSRing := MvPolynomial.X 1
-noncomputable abbrev d : UniversalEDSRing := MvPolynomial.X 2
-
-end UniversalEDSRing
-
-namespace WeierstrassCurve
-
-open UniversalEDSRing
-
-/--
-The division-polynomial specialization
-
-  `ℤ[b,c,d] → ℤ[X][Y]`
-
-sending
-
-  `b ↦ W.ψ₂`, `c ↦ C W.Ψ₃`, `d ↦ C W.preΨ₄`.
-
-Here `Polynomial (Polynomial ℤ)` is Mathlib's `ℤ[X][Y]` convention for the
-bivariate polynomial ring in `Y` over `ℤ[X]`.
--/
-noncomputable def divPolySpec (W : WeierstrassCurve ℤ) :
-    UniversalEDSRing →+* Polynomial (Polynomial ℤ) :=
-  MvPolynomial.eval₂Hom
-    (Int.castRingHom (Polynomial (Polynomial ℤ)))
-    ![W.ψ₂, Polynomial.C W.Ψ₃, Polynomial.C W.preΨ₄]
-
-@[simp] theorem divPolySpec_b (W : WeierstrassCurve ℤ) :
-    divPolySpec W b = W.ψ₂ := by
-  simp [divPolySpec, UniversalEDSRing.b]
-
-@[simp] theorem divPolySpec_c (W : WeierstrassCurve ℤ) :
-    divPolySpec W c = Polynomial.C W.Ψ₃ := by
-  simp [divPolySpec, UniversalEDSRing.c]
-
-@[simp] theorem divPolySpec_d (W : WeierstrassCurve ℤ) :
-    divPolySpec W d = Polynomial.C W.preΨ₄ := by
-  simp [divPolySpec, UniversalEDSRing.d]
-
-/--
-The defining specialization identity.  This is the exact formal content of
-“division polynomials are the normalized EDS specialized at
-`(ψ₂, Ψ₃, preΨ₄)`”.
--/
-theorem divPolySpec_normEDS (W : WeierstrassCurve ℤ) (j : ℤ) :
-    divPolySpec W (normEDS b c d j) = W.ψ j := by
-  rw [map_normEDS b c d (divPolySpec W) j]
-  simp [WeierstrassCurve.ψ]
-
-end WeierstrassCurve
+  have hNoCommon_2m := hNoCommon (((2*m : ℕ) : ℤ))
+  have hNoCommon_2m1 := hNoCommon (((2*m+1 : ℕ) : ℤ))
 ```
 
-If your local universal ring is an iterated polynomial ring rather than an
-`MvPolynomial`, replace `MvPolynomial.eval₂Hom` by the corresponding iterated
-`Polynomial.aeval`/`eval₂` map.  The proof is unchanged: `map_normEDS` is the
-only EDS-specific lemma needed.
+and then pass `by simpa using hNoCommon_2m` / `by simpa using hNoCommon_2m1`.
 
----
-
-## 3. The missing bridge: `ψ_n ≠ 0`
-
-The important distinction:
-
-* `preΨ_ne_zero` is already in the degree file.
-* `ΨSq_ne_zero` is already in the degree file.
-* A direct theorem `W.ψ n ≠ 0` may not be exported under that name.
-
-The bridge below proves it from existing coordinate-ring lemmas.
-
-The coordinate ring has basis `{1, Y}` over `R[X]`; Mathlib exposes this through
-`smul_basis_eq_zero`.  Therefore a nonzero `p : R[X]` remains nonzero after
-embedding as the constant-in-`Y` polynomial `C p` and passing to the affine
-coordinate ring.
+Second, if the two projective lemmas have positional rather than named hypotheses, the four-conjunct `exact` can be written as:
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
-
-open Polynomial
-
-namespace WeierstrassCurve
-namespace Affine
-namespace CoordinateRing
-
-/--
-A nonzero polynomial `p : R[X]` remains nonzero in the affine coordinate ring
-when embedded as the bivariate polynomial `C p`.
-
-This is the small zero-detection fact needed for constants in `Y`; it is much
-weaker than injectivity of an arbitrary specialization from `ℤ[b,c,d]`.
--/
-theorem mk_C_ne_zero
-    {R : Type*} [CommRing R]
-    (W : WeierstrassCurve.Affine R)
-    {p : Polynomial R} (hp : p ≠ 0) :
-    (mk W) (Polynomial.C p) ≠ 0 := by
-  intro hp0
-  apply hp
-
-  have hp1 : p • (1 : W.CoordinateRing) = 0 := by
-    calc
-      p • (1 : W.CoordinateRing)
-          = (mk W) (Polynomial.C p) * 1 := by
-              simpa using smul (W' := W) p (1 : W.CoordinateRing)
-      _ = 0 := by
-              simpa [hp0]
-
-  have hbasis :
-      p • (1 : W.CoordinateRing)
-        + (0 : Polynomial R) • (mk W) Polynomial.X = 0 := by
-    simpa [hp1]
-
-  exact (smul_basis_eq_zero (W' := W) (p := p) (q := 0) hbasis).1
-
-end CoordinateRing
-end Affine
-
-/--
-Division-polynomial nonvanishing in characteristic not dividing `n`.
-
-This is the theorem that Approach (c) really wants.  It is not a new degree
-calculation: it is just `ΨSq_ne_zero` plus the coordinate-ring comparison between
-`ψ`, `Ψ`, and `ΨSq`.
--/
-theorem psi_ne_zero_of_natCast_ne_zero
-    {R : Type*} [CommRing R] [NoZeroDivisors R]
-    (W : WeierstrassCurve R)
-    {n : ℤ} (hn : (n : R) ≠ 0) :
-    W.ψ n ≠ 0 := by
-  intro hψ
-
-  have hmkψ :
-      (Affine.CoordinateRing.mk W) (W.ψ n) = 0 := by
-    simpa [hψ]
-
-  have hmkΨ :
-      (Affine.CoordinateRing.mk W) (W.Ψ n) = 0 := by
-    simpa [Affine.CoordinateRing.mk_ψ W n] using hmkψ
-
-  have hmkΨSq :
-      (Affine.CoordinateRing.mk W) (Polynomial.C (W.ΨSq n)) = 0 := by
-    rw [← Affine.CoordinateRing.mk_Ψ_sq W n]
-    simpa [hmkΨ]
-
-  exact (Affine.CoordinateRing.mk_C_ne_zero W (W.ΨSq_ne_zero hn)) hmkΨSq
-
-end WeierstrassCurve
+  exact ⟨
+    h2m_ne,
+    xPair_double_sameP1 W m x h4 hψ_ne hc3,
+    h2m1_ne,
+    xPair_diffAdd_sameP1 W m x h4 hψ_ne hc3
+  ⟩
 ```
 
-Notes on this bridge:
+## Integer-indexed `xPair` version
 
-* The proof does not require `W` to be nonsingular.  These division-polynomial
-  definitions and coordinate-ring identities are attached to a Weierstrass curve
-  object, not to an elliptic-curve group law assumption.
-* The assumption `(n : R) ≠ 0` is essential.  In characteristic `p`, the degree
-  theorem is not available when `p ∣ n`; choosing `R = ℤ` avoids the issue.
-* This bridge uses `ΨSq_ne_zero`, not only positive `natDegree_preΨ`.  Positive
-  degree is also awkward at small indices (`±1`, `±2`), while `ΨSq_ne_zero`
-  handles all nonzero `n` uniformly.
-
----
-
-## 4. Universal nonvanishing theorem
-
-Now choose any Weierstrass curve over `ℤ`.  The coefficient values do not matter;
-all that matters is that `ℤ` is a domain and `(j : ℤ) ≠ 0` when `j ≠ 0`.
+If the actual `xPair` declaration is `(n : ℤ)` rather than `(n : ℕ)`, use the integer helper above and change the core proof to this.  The theorem statement can remain visually the same if Lean elaborates `2*m` and `2*m+1` in the expected integer argument type.
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
-import Mathlib.Data.MvPolynomial.Basic
+theorem xPair_double_and_diffAddOrInf_EDS_core
+    (W : WeierstrassCurve k) (m : ℕ) (x : k)
+    (h4 : (4 : k) ≠ 0)
+    (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0)
+    (hc3 : W.Ψ₃ ≠ 0)
+    (hNoCommon : ∀ n : ℤ,
+      ¬ ((W.Φ n).eval x = 0 ∧ (W.ΨSq n).eval x = 0)) :
+      xPair W (2*m) x ≠ 0
+    ∧ SameP1Vec (XOnly.doubleVec (E:=W⁄k) (xPair W m x))
+        (xPair W (2*m) x)
+    ∧ xPair W (2*m+1) x ≠ 0
+    ∧ SameP1Vec
+        (XOnly.diffAddOrInfVec (E:=W⁄k)
+          (xPair W (m+1) x) (xPair W m x) (xPair W 1 x))
+        (xPair W (2*m+1) x) := by
+  have h2m_ne : xPair W (2*m) x ≠ 0 :=
+    xPair_ne_zero_of_noCommon
+      (W := W) (n := (2 : ℤ) * (m : ℤ)) (x := x) <| by
+        simpa using hNoCommon ((2 : ℤ) * (m : ℤ))
 
-open Polynomial
+  have h2m1_ne : xPair W (2*m+1) x ≠ 0 :=
+    xPair_ne_zero_of_noCommon
+      (W := W) (n := (2 : ℤ) * (m : ℤ) + 1) (x := x) <| by
+        simpa using hNoCommon ((2 : ℤ) * (m : ℤ) + 1)
 
-abbrev UniversalEDSRing : Type := MvPolynomial (Fin 3) ℤ
-
-namespace UniversalEDSRing
-
-noncomputable abbrev b : UniversalEDSRing := MvPolynomial.X 0
-noncomputable abbrev c : UniversalEDSRing := MvPolynomial.X 1
-noncomputable abbrev d : UniversalEDSRing := MvPolynomial.X 2
-
-end UniversalEDSRing
-
-namespace WeierstrassCurve
-
-open UniversalEDSRing
-
-noncomputable def divPolySpec (W : WeierstrassCurve ℤ) :
-    UniversalEDSRing →+* Polynomial (Polynomial ℤ) :=
-  MvPolynomial.eval₂Hom
-    (Int.castRingHom (Polynomial (Polynomial ℤ)))
-    ![W.ψ₂, Polynomial.C W.Ψ₃, Polynomial.C W.preΨ₄]
-
-@[simp] theorem divPolySpec_b (W : WeierstrassCurve ℤ) :
-    divPolySpec W b = W.ψ₂ := by
-  simp [divPolySpec, UniversalEDSRing.b]
-
-@[simp] theorem divPolySpec_c (W : WeierstrassCurve ℤ) :
-    divPolySpec W c = Polynomial.C W.Ψ₃ := by
-  simp [divPolySpec, UniversalEDSRing.c]
-
-@[simp] theorem divPolySpec_d (W : WeierstrassCurve ℤ) :
-    divPolySpec W d = Polynomial.C W.preΨ₄ := by
-  simp [divPolySpec, UniversalEDSRing.d]
-
-theorem divPolySpec_normEDS (W : WeierstrassCurve ℤ) (j : ℤ) :
-    divPolySpec W (normEDS b c d j) = W.ψ j := by
-  rw [map_normEDS b c d (divPolySpec W) j]
-  simp [WeierstrassCurve.ψ]
-
-/-- A dummy Weierstrass curve over `ℤ`.  No nonsingularity is needed here. -/
-def Wzero : WeierstrassCurve ℤ where
-  a₁ := 0
-  a₂ := 0
-  a₃ := 0
-  a₄ := 0
-  a₆ := 0
-
-/--
-Universal normalized EDS nonvanishing over `ℤ[b,c,d]`.
-
-This is the desired unconditional Ward nonvanishing statement.
--/
-theorem universal_normEDS_ne_zero
-    {j : ℤ} (hj : j ≠ 0) :
-    normEDS b c d j ≠ 0 := by
-  intro hzero
-
-  let W : WeierstrassCurve ℤ := Wzero
-
-  have hψ : W.ψ j = 0 := by
-    have hmap := congrArg (divPolySpec W) hzero
-    simpa [divPolySpec_normEDS W j] using hmap
-
-  exact (psi_ne_zero_of_natCast_ne_zero W (by simpa using hj)) hψ
-
-end WeierstrassCurve
+  exact ⟨
+    h2m_ne,
+    xPair_double_sameP1
+      (W := W) (m := m) (x := x)
+      (h4 := h4) (hψ_ne := hψ_ne) (hc3 := hc3),
+    h2m1_ne,
+    xPair_diffAdd_sameP1
+      (W := W) (m := m) (x := x)
+      (h4 := h4) (hψ_ne := hψ_ne) (hc3 := hc3)
+  ⟩
 ```
 
-This proof has exactly the desired logical form:
+## How to wire the surrounding theorem
 
-```text
-assume universal polynomial is zero
-⇒ every specialization is zero
-⇒ the division-polynomial specialization is zero
-⇒ ψ_j = 0
-⇒ contradiction with ψ_ne_zero.
-```
-
-Again, no injectivity of `divPolySpec` is used.
-
----
-
-## 5. Pitfall check: algebraic independence is not needed
-
-The specialization
+At the call site, derive `hNoCommon` once from the existing no-common-root lemma around L1180, then pass it to the core.  The shape should be:
 
 ```lean
-b ↦ W.ψ₂,
-c ↦ Polynomial.C W.Ψ₃,
-d ↦ Polynomial.C W.preΨ₄
+  have hNoCommon : ∀ n : ℤ,
+      ¬ ((W.Φ n).eval x = 0 ∧ (W.ΨSq n).eval x = 0) := by
+    intro n
+    -- Replace this identifier with the actual L1180 theorem/lemma name.
+    exact xPair_no_common_vanishing_of_isElliptic
+      (W := W) (hW := hW) (n := n) (x := x)
+
+  exact xPair_double_and_diffAddOrInf_EDS_core
+    (W := W) (m := m) (x := x)
+    (h4 := h4) (hψ_ne := hψ_ne) (hc3 := hc3)
+    (hNoCommon := hNoCommon)
 ```
 
-may well satisfy algebraic relations in `ℤ[X][Y]`; that is irrelevant.
-
-What would require algebraic independence is the biconditional
+If the only existing L1180 theorem is already the vector nonzero statement
 
 ```lean
-normEDS b c d j = 0 ↔ W.ψ j = 0
+xPair_ne_zero_of_isElliptic ... : xPair W n x ≠ 0
 ```
 
-or a statement that the specialization is globally zero-reflecting on all of
-`ℤ[b,c,d]`.  We do not need either one.
-
-The actual implication used is only the contrapositive of `map_zero`:
+then you can skip `hNoCommon` entirely and make the core carry the two nonzero facts directly:
 
 ```lean
-φ x ≠ 0 → x ≠ 0
+(h2m_ne  : xPair W (2*m) x ≠ 0)
+(h2m1_ne : xPair W (2*m+1) x ≠ 0)
 ```
 
-which is valid for every ring homomorphism.  Therefore a single nonzero image is
-sufficient.
+but that is less aligned with the prompt's request to discharge the nonzero conjuncts from the no-common-vanishing statement.
 
-So the correct answer to the “zero-detecting map” question is:
+## Minimal alternative: carry only the two no-common instances
 
-* No, you do not need to prove that the map is injective.
-* No, you do not need algebraic independence of `ψ₂`, `Ψ₃`, `preΨ₄`.
-* Yes, the specialization detects nonvanishing of this specific element once you
-  prove its image is nonzero.
-
----
-
-## 6. Recommended implementation order
-
-1. Add the small coordinate-ring constant-in-`Y` lemma:
-
-   ```lean
-   WeierstrassCurve.Affine.CoordinateRing.mk_C_ne_zero
-   ```
-
-2. Add the division-polynomial nonzero bridge:
-
-   ```lean
-   WeierstrassCurve.psi_ne_zero_of_natCast_ne_zero
-   ```
-
-3. Define the universal `MvPolynomial (Fin 3) ℤ` variables `b c d`.
-
-4. Define `divPolySpec` by `MvPolynomial.eval₂Hom`.
-
-5. Prove `divPolySpec_normEDS` by `map_normEDS` and `simp [WeierstrassCurve.ψ]`.
-
-6. Prove the universal theorem by specializing to `Wzero : WeierstrassCurve ℤ`.
-
-The only proof fragility is exact namespace/simp spelling around
-`CoordinateRing.smul` and `smul_basis_eq_zero`; mathematically, that lemma is
-precisely the `{1,Y}` coordinate-ring basis statement already present in
-Mathlib.
-
----
-
-## 7. Answer to the three questions
-
-### Q1. Can universal nonvanishing be concluded by pulling back?
-
-Yes, but do not formulate it as requiring an injective pullback.  Define
+If you want the smallest possible core signature, replace the universal `hNoCommon` with only the two instances used by this `m`:
 
 ```lean
-φ := divPolySpec W : MvPolynomial (Fin 3) ℤ →+* Polynomial (Polynomial ℤ)
+(hNoCommon_2m :
+  ¬ ((W.Φ (((2*m : ℕ) : ℤ))).eval x = 0 ∧
+     (W.ΨSq (((2*m : ℕ) : ℤ))).eval x = 0))
+(hNoCommon_2m1 :
+  ¬ ((W.Φ (((2*m+1 : ℕ) : ℤ))).eval x = 0 ∧
+     (W.ΨSq (((2*m+1 : ℕ) : ℤ))).eval x = 0))
 ```
 
-and prove
+Then the two nonzero proofs are simply:
 
 ```lean
-φ (normEDS b c d j) = W.ψ j.
+  have h2m_ne : xPair W (2*m) x ≠ 0 :=
+    xPair_ne_zero_of_noCommon (W := W) (n := 2*m) (x := x) hNoCommon_2m
+
+  have h2m1_ne : xPair W (2*m+1) x ≠ 0 :=
+    xPair_ne_zero_of_noCommon (W := W) (n := 2*m+1) (x := x) hNoCommon_2m1
 ```
 
-If `W.ψ j ≠ 0`, then `normEDS b c d j ≠ 0`, because otherwise applying `φ` to
-`0 = normEDS b c d j` would force `0 = W.ψ j`.
-
-### Q2. What does Mathlib give for `ψ_n ≠ 0`?
-
-The degree file gives nonzero results for `preΨ` and `ΨSq`, including:
-
-```lean
-W.preΨ_ne_zero : (n : R) ≠ 0 → W.preΨ n ≠ 0
-W.ΨSq_ne_zero : (n : R) ≠ 0 → W.ΨSq n ≠ 0
-```
-
-For `ψ` itself, the robust chain is:
-
-```text
-W.ΨSq_ne_zero hn
-+ CoordinateRing.mk_Ψ_sq
-+ CoordinateRing.mk_ψ
-+ constants-in-Y inject into the coordinate ring
-⇒ W.ψ n ≠ 0.
-```
-
-This works over any `[CommRing R] [NoZeroDivisors R]` with `(n : R) ≠ 0`, and
-in particular over `R = ℤ` for every integer `n ≠ 0`.
-
-### Q3. Could algebraic relations in the specialization break the proof?
-
-No.  Algebraic relations would matter if the proof needed the specialization to
-be injective on all of `ℤ[b,c,d]`.  This proof only needs one fact:
-
-```lean
-φ (normEDS b c d j) = W.ψ j ≠ 0.
-```
-
-That single nonzero image already implies the source element is nonzero.  The
-map can have a huge kernel; it just cannot contain this particular element,
-because its image has been proved nonzero.
+I prefer the universal `hNoCommon` core parameter because it matches the surrounding `IsElliptic`/preΨ' theorem shape and keeps the call site less noisy.
