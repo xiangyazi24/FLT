@@ -2,6 +2,7 @@ import scratch.KeystoneLadder
 import scratch.KeystoneDoubling
 import scratch.KeystoneDoublingCert
 import scratch.KeystoneDiffAddCert
+import scratch.KeystoneCoprimality
 
 open Polynomial WeierstrassCurve
 open scoped Classical
@@ -238,7 +239,7 @@ theorem xPair_diffAdd_sameP1_of_inf_phi_ne
     · simpa [xPair, Z, one_smul] using hZcoord
 
 theorem xPair_odd_phi_eval_ne_zero_of_delta_zero
-    (W : WeierstrassCurve k) (m : ℤ) (x : k)
+    (W : WeierstrassCurve k) [W.IsElliptic] (m : ℤ) (x : k)
     (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0)
     (hδ : deltaVec (xPair W (m + 1) x) (xPair W m x) = 0) :
     (W.Φ (2 * m + 1)).eval x ≠ 0 := by
@@ -248,13 +249,13 @@ theorem xPair_odd_phi_eval_ne_zero_of_delta_zero
           = (deltaVec (xPair W (m + 1) x) (xPair W m x)) ^ 2 :=
             ΨSq_two_mul_add_one_eval_deltaVec_sq (W := W) (m := m) (x := x) h4 hψ_ne hc3
       _ = 0 := by simp [hδ]
-  -- AVENUE (c): division-polynomial coprimality gcd(Φ_(2m+1), ΨSq_(2m+1)) = 1
-  -- (non-circular: cannot use xPair_ne_zero_of_isElliptic, which is proved through the keystone).
-  sorry
+  -- AVENUE (c): non-circular division-polynomial coprimality gcd(Φ_(2m+1), ΨSq_(2m+1)) = 1
+  intro hΦ0
+  exact WeierstrassCurve.Φ_ΨSq_no_common_eval_zero_odd (W := W) (x := x) h4 m ⟨hΦ0, hΨzero⟩
 
 /-- Keystone x-only differential-addition wiring lemma. -/
 theorem xPair_diffAdd_sameP1
-    (W : WeierstrassCurve k) (m : ℤ) (x : k)
+    (W : WeierstrassCurve k) [W.IsElliptic] (m : ℤ) (x : k)
     (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0) :
     SameP1Vec
       (diffAddOrInfVec (E := W⁄k)
@@ -285,7 +286,7 @@ theorem diffAddOrInfVec_comm (E : WeierstrassCurve k) (A B D : Fin 2 → k) :
 /-- Core-order (A = xPair m, B = xPair (m+1)) differential-addition wiring, obtained from
 `xPair_diffAdd_sameP1` by the symmetry above. -/
 theorem xPair_diffAdd_sameP1_core_order
-    (W : WeierstrassCurve k) (m : ℤ) (x : k)
+    (W : WeierstrassCurve k) [W.IsElliptic] (m : ℤ) (x : k)
     (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0) :
     SameP1Vec
       (diffAddOrInfVec (E := W⁄k)
