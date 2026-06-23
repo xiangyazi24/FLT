@@ -1,4 +1,6 @@
-import scratch.PsiSomos
+module
+
+public import scratch.PsiSomos
 
 /-! # Keystone resultant/Bezout nonsingularity certificates (avenue c)
 
@@ -108,7 +110,7 @@ private lemma bezout_Ψ₂Sq_Ψ₃ (W : WeierstrassCurve k) :
           - (64 : k[X]) * (C W.b₈) ^ 2)) * hb
 
 /-- On an elliptic curve, `Ψ₂Sq` and `Ψ₃` have no common root. -/
-lemma Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero (W : WeierstrassCurve k) [W.IsElliptic] {x : k}
+public lemma Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero (W : WeierstrassCurve k) [W.IsElliptic] {x : k}
     (hs : W.Ψ₂Sq.eval x = 0) : W.Ψ₃.eval x ≠ 0 := by
   intro hc3
   have hb := congrArg (fun p : k[X] => p.eval x) (bezout_Ψ₂Sq_Ψ₃ W)
@@ -117,7 +119,7 @@ lemma Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero (W : WeierstrassCurve k) [W.IsElliptic]
   have hΔ2 : W.Δ ^ 2 = 0 := by linear_combination hb
   exact (W.isUnit_Δ.ne_zero) (pow_eq_zero_iff (by norm_num) |>.mp hΔ2)
 
-lemma Ψ₂Sq_eval_ne_of_Ψ₃_eval_zero (W : WeierstrassCurve k) [W.IsElliptic] {x : k}
+public lemma Ψ₂Sq_eval_ne_of_Ψ₃_eval_zero (W : WeierstrassCurve k) [W.IsElliptic] {x : k}
     (hc3 : W.Ψ₃.eval x = 0) : W.Ψ₂Sq.eval x ≠ 0 :=
   fun hs => Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero W hs hc3
 
@@ -617,7 +619,7 @@ private lemma bezout_Ψ₃_preΨ₄ (W : WeierstrassCurve k) :
           - (153664 : k[X]) * (C W.b₈) ^ 5)) * hb
 
 /-- On an elliptic curve, `Ψ₃` and `preΨ₄` have no common root. -/
-lemma preΨ₄_eval_ne_of_Ψ₃_eval_zero (W : WeierstrassCurve k) [W.IsElliptic] {x : k}
+public lemma preΨ₄_eval_ne_of_Ψ₃_eval_zero (W : WeierstrassCurve k) [W.IsElliptic] {x : k}
     (hc3 : W.Ψ₃.eval x = 0) : (W.preΨ 4).eval x ≠ 0 := by
   rw [show W.preΨ 4 = W.preΨ₄ from by simpa using W.preΨ'_four ▸ rfl]
   intro hd4

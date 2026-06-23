@@ -1,5 +1,7 @@
-import scratch.KeystoneDoubling
-import scratch.PsiInvariant
+module
+
+public import scratch.KeystoneDoubling
+public import scratch.PsiInvariant
 
 open Polynomial
 open scoped Polynomial
@@ -246,7 +248,7 @@ private lemma Φ_two_mul_sat_odd
               - P2 * Pm1^2 * X^2)) * hb)
 
 /-- Denominator part of x-coordinate doubling for division polynomials. -/
-lemma ΨSq_two_mul
+public lemma ΨSq_two_mul
     (W : WeierstrassCurve R)
     (h4 : (4 : R) ≠ 0)
     (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
@@ -261,7 +263,7 @@ lemma ΨSq_two_mul
   exact (mul_eq_zero.mp hsat).resolve_left hc3
 
 /-- Numerator part of x-coordinate doubling for division polynomials. -/
-lemma Φ_two_mul
+public lemma Φ_two_mul
     (W : WeierstrassCurve R)
     (h4 : (4 : R) ≠ 0)
     (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)

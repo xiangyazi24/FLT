@@ -1,4 +1,6 @@
-import scratch.WardConservation
+module
+
+public import scratch.WardConservation
 
 /-!
 # Single-index invariant for `normEDS`  (Ward / van der Poorten–Swart conserved quantity)
@@ -24,19 +26,19 @@ namespace FLT.EDS
 variable {R : Type*} [CommRing R]
 
 /-- The `s = 1` invariant relation `c · N_n = (d + b⁴) · D_n`. -/
-def InvarRel (b c d : R) (n : ℤ) : Prop :=
+@[expose] public def InvarRel (b c d : R) (n : ℤ) : Prop :=
   c * Nseq b c d n = (d + b ^ 4) * Dseq b c d n
 
 /-- Base cases: `n = 0, 1` (both sides vanish) and `n = 2`. -/
-lemma invarRel_zero (b c d : R) : InvarRel b c d 0 := by
+public lemma invarRel_zero (b c d : R) : InvarRel b c d 0 := by
   unfold InvarRel Nseq Dseq
   simp [normEDS_zero, normEDS_one, normEDS_two, normEDS_neg]
 
-lemma invarRel_one (b c d : R) : InvarRel b c d 1 := by
+public lemma invarRel_one (b c d : R) : InvarRel b c d 1 := by
   unfold InvarRel Nseq Dseq
   simp [normEDS_zero, normEDS_one, normEDS_two, normEDS_three, normEDS_neg]
 
-lemma invarRel_two (b c d : R) : InvarRel b c d 2 := by
+public lemma invarRel_two (b c d : R) : InvarRel b c d 2 := by
   unfold InvarRel Nseq Dseq
   norm_num [normEDS_zero, normEDS_one, normEDS_two, normEDS_three, normEDS_four]
   ring
@@ -46,7 +48,7 @@ lemma invarRel_two (b c d : R) : InvarRel b c d 2 := by
 identity (no unfolding of `Nseq`/`Dseq` needed). The final `InvarRel (n+1)` is got by cancelling
 `D_n` over a domain where `D_n ≠ 0` (e.g. the division-polynomial setting, `preΨ` nonvanishing via
 `Mathlib …DivisionPolynomial.Degree`). -/
-lemma invarRel_step_mul (b c d : R) (n : ℤ) (hn : InvarRel b c d n) :
+public lemma invarRel_step_mul (b c d : R) (n : ℤ) (hn : InvarRel b c d n) :
     Dseq b c d n * (c * Nseq b c d (n+1) - (d + b ^ 4) * Dseq b c d (n+1)) = 0 := by
   have hcons := normEDS_conservation b c d n
   unfold InvarRel at hn
@@ -56,7 +58,7 @@ lemma invarRel_step_mul (b c d : R) (n : ℤ) (hn : InvarRel b c d n) :
 (e.g. the division-polynomial setting — `preΨ` nonvanishing via Mathlib's degree lemmas),
 `InvarRel n` holds for every `n`. Proof: `Int` induction off the base cases and `invarRel_step_mul`,
 cancelling `D_n ≠ 0`; negative `n` by the `Nseq`/`Dseq` sign symmetry. -/
-lemma invarRel_all [IsDomain R] (b c d : R)
+public lemma invarRel_all [IsDomain R] (b c d : R)
     (hne : ∀ k : ℤ, k ≠ 0 → normEDS b c d k ≠ 0) (n : ℤ) : InvarRel b c d n := by
   have hge2 : ∀ m : ℤ, 2 ≤ m → InvarRel b c d m := by
     intro m hm
@@ -96,7 +98,7 @@ lemma invarRel_all [IsDomain R] (b c d : R)
 
 /-- **Double-off relation** `N_k D_m = N_m D_k` (i.e. `T_{k,m} = 0`): the conserved ratio is
 index-independent. From `invarRel_all` (`c N = (d+b⁴) D`) by cancelling `c`. -/
-lemma Trel_zero [IsDomain R] (b c d : R) (hc : c ≠ 0)
+public lemma Trel_zero [IsDomain R] (b c d : R) (hc : c ≠ 0)
     (hne : ∀ k : ℤ, k ≠ 0 → normEDS b c d k ≠ 0) (k m : ℤ) :
     Nseq b c d k * Dseq b c d m = Nseq b c d m * Dseq b c d k := by
   have hk := invarRel_all b c d hne k

@@ -1,4 +1,6 @@
-import scratch.KeystoneSameP1
+module
+
+public import scratch.KeystoneSameP1
 
 /-! # Keystone avenue (d): EDS core + export chain, relocated above SameP1 + Coprimality.
 The L1009 core is proven here (non-circular) and the downstream ladder/export is threaded
@@ -243,7 +245,7 @@ private theorem xLadderPair_same_xPair_EDS
 representative has no zero-vector specialization and agrees with the corrected Montgomery-pair
 ladder.  The first conjunct is the no-common-root/coprimality statement for `Φₙ` and `ΨSqₙ`;
 the second conjunct is the EDS recurrence compatibility with `doubleVec` and `diffAddOrInfVec`. -/
-theorem xPair_ne_zero_and_same_xLadderRep_EDS
+public theorem xPair_ne_zero_and_same_xLadderRep_EDS
     (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) (x : k)
     (h4 : (4 : k) ≠ 0)
     (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0)
@@ -256,7 +258,7 @@ theorem xPair_ne_zero_and_same_xLadderRep_EDS
     exact ⟨h.1, by simpa [XOnly.xLadderRep] using h.2.2.1⟩
 
 /-- No common root for the two coordinates of the division-polynomial x-representative. -/
-theorem xPair_ne_zero_of_isElliptic
+public theorem xPair_ne_zero_of_isElliptic
     (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) (x : k)
     (h4 : (4 : k) ≠ 0)
     (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0)
@@ -266,7 +268,7 @@ theorem xPair_ne_zero_of_isElliptic
 
 /-- Evaluation form of coprimality: `Φₙ(x)` and `ΨSqₙ(x)` do not vanish together on an
 elliptic curve. -/
-theorem Φ_ΨSq_no_common_eval_zero
+public theorem Φ_ΨSq_no_common_eval_zero
     (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) (x : k)
     (h4 : (4 : k) ≠ 0)
     (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0)
@@ -282,7 +284,7 @@ theorem Φ_ΨSq_no_common_eval_zero
 /-- Sanity check: the EDS representative agrees with the ladder at `n = 3`.  The
 `δ = 0` branch uses the elliptic no-common-root statement for `Φ₃` and `ΨSq₃`; the
 non-degenerate branch is a direct polynomial identity. -/
-theorem xPair_same_xLadderRep_three
+public theorem xPair_same_xLadderRep_three
     (W : WeierstrassCurve k) [W.IsElliptic] (x : k)
     (h4 : (4 : k) ≠ 0)
     (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0)
@@ -333,7 +335,7 @@ theorem xPair_same_xLadderRep_three
       ring
 
 /-- Sanity check: the EDS representative agrees with the ladder at `n = 4`. -/
-theorem xPair_same_xLadderRep_four (W : WeierstrassCurve k) (x : k) :
+public theorem xPair_same_xLadderRep_four (W : WeierstrassCurve k) (x : k) :
     SameP1Vec
       (XOnly.xLadderRep (E := W⁄k) x 4)
       (xPair W (4 : ℤ) x) := by
@@ -354,7 +356,7 @@ theorem xPair_same_xLadderRep_four (W : WeierstrassCurve k) (x : k) :
 
 /-- Irreducible remaining EDS recurrence seam: the corrected Montgomery-pair ladder agrees
 with the `[Φₙ, ΨSqₙ]` division-polynomial representative. -/
-theorem xPair_same_xLadderRep_seam_EDS_core
+public theorem xPair_same_xLadderRep_seam_EDS_core
     (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) (x : k)
     (h4 : (4 : k) ≠ 0)
     (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0)
@@ -365,7 +367,7 @@ theorem xPair_same_xLadderRep_seam_EDS_core
   (xPair_ne_zero_and_same_xLadderRep_EDS (W := W) n x h4 hψ_ne hc3).2
 
 /-- SEAM: the EDS/division-polynomial compatibility of the raw x-only ladder. -/
-theorem xPair_same_xLadderRep_seam
+public theorem xPair_same_xLadderRep_seam
     (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) (x : k)
     (h4 : (4 : k) ≠ 0)
     (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0)
@@ -376,7 +378,7 @@ theorem xPair_same_xLadderRep_seam
   xPair_same_xLadderRep_seam_EDS_core (W := W) n x h4 hψ_ne hc3
 
 /-- The projective division-polynomial coordinate formula assembled from the ladder seams. -/
-theorem xRep_nsmul_same_xPair (W : WeierstrassCurve k) [W.IsElliptic]
+public theorem xRep_nsmul_same_xPair (W : WeierstrassCurve k) [W.IsElliptic]
     (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0)
     {n : ℕ} {x y : k} (h : (W⁄k).Nonsingular x y) :
     SameP1Vec
@@ -387,7 +389,7 @@ theorem xRep_nsmul_same_xPair (W : WeierstrassCurve k) [W.IsElliptic]
     (xPair_same_xLadderRep_seam (W := W) n x h4 hψ_ne hc3)
 
 /-- Keystone target reduced to the projective division-polynomial coordinate formula. -/
-theorem nsmul_eq_zero_iff_ΨSq_eval (W : WeierstrassCurve k) [W.IsElliptic]
+public theorem nsmul_eq_zero_iff_ΨSq_eval (W : WeierstrassCurve k) [W.IsElliptic]
     (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0)
     {n : ℕ} {x y : k} (h : (W⁄k).Nonsingular x y) :
     n • (Point.some x y h : (W⁄k).Point) = 0 ↔ (W.ΨSq (n : ℤ)).eval x = 0 := by

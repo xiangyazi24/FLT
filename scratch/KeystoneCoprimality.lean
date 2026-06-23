@@ -1,5 +1,7 @@
-import scratch.PsiSomos
-import scratch.KeystoneResultantCerts
+module
+
+public import scratch.PsiSomos
+public import scratch.KeystoneResultantCerts
 
 /-! # Keystone avenue (c): coprimality capstone (propagation + rank-3 + 2-torsion).
 Resultant/Bezout certs are in scratch.KeystoneResultantCerts (imported above). -/
@@ -17,9 +19,9 @@ noncomputable section
 
 variable {k : Type*} [Field k]
 
-private abbrev pe (W : WeierstrassCurve k) (x : k) (i : ℤ) : k := (W.preΨ i).eval x
-private abbrev sx (W : WeierstrassCurve k) (x : k) : k := W.Ψ₂Sq.eval x
-private abbrev c3x (W : WeierstrassCurve k) (x : k) : k := W.Ψ₃.eval x
+@[expose] public abbrev pe (W : WeierstrassCurve k) (x : k) (i : ℤ) : k := (W.preΨ i).eval x
+@[expose] public abbrev sx (W : WeierstrassCurve k) (x : k) : k := W.Ψ₂Sq.eval x
+@[expose] public abbrev c3x (W : WeierstrassCurve k) (x : k) : k := W.Ψ₃.eval x
 
 /-- Evaluated adjacent-Somos relation. -/
 private lemma eval_preΨ_adjacent_somos
@@ -404,7 +406,7 @@ private lemma preΨ_eval_zero_iff_three_dvd_abs
       _ ↔ (3 : ℤ) ∣ n := hneg_dvd
 
 /-- Rank-3 apparition on the `Ψ₃.eval x = 0` stratum. -/
-theorem preΨ_eval_zero_iff_three_dvd_of_Ψ₃_eval_zero
+public theorem preΨ_eval_zero_iff_three_dvd_of_Ψ₃_eval_zero
     (W : WeierstrassCurve k) (x : k) [W.IsElliptic]
     (h4 : (4 : k) ≠ 0)
     (hc3 : W.Ψ₃.eval x = 0)
@@ -419,7 +421,7 @@ theorem preΨ_eval_zero_iff_three_dvd_of_Ψ₃_eval_zero
   simpa [pe] using preΨ_eval_zero_iff_three_dvd_abs (W := W) (x := x) hNat n
 
 /-- No adjacent vanishing on the `Ψ₃.eval x = 0` stratum. -/
-theorem no_adjacent_preΨ_zero_of_Ψ₃_eval_zero
+public theorem no_adjacent_preΨ_zero_of_Ψ₃_eval_zero
     (W : WeierstrassCurve k) (x : k) [W.IsElliptic]
     (h4 : (4 : k) ≠ 0)
     (hc3 : W.Ψ₃.eval x = 0)
@@ -445,7 +447,7 @@ If `Ψ₃(x) ≠ 0`, use the already-proved generic adjacent-zero lemma.  If
 `Ψ₃(x) = 0`, the resultant certificates supply the two nonzero inputs needed by
 the rank-3 apparition lemma.
 -/
-theorem no_adjacent_preΨ_zero
+public theorem no_adjacent_preΨ_zero
     (W : WeierstrassCurve k) [W.IsElliptic] (x : k)
     (h4 : (4 : k) ≠ 0) (r : ℤ) :
     ¬ (pe W x r = 0 ∧ pe W x (r + 1) = 0) := by
@@ -460,13 +462,13 @@ theorem no_adjacent_preΨ_zero
       (W := W) (x := x) h4 hc3 r
 
 /-- Odd `ΨSq` evaluation: at odd index it is just `preΨ²`. -/
-theorem ΨSq_eval_odd
+public theorem ΨSq_eval_odd
     (W : WeierstrassCurve k) (x : k) (m : ℤ) :
     (W.ΨSq (2 * m + 1)).eval x = (pe W x (2 * m + 1)) ^ 2 := by
   simp [ΨSq, pe, m.not_even_two_mul_add_one]
 
 /-- Odd `Φ` evaluation in the `pe/sx` notation used by the coprimality file. -/
-theorem Φ_eval_odd
+public theorem Φ_eval_odd
     (W : WeierstrassCurve k) (x : k) (m : ℤ) :
     (W.Φ (2 * m + 1)).eval x
       = x * (W.ΨSq (2 * m + 1)).eval x
@@ -495,7 +497,7 @@ collapses after evaluation at `x` because `(W.Ψ₂Sq).eval x = 0`.
 The bases are `preΨ_1 = 1` and `preΨ_3 = Ψ₃`, with the latter nonzero by the
 resultant certificate `Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero`.
 -/
-theorem preΨ_odd_eval_ne_of_Ψ₂Sq_eval_zero
+public theorem preΨ_odd_eval_ne_of_Ψ₂Sq_eval_zero
     (W : WeierstrassCurve k) [W.IsElliptic] (x : k)
     (h4 : (4 : k) ≠ 0) (hs : sx W x = 0)
     {n : ℤ} (hn : ¬ Even n) :
@@ -631,7 +633,7 @@ Odd `Φ` and `ΨSq` have no common evaluated zero on an elliptic curve.
 This is the avenue (c) no-common-root theorem needed by the x-only ladder
 infinity branch.
 -/
-theorem Φ_ΨSq_no_common_eval_zero_odd
+public theorem Φ_ΨSq_no_common_eval_zero_odd
     (W : WeierstrassCurve k) [W.IsElliptic] (x : k)
     (h4 : (4 : k) ≠ 0) (m : ℤ) :
     ¬ ((W.Φ (2 * m + 1)).eval x = 0 ∧
@@ -681,7 +683,7 @@ file.
 This is just `ΨSq_even` evaluated at `x`, with the large even-recursion factor
 identified with `preΨ (2*m)` by `preΨ_even`.
 -/
-theorem ΨSq_eval_even
+public theorem ΨSq_eval_even
     (W : WeierstrassCurve k) (x : k) (m : ℤ) :
     (W.ΨSq (2 * m)).eval x = (pe W x (2 * m)) ^ 2 * sx W x := by
   have hpre :
@@ -711,7 +713,7 @@ Even `Φ` evaluation in the `pe/sx` notation.
 For `n = 2*m`, the trailing factor in the general definition of `Φ` is `1`, not
 `Ψ₂Sq`.
 -/
-theorem Φ_eval_even
+public theorem Φ_eval_even
     (W : WeierstrassCurve k) (x : k) (m : ℤ) :
     (W.Φ (2 * m)).eval x
       = x * (W.ΨSq (2 * m)).eval x
@@ -724,7 +726,7 @@ Even-index no-common-root theorem for `Φ` and `ΨSq`.
 
 This is the exact even analogue of `Φ_ΨSq_no_common_eval_zero_odd`.
 -/
-theorem Φ_ΨSq_no_common_eval_zero_even
+public theorem Φ_ΨSq_no_common_eval_zero_even
     (W : WeierstrassCurve k) [W.IsElliptic] (x : k)
     (h4 : (4 : k) ≠ 0) (m : ℤ) :
     ¬ ((W.Φ (2 * m)).eval x = 0 ∧ (W.ΨSq (2 * m)).eval x = 0) := by

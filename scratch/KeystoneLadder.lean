@@ -1,4 +1,6 @@
-import Mathlib
+module
+
+public import Mathlib
 
 set_option maxHeartbeats 2000000
 set_option linter.unusedSectionVars false
@@ -19,7 +21,7 @@ universe u
 variable {k : Type u} [Field k] [DecidableEq k]
 
 /-- Minimal projective x-coordinate over an arbitrary field. -/
-structure P1 (k : Type u) [Zero k] where
+public structure P1 (k : Type u) [Zero k] where
   X : k
   Z : k
   not_both_zero : X ≠ 0 ∨ Z ≠ 0
@@ -29,17 +31,17 @@ namespace P1
 variable [Field k]
 
 /-- Equality in `P¹`, by cross multiplication. -/
-def Same (A B : P1 k) : Prop :=
+@[expose] public def Same (A B : P1 k) : Prop :=
   A.X * B.Z = B.X * A.Z
 
-@[simp] lemma same_refl (A : P1 k) : Same A A := by
+@[simp] public lemma same_refl (A : P1 k) : Same A A := by
   dsimp [Same]
 
-@[simp] lemma same_mk_iff {A B : P1 k} :
+@[simp] public lemma same_mk_iff {A B : P1 k} :
     Same A B ↔ A.X * B.Z = B.X * A.Z := Iff.rfl
 
 /-- Convert the bundled nonzero `P¹` representative to Mathlib's `Fin 2` convention. -/
-def toVec (A : P1 k) : Fin 2 → k :=
+@[expose] public def toVec (A : P1 k) : Fin 2 → k :=
   ![A.X, A.Z]
 
 end P1
@@ -47,42 +49,42 @@ end P1
 variable (E : WeierstrassCurve k)
 
 /-- The point at infinity on the Kummer line. -/
-def xInf : P1 k :=
+@[expose] public def xInf : P1 k :=
   { X := 1, Z := 0, not_both_zero := Or.inl one_ne_zero }
 
 /-- The affine x-coordinate `[x : 1]`. -/
-def xAff (x : k) : P1 k :=
+@[expose] public def xAff (x : k) : P1 k :=
   { X := x, Z := 1, not_both_zero := Or.inr one_ne_zero }
 
 /-- Projective x-coordinate. The group identity maps to `[1 : 0]`. -/
-def xRep : E.toAffine.Point → P1 k
+@[expose] public def xRep : E.toAffine.Point → P1 k
   | 0 => xInf
   | Point.some x _ _ => xAff x
 
-@[simp] lemma xRep_zero :
+@[simp] public lemma xRep_zero :
     xRep E (0 : E.toAffine.Point) = xInf := rfl
 
-@[simp] lemma xRep_some {x y : k} (h : E.toAffine.Nonsingular x y) :
+@[simp] public lemma xRep_some {x y : k} (h : E.toAffine.Nonsingular x y) :
     xRep E (Point.some x y h : E.toAffine.Point) = xAff x := rfl
 
-@[simp] lemma xRep_some_X {x y : k} (h : E.toAffine.Nonsingular x y) :
+@[simp] public lemma xRep_some_X {x y : k} (h : E.toAffine.Nonsingular x y) :
     (xRep E (Point.some x y h : E.toAffine.Point)).X = x := rfl
 
-@[simp] lemma xRep_some_Z {x y : k} (h : E.toAffine.Nonsingular x y) :
+@[simp] public lemma xRep_some_Z {x y : k} (h : E.toAffine.Nonsingular x y) :
     (xRep E (Point.some x y h : E.toAffine.Point)).Z = 1 := rfl
 
-@[simp] lemma xInf_X : (xInf : P1 k).X = 1 := rfl
-@[simp] lemma xInf_Z : (xInf : P1 k).Z = 0 := rfl
-@[simp] lemma xAff_X (x : k) : (xAff x).X = x := rfl
-@[simp] lemma xAff_Z (x : k) : (xAff x).Z = 1 := rfl
+@[simp] public lemma xInf_X : (xInf : P1 k).X = 1 := rfl
+@[simp] public lemma xInf_Z : (xInf : P1 k).Z = 0 := rfl
+@[simp] public lemma xAff_X (x : k) : (xAff x).X = x := rfl
+@[simp] public lemma xAff_Z (x : k) : (xAff x).Z = 1 := rfl
 
-@[simp] lemma xRep_neg_some_same {x y : k} (h : E.toAffine.Nonsingular x y) :
+@[simp] public lemma xRep_neg_some_same {x y : k} (h : E.toAffine.Nonsingular x y) :
     P1.Same
       (xRep E (-(Point.some x y h : E.toAffine.Point)))
       (xRep E (Point.some x y h : E.toAffine.Point)) := by
   simp [xRep, xAff, P1.Same]
 
-lemma xRep_neg_same (P : E.toAffine.Point) :
+public lemma xRep_neg_same (P : E.toAffine.Point) :
     P1.Same (xRep E (-P)) (xRep E P) := by
   cases P with
   | zero =>
@@ -92,22 +94,22 @@ lemma xRep_neg_same (P : E.toAffine.Point) :
       exact xRep_neg_some_same (E := E) h
 
 /-- `δ = X₁Z₂ - X₂Z₁`. -/
-def delta (A B : P1 k) : k :=
+@[expose] public def delta (A B : P1 k) : k :=
   A.X * B.Z - B.X * A.Z
 
 /-- Homogeneous numerator for `x₊ + x₋`. -/
-def sumNum (A B : P1 k) : k :=
+@[expose] public def sumNum (A B : P1 k) : k :=
     2 * A.X * B.X * (A.X * B.Z + B.X * A.Z)
   + E.b₂ * A.X * B.X * A.Z * B.Z
   + E.b₄ * A.Z * B.Z * (A.X * B.Z + B.X * A.Z)
   + E.b₆ * A.Z ^ 2 * B.Z ^ 2
 
-lemma delta_eq_zero_of_same {A B : P1 k} (h : P1.Same A B) :
+public lemma delta_eq_zero_of_same {A B : P1 k} (h : P1.Same A B) :
     delta A B = 0 := by
   dsimp [delta, P1.Same] at h ⊢
   linear_combination h
 
-@[simp] lemma xRep_add_some_of_X_ne
+@[simp] public lemma xRep_add_some_of_X_ne
     {x₁ y₁ x₂ y₂ : k}
     {h₁ : E.toAffine.Nonsingular x₁ y₁}
     {h₂ : E.toAffine.Nonsingular x₂ y₂}
@@ -118,7 +120,7 @@ lemma delta_eq_zero_of_same {A B : P1 k} (h : P1.Same A B) :
   rw [WeierstrassCurve.Affine.Point.add_of_X_ne (W := E.toAffine) hx]
   rfl
 
-@[simp] lemma xRep_sub_some_of_X_ne
+@[simp] public lemma xRep_sub_some_of_X_ne
     {x₁ y₁ x₂ y₂ : k}
     {h₁ : E.toAffine.Nonsingular x₁ y₁}
     {h₂ : E.toAffine.Nonsingular x₂ y₂}
@@ -132,7 +134,7 @@ lemma delta_eq_zero_of_same {A B : P1 k} (h : P1.Same A B) :
   rw [WeierstrassCurve.Affine.Point.add_of_X_ne (W := E.toAffine) hx]
   rfl
 
-lemma xRep_add_sub_kummer_affine_sum_ne_x
+public lemma xRep_add_sub_kummer_affine_sum_ne_x
     {x₁ y₁ x₂ y₂ : k}
     (h₁ : E.toAffine.Equation x₁ y₁)
     (h₂ : E.toAffine.Equation x₂ y₂)
@@ -156,7 +158,7 @@ lemma xRep_add_sub_kummer_affine_sum_ne_x
   field_simp [sub_ne_zero.mpr hx]
   linear_combination (norm := ring1) 2 * h₁ + 2 * h₂
 
-lemma some_ext_of_xy_eq
+public lemma some_ext_of_xy_eq
     {x₁ y₁ x₂ y₂ : k}
     {h₁ : E.toAffine.Nonsingular x₁ y₁}
     {h₂ : E.toAffine.Nonsingular x₂ y₂}
@@ -166,7 +168,7 @@ lemma some_ext_of_xy_eq
   subst hy
   congr
 
-lemma xRep_add_zero_of_Y_eq
+public lemma xRep_add_zero_of_Y_eq
     {x₁ y₁ x₂ y₂ : k}
     {h₁ : E.toAffine.Nonsingular x₁ y₁}
     {h₂ : E.toAffine.Nonsingular x₂ y₂}
@@ -175,7 +177,7 @@ lemma xRep_add_zero_of_Y_eq
   rw [WeierstrassCurve.Affine.Point.add_of_Y_eq (W := E.toAffine) hx hy]
   rfl
 
-lemma xRep_sub_zero_of_same_xy
+public lemma xRep_sub_zero_of_same_xy
     {x₁ y₁ x₂ y₂ : k}
     {h₁ : E.toAffine.Nonsingular x₁ y₁}
     {h₂ : E.toAffine.Nonsingular x₂ y₂}
@@ -187,7 +189,7 @@ lemma xRep_sub_zero_of_same_xy
   simp [xRep]
 
 set_option maxHeartbeats 2000000 in
-theorem xRep_add_sub_kummer_sum
+public theorem xRep_add_sub_kummer_sum
     (P Q : E.toAffine.Point) :
     let A := xRep E P
     let B := xRep E Q
@@ -247,7 +249,7 @@ theorem xRep_add_sub_kummer_sum
             ring_nf at hsum ⊢
             exact hsum
 
-lemma xRep_sub_Z_ne_zero_of_delta_ne_zero
+public lemma xRep_sub_Z_ne_zero_of_delta_ne_zero
     (P Q : E.toAffine.Point)
     (hδ : delta (xRep E P) (xRep E Q) ≠ 0) :
     (xRep E (P - Q)).Z ≠ 0 := by
@@ -274,7 +276,7 @@ lemma xRep_sub_Z_ne_zero_of_delta_ne_zero
             simp [xRep, xAff, delta, hx]
           simp [xRep_sub_some_of_X_ne (E := E) (h₁ := h₁) (h₂ := h₂) hx]
 
-lemma addFromSub_not_both_zero
+public lemma addFromSub_not_both_zero
     (P Q : E.toAffine.Point)
     (hδ : delta (xRep E P) (xRep E Q) ≠ 0) :
     (sumNum E (xRep E P) (xRep E Q) * (xRep E (P - Q)).Z
@@ -287,7 +289,7 @@ lemma addFromSub_not_both_zero
 
 set_option maxHeartbeats 2000000 in
 /-- SEAM2 generalized: x-only differential addition over an arbitrary field. -/
-theorem xRep_add_of_xRep_sub
+public theorem xRep_add_of_xRep_sub
     (P Q : E.toAffine.Point)
     (hδ : delta (xRep E P) (xRep E Q) ≠ 0) :
     P1.Same
@@ -302,24 +304,24 @@ theorem xRep_add_of_xRep_sub
   ring_nf at hsum ⊢
   linear_combination hsum
 
-@[simp] lemma p1_toVec_xInf :
+@[simp] public lemma p1_toVec_xInf :
     P1.toVec (xInf : P1 k) = ![1, 0] := rfl
 
-@[simp] lemma p1_toVec_xAff (x : k) :
+@[simp] public lemma p1_toVec_xAff (x : k) :
     P1.toVec (xAff x : P1 k) = ![x, 1] := rfl
 
-lemma xRep_toVec_eq_point_xRep (P : E.toAffine.Point) :
+public lemma xRep_toVec_eq_point_xRep (P : E.toAffine.Point) :
     P1.toVec (xRep E P) = P.xRep := by
   cases P <;> rfl
 
 /-- Projective equality on Mathlib's `Fin 2` representatives, oriented as `v = c • u`
 for a nonzero scalar `c`. This stronger orientation excludes the zero vector on the right. -/
-def SameP1Vec (u v : Fin 2 → k) : Prop :=
+@[expose] public def SameP1Vec (u v : Fin 2 → k) : Prop :=
   ∃ c : k, c ≠ 0 ∧ v = c • u
 
 namespace SameP1Vec
 
-lemma mk_vec
+public lemma mk_vec
     {u v : Fin 2 → k} {c : k}
     (hc : c ≠ 0)
     (h0 : v 0 = c * u 0)
@@ -331,24 +333,24 @@ lemma mk_vec
   · simpa [Pi.smul_apply] using h0
   · simpa [Pi.smul_apply] using h1
 
-lemma refl (u : Fin 2 → k) : SameP1Vec u u := by
+public lemma refl (u : Fin 2 → k) : SameP1Vec u u := by
   refine ⟨1, one_ne_zero, ?_⟩
   simp
 
-lemma smul_right {u v : Fin 2 → k} (h : SameP1Vec u v) {c : k} (hc : c ≠ 0) :
+public lemma smul_right {u v : Fin 2 → k} (h : SameP1Vec u v) {c : k} (hc : c ≠ 0) :
     SameP1Vec u (c • v) := by
   rcases h with ⟨a, ha, rfl⟩
   refine ⟨c * a, mul_ne_zero hc ha, ?_⟩
   ext i
   simp [Pi.smul_apply, mul_assoc]
 
-lemma symm {u v : Fin 2 → k} (h : SameP1Vec u v) : SameP1Vec v u := by
+public lemma symm {u v : Fin 2 → k} (h : SameP1Vec u v) : SameP1Vec v u := by
   rcases h with ⟨c, hc, rfl⟩
   refine ⟨c⁻¹, inv_ne_zero hc, ?_⟩
   ext i
   simp [Pi.smul_apply, hc]
 
-lemma trans {u v w : Fin 2 → k} (huv : SameP1Vec u v) (hvw : SameP1Vec v w) :
+public lemma trans {u v w : Fin 2 → k} (huv : SameP1Vec u v) (hvw : SameP1Vec v w) :
     SameP1Vec u w := by
   rcases huv with ⟨c, hc, rfl⟩
   rcases hvw with ⟨d, hd, rfl⟩
@@ -356,19 +358,19 @@ lemma trans {u v w : Fin 2 → k} (huv : SameP1Vec u v) (hvw : SameP1Vec v w) :
   ext i
   simp [Pi.smul_apply, mul_assoc]
 
-lemma second_eq_zero_of_same_infty {v : Fin 2 → k}
+public lemma second_eq_zero_of_same_infty {v : Fin 2 → k}
     (h : SameP1Vec (![1, 0] : Fin 2 → k) v) : v 1 = 0 := by
   rcases h with ⟨c, _hc, rfl⟩
   simp
 
-lemma second_ne_zero_of_same_affine {x : k} {v : Fin 2 → k}
+public lemma second_ne_zero_of_same_affine {x : k} {v : Fin 2 → k}
     (h : SameP1Vec (![x, 1] : Fin 2 → k) v) : v 1 ≠ 0 := by
   rcases h with ⟨c, hc, rfl⟩
   simpa using hc
 
 end SameP1Vec
 
-lemma sameP1Vec_of_P1_same {A B : P1 k} (h : P1.Same A B) :
+public lemma sameP1Vec_of_P1_same {A B : P1 k} (h : P1.Same A B) :
     SameP1Vec (P1.toVec A) (P1.toVec B) := by
   classical
   rcases A.not_both_zero with hAX | hAZ
@@ -411,21 +413,21 @@ lemma sameP1Vec_of_P1_same {A B : P1 k} (h : P1.Same A B) :
 
 namespace XOnly
 
-@[simp] def X (v : Fin 2 → k) : k := v 0
-@[simp] def Z (v : Fin 2 → k) : k := v 1
+@[expose, simp] public def X (v : Fin 2 → k) : k := v 0
+@[expose, simp] public def Z (v : Fin 2 → k) : k := v 1
 
-def xInfVec : Fin 2 → k :=
+@[expose] public def xInfVec : Fin 2 → k :=
   ![1, 0]
 
-def xAffVec (x : k) : Fin 2 → k :=
+@[expose] public def xAffVec (x : k) : Fin 2 → k :=
   ![x, 1]
 
 /-- `δ = X₁Z₂ - X₂Z₁` on raw vector representatives. -/
-def deltaVec (A B : Fin 2 → k) : k :=
+@[expose] public def deltaVec (A B : Fin 2 → k) : k :=
   X A * Z B - X B * Z A
 
 /-- Homogeneous numerator for `x₊ + x₋` on raw vector representatives. -/
-def sumNumVec (A B : Fin 2 → k) : k :=
+@[expose] public def sumNumVec (A B : Fin 2 → k) : k :=
     2 * X A * X B * (X A * Z B + X B * Z A)
   + E.b₂ * X A * X B * Z A * Z B
   + E.b₄ * Z A * Z B * (X A * Z B + X B * Z A)
@@ -433,38 +435,38 @@ def sumNumVec (A B : Fin 2 → k) : k :=
 
 /-- Raw x-only differential addition: from `x(A)`, `x(B)`, and `x(A-B)`, produce `x(A+B)`.
 It is deliberately unbundled because degeneracies may produce the zero vector. -/
-def diffAddVec (A B D : Fin 2 → k) : Fin 2 → k :=
+@[expose] public def diffAddVec (A B D : Fin 2 → k) : Fin 2 → k :=
   let δ := deltaVec A B
   ![sumNumVec E A B * Z D - δ ^ 2 * X D, δ ^ 2 * Z D]
 
 /-- Homogeneous numerator for the x-coordinate doubling map. -/
-def dupNumH (X Z : k) : k :=
+@[expose] public def dupNumH (X Z : k) : k :=
   X ^ 4 - E.b₄ * X ^ 2 * Z ^ 2 - 2 * E.b₆ * X * Z ^ 3 - E.b₈ * Z ^ 4
 
 /-- Homogeneous denominator for the x-coordinate doubling map. -/
-def dupDenH (X Z : k) : k :=
+@[expose] public def dupDenH (X Z : k) : k :=
   4 * X ^ 3 * Z + E.b₂ * X ^ 2 * Z ^ 2 + 2 * E.b₄ * X * Z ^ 3 + E.b₆ * Z ^ 4
 
 /-- Raw x-only doubling primitive. -/
-def doubleVec (A : Fin 2 → k) : Fin 2 → k :=
+@[expose] public def doubleVec (A : Fin 2 → k) : Fin 2 → k :=
   ![dupNumH E (X A) (Z A), dupDenH E (X A) (Z A)]
 
 /-- Differential addition with the adjacent-pair degenerate branch made total.
 For a genuine adjacent ladder pair, `δ = 0` means the desired sum is the point at infinity. -/
-def diffAddOrInfVec (A B D : Fin 2 → k) : Fin 2 → k :=
+@[expose] public def diffAddOrInfVec (A B D : Fin 2 → k) : Fin 2 → k :=
   if deltaVec A B = 0 then xInfVec else diffAddVec E A B D
 
-lemma deltaVec_smul_smul (A B : Fin 2 → k) (a b : k) :
+public lemma deltaVec_smul_smul (A B : Fin 2 → k) (a b : k) :
     deltaVec (a • A) (b • B) = a * b * deltaVec A B := by
   simp [deltaVec, X, Z, Pi.smul_apply]
   ring
 
-lemma sumNumVec_smul_smul (A B : Fin 2 → k) (a b : k) :
+public lemma sumNumVec_smul_smul (A B : Fin 2 → k) (a b : k) :
     sumNumVec E (a • A) (b • B) = a ^ 2 * b ^ 2 * sumNumVec E A B := by
   simp [sumNumVec, X, Z, Pi.smul_apply]
   ring
 
-lemma diffAddVec_smul_smul_smul (A B D : Fin 2 → k) (a b d : k) :
+public lemma diffAddVec_smul_smul_smul (A B D : Fin 2 → k) (a b d : k) :
     diffAddVec E (a • A) (b • B) (d • D) =
       (a ^ 2 * b ^ 2 * d) • diffAddVec E A B D := by
   ext i <;> fin_cases i
@@ -473,7 +475,7 @@ lemma diffAddVec_smul_smul_smul (A B D : Fin 2 → k) (a b d : k) :
   · simp [diffAddVec, deltaVec_smul_smul, X, Z, Pi.smul_apply]
     ring
 
-lemma diffAddVec_congr
+public lemma diffAddVec_congr
     {A A' B B' D D' : Fin 2 → k}
     (hA : SameP1Vec A A') (hB : SameP1Vec B B') (hD : SameP1Vec D D') :
     SameP1Vec (diffAddVec E A B D) (diffAddVec E A' B' D') := by
@@ -484,7 +486,7 @@ lemma diffAddVec_congr
     mul_ne_zero (mul_ne_zero (pow_ne_zero 2 ha) (pow_ne_zero 2 hb)) hd, ?_⟩
   exact diffAddVec_smul_smul_smul (E := E) A B D a b d
 
-lemma diffAddOrInfVec_congr
+public lemma diffAddOrInfVec_congr
     {A A' B B' D D' : Fin 2 → k}
     (hA : SameP1Vec A A') (hB : SameP1Vec B B') (hD : SameP1Vec D D') :
     SameP1Vec (diffAddOrInfVec E A B D) (diffAddOrInfVec E A' B' D') := by
@@ -504,17 +506,17 @@ lemma diffAddOrInfVec_congr
       mul_ne_zero (mul_ne_zero (pow_ne_zero 2 ha) (pow_ne_zero 2 hb)) hd, ?_⟩
     exact diffAddVec_smul_smul_smul (E := E) A B D a b d
 
-lemma dupNumH_smul (A : Fin 2 → k) (c : k) :
+public lemma dupNumH_smul (A : Fin 2 → k) (c : k) :
     dupNumH E (X (c • A)) (Z (c • A)) = c ^ 4 * dupNumH E (X A) (Z A) := by
   simp [dupNumH, X, Z, Pi.smul_apply]
   ring
 
-lemma dupDenH_smul (A : Fin 2 → k) (c : k) :
+public lemma dupDenH_smul (A : Fin 2 → k) (c : k) :
     dupDenH E (X (c • A)) (Z (c • A)) = c ^ 4 * dupDenH E (X A) (Z A) := by
   simp [dupDenH, X, Z, Pi.smul_apply]
   ring
 
-lemma doubleVec_congr {A B : Fin 2 → k} (h : SameP1Vec A B) :
+public lemma doubleVec_congr {A B : Fin 2 → k} (h : SameP1Vec A B) :
     SameP1Vec (doubleVec E A) (doubleVec E B) := by
   rcases h with ⟨c, hc, rfl⟩
   refine ⟨c ^ 4, pow_ne_zero 4 hc, ?_⟩
@@ -638,7 +640,7 @@ private theorem xRep_two_nsmul_same_dup_affine
 
 /-- Montgomery-pair ladder state: the first component represents `x(mP)` and the second
 represents `x((m+1)P)`. -/
-def xLadderPair (x : k) : ℕ → (Fin 2 → k) × (Fin 2 → k)
+@[expose] public def xLadderPair (x : k) : ℕ → (Fin 2 → k) × (Fin 2 → k)
   | 0 => (xInfVec, xAffVec x)
   | 1 => (xAffVec x, doubleVec E (xAffVec x))
   | n + 2 =>
@@ -653,48 +655,48 @@ decreasing_by
   omega
 
 /-- The x-only ladder representative for `x(nP)`, extracted from the Montgomery pair state. -/
-def xLadderRep (x : k) (n : ℕ) : Fin 2 → k :=
+@[expose] public def xLadderRep (x : k) (n : ℕ) : Fin 2 → k :=
   (xLadderPair E x n).1
 
 /-- Affine quotient readout of the x-only ladder. Meaningful when the denominator is nonzero. -/
-def xLadder (x : k) (n : ℕ) : k :=
+@[expose] public def xLadder (x : k) (n : ℕ) : k :=
   X (xLadderRep E x n) / Z (xLadderRep E x n)
 
-@[simp] lemma xLadderRep_zero (x : k) :
+@[simp] public lemma xLadderRep_zero (x : k) :
     xLadderRep E x 0 = xInfVec := by
   simp [xLadderRep, xLadderPair]
 
-@[simp] lemma xLadderRep_one (x : k) :
+@[simp] public lemma xLadderRep_one (x : k) :
     xLadderRep E x 1 = xAffVec x := by
   simp [xLadderRep, xLadderPair]
 
-@[simp] lemma xLadderRep_two (x : k) :
+@[simp] public lemma xLadderRep_two (x : k) :
     xLadderRep E x 2 = doubleVec E (xAffVec x) := by
   simp [xLadderRep, xLadderPair]
 
-@[simp] lemma xLadderRep_three (x : k) :
+@[simp] public lemma xLadderRep_three (x : k) :
     xLadderRep E x 3 =
       diffAddOrInfVec E (xAffVec x) (doubleVec E (xAffVec x)) (xAffVec x) := by
   simp [xLadderRep, xLadderPair, show ¬ Even (3 : ℕ) by decide]
 
-@[simp] lemma xLadderRep_four (x : k) :
+@[simp] public lemma xLadderRep_four (x : k) :
     xLadderRep E x 4 = doubleVec E (doubleVec E (xAffVec x)) := by
   simp [xLadderRep, xLadderPair, show Even (4 : ℕ) by decide]
 
-lemma deltaVec_point_xRep_eq (P Q : E.toAffine.Point) :
+public lemma deltaVec_point_xRep_eq (P Q : E.toAffine.Point) :
     deltaVec P.xRep Q.xRep = delta (xRep E P) (xRep E Q) := by
   cases P <;> cases Q <;>
     simp [deltaVec, delta, xRep, xInf, xAff, X, Z, Affine.Point.xRep]
 
-@[simp] lemma xRep_X_eq_point_xRep_zero (P : E.toAffine.Point) :
+@[simp] public lemma xRep_X_eq_point_xRep_zero (P : E.toAffine.Point) :
     (xRep E P).X = P.xRep 0 := by
   cases P <;> rfl
 
-@[simp] lemma xRep_Z_eq_point_xRep_one (P : E.toAffine.Point) :
+@[simp] public lemma xRep_Z_eq_point_xRep_one (P : E.toAffine.Point) :
     (xRep E P).Z = P.xRep 1 := by
   cases P <;> rfl
 
-lemma xRep_add_of_xRep_sub_vec
+public lemma xRep_add_of_xRep_sub_vec
     (P Q : E.toAffine.Point)
     (hδ : deltaVec P.xRep Q.xRep ≠ 0) :
     SameP1Vec
@@ -708,7 +710,7 @@ lemma xRep_add_of_xRep_sub_vec
   simpa [P1.toVec, diffAddVec, deltaVec, delta, sumNumVec, sumNum, X, Z,
     xRep_toVec_eq_point_xRep, xRep_X_eq_point_xRep_zero, xRep_Z_eq_point_xRep_one] using hvec
 
-lemma point_xRep_eq_of_deltaVec_zero
+public lemma point_xRep_eq_of_deltaVec_zero
     (P Q : E.toAffine.Point)
     (hδ : deltaVec P.xRep Q.xRep = 0) :
     P.xRep = Q.xRep := by
@@ -730,7 +732,7 @@ lemma point_xRep_eq_of_deltaVec_zero
           · simpa [hx]
           · simp
 
-lemma deltaVec_eq_zero_of_scaled
+public lemma deltaVec_eq_zero_of_scaled
     {U V A B : Fin 2 → k}
     (hA : SameP1Vec U A) (hB : SameP1Vec V B)
     (hδ : deltaVec A B = 0) :
@@ -741,7 +743,7 @@ lemma deltaVec_eq_zero_of_scaled
     simpa [deltaVec_smul_smul] using hδ
   exact (mul_eq_zero.mp hscaled).resolve_left (mul_ne_zero ha hb)
 
-lemma deltaVec_ne_zero_of_scaled
+public lemma deltaVec_ne_zero_of_scaled
     {U V A B : Fin 2 → k}
     (hA : SameP1Vec U A) (hB : SameP1Vec V B)
     (hδ : deltaVec A B ≠ 0) :
@@ -844,7 +846,7 @@ private lemma diffAddOrInfVec_adjacent_correct
       (diffAddVec_congr (E := E) hA hB hDsub)
 
 /-- SEAM: correctness of the total raw ladder, including degenerate differential-addition steps. -/
-theorem xLadderRep_correct_seam {x y : k}
+public theorem xLadderRep_correct_seam {x y : k}
     (h : E.toAffine.Nonsingular x y) (n : ℕ) :
     SameP1Vec
       ((n • (Point.some x y h : E.toAffine.Point)).xRep)
@@ -935,7 +937,7 @@ theorem xLadderRep_correct_seam {x y : k}
                 simpa [xLadderPair, N, m, hEven] using hsecond
   simpa [xLadderRep, P] using (hpair n).1
 
-lemma xLadderRep_ne_zero_of_nonsingular {x y : k}
+public lemma xLadderRep_ne_zero_of_nonsingular {x y : k}
     (h : E.toAffine.Nonsingular x y) (n : ℕ) :
     xLadderRep E x n ≠ 0 := by
   classical
@@ -947,17 +949,17 @@ lemma xLadderRep_ne_zero_of_nonsingular {x y : k}
   exact Affine.Point.xRep_ne_zero (n • P)
     ((smul_eq_zero.mp hzero).resolve_left hc)
 
-lemma xLadderRep_two_ne_zero_of_nonsingular {x y : k}
+public lemma xLadderRep_two_ne_zero_of_nonsingular {x y : k}
     (h : E.toAffine.Nonsingular x y) :
     xLadderRep E x 2 ≠ 0 :=
   xLadderRep_ne_zero_of_nonsingular (E := E) h 2
 
-lemma xLadderRep_three_ne_zero_of_nonsingular {x y : k}
+public lemma xLadderRep_three_ne_zero_of_nonsingular {x y : k}
     (h : E.toAffine.Nonsingular x y) :
     xLadderRep E x 3 ≠ 0 :=
   xLadderRep_ne_zero_of_nonsingular (E := E) h 3
 
-lemma xLadderRep_four_ne_zero_of_nonsingular {x y : k}
+public lemma xLadderRep_four_ne_zero_of_nonsingular {x y : k}
     (h : E.toAffine.Nonsingular x y) :
     xLadderRep E x 4 ≠ 0 :=
   xLadderRep_ne_zero_of_nonsingular (E := E) h 4
@@ -965,25 +967,25 @@ lemma xLadderRep_four_ne_zero_of_nonsingular {x y : k}
 end XOnly
 
 /-- The intended projective x-coordinate representative `[Φₙ(x), ΨSqₙ(x)]`. -/
-def xPair (W : WeierstrassCurve k) (n : ℤ) (x : k) : Fin 2 → k :=
+@[expose] public def xPair (W : WeierstrassCurve k) (n : ℤ) (x : k) : Fin 2 → k :=
   ![(W.Φ n).eval x, (W.ΨSq n).eval x]
 
 /-- Sanity check: the EDS representative agrees with the ladder at `n = 0`. -/
-theorem xPair_same_xLadderRep_zero (W : WeierstrassCurve k) (x : k) :
+public theorem xPair_same_xLadderRep_zero (W : WeierstrassCurve k) (x : k) :
     SameP1Vec
       (XOnly.xLadderRep (E := W⁄k) x 0)
       (xPair W (0 : ℤ) x) := by
   simpa [xPair, XOnly.xInfVec] using SameP1Vec.refl (![1, 0] : Fin 2 → k)
 
 /-- Sanity check: the EDS representative agrees with the ladder at `n = 1`. -/
-theorem xPair_same_xLadderRep_one (W : WeierstrassCurve k) (x : k) :
+public theorem xPair_same_xLadderRep_one (W : WeierstrassCurve k) (x : k) :
     SameP1Vec
       (XOnly.xLadderRep (E := W⁄k) x 1)
       (xPair W (1 : ℤ) x) := by
   simpa [xPair, XOnly.xAffVec] using SameP1Vec.refl (![x, 1] : Fin 2 → k)
 
 /-- Sanity check: the EDS representative agrees with the ladder at `n = 2`. -/
-theorem xPair_same_xLadderRep_two (W : WeierstrassCurve k) (x : k) :
+public theorem xPair_same_xLadderRep_two (W : WeierstrassCurve k) (x : k) :
     SameP1Vec
       (XOnly.xLadderRep (E := W⁄k) x 2)
       (xPair W (2 : ℤ) x) := by

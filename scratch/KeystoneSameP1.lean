@@ -1,8 +1,10 @@
-import scratch.KeystoneLadder
-import scratch.KeystoneDoubling
-import scratch.KeystoneDoublingCert
-import scratch.KeystoneDiffAddCert
-import scratch.KeystoneCoprimality
+module
+
+public import scratch.KeystoneLadder
+public import scratch.KeystoneDoubling
+public import scratch.KeystoneDoublingCert
+public import scratch.KeystoneDiffAddCert
+public import scratch.KeystoneCoprimality
 
 open Polynomial WeierstrassCurve
 open scoped Classical
@@ -13,7 +15,7 @@ variable {k : Type*} [Field k]
 
 /-- The x-coordinate doubling fact: `doubleVec (xPair m) ~ xPair (2m)` projectively (c = 1),
 from the proven polynomial doubling identities `Φ_two_mul`/`ΨSq_two_mul` evaluated at `x`. -/
-lemma xPair_double_sameP1 (W : WeierstrassCurve k) (m : ℤ) (x : k)
+public lemma xPair_double_sameP1 (W : WeierstrassCurve k) (m : ℤ) (x : k)
     (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0) :
     SameP1Vec (XOnly.doubleVec (E := W⁄k) (xPair W m x)) (xPair W (2 * m) x) := by
   refine ⟨1, one_ne_zero, ?_⟩
@@ -37,11 +39,11 @@ open Polynomial
 
 variable {k : Type*} [Field k]
 
-@[simp] theorem xPair_one_X (W : WeierstrassCurve k) (x : k) :
+@[simp] public theorem xPair_one_X (W : WeierstrassCurve k) (x : k) :
     X (xPair W 1 x) = x := by
   simp [xPair, X]
 
-@[simp] theorem xPair_one_Z (W : WeierstrassCurve k) (x : k) :
+@[simp] public theorem xPair_one_Z (W : WeierstrassCurve k) (x : k) :
     Z (xPair W 1 x) = 1 := by
   simp [xPair, Z]
 
@@ -50,7 +52,7 @@ The certificate uses projective order `(m, m+1)`, while the ladder step below
 uses vector order `(m+1, m)`.  Hence the minus sign.  The denominator bridges use
 only the square, so the sign disappears there.
 -/
-theorem deltaP_eval_xPair_succ_left
+public theorem deltaP_eval_xPair_succ_left
     (W : WeierstrassCurve k) (m : ℤ) (x : k) :
     ((WeierstrassCurve.deltaP W
         (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x)
@@ -58,7 +60,7 @@ theorem deltaP_eval_xPair_succ_left
   simp [WeierstrassCurve.deltaP, deltaVec, xPair, X, Z] <;> ring
 
 /-- Evaluated projective denominator equals the ladder `deltaVec` square. -/
-theorem diffAddDenP_eval_xPair_succ_left
+public theorem diffAddDenP_eval_xPair_succ_left
     (W : WeierstrassCurve k) (m : ℤ) (x : k) :
     ((WeierstrassCurve.diffAddDenP W
         (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x)
@@ -66,7 +68,7 @@ theorem diffAddDenP_eval_xPair_succ_left
   simp [WeierstrassCurve.diffAddDenP, deltaP_eval_xPair_succ_left] <;> ring
 
 /-- Evaluated `sumNumP`; the expression is symmetric in the two x-only inputs. -/
-theorem sumNumP_eval_xPair_succ_left
+public theorem sumNumP_eval_xPair_succ_left
     (W : WeierstrassCurve k) (m : ℤ) (x : k) :
     ((WeierstrassCurve.sumNumP W
         (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x)
@@ -79,7 +81,7 @@ theorem sumNumP_eval_xPair_succ_left
   ring
 
 /-- Evaluated projective numerator equals the `X` component of the ladder diff-add. -/
-theorem diffAddNumP_eval_xPair_succ_left
+public theorem diffAddNumP_eval_xPair_succ_left
     (W : WeierstrassCurve k) (m : ℤ) (x : k) :
     ((WeierstrassCurve.diffAddNumP W
         (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x)
@@ -94,7 +96,7 @@ theorem diffAddNumP_eval_xPair_succ_left
   ring
 
 /-- Evaluated projective denominator equals the `Z` component of the ladder diff-add. -/
-theorem diffAddVec_Z_xPair_succ_left
+public theorem diffAddVec_Z_xPair_succ_left
     (W : WeierstrassCurve k) (m : ℤ) (x : k) :
     Z (diffAddVec (E := W⁄k)
         (xPair W (m + 1) x) (xPair W m x) (xPair W 1 x))
@@ -104,7 +106,7 @@ theorem diffAddVec_Z_xPair_succ_left
     diffAddVec, deltaVec, xPair, X, Z] <;> ring
 
 /-- Evaluated `ΨSq_two_mul_add_one`, in denominator form. -/
-theorem ΨSq_two_mul_add_one_eval_diffAddDenP
+public theorem ΨSq_two_mul_add_one_eval_diffAddDenP
     (W : WeierstrassCurve k) (m : ℤ) (x : k) (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0) :
     (W.ΨSq (2 * m + 1)).eval x
       = ((WeierstrassCurve.diffAddDenP W
@@ -113,7 +115,7 @@ theorem ΨSq_two_mul_add_one_eval_diffAddDenP
   simpa using congrArg (fun p : Polynomial k => p.eval x) h
 
 /-- Evaluated `ΨSq_two_mul_add_one`, directly in ladder-delta form. -/
-theorem ΨSq_two_mul_add_one_eval_deltaVec_sq
+public theorem ΨSq_two_mul_add_one_eval_deltaVec_sq
     (W : WeierstrassCurve k) (m : ℤ) (x : k) (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0) :
     (W.ΨSq (2 * m + 1)).eval x
       = (deltaVec (xPair W (m + 1) x) (xPair W m x)) ^ 2 := by
@@ -127,7 +129,7 @@ theorem ΨSq_two_mul_add_one_eval_deltaVec_sq
             rw [diffAddDenP_eval_xPair_succ_left]
 
 /-- Evaluated projective diff-add certificate. -/
-theorem diffAdd_projective_two_mul_add_one_eval
+public theorem diffAdd_projective_two_mul_add_one_eval
     (W : WeierstrassCurve k) (m : ℤ) (x : k) (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0) :
     (W.Φ (2 * m + 1)).eval x *
         ((WeierstrassCurve.diffAddDenP W
@@ -145,7 +147,7 @@ fact needed by the infinity branch isolated as `hΦinf`.
 In the nonzero branch, scalar `1` works.  In the zero branch, the witness is
 `(W.Φ (2*m+1)).eval x`, so `hΦinf` is exactly the required nonzero proof.
 -/
-theorem xPair_diffAdd_sameP1_of_inf_phi_ne
+public theorem xPair_diffAdd_sameP1_of_inf_phi_ne
     (W : WeierstrassCurve k) (m : ℤ) (x : k)
     (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0)
     (hΦinf :
@@ -238,7 +240,7 @@ theorem xPair_diffAdd_sameP1_of_inf_phi_ne
     · simpa [xPair, X, one_smul] using hXcoord
     · simpa [xPair, Z, one_smul] using hZcoord
 
-theorem xPair_odd_phi_eval_ne_zero_of_delta_zero
+public theorem xPair_odd_phi_eval_ne_zero_of_delta_zero
     (W : WeierstrassCurve k) [W.IsElliptic] (m : ℤ) (x : k)
     (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0)
     (hδ : deltaVec (xPair W (m + 1) x) (xPair W m x) = 0) :
@@ -254,7 +256,7 @@ theorem xPair_odd_phi_eval_ne_zero_of_delta_zero
   exact WeierstrassCurve.Φ_ΨSq_no_common_eval_zero_odd (W := W) (x := x) h4 m ⟨hΦ0, hΨzero⟩
 
 /-- Keystone x-only differential-addition wiring lemma. -/
-theorem xPair_diffAdd_sameP1
+public theorem xPair_diffAdd_sameP1
     (W : WeierstrassCurve k) [W.IsElliptic] (m : ℤ) (x : k)
     (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0) :
     SameP1Vec
@@ -269,7 +271,7 @@ theorem xPair_diffAdd_sameP1
 
 /-- `diffAddOrInfVec` is symmetric in its first two (x-only) arguments: `sumNumVec` is
 symmetric and `deltaVec` only enters squared / through its vanishing. -/
-theorem diffAddOrInfVec_comm (E : WeierstrassCurve k) (A B D : Fin 2 → k) :
+public theorem diffAddOrInfVec_comm (E : WeierstrassCurve k) (A B D : Fin 2 → k) :
     diffAddOrInfVec E A B D = diffAddOrInfVec E B A D := by
   have hδ : deltaVec A B = 0 ↔ deltaVec B A = 0 := by
     have : deltaVec A B = - deltaVec B A := by simp only [deltaVec]; ring
@@ -285,7 +287,7 @@ theorem diffAddOrInfVec_comm (E : WeierstrassCurve k) (A B D : Fin 2 → k) :
 
 /-- Core-order (A = xPair m, B = xPair (m+1)) differential-addition wiring, obtained from
 `xPair_diffAdd_sameP1` by the symmetry above. -/
-theorem xPair_diffAdd_sameP1_core_order
+public theorem xPair_diffAdd_sameP1_core_order
     (W : WeierstrassCurve k) [W.IsElliptic] (m : ℤ) (x : k)
     (h4 : (4 : k) ≠ 0) (hψ_ne : ∀ n : ℤ, n ≠ 0 → W.ψ n ≠ 0) (hc3 : W.Ψ₃ ≠ 0) :
     SameP1Vec

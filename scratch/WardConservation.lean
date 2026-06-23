@@ -1,20 +1,22 @@
-import scratch.WardSomos
+module
+
+public import scratch.WardSomos
 
 namespace FLT.EDS
 
 variable {R : Type*} [CommRing R]
 
 /-- The Somos-4 numerator `N_n` and denominator `D_n`; `N_n / D_n` is the conserved quantity. -/
-def Nseq (b c d : R) (n : ℤ) : R :=
+@[expose] public def Nseq (b c d : R) (n : ℤ) : R :=
   normEDS b c d (n+2) * normEDS b c d (n-1)^2
     + normEDS b c d (n+1)^2 * normEDS b c d (n-2) + b^2 * normEDS b c d n ^ 3
 
-def Dseq (b c d : R) (n : ℤ) : R :=
+@[expose] public def Dseq (b c d : R) (n : ℤ) : R :=
   normEDS b c d (n+1) * normEDS b c d n * normEDS b c d (n-1)
 
 /-- Conservation step: `N_{n+1} D_n = N_n D_{n+1}`, a finite `linear_combination` of the adjacent
 Somos at `n` and `n+1` (cofactors from sympy Gröbner, remainder 0). -/
-lemma normEDS_conservation (b c d : R) (n : ℤ) :
+public lemma normEDS_conservation (b c d : R) (n : ℤ) :
     Nseq b c d (n+1) * Dseq b c d n = Nseq b c d n * Dseq b c d (n+1) := by
   have s0 := normEDS_adjacent_somos b c d n
   have s1 := normEDS_adjacent_somos b c d (n+1)

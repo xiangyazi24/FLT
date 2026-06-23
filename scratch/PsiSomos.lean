@@ -1,6 +1,8 @@
-import scratch.WardSomos
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
+module
+
+public import scratch.WardSomos
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
 
 open Polynomial WeierstrassCurve
 open scoped Classical
@@ -11,14 +13,14 @@ variable {R : Type*} [CommRing R]
 
 /-- The adjacent Somos relation for the division polynomial `ψ`, in `R[X][Y]`.
 Immediate from `normEDS_adjacent_somos` since `W.ψ n = normEDS W.ψ₂ (C Ψ₃) (C preΨ₄) n` (defn). -/
-lemma psi_adjacent_somos (W : WeierstrassCurve R) (m : ℤ) :
+public lemma psi_adjacent_somos (W : WeierstrassCurve R) (m : ℤ) :
     W.ψ (m + 2) * W.ψ (m - 2)
       = W.ψ₂ ^ 2 * W.ψ (m + 1) * W.ψ (m - 1) - C W.Ψ₃ * W.ψ m ^ 2 := by
   simpa only [WeierstrassCurve.ψ] using
     normEDS_adjacent_somos W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) m
 
 /-- Coordinate-ring form: under `mk`, `ψ₂² = Ψ₂Sq`, giving the Somos in terms of `Ψ₂Sq`. -/
-lemma mk_psi_adjacent_somos (W : WeierstrassCurve R) (m : ℤ) :
+public lemma mk_psi_adjacent_somos (W : WeierstrassCurve R) (m : ℤ) :
     Affine.CoordinateRing.mk W (W.ψ (m + 2)) * Affine.CoordinateRing.mk W (W.ψ (m - 2))
       = Affine.CoordinateRing.mk W (C W.Ψ₂Sq)
           * Affine.CoordinateRing.mk W (W.ψ (m + 1)) * Affine.CoordinateRing.mk W (W.ψ (m - 1))
@@ -28,7 +30,7 @@ lemma mk_psi_adjacent_somos (W : WeierstrassCurve R) (m : ℤ) :
 
 /-- Descent: `mk ∘ C : R[X] → CoordinateRing` is injective (the rank-1 component of the free
 rank-2 basis `{1, mk Y}`).  Lets us check any `R[X]` polynomial identity in the coordinate ring. -/
-lemma mk_C_injective (W : WeierstrassCurve R) :
+public lemma mk_C_injective (W : WeierstrassCurve R) :
     Function.Injective (fun p : R[X] => Affine.CoordinateRing.mk W (Polynomial.C p)) := by
   intro p q hpq
   simp only at hpq
@@ -44,7 +46,7 @@ lemma mk_C_injective (W : WeierstrassCurve R) :
 
 /-- ψ ↔ preΨ in the coordinate ring: `mk(ψ n) = mk(C preΨ n) · (ψ₂ if n even else 1)`.
 From `mk_ψ` and the definition `Ψ n = C(preΨ n)·(ψ₂ if even else 1)`. -/
-lemma mk_ψ_eq (W : WeierstrassCurve R) (n : ℤ) :
+public lemma mk_ψ_eq (W : WeierstrassCurve R) (n : ℤ) :
     Affine.CoordinateRing.mk W (W.ψ n)
       = Affine.CoordinateRing.mk W (Polynomial.C (W.preΨ n))
           * (if Even n then Affine.CoordinateRing.mk W W.ψ₂ else 1) := by
@@ -54,7 +56,7 @@ lemma mk_ψ_eq (W : WeierstrassCurve R) (n : ℤ) :
 /-- preΨ adjacent Somos (the (m,2,1) instance), parity-dependent coefficient: even m → coeff 1,
 odd m → coeff Ψ₂Sq². From `mk_psi_adjacent_somos` via `mk_ψ_eq` (ψ₂ factors collapse through
 `mk_ψ₂_sq`), descended by `mk_C_injective` + the `Ψ₂Sq ≠ 0` cancellation in the polynomial domain. -/
-lemma preΨ_adjacent_somos [IsDomain R] (W : WeierstrassCurve R) (h4 : (4 : R) ≠ 0) (m : ℤ) :
+public lemma preΨ_adjacent_somos [IsDomain R] (W : WeierstrassCurve R) (h4 : (4 : R) ≠ 0) (m : ℤ) :
     W.preΨ (m + 2) * W.preΨ (m - 2)
       = (if Even m then 1 else W.Ψ₂Sq ^ 2) * (W.preΨ (m + 1) * W.preΨ (m - 1))
         - W.Ψ₃ * W.preΨ m ^ 2 := by

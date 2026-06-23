@@ -1,5 +1,7 @@
-import scratch.KeystoneDoubling
-import scratch.PsiInvariant
+module
+
+public import scratch.KeystoneDoubling
+public import scratch.PsiInvariant
 
 /-!
 # Keystone differential addition — the x-only diff-add duplication identity (odd index).
@@ -24,31 +26,31 @@ noncomputable section
 variable {R : Type*} [CommRing R] [IsDomain R]
 
 /-- `deltaP = X0·Z1 − X1·Z0` on `R[X]` representatives. -/
-noncomputable def deltaP (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) : R[X] :=
+@[expose] public noncomputable def deltaP (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) : R[X] :=
   X0 * Z1 - X1 * Z0
 
 /-- Homogeneous numerator for `x₊ + x₋` on `R[X]` representatives. -/
-noncomputable def sumNumP (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) : R[X] :=
+@[expose] public noncomputable def sumNumP (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) : R[X] :=
   C (2 : R) * X0 * X1 * (X0 * Z1 + X1 * Z0)
     + C W.b₂ * X0 * X1 * Z0 * Z1
     + C W.b₄ * Z0 * Z1 * (X0 * Z1 + X1 * Z0)
     + C W.b₆ * Z0 ^ 2 * Z1 ^ 2
 
 /-- x-only differential-addition numerator on representatives. -/
-noncomputable def diffAddNumP (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) : R[X] :=
+@[expose] public noncomputable def diffAddNumP (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) : R[X] :=
   sumNumP W X0 Z0 X1 Z1 - (deltaP W X0 Z0 X1 Z1) ^ 2 * X
 
 /-- x-only differential-addition denominator on representatives. -/
-noncomputable def diffAddDenP (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) : R[X] :=
+@[expose] public noncomputable def diffAddDenP (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) : R[X] :=
   (deltaP W X0 Z0 X1 Z1) ^ 2
 
 /-- Eval bridge for `deltaP`. -/
-lemma deltaP_eval (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) (x : R) :
+public lemma deltaP_eval (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) (x : R) :
     (deltaP W X0 Z0 X1 Z1).eval x = X0.eval x * Z1.eval x - X1.eval x * Z0.eval x := by
   simp only [deltaP, eval_sub, eval_mul]
 
 /-- Eval bridge for `sumNumP`. -/
-lemma sumNumP_eval (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) (x : R) :
+public lemma sumNumP_eval (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) (x : R) :
     (sumNumP W X0 Z0 X1 Z1).eval x =
       2 * X0.eval x * X1.eval x * (X0.eval x * Z1.eval x + X1.eval x * Z0.eval x)
         + W.b₂ * X0.eval x * X1.eval x * Z0.eval x * Z1.eval x
@@ -57,13 +59,13 @@ lemma sumNumP_eval (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) (x : R) :
   simp only [sumNumP, eval_add, eval_mul, eval_pow, eval_C]
 
 /-- Eval bridge for `diffAddNumP`. -/
-lemma diffAddNumP_eval (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) (x : R) :
+public lemma diffAddNumP_eval (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) (x : R) :
     (diffAddNumP W X0 Z0 X1 Z1).eval x =
       (sumNumP W X0 Z0 X1 Z1).eval x - ((deltaP W X0 Z0 X1 Z1).eval x) ^ 2 * x := by
   simp only [diffAddNumP, eval_sub, eval_mul, eval_pow, eval_X]
 
 /-- Eval bridge for `diffAddDenP`. -/
-lemma diffAddDenP_eval (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) (x : R) :
+public lemma diffAddDenP_eval (W : WeierstrassCurve R) (X0 Z0 X1 Z1 : R[X]) (x : R) :
     (diffAddDenP W X0 Z0 X1 Z1).eval x = ((deltaP W X0 Z0 X1 Z1).eval x) ^ 2 := by
   simp only [diffAddDenP, eval_pow]
 
@@ -115,7 +117,7 @@ private lemma preΨ_2m_add_two (W : WeierstrassCurve R) (m : ℤ) :
   rw [h]
 
 /-- Denominator identity: `ΨSq(2m+1) = deltaP²`, purely definitional via `ΨSq_odd`. -/
-lemma ΨSq_two_mul_add_one (W : WeierstrassCurve R) (m : ℤ) :
+public lemma ΨSq_two_mul_add_one (W : WeierstrassCurve R) (m : ℤ) :
     W.ΨSq (2 * m + 1)
       = diffAddDenP W (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1)) := by
   by_cases hm : Even m
@@ -452,7 +454,7 @@ private lemma Φ_two_mul_add_one_sat_odd (W : WeierstrassCurve R) (h4 : (4 : R) 
           - (W.preΨ m) ^ 4 * (W.preΨ (m + 1)) ^ 4 * X * (C W.b₈) ^ 2) * hb
 
 /-- Numerator identity: `Φ(2m+1) = diffAddNumP`, after cancelling `Ψ₃≠0`. -/
-lemma Φ_two_mul_add_one (W : WeierstrassCurve R) (h4 : (4 : R) ≠ 0)
+public lemma Φ_two_mul_add_one (W : WeierstrassCurve R) (h4 : (4 : R) ≠ 0)
     (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0) (hc3 : W.Ψ₃ ≠ 0) (m : ℤ) :
     W.Φ (2 * m + 1)
       = diffAddNumP W (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1)) := by
@@ -465,7 +467,7 @@ lemma Φ_two_mul_add_one (W : WeierstrassCurve R) (h4 : (4 : R) ≠ 0)
   exact (mul_eq_zero.mp hsat).resolve_left hc3
 
 /-- Projective differential-addition identity (scalar `c = 1`). -/
-lemma diffAdd_projective_two_mul_add_one (W : WeierstrassCurve R) (h4 : (4 : R) ≠ 0)
+public lemma diffAdd_projective_two_mul_add_one (W : WeierstrassCurve R) (h4 : (4 : R) ≠ 0)
     (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0) (hc3 : W.Ψ₃ ≠ 0) (m : ℤ) :
     W.Φ (2 * m + 1) * diffAddDenP W (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))
       = W.ΨSq (2 * m + 1) * diffAddNumP W (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1)) := by
