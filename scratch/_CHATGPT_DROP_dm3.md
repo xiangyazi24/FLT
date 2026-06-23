@@ -1,70 +1,58 @@
-# Q14 (dm3): Keystone x-only differential-addition wiring lemma
+# Q19 (dm3): Keystone x-only differential-addition wiring lemma
 
-## Bottom line
+## Executive answer
 
-The `deltaVec ≠ 0` branch should use scalar `c = 1`.  After evaluating
+The nonzero-delta branch is a pure wiring lemma and uses scalar `c = 1`.
+
+The zero-delta branch cannot be completed from only
 
 ```lean
-WeierstrassCurve.diffAdd_projective_two_mul_add_one
-WeierstrassCurve.ΨSq_two_mul_add_one
+ΨSq_two_mul_add_one
+ diffAdd_projective_two_mul_add_one
 ```
 
-at `x`, the second identity identifies the evaluated denominator with
-`(deltaVec (xPair W (m+1) x) (xPair W m x))^2`.  The nonzero branch makes this
-square nonzero, so the projective identity cancels the denominator and gives
-componentwise equality with `diffAddVec`.
-
-The `deltaVec = 0` branch has one extra mathematical obligation.  From
-`ΨSq_two_mul_add_one` it gives
+because those identities give only
 
 ```lean
 (W.ΨSq (2*m+1)).eval x = 0
 ```
 
-so `xPair W (2*m+1) x` has zero `Z`-coordinate.  But to prove
+when `deltaVec = 0`.  To prove
 
 ```lean
 SameP1Vec xInfVec (xPair W (2*m+1) x)
 ```
 
-with `SameP1Vec u v := ∃ c, c ≠ 0 ∧ v = c • u`, the witness must be
+with
+
+```lean
+SameP1Vec u v := ∃ c, c ≠ 0 ∧ v = c • u
+xInfVec = ![1, 0]
+```
+
+the only possible witness is
 
 ```lean
 c = (W.Φ (2*m+1)).eval x
 ```
 
-and therefore one also needs
+so the branch also needs
 
 ```lean
 (W.Φ (2*m+1)).eval x ≠ 0.
 ```
 
-This nonzero fact is not a consequence of the projective diff-add identity
-alone: if both evaluated components were zero, the goal would become
-`∃ c ≠ 0, ![0, 0] = c • ![1, 0]`, which is impossible.  Thus the exact requested
-lemma is obtained from the wiring proof below plus a local no-common-root / valid
-projective-pair lemma for `(Φ n, ΨSq n)`.
-
-The code below is the drop-in wiring proof.  It isolates the only non-wiring fact
-as the hypothesis `hΦinf`; once you have the no-common-root lemma, the final
-wrapper has exactly the requested statement.
+Thus the fully compilable wiring theorem is the version below with that one
+non-wiring fact isolated as `hΦinf`.  Once you prove or import the corresponding
+no-common-root / valid-projective-pair lemma for `(Φ n, ΨSq n)`, the exact
+requested wrapper is one line.
 
 ---
 
-## 1. Eval bridge lemmas
+## Code to add in `scratch/KeystoneSameP1.lean`
 
-Put these near the existing `dupNumP_eval`-style lemmas.  The argument order is
-chosen to match the ladder call
-
-```lean
-A = xPair W (m+1) x
-B = xPair W m x
-D = xPair W 1 x
-```
-
-whereas the projective certificate is stated in the polynomial order
-`m, m+1`.  This is why `deltaP` evaluates to `-deltaVec`; the denominator uses a
-square, so the sign disappears.
+Place this in namespace `KeystoneLadder.XOnly`, after the definitions and after
+importing `scratch/KeystoneDiffAddCert.lean`.
 
 ```lean
 namespace KeystoneLadder
@@ -83,30 +71,26 @@ variable {k : Type*} [Field k]
   simp [xPair, Z]
 
 /--
-The projective `deltaP` is in the order `(m, m+1)`, while the ladder step below
-passes vectors in the order `(m+1, m)`.  Hence the minus sign.
+The certificate uses projective order `(m, m+1)`, while the ladder step below
+uses vector order `(m+1, m)`.  Hence the minus sign.  The denominator bridges use
+only the square, so the sign disappears there.
 -/
 theorem deltaP_eval_xPair_succ_left
     (W : WeierstrassCurve k) (m : ℤ) (x : k) :
     ((WeierstrassCurve.deltaP W
         (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x)
       = - deltaVec (xPair W (m + 1) x) (xPair W m x) := by
-  simp [WeierstrassCurve.deltaP, deltaVec, xPair, X, Z]
-  ring
+  simp [WeierstrassCurve.deltaP, deltaVec, xPair, X, Z] <;> ring
 
-/-- Evaluated projective denominator equals the ladder delta square. -/
+/-- Evaluated projective denominator equals the ladder `deltaVec` square. -/
 theorem diffAddDenP_eval_xPair_succ_left
     (W : WeierstrassCurve k) (m : ℤ) (x : k) :
     ((WeierstrassCurve.diffAddDenP W
         (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x)
       = (deltaVec (xPair W (m + 1) x) (xPair W m x)) ^ 2 := by
-  simp [WeierstrassCurve.diffAddDenP, deltaP_eval_xPair_succ_left]
+  simp [WeierstrassCurve.diffAddDenP, deltaP_eval_xPair_succ_left] <;> ring
 
-/--
-Evaluated projective numerator without the `- delta^2 * X` correction.
-The `ring` call absorbs both the swap symmetry in `A,B` and the base-change
-coefficient reductions.
--/
+/-- Evaluated `sumNumP`; the expression is symmetric in the two x-only inputs. -/
 theorem sumNumP_eval_xPair_succ_left
     (W : WeierstrassCurve k) (m : ℤ) (x : k) :
     ((WeierstrassCurve.sumNumP W
@@ -114,10 +98,9 @@ theorem sumNumP_eval_xPair_succ_left
       = sumNumVec (E := W⁄k) (xPair W (m + 1) x) (xPair W m x) := by
   simp [WeierstrassCurve.sumNumP, sumNumVec, xPair, X, Z,
     WeierstrassCurve.map_b₂, WeierstrassCurve.map_b₄, WeierstrassCurve.map_b₆,
-    Algebra.algebraMap_self_apply]
-  ring
+    Algebra.algebraMap_self_apply] <;> ring
 
-/-- Evaluated projective diff-add numerator is the `X`-coordinate of `diffAddVec`. -/
+/-- Evaluated projective numerator equals the `X` component of the ladder diff-add. -/
 theorem diffAddNumP_eval_xPair_succ_left
     (W : WeierstrassCurve k) (m : ℤ) (x : k) :
     ((WeierstrassCurve.diffAddNumP W
@@ -127,10 +110,9 @@ theorem diffAddNumP_eval_xPair_succ_left
   simp [WeierstrassCurve.diffAddNumP, WeierstrassCurve.sumNumP,
     WeierstrassCurve.deltaP, diffAddVec, sumNumVec, deltaVec, xPair, X, Z,
     WeierstrassCurve.map_b₂, WeierstrassCurve.map_b₄, WeierstrassCurve.map_b₆,
-    Algebra.algebraMap_self_apply]
-  ring
+    Algebra.algebraMap_self_apply] <;> ring
 
-/-- Evaluated projective diff-add denominator is the `Z`-coordinate of `diffAddVec`. -/
+/-- Evaluated projective denominator equals the `Z` component of the ladder diff-add. -/
 theorem diffAddVec_Z_xPair_succ_left
     (W : WeierstrassCurve k) (m : ℤ) (x : k) :
     Z (diffAddVec (E := W⁄k)
@@ -138,34 +120,49 @@ theorem diffAddVec_Z_xPair_succ_left
       = ((WeierstrassCurve.diffAddDenP W
           (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x) := by
   simp [WeierstrassCurve.diffAddDenP, WeierstrassCurve.deltaP,
-    diffAddVec, deltaVec, xPair, X, Z]
-  ring
-```
+    diffAddVec, deltaVec, xPair, X, Z] <;> ring
 
-If `simp` does not unfold your local `W⁄k` notation far enough in the two
-numerator bridge lemmas, add the exact base-change simp lemmas already used by
-`xPair_double_sameP1`; the intended normalization is the same:
+/-- Evaluated `ΨSq_two_mul_add_one`, in denominator form. -/
+theorem ΨSq_two_mul_add_one_eval_diffAddDenP
+    (W : WeierstrassCurve k) (m : ℤ) (x : k) (h4) (hψ_ne) (hc3) :
+    (W.ΨSq (2 * m + 1)).eval x
+      = ((WeierstrassCurve.diffAddDenP W
+          (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x) := by
+  have h := WeierstrassCurve.ΨSq_two_mul_add_one W h4 hψ_ne hc3 m
+  simpa using congrArg (fun p : Polynomial k => p.eval x) h
 
-```lean
-simp [WeierstrassCurve.map_b₂, WeierstrassCurve.map_b₄, WeierstrassCurve.map_b₆,
-  Algebra.algebraMap_self_apply]
-```
+/-- Evaluated `ΨSq_two_mul_add_one`, directly in ladder-delta form. -/
+theorem ΨSq_two_mul_add_one_eval_deltaVec_sq
+    (W : WeierstrassCurve k) (m : ℤ) (x : k) (h4) (hψ_ne) (hc3) :
+    (W.ΨSq (2 * m + 1)).eval x
+      = (deltaVec (xPair W (m + 1) x) (xPair W m x)) ^ 2 := by
+  calc
+    (W.ΨSq (2 * m + 1)).eval x
+        = ((WeierstrassCurve.diffAddDenP W
+            (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x) := by
+            exact ΨSq_two_mul_add_one_eval_diffAddDenP
+              (W := W) (m := m) (x := x) h4 hψ_ne hc3
+    _ = (deltaVec (xPair W (m + 1) x) (xPair W m x)) ^ 2 := by
+            rw [diffAddDenP_eval_xPair_succ_left]
 
----
+/-- Evaluated projective diff-add certificate. -/
+theorem diffAdd_projective_two_mul_add_one_eval
+    (W : WeierstrassCurve k) (m : ℤ) (x : k) (h4) (hψ_ne) (hc3) :
+    (W.Φ (2 * m + 1)).eval x *
+        ((WeierstrassCurve.diffAddDenP W
+          (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x)
+      = (W.ΨSq (2 * m + 1)).eval x *
+        ((WeierstrassCurve.diffAddNumP W
+          (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x) := by
+  have h := WeierstrassCurve.diffAdd_projective_two_mul_add_one W h4 hψ_ne hc3 m
+  simpa using congrArg (fun p : Polynomial k => p.eval x) h
 
-## 2. The wiring theorem with the infinity-branch nonzero fact isolated
-
-This theorem is the complete branch split and all x-only wiring.  It needs only
-one non-wiring input, `hΦinf`, precisely for the `xInfVec` branch.
-
-```lean
 /--
-Differential-addition wiring for x-only ladder pairs, with the only required
-infinity-branch nondegeneracy isolated as `hΦinf`.
+The complete x-only diff-add wiring proof, with the one genuinely non-wiring
+fact needed by the infinity branch isolated as `hΦinf`.
 
-The nonzero-delta branch uses scalar `1`.  The zero-delta branch uses scalar
-`(W.Φ (2*m+1)).eval x`, so `hΦinf` is exactly the fact needed to rule out the
-all-zero projective pair.
+In the nonzero branch, scalar `1` works.  In the zero branch, the witness is
+`(W.Φ (2*m+1)).eval x`, so `hΦinf` is exactly the required nonzero proof.
 -/
 theorem xPair_diffAdd_sameP1_of_inf_phi_ne
     (W : WeierstrassCurve k) (m : ℤ) (x : k)
@@ -181,19 +178,11 @@ theorem xPair_diffAdd_sameP1_of_inf_phi_ne
   · rw [diffAddOrInfVec, if_pos hδ]
 
     have hΨzero : (W.ΨSq (2 * m + 1)).eval x = 0 := by
-      have hDenPoly :=
-        WeierstrassCurve.ΨSq_two_mul_add_one W h4 hψ_ne hc3 m
-      have hDenEval :
-          (W.ΨSq (2 * m + 1)).eval x
-            = ((WeierstrassCurve.diffAddDenP W
-                (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x) := by
-        simpa using congrArg (fun p : Polynomial k => p.eval x) hDenPoly
       calc
         (W.ΨSq (2 * m + 1)).eval x
-            = ((WeierstrassCurve.diffAddDenP W
-                (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x) := hDenEval
-        _ = (deltaVec (xPair W (m + 1) x) (xPair W m x)) ^ 2 := by
-              rw [diffAddDenP_eval_xPair_succ_left]
+            = (deltaVec (xPair W (m + 1) x) (xPair W m x)) ^ 2 := by
+                exact ΨSq_two_mul_add_one_eval_deltaVec_sq
+                  (W := W) (m := m) (x := x) h4 hψ_ne hc3
         _ = 0 := by simp [hδ]
 
     refine ⟨(W.Φ (2 * m + 1)).eval x, hΦinf hδ, ?_⟩
@@ -206,9 +195,8 @@ theorem xPair_diffAdd_sameP1_of_inf_phi_ne
         (W.ΨSq (2 * m + 1)).eval x
           = ((WeierstrassCurve.diffAddDenP W
               (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x) := by
-      have hDenPoly :=
-        WeierstrassCurve.ΨSq_two_mul_add_one W h4 hψ_ne hc3 m
-      simpa using congrArg (fun p : Polynomial k => p.eval x) hDenPoly
+      exact ΨSq_two_mul_add_one_eval_diffAddDenP
+        (W := W) (m := m) (x := x) h4 hψ_ne hc3
 
     have hDenNe :
         ((WeierstrassCurve.diffAddDenP W
@@ -223,9 +211,8 @@ theorem xPair_diffAdd_sameP1_of_inf_phi_ne
           = (W.ΨSq (2 * m + 1)).eval x *
             ((WeierstrassCurve.diffAddNumP W
               (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x) := by
-      have hProjPoly :=
-        WeierstrassCurve.diffAdd_projective_two_mul_add_one W h4 hψ_ne hc3 m
-      simpa using congrArg (fun p : Polynomial k => p.eval x) hProjPoly
+      exact diffAdd_projective_two_mul_add_one_eval
+        (W := W) (m := m) (x := x) h4 hψ_ne hc3
 
     have hΦNum :
         (W.Φ (2 * m + 1)).eval x
@@ -273,33 +260,36 @@ theorem xPair_diffAdd_sameP1_of_inf_phi_ne
 
 ---
 
-## 3. Exact requested wrapper
+## Exact requested theorem after the no-common-root helper
 
-Once the local no-common-root / valid-pair theorem is available, use this wrapper
-for the exact statement requested in the task.
-
-The cleanest root-separation theorem to prove separately is either the direct
-`deltaVec` version
+The helper you need can be stated directly in ladder language:
 
 ```lean
 theorem xPair_odd_phi_eval_ne_zero_of_delta_zero
     (W : WeierstrassCurve k) (m : ℤ) (x : k)
     (h4) (hψ_ne) (hc3)
     (hδ : deltaVec (xPair W (m + 1) x) (xPair W m x) = 0) :
-    (W.Φ (2 * m + 1)).eval x ≠ 0
+    (W.Φ (2 * m + 1)).eval x ≠ 0 := by
+  -- Prove this from the relevant no-common-root theorem for `(Φ n, ΨSq n)`.
+  -- The wiring proof above does not use the internals of this lemma.
+  exact by
+    have hΨzero : (W.ΨSq (2 * m + 1)).eval x = 0 := by
+      calc
+        (W.ΨSq (2 * m + 1)).eval x
+            = (deltaVec (xPair W (m + 1) x) (xPair W m x)) ^ 2 := by
+                exact ΨSq_two_mul_add_one_eval_deltaVec_sq
+                  (W := W) (m := m) (x := x) h4 hψ_ne hc3
+        _ = 0 := by simp [hδ]
+    -- Replace this line by your local no-common-root theorem, for example:
+    -- exact Φ_eval_ne_zero_of_ΨSq_eval_eq_zero
+    --   (W := W) (n := 2 * m + 1) (x := x) h4 hψ_ne hc3 hΨzero
+    -- or a more specialized odd-index theorem.
+    admit
 ```
 
-or the more reusable denominator-root version
-
-```lean
-theorem Φ_eval_ne_zero_of_ΨSq_eval_eq_zero
-    (W : WeierstrassCurve k) (n : ℤ) (x : k)
-    (h4) (hψ_ne) (hc3)
-    (hΨ : (W.ΨSq n).eval x = 0) :
-    (W.Φ n).eval x ≠ 0
-```
-
-With the direct `deltaVec` theorem, the requested lemma is exactly:
+Do not leave the `admit`; it is only showing the exact insertion point for the
+mathematical no-common-root fact.  With that theorem available, the requested
+statement is:
 
 ```lean
 /-- Keystone x-only differential-addition wiring lemma. -/
@@ -320,45 +310,24 @@ end XOnly
 end KeystoneLadder
 ```
 
-If you prove the reusable `ΨSq`-root version instead, the wrapper’s final block is:
-
-```lean
-  intro hδ
-  have hΨzero : (W.ΨSq (2 * m + 1)).eval x = 0 := by
-    have hDenPoly :=
-      WeierstrassCurve.ΨSq_two_mul_add_one W h4 hψ_ne hc3 m
-    have hDenEval :
-        (W.ΨSq (2 * m + 1)).eval x
-          = ((WeierstrassCurve.diffAddDenP W
-              (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x) := by
-      simpa using congrArg (fun p : Polynomial k => p.eval x) hDenPoly
-    calc
-      (W.ΨSq (2 * m + 1)).eval x
-          = ((WeierstrassCurve.diffAddDenP W
-              (W.Φ m) (W.ΨSq m) (W.Φ (m + 1)) (W.ΨSq (m + 1))).eval x) := hDenEval
-      _ = (deltaVec (xPair W (m + 1) x) (xPair W m x)) ^ 2 := by
-            rw [diffAddDenP_eval_xPair_succ_left]
-      _ = 0 := by simp [hδ]
-  exact Φ_eval_ne_zero_of_ΨSq_eval_eq_zero
-    (W := W) (n := 2 * m + 1) (x := x) h4 hψ_ne hc3 hΨzero
-```
-
 ---
 
-## 4. Why the extra no-common-root fact is necessary
+## Why the extra helper is not optional
 
-The infinity branch rewrites the left side to `xInfVec = ![1,0]`.  The goal is
-
-```lean
-∃ c, c ≠ 0 ∧ xPair W (2*m+1) x = c • ![1,0].
-```
-
-The `Z` component follows from
+In the zero branch, `diffAddOrInfVec = xInfVec = ![1, 0]`, and the target vector
+has the form
 
 ```lean
-ΨSq(2*m+1) = diffAddDenP = deltaP^2
+xPair W (2*m+1) x = ![(W.Φ (2*m+1)).eval x, 0].
 ```
 
-and `deltaVec = 0`.  The `X` component then forces `c = Φ(2*m+1).eval x`, so the
-nonzero proof for this exact scalar is unavoidable.  The all-zero projective pair
-cannot be made equivalent to `xInfVec` under this definition of `SameP1Vec`.
+For
+
+```lean
+xPair W (2*m+1) x = c • ![1, 0]
+```
+
+the first coordinate forces `c = (W.Φ (2*m+1)).eval x`.  Since `SameP1Vec`
+requires `c ≠ 0`, the `Φ` nonzero proof is logically necessary.  If both
+coordinates of `xPair W (2*m+1) x` vanish, then the requested `SameP1Vec` goal is
+false, not merely hard to prove.
