@@ -1,179 +1,482 @@
-# Q17 (dm1): Keystone diff-add numerator cofactors — EVEN branch
+# Q30 (dm1): Keystone avenue (c) — division-polynomial coprimality
 
-## Result
+## Executive answer
 
-The requested EVEN-branch identity is certified by the following cofactors:
+The adjacent-Somos avenue is useful, but it does **not** prove the stated theorem as written.  The missing point is local invertibility: the propagation step from two adjacent vanishing `preΨ` values needs
+
+```lean
+(W.Ψ₃.eval x) ≠ 0
+```
+
+not merely the polynomial-level hypothesis
+
+```lean
+W.Ψ₃ ≠ 0.
+```
+
+Also, the displayed theorem has no nonsingularity/`IsElliptic` hypothesis.  With only `h4`, `hψ_ne`, and polynomial-level `hc3`, the no-common-root statement is not a valid target.  The singular cusp over `ℚ`, with
 
 ```text
-q0 = -P0*P1**3*P2*Pm1*b2**2*x**5 - 5*P0*P1**3*P2*Pm1*b2*b4*x**4 - 4*P0*P1**3*P2*Pm1*b2*b6*x**3 - P0*P1**3*P2*Pm1*b2*b8*x**2 - 7*P0*P1**3*P2*Pm1*b2*x**6 - 6*P0*P1**3*P2*Pm1*b4**2*x**3 - 9*P0*P1**3*P2*Pm1*b4*b6*x**2 - 2*P0*P1**3*P2*Pm1*b4*b8*x - 18*P0*P1**3*P2*Pm1*b4*x**5 - 3*P0*P1**3*P2*Pm1*b6**2*x - P0*P1**3*P2*Pm1*b6*b8 - 15*P0*P1**3*P2*Pm1*b6*x**4 - 4*P0*P1**3*P2*Pm1*b8*x**3 - 12*P0*P1**3*P2*Pm1*x**7
-q1 = P0**3*P1*P3*b2*x**2 + 2*P0**3*P1*P3*b4*x + P0**3*P1*P3*b6 + 4*P0**3*P1*P3*x**3
-q2 = P0**4*P1**2*b2*b4*b6*x**3 + 2*P0**4*P1**2*b2*b6**2*x**2 + P0**4*P1**2*b2*b6*b8*x - P0**4*P1**2*b2*b6*x**5 - P0**4*P1**2*b4**3*x**3 - 2*P0**4*P1**2*b4**2*b6*x**2 - P0**4*P1**2*b4**2*b8*x + P0**4*P1**2*b4**2*x**5 - 4*P0**4*P1**2*b4*b8*x**3 - 8*P0**4*P1**2*b6*b8*x**2 - 4*P0**4*P1**2*b8**2*x + 4*P0**4*P1**2*b8*x**5 - 3*P0**3*P1*P2*Pm1*b2**2*x**5 - 15*P0**3*P1*P2*Pm1*b2*b4*x**4 - 12*P0**3*P1*P2*Pm1*b2*b6*x**3 - 3*P0**3*P1*P2*Pm1*b2*b8*x**2 - 21*P0**3*P1*P2*Pm1*b2*x**6 - 18*P0**3*P1*P2*Pm1*b4**2*x**3 - 27*P0**3*P1*P2*Pm1*b4*b6*x**2 - 6*P0**3*P1*P2*Pm1*b4*b8*x - 54*P0**3*P1*P2*Pm1*b4*x**5 - 9*P0**3*P1*P2*Pm1*b6**2*x - 3*P0**3*P1*P2*Pm1*b6*b8 - 45*P0**3*P1*P2*Pm1*b6*x**4 - 12*P0**3*P1*P2*Pm1*b8*x**3 - 36*P0**3*P1*P2*Pm1*x**7
-q3 = -P0**4*P1*b2**3*x**6 - 6*P0**4*P1*b2**2*b4*x**5 - 3*P0**4*P1*b2**2*b6*x**4 - 12*P0**4*P1*b2**2*x**7 - 12*P0**4*P1*b2*b4**2*x**4 - 12*P0**4*P1*b2*b4*b6*x**3 - 48*P0**4*P1*b2*b4*x**6 - 3*P0**4*P1*b2*b6**2*x**2 - 24*P0**4*P1*b2*b6*x**5 - 48*P0**4*P1*b2*x**8 - 8*P0**4*P1*b4**3*x**3 - 12*P0**4*P1*b4**2*b6*x**2 - 48*P0**4*P1*b4**2*x**5 - 6*P0**4*P1*b4*b6**2*x - 48*P0**4*P1*b4*b6*x**4 - 96*P0**4*P1*b4*x**7 - P0**4*P1*b6**3 - 12*P0**4*P1*b6**2*x**3 - 48*P0**4*P1*b6*x**6 - 64*P0**4*P1*x**9 + P0**2*P1**2*Pm1*b2**2*x**3 + 3*P0**2*P1**2*Pm1*b2*b4*x**2 + 10*P0**2*P1**2*Pm1*b2*x**4 + 3*P0**2*P1**2*Pm1*b4**2*x + P0**2*P1**2*Pm1*b4*b6 + 16*P0**2*P1**2*Pm1*b4*x**3 + 6*P0**2*P1**2*Pm1*b6*x**2 + 4*P0**2*P1**2*Pm1*b8*x + 24*P0**2*P1**2*Pm1*x**5 + P0*P1*P2*Pm1**2*b2*x**2 + 2*P0*P1*P2*Pm1**2*b4*x + P0*P1*P2*Pm1**2*b6 + 4*P0*P1*P2*Pm1**2*x**3
-q4 = P0**5*P1**2*P2*b2**3*x**8 + 7*P0**5*P1**2*P2*b2**2*b4*x**7 + 5*P0**5*P1**2*P2*b2**2*b6*x**6 + P0**5*P1**2*P2*b2**2*b8*x**5 + 11*P0**5*P1**2*P2*b2**2*x**9 + 16*P0**5*P1**2*P2*b2*b4**2*x**6 + 22*P0**5*P1**2*P2*b2*b4*b6*x**5 + 4*P0**5*P1**2*P2*b2*b4*b8*x**4 + 52*P0**5*P1**2*P2*b2*b4*x**8 + 7*P0**5*P1**2*P2*b2*b6**2*x**4 + 2*P0**5*P1**2*P2*b2*b6*b8*x**3 + 38*P0**5*P1**2*P2*b2*b6*x**7 + 8*P0**5*P1**2*P2*b2*b8*x**6 + 40*P0**5*P1**2*P2*b2*x**10 + 12*P0**5*P1**2*P2*b4**3*x**5 + 24*P0**5*P1**2*P2*b4**2*b6*x**4 + 4*P0**5*P1**2*P2*b4**2*b8*x**3 + 60*P0**5*P1**2*P2*b4**2*x**7 + 15*P0**5*P1**2*P2*b4*b6**2*x**3 + 4*P0**5*P1**2*P2*b4*b6*b8*x**2 + 84*P0**5*P1**2*P2*b4*b6*x**6 + 16*P0**5*P1**2*P2*b4*b8*x**5 + 96*P0**5*P1**2*P2*b4*x**9 + 3*P0**5*P1**2*P2*b6**3*x**2 + P0**5*P1**2*P2*b6**2*b8*x + 27*P0**5*P1**2*P2*b6**2*x**5 + 8*P0**5*P1**2*P2*b6*b8*x**4 + 72*P0**5*P1**2*P2*b6*x**8 + 16*P0**5*P1**2*P2*b8*x**7 + 48*P0**5*P1**2*P2*x**11 - P0**4*P1**4*b2*b4*x**6 - 2*P0**4*P1**4*b2*b6*x**5 - P0**4*P1**4*b2*b8*x**4 + P0**4*P1**4*b2*x**8 - 3*P0**4*P1**4*b4**2*x**5 - 9*P0**4*P1**4*b4*b6*x**4 - 4*P0**4*P1**4*b4*b8*x**3 - 6*P0**4*P1**4*b6**2*x**3 - 5*P0**4*P1**4*b6*b8*x**2 - 3*P0**4*P1**4*b6*x**6 - P0**4*P1**4*b8**2*x - 2*P0**4*P1**4*b8*x**5 + 3*P0**4*P1**4*x**9 - 3*P0**3*P1**3*P2*Pm1*b2**2*x**5 - 12*P0**3*P1**3*P2*Pm1*b2*b4*x**4 - 7*P0**3*P1**3*P2*Pm1*b2*b6*x**3 - 2*P0**3*P1**3*P2*Pm1*b2*b8*x**2 - 26*P0**3*P1**3*P2*Pm1*b2*x**6 - 12*P0**3*P1**3*P2*Pm1*b4**2*x**3 - 13*P0**3*P1**3*P2*Pm1*b4*b6*x**2 - 3*P0**3*P1**3*P2*Pm1*b4*b8*x - 55*P0**3*P1**3*P2*Pm1*b4*x**5 - 3*P0**3*P1**3*P2*Pm1*b6**2*x - P0**3*P1**3*P2*Pm1*b6*b8 - 39*P0**3*P1**3*P2*Pm1*b6*x**4 - 14*P0**3*P1**3*P2*Pm1*b8*x**3 - 54*P0**3*P1**3*P2*Pm1*x**7 + P0**2*P1**5*Pm1*b2*x**4 + 3*P0**2*P1**5*Pm1*b4*x**3 + 3*P0**2*P1**5*Pm1*b6*x**2 + P0**2*P1**5*Pm1*b8*x + 3*P0**2*P1**5*Pm1*x**5 + P0**2*P1**2*P2**2*Pm1**2*b4*x**3 + 2*P0**2*P1**2*P2**2*Pm1**2*b6*x**2 + P0**2*P1**2*P2**2*Pm1**2*b8*x - P0**2*P1**2*P2**2*Pm1**2*x**5
+b2 = b4 = b6 = b8 = 0,
 ```
 
-With these definitions,
+has
 
 ```text
-expand(G - (q0*Adj0 + q1*Inv0 + q2*Adj1 + q3*Inv1 + q4*bRel)) == 0
+s  = 4*X^3,
+Ψ₃ = 3*X^4,
+preΨ₄ = 2*X^6.
 ```
 
-## Method/order note
-
-I used a tracked Buchberger/lift in SymPy's `polys.rings`, over `QQ`, with lexicographic order
+For `n = 3`, using `preΨ₂ = 1`,
 
 ```text
-Pm2 > P3 > Pm1 > P0 > P1 > P2 > x > b2 > b4 > b6 > b8.
+ΨSq 3 = Ψ₃^2 = 9*X^8,
+Φ 3   = X*Ψ₃^2 - preΨ₄*preΨ₂*Ψ₂Sq
+      = 9*X^9 - 8*X^9
+      = X^9.
 ```
 
-The input basis is the five original generators `(Adj0, Inv0, Adj1, Inv1, bRel)`, normalized only internally for reduction.  The representation vectors are tracked back to the original, unnormalized generators.  In this order, exactly one nonzero S-polynomial is added during the lift, from the pair `(Inv1, Adj1)`, and the target then reduces to zero.  The final check is the literal SymPy assertion below, using fully expanded curve constants and the original five generators.
+Thus both evaluate to zero at `X = 0`.  This curve satisfies `bRel` and `4 ≠ 0`, and `Ψ₃` is a nonzero polynomial.  Therefore the desired theorem needs at least a nonsingularity hypothesis, or an equivalent hypothesis ruling out common roots of the basic torsion factors.
 
-## Self-contained script
+The non-circular route I recommend is:
 
-```python
-import sympy as sp
-from sympy import QQ
-from sympy.polys.rings import ring
+1. Add or derive a nonsingularity hypothesis, preferably `hEll : W.IsElliptic` or `W.discr ≠ 0`.
+2. Prove finite base-resultant lemmas, especially:
+   ```lean
+   W.Ψ₂Sq.eval x = 0 → W.Ψ₃.eval x ≠ 0
+   W.Ψ₃.eval x = 0 → W.Ψ₂Sq.eval x ≠ 0 ∧ W.preΨ 4 |>.eval x ≠ 0
+   ```
+3. Use adjacent-Somos to prove no adjacent vanishing on the open stratum `Ψ₃.eval x ≠ 0`.
+4. Use the `Ψ₃.eval x = 0` stratum as the rank-three base case.  This is a small rank-of-apparition argument, not a one-line propagation from adjacent Somos.
+5. Then prove the `n = 2*m+1` specialization by expanding the definitions of `Φ` and `ΨSq` and reducing to “no adjacent preΨ vanishing” plus the 2-torsion lemma.
 
-# Lex order used for the lift.  The names are the problem variables, but P3 is
-# placed before Pm1 in the monomial order; the final identity is order-free.
-R, Pm2, P3, Pm1, P0, P1, P2, x, b2, b4, b6, b8 = ring(
-    'Pm2,P3,Pm1,P0,P1,P2,x,b2,b4,b6,b8', QQ, order='lex'
-)
-zero = R.zero
-one = R.one
+The rest of this note gives the exact recurrence rearrangement, the 2-torsion handling, and a Lean skeleton for the specialization.
 
-s  = 4*x**3 + b2*x**2 + 2*b4*x + b6
-c3 = 3*x**4 + b2*x**3 + 3*b4*x**2 + 3*b6*x + b8
-d4 = 2*x**6 + b2*x**5 + 5*b4*x**4 + 10*b6*x**3 + 10*b8*x**2 + (b2*b8-b4*b6)*x + (b4*b8-b6**2)
+---
 
-Z0 = P0**2*s
-F0 = x*P0**2*s - P1*Pm1
-Z1 = P1**2
-F1 = x*P1**2 - P2*P0*s
+## 1. Exact adjacent-Somos propagation
 
-pre2m  = P0*(Pm1**2*P2 - Pm2*P1**2)
-pre2m2 = P1*(P0**2*P3 - Pm1*P2**2)
-deltaP = F0*Z1 - F1*Z0
-sumNumP = (
-    2*F0*F1*(F0*Z1 + F1*Z0)
-    + b2*F0*F1*Z0*Z1
-    + b4*Z0*Z1*(F0*Z1 + F1*Z0)
-    + b6*Z0**2*Z1**2
-)
-Phi2m1 = x*deltaP**2 - s*pre2m2*pre2m
-diffAddNumP = sumNumP - deltaP**2*x
-G = c3*(Phi2m1 - diffAddNumP)
+Let
 
-Adj0 = Pm2*P2 - Pm1*P1 + c3*P0**2
-Inv0 = c3*(P2*Pm1**2 + P1**2*Pm2 + s**2*P0**3) - (d4+s**2)*P1*P0*Pm1
-Adj1 = Pm1*P3 - s**2*P2*P0 + c3*P1**2
-Inv1 = c3*(P3*P0**2 + P2**2*Pm1 + P1**3) - (d4+s**2)*P2*P1*P0
-bRel = b2*b6 - b4**2 - 4*b8
-orig = [Adj0, Inv0, Adj1, Inv1, bRel]
-
-
-def vzero():
-    return [zero]*5
-
-
-def vadd(a, b):
-    return [a[i] + b[i] for i in range(5)]
-
-
-def vsub(a, b):
-    return [a[i] - b[i] for i in range(5)]
-
-
-def vmul(t, a):
-    return [t*a[i] for i in range(5)]
-
-
-def normalize(poly, rep):
-    lc = poly.LC
-    if lc != 1:
-        poly = poly.quo_ground(lc)
-        rep = [ri.quo_ground(lc) for ri in rep]
-    return poly, rep
-
-
-def reduce_with_rep(p, basis, reps, p_rep=None):
-    h = p
-    rem = zero
-    quotient_rep = vzero()
-    while h:
-        m = h.LM
-        c = h.LC
-        for g, grep in zip(basis, reps):
-            div = R.monomial_div(m, g.LM)
-            if div is not None:
-                t = R.term_new(div, c/g.LC)
-                h = h - t*g
-                quotient_rep = vadd(quotient_rep, vmul(t, grep))
-                break
-        else:
-            lt = R.term_new(m, c)
-            rem = rem + lt
-            h = h - lt
-    if p_rep is None:
-        return rem, quotient_rep, None
-    return rem, quotient_rep, vsub(p_rep, quotient_rep)
-
-
-def spoly_with_rep(i, j, basis, reps):
-    f = basis[i]
-    g = basis[j]
-    lcm = R.monomial_lcm(f.LM, g.LM)
-    mf = R.monomial_div(lcm, f.LM)
-    mg = R.monomial_div(lcm, g.LM)
-    tf = R.term_new(mf, QQ(1, 1)/f.LC)
-    tg = R.term_new(mg, QQ(1, 1)/g.LC)
-    return tf*f - tg*g, vsub(vmul(tf, reps[i]), vmul(tg, reps[j]))
-
-
-# Build a tracked Groebner basis.  For this order exactly one nonzero
-# S-polynomial is added (from Inv1 and Adj1), and then G reduces to zero.
-basis = []
-reps = []
-for k, g in enumerate(orig):
-    rep = vzero()
-    rep[k] = one
-    g, rep = normalize(g, rep)
-    basis.append(g)
-    reps.append(rep)
-
-pairs = {(i, j) for i in range(len(basis)) for j in range(i)}
-while pairs:
-    i, j = min(pairs, key=lambda ij: R.order(R.monomial_lcm(basis[ij[0]].LM, basis[ij[1]].LM)))
-    pairs.remove((i, j))
-    if R.monomial_mul(basis[i].LM, basis[j].LM) == R.monomial_lcm(basis[i].LM, basis[j].LM):
-        continue
-    s_poly, s_rep = spoly_with_rep(i, j, basis, reps)
-    rem, _, rem_rep = reduce_with_rep(s_poly, basis, reps, s_rep)
-    if rem:
-        rem, rem_rep = normalize(rem, rem_rep)
-        if all(rem != g for g in basis):
-            new = len(basis)
-            basis.append(rem)
-            reps.append(rem_rep)
-            for k in range(new):
-                pairs.add((new, k))
-
-rem, q, _ = reduce_with_rep(G, basis, reps)
-assert rem == 0
-q0, q1, q2, q3, q4 = [sp.expand(qi.as_expr()) for qi in q]
-Gx, Adj0x, Inv0x, Adj1x, Inv1x, bRelx = [p.as_expr() for p in [G, Adj0, Inv0, Adj1, Inv1, bRel]]
-assert sp.expand(Gx - (q0*Adj0x + q1*Inv0x + q2*Adj1x + q3*Inv1x + q4*bRelx)) == 0
-
-for i, qi in enumerate([q0, q1, q2, q3, q4]):
-    print(f'q{i} = {qi}')
-print('OK')
+```lean
+a i := (W.preΨ i).eval x
+sx  := W.Ψ₂Sq.eval x
+c3x := W.Ψ₃.eval x
 ```
 
-## Verification output
-
-Running the script prints the cofactors above and ends with:
+The evaluated adjacent-Somos relation is
 
 ```text
-OK
+a(r-2) * a(r+2)
+  - (if Even r then 1 else sx^2) * (a(r-1) * a(r+1))
+  + c3x * a(r)^2 = 0.
 ```
+
+If `a r = 0` and `a (r+1) = 0`, then applying this at center `r-1` gives
+
+```text
+c3x * a(r-1)^2 = 0.
+```
+
+So, if `c3x ≠ 0`, then `a(r-1) = 0`.  The adjacent zero pair moves left:
+
+```text
+(a r = 0 ∧ a(r+1) = 0) ⟹ (a(r-1) = 0 ∧ a r = 0).
+```
+
+Similarly, applying the relation at center `r+2` gives
+
+```text
+c3x * a(r+2)^2 = 0,
+```
+
+so the pair also moves right:
+
+```text
+(a r = 0 ∧ a(r+1) = 0) ⟹ (a(r+1) = 0 ∧ a(r+2) = 0).
+```
+
+This part is correct and formalizable.  The crucial caveat is that it proves no adjacent vanishing only on the open set `Ψ₃.eval x ≠ 0`.
+
+A Lean skeleton for the open-stratum propagation is:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.Tactic
+
+open Polynomial
+open scoped Polynomial
+
+namespace WeierstrassCurve
+
+noncomputable section
+
+variable {k : Type*} [Field k]
+
+private abbrev pe (W : WeierstrassCurve k) (x : k) (i : ℤ) : k :=
+  (W.preΨ i).eval x
+
+private abbrev sx (W : WeierstrassCurve k) (x : k) : k :=
+  W.Ψ₂Sq.eval x
+
+private abbrev c3x (W : WeierstrassCurve k) (x : k) : k :=
+  W.Ψ₃.eval x
+
+private lemma eval_preΨ_adjacent_somos
+    (W : WeierstrassCurve k) (x : k) (h4 : (4 : k) ≠ 0) (r : ℤ) :
+    pe W x (r - 2) * pe W x (r + 2)
+      - (if Even r then 1 else (sx W x)^2) * (pe W x (r - 1) * pe W x (r + 1))
+      + c3x W x * (pe W x r)^2 = 0 := by
+  -- Uses the already-proved polynomial identity:
+  --   preΨ_adjacent_somos W h4 r
+  -- and evaluates at x.
+  simpa [pe, sx, c3x, map_mul, map_add, map_sub, pow_two]
+    using congrArg (fun p : k[X] => p.eval x) (preΨ_adjacent_somos W h4 r)
+
+private lemma preΨ_prev_zero_of_adjacent_zero
+    (W : WeierstrassCurve k) (x : k) (h4 : (4 : k) ≠ 0)
+    {r : ℤ} (hc3x : c3x W x ≠ 0)
+    (hr : pe W x r = 0) (hr1 : pe W x (r + 1) = 0) :
+    pe W x (r - 1) = 0 := by
+  have h := eval_preΨ_adjacent_somos W x h4 (r - 1)
+  have hsquare : c3x W x * (pe W x (r - 1))^2 = 0 := by
+    -- h is the relation at center r-1:
+    -- a(r-3)*a(r+1) - eps*a(r-2)*a(r) + c3*a(r-1)^2 = 0.
+    -- The first two products vanish by hr1 and hr.
+    simpa [pe, sx, c3x, hr, hr1, sub_eq_add_neg, add_assoc, add_left_comm,
+      add_comm, mul_assoc, mul_left_comm, mul_comm, pow_two] using h
+  have hsq : (pe W x (r - 1))^2 = 0 := by
+    exact (mul_eq_zero.mp hsquare).resolve_left hc3x
+  exact sq_eq_zero_iff.mp hsq
+
+private lemma preΨ_next_zero_of_adjacent_zero
+    (W : WeierstrassCurve k) (x : k) (h4 : (4 : k) ≠ 0)
+    {r : ℤ} (hc3x : c3x W x ≠ 0)
+    (hr : pe W x r = 0) (hr1 : pe W x (r + 1) = 0) :
+    pe W x (r + 2) = 0 := by
+  have h := eval_preΨ_adjacent_somos W x h4 (r + 2)
+  have hsquare : c3x W x * (pe W x (r + 2))^2 = 0 := by
+    -- h is the relation at center r+2:
+    -- a(r)*a(r+4) - eps*a(r+1)*a(r+3) + c3*a(r+2)^2 = 0.
+    -- The first two products vanish by hr and hr1.
+    simpa [pe, sx, c3x, hr, hr1, sub_eq_add_neg, add_assoc, add_left_comm,
+      add_comm, mul_assoc, mul_left_comm, mul_comm, pow_two] using h
+  have hsq : (pe W x (r + 2))^2 = 0 := by
+    exact (mul_eq_zero.mp hsquare).resolve_left hc3x
+  exact sq_eq_zero_iff.mp hsq
+
+private lemma no_adjacent_preΨ_zero_of_Ψ₃_eval_ne
+    (W : WeierstrassCurve k) (x : k) (h4 : (4 : k) ≠ 0)
+    (hc3x : c3x W x ≠ 0) (r : ℤ) :
+    ¬ (pe W x r = 0 ∧ pe W x (r + 1) = 0) := by
+  intro hz
+  -- Move the adjacent zero pair until it contains index 1, then use preΨ_one.
+  -- For r ≥ 1: repeatedly apply preΨ_prev_zero_of_adjacent_zero.
+  -- For r ≤ 0: repeatedly apply preΨ_next_zero_of_adjacent_zero.
+  -- The integer bookkeeping is routine with omega/Int.toNat.
+  -- The terminal contradiction is:
+  --   have h1 : pe W x 1 = 0 := ...
+  --   simpa [pe, preΨ_one] using h1
+  by_cases hr : 1 ≤ r
+  · -- Downward induction on Int.toNat (r - 1).
+    -- Skeleton:
+    --   let N : ℕ := Int.toNat (r - 1)
+    --   induction N generalizing r with
+    --   | zero => omega gives r = 1, then hz.left contradicts preΨ_one
+    --   | succ N ih =>
+    --       have hprev := preΨ_prev_zero_of_adjacent_zero W x h4 hc3x hz.left hz.right
+    --       exact ih (r := r - 1) ... ⟨hprev, hz.left⟩
+    omega
+  · -- Upward induction on Int.toNat (-r).
+    -- Terminal pair is (0,1), whose right component contradicts preΨ_one.
+    -- Same shape as the previous branch, using preΨ_next_zero_of_adjacent_zero.
+    omega
+
+end
+
+end WeierstrassCurve
+```
+
+The final two `omega` placeholders are the only omitted bookkeeping in this local lemma; no algebra remains there.  If desired, they can be replaced by an explicit `Int.le_induction` or `Nat` induction on `Int.toNat (r - 1)` / `Int.toNat (-r)`.
+
+---
+
+## 2. The 2-torsion case `Ψ₂Sq.eval x = 0`
+
+For the odd specialization `n = 2*m + 1`, the denominator is
+
+```text
+ΨSq n = preΨ n ^ 2
+```
+
+because `n` is odd.  Thus a common root forces `a n = 0`.  If additionally `sx = 0`, the `Φ` equation is automatic from the displayed definition unless we prove separately that odd-indexed `preΨ` values do not vanish at a nonsingular 2-torsion `x`.
+
+The clean lemma is:
+
+```lean
+private lemma preΨ_odd_eval_ne_of_Ψ₂Sq_eval_zero
+    (W : WeierstrassCurve k) (x : k)
+    (hEll : W.IsElliptic) (h4 : (4 : k) ≠ 0)
+    (hs : sx W x = 0) {n : ℤ} (hnodd : ¬ Even n) :
+    pe W x n ≠ 0 := by
+  -- Use hEll to prove c3x W x ≠ 0 at a root of Ψ₂Sq.
+  -- Then reduce to positive odd indices using preΨ_neg.
+  -- For positive odd indices, do strong induction.
+  -- Bases:
+  --   preΨ 1 = 1
+  --   preΨ 3 = Ψ₃, nonzero by c3x_ne
+  -- Step uses preΨ_odd:
+  --   if Even t:
+  --     a(2*t+1) = a(t+2)*a(t)^3*sx^2 - a(t-1)*a(t+1)^3
+  --              = - a(t-1)*a(t+1)^3
+  --   if ¬ Even t:
+  --     a(2*t+1) = a(t+2)*a(t)^3 - a(t-1)*a(t+1)^3*sx^2
+  --              = a(t+2)*a(t)^3
+  -- since sx = 0.
+  -- The smaller odd indices are handled by the induction hypothesis.
+  sorry
+```
+
+The required nonsingularity sublemma is finite and independent of keystone induction:
+
+```lean
+private lemma Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero_of_isElliptic
+    (W : WeierstrassCurve k) (x : k)
+    (hEll : W.IsElliptic) (hs : W.Ψ₂Sq.eval x = 0) :
+    W.Ψ₃.eval x ≠ 0 := by
+  -- Conceptual proof:
+  --   resultant(Ψ₂Sq, Ψ₃) = -discr(W)^2
+  -- after using bRel.
+  -- A common root would force the resultant to vanish, hence discr(W)=0,
+  -- contradicting hEll.
+  -- This can be made a finite polynomial certificate; no keystone theorem is used.
+  sorry
+```
+
+For reference, with the expanded constants in the prompt,
+
+```text
+resultant_X(s, c3) = -Δ^2   modulo bRel,
+```
+
+where
+
+```text
+Δ = -b2^2*b8 - 8*b4^3 - 27*b6^2 + 9*b2*b4*b6.
+```
+
+Equivalently,
+
+```text
+resultant_X(s,c3) + Δ^2
+  = -4*bRel*(3*b2^2*b4*b8 + b2^2*b6^2 - 20*b2*b4^2*b6
+      - 8*b2*b6*b8 + 16*b4^4 - 28*b4^2*b8
+      + 81*b4*b6^2 + 16*b8^2).
+```
+
+That is the finite certificate behind the 2-torsion separation lemma.
+
+---
+
+## 3. The odd specialization skeleton
+
+Once the two independent inputs below are available,
+
+```lean
+hNoAdj : ∀ r : ℤ, ¬ (pe W x r = 0 ∧ pe W x (r + 1) = 0)
+hOdd2 : ∀ {n : ℤ}, ¬ Even n → sx W x = 0 → pe W x n ≠ 0
+```
+
+then the `n = 2*m+1` no-common-root proof is short and non-circular:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.Tactic
+
+open Polynomial
+open scoped Polynomial
+
+namespace WeierstrassCurve
+
+noncomputable section
+
+variable {k : Type*} [Field k]
+
+private abbrev pe (W : WeierstrassCurve k) (x : k) (i : ℤ) : k :=
+  (W.preΨ i).eval x
+
+private abbrev sx (W : WeierstrassCurve k) (x : k) : k :=
+  W.Ψ₂Sq.eval x
+
+private lemma odd_index_two_mul_add_one (m : ℤ) : ¬ Even (2*m + 1 : ℤ) := by
+  omega
+
+private lemma ΨSq_eval_odd
+    (W : WeierstrassCurve k) (x : k) {n : ℤ} (hn : ¬ Even n) :
+    (W.ΨSq n).eval x = (pe W x n)^2 := by
+  -- ΨSq n = preΨ n^2 * if Even n then Ψ₂Sq else 1.
+  simp [pe, WeierstrassCurve.ΨSq, hn, pow_two]
+
+private lemma Φ_eval_odd
+    (W : WeierstrassCurve k) (x : k) {n : ℤ} (hn : ¬ Even n) :
+    (W.Φ n).eval x =
+      x * (W.ΨSq n).eval x
+        - pe W x (n + 1) * pe W x (n - 1) * sx W x := by
+  -- Φ n = X*ΨSq n - preΨ(n+1)*preΨ(n-1)*(if Even n then 1 else Ψ₂Sq).
+  simp [pe, sx, WeierstrassCurve.Φ, hn, mul_assoc, mul_left_comm, mul_comm]
+
+private theorem Φ_ΨSq_no_common_eval_zero_odd_from_no_adjacent
+    (W : WeierstrassCurve k) (x : k) (m : ℤ)
+    (hNoAdj : ∀ r : ℤ, ¬ (pe W x r = 0 ∧ pe W x (r + 1) = 0))
+    (hOdd2 : ∀ {n : ℤ}, ¬ Even n → sx W x = 0 → pe W x n ≠ 0) :
+    (W.ΨSq (2*m + 1)).eval x = 0 → (W.Φ (2*m + 1)).eval x ≠ 0 := by
+  intro hΨ hΦ
+  let n : ℤ := 2*m + 1
+  have hn : ¬ Even n := by
+    dsimp [n]
+    omega
+  have hΨ' : (pe W x n)^2 = 0 := by
+    simpa [n] using (show (W.ΨSq n).eval x = 0 from hΨ) ▸ (by
+      simpa using ΨSq_eval_odd W x hn)
+  have hpn : pe W x n = 0 := sq_eq_zero_iff.mp hΨ'
+  by_cases hs : sx W x = 0
+  · exact (hOdd2 hn hs hpn).elim
+  · have hΦeq := Φ_eval_odd W x hn
+    have hprod_s : pe W x (n + 1) * pe W x (n - 1) * sx W x = 0 := by
+      -- Substitute hΨ and hΦ into Φ_eval_odd.
+      -- The `x * ΨSq` term is zero because hΨ = 0.
+      have := hΦeq
+      -- In a live Lean file, this is just a `linear_combination` or `nlinarith`
+      -- after `simp [hΦ, hΨ, n, mul_assoc]`.
+      sorry
+    have hprod : pe W x (n + 1) * pe W x (n - 1) = 0 := by
+      exact (mul_eq_zero.mp hprod_s).resolve_right hs
+    rcases mul_eq_zero.mp hprod with hn1 | hnm1
+    · -- Pair (n,n+1) vanishes.
+      exact hNoAdj n ⟨hpn, hn1⟩
+    · -- Pair (n-1,n) vanishes.
+      have hz : pe W x (n - 1) = 0 ∧ pe W x ((n - 1) + 1) = 0 := by
+        constructor
+        · exact hnm1
+        · simpa using hpn
+      exact hNoAdj (n - 1) hz
+
+end
+
+end WeierstrassCurve
+```
+
+The proof above intentionally factors out the true hard lemma: `hNoAdj`.  The adjacent-Somos propagation proves `hNoAdj` on the stratum `Ψ₃.eval x ≠ 0`.  The remaining stratum `Ψ₃.eval x = 0` is a rank-three base case and cannot be closed by the same propagation step because the propagation coefficient has become zero.
+
+---
+
+## 4. The `Ψ₃.eval x = 0` stratum
+
+This is the exact place where the proposed proof otherwise gets stuck.  At a point with `c3x = 0`, adjacent Somos becomes
+
+```text
+a(r-2) * a(r+2)
+  = (if Even r then 1 else sx^2) * (a(r-1) * a(r+1)).
+```
+
+If `sx ≠ 0`, all displayed parity coefficients are nonzero, but the recurrence is multiplicative and does not force a neighboring square to vanish.  Hence the “two adjacent zeros propagate to `preΨ 1`” proof is unavailable on this stratum.
+
+The independent finite base facts needed here are:
+
+```lean
+private lemma Ψ₂Sq_eval_ne_of_Ψ₃_eval_zero_of_isElliptic
+    (W : WeierstrassCurve k) (x : k)
+    (hEll : W.IsElliptic) (hc3 : W.Ψ₃.eval x = 0) :
+    W.Ψ₂Sq.eval x ≠ 0 := by
+  -- resultant(Ψ₂Sq, Ψ₃) = -Δ^2 modulo bRel
+  sorry
+
+private lemma preΨ_four_eval_ne_of_Ψ₃_eval_zero_of_isElliptic
+    (W : WeierstrassCurve k) (x : k)
+    (hEll : W.IsElliptic) (hc3 : W.Ψ₃.eval x = 0) :
+    (W.preΨ 4).eval x ≠ 0 := by
+  -- resultant(Ψ₃, preΨ₄) = Δ^4 modulo bRel
+  sorry
+```
+
+With those, one proves the rank-three pattern at such an `x`:
+
+```lean
+private lemma preΨ_eval_zero_iff_three_dvd_of_Ψ₃_eval_zero
+    (W : WeierstrassCurve k) (x : k) (hEll : W.IsElliptic) (h4 : (4 : k) ≠ 0)
+    (hc3 : W.Ψ₃.eval x = 0) (n : ℤ) :
+    pe W x n = 0 ↔ (3 : ℤ) ∣ n := by
+  -- Use:
+  --   preΨ_one,
+  --   preΨ_two/preΨ₂ = 1,
+  --   preΨ_three = Ψ₃,
+  --   preΨ_four nonzero,
+  --   preΨ_odd and preΨ_even recurrences.
+  -- The induction is on |n| and splits n modulo 3.
+  -- This is the usual rank-of-apparition argument specialized to rank 3.
+  sorry
+```
+
+Then no adjacent vanishing on the `Ψ₃` stratum follows immediately, since two adjacent integers cannot both be divisible by `3`:
+
+```lean
+private lemma no_adjacent_preΨ_zero_of_Ψ₃_eval_zero
+    (W : WeierstrassCurve k) (x : k) (hEll : W.IsElliptic) (h4 : (4 : k) ≠ 0)
+    (hc3 : W.Ψ₃.eval x = 0) (r : ℤ) :
+    ¬ (pe W x r = 0 ∧ pe W x (r + 1) = 0) := by
+  intro hz
+  have hr3 : (3 : ℤ) ∣ r :=
+    (preΨ_eval_zero_iff_three_dvd_of_Ψ₃_eval_zero W x hEll h4 hc3 r).mp hz.left
+  have hr13 : (3 : ℤ) ∣ r + 1 :=
+    (preΨ_eval_zero_iff_three_dvd_of_Ψ₃_eval_zero W x hEll h4 hc3 (r + 1)).mp hz.right
+  omega
+```
+
+Combining `Ψ₃.eval x ≠ 0` and `Ψ₃.eval x = 0` gives the desired global `hNoAdj` under `IsElliptic`.
+
+---
+
+## 5. Resultant route
+
+A resultant proof is conceptually cleaner:
+
+```lean
+theorem isCoprime_Φ_ΨSq_of_isElliptic
+    (W : WeierstrassCurve k) (hEll : W.IsElliptic) (n : ℤ) :
+    IsCoprime (W.Φ n) (W.ΨSq n) := by
+  -- Show resultant(Φ n, ΨSq n) is a nonzero scalar:
+  --   resultant(Φ n, ΨSq n) = unit(n) * W.discr ^ e(n)
+  -- Then use hEll.
+  sorry
+```
+
+Then the no-common-root theorem is one line:
+
+```lean
+private theorem no_common_eval_zero_of_isCoprime
+    {f g : k[X]} (hcop : IsCoprime f g) (x : k) :
+    ¬ (f.eval x = 0 ∧ g.eval x = 0) := by
+  rcases hcop with ⟨a, b, hab⟩
+  intro h
+  have := congrArg (fun p : k[X] => p.eval x) hab
+  simpa [h.1, h.2] using this
+```
+
+But for variable `n`, the resultant formula is a substantial theorem.  Mathlib has `Polynomial.resultant`, but it does not provide the division-polynomial resultant formula.  For a fixed finite certificate, a CAS-produced Bezout identity is practical; for all `n`, the Ward/rank-of-apparition proof above is the more realistic Lean route.
+
+---
+
+## 6. What the hypotheses buy
+
+* `h4 : (4:k) ≠ 0` is genuinely useful.  It gives characteristic not `2`, keeps the `Ψ₂Sq` square-factor decomposition meaningful, and is required by the already-proved adjacent-Somos and invariant lemmas in this development.
+
+* `hψ_ne : ∀ j:ℤ, j ≠ 0 → W.ψ j ≠ 0` is a polynomial-level nonzero hypothesis used to establish the recurrence/invariant library.  It is **not** an evaluation nonvanishing statement at the particular `x`, so it cannot by itself rule out common roots.
+
+* `hc3 : W.Ψ₃ ≠ 0` is also polynomial-level.  It is useful for polynomial saturation/cancellation arguments, but the adjacent-zero propagation needs the stronger local assumption `(W.Ψ₃.eval x) ≠ 0`, or a separate proof of the `Ψ₃.eval x = 0` rank-three stratum.
+
+* The 2-torsion branch really needs characteristic not `2` plus nonsingularity.  Algebraically, this is the statement that `Ψ₂Sq` and `Ψ₃` have no common root on an elliptic curve; equivalently, a 2-torsion root is simple.
+
+## Bottom line
+
+The proposed adjacent propagation is correct only after strengthening `hc3` to the local condition `Ψ₃.eval x ≠ 0`.  It gives an excellent open-stratum lemma.  To obtain the non-circular theorem needed by keystone, add an independent nonsingularity hypothesis and prove the two finite resultant/base lemmas for the `Ψ₂Sq` and `Ψ₃` strata.  Without that extra input, the theorem as stated is false on singular curves, and the Lean proof should not try to close it from `preΨ_adjacent_somos` alone.
