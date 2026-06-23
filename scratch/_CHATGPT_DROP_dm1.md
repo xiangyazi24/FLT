@@ -1,73 +1,10 @@
-# Q35 (dm1): Ψ₃=0 stratum — rank-3 apparition lemma
+# Q53 (dm1): corrected rank-3 apparition strong induction
 
-## Executive answer
+Below is the corrected replacement for the Q35 main strong-induction block.  The changes are:
 
-For the `Ψ₃.eval x = 0` stratum, do **not** use adjacent-Somos propagation.  The cleaner proof is a strong induction on the positive index using the defining `preΨ_odd` / `preΨ_even` recurrences.  Modulo `3`, exactly one summand survives in each nonzero case, and both summands vanish in the divisible-by-`3` case.
-
-State the rank-3 lemma with the two nonsingularity base facts as local hypotheses:
-
-```lean
-(hs2 : W.Ψ₂Sq.eval x ≠ 0)
-(hd4 : (W.preΨ 4).eval x ≠ 0)
-(hc3 : W.Ψ₃.eval x = 0)
-```
-
-For the modified `preΨ`, note that `preΨ 2 = 1`; `hs2` is not the base value at index `2`, but is needed because the recurrence coefficients are powers of `Ψ₂Sq.eval x`.
-
----
-
-## The recurrence table
-
-Write
-
-```lean
-A i := (W.preΨ i).eval x
-S   := W.Ψ₂Sq.eval x
-```
-
-At `A 3 = W.Ψ₃.eval x = 0`, with `S ≠ 0`, the evaluated recurrences give:
-
-### Odd index, `N = 2*m + 1`
-
-```text
-A(2*m+1)
-  = A(m+2) * A(m)^3 * (if Even m then S^2 else 1)
-    - A(m-1) * A(m+1)^3 * (if Even m then 1 else S^2)
-```
-
-* If `m ≡ 0 mod 3`, then `A(m)=0`; the second summand is nonzero, so `A(2*m+1) ≠ 0` and `2*m+1 ≡ 1 mod 3`.
-* If `m ≡ 1 mod 3`, then `A(m+2)=0` and `A(m-1)=0`, so `A(2*m+1)=0` and `2*m+1 ≡ 0 mod 3`.
-* If `m ≡ 2 mod 3`, then `A(m+1)=0`; the first summand is nonzero, so `A(2*m+1) ≠ 0` and `2*m+1 ≡ 2 mod 3`.
-
-### Even index, `N = 2*m`
-
-```text
-A(2*m)
-  = A(m-1)^2 * A(m) * A(m+2)
-    - A(m-2) * A(m) * A(m+1)^2
-```
-
-* If `m ≡ 0 mod 3`, then `A(m)=0`, so `A(2*m)=0` and `2*m ≡ 0 mod 3`.
-* If `m ≡ 1 mod 3`, then `A(m-1)=0`; the second summand is nonzero, so `A(2*m) ≠ 0` and `2*m ≡ 2 mod 3`.
-* If `m ≡ 2 mod 3`, then `A(m+1)=0`; the first summand is nonzero, so `A(2*m) ≠ 0` and `2*m ≡ 1 mod 3`.
-
-The bases are:
-
-```text
-A 0 = 0
-A 1 = 1
-A 2 = 1
-A 3 = 0
-A 4 ≠ 0
-```
-
-The last base is exactly `hd4`.
-
----
-
-## Lean skeleton
-
-This is written as an implementation skeleton for `KeystoneCoprimality.lean`.  The only likely name adjustments are the exact names for `preΨ_zero`, `preΨ_two`, `preΨ_three`, and `preΨ_four` if your local imports expose them under slightly different names.  The arithmetic facts are deliberately isolated; in current Mathlib they are usually one-line `omega` goals.
+* the even branch is treated as the Nat index `M + M`, with explicit cast normalizers to `2 * (M : ℤ)` at every final use;
+* the `M ≡ 0 mod 3` placeholder is replaced by `three_dvd_two_mul_iff.mpr h0`;
+* the nonzero branches avoid fragile `simp [hsecond_ne]` / `simp [hfirst_ne]` goals and instead derive a contradiction by turning a zero of the whole recurrence into a zero of the explicitly nonzero surviving factor.
 
 ```lean
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
@@ -111,19 +48,20 @@ private lemma eval_preΨ_odd
           (if Even m then (sx W x)^2 else 1)
         - pe W x (m - 1) * (pe W x (m + 1))^3 *
           (if Even m then 1 else (sx W x)^2) := by
-  simpa [pe, sx, map_mul, map_sub, map_pow, mul_assoc, mul_left_comm, mul_comm]
-    using congrArg (fun p : k[X] => p.eval x) (W.preΨ_odd m)
+  have h := congrArg (fun p : k[X] => p.eval x) (W.preΨ_odd m)
+  simp only [pe, sx, eval_mul, eval_sub, eval_add, eval_pow,
+    apply_ite (fun p : k[X] => p.eval x), eval_one] at h ⊢
+  linear_combination h
 
 private lemma eval_preΨ_even
     (W : WeierstrassCurve k) (x : k) (m : ℤ) :
     pe W x (2*m)
       = (pe W x (m - 1))^2 * pe W x m * pe W x (m + 2)
         - pe W x (m - 2) * pe W x m * (pe W x (m + 1))^2 := by
-  simpa [pe, map_mul, map_sub, map_pow, mul_assoc, mul_left_comm, mul_comm, pow_two]
-    using congrArg (fun p : k[X] => p.eval x) (W.preΨ_even m)
+  have h := congrArg (fun p : k[X] => p.eval x) (W.preΨ_even m)
+  simp only [pe, eval_mul, eval_sub, eval_add, eval_pow] at h ⊢
+  linear_combination h
 
-/-- Exactly one of `z`, `z-1`, `z+1` is divisible by `3`.  The implication
-form is more convenient for the case split below. -/
 private lemma mod3_trichotomy (z : ℤ) :
     (3 : ℤ) ∣ z ∨ (3 : ℤ) ∣ z - 1 ∨ (3 : ℤ) ∣ z + 1 := by
   omega
@@ -160,138 +98,189 @@ private lemma not_three_dvd_two_mul_of_three_dvd_add_one {m : ℤ}
     (hm : (3 : ℤ) ∣ m + 1) : ¬ (3 : ℤ) ∣ 2*m := by
   omega
 
-/-- Nat-indexed rank-3 apparition.  This is the actual strong induction. -/
+private lemma nat_even_cast_to_int (M : ℕ) :
+    ((M + M : ℕ) : ℤ) = 2 * (M : ℤ) := by
+  omega
+
+private lemma nat_even_mul_cast_to_int (M : ℕ) :
+    ((2 * M : ℕ) : ℤ) = 2 * (M : ℤ) := by
+  omega
+
+private lemma nat_odd_cast_to_int (M : ℕ) :
+    ((M + M + 1 : ℕ) : ℤ) = 2 * (M : ℤ) + 1 := by
+  omega
+
+private lemma nat_odd_mul_cast_to_int (M : ℕ) :
+    ((2 * M + 1 : ℕ) : ℤ) = 2 * (M : ℤ) + 1 := by
+  omega
+
+private lemma nat_sub_one_cast (M : ℕ) (hM : 1 ≤ M) :
+    ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 := by
+  omega
+
+private lemma nat_sub_two_cast (M : ℕ) (hM : 2 ≤ M) :
+    ((M - 2 : ℕ) : ℤ) = (M : ℤ) - 2 := by
+  omega
+
+/-- Nat-indexed rank-3 apparition on the `Ψ₃.eval x = 0` stratum. -/
 private lemma preΨ_eval_zero_iff_three_dvd_nat_of_Ψ₃_eval_zero
     (W : WeierstrassCurve k) (x : k)
+    (h4 : (4 : k) ≠ 0)
     (hc3 : W.Ψ₃.eval x = 0)
     (hs2 : sx W x ≠ 0)
-    (hd4 : pe W x 4 ≠ 0) :
+    (hd4 : (W.preΨ 4).eval x ≠ 0) :
     ∀ N : ℕ, pe W x (N : ℤ) = 0 ↔ (3 : ℤ) ∣ (N : ℤ) := by
   intro N
   induction N using Nat.strong_induction_on with
   | h N IH =>
     by_cases hsmall : N ≤ 4
     · interval_cases N
-      · -- N = 0
-        constructor
+      · constructor
         · intro _; norm_num
         · intro _
           simpa [pe] using congrArg (fun p : k[X] => p.eval x) (W.preΨ_zero)
-      · -- N = 1
-        constructor
+      · constructor
         · intro h
-          have : (1 : k) = 0 := by simpa [pe] using h
-          exact (one_ne_zero this).elim
+          have h1 : (1 : k) = 0 := by simpa [pe] using h
+          exact (one_ne_zero h1).elim
+        · intro h; omega
+      · constructor
         · intro h
-          omega
-      · -- N = 2
-        constructor
-        · intro h
-          have : (1 : k) = 0 := by simpa [pe] using h
-          exact (one_ne_zero this).elim
-        · intro h
-          omega
-      · -- N = 3
-        constructor
+          have h2 : (1 : k) = 0 := by simpa [pe] using h
+          exact (one_ne_zero h2).elim
+        · intro h; omega
+      · constructor
         · intro _; norm_num
         · intro _
           simpa [pe] using hc3
-      · -- N = 4
-        constructor
+      · constructor
         · intro h
-          exact (hd4 h).elim
-        · intro h
-          omega
+          exact (hd4 (by simpa [pe] using h)).elim
+        · intro h; omega
     · have hN5 : 5 ≤ N := by omega
       rcases Nat.even_or_odd N with hEven | hOdd
       · rcases hEven with ⟨M, rfl⟩
         have hM3 : 3 ≤ M := by omega
-        have hMlt : M < 2*M := by omega
-        have hMm1lt : M - 1 < 2*M := by omega
-        have hMm2lt : M - 2 < 2*M := by omega
-        have hMp1lt : M + 1 < 2*M := by omega
-        have hMp2lt : M + 2 < 2*M := by omega
+        have hM1 : 1 ≤ M := by omega
+        have hM2 : 2 ≤ M := by omega
+        have hMlt : M < M + M := by omega
+        have hMm1lt : M - 1 < M + M := by omega
+        have hMm2lt : M - 2 < M + M := by omega
+        have hMp1lt : M + 1 < M + M := by omega
+        have hMp2lt : M + 2 < M + M := by omega
         have IHm   := IH M hMlt
         have IHm1  := IH (M - 1) hMm1lt
         have IHm2  := IH (M - 2) hMm2lt
         have IHp1  := IH (M + 1) hMp1lt
         have IHp2  := IH (M + 2) hMp2lt
         have hev := eval_preΨ_even W x (M : ℤ)
+        have hcastEven : ((M + M : ℕ) : ℤ) = 2 * (M : ℤ) := nat_even_cast_to_int M
+        have hcastEvenMul : ((2 * M : ℕ) : ℤ) = 2 * (M : ℤ) := nat_even_mul_cast_to_int M
         rcases mod3_trichotomy (M : ℤ) with h0 | hrest
-        · -- M ≡ 0: the common factor A(M) vanishes.
+        · -- M ≡ 0: A(M) is the common factor, so A(2M)=0.
           have hAm : pe W x (M : ℤ) = 0 := IHm.mpr h0
-          have hA : pe W x (2*(M : ℤ)) = 0 := by
+          have hA : pe W x (2 * (M : ℤ)) = 0 := by
             simpa [hAm, mul_assoc, mul_left_comm, mul_comm] using hev
           constructor
           · intro _
-            exact (three_dvd_two_mul_iff.mp ?_)
+            have hdiv : (3 : ℤ) ∣ 2 * (M : ℤ) :=
+              (three_dvd_two_mul_iff (m := (M : ℤ))).mpr h0
+            simpa [hcastEven, hcastEvenMul] using hdiv
           · intro _
-            simpa [Int.ofNat_mul, hA]
+            simpa [hcastEven, hcastEvenMul] using hA
         · rcases hrest with hm1 | hp1
           · -- M ≡ 1: first summand zero, second summand nonzero.
+            have hcast_m1 : ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 :=
+              nat_sub_one_cast M hM1
+            have hcast_m2 : ((M - 2 : ℕ) : ℤ) = (M : ℤ) - 2 :=
+              nat_sub_two_cast M hM2
+            have hcast_p1 : ((M + 1 : ℕ) : ℤ) = (M : ℤ) + 1 := by omega
             have hAm1 : pe W x ((M : ℤ) - 1) = 0 := by
-              have hcast : ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 := by omega
-              simpa [hcast] using (IHm1.mpr (by omega : (3 : ℤ) ∣ ((M - 1 : ℕ) : ℤ)))
+              have hraw : pe W x ((M - 1 : ℕ) : ℤ) = 0 :=
+                IHm1.mpr (by simpa [hcast_m1] using hm1)
+              simpa [hcast_m1] using hraw
             have hAm_ne : pe W x (M : ℤ) ≠ 0 := by
               intro h
               exact not_three_dvd_of_three_dvd_sub_one hm1 (IHm.mp h)
             have hAm2_ne : pe W x ((M : ℤ) - 2) ≠ 0 := by
               intro h
-              have hcast : ((M - 2 : ℕ) : ℤ) = (M : ℤ) - 2 := by omega
-              have hdvd := IHm2.mp (by simpa [hcast] using h)
+              have hraw : pe W x ((M - 2 : ℕ) : ℤ) = 0 := by simpa [hcast_m2] using h
+              have hdvd := IHm2.mp hraw
               omega
             have hAp1_ne : pe W x ((M : ℤ) + 1) ≠ 0 := by
               intro h
-              have hcast : ((M + 1 : ℕ) : ℤ) = (M : ℤ) + 1 := by omega
-              have hdvd := IHp1.mp (by simpa [hcast] using h)
+              have hraw : pe W x ((M + 1 : ℕ) : ℤ) = 0 := by simpa [hcast_p1] using h
+              have hdvd := IHp1.mp hraw
               omega
             have hsecond_ne :
                 pe W x ((M : ℤ) - 2) * pe W x (M : ℤ) *
                     (pe W x ((M : ℤ) + 1))^2 ≠ 0 := by
               exact mul_ne_zero (mul_ne_zero hAm2_ne hAm_ne) (pow_ne_zero 2 hAp1_ne)
-            have hAne : pe W x (2*(M : ℤ)) ≠ 0 := by
-              rw [hev]
-              simp [hAm1, hsecond_ne]
+            have hAne : pe W x (2 * (M : ℤ)) ≠ 0 := by
+              intro hz
+              apply hsecond_ne
+              have hneg :
+                  - (pe W x ((M : ℤ) - 2) * pe W x (M : ℤ) *
+                      (pe W x ((M : ℤ) + 1))^2) = 0 := by
+                simpa [hev, hAm1, sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
+                  using hz
+              exact neg_eq_zero.mp hneg
             constructor
             · intro h
-              exact (hAne h).elim
+              have hz : pe W x (2 * (M : ℤ)) = 0 := by
+                simpa [hcastEven, hcastEvenMul] using h
+              exact (hAne hz).elim
             · intro hdvd
-              exact (not_three_dvd_two_mul_of_three_dvd_sub_one hm1 hdvd).elim
+              have hdvd' : (3 : ℤ) ∣ 2 * (M : ℤ) := by
+                simpa [hcastEven, hcastEvenMul] using hdvd
+              exact (not_three_dvd_two_mul_of_three_dvd_sub_one hm1 hdvd').elim
           · -- M ≡ 2: second summand zero, first summand nonzero.
+            have hcast_m1 : ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 :=
+              nat_sub_one_cast M hM1
+            have hcast_p1 : ((M + 1 : ℕ) : ℤ) = (M : ℤ) + 1 := by omega
+            have hcast_p2 : ((M + 2 : ℕ) : ℤ) = (M : ℤ) + 2 := by omega
             have hAp1 : pe W x ((M : ℤ) + 1) = 0 := by
-              have hcast : ((M + 1 : ℕ) : ℤ) = (M : ℤ) + 1 := by omega
-              simpa [hcast] using (IHp1.mpr (by omega : (3 : ℤ) ∣ ((M + 1 : ℕ) : ℤ)))
+              have hraw : pe W x ((M + 1 : ℕ) : ℤ) = 0 :=
+                IHp1.mpr (by simpa [hcast_p1] using hp1)
+              simpa [hcast_p1] using hraw
             have hAm1_ne : pe W x ((M : ℤ) - 1) ≠ 0 := by
               intro h
-              have hcast : ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 := by omega
-              have hdvd := IHm1.mp (by simpa [hcast] using h)
+              have hraw : pe W x ((M - 1 : ℕ) : ℤ) = 0 := by simpa [hcast_m1] using h
+              have hdvd := IHm1.mp hraw
               omega
             have hAm_ne : pe W x (M : ℤ) ≠ 0 := by
               intro h
               exact not_three_dvd_of_three_dvd_add_one hp1 (IHm.mp h)
             have hAp2_ne : pe W x ((M : ℤ) + 2) ≠ 0 := by
               intro h
-              have hcast : ((M + 2 : ℕ) : ℤ) = (M : ℤ) + 2 := by omega
-              have hdvd := IHp2.mp (by simpa [hcast] using h)
+              have hraw : pe W x ((M + 2 : ℕ) : ℤ) = 0 := by simpa [hcast_p2] using h
+              have hdvd := IHp2.mp hraw
               omega
             have hfirst_ne :
                 (pe W x ((M : ℤ) - 1))^2 * pe W x (M : ℤ) *
                     pe W x ((M : ℤ) + 2) ≠ 0 := by
               exact mul_ne_zero (mul_ne_zero (pow_ne_zero 2 hAm1_ne) hAm_ne) hAp2_ne
-            have hAne : pe W x (2*(M : ℤ)) ≠ 0 := by
-              rw [hev]
-              simp [hAp1, hfirst_ne]
+            have hAne : pe W x (2 * (M : ℤ)) ≠ 0 := by
+              intro hz
+              apply hfirst_ne
+              simpa [hev, hAp1, sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
+                using hz
             constructor
             · intro h
-              exact (hAne h).elim
+              have hz : pe W x (2 * (M : ℤ)) = 0 := by
+                simpa [hcastEven, hcastEvenMul] using h
+              exact (hAne hz).elim
             · intro hdvd
-              exact (not_three_dvd_two_mul_of_three_dvd_add_one hp1 hdvd).elim
+              have hdvd' : (3 : ℤ) ∣ 2 * (M : ℤ) := by
+                simpa [hcastEven, hcastEvenMul] using hdvd
+              exact (not_three_dvd_two_mul_of_three_dvd_add_one hp1 hdvd').elim
       · rcases hOdd with ⟨M, rfl⟩
         have hM2 : 2 ≤ M := by omega
-        have hMlt : M < 2*M + 1 := by omega
-        have hMm1lt : M - 1 < 2*M + 1 := by omega
-        have hMp1lt : M + 1 < 2*M + 1 := by omega
-        have hMp2lt : M + 2 < 2*M + 1 := by omega
+        have hM1 : 1 ≤ M := by omega
+        have hMlt : M < M + M + 1 := by omega
+        have hMm1lt : M - 1 < M + M + 1 := by omega
+        have hMp1lt : M + 1 < M + M + 1 := by omega
+        have hMp2lt : M + 2 < M + M + 1 := by omega
         have IHm   := IH M hMlt
         have IHm1  := IH (M - 1) hMm1lt
         have IHp1  := IH (M + 1) hMp1lt
@@ -299,55 +288,81 @@ private lemma preΨ_eval_zero_iff_three_dvd_nat_of_Ψ₃_eval_zero
         have hodd := eval_preΨ_odd W x (M : ℤ)
         have hcleft := coeff_left_ne_zero W x hs2 (M : ℤ)
         have hcright := coeff_right_ne_zero W x hs2 (M : ℤ)
+        have hcastOdd : ((M + M + 1 : ℕ) : ℤ) = 2 * (M : ℤ) + 1 :=
+          nat_odd_cast_to_int M
+        have hcastOddMul : ((2 * M + 1 : ℕ) : ℤ) = 2 * (M : ℤ) + 1 :=
+          nat_odd_mul_cast_to_int M
         rcases mod3_trichotomy (M : ℤ) with h0 | hrest
         · -- M ≡ 0: first summand zero, second summand nonzero.
+          have hcast_m1 : ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 :=
+            nat_sub_one_cast M hM1
+          have hcast_p1 : ((M + 1 : ℕ) : ℤ) = (M : ℤ) + 1 := by omega
           have hAm : pe W x (M : ℤ) = 0 := IHm.mpr h0
           have hAm1_ne : pe W x ((M : ℤ) - 1) ≠ 0 := by
             intro h
-            have hcast : ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 := by omega
-            have hdvd := IHm1.mp (by simpa [hcast] using h)
+            have hraw : pe W x ((M - 1 : ℕ) : ℤ) = 0 := by simpa [hcast_m1] using h
+            have hdvd := IHm1.mp hraw
             omega
           have hAp1_ne : pe W x ((M : ℤ) + 1) ≠ 0 := by
             intro h
-            have hcast : ((M + 1 : ℕ) : ℤ) = (M : ℤ) + 1 := by omega
-            have hdvd := IHp1.mp (by simpa [hcast] using h)
+            have hraw : pe W x ((M + 1 : ℕ) : ℤ) = 0 := by simpa [hcast_p1] using h
+            have hdvd := IHp1.mp hraw
             omega
           have hsecond_ne :
               pe W x ((M : ℤ) - 1) * (pe W x ((M : ℤ) + 1))^3 *
                   (if Even (M : ℤ) then 1 else (sx W x)^2) ≠ 0 := by
             exact mul_ne_zero (mul_ne_zero hAm1_ne (pow_ne_zero 3 hAp1_ne)) hcright
-          have hAne : pe W x (2*(M : ℤ) + 1) ≠ 0 := by
-            rw [hodd]
-            simp [hAm, hsecond_ne]
+          have hAne : pe W x (2 * (M : ℤ) + 1) ≠ 0 := by
+            intro hz
+            apply hsecond_ne
+            have hneg :
+                - (pe W x ((M : ℤ) - 1) * (pe W x ((M : ℤ) + 1))^3 *
+                    (if Even (M : ℤ) then 1 else (sx W x)^2)) = 0 := by
+              simpa [hodd, hAm, sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
+                using hz
+            exact neg_eq_zero.mp hneg
           constructor
           · intro h
-            exact (hAne h).elim
+            have hz : pe W x (2 * (M : ℤ) + 1) = 0 := by
+              simpa [hcastOdd, hcastOddMul] using h
+            exact (hAne hz).elim
           · intro hdvd
-            exact (not_three_dvd_two_mul_add_one_of_three_dvd h0 hdvd).elim
+            have hdvd' : (3 : ℤ) ∣ 2 * (M : ℤ) + 1 := by
+              simpa [hcastOdd, hcastOddMul] using hdvd
+            exact (not_three_dvd_two_mul_add_one_of_three_dvd h0 hdvd').elim
         · rcases hrest with hm1 | hp1
-          · -- M ≡ 1: both summands vanish.
+          · -- M ≡ 1: both summands vanish, so A(2M+1)=0.
+            have hcast_m1 : ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 :=
+              nat_sub_one_cast M hM1
+            have hcast_p2 : ((M + 2 : ℕ) : ℤ) = (M : ℤ) + 2 := by omega
             have hAm1 : pe W x ((M : ℤ) - 1) = 0 := by
-              have hcast : ((M - 1 : ℕ) : ℤ) = (M : ℤ) - 1 := by omega
-              simpa [hcast] using (IHm1.mpr (by omega : (3 : ℤ) ∣ ((M - 1 : ℕ) : ℤ)))
+              have hraw : pe W x ((M - 1 : ℕ) : ℤ) = 0 :=
+                IHm1.mpr (by simpa [hcast_m1] using hm1)
+              simpa [hcast_m1] using hraw
             have hAp2 : pe W x ((M : ℤ) + 2) = 0 := by
-              have hcast : ((M + 2 : ℕ) : ℤ) = (M : ℤ) + 2 := by omega
-              simpa [hcast] using (IHp2.mpr (by omega : (3 : ℤ) ∣ ((M + 2 : ℕ) : ℤ)))
-            have hA : pe W x (2*(M : ℤ) + 1) = 0 := by
-              rw [hodd]
-              simp [hAm1, hAp2]
+              have hraw : pe W x ((M + 2 : ℕ) : ℤ) = 0 :=
+                IHp2.mpr (by omega)
+              simpa [hcast_p2] using hraw
+            have hA : pe W x (2 * (M : ℤ) + 1) = 0 := by
+              simpa [hodd, hAm1, hAp2, sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
             constructor
             · intro _
-              exact three_dvd_two_mul_add_one_iff_sub_one.mpr hm1
+              have hdiv : (3 : ℤ) ∣ 2 * (M : ℤ) + 1 :=
+                (three_dvd_two_mul_add_one_iff_sub_one (m := (M : ℤ))).mpr hm1
+              simpa [hcastOdd, hcastOddMul] using hdiv
             · intro _
-              simpa [hA]
+              simpa [hcastOdd, hcastOddMul] using hA
           · -- M ≡ 2: second summand zero, first summand nonzero.
+            have hcast_p1 : ((M + 1 : ℕ) : ℤ) = (M : ℤ) + 1 := by omega
+            have hcast_p2 : ((M + 2 : ℕ) : ℤ) = (M : ℤ) + 2 := by omega
             have hAp1 : pe W x ((M : ℤ) + 1) = 0 := by
-              have hcast : ((M + 1 : ℕ) : ℤ) = (M : ℤ) + 1 := by omega
-              simpa [hcast] using (IHp1.mpr (by omega : (3 : ℤ) ∣ ((M + 1 : ℕ) : ℤ)))
+              have hraw : pe W x ((M + 1 : ℕ) : ℤ) = 0 :=
+                IHp1.mpr (by simpa [hcast_p1] using hp1)
+              simpa [hcast_p1] using hraw
             have hAp2_ne : pe W x ((M : ℤ) + 2) ≠ 0 := by
               intro h
-              have hcast : ((M + 2 : ℕ) : ℤ) = (M : ℤ) + 2 := by omega
-              have hdvd := IHp2.mp (by simpa [hcast] using h)
+              have hraw : pe W x ((M + 2 : ℕ) : ℤ) = 0 := by simpa [hcast_p2] using h
+              have hdvd := IHp2.mp hraw
               omega
             have hAm_ne : pe W x (M : ℤ) ≠ 0 := by
               intro h
@@ -356,96 +371,40 @@ private lemma preΨ_eval_zero_iff_three_dvd_nat_of_Ψ₃_eval_zero
                 pe W x ((M : ℤ) + 2) * (pe W x (M : ℤ))^3 *
                     (if Even (M : ℤ) then (sx W x)^2 else 1) ≠ 0 := by
               exact mul_ne_zero (mul_ne_zero hAp2_ne (pow_ne_zero 3 hAm_ne)) hcleft
-            have hAne : pe W x (2*(M : ℤ) + 1) ≠ 0 := by
-              rw [hodd]
-              simp [hAp1, hfirst_ne]
+            have hAne : pe W x (2 * (M : ℤ) + 1) ≠ 0 := by
+              intro hz
+              apply hfirst_ne
+              simpa [hodd, hAp1, sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
+                using hz
             constructor
             · intro h
-              exact (hAne h).elim
+              have hz : pe W x (2 * (M : ℤ) + 1) = 0 := by
+                simpa [hcastOdd, hcastOddMul] using h
+              exact (hAne hz).elim
             · intro hdvd
-              exact (not_three_dvd_two_mul_add_one_of_three_dvd_add_one hp1 hdvd).elim
-
-private lemma preΨ_eval_zero_iff_three_dvd_abs
-    (W : WeierstrassCurve k) (x : k)
-    (hNat : ∀ N : ℕ, pe W x (N : ℤ) = 0 ↔ (3 : ℤ) ∣ (N : ℤ))
-    (n : ℤ) :
-    pe W x n = 0 ↔ (3 : ℤ) ∣ n := by
-  by_cases hn : 0 ≤ n
-  · have hcast : ((Int.toNat n : ℕ) : ℤ) = n := by omega
-    simpa [hcast] using hNat (Int.toNat n)
-  · have hnle : n ≤ 0 := by omega
-    have hpos : 0 ≤ -n := by omega
-    have hcast : ((Int.toNat (-n) : ℕ) : ℤ) = -n := by omega
-    have hneg_eval : pe W x (-n) = 0 ↔ pe W x n = 0 := by
-      have h := congrArg (fun p : k[X] => p.eval x) (W.preΨ_neg n)
-      -- `preΨ_neg` has the usual sign, so zero is invariant under negating the index.
-      -- Depending on the local theorem orientation, `simpa [pe] using h` or
-      -- `simpa [pe, eq_comm] using h` closes this.
-      simpa [pe] using h
-    have hneg_dvd : ((3 : ℤ) ∣ -n) ↔ (3 : ℤ) ∣ n := by omega
-    have hNatNeg := hNat (Int.toNat (-n))
-    calc
-      pe W x n = 0 ↔ pe W x (-n) = 0 := hneg_eval.symm
-      _ ↔ (3 : ℤ) ∣ -n := by simpa [hcast] using hNatNeg
-      _ ↔ (3 : ℤ) ∣ n := hneg_dvd
-
-/-- Rank-3 apparition on the `Ψ₃.eval x = 0` stratum. -/
-theorem preΨ_eval_zero_iff_three_dvd_of_Ψ₃_eval_zero
-    (W : WeierstrassCurve k) (x : k) [W.IsElliptic]
-    (h4 : (4 : k) ≠ 0)
-    (hc3 : W.Ψ₃.eval x = 0)
-    (hs2 : W.Ψ₂Sq.eval x ≠ 0)
-    (hd4 : (W.preΨ 4).eval x ≠ 0)
-    (n : ℤ) :
-    (W.preΨ n).eval x = 0 ↔ (3 : ℤ) ∣ n := by
-  -- `h4` and `[W.IsElliptic]` are kept in the statement for the final caller;
-  -- this local rank-3 induction only uses `hc3`, `hs2`, `hd4`, and the recurrences.
-  have hNat := preΨ_eval_zero_iff_three_dvd_nat_of_Ψ₃_eval_zero
-    (W := W) (x := x) hc3 (by simpa [sx] using hs2) (by simpa [pe] using hd4)
-  simpa [pe] using preΨ_eval_zero_iff_three_dvd_abs (W := W) (x := x) hNat n
-
-/-- No adjacent vanishing on the `Ψ₃.eval x = 0` stratum. -/
-theorem no_adjacent_preΨ_zero_of_Ψ₃_eval_zero
-    (W : WeierstrassCurve k) (x : k) [W.IsElliptic]
-    (h4 : (4 : k) ≠ 0)
-    (hc3 : W.Ψ₃.eval x = 0)
-    (hs2 : W.Ψ₂Sq.eval x ≠ 0)
-    (hd4 : (W.preΨ 4).eval x ≠ 0)
-    (r : ℤ) :
-    ¬ ((W.preΨ r).eval x = 0 ∧ (W.preΨ (r + 1)).eval x = 0) := by
-  intro hz
-  have hr : (3 : ℤ) ∣ r :=
-    (preΨ_eval_zero_iff_three_dvd_of_Ψ₃_eval_zero
-      (W := W) (x := x) h4 hc3 hs2 hd4 r).mp hz.left
-  have hr1 : (3 : ℤ) ∣ r + 1 :=
-    (preΨ_eval_zero_iff_three_dvd_of_Ψ₃_eval_zero
-      (W := W) (x := x) h4 hc3 hs2 hd4 (r + 1)).mp hz.right
-  omega
+              have hdvd' : (3 : ℤ) ∣ 2 * (M : ℤ) + 1 := by
+                simpa [hcastOdd, hcastOddMul] using hdvd
+              exact (not_three_dvd_two_mul_add_one_of_three_dvd_add_one hp1 hdvd').elim
 
 end
 
 end WeierstrassCurve
 ```
 
----
+## Two notes if Lean still complains
 
-## Notes for integration
+1. If your local `Nat.even_or_odd` rewrites the even case to `2 * M` instead of `M + M`, keep the same proof body and replace the final casts with `hcastEvenMul`.  Both normalizers are included above on purpose.
 
-1. The theorem intentionally takes `hs2` and `hd4` as hypotheses.  These are exactly the two finite resultant/Bezout certificates you said are being proved separately.
-
-2. The proof uses `h4` only to match the caller shape.  The rank-3 induction itself does not need adjacent-Somos or `h4`; it only needs the already-defined `preΨ_odd` and `preΨ_even` recurrences plus the two nonzero base facts.
-
-3. If `Nat.even_or_odd` has a different local name in your pinned Mathlib, replace that case split with:
+2. If `simp` does not turn the surviving recurrence into the exact negated factor in the nonzero branches, replace the relevant `simpa [...] using hz` by:
 
 ```lean
-by_cases hEven : Even N
-· rcases hEven with ⟨M, rfl⟩
-  ...
-· have hOdd : Odd N := Nat.not_even_iff_odd.mp hEven
-  rcases hOdd with ⟨M, rfl⟩
-  ...
+linear_combination (norm := ring_nf) hz - hodd
 ```
 
-4. If `omega` does not close `mod3_trichotomy` in your local Mathlib, prove it via `ZMod 3` or by `obtain ⟨q, rfl | rfl | rfl⟩` from Euclidean division.  All later arithmetic facts are the same linear/divisibility obligations.
+or, in the even branch,
 
-5. The corollary is the desired closure of the `Ψ₃=0` stratum: by the rank-3 lemma, adjacent vanishings imply `3 ∣ r` and `3 ∣ r+1`, impossible by `omega`.
+```lean
+linear_combination (norm := ring_nf) hz - hev
+```
+
+The important change is that the proof now proves nonzero by contradiction from the recurrence, rather than asking `simp` to prove a `sub ≠ 0` goal directly.
