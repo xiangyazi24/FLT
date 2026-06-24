@@ -15,11 +15,11 @@ namespace WeierstrassCurve.SEAM1
 
 variable {K : Type*} [Field K]
 
-abbrev D (K : Type*) [Field K] := DualNumber K
+public abbrev D (K : Type*) [Field K] := DualNumber K
 
 namespace Dual
-abbrev c (x : K) : D K := TrivSqZeroExt.inl x
-abbrev e (v : K) : D K := TrivSqZeroExt.inr v
+public abbrev c (x : K) : D K := TrivSqZeroExt.inl x
+public abbrev e (v : K) : D K := TrivSqZeroExt.inr v
 @[simp] lemma fst_c (x : K) : TrivSqZeroExt.fst (c x : D K) = x := rfl
 @[simp] lemma snd_c (x : K) : TrivSqZeroExt.snd (c x : D K) = 0 := rfl
 @[simp] lemma fst_e (v : K) : TrivSqZeroExt.fst (e v : D K) = 0 := rfl
@@ -29,7 +29,7 @@ end Dual
 namespace TangentO
 
 /-- First-order `n`-fold sum in the tangent coordinate at `O`. -/
-def nsmul₁ : ℕ → K → K
+public def nsmul₁ : ℕ → K → K
   | 0, _ => 0
   | n + 1, u => nsmul₁ n u + u
 
@@ -37,7 +37,7 @@ def nsmul₁ : ℕ → K → K
 @[simp] lemma nsmul₁_succ (n : ℕ) (u : K) : nsmul₁ (n + 1) u = nsmul₁ n u + u := rfl
 
 /-- The first-order tangent of `[n]` at `O` is scalar multiplication by `(n : K)`. -/
-lemma nsmul₁_eq_natCast_mul (n : ℕ) (u : K) : nsmul₁ n u = (n : K) * u := by
+public lemma nsmul₁_eq_natCast_mul (n : ℕ) (u : K) : nsmul₁ n u = (n : K) * u := by
   induction n with
   | zero => simp
   | succ n ih => rw [nsmul₁_succ, ih, Nat.cast_succ, add_mul, one_mul]
@@ -122,7 +122,7 @@ open Dual
 variable (W : WeierstrassCurve K)
 
 /-- The first-order `x`-jet `x + ε`. -/
-def xε (x : K) : D K := Dual.c x + Dual.e 1
+@[expose] public def xε (x : K) : D K := Dual.c x + Dual.e 1
 
 /-- The forced first-order `y`-jet over `x + ε` (slope from the curve). -/
 noncomputable def yε (x y : K) : D K := Dual.c y + Dual.e (AffineJet.ySlope W x y)
