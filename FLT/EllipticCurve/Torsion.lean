@@ -12,6 +12,7 @@ public import Mathlib.GroupTheory.FiniteAbelian.Basic
 public import Mathlib.Topology.Instances.ZMod
 public import FLT.Deformations.RepresentationTheory.GaloisRep
 public import scratch.KeystoneEDS
+public import scratch.SeamE1
 
 /-!
 
@@ -73,7 +74,8 @@ private noncomputable def nTorsionEquivKernel (n : ℕ) :
 /-- SEAM 1 (étaleness of [n]): the non-2-torsion division polynomial is separable when
 char ∤ n. To be discharged later via formal group (E1) or resultant identity (E2). -/
 theorem preΨ'_separable_of_natCast_ne_zero {n : ℕ} (hn : (n : k) ≠ 0) :
-    (W.preΨ' n).Separable := sorry
+    (W.preΨ' n).Separable :=
+  WeierstrassCurve.preΨ'_separable_of_natCast_ne_zero W hn
 
 /-- SEAM 2 (x-coordinate division polynomial formula), stated in the direct form needed for
 kernel membership. This is the `xRep_zsmul_some_eq_divisionPolynomial` seam after extracting the
