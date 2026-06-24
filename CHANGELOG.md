@@ -39,6 +39,10 @@ sorryAx + standard-3 only. No custom axiom introduced. scratch.SeamE1 full build
 - `12d7d52` **SEAM2 char-conditions scoped**: both keystone versions genuinely need h4/hψ_ne/hc3;
   re-route-to-bypass REJECTED (target carries same hypotheses). Discharge = thread CharZero from ℚ-level
   Mazur instantiation. Sub-agent dispatched.
+- `b45feae` **Sub-D step 1 CLOSED** (`scratch/PointRealization.lean`): `exists_nonsingular` —
+  over IsAlgClosed+IsElliptic, every x has a nonsingular y. Via Mathlib's `equation_iff_nonsingular`
+  (IsElliptic ⟹ Equation ↔ Nonsingular). 0-sorry, 0-custom-axiom, 1975 jobs. Sub-D now only needs
+  bridge-1 (Ψ₂Sq(x)≠0) to close.
 
 ## 2026-06-24 (cont) — /automode: bridge-1 coprimality even-case foundation
 
