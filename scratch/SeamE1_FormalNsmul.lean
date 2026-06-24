@@ -43,7 +43,13 @@ theorem hasSubst_pair {f g : PowerSeries R}
 theorem addSeries_constantCoeff (F : FormalGroup R) {f g : PowerSeries R}
     (hf : PowerSeries.constantCoeff (R := R) f = 0) (hg : PowerSeries.constantCoeff (R := R) g = 0) :
     PowerSeries.constantCoeff (R := R) (F.addSeries f g) = 0 := by
-  sorry
+  rw [PowerSeries.constantCoeff_eq, addSeries]
+  apply MvPowerSeries.constantCoeff_subst_eq_zero (hasSubst_pair hf hg)
+  · intro s
+    fin_cases s
+    · exact hf
+    · exact hg
+  · exact F.zero_constantCoeff
 
 /-- The linear coefficient of a formal addition is additive: this is where the two
 `FormalGroup` linear-coefficient fields `lin_coeff_X`, `lin_coeff_Y` are consumed. -/
