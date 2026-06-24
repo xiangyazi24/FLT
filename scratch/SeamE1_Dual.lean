@@ -48,5 +48,13 @@ public lemma eval_dualNumber (f : R[X]) (x v : R) :
         eval_monomial, op_smul_eq_mul, smul_zero, add_zero, zero_add]
       ring
 
+/-- A multiple root gives a first-order (dual) root: if `f` and its derivative both vanish at `x`,
+then `f` vanishes at the dual point `x + εv` for every `v`. -/
+public lemma aeval_dual_eq_zero_of_root_of_deriv_root {f : R[X]} {x v : R}
+    (hx : f.eval x = 0) (hdx : f.derivative.eval x = 0) :
+    aeval (inl x + inr v : DualNumber R) f = 0 := by
+  rw [eval_dualNumber, hx, hdx, mul_zero]
+  simp
+
 end SeamE1
 
