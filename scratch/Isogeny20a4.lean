@@ -105,4 +105,10 @@ theorem dual_phi_affine_equation_of_Equation {X Y : ℚ}
     simpa [sub_eq_add_neg] using h
   simpa [sub_eq_add_neg] using dual_phi_affine_equation X Y hX hraw
 
+theorem phi_at_1_1 : phiX 1 1 = 1 ∧ phiY 1 1 = -2 := by
+  constructor <;> norm_num [phiX, phiY]
+
+theorem phi_at_neg1_1 : phiX (-1) 1 = 1 ∧ phiY (-1) 1 = -2 := by
+  constructor <;> norm_num [phiX, phiY]
+
 end Isogeny20a4
