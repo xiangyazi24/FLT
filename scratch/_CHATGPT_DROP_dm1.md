@@ -1,296 +1,363 @@
-# Q93 (dm1): `n = 3` division-polynomial separability certificate
+# Q118 (dm1): roots of `preΨ' n` are not roots of `Ψ₂Sq`
 
-## Result
+## Executive answer
 
-For
+There **is** a clean non-circular general-`n` proof at the polynomial/EDS level.  It is not a per-`n` Sylvester resultant proof.  The right general lemma is an EDS recurrence lemma obtained by setting the EDS parameter
+
+```lean
+B := W.Ψ₂Sq.eval x
+```
+
+to zero.  In the quotient/evaluation stratum `B = 0`, the reduced division polynomial has an explicit closed form in terms of
+
+```lean
+C := W.Ψ₃.eval x
+D := W.preΨ₄.eval x.
+```
+
+The closed forms are:
 
 ```text
-Ψ₃  = 3*X**4 + b2*X**3 + 3*b4*X**2 + 3*b6*X + b8
-Ψ₃' = 12*X**3 + 3*b2*X**2 + 6*b4*X + 3*b6
-Δ   = -b2**2*b8 - 8*b4**3 - 27*b6**2 + 9*b2*b4*b6
-bRel = b2*b6 - b4**2 - 4*b8
+preNormEDS' 0 C D (2*m + 1)
+  = (-1)^(m*(m-1)/2) * C^(m*(m+1)/2)
+
+preNormEDS' 0 C D (4*m + 2)
+  = (2*m + 1) * C^(2*m*(m+1))
+
+preNormEDS' 0 C D (4*(m+1))
+  = (m+1) * D * C^(2*m*(m+2)).
 ```
 
-the following integer-coefficient cofactors satisfy
+The even formulas use the two-torsion relation
 
 ```text
-A3*Ψ₃ + B3*Ψ₃' = -81*Δ**2 + Q3*bRel
+D^2 + 4*C^3 = 0
 ```
 
-over `ℤ[b2,b4,b6,b8][X]`.
+which is the evaluated polynomial identity
 
 ```text
-A3 = 648*X**2*b2**3*b6 - 648*X**2*b2**2*b4**2 + 1296*X**2*b2**2*b8 - 27216*X**2*b2*b4*b6 + 23328*X**2*b4**3 - 31104*X**2*b4*b8 + 104976*X**2*b6**2 + 162*X*b2**4*b6 - 162*X*b2**3*b4**2 - 6480*X*b2**2*b4*b6 + 5832*X*b2*b4**3 + 2592*X*b2*b4*b8 + 29160*X*b2*b6**2 - 11664*X*b4**2*b6 - 46656*X*b6*b8 - 81*b2**4*b8 + 405*b2**3*b4*b6 - 324*b2**2*b4**3 + 3888*b2**2*b4*b8 + 81*b2**2*b6**2 - 16524*b2*b4**2*b6 - 14256*b2*b6*b8 + 11664*b4**4 - 31104*b4**2*b8 + 69984*b4*b6**2 + 20736*b8**2
-
-B3 = -162*X**3*b2**3*b6 + 162*X**3*b2**2*b4**2 - 324*X**3*b2**2*b8 + 6804*X**3*b2*b4*b6 - 5832*X**3*b4**3 + 7776*X**3*b4*b8 - 26244*X**3*b6**2 - 54*X**2*b2**4*b6 + 54*X**2*b2**3*b4**2 - 27*X**2*b2**3*b8 + 2187*X**2*b2**2*b4*b6 - 1944*X**2*b2*b4**3 - 9477*X**2*b2*b6**2 + 2916*X**2*b4**2*b6 + 11664*X**2*b6*b8 + 27*X*b2**4*b8 - 189*X*b2**3*b4*b6 + 162*X*b2**2*b4**3 - 1350*X*b2**2*b4*b8 - 81*X*b2**2*b6**2 + 7776*X*b2*b4**2*b6 + 4536*X*b2*b6*b8 - 5832*X*b4**4 + 11664*X*b4**2*b8 - 30618*X*b4*b6**2 - 5184*X*b8**2 + 27*b2**3*b4*b8 - 108*b2**3*b6**2 + 81*b2**2*b4**2*b6 - 189*b2**2*b6*b8 - 972*b2*b4**2*b8 + 4374*b2*b4*b6**2 - 432*b2*b8**2 - 2916*b4**3*b6 + 11664*b4*b6*b8 - 19683*b6**3
-
-Q3 = -972*b2**2*b4*b8 - 324*b2**2*b6**2 + 6480*b2*b4**2*b6 + 2592*b2*b6*b8 - 5184*b4**4 + 9072*b4**2*b8 - 26244*b4*b6**2 - 5184*b8**2
+preΨ₄^2 + 4*Ψ₃^3 ≡ 0  mod Ψ₂Sq, b_relation.
 ```
 
-The actual resultant before imposing `bRel = 0` is
+At a root of `Ψ₂Sq`, the already-proved small resultant certificates give
 
 ```text
-Res_X(Ψ₃, Ψ₃') = -81*Δ**2 + Q3*bRel.
+C ≠ 0     -- Ψ₂Sq and Ψ₃ have no common root
+D ≠ 0     -- Ψ₂Sq and preΨ₄ have no common root, needed only in the even case
 ```
 
-Equivalently,
+and the scalar factors `(2*m+1 : K)` and `(m+1 : K)` are nonzero exactly because `(n : K) ≠ 0`.  Thus `(W.preΨ' n).eval x ≠ 0` whenever `W.Ψ₂Sq.eval x = 0`, and the target theorem follows by contradiction from `hx : (W.preΨ' n).IsRoot x`.
 
-```text
-Res_X(Ψ₃, Ψ₃') + 81*Δ**2
-  = -324*bRel*(3*b2**2*b4*b8 + b2**2*b6**2 - 20*b2*b4**2*b6
-      - 8*b2*b6*b8 + 16*b4**4 - 28*b4**2*b8
-      + 81*b4*b6**2 + 16*b8**2).
-```
+So the answer to the question is: **yes, it reduces to a parity/divisibility induction on the EDS recurrence**.  Equivalently, in `K[X]/(Ψ₂Sq)` the residue of `preΨ'_n` is an invertible scalar times a power of `Ψ₃`, or an invertible scalar times `preΨ₄` times a power of `Ψ₃`.  This is the general resultant statement in recurrence form.
 
-## Verification / reproduction script
+---
 
-This is self-contained.  It computes the Sylvester/Bézout coefficient solve for `A3,B3`, checks that the solution is integral, checks the resultant relation modulo `bRel`, and verifies the final displayed identity.
+## Minimal lemma chain to add
 
-```python
-import sympy as sp
+The cleanest implementation is to add one generic EDS lemma plus three tiny elliptic wrappers.
 
-X, b2, b4, b6, b8 = sp.symbols('X b2 b4 b6 b8')
+### 1. Generic EDS closed forms at parameter zero
 
-Psi3 = 3*X**4 + b2*X**3 + 3*b4*X**2 + 3*b6*X + b8
-dPsi3 = sp.diff(Psi3, X)
-Delta = -b2**2*b8 - 8*b4**3 - 27*b6**2 + 9*b2*b4*b6
-bRel = b2*b6 - b4**2 - 4*b8
-
-A3 = (
-    648*X**2*b2**3*b6 - 648*X**2*b2**2*b4**2
-    + 1296*X**2*b2**2*b8 - 27216*X**2*b2*b4*b6
-    + 23328*X**2*b4**3 - 31104*X**2*b4*b8
-    + 104976*X**2*b6**2 + 162*X*b2**4*b6
-    - 162*X*b2**3*b4**2 - 6480*X*b2**2*b4*b6
-    + 5832*X*b2*b4**3 + 2592*X*b2*b4*b8
-    + 29160*X*b2*b6**2 - 11664*X*b4**2*b6
-    - 46656*X*b6*b8 - 81*b2**4*b8
-    + 405*b2**3*b4*b6 - 324*b2**2*b4**3
-    + 3888*b2**2*b4*b8 + 81*b2**2*b6**2
-    - 16524*b2*b4**2*b6 - 14256*b2*b6*b8
-    + 11664*b4**4 - 31104*b4**2*b8
-    + 69984*b4*b6**2 + 20736*b8**2
-)
-
-B3 = (
-    -162*X**3*b2**3*b6 + 162*X**3*b2**2*b4**2
-    - 324*X**3*b2**2*b8 + 6804*X**3*b2*b4*b6
-    - 5832*X**3*b4**3 + 7776*X**3*b4*b8
-    - 26244*X**3*b6**2 - 54*X**2*b2**4*b6
-    + 54*X**2*b2**3*b4**2 - 27*X**2*b2**3*b8
-    + 2187*X**2*b2**2*b4*b6 - 1944*X**2*b2*b4**3
-    - 9477*X**2*b2*b6**2 + 2916*X**2*b4**2*b6
-    + 11664*X**2*b6*b8 + 27*X*b2**4*b8
-    - 189*X*b2**3*b4*b6 + 162*X*b2**2*b4**3
-    - 1350*X*b2**2*b4*b8 - 81*X*b2**2*b6**2
-    + 7776*X*b2*b4**2*b6 + 4536*X*b2*b6*b8
-    - 5832*X*b4**4 + 11664*X*b4**2*b8
-    - 30618*X*b4*b6**2 - 5184*X*b8**2
-    + 27*b2**3*b4*b8 - 108*b2**3*b6**2
-    + 81*b2**2*b4**2*b6 - 189*b2**2*b6*b8
-    - 972*b2*b4**2*b8 + 4374*b2*b4*b6**2
-    - 432*b2*b8**2 - 2916*b4**3*b6
-    + 11664*b4*b6*b8 - 19683*b6**3
-)
-
-Q3 = (
-    -972*b2**2*b4*b8 - 324*b2**2*b6**2
-    + 6480*b2*b4**2*b6 + 2592*b2*b6*b8
-    - 5184*b4**4 + 9072*b4**2*b8
-    - 26244*b4*b6**2 - 5184*b8**2
-)
-
-# Recompute A3,B3 by the Sylvester/Bézout coefficient solve.
-# A has degree < deg(dPsi3)=3, B has degree < deg(Psi3)=4.
-Res = sp.resultant(Psi3, dPsi3, X)
-a0, a1, a2, c0, c1, c2, c3 = sp.symbols('a0 a1 a2 c0 c1 c2 c3')
-A = a0 + a1*X + a2*X**2
-B = c0 + c1*X + c2*X**2 + c3*X**3
-coeff_poly = sp.Poly(A*Psi3 + B*dPsi3 - Res, X)
-eqs = [sp.Eq(coeff_poly.coeff_monomial(X**i), 0) for i in range(7)]
-sol = sp.solve(eqs, [a0, a1, a2, c0, c1, c2, c3], dict=True, simplify=False)[0]
-A_computed = sp.expand(A.subs(sol))
-B_computed = sp.expand(B.subs(sol))
-
-assert A_computed == A3
-assert B_computed == B3
-
-# Integer-coefficient checks.
-for name, poly in [('A3', A3), ('B3', B3), ('Q3', Q3)]:
-    P = sp.Poly(poly, X, b2, b4, b6, b8, domain=sp.ZZ)
-    assert all(c in sp.ZZ for c in P.coeffs()), name
-
-assert sp.expand(A3*Psi3 + B3*dPsi3 - Res) == 0
-assert sp.expand(Res - (-81*Delta**2) - Q3*bRel) == 0
-assert sp.expand(A3*Psi3 + B3*dPsi3 - (-81*Delta**2) - Q3*bRel) == 0
-
-print('deg_X(A3)=', sp.Poly(A3, X).degree())
-print('deg_X(B3)=', sp.Poly(B3, X).degree())
-print('deg_X(Q3)=', sp.Poly(Q3, X).degree())
-print('OK')
-```
-
-Expected final output:
-
-```text
-deg_X(A3)= 2
-deg_X(B3)= 3
-deg_X(Q3)= 0
-OK
-```
-
-## Lean certificate
-
-The following is the direct certificate shape for `FLT/EllipticCurve/Torsion.lean` or a nearby division-polynomial file.  The only possible local-name adjustment is the discriminant definition name if your imports expose it as a qualified theorem/definition other than `WeierstrassCurve.Δ`; the polynomial certificate itself is completely expanded.
+These lemmas live naturally near `Mathlib/NumberTheory/EllipticDivisibilitySequence.lean` or locally in the FLT file.  They are independent of elliptic curves.
 
 ```lean
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.FieldTheory.Separable
 import Mathlib.Tactic
 
 open Polynomial
-open scoped Polynomial
 
 namespace WeierstrassCurve
 
 noncomputable section
 
-variable {k : Type*} [Field k] [DecidableEq k]
-variable (W : WeierstrassCurve k)
+variable {K : Type*} [Field K]
 
-private lemma bRelC (W : WeierstrassCurve k) :
-    C W.b₂ * C W.b₆ - C W.b₄ ^ 2 - C (4 : k) * C W.b₈ = (0 : k[X]) := by
-  have hb0 : W.b₂ * W.b₆ - W.b₄ ^ 2 - (4 : k) * W.b₈ = 0 := by
-    have hb := b_relation (W := W)
-    -- `hb : 4 * W.b₈ = W.b₂ * W.b₆ - W.b₄ ^ 2`.
-    rw [← hb]
-    ring
-  have hbC := congrArg (fun z : k => (C z : k[X])) hb0
-  simpa [map_sub, map_mul, map_pow] using hbC
+/-- Odd closed form for the auxiliary normalised EDS at parameter `0`.
 
-private noncomputable def A₃ (W : WeierstrassCurve k) : k[X] :=
-  648 * X ^ 2 * C W.b₂ ^ 3 * C W.b₆
-    - 648 * X ^ 2 * C W.b₂ ^ 2 * C W.b₄ ^ 2
-    + 1296 * X ^ 2 * C W.b₂ ^ 2 * C W.b₈
-    - 27216 * X ^ 2 * C W.b₂ * C W.b₄ * C W.b₆
-    + 23328 * X ^ 2 * C W.b₄ ^ 3
-    - 31104 * X ^ 2 * C W.b₄ * C W.b₈
-    + 104976 * X ^ 2 * C W.b₆ ^ 2
-    + 162 * X * C W.b₂ ^ 4 * C W.b₆
-    - 162 * X * C W.b₂ ^ 3 * C W.b₄ ^ 2
-    - 6480 * X * C W.b₂ ^ 2 * C W.b₄ * C W.b₆
-    + 5832 * X * C W.b₂ * C W.b₄ ^ 3
-    + 2592 * X * C W.b₂ * C W.b₄ * C W.b₈
-    + 29160 * X * C W.b₂ * C W.b₆ ^ 2
-    - 11664 * X * C W.b₄ ^ 2 * C W.b₆
-    - 46656 * X * C W.b₆ * C W.b₈
-    - 81 * C W.b₂ ^ 4 * C W.b₈
-    + 405 * C W.b₂ ^ 3 * C W.b₄ * C W.b₆
-    - 324 * C W.b₂ ^ 2 * C W.b₄ ^ 3
-    + 3888 * C W.b₂ ^ 2 * C W.b₄ * C W.b₈
-    + 81 * C W.b₂ ^ 2 * C W.b₆ ^ 2
-    - 16524 * C W.b₂ * C W.b₄ ^ 2 * C W.b₆
-    - 14256 * C W.b₂ * C W.b₆ * C W.b₈
-    + 11664 * C W.b₄ ^ 4
-    - 31104 * C W.b₄ ^ 2 * C W.b₈
-    + 69984 * C W.b₄ * C W.b₆ ^ 2
-    + 20736 * C W.b₈ ^ 2
+This one does not need the relation `D^2 + 4*C^3 = 0`: the odd recurrence at `B = 0`
+only ever sees odd-indexed terms. -/
+private lemma preNormEDS'_zero_odd
+    (C D : K) (m : ℕ) :
+    preNormEDS' (0 : K) C D (2*m + 1)
+      = (-1 : K) ^ (m * (m - 1) / 2) * C ^ (m * (m + 1) / 2) := by
+  -- Prove simultaneously with the two even formulas below, by strong induction on the index.
+  -- Base cases: m = 0 gives W₁ = 1; m = 1 gives W₃ = C.
+  -- Step: use `preNormEDS'_odd`; after `simp` with the zero parameter, exactly one summand
+  -- survives depending on `Even m`.  The exponent and sign arithmetic is `omega`/`ring_nf`.
+  -- This is a pure EDS lemma; no curve facts enter.
+  sorry
 
-private noncomputable def B₃ (W : WeierstrassCurve k) : k[X] :=
-  - 162 * X ^ 3 * C W.b₂ ^ 3 * C W.b₆
-    + 162 * X ^ 3 * C W.b₂ ^ 2 * C W.b₄ ^ 2
-    - 324 * X ^ 3 * C W.b₂ ^ 2 * C W.b₈
-    + 6804 * X ^ 3 * C W.b₂ * C W.b₄ * C W.b₆
-    - 5832 * X ^ 3 * C W.b₄ ^ 3
-    + 7776 * X ^ 3 * C W.b₄ * C W.b₈
-    - 26244 * X ^ 3 * C W.b₆ ^ 2
-    - 54 * X ^ 2 * C W.b₂ ^ 4 * C W.b₆
-    + 54 * X ^ 2 * C W.b₂ ^ 3 * C W.b₄ ^ 2
-    - 27 * X ^ 2 * C W.b₂ ^ 3 * C W.b₈
-    + 2187 * X ^ 2 * C W.b₂ ^ 2 * C W.b₄ * C W.b₆
-    - 1944 * X ^ 2 * C W.b₂ * C W.b₄ ^ 3
-    - 9477 * X ^ 2 * C W.b₂ * C W.b₆ ^ 2
-    + 2916 * X ^ 2 * C W.b₄ ^ 2 * C W.b₆
-    + 11664 * X ^ 2 * C W.b₆ * C W.b₈
-    + 27 * X * C W.b₂ ^ 4 * C W.b₈
-    - 189 * X * C W.b₂ ^ 3 * C W.b₄ * C W.b₆
-    + 162 * X * C W.b₂ ^ 2 * C W.b₄ ^ 3
-    - 1350 * X * C W.b₂ ^ 2 * C W.b₄ * C W.b₈
-    - 81 * X * C W.b₂ ^ 2 * C W.b₆ ^ 2
-    + 7776 * X * C W.b₂ * C W.b₄ ^ 2 * C W.b₆
-    + 4536 * X * C W.b₂ * C W.b₆ * C W.b₈
-    - 5832 * X * C W.b₄ ^ 4
-    + 11664 * X * C W.b₄ ^ 2 * C W.b₈
-    - 30618 * X * C W.b₄ * C W.b₆ ^ 2
-    - 5184 * X * C W.b₈ ^ 2
-    + 27 * C W.b₂ ^ 3 * C W.b₄ * C W.b₈
-    - 108 * C W.b₂ ^ 3 * C W.b₆ ^ 2
-    + 81 * C W.b₂ ^ 2 * C W.b₄ ^ 2 * C W.b₆
-    - 189 * C W.b₂ ^ 2 * C W.b₆ * C W.b₈
-    - 972 * C W.b₂ * C W.b₄ ^ 2 * C W.b₈
-    + 4374 * C W.b₂ * C W.b₄ * C W.b₆ ^ 2
-    - 432 * C W.b₂ * C W.b₈ ^ 2
-    - 2916 * C W.b₄ ^ 3 * C W.b₆
-    + 11664 * C W.b₄ * C W.b₆ * C W.b₈
-    - 19683 * C W.b₆ ^ 3
+/-- The `4*m+2` closed form at parameter `0`. -/
+private lemma preNormEDS'_zero_four_mul_add_two
+    (C D : K) (hCD : D ^ 2 + (4 : K) * C ^ 3 = 0) (m : ℕ) :
+    preNormEDS' (0 : K) C D (4*m + 2)
+      = (2*m + 1 : K) * C ^ (2*m*(m + 1)) := by
+  -- Strong induction on the index, using `preNormEDS'_even`.
+  -- The only algebraic simplification not handled by the inductive hypotheses is replacing
+  -- `D^2` by `-4*C^3`, obtained from `hCD`.
+  -- The scalar recurrence collapses to the identity for `2*m+1`.
+  sorry
 
-private noncomputable def Q₃ (W : WeierstrassCurve k) : k[X] :=
-  - 972 * C W.b₂ ^ 2 * C W.b₄ * C W.b₈
-    - 324 * C W.b₂ ^ 2 * C W.b₆ ^ 2
-    + 6480 * C W.b₂ * C W.b₄ ^ 2 * C W.b₆
-    + 2592 * C W.b₂ * C W.b₆ * C W.b₈
-    - 5184 * C W.b₄ ^ 4
-    + 9072 * C W.b₄ ^ 2 * C W.b₈
-    - 26244 * C W.b₄ * C W.b₆ ^ 2
-    - 5184 * C W.b₈ ^ 2
+/-- The `4*(m+1)` closed form at parameter `0`. -/
+private lemma preNormEDS'_zero_four_mul
+    (C D : K) (hCD : D ^ 2 + (4 : K) * C ^ 3 = 0) (m : ℕ) :
+    preNormEDS' (0 : K) C D (4*(m + 1))
+      = (m + 1 : K) * D * C ^ (2*m*(m + 2)) := by
+  -- Strong induction on the index, using `preNormEDS'_even`.
+  -- Base m = 0 is W₄ = D.  The recurrence again reduces by `hCD`.
+  sorry
+```
 
-/-- Integer Bézout certificate for `Ψ₃` and its derivative, after using `b_relation`. -/
-private lemma bezout_Ψ₃_dΨ₃ (W : WeierstrassCurve k) :
-    A₃ W * W.Ψ₃ + B₃ W * derivative W.Ψ₃ = C ((-81 : k) * W.Δ ^ 2) := by
-  have hb := bRelC (W := W)
-  linear_combination (norm := ring_nf [A₃, B₃, Q₃, WeierstrassCurve.Ψ₃,
-    WeierstrassCurve.Δ]) (Q₃ W) * hb
+The three proofs above can also be bundled as one theorem returning all three formulas.  In practice that is less repetition, because the even proofs call the odd formula and each other.
 
-variable [W.IsElliptic]
+A robust bundled statement is:
 
-lemma Ψ₃_isCoprime_derivative (h3 : (3 : k) ≠ 0) :
-    IsCoprime W.Ψ₃ (derivative W.Ψ₃) := by
+```lean
+private theorem preNormEDS'_zero_closed_forms
+    (C D : K) (hCD : D ^ 2 + (4 : K) * C ^ 3 = 0) :
+    (∀ m : ℕ,
+      preNormEDS' (0 : K) C D (2*m + 1)
+        = (-1 : K) ^ (m * (m - 1) / 2) * C ^ (m * (m + 1) / 2)) ∧
+    (∀ m : ℕ,
+      preNormEDS' (0 : K) C D (4*m + 2)
+        = (2*m + 1 : K) * C ^ (2*m*(m + 1))) ∧
+    (∀ m : ℕ,
+      preNormEDS' (0 : K) C D (4*(m + 1))
+        = (m + 1 : K) * D * C ^ (2*m*(m + 2))) := by
+  -- `Nat.strong_induction_on` over the requested index is the least painful proof.
+  -- Each recursive call lands at a strictly smaller index because the EDS recurrences use
+  -- roughly half-indices.
+  -- Use:
+  --   preNormEDS'_zero, preNormEDS'_one, preNormEDS'_two,
+  --   preNormEDS'_three, preNormEDS'_four,
+  --   preNormEDS'_odd, preNormEDS'_even.
+  -- The only non-linear field simplification is `D^2 = -4*C^3`, derived by
+  --   have hDsq : D^2 = -(4 : K) * C^3 := by linear_combination hCD
+  -- and then `ring_nf`.
+  sorry
+```
+
+This is the only genuinely new induction needed for the general theorem.
+
+### 2. Evaluation of `preΨ'` at a `Ψ₂Sq`-root
+
+The division-polynomial definition is `preNormEDS' (W.Ψ₂Sq^2) W.Ψ₃ W.preΨ₄ n`.  Evaluating at `x` and using `W.Ψ₂Sq.eval x = 0` gives the zero-parameter EDS.
+
+```lean
+private lemma eval_preΨ'_of_Ψ₂Sq_eval_zero
+    (W : WeierstrassCurve K) (x : K) {n : ℕ}
+    (hs : W.Ψ₂Sq.eval x = 0) :
+    (W.preΨ' n).eval x =
+      preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) n := by
+  -- This is either a direct use of the map/eval lemma for `preNormEDS'`, if available,
+  -- or a one-time induction on `n using normEDSRec`.
+  -- The intended proof with the existing API is:
+  --   simpa [WeierstrassCurve.preΨ', hs]
+  --     using congrArg (fun p : K[X] => p.eval x)
+  --       (show W.preΨ' n = preNormEDS' (W.Ψ₂Sq ^ 2) W.Ψ₃ W.preΨ₄ n from rfl)
+  -- If `simp` does not look through `preNormEDS'`, prove the generic map lemma:
+  --   map_preNormEDS' : map f (preNormEDS' B C D n)
+  --     = preNormEDS' (map f B) (map f C) (map f D) n.
+  sorry
+```
+
+If the existing `map_preΨ'` theorem is in scope, the above becomes:
+
+```lean
+private lemma eval_preΨ'_of_Ψ₂Sq_eval_zero'
+    (W : WeierstrassCurve K) (x : K) {n : ℕ}
+    (hs : W.Ψ₂Sq.eval x = 0) :
+    (W.preΨ' n).eval x =
+      preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) n := by
+  -- Replace `Polynomial.evalRingHom x` by the exact local name if needed.
+  simpa [WeierstrassCurve.preΨ', hs]
+    using map_preNormEDS' (Polynomial.evalRingHom x)
+      (W.Ψ₂Sq ^ 2) W.Ψ₃ W.preΨ₄ n
+```
+
+### 3. The small two-torsion base facts
+
+The general induction needs the following wrappers around the small resultant certificates already in the project.
+
+```lean
+variable (W : WeierstrassCurve K) [W.IsElliptic]
+
+/-- From the already-proved resultant certificate for `Ψ₂Sq` and `Ψ₃`. -/
+private lemma Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero
+    {x : K} (hs : W.Ψ₂Sq.eval x = 0) :
+    W.Ψ₃.eval x ≠ 0 := by
+  intro hc
+  -- Local certificate is reported as something like
+  --   Ψ₂Sq_eval_ne_of_Ψ₃_eval_zero : W.Ψ₃.eval x = 0 → W.Ψ₂Sq.eval x ≠ 0
+  exact (Ψ₂Sq_eval_ne_of_Ψ₃_eval_zero (W := W) (x := x) hc) hs
+
+/-- From the already-proved resultant certificate for `Ψ₂Sq` and `preΨ₄`. -/
+private lemma preΨ₄_eval_ne_of_Ψ₂Sq_eval_zero
+    {x : K} (hs : W.Ψ₂Sq.eval x = 0) :
+    W.preΨ₄.eval x ≠ 0 := by
+  intro hd
+  -- Use the local certificate name for the `Ψ₂Sq`/`preΨ₄` resultant.
+  -- Expected shape:
+  --   Ψ₂Sq_eval_ne_of_preΨ₄_eval_zero : W.preΨ₄.eval x = 0 → W.Ψ₂Sq.eval x ≠ 0
+  exact (Ψ₂Sq_eval_ne_of_preΨ₄_eval_zero (W := W) (x := x) hd) hs
+
+/-- The algebraic relation between `Ψ₃` and `preΨ₄` on the `Ψ₂Sq = 0` stratum. -/
+private lemma preΨ₄_eval_sq_add_four_Ψ₃_eval_cube_of_Ψ₂Sq_eval_zero
+    {x : K} (hs : W.Ψ₂Sq.eval x = 0) :
+    (W.preΨ₄.eval x) ^ 2 + (4 : K) * (W.Ψ₃.eval x) ^ 3 = 0 := by
+  -- Polynomial identity:
+  --   preΨ₄^2 + 4*Ψ₃^3 ∈ (Ψ₂Sq, b₂*b₆ - b₄^2 - 4*b₈).
+  -- This is a small `ring_nf`/`linear_combination` certificate, independent of `n`.
+  -- Suggested implementation:
+  --   have hb : W.b₂ * W.b₆ - W.b₄^2 - (4 : K) * W.b₈ = 0 := by
+  --     have h := b_relation (W := W); rw [← h]; ring
+  --   linear_combination (norm := ring_nf [WeierstrassCurve.Ψ₂Sq,
+  --     WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄])
+  --     <explicit cofactor in x and the bᵢ> * hs + <explicit cofactor> * hb
+  -- In many local setups `ring_nf` after substituting `b_relation` and `hs` is enough;
+  -- if not, extract the two small cofactors once from SymPy exactly like the Keystone certs.
+  sorry
+```
+
+The relation is needed only when `n` is even.  If `n` is odd and the field has characteristic `2`, the proof still works because the odd closed form involves only powers of `C = Ψ₃.eval x`.
+
+---
+
+## Final theorem from the lemma chain
+
+This is the final theorem in the requested form.  It uses no torsion-cardinality lemma, no root-set cardinality, no `preΨ'_separable`, and no geometric `nsmul` facts.
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.Tactic
+
+open Polynomial
+
+namespace WeierstrassCurve
+
+noncomputable section
+
+variable {K : Type*} [Field K]
+
+private lemma natCast_ne_zero_of_cast_mul_left_ne_zero
+    {a b : ℕ} (h : ((a * b : ℕ) : K) ≠ 0) : (b : K) ≠ 0 := by
+  intro hb
+  apply h
+  norm_num [Nat.cast_mul, hb]
+
+private lemma natCast_ne_zero_of_cast_mul_right_ne_zero
+    {a b : ℕ} (h : ((a * b : ℕ) : K) ≠ 0) : (a : K) ≠ 0 := by
+  intro ha
+  apply h
+  norm_num [Nat.cast_mul, ha]
+
+/-- A root of the reduced division polynomial cannot be a root of the two-division polynomial. -/
+theorem preΨ'_root_Ψ₂Sq_ne
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    {n : ℕ} (hn : (n : K) ≠ 0) {x : K}
+    (hx : (W.preΨ' n).IsRoot x) :
+    W.Ψ₂Sq.eval x ≠ 0 := by
   classical
-  have hbez := bezout_Ψ₃_dΨ₃ (W := W)
-  have h81 : (-81 : k) ≠ 0 := by
-    have hpow : (3 : k) ^ 4 ≠ 0 := pow_ne_zero 4 h3
-    have h81pos : (81 : k) ≠ 0 := by
-      norm_num at hpow ⊢
-    exact neg_ne_zero.mpr h81pos
-  have hunit_scalar : IsUnit ((-81 : k) * W.Δ ^ 2) := by
-    exact (isUnit_iff_ne_zero.mpr h81).mul ((W.isUnit_Δ).pow 2)
-  have hunitC : IsUnit (C ((-81 : k) * W.Δ ^ 2) : k[X]) := by
-    exact isUnit_C.mpr hunit_scalar
-  rcases hunitC with ⟨u, hu⟩
-  rw [← hu] at hbez
-  refine ⟨↑u⁻¹ * A₃ W, ↑u⁻¹ * B₃ W, ?_⟩
-  calc
-    (↑u⁻¹ * A₃ W) * W.Ψ₃ + (↑u⁻¹ * B₃ W) * derivative W.Ψ₃
-        = ↑u⁻¹ * (A₃ W * W.Ψ₃ + B₃ W * derivative W.Ψ₃) := by ring
-    _ = ↑u⁻¹ * ↑u := by rw [hbez]
-    _ = 1 := by simp
+  intro hs
+  have hC : W.Ψ₃.eval x ≠ 0 :=
+    Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero (W := W) hs
+  have hEval :
+      (W.preΨ' n).eval x =
+        preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) n :=
+    eval_preΨ'_of_Ψ₂Sq_eval_zero (W := W) (x := x) (n := n) hs
+  have hx0 :
+      preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) n = 0 := by
+    simpa [hEval] using hx
 
-lemma preΨ'_three_separable (h3 : (3 : k) ≠ 0) :
-    (W.preΨ' 3).Separable := by
-  rw [preΨ'_three, Polynomial.separable_def]
-  exact Ψ₃_isCoprime_derivative (W := W) h3
+  rcases n.even_or_odd' with ⟨m, hm | hm⟩
+  · -- n = 2*m.
+    subst n
+    rcases m.even_or_odd' with ⟨r, hr | hr⟩
+    · -- n = 4*r.
+      subst m
+      cases r with
+      | zero =>
+          -- n = 0, contradicting `(n : K) ≠ 0`.
+          simp at hn
+      | succ r =>
+          -- n = 4*(r+1).
+          have hD : W.preΨ₄.eval x ≠ 0 :=
+            preΨ₄_eval_ne_of_Ψ₂Sq_eval_zero (W := W) hs
+          have hCD :
+              (W.preΨ₄.eval x) ^ 2 + (4 : K) * (W.Ψ₃.eval x) ^ 3 = 0 :=
+            preΨ₄_eval_sq_add_four_Ψ₃_eval_cube_of_Ψ₂Sq_eval_zero (W := W) hs
+          have hscalar : ((r + 1 : ℕ) : K) ≠ 0 := by
+            intro hsc
+            apply hn
+            -- Current goal is `((4 * (r + 1) : ℕ) : K) = 0`.
+            norm_num [Nat.cast_mul, hsc]
+          have hclosed := preNormEDS'_zero_four_mul
+            (C := W.Ψ₃.eval x) (D := W.preΨ₄.eval x) hCD r
+          have hne :
+              preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) (4 * (r + 1)) ≠ 0 := by
+            rw [hclosed]
+            exact mul_ne_zero (mul_ne_zero hscalar hD)
+              (pow_ne_zero _ hC)
+          exact hne hx0
+    · -- n = 4*r + 2.
+      subst m
+      have hCD :
+          (W.preΨ₄.eval x) ^ 2 + (4 : K) * (W.Ψ₃.eval x) ^ 3 = 0 :=
+        preΨ₄_eval_sq_add_four_Ψ₃_eval_cube_of_Ψ₂Sq_eval_zero (W := W) hs
+      have hscalar : ((2 * r + 1 : ℕ) : K) ≠ 0 := by
+        intro hsc
+        apply hn
+        -- Current goal is `((2 * (2*r + 1) : ℕ) : K) = 0`.
+        norm_num [Nat.cast_mul, Nat.cast_add, hsc]
+      have hclosed := preNormEDS'_zero_four_mul_add_two
+        (C := W.Ψ₃.eval x) (D := W.preΨ₄.eval x) hCD r
+      have hne :
+          preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) (4*r + 2) ≠ 0 := by
+        rw [hclosed]
+        exact mul_ne_zero hscalar (pow_ne_zero _ hC)
+      exact hne hx0
+  · -- n = 2*m + 1.
+    subst n
+    have hclosed := preNormEDS'_zero_odd
+      (C := W.Ψ₃.eval x) (D := W.preΨ₄.eval x) m
+    have hne :
+        preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) (2*m + 1) ≠ 0 := by
+      rw [hclosed]
+      exact mul_ne_zero (pow_ne_zero _ (by norm_num : (-1 : K) ≠ 0))
+        (pow_ne_zero _ hC)
+    exact hne hx0
 
 end
 
 end WeierstrassCurve
 ```
 
-## Integration notes
+The only nontrivial additions are the generic zero-parameter EDS closed forms and the tiny `preΨ₄^2 + 4*Ψ₃^3` two-torsion identity.  The final theorem itself is just a mod-`4` case split plus nonzero-factor bookkeeping.
 
-* The certificate identity is independent of `[W.IsElliptic]`; ellipticity is used only to make `W.Δ` a unit via `W.isUnit_Δ`.
-* The hypothesis `(3 : k) ≠ 0` is exactly what makes `-81 = -3^4` a unit in `k`.
-* This proves the `n = 3` instance of the broader separability brick:
-  ```lean
-  (W.preΨ' 3).Separable
-  ```
-  without needing the general multiplication-by-`n` étaleness theorem.
+---
+
+## Equivalent coprimality statement
+
+The root theorem is the evaluation form of the stronger coprimality lemma:
+
+```lean
+theorem preΨ'_isCoprime_Ψ₂Sq_of_natCast_ne_zero
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    {n : ℕ} (hn : (n : K) ≠ 0) :
+    IsCoprime (W.preΨ' n) W.Ψ₂Sq := by
+  -- To prove this from the root theorem, apply the same root theorem after base-changing
+  -- to `AlgebraicClosure K`, then use the standard polynomial fact that two polynomials
+  -- over a field are coprime iff they have no common root over an algebraic closure.
+  -- The direct theorem requested above does not need this stronger form.
+  sorry
+```
+
+The quotient formulas imply the resultant shape as well.  For example, modulo `Ψ₂Sq`, every `preΨ'_n` is one of
+
+```text
+unit * Ψ₃^e,
+unit * preΨ₄ * Ψ₃^e.
+```
+
+Since the small certificates already prove `Ψ₂Sq` is coprime to both `Ψ₃` and `preΨ₄` on an elliptic curve, this gives the general resultant/coprimality statement without computing a new Sylvester matrix for each `n`.
