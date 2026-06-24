@@ -47,7 +47,12 @@ public theorem nonTwo_of_Ψ₂Sq_ne [IsAlgClosed K] (W : WeierstrassCurve K) {x 
 
 /-- BRIDGE 1', shrunk to the pure coprimality: a root of `preΨ' n` is not a root of `Ψ₂Sq`
 (the 2-division polynomial). The avenue-c resultant certs give this for Ψ₃/preΨ₄; the general-`n`
-version is the remaining content of bridge 1. -/
+version is the remaining content of bridge 1.
+
+REUSE LEAD (verified 2026-06-24): the ODD-n case is already proven in avenue-c as
+`KeystoneCoprimality.preΨ_odd_eval_ne_of_Ψ₂Sq_eval_zero` (Ψ₂Sq(x)=0 ⟹ (preΨ n).eval x ≠ 0 for n
+odd, needs 4≠0), modulo the preΨ(ℤ)↔preΨ'(ℕ) cast. The EVEN-n case is the missing half — the
+analogous even-recurrence argument. -/
 public theorem preΨ'_root_Ψ₂Sq_ne (W : WeierstrassCurve K) [W.IsElliptic]
     {n : ℕ} (hn : (n : K) ≠ 0) {x : K} (hx : (W.preΨ' n).IsRoot x) :
     W.Ψ₂Sq.eval x ≠ 0 := sorry
