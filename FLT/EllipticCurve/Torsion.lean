@@ -53,7 +53,23 @@ theorem WeierstrassCurve.n_torsion_finite {n : ℕ} (hn : 0 < n) : Finite (E.nTo
 
 namespace KeystoneNTorsion
 
-variable {k : Type*} [Field k] [DecidableEq k] (W : WeierstrassCurve k) [W.IsElliptic]
+variable {k : Type*} [Field k] [DecidableEq k] [CharZero k] (W : WeierstrassCurve k) [W.IsElliptic]
+
+/-- Nonvanishing of the (bivariate) `m`-division polynomial `ψ m` for `m ≠ 0` over a
+characteristic-zero field. Over a field the underlying ring `k[X][Y]` is a domain, and the
+normalised EDS `ψ m = normEDS ψ₂ (C Ψ₃) (C preΨ₄) m` is nonzero for `m ≠ 0` (this is the
+nonvanishing of the division polynomials, e.g. via the degree/leading-coefficient computation
+for `Ψ m = C (preΨ m) * (if Even m then ψ₂ else 1)`, with `preΨ m ≠ 0` from
+`WeierstrassCurve.preΨ_ne_zero` since `(m : k) ≠ 0` in characteristic zero, together with the
+identification of `ψ m` and `Ψ m` as polynomials).
+
+NAMED SORRY: the remaining gap is to identify `ψ m` with `Ψ m` as raw bivariate polynomials
+(Mathlib only provides `Affine.CoordinateRing.mk_ψ`, the identification in the coordinate-ring
+quotient) and to lift `preΨ m ≠ 0` (univariate) to `ψ m ≠ 0` (bivariate). A clean discharge
+needs a Mathlib lemma `WeierstrassCurve.ψ_ne_zero`/`Ψ_ne_zero` or a `natDegree`-in-`Y` argument
+on `normEDS`; it is NOT false (it holds in char 0) and does not block `h4`/`hc3`. -/
+theorem ψ_ne_zero_of_charZero : ∀ m : ℤ, m ≠ 0 → W.ψ m ≠ 0 := by
+  sorry
 
 private noncomputable def nTorsionEquivKernel (n : ℕ) :
     W.nTorsion n ≃ {P : (W⁄k).Point // n • P = 0} where
@@ -82,9 +98,10 @@ kernel membership. This is the `xRep_zsmul_some_eq_divisionPolynomial` seam afte
 zero-denominator criterion. -/
 theorem nsmul_eq_zero_iff_ΨSq_eval {n : ℕ} {x y : k} (h : (W⁄k).Nonsingular x y) :
     n • (Point.some x y h : (W⁄k).Point) = 0 ↔ (W.ΨSq (n : ℤ)).eval x = 0 := by
-  have h4 : (4 : k) ≠ 0 := sorry
-  have hψ_ne : ∀ m : ℤ, m ≠ 0 → W.ψ m ≠ 0 := sorry
-  have hc3 : W.Ψ₃ ≠ 0 := sorry
+  have h4 : (4 : k) ≠ 0 := by norm_num
+  have hc3 : W.Ψ₃ ≠ 0 :=
+    WeierstrassCurve.Ψ₃_ne_zero W (by norm_num)
+  have hψ_ne : ∀ m : ℤ, m ≠ 0 → W.ψ m ≠ 0 := ψ_ne_zero_of_charZero (W := W)
   have key := KeystoneLadder.nsmul_eq_zero_iff_ΨSq_eval (W := W) h4 hψ_ne hc3 (n := n) h
   convert key using 3
   congr
@@ -625,7 +642,7 @@ theorem nTorsion_card_eq [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
 
 end KeystoneNTorsion
 
-theorem WeierstrassCurve.n_torsion_card [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
+theorem WeierstrassCurve.n_torsion_card [CharZero k] [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
     Nat.card (E.nTorsion n) = n^2 := by
   exact KeystoneNTorsion.nTorsion_card_eq (W := E) hn
 
@@ -932,7 +949,8 @@ theorem group_theory_lemma {A : Type*} [AddCommGroup A] {n : ℕ} (hn : 0 < n) (
 -- I only need this if n is prime but there's no harm thinking about it in general I guess.
 -- It follows from the previous theorem using pure group theory (possibly including the
 -- structure theorem for finite abelian groups)
-theorem WeierstrassCurve.n_torsion_dimension [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
+theorem WeierstrassCurve.n_torsion_dimension [CharZero k] [IsSepClosed k] {n : ℕ}
+    (hn : (n : k) ≠ 0) :
     Nonempty (E.nTorsion n ≃+ (ZMod n) × (ZMod n)) := by
   obtain ⟨φ⟩ : Nonempty (E.nTorsion n ≃+ (Fin 2 → (ZMod n))) := by
     apply group_theory_lemma (Nat.pos_of_ne_zero fun h ↦ by simp [h] at hn)
@@ -968,7 +986,7 @@ The geometric `n`-torsion over a separably closed field is linearly equivalent t
 the rank-two coordinate module over `ZMod n`.
 -/
 theorem WeierstrassCurve.geomNTorsion_rank_two_linear
-    [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
+    [CharZero k] [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
     Nonempty (E.nTorsion n ≃ₗ[ZMod n] (Fin 2 → ZMod n)) := by
   obtain ⟨eProd⟩ := E.n_torsion_dimension hn
   let ePi : E.nTorsion n ≃+ (Fin 2 → ZMod n) :=
@@ -977,7 +995,7 @@ theorem WeierstrassCurve.geomNTorsion_rank_two_linear
 
 /-- A basis of geometric `n`-torsion over `ZMod n`, indexed by `Fin 2`. -/
 theorem WeierstrassCurve.geomNTorsion_basis
-    [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
+    [CharZero k] [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
     Nonempty (Module.Basis (Fin 2) (ZMod n) (E.nTorsion n)) := by
   obtain ⟨e⟩ := E.geomNTorsion_rank_two_linear hn
   exact ⟨Module.Basis.ofEquivFun e⟩
@@ -986,7 +1004,7 @@ theorem WeierstrassCurve.geomNTorsion_basis
 The rank-two linear structure on geometric torsion over the algebraic closure.
 -/
 theorem WeierstrassCurve.geomNTorsion_rank_two_linear_algClosure
-    {K : Type u} [Field K] [DecidableEq K]
+    {K : Type u} [Field K] [CharZero K] [DecidableEq K]
     [DecidableEq (AlgebraicClosure K)]
     (E : WeierstrassCurve K) [E.IsElliptic]
     {n : ℕ} (hn : (n : AlgebraicClosure K) ≠ 0) :
@@ -999,7 +1017,7 @@ theorem WeierstrassCurve.geomNTorsion_rank_two_linear_algClosure
 
 /-- A basis of geometric torsion over the algebraic closure. -/
 theorem WeierstrassCurve.geomNTorsion_basis_algClosure
-    {K : Type u} [Field K] [DecidableEq K]
+    {K : Type u} [Field K] [CharZero K] [DecidableEq K]
     [DecidableEq (AlgebraicClosure K)]
     (E : WeierstrassCurve K) [E.IsElliptic]
     {n : ℕ} (hn : (n : AlgebraicClosure K) ≠ 0) :

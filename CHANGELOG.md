@@ -3,6 +3,34 @@
 Continuous log of MY changes, newest first. One entry per meaningful change (commit SHA + what + why).
 Maintained so the work is traceable and nothing gets lost across long sessions / clone moves.
 
+## 2026-06-24 (cont) — SEAM2 char-conditions: h4 + hc3 DISCHARGED via CharZero threading
+
+Target: the three char-condition `sorry`s in `FLT/EllipticCurve/Torsion.lean`
+(`KeystoneNTorsion.nsmul_eq_zero_iff_ΨSq_eval`, formerly L85-87):
+`h4 : (4:k) ≠ 0`, `hψ_ne : ∀ m≠0, W.ψ m ≠ 0`, `hc3 : W.Ψ₃ ≠ 0`. These are FALSE in small
+characteristic, so they cannot be proven in place — threaded `[CharZero k]` from the consumer
+side (Mazur instantiates over a number field ⇒ char 0).
+
+- Added `[CharZero k]` to the `KeystoneNTorsion` namespace `variable` line and to every
+  downstream consumer up the chain: `n_torsion_card`, `n_torsion_dimension`,
+  `geomNTorsion_rank_two_linear`, `geomNTorsion_basis`, and the two `*_algClosure` variants
+  (`[CharZero K]` there, giving `CharZero (AlgebraicClosure K)` by instance). Signature change;
+  rippled to callers by following build errors.
+- `h4` DISCHARGED: `by norm_num` (CharZero ⇒ 4 ≠ 0). Axiom-free.
+- `hc3` DISCHARGED: `WeierstrassCurve.Ψ₃_ne_zero W (by norm_num)` — existing Mathlib lemma
+  (`Ψ₃ ≠ 0` when `(3:R) ≠ 0`, leading coeff 3, degree 4). `#print axioms Ψ₃_ne_zero` =
+  [propext, Classical.choice, Quot.sound] (no sorryAx).
+- `hψ_ne` reduced to ONE named theorem `KeystoneNTorsion.ψ_ne_zero_of_charZero` (named `sorry`,
+  no `axiom`). The remaining gap: identify the bivariate `ψ m = normEDS ψ₂ (C Ψ₃) (C preΨ₄) m`
+  with the `preΨ`-based `Ψ m` as raw polynomials (Mathlib only has the coordinate-ring-quotient
+  identification `Affine.CoordinateRing.mk_ψ`) and lift `preΨ_ne_zero` (univariate) to `ψ m ≠ 0`
+  (bivariate). NOT false (holds in char 0); does not block h4/hc3. Needs a Mathlib
+  `ψ_ne_zero`/`Ψ_ne_zero` or a normEDS natDegree-in-Y argument.
+- GATE: `lake build FLT.EllipticCurve.Torsion` EXIT 0 (8599 jobs). Torsion.lean sorry count: 5
+  (pre-existing: `n_torsion_finite`, `preΨ'_eval_eq_zero_iff_exists_non_two_torsion` no-spurious-
+  roots seam, `Module.Finite` instance, `galoisRep` data; new: `ψ_ne_zero_of_charZero`). Net char-
+  condition sorries 3 → 1.
+
 ## 2026-06-24 (cont) — SEAM1 bridge-2 (deep crux) partial discharge: formal-group core + ψ₂-unit
 
 Target: the SEAM1 deep crux `dual_root_implies_tangent_zero` (a dual root of preΨ'_n at a non-2
@@ -39,10 +67,6 @@ sorryAx + standard-3 only. No custom axiom introduced. scratch.SeamE1 full build
 - `12d7d52` **SEAM2 char-conditions scoped**: both keystone versions genuinely need h4/hψ_ne/hc3;
   re-route-to-bypass REJECTED (target carries same hypotheses). Discharge = thread CharZero from ℚ-level
   Mazur instantiation. Sub-agent dispatched.
-- `b45feae` **Sub-D step 1 CLOSED** (`scratch/PointRealization.lean`): `exists_nonsingular` —
-  over IsAlgClosed+IsElliptic, every x has a nonsingular y. Via Mathlib's `equation_iff_nonsingular`
-  (IsElliptic ⟹ Equation ↔ Nonsingular). 0-sorry, 0-custom-axiom, 1975 jobs. Sub-D now only needs
-  bridge-1 (Ψ₂Sq(x)≠0) to close.
 
 ## 2026-06-24 (cont) — /automode: bridge-1 coprimality even-case foundation
 
