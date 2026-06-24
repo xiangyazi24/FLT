@@ -48,11 +48,11 @@ namespace AffineJet
 open Dual
 variable (W : WeierstrassCurve K)
 
-@[simp] lemma bc_a₁ : (W.toAffine.baseChange (D K)).a₁ = c W.a₁ := rfl
-@[simp] lemma bc_a₂ : (W.toAffine.baseChange (D K)).a₂ = c W.a₂ := rfl
-@[simp] lemma bc_a₃ : (W.toAffine.baseChange (D K)).a₃ = c W.a₃ := rfl
-@[simp] lemma bc_a₄ : (W.toAffine.baseChange (D K)).a₄ = c W.a₄ := rfl
-@[simp] lemma bc_a₆ : (W.toAffine.baseChange (D K)).a₆ = c W.a₆ := rfl
+@[simp] public lemma bc_a₁ : (W.toAffine.baseChange (D K)).a₁ = c W.a₁ := rfl
+@[simp] public lemma bc_a₂ : (W.toAffine.baseChange (D K)).a₂ = c W.a₂ := rfl
+@[simp] public lemma bc_a₃ : (W.toAffine.baseChange (D K)).a₃ = c W.a₃ := rfl
+@[simp] public lemma bc_a₄ : (W.toAffine.baseChange (D K)).a₄ = c W.a₄ := rfl
+@[simp] public lemma bc_a₆ : (W.toAffine.baseChange (D K)).a₆ = c W.a₆ := rfl
 
 /-- Dual-number product (first-order). -/
 lemma dual_mul (a b a2 d : K) :
@@ -90,11 +90,11 @@ lemma equation_dual_iff (x y u v : K) :
   · rintro ⟨h1, h2⟩; exact ⟨by linear_combination h1, by linear_combination h2⟩
 
 /-- The slope `v/u` forced by the curve equation when `W_Y(x,y) ≠ 0`. -/
-noncomputable def ySlope (x y : K) : K :=
+@[expose] public noncomputable def ySlope (x y : K) : K :=
   - W.toAffine.polynomialX.evalEval x y / W.toAffine.polynomialY.evalEval x y
 
 /-- When `W_Y(x,y) ≠ 0`, the x-direction `u` lifts to a first-order curve point. -/
-lemma equation_dual_lift_of_polynomialY_ne_zero {x y u : K}
+public lemma equation_dual_lift_of_polynomialY_ne_zero {x y u : K}
     (hxy : W.toAffine.Equation x y)
     (hY : W.toAffine.polynomialY.evalEval x y ≠ 0) :
     (W.toAffine.baseChange (D K)).Equation (c x + e u) (c y + e (ySlope W x y * u)) := by
@@ -125,10 +125,10 @@ variable (W : WeierstrassCurve K)
 @[expose] public def xε (x : K) : D K := Dual.c x + Dual.e 1
 
 /-- The forced first-order `y`-jet over `x + ε` (slope from the curve). -/
-noncomputable def yε (x y : K) : D K := Dual.c y + Dual.e (AffineJet.ySlope W x y)
+@[expose] public noncomputable def yε (x y : K) : D K := Dual.c y + Dual.e (AffineJet.ySlope W x y)
 
 /-- The `(x+ε, y+ε·slope)` jet lies on the curve over `k[ε]` (non-2-torsion). -/
-lemma affine_dual_point_equation {x y : K}
+public lemma affine_dual_point_equation {x y : K}
     (hcurve : W.toAffine.Equation x y)
     (hY : W.toAffine.polynomialY.evalEval x y ≠ 0) :
     (W.toAffine.baseChange (D K)).Equation (xε x) (yε W x y) := by
