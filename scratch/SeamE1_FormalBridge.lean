@@ -2,6 +2,7 @@ module
 
 public import scratch.SeamE1_Core
 public import scratch.SeamE1_FormalNsmul
+public import scratch.KeystoneSeparability
 
 /-! # SEAM1 / E1 — Formal Bridge: dual root → tangent zero
 
@@ -110,23 +111,45 @@ theorem Ψ₂Sq_ne_zero_of_polynomialY_ne_zero (W : WeierstrassCurve K) {x y : K
   rw [h0] at hsq
   exact pow_eq_zero_iff (by norm_num : 2 ≠ 0) |>.mp hsq
 
-/-! ## Step 4: The remaining sorry — derivative nonvanishing
+/-! ## Step 4: Derivative nonvanishing
 
-This is the irreducible mathematical content: at a root of `preΨ'_n` on a non-2-torsion
-curve point, the derivative is nonzero when `(n:K) ≠ 0`.
+The irreducible mathematical content: at a root of `preΨ'_n`, the derivative is nonzero
+when `(n:K) ≠ 0` and the curve is elliptic. This encodes `[n]'(0) = n ≠ 0`. -/
 
-This encodes the formal group fact `[n]'(0) = n ≠ 0`. -/
+/-- Reusable helper: a separable polynomial has no common root with its derivative. -/
+theorem deriv_ne_zero_of_separable {f : K[X]} (hf : f.Separable) {x : K}
+    (hroot : f.eval x = 0) : (derivative f).eval x ≠ 0 := by
+  rw [Polynomial.separable_def] at hf
+  obtain ⟨a, b, hab⟩ := hf
+  intro hderiv
+  have heval : eval x (a * f + b * derivative f) = eval x 1 := by congr 1
+  simp only [eval_add, eval_mul, eval_one, hroot, hderiv, mul_zero, add_zero] at heval
+  exact absurd heval (by norm_num)
 
-/-- **The derivative nonvanishing**: at a root of `preΨ'_n` on a non-2-torsion curve point
-with `(n:K) ≠ 0`, the polynomial derivative `(preΨ'_n)'(x)` is nonzero.
+/-- **n=3 case PROVEN (0 sorry, 0 axiom)**: at a root of `preΨ'_3 = Ψ₃`, the derivative
+is nonzero when `(3:K) ≠ 0` and the curve is elliptic. Uses the Bezout certificate
+from `KeystoneSeparability.Psi3_separable`. -/
+theorem preΨ'_deriv_ne_zero_n3 (W : WeierstrassCurve K) [W.IsElliptic]
+    (h3 : (3 : K) ≠ 0) {x : K}
+    (hroot : (W.preΨ' 3).eval x = 0) :
+    (derivative (W.preΨ' 3)).eval x ≠ 0 := by
+  rw [preΨ'_three] at hroot ⊢
+  exact deriv_ne_zero_of_separable (Psi3_separable W h3) hroot
 
-This is the content of `[n]*ω = n·ω` for the invariant differential, restricted to
-n-torsion points. Equivalently, it says `IsCoprime (preΨ'_n) (derivative (preΨ'_n))`.
+/-- **General n (remaining sorry)**: the derivative of `preΨ'_n` is nonzero at its roots
+on non-2-torsion curve points when `(n:K) ≠ 0`.
 
 STATUS:
-- n=3: PROVEN via Bezout certificate in KeystoneSeparability.Psi3_separable (0 axiom)
-- n=4: cofactors computed (commit 66dea94, Res = 2⁹·Δ⁵)
-- General n: requires EDS induction or invariant differential infrastructure -/
+- n ≤ 2: vacuous (preΨ'_1 = preΨ'_2 = 1, no roots)
+- n = 3: PROVEN above via `Psi3_separable` Bezout certificate (0 axiom)
+- n = 4: Bezout cofactors CAS-computed (commit 66dea94, Res = 2⁹·Δ⁵)
+- General n: requires one of:
+  (a) EDS-recurrence induction on `IsCoprime (preΨ'_n) (derivative (preΨ'_n))`
+  (b) Invariant differential `[n]*ω = n·ω` → total derivative identity
+  (c) Formal group W.formalGroup + connection to division polynomials
+
+Once `(W.preΨ' n).Separable` is proven for all n with (n:K) ≠ 0, this sorry
+is closed by `deriv_ne_zero_of_separable`. -/
 theorem preΨ'_deriv_ne_zero_at_nontorsion_root [IsAlgClosed K]
     (W : WeierstrassCurve K) [W.IsElliptic]
     {n : ℕ} (hn : (n : K) ≠ 0) {x y : K}
