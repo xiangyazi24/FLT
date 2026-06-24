@@ -89,6 +89,32 @@ lemma equation_dual_iff (x y u v : K) :
   · rintro ⟨h1, h2⟩; exact ⟨by linear_combination h1, by linear_combination h2⟩
   · rintro ⟨h1, h2⟩; exact ⟨by linear_combination h1, by linear_combination h2⟩
 
+/-- The slope `v/u` forced by the curve equation when `W_Y(x,y) ≠ 0`. -/
+noncomputable def ySlope (x y : K) : K :=
+  - W.toAffine.polynomialX.evalEval x y / W.toAffine.polynomialY.evalEval x y
+
+/-- When `W_Y(x,y) ≠ 0`, the x-direction `u` lifts to a first-order curve point. -/
+lemma equation_dual_lift_of_polynomialY_ne_zero {x y u : K}
+    (hxy : W.toAffine.Equation x y)
+    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0) :
+    (W.toAffine.baseChange (D K)).Equation (c x + e u) (c y + e (ySlope W x y * u)) := by
+  rw [equation_dual_iff]
+  refine ⟨hxy, ?_⟩
+  rw [ySlope]
+  field_simp
+  ring
+
+/-- Uniqueness of the first-order `y` lift when `W_Y(x,y) ≠ 0`. -/
+lemma equation_dual_lift_unique {x y u v : K}
+    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
+    (h : (W.toAffine.baseChange (D K)).Equation (c x + e u) (c y + e v)) :
+    v = ySlope W x y * u := by
+  rw [equation_dual_iff] at h
+  rcases h with ⟨_, hlin⟩
+  rw [ySlope]
+  field_simp
+  linear_combination hlin
+
 end AffineJet
 
 end WeierstrassCurve.SEAM1
