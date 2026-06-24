@@ -17,19 +17,45 @@ namespace WeierstrassCurve.SEAM1
 
 variable {K : Type*} [Field K]
 
-/-- BRIDGE 1 (root dictionary): over an algebraically closed field a root of preΨ' n is the
-x-coordinate of a non-2-torsion point on the curve.
+/-- MECHANICAL (proven): over an algebraically closed field, `Ψ₂Sq(x) ≠ 0` gives a curve point
+over `x` with nonzero `ψ₂` (non-2-torsion). `∃ y` is the alg-closed quadratic root; `ψ₂ ≠ 0` is
+`ψ₂² = Ψ₂Sq` on the curve. -/
+public theorem nonTwo_of_Ψ₂Sq_ne [IsAlgClosed K] (W : WeierstrassCurve K) {x : K}
+    (hΨ : W.Ψ₂Sq.eval x ≠ 0) :
+    ∃ y, W.toAffine.Equation x y ∧ W.toAffine.polynomialY.evalEval x y ≠ 0 := by
+  set qy : K[X] := X ^ 2 + C (W.a₁ * x + W.a₃) * X - C (x ^ 3 + W.a₂ * x ^ 2 + W.a₄ * x + W.a₆)
+    with hqy
+  have hdeg : qy.degree = 2 := by rw [hqy]; compute_degree!
+  obtain ⟨y, hy⟩ := IsAlgClosed.exists_root qy (by rw [hdeg]; decide)
+  rw [Polynomial.IsRoot, hqy] at hy
+  simp only [eval_add, eval_sub, eval_pow, eval_mul, eval_X, eval_C] at hy
+  have hEq : W.toAffine.Equation x y := by
+    rw [WeierstrassCurve.Affine.Equation, WeierstrassCurve.Affine.evalEval_polynomial]
+    linear_combination hy
+  refine ⟨y, hEq, ?_⟩
+  intro h0
+  apply hΨ
+  have hEq' := hEq
+  rw [WeierstrassCurve.Affine.Equation, WeierstrassCurve.Affine.evalEval_polynomial] at hEq'
+  have hsq : (W.toAffine.polynomialY.evalEval x y) ^ 2 = W.Ψ₂Sq.eval x := by
+    rw [WeierstrassCurve.Affine.evalEval_polynomialY, WeierstrassCurve.Ψ₂Sq]
+    simp only [eval_add, eval_mul, eval_pow, eval_X, eval_C, WeierstrassCurve.b₂,
+      WeierstrassCurve.b₄, WeierstrassCurve.b₆]
+    linear_combination 4 * hEq'
+  rw [h0] at hsq
+  simpa using hsq.symm
 
-NON-CIRCULARITY TRAP (verified 2026-06-24): do NOT prove via the repo's
-preΨ'_eval_eq_zero_iff_exists_non_two_torsion / rootPointExists — those depend on
-preΨ'_rootSet_card, which depends on preΨ'_separable (the lemma this bridge feeds). Non-circular
-path: (a) exists y with W.Equation x y from the alg-closed quadratic polynomial.evalEval x Y
-(degree 2 in Y, splits); (b) Ψ₂Sq.eval x nonzero from a general preΨ'_n / Ψ₂Sq coprimality
-(NOT yet in repo — only Ψ₃/preΨ₄ vs Ψ₂Sq certs exist), then polynomialY nonzero via the on-curve
-relation psi2^2 = Ψ₂Sq. -/
+/-- BRIDGE 1', shrunk to the pure coprimality: a root of `preΨ' n` is not a root of `Ψ₂Sq`
+(the 2-division polynomial). The avenue-c resultant certs give this for Ψ₃/preΨ₄; the general-`n`
+version is the remaining content of bridge 1. -/
+public theorem preΨ'_root_Ψ₂Sq_ne (W : WeierstrassCurve K) [W.IsElliptic]
+    {n : ℕ} (hn : (n : K) ≠ 0) {x : K} (hx : (W.preΨ' n).IsRoot x) :
+    W.Ψ₂Sq.eval x ≠ 0 := sorry
+
 public theorem root_exists_non_two [IsAlgClosed K] (W : WeierstrassCurve K) [W.IsElliptic]
     {n : ℕ} (hn : (n : K) ≠ 0) {x : K} (hx : (W.preΨ' n).IsRoot x) :
-    ∃ y : K, W.toAffine.Equation x y ∧ W.toAffine.polynomialY.evalEval x y ≠ 0 := sorry
+    ∃ y : K, W.toAffine.Equation x y ∧ W.toAffine.polynomialY.evalEval x y ≠ 0 :=
+  nonTwo_of_Ψ₂Sq_ne W (preΨ'_root_Ψ₂Sq_ne W hn hx)
 
 /-- BRIDGE 2 (THE DEEP CRUX: raw multiplication-by-n over k[eps]): a first-order root of preΨ' n
 over k[eps] at a non-2-torsion point forces the [n]-tangent coordinate at O to vanish.
