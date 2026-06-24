@@ -1,363 +1,390 @@
-# Q118 (dm1): roots of `preΨ' n` are not roots of `Ψ₂Sq`
+# Q137 (dm1): Current-state audit of Mazur `|T| ≤ 16` formalization
 
-## Executive answer
-
-There **is** a clean non-circular general-`n` proof at the polynomial/EDS level.  It is not a per-`n` Sylvester resultant proof.  The right general lemma is an EDS recurrence lemma obtained by setting the EDS parameter
-
-```lean
-B := W.Ψ₂Sq.eval x
-```
-
-to zero.  In the quotient/evaluation stratum `B = 0`, the reduced division polynomial has an explicit closed form in terms of
-
-```lean
-C := W.Ψ₃.eval x
-D := W.preΨ₄.eval x.
-```
-
-The closed forms are:
+Audit target:
 
 ```text
-preNormEDS' 0 C D (2*m + 1)
-  = (-1)^(m*(m-1)/2) * C^(m*(m+1)/2)
-
-preNormEDS' 0 C D (4*m + 2)
-  = (2*m + 1) * C^(2*m*(m+1))
-
-preNormEDS' 0 C D (4*(m+1))
-  = (m+1) * D * C^(2*m*(m+2)).
+branch: scratch
+repo:   xiangyazi24/FLT
+paths:  FLT/Assumptions/MazurProof/ + FLT/EllipticCurve/Torsion.lean
 ```
 
-The even formulas use the two-torsion relation
+I checked the actual branch state through the GitHub connector.  The key finding is that the branch is **not** currently in the six-axiom Mazur-proof-checklist state described in `MAZUR_AXIOM_CHECKLIST.md`.  On the `scratch` branch I could not fetch `FLT/Assumptions/MazurProof/` at all: the GitHub contents endpoint reports it as missing.  The repository still has the older monolithic assumption file
 
 ```text
-D^2 + 4*C^3 = 0
+FLT/Assumptions/Mazur.lean
 ```
 
-which is the evaluated polynomial identity
+and `FLT/EllipticCurve/Torsion.lean` still contains several literal `sorry`s in the n-torsion/Galois-representation infrastructure.
+
+So the honest current-state summary is:
 
 ```text
-preΨ₄^2 + 4*Ψ₃^3 ≡ 0  mod Ψ₂Sq, b_relation.
+There is no axiom-free MazurProof stack in the checked branch.
+The six checklist axioms A1--A6 are not present as current declarations in the requested path.
+The effective current top-level Mazur assumption is still `axiom Mazur_statement`.
+The keystone torsion infrastructure K1/K2/K3 is still represented by sorries in `Torsion.lean`.
+The downstream Frey/Mazur irreducibility bridge is still a `sorry` in `FreyCurve/Contradiction.lean`.
 ```
 
-At a root of `Ψ₂Sq`, the already-proved small resultant certificates give
+## Files actually read
+
+### `FLT/Assumptions/Mazur.lean`
+
+This file contains the old monolithic statement:
+
+```lean
+/-- Mazur's bound for the size of the torsion subgroup of an elliptic curve
+ over the rationals . -/
+axiom Mazur_statement (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    (AddCommGroup.torsion (E⁄ℚ).Point : Set (E⁄ℚ).Point).ncard ≤ 16
+```
+
+There is no proof body and no reference to a `MazurProof` submodule in this file.
+
+### `FLT/EllipticCurve/Torsion.lean`
+
+This file still has these literal `sorry`s:
+
+```lean
+theorem WeierstrassCurve.n_torsion_finite {n : ℕ} (hn : 0 < n) :
+    Finite (E.nTorsion n) := sorry
+
+theorem WeierstrassCurve.n_torsion_card [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
+    Nat.card (E.nTorsion n) = n^2 := sorry
+
+theorem group_theory_lemma {A : Type*} [AddCommGroup A] {n : ℕ} (hn : 0 < n) (r : ℕ)
+    (h : ∀ d : ℕ, d ∣ n → Nat.card (Submodule.torsionBy ℤ A d) = d ^ r) :
+    Nonempty ((Submodule.torsionBy ℤ A n) ≃+ (Fin r → (ZMod n))) := sorry
+
+noncomputable instance (n : ℕ) : Module.Finite (ZMod n) (E.nTorsion n) := sorry
+
+noncomputable instance WeierstrassCurve.galoisRepresentation
+    (K : Type u) [Field K] [DecidableEq K] [Algebra k K] :
+    DistribMulAction (K ≃ₐ[k] K) (E⁄K).Point where
+      one_smul := sorry
+      mul_smul := sorry
+      smul_zero := sorry
+      smul_add := sorry
+
+def WeierstrassCurve.galoisRep {K : Type u} [Field K] (E : WeierstrassCurve K) [E.IsElliptic]
+    [DecidableEq K] [DecidableEq (AlgebraicClosure K)] (n : ℕ) (hn : 0 < n) :
+  GaloisRep K (ZMod n) ((E.map (algebraMap K (AlgebraicClosure K))).nTorsion n) := sorry
+```
+
+The theorem
+
+```lean
+theorem WeierstrassCurve.n_torsion_dimension [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
+    Nonempty (E.nTorsion n ≃+ (ZMod n) × (ZMod n))
+```
+
+is not itself a `sorry`, but it depends directly on `group_theory_lemma` and `n_torsion_card`.
+
+### `FLT/FreyCurve/Contradiction.lean`
+
+This file still has the downstream Mazur bridge as a literal `sorry`:
+
+```lean
+theorem Mazur_Frey (P : FreyPackage) :
+    haveI : Fact P.p.Prime := ⟨P.pp⟩
+    GaloisRep.IsIrreducible (P.freyCurve.galoisRep P.p P.hppos) :=
+  sorry
+```
+
+This file imports `FLT.EllipticCurve.Torsion`, so the `galoisRep` construction in `Torsion.lean` is on the path to `Mazur_Frey`.
+
+### `FLT/Assumptions/MazurProof/`
+
+I attempted direct repository-content access to this directory and to plausible files such as:
 
 ```text
-C ≠ 0     -- Ψ₂Sq and Ψ₃ have no common root
-D ≠ 0     -- Ψ₂Sq and preΨ₄ have no common root, needed only in the even case
+FLT/Assumptions/MazurProof/Basic.lean
+FLT/Assumptions/MazurProof/Main.lean
 ```
 
-and the scalar factors `(2*m+1 : K)` and `(m+1 : K)` are nonzero exactly because `(n : K) ≠ 0`.  Thus `(W.preΨ' n).eval x ≠ 0` whenever `W.Ψ₂Sq.eval x = 0`, and the target theorem follows by contradiction from `hx : (W.preΨ' n).IsRoot x`.
+The directory/file path was not found on the `scratch` branch.  Therefore the current audit cannot report theorem/axiom status inside `MazurProof/`: in the checked branch, that directory is not present.
 
-So the answer to the question is: **yes, it reduces to a parity/divisibility induction on the EDS recurrence**.  Equivalently, in `K[X]/(Ψ₂Sq)` the residue of `preΨ'_n` is an invertible scalar times a power of `Ψ₃`, or an invertible scalar times `preΨ₄` times a power of `Ψ₃`.  This is the general resultant statement in recurrence form.
+## 1. Status of the six checklist top-level axioms A1--A6
 
----
+Because `FLT/Assumptions/MazurProof/` is absent in the checked branch, the checklist axioms do not currently exist as declarations there.  The current code surface is the older single axiom `Mazur_statement`.
 
-## Minimal lemma chain to add
+| Checklist item | Current checked-branch status | Notes |
+|---|---:|---|
+| A1 `rational_torsion_two_invariant_factors` | Not present as a declaration in checked files | Not discharged; no `MazurProof/` module present. |
+| A2 `weil_pairing_primitive_root` | Not present as a declaration in checked files | Not discharged; no Miller/Weil pairing proof in the checked Mazur surface. |
+| A3 `no_rational_point_of_order_ge_17` | Not present as a declaration in checked files | Not discharged; this is essentially a core Mazur/modular-curve theorem. |
+| A4 `Z2xZ14` exclusion | Not present as a declaration in checked files | Not discharged. |
+| A5 `Z2xZ16` exclusion | Not present as a declaration in checked files | Not discharged. |
+| A6 `mordell_weil_fg` | Not present as a declaration in checked files | Not discharged; old monolithic `Mazur_statement` bypasses it. |
 
-The cleanest implementation is to add one generic EDS lemma plus three tiny elliptic wrappers.
+Effective current top-level Mazur axiom:
 
-### 1. Generic EDS closed forms at parameter zero
+| Effective current declaration | Status |
+|---|---:|
+| `axiom Mazur_statement` in `FLT/Assumptions/Mazur.lean` | Still an axiom |
 
-These lemmas live naturally near `Mathlib/NumberTheory/EllipticDivisibilitySequence.lean` or locally in the FLT file.  They are independent of elliptic curves.
+So the answer to “which of the six top-level custom axioms are now discharged to theorems?” is: **none are present/discharged in the checked branch**.  The branch is still using a monolithic `Mazur_statement` axiom, plus separate sorries in torsion infrastructure and the Frey/Mazur bridge.
 
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.Tactic
+## 2. Residual seam-sorryAx under discharged items
 
-open Polynomial
+There are no discharged A1--A6 items in the checked branch, so there are no residual seam dependencies under discharged A1--A6 theorems to report.
 
-namespace WeierstrassCurve
+For the existing torsion infrastructure, the residual seams are still explicit:
 
-noncomputable section
+| Infrastructure item | Current declaration | Residual obligations |
+|---|---|---|
+| K1 `#E[n] = n²` over separably/algebraically closed field | `WeierstrassCurve.n_torsion_card` | Literal `sorry`; needs SEAM1 separability, SEAM2 x-coordinate/nsmul criterion, root realization/counting. |
+| K2 rank-2 geometric n-torsion | `WeierstrassCurve.n_torsion_dimension` | The theorem body exists but rests on `n_torsion_card` and `group_theory_lemma`, both currently sorry-backed. |
+| K3 finite module/Galois API | `Module.Finite`, `galoisRepresentation`, `galoisRep` | Literal sorries remain. |
+| Group theory conversion from cardinality to `(ZMod n)^r` | `group_theory_lemma` | Literal `sorry`. |
 
-variable {K : Type*} [Field K]
+## 3. Full list of remaining Mazur/torsion obligations found
 
-/-- Odd closed form for the auxiliary normalised EDS at parameter `0`.
+### A. Hard axiom still present
 
-This one does not need the relation `D^2 + 4*C^3 = 0`: the odd recurrence at `B = 0`
-only ever sees odd-indexed terms. -/
-private lemma preNormEDS'_zero_odd
-    (C D : K) (m : ℕ) :
-    preNormEDS' (0 : K) C D (2*m + 1)
-      = (-1 : K) ^ (m * (m - 1) / 2) * C ^ (m * (m + 1) / 2) := by
-  -- Prove simultaneously with the two even formulas below, by strong induction on the index.
-  -- Base cases: m = 0 gives W₁ = 1; m = 1 gives W₃ = C.
-  -- Step: use `preNormEDS'_odd`; after `simp` with the zero parameter, exactly one summand
-  -- survives depending on `Even m`.  The exponent and sign arithmetic is `omega`/`ring_nf`.
-  -- This is a pure EDS lemma; no curve facts enter.
-  sorry
+1. `FLT/Assumptions/Mazur.lean`
 
-/-- The `4*m+2` closed form at parameter `0`. -/
-private lemma preNormEDS'_zero_four_mul_add_two
-    (C D : K) (hCD : D ^ 2 + (4 : K) * C ^ 3 = 0) (m : ℕ) :
-    preNormEDS' (0 : K) C D (4*m + 2)
-      = (2*m + 1 : K) * C ^ (2*m*(m + 1)) := by
-  -- Strong induction on the index, using `preNormEDS'_even`.
-  -- The only algebraic simplification not handled by the inductive hypotheses is replacing
-  -- `D^2` by `-4*C^3`, obtained from `hCD`.
-  -- The scalar recurrence collapses to the identity for `2*m+1`.
-  sorry
+   ```lean
+   axiom Mazur_statement ... : torsion.ncard ≤ 16
+   ```
 
-/-- The `4*(m+1)` closed form at parameter `0`. -/
-private lemma preNormEDS'_zero_four_mul
-    (C D : K) (hCD : D ^ 2 + (4 : K) * C ^ 3 = 0) (m : ℕ) :
-    preNormEDS' (0 : K) C D (4*(m + 1))
-      = (m + 1 : K) * D * C ^ (2*m*(m + 2)) := by
-  -- Strong induction on the index, using `preNormEDS'_even`.
-  -- Base m = 0 is W₄ = D.  The recurrence again reduces by `hCD`.
-  sorry
-```
+   This is the only actual Mazur theorem statement present in the checked assumptions file.
 
-The three proofs above can also be bundled as one theorem returning all three formulas.  In practice that is less repetition, because the even proofs call the odd formula and each other.
+### B. Torsion infrastructure sorries
 
-A robust bundled statement is:
+2. `FLT/EllipticCurve/Torsion.lean`
 
-```lean
-private theorem preNormEDS'_zero_closed_forms
-    (C D : K) (hCD : D ^ 2 + (4 : K) * C ^ 3 = 0) :
-    (∀ m : ℕ,
-      preNormEDS' (0 : K) C D (2*m + 1)
-        = (-1 : K) ^ (m * (m - 1) / 2) * C ^ (m * (m + 1) / 2)) ∧
-    (∀ m : ℕ,
-      preNormEDS' (0 : K) C D (4*m + 2)
-        = (2*m + 1 : K) * C ^ (2*m*(m + 1))) ∧
-    (∀ m : ℕ,
-      preNormEDS' (0 : K) C D (4*(m + 1))
-        = (m + 1 : K) * D * C ^ (2*m*(m + 2))) := by
-  -- `Nat.strong_induction_on` over the requested index is the least painful proof.
-  -- Each recursive call lands at a strictly smaller index because the EDS recurrences use
-  -- roughly half-indices.
-  -- Use:
-  --   preNormEDS'_zero, preNormEDS'_one, preNormEDS'_two,
-  --   preNormEDS'_three, preNormEDS'_four,
-  --   preNormEDS'_odd, preNormEDS'_even.
-  -- The only non-linear field simplification is `D^2 = -4*C^3`, derived by
-  --   have hDsq : D^2 = -(4 : K) * C^3 := by linear_combination hCD
-  -- and then `ring_nf`.
-  sorry
-```
+   ```lean
+   theorem WeierstrassCurve.n_torsion_finite ... := sorry
+   ```
 
-This is the only genuinely new induction needed for the general theorem.
+   Needed to make torsion groups finite over base fields and to support continuity/finite-module instances.
 
-### 2. Evaluation of `preΨ'` at a `Ψ₂Sq`-root
+3. `FLT/EllipticCurve/Torsion.lean`
 
-The division-polynomial definition is `preNormEDS' (W.Ψ₂Sq^2) W.Ψ₃ W.preΨ₄ n`.  Evaluating at `x` and using `W.Ψ₂Sq.eval x = 0` gives the zero-parameter EDS.
+   ```lean
+   theorem WeierstrassCurve.n_torsion_card [IsSepClosed k] ... : Nat.card (E.nTorsion n) = n^2 := sorry
+   ```
 
-```lean
-private lemma eval_preΨ'_of_Ψ₂Sq_eval_zero
-    (W : WeierstrassCurve K) (x : K) {n : ℕ}
-    (hs : W.Ψ₂Sq.eval x = 0) :
-    (W.preΨ' n).eval x =
-      preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) n := by
-  -- This is either a direct use of the map/eval lemma for `preNormEDS'`, if available,
-  -- or a one-time induction on `n using normEDSRec`.
-  -- The intended proof with the existing API is:
-  --   simpa [WeierstrassCurve.preΨ', hs]
-  --     using congrArg (fun p : K[X] => p.eval x)
-  --       (show W.preΨ' n = preNormEDS' (W.Ψ₂Sq ^ 2) W.Ψ₃ W.preΨ₄ n from rfl)
-  -- If `simp` does not look through `preNormEDS'`, prove the generic map lemma:
-  --   map_preNormEDS' : map f (preNormEDS' B C D n)
-  --     = preNormEDS' (map f B) (map f C) (map f D) n.
-  sorry
-```
+   This is K1.  It is the main division-polynomial counting theorem.
 
-If the existing `map_preΨ'` theorem is in scope, the above becomes:
+4. `FLT/EllipticCurve/Torsion.lean`
 
-```lean
-private lemma eval_preΨ'_of_Ψ₂Sq_eval_zero'
-    (W : WeierstrassCurve K) (x : K) {n : ℕ}
-    (hs : W.Ψ₂Sq.eval x = 0) :
-    (W.preΨ' n).eval x =
-      preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) n := by
-  -- Replace `Polynomial.evalRingHom x` by the exact local name if needed.
-  simpa [WeierstrassCurve.preΨ', hs]
-    using map_preNormEDS' (Polynomial.evalRingHom x)
-      (W.Ψ₂Sq ^ 2) W.Ψ₃ W.preΨ₄ n
-```
+   ```lean
+   theorem group_theory_lemma ... : Nonempty ((Submodule.torsionBy ℤ A n) ≃+ (Fin r → ZMod n)) := sorry
+   ```
 
-### 3. The small two-torsion base facts
+   This is the finite-abelian-group/invariant-factor conversion used by `n_torsion_dimension`.
 
-The general induction needs the following wrappers around the small resultant certificates already in the project.
+5. `FLT/EllipticCurve/Torsion.lean`
 
-```lean
-variable (W : WeierstrassCurve K) [W.IsElliptic]
+   ```lean
+   noncomputable instance (n : ℕ) : Module.Finite (ZMod n) (E.nTorsion n) := sorry
+   ```
 
-/-- From the already-proved resultant certificate for `Ψ₂Sq` and `Ψ₃`. -/
-private lemma Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero
-    {x : K} (hs : W.Ψ₂Sq.eval x = 0) :
-    W.Ψ₃.eval x ≠ 0 := by
-  intro hc
-  -- Local certificate is reported as something like
-  --   Ψ₂Sq_eval_ne_of_Ψ₃_eval_zero : W.Ψ₃.eval x = 0 → W.Ψ₂Sq.eval x ≠ 0
-  exact (Ψ₂Sq_eval_ne_of_Ψ₃_eval_zero (W := W) (x := x) hc) hs
+6. `FLT/EllipticCurve/Torsion.lean`
 
-/-- From the already-proved resultant certificate for `Ψ₂Sq` and `preΨ₄`. -/
-private lemma preΨ₄_eval_ne_of_Ψ₂Sq_eval_zero
-    {x : K} (hs : W.Ψ₂Sq.eval x = 0) :
-    W.preΨ₄.eval x ≠ 0 := by
-  intro hd
-  -- Use the local certificate name for the `Ψ₂Sq`/`preΨ₄` resultant.
-  -- Expected shape:
-  --   Ψ₂Sq_eval_ne_of_preΨ₄_eval_zero : W.preΨ₄.eval x = 0 → W.Ψ₂Sq.eval x ≠ 0
-  exact (Ψ₂Sq_eval_ne_of_preΨ₄_eval_zero (W := W) (x := x) hd) hs
+   ```lean
+   WeierstrassCurve.galoisRepresentation.one_smul := sorry
+   WeierstrassCurve.galoisRepresentation.mul_smul := sorry
+   WeierstrassCurve.galoisRepresentation.smul_zero := sorry
+   WeierstrassCurve.galoisRepresentation.smul_add := sorry
+   ```
 
-/-- The algebraic relation between `Ψ₃` and `preΨ₄` on the `Ψ₂Sq = 0` stratum. -/
-private lemma preΨ₄_eval_sq_add_four_Ψ₃_eval_cube_of_Ψ₂Sq_eval_zero
-    {x : K} (hs : W.Ψ₂Sq.eval x = 0) :
-    (W.preΨ₄.eval x) ^ 2 + (4 : K) * (W.Ψ₃.eval x) ^ 3 = 0 := by
-  -- Polynomial identity:
-  --   preΨ₄^2 + 4*Ψ₃^3 ∈ (Ψ₂Sq, b₂*b₆ - b₄^2 - 4*b₈).
-  -- This is a small `ring_nf`/`linear_combination` certificate, independent of `n`.
-  -- Suggested implementation:
-  --   have hb : W.b₂ * W.b₆ - W.b₄^2 - (4 : K) * W.b₈ = 0 := by
-  --     have h := b_relation (W := W); rw [← h]; ring
-  --   linear_combination (norm := ring_nf [WeierstrassCurve.Ψ₂Sq,
-  --     WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄])
-  --     <explicit cofactor in x and the bᵢ> * hs + <explicit cofactor> * hb
-  -- In many local setups `ring_nf` after substituting `b_relation` and `hs` is enough;
-  -- if not, extract the two small cofactors once from SymPy exactly like the Keystone certs.
-  sorry
-```
+   These should be small API proofs from `Affine.Point.map_id`, `Affine.Point.map_map`, and map preserving the group law.
 
-The relation is needed only when `n` is even.  If `n` is odd and the field has characteristic `2`, the proof still works because the odd closed form involves only powers of `C = Ψ₃.eval x`.
+7. `FLT/EllipticCurve/Torsion.lean`
 
----
+   ```lean
+   def WeierstrassCurve.galoisRep ... := sorry
+   ```
 
-## Final theorem from the lemma chain
+   This bundles the finite torsion module plus the Galois action into the project’s `GaloisRep` structure.  The file comment says the missing part should be continuity, following from finiteness.
 
-This is the final theorem in the requested form.  It uses no torsion-cardinality lemma, no root-set cardinality, no `preΨ'_separable`, and no geometric `nsmul` facts.
+### C. Downstream Mazur/Frey bridge sorry
 
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.Tactic
+8. `FLT/FreyCurve/Contradiction.lean`
 
-open Polynomial
+   ```lean
+   theorem Mazur_Frey (P : FreyPackage) :
+       haveI : Fact P.p.Prime := ⟨P.pp⟩
+       GaloisRep.IsIrreducible (P.freyCurve.galoisRep P.p P.hppos) := sorry
+   ```
 
-namespace WeierstrassCurve
+   This is currently the actual bridge from “Mazur” to the Frey-curve Galois representation in the FLT contradiction file.
 
-noncomputable section
+### D. Missing directory/module
 
-variable {K : Type*} [Field K]
+9. `FLT/Assumptions/MazurProof/`
 
-private lemma natCast_ne_zero_of_cast_mul_left_ne_zero
-    {a b : ℕ} (h : ((a * b : ℕ) : K) ≠ 0) : (b : K) ≠ 0 := by
-  intro hb
-  apply h
-  norm_num [Nat.cast_mul, hb]
+   Not present in the checked branch.  Any checklist obligations in that directory are not currently part of the Lean code surface of this branch.
 
-private lemma natCast_ne_zero_of_cast_mul_right_ne_zero
-    {a b : ℕ} (h : ((a * b : ℕ) : K) ≠ 0) : (a : K) ≠ 0 := by
-  intro ha
-  apply h
-  norm_num [Nat.cast_mul, ha]
+## 4. Dependency DAG
 
-/-- A root of the reduced division polynomial cannot be a root of the two-division polynomial. -/
-theorem preΨ'_root_Ψ₂Sq_ne
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} (hn : (n : K) ≠ 0) {x : K}
-    (hx : (W.preΨ' n).IsRoot x) :
-    W.Ψ₂Sq.eval x ≠ 0 := by
-  classical
-  intro hs
-  have hC : W.Ψ₃.eval x ≠ 0 :=
-    Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero (W := W) hs
-  have hEval :
-      (W.preΨ' n).eval x =
-        preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) n :=
-    eval_preΨ'_of_Ψ₂Sq_eval_zero (W := W) (x := x) (n := n) hs
-  have hx0 :
-      preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) n = 0 := by
-    simpa [hEval] using hx
-
-  rcases n.even_or_odd' with ⟨m, hm | hm⟩
-  · -- n = 2*m.
-    subst n
-    rcases m.even_or_odd' with ⟨r, hr | hr⟩
-    · -- n = 4*r.
-      subst m
-      cases r with
-      | zero =>
-          -- n = 0, contradicting `(n : K) ≠ 0`.
-          simp at hn
-      | succ r =>
-          -- n = 4*(r+1).
-          have hD : W.preΨ₄.eval x ≠ 0 :=
-            preΨ₄_eval_ne_of_Ψ₂Sq_eval_zero (W := W) hs
-          have hCD :
-              (W.preΨ₄.eval x) ^ 2 + (4 : K) * (W.Ψ₃.eval x) ^ 3 = 0 :=
-            preΨ₄_eval_sq_add_four_Ψ₃_eval_cube_of_Ψ₂Sq_eval_zero (W := W) hs
-          have hscalar : ((r + 1 : ℕ) : K) ≠ 0 := by
-            intro hsc
-            apply hn
-            -- Current goal is `((4 * (r + 1) : ℕ) : K) = 0`.
-            norm_num [Nat.cast_mul, hsc]
-          have hclosed := preNormEDS'_zero_four_mul
-            (C := W.Ψ₃.eval x) (D := W.preΨ₄.eval x) hCD r
-          have hne :
-              preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) (4 * (r + 1)) ≠ 0 := by
-            rw [hclosed]
-            exact mul_ne_zero (mul_ne_zero hscalar hD)
-              (pow_ne_zero _ hC)
-          exact hne hx0
-    · -- n = 4*r + 2.
-      subst m
-      have hCD :
-          (W.preΨ₄.eval x) ^ 2 + (4 : K) * (W.Ψ₃.eval x) ^ 3 = 0 :=
-        preΨ₄_eval_sq_add_four_Ψ₃_eval_cube_of_Ψ₂Sq_eval_zero (W := W) hs
-      have hscalar : ((2 * r + 1 : ℕ) : K) ≠ 0 := by
-        intro hsc
-        apply hn
-        -- Current goal is `((2 * (2*r + 1) : ℕ) : K) = 0`.
-        norm_num [Nat.cast_mul, Nat.cast_add, hsc]
-      have hclosed := preNormEDS'_zero_four_mul_add_two
-        (C := W.Ψ₃.eval x) (D := W.preΨ₄.eval x) hCD r
-      have hne :
-          preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) (4*r + 2) ≠ 0 := by
-        rw [hclosed]
-        exact mul_ne_zero hscalar (pow_ne_zero _ hC)
-      exact hne hx0
-  · -- n = 2*m + 1.
-    subst n
-    have hclosed := preNormEDS'_zero_odd
-      (C := W.Ψ₃.eval x) (D := W.preΨ₄.eval x) m
-    have hne :
-        preNormEDS' (0 : K) (W.Ψ₃.eval x) (W.preΨ₄.eval x) (2*m + 1) ≠ 0 := by
-      rw [hclosed]
-      exact mul_ne_zero (pow_ne_zero _ (by norm_num : (-1 : K) ≠ 0))
-        (pow_ne_zero _ hC)
-    exact hne hx0
-
-end
-
-end WeierstrassCurve
-```
-
-The only nontrivial additions are the generic zero-parameter EDS closed forms and the tiny `preΨ₄^2 + 4*Ψ₃^3` two-torsion identity.  The final theorem itself is just a mod-`4` case split plus nonzero-factor bookkeeping.
-
----
-
-## Equivalent coprimality statement
-
-The root theorem is the evaluation form of the stronger coprimality lemma:
-
-```lean
-theorem preΨ'_isCoprime_Ψ₂Sq_of_natCast_ne_zero
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} (hn : (n : K) ≠ 0) :
-    IsCoprime (W.preΨ' n) W.Ψ₂Sq := by
-  -- To prove this from the root theorem, apply the same root theorem after base-changing
-  -- to `AlgebraicClosure K`, then use the standard polynomial fact that two polynomials
-  -- over a field are coprime iff they have no common root over an algebraic closure.
-  -- The direct theorem requested above does not need this stronger form.
-  sorry
-```
-
-The quotient formulas imply the resultant shape as well.  For example, modulo `Ψ₂Sq`, every `preΨ'_n` is one of
+Current actual dependency graph:
 
 ```text
-unit * Ψ₃^e,
-unit * preΨ₄ * Ψ₃^e.
+FLT.Assumptions.Mazur
+└─ axiom Mazur_statement
+   └─ currently not wired into `FreyCurve/Contradiction.lean` in the files read
+
+FLT.EllipticCurve.Torsion
+├─ n_torsion_finite                       [sorry]
+├─ n_torsion_card                         [sorry, K1]
+│  ├─ SEAM1 preΨ'_separable               [not present in current Torsion.lean]
+│  ├─ SEAM2 nsmul_eq_zero_iff_ΨSq_eval     [not present in current Torsion.lean]
+│  ├─ root realization / non-2 branch      [not present in current Torsion.lean]
+│  └─ root counting over IsSepClosed        [not present in current Torsion.lean]
+├─ group_theory_lemma                     [sorry]
+│  └─ finite abelian group/invariant-factor argument
+├─ n_torsion_dimension
+│  ├─ depends on n_torsion_card            [sorry-backed]
+│  └─ depends on group_theory_lemma         [sorry-backed]
+├─ Module.Finite (ZMod n) (E.nTorsion n)  [sorry]
+├─ galoisRepresentation action laws        [4 small sorries]
+└─ galoisRep                              [sorry]
+   ├─ depends on Module.Finite / finiteness / topology
+   └─ used by FreyCurve.Contradiction.Mazur_Frey
+
+FLT.FreyCurve.Contradiction
+└─ Mazur_Frey                             [sorry]
+   ├─ depends on P.freyCurve.galoisRep
+   ├─ should use a Mazur torsion-bound theorem or stronger classification theorem
+   └─ feeds FreyPackage.false and Wiles_Taylor_Wiles
 ```
 
-Since the small certificates already prove `Ψ₂Sq` is coprime to both `Ψ₃` and `preΨ₄` on an elliptic curve, this gives the general resultant/coprimality statement without computing a new Sylvester matrix for each `n`.
+Checklist-intended dependency graph, not currently instantiated in the checked branch:
+
+```text
+A6 Mordell-Weil finite generation
+└─ rational torsion finite
+   └─ A1 rational torsion two invariant factors
+      ├─ A2 Weil pairing primitive root       (uses K1/K2/K3 + SEAM3)
+      ├─ A3 no rational point order ≥ 17      (Mazur modular-curve input)
+      ├─ A4 exclude Z/2 × Z/14                (Mazur modular-curve input)
+      └─ A5 exclude Z/2 × Z/16                (Mazur modular-curve input)
+         └─ Mazur bound |T| ≤ 16
+            └─ Mazur_Frey / irreducibility bridge
+```
+
+## 5. Critical path to a fully axiom-free `|T| ≤ 16`
+
+There are two possible interpretations of “fully axiom-free”.
+
+### Route 1: Prove the old monolithic `Mazur_statement`
+
+This is the current code-surface route because `FLT/Assumptions/Mazur.lean` exposes exactly that axiom.
+
+Critical path:
+
+```text
+Prove `Mazur_statement` directly
+  → rewrite `FreyCurve/Contradiction.Mazur_Frey` to use it
+  → discharge `Mazur_Frey`
+  → separately clean `Torsion.lean` sorries needed for `galoisRep`
+```
+
+This route is conceptually simple at the API level but mathematically enormous: it hides all of Mazur’s theorem behind one theorem.
+
+### Route 2: Reintroduce and complete the six-axiom checklist stack
+
+This is the roadmap route described by the prompt, but it is not currently present on the checked branch.
+
+Critical path:
+
+```text
+1. Add/restablish `FLT/Assumptions/MazurProof/` modules.
+2. Prove or explicitly stage A1--A6 as theorem targets.
+3. Finish K1/K2/K3 in `Torsion.lean`:
+   K1: n_torsion_card = n²
+   K2: n_torsion_dimension / rank-2 geometric torsion
+   K3: finite module + Galois representation API
+4. Prove A2 Weil-pairing primitive-root theorem from K1/K2/K3 + Miller/Weil pairing machinery.
+5. Prove or assume-then-replace A3/A4/A5 modular-curve exclusions.
+6. Combine A1--A6 into `Mazur_statement` or directly into the Frey irreducibility theorem.
+7. Replace `Mazur_Frey := sorry` with the actual proof.
+```
+
+The current shortest technical critical path inside the existing files is:
+
+```text
+n_torsion_card
+  + group_theory_lemma
+  → n_torsion_dimension
+  → Module.Finite + galoisRepresentation + galoisRep
+  → usable p-torsion Galois representation
+  → Mazur_Frey
+```
+
+But this only gives the Galois-representation infrastructure.  It does **not** prove the Mazur bound itself.  The bound/classification input is still the old `Mazur_statement` axiom unless the missing `MazurProof/` stack is added.
+
+## 6. Relative difficulty / size estimates
+
+### Small / API cleanup
+
+| Item | Estimate | Notes |
+|---|---:|---|
+| `galoisRepresentation.one_smul` | Small | Should follow from `Affine.Point.map_id`. |
+| `galoisRepresentation.mul_smul` | Small | Should follow from `Affine.Point.map_map`. |
+| `galoisRepresentation.smul_zero` | Small | Map is an additive monoid hom. |
+| `galoisRepresentation.smul_add` | Small | Map is an additive monoid hom. |
+| `Module.Finite (ZMod n) (E.nTorsion n)` once finite/cardinality is available | Small–medium | Likely straightforward from finiteness/equiv. |
+| `galoisRep` continuity once finite torsion/action laws are available | Small–medium | File comment says continuity follows from finiteness. |
+
+### Medium / group theory
+
+| Item | Estimate | Notes |
+|---|---:|---|
+| `group_theory_lemma` | Medium–large | Needs finite abelian group decomposition or a specialized torsion-card-to-free-`ZMod n` argument. Could be short if Mathlib has exactly the right finite-module structure theorem; otherwise substantial. |
+| `n_torsion_finite` | Medium | Could follow from embedding into algebraic closure plus finite `n_torsion_card`, or from polynomial root bounds. Needs careful field/base-change API. |
+
+### Large / division-polynomial keystone
+
+| Item | Estimate | Notes |
+|---|---:|---|
+| `n_torsion_card` K1 | Large | Needs SEAM1 separability, SEAM2 nsmul/x-coordinate criterion, root realization, root counting, and 2-torsion handling. This is the main technical Lean burden currently visible in `Torsion.lean`. |
+| SEAM1 `preΨ'_separable` | Large | From the previous SEAM discussion: local dual-number/tangent or equivalent resultant/Wronskian infrastructure. Not currently wired into `Torsion.lean`. |
+| SEAM2 `nsmul_eq_zero_iff_ΨSq_eval` | Large | Needs coordinate-ring congruences and point/multiplication formulas. |
+| SEAM3 Miller/Weil pairing | Large | Needed for A2; not part of current `Torsion.lean`. |
+
+### Very large / Mazur theorem proper
+
+| Item | Estimate | Notes |
+|---|---:|---|
+| A3 no rational point of order ≥ 17 | Very large | Core modular-curve/Mazur input. |
+| A4 exclude `Z/2 × Z/14` | Very large | Core modular-curve/Mazur input. |
+| A5 exclude `Z/2 × Z/16` | Very large | Core modular-curve/Mazur input. |
+| A6 Mordell-Weil finite generation | Very large | Major arithmetic theorem unless imported from a separate library. |
+| Full proof of `Mazur_statement` | Very large | Encompasses classification or enough of it for the bound. |
+| `Mazur_Frey` from the bound/classification | Medium once inputs exist | Needs Frey-specific torsion facts plus the Galois representation infrastructure. |
+
+## 7. Honest distance from done
+
+The current checked branch is **not close to an axiom-free Mazur bound**.  It is not merely one remaining `sorry`.  The actual state is:
+
+```text
+* Old monolithic Mazur axiom still present.
+* Six-axiom MazurProof decomposition absent from the checked branch.
+* K1/K2/K3 torsion infrastructure still sorry-backed.
+* Downstream `Mazur_Frey` bridge still a `sorry`.
+```
+
+The most realistic next steps are:
+
+1. Decide whether the active code path is the old monolithic `Mazur_statement` or the six-axiom `MazurProof/` checklist architecture.
+2. If using the checklist architecture, add or restore `FLT/Assumptions/MazurProof/` so the declarations exist and are imported.
+3. Independently finish the visible `Torsion.lean` infrastructure because it is needed for p-torsion Galois representations regardless of how the Mazur bound is packaged.
+4. Treat `n_torsion_card` as the current keystone blocker in code, with SEAM1/SEAM2/root-realization as its internal critical path.
+5. Treat A3/A4/A5/A6 as the mathematically largest remaining assumptions once the torsion infrastructure is finished.
+
+## 8. Compact status table
+
+| Layer | Current status on `scratch` | Blocking declarations |
+|---|---|---|
+| Old Mazur bound | Still axiom | `Mazur_statement` |
+| Six-axiom MazurProof stack | Not present in checked branch | Directory/path absent |
+| K1 `#E[n]=n²` | Sorry | `n_torsion_card` |
+| K2 rank-2 geometric torsion | Theorem body exists but sorry-backed | `n_torsion_card`, `group_theory_lemma` |
+| K3 finite/Galois API | Sorry-backed | `Module.Finite`, action laws, `galoisRep` |
+| Frey/Mazur irreducibility bridge | Sorry | `Mazur_Frey` |
+| Final FLT contradiction | Formal wrapper exists but depends on `Mazur_Frey` | `FreyPackage.false`, `Wiles_Taylor_Wiles` rely on `Mazur_Frey` |
