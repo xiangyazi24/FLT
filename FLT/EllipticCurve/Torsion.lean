@@ -11,6 +11,7 @@ public import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
 public import Mathlib.GroupTheory.FiniteAbelian.Basic
 public import Mathlib.Topology.Instances.ZMod
 public import FLT.Deformations.RepresentationTheory.GaloisRep
+public import scratch.KeystoneEDS
 
 /-!
 
@@ -78,7 +79,14 @@ theorem preΨ'_separable_of_natCast_ne_zero {n : ℕ} (hn : (n : k) ≠ 0) :
 kernel membership. This is the `xRep_zsmul_some_eq_divisionPolynomial` seam after extracting the
 zero-denominator criterion. -/
 theorem nsmul_eq_zero_iff_ΨSq_eval {n : ℕ} {x y : k} (h : (W⁄k).Nonsingular x y) :
-    n • (Point.some x y h : (W⁄k).Point) = 0 ↔ (W.ΨSq (n : ℤ)).eval x = 0 := sorry
+    n • (Point.some x y h : (W⁄k).Point) = 0 ↔ (W.ΨSq (n : ℤ)).eval x = 0 := by
+  have h4 : (4 : k) ≠ 0 := sorry
+  have hψ_ne : ∀ m : ℤ, m ≠ 0 → W.ψ m ≠ 0 := sorry
+  have hc3 : W.Ψ₃ ≠ 0 := sorry
+  have key := KeystoneLadder.nsmul_eq_zero_iff_ΨSq_eval (W := W) h4 hψ_ne hc3 (n := n) h
+  convert key using 3
+  congr
+  exact Subsingleton.elim _ _
 
 lemma two_nsmul_eq_zero_iff_Ψ₂Sq_eval_eq_zero {x y : k} (h : (W⁄k).Nonsingular x y) :
     2 • (Point.some x y h : (W⁄k).Point) = 0 ↔ W.Ψ₂Sq.eval x = 0 := by
