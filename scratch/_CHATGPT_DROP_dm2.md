@@ -1,105 +1,46 @@
-# Q104 (dm2): SEAM1 rootwise core — concrete Lean-facing bridge
+# Q119 (dm2): SEAM1 rootwise crux — what is still genuinely missing
 
-Target remaining theorem:
+Target theorem:
 
 ```lean
-theorem preΨ'_deriv_ne_zero_at_root {K : Type*} [Field K] [IsAlgClosed K]
-    (W : WeierstrassCurve K) [W.IsElliptic] {n : ℕ} (hn : (n : K) ≠ 0) {x : K}
-    (hx : (W.preΨ' n).IsRoot x) : ¬ (derivative (W.preΨ' n)).IsRoot x
+theorem dual_root_implies_tangent_zero [IsAlgClosed K] (W : WeierstrassCurve K) [W.IsElliptic]
+    {n : ℕ} (hn : (n : K) ≠ 0) {x y : K}
+    (hcurve : W.toAffine.Equation x y) (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
+    (hrootε : aeval (MultipleRootBridge.xε x) (W.preΨ' n) = 0) :
+    TangentO.nsmul₁ W n 1 = 0
 ```
 
-## Bottom line
+## Executive answer
 
-With the current public Mathlib API, the theorem **does not follow from the already-proved dual-number Taylor lemma alone**.  The missing piece is not `AffineJet.equation_dual_iff`; that layer is a local `ring_nf` computation.  The missing piece is the exact bridge from
+I cannot honestly give a closed proof of this theorem from only the currently listed Mathlib/repo lemmas. The missing item is **not** the dual-number Taylor engine, the affine jet equation, the `ψ₂` unit fact, or `TangentO.nsmul₁ = n`. Those are local and already handled.
+
+The genuinely missing item is a **raw coordinate multiplication-by-`n` theorem over the non-field ring `DualNumber K`**. More precisely, the proof needs a theorem saying that a dual-number affine point satisfying the curve equation, with `ψ₂` a unit, and satisfying the reduced equation `preΨ'_n(X)=0`, has `[n]` equal to the zero tangent in the projective `O` chart. This is the field-vs-ring bridge. It cannot be replaced by `Jacobian.Point (DualNumber K)` because that type’s group law is field-only.
+
+The concrete proof strategy below gives the exact missing theorem, the raw coordinate objects it should use, and the final assembly. Do **not** add it as an axiom in production; prove it from the raw division-polynomial coordinate formula for `[n]` over a commutative ring. Once that theorem exists, `dual_root_implies_tangent_zero` is a short proof.
+
+## Why `hrootε` alone is not a group-law statement
+
+`hrootε` has type:
+
+```lean
+hrootε : aeval (MultipleRootBridge.xε x) (W.preΨ' n) = 0
+```
+
+It says that the **reduced univariate division polynomial** vanishes at the dual x-coordinate `x + ε`.
+
+To conclude that the infinitesimal point is killed by `[n]`, one must use the division-polynomial coordinate formula for multiplication-by-`n`. Classically, for a non-2 point, the vanishing of the full `ψ_n` forces the projective `[n]` coordinates to land at `O`. In projective form this is represented schematically by coordinates of the shape
 
 ```text
-preΨ'_n(x + ε) = 0 over K[ε]
+[n](X,Y) = [ φ_n(X,Y) ψ_n(X,Y) : ω_n(X,Y) : ψ_n(X,Y)^3 ].
 ```
 
-to
+If `ψ_n = 0` and the middle coordinate is a unit, this is `[0:1:0]`. For the first-order tangent, one additionally needs the `X/Y` tangent coordinate at `O` to be zero.
 
-```text
-the first-order output tangent of [n] at O is zero.
-```
+Mathlib’s current division-polynomial file has `ψ`, `Ψ`, `φ`, `Φ`, and coordinate-ring congruences, but not a reusable raw `ω_n` / projective `[n]` coordinate theorem over arbitrary commutative rings. That is exactly the missing bridge.
 
-Because `DualNumber K` is not a field, this bridge cannot be expressed using `WeierstrassCurve.Jacobian.Point (DualNumber K)`.  It must be a raw coordinate theorem using the division-polynomial multiplication formulas.  I therefore recommend adding exactly the two assumed bridge lemmas below.  Once those two are available, the final rootwise theorem is a short compiling proof.
+## The exact theorem to add, not as an axiom
 
-The two required in-progress repo lemmas are:
-
-```lean
-preΨ'_root_exists_non_two_n_torsion_point
-preΨ'_dual_root_implies_nsmul_tangent_zero
-```
-
-The first is the root dictionary over algebraically closed fields.  The second is the field-vs-ring-safe replacement for the invalid phrase “`Pε ∈ E[n](K[ε])`”.
-
-## Existing Mathlib names used
-
-The following are real names in the current Mathlib files.
-
-```lean
--- Affine equation / tangent data, over CommRing.
-WeierstrassCurve.Affine.Equation
-WeierstrassCurve.Affine.Nonsingular
-WeierstrassCurve.Affine.polynomial
-WeierstrassCurve.Affine.polynomialX
-WeierstrassCurve.Affine.polynomialY
-WeierstrassCurve.Affine.evalEval_polynomial
-WeierstrassCurve.Affine.evalEval_polynomialX
-WeierstrassCurve.Affine.evalEval_polynomialY
-WeierstrassCurve.Affine.equation_iff
-WeierstrassCurve.Affine.equation_iff'
-WeierstrassCurve.Affine.baseChange
-WeierstrassCurve.Affine.baseChange_equation
-WeierstrassCurve.Affine.baseChange_polynomial
-WeierstrassCurve.Affine.baseChange_polynomialX
-WeierstrassCurve.Affine.baseChange_polynomialY
-
--- Ring-level affine addition data.  These do not require the target to be a field.
-WeierstrassCurve.Affine.negY
-WeierstrassCurve.Affine.linePolynomial
-WeierstrassCurve.Affine.addPolynomial
-WeierstrassCurve.Affine.addPolynomial_eq
-WeierstrassCurve.Affine.addX
-WeierstrassCurve.Affine.negAddY
-WeierstrassCurve.Affine.addY
-WeierstrassCurve.Affine.equation_add_iff
-WeierstrassCurve.Affine.map_addX
-WeierstrassCurve.Affine.map_addY
-WeierstrassCurve.Affine.map_negY
-
--- Field-only affine names.  Do not use these over DualNumber K.
-WeierstrassCurve.Affine.slope
-WeierstrassCurve.Affine.addPolynomial_slope
-WeierstrassCurve.Affine.equation_add
-WeierstrassCurve.Affine.nonsingular_add
-
--- Projective/Jacobian raw equations and coordinate functions.
-WeierstrassCurve.Projective.Equation
-WeierstrassCurve.Projective.equation_iff
-WeierstrassCurve.Projective.equation_zero
-WeierstrassCurve.Jacobian.Equation
-WeierstrassCurve.Jacobian.equation_iff
-WeierstrassCurve.Jacobian.dblXYZ
-WeierstrassCurve.Jacobian.addXYZ
-WeierstrassCurve.Jacobian.baseChange_dblXYZ
-WeierstrassCurve.Jacobian.baseChange_addXYZ
-
--- Division-polynomial API.
-WeierstrassCurve.preΨ'
-WeierstrassCurve.preΨ'_even
-WeierstrassCurve.preΨ'_odd
-WeierstrassCurve.preΨ'_three
-WeierstrassCurve.preΨ'_four
-WeierstrassCurve.map_preΨ'
-WeierstrassCurve.Affine.CoordinateRing.mk_ψ
-WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
-WeierstrassCurve.Affine.CoordinateRing.mk_φ
-```
-
-## Lean block
-
-This block is designed to be inserted in the SEAM1 file.  It gives the local dual-number objects, the precise lemma interfaces, and the final rootwise proof.  The only placeholders are the two bridge lemmas explicitly marked as in-progress repo lemmas.  Do **not** replace them by `sorry` in the final file; prove them separately from the raw coordinate formulas.
+The smallest useful theorem is the following. It is intentionally formulated over the raw dual-number affine lift and concludes directly in the `TangentO` chart, so it avoids building a full point group over `DualNumber K`.
 
 ```lean
 import Mathlib.Algebra.DualNumber
@@ -121,370 +62,309 @@ namespace SEAM1
 
 variable {K : Type*} [Field K]
 
-abbrev D (K : Type*) [Field K] := DualNumber K
+/-- The exact raw-coordinate bridge that must be proved from division-polynomial multiplication
+formulas over `DualNumber K`.
 
-namespace Dual
-
-/-- Scalar part of a dual number. -/
-abbrev c (x : K) : D K := TrivSqZeroExt.inl x
-
-/-- Pure epsilon part of a dual number. -/
-abbrev e (v : K) : D K := TrivSqZeroExt.inr v
-
-@[simp] lemma fst_c (x : K) : TrivSqZeroExt.fst (c x : D K) = x := rfl
-@[simp] lemma snd_c (x : K) : TrivSqZeroExt.snd (c x : D K) = 0 := rfl
-@[simp] lemma fst_e (v : K) : TrivSqZeroExt.fst (e v : D K) = 0 := rfl
-@[simp] lemma snd_e (v : K) : TrivSqZeroExt.snd (e v : D K) = v := rfl
-
-@[simp] lemma fst_c_add_e (x v : K) :
-    TrivSqZeroExt.fst (c x + e v : D K) = x := by
-  simp [c, e]
-
-@[simp] lemma snd_c_add_e (x v : K) :
-    TrivSqZeroExt.snd (c x + e v : D K) = v := by
-  simp [c, e]
-
-end Dual
-
-namespace AffineJet
-
-open Dual
-
-variable (W : WeierstrassCurve K)
-
-/-- First-order `x` coordinate `x + εu`. -/
-def X (x u : K) : D K := c x + e u
-
-/-- First-order `y` coordinate `y + εv`. -/
-def Y (y v : K) : D K := c y + e v
-
-/-- The slope `v/u` forced by the curve equation when `W_Y(x,y) ≠ 0`. -/
-def ySlope (x y : K) : K :=
-  - W.toAffine.polynomialX.evalEval x y / W.toAffine.polynomialY.evalEval x y
-
-/-- First-order expansion of the Weierstrass equation in affine coordinates.
-
-This is a local computation over `DualNumber K`, not a point-group statement.  It is the
-layer-C lemma that should close by `rw [Affine.Equation, Affine.evalEval_polynomial,
-Affine.evalEval_polynomialX, Affine.evalEval_polynomialY]` followed by `ring_nf` after
-unfolding `X`, `Y`, `Dual.c`, and `Dual.e`.
+Do not state this as an axiom in the production file. It is the missing lemma whose proof should
+be built from:
+* the affine dual lift `Pε = (x+ε, y+ε*slope)`;
+* `AffineJet.equation_dual_lift_of_polynomialY_ne_zero`;
+* the fact that the lifted `ψ₂ = W_Y(Pε)` is a unit because its scalar part is `hY`;
+* `W.map_preΨ'` and the coordinate-ring congruences `mk_ψ`, `mk_Ψ_sq`, `mk_φ`;
+* the raw projective/Jacobian multiplication-by-`n` coordinate formula over a commutative ring.
 -/
-lemma equation_dual_iff (x y u v : K) :
-    (W.toAffine.baseChange (D K)).Equation (X x u) (Y y v) ↔
-      W.toAffine.Equation x y ∧
-        W.toAffine.polynomialX.evalEval x y * u +
-          W.toAffine.polynomialY.evalEval x y * v = 0 := by
-  -- This proof is intentionally local.  Avoid all packaged point/group API.
-  rw [WeierstrassCurve.Affine.Equation]
-  rw [WeierstrassCurve.Affine.Equation]
-  rw [WeierstrassCurve.Affine.evalEval_polynomial]
-  rw [WeierstrassCurve.Affine.evalEval_polynomial]
-  rw [WeierstrassCurve.Affine.evalEval_polynomialX]
-  rw [WeierstrassCurve.Affine.evalEval_polynomialY]
-  simp [X, Y, Dual.c, Dual.e]
-  constructor
-  · intro h
-    constructor
-    · -- scalar part
-      exact TrivSqZeroExt.ext_iff.mp h |>.1
-    · -- epsilon part
-      simpa [sub_eq_add_neg, add_assoc, add_left_comm, add_comm, mul_add, add_mul] using
-        TrivSqZeroExt.ext_iff.mp h |>.2
-  · rintro ⟨h0, h1⟩
-    apply TrivSqZeroExt.ext
-    · simpa using h0
-    · simpa [sub_eq_add_neg, add_assoc, add_left_comm, add_comm, mul_add, add_mul] using h1
-
-/-- Existence of the unique first-order `y` lift when `W_Y(x,y) ≠ 0`. -/
-lemma equation_dual_lift_of_polynomialY_ne_zero
-    {x y u : K}
-    (hxy : W.toAffine.Equation x y)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0) :
-    (W.toAffine.baseChange (D K)).Equation
-      (X x u) (Y y (ySlope W x y * u)) := by
-  rw [equation_dual_iff]
-  refine ⟨hxy, ?_⟩
-  field_simp [ySlope, hY]
-  ring
-
-/-- Uniqueness of the first-order `y` lift when `W_Y(x,y) ≠ 0`. -/
-lemma equation_dual_lift_unique
-    {x y u v : K}
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    (h : (W.toAffine.baseChange (D K)).Equation (X x u) (Y y v)) :
-    v = ySlope W x y * u := by
-  rw [equation_dual_iff] at h
-  rcases h with ⟨_, hlin⟩
-  field_simp [ySlope, hY] at hlin ⊢
-  linear_combination hlin
-
-end AffineJet
-
-namespace TangentO
-
-open Dual
-
-variable (W : WeierstrassCurve K)
-
-/-- First-order projective jet at `O = [0:1:0]`, with tangent coordinate `u`.
-
-This is deliberately projective.  It avoids the finite affine chart, which does not contain `O`.
--/
-def OJet (u : K) : Fin 3 → D K :=
-  ![e u, c 1, c 0]
-
-lemma OJet_equation (u : K) :
-    (W.toProjective.baseChange (D K)).Equation (OJet W u) := by
-  rw [WeierstrassCurve.Projective.equation_iff]
-  simp [OJet, Dual.c, Dual.e]
-
-/-- First-order local addition at `O` on the tangent coordinate. -/
-def add₁ (u v : K) : K := u + v
-
-@[simp] lemma add₁_eq (u v : K) : add₁ W u v = u + v := rfl
-
-/-- First-order `n`-fold sum in the tangent coordinate at `O`. -/
-def nsmul₁ (W : WeierstrassCurve K) : ℕ → K → K
-  | 0, _ => 0
-  | n + 1, u => add₁ W (nsmul₁ W n u) u
-
-@[simp] lemma nsmul₁_zero (u : K) : nsmul₁ W 0 u = 0 := rfl
-
-@[simp] lemma nsmul₁_succ (n : ℕ) (u : K) :
-    nsmul₁ W (n + 1) u = nsmul₁ W n u + u := rfl
-
-/-- The first-order tangent of `[n]` at `O` is scalar multiplication by `(n : K)`. -/
-lemma nsmul₁_eq_natCast_mul (n : ℕ) (u : K) :
-    nsmul₁ W n u = (n : K) * u := by
-  induction n with
-  | zero => simp [nsmul₁]
-  | succ n ih =>
-      simp [nsmul₁, ih, Nat.cast_succ, add_mul]
-
-end TangentO
-
-namespace MultipleRootBridge
-
-open Dual
-
-variable (W : WeierstrassCurve K)
-
-/-- The dual-number `x + ε`. -/
-def xε (x : K) : D K := c x + e 1
-
-/-- The unique first-order curve lift over `x + ε`, assuming `W_Y(x,y) ≠ 0`. -/
-def yε (x y : K) : D K :=
-  c y + e (AffineJet.ySlope W x y)
-
-lemma affine_dual_point_equation
-    {x y : K}
-    (hcurve : W.toAffine.Equation x y)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0) :
-    (W.toAffine.baseChange (D K)).Equation (xε W x) (yε W x y) := by
-  simpa [xε, yε, AffineJet.X, AffineJet.Y] using
-    AffineJet.equation_dual_lift_of_polynomialY_ne_zero
-      (W := W) (x := x) (y := y) (u := 1) hcurve hY
-
-/-- Nonzero tangent coordinate of the constructed first-order lift. -/
-lemma xε_snd (x : K) : TrivSqZeroExt.snd (xε W x) = 1 := by
-  simp [xε, Dual.c, Dual.e]
-
-end MultipleRootBridge
-
-/-!
-## Exact in-progress repo lemmas needed
-
-These are the only non-local pieces.  They should be proved from the existing root-realization,
-coordinate-ring congruences, and raw first-order division-polynomial formulas.
--/
-
-namespace Needed
-
-/-- Root dictionary over an algebraically closed field, specialized to the non-2 branch.
-
-The returned `y` is an affine point over `K`; `hY` is exactly `ψ₂(P) ≠ 0`, i.e.
-`2*y + a₁*x + a₃ ≠ 0`.  The final field `torsion` should be whatever packaged nsmul/torsion
-statement the repo uses over fields; it is not used by the local analytic proof below except as
-input to the next bridge lemma.
--/
-structure RootData (W : WeierstrassCurve K) (n : ℕ) (x : K) : Prop where
-  y : K
-  curve : W.toAffine.Equation x y
-  nonTwo : W.toAffine.polynomialY.evalEval x y ≠ 0
-  torsion : True
-
-/-- Required root-realization lemma.
-
-This is the layer-3 dictionary: a root of the reduced division polynomial is the x-coordinate of
-a non-2-torsion n-torsion point.
--/
-axiom preΨ'_root_exists_non_two_n_torsion_point
-    [IsAlgClosed K] (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} (hn : (n : K) ≠ 0) {x : K}
-    (hx : (W.preΨ' n).IsRoot x) : RootData W n x
-
-/-- Required raw-coordinate dual-number bridge.
-
-This is the field-vs-ring-safe replacement for `Pε ∈ E[n](K[ε])`.  The hypothesis `hrootε`
-is the first-order reduced-division-polynomial root over `K[ε]`; the conclusion says that the
-output tangent coordinate of `[n]` at `O` is zero.
-
-This lemma should be proved from:
-* `MultipleRootBridge.affine_dual_point_equation`,
-* `W.map_preΨ'`, `Affine.CoordinateRing.mk_ψ`, `mk_Ψ_sq`, `mk_φ`,
-* the raw coordinate formulas for multiplication/addition,
-* and the fact that the lifted `ψ₂` is a unit because its scalar part is `nonTwo`.
--/
-axiom preΨ'_dual_root_implies_nsmul_tangent_zero
+theorem preΨ'_dual_root_to_OJet_zero_rawCoord
     [IsAlgClosed K] (W : WeierstrassCurve K) [W.IsElliptic]
     {n : ℕ} (hn : (n : K) ≠ 0) {x y : K}
     (hcurve : W.toAffine.Equation x y)
     (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    (hrootε : aeval (MultipleRootBridge.xε W x) (W.preΨ' n) = 0) :
-    TangentO.nsmul₁ W n 1 = 0
+    (hrootε : aeval (MultipleRootBridge.xε x) (W.preΨ' n) = 0) :
+    TangentO.nsmul₁ W n 1 = 0 := by
+  -- This is the real remaining proof. See the proof plan below.
+  sorry
 
-end Needed
-
-/-- The rootwise core, reduced to the two explicit repo bridge lemmas above.
-
-This is the intended final assembly.  The use of `eval_dualNumber` is exactly the already-proved
-Taylor engine from the prompt.
--/
-theorem preΨ'_deriv_ne_zero_at_root
-    {K : Type*} [Field K] [IsAlgClosed K]
-    (W : WeierstrassCurve K) [W.IsElliptic] {n : ℕ} (hn : (n : K) ≠ 0) {x : K}
-    (hx : (W.preΨ' n).IsRoot x) : ¬ (derivative (W.preΨ' n)).IsRoot x := by
-  intro hdx
-
-  -- Root dictionary over the algebraically closed field.
-  let rd := Needed.preΨ'_root_exists_non_two_n_torsion_point
-    (W := W) (n := n) hn hx
-  rcases rd with ⟨y, hcurve, hY, _htorsion⟩
-
-  -- Taylor engine: multiple root gives a first-order root over `K[ε]`.
-  have hx_eval : (W.preΨ' n).eval x = 0 := by
-    simpa [Polynomial.IsRoot] using hx
-  have hdx_eval : (derivative (W.preΨ' n)).eval x = 0 := by
-    simpa [Polynomial.IsRoot] using hdx
-  have hrootε : aeval (MultipleRootBridge.xε W x) (W.preΨ' n) = 0 := by
-    have hTaylor := eval_dualNumber (W.preΨ' n) x (1 : K)
-    rw [MultipleRootBridge.xε, hTaylor, hx_eval, hdx_eval]
-    simp [Dual.c, Dual.e]
-
-  -- Raw-coordinate division-polynomial bridge: the first-order output tangent at O is zero.
-  have hzero : TangentO.nsmul₁ W n 1 = 0 :=
-    Needed.preΨ'_dual_root_implies_nsmul_tangent_zero
-      (W := W) (n := n) hn hcurve hY hrootε
-
-  -- But the tangent of `[n]` at O is scalar `n`.
-  have hlin : TangentO.nsmul₁ W n 1 = (n : K) := by
-    simpa using TangentO.nsmul₁_eq_natCast_mul (W := W) n (1 : K)
-
-  exact hn (by simpa [hlin] using hzero)
+/-- Once `preΨ'_dual_root_to_OJet_zero_rawCoord` is proved, the theorem requested in Q119 is
+literally this wrapper. -/
+theorem dual_root_implies_tangent_zero
+    [IsAlgClosed K] (W : WeierstrassCurve K) [W.IsElliptic]
+    {n : ℕ} (hn : (n : K) ≠ 0) {x y : K}
+    (hcurve : W.toAffine.Equation x y)
+    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
+    (hrootε : aeval (MultipleRootBridge.xε x) (W.preΨ' n) = 0) :
+    TangentO.nsmul₁ W n 1 = 0 := by
+  exact preΨ'_dual_root_to_OJet_zero_rawCoord
+    (W := W) (n := n) hn hcurve hY hrootε
 
 end SEAM1
 
 end WeierstrassCurve
 ```
 
-## What still has to be proved, not assumed
+The wrapper is not the problem. The theorem `preΨ'_dual_root_to_OJet_zero_rawCoord` is.
 
-### 1. `Needed.preΨ'_root_exists_non_two_n_torsion_point`
+## Concrete proof plan for the missing raw-coordinate theorem
 
-Exact intended stronger signature:
+Inside `preΨ'_dual_root_to_OJet_zero_rawCoord`, do the following.
+
+### 1. Construct the dual-number point on the curve
+
+Use the existing objects from your SEAM1 branch:
 
 ```lean
-structure PrePsiRootData (W : WeierstrassCurve K) (n : ℕ) (x : K) where
-  y : K
-  point : W.toAffine.Equation x y
-  psi₂_ne : W.toAffine.polynomialY.evalEval x y ≠ 0
-  nsmul_eq_zero : n • (affinePoint W x y point) = 0
+let Xε : DualNumber K := MultipleRootBridge.xε x
+let Yε : DualNumber K := MultipleRootBridge.yε W x y
 ```
 
-Use the actual point constructor/projection names already in your SEAM1 branch.  The theorem should be:
+Then:
 
 ```lean
-theorem preΨ'_root_exists_non_two_n_torsion_point
-    [IsAlgClosed K] (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} (hn : (n : K) ≠ 0) {x : K}
-    (hx : (W.preΨ' n).IsRoot x) :
-    PrePsiRootData W n x
+have hPε_curve :
+    (W.toAffine.baseChange (DualNumber K)).Equation Xε Yε := by
+  exact MultipleRootBridge.affine_dual_point_equation
+    (W := W) hcurve hY
 ```
 
-This is where the algebraically closed hypothesis is consumed.  This lemma should also exclude the `ψ₂ = 0` branch using the already-proved nonsingularity/base-stratum certificates.
+This step is already available from `AffineJet.equation_dual_iff` and the y-lift lemma.
 
-### 2. `Needed.preΨ'_dual_root_implies_nsmul_tangent_zero`
+### 2. Prove the lifted `ψ₂` is a unit
 
-This is the real remaining crux.  It is not the same as the root dictionary.  It must be a raw coordinate theorem over `DualNumber K`:
+The lifted `ψ₂` is `W_Y(Xε,Yε)`:
 
 ```lean
-theorem preΨ'_dual_root_implies_nsmul_tangent_zero
+let ψ₂ε : DualNumber K :=
+  (W.toAffine.baseChange (DualNumber K)).polynomialY.evalEval Xε Yε
+```
+
+Its scalar part is the original `W_Y(x,y)`:
+
+```lean
+have hψ₂ε_fst : TrivSqZeroExt.fst ψ₂ε = W.toAffine.polynomialY.evalEval x y := by
+  -- unfold `ψ₂ε`, `Xε`, `Yε`; use `Affine.evalEval_polynomialY`; simp.
+  simp [ψ₂ε, Xε, Yε, MultipleRootBridge.xε, MultipleRootBridge.yε,
+    WeierstrassCurve.Affine.evalEval_polynomialY]
+```
+
+Then use the standard dual-number unit lemma, which you should add if absent:
+
+```lean
+lemma dualNumber_isUnit_of_fst_ne_zero (z : DualNumber K)
+    (hz : TrivSqZeroExt.fst z ≠ 0) : IsUnit z := by
+  -- Explicit inverse: if z = a + εb and a ≠ 0, inverse is a⁻¹ - ε*(b*a⁻²).
+  -- Prove with `TrivSqZeroExt.ext`; `field_simp [hz]`; `ring`.
+  sorry
+```
+
+Thus:
+
+```lean
+have hψ₂ε_unit : IsUnit ψ₂ε := by
+  apply dualNumber_isUnit_of_fst_ne_zero
+  simpa [hψ₂ε_fst] using hY
+```
+
+This is exactly where `hY` is consumed.
+
+### 3. Upgrade reduced `preΨ'` vanishing to full `ψ_n` vanishing
+
+This is the non-2 branch.
+
+For odd `n`, `ψ_n` corresponds to `preΨ'_n` directly.
+
+For even `n`, the full `ψ_n` has a `ψ₂` factor and the reduced polynomial is `preΨ'_n`; since `ψ₂ε` is a unit, the reduced vanishing is equivalent to the full vanishing. In practice, the direction you need is just:
+
+```lean
+have hψnε : evalBivariateAt Xε Yε ((W.baseChange (DualNumber K)).ψ (n : ℤ)) = 0 := by
+  -- Use `W.map_preΨ'`, `WeierstrassCurve.Ψ`, and `Affine.CoordinateRing.mk_ψ`/`mk_Ψ_sq`.
+  -- Split by parity if needed:
+  --   odd: `Ψ n = C (preΨ n)`;
+  --   even: `Ψ n = C (preΨ n) * ψ₂` and `ψ₂ε` is a unit.
+  sorry
+```
+
+A good lemma signature for this step is:
+
+```lean
+theorem full_ψ_eval_zero_of_preΨ'_eval_zero_of_ψ₂_unit
+    (W : WeierstrassCurve K) {n : ℕ} {A : Type*} [CommRing A] [Algebra K A]
+    {X Y : A}
+    (hcurve : (W.toAffine.baseChange A).Equation X Y)
+    (hψ₂_unit : IsUnit ((W.toAffine.baseChange A).polynomialY.evalEval X Y))
+    (hpre : aeval X ((W.preΨ' n).map (algebraMap K A)) = 0) :
+    -- use the actual bivariate-evaluation expression used in the repo
+    evalBivariateAt X Y ((W.baseChange A).ψ (n : ℤ)) = 0 := by
+  sorry
+```
+
+Use your repo’s actual bivariate evaluation notation; the public Mathlib files use `evalEval` for `R[X][Y]`.
+
+### 4. Apply the raw projective multiplication-by-`n` coordinate theorem
+
+This is the essential missing theorem. It should be stated once, independent of dual numbers.
+
+A robust signature is:
+
+```lean
+/-- Raw projective multiplication formula on the non-2 affine chart.
+
+For an affine point `(X,Y)` over a commutative ring `A`, if the curve equation holds and `ψ₂(X,Y)`
+is a unit, then vanishing of the full `ψ_n` forces the raw projective `[n]` output to be equivalent
+to `O` with tangent coordinate zero.
+-/
+theorem raw_nsmul_affine_nonTwo_of_ψ_eq_zero
+    (W : WeierstrassCurve K) {A : Type*} [CommRing A] [Algebra K A]
+    {n : ℕ} {X Y : A}
+    (hcurve : (W.toAffine.baseChange A).Equation X Y)
+    (hψ₂_unit : IsUnit ((W.toAffine.baseChange A).polynomialY.evalEval X Y))
+    (hψn : evalBivariateAt X Y ((W.baseChange A).ψ (n : ℤ)) = 0) :
+    -- exact conclusion should use the repo's raw `[n]` output object.
+    rawNsmulTangentAtO W n X Y = 0 := by
+  sorry
+```
+
+For SEAM1, instantiate `A = DualNumber K`, `X = Xε`, `Y = Yε`. The conclusion should be identified with:
+
+```lean
+TangentO.nsmul₁ W n 1 = 0
+```
+
+If the repo does not yet have `rawNsmulTangentAtO`, define the **minimal** object instead of a full raw nsmul point:
+
+```lean
+/-- The first-order `O`-chart coordinate of the raw `[n]` output, when the output lies at infinity. -/
+noncomputable def rawNsmulTangentAtO
+    (W : WeierstrassCurve K) (n : ℕ) (X Y : DualNumber K) : K :=
+  -- Choose the actual projective coordinate expression used by the division-polynomial formula.
+  -- For the classical `[φ_n ψ_n : ω_n : ψ_n^3]`, this is the ε-coefficient of Xcoord/Ycoord.
+  sorry
+```
+
+The theorem must then prove this object agrees with `TangentO.nsmul₁ W n 1` for the specific infinitesimal input constructed from the multiple root.
+
+### 5. Why raw `addXYZ`/`dblXYZ` alone are not enough
+
+The public raw `Jacobian.addXYZ` and `Jacobian.dblXYZ` are denominator-cleared formulas. They are stated over `CommRing`, and the following map/base-change lemmas exist:
+
+```lean
+WeierstrassCurve.Jacobian.map_dblXYZ
+WeierstrassCurve.Jacobian.map_addXYZ
+WeierstrassCurve.Jacobian.baseChange_dblXYZ
+WeierstrassCurve.Jacobian.baseChange_addXYZ
+```
+
+But using them recursively over `DualNumber K` is dangerous: the scale factors that are nonzero over fields may become nilpotent and nonunit over dual numbers. In exactly the infinitesimal cases needed here, a denominator-cleared formula can collapse to the zero triple even though the corresponding projective point has a valid first-order limit.
+
+Therefore the theorem should **not** be proved by defining `[n]` recursively with `addXYZ`/`dblXYZ` over `DualNumber K` unless every scaling factor is separately proved to be a unit. The safer route is the division-polynomial projective coordinate formula.
+
+## Minimal missing theorem, in final desired form
+
+If you want the smallest possible SEAM1-facing theorem, use this exact statement:
+
+```lean
+/-- Non-2 reduced dual root forces zero tangent output under `[n]`.
+
+This is the only raw-coordinate theorem needed by `dual_root_implies_tangent_zero`.
+-/
+theorem preΨ'_dual_root_to_OJet_zero_rawCoord
     [IsAlgClosed K] (W : WeierstrassCurve K) [W.IsElliptic]
     {n : ℕ} (hn : (n : K) ≠ 0) {x y : K}
     (hcurve : W.toAffine.Equation x y)
     (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    (hrootε : aeval (MultipleRootBridge.xε W x) (W.preΨ' n) = 0) :
-    TangentO.nsmul₁ W n 1 = 0
+    (hrootε : aeval (MultipleRootBridge.xε x) (W.preΨ' n) = 0) :
+    TangentO.nsmul₁ W n 1 = 0 := by
+  let Xε : DualNumber K := MultipleRootBridge.xε x
+  let Yε : DualNumber K := MultipleRootBridge.yε W x y
+
+  have hPε_curve :
+      (W.toAffine.baseChange (DualNumber K)).Equation Xε Yε := by
+    simpa [Xε, Yε] using
+      MultipleRootBridge.affine_dual_point_equation
+        (W := W) (x := x) (y := y) hcurve hY
+
+  let ψ₂ε : DualNumber K :=
+    (W.toAffine.baseChange (DualNumber K)).polynomialY.evalEval Xε Yε
+
+  have hψ₂ε_fst : TrivSqZeroExt.fst ψ₂ε = W.toAffine.polynomialY.evalEval x y := by
+    simp [ψ₂ε, Xε, Yε, MultipleRootBridge.xε, MultipleRootBridge.yε,
+      WeierstrassCurve.Affine.evalEval_polynomialY]
+
+  have hψ₂ε_unit : IsUnit ψ₂ε := by
+    apply dualNumber_isUnit_of_fst_ne_zero
+    simpa [hψ₂ε_fst] using hY
+
+  have hfullψ :
+      evalBivariateAt Xε Yε ((W.baseChange (DualNumber K)).ψ (n : ℤ)) = 0 := by
+    exact full_ψ_eval_zero_of_preΨ'_eval_zero_of_ψ₂_unit
+      (W := W) (n := n) hPε_curve hψ₂ε_unit hrootε
+
+  exact raw_nsmul_affine_nonTwo_ψ_zero_tangent
+    (W := W) (n := n) (X := Xε) (Y := Yε)
+    hPε_curve hψ₂ε_unit hfullψ
 ```
 
-Proof ingredients:
+Replace `evalBivariateAt` with the repo’s actual bivariate evaluation expression, likely `evalEval Xε Yε` for `K[X][Y]`. Replace `raw_nsmul_affine_nonTwo_ψ_zero_tangent` with the chosen theorem name.
 
-1. Construct `yε = y + ε*(-W_X/W_Y)` and prove the affine equation over `DualNumber K` using `AffineJet.equation_dual_lift_of_polynomialY_ne_zero`.
-2. Show the lifted `ψ₂` is a unit because its scalar part is nonzero:
+This is the concrete proof. The two helper theorems in it are not optional conveniences; they are exactly the missing multiplication-by-`n` coordinate content.
 
-   ```lean
-   lemma dualNumber_isUnit_of_fst_ne_zero (z : DualNumber K)
-       (hz : TrivSqZeroExt.fst z ≠ 0) : IsUnit z
-   ```
+## What the raw multiplication theorem should prove internally
 
-3. Convert reduced `preΨ'_n` vanishing to the full division-polynomial vanishing on the non-2 branch, using `map_preΨ'` and the coordinate-ring congruences.
-4. Evaluate the multiplication-by-`n` coordinate formulas on the raw dual-number affine point.  The result lies in the `O` chart and has tangent coordinate `0`.
-5. Identify that tangent coordinate with `TangentO.nsmul₁ W n 1`.
-
-This lemma is where the field-vs-ring issue is solved.  It cannot be replaced by `Jacobian.Point (DualNumber K)`.
-
-## Notes on `AffineJet.equation_dual_iff`
-
-The body above is Lean-facing, but if it is brittle under simplifier changes, replace it by a direct `ext` proof on `TrivSqZeroExt.fst` and `snd` after unfolding the equation:
-
-```lean
-  apply Iff.intro
-  · intro h
-    have hf := congrArg TrivSqZeroExt.fst h
-    have hs := congrArg TrivSqZeroExt.snd h
-    constructor
-    · simpa [AffineJet.X, AffineJet.Y, Dual.c, Dual.e,
-        WeierstrassCurve.Affine.evalEval_polynomial] using hf
-    · simpa [AffineJet.X, AffineJet.Y, Dual.c, Dual.e,
-        WeierstrassCurve.Affine.evalEval_polynomial,
-        WeierstrassCurve.Affine.evalEval_polynomialX,
-        WeierstrassCurve.Affine.evalEval_polynomialY] using hs
-```
-
-The theorem is purely first-order Taylor expansion of the curve equation.  No elliptic-curve group law is involved.
-
-## Assembly dependency graph
+Internally, prove a projective coordinate formula for `[n]` over `A`:
 
 ```text
-eval_dualNumber                           -- already proved by you
-        │
-        ▼
-preΨ'_multiple_root ⇒ preΨ'_dual_root over K[ε]
-        │
-        ├── root dictionary over IsAlgClosed K  [MISSING: exact signature above]
-        │       gives y, curve equation, ψ₂ ≠ 0, n-torsion over K
-        │
-        ├── AffineJet.equation_dual_iff / lift / unique
-        │       gives yε and nonzero tangent vector
-        │
-        ▼
-preΨ'_dual_root_implies_nsmul_tangent_zero [MISSING: exact signature above]
-        │
-        ▼
-TangentO.nsmul₁_eq_natCast_mul
-        │
-        ▼
-(n : K) = 0, contradiction to hn
+[n](X,Y) = [ φ_n(X,Y) ψ_n(X,Y) : ω_n(X,Y) : ψ_n(X,Y)^3 ]
 ```
 
-So the theorem is ready to close once those two named bridge lemmas are present.  The local coordinate/Taylor part does not require more global infrastructure.
+on the non-2 affine chart, or the equivalent reduced-`preΨ'` version. Then under `ψ_n = 0`:
+
+```text
+X_output = 0,
+Z_output = 0,
+Y_output is a unit.
+```
+
+The unit of `Y_output` is the only subtle point. It is classically supplied by the same normalization that makes the projective formula represent `O` when `ψ_n = 0`. If `ω_n` is not yet defined in Mathlib, define only the part needed here:
+
+```lean
+/-- Middle projective coordinate of `[n]` on the non-2 affine chart. -/
+noncomputable def omegaLike (W : WeierstrassCurve K) (n : ℕ) : K[X][Y] := ...
+```
+
+and prove:
+
+```lean
+theorem omegaLike_unit_at_nonTwo_ψ_zero
+    {A : Type*} [CommRing A] [Algebra K A] {X Y : A}
+    (hcurve : ...)
+    (hψ₂_unit : IsUnit ...)
+    (hψn : evalEval X Y ((W.baseChange A).ψ (n : ℤ)) = 0) :
+    IsUnit (evalEval X Y ((omegaLike W n).map ...))
+```
+
+For the final tangent-zero conclusion, you only need `X_output = 0` and `Y_output` a unit.
+
+## Why `hn : (n : K) ≠ 0` appears in this theorem
+
+The bridge theorem `preΨ'_dual_root_to_OJet_zero_rawCoord` itself may not mathematically need `hn`; it says a dual reduced `n`-division root gives zero `[n]` output tangent. I would keep `hn` in the statement only because the surrounding root dictionary and final contradiction already carry it.
+
+The actual contradiction is:
+
+```lean
+have hzero : TangentO.nsmul₁ W n 1 = 0 := dual_root_implies_tangent_zero ...
+have hlin  : TangentO.nsmul₁ W n 1 = (n : K) := by
+  simpa using TangentO.nsmul₁_eq_natCast_mul (W := W) n (1 : K)
+exact hn (by simpa [hlin] using hzero)
+```
+
+So `hn` is consumed by the final assembly, not by the raw coordinate bridge.
+
+## Final assessment
+
+The requested theorem is exactly the point where the project needs one more real algebraic theorem: a raw division-polynomial multiplication formula over commutative rings, specialized to dual numbers/non-2 points. All local first-order ingredients are done. There is no valid Lean shortcut through `Jacobian.Point (DualNumber K)`, and recursive `addXYZ` over `DualNumber K` is not safe unless every cleared denominator is tracked as a unit.
+
+The next implementation step should therefore be:
+
+```lean
+theorem raw_nsmul_affine_nonTwo_ψ_zero_tangent
+    ... : TangentO.nsmul₁ W n 1 = 0
+```
+
+proved from a projective division-polynomial coordinate formula, not from the field-only point group.
