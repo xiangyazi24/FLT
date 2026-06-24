@@ -1,445 +1,304 @@
-# Q86 (dm2): Planning — `preΨ'_isCoprime_derivative`
+# Q94 (dm2): Planning — `preΨ'_4` separability via Bezout
 
-Target theorem:
-
-```lean
-theorem preΨ'_isCoprime_derivative
-    (W : WeierstrassCurve k) [W.IsElliptic] {n : ℕ} (hn : (n : k) ≠ 0) :
-    IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n))
-```
-
-This is a planning note, not a full proof.
-
-## Executive verdict
-
-A direct **strong induction on `n` using only `preΨ'_even` / `preΨ'_odd` and product-rule differentiation is not the route I would choose**.  It is mathematically plausible only if strengthened with substantial extra invariants, but as a Lean implementation it is likely to become more complex than the resultant / nonsingularity route.
-
-The main obstruction is not the recurrence itself; it is the derivative.  Differentiating an EDS recurrence turns a clean algebraic identity into a cancellation-prone Wronskian problem.  To prove squarefreeness, it is not enough to know that the lower division polynomials are squarefree.  One needs a certificate that the derivative of the recursively constructed expression is nonzero at each root of the new expression.  The natural certificate is not the raw product rule; it is the separability of `[n]`, or equivalently a differential/Wronskian identity carrying the scalar `(n : k)`.
-
-The route that looks tractable in Lean is therefore:
-
-1. Continue the **resultant / Bezout / root-exclusion** route for the small base strata (`Ψ₂Sq`, `Ψ₃`, `preΨ₄`) and adjacent exceptional cases.
-2. Prove a structural identity for the `x`-coordinate of `[n]`, or a Wronskian-style identity derived from it, where the scalar `(n : k)` appears explicitly.
-3. Use the already-proved adjacent-Somos and resultant nonsingularity certificates to discharge the denominators / exceptional strata.
-4. Derive `IsCoprime F F.derivative` rootwise or by a Bezout certificate, but avoid expanding the derivative of the full EDS recurrence as the main induction invariant.
-
-## 1. Can strong induction via recurrence prove squarefreeness?
-
-### Naive induction statement
-
-A naive induction would try:
+Target brick for the first nontrivial even case:
 
 ```lean
-P n := (n : k) ≠ 0 →
-  IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n))
+theorem preΨ'_four_isCoprime_derivative
+    (W : WeierstrassCurve k) [W.IsElliptic] (h2 : (2 : k) ≠ 0) :
+    IsCoprime (W.preΨ' 4) (Polynomial.derivative (W.preΨ' 4))
 ```
 
-and then use the recurrence for `preΨ' (2*m)` or `preΨ' (2*m+1)` to express the target in terms of lower `preΨ'` values.
-
-This is not strong enough.
-
-For example, in positive characteristic `p`, from
-
-```lean
-((2*m + 1 : ℕ) : k) ≠ 0
-```
-
-we do **not** get
-
-```lean
-(m : k) ≠ 0
-```
-
-or the analogous nonvanishing for `m-1`, `m+1`, `m+2`.  Take `m = p`: then `2*m+1` is nonzero in characteristic `p`, but `(m : k)=0`.  Thus the induction hypotheses for the lower factors may be unavailable exactly when the recurrence uses those lower factors.
-
-This is a serious issue because the differentiated odd recurrence schematically has terms like
+Here `W.preΨ' 4 = W.preΨ 4 = W.preΨ₄`, where
 
 ```text
-(F_{m+2} * F_m^3 - F_{m-1} * F_{m+1}^3)'
+preΨ₄ = 2X^6 + b₂X^5 + 5b₄X^4 + 10b₆X^3 + 10b₈X^2
+        + (b₂b₈ - b₄b₆)X + (b₄b₈ - b₆^2).
 ```
 
-so it contains `F_m'`, `F_{m+1}'`, etc.  Some of those lower derivatives may not be controlled by the induction hypothesis under the target assumption `((2*m+1 : k) ≠ 0)`.
+This is a plan-only note; I did not dump the full Bezout cofactors yet.
 
-### Stronger induction that might work
+## 1. Resultant / discriminant constant
 
-A recurrence induction would need a much stronger package than squarefreeness alone.  Something like:
-
-```lean
-structure DivPolyInductionPackage (W : WeierstrassCurve k) (n : ℕ) : Prop where
-  squarefree_if_index_unit :
-    (n : k) ≠ 0 → IsCoprime (W.preΨ' n) (derivative (W.preΨ' n))
-  adjacent_coprime_left :
-    IsCoprime (W.preΨ' n) (W.preΨ' (n+1))
-  adjacent_coprime_right :
-    IsCoprime (W.preΨ' n) (W.preΨ' (n+2))
-  no_bad_base_common_roots :
-    -- root-exclusion facts involving Ψ₂Sq, Ψ₃, preΨ₄
-    True
-  wronskian_or_differential_certificate :
-    -- a non-expanded derivative identity carrying the scalar (n : k)
-    True
-```
-
-The essential missing field is the last one.  Adjacent coprimality and Somos identities can prevent the recurrence from degenerating when several nearby terms vanish at the same root.  But they do not by themselves prevent cancellation in the derivative of the recurrence.
-
-### Rootwise picture of the induction step
-
-Let `F_n := W.preΨ' n`.  To prove `IsCoprime F_N F_N.derivative`, over a field one can argue rootwise:
+Let
 
 ```text
-Assume F_N(a) = 0 and F_N'(a) = 0.
-Derive contradiction.
+f = preΨ₄,
+f' = derivative_X preΨ₄,
+Δ = -b₂^2 b₈ - 8 b₄^3 - 27 b₆^2 + 9 b₂ b₄ b₆,
+bRel = b₂ b₆ - b₄^2 - 4 b₈.
 ```
 
-For an odd recurrence, schematically,
+The classical discriminant stated in the prompt is
 
 ```text
-F_{2m+1} = F_{m+2} * F_m^3 - F_{m-1} * F_{m+1}^3
+Disc(f) = -2^8 · Δ^5.
 ```
 
-or a parity-adjusted variant with `Ψ₂Sq` factors.  At a root `a` of `F_{2m+1}`, the recurrence gives a ratio relation among nearby lower values:
+For a degree-`6` polynomial with leading coefficient `lc(f) = 2`, the convention is
 
 ```text
-F_{m+2}(a) * F_m(a)^3 = F_{m-1}(a) * F_{m+1}(a)^3.
+Disc(f) = (-1)^(6*5/2) * lc(f)^(-1) * Res(f, f')
+        = - Res(f, f') / 2.
 ```
 
-Adjacent-Somos can then be used to rule out many simultaneous vanishing patterns.  The nonsingularity certificates from Q47 handle the base exceptional collisions:
+Therefore
 
 ```text
-gcd(Ψ₂Sq, Ψ₃) = 1 under Δ ≠ 0,
-gcd(Ψ₃, preΨ₄) = 1 under Δ ≠ 0.
+Res_X(preΨ₄, preΨ₄') = 2^9 · Δ^5 = 512 · Δ^5
 ```
 
-However, after differentiating, one gets a logarithmic-derivative relation at `a` if all the lower values are nonzero:
+modulo `bRel`.
+
+Equivalently, the Bezout certificate should have the form
 
 ```text
-F'_{m+2}/F_{m+2} + 3 F'_m/F_m
-  = F'_{m-1}/F_{m-1} + 3 F'_{m+1}/F_{m+1}.
+A44 * preΨ₄ + B44 * preΨ₄' - 512 * Δ^5 - Q44 * bRel = 0
 ```
 
-That relation is not contradicted by lower squarefreeness.  Lower squarefreeness only says `F_i'(a) ≠ 0` when `F_i(a)=0`; it says very little when `F_i(a) ≠ 0`.  Thus the rootwise induction needs a **Wronskian identity** or a **multiplication-by-`n` differential identity**, not merely the recurrence.
+with all coefficients integral.
 
-### Where `(n : k) ≠ 0` enters
-
-The scalar `(n : k)` should enter through the differential of the multiplication-by-`n` map:
+I sanity-checked this by a Sylvester/adjugate computation over `ZZ[b₂,b₄,b₆,b₈]`.  The exact resultant has `117` terms before reducing by `bRel`, and
 
 ```text
-[n]^* ω = n · ω.
+Res_X(preΨ₄, preΨ₄') - 512 * Δ^5 = Q44 * bRel
 ```
 
-In `x`-coordinate/division-polynomial language, this is the source of a Wronskian identity whose right-hand side contains `(n : k)` times a product of known nonzero factors.  At a root of `F_n`, that identity is exactly what should imply `F_n'(a) ≠ 0`.
+with a `b`-cofactor `Q44` having `98` terms.
 
-In other words, `(n : k) ≠ 0` is not naturally consumed by the raw EDS recurrence.  It is naturally consumed by the differential identity for `[n]`.
+The important Lean consequence is that no factor of `3` is needed.  Even though `preΨ₄'` has leading coefficient `12`, the final obstruction is only `2^9 · Δ^5`.  Hence the n=4 separability statement should need exactly `(2 : k) ≠ 0` plus `[W.IsElliptic]`.
 
-That is the conceptual reason recurrence-only induction is awkward.
+A small reproducibility script for the constant/sign and size estimate is:
 
-## 2. Does product-rule differentiation stay controllable?
+```python
+import sympy as sp
+from sympy.polys.matrices import DomainMatrix
+from sympy.polys.domains import ZZ
 
-Not as the primary proof object.
+b2,b4,b6,b8,x = sp.symbols('b2 b4 b6 b8 x')
+K = ZZ.old_poly_ring(b2,b4,b6,b8)
 
-For the odd branch, the derivative expansion is already of the form:
+def Ksym(a):
+    return K.from_sympy(sp.sympify(a))
+
+def to_sym(a):
+    return K.to_sympy(a)
+
+def sylvester_bezout_stats(f,g):
+    m = sp.Poly(f,x).degree()
+    n = sp.Poly(g,x).degree()
+    N = m+n
+    def coeff_desc(poly,deg):
+        P = sp.Poly(poly,x)
+        return [P.coeff_monomial(x**e) for e in range(deg,-1,-1)]
+    cols = []
+    for i in range(n):
+        cols.append(coeff_desc(x**(n-1-i)*f,N-1))
+    for j in range(m):
+        cols.append(coeff_desc(x**(m-1-j)*g,N-1))
+    M = DomainMatrix([[Ksym(cols[c][r]) for c in range(N)] for r in range(N)], (N,N), K)
+    rhs = DomainMatrix([[Ksym(0)] for _ in range(N-1)] + [[Ksym(1)]], (N,1), K)
+    xnum, xden = M.solve_den(rhs, method='charpoly')
+    sol = [sp.expand(xnum.to_Matrix()[i,0]) for i in range(N)]
+    A = sp.expand(sum(sol[i]*x**(n-1-i) for i in range(n)))
+    B = sp.expand(sum(sol[n+j]*x**(m-1-j) for j in range(m)))
+    R = to_sym(xden)
+    assert sp.expand(A*f + B*g - R) == 0
+    return A,B,R
+
+f = 2*x**6 + b2*x**5 + 5*b4*x**4 + 10*b6*x**3 + 10*b8*x**2 + (b2*b8-b4*b6)*x + (b4*b8-b6**2)
+g = sp.diff(f,x)
+Delta = -b2**2*b8 - 8*b4**3 - 27*b6**2 + 9*b2*b4*b6
+bRel = b2*b6 - b4**2 - 4*b8
+
+A,B,R = sylvester_bezout_stats(f,g)
+assert sp.expand(R - sp.resultant(f,g,x)) == 0
+Q,rem = sp.div(sp.expand(R - 2**9*Delta**5), bRel, b8)
+assert rem == 0
+assert sp.expand(A*f + B*g - 2**9*Delta**5 - Q*bRel) == 0
+
+print('Res = 2^9 * Delta^5 mod bRel')
+print('deg_x A <=', sp.Poly(A,x).degree(), 'terms(A)=', len(sp.Poly(A,x,b2,b4,b6,b8).terms()))
+print('deg_x B <=', sp.Poly(B,x).degree(), 'terms(B)=', len(sp.Poly(B,x,b2,b4,b6,b8).terms()))
+print('terms(R)=', len(sp.Poly(R,b2,b4,b6,b8).terms()))
+print('terms(Q)=', len(sp.Poly(Q,b2,b4,b6,b8).terms()))
+print('OK')
+```
+
+Output from the size probe:
 
 ```text
-(F_{m+2} * F_m^3)'
-  - (F_{m-1} * F_{m+1}^3)'
-
-= F'_{m+2} * F_m^3
-  + 3 * F_{m+2} * F_m^2 * F'_m
-  - F'_{m-1} * F_{m+1}^3
-  - 3 * F_{m-1} * F_{m+1}^2 * F'_{m+1}.
+Res = 2^9 * Delta^5 mod bRel
+deg_x A <= 4 terms(A)= 342
+deg_x B <= 5 terms(B)= 425
+terms(R)= 117
+terms(Q)= 98
+OK
 ```
 
-The even branch is worse because the reduced even polynomial has extra `Ψ₂Sq` / parity normalization factors, so the differentiated expression carries additional derivative terms for `Ψ₂Sq` and for the lower factors.
+## 2. Cofactor-size estimate
 
-In Lean this causes three problems.
+The Sylvester matrix size is `6 + 5 = 11`.
 
-### Problem A: lower derivative hypotheses do not match the target index
-
-As noted above, `char k ∤ N` does not imply `char k ∤ i` for each lower index `i` in the recurrence.  So even if one expands the derivative perfectly, the induction hypotheses do not cover all derivative terms.
-
-### Problem B: squarefreeness of factors does not control derivative of a sum
-
-The recurrence is a difference of products.  Squarefreeness of the individual product factors does not imply squarefreeness of their difference.  A proof must exploit the special elliptic identities, not generic algebra about products.
-
-### Problem C: expression swell and rewriting risk
-
-A proof that repeatedly rewrites
-
-```lean
-Polynomial.derivative (W.preΨ'_odd ...)
-Polynomial.derivative (W.preΨ'_even ...)
-```
-
-will create large goals with many terms.  Even if mathematically possible, it will likely require custom normalization lemmas for every parity case and every `preΨ'` normalization.  This is exactly the kind of proof that becomes brittle under Mathlib changes.
-
-### Controllable alternative
-
-The derivative can be kept controllable if it appears only through a named identity, for example:
-
-```lean
--- schematic, not intended as exact API
-theorem preΨ'_wronskian
-    (W : WeierstrassCurve k) (n : ℕ) :
-    WronskianExpression W n = C (n : k) * NonzeroDenominatorExpression W n := by
-  -- proved once from multiplication formulas / Somos identities
-```
-
-Then the squarefreeness proof uses this identity at a root of `F_n`, rather than unfolding and differentiating the recurrence inside the induction step.
-
-## 3. Literature orientation
-
-I would not expect the cleanest known argument to be an EDS-only induction on the recurrence.
-
-The standard mathematical proof is geometric:
-
-1. The roots of the relevant division polynomial encode nontrivial `n`-torsion, up to the usual `±P` identification on `x`-coordinates.
-2. If `char k ∤ n`, the multiplication morphism `[n] : E → E` is separable because its differential is multiplication by `n` on the invariant differential.
-3. Hence the kernel group scheme `E[n]` is reduced/étale.
-4. Therefore the corresponding division-polynomial root scheme is reduced away from the known small exceptional strata; equivalently the polynomial is coprime to its formal derivative.
-
-Ward-style EDS recurrences explain the algebraic identities and divisibility properties, but the simple-roots statement is usually proved through division-polynomial/torsion geometry or through a resultant/Wronskian computation, not by a bare recurrence induction.
-
-For this project, the closest recurrence-compatible version is not “EDS implies separable” but rather:
+For the standard Sylvester Bezout shape
 
 ```text
-EDS recurrence + adjacent Somos + resultant nonsingularity
-  ⇒ denominator/nonzero factors in the [n]-differential identity are coprime to F_n
-  ⇒ F_n has no multiple roots when (n:k)≠0.
+A44 * f + B44 * f' = Res(f,f')
 ```
 
-That still uses recurrence/Somos, but only to manage nonvanishing and coprimality of the auxiliary factors, not to inductively expand every derivative.
-
-## 4. Recommended Lean route
-
-### Route A: recurrence-only induction
-
-Status: **high risk / probably not worth it**.
-
-Needed ingredients:
-
-```lean
--- schematic only
-lemma preΨ'_strong_induction_step_odd :
-    LowerPackage W m → LowerPackage W (m+1) → LowerPackage W (m+2) →
-    ((2*m+1 : ℕ) : k) ≠ 0 →
-    IsCoprime (W.preΨ' (2*m+1)) (derivative (W.preΨ' (2*m+1))) := by
-  -- product rule, recurrence, adjacent Somos, many root cases
-  sorry
-
-lemma preΨ'_strong_induction_step_even :
-    LowerPackage W (m-2) → LowerPackage W (m-1) → LowerPackage W m →
-    LowerPackage W (m+1) → LowerPackage W (m+2) →
-    ((2*m : ℕ) : k) ≠ 0 →
-    IsCoprime (W.preΨ' (2*m)) (derivative (W.preΨ' (2*m))) := by
-  -- worse parity and Ψ₂Sq factors
-  sorry
-```
-
-Risk points:
-
-* Lower induction hypotheses may be unusable when lower indices vanish in `k`.
-* The proof must split many root-vanishing cases.
-* The derivative of a recurrence difference has cancellation not controlled by lower squarefreeness.
-* Even if it works mathematically, the Lean term is likely brittle and large.
-
-### Route B: resultant / Wronskian route
-
-Status: **tractable and recommended**.
-
-The core shape should be:
-
-```lean
--- Schematic only.  Names and exact expressions should follow the existing API.
-lemma preΨ'_multiple_root_forces_bad_factor
-    (W : WeierstrassCurve k) [W.IsElliptic] {n : ℕ}
-    (hn : (n : k) ≠ 0) {a : k}
-    (hroot : (W.preΨ' n).eval a = 0)
-    (hderiv : (derivative (W.preΨ' n)).eval a = 0) :
-    BadBaseFactor W a = 0 := by
-  -- Use a named Wronskian / [n]-differential identity.
-  -- The RHS contains `(n : k)` times a product of auxiliary factors.
-  -- With hn and hroot/hderiv, force an auxiliary bad factor to vanish.
-  sorry
-
-lemma bad_base_factor_impossible
-    (W : WeierstrassCurve k) [W.IsElliptic] {a : k} :
-    BadBaseFactor W a ≠ 0 := by
-  -- Use Q47-style certificates:
-  --   Ψ₂Sq_eval_ne_of_Ψ₃_eval_zero_of_isElliptic
-  --   Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero_of_isElliptic
-  --   preΨ₄_eval_ne_of_Ψ₃_eval_zero_of_isElliptic
-  -- plus adjacent-Somos root-exclusion as needed.
-  sorry
-
-theorem preΨ'_isCoprime_derivative
-    (W : WeierstrassCurve k) [W.IsElliptic] {n : ℕ} (hn : (n : k) ≠ 0) :
-    IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n)) := by
-  -- Field-polynomial criterion: not coprime gives a common root after passing
-  -- to a splitting/algebraic closure, or use an existing `IsCoprime`/roots API.
-  -- Apply the previous two lemmas.
-  sorry
-```
-
-This route is better aligned with the hypothesis `hn`: the scalar `(n : k)` appears exactly once, in the differential identity, rather than being awkwardly distributed among lower recurrence indices.
-
-### Route C: pure universal resultant certificate for each `n`
-
-Status: **conceptually clean but not feasible uniformly**.
-
-One could try to prove
+one can take
 
 ```text
-Res_X(preΨ'_n, derivative preΨ'_n) = unit * n^N * Δ^M
+deg_X A44 < deg_X f' = 5, so deg_X A44 ≤ 4,
+deg_X B44 < deg_X f  = 6, so deg_X B44 ≤ 5.
 ```
 
-or a divisibility variant.  This would directly imply squarefreeness from `n ≠ 0` and `Δ ≠ 0`.  But producing and checking explicit certificates uniformly in `n` is not realistic.  This is useful as a sanity check for small `n`, not as the main proof.
-
-## Suggested decomposition for implementation
-
-### Step 0: finalize small nonsingularity certs
-
-Use Q47/Q37 results as hard base facts:
-
-```lean
-theorem Ψ₂Sq_eval_ne_of_Ψ₃_eval_zero_of_isElliptic
-    [W.IsElliptic] (hc3 : W.Ψ₃.eval x = 0) :
-    W.Ψ₂Sq.eval x ≠ 0
-
-theorem Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero_of_isElliptic
-    [W.IsElliptic] (hs : W.Ψ₂Sq.eval x = 0) :
-    W.Ψ₃.eval x ≠ 0
-
-theorem preΨ₄_eval_ne_of_Ψ₃_eval_zero_of_isElliptic
-    [W.IsElliptic] (hc3 : W.Ψ₃.eval x = 0) :
-    (W.preΨ 4).eval x ≠ 0
-```
-
-These are the non-circular facts needed when a recurrence or differential identity degenerates into the `Ψ₂Sq`, `Ψ₃`, `preΨ₄` stratum.
-
-### Step 1: prove adjacent root-exclusion lemmas
-
-Use `preΨ_adjacent_somos` to prove root-exclusion patterns of the form:
-
-```lean
--- schematic only
-lemma not_three_adjacent_roots
-    [W.IsElliptic] {i : ℤ} {a : k} :
-    ¬ ((W.preΨ i).eval a = 0 ∧
-       (W.preΨ (i+1)).eval a = 0 ∧
-       (W.preΨ (i+2)).eval a = 0) := by
-  -- adjacent Somos reduces to base nonsingularity certificates
-  sorry
-
-lemma adjacent_auxiliary_nonzero_at_preΨ'_root
-    [W.IsElliptic] {n : ℕ} {a : k}
-    (hroot : (W.preΨ' n).eval a = 0) :
-    AuxiliaryProduct W n a ≠ 0 := by
-  -- case split by parity and use adjacent Somos + Q47 base certs
-  sorry
-```
-
-Do not try to include derivatives here.  Keep this layer purely about values and coprimality/nonvanishing.
-
-### Step 2: isolate the derivative into one Wronskian lemma
-
-Prove or import a named identity that is morally the derivative of the multiplication formula.  The exact expression depends on the available Mathlib definitions, but the shape should be:
-
-```lean
--- schematic only
-theorem preΨ'_differential_identity
-    (W : WeierstrassCurve k) [W.IsElliptic] (n : ℕ) :
-    DifferentialLHS W n = C (n : k) * DifferentialRHS W n := by
-  -- Use multiplication formula / φ_n / ψ_n identities if available.
-  -- Otherwise derive once from the already-proved recurrence library.
-  sorry
-```
-
-The important design choice is that this theorem should be a standalone algebraic identity.  The final separability proof should not unfold the product rule for `preΨ'_even`/`preΨ'_odd` at every induction step.
-
-At a root of `F_n`, this identity should specialize to something like:
+The raw fraction-free Sylvester/adjugate solution I probed has:
 
 ```text
-constant_or_auxiliary_factor * F_n'(a)
-  = (n : k) * nonzero_auxiliary_product.
+A44: 342 terms, total degree 15 in (X,b₂,b₄,b₆,b₈), deg_X 4
+B44: 425 terms, total degree 16 in (X,b₂,b₄,b₆,b₈), deg_X 5
+Q44:  98 terms, b-only, total degree 13
 ```
 
-Then `hn` and the nonzero auxiliary-product lemma imply `F_n'(a) ≠ 0`.
+So the certificate is **moderate but not tiny**.  It is not smaller than the keystone `preΨ₄`-style ~250-term certificate if measured by total terms in `A+B`; it is around `342 + 425 + 98 = 865` printed terms for the raw Sylvester certificate.  But it is dramatically smaller than the Q47 `Ψ₃` vs `preΨ₄` certificate, and it should be mechanically manageable for Lean as a single `linear_combination` identity.
 
-### Step 3: convert rootwise non-multiple-root statement to `IsCoprime`
+There may be a smaller syzygy-adjusted certificate because the derivative pair has extra structure.  For the first Lean attempt I would still use the raw Sylvester certificate unless the generated term is too slow for `ring_nf`.
 
-Depending on the existing Mathlib API, use one of two paths.
+## 3. Lean lemma shape
 
-Path 3A: via roots over an algebraic closure:
+### Polynomial identity
 
-```lean
--- schematic only
-lemma isCoprime_derivative_of_no_common_root
-    {f : k[X]}
-    (hroot : ∀ a : AlgebraicClosure k,
-      aeval a f = 0 → aeval a (derivative f) ≠ 0) :
-    IsCoprime f f.derivative := by
-  sorry
+Define `q94A44`, `q94B44`, and `q94Q44` by direct `C`/`X` lifting of the expanded integer expressions.
+
+Example translation:
+
+```text
+-7*b2**3*b4*b6*x**4
+  ↦ C ((-7 : R) * W.b₂ ^ 3 * W.b₄ * W.b₆) * X ^ 4
 ```
 
-Path 3B: via gcd / irreducible divisor:
+The identity should be oriented as:
 
 ```lean
--- schematic only
-lemma isCoprime_derivative_of_no_common_irreducible_factor
-    {f : k[X]}
-    (h : ∀ p : k[X], Irreducible p → p ∣ f → ¬ p ∣ f.derivative) :
-    IsCoprime f f.derivative := by
-  sorry
-```
+import Mathlib
 
-The irreducible-factor path may avoid algebraic-closure API friction, but the rootwise path is often closer to the intended geometric argument.
+noncomputable section
 
-### Step 4: prove the theorem
-
-Final theorem shape:
-
-```lean
-variable {k : Type*} [Field k]
+open Polynomial
+open scoped Polynomial
 
 namespace WeierstrassCurve
 
-open Polynomial
+variable {R : Type*} [CommRing R]
 
--- Final target, after the helper identities above.
-theorem preΨ'_isCoprime_derivative
-    (W : WeierstrassCurve k) [W.IsElliptic] {n : ℕ} (hn : (n : k) ≠ 0) :
-    IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n)) := by
-  -- 1. reduce to excluding a common root/factor;
-  -- 2. apply `preΨ'_differential_identity` at that root;
-  -- 3. use `hn` and auxiliary nonzero facts;
-  -- 4. contradiction.
+-- To be filled by generated C/X-lifted integer expressions.
+def q94A44 (W : WeierstrassCurve R) : R[X] := 0
+def q94B44 (W : WeierstrassCurve R) : R[X] := 0
+def q94Q44 (W : WeierstrassCurve R) : R[X] := 0
+
+lemma q94_preΨ₄_derivative_bezout (W : WeierstrassCurve R) :
+    q94A44 W * (W.preΨ 4) + q94B44 W * Polynomial.derivative (W.preΨ 4)
+      = C ((512 : R) * W.Δ ^ 5) := by
+  -- CAS identity:
+  -- A44*preΨ₄ + B44*preΨ₄' - 512*Δ^5 - Q44*bRel = 0.
+  -- Mathlib has `W.b_relation : 4 * W.b₈ = W.b₂ * W.b₆ - W.b₄ ^ 2`,
+  -- while `bRel = W.b₂*W.b₆ - W.b₄^2 - 4*W.b₈`, so use `.symm`.
+  linear_combination (norm := ring_nf [q94A44, q94B44, q94Q44,
+      WeierstrassCurve.preΨ, WeierstrassCurve.Δ])
+    q94Q44 W * ((congrArg (fun t : R => (C t : R[X])) W.b_relation).symm)
+
+end WeierstrassCurve
+```
+
+If `W.preΨ 4` does not unfold conveniently through `WeierstrassCurve.preΨ`, add the local simp lemma that exposes the closed form of `preΨ₄`; the CAS identity is exactly for that closed form.
+
+### Coprimality of `preΨ₄` with its derivative
+
+Over a field, the right-hand side is a unit under `[W.IsElliptic]` and `(2 : k) ≠ 0`:
+
+```text
+(512 : k) * W.Δ^5 = (2 : k)^9 * W.Δ^5 ≠ 0.
+```
+
+`W.Δ` is nonzero because `WeierstrassCurve.isUnit_Δ` gives `IsUnit W.Δ`.
+
+Skeleton:
+
+```lean
+namespace WeierstrassCurve
+
+variable {k : Type*} [Field k]
+
+lemma preΨ₄_isCoprime_derivative
+    (W : WeierstrassCurve k) [W.IsElliptic] (h2 : (2 : k) ≠ 0) :
+    IsCoprime (W.preΨ 4) (Polynomial.derivative (W.preΨ 4)) := by
+  have hbez := q94_preΨ₄_derivative_bezout (W := W)
+  have hΔ : W.Δ ≠ 0 := (WeierstrassCurve.isUnit_Δ (W := W)).ne_zero
+  have h512 : (512 : k) ≠ 0 := by
+    -- `512 = 2^9`; exact script can be made by `norm_num` plus `h2`, or by
+    -- changing to `(2 : k)^9` and using `pow_ne_zero`.
+    norm_num [show (2 : k) ≠ 0 from h2]
+  have hscalar_ne : (512 : k) * W.Δ ^ 5 ≠ 0 := by
+    exact mul_ne_zero h512 (pow_ne_zero 5 hΔ)
+  have hscalar_unit : IsUnit ((512 : k) * W.Δ ^ 5) := by
+    exact isUnit_of_ne_zero hscalar_ne
+  -- Convert the Bezout identity with unit RHS into a Bezout identity with RHS `1`.
+  -- Depending on local API, either use `IsCoprime`'s existential form directly,
+  -- or a lemma saying `a*f + b*g` is a unit implies `IsCoprime f g`.
+  obtain ⟨u, hu⟩ := hscalar_unit
+  -- Schematic direct proof:
+  -- refine ⟨q94A44 W * C ↑u⁻¹, q94B44 W * C ↑u⁻¹, ?_⟩
+  -- calc
+  --   (q94A44 W * C ↑u⁻¹) * W.preΨ 4
+  --       + (q94B44 W * C ↑u⁻¹) * derivative (W.preΨ 4)
+  --       = (q94A44 W * W.preΨ 4 + q94B44 W * derivative (W.preΨ 4)) * C ↑u⁻¹ := by ring
+  --   _ = C ((512 : k) * W.Δ ^ 5) * C ↑u⁻¹ := by rw [hbez]
+  --   _ = 1 := by simpa [hu]
   sorry
 
 end WeierstrassCurve
 ```
 
-## Risk assessment
+A useful helper to avoid repeating the last block:
 
-### Low risk
+```lean
+lemma isCoprime_of_linear_combination_isUnit
+    {R : Type*} [CommRing R] {a b x y : R}
+    (h : IsUnit (x * a + y * b)) : IsCoprime a b := by
+  -- likely already in Mathlib under a similar name; otherwise prove by multiplying
+  -- the linear combination by the inverse unit.
+  sorry
+```
 
-* Q47-style resultant certificates for the small base pairs.
-* Adjacent-Somos value-level root exclusions, provided the existing theorem is already convenient at integer indices.
-* The final wrapper from rootwise simple-root statement to `IsCoprime`, assuming a usable polynomial-root or irreducible-factor API.
+Then the proof after `hbez` becomes only:
 
-### Medium risk
+```lean
+  exact isCoprime_of_linear_combination_isUnit
+    (a := W.preΨ 4)
+    (b := Polynomial.derivative (W.preΨ 4))
+    (x := q94A44 W)
+    (y := q94B44 W)
+    (by simpa [hbez] using Polynomial.isUnit_C.mpr hscalar_unit)
+```
 
-* Normalization mismatches among `preΨ`, `preΨ'`, `Ψ₂Sq`, `Ψ₃`, and `preΨ 4`.
-* Parity cases for even reduced polynomials.
-* Moving between natural and integer indices in the adjacent-Somos library.
+The exact theorem name for `C` preserving units may differ; if it is inconvenient, use the explicit inverse construction above.
 
-### High risk
+### Wrapper for `preΨ'_4`
 
-* A proof that differentiates `preΨ'_even` / `preΨ'_odd` recursively and tries to close by induction.
-* Any induction package that assumes lower-index separability from target-index separability.
-* Large `ring_nf` goals generated by repeated unfolding of derivative/product recurrences.
+Once the closed-form equality is available, the target wrapper should be trivial:
 
-## Bottom line
+```lean
+theorem preΨ'_four_isCoprime_derivative
+    (W : WeierstrassCurve k) [W.IsElliptic] (h2 : (2 : k) ≠ 0) :
+    IsCoprime (W.preΨ' 4) (Polynomial.derivative (W.preΨ' 4)) := by
+  -- Expected to close by the local simp lemma `W.preΨ' 4 = W.preΨ 4`.
+  simpa using preΨ₄_isCoprime_derivative (W := W) h2
+```
 
-Strong induction via the recurrence is useful for **value-level coprimality and root-exclusion lemmas**, especially with `preΨ_adjacent_somos`.  It is not the right main engine for the derivative/separability theorem.
+## Risk / implementation notes
 
-The derivative should be handled by one named Wronskian or `[n]^*ω = nω` identity.  The recurrence/Somos machinery should then be used only to prove that the auxiliary factors in that identity do not vanish at roots of `preΨ' n`.  This gives a proof architecture that is much closer to the mathematical reason for the theorem and much more likely to survive in Lean.
+* The main identity is a single `linear_combination` over integers, so it fits the Q37/Q47 proof pattern.
+* The constant is `512 * Δ^5`, not just `Δ^5`; this is harmless over a field with `(2 : k) ≠ 0`.
+* No `(3 : k) ≠ 0` hypothesis should be needed.  This is a good regression check for the certificate.
+* If `ring_nf` is slow with ~865 printed terms, try a syzygy-adjusted certificate or split the polynomial identity into a generated `bRel` certificate lemma plus a short wrapper.
+* This n=4 case is a good testbed for the general resultant/Wronskian route because it proves the theorem without invoking the full induction machinery.
