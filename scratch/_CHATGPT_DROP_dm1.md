@@ -1,390 +1,493 @@
-# Q137 (dm1): Current-state audit of Mazur `|T| ≤ 16` formalization
+# Q163 (dm1): dual-number tangent roadmap for division-polynomial multiple roots
 
-Audit target:
+## Executive answer
+
+For the exact dual-number argument you describe, the **mathematically right object is the formal completion / formal group of the elliptic curve**, not `WeierstrassCurve.Affine.Point`.  Current pinned Mathlib has useful pieces:
+
+```lean
+Mathlib.Algebra.TrivSqZeroExt
+Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+```
+
+but it does **not** currently package the Weierstrass formal group, the formal completion at `O`, or a group law on `WeierstrassCurve.Affine.Point` over non-field base rings such as
+
+```lean
+R := TrivSqZeroExt K K.
+```
+
+`WeierstrassCurve.Affine.Point` is field-oriented; its group structure is built for nonsingular points over a field.  Thus the formal-group route is conceptually correct but requires new infrastructure.
+
+For the separability theorem itself, the shorter current-Mathlib path is **not** to formalize the dual-number tangent proof.  The shorter path is the pure polynomial route:
+
+```lean
+Polynomial.aeval_dual_number
+  +  direct IsCoprime/Bezout certificate for W.preΨ' n and derivative (W.preΨ' n)
+```
+
+In other words, use dual numbers only to convert
+
+```lean
+aeval (x + ε) (W.preΨ' n) = 0
+```
+
+into
+
+```lean
+(W.preΨ' n).eval x = 0 ∧ derivative (W.preΨ' n).eval x = 0,
+```
+
+and then contradict a separately proved
+
+```lean
+(W.preΨ' n).Separable
+-- equivalently:
+IsCoprime (W.preΨ' n) (derivative (W.preΨ' n)).
+```
+
+There is no currently available Mathlib identity that directly relates
+
+```lean
+(derivative (W.preΨ' n)).eval x
+```
+
+to the tangent map of `[n]` on a Weierstrass curve.  Building such an identity would essentially require the same formal-group / group-scheme infrastructure as route (a).
+
+Bottom line:
+
+* If the goal is **to prove separability**, use the polynomial/Bezout route.
+* If the goal is **to formalize the geometric dual-number proof**, build the minimal formal-group/functor-of-points bridge.  The hardest missing step is not dual-number algebra; it is connecting `preΨ'_n` vanishing over `K[ε]/ε²` to membership in the infinitesimal kernel of `[n]` without a group law over the dual-number ring.
+
+---
+
+## 0. Dual-number algebra: small and worth adding
+
+This helper is useful in both routes.  It should be easy; it is just Taylor expansion to first order.
+
+```lean
+import Mathlib.Algebra.TrivSqZeroExt
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.FieldTheory.Separable
+import Mathlib.Tactic
+
+open Polynomial
+
+namespace Polynomial
+
+noncomputable section
+
+variable {K : Type*} [Field K]
+
+/-- First-order Taylor expansion in the trivial square-zero extension.
+
+The dual element is `x + ε v`, represented as
+`TrivSqZeroExt.inl x + TrivSqZeroExt.inr v`. -/
+theorem aeval_trivSqZeroExt_inl_add_inr
+    (p : K[X]) (x v : K) :
+    aeval (TrivSqZeroExt.inl x + TrivSqZeroExt.inr v : TrivSqZeroExt K K) p
+      = TrivSqZeroExt.inl (p.eval x)
+        + TrivSqZeroExt.inr (v * (derivative p).eval x) := by
+  -- Suggested proof:
+  --   induction p using Polynomial.induction_on' with
+  --   | monomial n a =>
+  --       reduce to `(x + εv)^n = x^n + ε * (n*x^(n-1)*v)`.
+  --   | add p q hp hq => simp [hp, hq, derivative_add]
+  -- or prove by `Polynomial.induction_on` using `C`, `X`, `add`, `mul`.
+  -- Useful API:
+  --   TrivSqZeroExt.inl, TrivSqZeroExt.inr,
+  --   TrivSqZeroExt.fst, TrivSqZeroExt.snd,
+  --   Polynomial.derivative_C, derivative_X, derivative_add, derivative_mul,
+  --   Polynomial.aeval_def / eval₂.
+  sorry
+
+/-- Immediate corollary: a dual root gives a root and a derivative root. -/
+theorem eval_and_derivative_eq_zero_of_aeval_dual_eq_zero
+    {p : K[X]} {x v : K}
+    (hv : v ≠ 0)
+    (h : aeval (TrivSqZeroExt.inl x + TrivSqZeroExt.inr v : TrivSqZeroExt K K) p = 0) :
+    p.eval x = 0 ∧ (derivative p).eval x = 0 := by
+  have ht := aeval_trivSqZeroExt_inl_add_inr p x v
+  have hfst : p.eval x = 0 := by
+    -- Apply `TrivSqZeroExt.fst` to `h` after rewriting by `ht`.
+    -- `simp [ht] at h` is likely enough after unfolding the extensionality fields.
+    sorry
+  have hsnd : v * (derivative p).eval x = 0 := by
+    -- Apply `TrivSqZeroExt.snd` to `h` after rewriting by `ht`.
+    sorry
+  exact ⟨hfst, (mul_eq_zero.mp hsnd).resolve_left hv⟩
+
+end
+
+end Polynomial
+```
+
+For your concrete deformation `x + ε·1`, `hv` is `one_ne_zero`, so the derivative vanishes.
+
+---
+
+## 1. Route (b): the short path currently compatible with Mathlib
+
+This route does **not** try to prove that the dual-number point is killed by `[n]`.  It proves directly that a double root is impossible.
+
+### Lemma chain
+
+```lean
+import Mathlib.Algebra.TrivSqZeroExt
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.FieldTheory.Separable
+import Mathlib.Tactic
+
+open Polynomial
+
+namespace WeierstrassCurve
+
+noncomputable section
+
+variable {K : Type*} [Field K] [DecidableEq K]
+variable (W : WeierstrassCurve K) [W.IsElliptic]
+
+/-- The main polynomial brick, proved separately by Bezout/resultant/EDS recurrence. -/
+theorem preΨ'_isCoprime_derivative_of_natCast_ne_zero
+    {n : ℕ} (hn : (n : K) ≠ 0) :
+    IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n)) := by
+  -- This is the real separability brick.
+  -- For fixed n: Sylvester/Bezout certificate.
+  -- For general n: EDS/resultant recurrence or a future formal-group proof.
+  sorry
+
+theorem preΨ'_separable_of_natCast_ne_zero
+    {n : ℕ} (hn : (n : K) ≠ 0) :
+    (W.preΨ' n).Separable := by
+  rw [Polynomial.separable_def]
+  exact W.preΨ'_isCoprime_derivative_of_natCast_ne_zero hn
+
+/-- Dual-number contradiction form of separability. -/
+theorem not_aeval_dual_root_preΨ'_of_natCast_ne_zero
+    {n : ℕ} (hn : (n : K) ≠ 0) {x v : K} (hv : v ≠ 0) :
+    ¬ aeval (TrivSqZeroExt.inl x + TrivSqZeroExt.inr v : TrivSqZeroExt K K)
+        (W.preΨ' n) = 0 := by
+  intro hdual
+  have hboth := Polynomial.eval_and_derivative_eq_zero_of_aeval_dual_eq_zero
+    (p := W.preΨ' n) (x := x) (v := v) hv hdual
+  have hsep : (W.preΨ' n).Separable :=
+    W.preΨ'_separable_of_natCast_ne_zero hn
+  -- `Polynomial.Separable.eval₂_derivative_ne_zero` is already in Mathlib.
+  have hder_ne : (derivative (W.preΨ' n)).eval x ≠ 0 := by
+    simpa using hsep.eval₂_derivative_ne_zero (RingHom.id K) hboth.1
+  exact hder_ne hboth.2
+
+end
+
+end WeierstrassCurve
+```
+
+This is the shortest formalization path once the separability brick is available.  It relies on existing general polynomial API:
+
+```lean
+Polynomial.Separable
+Polynomial.separable_def
+Polynomial.Separable.eval₂_derivative_ne_zero
+Polynomial.derivative
+Polynomial.aeval
+```
+
+The missing mathematical content is exactly the same brick you are already building:
+
+```lean
+IsCoprime (W.preΨ' n) (derivative (W.preΨ' n)).
+```
+
+### Why this does not prove torsion membership
+
+This route proves the dual lift cannot exist.  It does **not** build a dual-number group law or show that the lifted point is killed by `[n]`.  For separability, that is fine and much shorter.
+
+---
+
+## 2. Route (a): formal-group / infinitesimal kernel route
+
+This is the correct route if you specifically want the statement
 
 ```text
-branch: scratch
-repo:   xiangyazi24/FLT
-paths:  FLT/Assumptions/MazurProof/ + FLT/EllipticCurve/Torsion.lean
+preΨ'_n(x + ε) = 0  ⇒  n • tangent = 0.
 ```
 
-I checked the actual branch state through the GitHub connector.  The key finding is that the branch is **not** currently in the six-axiom Mazur-proof-checklist state described in `MAZUR_AXIOM_CHECKLIST.md`.  On the `scratch` branch I could not fetch `FLT/Assumptions/MazurProof/` at all: the GitHub contents endpoint reports it as missing.  The repository still has the older monolithic assumption file
+But current Mathlib does not appear to have the Weierstrass formal group packaged.  The minimal infrastructure should be built as a small local replacement rather than as a full scheme-theoretic theory at first.
 
-```text
-FLT/Assumptions/Mazur.lean
-```
+### Step A1: dual points and tangent vectors
 
-and `FLT/EllipticCurve/Torsion.lean` still contains several literal `sorry`s in the n-torsion/Galois-representation infrastructure.
-
-So the honest current-state summary is:
-
-```text
-There is no axiom-free MazurProof stack in the checked branch.
-The six checklist axioms A1--A6 are not present as current declarations in the requested path.
-The effective current top-level Mazur assumption is still `axiom Mazur_statement`.
-The keystone torsion infrastructure K1/K2/K3 is still represented by sorries in `Torsion.lean`.
-The downstream Frey/Mazur irreducibility bridge is still a `sorry` in `FreyCurve/Contradiction.lean`.
-```
-
-## Files actually read
-
-### `FLT/Assumptions/Mazur.lean`
-
-This file contains the old monolithic statement:
+Define a tangent vector at a finite point by linearizing the Weierstrass equation.
 
 ```lean
-/-- Mazur's bound for the size of the torsion subgroup of an elliptic curve
- over the rationals . -/
-axiom Mazur_statement (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    (AddCommGroup.torsion (E⁄ℚ).Point : Set (E⁄ℚ).Point).ncard ≤ 16
+namespace WeierstrassCurve
+
+noncomputable section
+
+variable {K : Type*} [Field K]
+variable (W : WeierstrassCurve K)
+
+/-- A tangent vector at an affine point `(x,y)` on `W`. -/
+structure AffineTangentAt (x y : K) where
+  dx : K
+  dy : K
+  lin_eq :
+    -- Schematic: Fx(x,y) * dx + Fy(x,y) * dy = 0.
+    -- Use the actual names from `WeierstrassCurve.Affine`:
+    --   W.toAffine.polynomial,
+    --   W.toAffine.polynomialY,
+    -- and the X/Y partial derivative polynomial if present; otherwise expand by `ring_nf`.
+    True
+
+/-- First-order curve equation over dual numbers iff the special point is on the curve and
+`(dx,dy)` satisfies the tangent equation. -/
+theorem dual_equation_iff_tangent
+    {x y dx dy : K} :
+    W.Equation x y ∧ AffineTangentAt W x y dx dy
+      ↔
+    -- Schematic statement: `(x + ε dx, y + ε dy)` satisfies the Weierstrass equation
+    -- over `TrivSqZeroExt K K`.
+    True := by
+  -- Proof uses `Polynomial.aeval_trivSqZeroExt_inl_add_inr` for the bivariate equation,
+  -- or direct coordinate expansion and `TrivSqZeroExt.ext`.
+  sorry
+
+end
+
+end WeierstrassCurve
 ```
 
-There is no proof body and no reference to a `MazurProof` submodule in this file.
-
-### `FLT/EllipticCurve/Torsion.lean`
-
-This file still has these literal `sorry`s:
+For your non-2-torsion hypothesis, the important local lemma is an implicit-function step:
 
 ```lean
-theorem WeierstrassCurve.n_torsion_finite {n : ℕ} (hn : 0 < n) :
-    Finite (E.nTorsion n) := sorry
-
-theorem WeierstrassCurve.n_torsion_card [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
-    Nat.card (E.nTorsion n) = n^2 := sorry
-
-theorem group_theory_lemma {A : Type*} [AddCommGroup A] {n : ℕ} (hn : 0 < n) (r : ℕ)
-    (h : ∀ d : ℕ, d ∣ n → Nat.card (Submodule.torsionBy ℤ A d) = d ^ r) :
-    Nonempty ((Submodule.torsionBy ℤ A n) ≃+ (Fin r → (ZMod n))) := sorry
-
-noncomputable instance (n : ℕ) : Module.Finite (ZMod n) (E.nTorsion n) := sorry
-
-noncomputable instance WeierstrassCurve.galoisRepresentation
-    (K : Type u) [Field K] [DecidableEq K] [Algebra k K] :
-    DistribMulAction (K ≃ₐ[k] K) (E⁄K).Point where
-      one_smul := sorry
-      mul_smul := sorry
-      smul_zero := sorry
-      smul_add := sorry
-
-def WeierstrassCurve.galoisRep {K : Type u} [Field K] (E : WeierstrassCurve K) [E.IsElliptic]
-    [DecidableEq K] [DecidableEq (AlgebraicClosure K)] (n : ℕ) (hn : 0 < n) :
-  GaloisRep K (ZMod n) ((E.map (algebraMap K (AlgebraicClosure K))).nTorsion n) := sorry
-```
-
-The theorem
-
-```lean
-theorem WeierstrassCurve.n_torsion_dimension [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
-    Nonempty (E.nTorsion n ≃+ (ZMod n) × (ZMod n))
-```
-
-is not itself a `sorry`, but it depends directly on `group_theory_lemma` and `n_torsion_card`.
-
-### `FLT/FreyCurve/Contradiction.lean`
-
-This file still has the downstream Mazur bridge as a literal `sorry`:
-
-```lean
-theorem Mazur_Frey (P : FreyPackage) :
-    haveI : Fact P.p.Prime := ⟨P.pp⟩
-    GaloisRep.IsIrreducible (P.freyCurve.galoisRep P.p P.hppos) :=
+/-- If `∂F/∂Y` is nonzero at `(x,y)`, the tangent equation determines `dy` uniquely from `dx`. -/
+theorem tangent_dy_eq_of_polynomialY_ne_zero
+    {x y dx dy : K}
+    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
+    (ht : AffineTangentAt W x y dx dy) :
+    dy = - (/* Fx(x,y) */) / W.toAffine.polynomialY.evalEval x y * dx := by
   sorry
 ```
 
-This file imports `FLT.EllipticCurve.Torsion`, so the `galoisRep` construction in `Torsion.lean` is on the path to `Mazur_Frey`.
+The actual `polynomialY` is available in the affine API; the X-partial may need a local expanded definition if no named partial derivative is exposed.
 
-### `FLT/Assumptions/MazurProof/`
+### Step A2: formal completion at `O`
 
-I attempted direct repository-content access to this directory and to plausible files such as:
-
-```text
-FLT/Assumptions/MazurProof/Basic.lean
-FLT/Assumptions/MazurProof/Main.lean
-```
-
-The directory/file path was not found on the `scratch` branch.  Therefore the current audit cannot report theorem/axiom status inside `MazurProof/`: in the checked branch, that directory is not present.
-
-## 1. Status of the six checklist top-level axioms A1--A6
-
-Because `FLT/Assumptions/MazurProof/` is absent in the checked branch, the checklist axioms do not currently exist as declarations there.  The current code surface is the older single axiom `Mazur_statement`.
-
-| Checklist item | Current checked-branch status | Notes |
-|---|---:|---|
-| A1 `rational_torsion_two_invariant_factors` | Not present as a declaration in checked files | Not discharged; no `MazurProof/` module present. |
-| A2 `weil_pairing_primitive_root` | Not present as a declaration in checked files | Not discharged; no Miller/Weil pairing proof in the checked Mazur surface. |
-| A3 `no_rational_point_of_order_ge_17` | Not present as a declaration in checked files | Not discharged; this is essentially a core Mazur/modular-curve theorem. |
-| A4 `Z2xZ14` exclusion | Not present as a declaration in checked files | Not discharged. |
-| A5 `Z2xZ16` exclusion | Not present as a declaration in checked files | Not discharged. |
-| A6 `mordell_weil_fg` | Not present as a declaration in checked files | Not discharged; old monolithic `Mazur_statement` bypasses it. |
-
-Effective current top-level Mazur axiom:
-
-| Effective current declaration | Status |
-|---|---:|
-| `axiom Mazur_statement` in `FLT/Assumptions/Mazur.lean` | Still an axiom |
-
-So the answer to “which of the six top-level custom axioms are now discharged to theorems?” is: **none are present/discharged in the checked branch**.  The branch is still using a monolithic `Mazur_statement` axiom, plus separate sorries in torsion infrastructure and the Frey/Mazur bridge.
-
-## 2. Residual seam-sorryAx under discharged items
-
-There are no discharged A1--A6 items in the checked branch, so there are no residual seam dependencies under discharged A1--A6 theorems to report.
-
-For the existing torsion infrastructure, the residual seams are still explicit:
-
-| Infrastructure item | Current declaration | Residual obligations |
-|---|---|---|
-| K1 `#E[n] = n²` over separably/algebraically closed field | `WeierstrassCurve.n_torsion_card` | Literal `sorry`; needs SEAM1 separability, SEAM2 x-coordinate/nsmul criterion, root realization/counting. |
-| K2 rank-2 geometric n-torsion | `WeierstrassCurve.n_torsion_dimension` | The theorem body exists but rests on `n_torsion_card` and `group_theory_lemma`, both currently sorry-backed. |
-| K3 finite module/Galois API | `Module.Finite`, `galoisRepresentation`, `galoisRep` | Literal sorries remain. |
-| Group theory conversion from cardinality to `(ZMod n)^r` | `group_theory_lemma` | Literal `sorry`. |
-
-## 3. Full list of remaining Mazur/torsion obligations found
-
-### A. Hard axiom still present
-
-1. `FLT/Assumptions/Mazur.lean`
-
-   ```lean
-   axiom Mazur_statement ... : torsion.ncard ≤ 16
-   ```
-
-   This is the only actual Mazur theorem statement present in the checked assumptions file.
-
-### B. Torsion infrastructure sorries
-
-2. `FLT/EllipticCurve/Torsion.lean`
-
-   ```lean
-   theorem WeierstrassCurve.n_torsion_finite ... := sorry
-   ```
-
-   Needed to make torsion groups finite over base fields and to support continuity/finite-module instances.
-
-3. `FLT/EllipticCurve/Torsion.lean`
-
-   ```lean
-   theorem WeierstrassCurve.n_torsion_card [IsSepClosed k] ... : Nat.card (E.nTorsion n) = n^2 := sorry
-   ```
-
-   This is K1.  It is the main division-polynomial counting theorem.
-
-4. `FLT/EllipticCurve/Torsion.lean`
-
-   ```lean
-   theorem group_theory_lemma ... : Nonempty ((Submodule.torsionBy ℤ A n) ≃+ (Fin r → ZMod n)) := sorry
-   ```
-
-   This is the finite-abelian-group/invariant-factor conversion used by `n_torsion_dimension`.
-
-5. `FLT/EllipticCurve/Torsion.lean`
-
-   ```lean
-   noncomputable instance (n : ℕ) : Module.Finite (ZMod n) (E.nTorsion n) := sorry
-   ```
-
-6. `FLT/EllipticCurve/Torsion.lean`
-
-   ```lean
-   WeierstrassCurve.galoisRepresentation.one_smul := sorry
-   WeierstrassCurve.galoisRepresentation.mul_smul := sorry
-   WeierstrassCurve.galoisRepresentation.smul_zero := sorry
-   WeierstrassCurve.galoisRepresentation.smul_add := sorry
-   ```
-
-   These should be small API proofs from `Affine.Point.map_id`, `Affine.Point.map_map`, and map preserving the group law.
-
-7. `FLT/EllipticCurve/Torsion.lean`
-
-   ```lean
-   def WeierstrassCurve.galoisRep ... := sorry
-   ```
-
-   This bundles the finite torsion module plus the Galois action into the project’s `GaloisRep` structure.  The file comment says the missing part should be continuity, following from finiteness.
-
-### C. Downstream Mazur/Frey bridge sorry
-
-8. `FLT/FreyCurve/Contradiction.lean`
-
-   ```lean
-   theorem Mazur_Frey (P : FreyPackage) :
-       haveI : Fact P.p.Prime := ⟨P.pp⟩
-       GaloisRep.IsIrreducible (P.freyCurve.galoisRep P.p P.hppos) := sorry
-   ```
-
-   This is currently the actual bridge from “Mazur” to the Frey-curve Galois representation in the FLT contradiction file.
-
-### D. Missing directory/module
-
-9. `FLT/Assumptions/MazurProof/`
-
-   Not present in the checked branch.  Any checklist obligations in that directory are not currently part of the Lean code surface of this branch.
-
-## 4. Dependency DAG
-
-Current actual dependency graph:
+The standard local parameter is usually
 
 ```text
-FLT.Assumptions.Mazur
-└─ axiom Mazur_statement
-   └─ currently not wired into `FreyCurve/Contradiction.lean` in the files read
-
-FLT.EllipticCurve.Torsion
-├─ n_torsion_finite                       [sorry]
-├─ n_torsion_card                         [sorry, K1]
-│  ├─ SEAM1 preΨ'_separable               [not present in current Torsion.lean]
-│  ├─ SEAM2 nsmul_eq_zero_iff_ΨSq_eval     [not present in current Torsion.lean]
-│  ├─ root realization / non-2 branch      [not present in current Torsion.lean]
-│  └─ root counting over IsSepClosed        [not present in current Torsion.lean]
-├─ group_theory_lemma                     [sorry]
-│  └─ finite abelian group/invariant-factor argument
-├─ n_torsion_dimension
-│  ├─ depends on n_torsion_card            [sorry-backed]
-│  └─ depends on group_theory_lemma         [sorry-backed]
-├─ Module.Finite (ZMod n) (E.nTorsion n)  [sorry]
-├─ galoisRepresentation action laws        [4 small sorries]
-└─ galoisRep                              [sorry]
-   ├─ depends on Module.Finite / finiteness / topology
-   └─ used by FreyCurve.Contradiction.Mazur_Frey
-
-FLT.FreyCurve.Contradiction
-└─ Mazur_Frey                             [sorry]
-   ├─ depends on P.freyCurve.galoisRep
-   ├─ should use a Mazur torsion-bound theorem or stronger classification theorem
-   └─ feeds FreyPackage.false and Wiles_Taylor_Wiles
+t = -X/Y
 ```
 
-Checklist-intended dependency graph, not currently instantiated in the checked branch:
+near `O`, with another parameter
 
 ```text
-A6 Mordell-Weil finite generation
-└─ rational torsion finite
-   └─ A1 rational torsion two invariant factors
-      ├─ A2 Weil pairing primitive root       (uses K1/K2/K3 + SEAM3)
-      ├─ A3 no rational point order ≥ 17      (Mazur modular-curve input)
-      ├─ A4 exclude Z/2 × Z/14                (Mazur modular-curve input)
-      └─ A5 exclude Z/2 × Z/16                (Mazur modular-curve input)
-         └─ Mazur bound |T| ≤ 16
-            └─ Mazur_Frey / irreducibility bridge
+w = -1/Y.
 ```
 
-## 5. Critical path to a fully axiom-free `|T| ≤ 16`
+The formal group law is obtained by writing the group law in `t`-coordinates.
 
-There are two possible interpretations of “fully axiom-free”.
+Minimal theorem to add:
 
-### Route 1: Prove the old monolithic `Mazur_statement`
+```lean
+/-- The Weierstrass formal group law in the local parameter at `O`. -/
+noncomputable def formalGroupLaw (W : WeierstrassCurve K) :
+    -- Schematic: a one-dimensional commutative formal group law over K.
+    Type := by
+  exact PUnit
 
-This is the current code-surface route because `FLT/Assumptions/Mazur.lean` exposes exactly that axiom.
+/-- Linear term of multiplication-by-n on the Weierstrass formal group. -/
+theorem formalGroup_nsmul_linearCoeff
+    (W : WeierstrassCurve K) (n : ℕ) :
+    -- Schematic:
+    --   [n]_W(T) = C (n : K) * T + terms of order ≥ 2.
+    True := by
+  -- Prove by induction from the formal group law:
+  --   F(T,U) = T + U + terms of total degree ≥ 2.
+  -- No division-polynomial theorem should be needed here.
+  sorry
 
-Critical path:
+/-- On dual numbers, the formal `[n]` map is scalar multiplication by `(n : K)`. -/
+theorem formalGroup_nsmul_dual
+    (W : WeierstrassCurve K) (n : ℕ) (v : K) :
+    -- Schematic: `[n]_(formal) (ε v) = ε ((n : K) * v)`.
+    True := by
+  -- Follows immediately from `formalGroup_nsmul_linearCoeff`, since ε² = 0.
+  sorry
+```
+
+This part is conceptually straightforward once the formal group law exists.  The formal group law itself is absent, so this is new infrastructure.
+
+### Step A3: translate the tangent at `P` to the tangent at `O`
+
+For a field point `P`, translation by `-P` identifies the tangent line at `P` with the tangent line at `O`.  Over dual numbers this should be the map
 
 ```text
-Prove `Mazur_statement` directly
-  → rewrite `FreyCurve/Contradiction.Mazur_Frey` to use it
-  → discharge `Mazur_Frey`
-  → separately clean `Torsion.lean` sorries needed for `galoisRep`
+P + εv  ↦  (P + εv) - P.
 ```
 
-This route is conceptually simple at the API level but mathematically enormous: it hides all of Mazur’s theorem behind one theorem.
+But this expression needs a group law over the dual-number ring or a formal/scheme-theoretic replacement.
 
-### Route 2: Reintroduce and complete the six-axiom checklist stack
+Minimal theorem:
 
-This is the roadmap route described by the prompt, but it is not currently present on the checked branch.
-
-Critical path:
-
-```text
-1. Add/restablish `FLT/Assumptions/MazurProof/` modules.
-2. Prove or explicitly stage A1--A6 as theorem targets.
-3. Finish K1/K2/K3 in `Torsion.lean`:
-   K1: n_torsion_card = n²
-   K2: n_torsion_dimension / rank-2 geometric torsion
-   K3: finite module + Galois representation API
-4. Prove A2 Weil-pairing primitive-root theorem from K1/K2/K3 + Miller/Weil pairing machinery.
-5. Prove or assume-then-replace A3/A4/A5 modular-curve exclusions.
-6. Combine A1--A6 into `Mazur_statement` or directly into the Frey irreducibility theorem.
-7. Replace `Mazur_Frey := sorry` with the actual proof.
+```lean
+/-- Translation by a field-valued point identifies first-order deformations of `P`
+with the formal group at `O`. -/
+theorem translate_dual_point_to_formalGroup
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    {x y : K} (hP : W.Equation x y)
+    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
+    (v : AffineTangentAt W x y 1 /*s*/) :
+    -- Schematic: tangent parameter in the formal group is a nonzero scalar multiple
+    -- of `dx = 1`.
+    True := by
+  -- Needs either:
+  --   * group law over `TrivSqZeroExt K K`, or
+  --   * explicit local coordinate formulas for translation by `-P` to `O`.
+  sorry
 ```
 
-The current shortest technical critical path inside the existing files is:
+This is one of the two hard bridges.
 
-```text
-n_torsion_card
-  + group_theory_lemma
-  → n_torsion_dimension
-  → Module.Finite + galoisRepresentation + galoisRep
-  → usable p-torsion Galois representation
-  → Mazur_Frey
+### Step A4: connect division-polynomial vanishing over dual numbers to infinitesimal `[n]`-kernel
+
+This is the other hard bridge, and probably the single most likely place where new infrastructure is unavoidable.
+
+You need a theorem of the following shape:
+
+```lean
+/-- Division-polynomial criterion over dual numbers, away from the two-torsion factor. -/
+theorem nsmul_dual_eq_zero_of_preΨ'_aeval_eq_zero
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    {n : ℕ} {x y s : K}
+    (hP : W.Equation x y)
+    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
+    (hpre : aeval (TrivSqZeroExt.inl x + TrivSqZeroExt.inr (1 : K) : TrivSqZeroExt K K)
+        (W.preΨ' n) = 0) :
+    -- Schematic: the dual-number point `(x+ε, y+εs)` is killed by `[n]`.
+    True := by
+  -- This is not currently available from `Affine.Point`, because the group law is field-only.
+  -- Prove either by:
+  --   * building the projective Weierstrass group scheme/functor of points over `TrivSqZeroExt`, or
+  --   * proving the division-polynomial coordinate formulas algebraically over any commutative ring
+  --     and interpreting the vanishing denominators in projective coordinates.
+  sorry
 ```
 
-But this only gives the Galois-representation infrastructure.  It does **not** prove the Mazur bound itself.  The bound/classification input is still the old `Mazur_statement` axiom unless the missing `MazurProof/` stack is added.
+Once this is available, the desired tangent conclusion is short:
 
-## 6. Relative difficulty / size estimates
-
-### Small / API cleanup
-
-| Item | Estimate | Notes |
-|---|---:|---|
-| `galoisRepresentation.one_smul` | Small | Should follow from `Affine.Point.map_id`. |
-| `galoisRepresentation.mul_smul` | Small | Should follow from `Affine.Point.map_map`. |
-| `galoisRepresentation.smul_zero` | Small | Map is an additive monoid hom. |
-| `galoisRepresentation.smul_add` | Small | Map is an additive monoid hom. |
-| `Module.Finite (ZMod n) (E.nTorsion n)` once finite/cardinality is available | Small–medium | Likely straightforward from finiteness/equiv. |
-| `galoisRep` continuity once finite torsion/action laws are available | Small–medium | File comment says continuity follows from finiteness. |
-
-### Medium / group theory
-
-| Item | Estimate | Notes |
-|---|---:|---|
-| `group_theory_lemma` | Medium–large | Needs finite abelian group decomposition or a specialized torsion-card-to-free-`ZMod n` argument. Could be short if Mathlib has exactly the right finite-module structure theorem; otherwise substantial. |
-| `n_torsion_finite` | Medium | Could follow from embedding into algebraic closure plus finite `n_torsion_card`, or from polynomial root bounds. Needs careful field/base-change API. |
-
-### Large / division-polynomial keystone
-
-| Item | Estimate | Notes |
-|---|---:|---|
-| `n_torsion_card` K1 | Large | Needs SEAM1 separability, SEAM2 nsmul/x-coordinate criterion, root realization, root counting, and 2-torsion handling. This is the main technical Lean burden currently visible in `Torsion.lean`. |
-| SEAM1 `preΨ'_separable` | Large | From the previous SEAM discussion: local dual-number/tangent or equivalent resultant/Wronskian infrastructure. Not currently wired into `Torsion.lean`. |
-| SEAM2 `nsmul_eq_zero_iff_ΨSq_eval` | Large | Needs coordinate-ring congruences and point/multiplication formulas. |
-| SEAM3 Miller/Weil pairing | Large | Needed for A2; not part of current `Torsion.lean`. |
-
-### Very large / Mazur theorem proper
-
-| Item | Estimate | Notes |
-|---|---:|---|
-| A3 no rational point of order ≥ 17 | Very large | Core modular-curve/Mazur input. |
-| A4 exclude `Z/2 × Z/14` | Very large | Core modular-curve/Mazur input. |
-| A5 exclude `Z/2 × Z/16` | Very large | Core modular-curve/Mazur input. |
-| A6 Mordell-Weil finite generation | Very large | Major arithmetic theorem unless imported from a separate library. |
-| Full proof of `Mazur_statement` | Very large | Encompasses classification or enough of it for the bound. |
-| `Mazur_Frey` from the bound/classification | Medium once inputs exist | Needs Frey-specific torsion facts plus the Galois representation infrastructure. |
-
-## 7. Honest distance from done
-
-The current checked branch is **not close to an axiom-free Mazur bound**.  It is not merely one remaining `sorry`.  The actual state is:
-
-```text
-* Old monolithic Mazur axiom still present.
-* Six-axiom MazurProof decomposition absent from the checked branch.
-* K1/K2/K3 torsion infrastructure still sorry-backed.
-* Downstream `Mazur_Frey` bridge still a `sorry`.
+```lean
+theorem tangent_killed_by_n_of_preΨ'_dual_root
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    {n : ℕ} {x y s : K}
+    (hP : W.Equation x y)
+    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
+    (hpre : aeval (TrivSqZeroExt.inl x + TrivSqZeroExt.inr (1 : K) : TrivSqZeroExt K K)
+        (W.preΨ' n) = 0) :
+    -- Schematic: `(n : K) • tangent = 0`.
+    True := by
+  have hker := nsmul_dual_eq_zero_of_preΨ'_aeval_eq_zero
+    (W := W) hP hY hpre
+  -- Translate to the formal group at `O`, then apply `formalGroup_nsmul_dual`.
+  sorry
 ```
 
-The most realistic next steps are:
+Finally, if `(n : K) ≠ 0`, scalar multiplication by `(n : K)` is injective on the one-dimensional `K`-vector space of tangents:
 
-1. Decide whether the active code path is the old monolithic `Mazur_statement` or the six-axiom `MazurProof/` checklist architecture.
-2. If using the checklist architecture, add or restore `FLT/Assumptions/MazurProof/` so the declarations exist and are imported.
-3. Independently finish the visible `Torsion.lean` infrastructure because it is needed for p-torsion Galois representations regardless of how the Mazur bound is packaged.
-4. Treat `n_torsion_card` as the current keystone blocker in code, with SEAM1/SEAM2/root-realization as its internal critical path.
-5. Treat A3/A4/A5/A6 as the mathematically largest remaining assumptions once the torsion infrastructure is finished.
+```lean
+theorem tangent_eq_zero_of_n_tangent_eq_zero
+    {n : ℕ} (hn : (n : K) ≠ 0) {v : K}
+    (h : (n : K) * v = 0) : v = 0 := by
+  exact (mul_eq_zero.mp h).resolve_left hn
+```
 
-## 8. Compact status table
+This contradicts `dx = 1` after the translation/coordinate-identification lemma shows that the formal tangent parameter is a nonzero scalar multiple of the chosen deformation.
 
-| Layer | Current status on `scratch` | Blocking declarations |
-|---|---|---|
-| Old Mazur bound | Still axiom | `Mazur_statement` |
-| Six-axiom MazurProof stack | Not present in checked branch | Directory/path absent |
-| K1 `#E[n]=n²` | Sorry | `n_torsion_card` |
-| K2 rank-2 geometric torsion | Theorem body exists but sorry-backed | `n_torsion_card`, `group_theory_lemma` |
-| K3 finite/Galois API | Sorry-backed | `Module.Finite`, action laws, `galoisRep` |
-| Frey/Mazur irreducibility bridge | Sorry | `Mazur_Frey` |
-| Final FLT contradiction | Formal wrapper exists but depends on `Mazur_Frey` | `FreyPackage.false`, `Wiles_Taylor_Wiles` rely on `Mazur_Frey` |
+---
+
+## 3. Route (b) as phrased in the question: no existing derivative-to-group identity
+
+The ε-linearization itself is clean:
+
+```lean
+aeval (x + ε) (W.preΨ' n) = 0
+  ⇒ (W.preΨ' n).eval x = 0
+  ⇒ (derivative (W.preΨ' n)).eval x = 0.
+```
+
+But there is currently no Mathlib theorem of the form
+
+```lean
+(derivative (W.preΨ' n)).eval x = some_group_theoretic_differential_expression
+```
+
+nor a theorem identifying the derivative of `preΨ'_n` with a sum over `n`-torsion points.  The standard mathematical explanations pass through one of:
+
+1. the differential of `[n]`,
+2. reducedness/étaleness of `ker[n]`,
+3. a resultant/Bezout identity showing coprimality with the derivative.
+
+Items 1 and 2 are formal-group/group-scheme infrastructure.  Item 3 is the pure polynomial separability brick.
+
+So route (b) is short only if you make it a direct polynomial proof:
+
+```lean
+IsCoprime (W.preΨ' n) (derivative (W.preΨ' n))
+```
+
+not if you try to route the derivative through torsion geometry.
+
+---
+
+## 4. Recommended implementation order
+
+### If your goal is the separability theorem
+
+Implement in this order:
+
+```lean
+-- 1. Generic dual-number Taylor lemma.
+Polynomial.aeval_trivSqZeroExt_inl_add_inr
+
+-- 2. Direct separability brick, by your selected polynomial method.
+WeierstrassCurve.preΨ'_isCoprime_derivative_of_natCast_ne_zero
+
+-- 3. Wrapper.
+WeierstrassCurve.preΨ'_separable_of_natCast_ne_zero
+
+-- 4. Optional: dual-number contradiction corollary.
+WeierstrassCurve.not_aeval_dual_root_preΨ'_of_natCast_ne_zero
+```
+
+This path needs no group law over `TrivSqZeroExt K K`.
+
+### If your goal is the geometric tangent proof
+
+Implement in this order:
+
+```lean
+-- 1. Dual equation / tangent equivalence.
+WeierstrassCurve.dual_equation_iff_tangent
+
+-- 2. Minimal formal group at O and `[n]` linear term.
+WeierstrassCurve.formalGroupLaw
+WeierstrassCurve.formalGroup_nsmul_linearCoeff
+WeierstrassCurve.formalGroup_nsmul_dual
+
+-- 3. Translation of first-order deformations from P to O.
+WeierstrassCurve.translate_dual_point_to_formalGroup
+
+-- 4. Division-polynomial criterion over dual numbers.
+WeierstrassCurve.nsmul_dual_eq_zero_of_preΨ'_aeval_eq_zero
+
+-- 5. Tangent killed by n, then scalar injectivity from `(n : K) ≠ 0`.
+WeierstrassCurve.tangent_killed_by_n_of_preΨ'_dual_root
+```
+
+The likely biggest new-infrastructure step is **Step 4**, because it asks for the division-polynomial coordinate formula for `[n]` over a non-field square-zero ring, or equivalently the functor-of-points interpretation of the kernel of `[n]`.  Step 2 is also new, but the theorem `[n](T) = nT + O(T²)` is local and relatively standard once the formal group law is defined.
+
+---
+
+## 5. Honest assessment
+
+* The formal-group route is the clean mathematical proof but is not currently a small Lean patch.  It requires building at least a minimal formal completion/formal group or group functor over dual numbers.
+* The derivative linearization route is already supported at the polynomial level, but Mathlib has no bridge from `derivative preΨ'_n` to the group law.  Without that bridge, it reduces to proving separability directly by `IsCoprime`/Bezout.
+* Therefore, for the current FLT formalization, the shortest axiom-removal path is the pure polynomial route.  The dual-number argument is valuable as mathematical guidance, but formalizing it faithfully will probably be larger than the separability brick itself.
