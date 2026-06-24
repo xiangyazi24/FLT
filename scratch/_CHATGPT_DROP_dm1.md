@@ -1,323 +1,296 @@
-# Q80 (dm1): `preΨ'` separability for division polynomials
+# Q93 (dm1): `n = 3` division-polynomial separability certificate
 
-## Executive answer
+## Result
 
-The target theorem
+For
 
-```lean
-theorem preΨ'_separable_of_natCast_ne_zero {n : ℕ} (hn : (n : k) ≠ 0) :
-    (W.preΨ' n).Separable
+```text
+Ψ₃  = 3*X**4 + b2*X**3 + 3*b4*X**2 + 3*b6*X + b8
+Ψ₃' = 12*X**3 + 3*b2*X**2 + 6*b4*X + 3*b6
+Δ   = -b2**2*b8 - 8*b4**3 - 27*b6**2 + 9*b2*b4*b6
+bRel = b2*b6 - b4**2 - 4*b8
 ```
 
-is mathematically true under the stated hypotheses, but current Mathlib does **not** already contain the elliptic-curve brick that proves it.  The polynomial infrastructure is present; the missing part is the elliptic-curve/simple-root theorem for division polynomials.
+the following integer-coefficient cofactors satisfy
 
-The most tractable route in the present API is **E2**, but not as a variable-`n` CAS resultant.  The clean Mathlib-facing form is a single structural lemma saying that `preΨ' n` has no repeated algebraic roots when `(n : k) ≠ 0`.  Once that lemma is available, the desired theorem is a short wrapper using `Polynomial.nodup_aroots_iff_of_splits` or, equivalently, `Polynomial.separable_def`.
-
-The **E1** route (`[n]` is étale, kernel reduced) is mathematically best, but current Mathlib/FLT does not expose enough scheme/isogeny API for elliptic curves to make it the short proof.  In `FLT/EllipticCurve/Torsion.lean`, even `n_torsion_finite` and `n_torsion_card` are still placeholders; using those to prove separability would be circular for the torsion development.
-
----
-
-## API currently available and useful
-
-From `Mathlib.FieldTheory.Separable`:
-
-```lean
-Polynomial.Separable f = IsCoprime f (Polynomial.derivative f)
-Polynomial.separable_def
-Polynomial.separable_def'
-Polynomial.separable_map
-Polynomial.nodup_aroots_iff_of_splits
-Polynomial.card_rootSet_eq_natDegree_iff_of_splits
-Polynomial.Separable.map
-Polynomial.Separable.ne_zero
-Polynomial.Separable.squarefree
+```text
+A3*Ψ₃ + B3*Ψ₃' = -81*Δ**2 + Q3*bRel
 ```
 
-The most important exact facts are:
+over `ℤ[b2,b4,b6,b8][X]`.
 
-```lean
-#check Polynomial.separable_def
--- p.Separable ↔ IsCoprime p (derivative p)
+```text
+A3 = 648*X**2*b2**3*b6 - 648*X**2*b2**2*b4**2 + 1296*X**2*b2**2*b8 - 27216*X**2*b2*b4*b6 + 23328*X**2*b4**3 - 31104*X**2*b4*b8 + 104976*X**2*b6**2 + 162*X*b2**4*b6 - 162*X*b2**3*b4**2 - 6480*X*b2**2*b4*b6 + 5832*X*b2*b4**3 + 2592*X*b2*b4*b8 + 29160*X*b2*b6**2 - 11664*X*b4**2*b6 - 46656*X*b6*b8 - 81*b2**4*b8 + 405*b2**3*b4*b6 - 324*b2**2*b4**3 + 3888*b2**2*b4*b8 + 81*b2**2*b6**2 - 16524*b2*b4**2*b6 - 14256*b2*b6*b8 + 11664*b4**4 - 31104*b4**2*b8 + 69984*b4*b6**2 + 20736*b8**2
 
-#check Polynomial.separable_def'
--- p.Separable ↔ ∃ a b, a * p + b * derivative p = 1
+B3 = -162*X**3*b2**3*b6 + 162*X**3*b2**2*b4**2 - 324*X**3*b2**2*b8 + 6804*X**3*b2*b4*b6 - 5832*X**3*b4**3 + 7776*X**3*b4*b8 - 26244*X**3*b6**2 - 54*X**2*b2**4*b6 + 54*X**2*b2**3*b4**2 - 27*X**2*b2**3*b8 + 2187*X**2*b2**2*b4*b6 - 1944*X**2*b2*b4**3 - 9477*X**2*b2*b6**2 + 2916*X**2*b4**2*b6 + 11664*X**2*b6*b8 + 27*X*b2**4*b8 - 189*X*b2**3*b4*b6 + 162*X*b2**2*b4**3 - 1350*X*b2**2*b4*b8 - 81*X*b2**2*b6**2 + 7776*X*b2*b4**2*b6 + 4536*X*b2*b6*b8 - 5832*X*b4**4 + 11664*X*b4**2*b8 - 30618*X*b4*b6**2 - 5184*X*b8**2 + 27*b2**3*b4*b8 - 108*b2**3*b6**2 + 81*b2**2*b4**2*b6 - 189*b2**2*b6*b8 - 972*b2*b4**2*b8 + 4374*b2*b4*b6**2 - 432*b2*b8**2 - 2916*b4**3*b6 + 11664*b4*b6*b8 - 19683*b6**3
 
-#check Polynomial.separable_map
--- (map f p).Separable ↔ p.Separable
-
-#check Polynomial.nodup_aroots_iff_of_splits
--- f ≠ 0 → (map (algebraMap F K) f).Splits →
---   (f.aroots K).Nodup ↔ f.Separable
+Q3 = -972*b2**2*b4*b8 - 324*b2**2*b6**2 + 6480*b2*b4**2*b6 + 2592*b2*b6*b8 - 5184*b4**4 + 9072*b4**2*b8 - 26244*b4*b6**2 - 5184*b8**2
 ```
 
-From `Mathlib.FieldTheory.IsAlgClosed.Basic`:
+The actual resultant before imposing `bRel = 0` is
 
-```lean
-#check IsAlgClosed.splits
-#check IsAlgClosed.splits_codomain
+```text
+Res_X(Ψ₃, Ψ₃') = -81*Δ**2 + Q3*bRel.
 ```
 
-The deprecated `IsAlgClosed.splits_codomain` is still exactly the shape one wants for algebraic closures:
+Equivalently,
 
-```lean
-(map (algebraMap k (AlgebraicClosure k)) p).Splits
+```text
+Res_X(Ψ₃, Ψ₃') + 81*Δ**2
+  = -324*bRel*(3*b2**2*b4*b8 + b2**2*b6**2 - 20*b2*b4**2*b6
+      - 8*b2*b6*b8 + 16*b4**4 - 28*b4**2*b8
+      + 81*b4*b6**2 + 16*b8**2).
 ```
 
-but the non-deprecated form
+## Verification / reproduction script
 
-```lean
-IsAlgClosed.splits (Polynomial.map (algebraMap k (AlgebraicClosure k)) p)
+This is self-contained.  It computes the Sylvester/Bézout coefficient solve for `A3,B3`, checks that the solution is integral, checks the resultant relation modulo `bRel`, and verifies the final displayed identity.
+
+```python
+import sympy as sp
+
+X, b2, b4, b6, b8 = sp.symbols('X b2 b4 b6 b8')
+
+Psi3 = 3*X**4 + b2*X**3 + 3*b4*X**2 + 3*b6*X + b8
+dPsi3 = sp.diff(Psi3, X)
+Delta = -b2**2*b8 - 8*b4**3 - 27*b6**2 + 9*b2*b4*b6
+bRel = b2*b6 - b4**2 - 4*b8
+
+A3 = (
+    648*X**2*b2**3*b6 - 648*X**2*b2**2*b4**2
+    + 1296*X**2*b2**2*b8 - 27216*X**2*b2*b4*b6
+    + 23328*X**2*b4**3 - 31104*X**2*b4*b8
+    + 104976*X**2*b6**2 + 162*X*b2**4*b6
+    - 162*X*b2**3*b4**2 - 6480*X*b2**2*b4*b6
+    + 5832*X*b2*b4**3 + 2592*X*b2*b4*b8
+    + 29160*X*b2*b6**2 - 11664*X*b4**2*b6
+    - 46656*X*b6*b8 - 81*b2**4*b8
+    + 405*b2**3*b4*b6 - 324*b2**2*b4**3
+    + 3888*b2**2*b4*b8 + 81*b2**2*b6**2
+    - 16524*b2*b4**2*b6 - 14256*b2*b6*b8
+    + 11664*b4**4 - 31104*b4**2*b8
+    + 69984*b4*b6**2 + 20736*b8**2
+)
+
+B3 = (
+    -162*X**3*b2**3*b6 + 162*X**3*b2**2*b4**2
+    - 324*X**3*b2**2*b8 + 6804*X**3*b2*b4*b6
+    - 5832*X**3*b4**3 + 7776*X**3*b4*b8
+    - 26244*X**3*b6**2 - 54*X**2*b2**4*b6
+    + 54*X**2*b2**3*b4**2 - 27*X**2*b2**3*b8
+    + 2187*X**2*b2**2*b4*b6 - 1944*X**2*b2*b4**3
+    - 9477*X**2*b2*b6**2 + 2916*X**2*b4**2*b6
+    + 11664*X**2*b6*b8 + 27*X*b2**4*b8
+    - 189*X*b2**3*b4*b6 + 162*X*b2**2*b4**3
+    - 1350*X*b2**2*b4*b8 - 81*X*b2**2*b6**2
+    + 7776*X*b2*b4**2*b6 + 4536*X*b2*b6*b8
+    - 5832*X*b4**4 + 11664*X*b4**2*b8
+    - 30618*X*b4*b6**2 - 5184*X*b8**2
+    + 27*b2**3*b4*b8 - 108*b2**3*b6**2
+    + 81*b2**2*b4**2*b6 - 189*b2**2*b6*b8
+    - 972*b2*b4**2*b8 + 4374*b2*b4*b6**2
+    - 432*b2*b8**2 - 2916*b4**3*b6
+    + 11664*b4*b6*b8 - 19683*b6**3
+)
+
+Q3 = (
+    -972*b2**2*b4*b8 - 324*b2**2*b6**2
+    + 6480*b2*b4**2*b6 + 2592*b2*b6*b8
+    - 5184*b4**4 + 9072*b4**2*b8
+    - 26244*b4*b6**2 - 5184*b8**2
+)
+
+# Recompute A3,B3 by the Sylvester/Bézout coefficient solve.
+# A has degree < deg(dPsi3)=3, B has degree < deg(Psi3)=4.
+Res = sp.resultant(Psi3, dPsi3, X)
+a0, a1, a2, c0, c1, c2, c3 = sp.symbols('a0 a1 a2 c0 c1 c2 c3')
+A = a0 + a1*X + a2*X**2
+B = c0 + c1*X + c2*X**2 + c3*X**3
+coeff_poly = sp.Poly(A*Psi3 + B*dPsi3 - Res, X)
+eqs = [sp.Eq(coeff_poly.coeff_monomial(X**i), 0) for i in range(7)]
+sol = sp.solve(eqs, [a0, a1, a2, c0, c1, c2, c3], dict=True, simplify=False)[0]
+A_computed = sp.expand(A.subs(sol))
+B_computed = sp.expand(B.subs(sol))
+
+assert A_computed == A3
+assert B_computed == B3
+
+# Integer-coefficient checks.
+for name, poly in [('A3', A3), ('B3', B3), ('Q3', Q3)]:
+    P = sp.Poly(poly, X, b2, b4, b6, b8, domain=sp.ZZ)
+    assert all(c in sp.ZZ for c in P.coeffs()), name
+
+assert sp.expand(A3*Psi3 + B3*dPsi3 - Res) == 0
+assert sp.expand(Res - (-81*Delta**2) - Q3*bRel) == 0
+assert sp.expand(A3*Psi3 + B3*dPsi3 - (-81*Delta**2) - Q3*bRel) == 0
+
+print('deg_X(A3)=', sp.Poly(A3, X).degree())
+print('deg_X(B3)=', sp.Poly(B3, X).degree())
+print('deg_X(Q3)=', sp.Poly(Q3, X).degree())
+print('OK')
 ```
 
-also works.
+Expected final output:
 
-From `Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic`:
-
-```lean
-#check WeierstrassCurve.preΨ'
-#check WeierstrassCurve.preΨ'_zero
-#check WeierstrassCurve.preΨ'_one
-#check WeierstrassCurve.preΨ'_two
-#check WeierstrassCurve.preΨ'_three
-#check WeierstrassCurve.preΨ'_four
-#check WeierstrassCurve.preΨ'_even
-#check WeierstrassCurve.preΨ'_odd
-#check WeierstrassCurve.map_preΨ'
-#check WeierstrassCurve.baseChange_preΨ'
+```text
+deg_X(A3)= 2
+deg_X(B3)= 3
+deg_X(Q3)= 0
+OK
 ```
 
-From `Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree`:
+## Lean certificate
 
-```lean
-#check WeierstrassCurve.natDegree_preΨ'_le
-#check WeierstrassCurve.coeff_preΨ'
-#check WeierstrassCurve.coeff_preΨ'_ne_zero
-#check WeierstrassCurve.natDegree_preΨ'
-#check WeierstrassCurve.leadingCoeff_preΨ'
-#check WeierstrassCurve.preΨ'_ne_zero
-```
-
-These prove that `preΨ' n` has the expected degree and is nonzero when `(n : k) ≠ 0`, but they do not prove squarefreeness/separability.
-
----
-
-## What is missing
-
-There is no current Mathlib theorem of the following kind:
-
-```lean
-theorem Isogeny.mul_separable_of_natCast_ne_zero ...
-theorem WeierstrassCurve.mul_by_n_etale ...
-theorem WeierstrassCurve.nTorsion_reduced ...
-theorem WeierstrassCurve.preΨ'_separable_of_natCast_ne_zero ...
-theorem WeierstrassCurve.preΨ'_isCoprime_derivative_of_natCast_ne_zero ...
-```
-
-The minimal useful missing lemma can be stated in either of the following two equivalent styles.
-
-### Missing brick A: direct Bézout / derivative coprimality
-
-```lean
-namespace WeierstrassCurve
-
-open Polynomial
-
-variable {k : Type*} [Field k] [DecidableEq k]
-variable (W : WeierstrassCurve k) [W.IsElliptic]
-
-/-- Missing structural theorem: division polynomials have no repeated roots when `char k ∤ n`. -/
-theorem preΨ'_isCoprime_derivative_of_natCast_ne_zero
-    {n : ℕ} (hn : (n : k) ≠ 0) :
-    IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n)) := by
-  -- Missing in current Mathlib/FLT.
-  -- Mathematical proof: `[n] : E → E` is separable/étale because `(n : k) ≠ 0`;
-  -- therefore the finite kernel is reduced.  Passing to the quotient by `P ~ -P`
-  -- gives that the univariate `x`-coordinate division polynomial has simple roots.
-  -- Algebraic proof: construct a Bezout identity
-  --   A_n * preΨ' n + B_n * derivative (preΨ' n) = 1
-  -- over the universal nonsingular Weierstrass ring after inverting `n`.
-  sorry
-
-end WeierstrassCurve
-```
-
-With this brick, the target theorem is literally just `Polynomial.separable_def`:
-
-```lean
-namespace WeierstrassCurve
-
-open Polynomial
-
-variable {k : Type*} [Field k] [DecidableEq k]
-variable (W : WeierstrassCurve k) [W.IsElliptic]
-
-theorem preΨ'_separable_of_natCast_ne_zero_via_coprime
-    {n : ℕ} (hn : (n : k) ≠ 0) :
-    (W.preΨ' n).Separable := by
-  rw [Polynomial.separable_def]
-  exact W.preΨ'_isCoprime_derivative_of_natCast_ne_zero hn
-
-end WeierstrassCurve
-```
-
-### Missing brick B: no repeated algebraic roots
-
-This form is often easier to connect to the geometric proof over an algebraic closure:
-
-```lean
-namespace WeierstrassCurve
-
-open Polynomial
-
-variable {k : Type*} [Field k] [DecidableEq k]
-variable (W : WeierstrassCurve k) [W.IsElliptic]
-
-/-- Missing structural theorem, root form. -/
-theorem preΨ'_aroots_nodup_of_natCast_ne_zero
-    {n : ℕ} (hn : (n : k) ≠ 0) :
-    ((W.preΨ' n).aroots (AlgebraicClosure k)).Nodup := by
-  -- Missing in current Mathlib/FLT.
-  -- Equivalent content: every algebraic root of `preΨ' n` is a simple root.
-  -- This is the `x`-coordinate shadow of the reducedness of `ker [n]`.
-  sorry
-
-end WeierstrassCurve
-```
-
-Given this root-form brick, the wrapper theorem is:
+The following is the direct certificate shape for `FLT/EllipticCurve/Torsion.lean` or a nearby division-polynomial file.  The only possible local-name adjustment is the discriminant definition name if your imports expose it as a qualified theorem/definition other than `WeierstrassCurve.Δ`; the polynomial certificate itself is completely expanded.
 
 ```lean
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
-import Mathlib.FieldTheory.AlgebraicClosure
-import Mathlib.FieldTheory.IsAlgClosed.Basic
 import Mathlib.FieldTheory.Separable
 import Mathlib.Tactic
 
 open Polynomial
+open scoped Polynomial
 
 namespace WeierstrassCurve
 
 noncomputable section
 
 variable {k : Type*} [Field k] [DecidableEq k]
-variable (W : WeierstrassCurve k) [W.IsElliptic]
+variable (W : WeierstrassCurve k)
 
-/-- This is the desired theorem, assuming the missing simple-root brick above. -/
-theorem preΨ'_separable_of_natCast_ne_zero
-    {n : ℕ} (hn : (n : k) ≠ 0) :
-    (W.preΨ' n).Separable := by
+private lemma bRelC (W : WeierstrassCurve k) :
+    C W.b₂ * C W.b₆ - C W.b₄ ^ 2 - C (4 : k) * C W.b₈ = (0 : k[X]) := by
+  have hb0 : W.b₂ * W.b₆ - W.b₄ ^ 2 - (4 : k) * W.b₈ = 0 := by
+    have hb := b_relation (W := W)
+    -- `hb : 4 * W.b₈ = W.b₂ * W.b₆ - W.b₄ ^ 2`.
+    rw [← hb]
+    ring
+  have hbC := congrArg (fun z : k => (C z : k[X])) hb0
+  simpa [map_sub, map_mul, map_pow] using hbC
+
+private noncomputable def A₃ (W : WeierstrassCurve k) : k[X] :=
+  648 * X ^ 2 * C W.b₂ ^ 3 * C W.b₆
+    - 648 * X ^ 2 * C W.b₂ ^ 2 * C W.b₄ ^ 2
+    + 1296 * X ^ 2 * C W.b₂ ^ 2 * C W.b₈
+    - 27216 * X ^ 2 * C W.b₂ * C W.b₄ * C W.b₆
+    + 23328 * X ^ 2 * C W.b₄ ^ 3
+    - 31104 * X ^ 2 * C W.b₄ * C W.b₈
+    + 104976 * X ^ 2 * C W.b₆ ^ 2
+    + 162 * X * C W.b₂ ^ 4 * C W.b₆
+    - 162 * X * C W.b₂ ^ 3 * C W.b₄ ^ 2
+    - 6480 * X * C W.b₂ ^ 2 * C W.b₄ * C W.b₆
+    + 5832 * X * C W.b₂ * C W.b₄ ^ 3
+    + 2592 * X * C W.b₂ * C W.b₄ * C W.b₈
+    + 29160 * X * C W.b₂ * C W.b₆ ^ 2
+    - 11664 * X * C W.b₄ ^ 2 * C W.b₆
+    - 46656 * X * C W.b₆ * C W.b₈
+    - 81 * C W.b₂ ^ 4 * C W.b₈
+    + 405 * C W.b₂ ^ 3 * C W.b₄ * C W.b₆
+    - 324 * C W.b₂ ^ 2 * C W.b₄ ^ 3
+    + 3888 * C W.b₂ ^ 2 * C W.b₄ * C W.b₈
+    + 81 * C W.b₂ ^ 2 * C W.b₆ ^ 2
+    - 16524 * C W.b₂ * C W.b₄ ^ 2 * C W.b₆
+    - 14256 * C W.b₂ * C W.b₆ * C W.b₈
+    + 11664 * C W.b₄ ^ 4
+    - 31104 * C W.b₄ ^ 2 * C W.b₈
+    + 69984 * C W.b₄ * C W.b₆ ^ 2
+    + 20736 * C W.b₈ ^ 2
+
+private noncomputable def B₃ (W : WeierstrassCurve k) : k[X] :=
+  - 162 * X ^ 3 * C W.b₂ ^ 3 * C W.b₆
+    + 162 * X ^ 3 * C W.b₂ ^ 2 * C W.b₄ ^ 2
+    - 324 * X ^ 3 * C W.b₂ ^ 2 * C W.b₈
+    + 6804 * X ^ 3 * C W.b₂ * C W.b₄ * C W.b₆
+    - 5832 * X ^ 3 * C W.b₄ ^ 3
+    + 7776 * X ^ 3 * C W.b₄ * C W.b₈
+    - 26244 * X ^ 3 * C W.b₆ ^ 2
+    - 54 * X ^ 2 * C W.b₂ ^ 4 * C W.b₆
+    + 54 * X ^ 2 * C W.b₂ ^ 3 * C W.b₄ ^ 2
+    - 27 * X ^ 2 * C W.b₂ ^ 3 * C W.b₈
+    + 2187 * X ^ 2 * C W.b₂ ^ 2 * C W.b₄ * C W.b₆
+    - 1944 * X ^ 2 * C W.b₂ * C W.b₄ ^ 3
+    - 9477 * X ^ 2 * C W.b₂ * C W.b₆ ^ 2
+    + 2916 * X ^ 2 * C W.b₄ ^ 2 * C W.b₆
+    + 11664 * X ^ 2 * C W.b₆ * C W.b₈
+    + 27 * X * C W.b₂ ^ 4 * C W.b₈
+    - 189 * X * C W.b₂ ^ 3 * C W.b₄ * C W.b₆
+    + 162 * X * C W.b₂ ^ 2 * C W.b₄ ^ 3
+    - 1350 * X * C W.b₂ ^ 2 * C W.b₄ * C W.b₈
+    - 81 * X * C W.b₂ ^ 2 * C W.b₆ ^ 2
+    + 7776 * X * C W.b₂ * C W.b₄ ^ 2 * C W.b₆
+    + 4536 * X * C W.b₂ * C W.b₆ * C W.b₈
+    - 5832 * X * C W.b₄ ^ 4
+    + 11664 * X * C W.b₄ ^ 2 * C W.b₈
+    - 30618 * X * C W.b₄ * C W.b₆ ^ 2
+    - 5184 * X * C W.b₈ ^ 2
+    + 27 * C W.b₂ ^ 3 * C W.b₄ * C W.b₈
+    - 108 * C W.b₂ ^ 3 * C W.b₆ ^ 2
+    + 81 * C W.b₂ ^ 2 * C W.b₄ ^ 2 * C W.b₆
+    - 189 * C W.b₂ ^ 2 * C W.b₆ * C W.b₈
+    - 972 * C W.b₂ * C W.b₄ ^ 2 * C W.b₈
+    + 4374 * C W.b₂ * C W.b₄ * C W.b₆ ^ 2
+    - 432 * C W.b₂ * C W.b₈ ^ 2
+    - 2916 * C W.b₄ ^ 3 * C W.b₆
+    + 11664 * C W.b₄ * C W.b₆ * C W.b₈
+    - 19683 * C W.b₆ ^ 3
+
+private noncomputable def Q₃ (W : WeierstrassCurve k) : k[X] :=
+  - 972 * C W.b₂ ^ 2 * C W.b₄ * C W.b₈
+    - 324 * C W.b₂ ^ 2 * C W.b₆ ^ 2
+    + 6480 * C W.b₂ * C W.b₄ ^ 2 * C W.b₆
+    + 2592 * C W.b₂ * C W.b₆ * C W.b₈
+    - 5184 * C W.b₄ ^ 4
+    + 9072 * C W.b₄ ^ 2 * C W.b₈
+    - 26244 * C W.b₄ * C W.b₆ ^ 2
+    - 5184 * C W.b₈ ^ 2
+
+/-- Integer Bézout certificate for `Ψ₃` and its derivative, after using `b_relation`. -/
+private lemma bezout_Ψ₃_dΨ₃ (W : WeierstrassCurve k) :
+    A₃ W * W.Ψ₃ + B₃ W * derivative W.Ψ₃ = C ((-81 : k) * W.Δ ^ 2) := by
+  have hb := bRelC (W := W)
+  linear_combination (norm := ring_nf [A₃, B₃, Q₃, WeierstrassCurve.Ψ₃,
+    WeierstrassCurve.Δ]) (Q₃ W) * hb
+
+variable [W.IsElliptic]
+
+lemma Ψ₃_isCoprime_derivative (h3 : (3 : k) ≠ 0) :
+    IsCoprime W.Ψ₃ (derivative W.Ψ₃) := by
   classical
-  let K := AlgebraicClosure k
-  let i : k →+* K := algebraMap k K
-  have hne : W.preΨ' n ≠ 0 := W.preΨ'_ne_zero hn
-  have hsplit : (Polynomial.map i (W.preΨ' n)).Splits := by
-    -- `K` is algebraically closed, so every polynomial over `K` splits.
-    exact IsAlgClosed.splits (Polynomial.map i (W.preΨ' n))
-  exact (Polynomial.nodup_aroots_iff_of_splits
-    (K := K) hne hsplit).mp
-      (W.preΨ'_aroots_nodup_of_natCast_ne_zero hn)
+  have hbez := bezout_Ψ₃_dΨ₃ (W := W)
+  have h81 : (-81 : k) ≠ 0 := by
+    have hpow : (3 : k) ^ 4 ≠ 0 := pow_ne_zero 4 h3
+    have h81pos : (81 : k) ≠ 0 := by
+      norm_num at hpow ⊢
+    exact neg_ne_zero.mpr h81pos
+  have hunit_scalar : IsUnit ((-81 : k) * W.Δ ^ 2) := by
+    exact (isUnit_iff_ne_zero.mpr h81).mul ((W.isUnit_Δ).pow 2)
+  have hunitC : IsUnit (C ((-81 : k) * W.Δ ^ 2) : k[X]) := by
+    exact isUnit_C.mpr hunit_scalar
+  rcases hunitC with ⟨u, hu⟩
+  rw [← hu] at hbez
+  refine ⟨↑u⁻¹ * A₃ W, ↑u⁻¹ * B₃ W, ?_⟩
+  calc
+    (↑u⁻¹ * A₃ W) * W.Ψ₃ + (↑u⁻¹ * B₃ W) * derivative W.Ψ₃
+        = ↑u⁻¹ * (A₃ W * W.Ψ₃ + B₃ W * derivative W.Ψ₃) := by ring
+    _ = ↑u⁻¹ * ↑u := by rw [hbez]
+    _ = 1 := by simp
+
+lemma preΨ'_three_separable (h3 : (3 : k) ≠ 0) :
+    (W.preΨ' 3).Separable := by
+  rw [preΨ'_three, Polynomial.separable_def]
+  exact Ψ₃_isCoprime_derivative (W := W) h3
 
 end
 
 end WeierstrassCurve
 ```
 
-This proof uses only the general polynomial API and `preΨ'_ne_zero`; all elliptic content is isolated in `preΨ'_aroots_nodup_of_natCast_ne_zero`.
+## Integration notes
 
----
-
-## A more geometric statement of the missing brick
-
-If you want the missing theorem to line up with the standard `[n]`-étale proof, use this shape over an arbitrary algebraically closed extension.  It avoids hard-coding `AlgebraicClosure k` and is reusable for torsion counting.
-
-```lean
-namespace WeierstrassCurve
-
-open Polynomial
-
-variable {k K : Type*} [Field k] [Field K]
-variable [Algebra k K] [IsScalarTower k k K]
-variable [DecidableEq k] [DecidableEq K]
-variable (W : WeierstrassCurve k) [W.IsElliptic]
-
-/-- Preferred geometric missing lemma: after base change to an algebraically closed field,
-`preΨ' n` has simple roots if `(n : K) ≠ 0`. -/
-theorem baseChange_preΨ'_aroots_nodup_of_natCast_ne_zero
-    [IsAlgClosed K]
-    {n : ℕ} (hnK : (n : K) ≠ 0) :
-    (((W.baseChange K).preΨ' n).aroots K).Nodup := by
-  -- Missing geometric proof.
-  -- Outline:
-  -- 1. Interpret roots of `(W.baseChange K).preΨ' n` as `x`-coordinates of nonzero
-  --    `n`-torsion points, excluding the pure `2`-torsion factor in the even case.
-  -- 2. Prove `[n]` has differential multiplication by `(n : K)` on the tangent space at `O`.
-  -- 3. Since `(n : K) ≠ 0`, `[n]` is étale, so `ker [n]` is reduced.
-  -- 4. The quotient by `P ↦ -P` is unramified away from 2-torsion; the normalized `preΨ'`
-  --    has removed the `ψ₂` factor in the even case, so every remaining `x`-root is simple.
-  sorry
-
-end WeierstrassCurve
-```
-
-Then specialize to `K = AlgebraicClosure k`.  The base-change relation is already available:
-
-```lean
-#check WeierstrassCurve.baseChange_preΨ'
-#check WeierstrassCurve.map_preΨ'
-```
-
----
-
-## Why a pure resultant proof is not currently the best route
-
-For a fixed small `n`, a CAS-generated Bezout certificate
-
-```text
-A_n * preΨ' n + B_n * derivative (preΨ' n) = 1
-```
-
-is practical.  For variable `n`, this is not a single finite polynomial identity; it is a theorem about the multiplication-by-`n` morphism or about the universal division-polynomial recurrence.  Mathlib has `Polynomial.resultant` and the separability/coprimality API, but it does not contain a universal formula
-
-```text
-Res(preΨ' n, (preΨ' n)') = unit * Δ^e * n^a
-```
-
-nor the formal group/isogeny result from which it follows.  Proving that resultant formula for all `n` would be at least as hard as proving the simple-root theorem directly.
-
----
-
-## Extra hypotheses
-
-No extra field hypothesis is mathematically needed.
-
-* No `[PerfectField k]` is needed.  Separability of this particular polynomial follows from `char k ∤ n`, not from all finite extensions of `k` being separable.
-* No `[IsSepClosed k]` or algebraic-closedness hypothesis is needed in the final theorem.  It is fine to pass temporarily to `AlgebraicClosure k` because `Polynomial.separable_map` and `Polynomial.nodup_aroots_iff_of_splits` are designed for this.
-* No `[CharZero k]` is needed.  Positive characteristic is allowed as long as `(n : k) ≠ 0`.
-* `[DecidableEq k]` is not mathematically needed for `Polynomial.Separable`, but it is harmless in the surrounding `Torsion.lean` namespace and is often needed by the elliptic-curve point API.
-* `[W.IsElliptic]` is genuinely needed.  On singular Weierstrass cubics, division polynomials can acquire multiple roots even when the relevant integer is nonzero in the field.
-
----
-
-## Recommendation for FLT
-
-Add the missing theorem in the direct form first:
-
-```lean
-theorem WeierstrassCurve.preΨ'_isCoprime_derivative_of_natCast_ne_zero
-    {k : Type*} [Field k] [DecidableEq k]
-    (W : WeierstrassCurve k) [W.IsElliptic]
-    {n : ℕ} (hn : (n : k) ≠ 0) :
-    IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n))
-```
-
-Then the target theorem in `FLT/EllipticCurve/Torsion.lean` is stable and tiny:
-
-```lean
-theorem preΨ'_separable_of_natCast_ne_zero {n : ℕ} (hn : (n : k) ≠ 0) :
-    (W.preΨ' n).Separable := by
-  rw [Polynomial.separable_def]
-  exact W.preΨ'_isCoprime_derivative_of_natCast_ne_zero hn
-```
-
-If the proof is developed geometrically, first prove the algebraic-root nodup statement over `AlgebraicClosure k`, then derive the direct coprimality theorem using `Polynomial.nodup_aroots_iff_of_splits`.  If the proof is developed algebraically, prove the direct `IsCoprime`/Bezout theorem and skip roots entirely.
+* The certificate identity is independent of `[W.IsElliptic]`; ellipticity is used only to make `W.Δ` a unit via `W.isUnit_Δ`.
+* The hypothesis `(3 : k) ≠ 0` is exactly what makes `-81 = -3^4` a unit in `k`.
+* This proves the `n = 3` instance of the broader separability brick:
+  ```lean
+  (W.preΨ' 3).Separable
+  ```
+  without needing the general multiplication-by-`n` étaleness theorem.
