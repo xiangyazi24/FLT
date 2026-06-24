@@ -1,104 +1,115 @@
-# Q174 (dm1): minimal Weierstrass formal-group architecture — brainstorm round 1
+# Q176 (dm1): first-order jet architecture — definition review
 
-## Executive assessment
+## Executive verdict
 
-The shortest path is **not** to build the full Silverman formal group law first.  The shortest path is to build the **first-order formal group bridge** that the proof actually needs:
+Use the existing `TangentO` scalar API directly.  Do **not** introduce an `OJetPoint` wrapper unless you need it to carry proof data about a projective dual-number point reducing to `O`.  If `TangentO` is already morally `K` and you already have
+
+```lean
+TangentO.nsmul₁ W n 1
+TangentO.nsmul₁_eq_natCast_mul
+```
+
+then that is the correct target for the first-order statement.  A wrapper
+
+```lean
+structure OJetPoint where coeff : K
+```
+
+only creates coercion/projection overhead unless it packages actual coordinates/proofs.
+
+The sharper architecture is:
 
 ```text
-infinitesimal deformation near O  ↔  tangent scalar v ∈ K,
-addition near O is v₁ + v₂ to first order,
-[n] near O is v ↦ (n : K) * v.
+input dual deformation at P
+  ⟶ scalar in T_O E, computed as dx / ψ₂(P)
+  ⟶ [n] sends this scalar to (n : K) * dx / ψ₂(P)
 ```
 
-You already proved the abstract theorem
+For your special deformation `dx = 1`, this scalar is nonzero because `ψ₂(P) = 2y + a₁x + a₃` is a unit/nonzero at a non-2-torsion point.
 
-```lean
-formalNsmul_coeff_one F n = (n : R)
-```
-
-for a `FormalGroup`.  That theorem is mathematically perfect, but to use it for `W` you still need to identify the `FormalGroup` with the actual first-order behavior of the Weierstrass curve.  Constructing a full
-
-```lean
-W.formalGroup : FormalGroup K
-```
-
-is one way to do this, but it is more infrastructure than the separability proof needs.  A smaller interface, something like
-
-```lean
-W.formalJetAtO
-```
-
-or
-
-```lean
-W.tangentAddAtO
-```
-
-is likely much faster: prove only the dual-number/degree-1 truncation of the formal group law, then prove `[n]` acts by `(n : K)` on that tangent line by ordinary induction.
-
-My route ranking for the general-`n` separability brick is:
+The critical bridge should not be phrased as “translation by `-P` produces an `OJetPoint`” unless you want a reusable dual-number group law.  Instead, phrase the bridge as the **combined differential statement**:
 
 ```text
-1. First-order formal jet at O + projective/division-polynomial bridge     best Lean path
-2. Full Weierstrass formal group law instance                             mathematically clean but heavier
-3. Invariant differential / formal logarithm                              elegant but needs differential-form infrastructure
-4. Direct derivative of x([n]P)=φ/ψ²                                      likely circular / wrong chart at O
-5. Pure EDS recurrence proof of derivative nonvanishing                   possible in principle but disguises formal group
+local-parameter coefficient of [n](Pε) at O
+  = (n : K) * (dx / ψ₂(P)).
 ```
 
-The **critical missing piece** is not `formalNsmul_coeff_one`; you already have the abstract version.  The critical missing piece is the bridge:
+Then the division-polynomial dual-root condition says the left-hand side is zero.  Since `(n : K) ≠ 0` and `dx / ψ₂(P) ≠ 0`, contradiction.
 
-```lean
-preΨ'_n(x + ε dx) = 0 for a dual point Pε
-  ⇒ [n](Pε) is an infinitesimal point at O,
+The precise derivative connection is not an isolated identity
+
+```text
+(preΨ'_n)'(x) = tangent([n])
 ```
 
-in a setting where Mathlib’s packaged group law is field-only.  This bridge requires either homogeneous/projective division-polynomial formulas over `TrivSqZeroExt K K`, or a minimal functor-of-points group law over square-zero rings.
+by itself.  The correct identity passes through the **projective local parameter at `O`**:
+
+```text
+t = -X/Y,
+```
+
+and the homogeneous division-polynomial formula for `[n]`.  Schematically,
+
+```text
+t([n]Pε) = - X_n(Pε) / Y_n(Pε)
+         = - Φ_n(Pε) * Ψ_n(Pε) / Ω_n(Pε),
+```
+
+so at an `n`-torsion point with `Ψ_n(P)=0` and `Ω_n(P)≠0`, the first-order coefficient is a unit multiple of `dΨ_n(Pε)`, hence a unit multiple of `(preΨ'_n)'(x) * dx` after the `ψ₂` unit is removed.  That is the exact mathematical chain.
+
+Therefore, route (d) using the affine quotient
+
+```text
+x([n]P) = φ_n / ΨSq_n
+```
+
+is not the right chart: `x` has a pole at `O`.  The correct “bypass translation” route is possible, but it uses the **projective local parameter** and requires the missing `Ω_n`/projective division-polynomial bridge.  `mk_φ` and `mk_Ψ_sq` alone are not enough.
 
 ---
 
-## (a) Minimal construction of the Weierstrass formal group law
+## (a) Definition check: `OJetPoint` vs `TangentO`
 
-### Full Silverman construction
+### Recommendation
 
-The standard construction is:
+Do not define
 
-```text
-t = -x/y,  w = -1/y,
-x = t/w,  y = -1/w,
-w = t³ + a₁*t*w + a₂*t²*w + a₃*w² + a₄*t*w² + a₆*w³.
+```lean
+abbrev FormalJetAtO := K
+structure OJetPoint where coeff : K
 ```
 
-Then one solves recursively for `w(t) ∈ R⟦t⟧`, obtains Laurent expansions `x(t), y(t)`, and defines
+as a new object if `TangentO` already does the same job.  The Lean theorem you want is scalar-valued:
 
-```text
-F(t₁,t₂) = t(P(t₁) + P(t₂)).
+```lean
+(n : K) * tangentCoeff = 0
 ```
 
-This gives a genuine one-dimensional commutative formal group law.  It is the right textbook object, but in Lean it requires substantial infrastructure:
+not object-valued:
 
-* recursive construction of `w(t)` as a formal power series;
-* Laurent-series or “power series with pole” bookkeeping for `x(t)` and `y(t)`;
-* an addition formula valid over the relevant coefficient ring;
-* proof of the formal group axioms, probably by comparison with the group law or by universal polynomial identities.
-
-If your current `FormalGroup` structure requires full associativity/unit/inverse axioms as power-series equalities, then `W.formalGroup : FormalGroup K` by the textbook route is a sizeable project.  It is a good long-term file, but it is not the minimal separability route.
-
-### Minimal first-order construction
-
-For separability, all higher terms of `F` are irrelevant.  Over dual numbers, every term of total degree at least two vanishes.  So the only facts needed are:
-
-```text
-F(T₁,T₂) ≡ T₁ + T₂       mod (degree ≥ 2),
-[-1](T) ≡ -T              mod (degree ≥ 2),
-[n](T) ≡ n*T              mod (degree ≥ 2).
+```lean
+OJetPoint.nsmul = 0.
 ```
 
-This suggests a smaller API:
+If your existing API proves
+
+```lean
+TangentO.nsmul₁_eq_natCast_mul W n v
+```
+
+or in the special input direction
+
+```lean
+TangentO.nsmul₁ W n 1 = (n : K)
+```
+
+then it already serves as the `OJetPoint.nsmul` theorem.
+
+### Suggested interface
+
+Use scalar functions, not wrappers:
 
 ```lean
 import Mathlib.Algebra.TrivSqZeroExt
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
 import Mathlib.Tactic
 
@@ -109,457 +120,505 @@ namespace WeierstrassCurve
 noncomputable section
 
 variable {K : Type*} [Field K] [DecidableEq K]
+variable (W : WeierstrassCurve K) [W.IsElliptic]
 
-/-- A first-order point at the origin of a Weierstrass curve, represented by its
-formal parameter coefficient.  This is intentionally just the tangent line. -/
-abbrev FormalJetAtO (W : WeierstrassCurve K) : Type _ := K
+/-- The invariant-differential scalar of a tangent vector `(dx,dy)` at a finite point `(x,y)`.
+For a non-2-torsion point this is well-defined because `ψ₂(P)=2y+a₁x+a₃ ≠ 0`. -/
+def tangentScalarAtAffine
+    (x y dx : K) : K :=
+  dx / W.toAffine.polynomialY.evalEval x y
 
-/-- Addition of first-order jets at `O`. -/
-def FormalJetAtO.add (W : WeierstrassCurve K) :
-    FormalJetAtO W → FormalJetAtO W → FormalJetAtO W :=
-  fun u v => u + v
+/-- For the specific deformation `x + ε`, the scalar is the inverse of `ψ₂(P)`. -/
+lemma tangentScalarAtAffine_one_ne_zero
+    {x y : K}
+    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0) :
+    tangentScalarAtAffine W x y 1 ≠ 0 := by
+  unfold tangentScalarAtAffine
+  exact div_ne_zero one_ne_zero hY
 
-/-- Multiplication by `n` on first-order jets at `O`. -/
-theorem FormalJetAtO.nsmul_eq_natCast_mul
-    (W : WeierstrassCurve K) (n : ℕ) (v : FormalJetAtO W) :
-    n • v = (n : K) * v := by
-  -- This is just `nsmul_eq_mul` for the additive group/vector space `K`.
-  simpa [FormalJetAtO] using (nsmul_eq_mul n v)
+/-- This is the scalar theorem that replaces `OJetPoint.nsmul`. -/
+lemma tangent_nsmul_scalar
+    (n : ℕ) (v : K) :
+    (n : K) * v = (n : K) * v := rfl
 
 end
 
 end WeierstrassCurve
 ```
 
-This does not pretend to be the full formal group.  It isolates the exact tangent theorem the separability proof needs.  Later, if you construct `W.formalGroup : FormalGroup K`, you can prove this jet API from it and deprecate the local version.
-
-### What remains after the jet API
-
-The jet itself is trivial.  The real work is proving that the actual curve maps into it correctly:
+In your actual code, replace `tangent_nsmul_scalar` by the existing
 
 ```lean
-/-- A dual-number point sufficiently near `O` has a formal parameter coefficient. -/
-def tangentCoeffAtO
-    (W : WeierstrassCurve K)
-    (Pε : /* projective W-point over TrivSqZeroExt K K reducing to O */) : K :=
-  sorry
-
-/-- Addition of dual-number points near `O` linearizes to addition of tangent coefficients. -/
-theorem tangentCoeffAtO_add
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    (Pε Qε : /* near-O dual points */) :
-    tangentCoeffAtO W (Pε + Qε)
-      = tangentCoeffAtO W Pε + tangentCoeffAtO W Qε := by
-  sorry
+TangentO.nsmul₁_eq_natCast_mul
 ```
 
-This is much smaller than full power-series associativity, but it still needs either projective coordinates over `TrivSqZeroExt` or explicit near-`O` formulas.
+or make a tiny wrapper lemma around it.  The point is: the separability proof needs only the scalar value, so keep the API scalar.
+
+### When a wrapper is justified
+
+A wrapper is justified only if it carries extra data:
+
+```lean
+structure OJetPoint (W : WeierstrassCurve K) where
+  coeff : K
+  coords : ProjectiveDualPoint W
+  reduces_to_O : ...
+  coeff_eq_local_parameter : ...
+```
+
+That is a different object.  A bare wrapper around `K` is not worth it.
 
 ---
 
-## (b) Can we avoid the full formal group and prove `d[n]|_O = n` directly?
+## (b) What is `translateToOJet` explicitly?
 
-Yes.  This is the route I recommend for the next Lean implementation attempt.
-
-There are two direct variants.
-
-### Variant B1: first-order projective coordinates near `O`
-
-Use projective coordinates.  The point at infinity is
-
-```text
-O = [0 : 1 : 0].
-```
-
-The standard local parameters are
-
-```text
-t = -X/Y,
-w = -Z/Y.
-```
-
-For a first-order point near `O` over `K[ε]/ε²`, the curve equation forces `w = 0` to first order, so it has the form
-
-```text
-[-ε*v : 1 : 0]
-```
-
-up to the chosen sign convention for `t`.  The first-order tangent scalar is `v`.
-
-Minimal theorem:
-
-```lean
-/-- First-order projective points near `O` are parametrized by one scalar. -/
-def OJetPoint (W : WeierstrassCurve K) (v : K) :
-    /* projective point over TrivSqZeroExt K K */ :=
-  -- schematic: [-ε*v : 1 : 0]
-  sorry
-
-/-- The addition law near `O` has linear part addition. -/
-theorem OJetPoint_add
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    (u v : K) :
-    OJetPoint W u + OJetPoint W v = OJetPoint W (u + v) := by
-  -- Prove by expanding the projective addition formula over dual numbers.
-  -- Since ε² = 0, all higher terms vanish.
-  sorry
-
-/-- Therefore `[n]` on first-order points near `O` is multiplication by `(n : K)`. -/
-theorem OJetPoint_nsmul
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    (n : ℕ) (v : K) :
-    n • OJetPoint W v = OJetPoint W ((n : K) * v) := by
-  induction n with
-  | zero => simp [OJetPoint]
-  | succ n ih =>
-      -- use `OJetPoint_add` and the induction hypothesis
-      sorry
-```
-
-This avoids infinite power series entirely.
-
-The catch is that Mathlib does not currently expose a projective Weierstrass group law over arbitrary commutative rings.  If there are projective addition formulas only over fields, you will need to write the tiny near-`O` dual-number addition formula yourself or formalize a ring-level projective formula.
-
-### Variant B2: invariant differential
-
-The invariant differential is
+Mathematically, the differential of translation by `-P` identifies `T_P E` with `T_O E`.  Under the standard local parameter at `O`, this identification is measured by the invariant differential
 
 ```text
 ω = dx / (2y + a₁x + a₃).
 ```
 
-The usual proof is:
+So for a tangent vector `(dx,dy)` at `P=(x,y)`, the translated tangent coefficient at `O` is
 
 ```text
-[n]^*ω = n · ω.
+translateToOJetCoeff(P; dx,dy) = dx / (2y + a₁x + a₃).
 ```
 
-Then `d[n]|_O = n` follows because `ω` trivializes the cotangent line at `O`.
+Up to a possible global sign depending on whether your local parameter is `t = -X/Y` or `t = X/Y`, this is the formula.  Choose the sign once and then make `TangentO` use the same convention.  The sign is irrelevant for nonvanishing, but it matters for exact coefficient equalities.
 
-This avoids explicit full formal group law, but in current Mathlib it is probably not shorter.  You would need:
+### Why this formula is right
 
-* a definition of regular differentials or at least Kähler differentials on the coordinate ring;
-* the invariant differential `ω` as a regular differential on the smooth cubic;
-* pullback of differentials by `[n]`;
-* proof that pullback by translation fixes `ω`;
-* proof that `[n]^*ω = nω`.
-
-That is elegant but heavy.  It is more general algebraic geometry than the separability proof needs.
-
-### Variant B3: formal logarithm
-
-In characteristic zero, the formal logarithm gives
+Let
 
 ```text
-log([n](T)) = n * log(T),
+ψ₂(P) = 2y + a₁x + a₃.
 ```
 
-hence the linear coefficient is `n`.  This is very clean mathematically in the application if the field really has characteristic zero.
-
-But Lean-wise, it still requires constructing the Weierstrass formal group law or at least its invariant differential as a power series.  It also introduces denominators, so it is less ideal if the theorem statement is only `(n : K) ≠ 0` in arbitrary characteristic.
-
-Conclusion for (b): **yes, avoid the full formal group; prove the first-order projective/tangent theorem directly.**  Do not start with invariant differentials unless the project later needs them anyway.
-
----
-
-## (c) Can we prove derivative nonvanishing directly from division-polynomial recurrences?
-
-I would not choose this as the main route.
-
-A recurrence-only proof would need to show that a dual-number root of `preΨ'_n` cannot exist.  Differentiating the recurrence gives identities involving neighboring `preΨ'` values and their derivatives.  At a root of `preΨ'_n`, the recurrence rarely isolates the derivative of `preΨ'_n` alone; it also requires strong coprimality/rank-of-apparition facts for neighboring indices and small strata.
-
-The induction would start needing statements like:
-
-```lean
-IsCoprime (W.preΨ' m) (W.preΨ' r)
-IsCoprime (W.preΨ' m) W.Ψ₂Sq
-IsCoprime (W.preΨ' m) W.Ψ₃
-IsCoprime (W.preΨ' m) W.preΨ₄
-```
-
-and finally a derivative/root exclusion that is equivalent to separability.  This is the formal-group theorem reappearing in recurrence language.
-
-There is a very useful recurrence proof for **two-torsion exclusion**:
-
-```lean
-(W.preΨ' n).IsRoot x → W.Ψ₂Sq.eval x ≠ 0
-```
-
-because setting `Ψ₂Sq.eval x = 0` collapses the EDS to explicit closed forms.  But derivative nonvanishing is harder: it is first-order data, and first-order data is exactly tangent/formal-group data.
-
-So route (c) is possible in principle, but I expect it to be longer and more fragile than the first-order geometric bridge.
-
----
-
-## (d) Does the derivative of `x([n]P)=φ_n/ψ_n²` route work?
-
-As stated, I think it is the wrong chart at the critical point.
-
-When `ψ_n(P)=0`, `[n]P = O`.  The affine `x`-coordinate of `[n]P` has a pole at `O`, so the formula
+The tangent equation is
 
 ```text
-x([n]P) = φ_n(P) / ψ_n(P)^2
+F_X(P) * dx + F_Y(P) * dy = 0,
 ```
 
-is not a regular coordinate near the image point.  Differentiating the quotient
+where
 
 ```text
-(dφ_n * ψ_n² - φ_n * d(ψ_n²)) / ψ_n⁴
+F_Y(P) = ψ₂(P).
 ```
 
-at `ψ_n(P)=0` is not a valid affine tangent calculation; the denominator vanishes.  The correct local coordinate at the image is not `x`, but
+The invariant differential evaluates on the tangent vector as
 
 ```text
-t = -X/Y
+ω_P(dx,dy) = dx / ψ₂(P).
 ```
 
-or an equivalent projective/formal parameter at `O`.
+At `O`, the local parameter `t = -X/Y` satisfies
 
-To use division-polynomial coordinate formulas productively, you would need the **projective** multiplication-by-`n` formula, including the `y`/`ω_n` coordinate, not only `φ_n` and `ψ_n²`.  Mathlib’s division-polynomial file even notes `ω_n` as TODO in the docs, so this is not presently packaged.
-
-The usable theorem would be closer to:
-
-```lean
-/-- Homogeneous/projective division-polynomial formula for `[n]`, valid over a commutative ring. -/
-theorem projective_nsmul_eq_division_polynomials
-    (W : WeierstrassCurve R) (n : ℕ) :
-    -- schematic: [n](X:Y:Z) = (Φₙ Ψₙ : Ωₙ : Ψₙ³) or equivalent homogeneous coordinates
-    True := by
-  sorry
+```text
+ω = dt + higher-order terms,
 ```
 
-Then at a dual-number point with `Ψₙ = ε*a` and `Φₙ` a unit/nonzero scalar, one computes the formal parameter of the image near `O` and sees its first-order coefficient.  But this is effectively building the functor-of-points bridge for `[n]` over dual numbers.
+so the first-order `t`-coefficient of the translated tangent is exactly `ω_P(dx,dy)`.
 
-So route (d) can work only after adding projective division-polynomial formulas over rings.  Without them, it risks circularity because:
+### Do you need both translation and `[n]`?
 
-* `φ_n(P) ≠ 0` at `ψ_n(P)=0` is already a no-common-root theorem;
-* showing the order of vanishing of `ψ_n` is exactly one is separability itself;
-* affine `x` is not a regular coordinate at `O`.
+Conceptually yes:
 
----
-
-## Critical missing piece by route
-
-| Route | Minimal missing piece | Difficulty | Comment |
-|---|---:|---:|---|
-| Full `W.formalGroup : FormalGroup K` | Construct Silverman formal group law as power series and prove FGL axioms | High | Clean long-term object, but too big for just separability |
-| First-order formal jet | Dual/projective addition near `O`: `OJet u + OJet v = OJet (u+v)` | Medium | Best targeted route for `d[n]|_O = n` |
-| Invariant differential | Pullback of `ω` under `[n]`, regular differentials on the curve | High | Elegant but requires differential infrastructure |
-| Formal logarithm | Full formal group plus log/exp over char 0 | High | Good only for char 0; theorem wants `(n : K) ≠ 0` |
-| Recurrence derivative induction | General derivative coprimality from EDS recurrence | High/unclear | Likely re-proves formal group in disguise |
-| Affine quotient derivative `φ/ψ²` | Replace affine quotient by projective local parameter at `O` | High | Needs `ω_n`/projective division-polynomial formulas |
-
----
-
-## Recommended architecture for Round 1 Lean design
-
-I would not define `W.formalGroup` first.  I would define the exact interface needed by the proof, then later show it follows from a full formal group if desired.
-
-### File 1: first-order projective/tangent API
-
-```lean
-import Mathlib.Algebra.TrivSqZeroExt
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.Tactic
-
-open Polynomial
-
-namespace WeierstrassCurve
-
-noncomputable section
-
-variable {K : Type*} [Field K] [DecidableEq K]
-
-/-- First-order tangent scalar at the origin. -/
-abbrev FormalJetAtO (W : WeierstrassCurve K) := K
-
-/-- A schematic first-order point reducing to `O`.  Implement this either with projective
-coordinates over `TrivSqZeroExt K K`, or as a local structure carrying the coordinate formula. -/
-structure OJetPoint (W : WeierstrassCurve K) where
-  coeff : K
-  -- projective coordinates and proof of the Weierstrass equation can be added here
-  -- if/when the ring-level projective point structure is introduced.
-
-@[simp] theorem OJetPoint.ext_iff {W : WeierstrassCurve K} {P Q : OJetPoint W} :
-    P = Q ↔ P.coeff = Q.coeff := by
-  constructor
-  · intro h; simpa [h]
-  · intro h; cases P; cases Q; simp at h; simp [h]
-
-/-- First-order addition at the origin. -/
-def OJetPoint.add (W : WeierstrassCurve K) (P Q : OJetPoint W) : OJetPoint W :=
-  ⟨P.coeff + Q.coeff⟩
-
-/-- The theorem that must eventually be connected to actual curve addition. -/
-theorem OJetPoint_add_coeff
-    (W : WeierstrassCurve K) (P Q : OJetPoint W) :
-    (OJetPoint.add W P Q).coeff = P.coeff + Q.coeff := rfl
-
-/-- Multiplication by `n` on first-order jets. -/
-def OJetPoint.nsmul (W : WeierstrassCurve K) (n : ℕ) (P : OJetPoint W) : OJetPoint W :=
-  ⟨(n : K) * P.coeff⟩
-
-@[simp] theorem OJetPoint.nsmul_coeff
-    (W : WeierstrassCurve K) (n : ℕ) (P : OJetPoint W) :
-    (OJetPoint.nsmul W n P).coeff = (n : K) * P.coeff := rfl
-
-end
-
-end WeierstrassCurve
+```text
+T_P E --dτ_{-P}--> T_O E --d[n]_O--> T_O E.
 ```
 
-This file is intentionally “honest fake infrastructure”: it states the tangent API in the smallest possible form.  The next files replace schematic parts by actual projective dual-number statements.
-
-### File 2: translation to `O`
+But in Lean you should avoid materializing both maps unless needed.  State the combined theorem:
 
 ```lean
-namespace WeierstrassCurve
-
-noncomputable section
-
-variable {K : Type*} [Field K] [DecidableEq K]
-variable (W : WeierstrassCurve K) [W.IsElliptic]
-
-/-- A first-order deformation of an affine non-2-torsion point. -/
-structure AffineDualPointAt (x y : K) where
-  dx : K
-  dy : K
-  equation_dual :
-    -- use your existing `equation_dual_iff` theorem here
-    True
-
-/-- Translation by `-P` sends a deformation of `P` to a first-order point at `O`. -/
-def translateToOJet
-    {x y : K}
-    (hP : W.Equation x y)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    (Pε : AffineDualPointAt W x y) :
-    OJetPoint W := by
-  -- This is where actual addition or explicit translation formulas enter.
-  -- The output coefficient must be a nonzero scalar multiple of `Pε.dx`.
-  exact ⟨Pε.dx⟩
-
-/-- Nonzero `dx` gives nonzero formal tangent after translation. -/
-theorem translateToOJet_coeff_ne_zero
-    {x y : K}
-    (hP : W.Equation x y)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    (Pε : AffineDualPointAt W x y)
-    (hdx : Pε.dx ≠ 0) :
-    (translateToOJet W hP hY Pε).coeff ≠ 0 := by
-  -- If the actual translation coefficient is `unit * dx`, this is immediate.
-  simpa [translateToOJet] using hdx
-
-end
-
-end WeierstrassCurve
-```
-
-The placeholder `exact ⟨Pε.dx⟩` is not the final formula; the point is that this file isolates the translation calculation.  In the real proof, the coefficient will likely be `unit * dx`, where the unit involves `polynomialY.evalEval x y`.
-
-### File 3: division-polynomial bridge over dual numbers
-
-```lean
-namespace WeierstrassCurve
-
-noncomputable section
-
-variable {K : Type*} [Field K] [DecidableEq K]
-variable (W : WeierstrassCurve K) [W.IsElliptic]
-
-/-- If the reduced division polynomial vanishes on a non-2-torsion dual deformation,
-then the translated first-order point lies in the infinitesimal kernel of `[n]`. -/
-theorem preΨ'_dual_root_translateToOJet_nsmul_eq_zero
-    {n : ℕ} {x y : K}
-    (hP : W.Equation x y)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    (Pε : AffineDualPointAt W x y)
-    (hpre :
-      -- use your existing `MultipleRootBridge` / dual aeval statement
-      True) :
-    (OJetPoint.nsmul W n (translateToOJet W hP hY Pε)).coeff = 0 := by
-  -- This is the critical bridge.
-  -- It needs either projective division-polynomial formulas over `TrivSqZeroExt K K`,
-  -- or a ring-level functor-of-points group law.
-  sorry
-
-/-- The final tangent contradiction. -/
-theorem no_nonzero_dual_preΨ'_root_of_natCast_ne_zero
-    {n : ℕ} (hn : (n : K) ≠ 0) {x y : K}
-    (hP : W.Equation x y)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    (Pε : AffineDualPointAt W x y)
-    (hdx : Pε.dx ≠ 0)
-    (hpre : True) : False := by
-  have hzero := preΨ'_dual_root_translateToOJet_nsmul_eq_zero
-    (W := W) (n := n) hP hY Pε hpre
-  have hcoeff_ne := translateToOJet_coeff_ne_zero (W := W) hP hY Pε hdx
-  have : (n : K) * (translateToOJet W hP hY Pε).coeff = 0 := by
-    simpa [OJetPoint.nsmul] using hzero
-  have hcoeff_zero : (translateToOJet W hP hY Pε).coeff = 0 :=
-    (mul_eq_zero.mp this).resolve_left hn
-  exact hcoeff_ne hcoeff_zero
-
-end
-
-end WeierstrassCurve
-```
-
-This is the exact shape of the final nonzero-tangent contradiction.  Notice that it does not require a full `FormalGroup` instance; it requires only the first-order behavior of `[n]` and the division-polynomial bridge.
-
----
-
-## How to reuse your existing `FormalGroup` theorem
-
-If you still want to use your existing `FormalGroup` structure, add an adapter theorem rather than building the full `W.formalGroup` immediately:
-
-```lean
-/-- Any actual formal group attached to `W` induces the first-order jet API. -/
-theorem formalGroup_to_OJet_nsmul
-    (W : WeierstrassCurve K)
-    (FG : FormalGroup K)
-    (hFG_linearizes_W :
-      -- `FG` is the formal completion of `W` at `O`, at least to first order.
-      True)
-    (n : ℕ) (v : K) :
-    -- schematic: `[n]` on the W-jet has coefficient `(n : K) * v`
-    True := by
-  -- use `formalNsmul_coeff_one FG n`
-  sorry
-```
-
-This keeps your `FormalGroup` work useful but prevents it from becoming a blocker.  The actual separability proof can depend on the first-order jet theorem; the full `W.formalGroup` can be proved later and shown to imply that theorem.
-
----
-
-## Round-1 recommendation
-
-For the next implementation round, I would **not** try to write `W.formalGroup : FormalGroup K` first.  I would write the following theorem as the central target:
-
-```lean
-theorem preΨ'_dual_root_translateToOJet_nsmul_eq_zero
+/-- Differential of multiplication by `n` at a finite point, expressed in the invariant
+local parameter at `O`. -/
+theorem nsmul_tangentCoeffAtAffine
     (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} {x y : K}
+    (n : ℕ) {x y dx dy : K}
     (hP : W.Equation x y)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    (Pε : AffineDualPointAt W x y)
-    (hpre : aeval (/* x + ε*dx */) (W.preΨ' n) = 0) :
-    (n : K) * (translateToOJet W hP hY Pε).coeff = 0
+    (htan : /* tangent equation for `(dx,dy)` at `(x,y)` */ True) :
+    /* local t-coefficient of `[n]` applied to the dual deformation */
+      = (n : K) * (dx / W.toAffine.polynomialY.evalEval x y) := by
+  -- Prove by translation-invariance of the first-order group law, or by projective formulas.
+  sorry
 ```
 
-Then split it into two independent subgoals:
+This combined theorem is the one the separability proof needs.  You can later refactor it into separate `translateToOJet` and `TangentO.nsmul₁` lemmas if useful.
 
-1. **Translation calculation:** `translateToOJet` is a unit multiple of the original `dx` for non-2-torsion points.
-2. **Division-polynomial/projective bridge:** `preΨ'_n` vanishing over dual numbers means `[n](Pε)` reduces to `O` and has formal jet equal to `n` times the translated jet.
+---
 
-The second subgoal is the hard one.  It is also the subgoal that a full formal group law alone does not solve unless you can connect `preΨ'_n` to the actual `[n]` functor over dual numbers.  Therefore, architecturally, the projective/homogeneous division-polynomial bridge is the highest-value next piece.
+## (c) The precise chain from `(preΨ'_n)'(x)=0` to zero tangent image
 
-## Final answer by route
+Here is the exact mathematical chain.  I will write `P=(x,y)` and `Pε=(x+ε dx, y+ε dy)`.
 
-* **(a) Full formal group law:** correct but heavy; not minimal.  Use only if you want a reusable formal-group library.
-* **(b) Direct `d[n]|_O = n`:** yes, best route.  Prove it as a first-order jet theorem, not as a full FGL instance.
-* **(c) Direct recurrence derivative proof:** not recommended; derivative data forces tangent/formal content back in.
-* **(d) Differentiate `φ/ψ²`:** not in affine `x`; at `ψ=0`, `[n]P=O`, so the correct chart is the formal/projective parameter at `O`.  Needs projective division-polynomial formulas, not just `mk_φ` and `mk_Ψ_sq`.
+### Step C1: dual evaluation gives root plus derivative root
 
-The main architectural point is: **separate the tangent theorem from the full formal group.**  Build the first-order Weierstrass jet and the dual-number projective division-polynomial bridge first.  Package it as `W.formalGroup` only after the separability proof no longer depends on that packaging decision.
+Your `eval_dualNumber` gives
+
+```text
+preΨ'_n(x + ε dx)
+  = preΨ'_n(x) + ε * dx * (preΨ'_n)'(x).
+```
+
+For `dx = 1`,
+
+```text
+preΨ'_n(x + ε) = 0
+```
+
+is equivalent to
+
+```text
+preΨ'_n(x) = 0
+(preΨ'_n)'(x) = 0.
+```
+
+Lean shape:
+
+```lean
+lemma preΨ'_dual_root_iff_root_and_deriv
+    {n : ℕ} {x dx : K} :
+    aeval (MultipleRootBridge.xε x) (W.preΨ' n) = 0
+      ↔ (W.preΨ' n).eval x = 0 ∧ (derivative (W.preΨ' n)).eval x = 0 := by
+  -- Use `eval_dualNumber` with `dx = 1`, then ext on `TrivSqZeroExt.fst/snd`.
+  sorry
+```
+
+### Step C2: reduced `preΨ'` zero equals full `Ψ_n` zero at non-2-torsion dual points
+
+For the dual point, `ψ₂(Pε)` is a unit by your
+
+```lean
+psi2_dual_isUnit
+```
+
+Thus the reduced polynomial zero is equivalent to the full division polynomial zero:
+
+```text
+preΨ'_n(xε) = 0
+  ⇔ Ψ_n(Pε) = 0.
+```
+
+For odd `n`, this is immediate.  For even `n`, `Ψ_n = preΨ'_n * ψ₂` or the corresponding reduced/full factor, and `ψ₂(Pε)` is a unit.
+
+Lean target:
+
+```lean
+lemma Ψ_dual_eq_zero_iff_preΨ'_dual_eq_zero_of_psi2_unit
+    {n : ℕ} {x y s : K}
+    (hunit : IsUnit (/* ψ₂ evaluated at `(xε,yε)` */)) :
+    (/* full Ψ_n evaluated at `(xε,yε)` */ = 0)
+      ↔ aeval (MultipleRootBridge.xε x) (W.preΨ' n) = 0 := by
+  -- Split on parity of n; for the even branch cancel the ψ₂ unit.
+  sorry
+```
+
+### Step C3: projective division-polynomial formula sends `Ψ_n=0` to `O`
+
+This is the first truly missing bridge.  You need a projective formula for multiplication by `n` over dual numbers:
+
+```text
+[n](X:Y:Z) = [X_n : Y_n : Z_n]
+```
+
+with, in affine input coordinates, the usual shape
+
+```text
+X_n = φ_n * Ψ_n,
+Y_n = Ω_n,
+Z_n = Ψ_n^3
+```
+
+or an equivalent homogeneous normalization.  Then `Ψ_n(Pε)=0` implies
+
+```text
+X_n(Pε)=0,
+Z_n(Pε)=0,
+Y_n(Pε)=Ω_n(Pε) is a unit,
+```
+
+so
+
+```text
+[n](Pε) = O
+```
+
+as a dual-number point.
+
+Lean target:
+
+```lean
+/-- Projective division-polynomial formula over dual numbers. -/
+theorem nsmul_dual_eq_O_of_Ψ_dual_eq_zero
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    {n : ℕ} {x y dx dy : K}
+    (hPε : /* `(x+εdx,y+εdy)` lies on W over dual numbers */)
+    (hNon2 : IsUnit (/* ψ₂(Pε) */))
+    (hΨ : /* full Ψ_n(Pε) */ = 0) :
+    /* `[n](Pε) = O` over TrivSqZeroExt K K */ := by
+  -- Needs projective/homogeneous division-polynomial formula, including Ω_n.
+  sorry
+```
+
+This theorem is the exact bridge between preΨ dual vanishing and zero tangent image.
+
+### Step C4: zero image means zero local-parameter coefficient
+
+If `[n](Pε)=O` exactly, then its first-order local parameter coefficient is zero:
+
+```lean
+lemma tangentCoeffAtO_eq_zero_of_dual_nsmul_eq_O
+    (h : /* `[n](Pε)=O` */) :
+    /* local t-coefficient of `[n](Pε)` */ = 0 := by
+  -- by definition of the local parameter coefficient at O
+  sorry
+```
+
+### Step C5: differential of `[n]` says the same coefficient is `(n : K) * dx / ψ₂(P)`
+
+This is the first-order formal-group theorem in the scalar API:
+
+```lean
+lemma tangentCoeff_nsmul_dual
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    (n : ℕ) {x y dx dy : K}
+    (hP : W.Equation x y)
+    (hPε : /* dual lift */)
+    (hNon2 : W.toAffine.polynomialY.evalEval x y ≠ 0) :
+    /* local t-coefficient of `[n](Pε)` */
+      = (n : K) * (dx / W.toAffine.polynomialY.evalEval x y) := by
+  -- This is where your existing `TangentO.nsmul₁_eq_natCast_mul` should be used.
+  -- The input tangent scalar is `dx / ψ₂(P)`.
+  sorry
+```
+
+Combining C4 and C5 gives
+
+```text
+(n : K) * dx / ψ₂(P) = 0.
+```
+
+For `dx = 1`, `(n : K) ≠ 0`, and `ψ₂(P) ≠ 0`, contradiction.
+
+### The direct identity relating derivative to tangent
+
+If you want an explicit identity, it is this local-parameter formula, not an affine-`x` formula:
+
+```text
+localCoeff_t([n]Pε)
+  = unit_n(P) * dx * (preΨ'_n)'(x)
+```
+
+where, up to normalization,
+
+```text
+unit_n(P) = - Φ_n(P) * ψ₂(P)^parity / Ω_n(P).
+```
+
+More explicitly, from projective division polynomials,
+
+```text
+t([n]Pε) = - X_n(Pε) / Y_n(Pε)
+         = - Φ_n(Pε) * Ψ_n(Pε) / Ω_n(Pε).
+```
+
+At an `n`-torsion non-2-torsion point, `Ψ_n(P)=0` and `Ω_n(P)≠0`, so the first-order coefficient is
+
+```text
+coeffε(t([n]Pε))
+  = - Φ_n(P) / Ω_n(P) * coeffε(Ψ_n(Pε)).
+```
+
+For odd `n`,
+
+```text
+coeffε(Ψ_n(Pε)) = dx * (preΨ'_n)'(x).
+```
+
+For even `n`, the full `Ψ_n` has an extra `ψ₂` factor, and because `ψ₂(P)` is a unit,
+
+```text
+coeffε(Ψ_n(Pε)) = ψ₂(P) * dx * (preΨ'_n)'(x)
+```
+
+up to the precise normalization in your `Ψ` definition.  Thus
+
+```text
+coeffε(t([n]Pε))
+  = unit * dx * (preΨ'_n)'(x).
+```
+
+This is the precise bridge from derivative to tangent.  Proving the unit facts requires the same projective formula and the nonzero `Ω_n(P)` fact at the torsion point.
+
+---
+
+## (d) Can we bypass translation by differentiating `φ_n / ΨSq_n`?
+
+Verdict: **not in affine `x`; it is the wrong coordinate and leads back to circularity.**
+
+At a root of `Ψ_n`, `[n]P = O`, and affine `x` has a pole at `O`.  The quotient
+
+```text
+x([n]P) = φ_n(P) / ΨSq_n(P)
+```
+
+is supposed to blow up, not define a regular tangent coordinate.  Differentiating
+
+```text
+(dφ_n * ΨSq_n - φ_n * dΨSq_n) / ΨSq_n^2
+```
+
+at `ΨSq_n(P)=0` is not a valid local computation in the target tangent space.  It is trying to use an affine chart that does not contain the image point.
+
+The correct bypass is to use the local parameter at `O`:
+
+```text
+t = -X/Y.
+```
+
+With projective division-polynomial coordinates,
+
+```text
+t([n]Pε) = -X_n(Pε)/Y_n(Pε)
+```
+
+and this is regular at `O` because `Y_n(P)` is nonzero.  This gives exactly the derivative/tangent identity above.
+
+So there is a good bypass of an explicit `translateToOJet` object, but it is **not** the affine `φ/ΨSq` quotient.  It is the projective local-parameter calculation, and it needs `Ω_n`.
+
+### Why `mk_φ` and `mk_Ψ_sq` are insufficient
+
+The existing coordinate-ring facts
+
+```lean
+mk_φ
+mk_Ψ_sq
+```
+
+control the affine `x`-coordinate relation.  They do not provide:
+
+```text
+Y_n = Ω_n,
+projective target coordinate near O,
+local parameter t = -X/Y,
+unit/nonzero of Ω_n at Ψ_n=0.
+```
+
+Those are exactly the missing ingredients for the derivative/tangent bridge.
+
+---
+
+## Recommended definitions after this review
+
+### Keep these scalar definitions
+
+```lean
+namespace WeierstrassCurve
+
+noncomputable section
+
+variable {K : Type*} [Field K] [DecidableEq K]
+variable (W : WeierstrassCurve K) [W.IsElliptic]
+
+/-- The tangent scalar at a non-2-torsion affine point, using the invariant differential. -/
+def tangentScalarAtAffine (x y dx : K) : K :=
+  dx / W.toAffine.polynomialY.evalEval x y
+
+lemma tangentScalarAtAffine_ne_zero_of_dx_ne_zero
+    {x y dx : K}
+    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
+    (hdx : dx ≠ 0) :
+    tangentScalarAtAffine W x y dx ≠ 0 := by
+  unfold tangentScalarAtAffine
+  exact div_ne_zero hdx hY
+
+/-- Combined first-order differential theorem.  This is the theorem to connect to
+`TangentO.nsmul₁_eq_natCast_mul`. -/
+theorem localCoeff_nsmul_dual_eq_natCast_mul_tangentScalar
+    {n : ℕ} {x y dx dy : K}
+    (hP : W.Equation x y)
+    (hdual : /* dual-number lift is on W */ True)
+    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0) :
+    /* local parameter coefficient of `[n](Pε)` at O */
+      = (n : K) * tangentScalarAtAffine W x y dx := by
+  -- This should be a wrapper around your existing `TangentO.nsmul₁_eq_natCast_mul`,
+  -- plus the identification of the input tangent with `dx / ψ₂(P)`.
+  sorry
+
+end
+
+end WeierstrassCurve
+```
+
+### Add this projective bridge, not a bare `OJetPoint`
+
+```lean
+namespace WeierstrassCurve
+
+noncomputable section
+
+variable {K : Type*} [Field K] [DecidableEq K]
+variable (W : WeierstrassCurve K) [W.IsElliptic]
+
+/-- Full division polynomial vanishing over dual numbers sends the dual point to `O`
+under multiplication by `n`. -/
+theorem nsmul_dual_eq_O_of_preΨ'_dual_eq_zero
+    {n : ℕ} {x y dx dy : K}
+    (hdual : /* `(x+εdx,y+εdy)` lies on W over dual numbers */ True)
+    (hYunit : IsUnit (/* ψ₂(Pε) */ (1 : TrivSqZeroExt K K)))
+    (hpre : aeval (/* x+εdx */ (0 : TrivSqZeroExt K K)) (W.preΨ' n) = 0) :
+    /* `[n](Pε) = O` over dual numbers */ True := by
+  -- This is the critical projective/homogeneous division-polynomial formula.
+  -- It requires Ω_n or an equivalent projective Y-coordinate formula.
+  sorry
+
+/-- The derivative contradiction theorem, after the bridge. -/
+theorem no_dual_preΨ'_root_with_nonzero_dx
+    {n : ℕ} (hn : (n : K) ≠ 0)
+    {x y dx dy : K}
+    (hP : W.Equation x y)
+    (hdual : /* dual lift */ True)
+    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
+    (hdx : dx ≠ 0)
+    (hpre : aeval (/* x+εdx */ (0 : TrivSqZeroExt K K)) (W.preΨ' n) = 0) :
+    False := by
+  have hO := nsmul_dual_eq_O_of_preΨ'_dual_eq_zero
+    (W := W) (n := n) hdual (by
+      -- `psi2_dual_isUnit`
+      sorry) hpre
+  have hlocal_zero :
+      /* local coeff of `[n](Pε)` */ (0 : K) = 0 := by
+    -- from `hO`
+    rfl
+  have hlocal_formula := localCoeff_nsmul_dual_eq_natCast_mul_tangentScalar
+    (W := W) (n := n) hP hdual hY
+  have htangent_ne : tangentScalarAtAffine W x y dx ≠ 0 :=
+    tangentScalarAtAffine_ne_zero_of_dx_ne_zero (W := W) hY hdx
+  have : (n : K) * tangentScalarAtAffine W x y dx = 0 := by
+    -- combine `hlocal_zero` and `hlocal_formula`
+    sorry
+  exact htangent_ne ((mul_eq_zero.mp this).resolve_left hn)
+
+end
+
+end WeierstrassCurve
+```
+
+The placeholders are deliberately the real seams.  The definitions themselves are now minimal: no bare wrapper, no duplicate `OJetPoint.nsmul`, no affine quotient derivative.
+
+---
+
+## Final architecture decision
+
+1. **Do not introduce bare `OJetPoint`.**  Use `TangentO`/`K` directly.
+2. **Do not define `translateToOJet` as an object-level map yet.**  Define the scalar `dx / ψ₂(P)` and a combined differential theorem for `[n]`.
+3. **The exact derivative/tangent identity is through the projective local parameter**
+   ```text
+   t([n]Pε) = -Φ_n(Pε) Ψ_n(Pε) / Ω_n(Pε),
+   ```
+   not through affine `φ_n / ΨSq_n`.
+4. **The critical missing API is `Ω_n` / projective division-polynomial coordinates over dual numbers.**  That is where the bridge lives.
+5. **Route (d) works only after replacing affine `x` by local parameter `t` at `O`.**  As an affine L’Hôpital calculation it is either ill-typed geometrically or circular.
+
+This means the next design target should be the projective bridge theorem, not a new formal-jet wrapper.
