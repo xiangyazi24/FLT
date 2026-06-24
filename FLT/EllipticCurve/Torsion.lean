@@ -56,20 +56,51 @@ namespace KeystoneNTorsion
 variable {k : Type*} [Field k] [DecidableEq k] [CharZero k] (W : WeierstrassCurve k) [W.IsElliptic]
 
 /-- Nonvanishing of the (bivariate) `m`-division polynomial `ψ m` for `m ≠ 0` over a
-characteristic-zero field. Over a field the underlying ring `k[X][Y]` is a domain, and the
-normalised EDS `ψ m = normEDS ψ₂ (C Ψ₃) (C preΨ₄) m` is nonzero for `m ≠ 0` (this is the
-nonvanishing of the division polynomials, e.g. via the degree/leading-coefficient computation
-for `Ψ m = C (preΨ m) * (if Even m then ψ₂ else 1)`, with `preΨ m ≠ 0` from
-`WeierstrassCurve.preΨ_ne_zero` since `(m : k) ≠ 0` in characteristic zero, together with the
-identification of `ψ m` and `Ψ m` as polynomials).
-
-NAMED SORRY: the remaining gap is to identify `ψ m` with `Ψ m` as raw bivariate polynomials
-(Mathlib only provides `Affine.CoordinateRing.mk_ψ`, the identification in the coordinate-ring
-quotient) and to lift `preΨ m ≠ 0` (univariate) to `ψ m ≠ 0` (bivariate). A clean discharge
-needs a Mathlib lemma `WeierstrassCurve.ψ_ne_zero`/`Ψ_ne_zero` or a `natDegree`-in-`Y` argument
-on `normEDS`; it is NOT false (it holds in char 0) and does not block `h4`/`hc3`. -/
+characteristic-zero field. The proof uses the coordinate-ring identification
+`Affine.CoordinateRing.mk_ψ : mk W (ψ m) = mk W (Ψ m)` together with the degree argument:
+`Ψ m` has Y-degree ≤ 1 (degree 0 for odd m, degree 1 for even m via `ψ₂`) and is nonzero
+(from `preΨ'_ne_zero`), while `polynomial W` is monic of Y-degree 2. By
+`AdjoinRoot.mk_ne_zero_of_natDegree_lt`, `mk W (Ψ m) ≠ 0`, so `ψ m ≠ 0`. -/
 theorem ψ_ne_zero_of_charZero : ∀ m : ℤ, m ≠ 0 → W.ψ m ≠ 0 := by
-  sorry
+  have hψ₂_ne : W.ψ₂ ≠ 0 := by
+    rw [WeierstrassCurve.ψ₂, Affine.polynomialY]
+    exact ne_of_apply_ne Polynomial.natDegree (by
+      rw [Polynomial.natDegree_linear (Polynomial.C_ne_zero.mpr (two_ne_zero (α := k))),
+        Polynomial.natDegree_zero]; omega)
+  have hψ₂_deg : W.ψ₂.natDegree ≤ 1 := by
+    rw [WeierstrassCurve.ψ₂, Affine.polynomialY]; exact Polynomial.natDegree_linear_le
+  have hΨ_ne : ∀ (n : ℕ), n ≠ 0 → W.Ψ (n : ℤ) ≠ 0 := by
+    intro n hn
+    rw [Ψ_ofNat]
+    have hC : Polynomial.C (W.preΨ' n) ≠ 0 :=
+      Polynomial.C_ne_zero.mpr (W.preΨ'_ne_zero (Nat.cast_ne_zero.mpr hn))
+    by_cases heven : Even n
+    · simp only [heven, ↓reduceIte]; exact mul_ne_zero hC hψ₂_ne
+    · simp only [heven, ↓reduceIte, mul_one]; exact hC
+  have hΨ_deg : ∀ (n : ℕ), n ≠ 0 →
+      (W.Ψ (n : ℤ)).natDegree < W.toAffine.polynomial.natDegree := by
+    intro n _
+    rw [natDegree_polynomial, Ψ_ofNat]
+    by_cases heven : Even n
+    · simp only [heven, ↓reduceIte]
+      calc (Polynomial.C (W.preΨ' n) * W.ψ₂).natDegree
+          ≤ 0 + 1 := Polynomial.natDegree_mul_le |>.trans
+            (Nat.add_le_add (Polynomial.natDegree_C _).le hψ₂_deg)
+        _ < 2 := by omega
+    · simp only [heven, ↓reduceIte, mul_one]
+      have : (Polynomial.C (W.preΨ' n)).natDegree = 0 := Polynomial.natDegree_C _
+      omega
+  intro m hm hψ
+  suffices hΨ : CoordinateRing.mk W.toAffine (W.Ψ m) ≠ 0 by
+    exact hΨ (by rw [← CoordinateRing.mk_ψ, hψ, map_zero])
+  rcases m with n | n
+  · exact AdjoinRoot.mk_ne_zero_of_natDegree_lt monic_polynomial
+      (hΨ_ne n (by intro h; exact hm (by simp [h])))
+      (hΨ_deg n (by intro h; exact hm (by simp [h])))
+  · rw [show (Int.negSucc n : ℤ) = -(↑(n + 1) : ℤ) by simp [Int.negSucc_eq],
+      Ψ_neg, map_neg, neg_ne_zero]
+    exact AdjoinRoot.mk_ne_zero_of_natDegree_lt monic_polynomial
+      (hΨ_ne _ (Nat.succ_ne_zero n)) (hΨ_deg _ (Nat.succ_ne_zero n))
 
 private noncomputable def nTorsionEquivKernel (n : ℕ) :
     W.nTorsion n ≃ {P : (W⁄k).Point // n • P = 0} where
