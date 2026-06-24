@@ -27,6 +27,19 @@ pieces toward it:
 State: `preΨ'_deriv_ne_zero_at_root` still depends on 2 named sorries (preΨ'_root_Ψ₂Sq_ne; dual_root_implies_tangent_zero),
 sorryAx + standard-3 only. No custom axiom introduced. scratch.SeamE1 full build 3007 jobs EXIT 0.
 
+## 2026-06-24 (cont) — bridge-1 hCD cert-lift CLOSED + strategic route analysis
+
+- `2723e94` **Bridge-1 hCD lemma 0-sorry**: `preΨ₄_sq_add_four_Ψ₃_cube_eq_zero_of_Ψ₂Sq_root` now closed
+  by INTEGER cofactor cert (cofactors recomputed over ℤ, not k, so `ring` closes in any CommRing).
+  Foundation for even-case EDS-zero closed forms. CAS-verified → Lean-lifted → builds.
+- `59e72a2` **Strategic route analysis** (ChatGPT Q163 dm1 f3729f13a): bridge-2 geometric route needs new
+  Weierstrass formal-group infra (Step A4); polynomial route IsCoprime(preΨ',deriv) bypasses it, computable
+  per-n via resultant (n=3 already done, n=4 cofactor recorded). Decisive question: general-n polynomial
+  route viable without formal group? Follow-up Q164 in flight.
+- `12d7d52` **SEAM2 char-conditions scoped**: both keystone versions genuinely need h4/hψ_ne/hc3;
+  re-route-to-bypass REJECTED (target carries same hypotheses). Discharge = thread CharZero from ℚ-level
+  Mazur instantiation. Sub-agent dispatched.
+
 ## 2026-06-24 (cont) — /automode: bridge-1 coprimality even-case foundation
 
 - Bridge-1 even case (preΨ-root-Ψ2Sq-ne): CAS-VERIFIED the hCD relation preΨ4^2 + 4*Ψ3^3 = Q1*Ψ2Sq + Q2*b_relation (remainder 0; Q1 57-term/Q2 25-term cofactors, scratch/bridge1_hcd_cert.py). scratch/Bridge1HCD.lean states the eval-level lemma (CAS-verified, linear_combination lift WIP, 1 sorry). Next (fresh context): fix cert lift; then EDS-zero closed forms via normEDSRec'; then nonvanishing -> even case closed.
@@ -43,11 +56,16 @@ sorryAx + standard-3 only. No custom axiom introduced. scratch.SeamE1 full build
 - `0543656`..`ecb0411` SEAM1 E1 chain (this session): A3 helper separable_of_deriv_ne_zero_at_roots (375761d) -> E-scaffold reduction (0543656) -> A1 dual-Taylor engine eval_dualNumber (313514c) + corollary (d215912) -> Dual/TangentO d[n]=n (000b6b4) -> equation_dual_iff (e3eff8e) -> y-lifts (33cb1c7) -> MultipleRootBridge (084e0de) -> rootwise-core assembly (6ef0a7e) -> final wiring (ecb0411). All 0-custom-axiom; whole SEAM1 reduced to 2 designed bridges in SeamE1_Core.
 - `7a383c3` n=3 separability brick Psi3_separable (resultant Bezout, 0 axioms). n=4 cofactor record (66dea94, Res = 2^9 * Delta^5).
 
-### State after this session
+### State (updated 2026-06-24 late)
 - Mazur |T|<=16 = axiom Mazur_statement (FLT black box); our MazurProof tree proves it.
 - 1 custom axiom remains: A3 no_rational_point_of_order_ge_17 (deep core).
-- Torsion.lean: 8 seam sorries (SEAM2 char conds x3, sub-D, infra: n_torsion_finite [not ours] / Module.Finite / galoisRep).
-- SEAM1: proven mod 2 designed bridges in SeamE1_Core (coprimality prePsi-root-Psi2Sq-ne; deep crux dual_root_implies_tangent_zero).
+- Torsion.lean: 8 seam sorries (SEAM2 char conds x3 [sub-agent in flight threading CharZero], sub-D, infra: n_torsion_finite [not ours] / Module.Finite / galoisRep).
+- SEAM1: proven mod 2 designed bridges in SeamE1_Core:
+  - bridge-1 (coprimality preΨ'_root_Ψ₂Sq_ne): hCD foundation CLOSED (2723e94). Remaining: EDS-zero closed forms + assembly.
+  - bridge-2 (deep crux dual_root_implies_tangent_zero): formal-group core PROVEN (formalNsmul_coeff_one) + ψ₂-unit PROVEN.
+    Remaining gap = Weierstrass σ-formal-group instance + x([n]P)=Φ/ΨSq formula. Route decision pending (Q164).
+- Route fork: general-n preΨ' separability — geometric (formal-group, bridge-2 wall) vs polynomial (IsCoprime via EDS recurrence).
+  ChatGPT Q164 in flight for the decisive comparison.
 
 ## How I maintain this (going forward)
 Append a dated section per session; one bullet per meaningful commit (SHA + what + why). Keep newest-first.
