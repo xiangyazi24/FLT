@@ -3,6 +3,10 @@
 Continuous log of MY changes, newest first. One entry per meaningful change (commit SHA + what + why).
 Maintained so the work is traceable and nothing gets lost across long sessions / clone moves.
 
+## 2026-06-24 (cont) — /automode: bridge-1 coprimality even-case foundation
+
+- Bridge-1 even case (preΨ-root-Ψ2Sq-ne): CAS-VERIFIED the hCD relation preΨ4^2 + 4*Ψ3^3 = Q1*Ψ2Sq + Q2*b_relation (remainder 0; Q1 57-term/Q2 25-term cofactors, scratch/bridge1_hcd_cert.py). scratch/Bridge1HCD.lean states the eval-level lemma (CAS-verified, linear_combination lift WIP, 1 sorry). Next (fresh context): fix cert lift; then EDS-zero closed forms via normEDSRec'; then nonvanishing -> even case closed.
+
 ## 2026-06-24 — SEAM1 proven + wired; clone sync
 
 - `97c41ca` Preserve MAZUR_CHECKLIST.md (root).
