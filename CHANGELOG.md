@@ -2,6 +2,26 @@
 
 Continuous log of MY changes, newest first. One entry per meaningful change (commit SHA + what + why).
 Maintained so the work is traceable and nothing gets lost across long sessions / clone moves.
+## 2026-06-24 (cont) — bridge-2 formal bridge: decomposition + n=3 proven
+
+- `85a63c4` scratch/SeamE1_FormalBridge.lean: reduce `dual_root_implies_tangent_zero` to single
+  sorry `preΨ'_deriv_ne_zero_at_nontorsion_root`. Proven infrastructure (0 sorry, 0 custom axiom):
+  `preΨ'_dual_root_extract` (dual root → value root + derivative root),
+  `Φ_eval_at_preΨ'_root` (Φ_n formula at division polynomial root),
+  `Ψ₂Sq_ne_zero_of_polynomialY_ne_zero` (non-2-torsion → Ψ₂Sq ≠ 0),
+  `dual_root_implies_tangent_zero_assembled` (assembly: contradiction from absurd hderiv hne).
+- `074cd1c` n=3 derivative nonvanishing PROVEN: `preΨ'_deriv_ne_zero_n3` wired to
+  `Psi3_separable` via reusable helper `deriv_ne_zero_of_separable`.
+  The general-n sorry `preΨ'_deriv_ne_zero_at_nontorsion_root` is EQUIVALENT to
+  `(W.preΨ' n).Separable` — once that's proven, `deriv_ne_zero_of_separable` closes it.
+
+### Bridge-2 state
+- ORIGINAL sorry: `dual_root_implies_tangent_zero` in SeamE1_Core.lean
+- NOW REDUCED TO: `preΨ'_deriv_ne_zero_at_nontorsion_root` (= separability at each root)
+- n=3: CLOSED (via Psi3_separable Bezout cert)
+- n=4: CAS cofactors exist (Res=2⁹·Δ⁵), Lean cert not yet built
+- General n: three routes (EDS induction / invariant differential / formal group)
+
 
 ## 2026-06-24 (cont) — SEAM2 char-conditions: h4 + hc3 DISCHARGED via CharZero threading
 
