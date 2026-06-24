@@ -2,6 +2,8 @@ module
 
 public import scratch.SeamE1_Jet
 public import scratch.SeamE1_Dual
+public import scratch.SeamE1_DualUnit
+public import scratch.SeamE1_FormalNsmul
 public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
 
@@ -64,9 +66,23 @@ public theorem root_exists_non_two [IsAlgClosed K] (W : WeierstrassCurve K) [W.I
 
 /-- BRIDGE 2 (THE DEEP CRUX: raw multiplication-by-n over k[eps]): a first-order root of preΨ' n
 over k[eps] at a non-2-torsion point forces the [n]-tangent coordinate at O to vanish.
-Ingredients (DESIGN_SEAM1_CD_assembly.md): lift to affine jet (AffineJet.equation_dual_lift,
-psi2-unit via Dual fst nonzero), evaluate raw Jacobian/Projective addXYZ/dblXYZ mult-by-n on the
-dual point, land in the O-chart, identify the tangent coordinate with TangentO.nsmul1 n 1. -/
+
+PROGRESS (this session, all 0-sorry 0-custom-axiom, available in the imports):
+* The FORMAL-GROUP HALF is DONE: `FormalGroup.formalNsmul_coeff_one F n = (n : R)`, i.e.
+  `[n](T) = nT + O(T²)` for any one-dimensional formal group law (the intrinsic version of the
+  `TangentO.nsmul₁ n 1 = (n:K)` tangent-at-origin fact). See `scratch/SeamE1_FormalNsmul.lean`.
+* STEP 2 (ψ₂-unit) is DISCHARGED: `WeierstrassCurve.SEAM1.psi2_dual_isUnit` proves the lifted
+  `ψ₂ = W_Y` at the dual point `(x+ε, y+ε·slope)` is a unit in `K[ε]` (its scalar part is
+  `hY ≠ 0`), via the reusable `dualNumber_isUnit_of_fst_ne_zero`. See `scratch/SeamE1_DualUnit.lean`.
+
+REMAINING GAP (genuine infrastructure, isolated below as the single sorry): the Weierstrass
+`σ`-formal-group instance `W.formalGroup : FormalGroup K` together with the x-coordinate
+multiplication formula `x([n]P) = Φ_n/ΨSq_n`, which links the proven `formalNsmul_coeff_one` and
+the division polynomial `preΨ'` so that `hrootε` forces `coeff 1 (W.formalGroup.formalNsmul n) = 0`,
+hence `(n:K) = TangentO.nsmul₁ n 1 = 0`. This requires building `W.σ` (PowerSeries), the formal
+group law from the projective addition formulas, and the Φ/ΨSq x-coordinate identity — multi-stage
+infrastructure not present in this Mathlib (only DivisionPolynomial/{Basic,Degree} exist; no ω_n,
+no raw [n] coordinate map). See `scratch/DESIGN_bridge2_crux.md`, `SEAM1_FormalGroup_ROADMAP.md`. -/
 public theorem dual_root_implies_tangent_zero [IsAlgClosed K] (W : WeierstrassCurve K) [W.IsElliptic]
     {n : ℕ} (hn : (n : K) ≠ 0) {x y : K}
     (hcurve : W.toAffine.Equation x y) (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
