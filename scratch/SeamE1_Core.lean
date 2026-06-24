@@ -17,14 +17,25 @@ namespace WeierstrassCurve.SEAM1
 
 variable {K : Type*} [Field K]
 
-/-- BRIDGE 1 (root dictionary, tractable): over an algebraically closed field a root of `preΨ' n`
-is the x-coordinate of a non-2-torsion point on the curve. -/
+/-- BRIDGE 1 (root dictionary): over an algebraically closed field a root of preΨ' n is the
+x-coordinate of a non-2-torsion point on the curve.
+
+NON-CIRCULARITY TRAP (verified 2026-06-24): do NOT prove via the repo's
+preΨ'_eval_eq_zero_iff_exists_non_two_torsion / rootPointExists — those depend on
+preΨ'_rootSet_card, which depends on preΨ'_separable (the lemma this bridge feeds). Non-circular
+path: (a) exists y with W.Equation x y from the alg-closed quadratic polynomial.evalEval x Y
+(degree 2 in Y, splits); (b) Ψ₂Sq.eval x nonzero from a general preΨ'_n / Ψ₂Sq coprimality
+(NOT yet in repo — only Ψ₃/preΨ₄ vs Ψ₂Sq certs exist), then polynomialY nonzero via the on-curve
+relation psi2^2 = Ψ₂Sq. -/
 public theorem root_exists_non_two [IsAlgClosed K] (W : WeierstrassCurve K) [W.IsElliptic]
     {n : ℕ} (hn : (n : K) ≠ 0) {x : K} (hx : (W.preΨ' n).IsRoot x) :
     ∃ y : K, W.toAffine.Equation x y ∧ W.toAffine.polynomialY.evalEval x y ≠ 0 := sorry
 
-/-- BRIDGE 2 (the deep crux: raw multiplication-by-`n` over `k[ε]`): a first-order root of `preΨ' n`
-over `k[ε]` at a non-2-torsion point forces the `[n]`-tangent coordinate at `O` to vanish. -/
+/-- BRIDGE 2 (THE DEEP CRUX: raw multiplication-by-n over k[eps]): a first-order root of preΨ' n
+over k[eps] at a non-2-torsion point forces the [n]-tangent coordinate at O to vanish.
+Ingredients (DESIGN_SEAM1_CD_assembly.md): lift to affine jet (AffineJet.equation_dual_lift,
+psi2-unit via Dual fst nonzero), evaluate raw Jacobian/Projective addXYZ/dblXYZ mult-by-n on the
+dual point, land in the O-chart, identify the tangent coordinate with TangentO.nsmul1 n 1. -/
 public theorem dual_root_implies_tangent_zero [IsAlgClosed K] (W : WeierstrassCurve K) [W.IsElliptic]
     {n : ℕ} (hn : (n : K) ≠ 0) {x y : K}
     (hcurve : W.toAffine.Equation x y) (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
