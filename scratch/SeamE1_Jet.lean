@@ -117,5 +117,29 @@ lemma equation_dual_lift_unique {x y u v : K}
 
 end AffineJet
 
+namespace MultipleRootBridge
+open Dual
+variable (W : WeierstrassCurve K)
+
+/-- The first-order `x`-jet `x + ε`. -/
+def xε (x : K) : D K := Dual.c x + Dual.e 1
+
+/-- The forced first-order `y`-jet over `x + ε` (slope from the curve). -/
+noncomputable def yε (x y : K) : D K := Dual.c y + Dual.e (AffineJet.ySlope W x y)
+
+/-- The `(x+ε, y+ε·slope)` jet lies on the curve over `k[ε]` (non-2-torsion). -/
+lemma affine_dual_point_equation {x y : K}
+    (hcurve : W.toAffine.Equation x y)
+    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0) :
+    (W.toAffine.baseChange (D K)).Equation (xε x) (yε W x y) := by
+  have := AffineJet.equation_dual_lift_of_polynomialY_ne_zero W (u := 1) hcurve hY
+  simpa [xε, yε] using this
+
+/-- The tangent coordinate of the `x`-jet is nonzero. -/
+@[simp] lemma xε_snd (x : K) : TrivSqZeroExt.snd (xε x) = 1 := by
+  simp [xε, Dual.c, Dual.e]
+
+end MultipleRootBridge
+
 end WeierstrassCurve.SEAM1
 
