@@ -1,6 +1,7 @@
 module
 
 public import scratch.SeamE1_Algebra
+public import scratch.SeamE1_Core
 public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
 public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 
@@ -20,8 +21,8 @@ variable {k : Type*} [Field k]
 a root of `preΨ' n` is a SIMPLE root when `(n : K) ≠ 0`. -/
 public theorem preΨ'_deriv_ne_zero_at_root {K : Type*} [Field K] [IsAlgClosed K]
     (W : WeierstrassCurve K) [W.IsElliptic] {n : ℕ} (hn : (n : K) ≠ 0) {x : K}
-    (hx : (W.preΨ' n).IsRoot x) : ¬ (derivative (W.preΨ' n)).IsRoot x := by
-  sorry
+    (hx : (W.preΨ' n).IsRoot x) : ¬ (derivative (W.preΨ' n)).IsRoot x :=
+  SEAM1.preΨ'_deriv_ne_zero_at_root W hn hx
 
 /-- SEAM1: the reduced `n`-division polynomial is separable when `(n : k) ≠ 0`. -/
 public theorem preΨ'_separable_of_natCast_ne_zero (W : WeierstrassCurve k) [W.IsElliptic]
