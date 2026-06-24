@@ -3,6 +3,30 @@
 Continuous log of MY changes, newest first. One entry per meaningful change (commit SHA + what + why).
 Maintained so the work is traceable and nothing gets lost across long sessions / clone moves.
 
+## 2026-06-24 (cont) — SEAM1 bridge-2 (deep crux) partial discharge: formal-group core + ψ₂-unit
+
+Target: the SEAM1 deep crux `dual_root_implies_tangent_zero` (a dual root of preΨ'_n at a non-2
+point forces the [n]-tangent at O to vanish ⇒ preΨ'_n separability). Landed three genuinely-new,
+fully-proven (0 sorry, 0 custom axiom; #print axioms = [propext, Classical.choice, Quot.sound])
+pieces toward it:
+
+- `78bff22` **Formal-group core** (`scratch/SeamE1_FormalNsmul.lean`): `FormalGroup.formalNsmul_coeff_one F n = (n:R)`,
+  i.e. `[n](T) = nT + O(T²)` over ANY 1-dim formal group law — the intrinsic tangent-at-origin fact.
+  Heart: `addSeries_coeff_one` via `MvPowerSeries.coeff_subst` finsum collapsed to `{single 0 1, single 1 1}`,
+  consuming `FormalGroup.lin_coeff_X/Y`. Reusable, Mathlib-quality. Olean builds.
+- `7680433` **Step-2 ψ₂-unit DISCHARGED** (`scratch/SeamE1_DualUnit.lean`): `dualNumber_isUnit_of_fst_ne_zero`
+  (dual number with nonzero scalar part is a unit, explicit inverse) + `psi2_dual_fst` + `psi2_dual_isUnit`
+  (lifted ψ₂=W_Y at (x+ε,y+ε·slope) is a unit since fst = hY ≠ 0). Exactly the ψ₂-unit hypothesis the raw
+  [n]-coordinate formula consumes. Exposed yε/ySlope + made bc_*/affine_dual_point_equation public in SeamE1_Jet
+  (additive; Core + scratch.SeamE1 + Torsion wiring all still build).
+- `65d2336` **Core wired**: dual_root_implies_tangent_zero docstring now records the discharged halves and the
+  PRECISE remaining gap = Weierstrass σ-formal-group instance `W.formalGroup` + x-coordinate formula
+  `x([n]P)=Φ_n/ΨSq_n` (multi-stage infra absent from this Mathlib: only DivisionPolynomial/{Basic,Degree},
+  no ω_n, no raw [n] coordinate map). Single sorry remains; 0 custom axioms.
+
+State: `preΨ'_deriv_ne_zero_at_root` still depends on 2 named sorries (preΨ'_root_Ψ₂Sq_ne; dual_root_implies_tangent_zero),
+sorryAx + standard-3 only. No custom axiom introduced. scratch.SeamE1 full build 3007 jobs EXIT 0.
+
 ## 2026-06-24 (cont) — /automode: bridge-1 coprimality even-case foundation
 
 - Bridge-1 even case (preΨ-root-Ψ2Sq-ne): CAS-VERIFIED the hCD relation preΨ4^2 + 4*Ψ3^3 = Q1*Ψ2Sq + Q2*b_relation (remainder 0; Q1 57-term/Q2 25-term cofactors, scratch/bridge1_hcd_cert.py). scratch/Bridge1HCD.lean states the eval-level lemma (CAS-verified, linear_combination lift WIP, 1 sorry). Next (fresh context): fix cert lift; then EDS-zero closed forms via normEDSRec'; then nonvanishing -> even case closed.
