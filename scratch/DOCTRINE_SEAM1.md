@@ -60,3 +60,31 @@ FIRST (dispatched dm2 2026-06-23), my own derivation in parallel (verify-don't-t
 1. Minimal sub-theory of E1: do we need full `ω`, or just the leading coeff of the `[n]`-series on `Ê`?
 2. Rigorous bridge "[n] formal-automorphism ⟹ preΨ'_n squarefree as a polynomial".
 3. Smaller-build estimate E1 vs a non-fragile reformulation of E2.
+
+## Recommended route (ChatGPT round-1, dm2 Q101, commit 3642f86; confirms my own derivation)
+**First-order TANGENT argument — NOT the full formal-group/isogeny stack.** Build only the first-order
+consequence. Cross-checks CONFIRMED independently: cardinality route circular; EDS-derivative
+induction fails (IH indices mismatch in pos char); per-n Bezout (n=3,4) = good base cases, don't scale.
+
+Core reduction: `preΨ'_separable` ⟸ rootwise `preΨ'_derivative_ne_zero_at_root` (over splitting field),
+descended via `separable_map`. A multiple root a of preΨ'_n ⟹ non-2-torsion P=(a,y), n•P=0; multiple
+root ⟹ nonzero tangent vector at P in ker[n] (over k[ε]); translate to O where d[n]=n·id ⟹ vector=0
+when (n:k)≠0 — contradiction. ONLY place (n:k)≠0 enters: d[n]|_O = n·id (the minimal formal fact).
+
+### Lemma DAG (build order)
+- A (general poly): A1 `eval_dualNumber` (eval at x+εv = f(x)+ε·v·f'(x)) — BUILD (elementary, not in Mathlib);
+  A3 `separable_of_deriv_ne_zero_at_roots` — BUILD (via `nodup_roots_iff_of_splits` + `one_lt_rootMultiplicity_iff_isRoot_gcd` + `count_roots`);
+  A4 descent = **FREE** (`Polynomial.separable_map`, biconditional).
+- B (root dictionary): B1 preΨ'_root_not_Ψ₂Sq_root (≈ repo KeystoneResultantCerts Ψ₂Sq_eval_ne + avenue-c);
+  B4 preΨ'_root_iff_non_two_n_torsion_x (≈ SEAM2 nsmul_eq_zero_iff_preΨ'). PARTLY EXISTS.
+- C (tangent crux, the genuinely-new minimal piece): tangent_nsmul_at_O = n·id. **k[ε] is not a field ⟹
+  can't use packaged Point group; needs raw affine-coordinate addition over k[ε].** ChatGPT round-2
+  (dm2 Q-crux) dispatched on this.
+- D (bridge): multiple-root → nonzero tangent kernel vector → contradiction via C.
+- E (final): base-change to alg closure + A3 + separable_map descent. SCAFFOLD buildable now.
+
+### Mathlib pieces CONFIRMED present
+`separable_map` (descent free), `nodup_roots_iff_of_splits`, `nodup_aroots_iff_of_splits`,
+`one_lt_rootMultiplicity_iff_isRoot_gcd`, `count_roots`, `preΨ'_three/four`, `map_preΨ'`,
+`natDegree_preΨ'`, `leadingCoeff_preΨ'` (= n/2 even, n odd), `preΨ'_ne_zero`, `DualNumber`/`TrivSqZeroExt`.
+Missing/new: A1, A3-helper, all of C, the B root-dictionary glue, D.
