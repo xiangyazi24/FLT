@@ -1,498 +1,339 @@
-# Q597 / dm4 — FormalGroup API, `[n]` coefficient, and division-polynomial separability
+# Q613 (dm4): `coeff X₀³ formalAddY = 1`
 
 ## Executive answer
 
-At the Mathlib revision pinned by this repo, the full chain is **not** already present.
+Yes, this is the right raw-numerator coefficient to prove directly, before touching the normalized quotient.  The proof should unfold
 
-Answers to the three API questions:
+```lean
+formalAddY W = (W.map C).addY (formalPointMv W 0) (formalPointMv W 1)
+```
 
-1. **Does Mathlib's `FormalGroup` have a formal multiplication-by-`n` map?**
-   No. `Mathlib/RingTheory/FormalGroup/Basic.lean` defines the structure `FormalGroup`, a commutativity predicate, a `Point` type synonym, and an `Add` instance on `F.Point σ` by substitution. It does **not** define `Zero`, `SMul`, `Inv`, `nsmul`, or a named `formalNsmul`. The file even has:
+and then unfold `Projective.addY` only one more step:
 
-   ```lean
-   /- TODO : Zero, SMul, Inv instance. -/
-   ```
+```lean
+addY W' P Q = W'.negY ![W'.addX P Q, W'.negAddY P Q, W'.addZ P Q]
+```
 
-2. **Is there a theorem that the first-order coefficient of `[n]_F` is `n`?**
-   No, not in `RingTheory/FormalGroup/Basic.lean`. But this is a small local lemma you can build yourself once you have `F.zero_constantCoeff`, `F.lin_coeff_X`, and `F.lin_coeff_Y`.
+so that, using `negY_eq`, the target becomes
 
-3. **Does Mathlib connect this formal group to division polynomials / `preΨ'` separability?**
-   No. `Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Basic.lean` defines `preΨ'`, `preΨ`, `ΨSq`, `Ψ`, `Φ`, `ψ`, and `φ`, and proves some coordinate-ring congruences such as `mk_ψ` and `mk_φ`. I did not find a theorem connecting the Weierstrass formal group to these division polynomials, nor a theorem that `preΨ' n` is separable when `(n : K) ≠ 0`.
+```lean
+coeff e03 (formalAddY W)
+  = - coeff e03 ((W.map C).negAddY P Q)
+    - coeff e03 ((W.map C).a₁ * (W.map C).addX P Q)
+    - coeff e03 ((W.map C).a₃ * (W.map C).addZ P Q)
+```
 
-So the minimal path is:
+The three needed raw facts are:
+
+```lean
+coeff e03 ((W.map C).negAddY P Q) = -1
+coeff e03 ((W.map C).addX P Q) = 0
+coeff e03 ((W.map C).addZ P Q) = 0
+```
+
+Then the final theorem is just `simp`/`ring`.
+
+Important correction to the proposed reasoning: for `negAddY`, it is **not** true that all terms involving `w(X₀)` or `w(X₁)` disappear at degree `3`.  The term
+
+```lean
+P y * Q y ^ 2 * P z
+```
+
+becomes
+
+```lean
+(-1) * (-1)^2 * w(X₀) = -w(X₀),
+```
+
+and since `w(t) = t^3 + a₁ t^4 + ...`, this contributes `-1` to `coeff X₀³ negAddY`.  This is exactly the `-X₀³` term in
 
 ```text
-A. Build your own recursive formal `[n]` power series and prove coeff₁ = n.
-B. Build the Weierstrass-local-coordinate bridge saying the projective group law near O is this formal group.
-C. Build the division-polynomial correctness bridge identifying zeros of `preΨ' n` with nonzero n-torsion x-coordinates.
-D. Use the tangent nonvanishing from A+B to rule out multiple roots of `preΨ' n` when `(n : K) ≠ 0`.
+negAddY degree 3 = -(X₀ - X₁)^3.
 ```
 
-The easy part is A. The hard part is B+C, especially C.
+So the correct local bookkeeping is:
 
-## What Mathlib currently has
-
-The repo pins Mathlib at:
-
-```toml
-rev = "96fd0fff3b8837985ae21dd02e712cb5df72ec05"
+```text
+negAddY degree 3
+  =  3 X₀² X₁          -- from -3 * P.x^2 * Q.x * Q.y
+     - 3 X₀ X₁²        -- from  3 * P.x * Q.x^2 * P.y
+     + w(X₁)           -- from -P.y^2 * Q.y * Q.z
+     - w(X₀)           -- from  P.y * Q.y^2 * P.z
+  = -X₀³ + 3X₀²X₁ - 3X₀X₁² + X₁³.
 ```
 
-### `FormalGroup`
+For the **axis coefficient** `X₀³`, only the last line contributes `-1`.  The mixed monomials have an `X₁` factor, and `w(X₁)` has no `X₀³` coefficient.
 
-At that revision, `Mathlib/RingTheory/FormalGroup/Basic.lean` defines:
+---
+
+## Recommended Lean shape
+
+I would prove the theorem with three local coefficient lemmas.  The following is the shape I would put in the coefficient file.
+
+Adjust the names `formalWMv`, `formalWMv_coeff_axis`, and `formalPointMv` to the exact names in `FormalGroupW.lean`; the algebraic structure is the important part.
 
 ```lean
-structure FormalGroup where
-  toPowerSeries : MvPowerSeries (Fin 2) R
-  zero_constantCoeff : toPowerSeries.constantCoeff = 0
-  lin_coeff_X : toPowerSeries.coeff (single 0 1) = 1
-  lin_coeff_Y : toPowerSeries.coeff (single 1 1) = 1
-  assoc : toPowerSeries.subst ![toPowerSeries.subst ![Y₀, Y₁], Y₂]
-    = toPowerSeries.subst ![Y₀, toPowerSeries.subst ![Y₁, Y₂]] (S := R)
-```
-
-It also defines:
-
-```lean
-class FormalGroup.IsComm (F : FormalGroup R) : Prop where
-  comm : F = (F : MvPowerSeries (Fin 2) R).subst ![X₁, X₀]
-
-def FormalGroup.Point (F : FormalGroup R) (σ : Type) := MvPowerSeries σ R
-
-instance : Add (F.Point σ) where
-  add x y := (F : MvPowerSeries (Fin 2) R).subst ![x, y]
-```
-
-But there is no `FormalGroup.nsmul`, `FormalGroup.formalNsmul`, or theorem about the linear coefficient of `[n]`.
-
-### Division polynomials
-
-`Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Basic.lean` defines:
-
-```lean
-noncomputable def preΨ' (n : ℕ) : R[X] :=
-  preNormEDS' (W.Ψ₂Sq ^ 2) W.Ψ₃ W.preΨ₄ n
-
-noncomputable def preΨ (n : ℤ) : R[X] :=
-  preNormEDS (W.Ψ₂Sq ^ 2) W.Ψ₃ W.preΨ₄ n
-
-protected noncomputable def Ψ (n : ℤ) : R[X][Y] :=
-  C (W.preΨ n) * if Even n then W.ψ₂ else 1
-
-protected noncomputable def Φ (n : ℤ) : R[X] :=
-  X * W.ΨSq n - W.preΨ (n + 1) * W.preΨ (n - 1) * if Even n then 1 else W.Ψ₂Sq
-
-protected noncomputable def ψ (n : ℤ) : R[X][Y] :=
-  normEDS W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) n
-
-protected noncomputable def φ (n : ℤ) : R[X][Y] :=
-  C X * W.ψ n ^ 2 - W.ψ (n + 1) * W.ψ (n - 1)
-```
-
-It also proves coordinate-ring congruences:
-
-```lean
-lemma Affine.CoordinateRing.mk_ψ (n : ℤ) : mk W (W.ψ n) = mk W (W.Ψ n)
-lemma Affine.CoordinateRing.mk_φ (n : ℤ) : mk W (W.φ n) = mk W (C <| W.Φ n)
-```
-
-But there is no built-in theorem of the form:
-
-```lean
-[n]P = [φₙ(P) : ωₙ(P) : ψₙ(P)]
-```
-
-nor a theorem:
-
-```lean
-(W.preΨ' n).Separable
-```
-
-under `(n : K) ≠ 0`.
-
-### `Polynomial.Separable`
-
-Mathlib does have the general separability notion:
-
-```lean
-def Polynomial.Separable (f : R[X]) : Prop :=
-  IsCoprime f (derivative f)
-```
-
-and useful downstream lemmas such as:
-
-```lean
-theorem Polynomial.Separable.eval₂_derivative_ne_zero
-    (h : p.Separable) (hx : p.eval₂ f x = 0) :
-    (derivative p).eval₂ f x ≠ 0
-```
-
-So the final target should probably be phrased using `Polynomial.Separable`, but the elliptic-curve proof of separability is yours to build.
-
-## Part A: build formal `[n]` yourself
-
-Define recursive multiplication by `n` as a univariate power series. This does not require Mathlib to have a full formal-group `SMul` instance.
-
-```lean
-import Mathlib.RingTheory.FormalGroup.Basic
-import Mathlib.RingTheory.PowerSeries.Basic
-import Mathlib.RingTheory.MvPowerSeries.Substitution
-
-open MvPowerSeries Finsupp
+import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Formula
+import Mathlib.RingTheory.MvPowerSeries.Basic
+import Mathlib.Tactic
 
 noncomputable section
 
-namespace FormalGroup
+open MvPowerSeries Finsupp
+open WeierstrassCurve
+
+namespace WeierstrassCurve
 
 variable {R : Type*} [CommRing R]
 
-/-- The recursive formal multiplication-by-`n` series.
-`formalNsmul F n` is `[n]_F(T)` as a univariate power series. -/
-def formalNsmul (F : FormalGroup R) : ℕ → PowerSeries R
-  | 0 => 0
-  | n + 1 => (F : MvPowerSeries (Fin 2) R).subst ![formalNsmul F n, PowerSeries.X]
+local notation "e₀" n => Finsupp.single (0 : Fin 2) n
+local notation "e₁" n => Finsupp.single (1 : Fin 2) n
 
-end FormalGroup
+local notation "X₀" => (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R)
+local notation "X₁" => (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R)
+
+/-!
+The only formal-`w` facts needed for the `X₀^3` coefficient.
+You probably already have these as consequences of the recursion defining `w(t)`.
+If not, prove them from:
+
+  w(t) = t^3 + a₁ t^4 + ...
+
+or from the coefficients:
+
+  formalUCoeff W 0 = 0,
+  formalUCoeff W 1 = 0,
+  formalUCoeff W 2 = 0,
+  formalUCoeff W 3 = 1.
+-/
+
+-- Suggested local simp-normal-form lemmas.  Replace `formalWMv W i` by the actual
+-- Z-coordinate series used by `formalPointMv W i`.
+--
+-- @[simp] lemma coeff_e03_formalWMv_zero (W : WeierstrassCurve R) :
+--     coeff (e₀ 3) (formalWMv W 0) = (1 : R) := ...
+--
+-- @[simp] lemma coeff_e03_formalWMv_one (W : WeierstrassCurve R) :
+--     coeff (e₀ 3) (formalWMv W 1) = (0 : R) := ...
+--
+-- @[simp] lemma coeff_e00_formalWMv_zero (W : WeierstrassCurve R) :
+--     coeff (e₀ 0) (formalWMv W 0) = (0 : R) := ...
+--
+-- @[simp] lemma coeff_e01_formalWMv_zero (W : WeierstrassCurve R) :
+--     coeff (e₀ 1) (formalWMv W 0) = (0 : R) := ...
+--
+-- @[simp] lemma coeff_e02_formalWMv_zero (W : WeierstrassCurve R) :
+--     coeff (e₀ 2) (formalWMv W 0) = (0 : R) := ...
 ```
 
-This definition uses total `subst`. For proofs, you show the relevant substitutions are valid because both input series have zero constant term.
+The reason I would keep these as separate lemmas is that they isolate the only use of the `w` recursion.  Everything else is just polynomial coefficient arithmetic in `MvPowerSeries (Fin 2) R`.
 
-### Constant term lemma
+---
 
-```lean
-namespace FormalGroup
+## Core coefficient lemmas
 
-variable {R : Type*} [CommRing R]
-
-lemma formalNsmul_constantCoeff (F : FormalGroup R) :
-    ∀ n, PowerSeries.constantCoeff (formalNsmul F n) = 0 := by
-  intro n
-  induction n with
-  | zero => simp [formalNsmul]
-  | succ n ih =>
-      -- Use `MvPowerSeries.constantCoeff_subst_eq_zero`.
-      -- Source has zero constant coefficient by `F.zero_constantCoeff`.
-      -- Inputs have zero constant coefficients: IH and `PowerSeries.coeff_zero_X`.
-      -- May need to unfold `PowerSeries.constantCoeff` as `MvPowerSeries.constantCoeff`.
-      sorry
-
-end FormalGroup
-```
-
-### The key linear-substitution lemma
-
-Prove this once. It is the main algebraic work.
+Use the following three statements.  They are intentionally axis-only; this avoids proving the full homogeneous degree-3 polynomial.
 
 ```lean
-/-- If `G(X,Y) = X + Y + O(2)`, and `A(0)=B(0)=0`, then
-`coeff₁ G(A(T),B(T)) = coeff₁ A + coeff₁ B`. -/
-lemma coeff_one_subst_two_linear
-    {R : Type*} [CommRing R]
-    (G : MvPowerSeries (Fin 2) R)
-    (hG0 : MvPowerSeries.constantCoeff G = 0)
-    (hGX : MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1) G = 1)
-    (hGY : MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) 1) G = 1)
-    (A B : PowerSeries R)
-    (hA0 : PowerSeries.constantCoeff A = 0)
-    (hB0 : PowerSeries.constantCoeff B = 0) :
-    PowerSeries.coeff 1 (G.subst ![A, B]) =
-      PowerSeries.coeff 1 A + PowerSeries.coeff 1 B := by
+private lemma coeff_e03_negAddY_formalPoint
+    (W : WeierstrassCurve R) :
+    MvPowerSeries.coeff (e₀ 3)
+      ((W.map (MvPowerSeries.C : R →+* MvPowerSeries (Fin 2) R)).negAddY
+        (formalPointMv W 0) (formalPointMv W 1))
+      = (-1 : R) := by
   classical
-  -- Proof outline:
-  -- 1. Use `MvPowerSeries.coeff_subst` at exponent `single () 1`.
-  -- 2. Only source monomials of total degree 0 or 1 can contribute to target degree 1.
-  -- 3. Degree 0 contribution is killed by `hG0`.
-  -- 4. Degree 1 monomials are `single 0 1` and `single 1 1`.
-  -- 5. Use `hGX`, `hGY`, and `coeff_one_X`.
-  -- 6. Degree ≥ 2 contributions vanish because `A` and `B` have zero constant coefficient.
-  sorry
+  -- After unfolding the projective formula and the two formal points, the degree-3
+  -- axis terms are exactly:
+  --   3*X₀^2*X₁ - 3*X₀*X₁^2 + w₁ - w₀.
+  -- At `e₀ 3`, the two mixed terms and `w₁` vanish, while `w₀` contributes `1`.
+  simp [WeierstrassCurve.Projective.negAddY,
+    formalPointMv,
+    pow_succ,
+    MvPowerSeries.coeff_C,
+    MvPowerSeries.coeff_X,
+    MvPowerSeries.coeff_X_pow,
+    MvPowerSeries.coeff_C_mul,
+    MvPowerSeries.coeff_mul_C]
+
+private lemma coeff_e03_addX_formalPoint
+    (W : WeierstrassCurve R) :
+    MvPowerSeries.coeff (e₀ 3)
+      ((W.map (MvPowerSeries.C : R →+* MvPowerSeries (Fin 2) R)).addX
+        (formalPointMv W 0) (formalPointMv W 1))
+      = (0 : R) := by
+  classical
+  -- Every term in `addX` either has an `X₁` factor, or has a `w` factor multiplied
+  -- by at least one positive-degree variable, or has at least two `w` factors.
+  -- Since `w` starts in degree 3, no term can contribute to the pure `X₀^3` axis.
+  simp [WeierstrassCurve.Projective.addX,
+    formalPointMv,
+    pow_succ,
+    MvPowerSeries.coeff_C,
+    MvPowerSeries.coeff_X,
+    MvPowerSeries.coeff_X_pow,
+    MvPowerSeries.coeff_C_mul,
+    MvPowerSeries.coeff_mul_C]
+
+private lemma coeff_e03_addZ_formalPoint
+    (W : WeierstrassCurve R) :
+    MvPowerSeries.coeff (e₀ 3)
+      ((W.map (MvPowerSeries.C : R →+* MvPowerSeries (Fin 2) R)).addZ
+        (formalPointMv W 0) (formalPointMv W 1))
+      = (0 : R) := by
+  classical
+  -- `addZ` has no standalone `w₀` term.  Its terms are mixed in `X₁`, quadratic
+  -- in `w`, or have an additional positive-degree factor.  Hence the pure `X₀^3`
+  -- coefficient is zero.
+  simp [WeierstrassCurve.Projective.addZ,
+    formalPointMv,
+    pow_succ,
+    MvPowerSeries.coeff_C,
+    MvPowerSeries.coeff_X,
+    MvPowerSeries.coeff_X_pow,
+    MvPowerSeries.coeff_C_mul,
+    MvPowerSeries.coeff_mul_C]
 ```
 
-This lemma is independent of Weierstrass curves.
-
-### First-order coefficient of `[n]_F`
-
-Then the coefficient theorem is short:
+Those `simp` proofs rely on the `formalWMv` coefficient lemmas being tagged `[simp]`.  If `simp` does not close the product terms containing `w`, add the following axis-product simp lemmas once:
 
 ```lean
-namespace FormalGroup
+private lemma coeff_e03_X₀_mul_of_coeff_e02_zero
+    {f : MvPowerSeries (Fin 2) R}
+    (hf : MvPowerSeries.coeff (e₀ 2) f = 0) :
+    MvPowerSeries.coeff (e₀ 3) (X₀ * f) = 0 := by
+  classical
+  simpa [X₀, Finsupp.single_add, hf] using
+    (MvPowerSeries.coeff_add_monomial_mul
+      (m := e₀ 1) (n := e₀ 2) (φ := f) (a := (1 : R)))
 
-variable {R : Type*} [CommRing R]
+private lemma coeff_e03_X₀_sq_mul_of_coeff_e01_zero
+    {f : MvPowerSeries (Fin 2) R}
+    (hf : MvPowerSeries.coeff (e₀ 1) f = 0) :
+    MvPowerSeries.coeff (e₀ 3) (X₀ ^ 2 * f) = 0 := by
+  classical
+  rw [MvPowerSeries.X_pow_eq]
+  simpa [Finsupp.single_add, hf] using
+    (MvPowerSeries.coeff_add_monomial_mul
+      (m := e₀ 2) (n := e₀ 1) (φ := f) (a := (1 : R)))
 
-/-- `[n]_F(T) = n*T + O(T^2)`. -/
-theorem formalNsmul_coeff_one (F : FormalGroup R) :
-    ∀ n : ℕ, PowerSeries.coeff 1 (formalNsmul F n) = (n : R) := by
-  intro n
-  induction n with
-  | zero => simp [formalNsmul]
-  | succ n ih =>
-      rw [formalNsmul]
-      have hA0 := formalNsmul_constantCoeff F n
-      have hB0 : PowerSeries.constantCoeff (PowerSeries.X : PowerSeries R) = 0 := by simp
-      rw [coeff_one_subst_two_linear
-        (G := (F : MvPowerSeries (Fin 2) R))
-        F.zero_constantCoeff F.lin_coeff_X F.lin_coeff_Y
-        (formalNsmul F n) PowerSeries.X hA0 hB0]
-      simp [ih, Nat.cast_succ]
-
-end FormalGroup
+private lemma coeff_e03_X₁_mul
+    (f : MvPowerSeries (Fin 2) R) :
+    MvPowerSeries.coeff (e₀ 3) (X₁ * f) = 0 := by
+  classical
+  rw [X₁, MvPowerSeries.coeff_monomial_mul]
+  simp [Finsupp.single_eq_single_iff]
 ```
 
-This proves item 2 of your chain once `F : FormalGroup K` exists. Notice that commutativity is not needed for this coefficient theorem; associativity/commutativity are needed only to justify calling this recursive series *the* `[n]` map.
+The third lemma is very useful: any term with an explicit factor `X₁` dies immediately for the pure `X₀`-axis coefficient.
 
-## Part B: what is still missing for division polynomials
+---
 
-The formal coefficient theorem says:
+## Final theorem
 
-```text
-[n]_F(T) = n*T + O(T^2).
-```
-
-This is a local statement at the identity `O`. To use it for `preΨ'`, you need at least two bridges.
-
-### Bridge 1: Weierstrass formal group equals the elliptic curve group law near `O`
-
-You need a theorem like:
+Once the three raw coefficient lemmas are available, the target proof is short.
 
 ```lean
-/-- The local parameter of the projective group law equals the formal group law. -/
-theorem localParameter_addXYZ_eq_formalGroupLaw
-    (u v : PowerSeries K) :
-    localT (Projective.addXYZ W (P u) (P v))
-      = (W.formalGroup : MvPowerSeries (Fin 2) K).subst ![u, v] := by
-  ...
+lemma formalAddY_coeff_X0_cube
+    (W : WeierstrassCurve R) :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 3) (formalAddY W) = (1 : R) := by
+  classical
+  let Cmv : R →+* MvPowerSeries (Fin 2) R := MvPowerSeries.C
+  let Wmv := W.map Cmv
+  let P : Fin 3 → MvPowerSeries (Fin 2) R := formalPointMv W 0
+  let Q : Fin 3 → MvPowerSeries (Fin 2) R := formalPointMv W 1
+
+  have hneg :
+      MvPowerSeries.coeff (e₀ 3) (Wmv.negAddY P Q) = (-1 : R) := by
+    simpa [Wmv, P, Q, Cmv] using coeff_e03_negAddY_formalPoint (W := W)
+
+  have hX :
+      MvPowerSeries.coeff (e₀ 3) (Wmv.addX P Q) = (0 : R) := by
+    simpa [Wmv, P, Q, Cmv] using coeff_e03_addX_formalPoint (W := W)
+
+  have hZ :
+      MvPowerSeries.coeff (e₀ 3) (Wmv.addZ P Q) = (0 : R) := by
+    simpa [Wmv, P, Q, Cmv] using coeff_e03_addZ_formalPoint (W := W)
+
+  calc
+    MvPowerSeries.coeff (e₀ 3) (formalAddY W)
+        = MvPowerSeries.coeff (e₀ 3)
+            (Wmv.negY ![Wmv.addX P Q, Wmv.negAddY P Q, Wmv.addZ P Q]) := by
+              simp [formalAddY, Wmv, P, Q, Cmv]
+    _ = MvPowerSeries.coeff (e₀ 3)
+            (-Wmv.negAddY P Q - Wmv.a₁ * Wmv.addX P Q - Wmv.a₃ * Wmv.addZ P Q) := by
+              rw [WeierstrassCurve.Projective.negY_eq]
+    _ = 1 := by
+              simp [hneg, hX, hZ, Wmv, Cmv]
 ```
 
-or at least the iterated version:
+If the last `simp` leaves scalar-multiplication residue, use this more explicit ending:
 
 ```lean
-theorem localParameter_nsmul_eq_formalNsmul
-    (n : ℕ) :
-    localT ([n] applied to P(T)) = FormalGroup.formalNsmul W.formalGroup n := by
-  ...
+    _ = -(-1 : R) - Wmv.a₁ * 0 - Wmv.a₃ * 0 := by
+              simp [hneg, hX, hZ]
+    _ = 1 := by ring
 ```
 
-This is not in Mathlib. This is essentially the bridge you are building in `FormalGroupW.lean`.
+---
 
-### Bridge 2: division-polynomial coordinates compute `[n]P`
+## If `simp` does not see the map coefficients
 
-You need a theorem that relates `ψ`, `φ`, and eventually `preΨ'` to the actual multiplication-by-`n` map. A typical target is:
+Sometimes the coefficient ring of `Wmv := W.map Cmv` leaves `Wmv.a₁` as a power series constant rather than exposing it as `C W.a₁`.  Then add this local simp lemma:
 
 ```lean
-/-- Projective coordinates for `[n]P`. Precise signs/powers depend on Mathlib's definitions. -/
-theorem nsmul_projective_eq_division_polynomial_coords
-    (P : W.Point) :
-    projectiveRep (n • P) ~
-      ![evalP (W.φ n), evalP (omega n), evalP (W.ψ n)] := by
-  ...
+private lemma map_C_a₁
+    (W : WeierstrassCurve R) :
+    (W.map (MvPowerSeries.C : R →+* MvPowerSeries (Fin 2) R)).a₁
+      = MvPowerSeries.C W.a₁ := by
+  rfl
+
+private lemma map_C_a₃
+    (W : WeierstrassCurve R) :
+    (W.map (MvPowerSeries.C : R →+* MvPowerSeries (Fin 2) R)).a₃
+      = MvPowerSeries.C W.a₃ := by
+  rfl
 ```
 
-Mathlib has `ψ` and `φ`, but the file explicitly still has:
+Then the final coefficient terms reduce by the existing Mathlib simp lemmas:
 
 ```lean
-* TODO: the bivariate polynomials `ωₙ`.
+MvPowerSeries.coeff_C_mul
+MvPowerSeries.coeff_mul_C
 ```
 
-So the full coordinate formula is not packaged. For `preΨ'`, you may be able to avoid defining all of `ωₙ` if you only need the `Z`-coordinate/vanishing criterion, but you still need a correctness theorem:
+So `coeff e03 (C W.a₁ * addX) = W.a₁ * coeff e03 addX = 0`, and similarly for the `a₃ * addZ` term.
+
+---
+
+## Minimal checklist
+
+To make the final theorem build, I would add exactly these facts first:
 
 ```lean
-W.preΨ' n x = 0  ↔  there is a point P over x with n • P = 0
+-- Z-coordinate of the first formal point starts with X₀³.
+@[simp] lemma coeff_e03_formalPointMv_0_z
+    (W : WeierstrassCurve R) :
+    coeff (e₀ 3) ((formalPointMv W 0) 2) = (1 : R) := ...
+
+-- Z-coordinate of the second formal point has no pure X₀³ term.
+@[simp] lemma coeff_e03_formalPointMv_1_z
+    (W : WeierstrassCurve R) :
+    coeff (e₀ 3) ((formalPointMv W 1) 2) = (0 : R) := ...
+
+-- Lower pure-axis coefficients of w(X₀) vanish.
+@[simp] lemma coeff_e00_formalPointMv_0_z
+    (W : WeierstrassCurve R) :
+    coeff (e₀ 0) ((formalPointMv W 0) 2) = (0 : R) := ...
+
+@[simp] lemma coeff_e01_formalPointMv_0_z
+    (W : WeierstrassCurve R) :
+    coeff (e₀ 1) ((formalPointMv W 0) 2) = (0 : R) := ...
+
+@[simp] lemma coeff_e02_formalPointMv_0_z
+    (W : WeierstrassCurve R) :
+    coeff (e₀ 2) ((formalPointMv W 0) 2) = (0 : R) := ...
 ```
 
-with the usual parity and 2-torsion caveats.
+Those five formal-point coefficient facts plus the three raw projective-formula facts above give the desired theorem cleanly.
 
-## How to use the formal coefficient theorem for separability
-
-The geometric argument is:
-
-1. If `(n : K) ≠ 0`, then the tangent map of `[n]` at `O` is nonzero, because its local power series is `n*T + O(T^2)`.
-2. By translation, the tangent map of `[n]` at any `n`-torsion point `P` is also nonzero:
-
-   ```text
-   [n](P + Q) = [n]P + [n]Q = [n]Q
-   ```
-
-   when `[n]P = O`.
-
-3. A multiple root of the division polynomial would produce a nonzero tangent vector at an `n`-torsion point killed by the tangent map of `[n]`.
-4. Contradiction.
-
-In Lean, make this explicit with dual numbers or tangent-vector structures.
-
-## Minimal theorem package to build
-
-Here is the leanest dependency chain I would aim for.
-
-### 1. Formal group coefficient package
-
-```lean
-namespace FormalGroup
-
-def formalNsmul (F : FormalGroup K) : ℕ → PowerSeries K
-
-theorem formalNsmul_constantCoeff
-    (F : FormalGroup K) (n : ℕ) :
-    PowerSeries.constantCoeff (formalNsmul F n) = 0
-
-theorem formalNsmul_coeff_one
-    (F : FormalGroup K) (n : ℕ) :
-    PowerSeries.coeff 1 (formalNsmul F n) = (n : K)
-
-end FormalGroup
-```
-
-This is the easy part.
-
-### 2. Weierstrass formal group bridge
-
-For your concrete `W.formalGroup`:
-
-```lean
-theorem weierstrass_local_nsmul_coeff_one
-    (n : ℕ) :
-    coeffε_of_local_parameter_of_nsmul_near_O W n = (n : K) := by
-  -- reduce to `FormalGroup.formalNsmul_coeff_one W.formalGroup n`
-  sorry
-```
-
-This is where `FormalGroupW.lean` should connect `addXYZ`/local parameter to `FormalGroup.formalNsmul`.
-
-### 3. Translate tangent nonvanishing to any torsion point
-
-You do not need the full formal group at every point. You need a theorem like:
-
-```lean
-theorem tangent_nsmul_at_torsion_is_nat
-    {P : W.Point} (hP : n • P = 0) :
-    tangentMapCoeff_at P (fun Q => n • Q) = (n : K) := by
-  -- translate P to O and use the local theorem at O
-  sorry
-```
-
-This can be proven either:
-
-* abstractly from group translation and the local formal group at `O`; or
-* by the finite-point tangent induction route discussed earlier.
-
-The abstract translation proof is conceptually cleaner, but it requires enough infrastructure for tangent/local coordinates under translation.
-
-### 4. Division-polynomial root/torsion bridge
-
-You need a theorem that a root of `preΨ' n` corresponds to a point in the kernel of `[n]`, and that a multiple root gives a tangent vector killed by `[n]`.
-
-A useful dual-number statement is:
-
-```lean
-theorem multiple_root_preΨ'_gives_dual_torsion
-    {x : K} (hx : Polynomial.aeval x (W.preΨ' n) = 0)
-    (hdx : Polynomial.aeval x (derivative (W.preΨ' n)) = 0) :
-    ∃ (Pε : point over K[ε]),
-      reduction Pε is an n-torsion point ∧
-      tangent vector of Pε is nonzero ∧
-      [n]Pε = Oε := by
-  ...
-```
-
-Then combine with tangent nonvanishing:
-
-```lean
-theorem preΨ'_root_derivative_ne_zero
-    (hn : (n : K) ≠ 0)
-    {x : K} (hx : Polynomial.aeval x (W.preΨ' n) = 0) :
-    Polynomial.aeval x (derivative (W.preΨ' n)) ≠ 0 := by
-  intro hderiv
-  obtain ⟨Pε, hred, hnonzero, hnPε⟩ :=
-    multiple_root_preΨ'_gives_dual_torsion W n hx hderiv
-  have htangent := tangent_nsmul_at_torsion_is_nat W hn hred
-  -- `hnPε` says tangent is killed, `htangent` says multiplication by nonzero scalar.
-  contradiction
-```
-
-Finally convert root-derivative nonvanishing into `Polynomial.Separable`. Depending on which Mathlib lemmas are convenient, either prove `IsCoprime f f.derivative` directly or prove no multiple roots over a splitting field and use an existing squarefree/separable criterion.
-
-## Direct algebraic alternative
-
-If the geometric bridge to `preΨ'` is too large, another possible route is purely algebraic:
-
-```lean
-theorem gcd_preΨ'_derivative_eq_one
-    (hn : (n : K) ≠ 0) :
-    IsCoprime (W.preΨ' n) (derivative (W.preΨ' n)) := by
-  -- use EDS recurrences, degree computations, and identities among `preΨ'`, `ΨSq`, `Φ`.
-```
-
-But this is likely harder than the tangent-map proof, because the recurrence algebra for `preΨ'` is large.
-
-## Important caveats for `preΨ'`
-
-`preΨ'` is not exactly `ψₙ` in all parities.
-
-Mathlib defines:
-
-```lean
-W.Ψ n = C (W.preΨ n) * if Even n then W.ψ₂ else 1
-```
-
-So for even `n`, `preΨ n` is the division polynomial with the `ψ₂` factor removed. This means the root/torsion bridge has a 2-torsion caveat:
-
-* odd `n`: `preΨ n` corresponds directly to the usual `ψₙ` roots;
-* even `n`: `Ψ n` has an extra `ψ₂` factor, and `preΨ n` excludes the 2-torsion factor.
-
-For separability of `preΨ' n`, this is actually helpful, but the proof must know which torsion points are represented by `preΨ'` and which are represented by `ψ₂`.
-
-## Recommended implementation order
-
-1. **In a small formal-group utility file**, add:
-
-   ```lean
-   FormalGroup.formalNsmul
-   FormalGroup.formalNsmul_constantCoeff
-   FormalGroup.formalNsmul_coeff_one
-   ```
-
-   This is independent of elliptic curves and should be reusable.
-
-2. **In `FormalGroupW.lean`**, after constructing `W.formalGroup`, prove:
-
-   ```lean
-   W.formalGroup_nsmul_local_coeff_one
-   ```
-
-   by reducing to `FormalGroup.formalNsmul_coeff_one`.
-
-3. **For division polynomials**, first prove only the correctness theorem you need:
-
-   ```lean
-   preΨ'_root_iff_xcoord_n_torsion_non2
-   ```
-
-   Do not try to formalize all of `ωₙ` unless the projective-coordinate theorem forces you to.
-
-4. **Then prove root derivative nonzero**, using dual numbers or tangent vectors.
-
-5. **Then package as `Polynomial.Separable`**:
-
-   ```lean
-   theorem preΨ'_separable_of_natCast_ne_zero
-       (hn : (n : K) ≠ 0) :
-       (W.preΨ' n).Separable := by
-     rw [Polynomial.separable_def]
-     -- show coprime with derivative, e.g. by no common root / gcd argument
-     sorry
-   ```
-
-## Bottom line
-
-Mathlib gives you the formal-group *structure* and the division-polynomial *definitions*, but not the multiplication-by-`n` formal power series, not the coefficient theorem, and not the formal-group-to-division-polynomial separability bridge.
-
-The minimum you should build yourself is:
-
-```text
-formalNsmul_coeff_one: [n]_F(T) = nT + O(T²)
-local_nsmul_bridge: elliptic [n] near O agrees with formalNsmul
-translation/tangent bridge: d[n] at torsion P is multiplication by n
-preΨ'_torsion bridge: roots/multiple roots of preΨ' correspond to torsion/tangent-kernel data
-```
-
-The first item is small. The remaining three are the real content of the separability proof.
+The key point is that the proof should **use** `coeff e03 w(X₀) = 1`; trying to discard all `w` terms will give the wrong sign for `negAddY` and will make the Lean proof fight the actual formula.
