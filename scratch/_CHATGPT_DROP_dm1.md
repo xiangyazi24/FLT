@@ -1,4 +1,4 @@
-# Q459 (dm1): Projective.addY CAS for `P(t) = [t:-1:w(t)]`
+# Q476 (dm1): normalized `Projective.addXYZ` quotients for `P(t)=[t:-1:w(t)]`
 
 ## Executive answer
 
@@ -8,177 +8,153 @@ For the short Weierstrass curve
 y^2 = x^3 + A*x + B
 ```
 
-and the standard projective formal-neighborhood representative
+with
 
 ```text
-P(t) = [X:Y:Z] = [t:-1:w(t)]
+P(t) = [t:-1:w(t)]
 w(t) = t^3 + A*t^7 + B*t^9 + O(t^11),
 ```
 
-Mathlib's `Projective.addXYZ` formulas give, to total degree `≤ 4` in `(t1,t2)`,
+Mathlib's projective addition formulas give the following truncations to total degree `≤ 8` in `(t1,t2)`:
 
 ```text
-addX(P(t1),P(t2)) = (t2 - t1)^3*(t1 + t2)      + O(total degree ≥ 5)
-addY(P(t1),P(t2)) = -(t2 - t1)^3                + O(total degree ≥ 5)
-addZ(P(t1),P(t2)) = 0                            + O(total degree ≥ 5)
+addX = -(t1 - t2)^3*(t1 + t2)*(1 + A*t1^4 + A*t1^2*t2^2 + A*t2^4)
+       + O(total degree ≥ 9)
+
+addY =  (t1 - t2)^3*(1 + A*t1^4 + 2*A*t1^3*t2
+                        + 3*A*t1^2*t2^2 + 2*A*t1*t2^3 + A*t2^4)
+       + O(total degree ≥ 9)
+
+addZ = -(t1 - t2)^3*(t1 + t2)^3
+       + O(total degree ≥ 9)
 ```
 
-More precisely, the first nonzero `addZ` term is total degree `6`:
+Therefore, after dividing by the requested divisor
 
 ```text
-addZ(P(t1),P(t2)) = (t2 - t1)^3*(t1+t2)^3 + O(total degree ≥ 7).
+D = (t1 - t2)^3,
 ```
 
-So the answer to the key question is:
+the normalized quotients are:
 
 ```text
-constantCoeff(addY at t1=t2=0) = 0.
+addX / D = -(t1 + t2)*(1 + A*t1^4 + A*t1^2*t2^2 + A*t2^4)
+
+addY / D =  1 + A*t1^4 + 2*A*t1^3*t2
+              + 3*A*t1^2*t2^2 + 2*A*t1*t2^3 + A*t2^4
+
+addZ / D = -(t1 + t2)^3
 ```
 
-Thus raw
+The polynomial division remainders are all zero for the degree-8 truncations.
+
+## Sign check
+
+With the divisor exactly as requested, `D=(t1-t2)^3`, the normalized `addY` constant coefficient is
 
 ```text
-F = -addX/addY
+(addY / (t1-t2)^3)(0,0) = 1.
 ```
 
-is a `0/0` expression at `(0,0)`.  One must first divide the three raw coordinates by the common diagonal factor
+So the requested verification `Q(0,0)=-1` is off by a sign for this divisor.  The `-1` constant occurs if one divides by the opposite diagonal factor:
 
 ```text
-C = (t2 - t1)^3.
+D' = (t2 - t1)^3 = -(t1 - t2)^3,
 ```
 
-After this normalization,
+because then
 
 ```text
-addX/C =  t1 + t2 + O(total degree ≥ 5)
-addY/C = -1 + O(total degree ≥ 4)
-addZ/C =  (t1+t2)^3 + O(total degree ≥ 7)
+addY / D' = -1 - A*t1^4 - 2*A*t1^3*t2
+              - 3*A*t1^2*t2^2 - 2*A*t1*t2^3 - A*t2^4.
 ```
 
-so the normalized `Y` coordinate is a unit.
-
-The sign check is:
+Both normalizations are valid projectively; they differ by the unit scalar `-1`.  For the local parameter
 
 ```text
-local parameter at [0:-1:0] is  t = -X/Y.
+t = -X/Y,
 ```
 
-For `P(t)=[t:-1:w(t)]`, this gives `-t/(-1)=t`.  Therefore the formal-group law from the raw coordinates is
+using the requested divisor gives
 
 ```text
-F(t1,t2) = -addX/addY = addX/(-addY),
+F(t1,t2) = - (addX/D) / (addY/D)
+         = t1 + t2 + O(total degree ≥ 5),
 ```
 
-after cancelling `C`.  To total degree `≤ 4`,
-
-```text
-F(t1,t2) = t1 + t2 + O(total degree ≥ 5).
-```
-
-If one computes one more meaningful term, the first nonlinear correction is total degree `5`:
-
-```text
-F(t1,t2)
-  = t1 + t2
-    - 2*A*(t1^4*t2 + 2*t1^3*t2^2 + 2*t1^2*t2^3 + t1*t2^4)
-    + O(total degree ≥ 6).
-```
-
-This agrees with the expectation that the linear part is additive, but it also confirms that Mathlib's raw projective addition formula still needs the diagonal-factor cancellation.
+as expected.
 
 ---
 
-## Formula source used
-
-I used Mathlib's standard projective formulas from:
+## Explicit expanded degree-8 coordinates
 
 ```text
-Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Formula.lean
+addX = -A*t1^8 + 2*A*t1^7*t2 - A*t1^6*t2^2
+       + A*t1^2*t2^6 - 2*A*t1*t2^7 + A*t2^8
+       - t1^4 + 2*t1^3*t2 - 2*t1*t2^3 + t2^4
+
+addY = A*t1^7 - A*t1^6*t2 - 2*A*t1^4*t2^3
+       + 2*A*t1^3*t2^4 + A*t1*t2^6 - A*t2^7
+       + t1^3 - 3*t1^2*t2 + 3*t1*t2^2 - t2^3
+
+addZ = -t1^6 + 3*t1^4*t2^2 - 3*t1^2*t2^4 + t2^6
 ```
 
-Relevant definitions:
-
-```lean
-addXYZ P Q = ![addX P Q, addY P Q, addZ P Q]
-addY P Q = negY ![addX P Q, negAddY P Q, addZ P Q]
-negY [X,Y,Z] = -Y - a₁*X - a₃*Z
-```
-
-For the short curve, `a₁=a₂=a₃=0`, `a₄=A`, `a₆=B`, hence
-
-```text
-addY = -negAddY.
-```
+No `B` term appears through total degree `8`; the first `B` contributions occur later.
 
 ---
 
-## Sympy script
+## Runnable Sympy script
 
 ```python
 import sympy as sp
 
+# Variables.  A and B are coefficients; total degree is measured only in t1,t2.
 t1, t2, A, B = sp.symbols('t1 t2 A B')
 
-# Short Weierstrass: y^2 = x^3 + A*x + B.
-# In Mathlib coefficient notation:
-a1 = 0
-a2 = 0
-a3 = 0
-a4 = A
-a6 = B
+# Short Weierstrass curve: y^2 = x^3 + A*x + B.
+# Mathlib coefficient convention: a1=a2=a3=0, a4=A, a6=B.
 
-# Standard formal parameter representative P(t) = [t:-1:w(t)].
-# For the short curve, w = t^3 + A*t*w^2 + B*w^3,
-# so w = t^3 + A*t^7 + B*t^9 + O(t^11).
+# Formal-neighborhood representative P(t) = [t:-1:w(t)].
+# Use enough terms for total-degree <= 8 in the output.
 w1 = t1**3 + A*t1**7 + B*t1**9
 w2 = t2**3 + A*t2**7 + B*t2**9
 
 Px, Py, Pz = t1, -1, w1
 Qx, Qy, Qz = t2, -1, w2
 
-# Mathlib Projective.addZ.
+# Mathlib Projective.addZ specialized to a1=a2=a3=0, a4=A, a6=B.
 addZ = (
     -3*Px**2*Qx*Qz + 3*Px*Qx**2*Pz
     + Py**2*Qz**2 - Qy**2*Pz**2
-    + a1*Px*Py*Qz**2 - a1*Qx*Qy*Pz**2
-    - a2*Px**2*Qz**2 + a2*Qx**2*Pz**2
-    + a3*Py*Pz*Qz**2 - a3*Qy*Pz**2*Qz
-    - a4*Px*Pz*Qz**2 + a4*Qx*Pz**2*Qz
+    - A*Px*Pz*Qz**2 + A*Qx*Pz**2*Qz
 )
 
-# Mathlib Projective.addX.
+# Mathlib Projective.addX specialized to the short curve.
 addX = (
     -Px*Qy**2*Pz + Qx*Py**2*Qz
     - 2*Px*Py*Qy*Qz + 2*Qx*Py*Qy*Pz
-    - a1*Px**2*Qy*Qz + a1*Qx**2*Py*Pz
-    + a2*Px**2*Qx*Qz - a2*Px*Qx**2*Pz
-    - a3*Px*Py*Qz**2 + a3*Qx*Qy*Pz**2
-    - 2*a3*Px*Qy*Pz*Qz + 2*a3*Qx*Py*Pz*Qz
-    + a4*Px**2*Qz**2 - a4*Qx**2*Pz**2
-    + 3*a6*Px*Pz*Qz**2 - 3*a6*Qx*Pz**2*Qz
+    + A*Px**2*Qz**2 - A*Qx**2*Pz**2
+    + 3*B*Px*Pz*Qz**2 - 3*B*Qx*Pz**2*Qz
 )
 
-# Mathlib Projective.negAddY.
+# Mathlib Projective.negAddY specialized to the short curve.
 negAddY = (
     -3*Px**2*Qx*Qy + 3*Px*Qx**2*Py
     - Py**2*Qy*Qz + Py*Qy**2*Pz
-    + a1*Px*Qy**2*Pz - a1*Qx*Py**2*Qz
-    - a2*Px**2*Qy*Qz + a2*Qx**2*Py*Pz
-    + 2*a2*Px*Qx*Py*Qz - 2*a2*Px*Qx*Qy*Pz
-    - a3*Py**2*Qz**2 + a3*Qy**2*Pz**2
-    + a4*Px*Py*Qz**2 - 2*a4*Px*Qy*Pz*Qz
-    + 2*a4*Qx*Py*Pz*Qz - a4*Qx*Qy*Pz**2
-    + 3*a6*Py*Pz*Qz**2 - 3*a6*Qy*Pz**2*Qz
+    + A*Px*Py*Qz**2 - 2*A*Px*Qy*Pz*Qz
+    + 2*A*Qx*Py*Pz*Qz - A*Qx*Qy*Pz**2
+    + 3*B*Py*Pz*Qz**2 - 3*B*Qy*Pz**2*Qz
 )
 
 # addY = negY([addX, negAddY, addZ]).
-# For short Weierstrass, negY([X,Y,Z]) = -Y.
+# For a1=a3=0, negY([X,Y,Z]) = -Y, so addY = -negAddY.
 addY = -negAddY
 
 
 def trunc_total(poly, maxdeg):
-    """Keep terms of total degree <= maxdeg in t1,t2.
-    A and B are treated as coefficients, not degree variables.
+    """Keep terms whose total degree in t1,t2 is <= maxdeg.
+    A and B are treated as coefficient variables.
     """
     poly = sp.Poly(sp.expand(poly), t1, t2, A, B)
     out = 0
@@ -189,42 +165,44 @@ def trunc_total(poly, maxdeg):
     return sp.expand(out)
 
 
-print('--- coordinates to total degree <= 4 ---')
-for name, expr in [('addX', addX), ('addY', addY), ('addZ', addZ)]:
-    print(name, '=', sp.factor(trunc_total(expr, 4)))
-    print('expanded:', sp.expand(trunc_total(expr, 4)))
+def divide_by_D(name, expr, maxdeg=8):
+    D = (t1 - t2)**3
+    tr = trunc_total(expr, maxdeg)
+    q, r = sp.div(
+        sp.Poly(tr, t1, t2, domain=sp.QQ.frac_field(A, B)),
+        sp.Poly(D, t1, t2, domain=sp.QQ.frac_field(A, B)),
+    )
+    q = q.as_expr()
+    r = r.as_expr()
+    print(f'--- {name} to total degree <= {maxdeg} ---')
+    print('truncated factor:', sp.factor(tr))
+    print('truncated expanded:', sp.expand(tr))
+    print('quotient factor:', sp.factor(q))
+    print('quotient expanded:', sp.expand(q))
+    print('remainder:', r)
+    print('quotient constant:', q.subs({t1: 0, t2: 0}))
+    print()
+    return tr, q, r
 
-print('\nconstant term of addY:', trunc_total(addY, 0))
 
-# The common diagonal factor detected from the leading terms.
-C = (t2 - t1)**3
+X8, Xq, Xr = divide_by_D('addX', addX)
+Y8, Yq, Yr = divide_by_D('addY', addY)
+Z8, Zq, Zr = divide_by_D('addZ', addZ)
 
-# To see the normalized denominator and F, keep enough terms before dividing.
-# addX starts in degree 4 and addY starts in degree 3, so degree 8 is enough
-# to see the first nonlinear correction in F.
-X8 = trunc_total(addX, 8)
-Y8 = trunc_total(addY, 8)
-Z9 = trunc_total(addZ, 9)
+print('Summary:')
+print('addX/(t1-t2)^3 =', sp.factor(Xq))
+print('addY/(t1-t2)^3 =', sp.factor(Yq))
+print('addZ/(t1-t2)^3 =', sp.factor(Zq))
+print('Y quotient at (0,0) =', Yq.subs({t1: 0, t2: 0}))
 
-Xbar, Xrem = sp.div(X8, C, domain=sp.QQ.frac_field(A, B))
-Ybar, Yrem = sp.div(Y8, C, domain=sp.QQ.frac_field(A, B))
-Zbar, Zrem = sp.div(Z9, C, domain=sp.QQ.frac_field(A, B))
-
-print('\n--- after dividing by C=(t2-t1)^3 ---')
-print('Xbar =', sp.factor(Xbar), 'remainder:', Xrem)
-print('Ybar =', sp.factor(Ybar), 'remainder:', Yrem)
-print('Zbar =', sp.factor(Zbar), 'remainder:', Zrem)
-
-# Since Ybar = -1 + terms of degree >= 4, the inverse is a unit series.
-# To degree <= 4, F = -Xbar/Ybar has no nonlinear terms.
-F_le_4 = t1 + t2
-F_le_5 = (
-    t1 + t2
-    - 2*A*(t1**4*t2 + 2*t1**3*t2**2 + 2*t1**2*t2**3 + t1*t2**4)
+# Optional sign comparison with Dprime = (t2-t1)^3.
+Dprime = (t2 - t1)**3
+Yq_prime, Yr_prime = sp.div(
+    sp.Poly(Y8, t1, t2, domain=sp.QQ.frac_field(A, B)),
+    sp.Poly(Dprime, t1, t2, domain=sp.QQ.frac_field(A, B)),
 )
-print('\nF = -addX/addY after cancellation')
-print('F to total degree <= 4:', F_le_4)
-print('F to total degree <= 5:', F_le_5)
+print('addY/(t2-t1)^3 =', sp.factor(Yq_prime.as_expr()))
+print('Y quotient for Dprime at (0,0) =', Yq_prime.as_expr().subs({t1: 0, t2: 0}))
 ```
 
 ---
@@ -232,48 +210,50 @@ print('F to total degree <= 5:', F_le_5)
 ## Script output
 
 ```text
---- coordinates to total degree <= 4 ---
-addX = -(t1 - t2)^3*(t1 + t2)
-expanded: -t1^4 + 2*t1^3*t2 - 2*t1*t2^3 + t2^4
-addY = (t1 - t2)^3
-expanded: t1^3 - 3*t1^2*t2 + 3*t1*t2^2 - t2^3
-addZ = 0
-expanded: 0
+--- addX to total degree <= 8 ---
+truncated factor: -(t1 - t2)^3*(t1 + t2)*(A*t1^4 + A*t1^2*t2^2 + A*t2^4 + 1)
+truncated expanded: -A*t1**8 + 2*A*t1**7*t2 - A*t1**6*t2**2 + A*t1**2*t2**6 - 2*A*t1*t2**7 + A*t2**8 - t1**4 + 2*t1**3*t2 - 2*t1*t2**3 + t2**4
+quotient factor: -(t1 + t2)*(A*t1**4 + A*t1**2*t2**2 + A*t2**4 + 1)
+quotient expanded: -A*t1**5 - A*t1**4*t2 - A*t1**3*t2**2 - A*t1**2*t2**3 - A*t1*t2**4 - A*t2**5 - t1 - t2
+remainder: 0
+quotient constant: 0
 
-constant term of addY: 0
+--- addY to total degree <= 8 ---
+truncated factor: (t1 - t2)^3*(A*t1**4 + 2*A*t1**3*t2 + 3*A*t1**2*t2**2 + 2*A*t1*t2**3 + A*t2**4 + 1)
+truncated expanded: A*t1**7 - A*t1**6*t2 - 2*A*t1**4*t2**3 + 2*A*t1**3*t2**4 + A*t1*t2**6 - A*t2**7 + t1**3 - 3*t1**2*t2 + 3*t1*t2**2 - t2**3
+quotient factor: A*t1**4 + 2*A*t1**3*t2 + 3*A*t1**2*t2**2 + 2*A*t1*t2**3 + A*t2**4 + 1
+quotient expanded: A*t1**4 + 2*A*t1**3*t2 + 3*A*t1**2*t2**2 + 2*A*t1*t2**3 + A*t2**4 + 1
+remainder: 0
+quotient constant: 1
 
---- after dividing by C=(t2-t1)^3 ---
-Xbar = (t1 + t2)*(A*t1^4 + A*t1^2*t2^2 + A*t2^4 + 1) remainder: 0
-Ybar = -A*t1^4 - 2*A*t1^3*t2 - 3*A*t1^2*t2^2 - 2*A*t1*t2^3 - A*t2^4 - 1 remainder: 0
-Zbar = (t1 + t2)^3 remainder: 0
+--- addZ to total degree <= 8 ---
+truncated factor: -(t1 - t2)^3*(t1 + t2)^3
+truncated expanded: -t1**6 + 3*t1**4*t2**2 - 3*t1**2*t2**4 + t2**6
+quotient factor: -(t1 + t2)^3
+quotient expanded: -t1**3 - 3*t1**2*t2 - 3*t1*t2**2 - t2**3
+remainder: 0
+quotient constant: 0
 
-F = -addX/addY after cancellation
-F to total degree <= 4: t1 + t2
-F to total degree <= 5: -2*A*(t1^4*t2 + 2*t1^3*t2^2 + 2*t1^2*t2^3 + t1*t2^4) + t1 + t2
+Summary:
+addX/(t1-t2)^3 = -(t1 + t2)*(A*t1**4 + A*t1**2*t2**2 + A*t2**4 + 1)
+addY/(t1-t2)^3 = A*t1**4 + 2*A*t1**3*t2 + 3*A*t1**2*t2**2 + 2*A*t1*t2**3 + A*t2**4 + 1
+addZ/(t1-t2)^3 = -(t1 + t2)^3
+Y quotient at (0,0) = 1
+addY/(t2-t1)^3 = -A*t1**4 - 2*A*t1**3*t2 - 3*A*t1**2*t2**2 - 2*A*t1*t2**3 - A*t2**4 - 1
+Y quotient for Dprime at (0,0) = -1
 ```
 
 ---
 
-## Interpretation for the Lean path
+## Lean-relevant takeaway
 
-The important Lean atom is not `isUnit addY` for the raw coordinate, because raw `addY` has zero constant term.  The atom should instead expose the normalized coordinates:
+For the requested divisor `(t1-t2)^3`, the normalized denominator is a unit with constant coefficient `+1`.  For the earlier convention `(t2-t1)^3`, it is a unit with constant coefficient `-1`.  The sign is projectively irrelevant, but it matters for the exact statement of the Lean lemma.
 
-```text
-addX(P(t1),P(t2)) = C * Xbar
-addY(P(t1),P(t2)) = C * Ybar
-addZ(P(t1),P(t2)) = C * Zbar
-C = (t2 - t1)^3
-Ybar.constantCoeff = -1
-```
-
-Then define the formal law by
+A clean Lean target for the short-curve degree-8 atom is therefore:
 
 ```text
-F = -Xbar / Ybar
+normalizedAddY_short_deg8 =
+  1 + A*T1^4 + 2*A*T1^3*T2 + 3*A*T1^2*T2^2 + 2*A*T1*T2^3 + A*T2^4
 ```
 
-using `PowerSeries.invOfUnit` / `MvPowerSeries` unit inversion on `Ybar`.  This avoids the raw `0/0` ratio and gives the required linear coefficients:
-
-```text
-F = t1 + t2 + O(total degree ≥ 5).
-```
+if the divisor is `(T1-T2)^3`, and its constant coefficient is `1`, not `-1`.
