@@ -111,17 +111,11 @@ private theorem ωfree_dvd (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0) (m :
     -- When ψ_m = 0: addX simplifies, ψ(2m) = ψ_0 = 0 (if m=0), etc.
     by_cases hm : m = 0
     · subst hm
-      sorry -- m=0 case: trivial since ψ_0 = 0
-      -- E at m=0: 2*(addX(P,[φ_0,0,0]) - ψ(-1)²*φ(1)) - ψ₂*(0 - 0) = 2*(addX - φ_1)
-      -- φ_1 = CX - 0 = CX (since ψ_1=1, ψ_0=0, ψ_2=ψ₂)
-      -- addX(P,[φ_0,0,0]): with Qz=0, addX = Px*Qx²*Pz² + ... = CX*φ_0²
-      -- φ_0 = CX*0 - ψ_1*ψ(-1) = -(-1) = 1... wait, need to check.
-      -- Actually, ψ_0 = 0, so φ_0 = CX*ψ_0² - ψ_1*ψ(-1) = 0 - 1*(-1) = 1.
-      -- addX(P, [1, 0, 0]): Qz=0, so addX = (Px*Qz)²*Qx = 0 [since Qz=0]
-      -- Actually addX with Qz=0: addX = Px*Qx²*Pz² + Px²*Qx*Qz² - ... with Qz=0:
-      -- = Px*Qx²*1 + 0 - 0 - 0 + 0 - 0 - 0 + 0 + 0 + 0 = CX*1 = CX
-      -- φ_1 = CX*ψ_1² - ψ_2*ψ_0 = CX - 0 = CX
-      -- E = 2*(CX - CX) = 0. 
+      simp only [ψ_zero, ψ_one, ψ_neg, φ_zero, φ_one,
+        show (2 : ℤ) * 0 = 0 from by ring,
+        show (0 : ℤ) - 1 = -1 from by ring, show (0 : ℤ) + 1 = 1 from by ring]
+      unfold addX WeierstrassCurve.toPoly WeierstrassCurve.map Affine.polynomial
+      simp [RingHom.comp_apply, Matrix.cons_val, map_ofNat]
     · -- m ≠ 0: mk(ψ_m) = 0 contradicts mk_ψ_ne_zero
       exact absurd hψm (mk_ψ_ne_zero W hψ_ne m hm)
 
