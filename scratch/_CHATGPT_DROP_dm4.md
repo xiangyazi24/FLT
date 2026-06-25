@@ -1,199 +1,198 @@
-# Q342 (dm4): `Polynomial.discriminant` / discriminant shortcut investigation
+# Q357 (dm4): finite morphism / dual-deformation shortcut for bridge-2
 
 ## Short answer
 
-For current Mathlib, the practical answer is: **do not plan on closing `preΨ'ₙ` separability through a built-in `Polynomial.discriminant` one-liner.**  The polynomial separability API exposed in Mathlib is centered on
-
-```lean
-Polynomial.Separable f  ↔  IsCoprime f f.derivative
-```
-
-not on a general discriminant shortcut.
-
-The robust Lean route for a concrete polynomial is therefore a **Bezout/resultant/coprimality certificate**:
-
-```lean
-rw [Polynomial.separable_def']
-exact ⟨A, B, by ring⟩
-```
-
-or equivalently prove `IsCoprime p p.derivative` directly.  This is usually much easier and more reliable than trying to formalize and evaluate a symbolic quartic discriminant.
-
-## Answers to the concrete questions
-
-### (a) Does Mathlib have `Polynomial.discriminant`?
-
-I do not find a current, general-purpose API of the form
-
-```lean
-Polynomial.discriminant : R[X] → R
-```
-
-that is wired into the separability API.  In particular, I would not write downstream code expecting
-
-```lean
-(p.discriminant)
-Polynomial.discriminant p
-```
-
-to be available and usable for `p.Separable`.
-
-Mathlib certainly has a polynomial separability definition and theorem API.  The relevant definition is:
-
-```lean
-Polynomial.Separable f
-```
-
-and it is definitionally / theorem-wise equivalent to coprimality with the derivative:
-
-```lean
-Polynomial.separable_def  : f.Separable ↔ IsCoprime f f.derivative
-Polynomial.separable_def' : f.Separable ↔ ∃ a b, a * f + b * f.derivative = 1
-```
-
-Use those for concrete proofs.
-
-### (b) Does Mathlib have `Polynomial.separable_of_discriminant_ne_zero` or `separable_iff_discriminant_ne_zero`?
-
-I would not rely on such a lemma; the exposed separability API is the coprime/Bezout API.  The actual stable route is:
-
-```lean
-by
-  rw [Polynomial.separable_def']
-  exact ⟨A, B, by ring⟩
-```
-
-where `A` and `B` are CAS-generated cofactors satisfying
-
-```lean
-A * p + B * p.derivative = 1.
-```
-
-If your CAS certificate gives a nonzero scalar instead,
-
-```lean
-A * p + B * p.derivative = C
-```
-
-with `C ≠ 0` over a field, divide through by `C`:
-
-```lean
-by
-  rw [Polynomial.separable_def']
-  refine ⟨C⁻¹ • A, C⁻¹ • B, ?_⟩
-  -- or use `C⁻¹ * A` / `C⁻¹ * B` depending on the coefficient type and simp-normal form.
-  -- Rewrite the certificate and use `field_simp [hC]` / `ring`.
-```
-
-### (c) Does Mathlib have `Polynomial.discriminant_eq_resultant`?
-
-Do not bank on a discriminant theorem.  If you want a resultant route, search/use the `Polynomial.resultant` API directly, but the separability endpoint still wants coprimality:
-
-```lean
-Polynomial.Separable p = IsCoprime p p.derivative
-```
-
-A resultant nonzero theorem, when available, is only useful as a way to produce the same coprimality statement.  In a proof generated from CAS, the Bezout certificate is usually more direct than a resultant determinant/discriminant equality.
-
-### (d) Can `norm_num` compute the discriminant of `Ψ₃ = 3X⁴+b₂X³+3b₄X²+3b₆X+b₈`?
-
-No, not in the sense you need.
-
-* `norm_num` computes numeric expressions; it does not symbolically compute the discriminant of a quartic with symbolic coefficients `b₂,b₄,b₆,b₈`.
-* `ring` can verify a fully expanded symbolic polynomial identity **after** you state the identity explicitly.
-* If you define your own quartic-discriminant expression and specialize it to `Ψ₃`, `ring`/`ring_nf` can verify algebraic rearrangements, but it will not discover the discriminant formula.
-
-For `Ψ₃`, the better Lean tactic route is:
-
-```lean
-rw [Polynomial.separable_def']
-exact ⟨A, B, by
-  -- A and B are explicit polynomial cofactors from CAS.
-  -- Then close by `ring` / `ring_nf` after unfolding `Ψ₃`.
-  ring⟩
-```
-
-or, if the goal is only nonzero rather than separability, use the existing degree/nonzero lemmas for division polynomials.
-
-## Buildable skeleton: concrete separability from a Bezout certificate
-
-```lean
-import Mathlib.FieldTheory.Separable
-import Mathlib.Tactic
-
-open Polynomial
-open scoped Polynomial
-
-namespace PolynomialConcreteSeparable
-
-variable {K : Type*} [Field K]
-
-/-- Concrete separability from an explicit Bezout identity. -/
-theorem separable_of_bezout_certificate
-    (p A B : K[X])
-    (hbez : A * p + B * p.derivative = 1) :
-    p.Separable := by
-  rw [Polynomial.separable_def']
-  exact ⟨A, B, hbez⟩
-
-/-- Same, with the certificate closed by `ring`. -/
-example (p A B : K[X])
-    (hbez : A * p + B * p.derivative = 1) :
-    p.Separable := by
-  exact separable_of_bezout_certificate p A B hbez
-
-/-- If the CAS gives a nonzero scalar certificate, normalize it to a Bezout identity. -/
-theorem separable_of_scalar_bezout_certificate
-    (p A B : K[X]) {c : K} (hc : c ≠ 0)
-    (hbez : A * p + B * p.derivative = C c) :
-    p.Separable := by
-  rw [Polynomial.separable_def']
-  refine ⟨C c⁻¹ * A, C c⁻¹ * B, ?_⟩
-  calc
-    (C c⁻¹ * A) * p + (C c⁻¹ * B) * p.derivative
-        = C c⁻¹ * (A * p + B * p.derivative) := by ring
-    _ = C c⁻¹ * C c := by rw [hbez]
-    _ = 1 := by
-      ext m
-      fin_cases m <;> simp [hc]
-
-end PolynomialConcreteSeparable
-```
-
-If the last `ext/fin_cases` is brittle in your Mathlib version, replace the final line by:
-
-```lean
-      simpa [Polynomial.C_mul, hc]
-```
-
-or simply:
-
-```lean
-      simp [hc]
-```
-
-depending on how `C c⁻¹ * C c` normalizes locally.
-
-## What this means for `preΨ'ₙ`
-
-A discriminant formula like
+No: **finite + nonconstant is not enough** to rule out a nonzero dual deformation mapping to the same point.  What you need is **unramified** or **étale** at the point, equivalently injectivity on tangent directions.  For multiplication-by-`n` on an elliptic curve, that unramified/étale statement is proved by exactly the tangent computation
 
 ```text
-Disc(preΨ'ₙ) = ± n^a · Δ^b
+d[n]_O = n.
 ```
 
-would be mathematically excellent, but in Lean it only helps if you also have a formal discriminant API connecting nonzero discriminant to `Polynomial.Separable`.  Since the stable Mathlib endpoint is coprimality with the derivative, the immediately actionable version of such a formula is a **resultant/Bezout certificate** for
+So the proposed “finite morphism” shortcut does not avoid bridge-2.  It replaces the missing step 5 by the theorem “`[n]` is unramified at `P`,” whose proof is precisely the same formal tangent/local-parameter content.
+
+## Why finite morphism is insufficient
+
+The statement
+
+```text
+finite nonconstant morphism ⇒ finite fibers
+```
+
+is a statement about **ordinary geometric points**.  A nonzero dual deformation is not a second ordinary point of the fiber; it is a nonreduced infinitesimal thickening over the same underlying point:
+
+```text
+Spec K[ε]/(ε²) → X.
+```
+
+Finite fibers do not prohibit nilpotent tangent directions inside a scheme-theoretic fiber.  Those nilpotent directions are exactly ramification.
+
+The basic counterexample is the finite nonconstant map
+
+```text
+A¹ → A¹,    t ↦ t².
+```
+
+At `0`, the nonzero dual deformation `t = ε` maps to
+
+```text
+t² = ε² = 0.
+```
+
+So it has the same image as the closed point `0`, even though the morphism is finite, nonconstant, and degree `2`.  This is ordinary ramification, not a contradiction.
+
+For elliptic curves the same issue appears in characteristic `p`: the Frobenius and inseparable parts of `[p]` can kill tangent directions.  The condition `(n : K) ≠ 0` is exactly what should rule this out, and it does so through the differential.
+
+## Correct replacement for the false claim
+
+The false claim is:
+
+```text
+finite nonconstant maps send distinct dual deformations to distinct images.
+```
+
+The correct claim is:
+
+```text
+unramified maps send nonzero tangent vectors to nonzero tangent vectors.
+```
+
+or, in dual-number language:
+
+```text
+If f is unramified at P and Pε is a dual lift of P with nonzero tangent vector,
+then f(Pε) cannot be the constant dual lift of f(P).
+```
+
+For `[n] : E → E`, the theorem you need is:
+
+```text
+[n] is unramified/étale at P when (n : K) ≠ 0.
+```
+
+The standard proof is:
+
+1. translations identify `T_P E` and `T_O E`;
+2. the differential of `[n]` commutes with translation;
+3. `d[n]_O` is multiplication by `(n : K)`;
+4. `(n : K) ≠ 0`, so the tangent map is injective.
+
+That is exactly the `TangentO.nsmul₁` route.
+
+## What the missing step 5 really is
+
+Step 5 cannot be replaced by finiteness.  It should be formalized as the tangent/local-parameter compatibility theorem:
 
 ```lean
-IsCoprime (W.preΨ' n) (W.preΨ' n).derivative
+/-- Compatibility of the concrete local parameter with the abstract tangent map. -/
+theorem coeff_localT_nsmul_dual_eq_TangentO_nsmul₁
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    (n : ℕ) {x y : K} (hP : (W⁄K).Nonsingular x y)
+    (Pε : DualAffinePoint W x y)
+    (λ : K)
+    (hλ : affineTangentCoord W x y Pε = λ) :
+    coeffε (localT (nsmulDualJacobianRep W n Pε))
+      = TangentO.nsmul₁ W n λ := by
+  -- prove from definitions of the local parameter, translations, and the group law over dual numbers
+  sorry
 ```
 
-or an explicit identity
+Then, for the scaled lift with tangent coordinate `λ = 1`:
 
 ```lean
-A * W.preΨ' n + B * (W.preΨ' n).derivative = 1
+have ht_coeff_tangent :
+    coeffε (localT (nsmulDualJacobianRep W n Pε)) = TangentO.nsmul₁ W n 1 := by
+  exact coeff_localT_nsmul_dual_eq_TangentO_nsmul₁
+    (W := W) (n := n) hP Pε 1 hλ_one
+
+have ht_coeff_nat :
+    coeffε (localT (nsmulDualJacobianRep W n Pε)) = (n : K) := by
+  calc
+    coeffε (localT (nsmulDualJacobianRep W n Pε))
+        = TangentO.nsmul₁ W n 1 := ht_coeff_tangent
+    _ = (n : K) := by
+        simpa using
+          TangentO.nsmul₁_eq_natCast_mul
+            (W := W) (n := n) (a := (1 : K))
 ```
 
-after specializing and normalizing the curve parameters.
+This is the non-circular bridge.  If the projective formula plus derivative-zero gives the same coefficient as `0`, then `(n : K) = 0`, contradicting `hn`.
 
-For the general `n` theorem, a closed-form discriminant in Lean would be a major formalization project.  For small fixed `n` like `n = 3`, a CAS-generated Bezout identity is the fastest path.
+## What “finite morphism” looks like in Mathlib
+
+Mathlib does have a scheme-level finite morphism API.  The file is:
+
+```lean
+import Mathlib.AlgebraicGeometry.Morphisms.Finite
+```
+
+The core class is:
+
+```lean
+namespace AlgebraicGeometry
+
+class IsFinite {X Y : Scheme} (f : X ⟶ Y) : Prop extends IsAffineHom f where
+  finite_app (U : Y.Opens) (hU : IsAffineOpen U) :
+    (f.app U).hom.Finite
+
+end AlgebraicGeometry
+```
+
+There is also an affine-Spec characterization:
+
+```lean
+AlgebraicGeometry.IsFinite.SpecMap_iff
+```
+
+with shape:
+
+```lean
+IsFinite (Spec.map f) ↔ f.hom.Finite
+```
+
+and Mathlib’s file comment points to a finite-fiber theorem:
+
+```lean
+AlgebraicGeometry.IsFinite.finite_preimage_singleton
+```
+
+But this API is **not** the right endpoint for bridge-2:
+
+* it concerns morphisms of `Scheme`, while the elliptic-curve group law in the files you are using is mostly point/formula-level;
+* even if `[n]` is packaged as a `Scheme.Hom` and proved finite, finite fibers do not imply injectivity on dual-number points;
+* to rule out the dual deformation, you need the unramified/étale API or a direct tangent calculation.
+
+## If you tried to use the scheme route anyway
+
+The correct scheme-level theorem would be something like:
+
+```lean
+-- schematic, not current local API
+have het : IsEtale (nMulMorphism W n) := by
+  -- prove from `d[n] = n` and `(n : K) ≠ 0`
+  sorry
+
+have hunram : IsUnramified (nMulMorphism W n) := by
+  infer_instance -- or from `het`
+```
+
+Then use the formal infinitesimal lifting / tangent-space characterization of unramified morphisms to show that a nonzero tangent vector cannot be killed.
+
+But this is not shorter.  Proving `het` is exactly the tangent map theorem in a more abstract wrapper.  If Mathlib eventually has a theorem saying multiplication-by-`n` on an elliptic curve is finite étale for `(n : K) ≠ 0`, then yes, it would close bridge-2.  In the current project architecture, that theorem would itself need a dependency audit, because it likely depends on the same `d[n] = n` computation or stronger isogeny theory.
+
+## Correct non-circular proof structure
+
+Keep the bridge-2 proof in the tangent/local-parameter language:
+
+1. Assume `(W.preΨ' n).derivative.eval x = 0` at a root.
+2. Use the dual Taylor lemma to get `preΨ'_n(xε) = 0` for a scaled nonzero tangent lift.
+3. Use the parity bridge to get `ψ_n(Pε) = 0`.
+4. Use the projective division-polynomial formula to make the `Z` coordinate of `[n]Pε` zero.
+5. Therefore the concrete local parameter coefficient of `[n]Pε` is `0`.
+6. Compare the same coefficient with `TangentO.nsmul₁ W n 1`.
+7. Rewrite `TangentO.nsmul₁ W n 1 = (n : K)` and contradict `(n : K) ≠ 0`.
+
+This is exactly the proof that `[n]` is unramified in the relevant tangent direction, but it avoids the heavy scheme-level finite/étale formalism.
+
+## Recommendation
+
+Do not spend time trying to formalize bridge-2 from `IsFinite`.  It is mathematically too weak and will not produce the needed dual-number injectivity.  The shortest non-circular path remains the explicit local-parameter/tangent comparison theorem.  In other words, step 5 is not optional; it is the precise Lean form of the statement that `[n]` has nonzero differential when `(n : K) ≠ 0`.
