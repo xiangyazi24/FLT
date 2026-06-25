@@ -103,3 +103,26 @@ Answers in tabs but git-write not triggering. Need manual paste or bridge fix.
 ### Remaining for bridge-2
 1. addY assembly (1 sorry, sub-agent in flight)
 2. Tangent bridge (irreducible, needs W.formalGroup or equivalent)
+
+## FINAL UPDATE 2026-06-25
+
+### PROJECTIVE FORMULA COMPLETE
+All 3 components proved for general m (0-sorry, standard-3 axioms):
+- Z: addZ (exact) + dblZ (exact) — ProjectiveFormula.lean
+- X: mk_addX_divPoly_general — AddXGeneral.lean  
+- Y: mk_addY_divPoly_general — AddYGeneral.lean
+
+### SOLE REMAINING GAP: Tangent Bridge
+Connect projective local-parameter coefficient to d[n]|_O = n.
+Requires W.formalGroup instance or equivalent.
+Mathlib has FormalGroup structure (RingTheory/FormalGroup/Basic.lean).
+Our formalNsmul_coeff_one proved d[n]=n abstractly.
+Missing: W.formalGroup : FormalGroup K for the Weierstrass curve.
+
+### All alternatives ruled out (exhaustively)
+- Per-n Bezout: n≥11 intractable
+- Discriminant recurrence: same formal-group content
+- Torsion counting: circular  
+- Function-field: needs same projective formula
+- Finite morphism: finite≠unramified
+- Additive FormalGroup shortcut: ALL FGLs agree to 1st order, but the CONNECTION to the curve is the content
