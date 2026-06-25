@@ -1,267 +1,327 @@
-# Q289 (dm2): CAS test of the formal `addY` reduction for general `m`
+# Q299 (dm2): Relating `mk_invariant_descended` to CAS `Hmiss`
 
-Question: after substituting the formal relations
-
-```text
-HF      : F_W = 0
-Hφ_m    : φ_m     = X ψ_m² - ψ_{m+1} ψ_{m-1}
-Hφ_m+1  : φ_{m+1} = X ψ_{m+1}² - ψ_{m+2} ψ_m
-Hω_m    : 2 ψ_m ω_m = ψ_{2m} - ψ_m²(a₁φ_m+a₃ψ_m²)
-Heven_m : ψ₂ ψ_{2m} = ψ_m(ψ_{m+2}ψ_{m-1}² - ψ_{m-2}ψ_{m+1}²)
-Hω_m+1  : 2 ψ_{m+1}ω_{m+1} = ψ_{2m+2} - ψ_{m+1}²(a₁φ_{m+1}+a₃ψ_{m+1}²)
-Heven_m+1 : ψ₂ ψ_{2m+2} = ψ_{m+1}(ψ_{m+3}ψ_m² - ψ_{m-1}ψ_{m+2}²)
-```
-
-does
+CAS missing identity `Hmiss`:
 
 ```text
-2 · (addY(P,R_m) - ψ_{m-1}³ω_{m+1})
+ψ_{m-1}² ψ_{m+2}
++ ψ_{m-2} ψ_{m+1}²
++ ψ_m³ Ψ₂Sq
+- ψ_{m-1} ψ_m ψ_{m+1} · (6X² + b₂X + b₄)
+= 0            in the affine coordinate ring
 ```
 
-reduce to zero?
-
-## Result
-
-The CAS answer is **NO** for the stated relation set.
-
-Even if I additionally substitute the already-proved/formal `addX` identity
+Repository lemma shape:
 
 ```text
-addX(P,R_m) = ψ_{m-1}² φ_{m+1},
+mk(Ψ₃ · (ψ_{m+2}ψ_{m-1}² + ψ_{m+1}²ψ_{m-2} + ψ₂²ψ_m³))
+  = mk((preΨ₄ + ψ₂⁴) · (ψ_{m+1}ψ_mψ_{m-1}))
 ```
 
-the formal `addY` expression does **not** reduce to zero from these relations.
+## Executive answer
 
-The script below gives a concrete counterexample over the nonsingular short curve
+They are **not literally the same identity**.  The repo lemma is the `Ψ₃`-multiple of `Hmiss`.
+
+The bridge is the universal polynomial identity
 
 ```text
-Y² = X³ + 1
+preΨ₄ + Ψ₂Sq² = Ψ₃ · (6X² + b₂X + b₄)      in R[X].
 ```
 
-at the point `(X,Y)=(0,1)`.  The assigned formal ψ-symbols satisfy all listed relations, including the shifted even recurrence and the `addX` identity, but the `addY` target evaluates to `-6`, not `0`.
-
-So the direct algebraic proof of the `addY` identity needs additional formal content beyond `HF`, `Hφ`, `Hω`, and the even EDS recurrences.  In particular, the `ω_{m+1}` definition introduces `ψ_{m+3}`; the listed relations do not determine the needed `ψ_{m+3}` contribution strongly enough.  A further division-polynomial/addition identity, or a direct coordinate-ring cofactor proof, is still needed.
-
-## Complete runnable SymPy script
-
-```python
-import sympy as sp
-
-# Curve variables and coefficients.
-X, Y, a1, a2, a3, a4, a6 = sp.symbols('X Y a1 a2 a3 a4 a6')
-FW = Y**2 + a1*X*Y + a3*Y - X**3 - a2*X**2 - a4*X - a6
-psi2 = 2*Y + a1*X + a3
-
-# Formal local EDS symbols.
-psi_m_minus_2, psi_m_minus_1, psi_m = sp.symbols('psi_m_minus_2 psi_m_minus_1 psi_m')
-psi_m_plus_1, psi_m_plus_2, psi_m_plus_3 = sp.symbols('psi_m_plus_1 psi_m_plus_2 psi_m_plus_3')
-psi_2m, psi_2m_plus_2 = sp.symbols('psi_2m psi_2m_plus_2')
-phi_m, phi_m_plus_1 = sp.symbols('phi_m phi_m_plus_1')
-omega_m, omega_m_plus_1 = sp.symbols('omega_m omega_m_plus_1')
-
-# General ψ3, ψ4, included only for the optional n=3 EDS relation.
-b2 = a1**2 + 4*a2
-b4 = 2*a4 + a1*a3
-b6 = a3**2 + 4*a6
-b8 = a1**2*a6 + 4*a2*a6 - a1*a3*a4 + a2*a3**2 - a4**2
-psi3 = 3*X**4 + b2*X**3 + 3*b4*X**2 + 3*b6*X + b8
-prepsi4 = (
-    2*X**6 + b2*X**5 + 5*b4*X**4 + 10*b6*X**3 + 10*b8*X**2
-    + (b2*b8 - b4*b6)*X + (b4*b8 - b6**2)
-)
-psi4 = psi2*prepsi4
-psi_m_minus_3 = sp.symbols('psi_m_minus_3')
-
-
-def jac_addZ(P, Q):
-    P0, P1, P2 = P
-    Q0, Q1, Q2 = Q
-    return sp.expand(P0*Q2**2 - Q0*P2**2)
-
-
-def jac_addX(P, Q):
-    P0, P1, P2 = P
-    Q0, Q1, Q2 = Q
-    return sp.expand(
-        P0*Q0**2*P2**2
-        - 2*P1*Q1*P2*Q2
-        + P0**2*Q0*Q2**2
-        - a1*P0*Q1*P2**2*Q2
-        - a1*P1*Q0*P2*Q2**2
-        + 2*a2*P0*Q0*P2**2*Q2**2
-        - a3*Q1*P2**4*Q2
-        - a3*P1*P2*Q2**4
-        + a4*Q0*P2**4*Q2**2
-        + a4*P0*P2**2*Q2**4
-        + 2*a6*P2**4*Q2**4
-    )
-
-
-def jac_negAddY(P, Q):
-    P0, P1, P2 = P
-    Q0, Q1, Q2 = Q
-    return sp.expand(
-        -P1*Q0**3*P2**3
-        + 2*P1*Q1**2*P2**3
-        - 3*P0**2*Q0*Q1*P2**2*Q2
-        + 3*P0*P1*Q0**2*P2*Q2**2
-        + P0**3*Q1*Q2**3
-        - 2*P1**2*Q1*Q2**3
-        + a1*P0*Q1**2*P2**4
-        + a1*P1*Q0*Q1*P2**3*Q2
-        - a1*P0*P1*Q1*P2*Q2**3
-        - a1*P1**2*Q0*Q2**4
-        - 2*a2*P0*Q0*Q1*P2**4*Q2
-        + 2*a2*P0*P1*Q0*P2*Q2**4
-        + a3*Q1**2*P2**6
-        - a3*P1**2*Q2**6
-        - a4*Q0*Q1*P2**6*Q2
-        - a4*P0*Q1*P2**4*Q2**3
-        + a4*P1*Q0*P2**3*Q2**4
-        + a4*P0*P1*P2*Q2**6
-        - 2*a6*Q1*P2**6*Q2**3
-        + 2*a6*P1*P2**3*Q2**6
-    )
-
-
-def jac_addY_from_addX(P, Q, addX_expr):
-    addZ = jac_addZ(P, Q)
-    negAddY = jac_negAddY(P, Q)
-    return sp.expand(-negAddY - a1*addX_expr*addZ - a3*addZ**3)
-
-
-P = [X, Y, sp.Integer(1)]
-R_m = [phi_m, omega_m, psi_m]
-addX_raw = jac_addX(P, R_m)
-addY_raw = jac_addY_from_addX(P, R_m, addX_raw)
-
-# Target without using addX identity.
-target_raw = sp.expand(2*(addY_raw - psi_m_minus_1**3 * omega_m_plus_1))
-
-# Target after substituting the addX identity addX(P,R_m)=ψ_{m-1}² φ_{m+1}.
-addY_using_HaddX = jac_addY_from_addX(P, R_m, psi_m_minus_1**2 * phi_m_plus_1)
-target_using_HaddX = sp.expand(2*(addY_using_HaddX - psi_m_minus_1**3 * omega_m_plus_1))
-
-# Formal relations.
-Hphi_m = sp.expand(phi_m - (X*psi_m**2 - psi_m_plus_1*psi_m_minus_1))
-Hphi_m_plus_1 = sp.expand(phi_m_plus_1 - (X*psi_m_plus_1**2 - psi_m_plus_2*psi_m))
-Homega_m = sp.expand(
-    2*psi_m*omega_m
-    - (psi_2m - psi_m**2*(a1*phi_m + a3*psi_m**2))
-)
-Homega_m_plus_1 = sp.expand(
-    2*psi_m_plus_1*omega_m_plus_1
-    - (psi_2m_plus_2 - psi_m_plus_1**2*(a1*phi_m_plus_1 + a3*psi_m_plus_1**2))
-)
-Heven_m = sp.expand(
-    psi2*psi_2m
-    - psi_m*(psi_m_plus_2*psi_m_minus_1**2 - psi_m_minus_2*psi_m_plus_1**2)
-)
-Heven_m_plus_1 = sp.expand(
-    psi2*psi_2m_plus_2
-    - psi_m_plus_1*(psi_m_plus_3*psi_m**2 - psi_m_minus_1*psi_m_plus_2**2)
-)
-
-# Optional n=3 EDS relation, included to test whether adding ψ_{m+3}/ψ_{m-3} helps.
-Hodd_n3 = sp.expand(
-    psi_m_plus_3*psi_m_minus_3
-    - (psi_m_plus_1*psi_m_minus_1*psi3**2 - psi4*psi2*psi_m**2)
-)
-
-base_relations = [FW, Hphi_m, Hphi_m_plus_1, Homega_m, Homega_m_plus_1, Heven_m, Heven_m_plus_1]
-vars_order = [
-    omega_m_plus_1, omega_m, phi_m_plus_1, phi_m, psi_2m_plus_2, psi_2m,
-    psi_m_plus_3, psi_m_plus_2, psi_m_minus_2, psi_m_plus_1, psi_m_minus_1, psi_m,
-    Y, X, a1, a2, a3, a4, a6,
-]
-
-print('building Groebner basis for base relations...')
-G = sp.groebner(base_relations, *vars_order, order='lex', domain=sp.QQ)
-rem_raw = sp.expand(G.reduce(target_raw)[1])
-rem_HaddX = sp.expand(G.reduce(target_using_HaddX)[1])
-print('raw_addY_reduces_to_zero =', rem_raw == 0)
-print('raw_addY_remainder_terms =', 0 if rem_raw == 0 else len(sp.Poly(rem_raw, *vars_order).terms()))
-print('after_substituting_addX_identity_reduces_to_zero =', rem_HaddX == 0)
-print('after_HaddX_remainder_terms =', 0 if rem_HaddX == 0 else len(sp.Poly(rem_HaddX, *vars_order).terms()))
-print()
-
-print('building Groebner basis with optional n=3 EDS relation...')
-vars_order_n3 = [
-    omega_m_plus_1, omega_m, phi_m_plus_1, phi_m, psi_2m_plus_2, psi_2m,
-    psi_m_plus_3, psi_m_minus_3, psi_m_plus_2, psi_m_minus_2,
-    psi_m_plus_1, psi_m_minus_1, psi_m, Y, X, a1, a2, a3, a4, a6,
-]
-G_n3 = sp.groebner(base_relations + [Hodd_n3], *vars_order_n3, order='lex', domain=sp.QQ)
-rem_HaddX_n3 = sp.expand(G_n3.reduce(target_using_HaddX)[1])
-print('after_HaddX_plus_n3_EDS_reduces_to_zero =', rem_HaddX_n3 == 0)
-print('after_HaddX_plus_n3_remainder_terms =',
-      0 if rem_HaddX_n3 == 0 else len(sp.Poly(rem_HaddX_n3, *vars_order_n3).terms()))
-print()
-
-# Concrete counterexample satisfying all base relations, the addX identity, and the optional n=3 relation.
-# Specialize to the nonsingular short curve y^2 = x^3 + 1 at (X,Y)=(0,1).
-# Here ψ2=2 and ψ3=0, ψ4=-16.
-subs_counterexample = {
-    a1: 0, a2: 0, a3: 0, a4: 0, a6: 1,
-    X: 0, Y: 1,
-    psi_m: 1,
-    psi_m_minus_1: 1,
-    psi_m_plus_1: 1,
-    psi_m_plus_2: -2,
-    psi_m_minus_2: -2,
-    psi_m_plus_3: 4,
-    psi_m_minus_3: 8,
-    psi_2m: 0,
-    psi_2m_plus_2: 0,
-    phi_m: -1,
-    phi_m_plus_1: 2,
-    omega_m: 0,
-    omega_m_plus_1: 0,
-}
-all_rels_for_counterexample = base_relations + [sp.expand(addX_raw - psi_m_minus_1**2*phi_m_plus_1), Hodd_n3]
-print('counterexample_relation_values =')
-print([sp.expand(r.subs(subs_counterexample)) for r in all_rels_for_counterexample])
-print('counterexample_target_after_HaddX =', sp.expand(target_using_HaddX.subs(subs_counterexample)))
-print('counterexample_curve_discriminant_short = -432 (nonzero)')
-```
-
-## Output
+Using `mk(ψ₂²)=mk(C Ψ₂Sq)`, the right-hand side of `mk_invariant_descended` rewrites to
 
 ```text
-building Groebner basis for base relations...
-raw_addY_reduces_to_zero = False
-raw_addY_remainder_terms = 48
-after_substituting_addX_identity_reduces_to_zero = False
-after_HaddX_remainder_terms = 44
-
-building Groebner basis with optional n=3 EDS relation...
-after_HaddX_plus_n3_EDS_reduces_to_zero = False
-after_HaddX_plus_n3_remainder_terms = 44
-
-counterexample_relation_values =
-[0, 0, 0, 0, 0, 0, 0, 0, 0]
-counterexample_target_after_HaddX = -6
-counterexample_curve_discriminant_short = -432 (nonzero)
+mk(Ψ₃ · (6X² + b₂X + b₄) · ψ_{m+1}ψ_mψ_{m-1}).
 ```
 
-## Interpretation
-
-The proposed direct formal reduction does **not** close.
-
-The counterexample is especially useful: it satisfies
+Thus `mk_invariant_descended` becomes
 
 ```text
-HF,
-Hφ_m,
-Hφ_{m+1},
-Hω_m,
-Hω_{m+1},
-Heven_m,
-Heven_{m+1},
-addX(P,R_m)=ψ_{m-1}²φ_{m+1},
-and the optional n=3 EDS relation involving ψ_{m+3}ψ_{m-3}.
+mk(Ψ₃ · HmissPoly) = 0.
 ```
 
-Yet the target is `-6`.  Therefore the `addY` identity is not a formal consequence of those relations alone.  It requires additional division-polynomial content, most likely a genuine `ω`/third-coordinate addition theorem or a direct coordinate-ring cofactor proof.
+So:
 
-Lean-facing conclusion: do not plan to finish the `addY` theorem using only these symbolic substitutions.  Either add a stronger formal identity for the `ω` sequence under addition, or generate a direct coordinate-ring certificate for the `addY` identity, analogous to the `addX` cofactor certificates.
+```text
+Hmiss      ⇒ mk_invariant_descended       -- always, by multiplication by Ψ₃
+mk_invariant_descended ⇒ Hmiss            -- only if `mk(C Ψ₃)` can be cancelled
+```
+
+Over a domain and away from the `Ψ₃=0` divisor this cancellation is fine.  Over a general `CommRing`, or on the `Ψ₃=0` stratum, it is not valid.  This distinction matters: `mk_invariant_descended` is weaker than `Hmiss` unless you can cancel `Ψ₃`.
+
+## Key polynomial identity
+
+Add this helper first.  It is a univariate identity in `R[X]`.
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+
+noncomputable section
+
+open Polynomial
+open scoped Polynomial.Bivariate
+
+namespace WeierstrassCurve
+
+variable {R : Type*} [CommRing R]
+
+/-- The small universal identity converting the repo invariant to the CAS `Hmiss` coefficient. -/
+lemma preΨ₄_add_Ψ₂Sq_sq_eq_Ψ₃_mul_HmissCoeff (W : WeierstrassCurve R) :
+    W.preΨ₄ + W.Ψ₂Sq ^ 2 =
+      W.Ψ₃ * ((6 : R[X]) * X ^ 2 + C W.b₂ * X + C W.b₄) := by
+  rw [preΨ₄, Ψ₂Sq, Ψ₃]
+  -- If `ring_nf` does not unfold the b-invariants automatically, add:
+  --   [b₂, b₄, b₆, b₈]
+  ring_nf [b₂, b₄, b₆, b₈]
+
+end WeierstrassCurve
+```
+
+This is the algebraic heart.  CAS verified exactly this identity.
+
+## Coordinate-ring version of the same helper
+
+For bivariate coordinate-ring rewriting, use `Affine.CoordinateRing.mk_ψ₂_sq` and the univariate identity above.
+
+```lean
+namespace WeierstrassCurve
+namespace Affine
+namespace CoordinateRing
+
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R)
+
+local notation "mkW" p => CoordinateRing.mk W.toAffine p
+
+/-- Coordinate-ring form of
+`preΨ₄ + ψ₂⁴ = Ψ₃ * (6X²+b₂X+b₄)`. -/
+lemma mk_preΨ₄_add_ψ₂_pow_four_eq_Ψ₃_mul_HmissCoeff :
+    mkW (C W.preΨ₄ + W.ψ₂ ^ 4) =
+      mkW (C (W.Ψ₃ * ((6 : R[X]) * X ^ 2 + C W.b₂ * X + C W.b₄))) := by
+  -- First replace ψ₂² by Ψ₂Sq in the coordinate ring.
+  have hψ2sq : mkW (W.ψ₂ ^ 2) = mkW (C W.Ψ₂Sq) := by
+    simpa using (Affine.CoordinateRing.mk_ψ₂_sq (W := W))
+  calc
+    mkW (C W.preΨ₄ + W.ψ₂ ^ 4)
+        = mkW (C W.preΨ₄) + mkW (W.ψ₂ ^ 2) ^ 2 := by
+            simp [pow_two, pow_succ, mul_assoc, map_add, map_mul]
+    _ = mkW (C W.preΨ₄) + mkW (C W.Ψ₂Sq) ^ 2 := by
+            rw [hψ2sq]
+    _ = mkW (C (W.preΨ₄ + W.Ψ₂Sq ^ 2)) := by
+            simp [map_add, map_mul, map_pow]
+    _ = mkW (C (W.Ψ₃ * ((6 : R[X]) * X ^ 2 + C W.b₂ * X + C W.b₄))) := by
+            rw [W.preΨ₄_add_Ψ₂Sq_sq_eq_Ψ₃_mul_HmissCoeff]
+
+end CoordinateRing
+end Affine
+end WeierstrassCurve
+```
+
+If the exact generated namespace of `mk_ψ₂_sq` in your file is opened, the call may also elaborate as:
+
+```lean
+simpa using (WeierstrassCurve.Affine.CoordinateRing.mk_ψ₂_sq (W := W))
+```
+
+or, depending on parameter order, simply:
+
+```lean
+simpa using W.toAffine.CoordinateRing.mk_ψ₂_sq
+```
+
+The lemma is the same one from `DivisionPolynomial.Basic`:
+
+```lean
+lemma Affine.CoordinateRing.mk_ψ₂_sq : mk W W.ψ₂ ^ 2 = mk W (C W.Ψ₂Sq)
+```
+
+## Define the CAS `Hmiss` polynomial
+
+Here is a Lean-facing definition using abstract nearby `ψ` terms.  Replace the `ψm...` arguments with the actual objects from `PsiInvariant.lean`.
+
+```lean
+namespace WeierstrassCurve
+namespace Affine
+namespace CoordinateRing
+
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R)
+
+/-- The coefficient `6X²+b₂X+b₄` occurring in CAS `Hmiss`. -/
+def HmissCoeff : R[X] :=
+  (6 : R[X]) * X ^ 2 + C W.b₂ * X + C W.b₄
+
+/-- CAS `Hmiss` polynomial in the bivariate polynomial ring. -/
+def HmissPoly
+    (ψm2 ψm1 ψm ψp1 ψp2 : R[X][Y]) : R[X][Y] :=
+  ψm1 ^ 2 * ψp2
+    + ψm2 * ψp1 ^ 2
+    + C W.Ψ₂Sq * ψm ^ 3
+    - C (HmissCoeff W) * (ψm1 * ψm * ψp1)
+
+end CoordinateRing
+end Affine
+end WeierstrassCurve
+```
+
+## Deriving `Ψ₃ * Hmiss = 0` from `mk_invariant_descended`
+
+This is the exact `have` chain.  The statement of `mk_invariant_descended` below is schematic only in the argument names; the proof body is the important part.
+
+```lean
+namespace WeierstrassCurve
+namespace Affine
+namespace CoordinateRing
+
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R)
+
+local notation "mkW" p => CoordinateRing.mk W.toAffine p
+
+/-- What `mk_invariant_descended` actually gives after rewriting: `Ψ₃ * Hmiss = 0`. -/
+lemma Ψ₃_mul_Hmiss_of_mk_invariant_descended
+    (ψm2 ψm1 ψm ψp1 ψp2 : R[X][Y])
+    -- Replace this hypothesis by the actual theorem call:
+    (hInv :
+      mkW (C W.Ψ₃ * (ψp2 * ψm1 ^ 2 + ψp1 ^ 2 * ψm2 + W.ψ₂ ^ 2 * ψm ^ 3)) =
+        mkW ((C W.preΨ₄ + W.ψ₂ ^ 4) * (ψp1 * ψm * ψm1))) :
+    mkW (C W.Ψ₃ * HmissPoly W ψm2 ψm1 ψm ψp1 ψp2) = 0 := by
+  have hψ2sq : mkW (W.ψ₂ ^ 2) = mkW (C W.Ψ₂Sq) := by
+    simpa using (Affine.CoordinateRing.mk_ψ₂_sq (W := W))
+
+  have hpre4 :
+      mkW (C W.preΨ₄ + W.ψ₂ ^ 4) = mkW (C (W.Ψ₃ * HmissCoeff W)) :=
+    mk_preΨ₄_add_ψ₂_pow_four_eq_Ψ₃_mul_HmissCoeff (W := W)
+
+  -- Normalize `hInv` into coordinate-ring algebra.
+  have hInv' :
+      mkW (C W.Ψ₃) *
+          (mkW (ψp2 * ψm1 ^ 2 + ψp1 ^ 2 * ψm2) + mkW (C W.Ψ₂Sq) * mkW (ψm ^ 3)) =
+        mkW (C W.Ψ₃) * mkW (C (HmissCoeff W)) * mkW (ψp1 * ψm * ψm1) := by
+    -- This is just `hInv` with `ψ₂² ↦ Ψ₂Sq` and
+    -- `preΨ₄ + ψ₂⁴ ↦ Ψ₃*(6X²+b₂X+b₄)`.
+    -- `simpa` often closes after the two rewrites; if not, use the calc below.
+    calc
+      mkW (C W.Ψ₃) *
+          (mkW (ψp2 * ψm1 ^ 2 + ψp1 ^ 2 * ψm2) + mkW (C W.Ψ₂Sq) * mkW (ψm ^ 3))
+          = mkW (C W.Ψ₃ * (ψp2 * ψm1 ^ 2 + ψp1 ^ 2 * ψm2 + W.ψ₂ ^ 2 * ψm ^ 3)) := by
+              rw [← hψ2sq]
+              simp [map_add, map_mul, map_pow]
+      _ = mkW ((C W.preΨ₄ + W.ψ₂ ^ 4) * (ψp1 * ψm * ψm1)) := hInv
+      _ = mkW (C W.Ψ₃) * mkW (C (HmissCoeff W)) * mkW (ψp1 * ψm * ψm1) := by
+              rw [hpre4]
+              simp [map_mul]
+
+  -- Convert the normalized equality to the zero statement.
+  -- This is ring algebra inside the coordinate ring.
+  have hzero :
+      mkW (C W.Ψ₃) *
+        (mkW (ψm1 ^ 2 * ψp2 + ψm2 * ψp1 ^ 2 + C W.Ψ₂Sq * ψm ^ 3
+            - C (HmissCoeff W) * (ψm1 * ψm * ψp1))) = 0 := by
+    -- The two sums differ only by commutativity/associativity.
+    -- `linear_combination` also works, but `ring_nf` is usually enough.
+    linear_combination (norm := ring_nf) hInv'
+
+  simpa [HmissPoly, map_add, map_sub, map_mul, map_pow, mul_assoc, add_comm, add_left_comm,
+    add_assoc, mul_comm, mul_left_comm] using hzero
+
+end CoordinateRing
+end Affine
+end WeierstrassCurve
+```
+
+This is the safe conclusion from the existing invariant lemma.
+
+## Getting `Hmiss` itself: cancellation is an extra hypothesis
+
+If you can cancel `mk(C W.Ψ₃)`, then `mk_invariant_descended` implies `Hmiss`.
+
+Over a field, the coordinate ring is an integral domain by the existing instance, but you still need to know `mk(C W.Ψ₃) ≠ 0`.  A typical statement is:
+
+```lean
+namespace WeierstrassCurve
+namespace Affine
+namespace CoordinateRing
+
+variable {K : Type*} [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
+
+local notation "mkW" p => CoordinateRing.mk W.toAffine p
+
+lemma Hmiss_of_mk_invariant_descended_of_Ψ₃_ne_zero
+    (ψm2 ψm1 ψm ψp1 ψp2 : K[X][Y])
+    (hΨ₃ : mkW (C W.Ψ₃) ≠ 0)
+    (hInv :
+      mkW (C W.Ψ₃ * (ψp2 * ψm1 ^ 2 + ψp1 ^ 2 * ψm2 + W.ψ₂ ^ 2 * ψm ^ 3)) =
+        mkW ((C W.preΨ₄ + W.ψ₂ ^ 4) * (ψp1 * ψm * ψm1))) :
+    mkW (HmissPoly W ψm2 ψm1 ψm ψp1 ψp2) = 0 := by
+  have hmul := Ψ₃_mul_Hmiss_of_mk_invariant_descended
+    (W := W) ψm2 ψm1 ψm ψp1 ψp2 hInv
+  -- Coordinate ring is a domain over a field/elliptic curve; use `mul_eq_zero.mp`.
+  exact (mul_eq_zero.mp (by simpa [map_mul] using hmul)).resolve_left hΨ₃
+
+end CoordinateRing
+end Affine
+end WeierstrassCurve
+```
+
+A possible proof of `hΨ₃` is by `AdjoinRoot.mk_ne_zero_of_natDegree_lt`, because `C W.Ψ₃` has `Y`-degree `0 < 2`.  You also need `W.Ψ₃ ≠ 0`.  That can fail or become delicate in small characteristics/special strata, so I would **not** bake cancellation into a general theorem unless the target assumptions really provide it.
+
+## Conversely: `Hmiss` implies `mk_invariant_descended` without cancellation
+
+This direction is unconditional and is often the better rewrite direction.
+
+```lean
+namespace WeierstrassCurve
+namespace Affine
+namespace CoordinateRing
+
+variable {R : Type*} [CommRing R] (W : WeierstrassCurve R)
+
+local notation "mkW" p => CoordinateRing.mk W.toAffine p
+
+lemma mk_invariant_descended_of_Hmiss
+    (ψm2 ψm1 ψm ψp1 ψp2 : R[X][Y])
+    (hHmiss : mkW (HmissPoly W ψm2 ψm1 ψm ψp1 ψp2) = 0) :
+    mkW (C W.Ψ₃ * (ψp2 * ψm1 ^ 2 + ψp1 ^ 2 * ψm2 + W.ψ₂ ^ 2 * ψm ^ 3)) =
+      mkW ((C W.preΨ₄ + W.ψ₂ ^ 4) * (ψp1 * ψm * ψm1)) := by
+  have hψ2sq : mkW (W.ψ₂ ^ 2) = mkW (C W.Ψ₂Sq) := by
+    simpa using (Affine.CoordinateRing.mk_ψ₂_sq (W := W))
+  have hpre4 :
+      mkW (C W.preΨ₄ + W.ψ₂ ^ 4) = mkW (C (W.Ψ₃ * HmissCoeff W)) :=
+    mk_preΨ₄_add_ψ₂_pow_four_eq_Ψ₃_mul_HmissCoeff (W := W)
+
+  -- Multiply `hHmiss` by `mk(C Ψ₃)` and rewrite back.
+  have hmul : mkW (C W.Ψ₃) * mkW (HmissPoly W ψm2 ψm1 ψm ψp1 ψp2) = 0 := by
+    simpa [hHmiss]
+
+  -- This final step is just coordinate-ring algebra plus the two rewrites.
+  calc
+    mkW (C W.Ψ₃ * (ψp2 * ψm1 ^ 2 + ψp1 ^ 2 * ψm2 + W.ψ₂ ^ 2 * ψm ^ 3))
+        = mkW (C W.Ψ₃) *
+            (mkW (ψp2 * ψm1 ^ 2 + ψp1 ^ 2 * ψm2) + mkW (C W.Ψ₂Sq) * mkW (ψm ^ 3)) := by
+              rw [← hψ2sq]
+              simp [map_add, map_mul, map_pow]
+    _ = mkW (C W.Ψ₃) * mkW (C (HmissCoeff W)) * mkW (ψp1 * ψm * ψm1) := by
+              -- Follows from `hmul`; `ring_nf` rearranges `HmissPoly`.
+              linear_combination (norm := ring_nf [HmissPoly]) hmul
+    _ = mkW ((C W.preΨ₄ + W.ψ₂ ^ 4) * (ψp1 * ψm * ψm1)) := by
+              rw [hpre4]
+              simp [map_mul]
+
+end CoordinateRing
+end Affine
+end WeierstrassCurve
+```
+
+## Practical recommendation
+
+For the CAS-identified missing identity, add `Hmiss` as the primary theorem if possible:
+
+```lean
+mkW (HmissPoly W ψm2 ψm1 ψm ψp1 ψp2) = 0
+```
+
+Then derive `mk_invariant_descended` from it.  If you only have `mk_invariant_descended`, you have only the weaker statement
+
+```lean
+mkW (C W.Ψ₃ * HmissPoly ...) = 0.
+```
+
+Do not cancel `Ψ₃` unless the proof context explicitly has a domain/nonzero hypothesis for `mk(C W.Ψ₃)`.
