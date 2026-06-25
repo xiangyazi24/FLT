@@ -6,6 +6,7 @@ public import scratch.SeamE1_DualUnit
 public import scratch.SeamE1_FormalNsmul
 public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import scratch.Bridge1Even
 
 /-! # SEAM1 / E1 — rootwise-core assembly
 
@@ -57,7 +58,7 @@ odd, needs 4≠0), modulo the preΨ(ℤ)↔preΨ'(ℕ) cast. The EVEN-n case is 
 analogous even-recurrence argument. -/
 public theorem preΨ'_root_Ψ₂Sq_ne (W : WeierstrassCurve K) [W.IsElliptic]
     {n : ℕ} (hn : (n : K) ≠ 0) {x : K} (hx : (W.preΨ' n).IsRoot x) :
-    W.Ψ₂Sq.eval x ≠ 0 := sorry
+    W.Ψ₂Sq.eval x ≠ 0 := WeierstrassCurve.preΨ'_root_Ψ₂Sq_ne' W hn hx
 
 public theorem root_exists_non_two [IsAlgClosed K] (W : WeierstrassCurve K) [W.IsElliptic]
     {n : ℕ} (hn : (n : K) ≠ 0) {x : K} (hx : (W.preΨ' n).IsRoot x) :

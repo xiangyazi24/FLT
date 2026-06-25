@@ -1,5 +1,7 @@
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.Tactic.LinearCombination
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+public import Mathlib.Tactic.LinearCombination
 
 /-! # Bridge-1 coprimality, even case — foundation (hCD relation)
 
@@ -18,7 +20,7 @@ set_option maxRecDepth 16000 in
 -- large integer cofactor  needs more heartbeats
 set_option maxHeartbeats 4000000 in
 /-- hCD: at a `Ψ₂Sq`-root, `preΨ₄² + 4·Ψ₃³ = 0`. CAS-verified, integer cofactor lift. -/
-lemma preΨ₄_sq_add_four_Ψ₃_cube_eq_zero_of_Ψ₂Sq_root {x : k} (hs : W.Ψ₂Sq.eval x = 0) :
+public lemma preΨ₄_sq_add_four_Ψ₃_cube_eq_zero_of_Ψ₂Sq_root {x : k} (hs : W.Ψ₂Sq.eval x = 0) :
     (W.preΨ₄.eval x) ^ 2 + 4 * (W.Ψ₃.eval x) ^ 3 = 0 := by
   have hbrel : W.b₂ * W.b₆ - W.b₄ ^ 2 - 4 * W.b₈ = 0 := by linear_combination -W.b_relation
   rw [WeierstrassCurve.Ψ₂Sq] at hs

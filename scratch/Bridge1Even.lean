@@ -1,7 +1,9 @@
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.Tactic
-import scratch.Bridge1HCD
-import scratch.KeystoneResultantCerts
+module
+
+public import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+public import Mathlib.Tactic
+public import scratch.Bridge1HCD
+public import scratch.KeystoneResultantCerts
 
 /-!
 # Bridge 1 (Even case): `preΨ'_root_Ψ₂Sq_ne'`
@@ -411,7 +413,7 @@ private theorem even_closed_forms {C D : K} (hC : C ≠ 0)
 
 namespace WeierstrassCurve
 
-theorem preΨ'_root_Ψ₂Sq_ne' (W : WeierstrassCurve K) [W.IsElliptic]
+public theorem preΨ'_root_Ψ₂Sq_ne' (W : WeierstrassCurve K) [W.IsElliptic]
     {n : ℕ} (hn : (n : K) ≠ 0) {x : K} (hx : (W.preΨ' n).IsRoot x) :
     W.Ψ₂Sq.eval x ≠ 0 := by
   intro hs
