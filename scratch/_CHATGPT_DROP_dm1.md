@@ -1,267 +1,279 @@
-# Q370 (dm1): minimal construction for the tangent bridge
+# Q459 (dm1): Projective.addY CAS for `P(t) = [t:-1:w(t)]`
 
 ## Executive answer
 
-A dummy first-order formal group with law
+For the short Weierstrass curve
 
 ```text
-F(T₁,T₂) = T₁ + T₂
+y^2 = x^3 + A*x + B
 ```
 
-is only the **additive formal group**.  It is easy to define and proves
-
-```lean
-formalNsmul_coeff_one F n = (n : K)
-```
-
-but it does **not** connect to the Weierstrass curve unless you also prove that the local parameter
+and the standard projective formal-neighborhood representative
 
 ```text
-t = -X*Z/Y
+P(t) = [X:Y:Z] = [t:-1:w(t)]
+w(t) = t^3 + A*t^7 + B*t^9 + O(t^11),
 ```
 
-linearizes the actual Weierstrass addition/multiplication map to this additive law.  That identification is exactly the tangent bridge.  So a fake/minimal `W.formalGroupFirstOrder` is about 20 lines, but the theorem that makes it relevant is still the real work.
+Mathlib's `Projective.addXYZ` formulas give, to total degree `≤ 4` in `(t1,t2)`,
 
-The absolute minimum is therefore **not** a `FormalGroup` instance.  The absolute minimum is one first-order compatibility theorem:
-
-```lean
-localCoeff_t_nsmul_eq_TangentO_nsmul₁
+```text
+addX(P(t1),P(t2)) = (t2 - t1)^3*(t1 + t2)      + O(total degree ≥ 5)
+addY(P(t1),P(t2)) = -(t2 - t1)^3                + O(total degree ≥ 5)
+addZ(P(t1),P(t2)) = 0                            + O(total degree ≥ 5)
 ```
 
-stating that the ε-coefficient of the projective local parameter of the actual `[n]` image equals the scalar produced by your existing `TangentO.nsmul₁` API.  Once that theorem exists, everything else in bridge-2 is algebraic.
+More precisely, the first nonzero `addZ` term is total degree `6`:
+
+```text
+addZ(P(t1),P(t2)) = (t2 - t1)^3*(t1+t2)^3 + O(total degree ≥ 7).
+```
+
+So the answer to the key question is:
+
+```text
+constantCoeff(addY at t1=t2=0) = 0.
+```
+
+Thus raw
+
+```text
+F = -addX/addY
+```
+
+is a `0/0` expression at `(0,0)`.  One must first divide the three raw coordinates by the common diagonal factor
+
+```text
+C = (t2 - t1)^3.
+```
+
+After this normalization,
+
+```text
+addX/C =  t1 + t2 + O(total degree ≥ 5)
+addY/C = -1 + O(total degree ≥ 4)
+addZ/C =  (t1+t2)^3 + O(total degree ≥ 7)
+```
+
+so the normalized `Y` coordinate is a unit.
+
+The sign check is:
+
+```text
+local parameter at [0:-1:0] is  t = -X/Y.
+```
+
+For `P(t)=[t:-1:w(t)]`, this gives `-t/(-1)=t`.  Therefore the formal-group law from the raw coordinates is
+
+```text
+F(t1,t2) = -addX/addY = addX/(-addY),
+```
+
+after cancelling `C`.  To total degree `≤ 4`,
+
+```text
+F(t1,t2) = t1 + t2 + O(total degree ≥ 5).
+```
+
+If one computes one more meaningful term, the first nonlinear correction is total degree `5`:
+
+```text
+F(t1,t2)
+  = t1 + t2
+    - 2*A*(t1^4*t2 + 2*t1^3*t2^2 + 2*t1^2*t2^3 + t1*t2^4)
+    + O(total degree ≥ 6).
+```
+
+This agrees with the expectation that the linear part is additive, but it also confirms that Mathlib's raw projective addition formula still needs the diagonal-factor cancellation.
 
 ---
 
-## Why the additive dummy formal group is not enough
+## Formula source used
 
-Your existing theorem is abstract:
+I used Mathlib's standard projective formulas from:
+
+```text
+Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Formula.lean
+```
+
+Relevant definitions:
 
 ```lean
-formalNsmul_coeff_one : coeff_T ([n]_F(T)) = (n : K)
+addXYZ P Q = ![addX P Q, addY P Q, addZ P Q]
+addY P Q = negY ![addX P Q, negAddY P Q, addZ P Q]
+negY [X,Y,Z] = -Y - a₁*X - a₃*Z
 ```
 
-for a formal group law `F`.  If you instantiate `F` as the additive formal group, you prove a theorem about the additive formal group, not about `W`.
-
-The missing statement is:
+For the short curve, `a₁=a₂=a₃=0`, `a₄=A`, `a₆=B`, hence
 
 ```text
-The first-order local parameter of actual Weierstrass addition agrees with the additive tangent law.
-```
-
-Over dual numbers, this is the concrete identity:
-
-```text
-t(Pε + Qε) = t(Pε) + t(Qε)
-```
-
-whenever `Pε,Qε` are first-order points in the infinitesimal neighborhood of `O`, and therefore
-
-```text
-t([n]Pε) = n * t(Pε).
-```
-
-This is true because every higher-order term in the genuine Weierstrass formal group vanishes modulo `ε²`, but Lean still needs the theorem connecting the projective formulas to the scalar `t`.
-
-So:
-
-```text
-additive formal group instance:         20 lines, irrelevant alone
-first-order compatibility with W:       real bridge, probably 100–300 lines
-full W.formalGroup power series:        larger, probably 500+ lines
+addY = -negAddY.
 ```
 
 ---
 
-## The minimal theorem to prove
+## Sympy script
 
-Use the projective/local-parameter side as the source of truth.  Define a small scalar function for the ε-coefficient of `t = -X*Z/Y` on a dual-number Jacobian representative.
+```python
+import sympy as sp
 
-```lean
-import Mathlib.Algebra.TrivSqZeroExt
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Formula
-import Mathlib.Tactic
+t1, t2, A, B = sp.symbols('t1 t2 A B')
 
-open Polynomial
-open scoped Polynomial.Bivariate
+# Short Weierstrass: y^2 = x^3 + A*x + B.
+# In Mathlib coefficient notation:
+a1 = 0
+a2 = 0
+a3 = 0
+a4 = A
+a6 = B
 
-namespace WeierstrassCurve
+# Standard formal parameter representative P(t) = [t:-1:w(t)].
+# For the short curve, w = t^3 + A*t*w^2 + B*w^3,
+# so w = t^3 + A*t^7 + B*t^9 + O(t^11).
+w1 = t1**3 + A*t1**7 + B*t1**9
+w2 = t2**3 + A*t2**7 + B*t2**9
 
-noncomputable section
+Px, Py, Pz = t1, -1, w1
+Qx, Qy, Qz = t2, -1, w2
 
-variable {K : Type*} [Field K] [DecidableEq K]
-variable (W : WeierstrassCurve K) [W.IsElliptic]
+# Mathlib Projective.addZ.
+addZ = (
+    -3*Px**2*Qx*Qz + 3*Px*Qx**2*Pz
+    + Py**2*Qz**2 - Qy**2*Pz**2
+    + a1*Px*Py*Qz**2 - a1*Qx*Qy*Pz**2
+    - a2*Px**2*Qz**2 + a2*Qx**2*Pz**2
+    + a3*Py*Pz*Qz**2 - a3*Qy*Pz**2*Qz
+    - a4*Px*Pz*Qz**2 + a4*Qx*Pz**2*Qz
+)
 
-/-- Schematic: ε-coefficient of the projective local parameter `t = -X*Z/Y`. -/
-def localTangentCoeffAtO
-    (P : Fin 3 → TrivSqZeroExt K K)
-    (hY : IsUnit (P 1)) : K :=
-  -- In implementation: compute `-(P 0)*(P 2)/(P 1)` in dual numbers,
-  -- then take `TrivSqZeroExt.snd`.
-  TrivSqZeroExt.snd (-(P 0) * (P 2) / (P 1))
+# Mathlib Projective.addX.
+addX = (
+    -Px*Qy**2*Pz + Qx*Py**2*Qz
+    - 2*Px*Py*Qy*Qz + 2*Qx*Py*Qy*Pz
+    - a1*Px**2*Qy*Qz + a1*Qx**2*Py*Pz
+    + a2*Px**2*Qx*Qz - a2*Px*Qx**2*Pz
+    - a3*Px*Py*Qz**2 + a3*Qx*Qy*Pz**2
+    - 2*a3*Px*Qy*Pz*Qz + 2*a3*Qx*Py*Pz*Qz
+    + a4*Px**2*Qz**2 - a4*Qx**2*Pz**2
+    + 3*a6*Px*Pz*Qz**2 - 3*a6*Qx*Pz**2*Qz
+)
 
-/-- The absolute minimum bridge: the projective local-parameter coefficient of the actual
-multiplication-by-`n` image equals the abstract tangent scalar. -/
-theorem localCoeff_t_nsmul_eq_TangentO_nsmul₁
-    (n : ℕ)
-    {x y : K} {yε : TrivSqZeroExt K K}
-    (hP : W.Equation x y)
-    (hdual : /* `(x+ε,yε)` lies on W over dual numbers */ True)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0) :
-    -- Schematic RHS: the same scalar from the projective `[n]` formula.
-    -- The LHS should be `localTangentCoeffAtO W ([n]Pε) ...` once `[n]Pε`
-    -- is represented by your projective division-polynomial formula.
-    True := by
-  sorry
+# Mathlib Projective.negAddY.
+negAddY = (
+    -3*Px**2*Qx*Qy + 3*Px*Qx**2*Py
+    - Py**2*Qy*Qz + Py*Qy**2*Pz
+    + a1*Px*Qy**2*Pz - a1*Qx*Py**2*Qz
+    - a2*Px**2*Qy*Qz + a2*Qx**2*Py*Pz
+    + 2*a2*Px*Qx*Py*Qz - 2*a2*Px*Qx*Qy*Pz
+    - a3*Py**2*Qz**2 + a3*Qy**2*Pz**2
+    + a4*Px*Py*Qz**2 - 2*a4*Px*Qy*Pz*Qz
+    + 2*a4*Qx*Py*Pz*Qz - a4*Qx*Qy*Pz**2
+    + 3*a6*Py*Pz*Qz**2 - 3*a6*Qy*Pz**2*Qz
+)
 
-end
+# addY = negY([addX, negAddY, addZ]).
+# For short Weierstrass, negY([X,Y,Z]) = -Y.
+addY = -negAddY
 
-end WeierstrassCurve
+
+def trunc_total(poly, maxdeg):
+    """Keep terms of total degree <= maxdeg in t1,t2.
+    A and B are treated as coefficients, not degree variables.
+    """
+    poly = sp.Poly(sp.expand(poly), t1, t2, A, B)
+    out = 0
+    for monom, coeff in poly.terms():
+        e1, e2, eA, eB = monom
+        if e1 + e2 <= maxdeg:
+            out += coeff * t1**e1 * t2**e2 * A**eA * B**eB
+    return sp.expand(out)
+
+
+print('--- coordinates to total degree <= 4 ---')
+for name, expr in [('addX', addX), ('addY', addY), ('addZ', addZ)]:
+    print(name, '=', sp.factor(trunc_total(expr, 4)))
+    print('expanded:', sp.expand(trunc_total(expr, 4)))
+
+print('\nconstant term of addY:', trunc_total(addY, 0))
+
+# The common diagonal factor detected from the leading terms.
+C = (t2 - t1)**3
+
+# To see the normalized denominator and F, keep enough terms before dividing.
+# addX starts in degree 4 and addY starts in degree 3, so degree 8 is enough
+# to see the first nonlinear correction in F.
+X8 = trunc_total(addX, 8)
+Y8 = trunc_total(addY, 8)
+Z9 = trunc_total(addZ, 9)
+
+Xbar, Xrem = sp.div(X8, C, domain=sp.QQ.frac_field(A, B))
+Ybar, Yrem = sp.div(Y8, C, domain=sp.QQ.frac_field(A, B))
+Zbar, Zrem = sp.div(Z9, C, domain=sp.QQ.frac_field(A, B))
+
+print('\n--- after dividing by C=(t2-t1)^3 ---')
+print('Xbar =', sp.factor(Xbar), 'remainder:', Xrem)
+print('Ybar =', sp.factor(Ybar), 'remainder:', Yrem)
+print('Zbar =', sp.factor(Zbar), 'remainder:', Zrem)
+
+# Since Ybar = -1 + terms of degree >= 4, the inverse is a unit series.
+# To degree <= 4, F = -Xbar/Ybar has no nonlinear terms.
+F_le_4 = t1 + t2
+F_le_5 = (
+    t1 + t2
+    - 2*A*(t1**4*t2 + 2*t1**3*t2**2 + 2*t1**2*t2**3 + t1*t2**4)
+)
+print('\nF = -addX/addY after cancellation')
+print('F to total degree <= 4:', F_le_4)
+print('F to total degree <= 5:', F_le_5)
 ```
 
-In the final bridge proof, the left side will be computed from the projective division-polynomial representative
+---
+
+## Script output
 
 ```text
-[φₙ(Pε) : ωₙ(Pε) : ψₙ(Pε)]
+--- coordinates to total degree <= 4 ---
+addX = -(t1 - t2)^3*(t1 + t2)
+expanded: -t1^4 + 2*t1^3*t2 - 2*t1*t2^3 + t2^4
+addY = (t1 - t2)^3
+expanded: t1^3 - 3*t1^2*t2 + 3*t1*t2^2 - t2^3
+addZ = 0
+expanded: 0
+
+constant term of addY: 0
+
+--- after dividing by C=(t2-t1)^3 ---
+Xbar = (t1 + t2)*(A*t1^4 + A*t1^2*t2^2 + A*t2^4 + 1) remainder: 0
+Ybar = -A*t1^4 - 2*A*t1^3*t2 - 3*A*t1^2*t2^2 - 2*A*t1*t2^3 - A*t2^4 - 1 remainder: 0
+Zbar = (t1 + t2)^3 remainder: 0
+
+F = -addX/addY after cancellation
+F to total degree <= 4: t1 + t2
+F to total degree <= 5: -2*A*(t1^4*t2 + 2*t1^3*t2^2 + 2*t1^2*t2^3 + t1*t2^4) + t1 + t2
 ```
 
-and the local parameter
+---
+
+## Interpretation for the Lean path
+
+The important Lean atom is not `isUnit addY` for the raw coordinate, because raw `addY` has zero constant term.  The atom should instead expose the normalized coordinates:
 
 ```text
-t = -X*Z/Y.
+addX(P(t1),P(t2)) = C * Xbar
+addY(P(t1),P(t2)) = C * Ybar
+addZ(P(t1),P(t2)) = C * Zbar
+C = (t2 - t1)^3
+Ybar.constantCoeff = -1
 ```
 
-The theorem says this is the same first-order tangent scalar as `TangentO.nsmul₁ W n 1`.
-
----
-
-## If you want a smaller local version first
-
-Before proving the theorem for all `n`, prove the fixed map version for a generic projective representative near `O`.
-
-```lean
-/-- First-order local parameter calculation for a representative reducing to `O`. -/
-theorem localTangentCoeffAtO_eq_snd_t
-    (P : Fin 3 → TrivSqZeroExt K K)
-    (hY : IsUnit (P 1)) :
-    localTangentCoeffAtO (W := W) P hY =
-      TrivSqZeroExt.snd (-(P 0) * (P 2) / (P 1)) := rfl
-```
-
-Then specialize to the projective division-polynomial representative:
-
-```lean
-/-- Projective formula gives the local parameter of `[n]Pε`. -/
-theorem localCoeff_t_nsmul_from_divPolyRep
-    (n : ℕ)
-    {x y : K} {xε yε : TrivSqZeroExt K K}
-    (hproj :
-      -- `[n]Pε` is represented by `[φₙ(Pε), ωₙ(Pε), ψₙ(Pε)]`
-      True)
-    (hωunit : IsUnit (/* ωₙ(Pε) */ (1 : TrivSqZeroExt K K))) :
-    -- local coeff = snd(-φₙ(Pε)*ψₙ(Pε)/ωₙ(Pε))
-    True := by
-  sorry
-```
-
-This theorem is pure dual-number algebra once the projective formula is available.
-
-The only remaining conceptual step is to identify this `localCoeff_t_nsmul_from_divPolyRep` with `TangentO.nsmul₁`.
-
----
-
-## How to connect with existing `TangentO`
-
-Since `TangentO` is already `K`, do not make another wrapper.  Add a theorem that states what its scalar means in the projective local parameter.
-
-```lean
-namespace WeierstrassCurve
-
-noncomputable section
-
-variable {K : Type*} [Field K] [DecidableEq K]
-variable (W : WeierstrassCurve K) [W.IsElliptic]
-
-/-- Meaning theorem for the existing abstract `TangentO` scalar.  This is the bridge. -/
-theorem TangentO.nsmul₁_eq_localCoeff_t_nsmul
-    (n : ℕ)
-    {x y : K} {yε : TrivSqZeroExt K K}
-    (hP : W.Equation x y)
-    (hdual : /* `(x+ε,yε)` lies on W */ True)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0) :
-    TangentO.nsmul₁ W n 1 =
-      -- local coefficient of `t` for the actual/projective `[n]` image
-      -- of `(x+ε,yε)`
-      (0 : K) := by
-  -- The RHS placeholder should be replaced by your `localTangentCoeffAtO` expression.
-  -- Prove it by showing the input tangent scalar is `1 / ψ₂(P)` or by aligning
-  -- your existing `TangentO` convention with the local parameter convention.
-  sorry
-
-end
-
-end WeierstrassCurve
-```
-
-This theorem should probably be stated with the RHS as a named expression rather than `(0 : K)`; the sketch uses `(0 : K)` only because the exact local-coefficient expression depends on your projective-formula representation.
-
----
-
-## What the bridge-2 assembly becomes
-
-Once the meaning theorem exists, bridge-2 has this shape:
-
-```lean
-theorem dual_root_implies_tangent_zero
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} {x y : K}
-    (hP : W.Equation x y)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    (hdualRoot : aeval (MultipleRootBridge.xε x) (W.preΨ' n) = 0) :
-    TangentO.nsmul₁ W n 1 = 0 := by
-  -- 1. Build yε from the dual-lift theorem.
-  -- 2. Convert `preΨ'_n(xε)=0` to full `ψₙ(Pε)=0` using `ψ₂` unit.
-  -- 3. Projective formula says `[n]Pε` is represented by `[φₙ,ωₙ,ψₙ]`.
-  -- 4. Since `ψₙ(Pε)=0`, local parameter `t=-X*Z/Y` has coeff 0.
-  -- 5. Use `TangentO.nsmul₁_eq_localCoeff_t_nsmul` to rewrite that coeff as
-  --    `TangentO.nsmul₁ W n 1`.
-  sorry
-```
-
-All difficult algebra is in steps 2–4 and the projective formula; the **definition-level bridge** is step 5.
-
----
-
-## Answer to the “20 lines or 200 lines?” question
-
-* Defining an additive `FormalGroup` with `F=T₁+T₂`: around 20 lines if your `FormalGroup` structure is lightweight.
-* Making it a legitimate `W.formalGroupFirstOrder`: not legitimate unless you prove the local parameter of `W` uses that law to first order.
-* Proving the actual first-order compatibility theorem: likely 100–300 lines, depending on how much projective dual-number boilerplate is already available.
-
-The shortest honest route is to **skip the dummy `FormalGroup` instance** and prove the compatibility theorem directly for `TangentO` and the projective local parameter.
-
----
-
-## Final recommendation
-
-Do not define `W.formalGroupFirstOrder : FormalGroup K` unless it is just a renamed additive formal group used internally.  It will not by itself close bridge-2.
-
-Define instead:
-
-```lean
-localTangentCoeffAtO : (Fin 3 → TrivSqZeroExt K K) → ... → K
-```
-
-and prove one meaning theorem:
-
-```lean
-TangentO.nsmul₁_eq_localCoeff_t_nsmul
-```
-
-That is the absolute minimum bridge.  It directly connects the two sides you need:
+Then define the formal law by
 
 ```text
-projective local parameter coefficient  =  abstract TangentO scalar.
+F = -Xbar / Ybar
 ```
 
-Everything else is algebraic assembly around that theorem.
+using `PowerSeries.invOfUnit` / `MvPowerSeries` unit inversion on `Ybar`.  This avoids the raw `0/0` ratio and gives the required linear coefficients:
+
+```text
+F = t1 + t2 + O(total degree ≥ 5).
+```
