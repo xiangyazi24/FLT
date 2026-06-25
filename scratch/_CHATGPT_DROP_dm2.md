@@ -1,270 +1,227 @@
-# Q226 (dm2): Coordinate-ring machinery for polynomial identities modulo `F_W`
+# Q240 (dm2): Bezout separability certificate for `preΨ'_5`, short Weierstrass
 
-Goal shape:
-
-```lean
-Affine.CoordinateRing.mk W.toAffine bigPoly = 0
-```
-
-where
-
-```lean
-bigPoly : K[X][Y]
-```
-
-and `bigPoly ∈ (W.toAffine.polynomial)`.
-
-## Short answer
-
-Use the `AdjoinRoot` quotient API directly.  The affine coordinate ring is literally
-
-```lean
-abbrev WeierstrassCurve.Affine.CoordinateRing (W : Affine R) :=
-  AdjoinRoot W.polynomial
-```
-
-and
-
-```lean
-Affine.CoordinateRing.mk W = AdjoinRoot.mk W.polynomial
-```
-
-So the exact kernel lemma is:
-
-```lean
-AdjoinRoot.mk_eq_zero :
-  AdjoinRoot.mk f g = 0 ↔ f ∣ g
-```
-
-There is no separate `CoordinateRing.mk_eq_zero` wrapper in the file I checked.  Use `rw [Affine.CoordinateRing.mk, AdjoinRoot.mk_eq_zero]` or `simpa [Affine.CoordinateRing.mk] using ...`.
-
-For monic reduction, the exact lemma is:
-
-```lean
-Polynomial.modByMonic_eq_zero_iff_dvd (hq : q.Monic) :
-  p %ₘ q = 0 ↔ q ∣ p
-```
-
-For the Weierstrass equation as a polynomial in `Y`, the monicity lemma is:
-
-```lean
-WeierstrassCurve.Affine.monic_polynomial : W.polynomial.Monic
-```
-
-Useful related names:
-
-```lean
-AdjoinRoot.mk_self     : AdjoinRoot.mk f f = 0
-AdjoinRoot.mk_eq_mk    : AdjoinRoot.mk f g = AdjoinRoot.mk f h ↔ f ∣ g - h
-Polynomial.mem_ker_modByMonic
-```
-
-## Toy example: `mk W W.polynomial = 0`
-
-This is the minimal proof.
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-
-noncomputable section
-
-open Polynomial
-open scoped Polynomial.Bivariate
-
-namespace WeierstrassCurve
-namespace Affine
-
-variable {R : Type*} [CommRing R] (W : Affine R)
-
-example : CoordinateRing.mk W W.polynomial = 0 := by
-  simpa [CoordinateRing.mk] using (AdjoinRoot.mk_self W.polynomial)
-
-end Affine
-end WeierstrassCurve
-```
-
-If your local goal is phrased with `W : WeierstrassCurve R` rather than `W : Affine R`, use:
-
-```lean
-example {R : Type*} [CommRing R] (W : WeierstrassCurve R) :
-    WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine W.toAffine.polynomial = 0 := by
-  simpa [WeierstrassCurve.Affine.CoordinateRing.mk] using
-    (AdjoinRoot.mk_self W.toAffine.polynomial)
-```
-
-## Divisibility/cofactor proof pattern
-
-If CAS gives a cofactor
-
-```lean
-Q : K[X][Y]
-```
-
-with
-
-```lean
-bigPoly = W.toAffine.polynomial * Q
-```
-
-or `bigPoly = Q * W.toAffine.polynomial`, the most robust Lean proof is:
-
-```lean
-example {K : Type*} [Field K] (W : WeierstrassCurve K)
-    (bigPoly Q : K[X][Y])
-    (hQ : bigPoly = W.toAffine.polynomial * Q) :
-    WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine bigPoly = 0 := by
-  rw [hQ, map_mul]
-  simp [WeierstrassCurve.Affine.CoordinateRing.mk]
-```
-
-For a generated proof, I would avoid using a hypothesis `hQ`; instead put the CAS-expanded `Q` in a `def` and close the equality by `ring_nf`/`ring1`:
-
-```lean
-noncomputable def addXCertQ (W : WeierstrassCurve K) : K[X][Y] :=
-  -- CAS-generated cofactor
-  0
-
-lemma addX_bigPoly_eq_mul_polynomial (W : WeierstrassCurve K) :
-    bigPoly W = W.toAffine.polynomial * addXCertQ W := by
-  -- Usually:
-  --   rw [bigPoly, addXCertQ, WeierstrassCurve.Affine.polynomial]
-  --   ring_nf
-  sorry
-
-lemma addX_bigPoly_mk_eq_zero (W : WeierstrassCurve K) :
-    WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (bigPoly W) = 0 := by
-  rw [addX_bigPoly_eq_mul_polynomial]
-  simp [WeierstrassCurve.Affine.CoordinateRing.mk]
-```
-
-This is approach (a), but using `AdjoinRoot.mk_self` through `simp` rather than manually mentioning `Ideal.Quotient`.
-
-## `modByMonic` proof pattern
-
-If you want the remainder route, the proof skeleton is:
-
-```lean
-example {K : Type*} [Field K] (W : WeierstrassCurve K)
-    (bigPoly : K[X][Y])
-    (hrem : bigPoly %ₘ W.toAffine.polynomial = 0) :
-    WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine bigPoly = 0 := by
-  rw [WeierstrassCurve.Affine.CoordinateRing.mk, AdjoinRoot.mk_eq_zero]
-  exact (Polynomial.modByMonic_eq_zero_iff_dvd
-    (p := bigPoly) (q := W.toAffine.polynomial)
-    W.toAffine.monic_polynomial).mp hrem
-```
-
-Or as a rewrite:
-
-```lean
-example {K : Type*} [Field K] (W : WeierstrassCurve K)
-    (bigPoly : K[X][Y])
-    (hrem : bigPoly %ₘ W.toAffine.polynomial = 0) :
-    WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine bigPoly = 0 := by
-  rw [WeierstrassCurve.Affine.CoordinateRing.mk, AdjoinRoot.mk_eq_zero,
-    ← Polynomial.modByMonic_eq_zero_iff_dvd W.toAffine.monic_polynomial]
-  exact hrem
-```
-
-This is approach (c).  It is conceptually clean, but for very large generated polynomials I would not ask Lean to compute `%ₘ` itself unless the expression has been normalized into a small form.
-
-## Which approach is best for the real `addX` identity?
-
-For the real `addX`/`addY` division-polynomial identities, I recommend:
+Short Weierstrass curve:
 
 ```text
-CAS-generate a cofactor Q and prove bigPoly = W.polynomial * Q by `ring_nf`/`ring1`, then use `mk_self`.
+y^2 = x^3 + A x + B
 ```
 
-Reason: `Polynomial.modByMonic` is mathematically perfect, but large Lean goals can become slow if Lean has to perform the quotient/remainder computation internally.  SymPy/Sage/Singular can divide by the monic quadratic in `Y` instantly and return both quotient and remainder.  Then Lean only checks a deterministic polynomial identity with a supplied certificate.
+For odd `n=5`, the reduced division polynomial is the usual `ψ₅`, so
 
-In other words, use this workflow:
+```text
+preΨ'_5 = ψ₅ ∈ ℤ[A,B][X].
+```
 
-1. In Python/SymPy, compute
+## Results
 
-   ```python
-   Q, R = div(bigPoly, F_W, main_variable=Y)
-   assert R == 0
-   ```
+### `preΨ'_5`
 
-2. Print `Q` as a Lean expression.
-3. In Lean, define `Q` and prove
+```text
+preΨ'_5 = 5*X**12 + 62*A*X**10 + 380*B*X**9 - 105*A**2*X**8 + 240*A*B*X**7 - 300*A**3*X**6 - 240*B**2*X**6 - 696*A**2*B*X**5 - 125*A**4*X**4 - 1920*A*B**2*X**4 - 80*A**3*B*X**3 - 1600*B**3*X**3 - 50*A**5*X**2 - 240*A**2*B**2*X**2 - 100*A**4*B*X - 640*A*B**3*X + A**6 - 32*A**3*B**2 - 256*B**4
+```
 
-   ```lean
-   bigPoly = W.toAffine.polynomial * Q
-   ```
+It has degree `12` in `X`, as expected from `(25-1)/2 = 12`.
 
-   by `ring_nf`/`ring1` after unfolding definitions.
-4. Finish by:
+### Derivative
 
-   ```lean
-   rw [hQ, map_mul]
-   simp [Affine.CoordinateRing.mk]
-   ```
+```text
+(preΨ'_5)' = 60*X**11 + 620*A*X**9 + 3420*B*X**8 - 840*A**2*X**7 + 1680*A*B*X**6 - 1800*A**3*X**5 - 1440*B**2*X**5 - 3480*A**2*B*X**4 - 500*A**4*X**3 - 7680*A*B**2*X**3 - 240*A**3*B*X**2 - 4800*B**3*X**2 - 100*A**5*X - 480*A**2*B**2*X - 100*A**4*B - 640*A*B**3
+```
 
-This keeps all hard division outside Lean but still gives a kernel-checked certificate: Lean verifies the cofactor identity.
+### Resultant
 
-## SymPy cofactor extraction
+```text
+Res_X(preΨ'_5, (preΨ'_5)') = 75557863725914323419136000000000000*(4*A**3 + 27*B**2)**22
+```
 
-For the short Weierstrass curve:
+Factored constant:
+
+```text
+75557863725914323419136000000000000 = 2^88 * 5^12
+```
+
+For short Weierstrass,
+
+```text
+Δ = -16*(4*A**3 + 27*B**2)
+```
+
+so, since the exponent is even,
+
+```text
+Res_X(preΨ'_5, (preΨ'_5)') = 5^12 * Δ^22.
+```
+
+Thus the separability obstruction is exactly `5 * Δ`, as expected: over a field, `preΨ'_5` is separable when `(5 : k) ≠ 0` and `Δ ≠ 0`.
+
+### Bezout cofactors
+
+I computed integer cofactors `U,V ∈ ℤ[A,B][X]` with
+
+```text
+U*preΨ'_5 + V*(preΨ'_5)' = Res_X(preΨ'_5, (preΨ'_5)').
+```
+
+The computation used a weighted-homogeneous linear ansatz rather than the full Sylvester adjugate, because the Sylvester adjugate over `ℤ[A,B]` is slow in plain SymPy for this `23 × 23` system.
+
+Weights:
+
+```text
+wt(X)=1, wt(A)=2, wt(B)=3.
+```
+
+Then:
+
+```text
+wt(preΨ'_5) = 12
+wt((preΨ'_5)') = 11
+wt(Res) = 132
+```
+
+so one can take:
+
+```text
+wt(U)=120, deg_X(U) ≤ 10
+wt(V)=121, deg_X(V) ≤ 11.
+```
+
+The solved integer certificate has:
+
+```text
+terms(U) = 216
+terms(V) = 236
+```
+
+Both are above the requested `< 200` cutoff, so I am not printing them explicitly here.  The script below computes them and asserts the exact Bezout identity.
+
+## Complete runnable SymPy script
 
 ```python
 import sympy as sp
 
-X, Y, A, B = sp.symbols("X Y A B")
-FW = Y**2 - X**3 - A*X - B
+X, A, B = sp.symbols('X A B')
 
-# bigPoly = ...
+# Short-Weierstrass initial division polynomials.
+psi3 = 3*X**4 + 6*A*X**2 + 12*B*X - A**2
+pre4 = (
+    X**6 + 5*A*X**4 + 20*B*X**3 - 5*A**2*X**2
+    - 4*A*B*X - 8*B**2 - A**3
+)
 
-Q, R = sp.div(sp.Poly(sp.expand(bigPoly), Y), sp.Poly(FW, Y))
-Q = sp.expand(Q.as_expr())
-R = sp.expand(R.as_expr())
-assert R == 0
-print(Q)
+# ψ5 = ψ4*ψ2^3 - ψ1*ψ3^3.
+# For short Weierstrass, ψ2 = 2Y and ψ4 = 4Y*pre4, hence
+# ψ4*ψ2^3 = 32*Y^4*pre4 = 32*(X^3 + A*X + B)^2*pre4.
+f = sp.expand(32*(X**3 + A*X + B)**2*pre4 - psi3**3)
+df = sp.diff(f, X)
+
+Delta = -16*(4*A**3 + 27*B**2)
+R = sp.resultant(f, df, X)
+
+print('prePsi5 =', sp.sstr(f))
+print()
+print('d_prePsi5 =', sp.sstr(df))
+print()
+print('degree_X(prePsi5) =', sp.Poly(f, X).degree())
+print('terms(prePsi5) =', len(sp.Poly(f, X, A, B).terms()))
+print()
+print('resultant =', sp.sstr(sp.factor(R)))
+print('resultant_factorint_constant =', sp.factorint(sp.Poly(R, A, B).content()))
+print('resultant_equals_5^12_Delta^22 =', sp.expand(R - 5**12 * Delta**22) == 0)
+print()
+
+# Weighted-homogeneous ansatz for Bezout cofactors.
+# wt(X)=1, wt(A)=2, wt(B)=3.
+# wt(f)=12, wt(df)=11, wt(R)=132, so wt(U)=120 and wt(V)=121.
+def monoms_weight(weight, max_x_degree):
+    mons = []
+    for i in range(max_x_degree + 1):
+        rem = weight - i
+        if rem < 0:
+            continue
+        for j in range(rem // 2 + 1):
+            rem2 = rem - 2*j
+            if rem2 % 3 == 0:
+                k = rem2 // 3
+                mons.append((i, j, k))
+    return mons
+
+monsU = monoms_weight(120, 10)  # deg_X(U) < deg_X(df)=11
+monsV = monoms_weight(121, 11)  # deg_X(V) < deg_X(f)=12
+
+u = sp.symbols('u0:' + str(len(monsU)))
+v = sp.symbols('v0:' + str(len(monsV)))
+unknowns = list(u) + list(v)
+
+U_ansatz = sum(c * X**i * A**j * B**k for c, (i, j, k) in zip(u, monsU))
+V_ansatz = sum(c * X**i * A**j * B**k for c, (i, j, k) in zip(v, monsV))
+
+expr = sp.Poly(sp.expand(U_ansatz*f + V_ansatz*df - R), X, A, B)
+equations = [coeff for _monom, coeff in expr.terms()]
+
+print('Bezout ansatz unknowns U =', len(monsU))
+print('Bezout ansatz unknowns V =', len(monsV))
+print('linear equations =', len(equations))
+
+sol_set = sp.linsolve(equations, unknowns)
+sol_tuple = next(iter(sol_set))
+
+# This particular system has a unique integer solution.
+free_symbols = set().union(*(s.free_symbols for s in sol_tuple)) - set(unknowns)
+assert not free_symbols
+
+U = sp.expand(sum(sol_tuple[i] * X**a * A**b * B**c for i, (a, b, c) in enumerate(monsU)))
+V = sp.expand(sum(sol_tuple[len(monsU) + i] * X**a * A**b * B**c for i, (a, b, c) in enumerate(monsV)))
+
+PU = sp.Poly(U, X, A, B, domain=sp.QQ)
+PV = sp.Poly(V, X, A, B, domain=sp.QQ)
+assert all(coeff.q == 1 for _monom, coeff in PU.terms())
+assert all(coeff.q == 1 for _monom, coeff in PV.terms())
+
+print('terms(U) =', len(PU.terms()))
+print('terms(V) =', len(PV.terms()))
+print('deg_X(U) =', sp.Poly(U, X).degree())
+print('deg_X(V) =', sp.Poly(V, X).degree())
+print('content(U) =', PU.content())
+print('content(V) =', PV.content())
+
+assert sp.expand(U*f + V*df - R) == 0
+print('Bezout verification = OK')
+
+if len(PU.terms()) < 200:
+    print('U =', sp.sstr(U))
+else:
+    print('U omitted: term count >= 200')
+
+if len(PV.terms()) < 200:
+    print('V =', sp.sstr(V))
+else:
+    print('V omitted: term count >= 200')
 ```
 
-For the general long Weierstrass curve:
-
-```python
-import sympy as sp
-
-X, Y, a1, a2, a3, a4, a6 = sp.symbols("X Y a1 a2 a3 a4 a6")
-FW = Y**2 + a1*X*Y + a3*Y - X**3 - a2*X**2 - a4*X - a6
-
-Q, R = sp.div(sp.Poly(sp.expand(bigPoly), Y), sp.Poly(FW, Y))
-Q = sp.expand(Q.as_expr())
-R = sp.expand(R.as_expr())
-assert R == 0
-print(Q)
-```
-
-Because `F_W` is monic in `Y`, this division is exact over the polynomial coefficient ring; no denominator issue is introduced.
-
-## Practical recommendation
-
-For small identities, this is fine:
-
-```lean
-rw [Affine.CoordinateRing.mk, AdjoinRoot.mk_eq_zero]
-exact (Polynomial.modByMonic_eq_zero_iff_dvd W.toAffine.monic_polynomial).mp hrem
-```
-
-For the large `addX` identity, use a CAS cofactor.  The final Lean proof should look like:
-
-```lean
-lemma addX_identity_mk_eq_zero (W : WeierstrassCurve K) :
-    Affine.CoordinateRing.mk W.toAffine (addXBigPoly W) = 0 := by
-  have hQ : addXBigPoly W = W.toAffine.polynomial * addXIdentityCofactor W := by
-    rw [addXBigPoly, addXIdentityCofactor, WeierstrassCurve.Affine.polynomial]
-    ring_nf
-  rw [hQ, map_mul]
-  simp [WeierstrassCurve.Affine.CoordinateRing.mk]
-```
-
-If `ring_nf` is too slow on the fully expanded `Q`, split the certificate by `Y`-degree:
+## Script output
 
 ```text
-bigPoly - F_W * Q = C R0 + C R1 * Y
-```
+prePsi5 = A**6 - 50*A**5*X**2 - 100*A**4*B*X - 125*A**4*X**4 - 32*A**3*B**2 - 80*A**3*B*X**3 - 300*A**3*X**6 - 240*A**2*B**2*X**2 - 696*A**2*B*X**5 - 105*A**2*X**8 - 640*A*B**3*X - 1920*A*B**2*X**4 + 240*A*B*X**7 + 62*A*X**10 - 256*B**4 - 1600*B**3*X**3 - 240*B**2*X**6 + 380*B*X**9 + 5*X**12
 
-and prove `R0 = 0`, `R1 = 0` as two smaller univariate identities in `K[X]`.  This mirrors the `modByMonic` remainder and is usually faster than one enormous bivariate `ring_nf` goal.
+d_prePsi5 = -100*A**5*X - 100*A**4*B - 500*A**4*X**3 - 240*A**3*B*X**2 - 1800*A**3*X**5 - 480*A**2*B**2*X - 3480*A**2*B*X**4 - 840*A**2*X**7 - 640*A*B**3 - 7680*A*B**2*X**3 + 1680*A*B*X**6 + 620*A*X**9 - 4800*B**3*X**2 - 1440*B**2*X**5 + 3420*B*X**8 + 60*X**11
+
+degree_X(prePsi5) = 12
+terms(prePsi5) = 19
+
+resultant = 75557863725914323419136000000000000*(4*A**3 + 27*B**2)**22
+resultant_factorint_constant = {2: 88, 5: 12}
+resultant_equals_5^12_Delta^22 = True
+
+Bezout ansatz unknowns U = 216
+Bezout ansatz unknowns V = 236
+linear equations = 474
+terms(U) = 216
+terms(V) = 236
+deg_X(U) = 10
+deg_X(V) = 11
+content(U) = 73786976294838206464000000000000
+content(V) = 3689348814741910323200000000000
+Bezout verification = OK
+U omitted: term count >= 200
+V omitted: term count >= 200
+```
