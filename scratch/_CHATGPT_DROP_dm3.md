@@ -1,383 +1,482 @@
-# Q356 (dm3): Final assembly from projective formula to bridge-2 closure
+# Q461 (dm3): addXYZ normalization at `(O,O)`
 
-## Definitive assessment
+## Bottom line
 
-With assumptions 1–8 exactly as listed, the requested theorem
+`constantCoeff formalAddY = 0`.
+
+The tempting argument
+
+```text
+P(0) = O, so addXYZ(O,O) should be O = [0:-1:0], hence addY(0,0) = -1
+```
+
+is **not** the behavior of Mathlib's raw projective addition polynomial.  The raw `addXYZ` formula is the polynomial chord-addition representative, not the already-normalized group-law map.  On the self-addition locus it degenerates; in particular Mathlib has the documented/self-addition behavior such as
 
 ```lean
-theorem preΨ'_deriv_ne_zero_at_nontorsion_root [IsAlgClosed K]
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} (hn : (n : K) ≠ 0) {x y : K}
-    (hcurve : W.toAffine.Equation x y)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    (hroot : (W.preΨ' n).eval x = 0) :
-    (derivative (W.preΨ' n)).eval x ≠ 0
+Projective.addZ_self : addZ W P P = 0
 ```
 
-**still cannot be closed non-circularly.**  The missing theorem is precisely the
-identification of the dual-number/local-parameter coefficient of the projective
-formula with the tangent map of the group endomorphism `[n]`:
+and the same zero-representative phenomenon occurs for the other coordinates in the `addXYZ(P,P)` package.  Therefore, after substituting
 
 ```text
-coeffε(t_O([n]Pε)) = (n : K) · coeffε(t_P(Pε)).
+P(t) = [t : -1 : w(t)]
 ```
 
-Equivalently, one needs one of the following bridge lemmas:
+we get
 
 ```text
-TangentO.nsmul₁ = n,
-formalNsmul_coeff_one transported to the geometric local parameter,
-[n] is étale/unramified when (n : K) ≠ 0,
+formalAddXYZ(t,t) = [0,0,0]
 ```
 
-or a non-circular `IsCoprime (W.preΨ' n) (derivative (W.preΨ' n))`, for example
-from a Bezout/resultant certificate.
+as raw coordinates.  In particular,
 
-The projective formula plus ATOMS 5–7 proves the formula for the output local
-parameter coefficient:
-
-```text
-coeffε(t_O([n]Pε))
-  = - φ_n(P) / ω_n(P) · parityUnit(P) · (preΨ'_n)'(x).
+```lean
+theorem formalAddY_constantCoeff :
+    MvPowerSeries.constantCoeff K formalAddY = 0 := by
+  -- morally:
+  -- constantCoeff = evaluate at t₁ = 0 and t₂ = 0
+  --              = Projective.addY W O O
+  --              = 0
+  simp [formalAddY, formalAddXYZ, formalP, Projective.addY]
 ```
 
-If `(preΨ'_n)'(x)=0`, this coefficient is `0`.  But to contradict
-`(n : K) ≠ 0`, one must know independently that the same coefficient is
-`(n : K)` times the nonzero input tangent coefficient.  That is exactly the
-TangentO/formal-group bridge.  It is not contained in the projective formula
-itself.
+The exact proof will depend on the local names in `FormalGroupW.lean`, but the proof should be a direct `simp`/unfold computation, not a geometric group-law argument.
 
-So the honest final assembly theorem is not the original theorem, but the original
-theorem **with one additional bridge hypothesis**.  Once that bridge is supplied,
-the final assembly is straightforward.
+So `F = -formalAddX / formalAddY` is **not directly definable** by `formalAddY⁻¹`, because `formalAddY` is not a unit in the bivariate power-series ring.
 
 ---
 
-## What ATOMS 5–7 actually give
+## What the vanishing means
 
-At a non-2-torsion root of `preΨ'_n`, after the projective X/Y/Z formulas land,
-we have:
+The vanishing is not saying the formal group law is singular.  It is saying the chosen projective representative has an extra scalar factor which vanishes on the diagonal.
 
-1. `ψ_n(P)=0`, so the projective representative of `[n]P` has `Z = 0`.
-2. `no_adjacent_preΨ_zero` plus the definition of `φ_n` gives `φ_n(P) ≠ 0`.
-3. ATOM 5 gives `ω_n(P) ≠ 0` from the curve equation at `Z=0`.
-4. ATOM 6 gives
-
-   ```text
-   coeffε(t_O([n]Pε)) = -φ_n(P)/ω_n(P) · snd(ψ_n(Pε)).
-   ```
-
-5. ATOM 7 gives
-
-   ```text
-   snd(ψ_n(Pε)) = parityUnit(P) · (preΨ'_n)'(x).
-   ```
-
-6. Bridge-1 gives `Ψ₂Sq(P) ≠ 0`, hence the parity factor is a unit in the even
-   case; in the odd case it is `1`.
-
-Therefore the purely projective/dual-number part proves:
+There should exist a scalar series `s(t₁,t₂)` and normalized coordinates `Xn, Yn, Zn` such that
 
 ```text
-coeffε(t_O([n]Pε))
-  = unit · (preΨ'_n)'(x),
+formalAddX = s * Xn
+formalAddY = s * Yn
+formalAddZ = s * Zn
+```
+
+with
+
+```text
+Yn(0,0) = -1
+Xn(0,0) = 0
+Zn(0,0) = 0
+```
+
+and then the formal group law is
+
+```text
+F(t₁,t₂) = - Xn / Yn.
+```
+
+Since `Yn.constantCoeff = -1`, `Yn` is a unit and the division is legal.
+
+Equivalently, the correct definition is not
+
+```lean
+def F := -formalAddX * formalAddY⁻¹
+```
+
+but rather
+
+```lean
+def F := -normalizedAddX * (normalizedAddY)⁻¹
+```
+
+where `normalizedAddX`, `normalizedAddY`, `normalizedAddZ` are obtained by cancelling the common vanishing factor of the raw `addXYZ` coordinates.
+
+---
+
+## First expected factor: the diagonal factor
+
+Because raw `addXYZ(P,P)` is the zero representative, after substitution we should prove
+
+```lean
+theorem formalAddX_diag : diagEval formalAddX = 0 := by ...
+theorem formalAddY_diag : diagEval formalAddY = 0 := by ...
+theorem formalAddZ_diag : diagEval formalAddZ = 0 := by ...
 ```
 
 where
 
-```text
-unit = -φ_n(P)/ω_n(P) · parityUnit(P) ≠ 0.
+```lean
+diagEval : MvPowerSeries (Fin 2) K →+* PowerSeries K
 ```
 
-This is a correct and useful theorem.  It identifies the derivative of the
-x-division polynomial with the tangent coefficient of `[n]` at that torsion point,
-up to a nonzero scalar.
+sends both variables to the same one-variable series `X`:
 
-But it is only half the proof of derivative nonvanishing.  The other half is that
-`[n]` has nonzero tangent coefficient when `(n : K) ≠ 0`.
+```text
+t₁ ↦ T,
+t₂ ↦ T.
+```
+
+Algebraically this says each raw coordinate lies in the kernel of diagonal restriction.  For two-variable formal power series, the kernel of diagonal restriction is generated by
+
+```text
+δ = t₂ - t₁
+```
+
+or by `t₁ - t₂`, depending on sign convention.
+
+So the first normalization attempt is:
+
+```lean
+def δ : MvPowerSeries (Fin 2) K := X 1 - X 0
+
+def addX₁ : MvPowerSeries (Fin 2) K := divByDiagonal formalAddX formalAddX_diag
+def addY₁ : MvPowerSeries (Fin 2) K := divByDiagonal formalAddY formalAddY_diag
+def addZ₁ : MvPowerSeries (Fin 2) K := divByDiagonal formalAddZ formalAddZ_diag
+```
+
+with lemmas
+
+```lean
+theorem δ_mul_addX₁ : δ * addX₁ = formalAddX := ...
+theorem δ_mul_addY₁ : δ * addY₁ = formalAddY := ...
+theorem δ_mul_addZ₁ : δ * addZ₁ = formalAddZ := ...
+```
+
+Then test/prove
+
+```lean
+theorem addY₁_constantCoeff_ne_zero :
+    MvPowerSeries.constantCoeff K addY₁ ≠ 0 := by ...
+```
+
+If this succeeds, define
+
+```lean
+noncomputable def formalGroupLawFromAddXYZ : MvPowerSeries (Fin 2) K :=
+  - addX₁ * Ring.inverse addY₁
+```
+
+or using whatever inverse/unit API is convenient:
+
+```lean
+noncomputable def addY₁Unit : (MvPowerSeries (Fin 2) K)ˣ :=
+  MvPowerSeries.isUnit_of_constantCoeff_ne_zero addY₁_constantCoeff_ne_zero
+
+noncomputable def formalGroupLawFromAddXYZ : MvPowerSeries (Fin 2) K :=
+  - addX₁ * ↑(addY₁Unit⁻¹)
+```
+
+The sign of `δ` only changes all three quotients by `-1`, so the ratio `-addX₁/addY₁` is unchanged.
 
 ---
 
-## The missing bridge theorem to add
+## Do not assume the diagonal factor is enough
 
-The exact theorem should be stated at the same abstraction level as ATOMS 6–7: a
-chosen dual deformation `Pε` of `P` with input local parameter coefficient `1`, and
-`[n]Pε` computed by the projective formula.
+Important caution: from
 
-A good seam theorem is:
+```text
+formalAddY(t,t) = 0
+```
+
+you get a diagonal factor, but you do **not** automatically get
+
+```text
+formalAddY = (t₂ - t₁) * unit.
+```
+
+The projective formula may have a larger scalar factor near `O`, because the raw polynomial formulas clear affine denominators.  With the local representative
+
+```text
+P(t) = [t : -1 : w(t)],  w(t) = O(t³),
+```
+
+some chord denominators contain expressions such as projective cross-determinants.  These can vanish to higher order at `(t₁,t₂)=(0,0)` than just the diagonal factor.
+
+Therefore the safe Lean plan is:
+
+1. Prove diagonal divisibility for all three coordinates.
+2. Compute `constantCoeff addY₁`.
+3. If it is nonzero, stop: `δ` was the full common factor needed for the formal group law.
+4. If it is zero, do **not** fight the unit proof.  Instead identify the larger explicit common scalar factor `s` and divide all three coordinates by `s`.
+
+The correct invariant target is:
+
+```text
+normalizedAddY.constantCoeff = -1
+```
+
+or at least a provably nonzero unit coefficient.  If the proof starts requiring assumptions like `(2 : K) ≠ 0`, that is a red flag: the formal group law for a generalized Weierstrass curve should not depend on excluding characteristic `2` merely to normalize the identity chart.
+
+---
+
+## Lean utility: division by the diagonal
+
+The reusable algebra lemma should be isolated, for example in
+
+```text
+scratch/FormalGroupW_DiagonalDiv.lean
+```
+
+Suggested API:
 
 ```lean
-/--
-Tangent bridge for the local parameter used in the projective formula.
+namespace MvPowerSeries
 
-This is the missing non-algebraic input.  It says that the first-order coefficient
-of the local parameter at the output of `[n]` is multiplication by `(n : K)` on the
-input tangent coefficient.
--/
-theorem coeff_t_output_nsmul_eq_natCast_mul_coeff_input
-    {K : Type*} [Field K]
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    (n : ℕ) {x y : K}
-    (hcurve : W.toAffine.Equation x y)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    -- `Pε` is the chosen tangent vector at `(x,y)`, usually `x + ε`,
-    -- `y + ε*slope` with curve equation over dual numbers.
-    (Pε : /* dual affine point data */ Sort _)
-    (hInputCoeff : inputLocalCoeff W x y Pε = 1) :
-    outputLocalCoeffOfNsmul W n Pε = (n : K) := by
-  -- This should be proved from `formalNsmul_coeff_one`, or from the tangent map
-  -- of the elliptic curve group law.
+variable {K : Type*} [CommRing K]
+
+abbrev FG2 := MvPowerSeries (Fin 2) K
+
+def T₁ : FG2 K := X 0
+def T₂ : FG2 K := X 1
+def diagonalSub : FG2 K := T₂ - T₁
+
+noncomputable def diagEval : FG2 K →+* PowerSeries K :=
+  -- map both variables to PowerSeries.X
+  sorry
+
+noncomputable def divByDiagonal
+    (f : FG2 K) (hf : diagEval f = 0) : FG2 K :=
+  -- coefficient construction
+  sorry
+
+theorem diagonalSub_mul_divByDiagonal
+    (f : FG2 K) (hf : diagEval f = 0) :
+    diagonalSub * divByDiagonal f hf = f := by
+  sorry
+
+end MvPowerSeries
+```
+
+The coefficient construction is explicit.  Write a bivariate coefficient of `f` as `a i j`.  The diagonal condition says
+
+```text
+∀ n, ∑ i = 0..n, a i (n-i) = 0.
+```
+
+For `δ = t₂ - t₁`, define the quotient coefficients by
+
+```text
+b i j = ∑ p = 0..i, a p (i+j+1-p).
+```
+
+Then a direct telescoping calculation proves
+
+```text
+(t₂ - t₁) * b = f.
+```
+
+This is a pure formal-power-series lemma.  Once proved, it will be useful beyond this file.
+
+---
+
+## Normalized addXYZ package
+
+After the diagonal division utility exists, define a structure that records a normalized representative.  This is cleaner than spreading quotient lemmas everywhere.
+
+```lean
+structure NormalizedFormalAddXYZ (K : Type*) [Field K] where
+  X Y Z : MvPowerSeries (Fin 2) K
+  scalar : MvPowerSeries (Fin 2) K
+  hX : scalar * X = formalAddX
+  hY : scalar * Y = formalAddY
+  hZ : scalar * Z = formalAddZ
+  hY_unit : MvPowerSeries.constantCoeff K Y ≠ 0
+```
+
+Then define
+
+```lean
+noncomputable def NormalizedFormalAddXYZ.F
+    (N : NormalizedFormalAddXYZ K) : MvPowerSeries (Fin 2) K :=
+  -N.X * ↑((MvPowerSeries.unitOfConstantCoeff_ne_zero N.Y N.hY_unit)⁻¹)
+```
+
+For the first implementation, the constructor can use `scalar = δ` if `addY₁` has nonzero constant coefficient:
+
+```lean
+noncomputable def normalizedFormalAddXYZ_diagnonalOnly :
+    NormalizedFormalAddXYZ K where
+  X := addX₁
+  Y := addY₁
+  Z := addZ₁
+  scalar := δ
+  hX := δ_mul_addX₁
+  hY := δ_mul_addY₁
+  hZ := δ_mul_addZ₁
+  hY_unit := addY₁_constantCoeff_ne_zero
+```
+
+If `addY₁.constantCoeff = 0`, replace `scalar := δ` by the larger explicit common factor found by the coefficient/CAS probe.  The public API stays unchanged.
+
+---
+
+## Relation to doubling
+
+Do **not** define the formal group law piecewise by using `addXYZ` away from the diagonal and `dblXYZ` on the diagonal.  That is geometrically intuitive but Lean-hostile: a bivariate formal power series has no native `if t₁ = t₂ then ... else ...` construction.
+
+Instead:
+
+1. Define one bivariate power series by cancellation of the raw `addXYZ` representative.
+2. Prove separately that diagonal restriction agrees with the projective doubling formula:
+
+```lean
+theorem diagEval_formalGroupLawFromAddXYZ_eq_formalDouble :
+    diagEval formalGroupLawFromAddXYZ = formalDoubleLaw := by
+  -- after normalization, this is the tangent/chord limiting identity
   sorry
 ```
 
-Depending on the local API, it may be cleaner to state the bridge directly in the
-formal group coordinates:
+This theorem is a compatibility lemma, not part of the definition.
 
-```lean
-theorem formal_tangent_coeff_nsmul
-    {K : Type*} [Field K]
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    (n : ℕ) :
-    coeffε ([n]^* t) = (n : K) * coeffε t := by
-  exact W.formalNsmul_coeff_one n
-```
-
-but then you need an additional identification lemma between the formal parameter
-`t` and the projective local parameter
-
-```text
-t_O = -X*Z/Y
-```
-
-used by ATOM 6.
-
-The essential point: the bridge must identify the **same local parameter** and the
-**same dual-number deformation** used in the projective formula.  A theorem about
-some formal coordinate is not enough until the coordinate-identification lemma is
-proved.
+The diagonal theorem may be harder than the definition because it is the formal version of “the chord formula limits to the tangent formula.”  It is still much better than a piecewise definition.
 
 ---
 
-## Correct final assembly shape with the tangent bridge
+## Practical recommendation
 
-Below is the theorem shape that can close once ATOMS 5–7 and the tangent bridge
-are available.  This is intentionally schematic at the atom-API boundaries, since
-those theorem names/data structures are project-local.
+For `W.formalGroup`, the safest route is still:
 
-```lean
-import Mathlib.Algebra.TrivSqZeroExt.Basic
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Basic
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.Tactic
-
-namespace WeierstrassCurve
-
-open Polynomial
-
-variable {K : Type*} [Field K] [IsAlgClosed K]
-
-/-- Parity factor in ATOM 7. -/
-noncomputable def preΨParityUnit
-    (W : WeierstrassCurve K) (n : ℕ) (x y : K) : K :=
-  if Even n then W.Ψ₂Sq.eval x else 1
-
-/-- The final derivative-nonvanishing theorem, assuming the tangent bridge. -/
-theorem preΨ'_deriv_ne_zero_at_nontorsion_root_of_tangent_bridge
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} (hn : (n : K) ≠ 0) {x y : K}
-    (hcurve : W.toAffine.Equation x y)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    (hroot : (W.preΨ' n).eval x = 0)
-    -- Bridge-1 / non-2-torsion root input.
-    (hΨ₂ : W.Ψ₂Sq.eval x ≠ 0)
-    -- From no_adjacent_preΨ_zero + φ definition at ψ_n=0.
-    (hφ : phiEval W n x y ≠ 0)
-    -- ATOM 5 result.
-    (hω : omegaEval W n x y ≠ 0)
-    -- ATOM 6 + ATOM 7 combined.
-    (hCoeffFormula :
-      outputCoeff W n x y =
-        (-phiEval W n x y / omegaEval W n x y)
-          * preΨParityUnit W n x y
-          * (Polynomial.derivative (W.preΨ' n)).eval x)
-    -- TangentO/formal-group bridge for the same chosen deformation.
-    (hTangent : outputCoeff W n x y = (n : K)) :
-    (Polynomial.derivative (W.preΨ' n)).eval x ≠ 0 := by
-  intro hderiv
-
-  have hParity : preΨParityUnit W n x y ≠ 0 := by
-    unfold preΨParityUnit
-    split_ifs with hnEven
-    · exact hΨ₂
-    · exact one_ne_zero
-
-  have hUnit :
-      (-phiEval W n x y / omegaEval W n x y)
-          * preΨParityUnit W n x y ≠ 0 := by
-    exact mul_ne_zero
-      (neg_ne_zero.mpr (div_ne_zero hφ hω))
-      hParity
-
-  have hOutZero : outputCoeff W n x y = 0 := by
-    simp [hCoeffFormula, hderiv]
-
-  have hOutNonzero : outputCoeff W n x y ≠ 0 := by
-    rw [hTangent]
-    exact hn
-
-  exact hOutNonzero hOutZero
-
-end WeierstrassCurve
+```text
+u(t) / w(t) chart → affine/Silverman formal law → FormalGroup instance
 ```
 
-In the real file, the placeholder symbols should be replaced by your atom APIs:
+and then prove compatibility with normalized `addXYZ` as a bridge theorem.
+
+If the immediate goal is specifically to define `F` from the existing `formalAddXYZ`, then use the normalized-representative route above.  The key theorem is **not** `formalAddY.constantCoeff ≠ 0`; that theorem is false.  The key theorem is:
 
 ```lean
-phiEval      := evaluated φ_n at `(x,y)`
-omegaEval    := evaluated ω_n at `(x,y)`
-outputCoeff  := `snd(t_O([n]Pε))`
-hCoeffFormula := ATOM 6 + ATOM 7
-hTangent      := TangentO/formal group bridge
+theorem normalizedFormalAddY_constantCoeff_ne_zero :
+    MvPowerSeries.constantCoeff K normalizedAddY ≠ 0
 ```
 
-The proof body is the entire final assembly.  The only nontrivial dependencies are
-proving `hφ`, `hω`, `hCoeffFormula`, and `hTangent` upstream.
+after cancelling the common scalar factor of the raw projective coordinates.
 
 ---
 
-## Why projective formula evaluated at dual numbers does not close by itself
+## Minimal atom list
 
-Suppose `(preΨ'_n)'(x)=0`.  ATOMS 6–7 imply
+### Atom 1: constant term of raw `addY`
 
-```text
-snd(ψ_n(Pε)) = 0,
-```
-
-and therefore the dual-number representative has
+File:
 
 ```text
-[n]Pε = [φ + εa : ω + εb : 0]
+scratch/FormalGroupW_AddXYZConst.lean
 ```
 
-in the projective formula, with `φ ≠ 0` and `ω ≠ 0`.
+Statements:
 
-This says that the **projective local parameter coefficient at infinity is zero**.
-It does not by itself contradict anything.  A nonzero tangent vector at the input
-can map to a zero tangent vector under a morphism if the morphism is ramified or
-inseparable.  The statement that this cannot happen for `[n]` when `(n : K) ≠ 0`
-is exactly:
+```lean
+theorem formalAddX_constantCoeff : constantCoeff formalAddX = 0 := ...
+theorem formalAddY_constantCoeff : constantCoeff formalAddY = 0 := ...
+theorem formalAddZ_constantCoeff : constantCoeff formalAddZ = 0 := ...
+```
+
+Expected size: 30–60 lines.
+
+### Atom 2: diagonal division utility
+
+File:
 
 ```text
-d[n] is multiplication by n on the tangent line,
+scratch/FormalGroupW_DiagonalDiv.lean
 ```
 
-or, equivalently, `[n]` is étale/unramified at that point.
+Statements:
 
-Thus the argument
+```lean
+def diagEval : FG2 K →+* PowerSeries K := ...
+def divByDiagonal (f : FG2 K) (hf : diagEval f = 0) : FG2 K := ...
+theorem diagonalSub_mul_divByDiagonal : δ * divByDiagonal f hf = f := ...
+```
+
+Expected size: 150–250 lines, mostly coefficient bookkeeping.
+
+### Atom 3: raw addXYZ has diagonal factor
+
+File:
 
 ```text
-projective formula + derivative zero ⇒ output first-order tangent is zero
+scratch/FormalGroupW_AddXYZDiagonal.lean
 ```
 
-is only a computation of the differential.  To get a contradiction, you need the
-independent theorem that the differential is nonzero.  That theorem is the formal
-content of `formalNsmul_coeff_one` after transporting it to the projective local
-parameter.
+Statements:
+
+```lean
+theorem formalAddX_diag : diagEval formalAddX = 0 := ...
+theorem formalAddY_diag : diagEval formalAddY = 0 := ...
+theorem formalAddZ_diag : diagEval formalAddZ = 0 := ...
+```
+
+Expected size: 50–100 lines if `addX_self/addY_self/addZ_self` are simp-friendly; more if the coordinate substitutions need local simp lemmas.
+
+### Atom 4: normalized quotient and unit denominator
+
+File:
+
+```text
+scratch/FormalGroupW_AddXYZNormalize.lean
+```
+
+Definitions:
+
+```lean
+def addX₁ := divByDiagonal formalAddX formalAddX_diag
+def addY₁ := divByDiagonal formalAddY formalAddY_diag
+def addZ₁ := divByDiagonal formalAddZ formalAddZ_diag
+```
+
+Then either:
+
+```lean
+theorem addY₁_constantCoeff_ne_zero : constantCoeff addY₁ ≠ 0 := ...
+```
+
+or, if the diagonal factor is insufficient, introduce a larger explicit common factor and prove the corresponding normalized denominator has nonzero constant coefficient.
+
+Expected size: 100–250 lines depending on the actual leading-term calculation.
+
+### Atom 5: define `F`
+
+File:
+
+```text
+scratch/FormalGroupW_FromAddXYZ.lean
+```
+
+Definition:
+
+```lean
+noncomputable def W.formalAddLawFromAddXYZ : MvPowerSeries (Fin 2) K :=
+  -normalizedAddX * normalizedAddY⁻¹
+```
+
+Statements:
+
+```lean
+theorem formalAddLaw_const : constantCoeff W.formalAddLawFromAddXYZ = 0 := ...
+theorem formalAddLaw_linear_left : coeff (single 0 1) W.formalAddLawFromAddXYZ = 1 := ...
+theorem formalAddLaw_linear_right : coeff (single 1 1) W.formalAddLawFromAddXYZ = 1 := ...
+```
+
+Expected size: 100–200 lines.
 
 ---
 
-## Why `IsCoprime` closure is circular here
+## Final answer to the question
 
-The alternative closure
+`constantCoeff formalAddY` is **zero**.
 
-```lean
-IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n))
-```
-
-immediately gives
-
-```text
-¬ (preΨ'_n(x)=0 ∧ (preΨ'_n)'(x)=0).
-```
-
-But this is exactly the desired separability brick.  If `IsCoprime` is obtained
-from per-`n` Bezout/resultant certificates, then it is a valid independent route.
-If it is assumed in the proof of
+So the direct definition
 
 ```lean
-preΨ'_deriv_ne_zero_at_nontorsion_root
+F = -formalAddX / formalAddY
 ```
 
-then the proof is circular.
+is not legal in `MvPowerSeries`.
 
-So there are only two non-circular closures:
-
-1. **Certificate closure:** prove `IsCoprime` independently by Bezout/resultants.
-2. **Tangent closure:** prove the `TangentO`/formal-group bridge independently,
-   then use ATOMS 5–7.
-
-The projective formula infrastructure is valuable for tangent closure, but it is
-not itself the tangent closure.
-
----
-
-## Minimal remaining theorem after projective infrastructure
-
-After addX/addY/addZ/dblZ and ATOMS 5–7 are all proved, the only missing theorem
-for the local-parameter route is:
+The Lean-correct definition is:
 
 ```lean
-/--
-For the same dual-number deformation used in ATOMS 6–7, the coefficient of the
-output local parameter under `[n]` is `(n : K)` times the input coefficient.
--/
-theorem projectiveLocalCoeff_nsmul
-    {K : Type*} [Field K]
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    (n : ℕ) {x y : K}
-    (hcurve : W.toAffine.Equation x y)
-    (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    (Pε : /* chosen dual tangent point */ Sort _)
-    (hPε : /* Pε lies on W over dual numbers */ True)
-    (hInput : inputLocalCoeff W x y Pε = 1) :
-    outputLocalCoeffOfProjectiveFormula W n Pε = (n : K) := by
-  -- Prove by transporting `formalNsmul_coeff_one` to the projective local
-  -- parameter `t_O = -X*Z/Y`.
-  sorry
+F = -normalizedAddX / normalizedAddY
 ```
 
-A slightly lower-level and often cleaner split is:
+where `normalizedAddX` and `normalizedAddY` are obtained by cancelling the common scalar factor in the raw `addXYZ` coordinates.  The first factor to cancel is the diagonal factor `t₂ - t₁`, obtained from `addXYZ(P(t),P(t)) = [0,0,0]`.  But do not assume this is the whole factor until `constantCoeff` of the quotient denominator is computed.  If the quotient denominator is not a unit, cancel the larger explicit common factor.
 
-```lean
-theorem formalParameter_eq_projectiveLocalParameter_at_O :
-    formal_t = -X*Z/Y + higher_order_terms_matching_to_first_order := by
-  ...
-
-theorem coeff_formal_nsmul :
-    coeffε (([n])^* formal_t) = (n : K) * coeffε formal_t := by
-  exact formalNsmul_coeff_one ...
-```
-
-Then combine them to get `projectiveLocalCoeff_nsmul`.
-
-This is the real final seam.
-
-## Final recommendation
-
-Do not try to state
-
-```lean
-preΨ'_deriv_ne_zero_at_nontorsion_root
-```
-
-as a 0-sorry theorem from assumptions 1–8 alone.  It is missing the tangent
-bridge and cannot be proved non-circularly.
-
-Instead, proceed in one of these two ways:
-
-* For the quickest Mazur `n ≤ 16` closure, use the per-`n` Bezout/resultant
-  `IsCoprime` certificates.
-* For the all-`n` conceptual proof, add the single remaining theorem
-  `projectiveLocalCoeff_nsmul` / `TangentO.nsmul₁`, then the final assembly proof
-  above becomes short and completely formal.
+The doubling formula should be used only to prove the diagonal compatibility of the resulting single bivariate series, not to define a piecewise formal group law.
