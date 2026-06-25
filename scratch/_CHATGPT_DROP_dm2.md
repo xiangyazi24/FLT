@@ -1,294 +1,231 @@
-# Q477 (dm2): proving `(X₀ - X₁)^3 ∣ formalAddY`
+# Q498 (dm2): CAS check for pure polynomial `(X₀-X₁)^3` divisibility
 
-## Executive recommendation
+## Executive result
 
-Use **option (c)**, but in a slightly strengthened form:
+The proposed **pure polynomial** identity is false.
 
-> prove a generic algebraic factorization certificate for `Projective.addY` along the diagonal, then instantiate it in `MvPowerSeries (Fin 2) K` using a reusable diagonal-difference quotient lemma.
+After substituting
 
-Do **not** try to get the result by cancelling `w₀w₁` from an identity involving `formalAddZ * w₀w₁`.  Algebraically that coprimality story is true, but in Lean it is the wrong battle: `MvPowerSeries` will not give you a pleasant UFD/gcd/coprime API for proving that `(X₀-X₁)` is coprime to `X₀X₁`, and the target is `formalAddY`, not `formalAddZ`.
-
-The fastest Lean path is:
-
-```lean
-((X 0 - X 1)^3 : MvPowerSeries (Fin 2) K) ∣ formalAddY W
+```text
+P₁ = [t₁, -1, s₁],   P₂ = [t₂, -1, s₂]
 ```
 
-by explicitly constructing a quotient and proving
+Mathlib's `Projective.addX(P₁,P₂)` and `Projective.addY(P₁,P₂)` are **not** divisible by
 
-```lean
-formalAddY W = (X 0 - X 1)^3 * formalAddYDiagQuot W
+```text
+D^3 := (t₁ - t₂)^3
 ```
 
-with `ring`/`ring_nf` after a small amount of diagonal normalization.
+in
+
+```text
+ℚ[a₁,a₂,a₃,a₄,a₆,t₁,t₂,s₁,s₂].
+```
+
+So the sub-agent's claim, if interpreted with independent `s₁,s₂`, is wrong.  The cube factor can only appear after imposing extra structure, such as `sᵢ = w(tᵢ)` with `w` the Weierstrass formal parameter series, or an equivalent curve-equation/formal-series certificate.
 
 ---
 
-## Key point
+## Minimal counterexample
 
-The useful input is not that `w₀w₁` is coprime to `(X₀-X₁)^3`; the useful input is that the two specializations of the same one-variable series differ by `X₀-X₁`:
+Set all Weierstrass coefficients to zero and set
 
-```lean
-w₀ - w₁ = (X₀ - X₁) * w₀₁
+```text
+s₁ = s₂ = 1.
 ```
 
-for an explicit diagonal difference quotient `w₀₁`.
+Then the specialized formulas give
 
-Once you rewrite
-
-```lean
-X₀ = X₁ + D
-w₀ = w₁ + D * w₀₁
+```text
+addX([t₁,-1,1], [t₂,-1,1]) = -3 * (t₁ - t₂)
+addY([t₁,-1,1], [t₂,-1,1]) = -3 * t₁ * t₂ * (t₁ - t₂)
 ```
 
-where
+Neither expression is divisible by `(t₁ - t₂)^3`.
 
-```lean
-D := X₀ - X₁,
-```
-
-then the Mathlib `addY` polynomial becomes a finite polynomial expression in
-
-```lean
-D, X₁, w₁, w₀₁, a₁, a₂, a₃, a₄, a₆.
-```
-
-The desired theorem is then just a polynomial identity saying that this expression has a factor `D^3`.
-
-This avoids all serious `MvPowerSeries` commutative algebra.
+This is already a counterexample even with `Z₀ = Z₁` constant.  Therefore the identity is not a consequence of just setting `Y₀ = Y₁ = -1`.
 
 ---
 
-## Reusable helper 1: diagonal difference quotient
+## SymPy check
 
-Add a general lemma for one-variable power series evaluated in the two variables.
-
-Schematic API:
+The following script uses the current Mathlib projective formulas.  In Mathlib,
 
 ```lean
-abbrev R (K : Type*) [Field K] := MvPowerSeries (Fin 2) K
+addY P Q = negY ![addX P Q, negAddY P Q, addZ P Q]
+```
 
-noncomputable def X0 : R K := MvPowerSeries.X 0
-noncomputable def X1 : R K := MvPowerSeries.X 1
-noncomputable def D : R K := X0 - X1
+and
 
-noncomputable def at0 (f : PowerSeries K) : R K :=
-  -- rename the one variable to `0 : Fin 2`
-  MvPowerSeries.rename (fun _ : Unit => (0 : Fin 2)) f
+```lean
+negY ![X,Y,Z] = -Y - a₁*X - a₃*Z.
+```
 
-noncomputable def at1 (f : PowerSeries K) : R K :=
-  -- rename the one variable to `1 : Fin 2`
-  MvPowerSeries.rename (fun _ : Unit => (1 : Fin 2)) f
+```python
+import sympy as sp
 
-noncomputable def diagDiffQuot (f : PowerSeries K) : R K :=
-  -- coefficient at `X₀^i X₁^j` is `coeff f (i+j+1)`
-  -- exact implementation depends on the local `PowerSeries`/`MvPowerSeries` API
+t1,t2,s1,s2 = sp.symbols('t1 t2 s1 s2')
+a1,a2,a3,a4,a6 = sp.symbols('a1 a2 a3 a4 a6')
+
+Px,Py,Pz = t1,-1,s1
+Qx,Qy,Qz = t2,-1,s2
+D = t1 - t2
+
+addZ = (
+    -3*Px**2*Qx*Qz + 3*Px*Qx**2*Pz + Py**2*Qz**2 - Qy**2*Pz**2
+    + a1*Px*Py*Qz**2 - a1*Qx*Qy*Pz**2 - a2*Px**2*Qz**2
+    + a2*Qx**2*Pz**2 + a3*Py*Pz*Qz**2 - a3*Qy*Pz**2*Qz
+    - a4*Px*Pz*Qz**2 + a4*Qx*Pz**2*Qz
+)
+
+addX = (
+    -Px*Qy**2*Pz + Qx*Py**2*Qz - 2*Px*Py*Qy*Qz + 2*Qx*Py*Qy*Pz
+    - a1*Px**2*Qy*Qz + a1*Qx**2*Py*Pz + a2*Px**2*Qx*Qz
+    - a2*Px*Qx**2*Pz - a3*Px*Py*Qz**2 + a3*Qx*Qy*Pz**2
+    - 2*a3*Px*Qy*Pz*Qz + 2*a3*Qx*Py*Pz*Qz
+    + a4*Px**2*Qz**2 - a4*Qx**2*Pz**2 + 3*a6*Px*Pz*Qz**2
+    - 3*a6*Qx*Pz**2*Qz
+)
+
+negAddY = (
+    -3*Px**2*Qx*Qy + 3*Px*Qx**2*Py - Py**2*Qy*Qz + Py*Qy**2*Pz
+    + a1*Px*Qy**2*Pz - a1*Qx*Py**2*Qz - a2*Px**2*Qy*Qz
+    + a2*Qx**2*Py*Pz + 2*a2*Px*Qx*Py*Qz
+    - 2*a2*Px*Qx*Qy*Pz - a3*Py**2*Qz**2 + a3*Qy**2*Pz**2
+    + a4*Px*Py*Qz**2 - 2*a4*Px*Qy*Pz*Qz
+    + 2*a4*Qx*Py*Pz*Qz - a4*Qx*Qy*Pz**2
+    + 3*a6*Py*Pz*Qz**2 - 3*a6*Qy*Pz**2*Qz
+)
+
+addY = -negAddY - a1*addX - a3*addZ
+
+for name, expr in [('addX', addX), ('addY', addY)]:
+    rem3 = sp.rem(sp.Poly(sp.expand(expr), t1), sp.Poly(D**3, t1)).as_expr()
+    diag = sp.factor(sp.expand(expr).subs(t1, t2))
+    print(name, 'divisible_by_D3:', sp.expand(rem3) == 0)
+    print(name, 'diag:', diag)
+    print(name, 'rem3 factor:', sp.factor(rem3))
+    print()
+
+simple = {a1:0, a2:0, a3:0, a4:0, a6:0, s1:1, s2:1}
+print('simple addX =', sp.factor(addX.subs(simple)))
+print('simple addY =', sp.factor(addY.subs(simple)))
+```
+
+Output:
+
+```text
+addX divisible_by_D3: False
+addX diag: -t2*(s1 - s2)*(a1*t2 + a2*t2**2 + a3*s1 + a3*s2 + a4*s1*t2 + a4*s2*t2 + 3*a6*s1*s2 - 1)
+
+addY divisible_by_D3: False
+addY diag: (s1 - s2)*(a1**2*t2**2 + a1*a2*t2**3 + a1*a4*s1*t2**2 + a1*a4*s2*t2**2 + 3*a1*a6*s1*s2*t2 - 2*a1*t2 - a2*a3*s1*t2**2 - a2*a3*s2*t2**2 - a2*t2**2 - a3**2*s1*s2 - a3*a4*s1*s2*t2 - 3*a3*t2**3 - a4*s1*t2 - a4*s2*t2 - 3*a6*s1*s2 + 1)
+
+simple addX = -3*(t1 - t2)
+simple addY = -3*t1*t2*(t1 - t2)
+```
+
+The diagonal values also show the issue clearly: without a relation forcing `s₁ = s₂` when `t₁ = t₂`, even first-order vanishing can fail.
+
+---
+
+## Why the mistaken pure statement looked plausible
+
+The identity
+
+```lean
+Projective.addXYZ_self : W.addXYZ P P = ![0,0,0]
+```
+
+only says that the formula vanishes after substituting the **same full vector** for both inputs.  It does not imply a cube factor in the polynomial ring with independent `Z` variables.
+
+Likewise, setting `Y₀ = Y₁ = -1` is not enough.  One still needs the fact that the `Z` coordinates are the same one-variable formal series evaluated at different variables:
+
+```text
+Z₀ = w(t₁),   Z₁ = w(t₂).
+```
+
+Then
+
+```text
+Z₀ - Z₁
+```
+
+is divisible by `t₁ - t₂`, and so is
+
+```text
+t₁*Z₁ - t₂*Z₀.
+```
+
+Those extra diagonal-difference factors are exactly what the independent-variable pure polynomial test is missing.
+
+As a sanity check, in the degenerate coefficient specialization `a₁=...=a₆=0` with the curve-compatible choice `w(t)=t^3`, SymPy gives
+
+```text
+addX([t₁,-1,t₁^3], [t₂,-1,t₂^3]) = -(t₁-t₂)^3*(t₁+t₂)
+addY([t₁,-1,t₁^3], [t₂,-1,t₂^3]) =  (t₁-t₂)^3
+addZ([t₁,-1,t₁^3], [t₂,-1,t₂^3]) = -(t₁-t₂)^3*(t₁+t₂)^3
+```
+
+So the cube divisibility can be true after the `Z=w(X)` specialization, but it is not a pure identity in `t₁,t₂,s₁,s₂`.
+
+---
+
+## Lean recommendation
+
+Do **not** try to prove the following pure-polynomial theorem:
+
+```lean
+theorem addX_cube_dvd_pure
+    (W : WeierstrassCurve.Projective R) :
+    ((t₁ - t₂)^3) ∣
+      W.addX ![t₁, -1, s₁] ![t₂, -1, s₂] := by
+  -- false
+```
+
+and similarly do not try it for `addY`.
+
+The correct theorem must include either:
+
+1. direct substitution of the formal parameter series
+   ```lean
+   Z₀ = formalW₀,  Z₁ = formalW₁,
+   ```
+   followed by an explicit factor certificate; or
+2. a quotient/certificate modulo the two curve equations plus diagonal-difference lemmas.
+
+A robust target is:
+
+```lean
+noncomputable def formalAddXQuot (W : WeierstrassCurve.Projective K) : MvPowerSeries (Fin 2) K :=
+  -- explicit quotient after substituting `Zᵢ = formalW(tᵢ)`
   sorry
 
-theorem at0_sub_at1_eq_D_mul_diagDiffQuot (f : PowerSeries K) :
-    at0 f - at1 f = D * diagDiffQuot f := by
-  ext m
-  -- coefficient proof; split on `m 0` and `m 1`
-  -- interior coefficients cancel, boundary coefficients give `f(X₀)-f(X₁)`
-  simp [at0, at1, D, diagDiffQuot]
-  omega
-```
-
-The formula behind `diagDiffQuot` is the standard identity
-
-```text
-f(X₀) - f(X₁)
-  = (X₀ - X₁) * Σ_{i,j≥0} f_{i+j+1} X₀^i X₁^j.
-```
-
-This lemma is much easier than proving UFD facts about `MvPowerSeries`, and it is reusable everywhere a same-series diagonal difference appears.
-
-For the current proof instantiate it with `f = formalW W`:
-
-```lean
-noncomputable def w0 : R K := at0 (formalW W)
-noncomputable def w1 : R K := at1 (formalW W)
-noncomputable def w01 : R K := diagDiffQuot (formalW W)
-
-lemma w0_eq_w1_add_D_mul_w01 :
-    w0 W = w1 W + D * w01 W := by
-  have h := at0_sub_at1_eq_D_mul_diagDiffQuot (formalW W)
-  -- `h : w0 - w1 = D * w01`
-  rw [sub_eq_iff_eq_add] at h
-  exact h
-```
-
-The proof should not need `formalU_eq` or the Weierstrass equation for `w`, unless the local definitions have hidden normalization rewrites.  The diagonal factor comes from the fact that `w₀` and `w₁` are the same series evaluated in two variables.
-
----
-
-## Reusable helper 2: a pure algebra certificate for `addY`
-
-Prove a lemma over an arbitrary commutative ring.  This keeps the hard `ring` proof away from the `MvPowerSeries` API.
-
-The shape should be:
-
-```lean
-section AddYDiagonalCertificate
-
-variable {A : Type*} [CommRing A]
-variable (a₁ a₂ a₃ a₄ a₆ x z D dz : A)
-
-/-- The quotient in the diagonal factorization of Mathlib's `Projective.addY`.
-This should be generated once from the unfolded formula, or built by hand from the
-same intermediate variables Mathlib uses in `addXYZ`. -/
-def addYDiagQuotExpr : A :=
-  -- explicit polynomial in `aᵢ x z D dz`
-  -- obtained by polynomial division by `D^3`
+noncomputable def formalAddYQuot (W : WeierstrassCurve.Projective K) : MvPowerSeries (Fin 2) K :=
+  -- explicit quotient after substituting `Zᵢ = formalW(tᵢ)`
   sorry
 
-/-- Algebraic certificate: if the second point is obtained from the first by
-`X ↦ X + D`, `Z ↦ Z + D*dz`, and the `Y` coordinate is unchanged, Mathlib's
-addition `Y`-coordinate has a factor `D^3`. -/
-lemma addY_diag_cube_certificate :
-    addYExpr a₁ a₂ a₃ a₄ a₆
-      (x + D) (-1) (z + D * dz)
-      x       (-1) z
-      = D^3 * addYDiagQuotExpr a₁ a₂ a₃ a₄ a₆ x z D dz := by
-  unfold addYExpr addYDiagQuotExpr
-  ring
+theorem formalAddX_eq_D_cube_mul (W : WeierstrassCurve.Projective K) :
+    formalAddX W = D^3 * formalAddXQuot W := by
+  -- unfold `formalAddX`; rewrite `formalW₀ - formalW₁ = D * E`; ring/certificate
+  sorry
 
-end AddYDiagonalCertificate
+theorem formalAddY_eq_D_cube_mul (W : WeierstrassCurve.Projective K) :
+    formalAddY W = D^3 * formalAddYQuot W := by
+  -- same: direct certificate after `Z=w(X)` specialization
+  sorry
 ```
 
-Here `addYExpr` should be the unfolded expression of `Projective.addY` with coefficients exposed as variables.  If unfolding all of `Projective.addY` gives a large term, split the certificate along Mathlib's internal addXYZ helper variables.
-
-The best decomposition is usually:
+The key helper is still the diagonal quotient lemma:
 
 ```lean
-U := ...   -- line/slope numerator-like difference
-V := ...   -- x/z denominator-like difference
+formalW₀ - formalW₁ = (X₀ - X₁) * formalW_diagQuot
 ```
 
-then prove, after the diagonal rewrite,
+and similarly for
 
 ```lean
-U = D * Uq
-V = D * Vq
+X₀ * formalW₁ - X₁ * formalW₀.
 ```
 
-and finally prove that every monomial of `addY` has total degree at least three in `U,V`, so
-
-```lean
-addY = D^3 * Q.
-```
-
-This keeps each `ring` goal small.  It also mirrors why `addXYZ(P,P)` gives the zero representative: the add formula is cubic in the basic difference quantities along the diagonal.
-
----
-
-## Final instantiation in `MvPowerSeries`
-
-After the two helpers, the actual theorem should be short.
-
-Schematic final proof:
-
-```lean
-noncomputable def formalAddYDiagQuot (W : WeierstrassCurve K) : R K :=
-  addYDiagQuotExpr
-    W.a₁ W.a₂ W.a₃ W.a₄ W.a₆
-    (X1 : R K)
-    (w1 W)
-    (D : R K)
-    (w01 W)
-
-theorem formalAddY_eq_D_cube_mul (W : WeierstrassCurve K) :
-    formalAddY W = (D : R K)^3 * formalAddYDiagQuot W := by
-  unfold formalAddY formalAddYDiagQuot
-  -- rewrite the first point as a diagonal perturbation of the second
-  have hx0 : (X0 : R K) = X1 + D := by
-    simp [D, X0, X1]
-    ring
-  have hw0 : w0 W = w1 W + D * w01 W :=
-    w0_eq_w1_add_D_mul_w01 W
-  -- now the statement is exactly the pure algebra certificate
-  rw [hx0, hw0]
-  simpa using
-    addY_diag_cube_certificate
-      (A := R K)
-      W.a₁ W.a₂ W.a₃ W.a₄ W.a₆
-      (X1 : R K) (w1 W) (D : R K) (w01 W)
-
-theorem D_cube_dvd_formalAddY (W : WeierstrassCurve K) :
-    ((D : R K)^3) ∣ formalAddY W := by
-  refine ⟨formalAddYDiagQuot W, ?_⟩
-  exact formalAddY_eq_D_cube_mul W
-```
-
-The exact names will differ, but this is the proof architecture I would use.
-
----
-
-## Why not use the `addZ * w₀w₁ = delta³` route?
-
-That route asks Lean to prove something like:
-
-```lean
-IsCoprime ((X₀-X₁)^3) (w₀*w₁)
-```
-
-inside `MvPowerSeries (Fin 2) K`, then cancel a nonunit factor from a divisibility statement.  Mathematically:
-
-```text
-w₀*w₁ = X₀^3 X₁^3 u₀ u₁,
-```
-
-and `(X₀-X₁)` is coprime to `X₀X₁`, so the argument is sound.  But formalizing that requires a large amount of commutative algebra infrastructure:
-
-- UFD or at least prime-element facts for `MvPowerSeries (Fin 2) K`;
-- proof that `X₀`, `X₁`, and `X₀-X₁` have the expected prime/coprime behavior;
-- transport through unit factors `u₀u₁`;
-- cancellation from divisibility after multiplying by a coprime nonunit.
-
-This is much more work than the direct factor certificate, and it proves the wrong coordinate unless you repeat a similar argument for `addY`.
-
-So I would use the `delta` result only as a sanity check, not as the formal proof path for `formalAddY`.
-
----
-
-## If the quotient is large
-
-If `addYDiagQuotExpr` is too large to write by hand, generate it externally once from the unfolded polynomial formula:
-
-1. introduce symbolic variables
-   ```text
-   a₁,a₂,a₃,a₄,a₆,x,z,D,dz;
-   ```
-2. substitute
-   ```text
-   X₀ = x + D,
-   Y₀ = -1,
-   Z₀ = z + D*dz,
-   X₁ = x,
-   Y₁ = -1,
-   Z₁ = z;
-   ```
-3. expand Mathlib's `addY` formula;
-4. divide by `D^3` in the polynomial ring;
-5. paste the quotient as `addYDiagQuotExpr`;
-6. verify in Lean with a single `ring` lemma over `[CommRing A]`.
-
-That gives a certificate-style proof: no analytic derivatives, no coefficient-order API beyond the small `diagDiffQuot` lemma, and no UFD/coprimality in `MvPowerSeries`.
-
----
-
-## Bottom line
-
-Recommended route:
-
-```text
-same-series diagonal quotient lemma
-        +
-generic algebraic addY diagonal-cube certificate
-        ⇒
-formalAddY = (X₀-X₁)^3 * Q
-        ⇒
-(X₀-X₁)^3 ∣ formalAddY.
-```
-
-Avoid the nonunit cancellation route.  It is mathematically elegant but Lean-expensive, and it is unnecessary for the `formalAddY` divisibility theorem.
+But the final cube divisibility must be proved **after** these substitutions.  The pure independent-`Z` statement is refuted by the counterexample above.
