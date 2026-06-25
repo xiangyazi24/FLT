@@ -1,103 +1,168 @@
-# Q383 / dm2 — simple CAS script for tangent multiplier `3`
+# Q388 / dm2 — CAS computation of the Weierstrass formal group to degree 3
 
-Short runnable script.  It keeps the final addition in projectivized form because, at true `3`-torsion, the affine denominator `x(P) - x([2]P)` has zero constant term and is not invertible in `K[ε]/(ε²)`.
-
-One important correction is encoded as the default: for `E : y² = x³ + 1`, the standard third division polynomial is `ψ₃ = 3*x^4 + 12*x`, not `3*x^4 + 12*x - 1`.  Set `PROMPT_DATA = True` to run the polynomial/sign exactly as typed; it prints that `[3]P` is not `O`, so there is no tangent-multiplier-at-`O` test.
-
-```python
-# q383.py
-import mpmath as mp
-mp.mp.dps = 50
-
-PROMPT_DATA = False  # True uses x root of 3*x^4 + 12*x - 1 and negative slope; it fails.
-
-class D:
-    """Dual number a + b*e with e^2 = 0."""
-    def __init__(self, a, b=0):
-        self.a, self.b = mp.mpc(a), mp.mpc(b)
-    def __add__(self, o):
-        o = D.of(o); return D(self.a + o.a, self.b + o.b)
-    __radd__ = __add__
-    def __sub__(self, o):
-        o = D.of(o); return D(self.a - o.a, self.b - o.b)
-    def __rsub__(self, o):
-        o = D.of(o); return D(o.a - self.a, o.b - self.b)
-    def __neg__(self):
-        return D(-self.a, -self.b)
-    def __mul__(self, o):
-        o = D.of(o); return D(self.a * o.a, self.a * o.b + self.b * o.a)
-    __rmul__ = __mul__
-    def inv(self):
-        return D(1 / self.a, -self.b / self.a**2)
-    def __truediv__(self, o):
-        return self * D.of(o).inv()
-    def __rtruediv__(self, o):
-        return D.of(o) * self.inv()
-    @staticmethod
-    def of(o):
-        return o if isinstance(o, D) else D(o)
-
-def dbl_aff(P):
-    # Affine doubling on y^2 = x^3 + 1.
-    x, y = P
-    lam = 3 * x * x / (2 * y)
-    x2 = lam * lam - 2 * x
-    y2 = lam * (x - x2) - y
-    return x2, y2
-
-def add_aff_projectivized(P, Q):
-    # Same affine addition formula, but without dividing by H = x2 - x1.
-    # It returns Jacobian coords X,Y,Z with x = X/Z^2 and y = Y/Z^3.
-    x1, y1 = P
-    x2, y2 = Q
-    H = x2 - x1
-    R = y2 - y1
-    X = R * R - (x1 + x2) * H * H
-    Y = R * (x1 * H * H - X) - y1 * H * H * H
-    Z = H
-    return X, Y, Z
-
-if PROMPT_DATA:
-    # As typed in the prompt.  This is not actual 3-torsion on y^2=x^3+1.
-    x0 = mp.findroot(lambda x: 3*x**4 + 12*x - 1, (mp.mpf("0"), mp.mpf("0.2")))
-    y0 = mp.sqrt(x0**3 + 1)
-    s = -(3 * x0**2) / (2 * y0)
-else:
-    # Correct 3-torsion: root of ψ3 = 3*x^4 + 12*x = 3*x*(x^3+4).
-    x0 = -mp.power(4, mp.mpf(1) / 3)
-    y0 = mp.sqrt(x0**3 + 1)      # = i*sqrt(3)
-    s = (3 * x0**2) / (2 * y0)   # tangent condition: 2*y0*s = 3*x0^2
-
-P = (D(x0, 1), D(y0, s))
-Q = dbl_aff(P)                   # [2]Pε, affine is OK here
-X, Y, Z = add_aff_projectivized(Q, P)  # [3]Pε in Jacobian coords
-
-input_coeff = 1 / (2 * y0)
-print("x0       =", mp.nstr(x0, 50))
-print("y0       =", mp.nstr(y0, 50))
-print("s        =", mp.nstr(s, 50))
-print("Z0       =", mp.nstr(Z.a, 30))
-print("Zeps     =", mp.nstr(Z.b, 30))
-
-if abs(Z.a) > mp.mpf("1e-40"):
-    print("[3]P is not O; no local-parameter multiplier test at O.")
-else:
-    # Local parameter at O in Jacobian coords: t = -X*Z/Y.
-    # Since Z0 = 0, coeff_e(t) = (-X0/Y0) * coeff_e(Z).
-    tcoeff = (-X.a / Y.a) * Z.b
-    ratio = tcoeff / input_coeff
-    print("input    =", mp.nstr(input_coeff, 50))
-    print("tcoeff   =", mp.nstr(tcoeff, 50))
-    print("t/input  =", mp.nstr(ratio, 50))
-    assert abs(ratio - 3) < mp.mpf("1e-40")
-```
-
-Expected output in the default corrected mode ends with
+Curve:
 
 ```text
-Z0       = 0.0
-Zeps     = 3.0
-input    = (0.0 - 0.28867513459481288225457439025097872782380087563506j)
-tcoeff   = (0.0 - 0.86602540378443864676372317075293618347140262690519j)
-t/input  = (3.0 + 0.0j)
+y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆.
+```
+
+Use the standard formal parameter
+
+```text
+t = -x/y,   w = -1/y,
+```
+
+so that
+
+```text
+x(t) = t / w(t),   y(t) = -1 / w(t).
+```
+
+Substituting into the Weierstrass equation gives
+
+```text
+w = t³ + a₁tw + a₂t²w + a₃w² + a₄tw² + a₆w³.
+```
+
+## Series for `w`, `x`, and `y`
+
+Solving iteratively gives
+
+```text
+w(t) = t³
+     + a₁ t⁴
+     + (a₁² + a₂) t⁵
+     + (a₁³ + 2a₁a₂ + a₃) t⁶
+     + (a₁⁴ + 3a₁²a₂ + 3a₁a₃ + a₂² + a₄) t⁷
+     + O(t⁸).
+```
+
+Thus
+
+```text
+x(t) = t⁻² - a₁t⁻¹ - a₂ - a₃t - (a₁a₃ + a₄)t² + O(t³),
+
+y(t) = -t⁻³ + a₁t⁻² + a₂t⁻¹ + a₃ + (a₁a₃ + a₄)t + O(t²).
+```
+
+## Addition formula used
+
+For two affine points `Pᵢ = (xᵢ,yᵢ)`, write
+
+```text
+λ = (y₂ - y₁)/(x₂ - x₁),
+ν = (y₁x₂ - y₂x₁)/(x₂ - x₁).
+```
+
+The sum is
+
+```text
+x₃ = λ² + a₁λ - a₂ - x₁ - x₂,
+y₃ = -(λ + a₁)x₃ - ν - a₃.
+```
+
+Then
+
+```text
+F(T₁,T₂) = -x₃/y₃.
+```
+
+## Result
+
+The degree-3 truncation is
+
+```text
+F(T₁,T₂)
+  = T₁ + T₂
+    - a₁ T₁T₂
+    - a₂(T₁²T₂ + T₁T₂²)
+    + O(total degree 4).
+```
+
+Equivalently,
+
+```text
+degree 1:  T₁ + T₂
+degree 2: -a₁ T₁T₂
+degree 3: -a₂ T₁T₂(T₁ + T₂).
+```
+
+So the linear coefficients of the formal group law are both `1`, as expected.
+
+## Runnable SymPy script
+
+```python
+import sympy as sp
+
+t, r, U, V = sp.symbols('t r U V')
+a1, a2, a3, a4, a6 = sp.symbols('a1 a2 a3 a4 a6')
+
+# 1. Solve w = t^3 + a1*t*w + a2*t^2*w + a3*w^2 + a4*t*w^2 + a6*w^3.
+N = 8                       # computes through t^7, i.e. O(t^8)
+c = sp.symbols(f'c0:{N}')
+w_unknown = sum(c[i] * t**i for i in range(N))
+eq = w_unknown - (t**3 + a1*t*w_unknown + a2*t**2*w_unknown
+                  + a3*w_unknown**2 + a4*t*w_unknown**2 + a6*w_unknown**3)
+sol = {c[0]: 0, c[1]: 0, c[2]: 0}
+for k in range(3, N):
+    sol[c[k]] = sp.solve(sp.Eq(sp.expand(eq.subs(sol)).coeff(t, k), 0), c[k])[0]
+w = sp.expand(w_unknown.subs(sol))
+print('w(t) =', w, '+ O(t^8)')
+
+# 2. Laurent expansions.
+x = sp.series(t / w, t, 0, 3).removeO()
+y = sp.series(-1 / w, t, 0, 2).removeO()
+print('x(t) =', sp.collect(sp.expand(x), t), '+ O(t^3)')
+print('y(t) =', sp.collect(sp.expand(y), t), '+ O(t^2)')
+
+# 3. Affine addition formula, expanded by scaling t1=r*U, t2=r*V.
+#    lambda=(y2-y1)/(x2-x1), nu=(y1*x2-y2*x1)/(x2-x1),
+#    x3=lambda^2+a1*lambda-a2-x1-x2, y3=-(lambda+a1)*x3-nu-a3.
+#    Using x=t/w, y=-1/w gives
+#      lambda=(w2-w1)/(t2*w1-t1*w2), nu=(t1-t2)/(t2*w1-t1*w2).
+S, P = U + V, U * V
+b2 = a1**2 + a2
+B0 = U**2 + U*V + V**2
+B1 = U**3 + U**2*V + U*V**2 + V**3
+B2 = U**4 + U**3*V + U**2*V**2 + U*V**3 + V**4
+
+# lambda = r^-1*l + m + r*n + O(r^2)
+Q = (B0 + a1*r*B1 + b2*r**2*B2) / (S + a1*r*B0 + b2*r**2*B1)
+Q = sp.series(Q, r, 0, 3).removeO()
+l = sp.factor(sp.cancel(-Q.coeff(r, 0) / P))
+m = sp.factor(sp.cancel(-Q.coeff(r, 1) / P))
+n = sp.factor(sp.cancel(-Q.coeff(r, 2) / P))
+
+# x(ti)=r^-2/U_i^2 - a1*r^-1/U_i - a2 + O(r).
+A = sp.cancel(l**2 - (1/U**2 + 1/V**2))
+B = sp.cancel(2*l*m + a1*l + a1*(1/U + 1/V))
+C = sp.cancel(m**2 + 2*l*n + a1*m + a2)
+
+# nu = r^-3*N0 + r^-2*N1 + r^-1*N2 + O(1)
+N0 = 1/(P*S)
+N1 = -a1*B0/(P*S**2)
+N2 = (a1**2*B0**2/S**3 - b2*B1/S**2)/P
+
+# y3 = r^-3*D0 + r^-2*D1 + r^-1*D2 + O(1)
+D0 = sp.cancel(-(l*A) - N0)
+D1 = sp.cancel(-(l*B + (m+a1)*A) - N1)
+D2 = sp.cancel(-(l*C + (m+a1)*B + n*A) - N2)
+
+# F=-x3/y3 = r*f1 + r^2*f2 + r^3*f3 + O(r^4).
+f1 = sp.factor(sp.cancel(-A/D0))
+f2 = sp.factor(sp.cancel(-(B/D0 - A*D1/D0**2)))
+f3 = sp.factor(sp.cancel(-(C/D0 - B*D1/D0**2 + A*(D1**2/D0**3 - D2/D0**2))))
+print('degree 1 =', f1)
+print('degree 2 =', f2)
+print('degree 3 =', f3)
+print('F(T1,T2) = T1 + T2 - a1*T1*T2 - a2*T1*T2*(T1+T2) + O(deg 4)')
+```
+
+Expected output ends with
+
+```text
+degree 1 = U + V
+degree 2 = -U*V*a1
+degree 3 = -U*V*a2*(U + V)
+F(T1,T2) = T1 + T2 - a1*T1*T2 - a2*T1*T2*(T1+T2) + O(deg 4)
 ```
