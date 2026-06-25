@@ -1,54 +1,221 @@
-# Q258 (dm3): Lean architecture for projective X/Y formula induction
+# Q262 (dm3): Fraction-field route vs local/evaluated route
 
-## Bottom line
+## Executive answer
 
-The clean Lean architecture is **not**:
+For the fraction-field route:
 
-```text
-coordinate-ring identity with scalar ψ_{m-1}
-⇒ directly a Mathlib `PointClass` equality
-⇒ directly the induction step.
-```
+* **Yes**, Mathlib has the function field of the affine coordinate ring.  In the
+  current API it is
 
-That fails because Mathlib’s Jacobian `PointClass` quotient is by weighted
-scaling with a **unit**, while the scalar in the polynomial identity is
-`ψ_{m-1}`, which is not a unit in the coordinate ring.
+  ```lean
+  WeierstrassCurve.Affine.FunctionField W
+  ```
 
-The clean architecture is instead:
+  and it is definitionally
 
-1. Prove the coordinate-ring/congruence step identities as independent algebraic
-   lemmas:
+  ```lean
+  FractionRing W.CoordinateRing
+  ```
 
-   ```text
-   addZ(P, R_m) = ψ_{m-1} · ψ_{m+1}
-   mk(addX(P, R_m) - ψ_{m-1}^2 · φ_{m+1}) = 0
-   mk(addY(P, R_m) - ψ_{m-1}^3 · ω_{m+1}) = 0
-   ```
+  for `W : WeierstrassCurve.Affine R`.  Since `Affine` is an abbreviation around
+  Weierstrass curves, in local notation this is usually `W.toAffine.FunctionField`
+  or simply `Affine.FunctionField W` depending on namespace/import context.
 
-2. When you want to connect to the **group law**, map to a field where
-   `ψ_{m-1}` is nonzero, typically the fraction field of the generic coordinate
-   ring.  There the scalar is a unit, so the weighted projective equality is a
-   valid Mathlib `PointClass` equality.
+* **Yes**, Mathlib has `Affine.Point` and `Jacobian.Point` over any field, hence
+  over that function field after base-changing the curve.  The group law exists
+  there.
 
-3. Use Mathlib’s existing Jacobian group-law API for `W.add` / `Point.add` /
-   `addMap`, not raw `addXYZ` globally.
+* **No**, Mathlib does not appear to have a theorem saying that the division
+  polynomial `ψ_n` in the function field cuts out
 
-4. Rewrite `W.add` to `W.addXYZ` only in the non-equivalent branch, using
-   `W.add_of_not_equiv`.  The case `m = 1` is the doubling branch and must be
-   handled by the already-proved `dblXYZ` identities.
+  ```lean
+  n • genericPoint = 0
+  ```
 
-So yes, Mathlib has enough group-law infrastructure to connect the representative
-recursion to `nsmul`, but the connection goes through `W.add`, and the
-nonunit-scalar issue means you should do that semantic induction over a field, not
-directly inside the coordinate ring.
+  or that
+
+  ```lean
+  n • genericPoint = [φ_n : ω_n : ψ_n].
+  ```
+
+  That is essentially the projective/division-polynomial theorem you are trying
+  to build.  The existing `mk_ψ`, `mk_φ`, `mk_Ψ_sq` lemmas normalize polynomial
+  expressions in the coordinate ring; they do not identify those expressions with
+  `nsmul` in the Jacobian group law.
+
+For your **actual separability/local-parameter goal**, the fraction-field route is
+probably not the simplest route.  A **local/evaluated coordinate-ring route** is
+closer to the goal, but with one important correction: evaluation at a point is
+only a zero-th order statement.  To compute a local parameter coefficient, you
+need the same identities in the **local ring at the point** or in a completed
+local ring, not merely their evaluated values.
+
+For the Mazur `|T| ≤ 16` separability brick, the fastest formal path still looks
+like the finite per-`n` Bezout/resultant certificates.  The local-parameter route
+is mathematically good, but formalizing the required local-ring/completion
+infrastructure may be larger than the finite certificates.
 
 ---
 
-## Answer to (a): can `mk_ψ`, `mk_φ`, `mk_Ψ_sq` avoid the induction?
+## (a) Fraction field of the coordinate ring
 
-No.  They help, but they do not replace the projective formula induction.
+Mathlib defines the affine coordinate ring and its function field in
+`Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Point.lean`:
 
-The existing coordinate-ring lemmas are of the form:
+```lean
+namespace WeierstrassCurve
+namespace Affine
+
+/-- The affine coordinate ring `R[W] := R[X, Y] / ⟨W(X, Y)⟩`. -/
+abbrev CoordinateRing (W : Affine R) : Type _ :=
+  AdjoinRoot W.polynomial
+
+/-- The function field `R(W) := Frac(R[W])`. -/
+abbrev FunctionField (W : Affine R) : Type _ :=
+  FractionRing W.CoordinateRing
+
+end Affine
+end WeierstrassCurve
+```
+
+The same file also provides an integral-domain instance:
+
+```lean
+instance [IsDomain R] : IsDomain W.CoordinateRing
+```
+
+So if your base is a field `k`, then the coordinate ring of `W.toAffine` is a
+domain, and `FractionRing W.toAffine.CoordinateRing` is available as its fraction
+field.
+
+The practical local names may be one of these, depending on opened namespaces:
+
+```lean
+W.toAffine.CoordinateRing
+W.toAffine.FunctionField
+WeierstrassCurve.Affine.CoordinateRing W.toAffine
+WeierstrassCurve.Affine.FunctionField W.toAffine
+```
+
+A useful skeleton:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Point
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.Tactic
+
+namespace WeierstrassCurve
+
+open Polynomial
+
+variable {k : Type*} [Field k]
+variable (W : WeierstrassCurve k)
+
+abbrev CoordRing : Type _ :=
+  W.toAffine.CoordinateRing
+
+abbrev FuncField : Type _ :=
+  W.toAffine.FunctionField
+
+-- Definitional target:
+-- FuncField W = FractionRing (CoordRing W)
+
+end WeierstrassCurve
+```
+
+---
+
+## (b) Points and group law over the function field
+
+Yes.  Mathlib has point types and group laws over any field.
+
+The relevant APIs are:
+
+```lean
+#check WeierstrassCurve.Affine.Point
+#check WeierstrassCurve.Affine.Point.instAddCommGroup
+
+#check WeierstrassCurve.Jacobian.Point
+#check WeierstrassCurve.Jacobian.Point.instAddCommGroup
+#check WeierstrassCurve.Jacobian.Point.toAffineAddEquiv
+#check WeierstrassCurve.Jacobian.Point.toAffineLift_add
+```
+
+So once you set
+
+```lean
+K := W.toAffine.FunctionField
+```
+
+and base-change the curve to `K`, you can form
+
+```lean
+(W⁄K).toAffine.Point
+(W⁄K).toJacobian.Point
+```
+
+and use the group law.
+
+What Mathlib does **not** give for free is the generic point as a named object.
+You would define it yourself from the coordinate-ring classes of `X` and `Y`, then
+map those classes into the fraction field.
+
+Schematic shape:
+
+```lean
+namespace WeierstrassCurve
+
+open Polynomial
+
+variable {k : Type*} [Field k]
+variable (W : WeierstrassCurve k)
+
+noncomputable abbrev K : Type _ :=
+  W.toAffine.FunctionField
+
+noncomputable abbrev A : Type _ :=
+  W.toAffine.CoordinateRing
+
+-- Coordinate-ring classes of `X` and `Y`.
+noncomputable def genericX_A : A W :=
+  WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (Polynomial.C Polynomial.X)
+
+noncomputable def genericY_A : A W :=
+  WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X
+
+-- Their images in the function field.
+noncomputable def genericX_K : K W :=
+  algebraMap (A W) (K W) (genericX_A W)
+
+noncomputable def genericY_K : K W :=
+  algebraMap (A W) (K W) (genericY_A W)
+
+-- Then prove the equation and nonsingularity and package as a point.
+noncomputable def genericAffinePoint
+    [DecidableEq (K W)] : (W⁄K W).toAffine.Point := by
+  -- Expected target: `.some (genericX_K W) (genericY_K W) hNonsing`
+  -- `hEquation` comes from the quotient relation defining the coordinate ring.
+  -- `hNonsing` uses `[W.IsElliptic]` after base-change.
+  sorry
+
+end WeierstrassCurve
+```
+
+The exact `Polynomial.C Polynomial.X` vs `Polynomial.X` notation depends on the
+`R[X][Y]` convention: `Polynomial.X` in the outer polynomial ring is the `Y`
+variable, while `Polynomial.C Polynomial.X` is the embedded `X` variable.
+
+This generic point construction is doable, but it is not already packaged as a
+single Mathlib theorem.
+
+---
+
+## (c) Is there a theorem connecting `ψ_n` to `n • genericPoint = 0`?
+
+I would assume **no** for planning purposes.
+
+Mathlib has these coordinate-ring comparison lemmas:
 
 ```lean
 #check WeierstrassCurve.Affine.CoordinateRing.mk_ψ
@@ -56,385 +223,275 @@ The existing coordinate-ring lemmas are of the form:
 #check WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
 ```
 
-Conceptually:
+They say that the bivariate and univariate division-polynomial packages agree
+modulo the curve relation.  Conceptually:
 
 ```lean
 mk W (W.ψ n) = mk W (W.Ψ n)
 mk W (W.φ n) = mk W (Polynomial.C (W.Φ n))
-mk W (W.Ψ n) ^ 2 = mk W (Polynomial.C (W.ΨSq n))
+mk W (W.Ψ n)^2 = mk W (Polynomial.C (W.ΨSq n))
 ```
 
-These lemmas say that Mathlib’s several packages for the **division polynomial
-expressions** agree modulo the Weierstrass equation.  In particular, `mk_φ` is the
-right way to avoid expanding the definition
+But they do not say:
 
 ```lean
-φ_n = X * ψ_n^2 - ψ_{n+1} * ψ_{n-1}
+n • genericPoint = 0 ↔ ψ_n = 0
 ```
 
-when relating the bivariate and univariate `φ`/`Φ` sides.
-
-But they do **not** say that `φ_n`, `ω_n`, `ψ_n` represent `[n]P` under the
-Jacobian group law.  That is exactly the theorem you are proving.  If Mathlib had
-an existing theorem saying
+or
 
 ```lean
-[n]P = [φ_n : ω_n : ψ_n]
+(n • genericPoint).point = ⟦![φ_n, ω_n, ψ_n]⟧.
 ```
 
-or equivalently that `mk φ_n / mk ψ_n^2` is the x-coordinate of `[n]P`, then the
-induction would already be done.  `mk_ψ`, `mk_φ`, and `mk_Ψ_sq` are lower-level
-normalization lemmas, not the group-law theorem.
+Those statements are exactly the missing projective formula / division-polynomial
+representability theorem.  If Mathlib already had them, the `ω_n` bridge and the
+projective induction would be unnecessary.
 
-Use them aggressively on the RHS of your X/Y identities, but do not expect them to
-supply the induction step.
+So the fraction-field route still requires you to prove a generic-point
+representability theorem.  The fraction field helps only with one issue: a
+nonzero scalar like `ψ_{m-1}` becomes a unit, so Mathlib’s `PointClass` quotient
+can use it as a weighted scalar.  It does not supply the `nsmul` theorem itself.
 
 ---
 
-## Answer to (b): does Mathlib have `Jacobian.addXYZ_eq_add`?
+## (d) Is the evaluated/local route simpler for the actual separability goal?
 
-Not globally, and it cannot be true globally.
+Probably yes, but with a local-ring refinement.
 
-Mathlib defines the representative-level Jacobian addition roughly as:
-
-```lean
-noncomputable def WeierstrassCurve.Jacobian.add (P Q : Fin 3 → R) : Fin 3 → R :=
-  if P ≈ Q then W.dblXYZ P else W.addXYZ P Q
-```
-
-So the globally correct representative operation is `W.add P Q`, not raw
-`W.addXYZ P Q`.
-
-The relevant existing API is:
-
-```lean
-#check WeierstrassCurve.Jacobian.add_of_equiv
-#check WeierstrassCurve.Jacobian.add_of_not_equiv
-#check WeierstrassCurve.Jacobian.addMap_eq
-#check WeierstrassCurve.Jacobian.Point.add_point
-#check WeierstrassCurve.Jacobian.Point.toAffineLift_add
-#check WeierstrassCurve.Jacobian.Point.toAffineAddEquiv
-#check WeierstrassCurve.Jacobian.map_add
-```
-
-The intended usage is:
-
-```lean
--- quotient-level addition is represented by `W.add`
-W.addMap ⟦P⟧ ⟦Q⟧ = ⟦W.add P Q⟧
-
--- point-level addition uses `addMap`
-(P + Q).point = W.addMap P.point Q.point
-
--- semantic correctness of the Jacobian group law
-(P + Q).toAffineLift = P.toAffineLift + Q.toAffineLift
-```
-
-Then, only after proving `¬ P ≈ Q`, you can use:
-
-```lean
-W.add_of_not_equiv hneq : W.add P Q = W.addXYZ P Q
-```
-
-If `P ≈ Q`, Mathlib uses the doubling branch:
-
-```lean
-W.add_of_equiv heq : W.add P Q = W.dblXYZ P
-```
-
-Therefore there is no global theorem of the form
-
-```lean
-W.add P Q = W.addXYZ P Q
-```
-
-and a theorem named `Jacobian.addXYZ_eq_add` would have to include a
-non-equivalence hypothesis.
-
----
-
-## The right induction scheme
-
-The most robust induction is a **semantic induction over a field**, with the
-coordinate-ring step identities used only after mapping into that field.
-
-For the universal/generic proof, the field should be the fraction field of the
-affine coordinate ring of the generic point.  Let `K` denote that fraction field.
-Map the coordinate-ring representatives into `K`:
-
-```lean
-R n : Fin 3 → CoordinateRing
-RK n : Fin 3 → K
-Pgen : W_K.Jacobian.Point
-```
-
-Then prove:
-
-```lean
-theorem rep_nsmul_generic (n : ℕ) :
-    ((n : ℕ) • Pgen).point = ⟦RK n⟧ := by
-  induction n with
-  | zero =>
-      -- point at infinity, depending on your indexing convention
-      ...
-  | succ n ih =>
-      -- use AddCommGroup/nsmul recursion and `Point.add_point`
-      -- then rewrite by `addMap_eq`.
-      ...
-```
-
-For `n = 1`, the statement is the base case:
-
-```lean
-R_1 = ![X, Y, 1].
-```
-
-For the step from `m` to `m+1`, split the small exceptional case:
-
-* `m = 1`: use the doubling identity
-
-  ```text
-  dblXYZ(R_1) = scalar · R_2
-  ```
-
-  together with `W.add_of_equiv` / `W.add_self`.
-
-* `m ≠ 1`: prove generically that `RK m ≉ RK 1`, then use
-
-  ```lean
-  W.add_of_not_equiv hneq
-  ```
-
-  to rewrite `W.add (RK m) (RK 1)` to `W.addXYZ (RK m) (RK 1)`.
-
-Then the coordinate-ring step identity, after mapping to `K`, gives
+Your proposed route:
 
 ```text
-W.addXYZ(RK m, RK 1) = ψ_{m-1} • RK (m+1).
+prove coordinate-ring identities generically;
+evaluate at P = (x,y);
+obtain projective representative [φ_n(P) : ω_n(P) : 0];
+use φ_n(P) ≠ 0 to get ω_n(P) ≠ 0;
+compute the local parameter coefficient.
 ```
 
-Since `ψ_{m-1}` is nonzero in `K`, it is a unit, so this becomes a valid
-`PointClass` equality:
+is directionally right.  The key point is that for local parameter coefficients,
+plain evaluation is not enough.  Evaluation gives only:
 
-```lean
-have hunit : IsUnit (ψK (m - 1)) := by
-  exact isUnit_iff_ne_zero.mpr hψ_nonzero
-
-have hclass :
-    (⟦W.addXYZ (RK m) (RK 1)⟧ : W.PointClass K) = ⟦RK (m + 1)⟧ := by
-  -- From `W.addXYZ ... = ψ_{m-1} • RK (m+1)` and `hunit`.
-  rw [hstep]
-  exact WeierstrassCurve.Jacobian.smul_eq (RK (m + 1)) hunit
+```text
+ψ_n(P) = 0,
+φ_n(P) ≠ 0,
+ω_n(P) ≠ 0.
 ```
 
-This is the exact place where the coordinate-ring proof cannot be used directly:
-`ψ_{m-1}` is not a unit in the coordinate ring, but it is a unit in the fraction
-field once you prove it is nonzero.
+To compute a coefficient, you need the identity in a neighborhood of `P`, i.e. in
+one of:
 
----
+```text
+localization of the affine coordinate ring at the maximal ideal of P;
+completed local ring at P;
+formal power series ring after choosing a local parameter.
+```
 
-## Skeleton of the semantic step
+In that local ring, `φ_n` and `ω_n` are units because their values at `P` are
+nonzero, while `ψ_n` lies in the maximal ideal.  The projective local parameter at
+infinity is, up to the project’s sign convention,
 
-The following is schematic, but it shows the correct Lean shape.
+```text
+t_O = -X*Z/Y
+```
+
+in weighted Jacobian coordinates `[X:Y:Z]`.  Therefore, if
+
+```text
+[n]Q = [φ_n(Q) : ω_n(Q) : ψ_n(Q)]
+```
+
+in the local sense, then near `P`
+
+```text
+t_O([n]Q) = - φ_n(Q) * ψ_n(Q) / ω_n(Q).
+```
+
+Since `φ_n(P)` and `ω_n(P)` are nonzero, the factor
+
+```text
+-φ_n / ω_n
+```
+
+is a unit in the local ring.  Thus `t_O([n]Q)` is a unit times `ψ_n(Q)`.  This is
+exactly the right shape for proving simple zero / derivative nonvanishing of
+`ψ_n`, once you know the linear term of `[n]^* t_O` is nonzero.
+
+A local-ring skeleton:
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.RingTheory.FractionalIdeal.Basic
-import Mathlib.Tactic
-
 namespace WeierstrassCurve
 
 open Polynomial
 
-namespace ProjectiveFormulaPlan
+variable {k : Type*} [Field k]
+variable (W : WeierstrassCurve k) [W.IsElliptic]
+variable (x y : k)
 
-variable {K : Type*} [Field K]
-variable (W : WeierstrassCurve K)
-
-local notation3 "x" => (0 : Fin 3)
-local notation3 "y" => (1 : Fin 3)
-local notation3 "z" => (2 : Fin 3)
-
-/-- Schematic representative.  In the real file this is `[φ_n, ω_n, ψ_n]`. -/
-def R (n : ℕ) : Fin 3 → K :=
+/-- Schematic maximal ideal of the affine coordinate ring at `(x,y)`. -/
+def pointIdeal : Ideal W.toAffine.CoordinateRing :=
   sorry
 
-/-- The base point `[X:Y:1]` after mapping to the chosen field. -/
-def P : Fin 3 → K :=
-  R 1
+/-- Local ring at the point `(x,y)`. -/
+abbrev LocalAtPoint : Type _ :=
+  Localization.AtPrime (pointIdeal W x y)
 
-/-- The scalar in the addition step. -/
-def stepScalar (m : ℕ) : K :=
-  sorry -- ψ_{m-1}
-
-/-- Coordinate identity, already proved in the coordinate ring and mapped to `K`. -/
-theorem addXYZ_step_identity
-    (m : ℕ) :
-    W.toJacobian.addXYZ (R W m) (P W)
-      = stepScalar W m • R W (m + 1) := by
-  -- map the coordinate-ring X/Y/Z identities to `K`
+/-- In the local ring, a function with nonzero value at `P` is a unit. -/
+theorem isUnit_of_eval_ne_zero
+    {f : W.toAffine.CoordinateRing}
+    (hf : evalAtPoint W x y f ≠ 0) :
+    IsUnit (algebraMap W.toAffine.CoordinateRing (LocalAtPoint W x y) f) := by
+  -- Standard localization-at-maximal-ideal fact.
   sorry
 
-/-- Generic nonvanishing of the scalar. -/
-theorem stepScalar_ne_zero
-    {m : ℕ} (hm : m ≠ 1) :
-    stepScalar W m ≠ 0 := by
-  -- division-polynomial nonvanishing in the generic function field
+/-- Local parameter formula for the projective representative. -/
+theorem local_t_mul_eq_unit_mul_psi
+    {n : ℕ}
+    (hψ : evalAtPoint W x y (ψClass W n) = 0)
+    (hφ : evalAtPoint W x y (φClass W n) ≠ 0)
+    (hω : evalAtPoint W x y (ωClass W n) ≠ 0) :
+    localPullbackT W x y n
+      = localUnit W x y n * algebraMap _ _ (ψClass W n) := by
+  -- Use the coordinate-ring/projective formula in the local ring.
+  -- `φ` and `ω` are units by `hφ`, `hω`.
   sorry
 
-/-- Non-equivalence needed to rewrite `W.add` to raw `addXYZ`. -/
-theorem R_nequiv_P
-    {m : ℕ} (hm : m ≠ 1) :
-    ¬ R W m ≈ P W := by
-  -- Usually follows from the Z/X relation and `ψ_{m-1} ≠ 0`, or from
-  -- generic non-torsion of the universal point.
-  sorry
-
-/-- One successor step for the point-class representative theorem. -/
-theorem rep_succ_step
-    {m : ℕ} (hm : m ≠ 1)
-    (ih : ((m : ℕ) • Pgen W).point = ⟦R W m⟧) :
-    (((m + 1 : ℕ) : ℕ) • Pgen W).point = ⟦R W (m + 1)⟧ := by
-  -- nsmul recursion in the additive group of nonsingular Jacobian points
-  -- rewrites `(m+1) • Pgen` as `m • Pgen + Pgen`.
-  -- Then use `Point.add_point`, `addMap_eq`, and `add_of_not_equiv`.
-
-  have hneq : ¬ R W m ≈ P W := R_nequiv_P (W := W) hm
-  have hunit : IsUnit (stepScalar W m) :=
-    isUnit_iff_ne_zero.mpr (stepScalar_ne_zero (W := W) hm)
-
-  -- Schematic quotient calculation:
-  calc
-    (((m + 1 : ℕ) : ℕ) • Pgen W).point
-        = W.toJacobian.addMap ⟦R W m⟧ ⟦P W⟧ := by
-            -- nsmul recursion + `ih` + base-point representative
-            sorry
-    _ = ⟦W.toJacobian.add (R W m) (P W)⟧ := by
-            rw [WeierstrassCurve.Jacobian.addMap_eq]
-    _ = ⟦W.toJacobian.addXYZ (R W m) (P W)⟧ := by
-            rw [WeierstrassCurve.Jacobian.add_of_not_equiv hneq]
-    _ = ⟦stepScalar W m • R W (m + 1)⟧ := by
-            rw [addXYZ_step_identity]
-    _ = ⟦R W (m + 1)⟧ := by
-            exact WeierstrassCurve.Jacobian.smul_eq (R W (m + 1)) hunit
-
-end ProjectiveFormulaPlan
 end WeierstrassCurve
 ```
 
-The real proof will need your actual generic point `Pgen`, the nonsingularity
-proofs, and the exact coercions from coordinate ring to fraction field.  But this
-is the correct API shape.
+This is often simpler than the fraction-field `PointClass` route because you
+avoid proving a global generic `nsmul` theorem and avoid descending from the
+fraction field.  But it still needs local-ring infrastructure.
+
+### Important caveat
+
+The evaluated identity alone does **not** prove that
+
+```text
+[φ_n(P) : ω_n(P) : 0]
+```
+
+is `[n]P` as a Mathlib point, because raw cleared projective formulas can
+degenerate at exceptional points.  What saves the local route is not mere
+evaluation; it is the stronger statement that the projective formula holds in the
+local ring / punctured neighborhood where the relevant unit factors are tracked.
 
 ---
 
-## What about the scalar vanishing at a concrete point?
+## How to get `ω_n(P) ≠ 0` from `φ_n(P) ≠ 0`
 
-At a concrete specialization, `ψ_{m-1}(P)` can vanish.  Then the identity
+This part is straightforward once you know the representative lies on the
+Jacobian curve at `Z = 0`.
 
-```text
-addXYZ(R_m, P) = ψ_{m-1} • R_{m+1}
-```
-
-can degenerate to the zero triple on the RHS and no longer gives a valid
-projective representative.  That is not a contradiction: raw cleared-denominator
-formulas often degenerate at exceptional points.
-
-This is why the induction should not be run directly at arbitrary evaluated
-points using raw `addXYZ`.  Run it generically over a fraction field, where the
-relevant division polynomials are nonzero.  If you later need a theorem for all
-specialized points, prove it by a separate specialization/closedness argument or
-by handling exceptional cases with the actual `W.add` branch logic.
-
-In other words:
+The weighted projective equation at infinity is:
 
 ```text
-coordinate-ring identity: valid everywhere, but not a point-class equality when scalar is nonunit/zero;
-fraction-field point-class proof: valid generically because scalar is a unit;
-specialized point theorem: needs extra exceptional-case handling.
+Y^2 = X^3
 ```
+
+because all terms involving `Z` vanish.  Therefore, at `Z = 0`, if
+
+```text
+X = φ_n(P) ≠ 0,
+```
+
+then
+
+```text
+Y^2 = X^3 ≠ 0,
+```
+
+so
+
+```text
+Y = ω_n(P) ≠ 0.
+```
+
+Lean shape:
+
+```lean
+theorem omega_eval_ne_of_phi_eval_ne_of_Z_zero
+    {k : Type*} [Field k]
+    (W : WeierstrassCurve k)
+    {X Y : k}
+    (hEq : W.toJacobian.Equation ![X, Y, 0])
+    (hX : X ≠ 0) :
+    Y ≠ 0 := by
+  have hYX : Y ^ 2 = X ^ 3 := by
+    -- unfold `Jacobian.Equation` / equation at `Z=0`
+    -- all `aᵢ` terms vanish
+    simpa [WeierstrassCurve.Jacobian.Equation] using hEq
+  intro hY
+  apply hX
+  have : X ^ 3 = 0 := by
+    simpa [hY] using hYX.symm
+  exact pow_eq_zero this
+```
+
+The exact theorem names around `Jacobian.Equation` may need adjustment, but the
+argument is just `Y^2 = X^3` at `Z=0` in a field.
 
 ---
 
-## Recommended final architecture
+## Which route is actually simplest?
 
-I would organize the project as four layers.
+For the narrow separability goal, ordered by expected formalization effort:
 
-### Layer 1: algebraic coordinate identities
+### 1. Per-`n` Bezout/resultant certificates
 
-These are pure coordinate-ring/polynomial lemmas:
+Still the fastest for `n ≤ 16`.
 
-```lean
-addZ_Rm_P
-addX_Rm_P_mk
-addY_Rm_P_mk
-dblZ_Rm
-dblX_Rm_mk
-dblY_Rm_mk
-```
+You avoid:
 
-This layer is where CAS certificates or structured `linear_combination` proofs
-live.  It does not mention `Jacobian.Point`, `PointClass`, or `nsmul`.
+* generic point construction;
+* fraction fields;
+* local rings/completions;
+* `ω_n` for all `n`;
+* point-level `nsmul` induction.
 
-### Layer 2: generic nonvanishing
-
-Over the fraction field, prove:
+You only prove:
 
 ```lean
-ψK n ≠ 0
-stepScalar K m ≠ 0
-R K n is a valid nonsingular representative
-R K m ≉ R K 1, for the addXYZ branch when m ≠ 1
+A_n * preΨ'_n + B_n * derivative preΨ'_n = C_n * Δ^e
 ```
 
-This is where division-polynomial nonzero facts are used.
+and then use `[W.IsElliptic]` and `(n : k) ≠ 0`.
 
-### Layer 3: semantic representative induction
+### 2. Local/evaluated route
 
-Use Mathlib’s group law:
+Likely the best conceptual route if you specifically want the local parameter
+coefficient.  But it needs local rings or completions.  It is less global than the
+fraction-field route and avoids the nonunit `PointClass` problem.
 
-```lean
-Jacobian.Point.add_point
-Jacobian.addMap_eq
-Jacobian.add_of_not_equiv
-Jacobian.add_of_equiv / add_self for m = 1
-Jacobian.Point.toAffineLift_add or toAffineAddEquiv when needed
-```
+### 3. Fraction-field generic-point route
 
-to prove:
+Useful if the project wants a reusable theorem that `[n]P` is represented by
+`[φ_n:ω_n:ψ_n]` generically.  But it still requires proving the projective formula
+and generic nonvanishing, and it does not by itself prove separability.
 
-```lean
-((n : ℕ) • Pgen).point = ⟦RK n⟧.
-```
+### 4. Full all-`n` projective formula over the coordinate ring
 
-This is the genuine `nsmul` connection.  It should be over a field.
-
-### Layer 4: specialization, if needed
-
-If the final theorem must apply to arbitrary evaluated points, add a separate
-specialization layer.  Do not try to get that for free from a nonunit-scaled
-coordinate-ring identity.
+Most reusable, but largest.
 
 ---
 
-## Practical answer
+## Recommendation
 
-For proving the projective formula by induction on `n`, the right scheme is:
+For the current separability/derivative nonvanishing brick, do **not** switch to
+the fraction-field route unless you already need the general projective formula
+for other reasons.
 
-```text
-base n = 1;
-step m = 1 uses doubling;
-step m > 1 uses `W.add_of_not_equiv` to rewrite `W.add` to `addXYZ`, then uses
-coordinate-ring X/Y/Z step identities mapped to the generic fraction field, where
-ψ_{m-1} is a unit.
-```
+Use one of these two strategies:
 
-You cannot avoid the induction entirely with `mk_ψ`/`mk_φ`/`mk_Ψ_sq`.  And
-Mathlib does not have a global `addXYZ_eq_add`; the correct theorem is the
-branch-specific `add_of_not_equiv`, because `W.add` is the operation that connects
-to `Point.add` and `nsmul`.
+1. **Fastest:** finish the finite `n ≤ 16` Bezout/resultant certificates.
+2. **If local-parameter proof is required:** use the coordinate-ring identities in
+   the **local ring at the evaluated point**, not the global fraction field.  Prove
+   `φ_n(P)` and `ω_n(P)` are units locally, then show
 
-This is the most reliable Lean path: keep the huge X/Y identities as algebraic
-step lemmas, but use Mathlib’s existing Jacobian group-law layer to connect the
-recursive representatives to `nsmul` over a field.
+   ```text
+   t_O([n]Q) = unit · ψ_n(Q).
+   ```
+
+The fraction field answers the unit-scalar problem for generic point classes, but
+it does not provide the missing theorem connecting `ψ_n` to `nsmul`; that theorem
+is exactly the projective formula infrastructure.
