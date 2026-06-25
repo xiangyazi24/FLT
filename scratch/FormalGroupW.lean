@@ -346,6 +346,7 @@ variable {R : Type*} [CommRing R]
 /-! ### Substituted functional equation -/
 
 set_option maxHeartbeats 800000 in
+-- Distributing subst over add/mul/pow in the functional equation is expensive.
 /-- The functional equation of `w(t)` after substituting `Xᵢ` into the MvPowerSeries ring. -/
 theorem formalW_subst_eq (W : WeierstrassCurve R) (i : Fin 2) :
     PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) R) W.formalW =
@@ -367,6 +368,7 @@ theorem formalW_subst_eq (W : WeierstrassCurve R) (i : Fin 2) :
   exact h
 
 set_option maxHeartbeats 1600000 in
+-- linear_combination + ring on the Weierstrass equation with MvPowerSeries coefficients.
 /-- The multivariate formal point `P(Xᵢ)` satisfies the Weierstrass equation. -/
 theorem formalPointMv_equation (W : WeierstrassCurve R) (i : Fin 2) :
     (W.map (MvPowerSeries.C (σ := Fin 2))).toProjective.Equation (W.formalPointMv i) := by
