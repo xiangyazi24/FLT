@@ -1,108 +1,221 @@
-# Q262 (dm3): Fraction-field route vs local/evaluated route
+# Q283 (dm3): Function-field separability route without the projective formula?
 
-## Executive answer
+## Short verdict
 
-For the fraction-field route:
+The proposed route is **mathematically standard**, but it is **not currently a
+shortcut in Mathlib** for the FLT/Mazur separability brick.
 
-* **Yes**, Mathlib has the function field of the affine coordinate ring.  In the
-  current API it is
+The reason is simple: Mathlib has enough raw ingredients to talk about function
+fields and elliptic-curve point groups over fields, and it even has field-theory
+separable degree infrastructure.  But it does **not** appear to have the bridge
+package that would make this route short:
 
-  ```lean
-  WeierstrassCurve.Affine.FunctionField W
-  ```
+```text
+elliptic curve as a scheme/group scheme
++ multiplication-by-n as a finite morphism/rational map
++ degree([n]) = n²
++ differential d[n] nonzero ⇒ [n] separable
++ separability of [n] ⇒ reduced n-torsion divisor
++ reduced n-torsion divisor ⇒ preΨ'_n squarefree.
+```
 
-  and it is definitionally
+Moreover, without the projective formula you do not have an explicit function
+field pullback
 
-  ```lean
-  FractionRing W.CoordinateRing
-  ```
+```text
+[n]^* X = φ_n / ψ_n²,
+[n]^* Y = ω_n / ψ_n³,
+```
 
-  for `W : WeierstrassCurve.Affine R`.  Since `Affine` is an abbreviation around
-  Weierstrass curves, in local notation this is usually `W.toAffine.FunctionField`
-  or simply `Affine.FunctionField W` depending on namespace/import context.
+so there is no direct formal connection between the abstract point-group map
+`n • P` and the denominator polynomial `preΨ'_n`.  That denominator connection is
+exactly what the projective formula supplies.
 
-* **Yes**, Mathlib has `Affine.Point` and `Jacobian.Point` over any field, hence
-  over that function field after base-changing the curve.  The group law exists
-  there.
+Thus the function-field separability route does **not** bypass both the Bezout
+certificates and the projective formula in current Mathlib.  It replaces them by a
+larger missing algebraic-geometry bridge.
 
-* **No**, Mathlib does not appear to have a theorem saying that the division
-  polynomial `ψ_n` in the function field cuts out
-
-  ```lean
-  n • genericPoint = 0
-  ```
-
-  or that
-
-  ```lean
-  n • genericPoint = [φ_n : ω_n : ψ_n].
-  ```
-
-  That is essentially the projective/division-polynomial theorem you are trying
-  to build.  The existing `mk_ψ`, `mk_φ`, `mk_Ψ_sq` lemmas normalize polynomial
-  expressions in the coordinate ring; they do not identify those expressions with
-  `nsmul` in the Jacobian group law.
-
-For your **actual separability/local-parameter goal**, the fraction-field route is
-probably not the simplest route.  A **local/evaluated coordinate-ring route** is
-closer to the goal, but with one important correction: evaluation at a point is
-only a zero-th order statement.  To compute a local parameter coefficient, you
-need the same identities in the **local ring at the point** or in a completed
-local ring, not merely their evaluated values.
-
-For the Mazur `|T| ≤ 16` separability brick, the fastest formal path still looks
-like the finite per-`n` Bezout/resultant certificates.  The local-parameter route
-is mathematically good, but formalizing the required local-ring/completion
-infrastructure may be larger than the finite certificates.
+For `n ≤ 16`, the per-`n` Bezout/resultant certificates remain the faster route.
 
 ---
 
-## (a) Fraction field of the coordinate ring
+## Current Mathlib status by question
 
-Mathlib defines the affine coordinate ring and its function field in
-`Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Point.lean`:
+### (a) Degree of `[n]` as a rational map: `n²`?
 
-```lean
-namespace WeierstrassCurve
-namespace Affine
+I would plan as if the answer is **no**, at least not in the elliptic-curve API in
+a usable form.
 
-/-- The affine coordinate ring `R[W] := R[X, Y] / ⟨W(X, Y)⟩`. -/
-abbrev CoordinateRing (W : Affine R) : Type _ :=
-  AdjoinRoot W.polynomial
-
-/-- The function field `R(W) := Frac(R[W])`. -/
-abbrev FunctionField (W : Affine R) : Type _ :=
-  FractionRing W.CoordinateRing
-
-end Affine
-end WeierstrassCurve
-```
-
-The same file also provides an integral-domain instance:
+Mathlib has:
 
 ```lean
-instance [IsDomain R] : IsDomain W.CoordinateRing
+#check WeierstrassCurve.Affine.FunctionField
+#check WeierstrassCurve.Affine.CoordinateRing
+#check WeierstrassCurve.Affine.Point
+#check WeierstrassCurve.Jacobian.Point
+#check WeierstrassCurve.Jacobian.Point.toAffineAddEquiv
 ```
 
-So if your base is a field `k`, then the coordinate ring of `W.toAffine` is a
-domain, and `FractionRing W.toAffine.CoordinateRing` is available as its fraction
-field.
+It also has `AlgebraicGeometry.RationalMap` and scheme/function-field files.  But
+the existing elliptic-curve development is primarily an explicit point/group-law
+development over fields, not yet a group-scheme/morphism-degree development for
+Weierstrass curves.
 
-The practical local names may be one of these, depending on opened namespaces:
+The theorem you would want would look like:
 
 ```lean
-W.toAffine.CoordinateRing
-W.toAffine.FunctionField
-WeierstrassCurve.Affine.CoordinateRing W.toAffine
-WeierstrassCurve.Affine.FunctionField W.toAffine
+-- Schematic; not an existing small theorem.
+theorem degree_mulMap
+    (W : WeierstrassCurve k) [W.IsElliptic]
+    (n : ℕ) (hn : (n : k) ≠ 0) :
+    RationalMap.degree (ellipticMulMap W n) = n ^ 2 := by
+  sorry
 ```
 
-A useful skeleton:
+But to even state this cleanly, one needs:
+
+```lean
+ellipticMulMap W n : RationalMap E E
+```
+
+or a function-field embedding
+
+```lean
+mulPullback W n : K(E) →+* K(E)
+```
+
+as part of the elliptic-curve API.  The point-level map
+
+```lean
+fun P : W.Affine.Point => n • P
+```
+
+is not automatically a rational map of curves with a degree theorem.
+
+### (b) Separable degree of a rational map?
+
+Mathlib has field-theory infrastructure around separable degree.  In particular,
+there is a `Mathlib/FieldTheory/SeparableDegree.lean` file, so the field-extension
+side is not empty.
+
+But for this route you need the **geometric wrapper**:
+
+```text
+separable degree of a dominant rational map of curves
+= separable degree of the corresponding function-field extension.
+```
+
+and then the elliptic-specific statement:
+
+```text
+sepDegree([n]) = degree([n])  iff  d[n] ≠ 0.
+```
+
+I would not expect these to already be connected to
+`WeierstrassCurve.Affine.Point` / `Jacobian.Point` in current Mathlib.
+
+A field-theoretic version would have to be built manually:
+
+```lean
+-- Schematic only.
+noncomputable def mulPullback
+    (W : WeierstrassCurve k) (n : ℕ) :
+    W.toAffine.FunctionField →+* W.toAffine.FunctionField := by
+  -- Need explicit rational functions for [n]^*X and [n]^*Y.
+  -- Without projective formula, these are not available.
+  sorry
+
+-- Then one would study the extension K(E) / image(mulPullback W n).
+```
+
+So Mathlib has some field-theory separability tools, but not the ready-made
+rational-map separable-degree theorem for elliptic multiplication.
+
+### (c) Theorem connecting separable degree to `preΨ'_n` squarefree?
+
+I would plan as if the answer is **no**.
+
+The desired theorem is highly nontrivial.  It would say that the denominator of
+`[n]^*x`, after removing the universal `ψ₂` factor in even degree, cuts out the
+nonzero `n`-torsion divisor modulo `±1`, and that separability of `[n]` implies
+this divisor is reduced.  In Lean terms, you would need a bridge like:
+
+```lean
+-- Schematic; not existing as a Mathlib theorem.
+theorem squarefree_preΨ'_of_sepDegree_mulMap
+    (W : WeierstrassCurve k) [W.IsElliptic]
+    (n : ℕ) (hn : (n : k) ≠ 0)
+    (hsep : separableDegree (ellipticMulMap W n) = n ^ 2) :
+    Squarefree (W.preΨ' n) := by
+  sorry
+```
+
+This bridge is essentially another form of the division-polynomial theorem.  It
+requires identifying roots of `preΨ'_n` with x-coordinates of torsion points and
+controlling the quotient by `P ↦ -P`.
+
+---
+
+## Why formal-group separability does not by itself prove `preΨ'_n` squarefree
+
+The formal-group statement
+
+```text
+[n](T) = n*T + higher terms
+```
+
+and hence `d[n] ≠ 0` when `(n : k) ≠ 0` is the correct local reason that
+multiplication by `n` is separable/étale.  But there are two missing links if the
+goal is squarefreeness of `preΨ'_n`.
+
+### Missing link 1: `[n]` as a morphism/rational map
+
+The formal group gives the differential of the group endomorphism **once the
+endomorphism exists as a morphism of the curve**.  Mathlib has the point-level
+group law, but not a packaged finite morphism
+
+```text
+[n] : E → E
+```
+
+with degree and separability theorems.
+
+### Missing link 2: denominator of `[n]^*x`
+
+Even if `[n]` is known to be separable, to conclude that `preΨ'_n` is squarefree
+you must know that `preΨ'_n` is the denominator/cutting equation for the nonzero
+kernel divisor.  That is the identity
+
+```text
+[n]^*x = φ_n / ψ_n²
+```
+
+or at least the weaker denominator statement
+
+```text
+poles of [n]^*x are exactly zeros of preΨ'_n with the expected multiplicities.
+```
+
+This is essentially the X/Z part of the projective formula.  Without it,
+separability of the abstract map `[n]` has no formal connection to the specific
+polynomial `W.preΨ' n`.
+
+So `formalNsmul_coeff_one` is excellent evidence and may be useful in a local
+proof, but it does not remove the need to relate the formal group map to the
+univariate division polynomial.
+
+---
+
+## The minimal theorem stack needed for this route
+
+If you wanted to make the function-field route work, I would build it as the
+following theorem stack.
 
 ```lean
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.FieldTheory.SeparableDegree
 import Mathlib.Tactic
 
 namespace WeierstrassCurve
@@ -110,388 +223,149 @@ namespace WeierstrassCurve
 open Polynomial
 
 variable {k : Type*} [Field k]
-variable (W : WeierstrassCurve k)
-
-abbrev CoordRing : Type _ :=
-  W.toAffine.CoordinateRing
-
-abbrev FuncField : Type _ :=
-  W.toAffine.FunctionField
-
--- Definitional target:
--- FuncField W = FractionRing (CoordRing W)
-
-end WeierstrassCurve
-```
-
----
-
-## (b) Points and group law over the function field
-
-Yes.  Mathlib has point types and group laws over any field.
-
-The relevant APIs are:
-
-```lean
-#check WeierstrassCurve.Affine.Point
-#check WeierstrassCurve.Affine.Point.instAddCommGroup
-
-#check WeierstrassCurve.Jacobian.Point
-#check WeierstrassCurve.Jacobian.Point.instAddCommGroup
-#check WeierstrassCurve.Jacobian.Point.toAffineAddEquiv
-#check WeierstrassCurve.Jacobian.Point.toAffineLift_add
-```
-
-So once you set
-
-```lean
-K := W.toAffine.FunctionField
-```
-
-and base-change the curve to `K`, you can form
-
-```lean
-(W⁄K).toAffine.Point
-(W⁄K).toJacobian.Point
-```
-
-and use the group law.
-
-What Mathlib does **not** give for free is the generic point as a named object.
-You would define it yourself from the coordinate-ring classes of `X` and `Y`, then
-map those classes into the fraction field.
-
-Schematic shape:
-
-```lean
-namespace WeierstrassCurve
-
-open Polynomial
-
-variable {k : Type*} [Field k]
-variable (W : WeierstrassCurve k)
-
-noncomputable abbrev K : Type _ :=
-  W.toAffine.FunctionField
-
-noncomputable abbrev A : Type _ :=
-  W.toAffine.CoordinateRing
-
--- Coordinate-ring classes of `X` and `Y`.
-noncomputable def genericX_A : A W :=
-  WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (Polynomial.C Polynomial.X)
-
-noncomputable def genericY_A : A W :=
-  WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X
-
--- Their images in the function field.
-noncomputable def genericX_K : K W :=
-  algebraMap (A W) (K W) (genericX_A W)
-
-noncomputable def genericY_K : K W :=
-  algebraMap (A W) (K W) (genericY_A W)
-
--- Then prove the equation and nonsingularity and package as a point.
-noncomputable def genericAffinePoint
-    [DecidableEq (K W)] : (W⁄K W).toAffine.Point := by
-  -- Expected target: `.some (genericX_K W) (genericY_K W) hNonsing`
-  -- `hEquation` comes from the quotient relation defining the coordinate ring.
-  -- `hNonsing` uses `[W.IsElliptic]` after base-change.
-  sorry
-
-end WeierstrassCurve
-```
-
-The exact `Polynomial.C Polynomial.X` vs `Polynomial.X` notation depends on the
-`R[X][Y]` convention: `Polynomial.X` in the outer polynomial ring is the `Y`
-variable, while `Polynomial.C Polynomial.X` is the embedded `X` variable.
-
-This generic point construction is doable, but it is not already packaged as a
-single Mathlib theorem.
-
----
-
-## (c) Is there a theorem connecting `ψ_n` to `n • genericPoint = 0`?
-
-I would assume **no** for planning purposes.
-
-Mathlib has these coordinate-ring comparison lemmas:
-
-```lean
-#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ
-#check WeierstrassCurve.Affine.CoordinateRing.mk_φ
-#check WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
-```
-
-They say that the bivariate and univariate division-polynomial packages agree
-modulo the curve relation.  Conceptually:
-
-```lean
-mk W (W.ψ n) = mk W (W.Ψ n)
-mk W (W.φ n) = mk W (Polynomial.C (W.Φ n))
-mk W (W.Ψ n)^2 = mk W (Polynomial.C (W.ΨSq n))
-```
-
-But they do not say:
-
-```lean
-n • genericPoint = 0 ↔ ψ_n = 0
-```
-
-or
-
-```lean
-(n • genericPoint).point = ⟦![φ_n, ω_n, ψ_n]⟧.
-```
-
-Those statements are exactly the missing projective formula / division-polynomial
-representability theorem.  If Mathlib already had them, the `ω_n` bridge and the
-projective induction would be unnecessary.
-
-So the fraction-field route still requires you to prove a generic-point
-representability theorem.  The fraction field helps only with one issue: a
-nonzero scalar like `ψ_{m-1}` becomes a unit, so Mathlib’s `PointClass` quotient
-can use it as a weighted scalar.  It does not supply the `nsmul` theorem itself.
-
----
-
-## (d) Is the evaluated/local route simpler for the actual separability goal?
-
-Probably yes, but with a local-ring refinement.
-
-Your proposed route:
-
-```text
-prove coordinate-ring identities generically;
-evaluate at P = (x,y);
-obtain projective representative [φ_n(P) : ω_n(P) : 0];
-use φ_n(P) ≠ 0 to get ω_n(P) ≠ 0;
-compute the local parameter coefficient.
-```
-
-is directionally right.  The key point is that for local parameter coefficients,
-plain evaluation is not enough.  Evaluation gives only:
-
-```text
-ψ_n(P) = 0,
-φ_n(P) ≠ 0,
-ω_n(P) ≠ 0.
-```
-
-To compute a coefficient, you need the identity in a neighborhood of `P`, i.e. in
-one of:
-
-```text
-localization of the affine coordinate ring at the maximal ideal of P;
-completed local ring at P;
-formal power series ring after choosing a local parameter.
-```
-
-In that local ring, `φ_n` and `ω_n` are units because their values at `P` are
-nonzero, while `ψ_n` lies in the maximal ideal.  The projective local parameter at
-infinity is, up to the project’s sign convention,
-
-```text
-t_O = -X*Z/Y
-```
-
-in weighted Jacobian coordinates `[X:Y:Z]`.  Therefore, if
-
-```text
-[n]Q = [φ_n(Q) : ω_n(Q) : ψ_n(Q)]
-```
-
-in the local sense, then near `P`
-
-```text
-t_O([n]Q) = - φ_n(Q) * ψ_n(Q) / ω_n(Q).
-```
-
-Since `φ_n(P)` and `ω_n(P)` are nonzero, the factor
-
-```text
--φ_n / ω_n
-```
-
-is a unit in the local ring.  Thus `t_O([n]Q)` is a unit times `ψ_n(Q)`.  This is
-exactly the right shape for proving simple zero / derivative nonvanishing of
-`ψ_n`, once you know the linear term of `[n]^* t_O` is nonzero.
-
-A local-ring skeleton:
-
-```lean
-namespace WeierstrassCurve
-
-open Polynomial
-
-variable {k : Type*} [Field k]
 variable (W : WeierstrassCurve k) [W.IsElliptic]
-variable (x y : k)
 
-/-- Schematic maximal ideal of the affine coordinate ring at `(x,y)`. -/
-def pointIdeal : Ideal W.toAffine.CoordinateRing :=
+/-- Function field of the affine curve.  This already exists as an abbrev. -/
+abbrev K : Type _ :=
+  W.toAffine.FunctionField
+
+/-- Missing bridge 1: multiplication-by-`n` as a function-field pullback. -/
+noncomputable def mulPullback (n : ℕ) : K W →+* K W := by
+  -- Needs rational functions for `[n]^*X` and `[n]^*Y`.
+  -- Without projective formula this is not available in computable form.
   sorry
 
-/-- Local ring at the point `(x,y)`. -/
-abbrev LocalAtPoint : Type _ :=
-  Localization.AtPrime (pointIdeal W x y)
-
-/-- In the local ring, a function with nonzero value at `P` is a unit. -/
-theorem isUnit_of_eval_ne_zero
-    {f : W.toAffine.CoordinateRing}
-    (hf : evalAtPoint W x y f ≠ 0) :
-    IsUnit (algebraMap W.toAffine.CoordinateRing (LocalAtPoint W x y) f) := by
-  -- Standard localization-at-maximal-ideal fact.
+/-- Missing bridge 2: degree of the function-field extension. -/
+theorem finrank_mulPullback_eq_sq
+    (n : ℕ) (hn : (n : k) ≠ 0) :
+    Module.finrank (SubsemiringClass?) (K W) = n ^ 2 := by
+  -- Schematic.  Need the correct algebra structure via `mulPullback W n`.
   sorry
 
-/-- Local parameter formula for the projective representative. -/
-theorem local_t_mul_eq_unit_mul_psi
-    {n : ℕ}
-    (hψ : evalAtPoint W x y (ψClass W n) = 0)
-    (hφ : evalAtPoint W x y (φClass W n) ≠ 0)
-    (hω : evalAtPoint W x y (ωClass W n) ≠ 0) :
-    localPullbackT W x y n
-      = localUnit W x y n * algebraMap _ _ (ψClass W n) := by
-  -- Use the coordinate-ring/projective formula in the local ring.
-  -- `φ` and `ω` are units by `hφ`, `hω`.
+/-- Missing bridge 3: formal derivative nonzero implies separability. -/
+theorem mulPullback_separable_of_natCast_ne_zero
+    (n : ℕ) (hn : (n : k) ≠ 0) :
+    -- `K(E)` is separable over `[n]^*K(E)`.
+    True := by
+  -- Would use `formalNsmul_coeff_one` plus smooth curve/group morphism theory.
+  sorry
+
+/-- Missing bridge 4: denominator of `[n]^*X` is `preΨ'_n²` up to units. -/
+theorem denom_mulPullback_X_eq_preΨ'
+    (n : ℕ) :
+    -- Denominator statement for `[n]^*X`.
+    True := by
+  -- This is essentially the X/Z part of the projective formula.
+  sorry
+
+/-- Missing bridge 5: separability of `[n]` implies squarefree denominator. -/
+theorem squarefree_preΨ'_of_mulPullback_separable
+    (n : ℕ) (hn : (n : k) ≠ 0) :
+    Squarefree (W.preΨ' n) := by
+  -- Needs divisor/fiber theorem plus the denominator theorem above.
   sorry
 
 end WeierstrassCurve
 ```
 
-This is often simpler than the fraction-field `PointClass` route because you
-avoid proving a global generic `nsmul` theorem and avoid descending from the
-fraction field.  But it still needs local-ring infrastructure.
-
-### Important caveat
-
-The evaluated identity alone does **not** prove that
-
-```text
-[φ_n(P) : ω_n(P) : 0]
-```
-
-is `[n]P` as a Mathlib point, because raw cleared projective formulas can
-degenerate at exceptional points.  What saves the local route is not mere
-evaluation; it is the stronger statement that the projective formula holds in the
-local ring / punctured neighborhood where the relevant unit factors are tracked.
+This is a major development.  The most expensive pieces are not field-theoretic
+separable degree itself; they are the elliptic-curve/rational-map bridges.
 
 ---
 
-## How to get `ω_n(P) ≠ 0` from `φ_n(P) ≠ 0`
+## Could one avoid `ω_n` but still use function fields?
 
-This part is straightforward once you know the representative lies on the
-Jacobian curve at `Z = 0`.
+Maybe partially, but not enough to be a clean shortcut.
 
-The weighted projective equation at infinity is:
-
-```text
-Y^2 = X^3
-```
-
-because all terms involving `Z` vanish.  Therefore, at `Z = 0`, if
+For squarefreeness of `preΨ'_n`, one might hope to prove only the X-coordinate
+pullback
 
 ```text
-X = φ_n(P) ≠ 0,
+[n]^*x = Φ_n / ΨSq_n
 ```
 
-then
+and avoid the Y-coordinate `ω_n`.  That would be enough to identify the denominator
+of the x-map.  However, to prove that the rational function really is `[n]^*x`,
+you still need to connect it to the group law.  The usual proof uses the full
+projective representative `[φ_n : ω_n : ψ_n]`, because the curve equation alone
+does not determine the sign/Y-coordinate of `[n]P`.
 
-```text
-Y^2 = X^3 ≠ 0,
-```
+There may be a route using only symmetric functions under `P ↦ -P`, because the
+x-coordinate descends to the quotient `E/{±1} ≅ P¹`.  But formalizing that in
+Mathlib would require quotient-map infrastructure and a proof that the induced
+map on `P¹` has denominator `preΨ'_n`.  That is not obviously shorter than adding
+`ω_n`.
 
-so
+---
 
-```text
-Y = ω_n(P) ≠ 0.
-```
+## Comparison with the per-`n` certificate route
 
-Lean shape:
+For the Mazur `|T| ≤ 16` target, the finite certificate route is still the most
+practical.
+
+Per-`n` Bezout/resultant proof needs:
 
 ```lean
-theorem omega_eval_ne_of_phi_eval_ne_of_Z_zero
-    {k : Type*} [Field k]
-    (W : WeierstrassCurve k)
-    {X Y : k}
-    (hEq : W.toJacobian.Equation ![X, Y, 0])
-    (hX : X ≠ 0) :
-    Y ≠ 0 := by
-  have hYX : Y ^ 2 = X ^ 3 := by
-    -- unfold `Jacobian.Equation` / equation at `Z=0`
-    -- all `aᵢ` terms vanish
-    simpa [WeierstrassCurve.Jacobian.Equation] using hEq
-  intro hY
-  apply hX
-  have : X ^ 3 = 0 := by
-    simpa [hY] using hYX.symm
-  exact pow_eq_zero this
+A_n * W.preΨ' n + B_n * derivative (W.preΨ' n)
+  = C_n * W.Δ ^ e_n
 ```
 
-The exact theorem names around `Jacobian.Equation` may need adjustment, but the
-argument is just `Y^2 = X^3` at `Z=0` in a field.
+Then:
+
+```text
+[W.IsElliptic] ⇒ W.Δ ≠ 0
+(n : k) ≠ 0    ⇒ (C_n : k) ≠ 0
+```
+
+and you get `IsCoprime (W.preΨ' n) (derivative (W.preΨ' n))` directly.
+
+The function-field separability route needs, in addition to formal group facts:
+
+```text
+construction of [n] as a rational map/function-field embedding;
+degree([n]) = n²;
+separable degree API connected to this map;
+differential nonzero ⇒ separability of the map;
+identification of preΨ'_n as the x-denominator/kernel divisor;
+separability of the map ⇒ squarefree denominator.
+```
+
+That is much larger than 16 generated certificates.
 
 ---
 
-## Which route is actually simplest?
+## Direct answers
 
-For the narrow separability goal, ordered by expected formalization effort:
+### (a) Does Mathlib have `degree([n]) = n²` as a rational map?
 
-### 1. Per-`n` Bezout/resultant certificates
+Not in a usable elliptic-curve form that I would rely on.  Mathlib has point group
+laws and some scheme/rational-map infrastructure, but no apparent packaged theorem
+for degree of the elliptic multiplication map.
 
-Still the fastest for `n ≤ 16`.
+### (b) Does Mathlib have separable degree of a rational map?
 
-You avoid:
+It has field-theory separable degree infrastructure, but the rational-map/curve
+wrapper and its connection to elliptic multiplication maps appear to be missing.
 
-* generic point construction;
-* fraction fields;
-* local rings/completions;
-* `ω_n` for all `n`;
-* point-level `nsmul` induction.
+### (c) Does Mathlib connect separable degree to `preΨ'_n` squarefree?
 
-You only prove:
-
-```lean
-A_n * preΨ'_n + B_n * derivative preΨ'_n = C_n * Δ^e
-```
-
-and then use `[W.IsElliptic]` and `(n : k) ≠ 0`.
-
-### 2. Local/evaluated route
-
-Likely the best conceptual route if you specifically want the local parameter
-coefficient.  But it needs local rings or completions.  It is less global than the
-fraction-field route and avoids the nonunit `PointClass` problem.
-
-### 3. Fraction-field generic-point route
-
-Useful if the project wants a reusable theorem that `[n]P` is represented by
-`[φ_n:ω_n:ψ_n]` generically.  But it still requires proving the projective formula
-and generic nonvanishing, and it does not by itself prove separability.
-
-### 4. Full all-`n` projective formula over the coordinate ring
-
-Most reusable, but largest.
-
----
+No.  That bridge would itself be a substantial theorem about the n-torsion divisor
+and the x-coordinate quotient.  It is essentially another incarnation of the
+projective/division-polynomial representability theorem.
 
 ## Recommendation
 
-For the current separability/derivative nonvanishing brick, do **not** switch to
-the fraction-field route unless you already need the general projective formula
-for other reasons.
+Do not pursue this as the main route for the FLT/Mazur separability brick.
 
-Use one of these two strategies:
+Use `formalNsmul_coeff_one` as conceptual validation and maybe later for a local
+formal proof, but for the current project goal the fastest route remains:
 
-1. **Fastest:** finish the finite `n ≤ 16` Bezout/resultant certificates.
-2. **If local-parameter proof is required:** use the coordinate-ring identities in
-   the **local ring at the evaluated point**, not the global fraction field.  Prove
-   `φ_n(P)` and `ω_n(P)` are units locally, then show
+```text
+per-`n` resultant/Bezout certificates for n ≤ 16.
+```
 
-   ```text
-   t_O([n]Q) = unit · ψ_n(Q).
-   ```
-
-The fraction field answers the unit-scalar problem for generic point classes, but
-it does not provide the missing theorem connecting `ψ_n` to `nsmul`; that theorem
-is exactly the projective formula infrastructure.
+If you later want a reusable general theorem, the most promising non-certificate
+route is probably a local/divisor proof that `preΨ'_n` cuts out the reduced
+nonzero n-torsion divisor when `(n : k) ≠ 0`.  But that still requires a serious
+bridge from division polynomials to the group law; it is not currently supplied by
+Mathlib’s function-field API alone.
