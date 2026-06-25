@@ -2,139 +2,149 @@
 
 ## Executive answer
 
-For the intended divisibility step
+For the intended step
 
 ```lean
 (X₀ - X₁)^3 ∣ addZ * X₀^3 * X₁^3  ⟹  (X₀ - X₁)^3 ∣ addZ
 ```
 
-do **not** try to use Mathlib's `IsCoprime` between `(X₀ - X₁)^3` and `X₀^3 * X₁^3`. In Mathlib, `IsCoprime a b` means a Bézout/comaximal identity `∃ u v, u * a + v * b = 1`. In the local ring `K⟦X₀,X₁⟧ = MvPowerSeries (Fin 2) K`, both `(X₀ - X₁)^3` and `X₀^3 * X₁^3` have zero constant coefficient, so they lie in the maximal ideal. Hence they are **not** `IsCoprime`.
+do **not** use Mathlib's `IsCoprime` between `(X₀ - X₁)^3` and `X₀^3 * X₁^3`.  That statement is not merely missing from Mathlib; with Mathlib's definition it is **false**.
 
-Mathematically, `K⟦X₀,X₁⟧` is a UFD and `(X₀ - X₁)` has no common prime factor with `X₀ X₁`. But at the pinned Mathlib revision in this repo, the multivariate UFD API does not appear to be available. Mathlib has enough to know `MvPowerSeries` has no zero divisors over a domain, but not enough out-of-the-box to run a UFD/no-common-prime-factor cancellation argument in `MvPowerSeries (Fin 2) K`.
+Mathlib's `IsCoprime x y` is Bézout/comaximal coprimality:
 
-## Repo / Mathlib revision checked
+```lean
+def IsCoprime (x y : R) : Prop :=
+  ∃ a b, a * x + b * y = 1
+```
 
-`FLT/lakefile.toml` pins:
+In the local power series ring `K[[X₀,X₁]] = MvPowerSeries (Fin 2) K`, both `(X₀ - X₁)^3` and `X₀^3 * X₁^3` have zero constant coefficient.  Applying `constantCoeff` to any supposed Bézout identity gives `0 = 1`.
+
+Mathematically, `K[[X₀,X₁]]` is a UFD and `(X₀ - X₁)` has no common prime factor with `X₀X₁`.  But Mathlib, at the pinned FLT mathlib revision,
 
 ```toml
-[[require]]
-name = "mathlib"
-git = "https://github.com/leanprover-community/mathlib4.git"
 rev = "96fd0fff3b8837985ae21dd02e712cb5df72ec05"
 ```
 
-I inspected the relevant Mathlib files at that revision.
+does not appear to package a multivariate `MvPowerSeries (Fin 2) K` UFD instance.  It does provide the no-zero-divisors/domain API and univariate `PowerSeries` UFD API.
 
-## Grep / API findings
+The best Lean route is a `δ`-adic / weighted-order cancellation after the linear change of variables
 
-### 1. `MvPowerSeries` basic ring/domain API
+```text
+U = X₀ - X₁,   V = X₁.
+```
+
+Under this change, the divisor becomes `U^3` and the multiplier becomes `(U+V)^3 * V^3`, which has `U`-order `0`.  So it cannot contribute any factor of `U`.
+
+---
+
+## Grep/API findings
+
+### 1. `MvPowerSeries` domain/no-zero-divisors API
 
 Relevant files:
 
 ```text
 Mathlib/RingTheory/MvPowerSeries/Basic.lean
 Mathlib/RingTheory/MvPowerSeries/NoZeroDivisors.lean
+Mathlib/RingTheory/MvPowerSeries/Order.lean
 Mathlib/RingTheory/MvPowerSeries/Inverse.lean
+Mathlib/RingTheory/MvPowerSeries/Substitution.lean
 ```
 
-`MvPowerSeries.Basic` defines
+`MvPowerSeries.Basic` defines:
 
 ```lean
-def MvPowerSeries (σ : Type*) (R : Type*) := (σ →₀ ℕ) → R
+def MvPowerSeries (σ : Type*) (R : Type*) :=
+  (σ →₀ ℕ) → R
 ```
 
-and provides the usual algebraic structure:
+and gives the usual algebraic instances, including:
 
 ```lean
 instance [CommSemiring R] : CommSemiring (MvPowerSeries σ R)
-instance [CommRing R] : CommRing (MvPowerSeries σ R)
+instance [CommRing R]    : CommRing    (MvPowerSeries σ R)
 ```
 
-It also defines the variables and the important monomial divisibility tests:
+The key domain file is `Mathlib/RingTheory/MvPowerSeries/NoZeroDivisors.lean`.  It contains:
 
 ```lean
-def X (s : σ) : MvPowerSeries σ R
+theorem MvPowerSeries.mem_nonZeroDivisors_of_constantCoeff
 
- theorem X_pow_dvd_iff {s : σ} {n : ℕ} {φ : MvPowerSeries σ R} :
-   (X s : MvPowerSeries σ R) ^ n ∣ φ ↔
-     ∀ m : σ →₀ ℕ, m s < n → coeff m φ = 0
-
- theorem X_dvd_iff {s : σ} {φ : MvPowerSeries σ R} :
-   (X s : MvPowerSeries σ R) ∣ φ ↔
-     ∀ m : σ →₀ ℕ, m s = 0 → coeff m φ = 0
-```
-
-`MvPowerSeries.NoZeroDivisors` gives:
-
-```lean
-instance [Semiring R] [NoZeroDivisors R] : NoZeroDivisors (MvPowerSeries σ R)
-```
-
-and also:
-
-```lean
-lemma X_mem_nonzeroDivisors {i : σ} :
+lemma MvPowerSeries.X_mem_nonzeroDivisors {i : σ} :
     X i ∈ (MvPowerSeries σ R)⁰
+
+instance [Semiring R] [NoZeroDivisors R] :
+    NoZeroDivisors (MvPowerSeries σ R)
 ```
 
-So for `[Field K]`, the ring
+and the order-multiplication theorem:
 
 ```lean
-MvPowerSeries (Fin 2) K
+theorem MvPowerSeries.weightedOrder_mul
+    (w : σ → ℕ) (f g : MvPowerSeries σ R) :
+    (f * g).weightedOrder w = f.weightedOrder w + g.weightedOrder w
 ```
 
-has `CommRing` and `NoZeroDivisors`. If a proof needs an explicit `IsDomain`, try adding the local instance
+under `[Semiring R] [NoZeroDivisors R]`.
+
+So over a field:
 
 ```lean
 import Mathlib.RingTheory.MvPowerSeries.NoZeroDivisors
 
-open MvPowerSeries
+example {K : Type*} [Field K] :
+    NoZeroDivisors (MvPowerSeries (Fin 2) K) := by
+  infer_instance
 
-variable (K : Type*) [Field K]
-
-local instance : IsDomain (MvPowerSeries (Fin 2) K) :=
-  NoZeroDivisors.to_isDomain _
+example {K : Type*} [Field K] :
+    IsDomain (MvPowerSeries (Fin 2) K) := by
+  exact NoZeroDivisors.to_isDomain _
 ```
 
-I did not find a dedicated declaration named like `MvPowerSeries.IsDomain`; the available multivariate file gives `NoZeroDivisors`, not a named `IsDomain` theorem.
+I did not find a dedicated declaration named `MvPowerSeries.IsDomain`; the available multivariate declaration is the `NoZeroDivisors` instance, and `IsDomain` follows by the general lemma `NoZeroDivisors.to_isDomain`.
 
 ### 2. UFD API
 
-Searches for multivariate UFD instances did **not** find an instance of the form
+Relevant file:
+
+```text
+Mathlib/RingTheory/PowerSeries/Ideal.lean
+```
+
+Mathlib has the univariate power-series UFD/UFM theorem:
+
+```lean
+instance [IsPrincipalIdealRing R] [IsDomain R] :
+    UniqueFactorizationMonoid R⟦X⟧
+```
+
+Here
+
+```lean
+PowerSeries R := MvPowerSeries Unit R
+```
+
+so this is a theorem about **one-variable** power series.  In particular, for a field `K`, `K⟦X⟧` has the packaged UFM instance.
+
+I did **not** find an instance of the form
 
 ```lean
 UniqueFactorizationMonoid (MvPowerSeries σ R)
 ```
 
-or, more specifically,
+or specifically
 
 ```lean
 UniqueFactorizationMonoid (MvPowerSeries (Fin 2) K)
 ```
 
-What Mathlib does have is univariate `PowerSeries` UFD/DVR API:
+The same `PowerSeries/Ideal.lean` file has the relevant TODO:
 
-```lean
--- Mathlib/RingTheory/PowerSeries/Inverse.lean
-instance : UniqueFactorizationMonoid k⟦X⟧
-instance : IsDiscreteValuationRing k⟦X⟧
-```
-
-for `[Field k]`, and also:
-
-```lean
--- Mathlib/RingTheory/PowerSeries/Ideal.lean
-instance [IsPrincipalIdealRing R] [IsDomain R] : UniqueFactorizationMonoid R⟦X⟧
-```
-
-The same `PowerSeries/Ideal.lean` file explicitly says:
-
-```lean
-## TODO
+```text
 Prove noetherianity of `MvPowerSeries` in finitely many variables.
 ```
 
-That is strong evidence that the finite-variable multivariate UFD route is not currently packaged in Mathlib at this revision.
+That is strong evidence that the finite-variable multivariate UFD route is not currently packaged in Mathlib.
 
 ### 3. Coprimality API
 
@@ -143,234 +153,280 @@ Relevant files:
 ```text
 Mathlib/RingTheory/Coprime/Basic.lean
 Mathlib/RingTheory/Coprime/Lemmas.lean
-Mathlib/RingTheory/UniqueFactorizationDomain/Basic.lean
 ```
 
-`IsCoprime` is generic, not power-series-specific:
+Useful generic declarations:
 
 ```lean
-def IsCoprime (x y : R) : Prop :=
-  ∃ a b, a * x + b * y = 1
+#check IsCoprime
+#check IsCoprime.dvd_of_dvd_mul_left
+#check IsCoprime.dvd_of_dvd_mul_right
+#check IsCoprime.mul_left
+#check IsCoprime.mul_right
+#check IsCoprime.pow_left
+#check IsCoprime.pow_right
+#check IsCoprime.pow
 ```
 
-The key cancellation lemmas are:
+These are generic for commutative semirings/rings; there does not appear to be special `PowerSeries`/`MvPowerSeries` coprimality API that would solve this goal.
 
-```lean
-theorem IsCoprime.dvd_of_dvd_mul_right
-    (H1 : IsCoprime x z) (H2 : x ∣ y * z) : x ∣ y
+More importantly, `IsCoprime` is the wrong notion here.  In a UFD one would want a no-common-prime-factor / relative-prime statement, not a Bézout identity.  The Mathlib coprime documentation explicitly warns that `IsCoprime` is stronger than `IsRelPrime`; multivariate polynomial variables are the standard example.
 
-theorem IsCoprime.dvd_of_dvd_mul_left
-    (H1 : IsCoprime x y) (H2 : x ∣ y * z) : x ∣ z
-```
+---
 
-and power closure exists:
-
-```lean
-theorem IsCoprime.pow_left  (H : IsCoprime x y) : IsCoprime (x ^ m) y
-theorem IsCoprime.pow_right (H : IsCoprime x y) : IsCoprime x (y ^ n)
-theorem IsCoprime.pow       (H : IsCoprime x y) : IsCoprime (x ^ m) (y ^ n)
-```
-
-But these do **not** apply here because the required `IsCoprime` fact is false.
-
-There is also UFD-style Euclid API:
-
-```lean
-namespace UniqueFactorizationMonoid
-
- theorem dvd_of_dvd_mul_left_of_no_prime_factors {a b c : R} (ha : a ≠ 0)
-     (h : ∀ ⦃d⦄, d ∣ a → d ∣ c → ¬Prime d) : a ∣ b * c → a ∣ b
-
- theorem dvd_of_dvd_mul_right_of_no_prime_factors {a b c : R} (ha : a ≠ 0)
-     (no_factors : ∀ {d}, d ∣ a → d ∣ b → ¬Prime d) : a ∣ b * c → a ∣ c
-```
-
-This is the *mathematically right shape*, but it requires a `UniqueFactorizationMonoid` instance for the ambient ring, which Mathlib does not appear to provide for `MvPowerSeries (Fin 2) K`.
-
-## Answers to the five questions
+## Answers to the numbered questions
 
 ### (a) Is `MvPowerSeries (Fin 2) K` a UFD when `K` is a field?
 
-Mathematically: **yes**. `K[[X₀,X₁]]` is a regular local ring / formal power series ring over a field, hence a UFD.
+Mathematically: **yes**.  `K[[X₀,X₁]]` is a regular local ring, hence a UFD.
 
-Lean/Mathlib at this repo's pinned revision: **not available as an instance**, as far as the grep/direct inspection shows.
+In Mathlib: **not available as a packaged instance/theorem** that I found.  The univariate theorem exists for `PowerSeries K = K⟦X⟧`, but the finite multivariate theorem for `MvPowerSeries (Fin 2) K` does not appear to be present.
 
 ### (b) Does Mathlib have `MvPowerSeries.IsDomain` or `MvPowerSeries.UniqueFactorizationDomain`?
 
-`MvPowerSeries.NoZeroDivisors` exists:
+`MvPowerSeries.IsDomain`: not as a dedicated declaration.  But for `[Field K]`:
 
 ```lean
-instance [Semiring R] [NoZeroDivisors R] : NoZeroDivisors (MvPowerSeries σ R)
+example : NoZeroDivisors (MvPowerSeries (Fin 2) K) := by
+  infer_instance
+
+example : IsDomain (MvPowerSeries (Fin 2) K) := by
+  exact NoZeroDivisors.to_isDomain _
 ```
 
-I did **not** find a named `MvPowerSeries.IsDomain` theorem or instance. If needed, use:
+`MvPowerSeries.UniqueFactorizationDomain` / `UniqueFactorizationMonoid`: not found for `MvPowerSeries (Fin 2) K`.  The available UFM instance is univariate:
 
 ```lean
-local instance : IsDomain (MvPowerSeries (Fin 2) K) :=
-  NoZeroDivisors.to_isDomain _
+instance [IsPrincipalIdealRing R] [IsDomain R] :
+    UniqueFactorizationMonoid R⟦X⟧
 ```
 
-I also did **not** find a `UniqueFactorizationMonoid (MvPowerSeries σ R)` instance. The UFD/DVR results I found are for univariate `PowerSeries`, not multivariate `MvPowerSeries`.
+### (c) Does Mathlib have `IsCoprime` for `MvPowerSeries`?
 
-### (c) Does Mathlib have `IsCoprime` for power series?
-
-Mathlib has generic `IsCoprime` for any `CommSemiring`, so it can be used in power series rings. But it is the **Bézout/comaximal** notion:
-
-```lean
-IsCoprime x y = ∃ a b, a * x + b * y = 1
-```
-
-There is no special power-series-specific `IsCoprime` API that turns UFD-relative-prime facts into `IsCoprime` in `MvPowerSeries`.
+Only generically.  Since `MvPowerSeries σ R` is a commutative semiring/ring when `R` is, the generic definition and lemmas apply.  But there does not appear to be power-series-specific API, and generic `IsCoprime` is Bézout/comaximal coprimality.
 
 ### (d) Can we prove `IsCoprime (X₀-X₁)^3 (X₀^3·X₁^3)` in `MvPowerSeries`?
 
-No. That proposition is false.
+No.  It is false.
 
-Reason: in `K[[X₀,X₁]]`, the ring is local and units are exactly the series with nonzero constant coefficient. Both
-
-```lean
-(X₀ - X₁)^3
-X₀^3 * X₁^3
-```
-
-have constant coefficient `0`. If there were `a b` with
-
-```lean
-a * (X₀ - X₁)^3 + b * (X₀^3 * X₁^3) = 1
-```
-
-then applying `constantCoeff` would give `0 = 1`, contradiction.
-
-Lean skeleton:
+Lean-shaped obstruction:
 
 ```lean
 import Mathlib.RingTheory.MvPowerSeries.Inverse
 import Mathlib.RingTheory.Coprime.Lemmas
 
-open MvPowerSeries
-
 noncomputable section
+
+open MvPowerSeries
 
 variable {K : Type*} [Field K]
 
-abbrev R₂ := MvPowerSeries (Fin 2) K
+abbrev Biv := MvPowerSeries (Fin 2) K
 
-local notation "X₀" => (MvPowerSeries.X (0 : Fin 2) : R₂)
-local notation "X₁" => (MvPowerSeries.X (1 : Fin 2) : R₂)
+abbrev X0 : Biv := MvPowerSeries.X (0 : Fin 2)
+abbrev X1 : Biv := MvPowerSeries.X (1 : Fin 2)
+abbrev Δ  : Biv := X0 - X1
 
-example : ¬ IsCoprime ((X₀ - X₁)^3) (X₀^3 * X₁^3) := by
-  rintro ⟨a, b, h⟩
-  have hcc := congrArg (MvPowerSeries.constantCoeff (σ := Fin 2) (R := K)) h
-  -- `simp` should reduce the left side to `0` and the right side to `1`.
-  simpa using hcc
+lemma not_isCoprime_delta_cube_X0X1_cube :
+    ¬ IsCoprime (Δ ^ 3) (X0 ^ 3 * X1 ^ 3) := by
+  intro h
+  rcases h with ⟨a, b, hab⟩
+  have hc := congrArg (MvPowerSeries.constantCoeff (σ := Fin 2) (R := K)) hab
+  -- `constantCoeff` kills `X0`, `X1`, and hence `Δ`; RHS has constant coefficient `1`.
+  simpa [Δ, X0, X1] using hc
 ```
 
-If `simp` needs help in the local file, add:
+If `simp` needs help in the local file, add explicit rewrites using `map_add`, `map_mul`, `map_sub`, `map_pow`, and `MvPowerSeries.constantCoeff_X`.
+
+### (e) Can we use `mul_dvd_cancel` / `dvd_of_mul_dvd_mul_left` if the multiplier is a non-zero-divisor?
+
+Not for this shape.
+
+A non-zero-divisor multiplier `m` does **not** imply
 
 ```lean
-  simp [map_add, map_mul, map_sub, map_pow] at hcc
+p ∣ f * m  →  p ∣ f
 ```
 
-or explicitly rewrite the constant coefficients of `X₀` and `X₁` using `MvPowerSeries.constantCoeff_X`.
+Counterexample in a domain: `2 ∣ 1 * 2`, but `2 ∤ 1`.
 
-### (e) Can a non-zero-divisor cancellation lemma replace coprimality?
-
-Not for the stated shape.
-
-From
+The standard cancellation lemmas cancel a common factor on both sides, e.g.
 
 ```lean
-a ∣ b * c
+#check mul_dvd_mul_iff_left
+#check mul_dvd_mul_iff_right
 ```
 
-and `c` a non-zero-divisor, one **cannot** conclude `a ∣ b`. Counterexample in `ℤ`: `6 ∣ 2 * 3`, and `3` is a non-zero-divisor, but `6 ∤ 2`.
-
-Regular cancellation works for shapes where the same regular factor appears on both sides, e.g.
+with shapes like
 
 ```lean
-a * c ∣ b * c  ⟹  a ∣ b
+a * b ∣ a * c ↔ b ∣ c
 ```
 
-under suitable cancellativity / non-zero-divisor hypotheses. But your hypothesis has only
+under nonzero/cancellative hypotheses on `a`.  They do not prove cancellation from `p ∣ f*m`.
 
-```lean
-(X₀ - X₁)^3 ∣ addZ * X₀^3 * X₁^3
-```
+For the intended argument you need one of:
 
-not
+1. UFD/GCD-style relative primality between `p` and `m`;
+2. `m` is a non-zero-divisor modulo `(p^3)`;
+3. an order/valuation argument showing that `m` has `p`-adic order zero.
 
-```lean
-(X₀ - X₁)^3 * X₀^3 * X₁^3 ∣ addZ * X₀^3 * X₁^3.
-```
+For the current `MvPowerSeries` goal, option 3 is the shortest with available Mathlib API.
 
-So `mul_dvd_cancel` / regular-factor cancellation is not enough.
+---
 
-## Recommended Lean route
-
-Do not aim for `IsCoprime`. The viable routes are:
-
-### Route 1: direct factorization
-
-Best if the expression is concrete.
-
-Prove directly:
-
-```lean
-∃ q : MvPowerSeries (Fin 2) K, addZ = (X₀ - X₁)^3 * q
-```
-
-or, at the polynomial/CAS layer before coercing into `MvPowerSeries`, factor the numerator and transport the identity.
-
-This avoids needing any UFD/coprime infrastructure.
-
-### Route 2: prove a custom `δ`-adic Euclid lemma
+## Recommended Lean route: shear + weighted order
 
 Let
 
 ```lean
-δ = X₀ - X₁
-m = X₀^3 * X₁^3
+U = X₀ - X₁
+V = X₁
 ```
 
-Mathematically, the needed statement is:
+Equivalently, apply the substitution/automorphism
+
+```text
+X₀ ↦ U + V,
+X₁ ↦ V.
+```
+
+Then
+
+```text
+X₀ - X₁       ↦ U,
+X₀^3 * X₁^3  ↦ (U + V)^3 * V^3.
+```
+
+Define the weight measuring only the `U` exponent:
 
 ```lean
-δ^3 ∣ f * m → δ^3 ∣ f
+abbrev Biv := MvPowerSeries (Fin 2) K
+abbrev U : Biv := MvPowerSeries.X (0 : Fin 2)
+abbrev V : Biv := MvPowerSeries.X (1 : Fin 2)
+
+def uWeight : Fin 2 → ℕ := fun i => if i = 0 then 1 else 0
 ```
 
-because the `δ`-adic order of `m` is `0`.
+Then `U^n ∣ f` can be bridged to weighted-order using:
 
-A possible formal path is to build a change-of-coordinates automorphism
-
-```text
-U = X₀ - X₁,
-V = X₁,
-X₀ = U + V,
-X₁ = V.
+```lean
+#check MvPowerSeries.X_pow_dvd_iff
+#check MvPowerSeries.nat_le_weightedOrder
+#check MvPowerSeries.coeff_eq_zero_of_lt_weightedOrder
 ```
 
-Under this automorphism, the multiplier becomes
+A useful local lemma is:
 
-```text
-(U + V)^3 * V^3,
+```lean
+lemma U_pow_dvd_of_uWeight_ge {n : ℕ} {f : Biv}
+    (h : (n : ℕ∞) ≤ f.weightedOrder uWeight) :
+    U ^ n ∣ f := by
+  rw [MvPowerSeries.X_pow_dvd_iff]
+  intro m hm
+  apply MvPowerSeries.coeff_eq_zero_of_lt_weightedOrder uWeight
+  refine lt_of_lt_of_le ?_ h
+  -- Need the small simplification lemma: `Finsupp.weight uWeight m = m 0`.
+  simpa [uWeight, U] using hm
+
+lemma uWeight_ge_of_U_pow_dvd {n : ℕ} {f : Biv}
+    (h : U ^ n ∣ f) :
+    (n : ℕ∞) ≤ f.weightedOrder uWeight := by
+  rw [MvPowerSeries.X_pow_dvd_iff] at h
+  apply MvPowerSeries.nat_le_weightedOrder uWeight
+  intro m hm
+  apply h m
+  -- Again use `Finsupp.weight uWeight m = m 0`.
+  simpa [uWeight, U] using hm
 ```
 
-which is not divisible by `U`. Then prove an `X`-adic order/cancellation lemma for the distinguished variable `U`. This is more work, but it uses the existing `X_pow_dvd_iff` / order API rather than a missing multivariate UFD instance.
+If the `simpa [uWeight]` does not close, prove once:
 
-### Route 3: develop enough UFD/prime API locally
+```lean
+lemma weight_uWeight (m : Fin 2 →₀ ℕ) :
+    Finsupp.weight uWeight m = m (0 : Fin 2) := by
+  classical
+  -- finite-support sum; coordinate `1` has weight zero.
+  sorry
+```
 
-This is mathematically clean but likely too expensive for the current divisibility goal:
+Now the cancellation lemma is exactly `weightedOrder_mul`:
 
-1. prove `MvPowerSeries (Fin 2) K` is a UFD, or at least prove `Prime (X₀ - X₁)`;
-2. prove `¬ (X₀ - X₁ ∣ X₀)` and `¬ (X₀ - X₁ ∣ X₁)`;
-3. use repeated Euclid/prime divisibility to cancel the multiplier.
+```lean
+lemma U_pow_dvd_of_U_pow_dvd_mul_of_uOrder_zero
+    {n : ℕ} {f m : Biv}
+    (hm : m.weightedOrder uWeight = 0)
+    (hdiv : U ^ n ∣ f * m) :
+    U ^ n ∣ f := by
+  apply U_pow_dvd_of_uWeight_ge (K := K)
+  have hge : (n : ℕ∞) ≤ (f * m).weightedOrder uWeight :=
+    uWeight_ge_of_U_pow_dvd (K := K) hdiv
+  simpa [MvPowerSeries.weightedOrder_mul, hm] using hge
+```
 
-Given the Mathlib TODO on finite-variable `MvPowerSeries` noetherianity, this route is probably overkill.
+For the sheared multiplier
+
+```lean
+def multUV : Biv := (U + V)^3 * V^3
+```
+
+prove:
+
+```lean
+lemma multUV_uOrder_zero :
+    (multUV (K := K)).weightedOrder uWeight = 0 := by
+  -- Coefficient of `V^6` is `1`, and its `uWeight` is `0`.
+  -- Use `MvPowerSeries.weightedOrder_le` and the coefficient computation.
+  sorry
+```
+
+The coefficient proof is small: the monomial `V^6` occurs uniquely from choosing the `V^3` term in `(U+V)^3` and multiplying by `V^3`.
+
+Finally, build the shear via substitution:
+
+```lean
+def shearArgs : Fin 2 → Biv := ![U + V, V]
+
+lemma shear_hasSubst : MvPowerSeries.HasSubst (R := K) (S := K) shearArgs := by
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero
+  intro i
+  fin_cases i <;> simp [shearArgs, U, V]
+
+def shear : Biv →ₐ[K] Biv :=
+  MvPowerSeries.substAlgHom shear_hasSubst
+```
+
+with inverse substitution
+
+```lean
+def unshearArgs : Fin 2 → Biv := ![X0 - X1, X1]
+```
+
+and use `MvPowerSeries.substAlgHom_X`, `subst_add`, `subst_sub`, `subst_mul`, and `subst_pow` to show the two substitutions are inverse and transport divisibility back.
+
+Conceptually the final theorem is:
+
+```lean
+lemma delta_cube_dvd_of_delta_cube_dvd_mul
+    {addZ : Biv}
+    (h : (X0 - X1)^3 ∣ addZ * (X0^3 * X1^3)) :
+    (X0 - X1)^3 ∣ addZ := by
+  -- apply `shear` to `h`
+  -- reduce to `U^3 ∣ shear addZ * multUV`
+  -- use `U_pow_dvd_of_U_pow_dvd_mul_of_uOrder_zero multUV_uOrder_zero`
+  -- apply `unshear` to return to original variables
+  sorry
+```
+
+The remaining work is substitution bookkeeping and one finite coefficient calculation, not a missing UFD/coprimality theorem.
+
+---
 
 ## Bottom line
 
-- `K[[X₀,X₁]]` is mathematically a UFD.
-- Mathlib at the pinned revision has `MvPowerSeries` as a domain/no-zero-divisors ring, but not as a packaged UFD.
-- Mathlib's `IsCoprime` is comaximal/Bézout and is false for `(X₀-X₁)^3` and `X₀^3 X₁^3`.
-- A non-zero-divisor multiplier is not enough to cancel from `a ∣ b*c`.
-- For the current project, the shortest Lean route is probably direct factorization of `addZ`, or a custom `δ`-adic divisibility lemma after the linear change of variables `U = X₀-X₁`, `V=X₁`.
+* `K[[X₀,X₁]]` is mathematically a UFD.
+* Mathlib has `NoZeroDivisors` / domain API for `MvPowerSeries`, but I did not find a multivariate UFD instance.
+* Mathlib has univariate `PowerSeries` UFD/UFM API.
+* `IsCoprime ((X₀-X₁)^3) (X₀^3*X₁^3)` is false because `IsCoprime` is Bézout/comaximal coprimality.
+* Non-zero-divisor cancellation alone does not prove `p ∣ f*m → p ∣ f`.
+* Use direct factorization if available; otherwise use the shear `U=X₀-X₁`, `V=X₁` and `MvPowerSeries.weightedOrder_mul` / `X_pow_dvd_iff`.
