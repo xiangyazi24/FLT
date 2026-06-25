@@ -1,371 +1,385 @@
-# Q283 (dm3): Function-field separability route without the projective formula?
+# Q291 (dm3): General-`m` `addX` identity — direct algebraic proof skeleton
 
-## Short verdict
+## Bottom line
 
-The proposed route is **mathematically standard**, but it is **not currently a
-shortcut in Mathlib** for the FLT/Mazur separability brick.
+The direct algebraic route is the right one, but there is one important correction
+to the proposed proof plan:
 
-The reason is simple: Mathlib has enough raw ingredients to talk about function
-fields and elliptic-curve point groups over fields, and it even has field-theory
-separable degree infrastructure.  But it does **not** appear to have the bridge
-package that would make this route short:
-
-```text
-elliptic curve as a scheme/group scheme
-+ multiplication-by-n as a finite morphism/rational map
-+ degree([n]) = n²
-+ differential d[n] nonzero ⇒ [n] separable
-+ separability of [n] ⇒ reduced n-torsion divisor
-+ reduced n-torsion divisor ⇒ preΨ'_n squarefree.
+```lean
+hω := W.two_mul_ψ_mul_ωProto m
+heven := W.ψ_even m
 ```
 
-Moreover, without the projective formula you do not have an explicit function
-field pullback
+are **not by themselves** the right local hypotheses for the final `ring` proof of
+`addX`.  They are enough only after you package the actual slope-numerator bridge.
+The clean final proof should use the following intermediate lemma:
 
-```text
-[n]^* X = φ_n / ψ_n²,
-[n]^* Y = ω_n / ψ_n³,
+```lean
+omegaSlope_mul_ψ₂
 ```
 
-so there is no direct formal connection between the abstract point-group map
-`n • P` and the denominator polynomial `preΨ'_n`.  That denominator connection is
-exactly what the projective formula supplies.
+This lemma is the exact symbolic identity that the `addX` proof needs.  Once it is
+available, the `addX` coordinate-ring proof is short, uniform in `m`, and closes
+by `ring1`/`ring_nf`.  The cofactor of the curve equation is
 
-Thus the function-field separability route does **not** bypass both the Bezout
-certificates and the projective formula in current Mathlib.  It replaces them by a
-larger missing algebraic-geometry bridge.
+```lean
+-4 * W.ψ m ^ 4
+```
 
-For `n ≤ 16`, the per-`n` Bezout/resultant certificates remain the faster route.
+for the doubled identity
+
+```lean
+2 * (addX(P,R_m) - ψ_{m-1}^2 * φ_{m+1}).
+```
+
+Equivalently, the algebraic normal form is
+
+```text
+2·(addX(P,R_m) - ψ_{m-1}² φ_{m+1})
+  = -4·ψ_m^4·F_W
+    - ψ_m · ( omegaSlope_m·ψ₂
+        - (2·ψ_{m-1}²·ψ_{m+2}
+             - ψ_m·ψ_{m-1}·ψ_{m+1}·(6X² + b₂X + b₄)) ).
+```
+
+Thus after applying `omegaSlope_mul_ψ₂`, the remaining cofactor is exactly
+`-4·ψ_m^4`.
+
+If your theorem `W.two_mul_ψ_mul_ωProto m` already states this slope-numerator
+identity under another name, use it directly as `hSlope`.  If it instead states
+only the normalization
+
+```text
+ψ_{2m} = 2ψ_mω_m + a₁φ_mψ_m² + a₃ψ_m⁴,
+```
+
+then it must be combined with the even recurrence and the companion symmetric Ward
+identity to prove `omegaSlope_mul_ψ₂` first.  Without that bridge, `ring` leaves a
+real residual term; this is not a tactic issue.
 
 ---
 
-## Current Mathlib status by question
+## Imports
 
-### (a) Degree of `[n]` as a rational map: `n²`?
-
-I would plan as if the answer is **no**, at least not in the elliptic-curve API in
-a usable form.
-
-Mathlib has:
-
-```lean
-#check WeierstrassCurve.Affine.FunctionField
-#check WeierstrassCurve.Affine.CoordinateRing
-#check WeierstrassCurve.Affine.Point
-#check WeierstrassCurve.Jacobian.Point
-#check WeierstrassCurve.Jacobian.Point.toAffineAddEquiv
-```
-
-It also has `AlgebraicGeometry.RationalMap` and scheme/function-field files.  But
-the existing elliptic-curve development is primarily an explicit point/group-law
-development over fields, not yet a group-scheme/morphism-degree development for
-Weierstrass curves.
-
-The theorem you would want would look like:
-
-```lean
--- Schematic; not an existing small theorem.
-theorem degree_mulMap
-    (W : WeierstrassCurve k) [W.IsElliptic]
-    (n : ℕ) (hn : (n : k) ≠ 0) :
-    RationalMap.degree (ellipticMulMap W n) = n ^ 2 := by
-  sorry
-```
-
-But to even state this cleanly, one needs:
-
-```lean
-ellipticMulMap W n : RationalMap E E
-```
-
-or a function-field embedding
-
-```lean
-mulPullback W n : K(E) →+* K(E)
-```
-
-as part of the elliptic-curve API.  The point-level map
-
-```lean
-fun P : W.Affine.Point => n • P
-```
-
-is not automatically a rational map of curves with a degree theorem.
-
-### (b) Separable degree of a rational map?
-
-Mathlib has field-theory infrastructure around separable degree.  In particular,
-there is a `Mathlib/FieldTheory/SeparableDegree.lean` file, so the field-extension
-side is not empty.
-
-But for this route you need the **geometric wrapper**:
-
-```text
-separable degree of a dominant rational map of curves
-= separable degree of the corresponding function-field extension.
-```
-
-and then the elliptic-specific statement:
-
-```text
-sepDegree([n]) = degree([n])  iff  d[n] ≠ 0.
-```
-
-I would not expect these to already be connected to
-`WeierstrassCurve.Affine.Point` / `Jacobian.Point` in current Mathlib.
-
-A field-theoretic version would have to be built manually:
-
-```lean
--- Schematic only.
-noncomputable def mulPullback
-    (W : WeierstrassCurve k) (n : ℕ) :
-    W.toAffine.FunctionField →+* W.toAffine.FunctionField := by
-  -- Need explicit rational functions for [n]^*X and [n]^*Y.
-  -- Without projective formula, these are not available.
-  sorry
-
--- Then one would study the extension K(E) / image(mulPullback W n).
-```
-
-So Mathlib has some field-theory separability tools, but not the ready-made
-rational-map separable-degree theorem for elliptic multiplication.
-
-### (c) Theorem connecting separable degree to `preΨ'_n` squarefree?
-
-I would plan as if the answer is **no**.
-
-The desired theorem is highly nontrivial.  It would say that the denominator of
-`[n]^*x`, after removing the universal `ψ₂` factor in even degree, cuts out the
-nonzero `n`-torsion divisor modulo `±1`, and that separability of `[n]` implies
-this divisor is reduced.  In Lean terms, you would need a bridge like:
-
-```lean
--- Schematic; not existing as a Mathlib theorem.
-theorem squarefree_preΨ'_of_sepDegree_mulMap
-    (W : WeierstrassCurve k) [W.IsElliptic]
-    (n : ℕ) (hn : (n : k) ≠ 0)
-    (hsep : separableDegree (ellipticMulMap W n) = n ^ 2) :
-    Squarefree (W.preΨ' n) := by
-  sorry
-```
-
-This bridge is essentially another form of the division-polynomial theorem.  It
-requires identifying roots of `preΨ'_n` with x-coordinates of torsion points and
-controlling the quotient by `P ↦ -P`.
-
----
-
-## Why formal-group separability does not by itself prove `preΨ'_n` squarefree
-
-The formal-group statement
-
-```text
-[n](T) = n*T + higher terms
-```
-
-and hence `d[n] ≠ 0` when `(n : k) ≠ 0` is the correct local reason that
-multiplication by `n` is separable/étale.  But there are two missing links if the
-goal is squarefreeness of `preΨ'_n`.
-
-### Missing link 1: `[n]` as a morphism/rational map
-
-The formal group gives the differential of the group endomorphism **once the
-endomorphism exists as a morphism of the curve**.  Mathlib has the point-level
-group law, but not a packaged finite morphism
-
-```text
-[n] : E → E
-```
-
-with degree and separability theorems.
-
-### Missing link 2: denominator of `[n]^*x`
-
-Even if `[n]` is known to be separable, to conclude that `preΨ'_n` is squarefree
-you must know that `preΨ'_n` is the denominator/cutting equation for the nonzero
-kernel divisor.  That is the identity
-
-```text
-[n]^*x = φ_n / ψ_n²
-```
-
-or at least the weaker denominator statement
-
-```text
-poles of [n]^*x are exactly zeros of preΨ'_n with the expected multiplicities.
-```
-
-This is essentially the X/Z part of the projective formula.  Without it,
-separability of the abstract map `[n]` has no formal connection to the specific
-polynomial `W.preΨ' n`.
-
-So `formalNsmul_coeff_one` is excellent evidence and may be useful in a local
-proof, but it does not remove the need to relate the formal group map to the
-univariate division polynomial.
-
----
-
-## The minimal theorem stack needed for this route
-
-If you wanted to make the function-field route work, I would build it as the
-following theorem stack.
+Use the files that expose the coordinate ring, division polynomials, and Jacobian
+`addX` formula.  In the project file, replace the scratch imports by the actual
+local filenames containing `ωProto`.
 
 ```lean
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Point
+import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Formula
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.FieldTheory.SeparableDegree
 import Mathlib.Tactic
 
+-- Project-local imports, adjust names to your tree:
+-- import FLT.Scratch.KeystoneOmega
+-- import FLT.Scratch.KeystoneProjectiveZ
+```
+
+---
+
+## Complete Lean skeleton
+
+This is written so the final `addX` theorem is uniform in `m`.  The only theorem
+that must already exist, or be proved just above it, is `omegaSlope_mul_ψ₂`.
+
+```lean
 namespace WeierstrassCurve
 
 open Polynomial
 
 variable {k : Type*} [Field k]
-variable (W : WeierstrassCurve k) [W.IsElliptic]
 
-/-- Function field of the affine curve.  This already exists as an abbrev. -/
-abbrev K : Type _ :=
-  W.toAffine.FunctionField
+namespace ProjectiveFormula
 
-/-- Missing bridge 1: multiplication-by-`n` as a function-field pullback. -/
-noncomputable def mulPullback (n : ℕ) : K W →+* K W := by
-  -- Needs rational functions for `[n]^*X` and `[n]^*Y`.
-  -- Without projective formula this is not available in computable form.
+/-- Bivariate polynomial ring `k[X][Y]`. -/
+abbrev Bivar (k : Type*) [CommSemiring k] := Polynomial (Polynomial k)
+
+local notation "kXY" => Bivar k
+
+/-- The embedded affine `X` variable in `k[X][Y]`. -/
+noncomputable abbrev XX : kXY :=
+  Polynomial.C Polynomial.X
+
+/-- The affine `Y` variable in `k[X][Y]`. -/
+noncomputable abbrev YY : kXY :=
+  Polynomial.X
+
+/-- A scalar coefficient as a bivariate constant. -/
+noncomputable abbrev CC (a : k) : kXY :=
+  Polynomial.C (Polynomial.C a)
+
+/-- The half-derivative of `Ψ₂Sq`: `6X² + b₂X + b₄`. -/
+noncomputable def halfDblXPoly (W : WeierstrassCurve k) : Polynomial k :=
+  6 * Polynomial.X ^ 2 + Polynomial.C W.b₂ * Polynomial.X + Polynomial.C W.b₄
+
+/-- The same polynomial embedded in `k[X][Y]`. -/
+noncomputable def halfDblXPolyBivar (W : WeierstrassCurve k) : kXY :=
+  Polynomial.C (halfDblXPoly W)
+
+/-- The point `P = [X,Y,1]` as a Jacobian representative over `k[X][Y]`. -/
+noncomputable def PJac : Fin 3 → kXY :=
+  ![XX, YY, 1]
+
+/-- The projective division-polynomial representative `R_m = [φ_m,ω_m,ψ_m]`. -/
+noncomputable def RJac (W : WeierstrassCurve k) (m : ℤ) : Fin 3 → kXY :=
+  ![W.φ m, W.ωProto m, W.ψ m]
+
+/--
+`addX(P,R_m)` as a bivariate polynomial.
+
+This uses the Jacobian formula over the base-changed curve.  The abbreviation is
+only to keep the final theorem readable.
+-/
+noncomputable def addX_PR (W : WeierstrassCurve k) (m : ℤ) : kXY :=
+  (W⁄kXY).toJacobian.addX (PJac (k := k)) (RJac W m)
+
+/-- The affine equation polynomial `F_W(X,Y)`. -/
+noncomputable def FW (W : WeierstrassCurve k) : kXY :=
+  W.toAffine.polynomial
+
+/--
+The slope numerator that the `addX` identity actually needs.
+
+It is
+
+```text
+N_m = 2(ω_m - Y ψ_m^3) - a₁ ψ_m ψ_{m-1} ψ_{m+1}.
+```
+
+The sign convention matches Mathlib's Jacobian `addX` formula for
+`addX(P,R_m)`.
+-/
+noncomputable def omegaSlope (W : WeierstrassCurve k) (m : ℤ) : kXY :=
+  2 * (W.ωProto m - YY * W.ψ m ^ 3)
+    - CC W.a₁ * W.ψ m * W.ψ (m - 1) * W.ψ (m + 1)
+
+/--
+The exact symbolic bridge needed for the `addX` proof.
+
+This is the lemma that should be proved from your `ω` normalization plus the Ward
+recurrences.  Once it is available, the final `addX` coordinate-ring identity is
+immediate by `ring`.
+
+If your local theorem `two_mul_ψ_mul_ωProto` already has this statement, make this
+lemma a wrapper around it.
+-/
+theorem omegaSlope_mul_ψ₂
+    (W : WeierstrassCurve k) (m : ℤ) :
+    omegaSlope W m * W.ψ₂
+      = 2 * W.ψ (m - 1) ^ 2 * W.ψ (m + 2)
+          - W.ψ m * W.ψ (m - 1) * W.ψ (m + 1) * halfDblXPolyBivar W := by
+  /-
+  Recommended local proof shape:
+
+  1. `have hω := W.two_mul_ψ_mul_ωProto m`
+  2. `have heven := W.ψ_even m`
+  3. combine them with the companion symmetric Ward identity
+
+       ψ_{m-1}²ψ_{m+2} + ψ_{m-2}ψ_{m+1}² + ψ_m³Ψ₂Sq
+         = ψ_mψ_{m-1}ψ_{m+1}(6X²+b₂X+b₄)
+
+     or with whatever local lemma already encodes this identity.
+
+  `hω` and `heven` alone generally leave the symmetric residual term above.
+  -/
   sorry
 
-/-- Missing bridge 2: degree of the function-field extension. -/
-theorem finrank_mulPullback_eq_sq
-    (n : ℕ) (hn : (n : k) ≠ 0) :
-    Module.finrank (SubsemiringClass?) (K W) = n ^ 2 := by
-  -- Schematic.  Need the correct algebra structure via `mulPullback W n`.
-  sorry
+/--
+Expanded polynomial identity behind the coordinate-ring `addX` proof.
 
-/-- Missing bridge 3: formal derivative nonzero implies separability. -/
-theorem mulPullback_separable_of_natCast_ne_zero
-    (n : ℕ) (hn : (n : k) ≠ 0) :
-    -- `K(E)` is separable over `[n]^*K(E)`.
-    True := by
-  -- Would use `formalNsmul_coeff_one` plus smooth curve/group morphism theory.
-  sorry
+This lemma is intentionally pure polynomial algebra.  It is the place where the
+cofactor is visible:
 
-/-- Missing bridge 4: denominator of `[n]^*X` is `preΨ'_n²` up to units. -/
-theorem denom_mulPullback_X_eq_preΨ'
-    (n : ℕ) :
-    -- Denominator statement for `[n]^*X`.
-    True := by
-  -- This is essentially the X/Z part of the projective formula.
-  sorry
+```text
+-4 * ψ_m^4
+```
 
-/-- Missing bridge 5: separability of `[n]` implies squarefree denominator. -/
-theorem squarefree_preΨ'_of_mulPullback_separable
-    (n : ℕ) (hn : (n : k) ≠ 0) :
-    Squarefree (W.preΨ' n) := by
-  -- Needs divisor/fiber theorem plus the denominator theorem above.
-  sorry
+After rewriting by `omegaSlope_mul_ψ₂`, the proof is only `ring1`.
+-/
+theorem two_mul_addX_PR_sub_sq_φ_succ_eq
+    (W : WeierstrassCurve k) (m : ℤ) :
+    2 * (addX_PR W m - W.ψ (m - 1) ^ 2 * W.φ (m + 1))
+      = (-4 * W.ψ m ^ 4) * FW W := by
+  have hSlope := omegaSlope_mul_ψ₂ (W := W) (m := m)
 
+  /-
+  If `simp` does not unfold `W⁄kXY` far enough, add the same base-change simp
+  lemmas used elsewhere in the project:
+
+    WeierstrassCurve.map_a₁, map_a₂, map_a₃, map_a₄, map_a₆,
+    WeierstrassCurve.map_b₂, map_b₄,
+    Algebra.algebraMap_self_apply
+
+  The important simplification list is:
+
+    addX_PR, PJac, RJac, Jacobian.addX,
+    omegaSlope, halfDblXPolyBivar, halfDblXPoly,
+    FW, Affine.polynomial,
+    WeierstrassCurve.φ, WeierstrassCurve.ψ₂,
+    WeierstrassCurve.b₂, WeierstrassCurve.b₄
+  -/
+  linear_combination (norm :=
+    (simp [addX_PR, PJac, RJac, Jacobian.addX,
+      omegaSlope, halfDblXPolyBivar, halfDblXPoly,
+      FW, Affine.polynomial,
+      WeierstrassCurve.φ, WeierstrassCurve.ψ₂,
+      WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+      CC, XX, YY]; ring1))
+    - W.ψ m * hSlope
+
+/--
+The desired coordinate-ring statement for the X-coordinate, with the harmless
+factor `2` included.
+-/
+theorem mk_two_mul_addX_PR_sub_sq_φ_succ
+    (W : WeierstrassCurve k) (m : ℤ) :
+    WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
+      (2 * (addX_PR W m - W.ψ (m - 1) ^ 2 * W.φ (m + 1))) = 0 := by
+  rw [AdjoinRoot.mk_eq_zero]
+  refine ⟨-4 * W.ψ m ^ 4, ?_⟩
+  exact two_mul_addX_PR_sub_sq_φ_succ_eq (W := W) (m := m)
+
+end ProjectiveFormula
 end WeierstrassCurve
 ```
 
-This is a major development.  The most expensive pieces are not field-theoretic
-separable degree itself; they are the elliptic-curve/rational-map bridges.
-
 ---
 
-## Could one avoid `ω_n` but still use function fields?
+## If `addX_PR` does not simplify because of base change
 
-Maybe partially, but not enough to be a clean shortcut.
-
-For squarefreeness of `preΨ'_n`, one might hope to prove only the X-coordinate
-pullback
-
-```text
-[n]^*x = Φ_n / ΨSq_n
-```
-
-and avoid the Y-coordinate `ω_n`.  That would be enough to identify the denominator
-of the x-map.  However, to prove that the rational function really is `[n]^*x`,
-you still need to connect it to the group law.  The usual proof uses the full
-projective representative `[φ_n : ω_n : ψ_n]`, because the curve equation alone
-does not determine the sign/Y-coordinate of `[n]P`.
-
-There may be a route using only symmetric functions under `P ↦ -P`, because the
-x-coordinate descends to the quotient `E/{±1} ≅ P¹`.  But formalizing that in
-Mathlib would require quotient-map infrastructure and a proof that the induced
-map on `P¹` has denominator `preΨ'_n`.  That is not obviously shorter than adding
-`ω_n`.
-
----
-
-## Comparison with the per-`n` certificate route
-
-For the Mazur `|T| ≤ 16` target, the finite certificate route is still the most
-practical.
-
-Per-`n` Bezout/resultant proof needs:
+If Lean does not reduce
 
 ```lean
-A_n * W.preΨ' n + B_n * derivative (W.preΨ' n)
-  = C_n * W.Δ ^ e_n
+(W⁄kXY).toJacobian.addX (PJac (k := k)) (RJac W m)
 ```
 
-Then:
+to the raw polynomial formula, define the raw formula directly and prove a bridge
+lemma once.
 
-```text
-[W.IsElliptic] ⇒ W.Δ ≠ 0
-(n : k) ≠ 0    ⇒ (C_n : k) ≠ 0
+```lean
+namespace WeierstrassCurve
+namespace ProjectiveFormula
+
+open Polynomial
+
+variable {k : Type*} [Field k]
+
+/-- Raw expanded `addX(P,R_m)` formula, avoiding base-change reducibility issues. -/
+noncomputable def addX_PR_raw (W : WeierstrassCurve k) (m : ℤ) : kXY :=
+  XX * (W.φ m) ^ 2
+    - 2 * YY * W.ωProto m * W.ψ m
+    + XX ^ 2 * W.φ m * W.ψ m ^ 2
+    - CC W.a₁ * XX * W.ωProto m * W.ψ m
+    - CC W.a₁ * YY * W.φ m * W.ψ m ^ 2
+    + 2 * CC W.a₂ * XX * W.φ m * W.ψ m ^ 2
+    - CC W.a₃ * W.ωProto m * W.ψ m
+    - CC W.a₃ * YY * W.ψ m ^ 4
+    + CC W.a₄ * W.φ m * W.ψ m ^ 2
+    + CC W.a₄ * XX * W.ψ m ^ 4
+    + 2 * CC W.a₆ * W.ψ m ^ 4
+
+/-- Bridge from the raw formula to Mathlib's `Jacobian.addX`. -/
+theorem addX_PR_eq_raw (W : WeierstrassCurve k) (m : ℤ) :
+    addX_PR W m = addX_PR_raw W m := by
+  simp [addX_PR, addX_PR_raw, PJac, RJac, Jacobian.addX,
+    CC, XX, YY]
+  ring1
+
+/-- Raw version of the polynomial identity. -/
+theorem two_mul_addX_PR_raw_sub_sq_φ_succ_eq
+    (W : WeierstrassCurve k) (m : ℤ) :
+    2 * (addX_PR_raw W m - W.ψ (m - 1) ^ 2 * W.φ (m + 1))
+      = (-4 * W.ψ m ^ 4) * FW W := by
+  have hSlope := omegaSlope_mul_ψ₂ (W := W) (m := m)
+  linear_combination (norm :=
+    (simp [addX_PR_raw, omegaSlope, halfDblXPolyBivar, halfDblXPoly,
+      FW, Affine.polynomial,
+      WeierstrassCurve.φ, WeierstrassCurve.ψ₂,
+      WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+      CC, XX, YY]; ring1))
+    - W.ψ m * hSlope
+
+end ProjectiveFormula
+end WeierstrassCurve
 ```
 
-and you get `IsCoprime (W.preΨ' n) (derivative (W.preΨ' n))` directly.
+Then the non-raw theorem is just:
 
-The function-field separability route needs, in addition to formal group facts:
-
-```text
-construction of [n] as a rational map/function-field embedding;
-degree([n]) = n²;
-separable degree API connected to this map;
-differential nonzero ⇒ separability of the map;
-identification of preΨ'_n as the x-denominator/kernel divisor;
-separability of the map ⇒ squarefree denominator.
+```lean
+  rw [addX_PR_eq_raw]
+  exact two_mul_addX_PR_raw_sub_sq_φ_succ_eq (W := W) (m := m)
 ```
 
-That is much larger than 16 generated certificates.
+This raw version is often more robust in scratch files, because it avoids any
+unfolding fragility around `W⁄kXY`.
 
 ---
 
-## Direct answers
+## Why `hω` + `heven` alone do not close
 
-### (a) Does Mathlib have `degree([n]) = n²` as a rational map?
-
-Not in a usable elliptic-curve form that I would rely on.  Mathlib has point group
-laws and some scheme/rational-map infrastructure, but no apparent packaged theorem
-for degree of the elliptic multiplication map.
-
-### (b) Does Mathlib have separable degree of a rational map?
-
-It has field-theory separable degree infrastructure, but the rational-map/curve
-wrapper and its connection to elliptic multiplication maps appear to be missing.
-
-### (c) Does Mathlib connect separable degree to `preΨ'_n` squarefree?
-
-No.  That bridge would itself be a substantial theorem about the n-torsion divisor
-and the x-coordinate quotient.  It is essentially another incarnation of the
-projective/division-polynomial representability theorem.
-
-## Recommendation
-
-Do not pursue this as the main route for the FLT/Mazur separability brick.
-
-Use `formalNsmul_coeff_one` as conceptual validation and maybe later for a local
-formal proof, but for the current project goal the fastest route remains:
+Let
 
 ```text
-per-`n` resultant/Bezout certificates for n ≤ 16.
+q = ψ_m,     r = ψ_{m-1},     s = ψ_{m+1},     t = ψ_{m+2},
+φ = Xq² - sr,      w = ω_m,
+ψ₂ = 2Y + a₁X + a₃,
+M = 6X² + b₂X + b₄.
 ```
 
-If you later want a reusable general theorem, the most promising non-certificate
-route is probably a local/divisor proof that `preΨ'_n` cuts out the reduced
-nonzero n-torsion divisor when `(n : k) ≠ 0`.  But that still requires a serious
-bridge from division polynomials to the group law; it is not currently supplied by
-Mathlib’s function-field API alone.
+The raw Jacobian `addX(P,R_m)` formula satisfies the formal identity
+
+```text
+2(addX(P,R_m) - r²(Xs² - tq))
+  = -4q⁴F_W
+    - q · ((2(w - Yq³) - a₁qrs)ψ₂ - (2r²t - qrsM)).
+```
+
+This is the exact algebraic identity that `ring1` proves.
+
+Therefore the final proof needs precisely
+
+```text
+(2(w - Yq³) - a₁qrs)ψ₂ = 2r²t - qrsM.
+```
+
+That is `omegaSlope_mul_ψ₂`.
+
+The normalization identity
+
+```text
+ψ_{2m} = 2q w + a₁φq² + a₃q⁴
+```
+
+and the even recurrence
+
+```text
+ψ_{2m}ψ₂ = q(r²t - u s²)
+```
+
+still leave the symmetric residual
+
+```text
+r²t + u s² + q³Ψ₂Sq - qrs(6X²+b₂X+b₄),
+```
+
+unless you also supply the companion symmetric Ward identity.  So if Lean leaves a
+nonzero residual after `linear_combination hω ... + heven ...`, the missing lemma
+is not a simplifier; it is this symmetric/slope identity.
+
+---
+
+## Recommended implementation order
+
+1. Add `halfDblXPoly`, `omegaSlope`.
+2. Prove `omegaSlope_mul_ψ₂` as a wrapper around your local `ω` normalization plus
+   the symmetric Ward identity.  If your current `two_mul_ψ_mul_ωProto` already
+   states it, just `simpa [omegaSlope, halfDblXPolyBivar, halfDblXPoly] using ...`.
+3. Add `addX_PR_raw` and prove `two_mul_addX_PR_raw_sub_sq_φ_succ_eq` by the
+   one-line `linear_combination` above.
+4. Add the coordinate-ring `mk` theorem via `AdjoinRoot.mk_eq_zero` with cofactor
+   `-4 * W.ψ m ^ 4`.
+5. Only afterwards bridge `addX_PR_raw` to `(W⁄kXY).toJacobian.addX` if needed.
+
+This gives an all-`m` proof and avoids per-`m` CAS certificates.  The only new
+mathematical ingredient is the slope-numerator identity `omegaSlope_mul_ψ₂`.
