@@ -1,121 +1,450 @@
-# Q541 (dm1): universal-ring transport for `formalAddZ_dvd_cube`
+# Q591 (dm1): proving `Prime (X₀ - X₁)` in `MvPowerSeries (Fin 2) S`
 
-Yes: Mathlib already has the projective naturality lemmas you want, with the exact names
-`WeierstrassCurve.Projective.map_addZ` and `WeierstrassCurve.Projective.map_addXYZ`; the important type correction is that the coefficient evaluation map must be lifted to power series as `MvPowerSeries.map (univEval W)`, not applied directly to `univWeierstrassCurve.formalAddZ`.
+## Executive answer
+
+Use `MvPowerSeries.rename` for the literal diagonal evaluation map, but do **not** try to prove the kernel/divisibility statement from the old univariate `diagDiffQuot` alone.  The clean Lean route is:
+
+1. construct
+   ```lean
+   diagEval : MvPowerSeries (Fin 2) S →ₐ[S] S⟦X⟧
+   ```
+   as `MvPowerSeries.rename (fun _ : Fin 2 => ())`;
+2. prove the kernel statement by reducing to the coordinate variable `X₀` using `killCompl` and the shear automorphism
+   ```lean
+   U ↦ X₀ - X₁,   V ↦ X₁;
+   ```
+3. prove `Prime X₀` from `MvPowerSeries.X_dvd_iff` plus `killCompl`; then transport primality across the shear equivalence using `MulEquiv.prime_iff`.
+
+This is shorter and more API-aligned than building the quotient `S⟦X₀,X₁⟧/(X₀-X₁) ≃ S⟦T⟧` explicitly.
+
+---
+
+## Imports
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Formula
-import Mathlib.RingTheory.MvPowerSeries.Basic
+import Mathlib.RingTheory.MvPowerSeries.Rename
+import Mathlib.RingTheory.MvPowerSeries.Substitution
+import Mathlib.RingTheory.PowerSeries.Order
+import Mathlib.Algebra.Prime.Lemmas
 import Mathlib.Tactic
+```
 
-open MvPolynomial
+`Rename` gives `MvPowerSeries.rename`, `killCompl`, and `rename_eq_subst`; `Substitution` gives `substAlgHom`; `PowerSeries.Order` is the safest import for the domain/no-zero-divisors instances on univariate power series.
 
-namespace WeierstrassCurve
+---
+
+## Notation
+
+```lean
+open scoped PowerSeries
+open Finsupp
+
+namespace MvPowerSeries
 
 noncomputable section
 
-variable {R S : Type*} [CommRing R] [CommRing S]
+variable {S : Type*} [CommRing S]
 
-/-- The universal coefficient ring `ℤ[a₁,a₂,a₃,a₄,a₆]`. -/
-abbrev UnivCoeff : Type := MvPolynomial (Fin 5) ℤ
+abbrev A (S : Type*) [CommRing S] := MvPowerSeries (Fin 2) S
 
-/-- The universal Weierstrass curve over `ℤ[a₁,a₂,a₃,a₄,a₆]`. -/
-def univWeierstrassCurve : WeierstrassCurve UnivCoeff where
-  a₁ := MvPolynomial.X (0 : Fin 5)
-  a₂ := MvPolynomial.X (1 : Fin 5)
-  a₃ := MvPolynomial.X (2 : Fin 5)
-  a₄ := MvPolynomial.X (3 : Fin 5)
-  a₆ := MvPolynomial.X (4 : Fin 5)
-
-/-- The five coefficient values of a curve `W`, used to evaluate the universal ring. -/
-def univCoeffEval (W : WeierstrassCurve R) : Fin 5 → R :=
-  ![W.a₁, W.a₂, W.a₃, W.a₄, W.a₆]
-
-/-- Evaluation from the universal coefficient ring to the coefficient ring of `W`. -/
-def univEval (W : WeierstrassCurve R) : UnivCoeff →+* R :=
-  MvPolynomial.eval₂Hom (Int.castRingHom R) (univCoeffEval W)
-
-@[simp] lemma univEval_X0 (W : WeierstrassCurve R) :
-    univEval W (MvPolynomial.X (0 : Fin 5)) = W.a₁ := by
-  simp [univEval, univCoeffEval]
-
-@[simp] lemma univEval_X1 (W : WeierstrassCurve R) :
-    univEval W (MvPolynomial.X (1 : Fin 5)) = W.a₂ := by
-  simp [univEval, univCoeffEval]
-
-@[simp] lemma univEval_X2 (W : WeierstrassCurve R) :
-    univEval W (MvPolynomial.X (2 : Fin 5)) = W.a₃ := by
-  simp [univEval, univCoeffEval]
-
-@[simp] lemma univEval_X3 (W : WeierstrassCurve R) :
-    univEval W (MvPolynomial.X (3 : Fin 5)) = W.a₄ := by
-  simp [univEval, univCoeffEval]
-
-@[simp] lemma univEval_X4 (W : WeierstrassCurve R) :
-    univEval W (MvPolynomial.X (4 : Fin 5)) = W.a₆ := by
-  simp [univEval, univCoeffEval]
-
-@[simp] lemma map_univWeierstrassCurve_univEval (W : WeierstrassCurve R) :
-    univWeierstrassCurve.map (univEval W) = W := by
-  ext <;> simp [univWeierstrassCurve]
-
-/-!
-The local naturality lemma for your formal addition construction.
-
-If you already have this lemma, keep your existing one and skip this block.  If not, this is the
-right statement.  Its proof is deliberately by unfolding the local formal point definitions and then
-using Mathlib's existing projective formula lemma `WeierstrassCurve.Projective.map_addZ`.
-
-The only project-local names in the proof are `formalPoint₀`, `formalPoint₁`, and the naturality
-lemma for the formal parameter solution `formalW_map`/`w_map`; replace those three names by the
-actual local names in your file if they differ.  The final theorem below is independent of those
-names once this `[simp]` lemma exists.
--/
-@[simp] lemma formalAddZ_map (f : R →+* S) (W : WeierstrassCurve R) :
-    MvPowerSeries.map (σ := Fin 2) f W.formalAddZ = (W.map f).formalAddZ := by
-  classical
-  -- Expected local definition shape:
-  --   W.formalAddZ = (W.map (MvPowerSeries.C : R →+* MvPowerSeries (Fin 2) R)).addZ
-  --       W.formalPoint₀ W.formalPoint₁
-  -- where the formal points are `[X₀,-1,w(X₀)]` and `[X₁,-1,w(X₁)]`.
-  -- After unfolding, `simp` uses:
-  --   * `MvPowerSeries.map_X`
-  --   * `MvPowerSeries.map_C`
-  --   * your `formalW_map`/`w_map`
-  --   * `WeierstrassCurve.Projective.map_addZ`
-  -- Mathlib's exact lemma is:
-  --   `WeierstrassCurve.Projective.map_addZ`.
-  unfold WeierstrassCurve.formalAddZ
-  simpa [WeierstrassCurve.map_map]
-    using
-      (WeierstrassCurve.Projective.map_addZ
-        (W' := W.map (MvPowerSeries.C : R →+* MvPowerSeries (Fin 2) R))
-        (f := MvPowerSeries.map (σ := Fin 2) f)
-        (P := W.formalPoint₀)
-        (Q := W.formalPoint₁)).symm
-
-/-- Universal evaluation commutes with the formal `Z`-addition series. -/
-@[simp] lemma univEval_formalAddZ (W : WeierstrassCurve R) :
-    MvPowerSeries.map (σ := Fin 2) (univEval W) univWeierstrassCurve.formalAddZ =
-      W.formalAddZ := by
-  simpa [map_univWeierstrassCurve_univEval]
-    using formalAddZ_map (R := UnivCoeff) (S := R) (univEval W) univWeierstrassCurve
-
-/-- General-ring divisibility, transported from the universal domain case. -/
-theorem formalAddZ_dvd_cube (W : WeierstrassCurve R) :
-    (MvPowerSeries.X (0 : Fin 2) - MvPowerSeries.X (1 : Fin 2)) ^ 3 ∣ W.formalAddZ := by
-  classical
-  -- `MvPolynomial (Fin 5) ℤ` is a domain, hence has no zero divisors.
-  letI : NoZeroDivisors UnivCoeff := inferInstance
-  rcases formalAddZ_dvd_cube_of_noZeroDivisors
-      (R := UnivCoeff) univWeierstrassCurve with ⟨q, hq⟩
-  refine ⟨MvPowerSeries.map (σ := Fin 2) (univEval W) q, ?_⟩
-  have hmap := congrArg (MvPowerSeries.map (σ := Fin 2) (univEval W)) hq
-  simpa [univEval_formalAddZ] using hmap
-
-end
-
-end WeierstrassCurve
+local notation "X₀" => (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) S)
+local notation "X₁" => (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) S)
+local notation "D"  => (X₀ - X₁)
 ```
 
-If your local formal-point names are not `formalPoint₀`/`formalPoint₁`, the only edit should be in `formalAddZ_map`; the final transport theorem is exactly the `rcases`/`congrArg (MvPowerSeries.map ...)` proof above.
+---
+
+## 1. Diagonal evaluation
+
+The cleanest construction is `rename` along the finite-fiber map `Fin 2 → Unit`.
+
+```lean
+/-- Diagonal evaluation: send both variables to the single univariate variable. -/
+noncomputable def diagEval (S : Type*) [CommRing S] :
+    MvPowerSeries (Fin 2) S →ₐ[S] S⟦X⟧ :=
+  MvPowerSeries.rename (R := S) (fun _ : Fin 2 => ())
+
+@[simp] lemma diagEval_X0 :
+    diagEval S (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) S) =
+      (MvPowerSeries.X () : S⟦X⟧) := by
+  simp [diagEval]
+
+@[simp] lemma diagEval_X1 :
+    diagEval S (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) S) =
+      (MvPowerSeries.X () : S⟦X⟧) := by
+  simp [diagEval]
+
+@[simp] lemma diagEval_D : diagEval S D = 0 := by
+  simp [diagEval]
+```
+
+The coefficient theorem you get from Mathlib is `MvPowerSeries.coeff_rename`.  For this diagonal map it says: the `T^k` coefficient is the finite sum over all bidegrees of total degree `k`.  If you want the explicit antidiagonal form, prove it once as a convenience lemma:
+
+```lean
+lemma coeff_diagEval (f : MvPowerSeries (Fin 2) S) (k : ℕ) :
+    PowerSeries.coeff k (diagEval S f) =
+      ∑ p in Finset.antidiagonal k,
+        MvPowerSeries.coeff
+          (Finsupp.single (0 : Fin 2) p.1 + Finsupp.single (1 : Fin 2) p.2) f := by
+  classical
+  -- Start with:
+  --   rw [PowerSeries.coeff, MvPowerSeries.coeff_rename]
+  -- Then identify the finite preimage of `Finsupp.single () k` under
+  -- `Finsupp.mapDomain (fun _ : Fin 2 => ())` with `Finset.antidiagonal k`.
+  -- This is just the bijection `(m,n) ↦ single 0 m + single 1 n`.
+  -- I would keep this as an isolated helper; do not inline this proof into primality.
+  sorry
+```
+
+The `sorry` above is intentionally marking an optional cosmetic lemma.  The primality proof below does not need this antidiagonal coefficient statement.
+
+---
+
+## 2. Kernel of killing one variable
+
+Instead of attacking the diagonal kernel directly, first prove the kernel statement for the projection that kills `X₀` and keeps `X₁`.
+
+```lean
+/-- Keep the second variable.  Thus `killCompl keep₁` kills variable `0`. -/
+def keep₁ : Unit ↪ Fin 2 where
+  toFun _ := (1 : Fin 2)
+  inj' := by
+    intro a b _
+    cases a
+    cases b
+    rfl
+
+/-- Set `X₀ = 0` and rename `X₁` to the single univariate variable. -/
+noncomputable def kill₀ (S : Type*) [CommRing S] :
+    MvPowerSeries (Fin 2) S →ₐ[S] S⟦X⟧ :=
+  MvPowerSeries.killCompl (R := S) keep₁
+
+@[simp] lemma kill₀_X0 : kill₀ S X₀ = 0 := by
+  classical
+  simpa [kill₀, keep₁] using
+    (MvPowerSeries.killCompl_X_eq_zero (R := S) (e := keep₁) (t := (0 : Fin 2)) (by
+      intro h
+      rcases h with ⟨u, hu⟩
+      cases u
+      norm_num at hu))
+
+@[simp] lemma kill₀_X1 : kill₀ S X₁ = (MvPowerSeries.X () : S⟦X⟧) := by
+  simpa [kill₀, keep₁] using
+    (MvPowerSeries.killCompl_X (R := S) (e := keep₁) ())
+
+/-- Kernel of `kill₀` is the principal ideal generated by `X₀`. -/
+lemma kill₀_eq_zero_iff_X0_dvd (f : MvPowerSeries (Fin 2) S) :
+    kill₀ S f = 0 ↔ X₀ ∣ f := by
+  classical
+  constructor
+  · intro hf
+    rw [MvPowerSeries.X_dvd_iff]
+    intro m hm0
+    -- `hm0 : m 0 = 0`, so `m` is in the image of `embDomain keep₁`.
+    let n : Unit →₀ ℕ := Finsupp.single () (m (1 : Fin 2))
+    have hm : m = Finsupp.embDomain keep₁ n := by
+      ext i
+      fin_cases i
+      · simpa [keep₁, n] using hm0
+      · simp [keep₁, n]
+    have hc := congrArg (MvPowerSeries.coeff n) hf
+    simpa [kill₀, MvPowerSeries.coeff_killCompl, hm] using hc
+  · intro hdiv
+    ext n
+    rw [MvPowerSeries.coeff_killCompl]
+    exact (MvPowerSeries.X_dvd_iff.mp hdiv)
+      (Finsupp.embDomain keep₁ n)
+      (by simp [keep₁])
+```
+
+This lemma is the real workhorse.  It says that the quotient by `X₀` is implemented by `killCompl keep₁`, without constructing an `Ideal.Quotient` object.
+
+---
+
+## 3. `X₀` is prime
+
+Now use the fact that `S⟦X⟧` has no zero divisors when `S` is a domain.
+
+```lean
+lemma prime_X0 [IsDomain S] :
+    Prime (X₀ : MvPowerSeries (Fin 2) S) := by
+  classical
+  refine ⟨?hne, ?hnotunit, ?hdvd⟩
+  · intro h
+    have hc := congrArg
+      (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1)) h
+    simpa [MvPowerSeries.coeff_X] using hc
+  · intro hunit
+    have hunit' : IsUnit (kill₀ S X₀) := hunit.map (kill₀ S)
+    simpa using hunit'
+  · intro a b hab
+    have hkill : kill₀ S (a * b) = 0 :=
+      (kill₀_eq_zero_iff_X0_dvd (S := S) (a * b)).2 hab
+    have hprod : kill₀ S a * kill₀ S b = 0 := by
+      simpa using hkill
+    rcases mul_eq_zero.mp hprod with ha | hb
+    · exact Or.inl ((kill₀_eq_zero_iff_X0_dvd (S := S) a).1 ha)
+    · exact Or.inr ((kill₀_eq_zero_iff_X0_dvd (S := S) b).1 hb)
+```
+
+If the nonunit line does not close by `simpa`, replace it with the explicit contradiction:
+
+```lean
+    have hzero : kill₀ S X₀ = 0 := by simp
+    rw [hzero] at hunit'
+    exact not_isUnit_zero hunit'
+```
+
+The exact name `not_isUnit_zero` is available in current Mathlib; if your local imports do not expose it, `simpa using hunit'` usually finds the same contradiction.
+
+---
+
+## 4. Shear automorphism sending `X₀` to `X₀ - X₁`
+
+The automorphism is the formal change of variables
+
+```text
+U ↦ X₀ - X₁,
+V ↦ X₁,
+```
+
+with inverse
+
+```text
+X₀ ↦ U + V,
+X₁ ↦ V.
+```
+
+Use `substAlgHom`; all substituted series have zero constant coefficient, and the source variable type is finite, so `hasSubst_of_constantCoeff_zero` applies.
+
+```lean
+private def shearSubst : Fin 2 → MvPowerSeries (Fin 2) S :=
+  ![X₀ - X₁, X₁]
+
+private def shearInvSubst : Fin 2 → MvPowerSeries (Fin 2) S :=
+  ![X₀ + X₁, X₁]
+
+private lemma hasSubst_shearSubst : MvPowerSeries.HasSubst (shearSubst (S := S)) := by
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero
+  intro i
+  fin_cases i <;> simp [shearSubst]
+
+private lemma hasSubst_shearInvSubst : MvPowerSeries.HasSubst (shearInvSubst (S := S)) := by
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero
+  intro i
+  fin_cases i <;> simp [shearInvSubst]
+
+noncomputable def shear :
+    MvPowerSeries (Fin 2) S →ₐ[S] MvPowerSeries (Fin 2) S :=
+  MvPowerSeries.substAlgHom (R := S) (S := S) (hasSubst_shearSubst (S := S))
+
+noncomputable def shearInv :
+    MvPowerSeries (Fin 2) S →ₐ[S] MvPowerSeries (Fin 2) S :=
+  MvPowerSeries.substAlgHom (R := S) (S := S) (hasSubst_shearInvSubst (S := S))
+
+@[simp] lemma shear_X0 : shear (S := S) X₀ = X₀ - X₁ := by
+  simp [shear, shearSubst]
+
+@[simp] lemma shear_X1 : shear (S := S) X₁ = X₁ := by
+  simp [shear, shearSubst]
+
+@[simp] lemma shearInv_X0 : shearInv (S := S) X₀ = X₀ + X₁ := by
+  simp [shearInv, shearInvSubst]
+
+@[simp] lemma shearInv_X1 : shearInv (S := S) X₁ = X₁ := by
+  simp [shearInv, shearInvSubst]
+```
+
+For the inverse laws, use `MvPowerSeries.eval₂_subst` / `MvPowerSeries.comp_subst_apply` from `Substitution.lean`, or prove the same thing with `MvPowerSeries.aeval_unique` since both sides are continuous substitution homomorphisms and agree on variables.  Keep this as an isolated API lemma:
+
+```lean
+lemma shear_comp_shearInv :
+    (shear (S := S)).comp (shearInv (S := S)) =
+      AlgHom.id S (MvPowerSeries (Fin 2) S) := by
+  -- Recommended proof:
+  --   ext via the substitution/evaluation uniqueness theorem, not by plain `AlgHom.ext`.
+  --   The composition sends
+  --     X₀ ↦ (X₀ - X₁) + X₁ = X₀,
+  --     X₁ ↦ X₁.
+  -- Current Mathlib tools:
+  --   * `MvPowerSeries.eval₂_subst`
+  --   * `MvPowerSeries.comp_subst_apply`
+  --   * `MvPowerSeries.aeval_unique`
+  -- depending on which import/API version you are on.
+  sorry
+
+lemma shearInv_comp_shear :
+    (shearInv (S := S)).comp (shear (S := S)) =
+      AlgHom.id S (MvPowerSeries (Fin 2) S) := by
+  -- Same proof; variables go
+  --   X₀ ↦ (X₀ + X₁) - X₁ = X₀,
+  --   X₁ ↦ X₁.
+  sorry
+
+noncomputable def shearEquiv :
+    MvPowerSeries (Fin 2) S ≃ₐ[S] MvPowerSeries (Fin 2) S where
+  toFun := shear (S := S)
+  invFun := shearInv (S := S)
+  left_inv f := by
+    have h := DFunLike.congr_fun (shearInv_comp_shear (S := S)) f
+    simpa [AlgHom.comp_apply] using h
+  right_inv f := by
+    have h := DFunLike.congr_fun (shear_comp_shearInv (S := S)) f
+    simpa [AlgHom.comp_apply] using h
+  map_mul' := map_mul (shear (S := S))
+  map_add' := map_add (shear (S := S))
+  commutes' := (shear (S := S)).commutes
+
+@[simp] lemma shearEquiv_X0 :
+    shearEquiv (S := S) X₀ = X₀ - X₁ := by
+  simp [shearEquiv]
+```
+
+If you want to remove the two `sorry`s above, the fastest local proof is usually:
+
+```lean
+  apply DFunLike.ext
+  intro f
+  -- rewrite both compositions as substitutions using `coe_substAlgHom`,
+  -- then use `eval₂_subst` to compose substitutions,
+  -- then simplify the resulting variable family with `ring`/`simp`.
+```
+
+Do not spend time trying to use ordinary `AlgHom.ext` on all power series: arbitrary algebra homomorphisms out of a power-series ring are not determined by the variables unless continuity/substitution hypotheses are in play.  Use the substitution API.
+
+---
+
+## 5. Final prime theorem
+
+Once `shearEquiv` exists, the final theorem is one line after `prime_X0`.
+
+```lean
+theorem prime_X0_sub_X1 [IsDomain S] :
+    Prime (X₀ - X₁ : MvPowerSeries (Fin 2) S) := by
+  classical
+  have hX0 := prime_X0 (S := S)
+  have h := (MulEquiv.prime_iff (shearEquiv (S := S)).toMulEquiv
+    (p := (X₀ : MvPowerSeries (Fin 2) S))).2 hX0
+  simpa using h
+```
+
+This is the most robust endpoint.  It uses Mathlib's existing theorem
+
+```lean
+MulEquiv.prime_iff
+```
+
+from `Mathlib.Algebra.Prime.Lemmas`.
+
+---
+
+## If you insist on the direct diagonal-kernel theorem
+
+You can also prove:
+
+```lean
+lemma diagEval_eq_zero_iff_D_dvd (f : MvPowerSeries (Fin 2) S) :
+    diagEval S f = 0 ↔ D ∣ f := by
+  -- forward: use `shearInv`, reduce to `kill₀_eq_zero_iff_X0_dvd`, then apply `shear`;
+  -- reverse: map a multiple of `D`; `diagEval_D` kills it.
+  sorry
+```
+
+The forward direction is:
+
+1. rewrite diagonal evaluation as
+   ```lean
+   kill₀ ∘ shearInv
+   ```
+   because `shearInv` sends `X₀ ↦ X₀+X₁`, `X₁ ↦ X₁`, and then `kill₀` sends `X₀ ↦ 0`, `X₁ ↦ T`, so both original variables go to `T`;
+2. use `kill₀_eq_zero_iff_X0_dvd` to get `X₀ ∣ shearInv f`;
+3. apply `shear` to the divisibility witness; since `shear X₀ = X₀-X₁` and `shear (shearInv f)=f`, obtain `(X₀-X₁) ∣ f`.
+
+This is the conceptual quotient statement
+
+```text
+S⟦X₀,X₁⟧ / (X₀-X₁) ≅ S⟦T⟧
+```
+
+without constructing `Ideal.Quotient`.
+
+---
+
+## Why the old `diagDiffQuot` is not enough
+
+Your existing lemma
+
+```lean
+f(X₀) - f(X₁) = (X₀-X₁) * diagDiffQuot f
+```
+
+is excellent for differences of two one-variable substitutions, but a general
+
+```lean
+g : MvPowerSeries (Fin 2) S
+```
+
+with `g(T,T)=0` is not syntactically of the form `f(X₀)-f(X₁)`.  To use only that lemma, you would first have to expand `g` as a power series in `X₀` with coefficients in `S⟦X₁⟧` and then sum infinitely many divided differences.  That is possible mathematically, but it is the wrong Lean route.
+
+The right Lean replacement is the kernel lemma for `killCompl`:
+
+```lean
+kill₀ f = 0 ↔ X₀ ∣ f
+```
+
+plus the shear automorphism.
+
+---
+
+## Direct coefficient fallback
+
+If the substitution-equivalence proof becomes annoying, a completely elementary fallback is to define the quotient in the kernel directly.  If `g(T,T)=0`, i.e.
+
+```lean
+∀ k, ∑ i in Finset.range (k+1),
+  coeff (single 0 i + single 1 (k - i)) g = 0,
+```
+
+then set
+
+```lean
+def diagKernelQuot (g : MvPowerSeries (Fin 2) S) : MvPowerSeries (Fin 2) S :=
+  fun e =>
+    - ∑ i in Finset.range (e (0 : Fin 2) + 1),
+        MvPowerSeries.coeff
+          (Finsupp.single (0 : Fin 2) i +
+           Finsupp.single (1 : Fin 2)
+             (e (0 : Fin 2) + e (1 : Fin 2) + 1 - i)) g
+```
+
+Then prove coefficientwise:
+
+```lean
+lemma X0_sub_X1_mul_diagKernelQuot
+    {g : MvPowerSeries (Fin 2) S}
+    (hdiag : ∀ k,
+      ∑ i in Finset.range (k+1),
+        MvPowerSeries.coeff
+          (Finsupp.single (0 : Fin 2) i + Finsupp.single (1 : Fin 2) (k - i)) g = 0) :
+    (X₀ - X₁) * diagKernelQuot (S := S) g = g := by
+  -- `ext e`; compute the coefficient of `(X₀-X₁)*q`.
+  -- The coefficient is `q(e₀-1,e₁) - q(e₀,e₁-1)`.
+  -- The two finite sums telescope.  Boundary cases use `hdiag (e₀+e₁)`.
+  sorry
+```
+
+This avoids `substAlgHom` equivalence work but replaces it with Nat/Finset telescoping.  I would use this only as a backup.
+
+---
+
+## Recommendation
+
+For the actual formalization, prove these atoms in this order:
+
+1. `diagEval` by `MvPowerSeries.rename`; prove `diagEval_X0`, `diagEval_X1`, `diagEval_D`.
+2. `kill₀_eq_zero_iff_X0_dvd` using `MvPowerSeries.killCompl` and `MvPowerSeries.X_dvd_iff`.
+3. `prime_X0` using `kill₀_eq_zero_iff_X0_dvd` and `NoZeroDivisors S⟦X⟧`.
+4. `shearEquiv` by `substAlgHom`.
+5. `prime_X0_sub_X1` by `MulEquiv.prime_iff`.
+
+That gives a true prime-element theorem and avoids a heavyweight quotient construction.
