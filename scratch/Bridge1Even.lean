@@ -1,6 +1,7 @@
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
 import Mathlib.Tactic
 import scratch.Bridge1HCD
+import scratch.KeystoneResultantCerts
 
 /-!
 # Bridge 1 (Even case): `preΨ'_root_Ψ₂Sq_ne'`
@@ -8,21 +9,19 @@ import scratch.Bridge1HCD
 Proves that at a root `x` of `Ψ₂Sq`, `(W.preΨ' n).eval x ≠ 0` when `(n : K) ≠ 0`.
 -/
 
-set_option maxHeartbeats 6400000
+set_option maxHeartbeats 12800000
 set_option maxRecDepth 4096
 
 open Polynomial
 
 variable {K : Type*} [Field K]
 
-/-! ### Section 0: Coprimality cert (proven in Keystone, extracted here) -/
+/-! ### Section 0: Coprimality cert -/
 
-/-- On an elliptic curve, `Ψ₂Sq` and `Ψ₃` have no common root.
-Proven via Bezout cofactor certificate in `KeystoneResultantCerts` (commit ec63d59). -/
 private lemma Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero_cert
     (W : WeierstrassCurve K) [W.IsElliptic] {x : K}
-    (hs : W.Ψ₂Sq.eval x = 0) : W.Ψ₃.eval x ≠ 0 := by
-  sorry -- KNOWN CERT: bezout_Ψ₂Sq_Ψ₃ ⟹ W.Δ^2 = 0 ⟹ contradiction with IsElliptic
+    (hs : W.Ψ₂Sq.eval x = 0) : W.Ψ₃.eval x ≠ 0 :=
+  WeierstrassCurve.Ψ₃_eval_ne_of_Ψ₂Sq_eval_zero W hs
 
 /-! ### Section 1: Eval lemma -/
 
@@ -131,22 +130,27 @@ private lemma oddSign_sq (n : ℕ) : oddSign (K := K) n ^ 2 = 1 := by
   | 1 => simp [oddSign]
   | n + 2 =>
     show (-(oddSign (K := K) n)) ^ 2 = 1
-    rw [neg_sq]
-    exact ih n (by omega)
+    rw [neg_sq]; exact ih n (by omega)
 
--- C-exponent identity for even-m case: tri(k) + 3*tri(k+1) = tri(2k+2)
+private lemma oddSign_4r2 (r : ℕ) : oddSign (K := K) (4 * r + 2) = -1 := by
+  induction r with
+  | zero => simp [oddSign]
+  | succ r ih =>
+    show -(-(oddSign (K := K) (4 * r + 2))) = -1
+    rw [neg_neg, ih]
+
+private lemma oddSign_4r (r : ℕ) : oddSign (K := K) (4 * r) = 1 := by
+  induction r with
+  | zero => simp [oddSign]
+  | succ r ih =>
+    show -(-(oddSign (K := K) (4 * r))) = 1
+    rw [neg_neg, ih]
+
 private lemma tri_even_m (k : ℕ) : tri k + 3 * tri (k + 1) = tri (2 * k + 2) := by
-  have h1 := two_mul_tri k
-  have h2 := two_mul_tri (k + 1)
-  have h3 := two_mul_tri (2 * k + 2)
-  nlinarith
+  have h1 := two_mul_tri k; have h2 := two_mul_tri (k + 1); have h3 := two_mul_tri (2 * k + 2); nlinarith
 
--- C-exponent identity for odd-m case: tri(k+2) + 3*tri(k+1) = tri(2k+3)
 private lemma tri_odd_m (k : ℕ) : tri (k + 2) + 3 * tri (k + 1) = tri (2 * k + 3) := by
-  have h1 := two_mul_tri (k + 2)
-  have h2 := two_mul_tri (k + 1)
-  have h3 := two_mul_tri (2 * k + 3)
-  nlinarith
+  have h1 := two_mul_tri (k + 2); have h2 := two_mul_tri (k + 1); have h3 := two_mul_tri (2 * k + 3); nlinarith
 
 /-! ### Section 3b: Odd closed form proof -/
 
@@ -163,34 +167,21 @@ private theorem odd_closed_form (C D : K) :
       obtain ⟨k, rfl⟩ := hm
       rw [show k + k + 1 = 2 * k + 1 from by omega, ih k (by omega)]
       rw [show k + k + 3 = 2 * (k + 1) + 1 from by omega, ih (k + 1) (by omega)]
-      -- Goal: -(oddSign k * C^tri(k) * (oddSign(k+1) * C^tri(k+1))^3)
-      --     = oddSign(k+k+2) * C^tri(k+k+2)
       rw [mul_pow, ← pow_mul]
       have hsgn3 : oddSign (K := K) (k + 1) ^ 3 = oddSign (K := K) (k + 1) := by
         rw [show (3 : ℕ) = 2 + 1 from rfl, pow_add, pow_one, oddSign_sq, one_mul]
-      rw [hsgn3]
-      rw [show k + k + 2 = 2 * k + 2 from by omega, ← oddSign_even_m (K := K) k]
-      rw [show tri (2 * k + 2) = tri k + 3 * tri (k + 1) from (tri_even_m k).symm]
-      rw [pow_add]
-      ring
+      rw [hsgn3, show k + k + 2 = 2 * k + 2 from by omega, ← oddSign_even_m (K := K) k]
+      rw [show tri (2 * k + 2) = tri k + 3 * tri (k + 1) from (tri_even_m k).symm, pow_add]; ring
     · simp only [hm, ↓reduceIte, mul_zero, sub_zero, mul_one]
       obtain ⟨k, rfl⟩ := Nat.not_even_iff_odd.mp hm
       rw [show 2 * k + 1 + 4 = 2 * (k + 2) + 1 from by omega, ih (k + 2) (by omega)]
       rw [show 2 * k + 1 + 2 = 2 * (k + 1) + 1 from by omega, ih (k + 1) (by omega)]
-      -- After rewrites, LHS = oddSign(k+2)*C^tri(k+2) * (oddSign(k+1)*C^tri(k+1))^3
-      -- RHS = oddSign(2*(k+1)+1) * C^tri(2*(k+1)+1)
       rw [mul_pow, ← pow_mul]
       have hsgn3 : oddSign (K := K) (k + 1) ^ 3 = oddSign (K := K) (k + 1) := by
         rw [show (3 : ℕ) = 2 + 1 from rfl, pow_add, pow_one, oddSign_sq, one_mul]
-      rw [hsgn3]
-      -- Goal: oddSign(k+2) * C^tri(k+2) * (oddSign(k+1) * C^(tri(k+1)*3))
-      --     = oddSign(2*(k+1)+1) * C^tri(2*(k+1)+1)
-      -- Rewrite RHS index: 2*(k+1)+1 = 2*k+3
-      rw [show 2 * (k + 1) + 1 = 2 * k + 3 from by omega]
+      rw [hsgn3, show 2 * (k + 1) + 1 = 2 * k + 3 from by omega]
       rw [show tri (2 * k + 3) = tri (k + 2) + 3 * tri (k + 1) from (tri_odd_m k).symm]
-      rw [← oddSign_odd_m (K := K) k]
-      rw [pow_add]
-      ring
+      rw [← oddSign_odd_m (K := K) k, pow_add]; ring
 
 /-! ### Section 4: D ≠ 0 at Ψ₂Sq-root -/
 
@@ -221,6 +212,7 @@ private theorem even_closed_forms {C D : K} (hC : C ≠ 0)
     fun j hj => (ih j hj).1
   have ihB : ∀ j < k, preNormEDS' (0:K) C D (4*(j+1)) = ((j:K)+1)*D*C^(2*j*(j+2)) :=
     fun j hj => (ih j hj).2
+  have hD2 : D ^ 2 = -4 * C ^ 3 := by linear_combination hCD
   have hA : preNormEDS' (0:K) C D (4*k+2) = (2*(k:K)+1)*C^(2*k*(k+1)) := by
     match k with
     | 0 => simp [preNormEDS'_two]
@@ -232,15 +224,118 @@ private theorem even_closed_forms {C D : K} (hC : C ≠ 0)
       rw [odd_closed_form C D k, odd_closed_form C D (k+1), odd_closed_form C D (k+2)]
       rw [show 2*k+0+2 = 2*k+2 from by omega, show 2*k+0+4 = 2*k+4 from by omega]
       by_cases hk : Even k
-      · obtain ⟨r, rfl⟩ := hk
+      · -- hA even-k case
+        obtain ⟨r, rfl⟩ := hk
         rw [show 2*(r+r)+2 = 4*r+2 from by omega, ihA r (by omega)]
         rw [show 2*(r+r)+4 = 4*(r+1) from by omega, ihB r (by omega)]
-        -- This is a polynomial identity in C, D with D² = -4C³.
-        sorry
-      · obtain ⟨r, rfl⟩ := Nat.not_even_iff_odd.mp hk
+        ring_nf; rw [hD2]
+        have h_os1 : oddSign (K := K) (1 + r * 2) * oddSign (K := K) (r * 2) = 1 := by
+          have : oddSign (K := K) (r * 2) = oddSign (K := K) (1 + r * 2) := by
+            rw [show r * 2 = 2 * r from by ring, show 1 + 2 * r = 2 * r + 1 from by omega]
+            exact oddSign_double_eq r
+          rw [this, ← sq, oddSign_sq]
+        have h_os2 : oddSign (K := K) (1 + r * 2) * oddSign (K := K) (2 + r * 2) = -1 := by
+          rw [show 1 + r * 2 = 2 * r + 1 from by omega,
+              show 2 + r * 2 = (2 * r + 1) + 1 from by omega,
+              oddSign_mul_succ, show 2 * (2 * r + 1) = 4 * r + 2 from by omega, oddSign_4r2]
+        have hcA : C ^ (r * 4) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (2 + r * 2) =
+            C ^ (4 + r * 12 + r ^ 2 * 8) := by
+          rw [← pow_add, ← pow_add, ← pow_add]; congr 1
+          have := two_mul_tri (1 + r * 2); have := two_mul_tri (2 + r * 2); nlinarith
+        have hcB : C ^ (r * 8) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (r * 2) * C ^ 3 =
+            C ^ (4 + r * 12 + r ^ 2 * 8) := by
+          rw [← pow_add, ← pow_add, ← pow_add, ← pow_add]; congr 1
+          have := two_mul_tri (1 + r * 2); have := two_mul_tri (r * 2); nlinarith
+        have hcR : C ^ 4 * C ^ (r * 12) * C ^ (r ^ 2 * 8) = C ^ (4 + r * 12 + r ^ 2 * 8) := by
+          rw [← pow_add, ← pow_add]
+        set P := C ^ (4 + r * 12 + r ^ 2 * 8)
+        rw [hcR]
+        have t1 : ↑r * C ^ (r * 4) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (2 + r * 2) *
+            oddSign (K := K) (1 + r * 2) * oddSign (K := K) (2 + r * 2) * 4 = -(4 * ↑r * P) := by
+          rw [show (↑r * C ^ (r * 4) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) *
+            C ^ tri (2 + r * 2) * oddSign (1 + r * 2) * oddSign (2 + r * 2) * 4 : K) =
+            4 * ↑r * (C ^ (r * 4) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (2 + r * 2)) *
+            (oddSign (1 + r * 2) * oddSign (2 + r * 2)) from by ring]
+          rw [h_os2, hcA]; ring
+        have t2 : ↑r * C ^ (r * 8) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (r * 2) *
+            oddSign (K := K) (1 + r * 2) * oddSign (K := K) (r * 2) * (-4 * C ^ 3) * 2 = -(8 * ↑r * P) := by
+          rw [show (↑r * C ^ (r * 8) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (r * 2) *
+            oddSign (1 + r * 2) * oddSign (r * 2) * (-4 * C ^ 3) * 2 : K) =
+            -8 * ↑r * (oddSign (1 + r * 2) * oddSign (r * 2)) *
+            (C ^ (r * 8) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (r * 2) * C ^ 3) from by ring]
+          rw [h_os1, hcB]; ring
+        have t3 : ↑r ^ 2 * C ^ (r * 4) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (2 + r * 2) *
+            oddSign (K := K) (1 + r * 2) * oddSign (K := K) (2 + r * 2) * 4 = -(4 * ↑r ^ 2 * P) := by
+          rw [show (↑r ^ 2 * C ^ (r * 4) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) *
+            C ^ tri (2 + r * 2) * oddSign (1 + r * 2) * oddSign (2 + r * 2) * 4 : K) =
+            4 * ↑r ^ 2 * (C ^ (r * 4) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (2 + r * 2)) *
+            (oddSign (1 + r * 2) * oddSign (2 + r * 2)) from by ring]
+          rw [h_os2, hcA]; ring
+        have t4 : ↑r ^ 2 * C ^ (r * 8) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (r * 2) *
+            oddSign (K := K) (1 + r * 2) * oddSign (K := K) (r * 2) * (-4 * C ^ 3) = -(4 * ↑r ^ 2 * P) := by
+          rw [show (↑r ^ 2 * C ^ (r * 8) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (r * 2) *
+            oddSign (1 + r * 2) * oddSign (r * 2) * (-4 * C ^ 3) : K) =
+            -4 * ↑r ^ 2 * (oddSign (1 + r * 2) * oddSign (r * 2)) *
+            (C ^ (r * 8) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (r * 2) * C ^ 3) from by ring]
+          rw [h_os1, hcB]; ring
+        have t5 : C ^ (r * 4) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (2 + r * 2) *
+            oddSign (K := K) (1 + r * 2) * oddSign (K := K) (2 + r * 2) = -P := by
+          rw [show (C ^ (r * 4) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (2 + r * 2) *
+            oddSign (1 + r * 2) * oddSign (2 + r * 2) : K) =
+            (C ^ (r * 4) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (2 + r * 2)) *
+            (oddSign (1 + r * 2) * oddSign (2 + r * 2)) from by ring]
+          rw [h_os2, hcA]; ring
+        have t6 : C ^ (r * 8) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (r * 2) *
+            oddSign (K := K) (1 + r * 2) * oddSign (K := K) (r * 2) * (-4 * C ^ 3) = -(4 * P) := by
+          rw [show (C ^ (r * 8) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (r * 2) *
+            oddSign (1 + r * 2) * oddSign (r * 2) * (-4 * C ^ 3) : K) =
+            -4 * (oddSign (1 + r * 2) * oddSign (r * 2)) *
+            (C ^ (r * 8) * C ^ (r ^ 2 * 4) * C ^ tri (1 + r * 2) * C ^ tri (r * 2) * C ^ 3) from by ring]
+          rw [h_os1, hcB]; ring
+        rw [t1, t2, t3, t4, t5, t6]; push_cast; ring
+      · -- hA odd-k case
+        obtain ⟨r, rfl⟩ := Nat.not_even_iff_odd.mp hk
         rw [show 2*(2*r+1)+2 = 4*(r+1) from by omega, ihB r (by omega)]
         rw [show 2*(2*r+1)+4 = 4*(r+1)+2 from by omega, ihA (r+1) (by omega)]
-        sorry
+        -- Goal has oddSign at indices 2*r+1, 2*r+1+1, 2*r+1+2 (all in +form)
+        have hos_pos : oddSign (K := K) (2 * r + 1 + 1) * oddSign (K := K) (2 * r + 1 + 2) = 1 := by
+          rw [show 2 * r + 1 + 1 = 2 * (r + 1) from by omega,
+              show 2 * r + 1 + 2 = 2 * (r + 1) + 1 from by omega,
+              oddSign_mul_succ, show 2 * (2 * (r + 1)) = 4 * (r + 1) from by omega, oddSign_4r]
+        have hos_neg : oddSign (K := K) (2 * r + 1) * oddSign (K := K) (2 * r + 1 + 1) = -1 := by
+          rw [show 2 * r + 1 + 1 = (2 * r + 1) + 1 from by omega, oddSign_mul_succ,
+              show 2 * (2 * r + 1) = 4 * r + 2 from by omega, oddSign_4r2]
+        calc _ = (↑r + 1) ^ 2 * D ^ 2 * (C ^ (2 * r * (r + 2))) ^ 2 *
+                    (oddSign (K := K) (2 * r + 1 + 1) * oddSign (K := K) (2 * r + 1 + 2)) *
+                    (C ^ tri (2 * r + 1 + 1) * C ^ tri (2 * r + 1 + 2)) -
+                  (oddSign (K := K) (2 * r + 1) * oddSign (K := K) (2 * r + 1 + 1)) *
+                    (C ^ tri (2 * r + 1) * C ^ tri (2 * r + 1 + 1)) *
+                    ((2 * (↑(r + 1) : K) + 1)) ^ 2 * (C ^ (2 * (r + 1) * (r + 1 + 1))) ^ 2 := by ring
+             _ = _ := by
+              rw [hos_pos, hos_neg, hD2, ← pow_mul, ← pow_mul]
+              have hcA : C ^ 3 * C ^ (2 * r * (r + 2) * 2) *
+                  C ^ tri (2 * r + 1 + 1) * C ^ tri (2 * r + 1 + 2) =
+                  C ^ (2 * (2 * r + 1 + 1) * (2 * r + 1 + 1 + 1)) := by
+                rw [← pow_add, ← pow_add, ← pow_add]; congr 1
+                have := two_mul_tri (2 * r + 1 + 1); have := two_mul_tri (2 * r + 1 + 2); nlinarith
+              have hcB : C ^ tri (2 * r + 1) * C ^ tri (2 * r + 1 + 1) *
+                  C ^ (2 * (r + 1) * (r + 1 + 1) * 2) =
+                  C ^ (2 * (2 * r + 1 + 1) * (2 * r + 1 + 1 + 1)) := by
+                rw [← pow_add, ← pow_add]; congr 1
+                have := two_mul_tri (2 * r + 1); have := two_mul_tri (2 * r + 1 + 1); nlinarith
+              conv_lhs =>
+                rw [show ((↑r + 1) ^ 2 * (-4 * C ^ 3) * C ^ (2 * r * (r + 2) * 2) * 1 *
+                      (C ^ tri (2 * r + 1 + 1) * C ^ tri (2 * r + 1 + 2)) -
+                    -1 * (C ^ tri (2 * r + 1) * C ^ tri (2 * r + 1 + 1)) *
+                      (2 * ↑(r + 1) + 1) ^ 2 * C ^ (2 * (r + 1) * (r + 1 + 1) * 2) : K) =
+                    (-(↑r + 1) ^ 2 * 4) *
+                      (C ^ 3 * C ^ (2 * r * (r + 2) * 2) *
+                        C ^ tri (2 * r + 1 + 1) * C ^ tri (2 * r + 1 + 2)) +
+                    (2 * ↑(r + 1) + 1) ^ 2 *
+                      (C ^ tri (2 * r + 1) * C ^ tri (2 * r + 1 + 1) *
+                        C ^ (2 * (r + 1) * (r + 1 + 1) * 2))
+                    from by ring]
+              rw [hcA, hcB]; push_cast; ring
   constructor
   · exact hA
   · match k with
@@ -259,21 +354,58 @@ private theorem even_closed_forms {C D : K} (hC : C ≠ 0)
         rw [show 2*(r+r)+4 = 4*(r+1) from by omega, ihB r (by omega)]
         rw [show 2*(r+r)+6 = 4*(r+1)+2 from by omega]
         rcases Nat.eq_zero_or_pos r with rfl | hr
-        · -- r = 0 case: use hA at k=0
-          simp only [Nat.cast_zero, zero_add, mul_one, mul_zero, pow_zero]
-          -- need hA for k=0 instance; we have ihA and ihB from the outer ih
-          -- For r=0: 4*(r+r+1+1) = 4*1 = 4, need preNormEDS' 0 C D 4
-          -- simpa path was wrong; the goal after r=0 substitution should involve preNormEDS'
-          -- Actually after all rewrites this should be a concrete computation
-          -- Let's try norm_num / simp path
-          sorry
-        · rw [ihA (r+1) (by omega)]
-          sorry
-      · obtain ⟨r, rfl⟩ := Nat.not_even_iff_odd.mp hk
+        · -- hB even-k r=0: use hA to substitute preNormEDS' 0 C D 6
+          rw [show 4 * (0 + 0 + 1) + 2 = 4 * 1 + 2 from by omega] at hA
+          simp only [oddSign, tri] at *
+          rw [hA]; ring
+        · -- hB even-k r>0
+          rw [ihA (r+1) (by omega)]
+          simp only [mul_pow, oddSign_sq, one_mul]
+          calc _ = D * ((2 * ↑(r + 1) + 1) * (↑r + 1) *
+                        ((C ^ tri (r + r + 1)) ^ 2 * C ^ (2 * r * (r + 2)) *
+                          C ^ (2 * (r + 1) * (r + 1 + 1))) -
+                      (2 * ↑r + 1) * (↑r + 1) *
+                        (C ^ (2 * r * (r + 1)) * C ^ (2 * r * (r + 2)) *
+                          (C ^ tri (r + r + 2)) ^ 2)) := by ring
+               _ = _ := by
+                rw [← pow_mul C (tri (r + r + 1)) 2, ← pow_mul C (tri (r + r + 2)) 2]
+                have hcA : C ^ (tri (r + r + 1) * 2) * C ^ (2 * r * (r + 2)) *
+                    C ^ (2 * (r + 1) * (r + 1 + 1)) =
+                    C ^ (2 * (r + r + 1) * (r + r + 1 + 2)) := by
+                  rw [← pow_add, ← pow_add]; congr 1
+                  have := two_mul_tri (r + r + 1); nlinarith
+                have hcB : C ^ (2 * r * (r + 1)) * C ^ (2 * r * (r + 2)) *
+                    C ^ (tri (r + r + 2) * 2) =
+                    C ^ (2 * (r + r + 1) * (r + r + 1 + 2)) := by
+                  rw [← pow_add, ← pow_add]; congr 1
+                  have := two_mul_tri (r + r + 2); nlinarith
+                rw [hcA, hcB]; push_cast; ring
+      · -- hB odd-k
+        obtain ⟨r, rfl⟩ := Nat.not_even_iff_odd.mp hk
         rw [show 2*(2*r+1)+2 = 4*(r+1) from by omega, ihB r (by omega)]
         rw [show 2*(2*r+1)+4 = 4*(r+1)+2 from by omega, ihA (r+1) (by omega)]
         rw [show 2*(2*r+1)+6 = 4*(r+2) from by omega, ihB (r+1) (by omega)]
-        sorry
+        -- All oddSign terms are squared → = 1. D is a linear factor.
+        simp only [mul_pow, oddSign_sq, one_mul]
+        calc _ = D * ((2 * ↑(r + 1) + 1) * (↑(r + 1) + 1) *
+                      ((C ^ tri (2 * r + 1 + 1)) ^ 2 * C ^ (2 * (r + 1) * (r + 1 + 1)) *
+                        C ^ (2 * (r + 1) * (r + 1 + 2))) -
+                    (↑r + 1) * (2 * ↑(r + 1) + 1) *
+                      (C ^ (2 * r * (r + 2)) * C ^ (2 * (r + 1) * (r + 1 + 1)) *
+                        (C ^ tri (2 * r + 1 + 2)) ^ 2)) := by ring
+             _ = _ := by
+              rw [← pow_mul C (tri (2 * r + 1 + 1)) 2, ← pow_mul C (tri (2 * r + 1 + 2)) 2]
+              have hcA : C ^ (tri (2 * r + 1 + 1) * 2) * C ^ (2 * (r + 1) * (r + 1 + 1)) *
+                  C ^ (2 * (r + 1) * (r + 1 + 2)) =
+                  C ^ (2 * (2 * r + 1 + 1) * (2 * r + 1 + 1 + 2)) := by
+                rw [← pow_add, ← pow_add]; congr 1
+                have := two_mul_tri (2 * r + 1 + 1); nlinarith
+              have hcB : C ^ (2 * r * (r + 2)) * C ^ (2 * (r + 1) * (r + 1 + 1)) *
+                  C ^ (tri (2 * r + 1 + 2) * 2) =
+                  C ^ (2 * (2 * r + 1 + 1) * (2 * r + 1 + 1 + 2)) := by
+                rw [← pow_add, ← pow_add]; congr 1
+                have := two_mul_tri (2 * r + 1 + 2); nlinarith
+              rw [hcA, hcB]; push_cast; ring
 
 /-! ### Section 6: Main theorem -/
 
@@ -304,29 +436,19 @@ theorem preΨ'_root_Ψ₂Sq_ne' (W : WeierstrassCurve K) [W.IsElliptic]
     obtain ⟨hfA, hfB⟩ := even_closed_forms hC hCD
     obtain ⟨m', hm'⟩ := hne
     rcases Nat.even_or_odd m' with ⟨r, hr⟩ | ⟨r, hr⟩
-    · -- m' = 2*r, so n = 4*r
-      rcases Nat.eq_zero_or_pos r with rfl | hr_pos
+    · rcases Nat.eq_zero_or_pos r with rfl | hr_pos
       · exfalso; apply hn; have hneq : n = 0 := by omega
         simp [hneq]
       · obtain ⟨s, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hr_pos.ne'
         have hn_eq : n = 4 * (s + 1) := by omega
         rw [hn_eq, hfB s] at hx
         have hs1_ne : ((s : K) + 1) ≠ 0 := by
-          intro hs1
-          apply hn
-          rw [hn_eq]
-          push_cast
-          linear_combination (4 : K) * hs1
+          intro hs1; apply hn; rw [hn_eq]; push_cast; linear_combination (4 : K) * hs1
         exact mul_ne_zero (mul_ne_zero hs1_ne hD) (pow_ne_zero _ hC) hx
-    · -- m' = 2*r+1, so n = 4*r+2
-      have hn_eq : n = 4 * r + 2 := by omega
+    · have hn_eq : n = 4 * r + 2 := by omega
       rw [hn_eq, hfA r] at hx
       have hr1_ne : (2 * (r : K) + 1) ≠ 0 := by
-        intro hr1
-        apply hn
-        rw [hn_eq]
-        push_cast
-        linear_combination (2 : K) * hr1
+        intro hr1; apply hn; rw [hn_eq]; push_cast; linear_combination (2 : K) * hr1
       exact mul_ne_zero hr1_ne (pow_ne_zero _ hC) hx
 
 end WeierstrassCurve
