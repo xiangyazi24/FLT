@@ -1,65 +1,55 @@
-# Session Handoff — 2026-06-24 Mazur FLT Formalization
+# Session Handoff — 2026-06-24 FINAL (Mazur FLT Formalization)
 
-## What was accomplished this session
+## Session achievements: Torsion.lean 8 → 3 sorries
 
-### Torsion.lean: 8 → 5 sorries (verified green, 8599 jobs)
-- h4 (4≠0): CLOSED via CharZero threading (f929c76)
-- hc3 (Ψ₃≠0): CLOSED via Mathlib Ψ₃_ne_zero (f929c76)
-- hψ_ne (ψ_m≠0): CLOSED via coordinate-ring degree argument (ee3af21)
+### Closed (verified green, 8601 jobs)
+- h4 (4≠0): CharZero threading (f929c76)
+- hc3 (Ψ₃≠0): Mathlib Ψ₃_ne_zero (f929c76)
+- hψ_ne (ψ_m≠0): coordinate-ring degree argument (ee3af21)
+- sub-D root realization: IsSepClosed→IsAlgClosed→bridge-1→assembly (be32fe3)
+- SEAM1 bridge-1 coprimality: CLOSED + wired (4e49710)
 
-### SEAM1: bridge-1 CLOSED, bridge-2 = 1 sorry
-- Bridge1Even: 0 sorry (eac5bdf) — EDS closed-form odd+even cases fully proved
-- Bridge1HCD: 0 sorry (2723e94) — preΨ₄²+4Ψ₃³=0 at Ψ₂Sq-root
-- Bridge-1 wired into SeamE1_Core (4e49710) — preΨ'_root_Ψ₂Sq_ne DISCHARGED
-- Bridge-2 (dual_root_implies_tangent_zero): 1 named sorry remains
-- SeamE1_Core: 1 sorry (bridge-2 only). scratch.SeamE1 builds 3012 jobs.
+### Remaining 3 sorries (all NOT OURS)
+- L52 n_torsion_finite (David Angdinata)
+- L1072 Module.Finite (depends on above)
+- L1133 galoisRep (data sorry)
 
-### ω_n projective bridge infrastructure
-- OmegaDivPoly.lean: 0 sorry (4c2c69b) — ψTwoMulQuot + ωProto + normalization
-- ProjectiveFormula.lean: 0 sorry (ff5cc53) — addZ + dblZ Z-components
-- ProjectiveFormulaXY.lean: m=1 proved, m=2 framework (1 sorry)
-- 6-round ChatGPT design brainstorm complete (R1-R6), architecture settled
-- Design doc: scratch/DESIGN_omega_projective_bridge.md
+## SEAM1 bridge-2: the ONE remaining mathematical sorry
 
-### Other
-- exists_nonsingular: 0 sorry (b45feae) — sub-D step 1
-- ψ_ne_zero_of_charZero: 0 sorry (ee3af21)
-- Proactive context management via sub-agents: validated + banked
+`dual_root_implies_tangent_zero` in SeamE1_Core = general-n preΨ'_n separability.
 
-## What needs to happen next
+### Architecture (6-round ChatGPT brainstorm, settled)
+Path: ω_n projective formula + local parameter + d[n]|_O = n identification.
 
-### Priority 1: Close bridge-2 (the last SEAM1 sorry)
-The deep crux = general-n preΨ'_n separability = derivative nonvanishing at roots.
-Two sub-routes converging:
+### What's built (all 0-sorry)
+- OmegaDivPoly: ψTwoMulQuot (complEDS₂) + ωProto + normalization
+- ProjectiveFormula: addZ + dblZ (Z-components)
+- ProjectiveFormulaXY: m=1,2 X-component
+- Bridge1Even: EDS closed forms (odd+even, all 6 ring identities)
+- SeamE1_FormalNsmul: formalNsmul_coeff_one ([n]'(0)=n)
+- SeamE1_DualUnit: ψ₂-unit at non-2-torsion
+- SeamE1_FormalBridge: decomposition + n=3 case
 
-**Route A (general projective formula):**
-- ATOM 3/4 X/Y components need coordinate-ring identities mod F_W
-- Proof pattern: CAS-compute cofactor Q, then `rw [AdjoinRoot.mk_eq_zero]; exact ⟨Q, by ring⟩`
-- addX cofactors CAS-verified for m=2..8 (Q₂=3 terms...Q₈=15160)
-- dblX/dblY cofactors also verified
-- Needs: per-m or general-m coordinate-ring Lean proofs
-- Once projective formula proved → ATOM 5 (ω≠0 from φ≠0) → ATOM 6 (local param) → ATOM 7 (coeffε) → assembly
+### The critical next step (for next session)
+**The direct addX proof needs 5 inputs, not 4.** CAS verified (dm1 Q288):
+1. hω: `W.two_mul_ψ_mul_ωProto m` (PROVED, OmegaDivPoly)
+2. heven: `W.ψ_even m` (MATHLIB)
+3. hφ: `WeierstrassCurve.φ` definition (MATHLIB)
+4. hFW: `AdjoinRoot.mk_self` (MATHLIB)
+5. **Hmiss**: Ward invariant relation = `mk_invariant_descended` (PsiInvariant.lean, IN REPO)
 
-**Route B (bypass via SeamE1_FormalBridge):**
-- preΨ'_deriv_ne_zero_at_nontorsion_root (= separability) already reduced to single sorry
-- n=3 case proved (074cd1c)
-- Closes if the projective formula proves general-n separability
+With all 5, `2·(addX - ψ_{m-1}²·φ_{m+1})` reduces to 0 mod F_W. Implementation: `rw [AdjoinRoot.mk_eq_zero]; exact ⟨cofactor_expressed_via_5_inputs, by ring⟩` or `linear_combination`.
 
-### Priority 2: sub-D wiring (Torsion.lean L175)
-- exists_nonsingular ready; bridge-1 ready
-- Needs: IsSepClosed → IsAlgClosed check (dm4 Q asked)
-- Should drop Torsion.lean from 5 → 4 sorries
+After addX general-m closes → addY (similar) → ATOM 5 (ω≠0) → ATOM 6 (local param) → ATOM 7 (coeffε) → assembly → bridge-2 CLOSED → SEAM1 fully 0-sorry.
 
-### Priority 3: per-n Bezout certificates (fallback for small n)
-- n=3: done; n=5: cofactors computed (216+236 terms); n=4,6,8: dm1 computing
-- Not tractable for n≥11 (cofactors too large)
-- Useful as building blocks even if general theorem is the main path
+## Shortcut analysis (all ruled out)
+- Per-n Bezout: tractable n≤5, intractable n≥11 ✗
+- Torsion counting (rank-2): circular ✗
+- Resultant recurrence: no EDS recurrence for resultants ✗
+- Function-field route: needs same projective formula ✗
+- Direct 4-input proof: needs 5th input (Ward invariant) — FOUND ✓
 
 ## Build state on uisai2
-- Branch: ai-scratch
-- Latest commit: f9d83ad (CHANGELOG)
-- Canonical Torsion.lean: 5 sorries, 8599 jobs green
+- Branch: ai-scratch, latest: 4a264fc
+- Torsion.lean: 3 actual sorries, 8601 jobs green
 - scratch.SeamE1: 1 sorry (bridge-2), 3012 jobs green
-- scratch.Bridge1Even: 0 sorry
-- scratch.OmegaDivPoly: 0 sorry
-- scratch.ProjectiveFormula: 0 sorry
