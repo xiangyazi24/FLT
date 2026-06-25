@@ -1,256 +1,261 @@
-# Q339 (dm1): strategic assessment — general discriminant/resultant route for `preΨ'_n` separability
+# Q354 (dm1): `addY` 8-input linear-combination coefficients — obstruction
 
-## Executive decision
+## Executive result
 
-For fixed `n`, the discriminant/resultant route is excellent.  For general `n`, I would **not** pivot from the formal/projective bridge to a pure EDS-discriminant induction unless a precise published formula and proof strategy are already in hand.
-
-The reason is structural: a general discriminant formula for `preΨ'_n` is essentially the same theorem as separability of `[n]` in a more global packaging.  Proving it uniformly in `n` by EDS recurrences is not just “the fixed-`n` resultant certificate with a parameter.”  It requires controlling resultants among all neighboring division polynomials appearing in the recurrences, and those coprimality/resultant controls are exactly the torsion/formal-group content reappearing algebraically.
-
-So the route ranking remains:
+The requested polynomial coefficients
 
 ```text
-fixed small n:      CAS Bezout/resultant certificates
-all n:              formal/projective bridge, or a geometric theorem that [n] is étale
-pure EDS Disc_n:    possible in principle, but likely larger and more circular-risky
+2*(addY(P,R_m) - ψ_{m-1}^3*ω_{m+1})
+  = d₁*Hω_m + d₂*Heven_m + d₃*Hmiss_m + d₄*Hφ_m + d₅*HF
+    + d₆*Heven_{m+1} + d₇*Hω_{m+1} + d₈*Hmiss_{m+1}
 ```
 
-The discriminant route is useful as a **diagnostic** and for fixed cases; I do not think it is the shortest axiom-removal path for the general theorem.
+**do not exist in the raw polynomial ring** with only those eight residual identities.
+
+This is not a CAS timeout; it is a structural obstruction.
+
+Two coefficient-obstructions are immediate:
+
+1. `addY(P,R_m)` contains an `ω_m^2` term.  The coefficient of `ω_m^2` in the left-hand side is
+   ```text
+   -2*ψ₂ = -2*(2Y + a₁X + a₃).
+   ```
+   The only input identity containing `ω_m` is
+   ```text
+   Hω_m = 2*ψ_m*ω_m - (...).
+   ```
+   Therefore any polynomial linear combination would need the coefficient of `ω_m` in `d₁` to be
+   ```text
+   -ψ₂ / ψ_m,
+   ```
+   which is not a polynomial.
+
+2. The left-hand side contains `ω_{m+1}` with coefficient
+   ```text
+   -2*ψ_{m-1}^3.
+   ```
+   The only input identity containing `ω_{m+1}` is
+   ```text
+   Hω_{m+1} = 2*ψ_{m+1}*ω_{m+1} - (...).
+   ```
+   Therefore
+   ```text
+   d₇ = -ψ_{m-1}^3 / ψ_{m+1}
+   ```
+   in any coefficient list using only `Hω_{m+1}` to eliminate `ω_{m+1}`.  Again, this is not a polynomial.
+
+So the 8-input `linear_combination` requested here can exist only after localizing/dividing by division-polynomial factors, or after replacing the inputs by stronger identities that determine `ω_m` and `ω_{m+1}` directly.
+
+This also corrects the interpretation of Q296: the CAS reduction there was a **localized** reduction. It used divisions by `ψ_m`, `ψ_{m+1}`, and `ψ₂`; it was not a raw polynomial-ring linear combination.
 
 ---
 
-## 1. First normalization warning
+## What happens in the localized calculation?
 
-The candidate formula must be stated very carefully.  With Mathlib’s reduced `preΨ'_n`, the even cases do not have the same scalar power as the odd cases.
-
-From the previous CAS data:
+If one unfolds
 
 ```text
-n = 3:
-  Res(preΨ'_3, (preΨ'_3)') = -3^4 * Δ^2
-  lc(preΨ'_3) = 3
-  Disc(preΨ'_3) = -3^3 * Δ^2
-
-n = 4:
-  Res(preΨ'_4, (preΨ'_4)') = 2^9 * Δ^5
-  lc(preΨ'_4) = 2
-  Disc(preΨ'_4) = ±2^8 * Δ^5
-
-n = 6:
-  Res(preΨ'_6, (preΨ'_6)') = 2^16 * 3^13 * Δ^40
-  lc(preΨ'_6) = 3
-  Disc(preΨ'_6) = ±2^16 * 3^12 * Δ^40
-
-n = 8:
-  Res(preΨ'_8, (preΨ'_8)') = 2^84 * Δ^145
-  lc(preΨ'_8) = 4
-  Disc(preΨ'_8) = ±2^82 * Δ^145
+φ_m = X*ψ_m^2 - ψ_{m+1}*ψ_{m-1}
 ```
 
-The exponent of `Δ` matches
+and performs the same reductions as in Q296, one possible localized reduction gives:
 
 ```text
-d * (d - 1) / 6
+d₇ = -ψ_{m-1}^3 / ψ_{m+1}
+d₆ = -ψ_{m-1}^3 / (ψ_{m+1}*ψ₂)
+d₈ = -ψ_{m-1}^3 / ψ₂
 ```
 
-where
+and after all eight residual identities are used, the remaining curve-equation term is
 
 ```text
-d = deg(preΨ'_n).
+(4*ψ_{m-1}^2*(ψ_m^3*ψ_{m+2} - ψ_{m-1}*ψ_{m+1}^3) / ψ₂) * HF.
 ```
 
-But the scalar factor depends on the normalization and parity.  For odd `n`, the pattern `± n^(d-1) * Δ^(d(d-1)/6)` matches the examples.  For even reduced `preΨ'_n`, the leading coefficient is `n/2`, and the scalar is not simply `n^(d-1)`.
+Thus, with the `Ψ₂Sq` version of `Hmiss`, `d₅` is **not** zero in this localized proof.  It is
 
-Therefore the safe general theorem for Lean should first be the weaker but sufficient statement:
+```text
+d₅ = 4*ψ_{m-1}^2*(ψ_m^3*ψ_{m+2} - ψ_{m-1}*ψ_{m+1}^3) / ψ₂.
+```
+
+This is compatible with Q296’s observation that the final residual is zero only after reducing modulo `HF` while working in the localization at `ψ₂`.
+
+---
+
+## Why this matters for Lean
+
+A Lean proof by
 
 ```lean
-∃ u : K, IsUnit u ∧
-  resultant (W.preΨ' n) (derivative (W.preΨ' n)) = C(u) * W.Δ ^ e(n)
+linear_combination
+  d₁*hω_m + d₂*heven_m + d₃*hmiss_m + d₄*hφ_m + d₅*hF
+    + d₆*heven_succ + d₇*hω_succ + d₈*hmiss_succ
 ```
 
-or simply:
+with polynomial `dᵢ : K[X][Y]` cannot close the raw `addY` theorem.  The obstruction is visible just by comparing the `ω_m^2` and `ω_{m+1}` coefficients.
+
+To get a polynomial proof, you need at least one of the following changes:
+
+### Option A: use the actual definition of `ω`, not only its normalization
+
+For the characteristic-zero prototype, if
 
 ```lean
-resultant (W.preΨ' n) (derivative (W.preΨ' n)) ≠ 0
+ω_m := (ψTwoMulQuot_m - ψ_m*(a₁φ_m+a₃ψ_m²)) / 2
 ```
 
-under `[W.IsElliptic]` and `(n : K) ≠ 0`.
+is unfolded directly, then `ω_m` is no longer an independent symbol and the `ω_m^2` obstruction disappears.  This is likely the cleanest route for the `addY` component.
 
-Trying to prove the exact closed scalar formula first is extra work and a possible normalization trap.
+### Option B: add the projective representative equation for `R_m`
+
+The Jacobian/projective equation for
+
+```text
+R_m = [φ_m : ω_m : ψ_m]
+```
+
+contains `ω_m^2`:
+
+```text
+ω_m^2 + a₁*φ_m*ω_m*ψ_m + a₃*ω_m*ψ_m^3
+  = φ_m^3 + a₂*φ_m^2*ψ_m^2 + a₄*φ_m*ψ_m^4 + a₆*ψ_m^6.
+```
+
+This can eliminate the `ω_m^2` term without dividing by `ψ_m`.  This is the natural missing identity if you want a raw polynomial-ring proof of `addY` using symbolic `ω_m`.
+
+### Option C: prove only a localized/multiplied theorem
+
+You can prove a localized identity after inverting `ψ₂`, `ψ_m`, and `ψ_{m+1}`.  This is **not** suitable at an `n`-torsion root where `ψ_m = 0`.  Multiplying by `ψ_m` would erase the first-order information you need.  Inverting `ψ₂` and `ψ_{m+1}` is acceptable in the non-2-torsion/no-adjacent context, but inverting `ψ_m` is not.
+
+So for the bridge proof, Option C is risky unless the multiplication/inversion factors are carefully restricted to known units.
 
 ---
 
-## 2. Why an EDS discriminant induction is not straightforward
+## Runnable SymPy obstruction script
 
-The tempting plan is:
+The script below verifies the obstruction and prints the localized coefficients that appear in the Q296-style reduction.
+
+```python
+import sympy as sp
+
+X, Y = sp.symbols('X Y')
+a1, a2, a3, a4, a6 = sp.symbols('a1 a2 a3 a4 a6')
+pm2, pm1, pm, pp1, pp2, pp3, p2m, p2m2 = sp.symbols('pm2 pm1 pm pp1 pp2 pp3 p2m p2m2')
+om, op1, ph = sp.symbols('om op1 ph')
+
+b2 = a1**2 + 4*a2
+b4 = a1*a3 + 2*a4
+b6 = a3**2 + 4*a6
+Psi2Sq = 4*X**3 + b2*X**2 + 2*b4*X + b6
+halfd = 6*X**2 + b2*X + b4
+psi2 = 2*Y + a1*X + a3
+F = Y**2 + a1*X*Y + a3*Y - X**3 - a2*X**2 - a4*X - a6
+
+phi1 = X*pp1**2 - pp2*pm
+
+P = (X, Y, 1)
+Q = (ph, om, pm)
+
+def addX(P,Q):
+    XP,YP,ZP=P; XQ,YQ,ZQ=Q
+    return (XP*XQ**2*ZP**2 - 2*YP*YQ*ZP*ZQ + XP**2*XQ*ZQ**2
+            - a1*XP*YQ*ZP**2*ZQ - a1*YP*XQ*ZP*ZQ**2
+            + 2*a2*XP*XQ*ZP**2*ZQ**2
+            - a3*YQ*ZP**4*ZQ - a3*YP*ZP*ZQ**4
+            + a4*XQ*ZP**4*ZQ**2 + a4*XP*ZP**2*ZQ**4 + 2*a6*ZP**4*ZQ**4)
+
+def negAddY(P,Q):
+    XP,YP,ZP=P; XQ,YQ,ZQ=Q
+    return (-YP*XQ**3*ZP**3 + 2*YP*YQ**2*ZP**3 - 3*XP**2*XQ*YQ*ZP**2*ZQ
+            + 3*XP*YP*XQ**2*ZP*ZQ**2 + XP**3*YQ*ZQ**3 - 2*YP**2*YQ*ZQ**3
+            + a1*XP*YQ**2*ZP**4 + a1*YP*XQ*YQ*ZP**3*ZQ
+            - a1*XP*YP*YQ*ZP*ZQ**3 - a1*YP**2*XQ*ZQ**4
+            - 2*a2*XP*XQ*YQ*ZP**4*ZQ + 2*a2*XP*YP*XQ*ZP*ZQ**4
+            + a3*YQ**2*ZP**6 - a3*YP**2*ZQ**6
+            - a4*XQ*YQ*ZP**6*ZQ - a4*XP*YQ*ZP**4*ZQ**3
+            + a4*YP*XQ*ZP**3*ZQ**4 + a4*XP*YP*ZP*ZQ**6
+            - 2*a6*YQ*ZP**6*ZQ**3 + 2*a6*YP*ZP**3*ZQ**6)
+
+def negY(P):
+    XP,YP,ZP=P
+    return -YP - a1*XP*ZP - a3*ZP**3
+
+def addY(P,Q):
+    ax = addX(P,Q)
+    az = P[0]*Q[2]**2 - Q[0]*P[2]**2
+    nay = negAddY(P,Q)
+    return negY((ax,nay,az))
+
+LHS = sp.expand(2*(addY(P,Q) - pm1**3*op1))
+
+print('coefficient of omega_m^2 in LHS =', sp.factor(sp.Poly(LHS, om).coeff_monomial(om**2)))
+print('coefficient of omega_m in Homega_m =', 2*pm)
+print('therefore coeff_omega(d1) would have to be', sp.factor(-psi2/pm))
+print()
+print('coefficient of omega_{m+1} in LHS =', sp.factor(sp.Poly(LHS, op1).coeff_monomial(op1)))
+print('coefficient of omega_{m+1} in Homega_{m+1} =', 2*pp1)
+print('therefore d7 would have to be', sp.factor(-pm1**3/pp1))
+
+# Now reproduce the localized Q296-style reduction after unfolding phi_m.
+Hphi = ph - (X*pm**2 - pp1*pm1)
+Homega = 2*pm*om - (p2m - pm**2*(a1*ph + a3*pm**2))
+Heven = p2m*psi2 - (pm1**2*pm*pp2 - pm2*pm*pp1**2)
+Hmiss = pm1**2*pp2 + pm2*pp1**2 + pm**3*Psi2Sq - pm1*pm*pp1*halfd
+Homega1 = 2*pp1*op1 - (p2m2 - pp1**2*(a1*phi1 + a3*pp1**2))
+Heven1 = p2m2*psi2 - (pm**2*pp1*pp3 - pm1*pp1*pp2**2)
+Hmiss1 = pm**2*pp3 + pm1*pp2**2 + pp1**3*Psi2Sq - pm*pp1*pp2*halfd
+
+E = sp.expand(LHS.subs(ph, X*pm**2 - pp1*pm1))
+E = E.subs(om, (p2m - pm**2*(a1*(X*pm**2-pp1*pm1)+a3*pm**2))/(2*pm))
+E = E.subs(p2m, (pm1**2*pm*pp2 - pm2*pm*pp1**2)/psi2)
+E = E.subs(pm2, (-pm1**2*pp2 - pm**3*Psi2Sq + pm1*pm*pp1*halfd)/pp1**2)
+E = E.subs(op1, (p2m2 - pp1**2*(a1*phi1+a3*pp1**2))/(2*pp1))
+E = E.subs(p2m2, (pm**2*pp1*pp3 - pm1*pp1*pp2**2)/psi2)
+E = E.subs(pp3, (-pm1*pp2**2 - pp1**3*Psi2Sq + pm*pp1*pp2*halfd)/pm**2)
+E = sp.factor(sp.cancel(E))
+num, den = sp.fraction(E)
+q, r = sp.div(sp.Poly(num, Y), sp.Poly(F, Y))
+assert r.as_expr() == 0
+
+print()
+print('localized residual after all eight identities =')
+print(E)
+print('denominator =', sp.factor(den))
+print('HF coefficient in this localized proof =', sp.factor(q.as_expr()/den))
+print('OK')
+```
+
+## Output
 
 ```text
-Disc(f*g) = Disc(f)*Disc(g)*Res(f,g)^2
+coefficient of omega_m^2 in LHS = -2*(X*a1 + 2*Y + a3)
+coefficient of omega_m in Homega_m = 2*pm
+therefore coeff_omega(d1) would have to be -(X*a1 + 2*Y + a3)/pm
+
+coefficient of omega_{m+1} in LHS = -2*pm1**3
+coefficient of omega_{m+1} in Homega_{m+1} = 2*pp1
+therefore d7 would have to be -pm1**3/pp1
+
+localized residual after all eight identities =
+4*pm1**2*(pm**3*pp2 - pm1*pp1**3)*(-X**3 - X**2*a2 + X*Y*a1 - X*a4 + Y**2 + Y*a3 - a6)/(X*a1 + 2*Y + a3)
+denominator = X*a1 + 2*Y + a3
+HF coefficient in this localized proof = 4*pm1**2*(pm**3*pp2 - pm1*pp1**3)/(X*a1 + 2*Y + a3)
+OK
 ```
 
-and the division-polynomial recurrences look product-like.  But the key odd recurrence is not a product:
+## Lean implication
+
+Do not spend time trying to make an 8-input polynomial `linear_combination` for raw `addY`; it cannot exist with only those inputs.
+
+For the Lean proof of `addY`, the minimal fix is one of:
+
+1. **Unfold the definition of `ω_m` and `ω_{m+1}`** from `ψTwoMulQuot` / complement sequences, instead of using only the normalization identities.
+2. **Add the projective equation for `R_m=[φ_m:ω_m:ψ_m]`**, which contains `ω_m^2` and can eliminate the quadratic `ω_m` term without dividing by `ψ_m`.
+3. Work in a localized theorem that explicitly inverts the required factors, but this is dangerous for the torsion-root bridge because `ψ_m=0` at the root.
+
+The most robust general projective-formula path is therefore:
 
 ```text
-ψ_{2m+1} = ψ_{m+2} * ψ_m^3 - ψ_{m-1} * ψ_{m+1}^3.
+addX: normalization + Heven + Hmiss is enough.
+addY: also needs either the actual ω definition or the projective representative equation; normalization alone is insufficient.
 ```
-
-The discriminant of a **difference of products** does not factor into discriminants and resultants of the factors.  To compute
-
-```text
-Disc(ψ_{2m+1}) = Res(ψ_{2m+1}, (ψ_{2m+1})') / lc(ψ_{2m+1}),
-```
-
-you must control the derivative of that difference.  This immediately introduces common-root exclusions and resultants between neighboring division-polynomial factors and their derivatives.
-
-In other words, the induction would need lemmas like:
-
-```lean
-IsCoprime (W.preΨ' m) (W.preΨ' (m+1))
-IsCoprime (W.preΨ' m) (W.preΨ' (m-1))
-IsCoprime (W.preΨ' m) W.Ψ₂Sq
-IsCoprime (W.preΨ' m) (derivative (W.preΨ' m))
-resultant formulas for many neighboring pairs
-```
-
-The last line includes the target theorem for smaller indices, and the neighboring-pair resultants encode rank-of-apparition / torsion structure.  This is not impossible, but it is a large structural theory, not a short recurrence induction.
-
-The even recurrence has a quotient/complement flavor, which also forces control of the `ψ₂` factor and the reduced/full normalization.  Again, this is manageable for fixed `n`, but general `n` becomes a web of resultant identities.
-
----
-
-## 3. Does a closed-form formula exist in the literature?
-
-There are classical product formulas for division polynomials and their discriminants/resultants, and there is literature studying division polynomials and discriminants.  But the proofs I know are geometric/arithmetic: they use the fact that the roots of `ψ_n` are torsion `x`-coordinates, the multiplication-by-`n` map, or intersection theory.
-
-That is exactly the content we are trying to formalize.
-
-I do **not** know a Lean-ready theorem of the form
-
-```text
-Disc(preΨ'_n) = unit(n) * Δ^e(n)
-```
-
-with a proof that uses only the Ward/EDS recurrences and no torsion geometry, no formal group, and no separability of `[n]`.
-
-Even if such a formula is written somewhere, porting it to Lean would likely require:
-
-```text
-1. exact normalization translation to Mathlib's `preΨ'`,
-2. parity handling for reduced even polynomials,
-3. many auxiliary resultant identities,
-4. proof that all scalar factors are units under `(n : K) ≠ 0`,
-5. a discriminant/resultant API bridge to `Polynomial.Separable`.
-```
-
-That is very likely comparable to, or larger than, the formal/projective bridge.
-
----
-
-## 4. What a Lean discriminant route would actually need
-
-A full Lean route would look like this:
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
-import Mathlib.FieldTheory.Separable
-import Mathlib.Tactic
-
-open Polynomial
-
-namespace WeierstrassCurve
-
-noncomputable section
-
-variable {K : Type*} [Field K] [DecidableEq K]
-variable (W : WeierstrassCurve K) [W.IsElliptic]
-
-/-- Scalar factor in the discriminant/resultant formula, with correct parity normalization. -/
-noncomputable def preΨ'ResultantUnitScalar (n : ℕ) : K :=
-  -- exact formula TBD; must distinguish odd/even reduced normalization
-  1
-
-/-- Exponent of the discriminant in the resultant/discriminant formula. -/
-def preΨ'DeltaExponent (n : ℕ) : ℕ :=
-  let d := if Even n then (n^2 - 4) / 2 else (n^2 - 1) / 2
-  d * (d - 1) / 6
-
-/-- The hard structural theorem. -/
-theorem resultant_preΨ'_derivative_formula
-    {n : ℕ} (hn : n ≠ 0) :
-    Polynomial.resultant (W.preΨ' n) (derivative (W.preΨ' n)) =
-      C (preΨ'ResultantUnitScalar W n) * C (W.Δ ^ preΨ'DeltaExponent n) := by
-  -- This is the whole project, not a small wrapper.
-  sorry
-
-/-- Resultant nonzero gives separability. -/
-theorem preΨ'_separable_of_resultant_formula
-    {n : ℕ} (hn : (n : K) ≠ 0)
-    (hres : Polynomial.resultant (W.preΨ' n) (derivative (W.preΨ' n)) ≠ 0) :
-    (W.preΨ' n).Separable := by
-  -- Use the polynomial API relating nonzero resultant to coprimality over a field,
-  -- or prove a Bezout identity from the resultant/Sylvester construction.
-  -- `Polynomial.Separable` is definitionally `IsCoprime f f'`.
-  sorry
-
-end
-
-end WeierstrassCurve
-```
-
-The hard theorem is `resultant_preΨ'_derivative_formula`.  If you can prove it, the rest is easy.  But proving it is at least as hard as proving the separability theorem itself.
-
----
-
-## 5. Why the formal/projective route is still better
-
-The formal/projective route isolates the one geometric input that is actually needed:
-
-```text
-d[n]|_O = n
-```
-
-and then connects it to division polynomials through the projective formula.  Your current A-path atoms are local and compositional:
-
-```text
-ω_n normalization
-projective representative [φ_n : ω_n : ψ_n]
-local parameter t = -X*Z/Y
-nonzero φ_n and ω_n at ψ_n-roots
-TangentO.nsmul₁ = n
-```
-
-Each atom has a clear role in the final contradiction.  By contrast, a general discriminant proof compresses all of this into one global resultant formula.  That can look shorter on paper, but in Lean it hides many of the same lemmas inside a harder-to-debug algebraic theorem.
-
-For fixed `n`, global compression is good: a CAS certificate is a finite artifact.  For variable `n`, global compression is bad: the proof has to rediscover the structure uniformly.
-
----
-
-## 6. Possible compromise
-
-Use discriminants/resultants only for small base cases and sanity checks:
-
-```text
-n = 3,4,5,7 fixed separability certificates
-small resultant certificates for Ψ₂Sq, Ψ₃, preΨ₄
-spot-checks of predicted scalar powers
-```
-
-But keep the general theorem on the A-path.
-
-A useful theorem to prove from the A-path later is the resultant/discriminant formula as a **corollary**.  Once separability and torsion/root descriptions are available, the discriminant formula becomes much more natural: roots are torsion `x`-coordinates, and products of differences can be computed using division-polynomial values/intersections.
-
----
-
-## Final recommendation
-
-Do not pivot the general proof to discriminants.
-
-The discriminant formula is a good validation target and a good fixed-`n` certificate generator.  But as a general Lean proof strategy, it is likely larger than the projective/formal bridge and risks circularity through hidden adjacent-coprimality and torsion-root facts.
-
-The current A-path remains the better architecture:
-
-```text
-build ω_n + projective formula + local parameter bridge
-```
-
-If the goal is to close `preΨ'_separable_of_natCast_ne_zero` for all `n`, the most honest bottleneck is still the structural theorem behind `[n]` on first-order tangent directions, not a missing symbolic discriminant identity.
