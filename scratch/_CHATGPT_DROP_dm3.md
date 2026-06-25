@@ -1,267 +1,440 @@
-# Q256 (dm3): Resultant recurrence for division-polynomial separability
+# Q258 (dm3): Lean architecture for projective X/Y formula induction
 
-## Verdict
+## Bottom line
 
-There is a clean closed form for the **power of the discriminant** in
-
-```text
-R_n = Res_X(preΨ'_n, derivative(preΨ'_n)).
-```
-
-For the reduced x-division polynomial `preΨ'_n`, let
+The clean Lean architecture is **not**:
 
 ```text
-d(n) = deg(preΨ'_n)
-     = (n^2 - 1) / 2   if n is odd,
-     = (n^2 - 4) / 2   if n is even.
+coordinate-ring identity with scalar ψ_{m-1}
+⇒ directly a Mathlib `PointClass` equality
+⇒ directly the induction step.
 ```
 
-Then the discriminant exponent is
+That fails because Mathlib’s Jacobian `PointClass` quotient is by weighted
+scaling with a **unit**, while the scalar in the polynomial identity is
+`ψ_{m-1}`, which is not a unit in the coordinate ring.
 
-```text
-e(n) = d(n) * (d(n) - 1) / 6.
-```
+The clean architecture is instead:
 
-Equivalently,
+1. Prove the coordinate-ring/congruence step identities as independent algebraic
+   lemmas:
 
-```text
-n odd:   e(n) = (n^2 - 1)(n^2 - 3) / 24,
-n even:  e(n) = (n^2 - 4)(n^2 - 6) / 24.
-```
+   ```text
+   addZ(P, R_m) = ψ_{m-1} · ψ_{m+1}
+   mk(addX(P, R_m) - ψ_{m-1}^2 · φ_{m+1}) = 0
+   mk(addY(P, R_m) - ψ_{m-1}^3 · ω_{m+1}) = 0
+   ```
 
-This matches the examples:
+2. When you want to connect to the **group law**, map to a field where
+   `ψ_{m-1}` is nonzero, typically the fraction field of the generic coordinate
+   ring.  There the scalar is a unit, so the weighted projective equality is a
+   valid Mathlib `PointClass` equality.
 
-```text
-n = 3:  d = 4,   e = 4*3/6 = 2
-n = 4:  d = 6,   e = 6*5/6 = 5
-n = 5:  d = 12,  e = 12*11/6 = 22
-n = 7:  d = 24,  e = 24*23/6 = 92
-```
+3. Use Mathlib’s existing Jacobian group-law API for `W.add` / `Point.add` /
+   `addMap`, not raw `addXYZ` globally.
 
-For odd `n`, with the standard normalization where `preΨ'_n` has leading
-coefficient `n`, the resultant has the familiar shape
+4. Rewrite `W.add` to `W.addXYZ` only in the non-equivalent branch, using
+   `W.add_of_not_equiv`.  The case `m = 1` is the doubling branch and must be
+   handled by the already-proved `dblXYZ` identities.
 
-```text
-Res(preΨ'_n, (preΨ'_n)') = ± n^d(n) · Δ^e(n).
-```
+So yes, Mathlib has enough group-law infrastructure to connect the representative
+recursion to `nsmul`, but the connection goes through `W.add`, and the
+nonunit-scalar issue means you should do that semantic induction over a field, not
+directly inside the coordinate ring.
 
-Indeed the polynomial discriminant satisfies
+---
 
-```text
-Disc(preΨ'_n) = ± n^(d(n)-1) · Δ^e(n),
-```
+## Answer to (a): can `mk_ψ`, `mk_φ`, `mk_Ψ_sq` avoid the induction?
 
-and
+No.  They help, but they do not replace the projective formula induction.
 
-```text
-Res(f, f') = (-1)^(d(d-1)/2) · lc(f) · Disc(f).
-```
-
-For even `n`, the exponent `e(n)` is still exactly the same formula above, but the
-integer constant is normalization-dependent.  With Mathlib’s reduced even
-polynomial, the constant is not simply `n^d`; your example
-
-```text
-R_4 = 2^9 · Δ^5
-```
-
-already shows this, since `4^6 = 2^12`.  The correct all-`n` statement should be
-formulated as
-
-```text
-Res(preΨ'_n, (preΨ'_n)') = ± C_n · Δ^e(n),
-```
-
-where `C_n ∈ ℤ \ {0}` has only prime divisors dividing `n`.  For separability over
-a field, this is enough: `(n : k) ≠ 0` implies `(C_n : k) ≠ 0`, and
-`W.IsElliptic` implies `W.Δ ≠ 0`.
-
-## Is there an EDS-style recurrence for `R_n`?
-
-I would **not** expect a useful scalar recurrence for
-
-```text
-R_n = Res(preΨ'_n, (preΨ'_n)').
-```
-
-that mirrors the EDS recurrence for `ψ_n` in a way that gives a short Lean proof.
-There are two different issues.
-
-### 1. Resultants are multiplicative for products, not for EDS differences
-
-The useful formal identities are things like
-
-```text
-Disc(fg) = Disc(f) Disc(g) Res(f,g)^2
-Res(fg, h) = Res(f,h) Res(g,h).
-```
-
-But the Ward/EDS recurrence is not a product recurrence.  It has the shape
-
-```text
-ψ_{2m+1} = ψ_{m+2} ψ_m^3 - ψ_{m-1} ψ_{m+1}^3
-ψ_{2m}   = (ψ_m / ψ_2) · (ψ_{m+2} ψ_{m-1}^2 - ψ_{m-2} ψ_{m+1}^2)
-```
-
-or the corresponding reduced/univariate version.  The discriminant of a
-**difference of products** is not controlled by the discriminants of the factors.
-To get a recurrence for `R_{2m+1}` from previous `R_i`, one would also need a
-large package of mixed resultants such as
-
-```text
-Res(ψ_i, ψ_j),
-Res(ψ_i, ψ_j'),
-Res(ψ_{m+2}ψ_m^3 - ψ_{m-1}ψ_{m+1}^3,
-    derivative(...)),
-```
-
-and those mixed resultants encode the same torsion-intersection information that
-the projective formula or the resultant certificates were trying to avoid.
-
-So there is an arithmetic structure behind the answer, but it is not a simple
-one-dimensional EDS recurrence for `R_n`.
-
-### 2. The known formula is geometric/divisor-theoretic, not recurrence-theoretic
-
-The clean explanation is that `preΨ'_n` cuts out the x-coordinates of the relevant
-nonzero `n`-torsion points modulo `±1`, with the nonzero 2-torsion removed in the
-even case.  The discriminant of this x-polynomial measures collisions of those
-x-coordinates.  Such collisions happen exactly over the discriminant divisor of
-the Weierstrass model, and weighted homogeneity/intersection theory gives the
-power
-
-```text
-e(n) = d(n)(d(n)-1)/6.
-```
-
-This is the standard “division-polynomial discriminant” story.  It is usually
-proved from the geometry of the multiplication-by-`n` map/torsion divisor, or
-from Cantor/de Jong style division-polynomial divisor calculations, rather than
-from the Ward recurrence alone.
-
-A recurrence proof may exist in a broad sense if one sets up a much larger system
-of recurrences for all relevant pairwise resultants/intersections.  But that would
-not be the small third route suggested in the question.  It would become another
-large project, comparable in size to the projective-formula infrastructure.
-
-## What a realistic general theorem would look like
-
-The most robust all-`n` theorem for Lean would not mention a scalar recurrence.  I
-would state it as a closed-form resultant theorem:
+The existing coordinate-ring lemmas are of the form:
 
 ```lean
+#check WeierstrassCurve.Affine.CoordinateRing.mk_ψ
+#check WeierstrassCurve.Affine.CoordinateRing.mk_φ
+#check WeierstrassCurve.Affine.CoordinateRing.mk_Ψ_sq
+```
+
+Conceptually:
+
+```lean
+mk W (W.ψ n) = mk W (W.Ψ n)
+mk W (W.φ n) = mk W (Polynomial.C (W.Φ n))
+mk W (W.Ψ n) ^ 2 = mk W (Polynomial.C (W.ΨSq n))
+```
+
+These lemmas say that Mathlib’s several packages for the **division polynomial
+expressions** agree modulo the Weierstrass equation.  In particular, `mk_φ` is the
+right way to avoid expanding the definition
+
+```lean
+φ_n = X * ψ_n^2 - ψ_{n+1} * ψ_{n-1}
+```
+
+when relating the bivariate and univariate `φ`/`Φ` sides.
+
+But they do **not** say that `φ_n`, `ω_n`, `ψ_n` represent `[n]P` under the
+Jacobian group law.  That is exactly the theorem you are proving.  If Mathlib had
+an existing theorem saying
+
+```lean
+[n]P = [φ_n : ω_n : ψ_n]
+```
+
+or equivalently that `mk φ_n / mk ψ_n^2` is the x-coordinate of `[n]P`, then the
+induction would already be done.  `mk_ψ`, `mk_φ`, and `mk_Ψ_sq` are lower-level
+normalization lemmas, not the group-law theorem.
+
+Use them aggressively on the RHS of your X/Y identities, but do not expect them to
+supply the induction step.
+
+---
+
+## Answer to (b): does Mathlib have `Jacobian.addXYZ_eq_add`?
+
+Not globally, and it cannot be true globally.
+
+Mathlib defines the representative-level Jacobian addition roughly as:
+
+```lean
+noncomputable def WeierstrassCurve.Jacobian.add (P Q : Fin 3 → R) : Fin 3 → R :=
+  if P ≈ Q then W.dblXYZ P else W.addXYZ P Q
+```
+
+So the globally correct representative operation is `W.add P Q`, not raw
+`W.addXYZ P Q`.
+
+The relevant existing API is:
+
+```lean
+#check WeierstrassCurve.Jacobian.add_of_equiv
+#check WeierstrassCurve.Jacobian.add_of_not_equiv
+#check WeierstrassCurve.Jacobian.addMap_eq
+#check WeierstrassCurve.Jacobian.Point.add_point
+#check WeierstrassCurve.Jacobian.Point.toAffineLift_add
+#check WeierstrassCurve.Jacobian.Point.toAffineAddEquiv
+#check WeierstrassCurve.Jacobian.map_add
+```
+
+The intended usage is:
+
+```lean
+-- quotient-level addition is represented by `W.add`
+W.addMap ⟦P⟧ ⟦Q⟧ = ⟦W.add P Q⟧
+
+-- point-level addition uses `addMap`
+(P + Q).point = W.addMap P.point Q.point
+
+-- semantic correctness of the Jacobian group law
+(P + Q).toAffineLift = P.toAffineLift + Q.toAffineLift
+```
+
+Then, only after proving `¬ P ≈ Q`, you can use:
+
+```lean
+W.add_of_not_equiv hneq : W.add P Q = W.addXYZ P Q
+```
+
+If `P ≈ Q`, Mathlib uses the doubling branch:
+
+```lean
+W.add_of_equiv heq : W.add P Q = W.dblXYZ P
+```
+
+Therefore there is no global theorem of the form
+
+```lean
+W.add P Q = W.addXYZ P Q
+```
+
+and a theorem named `Jacobian.addXYZ_eq_add` would have to include a
+non-equivalence hypothesis.
+
+---
+
+## The right induction scheme
+
+The most robust induction is a **semantic induction over a field**, with the
+coordinate-ring step identities used only after mapping into that field.
+
+For the universal/generic proof, the field should be the fraction field of the
+affine coordinate ring of the generic point.  Let `K` denote that fraction field.
+Map the coordinate-ring representatives into `K`:
+
+```lean
+R n : Fin 3 → CoordinateRing
+RK n : Fin 3 → K
+Pgen : W_K.Jacobian.Point
+```
+
+Then prove:
+
+```lean
+theorem rep_nsmul_generic (n : ℕ) :
+    ((n : ℕ) • Pgen).point = ⟦RK n⟧ := by
+  induction n with
+  | zero =>
+      -- point at infinity, depending on your indexing convention
+      ...
+  | succ n ih =>
+      -- use AddCommGroup/nsmul recursion and `Point.add_point`
+      -- then rewrite by `addMap_eq`.
+      ...
+```
+
+For `n = 1`, the statement is the base case:
+
+```lean
+R_1 = ![X, Y, 1].
+```
+
+For the step from `m` to `m+1`, split the small exceptional case:
+
+* `m = 1`: use the doubling identity
+
+  ```text
+  dblXYZ(R_1) = scalar · R_2
+  ```
+
+  together with `W.add_of_equiv` / `W.add_self`.
+
+* `m ≠ 1`: prove generically that `RK m ≉ RK 1`, then use
+
+  ```lean
+  W.add_of_not_equiv hneq
+  ```
+
+  to rewrite `W.add (RK m) (RK 1)` to `W.addXYZ (RK m) (RK 1)`.
+
+Then the coordinate-ring step identity, after mapping to `K`, gives
+
+```text
+W.addXYZ(RK m, RK 1) = ψ_{m-1} • RK (m+1).
+```
+
+Since `ψ_{m-1}` is nonzero in `K`, it is a unit, so this becomes a valid
+`PointClass` equality:
+
+```lean
+have hunit : IsUnit (ψK (m - 1)) := by
+  exact isUnit_iff_ne_zero.mpr hψ_nonzero
+
+have hclass :
+    (⟦W.addXYZ (RK m) (RK 1)⟧ : W.PointClass K) = ⟦RK (m + 1)⟧ := by
+  -- From `W.addXYZ ... = ψ_{m-1} • RK (m+1)` and `hunit`.
+  rw [hstep]
+  exact WeierstrassCurve.Jacobian.smul_eq (RK (m + 1)) hunit
+```
+
+This is the exact place where the coordinate-ring proof cannot be used directly:
+`ψ_{m-1}` is not a unit in the coordinate ring, but it is a unit in the fraction
+field once you prove it is nonzero.
+
+---
+
+## Skeleton of the semantic step
+
+The following is schematic, but it shows the correct Lean shape.
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Point
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.RingTheory.FractionalIdeal.Basic
+import Mathlib.Tactic
+
 namespace WeierstrassCurve
 
 open Polynomial
 
-variable {k : Type*} [Field k]
+namespace ProjectiveFormulaPlan
 
-/-- Degree of the reduced x-division polynomial. -/
-def preΨ'DegreeFormula (n : ℕ) : ℕ :=
-  if Even n then (n ^ 2 - 4) / 2 else (n ^ 2 - 1) / 2
+variable {K : Type*} [Field K]
+variable (W : WeierstrassCurve K)
 
-/-- Discriminant exponent for the reduced x-division polynomial. -/
-def preΨ'DiscExponent (n : ℕ) : ℕ :=
-  let d := preΨ'DegreeFormula n
-  d * (d - 1) / 6
+local notation3 "x" => (0 : Fin 3)
+local notation3 "y" => (1 : Fin 3)
+local notation3 "z" => (2 : Fin 3)
 
-/-- Schematic all-`n` resultant theorem. -/
-theorem resultant_preΨ'_derivative_shape
-    (W : WeierstrassCurve k) (n : ℕ) :
-    ∃ C : ℤ,
-      C ≠ 0 ∧
-      (∀ p : ℕ, Nat.Prime p → p ∣ C.natAbs → p ∣ n) ∧
-      Polynomial.resultant (W.preΨ' n) (Polynomial.derivative (W.preΨ' n))
-        = (C : k) * W.Δ ^ preΨ'DiscExponent n := by
-  -- This is the real general theorem.  It is not currently a small consequence
-  -- of the Ward recurrence.
+/-- Schematic representative.  In the real file this is `[φ_n, ω_n, ψ_n]`. -/
+def R (n : ℕ) : Fin 3 → K :=
   sorry
 
-/-- Separability follows immediately from the closed-form resultant theorem. -/
-theorem isCoprime_preΨ'_derivative_of_resultant_shape
-    (W : WeierstrassCurve k) [W.IsElliptic]
-    (n : ℕ) (hn : (n : k) ≠ 0) :
-    IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n)) := by
-  -- Use `resultant_preΨ'_derivative_shape`, `W.Δ ≠ 0`, and the prime-support
-  -- condition on `C` to prove the resultant is nonzero/unit, then convert
-  -- resultant nonzero to coprimality in `k[X]`.
+/-- The base point `[X:Y:1]` after mapping to the chosen field. -/
+def P : Fin 3 → K :=
+  R 1
+
+/-- The scalar in the addition step. -/
+def stepScalar (m : ℕ) : K :=
+  sorry -- ψ_{m-1}
+
+/-- Coordinate identity, already proved in the coordinate ring and mapped to `K`. -/
+theorem addXYZ_step_identity
+    (m : ℕ) :
+    W.toJacobian.addXYZ (R W m) (P W)
+      = stepScalar W m • R W (m + 1) := by
+  -- map the coordinate-ring X/Y/Z identities to `K`
   sorry
 
+/-- Generic nonvanishing of the scalar. -/
+theorem stepScalar_ne_zero
+    {m : ℕ} (hm : m ≠ 1) :
+    stepScalar W m ≠ 0 := by
+  -- division-polynomial nonvanishing in the generic function field
+  sorry
+
+/-- Non-equivalence needed to rewrite `W.add` to raw `addXYZ`. -/
+theorem R_nequiv_P
+    {m : ℕ} (hm : m ≠ 1) :
+    ¬ R W m ≈ P W := by
+  -- Usually follows from the Z/X relation and `ψ_{m-1} ≠ 0`, or from
+  -- generic non-torsion of the universal point.
+  sorry
+
+/-- One successor step for the point-class representative theorem. -/
+theorem rep_succ_step
+    {m : ℕ} (hm : m ≠ 1)
+    (ih : ((m : ℕ) • Pgen W).point = ⟦R W m⟧) :
+    (((m + 1 : ℕ) : ℕ) • Pgen W).point = ⟦R W (m + 1)⟧ := by
+  -- nsmul recursion in the additive group of nonsingular Jacobian points
+  -- rewrites `(m+1) • Pgen` as `m • Pgen + Pgen`.
+  -- Then use `Point.add_point`, `addMap_eq`, and `add_of_not_equiv`.
+
+  have hneq : ¬ R W m ≈ P W := R_nequiv_P (W := W) hm
+  have hunit : IsUnit (stepScalar W m) :=
+    isUnit_iff_ne_zero.mpr (stepScalar_ne_zero (W := W) hm)
+
+  -- Schematic quotient calculation:
+  calc
+    (((m + 1 : ℕ) : ℕ) • Pgen W).point
+        = W.toJacobian.addMap ⟦R W m⟧ ⟦P W⟧ := by
+            -- nsmul recursion + `ih` + base-point representative
+            sorry
+    _ = ⟦W.toJacobian.add (R W m) (P W)⟧ := by
+            rw [WeierstrassCurve.Jacobian.addMap_eq]
+    _ = ⟦W.toJacobian.addXYZ (R W m) (P W)⟧ := by
+            rw [WeierstrassCurve.Jacobian.add_of_not_equiv hneq]
+    _ = ⟦stepScalar W m • R W (m + 1)⟧ := by
+            rw [addXYZ_step_identity]
+    _ = ⟦R W (m + 1)⟧ := by
+            exact WeierstrassCurve.Jacobian.smul_eq (R W (m + 1)) hunit
+
+end ProjectiveFormulaPlan
 end WeierstrassCurve
 ```
 
-This theorem is mathematically clean, but proving it in Lean is not obviously
-shorter than the projective formula.  It would require one of the following:
+The real proof will need your actual generic point `Pgen`, the nonsingularity
+proofs, and the exact coercions from coordinate ring to fraction field.  But this
+is the correct API shape.
 
-1. a formal divisor/intersection proof for the torsion divisor under `x : E → P¹`;
-2. a formal proof of the known division-polynomial discriminant formula;
-3. a large generated algebraic certificate for the universal resultant identity;
-4. a large recurrence system for not only `R_n`, but also mixed resultants between
-   the division-polynomial factors appearing in the Ward recurrences.
+---
 
-Only option 3 is close to the current project’s certificate technology; but option
-3 is exactly the per-`n` certificate route unless you generate a symbolic all-`n`
-proof, which is much harder.
+## What about the scalar vanishing at a concrete point?
 
-## Relation to the three routes
-
-### Route A: per-`n` Bezout certificates
-
-For Mazur `|T| ≤ 16`, this is still the fastest route.  It proves exactly the
-needed finite range.  It does not require `ω_n`, a projective formula, generic
-points, or an all-`n` discriminant theorem.
-
-### Route B: projective formula with `ω_n`
-
-This gives more reusable infrastructure and can prove the division-polynomial
-representability theorem.  But it is a genuine 600–1200 line development and still
-has hard X/Y coordinate-ring identities.
-
-### Route C: resultant/discriminant closed formula for all `n`
-
-Mathematically elegant, but I would not classify it as “short” unless the project
-already has enough geometry of torsion divisors.  It bypasses `ω_n`, but it
-replaces it with an all-`n` discriminant theorem for division polynomials.  A
-simple EDS-style recurrence for the scalar resultant does not seem to be the known
-or practical way to prove it.
-
-## Recommendation
-
-For the FLT/Mazur bound, do **not** switch to the all-`n` resultant-recurrence
-route.  Use the closed-form exponent as a sanity check and as metadata for the
-per-`n` certificates:
+At a concrete specialization, `ψ_{m-1}(P)` can vanish.  Then the identity
 
 ```text
-e(n) = d(n)(d(n)-1)/6.
+addXYZ(R_m, P) = ψ_{m-1} • R_{m+1}
 ```
 
-For each fixed `n ≤ 16`, generate
+can degenerate to the zero triple on the RHS and no longer gives a valid
+projective representative.  That is not a contradiction: raw cleared-denominator
+formulas often degenerate at exceptional points.
+
+This is why the induction should not be run directly at arbitrary evaluated
+points using raw `addXYZ`.  Run it generically over a fraction field, where the
+relevant division polynomials are nonzero.  If you later need a theorem for all
+specialized points, prove it by a separate specialization/closedness argument or
+by handling exceptional cases with the actual `W.add` branch logic.
+
+In other words:
 
 ```text
-A_n · preΨ'_n + B_n · (preΨ'_n)' = C_n · Δ^e(n),
+coordinate-ring identity: valid everywhere, but not a point-class equality when scalar is nonunit/zero;
+fraction-field point-class proof: valid generically because scalar is a unit;
+specialized point theorem: needs extra exceptional-case handling.
 ```
 
-with `C_n` factored and prime-supported on `n`.  Then Lean only needs:
+---
+
+## Recommended final architecture
+
+I would organize the project as four layers.
+
+### Layer 1: algebraic coordinate identities
+
+These are pure coordinate-ring/polynomial lemmas:
+
+```lean
+addZ_Rm_P
+addX_Rm_P_mk
+addY_Rm_P_mk
+dblZ_Rm
+dblX_Rm_mk
+dblY_Rm_mk
+```
+
+This layer is where CAS certificates or structured `linear_combination` proofs
+live.  It does not mention `Jacobian.Point`, `PointClass`, or `nsmul`.
+
+### Layer 2: generic nonvanishing
+
+Over the fraction field, prove:
+
+```lean
+ψK n ≠ 0
+stepScalar K m ≠ 0
+R K n is a valid nonsingular representative
+R K m ≉ R K 1, for the addXYZ branch when m ≠ 1
+```
+
+This is where division-polynomial nonzero facts are used.
+
+### Layer 3: semantic representative induction
+
+Use Mathlib’s group law:
+
+```lean
+Jacobian.Point.add_point
+Jacobian.addMap_eq
+Jacobian.add_of_not_equiv
+Jacobian.add_of_equiv / add_self for m = 1
+Jacobian.Point.toAffineLift_add or toAffineAddEquiv when needed
+```
+
+to prove:
+
+```lean
+((n : ℕ) • Pgen).point = ⟦RK n⟧.
+```
+
+This is the genuine `nsmul` connection.  It should be over a field.
+
+### Layer 4: specialization, if needed
+
+If the final theorem must apply to arbitrary evaluated points, add a separate
+specialization layer.  Do not try to get that for free from a nonunit-scaled
+coordinate-ring identity.
+
+---
+
+## Practical answer
+
+For proving the projective formula by induction on `n`, the right scheme is:
 
 ```text
-W.IsElliptic  ⇒  W.Δ ≠ 0
-(n : k) ≠ 0   ⇒  (C_n : k) ≠ 0
+base n = 1;
+step m = 1 uses doubling;
+step m > 1 uses `W.add_of_not_equiv` to rewrite `W.add` to `addXYZ`, then uses
+coordinate-ring X/Y/Z step identities mapped to the generic fraction field, where
+ψ_{m-1} is a unit.
 ```
 
-The recurrence idea is useful conceptually, but as a formalization strategy it is
-unlikely to beat finite generated certificates for `n = 1..16`.
+You cannot avoid the induction entirely with `mk_ψ`/`mk_φ`/`mk_Ψ_sq`.  And
+Mathlib does not have a global `addXYZ_eq_add`; the correct theorem is the
+branch-specific `add_of_not_equiv`, because `W.add` is the operation that connects
+to `Point.add` and `nsmul`.
 
-## Reference pointers
-
-* Silverman, *The Arithmetic of Elliptic Curves*, Exercise III.3.7, for the
-  classical division-polynomial degree and discriminant formula background.
-* Robin de Jong, “One half log discriminant and division polynomials,” especially
-  the introduction and Cantor-division-polynomial discussion, for the divisor and
-  discriminant/intersection viewpoint.
-* The standard polynomial identity
-
-  ```text
-  Disc(f) = (-1)^(d(d-1)/2) · lc(f)^(-1) · Res(f,f')
-  ```
-
-  explains the shift from discriminant constants to resultant constants.
+This is the most reliable Lean path: keep the huge X/Y identities as algebraic
+step lemmas, but use Mathlib’s existing Jacobian group-law layer to connect the
+recursive representatives to `nsmul` over a field.
