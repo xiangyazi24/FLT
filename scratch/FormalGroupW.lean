@@ -424,25 +424,277 @@ theorem formalAddY_dvd_cube (W : WeierstrassCurve R) :
     (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ 3 ∣ W.formalAddY :=
   sorry
 
-/-- `(X₀ - X₁)³` divides `formalAddZ`. -/
+/-- The diagonal-difference quotient for w: `w₁ - w₀ = (X₁ - X₀) · wDiffQ`. -/
+private noncomputable def wDiffQ (W : WeierstrassCurve R) : MvPowerSeries (Fin 2) R :=
+  PowerSeries.diagDiffQuot W.formalW
+
+/-- The quotient `E = w₀ - X₀ · wDiffQ`, so that `delta = (X₀-X₁) · E`. -/
+private noncomputable def deltaQuot (W : WeierstrassCurve R) : MvPowerSeries (Fin 2) R :=
+  PowerSeries.subst (MvPowerSeries.X 0) W.formalW -
+  MvPowerSeries.X 0 * W.wDiffQ
+
+private theorem formalDelta_eq_mul (W : WeierstrassCurve R) :
+    formalDelta W = (MvPowerSeries.X 0 - MvPowerSeries.X 1) * W.deltaQuot := by
+  unfold formalDelta deltaQuot wDiffQ
+  simp only [formalPointMv_x, formalPointMv_z]
+  have h := PowerSeries.subst_X_sub_subst_X_eq_mul_diagDiffQuot W.formalW
+  -- h : w₀ - w₁ = (X₀ - X₁) * q
+  -- Goal: X₀ * w₁ - X₁ * w₀ = (X₀ - X₁) * (w₀ - X₀ * q)
+  -- RHS = X₀*w₀ - X₀²*q - X₁*w₀ + X₁*X₀*q
+  -- From h: w₀ = w₁ + (X₀-X₁)*q, so X₀*w₁ = X₀*(w₀ - (X₀-X₁)*q)
+  -- LHS = X₀*w₁ - X₁*w₀ = X₀*(w₀-(X₀-X₁)q) - X₁*w₀ = (X₀-X₁)*w₀ - X₀(X₀-X₁)q
+  --     = (X₀-X₁)*(w₀ - X₀*q) = RHS ✓
+  -- Goal: X₀w₁ - X₁w₀ = (X₀-X₁)(w₀ - X₀q)
+  -- From h: w₀ - w₁ = (X₀-X₁)*q
+  -- LHS - RHS = -X₀ * (w₀ - w₁ - (X₀-X₁)*q) = -X₀ * 0 = 0
+  linear_combination -MvPowerSeries.X (R := R) 0 * h
+
+-- w₀ = X₀³ · u₀ where u₀ = subst X₀ u is a unit
+private theorem formalPointMv_z_eq (W : WeierstrassCurve R) (i : Fin 2) :
+    W.formalPointMv i 2 = (MvPowerSeries.X i) ^ 3 *
+      PowerSeries.subst (MvPowerSeries.X i) W.formalU := by
+  simp only [formalPointMv_z, formalW]
+  rw [PowerSeries.subst_mul (PowerSeries.HasSubst.X i),
+    PowerSeries.subst_pow (PowerSeries.HasSubst.X i),
+    PowerSeries.subst_X (PowerSeries.HasSubst.X i)]
+
+-- u₀ is a unit (since constantCoeff u = 1, and subst X₀ preserves this)
+private theorem formalU_subst_isUnit (W : WeierstrassCurve R) (i : Fin 2) :
+    IsUnit (PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) R) W.formalU) := by
+  rw [MvPowerSeries.isUnit_iff_constantCoeff,
+    ← MvPowerSeries.coeff_zero_eq_constantCoeff_apply,
+    PowerSeries.coeff_subst_single]
+  simp [Finsupp.single_eq_zero.mpr rfl, formalU_coeff, formalUCoeff_zero]
+
+/-- The quotient G such that deltaQuot = X₀ · X₁ · G.
+Defined as -(X₀² · diagDiffQuot(u) + (X₀+X₁) · u₁). -/
+private noncomputable def deltaQuotQuot (W : WeierstrassCurve R) :
+    MvPowerSeries (Fin 2) R :=
+  -((MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ 2 *
+      PowerSeries.diagDiffQuot W.formalU +
+    (MvPowerSeries.X 0 + MvPowerSeries.X 1) *
+      PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) W.formalU)
+
+/-- diagDiffQuot(X³u) = X₀³ · diagDiffQuot(u) + u₁ · (X₀² + X₀X₁ + X₁²).
+This identity holds coefficient-by-coefficient: both sides evaluate to coeff_{e₀+e₁-2}(u)
+at any multi-index (e₀,e₁) with e₀+e₁ ≥ 2, and 0 otherwise. -/
+private theorem diagDiffQuot_formalW (W : WeierstrassCurve R) :
+    PowerSeries.diagDiffQuot W.formalW =
+      (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ 3 *
+        PowerSeries.diagDiffQuot W.formalU +
+      PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) W.formalU *
+        ((MvPowerSeries.X 0) ^ 2 + MvPowerSeries.X 0 * MvPowerSeries.X 1 +
+         (MvPowerSeries.X 1) ^ 2) := by
+  -- Both sides of the identity (X₀-X₁) * LHS = w₀ - w₁ can be verified.
+  -- We prove the factorization of diagDiffQuot(w) by the uniqueness of the quotient:
+  -- (X₀-X₁) * diagDiffQuot(w) = w₀ - w₁ = X₀³u₀ - X₁³u₁
+  --   = X₀³(u₀-u₁) + u₁(X₀³-X₁³)
+  --   = X₀³·(X₀-X₁)·diagDiffQuot(u) + u₁·(X₀-X₁)·(X₀²+X₀X₁+X₁²)
+  --   = (X₀-X₁)·(X₀³·diagDiffQuot(u) + u₁·(X₀²+X₀X₁+X₁²))
+  -- Since diagDiffQuot gives the UNIQUE quotient, the two are equal.
+  -- Proof: show (X₀-X₁) * RHS = w₀ - w₁, then use the factored form of LHS.
+  have ha0 : PowerSeries.HasSubst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) :=
+    PowerSeries.HasSubst.X 0
+  have ha1 : PowerSeries.HasSubst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) :=
+    PowerSeries.HasSubst.X 1
+  have hw := PowerSeries.subst_X_sub_subst_X_eq_mul_diagDiffQuot W.formalW
+  have hu := PowerSeries.subst_X_sub_subst_X_eq_mul_diagDiffQuot W.formalU
+  -- Rewrite w = X³u in hw
+  rw [show W.formalW = X ^ 3 * W.formalU from rfl,
+    PowerSeries.subst_mul ha0, PowerSeries.subst_pow ha0, PowerSeries.subst_X ha0,
+    PowerSeries.subst_mul ha1, PowerSeries.subst_pow ha1, PowerSeries.subst_X ha1] at hw
+  -- hw : X₀³u₀ - X₁³u₁ = (X₀-X₁) · diagDiffQuot(X³u)
+  -- hu : u₀ - u₁ = (X₀-X₁) · diagDiffQuot(u)
+  -- Show: (X₀-X₁) · RHS = (X₀-X₁) · diagDiffQuot(X³u)
+  -- By showing (X₀-X₁) · RHS = X₀³u₀ - X₁³u₁ = (X₀-X₁) · diagDiffQuot(X³u)
+  -- Then cancel (X₀-X₁) using ext on the diagDiffQuot
+  -- Actually, we show the two sides are equal by showing they produce the same product with (X₀-X₁)
+  -- This works because diagDiffQuot is the UNIQUE element with this property (by definition/ext).
+  -- More directly: both sides have the same coefficients.
+  -- Both sides multiplied by (X₀-X₁) equal w₀-w₁.
+  -- Since diagDiffQuot is uniquely determined (coefficient-by-coefficient),
+  -- we prove: (X₀-X₁) * RHS = (X₀-X₁) * LHS, and then use ext + diagDiffQuot_coeff.
+  -- Actually, since diagDiffQuot(f)(e) = coeff_{e₀+e₁+1}(f) by definition,
+  -- we prove the coefficient identity directly.
+  -- LHS(e) = coeff_{e₀+e₁+1}(X³u)
+  -- X³u: coeff_n = coeff_{n-3}(u) for n≥3, 0 for n<3
+  -- So LHS(e) = coeff_{e₀+e₁-2}(u) when e₀+e₁+1≥3, i.e. e₀+e₁≥2
+  --          = 0 when e₀+e₁≤1
+  -- RHS: X₀³q_u + u₁(X₀²+X₀X₁+X₁²)
+  -- We showed this also equals coeff_{e₀+e₁-2}(u) in all cases.
+  -- Proof by uniqueness: both produce the same value when multiplied by (X₀-X₁).
+  -- More directly: use linear_combination on the (X₀-X₁)-multiplied equations.
+  have hwu := PowerSeries.subst_X_sub_subst_X_eq_mul_diagDiffQuot (R := R) W.formalU
+  -- hwu : u₀ - u₁ = (X₀-X₁) · diagDiffQuot(u)
+  -- Suffices: (X₀-X₁) * LHS = (X₀-X₁) * RHS
+  -- This follows from: both equal w₀-w₁ = X₀³u₀ - X₁³u₁
+  suffices h : (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) *
+    ((X ^ 3 * W.formalU).diagDiffQuot) =
+    (MvPowerSeries.X 0 - MvPowerSeries.X 1) *
+    (MvPowerSeries.X 0 ^ 3 * W.formalU.diagDiffQuot +
+      PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) W.formalU *
+        (MvPowerSeries.X 0 ^ 2 + MvPowerSeries.X 0 * MvPowerSeries.X 1 +
+         MvPowerSeries.X 1 ^ 2)) by
+    -- From h and hw: (X₀-X₁) * (LHS - RHS) = 0
+    -- Then: LHS - RHS has the property that (X₀-X₁) * it = 0
+    -- For diagDiffQuot: coeff at e is coeff_{e₀+e₁+1}(f), so
+    -- LHS(e) - RHS(e) can be computed coefficient by coefficient
+    -- Actually, we use ext on diagDiffQuot coefficients directly
+    -- diagDiffQuot is defined so that coeff e q = coeff_{e₀+e₁+1} f
+    -- The product (X₀-X₁)*q has coeff at e:
+    --   q(e-s01) - q(e-s11) = coeff_{e₀+e₁}(f) - coeff_{e₀+e₁}(f) = 0 (when both defined)
+    -- This uniquely determines q, so if two elements produce the same product with (X₀-X₁),
+    -- they must be equal.
+    -- More concretely: (X₀-X₁) * (LHS - RHS) = 0, and looking at
+    -- coeff at (e₀, 0): 0 = (LHS-RHS)(e₀-1, 0) for e₀≥1
+    -- coeff at (0, e₁): 0 = -(LHS-RHS)(0, e₁-1) for e₁≥1
+    -- These recursively force (LHS-RHS)(e) = 0 for all e.
+    -- Since diagDiffQuot(f)(e) = coeff_{e₀+e₁+1}(f) by definition,
+    -- LHS = RHS follows from the ext proof below.
+    -- LHS at e: diagDiffQuot(X³u)(e) = coeff_{e₀+e₁+1}(X³u)
+    -- X³u has coeff_n = coeff_{n-3}(u) for n≥3, 0 for n<3
+    -- RHS at e: X₀³·diagDiffQuot(u) + u₁·(X₀²+X₀X₁+X₁²)
+    -- This is a sum where each summand contributes coeff_{e₀+e₁-2}(u) when active.
+    -- Both equal coeff_{e₀+e₁-2}(u) when e₀+e₁≥2, and 0 when e₀+e₁≤1.
+    --
+    -- But proving this by ext is very tedious with Finsupp.
+    -- Instead, use that (X₀-X₁)*diff = 0 where diff = LHS-RHS.
+    -- Since both diff and (X₀-X₁) are defined coefficient-by-coefficient,
+    -- the multiplication constraint forces diff(e) = 0 by induction.
+    -- Specifically: diff at (0,b) is determined by (X₀-X₁)*diff at (1,b) and (0,b+1),
+    -- which are both 0 from h.
+    -- This is the uniqueness of diagDiffQuot: (X₀-X₁)*q = f(X₀)-f(X₁) has a UNIQUE solution q.
+    -- Actually, the cleanest proof: apply ext, then use diagDiffQuot_coeff on both sides.
+    apply MvPowerSeries.ext; intro e
+    -- LHS coeff e = coeff_{e₀+e₁+1}(X³·u) = coeff_{e₀+e₁+1}(X^3 * u)
+    simp only [PowerSeries.diagDiffQuot_coeff]
+    -- LHS = coeff (e 0 + e 1 + 1) (X^3 * formalU W)
+    -- This is coeff_{e₀+e₁-2}(formalU W) when e₀+e₁+1 ≥ 3, i.e., e₀+e₁ ≥ 2
+    -- and 0 when e₀+e₁ ≤ 1
+    simp only [formalW, PowerSeries.coeff_X_pow_mul']
+    -- coeff (e0+e1+1) (X^3 * u) = if 3 ≤ e0+e1+1 then coeff (e0+e1+1-3) u else 0
+    -- = if e0+e1 ≥ 2 then coeff (e0+e1-2) u else 0
+    -- RHS: need to evaluate the sum X₀³·q_u + u₁·(X₀²+X₀X₁+X₁²) at e
+    sorry
+  -- Prove h: (X₀-X₁)*LHS = (X₀-X₁)*RHS
+  -- (X₀-X₁)*LHS = w₀-w₁ (= hw, reversed)
+  rw [← hw]
+  -- (X₀-X₁)*RHS: distribute
+  -- = (X₀-X₁)(X₀³q_u) + (X₀-X₁)(u₁(X₀²+X₀X₁+X₁²))
+  -- = X₀³(u₀-u₁) + u₁(X₀³-X₁³)   [using hwu and X³-Y³ factoring]
+  -- = X₀³u₀ - X₁³u₁
+  linear_combination (MvPowerSeries.X (R := R) 0) ^ 3 * hwu
+
+set_option maxHeartbeats 800000 in
+private theorem deltaQuot_eq_X_mul_X_mul (W : WeierstrassCurve R) :
+    W.deltaQuot = MvPowerSeries.X 0 * MvPowerSeries.X 1 * W.deltaQuotQuot := by
+  -- E = w₀ - X₀ · q_w
+  -- q_w = X₀³q_u + u₁(X₀²+X₀X₁+X₁²)  [diagDiffQuot_formalW]
+  -- E = X₀³u₀ - X₀(X₀³q_u + u₁(X₀²+X₀X₁+X₁²))
+  -- = X₀³u₀ - X₀⁴q_u - X₀³u₁ - X₀²X₁u₁ - X₀X₁²u₁
+  -- = X₀³(u₀-u₁) - X₀⁴q_u - X₀²X₁u₁ - X₀X₁²u₁
+  -- = X₀³(X₀-X₁)q_u - X₀⁴q_u - X₀²X₁u₁ - X₀X₁²u₁
+  -- = -X₀³X₁q_u - X₀²X₁u₁ - X₀X₁²u₁
+  -- = -X₀X₁(X₀²q_u + X₀u₁ + X₁u₁)
+  -- = X₀X₁ · deltaQuotQuot ✓
+  unfold deltaQuot wDiffQ deltaQuotQuot
+  have hq := diagDiffQuot_formalW W
+  have hu := PowerSeries.subst_X_sub_subst_X_eq_mul_diagDiffQuot W.formalU
+  have hwdef : W.formalW = X ^ 3 * W.formalU := rfl
+  rw [hwdef] at hq
+  have ha0 : PowerSeries.HasSubst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) :=
+    PowerSeries.HasSubst.X 0
+  rw [hwdef, PowerSeries.subst_mul ha0, PowerSeries.subst_pow ha0, PowerSeries.subst_X ha0]
+  rw [hq]
+  -- hu : u₀ - u₁ = (X₀-X₁) · diagDiffQuot(u)
+  -- Goal should now be purely algebraic
+  linear_combination (MvPowerSeries.X (R := R) 0) ^ 3 * hu
+
+-- Helper: in a domain, addZ is divisible by d³.
+-- Uses: addZ * w₀w₁ = d³ * E³, E = X₀X₁G, domain cancellation.
+private theorem formalAddZ_dvd_cube_of_noZeroDivisors
+    {S : Type*} [CommRing S] [NoZeroDivisors S] [Nontrivial S]
+    (V : WeierstrassCurve S) :
+    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) S) ^ 3 ∣
+    V.formalAddZ := by
+  -- delta = d * E, so delta³ = d³ * E³
+  have hd := formalDelta_eq_mul V
+  -- E = X₀ · X₁ · G
+  have hE := deltaQuot_eq_X_mul_X_mul V
+  -- So delta = d · X₀ · X₁ · G, delta³ = d³ · X₀³ · X₁³ · G³
+  have hd3 : formalDelta V ^ 3 = (MvPowerSeries.X 0 - MvPowerSeries.X 1) ^ 3 *
+      ((MvPowerSeries.X 0) ^ 3 * (MvPowerSeries.X 1) ^ 3 *
+       V.deltaQuotQuot ^ 3) := by rw [hd, hE]; ring
+  -- addZ * w₀w₁ = delta³ = d³ * X₀³X₁³ * G³
+  have hmul := formalAddZ_mul_ww V
+  rw [hd3] at hmul
+  -- w₀ = X₀³ * u₀, w₁ = X₁³ * u₁
+  have hw0 := formalPointMv_z_eq V 0
+  have hw1 := formalPointMv_z_eq V 1
+  rw [hw0, hw1] at hmul
+  -- hmul : addZ * (X₀³u₀ * X₁³u₁) = d³ * (X₀³ * X₁³ * G³)
+  -- Rearrange: (addZ * u₀u₁ - d³ * G³) * X₀³X₁³ = 0
+  have hrearr : (V.formalAddZ *
+      (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) S) V.formalU *
+       PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) S) V.formalU) -
+    (MvPowerSeries.X 0 - MvPowerSeries.X 1) ^ 3 * V.deltaQuotQuot ^ 3) *
+    ((MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) S) ^ 3 *
+     (MvPowerSeries.X (1 : Fin 2)) ^ 3) = 0 := by linear_combination hmul
+  -- In a NoZeroDivisors ring, X₀³X₁³ ≠ 0
+  have hX0 : (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) S) ≠ 0 :=
+    MvPowerSeries.ne_zero_iff_exists_coeff_ne_zero _ |>.mpr
+      ⟨Finsupp.single 0 1, by simp [MvPowerSeries.coeff_X]⟩
+  have hX1 : (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) S) ≠ 0 :=
+    MvPowerSeries.ne_zero_iff_exists_coeff_ne_zero _ |>.mpr
+      ⟨Finsupp.single 1 1, by simp [MvPowerSeries.coeff_X]⟩
+  have hX01 : (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) S) ^ 3 *
+    (MvPowerSeries.X (1 : Fin 2)) ^ 3 ≠ 0 :=
+    mul_ne_zero (pow_ne_zero 3 hX0) (pow_ne_zero 3 hX1)
+  -- So the other factor is zero
+  have hcancel := (mul_eq_zero.mp hrearr).resolve_right hX01
+  -- addZ * u₀u₁ = d³ * G³ (from sub_eq_zero)
+  have heq : V.formalAddZ *
+      (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) S) V.formalU *
+       PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) S) V.formalU) =
+    (MvPowerSeries.X 0 - MvPowerSeries.X 1) ^ 3 * V.deltaQuotQuot ^ 3 :=
+    sub_eq_zero.mp hcancel
+  -- Since u₀u₁ is a unit, addZ = d³ * G³ * (u₀u₁)⁻¹
+  have hu : IsUnit (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) S) V.formalU *
+       PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) S) V.formalU) :=
+    (formalU_subst_isUnit V 0).mul (formalU_subst_isUnit V 1)
+  -- Extract the unit
+  obtain ⟨uu, huu⟩ := hu
+  -- addZ * uu = d³ * G³
+  rw [← huu] at heq
+  -- Multiply both sides by uu⁻¹ on the right
+  have hfinal : V.formalAddZ = (MvPowerSeries.X 0 - MvPowerSeries.X 1) ^ 3 *
+      (V.deltaQuotQuot ^ 3 * (↑uu⁻¹ : MvPowerSeries (Fin 2) S)) := by
+    have hone : (uu : MvPowerSeries (Fin 2) S) * (↑uu⁻¹ : MvPowerSeries (Fin 2) S) = 1 :=
+      Units.mul_inv uu
+    have := congr_arg (· * (↑uu⁻¹ : MvPowerSeries (Fin 2) S)) heq
+    rw [mul_assoc, hone, mul_one, mul_assoc] at this
+    exact this
+  exact ⟨V.deltaQuotQuot ^ 3 * (↑uu⁻¹ : MvPowerSeries (Fin 2) S), hfinal⟩
+
+/-- The universal Weierstrass curve over `ℤ[a₁,...,a₆]`. -/
+private noncomputable def univWeierstrassCurve : WeierstrassCurve (MvPolynomial (Fin 5) ℤ) where
+  a₁ := MvPolynomial.X 0
+  a₂ := MvPolynomial.X 1
+  a₃ := MvPolynomial.X 2
+  a₄ := MvPolynomial.X 3
+  a₆ := MvPolynomial.X 4
+
+/-- The evaluation ring hom from the universal ring to any target. -/
+private noncomputable def univEval (W : WeierstrassCurve R) :
+    MvPolynomial (Fin 5) ℤ →+* R :=
+  MvPolynomial.eval₂Hom (Int.castRingHom R) ![W.a₁, W.a₂, W.a₃, W.a₄, W.a₆]
+
+private theorem univEval_map (W : WeierstrassCurve R) :
+    univWeierstrassCurve.map (univEval W) = W := by
+  ext <;> simp [univWeierstrassCurve, univEval, MvPolynomial.eval₂Hom_X']
+
 theorem formalAddZ_dvd_cube (W : WeierstrassCurve R) :
     (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ 3 ∣ W.formalAddZ := by
-  -- Strategy: formalAddZ * (w₀·w₁) = delta³ (formalAddZ_mul_ww)
-  -- and (X₀-X₁) | delta (X_sub_dvd_formalDelta), so (X₀-X₁)³ | delta³.
-  -- Cancellation of w₀·w₁ uses primality of (X₀-X₁) in a domain + universality.
-  have hdelta := X_sub_dvd_formalDelta W
-  have hdelta3 : (MvPowerSeries.X 0 - MvPowerSeries.X 1 :
-      MvPowerSeries (Fin 2) R) ^ 3 ∣ formalDelta W ^ 3 :=
-    pow_dvd_pow_of_dvd hdelta 3
-  have hmul := formalAddZ_mul_ww W
-  -- (X₀-X₁)³ | formalAddZ * (w₀ * w₁) since (X₀-X₁)³ | delta³ = RHS
-  have hdvd_prod : (MvPowerSeries.X 0 - MvPowerSeries.X 1 :
-      MvPowerSeries (Fin 2) R) ^ 3 ∣
-      formalAddZ W * (formalPointMv W 0 2 * formalPointMv W 1 2) :=
-    hmul ▸ hdelta3
-  -- To extract (X₀-X₁)³ | formalAddZ from (X₀-X₁)³ | formalAddZ * w₀w₁,
-  -- we need (X₀-X₁) to be prime and coprime to w₀·w₁.
-  -- This holds universally via the universal Weierstrass curve over ℤ[a₁,...,a₆].
   sorry
 
 /-! ### Normalized coordinates -/
