@@ -84,7 +84,7 @@ private lemma mk_C_half_deriv_expand :
   ring
 
 set_option maxHeartbeats 64000000 in
-lemma mk_cross_identity [IsDomain R] (h3 : (3 : R) ≠ 0)
+lemma mk_cross_identity [IsDomain R]
     (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0) (m : ℤ) :
     let A := Affine.CoordinateRing.mk W.toAffine
     A (W.ψ (m + 2)) * A (W.ψ (m - 1)) ^ 2
@@ -115,7 +115,10 @@ lemma mk_cross_identity [IsDomain R] (h3 : (3 : R) ≠ 0)
       _ = _ := by rw [h_sq]
   rw [h_sq, h4] at h_inv
   rw [h_factor_cr] at h_inv
-  have hΨ₃_ne : W.Ψ₃ ≠ 0 := W.Ψ₃_ne_zero h3
+  have hΨ₃_ne : W.Ψ₃ ≠ 0 := by
+    have h3 := hψ_ne 3 (by omega)
+    rw [ψ_three] at h3
+    exact (Polynomial.C_ne_zero.mp h3)
   have hΨ₃_mk : Affine.CoordinateRing.mk W (Polynomial.C W.Ψ₃) ≠ 0 :=
     fun h => hΨ₃_ne (mk_C_injective W (by simpa using h))
   have h_rearr : Affine.CoordinateRing.mk W (Polynomial.C W.Ψ₃) *
@@ -136,7 +139,7 @@ variable [IsDomain R] [Invertible (2 : R)]
 
 set_option maxHeartbeats 800000000 in
 set_option maxRecDepth 16000 in
-theorem probe (h3 : (3 : R) ≠ 0) (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0) (m : ℤ) :
+theorem probe (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0) (m : ℤ) :
     AdjoinRoot.mk W.toAffine.polynomial
       ((Polynomial.C (Polynomial.C (2 : R)) *
         (addX W.toPoly
@@ -208,7 +211,7 @@ theorem probe (h3 : (3 : R) ≠ 0) (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠
       * A (W.ψ m) ^ 3
     = (6 * cx ^ 2 + (ca1 ^ 2 + 4 * ca2) * cx + (ca1 * ca3 + 2 * ca4))
       * A (W.ψ m) * A (W.ψ (m + 1)) * A (W.ψ (m - 1)) :=
-    mk_cross_identity W h3 hψ_ne m
+    mk_cross_identity W hψ_ne m
   linear_combination (norm := ring)
     2 * h_mk_ring
     - A (W.ψ m) ^ 2 * h_mk_even
