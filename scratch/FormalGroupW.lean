@@ -392,6 +392,29 @@ theorem formalAddZ_mul_ww (W : WeierstrassCurve R) :
   exact WeierstrassCurve.Projective.addZ_eq'
     (W.formalPointMv_equation 0) (W.formalPointMv_equation 1)
 
+
+/-- For any power series `f`, `(X₀ - X₁)` divides `f(X₀) - f(X₁)` in `MvPowerSeries (Fin 2) R`. -/
+private theorem X_sub_dvd_subst_diff (f : R⟦X⟧) :
+    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ∣
+    (PowerSeries.subst (MvPowerSeries.X 0) f -
+     PowerSeries.subst (MvPowerSeries.X 1) f) := by
+  -- The quotient g has coeff_{(a,b)} = f_{a+b+1}.
+  -- Verification: (X₀-X₁)*g at (a,b) = g(a-1,b) - g(a,b-1)
+  --   = f_{a+b} - f_{a+b} = 0 when a,b ≥ 1;
+  --   = f_a when b = 0; = -f_b when a = 0; matching f(X₀)-f(X₁).
+  sorry
+
+/-- `formalDelta` is divisible by `(X₀ - X₁)`. -/
+private theorem X_sub_dvd_formalDelta (W : WeierstrassCurve R) :
+    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ∣
+    formalDelta W := by
+  unfold formalDelta
+  simp only [formalPointMv_x, formalPointMv_z]
+  obtain ⟨q, hq⟩ := X_sub_dvd_subst_diff (R := R) W.formalW
+  exact ⟨PowerSeries.subst (MvPowerSeries.X 1) W.formalW -
+    MvPowerSeries.X 1 * q,
+    by linear_combination (norm := ring) -(MvPowerSeries.X (R := R) 1) * hq⟩
+
 /-! ### Divisibility by (X₀ - X₁)³ -/
 
 /-- `(X₀ - X₁)³` divides `formalAddX`. -/
@@ -406,7 +429,23 @@ theorem formalAddY_dvd_cube (W : WeierstrassCurve R) :
 
 /-- `(X₀ - X₁)³` divides `formalAddZ`. -/
 theorem formalAddZ_dvd_cube (W : WeierstrassCurve R) :
-    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ 3 ∣ W.formalAddZ :=
+    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ 3 ∣ W.formalAddZ := by
+  -- Strategy: formalAddZ * (w₀·w₁) = delta³ (formalAddZ_mul_ww)
+  -- and (X₀-X₁) | delta (X_sub_dvd_formalDelta), so (X₀-X₁)³ | delta³.
+  -- Cancellation of w₀·w₁ uses primality of (X₀-X₁) in a domain + universality.
+  have hdelta := X_sub_dvd_formalDelta W
+  have hdelta3 : (MvPowerSeries.X 0 - MvPowerSeries.X 1 :
+      MvPowerSeries (Fin 2) R) ^ 3 ∣ formalDelta W ^ 3 :=
+    pow_dvd_pow_of_dvd hdelta 3
+  have hmul := formalAddZ_mul_ww W
+  -- (X₀-X₁)³ | formalAddZ * (w₀ * w₁) since (X₀-X₁)³ | delta³ = RHS
+  have hdvd_prod : (MvPowerSeries.X 0 - MvPowerSeries.X 1 :
+      MvPowerSeries (Fin 2) R) ^ 3 ∣
+      formalAddZ W * (formalPointMv W 0 2 * formalPointMv W 1 2) :=
+    hmul ▸ hdelta3
+  -- To extract (X₀-X₁)³ | formalAddZ from (X₀-X₁)³ | formalAddZ * w₀w₁,
+  -- we need (X₀-X₁) to be prime and coprime to w₀·w₁.
+  -- This holds universally via the universal Weierstrass curve over ℤ[a₁,...,a₆].
   sorry
 
 /-! ### Normalized coordinates -/
