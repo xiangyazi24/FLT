@@ -1,432 +1,323 @@
-# Q479 / dm4 — `MvPowerSeries (Fin 2) K`, UFD, and coprimality
+# Q500 / dm4 — Can we bypass `(X₀-X₁)^3` divisibility by defining the Weierstrass formal group directly?
 
 ## Executive answer
 
-For the intended step
+For a **genuine Mathlib `FormalGroup K`**, this shortcut is **not shorter** than the `(X₀-X₁)^3` divisibility / normalization route.
+
+It is shorter only if the target is a **finite jet** or a **low-order computation** such as `lin_coeff_X`, `lin_coeff_Y`, or a first-order tangent calculation. It is not a viable shortcut for constructing an actual inhabitant of
 
 ```lean
-(X₀ - X₁)^3 ∣ addZ * X₀^3 * X₁^3  ⟹  (X₀ - X₁)^3 ∣ addZ
+FormalGroup K
 ```
 
-do **not** use Mathlib's `IsCoprime` between `(X₀ - X₁)^3` and `X₀^3 * X₁^3`.  That statement is not merely missing from Mathlib; with Mathlib's definition it is **false**.
+because Mathlib's `FormalGroup.assoc` field is an **exact equality of full multivariate power series**, not an equality modulo degree `N`.
 
-Mathlib's `IsCoprime x y` is Bézout/comaximal coprimality:
+The key misconception in the proposed shortcut is:
 
-```lean
-def IsCoprime (x y : R) : Prop :=
-  ∃ a b, a * x + b * y = 1
-```
+> "Associativity is a finite check modulo sufficiently high degree."
 
-In the local power series ring `K[[X₀,X₁]] = MvPowerSeries (Fin 2) K`, both `(X₀ - X₁)^3` and `X₀^3 * X₁^3` have zero constant coefficient.  Applying `constantCoeff` to any supposed Bézout identity gives `0 = 1`.
+That is false for formal group laws in Mathlib and false mathematically for full formal power series. A finite truncation proves associativity only in a truncated Artin quotient, not in `MvPowerSeries` itself.
 
-Mathematically, `K[[X₀,X₁]]` is a UFD and `(X₀ - X₁)` has no common prime factor with `X₀X₁`.  But Mathlib, at the pinned FLT mathlib revision,
+## Mathlib API checked
+
+The repo pins Mathlib at:
 
 ```toml
 rev = "96fd0fff3b8837985ae21dd02e712cb5df72ec05"
 ```
 
-does not appear to package a multivariate `MvPowerSeries (Fin 2) K` UFD instance.  It does provide the no-zero-divisors/domain API and univariate `PowerSeries` UFD API.
+At that revision, `Mathlib/RingTheory/FormalGroup/Basic.lean` defines:
 
-The best Lean route is a `δ`-adic / weighted-order cancellation after the linear change of variables
+```lean
+structure FormalGroup where
+  toPowerSeries : MvPowerSeries (Fin 2) R
+  zero_constantCoeff : toPowerSeries.constantCoeff = 0
+  lin_coeff_X : toPowerSeries.coeff (single 0 1) = 1
+  lin_coeff_Y : toPowerSeries.coeff (single 1 1) = 1
+  assoc : toPowerSeries.subst ![toPowerSeries.subst ![Y₀, Y₁], Y₂]
+    = toPowerSeries.subst ![Y₀, toPowerSeries.subst ![Y₁, Y₂]] (S := R)
+```
+
+So to build `FormalGroup K`, you must prove an equality in
+
+```lean
+MvPowerSeries (Fin 3) K
+```
+
+not a truncated equality.
+
+The substitution API in `Mathlib/RingTheory/MvPowerSeries/Substitution.lean` is also full-power-series substitution:
+
+```lean
+noncomputable def subst (a : σ → MvPowerSeries τ S) (f : MvPowerSeries σ R) :
+    MvPowerSeries τ S
+```
+
+with lemmas such as:
+
+```lean
+theorem subst_add
+theorem subst_sub
+theorem subst_mul
+theorem subst_pow
+theorem coeff_subst
+```
+
+Again, this is exact API, not a finite-jet API.
+
+## Why the affine formula route is not a shortcut
+
+The affine chord formula wants to use
 
 ```text
-U = X₀ - X₁,   V = X₁.
+x(t) = t / w(t),
+y(t) = -1 / w(t),
 ```
 
-Under this change, the divisor becomes `U^3` and the multiplier becomes `(U+V)^3 * V^3`, which has `U`-order `0`.  So it cannot contribute any factor of `U`.
-
----
-
-## Grep/API findings
-
-### 1. `MvPowerSeries` domain/no-zero-divisors API
-
-Relevant files:
+where, for the local parameter at infinity,
 
 ```text
-Mathlib/RingTheory/MvPowerSeries/Basic.lean
-Mathlib/RingTheory/MvPowerSeries/NoZeroDivisors.lean
-Mathlib/RingTheory/MvPowerSeries/Order.lean
-Mathlib/RingTheory/MvPowerSeries/Inverse.lean
-Mathlib/RingTheory/MvPowerSeries/Substitution.lean
+w(t) = t^3 u(t),       u(0) = 1.
 ```
 
-`MvPowerSeries.Basic` defines:
-
-```lean
-def MvPowerSeries (σ : Type*) (R : Type*) :=
-  (σ →₀ ℕ) → R
-```
-
-and gives the usual algebraic instances, including:
-
-```lean
-instance [CommSemiring R] : CommSemiring (MvPowerSeries σ R)
-instance [CommRing R]    : CommRing    (MvPowerSeries σ R)
-```
-
-The key domain file is `Mathlib/RingTheory/MvPowerSeries/NoZeroDivisors.lean`.  It contains:
-
-```lean
-theorem MvPowerSeries.mem_nonZeroDivisors_of_constantCoeff
-
-lemma MvPowerSeries.X_mem_nonzeroDivisors {i : σ} :
-    X i ∈ (MvPowerSeries σ R)⁰
-
-instance [Semiring R] [NoZeroDivisors R] :
-    NoZeroDivisors (MvPowerSeries σ R)
-```
-
-and the order-multiplication theorem:
-
-```lean
-theorem MvPowerSeries.weightedOrder_mul
-    (w : σ → ℕ) (f g : MvPowerSeries σ R) :
-    (f * g).weightedOrder w = f.weightedOrder w + g.weightedOrder w
-```
-
-under `[Semiring R] [NoZeroDivisors R]`.
-
-So over a field:
-
-```lean
-import Mathlib.RingTheory.MvPowerSeries.NoZeroDivisors
-
-example {K : Type*} [Field K] :
-    NoZeroDivisors (MvPowerSeries (Fin 2) K) := by
-  infer_instance
-
-example {K : Type*} [Field K] :
-    IsDomain (MvPowerSeries (Fin 2) K) := by
-  exact NoZeroDivisors.to_isDomain _
-```
-
-I did not find a dedicated declaration named `MvPowerSeries.IsDomain`; the available multivariate declaration is the `NoZeroDivisors` instance, and `IsDomain` follows by the general lemma `NoZeroDivisors.to_isDomain`.
-
-### 2. UFD API
-
-Relevant file:
+Thus
 
 ```text
-Mathlib/RingTheory/PowerSeries/Ideal.lean
+x(t) = 1 / (t^2 u(t)),
+y(t) = -1 / (t^3 u(t)).
 ```
 
-Mathlib has the univariate power-series UFD/UFM theorem:
-
-```lean
-instance [IsPrincipalIdealRing R] [IsDomain R] :
-    UniqueFactorizationMonoid R⟦X⟧
-```
-
-Here
-
-```lean
-PowerSeries R := MvPowerSeries Unit R
-```
-
-so this is a theorem about **one-variable** power series.  In particular, for a field `K`, `K⟦X⟧` has the packaged UFM instance.
-
-I did **not** find an instance of the form
-
-```lean
-UniqueFactorizationMonoid (MvPowerSeries σ R)
-```
-
-or specifically
-
-```lean
-UniqueFactorizationMonoid (MvPowerSeries (Fin 2) K)
-```
-
-The same `PowerSeries/Ideal.lean` file has the relevant TODO:
+These are Laurent series, not ordinary `PowerSeries` / `MvPowerSeries`. The final formal group law
 
 ```text
-Prove noetherianity of `MvPowerSeries` in finitely many variables.
+F(t₁,t₂) = t(P(t₁) + P(t₂))
 ```
 
-That is strong evidence that the finite-variable multivariate UFD route is not currently packaged in Mathlib.
+is an ordinary power series, but the intermediate affine slope/intercept formulas live in Laurent/rational expressions and then cancel.
 
-### 3. Coprimality API
+So the affine formula does not remove the cancellation problem; it merely moves it from projective `addXYZ` normalization to Laurent-series cancellation.
 
-Relevant files:
+In Lean, unless you introduce a robust Laurent/Hahn-series layer and prove the cancellation back into `MvPowerSeries`, this is probably **longer** than the projective route.
+
+## Why a finite Silverman table is insufficient
+
+Silverman's displayed expansion
 
 ```text
-Mathlib/RingTheory/Coprime/Basic.lean
-Mathlib/RingTheory/Coprime/Lemmas.lean
+F(T₁,T₂) = T₁ + T₂ - a₁T₁T₂ - a₂(T₁²T₂ + T₁T₂²) - ...
 ```
 
-Useful generic declarations:
+is only the beginning of an infinite power series. If we define a finite polynomial/truncation from the table, say
 
 ```lean
-#check IsCoprime
-#check IsCoprime.dvd_of_dvd_mul_left
-#check IsCoprime.dvd_of_dvd_mul_right
-#check IsCoprime.mul_left
-#check IsCoprime.mul_right
-#check IsCoprime.pow_left
-#check IsCoprime.pow_right
-#check IsCoprime.pow
+def F_trunc : MvPowerSeries (Fin 2) K :=
+  X₀ + X₁ - C a₁ * X₀ * X₁ - C a₂ * (X₀^2 * X₁ + X₀ * X₁^2) + ...
 ```
 
-These are generic for commutative semirings/rings; there does not appear to be special `PowerSeries`/`MvPowerSeries` coprimality API that would solve this goal.
+then `zero_constantCoeff`, `lin_coeff_X`, and `lin_coeff_Y` are easy. But `assoc` will normally fail as an exact equality, because the omitted higher terms are exactly what cancel the higher-degree associator.
 
-More importantly, `IsCoprime` is the wrong notion here.  In a UFD one would want a no-common-prime-factor / relative-prime statement, not a Bézout identity.  The Mathlib coprime documentation explicitly warns that `IsCoprime` is stronger than `IsRelPrime`; multivariate polynomial variables are the standard example.
+Finite checking proves only statements like
 
----
-
-## Answers to the numbered questions
-
-### (a) Is `MvPowerSeries (Fin 2) K` a UFD when `K` is a field?
-
-Mathematically: **yes**.  `K[[X₀,X₁]]` is a regular local ring, hence a UFD.
-
-In Mathlib: **not available as a packaged instance/theorem** that I found.  The univariate theorem exists for `PowerSeries K = K⟦X⟧`, but the finite multivariate theorem for `MvPowerSeries (Fin 2) K` does not appear to be present.
-
-### (b) Does Mathlib have `MvPowerSeries.IsDomain` or `MvPowerSeries.UniqueFactorizationDomain`?
-
-`MvPowerSeries.IsDomain`: not as a dedicated declaration.  But for `[Field K]`:
-
-```lean
-example : NoZeroDivisors (MvPowerSeries (Fin 2) K) := by
-  infer_instance
-
-example : IsDomain (MvPowerSeries (Fin 2) K) := by
-  exact NoZeroDivisors.to_isDomain _
+```text
+assoc holds modulo total degree ≤ N
 ```
 
-`MvPowerSeries.UniqueFactorizationDomain` / `UniqueFactorizationMonoid`: not found for `MvPowerSeries (Fin 2) K`.  The available UFM instance is univariate:
+not
 
 ```lean
-instance [IsPrincipalIdealRing R] [IsDomain R] :
-    UniqueFactorizationMonoid R⟦X⟧
+F.subst ![F.subst ![Y₀,Y₁],Y₂]
+  = F.subst ![Y₀,F.subst ![Y₁,Y₂]]
 ```
 
-### (c) Does Mathlib have `IsCoprime` for `MvPowerSeries`?
+in `MvPowerSeries (Fin 3) K`.
 
-Only generically.  Since `MvPowerSeries σ R` is a commutative semiring/ring when `R` is, the generic definition and lemmas apply.  But there does not appear to be power-series-specific API, and generic `IsCoprime` is Bézout/comaximal coprimality.
+There is no finite `N` that determines a one-dimensional formal group law over a field. For example, over a characteristic-zero field, the coordinate changes
 
-### (d) Can we prove `IsCoprime (X₀-X₁)^3 (X₀^3·X₁^3)` in `MvPowerSeries`?
+```text
+φ(T) = T + c T^(N+1)
+```
 
-No.  It is false.
+produce formal group laws
 
-Lean-shaped obstruction:
+```text
+Fφ(X,Y) = φ⁻¹(φ(X) + φ(Y))
+```
+
+which agree with the additive formal group law through degree `N` but differ in higher degree. Thus finite jets cannot certify a full formal group law.
+
+## Can we define `F` coefficient-by-coefficient?
+
+Technically, yes: `MvPowerSeries (Fin 2) K` is just a coefficient function
 
 ```lean
-import Mathlib.RingTheory.MvPowerSeries.Inverse
-import Mathlib.RingTheory.Coprime.Lemmas
+def MvPowerSeries (σ : Type*) (R : Type*) := (σ →₀ ℕ) → R
+```
+
+so one can define
+
+```lean
+def F : MvPowerSeries (Fin 2) K := fun d =>
+  -- coefficient indexed by d : Fin 2 →₀ ℕ
+  ...
+```
+
+or pattern-match on
+
+```lean
+d (0 : Fin 2), d (1 : Fin 2)
+```
+
+for explicitly known low-degree coefficients.
+
+But this only moves the hard part. To make a `FormalGroup`, you must prove:
+
+```lean
+F.subst ![F.subst ![Y₀, Y₁], Y₂]
+  = F.subst ![Y₀, F.subst ![Y₁, Y₂]]
+```
+
+That proof is coefficientwise infinite. It requires showing every coefficient of the associator is zero. There are two realistic ways to do this:
+
+1. prove the coefficient recursion is exactly the one obtained from the elliptic curve group law, then inherit associativity from the curve group law; or
+2. define the coefficients recursively so that the associator vanishes at every degree, and then prove this recursion matches the Weierstrass/Silverman formal group.
+
+Both are substantially larger than proving one localized divisibility/cancellation statement for the projective formula.
+
+## The finite-check idea would require a different structure
+
+If the immediate goal is only a finite-order calculation, define a jet structure instead of using Mathlib's `FormalGroup`:
+
+```lean
+structure FormalGroupJet (R : Type*) [CommRing R] (N : ℕ) where
+  F : MvPolynomial (Fin 2) R       -- or truncated MvPowerSeries
+  zero_constantCoeff : ...
+  lin_coeff_X : ...
+  lin_coeff_Y : ...
+  assoc_mod_degree : ...           -- modulo total degree > N
+```
+
+Then the Silverman table route is attractive. It is excellent for proving low-order facts like:
+
+```lean
+coeff (single 0 1) F = 1
+coeff (single 1 1) F = 1
+coeff (single 0 1 + single 1 1) F = -a₁
+```
+
+But this does not produce a value of type
+
+```lean
+FormalGroup K
+```
+
+and therefore will not plug into Mathlib's existing `FormalGroup` API.
+
+## Comparison with the `(X₀-X₁)^3` divisibility route
+
+### Divisibility/projective route
+
+Hard point:
+
+```lean
+(X₀ - X₁)^3 ∣ addX/addY/addZ numerator pieces
+```
+
+or some equivalent normalization/cancellation statement.
+
+Advantages:
+
+* It keeps everything in ordinary `MvPowerSeries` / polynomial expressions.
+* It is tied directly to Mathlib's projective addition formulas.
+* Once the normalized expression is identified with actual curve addition, associativity should ultimately come from the elliptic curve group law rather than an infinite coefficient proof.
+* The hard lemma is local and algebraic.
+
+### Direct Silverman coefficient route
+
+Hard points:
+
+* need an infinite coefficient definition, not merely the displayed first terms;
+* need exact associativity of the infinite power series;
+* need a proof that the constructed series is the Weierstrass formal group law, not just some formal group law with the same low-degree terms;
+* if using affine formulas, need Laurent/rational cancellation anyway.
+
+Verdict: this is likely much longer for a genuine `FormalGroup`.
+
+## Recommended practical route
+
+### If the goal is `W.formalGroup : FormalGroup K`
+
+Stay with the projective/normalization route. Avoid `IsCoprime` from the previous question, because it is the wrong notion in the local ring. Instead use one of:
+
+1. direct factorization of the concrete normalized numerator;
+2. a custom `δ`-adic divisibility lemma for `δ = X₀ - X₁`;
+3. a coordinate-change argument `U = X₀ - X₁`, `V = X₁`, reducing divisibility by `δ` to divisibility by a coordinate variable `U` and using `MvPowerSeries.X_pow_dvd_iff`.
+
+The third route is probably the cleanest Mathlib-aligned approach if direct `ring` factorization is too large.
+
+### If the goal is only the tangent bridge / linear coefficient
+
+Do not build the full `FormalGroup` yet. Define or prove only the required jet-level facts:
+
+```lean
+F = T₁ + T₂ + terms of total degree ≥ 2
+```
+
+or explicitly:
+
+```lean
+coeff (single 0 1) F = 1
+coeff (single 1 1) F = 1
+```
+
+A Silverman-table finite truncation is useful here. But call it a jet/truncation theorem, not `FormalGroup`.
+
+## Lean skeleton for the safe finite-jet approach
+
+A minimal finite-jet object could look like:
+
+```lean
+import Mathlib.RingTheory.FormalGroup.Basic
+import Mathlib.RingTheory.MvPowerSeries.Trunc
+
+open MvPowerSeries Finsupp
 
 noncomputable section
 
-open MvPowerSeries
-
 variable {K : Type*} [Field K]
 
-abbrev Biv := MvPowerSeries (Fin 2) K
+abbrev R₂ := MvPowerSeries (Fin 2) K
 
-abbrev X0 : Biv := MvPowerSeries.X (0 : Fin 2)
-abbrev X1 : Biv := MvPowerSeries.X (1 : Fin 2)
-abbrev Δ  : Biv := X0 - X1
+local notation "X₀" => (MvPowerSeries.X (0 : Fin 2) : R₂)
+local notation "X₁" => (MvPowerSeries.X (1 : Fin 2) : R₂)
 
-lemma not_isCoprime_delta_cube_X0X1_cube :
-    ¬ IsCoprime (Δ ^ 3) (X0 ^ 3 * X1 ^ 3) := by
-  intro h
-  rcases h with ⟨a, b, hab⟩
-  have hc := congrArg (MvPowerSeries.constantCoeff (σ := Fin 2) (R := K)) hab
-  -- `constantCoeff` kills `X0`, `X1`, and hence `Δ`; RHS has constant coefficient `1`.
-  simpa [Δ, X0, X1] using hc
-```
+-- Low-order Silverman polynomial, not a full formal group law.
+def WeierstrassFJet2 (a₁ : K) : R₂ :=
+  X₀ + X₁ - MvPowerSeries.C a₁ * X₀ * X₁
 
-If `simp` needs help in the local file, add explicit rewrites using `map_add`, `map_mul`, `map_sub`, `map_pow`, and `MvPowerSeries.constantCoeff_X`.
+example (a₁ : K) : (WeierstrassFJet2 (K := K) a₁).constantCoeff = 0 := by
+  simp [WeierstrassFJet2]
 
-### (e) Can we use `mul_dvd_cancel` / `dvd_of_mul_dvd_mul_left` if the multiplier is a non-zero-divisor?
+example (a₁ : K) :
+    (WeierstrassFJet2 (K := K) a₁).coeff (single (0 : Fin 2) 1) = 1 := by
+  -- likely `simp [WeierstrassFJet2, coeff_index_single_X, X, monomial_mul_monomial]`
+  sorry
 
-Not for this shape.
-
-A non-zero-divisor multiplier `m` does **not** imply
-
-```lean
-p ∣ f * m  →  p ∣ f
-```
-
-Counterexample in a domain: `2 ∣ 1 * 2`, but `2 ∤ 1`.
-
-The standard cancellation lemmas cancel a common factor on both sides, e.g.
-
-```lean
-#check mul_dvd_mul_iff_left
-#check mul_dvd_mul_iff_right
-```
-
-with shapes like
-
-```lean
-a * b ∣ a * c ↔ b ∣ c
-```
-
-under nonzero/cancellative hypotheses on `a`.  They do not prove cancellation from `p ∣ f*m`.
-
-For the intended argument you need one of:
-
-1. UFD/GCD-style relative primality between `p` and `m`;
-2. `m` is a non-zero-divisor modulo `(p^3)`;
-3. an order/valuation argument showing that `m` has `p`-adic order zero.
-
-For the current `MvPowerSeries` goal, option 3 is the shortest with available Mathlib API.
-
----
-
-## Recommended Lean route: shear + weighted order
-
-Let
-
-```lean
-U = X₀ - X₁
-V = X₁
-```
-
-Equivalently, apply the substitution/automorphism
-
-```text
-X₀ ↦ U + V,
-X₁ ↦ V.
-```
-
-Then
-
-```text
-X₀ - X₁       ↦ U,
-X₀^3 * X₁^3  ↦ (U + V)^3 * V^3.
-```
-
-Define the weight measuring only the `U` exponent:
-
-```lean
-abbrev Biv := MvPowerSeries (Fin 2) K
-abbrev U : Biv := MvPowerSeries.X (0 : Fin 2)
-abbrev V : Biv := MvPowerSeries.X (1 : Fin 2)
-
-def uWeight : Fin 2 → ℕ := fun i => if i = 0 then 1 else 0
-```
-
-Then `U^n ∣ f` can be bridged to weighted-order using:
-
-```lean
-#check MvPowerSeries.X_pow_dvd_iff
-#check MvPowerSeries.nat_le_weightedOrder
-#check MvPowerSeries.coeff_eq_zero_of_lt_weightedOrder
-```
-
-A useful local lemma is:
-
-```lean
-lemma U_pow_dvd_of_uWeight_ge {n : ℕ} {f : Biv}
-    (h : (n : ℕ∞) ≤ f.weightedOrder uWeight) :
-    U ^ n ∣ f := by
-  rw [MvPowerSeries.X_pow_dvd_iff]
-  intro m hm
-  apply MvPowerSeries.coeff_eq_zero_of_lt_weightedOrder uWeight
-  refine lt_of_lt_of_le ?_ h
-  -- Need the small simplification lemma: `Finsupp.weight uWeight m = m 0`.
-  simpa [uWeight, U] using hm
-
-lemma uWeight_ge_of_U_pow_dvd {n : ℕ} {f : Biv}
-    (h : U ^ n ∣ f) :
-    (n : ℕ∞) ≤ f.weightedOrder uWeight := by
-  rw [MvPowerSeries.X_pow_dvd_iff] at h
-  apply MvPowerSeries.nat_le_weightedOrder uWeight
-  intro m hm
-  apply h m
-  -- Again use `Finsupp.weight uWeight m = m 0`.
-  simpa [uWeight, U] using hm
-```
-
-If the `simpa [uWeight]` does not close, prove once:
-
-```lean
-lemma weight_uWeight (m : Fin 2 →₀ ℕ) :
-    Finsupp.weight uWeight m = m (0 : Fin 2) := by
-  classical
-  -- finite-support sum; coordinate `1` has weight zero.
+example (a₁ : K) :
+    (WeierstrassFJet2 (K := K) a₁).coeff (single (1 : Fin 2) 1) = 1 := by
+  -- same style
   sorry
 ```
 
-Now the cancellation lemma is exactly `weightedOrder_mul`:
+This is useful for local coefficient computations, but intentionally does **not** attempt:
 
 ```lean
-lemma U_pow_dvd_of_U_pow_dvd_mul_of_uOrder_zero
-    {n : ℕ} {f m : Biv}
-    (hm : m.weightedOrder uWeight = 0)
-    (hdiv : U ^ n ∣ f * m) :
-    U ^ n ∣ f := by
-  apply U_pow_dvd_of_uWeight_ge (K := K)
-  have hge : (n : ℕ∞) ≤ (f * m).weightedOrder uWeight :=
-    uWeight_ge_of_U_pow_dvd (K := K) hdiv
-  simpa [MvPowerSeries.weightedOrder_mul, hm] using hge
+def bad : FormalGroup K := ...
 ```
 
-For the sheared multiplier
-
-```lean
-def multUV : Biv := (U + V)^3 * V^3
-```
-
-prove:
-
-```lean
-lemma multUV_uOrder_zero :
-    (multUV (K := K)).weightedOrder uWeight = 0 := by
-  -- Coefficient of `V^6` is `1`, and its `uWeight` is `0`.
-  -- Use `MvPowerSeries.weightedOrder_le` and the coefficient computation.
-  sorry
-```
-
-The coefficient proof is small: the monomial `V^6` occurs uniquely from choosing the `V^3` term in `(U+V)^3` and multiplying by `V^3`.
-
-Finally, build the shear via substitution:
-
-```lean
-def shearArgs : Fin 2 → Biv := ![U + V, V]
-
-lemma shear_hasSubst : MvPowerSeries.HasSubst (R := K) (S := K) shearArgs := by
-  apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-  intro i
-  fin_cases i <;> simp [shearArgs, U, V]
-
-def shear : Biv →ₐ[K] Biv :=
-  MvPowerSeries.substAlgHom shear_hasSubst
-```
-
-with inverse substitution
-
-```lean
-def unshearArgs : Fin 2 → Biv := ![X0 - X1, X1]
-```
-
-and use `MvPowerSeries.substAlgHom_X`, `subst_add`, `subst_sub`, `subst_mul`, and `subst_pow` to show the two substitutions are inverse and transport divisibility back.
-
-Conceptually the final theorem is:
-
-```lean
-lemma delta_cube_dvd_of_delta_cube_dvd_mul
-    {addZ : Biv}
-    (h : (X0 - X1)^3 ∣ addZ * (X0^3 * X1^3)) :
-    (X0 - X1)^3 ∣ addZ := by
-  -- apply `shear` to `h`
-  -- reduce to `U^3 ∣ shear addZ * multUV`
-  -- use `U_pow_dvd_of_U_pow_dvd_mul_of_uOrder_zero multUV_uOrder_zero`
-  -- apply `unshear` to return to original variables
-  sorry
-```
-
-The remaining work is substitution bookkeeping and one finite coefficient calculation, not a missing UFD/coprimality theorem.
-
----
+because exact associativity is unavailable from a finite truncation.
 
 ## Bottom line
 
-* `K[[X₀,X₁]]` is mathematically a UFD.
-* Mathlib has `NoZeroDivisors` / domain API for `MvPowerSeries`, but I did not find a multivariate UFD instance.
-* Mathlib has univariate `PowerSeries` UFD/UFM API.
-* `IsCoprime ((X₀-X₁)^3) (X₀^3*X₁^3)` is false because `IsCoprime` is Bézout/comaximal coprimality.
-* Non-zero-divisor cancellation alone does not prove `p ∣ f*m → p ∣ f`.
-* Use direct factorization if available; otherwise use the shear `U=X₀-X₁`, `V=X₁` and `MvPowerSeries.weightedOrder_mul` / `X_pow_dvd_iff`.
+*Defining a finite Silverman expansion is shorter for coefficient/jet lemmas.*
+
+*It is not shorter for constructing `W.formalGroup : FormalGroup K`.* The full `FormalGroup` route still needs an exact infinite associativity proof. The projective normalization route remains the better path because it ties the power series to the actual elliptic curve addition law and localizes the hard algebra to the normalization/divisibility step.
