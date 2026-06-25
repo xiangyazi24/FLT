@@ -1,447 +1,198 @@
-# Q415 / dm2 — blind design brainstorm for `W.formalGroup`
+# Q433 / dm2 — CAS: compute `u(t)=w(t)/t³` to `O(t¹⁰)`
 
-This is an independent design, written without looking at dm1's answer.
-
-Goal:
-
-```lean
-W.formalGroup : FormalGroup K
-```
-
-for a general Weierstrass curve
-
-```text
-y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆,
-```
-
-using Mathlib's `PowerSeries` / `MvPowerSeries` API and eventually connecting the formal-group linear term to division-polynomial tangent computations.
-
-## Executive recommendation
-
-I would **not** construct the formal group law by introducing Laurent series `x(t)` and `y(t)` in Lean.
-
-Instead, use projective coordinates near infinity:
-
-```text
-t = -X/Y,
-w = -Z/Y,
-P(t) = [X : Y : Z] = [t : -1 : w(t)].
-```
-
-This keeps everything inside ordinary power series.  The only one-variable power series needed is `w(t)`, satisfying
+We start from
 
 ```text
 w = t³ + a₁tw + a₂t²w + a₃w² + a₄tw² + a₆w³.
 ```
 
-Then define the two-variable formal group law by projective addition:
+Writing `w = t³u`, the equation becomes an ordinary power-series recursion:
 
 ```text
-P(T₁) + P(T₂) = [X₁₂ : Y₁₂ : Z₁₂],
-F(T₁,T₂)     = -X₁₂ / Y₁₂,
+u = 1 + a₁tu + a₂t²u + a₃t³u² + a₄t⁴u² + a₆t⁶u³.
 ```
 
-where `Y₁₂` is a unit because the sum is again near `[0:1:0]`.  This avoids custom Laurent series completely and makes the connection to the projective division-polynomial formula much cleaner.
+Thus `u(0)=1`, so `u` is a unit power series.
 
-## (a) Construction plan: key definitions and lemmas
+## Result
 
-### 1. Work universally first
-
-Define the universal coefficient ring
-
-```lean
-A := MvPolynomial (Fin 5) ℤ
-```
-
-or a named polynomial ring with variables `a₁,a₂,a₃,a₄,a₆`.  Build the universal formal group over `A`, then map it to an arbitrary coefficient ring `K` using Mathlib's `FormalGroup.map`.
-
-Why universal first:
-
-* all associativity and coefficient identities are polynomial identities;
-* no field or nonzero-discriminant hypothesis is needed for the formal group law itself;
-* division-polynomial compatibility later is easier to state once universally and then specialize.
-
-Final specialization should look morally like
-
-```lean
-def WeierstrassCurve.formalGroup (W : WeierstrassCurve K) : FormalGroup K :=
-  (universalFormalGroup.map (universalCoeffMap W))
-```
-
-unless direct construction over `K` is easier in the local codebase.
-
-### 2. Define the one-variable series `w(t)`
-
-Definitions:
-
-```lean
-def W.w : PowerSeries K
-```
-
-with equation
-
-```lean
-W.w = X^3
-    + C a₁ * X * W.w
-    + C a₂ * X^2 * W.w
-    + C a₃ * W.w^2
-    + C a₄ * X * W.w^2
-    + C a₆ * W.w^3
-```
-
-Key lemmas:
-
-```lean
-@[simp] lemma w_coeff_0 : coeff K 0 W.w = 0
-@[simp] lemma w_coeff_1 : coeff K 1 W.w = 0
-@[simp] lemma w_coeff_2 : coeff K 2 W.w = 0
-@[simp] lemma w_coeff_3 : coeff K 3 W.w = 1
-lemma w_eq : W.w = ...
-lemma w_unique : equation w' -> w' = W.w
-lemma w_order3 : ∃ u : PowerSeries Kˣ-or-Unit, W.w = X^3 * u ∧ constantCoeff u = 1
-```
-
-Implementation detail: define `w` by coefficient recursion, not by closed forms.  The equation is triangular: the coefficient of `t^n` on the right only involves coefficients of `w` of degree `< n`.  No division by integers is required.
-
-Do not expose much of the recursion.  Most later files should use only `w_eq`, the first few coefficients, and `w_unique`.
-
-### 3. Define the formal projective point
-
-In one variable:
+Modulo `t¹⁰`, i.e. keeping terms through `t⁹`,
 
 ```text
-P(T) = [T : -1 : w(T)].
+u(t) = 1
++ a₁ t
++ (a₁² + a₂)t²
++ (a₁³ + 2a₁a₂ + a₃)t³
++ (a₁⁴ + 3a₁²a₂ + 3a₁a₃ + a₂² + a₄)t⁴
++ (a₁⁵ + 4a₁³a₂ + 6a₁²a₃ + 3a₁a₂² + 3a₁a₄ + 3a₂a₃)t⁵
++ (a₁⁶ + 5a₁⁴a₂ + 10a₁³a₃ + 6a₁²a₂² + 6a₁²a₄
+   + 12a₁a₂a₃ + a₂³ + 3a₂a₄ + 2a₃² + a₆)t⁶
++ (a₁⁷ + 6a₁⁵a₂ + 15a₁⁴a₃ + 10a₁³a₂² + 10a₁³a₄
+   + 30a₁²a₂a₃ + 4a₁a₂³ + 12a₁a₂a₄ + 10a₁a₃²
+   + 4a₁a₆ + 6a₂²a₃ + 4a₃a₄)t⁷
++ (a₁⁸ + 7a₁⁶a₂ + 21a₁⁵a₃ + 15a₁⁴a₂² + 15a₁⁴a₄
+   + 60a₁³a₂a₃ + 10a₁²a₂³ + 30a₁²a₂a₄ + 30a₁²a₃²
+   + 10a₁²a₆ + 30a₁a₂²a₃ + 20a₁a₃a₄ + a₂⁴
+   + 6a₂²a₄ + 10a₂a₃² + 4a₂a₆ + 2a₄²)t⁸
++ (a₁⁹ + 8a₁⁷a₂ + 28a₁⁶a₃ + 21a₁⁵a₂² + 21a₁⁵a₄
+   + 105a₁⁴a₂a₃ + 20a₁³a₂³ + 60a₁³a₂a₄ + 70a₁³a₃²
+   + 20a₁³a₆ + 90a₁²a₂²a₃ + 60a₁²a₃a₄ + 5a₁a₂⁴
+   + 30a₁a₂²a₄ + 60a₁a₂a₃² + 20a₁a₂a₆ + 10a₁a₄²
+   + 10a₂³a₃ + 20a₂a₃a₄ + 5a₃³ + 5a₃a₆)t⁹
++ O(t¹⁰).
 ```
 
-In `MvPowerSeries (Fin n) K`, define a substitution/rename helper:
-
-```lean
-def W.wAt (i : Fin n) : MvPowerSeries (Fin n) K
-```
-
-so that
+The same script also computes the first homogeneous pieces of the formal group law.  With `T₁=rU`, `T₂=rV`, the coefficient of `r^d` is the degree-`d` homogeneous part.  It prints
 
 ```text
-Pᵢ = [Xᵢ : -1 : wAt i].
+degree 1: U + V
+degree 2: -U*V*a1
+degree 3: -U*V*a2*(U + V)
 ```
 
-Key lemma:
-
-```lean
-lemma formalPoint_on_curve :
-  W.projectiveEquation Xᵢ (-1) (wAt i) = 0
-```
-
-This is just `w_eq` rewritten in homogeneous/projective form.
-
-### 4. Define projective addition of two formal points
-
-Use existing projective addition formulas if the project already has them.  The desired object is a coordinate triple
-
-```lean
-def W.formalAddXYZ : (MvPowerSeries (Fin 2) K)^3
-```
-
-representing
+So
 
 ```text
-P(T₁) + P(T₂) = [X₁₂ : Y₁₂ : Z₁₂].
+F(T₁,T₂) = T₁ + T₂ - a₁T₁T₂ - a₂T₁T₂(T₁+T₂) + O(total degree 4),
 ```
 
-If the only available addition formula is affine, do not form `x=t/w` or `y=-1/w` in Lean.  Use the projective version or the cleared-denominator collinearity determinant.  The projective point `[t:-1:w]` is the main trick that keeps this in `PowerSeries`.
-
-Key lemmas:
-
-```lean
-lemma formalAdd_on_curve : W.projectiveEquation X₁₂ Y₁₂ Z₁₂ = 0
-lemma formalAdd_Y_constantCoeff : constantCoeff Y₁₂ = 1  -- or -1, depending conventions
-lemma formalAdd_Y_isUnit : IsUnit Y₁₂
-lemma formalAdd_t_def : W.F = -X₁₂ * (Y₁₂)⁻¹
-```
-
-I would normalize signs once and then hide them behind simp lemmas.
-
-### 5. Define the formal group law
-
-```lean
-def W.formalGroupLaw : MvPowerSeries (Fin 2) K :=
-  - formalAddX * formalAddY⁻¹
-```
-
-Then package:
-
-```lean
-def W.formalGroup : FormalGroup K where
-  toPowerSeries := W.formalGroupLaw
-  zero_constantCoeff := ...
-  lin_coeff_X := ...
-  lin_coeff_Y := ...
-  assoc := ...
-```
-
-Linear coefficient lemmas should be proved by reducing the projective addition formula modulo terms of total degree `≥ 2`.  Expected statement:
+and in particular
 
 ```text
-F(T₁,T₂) = T₁ + T₂ + O(deg ≥ 2).
+F(T₁,T₂) = T₁ + T₂ + O(total degree ≥ 2),
 ```
 
-Concrete first lemmas:
-
-```lean
-lemma formalGroupLaw_constantCoeff : constantCoeff W.formalGroupLaw = 0
-lemma formalGroupLaw_coeff_X : coeff (single 0 1) W.formalGroupLaw = 1
-lemma formalGroupLaw_coeff_Y : coeff (single 1 1) W.formalGroupLaw = 1
-lemma formalGroupLaw_eq_linear_mod_square :
-  W.formalGroupLaw - X₀ - X₁ ∈ augmentationIdeal^2
-```
-
-### 6. Associativity
-
-This is the key design choice.  I would avoid a brute-force `ring_nf` proof of associativity of the expanded two-variable formal law.
-
-Preferred proof:
-
-1. In three variables, define the three formal projective points
-
-   ```text
-   P₀ = [T₀:-1:w(T₀)], P₁ = [T₁:-1:w(T₁)], P₂ = [T₂:-1:w(T₂)].
-   ```
-
-2. Show both power series
-
-   ```text
-   F(F(T₀,T₁),T₂)
-   F(T₀,F(T₁,T₂))
-   ```
-
-   are the local parameter `-X/Y` of the corresponding projective sums
-
-   ```text
-   (P₀ + P₁) + P₂,
-   P₀ + (P₁ + P₂).
-   ```
-
-3. Use associativity of the projective Weierstrass group law.
-
-4. Since both resulting projective representatives have `Y` a unit, equality of projective points implies equality of normalized local parameters `-X/Y`.
-
-If the existing projective group law is only available over fields, prove the universal associativity over the fraction field of the universal power-series ring, then inject back into power series.  This is still not a custom Laurent series API; it uses Mathlib's fraction field/ring machinery.  The projective point `[T:-1:w(T)]` remains in ordinary power series, while the field proof can temporarily interpret `x=T/w` and `y=-1/w` if needed.
-
-Key associativity support lemmas:
-
-```lean
-lemma formalAdd_subst_left :
-  W.formalGroupLaw.subst ![W.formalGroupLaw.subst ![Y₀,Y₁], Y₂]
-    = t_of_projective_sum ((P₀ + P₁) + P₂)
-
-lemma formalAdd_subst_right :
-  W.formalGroupLaw.subst ![Y₀, W.formalGroupLaw.subst ![Y₁,Y₂]]
-    = t_of_projective_sum (P₀ + (P₁ + P₂))
-
-lemma normalized_t_eq_of_projective_eq
-  (h : projectivelyEquivalent P Q)
-  (hPY : IsUnit P.Y) (hQY : IsUnit Q.Y) :
-  -P.X/P.Y = -Q.X/Q.Y
-```
-
-The final `assoc` field is then a short wrapper around these lemmas.
-
-## (b) Shortest path / can we avoid `w(t)` iteration?
-
-Shortest path in Lean:
+with degree-2 term
 
 ```text
-w(t) once  →  projective formal point [t:-1:w(t)]
-          →  projective addition formulas
-          →  F = -X/Y
-          →  associativity from projective group-law associativity
-          →  FormalGroup instance
+-a₁T₁T₂.
 ```
 
-This avoids:
+## Runnable SymPy script
 
-* defining Laurent series;
-* expanding `x(t)=t/w(t)` and `y(t)=-1/w(t)` as Laurent series;
-* deriving the affine addition formula in the completed local ring;
-* proving associativity by direct coefficient bashing.
+```python
+import sympy as sp
 
-Can `w(t)` iteration be avoided entirely?  I do not think so, not if we want a concrete formal point on the curve using only `PowerSeries`.  Some object equivalent to `w(t)` is needed because `[t:-1:w]` must satisfy the homogeneous Weierstrass equation.
+t, r, U, V = sp.symbols("t r U V")
+a1, a2, a3, a4, a6 = sp.symbols("a1 a2 a3 a4 a6")
 
-But we can avoid making the iteration part of the main proof.  Prove once:
+# ---------- u(t)=w(t)/t^3 mod t^10 ----------
+# After w=t^3*u, the defining equation becomes
+# u = 1 + a1*t*u + a2*t^2*u + a3*t^3*u^2 + a4*t^4*u^2 + a6*t^6*u^3.
+N = 10
 
-```lean
-existsUnique_w : ∃! w, w = t³ + a₁tw + a₂t²w + a₃w² + a₄tw² + a₆w³
+def padd(p, q):
+    return [sp.expand(p[i] + q[i]) for i in range(N)]
+
+def shift(c, k, p):
+    out = [0]*N
+    for i in range(N-k):
+        out[i+k] = sp.expand(c*p[i])
+    return out
+
+def pmul(p, q):
+    out = [0]*N
+    for i in range(N):
+        for j in range(N-i):
+            out[i+j] += p[i]*q[j]
+    return [sp.expand(x) for x in out]
+
+u = [0]*N
+for _ in range(N+2):
+    u2, u3 = pmul(u, u), pmul(pmul(u, u), u)
+    new = [0]*N
+    new[0] = 1
+    for term in [shift(a1,1,u), shift(a2,2,u), shift(a3,3,u2),
+                 shift(a4,4,u2), shift(a6,6,u3)]:
+        new = padd(new, term)
+    if new == u:
+        break
+    u = new
+
+u_expr = sum(u[i]*t**i for i in range(N))
+print("u(t) mod t^10 =")
+print(sp.collect(u_expr, t))
+print("u(0) =", u[0])
+
+# ---------- formal group check through total degree 3 ----------
+# Substitute t1=r*U, t2=r*V and do Laurent arithmetic in r.
+# Coeff r^d is the homogeneous degree-d part in (T1,T2).
+
+MAX, MIN = 5, -10
+
+class LS:
+    def __init__(self, d=None):
+        self.d = {}
+        if d:
+            for k, v in d.items():
+                if MIN <= k <= MAX and v != 0:
+                    self.d[int(k)] = sp.cancel(v)
+    @staticmethod
+    def mon(k, c=1):
+        return LS({k: c})
+    def __add__(self, other):
+        other = toLS(other)
+        d = dict(self.d)
+        for k, v in other.d.items():
+            d[k] = d.get(k, 0) + v
+        return LS({k: sp.cancel(v) for k, v in d.items() if v != 0})
+    __radd__ = __add__
+    def __neg__(self):
+        return LS({k: -v for k, v in self.d.items()})
+    def __sub__(self, other):
+        return self + (-toLS(other))
+    def __rsub__(self, other):
+        return toLS(other) + (-self)
+    def __mul__(self, other):
+        other = toLS(other)
+        d = {}
+        for i, ai in self.d.items():
+            for j, bj in other.d.items():
+                k = i+j
+                if MIN <= k <= MAX:
+                    d[k] = d.get(k, 0) + ai*bj
+        return LS({k: sp.cancel(v) for k, v in d.items() if v != 0})
+    __rmul__ = __mul__
+    def inv(self):
+        e = min(self.d)
+        a0 = self.d[e]
+        b = {-e: 1/a0}
+        for n in range(1, MAX + e + 1):
+            b[-e+n] = -sum(self.d.get(e+i, 0)*b.get(-e+n-i, 0)
+                            for i in range(1, n+1))/a0
+        return LS({k: sp.cancel(v) for k, v in b.items()})
+    def __truediv__(self, other):
+        return self * toLS(other).inv()
+    def __rtruediv__(self, other):
+        return toLS(other) * self.inv()
+    def coeff(self, k):
+        return sp.factor(sp.cancel(self.d.get(k, 0)))
+
+def toLS(x):
+    return x if isinstance(x, LS) else LS({0: x})
+
+T1, T2 = LS.mon(1, U), LS.mon(1, V)
+
+def u_at(T):
+    out, p = LS(), LS.mon(0, 1)
+    for ci in u:
+        out = out + ci*p
+        p = p*T
+    return out
+
+w1, w2 = T1*T1*T1*u_at(T1), T2*T2*T2*u_at(T2)
+x1, x2 = T1/w1, T2/w2
+y1, y2 = -1/w1, -1/w2
+
+lam = (y2-y1)/(x2-x1)
+nu  = (y1*x2-y2*x1)/(x2-x1)
+x3  = lam*lam + a1*lam - a2 - x1 - x2
+y3  = -(lam+a1)*x3 - nu - a3
+F   = -x3/y3
+
+print("\nFormal group homogeneous pieces:")
+print("degree 1:", F.coeff(1))
+print("degree 2:", F.coeff(2))
+print("degree 3:", F.coeff(3))
+print("\nSo F(T1,T2) = T1 + T2 - a1*T1*T2 + O(total degree 3).")
 ```
-
-then define
-
-```lean
-def W.w := Classical.choose existsUnique_w
-```
-
-and expose only `w_eq` and `w_unique`.  That keeps the formal group construction from depending on a long list of explicit coefficient computations.
-
-The only place I would compute coefficients of `w` is for small-order lemmas such as
-
-```text
-w = t³ + a₁t⁴ + (a₁²+a₂)t⁵ + ...
-```
-
-used to prove linear terms or to debug CAS output.  These should not be part of the core definition.
-
-## (c) Biggest risk / hardest step
-
-The hardest step is **associativity in Mathlib's `MvPowerSeries.subst` language**.
-
-There are three separate risks:
-
-1. **Projective group-law availability.**  If the repository already has a robust associative projective Weierstrass addition theorem over the rings needed for `MvPowerSeries`, this is manageable.  If not, proving associativity of the formal law from scratch will dominate the project.
-
-2. **Normalization by a unit.**  The proof must repeatedly show that the `Y` coordinate of a formal sum has unit constant coefficient, so `-X/Y` is a legal `PowerSeries` expression.  This is conceptually easy but can create many API lemmas about `constantCoeff`, `IsUnit`, and substitution.
-
-3. **Substitution bookkeeping.**  The `FormalGroup.assoc` field is stated using `MvPowerSeries.subst`.  The proof has to align projective addition after substituting `F(T₀,T₁)` with Mathlib's exact `subst ![...]` expression.  This is mostly API engineering, but it is brittle.
-
-If projective associativity is unavailable, the fallback is to prove the universal identity in a fraction field of the universal power-series ring and inject back.  That avoids custom Laurent series, but it increases algebraic overhead.
-
-## (d) Size estimate
-
-Assuming a usable projective Weierstrass addition API already exists:
-
-```text
-w(t) existence/uniqueness:              250–500 lines
-formal point + substitution helpers:    150–300 lines
-formal addition and Y-unit lemmas:       250–500 lines
-linear coefficient proofs:              100–250 lines
-associativity wrapper:                  300–700 lines
-generic n-series tangent lemma:         150–300 lines
------------------------------------------------------
-total:                                1,200–2,500 lines
-```
-
-If projective associativity or coordinate addition has to be formalized from scratch, the estimate jumps to roughly
-
-```text
-4,000–8,000 lines
-```
-
-because the projective group-law algebra, normalization, and substitution compatibility become the main proof burden.
-
-A pragmatic milestone split:
-
-```text
-Milestone 1: w(t), formal point, F definition, linear coefficients.
-Milestone 2: associativity via existing projective group law.
-Milestone 3: n-series linear coefficient = n for any FormalGroup.
-Milestone 4: division-polynomial compatibility and tangent bridge.
-```
-
-## (e) How Mathlib's `RingTheory/FormalGroup/Basic.lean` helps
-
-It helps as the target API and proof style, but it does not remove the Weierstrass-specific work.
-
-Useful parts:
-
-* `FormalGroup` already has exactly the fields we need:
-
-  ```lean
-  toPowerSeries
-  zero_constantCoeff
-  lin_coeff_X
-  lin_coeff_Y
-  assoc
-  ```
-
-* The associativity field is already phrased in terms of `MvPowerSeries.subst`, so our `F` should be built directly as an `MvPowerSeries (Fin 2) K`.
-
-* `additiveFormalGroup` and `multiplicativeFormalGroup` are good templates for how to prove the linear coefficient and associativity fields using `simp`, `subst_add`, `subst_mul`, and `subst_X`.
-
-* `FormalGroup.map` is important.  It strongly suggests the universal-first construction:
-
-  ```text
-  build once over ℤ[a₁,a₂,a₃,a₄,a₆], then map coefficients to K.
-  ```
-
-* If the pinned Mathlib version has group/point instances for formal group laws over the evaluation ideal, those can help later for the tangent bridge and for defining/using the formal `[n]`-series.  They are not, by themselves, enough to construct `W.formalGroup`; the Weierstrass addition law and associativity proof still have to be supplied.
-
-I would also add a small local API if Mathlib does not already provide it:
-
-```lean
-def FormalGroup.nseries (F : FormalGroup K) : ℕ → PowerSeries K
-lemma nseries_zero
-lemma nseries_succ
-lemma coeff_one_nseries : coeff 1 (F.nseries n) = (n : K)
-```
-
-The proof of `coeff_one_nseries` uses only `lin_coeff_X = 1` and `lin_coeff_Y = 1`; it should be independent of Weierstrass curves.
-
-## Tangent bridge to division polynomials
-
-Once `W.formalGroup` exists, the bridge should be separated into two independent layers.
-
-### Layer 1: pure formal-group tangent theorem
-
-For any formal group law `F` over `K`, prove:
-
-```text
-[n]_F(T) = nT + O(T²).
-```
-
-In dual numbers this gives
-
-```text
-[n]_F(ε c) = ε · n · c.
-```
-
-Lean shape:
-
-```lean
-lemma coeff_one_nseries (F : FormalGroup K) (n : ℕ) :
-  coeff 1 (F.nseries n) = (n : K)
-```
-
-and then a dual-number corollary.
-
-### Layer 2: Weierstrass/division-polynomial identification
-
-Prove that for the formal point
-
-```text
-P(T) = [T:-1:w(T)],
-```
-
-projective multiplication by `n` agrees with the division-polynomial projective formula:
-
-```text
-[n]P(T) = [Φ_n(P(T)) : Ω_n(P(T)) : Ψ_n(P(T))]
-```
-
-with the repository's exact conventions.  Then
-
-```text
-t([n]P(T)) = -X([n]P(T)) / Y([n]P(T)) = [n]_F(T).
-```
-
-Taking the coefficient of `T` gives `(n : K)`.  Substituting `T = ε c` gives
-
-```text
-coeffε(t([n]Pε)) = (n : K) · c.
-```
-
-For a non-identity point `P`, `c` must be the coefficient of a source local parameter normalized by the invariant differential, not necessarily the coefficient of the global affine function `-x/y`.  The formal group lives at `O`; nonzero torsion points enter by translating the local parameter to `O` before applying the theorem.
-
-## Final design choice
-
-My preferred construction is:
-
-```text
-1. Define w(t) as the unique ordinary PowerSeries solving the Weierstrass local equation.
-2. Use projective coordinates P(t) = [t:-1:w(t)].
-3. Define F(T₁,T₂) = -X/Y from projective addition P(T₁)+P(T₂).
-4. Prove linear coefficients by first-order truncation.
-5. Prove associativity using projective group-law associativity plus Y-unit normalization.
-6. Use Mathlib FormalGroup.map to specialize from the universal coefficient ring.
-7. Prove the generic n-series tangent theorem once for all FormalGroup laws.
-8. Connect to division polynomials by showing their projective formula computes the same [n]P(T).
-```
-
-This is the shortest path I see that respects the `PowerSeries` constraint while keeping the final tangent bridge aligned with the projective division-polynomial formulas.
