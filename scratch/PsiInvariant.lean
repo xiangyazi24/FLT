@@ -22,7 +22,7 @@ variable {R : Type*} [CommRing R]
 @[expose] public def preΨInvD (W : WeierstrassCurve R) (m : ℤ) : R[X] :=
   W.preΨ (m + 1) * W.preΨ m * W.preΨ (m - 1)
 
-private lemma mk_invariant_descended [IsDomain R] (W : WeierstrassCurve R)
+public lemma mk_invariant_descended [IsDomain R] (W : WeierstrassCurve R)
     (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0) (m : ℤ) :
     Affine.CoordinateRing.mk W (C W.Ψ₃ *
         (W.ψ (m + 2) * W.ψ (m - 1) ^ 2 + W.ψ (m + 1) ^ 2 * W.ψ (m - 2) + W.ψ₂ ^ 2 * W.ψ m ^ 3))
