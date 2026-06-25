@@ -574,7 +574,19 @@ private theorem diagDiffQuot_formalW (W : WeierstrassCurve R) :
     simp only [formalW, PowerSeries.coeff_X_pow_mul']
     -- coeff (e0+e1+1) (X^3 * u) = if 3 ≤ e0+e1+1 then coeff (e0+e1+1-3) u else 0
     -- = if e0+e1 ≥ 2 then coeff (e0+e1-2) u else 0
-    -- RHS: need to evaluate the sum X₀³·q_u + u₁·(X₀²+X₀X₁+X₁²) at e
+    -- RHS: evaluate the sum X₀³·q_u + u₁·(X₀²+X₀X₁+X₁²) at e
+    -- Simplify the condition
+    have h3 : (3 ≤ e 0 + e 1 + 1) ↔ (2 ≤ e 0 + e 1) := by omega
+    simp only [h3]
+    have hshift : e 0 + e 1 + 1 - 3 = e 0 + e 1 - 2 := by omega
+    rw [hshift]
+    -- RHS: expand coefficients of the sum
+    simp only [map_add, map_mul, MvPowerSeries.X_def, MvPowerSeries.coeff_monomial_mul, one_mul,
+      PowerSeries.diagDiffQuot_coeff, PowerSeries.coeff_subst_single]
+    -- Now need careful Finsupp arithmetic case analysis
+    -- X₀³·q_u at e: if single 0 3 ≤ e then q_u(e-3·e₀) else 0
+    -- u₁·X₀² at e: if single 0 2 ≤ e then u₁(e-2·e₀) else 0
+    -- etc.
     sorry
   -- Prove h: (X₀-X₁)*LHS = (X₀-X₁)*RHS
   -- (X₀-X₁)*LHS = w₀-w₁ (= hw, reversed)
