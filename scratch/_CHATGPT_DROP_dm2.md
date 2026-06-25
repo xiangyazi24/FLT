@@ -1,303 +1,335 @@
-# Q371 / dm2 — division polynomials, local parameters, and the multiplier `(n : K)`
+# Q377 / dm2 — CAS check: tangent multiplier `3` at a `3`-torsion point
 
-## Verdict
-
-Not in the literal form
+Curve:
 
 ```text
-coeffε (t ([n] Pε)) = (n : K) * coeffε (t Pε)
+E : y^2 = x^3 + 1
 ```
 
-with the same unshifted affine rational function `t = -x / y` on both sides.
-That statement is false at a generic affine point, and at a smooth `2`-torsion point it is not even the right first-order test: a deformation
+over `K = ℂ` numerically.  This is the short Weierstrass curve with `A = 0`, `B = 1`, discriminant `-432 ≠ 0`.
+
+## Important correction before the CAS test
+
+For a short Weierstrass curve
 
 ```text
-Pε = (x + ε, y + ε s)
+y^2 = x^3 + A x + B,
 ```
 
-with `dx = 1` is not tangent to the curve when `y = 0`.
-
-What *can* be proved directly from the division-polynomial/projective formula, without importing a `FormalGroup` API, is the corrected invariant-differential statement
+the standard third division polynomial is
 
 ```text
-[n]^* η = (n : K) • η,
+ψ₃ = 3x^4 + 6A x^2 + 12B x - A^2.
 ```
 
-where, for a short Weierstrass curve `y^2 = x^3 + A x + B`,
+Thus for `A = 0`, `B = 1`,
 
 ```text
-η = dx / (2 y).
+ψ₃ = 3x^4 + 12x,
 ```
 
-Then the desired coefficient `n` follows after using a local parameter whose differential is normalized by `η`.  At `O`, the projective local parameter
+not `3x^4 + 12x - 1`.
+
+The typed polynomial `3x^4 + 12x - 1` does **not** cut out the `3`-torsion on this curve.  For example, its small real root is
 
 ```text
-t = -X Z / Y
+x ≈ 0.08332128397766737,
 ```
 
-has `dt / η = 1` at `O`.  At a nonzero `n`-torsion point `P`, the source parameter must be translated/normalized, e.g. morally
+but for the actual `ψ₃ = 3x^4 + 12x` this gives
 
 ```text
-τ_P(Q) = t(Q - P),
+3x^4 + 12x ≈ 1,
 ```
 
-not the same global function `-x/y` evaluated at `Q`.
+so the point is not `3`-torsion.  A Jacobian computation at that root has nonzero constant `Z` for `[3]P`, so it is not a perturbation of `O`.
 
-So the answer is:
-
-* **Yes**, a proof avoiding `FormalGroup` is possible if it proves the rational differential identity coming from the division polynomials and then does a small local-chart computation at `O`.
-* **No**, the coefficient cannot be obtained by differentiating the affine `x`-chart formula at a generic point and specializing through `ψ_n(P) = 0`; the affine `x`-chart has a pole at `O`, and the unshifted `t = -x/y` is not a normalized local parameter at a general point.
-
-## Why the literal identity is wrong
-
-Let `t = -x/y`.  For any morphism `[n]`,
+There is also a sign issue in the proposed tangent slope.  For a dual deformation
 
 ```text
-d(t ∘ [n])_P = (dt/η)_[n]P · ([n]^* η)_P
-             = (n : K) · (dt/η)_[n]P · η_P.
+Pε = (x₀ + ε, y₀ + ε s)
 ```
 
-On the other hand,
+to remain on `E` modulo `ε²`, the first-order curve equation is
 
 ```text
-(n : K) · dt_P = (n : K) · (dt/η)_P · η_P.
+2 y₀ s = 3 x₀^2,
 ```
 
-Thus the literal identity `d(t ∘ [n]) = n dt` would require
+so the tangent slope is
 
 ```text
-(dt/η)_[n]P = (dt/η)_P,
+s = 3 x₀^2 / (2 y₀),
 ```
 
-which is not true in general.  The true globally meaningful statement is about the invariant differential `η`, not about the rational function `t` away from the chart where it is a normalized local parameter.
+not the negative of this.  The negative slope is not tangent unless `x₀ = 0`.
 
-For a short Weierstrass curve,
+## Numerical `3`-torsion point
+
+Use the nonzero numerical root of the corrected `ψ₃`:
 
 ```text
-t = -x/y,
-η = dx/(2y),
+x₀ = -∛4 ≈ -1.5874010519681994747517056392723082603914933278999.
 ```
 
-and along the curve
+Then
 
 ```text
-dt/η = x(3x^2 + A)/y^2 - 2.
+y₀ = sqrt(x₀^3 + 1) = i sqrt(3)
+   ≈ 1.7320508075688772935274463415058723669428052538104 i.
 ```
 
-This is visibly not constant.
+This point satisfies `ψ₃(x₀) = 0`, hence is a nonzero `3`-torsion point over `ℂ`.
 
-## Concrete generic counterexample for `n = 2`
-
-Take
+The tangent deformation with `dx = 1` is
 
 ```text
-E : y^2 = x^3 + x + 1
-P = (0, 1).
+Pε = (x₀ + ε, y₀ + ε s),
+s  = 3 x₀^2 / (2 y₀)
+   ≈ -2.1822472719434428071201452283796177626517466774806 i.
 ```
 
-The tangent condition for a dual deformation with `dx = 1` is
+The input invariant-differential coefficient is
 
 ```text
-2 y s = 3 x^2 + A,
+input = dx / (2 y₀) = 1 / (2 y₀)
+      ≈ -0.28867513459481288225457439025097872782380087563506 i.
 ```
 
-so here `s = 1/2`, and
+## Jacobian formulas used
+
+The computation uses Jacobian coordinates
 
 ```text
-Pε = (ε, 1 + ε/2)
+x = X / Z^2,
+y = Y / Z^3,
 ```
 
-is curve-valued modulo `ε^2`.
-
-Using the usual doubling formulas
+so the projective/local parameter at `O` is
 
 ```text
-λ  = (3x^2 + A)/(2y),
-x₂ = λ^2 - 2x,
-y₂ = λ(x - x₂) - y,
-t₂ = -x₂/y₂,
+t = -X Z / Y.
 ```
 
-one gets
+The CAS used standard short-Weierstrass `A = 0` Jacobian doubling and generic addition formulas over dual numbers `a + bε`, `ε² = 0`.
+
+## CAS output
+
+With
 
 ```text
-d/dε [ t([2]Pε) ] at ε = 0 = -143/81,
-d/dε [ t(Pε)   ] at ε = 0 = -1.
+Qε = [2]Pε,
+Rε = [3]Pε = Qε + Pε,
 ```
 
-Therefore
+the Jacobian addition formula gives, numerically,
 
 ```text
-d/dε [ t([2]Pε) ] - 2 d/dε [ t(Pε) ] = 19/81 ≠ 0.
+Rε.X = 82944
+       - 522514.45781240179889225758305042686154849468744103 ε,
+
+Rε.Y = -23887872
+       + 225726245.77495757712145527587778440418894970497453 ε,
+
+Rε.Z = -249.41531628991833026795227317684562083976395654869 i · ε.
 ```
 
-So `d(t ∘ [2]) = 2 dt` is false even at an ordinary affine point where the deformation is perfectly valid.
-
-## The `2`-torsion CAS test, corrected
-
-Let
+The constant term is
 
 ```text
-E : y^2 = f(x) = x^3 + A x + B
-T = (r, 0)
+R₀ = [82944 : -23887872 : 0]
+   = [288^2 : -288^3 : 0],
 ```
 
-be a smooth `2`-torsion point, so
+which is a valid Jacobian-coordinate representative of `O`.
+
+The raw `Z` coefficient therefore satisfies
 
 ```text
-f(r) = 0,
-D := f'(r) = 3r^2 + A ≠ 0.
+Zcoeff / input = 864 = 288 · 3.
 ```
 
-The proposed deformation
+The extra factor `288` is exactly the Jacobian-coordinate unit coming from the chosen representative of `O`.  Since
 
 ```text
-(r + ε, ε s)
+-X₀ / Y₀ = -82944 / (-23887872) = 1 / 288,
 ```
 
-with `dx = 1` is not tangent to `E`, because the first-order tangent equation gives
+the local parameter coefficient is
 
 ```text
-2y dy = f'(x) dx,
+coeffε(t(Rε)) = coeffε(-Rε.X · Rε.Z / Rε.Y)
+              = (1/288) · Zcoeff
+              ≈ -0.86602540378443864676372317075293618347140262690515 i.
 ```
 
-hence at `T`
+Hence
 
 ```text
-0 = D,
+coeffε(t([3]Pε)) / input
+  = (-0.86602540378443864676372317075293618347140262690515 i)
+    / (-0.28867513459481288225457439025097872782380087563506 i)
+  = 3.0000000000000000000000000000000000000000000000000.
 ```
 
-contradicting smoothness.  Thus there is no curve-valued dual-number deformation of this form at a smooth `2`-torsion point.
-
-Use the correct local branch parameter `u = y`.  Solving the curve equation gives
+So the CAS verification succeeds:
 
 ```text
-x = r + u^2/D - 3r u^4/D^3 + O(u^6).
+coeffε(t([3]Pε)) = 3 · coeffε(input tangent).
 ```
 
-Now apply the doubling formula.  Since
+Equivalently, at the raw Jacobian `Z` level,
 
 ```text
-λ = (3x^2 + A)/(2u) = D/(2u) + O(u),
+Zcoeff = 288 · 3 · input,
 ```
 
-we get
+and the explicit unit `1/288` in `t = -XZ/Y` removes the coordinate scaling.
+
+## Complete Python/mpmath script
+
+```python
+import mpmath as mp
+mp.mp.dps = 50
+
+class D:
+    """Dual number a + b eps, eps^2 = 0."""
+    __slots__ = ("a", "b")
+    def __init__(self, a, b=0):
+        self.a = mp.mpc(a)
+        self.b = mp.mpc(b)
+    def __add__(self, other):
+        other = toD(other)
+        return D(self.a + other.a, self.b + other.b)
+    __radd__ = __add__
+    def __sub__(self, other):
+        other = toD(other)
+        return D(self.a - other.a, self.b - other.b)
+    def __rsub__(self, other):
+        other = toD(other)
+        return D(other.a - self.a, other.b - self.b)
+    def __neg__(self):
+        return D(-self.a, -self.b)
+    def __mul__(self, other):
+        other = toD(other)
+        return D(self.a * other.a, self.a * other.b + self.b * other.a)
+    __rmul__ = __mul__
+    def inv(self):
+        return D(1 / self.a, -self.b / (self.a * self.a))
+    def __truediv__(self, other):
+        other = toD(other)
+        return self * other.inv()
+    def __rtruediv__(self, other):
+        other = toD(other)
+        return other * self.inv()
+    def __pow__(self, n):
+        assert isinstance(n, int)
+        if n == 0:
+            return D(1, 0)
+        if n < 0:
+            return self.inv() ** (-n)
+        out = D(1, 0)
+        base = self
+        while n:
+            if n & 1:
+                out = out * base
+            base = base * base
+            n >>= 1
+        return out
+
+def toD(x):
+    return x if isinstance(x, D) else D(x, 0)
+
+def dbl(P):
+    # Jacobian doubling for y^2 = x^3 + 1, so A = 0.
+    X1, Y1, Z1 = map(toD, P)
+    XX = X1 * X1
+    YY = Y1 * Y1
+    YYYY = YY * YY
+    S = 2 * ((X1 + YY) * (X1 + YY) - XX - YYYY)
+    M = 3 * XX
+    T = M * M - 2 * S
+    X3 = T
+    Y3 = M * (S - T) - 8 * YYYY
+    Z3 = (Y1 + Z1) * (Y1 + Z1) - YY - Z1 * Z1
+    return (X3, Y3, Z3)
+
+def add(P, Q):
+    # Standard Jacobian addition formula.
+    X1, Y1, Z1 = map(toD, P)
+    X2, Y2, Z2 = map(toD, Q)
+    Z1Z1 = Z1 * Z1
+    Z2Z2 = Z2 * Z2
+    U1 = X1 * Z2Z2
+    U2 = X2 * Z1Z1
+    S1 = Y1 * Z2 * Z2Z2
+    S2 = Y2 * Z1 * Z1Z1
+    H = U2 - U1
+    I = (2 * H) * (2 * H)
+    J = H * I
+    r = 2 * (S2 - S1)
+    V = U1 * I
+    X3 = r * r - J - 2 * V
+    Y3 = r * (V - X3) - 2 * S1 * J
+    Z3 = ((Z1 + Z2) * (Z1 + Z2) - Z1Z1 - Z2Z2) * H
+    return (X3, Y3, Z3)
+
+# Correct division polynomial for y^2 = x^3 + 1:
+# ψ3 = 3*x^4 + 12*x = 3*x*(x^3 + 4).
+x0 = -mp.power(4, mp.mpf(1) / 3)
+y0 = mp.sqrt(x0**3 + 1)       # i*sqrt(3)
+s = 3 * x0**2 / (2 * y0)      # tangent slope, dx = 1
+input_coeff = 1 / (2 * y0)
+
+P = (D(x0, 1), D(y0, s), D(1, 0))
+Q = dbl(P)
+R = add(Q, P)                  # [3]Pε
+
+X0, Y0, Z0 = R[0].a, R[1].a, R[2].a
+Zcoeff = R[2].b
+unit = -X0 / Y0
+Tcoeff = unit * Zcoeff
+
+print("x0        =", x0)
+print("y0        =", y0)
+print("s         =", s)
+print("input     =", input_coeff)
+print("R.X       =", R[0].a, "+ eps *", R[0].b)
+print("R.Y       =", R[1].a, "+ eps *", R[1].b)
+print("R.Z       =", R[2].a, "+ eps *", R[2].b)
+print("Z/input   =", Zcoeff / input_coeff)
+print("unit      =", unit)
+print("tcoeff    =", Tcoeff)
+print("t/input   =", Tcoeff / input_coeff)
+
+# Sanity check for the typed but incorrect polynomial 3*x^4 + 12*x - 1.
+roots_bad = mp.polyroots([3, 0, 0, 12, -1])
+r_bad = roots_bad[1]
+print("bad root  =", r_bad)
+print("actual ψ3 at bad root =", 3 * r_bad**4 + 12 * r_bad)
+```
+
+The final lines print
 
 ```text
-x([2](x,u)) = D^2/(4u^2) + O(1),
-y([2](x,u)) = -D^3/(8u^3) + O(u^-1).
+Z/input = 864.0
+unit    = 0.0034722222222222222222222222222222222222222222222222
+        = 1/288
+t/input = 3.0
 ```
 
-Therefore the target projective local parameter at `O` satisfies
+## Negative-slope sanity check
+
+If one uses the sign from the prompt,
 
 ```text
-t([2](x,u)) = -x([2](x,u)) / y([2](x,u))
-            = 2u/D + O(u^3).
+s = -3x₀^2/(2y₀),
 ```
 
-Meanwhile
+then the first-order curve equation fails:
 
 ```text
-η = dx/(2y) = du/D + O(u^2) du.
+2y₀s - 3x₀² ≠ 0.
 ```
 
-So if the normalized source local parameter `τ_T` is chosen with
-
-```text
-dτ_T = η at T,
-```
-
-then
-
-```text
-τ_T = u/D + O(u^3),
-```
-
-and the corrected coefficient statement is
-
-```text
-t([2]Q) = 2 τ_T(Q) + higher-order terms.
-```
-
-This is the concrete `n = 2` verification that the tangent multiplier is `2`.  It verifies the translated/normalized local-parameter statement, not the literal statement with `t(Pε) = -x(Pε)/y(Pε)`.
-
-## What a direct division-polynomial proof should prove
-
-For a short Weierstrass model, write the multiplication formulas in the usual affine form on the generic open set:
-
-```text
-x_n = φ_n / ψ_n^2,
-y_n = ω_n / ψ_n^3.
-```
-
-Let `δ` be the derivation on the function field determined by
-
-```text
-δ x = 1,
-δ y = (3x^2 + A)/(2y).
-```
-
-The direct algebraic target is
-
-```text
-δ x_n / (2 y_n) = (n : K) / (2 y),
-```
-
-or equivalently, after clearing denominators,
-
-```text
-y · δ(x_n) = (n : K) · y_n.
-```
-
-Substituting `x_n = φ_n / ψ_n^2` and `y_n = ω_n / ψ_n^3` gives the polynomial/rational identity
-
-```text
-y · (ψ_n · δφ_n - 2 φ_n · δψ_n) = (n : K) · ω_n.
-```
-
-Depending on the exact convention for `ω_n` and the projective triple `[φ_n : ω_n : ψ_n]`, the displayed clearing factor may change, but the invariant content is exactly
-
-```text
-[n]^* η = (n : K) • η.
-```
-
-This is the correct place to do the division-polynomial computation.  Once it is proved as an identity of rational differentials on the function field, it extends across the zeros of `ψ_n`; one should not do L'Hôpital in the affine `x`-chart at those points.
-
-## Lean guidance
-
-For Lean, I would avoid trying to prove the originally stated dual-number lemma with the global `t = -x/y`.  A robust route is:
-
-1. Define or use the invariant differential `η`.
-2. Prove, possibly by direct division-polynomial calculation, that the multiplication map satisfies
-
-   ```lean
-   [n]^* η = (n : K) • η
-   ```
-
-   as a rational differential/function-field identity.
-3. Prove in the projective chart at `O` that the local parameter
-
-   ```text
-   t = -X Z / Y
-   ```
-
-   satisfies `dt/η = 1` at `O`.
-4. For a point `P` with `[n]P = O`, compare against a translated source local parameter `τ_P`, not the unshifted affine function `-x/y`.
-
-The theorem statement should therefore look morally like
-
-```text
-coeffε (t_O ([n] Pε)) = (n : K) * coeffε (τ_P Pε),
-```
-
-where `τ_P` is a local parameter at `P` normalized by the invariant differential.  If `P = O`, then `τ_P` can be the usual `t`; if `P` is nonzero torsion, it must be translated or otherwise locally normalized.
-
-## Bottom line
-
-The projective division-polynomial formula is enough to rederive the multiplier `(n : K)`, but only through the invariant differential or an equivalent local-chart computation.  Trying to read `d[n]|_O = n` from the affine derivative of
-
-```text
-x([n]P) = φ_n(P) / ψ_n(P)^2
-```
-
-at `ψ_n(P) = 0` is the wrong chart.  The affine `x`-coordinate has a pole at `O`; the projective parameter `t = -XZ/Y` fixes the target chart, and a translated/normalized local parameter fixes the source chart.
+For the same nonzero torsion point above, the CAS gives a meaningless local-parameter ratio `-21` rather than `3`, exactly because the deformation is not tangent to the curve.
