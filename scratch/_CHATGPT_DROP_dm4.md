@@ -1,154 +1,205 @@
-# Q255 (dm4): closing `preΨ'_eval_eq_zero_iff_exists_non_two_torsion` sub-D
+# Q260 (dm4): proving `ωₙ(P) ≠ 0` from the Jacobian equation at `Z = 0`
 
-## (a) Does `[IsSepClosed k]` imply `[IsAlgClosed k]`?
+## Exact Mathlib API
 
-No, not in general, and you should not expect a Mathlib instance
-
-```lean
-[IsSepClosed k] → IsAlgClosed k
-```
-
-because the implication is false mathematically in positive characteristic: a separably closed field can still have purely inseparable algebraic extensions.  The implication becomes true under an additional perfection hypothesis, for example in characteristic zero / perfect-field contexts, but not from `IsSepClosed` alone.
-
-Therefore, with the pieces listed in the question, there are two clean options:
-
-1. **Fast wiring option:** strengthen this theorem, or at least the `→` direction helper, with `[IsAlgClosed k]` and use the existing `exists_nonsingular` from `scratch/PointRealization.lean`.
-2. **Best final API option:** keep the theorem under `[IsSepClosed k]`, but add a new point-realization lemma specialized to the separable fiber:
-
-   ```lean
-   theorem exists_nonsingular_of_Ψ₂Sq_eval_ne_zero
-       [IsSepClosed k] (hΨ₂ : W.Ψ₂Sq.eval x ≠ 0) :
-       ∃ y, (W⁄k).Nonsingular x y
-   ```
-
-   This is plausible because `hΨ₂` says the quadratic fiber over `x` has nonzero discriminant / is separable, so separable closedness should supply a root.  But this is a new lemma; the existing `exists_nonsingular` requiring `[IsAlgClosed k]` cannot be used from `[IsSepClosed k]` alone.
-
-The exact proof term below is for option 1, because it uses the available `exists_nonsingular` directly.
-
-## Minimal strengthened theorem
-
-Add `[IsAlgClosed k]` to the theorem if you want to use the current point-realization lemma:
+The Jacobian-coordinate equation lives in
 
 ```lean
-theorem preΨ'_eval_eq_zero_iff_exists_non_two_torsion
-    [IsSepClosed k] [IsAlgClosed k] {n : ℕ}
-    (hn : (n : k) ≠ 0) {x : k} :
-    (W.preΨ' n).eval x = 0 ↔
-      ∃ y, ∃ h : (W⁄k).Nonsingular x y,
-        2 • (Point.some x y h : (W⁄k).Point) ≠ 0 ∧
-          n • (Point.some x y h : (W⁄k).Point) = 0 := by
-  constructor
-  · intro hx
-    have hΨ₂ : W.Ψ₂Sq.eval x ≠ 0 :=
-      preΨ'_root_Ψ₂Sq_ne (W := W) (n := n) (x := x) hn hx
-    rcases exists_nonsingular (W := W) (x := x) with ⟨y, h⟩
-    let P : (W⁄k).Point := Point.some x y h
-    have h₂ : 2 • P ≠ 0 := by
-      exact (two_nsmul_ne_zero_iff_Ψ₂Sq_eval_ne_zero (W := W) (x := x) (y := y) h).2 hΨ₂
-    have hnP : n • P = 0 := by
-      exact
-        (nsmul_eq_zero_iff_preΨ'_eval_eq_zero_of_two_nsmul_ne_zero
-          (W := W) (n := n) h h₂).mpr hx
-    exact ⟨y, h, by simpa [P] using h₂, by simpa [P] using hnP⟩
-  · rintro ⟨y, h, h₂, hnP⟩
-    exact
-      (nsmul_eq_zero_iff_preΨ'_eval_eq_zero_of_two_nsmul_ne_zero
-        (W := W) (n := n) h h₂).mp hnP
+WeierstrassCurve.Jacobian.Equation
 ```
 
-If your local equivalence theorem carries `hn` explicitly, use this variant at the two calls:
+and is a predicate on a `Fin 3 → R` representative:
 
 ```lean
-(nsmul_eq_zero_iff_preΨ'_eval_eq_zero_of_two_nsmul_ne_zero
-  (W := W) (n := n) (hn := hn) h h₂)
+W'.Equation P
 ```
 
-rather than the shorter version.
+where `W' : WeierstrassCurve.Jacobian R` and `P : Fin 3 → R`.
 
-## If the 2-torsion lemma is stated with equality-to-zero
-
-If your local file has the zero equivalence instead of the `ne_zero` equivalence, replace the proof of `h₂` by:
+If your original curve is `W : WeierstrassCurve k`, use the Jacobian-coordinate conversion:
 
 ```lean
-    have h₂ : 2 • P ≠ 0 := by
-      intro h2zero
-      have hΨ₂_zero : W.Ψ₂Sq.eval x = 0 := by
-        exact
-          (two_nsmul_eq_zero_iff_Ψ₂Sq_eval_eq_zero
-            (W := W) (x := x) (y := y) h).mp (by simpa [P] using h2zero)
-      exact hΨ₂ hΨ₂_zero
+W.toJacobian.Equation (![φ, ω, 0] : Fin 3 → k)
 ```
 
-Equivalently, if the lemma is stated with the iff in the other direction, use `.1`/`.2` accordingly.  The proof is just contraposition of the direct 2-torsion criterion.
-
-## If bridge-1 returns `(W.ΨSq (2 : ℤ)).eval x ≠ 0`
-
-Some files state the bridge in terms of `ΨSq 2` rather than `Ψ₂Sq`.  Normalize once:
+The exact lemma for reducing the equation at `Z = 0` is:
 
 ```lean
-    have hΨSq2 : (W.ΨSq (2 : ℤ)).eval x ≠ 0 :=
-      preΨ'_root_Ψ₂Sq_ne (W := W) (n := n) (x := x) hn hx
-    have hΨ₂ : W.Ψ₂Sq.eval x ≠ 0 := by
-      simpa [WeierstrassCurve.ΨSq_two] using hΨSq2
+WeierstrassCurve.Jacobian.equation_of_Z_eq_zero
 ```
 
-or the reverse:
+with shape:
 
 ```lean
-    have hΨSq2 : (W.ΨSq (2 : ℤ)).eval x ≠ 0 := by
-      simpa [WeierstrassCurve.ΨSq_two] using hΨ₂
+W'.Equation P ↔ P 1 ^ 2 = P 0 ^ 3
 ```
 
-depending on what the 2-torsion lemma consumes.
+under the hypothesis `P 2 = 0`.  So yes: at `Z = 0`, Mathlib’s Jacobian equation reduces to `Y² = X³`.
 
-## Keeping the original `[IsSepClosed k]` theorem
-
-To keep exactly the original theorem signature, first add the separable-fiber point-realization lemma:
+There is also a direct Mathlib lemma if you have nonsingularity of the Jacobian representative, not just the equation:
 
 ```lean
-theorem exists_nonsingular_of_Ψ₂Sq_eval_ne_zero
-    [IsSepClosed k] {x : k} (hΨ₂ : W.Ψ₂Sq.eval x ≠ 0) :
-    ∃ y, (W⁄k).Nonsingular x y := by
-  -- Prove the fiber polynomial in `Y`
-  --   Y^2 + (a₁*x + a₃) Y - (x^3 + a₂*x^2 + a₄*x + a₆)
-  -- is separable from `hΨ₂`, then apply the `IsSepClosed` root theorem.
-  -- This replaces the `IsAlgClosed`-based `exists_nonsingular`.
-  sorry
+WeierstrassCurve.Jacobian.Y_ne_zero_of_Z_eq_zero
 ```
 
-Then the `→` direction becomes the same proof, with only the realization line changed:
+It proves `P 1 ≠ 0` from `W'.Nonsingular P` and `P 2 = 0`.  In your stated use, you only mentioned the equation plus `φ ≠ 0`, so the first lemma below is the equation-only proof.
+
+## Reusable equation-only proof
 
 ```lean
-  · intro hx
-    have hΨ₂ : W.Ψ₂Sq.eval x ≠ 0 :=
-      preΨ'_root_Ψ₂Sq_ne (W := W) (n := n) (x := x) hn hx
-    rcases exists_nonsingular_of_Ψ₂Sq_eval_ne_zero (W := W) (x := x) hΨ₂ with ⟨y, h⟩
-    let P : (W⁄k).Point := Point.some x y h
-    have h₂ : 2 • P ≠ 0 := by
-      exact (two_nsmul_ne_zero_iff_Ψ₂Sq_eval_ne_zero (W := W) (x := x) (y := y) h).2 hΨ₂
-    have hnP : n • P = 0 := by
-      exact
-        (nsmul_eq_zero_iff_preΨ'_eval_eq_zero_of_two_nsmul_ne_zero
-          (W := W) (n := n) h h₂).mpr hx
-    exact ⟨y, h, by simpa [P] using h₂, by simpa [P] using hnP⟩
+import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Basic
+import Mathlib.Tactic
+
+noncomputable section
+
+open Matrix
+
+namespace WeierstrassCurve
+
+variable {k : Type*} [Field k]
+
+/-- If a Jacobian representative lies on the curve, has `Z = 0`, and has nonzero
+`X`, then its `Y` coordinate is nonzero.  This uses only the equation at infinity,
+not nonsingularity. -/
+lemma Jacobian.Y_ne_zero_of_equation_of_Z_eq_zero_of_X_ne_zero
+    (W' : WeierstrassCurve.Jacobian k) {P : Fin 3 → k}
+    (hEq : W'.Equation P) (hZ : P 2 = 0) (hX : P 0 ≠ 0) :
+    P 1 ≠ 0 := by
+  have hY2X3 : P 1 ^ 2 = P 0 ^ 3 :=
+    (WeierstrassCurve.Jacobian.equation_of_Z_eq_zero
+      (W' := W') (P := P) hZ).mp hEq
+  intro hY
+  have hX3_zero : P 0 ^ 3 = 0 := by
+    rw [← hY2X3]
+    simp [hY]
+  exact (pow_ne_zero 3 hX) hX3_zero
+
+/-- Specialized `[φ : ω : 0]` form for an ordinary Weierstrass curve converted to
+Jacobian coordinates. -/
+lemma omega_ne_zero_of_phi_ne_zero_of_jacobian_equation_at_infinity
+    (W : WeierstrassCurve k) {φ ω : k}
+    (hEq : W.toJacobian.Equation (![φ, ω, 0] : Fin 3 → k))
+    (hφ : φ ≠ 0) :
+    ω ≠ 0 := by
+  simpa using
+    (Jacobian.Y_ne_zero_of_equation_of_Z_eq_zero_of_X_ne_zero
+      (W' := W.toJacobian)
+      (P := (![φ, ω, 0] : Fin 3 → k))
+      hEq
+      (by simp)
+      (by simpa using hφ))
+
+end WeierstrassCurve
 ```
 
-This is the non-strengthened final form I would aim for.  But until `exists_nonsingular_of_Ψ₂Sq_eval_ne_zero` exists, the theorem cannot be closed from only `[IsSepClosed k]` using the current `exists_nonsingular` lemma.
-
-## Import/wiring reminder
-
-The file closing this should import the files that provide:
+This is the proof you want for the ATOM 5 step once you have:
 
 ```lean
-import scratch.PointRealization      -- `exists_nonsingular`, if using `[IsAlgClosed k]`
-import scratch.SeamE1_Core           -- `preΨ'_root_Ψ₂Sq_ne`
+hφ : φ ≠ 0
+hEq : W.toJacobian.Equation (![φ, ω, 0] : Fin 3 → k)
 ```
 
-and the local torsion file must already contain, or import, the two criteria:
+Then simply write:
 
 ```lean
-two_nsmul_ne_zero_iff_Ψ₂Sq_eval_ne_zero
-nsmul_eq_zero_iff_preΨ'_eval_eq_zero_of_two_nsmul_ne_zero
+have hω : ω ≠ 0 := by
+  exact WeierstrassCurve.omega_ne_zero_of_phi_ne_zero_of_jacobian_equation_at_infinity
+    (W := W) (φ := φ) (ω := ω) hEq hφ
 ```
 
-If either criterion is currently named differently, the proof above needs only that local name substitution; the term structure is unchanged.
+## If you prefer to see the explicit `Y² = X³` step
+
+The core reduction can also be written inline:
+
+```lean
+have hY2X3 : ω ^ 2 = φ ^ 3 := by
+  have h :=
+    (WeierstrassCurve.Jacobian.equation_of_Z_eq_zero
+      (W' := W.toJacobian)
+      (P := (![φ, ω, 0] : Fin 3 → k))
+      (by simp)).mp hEq
+  simpa using h
+
+have hω : ω ≠ 0 := by
+  intro hω0
+  have hφ3_zero : φ ^ 3 = 0 := by
+    rw [← hY2X3]
+    simp [hω0]
+  exact (pow_ne_zero 3 hφ) hφ3_zero
+```
+
+This avoids `pow_eq_zero_iff`; `pow_ne_zero 3 hφ` is usually the most robust way to close the final field-domain contradiction.
+
+## Direct proof if you have `Nonsingular`
+
+If your projective representative is already packaged as a nonsingular Jacobian representative, Mathlib has the exact lemma:
+
+```lean
+lemma omega_ne_zero_of_jacobian_nonsingular_at_infinity
+    (W : WeierstrassCurve k) {φ ω : k}
+    (hP : W.toJacobian.Nonsingular (![φ, ω, 0] : Fin 3 → k)) :
+    ω ≠ 0 := by
+  simpa using
+    (WeierstrassCurve.Jacobian.Y_ne_zero_of_Z_eq_zero
+      (W' := W.toJacobian)
+      (P := (![φ, ω, 0] : Fin 3 → k))
+      hP
+      (by simp))
+```
+
+This version does not need `φ ≠ 0` as a separate hypothesis because nonsingularity at `Z = 0` already forces both `X` and `Y` nonzero in Mathlib.
+
+## How this plugs into the division-polynomial setting
+
+For your torsion point, instantiate:
+
+```lean
+φ := (W.Φ n).eval x
+ω := omegaEval   -- whatever name you use for the evaluated ωₙ(P)
+```
+
+and use your already-proved ATOM 4 statement:
+
+```lean
+have hφ : (W.Φ n).eval x ≠ 0 := by
+  -- from `ψₙ(P)=0`, `Ψ₂Sq(x)≠0`, no-adjacent-preΨ-zero, and the definition of `Φ`
+  exact hphi
+```
+
+Then get the Jacobian equation from the theorem saying the projective division-polynomial representative lies on the Jacobian curve:
+
+```lean
+have hEq :
+    W.toJacobian.Equation
+      (![(W.Φ n).eval x, omegaEval, (W.ψ n).evalXY x y] : Fin 3 → k) := by
+  -- your projective-representative-on-curve theorem
+  exact hJac
+```
+
+At an `n`-torsion point, rewrite the third coordinate to zero:
+
+```lean
+have hEq0 :
+    W.toJacobian.Equation
+      (![(W.Φ n).eval x, omegaEval, 0] : Fin 3 → k) := by
+  simpa [hψ] using hEq
+```
+
+and conclude:
+
+```lean
+have hω : omegaEval ≠ 0 := by
+  exact WeierstrassCurve.omega_ne_zero_of_phi_ne_zero_of_jacobian_equation_at_infinity
+    (W := W)
+    (φ := (W.Φ n).eval x)
+    (ω := omegaEval)
+    hEq0
+    hφ
+```
+
+The important API answers are therefore:
+
+* equation predicate: `W.toJacobian.Equation (![φ, ω, 0] : Fin 3 → k)`;
+* reduction at infinity: `WeierstrassCurve.Jacobian.equation_of_Z_eq_zero`;
+* nonzero conclusion from a nonsingular representative, if available: `WeierstrassCurve.Jacobian.Y_ne_zero_of_Z_eq_zero`;
+* final field-domain contradiction: `pow_ne_zero 3 hφ` applied to `φ ^ 3 = 0`.
