@@ -54,20 +54,48 @@ private theorem addX_elim_ω_gen (m : ℤ) :
       Polynomial.C (Polynomial.C W.a₃)) * hω
 
 -- mk(ψ_m) ≠ 0 for m ≠ 0 (needed for domain cancellation).
--- From hψ_ne: ψ_m ≠ 0. And mk(ψ_m) = mk(Ψ_m).
--- Ψ_m = C(preΨ_m) * (ψ₂ if even else 1) has natDegree ≤ 1.
--- If Ψ_m ≠ 0, then mk(Ψ_m) ≠ 0 by mk_ne_zero_of_natDegree_lt.
--- Ψ_m ≠ 0 follows from preΨ_m ≠ 0 (since ψ₂ ≠ 0).
--- preΨ_m ≠ 0 follows from hψ_ne via Somos propagation:
--- if preΨ_m = 0, then F_W | ψ_m, hence F_W | ψ_1 = 1, contradiction.
-private lemma mk_ψ_ne_zero (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0) (m : ℤ) (hm : m ≠ 0) :
+-- Strategy (following Torsion.lean): mk(ψ_m) = mk(Ψ_m), and Ψ_m ≠ 0 with natDegree < 2,
+-- so mk_ne_zero_of_natDegree_lt applies. preΨ_m ≠ 0 from Mathlib's preΨ_ne_zero.
+omit [Invertible (2 : R)] in
+private lemma mk_ψ_ne_zero (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
+    (hcast : ∀ (k : ℤ), k ≠ 0 → (k : R) ≠ 0)
+    (m : ℤ) (hm : m ≠ 0) :
     AdjoinRoot.mk W.toAffine.polynomial (W.ψ m) ≠ 0 := by
-  sorry
+  rw [Affine.CoordinateRing.mk_ψ]
+  -- Goal: mk(Ψ m) ≠ 0
+  -- ψ₂ ≠ 0 and has natDegree ≤ 1
+  have hψ₂_ne : W.ψ₂ ≠ 0 := by
+    have h2 := hψ_ne 2 (by omega)
+    rwa [ψ_two] at h2
+  have hψ₂_deg : W.ψ₂.natDegree ≤ 1 := by
+    rw [WeierstrassCurve.ψ₂, Affine.polynomialY]; exact Polynomial.natDegree_linear_le
+  -- Ψ m ≠ 0 (from preΨ_ne_zero, using hcast)
+  have hΨ_ne : W.Ψ m ≠ 0 := by
+    rw [WeierstrassCurve.Ψ]
+    have hC : Polynomial.C (W.preΨ m) ≠ 0 :=
+      Polynomial.C_ne_zero.mpr (W.preΨ_ne_zero (hcast m hm))
+    by_cases heven : Even m
+    · simp only [heven, ↓reduceIte]; exact mul_ne_zero hC hψ₂_ne
+    · simp only [heven, ↓reduceIte, mul_one]; exact hC
+  -- natDegree(Ψ m) < natDegree(polynomial) = 2
+  have hΨ_deg : (W.Ψ m).natDegree < W.toAffine.polynomial.natDegree := by
+    rw [Affine.natDegree_polynomial, WeierstrassCurve.Ψ]
+    by_cases heven : Even m
+    · simp only [heven, ↓reduceIte]
+      calc (Polynomial.C (W.preΨ m) * W.ψ₂).natDegree
+          ≤ 0 + 1 := Polynomial.natDegree_mul_le |>.trans
+            (Nat.add_le_add (Polynomial.natDegree_C _).le hψ₂_deg)
+        _ < 2 := by omega
+    · simp only [heven, ↓reduceIte, mul_one]
+      have : (Polynomial.C (W.preΨ m)).natDegree = 0 := Polynomial.natDegree_C _
+      omega
+  exact AdjoinRoot.mk_ne_zero_of_natDegree_lt Affine.monic_polynomial hΨ_ne hΨ_deg
 
 -- The ω-free expression is divisible by F_W.
 set_option maxHeartbeats 800000000 in
 set_option maxRecDepth 16000 in
-private theorem ωfree_dvd (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0) (m : ℤ) :
+private theorem ωfree_dvd (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
+    (hcast : ∀ (k : ℤ), k ≠ 0 → (k : R) ≠ 0) (m : ℤ) :
     W.toAffine.polynomial ∣
       (Polynomial.C (Polynomial.C (2 : R)) *
         (addX W.toPoly
@@ -117,12 +145,13 @@ private theorem ωfree_dvd (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0) (m :
       unfold addX WeierstrassCurve.toPoly WeierstrassCurve.map Affine.polynomial
       simp [RingHom.comp_apply, Matrix.cons_val, map_ofNat]
     · -- m ≠ 0: mk(ψ_m) = 0 contradicts mk_ψ_ne_zero
-      exact absurd hψm (mk_ψ_ne_zero W hψ_ne m hm)
+      exact absurd hψm (mk_ψ_ne_zero W hψ_ne hcast m hm)
 
 /-- **ATOM 4a (general m).** X-component projective identity for ALL m.
 In the coordinate ring R[W], the X-coordinate of the formal addition
 P + [m]P equals ψ_{m-1}² · φ_{m+1}. -/
-theorem mk_addX_divPoly_general (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0) (m : ℤ) :
+theorem mk_addX_divPoly_general (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
+    (hcast : ∀ (k : ℤ), k ≠ 0 → (k : R) ≠ 0) (m : ℤ) :
     (AdjoinRoot.mk W.toAffine.polynomial)
       (addX W.toPoly
         (![Polynomial.C (Polynomial.X : R[X]), (Polynomial.X : R[X][X]), 1])
@@ -130,7 +159,7 @@ theorem mk_addX_divPoly_general (hψ_ne : ∀ k : ℤ, k ≠ 0 → W.ψ k ≠ 0)
        W.ψ (m - 1) ^ 2 * W.φ (m + 1)) = 0 := by
   rw [AdjoinRoot.mk_eq_zero]
   have h := addX_elim_ω_gen W m
-  have hd := ωfree_dvd W hψ_ne m
+  have hd := ωfree_dvd W hψ_ne hcast m
   rw [← h] at hd
   exact (IsUnit.dvd_mul_left (by
     rw [Polynomial.isUnit_C, Polynomial.isUnit_C]
