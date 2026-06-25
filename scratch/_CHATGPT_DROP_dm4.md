@@ -1,198 +1,332 @@
-# Q357 (dm4): finite morphism / dual-deformation shortcut for bridge-2
+# Q462 / dm4 — proving `lin_coeff_X = 1` and `lin_coeff_Y = 1` for the Weierstrass formal group law
 
-## Short answer
+## Goal
 
-No: **finite + nonconstant is not enough** to rule out a nonzero dual deformation mapping to the same point.  What you need is **unramified** or **étale** at the point, equivalently injectivity on tangent directions.  For multiplication-by-`n` on an elliptic curve, that unramified/étale statement is proved by exactly the tangent computation
-
-```text
-d[n]_O = n.
-```
-
-So the proposed “finite morphism” shortcut does not avoid bridge-2.  It replaces the missing step 5 by the theorem “`[n]` is unramified at `P`,” whose proof is precisely the same formal tangent/local-parameter content.
-
-## Why finite morphism is insufficient
-
-The statement
-
-```text
-finite nonconstant morphism ⇒ finite fibers
-```
-
-is a statement about **ordinary geometric points**.  A nonzero dual deformation is not a second ordinary point of the fiber; it is a nonreduced infinitesimal thickening over the same underlying point:
-
-```text
-Spec K[ε]/(ε²) → X.
-```
-
-Finite fibers do not prohibit nilpotent tangent directions inside a scheme-theoretic fiber.  Those nilpotent directions are exactly ramification.
-
-The basic counterexample is the finite nonconstant map
-
-```text
-A¹ → A¹,    t ↦ t².
-```
-
-At `0`, the nonzero dual deformation `t = ε` maps to
-
-```text
-t² = ε² = 0.
-```
-
-So it has the same image as the closed point `0`, even though the morphism is finite, nonconstant, and degree `2`.  This is ordinary ramification, not a contradiction.
-
-For elliptic curves the same issue appears in characteristic `p`: the Frobenius and inseparable parts of `[p]` can kill tangent directions.  The condition `(n : K) ≠ 0` is exactly what should rule this out, and it does so through the differential.
-
-## Correct replacement for the false claim
-
-The false claim is:
-
-```text
-finite nonconstant maps send distinct dual deformations to distinct images.
-```
-
-The correct claim is:
-
-```text
-unramified maps send nonzero tangent vectors to nonzero tangent vectors.
-```
-
-or, in dual-number language:
-
-```text
-If f is unramified at P and Pε is a dual lift of P with nonzero tangent vector,
-then f(Pε) cannot be the constant dual lift of f(P).
-```
-
-For `[n] : E → E`, the theorem you need is:
-
-```text
-[n] is unramified/étale at P when (n : K) ≠ 0.
-```
-
-The standard proof is:
-
-1. translations identify `T_P E` and `T_O E`;
-2. the differential of `[n]` commutes with translation;
-3. `d[n]_O` is multiplication by `(n : K)`;
-4. `(n : K) ≠ 0`, so the tangent map is injective.
-
-That is exactly the `TangentO.nsmul₁` route.
-
-## What the missing step 5 really is
-
-Step 5 cannot be replaced by finiteness.  It should be formalized as the tangent/local-parameter compatibility theorem:
+Assume the normalized formal group law has already been defined as
 
 ```lean
-/-- Compatibility of the concrete local parameter with the abstract tangent map. -/
-theorem coeff_localT_nsmul_dual_eq_TangentO_nsmul₁
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    (n : ℕ) {x y : K} (hP : (W⁄K).Nonsingular x y)
-    (Pε : DualAffinePoint W x y)
-    (λ : K)
-    (hλ : affineTangentCoord W x y Pε = λ) :
-    coeffε (localT (nsmulDualJacobianRep W n Pε))
-      = TangentO.nsmul₁ W n λ := by
-  -- prove from definitions of the local parameter, translations, and the group law over dual numbers
+F : MvPowerSeries (Fin 2) K
+```
+
+with variables
+
+```lean
+T₁ = MvPowerSeries.X (0 : Fin 2)
+T₂ = MvPowerSeries.X (1 : Fin 2)
+```
+
+The target fields are
+
+```lean
+lin_coeff_X : MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1) F = 1
+lin_coeff_Y : MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) 1) F = 1
+```
+
+Mathematically this is the statement
+
+```text
+F(T₁,T₂) = T₁ + T₂ + terms of total degree ≥ 2.
+```
+
+## Main recommendation
+
+Do **not** prove these coefficients by expanding the full normalized `-addX/addY` expression and asking `ring_nf` to find the linear terms.  Instead prove the two one-variable neutral-axis identities:
+
+```lean
+F(T₁, 0) = T₁
+F(0, T₂) = T₂
+```
+
+Then extract the coefficient of `X^1` from each identity.
+
+This is much smaller in Lean because the neutral-element property collapses one input point to `O`, and the final coefficient extraction is a generic `MvPowerSeries` lemma.
+
+## Important caveat about raw `addXYZ`
+
+The raw standard-projective formula can produce representatives with a common nonunit factor on the axes.  For example, with
+
+```text
+P(t) = [t : -1 : w(t)],   O = P(0) = [0 : -1 : 0],
+```
+
+Mathlib's standard projective lemma for adding a point at infinity gives a scalar multiple of `P(t)`, and the scalar may be a nonunit such as `w(t)`.  Therefore the identity should be proved for the **normalized local parameter formula** defining `F`, not by treating raw `addXYZ(P(t),O)` as a unit-equivalent projective representative.
+
+Concretely: once your construction has cancelled the common factor and defined a denominator with unit constant term, prove the axis identities for that normalized quotient.
+
+## API setup
+
+Use bivariate power series and the two coordinate variables:
+
+```lean
+import Mathlib.RingTheory.PowerSeries.Substitution
+import Mathlib.RingTheory.MvPowerSeries.Inverse
+
+noncomputable section
+
+open MvPowerSeries
+open Finsupp
+
+variable {K : Type*} [Field K]
+
+abbrev Biv := MvPowerSeries (Fin 2) K
+
+abbrev T₁ : Biv := MvPowerSeries.X (0 : Fin 2)
+abbrev T₂ : Biv := MvPowerSeries.X (1 : Fin 2)
+```
+
+Define the two axis-specialization maps by substitution:
+
+```lean
+/-- Substitute `(T₁,T₂) = (X,0)`, giving a univariate power series. -/
+def axis₁Args : Fin 2 → PowerSeries K :=
+  ![PowerSeries.X, 0]
+
+/-- Substitute `(T₁,T₂) = (0,X)`, giving a univariate power series. -/
+def axis₂Args : Fin 2 → PowerSeries K :=
+  ![0, PowerSeries.X]
+
+lemma axis₁_hasSubst : MvPowerSeries.HasSubst (R := K) (S := K) axis₁Args := by
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero
+  intro i
+  fin_cases i <;> simp [axis₁Args]
+
+lemma axis₂_hasSubst : MvPowerSeries.HasSubst (R := K) (S := K) axis₂Args := by
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero
+  intro i
+  fin_cases i <;> simp [axis₂Args]
+
+def axis₁ : Biv →ₐ[K] PowerSeries K :=
+  MvPowerSeries.substAlgHom axis₁_hasSubst
+
+def axis₂ : Biv →ₐ[K] PowerSeries K :=
+  MvPowerSeries.substAlgHom axis₂_hasSubst
+```
+
+You get the expected behavior on variables from `MvPowerSeries.subst_X` / `substAlgHom_X`:
+
+```lean
+lemma axis₁_T₁ : axis₁ (K := K) T₁ = PowerSeries.X := by
+  rw [axis₁, MvPowerSeries.substAlgHom_X]
+  rfl
+
+lemma axis₁_T₂ : axis₁ (K := K) T₂ = 0 := by
+  rw [axis₁, MvPowerSeries.substAlgHom_X]
+  rfl
+
+lemma axis₂_T₁ : axis₂ (K := K) T₁ = 0 := by
+  rw [axis₂, MvPowerSeries.substAlgHom_X]
+  rfl
+
+lemma axis₂_T₂ : axis₂ (K := K) T₂ = PowerSeries.X := by
+  rw [axis₂, MvPowerSeries.substAlgHom_X]
+  rfl
+```
+
+The exact syntax may need minor adjustment around implicit parameters, but this is the intended API shape.
+
+## Generic coefficient-extraction lemmas
+
+Prove these once and reuse them.
+
+```lean
+lemma coeff_axis₁_one (G : Biv) :
+    PowerSeries.coeff 1 (axis₁ (K := K) G)
+      = MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1) G := by
+  -- Recommended proof:
+  -- 1. unfold `axis₁` and `PowerSeries.coeff`;
+  -- 2. use `MvPowerSeries.coeff_subst axis₁_hasSubst G (Finsupp.single () 1)`;
+  -- 3. all terms vanish except the source exponent `single 0 1`;
+  -- 4. use `coeff_X_pow`, `coeff_zero`, and `zero_pow`.
+  -- This is a finite-support/finsum cleanup lemma.  Prove it once.
+  sorry
+
+lemma coeff_axis₂_one (G : Biv) :
+    PowerSeries.coeff 1 (axis₂ (K := K) G)
+      = MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) 1) G := by
+  -- Same proof, with variables swapped.
   sorry
 ```
 
-Then, for the scaled lift with tangent coordinate `λ = 1`:
+This pair is the clean bridge from one-variable neutral identities to bivariate linear coefficients.
+
+If the `finsum` proof is annoying, an alternative is to use `MvPowerSeries.truncTotal` and prove that `axis₁` preserves the degree-1 truncation.  But `coeff_subst` is the most direct theorem.
+
+Relevant APIs:
 
 ```lean
-have ht_coeff_tangent :
-    coeffε (localT (nsmulDualJacobianRep W n Pε)) = TangentO.nsmul₁ W n 1 := by
-  exact coeff_localT_nsmul_dual_eq_TangentO_nsmul₁
-    (W := W) (n := n) hP Pε 1 hλ_one
-
-have ht_coeff_nat :
-    coeffε (localT (nsmulDualJacobianRep W n Pε)) = (n : K) := by
-  calc
-    coeffε (localT (nsmulDualJacobianRep W n Pε))
-        = TangentO.nsmul₁ W n 1 := ht_coeff_tangent
-    _ = (n : K) := by
-        simpa using
-          TangentO.nsmul₁_eq_natCast_mul
-            (W := W) (n := n) (a := (1 : K))
+#check MvPowerSeries.coeff_subst
+#check MvPowerSeries.substAlgHom
+#check MvPowerSeries.subst_X
+#check MvPowerSeries.substAlgHom_X
+#check PowerSeries.coeff_one_X
+#check MvPowerSeries.coeff_index_single_X
+#check MvPowerSeries.coeff_index_single_self_X
 ```
 
-This is the non-circular bridge.  If the projective formula plus derivative-zero gives the same coefficient as `0`, then `(n : K) = 0`, contradicting `hn`.
+## The two curve-specific neutral-axis lemmas
 
-## What “finite morphism” looks like in Mathlib
-
-Mathlib does have a scheme-level finite morphism API.  The file is:
+For the normalized formal group law, prove:
 
 ```lean
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
-```
-
-The core class is:
-
-```lean
-namespace AlgebraicGeometry
-
-class IsFinite {X Y : Scheme} (f : X ⟶ Y) : Prop extends IsAffineHom f where
-  finite_app (U : Y.Opens) (hU : IsAffineOpen U) :
-    (f.app U).hom.Finite
-
-end AlgebraicGeometry
-```
-
-There is also an affine-Spec characterization:
-
-```lean
-AlgebraicGeometry.IsFinite.SpecMap_iff
-```
-
-with shape:
-
-```lean
-IsFinite (Spec.map f) ↔ f.hom.Finite
-```
-
-and Mathlib’s file comment points to a finite-fiber theorem:
-
-```lean
-AlgebraicGeometry.IsFinite.finite_preimage_singleton
-```
-
-But this API is **not** the right endpoint for bridge-2:
-
-* it concerns morphisms of `Scheme`, while the elliptic-curve group law in the files you are using is mostly point/formula-level;
-* even if `[n]` is packaged as a `Scheme.Hom` and proved finite, finite fibers do not imply injectivity on dual-number points;
-* to rule out the dual deformation, you need the unramified/étale API or a direct tangent calculation.
-
-## If you tried to use the scheme route anyway
-
-The correct scheme-level theorem would be something like:
-
-```lean
--- schematic, not current local API
-have het : IsEtale (nMulMorphism W n) := by
-  -- prove from `d[n] = n` and `(n : K) ≠ 0`
+lemma formalGroupLaw_axis₁ (F : Biv) :
+    axis₁ (K := K) F = PowerSeries.X := by
+  -- This is the curve-specific content.
+  -- It should come from the construction of `F` and the identity `P(t) + O = P(t)`.
+  -- Do this after normalization/cancellation, not at raw `addXYZ` level.
   sorry
 
-have hunram : IsUnramified (nMulMorphism W n) := by
-  infer_instance -- or from `het`
+lemma formalGroupLaw_axis₂ (F : Biv) :
+    axis₂ (K := K) F = PowerSeries.X := by
+  -- Same, using `O + P(t) = P(t)`.
+  sorry
 ```
 
-Then use the formal infinitesimal lifting / tangent-space characterization of unramified morphisms to show that a nonzero tangent vector cannot be killed.
+More specifically, if
 
-But this is not shorter.  Proving `het` is exactly the tangent map theorem in a more abstract wrapper.  If Mathlib eventually has a theorem saying multiplication-by-`n` on an elliptic curve is finite étale for `(n : K) ≠ 0`, then yes, it would close bridge-2.  In the current project architecture, that theorem would itself need a dependency audit, because it likely depends on the same `d[n] = n` computation or stronger isogeny theory.
+```lean
+P(t) = [t, -1, w(t)]
+```
 
-## Correct non-circular proof structure
+and your bivariate inputs are
 
-Keep the bridge-2 proof in the tangent/local-parameter language:
+```lean
+P₁ = [T₁, -1, w(T₁)]
+P₂ = [T₂, -1, w(T₂)]
+```
 
-1. Assume `(W.preΨ' n).derivative.eval x = 0` at a root.
-2. Use the dual Taylor lemma to get `preΨ'_n(xε) = 0` for a scaled nonzero tangent lift.
-3. Use the parity bridge to get `ψ_n(Pε) = 0`.
-4. Use the projective division-polynomial formula to make the `Z` coordinate of `[n]Pε` zero.
-5. Therefore the concrete local parameter coefficient of `[n]Pε` is `0`.
-6. Compare the same coefficient with `TangentO.nsmul₁ W n 1`.
-7. Rewrite `TangentO.nsmul₁ W n 1 = (n : K)` and contradict `(n : K) ≠ 0`.
+then `axis₁` sends `P₂` to `O` and leaves `P₁` as the univariate point `P(t)`.  The normalized local parameter of `P(t)+O` is exactly `t`, hence `axis₁ F = X`.  Similarly, `axis₂` sends `P₁` to `O`, leaves `P₂ = P(t)`, and gives `axis₂ F = X`.
 
-This is exactly the proof that `[n]` is unramified in the relevant tangent direction, but it avoids the heavy scheme-level finite/étale formalism.
+The raw projective helper lemmas that may help diagnose the axis computation are:
 
-## Recommendation
+```lean
+WeierstrassCurve.Projective.addXYZ_of_Z_eq_zero_left
+WeierstrassCurve.Projective.addXYZ_of_Z_eq_zero_right
+WeierstrassCurve.Projective.map_addXYZ
+WeierstrassCurve.Projective.baseChange_addXYZ
+```
 
-Do not spend time trying to formalize bridge-2 from `IsFinite`.  It is mathematically too weak and will not produce the needed dual-number injectivity.  The shortest non-circular path remains the explicit local-parameter/tangent comparison theorem.  In other words, step 5 is not optional; it is the precise Lean form of the statement that `[n]` has nonzero differential when `(n : K) ≠ 0`.
+but remember: because the scalar can be a nonunit in the power-series ring, the final axis proof should use the normalized quotient/factorization defining `F`.
+
+## Final linear coefficient proofs
+
+Once the generic coefficient-extraction lemmas and the two axis identities are available, the formal group linear coefficient fields are tiny:
+
+```lean
+theorem lin_coeff_X_of_axis₁
+    {F : Biv}
+    (hF₁ : axis₁ (K := K) F = PowerSeries.X) :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1) F = 1 := by
+  rw [← coeff_axis₁_one (K := K) F]
+  rw [hF₁]
+  exact PowerSeries.coeff_one_X
+
+
+theorem lin_coeff_Y_of_axis₂
+    {F : Biv}
+    (hF₂ : axis₂ (K := K) F = PowerSeries.X) :
+    MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) 1) F = 1 := by
+  rw [← coeff_axis₂_one (K := K) F]
+  rw [hF₂]
+  exact PowerSeries.coeff_one_X
+```
+
+Then instantiate these with your formal group law:
+
+```lean
+theorem W_formalGroup_lin_coeff_X :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1) W.F = 1 := by
+  exact lin_coeff_X_of_axis₁ (formalGroupLaw_axis₁ W.F)
+
+
+theorem W_formalGroup_lin_coeff_Y :
+    MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) 1) W.F = 1 := by
+  exact lin_coeff_Y_of_axis₂ (formalGroupLaw_axis₂ W.F)
+```
+
+Adjust field names to your actual `FormalGroup` structure.
+
+## Why this is better than direct coefficient expansion
+
+A direct proof of
+
+```lean
+MvPowerSeries.coeff (single 0 1) F = 1
+```
+
+from the full formula sees every piece of the normalized addition expression.  Even if all high-degree terms vanish, Lean still has to expand/project/cancel a large projective expression.
+
+The axis proof uses only:
+
+1. the neutral element identity in one variable;
+2. a generic `coeff_subst` lemma;
+3. `PowerSeries.coeff_one_X`.
+
+So the hard algebra is concentrated in proving
+
+```lean
+axis₁ F = X
+axis₂ F = X
+```
+
+which is exactly what the group-law construction is supposed to guarantee.
+
+## Alternative: degree-1 truncation
+
+If the axis identities are hard because the normalization is still being built, a second viable target is the linear truncation:
+
+```lean
+F = T₁ + T₂ + H
+```
+
+where
+
+```lean
+MvPowerSeries.coeff (single (0 : Fin 2) 0) H = 0
+MvPowerSeries.coeff (single (0 : Fin 2) 1) H = 0
+MvPowerSeries.coeff (single (1 : Fin 2) 1) H = 0
+```
+
+More invariantly, all coefficients of total degree `≤ 1` in `H` vanish.  Mathlib has `MvPowerSeries.truncTotal` for finite variable types, so one can prove
+
+```lean
+F.truncTotal 1 = (T₁ + T₂).truncTotal 1
+```
+
+or the corresponding coefficient equalities.  However, the neutral-axis approach is usually shorter because it avoids bivariate total-degree bookkeeping.
+
+## Bottom line
+
+The recommended Lean route is:
+
+1. Define axis specialization homs:
+
+```lean
+axis₁ : MvPowerSeries (Fin 2) K →ₐ[K] PowerSeries K
+axis₂ : MvPowerSeries (Fin 2) K →ₐ[K] PowerSeries K
+```
+
+by `MvPowerSeries.substAlgHom ![PowerSeries.X,0]` and `![0,PowerSeries.X]`.
+
+2. Prove once:
+
+```lean
+PowerSeries.coeff 1 (axis₁ G) = coeff (single 0 1) G
+PowerSeries.coeff 1 (axis₂ G) = coeff (single 1 1) G
+```
+
+using `MvPowerSeries.coeff_subst`.
+
+3. Prove the curve-specific neutral identities after normalization:
+
+```lean
+axis₁ F = PowerSeries.X
+axis₂ F = PowerSeries.X
+```
+
+4. Finish both formal group fields by rewriting and applying:
+
+```lean
+PowerSeries.coeff_one_X
+```
+
+This avoids expanding the full bivariate addition formula and isolates the actual geometry in the two neutral-axis lemmas.
