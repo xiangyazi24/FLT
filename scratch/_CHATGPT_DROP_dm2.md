@@ -1,231 +1,249 @@
-# Q498 (dm2): CAS check for pure polynomial `(X₀-X₁)^3` divisibility
+# Q512 (dm2): CAS factorization of `formalAddX = (t₁-t₂)^3 Q`
 
 ## Executive result
 
-The proposed **pure polynomial** identity is false.
+With the formal parameter specialization
+
+```text
+P(t) = [t, -1, w(t)]
+```
+
+the Mathlib projective `addX` formula **does** have the expected cube factor:
+
+```text
+Projective.addX(P(t₁), P(t₂)) = (t₁ - t₂)^3 Q(t₁,t₂).
+```
+
+This is false for independent `Z`-variables, as in Q498, but becomes true after substituting `Zᵢ = w(tᵢ)`.
+
+All truncations below are by **total degree** in `(t₁,t₂)` after substitution.
+
+---
+
+## 1. Short Weierstrass case
+
+For
+
+```text
+y² = x³ + A x + B
+```
+
+the projective equation with `P(t)=[t,-1,w(t)]` gives
+
+```text
+w = t³ + A t w² + B w³.
+```
+
+Solving recursively through degree `12` gives
+
+```text
+w(t) = t³ + A t⁷ + B t⁹ + 2 A² t¹¹ + O(t¹³).
+```
+
+There is no `t¹²` term.
 
 After substituting
 
 ```text
-P₁ = [t₁, -1, s₁],   P₂ = [t₂, -1, s₂]
+P₁ = [t₁, -1, w(t₁)],
+P₂ = [t₂, -1, w(t₂)]
 ```
 
-Mathlib's `Projective.addX(P₁,P₂)` and `Projective.addY(P₁,P₂)` are **not** divisible by
+into Mathlib's `Projective.addX`, the truncation through total degree `12` factors as
 
 ```text
-D^3 := (t₁ - t₂)^3
+[addX(P₁,P₂)]_{≤12}
+  = -(t₁-t₂)³ (t₁+t₂)
+      * ( 1
+          + A (t₁⁴ + t₁²t₂² + t₂⁴)
+          + B (t₁⁶ - 2t₁³t₂³ + t₂⁶)
+          + 2A² (t₁⁸ + t₁⁶t₂² + t₁⁴t₂⁴ + t₁²t₂⁶ + t₂⁸) ).
 ```
 
-in
+Equivalently, the quotient through total degree `9` is
 
 ```text
-ℚ[a₁,a₂,a₃,a₄,a₆,t₁,t₂,s₁,s₂].
+Q_short(t₁,t₂) = [addX/(t₁-t₂)³]_{≤9}
+  = -(t₁+t₂)
+      * ( 1
+          + A (t₁⁴ + t₁²t₂² + t₂⁴)
+          + B (t₁⁶ - 2t₁³t₂³ + t₂⁶)
+          + 2A² (t₁⁸ + t₁⁶t₂² + t₁⁴t₂⁴ + t₁²t₂⁶ + t₂⁸) ).
 ```
 
-So the sub-agent's claim, if interpreted with independent `s₁,s₂`, is wrong.  The cube factor can only appear after imposing extra structure, such as `sᵢ = w(tᵢ)` with `w` the Weierstrass formal parameter series, or an equivalent curve-equation/formal-series certificate.
+Expanded lowest-degree terms:
+
+```text
+Q_short
+  = -(t₁+t₂)
+    - A(t₁⁵ + t₁⁴t₂ + t₁³t₂² + t₁²t₂³ + t₁t₂⁴ + t₂⁵)
+    - B(t₁⁷ + t₁⁶t₂ - 2t₁⁴t₂³ - 2t₁³t₂⁴ + t₁t₂⁶ + t₂⁷)
+    - 2A²(t₁⁹ + t₁⁸t₂ + t₁⁷t₂² + t₁⁶t₂³ + t₁⁵t₂⁴
+           + t₁⁴t₂⁵ + t₁³t₂⁶ + t₁²t₂⁷ + t₁t₂⁸ + t₂⁹)
+    + O_tot(10).
+```
+
+The CAS division by `(t₁-t₂)^3` has remainder `0` through this truncation.
 
 ---
 
-## Minimal counterexample
+## 2. General Weierstrass case
 
-Set all Weierstrass coefficients to zero and set
-
-```text
-s₁ = s₂ = 1.
-```
-
-Then the specialized formulas give
+For the general projective Weierstrass equation
 
 ```text
-addX([t₁,-1,1], [t₂,-1,1]) = -3 * (t₁ - t₂)
-addY([t₁,-1,1], [t₂,-1,1]) = -3 * t₁ * t₂ * (t₁ - t₂)
+Y²Z + a₁XYZ + a₃YZ² = X³ + a₂X²Z + a₄XZ² + a₆Z³
 ```
 
-Neither expression is divisible by `(t₁ - t₂)^3`.
+with `P(t)=[t,-1,w(t)]`, the formal equation is
 
-This is already a counterexample even with `Z₀ = Z₁` constant.  Therefore the identity is not a consequence of just setting `Y₀ = Y₁ = -1`.
+```text
+w = t³ + a₁ t w + a₂ t² w + a₃ w² + a₄ t w² + a₆ w³.
+```
+
+Solving recursively through degree `8` gives
+
+```text
+w(t)
+  = t³
+    + a₁ t⁴
+    + (a₁² + a₂) t⁵
+    + (a₁³ + 2a₁a₂ + a₃) t⁶
+    + (a₁⁴ + 3a₁²a₂ + a₂² + 3a₁a₃ + a₄) t⁷
+    + (a₁⁵ + 4a₁³a₂ + 3a₁a₂² + 6a₁²a₃ + 3a₂a₃ + 3a₁a₄) t⁸
+    + O(t⁹).
+```
+
+Let
+
+```text
+D  := t₁ - t₂,
+Hₙ := Σ_{i=0}^n t₁^{n-i} t₂^i.
+```
+
+Then the truncation of `Projective.addX(P(t₁),P(t₂))` through total degree `8` satisfies
+
+```text
+[addX(P(t₁),P(t₂))]_{≤8} = D³ * Q_general,≤5.
+```
+
+The quotient through total degree `5` is
+
+```text
+Q_general,≤5
+  = -H₁
+    - a₁ H₂
+    - (a₁² + a₂) H₃
+    - (a₁³ + 2a₁a₂) H₄
+    - a₃ (t₁⁴ + 2t₁³t₂ + 3t₁²t₂² + 2t₁t₂³ + t₂⁴)
+    - (a₁⁴ + 3a₁²a₂ + a₂² + a₄) H₅
+    - a₁a₃ (3t₁⁵ + 5t₁⁴t₂ + 7t₁³t₂² + 7t₁²t₂³ + 5t₁t₂⁴ + 3t₂⁵)
+    + O_tot(6).
+```
+
+Expanded by total degree:
+
+```text
+Q_general,≤5
+  = -(t₁+t₂)
+    - a₁(t₁²+t₁t₂+t₂²)
+    - (a₁²+a₂)(t₁³+t₁²t₂+t₁t₂²+t₂³)
+
+    - (a₁³+2a₁a₂+a₃)(t₁⁴+t₂⁴)
+    - (a₁³+2a₁a₂+2a₃)(t₁³t₂+t₁t₂³)
+    - (a₁³+2a₁a₂+3a₃)t₁²t₂²
+
+    - (a₁⁴+3a₁²a₂+3a₁a₃+a₂²+a₄)(t₁⁵+t₂⁵)
+    - (a₁⁴+3a₁²a₂+5a₁a₃+a₂²+a₄)(t₁⁴t₂+t₁t₂⁴)
+    - (a₁⁴+3a₁²a₂+7a₁a₃+a₂²+a₄)(t₁³t₂²+t₁²t₂³)
+    + O_tot(6).
+```
+
+Again, the CAS division by `(t₁-t₂)^3` has remainder `0` through this truncation.
 
 ---
 
-## SymPy check
-
-The following script uses the current Mathlib projective formulas.  In Mathlib,
-
-```lean
-addY P Q = negY ![addX P Q, negAddY P Q, addZ P Q]
-```
-
-and
-
-```lean
-negY ![X,Y,Z] = -Y - a₁*X - a₃*Z.
-```
+## Reproduction script
 
 ```python
 import sympy as sp
 
-t1,t2,s1,s2 = sp.symbols('t1 t2 s1 s2')
-a1,a2,a3,a4,a6 = sp.symbols('a1 a2 a3 a4 a6')
-
-Px,Py,Pz = t1,-1,s1
-Qx,Qy,Qz = t2,-1,s2
+t,t1,t2 = sp.symbols('t t1 t2')
+a1,a2,a3,a4,a6,A,B = sp.symbols('a1 a2 a3 a4 a6 A B')
 D = t1 - t2
 
-addZ = (
-    -3*Px**2*Qx*Qz + 3*Px*Qx**2*Pz + Py**2*Qz**2 - Qy**2*Pz**2
-    + a1*Px*Py*Qz**2 - a1*Qx*Qy*Pz**2 - a2*Px**2*Qz**2
-    + a2*Qx**2*Pz**2 + a3*Py*Pz*Qz**2 - a3*Qy*Pz**2*Qz
-    - a4*Px*Pz*Qz**2 + a4*Qx*Pz**2*Qz
-)
+def truncate_univar(expr, var, N):
+    expr = sp.expand(expr)
+    return sp.expand(sum(expr.coeff(var,n)*var**n for n in range(N+1)))
 
-addX = (
-    -Px*Qy**2*Pz + Qx*Py**2*Qz - 2*Px*Py*Qy*Qz + 2*Qx*Py*Qy*Pz
-    - a1*Px**2*Qy*Qz + a1*Qx**2*Py*Pz + a2*Px**2*Qx*Qz
-    - a2*Px*Qx**2*Pz - a3*Px*Py*Qz**2 + a3*Qx*Qy*Pz**2
-    - 2*a3*Px*Qy*Pz*Qz + 2*a3*Qx*Py*Pz*Qz
-    + a4*Px**2*Qz**2 - a4*Qx**2*Pz**2 + 3*a6*Px*Pz*Qz**2
-    - 3*a6*Qx*Pz**2*Qz
-)
+def truncate_total(expr, vars, N):
+    poly = sp.Poly(sp.expand(expr), *vars, domain='EX')
+    out = 0
+    for monom, coeff in poly.terms():
+        if sum(monom) <= N:
+            term = coeff
+            for v,e in zip(vars, monom):
+                term *= v**e
+            out += term
+    return sp.expand(out)
 
-negAddY = (
-    -3*Px**2*Qx*Qy + 3*Px*Qx**2*Py - Py**2*Qy*Qz + Py*Qy**2*Pz
-    + a1*Px*Qy**2*Pz - a1*Qx*Py**2*Qz - a2*Px**2*Qy*Qz
-    + a2*Qx**2*Py*Pz + 2*a2*Px*Qx*Py*Qz
-    - 2*a2*Px*Qx*Qy*Pz - a3*Py**2*Qz**2 + a3*Qy**2*Pz**2
-    + a4*Px*Py*Qz**2 - 2*a4*Px*Qy*Pz*Qz
-    + 2*a4*Qx*Py*Pz*Qz - a4*Qx*Qy*Pz**2
-    + 3*a6*Py*Pz*Qz**2 - 3*a6*Qy*Pz**2*Qz
-)
+def series_w(N, coeffs):
+    A1,A2,A3,A4,A6 = coeffs
+    cs = {n: sp.Symbol(f'c{n}') for n in range(3,N+1)}
+    w = sum(cs[n]*t**n for n in range(3,N+1))
+    rhs = t**3 + A1*t*w + A2*t**2*w + A3*w**2 + A4*t*w**2 + A6*w**3
+    eq = sp.expand(w-rhs)
+    subd = {}
+    for n in range(3,N+1):
+        coeff_n = sp.expand(eq.subs(subd)).coeff(t,n)
+        subd[cs[n]] = sp.solve(sp.Eq(coeff_n,0), cs[n])[0]
+    return truncate_univar(w.subs(subd), t, N)
 
-addY = -negAddY - a1*addX - a3*addZ
+def addX(Px,Py,Pz,Qx,Qy,Qz, coeffs):
+    A1,A2,A3,A4,A6 = coeffs
+    return sp.expand(
+      -Px*Qy**2*Pz + Qx*Py**2*Qz - 2*Px*Py*Qy*Qz + 2*Qx*Py*Qy*Pz
+      - A1*Px**2*Qy*Qz + A1*Qx**2*Py*Pz + A2*Px**2*Qx*Qz
+      - A2*Px*Qx**2*Pz - A3*Px*Py*Qz**2 + A3*Qx*Qy*Pz**2
+      - 2*A3*Px*Qy*Pz*Qz + 2*A3*Qx*Py*Pz*Qz
+      + A4*Px**2*Qz**2 - A4*Qx**2*Pz**2 + 3*A6*Px*Pz*Qz**2
+      - 3*A6*Qx*Pz**2*Qz)
 
-for name, expr in [('addX', addX), ('addY', addY)]:
-    rem3 = sp.rem(sp.Poly(sp.expand(expr), t1), sp.Poly(D**3, t1)).as_expr()
-    diag = sp.factor(sp.expand(expr).subs(t1, t2))
-    print(name, 'divisible_by_D3:', sp.expand(rem3) == 0)
-    print(name, 'diag:', diag)
-    print(name, 'rem3 factor:', sp.factor(rem3))
-    print()
+# Short case
+w_short = series_w(12, (0,0,0,A,B))
+addX_short = addX(t1,-1,w_short.subs(t,t1), t2,-1,w_short.subs(t,t2), (0,0,0,A,B))
+addX_short_tr = truncate_total(addX_short, (t1,t2), 12)
+q_short, r_short = sp.div(sp.Poly(addX_short_tr, t1, domain='EX'), sp.Poly(D**3, t1, domain='EX'))
+print('w_short =', w_short)
+print('short remainder =', sp.expand(r_short.as_expr()))
+print('Q_short =', sp.factor(q_short.as_expr()))
 
-simple = {a1:0, a2:0, a3:0, a4:0, a6:0, s1:1, s2:1}
-print('simple addX =', sp.factor(addX.subs(simple)))
-print('simple addY =', sp.factor(addY.subs(simple)))
+# General case
+w_gen = series_w(8, (a1,a2,a3,a4,a6))
+addX_gen = addX(t1,-1,w_gen.subs(t,t1), t2,-1,w_gen.subs(t,t2), (a1,a2,a3,a4,a6))
+addX_gen_tr = truncate_total(addX_gen, (t1,t2), 8)
+q_gen, r_gen = sp.div(sp.Poly(addX_gen_tr, t1, domain='EX'), sp.Poly(D**3, t1, domain='EX'))
+print('w_gen =', w_gen)
+print('general remainder =', sp.expand(r_gen.as_expr()))
+print('Q_general_to_degree5 =', truncate_total(q_gen.as_expr(), (t1,t2), 5))
 ```
-
-Output:
-
-```text
-addX divisible_by_D3: False
-addX diag: -t2*(s1 - s2)*(a1*t2 + a2*t2**2 + a3*s1 + a3*s2 + a4*s1*t2 + a4*s2*t2 + 3*a6*s1*s2 - 1)
-
-addY divisible_by_D3: False
-addY diag: (s1 - s2)*(a1**2*t2**2 + a1*a2*t2**3 + a1*a4*s1*t2**2 + a1*a4*s2*t2**2 + 3*a1*a6*s1*s2*t2 - 2*a1*t2 - a2*a3*s1*t2**2 - a2*a3*s2*t2**2 - a2*t2**2 - a3**2*s1*s2 - a3*a4*s1*s2*t2 - 3*a3*t2**3 - a4*s1*t2 - a4*s2*t2 - 3*a6*s1*s2 + 1)
-
-simple addX = -3*(t1 - t2)
-simple addY = -3*t1*t2*(t1 - t2)
-```
-
-The diagonal values also show the issue clearly: without a relation forcing `s₁ = s₂` when `t₁ = t₂`, even first-order vanishing can fail.
 
 ---
 
-## Why the mistaken pure statement looked plausible
+## Lean implication
 
-The identity
-
-```lean
-Projective.addXYZ_self : W.addXYZ P P = ![0,0,0]
-```
-
-only says that the formula vanishes after substituting the **same full vector** for both inputs.  It does not imply a cube factor in the polynomial ring with independent `Z` variables.
-
-Likewise, setting `Y₀ = Y₁ = -1` is not enough.  One still needs the fact that the `Z` coordinates are the same one-variable formal series evaluated at different variables:
-
-```text
-Z₀ = w(t₁),   Z₁ = w(t₂).
-```
-
-Then
-
-```text
-Z₀ - Z₁
-```
-
-is divisible by `t₁ - t₂`, and so is
-
-```text
-t₁*Z₁ - t₂*Z₀.
-```
-
-Those extra diagonal-difference factors are exactly what the independent-variable pure polynomial test is missing.
-
-As a sanity check, in the degenerate coefficient specialization `a₁=...=a₆=0` with the curve-compatible choice `w(t)=t^3`, SymPy gives
-
-```text
-addX([t₁,-1,t₁^3], [t₂,-1,t₂^3]) = -(t₁-t₂)^3*(t₁+t₂)
-addY([t₁,-1,t₁^3], [t₂,-1,t₂^3]) =  (t₁-t₂)^3
-addZ([t₁,-1,t₁^3], [t₂,-1,t₂^3]) = -(t₁-t₂)^3*(t₁+t₂)^3
-```
-
-So the cube divisibility can be true after the `Z=w(X)` specialization, but it is not a pure identity in `t₁,t₂,s₁,s₂`.
-
----
-
-## Lean recommendation
-
-Do **not** try to prove the following pure-polynomial theorem:
+The right Lean theorem is not the independent-`Z` pure polynomial statement from Q498.  The right certificate is the specialized one:
 
 ```lean
-theorem addX_cube_dvd_pure
-    (W : WeierstrassCurve.Projective R) :
-    ((t₁ - t₂)^3) ∣
-      W.addX ![t₁, -1, s₁] ![t₂, -1, s₂] := by
-  -- false
+formalAddX W = (X₀ - X₁)^3 * formalAddXQuot W
 ```
 
-and similarly do not try it for `addY`.
-
-The correct theorem must include either:
-
-1. direct substitution of the formal parameter series
-   ```lean
-   Z₀ = formalW₀,  Z₁ = formalW₁,
-   ```
-   followed by an explicit factor certificate; or
-2. a quotient/certificate modulo the two curve equations plus diagonal-difference lemmas.
-
-A robust target is:
+where `formalAddX` has already substituted
 
 ```lean
-noncomputable def formalAddXQuot (W : WeierstrassCurve.Projective K) : MvPowerSeries (Fin 2) K :=
-  -- explicit quotient after substituting `Zᵢ = formalW(tᵢ)`
-  sorry
-
-noncomputable def formalAddYQuot (W : WeierstrassCurve.Projective K) : MvPowerSeries (Fin 2) K :=
-  -- explicit quotient after substituting `Zᵢ = formalW(tᵢ)`
-  sorry
-
-theorem formalAddX_eq_D_cube_mul (W : WeierstrassCurve.Projective K) :
-    formalAddX W = D^3 * formalAddXQuot W := by
-  -- unfold `formalAddX`; rewrite `formalW₀ - formalW₁ = D * E`; ring/certificate
-  sorry
-
-theorem formalAddY_eq_D_cube_mul (W : WeierstrassCurve.Projective K) :
-    formalAddY W = D^3 * formalAddYQuot W := by
-  -- same: direct certificate after `Z=w(X)` specialization
-  sorry
+P i = ![X i, -1, formalW_i]
 ```
 
-The key helper is still the diagonal quotient lemma:
+and `formalW_i` is the one-variable formal solution evaluated at coordinate `i`.
 
-```lean
-formalW₀ - formalW₁ = (X₀ - X₁) * formalW_diagQuot
-```
-
-and similarly for
-
-```lean
-X₀ * formalW₁ - X₁ * formalW₀.
-```
-
-But the final cube divisibility must be proved **after** these substitutions.  The pure independent-`Z` statement is refuted by the counterexample above.
+For the general Weierstrass case, the quotient begins exactly as `Q_general,≤5` above.  That quotient data is a useful target for debugging a Lean `ring`/certificate proof: if the implementation's first quotient terms disagree with the displayed terms, the mismatch is in the formal `w(t)` normalization or in the sign convention for `P(t)=[t,-1,w(t)]`.
