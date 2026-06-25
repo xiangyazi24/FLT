@@ -36,3 +36,14 @@
   - Normalization identity: 2·ψ_n·ω_n = ψ_{2n} - ψ_n²·(a₁φ+a₃ψ²)
 
 
+## 2026-06-25 — addX general-m PROVED + ATOM 5 proved
+
+- `fcc5aa4` **addX general-m 0-sorry**: mk_addX_divPoly_general proved for ALL m via
+  coordinate-ring Ward invariant + ω-elimination + ring. Added hcast hypothesis for
+  mk(ψ_m)≠0 via natDegree bound. 2986 jobs green, standard-3 axioms.
+- `42d6b83` ωfree_dvd closed (m=0 case + domain cancellation)
+- `7e8d498` ωfree_dvd main identity via coordinate ring
+- `32804ef` **ATOM 5 proved**: omega_ne_zero_of_phi_ne_zero_at_Z_zero (equation at Z=0: ω²=φ³)
+- `b1244ab` addX m=2 X-component closed (per-m cofactor)
+- `b38efac` addX general scaffold (ω-elimination for all m)
+
