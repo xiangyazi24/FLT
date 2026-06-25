@@ -132,3 +132,10 @@ Missing: W.formalGroup : FormalGroup K for the Weierstrass curve.
 - Jacobian dblXYZ/addXYZ DEGENERATE at Z=0 (confirmed): w(t) construction necessary
 - dm1 atom decomposition + dm4 CAS dblXYZ: still processing
 - Design approach: w(t) → [t:-1:w(t)] → projective addition → F = -X/Y
+
+## W.formalGroup Design R2 findings
+- u(t) = 1 + a₁t + (a₁²+a₂)t² + ... (CAS verified, u(0)=1, unit power series)
+- Correct equation: u = 1 + a₁tu + a₂t²u + a₃t³u² + a₄t⁴u² + a₆t⁶u³
+- addXYZ(P(t₁),P(t₂)) at Z~t degenerates: addZ factors as u₁u₂(t₂-t₁)(t₂+t₁+O(t²))
+- The (t₂-t₁) factor cancels when computing F = -XZ/Y (the t₁+t₂ survives)
+- PowerSeries.subst API available for substitution
