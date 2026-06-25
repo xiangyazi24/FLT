@@ -53,3 +53,32 @@ After addX general-m closes → addY (similar) → ATOM 5 (ω≠0) → ATOM 6 (l
 - Branch: ai-scratch, latest: 4a264fc
 - Torsion.lean: 3 actual sorries, 8601 jobs green
 - scratch.SeamE1: 1 sorry (bridge-2), 3012 jobs green
+## Update 2026-06-25 (continued session)
+
+### New findings
+- ATOM 5 (ω≠0): PROVED (32804ef, 0-sorry)
+- addX general-m: ω-elimination proved, ωfree_dvd 1 sorry (sub-agent grinding)
+- c₅=0 breakthrough: addX with Ψ₂Sq-Hmiss is an EXACT polynomial identity (no AdjoinRoot needed)
+- addY structural obstruction: ω_m² term needs 1/ψ_m → MUST use coordinate ring (polynomial LC impossible)
+- Discriminant route: NOT viable for general n (same formal-group content, normalization traps)
+- Finite morphism injectivity: NOT a shortcut (finite+nonconstant ≠ unramified)
+- Torsion counting: circular
+- Function-field: needs same projective formula
+
+### The irreducible gap: tangent bridge
+After exhaustive exploration (40+ ChatGPT rounds, 5 alternative routes ruled out):
+The tangent bridge = connecting projective local-parameter coefficient to abstract d[n]|_O = n.
+This is the CORE CONTENT of the Weierstrass formal group and cannot be bypassed.
+
+### Two legs remaining for bridge-2
+1. Projective formula addX/addY (leg 1): ωfree_dvd sub-agent grinding
+2. Tangent bridge (leg 2): needs W.formalGroup or equivalent first-order construction
+
+### Verified state on uisai2
+- Torsion.lean: 3 actual sorries (all not-ours), 8601 jobs green
+- scratch.SeamE1: 1 sorry (bridge-2), 3012 jobs green  
+- scratch.Bridge1Even: 0 sorry
+- scratch.OmegaDivPoly: 0 sorry
+- scratch.ProjectiveFormula: 0 sorry (Z-components)
+- scratch.Atom5OmegaNonzero: 0 sorry
+- scratch.AddXGeneral: 1 sorry (ωfree_dvd, sub-agent in flight)
