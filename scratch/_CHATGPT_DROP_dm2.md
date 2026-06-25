@@ -1,249 +1,259 @@
-# Q512 (dm2): CAS factorization of `formalAddX = (t₁-t₂)^3 Q`
+# Q522 (dm2): Mathlib API for `Projective.addX` in chord variables `U,V`
 
-## Executive result
+## Executive answer
 
-With the formal parameter specialization
+Yes: Mathlib has the useful chord-variable formula for `Projective.addX`, but it is **not** a definitional/pure polynomial factorization of `addX`.  It is the cleared-denominator, curve-equation-dependent lemma
 
-```text
-P(t) = [t, -1, w(t)]
+```lean
+Projective.addX_eq'
 ```
 
-the Mathlib projective `addX` formula **does** have the expected cube factor:
+with hypotheses
 
-```text
-Projective.addX(P(t₁), P(t₂)) = (t₁ - t₂)^3 Q(t₁,t₂).
+```lean
+hP : W'.Equation P
+hQ : W'.Equation Q
 ```
 
-This is false for independent `Z`-variables, as in Q498, but becomes true after substituting `Zᵢ = w(tᵢ)`.
+It rewrites
 
-All truncations below are by **total degree** in `(t₁,t₂)` after substitution.
+```text
+addX(P,Q) * (Pz*Qz)^2
+```
+
+as a homogeneous cubic expression in the two chord variables
+
+```text
+U := Px*Qz - Qx*Pz,
+V := Py*Qz - Qy*Pz.
+```
+
+Mathlib also has
+
+```lean
+Projective.addZ_eq'
+```
+
+which gives
+
+```text
+addZ(P,Q) * (Pz*Qz) = U^3.
+```
+
+There is no general `addY_eq'` with a full `U,V` expression for `addY` itself, but there is a factored lemma for `negAddY`:
+
+```lean
+Projective.negAddY_eq'
+```
+
+and since
+
+```lean
+addY P Q = negY ![addX P Q, negAddY P Q, addZ P Q]
+```
+
+one can derive the corresponding cleared-denominator cubic formula for `addY` by combining `negAddY_eq'`, `addX_eq'`, and `addZ_eq'`.
 
 ---
 
-## 1. Short Weierstrass case
+## What grep found
 
-For
-
-```text
-y² = x³ + A x + B
-```
-
-the projective equation with `P(t)=[t,-1,w(t)]` gives
+A search in the accessible `xiangyazi24/FLT` source itself did not return direct hits for `addX_eq'`/`addZ_eq'`, which suggests the file is coming from the Mathlib dependency rather than being vendored in the FLT repo.  In Mathlib's source file
 
 ```text
-w = t³ + A t w² + B w³.
+Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Formula.lean
 ```
 
-Solving recursively through degree `12` gives
-
-```text
-w(t) = t³ + A t⁷ + B t⁹ + 2 A² t¹¹ + O(t¹³).
-```
-
-There is no `t¹²` term.
-
-After substituting
-
-```text
-P₁ = [t₁, -1, w(t₁)],
-P₂ = [t₂, -1, w(t₂)]
-```
-
-into Mathlib's `Projective.addX`, the truncation through total degree `12` factors as
-
-```text
-[addX(P₁,P₂)]_{≤12}
-  = -(t₁-t₂)³ (t₁+t₂)
-      * ( 1
-          + A (t₁⁴ + t₁²t₂² + t₂⁴)
-          + B (t₁⁶ - 2t₁³t₂³ + t₂⁶)
-          + 2A² (t₁⁸ + t₁⁶t₂² + t₁⁴t₂⁴ + t₁²t₂⁶ + t₂⁸) ).
-```
-
-Equivalently, the quotient through total degree `9` is
-
-```text
-Q_short(t₁,t₂) = [addX/(t₁-t₂)³]_{≤9}
-  = -(t₁+t₂)
-      * ( 1
-          + A (t₁⁴ + t₁²t₂² + t₂⁴)
-          + B (t₁⁶ - 2t₁³t₂³ + t₂⁶)
-          + 2A² (t₁⁸ + t₁⁶t₂² + t₁⁴t₂⁴ + t₁²t₂⁶ + t₂⁸) ).
-```
-
-Expanded lowest-degree terms:
-
-```text
-Q_short
-  = -(t₁+t₂)
-    - A(t₁⁵ + t₁⁴t₂ + t₁³t₂² + t₁²t₂³ + t₁t₂⁴ + t₂⁵)
-    - B(t₁⁷ + t₁⁶t₂ - 2t₁⁴t₂³ - 2t₁³t₂⁴ + t₁t₂⁶ + t₂⁷)
-    - 2A²(t₁⁹ + t₁⁸t₂ + t₁⁷t₂² + t₁⁶t₂³ + t₁⁵t₂⁴
-           + t₁⁴t₂⁵ + t₁³t₂⁶ + t₁²t₂⁷ + t₁t₂⁸ + t₂⁹)
-    + O_tot(10).
-```
-
-The CAS division by `(t₁-t₂)^3` has remainder `0` through this truncation.
+the relevant API is present.
 
 ---
 
-## 2. General Weierstrass case
-
-For the general projective Weierstrass equation
-
-```text
-Y²Z + a₁XYZ + a₃YZ² = X³ + a₂X²Z + a₄XZ² + a₆Z³
-```
-
-with `P(t)=[t,-1,w(t)]`, the formal equation is
-
-```text
-w = t³ + a₁ t w + a₂ t² w + a₃ w² + a₄ t w² + a₆ w³.
-```
-
-Solving recursively through degree `8` gives
-
-```text
-w(t)
-  = t³
-    + a₁ t⁴
-    + (a₁² + a₂) t⁵
-    + (a₁³ + 2a₁a₂ + a₃) t⁶
-    + (a₁⁴ + 3a₁²a₂ + a₂² + 3a₁a₃ + a₄) t⁷
-    + (a₁⁵ + 4a₁³a₂ + 3a₁a₂² + 6a₁²a₃ + 3a₂a₃ + 3a₁a₄) t⁸
-    + O(t⁹).
-```
+## Exact formulas
 
 Let
 
 ```text
-D  := t₁ - t₂,
-Hₙ := Σ_{i=0}^n t₁^{n-i} t₂^i.
+U := P x * Q z - Q x * P z
+V := P y * Q z - Q y * P z
+ZPQ := P z * Q z.
 ```
 
-Then the truncation of `Projective.addX(P(t₁),P(t₂))` through total degree `8` satisfies
+### `addZ_eq'`
+
+Mathlib has:
+
+```lean
+lemma addZ_eq' {P Q : Fin 3 → R} (hP : W'.Equation P) (hQ : W'.Equation Q) :
+    W'.addZ P Q * (P z * Q z) = (P x * Q z - Q x * P z) ^ 3 := by
+  linear_combination (norm := (rw [addZ]; ring1))
+    Q z ^ 3 * (equation_iff _).mp hP - P z ^ 3 * (equation_iff _).mp hQ
+```
+
+So, modulo the two curve equations,
 
 ```text
-[addX(P(t₁),P(t₂))]_{≤8} = D³ * Q_general,≤5.
+addZ * ZPQ = U^3.
 ```
 
-The quotient through total degree `5` is
+In the field/nonzero-`Z` version, Mathlib also has
+
+```lean
+lemma addZ_eq ... :
+    W.addZ P Q = (P x * Q z - Q x * P z) ^ 3 / (P z * Q z)
+```
+
+### `addX_eq'`
+
+Mathlib has:
+
+```lean
+lemma addX_eq' {P Q : Fin 3 → R} (hP : W'.Equation P) (hQ : W'.Equation Q) :
+    W'.addX P Q * (P z * Q z) ^ 2 =
+      ((P y * Q z - Q y * P z) ^ 2 * P z * Q z
+        + W'.a₁ * (P y * Q z - Q y * P z) * P z * Q z * (P x * Q z - Q x * P z)
+        - W'.a₂ * P z * Q z * (P x * Q z - Q x * P z) ^ 2
+        - P x * Q z * (P x * Q z - Q x * P z) ^ 2
+        - Q x * P z * (P x * Q z - Q x * P z) ^ 2)
+        * (P x * Q z - Q x * P z) := by
+  linear_combination (norm := (rw [addX]; ring1))
+    (2 * Q x * P z * Q z ^ 3 - P x * Q z ^ 4) * (equation_iff _).mp hP
+      + (Q x * P z ^ 4 - 2 * P x * P z ^ 3 * Q z) * (equation_iff _).mp hQ
+```
+
+In `U,V` notation:
 
 ```text
-Q_general,≤5
-  = -H₁
-    - a₁ H₂
-    - (a₁² + a₂) H₃
-    - (a₁³ + 2a₁a₂) H₄
-    - a₃ (t₁⁴ + 2t₁³t₂ + 3t₁²t₂² + 2t₁t₂³ + t₂⁴)
-    - (a₁⁴ + 3a₁²a₂ + a₂² + a₄) H₅
-    - a₁a₃ (3t₁⁵ + 5t₁⁴t₂ + 7t₁³t₂² + 7t₁²t₂³ + 5t₁t₂⁴ + 3t₂⁵)
-    + O_tot(6).
+addX * ZPQ^2
+  = ( V^2 * ZPQ
+      + a₁ * V * ZPQ * U
+      - a₂ * ZPQ * U^2
+      - Px*Qz * U^2
+      - Qx*Pz * U^2 ) * U.
 ```
 
-Expanded by total degree:
+This is homogeneous of degree `3` in `(U,V)`.
+
+### `negAddY_eq'`
+
+Mathlib has the analogous formula for the negative `Y` coordinate:
+
+```lean
+lemma negAddY_eq' {P Q : Fin 3 → R} (hP : W'.Equation P) (hQ : W'.Equation Q) :
+    W'.negAddY P Q * (P z * Q z) ^ 2 =
+      (P y * Q z - Q y * P z) * ((P y * Q z - Q y * P z) ^ 2 * P z * Q z
+        + W'.a₁ * (P y * Q z - Q y * P z) * P z * Q z * (P x * Q z - Q x * P z)
+        - W'.a₂ * P z * Q z * (P x * Q z - Q x * P z) ^ 2
+        - P x * Q z * (P x * Q z - Q x * P z) ^ 2
+        - Q x * P z * (P x * Q z - Q x * P z) ^ 2
+        - P x * Q z * (P x * Q z - Q x * P z) ^ 2)
+        + P y * Q z * (P x * Q z - Q x * P z) ^ 3 := by
+  linear_combination (norm := (rw [negAddY]; ring1))
+    (2 * Q y * P z * Q z ^ 3 - P y * Q z ^ 4) * (equation_iff _).mp hP
+      + (Q y * P z ^ 4 - 2 * P y * P z ^ 3 * Q z) * (equation_iff _).mp hQ
+```
+
+In `U,V` notation:
 
 ```text
-Q_general,≤5
-  = -(t₁+t₂)
-    - a₁(t₁²+t₁t₂+t₂²)
-    - (a₁²+a₂)(t₁³+t₁²t₂+t₁t₂²+t₂³)
-
-    - (a₁³+2a₁a₂+a₃)(t₁⁴+t₂⁴)
-    - (a₁³+2a₁a₂+2a₃)(t₁³t₂+t₁t₂³)
-    - (a₁³+2a₁a₂+3a₃)t₁²t₂²
-
-    - (a₁⁴+3a₁²a₂+3a₁a₃+a₂²+a₄)(t₁⁵+t₂⁵)
-    - (a₁⁴+3a₁²a₂+5a₁a₃+a₂²+a₄)(t₁⁴t₂+t₁t₂⁴)
-    - (a₁⁴+3a₁²a₂+7a₁a₃+a₂²+a₄)(t₁³t₂²+t₁²t₂³)
-    + O_tot(6).
+negAddY * ZPQ^2
+  = V * ( V^2*ZPQ
+          + a₁*V*ZPQ*U
+          - a₂*ZPQ*U^2
+          - Px*Qz*U^2
+          - Qx*Pz*U^2
+          - Px*Qz*U^2 )
+    + Py*Qz*U^3.
 ```
 
-Again, the CAS division by `(t₁-t₂)^3` has remainder `0` through this truncation.
+This is again homogeneous of degree `3` in `(U,V)`.
+
+### `addY`
+
+Mathlib defines
+
+```lean
+def addY (P Q : Fin 3 → R) : R :=
+  W'.negY ![W'.addX P Q, W'.negAddY P Q, W'.addZ P Q]
+```
+
+and
+
+```lean
+def negY (P : Fin 3 → R) : R :=
+  -P y - W'.a₁ * P x - W'.a₃ * P z
+```
+
+Therefore
+
+```text
+addY = -negAddY - a₁*addX - a₃*addZ.
+```
+
+Multiplying by `ZPQ^2` and using the three preceding factored lemmas gives a derived formula
+
+```text
+addY * ZPQ^2
+  = -(negAddY * ZPQ^2)
+    - a₁*(addX * ZPQ^2)
+    - a₃*(addZ * ZPQ)*ZPQ.
+```
+
+Every term on the right is homogeneous of degree `3` in `(U,V)`.  So `addY` also has a cleared-denominator cubic-in-`U,V` expression, but Mathlib does not appear to expose this as a named general `addY_eq'` lemma.  The named `addY_of_X_eq'` is only the special `U=0` case.
 
 ---
 
-## Reproduction script
+## Degrees in `(U,V)`
 
-```python
-import sympy as sp
+The practical degree table is:
 
-t,t1,t2 = sp.symbols('t t1 t2')
-a1,a2,a3,a4,a6,A,B = sp.symbols('a1 a2 a3 a4 a6 A B')
-D = t1 - t2
+| coordinate | Mathlib API | cleared expression | degree in `(U,V)` |
+|---|---|---:|---:|
+| `addZ` | `addZ_eq'` | `addZ * ZPQ = U^3` | `3` |
+| `addX` | `addX_eq'` | `addX * ZPQ^2 = cubic(U,V)` | `3` |
+| `negAddY` | `negAddY_eq'` | `negAddY * ZPQ^2 = cubic(U,V)` | `3` |
+| `addY` | derived from `addY`, `negY`, `addX_eq'`, `negAddY_eq'`, `addZ_eq'` | `addY * ZPQ^2 = cubic(U,V)` | `3` |
 
-def truncate_univar(expr, var, N):
-    expr = sp.expand(expr)
-    return sp.expand(sum(expr.coeff(var,n)*var**n for n in range(N+1)))
-
-def truncate_total(expr, vars, N):
-    poly = sp.Poly(sp.expand(expr), *vars, domain='EX')
-    out = 0
-    for monom, coeff in poly.terms():
-        if sum(monom) <= N:
-            term = coeff
-            for v,e in zip(vars, monom):
-                term *= v**e
-            out += term
-    return sp.expand(out)
-
-def series_w(N, coeffs):
-    A1,A2,A3,A4,A6 = coeffs
-    cs = {n: sp.Symbol(f'c{n}') for n in range(3,N+1)}
-    w = sum(cs[n]*t**n for n in range(3,N+1))
-    rhs = t**3 + A1*t*w + A2*t**2*w + A3*w**2 + A4*t*w**2 + A6*w**3
-    eq = sp.expand(w-rhs)
-    subd = {}
-    for n in range(3,N+1):
-        coeff_n = sp.expand(eq.subs(subd)).coeff(t,n)
-        subd[cs[n]] = sp.solve(sp.Eq(coeff_n,0), cs[n])[0]
-    return truncate_univar(w.subs(subd), t, N)
-
-def addX(Px,Py,Pz,Qx,Qy,Qz, coeffs):
-    A1,A2,A3,A4,A6 = coeffs
-    return sp.expand(
-      -Px*Qy**2*Pz + Qx*Py**2*Qz - 2*Px*Py*Qy*Qz + 2*Qx*Py*Qy*Pz
-      - A1*Px**2*Qy*Qz + A1*Qx**2*Py*Pz + A2*Px**2*Qx*Qz
-      - A2*Px*Qx**2*Pz - A3*Px*Py*Qz**2 + A3*Qx*Qy*Pz**2
-      - 2*A3*Px*Qy*Pz*Qz + 2*A3*Qx*Py*Pz*Qz
-      + A4*Px**2*Qz**2 - A4*Qx**2*Pz**2 + 3*A6*Px*Pz*Qz**2
-      - 3*A6*Qx*Pz**2*Qz)
-
-# Short case
-w_short = series_w(12, (0,0,0,A,B))
-addX_short = addX(t1,-1,w_short.subs(t,t1), t2,-1,w_short.subs(t,t2), (0,0,0,A,B))
-addX_short_tr = truncate_total(addX_short, (t1,t2), 12)
-q_short, r_short = sp.div(sp.Poly(addX_short_tr, t1, domain='EX'), sp.Poly(D**3, t1, domain='EX'))
-print('w_short =', w_short)
-print('short remainder =', sp.expand(r_short.as_expr()))
-print('Q_short =', sp.factor(q_short.as_expr()))
-
-# General case
-w_gen = series_w(8, (a1,a2,a3,a4,a6))
-addX_gen = addX(t1,-1,w_gen.subs(t,t1), t2,-1,w_gen.subs(t,t2), (a1,a2,a3,a4,a6))
-addX_gen_tr = truncate_total(addX_gen, (t1,t2), 8)
-q_gen, r_gen = sp.div(sp.Poly(addX_gen_tr, t1, domain='EX'), sp.Poly(D**3, t1, domain='EX'))
-print('w_gen =', w_gen)
-print('general remainder =', sp.expand(r_gen.as_expr()))
-print('Q_general_to_degree5 =', truncate_total(q_gen.as_expr(), (t1,t2), 5))
-```
+So, morally, the addition coordinates vanish to order `3` in the chord variables.
 
 ---
 
-## Lean implication
+## Important Lean caveat
 
-The right Lean theorem is not the independent-`Z` pure polynomial statement from Q498.  The right certificate is the specialized one:
+These lemmas prove cubic divisibility only for the **cleared** expressions:
 
-```lean
-formalAddX W = (X₀ - X₁)^3 * formalAddXQuot W
+```text
+addZ * (Pz*Qz),
+addX * (Pz*Qz)^2,
+negAddY * (Pz*Qz)^2,
+addY * (Pz*Qz)^2.
 ```
 
-where `formalAddX` has already substituted
+They do **not** automatically prove
 
-```lean
-P i = ![X i, -1, formalW_i]
+```text
+D^3 ∣ addX
+D^3 ∣ addY
+D^3 ∣ addZ
 ```
 
-and `formalW_i` is the one-variable formal solution evaluated at coordinate `i`.
+inside `MvPowerSeries`, because in the formal-parameter application
 
-For the general Weierstrass case, the quotient begins exactly as `Q_general,≤5` above.  That quotient data is a useful target for debugging a Lean `ring`/certificate proof: if the implementation's first quotient terms disagree with the displayed terms, the mismatch is in the formal `w(t)` normalization or in the sign convention for `P(t)=[t,-1,w(t)]`.
+```text
+Pz = w(t₁),   Qz = w(t₂),
+```
+
+and `w(t)` begins with `t^3`, so `Pz*Qz` is **not a unit**.  Thus one cannot simply cancel the `ZPQ` factors in `MvPowerSeries`.
+
+For the formal group target, the best use of these lemmas is:
+
+1. define
+   ```text
+   U = X₀*w₁ - X₁*w₀,
+   V = -w₁ + w₀ = w₀ - w₁
+   ```
+   for `P(t)=[t,-1,w(t)]`;
+2. prove `D ∣ U` and `D ∣ V`, where `D = X₀-X₁`;
+3. use `addX_eq'`, `negAddY_eq'`, `addZ_eq'` to show the cleared numerators have a `D^3` factor;
+4. separately prove the raw `formalAddX = D^3 * Q` / `formalAddY = D^3 * Q` certificates, or work in a localized/Laurent setting where the `w₀w₁` factor is invertible.
+
+This explains the Q512 CAS result: the raw `formalAddX` cube factor is true after substitution, but the Mathlib factored lemmas alone give the cube factor for the cleared equations.  They are excellent for reducing the expansion size and for checking the order, but they do not by themselves solve the nonunit-cancellation problem in `MvPowerSeries`.
