@@ -475,6 +475,75 @@ private noncomputable def deltaQuotQuot (W : WeierstrassCurve R) :
     (MvPowerSeries.X 0 + MvPowerSeries.X 1) *
       PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) W.formalU)
 
+section XSubXRegular
+open Finsupp
+
+/-- `(X₀ - X₁)` is regular (a non-zero-divisor) in `MvPowerSeries (Fin 2) R` for any `CommRing R`.
+This follows from a coefficient-level induction: `(X₀-X₁)·g = 0` forces
+`g(a, b+1) = g(a+1, b)`, which shifts everything to `g(n, 0) = 0`. -/
+private theorem X_sub_X_regular (g : MvPowerSeries (Fin 2) R)
+    (h : (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) * g = 0) :
+    g = 0 := by
+  -- Extract: if 1 ≤ e₀ then g(e-δ₀) = (if 1 ≤ e₁ then g(e-δ₁) else 0)
+  have hcoeff : ∀ e : Fin 2 →₀ ℕ,
+      (if 1 ≤ e 0 then MvPowerSeries.coeff (e - Finsupp.single 0 1) g else 0) =
+      (if 1 ≤ e 1 then MvPowerSeries.coeff (e - Finsupp.single 1 1) g else 0) := by
+    intro e
+    have he := MvPowerSeries.ext_iff.mp h e
+    simp only [map_zero, map_sub, MvPowerSeries.X_def, sub_mul,
+      MvPowerSeries.coeff_monomial_mul, one_mul] at he
+    rw [sub_eq_zero] at he
+    -- he has conditions Finsupp.single i 1 ≤ e; convert to 1 ≤ e i
+    have h0 : (∀ e : Fin 2 →₀ ℕ, Finsupp.single (0 : Fin 2) 1 ≤ e ↔ 1 ≤ e 0) :=
+      fun e => ⟨fun h => by simpa using h 0,
+        fun h i => by
+          by_cases hi : i = (0 : Fin 2)
+          · subst hi; simpa using h
+          · simp [Finsupp.single_apply, hi]⟩
+    have h1 : (∀ e : Fin 2 →₀ ℕ, Finsupp.single (1 : Fin 2) 1 ≤ e ↔ 1 ≤ e 1) :=
+      fun e => ⟨fun h => by simpa using h 1,
+        fun h i => by fin_cases i <;> simp_all [Finsupp.single_apply] <;> omega⟩
+    simp only [h0, h1] at he
+    exact he
+  -- g(n, 0) = 0 for all n
+  have hbase : ∀ a, MvPowerSeries.coeff (Finsupp.equivFunOnFinite.symm ![a, 0]) g = 0 := by
+    intro a
+    have := hcoeff (Finsupp.equivFunOnFinite.symm ![a + 1, 0])
+    simp only [Finsupp.equivFunOnFinite_symm_apply_apply, Matrix.cons_val_zero,
+      Matrix.cons_val_one] at this
+    rw [if_pos (show 1 ≤ a + 1 from by omega),
+      if_neg (show ¬(1 ≤ (0 : ℕ)) from by omega)] at this
+    rw [show Finsupp.equivFunOnFinite.symm (![a + 1, 0]) - Finsupp.single (0 : Fin 2) 1 =
+        Finsupp.equivFunOnFinite.symm ![a, 0] from by
+      ext i; fin_cases i <;> simp [Finsupp.tsub_apply]] at this
+    exact this
+  -- g(a, b+1) = g(a+1, b)
+  have hshift : ∀ a b, MvPowerSeries.coeff (Finsupp.equivFunOnFinite.symm ![a, b + 1]) g =
+      MvPowerSeries.coeff (Finsupp.equivFunOnFinite.symm ![a + 1, b]) g := by
+    intro a b
+    have := hcoeff (Finsupp.equivFunOnFinite.symm ![a + 1, b + 1])
+    simp only [Finsupp.equivFunOnFinite_symm_apply_apply, Matrix.cons_val_zero,
+      Matrix.cons_val_one] at this
+    rw [if_pos (show 1 ≤ a + 1 from by omega), if_pos (show 1 ≤ b + 1 from by omega),
+      show Finsupp.equivFunOnFinite.symm (![a + 1, b + 1]) - Finsupp.single (0 : Fin 2) 1 =
+        Finsupp.equivFunOnFinite.symm ![a, b + 1] from by
+        ext i; fin_cases i <;> simp [Finsupp.tsub_apply],
+      show Finsupp.equivFunOnFinite.symm (![a + 1, b + 1]) - Finsupp.single (1 : Fin 2) 1 =
+        Finsupp.equivFunOnFinite.symm ![a + 1, b] from by
+        ext i; fin_cases i <;> simp [Finsupp.tsub_apply]] at this
+    exact this
+  -- g(a, b) = g(a+b, 0) = 0
+  have hmain : ∀ a b, MvPowerSeries.coeff (Finsupp.equivFunOnFinite.symm ![a, b]) g = 0 := by
+    intro a b; induction b generalizing a with
+    | zero => exact hbase a
+    | succ n ih => rw [hshift a n]; exact ih (a + 1)
+  ext e; simp only [MvPowerSeries.coeff_zero]
+  rw [show e = Finsupp.equivFunOnFinite.symm ![e 0, e 1] from by
+    ext i; fin_cases i <;> simp]
+  exact hmain (e 0) (e 1)
+
+end XSubXRegular
+
 /-- diagDiffQuot(X³u) = X₀³ · diagDiffQuot(u) + u₁ · (X₀² + X₀X₁ + X₁²).
 This identity holds coefficient-by-coefficient: both sides evaluate to coeff_{e₀+e₁-2}(u)
 at any multi-index (e₀,e₁) with e₀+e₁ ≥ 2, and 0 otherwise. -/
@@ -535,59 +604,12 @@ private theorem diagDiffQuot_formalW (W : WeierstrassCurve R) :
       PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) W.formalU *
         (MvPowerSeries.X 0 ^ 2 + MvPowerSeries.X 0 * MvPowerSeries.X 1 +
          MvPowerSeries.X 1 ^ 2)) by
-    -- From h and hw: (X₀-X₁) * (LHS - RHS) = 0
-    -- Then: LHS - RHS has the property that (X₀-X₁) * it = 0
-    -- For diagDiffQuot: coeff at e is coeff_{e₀+e₁+1}(f), so
-    -- LHS(e) - RHS(e) can be computed coefficient by coefficient
-    -- Actually, we use ext on diagDiffQuot coefficients directly
-    -- diagDiffQuot is defined so that coeff e q = coeff_{e₀+e₁+1} f
-    -- The product (X₀-X₁)*q has coeff at e:
-    --   q(e-s01) - q(e-s11) = coeff_{e₀+e₁}(f) - coeff_{e₀+e₁}(f) = 0 (when both defined)
-    -- This uniquely determines q, so if two elements produce the same product with (X₀-X₁),
-    -- they must be equal.
-    -- More concretely: (X₀-X₁) * (LHS - RHS) = 0, and looking at
-    -- coeff at (e₀, 0): 0 = (LHS-RHS)(e₀-1, 0) for e₀≥1
-    -- coeff at (0, e₁): 0 = -(LHS-RHS)(0, e₁-1) for e₁≥1
-    -- These recursively force (LHS-RHS)(e) = 0 for all e.
-    -- Since diagDiffQuot(f)(e) = coeff_{e₀+e₁+1}(f) by definition,
-    -- LHS = RHS follows from the ext proof below.
-    -- LHS at e: diagDiffQuot(X³u)(e) = coeff_{e₀+e₁+1}(X³u)
-    -- X³u has coeff_n = coeff_{n-3}(u) for n≥3, 0 for n<3
-    -- RHS at e: X₀³·diagDiffQuot(u) + u₁·(X₀²+X₀X₁+X₁²)
-    -- This is a sum where each summand contributes coeff_{e₀+e₁-2}(u) when active.
-    -- Both equal coeff_{e₀+e₁-2}(u) when e₀+e₁≥2, and 0 when e₀+e₁≤1.
-    --
-    -- But proving this by ext is very tedious with Finsupp.
-    -- Instead, use that (X₀-X₁)*diff = 0 where diff = LHS-RHS.
-    -- Since both diff and (X₀-X₁) are defined coefficient-by-coefficient,
-    -- the multiplication constraint forces diff(e) = 0 by induction.
-    -- Specifically: diff at (0,b) is determined by (X₀-X₁)*diff at (1,b) and (0,b+1),
-    -- which are both 0 from h.
-    -- This is the uniqueness of diagDiffQuot: (X₀-X₁)*q = f(X₀)-f(X₁) has a UNIQUE solution q.
-    -- Actually, the cleanest proof: apply ext, then use diagDiffQuot_coeff on both sides.
-    apply MvPowerSeries.ext; intro e
-    -- LHS coeff e = coeff_{e₀+e₁+1}(X³·u) = coeff_{e₀+e₁+1}(X^3 * u)
-    simp only [PowerSeries.diagDiffQuot_coeff]
-    -- LHS = coeff (e 0 + e 1 + 1) (X^3 * formalU W)
-    -- This is coeff_{e₀+e₁-2}(formalU W) when e₀+e₁+1 ≥ 3, i.e., e₀+e₁ ≥ 2
-    -- and 0 when e₀+e₁ ≤ 1
-    simp only [formalW, PowerSeries.coeff_X_pow_mul']
-    -- coeff (e0+e1+1) (X^3 * u) = if 3 ≤ e0+e1+1 then coeff (e0+e1+1-3) u else 0
-    -- = if e0+e1 ≥ 2 then coeff (e0+e1-2) u else 0
-    -- RHS: evaluate the sum X₀³·q_u + u₁·(X₀²+X₀X₁+X₁²) at e
-    -- Simplify the condition
-    have h3 : (3 ≤ e 0 + e 1 + 1) ↔ (2 ≤ e 0 + e 1) := by omega
-    simp only [h3]
-    have hshift : e 0 + e 1 + 1 - 3 = e 0 + e 1 - 2 := by omega
-    rw [hshift]
-    -- RHS: expand coefficients of the sum
-    simp only [map_add, map_mul, MvPowerSeries.X_def, MvPowerSeries.coeff_monomial_mul, one_mul,
-      PowerSeries.diagDiffQuot_coeff, PowerSeries.coeff_subst_single]
-    -- Now need careful Finsupp arithmetic case analysis
-    -- X₀³·q_u at e: if single 0 3 ≤ e then q_u(e-3·e₀) else 0
-    -- u₁·X₀² at e: if single 0 2 ≤ e then u₁(e-2·e₀) else 0
-    -- etc.
-    sorry
+    -- (X₀-X₁) * (LHS - RHS) = 0, so LHS = RHS by regularity of (X₀-X₁).
+    apply sub_eq_zero.mp
+    apply X_sub_X_regular
+    show (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) *
+      ((X ^ 3 * W.formalU).diagDiffQuot - _) = 0
+    rw [mul_sub, h, sub_self]
   -- Prove h: (X₀-X₁)*LHS = (X₀-X₁)*RHS
   -- (X₀-X₁)*LHS = w₀-w₁ (= hw, reversed)
   rw [← hw]
