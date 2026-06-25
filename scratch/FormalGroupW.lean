@@ -214,7 +214,33 @@ theorem formalU_eq (W : WeierstrassCurve R) :
     -- 16 cases. In each, the equation has concrete arithmetic to equate.
     -- Close impossible cases, then align arithmetic in compatible cases.
     -- Close all remaining goals: rfl, contradiction, or arithmetic alignment
-    all_goals first | rfl | (exfalso; omega) | sorry
+    all_goals first | rfl | (exfalso; omega) | skip
+    -- Goal 1: n >= 5
+    · congr 1
+      · congr 1; congr 1
+        · -- a₃ part
+          refine congr_arg (W.a₃ * ·) ?_
+          refine Finset.sum_congr (by congr 1; omega) (fun x hx => by congr 1)
+        · -- a₄ part
+          refine congr_arg (W.a₄ * ·) ?_
+          refine Finset.sum_congr (by congr 1; omega) (fun x hx => by congr 1)
+      · -- a₆ part
+        refine congr_arg (W.a₆ * ·) ?_
+        refine Finset.sum_congr (by congr 1; omega) (fun j hj => ?_)
+        refine congr_arg (W.formalUCoeff j * ·) ?_
+        have hjr := Finset.mem_range.mp hj
+        refine Finset.sum_congr (by congr 1; omega) (fun k hk => by congr 1)
+    -- Goal 2: 3 <= n < 5
+    · congr 1
+      · congr 1; congr 1
+        · refine congr_arg (W.a₃ * ·) ?_
+          refine Finset.sum_congr (by congr 1; omega) (fun x hx => by congr 1)
+        · refine congr_arg (W.a₄ * ·) ?_
+          refine Finset.sum_congr (by congr 1; omega) (fun x hx => by congr 1)
+    -- Goal 3: 2 <= n < 3
+    · congr 1; congr 1; congr 1
+      refine congr_arg (W.a₃ * ·) ?_
+      refine Finset.sum_congr (by congr 1; omega) (fun x hx => by congr 1)
 
 /-- `w(t)` satisfies its defining functional equation. Derived from `formalU_eq` by
   multiplying through by `X³`. -/
