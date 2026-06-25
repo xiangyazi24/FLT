@@ -4,3 +4,16 @@
 - Main theorem: WeierstrassCurve.preΨ'_root_Ψ₂Sq_ne'
 - Proven (0-sorry): eval lemma, odd nonvanishing, odd closed form, helpers, D!=0, main assembly
 - Named sorries (5): 1 Bezout cert (known) + 4 even closed form ring identities
+
+## 2026-06-24: ProjectiveFormula -- Z-component projective bridge (ATOM 3a + 3b)
+- New file: scratch/ProjectiveFormula.lean
+- ATOM 3a (addZ_divPoly_eq): addZ(![C X, y, 1], ![φ_m, ω, ψ_m]) = ψ_{m-1} * ψ_{m+1}
+  - Raw polynomial identity, no coordinate-ring quotient needed
+  - Proof: unfold φ_m definition and ring
+- ATOM 3b (dblZ_divPoly_eq): dblZ_W.toPoly(![φ_m, ωP_m, ψ_m]) = ψ_{2m}
+  - Requires Invertible 2 (char ≠ 2)
+  - Uses W.toPoly to lift curve to R[X][Y] (dblZ depends on a₁, a₃)
+  - Proof: expand negY, apply ωP normalization identity via linear_combination
+- Supporting infrastructure: toPoly, ψTwoMulQuotP, ωP, two_mul_ψ_mul_ωP
+- Status: 0 sorry, 0 custom axioms
+- Note: X-component (addX) requires Weierstrass equation (Equation P), not attempted
