@@ -1,288 +1,199 @@
-# Q320 (dm4): `scratch/Atom7CoeffEpsilon.lean`
+# Q342 (dm4): `Polynomial.discriminant` / discriminant shortcut investigation
 
-Below is the complete proposed file for ATOM 7.  It isolates the fragile/local part into one adapter theorem:
+## Short answer
+
+For current Mathlib, the practical answer is: **do not plan on closing `preΨ'ₙ` separability through a built-in `Polynomial.discriminant` one-liner.**  The polynomial separability API exposed in Mathlib is centered on
 
 ```lean
-simpa [evalUnivar_dual, dualNumber] using (eval_dualNumber f x dx)
+Polynomial.Separable f  ↔  IsCoprime f f.derivative
 ```
 
-If your `scratch/SeamE1_Dual.lean` exports `eval_dualNumber` inside a namespace, qualify that single call.  The rest of the file is closed dual-number algebra.  The combined `ψₙ` lemma takes the parity/coordinate-ring rewrite for raw `W.ψ n` as a hypothesis, because that rewrite is the separate bridge from Mathlib’s raw bivariate `ψ` to the normalized `preΨ'` factor.
+not on a general discriminant shortcut.
+
+The robust Lean route for a concrete polynomial is therefore a **Bezout/resultant/coprimality certificate**:
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.Algebra.TrivSqZeroExt
-import Mathlib.Data.Polynomial.Derivative
-import Mathlib.Tactic
-import scratch.SeamE1_Dual
+rw [Polynomial.separable_def']
+exact ⟨A, B, by ring⟩
+```
 
-noncomputable section
+or equivalently prove `IsCoprime p p.derivative` directly.  This is usually much easier and more reliable than trying to formalize and evaluate a symbolic quartic discriminant.
+
+## Answers to the concrete questions
+
+### (a) Does Mathlib have `Polynomial.discriminant`?
+
+I do not find a current, general-purpose API of the form
+
+```lean
+Polynomial.discriminant : R[X] → R
+```
+
+that is wired into the separability API.  In particular, I would not write downstream code expecting
+
+```lean
+(p.discriminant)
+Polynomial.discriminant p
+```
+
+to be available and usable for `p.Separable`.
+
+Mathlib certainly has a polynomial separability definition and theorem API.  The relevant definition is:
+
+```lean
+Polynomial.Separable f
+```
+
+and it is definitionally / theorem-wise equivalent to coprimality with the derivative:
+
+```lean
+Polynomial.separable_def  : f.Separable ↔ IsCoprime f f.derivative
+Polynomial.separable_def' : f.Separable ↔ ∃ a b, a * f + b * f.derivative = 1
+```
+
+Use those for concrete proofs.
+
+### (b) Does Mathlib have `Polynomial.separable_of_discriminant_ne_zero` or `separable_iff_discriminant_ne_zero`?
+
+I would not rely on such a lemma; the exposed separability API is the coprime/Bezout API.  The actual stable route is:
+
+```lean
+by
+  rw [Polynomial.separable_def']
+  exact ⟨A, B, by ring⟩
+```
+
+where `A` and `B` are CAS-generated cofactors satisfying
+
+```lean
+A * p + B * p.derivative = 1.
+```
+
+If your CAS certificate gives a nonzero scalar instead,
+
+```lean
+A * p + B * p.derivative = C
+```
+
+with `C ≠ 0` over a field, divide through by `C`:
+
+```lean
+by
+  rw [Polynomial.separable_def']
+  refine ⟨C⁻¹ • A, C⁻¹ • B, ?_⟩
+  -- or use `C⁻¹ * A` / `C⁻¹ * B` depending on the coefficient type and simp-normal form.
+  -- Rewrite the certificate and use `field_simp [hC]` / `ring`.
+```
+
+### (c) Does Mathlib have `Polynomial.discriminant_eq_resultant`?
+
+Do not bank on a discriminant theorem.  If you want a resultant route, search/use the `Polynomial.resultant` API directly, but the separability endpoint still wants coprimality:
+
+```lean
+Polynomial.Separable p = IsCoprime p p.derivative
+```
+
+A resultant nonzero theorem, when available, is only useful as a way to produce the same coprimality statement.  In a proof generated from CAS, the Bezout certificate is usually more direct than a resultant determinant/discriminant equality.
+
+### (d) Can `norm_num` compute the discriminant of `Ψ₃ = 3X⁴+b₂X³+3b₄X²+3b₆X+b₈`?
+
+No, not in the sense you need.
+
+* `norm_num` computes numeric expressions; it does not symbolically compute the discriminant of a quartic with symbolic coefficients `b₂,b₄,b₆,b₈`.
+* `ring` can verify a fully expanded symbolic polynomial identity **after** you state the identity explicitly.
+* If you define your own quartic-discriminant expression and specialize it to `Ψ₃`, `ring`/`ring_nf` can verify algebraic rearrangements, but it will not discover the discriminant formula.
+
+For `Ψ₃`, the better Lean tactic route is:
+
+```lean
+rw [Polynomial.separable_def']
+exact ⟨A, B, by
+  -- A and B are explicit polynomial cofactors from CAS.
+  -- Then close by `ring` / `ring_nf` after unfolding `Ψ₃`.
+  ring⟩
+```
+
+or, if the goal is only nonzero rather than separability, use the existing degree/nonzero lemmas for division polynomials.
+
+## Buildable skeleton: concrete separability from a Bezout certificate
+
+```lean
+import Mathlib.FieldTheory.Separable
+import Mathlib.Tactic
 
 open Polynomial
 open scoped Polynomial
 
-namespace Atom7CoeffEpsilon
+namespace PolynomialConcreteSeparable
 
 variable {K : Type*} [Field K]
 
-/-- Dual numbers over `K`, implemented as the trivial square-zero extension `K ⊕ Kε`. -/
-abbrev Dual (K : Type*) := TrivSqZeroExt K K
+/-- Concrete separability from an explicit Bezout identity. -/
+theorem separable_of_bezout_certificate
+    (p A B : K[X])
+    (hbez : A * p + B * p.derivative = 1) :
+    p.Separable := by
+  rw [Polynomial.separable_def']
+  exact ⟨A, B, hbez⟩
 
-/-- `x + ε dx`. -/
-def dualNumber (x dx : K) : Dual K :=
-  TrivSqZeroExt.inl x + TrivSqZeroExt.inr dx
+/-- Same, with the certificate closed by `ring`. -/
+example (p A B : K[X])
+    (hbez : A * p + B * p.derivative = 1) :
+    p.Separable := by
+  exact separable_of_bezout_certificate p A B hbez
 
-/-- ε-coefficient of a dual number. -/
-def coeffε (z : Dual K) : K :=
-  z.snd
-
-/-- Univariate polynomial evaluation at a dual number. -/
-def evalUnivar_dual (f : K[X]) (xε : Dual K) : Dual K :=
-  Polynomial.eval₂ (TrivSqZeroExt.inlHom K K) xε f
-
-/-- Bivariate polynomial evaluation at a dual point `(xε,yε)`.  Mathlib represents
-`K[X,Y]` as `Polynomial (Polynomial K)`, i.e. outer variable `Y`, coefficients in `K[X]`. -/
-def evalBivar_dual (F : Polynomial (Polynomial K)) (xε yε : Dual K) : Dual K :=
-  Polynomial.eval₂ (Polynomial.eval₂RingHom (TrivSqZeroExt.inlHom K K) xε) yε F
-
-/-- Adapter to the Taylor lemma from `scratch/SeamE1_Dual.lean`.
-
-Expected local shape of `eval_dualNumber`:
-
-```lean
-eval_dualNumber f x dx :
-  evalUnivar_dual f (dualNumber x dx)
-    = inl (f.eval x) + inr (f.derivative.eval x * dx)
-```
-
-If your theorem is namespaced, change only the final line of this proof. -/
-theorem evalUnivar_dual_eq_taylor
-    (f : K[X]) (x dx : K) :
-    evalUnivar_dual f (dualNumber x dx)
-      = TrivSqZeroExt.inl (f.eval x)
-        + TrivSqZeroExt.inr (f.derivative.eval x * dx) := by
-  simpa [evalUnivar_dual, dualNumber] using (eval_dualNumber f x dx)
-
-lemma evalUnivar_dual_fst_eq_eval
-    (f : K[X]) (x dx : K) :
-    (evalUnivar_dual f (dualNumber x dx)).fst = f.eval x := by
-  rw [evalUnivar_dual_eq_taylor]
-  simp
-
-lemma evalUnivar_dual_snd_eq_derivative_mul
-    (f : K[X]) (x dx : K) :
-    (evalUnivar_dual f (dualNumber x dx)).snd = f.derivative.eval x * dx := by
-  rw [evalUnivar_dual_eq_taylor]
-  simp
-
-lemma evalUnivar_dual_snd_eq_derivative_dx_one
-    (f : K[X]) (x : K) :
-    (evalUnivar_dual f (dualNumber x 1)).snd = f.derivative.eval x := by
-  simpa using evalUnivar_dual_snd_eq_derivative_mul (f := f) (x := x) (dx := (1 : K))
-
-/-- Bivariate evaluation of a polynomial constant in `Y` reduces to univariate evaluation
-in `X`. -/
-lemma evalBivar_dual_C
-    (f : K[X]) (xε yε : Dual K) :
-    evalBivar_dual (Polynomial.C f) xε yε = evalUnivar_dual f xε := by
-  simp [evalBivar_dual, evalUnivar_dual]
-
-/-- Requested odd-branch API lemma: `C f` is constant in `Y`, so its ε-coefficient is
-just the ε-coefficient of the univariate evaluation of `f`. -/
-lemma snd_evalBivar_dual_C
-    (f : K[X]) (xε yε : Dual K) :
-    (evalBivar_dual (Polynomial.C f) xε yε).snd = (evalUnivar_dual f xε).snd := by
-  rw [evalBivar_dual_C]
-
-/-- Odd branch with `dx = 1`: evaluating `C f` at `(x + ε, y + ε sy)` has
-ε-coefficient `f'(x)`. -/
-lemma snd_evalBivar_dual_C_dualNumber_dx_one
-    (f : K[X]) (x y sy : K) :
-    (evalBivar_dual (Polynomial.C f) (dualNumber x 1) (dualNumber y sy)).snd
-      = f.derivative.eval x := by
-  rw [snd_evalBivar_dual_C]
-  exact evalUnivar_dual_snd_eq_derivative_dx_one (f := f) (x := x)
-
-/-- Square-zero product rule in the special form used for the even branch: if the right
-factor has zero base part, then only `A.fst * B.snd` contributes to the ε-coefficient. -/
-lemma snd_mul_of_right_fst_eq_zero
-    (A B : Dual K) (hB : B.fst = 0) :
-    (A * B).snd = A.fst * B.snd := by
-  rcases A with ⟨a0, a1⟩
-  rcases B with ⟨b0, b1⟩
-  simp at hB ⊢
-  subst b0
-  simp
-
-/-- Even-branch algebra.  If `preΨ'ₙ(x)=0`, then the `dψ₂` term in the product rule for
-`ψ₂(Pε) * preΨ'ₙ(xε)` vanishes. -/
-lemma snd_ψ₂_mul_C_preΨ_of_preΨ_eval_eq_zero
-    (W : WeierstrassCurve K) (n : ℕ) (x y sy : K)
-    (hroot : (W.preΨ' n).eval x = 0) :
-    (evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)
-        * evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy)).snd
-      = (evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)).fst
-          * (W.preΨ' n).derivative.eval x := by
-  have hpre_fst :
-      (evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy)).fst = 0 := by
-    rw [evalBivar_dual_C]
-    simpa [hroot] using
-      evalUnivar_dual_fst_eq_eval (f := W.preΨ' n) (x := x) (dx := (1 : K))
-  have hpre_snd :
-      (evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy)).snd
-        = (W.preΨ' n).derivative.eval x := by
-    rw [snd_evalBivar_dual_C]
-    exact evalUnivar_dual_snd_eq_derivative_dx_one (f := W.preΨ' n) (x := x)
+/-- If the CAS gives a nonzero scalar certificate, normalize it to a Bezout identity. -/
+theorem separable_of_scalar_bezout_certificate
+    (p A B : K[X]) {c : K} (hc : c ≠ 0)
+    (hbez : A * p + B * p.derivative = C c) :
+    p.Separable := by
+  rw [Polynomial.separable_def']
+  refine ⟨C c⁻¹ * A, C c⁻¹ * B, ?_⟩
   calc
-    (evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)
-        * evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy)).snd
-        = (evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)).fst
-            * (evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy)).snd := by
-            exact snd_mul_of_right_fst_eq_zero
-              (A := evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy))
-              (B := evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy))
-              hpre_fst
-    _ = (evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)).fst
-          * (W.preΨ' n).derivative.eval x := by
-          rw [hpre_snd]
+    (C c⁻¹ * A) * p + (C c⁻¹ * B) * p.derivative
+        = C c⁻¹ * (A * p + B * p.derivative) := by ring
+    _ = C c⁻¹ * C c := by rw [hbez]
+    _ = 1 := by
+      ext m
+      fin_cases m <;> simp [hc]
 
-/-- Combined ATOM 7 coefficient bridge.
+end PolynomialConcreteSeparable
+```
 
-`hψ_parity` is the separate coordinate-ring/parity rewrite for raw `W.ψ n` evaluated on the
-dual curve point:
-
-* odd `n`: `ψₙ(Pε) = C(preΨ'ₙ)(Pε)`;
-* even `n`: `ψₙ(Pε) = ψ₂(Pε) * C(preΨ'ₙ)(Pε)`.
-
-Given this rewrite and the root condition `preΨ'ₙ(x)=0`, the ε-coefficient is
+If the last `ext/fin_cases` is brittle in your Mathlib version, replace the final line by:
 
 ```lean
-(if Even n then ψ₂(P) else 1) * (preΨ'ₙ)'(x)
+      simpa [Polynomial.C_mul, hc]
 ```
 
-where `ψ₂(P)` is represented as the base projection of `ψ₂(Pε)`. -/
-theorem coeffε_ψ_eq_if_even_ψ₂_mul_preΨ_derivative
-    (W : WeierstrassCurve K) (n : ℕ) (x y sy : K)
-    (hroot : (W.preΨ' n).eval x = 0)
-    (hψ_parity :
-      evalBivar_dual (W.ψ (n : ℤ)) (dualNumber x 1) (dualNumber y sy)
-        = if Even n then
-            evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)
-              * evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy)
-          else
-            evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy)) :
-    coeffε (evalBivar_dual (W.ψ (n : ℤ)) (dualNumber x 1) (dualNumber y sy))
-      = (if Even n then
-            (evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)).fst
-          else
-            1)
-          * (W.preΨ' n).derivative.eval x := by
-  by_cases hn : Even n
-  · have hψ_even :
-      evalBivar_dual (W.ψ (n : ℤ)) (dualNumber x 1) (dualNumber y sy)
-        = evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)
-            * evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy) := by
-      simpa [hn] using hψ_parity
-    calc
-      coeffε (evalBivar_dual (W.ψ (n : ℤ)) (dualNumber x 1) (dualNumber y sy))
-          = (evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)
-              * evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy)).snd := by
-              simp [coeffε, hψ_even]
-      _ = (evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)).fst
-            * (W.preΨ' n).derivative.eval x := by
-            exact snd_ψ₂_mul_C_preΨ_of_preΨ_eval_eq_zero
-              (W := W) (n := n) (x := x) (y := y) (sy := sy) hroot
-      _ = (if Even n then
-              (evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)).fst
-            else
-              1)
-            * (W.preΨ' n).derivative.eval x := by
-            simp [hn]
-  · have hψ_odd :
-      evalBivar_dual (W.ψ (n : ℤ)) (dualNumber x 1) (dualNumber y sy)
-        = evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy) := by
-      simpa [hn] using hψ_parity
-    calc
-      coeffε (evalBivar_dual (W.ψ (n : ℤ)) (dualNumber x 1) (dualNumber y sy))
-          = (evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy)).snd := by
-              simp [coeffε, hψ_odd]
-      _ = (W.preΨ' n).derivative.eval x := by
-            exact snd_evalBivar_dual_C_dualNumber_dx_one
-              (f := W.preΨ' n) (x := x) (y := y) (sy := sy)
-      _ = (if Even n then
-              (evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)).fst
-            else
-              1)
-            * (W.preΨ' n).derivative.eval x := by
-            simp [hn]
-
-/-- Optional rewrite of the base projection of `ψ₂(Pε)` to the usual affine expression.
-This is useful if the target statement uses `ψ₂(P) = 2*y + a₁*x + a₃`. -/
-lemma evalBivar_dual_ψ₂_fst
-    (W : WeierstrassCurve K) (x y sy : K) :
-    (evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)).fst
-      = 2 * y + W.a₁ * x + W.a₃ := by
-  simp [evalBivar_dual, evalUnivar_dual, dualNumber, WeierstrassCurve.ψ₂]
-  ring
-
-/-- Same combined bridge with the `ψ₂(P)` factor rewritten to `2*y + a₁*x + a₃`. -/
-theorem coeffε_ψ_eq_if_even_affine_ψ₂_mul_preΨ_derivative
-    (W : WeierstrassCurve K) (n : ℕ) (x y sy : K)
-    (hroot : (W.preΨ' n).eval x = 0)
-    (hψ_parity :
-      evalBivar_dual (W.ψ (n : ℤ)) (dualNumber x 1) (dualNumber y sy)
-        = if Even n then
-            evalBivar_dual W.ψ₂ (dualNumber x 1) (dualNumber y sy)
-              * evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy)
-          else
-            evalBivar_dual (Polynomial.C (W.preΨ' n)) (dualNumber x 1) (dualNumber y sy)) :
-    coeffε (evalBivar_dual (W.ψ (n : ℤ)) (dualNumber x 1) (dualNumber y sy))
-      = (if Even n then 2 * y + W.a₁ * x + W.a₃ else 1)
-          * (W.preΨ' n).derivative.eval x := by
-  have h := coeffε_ψ_eq_if_even_ψ₂_mul_preΨ_derivative
-    (W := W) (n := n) (x := x) (y := y) (sy := sy) hroot hψ_parity
-  by_cases hn : Even n
-  · simpa [hn, evalBivar_dual_ψ₂_fst (W := W) (x := x) (y := y) (sy := sy)] using h
-  · simpa [hn] using h
-
-end Atom7CoeffEpsilon
-```
-
-## How to supply `hψ_parity`
-
-The file above deliberately does not prove the raw-`ψ` coordinate-ring rewrite.  In the local Atom 7 integration, prove or import a theorem of the following form:
+or simply:
 
 ```lean
-have hψ_parity :
-    Atom7CoeffEpsilon.evalBivar_dual (W.ψ (n : ℤ))
-      (Atom7CoeffEpsilon.dualNumber x 1) (Atom7CoeffEpsilon.dualNumber y sy)
-      = if Even n then
-          Atom7CoeffEpsilon.evalBivar_dual W.ψ₂
-            (Atom7CoeffEpsilon.dualNumber x 1) (Atom7CoeffEpsilon.dualNumber y sy)
-            * Atom7CoeffEpsilon.evalBivar_dual (Polynomial.C (W.preΨ' n))
-              (Atom7CoeffEpsilon.dualNumber x 1) (Atom7CoeffEpsilon.dualNumber y sy)
-        else
-          Atom7CoeffEpsilon.evalBivar_dual (Polynomial.C (W.preΨ' n))
-            (Atom7CoeffEpsilon.dualNumber x 1) (Atom7CoeffEpsilon.dualNumber y sy) := by
-  -- Odd branch: `ψₙ = C(preΨ'ₙ)` on the dual curve point.
-  -- Even branch: `ψₙ = ψ₂ * C(preΨ'ₙ)` on the dual curve point.
-  -- Use `Affine.CoordinateRing.mk_ψ` / the local on-curve evaluation bridge here.
-  sorry
+      simp [hc]
 ```
 
-Then the combined result is:
+depending on how `C c⁻¹ * C c` normalizes locally.
+
+## What this means for `preΨ'ₙ`
+
+A discriminant formula like
+
+```text
+Disc(preΨ'ₙ) = ± n^a · Δ^b
+```
+
+would be mathematically excellent, but in Lean it only helps if you also have a formal discriminant API connecting nonzero discriminant to `Polynomial.Separable`.  Since the stable Mathlib endpoint is coprimality with the derivative, the immediately actionable version of such a formula is a **resultant/Bezout certificate** for
 
 ```lean
-have hcoeff :=
-  Atom7CoeffEpsilon.coeffε_ψ_eq_if_even_affine_ψ₂_mul_preΨ_derivative
-    (W := W) (n := n) (x := x) (y := y) (sy := sy)
-    hroot hψ_parity
+IsCoprime (W.preΨ' n) (W.preΨ' n).derivative
 ```
 
-This gives exactly:
+or an explicit identity
 
 ```lean
-coeffε(ψₙ(Pε)) = (if Even n then 2*y + W.a₁*x + W.a₃ else 1)
-  * (W.preΨ' n).derivative.eval x
+A * W.preΨ' n + B * (W.preΨ' n).derivative = 1
 ```
 
-with `dx = 1`.  For a general deformation `x + ε dx`, replace every `dualNumber x 1` above by `dualNumber x dx`; the derivative term becomes `(W.preΨ' n).derivative.eval x * dx`.
+after specializing and normalizing the curve parameters.
+
+For the general `n` theorem, a closed-form discriminant in Lean would be a major formalization project.  For small fixed `n` like `n = 3`, a CAS-generated Bezout identity is the fastest path.
