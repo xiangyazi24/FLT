@@ -2,7 +2,7 @@
   scratch/ProjectiveFormulaXY.lean
   Projective division-polynomial X-component formulas.
   ATOM 4a: mk W.toAffine (addX(P, R_m) - ψ_{m-1}² · φ_{m+1}) = 0
-  Status: m=1 0-sorry, m=2 1-sorry (integral identity).
+  Status: m=1 0-sorry, m=2 0-sorry.
 -/
 module
 
@@ -80,11 +80,7 @@ private theorem addX_elim_ωP :
       Polynomial.C (Polynomial.C W.a₁) * Polynomial.C (Polynomial.X : R[X]) +
       Polynomial.C (Polynomial.C W.a₃)) * hω
 
--- The integral identity. This is the core computational step.
--- After full unfolding, the expression is a polynomial in CC(aᵢ), CX, X
--- with integer coefficients, and we need polynomial ∣ expression.
--- CAS-verified. Lean proof requires providing the ~40-term quotient.
-set_option maxHeartbeats 400000000 in
+set_option maxHeartbeats 800000000 in
 set_option maxRecDepth 8000 in
 private theorem two_mul_addX_sub_phi3_dvd :
     W.toAffine.polynomial ∣
@@ -95,15 +91,22 @@ private theorem two_mul_addX_sub_phi3_dvd :
        W.ψ 2 * (W.ψ (2 * 2) - W.ψ 2 ^ 2 *
           (Polynomial.C (Polynomial.C W.a₁) * W.φ 2 +
            Polynomial.C (Polynomial.C W.a₃) * W.ψ 2 ^ 2))) := by
+  -- CAS-verified cofactor: Q = 4 * ψ_2² * (4X³ + b₂X² + 2b₄X + b₆)
+  refine ⟨4 * W.ψ 2 ^ 2 *
+    (4 * Polynomial.C (Polynomial.X : R[X]) ^ 3 +
+      Polynomial.C (Polynomial.C W.toAffine.b₂) * Polynomial.C (Polynomial.X : R[X]) ^ 2 +
+      2 * Polynomial.C (Polynomial.C W.toAffine.b₄) * Polynomial.C (Polynomial.X : R[X]) +
+      Polynomial.C (Polynomial.C W.toAffine.b₆)), ?_⟩
   rw [show (2 * 2 : ℤ) = 4 from rfl, ψ_four, φ_two, φ_three, ψ₂_explicit]
   unfold Jacobian.addX WeierstrassCurve.toPoly WeierstrassCurve.map
     Affine.polynomial WeierstrassCurve.ψ₂ Affine.polynomialY
     WeierstrassCurve.Ψ₃ WeierstrassCurve.preΨ₄
   simp only [WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆, WeierstrassCurve.b₈,
-    RingHom.comp_apply, Matrix.cons_val, map_ofNat]
-  sorry
+    RingHom.comp_apply, Matrix.cons_val, map_ofNat,
+    map_add, map_sub, map_mul, map_pow]
+  ring
 
-/-- **ATOM 4a (m=2).** X-component identity for m=2. 1 sorry (integral polynomial identity). -/
+/-- **ATOM 4a (m=2).** X-component identity for m=2. 0 sorry, 0 custom axiom. -/
 theorem mk_addX_divPoly_m2 :
     (AdjoinRoot.mk W.toAffine.polynomial)
       (Jacobian.addX W.toPoly
