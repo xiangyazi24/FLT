@@ -336,3 +336,138 @@ theorem formalAddXYZ_def (W : WeierstrassCurve R) :
 end FormalAddition
 
 end WeierstrassCurve
+
+/-! ## ATOM 3: Formal group law F(t₁, t₂) -/
+
+namespace WeierstrassCurve
+
+variable {R : Type*} [CommRing R]
+
+/-! ### Substituted functional equation -/
+
+set_option maxHeartbeats 800000 in
+/-- The functional equation of `w(t)` after substituting `Xᵢ` into the MvPowerSeries ring. -/
+theorem formalW_subst_eq (W : WeierstrassCurve R) (i : Fin 2) :
+    PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) R) W.formalW =
+    (MvPowerSeries.X i : MvPowerSeries (Fin 2) R) ^ 3 +
+    MvPowerSeries.C W.a₁ * MvPowerSeries.X i *
+      PowerSeries.subst (MvPowerSeries.X i) W.formalW +
+    MvPowerSeries.C W.a₂ * (MvPowerSeries.X i) ^ 2 *
+      PowerSeries.subst (MvPowerSeries.X i) W.formalW +
+    MvPowerSeries.C W.a₃ * (PowerSeries.subst (MvPowerSeries.X i) W.formalW) ^ 2 +
+    MvPowerSeries.C W.a₄ * MvPowerSeries.X i *
+      (PowerSeries.subst (MvPowerSeries.X i) W.formalW) ^ 2 +
+    MvPowerSeries.C W.a₆ * (PowerSeries.subst (MvPowerSeries.X i) W.formalW) ^ 3 := by
+  have ha : PowerSeries.HasSubst (MvPowerSeries.X i : MvPowerSeries (Fin 2) R) :=
+    PowerSeries.HasSubst.X i
+  have h := congr_arg (PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) R))
+    (formalW_eq W)
+  simp only [PowerSeries.subst_add ha, PowerSeries.subst_mul ha, PowerSeries.subst_pow ha,
+    PowerSeries.subst_C, PowerSeries.subst_X ha] at h
+  exact h
+
+set_option maxHeartbeats 1600000 in
+/-- The multivariate formal point `P(Xᵢ)` satisfies the Weierstrass equation. -/
+theorem formalPointMv_equation (W : WeierstrassCurve R) (i : Fin 2) :
+    (W.map (MvPowerSeries.C (σ := Fin 2))).toProjective.Equation (W.formalPointMv i) := by
+  rw [WeierstrassCurve.Projective.equation_iff]
+  simp only [WeierstrassCurve.map, formalPointMv]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    Matrix.cons_val_two, Matrix.tail_cons]
+  have h := formalW_subst_eq W i
+  linear_combination (norm := ring) h
+
+/-! ### The addZ factoring identity -/
+
+/-- The projective slope denominator `Px·Qz - Qx·Pz` for the two formal points. -/
+noncomputable def formalDelta (W : WeierstrassCurve R) : MvPowerSeries (Fin 2) R :=
+  W.formalPointMv 0 0 * W.formalPointMv 1 2 - W.formalPointMv 1 0 * W.formalPointMv 0 2
+
+/-- Mathlib's `addZ_eq'` specialized to the formal points. -/
+theorem formalAddZ_mul_ww (W : WeierstrassCurve R) :
+    W.formalAddZ * (W.formalPointMv 0 2 * W.formalPointMv 1 2) = W.formalDelta ^ 3 := by
+  unfold formalAddZ formalAddXYZ formalDelta
+  exact WeierstrassCurve.Projective.addZ_eq'
+    (W.formalPointMv_equation 0) (W.formalPointMv_equation 1)
+
+/-! ### Divisibility by (X₀ - X₁)³ -/
+
+/-- `(X₀ - X₁)³` divides `formalAddX`. -/
+theorem formalAddX_dvd_cube (W : WeierstrassCurve R) :
+    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ 3 ∣ W.formalAddX :=
+  sorry
+
+/-- `(X₀ - X₁)³` divides `formalAddY`. -/
+theorem formalAddY_dvd_cube (W : WeierstrassCurve R) :
+    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ 3 ∣ W.formalAddY :=
+  sorry
+
+/-- `(X₀ - X₁)³` divides `formalAddZ`. -/
+theorem formalAddZ_dvd_cube (W : WeierstrassCurve R) :
+    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ 3 ∣ W.formalAddZ :=
+  sorry
+
+/-! ### Normalized coordinates -/
+
+/-- The quotient of `formalAddX` by `(X₀ - X₁)³`. -/
+noncomputable def normalizedAddX (W : WeierstrassCurve R) : MvPowerSeries (Fin 2) R :=
+  W.formalAddX_dvd_cube.choose
+
+/-- `formalAddX = (X₀ - X₁)³ · normalizedAddX`. -/
+theorem formalAddX_eq_cube_mul (W : WeierstrassCurve R) :
+    W.formalAddX = (MvPowerSeries.X 0 - MvPowerSeries.X 1) ^ 3 * W.normalizedAddX :=
+  W.formalAddX_dvd_cube.choose_spec
+
+/-- The quotient of `formalAddY` by `(X₀ - X₁)³`. -/
+noncomputable def normalizedAddY (W : WeierstrassCurve R) : MvPowerSeries (Fin 2) R :=
+  W.formalAddY_dvd_cube.choose
+
+/-- `formalAddY = (X₀ - X₁)³ · normalizedAddY`. -/
+theorem formalAddY_eq_cube_mul (W : WeierstrassCurve R) :
+    W.formalAddY = (MvPowerSeries.X 0 - MvPowerSeries.X 1) ^ 3 * W.normalizedAddY :=
+  W.formalAddY_dvd_cube.choose_spec
+
+/-- The quotient of `formalAddZ` by `(X₀ - X₁)³`. -/
+noncomputable def normalizedAddZ (W : WeierstrassCurve R) : MvPowerSeries (Fin 2) R :=
+  W.formalAddZ_dvd_cube.choose
+
+/-- `formalAddZ = (X₀ - X₁)³ · normalizedAddZ`. -/
+theorem formalAddZ_eq_cube_mul (W : WeierstrassCurve R) :
+    W.formalAddZ = (MvPowerSeries.X 0 - MvPowerSeries.X 1) ^ 3 * W.normalizedAddZ :=
+  W.formalAddZ_dvd_cube.choose_spec
+
+/-! ### normalizedAddY is a unit -/
+
+/-- The constant coefficient of `normalizedAddY` is `-1`. -/
+theorem normalizedAddY_constantCoeff (W : WeierstrassCurve R) :
+    MvPowerSeries.constantCoeff (W.normalizedAddY) = -1 :=
+  sorry
+
+/-- `normalizedAddY` is a unit in `MvPowerSeries (Fin 2) R`. -/
+theorem normalizedAddY_isUnit (W : WeierstrassCurve R) : IsUnit (W.normalizedAddY) := by
+  rw [MvPowerSeries.isUnit_iff_constantCoeff, normalizedAddY_constantCoeff]
+  exact isUnit_one.neg
+
+/-! ### The formal group law -/
+
+/-- The formal group law `F(t₁, t₂)` of a Weierstrass curve, defined as
+  `F = -normalizedAddX · normalizedAddY⁻¹ = t₁ + t₂ + O(deg ≥ 2)`. -/
+noncomputable def formalGroupLaw (W : WeierstrassCurve R) : MvPowerSeries (Fin 2) R :=
+  -W.normalizedAddX * ↑(W.normalizedAddY_isUnit.unit⁻¹)
+
+/-- `F(0, 0) = 0`. -/
+theorem formalGroupLaw_constantCoeff (W : WeierstrassCurve R) :
+    MvPowerSeries.constantCoeff (W.formalGroupLaw) = 0 :=
+  sorry
+
+/-- The coefficient of `t₁` in `F(t₁, t₂)` is `1`. -/
+theorem formalGroupLaw_lin_coeff_X (W : WeierstrassCurve R) :
+    MvPowerSeries.coeff (Finsupp.single 0 1) (W.formalGroupLaw) = 1 :=
+  sorry
+
+/-- The coefficient of `t₂` in `F(t₁, t₂)` is `1`. -/
+theorem formalGroupLaw_lin_coeff_Y (W : WeierstrassCurve R) :
+    MvPowerSeries.coeff (Finsupp.single 1 1) (W.formalGroupLaw) = 1 :=
+  sorry
+
+end WeierstrassCurve
