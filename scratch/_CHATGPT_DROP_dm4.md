@@ -1,177 +1,169 @@
-# Q284 (dm4): can Mathlib already prove `preΨ'ₙ` separability by torsion counting?
+# Q290 (dm4): Mathlib API for the even `ψ` / EDS recurrence
 
-## Executive answer
+## Exact theorem for bivariate division polynomials
 
-The proposed shortcut is mathematically reasonable on paper, but it is **not** a clean Lean shortcut with the current ingredients, and it is very likely circular in this project.
-
-The route
-
-```text
-degree(preΨ'ₙ) = expected d
-+ preΨ'ₙ splits over alg-closed k
-+ roots are exactly non-2 n-torsion x-coordinates
-+ there are exactly d distinct such x-coordinates
-⇒ all roots are simple
-⇒ preΨ'ₙ separable
-```
-
-requires a non-circular theorem that the geometric `n`-torsion has exactly the expected rank/cardinality:
-
-```text
-E[n](k) ≃ (Z/nZ)^2,
-#E[n](k) = n^2,
-```
-
-or at least the distinct x-coordinate count after quotienting by `±1`.  That theorem is essentially the same geometric separability/étaleness content as the separability of the multiplication-by-`n` kernel.  Unless it has been independently formalized from the formal group/tangent argument `d[n] = n`, using it to prove division-polynomial separability just moves the same bridge somewhere else.
-
-So the safe conclusion is:
-
-* `natDegree_preΨ'` is useful for the degree side.
-* `IsAlgClosed` gives splitting.
-* `mk_ψ`, `mk_φ`, `mk_Ψ_sq` help identify kernels with division-polynomial zero loci.
-* But Mathlib does **not** appear to provide the full independent rank-two torsion theorem needed to count roots.
-* Any repo theorem named like `geomNTorsion_rank_two_linear` must be dependency-audited.  If it imports/uses `preΨ'_separable`, `preΨ'_eval_eq_zero_iff_exists_non_two_torsion`, the E1 bridge, or a theorem proved from the keystone torsion-cardinality seam, it is circular for this purpose.
-
-## Repository check caveat
-
-I attempted to search the accessible `xiangyazi24/FLT` GitHub index for names like
-
-```text
-geomNTorsion_rank_two_linear
-preΨ'_separable
-rank_two
-n_torsion_finite
-```
-
-and got no hits.  The connector also did not expose the `ai-scratch` branch/files in this session, so I could not directly inspect `scratch/KeystoneNTorsion.lean` or any theorem with that exact name.  The dependency conclusion below is therefore an architectural one: even if such a theorem exists locally, it must be treated as usable for this shortcut only if its imports/proof do **not** depend on the division-polynomial separability bridge you are trying to prove.
-
-## Why the counting proof is not currently a shortcut
-
-To make the counting proof work, you need the following exact chain.
+Mathlib already has the Weierstrass-specialized bivariate theorem.  The exact name is:
 
 ```lean
--- schematic only
-have hdeg : (W.preΨ' n).natDegree = expectedDegree n :=
-  WeierstrassCurve.natDegree_preΨ' ...
-
-have hsplit : (W.preΨ' n).Splits (RingHom.id k) := by
-  -- from [IsAlgClosed k]
-  exact Polynomial.splits_of_isAlgClosed _
-
-have hroots_exact :
-    {x | (W.preΨ' n).eval x = 0}
-      = {x | ∃ y h, 2 • P(x,y,h) ≠ 0 ∧ n • P(x,y,h) = 0} := by
-  -- this is exactly the theorem currently under construction:
-  -- preΨ'_eval_eq_zero_iff_exists_non_two_torsion
-  sorry
-
-have hcard_xroots :
-    Fintype.card {x // (W.preΨ' n).eval x = 0} = expectedDegree n := by
-  -- requires E[n] ≃ (ZMod n × ZMod n), then quotient by ±P and remove 2-torsion.
-  sorry
+WeierstrassCurve.ψ_even
 ```
 
-The problem is the last two steps:
-
-1. `hroots_exact` is already one of the downstream bridge results.  If it uses `preΨ'` separability, it cannot be used to prove separability.
-2. `hcard_xroots` is not available from mere finiteness.  `n_torsion_finite` only gives finite, not the expected cardinality or rank-two structure.
-
-Classically, the theorem `E[n](k) ≃ (Z/nZ)^2` for `char k ∤ n` is proved using the fact that `[n]` is a separable isogeny of degree `n^2`, or equivalently that its kernel is finite étale of rank `n^2`.  The separability of `[n]` is proved from the differential `d[n] = n`, i.e. the same formal-group tangent input you identified in bridge-2.  That is fine as an independent route, but then the formalized theorem must expose that proof directly.  If the theorem was instead proved by division polynomials, it is circular here.
-
-## What to grep in the local branch
-
-Run these locally on `ai-scratch`:
-
-```bash
-grep -R "geomNTorsion_rank_two_linear" -n .
-grep -R "rank_two" -n scratch FLT Mathlib | head -100
-grep -R "preΨ'_separable\|preΨ'_eval_eq_zero_iff_exists_non_two_torsion\|deriv_ne_zero\|separable" -n scratch/KeystoneNTorsion.lean FLT/EllipticCurve/Torsion.lean scratch | head -200
-```
-
-For any candidate theorem, inspect its import chain:
-
-```bash
-grep -n "^import" scratch/KeystoneNTorsion.lean
-grep -n "preΨ'_separable\|preΨ'_eval_eq_zero_iff_exists_non_two_torsion\|SeamE1\|Torsion" scratch/KeystoneNTorsion.lean
-```
-
-A theorem like this is **usable** for the shortcut only if it is proved without importing or using:
-
-```text
-preΨ'_separable
-preΨ'_derivative_ne_zero_at_roots
-preΨ'_eval_eq_zero_iff_exists_non_two_torsion
-nsmul_eq_zero_iff_preΨ'_eval_eq_zero_of_two_nsmul_ne_zero
-any theorem whose proof uses those
-```
-
-It is **circular** if it depends on the torsion/division-polynomial root equivalence or the separability theorem under construction.
-
-## How the shortcut would look if a non-circular rank-two theorem exists
-
-If you really have an independent theorem of this form:
+In namespace form, with `W : WeierstrassCurve R`, its signature is:
 
 ```lean
--- schematic
-noncomputable def torsionEquivRankTwo
-    (W : WeierstrassCurve k) [W.IsElliptic]
-    [IsAlgClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
-    {P : (W⁄k).Point // n • P = 0} ≃ (ZMod n × ZMod n)
+lemma WeierstrassCurve.ψ_even
+    {R : Type*} [CommRing R]
+    (W : WeierstrassCurve R) (m : ℤ) :
+    W.ψ (2 * m) * W.ψ₂ =
+      W.ψ (m - 1) ^ 2 * W.ψ m * W.ψ (m + 2) -
+        W.ψ (m - 2) * W.ψ m * W.ψ (m + 1) ^ 2
 ```
 
-and a non-circular root equivalence:
+Inside `namespace WeierstrassCurve`, or with dot notation, use:
 
 ```lean
--- schematic
-(W.preΨ' n).eval x = 0 ↔
-  ∃ y h, 2 • Point.some x y h ≠ 0 ∧ n • Point.some x y h = 0
+W.ψ_even m
 ```
 
-then the separability proof can be done by cardinality:
+This is exactly the recurrence you asked for:
 
 ```lean
--- schematic only
-theorem preΨ'_separable_by_torsion_count
-    (W : WeierstrassCurve k) [W.IsElliptic]
-    [IsAlgClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
-    (W.preΨ' n).Separable := by
-  -- 1. get `natDegree_preΨ'`.
-  have hdeg := WeierstrassCurve.natDegree_preΨ' (W := W) (n := n) hn
-
-  -- 2. all roots split over `k`.
-  have hsplit : (W.preΨ' n).Splits (RingHom.id k) := by
-    exact Polynomial.splits_of_isAlgClosed _
-
-  -- 3. identify roots with non-2 n-torsion x-coordinates.
-  have hroot_equiv := preΨ'_root_xcoord_equiv_non_two_torsion_xcoords
-    (W := W) (n := n) hn
-
-  -- 4. count those x-coordinates from independent rank-two torsion.
-  have hcard_roots :
-      Fintype.card {x : k // (W.preΨ' n).eval x = 0}
-        = (W.preΨ' n).natDegree := by
-    -- rank-two torsion count, remove `O` and 2-torsion if needed,
-    -- quotient non-2 points by `P ~ -P`; the quotient map is exactly `x`.
-    sorry
-
-  -- 5. use a standard split-polynomial criterion:
-  -- if a split nonzero polynomial has as many distinct roots as its degree,
-  -- then it is squarefree/separable.
-  exact separable_of_splits_card_roots_eq_natDegree hsplit hcard_roots
+ψ_{2m} · ψ₂ = ψ_{m-1}² · ψ_m · ψ_{m+2}
+             - ψ_{m-2} · ψ_m · ψ_{m+1}²
 ```
 
-But this is not shorter unless steps 3 and 4 are already non-circularly available.  In the current architecture, step 3 is precisely the sub-D theorem you are closing, and step 4 is usually proved from the same étaleness/separability input.
+It is proved in `DivisionPolynomial/Basic.lean` by specialization from the abstract EDS recurrence:
 
-## Recommendation
-
-Do **not** switch to the torsion-counting proof unless you can exhibit a theorem, already in the local branch, whose proof of geometric `n`-torsion rank two/order `n^2` depends only on:
-
-```text
-formal group / tangent map `d[n] = n`,
-isogeny degree theory independent of division-polynomial separability,
-or a pre-existing Mathlib theorem about finite étale kernels of elliptic curves
+```lean
+lemma ψ_even (m : ℤ) :
+    W.ψ (2 * m) * W.ψ₂ =
+      W.ψ (m - 1) ^ 2 * W.ψ m * W.ψ (m + 2) -
+        W.ψ (m - 2) * W.ψ m * W.ψ (m + 1) ^ 2 :=
+  normEDS_even ..
 ```
 
-and not on the `preΨ'` separability bridge.
+So there is no need to construct this from `normEDS_even` by hand unless you are working with an abstract normalized EDS rather than `W.ψ`.
 
-Given the current state described in the previous atoms, the formal-group/local-parameter bridge remains the correct non-circular path.  It proves the derivative nonvanishing directly from `d[n] = n` and the projective division-polynomial formula, instead of trying to count torsion roots with a theorem whose proof likely already uses the desired separability.
+## Underlying abstract EDS theorem
+
+The exact abstract theorem is:
+
+```lean
+normEDS_even
+```
+
+with signature:
+
+```lean
+lemma normEDS_even
+    {R : Type*} [CommRing R]
+    (b c d : R) (m : ℤ) :
+    normEDS b c d (2 * m) * b =
+      normEDS b c d (m - 1) ^ 2 * normEDS b c d m * normEDS b c d (m + 2) -
+        normEDS b c d (m - 2) * normEDS b c d m * normEDS b c d (m + 1) ^ 2
+```
+
+This lives in:
+
+```lean
+import Mathlib.NumberTheory.EllipticDivisibilitySequence
+```
+
+The deprecated alias also exists:
+
+```lean
+normEDS_even_ofNat
+```
+
+but Mathlib marks it deprecated since `2025-05-15`; use `normEDS_even`.
+
+## Related normalized division-polynomial theorem
+
+There is also a theorem for the normalized bivariate `Ψ`, not raw `ψ`:
+
+```lean
+WeierstrassCurve.Ψ_even
+```
+
+Signature:
+
+```lean
+lemma WeierstrassCurve.Ψ_even
+    {R : Type*} [CommRing R]
+    (W : WeierstrassCurve R) (m : ℤ) :
+    W.Ψ (2 * m) * W.ψ₂ =
+      W.Ψ (m - 1) ^ 2 * W.Ψ m * W.Ψ (m + 2) -
+        W.Ψ (m - 2) * W.Ψ m * W.Ψ (m + 1) ^ 2
+```
+
+For univariate `preΨ`, the corresponding theorem is:
+
+```lean
+WeierstrassCurve.preΨ_even
+```
+
+Signature:
+
+```lean
+lemma WeierstrassCurve.preΨ_even
+    {R : Type*} [CommRing R]
+    (W : WeierstrassCurve R) (m : ℤ) :
+    W.preΨ (2 * m) =
+      W.preΨ (m - 1) ^ 2 * W.preΨ m * W.preΨ (m + 2) -
+        W.preΨ (m - 2) * W.preΨ m * W.preΨ (m + 1) ^ 2
+```
+
+## Usage snippets
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+
+open Polynomial
+open scoped Polynomial
+
+namespace WeierstrassCurve
+
+variable {R : Type*} [CommRing R]
+variable (W : WeierstrassCurve R) (m : ℤ)
+
+example :
+    W.ψ (2 * m) * W.ψ₂ =
+      W.ψ (m - 1) ^ 2 * W.ψ m * W.ψ (m + 2) -
+        W.ψ (m - 2) * W.ψ m * W.ψ (m + 1) ^ 2 := by
+  exact W.ψ_even m
+
+example :
+    W.ψ (2 * m) * W.ψ₂ =
+      W.ψ (m - 1) ^ 2 * W.ψ m * W.ψ (m + 2) -
+        W.ψ (m - 2) * W.ψ m * W.ψ (m + 1) ^ 2 := by
+  simpa using WeierstrassCurve.ψ_even (W := W) m
+
+end WeierstrassCurve
+```
+
+If your goal has the opposite orientation, use:
+
+```lean
+  exact (W.ψ_even m).symm
+```
+
+or:
+
+```lean
+  simpa using (WeierstrassCurve.ψ_even (W := W) m).symm
+```
+
+If associativity/parentheses differ, `simpa [mul_assoc, mul_left_comm, mul_comm] using W.ψ_even m` is usually enough; for polynomial-heavy goals, `ring_nf` after rewriting is also fine.
+
+## Answer to the concrete search question
+
+The names are:
+
+```lean
+WeierstrassCurve.ψ_even        -- specialized raw bivariate ψ recurrence
+normEDS_even                  -- abstract normalized EDS recurrence
+WeierstrassCurve.Ψ_even        -- normalized bivariate Ψ recurrence
+WeierstrassCurve.preΨ_even     -- univariate preΨ recurrence
+```
+
+There is no separate `ψ_two_mul` theorem needed for the displayed identity; `W.ψ_even m` is the exact theorem.
