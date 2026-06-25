@@ -1,126 +1,166 @@
-# Q396 / dm2 — affine addition over dual numbers for `[3](P + ε)`
+# Q400 / dm2 — CAS certificate for `n = 5` separability
 
-Short runnable script.  It follows the affine doubling/secant formulas, but keeps the final secant denominator `H` projectivized so the pole at `O` can be read as
+Goal: compute the resultant certificate for the degree-12 polynomial `preΨ'_5 = preΨ_5` for a general Weierstrass curve, using the `b`-invariants.
+
+Curve:
 
 ```text
-t = -x/y = -X·H/Y.
+y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆.
 ```
 
-With the data exactly as typed in the prompt (`3*x^4 + 12*x - 1` and the negative slope), the script reports that `[3]P` is **not** at infinity and no tangent-multiplier test is being performed.  Flip `PROMPT_AS_TYPED = False` to run the actual `3`-torsion test on `y² = x³+1`; then the output verifies `tcoeff = 3/(2*y0)`.
+Use
+
+```text
+b₂ = a₁² + 4a₂,
+b₄ = 2a₄ + a₁a₃,
+b₆ = a₃² + 4a₆,
+4b₈ = b₂b₆ - b₄²,
+Δ = -b₂²b₈ - 8b₄³ - 27b₆² + 9b₂b₄b₆.
+```
+
+The relation `4b₈ = b₂b₆ - b₄²` is essential for the clean power-of-`Δ` resultant.  If `b₂,b₄,b₆,b₈` are treated as algebraically independent, the resultant is not just a scalar times `Δ^22`.
+
+## `preΨ₅`
+
+For odd `n = 5`, `preΨ'_5 = preΨ_5`, and the leading coefficient is `5`.
+
+Using
+
+```text
+ψ₃ = 3X⁴ + b₂X³ + 3b₄X² + 3b₆X + b₈,
+ψ₂² = 4X³ + b₂X² + 2b₄X + b₆,
+ψ₄/ψ₂ = 2X⁶ + b₂X⁵ + 5b₄X⁴ + 10b₆X³ + 10b₈X²
+        + (b₂b₈ - b₄b₆)X + (b₄b₈ - b₆²),
+ψ₅ = (ψ₂²)²(ψ₄/ψ₂) - ψ₃³,
+```
+
+one gets
+
+```text
+preΨ₅ =
+  5X¹²
++ 5b₂X¹¹
++ (b₂² + 31b₄)X¹⁰
++ (10b₂b₄ + 95b₆)X⁹
++ (38b₂b₆ + 7b₄² + 133b₈)X⁸
++ (3b₂²b₆ - 3b₂b₄² + 78b₂b₈ + 30b₄b₆)X⁷
++ (15b₂²b₈ - 8b₂b₄b₆ - 7b₄³ + 122b₄b₈ - 15b₆²)X⁶
++ (b₂³b₈ - b₂²b₄b₆ + 46b₂b₄b₈ - 14b₂b₆² - 37b₄²b₆ + 26b₆b₈)X⁵
++ (5b₂²b₄b₈ - b₂²b₆² - 4b₂b₄²b₆ + 10b₂b₆b₈
+   + 29b₄²b₈ - 60b₄b₆² - 9b₈²)X⁴
++ (2b₂²b₆b₈ + 8b₂b₄²b₈ - 6b₂b₄b₆² - 3b₂b₈²
+   - 4b₄³b₆ - 6b₄b₆b₈ - 25b₆³)X³
++ (6b₂b₄b₆b₈ - 2b₂b₆³ + 4b₄³b₈ - 8b₄²b₆²
+   - 9b₄b₈² - 17b₆²b₈)X²
++ (b₂b₆²b₈ + 4b₄²b₆b₈ - 5b₄b₆³ - 9b₆b₈²)X
++ (b₄b₆²b₈ - b₆⁴ - b₈³).
+```
+
+## Resultant
+
+After imposing `4b₈ = b₂b₆ - b₄²`, the certificate is
+
+```text
+Res_X(preΨ₅, d(preΨ₅)/dX) = 5¹² · Δ²².
+```
+
+So the exponent is
+
+```text
+k = 22.
+```
+
+Weighted-degree check: `X,b₂,b₄,b₆,b₈` have weights `2,2,4,6,8`; roots have weight `2`; `preΨ₅` has degree `12`; hence the resultant weight is
+
+```text
+4 * binom(12,2) = 264 = 22 * 12 = weight(Δ²²).
+```
+
+The scalar is found from the exact specialization `y² = x³ + 1`, where
+
+```text
+b₂ = 0, b₄ = 0, b₆ = 4, b₈ = 0, Δ = -432,
+preΨ₅ = 5X¹² + 380X⁹ - 240X⁶ - 1600X³ - 256,
+Res(preΨ₅, preΨ₅') = 2⁸⁸ · 3⁶⁶ · 5¹² = 5¹² · (-432)²².
+```
+
+## Bezout cofactors
+
+The general Bezout cofactors in `Q(b₂,b₄,b₆,b₈)[X]` are not included here.  In SymPy they are not tractable for the requested `≤ 500`-term cutoff; the useful small certificate for Lean is the resultant identity above.  If a later Lean step truly needs explicit cofactors, compute them in a specialized quotient or use a resultant/Bézout theorem rather than trying to inline the universal cofactors.
+
+## Runnable SymPy script
+
+This script computes `preΨ₅`, its derivative, verifies the exact specialization, and checks several exact samples after imposing `b_relation`.
 
 ```python
-import mpmath as mp
-mp.mp.dps = 50
+import sympy as sp
 
-PROMPT_AS_TYPED = True
+X = sp.symbols("X")
+b2, b4, b6, b8 = sp.symbols("b2 b4 b6 b8")
 
-class D:
-    """Dual number a + b*e, e^2 = 0."""
-    def __init__(self, a, b=0):
-        self.a, self.b = mp.mpc(a), mp.mpc(b)
-    @staticmethod
-    def of(z):
-        return z if isinstance(z, D) else D(z)
-    def __add__(self, z):
-        z = D.of(z); return D(self.a + z.a, self.b + z.b)
-    __radd__ = __add__
-    def __sub__(self, z):
-        z = D.of(z); return D(self.a - z.a, self.b - z.b)
-    def __rsub__(self, z):
-        z = D.of(z); return D(z.a - self.a, z.b - self.b)
-    def __neg__(self):
-        return D(-self.a, -self.b)
-    def __mul__(self, z):
-        z = D.of(z); return D(self.a*z.a, self.a*z.b + self.b*z.a)
-    __rmul__ = __mul__
-    def inv(self):
-        if abs(self.a) < mp.mpf("1e-45"):
-            raise ZeroDivisionError("not a unit in K[e]/e^2; affine coord has a pole")
-        return D(1/self.a, -self.b/self.a**2)
-    def __truediv__(self, z):
-        return self * D.of(z).inv()
-    def __rtruediv__(self, z):
-        return D.of(z) * self.inv()
+Delta = -b2**2*b8 - 8*b4**3 - 27*b6**2 + 9*b2*b4*b6
+b8_rel = (b2*b6 - b4**2) / 4
 
-def dbl(P):
-    # y^2 = x^3 + 1, so a1=a2=a3=a4=0.
-    x, y = P
-    lam = 3*x*x/(2*y)
-    x2 = lam*lam - 2*x
-    y2 = lam*(x - x2) - y
-    return x2, y2
+psi3 = 3*X**4 + b2*X**3 + 3*b4*X**2 + 3*b6*X + b8
+psi2_sq = 4*X**3 + b2*X**2 + 2*b4*X + b6
+psi4_over_psi2 = (
+    2*X**6 + b2*X**5 + 5*b4*X**4 + 10*b6*X**3 + 10*b8*X**2
+    + (b2*b8 - b4*b6)*X + (b4*b8 - b6**2)
+)
 
-def add_projectivized(P1, P2):
-    # Secant addition formula, but do not divide by H.
-    # If H is a unit, this is affine addition with x=X/H^2, y=Y/H^3.
-    # If H has zero constant term, this records the pole at infinity.
-    x1, y1 = P1
-    x2, y2 = P2
-    H = x2 - x1
-    R = y2 - y1
-    X = R*R - (x1 + x2)*H*H
-    Y = R*(x1*H*H - X) - y1*H*H*H
-    return X, Y, H
+prepsi5 = sp.expand(psi2_sq**2 * psi4_over_psi2 - psi3**3)
+dprepsi5 = sp.diff(prepsi5, X)
 
-if PROMPT_AS_TYPED:
-    # Root requested in the prompt.  This is not a 3-torsion root for E: y^2=x^3+1.
-    x0 = mp.findroot(lambda x: 3*x**4 + 12*x - 1, (mp.mpf("0"), mp.mpf("0.2")))
-    y0 = mp.sqrt(x0**3 + 1)
-    s = -(3*x0**2)/(2*y0)       # as typed; not tangent on y^2=x^3+1
-else:
-    # Actual nonzero 3-torsion: psi3 = 3*x^4 + 12*x = 3*x*(x^3+4).
-    x0 = -mp.power(4, mp.mpf(1)/3)
-    y0 = mp.sqrt(x0**3 + 1)     # = i*sqrt(3)
-    s = (3*x0**2)/(2*y0)        # true tangent: 2*y0*s = 3*x0^2
+print("deg prepsi5 =", sp.degree(prepsi5, X))
+print("LC prepsi5  =", sp.LC(prepsi5, X))
+print("prepsi5     =", sp.collect(prepsi5, X))
+print("dprepsi5    =", sp.collect(dprepsi5, X))
 
-P = (D(x0, 1), D(y0, s))
-Q = dbl(P)
-X, Y, H = add_projectivized(Q, P)  # [3]P_e = Q + P
+# Exact one-variable specialization y^2 = x^3 + 1.
+spec = {b2: 0, b4: 0, b6: 4, b8: 0}
+f_spec = sp.expand(prepsi5.subs(spec))
+R_spec = sp.resultant(f_spec, sp.diff(f_spec, X), X)
+Delta_spec = sp.expand(Delta.subs(spec))
 
-target = 3/(2*y0)
-print("x0               =", mp.nstr(x0, 50))
-print("y0               =", mp.nstr(y0, 50))
-print("s                =", mp.nstr(s, 50))
-print("correct psi3     =", mp.nstr(3*x0**4 + 12*x0, 50))
-print("prompt poly      =", mp.nstr(3*x0**4 + 12*x0 - 1, 50))
-print("tangent residual =", mp.nstr(2*y0*s - 3*x0**2, 50))
-print("H = H0 + e H1   =", mp.nstr(H.a, 30), "+ e*", mp.nstr(H.b, 30))
+print("\nSpecialization y^2=x^3+1")
+print("f_spec       =", f_spec)
+print("Delta_spec   =", Delta_spec)
+print("factor Res   =", sp.factorint(int(R_spec)))
+print("factor RHS   =", sp.factorint(int(5**12 * Delta_spec**22)))
+assert R_spec == 5**12 * Delta_spec**22
 
-if abs(H.a) > mp.mpf("1e-40"):
-    # No pole: affine x,y are finite, so [3]P is not O.
-    t = -(X*H)/Y
-    print("[3]P is not O; affine coords do not blow up.")
-    print("t0               =", mp.nstr(t.a, 50))
-    print("teps             =", mp.nstr(t.b, 50))
-    print("3/(2*y0)         =", mp.nstr(target, 50))
-    print("teps/target      =", mp.nstr(t.b/target, 50))
-else:
-    # H = e*H1.  Since t=-X*H/Y, coeff_e(t)=(-X0/Y0)*H1.
-    tcoeff = (-X.a/Y.a) * H.b
-    print("[3]P is O to constant order; extracting local parameter.")
-    print("tcoeff           =", mp.nstr(tcoeff, 50))
-    print("3/(2*y0)         =", mp.nstr(target, 50))
-    print("tcoeff/target    =", mp.nstr(tcoeff/target, 50))
+# Check more exact samples satisfying 4*b8=b2*b6-b4^2.
+def check_sample(B2, B4, B6):
+    B8 = sp.Rational(B2*B6 - B4**2, 4)
+    sub = {b2: sp.Rational(B2), b4: sp.Rational(B4), b6: sp.Rational(B6), b8: B8}
+    f = sp.expand(prepsi5.subs(sub))
+    R = sp.resultant(f, sp.diff(f, X), X)
+    D = sp.expand(Delta.subs(sub))
+    ok = sp.simplify(R - 5**12 * D**22) == 0
+    print("sample", (B2, B4, B6, B8), "Delta=", D, "ok=", ok)
+    assert ok
+
+for vals in [(1, 2, 3), (1, -1, 2), (3, 5, 7), (2, -3, 11)]:
+    check_sample(*vals)
+
+print("\nRESULTANT CERTIFICATE:")
+print("Res_X(prepsi5, dprepsi5/dX) = 5^12 * Delta^22, modulo 4*b8=b2*b6-b4^2")
+
+# Optional / usually too large:
+# To try universal Bezout coefficients, uncomment this block.  It is off by default
+# because the universal cofactors are not small enough for the <=500-term goal.
+#
+# K = sp.QQ.frac_field(b2, b4, b6, b8)
+# fK = sp.Poly(prepsi5, X, domain=K)
+# gK = sp.Poly(dprepsi5, X, domain=K)
+# S, T, H = sp.gcdex(fK, gK)
+# print("gcdex H =", H)
+# print("deg S, deg T =", S.degree(), T.degree())
+# print("terms S, T =", len(S.terms()), len(T.terms()))
 ```
 
-In the prompt-as-typed mode, the key lines are
+Expected final line:
 
 ```text
-correct psi3     = 1.0
-prompt poly      = 0.0
-tangent residual = -0.0416546181821225...
-H = H0 + e H1   = 0.249855470425585... + e* 2.99479467933090...
-[3]P is not O; affine coords do not blow up.
-teps/target      = 1.00172404023635...
-```
-
-In the corrected true-`3`-torsion mode, the key lines are
-
-```text
-correct psi3     = 0.0
-prompt poly      = -1.0
-tangent residual = 0.0
-H = H0 + e H1   = 0.0 + e* 3.0
-[3]P is O to constant order; extracting local parameter.
-tcoeff/target    = 1.0
+Res_X(prepsi5, dprepsi5/dX) = 5^12 * Delta^22, modulo 4*b8=b2*b6-b4^2
 ```
