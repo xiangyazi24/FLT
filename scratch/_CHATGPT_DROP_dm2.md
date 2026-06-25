@@ -1,168 +1,193 @@
-# Q388 / dm2 — CAS computation of the Weierstrass formal group to degree 3
+# Q392 / dm2 — CAS recipe for `addY` assembly in the coordinate ring
 
-Curve:
+This is a SymPy script for the `addY` assembly calculation with formal division-polynomial symbols.  It prints the residual after each rewrite, so the output gives a Lean `calc` order.
 
-```text
-y² + a₁xy + a₃y = x³ + a₂x² + a₄x + a₆.
-```
-
-Use the standard formal parameter
+The important convention used below is the generalized Weierstrass omega identity
 
 ```text
-t = -x/y,   w = -1/y,
+2 ψ_n ω_n = ψ_{2n} - a₁ φ_n ψ_n² - a₃ ψ_n⁴.
 ```
 
-so that
+For the normalized addition output, set
 
 ```text
-x(t) = t / w(t),   y(t) = -1 / w(t).
+Z = X ψ_m² - φ_m = ψ_{m-1} ψ_{m+1},
+U = Y ψ_m³ - ω_m,
+N = Xω_m - Yφ_mψ_m.
 ```
 
-Substituting into the Weierstrass equation gives
+Then Mathlib’s affine addition formula
 
 ```text
-w = t³ + a₁tw + a₂t²w + a₃w² + a₄tw² + a₆w³.
+y(P + R_m) = -(λ + a₁)x(P + R_m) - ν - a₃
 ```
 
-## Series for `w`, `x`, and `y`
-
-Solving iteratively gives
+with
 
 ```text
-w(t) = t³
-     + a₁ t⁴
-     + (a₁² + a₂) t⁵
-     + (a₁³ + 2a₁a₂ + a₃) t⁶
-     + (a₁⁴ + 3a₁²a₂ + 3a₁a₃ + a₂² + a₄) t⁷
-     + O(t⁸).
+λ = U/(ψ_m Z),   ν = N/(ψ_m Z)
 ```
 
-Thus
+gives the cleared numerator
 
 ```text
-x(t) = t⁻² - a₁t⁻¹ - a₂ - a₃t - (a₁a₃ + a₄)t² + O(t³),
-
-y(t) = -t⁻³ + a₁t⁻² + a₂t⁻¹ + a₃ + (a₁a₃ + a₄)t + O(t²).
+addY = -((U·addX + N·Z²)/ψ_m) - a₁·addX·Z - a₃·Z³.
 ```
 
-## Addition formula used
-
-For two affine points `Pᵢ = (xᵢ,yᵢ)`, write
+The target is
 
 ```text
-λ = (y₂ - y₁)/(x₂ - x₁),
-ν = (y₁x₂ - y₂x₁)/(x₂ - x₁).
+addY = ψ_{m-1}³ · ω_{m+1}.
 ```
 
-The sum is
+## Short warning
+
+Using exactly the shifted EDS identity as stated leaves the residual
 
 ```text
-x₃ = λ² + a₁λ - a₂ - x₁ - x₂,
-y₃ = -(λ + a₁)x₃ - ν - a₃.
+ψ₂ ψ_{m-1}² · (ψ_{m+2}ψ_m³ - ψ_{m-1}ψ_{m+1}³ - ψ_{2m+1}) / 2.
 ```
 
-Then
+So the final zero also needs the standard odd EDS recurrence
 
 ```text
-F(T₁,T₂) = -x₃/y₃.
+ψ_{2m+1} = ψ_{m+2}ψ_m³ - ψ_{m-1}ψ_{m+1}³.
 ```
 
-## Result
+If your Lean lemma named `eds_shifted` already packages this odd recurrence, then fold the final `Hodd` step below into that rewrite.
 
-The degree-3 truncation is
-
-```text
-F(T₁,T₂)
-  = T₁ + T₂
-    - a₁ T₁T₂
-    - a₂(T₁²T₂ + T₁T₂²)
-    + O(total degree 4).
-```
-
-Equivalently,
-
-```text
-degree 1:  T₁ + T₂
-degree 2: -a₁ T₁T₂
-degree 3: -a₂ T₁T₂(T₁ + T₂).
-```
-
-So the linear coefficients of the formal group law are both `1`, as expected.
-
-## Runnable SymPy script
+## Runnable script
 
 ```python
 import sympy as sp
 
-t, r, U, V = sp.symbols('t r U V')
-a1, a2, a3, a4, a6 = sp.symbols('a1 a2 a3 a4 a6')
+# Symbols: coefficients and affine coordinates in the coordinate ring.
+X, Y = sp.symbols("X Y")
+a1, a2, a3, a4, a6 = sp.symbols("a1 a2 a3 a4 a6")
 
-# 1. Solve w = t^3 + a1*t*w + a2*t^2*w + a3*w^2 + a4*t*w^2 + a6*w^3.
-N = 8                       # computes through t^7, i.e. O(t^8)
-c = sp.symbols(f'c0:{N}')
-w_unknown = sum(c[i] * t**i for i in range(N))
-eq = w_unknown - (t**3 + a1*t*w_unknown + a2*t**2*w_unknown
-                  + a3*w_unknown**2 + a4*t*w_unknown**2 + a6*w_unknown**3)
-sol = {c[0]: 0, c[1]: 0, c[2]: 0}
-for k in range(3, N):
-    sol[c[k]] = sp.solve(sp.Eq(sp.expand(eq.subs(sol)).coeff(t, k), 0), c[k])[0]
-w = sp.expand(w_unknown.subs(sol))
-print('w(t) =', w, '+ O(t^8)')
+# Formal division-polynomial symbols.
+psi2 = sp.symbols("psi2")
+pm2, pm1, p0, pp1, pp2, pp3 = sp.symbols(
+    "psi_m2 psi_m1 psi_m psi_p1 psi_p2 psi_p3"
+)
+p2m, p2m1, p2mp2 = sp.symbols("psi_2m psi_2m1 psi_2mp2")
 
-# 2. Laurent expansions.
-x = sp.series(t / w, t, 0, 3).removeO()
-y = sp.series(-1 / w, t, 0, 2).removeO()
-print('x(t) =', sp.collect(sp.expand(x), t), '+ O(t^3)')
-print('y(t) =', sp.collect(sp.expand(y), t), '+ O(t^2)')
+# Formal phi/omega/addX symbols.
+phi_m, phi_p1 = sp.symbols("phi_m phi_p1")
+omega_m, omega_p1 = sp.symbols("omega_m omega_p1")
+addX = sp.symbols("addX")
 
-# 3. Affine addition formula, expanded by scaling t1=r*U, t2=r*V.
-#    lambda=(y2-y1)/(x2-x1), nu=(y1*x2-y2*x1)/(x2-x1),
-#    x3=lambda^2+a1*lambda-a2-x1-x2, y3=-(lambda+a1)*x3-nu-a3.
-#    Using x=t/w, y=-1/w gives
-#      lambda=(w2-w1)/(t2*w1-t1*w2), nu=(t1-t2)/(t2*w1-t1*w2).
-S, P = U + V, U * V
-b2 = a1**2 + a2
-B0 = U**2 + U*V + V**2
-B1 = U**3 + U**2*V + U*V**2 + V**3
-B2 = U**4 + U**3*V + U**2*V**2 + U*V**3 + V**4
+def nf(e):
+    return sp.factor(sp.cancel(sp.expand(e)))
 
-# lambda = r^-1*l + m + r*n + O(r^2)
-Q = (B0 + a1*r*B1 + b2*r**2*B2) / (S + a1*r*B0 + b2*r**2*B1)
-Q = sp.series(Q, r, 0, 3).removeO()
-l = sp.factor(sp.cancel(-Q.coeff(r, 0) / P))
-m = sp.factor(sp.cancel(-Q.coeff(r, 1) / P))
-n = sp.factor(sp.cancel(-Q.coeff(r, 2) / P))
+def show(label, e):
+    print("\n--", label)
+    print(sp.factor(sp.cancel(e)))
 
-# x(ti)=r^-2/U_i^2 - a1*r^-1/U_i - a2 + O(r).
-A = sp.cancel(l**2 - (1/U**2 + 1/V**2))
-B = sp.cancel(2*l*m + a1*l + a1*(1/U + 1/V))
-C = sp.cancel(m**2 + 2*l*n + a1*m + a2)
+# Weierstrass relation for the final coordinate-ring check.
+FW = Y**2 + a1*X*Y + a3*Y - (X**3 + a2*X**2 + a4*X + a6)
 
-# nu = r^-3*N0 + r^-2*N1 + r^-1*N2 + O(1)
-N0 = 1/(P*S)
-N1 = -a1*B0/(P*S**2)
-N2 = (a1**2*B0**2/S**3 - b2*B1/S**2)/P
+def mod_FW(e):
+    """Reduce numerator modulo F_W, viewed as a monic quadratic in Y."""
+    num, den = sp.together(e).as_numer_denom()
+    rem = sp.rem(sp.Poly(sp.expand(num), Y), sp.Poly(FW, Y)).as_expr()
+    return nf(rem / den)
 
-# y3 = r^-3*D0 + r^-2*D1 + r^-1*D2 + O(1)
-D0 = sp.cancel(-(l*A) - N0)
-D1 = sp.cancel(-(l*B + (m+a1)*A) - N1)
-D2 = sp.cancel(-(l*C + (m+a1)*B + n*A) - N2)
+# Mathlib affine addition shape, normalized so the output Z is
+#   Z = X*psi_m^2 - phi_m = psi_{m-1}*psi_{m+1}.
+#
+# Write U = Y*psi_m^3 - omega_m and
+#       N = X*omega_m - Y*phi_m*psi_m.
+# Then lambda = U/(psi_m*Z) and nu = N/(psi_m*Z), and
+#   y(P+R_m) = -(lambda+a1)*x(P+R_m) - nu - a3.
+#
+# addY is the numerator after clearing Z^3:
+#   addY = -((U*addX + N*Z^2)/psi_m) - a1*addX*Z - a3*Z^3.
+Z = X*p0**2 - phi_m
+U = Y*p0**3 - omega_m
+N = X*omega_m - Y*phi_m*p0
+addY = -((U*addX + N*Z**2)/p0) - a1*addX*Z - a3*Z**3
 
-# F=-x3/y3 = r*f1 + r^2*f2 + r^3*f3 + O(r^4).
-f1 = sp.factor(sp.cancel(-A/D0))
-f2 = sp.factor(sp.cancel(-(B/D0 - A*D1/D0**2)))
-f3 = sp.factor(sp.cancel(-(C/D0 - B*D1/D0**2 + A*(D1**2/D0**3 - D2/D0**2))))
-print('degree 1 =', f1)
-print('degree 2 =', f2)
-print('degree 3 =', f3)
-print('F(T1,T2) = T1 + T2 - a1*T1*T2 - a2*T1*T2*(T1+T2) + O(deg 4)')
+R = addY - pm1**3 * omega_p1
+show("0. raw residual addY - psi_{m-1}^3*omega_{m+1}", R)
+
+# 1. addX helper.
+R = nf(R.subs(addX, pm1**2 * phi_p1))
+show("1. use HaddX: addX -> psi_{m-1}^2*phi_{m+1}", R)
+
+# 2-3. phi definitions.
+R = nf(R.subs(phi_m, X*p0**2 - pp1*pm1))
+show("2. use Hphi_m: phi_m -> X*psi_m^2 - psi_{m+1}*psi_{m-1}", R)
+
+R = nf(R.subs(phi_p1, X*pp1**2 - pp2*p0))
+show("3. use Hphi_{m+1}: phi_{m+1} -> X*psi_{m+1}^2 - psi_{m+2}*psi_m", R)
+
+# 4-5. General omega identity:
+#   2*psi_n*omega_n =
+#     psi_{2n} - a1*phi_n*psi_n^2 - a3*psi_n^4.
+omega_m_rhs = (p2m - a1*(X*p0**2 - pp1*pm1)*p0**2 - a3*p0**4) / (2*p0)
+R = nf(R.subs(omega_m, omega_m_rhs))
+show("4. use Homega_m", R)
+
+omega_p1_rhs = (p2mp2 - a1*(X*pp1**2 - pp2*p0)*pp1**2 - a3*pp1**4) / (2*pp1)
+R = nf(R.subs(omega_p1, omega_p1_rhs))
+show("5. use Homega_{m+1}", R)
+
+# 6-7. Even division-polynomial identities:
+#   psi_{2m}*psi2 = psi_m*(psi_{m+2}*psi_{m-1}^2 - psi_{m-2}*psi_{m+1}^2)
+#   psi_{2(m+1)}*psi2 = psi_{m+1}*(psi_{m+3}*psi_m^2 - psi_{m-1}*psi_{m+2}^2)
+R = nf(R.subs(p2m, p0*(pp2*pm1**2 - pm2*pp1**2)/psi2))
+show("6. use Heven_m", R)
+
+R = nf(R.subs(p2mp2, pp1*(pp3*p0**2 - pm1*pp2**2)/psi2))
+show("7. use Heven_{m+1}", R)
+
+# 8. Put the occurrence of 2Y+a1X+a3 back into the formal symbol psi2.
+# SymPy does not reliably do this replacement once expanded, so we regroup and verify.
+odd_lhs = pp2*p0**3 - pm1*pp1**3
+shifted_lhs = p0**2*pp3*pm1 - pm2*pp1**2*pp2
+R_regrouped = pm1**2 * (psi2**2 * odd_lhs - shifted_lhs) / (2*psi2)
+assert nf((R - R_regrouped).subs(psi2, 2*Y + a1*X + a3)) == 0
+R = nf(R_regrouped)
+show("8. use Hpsi2: psi2 = 2Y + a1X + a3, then regroup", R)
+
+# 9. Shifted EDS identity from the prompt:
+#   psi_m^2*psi_{m+3}*psi_{m-1}
+#     - psi_{m-2}*psi_{m+1}^2*psi_{m+2}
+#   = psi2^2*psi_{2m+1}
+R = nf(R.subs(shifted_lhs, psi2**2 * p2m1))
+show("9. use eds_shifted", R)
+
+# The residual left by exactly the listed shifted EDS relation is now visible.
+# To reach zero one also needs the standard odd EDS recurrence:
+#   psi_{2m+1} = psi_{m+2}*psi_m^3 - psi_{m-1}*psi_{m+1}^3.
+R = nf(R.subs(p2m1, odd_lhs))
+show("10. use Hodd: psi_{2m+1} -> psi_{m+2}*psi_m^3 - psi_{m-1}*psi_{m+1}^3", R)
+
+print("\nfinal mod F_W =", mod_FW(R))
+assert mod_FW(R) == 0
 ```
 
-Expected output ends with
+## Lean substitution order
+
+Use this order in the `calc` proof:
 
 ```text
-degree 1 = U + V
-degree 2 = -U*V*a1
-degree 3 = -U*V*a2*(U + V)
-F(T1,T2) = T1 + T2 - a1*T1*T2 - a2*T1*T2*(T1+T2) + O(deg 4)
+1.  HaddX
+2.  Hφ_m
+3.  Hφ_{m+1}
+4.  Hω_m
+5.  Hω_{m+1}
+6.  Heven_m
+7.  Heven_{m+1}
+8.  Hψ₂ / regroup to expose ψ₂²
+9.  eds_shifted
+10. Hodd, unless your eds_shifted lemma already includes the odd EDS recurrence
+11. reduce modulo F_W / ring_nf
+```
+
+The final printed line is
+
+```text
+final mod F_W = 0
 ```
