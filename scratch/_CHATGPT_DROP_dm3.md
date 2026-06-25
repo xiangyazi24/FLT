@@ -1,299 +1,268 @@
-# Q499 (dm3): `(X₀-X₁)` prime/non-zero-divisor in `MvPowerSeries (Fin 2) K`
+# Q513 (dm3): proving `(X0-X1)^3 | formalAddX` by chord-variable factoring
 
-## Bottom line
+## Check result
 
-For the immediate `addZ` proof, do **not** make the first target
-
-```lean
-Prime (X₀ - X₁ : MvPowerSeries (Fin 2) K)
-```
-
-or a UFD instance for `MvPowerSeries (Fin 2) K`.  Mathematically this is true over a field, but it is not the Lean-shortest route.
-
-The useful route is to change coordinates from `(X₀,X₁)` to
-
-```text
-S = X₁,
-H = X₀ - X₁.
-```
-
-Then
-
-```text
-K⟦X₀,X₁⟧ ≃ (K⟦S⟧)⟦H⟧,
-X₀-X₁ ↦ H.
-```
-
-After this coordinate change, the desired statement is only a one-variable power-series statement in the variable `H`.
-
----
-
-## Mathlib API status
-
-The public `MvPowerSeries.Basic` API has the important coordinate-variable lemmas
+Yes: Mathlib has the useful refactored theorem, named
 
 ```lean
-MvPowerSeries.X_pow_dvd_iff
-MvPowerSeries.X_dvd_iff
+WeierstrassCurve.Projective.addX_eq'
 ```
 
-with the shape
+in `Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Formula.lean`.
+
+But the theorem is slightly weaker/different from the naive hope.  It does **not** say that bare `addX` is definitionally a cubic polynomial in the chord variables.  The raw definition of `addX` is still the explicit homogeneous degree-4 polynomial.  The factored theorem says:
 
 ```lean
-X s ^ n ∣ φ ↔ ∀ m, m s < n → coeff m φ = 0
-X s ∣ φ     ↔ ∀ m, m s = 0 → coeff m φ = 0
+lemma addX_eq' {P Q : Fin 3 -> R} (hP : W'.Equation P) (hQ : W'.Equation Q) :
+    W'.addX P Q * (P z * Q z) ^ 2 =
+      ((P y * Q z - Q y * P z) ^ 2 * P z * Q z
+        + W'.a1 * (P y * Q z - Q y * P z) * P z * Q z
+            * (P x * Q z - Q x * P z)
+        - W'.a2 * P z * Q z * (P x * Q z - Q x * P z) ^ 2
+        - P x * Q z * (P x * Q z - Q x * P z) ^ 2
+        - Q x * P z * (P x * Q z - Q x * P z) ^ 2)
+        * (P x * Q z - Q x * P z)
 ```
 
-I do not see exposed declarations named
+Mathlib also has the analogous denominator-cleared theorem for `addZ`:
 
 ```lean
-MvPowerSeries.Prime
-MvPowerSeries.UniqueFactorizationDomain
-PowerSeries.Prime
+lemma addZ_eq' {P Q : Fin 3 -> R} (hP : W'.Equation P) (hQ : W'.Equation Q) :
+    W'.addZ P Q * (P z * Q z) = (P x * Q z - Q x * P z) ^ 3
 ```
 
-so I would not base the implementation on those names.  `Prime.dvd_mul` is a general algebra lemma once one has a `Prime p` hypothesis, but the hard part here is producing `Prime (X₀-X₁)`.
+and `addXYZ_X` is just `rfl`, so the X-coordinate of `addXYZ` is exactly `addX`.
 
-There is general quotient infrastructure via `Ideal.Quotient`, but I would not expect a ready-made specialized isomorphism
+Important naming warning: Mathlib's `addU` is **not** the chord variable `U = Px*Qz - Qx*Pz`.  Mathlib's `addU` is the scalar
 
 ```lean
-MvPowerSeries (Fin 2) K ⧸ Ideal.span {X₀-X₁} ≃+* PowerSeries K
+-(P y * Q z - Q y * P z)^3 / (P z * Q z)
 ```
 
-You can prove it, but it requires defining diagonal evaluation and proving its kernel is exactly `(X₀-X₁)`.  That is heavier than needed for this cancellation.
+over a field.  For this proof, define local names such as `formalU` and `formalV`; do not reuse `addU`.
 
----
-
-## Non-zero-divisor is not enough
-
-A non-zero-divisor proof gives cancellation from equalities:
-
-```text
-δ^3 * A = δ^3 * B  ⇒  A = B.
-```
-
-It does **not** give the divisibility transfer
-
-```text
-δ^3 ∣ A * B  and  δ ∤ B  ⇒  δ^3 ∣ A.
-```
-
-For that you need primality, coprimality, or an order/valuation argument.  The order argument is easiest here.
-
----
-
-## One-variable cancellation lemma
-
-Work in `PowerSeries R`, where `R` is a domain.
-
-```lean
-import Mathlib.RingTheory.PowerSeries.Basic
-import Mathlib.RingTheory.PowerSeries.Order
-
-namespace PowerSeries
-
-variable {R : Type*} [CommRing R] [NoZeroDivisors R]
-
-/-- If `B` has nonzero constant coefficient, then multiplication by `B`
-does not create extra `X`-adic divisibility. -/
-theorem X_pow_dvd_cancel_right_constCoeff_ne_zero
-    {A B : PowerSeries R} {n : ℕ}
-    (hB0 : PowerSeries.constantCoeff B ≠ 0)
-    (h : PowerSeries.X ^ n ∣ A * B) :
-    PowerSeries.X ^ n ∣ A := by
-  -- Proof plan:
-  --   rw [PowerSeries.X_pow_dvd_iff] at h ⊢
-  --   intro m hm
-  --   strong induction on m.
-  --   Expand coeff m (A*B) using `PowerSeries.coeff_mul`.
-  --   Lower coefficients of A vanish by induction.
-  --   The remaining term is `(coeff m A) * constantCoeff B = 0`.
-  --   Since `constantCoeff B ≠ 0` and `R` is a domain, `coeff m A = 0`.
-  sorry
-
-end PowerSeries
-```
-
-This lemma is enough.  It does not require `B` to be a unit.  It only requires the constant coefficient of `B` in the distinguished variable to be nonzero.
-
----
-
-## Difference-coordinate equivalence
-
-Define a reusable equivalence, or reuse the diagonal/Taylor substitution map from Q478.
-
-Schematic API:
-
-```lean
-namespace FormalGroupW
-
-open MvPowerSeries PowerSeries
-
-variable {K : Type*} [CommRing K]
-
-abbrev FG2 := MvPowerSeries (Fin 2) K
-abbrev Inner := PowerSeries K
-abbrev Outer := PowerSeries Inner
-
-noncomputable def diffCoord : FG2 K ≃+* Outer K :=
-  -- X₀ ↦ C(S) + H
-  -- X₁ ↦ C(S)
-  -- inverse: S ↦ X₁, H ↦ X₀ - X₁
-  sorry
-
-theorem diffCoord_X0 :
-    diffCoord (K := K) (MvPowerSeries.X (0 : Fin 2)) =
-      PowerSeries.C (PowerSeries.X : PowerSeries K) + PowerSeries.X := by
-  sorry
-
-theorem diffCoord_X1 :
-    diffCoord (K := K) (MvPowerSeries.X (1 : Fin 2)) =
-      PowerSeries.C (PowerSeries.X : PowerSeries K) := by
-  sorry
-
-theorem diffCoord_delta :
-    diffCoord (K := K)
-      (MvPowerSeries.X (0 : Fin 2) - MvPowerSeries.X (1 : Fin 2)) =
-      PowerSeries.X := by
-  simp [diffCoord_X0, diffCoord_X1]
-
-end FormalGroupW
-```
-
-If there is no substitution API, define `diffCoord` coefficientwise by the finite binomial formula
-
-```text
-f(X₀,X₁) = Σ aᵢⱼ X₀^i X₁^j
-f(S+H,S) = Σ aᵢⱼ (S+H)^i S^j
-          = Σ aᵢⱼ Σ_{r≤i} binom(i,r) H^r S^{i-r+j}.
-```
-
-For fixed `H^r S^m`, only finitely many pairs contribute, so this is a legitimate coefficient definition.  The inverse is the substitution
-
-```text
-S ↦ X₁,
-H ↦ X₀-X₁.
-```
-
----
-
-## Applying it to `w₀w₁`
+## Consequence for the formal point
 
 Let
 
-```text
-w₀ = w(X₀),
-w₁ = w(X₁),
-δ = X₀-X₁.
+```lean
+P0 = P(t0) = ![t0, -1, w0]
+P1 = P(t1) = ![t1, -1, w1]
 ```
 
-Under `diffCoord`,
+and define
 
-```text
-w₀ ↦ w(S+H),
-w₁ ↦ w(S).
+```lean
+def formalU : FG2 K := P0 x * P1 z - P1 x * P0 z
+-- = t0*w1 - t1*w0
+
+def formalV : FG2 K := P0 y * P1 z - P1 y * P0 z
+-- = (-1)*w1 - (-1)*w0 = w0 - w1
 ```
 
-Therefore the constant coefficient in the outer `H` variable is
+depending on the order convention, these may be negated.  The sign is irrelevant for divisibility by `delta^3`.
 
-```text
-constantCoeff_H (w(S+H) * w(S)) = w(S)^2.
+Let
+
+```lean
+def delta : FG2 K := X0 - X1
 ```
 
-This is nonzero in `K⟦S⟧`, because the formal parameter series satisfies
+or the opposite sign.  From the earlier diagonal-difference lemmas:
 
-```text
-w(T) = T^3 * unit
+```lean
+theorem delta_dvd_formalU : delta | formalU := ...
+theorem delta_dvd_formalV : delta | formalV := ...
 ```
 
-or equivalently has nonzero coefficient at degree `3`.  Since `K` is a field, `K⟦S⟧` is a domain, so `w(S)^2 ≠ 0`.
+The right hand side of `addX_eq'` is cubic in `formalU` and `formalV`:
 
-Important: the ordinary total constant coefficient of `w₀w₁` in `K⟦X₀,X₁⟧` is zero.  The useful nonzero coefficient is the constant coefficient in the **difference variable** `H`, with coefficient ring `K⟦S⟧`.
+```text
+(V^2 * PzQz
+ + a1 * V * PzQz * U
+ - a2 * PzQz * U^2
+ - PxQz * U^2
+ - QxPz * U^2) * U
+```
 
----
+Each term contains total `U,V` degree at least 3:
 
-## Final theorem shape
+```text
+V^2 * U,
+V * U^2,
+U^3,
+U^3,
+U^3.
+```
+
+Therefore `(X0-X1)^3` divides the RHS, and hence
+
+```lean
+delta^3 | formalAddX * (w0*w1)^2
+```
+
+not immediately `delta^3 | formalAddX`.
+
+The remaining step is exactly the Q499 cancellation: cancel `(w0*w1)^2` because it has difference-order zero.  Under the difference coordinate change
+
+```text
+X0 = S + H,
+X1 = S,
+delta = H,
+```
+
+the `H`-constant coefficient of `(w0*w1)^2` is
+
+```text
+(w(S)^2)^2 = w(S)^4 != 0.
+```
+
+So the one-variable `PowerSeries.X^n` cancellation lemma from Q499 applies.
+
+## Lean implementation skeleton
+
+First expose the formal chord variables and the denominator-cleared RHS.
 
 ```lean
 namespace FormalGroupW
 
-open MvPowerSeries PowerSeries
+open MvPowerSeries WeierstrassCurve.Projective
 
 variable {K : Type*} [Field K]
 
 abbrev FG2 := MvPowerSeries (Fin 2) K
 
-def δ : FG2 K := MvPowerSeries.X (0 : Fin 2) - MvPowerSeries.X (1 : Fin 2)
+-- Choose the sign convention once and keep it everywhere.
+def delta : FG2 K := MvPowerSeries.X (0 : Fin 2) - MvPowerSeries.X (1 : Fin 2)
 
-noncomputable def w0 : FG2 K := ...
-noncomputable def w1 : FG2 K := ...
-noncomputable def formalAddZ : FG2 K := ...
+noncomputable def P0 : Fin 3 -> FG2 K := formalP0
+noncomputable def P1 : Fin 3 -> FG2 K := formalP1
 
-theorem diffCoord_w0w1_constCoeff_ne_zero :
-    PowerSeries.constantCoeff (diffCoord (K := K) (w0 * w1)) ≠ 0 := by
-  -- simplify to `w(S)^2 ≠ 0`
-  -- use `w = X^3 * unit` or `coeff 3 w = 1`
-  sorry
+local notation "x" => (0 : Fin 3)
+local notation "y" => (1 : Fin 3)
+local notation "z" => (2 : Fin 3)
 
-theorem delta_pow3_dvd_addZ_of_dvd_mul_w0w1
-    (h : δ (K := K)^3 ∣ formalAddZ * (w0 * w1)) :
-    δ (K := K)^3 ∣ formalAddZ := by
-  have hmap :
-      PowerSeries.X ^ 3 ∣
-        diffCoord (K := K) formalAddZ * diffCoord (K := K) (w0 * w1) := by
-    -- apply `diffCoord` to h and simplify using `diffCoord_delta`
-    sorry
+noncomputable def w0 : FG2 K := P0 (K := K) z
+noncomputable def w1 : FG2 K := P1 (K := K) z
 
-  have hB0 :
-      PowerSeries.constantCoeff (diffCoord (K := K) (w0 * w1)) ≠ 0 :=
-    diffCoord_w0w1_constCoeff_ne_zero (K := K)
+noncomputable def formalU : FG2 K :=
+  P0 (K := K) x * P1 (K := K) z - P1 (K := K) x * P0 (K := K) z
 
-  have hA : PowerSeries.X ^ 3 ∣ diffCoord (K := K) formalAddZ :=
-    PowerSeries.X_pow_dvd_cancel_right_constCoeff_ne_zero hB0 hmap
+noncomputable def formalV : FG2 K :=
+  P0 (K := K) y * P1 (K := K) z - P1 (K := K) y * P0 (K := K) z
 
-  rcases hA with ⟨Q, hQ⟩
-  refine ⟨diffCoord.symm Q, ?_⟩
-  -- Apply `diffCoord.injective`; map both sides and simplify.
-  sorry
+noncomputable def formalAddX : FG2 K :=
+  W.addX (P0 (K := K)) (P1 (K := K))
 
-end FormalGroupW
+noncomputable def formalAddXRhs : FG2 K :=
+  ((formalV (K := K)^2 * (w0 (K := K) * w1 (K := K))
+    + W.a1 * formalV (K := K) * (w0 (K := K) * w1 (K := K)) * formalU (K := K)
+    - W.a2 * (w0 (K := K) * w1 (K := K)) * formalU (K := K)^2
+    - P0 (K := K) x * P1 (K := K) z * formalU (K := K)^2
+    - P1 (K := K) x * P0 (K := K) z * formalU (K := K)^2)
+    * formalU (K := K))
 ```
 
----
+The precise coefficient names are probably `W.a1`, `W.a2` or `W'.a1`, `W'.a2` depending on how `FormalGroupW.lean` names the base-changed projective curve.  Use the names already present in that file.
 
-## If you still want `Prime δ`
-
-The mathematical proof is:
-
-```text
-K⟦X₀,X₁⟧/(X₀-X₁) ≅ K⟦X₁⟧,
-```
-
-and the right-hand side is a domain, so `(X₀-X₁)` generates a prime ideal.  From there one can package an element-level `Prime (X₀-X₁)` if the needed principal-ideal API is convenient.
-
-But the quotient proof needs:
+Then instantiate Mathlib's theorem.
 
 ```lean
-def diagEval : MvPowerSeries (Fin 2) K →+* PowerSeries K
--- X₀ ↦ X, X₁ ↦ X
-
-theorem ker_diagEval :
-    RingHom.ker diagEval = Ideal.span {X₀ - X₁}
-
-theorem diagEval_surjective : Function.Surjective diagEval
+theorem formalAddX_mul_w0w1_sq_eq_rhs :
+    formalAddX (W := W) * (w0 (W := W) * w1 (W := W))^2 =
+      formalAddXRhs (W := W) := by
+  -- `hP0` and `hP1` are the formal curve-equation proofs for the two substituted points.
+  have h := W.addX_eq' (P := P0 (W := W)) (Q := P1 (W := W)) hP0 hP1
+  -- h has exactly the desired denominator-cleared shape.
+  -- Reduce `P0 z`, `P1 z`, `P0 x`, `P1 x`, etc. to `w0`, `w1`, `t0`, `t1`.
+  simpa [formalAddX, formalAddXRhs, formalU, formalV, w0, w1, P0, P1, mul_assoc, mul_left_comm,
+    mul_comm] using h
 ```
 
-This is clean but heavier than the difference-coordinate cancellation.
+Now prove the cubic divisibility of the RHS.
 
----
+```lean
+lemma delta_pow3_dvd_formalAddXRhs
+    (hU : delta (K := K) | formalU (W := W))
+    (hV : delta (K := K) | formalV (W := W)) :
+    delta (K := K)^3 | formalAddXRhs (W := W) := by
+  rcases hU with ⟨U1, hU⟩
+  rcases hV with ⟨V1, hV⟩
+  subst hU
+  subst hV
+  refine ⟨_, ?_⟩
+  ring
+```
 
-## Minimal atom list
+If `subst hU` does not work cleanly, use
 
-1. `scratch/FormalGroupW_XCancel.lean` — prove the one-variable cancellation lemma for `PowerSeries.X^n`.  Estimated 80–160 lines.
-2. `scratch/FormalGroupW_DiffCoord.lean` — define `diffCoord`, prove images of `X₀`, `X₁`, and `δ`.  Estimated 200–400 lines if coefficient-defined from scratch; much less if Q478's substitution map is reusable.
-3. `scratch/FormalGroupW_WDiffOrder.lean` — prove `constantCoeff_H(diffCoord (w0*w1)) ≠ 0`.  Estimated 80–150 lines.
-4. `scratch/FormalGroupW_AddZCancel.lean` — combine the pieces to prove `δ^3 ∣ addZ` from `δ^3 ∣ addZ*w0*w1`.  Estimated 50–100 lines.
+```lean
+  rw [hU, hV]
+  refine ⟨_, ?_⟩
+  ring
+```
 
-## Final recommendation
+or define the quotient explicitly.  If `ring` is too slow, split into five terms and use `dvd_add`, `dvd_sub`, and `dvd_mul_of_dvd_right/left`.
 
-Use the difference-coordinate/order route.  It proves exactly the needed cancellation without waiting on a global `Prime (X₀-X₁)` theorem or a UFD instance for multivariate power series.  Package `Prime δ` later only if it becomes independently useful.
+This gives the denominator-cleared divisibility:
+
+```lean
+theorem delta_pow3_dvd_formalAddX_mul_w0w1_sq :
+    delta (K := K)^3 | formalAddX (W := W) * (w0 (W := W) * w1 (W := W))^2 := by
+  rw [formalAddX_mul_w0w1_sq_eq_rhs]
+  exact delta_pow3_dvd_formalAddXRhs
+    (delta_dvd_formalU (W := W))
+    (delta_dvd_formalV (W := W))
+```
+
+Finally cancel `(w0*w1)^2` using the Q499 difference-coordinate cancellation lemma.
+
+```lean
+theorem delta_pow3_dvd_formalAddX :
+    delta (K := K)^3 | formalAddX (W := W) := by
+  apply delta_pow3_dvd_cancel_right_of_diffConst_ne_zero
+    (B := (w0 (W := W) * w1 (W := W))^2)
+  · -- diff-coordinate constant coefficient is w(S)^4, nonzero
+    exact diffCoord_w0w1_sq_constCoeff_ne_zero (W := W)
+  · exact delta_pow3_dvd_formalAddX_mul_w0w1_sq (W := W)
+```
+
+The cancellation lemma can be the Q499 theorem in the form:
+
+```lean
+theorem delta_pow_dvd_cancel_right_diffConst_ne_zero
+    {A B : FG2 K} {n : Nat}
+    (hB0 : diffConstCoeff B != 0)
+    (h : delta^n | A * B) :
+    delta^n | A
+```
+
+or the transported one-variable statement in `(K[[S]])[[H]]`.
+
+## Practical file split
+
+Suggested atom files:
+
+1. `scratch/FormalGroupW_AddXFactored.lean` -- define `formalU`, `formalV`, `formalAddXRhs`, prove `formalAddX_mul_w0w1_sq_eq_rhs` from `Projective.addX_eq'`.  Estimated 60-120 lines.
+2. `scratch/FormalGroupW_AddXDivCleared.lean` -- prove `delta^3 | formalAddXRhs`, hence `delta^3 | formalAddX*(w0*w1)^2`.  Estimated 50-100 lines.
+3. `scratch/FormalGroupW_AddXCancel.lean` -- reuse Q499 cancellation to prove `delta^3 | formalAddX`.  Estimated 30-70 lines.
+
+## Final answer
+
+Use `Projective.addX_eq'`.  It is exactly the denominator-cleared chord-variable factorization needed for the proof.  However, it proves cubic divisibility for
+
+```text
+formalAddX * (w0*w1)^2
+```
+
+not directly for `formalAddX`.  Therefore the full proof is:
+
+```text
+delta | formalU,
+delta | formalV
+=> delta^3 | formalAddXRhs
+=> delta^3 | formalAddX * (w0*w1)^2
+=> delta^3 | formalAddX         -- by Q499 cancellation
+```
+
+Do not try to prove a new raw factored definition of `addX`; Mathlib's `addX_eq'` is the right theorem.  Also do not use Mathlib's `addU` as the chord variable: define local `formalU = Px*Qz - Qx*Pz` and `formalV = Py*Qz - Qy*Pz` instead.
