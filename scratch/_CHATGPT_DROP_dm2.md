@@ -1,54 +1,46 @@
-# Q282 (dm2): CAS investigation — is the `addX` identity an EDS-formal consequence?
+# Q289 (dm2): CAS test of the formal `addY` reduction for general `m`
 
-Question: for the short Weierstrass curve
-
-```text
-Y² = X³ + A X + B,
-```
-
-treat the values
+Question: after substituting the formal relations
 
 ```text
-ψ_{m-2}, ψ_{m-1}, ψ_m, ψ_{m+1}, ψ_{m+2}
+HF      : F_W = 0
+Hφ_m    : φ_m     = X ψ_m² - ψ_{m+1} ψ_{m-1}
+Hφ_m+1  : φ_{m+1} = X ψ_{m+1}² - ψ_{m+2} ψ_m
+Hω_m    : 2 ψ_m ω_m = ψ_{2m} - ψ_m²(a₁φ_m+a₃ψ_m²)
+Heven_m : ψ₂ ψ_{2m} = ψ_m(ψ_{m+2}ψ_{m-1}² - ψ_{m-2}ψ_{m+1}²)
+Hω_m+1  : 2 ψ_{m+1}ω_{m+1} = ψ_{2m+2} - ψ_{m+1}²(a₁φ_{m+1}+a₃ψ_{m+1}²)
+Heven_m+1 : ψ₂ ψ_{2m+2} = ψ_{m+1}(ψ_{m+3}ψ_m² - ψ_{m-1}ψ_{m+2}²)
 ```
 
-as formal symbols satisfying the relevant local EDS relation, together with the curve equation and the definitions of `φ_m` and `ω_m`.  Does
+does
 
 ```text
-addX([X,Y,1], [φ_m,ω_m,ψ_m]) - ψ_{m-1}² φ_{m+1}
+2 · (addY(P,R_m) - ψ_{m-1}³ω_{m+1})
 ```
 
-reduce to zero formally?
+reduce to zero?
 
 ## Result
 
-**No, not from the local EDS product recurrence alone.**
+The CAS answer is **NO** for the stated relation set.
 
-After substituting the formal definitions of `φ_m`, `φ_{m+1}`, and `ω_m`, and reducing by the curve equation plus the relevant EDS recurrence
-
-```text
-ψ_{m+2} ψ_{m-2} = ψ_{m+1} ψ_{m-1} ψ_2² - ψ_3 ψ_m²,
-```
-
-the target does **not** reduce to zero.
-
-The residual is
+Even if I additionally substitute the already-proved/formal `addX` identity
 
 ```text
-ψ_m/2 * I_m
+addX(P,R_m) = ψ_{m-1}² φ_{m+1},
 ```
 
-where the missing extra identity is
+the formal `addY` expression does **not** reduce to zero from these relations.
+
+The script below gives a concrete counterexample over the nonsingular short curve
 
 ```text
-I_m = ψ_{m+2} ψ_{m-1}² + ψ_{m-2} ψ_{m+1}²
-      - 2(3X² + A) ψ_m ψ_{m-1} ψ_{m+1}
-      + 4Y² ψ_m³.
+Y² = X³ + 1
 ```
 
-This identity `I_m = 0` is true for the actual short-Weierstrass division polynomials; the script verifies it for `m=2,3,4`.  But it is **not** a consequence of the local EDS product recurrence tested by the Groebner reduction.  It is an additional x-coordinate/addition identity, essentially the missing formal content behind the `addX` theorem.
+at the point `(X,Y)=(0,1)`.  The assigned formal ψ-symbols satisfy all listed relations, including the shifted even recurrence and the `addX` identity, but the `addY` target evaluates to `-6`, not `0`.
 
-So the induction step is not clean if the only inductive algebra available is the EDS recurrence.  You need to carry/prove this extra identity, or prove the coordinate-ring `addX` identity directly.
+So the direct algebraic proof of the `addY` identity needs additional formal content beyond `HF`, `Hφ`, `Hω`, and the even EDS recurrences.  In particular, the `ω_{m+1}` definition introduces `ψ_{m+3}`; the listed relations do not determine the needed `ψ_{m+3}` contribution strongly enough.  A further division-polynomial/addition identity, or a direct coordinate-ring cofactor proof, is still needed.
 
 ## Complete runnable SymPy script
 
@@ -56,160 +48,220 @@ So the induction step is not clean if the only inductive algebra available is th
 import sympy as sp
 
 # Curve variables and coefficients.
-X, Y, A, B = sp.symbols('X Y A B')
-S = X**3 + A*X + B
-FW = Y**2 - S
+X, Y, a1, a2, a3, a4, a6 = sp.symbols('X Y a1 a2 a3 a4 a6')
+FW = Y**2 + a1*X*Y + a3*Y - X**3 - a2*X**2 - a4*X - a6
+psi2 = 2*Y + a1*X + a3
 
-# Formal local EDS symbols around m.
-pm2, pm1, pm, pp1, pp2, om = sp.symbols(
-    'psi_m_minus_2 psi_m_minus_1 psi_m psi_m_plus_1 psi_m_plus_2 omega_m'
+# Formal local EDS symbols.
+psi_m_minus_2, psi_m_minus_1, psi_m = sp.symbols('psi_m_minus_2 psi_m_minus_1 psi_m')
+psi_m_plus_1, psi_m_plus_2, psi_m_plus_3 = sp.symbols('psi_m_plus_1 psi_m_plus_2 psi_m_plus_3')
+psi_2m, psi_2m_plus_2 = sp.symbols('psi_2m psi_2m_plus_2')
+phi_m, phi_m_plus_1 = sp.symbols('phi_m phi_m_plus_1')
+omega_m, omega_m_plus_1 = sp.symbols('omega_m omega_m_plus_1')
+
+# General ψ3, ψ4, included only for the optional n=3 EDS relation.
+b2 = a1**2 + 4*a2
+b4 = 2*a4 + a1*a3
+b6 = a3**2 + 4*a6
+b8 = a1**2*a6 + 4*a2*a6 - a1*a3*a4 + a2*a3**2 - a4**2
+psi3 = 3*X**4 + b2*X**3 + 3*b4*X**2 + 3*b6*X + b8
+prepsi4 = (
+    2*X**6 + b2*X**5 + 5*b4*X**4 + 10*b6*X**3 + 10*b8*X**2
+    + (b2*b8 - b4*b6)*X + (b4*b8 - b6**2)
 )
-
-psi2 = 2*Y
-psi3 = 3*X**4 + 6*A*X**2 + 12*B*X - A**2
-
-# Formal definitions.
-phi_m = X*pm**2 - pp1*pm1
-phi_mp1 = X*pp1**2 - pp2*pm
-
-# Mathlib short-Weierstrass Jacobian.addX for P=[X,Y,1], Q=[phi_m, omega_m, psi_m].
-addX = sp.expand(
-    X*phi_m**2
-    - 2*Y*om*pm
-    + X**2*phi_m*pm**2
-    + A*phi_m*pm**2
-    + A*X*pm**4
-    + 2*B*pm**4
-)
-
-target = sp.expand(addX - pm1**2 * phi_mp1)
-
-# Relations allowed in the formal test.
-curve_rel = FW
-omega_rel = sp.expand(4*Y*om - (pp2*pm1**2 - pm2*pp1**2))
-eds_n2_rel = sp.expand(pp2*pm2 - (pp1*pm1*psi2**2 - psi3*pm**2))
-
-vars_order = [om, pp2, pm2, pp1, pm1, pm, Y, X, A, B]
-G = sp.groebner([curve_rel, omega_rel, eds_n2_rel], *vars_order, order='lex', domain=sp.QQ)
-formal_remainder = sp.factor(G.reduce(target)[1])
-
-print('formal_reduction_zero =', formal_remainder == 0)
-print('formal_remainder =')
-print(formal_remainder)
-print()
-
-# A concrete counterexample satisfying the allowed relations but not the target.
-# A=0,B=1 gives nonsingular curve Y^2=X^3+1; (X,Y)=(0,1) lies on it.
-# At X=0, psi3=0, so the EDS n=2 relation becomes pp2*pm2 = 4Y^2*pp1*pm1.
-subs_counterexample = {
-    A: 0,
-    B: 1,
-    X: 0,
-    Y: 1,
-    pm: 1,
-    pm1: 1,
-    pp1: 1,
-    pm2: 1,
-    pp2: 4,
-    om: sp.Rational(3, 4),
-}
-print('counterexample_curve_rel =', sp.expand(curve_rel.subs(subs_counterexample)))
-print('counterexample_omega_rel =', sp.expand(omega_rel.subs(subs_counterexample)))
-print('counterexample_eds_n2_rel =', sp.expand(eds_n2_rel.subs(subs_counterexample)))
-print('counterexample_target =', sp.expand(target.subs(subs_counterexample)))
-print()
-
-# The missing identity exposed by the formal reduction.
-I_m = sp.expand(
-    pp2*pm1**2 + pm2*pp1**2
-    - 2*(3*X**2 + A)*pm*pm1*pp1
-    + psi2**2 * pm**3
-)
-print('missing_identity_I_m =')
-print(I_m)
-print()
-
-G_with_I = sp.groebner([curve_rel, omega_rel, I_m], *vars_order, order='lex', domain=sp.QQ)
-print('target_reduces_zero_with_I_m =', G_with_I.reduce(target)[1] == 0)
-
-# Verify that I_m holds for actual short-Weierstrass division polynomials in small cases.
-def rem_curve(poly):
-    return sp.expand(sp.rem(sp.Poly(sp.expand(poly), Y), sp.Poly(FW, Y)).as_expr())
+psi4 = psi2*prepsi4
+psi_m_minus_3 = sp.symbols('psi_m_minus_3')
 
 
-def exact_div(num, den):
-    q, r = sp.div(sp.expand(num), sp.expand(den), Y, X, A, B, domain=sp.QQ)
-    assert sp.expand(r) == 0
-    return sp.expand(q)
+def jac_addZ(P, Q):
+    P0, P1, P2 = P
+    Q0, Q1, Q2 = Q
+    return sp.expand(P0*Q2**2 - Q0*P2**2)
 
-psi = {
-    0: sp.Integer(0),
-    1: sp.Integer(1),
-    2: 2*Y,
-    3: psi3,
-}
-pre4 = (
-    X**6 + 5*A*X**4 + 20*B*X**3 - 5*A**2*X**2
-    - 4*A*B*X - 8*B**2 - A**3
-)
-psi[4] = 4*Y*pre4
 
-for n in range(5, 8):
-    if n % 2:
-        r = (n - 1) // 2
-        psi[n] = rem_curve(psi[r+2]*psi[r]**3 - psi[r-1]*psi[r+1]**3)
-    else:
-        r = n // 2
-        psi[n] = rem_curve(exact_div(
-            psi[r]*(psi[r+2]*psi[r-1]**2 - psi[r-2]*psi[r+1]**2),
-            2*Y,
-        ))
-
-for m in [2, 3, 4]:
-    Im_actual = sp.expand(
-        psi[m+2]*psi[m-1]**2 + psi[m-2]*psi[m+1]**2
-        - 2*(3*X**2 + A)*psi[m]*psi[m-1]*psi[m+1]
-        + (2*Y)**2 * psi[m]**3
+def jac_addX(P, Q):
+    P0, P1, P2 = P
+    Q0, Q1, Q2 = Q
+    return sp.expand(
+        P0*Q0**2*P2**2
+        - 2*P1*Q1*P2*Q2
+        + P0**2*Q0*Q2**2
+        - a1*P0*Q1*P2**2*Q2
+        - a1*P1*Q0*P2*Q2**2
+        + 2*a2*P0*Q0*P2**2*Q2**2
+        - a3*Q1*P2**4*Q2
+        - a3*P1*P2*Q2**4
+        + a4*Q0*P2**4*Q2**2
+        + a4*P0*P2**2*Q2**4
+        + 2*a6*P2**4*Q2**4
     )
-    print(f'I_m actual m={m} reduces to zero =', rem_curve(Im_actual) == 0)
+
+
+def jac_negAddY(P, Q):
+    P0, P1, P2 = P
+    Q0, Q1, Q2 = Q
+    return sp.expand(
+        -P1*Q0**3*P2**3
+        + 2*P1*Q1**2*P2**3
+        - 3*P0**2*Q0*Q1*P2**2*Q2
+        + 3*P0*P1*Q0**2*P2*Q2**2
+        + P0**3*Q1*Q2**3
+        - 2*P1**2*Q1*Q2**3
+        + a1*P0*Q1**2*P2**4
+        + a1*P1*Q0*Q1*P2**3*Q2
+        - a1*P0*P1*Q1*P2*Q2**3
+        - a1*P1**2*Q0*Q2**4
+        - 2*a2*P0*Q0*Q1*P2**4*Q2
+        + 2*a2*P0*P1*Q0*P2*Q2**4
+        + a3*Q1**2*P2**6
+        - a3*P1**2*Q2**6
+        - a4*Q0*Q1*P2**6*Q2
+        - a4*P0*Q1*P2**4*Q2**3
+        + a4*P1*Q0*P2**3*Q2**4
+        + a4*P0*P1*P2*Q2**6
+        - 2*a6*Q1*P2**6*Q2**3
+        + 2*a6*P1*P2**3*Q2**6
+    )
+
+
+def jac_addY_from_addX(P, Q, addX_expr):
+    addZ = jac_addZ(P, Q)
+    negAddY = jac_negAddY(P, Q)
+    return sp.expand(-negAddY - a1*addX_expr*addZ - a3*addZ**3)
+
+
+P = [X, Y, sp.Integer(1)]
+R_m = [phi_m, omega_m, psi_m]
+addX_raw = jac_addX(P, R_m)
+addY_raw = jac_addY_from_addX(P, R_m, addX_raw)
+
+# Target without using addX identity.
+target_raw = sp.expand(2*(addY_raw - psi_m_minus_1**3 * omega_m_plus_1))
+
+# Target after substituting the addX identity addX(P,R_m)=ψ_{m-1}² φ_{m+1}.
+addY_using_HaddX = jac_addY_from_addX(P, R_m, psi_m_minus_1**2 * phi_m_plus_1)
+target_using_HaddX = sp.expand(2*(addY_using_HaddX - psi_m_minus_1**3 * omega_m_plus_1))
+
+# Formal relations.
+Hphi_m = sp.expand(phi_m - (X*psi_m**2 - psi_m_plus_1*psi_m_minus_1))
+Hphi_m_plus_1 = sp.expand(phi_m_plus_1 - (X*psi_m_plus_1**2 - psi_m_plus_2*psi_m))
+Homega_m = sp.expand(
+    2*psi_m*omega_m
+    - (psi_2m - psi_m**2*(a1*phi_m + a3*psi_m**2))
+)
+Homega_m_plus_1 = sp.expand(
+    2*psi_m_plus_1*omega_m_plus_1
+    - (psi_2m_plus_2 - psi_m_plus_1**2*(a1*phi_m_plus_1 + a3*psi_m_plus_1**2))
+)
+Heven_m = sp.expand(
+    psi2*psi_2m
+    - psi_m*(psi_m_plus_2*psi_m_minus_1**2 - psi_m_minus_2*psi_m_plus_1**2)
+)
+Heven_m_plus_1 = sp.expand(
+    psi2*psi_2m_plus_2
+    - psi_m_plus_1*(psi_m_plus_3*psi_m**2 - psi_m_minus_1*psi_m_plus_2**2)
+)
+
+# Optional n=3 EDS relation, included to test whether adding ψ_{m+3}/ψ_{m-3} helps.
+Hodd_n3 = sp.expand(
+    psi_m_plus_3*psi_m_minus_3
+    - (psi_m_plus_1*psi_m_minus_1*psi3**2 - psi4*psi2*psi_m**2)
+)
+
+base_relations = [FW, Hphi_m, Hphi_m_plus_1, Homega_m, Homega_m_plus_1, Heven_m, Heven_m_plus_1]
+vars_order = [
+    omega_m_plus_1, omega_m, phi_m_plus_1, phi_m, psi_2m_plus_2, psi_2m,
+    psi_m_plus_3, psi_m_plus_2, psi_m_minus_2, psi_m_plus_1, psi_m_minus_1, psi_m,
+    Y, X, a1, a2, a3, a4, a6,
+]
+
+print('building Groebner basis for base relations...')
+G = sp.groebner(base_relations, *vars_order, order='lex', domain=sp.QQ)
+rem_raw = sp.expand(G.reduce(target_raw)[1])
+rem_HaddX = sp.expand(G.reduce(target_using_HaddX)[1])
+print('raw_addY_reduces_to_zero =', rem_raw == 0)
+print('raw_addY_remainder_terms =', 0 if rem_raw == 0 else len(sp.Poly(rem_raw, *vars_order).terms()))
+print('after_substituting_addX_identity_reduces_to_zero =', rem_HaddX == 0)
+print('after_HaddX_remainder_terms =', 0 if rem_HaddX == 0 else len(sp.Poly(rem_HaddX, *vars_order).terms()))
+print()
+
+print('building Groebner basis with optional n=3 EDS relation...')
+vars_order_n3 = [
+    omega_m_plus_1, omega_m, phi_m_plus_1, phi_m, psi_2m_plus_2, psi_2m,
+    psi_m_plus_3, psi_m_minus_3, psi_m_plus_2, psi_m_minus_2,
+    psi_m_plus_1, psi_m_minus_1, psi_m, Y, X, a1, a2, a3, a4, a6,
+]
+G_n3 = sp.groebner(base_relations + [Hodd_n3], *vars_order_n3, order='lex', domain=sp.QQ)
+rem_HaddX_n3 = sp.expand(G_n3.reduce(target_using_HaddX)[1])
+print('after_HaddX_plus_n3_EDS_reduces_to_zero =', rem_HaddX_n3 == 0)
+print('after_HaddX_plus_n3_remainder_terms =',
+      0 if rem_HaddX_n3 == 0 else len(sp.Poly(rem_HaddX_n3, *vars_order_n3).terms()))
+print()
+
+# Concrete counterexample satisfying all base relations, the addX identity, and the optional n=3 relation.
+# Specialize to the nonsingular short curve y^2 = x^3 + 1 at (X,Y)=(0,1).
+# Here ψ2=2 and ψ3=0, ψ4=-16.
+subs_counterexample = {
+    a1: 0, a2: 0, a3: 0, a4: 0, a6: 1,
+    X: 0, Y: 1,
+    psi_m: 1,
+    psi_m_minus_1: 1,
+    psi_m_plus_1: 1,
+    psi_m_plus_2: -2,
+    psi_m_minus_2: -2,
+    psi_m_plus_3: 4,
+    psi_m_minus_3: 8,
+    psi_2m: 0,
+    psi_2m_plus_2: 0,
+    phi_m: -1,
+    phi_m_plus_1: 2,
+    omega_m: 0,
+    omega_m_plus_1: 0,
+}
+all_rels_for_counterexample = base_relations + [sp.expand(addX_raw - psi_m_minus_1**2*phi_m_plus_1), Hodd_n3]
+print('counterexample_relation_values =')
+print([sp.expand(r.subs(subs_counterexample)) for r in all_rels_for_counterexample])
+print('counterexample_target_after_HaddX =', sp.expand(target_using_HaddX.subs(subs_counterexample)))
+print('counterexample_curve_discriminant_short = -432 (nonzero)')
 ```
 
 ## Output
 
 ```text
-formal_reduction_zero = False
-formal_remainder =
-psi_m*(4*A*X*psi_m**3 - 2*A*psi_m*psi_m_minus_1*psi_m_plus_1 + 4*B*psi_m**3 + 4*X**3*psi_m**3 - 6*X**2*psi_m*psi_m_minus_1*psi_m_plus_1 + psi_m_minus_1**2*psi_m_plus_2 + psi_m_minus_2*psi_m_plus_1**2)/2
+building Groebner basis for base relations...
+raw_addY_reduces_to_zero = False
+raw_addY_remainder_terms = 48
+after_substituting_addX_identity_reduces_to_zero = False
+after_HaddX_remainder_terms = 44
 
-counterexample_curve_rel = 0
-counterexample_omega_rel = 0
-counterexample_eds_n2_rel = 0
-counterexample_target = 9/2
+building Groebner basis with optional n=3 EDS relation...
+after_HaddX_plus_n3_EDS_reduces_to_zero = False
+after_HaddX_plus_n3_remainder_terms = 44
 
-missing_identity_I_m =
--2*A*psi_m*psi_m_minus_1*psi_m_plus_1 + 4*Y**2*psi_m**3 - 6*X**2*psi_m*psi_m_minus_1*psi_m_plus_1 + psi_m_minus_1**2*psi_m_plus_2 + psi_m_minus_2*psi_m_plus_1**2
-
-target_reduces_zero_with_I_m = True
-I_m actual m=2 reduces to zero = True
-I_m actual m=3 reduces to zero = True
-I_m actual m=4 reduces to zero = True
+counterexample_relation_values =
+[0, 0, 0, 0, 0, 0, 0, 0, 0]
+counterexample_target_after_HaddX = -6
+counterexample_curve_discriminant_short = -432 (nonzero)
 ```
 
 ## Interpretation
 
-The `addX` identity is not just a formal consequence of the EDS product recurrence plus the curve equation and the `φ/ω` definitions.
+The proposed direct formal reduction does **not** close.
 
-The local EDS recurrence gives the product relation
-
-```text
-ψ_{m+2}ψ_{m-2} = 4Y² ψ_{m+1}ψ_{m-1} - ψ₃ ψ_m².
-```
-
-But the `addX` computation needs the symmetric linear relation
+The counterexample is especially useful: it satisfies
 
 ```text
-ψ_{m+2}ψ_{m-1}² + ψ_{m-2}ψ_{m+1}²
-  = 2(3X² + A)ψ_mψ_{m-1}ψ_{m+1} - 4Y²ψ_m³.
+HF,
+Hφ_m,
+Hφ_{m+1},
+Hω_m,
+Hω_{m+1},
+Heven_m,
+Heven_{m+1},
+addX(P,R_m)=ψ_{m-1}²φ_{m+1},
+and the optional n=3 EDS relation involving ψ_{m+3}ψ_{m-3}.
 ```
 
-This relation is true for actual division polynomials, but it is extra structure beyond the product recurrence.  It is best treated as a separate coordinate/addition identity, or proved directly in the coordinate ring with a CAS cofactor certificate.
+Yet the target is `-6`.  Therefore the `addY` identity is not a formal consequence of those relations alone.  It requires additional division-polynomial content, most likely a genuine `ω`/third-coordinate addition theorem or a direct coordinate-ring cofactor proof.
+
+Lean-facing conclusion: do not plan to finish the `addY` theorem using only these symbolic substitutions.  Either add a stronger formal identity for the `ω` sequence under addition, or generate a direct coordinate-ring certificate for the `addY` identity, analogous to the `addX` cofactor certificates.
