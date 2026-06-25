@@ -47,3 +47,14 @@
 - `b1244ab` addX m=2 X-component closed (per-m cofactor)
 - `b38efac` addX general scaffold (ω-elimination for all m)
 
+## 2026-06-25 — addY general-m PROVED + projective formula COMPLETE
+
+- `25be484` **addY general-m 0-sorry**: mk_addY_divPoly_general proved for ALL m via
+  eds_shifted_identity + coordinate-ring factoring + domain cancellation. 228 lines. Key new
+  identity: 2·ψ₂·E = -(H_eds) - ψ_{m+2}·H_tmq_m - ψ_{m-1}·H_tmq_{m+1}. 2987 jobs green.
+
+**PROJECTIVE FORMULA COMPLETE**: all 3 components (Z exact + X coord-ring + Y coord-ring) proved
+for general m. [n]P = [φ_n : ω_n : ψ_n] fully formalized.
+
+Bridge-2 status: projective leg DONE. Tangent leg (W.formalGroup) = sole remaining gap.
+
