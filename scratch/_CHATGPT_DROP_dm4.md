@@ -1,209 +1,349 @@
-# Q441 / dm4 — Mathlib Projective.addXYZ over CommRing
+# Q450 / dm4 — MvPowerSeries substitution API for formal-group construction
 
 ## Question
 
-For the `W.formalGroup` construction, we want to use the standard projective Silverman parameterization
+For the formal group law
+
+```lean
+F : MvPowerSeries (Fin 2) K
+```
+
+we need to insert a univariate power series `u(t) : PowerSeries K` into the two bivariate variables `t₁` and `t₂`, then use the resulting bivariate series inside the projective addition formula.
+
+The key API questions are:
+
+* how `PowerSeries K` relates to `MvPowerSeries (Fin 2) K`;
+* how to define `u(t₁)` and `u(t₂)`;
+* how to divide by a unit bivariate power series;
+* how to prove coefficient statements such as `coeff (single 0 1) F = 1`.
+
+## Short verdict
+
+There is no dedicated API called
+
+```lean
+PowerSeries.toMvPowerSeries : PowerSeries K → MvPowerSeries (Fin 2) K
+```
+
+that embeds a univariate series as the `i`-th variable.  The right API is **substitution**:
+
+```lean
+PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) K) u
+```
+
+This is exactly `u(tᵢ)` as a bivariate power series.
+
+## Imports
+
+Use these imports:
+
+```lean
+import Mathlib.RingTheory.PowerSeries.Substitution
+import Mathlib.RingTheory.MvPowerSeries.Inverse
+```
+
+`PowerSeries.Substitution` imports the multivariate substitution/evaluation API and provides the univariate wrapper.
+
+## Basic definitions
+
+```lean
+noncomputable section
+
+open MvPowerSeries
+open Finsupp
+
+variable {K : Type*} [Field K]
+
+abbrev Biv (K : Type*) [Field K] := MvPowerSeries (Fin 2) K
+
+def t₁ : Biv K := MvPowerSeries.X (0 : Fin 2)
+def t₂ : Biv K := MvPowerSeries.X (1 : Fin 2)
+
+/-- Interpret a univariate power series `f(t)` as `f(tᵢ)` in `K⟦t₁,t₂⟧`. -/
+def atVar (i : Fin 2) (f : PowerSeries K) : Biv K :=
+  PowerSeries.subst (R := K) (S := K) (τ := Fin 2)
+    (MvPowerSeries.X i : Biv K) f
+
+notation f "⟦t₁⟧" => atVar (K := K) (0 : Fin 2) f
+notation f "⟦t₂⟧" => atVar (K := K) (1 : Fin 2) f
+```
+
+Then, for `u : PowerSeries K`, use
+
+```lean
+def u₁ (u : PowerSeries K) : Biv K := atVar (K := K) 0 u
+def u₂ (u : PowerSeries K) : Biv K := atVar (K := K) 1 u
+```
+
+or just inline
+
+```lean
+PowerSeries.subst (MvPowerSeries.X (0 : Fin 2) : Biv K) u
+PowerSeries.subst (MvPowerSeries.X (1 : Fin 2) : Biv K) u
+```
+
+## Why this is the right API
+
+Mathlib defines
+
+```lean
+PowerSeries R := MvPowerSeries Unit R
+```
+
+so a univariate power series is literally a multivariate power series with one variable, indexed by `Unit`.  But to move from the `Unit` variable to the `Fin 2` variables, the API is substitution, not coercion/embedding.
+
+The relevant univariate substitution definition is:
+
+```lean
+noncomputable def PowerSeries.subst
+    (a : MvPowerSeries τ S) (f : PowerSeries R) : MvPowerSeries τ S :=
+  MvPowerSeries.subst (fun _ ↦ a) f
+```
+
+So `PowerSeries.subst (MvPowerSeries.X i) f` is exactly the substitution of the unique univariate variable by the bivariate variable `X i`.
+
+The required substitution hypothesis is packaged as
+
+```lean
+PowerSeries.HasSubst a := IsNilpotent (MvPowerSeries.constantCoeff a)
+```
+
+and Mathlib has
+
+```lean
+PowerSeries.HasSubst.X : HasSubst (MvPowerSeries.X t)
+PowerSeries.HasSubst.X' : HasSubst (PowerSeries.X)
+PowerSeries.HasSubst.of_constantCoeff_zero
+```
+
+Since `MvPowerSeries.X i` has constant coefficient zero, the substitution `f(tᵢ)` is legitimate.
+
+## Coefficient formula for substituted univariate series
+
+Mathlib has a coefficient formula:
+
+```lean
+theorem PowerSeries.coeff_subst
+    (ha : PowerSeries.HasSubst a) (f : PowerSeries R) (e : τ →₀ ℕ) :
+  MvPowerSeries.coeff e (PowerSeries.subst a f) =
+    finsum (fun d : ℕ ↦
+      PowerSeries.coeff d f • MvPowerSeries.coeff e (a ^ d))
+```
+
+In particular, for `a = X i`, this reduces morally to
 
 ```text
-P(t) = [t : -1 : w(t)]
+coeff_e(f(tᵢ)) = coeff_d(f)
 ```
 
-and then substitute two such points into the projective addition formula.  The API question is whether the FLT-pinned Mathlib has standard-projective formulas, in namespace `WeierstrassCurve.Projective`, over `CommRing`, not only field-level point/group-law statements.
+when `e = single i d`, and zero when `e` has support in the wrong variable or has mixed support.  You may need a small local lemma for the exact shape you use, proved from `PowerSeries.coeff_subst`, `MvPowerSeries.coeff_X`, and `MvPowerSeries.coeff_X_pow`.
 
-## FLT Mathlib revision checked
-
-`xiangyazi24/FLT` pins Mathlib at
-
-```toml
-rev = "96fd0fff3b8837985ae21dd02e712cb5df72ec05"
-```
-
-I checked the Mathlib files at that revision.
-
-## Verdict
-
-Yes.  Mathlib has **standard unweighted projective** formulas in
+For linear terms, the cheap lemmas are usually enough:
 
 ```lean
-Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Formula
+#check MvPowerSeries.coeff_index_single_X
+#check MvPowerSeries.coeff_index_single_self_X
 ```
 
-with namespace
+They say:
 
 ```lean
-WeierstrassCurve.Projective
+coeff (single t 1) (X s) = if t = s then 1 else 0
+coeff (single s 1) (X s) = 1
 ```
 
-and the raw formula definitions are over `CommRing R`.
+These are the lemmas to prove `lin_coeff_X` and `lin_coeff_Y` once you know your constructed `F` is `X 0 + X 1 + higher`.
 
-This is the representation needed by
+## Substituting into a six-variable polynomial/power-series expression
 
-```text
-[t : -1 : w(t)]
-```
+For the projective addition formula, the cleanest approach is not to manufacture a separate six-variable `MvPowerSeries`; just instantiate the formula directly over the bivariate power-series coefficient ring.
 
-namely the ordinary projective coordinates with weight `(1,1,1)`, not Jacobian weighted coordinates `(2,3,1)`.
-
-## Evidence from `Projective.Basic`
-
-The standard-projective file says explicitly that the projective point is an unweighted equivalence class:
-
-```text
-[x : y : z] ~ [u x : u y : u z]
-```
-
-for a unit `u`.  The homogeneous equation is
-
-```text
-Y²Z + a₁XYZ + a₃YZ² - (X³ + a₂X²Z + a₄XZ² + a₆Z³) = 0.
-```
-
-This is exactly the ordinary projective Weierstrass model used by `[t:-1:w(t)]`.
-
-In Lean, the relevant type is only an abbreviation:
-
-```lean
-abbrev Projective : Type r := WeierstrassCurve R
-abbrev toProjective (W : WeierstrassCurve R) : Projective R := W
-```
-
-and the scalar action is unweighted:
-
-```lean
-lemma smul_fin3 (P : Fin 3 → R) (u : R) :
-  u • P = ![u * P x, u * P y, u * P z]
-```
-
-So this is not the Jacobian `(2,3,1)` coordinate model.
-
-## Evidence from `Projective.Formula`
-
-The file imports `Projective.Basic` and its module doc lists the projective formula API:
-
-```lean
-WeierstrassCurve.Projective.negY
-WeierstrassCurve.Projective.dblZ
-WeierstrassCurve.Projective.dblX
-WeierstrassCurve.Projective.negDblY
-WeierstrassCurve.Projective.dblY
-WeierstrassCurve.Projective.addZ
-WeierstrassCurve.Projective.addX
-WeierstrassCurve.Projective.negAddY
-WeierstrassCurve.Projective.addY
-```
-
-It also says the definitions of `dblXYZ` and `addXYZ` are homogeneous of degree `4`.
-
-The variables at the top of `Projective.Formula` are:
-
-```lean
-variable {R : Type r} {S : Type s} {A F : Type u} {B K : Type v}
-  [CommRing R] [CommRing S] [CommRing A] [CommRing B]
-  [Field F] [Field K] {W' : Projective R} {W : Projective F}
-```
-
-This is the important split:
-
-* raw polynomial formula definitions and polynomial identities are generally over `CommRing R`;
-* geometric/affine-normalization statements that divide or use `IsUnit` are over fields or require stronger hypotheses such as `[NoZeroDivisors R]`.
-
-The raw addition formula is available over `CommRing R`:
-
-```lean
-variable (W') in
-/-- The `X`-coordinate of a representative of `P + Q` ... -/
-def addX (P Q : Fin 3 → R) : R := ...
-```
-
-and similarly for `addZ`, `negAddY`, `addY`.
-
-The assembled coordinate vector is also over `CommRing R`:
-
-```lean
-variable (W') in
-/-- The coordinates of a representative of `P + Q` ... -/
-noncomputable def addXYZ (P Q : Fin 3 → R) : Fin 3 → R :=
-  ![W'.addX P Q, W'.addY P Q, W'.addZ P Q]
-```
-
-with component projection lemmas:
-
-```lean
-lemma addXYZ_X (P Q : Fin 3 → R) : W'.addXYZ P Q x = W'.addX P Q := rfl
-lemma addXYZ_Y (P Q : Fin 3 → R) : W'.addXYZ P Q y = W'.addY P Q := rfl
-lemma addXYZ_Z (P Q : Fin 3 → R) : W'.addXYZ P Q z = W'.addZ P Q := rfl
-```
-
-and a homogeneous scaling lemma over `CommRing R`:
-
-```lean
-lemma addXYZ_smul (P Q : Fin 3 → R) (u v : R) :
-  W'.addXYZ (u • P) (v • Q) = (u * v) ^ 2 • W'.addXYZ P Q
-```
-
-It also has the degeneracy warning:
-
-```lean
-lemma addXYZ_self (P : Fin 3 → R) : W'.addXYZ P P = ![0, 0, 0]
-```
-
-So `addXYZ` is a raw homogeneous representative formula, not a globally nonzero point-valued morphism on representatives.
-
-## Base-change API
-
-The file has map/base-change lemmas for the projective formulas, e.g.
-
-```lean
-@[simp]
-lemma map_addX : (W'.map f).addX (f ∘ P) (f ∘ Q) = f (W'.addX P Q)
-
-@[simp]
-lemma map_addXYZ :
-  (W'.map f).addXYZ (f ∘ P) (f ∘ Q) = f ∘ addXYZ W' P Q
-```
-
-and algebra base-change versions:
-
-```lean
-lemma baseChange_addX :
-  (W'⁄B).addX (f ∘ P) (f ∘ Q) = f ((W'⁄A).addX P Q)
-
-lemma baseChange_addXYZ :
-  (W'⁄B).addXYZ (f ∘ P) (f ∘ Q) = f ∘ (W'⁄A).addXYZ P Q
-```
-
-This is useful for moving formulas into power-series coefficient rings.
-
-## Answer to the construction question
-
-For the formal group law route using
-
-```text
-P(t) = [t : -1 : w(t)]
-```
-
-use the **Projective** formulas, not the Jacobian formulas:
+Sketch:
 
 ```lean
 open WeierstrassCurve WeierstrassCurve.Projective
 
--- standard projective, ordinary weights (1,1,1)
-#check WeierstrassCurve.Projective.addX
-#check WeierstrassCurve.Projective.addY
-#check WeierstrassCurve.Projective.addZ
-#check WeierstrassCurve.Projective.addXYZ
+variable (W : WeierstrassCurve K)
+
+abbrev R₂ := MvPowerSeries (Fin 2) K
+
+def W₂ : WeierstrassCurve.Projective (R₂ K) :=
+  W.map (algebraMap K (R₂ K))
+
+def P₁ (w : PowerSeries K) : Fin 3 → R₂ K :=
+  ![MvPowerSeries.X (0 : Fin 2), -1, PowerSeries.subst (MvPowerSeries.X (0 : Fin 2) : R₂ K) w]
+
+def P₂ (w : PowerSeries K) : Fin 3 → R₂ K :=
+  ![MvPowerSeries.X (1 : Fin 2), -1, PowerSeries.subst (MvPowerSeries.X (1 : Fin 2) : R₂ K) w]
+
+def rawAddXYZ (w : PowerSeries K) : Fin 3 → R₂ K :=
+  (W₂ W).addXYZ (P₁ w) (P₂ w)
 ```
 
-The input ring can be a power series ring such as
+This works because the raw projective formulas are polynomial expressions over a `CommRing`, and `MvPowerSeries (Fin 2) K` is a commutative ring.
+
+If you do have a separate six-variable expression, use `MvPowerSeries.subst` for a power series expression, or `MvPolynomial.aeval` for a polynomial expression:
 
 ```lean
-MvPowerSeries (Fin 2) K
+-- six-variable target, schematic only
+abbrev Six := Fin 6
+
+-- for a polynomial p : MvPolynomial Six K
+-- MvPolynomial.aeval coords p : R₂ K
+
+-- for a power series f : MvPowerSeries Six K
+-- MvPowerSeries.subst coords f : R₂ K
 ```
 
-because the raw formulas only need `[CommRing R]`.
+where `coords : Six → R₂ K` maps the six variables to the three coordinates of `P₁` and `P₂`.
 
-The main caveat is normalization.  `Projective.addXYZ` may output a representative with common vanishing factor, especially on diagonal/identity loci.  Therefore the formal group law must be extracted after the right local normalization/cancellation, not by blindly taking a coordinate quotient in a place where the raw representative is `![0,0,0]`.
+## Division by a unit bivariate power series
 
-## Short final answer
+Use `MvPowerSeries.invOfUnit` when you have an explicit unit constant coefficient:
 
-Yes: FLT-pinned Mathlib has standard-projective addition formulas over `CommRing` in `Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Formula.lean`.  They are in namespace `WeierstrassCurve.Projective`, and include `addX`, `addY`, `addZ`, and `addXYZ`.  This is exactly the coordinate system for `[t:-1:w(t)]`; the Jacobian namespace is the weighted `(2,3,1)` system and is not the right one for that parametrization.
+```lean
+def divByUnit (num den : Biv K) (u : Kˣ)
+    (hden : MvPowerSeries.constantCoeff den = u) : Biv K :=
+  num * MvPowerSeries.invOfUnit den u
+```
+
+Relevant API:
+
+```lean
+MvPowerSeries.invOfUnit
+MvPowerSeries.mul_invOfUnit
+MvPowerSeries.invOfUnit_mul
+MvPowerSeries.isUnit_iff_constantCoeff
+```
+
+So if the denominator has constant coefficient `-1`, `1`, or another nonzero scalar, package it as a `Kˣ` and use `invOfUnit`.  Over a field, `IsUnit (constantCoeff den)` is equivalent to `constantCoeff den ≠ 0`, but `invOfUnit` is usually the most controllable for rewriting.
+
+## Coefficients of the final formal group law
+
+For your custom `FormalGroup`, the linear coefficient fields should be proved from statements of the form
+
+```lean
+MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1) F = 1
+MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) 1) F = 1
+```
+
+Recommended proof strategy:
+
+1. First prove a local expansion lemma:
+
+```lean
+F = MvPowerSeries.X 0 + MvPowerSeries.X 1 + H
+```
+
+where all coefficients of `H` of total degree `≤ 1` vanish.
+
+2. Then the linear coefficient proofs are short rewrites using:
+
+```lean
+MvPowerSeries.coeff_index_single_X
+MvPowerSeries.coeff_index_single_self_X
+MvPowerSeries.coeff_add
+MvPowerSeries.coeff_zero
+```
+
+3. For `H`, use a purpose-built lemma, e.g.
+
+```lean
+theorem coeff_H_linear_zero (i : Fin 2) :
+  MvPowerSeries.coeff (Finsupp.single i 1) H = 0 := ...
+```
+
+Do not try to prove the linear coefficient facts directly from the full projective `addXYZ` expression in one `ring_nf`; isolate the degree-1 truncation first.
+
+## Answer to each question
+
+### 1. How to define `F` by substituting `u(t₁)`, `u(t₂)`?
+
+Use
+
+```lean
+PowerSeries.subst (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) K) u
+PowerSeries.subst (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) K) u
+```
+
+then instantiate `Projective.addXYZ` over `MvPowerSeries (Fin 2) K`.
+
+### 2. How does Mathlib handle `PowerSeries → MvPowerSeries` conversion?
+
+`PowerSeries K` is definitionally `MvPowerSeries Unit K`.  To reinterpret it in two variables, use `PowerSeries.subst`, not a coercion.
+
+### 3. Is there `PowerSeries.toMvPowerSeries`?
+
+Not as the right tool.  The effective operation is:
+
+```lean
+PowerSeries.subst (MvPowerSeries.X i) f
+```
+
+### 4. How to express `u(t₁)` vs `u(t₂)`?
+
+```lean
+def u_at (i : Fin 2) (u : PowerSeries K) : MvPowerSeries (Fin 2) K :=
+  PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) K) u
+
+abbrev u₁ (u : PowerSeries K) := u_at (K := K) 0 u
+abbrev u₂ (u : PowerSeries K) := u_at (K := K) 1 u
+```
+
+### 5. Division by a unit?
+
+Use
+
+```lean
+MvPowerSeries.invOfUnit den u
+```
+
+with proof `constantCoeff den = u`, or use `MvPowerSeries.isUnit_iff_constantCoeff` to convert a unit constant coefficient into a unit power series.
+
+### 6. Computing coefficients?
+
+Use
+
+```lean
+MvPowerSeries.coeff e F
+```
+
+with `e : Fin 2 →₀ ℕ`, especially `Finsupp.single 0 1` and `Finsupp.single 1 1`.  The core variable coefficient lemmas are `coeff_index_single_X` and `coeff_index_single_self_X`.
+
+## Final recommended minimal API layer
+
+Put this in a scratch helper file:
+
+```lean
+import Mathlib.RingTheory.PowerSeries.Substitution
+import Mathlib.RingTheory.MvPowerSeries.Inverse
+
+noncomputable section
+
+open MvPowerSeries
+open Finsupp
+
+namespace WeierstrassFormalGroupScratch
+
+variable {K : Type*} [Field K]
+
+abbrev Biv := MvPowerSeries (Fin 2) K
+
+abbrev T₁ : Biv := MvPowerSeries.X (0 : Fin 2)
+abbrev T₂ : Biv := MvPowerSeries.X (1 : Fin 2)
+
+def atVar (i : Fin 2) (f : PowerSeries K) : Biv :=
+  PowerSeries.subst (R := K) (S := K) (τ := Fin 2)
+    (MvPowerSeries.X i : Biv) f
+
+abbrev atT₁ (f : PowerSeries K) : Biv := atVar (K := K) 0 f
+abbrev atT₂ (f : PowerSeries K) : Biv := atVar (K := K) 1 f
+
+def divByUnit (num den : Biv) (u : Kˣ)
+    (_hden : MvPowerSeries.constantCoeff den = u) : Biv :=
+  num * MvPowerSeries.invOfUnit den u
+
+end WeierstrassFormalGroupScratch
+```
+
+This is enough to express `u(t₁)`, `u(t₂)`, instantiate projective `addXYZ` over the bivariate power-series ring, normalize by a unit denominator, and state/prove the linear coefficient properties of the resulting formal group law.
