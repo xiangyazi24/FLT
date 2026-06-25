@@ -1,521 +1,551 @@
-# Q593 (dm3): separability of `preΨ' n`
+# Q610 (dm3): coefficient facts for `formalGroupLaw`
 
-## Bottom line
+## Executive summary
 
-I would **not** try to prove separability of all `preΨ' n` by a raw strong induction on the EDS recurrence.  The recurrence is excellent for proving divisibility, gcd/common-root facts, and adjacent non-vanishing, but it is the wrong shape for a global no-double-root proof.
-
-The clean proof is the tangent/étale proof:
-
-> If `char K ∤ n`, then the differential of `[n]` is multiplication by `(n : K)`, hence nonzero.  Therefore `[n]` is unramified at every point.  A double root of the division polynomial would give a nonzero first-order deformation of an `n`-torsion point whose image under `[n]` has zero first-order local parameter.  This contradicts the tangent map formula `d[n] = n`.
-
-In your current Lean ecosystem, the most direct implementation is probably the **dual-number/tangent bridge** version, not the full scheme-theoretic étale version.
-
----
-
-## Answer to question 1: the even cofactor branch does not close from adjacent non-vanishing
-
-Write, at a fixed `x`,
-
-```text
-Ψ(2m) = Ψ(m) * g
-
-g = Ψ(m-1)^2 * Ψ(m+2) - Ψ(m-2) * Ψ(m+1)^2.
-```
-
-Assume `Ψ(m)(x) = 0`.  Your adjacent non-vanishing theorem gives
-
-```text
-Ψ(m-1)(x) ≠ 0,
-Ψ(m+1)(x) ≠ 0.
-```
-
-But this alone says essentially nothing decisive about `Ψ(m-2)(x)` and `Ψ(m+2)(x)`.  In particular, adjacent non-vanishing only forbids zeros at distance `1`; it does not forbid zeros at distance `2`.
-
-With a stronger Ward/gcd theorem you can say more.  If `x` has exact division-polynomial rank `r`, then morally
-
-```text
-Ψ(k)(x) = 0  iff  r ∣ k.
-```
-
-Thus, from `Ψ(m)(x)=0`, one gets `r ∣ m`; and
-
-```text
-Ψ(m+2)(x)=0 or Ψ(m-2)(x)=0
-```
-
-would force `r ∣ 2`.  So for a normalized `preΨ'` root corresponding to a non-2-torsion point, the terms `Ψ(m±2)(x)` should also be nonzero.  This is a **gcd/Ward** consequence, not an adjacent-nonzero consequence.
-
-However, even after proving all four neighboring terms are nonzero, you still do **not** get `g(x) ≠ 0` formally.  The equation
-
-```text
-Ψ(m-1)(x)^2 * Ψ(m+2)(x)
-  = Ψ(m-2)(x) * Ψ(m+1)(x)^2
-```
-
-is a cancellation relation among nonzero field elements.  Adjacent non-vanishing cannot rule it out.
-
-What is true geometrically is this:
-
-```text
-Ψ(2m) = Ψ(m) * g
-```
-
-and near a point with `[m]P = O`, the map `[2m]` is `[2] ∘ [m]`.  If the zero of `Ψ(m)` is simple and `(2 : K) ≠ 0`, then composing with `[2]` does not increase its local multiplicity.  Therefore `g(x) ≠ 0`.  But this is already a tangent/unramified statement; it is not a consequence of the recurrence plus adjacent non-vanishing.
-
-So the even branch
-
-```text
-Ψ(m)(x)=0, g(x)=0
-```
-
-is not where the induction should spend effort.  Proving `g(x)≠0` is basically proving that `[2]` has nonzero tangent at `O`.
-
-The other even branch is even worse for descent:
-
-```text
-Ψ(m)(x) ≠ 0,
-g(x)=0,
-g'(x)=0.
-```
-
-A root in this branch corresponds geometrically to a point `P` such that `[m]P` is a nonzero 2-torsion point.  This is not a root of a smaller `Ψ(k)` in any simple way.  Separability here says that the pullback of the reduced 2-torsion divisor under `[m]` is reduced.  Again, this follows from `[m]` being unramified when `(m : K) ≠ 0`, not from induction on the smaller division polynomials.
-
----
-
-## Odd recurrence: the cubic powers do not solve the exact-order case
-
-For odd
-
-```text
-Ψ(2m+1)
-```
-
-the recurrence has terms involving powers like `Ψ(m)^3` and `Ψ(m+1)^3`.  These powers help in branches where the root is already a root of one of the smaller factors.  But a generic root of `Ψ(2m+1)` has exact order `2m+1`; it is not a root of any smaller `Ψ(k)`.  In that case the recurrence vanishing is produced by cancellation between two nonzero terms.
-
-Differentiating the recurrence at such a cancellation point gives a large derivative identity, not a descent to a double root of a smaller division polynomial.  So the odd recurrence has the same structural problem: exact-order roots have nowhere to descend.
-
-This is the main reason a strong induction on `n` is unnatural.  Roots of `Ψ(n)` are not usually inherited from smaller `Ψ(k)`; only roots whose order is a proper divisor of `n` descend.
-
----
-
-## Answer to question 2: Ward/SOMOS is useful, but not sufficient for separability
-
-The Ward determinant identity, or equivalently the EDS/SOMOS package, is very useful for proving facts of the following kind:
-
-```text
-common root of Ψ(a) and Ψ(b)
-  ⇒ common root of Ψ(gcd a b),
-```
-
-and hence exact-rank statements such as
-
-```text
-Ψ(r)(x)=0 and r minimal
-⇒ Ψ(k)(x)=0 iff r ∣ k.
-```
-
-This is exactly the right tool for strengthening `no_adjacent_preΨ_zero` to a full `gcd`/rank-of-apparition theorem.
-
-But squarefreeness is a **multiplicity** statement, not just a common-zero statement.  Ward identities can tell you which indices vanish at `x`; they do not by themselves tell you the order of vanishing of `Ψ(n)` at `x`.
-
-The algebraic theorem that would actually imply separability is a local valuation theorem:
-
-```text
-Let r be the exact rank of x.
-Then ord_x Ψ(n) = 0 if r ∤ n.
-If n = r * q and (q : K) ≠ 0, then
-  ord_x Ψ(n) = ord_x Ψ(r).
-```
-
-Then one still needs
-
-```text
-ord_x Ψ(r) = 1.
-```
-
-But that last statement is exactly the tangent-map statement for `[r]` at the corresponding torsion point.  So even a polished Ward/SOMOS route ultimately wants the same local tangent input.
-
-Therefore my recommendation is:
-
-1. Use Ward/SOMOS for gcd/exact-rank/no-common-root lemmas.
-2. Use the tangent/dual-number bridge for multiplicity-one/separability.
-3. Do not try to make the raw recurrence carry the derivative proof globally.
-
----
-
-## Answer to question 3: degree and leading coefficient help only after root counting
-
-The degree and leading coefficient facts are useful, but not by themselves enough.
-
-For odd `n`, the expected degree is
-
-```text
-(n^2 - 1) / 2,
-```
-
-matching the number of pairs `{P, -P}` with `P ∈ E[n]`, `P ≠ O`.
-
-For even `n`, the normalized polynomial `preΨ' n = Ψ_n / Ψ_2` has expected degree
-
-```text
-(n^2 - 4) / 2,
-```
-
-matching the number of pairs `{P, -P}` with `P ∈ E[n] \ E[2]`.
-
-Thus, if you already have:
-
-```text
-#E[n] = n^2,
-```
-
-and the root classification
-
-```text
-roots(preΨ' n)
-  = x-coordinates of E[n] \ {O}          -- odd n
-  = x-coordinates of E[n] \ E[2]         -- even n,
-```
-
-then the degree formula proves separability by counting distinct roots.
-
-But proving `#E[n]=n^2` in characteristic prime to `n` is itself normally proved from the fact that `[n]` is separable/étale, i.e. from the same tangent statement.  So degree/leading coefficient is a good final wrapper if Mathlib already gives you the finite-kernel cardinality theorem, but it is not a shortcut around the tangent bridge.
-
-The leading coefficient `n` or `n/2` is still important because it ensures the polynomial does not degenerate when `(n : K) ≠ 0`.  In characteristic dividing `n`, inseparability really can occur, and the leading term degenerates accordingly.
-
----
-
-## Recommended Lean route: dual numbers plus the tangent bridge
-
-This is the route I would implement.
-
-### Step 0: use the right separability target
-
-Work with the local no-double-root statement:
+Do **not** try to unfold or compute `Dvd.dvd.choose` directly.  The quotient was chosen only to provide an equation of the form
 
 ```lean
-def IsDoubleRoot (f : K[X]) (x : K) : Prop :=
-  f.eval x = 0 ∧ f.derivative.eval x = 0
+δ ^ 3 * W.normalizedAddX = W.formalAddX
+δ ^ 3 * W.normalizedAddY = W.formalAddY
 ```
 
-Then prove
+or the same equations with the multiplication order reversed.  The low coefficients of the quotient are forced by these equations.  Since `δ := X₀ - X₁` has axis terms `X₀^3` and `-X₁^3` in `δ^3`, the axis coefficients of `δ^3 * q` read off the constant and linear axis coefficients of `q` without any cancellation or uniqueness of quotient.
+
+So the clean strategy is:
+
+1. Prove four **raw numerator coefficient facts** for `formalAddY` and `formalAddX`.
+2. Prove three generic coefficient lemmas for `δ^3 * q`.
+3. Deduce the coefficients of `normalizedAddY` and `normalizedAddX` from `choose_spec`.
+4. Use elementary coefficient lemmas for multiplying by a unit with constant coefficient `1` to get the four facts for `formalGroupLaw`.
+
+The universal ring approach is useful only for step 1, namely the raw numerator coefficient computations.  I would not use it to compute the quotient itself unless you also prove uniqueness/functoriality of the quotient.  With arbitrary `Dvd.dvd.choose`, quotient functoriality is exactly the wrong thing to fight.
+
+---
+
+## Notation
+
+Use local notation like this in the coefficient file:
 
 ```lean
-∀ x, ¬ IsDoubleRoot (preΨ' n) x
+local notation "X₀" => MvPowerSeries.X (0 : Fin 2)
+local notation "X₁" => MvPowerSeries.X (1 : Fin 2)
+local notation "δ"  => (X₀ - X₁)
+
+local notation "e₀" n => Finsupp.single (0 : Fin 2) n
+local notation "e₁" n => Finsupp.single (1 : Fin 2) n
 ```
 
-and convert to `Polynomial.Separable`/`Squarefree` using the existing polynomial API.
-
-Over an algebraically closed field, this is usually the cleanest interface.
-
-### Step 1: polynomial double root means dual-number vanishing
-
-Prove the standard dual-number lemma:
+Then the target coefficients are:
 
 ```lean
-lemma eval_dual_eq_zero_of_doubleRoot
-    (f : K[X]) (x v : K)
-    (h0 : f.eval x = 0)
-    (h1 : f.derivative.eval x = 0) :
-    Polynomial.eval₂
-      (algebraMap K (TrivSqZeroExt K K))
-      (TrivSqZeroExt.inl x + TrivSqZeroExt.inr v)
-      f = 0 := by
-  -- f(x + ε v) = f(x) + ε v f'(x)
+coeff (e₀ 0) W.normalizedAddY = 1
+coeff (e₀ 0) W.formalGroupLaw = 0
+coeff (e₀ 1) W.formalGroupLaw = 1
+coeff (e₁ 1) W.formalGroupLaw = 1
+```
+
+Depending on your local API, `constantCoeff f` may already be notation for `coeff 0 f`; if so, prove both statements by `simpa [constantCoeff]` from the `coeff 0` version.
+
+---
+
+## Step 1: prove only raw numerator coefficient facts
+
+The CAS facts you need should be packaged as these Lean lemmas:
+
+```lean
+lemma formalAddY_coeff_300 (W : WeierstrassCurve R) :
+    coeff (e₀ 3) W.formalAddY = 1 := by
+  -- degree-3 part of formalAddY is δ^3
+  ...
+
+lemma formalAddX_coeff_300 (W : WeierstrassCurve R) :
+    coeff (e₀ 3) W.formalAddX = 0 := by
+  -- formalAddX has min total degree 4
+  ...
+
+lemma formalAddX_coeff_400 (W : WeierstrassCurve R) :
+    coeff (e₀ 4) W.formalAddX = -1 := by
+  -- degree-4 part is -δ^3 * (X₀ + X₁)
+  ...
+
+lemma formalAddX_coeff_040 (W : WeierstrassCurve R) :
+    coeff (e₁ 4) W.formalAddX = 1 := by
+  -- degree-4 part is -δ^3 * (X₀ + X₁)
   ...
 ```
 
-You will also want the more precise expansion:
+These four facts are enough.  You do **not** need the full degree-3 or degree-4 homogeneous polynomial inside the quotient proof.
+
+Why the signs are right:
 
 ```text
-f(x + ε v) = f(x) + ε * v * f'(x).
+δ^3 = X₀^3 - 3 X₀^2X₁ + 3 X₀X₁^2 - X₁^3.
+
+formalAddY degree 3 = δ^3,
+so coeff X₀^3 formalAddY = 1.
+
+formalAddX degree 4 = -δ^3 * (X₀ + X₁),
+so coeff X₀^4 formalAddX = -1,
+and coeff X₁^4 formalAddX = 1.
 ```
 
-This lemma is pure polynomial arithmetic and should be reusable everywhere.
-
-### Step 2: pick a nonzero first-order lift of a root point
-
-Let `x` be a hypothetical double root of `preΨ' n`.  Since `K` is algebraically closed, choose a point `P` above `x` on the elliptic curve.
-
-The root-classification lemma should give:
-
-```text
-[n]P = O.
-```
-
-Also, `P` is not a 2-torsion/ramification point for the normalized polynomial:
-
-* if `n` is odd, a nonzero `n`-torsion point cannot be 2-torsion;
-* if `n` is even, `preΨ' n = Ψ_n / Ψ_2` removes the 2-torsion factor, so its roots correspond to `E[n] \ E[2]`.
-
-Therefore the `x`-map is unramified at `P`.  In affine coordinates this is the statement that
-
-```text
-F_Y(P) = 2*y(P) + a₁*x(P) + a₃ ≠ 0.
-```
-
-So you can construct a dual-number lift with nonzero tangent by setting
-
-```text
-xε = x(P) + ε,
-yε = y(P) + ε * η,
-```
-
-where
-
-```text
-η = - F_X(P) / F_Y(P).
-```
-
-Then `Pε` lies on the curve over `K[ε]`, reduces to `P`, and has nonzero tangent.
-
-In Lean, isolate this as a lemma:
-
-```lean
-lemma exists_dual_lift_nonzero_tangent_of_not_twoTorsion
-    (P : W.Point K)
-    (hP : ¬ IsTwoTorsion P) :
-    ∃ Pε : W.Point (TrivSqZeroExt K K),
-      reduce Pε = P ∧ tangentCoeff Pε ≠ 0 := by
-  ...
-```
-
-The exact names will differ, but the content should be this.
-
-### Step 3: double root forces the division-polynomial `Z` coordinate to vanish to first order
-
-For odd `n`, `Ψ_n` is already a polynomial in `x`, so
-
-```text
-preΨ' n (xε) = 0
-```
-
-implies
-
-```text
-Ψ_n(Pε) = 0
-```
-
-in the dual-number ring.
-
-For even `n`, use
-
-```text
-Ψ_n = Ψ_2 * preΨ' n.
-```
-
-Since `preΨ' n (xε)=0`, again
-
-```text
-Ψ_n(Pε)=0.
-```
-
-Equivalently, in the projective division-polynomial representative for `[n]Pε`, the relevant `ψ_n`/`Z` factor has zero infinitesimal part.
-
-This is where your existing local-parameter coefficient computation should plug in.  The earlier atom has the shape:
-
-```text
-coeffε(t([n]Pε))
-  = - φ_n(P) / ω_n(P) * snd(ψ_n(Pε)).
-```
-
-At a double root, the right side is `0`, because `snd(ψ_n(Pε)) = 0`.  Therefore
-
-```text
-coeffε(t([n]Pε)) = 0.
-```
-
-### Step 4: tangent bridge gives the contradiction
-
-On the other hand, since `[n]P = O`, translate the deformation `Pε` back to the origin, or equivalently use the tangent map of `[n]` at `P`.  The tangent bridge says:
-
-```text
-coeffε(t([n]Pε)) = (n : K) * tangentCoeff(Pε).
-```
-
-The chosen lift has
-
-```text
-tangentCoeff(Pε) ≠ 0,
-```
-
-and the hypothesis `char K ∤ n` is exactly
-
-```text
-(n : K) ≠ 0.
-```
-
-Since `K` is a field,
-
-```text
-(n : K) * tangentCoeff(Pε) ≠ 0.
-```
-
-Contradiction.
-
-So no double root exists.
-
-This proves separability without any induction on `n`.
+The axis coefficients are deliberately chosen to avoid mixed-term bookkeeping.
 
 ---
 
-## Minimal theorem stack I would target
+## Step 2: generic coefficient lemmas for `δ^3 * q`
 
-Here is the Lean-facing decomposition I would aim for.
-
-### Pure polynomial/dual arithmetic
+Prove these once for all `q : MvPowerSeries (Fin 2) R`:
 
 ```lean
-lemma polynomial_eval_dual
-    (f : K[X]) (x v : K) :
-    evalDual f (x + ε*v)
-      = inl (f.eval x) + inr (v * f.derivative.eval x)
+lemma coeff_e03_delta3_mul (q : MvPowerSeries (Fin 2) R) :
+    coeff (e₀ 3) (δ ^ 3 * q) = coeff 0 q := by
+  -- only split of e₀ 3 using an axis monomial of δ^3 is e₀ 3 + 0
+  ...
+
+lemma coeff_e04_delta3_mul (q : MvPowerSeries (Fin 2) R) :
+    coeff (e₀ 4) (δ ^ 3 * q) = coeff (e₀ 1) q := by
+  -- only split of e₀ 4 is e₀ 3 + e₀ 1
+  ...
+
+lemma coeff_e14_delta3_mul (q : MvPowerSeries (Fin 2) R) :
+    coeff (e₁ 4) (δ ^ 3 * q) = - coeff (e₁ 1) q := by
+  -- only split of e₁ 4 is e₁ 3 + e₁ 1,
+  -- and coeff (e₁ 3) δ^3 = -1
+  ...
+```
+
+These lemmas are purely coefficient arithmetic.  They should not use any curve data.
+
+A robust way to prove them is by `rw [MvPowerSeries.coeff_mul]` and then `simp` the antidiagonal.  If the antidiagonal simplifier is painful, prove a slightly more general axis lemma:
+
+```lean
+lemma coeff_axis0_delta3_mul (q : MvPowerSeries (Fin 2) R) (n : ℕ) :
+    coeff (e₀ (3 + n)) (δ ^ 3 * q) = coeff (e₀ n) q := by
+  ...
+
+lemma coeff_axis1_delta3_mul (q : MvPowerSeries (Fin 2) R) (n : ℕ) :
+    coeff (e₁ (3 + n)) (δ ^ 3 * q) = - coeff (e₁ n) q := by
+  ...
+```
+
+Then specialize to `n = 0` and `n = 1`.
+
+An alternative is to define an axis restriction homomorphism
+
+```text
+MvPowerSeries (Fin 2) R →+* PowerSeries R
+X₀ ↦ X,  X₁ ↦ 0
+```
+
+and similarly for the `X₁` axis.  Under axis restriction,
+
+```text
+δ^3 ↦ X^3          on the X₀-axis,
+δ^3 ↦ -X^3         on the X₁-axis.
+```
+
+Then the axis coefficient lemmas become one-variable `PowerSeries` coefficient lemmas.  This is conceptually clean, but it requires more API setup.  For only three coefficient facts, direct `coeff_mul` is likely shorter.
+
+---
+
+## Step 3: deduce quotient coefficients from `choose_spec`
+
+Let `qY := W.normalizedAddY` and `qX := W.normalizedAddX`.
+
+You should have equations from the divisibility proofs, something like:
+
+```lean
+lemma normalizedAddY_mul_delta3 (W : WeierstrassCurve R) :
+    δ ^ 3 * W.normalizedAddY = W.formalAddY := by
+  simpa [normalizedAddY] using W.normalizedAddY_dvd.choose_spec
+
+lemma normalizedAddX_mul_delta3 (W : WeierstrassCurve R) :
+    δ ^ 3 * W.normalizedAddX = W.formalAddX := by
+  simpa [normalizedAddX] using W.normalizedAddX_dvd.choose_spec
+```
+
+If the local theorem is oriented as `formalAddY = δ ^ 3 * normalizedAddY`, use `.symm` or rewrite accordingly.  The exact names will differ, but the only thing needed is the multiplication equation.
+
+Then prove:
+
+```lean
+lemma normalizedAddY_constantCoeff (W : WeierstrassCurve R) :
+    constantCoeff W.normalizedAddY = 1 := by
+  -- Better prove coeff 0 first.
+  have hmul : δ ^ 3 * W.normalizedAddY = W.formalAddY :=
+    normalizedAddY_mul_delta3 W
+  have hcoeff := congrArg (fun f => coeff (e₀ 3) f) hmul
+  -- left side becomes coeff 0 normalizedAddY
+  rw [coeff_e03_delta3_mul] at hcoeff
+  -- right side is formalAddY_coeff_300
+  rw [formalAddY_coeff_300] at hcoeff
+  simpa [constantCoeff] using hcoeff
+```
+
+Similarly, add these normalized `X` lemmas:
+
+```lean
+lemma normalizedAddX_constantCoeff (W : WeierstrassCurve R) :
+    constantCoeff W.normalizedAddX = 0 := by
+  have hmul : δ ^ 3 * W.normalizedAddX = W.formalAddX :=
+    normalizedAddX_mul_delta3 W
+  have hcoeff := congrArg (fun f => coeff (e₀ 3) f) hmul
+  rw [coeff_e03_delta3_mul] at hcoeff
+  rw [formalAddX_coeff_300] at hcoeff
+  simpa [constantCoeff] using hcoeff
+
+lemma normalizedAddX_lin_coeff_X (W : WeierstrassCurve R) :
+    coeff (e₀ 1) W.normalizedAddX = -1 := by
+  have hmul : δ ^ 3 * W.normalizedAddX = W.formalAddX :=
+    normalizedAddX_mul_delta3 W
+  have hcoeff := congrArg (fun f => coeff (e₀ 4) f) hmul
+  rw [coeff_e04_delta3_mul] at hcoeff
+  rw [formalAddX_coeff_400] at hcoeff
+  simpa using hcoeff
+
+lemma normalizedAddX_lin_coeff_Y (W : WeierstrassCurve R) :
+    coeff (e₁ 1) W.normalizedAddX = -1 := by
+  have hmul : δ ^ 3 * W.normalizedAddX = W.formalAddX :=
+    normalizedAddX_mul_delta3 W
+  have hcoeff := congrArg (fun f => coeff (e₁ 4) f) hmul
+  rw [coeff_e14_delta3_mul] at hcoeff
+  rw [formalAddX_coeff_040] at hcoeff
+  -- hcoeff : - coeff (e₁ 1) normalizedAddX = 1
+  -- hence coeff = -1
+  linarith
+```
+
+If `linarith` does not like the semiring/ring context, replace the last line by a ring manipulation:
+
+```lean
+  have h := congrArg Neg.neg hcoeff
+  -- h : -(-coeff ...) = -1
+  simpa using h
+```
+
+or simply:
+
+```lean
+  rw [← neg_eq_iff_eq_neg] at hcoeff
+  simpa using hcoeff
+```
+
+The key point is that the `X₁`-axis lemma has the minus sign.
+
+---
+
+## Step 4: constant coefficient of the inverse unit
+
+From `normalizedAddY_constantCoeff`, prove:
+
+```lean
+lemma normalizedAddY_unit_inv_constantCoeff (W : WeierstrassCurve R) :
+    constantCoeff (↑(W.normalizedAddY_isUnit.unit⁻¹) : MvPowerSeries (Fin 2) R) = 1 := by
+  let u := W.normalizedAddY_isUnit.unit
+  have hccu : constantCoeff (↑u : MvPowerSeries (Fin 2) R) = 1 := by
+    simpa [u] using W.normalizedAddY_constantCoeff
+  have hmul : constantCoeff ((↑u : MvPowerSeries (Fin 2) R) * ↑(u⁻¹)) = 1 := by
+    simpa using congrArg constantCoeff (Units.mul_inv u)
+  rw [constantCoeff_mul, hccu, one_mul] at hmul
+  simpa [u] using hmul
+```
+
+If there is already a lemma like
+
+```lean
+map_units_inv
+constantCoeff_unit_inv
+```
+
+use it.  But the above proof is stable: apply the ring hom `constantCoeff` to `u * u⁻¹ = 1`.
+
+---
+
+## Step 5: generic linear coefficient lemma for multiplication by a series with constant coefficient `1`
+
+Prove this reusable lemma:
+
+```lean
+lemma coeff_single_one_mul_of_left_constantCoeff_zero
+    (f g : MvPowerSeries (Fin 2) R) (i : Fin 2)
+    (hf0 : constantCoeff f = 0)
+    (hg0 : constantCoeff g = 1) :
+    coeff (Finsupp.single i 1) (f * g) = coeff (Finsupp.single i 1) f := by
+  -- coefficient of f*g at X_i is
+  --   coeff X_i f * coeff 0 g + coeff 0 f * coeff X_i g
+  -- and coeff 0 f = 0, coeff 0 g = 1.
+  rw [MvPowerSeries.coeff_mul]
+  -- simplify the antidiagonal of `single i 1`:
+  -- only `(single i 1, 0)` and `(0, single i 1)` occur.
+  simp [constantCoeff, hf0, hg0]
+```
+
+Depending on orientation of the antidiagonal, the final expression may be
+
+```lean
+coeff (single i 1) f * coeff 0 g + coeff 0 f * coeff (single i 1) g
+```
+
+or the two terms reversed.  Either way `ring_nf [hf0, hg0]` should finish once the antidiagonal is simplified.
+
+Also prove the constant coefficient product lemma if the API does not already have it:
+
+```lean
+lemma constantCoeff_mul' (f g : MvPowerSeries (Fin 2) R) :
+    constantCoeff (f * g) = constantCoeff f * constantCoeff g := by
+  simpa [constantCoeff] using MvPowerSeries.coeff_zero_mul f g
+```
+
+The exact existing name is likely already available because `constantCoeff` is usually a ring hom.
+
+---
+
+## Step 6: prove the four requested facts
+
+### 1. `normalizedAddY_constantCoeff`
+
+As above, prove it from the `X₀^3` coefficient of
+
+```lean
+δ ^ 3 * W.normalizedAddY = W.formalAddY.
+```
+
+This avoids unfolding `Dvd.dvd.choose`.
+
+### 2. `formalGroupLaw_constantCoeff`
+
+Use
+
+```lean
+formalGroupLaw = -W.normalizedAddX * ↑(W.normalizedAddY_isUnit.unit⁻¹)
+```
+
+and the facts:
+
+```lean
+constantCoeff W.normalizedAddX = 0
+constantCoeff ↑(W.normalizedAddY_isUnit.unit⁻¹) = 1.
+```
+
+Skeleton:
+
+```lean
+lemma formalGroupLaw_constantCoeff (W : WeierstrassCurve R) :
+    constantCoeff W.formalGroupLaw = 0 := by
+  have hx0 : constantCoeff W.normalizedAddX = 0 :=
+    normalizedAddX_constantCoeff W
+  have hyinv0 :
+      constantCoeff (↑(W.normalizedAddY_isUnit.unit⁻¹) : MvPowerSeries (Fin 2) R) = 1 :=
+    normalizedAddY_unit_inv_constantCoeff W
+  simp [formalGroupLaw, constantCoeff_mul, hx0, hyinv0]
+```
+
+If `simp` leaves `-(0 * 1)`, finish by `ring`.
+
+### 3. `formalGroupLaw_lin_coeff_X`
+
+Let
+
+```lean
+h := (↑(W.normalizedAddY_isUnit.unit⁻¹) : MvPowerSeries (Fin 2) R)
 ```
 
 Then:
 
 ```lean
-lemma eval_dual_zero_of_doubleRoot
-    (h0 : f.eval x = 0)
-    (h1 : f.derivative.eval x = 0) :
-    evalDual f (x + ε*v) = 0
+coeff (e₀ 1) (W.normalizedAddX * h)
+  = coeff (e₀ 1) W.normalizedAddX
+  = -1.
 ```
 
-### Root classification
+Since `formalGroupLaw` has a leading minus sign, the result is `1`.
 
-For roots of the normalized polynomial:
+Skeleton:
 
 ```lean
-lemma prePsi'_root_iff_exists_nsmul_eq_zero_not_twoTorsion
-    (x : K) :
-    (preΨ' n).eval x = 0 ↔
-      ∃ P : W.Point K,
-        P.x = x ∧ n • P = O ∧ P ≠ O ∧ ¬ IsTwoTorsion P
+lemma formalGroupLaw_lin_coeff_X (W : WeierstrassCurve R) :
+    coeff (e₀ 1) W.formalGroupLaw = 1 := by
+  let h : MvPowerSeries (Fin 2) R := ↑(W.normalizedAddY_isUnit.unit⁻¹)
+  have hx0 : constantCoeff W.normalizedAddX = 0 :=
+    normalizedAddX_constantCoeff W
+  have hh0 : constantCoeff h = 1 := by
+    simpa [h] using normalizedAddY_unit_inv_constantCoeff W
+  have hlinmul :
+      coeff (e₀ 1) (W.normalizedAddX * h)
+        = coeff (e₀ 1) W.normalizedAddX :=
+    coeff_single_one_mul_of_left_constantCoeff_zero
+      W.normalizedAddX h (0 : Fin 2) hx0 hh0
+  have hxlin : coeff (e₀ 1) W.normalizedAddX = -1 :=
+    normalizedAddX_lin_coeff_X W
+  simp [formalGroupLaw, h, hlinmul, hxlin]
 ```
 
-The exact statement may need separate odd/even versions.
-
-For odd `n`, the `¬ IsTwoTorsion P` part follows from `n • P = O`, `P ≠ O`, and `Nat.Coprime n 2`.
-
-For even `n`, it is the point of using `preΨ' n = Ψ_n / Ψ_2`.
-
-### Non-ramified `x` lift
+If the definition parses as `-(W.normalizedAddX * h)` rather than `-W.normalizedAddX * h`, normalize it explicitly:
 
 ```lean
-lemma exists_dual_point_lift_x_direction
-    (P : W.Point K) (h2 : ¬ IsTwoTorsion P) :
-    ∃ Pε : W.Point (TrivSqZeroExt K K),
-      reduce Pε = P ∧
-      xCoord Pε = inl P.x + inr 1 ∧
-      tangentCoeffAt P Pε ≠ 0
+simp [formalGroupLaw, h, neg_mul, hlinmul, hxlin]
 ```
 
-This is just implicit differentiation using `F_Y(P) ≠ 0`.
+### 4. `formalGroupLaw_lin_coeff_Y`
 
-### Division-polynomial local parameter atom
-
-Use/finish the atom of the form:
+Same proof with `(1 : Fin 2)`:
 
 ```lean
-lemma localParameterCoeff_nsmul_of_divisionPolynomial
-    (hψ0 : ψ_n P = 0)
-    (hω : ω_n P ≠ 0)
-    (hφ : φ_n P ≠ 0) :
-    coeffε (t ([n] Pε))
-      = - φ_n P / ω_n P * snd (ψ_n Pε)
+lemma formalGroupLaw_lin_coeff_Y (W : WeierstrassCurve R) :
+    coeff (e₁ 1) W.formalGroupLaw = 1 := by
+  let h : MvPowerSeries (Fin 2) R := ↑(W.normalizedAddY_isUnit.unit⁻¹)
+  have hx0 : constantCoeff W.normalizedAddX = 0 :=
+    normalizedAddX_constantCoeff W
+  have hh0 : constantCoeff h = 1 := by
+    simpa [h] using normalizedAddY_unit_inv_constantCoeff W
+  have hlinmul :
+      coeff (e₁ 1) (W.normalizedAddX * h)
+        = coeff (e₁ 1) W.normalizedAddX :=
+    coeff_single_one_mul_of_left_constantCoeff_zero
+      W.normalizedAddX h (1 : Fin 2) hx0 hh0
+  have hxlin : coeff (e₁ 1) W.normalizedAddX = -1 :=
+    normalizedAddX_lin_coeff_Y W
+  simp [formalGroupLaw, h, hlinmul, hxlin]
 ```
 
-Then double-root gives `snd (ψ_n Pε)=0`, hence output coefficient is zero.
+---
 
-### Tangent bridge
+## Should you use the universal ring?
+
+Yes, but only in a controlled way.
+
+The safe universal-ring workflow is:
+
+1. Let
 
 ```lean
-lemma tangentCoeff_nsmul
-    (Pε : W.Point (TrivSqZeroExt K K))
-    (hred : reduce Pε = P)
-    (hnP : n • P = O) :
-    coeffε (t ([n] Pε))
-      = (n : K) * tangentCoeffAt P Pε
+A := MvPolynomial (Fin 5) ℤ
 ```
 
-This is the formal group/tangent-map theorem.  Translation by `-P` reduces it to the already expected theorem at `O`.
+or whatever index set you use for `a₁ a₂ a₃ a₄ a₆`.
 
-### Final no-double-root theorem
+2. Define the universal curve `Wuniv : WeierstrassCurve A`.
+3. Prove the raw numerator coefficient facts for `Wuniv` by finite expansion/truncation:
 
 ```lean
-lemma not_doubleRoot_preΨ'
-    (hn : (n : K) ≠ 0)
-    (x : K) :
-    ¬ IsDoubleRoot (preΨ' n) x := by
-  intro hdouble
-  obtain ⟨P, hxP, hnP, hPO, hP2⟩ :=
-    prePsi'_root_iff_exists_nsmul_eq_zero_not_twoTorsion.mp hdouble.1
-  obtain ⟨Pε, hred, hxε, htangent_ne⟩ :=
-    exists_dual_point_lift_x_direction P hP2
-
-  have hψdual : ψ_n Pε = 0 := by
-    -- from polynomial_eval_dual + hdouble.1 + hdouble.2,
-    -- with the odd/even normalization bridge
-    ...
-
-  have hout_zero : coeffε (t ([n] Pε)) = 0 := by
-    -- localParameterCoeff_nsmul_of_divisionPolynomial + hψdual
-    ...
-
-  have hout_n : coeffε (t ([n] Pε)) = (n : K) * tangentCoeffAt P Pε := by
-    exact tangentCoeff_nsmul Pε hred hnP
-
-  have hout_ne : coeffε (t ([n] Pε)) ≠ 0 := by
-    rw [hout_n]
-    exact mul_ne_zero hn htangent_ne
-
-  exact hout_ne hout_zero
+coeff (e₀ 3) Wuniv.formalAddY = 1
+coeff (e₀ 3) Wuniv.formalAddX = 0
+coeff (e₀ 4) Wuniv.formalAddX = -1
+coeff (e₁ 4) Wuniv.formalAddX = 1
 ```
 
-Then convert:
+4. Specialize these facts to any `R` and any `W : WeierstrassCurve R` by the coefficient-commutation lemma for `MvPowerSeries.map`.
+
+But I would **not** define or compute
 
 ```lean
-theorem preΨ'_separable
-    (hn : (n : K) ≠ 0) :
-    (preΨ' n).Separable := by
-  -- over algebraically closed field, use no double roots
+Wuniv.normalizedAddY
+```
+
+and then try to map it to
+
+```lean
+W.normalizedAddY.
+```
+
+The reason is that `normalizedAddY` is a `Dvd.dvd.choose`.  Unless you define the quotient canonically or prove quotient uniqueness by regularity of `δ^3`, there is no reason Lean should know that specialization commutes with this arbitrary choice.
+
+The good news is that you do not need that.  Once the raw numerator coefficient facts are known after specialization, the quotient coefficients follow from
+
+```lean
+δ ^ 3 * q = numerator
+```
+
+inside the target ring `R`.
+
+So the universal ring is best used as a **certificate generator for the raw low jet**, not as the home of the quotient proof.
+
+---
+
+## Even cleaner: make a low-jet certificate theorem
+
+If direct expansion of `formalAddX`/`formalAddY` is annoying, package the CAS result as one theorem about a projection to total degree `≤ 4`.
+
+For example, define a finite truncation map or just state a theorem saying:
+
+```lean
+theorem formalAdd_lowJet (W : WeierstrassCurve R) :
+  lowJet4 W.formalAddY = lowJet4 (δ ^ 3) ∧
+  lowJet4 W.formalAddX = lowJet4 (-(δ ^ 3) * (X₀ + X₁)) := by
   ...
 ```
 
----
+Then derive the four raw coefficient facts by applying `coeff` to the relevant axis monomials.
 
-## Where the existing `Psi3_separable` proof fits
-
-The `n=3` Bézout certificate is still useful as a sanity check and as a small-characteristic/base-case certificate, but it should not be the model for the general proof.
-
-If you continue the recurrence induction route, every new `n` introduces cofactors whose roots correspond to preimages of lower torsion under multiplication maps.  Proving those cofactors squarefree is essentially proving that multiplication maps are unramified.  That is exactly the tangent bridge again.
-
-So the scalable proof should make the tangent bridge explicit and then use it uniformly for all `n` with `(n : K) ≠ 0`.
-
----
-
-## Warning about the `(4 : K) ≠ 0` hypothesis
-
-Your theorem `no_adjacent_preΨ_zero` assumes `(4 : K) ≠ 0`.  That is fine if your whole development is restricted to characteristic not `2`.  But the natural separability theorem only assumes `char K ∤ n`.
-
-For odd `n`, this allows characteristic `2`.  In that case `no_adjacent_preΨ_zero` is not available as stated, but the tangent/dual-number proof still works: the differential of `[n]` is multiplication by `(n : K)`, which is nonzero.
-
-So another reason not to base the final proof on `no_adjacent_preΨ_zero` is that it may impose an unnecessary characteristic restriction for odd `n`.
-
----
-
-## Practical recommendation
-
-Use the recurrence/EDS machinery to prove:
+This is more maintainable than scattering four separate `ring_nf` computations through the formal group proof file.  It also documents the mathematics:
 
 ```text
-root classification, no adjacent roots, gcd/common-root lemmas.
+formalAddY starts as δ^3,
+formalAddX starts as -δ^3(X₀+X₁).
 ```
 
-Use the tangent bridge to prove:
+---
+
+## Recommended file structure
+
+I would split the proof into three layers:
+
+### Layer A: pure `MvPowerSeries` coefficient lemmas
+
+No curve data.
+
+```lean
+coeff_e03_delta3_mul
+coeff_e04_delta3_mul
+coeff_e14_delta3_mul
+coeff_single_one_mul_of_left_constantCoeff_zero
+```
+
+### Layer B: raw addition low-jet lemmas
+
+Curve-specific, but no quotients.
+
+```lean
+formalAddY_coeff_300
+formalAddX_coeff_300
+formalAddX_coeff_400
+formalAddX_coeff_040
+```
+
+These can be direct proofs or universal-ring-specialized proofs.
+
+### Layer C: normalized quotient and formal group law coefficients
+
+Uses `choose_spec`, not `choose` unfolding.
+
+```lean
+normalizedAddY_constantCoeff
+normalizedAddX_constantCoeff
+normalizedAddX_lin_coeff_X
+normalizedAddX_lin_coeff_Y
+normalizedAddY_unit_inv_constantCoeff
+formalGroupLaw_constantCoeff
+formalGroupLaw_lin_coeff_X
+formalGroupLaw_lin_coeff_Y
+```
+
+This makes the final formal group law proof small and insensitive to the messy projective addition formulas.
+
+---
+
+## Main answer to the `Dvd.dvd.choose` concern
+
+For `normalizedAddY_constantCoeff`, do this:
 
 ```text
-multiplicity one at every root.
+Do not compute `constantCoeff (Dvd.dvd.choose h)`.
+Instead apply `coeff X₀^3` to the equation
+  δ^3 * Dvd.dvd.choose h = formalAddY.
+The left side is exactly `constantCoeff (Dvd.dvd.choose h)`.
+The right side is the CAS-certified coefficient `1`.
 ```
 
-That separation of responsibilities is the cleanest Lean architecture.  The recurrence route can explain where the roots are; the tangent route proves they are simple.
+This avoids quotient uniqueness, avoids cancellation by `δ^3`, and works even over rings with zero divisors.
+
+The same trick gives the linear coefficients of `normalizedAddX` using the `X₀^4` and `X₁^4` coefficients.  Then the inverse unit contributes only its constant coefficient `1`, so the formal group law linear coefficients are immediate.
