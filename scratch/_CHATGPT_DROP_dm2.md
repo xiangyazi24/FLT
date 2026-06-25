@@ -1,38 +1,212 @@
-# Q199 (dm2): CAS verification for short-Weierstrass projective division-polynomial addX/addY
+# Q226 (dm2): Coordinate-ring machinery for polynomial identities modulo `F_W`
 
-## Executive result
+Goal shape:
 
-I checked the requested Mathlib `Jacobian.addX/addY` identities for the short Weierstrass curve
-
-```text
-Y^2 = X^3 + A X + B.
+```lean
+Affine.CoordinateRing.mk W.toAffine bigPoly = 0
 ```
 
-There is an important correction:
+where
 
-```text
-ω_m = (ψ_{m+2} ψ_{m-1}^2 - ψ_{m-2} ψ_{m+1}^2) / (4 ψ_m)
+```lean
+bigPoly : K[X][Y]
 ```
 
-is **not** a polynomial formula for the standard projective representative `[φ_m, ω_m, ψ_m]`.  In fact, with this denominator, `ω_3`, `ω_4`, and `ω_5` are not in `K[X,Y]`.  The `m=2` quotient is polynomial, but it is off by a factor of `1/2`, and the `addX` identity already fails.
+and `bigPoly ∈ (W.toAffine.polynomial)`.
 
-The standard short-Weierstrass formula is
+## Short answer
 
-```text
-ω_m = (ψ_{m+2} ψ_{m-1}^2 - ψ_{m-2} ψ_{m+1}^2) / (4Y)
-    = (ψ_{m+2} ψ_{m-1}^2 - ψ_{m-2} ψ_{m+1}^2) / (2ψ_2).
+Use the `AdjoinRoot` quotient API directly.  The affine coordinate ring is literally
+
+```lean
+abbrev WeierstrassCurve.Affine.CoordinateRing (W : Affine R) :=
+  AdjoinRoot W.polynomial
 ```
 
-With that corrected denominator, the identities
+and
 
-```text
-addX([X,Y,1], [φ_m,ω_m,ψ_m]) ≡ ψ_{m-1}^2 φ_{m+1}     mod F_W
-addY([X,Y,1], [φ_m,ω_m,ψ_m]) ≡ ψ_{m-1}^3 ω_{m+1}     mod F_W
+```lean
+Affine.CoordinateRing.mk W = AdjoinRoot.mk W.polynomial
 ```
 
-are all verified for `m = 2,3,4`.
+So the exact kernel lemma is:
 
-## Runnable Python/SymPy script
+```lean
+AdjoinRoot.mk_eq_zero :
+  AdjoinRoot.mk f g = 0 ↔ f ∣ g
+```
+
+There is no separate `CoordinateRing.mk_eq_zero` wrapper in the file I checked.  Use `rw [Affine.CoordinateRing.mk, AdjoinRoot.mk_eq_zero]` or `simpa [Affine.CoordinateRing.mk] using ...`.
+
+For monic reduction, the exact lemma is:
+
+```lean
+Polynomial.modByMonic_eq_zero_iff_dvd (hq : q.Monic) :
+  p %ₘ q = 0 ↔ q ∣ p
+```
+
+For the Weierstrass equation as a polynomial in `Y`, the monicity lemma is:
+
+```lean
+WeierstrassCurve.Affine.monic_polynomial : W.polynomial.Monic
+```
+
+Useful related names:
+
+```lean
+AdjoinRoot.mk_self     : AdjoinRoot.mk f f = 0
+AdjoinRoot.mk_eq_mk    : AdjoinRoot.mk f g = AdjoinRoot.mk f h ↔ f ∣ g - h
+Polynomial.mem_ker_modByMonic
+```
+
+## Toy example: `mk W W.polynomial = 0`
+
+This is the minimal proof.
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+
+noncomputable section
+
+open Polynomial
+open scoped Polynomial.Bivariate
+
+namespace WeierstrassCurve
+namespace Affine
+
+variable {R : Type*} [CommRing R] (W : Affine R)
+
+example : CoordinateRing.mk W W.polynomial = 0 := by
+  simpa [CoordinateRing.mk] using (AdjoinRoot.mk_self W.polynomial)
+
+end Affine
+end WeierstrassCurve
+```
+
+If your local goal is phrased with `W : WeierstrassCurve R` rather than `W : Affine R`, use:
+
+```lean
+example {R : Type*} [CommRing R] (W : WeierstrassCurve R) :
+    WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine W.toAffine.polynomial = 0 := by
+  simpa [WeierstrassCurve.Affine.CoordinateRing.mk] using
+    (AdjoinRoot.mk_self W.toAffine.polynomial)
+```
+
+## Divisibility/cofactor proof pattern
+
+If CAS gives a cofactor
+
+```lean
+Q : K[X][Y]
+```
+
+with
+
+```lean
+bigPoly = W.toAffine.polynomial * Q
+```
+
+or `bigPoly = Q * W.toAffine.polynomial`, the most robust Lean proof is:
+
+```lean
+example {K : Type*} [Field K] (W : WeierstrassCurve K)
+    (bigPoly Q : K[X][Y])
+    (hQ : bigPoly = W.toAffine.polynomial * Q) :
+    WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine bigPoly = 0 := by
+  rw [hQ, map_mul]
+  simp [WeierstrassCurve.Affine.CoordinateRing.mk]
+```
+
+For a generated proof, I would avoid using a hypothesis `hQ`; instead put the CAS-expanded `Q` in a `def` and close the equality by `ring_nf`/`ring1`:
+
+```lean
+noncomputable def addXCertQ (W : WeierstrassCurve K) : K[X][Y] :=
+  -- CAS-generated cofactor
+  0
+
+lemma addX_bigPoly_eq_mul_polynomial (W : WeierstrassCurve K) :
+    bigPoly W = W.toAffine.polynomial * addXCertQ W := by
+  -- Usually:
+  --   rw [bigPoly, addXCertQ, WeierstrassCurve.Affine.polynomial]
+  --   ring_nf
+  sorry
+
+lemma addX_bigPoly_mk_eq_zero (W : WeierstrassCurve K) :
+    WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (bigPoly W) = 0 := by
+  rw [addX_bigPoly_eq_mul_polynomial]
+  simp [WeierstrassCurve.Affine.CoordinateRing.mk]
+```
+
+This is approach (a), but using `AdjoinRoot.mk_self` through `simp` rather than manually mentioning `Ideal.Quotient`.
+
+## `modByMonic` proof pattern
+
+If you want the remainder route, the proof skeleton is:
+
+```lean
+example {K : Type*} [Field K] (W : WeierstrassCurve K)
+    (bigPoly : K[X][Y])
+    (hrem : bigPoly %ₘ W.toAffine.polynomial = 0) :
+    WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine bigPoly = 0 := by
+  rw [WeierstrassCurve.Affine.CoordinateRing.mk, AdjoinRoot.mk_eq_zero]
+  exact (Polynomial.modByMonic_eq_zero_iff_dvd
+    (p := bigPoly) (q := W.toAffine.polynomial)
+    W.toAffine.monic_polynomial).mp hrem
+```
+
+Or as a rewrite:
+
+```lean
+example {K : Type*} [Field K] (W : WeierstrassCurve K)
+    (bigPoly : K[X][Y])
+    (hrem : bigPoly %ₘ W.toAffine.polynomial = 0) :
+    WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine bigPoly = 0 := by
+  rw [WeierstrassCurve.Affine.CoordinateRing.mk, AdjoinRoot.mk_eq_zero,
+    ← Polynomial.modByMonic_eq_zero_iff_dvd W.toAffine.monic_polynomial]
+  exact hrem
+```
+
+This is approach (c).  It is conceptually clean, but for very large generated polynomials I would not ask Lean to compute `%ₘ` itself unless the expression has been normalized into a small form.
+
+## Which approach is best for the real `addX` identity?
+
+For the real `addX`/`addY` division-polynomial identities, I recommend:
+
+```text
+CAS-generate a cofactor Q and prove bigPoly = W.polynomial * Q by `ring_nf`/`ring1`, then use `mk_self`.
+```
+
+Reason: `Polynomial.modByMonic` is mathematically perfect, but large Lean goals can become slow if Lean has to perform the quotient/remainder computation internally.  SymPy/Sage/Singular can divide by the monic quadratic in `Y` instantly and return both quotient and remainder.  Then Lean only checks a deterministic polynomial identity with a supplied certificate.
+
+In other words, use this workflow:
+
+1. In Python/SymPy, compute
+
+   ```python
+   Q, R = div(bigPoly, F_W, main_variable=Y)
+   assert R == 0
+   ```
+
+2. Print `Q` as a Lean expression.
+3. In Lean, define `Q` and prove
+
+   ```lean
+   bigPoly = W.toAffine.polynomial * Q
+   ```
+
+   by `ring_nf`/`ring1` after unfolding definitions.
+4. Finish by:
+
+   ```lean
+   rw [hQ, map_mul]
+   simp [Affine.CoordinateRing.mk]
+   ```
+
+This keeps all hard division outside Lean but still gives a kernel-checked certificate: Lean verifies the cofactor identity.
+
+## SymPy cofactor extraction
+
+For the short Weierstrass curve:
 
 ```python
 import sympy as sp
@@ -40,194 +214,57 @@ import sympy as sp
 X, Y, A, B = sp.symbols("X Y A B")
 FW = Y**2 - X**3 - A*X - B
 
+# bigPoly = ...
 
-def rem_curve(poly):
-    """Remainder modulo Y^2 - X^3 - A*X - B, treating it as monic in Y."""
-    return sp.expand(sp.rem(sp.Poly(sp.expand(poly), Y), sp.Poly(FW, Y)).as_expr())
-
-
-def is_zero_mod_curve(poly):
-    return rem_curve(poly) == 0
-
-
-def exact_div(num, den):
-    """Exact polynomial division in QQ[Y,X,A,B]."""
-    q, r = sp.div(sp.expand(num), sp.expand(den), Y, X, A, B, domain=sp.QQ)
-    return sp.expand(q), sp.expand(r)
-
-
-# Short-Weierstrass division polynomials.
-psi = {
-    0: sp.Integer(0),
-    1: sp.Integer(1),
-    2: 2*Y,
-    3: 3*X**4 + 6*A*X**2 + 12*B*X - A**2,
-    4: 4*Y*(X**6 + 5*A*X**4 + 20*B*X**3 - 5*A**2*X**2
-             - 4*A*B*X - 8*B**2 - A**3),
-}
-
-# Need up to psi_7, because the Y-check for m=4 uses omega_5.
-for n in range(5, 8):
-    if n % 2:
-        m = (n - 1) // 2
-        psi[n] = sp.expand(psi[m+2]*psi[m]**3 - psi[m-1]*psi[m+1]**3)
-    else:
-        m = n // 2
-        q, r = exact_div(
-            psi[m] * (psi[m+2]*psi[m-1]**2 - psi[m-2]*psi[m+1]**2),
-            2*Y,
-        )
-        assert r == 0
-        psi[n] = q
-
-# phi_m = X*psi_m^2 - psi_{m+1}*psi_{m-1}
-phi = {m: sp.expand(X*psi[m]**2 - psi[m+1]*psi[m-1]) for m in range(1, 6)}
-
-
-def omega_numerator(m):
-    return sp.expand(psi[m+2]*psi[m-1]**2 - psi[m-2]*psi[m+1]**2)
-
-
-# User-requested denominator: 4*psi_m.
-# This is checked for exact polynomial quotient; it is not exact for m=3,4,5.
-omega_user = {}
-omega_user_ok = {}
-for m in range(2, 6):
-    q, r = exact_div(omega_numerator(m), 4*psi[m])
-    omega_user[m] = q
-    omega_user_ok[m] = (r == 0)
-
-# Standard short-Weierstrass denominator: 4Y = 2*psi_2.
-omega_std = {}
-for m in range(2, 6):
-    q, r = exact_div(omega_numerator(m), 4*Y)
-    assert r == 0
-    omega_std[m] = q
-
-
-# Mathlib Jacobian.addX/addY specialized to a1=a2=a3=0, a4=A, a6=B.
-# Variables are Jacobian coordinates P=[P0,P1,P2], Q=[Q0,Q1,Q2]
-# with affine coordinates x=P0/P2^2, y=P1/P2^3.
-def jac_addX(P, Q):
-    P0, P1, P2 = P
-    Q0, Q1, Q2 = Q
-    return sp.expand(
-        P0*Q0**2*P2**2
-        - 2*P1*Q1*P2*Q2
-        + P0**2*Q0*Q2**2
-        + A*Q0*P2**4*Q2**2
-        + A*P0*P2**2*Q2**4
-        + 2*B*P2**4*Q2**4
-    )
-
-
-def jac_negAddY(P, Q):
-    P0, P1, P2 = P
-    Q0, Q1, Q2 = Q
-    return sp.expand(
-        -P1*Q0**3*P2**3
-        + 2*P1*Q1**2*P2**3
-        - 3*P0**2*Q0*Q1*P2**2*Q2
-        + 3*P0*P1*Q0**2*P2*Q2**2
-        + P0**3*Q1*Q2**3
-        - 2*P1**2*Q1*Q2**3
-        - A*Q0*Q1*P2**6*Q2
-        - A*P0*Q1*P2**4*Q2**3
-        + A*P1*Q0*P2**3*Q2**4
-        + A*P0*P1*P2*Q2**6
-        - 2*B*Q1*P2**6*Q2**3
-        + 2*B*P1*P2**3*Q2**6
-    )
-
-
-def jac_addY(P, Q):
-    # For short Weierstrass, Jacobian.negY([X,Y,Z]) = -Y,
-    # so addY = -negAddY.
-    return sp.expand(-jac_negAddY(P, Q))
-
-
-P = [X, Y, sp.Integer(1)]
-
-print("USER omega_m = numerator/(4*psi_m): polynomial exactness")
-for m in range(2, 6):
-    print(f"omega_{m}: {'POLYNOMIAL' if omega_user_ok[m] else 'NOT_POLYNOMIAL'}")
-
-print("\nVerification using USER omega where polynomial:")
-for m in [2, 3, 4]:
-    if not omega_user_ok[m]:
-        print(f"m={m} X: NO (omega_{m} is not a polynomial)")
-    else:
-        Q = [phi[m], omega_user[m], psi[m]]
-        ok = is_zero_mod_curve(jac_addX(P, Q) - psi[m-1]**2 * phi[m+1])
-        print(f"m={m} X: {'YES' if ok else 'NO'}")
-
-    if not (omega_user_ok[m] and omega_user_ok[m+1]):
-        bad = [f"omega_{j}" for j in (m, m+1) if not omega_user_ok[j]]
-        print(f"m={m} Y: NO ({', '.join(bad)} not polynomial)")
-    else:
-        Q = [phi[m], omega_user[m], psi[m]]
-        ok = is_zero_mod_curve(jac_addY(P, Q) - psi[m-1]**3 * omega_user[m+1])
-        print(f"m={m} Y: {'YES' if ok else 'NO'}")
-
-print("\nVerification using STANDARD omega_m = numerator/(4*Y) = numerator/(2*psi_2):")
-for m in [2, 3, 4]:
-    Q = [phi[m], omega_std[m], psi[m]]
-    okx = is_zero_mod_curve(jac_addX(P, Q) - psi[m-1]**2 * phi[m+1])
-    oky = is_zero_mod_curve(jac_addY(P, Q) - psi[m-1]**3 * omega_std[m+1])
-    print(f"m={m} X: {'YES' if okx else 'NO'}")
-    print(f"m={m} Y: {'YES' if oky else 'NO'}")
+Q, R = sp.div(sp.Poly(sp.expand(bigPoly), Y), sp.Poly(FW, Y))
+Q = sp.expand(Q.as_expr())
+R = sp.expand(R.as_expr())
+assert R == 0
+print(Q)
 ```
 
-## Output
+For the general long Weierstrass curve:
+
+```python
+import sympy as sp
+
+X, Y, a1, a2, a3, a4, a6 = sp.symbols("X Y a1 a2 a3 a4 a6")
+FW = Y**2 + a1*X*Y + a3*Y - X**3 - a2*X**2 - a4*X - a6
+
+Q, R = sp.div(sp.Poly(sp.expand(bigPoly), Y), sp.Poly(FW, Y))
+Q = sp.expand(Q.as_expr())
+R = sp.expand(R.as_expr())
+assert R == 0
+print(Q)
+```
+
+Because `F_W` is monic in `Y`, this division is exact over the polynomial coefficient ring; no denominator issue is introduced.
+
+## Practical recommendation
+
+For small identities, this is fine:
+
+```lean
+rw [Affine.CoordinateRing.mk, AdjoinRoot.mk_eq_zero]
+exact (Polynomial.modByMonic_eq_zero_iff_dvd W.toAffine.monic_polynomial).mp hrem
+```
+
+For the large `addX` identity, use a CAS cofactor.  The final Lean proof should look like:
+
+```lean
+lemma addX_identity_mk_eq_zero (W : WeierstrassCurve K) :
+    Affine.CoordinateRing.mk W.toAffine (addXBigPoly W) = 0 := by
+  have hQ : addXBigPoly W = W.toAffine.polynomial * addXIdentityCofactor W := by
+    rw [addXBigPoly, addXIdentityCofactor, WeierstrassCurve.Affine.polynomial]
+    ring_nf
+  rw [hQ, map_mul]
+  simp [WeierstrassCurve.Affine.CoordinateRing.mk]
+```
+
+If `ring_nf` is too slow on the fully expanded `Q`, split the certificate by `Y`-degree:
 
 ```text
-USER omega_m = numerator/(4*psi_m): polynomial exactness
-omega_2: POLYNOMIAL
-omega_3: NOT_POLYNOMIAL
-omega_4: NOT_POLYNOMIAL
-omega_5: NOT_POLYNOMIAL
-
-Verification using USER omega where polynomial:
-m=2 X: NO
-m=2 Y: NO (omega_3 not polynomial)
-m=3 X: NO (omega_3 is not a polynomial)
-m=3 Y: NO (omega_3, omega_4 not polynomial)
-m=4 X: NO (omega_4 is not a polynomial)
-m=4 Y: NO (omega_4, omega_5 not polynomial)
-
-Verification using STANDARD omega_m = numerator/(4*Y) = numerator/(2*psi_2):
-m=2 X: YES
-m=2 Y: YES
-m=3 X: YES
-m=3 Y: YES
-m=4 X: YES
-m=4 Y: YES
+bigPoly - F_W * Q = C R0 + C R1 * Y
 ```
 
-## Diagnosis
-
-The requested projective representative
-
-```text
-R_m = [φ_m, ω_m, ψ_m]
-```
-
-is correct for the standard division-polynomial `ω_m`, but the denominator in the prompt is not the standard one.  For the short Weierstrass curve, the standard formula is
-
-```text
-4Y * ω_m = ψ_{m+2} ψ_{m-1}^2 - ψ_{m-2} ψ_{m+1}^2.
-```
-
-Since `ψ_2 = 2Y`, this is equivalently
-
-```text
-2ψ_2 * ω_m = ψ_{m+2} ψ_{m-1}^2 - ψ_{m-2} ψ_{m+1}^2.
-```
-
-It is **not**
-
-```text
-4ψ_m * ω_m = ψ_{m+2} ψ_{m-1}^2 - ψ_{m-2} ψ_{m+1}^2.
-```
-
-So the requested identities fail as stated, but the corrected standard `ω_m` verifies all six `m=2,3,4` `addX/addY` identities modulo `F_W`.
+and prove `R0 = 0`, `R1 = 0` as two smaller univariate identities in `K[X]`.  This mirrors the `modByMonic` remainder and is usually faster than one enormous bivariate `ring_nf` goal.
