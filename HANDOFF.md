@@ -139,3 +139,14 @@ Missing: W.formalGroup : FormalGroup K for the Weierstrass curve.
 - addXYZ(P(t₁),P(t₂)) at Z~t degenerates: addZ factors as u₁u₂(t₂-t₁)(t₂+t₁+O(t²))
 - The (t₂-t₁) factor cancels when computing F = -XZ/Y (the t₁+t₂ survives)
 - PowerSeries.subst API available for substitution
+
+## W.formalGroup ATOM 3 status (2026-06-25 late)
+- 8 sorries remain in FormalGroupW.lean (was 7, decomposed into clearer structure)
+- Core 3 divisibility lemmas: (X₀-X₁)³ ∣ addX/Y/Z
+- addZ: delta factored, (X₀-X₁)|delta proved, gap = prime cancellation of w₀w₁
+- addX/Y: may hold as pure polynomial identities (CAS check in flight)
+- Diagonal-difference base lemma: sub-agent grinding (sub_dvd_pow_sub_pow + dvd_sum)
+- Design: UFD/coprime route REJECTED (Mathlib lacks API), diagonal-difference route ADOPTED
+- CAS: (t₁-t₂)³ divisibility verified for all 3 coords (Q476, remainder=0)
+- dm3 Q478: order-3 from chord variables U,V structure
+- dm2 Q477: diagonal-difference strategy recommended
