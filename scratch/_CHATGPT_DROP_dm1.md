@@ -1,239 +1,182 @@
-# Q317 (dm1): exact `linear_combination` coefficients for the general symbolic `addX` proof
+# Q322 (dm1): exact Lean `linear_combination` proof for the general-`m` `addX` identity
 
-## Result
+## Main point
 
-There is one normalization issue to be explicit about.
-
-With
+Use the residual form of each input identity.  With
 
 ```text
-ψ₂ = 2Y + a₁X + a₃
-Ψ₂Sq = 4X³ + b₂X² + 2b₄X + b₆
-HF = Y² + a₁XY + a₃Y - X³ - a₂X² - a₄X - a₆
+Hφ = φ_m - (X*ψ_m² - ψ_{m+1}*ψ_{m-1}) = 0,
 ```
 
-we have
-
-```text
-ψ₂² = Ψ₂Sq + 4*HF.
-```
-
-So there are two equivalent coefficient lists depending on which Ward/Hmiss lemma you use.
-
----
-
-## Coefficients for the Hmiss stated in the prompt, using `Ψ₂Sq`
-
-Define
-
-```text
-Hφ = φ_m - (X*ψ_m² - ψ_{m+1}*ψ_{m-1})
-Hω = 2*ψ_m*ω_m - (ψ_{2m} - ψ_m²*(a₁*φ_m + a₃*ψ_m²))
-Heven = ψ_{2m}*ψ₂ - (ψ_{m-1}²*ψ_m*ψ_{m+2} - ψ_{m-2}*ψ_m*ψ_{m+1}²)
-Hmiss_Ψ = ψ_{m-1}²*ψ_{m+2} + ψ_{m-2}*ψ_{m+1}²
-           + ψ_m³*Ψ₂Sq
-           - ψ_{m-1}*ψ_m*ψ_{m+1}*(6X² + b₂X + b₄)
-```
-
-Then
-
-```text
-2*(addX(P,R_m) - ψ_{m-1}²*φ_{m+1})
-  = c₁*Hω + c₂*Heven + c₃*Hmiss_Ψ + c₄*Hφ + c₅*HF
-```
-
-with
+the exact coefficients are:
 
 ```text
 c₁ = -ψ₂
 c₂ = -1
 c₃ = ψ_m
-c₄ = (4X² + b₂X + b₄)*ψ_m² + 2X*φ_m - 2X*ψ_{m-1}*ψ_{m+1}
-c₅ = 0
+c₄ = C(4X² + b₂X + b₄)*ψ_m² + 2*C(X)*φ_m - 2*C(X)*ψ_{m-1}*ψ_{m+1}.
 ```
 
-So, **with the Hmiss exactly as written in the prompt using `Ψ₂Sq`, the HF coefficient is `0`, not `-4*ψ_m^4`.**
+For the `Hmiss` version using `C W.Ψ₂Sq`, there is no `HF` term.  The `-4*ψ_m^4` coefficient only appears if `Hmiss` is stated with `ψ₂²` instead of `C W.Ψ₂Sq`.
 
----
-
-## Coefficients for the bivariate/full Hmiss using `ψ₂²`
-
-If instead you use the bivariate Ward/Hmiss lemma
+The Lean code below is written as a self-contained theorem over `K[X][Y]`.  I use an unfolded `addX_unfolded` definition to avoid fighting `W.map (algebraMap K K[X][Y])` coercions.  It is exactly Mathlib’s `Jacobian.addX` specialized to
 
 ```text
-Hmiss_ψ₂ = ψ_{m-1}²*ψ_{m+2} + ψ_{m-2}*ψ_{m+1}²
-           + ψ_m³*ψ₂²
-           - ψ_{m-1}*ψ_m*ψ_{m+1}*(6X² + b₂X + b₄)
+P = [C X, Y, 1],
+Q = [φ_m, ω_m, ψ_m].
 ```
 
-then the same identity is
-
-```text
-2*(addX(P,R_m) - ψ_{m-1}²*φ_{m+1})
-  = c₁*Hω + c₂*Heven + c₃*Hmiss_ψ₂ + c₄*Hφ + c₅*HF
-```
-
-with
-
-```text
-c₁ = -ψ₂
-c₂ = -1
-c₃ = ψ_m
-c₄ = (4X² + b₂X + b₄)*ψ_m² + 2X*φ_m - 2X*ψ_{m-1}*ψ_{m+1}
-c₅ = -4*ψ_m^4
-```
-
-This is the source of the `-4*ψ_m^4` cofactor: it belongs to the version of `Hmiss` with `ψ₂²`, since
-
-```text
-ψ_m*Hmiss_ψ₂ = ψ_m*Hmiss_Ψ + 4*ψ_m^4*HF.
-```
-
----
-
-## Lean-oriented coefficient names
-
-Using Lean-ish names:
+If your local file already has `W.toPoly.toJacobian.addX genericAffineRep (W.divPolyRep m)`, prove one small unfold lemma equating it with `addX_unfolded` and then rewrite before applying the theorem below.
 
 ```lean
--- schematic
-c₁ := -(ψ₂)
-c₂ := -1
-c₃ := ψ_m
-c₄ := (4*X^2 + b₂*X + b₄) * ψ_m^2
-        + 2*X*φ_m - 2*X*ψ_{m-1}*ψ_{m+1}
-c₅_Ψ  := 0
-c₅_ψ₂ := -4*ψ_m^4
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Formula
+import Mathlib.Tactic
+
+open Polynomial
+open scoped Polynomial.Bivariate
+
+namespace WeierstrassCurve
+
+noncomputable section
+
+variable {K : Type*} [Field K]
+variable (W : WeierstrassCurve K)
+
+/-- Generic affine point `[X,Y,1]` as a bivariate Jacobian-coordinate representative. -/
+private def genericAffineRep : Fin 3 → K[X][Y] :=
+  ![C X, Y, 1]
+
+/-- Projective representative `[φ_m, ω_m, ψ_m]`, where `omegaP` is the bivariate `ω`. -/
+private def divPolyRep (omegaP : ℤ → K[X][Y]) (m : ℤ) : Fin 3 → K[X][Y] :=
+  ![W.φ m, omegaP m, W.ψ m]
+
+/-- `Jacobian.addX` unfolded for `P=[X,Y,1]` and `Q=[φ_m,ω_m,ψ_m]`. -/
+private def addX_unfolded (omegaP : ℤ → K[X][Y]) (m : ℤ) : K[X][Y] :=
+  C X * W.φ m ^ 2
+    - 2 * Y * omegaP m * W.ψ m
+    + (C X) ^ 2 * W.φ m * W.ψ m ^ 2
+    - C (C W.a₁) * C X * omegaP m * W.ψ m
+    - C (C W.a₁) * Y * W.φ m * W.ψ m ^ 2
+    + 2 * C (C W.a₂) * C X * W.φ m * W.ψ m ^ 2
+    - C (C W.a₃) * omegaP m * W.ψ m
+    - C (C W.a₃) * Y * W.ψ m ^ 4
+    + C (C W.a₄) * W.φ m * W.ψ m ^ 2
+    + C (C W.a₄) * C X * W.ψ m ^ 4
+    + 2 * C (C W.a₆) * W.ψ m ^ 4
+
+/-- The `Hmiss`/Ward residual in the `C W.Ψ₂Sq` normalization. -/
+private def HmissΨ (m : ℤ) : K[X][Y] :=
+  W.ψ (m - 1) ^ 2 * W.ψ (m + 2)
+    + W.ψ (m - 2) * W.ψ (m + 1) ^ 2
+    + W.ψ m ^ 3 * C W.Ψ₂Sq
+    - W.ψ (m - 1) * W.ψ m * W.ψ (m + 1)
+        * C (6 * X ^ 2 + C W.b₂ * X + C W.b₄)
+
+/-- The coefficient of the `φ_m` definition residual. -/
+private def addX_c₄ (m : ℤ) : K[X][Y] :=
+  C (4 * X ^ 2 + C W.b₂ * X + C W.b₄) * W.ψ m ^ 2
+    + 2 * C X * W.φ m
+    - 2 * C X * W.ψ (m - 1) * W.ψ (m + 1)
+
+/-- Raw symbolic `linear_combination` identity for the general `addX` step.
+
+This theorem assumes the four residual identities as hypotheses.  It is the exact Lean form of
+Q317’s CAS identity. -/
+theorem addX_projective_general_from_residuals
+    (omegaP : ℤ → K[X][Y]) (m : ℤ)
+    (hω :
+      (2 : K[X][Y]) * W.ψ m * omegaP m
+        - (W.ψ (2 * m)
+            - W.ψ m ^ 2 * (C (C W.a₁) * W.φ m + C (C W.a₃) * W.ψ m ^ 2)) = 0)
+    (heven :
+      W.ψ (2 * m) * W.ψ₂
+        - (W.ψ (m - 1) ^ 2 * W.ψ m * W.ψ (m + 2)
+            - W.ψ (m - 2) * W.ψ m * W.ψ (m + 1) ^ 2) = 0)
+    (hmiss : W.HmissΨ m = 0)
+    (hφ : W.φ m - (C X * W.ψ m ^ 2 - W.ψ (m + 1) * W.ψ (m - 1)) = 0) :
+    (2 : K[X][Y])
+      * (W.addX_unfolded omegaP m - W.ψ (m - 1) ^ 2 * W.φ (m + 1)) = 0 := by
+  linear_combination (norm := ring_nf [addX_unfolded, HmissΨ, addX_c₄])
+    (-W.ψ₂) * hω
+      - heven
+      + W.ψ m * hmiss
+      + W.addX_c₄ m * hφ
+
+/-- Convenient wrapper when `ω` is known by the usual equality rather than residual form. -/
+theorem addX_projective_general
+    (omegaP : ℤ → K[X][Y]) (m : ℤ)
+    (hωeq :
+      (2 : K[X][Y]) * W.ψ m * omegaP m =
+        W.ψ (2 * m)
+          - W.ψ m ^ 2 * (C (C W.a₁) * W.φ m + C (C W.a₃) * W.ψ m ^ 2))
+    (hmiss : W.HmissΨ m = 0) :
+    (2 : K[X][Y])
+      * (W.addX_unfolded omegaP m - W.ψ (m - 1) ^ 2 * W.φ (m + 1)) = 0 := by
+  refine W.addX_projective_general_from_residuals omegaP m ?hω ?heven hmiss ?hφ
+  · exact sub_eq_zero.mpr hωeq
+  · exact sub_eq_zero.mpr (W.ψ_even m)
+  · rw [WeierstrassCurve.φ]
+    ring
+
+end
+
+end WeierstrassCurve
 ```
 
-Be careful about the sign convention for `Hφ`.  The coefficients above use
+## If your `Hmiss` theorem is the `ψ₂²` version
 
-```text
-Hφ = φ_m - (X*ψ_m² - ψ_{m+1}*ψ_{m-1}).
+If the available theorem is
+
+```lean
+Hmissψ₂ m =
+  ψ_{m-1}² ψ_{m+2} + ψ_{m-2} ψ_{m+1}²
+    + ψ_m³ ψ₂²
+    - ψ_{m-1} ψ_m ψ_{m+1} C(6X²+b₂X+b₄) = 0,
 ```
 
-If your Lean lemma states the opposite residual
+then replace `HmissΨ` by `Hmissψ₂` and add the curve-equation term coefficient
 
-```text
-X*ψ_m² - ψ_{m+1}*ψ_{m-1} - φ_m = 0,
+```lean
+-4 * W.ψ m ^ 4
 ```
 
-then replace `c₄` by `-c₄`.
+against the identity
 
----
-
-## Runnable SymPy verification script
-
-```python
-import sympy as sp
-
-# Curve variables and general Weierstrass coefficients.
-X, Y = sp.symbols('X Y')
-a1, a2, a3, a4, a6 = sp.symbols('a1 a2 a3 a4 a6')
-
-# Formal division-polynomial symbols.
-pm2, pm1, pm, pp1, pp2, p2m = sp.symbols(
-    'psi_m_minus_2 psi_m_minus_1 psi_m psi_m_plus_1 psi_m_plus_2 psi_2m'
-)
-om, ph = sp.symbols('omega_m phi_m')
-
-b2 = a1**2 + 4*a2
-b4 = a1*a3 + 2*a4
-b6 = a3**2 + 4*a6
-Psi2Sq = 4*X**3 + b2*X**2 + 2*b4*X + b6
-half_dPsi2Sq = 6*X**2 + b2*X + b4
-psi2 = 2*Y + a1*X + a3
-HF = Y**2 + a1*X*Y + a3*Y - X**3 - a2*X**2 - a4*X - a6
-
-# Hφ and φ_{m+1}.
-Hphi = ph - (X*pm**2 - pp1*pm1)
-phi_m_plus_1 = X*pp1**2 - pp2*pm
-
-# General Weierstrass addX for P=[X,Y,1], Q=[φ_m,ω_m,ψ_m].
-addX = (
-    X*ph**2
-    - 2*Y*om*pm
-    + X**2*ph*pm**2
-    - a1*X*om*pm
-    - a1*Y*ph*pm**2
-    + 2*a2*X*ph*pm**2
-    - a3*om*pm
-    - a3*Y*pm**4
-    + a4*ph*pm**2
-    + a4*X*pm**4
-    + 2*a6*pm**4
-)
-
-LHS = sp.expand(2*(addX - pm1**2*phi_m_plus_1))
-
-Homega = sp.expand(2*pm*om - (p2m - pm**2*(a1*ph + a3*pm**2)))
-Heven = sp.expand(p2m*psi2 - (pm1**2*pm*pp2 - pm2*pm*pp1**2))
-Hmiss_Psi = sp.expand(
-    pm1**2*pp2 + pm2*pp1**2 + pm**3*Psi2Sq - pm1*pm*pp1*half_dPsi2Sq
-)
-Hmiss_psi2 = sp.expand(
-    pm1**2*pp2 + pm2*pp1**2 + pm**3*psi2**2 - pm1*pm*pp1*half_dPsi2Sq
-)
-
-c1 = -psi2
-c2 = -1
-c3 = pm
-c4 = sp.expand((4*X**2 + b2*X + b4)*pm**2 + 2*X*ph - 2*X*pm1*pp1)
-c5_Psi = sp.Integer(0)
-c5_psi2 = -4*pm**4
-
-check_Psi = sp.expand(
-    LHS - (c1*Homega + c2*Heven + c3*Hmiss_Psi + c4*Hphi + c5_Psi*HF)
-)
-check_psi2 = sp.expand(
-    LHS - (c1*Homega + c2*Heven + c3*Hmiss_psi2 + c4*Hphi + c5_psi2*HF)
-)
-
-print('c1 =', c1)
-print('c2 =', c2)
-print('c3 =', c3)
-print('c4 =', c4)
-print('c5 for Hmiss_Psi =', c5_Psi)
-print('c5 for Hmiss_psi2 =', c5_psi2)
-print()
-print('check with Hmiss_Psi == 0?', check_Psi == 0)
-print('check with Hmiss_psi2 == 0?', check_psi2 == 0)
-print()
-print('Hmiss_psi2 - Hmiss_Psi =', sp.factor(Hmiss_psi2 - Hmiss_Psi))
-print('expected difference 4*psi_m^3*HF?', sp.expand((Hmiss_psi2 - Hmiss_Psi) - 4*pm**3*HF) == 0)
-print('OK')
+```lean
+W.ψ₂ ^ 2 - C W.Ψ₂Sq - 4 * W.toAffine.polynomial = 0
 ```
 
-## Output
+which is exactly Mathlib’s `C_Ψ₂Sq` rearranged.
 
-```text
-c1 = -X*a1 - 2*Y - a3
-c2 = -1
-c3 = psi_m
-c4 = 4*X**2*psi_m**2 + X*a1**2*psi_m**2 + 4*X*a2*psi_m**2 + 2*X*phi_m - 2*X*psi_m_minus_1*psi_m_plus_1 + a1*a3*psi_m**2 + 2*a4*psi_m**2
-c5 for Hmiss_Psi = 0
-c5 for Hmiss_psi2 = -4*psi_m**4
+The `C W.Ψ₂Sq` version above is cleaner because the `HF` coefficient is zero.
 
-check with Hmiss_Psi == 0? True
-check with Hmiss_psi2 == 0? True
+## Coercion note
 
-Hmiss_psi2 - Hmiss_Psi = 4*psi_m**3*(-X**3 - X**2*a2 + X*Y*a1 - X*a4 + Y**2 + Y*a3 - a6)
-expected difference 4*psi_m^3*HF? True
-OK
+If you want the theorem literally with Mathlib’s `Jacobian.addX`, define your polynomial-coefficient curve by mapping coefficients into `K[X][Y]`:
+
+```lean
+private abbrev Wbivar : WeierstrassCurve.Jacobian K[X][Y] :=
+  (W.map (algebraMap K K[X][Y])).toJacobian
 ```
 
-## Practical Lean recommendation
+Then prove the unfold lemma:
 
-If the Lean `Hmiss` lemma you have is already the **univariate/reduced** version with `C W.Ψ₂Sq`, use:
-
-```text
-c₅ = 0.
+```lean
+private theorem addX_unfolded_eq_jacobian_addX
+    (omegaP : ℤ → K[X][Y]) (m : ℤ) :
+    W.addX_unfolded omegaP m =
+      Wbivar W |>.addX (genericAffineRep (K := K)) (W.divPolyRep omegaP m) := by
+  rw [addX_unfolded, genericAffineRep, divPolyRep, WeierstrassCurve.Jacobian.addX]
+  simp [Wbivar, WeierstrassCurve.map]
+  ring
 ```
 
-If the Lean `Hmiss` lemma is the **bivariate/full** version with `W.ψ₂^2`, use:
+Depending on the exact local name for `toPoly`, your version may be even shorter:
 
-```text
-c₅ = -4*ψ_m^4.
+```lean
+rw [addX_unfolded, genericAffineRep, divPolyRep, Jacobian.addX]
+ring_nf
 ```
 
-Both are correct, and the script verifies both exact identities. The rest of the coefficients are unchanged.
+Once this unfold lemma is in place, rewrite the goal to `addX_unfolded` and apply `addX_projective_general`.
