@@ -171,8 +171,17 @@ theorem preΨ'_eval_eq_zero_iff_exists_non_two_torsion [IsSepClosed k] {n : ℕ}
           n • (Point.some x y h : (W⁄k).Point) = 0 := by
   constructor
   · intro hx
-    -- TODO: no-spurious-roots / point realization over a separably closed field.
-    sorry
+    have hΨ₂ : W.Ψ₂Sq.eval x ≠ 0 :=
+      WeierstrassCurve.SEAM1.preΨ'_root_Ψ₂Sq_ne W hn hx
+    obtain ⟨y, hEq, _hY⟩ := WeierstrassCurve.SEAM1.nonTwo_of_Ψ₂Sq_ne W hΨ₂
+    have hNS : (W⁄k).Nonsingular x y :=
+      (equation_iff_nonsingular (W := W.toAffine)).mp hEq
+    have h₂ : 2 • (Point.some x y hNS : (W⁄k).Point) ≠ 0 := by
+      intro h
+      exact hΨ₂ ((two_nsmul_eq_zero_iff_Ψ₂Sq_eval_eq_zero (W := W) hNS).mp h)
+    have hn₀ : n • (Point.some x y hNS : (W⁄k).Point) = 0 :=
+      (nsmul_eq_zero_iff_preΨ'_eval_eq_zero_of_two_nsmul_ne_zero (W := W) hNS h₂).mpr hx
+    exact ⟨y, hNS, h₂, hn₀⟩
   · rintro ⟨y, h, h₂, hnP⟩
     exact (nsmul_eq_zero_iff_preΨ'_eval_eq_zero_of_two_nsmul_ne_zero
       (W := W) h h₂).mp hnP
