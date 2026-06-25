@@ -1,205 +1,163 @@
-# Q260 (dm4): proving `ωₙ(P) ≠ 0` from the Jacobian equation at `Z = 0`
+# Q239 (dm4): `AdjoinRoot.mk` quotient-zero API
 
-## Exact Mathlib API
+## Exact lemma names
 
-The Jacobian-coordinate equation lives in
+The quotient-zero lemma is:
 
 ```lean
-WeierstrassCurve.Jacobian.Equation
+AdjoinRoot.mk_eq_zero
 ```
 
-and is a predicate on a `Fin 3 → R` representative:
+Its statement has the shape:
 
 ```lean
-W'.Equation P
+(AdjoinRoot.mk f) g = 0 ↔ f ∣ g
 ```
 
-where `W' : WeierstrassCurve.Jacobian R` and `P : Fin 3 → R`.
-
-If your original curve is `W : WeierstrassCurve k`, use the Jacobian-coordinate conversion:
+The direct relation for the defining polynomial itself is:
 
 ```lean
-W.toJacobian.Equation (![φ, ω, 0] : Fin 3 → k)
-```
-
-The exact lemma for reducing the equation at `Z = 0` is:
-
-```lean
-WeierstrassCurve.Jacobian.equation_of_Z_eq_zero
+AdjoinRoot.mk_self
 ```
 
 with shape:
 
 ```lean
-W'.Equation P ↔ P 1 ^ 2 = P 0 ^ 3
+(AdjoinRoot.mk f) f = 0
 ```
 
-under the hypothesis `P 2 = 0`.  So yes: at `Z = 0`, Mathlib’s Jacobian equation reduces to `Y² = X³`.
+For a CAS cofactor goal `mk f (Q * f) = 0` or `mk f (f * Q) = 0`, use `AdjoinRoot.mk_eq_zero`.  `AdjoinRoot.mk_self` is only the special case `g = f`.
 
-There is also a direct Mathlib lemma if you have nonsingularity of the Jacobian representative, not just the equation:
-
-```lean
-WeierstrassCurve.Jacobian.Y_ne_zero_of_Z_eq_zero
-```
-
-It proves `P 1 ≠ 0` from `W'.Nonsingular P` and `P 2 = 0`.  In your stated use, you only mentioned the equation plus `φ ≠ 0`, so the first lemma below is the equation-only proof.
-
-## Reusable equation-only proof
+## Generic three-line proofs
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Basic
+import Mathlib.RingTheory.AdjoinRoot
 import Mathlib.Tactic
 
-noncomputable section
+open Polynomial
 
-open Matrix
+variable {R : Type*} [CommRing R]
+variable (f Q : R[X])
 
-namespace WeierstrassCurve
+example : (AdjoinRoot.mk f) (Q * f) = 0 := by
+  rw [AdjoinRoot.mk_eq_zero]
+  exact ⟨Q, by ring⟩
 
-variable {k : Type*} [Field k]
-
-/-- If a Jacobian representative lies on the curve, has `Z = 0`, and has nonzero
-`X`, then its `Y` coordinate is nonzero.  This uses only the equation at infinity,
-not nonsingularity. -/
-lemma Jacobian.Y_ne_zero_of_equation_of_Z_eq_zero_of_X_ne_zero
-    (W' : WeierstrassCurve.Jacobian k) {P : Fin 3 → k}
-    (hEq : W'.Equation P) (hZ : P 2 = 0) (hX : P 0 ≠ 0) :
-    P 1 ≠ 0 := by
-  have hY2X3 : P 1 ^ 2 = P 0 ^ 3 :=
-    (WeierstrassCurve.Jacobian.equation_of_Z_eq_zero
-      (W' := W') (P := P) hZ).mp hEq
-  intro hY
-  have hX3_zero : P 0 ^ 3 = 0 := by
-    rw [← hY2X3]
-    simp [hY]
-  exact (pow_ne_zero 3 hX) hX3_zero
-
-/-- Specialized `[φ : ω : 0]` form for an ordinary Weierstrass curve converted to
-Jacobian coordinates. -/
-lemma omega_ne_zero_of_phi_ne_zero_of_jacobian_equation_at_infinity
-    (W : WeierstrassCurve k) {φ ω : k}
-    (hEq : W.toJacobian.Equation (![φ, ω, 0] : Fin 3 → k))
-    (hφ : φ ≠ 0) :
-    ω ≠ 0 := by
-  simpa using
-    (Jacobian.Y_ne_zero_of_equation_of_Z_eq_zero_of_X_ne_zero
-      (W' := W.toJacobian)
-      (P := (![φ, ω, 0] : Fin 3 → k))
-      hEq
-      (by simp)
-      (by simpa using hφ))
-
-end WeierstrassCurve
+example : (AdjoinRoot.mk f) (f * Q) = 0 := by
+  rw [AdjoinRoot.mk_eq_zero]
+  exact ⟨Q, by ring⟩
 ```
 
-This is the proof you want for the ATOM 5 step once you have:
+The witness is `Q` in both cases.  Lean’s divisibility convention is `f ∣ g` means `∃ q, g = f * q`; in the `Q * f` case the `ring` step commutes the product.
+
+If you prefer theorem-library proofs of divisibility instead of an explicit witness:
 
 ```lean
-hφ : φ ≠ 0
-hEq : W.toJacobian.Equation (![φ, ω, 0] : Fin 3 → k)
+example : (AdjoinRoot.mk f) (Q * f) = 0 := by
+  rw [AdjoinRoot.mk_eq_zero]
+  exact dvd_mul_left f Q
+
+example : (AdjoinRoot.mk f) (f * Q) = 0 := by
+  rw [AdjoinRoot.mk_eq_zero]
+  exact dvd_mul_right f Q
 ```
 
-Then simply write:
+The explicit-witness version is usually more robust in polynomial-heavy files.
+
+## Coordinate-ring form
+
+If your goal is literally the affine coordinate-ring wrapper and the curve abbreviation is `W.toAffine`, use `change` to expose the underlying `AdjoinRoot.mk`.
+
+For a left cofactor:
 
 ```lean
-have hω : ω ≠ 0 := by
-  exact WeierstrassCurve.omega_ne_zero_of_phi_ne_zero_of_jacobian_equation_at_infinity
-    (W := W) (φ := φ) (ω := ω) hEq hφ
+by
+  change (AdjoinRoot.mk W.toAffine.polynomial) (Q * W.toAffine.polynomial) = 0
+  rw [AdjoinRoot.mk_eq_zero]
+  exact ⟨Q, by ring⟩
 ```
 
-## If you prefer to see the explicit `Y² = X³` step
-
-The core reduction can also be written inline:
+For a right cofactor:
 
 ```lean
-have hY2X3 : ω ^ 2 = φ ^ 3 := by
-  have h :=
-    (WeierstrassCurve.Jacobian.equation_of_Z_eq_zero
-      (W' := W.toJacobian)
-      (P := (![φ, ω, 0] : Fin 3 → k))
-      (by simp)).mp hEq
-  simpa using h
-
-have hω : ω ≠ 0 := by
-  intro hω0
-  have hφ3_zero : φ ^ 3 = 0 := by
-    rw [← hY2X3]
-    simp [hω0]
-  exact (pow_ne_zero 3 hφ) hφ3_zero
+by
+  change (AdjoinRoot.mk W.toAffine.polynomial) (W.toAffine.polynomial * Q) = 0
+  rw [AdjoinRoot.mk_eq_zero]
+  exact ⟨Q, by ring⟩
 ```
 
-This avoids `pow_eq_zero_iff`; `pow_ne_zero 3 hφ` is usually the most robust way to close the final field-domain contradiction.
-
-## Direct proof if you have `Nonsingular`
-
-If your projective representative is already packaged as a nonsingular Jacobian representative, Mathlib has the exact lemma:
+If the local affine curve object is already named `W` and the goal is
 
 ```lean
-lemma omega_ne_zero_of_jacobian_nonsingular_at_infinity
-    (W : WeierstrassCurve k) {φ ω : k}
-    (hP : W.toJacobian.Nonsingular (![φ, ω, 0] : Fin 3 → k)) :
-    ω ≠ 0 := by
-  simpa using
-    (WeierstrassCurve.Jacobian.Y_ne_zero_of_Z_eq_zero
-      (W' := W.toJacobian)
-      (P := (![φ, ω, 0] : Fin 3 → k))
-      hP
-      (by simp))
+Affine.CoordinateRing.mk W (Q * W.polynomial) = 0
 ```
 
-This version does not need `φ ≠ 0` as a separate hypothesis because nonsingularity at `Z = 0` already forces both `X` and `Y` nonzero in Mathlib.
-
-## How this plugs into the division-polynomial setting
-
-For your torsion point, instantiate:
+then use:
 
 ```lean
-φ := (W.Φ n).eval x
-ω := omegaEval   -- whatever name you use for the evaluated ωₙ(P)
+by
+  change (AdjoinRoot.mk W.polynomial) (Q * W.polynomial) = 0
+  rw [AdjoinRoot.mk_eq_zero]
+  exact ⟨Q, by ring⟩
 ```
 
-and use your already-proved ATOM 4 statement:
+and for the other multiplication order:
 
 ```lean
-have hφ : (W.Φ n).eval x ≠ 0 := by
-  -- from `ψₙ(P)=0`, `Ψ₂Sq(x)≠0`, no-adjacent-preΨ-zero, and the definition of `Φ`
-  exact hphi
+by
+  change (AdjoinRoot.mk W.polynomial) (W.polynomial * Q) = 0
+  rw [AdjoinRoot.mk_eq_zero]
+  exact ⟨Q, by ring⟩
 ```
 
-Then get the Jacobian equation from the theorem saying the projective division-polynomial representative lies on the Jacobian curve:
+## When `bigPoly` is hidden behind a CAS identity
+
+If the goal is
 
 ```lean
-have hEq :
-    W.toJacobian.Equation
-      (![(W.Φ n).eval x, omegaEval, (W.ψ n).evalXY x y] : Fin 3 → k) := by
-  -- your projective-representative-on-curve theorem
-  exact hJac
+Affine.CoordinateRing.mk W.toAffine bigPoly = 0
 ```
 
-At an `n`-torsion point, rewrite the third coordinate to zero:
+and you have
 
 ```lean
-have hEq0 :
-    W.toJacobian.Equation
-      (![(W.Φ n).eval x, omegaEval, 0] : Fin 3 → k) := by
-  simpa [hψ] using hEq
+hbig : bigPoly = Q * W.toAffine.polynomial
 ```
 
-and conclude:
+then:
 
 ```lean
-have hω : omegaEval ≠ 0 := by
-  exact WeierstrassCurve.omega_ne_zero_of_phi_ne_zero_of_jacobian_equation_at_infinity
-    (W := W)
-    (φ := (W.Φ n).eval x)
-    (ω := omegaEval)
-    hEq0
-    hφ
+by
+  rw [hbig]
+  change (AdjoinRoot.mk W.toAffine.polynomial) (Q * W.toAffine.polynomial) = 0
+  rw [AdjoinRoot.mk_eq_zero]
+  exact ⟨Q, by ring⟩
 ```
 
-The important API answers are therefore:
+For
 
-* equation predicate: `W.toJacobian.Equation (![φ, ω, 0] : Fin 3 → k)`;
-* reduction at infinity: `WeierstrassCurve.Jacobian.equation_of_Z_eq_zero`;
-* nonzero conclusion from a nonsingular representative, if available: `WeierstrassCurve.Jacobian.Y_ne_zero_of_Z_eq_zero`;
-* final field-domain contradiction: `pow_ne_zero 3 hφ` applied to `φ ^ 3 = 0`.
+```lean
+hbig : bigPoly = W.toAffine.polynomial * Q
+```
+
+use:
+
+```lean
+by
+  rw [hbig]
+  change (AdjoinRoot.mk W.toAffine.polynomial) (W.toAffine.polynomial * Q) = 0
+  rw [AdjoinRoot.mk_eq_zero]
+  exact ⟨Q, by ring⟩
+```
+
+## Ultra-short version if the wrapper unfolds by `simp`
+
+Sometimes the coordinate-ring `mk` abbreviation unfolds enough for this to work directly:
+
+```lean
+by
+  rw [AdjoinRoot.mk_eq_zero]
+  exact ⟨Q, by ring⟩
+```
+
+If not, add the `change` line above.  The `change` line is the reliable version for `Affine.CoordinateRing.mk W.toAffine` goals.
