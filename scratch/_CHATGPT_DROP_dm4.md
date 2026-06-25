@@ -1,410 +1,512 @@
-# Q514 / dm4 — Bypass full `FormalGroup`: prove the `[n]` tangent scalar directly from finite-point formulas
+# Q594 / dm4 — Explicit leading computation for `normalizedAddY`
 
 ## Executive answer
 
-Yes, this is a plausible bypass of the full `W.formalGroup : FormalGroup K` construction **for the tangent bridge only**. But the proposed statement needs two important corrections.
-
-1. The additive tangent coordinate is **not** the raw `dx` or `dy` coefficient. It is the coordinate defined by the invariant differential
-
-```text
-ω = dx / (2y + a₁x + a₃)
-```
-
-on the chart where `2y + a₁x + a₃ ≠ 0`, with the alternative `dy`-chart at 2-torsion points. Addition is additive on this invariant-differential coordinate.
-
-2. The final induction step where `(n-1)P + P = O` is **not** an affine secant computation. The affine denominator has zero scalar part, hence is not invertible in `K[ε]`. That endpoint still needs a projective/local-parameter computation using `addXYZ` or a special vertical-addition lemma.
-
-So the corrected route is:
-
-```text
-finite secant/doubling tangent lemmas
-  + one vertical endpoint lemma into the local parameter at O
-  + induction along the finite orbit P, 2P, ..., (n-1)P, O
-```
-
-This can bypass full formal groups. It probably is shorter than constructing a genuine `FormalGroup K`, but it is **not** just one affine `K[ε]` lemma.
-
-## Mathlib surface checked
-
-The repo pins Mathlib at
-
-```toml
-rev = "96fd0fff3b8837985ae21dd02e712cb5df72ec05"
-```
-
-Relevant files:
-
-```text
-Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Formula.lean
-Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Point.lean
-Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Formula.lean
-```
-
-`Affine/Formula.lean` has exactly the branch formulas one would want to differentiate:
+With the conventions stated in the question,
 
 ```lean
-WeierstrassCurve.Affine.negY
-WeierstrassCurve.Affine.slope
-WeierstrassCurve.Affine.addX
-WeierstrassCurve.Affine.negAddY
-WeierstrassCurve.Affine.addY
+normalizedAddY = formalAddY / (X₀ - X₁)^3
+formalAddY     = Projective.addY(W', P(X₀), P(X₁))
+P(t)           = [t, -1, w(t)]
 ```
 
-The file documents the affine slope branches:
+the explicit Mathlib-formula computation gives
 
 ```text
-if x₁ ≠ x₂,       ℓ = (y₁ - y₂) / (x₁ - x₂)
-if P = Q nonvert, ℓ = (3x₁² + 2a₂x₁ + a₄ - a₁y₁) / (2y₁ + a₁x₁ + a₃)
+formalAddY = (X₀ - X₁)^3 * (1 + higher terms).
 ```
 
-and then
-
-```text
-x(P+Q) = ℓ² + a₁ℓ - a₂ - x₁ - x₂
-y(P+Q) = -(ℓ(x(P+Q)-x₁)+y₁) - a₁x(P+Q) - a₃.
-```
-
-`Affine/Point.lean` builds the actual point group law over a **field** and proves `AddCommGroup W.Point`. This is useful for scalar/base points, but it does **not** give a group law over `K[ε]`, because `K[ε]` is not a field.
-
-That is the first Lean implementation warning: do not try to instantiate `W.Point` over `TrivSqZeroExt K K`. Instead, differentiate the branch formulas over `K` or define branch-specific dual-number formulas with explicit inverses for denominators whose scalar part is nonzero.
-
-## Why the raw `K[ε]` affine statement is too optimistic
-
-The proposed lemma was:
-
-```text
-for P,Q distinct finite affine points over K[ε],
-tangent(P+Q) decomposes additively.
-```
-
-This needs to be narrowed.
-
-### Problem 1: `K[ε]` is not a field
-
-Mathlib's `Affine.Point` group law is over fields. The dual numbers are a commutative ring with nilpotents, not a field. So the existing field-level `slope` and `Point.add` API cannot be used directly over `K[ε]`.
-
-For the secant branch with distinct **reductions** `x₁ ≠ x₂` over `K`, the denominator
-
-```text
-(x₁ + ε dx₁) - (x₂ + ε dx₂)
-```
-
-has nonzero scalar part and is a unit in `K[ε]`. That branch is fine, but Lean should use either:
-
-* an explicit inverse formula for dual units; or
-* ordinary derivative formulas over `K`, avoiding division in the dual ring.
-
-### Problem 2: dual-number distinctness is not enough
-
-If the reductions have the same `x`-coordinate, the affine denominator may be nilpotent. For example, in the final vertical step, the scalar denominator is zero. Then it is not a unit in `K[ε]`, so the affine secant formula is not valid.
-
-The branch condition should be scalar/open-chart data such as:
+Therefore
 
 ```lean
-hx : x₁ ≠ x₂
+constantCoeff normalizedAddY = 1
 ```
 
-not merely `Pε ≠ Qε` in the dual ring.
+not `-1`.
 
-### Problem 3: addition is additive only after the right tangent trivialization
+The `-1` appears if either:
 
-For a finite nonsingular point `(x,y)`, the tangent equation is the linearization of the Weierstrass equation. In one common convention,
+1. you divide by `(X₁ - X₀)^3`, since `(X₁-X₀)^3 = -(X₀-X₁)^3`; or
+2. you accidentally use `negAddY` instead of `addY`. Indeed `negAddY` has leading term `-(X₀-X₁)^3`.
+
+This sign matters, but the formal group law still has the expected leading term:
 
 ```text
-F(x,y) = y² + a₁xy + a₃y - x³ - a₂x² - a₄x - a₆,
+normalizedAddX = -(X₀ + X₁) + O(total degree ≥ 2)
+normalizedAddY =  1 + O(total degree ≥ 1)
+F = -normalizedAddX * normalizedAddY⁻¹ = X₀ + X₁ + O(total degree ≥ 2).
 ```
 
-so a tangent vector `(dx,dy)` satisfies
+So the constant coefficient of `F` is `0`, and the two linear coefficients are both `1`.
 
-```text
-(a₁y - 3x² - 2a₂x - a₄) dx + (2y + a₁x + a₃) dy = 0.
-```
+## Mathlib formulas used
 
-The invariant-differential coordinate is
-
-```text
-θ(x,y; dx,dy) = dx / (2y + a₁x + a₃)
-```
-
-when `2y + a₁x + a₃ ≠ 0`. At a 2-torsion point this denominator vanishes, and one must use the equivalent `dy` formula on the other nonsingular chart.
-
-The correct local statement is not
-
-```text
-dx(P+Q) = dx(P) + dx(Q),
-```
-
-but rather
-
-```text
-θ(P+Q; d(P+Q)) = θ(P; dP) + θ(Q; dQ).
-```
-
-This is the algebraic form of
-
-```text
-m^*ω = pr₁^*ω + pr₂^*ω
-```
-
-for the group law.
-
-## Correct finite-point lemma package
-
-The route should be organized into branch lemmas, not one giant dual-number theorem.
-
-### 1. Tangent data and invariant coordinate
-
-Use definitions like:
+From `Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Formula.lean`, the relevant definitions are:
 
 ```lean
-namespace WeierstrassCurve.Affine
-
-variable {K : Type*} [Field K] (W : WeierstrassCurve.Affine K)
-
--- Name only; exact polynomial signs should match Mathlib's `polynomialX/polynomialY` convention.
-def TangentAt (x y dx dy : K) : Prop :=
-  W.polynomialX.evalEval x y * dx + W.polynomialY.evalEval x y * dy = 0
-
--- On the non-2-torsion finite chart.
-def psi (x y : K) : K :=
-  y - W.negY x y       -- equals 2*y + a₁*x + a₃ after simp/ring
-
-noncomputable def omegaCoord (x y dx dy : K) : K :=
-  dx / W.psi x y
-
-end WeierstrassCurve.Affine
+def addY (P Q : Fin 3 → R) : R :=
+  W'.negY ![W'.addX P Q, W'.negAddY P Q, W'.addZ P Q]
 ```
 
-For an input deformation of the form
-
-```text
-Pε = (x + ε, y + ε s),
-```
-
-`(1,s)` must satisfy the tangent equation. Its invariant coordinate is generally
-
-```text
-1 / (2y + a₁x + a₃),
-```
-
-not `1`. If the target theorem wants output coefficient `n`, normalize the input tangent vector so that `θ = 1`; if the input is `dx = 1`, expect output coefficient
-
-```text
-n / (2y + a₁x + a₃)
-```
-
-up to the sign convention of the local parameter at `O`.
-
-### 2. Secant tangent-addition lemma
-
-For scalar finite points with `x₁ ≠ x₂`, define the derivative of the affine formulas explicitly.
-
-Mathematically:
-
-```text
-ℓ  = (y₁ - y₂)/(x₁ - x₂)
-dℓ = ((dy₁ - dy₂)(x₁ - x₂) - (y₁ - y₂)(dx₁ - dx₂))/(x₁ - x₂)²
-
-x₃  = ℓ² + a₁ℓ - a₂ - x₁ - x₂
-dx₃ = (2ℓ + a₁)dℓ - dx₁ - dx₂
-
-y₃  = -(ℓ(x₃-x₁)+y₁) - a₁x₃ - a₃
-dy₃ = -(dℓ(x₃-x₁) + ℓ(dx₃-dx₁) + dy₁) - a₁dx₃
-```
-
-Then prove:
-
-```text
-TangentAt(x₁,y₁,dx₁,dy₁)
-TangentAt(x₂,y₂,dx₂,dy₂)
-x₁ ≠ x₂
----------------------------------------------
-TangentAt(x₃,y₃,dx₃,dy₃)
-omegaCoord(x₃,y₃,dx₃,dy₃)
-  = omegaCoord(x₁,y₁,dx₁,dy₁)
-  + omegaCoord(x₂,y₂,dx₂,dy₂)
-```
-
-Lean proof style: expand definitions, use `field_simp` with the nonzero denominators, then `ring`/`ring_nf`. This is a finite calculation over `K`.
-
-This is probably much easier than a multivariate `MvPowerSeries` associativity proof.
-
-### 3. Doubling tangent lemma
-
-For `P = Q` with `P` not 2-torsion, use the tangent-line slope branch:
-
-```text
-ℓ = (3x² + 2a₂x + a₄ - a₁y)/(2y + a₁x + a₃).
-```
-
-Differentiate this formula and prove:
-
-```text
-omegaCoord(d(2P)) = 2 * omegaCoord(dP).
-```
-
-Again this is finite `field_simp` + `ring`, but it is a separate branch. It is needed for the first induction step `[2]Q = Q + Q` unless the proof starts from a projective `dblXYZ` tangent lemma.
-
-### 4. Vertical endpoint lemma into `O`
-
-This is the unavoidable endpoint.
-
-If `R = -P`, then `R + P = O`. For deformations
-
-```text
-Rε near R,
-Pε near P,
-```
-
-the affine secant denominator has zero scalar part. It is not invertible in `K[ε]`. Therefore the affine formula cannot compute the output near `O`.
-
-The correct endpoint lemma is projective/local:
-
-```text
-localParameterCoeffAtO(addXYZ(Rε, Pε))
-  = omegaCoord(R; dR) + omegaCoord(P; dP)
-```
-
-with the sign fixed by the chosen convention for the local parameter at infinity, e.g. `t = -X/Y` or `t = -XZ/Y` depending on the projective representative convention.
-
-This is still only a **finite dual-number computation**, not a full formal group construction. It should be much smaller than proving full `(X₀-X₁)^3` normalization as a two-variable power-series identity.
-
-But it means the route is not purely affine.
-
-## Induction theorem shape
-
-Assume `P` has exact order `n` and, for the simplest version, assume the orbit avoids 2-torsion on the finite steps where the `dx/ψ` chart is used. For odd exact order this avoids the main chart-switching problem. For even order, `(n/2)P` is 2-torsion and one must either switch charts or add a 2-torsion branch lemma.
-
-A clean theorem statement should look more like:
+and
 
 ```lean
--- P is finite, nonsingular, exact order n, with a tangent vector v at P.
--- `thetaP` is the invariant-differential coordinate of v.
-theorem localCoeff_nsmul_torsion_direct
-    {n : ℕ} {P : W.Point} {v : TangentVectorAt P}
-    (hPfin : P is finite)
-    (horder : exact_order P n)
-    (hchart : orbit_chart_good P n)
-    (htangent : tangent vector data is valid) :
-  coeffε (localParameterAtO ([n] (P + ε v))) = (n : K) * thetaP := by
-  -- induction on k
-  -- k = 1: identity
-  -- k = 2: doubling lemma
-  -- 2 < k < n: secant finite-add lemma
-  -- k = n: vertical endpoint lemma
+def negY (P : Fin 3 → R) : R :=
+  -P y - W'.a₁ * P x - W'.a₃ * P z
 ```
 
-More concretely, maintain an induction invariant:
+Therefore
 
 ```text
-For 1 ≤ k < n,
-  [k](Pε) is a deformation of kP with invariant coordinate k * θ(Pε).
+addY(P,Q) = -negAddY(P,Q) - a₁*addX(P,Q) - a₃*addZ(P,Q).
 ```
 
-Then:
-
-* `k = 1`: immediate.
-* `k = 2`: finite doubling lemma, unless `2P=O`.
-* `2 ≤ k ≤ n-2`: add the deformation of `kP` to the original deformation of `P`; use the secant lemma, because for exact order `n`, `kP` is neither `P` nor `-P` in the generic range.
-* `k = n-1`: `kP = -P`; use the vertical endpoint lemma to land in the local parameter at `O`.
-
-The final result is:
+The raw `negAddY` formula is:
 
 ```text
-local t coefficient of [n](Pε) = n * θ(Pε).
+negAddY(P,Q) =
+  -3*Px^2*Qx*Qy + 3*Px*Qx^2*Py
+  - Py^2*Qy*Qz + Py*Qy^2*Pz
+  + a₁*Px*Qy^2*Pz - a₁*Qx*Py^2*Qz
+  - a₂*Px^2*Qy*Qz + a₂*Qx^2*Py*Pz
+  + 2*a₂*Px*Qx*Py*Qz - 2*a₂*Px*Qx*Qy*Pz
+  - a₃*Py^2*Qz^2 + a₃*Qy^2*Pz^2
+  + a₄*Px*Py*Qz^2 - 2*a₄*Px*Qy*Pz*Qz
+  + 2*a₄*Qx*Py*Pz*Qz - a₄*Qx*Qy*Pz^2
+  + 3*a₆*Py*Pz*Qz^2 - 3*a₆*Qy*Pz^2*Qz.
 ```
 
-If `Pε = (x + ε, y + εs)` with `dx = 1`, then `θ(Pε) = 1 / (2y + a₁x + a₃)` on the non-2 chart. So the output is not literally `n` unless the input tangent was normalized to have invariant coordinate `1`.
+The raw `addX` and `addZ` formulas are the Mathlib ones. The only fact about `addY` needed for the leading sign is the identity above:
 
-## What this bypasses and what it does not
+```text
+addY = -negAddY - a₁ addX - a₃ addZ.
+```
 
-### It bypasses
+## Formal point expansion
 
-* defining `F(T₁,T₂)` as a full `MvPowerSeries`;
-* proving `FormalGroup.assoc`;
-* proving full two-variable associativity / formal group law identities;
-* proving the complete `(X₀-X₁)^3` normalization for all formal variables, if the only target is the tangent scalar.
+The formal point is
 
-### It does not bypass
+```text
+P(t) = [t, -1, w(t)]
+```
 
-* differentiating the affine add/double formulas;
-* handling branch conditions (`secant`, `doubling`, `vertical endpoint`);
-* one projective/local calculation at `O`;
-* chart-switching at 2-torsion orbit points, unless excluded;
-* exact-order/orbit bookkeeping.
+with `w` satisfying
 
-## Lean implementation recommendation
+```text
+w = t^3 + a₁*t*w + a₂*t^2*w + a₃*w^2 + a₄*t*w^2 + a₆*w^3.
+```
 
-Do **not** phrase the first lemmas over dual-number `Point`s. Instead define branchwise derivative formulas over `K`.
+Thus
 
-Recommended order:
+```text
+w(t) = t^3
+     + a₁*t^4
+     + (a₁^2 + a₂)*t^5
+     + (a₁^3 + 2*a₁*a₂ + a₃)*t^6
+     + (a₁^4 + 3*a₁^2*a₂ + 3*a₁*a₃ + a₂^2 + a₄)*t^7
+     + O(t^8).
+```
 
-1. Define `TangentAt` and `omegaCoord` for finite affine points.
-2. Prove the finite secant derivative lemma in ordinary field algebra.
-3. Prove the finite doubling derivative lemma in ordinary field algebra.
-4. Prove the vertical endpoint lemma using `Projective.addXYZ`/local parameter over `TrivSqZeroExt K K`.
-5. Assemble the exact-order induction.
+For the leading computation through total degree `6`, it is enough to use
 
-This avoids fighting `K[ε]` as a non-field and avoids `if` branches in `Affine.slope`.
+```text
+w(t) = t^3 + a₁*t^4 + (a₁^2+a₂)*t^5 + (a₁^3+2a₁a₂+a₃)*t^6 + O(t^7).
+```
 
-A branch lemma skeleton:
+Set
+
+```text
+x = X₀,
+y = X₁,
+δ = X₀ - X₁,
+w₀ = w(X₀),
+w₁ = w(X₁),
+P = [X₀,-1,w₀],
+Q = [X₁,-1,w₁].
+```
+
+## Explicit component expansions
+
+After substituting `Py = Qy = -1`, `Pz = w₀`, `Qz = w₁`, the Mathlib formulas give the following leading terms.
+
+### `addZ`
+
+```text
+addZ(P,Q) = -δ^3*(X₀+X₁)^3 + O(total degree ≥ 7).
+```
+
+So `addZ` starts only in total degree `6`.
+
+### `addX`
+
+```text
+addX(P,Q)
+  = -δ^3 * (
+      (X₀+X₁)
+    + a₁*(X₀^2 + X₀X₁ + X₁^2)
+    + (a₁^2+a₂)*(X₀^3 + X₀^2X₁ + X₀X₁^2 + X₁^3)
+    + O(total degree ≥ 4 inside the parentheses)
+    ).
+```
+
+In particular,
+
+```text
+normalizedAddX = addX/δ^3 = -(X₀+X₁) + O(total degree ≥ 2).
+```
+
+### `negAddY`
+
+```text
+negAddY(P,Q)
+  = -δ^3 * (
+      1
+    + a₂*(X₀^2 + X₀X₁ + X₁^2)
+    + a₁*a₂*(X₀^3 + X₀^2X₁ + X₀X₁^2 + X₁^3)
+    + O(total degree ≥ 4 inside the parentheses)
+    ).
+```
+
+This is probably where the expected `-1` came from: `negAddY/δ^3` has constant coefficient `-1`.
+
+### `addY`
+
+But Mathlib's actual `addY` is
+
+```text
+addY = -negAddY - a₁*addX - a₃*addZ.
+```
+
+Combining the previous expansions gives:
+
+```text
+addY(P,Q)
+  = δ^3 * (
+      1
+    + a₁*(X₀+X₁)
+    + (a₁^2+a₂)*(X₀^2 + X₀X₁ + X₁^2)
+    + (a₁^3+2*a₁*a₂)*(X₀^3 + X₀^2X₁ + X₀X₁^2 + X₁^3)
+    + a₃*(X₀+X₁)^3
+    + O(total degree ≥ 4 inside the parentheses)
+    ).
+```
+
+Equivalently, written without the shorthand `δ`:
+
+```text
+addY(P,Q)
+  = (X₀-X₁)^3
+  + a₁*(X₀-X₁)^3*(X₀+X₁)
+  + (a₁^2+a₂)*(X₀-X₁)^3*(X₀^2+X₀X₁+X₁^2)
+  + O(total degree ≥ 6).
+```
+
+Including the total-degree-6 terms:
+
+```text
+addY(P,Q)
+  = (X₀-X₁)^3 * (
+      1
+    + a₁*(X₀+X₁)
+    + (a₁^2+a₂)*(X₀^2 + X₀X₁ + X₁^2)
+    + (a₁^3+2*a₁*a₂)*(X₀^3 + X₀^2X₁ + X₀X₁^2 + X₁^3)
+    + a₃*(X₀+X₁)^3
+    )
+  + O(total degree ≥ 7).
+```
+
+Thus, with divisor `(X₀-X₁)^3`, the quotient has leading expansion
+
+```text
+normalizedAddY
+  = 1
+  + a₁*(X₀+X₁)
+  + (a₁^2+a₂)*(X₀^2 + X₀X₁ + X₁^2)
+  + O(total degree ≥ 3).
+```
+
+So
+
+```text
+constantCoeff normalizedAddY = 1.
+```
+
+If instead the quotient is defined by dividing by `(X₁-X₀)^3`, then the expansion becomes
+
+```text
+addY(P,Q) = -(X₁-X₀)^3 * (1 + higher terms),
+```
+
+and then the constant coefficient is `-1`.
+
+## Lean consequence: fix the sign target
+
+If your Lean definition is literally:
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
-import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Formula
-
-open WeierstrassCurve
-
-namespace WeierstrassCurve.Affine
-
-variable {K : Type*} [Field K]
-variable (W : WeierstrassCurve.Affine K)
-
-noncomputable def psi (x y : K) : K :=
-  y - W.negY x y
-
--- Use the exact `polynomialX/polynomialY` convention from Mathlib.
-def TangentAt (x y dx dy : K) : Prop :=
-  W.polynomialX.evalEval x y * dx + W.polynomialY.evalEval x y * dy = 0
-
-noncomputable def omegaCoord (x y dx dy : K) : K :=
-  dx / W.psi x y
-
--- Secant branch: scalar reductions have x₁ ≠ x₂.
-theorem omegaCoord_add_secant
-    {x₁ y₁ x₂ y₂ dx₁ dy₁ dx₂ dy₂ : K}
-    (h₁ : W.Nonsingular x₁ y₁)
-    (h₂ : W.Nonsingular x₂ y₂)
-    (hx : x₁ ≠ x₂)
-    (ht₁ : W.TangentAt x₁ y₁ dx₁ dy₁)
-    (ht₂ : W.TangentAt x₂ y₂ dx₂ dy₂) :
-    -- after defining ℓ,dℓ,x₃,y₃,dx₃,dy₃:
-    True := by
-  -- expand definitions; `field_simp [hx, ...]`; `ring_nf`
-  trivial
-
--- Doubling branch: non-vertical tangent.
-theorem omegaCoord_dbl
-    {x y dx dy : K}
-    (h : W.Nonsingular x y)
-    (hpsi : W.psi x y ≠ 0)
-    (ht : W.TangentAt x y dx dy) :
-    -- omegaCoord of the doubled tangent = 2 * omegaCoord of input
-    True := by
-  -- expand definitions; `field_simp [hpsi, ...]`; `ring_nf`
-  trivial
-
-end WeierstrassCurve.Affine
+formalAddY = Projective.addY(W', P X₀, P X₁)
+formalAddY = (X₀ - X₁)^3 * normalizedAddY
 ```
 
-The real theorem bodies should not leave `True`; this is just the recommended decomposition. The point is that each branch is a finite rational identity over `K`.
+then the theorem should be:
 
-## Verdict
+```lean
+theorem normalizedAddY_constantCoeff :
+    MvPowerSeries.constantCoeff normalizedAddY = 1 := by
+  ...
+```
 
-This route is worth pursuing if the only required result is the tangent scalar used in the division-polynomial bridge:
+not `= -1`.
+
+If your current intended theorem is:
+
+```lean
+MvPowerSeries.constantCoeff normalizedAddY = -1
+```
+
+then one of these is true:
+
+1. your divisor is actually `(X₁-X₀)^3`; or
+2. your `formalAddY` is actually Mathlib's `negAddY`; or
+3. the target sign is wrong.
+
+## Minimal coefficient proof for `normalizedAddY_constantCoeff`
+
+Let
+
+```lean
+δ = X₀ - X₁
+hY : formalAddY = δ^3 * normalizedAddY
+```
+
+and prove the degree-3 coefficient calculation:
+
+```lean
+coeff_X0_cubed_formalAddY :
+  MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 3) formalAddY = 1
+```
+
+This is exactly the leading term above: the coefficient of `X₀^3` in `(X₀-X₁)^3` is `1`.
+
+Then compare coefficients in `hY`:
+
+```lean
+have hcoeff := congrArg (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 3)) hY
+```
+
+The right side reduces to the constant coefficient of `normalizedAddY`, because the only way to get the monomial `X₀^3` from
 
 ```text
-coeffε(t([n](Pε))) = n * θ(Pε).
+(X₀-X₁)^3 * normalizedAddY
 ```
 
-It is likely shorter than constructing the full Weierstrass `FormalGroup`. But the viable proof is not the naive affine addition over `K[ε]`; it is a branchwise proof using the invariant differential, plus one projective vertical endpoint computation. If you restrict to exact odd order and non-2-torsion charts, the induction becomes much cleaner. For general `n`, chart switching and earlier hits of `O` must be handled explicitly.
+is the `X₀^3` term of `(X₀-X₁)^3` times the constant term of `normalizedAddY`.
+
+Lean skeleton:
+
+```lean
+open MvPowerSeries Finsupp
+
+local notation "X₀" => (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) K)
+local notation "X₁" => (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) K)
+local notation "δ"  => (X₀ - X₁)
+
+-- Proved by expanding Mathlib's `addY = -negAddY - a₁*addX - a₃*addZ`
+-- after substituting `P(X₀), P(X₁)` and using `w = X^3 + O(X^4)`.
+lemma coeff_X0_cubed_formalAddY :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 3) formalAddY = 1 := by
+  -- `rw [formalAddY, Projective.addY, Projective.negY_eq, ...]`
+  -- all terms except the cubic part of `-negAddY` vanish at this coefficient.
+  -- The surviving contribution is `X₀^3` from `(X₀-X₁)^3`.
+  sorry
+
+lemma coeff_X0_cubed_delta_pow_mul (G : MvPowerSeries (Fin 2) K) :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 3) (δ^3 * G)
+      = MvPowerSeries.constantCoeff G := by
+  -- Use `MvPowerSeries.coeff_mul`.
+  -- Only the antidiagonal pair `(single 0 3, 0)` contributes.
+  -- Coefficients of `δ^3` at all other monomials that could combine
+  -- to `single 0 3` are zero/impossible except `single 0 3`.
+  sorry
+
+theorem normalizedAddY_constantCoeff
+    (hY : formalAddY = δ^3 * normalizedAddY) :
+    MvPowerSeries.constantCoeff normalizedAddY = 1 := by
+  have h := congrArg (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 3)) hY
+  rw [coeff_X0_cubed_formalAddY, coeff_X0_cubed_delta_pow_mul] at h
+  exact h.symm
+```
+
+If using divisor `(X₁-X₀)^3`, replace `δ` by `X₁-X₀`; then the analogous coefficient of `X₀^3` in `(X₁-X₀)^3` is `-1`, so the result is `-1`.
+
+## Constant coefficient of `F`
+
+From the expansion of `addX`:
+
+```text
+normalizedAddX = -(X₀+X₁) + O(total degree ≥ 2),
+```
+
+so
+
+```lean
+constantCoeff normalizedAddX = 0.
+```
+
+Also
+
+```lean
+constantCoeff normalizedAddY = 1
+```
+
+so `normalizedAddY` is a unit and
+
+```lean
+constantCoeff normalizedAddY⁻¹ = 1.
+```
+
+Therefore
+
+```text
+constantCoeff F
+= constantCoeff (-normalizedAddX * normalizedAddY⁻¹)
+= -0 * 1
+= 0.
+```
+
+Lean skeleton:
+
+```lean
+theorem formalGroupLaw_constantCoeff
+    (hX0 : MvPowerSeries.constantCoeff normalizedAddX = 0)
+    (hY0 : MvPowerSeries.constantCoeff normalizedAddY = 1) :
+    MvPowerSeries.constantCoeff (-normalizedAddX * normalizedAddY⁻¹) = 0 := by
+  simp [map_mul, hX0, hY0]
+```
+
+Over a field, `constantCoeff_inv` rewrites the inverse constant coefficient:
+
+```lean
+@[simp] theorem MvPowerSeries.constantCoeff_inv (φ : MvPowerSeries σ k) :
+  constantCoeff φ⁻¹ = (constantCoeff φ)⁻¹
+```
+
+so `simp [hY0]` should finish.
+
+## Linear coefficients of `F`
+
+The leading expansions are:
+
+```text
+normalizedAddX = -(X₀+X₁) + O(total degree ≥ 2)
+normalizedAddY = 1 + a₁*(X₀+X₁) + O(total degree ≥ 2)
+normalizedAddY⁻¹ = 1 - a₁*(X₀+X₁) + O(total degree ≥ 2).
+```
+
+Since `normalizedAddX` has zero constant term, the linear part of
+
+```text
+-normalizedAddX * normalizedAddY⁻¹
+```
+
+only sees the constant term of `normalizedAddY⁻¹`, which is `1`. Hence
+
+```text
+F = X₀ + X₁ + O(total degree ≥ 2).
+```
+
+So:
+
+```lean
+coeff (single 0 1) F = 1
+coeff (single 1 1) F = 1
+```
+
+A direct coefficient proof can use these helper facts:
+
+```lean
+constantCoeff normalizedAddX = 0
+coeff (single 0 1) normalizedAddX = -1
+coeff (single 1 1) normalizedAddX = -1
+constantCoeff normalizedAddY = 1
+constantCoeff normalizedAddY⁻¹ = 1
+```
+
+Then coefficient multiplication at a linear monomial gives:
+
+```text
+coeff_X₀(normalizedAddX * normalizedAddY⁻¹)
+  = coeff_X₀(normalizedAddX)*constantCoeff(normalizedAddY⁻¹)
+    + constantCoeff(normalizedAddX)*coeff_X₀(normalizedAddY⁻¹)
+  = (-1)*1 + 0*... = -1.
+```
+
+After the outer negation, the result is `1`. The `X₁` proof is identical.
+
+Lean skeleton:
+
+```lean
+lemma coeff_X0_mul_of_left_const_zero {A B : MvPowerSeries (Fin 2) K}
+    (hA0 : MvPowerSeries.constantCoeff A = 0) :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1) (A * B)
+      = MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1) A
+          * MvPowerSeries.constantCoeff B := by
+  -- Expand `MvPowerSeries.coeff_mul` at `single 0 1`.
+  -- The antidiagonal has only `(0,single 0 1)` and `(single 0 1,0)`.
+  -- The first term vanishes by `hA0` if arranged appropriately.
+  sorry
+
+theorem formalGroupLaw_lin_coeff_X
+    (hA0 : MvPowerSeries.constantCoeff normalizedAddX = 0)
+    (hAX : MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1) normalizedAddX = -1)
+    (hY0 : MvPowerSeries.constantCoeff normalizedAddY = 1) :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1)
+      (-normalizedAddX * normalizedAddY⁻¹) = 1 := by
+  have hBinv0 : MvPowerSeries.constantCoeff normalizedAddY⁻¹ = 1 := by
+    simp [hY0]
+  rw [map_neg]
+  -- use the multiplication helper
+  -- coefficient of product is `-1`, then negation gives `1`.
+  sorry
+```
+
+Alternatively, use the specialization route from Q548:
+
+```text
+F(T,0)=T  ⇒ coeff X₀ F = 1
+F(0,T)=T  ⇒ coeff X₁ F = 1.
+```
+
+That route is more geometric and avoids proving multiplication-at-linear-monomial lemmas, but the expansion above is already enough for the coefficients.
+
+## Recommended corrected theorem targets
+
+With `δ = X₀-X₁`:
+
+```lean
+normalizedAddY_constantCoeff : constantCoeff normalizedAddY = 1
+formalGroupLaw_constantCoeff : constantCoeff formalGroupLaw = 0
+formalGroupLaw_lin_coeff_X  : coeff (single 0 1) formalGroupLaw = 1
+formalGroupLaw_lin_coeff_Y  : coeff (single 1 1) formalGroupLaw = 1
+```
+
+With `δ = X₁-X₀`:
+
+```lean
+normalizedAddY_constantCoeff : constantCoeff normalizedAddY = -1
+normalizedAddX_lin_X        : coeff (single 0 1) normalizedAddX = 1
+normalizedAddX_lin_Y        : coeff (single 1 1) normalizedAddX = 1
+```
+
+and the final `F = -normalizedAddX * normalizedAddY⁻¹` still has linear coefficients `1`.
+
+## Bottom line
+
+The explicit leading computation is:
+
+```text
+Projective.addY(P(X₀), P(X₁))
+  = (X₀-X₁)^3 * (1 + a₁(X₀+X₁) + O(total degree ≥ 2)).
+```
+
+So the quotient by `(X₀-X₁)^3` has constant coefficient `+1`. If Lean is asking you to prove `-1`, the sign convention of the divisor or the use of `negAddY` vs `addY` is mismatched.
