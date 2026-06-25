@@ -1,92 +1,65 @@
-# Handoff: Mazur |T|≤16 Formalization
+# Session Handoff — 2026-06-24 Mazur FLT Formalization
 
-## Where we are
-- **Repo**: uisai2:~/repos/flt-ai, branch `ai-scratch`
-- **Fork**: github.com/xiangyazi24/FLT (ChatGPT git-drop target)
-- **Status**: 0 sorry, 12 axioms, ~4000 LOC
+## What was accomplished this session
 
-## What's running RIGHT NOW
-1. **Codex PID 171018** on uisai2: writing `scratch/DescentAssembly.lean` — the full chain to discharge `obstruction_curve_20a4_points_degenerate`. Check: `cat /tmp/codex_assembly_output.log | tail -30`
-2. **ChatGPT dm1/dm2**: idle, available for git-drop tasks
+### Torsion.lean: 8 → 5 sorries (verified green, 8599 jobs)
+- h4 (4≠0): CLOSED via CharZero threading (f929c76)
+- hc3 (Ψ₃≠0): CLOSED via Mathlib Ψ₃_ne_zero (f929c76)
+- hψ_ne (ψ_m≠0): CLOSED via coordinate-ring degree argument (ee3af21)
 
-## The critical path to FIRST AXIOM DISCHARGE
+### SEAM1: bridge-1 CLOSED, bridge-2 = 1 sorry
+- Bridge1Even: 0 sorry (eac5bdf) — EDS closed-form odd+even cases fully proved
+- Bridge1HCD: 0 sorry (2723e94) — preΨ₄²+4Ψ₃³=0 at Ψ₂Sq-root
+- Bridge-1 wired into SeamE1_Core (4e49710) — preΨ'_root_Ψ₂Sq_ne DISCHARGED
+- Bridge-2 (dual_root_implies_tangent_zero): 1 named sorry remains
+- SeamE1_Core: 1 sorry (bridge-2 only). scratch.SeamE1 builds 3012 jobs.
 
-ChatGPT (dm2) gave us the concrete architecture (saved at `scratch/strategy_descent_concrete.md` on the fork). The chain:
+### ω_n projective bridge infrastructure
+- OmegaDivPoly.lean: 0 sorry (4c2c69b) — ψTwoMulQuot + ωProto + normalization
+- ProjectiveFormula.lean: 0 sorry (ff5cc53) — addZ + dblZ Z-components
+- ProjectiveFormulaXY.lean: m=1 proved, m=2 framework (1 sorry)
+- 6-round ChatGPT design brainstorm complete (R1-R6), architecture settled
+- Design doc: scratch/DESIGN_omega_projective_bridge.md
 
-```
-rational point P=(x,y) on y²=x³+x²-x, x≠0
-    ↓ write x = d·u² (squareclass decomposition)
-    ↓ descent_map (PROVED, scratch/DescentMap.lean)
-cover C_d has a rational point
-    ↓ bad-prime argument: if prime p∤10 and p|d, C_d has no p-adic point
-    ↓ so d divides 10 up to squares: d ∈ {±1,±2,±5,±10}
-    ↓ Selmer obstructions (PROVED, 12 files): d∈{±2,±5,±10} → C_d trivial
-d ∈ {1,-1}, so x = ±(rational)²
-    ↓ integer descent (PROVED, scratch/Descent20a4.lean)
-x ∈ {-1, 0, 1}
-```
+### Other
+- exists_nonsingular: 0 sorry (b45feae) — sub-D step 1
+- ψ_ne_zero_of_charZero: 0 sorry (ee3af21)
+- Proactive context management via sub-agents: validated + banked
 
-**What's done** (all 0 sorry):
-- DescentMap.lean: step 1 (descent map)
-- Selmer*.lean (12 files): step 3 (local obstructions)  
-- Descent20a4.lean: step 4 (integer case)
+## What needs to happen next
 
-**What's NOT done**:
-- Squareclass decomposition: x ∈ Q* → x = d·u² for squarefree d
-- Bad-prime argument: p∤10, p|d → C_d has no p-adic point (same descent pattern as Selmer files)
-- Assembly connecting all pieces
+### Priority 1: Close bridge-2 (the last SEAM1 sorry)
+The deep crux = general-n preΨ'_n separability = derivative nonvanishing at roots.
+Two sub-routes converging:
 
-## ChatGPT git-drop workflow
+**Route A (general projective formula):**
+- ATOM 3/4 X/Y components need coordinate-ring identities mod F_W
+- Proof pattern: CAS-compute cofactor Q, then `rw [AdjoinRoot.mk_eq_zero]; exact ⟨Q, by ring⟩`
+- addX cofactors CAS-verified for m=2..8 (Q₂=3 terms...Q₈=15160)
+- dblX/dblY cofactors also verified
+- Needs: per-m or general-m coordinate-ring Lean proofs
+- Once projective formula proved → ATOM 5 (ω≠0 from φ≠0) → ATOM 6 (local param) → ATOM 7 (coeffε) → assembly
 
-Skills in `~/repos/zinan-skills/` (symlinked to `~/.claude/skills/`).
+**Route B (bypass via SeamE1_FormalBridge):**
+- preΨ'_deriv_ne_zero_at_nontorsion_root (= separability) already reduced to single sorry
+- n=3 case proved (074cd1c)
+- Closes if the projective formula proves general-n separability
 
-```bash
-# Send task (task in the question, NOT in the drop file):
-python3 -u ~/.openclaw/workspace/scripts/ask-gpt.py dm1 <<'EOQ'
-<question>
-Write COMPLETE response into scratch/_CHATGPT_DROP_dm1.md on ai-scratch (UPDATE). Report SHA.
-EOQ
+### Priority 2: sub-D wiring (Torsion.lean L175)
+- exists_nonsingular ready; bridge-1 ready
+- Needs: IsSepClosed → IsAlgClosed check (dm4 Q asked)
+- Should drop Torsion.lean from 5 → 4 sorries
 
-# Harvest:
-git fetch xiang ai-scratch
-git show xiang/ai-scratch:scratch/_CHATGPT_DROP_dm1.md > /tmp/answer.md
-# Extract lean:
-awk '/^```lean$/{f=1;next} f&&/^```$/{exit} f{print}' /tmp/answer.md > /tmp/answer.lean
-# Compile:
-cd ~/repos/flt-ai && PATH=$HOME/.elan/bin:$PATH lake env lean /tmp/answer.lean
-```
+### Priority 3: per-n Bezout certificates (fallback for small n)
+- n=3: done; n=5: cofactors computed (216+236 terms); n=4,6,8: dm1 computing
+- Not tractable for n≥11 (cofactors too large)
+- Useful as building blocks even if general theorem is the main path
 
-Drop files: `scratch/_CHATGPT_DROP_dm1.md`, `scratch/_CHATGPT_DROP_dm2.md`
-
-## CHECKLIST
-
-File: `uisai2:~/repos/flt-ai/MAZUR_CHECKLIST.md`
-
-## Key files inventory
-
-| File | What | Status |
-|------|------|--------|
-| FLT/Assumptions/MazurProof/Axioms.lean | 12 axioms | target |
-| FLT/Assumptions/MazurProof/TorsionBound.lean | main theorem | 0 sorry |
-| scratch/DescentMap.lean | descent map | 0 sorry |
-| scratch/Descent20a4.lean | integer case N=10 | 0 sorry |
-| scratch/Selmer20a4.lean + 11 others | 12 Selmer obstructions | 0 sorry |
-| scratch/QuarticD{2..10}.lean | d-by-d quartics | 0 sorry (dead end for uniform) |
-| scratch/TwoTorsionBound.lean | |E[2]|≤4 | 0 sorry (by Codex) |
-| scratch/InvariantFactorLemmas.lean | group theory | 0 sorry |
-
-## Build
-
-```bash
-cd ~/repos/flt-ai
-export PATH=$HOME/.elan/bin:$PATH
-lake env lean scratch/<file>.lean        # single file
-lake build FLT.Assumptions.MazurProof.TorsionBound  # full chain
-```
-
-## Axiom check
-
-```bash
-echo 'import FLT.Assumptions.MazurProof.TorsionBound
-open MazurProof in #print axioms mazur_torsion_bound' | lake env lean --stdin
-```
+## Build state on uisai2
+- Branch: ai-scratch
+- Latest commit: f9d83ad (CHANGELOG)
+- Canonical Torsion.lean: 5 sorries, 8599 jobs green
+- scratch.SeamE1: 1 sorry (bridge-2), 3012 jobs green
+- scratch.Bridge1Even: 0 sorry
+- scratch.OmegaDivPoly: 0 sorry
+- scratch.ProjectiveFormula: 0 sorry
