@@ -1,385 +1,512 @@
-# Q291 (dm3): General-`m` `addX` identity — direct algebraic proof skeleton
+# Q300 (dm3): ATOMS 5–8 assembly chain and bridge-2 assessment
 
-## Bottom line
+## Executive verdict
 
-The direct algebraic route is the right one, but there is one important correction
-to the proposed proof plan:
-
-```lean
-hω := W.two_mul_ψ_mul_ωProto m
-heven := W.ψ_even m
-```
-
-are **not by themselves** the right local hypotheses for the final `ring` proof of
-`addX`.  They are enough only after you package the actual slope-numerator bridge.
-The clean final proof should use the following intermediate lemma:
-
-```lean
-omegaSlope_mul_ψ₂
-```
-
-This lemma is the exact symbolic identity that the `addX` proof needs.  Once it is
-available, the `addX` coordinate-ring proof is short, uniform in `m`, and closes
-by `ring1`/`ring_nf`.  The cofactor of the curve equation is
-
-```lean
--4 * W.ψ m ^ 4
-```
-
-for the doubled identity
-
-```lean
-2 * (addX(P,R_m) - ψ_{m-1}^2 * φ_{m+1}).
-```
-
-Equivalently, the algebraic normal form is
+ATOMS 5–7 have a clean Lean chain once the projective X/Y/Z coordinate identities
+are available.  They prove the expected formula
 
 ```text
-2·(addX(P,R_m) - ψ_{m-1}² φ_{m+1})
-  = -4·ψ_m^4·F_W
-    - ψ_m · ( omegaSlope_m·ψ₂
-        - (2·ψ_{m-1}²·ψ_{m+2}
-             - ψ_m·ψ_{m-1}·ψ_{m+1}·(6X² + b₂X + b₄)) ).
+coeffε t_O([n]Pε)
+  = - φ_n(P) / ω_n(P) · parityUnit(P) · (preΨ'_n)'(x)
 ```
 
-Thus after applying `omegaSlope_mul_ψ₂`, the remaining cofactor is exactly
-`-4·ψ_m^4`.
+at a non-2-torsion root of `preΨ'_n`.
 
-If your theorem `W.two_mul_ψ_mul_ωProto m` already states this slope-numerator
-identity under another name, use it directly as `hSlope`.  If it instead states
-only the normalization
+But ATOM 8 still needs one extra conceptual bridge:
 
 ```text
-ψ_{2m} = 2ψ_mω_m + a₁φ_mψ_m² + a₃ψ_m⁴,
+coeffε t_O([n]Pε) = (n : K) · coeffε t_P(Pε)
 ```
 
-then it must be combined with the even recurrence and the companion symmetric Ward
-identity to prove `omegaSlope_mul_ψ₂` first.  Without that bridge, `ring` leaves a
-real residual term; this is not a tactic issue.
+or equivalently the `TangentO.nsmul₁` / formal differential identification.  The
+projective formula alone tells you the output projective coordinates and hence the
+local parameter coefficient; it does **not** by itself say that the differential
+of `[n]` is multiplication by `n` on tangent vectors.  That is exactly the missing
+bridge.
+
+So there are two viable closures:
+
+1. **Tangent closure:** use ATOMS 5–7 plus `TangentO.nsmul₁` / formal-group
+   coefficient `formalNsmul_coeff_one` to contradict `(n : K) ≠ 0`.
+2. **Bezout closure:** skip ATOMS 5–8 for separability and use
+   `IsCoprime (W.preΨ' n) (derivative (W.preΨ' n))` directly.  This is exactly
+   what the per-`n` resultant certificates prove.
+
+There is no third free closure “from the projective formula alone”: deriving
+`IsCoprime(preΨ'_n, (preΨ'_n)')` from the projective formula requires proving that
+`[n]` is unramified at nonzero `n`-torsion, and that is the same tangent/differential
+statement in different language.
 
 ---
 
 ## Imports
 
-Use the files that expose the coordinate ring, division polynomials, and Jacobian
-`addX` formula.  In the project file, replace the scratch imports by the actual
-local filenames containing `ωProto`.
+The atom file wants only the dual-number API, division polynomials, Jacobian
+coordinates, and tactics.  Adjust project-local imports to your actual filenames.
 
 ```lean
+import Mathlib.Algebra.TrivSqZeroExt.Basic
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Formula
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
 import Mathlib.Tactic
 
--- Project-local imports, adjust names to your tree:
--- import FLT.Scratch.KeystoneOmega
--- import FLT.Scratch.KeystoneProjectiveZ
+-- Project-local imports, adjust names:
+-- import FLT.Scratch.KeystoneProjectiveFormula
+-- import FLT.Scratch.KeystoneCoprimality
+-- import FLT.Scratch.KeystoneTangentO
 ```
 
----
-
-## Complete Lean skeleton
-
-This is written so the final `addX` theorem is uniform in `m`.  The only theorem
-that must already exist, or be proved just above it, is `omegaSlope_mul_ψ₂`.
+The `TrivSqZeroExt` field projections below are written as `dualFst` and
+`dualSnd`.  If your Mathlib exposes them as `.fst`/`.snd`, these abbreviations are
+just wrappers; if it exposes the underlying product fields differently, only these
+wrappers need changing.
 
 ```lean
 namespace WeierstrassCurve
 
 open Polynomial
 
-variable {k : Type*} [Field k]
+variable {K : Type*} [Field K]
 
-namespace ProjectiveFormula
+abbrev Dual (K : Type*) [CommRing K] : Type _ := TrivSqZeroExt K K
 
-/-- Bivariate polynomial ring `k[X][Y]`. -/
-abbrev Bivar (k : Type*) [CommSemiring k] := Polynomial (Polynomial k)
+-- Replace the RHS by the exact field names in your local Mathlib if needed.
+noncomputable abbrev dualFst (z : Dual K) : K := z.fst
+noncomputable abbrev dualSnd (z : Dual K) : K := z.snd
 
-local notation "kXY" => Bivar k
+/-- Bivariate evaluation convention for `K[X][Y]`: first outer `Y`, then inner `X`. -/
+noncomputable def evalBivar (p : Polynomial (Polynomial K)) (x y : K) : K :=
+  (p.eval y).eval x
 
-/-- The embedded affine `X` variable in `k[X][Y]`. -/
-noncomputable abbrev XX : kXY :=
-  Polynomial.C Polynomial.X
-
-/-- The affine `Y` variable in `k[X][Y]`. -/
-noncomputable abbrev YY : kXY :=
-  Polynomial.X
-
-/-- A scalar coefficient as a bivariate constant. -/
-noncomputable abbrev CC (a : k) : kXY :=
-  Polynomial.C (Polynomial.C a)
-
-/-- The half-derivative of `Ψ₂Sq`: `6X² + b₂X + b₄`. -/
-noncomputable def halfDblXPoly (W : WeierstrassCurve k) : Polynomial k :=
-  6 * Polynomial.X ^ 2 + Polynomial.C W.b₂ * Polynomial.X + Polynomial.C W.b₄
-
-/-- The same polynomial embedded in `k[X][Y]`. -/
-noncomputable def halfDblXPolyBivar (W : WeierstrassCurve k) : kXY :=
-  Polynomial.C (halfDblXPoly W)
-
-/-- The point `P = [X,Y,1]` as a Jacobian representative over `k[X][Y]`. -/
-noncomputable def PJac : Fin 3 → kXY :=
-  ![XX, YY, 1]
-
-/-- The projective division-polynomial representative `R_m = [φ_m,ω_m,ψ_m]`. -/
-noncomputable def RJac (W : WeierstrassCurve k) (m : ℤ) : Fin 3 → kXY :=
-  ![W.φ m, W.ωProto m, W.ψ m]
-
-/--
-`addX(P,R_m)` as a bivariate polynomial.
-
-This uses the Jacobian formula over the base-changed curve.  The abbreviation is
-only to keep the final theorem readable.
--/
-noncomputable def addX_PR (W : WeierstrassCurve k) (m : ℤ) : kXY :=
-  (W⁄kXY).toJacobian.addX (PJac (k := k)) (RJac W m)
-
-/-- The affine equation polynomial `F_W(X,Y)`. -/
-noncomputable def FW (W : WeierstrassCurve k) : kXY :=
-  W.toAffine.polynomial
-
-/--
-The slope numerator that the `addX` identity actually needs.
-
-It is
-
-```text
-N_m = 2(ω_m - Y ψ_m^3) - a₁ ψ_m ψ_{m-1} ψ_{m+1}.
+/-- Bivariate evaluation into dual numbers. -/
+noncomputable def evalBivarDual
+    (p : Polynomial (Polynomial K)) (xε yε : Dual K) : Dual K :=
+  Polynomial.eval₂ (Polynomial.eval₂ (algebraMap K (Dual K)) xε) yε p
 ```
 
-The sign convention matches Mathlib's Jacobian `addX` formula for
-`addX(P,R_m)`.
--/
-noncomputable def omegaSlope (W : WeierstrassCurve k) (m : ℤ) : kXY :=
-  2 * (W.ωProto m - YY * W.ψ m ^ 3)
-    - CC W.a₁ * W.ψ m * W.ψ (m - 1) * W.ψ (m + 1)
+---
+
+## ATOM 5: `ω_n(P) ≠ 0` at `ψ_n(P)=0`, non-2-torsion stratum
+
+Mathematics:
+
+* projective formula and `ψ_n(P)=0` put `[n]P` at `Z=0`;
+* the Jacobian equation at `Z=0` is `Y² = X³`;
+* if `X = φ_n(P) ≠ 0`, then `Y = ω_n(P) ≠ 0`.
+
+The only curve equation fact needed is the tiny “at infinity” lemma below.
+
+```lean
+namespace Atom5
+
+variable (W : WeierstrassCurve K)
+
+/-- At `Z = 0`, the Jacobian equation is `Y² = X³`; hence nonzero `X` forces nonzero `Y`. -/
+theorem omega_ne_of_phi_ne_at_infinity
+    {φ ω : K}
+    (hEq : W.toJacobian.Equation ![φ, ω, 0])
+    (hφ : φ ≠ 0) :
+    ω ≠ 0 := by
+  intro hω
+  apply hφ
+  have hφ3 : φ ^ 3 = 0 := by
+    -- Unfolding the Jacobian equation at `Z = 0` gives `ω^2 - φ^3 = 0`.
+    -- The exact simp theorem may be `Jacobian.equation_iff` in your file.
+    have hEq' : ω ^ 2 = φ ^ 3 := by
+      simpa [WeierstrassCurve.Jacobian.Equation,
+        WeierstrassCurve.Jacobian.polynomial,
+        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+        hω] using hEq
+    simpa [hω] using hEq'.symm
+  exact pow_eq_zero hφ3
+
+/-- ATOM 5 packaged for the actual division-polynomial representative. -/
+theorem omega_eval_ne_of_phi_eval_ne
+    (W : WeierstrassCurve K) (n : ℤ) (x y : K)
+    (φn ωn : K)
+    (hEqInf : W.toJacobian.Equation ![φn, ωn, 0])
+    (hφn : φn ≠ 0) :
+    ωn ≠ 0 := by
+  exact omega_ne_of_phi_ne_at_infinity (W := W) hEqInf hφn
+
+end Atom5
+```
+
+In the real file, `hEqInf` comes from the projective formula plus evaluation at a
+point satisfying the curve equation and `ψ_n(P)=0`.  The input `hφn` is the
+already-planned consequence of `no_adjacent_preΨ_zero` and the definition of
+`φ_n`.
+
+---
+
+## ATOM 6: local parameter coefficient at infinity
+
+Use the weighted-Jacobian local parameter at infinity
+
+```text
+t_O([X:Y:Z]) = - X*Z / Y.
+```
+
+If `Z.fst = 0` and `Y.fst ≠ 0`, then in dual numbers
+
+```text
+snd(-X*Z/Y) = -(fst X / fst Y) * snd Z.
+```
+
+The `snd X` and `snd Y` terms vanish from the coefficient because `fst Z = 0`.
+
+```lean
+namespace Atom6
+
+/-- Dual-number coefficient of the local parameter `-X*Z/Y` at infinity. -/
+theorem dual_snd_neg_mul_div_at_infinity
+    {X Y Z : Dual K}
+    (hZ0 : dualFst Z = 0)
+    (hY0 : dualFst Y ≠ 0) :
+    dualSnd (-(X * Z) / Y) = - (dualFst X / dualFst Y) * dualSnd Z := by
+  -- This is pure `TrivSqZeroExt` arithmetic.
+  -- Recommended proof after fixing projection names:
+  --   ext <;> simp [dualFst, dualSnd, hZ0]
+  --   field_simp [hY0]
+  --   ring
+  -- or use local lemmas for `fst_mul`, `snd_mul`, `fst_inv`, `snd_inv`.
+  sorry
+
+/-- ATOM 6 in the notation of the projective formula. -/
+theorem coeff_t_of_projective_formula_at_root
+    {Xε Yε Zε : Dual K}
+    (hZ0 : dualFst Zε = 0)
+    (hY0 : dualFst Yε ≠ 0) :
+    dualSnd (-(Xε * Zε) / Yε)
+      = - (dualFst Xε / dualFst Yε) * dualSnd Zε := by
+  exact dual_snd_neg_mul_div_at_infinity (X := Xε) (Y := Yε) (Z := Zε) hZ0 hY0
+
+end Atom6
+```
+
+For the application:
+
+```text
+Xε = φ_n(Pε),
+Yε = ω_n(Pε),
+Zε = ψ_n(Pε).
+```
+
+ATOM 5 supplies `dualFst Yε ≠ 0`.  The hypothesis `ψ_n(P)=0` supplies
+`dualFst Zε = 0`.  Therefore
+
+```text
+coeffε t_O([n]Pε)
+  = -φ_n(P)/ω_n(P) · coeffε(ψ_n(Pε)).
+```
+
+---
+
+## ATOM 7: coefficient of `ψ_n(Pε)` is parity unit times `(preΨ'_n)'(x)`
+
+The precise statement should include the tangent lift assumptions for `Pε`:
+
+* `fst Xε = x`;
+* `snd Xε = 1` if the infinitesimal is `x + ε`;
+* `fst Yε = y`;
+* `Pε` satisfies the curve equation over `Dual K`;
+* `preΨ'_n(x)=0`.
+
+For even `n`, the bivariate division polynomial is
+
+```text
+ψ_n = C(preΨ'_n) * ψ₂.
+```
+
+The derivative of the second factor drops out at a root of `preΨ'_n`.  For odd
+`n`, the factor is `1`.
+
+```lean
+namespace Atom7
+
+variable (W : WeierstrassCurve K)
+
+/-- Parity factor relating bivariate `ψ_n` and reduced univariate `preΨ'_n`. -/
+noncomputable def psiParityFactor (W : WeierstrassCurve K) (n : ℕ) (x y : K) : K :=
+  if Even n then evalBivar W.ψ₂ x y else 1
 
 /--
-The exact symbolic bridge needed for the `addX` proof.
+Dual evaluation of a univariate polynomial at `x + ε`.
 
-This is the lemma that should be proved from your `ω` normalization plus the Ward
-recurrences.  Once it is available, the final `addX` coordinate-ring identity is
-immediate by `ring`.
-
-If your local theorem `two_mul_ψ_mul_ωProto` already has this statement, make this
-lemma a wrapper around it.
+This is the standard Taylor formula modulo `ε²`.
 -/
-theorem omegaSlope_mul_ψ₂
-    (W : WeierstrassCurve k) (m : ℤ) :
-    omegaSlope W m * W.ψ₂
-      = 2 * W.ψ (m - 1) ^ 2 * W.ψ (m + 2)
-          - W.ψ m * W.ψ (m - 1) * W.ψ (m + 1) * halfDblXPolyBivar W := by
-  /-
-  Recommended local proof shape:
-
-  1. `have hω := W.two_mul_ψ_mul_ωProto m`
-  2. `have heven := W.ψ_even m`
-  3. combine them with the companion symmetric Ward identity
-
-       ψ_{m-1}²ψ_{m+2} + ψ_{m-2}ψ_{m+1}² + ψ_m³Ψ₂Sq
-         = ψ_mψ_{m-1}ψ_{m+1}(6X²+b₂X+b₄)
-
-     or with whatever local lemma already encodes this identity.
-
-  `hω` and `heven` alone generally leave the symmetric residual term above.
-  -/
+theorem dual_snd_eval_univariate_of_snd_eq_one
+    (f : Polynomial K) {xε : Dual K} {x : K}
+    (hx0 : dualFst xε = x) (hx1 : dualSnd xε = 1) :
+    dualSnd (Polynomial.eval₂ (algebraMap K (Dual K)) xε f)
+      = (Polynomial.derivative f).eval x := by
+  -- Prove by induction on `f`, or use an existing project lemma `eval_dualNumber`.
+  -- The general version is
+  --   snd(f(x + ε·u)) = u * f'(x).
   sorry
 
 /--
-Expanded polynomial identity behind the coordinate-ring `addX` proof.
+ATOM 7: coefficient of `ψ_n(Pε)` at a root is the parity factor times
+`(preΨ'_n)'(x)`.
 
-This lemma is intentionally pure polynomial algebra.  It is the place where the
-cofactor is visible:
+The bridge `hψ_eq_Ψ_dual` is the evaluated form of `mk_ψ`: because `Pε` lies on
+`W`, bivariate `ψ_n` and the packaged `Ψ_n` have the same dual evaluation.
+-/
+theorem snd_psi_eval_dual_eq_parity_mul_derivative
+    (W : WeierstrassCurve K) (n : ℕ)
+    {x y : K} {xε yε : Dual K}
+    (hx0 : dualFst xε = x) (hx1 : dualSnd xε = 1)
+    (hy0 : dualFst yε = y)
+    (hroot : (W.preΨ' n).eval x = 0)
+    (hψ_eq_Ψ_dual :
+      evalBivarDual (W.ψ n) xε yε
+        = evalBivarDual (W.Ψ n) xε yε) :
+    dualSnd (evalBivarDual (W.ψ n) xε yε)
+      = psiParityFactor W n x y * (Polynomial.derivative (W.preΨ' n)).eval x := by
+  rw [hψ_eq_Ψ_dual]
+  by_cases hn : Even n
+  · -- even case: `Ψ n = C(preΨ' n) * ψ₂`
+    simp [WeierstrassCurve.Ψ_ofNat, hn, psiParityFactor, hroot,
+      dual_snd_eval_univariate_of_snd_eq_one (f := W.preΨ' n) hx0 hx1,
+      hx0, hy0]
+    ring
+  · -- odd case: `Ψ n = C(preΨ' n)`
+    simp [WeierstrassCurve.Ψ_ofNat, hn, psiParityFactor,
+      dual_snd_eval_univariate_of_snd_eq_one (f := W.preΨ' n) hx0 hx1,
+      hx0, hy0]
 
-```text
--4 * ψ_m^4
+end Atom7
 ```
 
-After rewriting by `omegaSlope_mul_ψ₂`, the proof is only `ring1`.
--/
-theorem two_mul_addX_PR_sub_sq_φ_succ_eq
-    (W : WeierstrassCurve k) (m : ℤ) :
-    2 * (addX_PR W m - W.ψ (m - 1) ^ 2 * W.φ (m + 1))
-      = (-4 * W.ψ m ^ 4) * FW W := by
-  have hSlope := omegaSlope_mul_ψ₂ (W := W) (m := m)
+The only nontrivial bridge in ATOM 7 is `hψ_eq_Ψ_dual`.  It is exactly the
+“evaluation through the coordinate ring” version of Mathlib’s
+`Affine.CoordinateRing.mk_ψ`.  Since `Pε` satisfies the curve equation in
+`Dual K`, the evaluation hom kills `F_W`, so equality in the coordinate ring
+implies equality after dual evaluation.
 
-  /-
-  If `simp` does not unfold `W⁄kXY` far enough, add the same base-change simp
-  lemmas used elsewhere in the project:
+---
 
-    WeierstrassCurve.map_a₁, map_a₂, map_a₃, map_a₄, map_a₆,
-    WeierstrassCurve.map_b₂, map_b₄,
-    Algebra.algebraMap_self_apply
+## ATOM 8A: tangent closure, if you keep the differential route
 
-  The important simplification list is:
+Combining ATOMS 6 and 7 gives:
 
-    addX_PR, PJac, RJac, Jacobian.addX,
-    omegaSlope, halfDblXPolyBivar, halfDblXPoly,
-    FW, Affine.polynomial,
-    WeierstrassCurve.φ, WeierstrassCurve.ψ₂,
-    WeierstrassCurve.b₂, WeierstrassCurve.b₄
-  -/
-  linear_combination (norm :=
-    (simp [addX_PR, PJac, RJac, Jacobian.addX,
-      omegaSlope, halfDblXPolyBivar, halfDblXPoly,
-      FW, Affine.polynomial,
-      WeierstrassCurve.φ, WeierstrassCurve.ψ₂,
-      WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-      CC, XX, YY]; ring1))
-    - W.ψ m * hSlope
+```text
+coeffε t_O([n]Pε)
+  = -φ_n(P)/ω_n(P) · parityUnit(P) · (preΨ'_n)'(x).
+```
+
+If `(preΨ'_n)'(x)=0`, then the output tangent coefficient is zero.  To get a
+contradiction you still need:
+
+```text
+coeffε t_O([n]Pε) = (n : K) · coeffε t_P(Pε).
+```
+
+This is the missing `TangentO` identification lemma.
+
+```lean
+namespace Atom8Tangent
+
+/-- Product of nonzero units in the coefficient formula. -/
+theorem atom6_atom7_unit_factor_ne_zero
+    {φ ω parity : K}
+    (hφ : φ ≠ 0) (hω : ω ≠ 0) (hparity : parity ≠ 0) :
+    -φ / ω * parity ≠ 0 := by
+  exact mul_ne_zero (neg_ne_zero.mpr (div_ne_zero hφ hω)) hparity
+
+/-- Schematic final tangent contradiction. -/
+theorem bridge2_contradiction_from_tangent
+    {n : ℕ} (hn : (n : K) ≠ 0)
+    {inputCoeff outputCoeff : K}
+    (hinput : inputCoeff = 1)
+    (hTangent : outputCoeff = (n : K) * inputCoeff)
+    (hOutputZero : outputCoeff = 0) :
+    False := by
+  have hnzero : (n : K) * inputCoeff ≠ 0 := by
+    rw [hinput]
+    simpa using hn
+  exact hnzero (by simpa [hTangent] using hOutputZero)
 
 /--
-The desired coordinate-ring statement for the X-coordinate, with the harmless
-factor `2` included.
+What ATOMS 5–7 prove before the tangent bridge.
+
+If the dual root hypothesis gives `(preΨ'_n)'(x)=0`, then the local parameter
+coefficient of the output is zero.
 -/
-theorem mk_two_mul_addX_PR_sub_sq_φ_succ
-    (W : WeierstrassCurve k) (m : ℤ) :
-    WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
-      (2 * (addX_PR W m - W.ψ (m - 1) ^ 2 * W.φ (m + 1))) = 0 := by
-  rw [AdjoinRoot.mk_eq_zero]
-  refine ⟨-4 * W.ψ m ^ 4, ?_⟩
-  exact two_mul_addX_PR_sub_sq_φ_succ_eq (W := W) (m := m)
+theorem output_coeff_zero_of_dual_root
+    {φ ω parity deriv : K}
+    {outputCoeff : K}
+    (hCoeff : outputCoeff = -φ / ω * parity * deriv)
+    (hderiv : deriv = 0) :
+    outputCoeff = 0 := by
+  simp [hCoeff, hderiv]
 
-end ProjectiveFormula
+end Atom8Tangent
+```
+
+This is the honest closure: ATOMS 5–7 reduce the problem to tangent nonvanishing,
+and `TangentO.nsmul₁` supplies the contradiction.
+
+---
+
+## ATOM 8B: Bezout closure, bypassing the tangent bridge
+
+If you already have
+
+```lean
+IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n))
+```
+
+then bridge-2 closes immediately and does not need projective formula, ATOMS 5–7,
+or tangent identification.
+
+```lean
+namespace Atom8Bezout
+
+/-- Common evaluated root contradiction from a Bezout/`IsCoprime` certificate. -/
+theorem not_root_and_derivative_root_of_isCoprime
+    {f : Polynomial K} (hcop : IsCoprime f (Polynomial.derivative f))
+    {x : K} :
+    ¬ (f.eval x = 0 ∧ (Polynomial.derivative f).eval x = 0) := by
+  rcases hcop with ⟨A, B, hAB⟩
+  rintro ⟨hf, hdf⟩
+  have hEval := congrArg (fun p : Polynomial K => p.eval x) hAB
+  -- Depending on your `IsCoprime` orientation, `hAB` may be
+  -- `A*f + B*f' = 1` or `f*A + f'*B = 1`; `ring` handles either after rewrites.
+  simp [hf, hdf] at hEval
+
+/-- The direct per-`n` bridge-2 closure. -/
+theorem bridge2_closed_by_isCoprime
+    (W : WeierstrassCurve K) (n : ℕ)
+    (hcop : IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n)))
+    {x : K}
+    (hroot : (W.preΨ' n).eval x = 0)
+    (hderiv : (Polynomial.derivative (W.preΨ' n)).eval x = 0) :
+    False := by
+  exact (not_root_and_derivative_root_of_isCoprime (f := W.preΨ' n) hcop)
+    ⟨hroot, hderiv⟩
+
+end Atom8Bezout
+```
+
+This is why the per-`n` resultant certificates are so effective: they prove the
+exact impossibility bridge-2 needs, without any local-parameter or group-law
+infrastructure.
+
+---
+
+## Can `IsCoprime(preΨ'_n, (preΨ'_n)')` be proved directly from the projective formula?
+
+Not without proving the tangent/differential statement in some form.
+
+The proposed argument is:
+
+```text
+preΨ'_n(x)=0 and (preΨ'_n)'(x)=0
+⇒ ψ_n has a double root at P
+⇒ [n] ramifies at P
+⇒ impossible because d[n] = n ≠ 0.
+```
+
+The first two arrows are algebraic and are essentially ATOMS 6–7.  The last arrow
+is exactly the tangent theorem:
+
+```text
+d[n]_P is multiplication by n on the tangent line.
+```
+
+So a theorem
+
+```lean
+theorem isCoprime_preΨ'_derivative_of_projective_formula ...
+```
+
+would internally need one of the following:
+
+1. the `TangentO.nsmul₁` / formal-group bridge;
+2. a scheme-theoretic theorem that `[n]` is étale when `(n : K) ≠ 0`;
+3. a resultant/Bezout certificate.
+
+Option 1 is the tangent route.  Option 2 is a larger algebraic-geometry route.
+Option 3 is the per-`n` certificate route.  The projective formula by itself only
+identifies coordinates of `[n]P`; it does not prove `[n]` is unramified.
+
+---
+
+## Recommended implementation chain
+
+For the tangent route, implement in this order:
+
+1. **ATOM 5:**
+
+   ```lean
+   omega_ne_of_phi_ne_at_infinity
+   omega_eval_ne_of_phi_eval_ne
+   ```
+
+2. **ATOM 6:**
+
+   ```lean
+   dual_snd_neg_mul_div_at_infinity
+   coeff_t_of_projective_formula_at_root
+   ```
+
+3. **ATOM 7:**
+
+   ```lean
+   dual_snd_eval_univariate_of_snd_eq_one
+   snd_psi_eval_dual_eq_parity_mul_derivative
+   ```
+
+4. **ATOM 8 tangent bridge:**
+
+   ```lean
+   output_coeff_zero_of_dual_root
+   bridge2_contradiction_from_tangent
+   ```
+
+The final theorem shape is:
+
+```lean
+theorem bridge2_closed_by_tangent
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    (n : ℕ) (hn : (n : K) ≠ 0)
+    {x y : K}
+    -- point and non-2-torsion hypotheses
+    -- projective formula hypotheses over dual numbers
+    -- root and dual-root hypotheses
+    : False := by
+  -- ATOM 5: `ω_n(P) ≠ 0`
+  -- ATOM 6: coefficient of `t_O` is unit times `snd ψ_n(Pε)`
+  -- ATOM 7: `snd ψ_n(Pε)` is parity unit times `(preΨ'_n)'(x)`
+  -- dual-root hypothesis: derivative is zero, so output coefficient is zero
+  -- TangentO/formal group: output coefficient is `(n : K) * inputCoeff`
+  -- input tangent chosen with `inputCoeff = 1`; contradiction with `hn`
+  sorry
+```
+
+For the certificate route, implement only:
+
+```lean
+theorem isCoprime_preΨ'_derivative_n
+    (W : WeierstrassCurve K) [W.IsElliptic]
+    (hn : (n : K) ≠ 0) :
+    IsCoprime (W.preΨ' n) (Polynomial.derivative (W.preΨ' n)) := by
+  -- per-`n` resultant/Bezout certificate
+  ...
+```
+
+and close bridge-2 by `bridge2_closed_by_isCoprime`.
+
+## Final assessment
+
+ATOMS 5–7 are worth implementing if you want the local-parameter proof and the
+projective formula infrastructure.  They form a clean, reusable chain.  But ATOM 8
+cannot be completed from the projective formula alone.  The missing step is not a
+coordinate identity; it is the differential identification of `[n]` on the tangent
+line.  If the immediate goal is only separability of `preΨ'_n` for the Mazur
+range, the per-`n` Bezout certificates remain the shortest closure.
+
 end WeierstrassCurve
 ```
-
----
-
-## If `addX_PR` does not simplify because of base change
-
-If Lean does not reduce
-
-```lean
-(W⁄kXY).toJacobian.addX (PJac (k := k)) (RJac W m)
-```
-
-to the raw polynomial formula, define the raw formula directly and prove a bridge
-lemma once.
-
-```lean
-namespace WeierstrassCurve
-namespace ProjectiveFormula
-
-open Polynomial
-
-variable {k : Type*} [Field k]
-
-/-- Raw expanded `addX(P,R_m)` formula, avoiding base-change reducibility issues. -/
-noncomputable def addX_PR_raw (W : WeierstrassCurve k) (m : ℤ) : kXY :=
-  XX * (W.φ m) ^ 2
-    - 2 * YY * W.ωProto m * W.ψ m
-    + XX ^ 2 * W.φ m * W.ψ m ^ 2
-    - CC W.a₁ * XX * W.ωProto m * W.ψ m
-    - CC W.a₁ * YY * W.φ m * W.ψ m ^ 2
-    + 2 * CC W.a₂ * XX * W.φ m * W.ψ m ^ 2
-    - CC W.a₃ * W.ωProto m * W.ψ m
-    - CC W.a₃ * YY * W.ψ m ^ 4
-    + CC W.a₄ * W.φ m * W.ψ m ^ 2
-    + CC W.a₄ * XX * W.ψ m ^ 4
-    + 2 * CC W.a₆ * W.ψ m ^ 4
-
-/-- Bridge from the raw formula to Mathlib's `Jacobian.addX`. -/
-theorem addX_PR_eq_raw (W : WeierstrassCurve k) (m : ℤ) :
-    addX_PR W m = addX_PR_raw W m := by
-  simp [addX_PR, addX_PR_raw, PJac, RJac, Jacobian.addX,
-    CC, XX, YY]
-  ring1
-
-/-- Raw version of the polynomial identity. -/
-theorem two_mul_addX_PR_raw_sub_sq_φ_succ_eq
-    (W : WeierstrassCurve k) (m : ℤ) :
-    2 * (addX_PR_raw W m - W.ψ (m - 1) ^ 2 * W.φ (m + 1))
-      = (-4 * W.ψ m ^ 4) * FW W := by
-  have hSlope := omegaSlope_mul_ψ₂ (W := W) (m := m)
-  linear_combination (norm :=
-    (simp [addX_PR_raw, omegaSlope, halfDblXPolyBivar, halfDblXPoly,
-      FW, Affine.polynomial,
-      WeierstrassCurve.φ, WeierstrassCurve.ψ₂,
-      WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-      CC, XX, YY]; ring1))
-    - W.ψ m * hSlope
-
-end ProjectiveFormula
-end WeierstrassCurve
-```
-
-Then the non-raw theorem is just:
-
-```lean
-  rw [addX_PR_eq_raw]
-  exact two_mul_addX_PR_raw_sub_sq_φ_succ_eq (W := W) (m := m)
-```
-
-This raw version is often more robust in scratch files, because it avoids any
-unfolding fragility around `W⁄kXY`.
-
----
-
-## Why `hω` + `heven` alone do not close
-
-Let
-
-```text
-q = ψ_m,     r = ψ_{m-1},     s = ψ_{m+1},     t = ψ_{m+2},
-φ = Xq² - sr,      w = ω_m,
-ψ₂ = 2Y + a₁X + a₃,
-M = 6X² + b₂X + b₄.
-```
-
-The raw Jacobian `addX(P,R_m)` formula satisfies the formal identity
-
-```text
-2(addX(P,R_m) - r²(Xs² - tq))
-  = -4q⁴F_W
-    - q · ((2(w - Yq³) - a₁qrs)ψ₂ - (2r²t - qrsM)).
-```
-
-This is the exact algebraic identity that `ring1` proves.
-
-Therefore the final proof needs precisely
-
-```text
-(2(w - Yq³) - a₁qrs)ψ₂ = 2r²t - qrsM.
-```
-
-That is `omegaSlope_mul_ψ₂`.
-
-The normalization identity
-
-```text
-ψ_{2m} = 2q w + a₁φq² + a₃q⁴
-```
-
-and the even recurrence
-
-```text
-ψ_{2m}ψ₂ = q(r²t - u s²)
-```
-
-still leave the symmetric residual
-
-```text
-r²t + u s² + q³Ψ₂Sq - qrs(6X²+b₂X+b₄),
-```
-
-unless you also supply the companion symmetric Ward identity.  So if Lean leaves a
-nonzero residual after `linear_combination hω ... + heven ...`, the missing lemma
-is not a simplifier; it is this symmetric/slope identity.
-
----
-
-## Recommended implementation order
-
-1. Add `halfDblXPoly`, `omegaSlope`.
-2. Prove `omegaSlope_mul_ψ₂` as a wrapper around your local `ω` normalization plus
-   the symmetric Ward identity.  If your current `two_mul_ψ_mul_ωProto` already
-   states it, just `simpa [omegaSlope, halfDblXPolyBivar, halfDblXPoly] using ...`.
-3. Add `addX_PR_raw` and prove `two_mul_addX_PR_raw_sub_sq_φ_succ_eq` by the
-   one-line `linear_combination` above.
-4. Add the coordinate-ring `mk` theorem via `AdjoinRoot.mk_eq_zero` with cofactor
-   `-4 * W.ψ m ^ 4`.
-5. Only afterwards bridge `addX_PR_raw` to `(W⁄kXY).toJacobian.addX` if needed.
-
-This gives an all-`m` proof and avoids per-`m` CAS certificates.  The only new
-mathematical ingredient is the slope-numerator identity `omegaSlope_mul_ψ₂`.
