@@ -82,3 +82,24 @@ This is the CORE CONTENT of the Weierstrass formal group and cannot be bypassed.
 - scratch.ProjectiveFormula: 0 sorry (Z-components)
 - scratch.Atom5OmegaNonzero: 0 sorry
 - scratch.AddXGeneral: 1 sorry (ωfree_dvd, sub-agent in flight)
+
+## Update 2026-06-25 (late)
+
+### Mathlib FormalGroup discovery
+Mathlib has FormalGroup at RingTheory/FormalGroup/Basic.lean (Wenrong Zou).
+Same structure as our SeamE1_FormalNsmul.lean. Has additiveFormalGroup.
+Our formalNsmul_coeff_one (d[n]=n) is NOT in Mathlib — our contribution.
+W.formalGroup instance is NOT in Mathlib — the tangent bridge gap.
+
+### Proven this sub-session
+- addX general-m: 0-sorry (fcc5aa4)
+- ATOM 5 (ω≠0): 0-sorry (32804ef)
+- addY: 6/7 helpers 0-sorry, assembly 1 sorry (sub-agent grinding)
+
+### ChatGPT bridge reliability
+Last 2 rounds (~8 questions) ALL returned PENDING (bridge capture failure on Pro long-thinks).
+Answers in tabs but git-write not triggering. Need manual paste or bridge fix.
+
+### Remaining for bridge-2
+1. addY assembly (1 sorry, sub-agent in flight)
+2. Tangent bridge (irreducible, needs W.formalGroup or equivalent)
