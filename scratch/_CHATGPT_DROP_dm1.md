@@ -1,431 +1,400 @@
-# Q611 (dm1): bridge from formal `[n]'(0)=n` to no double roots of `preΨ' n`
+# Q614 (dm1): group law on dual-number points of a Weierstrass curve
 
 ## Executive answer
 
-`formalNsmulF_coeff_one` at the origin **is sufficient**, but not by evaluating a formal-group derivative at a general torsion point `t₀`.  The formal group only describes an infinitesimal neighborhood of the identity `O`.  The missing step is translation: for an algebraic group, the differential of `[n]` at any point `P` is translation-conjugate to the differential of `[n]` at `O`.  Thus
+At Mathlib rev `96fd0fff3b8837985ae21dd02e712cb5df72ec05`, the projective and affine nonsingular point types have the abelian group law **over fields**, but not over arbitrary commutative rings.  Since `TrivSqZeroExt K K` is not a field, Mathlib does **not** directly give an `AddCommGroup`/`nsmul` instance on dual-number points of `W`.  The raw projective formulas `Projective.addXYZ`, `Projective.add`, `Projective.neg`, and their map/base-change lemmas exist over commutative rings, but the packaged point-level group structure over `K[ε]` is missing.
+
+Therefore the bridge
 
 ```text
-d[n]_P = d(τ_{[n]P})_O ∘ d[n]_O ∘ d(τ_{-P})_P.
+[n] Pε = [n] ((-lift P) + Pε)
 ```
 
-If `P` is `n`-torsion, `[n]P = O`, so this is just the origin tangent map, transported by tangent-space isomorphisms.  Since `d[n]_O = n` and `(n : K) ≠ 0`, `d[n]_P` is nonzero/invertible.  Therefore a nonzero first-order tangent vector at `P` cannot be killed by `[n]`, and a dual-number double root of `preΨ' n` gives exactly such a killed tangent vector.  Contradiction.
-
-So: you do **not** need a separate stronger theorem saying the formal power series `[n]_F(T)` has nonzero derivative at every formal root `t₀`; that is the wrong coordinate picture.  You need the translation/tangent bridge.  If stated globally, this is exactly the standard theorem that `[n] : E → E` is étale/separable when `(n : K) ≠ 0`, but for your Lean goal it is better to prove only the dual-number tangent-injectivity consequence.
+is a one-line group-theory proof **once** you have a dual-point `AddCommGroup` and a base-lift additive homomorphism, but Mathlib does not provide those objects for `TrivSqZeroExt K K` out of the box.
 
 ---
 
-## Why the tempting `t₀` argument is wrong
+## What Mathlib has at the pinned rev
 
-This sentence is the dangerous part:
+### 1. `nsmul` on projective/affine points
 
-```text
-Since t_ε = t₀ + ε t₁ and [n]_F(t₀)=0, the ε-coefficient gives [n]'_F(t₀)t₁ = 0.
-```
+Yes, but only over fields.
 
-For a general torsion point `P`, its local parameter is **not** the identity formal parameter `t` unless `P = O`.  The formal group law `F` is a completed local object at `O`; it does not give a global coordinate in which all torsion points are formal roots.  The correct local coordinate near `P` is obtained by translating `P` back to `O`.
-
-If `Pε` is a first-order deformation of `P`, define the translated infinitesimal displacement
-
-```text
-δ := (-P) + Pε   over K[ε].
-```
-
-Then `δ` has constant part `O`, hence it is a genuine formal-group infinitesimal.  If `P` is `n`-torsion, then in the group over dual numbers:
-
-```text
-[n] Pε = [n] (P + δ) = [n]P + [n]δ = O + [n]δ = [n]δ.
-```
-
-Now the formal tangent computation at `O` applies to `δ`:
-
-```text
-localParameter([n]δ).ε = (n : K) * localParameter(δ).ε.
-```
-
-If `(n : K) ≠ 0` and `δ` has nonzero tangent, then `[n]δ` is not the infinitesimal identity.  Therefore `[n]Pε ≠ Oε`.
-
-That is the exact contradiction to “double root gives a nontrivial dual lift still killed by `[n]`”.
-
----
-
-## The Lean atom you actually need
-
-Do not try to prove a global separability theorem first.  Prove this dual-number tangent lemma.
-
-A good statement shape is:
+In `Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Point.lean`, `WeierstrassCurve.Projective.Point.instAddCommGroup` gives
 
 ```lean
-/-- Infinitesimal injectivity of `[n]` at an `n`-torsion point, reduced to the
-formal tangent computation at the origin by translation. -/
-theorem nsmul_dual_ne_identity_of_nonzero_translated_tangent
+noncomputable instance : AddCommGroup W.Point
+```
+
+where the ambient variable is
+
+```lean
+{W : Projective F} [Field F]
+```
+
+So for a field `K`, a projective curve `W : WeierstrassCurve.Projective K`, and points
+
+```lean
+P Q : W.Point
+```
+
+Lean has:
+
+```lean
+P + Q
+-P
+n • P
+```
+
+and all generic additive-group lemmas such as:
+
+```lean
+nsmul_add      -- n • (P + Q) = n • P + n • Q
+add_comm
+add_assoc
+zero_add
+add_zero
+neg_add_cancel
+```
+
+The affine file similarly has `WeierstrassCurve.Affine.Point.instAddCommGroup`, again over fields.
+
+### 2. Compatibility with base change / maps
+
+At the formula/representative level, yes.  Mathlib has, among others:
+
+```lean
+WeierstrassCurve.Projective.map_neg
+WeierstrassCurve.Projective.map_add
+WeierstrassCurve.Projective.baseChange_neg
+WeierstrassCurve.Projective.baseChange_add
+WeierstrassCurve.Projective.map_addXYZ
+WeierstrassCurve.Projective.baseChange_addXYZ
+```
+
+The important distinction is:
+
+* `map_addXYZ` / `baseChange_addXYZ` are raw formula naturality lemmas and work at the representative/formula level.
+* `Projective.map_add` and `Projective.baseChange_add` in `Projective/Point.lean` are still in the field-point context when used to package the group law.
+* There is no ready-made point-level additive homomorphism
+  ```lean
+  W.Point →+ (W.map f).Point
+  ```
+  that works with target `TrivSqZeroExt K K`, because the target point type is not equipped with the field-based group law.
+
+For field extensions `f : F →+* K`, you can build such a map from the representative-level `map_add`; then `map_nsmul` gives nsmul compatibility automatically.  For dual numbers, the obstruction is the missing group law on the target.
+
+### 3. Abelian group structure
+
+Yes over fields, no over `K[ε]` by default.
+
+For field points, the desired identity is pure additive-group theory:
+
+```lean
+example {K : Type*} [Field K] [DecidableEq K]
+    (W : WeierstrassCurve.Projective K)
+    (n : ℕ) (P δ : W.Point) (hP : n • P = 0) :
+    n • (P + δ) = n • δ := by
+  rw [nsmul_add, hP, zero_add]
+```
+
+This is exactly the algebra you want, but it is only directly available in `W.Point` when the coefficient ring is a field.
+
+---
+
+## The generic Lean lemma you want once dual points form an additive group
+
+Suppose you introduce a type of dual-number points
+
+```lean
+DualPoint W
+```
+
+with an `AddCommGroup` instance, and a lift map
+
+```lean
+liftPointAddHom : W.Point →+ DualPoint W
+```
+
+that sends field points to their scalar/base-change lifts.  Then the translation bridge is completely generic:
+
+```lean
+theorem nsmul_eq_nsmul_translated
+    {G H : Type*} [AddCommGroup G] [AddCommGroup H]
+    (lift : G →+ H) (n : ℕ) (P : G) (Pε : H)
+    (hPtor : n • P = 0) :
+    n • Pε = n • (-lift P + Pε) := by
+  let δ : H := -lift P + Pε
+  have hdecomp : lift P + δ = Pε := by
+    dsimp [δ]
+    rw [← add_assoc, add_left_neg, zero_add]
+  calc
+    n • Pε = n • (lift P + δ) := by rw [hdecomp]
+    _ = n • lift P + n • δ := by rw [nsmul_add]
+    _ = lift (n • P) + n • δ := by
+      have hmap : n • lift P = lift (n • P) := (map_nsmul lift P n).symm
+      rw [hmap]
+    _ = lift 0 + n • δ := by rw [hPtor]
+    _ = n • δ := by simp
+```
+
+Instantiated with
+
+```lean
+G := W.Point
+H := DualPoint W
+δ := -liftPointAddHom P + Pε
+```
+
+this is exactly:
+
+```lean
+[n]Pε = [n]δ.
+```
+
+This is the proof you want to use after the missing dual-point infrastructure is available.
+
+---
+
+## Why Mathlib cannot prove this directly for `TrivSqZeroExt K K`
+
+`TrivSqZeroExt K K` has nilpotents, so it is not a field.  The existing projective point group law in Mathlib is intentionally built for nonsingular projective points over a field.  In the source, the `Point` structure itself is defined over a general `CommRing`, but the operations
+
+```lean
+Point.neg
+Point.add
+AddCommGroup W.Point
+```
+
+are built in the field context.  So the following target is not available without adding infrastructure:
+
+```lean
+(W.map (algebraMap K (TrivSqZeroExt K K))).Point
+```
+
+as an additive group.
+
+The raw formulas still exist:
+
+```lean
+W.neg      : (Fin 3 → R) → Fin 3 → R
+W.add      : (Fin 3 → R) → (Fin 3 → R) → Fin 3 → R
+W.addXYZ   : (Fin 3 → R) → (Fin 3 → R) → Fin 3 → R
+```
+
+for `R : Type*` with `[CommRing R]`, and their map lemmas are available.  What is missing is the theorem that these formulas induce an abelian group on the appropriate nonsingular projective `R`-points when `R = K[ε]`.
+
+---
+
+## Minimal infrastructure options
+
+### Option A: build the full dual-point group
+
+Define a dual-point type and prove it is an additive commutative group:
+
+```lean
+abbrev DualK (K : Type*) [CommRing K] := TrivSqZeroExt K K
+
+structure DualPoint
     {K : Type*} [Field K]
-    (W : WeierstrassCurve K)
+    (W : WeierstrassCurve.Projective K) where
+  point : (W.map (algebraMap K (DualK K))).Point
+  -- optionally add a cached scalar part if convenient:
+  -- fst_point : W.Point
+  -- fst_eq : fstPoint point = fst_point
+```
+
+Then define:
+
+```lean
+noncomputable def liftPoint
+    {K : Type*} [Field K]
+    (W : WeierstrassCurve.Projective K) :
+    W.Point → DualPoint W :=
+  sorry
+
+noncomputable def dualNeg : DualPoint W → DualPoint W :=
+  sorry
+
+noncomputable def dualAdd : DualPoint W → DualPoint W → DualPoint W :=
+  sorry
+```
+
+using the raw projective formulas over `TrivSqZeroExt K K`.
+
+The hard part is not writing the formulas; it is proving closure and the group laws:
+
+```lean
+instance : AddCommGroup (DualPoint W) := ...
+```
+
+This is essentially proving the functor-of-points group law for the elliptic curve over the nonreduced ring `K[ε]`.  It is mathematically standard but probably too large if your only immediate goal is the derivative/non-double-root lemma.
+
+### Option B: build only the local theorem you need
+
+This is the recommended route.
+
+Do not try to instantiate all of `AddCommGroup` on all dual points.  Instead, define the few operations involved in the proof on normalized representatives and prove the single reduction lemma directly.
+
+You need:
+
+```lean
+/-- Scalar/base lift of a field point to dual numbers. -/
+def liftPointRep
+    (P : Fin 3 → K) : Fin 3 → TrivSqZeroExt K K :=
+  (algebraMap K (TrivSqZeroExt K K)) ∘ P
+
+/-- Scalar part of a dual representative. -/
+def fstRep
+    (Pε : Fin 3 → TrivSqZeroExt K K) : Fin 3 → K :=
+  TrivSqZeroExt.fst ∘ Pε
+```
+
+Then prove the representative-level map lemmas:
+
+```lean
+lemma fst_negRep
+    (Pε : Fin 3 → TrivSqZeroExt K K) :
+    fstRep ((W.map (algebraMap K (TrivSqZeroExt K K))).neg Pε)
+      = W.neg (fstRep Pε) := by
+  -- `Projective.map_neg` with `fst` as the ring hom, plus simp.
+  sorry
+
+lemma fst_addRep
+    (Pε Qε : Fin 3 → TrivSqZeroExt K K)
+    (hPε : (W.map (algebraMap K (TrivSqZeroExt K K))).Nonsingular Pε)
+    (hQε : (W.map (algebraMap K (TrivSqZeroExt K K))).Nonsingular Qε) :
+    fstRep ((W.map (algebraMap K (TrivSqZeroExt K K))).add Pε Qε)
+      = W.add (fstRep Pε) (fstRep Qε) := by
+  -- `Projective.map_add` wants field-to-field in Mathlib's point-law version,
+  -- so for `fst : K[ε] → K` use formula-level `map_addXYZ`/`map_dblXYZ`
+  -- and handle the `if P ≈ Q` branch, or avoid `Projective.add` and use
+  -- the branch-specific formula you know applies.
+  sorry
+```
+
+However, the `if P ≈ Q` branch in `Projective.add` is awkward over dual numbers.  If your points are in an affine chart and not in a doubling/vertical exceptional branch, use `addXYZ` or the affine formula branch directly.  If you are translating `Pε` by `-lift P`, the scalar part is the exceptional vertical line case, so you must be careful: this is precisely where raw formula branch management becomes annoying.
+
+For that reason, the best local theorem is not “all dual points form a group”, but the exact identity required by your proof, stated abstractly and proved later by the specific formulas you already use for `[n]` and the formal group:
+
+```lean
+/-- The only dual-point group-law fact needed for the tangent bridge. -/
+theorem nsmul_dual_eq_nsmul_delta
+    {K : Type*} [Field K]
+    (W : WeierstrassCurve.Projective K)
     (n : ℕ)
-    (hn : (n : K) ≠ 0)
-    (P : W.Point K)                         -- or your projective/affine point type
-    (hPtor : n • P = 0)
-    (Pε : W.Point (TrivSqZeroExt K K))
-    (hfst : fstPoint Pε = P)
-    (hδne : tangentOCoord W ((-mapPoint P) + Pε) ≠ 0) :
-    n • Pε ≠ identityPointOverDual W := by
-  -- 1. Let δ := (-P) + Pε.  Its scalar/fst part is O.
-  -- 2. Use group-hom/nsmul compatibility over `TrivSqZeroExt`:
-  --      n • Pε = n • (mapPoint P + δ)
-  --             = mapPoint (n • P) + n • δ
-  --             = n • δ.
-  -- 3. Use the formal-group tangent bridge at O:
-  --      tangentOCoord W (n • δ) = (n : K) * tangentOCoord W δ.
-  --    This is where `formalNsmulF_coeff_one` enters.
-  -- 4. Since `(n : K) ≠ 0` and `tangentOCoord W δ ≠ 0`, the RHS is nonzero.
-  -- 5. The infinitesimal identity has tangent coordinate zero. Contradiction.
+    (P : W.Point)
+    (Pε : DualLiftAt W P)
+    (hPtor : n • P = 0) :
+    dualNsmul W n Pε =
+      dualNsmulAtO W n (dualTranslateToOrigin W P Pε) := by
+  -- Prove this either from a small local group-law infrastructure or from the
+  -- raw projective formulas used to define `dualNsmul` and `dualTranslateToOrigin`.
   sorry
 ```
 
-The important point is that this theorem is about **dual-number points and translation**, not about polynomial roots yet.
+Once this lemma exists, your formal tangent bridge can use it without needing a global dual-point `AddCommGroup` instance.
 
-You may prefer to split it into two smaller atoms:
+---
+
+## If you still want a point-level base-change map over fields
+
+For field extensions only, the infrastructure is modest.  You can define a point map and package it as an additive homomorphism.
+
+Sketch:
 
 ```lean
-theorem tangentOCoord_nsmul_of_infinitesimal_at_O
+namespace WeierstrassCurve.Projective.Point
+
+noncomputable def map
+    {F K : Type*} [Field F] [Field K]
+    {W : WeierstrassCurve.Projective F}
+    (f : F →+* K) :
+    W.Point → (W.map f).Point := by
+  intro P
+  refine ⟨?_⟩
+  -- map the quotient point class by representatives `P ↦ f ∘ P`
+  -- and use `Projective.map_nonsingular f.injective`.
+  -- This is standard quotient-map code; `Projective.negMap` is a template.
+  sorry
+
+noncomputable def mapAddHom
+    {F K : Type*} [Field F] [Field K] [DecidableEq F] [DecidableEq K]
+    {W : WeierstrassCurve.Projective F}
+    (f : F →+* K) :
+    W.Point →+ (W.map f).Point where
+  toFun := map f
+  map_zero' := by
+    -- representatives `[0,1,0]` map to `[0,1,0]`
+    sorry
+  map_add' := by
+    intro P Q
+    -- use `Projective.map_add` on representatives, then quotient/ext
+    sorry
+
+@[simp] lemma mapAddHom_nsmul
+    {F K : Type*} [Field F] [Field K] [DecidableEq F] [DecidableEq K]
+    {W : WeierstrassCurve.Projective F}
+    (f : F →+* K) (n : ℕ) (P : W.Point) :
+    mapAddHom (W := W) f (n • P) = n • mapAddHom (W := W) f P := by
+  simpa using map_nsmul (mapAddHom (W := W) f) P n
+
+end WeierstrassCurve.Projective.Point
+```
+
+This is useful for ordinary field extensions, but it does not solve `K[ε]` because `K[ε]` is not a field.
+
+---
+
+## Recommended plan for your current proof
+
+For `preΨ'_deriv_ne_zero_at_nontorsion_root`, do not stop to build the full group of dual-number points unless you want a large reusable component.  Instead, add exactly one abstraction layer:
+
+```lean
+structure InfinitesimalAt
     {K : Type*} [Field K]
-    (W : WeierstrassCurve K) (n : ℕ)
-    (δ : W.Point (TrivSqZeroExt K K))
-    (hδfst : fstPoint δ = identityPoint W) :
-    tangentOCoord W (n • δ) = (n : K) * tangentOCoord W δ := by
-  -- This is the direct `formalNsmulF_coeff_one` bridge.
-  sorry
-
-theorem nsmul_translate_to_origin
-    {K : Type*} [Field K]
-    (W : WeierstrassCurve K) (n : ℕ)
-    (P : W.Point K) (Pε : W.Point (TrivSqZeroExt K K))
-    (hPtor : n • P = 0)
-    (hfst : fstPoint Pε = P) :
-    n • Pε = n • ((-mapPoint P) + Pε) := by
-  -- More precisely there may be an `identity +` or `mapPoint (n • P) + _`
-  -- depending on your point representation; after rewriting `hPtor`, it is `n • δ`.
-  sorry
+    (W : WeierstrassCurve.Projective K)
+    (P : W.Point) where
+  rep : Fin 3 → TrivSqZeroExt K K
+  equation : (W.map (algebraMap K (TrivSqZeroExt K K))).Equation rep
+  fst_eq : fstRep rep = chosenRepOf P      -- or quotient/class version
+  tangent_ne_zero : Prop                  -- optional/cache if useful
 ```
 
-Then combine them.
+Then define only:
+
+```lean
+liftAt        : (P : W.Point) → InfinitesimalAt W P
+translateToO  : InfinitesimalAt W P → InfinitesimalAt W 0
+nsmulDual     : (n : ℕ) → InfinitesimalAt W P → ...
+```
+
+and prove the one theorem:
+
+```lean
+theorem nsmul_lift_eq_nsmul_translateToO
+    (hnP : n • P = 0) :
+    nsmulDual n Pε = nsmulDualAtO n (translateToO Pε)
+```
+
+Mathematically this theorem is just `nsmul_add` plus `map_nsmul`; in Lean, because `K[ε]` lacks the packaged point group, this theorem is the minimal replacement for the missing group-scheme API.
 
 ---
 
-## How double root gives the contradictory dual lift
+## Bottom line
 
-For the derivative lemma, the Lean proof should be organized as follows.
+Answers to your three questions:
 
-Assumptions, schematically:
+1. **`nsmul` on projective/affine points?** Yes over fields: `Projective.Point` and `Affine.Point` have `AddCommGroup` instances, hence `nsmul`. No packaged `nsmul` for dual-number points because `TrivSqZeroExt K K` is not a field.
 
-```lean
-variable {K : Type*} [Field K] [IsAlgClosed K]
-variable (W : WeierstrassCurve K)
-variable (n : ℕ)
-variable (x y : K)
+2. **`nsmul` compatible with base change?** Formula-level map/base-change lemmas exist. Point-level additive base-change can be built for field extensions, then `map_nsmul` gives compatibility. For `K → K[ε]`, Mathlib does not provide the needed point-level additive hom because the target has no group instance.
 
--- affine point on the curve
-(hcurve : W.affineEquation x y = 0)
--- not 2-torsion; equivalently ψ₂(P) is nonzero/unit
-(hψ2 : W.ψ₂.eval₂ x y ≠ 0)
--- n is nonzero in K
-(hn : (n : K) ≠ 0)
--- root of preΨ' n
-(hroot : (W.preΨ' n).eval x = 0)
-```
+3. **Abelian group structure?** Yes for field-valued nonsingular points. Not for `K[ε]`-valued points in the current Mathlib API.
 
-Goal:
+So the translation bridge is straightforward **after** you provide either a custom dual-point `AddCommGroup` or, preferably, a single local lemma replacing that infrastructure:
 
 ```lean
-(W.preΨ' n).derivative.eval x ≠ 0
+[n]Pε = [n]((-lift P) + Pε)
 ```
 
-Prove by contradiction:
-
-```lean
-by
-  intro hderiv
-```
-
-### Step A: build a nonzero tangent lift `Pε`
-
-Because `hψ2 : 2*y + a₁*x + a₃ ≠ 0`, the affine curve equation is smooth in the `Y` direction at `(x,y)`.  Therefore the dual lift with `x`-velocity `1` is obtained by solving for the `y`-velocity.
-
-Mathematically:
-
-```text
-Fx = -(3x^2 + 2a₂x + a₄) + a₁y
-Fy = 2y + a₁x + a₃ = ψ₂(P)
-slope = -Fx / Fy
-Pε = (x + ε, y + ε*slope).
-```
-
-You probably already have this or something close; if not, this is the helper to add:
-
-```lean
-/-- The canonical nonzero tangent lift in the `x` direction at a non-2-torsion affine point. -/
-def tangentLiftX
-    (W : WeierstrassCurve K) (x y : K) (hψ2 : W.ψ₂.eval₂ x y ≠ 0) :
-    W.Point (TrivSqZeroExt K K) :=
-  -- x-coordinate: inl x + inr 1
-  -- y-coordinate: inl y + inr slope
-  -- prove the dual curve equation by linearizing and using the chosen slope
-  sorry
-
-lemma tangentLiftX_translated_tangent_ne_zero
-    (W : WeierstrassCurve K) (x y : K) (hψ2 : W.ψ₂.eval₂ x y ≠ 0) :
-    tangentOCoord W ((-mapPoint (affinePoint W x y)) + tangentLiftX W x y hψ2) ≠ 0 := by
-  -- The translated tangent has nonzero tangent vector because the original x-velocity is `1`.
-  -- Translation is an isomorphism on tangent spaces; concretely the x-component remains a nonzero
-  -- tangent direction in your chosen tangent coordinate.
-  sorry
-```
-
-If your current tangent coordinate at `O` is `-X/Y` or `-XZ/Y`, the exact nonzero expression after translation may not be literally `1`, but it will be a nonzero scalar multiple of the input tangent.  This is the right place to use your existing `psi2_dual_isUnit` / denominator-unit lemmas.
-
-### Step B: double root gives `preΨ' n` zero on the dual lift
-
-You already described these atoms:
-
-```lean
-preΨ'_eval_zero_of_dual_root
-preΨ'_deriv_eval_zero_of_dual_root
-```
-
-The direction needed here is the standard dual-number Taylor lemma:
-
-```lean
-lemma preΨ'_dual_eval_eq_zero_of_root_and_deriv_zero
-    (hroot : (W.preΨ' n).eval x = 0)
-    (hderiv : (W.preΨ' n).derivative.eval x = 0) :
-    evalDualX (W.preΨ' n) (x + ε) = 0 := by
-  -- polynomial Taylor over dual numbers:
-  -- p(x + ε) = p(x) + ε * p'(x)
-  sorry
-```
-
-Then for the actual point:
-
-```lean
-have hpre_dual :
-    dualEvalPreΨ' W n (tangentLiftX W x y hψ2) = 0 :=
-  preΨ'_dual_eval_eq_zero_of_root_and_deriv_zero W n x hroot hderiv
-```
-
-Since `preΨ' n` is univariate in `x`, the `y`-velocity does not affect this evaluation.
-
-### Step C: dual root implies `[n]Pε = Oε`
-
-This is where `ψ₂` being a unit matters.  For non-2-torsion affine/projective points, the actual `ψ_n` condition and the univariate `preΨ' n` condition agree because
-
-```text
-Ψ_n = preΨ_n              if n odd,
-Ψ_n = preΨ_n * ψ₂         if n even,
-```
-
-and `ψ₂(Pε)` is a unit.
-
-You already have:
-
-```lean
-psi2_dual_isUnit
-```
-
-so the statement should be:
-
-```lean
-lemma nsmul_eq_identity_of_preΨ'_dual_zero
-    (W : WeierstrassCurve K) (n : ℕ)
-    (Pε : W.Point (TrivSqZeroExt K K))
-    (hψ2unit : IsUnit (dualΨ₂ W Pε))
-    (hpre : dualEvalPreΨ' W n Pε = 0) :
-    n • Pε = identityPointOverDual W := by
-  -- Use the projective division-polynomial formula for `[n]Pε`.
-  -- For even n, `ψ₂` is a unit, so `preΨ' n = 0` iff `Ψ_n = 0`.
-  -- Then the projective representative has the `Z`/denominator coordinate that identifies O.
-  sorry
-```
-
-This is the second bridge.  It is algebraic/projective, not formal-group-theoretic.
-
-### Step D: contradiction by tangent injectivity
-
-Now assemble:
-
-```lean
-theorem preΨ'_deriv_ne_zero_at_nontorsion_root
-    {K : Type*} [Field K] [IsAlgClosed K]
-    (W : WeierstrassCurve K) (n : ℕ)
-    (hn : (n : K) ≠ 0)
-    (x y : K)
-    (hcurve : W.affineEquation x y = 0)
-    (hψ2 : W.ψ₂.eval₂ x y ≠ 0)
-    (hroot : (W.preΨ' n).eval x = 0) :
-    (W.preΨ' n).derivative.eval x ≠ 0 := by
-  intro hderiv
-
-  let P : W.Point K := affinePoint W x y hcurve
-  let Pε : W.Point (TrivSqZeroExt K K) := tangentLiftX W x y hψ2
-
-  have hPtor : n • P = 0 := by
-    -- root of `preΨ' n`, plus `ψ₂(P) ≠ 0`, implies P is n-torsion.
-    exact nsmul_eq_identity_of_preΨ'_root W n P hψ2 hroot
-
-  have hpre_dual : dualEvalPreΨ' W n Pε = 0 := by
-    exact preΨ'_dual_eval_eq_zero_of_root_and_deriv_zero W n x hroot hderiv
-
-  have hψ2unit : IsUnit (dualΨ₂ W Pε) := by
-    exact psi2_dual_isUnit W x y hψ2
-
-  have hnPε_zero : n • Pε = identityPointOverDual W := by
-    exact nsmul_eq_identity_of_preΨ'_dual_zero W n Pε hψ2unit hpre_dual
-
-  have htan_ne : tangentOCoord W ((-mapPoint P) + Pε) ≠ 0 := by
-    exact tangentLiftX_translated_tangent_ne_zero W x y hψ2
-
-  exact
-    (nsmul_dual_ne_identity_of_nonzero_translated_tangent
-      W n hn P hPtor Pε (by simp [Pε, P]) htan_ne) hnPε_zero
-```
-
-This is the right high-level Lean shape.  The exact point type names and coercions will differ in your repo, but the theorem dependencies are the correct ones.
-
----
-
-## Where `formalNsmulF_coeff_one` enters
-
-The theorem
-
-```lean
-formalNsmulF_coeff_one
-```
-
-should not be used directly in the polynomial derivative proof.  It should be encapsulated in exactly one local tangent theorem at the identity:
-
-```lean
-lemma tangentOCoord_nsmul_infinitesimal
-    (W : WeierstrassCurve K) (n : ℕ)
-    (δ : W.Point (TrivSqZeroExt K K))
-    (hδ0 : fstPoint δ = identityPoint W) :
-    tangentOCoord W (n • δ) = (n : K) * tangentOCoord W δ := by
-  -- Convert `δ` to a formal parameter `t = ε*c` at O.
-  -- Use the already-built `formalGroupLaw W` and the theorem
-  -- `formalNsmulF_coeff_one` to get coefficient `(n : K)`.
-  -- Convert back from formal parameter coefficient to `tangentOCoord`.
-  sorry
-```
-
-Then all later proofs should only use this lemma.  That keeps the formal-group machinery isolated from the projective division-polynomial machinery.
-
----
-
-## Do you need separability of `[n]_F`?
-
-There are three levels:
-
-1. **Origin tangent fact:**
-   ```text
-   d[n]_O = n.
-   ```
-   This is exactly `formalNsmulF_coeff_one`.
-
-2. **Global tangent injectivity:**
-   ```text
-   for every P, d[n]_P is nonzero/invertible if (n : K) ≠ 0.
-   ```
-   This follows from (1) by translation because `[n]` is a group homomorphism.
-   This is the level you need.
-
-3. **Global separability/étaleness of `[n]`:**
-   ```text
-   [n] : E → E is separable/étale.
-   ```
-   This is the algebro-geometric packaging of (2).  It is standard, but it is overkill for your immediate polynomial derivative goal.
-
-So the answer is:
-
-```text
-formalNsmulF_coeff_one is sufficient only after proving the translation bridge from tangent at P to tangent at O.  You do not need a separate all-roots formal-power-series derivative theorem; that theorem is not even naturally stated in the identity formal coordinate.
-```
-
----
-
-## Minimal new atoms to close the sorry
-
-I would add these atoms, in this order:
-
-### Atom 1: dual tangent lift from non-2-torsion
-
-```lean
-lemma exists_nonzero_dual_tangent_lift_affine
-    (hcurve : W.affineEquation x y = 0)
-    (hψ2 : W.ψ₂.eval₂ x y ≠ 0) :
-    ∃ Pε : W.Point (TrivSqZeroExt K K),
-      fstPoint Pε = affinePoint W x y hcurve ∧
-      tangentAtPointNonzero W Pε
-```
-
-Prefer a constructive version `tangentLiftX` if you already have formulas.
-
-### Atom 2: root + derivative zero gives dual root
-
-```lean
-lemma polynomial_dual_eval_zero_of_eval_and_deriv_zero
-    (p : K[X]) (x : K)
-    (hp : p.eval x = 0) (hderiv : p.derivative.eval x = 0) :
-    evalDual p (TrivSqZeroExt.inl x + TrivSqZeroExt.inr 1) = 0
-```
-
-This should be pure polynomial/dual-number arithmetic and reusable.
-
-### Atom 3: dual `preΨ'` root gives dual torsion
-
-```lean
-lemma nsmul_dual_eq_zero_of_preΨ'_dual_eval_zero
-    (hψ2unit : IsUnit (dualΨ₂ W Pε))
-    (hpre : dualEvalPreΨ' W n Pε = 0) :
-    n • Pε = identityPointOverDual W
-```
-
-This uses the division-polynomial/projective formula side.
-
-### Atom 4: formal tangent at O for dual infinitesimals
-
-```lean
-lemma tangentOCoord_nsmul_infinitesimal
-    (hδ0 : fstPoint δ = identityPoint W) :
-    tangentOCoord W (n • δ) = (n : K) * tangentOCoord W δ
-```
-
-This is the exact consumer of `formalNsmulF_coeff_one`.
-
-### Atom 5: translate tangent at torsion point to origin
-
-```lean
-lemma nsmul_dual_ne_identity_of_nonzero_translated_tangent
-    (hn : (n : K) ≠ 0)
-    (hPtor : n • P = 0)
-    (hδne : tangentOCoord W ((-mapPoint P) + Pε) ≠ 0) :
-    n • Pε ≠ identityPointOverDual W
-```
-
-This is the conceptual bridge.
-
-Then `preΨ'_deriv_ne_zero_at_nontorsion_root` is a short contradiction proof.
-
----
-
-## Common pitfall to avoid
-
-Do **not** try to prove:
-
-```lean
-[n]_F'(t₀) ≠ 0 for all formal roots t₀ of [n]_F
-```
-
-as the primary bridge.  That suggests a global coordinate on the elliptic curve, which the formal group does not provide.  The correct replacement is:
-
-```lean
-translate P to O, apply [n]'_O = n, translate back.
-```
-
-This is also exactly how Silverman's proof works: he uses the invariant differential / formal group at the identity to show `[n]` is separable when `n` is not zero in the base field; separability at arbitrary points follows from the group structure, not from evaluating the identity formal coordinate at those points.
+under `n • P = 0`.
