@@ -7,6 +7,7 @@ import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
 import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Formula
 import Mathlib.RingTheory.PowerSeries.Inverse
 import Mathlib.RingTheory.PowerSeries.Substitution
+import scratch.DiagonalDifference
 
 /-! # The Weierstrass formal group: w(t) power series, formal point, and formal addition
 
@@ -397,12 +398,8 @@ theorem formalAddZ_mul_ww (W : WeierstrassCurve R) :
 private theorem X_sub_dvd_subst_diff (f : R⟦X⟧) :
     (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ∣
     (PowerSeries.subst (MvPowerSeries.X 0) f -
-     PowerSeries.subst (MvPowerSeries.X 1) f) := by
-  -- The quotient g has coeff_{(a,b)} = f_{a+b+1}.
-  -- Verification: (X₀-X₁)*g at (a,b) = g(a-1,b) - g(a,b-1)
-  --   = f_{a+b} - f_{a+b} = 0 when a,b ≥ 1;
-  --   = f_a when b = 0; = -f_b when a = 0; matching f(X₀)-f(X₁).
-  sorry
+     PowerSeries.subst (MvPowerSeries.X 1) f) :=
+  PowerSeries.X_sub_X_dvd_subst_sub_subst f
 
 /-- `formalDelta` is divisible by `(X₀ - X₁)`. -/
 private theorem X_sub_dvd_formalDelta (W : WeierstrassCurve R) :
