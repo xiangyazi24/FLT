@@ -1,323 +1,410 @@
-# Q500 / dm4 — Can we bypass `(X₀-X₁)^3` divisibility by defining the Weierstrass formal group directly?
+# Q514 / dm4 — Bypass full `FormalGroup`: prove the `[n]` tangent scalar directly from finite-point formulas
 
 ## Executive answer
 
-For a **genuine Mathlib `FormalGroup K`**, this shortcut is **not shorter** than the `(X₀-X₁)^3` divisibility / normalization route.
+Yes, this is a plausible bypass of the full `W.formalGroup : FormalGroup K` construction **for the tangent bridge only**. But the proposed statement needs two important corrections.
 
-It is shorter only if the target is a **finite jet** or a **low-order computation** such as `lin_coeff_X`, `lin_coeff_Y`, or a first-order tangent calculation. It is not a viable shortcut for constructing an actual inhabitant of
+1. The additive tangent coordinate is **not** the raw `dx` or `dy` coefficient. It is the coordinate defined by the invariant differential
 
-```lean
-FormalGroup K
+```text
+ω = dx / (2y + a₁x + a₃)
 ```
 
-because Mathlib's `FormalGroup.assoc` field is an **exact equality of full multivariate power series**, not an equality modulo degree `N`.
+on the chart where `2y + a₁x + a₃ ≠ 0`, with the alternative `dy`-chart at 2-torsion points. Addition is additive on this invariant-differential coordinate.
 
-The key misconception in the proposed shortcut is:
+2. The final induction step where `(n-1)P + P = O` is **not** an affine secant computation. The affine denominator has zero scalar part, hence is not invertible in `K[ε]`. That endpoint still needs a projective/local-parameter computation using `addXYZ` or a special vertical-addition lemma.
 
-> "Associativity is a finite check modulo sufficiently high degree."
+So the corrected route is:
 
-That is false for formal group laws in Mathlib and false mathematically for full formal power series. A finite truncation proves associativity only in a truncated Artin quotient, not in `MvPowerSeries` itself.
+```text
+finite secant/doubling tangent lemmas
+  + one vertical endpoint lemma into the local parameter at O
+  + induction along the finite orbit P, 2P, ..., (n-1)P, O
+```
 
-## Mathlib API checked
+This can bypass full formal groups. It probably is shorter than constructing a genuine `FormalGroup K`, but it is **not** just one affine `K[ε]` lemma.
 
-The repo pins Mathlib at:
+## Mathlib surface checked
+
+The repo pins Mathlib at
 
 ```toml
 rev = "96fd0fff3b8837985ae21dd02e712cb5df72ec05"
 ```
 
-At that revision, `Mathlib/RingTheory/FormalGroup/Basic.lean` defines:
-
-```lean
-structure FormalGroup where
-  toPowerSeries : MvPowerSeries (Fin 2) R
-  zero_constantCoeff : toPowerSeries.constantCoeff = 0
-  lin_coeff_X : toPowerSeries.coeff (single 0 1) = 1
-  lin_coeff_Y : toPowerSeries.coeff (single 1 1) = 1
-  assoc : toPowerSeries.subst ![toPowerSeries.subst ![Y₀, Y₁], Y₂]
-    = toPowerSeries.subst ![Y₀, toPowerSeries.subst ![Y₁, Y₂]] (S := R)
-```
-
-So to build `FormalGroup K`, you must prove an equality in
-
-```lean
-MvPowerSeries (Fin 3) K
-```
-
-not a truncated equality.
-
-The substitution API in `Mathlib/RingTheory/MvPowerSeries/Substitution.lean` is also full-power-series substitution:
-
-```lean
-noncomputable def subst (a : σ → MvPowerSeries τ S) (f : MvPowerSeries σ R) :
-    MvPowerSeries τ S
-```
-
-with lemmas such as:
-
-```lean
-theorem subst_add
-theorem subst_sub
-theorem subst_mul
-theorem subst_pow
-theorem coeff_subst
-```
-
-Again, this is exact API, not a finite-jet API.
-
-## Why the affine formula route is not a shortcut
-
-The affine chord formula wants to use
+Relevant files:
 
 ```text
-x(t) = t / w(t),
-y(t) = -1 / w(t),
+Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Formula.lean
+Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Point.lean
+Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Formula.lean
 ```
 
-where, for the local parameter at infinity,
+`Affine/Formula.lean` has exactly the branch formulas one would want to differentiate:
+
+```lean
+WeierstrassCurve.Affine.negY
+WeierstrassCurve.Affine.slope
+WeierstrassCurve.Affine.addX
+WeierstrassCurve.Affine.negAddY
+WeierstrassCurve.Affine.addY
+```
+
+The file documents the affine slope branches:
 
 ```text
-w(t) = t^3 u(t),       u(0) = 1.
+if x₁ ≠ x₂,       ℓ = (y₁ - y₂) / (x₁ - x₂)
+if P = Q nonvert, ℓ = (3x₁² + 2a₂x₁ + a₄ - a₁y₁) / (2y₁ + a₁x₁ + a₃)
 ```
 
-Thus
+and then
 
 ```text
-x(t) = 1 / (t^2 u(t)),
-y(t) = -1 / (t^3 u(t)).
+x(P+Q) = ℓ² + a₁ℓ - a₂ - x₁ - x₂
+y(P+Q) = -(ℓ(x(P+Q)-x₁)+y₁) - a₁x(P+Q) - a₃.
 ```
 
-These are Laurent series, not ordinary `PowerSeries` / `MvPowerSeries`. The final formal group law
+`Affine/Point.lean` builds the actual point group law over a **field** and proves `AddCommGroup W.Point`. This is useful for scalar/base points, but it does **not** give a group law over `K[ε]`, because `K[ε]` is not a field.
+
+That is the first Lean implementation warning: do not try to instantiate `W.Point` over `TrivSqZeroExt K K`. Instead, differentiate the branch formulas over `K` or define branch-specific dual-number formulas with explicit inverses for denominators whose scalar part is nonzero.
+
+## Why the raw `K[ε]` affine statement is too optimistic
+
+The proposed lemma was:
 
 ```text
-F(t₁,t₂) = t(P(t₁) + P(t₂))
+for P,Q distinct finite affine points over K[ε],
+tangent(P+Q) decomposes additively.
 ```
 
-is an ordinary power series, but the intermediate affine slope/intercept formulas live in Laurent/rational expressions and then cancel.
+This needs to be narrowed.
 
-So the affine formula does not remove the cancellation problem; it merely moves it from projective `addXYZ` normalization to Laurent-series cancellation.
+### Problem 1: `K[ε]` is not a field
 
-In Lean, unless you introduce a robust Laurent/Hahn-series layer and prove the cancellation back into `MvPowerSeries`, this is probably **longer** than the projective route.
+Mathlib's `Affine.Point` group law is over fields. The dual numbers are a commutative ring with nilpotents, not a field. So the existing field-level `slope` and `Point.add` API cannot be used directly over `K[ε]`.
 
-## Why a finite Silverman table is insufficient
-
-Silverman's displayed expansion
+For the secant branch with distinct **reductions** `x₁ ≠ x₂` over `K`, the denominator
 
 ```text
-F(T₁,T₂) = T₁ + T₂ - a₁T₁T₂ - a₂(T₁²T₂ + T₁T₂²) - ...
+(x₁ + ε dx₁) - (x₂ + ε dx₂)
 ```
 
-is only the beginning of an infinite power series. If we define a finite polynomial/truncation from the table, say
+has nonzero scalar part and is a unit in `K[ε]`. That branch is fine, but Lean should use either:
+
+* an explicit inverse formula for dual units; or
+* ordinary derivative formulas over `K`, avoiding division in the dual ring.
+
+### Problem 2: dual-number distinctness is not enough
+
+If the reductions have the same `x`-coordinate, the affine denominator may be nilpotent. For example, in the final vertical step, the scalar denominator is zero. Then it is not a unit in `K[ε]`, so the affine secant formula is not valid.
+
+The branch condition should be scalar/open-chart data such as:
 
 ```lean
-def F_trunc : MvPowerSeries (Fin 2) K :=
-  X₀ + X₁ - C a₁ * X₀ * X₁ - C a₂ * (X₀^2 * X₁ + X₀ * X₁^2) + ...
+hx : x₁ ≠ x₂
 ```
 
-then `zero_constantCoeff`, `lin_coeff_X`, and `lin_coeff_Y` are easy. But `assoc` will normally fail as an exact equality, because the omitted higher terms are exactly what cancel the higher-degree associator.
+not merely `Pε ≠ Qε` in the dual ring.
 
-Finite checking proves only statements like
+### Problem 3: addition is additive only after the right tangent trivialization
+
+For a finite nonsingular point `(x,y)`, the tangent equation is the linearization of the Weierstrass equation. In one common convention,
 
 ```text
-assoc holds modulo total degree ≤ N
+F(x,y) = y² + a₁xy + a₃y - x³ - a₂x² - a₄x - a₆,
 ```
 
-not
-
-```lean
-F.subst ![F.subst ![Y₀,Y₁],Y₂]
-  = F.subst ![Y₀,F.subst ![Y₁,Y₂]]
-```
-
-in `MvPowerSeries (Fin 3) K`.
-
-There is no finite `N` that determines a one-dimensional formal group law over a field. For example, over a characteristic-zero field, the coordinate changes
+so a tangent vector `(dx,dy)` satisfies
 
 ```text
-φ(T) = T + c T^(N+1)
+(a₁y - 3x² - 2a₂x - a₄) dx + (2y + a₁x + a₃) dy = 0.
 ```
 
-produce formal group laws
+The invariant-differential coordinate is
 
 ```text
-Fφ(X,Y) = φ⁻¹(φ(X) + φ(Y))
+θ(x,y; dx,dy) = dx / (2y + a₁x + a₃)
 ```
 
-which agree with the additive formal group law through degree `N` but differ in higher degree. Thus finite jets cannot certify a full formal group law.
+when `2y + a₁x + a₃ ≠ 0`. At a 2-torsion point this denominator vanishes, and one must use the equivalent `dy` formula on the other nonsingular chart.
 
-## Can we define `F` coefficient-by-coefficient?
+The correct local statement is not
 
-Technically, yes: `MvPowerSeries (Fin 2) K` is just a coefficient function
-
-```lean
-def MvPowerSeries (σ : Type*) (R : Type*) := (σ →₀ ℕ) → R
+```text
+dx(P+Q) = dx(P) + dx(Q),
 ```
 
-so one can define
+but rather
 
-```lean
-def F : MvPowerSeries (Fin 2) K := fun d =>
-  -- coefficient indexed by d : Fin 2 →₀ ℕ
-  ...
+```text
+θ(P+Q; d(P+Q)) = θ(P; dP) + θ(Q; dQ).
 ```
 
-or pattern-match on
+This is the algebraic form of
 
-```lean
-d (0 : Fin 2), d (1 : Fin 2)
+```text
+m^*ω = pr₁^*ω + pr₂^*ω
 ```
 
-for explicitly known low-degree coefficients.
+for the group law.
 
-But this only moves the hard part. To make a `FormalGroup`, you must prove:
+## Correct finite-point lemma package
+
+The route should be organized into branch lemmas, not one giant dual-number theorem.
+
+### 1. Tangent data and invariant coordinate
+
+Use definitions like:
 
 ```lean
-F.subst ![F.subst ![Y₀, Y₁], Y₂]
-  = F.subst ![Y₀, F.subst ![Y₁, Y₂]]
+namespace WeierstrassCurve.Affine
+
+variable {K : Type*} [Field K] (W : WeierstrassCurve.Affine K)
+
+-- Name only; exact polynomial signs should match Mathlib's `polynomialX/polynomialY` convention.
+def TangentAt (x y dx dy : K) : Prop :=
+  W.polynomialX.evalEval x y * dx + W.polynomialY.evalEval x y * dy = 0
+
+-- On the non-2-torsion finite chart.
+def psi (x y : K) : K :=
+  y - W.negY x y       -- equals 2*y + a₁*x + a₃ after simp/ring
+
+noncomputable def omegaCoord (x y dx dy : K) : K :=
+  dx / W.psi x y
+
+end WeierstrassCurve.Affine
 ```
 
-That proof is coefficientwise infinite. It requires showing every coefficient of the associator is zero. There are two realistic ways to do this:
+For an input deformation of the form
 
-1. prove the coefficient recursion is exactly the one obtained from the elliptic curve group law, then inherit associativity from the curve group law; or
-2. define the coefficients recursively so that the associator vanishes at every degree, and then prove this recursion matches the Weierstrass/Silverman formal group.
-
-Both are substantially larger than proving one localized divisibility/cancellation statement for the projective formula.
-
-## The finite-check idea would require a different structure
-
-If the immediate goal is only a finite-order calculation, define a jet structure instead of using Mathlib's `FormalGroup`:
-
-```lean
-structure FormalGroupJet (R : Type*) [CommRing R] (N : ℕ) where
-  F : MvPolynomial (Fin 2) R       -- or truncated MvPowerSeries
-  zero_constantCoeff : ...
-  lin_coeff_X : ...
-  lin_coeff_Y : ...
-  assoc_mod_degree : ...           -- modulo total degree > N
+```text
+Pε = (x + ε, y + ε s),
 ```
 
-Then the Silverman table route is attractive. It is excellent for proving low-order facts like:
+`(1,s)` must satisfy the tangent equation. Its invariant coordinate is generally
 
-```lean
-coeff (single 0 1) F = 1
-coeff (single 1 1) F = 1
-coeff (single 0 1 + single 1 1) F = -a₁
+```text
+1 / (2y + a₁x + a₃),
 ```
 
-But this does not produce a value of type
+not `1`. If the target theorem wants output coefficient `n`, normalize the input tangent vector so that `θ = 1`; if the input is `dx = 1`, expect output coefficient
 
-```lean
-FormalGroup K
+```text
+n / (2y + a₁x + a₃)
 ```
 
-and therefore will not plug into Mathlib's existing `FormalGroup` API.
+up to the sign convention of the local parameter at `O`.
 
-## Comparison with the `(X₀-X₁)^3` divisibility route
+### 2. Secant tangent-addition lemma
 
-### Divisibility/projective route
+For scalar finite points with `x₁ ≠ x₂`, define the derivative of the affine formulas explicitly.
 
-Hard point:
+Mathematically:
 
-```lean
-(X₀ - X₁)^3 ∣ addX/addY/addZ numerator pieces
+```text
+ℓ  = (y₁ - y₂)/(x₁ - x₂)
+dℓ = ((dy₁ - dy₂)(x₁ - x₂) - (y₁ - y₂)(dx₁ - dx₂))/(x₁ - x₂)²
+
+x₃  = ℓ² + a₁ℓ - a₂ - x₁ - x₂
+dx₃ = (2ℓ + a₁)dℓ - dx₁ - dx₂
+
+y₃  = -(ℓ(x₃-x₁)+y₁) - a₁x₃ - a₃
+dy₃ = -(dℓ(x₃-x₁) + ℓ(dx₃-dx₁) + dy₁) - a₁dx₃
 ```
 
-or some equivalent normalization/cancellation statement.
+Then prove:
 
-Advantages:
-
-* It keeps everything in ordinary `MvPowerSeries` / polynomial expressions.
-* It is tied directly to Mathlib's projective addition formulas.
-* Once the normalized expression is identified with actual curve addition, associativity should ultimately come from the elliptic curve group law rather than an infinite coefficient proof.
-* The hard lemma is local and algebraic.
-
-### Direct Silverman coefficient route
-
-Hard points:
-
-* need an infinite coefficient definition, not merely the displayed first terms;
-* need exact associativity of the infinite power series;
-* need a proof that the constructed series is the Weierstrass formal group law, not just some formal group law with the same low-degree terms;
-* if using affine formulas, need Laurent/rational cancellation anyway.
-
-Verdict: this is likely much longer for a genuine `FormalGroup`.
-
-## Recommended practical route
-
-### If the goal is `W.formalGroup : FormalGroup K`
-
-Stay with the projective/normalization route. Avoid `IsCoprime` from the previous question, because it is the wrong notion in the local ring. Instead use one of:
-
-1. direct factorization of the concrete normalized numerator;
-2. a custom `δ`-adic divisibility lemma for `δ = X₀ - X₁`;
-3. a coordinate-change argument `U = X₀ - X₁`, `V = X₁`, reducing divisibility by `δ` to divisibility by a coordinate variable `U` and using `MvPowerSeries.X_pow_dvd_iff`.
-
-The third route is probably the cleanest Mathlib-aligned approach if direct `ring` factorization is too large.
-
-### If the goal is only the tangent bridge / linear coefficient
-
-Do not build the full `FormalGroup` yet. Define or prove only the required jet-level facts:
-
-```lean
-F = T₁ + T₂ + terms of total degree ≥ 2
+```text
+TangentAt(x₁,y₁,dx₁,dy₁)
+TangentAt(x₂,y₂,dx₂,dy₂)
+x₁ ≠ x₂
+---------------------------------------------
+TangentAt(x₃,y₃,dx₃,dy₃)
+omegaCoord(x₃,y₃,dx₃,dy₃)
+  = omegaCoord(x₁,y₁,dx₁,dy₁)
+  + omegaCoord(x₂,y₂,dx₂,dy₂)
 ```
 
-or explicitly:
+Lean proof style: expand definitions, use `field_simp` with the nonzero denominators, then `ring`/`ring_nf`. This is a finite calculation over `K`.
 
-```lean
-coeff (single 0 1) F = 1
-coeff (single 1 1) F = 1
+This is probably much easier than a multivariate `MvPowerSeries` associativity proof.
+
+### 3. Doubling tangent lemma
+
+For `P = Q` with `P` not 2-torsion, use the tangent-line slope branch:
+
+```text
+ℓ = (3x² + 2a₂x + a₄ - a₁y)/(2y + a₁x + a₃).
 ```
 
-A Silverman-table finite truncation is useful here. But call it a jet/truncation theorem, not `FormalGroup`.
+Differentiate this formula and prove:
 
-## Lean skeleton for the safe finite-jet approach
+```text
+omegaCoord(d(2P)) = 2 * omegaCoord(dP).
+```
 
-A minimal finite-jet object could look like:
+Again this is finite `field_simp` + `ring`, but it is a separate branch. It is needed for the first induction step `[2]Q = Q + Q` unless the proof starts from a projective `dblXYZ` tangent lemma.
+
+### 4. Vertical endpoint lemma into `O`
+
+This is the unavoidable endpoint.
+
+If `R = -P`, then `R + P = O`. For deformations
+
+```text
+Rε near R,
+Pε near P,
+```
+
+the affine secant denominator has zero scalar part. It is not invertible in `K[ε]`. Therefore the affine formula cannot compute the output near `O`.
+
+The correct endpoint lemma is projective/local:
+
+```text
+localParameterCoeffAtO(addXYZ(Rε, Pε))
+  = omegaCoord(R; dR) + omegaCoord(P; dP)
+```
+
+with the sign fixed by the chosen convention for the local parameter at infinity, e.g. `t = -X/Y` or `t = -XZ/Y` depending on the projective representative convention.
+
+This is still only a **finite dual-number computation**, not a full formal group construction. It should be much smaller than proving full `(X₀-X₁)^3` normalization as a two-variable power-series identity.
+
+But it means the route is not purely affine.
+
+## Induction theorem shape
+
+Assume `P` has exact order `n` and, for the simplest version, assume the orbit avoids 2-torsion on the finite steps where the `dx/ψ` chart is used. For odd exact order this avoids the main chart-switching problem. For even order, `(n/2)P` is 2-torsion and one must either switch charts or add a 2-torsion branch lemma.
+
+A clean theorem statement should look more like:
 
 ```lean
-import Mathlib.RingTheory.FormalGroup.Basic
-import Mathlib.RingTheory.MvPowerSeries.Trunc
+-- P is finite, nonsingular, exact order n, with a tangent vector v at P.
+-- `thetaP` is the invariant-differential coordinate of v.
+theorem localCoeff_nsmul_torsion_direct
+    {n : ℕ} {P : W.Point} {v : TangentVectorAt P}
+    (hPfin : P is finite)
+    (horder : exact_order P n)
+    (hchart : orbit_chart_good P n)
+    (htangent : tangent vector data is valid) :
+  coeffε (localParameterAtO ([n] (P + ε v))) = (n : K) * thetaP := by
+  -- induction on k
+  -- k = 1: identity
+  -- k = 2: doubling lemma
+  -- 2 < k < n: secant finite-add lemma
+  -- k = n: vertical endpoint lemma
+```
 
-open MvPowerSeries Finsupp
+More concretely, maintain an induction invariant:
 
-noncomputable section
+```text
+For 1 ≤ k < n,
+  [k](Pε) is a deformation of kP with invariant coordinate k * θ(Pε).
+```
+
+Then:
+
+* `k = 1`: immediate.
+* `k = 2`: finite doubling lemma, unless `2P=O`.
+* `2 ≤ k ≤ n-2`: add the deformation of `kP` to the original deformation of `P`; use the secant lemma, because for exact order `n`, `kP` is neither `P` nor `-P` in the generic range.
+* `k = n-1`: `kP = -P`; use the vertical endpoint lemma to land in the local parameter at `O`.
+
+The final result is:
+
+```text
+local t coefficient of [n](Pε) = n * θ(Pε).
+```
+
+If `Pε = (x + ε, y + εs)` with `dx = 1`, then `θ(Pε) = 1 / (2y + a₁x + a₃)` on the non-2 chart. So the output is not literally `n` unless the input tangent was normalized to have invariant coordinate `1`.
+
+## What this bypasses and what it does not
+
+### It bypasses
+
+* defining `F(T₁,T₂)` as a full `MvPowerSeries`;
+* proving `FormalGroup.assoc`;
+* proving full two-variable associativity / formal group law identities;
+* proving the complete `(X₀-X₁)^3` normalization for all formal variables, if the only target is the tangent scalar.
+
+### It does not bypass
+
+* differentiating the affine add/double formulas;
+* handling branch conditions (`secant`, `doubling`, `vertical endpoint`);
+* one projective/local calculation at `O`;
+* chart-switching at 2-torsion orbit points, unless excluded;
+* exact-order/orbit bookkeeping.
+
+## Lean implementation recommendation
+
+Do **not** phrase the first lemmas over dual-number `Point`s. Instead define branchwise derivative formulas over `K`.
+
+Recommended order:
+
+1. Define `TangentAt` and `omegaCoord` for finite affine points.
+2. Prove the finite secant derivative lemma in ordinary field algebra.
+3. Prove the finite doubling derivative lemma in ordinary field algebra.
+4. Prove the vertical endpoint lemma using `Projective.addXYZ`/local parameter over `TrivSqZeroExt K K`.
+5. Assemble the exact-order induction.
+
+This avoids fighting `K[ε]` as a non-field and avoids `if` branches in `Affine.slope`.
+
+A branch lemma skeleton:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
+import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Formula
+
+open WeierstrassCurve
+
+namespace WeierstrassCurve.Affine
 
 variable {K : Type*} [Field K]
+variable (W : WeierstrassCurve.Affine K)
 
-abbrev R₂ := MvPowerSeries (Fin 2) K
+noncomputable def psi (x y : K) : K :=
+  y - W.negY x y
 
-local notation "X₀" => (MvPowerSeries.X (0 : Fin 2) : R₂)
-local notation "X₁" => (MvPowerSeries.X (1 : Fin 2) : R₂)
+-- Use the exact `polynomialX/polynomialY` convention from Mathlib.
+def TangentAt (x y dx dy : K) : Prop :=
+  W.polynomialX.evalEval x y * dx + W.polynomialY.evalEval x y * dy = 0
 
--- Low-order Silverman polynomial, not a full formal group law.
-def WeierstrassFJet2 (a₁ : K) : R₂ :=
-  X₀ + X₁ - MvPowerSeries.C a₁ * X₀ * X₁
+noncomputable def omegaCoord (x y dx dy : K) : K :=
+  dx / W.psi x y
 
-example (a₁ : K) : (WeierstrassFJet2 (K := K) a₁).constantCoeff = 0 := by
-  simp [WeierstrassFJet2]
+-- Secant branch: scalar reductions have x₁ ≠ x₂.
+theorem omegaCoord_add_secant
+    {x₁ y₁ x₂ y₂ dx₁ dy₁ dx₂ dy₂ : K}
+    (h₁ : W.Nonsingular x₁ y₁)
+    (h₂ : W.Nonsingular x₂ y₂)
+    (hx : x₁ ≠ x₂)
+    (ht₁ : W.TangentAt x₁ y₁ dx₁ dy₁)
+    (ht₂ : W.TangentAt x₂ y₂ dx₂ dy₂) :
+    -- after defining ℓ,dℓ,x₃,y₃,dx₃,dy₃:
+    True := by
+  -- expand definitions; `field_simp [hx, ...]`; `ring_nf`
+  trivial
 
-example (a₁ : K) :
-    (WeierstrassFJet2 (K := K) a₁).coeff (single (0 : Fin 2) 1) = 1 := by
-  -- likely `simp [WeierstrassFJet2, coeff_index_single_X, X, monomial_mul_monomial]`
-  sorry
+-- Doubling branch: non-vertical tangent.
+theorem omegaCoord_dbl
+    {x y dx dy : K}
+    (h : W.Nonsingular x y)
+    (hpsi : W.psi x y ≠ 0)
+    (ht : W.TangentAt x y dx dy) :
+    -- omegaCoord of the doubled tangent = 2 * omegaCoord of input
+    True := by
+  -- expand definitions; `field_simp [hpsi, ...]`; `ring_nf`
+  trivial
 
-example (a₁ : K) :
-    (WeierstrassFJet2 (K := K) a₁).coeff (single (1 : Fin 2) 1) = 1 := by
-  -- same style
-  sorry
+end WeierstrassCurve.Affine
 ```
 
-This is useful for local coefficient computations, but intentionally does **not** attempt:
+The real theorem bodies should not leave `True`; this is just the recommended decomposition. The point is that each branch is a finite rational identity over `K`.
 
-```lean
-def bad : FormalGroup K := ...
+## Verdict
+
+This route is worth pursuing if the only required result is the tangent scalar used in the division-polynomial bridge:
+
+```text
+coeffε(t([n](Pε))) = n * θ(Pε).
 ```
 
-because exact associativity is unavailable from a finite truncation.
-
-## Bottom line
-
-*Defining a finite Silverman expansion is shorter for coefficient/jet lemmas.*
-
-*It is not shorter for constructing `W.formalGroup : FormalGroup K`.* The full `FormalGroup` route still needs an exact infinite associativity proof. The projective normalization route remains the better path because it ties the power series to the actual elliptic curve addition law and localizes the hard algebra to the normalization/divisibility step.
+It is likely shorter than constructing the full Weierstrass `FormalGroup`. But the viable proof is not the naive affine addition over `K[ε]`; it is a branchwise proof using the invariant differential, plus one projective vertical endpoint computation. If you restrict to exact odd order and non-2-torsion charts, the induction becomes much cleaner. For general `n`, chart switching and earlier hits of `O` must be handled explicitly.
