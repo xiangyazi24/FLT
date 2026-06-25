@@ -126,3 +126,9 @@ Missing: W.formalGroup : FormalGroup K for the Weierstrass curve.
 - Function-field: needs same projective formula
 - Finite morphism: finite≠unramified
 - Additive FormalGroup shortcut: ALL FGLs agree to 1st order, but the CONNECTION to the curve is the content
+
+## W.formalGroup Design Round 1 (in progress)
+- dm2 blind review (86bb631a8): projective coords, w(t) iteration, ~650-1300 lines
+- Jacobian dblXYZ/addXYZ DEGENERATE at Z=0 (confirmed): w(t) construction necessary
+- dm1 atom decomposition + dm4 CAS dblXYZ: still processing
+- Design approach: w(t) → [t:-1:w(t)] → projective addition → F = -X/Y
