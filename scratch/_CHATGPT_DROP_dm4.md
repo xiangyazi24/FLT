@@ -1,388 +1,443 @@
-# Q798 (dm4): closing `preΨ'_deriv_ne_zero_at_root_general`
+# Q820 (dm4): exact Mathlib expansion of `WeierstrassCurve.preΨ₄`
 
-## Recommendation
+## Checked Mathlib revision
 
-Do **not** try to close the `n ≥ 4` case by the even product-rule descent as currently sketched.  That descent proves only the branch where the old factor vanishes.  In the branch where the new even cofactor vanishes, it asks for the cofactor to have simple roots, which is essentially another separability theorem.
+I checked `leanprover-community/mathlib4` at the requested pinned rev `96fd0fff`.
 
-The cleaner route is the Ω-free dual-number proof:
-
-```text
-double root of preΨ'(n)
-  ⇒ preΨ'(n) vanishes on a nonzero dual tangent lift Pε
-  ⇒ projective division-polynomial formula gives [n]Pε = O
-  ⇒ Pε is a nonzero infinitesimal vector in ker([n])
-  ⇒ contradiction because d[n] = n and (n : K) ≠ 0.
-```
-
-This bypasses `Ω_n` completely.  The important correction is that the formal-group argument is **not** “evaluate `[n]_F` at `t(P)`.”  A torsion point `P` is not generally in the formal neighborhood of `O`.  Instead, translate the first-order deformation of `P` back to the identity, use the formal group there, and translate forward again.
-
-## Why the even strong induction is not simpler
-
-Write
+The relevant files are:
 
 ```text
-preΨ'(2k) = preΨ'(k) · C_k.
+Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Basic.lean
+Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Degree.lean
+Mathlib/AlgebraicGeometry/EllipticCurve/Weierstrass.lean
+Mathlib/FieldTheory/Separable.lean
 ```
 
-Let `f = preΨ'(k)` and `g = C_k`.  At a root of `h = f*g`, the derivative is
+## 1. Exact Mathlib definition of `preΨ₄`
+
+Yes, `WeierstrassCurve.preΨ₄` is explicitly defined as a univariate polynomial in `X`, with coefficients expressed through the standard `bᵢ` invariants.
+
+At rev `96fd0fff`, the definition is exactly:
+
+```lean
+/-- The univariate polynomial `preΨ₄`, which is auxiliary to the 4-division polynomial
+`ψ₄ = Ψ₄ = preΨ₄ψ₂`. -/
+noncomputable def preΨ₄ : R[X] :=
+  2 * X ^ 6 + C W.b₂ * X ^ 5 + 5 * C W.b₄ * X ^ 4 + 10 * C W.b₆ * X ^ 3 + 10 * C W.b₈ * X ^ 2 +
+    C (W.b₂ * W.b₈ - W.b₄ * W.b₆) * X + C (W.b₄ * W.b₈ - W.b₆ ^ 2)
+```
+
+So, in mathematical notation:
 
 ```text
-h' = f'·g + f·g'.
+preΨ₄(x) = 2x⁶ + b₂x⁵ + 5b₄x⁴ + 10b₆x³ + 10b₈x²
+           + (b₂b₈ - b₄b₆)x + (b₄b₈ - b₆²).
 ```
 
-There are two cases.
+The `bᵢ` invariants are also explicit in Mathlib:
 
-### Case 1: `f(x) = 0`
+```lean
+def b₂ : R :=
+  W.a₁ ^ 2 + 4 * W.a₂
 
-Then
+def b₄ : R :=
+  2 * W.a₄ + W.a₁ * W.a₃
+
+def b₆ : R :=
+  W.a₃ ^ 2 + 4 * W.a₆
+
+def b₈ : R :=
+  W.a₁ ^ 2 * W.a₆ + 4 * W.a₂ * W.a₆ - W.a₁ * W.a₃ * W.a₄ + W.a₂ * W.a₃ ^ 2 - W.a₄ ^ 2
+```
+
+and Mathlib has the useful relation
+
+```lean
+lemma b_relation : 4 * W.b₈ = W.b₂ * W.b₆ - W.b₄ ^ 2
+```
+
+## Fully expanded in `a₁,a₂,a₃,a₄,a₆`
+
+Substituting the `bᵢ` definitions, the polynomial is:
 
 ```text
-h'(x) = f'(x) · g(x).
+preΨ₄(x) =
+  2*x^6
+  + (a1^2 + 4*a2)*x^5
+  + (5*a1*a3 + 10*a4)*x^4
+  + (10*a3^2 + 40*a6)*x^3
+  + (10*a1^2*a6 - 10*a1*a3*a4 + 10*a2*a3^2 + 40*a2*a6 - 10*a4^2)*x^2
+  + (a1^4*a6 - a1^3*a3*a4 + a1^2*a2*a3^2 + 8*a1^2*a2*a6
+     - a1^2*a4^2 - 4*a1*a2*a3*a4 - a1*a3^3 - 4*a1*a3*a6
+     + 4*a2^2*a3^2 + 16*a2^2*a6 - 4*a2*a4^2 - 2*a3^2*a4 - 8*a4*a6)*x
+  + (a1^3*a3*a6 - a1^2*a3^2*a4 + 2*a1^2*a4*a6
+     + a1*a2*a3^3 + 4*a1*a2*a3*a6 - 3*a1*a3*a4^2
+     + 2*a2*a3^2*a4 + 8*a2*a4*a6
+     - a3^4 - 8*a3^2*a6 - 2*a4^3 - 16*a6^2).
 ```
 
-This branch is good:
+For Lean, I would normally keep the `bᵢ` form.  It is much smaller, it matches Mathlib definitional unfolding, and it exposes `b_relation`, which is useful for the Bézout certificate below.
 
-* `f'(x) ≠ 0` by induction on `k`, and
-* `g(x) ≠ 0` by the already proved cofactor nonvanishing lemma, for example `evenCofactor_ne_zero_Psi3_ne` plus the relevant side conditions.
+## 2. What is `preΨ'(4)`?
 
-### Case 2: `g(x) = 0` and `f(x) ≠ 0`
+Mathlib defines
 
-Then
+```lean
+noncomputable def preΨ' (n : ℕ) : R[X] :=
+  preNormEDS' (W.Ψ₂Sq ^ 2) W.Ψ₃ W.preΨ₄ n
+```
+
+and has the simp lemma:
+
+```lean
+@[simp]
+lemma preΨ'_four : W.preΨ' 4 = W.preΨ₄ :=
+  preNormEDS'_four ..
+```
+
+So yes: `preΨ'_four` exists, and it is tagged `@[simp]`.
+
+For proofs, this means that goals involving `W.preΨ' 4` should reduce to `W.preΨ₄` by `simp`.
+
+## 3. Degree of `preΨ₄`
+
+Mathlib proves the unconditional upper bound and the exact degree under `(2 : R) ≠ 0`:
+
+```lean
+lemma natDegree_preΨ₄_le : W.preΨ₄.natDegree ≤ 6 := by
+  rw [preΨ₄]
+  compute_degree
+
+@[simp]
+lemma coeff_preΨ₄ : W.preΨ₄.coeff 6 = 2 := by
+  rw [preΨ₄]
+  compute_degree!
+
+lemma coeff_preΨ₄_ne_zero (h : (2 : R) ≠ 0) : W.preΨ₄.coeff 6 ≠ 0 := by
+  rwa [coeff_preΨ₄]
+
+@[simp]
+lemma natDegree_preΨ₄ (h : (2 : R) ≠ 0) : W.preΨ₄.natDegree = 6 :=
+  natDegree_eq_of_le_of_coeff_ne_zero W.natDegree_preΨ₄_le <| W.coeff_preΨ₄_ne_zero h
+
+@[simp]
+lemma leadingCoeff_preΨ₄ (h : (2 : R) ≠ 0) : W.preΨ₄.leadingCoeff = 2 := by
+  rw [leadingCoeff, W.natDegree_preΨ₄ h, coeff_preΨ₄]
+```
+
+So the degree is `6` when `(2 : R) ≠ 0`.  In your theorem for `n = 4`, the hypothesis `(4 : K) ≠ 0` over a field implies `(2 : K) ≠ 0`, so this applies.
+
+## About `Polynomial.Separable` and `decide`
+
+Mathlib defines polynomial separability as a coprimality proposition:
+
+```lean
+def Polynomial.Separable (f : R[X]) : Prop :=
+  IsCoprime f (derivative f)
+
+theorem separable_def' (f : R[X]) :
+  f.Separable ↔ ∃ a b : R[X], a * f + b * (derivative f) = 1 :=
+  Iff.rfl
+```
+
+I would not expect `decide` to close `W.preΨ₄.Separable` in the symbolic setting.  Even if propositions are classically decidable, `decide` is not going to synthesize a nontrivial Bézout certificate over coefficients involving symbolic `W.a₁,...,W.a₆` and the ellipticity hypothesis.  The right Lean route is an explicit certificate, then normalize a nonzero constant to `1` using the field inverse/unit argument.
+
+## Better certificate target than the raw resultant
+
+A direct resultant computation is possible.  For the actual `preΨ₄` polynomial `p`, over the Weierstrass invariant relation, the resultant satisfies
 
 ```text
-h'(x) = f(x) · g'(x).
+resultant(p, p') = 512 * Δ^5.
 ```
 
-Now the proof needs
+But for Lean, a smaller certificate is more useful.  Use `b_relation` to replace `4*b₈` by `b₂*b₆ - b₄²`, and define
 
 ```text
-g'(x) ≠ 0.
+q := 4 * preΨ₄.
 ```
 
-That is not a consequence of the induction hypothesis on `preΨ'(k)`, because `g` is not just `preΨ'(m)` for one smaller `m`; it is the new part of the `2k`-torsion divisor.  So a “simple” strong induction would have to strengthen the induction predicate to include squarefreeness of every even cofactor/primitive factor and coprimality among all those factors.  That is larger than the theorem you are trying to close.
+Then, after eliminating `b₈`,
 
-So the product-rule descent can be made to work, but only after proving a primitive-factor separability package.  It is not the shortest way to close the final sorry.
-
-## The direct dual-number proof
+```text
+q(x) =
+  8*x^6
+  + 4*b2*x^5
+  + 20*b4*x^4
+  + 40*b6*x^3
+  + 10*(b2*b6 - b4^2)*x^2
+  + (b2^2*b6 - b2*b4^2 - 4*b4*b6)*x
+  + (b2*b4*b6 - b4^3 - 4*b6^2).
+```
 
 Let
 
 ```text
-ψ = W.preΨ' n.
+D := b2^3*b6 - b2^2*b4^2 - 36*b2*b4*b6 + 32*b4^3 + 108*b6^2.
 ```
 
-Assume `x` is a root of `ψ` and also a root of `ψ.derivative`.  Over the algebraically closed field `K`, choose an affine point
+Using Mathlib’s discriminant convention and `b_relation`, this is
 
 ```text
-P = (x, y)
+D = -4 * Δ.
 ```
 
-above `x`.  The existing root criterion for `preΨ'` should give
+A compact Bézout certificate is:
 
 ```text
-n • P = O.
+(-S) * q + T * q' = 2 * D^2,
 ```
 
-The adjacent-coprimality infrastructure, especially `no_adjacent_preΨ_zero`, should give the corresponding numerator nonvanishing statement
+where
 
 ```text
-Φ_n(P.x) ≠ 0
+S =
+  69*b2^3*b6 + 50*b2^3*x^3 - 69*b2^2*b4^2 + 150*b2^2*b4*x^2
+  + 210*b2^2*b6*x + 120*b2^2*x^4 - 60*b2*b4^2*x - 2274*b2*b4*b6
+  - 1320*b2*b4*x^3 + 540*b2*b6*x^2 + 2048*b4^3 - 4320*b4^2*x^2
+  - 3960*b4*b6*x - 2880*b4*x^4 + 5832*b6^2 + 2160*b6*x^3
 ```
 
-at a root of `ψ_n`.  This is the same nonvanishing used in the usual argument
+and
 
 ```text
-Φ_n ≡ -ψ_{n+1}ψ_{n-1} · factor    mod ψ_n.
+T =
+  2*b2^4*b6 - 2*b2^3*b4^2 + 29*b2^3*b6*x + 10*b2^3*x^4
+  - 29*b2^2*b4^2*x - 67*b2^2*b4*b6 + 40*b2^2*b4*x^3
+  + 80*b2^2*b6*x^2 + 20*b2^2*x^5 + 59*b2*b4^3 - 20*b2*b4^2*x^2
+  - 884*b2*b4*b6*x - 260*b2*b4*x^4 + 156*b2*b6^2 + 120*b2*b6*x^3
+  + 808*b4^3*x + 50*b4^2*b6 - 1120*b4^2*x^3 - 1560*b4*b6*x^2
+  - 480*b4*x^5 + 1872*b6^2*x + 360*b6*x^4.
 ```
 
-The proof then proceeds infinitesimally.
+This is probably the best Lean certificate shape:
 
-## Step 1: build a nonzero dual-number lift
+1. Prove `q = 4 • W.preΨ₄` by unfolding `preΨ₄` and using `W.b_relation`.
+2. Prove `(-S) * q + T * derivative q = C (2 * D^2)` by `ring_nf` after unfolding `q`, `S`, `T`, `D`.
+3. Prove `D = -4 * W.Δ` by unfolding `D`, `Δ`, and using `W.b_relation` or the already unfolded expression.
+4. Since `[Field K]`, `[W.IsElliptic]`, and `(4 : K) ≠ 0`, the constant `2 * D^2 = 32 * W.Δ^2` is nonzero, hence a unit.
+5. Convert the certificate for `q` to one for `preΨ₄`, because `q = 4 * preΨ₄` and `4` is a unit.
 
-Let
+This avoids producing the much larger `512 * Δ^5` resultant certificate.
+
+## SymPy script
+
+This script does four things:
+
+1. defines Mathlib’s `preΨ₄`,
+2. expands it in `a₁,...,a₆`,
+3. computes derivative and resultant,
+4. computes/prints the compact Bézout certificate above after eliminating `b₈` using `4*b₈ = b₂*b₆ - b₄²`.
+
+```python
+#!/usr/bin/env python3
+import sympy as sp
+
+# Main polynomial variable.
+x = sp.symbols("x")
+
+# Weierstrass coefficients.
+a1, a2, a3, a4, a6 = sp.symbols("a1 a2 a3 a4 a6")
+
+# Standard b-invariants, matching Mathlib's WeierstrassCurve.b₂, b₄, b₆, b₈.
+b2_a = a1**2 + 4*a2
+b4_a = 2*a4 + a1*a3
+b6_a = a3**2 + 4*a6
+b8_a = a1**2*a6 + 4*a2*a6 - a1*a3*a4 + a2*a3**2 - a4**2
+
+# Independent b-symbols.  For the compact certificate we use the Weierstrass
+# relation 4*b8 = b2*b6 - b4^2 and eliminate b8.
+b2, b4, b6, b8 = sp.symbols("b2 b4 b6 b8")
+
+# Mathlib's preΨ₄ in b-invariant form.
+pre4_b = (
+    2*x**6
+    + b2*x**5
+    + 5*b4*x**4
+    + 10*b6*x**3
+    + 10*b8*x**2
+    + (b2*b8 - b4*b6)*x
+    + (b4*b8 - b6**2)
+)
+
+# Same polynomial expanded in a_i.
+pre4_a = sp.expand(pre4_b.subs({b2: b2_a, b4: b4_a, b6: b6_a, b8: b8_a}))
+
+dpre4_b = sp.diff(pre4_b, x)
+dpre4_a = sp.diff(pre4_a, x)
+
+print("prePsi4 in b-invariants:")
+print(sp.Poly(pre4_b, x))
+print()
+
+print("prePsi4 expanded in a_i:")
+print(sp.Poly(pre4_a, x))
+print()
+
+print("derivative in b-invariants:")
+print(sp.Poly(dpre4_b, x))
+print()
+
+# If b2,b4,b6,b8 are treated as independent, the resultant is huge and does not
+# reflect the Weierstrass relation.  Use b8 = (b2*b6 - b4^2)/4.
+b8_rel = (b2*b6 - b4**2) / 4
+pre4_rel = sp.expand(pre4_b.subs(b8, b8_rel))
+
+# Work with q = 4*preΨ₄ after relation, to keep integral coefficients.
+q = sp.expand(4 * pre4_rel)
+dq = sp.diff(q, x)
+
+D = b2**3*b6 - b2**2*b4**2 - 36*b2*b4*b6 + 32*b4**3 + 108*b6**2
+
+print("q = 4*prePsi4 after eliminating b8:")
+print(sp.Poly(q, x))
+print()
+
+print("D =")
+print(D)
+print()
+
+# GCD and extended GCD over QQ(b2,b4,b6)[x].
+K = sp.QQ.frac_field(b2, b4, b6)
+Q = sp.Poly(q, x, domain=K)
+DQ = sp.Poly(dq, x, domain=K)
+
+g = sp.gcd(Q, DQ)
+print("gcd(q, q') over QQ(b2,b4,b6)[x] =")
+print(g)
+print()
+
+s, t, h = sp.gcdex(Q, DQ)  # s*q + t*q' = h
+print("extended gcd h =")
+print(h)
+print()
+print("s =")
+print(sp.factor(s.as_expr()))
+print()
+print("t =")
+print(sp.factor(t.as_expr()))
+print()
+
+# Compact denominator-cleared cofactors.
+S = (
+    69*b2**3*b6 + 50*b2**3*x**3 - 69*b2**2*b4**2 + 150*b2**2*b4*x**2
+    + 210*b2**2*b6*x + 120*b2**2*x**4 - 60*b2*b4**2*x - 2274*b2*b4*b6
+    - 1320*b2*b4*x**3 + 540*b2*b6*x**2 + 2048*b4**3 - 4320*b4**2*x**2
+    - 3960*b4*b6*x - 2880*b4*x**4 + 5832*b6**2 + 2160*b6*x**3
+)
+
+T = (
+    2*b2**4*b6 - 2*b2**3*b4**2 + 29*b2**3*b6*x + 10*b2**3*x**4
+    - 29*b2**2*b4**2*x - 67*b2**2*b4*b6 + 40*b2**2*b4*x**3
+    + 80*b2**2*b6*x**2 + 20*b2**2*x**5 + 59*b2*b4**3 - 20*b2*b4**2*x**2
+    - 884*b2*b4*b6*x - 260*b2*b4*x**4 + 156*b2*b6**2 + 120*b2*b6*x**3
+    + 808*b4**3*x + 50*b4**2*b6 - 1120*b4**2*x**3 - 1560*b4*b6*x**2
+    - 480*b4*x**5 + 1872*b6**2*x + 360*b6*x**4
+)
+
+cert = sp.expand((-S)*q + T*dq - 2*D**2)
+print("certificate check (-S)*q + T*q' - 2*D^2 =")
+print(sp.factor(cert))
+print()
+
+# Resultant check.  For p = preΨ₄, resultant(p,p') = 512*Δ^5.
+# For q = 4*p, resultant(q,q') = 4^11 * resultant(p,p').
+res_q = sp.factor(sp.resultant(q, dq, x))
+print("resultant(q, q') =")
+print(res_q)
+print()
+print("resultant(q, q') / D^5 =")
+print(sp.factor(res_q / D**5))
+print()
+
+# Relation with Mathlib's discriminant convention:
+# Δ = -D/4 after eliminating b8.
+Delta_rel = -D/4
+res_pre4 = sp.factor(res_q / (4**11))
+print("resultant(prePsi4, derivative prePsi4) =")
+print(res_pre4)
+print()
+print("resultant(prePsi4, derivative prePsi4) / Delta^5 =")
+print(sp.factor(res_pre4 / Delta_rel**5))
+```
+
+Expected important output:
 
 ```text
-A = DualNumber K.
+gcd(q, q') over QQ(b2,b4,b6)[x] = Poly(1, x, domain='QQ(b2,b4,b6)')
+
+certificate check (-S)*q + T*q' - 2*D^2 =
+0
+
+resultant(q, q') / D^5 =
+-2097152
+
+resultant(prePsi4, derivative prePsi4) / Delta^5 =
+512
 ```
 
-You want a point `Pε : W(A)` reducing to `P` with nonzero tangent vector.  In the nonvertical case, take
+The sign in `resultant(q,q') / D^5` is negative because `D = -4Δ`; since the exponent is `5`, this matches the positive `512*Δ^5` for `preΨ₄`.
 
-```text
-xε = x + ε,
-yε = y + y₁ ε,
-```
+## Lean proof sketch for `preΨ₄.Separable`
 
-where `y₁` solves the linearized Weierstrass equation.  For
+A Lean-friendly proof should avoid the full resultant and use the compact certificate.
 
-```text
-F = y² + a₁xy + a₃y - x³ - a₂x² - a₄x - a₆,
-```
-
-the linear condition is
-
-```text
-F_x(P) + F_y(P) · y₁ = 0,
-```
-
-with
-
-```text
-F_y(P) = 2y + a₁x + a₃.
-```
-
-So when `F_y(P) ≠ 0`, choose
-
-```text
-y₁ = -F_x(P) / F_y(P).
-```
-
-This gives a genuine dual-number point with `dx = 1`, hence a nonzero tangent vector.
-
-For the normalized `preΨ'`, roots should be nonvertical.  If that is not already available, isolate it as a small lemma:
+Schematic shape:
 
 ```lean
--- Schematic name.
-theorem preΨ'_root_not_twoTorsion
-    [IsAlgClosed K] (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} (hn_ge4 : 4 ≤ n) {x : K}
-    (hx : (W.preΨ' n).IsRoot x)
-    {P : W.AffinePoint K} (hPx : P.x = x)
-    (hP_on_root : -- P is the point above the root used by the division-polynomial criterion
-      True) :
-    2 * P.y + W.a₁ * P.x + W.a₃ ≠ 0 := by
-  -- Either follows from the normalization of `preΨ'` removing the Ψ₂ factor,
-  -- or is handled by a separate 2-torsion squarefreeness lemma.
+-- Define the b-only eliminated polynomial q = 4 * preΨ₄.
+private noncomputable def preΨ₄_q (W : WeierstrassCurve K) : K[X] :=
+  8 * X ^ 6
+    + 4 * C W.b₂ * X ^ 5
+    + 20 * C W.b₄ * X ^ 4
+    + 40 * C W.b₆ * X ^ 3
+    + 10 * C (W.b₂ * W.b₆ - W.b₄ ^ 2) * X ^ 2
+    + C (W.b₂ ^ 2 * W.b₆ - W.b₂ * W.b₄ ^ 2 - 4 * W.b₄ * W.b₆) * X
+    + C (W.b₂ * W.b₄ * W.b₆ - W.b₄ ^ 3 - 4 * W.b₆ ^ 2)
+
+private def preΨ₄_D (W : WeierstrassCurve K) : K :=
+  W.b₂ ^ 3 * W.b₆ - W.b₂ ^ 2 * W.b₄ ^ 2
+    - 36 * W.b₂ * W.b₄ * W.b₆ + 32 * W.b₄ ^ 3 + 108 * W.b₆ ^ 2
+```
+
+Then prove:
+
+```lean
+private lemma preΨ₄_q_eq_four_mul (W : WeierstrassCurve K) :
+    preΨ₄_q W = C (4 : K) * W.preΨ₄ := by
+  rw [preΨ₄_q, preΨ₄]
+  -- use W.b_relation to eliminate b₈
+  -- ring_nf should finish after rewriting `4 * W.b₈`.
+  sorry
+
+private lemma preΨ₄_D_eq_neg_four_delta (W : WeierstrassCurve K) :
+    preΨ₄_D W = -4 * W.Δ := by
+  rw [preΨ₄_D, Δ]
+  -- either unfold b_relation or use it; ring_nf.
+  sorry
+
+private lemma preΨ₄_q_bezout (W : WeierstrassCurve K) :
+    ∃ A B : K[X],
+      A * preΨ₄_q W + B * derivative (preΨ₄_q W) = C (2 * preΨ₄_D W ^ 2) := by
+  refine ⟨-S_poly W, T_poly W, ?_⟩
+  -- `S_poly` and `T_poly` are the polynomial cofactors listed above.
+  -- Unfold q, S, T, D and use ring_nf.
   sorry
 ```
 
-This lemma is much smaller than proving the even cofactor squarefree.  If Mathlib’s normalization does allow vertical roots in `preΨ'`, split those roots off separately; they are controlled by nonsingularity of the cubic, not by the EDS descent.
-
-## Step 2: a double root gives a dual root
-
-For any polynomial `p`, over dual numbers:
-
-```text
-p(x + ε) = p(x) + p'(x) ε.
-```
-
-Thus from
+Finally, under `[Field K]`, `[W.IsElliptic]`, and `(4 : K) ≠ 0`:
 
 ```lean
-hx   : (W.preΨ' n).IsRoot x
-hder : (derivative (W.preΨ' n)).IsRoot x
-```
-
-you get
-
-```text
-(W.preΨ' n)(x + ε) = 0
-```
-
-in `DualNumber K`.
-
-The useful Lean lemma is:
-
-```lean
--- Schematic.  Adjust to Mathlib's actual DualNumber and Polynomial API.
-theorem polynomial_eval_dual_eq_eval_add_derivative
-    (p : Polynomial K) (x u : K) :
-    Polynomial.aeval (DualNumber.of x + DualNumber.of u * DualNumber.epsilon) p =
-      DualNumber.of (p.eval x) +
-        DualNumber.of (u * p.derivative.eval x) * DualNumber.epsilon := by
-  -- polynomial induction, or use an existing simp theorem if available
+have h2 : (2 : K) ≠ 0 := by
+  -- from `(4 : K) ≠ 0`; in a field, if 2 = 0 then 4 = 0.
   sorry
-```
-
-With `u = 1`, this gives the dual root of `ψ`.
-
-## Step 3: the projective formula gives `[n]Pε = O`
-
-This is the key Ω-free replacement.
-
-Do **not** use the affine formula
-
-```text
-[n](P) = (Φ/ψ², Ω/ψ³),
-```
-
-because it divides by `ψ`, which is zero on the dual lift.  Use the projective division-polynomial formula instead.  In projective coordinates the `Z`-component is a power of `ψ`; the `X`-component has a factor of `ψ`; and the remaining coordinate is automatically a unit when the triple is a valid projective point reducing to infinity.
-
-The lemma you want is:
-
-```lean
--- Schematic.
-theorem nsmul_eq_zero_of_preΨ'_dual_root
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    {A : Type*} [CommRing A] [Algebra K A]
-    {n : ℕ} {Pε : W.ProjectivePoint A}
-    (hψ : -- `preΨ' n` evaluates to 0 at the x-coordinate of Pε
-      True)
-    (hΦ_unit : -- `Φ_n` evaluates to a unit at Pε
-      True) :
-    n • Pε = 0 := by
-  -- Use the projective nsmul/division-polynomial coordinate formula.
-  -- Since ψ = 0, the projective `Z` coordinate is 0 and the projective `X`
-  -- coordinate is also 0.  Since the triple is a projective point and Φ is a
-  -- unit after reduction, the remaining coordinate is a unit, hence the point is O.
+have hD : preΨ₄_D W ≠ 0 := by
+  rw [preΨ₄_D_eq_neg_four_delta]
+  -- `W.IsElliptic` gives `W.Δ ≠ 0`, and `4 ≠ 0`.
   sorry
+have hconst : IsUnit (2 * preΨ₄_D W ^ 2) := by
+  exact isUnit_iff_ne_zero.mpr (by field_simp [h2, hD])
 ```
 
-The `hΦ_unit` proof does **not** need `Ω_n`.  It uses only that the residue of `Φ_n(Pε.x)` is nonzero:
+Normalize the certificate by multiplying both cofactors by the inverse of the constant.  This gives `IsCoprime (preΨ₄_q W) (derivative (preΨ₄_q W))`, hence separability of `preΨ₄_q W`.  Since `preΨ₄_q W = C 4 * W.preΨ₄` and `C 4` is a unit, transfer separability back to `W.preΨ₄`.
 
-```text
-Φ_n(P.x) ≠ 0.
-```
-
-An element of `DualNumber K` is a unit exactly when its scalar/residue part is nonzero.
-
-A practical helper lemma is:
-
-```lean
--- Schematic.
-theorem isUnit_dual_of_residue_ne_zero {z : DualNumber K}
-    (hz : DualNumber.re z ≠ 0) : IsUnit z := by
-  -- explicit inverse or existing DualNumber unit criterion
-  sorry
-```
-
-Then `no_adjacent_preΨ_zero` supplies the residue nonvanishing of `Φ_n` at the original root.
-
-## Step 4: `[n]` has no infinitesimal kernel when `(n : K) ≠ 0`
-
-This is the formal-group input.
-
-State it independently of division polynomials:
-
-```lean
--- Schematic.
-theorem no_dual_tangent_kernel_of_nsmul
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} (hn : (n : K) ≠ 0)
-    {P : W.Point K} (hP_tors : n • P = 0)
-    {Pε : W.Point (DualNumber K)}
-    (hred : reduce Pε = P)
-    (htangent_ne : tangentVector Pε ≠ 0) :
-    n • Pε ≠ 0 := by
-  -- Let Qε = Pε - const(P).  Then Qε reduces to O and has the same nonzero
-  -- tangent vector, transported to the identity.
-  -- If n • Pε = O, then n • Qε = O.
-  -- In the formal parameter at O, write t(Qε) = u ε with u ≠ 0.
-  -- `FormalNsmulDirect` gives t(n • Qε) = (n : K) * u * ε because ε² = 0.
-  -- Since `(n : K) ≠ 0` and `u ≠ 0`, this is nonzero. Contradiction.
-  sorry
-```
-
-This is the right use of `FormalNsmulDirect`: it is applied at the identity after translating the tangent vector from `P` to `O`.
-
-## How the final theorem should look
-
-Once the bridge lemmas above exist, the `n ≥ 4` branch of
-
-```lean
-public theorem preΨ'_deriv_ne_zero_at_root_general [IsAlgClosed K]
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} (hn : (n : K) ≠ 0) {x : K}
-    (hx : (W.preΨ' n).IsRoot x) :
-    ¬ (derivative (W.preΨ' n)).IsRoot x
-```
-
-should not need EDS descent.  It should reduce to one auxiliary theorem:
-
-```lean
--- Schematic.
-theorem preΨ'_deriv_ne_zero_at_root_by_dual
-    [IsAlgClosed K]
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} (hn : (n : K) ≠ 0) {x : K}
-    (hx : (W.preΨ' n).IsRoot x) :
-    ¬ (derivative (W.preΨ' n)).IsRoot x := by
-  intro hder
-
-  -- Choose an affine point P above x and get n-torsion from the preΨ' root.
-  obtain ⟨P, hPx, hP_tors, hP_ne_O, hΦ_ne⟩ :=
-    W.point_torsion_and_Phi_ne_of_preΨ'_root hn hx
-
-  -- Roots of the normalized preΨ' are nonvertical; otherwise split off the
-  -- separate 2-torsion squarefreeness case.
-  have hv : 2 * P.y + W.a₁ * P.x + W.a₃ ≠ 0 := by
-    exact W.preΨ'_root_not_twoTorsion hn hx hPx
-
-  -- Build a dual lift with dx = 1.
-  obtain ⟨Pε, hred, hdx⟩ := W.exists_dual_lift_dx_one P hv
-  have htangent_ne : tangentVector Pε ≠ 0 := by
-    -- follows from `hdx : dx = 1`
-    exact W.tangent_ne_zero_of_dx_eq_one hdx
-
-  -- Double root implies ψ_n vanishes on the dual lift.
-  have hψ_dual : -- `(W.preΨ' n)` evaluates to 0 on `Pε.x`
-      True := by
-    -- polynomial_eval_dual_eq_eval_add_derivative + hx + hder + hdx
-    trivial
-
-  -- Φ is a unit on the dual lift because its residue at P is nonzero.
-  have hΦ_unit : -- `Φ_n(Pε.x)` is a unit
-      True := by
-    -- residue is `Φ_n(P.x)`, and `hΦ_ne` says this residue is nonzero
-    trivial
-
-  -- Projective division-polynomial formula: ψ=0 and Φ unit force `[n]Pε = O`.
-  have hnPε : n • Pε = 0 := by
-    exact W.nsmul_eq_zero_of_preΨ'_dual_root hψ_dual hΦ_unit
-
-  -- But multiplication by n has no infinitesimal kernel.
-  exact W.no_dual_tangent_kernel_of_nsmul hn hP_tors hred htangent_ne hnPε
-```
-
-Then the existing theorem becomes:
-
-```lean
-public theorem preΨ'_deriv_ne_zero_at_root_general [IsAlgClosed K]
-    (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} (hn : (n : K) ≠ 0) {x : K}
-    (hx : (W.preΨ' n).IsRoot x) :
-    ¬ (derivative (W.preΨ' n)).IsRoot x := by
-  -- keep the existing `n ≤ 3` branches if they are already stable
-  by_cases hsmall : n ≤ 3
-  · exact W.preΨ'_deriv_ne_zero_at_root_small hn hsmall hx
-  · exact W.preΨ'_deriv_ne_zero_at_root_by_dual hn hx
-```
-
-The small-case split is no longer mathematically necessary once the dual theorem is general, but keeping it is fine if those branches already compile.
-
-## What must be available over `DualNumber K`
-
-The only serious implementation caveat is that `DualNumber K` is not a field.  Therefore any division-polynomial formula used in Step 3 must be stated over a commutative ring or at least over the specific `K`-algebra `DualNumber K`, not only over fields.
-
-If the current projective `[n]` formula is field-only, do not define `Ω_n`; instead generalize the projective coordinate formula by base change.  The formula is polynomial, so it should transport to `DualNumber K` without divisions.
-
-The minimum projective bridge is:
-
-```lean
--- Schematic, Ω-free.
-theorem projective_nsmul_Z_eq_preΨ'_power
-    (Pε : W.ProjectivePoint (DualNumber K)) :
-    Zcoord (n • Pε) = unitFactor * (eval_preΨ' n Pε.x) ^ e := by
-  sorry
-
-theorem projective_nsmul_X_has_preΨ'_factor
-    (Pε : W.ProjectivePoint (DualNumber K)) :
-    Xcoord (n • Pε) = eval_preΨ' n Pε.x * eval_Φ n Pε.x * unitFactor := by
-  sorry
-```
-
-Together with the projective-point condition, these are enough: when `ψ=0`, both `X` and `Z` are zero, so the point is `O`.
-
-## Final answer to the design question
-
-The dual-number approach is the simpler **mathematical** proof and the better long-term Lean architecture.  It avoids `Ω_n`, avoids division by `2`, avoids the even cofactor derivative branch, and uses exactly the hypothesis `(n : K) ≠ 0`.
-
-However, it is not a one-line local replacement for the sorry.  To make it close, add the four bridge lemmas:
-
-```text
-1. double root ⇒ dual-number root of preΨ'(n),
-2. nonvertical root ⇒ nonzero dual lift with dx = 1,
-3. projective division-polynomial formula over DualNumber K gives [n]Pε = O,
-4. FormalNsmulDirect ⇒ no nonzero infinitesimal kernel of [n] when (n : K) ≠ 0.
-```
-
-After those are in place, the `n ≥ 4` case of `preΨ'_deriv_ne_zero_at_root_general` is a short contradiction proof, and the EDS descent can be abandoned for this theorem.
+This should be much more tractable than asking Lean to discover separability automatically.
