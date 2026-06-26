@@ -1,64 +1,44 @@
-# Q670 (dm3): coefficient `coeff (single 0 3) formalAddY = 1`
+# Q676 (dm3): pure-`X₀` coefficient vanishing for `X₁`-supported factors
 
 ## Bottom line
 
-Yes, you can prove this by extracting the single contributing term.  The diagonal-vanishing idea is not enough to determine the coefficient `α = coeff_{(3,0)}`, but the one-term proof is exactly the right local proof.
-
-The proof should be organized as follows:
-
-1. Prove the one-variable fact
+The right helper family is:
 
 ```lean
-coeff 3 W.formalW = 1
+coeff (single 0 n) (X₁ * f) = 0
+coeff (single 0 n) (f * X₁) = 0
+coeff (single 0 n) (X₁ ^ k * f) = 0       -- when `0 < k`
+coeff (single 0 n) ((X₁ * g) * f) = 0
 ```
 
-from
-
-```lean
-W.formalW = PowerSeries.X ^ 3 * W.formalU
-```
-
-and `constantCoeff W.formalU = 1`.
-
-2. Transfer this to the first formal point:
-
-```lean
-coeff (single 0 3) w₀ = 1
-```
-
-where `w₀` is `formalW` substituted into variable `0`.
-
-3. Prove `coeff (single 0 3) negAddY_formal = -1` by unfolding `negAddY` only enough to isolate the term
+For substituted one-variable series, the correct theorem is **not** unconditional:
 
 ```text
-P[1] * Q[1]^2 * P[2] = (-1) * 1 * w₀ = -w₀.
+coeff_{(n,0)}(subst(X₁, g) * f)
+  = constantCoeff(g) * coeff_{(n,0)}(f).
 ```
 
-All other terms have zero `(3,0)` coefficient because they either contain an `X₁` factor, contain `w₁`, contain `X₀^r * w₀` with `r > 0` and hence need a coefficient of `formalW` below degree `3`, or have total degree too high.
+So it vanishes exactly when `constantCoeff(g) = 0`.  For your `w₁ = subst(X₁, formalW)`, this applies because `formalW = X^3 * formalU`, hence `constantCoeff formalW = 0`.
 
-4. Use
+The easiest Lean proof of the substituted version is not to expand the coefficient sum.  Instead use
 
 ```lean
-formalAddY = -negAddY_formal - C(a₁) * addX_formal - C(a₃) * addZ_formal
+constantCoeff g = 0  ⇒  PowerSeries.X ∣ g,
 ```
 
-plus `coeff_{(3,0)} addX = 0` and `coeff_{(3,0)} addZ = 0`.
-
-Then
+so
 
 ```text
-coeff formalAddY
-  = -(-1) - a₁*0 - a₃*0
-  = 1.
+subst(X₁, g) = X₁ * subst(X₁, g/X).
 ```
 
-This is simpler than trying to run `native_decide` through all of `formalAddY`, and it still avoids hand-simplifying all 18 terms.
+Then the basic `X₁`-factor lemma kills the pure `X₀` coefficient.
 
 ---
 
-## Core coefficient lemmas
+## Lean helper lemmas
 
-Here is the support code I would put near your existing coefficient-extraction lemmas.  The names of `formalW`, `formalU`, `formalPointMv`, and the substitution maps may need small edits to match your files, but the proof shape is stable.
+This code is designed to live in a small helper namespace near your formal-group coefficient proofs.  The names `PowerSeries.X_dvd_iff`, `MvPowerSeries.X_pow_eq`, and `MvPowerSeries.coeff_monomial_mul` are the only Mathlib API names that may need small local edits if your snapshot uses different names.
 
 ```lean
 import Mathlib.RingTheory.PowerSeries.Basic
@@ -69,9 +49,9 @@ noncomputable section
 
 open Finsupp
 
-namespace WeierstrassCurve
+namespace MvPowerSeries
 
-section FormalAddYCoeff
+section PureX0Axis
 
 variable {R : Type*} [CommRing R]
 
@@ -81,376 +61,300 @@ local notation "e₁" n => Finsupp.single (1 : Fin 2) n
 local notation "X₀" => (MvPowerSeries.X (0 : Fin 2) : S)
 local notation "X₁" => (MvPowerSeries.X (1 : Fin 2) : S)
 
-/-- Shorthand for the coefficient we care about. -/
-private abbrev coeff30 (f : S) : R :=
-  MvPowerSeries.coeff R (e₀ 3) f
+/-- `X₁^k` cannot divide a pure `X₀^n` monomial when `0 < k`. -/
+private lemma not_e1_pos_le_e0 {k n : ℕ} (hk : 0 < k) :
+    ¬ e₁ k ≤ e₀ n := by
+  intro h
+  have hcoord := h (1 : Fin 2)
+  have hk0 : k ≤ 0 := by
+    simpa using hcoord
+  omega
 
-/-- Multiplication by `X₁` kills pure `X₀`-axis coefficients. -/
-private lemma coeff30_X1_mul (f : S) :
-    coeff30 (X₁ * f) = 0 := by
+/-- `X₀^k` cannot divide a pure `X₁^n` monomial when `0 < k`.  This is the
+symmetric helper, useful if later you need pure-`X₁` coefficients. -/
+private lemma not_e0_pos_le_e1 {k n : ℕ} (hk : 0 < k) :
+    ¬ e₀ k ≤ e₁ n := by
+  intro h
+  have hcoord := h (0 : Fin 2)
+  have hk0 : k ≤ 0 := by
+    simpa using hcoord
+  omega
+
+/-- A positive power of `X₁` kills every pure `X₀` coefficient. -/
+lemma coeff_axis0_X1_pow_mul {k n : ℕ} (hk : 0 < k) (f : S) :
+    MvPowerSeries.coeff R (e₀ n) (X₁ ^ k * f) = 0 := by
   classical
-  have hle : ¬ e₁ 1 ≤ e₀ 3 := by
-    intro h
-    have hcoord := h (1 : Fin 2)
-    have : 1 ≤ 0 := by simpa using hcoord
-    exact Nat.not_succ_le_zero 0 this
-  simpa [coeff30, MvPowerSeries.X, hle] using
+  have hle : ¬ e₁ k ≤ e₀ n := not_e1_pos_le_e0 (R := R) hk
+  simpa [MvPowerSeries.X_pow_eq, hle] using
     (MvPowerSeries.coeff_monomial_mul
-      (R := R) (m := e₀ 3) (n := e₁ 1) (φ := f) (a := (1 : R)))
+      (R := R) (m := e₀ n) (n := e₁ k) (φ := f) (a := (1 : R)))
 
-/-- Same as `coeff30_X1_mul`, but with the `X₁` factor on the right. -/
-private lemma coeff30_mul_X1 (f : S) :
-    coeff30 (f * X₁) = 0 := by
+/-- Multiplication by `X₁` on the left kills every pure `X₀` coefficient. -/
+lemma coeff_axis0_X1_mul (n : ℕ) (f : S) :
+    MvPowerSeries.coeff R (e₀ n) (X₁ * f) = 0 := by
+  simpa using coeff_axis0_X1_pow_mul (R := R) (k := 1) (n := n) (by omega) f
+
+/-- Multiplication by `X₁` on the right kills every pure `X₀` coefficient. -/
+lemma coeff_axis0_mul_X1 (n : ℕ) (f : S) :
+    MvPowerSeries.coeff R (e₀ n) (f * X₁) = 0 := by
   rw [mul_comm]
-  exact coeff30_X1_mul f
+  exact coeff_axis0_X1_mul (R := R) n f
 
-/-- Constants pull out of the `(3,0)` coefficient. -/
-private lemma coeff30_C_mul (a : R) (f : S) :
-    coeff30 ((MvPowerSeries.C R a) * f) = a * coeff30 f := by
-  classical
-  -- If your local API has this exact lemma, this is a one-line `simpa`.
-  simpa [coeff30] using
-    (MvPowerSeries.coeff_C_mul (R := R) (a := a) (n := e₀ 3) (φ := f))
+/-- A visible left `X₁` factor anywhere in a product kills pure `X₀` coefficients. -/
+lemma coeff_axis0_X1_factor_left (n : ℕ) (g f : S) :
+    MvPowerSeries.coeff R (e₀ n) ((X₁ * g) * f) = 0 := by
+  rw [mul_assoc]
+  exact coeff_axis0_X1_mul (R := R) n (g * f)
 
-private lemma coeff30_mul_C (a : R) (f : S) :
-    coeff30 (f * (MvPowerSeries.C R a)) = coeff30 f * a := by
+/-- A visible right `X₁` factor anywhere in a product kills pure `X₀` coefficients. -/
+lemma coeff_axis0_X1_factor_right (n : ℕ) (g f : S) :
+    MvPowerSeries.coeff R (e₀ n) (g * (X₁ * f)) = 0 := by
+  rw [mul_comm g (X₁ * f), mul_assoc]
+  exact coeff_axis0_X1_mul (R := R) n (f * g)
+
+/-- A visible positive `X₁^k` factor kills pure `X₀` coefficients. -/
+lemma coeff_axis0_X1_pow_factor_left {k n : ℕ} (hk : 0 < k) (g f : S) :
+    MvPowerSeries.coeff R (e₀ n) ((X₁ ^ k * g) * f) = 0 := by
+  rw [mul_assoc]
+  exact coeff_axis0_X1_pow_mul (R := R) (k := k) (n := n) hk (g * f)
+
+/-- If a series is known to be divisible by `X₁`, then it kills pure `X₀`
+coefficients after multiplication on the left. -/
+lemma coeff_axis0_mul_of_exists_X1_factor_left
+    {s : S} (hs : ∃ t : S, s = X₁ * t) (n : ℕ) (f : S) :
+    MvPowerSeries.coeff R (e₀ n) (s * f) = 0 := by
+  rcases hs with ⟨t, rfl⟩
+  exact coeff_axis0_X1_factor_left (R := R) n t f
+
+/-- Same as the previous lemma, with the `X₁`-divisible series on the right. -/
+lemma coeff_axis0_mul_of_exists_X1_factor_right
+    {s : S} (hs : ∃ t : S, s = X₁ * t) (n : ℕ) (f : S) :
+    MvPowerSeries.coeff R (e₀ n) (f * s) = 0 := by
   rw [mul_comm]
-  simpa [mul_comm] using coeff30_C_mul (R := R) a f
+  exact coeff_axis0_mul_of_exists_X1_factor_left (R := R) hs n f
+
+end PureX0Axis
+
+end MvPowerSeries
 ```
 
-If your Mathlib snapshot does not have `MvPowerSeries.coeff_C_mul`, prove it from `MvPowerSeries.coeff_mul`; the antidiagonal of `e₀ 3` has many elements, but all terms vanish because `C a` has only coefficient `0` nonzero.
+If your `coeff_monomial_mul` theorem is only stated in the shifted form
+
+```lean
+coeff (m + n) (monomial m a * f) = a * coeff n f
+```
+
+rather than the arbitrary-target form, keep the theorem statements above and prove `coeff_axis0_X1_pow_mul` from `MvPowerSeries.coeff_mul` plus `Finsupp.mem_antidiagonal`.  Everything downstream stays the same.
 
 ---
 
-## One-variable `formalW` coefficient
+## Substitution-at-`X₁` helpers
 
-This is the easy part.  The key is to prove both the degree-`3` coefficient and the lower-degree vanishings, because the latter kill terms like `X₀ * w₀` and `X₀^2 * w₀` when extracting coefficient `(3,0)`.
+The cleanest version is abstract over whatever substitution hom your file uses.  Let
 
 ```lean
-/-- `formalU` has constant coefficient `1`. -/
-private lemma formalU_constantCoeff (W : WeierstrassCurve R) :
-    PowerSeries.coeff R 0 W.formalU = 1 := by
-  -- `formalU = PowerSeries.mk W.formalUCoeff` and `formalUCoeff 0 = 1`.
-  simpa [formalU, formalUCoeff]
+substX1 : PowerSeries R →+* MvPowerSeries (Fin 2) R
+```
 
-/-- Since `formalW = X^3 * formalU`, its degree-3 coefficient is `1`. -/
-theorem formalW_coeff_three (W : WeierstrassCurve R) :
-    PowerSeries.coeff R 3 W.formalW = 1 := by
-  classical
-  -- Use your local lemma name `coeff_X_pow_mul'`.
-  -- The coefficient at degree `3 + 0` of `X^3 * formalU` is `coeff 0 formalU`.
-  simpa [formalW, formalU_constantCoeff W] using
-    (PowerSeries.coeff_X_pow_mul'
-      (R := R) (n := 3) (m := 0) (φ := W.formalU))
+be the hom that sends the univariate variable to `X₁`.
 
-/-- All coefficients of `formalW` below degree `3` vanish. -/
-theorem formalW_coeff_lt_three (W : WeierstrassCurve R) {n : ℕ} (hn : n < 3) :
-    PowerSeries.coeff R n W.formalW = 0 := by
+```lean
+import Mathlib.RingTheory.PowerSeries.Basic
+import Mathlib.RingTheory.MvPowerSeries.Basic
+import Mathlib.Tactic
+
+noncomputable section
+
+open Finsupp
+
+namespace MvPowerSeries
+
+section SubstX1
+
+variable {R : Type*} [CommRing R]
+
+local notation "S" => MvPowerSeries (Fin 2) R
+local notation "e₀" n => Finsupp.single (0 : Fin 2) n
+local notation "X₁" => (MvPowerSeries.X (1 : Fin 2) : S)
+
+/-- If a one-variable power series has zero constant coefficient, then its
+substitution at `X₁` is divisible by `X₁`. -/
+lemma exists_X1_factor_substX1_of_constantCoeff_eq_zero
+    (substX1 : PowerSeries R →+* S)
+    (hX : substX1 (PowerSeries.X : PowerSeries R) = X₁)
+    (g : PowerSeries R)
+    (hg0 : PowerSeries.coeff R 0 g = 0) :
+    ∃ t : S, substX1 g = X₁ * t := by
   classical
-  -- This is the complementary form of the same `X^3 * formalU` shift lemma.
-  -- Use your local `coeff_X_pow_mul_of_lt`, or prove from coefficient support.
+  have hdiv : (PowerSeries.X : PowerSeries R) ∣ g := by
+    -- If your snapshot states this using `PowerSeries.constantCoeff R g = 0`,
+    -- replace `hg0` by that formulation or `simpa` between the two.
+    exact (PowerSeries.X_dvd_iff (R := R) (φ := g)).2 hg0
+  rcases hdiv with ⟨u, hu⟩
+  refine ⟨substX1 u, ?_⟩
+  rw [hu, map_mul, hX]
+
+/-- Main substituted helper: if `constantCoeff g = 0`, then
+`substX1 g * f` has no pure `X₀` coefficient. -/
+lemma coeff_axis0_substX1_mul_of_constantCoeff_eq_zero
+    (substX1 : PowerSeries R →+* S)
+    (hX : substX1 (PowerSeries.X : PowerSeries R) = X₁)
+    (g : PowerSeries R) (f : S) (n : ℕ)
+    (hg0 : PowerSeries.coeff R 0 g = 0) :
+    MvPowerSeries.coeff R (e₀ n) (substX1 g * f) = 0 := by
+  classical
+  have hs : ∃ t : S, substX1 g = X₁ * t :=
+    exists_X1_factor_substX1_of_constantCoeff_eq_zero
+      (R := R) substX1 hX g hg0
+  exact MvPowerSeries.coeff_axis0_mul_of_exists_X1_factor_left
+    (R := R) hs n f
+
+/-- Same substituted helper with `substX1 g` on the right. -/
+lemma coeff_axis0_mul_substX1_of_constantCoeff_eq_zero
+    (substX1 : PowerSeries R →+* S)
+    (hX : substX1 (PowerSeries.X : PowerSeries R) = X₁)
+    (g : PowerSeries R) (f : S) (n : ℕ)
+    (hg0 : PowerSeries.coeff R 0 g = 0) :
+    MvPowerSeries.coeff R (e₀ n) (f * substX1 g) = 0 := by
+  rw [mul_comm]
+  exact coeff_axis0_substX1_mul_of_constantCoeff_eq_zero
+    (R := R) substX1 hX g f n hg0
+
+end SubstX1
+
+end MvPowerSeries
+```
+
+### If your project uses `PowerSeries.constantCoeff`
+
+If your zero-constant hypothesis is written as
+
+```lean
+PowerSeries.constantCoeff R g = 0
+```
+
+instead of
+
+```lean
+PowerSeries.coeff R 0 g = 0
+```
+
+add this wrapper:
+
+```lean
+lemma coeff_axis0_substX1_mul_of_constantCoeff_eq_zero'
+    {R : Type*} [CommRing R]
+    (substX1 : PowerSeries R →+* MvPowerSeries (Fin 2) R)
+    (hX : substX1 (PowerSeries.X : PowerSeries R)
+        = (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R))
+    (g : PowerSeries R) (f : MvPowerSeries (Fin 2) R) (n : ℕ)
+    (hg0 : PowerSeries.constantCoeff R g = 0) :
+    MvPowerSeries.coeff R (Finsupp.single (0 : Fin 2) n) (substX1 g * f) = 0 := by
+  exact MvPowerSeries.coeff_axis0_substX1_mul_of_constantCoeff_eq_zero
+    (R := R) substX1 hX g f n (by simpa [PowerSeries.constantCoeff] using hg0)
+```
+
+---
+
+## Applying this to `w₁ = subst(X₁, formalW)`
+
+For your formal group files, the application should be tiny.
+
+First prove the constant coefficient of `formalW` is zero:
+
+```lean
+import Mathlib.RingTheory.PowerSeries.Basic
+import Mathlib.RingTheory.MvPowerSeries.Basic
+import Mathlib.Tactic
+
+noncomputable section
+
+namespace WeierstrassCurve
+
+section FormalWSubstX1
+
+variable {R : Type*} [CommRing R]
+
+/-- `formalW = X^3 * formalU`, so its constant coefficient is zero. -/
+theorem formalW_constantCoeff_zero (W : WeierstrassCurve R) :
+    PowerSeries.coeff R 0 W.formalW = 0 := by
+  classical
+  -- Use your local theorem if you already have it.  This is the standard proof.
+  -- `0 < 3`, so the coefficient below degree `3` of `X^3 * formalU` is zero.
   simpa [formalW] using
     (PowerSeries.coeff_X_pow_mul_of_lt
-      (R := R) (n := 3) (m := n) (φ := W.formalU) hn)
+      (R := R) (n := 3) (m := 0) (φ := W.formalU) (by omega))
+
+end FormalWSubstX1
+
+end WeierstrassCurve
 ```
 
-If your file already has a lemma like `formalW_eq_X_pow_three_mul_formalU`, use that instead of unfolding `formalW`.
+Then use the substituted helper.  The following is schematic because your actual substitution hom may be named `substX1`, `subst1`, `PowerSeries.subst`, or be hidden inside `formalPointMv 1`.
+
+```lean
+namespace WeierstrassCurve
+
+section FormalW1Axis
+
+variable {R : Type*} [CommRing R]
+
+local notation "S" => MvPowerSeries (Fin 2) R
+local notation "e₀" n => Finsupp.single (0 : Fin 2) n
+local notation "X₁" => (MvPowerSeries.X (1 : Fin 2) : S)
+
+/-- The `w`-coordinate of the second formal point kills pure `X₀` coefficients. -/
+theorem coeff_axis0_formalW1_mul
+    (W : WeierstrassCurve R)
+    (substX1 : PowerSeries R →+* S)
+    (hX : substX1 (PowerSeries.X : PowerSeries R) = X₁)
+    (hW1 : W.formalW1 = substX1 W.formalW)
+    (n : ℕ) (f : S) :
+    MvPowerSeries.coeff R (e₀ n) (W.formalW1 * f) = 0 := by
+  rw [hW1]
+  exact MvPowerSeries.coeff_axis0_substX1_mul_of_constantCoeff_eq_zero
+    (R := R) substX1 hX W.formalW f n (W.formalW_constantCoeff_zero)
+
+/-- Same with `formalW1` on the right. -/
+theorem coeff_axis0_mul_formalW1
+    (W : WeierstrassCurve R)
+    (substX1 : PowerSeries R →+* S)
+    (hX : substX1 (PowerSeries.X : PowerSeries R) = X₁)
+    (hW1 : W.formalW1 = substX1 W.formalW)
+    (n : ℕ) (f : S) :
+    MvPowerSeries.coeff R (e₀ n) (f * W.formalW1) = 0 := by
+  rw [mul_comm]
+  exact coeff_axis0_formalW1_mul W substX1 hX hW1 n f
+
+end FormalW1Axis
+
+end WeierstrassCurve
+```
+
+In your actual file, `hW1` should probably be just `rfl` or a `simp [formalW1, formalPointMv]` fact.
 
 ---
 
-## Axis substitution lemmas for `w₀` and `w₁`
+## Optional stronger formula
 
-Let `w₀` be `formalW` inserted in variable `0`, and `w₁` be `formalW` inserted in variable `1`.  Your project probably already has these as components of `formalPointMv 0` and `formalPointMv 1`.
-
-The only facts needed are:
+If you later need the nonzero-constant case, prove the stronger theorem:
 
 ```lean
-/-- The `w`-coordinate of the first formal point has `(3,0)` coefficient `1`. -/
-theorem formalW0_coeff30 (W : WeierstrassCurve R) :
-    coeff30 W.formalW0 = 1 := by
-  -- Here `formalW0` means `formalW` substituted along `X ↦ X₀`.
-  -- Replace `formalW0` and `coeff_subst0` by your local names.
-  simpa [coeff30, formalW0] using
-    (coeff_subst0_powerSeries
-      (R := R) (n := 3) (f := W.formalW) ▸ W.formalW_coeff_three)
-
-/-- Lower axis coefficients of `w₀` vanish below degree `3`. -/
-theorem formalW0_coeff_lt_three (W : WeierstrassCurve R) {n : ℕ} (hn : n < 3) :
-    MvPowerSeries.coeff R (e₀ n) W.formalW0 = 0 := by
-  simpa [formalW0] using
-    (coeff_subst0_powerSeries
-      (R := R) (n := n) (f := W.formalW) ▸ W.formalW_coeff_lt_three hn)
-
-/-- The second formal point has no pure `X₀`-axis degree-3 coefficient. -/
-theorem formalW1_coeff30 (W : WeierstrassCurve R) :
-    coeff30 W.formalW1 = 0 := by
-  -- `formalW1` only involves `X₁`; its `(3,0)` coefficient is zero.
-  -- Replace by your local substitution lemma.
-  simpa [coeff30, formalW1]
+coeff (single 0 n) (substX1 g * f)
+  = PowerSeries.coeff R 0 g * coeff (single 0 n) f
 ```
 
-In many developments, these are just `simp` after unfolding `formalPointMv` and the two substitution maps.
-
----
-
-## Killing `X₀^r * w₀` terms
-
-This is the lemma that makes the “one contributing term” proof painless.
-
-```lean
-/-- If a positive power of `X₀` multiplies `w₀`, then the `(3,0)` coefficient
-vanishes, because it asks for a coefficient of `formalW` below degree `3`. -/
-private lemma coeff30_X0_pow_mul_formalW0_eq_zero
-    (W : WeierstrassCurve R) {r : ℕ} (hr : 0 < r) :
-    coeff30 (X₀ ^ r * W.formalW0) = 0 := by
-  classical
-  by_cases hle : r ≤ 3
-  · let k : ℕ := 3 - r
-    have hk : k < 3 := by
-      dsimp [k]
-      omega
-    have hadd : e₀ r + e₀ k = e₀ 3 := by
-      ext i
-      fin_cases i <;> simp [k]
-      omega
-    -- Coefficient shift by the monomial `X₀^r`.
-    -- Replace the `X_pow_eq`/`coeff_add_monomial_mul` line by your local version.
-    have hshift :
-        coeff30 (X₀ ^ r * W.formalW0)
-          = MvPowerSeries.coeff R (e₀ k) W.formalW0 := by
-      simpa [coeff30, MvPowerSeries.X_pow_eq, hadd] using
-        (MvPowerSeries.coeff_add_monomial_mul
-          (R := R) (m := e₀ r) (n := e₀ k)
-          (φ := W.formalW0) (a := (1 : R)))
-    rw [hshift]
-    exact formalW0_coeff_lt_three W hk
-  · -- If `r > 3`, then `X₀^r` cannot divide `X₀^3`.
-    have hnot : ¬ e₀ r ≤ e₀ 3 := by
-      intro h
-      have hcoord := h (0 : Fin 2)
-      have : r ≤ 3 := by simpa using hcoord
-      exact hle this
-    simpa [coeff30, MvPowerSeries.X_pow_eq, hnot] using
-      (MvPowerSeries.coeff_monomial_mul
-        (R := R) (m := e₀ 3) (n := e₀ r)
-        (φ := W.formalW0) (a := (1 : R)))
-```
-
-You usually only need `r = 1`, `2`, or `3`, so if this general lemma is annoying, prove the three special cases directly.
-
----
-
-## The one-term proof for `negAddY_formal`
-
-The best way to make Lean see the one-term contribution is to prove a coefficient-level split lemma.  You do not need to state a huge equality of power series; state that after applying `coeff30`, the full `negAddY` expression equals the coefficient of the single term.
-
-The term is:
-
-```lean
-P[1] * Q[1]^2 * P[2]
-```
-
-where, for formal points,
-
-```lean
-P[1] = -1,
-Q[1] = -1,
-P[2] = w₀.
-```
-
-Hence the term is `-w₀`.
-
-```lean
-/-- The only contribution to `coeff (single 0 3)` of `negAddY` is
-`P[1] * Q[1]^2 * P[2] = -w₀`. -/
-private lemma negAddY_formal_coeff30_only_term (W : WeierstrassCurve R) :
-    coeff30 W.negAddY_formal
-      = coeff30
-          ((W.formalPointMv 0 1) * (W.formalPointMv 1 1)^2 * (W.formalPointMv 0 2)) := by
-  classical
-  -- This is the only place where you unfold the 18-term `negAddY` formula.
-  -- After unfolding, `simp` should kill all non-contributing terms using:
-  --   * `coeff30_X1_mul`, `coeff30_mul_X1`
-  --   * `formalW1_coeff30`
-  --   * `coeff30_X0_pow_mul_formalW0_eq_zero`
-  --   * coefficient add/sub/neg/mul-by-constant lemmas
-  --   * min-degree facts for terms with `addX`/`addZ`, if they occur here
-  unfold negAddY_formal
-  unfold negAddY
-  simp only [
-    coeff30,
-    MvPowerSeries.coeff_add,
-    MvPowerSeries.coeff_sub,
-    MvPowerSeries.coeff_neg,
-    coeff30_X1_mul,
-    coeff30_mul_X1,
-    formalW1_coeff30,
-    coeff30_X0_pow_mul_formalW0_eq_zero,
-    formalPointMv
-  ]
-  ring
-
-/-- The coefficient of `negAddY` at `(3,0)` is `-1`. -/
-theorem negAddY_formal_coeff30 (W : WeierstrassCurve R) :
-    coeff30 W.negAddY_formal = -1 := by
-  classical
-  rw [negAddY_formal_coeff30_only_term W]
-
-  -- Evaluate the single contributing term.
-  have hterm :
-      (W.formalPointMv 0 1) * (W.formalPointMv 1 1)^2 * (W.formalPointMv 0 2)
-        = - W.formalW0 := by
-    -- Replace the simp names by your local component lemmas, e.g.
-    --   formalPointMv_Y, formalPointMv_Z, formalW0.
-    simp [formalPointMv, formalW0]
-
-  rw [hterm]
-  simp [coeff30, formalW0_coeff30 W]
-```
-
-The important thing is that `negAddY_formal_coeff30_only_term` is allowed to unfold the 18-term definition, but it does **not** require you to reason about 18 terms manually.  Every non-contributing term dies by a small reusable coefficient lemma.
-
-If `simp` does not kill all terms in one shot, do this instead:
-
-```lean
-  rw [negAddY_formal_expanded]
-  repeat rw [MvPowerSeries.coeff_add]
-  repeat rw [MvPowerSeries.coeff_sub]
-  repeat rw [MvPowerSeries.coeff_neg]
-  simp [
-    coeff30_X1_mul,
-    coeff30_mul_X1,
-    formalW1_coeff30,
-    coeff30_X0_pow_mul_formalW0_eq_zero,
-    formalPointMv,
-    formalW0_coeff30,
-    formalW0_coeff_lt_three
-  ]
-  ring
-```
-
-That is still a one-term extraction proof: the proof engine sees the 18 terms, but all except `-w₀` are eliminated by generic lemmas.
-
----
-
-## `formalAddY_coeff_e30`
-
-Now prove the numerator coefficient.
-
-```lean
-/-- The raw numerator coefficient needed for `normalizedAddY_constantCoeff`. -/
-theorem formalAddY_coeff_e30 (W : WeierstrassCurve R) :
-    MvPowerSeries.coeff R (e₀ 3) W.formalAddY = 1 := by
-  classical
-
-  -- Use `addY` plus `negY_eq`.
-  have hdef :
-      W.formalAddY
-        = - W.negAddY_formal
-          - (MvPowerSeries.C R W.a₁) * W.formalAddX
-          - (MvPowerSeries.C R W.a₃) * W.formalAddZ := by
-    -- Depending on the local orientation of `negY_eq`, this may need `.symm`.
-    -- The mapped coefficients are `(W.map C).a₁ = C W.a₁`, etc.; `simp` should close.
-    simp [formalAddY, addY, negY_eq, map_weierstrassCurve, formalAddX, formalAddZ]
-
-  have hX : MvPowerSeries.coeff R (e₀ 3) W.formalAddX = 0 := by
-    -- Your min-degree-4 theorem for `formalAddX`.
-    exact W.formalAddX_coeff_e30
-
-  have hZ : MvPowerSeries.coeff R (e₀ 3) W.formalAddZ = 0 := by
-    -- Your min-degree-6 theorem for `formalAddZ`.
-    exact W.formalAddZ_coeff_e30
-
-  rw [hdef]
-  simp [
-    coeff30,
-    MvPowerSeries.coeff_neg,
-    MvPowerSeries.coeff_sub,
-    coeff30_C_mul,
-    negAddY_formal_coeff30 W,
-    hX,
-    hZ
-  ]
-```
-
-If the last `simp` leaves ring arithmetic like `-(-1) - W.a₁ * 0 - W.a₃ * 0`, finish with:
-
-```lean
-  ring
-```
-
-or:
-
-```lean
-  norm_num
-```
-
----
-
-## Final use: `normalizedAddY_constantCoeff`
-
-With your existing extraction lemma
-
-```lean
-coeff (single 0 3) ((X₀ - X₁)^3 * q) = constantCoeff q
-```
-
-the normalized result is short.
-
-```lean
-/-- The constant coefficient of `normalizedAddY` is `1`. -/
-theorem normalizedAddY_constantCoeff (W : WeierstrassCurve R) :
-    MvPowerSeries.constantCoeff R W.normalizedAddY = 1 := by
-  classical
-
-  local notation "δ" => (X₀ - X₁)
-
-  have hdiv : W.formalAddY = δ ^ 3 * W.normalizedAddY := by
-    -- Use the orientation supplied by your `choose_spec`.
-    simpa [normalizedAddY] using W.formalAddY_dvd_cube.choose_spec
-
-  calc
-    MvPowerSeries.constantCoeff R W.normalizedAddY
-        = MvPowerSeries.coeff R (e₀ 3) (δ ^ 3 * W.normalizedAddY) := by
-            simpa using
-              (coeff_e30_delta_cube_mul
-                (R := R) (q := W.normalizedAddY)).symm
-    _ = MvPowerSeries.coeff R (e₀ 3) W.formalAddY := by
-            rw [← hdiv]
-    _ = 1 := formalAddY_coeff_e30 W
-```
-
-If your `choose_spec` is oriented as
-
-```lean
-δ ^ 3 * W.normalizedAddY = W.formalAddY
-```
-
-then change the product equation to:
-
-```lean
-  have hdiv : δ ^ 3 * W.normalizedAddY = W.formalAddY := by
-    simpa [normalizedAddY] using W.formalAddY_dvd_cube.choose_spec
-```
-
-and the middle line becomes:
-
-```lean
-    _ = MvPowerSeries.coeff R (e₀ 3) W.formalAddY := by
-            rw [hdiv]
-```
-
----
-
-## Why this is better than the universal computation here
-
-The universal-ring proof is still valid, but for this coefficient it is probably heavier than necessary.  You only need one coefficient of `negAddY`, and only one term contributes to that coefficient.  The proof above uses a single unfold of `negAddY`, then generic vanishing lemmas eliminate the rest.
-
-So the practical answer is:
+A clean proof is to decompose
 
 ```text
-Yes, prove it by extracting the single term `P[1] * Q[1]^2 * P[2]`.
-Do not use diagonal vanishing to identify the coefficient.
-Do not compute the quotient `normalizedAddY`.
-Use `choose_spec` only after the raw numerator coefficient is proved.
+g = C (coeff 0 g) + X * tail(g),
 ```
+
+map by `substX1`, and use the lemmas above:
+
+```text
+substX1 g * f
+  = C (coeff 0 g) * f + (X₁ * substX1 tail(g)) * f.
+```
+
+The second summand has zero pure-`X₀` coefficient, and the first contributes exactly the scalar multiple.  For the current `formalW` use case, the zero-constant version is shorter and avoids setting up `tail(g)`.
