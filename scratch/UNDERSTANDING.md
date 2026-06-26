@@ -60,3 +60,20 @@ Identity: preΨ₄ + Ψ₂Sq² = (6X²+b₂X+b₄)·Ψ₃, provable by ring.
 Simplifies cofactor on Ψ₃=0 stratum.
 
 ### Sub-agents active on L135 (Ψ₃=0) and L223 (odd via even)
+
+## Update (2026-06-26 03:30)
+
+### Circularity CONFIRMED (ChatGPT dm1 Q867)
+Even/odd EDS descent is genuinely circular. The even Case B (cofactor-root)
+requires Sep(n) which is the odd goal. No well-founded induction breaks it.
+
+### Resolution: Formal group tangent bridge (option C)
+The only non-circular route: [n]'(0) = n (proved in FormalNsmulDirect) →
+global separability for ALL n. This bypasses the parity decomposition entirely.
+
+### Architecture for next session
+1. Define formula-level [n] over DualNumber K (using dblXYZ for doubling)
+2. Connect preΨ'(n)(x+ε)=0 to formula-level [n]Pε = O
+3. Translate Pε to infinitesimal δ at O
+4. Apply formal group tangent: [n]δ has tangent n·tangent(δ) ≠ 0
+5. Contradiction → preΨ'(n) separable
