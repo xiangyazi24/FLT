@@ -1,107 +1,202 @@
-# Q797 (dm3): defining the missing y-coordinate numerator `ωₙ` / `Ωₙ`
+# Q819 (dm3): odd `preΨ' n` separability for `n ≥ 5`
 
 ## Bottom line
 
-Do **not** define `ωₙ` merely as an arbitrary root of the cleared curve-equation quadratic.  In Lean this gives the wrong object: the root is not canonical in the polynomial ring, uniqueness is false in the cases where it matters most, and a `Classical.choose` definition will not have usable computation, map/naturality, or compatibility with the division-polynomial recurrences.
+Do **not** try to prove the odd case by reducing it to a nearby even case, and do **not** expect the odd EDS recurrence to give a clean product-rule descent.
 
-The best first definition is exactly your cleaner object:
-
-```text
-Qₙ := ψ₂ₙ / ψₙ.
-```
-
-This is already supported by Mathlib’s EDS infrastructure.  The helper sequence `complEDS₂` is specifically the quotient witnessing
+For odd `n`, the correct short route is the same one used in the classical proof: use the tangent/differential identity for multiplication-by-`n`.  In Mathlib-compatible notation, for odd `n` the reduced identity is
 
 ```text
-normEDS k · complEDS₂ k = normEDS (2*k).
+ψ₂ · Φₙ · (preΨ'_n)' + n · Ωₙ ≡ 0      mod preΨ'_n,
 ```
 
-Since Mathlib defines
-
-```lean
-W.ψ n = normEDS W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) n,
-```
-
-you can define
+or, if avoiding `Ωₙ` and using the quotient `Qₙ = ψ₂ₙ / ψₙ`,
 
 ```text
-Qₙ := complEDS₂ W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) n
+2 · ψ₂ · Φₙ · (preΨ'_n)' + n · Qₙ ≡ 0  mod preΨ'_n.
 ```
 
-and get the theorem
+The quotient form is enough when `2` is invertible.  In characteristic `2`, it loses the y-coordinate information, so for odd `n` in characteristic `2` one still needs the genuine `Ωₙ`/`ωₙ` or a formal-group argument that bypasses `Qₙ`.
 
-```text
-ψₙ · Qₙ = ψ₂ₙ
-```
-
-by `simpa [WeierstrassCurve.ψ] using normEDS_mul_complEDS₂ ...`.
-
-Then define the division-by-2-free y-numerator as
-
-```text
-twoωₙ := Qₙ - ψₙ · (a₁φₙ + a₃ψₙ²).
-```
-
-This is the char-free polynomial object satisfying
-
-```text
-twoωₙ = 2ωₙ
-```
-
-when the usual `ωₙ` exists.  For the separability identity, you can avoid `ωₙ` entirely at the differential-congruence stage:
-
-```text
-2 · φₙ · D(ψₙ) + n · Qₙ ≡ 0    mod ψₙ.
-```
-
-After reducing through Mathlib’s `Ψ`/`Φ` and `preΨ'`, this becomes
-
-```text
-2 · ηₙ · v · Φₙ · (preΨ'_n)' + n · Qₙ ≡ 0    mod preΨ'_n,
-```
-
-where
-
-```text
-v   = ψ₂ = 2Y + a₁X + a₃,
-ηₙ = if Even n then v else 1.
-```
-
-This is the cleanest identity to formalize first.
+The EDS odd recurrence is useful for defining `preΨ'`, degrees, and adjacent coprimality, but it is not the right separability induction principle.
 
 ---
 
-## Important correction: use `φₙ`, not `Φₙ`, in the bivariate definition
+## Why nearby even cases do not imply the odd case
 
-The explicit formula is a bivariate-polynomial formula:
+A root of `preΨ'(2m+1)` corresponds to the `x`-coordinate of a nonzero `(2m+1)`-torsion point.  It is not forced to be a root of either `preΨ'(2m)` or `preΨ'(2m+2)`.  In fact, the adjacent-coprimality statements you need elsewhere say the opposite: generically there should be no common root between adjacent division polynomials.
 
-```text
-2ωₙ = Qₙ - ψₙ · (a₁φₙ + a₃ψₙ²).
-```
+So even if separability is known for all even indices, that does not rule out a multiple root of an odd-index polynomial.  Separability is not monotone in the index and does not propagate from `n+1` to `n`.
 
-So in `R[X][Y]` it must use `W.φ n`, not `W.Φ n`.
-
-You may replace `φₙ` by `Φₙ` only **after** mapping to the affine coordinate ring, using Mathlib’s existing congruence:
-
-```lean
-Affine.CoordinateRing.mk_φ (n : ℤ) :
-  Affine.CoordinateRing.mk W (W.φ n) =
-    Affine.CoordinateRing.mk W (C (W.Φ n))
-```
-
-Likewise, `ψₙ` is congruent to `Ψₙ` in the coordinate ring:
-
-```lean
-Affine.CoordinateRing.mk_ψ (n : ℤ) :
-  Affine.CoordinateRing.mk W (W.ψ n) =
-    Affine.CoordinateRing.mk W (W.Ψ n)
-```
+The same issue affects the proposed `n = 5, 7` base-case strategy.  Proving `5` and `7` by Bézout certificates is useful for computations, but it does not supply an induction step for arbitrary odd `n`, because the odd recurrence is a difference of two products, not a smaller factor times a cofactor.
 
 ---
 
-## Lean core definition
+## Why the odd recurrence is a trap for squarefreeness
 
-Here is the Lean core I would add near the division-polynomial development, or locally in your scratch file first.
+The recurrence has the shape
+
+```text
+preΨ(2m+1)
+  = preΨ(m+2) · preΨ(m)^3 · F₁
+    - preΨ(m-1) · preΨ(m+1)^3 · F₂,
+```
+
+where the `Fᵢ` are `1` or powers of `Ψ₂Sq`, depending on parity.
+
+At a point `x` with
+
+```text
+preΨ(2m+1)(x) = 0,
+```
+
+you only get an equality of two products:
+
+```text
+preΨ(m+2)(x) · preΨ(m)(x)^3 · F₁(x)
+  = preΨ(m-1)(x) · preΨ(m+1)(x)^3 · F₂(x).
+```
+
+If one of the visible factors is zero, then adjacent/strong coprimality can sometimes descend to a smaller index.  But the hard case is exactly the generic case where all these factors are nonzero.  Then the zero of `preΨ(2m+1)` comes from cancellation between two nonzero products.
+
+Differentiating the recurrence gives a log-derivative equality in the residue field:
+
+```text
+(A'B - AB') evaluated at x = 0,
+```
+
+or, after cancellation of nonzero factors, a relation between logarithmic derivatives of the smaller `preΨ`s and the `Ψ₂Sq` factors.  That relation is not a descent statement.  To rule it out, you need extra structure: precisely the invariant differential / multiplication-by-`n` tangent identity.
+
+So a recurrence-only proof will end up reproving the differential identity in a much less usable form.
+
+---
+
+## The clean odd-case argument
+
+Let
+
+```text
+pₙ := preΨ'_n.
+```
+
+Assume `n` is odd, `n ≥ 5`, and `(n : K) ≠ 0`, over a field `K` and a nonsingular Weierstrass curve.  Suppose for contradiction that `α` is a double root:
+
+```text
+pₙ(α) = 0,
+pₙ'(α) = 0.
+```
+
+Choose a point `P = (α, β)` on the affine curve above `α`, after passing to an algebraic closure if needed.
+
+For odd `n`, Mathlib’s reduced/full denominator relation has no extra `ψ₂` factor:
+
+```text
+Ψₙ = C(pₙ).
+```
+
+The invariant differential identity reduces to
+
+```text
+ψ₂(P) · Φₙ(α) · pₙ'(α) + n · Ωₙ(P) = 0.
+```
+
+Since `pₙ'(α) = 0`, this gives
+
+```text
+n · Ωₙ(P) = 0.
+```
+
+If `(n : K) ≠ 0`, then
+
+```text
+Ωₙ(P) = 0.
+```
+
+Now use the cleared curve equation for the image `[n]P`:
+
+```text
+Ωₙ² + a₁ Φₙ Ωₙ Ψₙ + a₃ Ωₙ Ψₙ³
+  = Φₙ³ + a₂ Φₙ² Ψₙ² + a₄ Φₙ Ψₙ⁴ + a₆ Ψₙ⁶.
+```
+
+At a root of `pₙ`, we have `Ψₙ(P) = 0`, so this reduces to
+
+```text
+Ωₙ(P)^2 = Φₙ(α)^3.
+```
+
+Since `Ωₙ(P) = 0`, it follows that
+
+```text
+Φₙ(α) = 0.
+```
+
+But for odd `n`, Mathlib’s definition of `Φ` gives, modulo `pₙ`,
+
+```text
+Φₙ ≡ - preΨ'_{n+1} · preΨ'_{n-1} · Ψ₂Sq     mod pₙ.
+```
+
+Thus `Φₙ(α) ≠ 0` follows from the three coprimality facts
+
+```text
+gcd(pₙ, preΨ'_{n+1}) = 1,
+gcd(pₙ, preΨ'_{n-1}) = 1,
+gcd(pₙ, Ψ₂Sq) = 1        -- because n is odd: no odd n-torsion point is 2-torsion.
+```
+
+Contradiction.  Hence `pₙ` has no double root.
+
+This proof does not use `n ≥ 5` in an essential way except to avoid small-index edge cases and to ensure the standard adjacent-coprimality package is being used outside the degenerate definitions `preΨ'_1 = 1`, `preΨ'_2 = 1`, `preΨ'_3 = Ψ₃`.
+
+---
+
+## Lean target for the odd differential identity
+
+If `Ωₙ` is available, the odd reduced theorem should be stated directly as an affine-coordinate-ring ideal membership.
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.Tactic
+
+noncomputable section
+
+open Polynomial
+open scoped Polynomial.Bivariate
+
+namespace WeierstrassCurve
+
+variable {K : Type*} [Field K]
+variable (W : WeierstrassCurve K)
+
+/-- Placeholder: Mathlib does not yet define the y-coordinate numerator. -/
+protected noncomputable def Ω (_n : ℤ) : K[X][Y] :=
+  sorry
+
+private abbrev coeffBiv (r : K) : K[X][Y] :=
+  C (C r)
+
+/-- Ideal generated by the reduced denominator `preΨ'_n` in the affine coordinate ring. -/
+def reducedPsiIdeal (n : ℕ) : Ideal W.toAffine.CoordinateRing :=
+  Ideal.span
+    ({Affine.CoordinateRing.mk W (C (W.preΨ' n))} : Set W.toAffine.CoordinateRing)
+
+/-- The exact odd-index reduced differential identity.
+
+For odd `n`, there is no extra parity factor because
+`W.Ψ (n : ℤ) = C (W.preΨ' n)`. -/
+theorem odd_reduced_Ω_differential_congruence
+    (n : ℕ) (hn : Odd n) :
+    Affine.CoordinateRing.mk W
+      (W.ψ₂ * C (W.Φ (n : ℤ) * (W.preΨ' n).derivative)
+        + coeffBiv (n : K) * W.Ω (n : ℤ))
+      ∈ W.reducedPsiIdeal n := by
+  sorry
+
+end WeierstrassCurve
+```
+
+If using the quotient `Qₙ = ψ₂ₙ / ψₙ` instead of `Ωₙ`, use the division-by-2-free theorem:
 
 ```lean
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
@@ -115,17 +210,16 @@ open scoped Polynomial.Bivariate
 
 namespace WeierstrassCurve
 
-variable {R : Type*} [CommRing R]
-variable (W : WeierstrassCurve R)
+variable {K : Type*} [Field K]
+variable (W : WeierstrassCurve K)
 
-/-- The polynomial quotient `Qₙ = ψ₂ₙ / ψₙ`.
+private abbrev coeffBiv (r : K) : K[X][Y] :=
+  C (C r)
 
-This is the EDS 2-complement specialized to the division-polynomial EDS.  It is a genuine
-polynomial over any commutative ring, with no localization and no division by `2`. -/
-protected noncomputable def divisionQuot (n : ℤ) : R[X][Y] :=
+/-- Quotient `Qₙ = ψ₂ₙ / ψₙ`, available from Mathlib's EDS complement sequence. -/
+protected noncomputable def divisionQuot (n : ℤ) : K[X][Y] :=
   complEDS₂ W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) n
 
-/-- Defining property of `divisionQuot`: it witnesses `ψₙ ∣ ψ₂ₙ`. -/
 theorem ψ_mul_divisionQuot (n : ℤ) :
     W.ψ n * W.divisionQuot n = W.ψ (2 * n) := by
   simpa [WeierstrassCurve.ψ, WeierstrassCurve.divisionQuot] using
@@ -135,368 +229,188 @@ theorem ψ_mul_divisionQuot (n : ℤ) :
       (d := C W.preΨ₄)
       n)
 
-/-- Divisibility form of `ψ_mul_divisionQuot`. -/
-theorem ψ_dvd_ψ_two_mul (n : ℤ) :
-    W.ψ n ∣ W.ψ (2 * n) := by
-  exact ⟨W.divisionQuot n, (W.ψ_mul_divisionQuot n).symm⟩
-
-/-- The bivariate constant polynomial attached to a curve coefficient. -/
-private abbrev coeffBiv (r : R) : R[X][Y] :=
-  C (C r)
-
-/-- The division-by-2-free y-coordinate numerator.
-
-Mathematically:
-
-`twoωₙ = Qₙ - ψₙ · (a₁φₙ + a₃ψₙ²) = 2ωₙ`.
-
-This is the preferred char-free object. -/
-protected noncomputable def twoω (n : ℤ) : R[X][Y] :=
-  W.divisionQuot n -
-    W.ψ n * (coeffBiv W.a₁ * W.φ n + coeffBiv W.a₃ * W.ψ n ^ 2)
-
-/-- Rearranged defining equation, often the most convenient rewrite form. -/
-theorem divisionQuot_eq_twoω_add (n : ℤ) :
-    W.divisionQuot n =
-      W.twoω n + W.ψ n * (coeffBiv W.a₁ * W.φ n + coeffBiv W.a₃ * W.ψ n ^ 2) := by
-  rw [WeierstrassCurve.twoω]
-  abel
-
-/-- Modulo `ψₙ`, the quotient `Qₙ` and `twoωₙ` have the same class. -/
-theorem divisionQuot_sub_twoω_mem_span_ψ (n : ℤ) :
-    W.divisionQuot n - W.twoω n ∈ Ideal.span ({W.ψ n} : Set R[X][Y]) := by
-  refine Ideal.mem_span_singleton.mpr ?_
-  refine ⟨coeffBiv W.a₁ * W.φ n + coeffBiv W.a₃ * W.ψ n ^ 2, ?_⟩
-  rw [divisionQuot_eq_twoω_add]
-  ring
-
-end WeierstrassCurve
-```
-
-The theorem `divisionQuot_eq_twoω_add` is deliberately oriented as a rewrite away from `divisionQuot`.  For the differential identity modulo `ψₙ`, the last lemma lets you replace `twoωₙ` by `Qₙ` or vice versa.
-
----
-
-## If `2` is invertible
-
-If you only need characteristic not `2`, you can define `ωₙ` from `twoωₙ` by multiplying coefficients by `1/2`.
-
-Do **not** try to invert `(2 : K[X][Y])`; the polynomial ring is not a field.  Inject the inverse scalar from `K` into the bivariate polynomial ring.
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.NumberTheory.EllipticDivisibilitySequence
-import Mathlib.Tactic
-
-noncomputable section
-
-open Polynomial
-open scoped Polynomial.Bivariate
-
-namespace WeierstrassCurve
-
-variable {K : Type*} [Field K]
-variable (W : WeierstrassCurve K)
-
-private abbrev coeffBivK (r : K) : K[X][Y] :=
-  C (C r)
-
-/-- The usual y-coordinate numerator when `2` is invertible. -/
-protected noncomputable def ωOfTwoInvertible (n : ℤ) : K[X][Y] :=
-  coeffBivK ((2 : K)⁻¹) * W.twoω n
-
-/-- Expected normalization lemma.  The proof is a one-line `field_simp`/`ring` argument
-under the hypothesis `(2 : K) ≠ 0`. -/
-theorem two_mul_ωOfTwoInvertible (n : ℤ) (h2 : (2 : K) ≠ 0) :
-    coeffBivK (2 : K) * W.ωOfTwoInvertible n = W.twoω n := by
-  rw [WeierstrassCurve.ωOfTwoInvertible]
-  -- `coeffBivK` is a ring hom, so this reduces to `2 * 2⁻¹ = 1` in `K`.
-  simp [coeffBivK, h2]
-
-end WeierstrassCurve
-```
-
-This is enough for the usual separability proof over fields of characteristic not dividing `2n`.
-
----
-
-## Why the implicit quadratic definition is a bad Lean definition
-
-The cleared curve equation is
-
-```text
-ωₙ² + a₁Φₙωₙψₙ + a₃ωₙψₙ³
-  = Φₙ³ + a₂Φₙ²ψₙ² + a₄Φₙψₙ⁴ + a₆ψₙ⁶.
-```
-
-This is useful as a theorem, but not as a definition.
-
-Reasons:
-
-1. **It does not select the branch.**  The quadratic equation encodes the curve equation for the point `[n]P`; a quadratic equation generally has two branches, geometrically corresponding to a point and its negation.  The division-polynomial recurrence selects one branch; the equation alone does not.
-
-2. **Uniqueness fails badly in characteristic `2`.**  In characteristic `2`, the quadratic can become inseparable or partially linear, and the usual “two roots” intuition degenerates.  This is exactly the setting where a root-by-choice definition is least informative.
-
-3. **A `Classical.choose` root will not compute.**  Even if you prove existence of some polynomial satisfying the quadratic and then define `ωₙ` as a chosen root, Lean will not know its relationship to `ψ₂ₙ / ψₙ`, to base change, to the EDS recurrences, or to the differential identity unless you prove all of those separately.  That defeats the purpose.
-
-4. **The quadratic alone is weaker than the quotient identity.**  The quotient identity
-
-   ```text
-   2ωₙ + ψₙ(a₁φₙ + a₃ψₙ²) = Qₙ
-   ```
-
-   is branch-selecting.  The quadratic relation is a compatibility theorem after the branch has already been chosen.
-
-So the quadratic should be a theorem about `twoω`/`ω`, not the definition.
-
----
-
-## The `Qₙ` identity for separability
-
-Let `D` be the invariant derivation
-
-```text
-D = ψ₂ · ∂/∂X + (3X² + 2a₂X + a₄ - a₁Y) · ∂/∂Y.
-```
-
-The division-by-2-free differential congruence is
-
-```text
-2 · φₙ · D(ψₙ) + n · Qₙ ≡ 0    mod ψₙ.
-```
-
-This follows from the usual identity
-
-```text
-φₙ · D(ψₙ) + n · ωₙ ≡ 0    mod ψₙ
-```
-
-by multiplying by `2` and using
-
-```text
-2ωₙ ≡ Qₙ    mod ψₙ.
-```
-
-Equivalently, it can be proved without mentioning `ωₙ` at all, by differentiating the `x`-coordinate formula
-
-```text
-x([n]P) = φₙ / ψₙ²
-```
-
-and clearing denominators.
-
-In reduced Mathlib notation, set
-
-```text
-pₙ = preΨ'_n,
-ηₙ = if Even n then ψ₂ else 1,
-Ψₙ = C(pₙ) · ηₙ.
-```
-
-Modulo `C(pₙ)`, the invariant derivation gives
-
-```text
-D(Ψₙ) ≡ ηₙ · ψ₂ · C(pₙ.derivative).
-```
-
-Using `mk_φ` to replace `φₙ` by `C(Φₙ)`, the reduced congruence becomes
-
-```text
-2 · ηₙ · ψ₂ · C(Φₙ · pₙ.derivative) + n · Qₙ ≡ 0    mod C(pₙ).
-```
-
-This is the exact Lean target I would use if you want to avoid `Ωₙ` initially.
-
-A schematic theorem statement:
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.NumberTheory.EllipticDivisibilitySequence
-import Mathlib.Tactic
-
-noncomputable section
-
-open Polynomial
-open scoped Polynomial.Bivariate
-
-namespace WeierstrassCurve
-
-variable {K : Type*} [Field K]
-variable (W : WeierstrassCurve K)
-
-private abbrev coeffBivK (r : K) : K[X][Y] :=
-  C (C r)
-
-/-- Parity factor in `Ψₙ = C(preΨ'_n) * reducedPsiFactor n`. -/
-def reducedPsiFactor (n : ℕ) : K[X][Y] :=
-  if Even n then W.ψ₂ else 1
-
-/-- The ideal generated by the reduced denominator in the affine coordinate ring. -/
 def reducedPsiIdeal (n : ℕ) : Ideal W.toAffine.CoordinateRing :=
   Ideal.span
     ({Affine.CoordinateRing.mk W (C (W.preΨ' n))} : Set W.toAffine.CoordinateRing)
 
-/-- Target reduced quotient congruence, avoiding `ωₙ` entirely. -/
-theorem reduced_divisionQuot_differential_congruence (n : ℕ) :
+/-- Odd reduced differential identity without defining `Ωₙ`.
+
+This is enough for separability when `2` is invertible. -/
+theorem odd_reduced_divisionQuot_differential_congruence
+    (n : ℕ) (hn : Odd n) :
     Affine.CoordinateRing.mk W
-      ((coeffBivK (2 : K)) *
-          (W.reducedPsiFactor n * W.ψ₂ * C (W.Φ (n : ℤ) * (W.preΨ' n).derivative))
-        + coeffBivK (n : K) * W.divisionQuot (n : ℤ))
+      (coeffBiv (2 : K) *
+          (W.ψ₂ * C (W.Φ (n : ℤ) * (W.preΨ' n).derivative))
+        + coeffBiv (n : K) * W.divisionQuot (n : ℤ))
       ∈ W.reducedPsiIdeal n := by
   sorry
 
 end WeierstrassCurve
 ```
 
-The important feature is that this theorem has no `/ 2` and no `Ωₙ`.
+This quotient theorem is the one I would formalize first, because `divisionQuot` is directly available from `complEDS₂` and does not require building the universal `Ωₙ` construction.
 
 ---
 
-## Does `Qₙ` alone finish separability?
+## The odd `Φₙ` nonvanishing lemma
 
-It depends on whether characteristic `2` is in scope.
-
-### If `char K ≠ 2`
-
-Yes.  At a double root of `preΨ'_n`, the reduced quotient congruence gives
-
-```text
-n · Qₙ(P) = 0.
-```
-
-If `(n : K) ≠ 0`, then
-
-```text
-Qₙ(P) = 0.
-```
-
-Since `ψₙ(P) = 0`, the defining relation gives
-
-```text
-Qₙ(P) = 2ωₙ(P).
-```
-
-If `2 ≠ 0`, this implies
-
-```text
-ωₙ(P) = 0.
-```
-
-Then the cleared curve equation reduces to
-
-```text
-ωₙ(P)^2 = Φₙ(P)^3,
-```
-
-so `ωₙ(P) = 0` implies `Φₙ(P) = 0`, contradicting adjacent coprimality as planned.
-
-So for `char K ∤ 2n`, `Qₙ` is enough and is the best Lean route.
-
-### If `char K = 2` and `n` is odd
-
-`Qₙ` alone is **not enough**.
-
-At a root of `ψₙ`, the relation
-
-```text
-Qₙ = 2ωₙ + ψₙ(a₁φₙ + a₃ψₙ²)
-```
-
-specializes to
-
-```text
-Qₙ(P) = 2ωₙ(P).
-```
-
-In characteristic `2`, this says simply
-
-```text
-Qₙ(P) = 0,
-```
-
-regardless of `ωₙ(P)`.  Thus the quotient congruence will only prove something automatic; it loses exactly the y-coordinate information needed for the final contradiction.
-
-For characteristic `2`, you need either:
-
-1. a genuine `ωₙ` defined by universal integral construction and then reduced mod `2`, or
-2. a different formal-group/differential argument that avoids extracting `ωₙ` from `Qₙ`.
-
-The universal construction is the mathematically correct char-free way to define `ωₙ`: prove over the universal ring
-
-```text
-Qₙ - ψₙ(a₁φₙ + a₃ψₙ²)
-```
-
-has all coefficients divisible by `2`, divide those integer coefficients by `2`, and then map the resulting universal polynomial to any base ring.  This is precisely what Mathlib’s doc comment hints at.
-
----
-
-## Recommended implementation path
-
-### Phase 1: add `divisionQuot` and `twoω`
-
-This is immediate from existing Mathlib APIs:
+For the contradiction, isolate the following lemma.  It is the exact place where oddness matters.
 
 ```lean
-protected noncomputable def divisionQuot (W : WeierstrassCurve R) (n : ℤ) : R[X][Y] :=
-  complEDS₂ W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) n
-
-protected noncomputable def twoω (W : WeierstrassCurve R) (n : ℤ) : R[X][Y] :=
-  W.divisionQuot n -
-    W.ψ n * (C (C W.a₁) * W.φ n + C (C W.a₃) * W.ψ n ^ 2)
+-- schematic statement
+lemma odd_eval_Φ_ne_zero_of_eval_preΨ_eq_zero
+    {K : Type*} [Field K]
+    (W : WeierstrassCurve K)
+    (n : ℕ) (hn_odd : Odd n) (hn_ge : 3 ≤ n)
+    (α : K)
+    (hroot : (W.preΨ' n).eval α = 0)
+    -- coprimality hypotheses packaged separately:
+    (hcop_next : IsCoprime (W.preΨ' n) (W.preΨ' (n+1)))
+    (hcop_prev : IsCoprime (W.preΨ' n) (W.preΨ' (n-1)))
+    (hcop_two : IsCoprime (W.preΨ' n) W.Ψ₂Sq) :
+    (W.Φ (n : ℤ)).eval α ≠ 0 := by
+  sorry
 ```
 
-Prove:
+The proof is by rewriting `Φ` modulo `preΨ'_n`.  For odd `n`, Mathlib’s definition gives
 
 ```text
-ψₙ · Qₙ = ψ₂ₙ,
-Qₙ = twoωₙ + ψₙ(a₁φₙ + a₃ψₙ²),
-Qₙ ≡ twoωₙ mod ψₙ.
+Φₙ = X · pₙ² - pₙ₊₁ · pₙ₋₁ · Ψ₂Sq.
 ```
 
-### Phase 2: prove the quotient differential identity
-
-Avoid `ωₙ`:
+Therefore at a root of `pₙ`,
 
 ```text
-2φₙDψₙ + nQₙ ≡ 0 mod ψₙ.
+Φₙ(α) = -pₙ₊₁(α) · pₙ₋₁(α) · Ψ₂Sq(α).
 ```
 
-Then reduce to `preΨ'`:
+Each factor is nonzero by the corresponding coprimality hypothesis.
 
-```text
-2ηₙψ₂Φₙ(preΨ'_n)' + nQₙ ≡ 0 mod preΨ'_n.
-```
-
-### Phase 3: finish separability in characteristic not `2`
-
-Define
+In Lean, this lemma is much easier if you prove three small evaluation consequences of coprimality first:
 
 ```lean
-ωOfTwoInvertible := (1/2) • twoω
+lemma eval_ne_zero_of_isCoprime_of_eval_eq_zero
+    {K : Type*} [Field K] {p q : K[X]} {α : K}
+    (hcop : IsCoprime p q) (hp : p.eval α = 0) :
+    q.eval α ≠ 0 := by
+  intro hq
+  -- evaluate a Bézout identity `a*p + b*q = 1` at α
+  -- contradiction: `0 = 1`
+  sorry
 ```
 
-as coefficient scaling, and use the curve equation theorem for `ω`.
-
-### Phase 4: handle characteristic `2` only if needed
-
-Do not rely on `Qₙ` for this.  Either define `ωₙ` universally, or prove separability through the formal group without converting `Qₙ` to `ωₙ`.
+Then `odd_eval_Φ_ne_zero_of_eval_preΨ_eq_zero` is mostly `rw [Φ_ofNat]`, parity simplification, evaluation, and `mul_ne_zero`.
 
 ---
 
-## Final recommendation
+## What to use as the induction theorem instead
 
-For the current Lean project, I would **not** try the implicit quadratic definition.  I would implement:
-
-```text
-Qₙ       := complEDS₂ W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) n,
-twoωₙ   := Qₙ - ψₙ(a₁φₙ + a₃ψₙ²).
-```
-
-Then prove the differential congruence using `Qₙ`:
+If you still want an induction-based proof, the induction invariant should not be plain squarefreeness of `preΨ'_n`.  A workable invariant is the differential congruence itself:
 
 ```text
-2 · ηₙ · ψ₂ · Φₙ · (preΨ'_n)' + n · Qₙ ≡ 0  mod preΨ'_n.
+D(Ψₙ) controls the tangent of `[n]`.
 ```
 
-This is clean, char-free, and uses Mathlib’s existing EDS quotient machinery.  It proves the desired separability contradiction immediately under `char K ≠ 2` and `(n : K) ≠ 0`.  For characteristic `2`, `Qₙ` is still definable and useful, but it cannot replace `ωₙ`; the missing information is exactly the reduction of `ωₙ` modulo `2`, which must come from a universal construction or a separate formal-group argument.
+For odd `n`, after reduction this says:
+
+```text
+ψ₂ · Φₙ · pₙ' + n · Ωₙ ≡ 0 mod pₙ.
+```
+
+For all `n`, with the parity factor `ηₙ = if Even n then ψ₂ else 1`, it says:
+
+```text
+ηₙ · ψ₂ · Φₙ · pₙ' + n · Ωₙ ≡ 0 mod pₙ.
+```
+
+Or with `Qₙ`:
+
+```text
+2 · ηₙ · ψ₂ · Φₙ · pₙ' + n · Qₙ ≡ 0 mod pₙ.
+```
+
+That invariant is stable under addition formulas because it is really `[n]^*ω = nω`.  Plain squarefreeness is not stable under the odd EDS recurrence in any direct way.
+
+---
+
+## Small `n` Bézout certificates
+
+Bézout/resultant certificates for `n = 5` and `n = 7` are useful as tests, but they should not be the main proof architecture.
+
+A good use of them:
+
+```text
+example : IsCoprime (W.preΨ' 5) (W.preΨ' 5).derivative := by
+  -- generated certificate, probably after specializing hypotheses and normalizing coefficients
+  ...
+
+example : IsCoprime (W.preΨ' 7) (W.preΨ' 7).derivative := by
+  ...
+```
+
+A bad use:
+
+```text
+prove n = 5, 7, then hope the odd recurrence descends squarefreeness.
+```
+
+There is no such clean descent because odd-index roots can arise from cancellation between nonzero products.
+
+For arbitrary `n`, a resultant formula for division polynomials would also work in principle, but formalizing that universal resultant/discriminant identity is likely harder than proving the invariant differential identity.
+
+---
+
+## Recommended Lean plan
+
+1. **Keep the EDS recurrence for definitions and coprimality.**
+   Use it to prove or import:
+
+   ```text
+   gcd(preΨ'_n, preΨ'_{n+1}) = 1,
+   gcd(preΨ'_n, preΨ'_{n-1}) = 1,
+   if Odd n then gcd(preΨ'_n, Ψ₂Sq) = 1.
+   ```
+
+2. **Define `divisionQuot`.**
+   This is immediate from `complEDS₂`:
+
+   ```lean
+   W.divisionQuot n := complEDS₂ W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) n
+   ```
+
+   with
+
+   ```lean
+   W.ψ n * W.divisionQuot n = W.ψ (2*n)
+   ```
+
+3. **Prove the quotient differential congruence.**
+   For odd `n`:
+
+   ```text
+   2ψ₂Φₙpₙ' + nQₙ ≡ 0 mod pₙ.
+   ```
+
+4. **If `2` is invertible, finish using `Qₙ`.**
+   At a double root, get `Qₙ(P)=0`, hence `ωₙ(P)=0`, hence `Φₙ(P)=0`, contradiction.
+
+5. **If characteristic `2` is in scope, do not use `Qₙ` as the final y-coordinate substitute.**
+   You need either the genuine universal `Ωₙ` or a formal-group proof of the tangent identity that gives `Ωₙ(P)=0` directly.
+
+---
+
+## Final answer to the proposed idea
+
+The nearby-even reduction is not viable, and `n = 5, 7` base cases do not produce an odd induction.  The simpler route is to stop trying to make the odd recurrence factor.  Prove the odd differential identity instead:
+
+```text
+ψ₂ · Φₙ · (preΨ'_n)' + n · Ωₙ ≡ 0      mod preΨ'_n
+```
+
+or, in the division-by-2-free quotient form,
+
+```text
+2 · ψ₂ · Φₙ · (preΨ'_n)' + n · Qₙ ≡ 0  mod preΨ'_n.
+```
+
+Then the odd case is straightforward: a double root forces `Ωₙ = 0` (or, when `2` is invertible, `Qₙ = 0` and hence `Ωₙ = 0`), while the curve equation and adjacent coprimality force `Ωₙ ≠ 0`.  This is the mathematically natural proof and the Lean-friendly proof, because it turns the difficult cancellation in the odd recurrence into a single reusable tangent-transport lemma.
