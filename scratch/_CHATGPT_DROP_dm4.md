@@ -1,230 +1,331 @@
-# Q707 (dm4): domain proof for `(X₀ - X₁)^3 ∣ formalAddX`
+# Q764 (dm4): separability of `preΨ'(n)` from the differential of `[n]`
 
-## Important correction
+## Bottom line
 
-The `addX_eq'` part of the proof is straightforward and should be done exactly as you described.  It proves the **multiplied** divisibility
+Yes: there is a clean identity, but I would **not** use the raw total derivative of the `x`-coordinate as the main separability certificate.  The better identity comes from the local parameter at infinity.
 
-```lean
-(X₀ - X₁)^3 ∣ formalAddX W * (w₀ * w₁)^2.
-```
-
-However, `NoZeroDivisors` alone does **not** justify the last cancellation step
+I will write
 
 ```text
-c^3 ∣ f * z  ⇒  c^3 ∣ f.
+ψ  = ψ_n        -- the x-polynomial `preΨ'(n)` in the odd case
+Φ  = Φ_n        -- x-coordinate numerator
+Ω  = Ω_n        -- y-coordinate numerator, not the invariant differential
+v  = 2y + a₁x + a₃
 ```
 
-That implication is false in a domain in general; for example, in `ℤ`, `2 ∣ 3 * 2`, but `2 ∤ 3`.  The last step needs the same extra diagonal-vs-axis cancellation lemma used by the existing `formalAddZ_dvd_cube_of_noZeroDivisors` proof: morally, `(X₀ - X₁)` is coprime to `X₀^6 X₁^6` and to the unit part of `(w₀*w₁)^2`.
-
-So the proof should be split into two pieces:
-
-1. a fully algebraic `addX_eq'` proof of
-   ```lean
-   (X₀ - X₁)^3 ∣ formalAddX W * (w₀*w₁)^2;
-   ```
-2. reuse the existing diagonal-cancellation lemma from the `formalAddZ` proof to remove `(w₀*w₁)^2`.
-
-The first piece below is the part that directly uses Mathlib’s `Projective.addX_eq'`.  The final theorem is written so the cancellation lemma is a hypothesis; in your file, instantiate that hypothesis with the same lemma/pattern used in `formalAddZ_dvd_cube_of_noZeroDivisors`.
-
----
-
-## Compilable algebraic core
-
-This block has no `sorry`.  It proves the core `addX_eq'` divisibility under the two diagonal-difference hypotheses.
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Formula
-import Mathlib.RingTheory.MvPowerSeries.NoZeroDivisors
-import Mathlib.Tactic
-
-noncomputable section
-
-namespace Q707
-
-open WeierstrassCurve
-
-local notation "x" => (0 : Fin 3)
-local notation "y" => (1 : Fin 3)
-local notation "z" => (2 : Fin 3)
-
-namespace Projective
-
-variable {S : Type*} [CommRing S]
-
-/-- The pure algebraic divisibility consequence of Mathlib's projective `addX_eq'`.
-
-If both
+so that on the affine coordinate ring of
 
 ```text
-Py*Qz - Qy*Pz
-Px*Qz - Qx*Pz
+F = y² + a₁xy + a₃y - x³ - a₂x² - a₄x - a₆
 ```
 
-are divisible by `c`, then `addX P Q * (Pz*Qz)^2` is divisible by `c^3`.
-This is the exact formal computation needed before the final cancellation of `(w₀*w₁)^2`.
--/
-lemma addX_mul_zsq_dvd_cube_of_slope_delta
-    (W : WeierstrassCurve.Projective S) (P Q : Fin 3 → S)
-    (c slopeQuot deltaQuot : S)
-    (hP : W.Equation P) (hQ : W.Equation Q)
-    (hslope : P y * Q z - Q y * P z = c * slopeQuot)
-    (hdelta : P x * Q z - Q x * P z = c * deltaQuot) :
-    c ^ 3 ∣ W.addX P Q * (P z * Q z) ^ 2 := by
-  refine ⟨
-    ((slopeQuot ^ 2 * P z * Q z
-      + W.a₁ * slopeQuot * P z * Q z * deltaQuot
-      - W.a₂ * P z * Q z * deltaQuot ^ 2
-      - P x * Q z * deltaQuot ^ 2
-      - Q x * P z * deltaQuot ^ 2) * deltaQuot), ?_⟩
-  rw [WeierstrassCurve.Projective.addX_eq' (W' := W) (P := P) (Q := Q) hP hQ]
-  rw [hslope, hdelta]
-  ring
+we have
 
-/-- Same result, but with an abstract series/function `A` known to be `W.addX P Q`.
-
-This is the form that plugs into `formalAddX`: first rewrite `formalAddX` to the projective
-formula, use `addX_mul_zsq_dvd_cube_of_slope_delta`, then use the caller-provided cancellation
-lemma to remove `(Pz*Qz)^2`.
--/
-lemma addX_dvd_cube_of_slope_delta_and_cancel
-    (W : WeierstrassCurve.Projective S) (P Q : Fin 3 → S)
-    (A c slopeQuot deltaQuot : S)
-    (hA : A = W.addX P Q)
-    (hP : W.Equation P) (hQ : W.Equation Q)
-    (hslope : P y * Q z - Q y * P z = c * slopeQuot)
-    (hdelta : P x * Q z - Q x * P z = c * deltaQuot)
-    (hcancel : c ^ 3 ∣ A * (P z * Q z) ^ 2 → c ^ 3 ∣ A) :
-    c ^ 3 ∣ A := by
-  apply hcancel
-  rw [hA]
-  exact addX_mul_zsq_dvd_cube_of_slope_delta
-    (W := W) (P := P) (Q := Q)
-    (c := c) (slopeQuot := slopeQuot) (deltaQuot := deltaQuot)
-    hP hQ hslope hdelta
-
-end Projective
-
-end Q707
+```text
+[n](P) = (Φ/ψ², Ω/ψ³).
 ```
 
----
+The useful root-level identity is the congruence
 
-## Drop-in specialization to formal points
+```text
+v · Φ · ∂xψ + n · Ω ≡ 0    mod ψ.        (★)
+```
 
-Below is the theorem shape I would use in the actual formal group file.  It is written to make the dependency on the existing cancellation lemma explicit.
+Depending on the sign convention for the local parameter, this may appear as
 
-Rename the local facts to match your file.  The facts needed are exactly the ones already present or used in the `formalAddZ` proof:
+```text
+v · Φ · ∂xψ - n · Ω ≡ 0    mod ψ.
+```
+
+The sign is irrelevant for separability.  What matters is that the identity has **no factor of 2** in front of `∂xψ`, so it works in characteristic `2` as long as `(n : K) ≠ 0`.
+
+Equivalently, in the coordinate ring `R = K[x,y]/(F)`, the statement can be packaged as
+
+```text
+∃ H_n : R,
+  v · Φ_n · ∂xψ_n + (n : K) · Ω_n = ψ_n · H_n.
+```
+
+This is the polynomial identity I would target.
+
+## Why the direct `x`-coordinate derivative is weaker
+
+The invariant differential is
+
+```text
+ω_E = dx / v.
+```
+
+Also
+
+```text
+v([n]P) = 2(Ω/ψ³) + a₁(Φ/ψ²) + a₃
+        = (2Ω + a₁Φψ + a₃ψ³) / ψ³.
+```
+
+Since
+
+```text
+d(Φ/ψ²) = (Φ'ψ - 2Φψ') / ψ³ · dx,
+```
+
+the identity `[n]^*ω_E = n · ω_E` gives the correct global Wronskian identity
+
+```text
+v · (Φ'ψ - 2Φψ') = n · (2Ω + a₁Φψ + a₃ψ³).      (x-W)
+```
+
+Modulo `ψ`, this becomes
+
+```text
+-2 · v · Φ · ψ' = 2 · n · Ω.                      (x-W mod ψ)
+```
+
+This proves the desired root statement in characteristics different from `2`, after proving the relevant numerator terms are nonzero.  But it loses all information in characteristic `2`.  That is the main reason to avoid making `(x-W)` the primary proof of separability.
+
+## Derivation of the clean congruence `(★)`
+
+Use the standard local parameter at infinity
+
+```text
+t = -x/y.
+```
+
+At the identity `O`, `dt` and the invariant differential differ by a unit whose value at `O` is `1`.  Hence, at points mapping to `O`, the differential of `t ∘ [n]` has leading coefficient `n`:
+
+```text
+d(t ∘ [n]) = n · ω_E          on the kernel, up to a unit evaluating to 1.
+```
+
+Now compute `t ∘ [n]` using the division-polynomial coordinates:
+
+```text
+t([n]P) = - x([n]P) / y([n]P)
+        = - (Φ/ψ²) / (Ω/ψ³)
+        = - Φψ / Ω.
+```
+
+Reducing the differential modulo `ψ`, all terms containing an explicit factor of `ψ` vanish, so
+
+```text
+d(-Φψ/Ω) ≡ - (Φ/Ω) · dψ    mod ψ.
+```
+
+Since `ψ = ψ(x)`,
+
+```text
+dψ = ψ'(x) · dx = ψ'(x) · v · ω_E.
+```
+
+Therefore, modulo `ψ`,
+
+```text
+- (Φ/Ω) · ψ' · v · ω_E = n · ω_E.
+```
+
+Multiplying by `Ω` gives
+
+```text
+v · Φ · ψ' + n · Ω = 0       mod ψ,
+```
+
+up to the harmless sign convention mentioned above.
+
+This is the clean identity that directly relates `n`, `ψ_n`, `ψ_n'`, and the other division-polynomial numerators.
+
+## How `(★)` proves separability
+
+Let `P = (x₀,y₀)` be an affine geometric point with
+
+```text
+ψ_n(x₀) = 0.
+```
+
+Assume `(n : K) ≠ 0`.  If also
+
+```text
+ψ_n'(x₀) = 0,
+```
+
+then evaluating `(★)` at `P` gives
+
+```text
+n · Ω_n(P) = 0.
+```
+
+Since `(n : K) ≠ 0`, this forces
+
+```text
+Ω_n(P) = 0.
+```
+
+But `Ω_n(P)` is nonzero at a nonzero `n`-torsion point.  Here is the elementary proof.
+
+First,
+
+```text
+Φ_n = xψ_n² - ψ_{n+1}ψ_{n-1},
+```
+
+so modulo `ψ_n`,
+
+```text
+Φ_n ≡ -ψ_{n+1}ψ_{n-1}.                         (1)
+```
+
+At a point with `ψ_n(P)=0`, the factors `ψ_{n-1}(P)` and `ψ_{n+1}(P)` are nonzero: otherwise `P` would be simultaneously killed by `n` and by `n-1` or `n+1`, hence killed by `gcd(n,n±1)=1`, forcing `P=O`, impossible for an affine root.  In a purely EDS proof this is exactly the easy coprimality lemma
+
+```text
+gcd(ψ_n, ψ_{n-1}) = gcd(ψ_n, ψ_{n+1}) = 1.
+```
+
+Thus
+
+```text
+Φ_n(P) ≠ 0.                                      (2)
+```
+
+Next use the cleared curve equation for the image coordinates.  Since
+
+```text
+x([n]P) = Φ/ψ²,
+y([n]P) = Ω/ψ³,
+```
+
+substitution into the Weierstrass equation and multiplication by `ψ⁶` gives
+
+```text
+Ω² + a₁ΦΩψ + a₃Ωψ³
+  = Φ³ + a₂Φ²ψ² + a₄Φψ⁴ + a₆ψ⁶.                (3)
+```
+
+Modulo `ψ`, this reduces to
+
+```text
+Ω² ≡ Φ³    mod ψ.                                (4)
+```
+
+Evaluating at `P`, equations `(2)` and `(4)` imply
+
+```text
+Ω_n(P)² = Φ_n(P)³ ≠ 0,
+```
+
+so
+
+```text
+Ω_n(P) ≠ 0.
+```
+
+This contradicts the consequence of `(★)` and `ψ_n'(x₀)=0`.  Therefore
+
+```text
+ψ_n'(x₀) ≠ 0.
+```
+
+Since every geometric root has nonzero derivative, `ψ_n` is squarefree, equivalently
+
+```text
+gcd(ψ_n, ψ_n') = 1.
+```
+
+This is the characteristic-free separability proof for `(n : K) ≠ 0`.
+
+## Even `n`
+
+For even `n`, the usual division polynomial has the extra factor
+
+```text
+ψ₂ = 2y + a₁x + a₃.
+```
+
+If `preΨ'(n)` is the x-polynomial factor with the `ψ₂`/vertical factor removed, apply the same argument to roots with `ψ₂(P) ≠ 0`.  The removed `2`-torsion part is handled separately: when `(n : K) ≠ 0` and `n` is even, the characteristic is not `2`, and nonsingularity of the Weierstrass cubic gives the separability of the `2`-torsion x-polynomial.  The two factors are coprime because a point in the non-`2` part and in the `2`-torsion part would have order dividing both `2` and the odd quotient, hence would be trivial.
+
+So the implementation split should be:
+
+```text
+odd n:
+  use the congruence (★) directly for ψ_n = preΨ'(n)
+
+even n:
+  remove the ψ₂ factor;
+  use (★) on the non-2 roots;
+  prove the ψ₂/x-cubic part squarefree from nonsingularity;
+  prove the two factors coprime by torsion-order/copairing.
+```
+
+## Can this be proved by Somos/EDS recurrence plus resultants?
+
+In principle, yes, but it is not the route I would mechanize first.
+
+The recurrence is good for the **reduced** facts:
+
+```text
+gcd(ψ_n, ψ_{n-1}) = 1,
+gcd(ψ_n, ψ_{n+1}) = 1,
+Φ_n ≡ -ψ_{n+1}ψ_{n-1} mod ψ_n,
+Ω_n² ≡ Φ_n³ mod ψ_n.
+```
+
+These are exactly the facts needed to show `Φ_n` and `Ω_n` are units at roots of `ψ_n`.
+
+But multiplicity is infinitesimal.  To prove
+
+```text
+gcd(ψ_n, ψ_n') = 1,
+```
+
+a recurrence-only proof eventually has to reintroduce either a differential argument or a discriminant/resultant theorem.  The classical resultant certificate is a universal formula of the shape
+
+```text
+Disc(preψ_n) = unit · n^A · Δ^B
+```
+
+with exponents depending on the normalization and parity.  Since the curve is nonsingular (`Δ ≠ 0`) and `(n : K) ≠ 0`, the discriminant is nonzero, so the polynomial is squarefree.
+
+That is a valid mathematical proof, but in Lean it is likely much heavier than the differential congruence: it requires setting up the universal division polynomials, proving the resultant/discriminant formula through the recursive definitions, tracking normalizations and the even factor, and then specializing.  The differential/local-parameter proof instead needs only the coordinate formulas for `[n]`, the invariant differential identity `[n]^*ω_E = nω_E`, and the small coprimality/unit lemmas above.
+
+## Suggested Lean target lemmas
+
+I would aim for these lemmas, using the repository's actual names for `preΨ'`, `Φ`, and `Ω`.
 
 ```lean
-formalPointMv_equation
-formalSlope_eq_sub_mul_quot      -- w₀ - w₁ = (X₀ - X₁) * slopeQuot
-formalDelta_eq_sub_mul_quot      -- X₀*w₁ - X₁*w₀ = (X₀ - X₁) * deltaQuot
-formalAddX_def / rfl             -- formalAddX is projective addX at formal points
-formal_cancel_zsq_dvd_cube       -- the cancellation step from formalAddZ_dvd_cube_of_noZeroDivisors
+-- Schematic, not exact repo syntax.
+
+/-- The clean root congruence coming from `t = -x/y`. -/
+theorem divpoly_derivative_congr_mod_psi
+    (n : ℕ) (hn : (n : K) ≠ 0) :
+    v * Φ n * (Polynomial.derivative (preΨ' n)).aeval x + (n : R) * Ω n
+      ∈ Ideal.span ({preΨ' n} : Set R) := by
+  -- derive from `t ∘ [n] = -Φψ/Ω` and `[n]^*ω = nω`
+  -- after reducing modulo `ψ`.
+  sorry
+
+/-- At a root of `ψ_n`, the y-coordinate numerator is nonzero. -/
+theorem Omega_ne_zero_of_psi_eq_zero
+    {P : E(Kbar)} (hP : preΨ' n P.x = 0) (hPaff : P ≠ O) :
+    Ω n P ≠ 0 := by
+  -- `Φ ≡ -ψ_{n+1}ψ_{n-1} mod ψ`, consecutive gcd/torsion coprime,
+  -- and the cleared curve equation gives `Ω² ≡ Φ³ mod ψ`.
+  sorry
+
+/-- Root-level derivative nonvanishing. -/
+theorem derivative_preΨ'_ne_zero_at_root
+    {P : E(Kbar)} (hn : (n : K) ≠ 0)
+    (hroot : preΨ' n P.x = 0) (hPaff : P ≠ O) :
+    (Polynomial.derivative (preΨ' n)).eval P.x ≠ 0 := by
+  intro hder
+  have hcongr := divpoly_derivative_congr_mod_psi n hn
+  -- evaluate at P; the derivative term vanishes, so `(n : K) * Ω n P = 0`.
+  -- use `hn` and `Omega_ne_zero_of_psi_eq_zero`.
+  sorry
+
+/-- Separability/squarefreeness of the division polynomial. -/
+theorem separable_preΨ'_of_char_not_dvd
+    (n : ℕ) (hn : (n : K) ≠ 0) :
+    (preΨ' n).Separable := by
+  -- reduce to geometric roots and use `derivative_preΨ'_ne_zero_at_root`.
+  sorry
 ```
 
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Formula
-import Mathlib.RingTheory.MvPowerSeries.NoZeroDivisors
-import Mathlib.Tactic
--- import your local FormalGroupW file
-
-noncomputable section
-
-open MvPowerSeries Finsupp
-open WeierstrassCurve
-
-namespace WeierstrassCurve
-
-variable {R : Type*} [CommRing R] [NoZeroDivisors R]
-
-local notation "X₀" =>
-  (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R)
-local notation "X₁" =>
-  (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R)
-local notation "δ" => (X₀ - X₁)
-
-local notation "x" => (0 : Fin 3)
-local notation "y" => (1 : Fin 3)
-local notation "z" => (2 : Fin 3)
-
-/-- Domain proof for the formal `addX` numerator.
-
-The proof is intentionally the same pattern as `formalAddZ_dvd_cube_of_noZeroDivisors`:
-first prove divisibility after multiplying by `(w₀*w₁)^2`, then invoke the existing
-formal-point `z`-coordinate cancellation lemma.
--/
-lemma formalAddX_dvd_cube_of_noZeroDivisors
-    (W : WeierstrassCurve R) :
-    δ ^ 3 ∣ formalAddX W := by
-  classical
-  let Cmv : R →+* MvPowerSeries (Fin 2) R := MvPowerSeries.C
-  let Wmv := W.map Cmv
-  let P : Fin 3 → MvPowerSeries (Fin 2) R := formalPointMv W 0
-  let Q : Fin 3 → MvPowerSeries (Fin 2) R := formalPointMv W 1
-  let slopeQuot : MvPowerSeries (Fin 2) R := formalSlopeQuot W
-  let deltaQuot : MvPowerSeries (Fin 2) R := formalDeltaQuot W
-
-  have hP : Wmv.Equation P := by
-    simpa [Wmv, P, Cmv] using formalPointMv_equation (W := W) (i := 0)
-
-  have hQ : Wmv.Equation Q := by
-    simpa [Wmv, Q, Cmv] using formalPointMv_equation (W := W) (i := 1)
-
-  -- `Py = Qy = -1`, so this is exactly `w₀ - w₁`.
-  have hslope :
-      P y * Q z - Q y * P z = δ * slopeQuot := by
-    simpa [P, Q, slopeQuot, δ, formalPointMv, mul_comm, mul_left_comm, mul_assoc] using
-      formalSlope_eq_sub_mul_quot (W := W)
-
-  -- This is `X₀*w₁ - X₁*w₀ = (X₀ - X₁) * formalDeltaQuot W`.
-  have hdelta :
-      P x * Q z - Q x * P z = δ * deltaQuot := by
-    simpa [P, Q, deltaQuot, δ, formalPointMv, mul_comm, mul_left_comm, mul_assoc] using
-      formalDelta_eq_sub_mul_quot (W := W)
-
-  -- This is the only nontrivial domain/coprimality step.  Reuse the same helper used
-  -- in `formalAddZ_dvd_cube_of_noZeroDivisors`.  It should use
-  -- `wᵢ = Xᵢ^3 * unit`, plus the fact that `(X₀ - X₁)` is coprime to the axis
-  -- monomials `X₀` and `X₁`.
-  have hcancel :
-      δ ^ 3 ∣ formalAddX W * (P z * Q z) ^ 2 → δ ^ 3 ∣ formalAddX W := by
-    intro hmul
-    exact formal_cancel_zsq_dvd_cube_of_noZeroDivisors
-      (W := W) (F := formalAddX W) hmul
-
-  exact Q707.Projective.addX_dvd_cube_of_slope_delta_and_cancel
-    (W := Wmv) (P := P) (Q := Q)
-    (A := formalAddX W)
-    (c := δ)
-    (slopeQuot := slopeQuot)
-    (deltaQuot := deltaQuot)
-    (hA := by simp [formalAddX, Wmv, P, Q, Cmv])
-    hP hQ hslope hdelta hcancel
-
-end WeierstrassCurve
-```
-
----
-
-## If the cancellation lemma is not already factored out
-
-Do **not** try to prove the last step with only `mul_right_cancel₀`; that proves equality cancellation, not ideal/divisibility cancellation.  The lemma you need has this shape:
-
-```lean
-lemma formal_cancel_zsq_dvd_cube_of_noZeroDivisors
-    {R : Type*} [CommRing R] [NoZeroDivisors R]
-    (W : WeierstrassCurve R)
-    (F : MvPowerSeries (Fin 2) R) :
-    (X₀ - X₁) ^ 3 ∣ F *
-      (((formalPointMv W 0) (2 : Fin 3) * (formalPointMv W 1) (2 : Fin 3)) ^ 2) →
-    (X₀ - X₁) ^ 3 ∣ F := by
-  -- exactly the cancellation code already used for `formalAddZ_dvd_cube_of_noZeroDivisors`
-  -- using:
-  --   (formalPointMv W 0).z = X₀^3 * unit
-  --   (formalPointMv W 1).z = X₁^3 * unit
-  -- and diagonal/axis coprimality.
-  ...
-```
-
-If the existing `formalAddZ` proof has this cancellation inline, extract it first.  Then both `formalAddZ` and `formalAddX` become short, and the `addX`-specific proof is just the `addX_eq'` calculation above.
+The key point is that the first lemma should be the congruence `(★)`, not the full `x`-coordinate Wronskian.  The Wronskian is still useful as a check, but `(★)` is the identity that gives separability cleanly at a root.
