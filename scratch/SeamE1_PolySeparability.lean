@@ -3,7 +3,6 @@ module
 public import scratch.KeystoneCoprimality
 public import scratch.KeystoneSeparability
 public import scratch.Bridge1Even
-public import scratch.SeamE1_SeparabilityCore
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
 
 /-! # Cofactor nonvanishing for even EDS descent -/
