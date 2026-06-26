@@ -1064,15 +1064,15 @@ theorem formalAddZ_eq_cube_mul (W : WeierstrassCurve R) :
 
 /-! ### normalizedAddY is a unit -/
 
-/-- The constant coefficient of `normalizedAddY` is `-1`. -/
+/-- The constant coefficient of `normalizedAddY` is `1`. -/
 theorem normalizedAddY_constantCoeff (W : WeierstrassCurve R) :
-    MvPowerSeries.constantCoeff (W.normalizedAddY) = -1 :=
+    MvPowerSeries.constantCoeff (W.normalizedAddY) = 1 :=
   sorry
 
 /-- `normalizedAddY` is a unit in `MvPowerSeries (Fin 2) R`. -/
 theorem normalizedAddY_isUnit (W : WeierstrassCurve R) : IsUnit (W.normalizedAddY) := by
   rw [MvPowerSeries.isUnit_iff_constantCoeff, normalizedAddY_constantCoeff]
-  exact isUnit_one.neg
+  exact isUnit_one
 
 /-! ### The formal group law -/
 
