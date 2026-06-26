@@ -46,3 +46,17 @@ HARD — requires new infrastructure (Ω_n or dual-number tangent).
 4. For odd n: define Ω_n + prove polynomial identity, OR dual-number bridge
 
 ## Torsion.lean: 3 sorry (downstream, depends on SEAM1)
+
+## Update (2026-06-26 02:30)
+
+### Odd-via-even reduction CONFIRMED (ChatGPT dm4 Q848)
+For odd n with (2:K) ≠ 0:
+- Double root of preΨ'(n) → double root of preΨ'(2n) (via factorization + product rule)
+- But preΨ'(2n) separable by even theorem → contradiction
+- Only char 2 needs separate treatment
+
+### preΨ₄ = -Ψ₂Sq² at Ψ₃ roots (ChatGPT dm1 Q845)
+Identity: preΨ₄ + Ψ₂Sq² = (6X²+b₂X+b₄)·Ψ₃, provable by ring.
+Simplifies cofactor on Ψ₃=0 stratum.
+
+### Sub-agents active on L135 (Ψ₃=0) and L223 (odd via even)
