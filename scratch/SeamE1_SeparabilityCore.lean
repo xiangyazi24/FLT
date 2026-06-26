@@ -219,7 +219,57 @@ public theorem preΨ'_deriv_ne_zero_at_root_general [IsAlgClosed K]
           rw [this]; exact h0
         rw [hn_eq] at hx' ⊢
         exact even_step W hn' (fun k hk => ih k (by rw [hn_eq]; exact hk)) hx'
-    · -- n is odd
-      sorry
+    · -- n is odd, n ≥ 5 (since n ≥ 4 and odd)
+      obtain ⟨j, hj⟩ := hodd  -- n = 2*j + 1
+      have hn_ge5 : n ≥ 5 := by omega
+      set m := n - 3 with hm_def
+      have hn_eq : n = m + 3 := by omega
+      by_cases h2 : (2 : K) = 0
+      · -- Characteristic 2: (2n:K) = 0, even-descent blocked.
+        -- Not needed for the main application (char 0).
+        sorry
+      · -- char ≠ 2
+        have h4 : (4 : K) ≠ 0 := four_ne_of_two h2
+        -- (2*(m+3) : K) ≠ 0, since (2:K) ≠ 0 and (m+3 : K) = (n:K) ≠ 0
+        have hk_ne : ((m + 3 : ℕ) : K) ≠ 0 := by
+          rwa [show (m + 3 : ℕ) = n from by omega]
+        have h2n_ne : (2 * ((m : K) + 3)) ≠ 0 := by
+          have : (2 : K) * ((m : K) + 3) = (2 : K) * ((↑(m + 3) : K)) := by push_cast; ring
+          rw [this]; exact mul_ne_zero (by exact_mod_cast h2) hk_ne
+        -- Rewrite root
+        have hx_root : (W.preΨ' (m + 3)).IsRoot x' := by rwa [hn_eq] at hx'
+        -- x' is a root of preΨ'(2*(m+3)) via even factorization
+        have hx_2n : (W.preΨ' (2 * (m + 3))).IsRoot x' := by
+          rw [preΨ'_even_factor]
+          simp only [IsRoot, eval_mul, IsRoot.def.mp hx_root, zero_mul]
+        -- Derivative factors at the root via product rule
+        have hderiv_eq := deriv_preΨ'_even_at_half_root W m hx_root
+        -- Cofactor(x') ≠ 0
+        have hpe_root : pe W x' (↑(m + 3)) = 0 := by rw [pe_nat]; exact IsRoot.def.mp hx_root
+        have hcof_ne := cofactor_ne_at_half_root W h4 h2 h2n_ne hpe_root hx_2n
+        have hcof_eval_ne : (W.preΨ' (m + 2) ^ 2 * W.preΨ' (m + 5) -
+            W.preΨ' (m + 1) * W.preΨ' (m + 4) ^ 2).eval x' ≠ 0 := by
+          simp only [eval_sub, eval_mul, eval_pow]
+          rw [pe_nat, pe_nat, pe_nat, pe_nat] at hcof_ne; exact hcof_ne
+        -- Rewrite goal to m+3 form
+        rw [hn_eq]
+        -- even_step for 2*(m+3) proves (preΨ'(2*(m+3)))'(x') ≠ 0,
+        -- given an IH covering all k < 2*(m+3).
+        -- For k < m+3 = n: use our strong induction IH.
+        -- For k ≥ m+3 (= n): this is the circularity point.
+        -- even_step only calls ih at k = m+3 in Case A.
+        have h2n_sep : ¬ (derivative (W.preΨ' (2 * (m + 3)))).IsRoot x' := by
+          apply even_step W h2n_ne _ hx_2n
+          intro k hk
+          rcases Nat.lt_or_ge k (m + 3) with hlt | hge'
+          · exact ih k (show k < n by omega)
+          · -- k ≥ n = m+3: even_step only reaches k = m+3 (Case A).
+            -- This is RootSepPred(n), our current goal — the irreducible gap.
+            -- Closed when a non-circular proof is available
+            -- (formal group bridge, or independent separability certificate).
+            sorry
+        -- Contrapositive: (preΨ'(m+3))'(x') = 0 forces (preΨ'(2*(m+3)))'(x') = 0
+        intro hd
+        exact h2n_sep (IsRoot.def.mpr (by rw [hderiv_eq, IsRoot.def.mp hd, zero_mul]))
 
 end WeierstrassCurve.SeparabilityCore
