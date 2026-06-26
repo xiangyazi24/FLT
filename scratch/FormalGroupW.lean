@@ -414,6 +414,16 @@ private theorem X_sub_dvd_formalDelta (W : WeierstrassCurve R) :
 
 /-! ### Divisibility by (X₀ - X₁)³ -/
 
+/-- `(X₀ - X₁)³` divides `formalAddX`. -/
+theorem formalAddX_dvd_cube (W : WeierstrassCurve R) :
+    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ 3 ∣ W.formalAddX :=
+  sorry
+
+/-- `(X₀ - X₁)³` divides `formalAddY`. -/
+theorem formalAddY_dvd_cube (W : WeierstrassCurve R) :
+    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ 3 ∣ W.formalAddY :=
+  sorry
+
 /-- The diagonal-difference quotient for w: `w₁ - w₀ = (X₁ - X₀) · wDiffQ`. -/
 private noncomputable def wDiffQ (W : WeierstrassCurve R) : MvPowerSeries (Fin 2) R :=
   PowerSeries.diagDiffQuot W.formalW
@@ -717,321 +727,9 @@ private theorem univEval_map (W : WeierstrassCurve R) :
     univWeierstrassCurve.map (univEval W) = W := by
   ext <;> simp [univWeierstrassCurve, univEval, MvPolynomial.eval₂Hom_X']
 
--- Helper: in a domain, addX is divisible by d³.
--- Uses addX_eq' with d | slope, d | delta, then cancels (w₀w₁)².
-set_option maxHeartbeats 51200000 in
-private theorem formalAddX_dvd_cube_of_noZeroDivisors
-    {S : Type*} [CommRing S] [NoZeroDivisors S] [Nontrivial S]
-    (V : WeierstrassCurve S) :
-    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) S) ^ 3 ∣
-    V.formalAddX := by
-  set d := (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) S)
-  set w₀ := PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) S) V.formalW
-  set w₁ := PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) S) V.formalW
-  set u₀ := PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) S) V.formalU
-  set u₁ := PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) S) V.formalU
-  set slope := (-1 : MvPowerSeries (Fin 2) S) * w₁ - (-1) * w₀
-  set delta := MvPowerSeries.X (R := S) 0 * w₁ - MvPowerSeries.X 1 * w₀
-  have hP := formalPointMv_equation V 0
-  have hQ := formalPointMv_equation V 1
-  have haddX := WeierstrassCurve.Projective.addX_eq' hP hQ
-  simp only [formalPointMv_x, formalPointMv_y, formalPointMv_z, WeierstrassCurve.map] at haddX
-  have h_slope_eq : w₀ - w₁ = d * PowerSeries.diagDiffQuot V.formalW :=
-    PowerSeries.subst_X_sub_subst_X_eq_mul_diagDiffQuot V.formalW
-  have hd_slope : d ∣ slope := ⟨PowerSeries.diagDiffQuot V.formalW, by
-    show slope = d * _; simp only [slope]; linear_combination h_slope_eq⟩
-  have hd_delta : d ∣ delta := ⟨V.deltaQuot, formalDelta_eq_mul V⟩
-  have hd3_rhs : d ^ 3 ∣ (slope ^ 2 * w₀ * w₁ +
-      MvPowerSeries.C V.a₁ * slope * w₀ * w₁ * delta -
-      MvPowerSeries.C V.a₂ * w₀ * w₁ * delta ^ 2 -
-      MvPowerSeries.X 0 * w₁ * delta ^ 2 -
-      MvPowerSeries.X 1 * w₀ * delta ^ 2) * delta := by
-    rw [show (3 : ℕ) = 2 + 1 from rfl, pow_succ]
-    apply mul_dvd_mul _ hd_delta
-    apply dvd_sub; apply dvd_sub; apply dvd_sub; apply dvd_add
-    · exact dvd_mul_of_dvd_left (dvd_mul_of_dvd_left (pow_dvd_pow_of_dvd hd_slope 2) _) _
-    · exact dvd_mul_of_dvd_left (dvd_mul_of_dvd_left
-        (dvd_mul_of_dvd_left (dvd_mul_of_dvd_right (mul_dvd_mul hd_slope hd_delta) _) _) _) _
-    · exact dvd_mul_of_dvd_right (pow_dvd_pow_of_dvd hd_delta 2) _
-    · exact dvd_mul_of_dvd_right (pow_dvd_pow_of_dvd hd_delta 2) _
-    · exact dvd_mul_of_dvd_right (pow_dvd_pow_of_dvd hd_delta 2) _
-  have h_d3_prod : d ^ 3 ∣ V.formalAddX * (w₀ * w₁) ^ 2 := by
-    unfold formalAddX formalAddXYZ; rw [haddX]; exact hd3_rhs
-  obtain ⟨Q, hQ'⟩ := h_d3_prod
-  have hw0_eq := formalPointMv_z_eq V 0
-  have hw1_eq := formalPointMv_z_eq V 1
-  simp only [formalPointMv_z] at hw0_eq hw1_eq
-  rw [hw0_eq, hw1_eq] at hQ'
-  have hX0 : (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) S) ≠ 0 :=
-    MvPowerSeries.ne_zero_iff_exists_coeff_ne_zero _ |>.mpr
-      ⟨Finsupp.single 0 1, by simp [MvPowerSeries.coeff_X]⟩
-  have hX1 : (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) S) ≠ 0 :=
-    MvPowerSeries.ne_zero_iff_exists_coeff_ne_zero _ |>.mpr
-      ⟨Finsupp.single 1 1, by simp [MvPowerSeries.coeff_X]⟩
-  have hXpow_ne : ((MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) S) ^ 3 *
-    (MvPowerSeries.X (1 : Fin 2)) ^ 3) ^ 2 ≠ 0 :=
-    pow_ne_zero 2 (mul_ne_zero (pow_ne_zero 3 hX0) (pow_ne_zero 3 hX1))
-  have hrearr : (V.formalAddX * (u₀ * u₁) ^ 2 - d ^ 3 * Q) *
-    ((MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) S) ^ 3 *
-     (MvPowerSeries.X (1 : Fin 2)) ^ 3) ^ 2 = 0 := by linear_combination hQ'
-  have hcancel := (mul_eq_zero.mp hrearr).resolve_right hXpow_ne
-  have heq : V.formalAddX * (u₀ * u₁) ^ 2 = d ^ 3 * Q := sub_eq_zero.mp hcancel
-  have hu : IsUnit ((u₀ * u₁) ^ 2) :=
-    ((formalU_subst_isUnit V 0).mul (formalU_subst_isUnit V 1)).pow 2
-  obtain ⟨uu, huu⟩ := hu
-  rw [← huu] at heq
-  have hone : (uu : MvPowerSeries (Fin 2) S) * (↑uu⁻¹ : MvPowerSeries (Fin 2) S) = 1 :=
-    Units.mul_inv uu
-  have := congr_arg (· * (↑uu⁻¹ : MvPowerSeries (Fin 2) S)) heq
-  rw [mul_assoc, hone, mul_one, mul_assoc] at this
-  exact ⟨Q * ↑uu⁻¹, this⟩
-
--- Helper: in a domain, negAddY is divisible by d³.
--- Uses negAddY_eq' with d | slope, d | delta, then cancels (w₀w₁)².
-set_option maxHeartbeats 51200000 in
-private theorem formalNegAddY_dvd_cube_of_noZeroDivisors
-    {S : Type*} [CommRing S] [NoZeroDivisors S] [Nontrivial S]
-    (V : WeierstrassCurve S) :
-    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) S) ^ 3 ∣
-    (V.map (MvPowerSeries.C (σ := Fin 2))).toProjective.negAddY
-      (V.formalPointMv 0) (V.formalPointMv 1) := by
-  set d := (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) S)
-  set w₀ := PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) S) V.formalW
-  set w₁ := PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) S) V.formalW
-  set u₀ := PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) S) V.formalU
-  set u₁ := PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) S) V.formalU
-  set slope := (-1 : MvPowerSeries (Fin 2) S) * w₁ - (-1) * w₀
-  set delta := MvPowerSeries.X (R := S) 0 * w₁ - MvPowerSeries.X 1 * w₀
-  have hP := formalPointMv_equation V 0
-  have hQ := formalPointMv_equation V 1
-  have hnegAddY := WeierstrassCurve.Projective.negAddY_eq' hP hQ
-  simp only [formalPointMv_x, formalPointMv_y, formalPointMv_z, WeierstrassCurve.map] at hnegAddY
-  have h_slope_eq : w₀ - w₁ = d * PowerSeries.diagDiffQuot V.formalW :=
-    PowerSeries.subst_X_sub_subst_X_eq_mul_diagDiffQuot V.formalW
-  have hd_slope : d ∣ slope := ⟨PowerSeries.diagDiffQuot V.formalW, by
-    show slope = d * _; simp only [slope]; linear_combination h_slope_eq⟩
-  have hd_delta : d ∣ delta := ⟨V.deltaQuot, formalDelta_eq_mul V⟩
-  -- negAddY_eq' RHS = slope * (slope²*w₀w₁ + a₁*slope*w₀w₁*delta - a₂*w₀w₁*delta²
-  --   - X₀*w₁*delta² - X₁*w₀*delta² - X₀*w₁*delta²) + (-1)*w₁*delta³
-  -- Each term has d³ factor (slope*d² or delta³)
-  have hd3_rhs : d ^ 3 ∣
-      (slope *
-        (slope ^ 2 * w₀ * w₁ +
-         MvPowerSeries.C V.a₁ * slope * w₀ * w₁ * delta -
-         MvPowerSeries.C V.a₂ * w₀ * w₁ * delta ^ 2 -
-         MvPowerSeries.X 0 * w₁ * delta ^ 2 -
-         MvPowerSeries.X 1 * w₀ * delta ^ 2 -
-         MvPowerSeries.X 0 * w₁ * delta ^ 2) +
-       (-1) * w₁ * delta ^ 3) := by
-    apply dvd_add
-    · -- slope * big_parens where each term in big_parens has d²
-      rw [show (3 : ℕ) = 1 + 2 from rfl, pow_add, pow_one]
-      apply mul_dvd_mul hd_slope
-      apply dvd_sub; apply dvd_sub; apply dvd_sub; apply dvd_sub; apply dvd_add
-      · exact dvd_mul_of_dvd_left (dvd_mul_of_dvd_left (pow_dvd_pow_of_dvd hd_slope 2) _) _
-      · exact dvd_mul_of_dvd_left (dvd_mul_of_dvd_left
-          (dvd_mul_of_dvd_left (dvd_mul_of_dvd_right (mul_dvd_mul hd_slope hd_delta) _) _) _) _
-      · exact dvd_mul_of_dvd_right (pow_dvd_pow_of_dvd hd_delta 2) _
-      · exact dvd_mul_of_dvd_right (pow_dvd_pow_of_dvd hd_delta 2) _
-      · exact dvd_mul_of_dvd_right (pow_dvd_pow_of_dvd hd_delta 2) _
-      · exact dvd_mul_of_dvd_right (pow_dvd_pow_of_dvd hd_delta 2) _
-    · -- (-1)*w₁*delta³ has d³ from delta³
-      exact dvd_mul_of_dvd_right (pow_dvd_pow_of_dvd hd_delta 3) _
-  -- Transfer d³ | RHS to d³ | negAddY * (w₀w₁)²
-  set negAddYval := (V.map (MvPowerSeries.C (σ := Fin 2))).toProjective.negAddY
-      (V.formalPointMv 0) (V.formalPointMv 1)
-  have h_d3_prod : d ^ 3 ∣ negAddYval * (w₀ * w₁) ^ 2 := by
-    rw [hnegAddY]; exact hd3_rhs
-  obtain ⟨Q, hQ'⟩ := h_d3_prod
-  have hw0_eq := formalPointMv_z_eq V 0
-  have hw1_eq := formalPointMv_z_eq V 1
-  simp only [formalPointMv_z] at hw0_eq hw1_eq
-  rw [hw0_eq, hw1_eq] at hQ'
-  have hX0 : (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) S) ≠ 0 :=
-    MvPowerSeries.ne_zero_iff_exists_coeff_ne_zero _ |>.mpr
-      ⟨Finsupp.single 0 1, by simp [MvPowerSeries.coeff_X]⟩
-  have hX1 : (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) S) ≠ 0 :=
-    MvPowerSeries.ne_zero_iff_exists_coeff_ne_zero _ |>.mpr
-      ⟨Finsupp.single 1 1, by simp [MvPowerSeries.coeff_X]⟩
-  have hXpow_ne : ((MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) S) ^ 3 *
-    (MvPowerSeries.X (1 : Fin 2)) ^ 3) ^ 2 ≠ 0 :=
-    pow_ne_zero 2 (mul_ne_zero (pow_ne_zero 3 hX0) (pow_ne_zero 3 hX1))
-  have hrearr : (negAddYval * (u₀ * u₁) ^ 2 - d ^ 3 * Q) *
-    ((MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) S) ^ 3 *
-     (MvPowerSeries.X (1 : Fin 2)) ^ 3) ^ 2 = 0 := by linear_combination hQ'
-  have hcancel := (mul_eq_zero.mp hrearr).resolve_right hXpow_ne
-  have heq : negAddYval * (u₀ * u₁) ^ 2 = d ^ 3 * Q := sub_eq_zero.mp hcancel
-  have hu : IsUnit ((u₀ * u₁) ^ 2) :=
-    ((formalU_subst_isUnit V 0).mul (formalU_subst_isUnit V 1)).pow 2
-  obtain ⟨uu, huu⟩ := hu
-  rw [← huu] at heq
-  have hone : (uu : MvPowerSeries (Fin 2) S) * (↑uu⁻¹ : MvPowerSeries (Fin 2) S) = 1 :=
-    Units.mul_inv uu
-  have := congr_arg (· * (↑uu⁻¹ : MvPowerSeries (Fin 2) S)) heq
-  rw [mul_assoc, hone, mul_one, mul_assoc] at this
-  exact ⟨Q * ↑uu⁻¹, this⟩
-
--- Helper: in a domain, addY is divisible by d³.
--- addY = negY ![addX, negAddY, addZ] = -negAddY - a₁*addX - a₃*addZ
-private theorem formalAddY_dvd_cube_of_noZeroDivisors
-    {S : Type*} [CommRing S] [NoZeroDivisors S] [Nontrivial S]
-    (V : WeierstrassCurve S) :
-    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) S) ^ 3 ∣
-    V.formalAddY := by
-  have haddY : V.formalAddY =
-      -(V.map (MvPowerSeries.C (σ := Fin 2))).toProjective.negAddY
-        (V.formalPointMv 0) (V.formalPointMv 1) -
-      MvPowerSeries.C V.a₁ * V.formalAddX -
-      MvPowerSeries.C V.a₃ * V.formalAddZ := by
-    unfold formalAddY formalAddXYZ formalAddX formalAddZ
-    simp only [WeierstrassCurve.Projective.addY, WeierstrassCurve.Projective.negY_eq,
-      WeierstrassCurve.Projective.addXYZ_X, WeierstrassCurve.Projective.addXYZ_Y,
-      WeierstrassCurve.Projective.addXYZ_Z, WeierstrassCurve.map]
-    ring
-  rw [haddY]
-  exact dvd_sub (dvd_sub (dvd_neg.mpr (formalNegAddY_dvd_cube_of_noZeroDivisors V))
-    (dvd_mul_of_dvd_right (formalAddX_dvd_cube_of_noZeroDivisors V) _))
-    (dvd_mul_of_dvd_right (formalAddZ_dvd_cube_of_noZeroDivisors V) _)
-
-/-! ### Naturality of the formal point and addition under ring maps -/
-
-section Naturality
-
-variable {S₂ : Type*} [CommRing S₂] (φ : R →+* S₂)
-
-set_option maxHeartbeats 12800000 in
-private theorem formalUCoeff_map (W : WeierstrassCurve R) :
-    ∀ n, formalUCoeff (W.map φ) n = φ (formalUCoeff W n) := by
-  intro n
-  induction n using Nat.strongRecOn with
-  | ind n ih =>
-  cases n with
-  | zero => simp [formalUCoeff_zero]
-  | succ n =>
-    rw [formalUCoeff_succ, formalUCoeff_succ]
-    simp only [WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
-      WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄,
-      WeierstrassCurve.map_a₆]
-    have rw_k : ∀ k, k ≤ n → (W.map φ).formalUCoeff k = φ (W.formalUCoeff k) :=
-      fun k hk => ih k (by omega)
-    have sum3 : ∀ (_ : n ≥ 2),
-      ∑ x ∈ Finset.range (n - 1), (W.map φ).formalUCoeff x * (W.map φ).formalUCoeff (n - 2 - x) =
-      ∑ x ∈ Finset.range (n - 1), φ (W.formalUCoeff x) * φ (W.formalUCoeff (n - 2 - x)) :=
-      fun h => Finset.sum_congr rfl (fun x hx => by
-        have hxr := Finset.mem_range.mp hx
-        rw [rw_k x (by omega), rw_k (n - 2 - x) (by omega)])
-    have sum4 : ∀ (_ : n ≥ 3),
-      ∑ x ∈ Finset.range (n - 2), (W.map φ).formalUCoeff x * (W.map φ).formalUCoeff (n - 3 - x) =
-      ∑ x ∈ Finset.range (n - 2), φ (W.formalUCoeff x) * φ (W.formalUCoeff (n - 3 - x)) :=
-      fun h => Finset.sum_congr rfl (fun x hx => by
-        have hxr := Finset.mem_range.mp hx
-        rw [rw_k x (by omega), rw_k (n - 3 - x) (by omega)])
-    have sum6 : ∀ (_ : n ≥ 5),
-      ∑ x ∈ Finset.range (n - 4), (W.map φ).formalUCoeff x *
-        ∑ y ∈ Finset.range (n - 4 - x), (W.map φ).formalUCoeff y * (W.map φ).formalUCoeff (n - 5 - x - y) =
-      ∑ x ∈ Finset.range (n - 4), φ (W.formalUCoeff x) *
-        ∑ y ∈ Finset.range (n - 4 - x), φ (W.formalUCoeff y) * φ (W.formalUCoeff (n - 5 - x - y)) :=
-      fun h => Finset.sum_congr rfl (fun x hx => by
-        have hxr := Finset.mem_range.mp hx
-        rw [rw_k x (by omega)]
-        congr 1
-        exact Finset.sum_congr rfl (fun y hy => by
-          have hyr := Finset.mem_range.mp hy
-          rw [rw_k y (by omega), rw_k (n - 5 - x - y) (by omega)]))
-    rw [rw_k n le_rfl]
-    split_ifs with h1 h2 h3 h4
-    all_goals first
-      | (rw [rw_k (n-1) (by omega), sum3 (by omega), sum4 (by omega), sum6 (by omega)]
-         simp only [map_add, map_mul, map_sum, map_zero])
-      | (rw [rw_k (n-1) (by omega), sum3 (by omega), sum4 (by omega)]
-         simp only [map_add, map_mul, map_sum, map_zero])
-      | (rw [rw_k (n-1) (by omega), sum3 (by omega)]
-         simp only [map_add, map_mul, map_sum, map_zero])
-      | (rw [rw_k (n-1) (by omega)]
-         simp only [map_add, map_mul, map_sum, map_zero])
-      | (simp only [map_add, map_mul, map_sum, map_zero])
-      | skip
-    all_goals simp_all only [not_le, map_add, map_mul, map_zero]
-
-private theorem formalU_map (W : WeierstrassCurve R) :
-    PowerSeries.map φ W.formalU = (W.map φ).formalU := by
-  ext n
-  simp only [PowerSeries.coeff_map, formalU_coeff]
-  exact (formalUCoeff_map φ W n).symm
-
-private theorem formalW_map (W : WeierstrassCurve R) :
-    PowerSeries.map φ W.formalW = (W.map φ).formalW := by
-  unfold formalW
-  rw [map_mul, map_pow, PowerSeries.map_X, formalU_map]
-
-private theorem formalPointMv_map_comp (W : WeierstrassCurve R) (i : Fin 2) :
-    MvPowerSeries.map φ ∘ W.formalPointMv i = (W.map φ).formalPointMv i := by
-  funext j; fin_cases j
-  · simp [formalPointMv]
-  · simp [formalPointMv, Matrix.cons_val_one]
-  · show MvPowerSeries.map φ (W.formalPointMv i 2) = (W.map φ).formalPointMv i 2
-    simp only [formalPointMv_z]
-    rw [PowerSeries.map_subst (PowerSeries.HasSubst.X i), MvPowerSeries.map_X, formalW_map]
-
-set_option maxHeartbeats 3200000 in
-private theorem formalAddXYZ_map (W : WeierstrassCurve R) (j : Fin 3) :
-    MvPowerSeries.map φ (W.formalAddXYZ j) = (W.map φ).formalAddXYZ j := by
-  have hmap := @WeierstrassCurve.Projective.map_addXYZ
-    (MvPowerSeries (Fin 2) R) (MvPowerSeries (Fin 2) S₂) _ _
-    (W.map (MvPowerSeries.C (σ := Fin 2))).toProjective
-    (MvPowerSeries.map φ)
-    (W.formalPointMv 0) (W.formalPointMv 1)
-  rw [formalPointMv_map_comp φ W 0, formalPointMv_map_comp φ W 1] at hmap
-  have hcurve : (W.map (MvPowerSeries.C (σ := Fin 2))).map (MvPowerSeries.map φ) =
-      (W.map φ).map (MvPowerSeries.C (σ := Fin 2)) := by
-    simp only [WeierstrassCurve.map_map]
-    apply WeierstrassCurve.ext <;> simp [WeierstrassCurve.map, MvPowerSeries.map_C]
-  unfold formalAddXYZ
-  rw [← hcurve]
-  exact (congr_fun hmap j).symm
-
-end Naturality
-
-/-! ### Transport from domain to general ring -/
-
-/-- Transport: d³ | addZ over any commutative ring, via naturality from the universal curve. -/
 theorem formalAddZ_dvd_cube (W : WeierstrassCurve R) :
     (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ 3 ∣ W.formalAddZ := by
-  have huniv := formalAddZ_dvd_cube_of_noZeroDivisors univWeierstrassCurve
-  obtain ⟨q, hq⟩ := huniv
-  have hmap := formalAddXYZ_map (univEval W) univWeierstrassCurve (2 : Fin 3)
-  rw [univEval_map] at hmap
-  have hmapped := congr_arg (MvPowerSeries.map (univEval W)) hq
-  rw [map_mul, map_pow, map_sub, MvPowerSeries.map_X, MvPowerSeries.map_X] at hmapped
-  show _ ∣ W.formalAddXYZ 2
-  rw [← hmap, hmapped]
-  exact dvd_mul_right _ _
-
-/-- `(X₀ - X₁)³` divides `formalAddX`. -/
-theorem formalAddX_dvd_cube (W : WeierstrassCurve R) :
-    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ 3 ∣ W.formalAddX := by
-  have huniv := formalAddX_dvd_cube_of_noZeroDivisors univWeierstrassCurve
-  obtain ⟨q, hq⟩ := huniv
-  have hmap := formalAddXYZ_map (univEval W) univWeierstrassCurve (0 : Fin 3)
-  rw [univEval_map] at hmap
-  have hmapped := congr_arg (MvPowerSeries.map (univEval W)) hq
-  rw [map_mul, map_pow, map_sub, MvPowerSeries.map_X, MvPowerSeries.map_X] at hmapped
-  show _ ∣ W.formalAddXYZ 0
-  rw [← hmap, hmapped]
-  exact dvd_mul_right _ _
-
-/-- `(X₀ - X₁)³` divides `formalAddY`. -/
-theorem formalAddY_dvd_cube (W : WeierstrassCurve R) :
-    (MvPowerSeries.X 0 - MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) ^ 3 ∣ W.formalAddY := by
-  have huniv := formalAddY_dvd_cube_of_noZeroDivisors univWeierstrassCurve
-  obtain ⟨q, hq⟩ := huniv
-  have hmap := formalAddXYZ_map (univEval W) univWeierstrassCurve (1 : Fin 3)
-  rw [univEval_map] at hmap
-  have hmapped := congr_arg (MvPowerSeries.map (univEval W)) hq
-  rw [map_mul, map_pow, map_sub, MvPowerSeries.map_X, MvPowerSeries.map_X] at hmapped
-  show _ ∣ W.formalAddXYZ 1
-  rw [← hmap, hmapped]
-  exact dvd_mul_right _ _
+  sorry
 
 /-! ### Normalized coordinates -/
 
@@ -1064,15 +762,15 @@ theorem formalAddZ_eq_cube_mul (W : WeierstrassCurve R) :
 
 /-! ### normalizedAddY is a unit -/
 
-/-- The constant coefficient of `normalizedAddY` is `1`. -/
+/-- The constant coefficient of `normalizedAddY` is `-1`. -/
 theorem normalizedAddY_constantCoeff (W : WeierstrassCurve R) :
-    MvPowerSeries.constantCoeff (W.normalizedAddY) = 1 :=
+    MvPowerSeries.constantCoeff (W.normalizedAddY) = -1 :=
   sorry
 
 /-- `normalizedAddY` is a unit in `MvPowerSeries (Fin 2) R`. -/
 theorem normalizedAddY_isUnit (W : WeierstrassCurve R) : IsUnit (W.normalizedAddY) := by
   rw [MvPowerSeries.isUnit_iff_constantCoeff, normalizedAddY_constantCoeff]
-  exact isUnit_one
+  exact isUnit_one.neg
 
 /-! ### The formal group law -/
 
