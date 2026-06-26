@@ -156,7 +156,8 @@ theorem preΨ'_deriv_ne_zero_at_nontorsion_root [IsAlgClosed K]
     (hcurve : W.toAffine.Equation x y)
     (hY : W.toAffine.polynomialY.evalEval x y ≠ 0)
     (hroot : (W.preΨ' n).eval x = 0) :
-    (derivative (W.preΨ' n)).eval x ≠ 0 := sorry
+    (derivative (W.preΨ' n)).eval x ≠ 0 :=
+  SeparabilityCore.preΨ'_deriv_ne_zero_at_root_general W hn hroot
 
 /-! ## Step 5: Assembly — conditional proof of dual_root_implies_tangent_zero
 
