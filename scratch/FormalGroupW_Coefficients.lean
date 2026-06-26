@@ -44,3 +44,16 @@ theorem normalizedAddY_constantCoeff_correct (W : WeierstrassCurve R) :
   exact h.symm
 
 end WeierstrassCurve.FormalGroupCoefficients
+
+/-! ### Substitution coefficient helper -/
+
+/-- coeff (single i n) of subst (X i) f = coeff n f. -/
+theorem coeff_subst_X (i : Fin 2) (f : R⟦X⟧) (n : ℕ) :
+    MvPowerSeries.coeff (single i n)
+      (PowerSeries.subst (MvPowerSeries.X i : MvPowerSeries (Fin 2) R) f) =
+    PowerSeries.coeff (R := R) n f := by
+  rw [PowerSeries.coeff_subst (PowerSeries.HasSubst.X i)]
+  simp only [MvPowerSeries.X_pow_eq, MvPowerSeries.coeff_monomial,
+    (Finsupp.single_injective i).eq_iff, smul_ite, smul_one, smul_zero]
+  rw [finsum_eq_single n (fun d hd => by simp [hd])]
+  simp
