@@ -1,44 +1,26 @@
 # FormalGroupW — Weierstrass formal group construction
 
-## Goal
-Build W.formalGroupLaw : MvPowerSeries (Fin 2) R with:
-- F(0,0) = 0
-- coeff_X(F) = 1
-- coeff_Y(F) = 1
+## Status: COMPLETE (0 sorry, 0 custom axiom)
+Commit: 67a7e09 (2026-06-25)
+Build: verified clean via lake env lean
 
-This feeds into FormalNsmulDirect (tangent [n] = n) → separability → Torsion.lean.
+## What it proves
+- formalGroupLaw W : MvPowerSeries (Fin 2) R — the formal group law
+- F(0,0) = 0 (constantCoeff)
+- coeff_X(F) = 1 (lin_coeff_X)
+- coeff_Y(F) = 1 (lin_coeff_Y)
 
-## Current state (2026-06-25)
+## Infrastructure built
+- 3 divisibility proofs (addX/Y/Z via domain proof + universal ring transport)
+- Full naturality chain (formalUCoeff_map → formalW_map → formalAddXYZ_map)
+- Coefficient extraction via coeff_{(3,0)} of (X₀-X₁)³·q = constantCoeff(q)
+- normalizedAddY_constantCoeff = 1 (CAS-verified, sign bug fixed from -1)
 
-### DONE (0 sorry)
-- formalW, formalU definitions + functional equations
-- formalPoint, formalPointMv, formalPointMv_equation
-- formalDelta, deltaQuot, deltaQuotQuot factorization
-- X_sub_X_regular (non-zero-divisor)
-- diagDiffQuot_formalW
-- formalAddZ_mul_ww (addZ identity)
-- formalAddZ_dvd_cube_of_noZeroDivisors (domain proof)
-- formalAddX_dvd_cube_of_noZeroDivisors (domain proof via addX_eq')
-- formalAddY_dvd_cube_of_noZeroDivisors (domain proof via negAddY_eq')
-- formalUCoeff_map, formalU_map, formalW_map (naturality chain)
-- formalPointMv_map_comp, formalAddXYZ_map (projective naturality)
-- formalAddX_dvd_cube, formalAddY_dvd_cube, formalAddZ_dvd_cube (transport)
-- univWeierstrassCurve, univEval, univEval_map
-- normalizedAddX/Y/Z definitions, formalGroupLaw definition
+## Downstream files (all 0 sorry)
+- FormalNsmulDirect.lean: tangent [n] = n (bypasses FormalGroup.assoc)
+- FormalGroupWiring.lean: connects FormalGroupW → FormalNsmulDirect
+- FormalGroupW_Coefficients.lean: extraction infrastructure
 
-### 4 SORRY remaining
-1. normalizedAddY_constantCoeff = 1 (sign fixed from -1)
-2. formalGroupLaw_constantCoeff = 0
-3. formalGroupLaw_lin_coeff_X = 1
-4. formalGroupLaw_lin_coeff_Y = 1
-
-### Proof strategy for remaining sorries
-- Use coefficient extraction: coeff_{(3,0)} of (X₀-X₁)³·q = constantCoeff(q)
-- Raw fact: coeff_{(3,0)}(formalAddY) = 1 (CAS verified)
-- Infrastructure in FormalGroupW_Coefficients.lean: coeff_subst_X, coeff extraction chain
-
-### Downstream files
-- FormalNsmulDirect.lean: 0 sorry (tangent = n, bypasses FormalGroup.assoc)
-- FormalGroupWiring.lean: scaffold connecting FormalGroupW → FormalNsmulDirect
-- SeamE1_FormalBridge.lean: 1 sorry (formal group → separability bridge)
-- SeamE1_SeparabilityCore.lean: 1 sorry (n≥4 case — use formal group route, not EDS descent)
+## Path to Mazur mainline
+FormalGroupW → FormalNsmulDirect → tangent bridge → separability → Torsion.lean
+Remaining real sorries: FormalBridge(1) + SeparabilityCore(1) + Torsion(3) = 5
