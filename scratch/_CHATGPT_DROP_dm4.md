@@ -1,331 +1,343 @@
-# Q764 (dm4): separability of `preΨ'(n)` from the differential of `[n]`
+# Q778 (dm4): proving separability of `preΨ'(n)` without defining `Ω_n`
 
 ## Bottom line
 
-Yes: there is a clean identity, but I would **not** use the raw total derivative of the `x`-coordinate as the main separability certificate.  The better identity comes from the local parameter at infinity.
-
-I will write
+Do **not** define `Ω_n` just to prove separability of `preΨ'(n)`.  The clean route is the infinitesimal/kernel route:
 
 ```text
-ψ  = ψ_n        -- the x-polynomial `preΨ'(n)` in the odd case
-Φ  = Φ_n        -- x-coordinate numerator
-Ω  = Ω_n        -- y-coordinate numerator, not the invariant differential
-v  = 2y + a₁x + a₃
+[n] is étale when (n : K) ≠ 0,
+so its kernel has no nonzero dual-number tangent,
+so the function cutting out the affine kernel has simple zeros.
 ```
 
-so that on the affine coordinate ring of
+In concrete Lean terms, this is the **dual-number/projective-coordinate proof**, not the `Ω_n` proof.
+
+The set-theoretic statement
 
 ```text
-F = y² + a₁xy + a₃y - x³ - a₂x² - a₄x - a₆
+ψ_n(P) = 0  ⇒  [n]P = O
 ```
 
-we have
+is not enough by itself.  Squarefreeness is infinitesimal data.  A polynomial can cut out the correct set of points and still have multiple roots.  To prove
 
 ```text
-[n](P) = (Φ/ψ², Ω/ψ³).
+ψ_n'(x₀) ≠ 0,
 ```
 
-The useful root-level identity is the congruence
+you need a first-order statement, either a differential identity or a dual-number argument.  Since `Ω_n` is absent from Mathlib and the usual formula for it has characteristic-`2` issues, the dual-number argument is the better Mathlib-compatible route.
+
+## Correcting the formal-group intuition
+
+The objection in the prompt is right in this form:
 
 ```text
-v · Φ · ∂xψ + n · Ω ≡ 0    mod ψ.        (★)
+[n]_F'(0) = n
 ```
 
-Depending on the sign convention for the local parameter, this may appear as
+is a statement at the identity, not directly at the torsion point `P`.
+
+But for an elliptic curve, the differential of `[n]` is translation-invariant.  If `P` is an `n`-torsion point, then locally at `P` write a first-order deformation as
 
 ```text
-v · Φ · ∂xψ - n · Ω ≡ 0    mod ψ.
+P_ε = P + Q_ε,
 ```
 
-The sign is irrelevant for separability.  What matters is that the identity has **no factor of 2** in front of `∂xψ`, so it works in characteristic `2` as long as `(n : K) ≠ 0`.
-
-Equivalently, in the coordinate ring `R = K[x,y]/(F)`, the statement can be packaged as
+where `Q_ε` is a dual-number point in the formal neighborhood of `O`.  Then
 
 ```text
-∃ H_n : R,
-  v · Φ_n · ∂xψ_n + (n : K) · Ω_n = ψ_n · H_n.
+[n](P_ε) = [n]P + [n](Q_ε) = O + [n](Q_ε) = [n](Q_ε).
 ```
 
-This is the polynomial identity I would target.
-
-## Why the direct `x`-coordinate derivative is weaker
-
-The invariant differential is
+On first-order tangent vectors, the formal group theorem gives
 
 ```text
-ω_E = dx / v.
+[n](Q_ε) = n · Q_ε    mod ε².
 ```
 
-Also
+Thus, if `(n : K) ≠ 0`, a nonzero tangent vector at any `n`-torsion point cannot be killed by `[n]`.  This is the infinitesimal fact you need.
+
+So the right statement is not “evaluate `[n]_F` at `t(P)`.”  It is:
 
 ```text
-v([n]P) = 2(Ω/ψ³) + a₁(Φ/ψ²) + a₃
-        = (2Ω + a₁Φψ + a₃ψ³) / ψ³.
+d[n]_P = d(translation) ∘ d[n]_O ∘ d(translation),
 ```
 
-Since
+and `d[n]_O` is scalar multiplication by `(n : K)`.
+
+## Odd `n`: the dual-number proof
+
+Let
 
 ```text
-d(Φ/ψ²) = (Φ'ψ - 2Φψ') / ψ³ · dx,
+ψ = preΨ'(n)
 ```
 
-the identity `[n]^*ω_E = n · ω_E` gives the correct global Wronskian identity
+in the odd case, so `ψ` is the usual x-polynomial division factor.
+
+Work over an algebraic closure or a splitting field.  Let `x₀` be a root of `ψ`, and let `P = (x₀, y₀)` be the corresponding affine point on the curve.  The existing Mathlib facts you want to use are:
 
 ```text
-v · (Φ'ψ - 2Φψ') = n · (2Ω + a₁Φψ + a₃ψ³).      (x-W)
+ψ_n(P.x) = 0        ⇒        [n]P = O,
+Φ_n(P.x) ≠ 0        at roots of ψ_n,
 ```
 
-Modulo `ψ`, this becomes
+where the nonvanishing of `Φ_n` comes from the identity
 
 ```text
--2 · v · Φ · ψ' = 2 · n · Ω.                      (x-W mod ψ)
+Φ_n = x · ψ_n² - ψ_{n+1}ψ_{n-1} · factor
 ```
 
-This proves the desired root statement in characteristics different from `2`, after proving the relevant numerator terms are nonzero.  But it loses all information in characteristic `2`.  That is the main reason to avoid making `(x-W)` the primary proof of separability.
+plus the adjacent nonvanishing/coprimality lemma such as `no_adjacent_preΨ_zero`.
 
-## Derivation of the clean congruence `(★)`
-
-Use the standard local parameter at infinity
+Now suppose, for contradiction, that
 
 ```text
-t = -x/y.
+ψ'(x₀) = 0.
 ```
 
-At the identity `O`, `dt` and the invariant differential differ by a unit whose value at `O` is `1`.  Hence, at points mapping to `O`, the differential of `t ∘ [n]` has leading coefficient `n`:
+Because `n` is odd, `P` is not a nontrivial `2`-torsion point.  Indeed, if `P` were killed by both `2` and odd `n`, it would be killed by `gcd(2,n)=1`, hence would be `O`, impossible for an affine root.  Therefore the projection to the `x`-line is unramified at `P`; equivalently
 
 ```text
-d(t ∘ [n]) = n · ω_E          on the kernel, up to a unit evaluating to 1.
+v(P) = 2y₀ + a₁x₀ + a₃ ≠ 0.
 ```
 
-Now compute `t ∘ [n]` using the division-polynomial coordinates:
+This lets you build a dual-number tangent lift with `dx = 1`:
 
 ```text
-t([n]P) = - x([n]P) / y([n]P)
-        = - (Φ/ψ²) / (Ω/ψ³)
-        = - Φψ / Ω.
+x_ε = x₀ + ε,
+y_ε = y₀ + y₁ ε,
 ```
 
-Reducing the differential modulo `ψ`, all terms containing an explicit factor of `ψ` vanish, so
+where `y₁` is chosen from the linearized curve equation
 
 ```text
-d(-Φψ/Ω) ≡ - (Φ/Ω) · dψ    mod ψ.
+F_x(P) + F_y(P) · y₁ = 0,
 ```
 
-Since `ψ = ψ(x)`,
+and `F_y(P) = v(P)` is invertible.  Thus `P_ε = (x_ε, y_ε)` is a genuine `DualNumber K`-point of the curve with nonzero tangent vector.
+
+For any polynomial `p`, evaluation on dual numbers gives
 
 ```text
-dψ = ψ'(x) · dx = ψ'(x) · v · ω_E.
+p(x₀ + ε) = p(x₀) + p'(x₀) ε.
 ```
 
-Therefore, modulo `ψ`,
+Applying this to `ψ`, the assumptions `ψ(x₀)=0` and `ψ'(x₀)=0` give
 
 ```text
-- (Φ/Ω) · ψ' · v · ω_E = n · ω_E.
+ψ(x_ε) = 0
 ```
 
-Multiplying by `Ω` gives
+inside the dual-number ring.
+
+Now use the projective division-polynomial/nsmul formula over the dual-number algebra.  Since the same kernel-cutting factor `ψ` vanishes on `P_ε`, and since `Φ_n(P_ε)` is a unit because its residue `Φ_n(P)` is nonzero, the projective formula forces
 
 ```text
-v · Φ · ψ' + n · Ω = 0       mod ψ,
+[n](P_ε) = O
 ```
 
-up to the harmless sign convention mentioned above.
+over the dual numbers.
 
-This is the clean identity that directly relates `n`, `ψ_n`, `ψ_n'`, and the other division-polynomial numerators.
+But this says that the nonzero tangent vector represented by `P_ε` lies in the infinitesimal kernel of `[n]` at `P`.  That contradicts the formal-group/tangent result above, because `(n : K) ≠ 0`.
 
-## How `(★)` proves separability
-
-Let `P = (x₀,y₀)` be an affine geometric point with
+Therefore
 
 ```text
-ψ_n(x₀) = 0.
+ψ'(x₀) ≠ 0.
 ```
 
-Assume `(n : K) ≠ 0`.  If also
+Since this holds at every geometric root, `ψ` is squarefree, hence separable.
 
-```text
-ψ_n'(x₀) = 0,
+## What exactly must be proved in Lean
+
+The proof can be organized into four reusable lemmas.
+
+```lean
+-- Schematic names only.  Use the repository/Mathlib names for the curve,
+-- points, division polynomials, and dual-number API.
+
+/-- Polynomial evaluation on a first-order x-lift. -/
+theorem eval_dual_x_eq_eval_add_derivative
+    (p : Polynomial K) (x₀ : K) :
+    aeval (x₀ + ε) p = p.eval x₀ + (p.derivative.eval x₀) * ε := by
+  -- standard polynomial induction / existing dual-number simp lemma
+  sorry
+
+/-- A nonvertical affine point admits a dual lift with dx = 1. -/
+theorem exists_dual_lift_dx_one
+    {P : E(K)} (hvertical : v P ≠ 0) :
+    ∃ Pε : E(DualNumber K),
+      residue Pε = P ∧ dx_tangent Pε = 1 := by
+  -- choose y₁ = -F_x(P) / F_y(P)
+  sorry
+
+/-- If ψ_n and its derivative vanish at x(P), the dual lift is still in the ψ_n-zero locus. -/
+theorem preΨ_dual_zero_of_root_and_derivative_zero
+    {P : E(K)} {Pε : E(DualNumber K)}
+    (hres : residue Pε = P)
+    (hroot : (preΨ' n).eval P.x = 0)
+    (hder : (preΨ' n).derivative.eval P.x = 0)
+    (hdx : dx_tangent Pε = 1) :
+    aeval Pε.x (preΨ' n) = 0 := by
+  -- use `eval_dual_x_eq_eval_add_derivative`
+  sorry
+
+/-- No nonzero dual tangent at an n-torsion point is killed by [n] when n is invertible. -/
+theorem no_infinitesimal_kernel_of_nsmul
+    {P : E(K)} (hP : n • P = 0) (hn : (n : K) ≠ 0)
+    {Pε : E(DualNumber K)}
+    (hres : residue Pε = P) (htangent_ne : tangent Pε ≠ 0) :
+    n • Pε ≠ O := by
+  -- translate by `-P`, reduce to the formal group at O,
+  -- and use `FormalNsmulDirect`: first-order coefficient is `(n : K)`.
+  sorry
 ```
 
-then evaluating `(★)` at `P` gives
+Then the root-level theorem is short:
 
-```text
-n · Ω_n(P) = 0.
+```lean
+theorem derivative_preΨ'_ne_zero_at_root_odd
+    (hn_odd : Odd n) (hn : (n : K) ≠ 0)
+    {x₀ : Kbar} (hroot : (preΨ' n).eval x₀ = 0) :
+    ((preΨ' n).derivative.eval x₀) ≠ 0 := by
+  intro hder
+
+  -- Get an affine n-torsion point P above x₀.
+  obtain ⟨P, hxP, hnP, hP_ne_O⟩ := point_of_preΨ'_root hroot
+
+  -- Odd n means P is not 2-torsion, hence the x-map is unramified at P.
+  have hv : v P ≠ 0 := by
+    -- if v P = 0 then P is 2-torsion; combine with hnP and odd n.
+    sorry
+
+  -- Build a nonzero dual tangent with dx = 1.
+  obtain ⟨Pε, hres, hdx⟩ := exists_dual_lift_dx_one hv
+  have htangent_ne : tangent Pε ≠ 0 := by
+    -- because dx_tangent = 1
+    sorry
+
+  -- ψ vanishes on the dual lift because ψ and ψ' vanish at x₀.
+  have hψ_dual : aeval Pε.x (preΨ' n) = 0 := by
+    exact preΨ_dual_zero_of_root_and_derivative_zero hres hroot hder hdx
+
+  -- Projective division-polynomial formula: ψ=0 and Φ unit imply n • Pε = O.
+  have hnPε : n • Pε = O := by
+    apply nsmul_eq_zero_of_preΨ'_dual_zero
+    · exact hψ_dual
+    · -- Φ is a unit on Pε because Φ(P) ≠ 0, from adjacent nonvanishing.
+      exact Phi_unit_at_dual_root hres hroot
+
+  -- But [n] has no infinitesimal kernel when n is invertible.
+  exact no_infinitesimal_kernel_of_nsmul hnP hn hres htangent_ne hnPε
 ```
 
-Since `(n : K) ≠ 0`, this forces
-
-```text
-Ω_n(P) = 0.
-```
-
-But `Ω_n(P)` is nonzero at a nonzero `n`-torsion point.  Here is the elementary proof.
-
-First,
-
-```text
-Φ_n = xψ_n² - ψ_{n+1}ψ_{n-1},
-```
-
-so modulo `ψ_n`,
-
-```text
-Φ_n ≡ -ψ_{n+1}ψ_{n-1}.                         (1)
-```
-
-At a point with `ψ_n(P)=0`, the factors `ψ_{n-1}(P)` and `ψ_{n+1}(P)` are nonzero: otherwise `P` would be simultaneously killed by `n` and by `n-1` or `n+1`, hence killed by `gcd(n,n±1)=1`, forcing `P=O`, impossible for an affine root.  In a purely EDS proof this is exactly the easy coprimality lemma
-
-```text
-gcd(ψ_n, ψ_{n-1}) = gcd(ψ_n, ψ_{n+1}) = 1.
-```
-
-Thus
-
-```text
-Φ_n(P) ≠ 0.                                      (2)
-```
-
-Next use the cleared curve equation for the image coordinates.  Since
-
-```text
-x([n]P) = Φ/ψ²,
-y([n]P) = Ω/ψ³,
-```
-
-substitution into the Weierstrass equation and multiplication by `ψ⁶` gives
-
-```text
-Ω² + a₁ΦΩψ + a₃Ωψ³
-  = Φ³ + a₂Φ²ψ² + a₄Φψ⁴ + a₆ψ⁶.                (3)
-```
-
-Modulo `ψ`, this reduces to
-
-```text
-Ω² ≡ Φ³    mod ψ.                                (4)
-```
-
-Evaluating at `P`, equations `(2)` and `(4)` imply
-
-```text
-Ω_n(P)² = Φ_n(P)³ ≠ 0,
-```
-
-so
-
-```text
-Ω_n(P) ≠ 0.
-```
-
-This contradicts the consequence of `(★)` and `ψ_n'(x₀)=0`.  Therefore
-
-```text
-ψ_n'(x₀) ≠ 0.
-```
-
-Since every geometric root has nonzero derivative, `ψ_n` is squarefree, equivalently
-
-```text
-gcd(ψ_n, ψ_n') = 1.
-```
-
-This is the characteristic-free separability proof for `(n : K) ≠ 0`.
+The names are schematic, but this is the minimal shape: only `preΨ'`, `Φ`, adjacent nonvanishing, projective division-polynomial formulas, and formal-group/tangent scalar multiplication by `n`.
 
 ## Even `n`
 
-For even `n`, the usual division polynomial has the extra factor
+For even `n`, split off the `2`-torsion/vertical factor exactly as Mathlib’s normalization requires.
+
+The non-`2` roots are handled by the same argument: they are affine `n`-torsion points where the x-map is unramified, so the dual lift with `dx = 1` exists and the infinitesimal-kernel contradiction proves simple roots.
+
+The `2`-torsion factor is separate.  If `(n : K) ≠ 0` and `n` is even, then `char K ≠ 2`.  In that case the `2`-torsion x-polynomial is squarefree by nonsingularity of the Weierstrass cubic: a multiple root of the cubic would make the affine cubic singular.  The `2`-torsion factor is coprime to the remaining factor because a common root would be a point killed by both `2` and the odd quotient, hence killed by `1`, i.e. the identity.
+
+So the even proof should be a factorization proof:
 
 ```text
-ψ₂ = 2y + a₁x + a₃.
+preΨ'(2m) = two_torsion_factor * non2_factor
 ```
 
-If `preΨ'(n)` is the x-polynomial factor with the `ψ₂`/vertical factor removed, apply the same argument to roots with `ψ₂(P) ≠ 0`.  The removed `2`-torsion part is handled separately: when `(n : K) ≠ 0` and `n` is even, the characteristic is not `2`, and nonsingularity of the Weierstrass cubic gives the separability of the `2`-torsion x-polynomial.  The two factors are coprime because a point in the non-`2` part and in the `2`-torsion part would have order dividing both `2` and the odd quotient, hence would be trivial.
-
-So the implementation split should be:
+with
 
 ```text
-odd n:
-  use the congruence (★) directly for ψ_n = preΨ'(n)
-
-even n:
-  remove the ψ₂ factor;
-  use (★) on the non-2 roots;
-  prove the ψ₂/x-cubic part squarefree from nonsingularity;
-  prove the two factors coprime by torsion-order/copairing.
+Squarefree two_torsion_factor,
+Squarefree non2_factor,
+IsCoprime two_torsion_factor non2_factor.
 ```
 
-## Can this be proved by Somos/EDS recurrence plus resultants?
+## Why defining `Ω_n` is not simpler
 
-In principle, yes, but it is not the route I would mechanize first.
+There are three traps in the `Ω_n` route.
 
-The recurrence is good for the **reduced** facts:
+First, the common formula
 
 ```text
-gcd(ψ_n, ψ_{n-1}) = 1,
-gcd(ψ_n, ψ_{n+1}) = 1,
-Φ_n ≡ -ψ_{n+1}ψ_{n-1} mod ψ_n,
-Ω_n² ≡ Φ_n³ mod ψ_n.
+Ω_n = (ψ_{2n}/ψ_n - ψ_n(a₁Φ_n + a₃ψ_n²)) / 2
 ```
 
-These are exactly the facts needed to show `Φ_n` and `Ω_n` are units at roots of `ψ_n`.
+is not characteristic-free.  It is fine when `2` is invertible, but it is not a good target for the theorem stated only under `(n : K) ≠ 0`.
 
-But multiplicity is infinitesimal.  To prove
+Second, defining `Ω_n` by the Weierstrass equation
 
 ```text
-gcd(ψ_n, ψ_n') = 1,
+Ω_n² + a₁Φ_nΩ_nψ_n + a₃Ω_nψ_n³
+  = Φ_n³ + a₂Φ_n²ψ_n² + a₄Φ_nψ_n⁴ + a₆ψ_n⁶
 ```
 
-a recurrence-only proof eventually has to reintroduce either a differential argument or a discriminant/resultant theorem.  The classical resultant certificate is a universal formula of the shape
+is not really a definition.  It asks Lean to construct a polynomial square root / y-coordinate numerator.  That is essentially the missing Mathlib TODO.
+
+Third, even if you define `Ω_n`, the separability proof still needs the differential/local-parameter identity.  Constructing `Ω_n` and proving that identity is at least as much work as the dual-number proof, and likely more.
+
+## An Ω-free polynomial certificate, if you want one
+
+There is a useful identity with no `Ω_n` in the **statement**.  From the local-parameter congruence
 
 ```text
-Disc(preψ_n) = unit · n^A · Δ^B
+v · Φ_n · ψ_n' + n · Ω_n ≡ 0 mod ψ_n
 ```
 
-with exponents depending on the normalization and parity.  Since the curve is nonsingular (`Δ ≠ 0`) and `(n : K) ≠ 0`, the discriminant is nonzero, so the polynomial is squarefree.
+and the cleared curve equation, which gives
 
-That is a valid mathematical proof, but in Lean it is likely much heavier than the differential congruence: it requires setting up the universal division polynomials, proving the resultant/discriminant formula through the recursive definitions, tracking normalizations and the even factor, and then specializing.  The differential/local-parameter proof instead needs only the coordinate formulas for `[n]`, the invariant differential identity `[n]^*ω_E = nω_E`, and the small coprimality/unit lemmas above.
-
-## Suggested Lean target lemmas
-
-I would aim for these lemmas, using the repository's actual names for `preΨ'`, `Φ`, and `Ω`.
-
-```lean
--- Schematic, not exact repo syntax.
-
-/-- The clean root congruence coming from `t = -x/y`. -/
-theorem divpoly_derivative_congr_mod_psi
-    (n : ℕ) (hn : (n : K) ≠ 0) :
-    v * Φ n * (Polynomial.derivative (preΨ' n)).aeval x + (n : R) * Ω n
-      ∈ Ideal.span ({preΨ' n} : Set R) := by
-  -- derive from `t ∘ [n] = -Φψ/Ω` and `[n]^*ω = nω`
-  -- after reducing modulo `ψ`.
-  sorry
-
-/-- At a root of `ψ_n`, the y-coordinate numerator is nonzero. -/
-theorem Omega_ne_zero_of_psi_eq_zero
-    {P : E(Kbar)} (hP : preΨ' n P.x = 0) (hPaff : P ≠ O) :
-    Ω n P ≠ 0 := by
-  -- `Φ ≡ -ψ_{n+1}ψ_{n-1} mod ψ`, consecutive gcd/torsion coprime,
-  -- and the cleared curve equation gives `Ω² ≡ Φ³ mod ψ`.
-  sorry
-
-/-- Root-level derivative nonvanishing. -/
-theorem derivative_preΨ'_ne_zero_at_root
-    {P : E(Kbar)} (hn : (n : K) ≠ 0)
-    (hroot : preΨ' n P.x = 0) (hPaff : P ≠ O) :
-    (Polynomial.derivative (preΨ' n)).eval P.x ≠ 0 := by
-  intro hder
-  have hcongr := divpoly_derivative_congr_mod_psi n hn
-  -- evaluate at P; the derivative term vanishes, so `(n : K) * Ω n P = 0`.
-  -- use `hn` and `Omega_ne_zero_of_psi_eq_zero`.
-  sorry
-
-/-- Separability/squarefreeness of the division polynomial. -/
-theorem separable_preΨ'_of_char_not_dvd
-    (n : ℕ) (hn : (n : K) ≠ 0) :
-    (preΨ' n).Separable := by
-  -- reduce to geometric roots and use `derivative_preΨ'_ne_zero_at_root`.
-  sorry
+```text
+Ω_n² ≡ Φ_n³ mod ψ_n,
 ```
 
-The key point is that the first lemma should be the congruence `(★)`, not the full `x`-coordinate Wronskian.  The Wronskian is still useful as a check, but `(★)` is the identity that gives separability cleanly at a root.
+one obtains the squared congruence
+
+```text
+v² · Φ_n² · (ψ_n')² ≡ n² · Φ_n³     mod ψ_n.      (†)
+```
+
+Equivalently, in the affine coordinate ring,
+
+```text
+ψ_n ∣ v² · Φ_n² · (ψ_n')² - n² · Φ_n³.
+```
+
+This identity is characteristic-free and does not mention `Ω_n`.  At a root of `ψ_n`, adjacent nonvanishing gives `Φ_n(x₀) ≠ 0`; if `ψ_n'(x₀)=0`, then `(†)` gives
+
+```text
+0 = n² · Φ_n(x₀)³,
+```
+
+contradicting `(n : K) ≠ 0` and `Φ_n(x₀) ≠ 0`.
+
+However, proving `(†)` globally still requires some source of infinitesimal information.  Without `Ω_n`, that source is again the dual-number/projective-coordinate proof.  So `(†)` is a nice optional final certificate, but it is not a replacement for the infinitesimal argument unless you already have a way to prove it.
+
+## Recommended implementation path
+
+Use this order.
+
+1. Prove the standard dual-number polynomial evaluation lemma:
+
+```text
+p(x + εu) = p(x) + p'(x)u ε.
+```
+
+2. Prove the nonvertical dual lift lemma for affine curve points.
+
+3. Prove the infinitesimal kernel lemma for `[n]` from `FormalNsmulDirect`, using translation by the torsion point.
+
+4. Extend the existing division-polynomial root criterion to dual numbers using projective formulas.  The needed input is only the `Z`/denominator factor `ψ_n` and the fact that `Φ_n` is a unit at a `ψ_n`-root.
+
+5. Combine them to prove root-level derivative nonvanishing.
+
+6. Convert root-level derivative nonvanishing over an algebraic closure into
+
+```text
+IsCoprime (preΨ' n) (Polynomial.derivative (preΨ' n))
+```
+
+or the Mathlib separability predicate you need.
+
+This avoids `Ω_n`, avoids division by `2`, and proves exactly the infinitesimal fact that squarefreeness requires.
