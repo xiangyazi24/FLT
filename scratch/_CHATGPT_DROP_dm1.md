@@ -1,348 +1,353 @@
-# Q813 (dm1): the `Ψ₃ = 0` stratum and the even cofactor
+# Q823 (dm1): the `n = 5` odd base case for separability of `preΨ'`
 
-## Recommendation
+## Executive summary
 
-Do **not** try to get
+The recurrence shortcut is real, but it is **not enough by itself** to prove separability of `preΨ'(5)` from separability of `Ψ₃`.
 
-```text
-β² δ - α γ² ≠ 0
-```
-
-from the weak facts
+The identity
 
 ```text
-preΨ(j)(x) = 0 ↔ 3 ∣ j
+preΨ'(5) = preΨ₄ * Ψ₂Sq^2 - Ψ₃^3
 ```
 
-and individual nonvanishing of `α, β, γ, δ`.  That is not enough: two nonzero monomials can still cancel.
+is the right way to avoid expanding the degree-12 polynomial.  It gives a compact expression for the polynomial and for its derivative.  It also immediately disposes of the special strata `Ψ₃(x) = 0` and `Ψ₂Sq(x) = 0` under `Δ ≠ 0`.
 
-Also, the plain Somos-style relation is not quite the right tool for Mathlib's **reduced** sequence `preΨ`.  The reduced sequence has parity-dependent `Ψ₂Sq²` factors in its recurrence.  The useful move is instead to specialize the whole reduced EDS recurrence to the `Ψ₃ = 0` stratum.  On that stratum there is an extra curve-specific identity:
+But the hard case is the generic stratum
 
 ```text
-preΨ₄ = - Ψ₂Sq².
+Ψ₂Sq(x) ≠ 0,   Ψ₃(x) ≠ 0,   preΨ₄(x) ≠ 0.
 ```
 
-With that identity, the cofactor is not merely nonzero; it is an explicit monomial times `2`.
+On that stratum, a double root of
 
-## The key polynomial identity
+```text
+preΨ₄ * Ψ₂Sq^2 - Ψ₃^3
+```
 
-In `DivisionPolynomial/Basic.lean`, the relevant initial values are
+is a logarithmic-derivative condition.  It does not force `Ψ₃(x) = 0` or `Ψ₃'(x) = 0`, so the already-proved separability of `Ψ₃` does not close the case.
+
+So the answer is:
+
+* **yes**, use the recurrence identity to keep the algebra small;
+* **no**, it does not eliminate the need for a real `n = 5` argument;
+* the cleanest shortcut is geometric/differential: `[5]` is étale when `(5 : K) ≠ 0`, hence the 5-torsion kernel is reduced, hence the odd 5-division polynomial is squarefree away from the `x`-map ramification locus, and a 5-torsion point is not 2-torsion.
+
+If you want a purely polynomial proof, the recurrence identity lets you replace one huge expanded degree-12 Bézout certificate by a much more structured certificate using a few small auxiliary identities.  But some certificate/resultant for the remaining generic stratum is still needed.
+
+## First correction: the Mathlib recurrence index
+
+For the `ℕ`-indexed Mathlib theorem
 
 ```lean
-preΨ' 1 = 1
-preΨ' 2 = 1
-preΨ' 3 = Ψ₃
-preΨ' 4 = preΨ₄
+W.preΨ'_odd (m : ℕ)
 ```
 
-and the reduced EDS parameter is `Ψ₂Sq²`.
-
-The missing identity to prove is:
+the statement is shifted:
 
 ```lean
-lemma preΨ₄_add_Ψ₂Sq_sq (W : WeierstrassCurve K) :
+W.preΨ' (2 * (m + 2) + 1) =
+  W.preΨ' (m + 4) * W.preΨ' (m + 2)^3 *
+      (if Even m then W.Ψ₂Sq^2 else 1)
+    - W.preΨ' (m + 1) * W.preΨ' (m + 3)^3 *
+      (if Even m then 1 else W.Ψ₂Sq^2)
+```
+
+So for `n = 5`, use `m = 0`, not `m = 2`.  The `ℤ`-indexed recurrence has the unshifted shape where `2*m+1 = 5` means `m = 2`.
+
+A useful local lemma is:
+
+```lean
+lemma preΨ'_five {K : Type*} [CommRing K] (W : WeierstrassCurve K) :
+    W.preΨ' 5 = W.preΨ₄ * W.Ψ₂Sq ^ 2 - W.Ψ₃ ^ 3 := by
+  rw [show 5 = 2 * (0 + 2) + 1 by norm_num, W.preΨ'_odd 0]
+  simp
+```
+
+This is the right normal form for the `n = 5` base case.
+
+## Do not call it a factorization
+
+The expression
+
+```text
+preΨ₄ * Ψ₂Sq^2 - Ψ₃^3
+```
+
+is not a multiplicative factorization of `preΨ'(5)`.  It is a structured difference of products.  This matters: squarefreeness of the pieces does not imply squarefreeness of the difference.
+
+The derivative is
+
+```text
+(preΨ₄ * Ψ₂Sq^2 - Ψ₃^3)'
+  = preΨ₄' * Ψ₂Sq^2
+      + 2 preΨ₄ * Ψ₂Sq * Ψ₂Sq'
+      - 3 Ψ₃^2 * Ψ₃'.
+```
+
+At a root, this is a relation among three nonzero terms in the generic stratum.  It is not simply saying that one of the known lower polynomials has a multiple root.
+
+## The small identities that make the algebra manageable
+
+Use the following abbreviations:
+
+```text
+S := Ψ₂Sq
+C := Ψ₃
+D := preΨ₄
+L := 6X^2 + b₂X + b₄
+M := 12X + b₂        -- so M = L'
+P₅ := D*S^2 - C^3
+```
+
+There are three very useful identities.
+
+### 1. `C' = 3S`
+
+```text
+(Ψ₃)' = 3 Ψ₂Sq.
+```
+
+This is immediate from the definitions:
+
+```text
+Ψ₃ = 3X^4 + b₂X^3 + 3b₄X^2 + 3b₆X + b₈
+Ψ₂Sq = 4X^3 + b₂X^2 + 2b₄X + b₆.
+```
+
+### 2. `S' = 2L`
+
+```text
+(Ψ₂Sq)' = 2 * (6X^2 + b₂X + b₄).
+```
+
+### 3. `D + S^2 = L*C`
+
+The key identity, already useful in the `Ψ₃ = 0` stratum, is
+
+```text
+preΨ₄ + Ψ₂Sq^2 = (6X^2 + b₂X + b₄) * Ψ₃.
+```
+
+In Lean this is a small `ring1` proof after unfolding `preΨ₄`, `Ψ₂Sq`, `Ψ₃`, and the `bᵢ` definitions:
+
+```lean
+lemma preΨ₄_add_Ψ₂Sq_sq {K : Type*} [CommRing K] (W : WeierstrassCurve K) :
     W.preΨ₄ + W.Ψ₂Sq ^ 2 =
-      (6 * X ^ 2 + C W.b₂ * X + C W.b₄) * W.Ψ₃ := by
+      (C (6 : K) * X ^ 2 + C W.b₂ * X + C W.b₄) * W.Ψ₃ := by
   rw [preΨ₄, Ψ₂Sq, Ψ₃, b₂, b₄, b₆, b₈]
   ring1
 ```
 
-The exact Lean syntax may need minor coercion polishing, for example `C (6 : K) * X ^ 2`, but mathematically the identity is exactly
+Differentiating this identity and using `C' = 3S`, `S' = 2L` gives
 
 ```text
-preΨ₄ + Ψ₂Sq² = (6X² + b₂X + b₄) Ψ₃.
+D' = M*C - L*S.
 ```
 
-So if `x` is on the `Ψ₃ = 0` stratum, and
+Then the derivative of `P₅` has the compact form
 
 ```text
-S := Ψ₂Sq(x),
-B := S²,
-D := preΨ₄(x),
+P₅' = S * (M*C*S + 4*L^2*C - 5*L*S^2 - 9*C^2).
+```
+
+This formula is far better than expanding the derivative of the degree-12 polynomial.
+
+## What the recurrence identity proves immediately
+
+Assume `x` is a root of `P₅`.
+
+### Stratum `S(x) = 0`
+
+If
+
+```text
+S(x) = Ψ₂Sq(x) = 0,
 ```
 
 then
 
 ```text
-D = -B.
+0 = P₅(x) = D(x)*S(x)^2 - C(x)^3 = -C(x)^3,
 ```
 
-This is the fact that prevents cancellation in the cofactor.
+so `C(x) = 0`.
 
-## Specialized reduced EDS on the `Ψ₃ = 0` stratum
-
-Let
+Thus `x` is a common root of `Ψ₂Sq` and `Ψ₃`.  The small resultant is
 
 ```text
-A_j := preΨ'(j)(x).
+Res(Ψ₂Sq, Ψ₃) = -Δ^2.
 ```
 
-Using the map lemma for `preNormEDS'`, the specialization is
+So under `Δ ≠ 0`, this stratum is impossible.
+
+This is a much smaller certificate than the degree-12 resultant: it is only a cubic/quartic resultant.
+
+### Stratum `C(x) = 0`
+
+If
 
 ```text
-A_j = preNormEDS' B 0 (-B) j,
+C(x) = Ψ₃(x) = 0,
 ```
 
-where
+then the identity
 
 ```text
-B = Ψ₂Sq(x)².
+D + S^2 = L*C
 ```
 
-The specialized sequence has the following six-term pattern:
+specializes to
 
 ```text
-A_{6t}     = 0
-A_{6t+1}   =  B^(3t² + t)
-A_{6t+2}   =  B^(3t² + 2t)
-A_{6t+3}   = 0
-A_{6t+4}   = -B^(3t² + 4t + 1)
-A_{6t+5}   = -B^(3t² + 5t + 2)
-```
-
-Equivalently,
-
-```text
-A_{3q}   = 0,
-A_{3q+1} = (-1)^q B^(q(q+1)/2 + floor(q²/4)),
-A_{3q+2} = (-1)^q B^(q(q+1)/2 + floor((q+1)²/4)).
-```
-
-For Lean, the six-residue-class version is probably easier than the floor-division version.
-
-This pattern follows directly from the two reduced EDS recurrences in Mathlib:
-
-```lean
-preΨ'_even :
-  preΨ' (2 * (m + 3)) =
-    preΨ' (m + 2)^2 * preΨ' (m + 3) * preΨ' (m + 5)
-      - preΨ' (m + 1) * preΨ' (m + 3) * preΨ' (m + 4)^2
-
-preΨ'_odd :
-  preΨ' (2 * (m + 2) + 1) =
-    preΨ' (m + 4) * preΨ' (m + 2)^3 * (if Even m then Ψ₂Sq² else 1)
-      - preΨ' (m + 1) * preΨ' (m + 3)^3 * (if Even m then 1 else Ψ₂Sq²)
-```
-
-After evaluation at `x`, these become the recurrences for `preNormEDS' B 0 (-B)`.
-
-## The cofactor computation
-
-Your even case has
-
-```text
-n = 2 * (m + 3)
-A_{m+3} = 0.
-```
-
-On the `Ψ₃ = 0` stratum, the divisibility/zero pattern gives
-
-```text
-3 ∣ m + 3.
-```
-
-Since `m : ℕ`, this means
-
-```text
-m = 3r
-```
-
-for some `r : ℕ`.  Then
-
-```text
-α = A_{m+1} = A_{3r+1}
-β = A_{m+2} = A_{3r+2}
-γ = A_{m+4} = A_{3r+4}
-δ = A_{m+5} = A_{3r+5}.
-```
-
-Now split on the parity of `r`.
-
-### Case 1: `r = 2t`
-
-Using the six-term pattern:
-
-```text
-α =  B^(3t² + t)
-β =  B^(3t² + 2t)
-γ = -B^(3t² + 4t + 1)
-δ = -B^(3t² + 5t + 2)
+D(x) = -S(x)^2.
 ```
 
 Therefore
 
 ```text
-β²δ - αγ²
-  = -B^(2(3t²+2t) + (3t²+5t+2))
-    - B^((3t²+t) + 2(3t²+4t+1))
-  = -2 * B^(9t² + 9t + 2).
+P₅(x) = D(x)*S(x)^2 - C(x)^3 = -S(x)^4.
 ```
 
-### Case 2: `r = 2t + 1`
+So `P₅(x) = 0` implies `S(x) = 0`, again contradicting `Res(S,C) = -Δ^2` and `Δ ≠ 0`.
 
-Then
+Thus every root of `P₅` lies in the generic stratum
 
 ```text
-α = -B^(3t² + 4t + 1)
-β = -B^(3t² + 5t + 2)
-γ =  B^(3t² + 7t + 4)
-δ =  B^(3t² + 8t + 5)
+S(x) ≠ 0,   C(x) ≠ 0,   D(x) ≠ 0.
 ```
 
-and hence
+This is the useful payoff of the recurrence identity.
+
+## Why this still does not prove separability
+
+Now suppose `x` is a double root.  In the generic stratum, the two equations are
 
 ```text
-β²δ - αγ²
-  = B^(2(3t²+5t+2) + (3t²+8t+5))
-    + B^((3t²+4t+1) + 2(3t²+7t+4))
-  = 2 * B^(9t² + 18t + 9).
+P₅(x) = 0,
+P₅'(x) = 0.
 ```
 
-So in all cases the cofactor is
+Using the compact formulas, these become
 
 ```text
-β²δ - αγ² = ± 2 * B^N
+D*S^2 = C^3,
+M*C*S + 4*L^2*C - 5*L*S^2 - 9*C^2 = 0,
 ```
 
-for an explicit natural exponent `N`.  In the compact `q = (m+3)/3` notation:
+with `S,C,D ≠ 0`, all evaluated at `x`.
+
+Using `D = L*C - S^2`, the first equation can also be written as
 
 ```text
-β²δ - αγ² = (-1)^q * 2 * B^floor(9q² / 4).
+C^3 = L*C*S^2 - S^4.
 ```
 
-Here `B = Ψ₂Sq(x)²`.
-
-## Nonvanishing hypotheses needed
-
-The final nonvanishing is now immediate under the separability hypotheses you should already have:
+This does **not** imply
 
 ```text
-2 ≠ 0
-Ψ₂Sq(x) ≠ 0
+C = 0
 ```
 
-because then
+or
 
 ```text
-B = Ψ₂Sq(x)² ≠ 0,
-B^N ≠ 0,
-±2 * B^N ≠ 0.
+C' = 0.
 ```
 
-In a field this is just `mul_ne_zero`, `pow_ne_zero`, and `neg_ne_zero`.
-
-The hypothesis `Ψ₂Sq(x) ≠ 0` is geometrically: a `3`-torsion point is not also `2`-torsion.  Algebraically, it is the statement that `Ψ₃` and `Ψ₂Sq` have no common root on a nonsingular curve, under the characteristic assumptions in the separability theorem.  If your global assumptions include `Nat.Prime p`, `p ∤ n`, or `NeZero (n : K)`, then in this even branch with `3 ∣ m+3` and `n = 2(m+3)`, you should in particular have `2 ≠ 0`; usually you also exclude the bad common-root case by the nonsingularity/discriminant hypothesis.
-
-## Why the simple Somos argument is insufficient
-
-The relation you wrote is too weak for this goal.  Even if some Somos relation gives a product equality among neighboring nonzero terms, it does not by itself rule out cancellation in
+So separability of `Ψ₃` does not contradict these equations.  The derivative equation is a logarithmic-derivative relation
 
 ```text
-β²δ - αγ².
+D'/D + 2*S'/S = 3*C'/C,
 ```
 
-For example, in the abstract specialized recurrence with only `A₃ = 0`, if one treats
+not a multiple-root condition for one of `D`, `S`, or `C` individually.
+
+This is the obstruction to the proposed shortcut.
+
+There is also a characteristic issue: if your theorem only assumes `(5 : K) ≠ 0`, then `char K` may be `3`.  In characteristic `3`, `Ψ₃` is not the right separability input anyway.  The robust lower-level fact is not “`Ψ₃` is separable”, but rather the coprimality/no-common-root statement
 
 ```text
-B = Ψ₂Sq(x)²,
-D = preΨ₄(x)
+gcd(Ψ₂Sq, Ψ₃) = 1
 ```
 
-as unrelated nonzero parameters, then already for `m = 0`:
+under `Δ ≠ 0`, witnessed by `Res(Ψ₂Sq, Ψ₃) = -Δ^2`.
+
+## Best shortcut: use étaleness of `[5]`
+
+The conceptual proof of the `n = 5` base case is not a polynomial Bézout proof.  It is this:
+
+1. Since `5` is odd, `preΨ'(5)` is the x-polynomial representing the full `5`-division polynomial; there is no `ψ₂`/`Y` factor.
+
+2. A root `x₀` of `preΨ'(5)` gives points `P = (x₀, y₀)` with `[5]P = O` over an algebraic closure.
+
+3. The previous stratum analysis shows `Ψ₂Sq(x₀) ≠ 0`, so `P` is not a 2-torsion/ramification point of the `x`-map.  Equivalently, `x - x₀` is a local parameter at `P`.
+
+4. If `preΨ'(5)` had a multiple root at `x₀`, then the corresponding function `ψ₅` would vanish to order at least `2` at `P`.
+
+5. But `[5]` is étale when `(5 : K) ≠ 0`.  Equivalently, on the formal group the tangent map is multiplication by `5`, hence a unit.  Therefore the kernel of `[5]` is reduced, so `ψ₅` vanishes simply at each nonzero 5-torsion point.
+
+6. Contradiction.
+
+This avoids the degree-12 Bézout certificate completely.
+
+This route matches the “dual-number tangent” bridge you have been developing: a double root should produce a nontrivial dual-number lift of a 5-torsion point in the kernel of `[5]`; the tangent calculation `[5]' = 5` rules this out when `(5 : K) ≠ 0`.
+
+## If you stay purely algebraic
+
+Then the recurrence identity should still be used, but the proof shape should be:
+
+1. Prove the compact identity
+
+   ```lean
+   W.preΨ' 5 = W.preΨ₄ * W.Ψ₂Sq ^ 2 - W.Ψ₃ ^ 3
+   ```
+
+2. Prove the small auxiliary identities
+
+   ```text
+   Ψ₃' = 3 Ψ₂Sq
+   Ψ₂Sq' = 2L
+   preΨ₄ + Ψ₂Sq^2 = L Ψ₃
+   preΨ₄' = M Ψ₃ - L Ψ₂Sq
+   ```
+
+3. Prove the compact derivative formula
+
+   ```text
+   (preΨ'(5))' =
+     Ψ₂Sq * (M*Ψ₃*Ψ₂Sq + 4*L^2*Ψ₃ - 5*L*Ψ₂Sq^2 - 9*Ψ₃^2).
+   ```
+
+4. Use `Res(Ψ₂Sq, Ψ₃) = -Δ^2` to eliminate the `S = 0` and `C = 0` strata.
+
+5. For the remaining generic stratum, either:
+
+   * use the geometric/dual-number `[5]' = 5` argument; or
+   * use a structured resultant/certificate for the two compact equations
+
+     ```text
+     C^3 = L*C*S^2 - S^4,
+     M*C*S + 4*L^2*C - 5*L*S^2 - 9*C^2 = 0.
+     ```
+
+The direct resultant for the fully expanded polynomial should be, with Mathlib's normalization,
 
 ```text
-α = A₁ = 1,
-β = A₂ = 1,
-γ = A₄ = D,
-δ = A₅ = B D,
+Res(preΨ'(5), (preΨ'(5))') = 5^12 * Δ^22
 ```
 
-so
+(up to the conventional sign of `Polynomial.resultant`; for degree `12` the usual sign is harmless).  But proving that directly in Lean is exactly the large certificate you are trying to avoid.
+
+## Bottom line
+
+The recurrence formula is the right normalization lemma:
 
 ```text
-β²δ - αγ² = B D - D² = D(B - D),
+preΨ'(5) = preΨ₄ * Ψ₂Sq^2 - Ψ₃^3.
 ```
 
-which can vanish with all four of `α, β, γ, δ` nonzero.
+Use it.  It makes the `Ψ₃ = 0` and `Ψ₂Sq = 0` strata easy and gives a compact derivative formula.
 
-The actual division-polynomial stratum avoids this because `D = -B`, not because the zero pattern alone is strong enough.  With `D = -B`, the same base case becomes
+But it does **not** reduce separability of `preΨ'(5)` to separability of `Ψ₃`.  The remaining generic case is genuinely the statement that `[5]` is étale, or equivalently that the degree-12 resultant is a unit under `Δ ≠ 0` and `(5 : K) ≠ 0`.
 
-```text
-β²δ - αγ² = -2B².
-```
-
-That is the whole mechanism.
-
-## Lean implementation route
-
-I would close this sub-sorry with three small local lemmas.
-
-### 1. The stratum identity
-
-```lean
-lemma preΨ₄_add_Ψ₂Sq_sq (W : WeierstrassCurve K) :
-    W.preΨ₄ + W.Ψ₂Sq ^ 2 =
-      (6 * X ^ 2 + C W.b₂ * X + C W.b₄) * W.Ψ₃ := by
-  rw [preΨ₄, Ψ₂Sq, Ψ₃, b₂, b₄, b₆, b₈]
-  ring1
-```
-
-Then derive, after evaluation at `x`:
-
-```lean
-have hD : W.preΨ₄.eval x = - (W.Ψ₂Sq.eval x)^2 := by
-  have h := congrArg (fun f : K[X] => f.eval x) (preΨ₄_add_Ψ₂Sq_sq W)
-  -- simp [Polynomial.eval_mul, Polynomial.eval_add, hΨ₃] at h
-  -- exact rearranged h
-```
-
-### 2. The specialized sequence formula
-
-Define locally:
-
-```lean
-def A (B : K) (j : ℕ) : K :=
-  preNormEDS' B 0 (-B) j
-```
-
-Prove the six residue formulas:
-
-```lean
-A B (6*t)     = 0
-A B (6*t+1)   =  B^(3*t^2 + t)
-A B (6*t+2)   =  B^(3*t^2 + 2*t)
-A B (6*t+3)   = 0
-A B (6*t+4)   = -B^(3*t^2 + 4*t + 1)
-A B (6*t+5)   = -B^(3*t^2 + 5*t + 2)
-```
-
-Use `normEDSRec'` or strong induction over the recurrences.  Each recurrence branch is just `simp [preNormEDS'_even, preNormEDS'_odd]` followed by parity splitting and `ring_nf`/`ring1` for exponents.
-
-This is more Lean-friendly than using `floor(9q²/4)`.
-
-### 3. The cofactor lemma
-
-State the exact nonzero lemma in the form that matches your branch:
-
-```lean
-lemma cofactor_ne_zero_three_stratum
-    {B : K} (hB : B ≠ 0) (h2 : (2 : K) ≠ 0) (r : ℕ) :
-    let A := fun j => preNormEDS' B 0 (-B) j
-    A (3*r + 2)^2 * A (3*r + 5)
-      - A (3*r + 1) * A (3*r + 4)^2 ≠ 0 := by
-  -- split `r` as `2*t` or `2*t+1`
-  -- rewrite the six residue formulas
-  -- case r = 2*t: expression is `-2 * B^(9*t^2 + 9*t + 2)`
-  -- case r = 2*t+1: expression is `2 * B^(9*t^2 + 18*t + 9)`
-  -- finish by `mul_ne_zero h2 (pow_ne_zero _ hB)` and sign handling
-```
-
-Then connect your actual terms to this lemma using
-
-```lean
-B = (W.Ψ₂Sq.eval x)^2,
-preΨ'(j)(x) = preNormEDS' B 0 (-B) j,
-m = 3*r.
-```
-
-That should close exactly the `Ψ₃(x)=0` even-cofactor subcase.
+So the cleanest non-certificate shortcut is the dual-number/formal-group proof of étaleness of `[5]`.  If you want to remain purely inside polynomial algebra, keep the recurrence normal form and prove a structured resultant, not the fully expanded degree-12 Bézout identity.
