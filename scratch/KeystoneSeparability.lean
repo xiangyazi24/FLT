@@ -318,6 +318,151 @@ public theorem Psi3_separable (W : WeierstrassCurve k) [W.IsElliptic] (h3 : (3 :
   rw [key, hb, ← hw]
   exact Units.inv_mul w
 
+
+/-- Explicit derivative of `preΨ₄`. -/
+private lemma dPreΨ₄ (W : WeierstrassCurve k) :
+    derivative W.preΨ₄
+      = (12 : k[X]) * X ^ 5 + (5 : k[X]) * C W.b₂ * X ^ 4
+        + (20 : k[X]) * C W.b₄ * X ^ 3 + (30 : k[X]) * C W.b₆ * X ^ 2
+        + (20 : k[X]) * C W.b₈ * X + C (W.b₂ * W.b₈ - W.b₄ * W.b₆) := by
+  rw [WeierstrassCurve.preΨ₄]
+  simp only [derivative_add, derivative_mul, derivative_pow, derivative_X, derivative_ofNat,
+    derivative_C, derivative_C_mul, Nat.cast_ofNat, map_ofNat, mul_one,
+    mul_zero, zero_mul, add_zero, zero_add, Nat.reduceSub, pow_one]
+  ring
+
+/-- Bezout cofactor identity for `preΨ₄` separability (CAS-verified). -/
+private lemma bezout_PreΨ₄_dPreΨ₄ (W : WeierstrassCurve k) :
+    ((5760 : k[X]) * X ^ 4 * (C W.b₄)
+          - (240 : k[X]) * X ^ 4 * (C W.b₂) ^ 2
+          + (2640 : k[X]) * X ^ 3 * (C W.b₂) * (C W.b₄)
+          - (100 : k[X]) * X ^ 3 * (C W.b₂) ^ 3
+          - (4320 : k[X]) * X ^ 3 * (C W.b₆)
+          + (8640 : k[X]) * X ^ 2 * (C W.b₄) ^ 2
+          - (300 : k[X]) * X ^ 2 * (C W.b₂) ^ 2 * (C W.b₄)
+          - (1080 : k[X]) * X ^ 2 * (C W.b₂) * (C W.b₆)
+          + (120 : k[X]) * X * (C W.b₂) * (C W.b₄) ^ 2
+          + (7920 : k[X]) * X * (C W.b₄) * (C W.b₆)
+          - (420 : k[X]) * X * (C W.b₂) ^ 2 * (C W.b₆)
+          + (138 : k[X]) * (C W.b₂) ^ 2 * (C W.b₄) ^ 2
+          + (4548 : k[X]) * (C W.b₂) * (C W.b₄) * (C W.b₆)
+          - (138 : k[X]) * (C W.b₂) ^ 3 * (C W.b₆)
+          - (4096 : k[X]) * (C W.b₄) ^ 3
+          - (11664 : k[X]) * (C W.b₆) ^ 2) * W.preΨ₄
+      + ((40 : k[X]) * X ^ 5 * (C W.b₂) ^ 2
+          - (960 : k[X]) * X ^ 5 * (C W.b₄)
+          + (20 : k[X]) * X ^ 4 * (C W.b₂) ^ 3
+          - (520 : k[X]) * X ^ 4 * (C W.b₂) * (C W.b₄)
+          + (720 : k[X]) * X ^ 4 * (C W.b₆)
+          + (80 : k[X]) * X ^ 3 * (C W.b₂) ^ 2 * (C W.b₄)
+          + (240 : k[X]) * X ^ 3 * (C W.b₂) * (C W.b₆)
+          - (2240 : k[X]) * X ^ 3 * (C W.b₄) ^ 2
+          + (160 : k[X]) * X ^ 2 * (C W.b₂) ^ 2 * (C W.b₆)
+          - (40 : k[X]) * X ^ 2 * (C W.b₂) * (C W.b₄) ^ 2
+          - (3120 : k[X]) * X ^ 2 * (C W.b₄) * (C W.b₆)
+          + (58 : k[X]) * X * (C W.b₂) ^ 3 * (C W.b₆)
+          - (58 : k[X]) * X * (C W.b₂) ^ 2 * (C W.b₄) ^ 2
+          - (1768 : k[X]) * X * (C W.b₂) * (C W.b₄) * (C W.b₆)
+          + (1616 : k[X]) * X * (C W.b₄) ^ 3
+          + (3744 : k[X]) * X * (C W.b₆) ^ 2
+          + (4 : k[X]) * (C W.b₂) ^ 4 * (C W.b₆)
+          - (4 : k[X]) * (C W.b₂) ^ 3 * (C W.b₄) ^ 2
+          - (134 : k[X]) * (C W.b₂) ^ 2 * (C W.b₄) * (C W.b₆)
+          + (118 : k[X]) * (C W.b₂) * (C W.b₄) ^ 3
+          + (312 : k[X]) * (C W.b₂) * (C W.b₆) ^ 2
+          + (100 : k[X]) * (C W.b₄) ^ 2 * (C W.b₆)) * derivative W.preΨ₄
+      = C (16 * W.Δ ^ 2) := by
+  have hb := bRelC W
+  rw [dPreΨ₄ W]
+  linear_combination (norm :=
+    (simp only [WeierstrassCurve.preΨ₄, WeierstrassCurve.Δ,
+      map_neg, map_mul, map_add, map_sub, map_pow, map_ofNat, map_one,
+      Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow,
+      Polynomial.C_neg, Polynomial.C_1]; ring1))
+    (((400 : k[X]) * X ^ 6 * (C W.b₂) ^ 2
+          - (9600 : k[X]) * X ^ 6 * (C W.b₄)
+          + (200 : k[X]) * X ^ 5 * (C W.b₂) ^ 3
+          - (5200 : k[X]) * X ^ 5 * (C W.b₂) * (C W.b₄)
+          + (7200 : k[X]) * X ^ 5 * (C W.b₆)
+          + (20 : k[X]) * X ^ 4 * (C W.b₂) ^ 4
+          - (120 : k[X]) * X ^ 4 * (C W.b₂) ^ 2 * (C W.b₄)
+          + (2400 : k[X]) * X ^ 4 * (C W.b₂) * (C W.b₆)
+          - (11840 : k[X]) * X ^ 4 * (C W.b₄) ^ 2
+          + (80 : k[X]) * X ^ 3 * (C W.b₂) ^ 3 * (C W.b₄)
+          + (460 : k[X]) * X ^ 3 * (C W.b₂) ^ 2 * (C W.b₆)
+          - (2360 : k[X]) * X ^ 3 * (C W.b₂) * (C W.b₄) ^ 2
+          - (3120 : k[X]) * X ^ 3 * (C W.b₄) * (C W.b₆)
+          + (120 : k[X]) * X ^ 2 * (C W.b₂) ^ 3 * (C W.b₆)
+          - (3460 : k[X]) * X ^ 2 * (C W.b₂) * (C W.b₄) * (C W.b₆)
+          + (10440 : k[X]) * X ^ 2 * (C W.b₆) ^ 2
+          + (80 : k[X]) * X * (C W.b₂) ^ 2 * (C W.b₄) * (C W.b₆)
+          + (420 : k[X]) * X * (C W.b₂) * (C W.b₆) ^ 2
+          - (2480 : k[X]) * X * (C W.b₄) ^ 2 * (C W.b₆)
+          + (4 : k[X]) * (C W.b₂) ^ 4 * (C W.b₈)
+          - (4 : k[X]) * (C W.b₂) ^ 3 * (C W.b₄) * (C W.b₆)
+          + (138 : k[X]) * (C W.b₂) ^ 2 * (C W.b₆) ^ 2
+          - (1162 : k[X]) * (C W.b₂) * (C W.b₄) ^ 2 * (C W.b₆)
+          + (1024 : k[X]) * (C W.b₄) ^ 4
+          + (2916 : k[X]) * (C W.b₄) * (C W.b₆) ^ 2) * hb)
+
+/-- `preΨ₄` is separable when `(4:k)` is nonzero. -/
+public theorem Psi4_separable (W : WeierstrassCurve k) [W.IsElliptic] (h4 : (4 : k) ≠ 0) :
+    W.preΨ₄.Separable := by
+  have hbez := bezout_PreΨ₄_dPreΨ₄ W
+  have hu : IsUnit (C (16 * W.Δ ^ 2) : k[X]) := by
+    rw [Polynomial.isUnit_C]
+    have h16 : (16 : k) ≠ 0 := by
+      have e : (16 : k) = 4 * 4 := by norm_num
+      rw [e]; exact mul_ne_zero h4 h4
+    exact (isUnit_iff_ne_zero.mpr h16).mul (W.isUnit_Δ.pow 2)
+  rw [Polynomial.separable_def]
+  obtain ⟨w, hw⟩ := hu
+  -- Provide the Bezout witnesses: (w⁻¹ * S, w⁻¹ * T)
+  -- where S * preΨ₄ + T * derivative preΨ₄ = C(16*Δ²) = ↑w
+  -- so (w⁻¹ * S) * preΨ₄ + (w⁻¹ * T) * derivative preΨ₄ = w⁻¹ * ↑w = 1
+  set S := ((5760 : k[X]) * X ^ 4 * (C W.b₄)
+          - (240 : k[X]) * X ^ 4 * (C W.b₂) ^ 2
+          + (2640 : k[X]) * X ^ 3 * (C W.b₂) * (C W.b₄)
+          - (100 : k[X]) * X ^ 3 * (C W.b₂) ^ 3
+          - (4320 : k[X]) * X ^ 3 * (C W.b₆)
+          + (8640 : k[X]) * X ^ 2 * (C W.b₄) ^ 2
+          - (300 : k[X]) * X ^ 2 * (C W.b₂) ^ 2 * (C W.b₄)
+          - (1080 : k[X]) * X ^ 2 * (C W.b₂) * (C W.b₆)
+          + (120 : k[X]) * X * (C W.b₂) * (C W.b₄) ^ 2
+          + (7920 : k[X]) * X * (C W.b₄) * (C W.b₆)
+          - (420 : k[X]) * X * (C W.b₂) ^ 2 * (C W.b₆)
+          + (138 : k[X]) * (C W.b₂) ^ 2 * (C W.b₄) ^ 2
+          + (4548 : k[X]) * (C W.b₂) * (C W.b₄) * (C W.b₆)
+          - (138 : k[X]) * (C W.b₂) ^ 3 * (C W.b₆)
+          - (4096 : k[X]) * (C W.b₄) ^ 3
+          - (11664 : k[X]) * (C W.b₆) ^ 2)
+  set T := ((40 : k[X]) * X ^ 5 * (C W.b₂) ^ 2
+          - (960 : k[X]) * X ^ 5 * (C W.b₄)
+          + (20 : k[X]) * X ^ 4 * (C W.b₂) ^ 3
+          - (520 : k[X]) * X ^ 4 * (C W.b₂) * (C W.b₄)
+          + (720 : k[X]) * X ^ 4 * (C W.b₆)
+          + (80 : k[X]) * X ^ 3 * (C W.b₂) ^ 2 * (C W.b₄)
+          + (240 : k[X]) * X ^ 3 * (C W.b₂) * (C W.b₆)
+          - (2240 : k[X]) * X ^ 3 * (C W.b₄) ^ 2
+          + (160 : k[X]) * X ^ 2 * (C W.b₂) ^ 2 * (C W.b₆)
+          - (40 : k[X]) * X ^ 2 * (C W.b₂) * (C W.b₄) ^ 2
+          - (3120 : k[X]) * X ^ 2 * (C W.b₄) * (C W.b₆)
+          + (58 : k[X]) * X * (C W.b₂) ^ 3 * (C W.b₆)
+          - (58 : k[X]) * X * (C W.b₂) ^ 2 * (C W.b₄) ^ 2
+          - (1768 : k[X]) * X * (C W.b₂) * (C W.b₄) * (C W.b₆)
+          + (1616 : k[X]) * X * (C W.b₄) ^ 3
+          + (3744 : k[X]) * X * (C W.b₆) ^ 2
+          + (4 : k[X]) * (C W.b₂) ^ 4 * (C W.b₆)
+          - (4 : k[X]) * (C W.b₂) ^ 3 * (C W.b₄) ^ 2
+          - (134 : k[X]) * (C W.b₂) ^ 2 * (C W.b₄) * (C W.b₆)
+          + (118 : k[X]) * (C W.b₂) * (C W.b₄) ^ 3
+          + (312 : k[X]) * (C W.b₂) * (C W.b₆) ^ 2
+          + (100 : k[X]) * (C W.b₄) ^ 2 * (C W.b₆))
+  refine ⟨(w⁻¹).val * S, (w⁻¹).val * T, ?_⟩
+  have key : (w⁻¹).val * S * W.preΨ₄ + (w⁻¹).val * T * derivative W.preΨ₄
+      = (w⁻¹).val * (S * W.preΨ₄ + T * derivative W.preΨ₄) := by ring
+  rw [key, hbez, ← hw]
+  exact Units.inv_mul w
+
 end
 end WeierstrassCurve
-

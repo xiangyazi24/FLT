@@ -204,8 +204,12 @@ public theorem preΨ'_deriv_ne_zero_at_root_general [IsAlgClosed K]
       · -- j < 3 and n ≥ 4: j = 2, n = 4
         have : j = 2 := by omega
         subst this
-        -- n = 4: TODO base case via Bezout certificate
-        sorry
+        -- n = 4: use Bezout certificate (Psi4_separable)
+        have hn4 : n = 4 := by omega
+        have h4 : (4 : K) ≠ 0 := by push_cast [hn4] at hn'; exact hn'
+        rw [hn4] at hx' ⊢
+        rw [preΨ'_four] at hx' ⊢
+        exact eval_deriv_ne_zero_of_separable (Psi4_separable W h4) hx'
       · -- j ≥ 3: n = 2*(m+3)
         have hn_eq : n = 2 * ((j - 3) + 3) := by omega
         have hn' : (2 * (((j - 3 : ℕ) : K) + 3)) ≠ 0 := by
