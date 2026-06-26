@@ -1,480 +1,330 @@
-# Q762 (dm2): invariant differential, division polynomials, and separability of `preΨ' n`
+# Q772 (dm2): using `no_adjacent_preΨ_zero` to get nonzero adjacent `preΨ` values
 
-## Executive answer
+## Core point
 
-Mathlib has **some** of the ingredients, but not the invariant-differential proof as a packaged theorem.
-
-What I found in Mathlib:
-
-* `WeierstrassCurve` and its affine/projective point group laws exist.
-  In particular, Mathlib has nonsingular affine/projective point types and `AddCommGroup` instances for them over fields.
-* The affine coordinate ring exists as
+The cleanest proof is to first prove an **integer-indexed** lemma.  This avoids the `ℕ` predecessor issue entirely:
 
 ```lean
-WeierstrassCurve.Affine.CoordinateRing W
+preΨ (m - 1), preΨ m, preΨ (m + 1)       -- all indexed by ℤ
 ```
 
-with function field
+Then specialize to `m = (n : ℤ)`.  The bridge from `preΨ' n` to `preΨ (n : ℤ)` is Mathlib’s simp lemma from `DivisionPolynomial.Basic`:
 
 ```lean
-WeierstrassCurve.Affine.FunctionField W
+@[simp]
+lemma WeierstrassCurve.preΨ_ofNat (n : ℕ) :
+    W.preΨ n = W.preΨ' n
 ```
 
-* Division-polynomial infrastructure exists in
+So this usually works:
 
 ```lean
-Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Degree
+have hmid : (W.preΨ (n : ℤ)).eval x = 0 := by
+  simpa using hroot
 ```
 
-It defines:
-
-```lean
-WeierstrassCurve.preΨ'
-WeierstrassCurve.preΨ
-WeierstrassCurve.ΨSq
-WeierstrassCurve.Ψ
-WeierstrassCurve.Φ
-WeierstrassCurve.ψ
-WeierstrassCurve.φ
-```
-
-and proves coordinate-ring congruences such as:
-
-```lean
-WeierstrassCurve.Affine.CoordinateRing.mk_ψ_sq
-WeierstrassCurve.Affine.CoordinateRing.mk_ψ
-WeierstrassCurve.Affine.CoordinateRing.mk_φ
-```
-
-It also has map/base-change lemmas:
-
-```lean
-map_preΨ'
-map_preΨ
-map_ΨSq
-map_Ψ
-map_Φ
-map_ψ
-map_φ
-
-baseChange_preΨ'
-baseChange_preΨ
-baseChange_ΨSq
-baseChange_Ψ
-baseChange_Φ
-baseChange_ψ
-baseChange_φ
-```
-
-But Mathlib’s division-polynomial file explicitly still has:
-
-```lean
-* TODO: the bivariate polynomials `ωₙ`.
-```
-
-So the `y`-coordinate numerator `ωₙ`/`Ωₙ` is not currently formalized there.
-
-What I did **not** find as existing packaged Mathlib API:
-
-1. an elliptic-curve-specific definition of the invariant differential
-
-```text
-ω = dx / (2y + a₁x + a₃)
-```
-
-2. a theorem
-
-```text
-[n]^*ω = n • ω
-```
-
-3. a theorem connecting the Mathlib division polynomials to the actual multiplication-by-`n` map in the form
-
-```text
-[n](P) = (φₙ(P) / ψₙ(P)^2, ωₙ(P) / ψₙ(P)^3)
-```
-
-or projectively
-
-```text
-[n](P) = [φₙ(P)ψₙ(P) : ωₙ(P) : ψₙ(P)^3].
-```
-
-Mathlib does have general Kähler differentials in `Mathlib.RingTheory.Kaehler.Basic`, so one does **not** need to build differentials from zero.  But the elliptic-curve-specific invariant differential and its compatibility with multiplication are not there as far as I found.
+For `n + 1`, simp/coercions are easy.  For `n - 1`, if you want a **Nat-indexed** statement about `preΨ' (n - 1)`, you need `0 < n`, because Nat subtraction truncates at zero.  Without `0 < n`, `preΨ' (n - 1)` is not the same as `preΨ ((n : ℤ) - 1)`.
 
 ---
 
-## Can the chain-rule proof be done without scheme theory?
+## Integer-indexed adjacent nonvanishing lemma
 
-Yes.  You do **not** need schemes for this proof.  You can do it as pure commutative algebra in the affine coordinate ring, its fraction field, and modules of Kähler differentials.
-
-But it is not just a one-variable polynomial derivative proof.  The clean algebraic replacement for scheme theory is:
+This is the lemma I recommend using internally.
 
 ```lean
-A := W.toAffine.CoordinateRing
-L := W.toAffine.FunctionField
-Ω := KaehlerDifferential K A
-```
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.Tactic
+import scratch.KeystoneCoprimality
 
-or, after moving to the function field,
+open Polynomial
 
-```lean
-ΩL := KaehlerDifferential K L
-```
-
-Then prove the relevant rational-function identities in `L` and their differential identities in `ΩL`.
-
-The most robust version uses the projective local parameter at infinity
-
-```text
-t = -X / Y
-```
-
-rather than differentiating only the affine `x`-coordinate.  This avoids annoying characteristic `2` issues caused by the derivative of the denominator `ψₙ²`.
-
-Projectively, the multiplication-by-`n` formula should be stated as
-
-```text
-[n](P) = [φₙ(P) ψₙ(P) : ωₙ(P) : ψₙ(P)^3].
-```
-
-Then near a nonzero `n`-torsion point where `ψₙ(P) = 0`, one has
-
-```text
-t([n]P) = - φₙ(P) ψₙ(P) / ωₙ(P).
-```
-
-At such a point, `φₙ(P)` and `ωₙ(P)` are nonzero, so differentiating gives
-
-```text
-d(t ∘ [n]) = nonzero_scalar * dψₙ.
-```
-
-On the other hand, the invariant differential identity `[n]^*ω = nω`, together with `(n : K) ≠ 0`, says that `d(t ∘ [n])` is nonzero at the point.  Therefore `dψₙ` is nonzero at the point, so the zero of `ψₙ` is simple.
-
-Finally, away from `2`-torsion, Mathlib’s univariate `preΨ' n` is exactly the `x`-part of `ψₙ`:
-
-```text
-ψₙ = preΨₙ        if n is odd,
-ψₙ = preΨₙ ψ₂    if n is even.
-```
-
-At a non-2-torsion point, `ψ₂(P) ≠ 0`, so simplicity of `ψₙ` implies simplicity of `preΨₙ(x)`.
-
-Thus the proof can be done entirely using:
-
-* coordinate rings,
-* localizations/fraction fields,
-* Kähler differentials or equivalent derivations,
-* explicit rational identities for division polynomials.
-
-No schemes are required.
-
----
-
-## Minimal formalization needed
-
-Here is the minimal stack I would build.  I would **not** start by formalizing global regular differentials on schemes.
-
-### 1. Coordinate-ring notation
-
-Use the existing affine coordinate ring:
-
-```lean
-namespace WeierstrassCurve.Affine.CoordinateRing
+namespace WeierstrassCurve
 
 variable {K : Type*} [Field K]
-variable (W : WeierstrassCurve K)
+variable (W : WeierstrassCurve K) {x : K}
 
-local notation "A" => W.toAffine.CoordinateRing
-
-noncomputable abbrev Xbar : A :=
-  mk W.toAffine (Polynomial.C Polynomial.X)
-
-noncomputable abbrev Ybar : A :=
-  mk W.toAffine Polynomial.X
-
-noncomputable abbrev dYDen : A :=
-  2 * Ybar W + W.a₁ • Xbar W + algebraMap K A W.a₃
-
-end WeierstrassCurve.Affine.CoordinateRing
+/--
+If `preΨ m` vanishes at `x`, then neither adjacent value can vanish.
+This is the direct reusable form of `no_adjacent_preΨ_zero`.
+-/
+public theorem preΨ_adjacent_ne_zero_of_preΨ_zero
+    [W.IsElliptic] (h4 : (4 : K) ≠ 0) {m : ℤ}
+    (hm : (W.preΨ m).eval x = 0) :
+    (W.preΨ (m - 1)).eval x ≠ 0 ∧
+    (W.preΨ (m + 1)).eval x ≠ 0 := by
+  constructor
+  · intro hprev
+    have hno := no_adjacent_preΨ_zero (W := W) (x := x) h4 (m - 1)
+    apply hno
+    constructor
+    · exact hprev
+    · -- The second term in the adjacent pair at `m - 1` is `m`.
+      simpa using hm
+  · intro hnext
+    have hno := no_adjacent_preΨ_zero (W := W) (x := x) h4 m
+    exact hno ⟨hm, hnext⟩
 ```
 
-The exact expression for `Xbar`/`Ybar` will depend on the local open namespaces and bivariate-polynomial notation, but the conceptual target is:
-
-```text
-Xbar = class of X in K[X,Y]/(F)
-Ybar = class of Y in K[X,Y]/(F)
-D    = 2Ybar + a₁Xbar + a₃.
-```
-
-You already get the coordinate ring and its function field from Mathlib.
-
-### 2. A local/birational invariant differential, not a scheme differential
-
-Define the invariant differential as an element of a localized Kähler differential module, or as a pair consisting of a denominator and a numerator:
+If the named implicit argument `(x := x)` is not accepted because of how your section variables are named, just remove it:
 
 ```lean
--- conceptual shape, not exact API
-noncomputable def invDifferential :
-    Localization.AtPrime ... :=
-  d Xbar / (2 * Ybar + C W.a₁ * Xbar + C W.a₃)
+have hno := no_adjacent_preΨ_zero (W := W) h4 (m - 1)
 ```
 
-A more Lean-friendly first version is to avoid division in the definition and state identities after clearing denominators:
-
-```text
-D • ω = dX,
-where D = 2Y + a₁X + a₃.
-```
-
-At a non-2-torsion affine point, `D(P) ≠ 0`, so this is equivalent to the usual formula.
-
-### 3. The missing `ωₙ`/`Ωₙ` division polynomial
-
-This is the largest missing Mathlib ingredient.  Mathlib already defines `ψ` and `φ`, and says `ωₙ` is TODO.  You need a bivariate polynomial, say:
+The proof idea is exactly:
 
 ```lean
-protected noncomputable def ω (W : WeierstrassCurve R) (n : ℤ) : R[X][Y] := ...
+no_adjacent_preΨ_zero h4 (m - 1) :
+  ¬(preΨ (m - 1) x = 0 ∧ preΨ ((m - 1) + 1) x = 0)
+
+no_adjacent_preΨ_zero h4 m :
+  ¬(preΨ m x = 0 ∧ preΨ (m + 1) x = 0)
 ```
 
-or use `Ω` to avoid collision with the invariant differential.
+and `simpa` normalizes `((m - 1) + 1)` to `m`.
 
-The required theorem is the projective coordinate theorem:
+---
+
+## Version for a root of `preΨ' n`, returning integer-indexed neighbors
+
+This is the best version when the root hypothesis is Nat-indexed but the adjacent terms are intended as true adjacent division polynomials.
 
 ```lean
-theorem nsmul_projective_eq_division_polynomials
-    {K : Type*} [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
-    (n : ℤ) (P : W.toProjective.Point) :
-    -- conceptual statement:
-    n • P = [φₙ(P) ψₙ(P) : ωₙ(P) : ψₙ(P)^3]
+/--
+If `preΨ' n` vanishes, then the integer-adjacent values
+`preΨ ((n : ℤ) - 1)` and `preΨ ((n : ℤ) + 1)` do not vanish.
+-/
+public theorem preΨ_int_adjacent_ne_zero_of_preΨ'_zero
+    [W.IsElliptic] (h4 : (4 : K) ≠ 0) {n : ℕ}
+    (hroot : (W.preΨ' n).eval x = 0) :
+    (W.preΨ ((n : ℤ) - 1)).eval x ≠ 0 ∧
+    (W.preΨ ((n : ℤ) + 1)).eval x ≠ 0 := by
+  have hmid : (W.preΨ (n : ℤ)).eval x = 0 := by
+    simpa using hroot
+  exact preΨ_adjacent_ne_zero_of_preΨ_zero
+    (W := W) (x := x) h4 hmid
 ```
 
-You do not need this for all points immediately.  For separability, it is enough to prove the local consequence:
+This statement is valid even for `n = 0`.  In that case the left neighbor is genuinely `preΨ (-1)`, not `preΨ' 0`.
+
+---
+
+## Nat-indexed version, requiring `0 < n`
+
+If downstream code wants the adjacent values as `preΨ' (n - 1)` and `preΨ' (n + 1)`, use this wrapper.
 
 ```lean
-theorem nsmul_eq_zero_of_ψ_eq_zero
-    (hψ : eval P (W.ψ n) = 0)
-    (hω : eval P (W.ω n) ≠ 0) :
-    n • P = 0
+/--
+Nat-indexed adjacent nonvanishing.  The hypothesis `0 < n` is needed because
+`preΨ' (n - 1)` corresponds to `preΨ ((n : ℤ) - 1)` only when Nat subtraction
+has not truncated.
+-/
+public theorem preΨ'_adjacent_ne_zero_of_preΨ'_zero
+    [W.IsElliptic] (h4 : (4 : K) ≠ 0) {n : ℕ}
+    (hn : 0 < n) (hroot : (W.preΨ' n).eval x = 0) :
+    (W.preΨ' (n - 1)).eval x ≠ 0 ∧
+    (W.preΨ' (n + 1)).eval x ≠ 0 := by
+  have hZ := preΨ_int_adjacent_ne_zero_of_preΨ'_zero
+    (W := W) (x := x) h4 hroot
+  constructor
+  · intro hprev
+    apply hZ.1
+    have hcast : ((n - 1 : ℕ) : ℤ) = (n : ℤ) - 1 := by
+      omega
+    have hprevZ : (W.preΨ ((n - 1 : ℕ) : ℤ)).eval x = 0 := by
+      simpa using hprev
+    simpa [hcast] using hprevZ
+  · intro hnext
+    apply hZ.2
+    have hcast : ((n + 1 : ℕ) : ℤ) = (n : ℤ) + 1 := by
+      omega
+    have hnextZ : (W.preΨ ((n + 1 : ℕ) : ℤ)).eval x = 0 := by
+      simpa using hnext
+    simpa [hcast] using hnextZ
+
+end WeierstrassCurve
 ```
 
-and the local parameter formula:
+If Lean has trouble with `omega` on the first cast, make the positivity explicit:
 
 ```lean
-t([n]P) = - φₙ(P) * ψₙ(P) / ωₙ(P).
-```
-
-### 4. Pullback identity in a purely algebraic form
-
-Instead of formalizing global pullback of differentials on schemes, prove the following in the function field or in a localized coordinate ring:
-
-```text
-[n]^*(ω_inv) = n • ω_inv.
-```
-
-For the separability argument, the version you actually use is even smaller:
-
-```text
-d(t ∘ [n]) is nonzero at P whenever (n : K) ≠ 0 and P is nonsingular.
-```
-
-A practical Lean target is:
-
-```lean
-theorem d_localParameter_nsmul_ne_zero
-    {K : Type*} [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℤ} (hn : (n : K) ≠ 0)
-    {P : W.toAffine.Point}
-    (hP_non2 : eval P W.ψ₂ ≠ 0) :
-    -- conceptual:
-    evalDifferential P (d (localParameterAtInfinity ∘ nsmulMap n)) ≠ 0
-```
-
-This theorem can be proved from `[n]^*ω = nω`, but for the first implementation it may be easier to prove it directly from the formal group law at the identity plus translation invariance.
-
-### 5. Reduce `ψₙ` simplicity to `preΨ' n` simplicity
-
-This is the part closest to existing Mathlib.
-
-For odd `n`:
-
-```text
-ψₙ = C(preΨₙ),
-```
-
-so at `P = (x,y)`:
-
-```text
-dψₙ(P) = preΨₙ.derivative.eval x • dX(P).
-```
-
-For even `n`:
-
-```text
-ψₙ = C(preΨₙ) * ψ₂.
-```
-
-At a non-2-torsion point, `ψ₂(P) ≠ 0`, and if `preΨₙ(x)=0`, then
-
-```text
-dψₙ(P) = ψ₂(P) * preΨₙ.derivative.eval x • dX(P).
-```
-
-Thus:
-
-```lean
-theorem derivative_preΨ'_ne_zero_of_dψ_ne_zero
-    {K : Type*} [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} {x y : K}
-    (hcurve : W.toAffine.Equation x y)
-    (hroot : (W.preΨ' n).eval x = 0)
-    (hψ₂ : W.toAffine.polynomialY.evalEval x y ≠ 0)
-    (hdψ : differential_of_ψ_at_point_ne_zero W n x y) :
-    (W.preΨ' n).derivative.eval x ≠ 0 := by
-  -- odd/even split using `W.Ψ_ofNat` / `W.ψ` definitions and product rule
-  sorry
-```
-
-Then separability is the standard polynomial criterion over a field:
-
-```lean
-theorem separable_preΨ'
-    {K : Type*} [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
-    {n : ℕ} (hn : (n : K) ≠ 0) :
-    (W.preΨ' n).Separable := by
-  -- use `Polynomial.separable_iff` / gcd with derivative,
-  -- or root criterion over splitting fields
-  sorry
+have hn1 : 1 ≤ n := Nat.succ_le_of_lt hn
+have hcast : ((n - 1 : ℕ) : ℤ) = (n : ℤ) - 1 := by
+  omega
 ```
 
 ---
 
-## Why I would not try to prove this directly from `preΨ'` recurrences
+## Variant for `n ≥ 3`
 
-The recurrence definitions in Mathlib are excellent for degree and leading-coefficient computations.  They are much less pleasant for separability.
+In a separability proof you likely have `3 ≤ n`; then the Nat-indexed wrapper is immediate:
 
-A recurrence-only separability proof would require a large EDS-style coprimality theory proving that common roots of `preΨₙ` and `(preΨₙ)'` cannot occur when `(n : K) ≠ 0`.  That is possible, but it essentially reproves the reducedness of the `n`-torsion subgroup in a disguised form.
-
-The invariant-differential proof is conceptually shorter, but it requires the missing bridge between:
-
-```text
-abstract group law / multiplication-by-n
+```lean
+public theorem preΨ'_adjacent_ne_zero_of_preΨ'_zero_of_three_le
+    [W.IsElliptic] (h4 : (4 : K) ≠ 0) {n : ℕ}
+    (hn3 : 3 ≤ n) (hroot : (W.preΨ' n).eval x = 0) :
+    (W.preΨ' (n - 1)).eval x ≠ 0 ∧
+    (W.preΨ' (n + 1)).eval x ≠ 0 := by
+  exact preΨ'_adjacent_ne_zero_of_preΨ'_zero
+    (W := W) (x := x) h4 (by omega) hroot
 ```
-
-and
-
-```text
-explicit division-polynomial coordinates.
-```
-
-That bridge is currently the main missing formalization.
 
 ---
 
-## Recommended implementation path
+## About the characteristic hypothesis
 
-I would implement this in the following order.
-
-### Step A: Add `ωₙ` / `Ωₙ`
-
-Extend `DivisionPolynomial.Basic` locally with the missing y-coordinate numerator:
+You are right to be suspicious:
 
 ```lean
-protected noncomputable def Ω (W : WeierstrassCurve R) (n : ℤ) : R[X][Y] := ...
+(n : K) ≠ 0
 ```
 
-Prove map/base-change lemmas, matching the existing style:
+does **not** imply
 
 ```lean
-@[simp] lemma map_Ω (f : R →+* S) (n : ℤ) :
-    (W.map f).Ω n = (W.Ω n).map (mapRingHom f) := by
+(4 : K) ≠ 0
+```
+
+even for `n ≥ 3`.  In characteristic `2`, any odd `n` has `(n : K) ≠ 0`, but `(4 : K) = 0`.  For example, `n = 3` in characteristic `2` is the basic counterexample.
+
+So any proof that literally uses
+
+```lean
+no_adjacent_preΨ_zero h4
+```
+
+must carry an explicit hypothesis
+
+```lean
+h4 : (4 : K) ≠ 0
+```
+
+or must be inside a branch where `h4` has been proved.
+
+The hypothesis
+
+```lean
+hY : W.toAffine.polynomialY.evalEval x y ≠ 0
+```
+
+or equivalently
+
+```text
+2y + a₁x + a₃ ≠ 0
+```
+
+also does **not** imply `(4 : K) ≠ 0`.  It is a condition on the point being non-2-torsion, not a condition on the characteristic of the field.  In characteristic `2`, it becomes
+
+```text
+a₁x + a₃ ≠ 0,
+```
+
+which can certainly hold.
+
+What `hY` can give you is a **local non-2-torsion condition**, essentially
+
+```lean
+W.Ψ₂Sq.eval x ≠ 0
+```
+
+because on the curve one has
+
+```text
+ψ₂(x,y)^2 = Ψ₂Sq(x).
+```
+
+That is useful, but it is not the same as `(4 : K) ≠ 0`.
+
+---
+
+## What to do in the full separability theorem
+
+If the final separability theorem assumes only
+
+```lean
+hn : (n : K) ≠ 0
+```
+
+then there are two cases.
+
+### Case 1: `(4 : K) ≠ 0`
+
+Use the lemmas above directly:
+
+```lean
+by_cases h4 : (4 : K) ≠ 0
+· have hadj := preΨ'_adjacent_ne_zero_of_preΨ'_zero
+    (W := W) (x := x) h4 hn_pos hroot
+  -- hadj.1 : (W.preΨ' (n - 1)).eval x ≠ 0
+  -- hadj.2 : (W.preΨ' (n + 1)).eval x ≠ 0
   ...
-
-lemma baseChange_Ω ... := by
-  rw [← map_Ω, map_baseChange]
 ```
 
-### Step B: Prove projective coordinate formula for multiplication
+### Case 2: `(4 : K) = 0`
 
-Target:
+You cannot use the current `no_adjacent_preΨ_zero`.  The assumption `hn : (n : K) ≠ 0` only tells you that the characteristic does not divide `n`; it does not rule out characteristic `2`.
 
-```text
-[n]P = [φₙψₙ : Ωₙ : ψₙ³].
-```
-
-This can be proved by induction on `n` using Mathlib’s projective `addXYZ`, `dblXYZ`, and the existing division-polynomial recurrences.  This is computational but finite and does not involve schemes.
-
-### Step C: Define the local parameter `t = -X/Y` and prove the key differential identity
-
-At the identity, use projective coordinates and define:
-
-```text
-t = -X/Y.
-```
-
-From the coordinate formula:
-
-```text
-t ∘ [n] = - φₙ ψₙ / Ωₙ.
-```
-
-At a point with `ψₙ(P)=0` and `Ωₙ(P)≠0`, the derivative is:
-
-```text
-d(t ∘ [n])_P = -φₙ(P)/Ωₙ(P) • dψₙ(P).
-```
-
-### Step D: Prove `[n]^*ω = nω`, or only the nonvanishing consequence
-
-Full theorem:
+For this branch, the right fix is to strengthen the coprimality/no-adjacent theorem so that it uses the local non-2-torsion hypothesis instead of global `(4 : K) ≠ 0`:
 
 ```lean
-theorem pullback_invariantDifferential_nsmul
-    (W : WeierstrassCurve K) [W.IsElliptic] (n : ℤ) :
-    pullback (nsmulMap W n) (invDifferential W)
-      = n • invDifferential W := by
-  ...
+public theorem no_adjacent_preΨ_zero_of_Ψ₂Sq_eval_ne_zero
+    [W.IsElliptic] (hΨ₂ : W.Ψ₂Sq.eval x ≠ 0) (m : ℤ) :
+    ¬(W.preΨ m |>.eval x = 0 ∧ W.preΨ (m + 1) |>.eval x = 0) := by
+  -- Same EDS argument as `no_adjacent_preΨ_zero`, but after evaluating at `x`.
+  -- The recurrence parameter is `W.Ψ₂Sq.eval x`, and the proof only needs
+  -- this evaluated parameter to be nonzero.
+  sorry
 ```
 
-Minimal theorem for separability:
+Then the adjacent proof is literally the same:
 
 ```lean
-theorem d_localParameter_nsmul_ne_zero_at_torsion
-    (hn : (n : K) ≠ 0) ... :
-    d(t ∘ [n]) at P ≠ 0 := by
-  -- follows from `[n]^*ω = nω`, or from formal group linear coefficient
-  ...
+public theorem preΨ_adjacent_ne_zero_of_preΨ_zero_of_Ψ₂Sq_eval_ne_zero
+    [W.IsElliptic] (hΨ₂ : W.Ψ₂Sq.eval x ≠ 0) {m : ℤ}
+    (hm : (W.preΨ m).eval x = 0) :
+    (W.preΨ (m - 1)).eval x ≠ 0 ∧
+    (W.preΨ (m + 1)).eval x ≠ 0 := by
+  constructor
+  · intro hprev
+    exact (no_adjacent_preΨ_zero_of_Ψ₂Sq_eval_ne_zero
+      (W := W) (x := x) hΨ₂ (m - 1)) ⟨hprev, by simpa using hm⟩
+  · intro hnext
+    exact (no_adjacent_preΨ_zero_of_Ψ₂Sq_eval_ne_zero
+      (W := W) (x := x) hΨ₂ m) ⟨hm, hnext⟩
 ```
 
-### Step E: Convert `dψₙ ≠ 0` to `(preΨ' n).derivative x ≠ 0`
+And `hY` should feed this stronger theorem via:
 
-Use odd/even cases:
-
-```text
-ψₙ = preΨₙ              if n odd,
-ψₙ = preΨₙ * ψ₂         if n even.
+```lean
+have hΨ₂ : W.Ψ₂Sq.eval x ≠ 0 := by
+  -- Use `W.ψ₂_sq` / `W.C_Ψ₂Sq`, evaluate at `(x,y)`, and use the curve equation.
+  -- Conceptually: `ψ₂(x,y)^2 = Ψ₂Sq(x)`, so nonzero `ψ₂(x,y)` implies
+  -- nonzero `Ψ₂Sq(x)` in a field.
+  sorry
 ```
 
-At non-2-torsion roots, `ψ₂(P) ≠ 0`, so `dψₙ ≠ 0` implies `d(preΨₙ(X)) ≠ 0`, hence the ordinary univariate derivative does not vanish at `x`.
+This is the branch that will cover characteristic `2` with odd `n`.
 
 ---
 
 ## Bottom line
 
-Mathlib currently has the Weierstrass curve, affine/projective group law, coordinate ring, function field, and most of the division-polynomial objects (`preΨ`, `Ψ`, `Φ`, `ψ`, `φ`).  It does **not** appear to have the invariant differential, the theorem `[n]^*ω = nω`, the missing `ωₙ` y-coordinate division polynomial, or the theorem identifying division-polynomial coordinates with multiplication-by-`n`.
+For the theorem you can prove **right now** from your existing lemma, use:
 
-The chain-rule proof can absolutely be done without schemes, but it should be done in coordinate rings/function fields with Kähler differentials, not as a bare polynomial recurrence argument.  The most robust polynomial-level route is to use the projective local parameter
-
-```text
-t = -X/Y
+```lean
+preΨ_int_adjacent_ne_zero_of_preΨ'_zero
 ```
 
-and the coordinate formula
+or, if `0 < n`, the Nat-indexed wrapper:
 
-```text
-t ∘ [n] = -φₙψₙ/ωₙ.
+```lean
+preΨ'_adjacent_ne_zero_of_preΨ'_zero
 ```
 
-Then `[n]^*ω = nω` gives nonvanishing of `d(t ∘ [n])`, which gives nonvanishing of `dψₙ`, and finally nonvanishing of `(preΨ' n).derivative` at every root away from `2`-torsion.  That proves separability of `preΨ' n` when `(n : K) ≠ 0`.
+But this proof necessarily assumes:
+
+```lean
+h4 : (4 : K) ≠ 0
+```
+
+It cannot be recovered from `(n : K) ≠ 0`, and it cannot be recovered from `hY`.  For the final separability theorem under only `(n : K) ≠ 0`, you need either a characteristic-2 branch or, better, a strengthened no-adjacent theorem using the evaluated non-2-torsion condition `W.Ψ₂Sq.eval x ≠ 0`.
