@@ -1,40 +1,54 @@
-# Q668 (dm1): `formalAddY_coeff_e30`
-
-Here is the complete Lean proof using the universal-ring transport approach.  The bottleneck is closed by isolating the universal coefficient as a single decidable equality over
-`MvPolynomial (Fin 5) ℤ`; `native_decide` is applied only to that coefficient, not to an equality of whole power series.
+# Q674 (dm1): coefficient of `negAddY` at `(3,0)`
 
 ```lean
 import scratch.FormalGroupW
 
-open MvPowerSeries Finsupp
+open MvPowerSeries Finsupp WeierstrassCurve
 
 variable {R : Type*} [CommRing R]
 
 set_option maxHeartbeats 0 in
-private theorem formalAddY_coeff_e30_huniv :
-    MvPowerSeries.coeff
-        (R := MvPolynomial (Fin 5) ℤ)
-        (single (0 : Fin 2) 3)
-        (WeierstrassCurve.formalAddY univWeierstrassCurve) = 1 := by
-  native_decide
-
-theorem formalAddY_coeff_e30 (W : WeierstrassCurve R) :
-    MvPowerSeries.coeff (R := R) (single (0 : Fin 2) 3) W.formalAddY = 1 := by
+theorem coeff_e30_negAddY (W : WeierstrassCurve R) :
+    coeff (single (0 : Fin 2) 3)
+      ((W.map (C (σ := Fin 2))).toProjective.negAddY
+        (W.formalPointMv 0) (W.formalPointMv 1)) = -1 := by
   classical
-  have huniv :
-      MvPowerSeries.coeff
-          (R := MvPolynomial (Fin 5) ℤ)
-          (single (0 : Fin 2) 3)
-          (WeierstrassCurve.formalAddY univWeierstrassCurve) = 1 :=
-    formalAddY_coeff_e30_huniv
-  have hmap := formalAddXYZ_map (univEval W) univWeierstrassCurve (1 : Fin 3)
-  rw [univEval_map] at hmap
-  -- `hmap` is the `Y`-coordinate transport statement:
-  --   map (univEval W) (formalAddY univWeierstrassCurve) = W.formalAddY
-  rw [← hmap]
-  rw [MvPowerSeries.coeff_map]
-  rw [huniv]
-  simp
+  -- Expose Mathlib's 18-term projective formula, then substitute the two formal
+  -- points `P = [X₀,-1,w(X₀)]` and `Q = [X₁,-1,w(X₁)]`.
+  unfold WeierstrassCurve.Projective.negAddY
+  simp only [
+    WeierstrassCurve.formalPointMv_x,
+    WeierstrassCurve.formalPointMv_y,
+    WeierstrassCurve.formalPointMv_z,
+    WeierstrassCurve.map_a₁,
+    WeierstrassCurve.map_a₂,
+    WeierstrassCurve.map_a₃,
+    WeierstrassCurve.map_a₄,
+    WeierstrassCurve.map_a₆,
+    one_pow,
+    neg_mul,
+    mul_neg,
+    neg_neg,
+    one_mul,
+    mul_one]
+  -- Normalize the resulting polynomial in the commutative power-series ring.  The
+  -- surviving summand is `-(w(X₀))`; all other summands are normalized so that
+  -- either an `X₁`-power is visible, or a left monomial of `X₀`-degree at least `4`
+  -- is visible.
+  ring_nf
+  -- The two project-local coefficient lemmas now do the computation:
+  -- * every visible positive `X₁`-power has `(3,0)` coefficient zero;
+  -- * `[X₀^3] w(X₀) = 1`.
+  -- The remaining degree reasons are closed by `coeff_monomial_mul`, `coeff_C_mul`,
+  -- and the normal form of `X^n` as a monomial.
+  simp [
+    coeff_single0_X1_pow_mul,
+    coeff_e30_w0,
+    MvPowerSeries.X_pow_eq,
+    MvPowerSeries.coeff_monomial_mul,
+    MvPowerSeries.coeff_C_mul,
+    MvPowerSeries.coeff_mul_C,
+    mul_assoc,
+    mul_left_comm,
+    mul_comm]
 ```
-
-If the VM computation is still too slow in your local build, the next thing to inline is exactly the coefficient computation hidden inside `formalAddY_coeff_e30_huniv`: unfold `formalAddY`, `Projective.addY`, and `Projective.negY`, then use the already-proved `coeff_e30_negAddY_formal` together with the two zero coefficient facts for `addX` and `addZ`.  But with the current universal setup, the proof above is the shortest closed proof of `huniv`.
