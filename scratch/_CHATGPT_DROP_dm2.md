@@ -1,286 +1,175 @@
-# Q772 (dm2): using `no_adjacent_preΨ_zero` to get nonzero adjacent `preΨ` values
+# Q796 (dm2): characteristic 2 separability without `Ωₙ`
 
-## Core point
+## Bottom line
 
-The cleanest proof is to first prove an **integer-indexed** lemma.  This avoids the `ℕ` predecessor issue entirely:
+The literal proof strategy “EDS recurrence + adjacent coprimality only” is not enough by itself.  Adjacent coprimality is a zero-set statement: it tells you that a root of `ψₙ` is not also a root of the neighboring division polynomials.  Separability is a first-order statement: it says that a root of `ψₙ` is not a double root, equivalently that `ψₙ'` does not vanish there.  Some first-order input is unavoidable.
 
-```lean
-preΨ (m - 1), preΨ m, preΨ (m + 1)       -- all indexed by ℤ
-```
-
-Then specialize to `m = (n : ℤ)`.  The bridge from `preΨ' n` to `preΨ (n : ℤ)` is Mathlib’s simp lemma from `DivisionPolynomial.Basic`:
-
-```lean
-@[simp]
-lemma WeierstrassCurve.preΨ_ofNat (n : ℕ) :
-    W.preΨ n = W.preΨ' n
-```
-
-So this usually works:
-
-```lean
-have hmid : (W.preΨ (n : ℤ)).eval x = 0 := by
-  simpa using hroot
-```
-
-For `n + 1`, simp/coercions are easy.  For `n - 1`, if you want a **Nat-indexed** statement about `preΨ' (n - 1)`, you need `0 < n`, because Nat subtraction truncates at zero.  Without `0 < n`, `preΨ' (n - 1)` is not the same as `preΨ ((n : ℤ) - 1)`.
-
----
-
-## Integer-indexed adjacent nonvanishing lemma
-
-This is the lemma I recommend using internally.
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.Tactic
-import scratch.KeystoneCoprimality
-
-open Polynomial
-
-namespace WeierstrassCurve
-
-variable {K : Type*} [Field K]
-variable (W : WeierstrassCurve K) {x : K}
-
-/--
-If `preΨ m` vanishes at `x`, then neither adjacent value can vanish.
-This is the direct reusable form of `no_adjacent_preΨ_zero`.
--/
-public theorem preΨ_adjacent_ne_zero_of_preΨ_zero
-    [W.IsElliptic] (h4 : (4 : K) ≠ 0) {m : ℤ}
-    (hm : (W.preΨ m).eval x = 0) :
-    (W.preΨ (m - 1)).eval x ≠ 0 ∧
-    (W.preΨ (m + 1)).eval x ≠ 0 := by
-  constructor
-  · intro hprev
-    have hno := no_adjacent_preΨ_zero (W := W) (x := x) h4 (m - 1)
-    apply hno
-    constructor
-    · exact hprev
-    · -- The second term in the adjacent pair at `m - 1` is `m`.
-      simpa using hm
-  · intro hnext
-    have hno := no_adjacent_preΨ_zero (W := W) (x := x) h4 m
-    exact hno ⟨hm, hnext⟩
-```
-
-If the named implicit argument `(x := x)` is not accepted because of how your section variables are named, just remove it:
-
-```lean
-have hno := no_adjacent_preΨ_zero (W := W) h4 (m - 1)
-```
-
-The proof idea is exactly:
-
-```lean
-no_adjacent_preΨ_zero h4 (m - 1) :
-  ¬(preΨ (m - 1) x = 0 ∧ preΨ ((m - 1) + 1) x = 0)
-
-no_adjacent_preΨ_zero h4 m :
-  ¬(preΨ m x = 0 ∧ preΨ (m + 1) x = 0)
-```
-
-and `simpa` normalizes `((m - 1) + 1)` to `m`.
-
----
-
-## Version for a root of `preΨ' n`, returning integer-indexed neighbors
-
-This is the best version when the root hypothesis is Nat-indexed but the adjacent terms are intended as true adjacent division polynomials.
-
-```lean
-/--
-If `preΨ' n` vanishes, then the integer-adjacent values
-`preΨ ((n : ℤ) - 1)` and `preΨ ((n : ℤ) + 1)` do not vanish.
--/
-public theorem preΨ_int_adjacent_ne_zero_of_preΨ'_zero
-    [W.IsElliptic] (h4 : (4 : K) ≠ 0) {n : ℕ}
-    (hroot : (W.preΨ' n).eval x = 0) :
-    (W.preΨ ((n : ℤ) - 1)).eval x ≠ 0 ∧
-    (W.preΨ ((n : ℤ) + 1)).eval x ≠ 0 := by
-  have hmid : (W.preΨ (n : ℤ)).eval x = 0 := by
-    simpa using hroot
-  exact preΨ_adjacent_ne_zero_of_preΨ_zero
-    (W := W) (x := x) h4 hmid
-```
-
-This statement is valid even for `n = 0`.  In that case the left neighbor is genuinely `preΨ (-1)`, not `preΨ' 0`.
-
----
-
-## Nat-indexed version, requiring `0 < n`
-
-If downstream code wants the adjacent values as `preΨ' (n - 1)` and `preΨ' (n + 1)`, use this wrapper.
-
-```lean
-/--
-Nat-indexed adjacent nonvanishing.  The hypothesis `0 < n` is needed because
-`preΨ' (n - 1)` corresponds to `preΨ ((n : ℤ) - 1)` only when Nat subtraction
-has not truncated.
--/
-public theorem preΨ'_adjacent_ne_zero_of_preΨ'_zero
-    [W.IsElliptic] (h4 : (4 : K) ≠ 0) {n : ℕ}
-    (hn : 0 < n) (hroot : (W.preΨ' n).eval x = 0) :
-    (W.preΨ' (n - 1)).eval x ≠ 0 ∧
-    (W.preΨ' (n + 1)).eval x ≠ 0 := by
-  have hZ := preΨ_int_adjacent_ne_zero_of_preΨ'_zero
-    (W := W) (x := x) h4 hroot
-  constructor
-  · intro hprev
-    apply hZ.1
-    have hcast : ((n - 1 : ℕ) : ℤ) = (n : ℤ) - 1 := by
-      omega
-    have hprevZ : (W.preΨ ((n - 1 : ℕ) : ℤ)).eval x = 0 := by
-      simpa using hprev
-    simpa [hcast] using hprevZ
-  · intro hnext
-    apply hZ.2
-    have hcast : ((n + 1 : ℕ) : ℤ) = (n : ℤ) + 1 := by
-      omega
-    have hnextZ : (W.preΨ ((n + 1 : ℕ) : ℤ)).eval x = 0 := by
-      simpa using hnext
-    simpa [hcast] using hnextZ
-
-end WeierstrassCurve
-```
-
-If Lean has trouble with `omega` on the first cast, make the positivity explicit:
-
-```lean
-have hn1 : 1 ≤ n := Nat.succ_le_of_lt hn
-have hcast : ((n - 1 : ℕ) : ℤ) = (n : ℤ) - 1 := by
-  omega
-```
-
----
-
-## Variant for `n ≥ 3`
-
-In a separability proof you likely have `3 ≤ n`; then the Nat-indexed wrapper is immediate:
-
-```lean
-public theorem preΨ'_adjacent_ne_zero_of_preΨ'_zero_of_three_le
-    [W.IsElliptic] (h4 : (4 : K) ≠ 0) {n : ℕ}
-    (hn3 : 3 ≤ n) (hroot : (W.preΨ' n).eval x = 0) :
-    (W.preΨ' (n - 1)).eval x ≠ 0 ∧
-    (W.preΨ' (n + 1)).eval x ≠ 0 := by
-  exact preΨ'_adjacent_ne_zero_of_preΨ'_zero
-    (W := W) (x := x) h4 (by omega) hroot
-```
-
----
-
-## About the characteristic hypothesis
-
-You are right to be suspicious:
-
-```lean
-(n : K) ≠ 0
-```
-
-does **not** imply
-
-```lean
-(4 : K) ≠ 0
-```
-
-even for `n ≥ 3`.  In characteristic `2`, any odd `n` has `(n : K) ≠ 0`, but `(4 : K) = 0`.  For example, `n = 3` in characteristic `2` is the basic counterexample.
-
-So any proof that literally uses
-
-```lean
-no_adjacent_preΨ_zero h4
-```
-
-must carry an explicit hypothesis
-
-```lean
-h4 : (4 : K) ≠ 0
-```
-
-or must be inside a branch where `h4` has been proved.
-
-The hypothesis
-
-```lean
-hY : W.toAffine.polynomialY.evalEval x y ≠ 0
-```
-
-or equivalently
+However, there is a good characteristic-2-friendly replacement for the `Ωₙ` argument.  Do **not** try to define `Ωₙ` in characteristic `2`.  Instead, prove and use the Ω-free squared differential congruence
 
 ```text
-2y + a₁x + a₃ ≠ 0
+Ψ₂Sq · (preΨₙ')² ≡ n² · Φₙ        mod preΨₙ          (n odd).
 ```
 
-also does **not** imply `(4 : K) ≠ 0`.  It is a condition on the point being non-2-torsion, not a condition on the characteristic of the field.  In characteristic `2`, it becomes
-
-```text
-a₁x + a₃ ≠ 0,
-```
-
-which can certainly hold.
-
-What `hY` can give you is a **local non-2-torsion condition**, essentially
+In Mathlib-style notation, for odd `n : ℕ`, the target should be something like
 
 ```lean
-W.Ψ₂Sq.eval x ≠ 0
+(W.preΨ' n) ∣
+  W.Ψ₂Sq * (Polynomial.derivative (W.preΨ' n)) ^ 2
+    - C ((n : K) ^ 2) * W.Φ (n : ℤ)
 ```
 
-because on the curve one has
+or equivalently as a `Polynomial.ModEq` statement.  This identity uses only objects that Mathlib already has: `preΨ'`, `Ψ₂Sq`, `Φ`, and `derivative`.  It contains no division by `2` and no `Ωₙ`.
+
+This congruence is essentially the square of the local-parameter identity
 
 ```text
-ψ₂(x,y)^2 = Ψ₂Sq(x).
+v · Φₙ · ψₙ' + n · Ωₙ ≡ 0        mod ψₙ,
 ```
 
-That is useful, but it is not the same as `(4 : K) ≠ 0`.
+together with the curve-equation consequence
+
+```text
+Ωₙ² ≡ Φₙ³                         mod ψₙ.
+```
+
+But the important point for formalization is that the squared congruence can be stated without ever defining `Ωₙ`.
 
 ---
 
-## What to do in the full separability theorem
+## Why this avoids the characteristic-2 problem
 
-If the final separability theorem assumes only
+The x-coordinate Wronskian loses information in characteristic `2` because the denominator is `ψₙ²`; differentiating `ψₙ²` produces a factor `2`, which vanishes.  The local parameter `t = -x/y` does not have this problem: the formal-group identity is
+
+```text
+[n]^* t = n · t + higher order terms.
+```
+
+So when `(n : K) ≠ 0`, the pullback of the local parameter still has order one.  Squaring the resulting first-order identity gives the univariate congruence above.  The factor `2` never appears.
+
+Geometrically, at an affine `n`-torsion point `P`, with `n` prime to the characteristic, `[n]^*t` is a uniformizer at `P`.  Since `x` has a double pole at `O`, `x ∘ [n]` has pole order `2` at `P`.  But
+
+```text
+x([n]Q) = Φₙ(Q) / ψₙ(Q)².
+```
+
+If `Φₙ(P)` is a unit, then `ψₙ` has order exactly `1` at `P`.  This proves separability and uses only the x-coordinate numerator `Φₙ`, not the y-coordinate numerator `Ωₙ`.
+
+The squared congruence is the polynomial version of that order calculation.
+
+---
+
+## Characteristic `2` branch
+
+Assume
 
 ```lean
+h2 : (2 : K) = 0
 hn : (n : K) ≠ 0
 ```
 
-then there are two cases.
-
-### Case 1: `(4 : K) ≠ 0`
-
-Use the lemmas above directly:
+with `K` a field.  Then `n` is odd.  In Lean this should be a small lemma:
 
 ```lean
-by_cases h4 : (4 : K) ≠ 0
-· have hadj := preΨ'_adjacent_ne_zero_of_preΨ'_zero
-    (W := W) (x := x) h4 hn_pos hroot
-  -- hadj.1 : (W.preΨ' (n - 1)).eval x ≠ 0
-  -- hadj.2 : (W.preΨ' (n + 1)).eval x ≠ 0
-  ...
+have hnodd : Odd n := by
+  rw [← Nat.not_even_iff_odd]
+  intro hneven
+  rcases hneven with ⟨m, rfl⟩
+  -- now `(2 * m : K) = 0`, contradicting `hn`
+  simpa [Nat.cast_mul, h2] using hn
 ```
 
-### Case 2: `(4 : K) = 0`
+For odd `n`, the actual bivariate division polynomial is just the univariate polynomial:
 
-You cannot use the current `no_adjacent_preΨ_zero`.  The assumption `hn : (n : K) ≠ 0` only tells you that the characteristic does not divide `n`; it does not rule out characteristic `2`.
+```text
+Ψₙ = preΨₙ.
+```
 
-For this branch, the right fix is to strengthen the coprimality/no-adjacent theorem so that it uses the local non-2-torsion hypothesis instead of global `(4 : K) ≠ 0`:
+So the relevant separability statement is about `W.preΨ' n`.
+
+Let `x` be a root:
+
+```lean
+hroot : (W.preΨ' n).eval x = 0
+```
+
+To prove separability, it is enough to show
+
+```lean
+(Polynomial.derivative (W.preΨ' n)).eval x ≠ 0
+```
+
+Suppose, for contradiction, that the derivative vanishes.  Evaluating the squared congruence at `x` gives
+
+```text
+Ψ₂Sq(x) · ψₙ'(x)² = n² · Φₙ(x).
+```
+
+If `ψₙ'(x) = 0`, then
+
+```text
+n² · Φₙ(x) = 0.
+```
+
+Since `(n : K) ≠ 0`, also `(n : K)² ≠ 0`, hence
+
+```text
+Φₙ(x) = 0.
+```
+
+But for odd `n`, Mathlib’s definition of `Φ` gives
+
+```text
+Φₙ = X · preΨₙ² - preΨₙ₊₁ · preΨₙ₋₁ · Ψ₂Sq.
+```
+
+At a root of `preΨₙ`, this reduces to
+
+```text
+Φₙ(x) = - preΨₙ₊₁(x) · preΨₙ₋₁(x) · Ψ₂Sq(x).
+```
+
+Thus `Φₙ(x) ≠ 0` follows from three nonvanishing facts:
+
+```text
+preΨₙ₊₁(x) ≠ 0,
+preΨₙ₋₁(x) ≠ 0,
+Ψ₂Sq(x) ≠ 0.
+```
+
+This contradicts `Φₙ(x) = 0`, so `ψₙ'(x) ≠ 0`.
+
+That is the complete characteristic-2 separability argument.
+
+---
+
+## What coprimality input is actually needed
+
+You need slightly more than the old adjacent `preΨ` statement.
+
+For a root of odd `preΨₙ`, the formula for `Φₙ(x)` contains the extra factor `Ψ₂Sq(x)`.  Therefore the characteristic-2 proof needs either:
+
+1. point-level adjacent nonvanishing for the **actual** division polynomials `Ψₙ`, or
+2. a univariate package consisting of adjacent nonvanishing for `preΨ` plus a separate proof that `Ψ₂Sq(x) ≠ 0`.
+
+The second option is usually easier to integrate into the existing `preΨ` work.
+
+A useful local replacement for the old characteristic restriction is:
 
 ```lean
 public theorem no_adjacent_preΨ_zero_of_Ψ₂Sq_eval_ne_zero
-    [W.IsElliptic] (hΨ₂ : W.Ψ₂Sq.eval x ≠ 0) (m : ℤ) :
-    ¬(W.preΨ m |>.eval x = 0 ∧ W.preΨ (m + 1) |>.eval x = 0) := by
-  -- Same EDS argument as `no_adjacent_preΨ_zero`, but after evaluating at `x`.
-  -- The recurrence parameter is `W.Ψ₂Sq.eval x`, and the proof only needs
-  -- this evaluated parameter to be nonzero.
+    [W.IsElliptic] {x : K} (hΨ₂ : W.Ψ₂Sq.eval x ≠ 0) (m : ℤ) :
+    ¬ ((W.preΨ m).eval x = 0 ∧ (W.preΨ (m + 1)).eval x = 0) := by
+  -- Same EDS proof as `no_adjacent_preΨ_zero`, but after evaluating at `x`.
+  -- The recurrence parameter is `W.Ψ₂Sq.eval x`, and the proof needs this
+  -- evaluated parameter to be nonzero, not the global hypothesis `(4 : K) ≠ 0`.
   sorry
 ```
 
-Then the adjacent proof is literally the same:
+Then the adjacent-root lemma is unchanged:
 
 ```lean
 public theorem preΨ_adjacent_ne_zero_of_preΨ_zero_of_Ψ₂Sq_eval_ne_zero
-    [W.IsElliptic] (hΨ₂ : W.Ψ₂Sq.eval x ≠ 0) {m : ℤ}
+    [W.IsElliptic] {x : K} (hΨ₂ : W.Ψ₂Sq.eval x ≠ 0) {m : ℤ}
     (hm : (W.preΨ m).eval x = 0) :
     (W.preΨ (m - 1)).eval x ≠ 0 ∧
     (W.preΨ (m + 1)).eval x ≠ 0 := by
@@ -293,38 +182,197 @@ public theorem preΨ_adjacent_ne_zero_of_preΨ_zero_of_Ψ₂Sq_eval_ne_zero
       (W := W) (x := x) hΨ₂ m) ⟨hm, hnext⟩
 ```
 
-And `hY` should feed this stronger theorem via:
+So the remaining non-adjacent input is:
 
 ```lean
-have hΨ₂ : W.Ψ₂Sq.eval x ≠ 0 := by
-  -- Use `W.ψ₂_sq` / `W.C_Ψ₂Sq`, evaluate at `(x,y)`, and use the curve equation.
-  -- Conceptually: `ψ₂(x,y)^2 = Ψ₂Sq(x)`, so nonzero `ψ₂(x,y)` implies
-  -- nonzero `Ψ₂Sq(x)` in a field.
+public theorem Ψ₂Sq_eval_ne_zero_of_preΨ'_odd_root_char_two
+    [W.IsElliptic] (h2 : (2 : K) = 0) {n : ℕ}
+    (hnodd : Odd n) (hn : (n : K) ≠ 0) {x : K}
+    (hroot : (W.preΨ' n).eval x = 0) :
+    W.Ψ₂Sq.eval x ≠ 0 := by
   sorry
 ```
 
-This is the branch that will cover characteristic `2` with odd `n`.
+There are two ways to prove this theorem.
+
+### Option A: point-level proof
+
+Over an algebraic closure, choose `y` with `(x, y)` on the curve.  Since `n` is odd and `preΨₙ(x) = 0`, the point is `n`-torsion.  If `Ψ₂Sq(x) = 0`, then `ψ₂(x,y) = 0`, so the point is also `2`-torsion.  Because `gcd n 2 = 1`, the point would be `O`, impossible for an affine point.  Hence `Ψ₂Sq(x) ≠ 0`.
+
+This is conceptually clean, but it needs whatever point/multiplication API the project has available.
+
+### Option B: univariate EDS proof in characteristic `2`
+
+Work modulo `Ψ₂Sq`.  In characteristic `2`, the EDS parameter for `preΨ` is `Ψ₂Sq²`, so modulo `Ψ₂Sq` the odd recurrence collapses.  One gets the congruence
+
+```text
+preΨ'_(2r+1) ≡ Ψ₃^(r(r+1)/2)        mod Ψ₂Sq.
+```
+
+Equivalently, for odd `n`,
+
+```text
+preΨ'_n ≡ Ψ₃^((n² - 1) / 8)          mod Ψ₂Sq.
+```
+
+So it is enough to prove
+
+```lean
+IsCoprime W.Ψ₃ W.Ψ₂Sq
+```
+
+in characteristic `2`, under `[W.IsElliptic]`.  This is the statement that a smooth curve has no point that is simultaneously `2`-torsion and `3`-torsion.  Algebraically, it is a finite calculation from the discriminant/nonsingularity hypothesis.
+
+Then `preΨ'_n` is coprime to `Ψ₂Sq`, so a root of `preΨ'_n` cannot be a root of `Ψ₂Sq`.
+
+This option is probably the most compatible with an EDS-only development.
 
 ---
 
-## Bottom line
+## The recommended theorem stack
 
-For the theorem you can prove **right now** from your existing lemma, use:
+I would structure the implementation like this.
 
-```lean
-preΨ_int_adjacent_ne_zero_of_preΨ'_zero
-```
-
-or, if `0 < n`, the Nat-indexed wrapper:
+### 1. Characteristic-2 parity lemma
 
 ```lean
-preΨ'_adjacent_ne_zero_of_preΨ'_zero
+theorem odd_of_char_two_natCast_ne_zero
+    [Field K] (h2 : (2 : K) = 0) {n : ℕ} (hn : (n : K) ≠ 0) :
+    Odd n := by
+  rw [← Nat.not_even_iff_odd]
+  intro hneven
+  rcases hneven with ⟨m, rfl⟩
+  exact hn (by simp [Nat.cast_mul, h2])
 ```
 
-But this proof necessarily assumes:
+The exact `simp` line may need minor adjustment, but the proof is just `n = 2*m` implies `(n : K) = 0`.
+
+### 2. Ω-free squared differential congruence
 
 ```lean
-h4 : (4 : K) ≠ 0
+theorem preΨ'_odd_derivative_sq_mod
+    [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
+    {n : ℕ} (hnodd : Odd n) :
+    (W.preΨ' n) ∣
+      W.Ψ₂Sq * (Polynomial.derivative (W.preΨ' n)) ^ 2
+        - C ((n : K) ^ 2) * W.Φ (n : ℤ) := by
+  -- Best proof: local parameter / invariant differential.
+  -- Alternative proof: EDS induction, but it will be a differentiated EDS identity,
+  -- not a consequence of adjacent coprimality alone.
+  sorry
 ```
 
-It cannot be recovered from `(n : K) ≠ 0`, and it cannot be recovered from `hY`.  For the final separability theorem under only `(n : K) ≠ 0`, you need either a characteristic-2 branch or, better, a strengthened no-adjacent theorem using the evaluated non-2-torsion condition `W.Ψ₂Sq.eval x ≠ 0`.
+This is the key replacement for `Ωₙ`.
+
+### 3. Non-2-torsion at roots of odd `preΨₙ`
+
+```lean
+theorem Ψ₂Sq_eval_ne_zero_of_preΨ'_odd_root_char_two
+    [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
+    (h2 : (2 : K) = 0) {n : ℕ}
+    (hnodd : Odd n) (hn : (n : K) ≠ 0) {x : K}
+    (hroot : (W.preΨ' n).eval x = 0) :
+    W.Ψ₂Sq.eval x ≠ 0 := by
+  -- Either point-level torsion proof, or the modulo-Ψ₂Sq EDS proof.
+  sorry
+```
+
+### 4. Adjacent nonvanishing with local `Ψ₂Sq` hypothesis
+
+```lean
+theorem preΨ_int_adjacent_ne_zero_of_preΨ_zero_of_Ψ₂Sq_eval_ne_zero
+    [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
+    {x : K} (hΨ₂ : W.Ψ₂Sq.eval x ≠ 0) {m : ℤ}
+    (hm : (W.preΨ m).eval x = 0) :
+    (W.preΨ (m - 1)).eval x ≠ 0 ∧
+    (W.preΨ (m + 1)).eval x ≠ 0 := by
+  constructor
+  · intro hprev
+    exact (no_adjacent_preΨ_zero_of_Ψ₂Sq_eval_ne_zero
+      (W := W) (x := x) hΨ₂ (m - 1)) ⟨hprev, by simpa using hm⟩
+  · intro hnext
+    exact (no_adjacent_preΨ_zero_of_Ψ₂Sq_eval_ne_zero
+      (W := W) (x := x) hΨ₂ m) ⟨hm, hnext⟩
+```
+
+Use integer indices internally to avoid `Nat` subtraction issues.
+
+### 5. Characteristic-2 derivative nonvanishing
+
+```lean
+theorem preΨ'_derivative_eval_ne_zero_of_root_char_two
+    [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
+    (h2 : (2 : K) = 0) {n : ℕ} (hn : (n : K) ≠ 0)
+    {x : K} (hroot : (W.preΨ' n).eval x = 0) :
+    (Polynomial.derivative (W.preΨ' n)).eval x ≠ 0 := by
+  have hnodd : Odd n := odd_of_char_two_natCast_ne_zero (K := K) h2 hn
+
+  have hΨ₂ : W.Ψ₂Sq.eval x ≠ 0 :=
+    Ψ₂Sq_eval_ne_zero_of_preΨ'_odd_root_char_two
+      (W := W) h2 hnodd hn hroot
+
+  have hrootZ : (W.preΨ (n : ℤ)).eval x = 0 := by
+    simpa using hroot
+
+  have hadj :=
+    preΨ_int_adjacent_ne_zero_of_preΨ_zero_of_Ψ₂Sq_eval_ne_zero
+      (W := W) (x := x) hΨ₂ hrootZ
+
+  have hΦ_ne : (W.Φ (n : ℤ)).eval x ≠ 0 := by
+    -- Expand `Φ` for odd `n`:
+    --   Φₙ(x) = - preΨₙ₊₁(x) * preΨₙ₋₁(x) * Ψ₂Sq(x)
+    -- because `preΨₙ(x) = 0`.
+    -- Then use `hadj.1`, `hadj.2`, and `hΨ₂`.
+    sorry
+
+  intro hderiv
+
+  have hmod := preΨ'_odd_derivative_sq_mod (W := W) hnodd
+
+  have hΦ_zero : (W.Φ (n : ℤ)).eval x = 0 := by
+    -- Evaluate `hmod` at `x`.
+    -- The modulus term vanishes by `hroot`.
+    -- The left side vanishes by `hderiv`.
+    -- Since `(n : K)^2 ≠ 0`, conclude `Φₙ(x) = 0`.
+    sorry
+
+  exact hΦ_ne hΦ_zero
+```
+
+This is the separability core for characteristic `2`.
+
+---
+
+## Ordinary versus supersingular
+
+You do not need to split the characteristic-2 proof into ordinary and supersingular cases.
+
+In characteristic `2`,
+
+```text
+v = 2y + a₁x + a₃ = a₁x + a₃.
+```
+
+If the curve is supersingular, then `a₁ = 0`, and nonsingularity forces `a₃ ≠ 0`; hence `v = a₃` is automatically nonzero.  If the curve is ordinary, then `v = 0` is exactly the affine `2`-torsion condition.  Since `n` is odd, an `n`-torsion point cannot also be nontrivial `2`-torsion.  Thus `v ≠ 0`, equivalently `Ψ₂Sq(x) ≠ 0`, in both cases.
+
+So the uniform proof should be phrased as “odd `n`-division roots are not roots of `Ψ₂Sq`,” not as a case split on `a₁`.
+
+---
+
+## Answer to the proposed alternative
+
+There is no proof from adjacent coprimality alone.  Adjacent coprimality gives
+
+```text
+preΨₙ(x) = 0  ⇒  preΨₙ₋₁(x) ≠ 0 and preΨₙ₊₁(x) ≠ 0,
+```
+
+but it says nothing about whether `preΨₙ` has a double zero at `x`.  To rule out a double zero you need first-order information.  In characteristic `2`, the right first-order information is not the x-coordinate Wronskian and not `Ωₙ`; it is the local-parameter/invariant-differential identity, packaged as the squared univariate congruence
+
+```text
+Ψ₂Sq · (preΨₙ')² ≡ n² · Φₙ        mod preΨₙ.
+```
+
+Once that congruence is available, the rest of the proof is exactly EDS-style: use the oddness of `n`, nonvanishing of `Ψ₂Sq` at odd `n`-division roots, and adjacent coprimality to show `Φₙ(x) ≠ 0`.  Then the congruence forces `preΨₙ'(x) ≠ 0`.
+
+That is the cleanest Ω-free characteristic-2 path.
