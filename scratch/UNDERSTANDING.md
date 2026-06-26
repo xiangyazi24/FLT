@@ -1,49 +1,48 @@
-# FormalGroupW — Weierstrass formal group construction
+# SEAM1 Separability — Session Handoff (2026-06-26)
 
-## Status: COMPLETE (0 sorry, 0 custom axiom)
-Commit: 67a7e09 (2026-06-25)
-Build: verified clean via lake env lean
+## FormalGroupW: COMPLETE (0 sorry, commit 67a7e09)
+The formal group law F(t₁,t₂) = t₁+t₂+O(2) is fully proved:
+- 3 divisibility proofs (addX/Y/Z via domain + universal ring transport)
+- Full naturality chain
+- normalizedAddY_constantCoeff = 1 (sign bug fixed)
+- formalGroupLaw: constantCoeff=0, lin_coeff_X=1, lin_coeff_Y=1
+- Olean built at .lake/build/lib/lean/scratch/FormalGroupW.olean
 
-## What it proves
-- formalGroupLaw W : MvPowerSeries (Fin 2) R — the formal group law
-- F(0,0) = 0 (constantCoeff)
-- coeff_X(F) = 1 (lin_coeff_X)
-- coeff_Y(F) = 1 (lin_coeff_Y)
+## FormalNsmulDirect: COMPLETE (0 sorry, commit 1061bdc)
+Tangent [n]'(0) = n. Bypasses FormalGroup.assoc.
 
-## Infrastructure built
-- 3 divisibility proofs (addX/Y/Z via domain proof + universal ring transport)
-- Full naturality chain (formalUCoeff_map → formalW_map → formalAddXYZ_map)
-- Coefficient extraction via coeff_{(3,0)} of (X₀-X₁)³·q = constantCoeff(q)
-- normalizedAddY_constantCoeff = 1 (CAS-verified, sign bug fixed from -1)
+## FormalBridge: COMPLETE (0 sorry, commit 7aaef13)
+Wired to SeparabilityCore.
 
-## Downstream files (all 0 sorry)
-- FormalNsmulDirect.lean: tangent [n] = n (bypasses FormalGroup.assoc)
-- FormalGroupWiring.lean: connects FormalGroupW → FormalNsmulDirect
-- FormalGroupW_Coefficients.lean: extraction infrastructure
+## SeparabilityCore: 4 sorry (commit fde7314)
+Strong induction decomposed into 4 precise sub-sorries:
 
-## Path to Mazur mainline
-FormalGroupW -> FormalNsmulDirect -> tangent bridge -> separability -> Torsion.lean
-Remaining real sorries: SeparabilityCore(1) + Torsion(3) = 4
+### L135: Ψ₃=0 cofactor nonvanishing
+On the 3-torsion stratum, need cofactor ≠ 0. ChatGPT dm1 Q813 says:
+use identity preΨ₄ + Ψ₂Sq² = (6X² + b₂X + b₄)·Ψ₃, so at Ψ₃=0:
+preΨ₄ = -Ψ₂Sq². Then cofactor becomes explicit monomial × 2.
+TRACTABLE if (2:K) ≠ 0.
 
-## SEAM1 Sorry Status (2026-06-26)
+### L177: Cofactor-root case (Even Case B)
+When cofactor(x) = 0 but preΨ(m+3)(x) ≠ 0. Needs cofactor'(x) ≠ 0.
+ChatGPT dm2 Q814: bypass as named axiom, close other cases first.
+HARD — might need dual-number/differential argument.
 
-### FormalBridge sorry: CLOSED (commit 7aaef13)
-preΨ_deriv_ne_zero_at_nontorsion_root now delegates to SeparabilityCore.
-The extra hcurve/hY hypotheses were unused.
+### L208: n=4 base case
+Pure computation: Bézout certificate for preΨ₄ separability.
+CAS: Res(preΨ₄, preΨ₄') = 2⁹·Δ⁵.
+TRACTABLE — generate Bézout cofactors by sympy.
 
-### SeparabilityCore sorry: 1 remaining (n >= 4 rootwise separability)
-n = 3 base: PROVEN (Bezout certificate, Res = -81*Delta^2)
+### L219: Odd n ≥ 5
+ChatGPT dm3 Q819: EDS descent doesn't work for odd case.
+Needs differential identity v·Φ·ψ'+n·Ω ≡ 0 (mod ψ) OR dual-number bridge.
+Ω_n is NOT in Mathlib (TODO). Would need to define it.
+HARD — requires new infrastructure (Ω_n or dual-number tangent).
 
-### New infrastructure
-- SeamE1_EvenDescent.lean (0 sorry): divisor of squarefree poly is squarefree;
-  rootwise separability descends via even factorization preΨ(2k) = preΨ(k) * cof
-- SeamE1_CofactorNonzero.lean (WIP): Somos-based proof that cofactor != 0 at
-  roots of preΨ(k) when Psi3(x) != 0. Math verified, Lean tactic issues remain.
+## Recommended next steps
+1. Close n=4 via Bézout certificate (pure CAS computation)
+2. Close Ψ₃=0 case using preΨ₄=-Ψ₂Sq² identity
+3. Leave cofactor-root (L177) as named axiom
+4. For odd n: define Ω_n + prove polynomial identity, OR dual-number bridge
 
-### Mathematical analysis
-- Even n = 2k at roots of preΨ(k): handled by IH + cofactor nonvanishing
-  - Psi3 != 0 case: 2*Psi3*pe(k-2)^2 = 0 contradiction (char != 2)
-  - Psi3 = 0 case (3|k): Res(Psi3, Psi2Sq^4+preP4^2) = 16*Delta^8 != 0
-- Even n at cofactor roots: OPEN (needs cofactor separability or dual-number proof)
-- Odd n: reduces to even 2n via divisibility descent
-- Best approach per ChatGPT: dual-number no-infinitesimal-kernel proof (all-at-once)
+## Torsion.lean: 3 sorry (downstream, depends on SEAM1)
