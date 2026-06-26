@@ -1,211 +1,321 @@
-# Q659 (dm3): degree-4 extraction for `(X₀ - X₁)^3 * q`
+# Q663 (dm3): `formalAddY` coefficient and `normalizedAddY_constantCoeff`
 
-The cleanest proof is to avoid expanding all mixed terms in the coefficient computation.  For the `X₀`-axis coefficient, write
+## Short answer
 
-```text
-(X₀ - X₁)^3 = X₀^3 + X₁ * A.
+Yes: use the universal ring, but only for the **raw numerator** coefficient
+
+```lean
+coeff (single 0 3) (formalAddY W) = 1.
 ```
 
-Then `X₁ * A * q` has zero coefficient on every pure `X₀`-axis monomial.  For the `X₁`-axis coefficient, write
+Do **not** try to compute `normalizedAddY = formalAddY_dvd_cube.choose`.  Once you know
 
-```text
-(X₀ - X₁)^3 = -X₁^3 + X₀ * B.
+```lean
+formalAddY W = (X₀ - X₁) ^ 3 * normalizedAddY W
 ```
 
-Then `X₀ * B * q` has zero coefficient on every pure `X₁`-axis monomial, and `-X₁^3 * q` shifts the `X₁`-axis coefficient by `3` with the minus sign.
+and you already have the extraction lemma
 
-Here is the Lean code I would add near your existing degree-3 extraction lemma.  It uses the current Mathlib API names from `Mathlib.RingTheory.MvPowerSeries.Basic`: `MvPowerSeries.X_pow_eq`, `MvPowerSeries.coeff_add_monomial_mul`, and `MvPowerSeries.coeff_monomial_mul`.
+```lean
+coeff (single 0 3) ((X₀ - X₁) ^ 3 * q) = constantCoeff q,
+```
+
+`normalizedAddY_constantCoeff` is immediate.
+
+The robust architecture is:
+
+1. Prove one closed universal certificate:
+
+```lean
+formalAddY_coeff_e30_univ :
+  coeff (single 0 3) (formalAddY univWeierstrassCurve) = 1
+```
+
+2. Transport it to arbitrary `W` using `formalAddXYZ_map` and `univEval_map`.
+3. Apply your degree-3 extraction lemma to the quotient equation.
+
+The important practical point is that `native_decide` should be isolated in the universal certificate, not buried in the final theorem.  If `native_decide` on the full power-series definition does not terminate, replace only that certificate by a generated finite expansion proof.  The transport and quotient proofs below do not change.
+
+---
+
+## Lean code: transport from the universal coefficient
+
+This is the Lean shape I would use.  Replace the import line and local theorem names with the names in your project; the proof structure is the part that matters.
 
 ```lean
 import Mathlib.RingTheory.MvPowerSeries.Basic
 import Mathlib.Tactic
+-- import FLT.YourFile.DefiningFormalAddY
 
 noncomputable section
 
 open Finsupp
 
-namespace MvPowerSeries
+namespace WeierstrassCurve
 
-section DegreeFourExtraction
+section FormalAddYCoeff
 
 variable {R : Type*} [CommRing R]
 
 local notation "S" => MvPowerSeries (Fin 2) R
 local notation "e₀" n => Finsupp.single (0 : Fin 2) n
-local notation "e₁" n => Finsupp.single (1 : Fin 2) n
 local notation "X₀" => (MvPowerSeries.X (0 : Fin 2) : S)
 local notation "X₁" => (MvPowerSeries.X (1 : Fin 2) : S)
 local notation "δ" => (X₀ - X₁)
 
-private lemma not_e1_one_le_e0 (n : ℕ) : ¬ e₁ 1 ≤ e₀ n := by
-  intro h
-  have hcoord := h (1 : Fin 2)
-  have h10 : 1 ≤ 0 := by
-    simpa using hcoord
-  exact (Nat.not_succ_le_zero 0) h10
+/--
+The single universal finite computation.
 
-private lemma not_e0_one_le_e1 (n : ℕ) : ¬ e₀ 1 ≤ e₁ n := by
-  intro h
-  have hcoord := h (0 : Fin 2)
-  have h10 : 1 ≤ 0 := by
-    simpa using hcoord
-  exact (Nat.not_succ_le_zero 0) h10
+This theorem should live near the definitions of the universal Weierstrass curve.
+It involves no `choose`, no quotient, and no arbitrary ring `R`.
 
-/-- Multiplication by `X₁` kills pure `X₀`-axis coefficients. -/
-private lemma coeff_axis0_X1_mul (q : S) (n : ℕ) :
-    coeff R (e₀ n) (X₁ * q) = 0 := by
+If this closes quickly, keep it exactly as `native_decide`.
+If it does not close, prove this one theorem by unfolding the finite projective
+addition formula over the universal coefficient ring and finishing the resulting
+polynomial equality by `norm_num`/`ring_nf`/a generated CAS certificate.
+-/
+private theorem formalAddY_coeff_e30_univ :
+    MvPowerSeries.coeff
+        (MvPolynomial (Fin 5) ℤ)
+        (Finsupp.single (0 : Fin 2) 3)
+        (univWeierstrassCurve.formalAddY)
+      = (1 : MvPolynomial (Fin 5) ℤ) := by
+  -- Best case: the coefficient evaluator reduces the finite jet.
+  -- This is deliberately isolated: if it is too slow, replace only this proof.
+  native_decide
+
+/--
+Transport the universal coefficient computation to any coefficient ring and any
+Weierstrass curve.
+-/
+theorem formalAddY_coeff_e30 (W : WeierstrassCurve R) :
+    MvPowerSeries.coeff R (e₀ 3) W.formalAddY = 1 := by
   classical
-  have hle : ¬ e₁ 1 ≤ e₀ n := not_e1_one_le_e0 (R := R) n
-  simpa [MvPowerSeries.X, hle] using
-    (MvPowerSeries.coeff_monomial_mul
-      (R := R) (m := e₀ n) (n := e₁ 1) (φ := q) (a := (1 : R)))
 
-/-- Multiplication by `X₀` kills pure `X₁`-axis coefficients. -/
-private lemma coeff_axis1_X0_mul (q : S) (n : ℕ) :
-    coeff R (e₁ n) (X₀ * q) = 0 := by
-  classical
-  have hle : ¬ e₀ 1 ≤ e₁ n := not_e0_one_le_e1 (R := R) n
-  simpa [MvPowerSeries.X, hle] using
-    (MvPowerSeries.coeff_monomial_mul
-      (R := R) (m := e₁ n) (n := e₀ 1) (φ := q) (a := (1 : R)))
+  -- The universal coefficient ring and specialization map.
+  let A := MvPolynomial (Fin 5) ℤ
+  let W₀ : WeierstrassCurve A := univWeierstrassCurve
+  let φ : A →+* R := univEval W
 
-/-- The pure `X₀^3` term shifts the `X₀`-axis coefficient down by `3`. -/
-private lemma coeff_axis0_X0_pow3_mul (q : S) :
-    coeff R (e₀ 4) (X₀ ^ 3 * q) = coeff R (e₀ 1) q := by
-  classical
-  simpa [MvPowerSeries.X_pow_eq, Finsupp.single_add] using
-    (MvPowerSeries.coeff_add_monomial_mul
-      (R := R) (m := e₀ 3) (n := e₀ 1) (φ := q) (a := (1 : R)))
+  -- Naturality of formal addition, specialized to the Y-coordinate.
+  -- Your theorem may have the opposite orientation; use `.symm` if needed.
+  have hmapXYZ := formalAddXYZ_map φ W₀ (1 : Fin 3)
 
-/-- The pure `-X₁^3` term shifts the `X₁`-axis coefficient down by `3` and contributes a sign. -/
-private lemma coeff_axis1_neg_X1_pow3_mul (q : S) :
-    coeff R (e₁ 4) ((-X₁ ^ 3) * q) = - coeff R (e₁ 1) q := by
-  classical
-  have hmon :
-      (-X₁ ^ 3 : S) = MvPowerSeries.monomial R (e₁ 3) (-1 : R) := by
-    rw [MvPowerSeries.X_pow_eq]
-    simpa using ((MvPowerSeries.monomial R (e₁ 3)).map_neg (1 : R)).symm
-  rw [hmon]
-  simpa [Finsupp.single_add, neg_mul] using
-    (MvPowerSeries.coeff_add_monomial_mul
-      (R := R) (m := e₁ 3) (n := e₁ 1) (φ := q) (a := (-1 : R)))
+  have hmap :
+      MvPowerSeries.map φ W₀.formalAddY = W.formalAddY := by
+    -- `univEval_map` should rewrite `W₀.map φ` to `W`.
+    -- The `formalAddY` simp may be unnecessary if `formalAddXYZ_map` is already
+    -- stated directly for `formalAddY`.
+    simpa [W₀, φ, formalAddY, univEval_map] using hmapXYZ
 
-/-- Degree-4 extraction on the `X₀` axis:
-`coeff_{(4,0)} ((X₀-X₁)^3*q) = coeff_{(1,0)} q`. -/
-lemma coeff_single0_four_delta_cube_mul (q : S) :
-    coeff R (e₀ 4) (δ ^ 3 * q) = coeff R (e₀ 1) q := by
-  classical
-  let A : S := -(3 : S) * X₀ ^ 2 + (3 : S) * (X₀ * X₁) - X₁ ^ 2
-  have hδ : δ ^ 3 = X₀ ^ 3 + X₁ * A := by
-    dsimp [A]
-    ring
-  rw [hδ, add_mul]
-  simpa [mul_assoc, coeff_axis0_X0_pow3_mul, coeff_axis0_X1_mul]
+  -- Apply coefficient to the map identity and commute coefficient with map.
+  calc
+    MvPowerSeries.coeff R (e₀ 3) W.formalAddY
+        = MvPowerSeries.coeff R (e₀ 3)
+            (MvPowerSeries.map φ W₀.formalAddY) := by
+            rw [hmap]
+    _ = φ (MvPowerSeries.coeff A (e₀ 3) W₀.formalAddY) := by
+            simpa [A, W₀] using
+              (MvPowerSeries.coeff_map
+                (f := φ)
+                (n := e₀ 3)
+                (φ := W₀.formalAddY))
+    _ = 1 := by
+            simp [A, W₀, formalAddY_coeff_e30_univ]
 
-/-- Degree-4 extraction on the `X₁` axis:
-`coeff_{(0,4)} ((X₀-X₁)^3*q) = - coeff_{(0,1)} q`. -/
-lemma coeff_single1_four_delta_cube_mul (q : S) :
-    coeff R (e₁ 4) (δ ^ 3 * q) = - coeff R (e₁ 1) q := by
-  classical
-  let B : S := X₀ ^ 2 - (3 : S) * (X₀ * X₁) + (3 : S) * X₁ ^ 2
-  have hδ : δ ^ 3 = -X₁ ^ 3 + X₀ * B := by
-    dsimp [B]
-    ring
-  rw [hδ, add_mul]
-  simpa [mul_assoc, coeff_axis1_neg_X1_pow3_mul, coeff_axis1_X0_mul]
+end FormalAddYCoeff
 
-end DegreeFourExtraction
-
-end MvPowerSeries
+end WeierstrassCurve
 ```
 
-## Applying this to `normalizedAddX`
+### If `formalAddXYZ_map` has the other orientation
 
-Once you have the quotient equation in the orientation
+If your map theorem says
 
 ```lean
-hdiv : δ ^ 3 * W.normalizedAddX = W.formalAddX
+W.formalAddY = MvPowerSeries.map φ W₀.formalAddY
 ```
 
-the normalized coefficients follow by applying `coeff` to `hdiv`.
-
-If your `choose_spec` is oriented as
+instead of
 
 ```lean
-W.formalAddX = δ ^ 3 * W.normalizedAddX
+MvPowerSeries.map φ W₀.formalAddY = W.formalAddY,
 ```
 
-then use `.symm` when constructing `hdiv`.
+just change the `hmap` proof to:
 
-A generic version, independent of the exact names in your curve namespace, is:
+```lean
+  have hmap :
+      MvPowerSeries.map φ W₀.formalAddY = W.formalAddY := by
+    simpa [W₀, φ, formalAddY, univEval_map] using hmapXYZ.symm
+```
+
+Everything else is unchanged.
+
+---
+
+## Making the universal certificate reliable
+
+I would first try this exact theorem:
+
+```lean
+private theorem formalAddY_coeff_e30_univ :
+    MvPowerSeries.coeff
+        (MvPolynomial (Fin 5) ℤ)
+        (Finsupp.single (0 : Fin 2) 3)
+        (univWeierstrassCurve.formalAddY)
+      = (1 : MvPolynomial (Fin 5) ℤ) := by
+  native_decide
+```
+
+But I would **not** rely on this being fast.  `native_decide` only works well if the coefficient expression reduces to a decidable polynomial equality without unfolding too much recursive power-series infrastructure.
+
+If it is slow or times out, keep the theorem statement and replace the proof by a controlled finite expansion.  The proof should unfold only the Y-coordinate formula and use the already-known low-degree vanishings for `addX` and `addZ`:
+
+```lean
+private theorem formalAddY_coeff_e30_univ :
+    MvPowerSeries.coeff
+        (MvPolynomial (Fin 5) ℤ)
+        (Finsupp.single (0 : Fin 2) 3)
+        (univWeierstrassCurve.formalAddY)
+      = (1 : MvPolynomial (Fin 5) ℤ) := by
+  -- Schematic controlled proof:
+  --   formalAddY = -negAddY_formal - C(a₁) * addX_formal - C(a₃) * addZ_formal
+  --   coeff_e30 negAddY_formal = -1
+  --   coeff_e30 addX_formal = 0
+  --   coeff_e30 addZ_formal = 0
+  -- so the coefficient is -(-1) - a₁*0 - a₃*0 = 1.
+  --
+  -- In the universal ring this is a finite computation.  Put the generated
+  -- coefficient lemmas here or unfold the finite formula and finish by `ring_nf`.
+  rw [formalAddY_eq_neg_negAddY_sub_a1_addX_sub_a3_addZ]
+  simp [
+    MvPowerSeries.coeff_neg,
+    MvPowerSeries.coeff_add,
+    MvPowerSeries.coeff_sub,
+    MvPowerSeries.coeff_C_mul,
+    negAddY_formal_coeff_e30_univ,
+    addX_formal_coeff_e30_univ,
+    addZ_formal_coeff_e30_univ
+  ]
+```
+
+The names in that controlled proof are placeholders for your local names, but the identity is exactly the one you wrote:
+
+```text
+formalAddY = -negAddY_formal - C(a₁) * addX_formal - C(a₃) * addZ_formal.
+```
+
+The point is that the entire hard computation remains inside one theorem over
+
+```lean
+MvPolynomial (Fin 5) ℤ
+```
+
+and the arbitrary-ring theorem never unfolds the addition formula.
+
+---
+
+## Lean code: `normalizedAddY_constantCoeff`
+
+Now use the universal coefficient theorem plus your already-proved extraction lemma.
+
+Assume your degree-3 extraction lemma has the following shape:
+
+```lean
+lemma coeff_e30_delta_cube_mul
+    {R : Type*} [CommRing R]
+    (q : MvPowerSeries (Fin 2) R) :
+    MvPowerSeries.coeff R (Finsupp.single (0 : Fin 2) 3)
+      (((MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R)
+        - (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R)) ^ 3 * q)
+      = MvPowerSeries.constantCoeff R q := by
+  ...
+```
+
+Then the final proof is:
 
 ```lean
 import Mathlib.RingTheory.MvPowerSeries.Basic
 import Mathlib.Tactic
+-- import FLT.YourFile.FormalAddYCoeff
 
 noncomputable section
 
 open Finsupp
 
-namespace MvPowerSeries
+namespace WeierstrassCurve
 
-section ApplyDegreeFourExtraction
+section NormalizedAddYConstant
 
 variable {R : Type*} [CommRing R]
 
 local notation "S" => MvPowerSeries (Fin 2) R
 local notation "e₀" n => Finsupp.single (0 : Fin 2) n
-local notation "e₁" n => Finsupp.single (1 : Fin 2) n
 local notation "X₀" => (MvPowerSeries.X (0 : Fin 2) : S)
 local notation "X₁" => (MvPowerSeries.X (1 : Fin 2) : S)
 local notation "δ" => (X₀ - X₁)
 
-lemma normalizedAddX_coeff_X_from_cube
-    {formalAddX normalizedAddX : S}
-    (hdiv : δ ^ 3 * normalizedAddX = formalAddX)
-    (h400 : coeff R (e₀ 4) formalAddX = -1) :
-    coeff R (e₀ 1) normalizedAddX = -1 := by
-  have h := congrArg (fun f : S => coeff R (e₀ 4) f) hdiv
-  rw [MvPowerSeries.coeff_single0_four_delta_cube_mul] at h
-  rw [h400] at h
-  exact h
+/-- The constant coefficient of the normalized Y denominator is `1`. -/
+theorem normalizedAddY_constantCoeff (W : WeierstrassCurve R) :
+    MvPowerSeries.constantCoeff R W.normalizedAddY = 1 := by
+  classical
 
-lemma normalizedAddX_coeff_Y_from_cube
-    {formalAddX normalizedAddX : S}
-    (hdiv : δ ^ 3 * normalizedAddX = formalAddX)
-    (h040 : coeff R (e₁ 4) formalAddX = 1) :
-    coeff R (e₁ 1) normalizedAddX = -1 := by
-  have h := congrArg (fun f : S => coeff R (e₁ 4) f) hdiv
-  rw [MvPowerSeries.coeff_single1_four_delta_cube_mul] at h
-  rw [h040] at h
-  -- h : - coeff R (e₁ 1) normalizedAddX = 1
-  have h' := congrArg Neg.neg h
-  simpa using h'
+  -- The product equation supplied by `Dvd.dvd.choose`.
+  -- If your `choose_spec` is oriented as
+  --   W.formalAddY = δ ^ 3 * W.normalizedAddY,
+  -- use `.symm` below.
+  have hdiv : δ ^ 3 * W.normalizedAddY = W.formalAddY := by
+    simpa [δ, normalizedAddY] using
+      (W.formalAddY_dvd_cube.choose_spec)
 
-end ApplyDegreeFourExtraction
+  have hcoeff := congrArg
+    (fun f : S => MvPowerSeries.coeff R (e₀ 3) f)
+    hdiv
 
-end MvPowerSeries
+  -- Left side: extraction from `(X₀-X₁)^3 * normalizedAddY`.
+  rw [coeff_e30_delta_cube_mul] at hcoeff
+
+  -- Right side: universal-ring computation transported to `W`.
+  rw [formalAddY_coeff_e30 W] at hcoeff
+
+  simpa using hcoeff
+
+end NormalizedAddYConstant
+
+end WeierstrassCurve
 ```
 
-In your curve file, the final use should look like this, modulo the exact namespace names:
+If your `choose_spec` has the opposite orientation, change only this part:
 
 ```lean
-have hdiv : δ ^ 3 * W.normalizedAddX = W.formalAddX := by
-  -- choose_spec may need `.symm`, depending on orientation.
-  simpa [WeierstrassCurve.normalizedAddX] using
-    W.formalAddX_dvd_cube.choose_spec.symm
-
-have hx : coeff R (e₀ 1) W.normalizedAddX = -1 :=
-  MvPowerSeries.normalizedAddX_coeff_X_from_cube
-    (formalAddX := W.formalAddX)
-    (normalizedAddX := W.normalizedAddX)
-    hdiv W.formalAddX_coeff_400
-
-have hy : coeff R (e₁ 1) W.normalizedAddX = -1 :=
-  MvPowerSeries.normalizedAddX_coeff_Y_from_cube
-    (formalAddX := W.formalAddX)
-    (normalizedAddX := W.normalizedAddX)
-    hdiv W.formalAddX_coeff_040
+  have hdiv : δ ^ 3 * W.normalizedAddY = W.formalAddY := by
+    simpa [δ, normalizedAddY] using
+      (W.formalAddY_dvd_cube.choose_spec).symm
 ```
 
-The key point is that the proof never unfolds `formalAddX_dvd_cube.choose`.  It only uses the defining product equation and extracts coefficients from it.
+---
+
+## Why this is the right split
+
+The universal theorem proves a low-jet fact about the numerator `formalAddY`; it is independent of `Dvd.dvd.choose`.  The final normalized theorem uses only the product equation from `choose_spec`, so it never depends on how Lean chose the quotient.
+
+That separation avoids the two main traps:
+
+1. trying to compute an arbitrary `choose`, and
+2. asking `native_decide` to normalize a large arbitrary-ring expression.
+
+The only concrete computation is the closed universal theorem
+
+```lean
+formalAddY_coeff_e30_univ
+```
+
+and once it exists, both
+
+```lean
+formalAddY_coeff_e30 W
+normalizedAddY_constantCoeff W
+```
+
+are short transport/extraction proofs.
