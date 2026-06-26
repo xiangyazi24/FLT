@@ -1,4 +1,4 @@
-# Q674 (dm1): coefficient of `negAddY` at `(3,0)`
+# Q702 (dm1): `formalAddZ_dvd_cube` by universal-ring transport
 
 ```lean
 import scratch.FormalGroupW
@@ -7,48 +7,56 @@ open MvPowerSeries Finsupp WeierstrassCurve
 
 variable {R : Type*} [CommRing R]
 
-set_option maxHeartbeats 0 in
-theorem coeff_e30_negAddY (W : WeierstrassCurve R) :
-    coeff (single (0 : Fin 2) 3)
-      ((W.map (C (σ := Fin 2))).toProjective.negAddY
-        (W.formalPointMv 0) (W.formalPointMv 1)) = -1 := by
+/-- The `Z`-coordinate naturality statement extracted from `formalAddXYZ_map`.
+This is the only naturality fact needed for the universal-ring transport. -/
+private theorem formalAddZ_map_from_formalAddXYZ
+    {S T : Type*} [CommRing S] [CommRing T]
+    (φ : S →+* T) (V : WeierstrassCurve S) :
+    MvPowerSeries.map φ V.formalAddZ = (V.map φ).formalAddZ := by
+  simpa using (formalAddXYZ_map φ V (2 : Fin 3))
+
+/-- Divisibility of the formal `Z` addition coordinate by `(X₀ - X₁)^3`, transported
+from the universal Weierstrass curve over `MvPolynomial (Fin 5) ℤ`. -/
+theorem formalAddZ_dvd_cube (W : WeierstrassCurve R) :
+    (((MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R) -
+        MvPowerSeries.X (1 : Fin 2)) ^ 3) ∣ W.formalAddZ := by
   classical
-  -- Expose Mathlib's 18-term projective formula, then substitute the two formal
-  -- points `P = [X₀,-1,w(X₀)]` and `Q = [X₁,-1,w(X₁)]`.
-  unfold WeierstrassCurve.Projective.negAddY
-  simp only [
-    WeierstrassCurve.formalPointMv_x,
-    WeierstrassCurve.formalPointMv_y,
-    WeierstrassCurve.formalPointMv_z,
-    WeierstrassCurve.map_a₁,
-    WeierstrassCurve.map_a₂,
-    WeierstrassCurve.map_a₃,
-    WeierstrassCurve.map_a₄,
-    WeierstrassCurve.map_a₆,
-    one_pow,
-    neg_mul,
-    mul_neg,
-    neg_neg,
-    one_mul,
-    mul_one]
-  -- Normalize the resulting polynomial in the commutative power-series ring.  The
-  -- surviving summand is `-(w(X₀))`; all other summands are normalized so that
-  -- either an `X₁`-power is visible, or a left monomial of `X₀`-degree at least `4`
-  -- is visible.
-  ring_nf
-  -- The two project-local coefficient lemmas now do the computation:
-  -- * every visible positive `X₁`-power has `(3,0)` coefficient zero;
-  -- * `[X₀^3] w(X₀) = 1`.
-  -- The remaining degree reasons are closed by `coeff_monomial_mul`, `coeff_C_mul`,
-  -- and the normal form of `X^n` as a monomial.
-  simp [
-    coeff_single0_X1_pow_mul,
-    coeff_e30_w0,
-    MvPowerSeries.X_pow_eq,
-    MvPowerSeries.coeff_monomial_mul,
-    MvPowerSeries.coeff_C_mul,
-    MvPowerSeries.coeff_mul_C,
-    mul_assoc,
-    mul_left_comm,
-    mul_comm]
+  let A := MvPolynomial (Fin 5) ℤ
+  let φ : A →+* R := univEval W
+  let ΔA : MvPowerSeries (Fin 2) A :=
+    (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) A) -
+      MvPowerSeries.X (1 : Fin 2)
+  let ΔR : MvPowerSeries (Fin 2) R :=
+    (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R) -
+      MvPowerSeries.X (1 : Fin 2)
+
+  -- 1. The universal coefficient ring is a domain, so the domain proof applies.
+  have huniv : ΔA ^ 3 ∣ univWeierstrassCurve.formalAddZ := by
+    simpa [A, ΔA] using
+      (formalAddZ_dvd_cube_of_noZeroDivisors (V := univWeierstrassCurve))
+  rcases huniv with ⟨q, hq⟩
+
+  -- 2. Transport the universal witness through `MvPowerSeries.map φ`.
+  refine ⟨MvPowerSeries.map φ q, ?_⟩
+  change W.formalAddZ = ΔR ^ 3 * MvPowerSeries.map φ q
+
+  -- 3. Naturality of `formalAddZ` under coefficient maps.
+  have hZmap :
+      MvPowerSeries.map φ univWeierstrassCurve.formalAddZ = W.formalAddZ := by
+    simpa [A, φ, univEval_map W] using
+      (formalAddZ_map_from_formalAddXYZ φ univWeierstrassCurve)
+
+  -- 4. The factor `(X₀ - X₁)^3` is coefficient-free, so it is fixed by `map φ`.
+  have hΔmap : MvPowerSeries.map φ (ΔA ^ 3) = ΔR ^ 3 := by
+    simp [A, φ, ΔA, ΔR]
+
+  calc
+    W.formalAddZ
+        = MvPowerSeries.map φ univWeierstrassCurve.formalAddZ := hZmap.symm
+    _ = MvPowerSeries.map φ (ΔA ^ 3 * q) := by
+        rw [hq]
+    _ = MvPowerSeries.map φ (ΔA ^ 3) * MvPowerSeries.map φ q := by
+        rw [map_mul]
+    _ = ΔR ^ 3 * MvPowerSeries.map φ q := by
+        rw [hΔmap]
 ```
