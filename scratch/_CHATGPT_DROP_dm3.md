@@ -1,422 +1,493 @@
-# Q763 (dm3): formula-level `n`-fold projective addition over `CommRing`
+# Q776 (dm3): exact polynomial identity for separability of `preΨ'`
 
 ## Bottom line
 
-The approach is feasible as a **formula-level auxiliary**, but not with the exact recursion
+The identity you wrote is the right **odd-`n` reduced identity**, but it is not quite the uniform Mathlib-compatible identity for all `n : ℕ`.
+
+Mathlib currently has `preΨ'`, `Ψ`, `Φ`, `ψ`, and `φ`; it does **not** currently define the y-coordinate numerator `ωₙ`/`Ωₙ` as a declaration. The file comment in `DivisionPolynomial/Basic.lean` still lists:
+
+```text
+TODO: the bivariate polynomials `ωₙ`.
+```
+
+So the clean Lean plan is to first add either `ω` or, better, a division-by-2-free `twoω`.
+
+The exact reduced congruence is:
+
+```text
+ηₙ · v · Φₙ · (preΨ'_n)' + n · Ωₙ ≡ 0  mod preΨ'_n,
+```
+
+where
+
+```text
+v   = ψ₂ = 2Y + a₁X + a₃,
+ηₙ = if Even n then v else 1.
+```
+
+Thus:
+
+* if `n` is odd, `ηₙ = 1`, and the identity is exactly
+
+  ```text
+  v · Φₙ · (preΨ'_n)' + n · Ωₙ ≡ 0  mod preΨ'_n;
+  ```
+
+* if `n` is even, the exact reduced identity has one extra factor of `v`:
+
+  ```text
+  v^2 · Φₙ · (preΨ'_n)' + n · Ωₙ ≡ 0  mod preΨ'_n.
+  ```
+
+That extra factor is not cosmetic. It comes from Mathlib's reduced/full relation
 
 ```lean
-def formulaNsmul (W : WeierstrassCurve R) : ℕ → (Fin 3 → R) → (Fin 3 → R)
-  | 0, _ => ![0, 1, 0]
-  | n+1, P => W.toProjective.addXYZ (formulaNsmul W n P) P
+W.Ψ (n : ℤ) = C (W.preΨ' n) * if Even n then W.ψ₂ else 1
 ```
 
-The obstruction is important: `Projective.addXYZ` is the **generic addition** formula for two distinct representatives.  Mathlib deliberately has a separate `Projective.dblXYZ` for doubling.  In fact `addXYZ P P = ![0,0,0]`, so a repeated-addition recursion that ever calls `addXYZ` on two scalar-multiple copies of the same representative collapses to the zero triple.
-
-For the formal point
+because, in the coordinate ring, the invariant derivation satisfies
 
 ```text
-P(t) = [t : -1 : w(t)]
+D(C f) = v · C(f.derivative).
 ```
 
-the first step from the point at infinity is already dangerous.  The projective formula gives
+So when `n` is even,
 
 ```text
-addXYZ O P = P_z • P
+D(Ψₙ) ≡ D(C(preΨ'_n) · v)
+      ≡ v · D(C(preΨ'_n))
+      ≡ v² · C((preΨ'_n)')       mod preΨ'_n.
 ```
 
-up to the standard theorem `addXYZ_of_Z_eq_zero_left`.  Here `P_z = w(t)`, and `w(t)` is not a unit in `PowerSeries R`.  Hence `P_z • P` is not equivalent to `P` in Mathlib's projective setoid, which only scales by units.  The next generic addition against `P` is a scalar-multiple self-addition and the homogeneity lemma `addXYZ_smul` reduces it to `addXYZ P P = 0`.
-
-So the exact `addXYZ`-only recursion is not the right object for `[n]P` over `PowerSeries R` or over dual numbers.  The corrected version is: use a formula expression/addition chain with **explicit doubling nodes** and **explicit generic-addition nodes**, avoiding `addXYZ` whenever the two input formulae are known to represent the same multiple.
+For the contradiction argument, the distinction usually does not hurt: if `(preΨ'_n)'(x) = 0`, then both `v · Φₙ · (preΨ'_n)'` and `v² · Φₙ · (preΨ'_n)'` vanish after evaluation. But for an exact theorem statement, the parity factor must be present.
 
 ---
 
-## What Mathlib already gives you
+## Recommended notation
 
-The relevant current Mathlib API is very favorable:
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Formula
-```
-
-Key definitions/lemmas in `WeierstrassCurve.Projective`:
+In Mathlib notation, use `W.ψ₂` for `v`.
 
 ```lean
--- generic addition formula; if the representatives are equal, this is zero
-noncomputable def addXYZ (W : WeierstrassCurve.Projective R)
-    (P Q : Fin 3 → R) : Fin 3 → R
-
--- doubling formula
-noncomputable def dblXYZ (W : WeierstrassCurve.Projective R)
-    (P : Fin 3 → R) : Fin 3 → R
-
-@[simp]
-lemma map_addXYZ (f : R →+* S) (P Q : Fin 3 → R) :
-    (W.map f).addXYZ (f ∘ P) (f ∘ Q) = f ∘ W.addXYZ P Q
-
-@[simp]
-lemma map_dblXYZ (f : R →+* S) (P : Fin 3 → R) :
-    (W.map f).dblXYZ (f ∘ P) = f ∘ W.dblXYZ P
-
-lemma addXYZ_smul (P Q : Fin 3 → R) (u v : R) :
-    W.addXYZ (u • P) (v • Q) = (u * v) ^ 2 • W.addXYZ P Q
-
-lemma dblXYZ_smul (P : Fin 3 → R) (u : R) :
-    W.dblXYZ (u • P) = u ^ 4 • W.dblXYZ P
-
-lemma addXYZ_self (P : Fin 3 → R) :
-    W.addXYZ P P = ![0, 0, 0]
-```
-
-This is exactly the split needed for a formula-level construction: `dblXYZ` for known self-additions, `addXYZ` for known distinct additions, and the map lemmas for base change to `K[ε]`.
-
----
-
-## Recommended Lean shape: formula expressions, not naive recursion
-
-Use an expression tree that records which formula is being applied.  This avoids any need to decide equality of projective representatives over a general ring.
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Formula
-import Mathlib.RingTheory.PowerSeries.Basic
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.RingTheory.Ideal.Quotient.Basic
 import Mathlib.Tactic
 
 noncomputable section
 
+open Polynomial
+open scoped Polynomial.Bivariate
+
 namespace WeierstrassCurve
-namespace ProjectiveFormula
 
-abbrev Triple (R : Type*) := Fin 3 → R
+variable {R : Type*} [CommRing R]
+variable (W : WeierstrassCurve R)
 
-/-- Formula expressions for projective multiples of a fixed base point.
+/-- The invariant-differential denominator `v = 2Y + a₁X + a₃`.
 
-`add A B` means: apply the generic two-input addition formula to the representatives
-computed by `A` and `B`.  It should only be used in chains where the two multiples are
-known generically distinct.  Use `dbl A` for self-addition. -/
-inductive Expr : Type
-  | O : Expr
-  | P : Expr
-  | dbl : Expr → Expr
-  | add : Expr → Expr → Expr
-  deriving Repr
+In Mathlib this is already the second division polynomial. -/
+abbrev vPoly : R[X][Y] :=
+  W.ψ₂
 
-namespace Expr
+/-- The parity factor relating the reduced univariate `preΨ' n` to the full bivariate `Ψ n`.
 
-/-- The integer multiple represented by the expression, used only as bookkeeping. -/
-def weight : Expr → ℕ
-  | O => 0
-  | P => 1
-  | dbl A => 2 * weight A
-  | add A B => weight A + weight B
+For odd `n`, the full denominator is just `C (preΨ' n)`.
+For even `n`, it is `C (preΨ' n) * ψ₂`. -/
+def reducedPsiFactor (n : ℕ) : R[X][Y] :=
+  if Even n then W.ψ₂ else 1
 
-/-- Evaluate a formula expression over any commutative ring. -/
-def eval {R : Type*} [CommRing R]
-    (W : WeierstrassCurve.Projective R) (P : Triple R) : Expr → Triple R
-  | O => ![0, 1, 0]
-  | P => P
-  | dbl A => W.dblXYZ (eval W P A)
-  | add A B => W.addXYZ (eval W P A) (eval W P B)
+lemma Ψ_ofNat_eq_preΨ'_mul_reducedPsiFactor (n : ℕ) :
+    W.Ψ (n : ℤ) = C (W.preΨ' n) * W.reducedPsiFactor n := by
+  -- This should be a `simpa` wrapper around Mathlib's `WeierstrassCurve.Ψ_ofNat`.
+  -- Depending on the local simp set, one may need to normalize `Even (n : ℤ)` vs `Even n`.
+  simpa [reducedPsiFactor] using (WeierstrassCurve.Ψ_ofNat (W := W) n)
 
-@[simp]
-theorem eval_O {R : Type*} [CommRing R]
-    (W : WeierstrassCurve.Projective R) (P : Triple R) :
-    eval W P O = ![0, 1, 0] := rfl
-
-@[simp]
-theorem eval_P {R : Type*} [CommRing R]
-    (W : WeierstrassCurve.Projective R) (P : Triple R) :
-    eval W P P = P := rfl
-
-@[simp]
-theorem eval_dbl {R : Type*} [CommRing R]
-    (W : WeierstrassCurve.Projective R) (P : Triple R) (A : Expr) :
-    eval W P (dbl A) = W.dblXYZ (eval W P A) := rfl
-
-@[simp]
-theorem eval_add {R : Type*} [CommRing R]
-    (W : WeierstrassCurve.Projective R) (P : Triple R) (A B : Expr) :
-    eval W P (add A B) = W.addXYZ (eval W P A) (eval W P B) := rfl
-
-/-- Naturality/base-change of any formula expression.  This is the key transport
-lemma for evaluating the same formula over `R`, `S`, `PowerSeries R`, or `K[ε]`. -/
-@[simp]
-theorem eval_map {R S : Type*} [CommRing R] [CommRing S]
-    (φ : R →+* S) (W : WeierstrassCurve.Projective R) (P : Triple R) :
-    ∀ A : Expr,
-      eval (W.map φ) (φ ∘ P) A = φ ∘ eval W P A := by
-  intro A
-  induction A with
-  | O =>
-      ext i <;> fin_cases i <;> simp [eval]
-  | P =>
-      rfl
-  | dbl A ih =>
-      simp [eval, ih]
-  | add A B ihA ihB =>
-      simp [eval, ihA, ihB]
-
-/-- A compact binary-chain expression for small tests.  For serious proofs, make this
-an explicit addition chain so its shape is stable under simp. -/
-def two : Expr := dbl P
-
-def three : Expr := add (dbl P) P
-
-def four : Expr := dbl (dbl P)
-
-def five : Expr := add (dbl (dbl P)) P
-
-end Expr
-end ProjectiveFormula
 end WeierstrassCurve
 ```
 
-This is the small core I would put in the repository first.  The important theorem is `Expr.eval_map`; it is the formula-level analogue of naturality and should be robust because Mathlib marks `map_dblXYZ` and `map_addXYZ` as simp lemmas.
+The last lemma is the key bookkeeping lemma: it explains exactly why the odd and even reduced identities differ.
 
 ---
 
-## What `formulaNsmul` should be
+## The identity I would formalize first: avoid division by `2`
 
-For a usable `formulaNsmul`, do not define it by linear recursion through `O + P`.  Use one of these two patterns.
+Since Mathlib does not yet define `ωₙ`, do **not** start by trying to define `Ωₙ` over an arbitrary `CommRing` using `/ 2`. Define the doubled numerator first.
 
-### Pattern A: explicit addition chains
+Mathematically:
 
-For each fixed `n` needed in the Mortenson/division-polynomial proof, define an expression:
-
-```lean
-def expr2 : Expr := Expr.dbl Expr.P
-def expr3 : Expr := Expr.add (Expr.dbl Expr.P) Expr.P
-def expr4 : Expr := Expr.dbl (Expr.dbl Expr.P)
-def expr5 : Expr := Expr.add (Expr.dbl (Expr.dbl Expr.P)) Expr.P
+```text
+twoΩₙ = ψ₂ₙ / ψₙ - ψₙ · (a₁φₙ + a₃ψₙ²).
 ```
 
-Then evaluate by
+Then `twoΩₙ = 2Ωₙ` when `Ωₙ` is available.
 
-```lean
-Expr.eval W.toProjective P exprN
+The full bivariate congruence is:
+
+```text
+2 · φₙ · D(ψₙ) + n · twoΩₙ ≡ 0  mod ψₙ,
 ```
 
-This is the best route if the proof only needs a finite list of small `n`, or if `preΨ' n` is also being developed recursively along the same chain.
+where `D` is the invariant derivation on the affine coordinate ring:
 
-### Pattern B: a recursive binary chain
-
-If you need arbitrary `n`, build a chain by recursion on `n`, but make the branch produce `dbl` for even steps and `add _ P` for odd steps.  The actual implementation should be an expression-valued function, not a direct triple-valued function:
-
-```lean
--- schematic shape, not meant as the final termination proof
-def nsmulExpr : ℕ → Expr
-  | 0 => Expr.O
-  | 1 => Expr.P
-  | 2 => Expr.dbl Expr.P
-  | n + 3 =>
-      if h : Even (n + 3) then
-        Expr.dbl (nsmulExpr ((n + 3) / 2))
-      else
-        Expr.add (nsmulExpr (n + 2)) Expr.P
+```text
+D = v · ∂/∂X + (3X² + 2a₂X + a₄ - a₁Y) · ∂/∂Y.
 ```
 
-In the actual Lean file I would use either a well-founded definition on `<` or avoid cleverness and define an addition-chain data structure with a proof that every reference points backward.  That gives you clean induction principles for both naturality and leading-term proofs.
+After passing through Mathlib's coordinate-ring congruences
+
+```lean
+Affine.CoordinateRing.mk_ψ : mk W (W.ψ n) = mk W (W.Ψ n)
+Affine.CoordinateRing.mk_φ : mk W (W.φ n) = mk W (C (W.Φ n))
+```
+
+and then reducing modulo `C (W.preΨ' n)`, this becomes the reduced identity:
+
+```text
+2 · ηₙ · v · Φₙ · (preΨ'_n)' + n · twoΩₙ ≡ 0  mod preΨ'_n.
+```
+
+If you work over a ring/field where `2` is invertible and define `Ωₙ = twoΩₙ / 2`, then divide by `2` to get:
+
+```text
+ηₙ · v · Φₙ · (preΨ'_n)' + n · Ωₙ ≡ 0  mod preΨ'_n.
+```
+
+That is the exact identity to aim for.
 
 ---
 
-## Relation to the formal group
+## Lean target statement
 
-This approach can bridge to the formal group, but the bridge is not just `Z`-coordinate inspection.  You need a normalization layer.
+The most robust Lean target is an ideal-membership statement in the affine coordinate ring, not a raw syntactic `%` statement.
 
-For the formal point
-
-```text
-P(t) = [t : -1 : w(t)]
-```
-
-the affine/formal local coordinates are recovered on the chart where the `Y`-coordinate is a unit:
-
-```text
-t(P) = -X / Y,
-w(P) = -Z / Y.
-```
-
-Over `PowerSeries R`, division here means multiplication by the inverse of the unit `Y`.  Thus the right target statement should usually be normalized:
-
-```text
-normalizeY(Q) := (-Q_Y)⁻¹ • Q
-```
-
-or, more Lean-friendly, define only the two local functions
+Here is the shape I would use once `twoΩ` exists.
 
 ```lean
-localT(Q) = - Q 0 * (Q 1)⁻¹
-localW(Q) = - Q 2 * (Q 1)⁻¹
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.RingTheory.Ideal.Quotient.Basic
+import Mathlib.Tactic
+
+noncomputable section
+
+open Polynomial
+open scoped Polynomial.Bivariate
+
+namespace WeierstrassCurve
+
+variable {K : Type*} [Field K]
+variable (W : WeierstrassCurve K)
+
+/-- Placeholder for the doubled y-coordinate numerator.
+
+This is not in Mathlib yet.  The desired defining relation is
+`twoΩ n = ψ (2*n) / ψ n - ψ n * (a₁φ n + a₃ψ n^2)`, avoiding division by `2`.
+In the actual implementation, define this using a divisibility theorem
+`ψ n ∣ ψ (2*n)` or by the universal construction. -/
+noncomputable def twoΩ (_n : ℤ) : K[X][Y] :=
+  sorry
+
+/-- The parity factor relating reduced and full division denominators. -/
+def reducedPsiFactor (n : ℕ) : K[X][Y] :=
+  if Even n then W.ψ₂ else 1
+
+/-- The ideal in the affine coordinate ring generated by the reduced univariate denominator. -/
+def reducedPsiIdeal (n : ℕ) : Ideal W.toAffine.CoordinateRing :=
+  Ideal.span
+    ({Affine.CoordinateRing.mk W (C (W.preΨ' n))} : Set W.toAffine.CoordinateRing)
+
+/-- Exact reduced differential congruence, stated without dividing by `2`.
+
+This is the theorem to prove first.  It specializes to the user's displayed identity after
+assuming `2` is invertible and setting `Ω = twoΩ / 2`. -/
+theorem reduced_twoΩ_differential_congruence (n : ℕ) :
+    Affine.CoordinateRing.mk W
+      ((2 : K[X][Y]) *
+          (W.reducedPsiFactor n * W.ψ₂ *
+            C (W.Φ (n : ℤ) * (W.preΨ' n).derivative))
+        + (n : K[X][Y]) * W.twoΩ (n : ℤ))
+      ∈ W.reducedPsiIdeal n := by
+  sorry
+
+/-- If `Ω` is available and `2` is invertible, this is the divided-by-2 statement. -/
+noncomputable def Ω (_n : ℤ) : K[X][Y] :=
+  sorry
+
+theorem reduced_Ω_differential_congruence (n : ℕ) :
+    Affine.CoordinateRing.mk W
+      (W.reducedPsiFactor n * W.ψ₂ *
+          C (W.Φ (n : ℤ) * (W.preΨ' n).derivative)
+        + (n : K[X][Y]) * W.Ω (n : ℤ))
+      ∈ W.reducedPsiIdeal n := by
+  sorry
+
+end WeierstrassCurve
 ```
 
-where `(Q 1)⁻¹` is available after proving `Q 1` is a unit in `PowerSeries R`.
+Notes on the syntax:
 
-Then the bridge theorem should look like:
-
-```text
-localT (Expr.eval W P (nsmulExpr n)) = formalGroupMul W n t
-localW (Expr.eval W P (nsmulExpr n)) = formalW evaluated at formalGroupMul W n t
-```
-
-up to any scalar factor introduced by the formula expression.  The raw projective triple produced by `dblXYZ`/`addXYZ` is homogeneous and may carry nonunit scalar factors.  Those scalar factors do not matter after `Y`-normalization if the `Y`-coordinate is a unit, but they absolutely matter for a raw statement about the `Z`-component.
-
-This is also where the expected relation with `preΨ' n` should be stated carefully.  A raw formula `Z`-coordinate often contains division-polynomial factors and expression-dependent homogeneous scaling factors.  The invariant statement is usually one of:
-
-```text
-Z_n = unit_or_known_factor * preΨ'(n) * known_power_of_w_or_t
-```
-
-or
-
-```text
-localW(Q_n) = -Z_n / Y_n = formalW([n]_F t).
-```
-
-The second statement is normally easier to connect to the formal group; the first statement is the stronger division-polynomial bookkeeping theorem.
+* `C (W.preΨ' n)` lifts the univariate polynomial `K[X]` to the bivariate polynomial ring `K[X][Y]`.
+* `W.ψ₂` is the bivariate polynomial `2Y + a₁X + a₃`.
+* `W.Φ (n : ℤ)` is univariate, so `C (W.Φ (n : ℤ) * (W.preΨ' n).derivative)` is bivariate.
+* The scalar `(n : K[X][Y])` is the natural-number coefficient inside the bivariate polynomial ring.
+* If Lean has trouble with `W.toAffine.CoordinateRing` versus `Affine.CoordinateRing W`, follow the style already used in Mathlib's division-polynomial file: its lemmas are stated as `Affine.CoordinateRing.mk_ψ` and `Affine.CoordinateRing.mk_φ`, with `mk W`/`Affine.CoordinateRing.mk W` applied to bivariate polynomials.
 
 ---
 
-## Infrastructure needed in Lean
+## Why the sign is `+ n · Ωₙ`
 
-### 1. Formula expression evaluator
-
-Implement `Expr` and `Expr.eval` as above.  Prove once:
-
-```lean
-Expr.eval_map
-```
-
-This gives universal transport to every base ring, including `PowerSeries R` and dual numbers.
-
-### 2. Homogeneity/scaling bookkeeping
-
-Use Mathlib's existing lemmas:
-
-```lean
-dblXYZ_smul : W.dblXYZ (u • P) = u ^ 4 • W.dblXYZ P
-addXYZ_smul : W.addXYZ (u • P) (v • Q) = (u * v) ^ 2 • W.addXYZ P Q
-```
-
-For expression trees, define a scaling exponent function if needed:
+Use the local parameter at infinity
 
 ```text
-scaleWeight(dbl A)    = 4 * scaleWeight(A)
-scaleWeight(add A B)  = 2 * scaleWeight(A) + 2 * scaleWeight(B)
+t = -x/y.
 ```
 
-or more concretely prove expression-specific lemmas for the chains you use.  This is necessary because nonunit scalar factors over `PowerSeries R` cannot be ignored as projective equivalences.
-
-### 3. Formal point package
-
-Bundle the formal point and its equation proof:
-
-```lean
-def formalPoint (W : WeierstrassCurve R) : Fin 3 → PowerSeries R :=
-  ![PowerSeries.X, -1, W.formalW]
-```
-
-Then prove:
+For multiplication by `n`, the affine formulas are
 
 ```text
-W.toProjective.Equation (formalPoint W)
-(formalPoint W) 1 is a unit
+x([n]P) = φₙ / ψₙ²,
+y([n]P) = Ωₙ / ψₙ³.
 ```
 
-The second is immediate from coefficient/constant-term facts because the `Y` coordinate is `-1`.
-
-### 4. Unit criterion for power series
-
-You will repeatedly need:
+Hence
 
 ```text
-IsUnit f ↔ IsUnit (PowerSeries.constantCoeff R f)
+t([n]P) = -x([n]P) / y([n]P)
+         = -φₙψₙ / Ωₙ.
 ```
 
-or the local theorem available in your Mathlib snapshot.  Use this to show the `Y`-coordinate of the evaluated expression remains a unit for the formal multiples you care about.
-
-### 5. Local-coordinate normalization
-
-Define local coordinates only under a unit hypothesis:
-
-```lean
-noncomputable def localT {R : Type*} [CommRing R]
-    (Q : Fin 3 → PowerSeries R) (hY : IsUnit (Q 1)) : PowerSeries R :=
-  -Q 0 * hY.unit⁻¹
-
-noncomputable def localW {R : Type*} [CommRing R]
-    (Q : Fin 3 → PowerSeries R) (hY : IsUnit (Q 1)) : PowerSeries R :=
-  -Q 2 * hY.unit⁻¹
-```
-
-Depending on your local API, the exact coercion from `hY.unit⁻¹` may need `((hY.unit⁻¹ : (PowerSeries R)ˣ) : PowerSeries R)`.
-
-### 6. Leading-term API
-
-For the `Z`-component leading statement, avoid depending on a global valuation API at first.  Define a simple coefficient-level predicate:
-
-```lean
-def HasLeadingTerm {R : Type*} [CommRing R]
-    (f : PowerSeries R) (k : ℕ) (u : R) : Prop :=
-  PowerSeries.coeff R k f = u ∧ IsUnit u ∧ ∀ m < k, PowerSeries.coeff R m f = 0
-```
-
-Then prove closure lemmas:
+At a point where `ψₙ = 0`, differentiating modulo `ψₙ` gives
 
 ```text
-HasLeadingTerm f a u → HasLeadingTerm g b v → HasLeadingTerm (f * g) (a+b) (u*v)
-HasLeadingTerm f a u → HasLeadingTerm (f^k) (a*k) (u^k)
-HasLeadingTerm f a u → IsUnit c → HasLeadingTerm (c • f) a (c*u)
+D(t([n]P)) ≡ -φₙ · D(ψₙ) / Ωₙ  mod ψₙ.
 ```
 
-This is enough to state and prove claims like
+The invariant differential gives the tangent action of `[n]` as multiplication by `n`, so
 
 ```text
-HasLeadingTerm ((Expr.eval W P exprN) 2) (n^2) unitCoeff
+D(t([n]P)) ≡ n  mod ψₙ.
 ```
 
-without first importing a valuation theory.
-
-### 7. Dual-number / `K[ε]` transport
-
-Once `Expr.eval_map` exists, transport to dual numbers is formal.  Let `ι : K →+* Kε` be the scalar inclusion.  Then:
+Therefore
 
 ```text
-Expr.eval ((W.map ι).toProjective) (ι ∘ P) A
-  = ι ∘ Expr.eval W.toProjective P A
+-φₙ · D(ψₙ) / Ωₙ ≡ n,
 ```
 
-For a genuine infinitesimal point over `K[ε]`, define it directly and use the same evaluator.  The connection to the formal group derivative then goes through `localT`, not through raw projective equality.
+or equivalently
+
+```text
+φₙ · D(ψₙ) + n · Ωₙ ≡ 0  mod ψₙ.
+```
+
+So the sign in your proposed identity is correct for the standard convention
+`Ωₙ =` y-coordinate numerator and `t = -x/y`. If someone instead uses `t = x/y`, the sign flips.
 
 ---
 
-## Suggested theorem targets
+## How to prove the identity in Lean
 
-I would add theorem targets in this order.
+The proof should not start from resultants.  It should start from a derivation on the coordinate ring.
 
-```lean
--- 1. Formula-level naturality.
-theorem Expr.eval_map ...
+### 1. Define the invariant derivation
 
--- 2. Formal point lies on the curve.
-theorem formalPoint_equation ...
+On `K[X][Y]`, define
 
--- 3. The evaluated formula still has unit Y-coordinate for each fixed expression.
-theorem eval_Y_isUnit_for_exprN ...
+```text
+D = v · ∂X + g · ∂Y,
 
--- 4. Normalized local parameter agrees with formal-group multiplication.
-theorem localT_eval_exprN_eq_formalMul ...
-
--- 5. Only after that, prove the raw Z/preΨ' relation.
-theorem eval_Z_exprN_eq_prePsi_factor ...
-
--- 6. Convert the equality into a leading-term statement.
-theorem eval_Z_exprN_hasLeadingTerm ...
+g = 3X² + 2a₂X + a₄ - a₁Y.
 ```
 
-The hardest step is not defining formula evaluation; it is proving theorem 4 or theorem 5.  The map/naturality part is easy because Mathlib already supplies the map lemmas for `dblXYZ` and `addXYZ`.
+The essential lemmas are:
+
+```lean
+-- schematic names
+lemma invariantDeriv_C (f : K[X]) :
+    D W (C f) = W.ψ₂ * C f.derivative := by
+  ...
+
+lemma invariantDeriv_Y :
+    D W Y = C (3 * X^2 + C (2 * W.a₂) * X + C W.a₄) - C (C W.a₁) * Y := by
+  ...
+
+lemma invariantDeriv_curvePolynomial :
+    D W W.toAffine.polynomial = 0 := by
+  ring_nf [D, W.ψ₂, W.toAffine.polynomial]
+```
+
+The last lemma lets `D` descend to `W.toAffine.CoordinateRing`.
+
+### 2. Prove the full differential congruence
+
+Prove in the coordinate ring modulo `mk W (W.ψ n)`:
+
+```text
+2 · φₙ · D(ψₙ) + n · twoΩₙ ≡ 0.
+```
+
+A good derivation is through the invariant differential identity for the `x`-coordinate:
+
+```text
+D(φₙ / ψₙ²) = n · v([n]P).
+```
+
+After clearing denominators:
+
+```text
+D(φₙ) · ψₙ - 2φₙ · D(ψₙ) = n · (ψ₂ₙ / ψₙ).
+```
+
+Reduce modulo `ψₙ` and use
+
+```text
+twoΩₙ ≡ ψ₂ₙ / ψₙ  mod ψₙ.
+```
+
+This gives
+
+```text
+2φₙD(ψₙ) + n·twoΩₙ ≡ 0  mod ψₙ.
+```
+
+This route avoids having to reason directly with the local parameter `t`, although conceptually it is the same tangent calculation.
+
+### 3. Replace `ψ`, `φ` by Mathlib's reduced `Ψ`, `Φ`
+
+Use the existing coordinate-ring congruences:
+
+```lean
+Affine.CoordinateRing.mk_ψ (W := W) (n : ℤ) :
+  Affine.CoordinateRing.mk W (W.ψ n) = Affine.CoordinateRing.mk W (W.Ψ n)
+
+Affine.CoordinateRing.mk_φ (W := W) (n : ℤ) :
+  Affine.CoordinateRing.mk W (W.φ n) = Affine.CoordinateRing.mk W (C (W.Φ n))
+```
+
+Then use:
+
+```lean
+W.Ψ (n : ℤ) = C (W.preΨ' n) * W.reducedPsiFactor n
+```
+
+and the derivation lemma
+
+```text
+D(C f) = v · C(f.derivative)
+```
+
+to reduce modulo `C (W.preΨ' n)`.
+
+This produces the target reduced identity with the parity factor `ηₙ`.
 
 ---
 
-## Practical recommendation
+## Separability contradiction using the identity
 
-Use `Projective.addXYZ` and `Projective.dblXYZ` as a low-level formula language, not as a naive `nsmul` function.  Define an explicit addition-chain expression for `[n]P`, prove `eval_map` once, normalize by the `Y`-coordinate to compare with the formal group, and separately track the homogeneous scalar factors if you need a raw `Z`-coordinate/preΨ' theorem.
+Assume:
 
-That route is feasible and probably a good way to connect formula-level division-polynomial identities with universal formal-group transport.  The only thing I would avoid is the `addXYZ`-only recursion from `O`, because over `PowerSeries R` the nonunit scaling by `w(t)` makes it collapse almost immediately.
+```text
+K is a field,
+W is nonsingular,
+(n : K) ≠ 0,
+preΨ'_n(α) = 0,
+(preΨ'_n)'(α) = 0.
+```
+
+Work over an algebraic closure and choose a point `P = (α, β)` on the curve lying above `α`.
+
+The reduced identity gives, after evaluation at `P`:
+
+```text
+n · Ωₙ(P) = 0.
+```
+
+Since `(n : K) ≠ 0`, this implies
+
+```text
+Ωₙ(P) = 0.
+```
+
+To contradict this, use the weighted curve relation for multiplication:
+
+```text
+Ωₙ² + a₁ Φₙ Ψₙ Ωₙ + a₃ Ψₙ³ Ωₙ
+  = Φₙ³ + a₂ Φₙ² Ψₙ² + a₄ Φₙ Ψₙ⁴ + a₆ Ψₙ⁶.
+```
+
+Modulo `preΨ'_n`, the full denominator `Ψₙ` vanishes, so this reduces to
+
+```text
+Ωₙ² = Φₙ³.
+```
+
+Thus it is enough to prove
+
+```text
+Φₙ(P) ≠ 0.
+```
+
+Using Mathlib's definition of `Φ`, modulo `preΨ'_n` one gets
+
+```text
+Φₙ ≡ - preΨ'_{n+1} · preΨ'_{n-1} · parityFactor,
+```
+
+where the extra factor is:
+
+```text
+if Even n then 1 else Ψ₂Sq.
+```
+
+So the required coprimality package is:
+
+```text
+gcd(preΨ'_n, preΨ'_{n+1}) = 1,
+gcd(preΨ'_n, preΨ'_{n-1}) = 1,
+if Odd n then gcd(preΨ'_n, Ψ₂Sq) = 1.
+```
+
+The last condition says an odd-`n` torsion point is not a 2-torsion point.  It is easy conceptually, but it should be made explicit in Lean because it is exactly the factor that appears in `Φ` for odd `n`.
+
+Then `Φₙ(P) ≠ 0`, hence `Ωₙ(P)^2 = Φₙ(P)^3 ≠ 0`, so `Ωₙ(P) ≠ 0`, contradiction.
+
+---
+
+## Can step 4 be proved using only the EDS recurrence?
+
+Not cleanly.
+
+The adjacent-coprimality part is EDS-flavored, and the definitions of `ψ`, `Ψ`, and `Φ` are EDS-flavored.  But the key implication
+
+```text
+(preΨ'_n)'(P.x) = 0  ⇒  Ωₙ(P) = 0
+```
+
+is infinitesimal.  It is the tangent action of multiplication-by-`n`, equivalently `[n]^*ω = nω`.
+
+You can prove it by induction on the EDS recurrences if you strengthen the induction to include the derivative identity, but that is essentially re-proving the invariant-differential statement inside the EDS development.  It is not a simpler proof; it just hides the geometry.
+
+The best Lean route is therefore:
+
+1. add `twoΩ`/`Ω`,
+2. add the invariant derivation on the coordinate ring,
+3. prove the full congruence `2φDψ + n·twoΩ ≡ 0 mod ψ`,
+4. reduce it to `preΨ'` using `mk_ψ`, `mk_φ`, and the parity factor.
+
+---
+
+## Direct gcd/resultant alternative
+
+For a fixed small `n`, yes, a CAS-style certificate is possible:
+
+```text
+gcd(preΨ'_n, (preΨ'_n)') = 1
+```
+
+can be proved by producing explicit Bézout polynomials, or by computing a resultant and showing it is nonzero after the required hypotheses.
+
+For arbitrary `n`, this is not the route I would take in Lean.  The general resultant/discriminant of division polynomials is a large theorem: it will involve powers of `n` and the discriminant of the curve.  Formalizing that universal resultant identity is likely harder than formalizing the invariant-differential congruence above.
+
+So:
+
+* **small fixed `n`**: resultant/Bézout certificate is feasible;
+* **general `n`**: use the differential identity;
+* **Mathlib-compatible exact statement**: include the parity factor `ηₙ = if Even n then ψ₂ else 1`.
