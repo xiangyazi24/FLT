@@ -1,107 +1,158 @@
-# Q818 (dm2): `preΨ'(4)` separability via a generated Bézout certificate
+# Q846 (dm2): nonvanishing of the even cofactor on the `Ψ₃ = 0` stratum
 
 ## Bottom line
 
-For `n = 4`, I would **not** try to build a reusable resultant theory first.  The most direct Lean path is:
-
-1. use Mathlib’s lemma
-
-```lean
-@[simp] lemma WeierstrassCurve.preΨ'_four : W.preΨ' 4 = W.preΨ₄
-```
-
-2. generate one explicit certificate
-
-```lean
-A₄(W) * W.preΨ₄ + B₄(W) * derivative W.preΨ₄
-  = C ((2 : K)^9 * W.Δ ^ 5),
-```
-
-3. use `[W.IsElliptic]` to get `W.Δ ≠ 0`, and `(4 : K) ≠ 0` to get `(2 : K) ≠ 0`, and
-4. scale the certificate by the inverse of the nonzero constant.
-
-This proves
-
-```lean
-IsCoprime (W.preΨ' 4) (derivative (W.preΨ' 4))
-```
-
-without needing a general `Polynomial.resultant_ne_zero → IsCoprime` API.
-
-The resultant identity is still useful as a CAS sanity check, but the Lean proof should consume the **Bézout identity**, not the resultant theorem.
-
----
-
-## Step 1: exact Mathlib definition of `preΨ₄`
-
-Mathlib defines:
-
-```lean
-noncomputable def WeierstrassCurve.preΨ₄ : R[X] :=
-  2 * X ^ 6
-    + C W.b₂ * X ^ 5
-    + 5 * C W.b₄ * X ^ 4
-    + 10 * C W.b₆ * X ^ 3
-    + 10 * C W.b₈ * X ^ 2
-    + C (W.b₂ * W.b₈ - W.b₄ * W.b₆) * X
-    + C (W.b₄ * W.b₈ - W.b₆ ^ 2)
-```
-
-and then
-
-```lean
-@[simp]
-lemma WeierstrassCurve.preΨ'_four : W.preΨ' 4 = W.preΨ₄
-```
-
-So the target is really about `W.preΨ₄`.
-
-Important: `preΨ₄` is written in terms of the `bᵢ`, but for the resultant formula you must substitute the actual Weierstrass definitions
-
-```lean
-b₂ = a₁^2 + 4 a₂
-b₄ = 2 a₄ + a₁ a₃
-b₆ = a₃^2 + 4 a₆
-b₈ = a₁^2 a₆ + 4 a₂ a₆ - a₁ a₃ a₄ + a₂ a₃^2 - a₄^2
-```
-
-and
-
-```lean
-Δ = -b₂^2 b₈ - 8 b₄^3 - 27 b₆^2 + 9 b₂ b₄ b₆.
-```
-
-Do **not** compute the final certificate over independent variables `b₂,b₄,b₆,b₈`.  The simple formula
+Do **not** try to prove this from the four-neighbor relation
 
 ```text
-Res(preΨ₄, preΨ₄') = 2^9 Δ^5
+δ · α = γ · β.
 ```
 
-uses the Weierstrass relation among the `bᵢ`, especially
+For Mathlib’s auxiliary sequence `preΨ`, that relation is not valid without parity / `Ψ₂Sq` factors.  The clean way is to specialize the whole evaluated `preΨ` sequence at a root of `Ψ₃`.
 
-```lean
-4 * W.b₈ = W.b₂ * W.b₆ - W.b₄ ^ 2.
+Let
+
+```text
+B := Ψ₂Sq(x)^2.
 ```
 
-If `b₂,b₄,b₆,b₈` are treated as algebraically independent, Sympy gives a huge unrelated resultant.
+At a root of `Ψ₃`, using
+
+```text
+preΨ₄(x) = -Ψ₂Sq(x)^2 = -B,
+```
+
+the evaluated auxiliary EDS has initial values
+
+```text
+u₀ = 0,
+u₁ = 1,
+u₂ = 1,
+u₃ = 0,
+u₄ = -B.
+```
+
+The resulting specialized sequence is six-periodic up to powers of `B`:
+
+```text
+u_{6t}     = 0
+u_{6t+1}   =  B^(3t² + t)
+u_{6t+2}   =  B^(3t² + 2t)
+u_{6t+3}   = 0
+u_{6t+4}   = -B^(3t² + 4t + 1)
+u_{6t+5}   = -B^(3t² + 5t + 2).
+```
+
+Then, since `3 ∣ m + 3`, there are only two cases.
+
+If
+
+```text
+m = 6t,
+```
+
+then
+
+```text
+α = preΨ(m+1)(x) =  B^(3t² + t)
+β = preΨ(m+2)(x) =  B^(3t² + 2t)
+γ = preΨ(m+4)(x) = -B^(3t² + 4t + 1)
+δ = preΨ(m+5)(x) = -B^(3t² + 5t + 2),
+```
+
+so
+
+```text
+β²δ - αγ² = -2 · B^(9t² + 9t + 2).
+```
+
+If
+
+```text
+m = 6t + 3,
+```
+
+then
+
+```text
+α = preΨ(m+1)(x) = -B^(3t² + 4t + 1)
+β = preΨ(m+2)(x) = -B^(3t² + 5t + 2)
+γ = preΨ(m+4)(x) =  B^(3t² + 7t + 4)
+δ = preΨ(m+5)(x) =  B^(3t² + 8t + 5),
+```
+
+so
+
+```text
+β²δ - αγ² = 2 · B^(9t² + 18t + 9).
+```
+
+Thus the cofactor is nonzero as soon as
+
+```text
+2 ≠ 0
+B ≠ 0.
+```
+
+The hypothesis `(2 * (m + 3) : K) ≠ 0` gives `2 ≠ 0`.  The fact `B ≠ 0` follows from adjacent nonvanishing of `preΨ₃` and `preΨ₄`: if `B = 0`, then `preΨ₄(x) = -B = 0`, contradicting `preΨ₃(x) = Ψ₃(x) = 0` and adjacent coprimality.
+
+That proves the desired nonvanishing.
 
 ---
 
-## Step 2: derivative of `preΨ₄`
+## The important correction
 
-The derivative is:
+The tempting relation
 
-```lean
-derivative W.preΨ₄ =
-  12 * X ^ 5
-    + C (5 * W.b₂) * X ^ 4
-    + C (20 * W.b₄) * X ^ 3
-    + C (30 * W.b₆) * X ^ 2
-    + C (20 * W.b₈) * X
-    + C (W.b₂ * W.b₈ - W.b₄ * W.b₆)
+```text
+preΨ(r+2)(x) · preΨ(r-2)(x)
+  = preΨ(r+1)(x) · preΨ(r-1)(x)
 ```
 
-A small Lean lemma should prove this once and keep the generated certificate readable:
+at `preΨ(r)(x) = 0` is **not** a valid relation for Mathlib’s auxiliary `preΨ` sequence.
+
+You can see the failure already at the specialized initial values.  Put `r = 3`.  Then
+
+```text
+u₁ = 1,
+u₂ = 1,
+u₄ = -B,
+u₅ = -B².
+```
+
+The claimed relation would say
+
+```text
+u₅ · u₁ = u₄ · u₂,
+```
+
+that is
+
+```text
+-B² = -B,
+```
+
+which is false for general `B`.
+
+The missing issue is that `preΨ` is not the actual normalized EDS; it is Mathlib’s auxiliary sequence with the even `ψ₂` factors stripped off.  The Ward/Somos relations for the actual normalized EDS acquire parity factors when translated to `preΨ`.  So this branch should not be attacked through the naive four-neighbor Somos relation.
+
+---
+
+## First useful polynomial identity
+
+The identity behind the assumption
+
+```text
+preΨ₄(x) = -Ψ₂Sq(x)^2
+```
+
+is the polynomial identity
+
+```text
+preΨ₄ + Ψ₂Sq² = (6X² + b₂X + b₄) · Ψ₃.
+```
+
+In Lean, prove it as a lemma by unfolding the `bᵢ` definitions:
 
 ```lean
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
@@ -114,413 +165,371 @@ namespace WeierstrassCurve
 variable {K : Type*} [Field K]
 variable (W : WeierstrassCurve K)
 
-lemma derivative_preΨ₄ :
-    derivative W.preΨ₄ =
-      12 * X ^ 5
-        + C (5 * W.b₂) * X ^ 4
-        + C (20 * W.b₄) * X ^ 3
-        + C (30 * W.b₆) * X ^ 2
-        + C (20 * W.b₈) * X
-        + C (W.b₂ * W.b₈ - W.b₄ * W.b₆) := by
-  rw [preΨ₄]
-  -- `ring_nf` usually succeeds here; if not, expand derivative simp lemmas first.
+lemma preΨ₄_add_Ψ₂Sq_sq :
+    W.preΨ₄ + W.Ψ₂Sq ^ 2 =
+      (6 * X ^ 2 + C W.b₂ * X + C W.b₄) * W.Ψ₃ := by
+  rw [preΨ₄, Ψ₂Sq, Ψ₃]
+  rw [b₂, b₄, b₆, b₈]
   ring_nf
+
+lemma preΨ₄_eval_eq_neg_Ψ₂Sq_sq_of_Ψ₃_eval_eq_zero
+    {x : K} (h3 : W.Ψ₃.eval x = 0) :
+    W.preΨ₄.eval x = - (W.Ψ₂Sq.eval x) ^ 2 := by
+  have h := congrArg (fun p : K[X] => p.eval x) (W.preΨ₄_add_Ψ₂Sq_sq)
+  simp [eval_add, eval_mul, eval_pow, h3] at h
+  -- h : W.preΨ₄.eval x + (W.Ψ₂Sq.eval x)^2 = 0
+  linarith
 
 end WeierstrassCurve
 ```
 
-If `ring_nf` does not unfold enough in the local file, use:
+If `linarith` dislikes the final ring expression, use:
 
 ```lean
-  simp only [derivative_add, derivative_sub, derivative_mul, derivative_pow,
-    derivative_X, derivative_C, map_ofNat, C_0, C_1]
+  linear_combination h
+```
+
+or simply
+
+```lean
+  rw [eq_neg_iff_add_eq_zero]
+  exact h
+```
+
+depending on the exact shape after `simp`.
+
+---
+
+## The specialized EDS block lemma
+
+Define, after evaluation at `x`,
+
+```lean
+u j := (W.preΨ' j).eval x
+B   := (W.Ψ₂Sq.eval x) ^ 2
+```
+
+Under
+
+```lean
+h3 : W.Ψ₃.eval x = 0
+h4 : W.preΨ₄.eval x = -B
+```
+
+Mathlib’s recurrence for `preΨ'` specializes to the sequence with initial values
+
+```text
+0, 1, 1, 0, -B.
+```
+
+The useful lemma is:
+
+```lean
+lemma preΨ'_eval_six_block_of_Ψ₃_eval_eq_zero
+    {x : K} (h3 : W.Ψ₃.eval x = 0)
+    (h4 : W.preΨ₄.eval x = - (W.Ψ₂Sq.eval x) ^ 2) (t : ℕ) :
+    let B : K := (W.Ψ₂Sq.eval x) ^ 2
+    (W.preΨ' (6 * t)).eval x = 0 ∧
+    (W.preΨ' (6 * t + 1)).eval x = B ^ (3 * t ^ 2 + t) ∧
+    (W.preΨ' (6 * t + 2)).eval x = B ^ (3 * t ^ 2 + 2 * t) ∧
+    (W.preΨ' (6 * t + 3)).eval x = 0 ∧
+    (W.preΨ' (6 * t + 4)).eval x = -B ^ (3 * t ^ 2 + 4 * t + 1) ∧
+    (W.preΨ' (6 * t + 5)).eval x = -B ^ (3 * t ^ 2 + 5 * t + 2) := by
+  -- Prove by strong induction using `preΨ'_even` and `preΨ'_odd`,
+  -- or prove the corresponding scalar lemma for `preNormEDS' B 0 (-B)`.
+  sorry
+```
+
+For maintainability, I recommend proving the scalar version first:
+
+```lean
+lemma preNormEDS'_zero_neg_six_block (B : K) (t : ℕ) :
+    preNormEDS' B 0 (-B) (6 * t) = 0 ∧
+    preNormEDS' B 0 (-B) (6 * t + 1) = B ^ (3 * t ^ 2 + t) ∧
+    preNormEDS' B 0 (-B) (6 * t + 2) = B ^ (3 * t ^ 2 + 2 * t) ∧
+    preNormEDS' B 0 (-B) (6 * t + 3) = 0 ∧
+    preNormEDS' B 0 (-B) (6 * t + 4) = -B ^ (3 * t ^ 2 + 4 * t + 1) ∧
+    preNormEDS' B 0 (-B) (6 * t + 5) = -B ^ (3 * t ^ 2 + 5 * t + 2) := by
+  sorry
+```
+
+Then either prove an evaluation-commutation lemma for `preNormEDS'`, or just use the same proof pattern directly on the evaluated `preΨ'` recurrences.
+
+The recurrences you need after evaluating are exactly:
+
+```lean
+have h_even (r : ℕ) :
+    u (2 * (r + 3)) =
+      u (r + 2) ^ 2 * u (r + 3) * u (r + 5)
+        - u (r + 1) * u (r + 3) * u (r + 4) ^ 2 := by
+  simpa [u, eval_mul, eval_sub, eval_pow]
+    using congrArg (fun p : K[X] => p.eval x) (W.preΨ'_even r)
+
+have h_odd (r : ℕ) :
+    u (2 * (r + 2) + 1) =
+      u (r + 4) * u (r + 2) ^ 3 * (if Even r then B else 1)
+        - u (r + 1) * u (r + 3) ^ 3 * (if Even r then 1 else B) := by
+  simpa [u, B, eval_mul, eval_sub, eval_pow]
+    using congrArg (fun p : K[X] => p.eval x) (W.preΨ'_odd r)
+```
+
+The proof of the six-block lemma is just these recurrences plus `omega` for index arithmetic and `ring_nf` for the exponent arithmetic.
+
+---
+
+## Cofactor calculation
+
+Let
+
+```lean
+C_m :=
+  (W.preΨ' (m + 2)).eval x ^ 2 * (W.preΨ' (m + 5)).eval x
+    - (W.preΨ' (m + 1)).eval x * (W.preΨ' (m + 4)).eval x ^ 2
+```
+
+Assume
+
+```lean
+hdiv : 3 ∣ m + 3.
+```
+
+Since `m + 3 ≥ 3`, write either
+
+```text
+m = 6t
+```
+
+or
+
+```text
+m = 6t + 3.
+```
+
+The six-block lemma gives the following two concrete calculations.
+
+### Case 1: `m = 6t`
+
+```lean
+have hC : C_m = -2 * B ^ (9 * t ^ 2 + 9 * t + 2) := by
+  subst m
+  simp [C_m, preΨ'_eval_six_block_of_Ψ₃_eval_eq_zero, B]
   ring_nf
 ```
 
----
-
-## Step 3: generate the Bézout cofactors by Sympy
-
-The robust way is not `sp.gcdex` over the rational function field; that tends to create enormous rational cancellations.  Instead, build the multiplication map
+Mathematically, this is:
 
 ```text
-(A, B) ↦ A · f + B · f'
+β²δ - αγ²
+  = (B^(3t²+2t))² · (-B^(3t²+5t+2))
+      - B^(3t²+t) · (-B^(3t²+4t+1))²
+  = -B^(9t²+9t+2) - B^(9t²+9t+2)
+  = -2B^(9t²+9t+2).
 ```
 
-with
-
-```text
-deg A < 5,
-deg B < 6,
-```
-
-where `f = preΨ₄`.  This is an `11 × 11` Sylvester-style matrix.  Solving this system fraction-free gives the adjugate-column Bézout certificate.
-
-Use the actual `aᵢ` variables, not independent `bᵢ` variables.
-
-```python
-#!/usr/bin/env python3
-import sympy as sp
-from sympy.polys.matrices import DomainMatrix
-
-# Polynomial variable and universal Weierstrass coefficients.
-x = sp.Symbol("x")
-a1, a2, a3, a4, a6 = sp.symbols("a1 a2 a3 a4 a6")
-
-# Mathlib's b-invariants.
-b2 = a1**2 + 4*a2
-b4 = 2*a4 + a1*a3
-b6 = a3**2 + 4*a6
-b8 = a1**2*a6 + 4*a2*a6 - a1*a3*a4 + a2*a3**2 - a4**2
-
-Delta = sp.expand(-b2**2*b8 - 8*b4**3 - 27*b6**2 + 9*b2*b4*b6)
-
-# Mathlib's preΨ₄.
-f = sp.expand(
-    2*x**6
-    + b2*x**5
-    + 5*b4*x**4
-    + 10*b6*x**3
-    + 10*b8*x**2
-    + (b2*b8 - b4*b6)*x
-    + (b4*b8 - b6**2)
-)
-g = sp.diff(f, x)
-
-# Expected resultant / certificate constant.
-target = sp.expand(2**9 * Delta**5)
-
-# Coefficient vector in ascending powers of x, length maxdeg+1.
-def coeff_vec(poly, maxdeg):
-    P = sp.Poly(sp.expand(poly), x)
-    return [P.coeff_monomial(x**i) for i in range(maxdeg + 1)]
-
-# Unknowns are coefficients of A, deg A < 5, and B, deg B < 6.
-# The columns are coeff vectors of x^i*f and x^j*g.
-cols = []
-for i in range(5):
-    cols.append(sp.Matrix(coeff_vec(x**i * f, 10)))
-for j in range(6):
-    cols.append(sp.Matrix(coeff_vec(x**j * g, 10)))
-
-S = sp.Matrix.hstack(*cols)
-rhs = sp.Matrix([1] + [0]*10)
-
-# Work over ZZ[a1,a2,a3,a4,a6], not over a rational function field.
-domain = sp.ZZ.poly_ring(a1, a2, a3, a4, a6)
-Sdm = DomainMatrix.from_Matrix(S, domain=domain)
-rhsdm = DomainMatrix.from_Matrix(rhs, (11, 1), domain=domain)
-
-# solve_den returns sol, den with S * sol = den * rhs.
-# The denominator should divide the resultant.  We scale to target = 2^9 * Delta^5.
-sol_dm, den = Sdm.solve_den(rhsdm, method="charpoly")
-sol_mat = sol_dm.to_Matrix()
-den_expr = sp.factor(den.as_expr())
-
-q = sp.cancel(target / den_expr)
-q_num, q_den = sp.fraction(q)
-assert q_den == 1, f"denominator did not divide target; den={den_expr}"
-q = sp.expand(q_num)
-
-sol = [sp.expand(q * sol_mat[i, 0]) for i in range(11)]
-
-A = sp.expand(sum(sol[i] * x**i for i in range(5)))
-B = sp.expand(sum(sol[5 + j] * x**j for j in range(6)))
-
-check = sp.Poly(sp.expand(A*f + B*g - target), x)
-assert check.is_zero, "Bézout identity failed"
-
-print("degree A =", sp.Poly(A, x).degree())
-print("degree B =", sp.Poly(B, x).degree())
-print("den =", den_expr)
-print("scaled by q =", sp.factor(q))
-print("certificate OK")
-```
-
-If `solve_den(..., method="charpoly")` is slow, try the default method:
-
-```python
-sol_dm, den = Sdm.solve_den(rhsdm)
-```
-
-or explicitly use the adjugate/determinant path:
-
-```python
-adj, den = Sdm.adj_det()
-sol_dm = adj.matmul(rhsdm)
-```
-
-The `solve_den` version is usually preferable because it may return a smaller denominator; the script then scales the certificate back up to the canonical target `2^9 * Δ^5`.
-
----
-
-## Exporting Lean definitions
-
-After the script computes `A` and `B`, generate Lean definitions.  The generated cofactors should be polynomials in `X` whose coefficients are expressions in `W.a₁,W.a₂,W.a₃,W.a₄,W.a₆`.
-
-Here is a minimal printer skeleton:
-
-```python
-var_to_lean = {
-    a1: "W.a₁",
-    a2: "W.a₂",
-    a3: "W.a₃",
-    a4: "W.a₄",
-    a6: "W.a₆",
-}
-
-def lean_expr(e):
-    e = sp.expand(e)
-    if e == 0:
-        return "0"
-    if e == 1:
-        return "1"
-    if e == -1:
-        return "-1"
-    if e in var_to_lean:
-        return var_to_lean[e]
-    if e.is_Integer:
-        return str(int(e))
-    if e.is_Add:
-        return "(" + " + ".join(lean_expr(t) for t in e.as_ordered_terms()) + ")"
-    if e.is_Mul:
-        coeff, rest = e.as_coeff_Mul()
-        if coeff == -1:
-            return "(-" + lean_expr(rest) + ")"
-        if coeff != 1:
-            return "(" + str(int(coeff)) + " * " + lean_expr(rest) + ")"
-        return "(" + " * ".join(lean_expr(t) for t in e.as_ordered_factors()) + ")"
-    if e.is_Pow:
-        base, exp = e.as_base_exp()
-        assert exp.is_Integer and exp >= 0
-        return "(" + lean_expr(base) + ") ^ " + str(int(exp))
-    raise ValueError(f"unhandled expression: {e!r}")
-
-def lean_poly(poly):
-    P = sp.Poly(sp.expand(poly), x)
-    terms = []
-    for (deg,), coeff in sorted(P.terms(), reverse=False):
-        if coeff == 0:
-            continue
-        c = "C (" + lean_expr(coeff) + ")"
-        if deg == 0:
-            terms.append(c)
-        elif deg == 1:
-            terms.append(c + " * X")
-        else:
-            terms.append(c + f" * X ^ {deg}")
-    if not terms:
-        return "0"
-    return "\n    + ".join(terms)
-
-with open("scratch/PrePsi4Certificate.lean", "w", encoding="utf-8") as out:
-    out.write("import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic\n")
-    out.write("import Mathlib.Tactic\n\n")
-    out.write("open Polynomial\n\n")
-    out.write("namespace WeierstrassCurve\n\n")
-    out.write("noncomputable section\n\n")
-    out.write("variable {K : Type*} [Field K]\n")
-    out.write("variable (W : WeierstrassCurve K)\n\n")
-    out.write("def preΨ₄BezoutA : K[X] :=\n    ")
-    out.write(lean_poly(A))
-    out.write("\n\n")
-    out.write("def preΨ₄BezoutB : K[X] :=\n    ")
-    out.write(lean_poly(B))
-    out.write("\n\n")
-    out.write("end\n\n")
-    out.write("end WeierstrassCurve\n")
-```
-
-This printer is intentionally simple.  It will produce large expressions, but Lean accepts heavily parenthesized ring expressions.
-
----
-
-## The generated Lean certificate theorem
-
-After inserting the generated `preΨ₄BezoutA` and `preΨ₄BezoutB`, add:
+### Case 2: `m = 6t + 3`
 
 ```lean
-namespace WeierstrassCurve
-
-open Polynomial
-
-variable {K : Type*} [Field K]
-variable (W : WeierstrassCurve K)
-
-lemma preΨ₄_bezout_certificate :
-    W.preΨ₄BezoutA * W.preΨ₄
-      + W.preΨ₄BezoutB * derivative W.preΨ₄
-      = C ((2 : K) ^ 9 * W.Δ ^ 5) := by
-  rw [preΨ₄BezoutA, preΨ₄BezoutB]
-  rw [preΨ₄, derivative_preΨ₄]
-  rw [Δ, b₂, b₄, b₆, b₈]
+have hC : C_m = 2 * B ^ (9 * t ^ 2 + 18 * t + 9) := by
+  subst m
+  simp [C_m, preΨ'_eval_six_block_of_Ψ₃_eval_eq_zero, B]
   ring_nf
-
-end WeierstrassCurve
 ```
 
-If this single `ring_nf` is too slow, generate a coefficientwise theorem instead:
+Mathematically:
 
-```lean
-  ext n
-  fin_cases n using -- not literally; use the local coefficient automation pattern
+```text
+β²δ - αγ²
+  = (-B^(3t²+5t+2))² · B^(3t²+8t+5)
+      - (-B^(3t²+4t+1)) · (B^(3t²+7t+4))²
+  = B^(9t²+18t+9) + B^(9t²+18t+9)
+  = 2B^(9t²+18t+9).
 ```
 
-The practical version is to generate eleven coefficient goals for degrees `0, ..., 10` and one generic high-degree zero case.  Each coefficient identity is just a commutative-ring identity in `a₁,a₂,a₃,a₄,a₆`, and `ring_nf` is much easier on those smaller goals than on the full polynomial identity.
-
-But I would first try the single `ring_nf`; for this degree-6 certificate it may be acceptable.
+The cancellation danger disappears because the two terms have **opposite signs**.  This is the piece that the naive `δα = γβ` manipulation misses.
 
 ---
 
-## Final separability theorem for `preΨ'(4)`
+## Nonzero inputs
 
-Once the certificate theorem exists, the proof is short.
+You need two nonzero facts.
+
+### 1. `2 ≠ 0`
+
+From the final separability hypothesis
 
 ```lean
-namespace WeierstrassCurve
+hn : ((2 * (m + 3) : ℕ) : K) ≠ 0
+```
 
-open Polynomial
+get:
 
-variable {K : Type*} [Field K]
-variable (W : WeierstrassCurve K)
+```lean
+have h2 : (2 : K) ≠ 0 := by
+  intro h2zero
+  apply hn
+  simp [Nat.cast_mul, h2zero]
+```
 
-lemma preΨ'_four_isCoprime_derivative
-    [W.IsElliptic] (h4 : (4 : K) ≠ 0) :
-    IsCoprime (W.preΨ' 4) (derivative (W.preΨ' 4)) := by
-  rw [preΨ'_four]
+In a field, this also gives `(4 : K) ≠ 0` if you need adjacent coprimality:
+
+```lean
+have h4K : (4 : K) ≠ 0 := by
+  norm_num [show (4 : K) = (2 : K) * (2 : K) by norm_num]
+  exact mul_ne_zero h2 h2
+```
+
+If the displayed `norm_num` proof does not work verbatim, use:
+
+```lean
+have hfour : (4 : K) = (2 : K) * (2 : K) := by norm_num
+rw [hfour]
+exact mul_ne_zero h2 h2
+```
+
+### 2. `B ≠ 0`
+
+Use adjacent nonvanishing between `preΨ₃` and `preΨ₄`.
+
+```lean
+have hpre4_ne : (W.preΨ₄.eval x) ≠ 0 := by
+  have hadj := preΨ'_adjacent_ne_zero_of_preΨ'_zero
+    (W := W) (x := x) h4K (n := 3) (by norm_num) (by simpa using h3)
+  -- hadj.2 is nonvanishing of `preΨ' 4`.
+  simpa [preΨ'_four] using hadj.2
+```
+
+Then:
+
+```lean
+let B : K := (W.Ψ₂Sq.eval x) ^ 2
+have hB : B ≠ 0 := by
+  intro hBzero
+  apply hpre4_ne
+  have hpre4 : W.preΨ₄.eval x = -B := by
+    dsimp [B]
+    exact W.preΨ₄_eval_eq_neg_Ψ₂Sq_sq_of_Ψ₃_eval_eq_zero h3
+  rw [hpre4, hBzero, neg_zero]
+```
+
+Alternatively, if you already have a theorem that roots of `Ψ₃` are not roots of `Ψ₂Sq` under `[W.IsElliptic]` and `(6 : K) ≠ 0`, use that directly.
+
+---
+
+## Final theorem shape
+
+A good local theorem is:
+
+```lean
+theorem evenCofactor_eval_ne_zero_of_middle_zero_of_Ψ₃_zero
+    [W.IsElliptic] {m : ℕ} {x : K}
+    (hn : ((2 * (m + 3) : ℕ) : K) ≠ 0)
+    (hdiv : 3 ∣ m + 3)
+    (h3 : W.Ψ₃.eval x = 0) :
+    ( (W.preΨ' (m + 2)).eval x ^ 2 * (W.preΨ' (m + 5)).eval x
+        - (W.preΨ' (m + 1)).eval x * (W.preΨ' (m + 4)).eval x ^ 2 ) ≠ 0 := by
+  let B : K := (W.Ψ₂Sq.eval x) ^ 2
+
+  have hpre4 : W.preΨ₄.eval x = -B := by
+    dsimp [B]
+    exact W.preΨ₄_eval_eq_neg_Ψ₂Sq_sq_of_Ψ₃_eval_eq_zero h3
 
   have h2 : (2 : K) ≠ 0 := by
     intro h2zero
-    apply h4
+    apply hn
+    simp [Nat.cast_mul, h2zero]
+
+  have h4K : (4 : K) ≠ 0 := by
     have hfour : (4 : K) = (2 : K) * (2 : K) := by norm_num
-    rw [hfour, h2zero, zero_mul]
+    rw [hfour]
+    exact mul_ne_zero h2 h2
 
-  let c : K := (2 : K) ^ 9 * W.Δ ^ 5
+  have hpre4_ne : W.preΨ₄.eval x ≠ 0 := by
+    have hadj := preΨ'_adjacent_ne_zero_of_preΨ'_zero
+      (W := W) (x := x) h4K (n := 3) (by norm_num) (by simpa using h3)
+    simpa [preΨ'_four] using hadj.2
 
-  have hc : c ≠ 0 := by
-    dsimp [c]
-    exact mul_ne_zero
-      (pow_ne_zero 9 h2)
-      (pow_ne_zero 5 W.isUnit_Δ.ne_zero)
+  have hB : B ≠ 0 := by
+    intro hBzero
+    exact hpre4_ne (by simpa [hpre4, hBzero])
 
-  have hbez := W.preΨ₄_bezout_certificate
+  rcases hdiv with ⟨s, hs⟩
+  have hspos : 0 < s := by omega
 
-  refine ⟨C c⁻¹ * W.preΨ₄BezoutA, C c⁻¹ * W.preΨ₄BezoutB, ?_⟩
-  calc
-    (C c⁻¹ * W.preΨ₄BezoutA) * W.preΨ₄
-        + (C c⁻¹ * W.preΨ₄BezoutB) * derivative W.preΨ₄
-        = C c⁻¹ * (W.preΨ₄BezoutA * W.preΨ₄
-            + W.preΨ₄BezoutB * derivative W.preΨ₄) := by
-          ring
-    _ = C c⁻¹ * C c := by
-          rw [hbez]
-          rfl
-    _ = 1 := by
-          rw [← C_mul]
-          simp [c, hc]
-
-end WeierstrassCurve
+  -- Split `s` by parity.  Since `m + 3 = 3s`, odd `s` gives `m = 6t`,
+  -- and positive even `s` gives `m = 6t + 3`.
+  rcases Nat.even_or_odd s with hs_even | hs_odd
+  · rcases hs_even with ⟨r, rfl⟩
+    cases r with
+    | zero => omega
+    | succ t =>
+        have hm : m = 6 * t + 3 := by omega
+        subst m
+        have hC :
+            (W.preΨ' (6 * t + 3 + 2)).eval x ^ 2
+                * (W.preΨ' (6 * t + 3 + 5)).eval x
+              - (W.preΨ' (6 * t + 3 + 1)).eval x
+                * (W.preΨ' (6 * t + 3 + 4)).eval x ^ 2
+              = 2 * B ^ (9 * t ^ 2 + 18 * t + 9) := by
+          -- Use the six-block lemma and `ring_nf`.
+          sorry
+        rw [hC]
+        exact mul_ne_zero h2 (pow_ne_zero _ hB)
+  · rcases hs_odd with ⟨t, rfl⟩
+    have hm : m = 6 * t := by omega
+    subst m
+    have hC :
+        (W.preΨ' (6 * t + 2)).eval x ^ 2
+            * (W.preΨ' (6 * t + 5)).eval x
+          - (W.preΨ' (6 * t + 1)).eval x
+            * (W.preΨ' (6 * t + 4)).eval x ^ 2
+          = -2 * B ^ (9 * t ^ 2 + 9 * t + 2) := by
+      -- Use the six-block lemma and `ring_nf`.
+      sorry
+    rw [hC]
+    exact neg_ne_zero.mpr (mul_ne_zero h2 (pow_ne_zero _ hB))
 ```
 
-This uses the definition of `IsCoprime` directly:
-
-```lean
-def IsCoprime (x y : R) : Prop :=
-  ∃ a b, a * x + b * y = 1
-```
-
-So no resultant API is needed in the final Lean theorem.
+The two remaining `sorry`s are not conceptual; they are the mechanical substitutions from the six-block lemma.
 
 ---
 
-## Why this handles characteristic `3`
+## If the local code uses integer-indexed `preΨ`
 
-Do not assume `derivative W.preΨ₄` has degree `5`.  In characteristic `3`, the leading term
-
-```text
-12 X^5
-```
-
-vanishes.  This is harmless for the Bézout-certificate proof: the identity
+Do the proof Nat-indexed first.  Then transport by `simp`:
 
 ```lean
-A * preΨ₄ + B * derivative preΨ₄ = C ((2 : K)^9 * Δ^5)
+@[simp]
+lemma WeierstrassCurve.preΨ_ofNat (n : ℕ) :
+    W.preΨ n = W.preΨ' n
 ```
 
-specializes correctly in every characteristic.  The hypotheses only need
+So a term like
 
 ```lean
-(4 : K) ≠ 0
+(W.preΨ ((m + 2 : ℕ) : ℤ)).eval x
 ```
 
-and `[W.IsElliptic]`.  In characteristic `3`, `(4 : K) = 1`, so the theorem should still apply.
+should reduce to
 
-This is another reason to prefer a direct certificate over a proof that depends on the default `natDegree` of the derivative.
+```lean
+(W.preΨ' (m + 2)).eval x
+```
+
+by `simpa`.
+
+Avoid doing the six-block arithmetic over arbitrary `ℤ` indices unless downstream code truly requires it.  The cofactor in this branch has Nat indices, and the Nat block lemma is much easier.
 
 ---
 
-## Sanity checks to run in CAS
+## Final recommendation
 
-Before exporting Lean, run two checks.
+Replace the attempted Somos manipulation by the specialized six-block lemma.  The proof becomes:
 
-First, check the short Weierstrass specialization `a₁=a₂=a₃=0`, `a₄=A`, `a₆=B`:
+1. prove `preΨ₄ + Ψ₂Sq² = (6X² + b₂X + b₄)Ψ₃`,
+2. set `B = Ψ₂Sq(x)^2`, so at `Ψ₃(x)=0` the evaluated sequence has data `0,1,1,0,-B`,
+3. prove the six-block formulas for `preΨ'` values,
+4. split `3 ∣ m + 3` into `m = 6t` or `m = 6t + 3`,
+5. compute the cofactor as `-2B^N` or `2B^N`, and
+6. use `(2 * (m + 3) : K) ≠ 0` plus adjacent nonvanishing to get `2 ≠ 0` and `B ≠ 0`.
 
-```python
-A0, B0 = sp.symbols("A0 B0")
-short = {
-    a1: 0,
-    a2: 0,
-    a3: 0,
-    a4: A0,
-    a6: B0,
-}
-res_short = sp.factor(sp.resultant(f.subs(short), g.subs(short), x))
-Delta_short = sp.factor(Delta.subs(short))
-assert sp.factor(res_short - 2**9 * Delta_short**5) == 0
-```
-
-This should reproduce
-
-```text
-Res = 2^9 · Δ^5.
-```
-
-Second, after producing `A` and `B`, test several small integer specializations with nonsingular discriminant:
-
-```python
-tests = [
-    {a1:0, a2:0, a3:0, a4:-1, a6:1},
-    {a1:1, a2:0, a3:1, a4:-1, a6:2},
-    {a1:2, a2:-1, a3:1, a4:3, a6:-2},
-]
-for t in tests:
-    lhs = sp.Poly(sp.expand((A*f + B*g - target).subs(t)), x)
-    assert lhs.is_zero, t
-```
-
-These are not proof steps, but they catch wrong matrix orientation and sign errors before Lean sees the certificate.
-
----
-
-## Practical recommendation
-
-Generate and check exactly one file containing:
-
-```lean
-def preΨ₄BezoutA : K[X] := ...
-def preΨ₄BezoutB : K[X] := ...
-lemma derivative_preΨ₄ : ...
-lemma preΨ₄_bezout_certificate : ...
-lemma preΨ'_four_isCoprime_derivative : ...
-```
-
-The only large part is the two generated cofactor definitions.  The mathematical proof is then just:
-
-```text
-Bézout certificate gives a nonzero constant in the ideal.
-A nonzero constant is a unit in K[X].
-Therefore preΨ₄ and derivative preΨ₄ are coprime.
-preΨ'(4) = preΨ₄.
-```
-
-This is much lighter than formalizing the full resultant formula, and it avoids the derivative-degree pitfalls in characteristic `3`.
+This bypasses the false four-neighbor relation and gives exactly the nonvanishing needed for the even cofactor branch.
