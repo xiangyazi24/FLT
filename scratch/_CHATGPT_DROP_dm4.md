@@ -1,77 +1,58 @@
-# Q657 (dm4): `coeff (single 0 3) formalAddX = 0`
+# Q662 (dm4): linear coefficients of `formalGroupLaw`
 
 ## Executive answer
 
-For this coefficient, the direct `addX`-unfolding proof is the right one.  Do **not** try to deduce it from the `formalAddY` identity: that only gives the linear combination
-
-```text
-a₁ * coeff₍₃,₀₎ addX + a₃ * coeff₍₃,₀₎ addZ = 0,
-```
-
-and extracting the two coefficients separately would require a universal/free-coefficient argument that is much heavier than the target.
-
-A Lean-friendly proof should exploit the fact that the requested monomial is the **pure `X₀` axis monomial** `X₀³`.  After substituting
-
-```text
-P = [X₀, -1, w₀],     Q = [X₁, -1, w₁]
-w₀ = w(X₀),           w₁ = w(X₁),
-```
-
-almost every term in `Projective.addX` has either an explicit factor `X₁` or a factor `w₁`; both have zero pure-`X₀`-axis coefficients.  The only term without `X₁` or `w₁` is
-
-```text
-- X₀ * w₀,
-```
-
-and its `X₀³` coefficient is the `X₀²` coefficient of `w₀`, which is zero because `w(t)` starts with `t³`.
-
-So for the axis coefficient `X₀³`, the proof needs only:
+The clean local lemma is the degree-one product formula for multivariate power series:
 
 ```lean
-coeff (single 0 2) w₀ = 0
-∀ n, coeff (single 0 n) w₁ = 0
-∀ n, coeff (single 0 n) X₁ = 0
+coeff (single i 1) (f * g)
+  = constantCoeff f * coeff (single i 1) g
+    + coeff (single i 1) f * constantCoeff g
 ```
 
-plus closure of the pure-axis-zero property under multiplication.
+Then specialize it to `f = -A`, where `A = normalizedAddX W`, and `g = ↑u⁻¹`, where
+
+```lean
+u := (normalizedAddY_isUnit W).unit.
+```
+
+If `constantCoeff A = 0`, the first summand dies, so
+
+```lean
+coeff (single i 1) (-A * ↑u⁻¹)
+  = - coeff (single i 1) A * constantCoeff (↑u⁻¹).
+```
+
+Finally, if `constantCoeff (↑u) = 1`, then `constantCoeff (↑u⁻¹) = 1`, because `constantCoeff` is a ring hom and `↑u * ↑u⁻¹ = 1`.  Therefore, using
+
+```lean
+coeff (single i 1) (normalizedAddX W) = -1,
+```
+
+the formal group law coefficient is
+
+```text
+-(-1) * 1 = 1.
+```
+
+This is better than trying to prove a special theorem about units directly: the only coefficient computation is the `coeff_mul` computation at `single i 1`.
 
 ---
 
-## The addX normal form to use
+## Drop-in Lean lemmas
 
-After unfolding the Mathlib formula for projective `addX`, the formal-point substitution gives this expression:
-
-```text
-formalAddX W
-  = - X₀ * w₀
-    + X₁ * w₁
-    - 2 * X₀ * w₁
-    + 2 * X₁ * w₀
-    + a₁ * X₀^2 * w₁
-    - a₁ * X₁^2 * w₀
-    + a₂ * X₀^2 * X₁ * w₁
-    - a₂ * X₀ * X₁^2 * w₀
-    + a₃ * X₀ * w₁^2
-    - a₃ * X₁ * w₀^2
-    + 2 * a₃ * X₀ * w₀ * w₁
-    - 2 * a₃ * X₁ * w₀ * w₁
-    + a₄ * X₀^2 * w₁^2
-    - a₄ * X₁^2 * w₀^2
-    + 3 * a₆ * X₀ * w₀ * w₁^2
-    - 3 * a₆ * X₁ * w₀^2 * w₁.
-```
-
-This is the expression I would prove as a local lemma, then use for coefficient extraction.
-
----
-
-## Lean proof skeleton
-
-The following is intentionally written as a robust proof skeleton.  Replace the `formalW...` coefficient lemma names by the actual lemmas in `FormalGroupW.lean` that say `w(X₀)` starts in degree `3` and `w(X₁)` has no pure `X₀`-axis coefficients.
+The following code is written so the product-coefficient lemmas are independent of the elliptic-curve code.  The final theorem is parameterized by the three normalized coefficient facts; at the bottom I show how to specialize it using the expected names from the quotient-extraction lemmas.
 
 ```lean
-import Mathlib
--- import the local file defining `formalAddX`, `formalPointMv`, and the formal `w` lemmas
+import Mathlib.RingTheory.MvPowerSeries.Basic
+import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Formula
+import Mathlib.Tactic
+-- import the local file that defines:
+--   formalGroupLaw
+--   normalizedAddX
+--   normalizedAddY
+--   normalizedAddY_isUnit
+-- and the normalized coefficient lemmas.
 -- import FLT.<path>.FormalGroupW
 
 noncomputable section
@@ -83,192 +64,176 @@ namespace WeierstrassCurve
 
 variable {R : Type*} [CommRing R]
 
+local notation "e" i => Finsupp.single i 1
 local notation "e₀" n => Finsupp.single (0 : Fin 2) n
-local notation "X₀" => (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R)
-local notation "X₁" => (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R)
+local notation "e₁" n => Finsupp.single (1 : Fin 2) n
 
-/-- A series has no pure `X₀`-axis coefficients. -/
-private def Axis0Zero (f : MvPowerSeries (Fin 2) R) : Prop :=
-  ∀ n : ℕ, MvPowerSeries.coeff (e₀ n) f = 0
+/-- The linear coefficient of a product of two bivariate formal power series.
 
-private lemma Axis0Zero.coeff
-    {f : MvPowerSeries (Fin 2) R} (hf : Axis0Zero f) (n : ℕ) :
-    MvPowerSeries.coeff (e₀ n) f = 0 :=
-  hf n
-
-/-- `X₁` has no pure `X₀`-axis coefficients. -/
-private lemma axis0Zero_X₁ :
-    Axis0Zero (X₁ : MvPowerSeries (Fin 2) R) := by
+This is the only real `coeff_mul` calculation needed for the linear coefficients of
+`formalGroupLaw`.  The antidiagonal of `single i 1` has exactly the two splittings
+`0 + single i 1` and `single i 1 + 0`. -/
+private lemma coeff_mul_single_one
+    (i : Fin 2) (f g : MvPowerSeries (Fin 2) R) :
+    MvPowerSeries.coeff (e i) (f * g) =
+      MvPowerSeries.constantCoeff f * MvPowerSeries.coeff (e i) g
+        + MvPowerSeries.coeff (e i) f * MvPowerSeries.constantCoeff g := by
   classical
-  intro n
-  simp [Axis0Zero, MvPowerSeries.coeff_X, Finsupp.single_eq_single_iff]
-
-/-- If the left factor has no pure `X₀`-axis coefficients, neither does the product.
-
-The only point in the proof is that a decomposition of `e₀ n` in the antidiagonal
-has both summands on the pure `X₀` axis. -/
-private lemma Axis0Zero.mul_left
-    {f g : MvPowerSeries (Fin 2) R} (hf : Axis0Zero f) :
-    Axis0Zero (f * g) := by
-  classical
-  intro n
   rw [MvPowerSeries.coeff_mul]
-  apply Finset.sum_eq_zero
-  intro p hp
-  rcases p with ⟨i, j⟩
-  have hij : i + j = e₀ n := by
-    simpa [Finset.mem_antidiagonal] using hp
-  have hi_axis : ∃ k : ℕ, i = e₀ k := by
-    refine ⟨i (0 : Fin 2), ?_⟩
-    ext s
-    fin_cases s
-    · simp
-    · have hcoord := congrArg (fun d : Fin 2 →₀ ℕ => d (1 : Fin 2)) hij
-      have hi1 : i (1 : Fin 2) = 0 := by
-        have : i (1 : Fin 2) + j (1 : Fin 2) = 0 := by simpa using hcoord
-        exact Nat.eq_zero_of_add_eq_zero_left this
-      simp [hi1]
-  rcases hi_axis with ⟨k, rfl⟩
-  simp [hf k]
+  -- `Finsupp.antidiagonal_single` reduces the bivariate antidiagonal to the
+  -- natural-number antidiagonal of `1`, namely `(0,1)` and `(1,0)`.
+  rw [Finsupp.antidiagonal_single]
+  simp [Finset.Nat.antidiagonal_succ,
+    MvPowerSeries.coeff_zero_eq_constantCoeff_apply,
+    add_comm, add_left_comm, add_assoc]
 
-private lemma Axis0Zero.mul_right
-    {f g : MvPowerSeries (Fin 2) R} (hg : Axis0Zero g) :
-    Axis0Zero (f * g) := by
-  classical
-  simpa [mul_comm] using (Axis0Zero.mul_left (f := g) (g := f) hg)
-
-/-- Multiplying by `X₀` shifts pure-axis coefficients by one. -/
-private lemma coeff_e03_X₀_mul_of_coeff_e02_zero
-    {f : MvPowerSeries (Fin 2) R}
-    (hf : MvPowerSeries.coeff (e₀ 2) f = 0) :
-    MvPowerSeries.coeff (e₀ 3) (X₀ * f) = 0 := by
-  classical
-  simpa [X₀, Finsupp.single_add, hf] using
-    (MvPowerSeries.coeff_add_monomial_mul
-      (m := e₀ 1) (n := e₀ 2) (φ := f) (a := (1 : R)))
-```
-
-The two formal-`w` facts needed for the final coefficient are best packaged as follows:
-
-```lean
--- Replace these proofs by the actual coefficient lemmas from the recursion defining `w`.
-private lemma coeff_e02_w0
-    (W : WeierstrassCurve R) :
-    MvPowerSeries.coeff (e₀ 2) ((formalPointMv W 0) (2 : Fin 3)) = 0 := by
-  -- `w(X₀) = X₀^3 + a₁ X₀^4 + ...`
-  simpa [formalPointMv] using formalW_coeff_lt_three_axis0 (W := W) (i := 0) (n := 2)
-
-private lemma axis0Zero_w1
-    (W : WeierstrassCurve R) :
-    Axis0Zero ((formalPointMv W 1) (2 : Fin 3)) := by
-  intro n
-  -- `w(X₁)` has only `X₁`-axis monomials, so every pure `X₀` coefficient is zero.
-  simpa [Axis0Zero, formalPointMv] using formalW_axis0_coeff_of_index_one (W := W) (n := n)
-```
-
-Now prove a local normal form for `formalAddX`.  This keeps the final coefficient proof readable.
-
-```lean
-private lemma formalAddX_eq_expanded
-    (W : WeierstrassCurve R) :
-    let Cmv : R →+* MvPowerSeries (Fin 2) R := MvPowerSeries.C
-    let Wmv := W.map Cmv
-    let w₀ : MvPowerSeries (Fin 2) R := (formalPointMv W 0) (2 : Fin 3)
-    let w₁ : MvPowerSeries (Fin 2) R := (formalPointMv W 1) (2 : Fin 3)
-    formalAddX W =
-      - X₀ * w₀
-      + X₁ * w₁
-      - (2 : MvPowerSeries (Fin 2) R) * X₀ * w₁
-      + (2 : MvPowerSeries (Fin 2) R) * X₁ * w₀
-      + Wmv.a₁ * X₀ ^ 2 * w₁
-      - Wmv.a₁ * X₁ ^ 2 * w₀
-      + Wmv.a₂ * X₀ ^ 2 * X₁ * w₁
-      - Wmv.a₂ * X₀ * X₁ ^ 2 * w₀
-      + Wmv.a₃ * X₀ * w₁ ^ 2
-      - Wmv.a₃ * X₁ * w₀ ^ 2
-      + (2 : MvPowerSeries (Fin 2) R) * Wmv.a₃ * X₀ * w₀ * w₁
-      - (2 : MvPowerSeries (Fin 2) R) * Wmv.a₃ * X₁ * w₀ * w₁
-      + Wmv.a₄ * X₀ ^ 2 * w₁ ^ 2
-      - Wmv.a₄ * X₁ ^ 2 * w₀ ^ 2
-      + (3 : MvPowerSeries (Fin 2) R) * Wmv.a₆ * X₀ * w₀ * w₁ ^ 2
-      - (3 : MvPowerSeries (Fin 2) R) * Wmv.a₆ * X₁ * w₀ ^ 2 * w₁ := by
-  classical
-  dsimp
-  -- This is just the Mathlib polynomial formula for `Projective.addX` evaluated at
-  -- `[X₀, -1, w₀]` and `[X₁, -1, w₁]`.
-  simp [formalAddX, WeierstrassCurve.Projective.addX, formalPointMv]
+/-- If the left factor has zero constant coefficient, then the degree-one coefficient
+of `-A * V` only sees the degree-one coefficient of `A` and the constant coefficient
+of `V`. -/
+private lemma coeff_neg_mul_single_one_of_constantCoeff_eq_zero
+    (i : Fin 2) {A V : MvPowerSeries (Fin 2) R}
+    (hA0 : MvPowerSeries.constantCoeff A = 0) :
+    MvPowerSeries.coeff (e i) (-A * V) =
+      - MvPowerSeries.coeff (e i) A * MvPowerSeries.constantCoeff V := by
+  rw [coeff_mul_single_one]
+  simp [hA0]
   ring
+
+/-- If a power-series unit has constant coefficient `1`, then its inverse also has
+constant coefficient `1`. -/
+private lemma constantCoeff_unit_inv_eq_one
+    (u : Units (MvPowerSeries (Fin 2) R))
+    (hu : MvPowerSeries.constantCoeff (u : MvPowerSeries (Fin 2) R) = 1) :
+    MvPowerSeries.constantCoeff
+      ((u⁻¹ : Units (MvPowerSeries (Fin 2) R)) : MvPowerSeries (Fin 2) R) = 1 := by
+  have hmul := congrArg
+    (fun f : MvPowerSeries (Fin 2) R => MvPowerSeries.constantCoeff f)
+    (Units.mul_inv u)
+  -- `constantCoeff` is a ring hom, so the constant coefficient of the product is
+  -- the product of constant coefficients.
+  simpa [hu] using hmul
 ```
 
-Finally, use the normal form and kill every summand.
+If the first lemma does not close by the `simp` line in your local revision, replace the proof by this slightly more explicit version of the last two lines:
 
 ```lean
-lemma formalAddX_coeff_X0_cube
-    (W : WeierstrassCurve R) :
-    MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 3) (formalAddX W) = 0 := by
-  classical
-  let Cmv : R →+* MvPowerSeries (Fin 2) R := MvPowerSeries.C
-  let Wmv := W.map Cmv
-  let w₀ : MvPowerSeries (Fin 2) R := (formalPointMv W 0) (2 : Fin 3)
-  let w₁ : MvPowerSeries (Fin 2) R := (formalPointMv W 1) (2 : Fin 3)
-
-  have hw₀₂ : MvPowerSeries.coeff (e₀ 2) w₀ = 0 := by
-    simpa [w₀] using coeff_e02_w0 (W := W)
-
-  have hX₀w₀ : MvPowerSeries.coeff (e₀ 3) (X₀ * w₀) = 0 :=
-    coeff_e03_X₀_mul_of_coeff_e02_zero hw₀₂
-
-  have hw₁ : Axis0Zero w₁ := by
-    simpa [w₁] using axis0Zero_w1 (W := W)
-
-  have hX₁ : Axis0Zero (X₁ : MvPowerSeries (Fin 2) R) := axis0Zero_X₁
-
-  -- All terms except `-X₀*w₀` have either an `X₁` factor or a `w₁` factor.
-  -- The following examples show the pattern; the final `simp` uses the same facts.
-  have h_X₁_w₁ : MvPowerSeries.coeff (e₀ 3) (X₁ * w₁) = 0 :=
-    (Axis0Zero.mul_left (f := X₁) (g := w₁) hX₁).coeff 3
-
-  have h_X₀_w₁ : MvPowerSeries.coeff (e₀ 3) (X₀ * w₁) = 0 :=
-    (Axis0Zero.mul_right (f := X₀) (g := w₁) hw₁).coeff 3
-
-  have h_X₁_w₀ : MvPowerSeries.coeff (e₀ 3) (X₁ * w₀) = 0 :=
-    (Axis0Zero.mul_left (f := X₁) (g := w₀) hX₁).coeff 3
-
-  -- Rewrite to the substituted projective formula and let `simp` distribute `coeff`
-  -- over addition/negation and use the zero coefficient facts above.
-  rw [formalAddX_eq_expanded (W := W)]
-  dsimp [Cmv, Wmv, w₀, w₁]
-
-  -- In a real file, add the remaining summand-zero facts either explicitly, or register
-  -- `Axis0Zero.coeff`, `Axis0Zero.mul_left`, and `Axis0Zero.mul_right` as local simp lemmas.
-  -- The only non-axis-zero term is `X₀*w₀`, handled by `hX₀w₀`.
-  simp [hX₀w₀, h_X₁_w₁, h_X₀_w₁, h_X₁_w₀,
-    Axis0Zero.coeff,
-    Axis0Zero.mul_left,
-    Axis0Zero.mul_right,
-    hX₁, hw₁]
+  rw [Finsupp.antidiagonal_single]
+  rw [Finset.Nat.antidiagonal_succ]
+  simp [MvPowerSeries.coeff_zero_eq_constantCoeff_apply,
+    add_comm, add_left_comm, add_assoc]
 ```
+
+The important point is that `Finsupp.antidiagonal_single i 1` reduces the sum to exactly the two terms corresponding to `(0, 1)` and `(1, 0)`.
 
 ---
 
-## Practical version
+## Generic formalGroupLaw linear-coefficient theorem
 
-If `simp` struggles with the final long expression, do not fight it.  Add one local lemma per term after the normal-form rewrite.  For example:
+Use this theorem for either variable `i = 0` or `i = 1`.
 
 ```lean
-have h₁ : coeff (e₀ 3) (-X₀ * w₀) = 0 := by
-  simpa using congrArg Neg.neg hX₀w₀
+/-- Linear coefficient of `formalGroupLaw`, assuming the corresponding normalized
+coefficient facts for `normalizedAddX` and `normalizedAddY`.
 
-have h₂ : coeff (e₀ 3) (X₁ * w₁) = 0 :=
-  (Axis0Zero.mul_left (f := X₁) (g := w₁) hX₁).coeff 3
+The hypotheses are exactly the facts obtained from the previous quotient-extraction step:
+* `hA0`: `normalizedAddX` has zero constant coefficient;
+* `hAi`: its `i`th linear coefficient is `-1`;
+* `hB0`: `normalizedAddY` has constant coefficient `1`.
+-/
+lemma formalGroupLaw_coeff_single_one_of_normalizedAddX
+    (W : WeierstrassCurve R) (i : Fin 2)
+    (hA0 : MvPowerSeries.constantCoeff (normalizedAddX W) = 0)
+    (hAi : MvPowerSeries.coeff (e i) (normalizedAddX W) = (-1 : R))
+    (hB0 : MvPowerSeries.constantCoeff (normalizedAddY W) = 1) :
+    MvPowerSeries.coeff (e i) (formalGroupLaw W) = (1 : R) := by
+  classical
+  let A : MvPowerSeries (Fin 2) R := normalizedAddX W
+  let u : Units (MvPowerSeries (Fin 2) R) := (normalizedAddY_isUnit W).unit
+  let V : MvPowerSeries (Fin 2) R :=
+    ((u⁻¹ : Units (MvPowerSeries (Fin 2) R)) : MvPowerSeries (Fin 2) R)
 
-have h₃ : coeff (e₀ 3) ((Wmv.a₁ * X₀ ^ 2) * w₁) = 0 :=
-  (Axis0Zero.mul_right (f := Wmv.a₁ * X₀ ^ 2) (g := w₁) hw₁).coeff 3
+  have hA0' : MvPowerSeries.constantCoeff A = 0 := by
+    simpa [A] using hA0
 
-have h₄ : coeff (e₀ 3) ((Wmv.a₃ * X₁) * w₀ ^ 2) = 0 :=
-  (Axis0Zero.mul_left (f := X₁) (g := Wmv.a₃ * w₀ ^ 2) hX₁).coeff 3
+  have hAi' : MvPowerSeries.coeff (e i) A = (-1 : R) := by
+    simpa [A] using hAi
+
+  have hu0 : MvPowerSeries.constantCoeff (u : MvPowerSeries (Fin 2) R) = 1 := by
+    -- Usually this is just `simpa [u] using hB0` because `u.val = normalizedAddY W`.
+    -- If your local `IsUnit.unit_spec` has the opposite orientation, the `simp`
+    -- line below handles it as long as the theorem is visible.
+    simpa [u, (normalizedAddY_isUnit W).unit_spec] using hB0
+
+  have hV0 : MvPowerSeries.constantCoeff V = 1 := by
+    simpa [V] using constantCoeff_unit_inv_eq_one (R := R) u hu0
+
+  calc
+    MvPowerSeries.coeff (e i) (formalGroupLaw W)
+        = MvPowerSeries.coeff (e i) (-A * V) := by
+            simp [formalGroupLaw, A, V, u]
+    _ = - MvPowerSeries.coeff (e i) A * MvPowerSeries.constantCoeff V := by
+            exact coeff_neg_mul_single_one_of_constantCoeff_eq_zero
+              (R := R) (i := i) (A := A) (V := V) hA0'
+    _ = 1 := by
+            simp [hAi', hV0]
 ```
 
-Then finish with repeated rewriting of `map_add`, `map_neg`, `map_sub`, and those `hᵢ` facts.  This is usually more reliable than expecting one huge `simp` to solve all 16 terms.
+The proof uses only the linear product formula.  Notice that it never needs to know any higher coefficients of `↑u⁻¹`; those cannot contribute to degree `1`.
 
-The core mathematical point remains simple: for the pure `X₀³` coefficient, every summand in `addX` either has an `X₁`/`w₁` factor and vanishes on the `X₀` axis, or is the single term `X₀*w₀`, whose contribution would require an `X₀²` coefficient of `w₀`; that coefficient is zero because `w` starts at degree `3`.
+---
+
+## Specializations to `X₀` and `X₁`
+
+Assuming the quotient-extraction lemmas have the names from the previous plan:
+
+```lean
+normalizedAddX_constantCoeff      : constantCoeff (normalizedAddX W) = 0
+normalizedAddX_lin_coeff_X        : coeff (single 0 1) (normalizedAddX W) = -1
+normalizedAddX_lin_coeff_Y        : coeff (single 1 1) (normalizedAddX W) = -1
+normalizedAddY_constantCoeff      : constantCoeff (normalizedAddY W) = 1
+```
+
+then the two formal-group linear coefficient proofs are just:
+
+```lean
+lemma formalGroupLaw_coeff_X0
+    (W : WeierstrassCurve R) :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) 1) (formalGroupLaw W) = (1 : R) := by
+  exact formalGroupLaw_coeff_single_one_of_normalizedAddX
+    (W := W) (i := (0 : Fin 2))
+    (hA0 := normalizedAddX_constantCoeff W)
+    (hAi := normalizedAddX_lin_coeff_X W)
+    (hB0 := normalizedAddY_constantCoeff W)
+
+lemma formalGroupLaw_coeff_X1
+    (W : WeierstrassCurve R) :
+    MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) 1) (formalGroupLaw W) = (1 : R) := by
+  exact formalGroupLaw_coeff_single_one_of_normalizedAddX
+    (W := W) (i := (1 : Fin 2))
+    (hA0 := normalizedAddX_constantCoeff W)
+    (hAi := normalizedAddX_lin_coeff_Y W)
+    (hB0 := normalizedAddY_constantCoeff W)
+
+end WeierstrassCurve
+```
+
+If your local names differ, only the four lemma names in the final two proofs need changing.  The three reusable lemmas above should remain unchanged.
+
+---
+
+## Why this avoids the unit-coefficient trap
+
+A tempting but brittle route is to prove a special theorem about coefficients of `↑u⁻¹`.  You do not need that.  At degree `1`, `coeff_mul` sees only two splittings:
+
+```text
+(single i 1) = 0 + single i 1
+(single i 1) = single i 1 + 0.
+```
+
+Since `constantCoeff(normalizedAddX W) = 0`, the first splitting contributes zero.  The second splitting uses only
+
+```lean
+constantCoeff (↑u⁻¹) = 1,
+```
+
+which follows from applying `constantCoeff` to `↑u * ↑u⁻¹ = 1`.  That is the full bridge from the normalized quotient coefficients to the formal-group linear coefficients.
