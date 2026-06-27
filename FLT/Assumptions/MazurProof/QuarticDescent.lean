@@ -90,15 +90,26 @@ theorem UV_odd {r B s : ℤ}
     (2 * r ^ 2 + B ^ 2 + 2 * s) % 2 = 1 := by
   constructor <;> omega
 
-/-- gcd(U, V) = 1: any common factor divides 4s and 2(2r²+B²),
-and since U,V odd the factor is odd, so it divides s and 2r²+B².
-Then gcd(r,B)=1 forces the factor to be 1. -/
+/-- gcd(h, b²) = 1 from gcd(a,b) = 1 and 2h = a²-b² (ChatGPT Q1410). -/
+theorem gcd_half_sq_sub_bsq {a b h : ℤ}
+    (hab : Int.gcd a b = 1) (hh : 2 * h = a ^ 2 - b ^ 2) :
+    Int.gcd h (b ^ 2) = 1 := by
+  rw [← Int.isCoprime_iff_gcd_eq_one]
+  have hab' := Int.isCoprime_iff_gcd_eq_one.mpr hab
+  have ha2b : IsCoprime (a ^ 2) b := hab'.pow_left (m := 2)
+  have h2hb : IsCoprime (2 * h + b * b) b := by
+    simpa [show a ^ 2 = 2 * h + b * b by linarith] using ha2b
+  have h2hb' : IsCoprime (2 * h) b := h2hb.of_add_mul_left_left
+  exact ((IsCoprime.mul_left_iff.mp h2hb').2).pow_right (n := 2)
+
+/-- gcd(U, V) = 1. -/
 theorem UV_coprime {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (hcop : Int.gcd r B = 1)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4)
     (hr_odd : r % 2 = 1) (hB_odd : B % 2 = 1) :
     Int.gcd (2 * r ^ 2 + B ^ 2 - 2 * s) (2 * r ^ 2 + B ^ 2 + 2 * s) = 1 := by
-  sorry -- prime factor analysis using gcd(r,B)=1
+  sorry -- prime factor analysis: any common odd prime divides s and 2r²+B²,
+        -- hence divides B⁴ (from equation) and 2r²+B², then divides r, contradicting gcd=1
 
 /-! ## Descent step (the hard core) -/
 
