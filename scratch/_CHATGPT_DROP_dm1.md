@@ -1,43 +1,40 @@
-# Q1451 (dm1/dm3): `rat_denom_square` for `w^2 = u^3 + u^2 - u`
+# Q1460 (dm1): `den_cubic` for `u^3 + u^2 - u`
 
-This is the drop-in shape I would use.  It is written against the FLT repo's pinned Mathlib rev `96fd0fff...`.
-
-The only outside dependency below is the lemma you said you already have:
+The useful point is that `Rat.den_div_eq_of_coprime` already returns the denominator as an integer:
 
 ```lean
-nat_isSquare_of_isSquare_cube : ∀ {n : ℕ}, IsSquare (n ^ 3) → IsSquare n
+Rat.den_div_eq_of_coprime
+  {a b : ℤ} (hb0 : 0 < b)
+  (h : Nat.Coprime a.natAbs b.natAbs) :
+  ((a / b : ℚ).den : ℤ) = b
 ```
 
-If that lemma is already in scope with exactly that name, delete the `variable` line before `rat_denom_square`.
+So the proof can target the requested `ℤ` statement directly.
 
 ```lean
 import Mathlib
 
-namespace DM3
+namespace DM1
 
-/-- The denominator of `u^3 + u^2 - u` is exactly `u.den^3`. -/
-lemma den_cubic_num_den (u : ℚ) :
-    (u ^ 3 + u ^ 2 - u).den = u.den ^ 3 := by
+/-- Denominator of the cubic expression on the curve chart. -/
+theorem den_cubic (u : ℚ) :
+    ((u ^ 3 + u ^ 2 - u).den : ℤ) = (u.den : ℤ) ^ 3 := by
   let a : ℤ := u.num
   let d : ℤ := (u.den : ℤ)
   let N : ℤ := a ^ 3 + a ^ 2 * d - a * d ^ 2
-  let D : ℕ := u.den ^ 3
 
   have hdpos : 0 < d := by
     exact_mod_cast u.den_pos
+  have hd3pos : 0 < d ^ 3 := pow_pos hdpos 3
   have hdq : (d : ℚ) ≠ 0 := by
-    exact_mod_cast (ne_of_gt hdpos)
-  have hDpos : 0 < D := by
-    dsimp [D]
-    positivity
-  have hDpos_int : (0 : ℤ) < (D : ℤ) := by
-    exact_mod_cast hDpos
+    have hdz : d ≠ 0 := ne_of_gt hdpos
+    exact_mod_cast hdz
 
-  -- `u.num` and `u.den` are coprime, as integers.
+  -- Reduced numerator/denominator for `u`, as an integer coprimality statement.
   have hred : IsCoprime a d := by
     simpa [a, d] using Rat.isCoprime_num_den u
 
-  -- The numerator candidate is coprime to `d`.
+  -- `N ≡ a^3 (mod d)`, hence `N` is coprime to `d`.
   have ha3copd : IsCoprime (a ^ 3) d := by
     simpa using (hred.pow_left (m := 3))
   have hNcopd0 : IsCoprime (a ^ 3 + d * (a ^ 2 - a * d)) d :=
@@ -46,60 +43,27 @@ lemma den_cubic_num_den (u : ℚ) :
     convert hNcopd0 using 1
     ring_nf [N]
 
-  -- Therefore it is coprime to `d^3`, hence to `D = u.den^3`.
+  -- Therefore `N` is coprime to `d^3`.
   have hNcopd3 : IsCoprime N (d ^ 3) := by
     simpa using (hNcopd.pow_right (n := 3))
-  have hNcopD : Nat.Coprime N.natAbs D := by
-    have htmp : Nat.Coprime N.natAbs (d ^ 3).natAbs := by
-      rw [← Int.isCoprime_iff_nat_coprime]
-      exact hNcopd3
-    simpa [D, d, Int.natAbs_pow] using htmp
+  have hNcopd3Nat : Nat.Coprime N.natAbs (d ^ 3).natAbs :=
+    Int.isCoprime_iff_nat_coprime.mp hNcopd3
 
-  -- Rewrite the rational value with numerator `N` and denominator `D`.
+  -- Rewrite the rational expression with numerator `N` and denominator `d^3`.
   have hu : u = (a : ℚ) / (d : ℚ) := by
     rw [← Rat.num_div_den u]
     simp [a, d]
-  have hD_cast : (D : ℚ) = (d : ℚ) ^ 3 := by
-    simp [D, d]
-  have hval : u ^ 3 + u ^ 2 - u = (N : ℚ) / (D : ℚ) := by
-    rw [hu, hD_cast]
+  have hval : u ^ 3 + u ^ 2 - u = (N : ℚ) / (d ^ 3 : ℚ) := by
+    rw [hu]
     field_simp [hdq]
     ring_nf [N]
 
-  -- Now use the reduced-denominator theorem for rationals.
-  have hden : ((N : ℚ) / (D : ℚ)).den = D := by
-    simpa using
-      (Rat.den_div_eq_of_coprime N (D : ℤ) hDpos_int (by simpa using hNcopD))
+  -- Exact denominator of a reduced rational quotient.
   rw [hval]
-  exact hden
+  simpa [d] using
+    (Rat.den_div_eq_of_coprime (a := N) (b := d ^ 3) hd3pos hNcopd3Nat)
 
--- Delete this line if your lemma is already globally in scope.
-variable (nat_isSquare_of_isSquare_cube : ∀ {n : ℕ}, IsSquare (n ^ 3) → IsSquare n)
-
-/-- If `w^2 = u^3 + u^2 - u`, then the denominator of `u` is a square. -/
-theorem rat_denom_square {u w : ℚ}
-    (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
-    IsSquare u.den := by
-  have hsq : IsSquare (u ^ 3 + u ^ 2 - u) := by
-    refine ⟨w, ?_⟩
-    rw [← h]
-    ring
-  have hden_sq0 : IsSquare ((u ^ 3 + u ^ 2 - u).den) :=
-    (Rat.isSquare_iff.mp hsq).2
-  have hden_sq3 : IsSquare (u.den ^ 3) := by
-    simpa [den_cubic_num_den (u := u)] using hden_sq0
-  exact nat_isSquare_of_isSquare_cube hden_sq3
-
-end DM3
+end DM1
 ```
 
-The important denominator step is this one:
-
-```lean
-have hNcopD : Nat.Coprime N.natAbs D := ...
-have hden : ((N : ℚ) / (D : ℚ)).den = D := by
-  simpa using
-    (Rat.den_div_eq_of_coprime N (D : ℤ) hDpos_int (by simpa using hNcopD))
-```
-
-This avoids trying to use `Rat.add_den_dvd`/`mul_den_dvd`, which only give divisibility bounds and are too weak for the exact denominator.
+The most important line is the final one: because `b = d^3` is positive and coprime to `N`, Mathlib returns the exact integer denominator immediately.
