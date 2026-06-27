@@ -1,138 +1,164 @@
-# Q1174 (dm4): Alternative B-line via reduction mod primes
+# Q1183 (dm4): reduction mod primes for `fullRationalTorsion_order_le_two`
 
 ## Executive answer
 
-No: the proposed reduction-mod-primes route is **not** shorter than the real torsion bound route for the theorem currently needed in `Axioms.lean`.
+For the general theorem
 
-It is a valid local obstruction in the following form:
-
-```text
-if E has good reduction at ℓ, ℓ ∤ m, and #E(F_ℓ) < m²,
-then (Z/mZ)² cannot inject into E(Q).
+```lean
+fullRationalTorsion_order_le_two :
+  HasFullRationalTorsion E m → m ≤ 2
 ```
 
-But Hasse plus “there exists some good reduction prime” does **not** imply such an `ℓ` exists.  The first usable good reduction prime can be arbitrarily large for a general rational Weierstrass curve, and Hasse at a large prime only gives
+the reduction-mod-primes route is **not concretely shorter** than the real-topology Route 4B.
+
+The reduction idea gives a valid **conditional obstruction**:
 
 ```text
-m² ≤ #E(F_ℓ) ≤ (sqrt ℓ + 1)²,
+if E has good reduction at ℓ,
+if ℓ ∤ m,
+if reduction is injective on m-torsion,
+and if #E(F_ℓ) < m²,
+then full rational m-torsion is impossible.
 ```
 
-which is too weak.
+But it does not give the global theorem from Hasse alone.  The `m = 3` case is the first visible failure, but the real problem is broader: for a general elliptic curve over `Q`, there is no uniform small good prime available from elementary good-reduction existence.  The bad reduction set is finite, but it can contain any prescribed finite set of small primes, so fixed small primes cannot be used uniformly.
 
-So the B-line would need a new hard theorem of the form:
+So the honest feasibility comparison is:
 
 ```text
-for every E/Q and every m ≥ 3, there is a good prime ℓ ∤ m
-such that #E(F_ℓ) < m².
+Route 4B real topology:
+  hard input = #E(R)[m] ≤ 2m.
+  After that, the desired theorem is a direct cardinality argument.
+
+Reduction mod primes:
+  hard inputs = good reduction API
+              + reduction map on points/torsion
+              + injectivity on prime-to-ℓ torsion
+              + Hasse bound
+              + an additional theorem producing a good prime ℓ with a useful
+                cardinality/divisibility obstruction.
 ```
 
-That theorem is essentially another formulation of the same torsion obstruction.  It is not a consequence of elementary good-reduction existence plus Hasse.  In particular, it would not be a smaller axiom than Route 4B.
+The last item is not supplied by Hasse plus “bad primes are finite”.  Without it, the route cannot close.
 
-My recommendation: keep the Route 4B real torsion bound architecture.  Do **not** replace it by the reduction-mod-primes route unless you are willing to add a stronger reduction obstruction axiom, in which case the axiom is not obviously simpler than `real_mTorsion_card_le`.
+## The `m = 3` obstruction
 
-## Why the simple Hasse argument fails
+You correctly identified the issue.
 
-Assume full rational `m`-torsion:
+For full rational `m`-torsion, reduction at a good prime `ℓ ∤ m` would give
 
 ```text
-(Z/mZ)² ↪ E(Q).
+m² | #E(F_ℓ)
 ```
 
-At a prime `ℓ` of good reduction with `ℓ ∤ m`, the specialization theorem should give an injection
+and hence
 
 ```text
-(Z/mZ)² ↪ E(F_ℓ).
+m² ≤ #E(F_ℓ) ≤ (sqrt ℓ + 1)².
 ```
 
-Thus
+For `m = 3`, Hasse alone would need
 
 ```text
-m² ≤ #E(F_ℓ).
+(sqrt ℓ + 1)² < 9,
 ```
 
-Hasse gives
+so `ℓ < 4`; only `ℓ = 2, 3` are relevant, and these may be bad reduction or divide `m`.
+
+Using small odd primes does not fix this:
 
 ```text
-#E(F_ℓ) ≤ ℓ + 1 + 2 sqrt ℓ = (sqrt ℓ + 1)².
+ℓ = 5: #E(F_5) can lie between 2 and 10; # = 9 is Hasse-allowed.
+ℓ = 7: #E(F_7) can lie between 4 and 12; # = 9 is Hasse-allowed.
 ```
 
-Therefore
+Thus Hasse does not rule out a subgroup `(Z/3Z)²` at `ℓ = 5` or `ℓ = 7` by cardinality alone.
+
+There is a stronger finite-field fact:
 
 ```text
-m ≤ sqrt ℓ + 1.
+if E(F_q) contains full m-torsion and gcd(m,q)=1,
+then m | q - 1.
 ```
 
-This only bounds `m` in terms of the chosen good prime `ℓ`.  For a general elliptic curve over `Q`, the first good prime not dividing `m` may be much larger than `m²`.  Finite bad reduction says only that some good primes exist; it gives no uniform small good prime.
+This would immediately rule out full `3`-torsion over `F_5`, since `3 ∤ 4`.  But this fact is essentially the finite-field Weil-pairing/determinant argument.  If the point of Route B is to avoid Weil pairing/cyclotomic arguments, this reintroduces the same mathematics in a finite-field wrapper.
 
-For small primes:
+For `ℓ = 7`, even `3 | 7 - 1`, and Hasse still permits `#E(F_7) = 9`.  So one would then need to choose primes in other congruence classes and prove there is a good one.  That needs a Dirichlet/Chebotarev-style existence theorem plus the finite-field torsion structure theorem.  This is not shorter than Route 4B.
+
+## Larger `m` does not solve the global problem
+
+For `m = 5`, a good prime `ℓ < 16` and `ℓ ∤ 5` with Hasse bound would rule out full `5`-torsion by cardinality.  Candidates include `7, 11, 13`.
+
+For `m = 7`, a good prime `ℓ < 36` and `ℓ ∤ 7` would suffice, and there are many candidates.
+
+But for a **general** rational elliptic curve, there is no guarantee that one of those small candidate primes is good.  A rational Weierstrass model can have bad reduction at a prescribed finite set of primes after arranging the discriminant to be divisible by those primes.  Finite bad reduction says there are good primes eventually; it does not say there is one below `(m - 1)^2`.
+
+Therefore, Hasse gives this theorem:
 
 ```text
-ℓ = 5:  #E(F_5) ≤ 10, so m² ≤ 10 gives m ≤ 3.
-ℓ = 7:  #E(F_7) ≤ 12, so m² ≤ 12 gives m ≤ 3.
-```
-
-This still does not rule out `m = 3`.  Also, `E` can have bad reduction at `5` and `7`.  The same issue occurs for `ℓ = 2,3`, and if `ℓ | m`, the prime-to-`ℓ` specialization injection does not apply to the full `m`-torsion.
-
-So the Hasse-bound line proves only this conditional theorem:
-
-```text
-small good prime with #E(F_ℓ) < m²
+small good prime below (m - 1)^2
   ⇒ no full rational m-torsion.
 ```
 
-It does not prove the global theorem:
+It does not give:
 
 ```text
 m ≥ 3 ⇒ no full rational m-torsion.
 ```
 
-## What Mathlib/FLT currently has
+That is the gap.
 
-From the FLT repo side, the visible elliptic torsion infrastructure is still centered around `FLT.EllipticCurve.Torsion`.  It defines
+## What exists in the current FLT/Mathlib environment?
+
+I checked the FLT repository through the GitHub connector.  The visible elliptic torsion file is `FLT.EllipticCurve.Torsion`, which defines
 
 ```lean
 abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u :=
   Submodule.torsionBy ℤ (E⁄k).Point n
 ```
 
-and contains placeholder/sorried geometric torsion facts such as finiteness and cardinality over separably closed fields.  I did not find a ready FLT-local API for:
+and has placeholder/sorried facts such as:
 
-```text
-* good reduction of a rational Weierstrass curve at a prime;
-* the reduced curve E/F_ℓ as an elliptic curve with point group;
-* the reduction map E(Q) → E(F_ℓ);
-* injectivity on prime-to-ℓ torsion;
-* Hasse's bound for #E(F_ℓ).
+```lean
+theorem WeierstrassCurve.n_torsion_finite {n : ℕ} (hn : 0 < n) :
+    Finite (E.nTorsion n) := sorry
+
+theorem WeierstrassCurve.n_torsion_card [IsSepClosed k] {n : ℕ}
+    (hn : (n : k) ≠ 0) :
+    Nat.card (E.nTorsion n) = n^2 := sorry
 ```
 
-As for Mathlib: at the project’s pinned revision, this is not a ready-to-wire stack.  Mathlib has general algebraic geometry, finite fields, and Weierstrass curves, but the complete arithmetic package needed here — integral models/good reduction, specialization of torsion, and Hasse bound for elliptic curves over finite fields — is not available as a small import-and-apply API.
-
-Even if all of those APIs existed, the mathematical obstruction above remains: Hasse plus existence of some good prime is too weak to prove `m ≤ 2`.
-
-## Important correction: Néron-Ogg-Shafarevich is overkill for existence of good primes
-
-For a fixed rational Weierstrass equation, one does not need Néron-Ogg-Shafarevich merely to know that there are good reduction primes.  After clearing denominators, all but finitely many primes avoid the discriminant and give good reduction of that model.
-
-Néron-Ogg-Shafarevich is about characterizing good reduction in terms of the ℓ-adic representation.  It is much stronger than needed for “bad primes are finite”.
-
-But the B-line needs more than finite good reduction.  It needs a prime of good reduction that is small enough, or a theorem producing a cardinality obstruction.  That is the missing hard part.
-
-## The valid local reduction obstruction
-
-The following is the precise mathematical lemma that the B-line can use.
+I did **not** find a ready FLT-local API for:
 
 ```text
-Given:
-  * good reduction at ℓ;
-  * ℓ ∤ m;
-  * reduction injects m-torsion E(Q)[m] ↪ E(F_ℓ);
-  * #E(F_ℓ) < m²;
-  * full rational m-torsion (Z/mZ)² ↪ E(Q),
-
-contradiction.
+1. good/bad reduction of rational elliptic curves;
+2. reduction maps E(Q) → E(F_ℓ);
+3. injectivity of reduction on prime-to-ℓ torsion;
+4. Hasse bound for #E(F_ℓ).
 ```
 
-Here is a Lean-level cardinality skeleton independent of the missing elliptic APIs.
+My honest assessment for Mathlib at the pinned FLT revision is the same: there are many general ingredients in Mathlib — finite fields, Weierstrass curves, algebraic geometry, point groups — but not a ready end-to-end arithmetic-reduction stack that would make this route a short implementation.
+
+So the answers to your three concrete API questions are:
+
+```text
+1. Good/bad reduction of elliptic curves?
+   Not as a ready-to-use FLT-local API found here.  If Mathlib has fragments, they
+   are not wired into this project’s torsion API.
+
+2. Injection E(Q)[m] → E(F_ℓ) for good ℓ ∤ m?
+   Not found as a ready theorem.  This would require integral models, reduction
+   maps, formal group/kernel analysis, and prime-to-ℓ torsion specialization.
+
+3. Hasse bound #E(F_ℓ) = ℓ + 1 - a_ℓ with |a_ℓ| ≤ 2√ℓ?
+   Not found as a ready theorem in the FLT-facing API.  Even if available, it
+   would not close the global `m ≤ 2` theorem without a small-good-prime or
+   finite-field-structure theorem.
+```
+
+## What the reduction route can prove immediately, assuming the missing APIs
+
+The easy part is pure cardinality.  Here is the reusable Lean skeleton.
 
 ```lean
 import Mathlib
@@ -146,11 +172,10 @@ namespace FLT
 namespace ReductionModPrimeRoute
 
 /--
-Pure cardinality core of the reduction-mod-prime obstruction.
+Pure cardinality obstruction.
 
-This is the only easy part of the B-line.  The hard elliptic-curve input is
-hidden in `hred_inj`, namely the existence of an injection from `(ZMod m)^2`
-into the finite reduced point group.
+If `(ZMod m)^2` injects into a finite reduced point group `G`, then `G` must
+have at least `m^2` elements.  So any bound `#G < m^2` gives a contradiction.
 -/
 theorem contradiction_of_reduction_card_lt_sq
     {G : Type*} [Fintype G]
@@ -160,8 +185,6 @@ theorem contradiction_of_reduction_card_lt_sq
     False := by
   rcases hred_inj with ⟨g, hg⟩
   have hdom : Fintype.card (ZMod m × ZMod m) = m * m := by
-    -- Usually solved by `simp [Fintype.card_prod]` at current Mathlib.
-    -- The positivity hypothesis avoids the pathological `ZMod 0` edge case.
     simp [Fintype.card_prod]
   have hle : m * m ≤ Fintype.card G := by
     rw [← hdom]
@@ -173,7 +196,7 @@ end ReductionModPrimeRoute
 end FLT
 ```
 
-If the reduced point group is represented by `Nat.card` rather than `Fintype.card`, the same proof becomes:
+The same proof can be written with `Nat.card` if the reduced point group is packaged as a `Finite` type rather than a `Fintype` type:
 
 ```lean
 import Mathlib
@@ -186,7 +209,7 @@ namespace FLT
 
 namespace ReductionModPrimeRoute
 
-/-- Same cardinality obstruction, phrased with `Nat.card`. -/
+/-- `Nat.card` version of the same pure cardinality obstruction. -/
 theorem contradiction_of_reduction_natCard_lt_sq
     {G : Type*} [Finite G]
     {m : ℕ} (hm : 0 < m)
@@ -195,8 +218,6 @@ theorem contradiction_of_reduction_natCard_lt_sq
     False := by
   rcases hred_inj with ⟨g, hg⟩
   have hdom : Nat.card (ZMod m × ZMod m) = m * m := by
-    -- Depending on the local Mathlib simp set, this may need the explicit theorem
-    -- for `Nat.card (ZMod m)` plus `Nat.card_prod`.
     simp [Nat.card_prod]
   have hle : m * m ≤ Nat.card G := by
     rw [← hdom]
@@ -208,11 +229,11 @@ end ReductionModPrimeRoute
 end FLT
 ```
 
-The proof is tiny.  The problem is obtaining `hred_inj` and `hred_card` uniformly.
+This is not the hard part.  The hard part is producing `hred_inj` and a useful `hred_card` for some good prime.
 
-## The missing B-line API, if you want to pursue it anyway
+## Minimal B-line API if pursued anyway
 
-A realistic B-line file would need definitions or axioms like this.
+If you want to package the reduction route as a theorem, the honest interface should look like this.
 
 ```lean
 import Mathlib
@@ -226,7 +247,7 @@ namespace FLT
 
 namespace ReductionModPrimeRoute
 
-/-- Placeholder predicate: `E` has good reduction at the rational prime `ℓ`. -/
+/-- Placeholder: `E` has good reduction at the rational prime `ℓ`. -/
 axiom GoodReductionAt
     (E : WeierstrassCurve ℚ) [E.IsElliptic] (ℓ : ℕ) : Prop
 
@@ -238,10 +259,7 @@ axiom reducedPointGroup_fintype
     (E : WeierstrassCurve ℚ) [E.IsElliptic] (ℓ : ℕ) :
     Fintype (ReducedPointGroup E ℓ)
 
-/--
-Specialization of full rational `m`-torsion into the reduced finite group.
-This requires good reduction and `ℓ ∤ m`.
--/
+/-- Specialization injectivity on prime-to-`ℓ` torsion. -/
 axiom fullTorsion_specializes_injectively
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     {m ℓ : ℕ}
@@ -251,45 +269,11 @@ axiom fullTorsion_specializes_injectively
     ∃ g : ZMod m × ZMod m → ReducedPointGroup E ℓ,
       Function.Injective g
 
-/-- Hasse/cardinality consequence strong enough to contradict full `m`-torsion. -/
-axiom reduced_card_lt_sq
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m ℓ : ℕ}
-    (hm3 : 3 ≤ m) (hℓprime : ℓ.Prime)
-    (hgood : GoodReductionAt E ℓ) :
-    Fintype.card (ReducedPointGroup E ℓ) < m * m
-
-end ReductionModPrimeRoute
-
-end FLT
-```
-
-But note that `reduced_card_lt_sq` is not a consequence of Hasse for an arbitrary good `ℓ`; it requires `ℓ` to be small relative to `m`, or it must be replaced by an existential theorem producing such an `ℓ`.
-
-The honest global B-line axiom would therefore be this:
-
-```lean
-import Mathlib
-import FLT.EllipticCurve.Torsion
-
-open scoped Classical
-
-noncomputable section
-
-namespace FLT
-
-namespace ReductionModPrimeRoute
-
 /--
-The genuinely hard global B-line input.
-
-This says that for any alleged full rational `m`-torsion with `m ≥ 3`, there is
-a good prime of reduction whose finite reduced point group is too small to
-contain `(ZMod m)^2`.
-
-This is not supplied by Hasse plus finite bad reduction.
+A useful reduction obstruction.  This is stronger than Hasse alone unless `ℓ`
+is already known to be small relative to `m`.
 -/
-axiom exists_small_good_reduction_obstruction
+axiom exists_good_reduction_card_lt_sq
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     {m : ℕ} (hm3 : 3 ≤ m) :
     ∃ ℓ : ℕ,
@@ -298,36 +282,16 @@ axiom exists_small_good_reduction_obstruction
       ¬ ℓ ∣ m ∧
       Fintype.card (ReducedPointGroup E ℓ) < m * m
 
-end ReductionModPrimeRoute
-
-end FLT
-```
-
-With that strong axiom, the route is short:
-
-```lean
-import Mathlib
-import FLT.EllipticCurve.Torsion
-
-open scoped Classical
-
-noncomputable section
-
-namespace FLT
-
-namespace ReductionModPrimeRoute
-
 /--
-If the B-line obstruction axiom is available, full rational `m`-torsion is
-impossible for `m ≥ 3`.
+If the strong B-line obstruction is available, it gives the desired no-full-torsion theorem.
 -/
 theorem not_hasFullRationalTorsion_of_three_le_routeB
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     {m : ℕ} (hm3 : 3 ≤ m) :
     ¬ HasFullRationalTorsion E m := by
   intro hfull
-  have hm_pos : 0 < m := lt_of_lt_of_le (by norm_num : 0 < 3) hm3
-  rcases exists_small_good_reduction_obstruction (E := E) (m := m) hm3 with
+  have hm_pos : 0 < m := by omega
+  rcases exists_good_reduction_card_lt_sq (E := E) (m := m) hm3 with
     ⟨ℓ, hℓprime, hgood, hℓ_not_dvd_m, hcard_lt⟩
   letI : Fintype (ReducedPointGroup E ℓ) :=
     reducedPointGroup_fintype E ℓ
@@ -345,111 +309,131 @@ end ReductionModPrimeRoute
 end FLT
 ```
 
-This is structurally parallel to Route 4B:
-
-```text
-Route 4B hard input:
-  #E(R)[m] ≤ 2m
-
-B-line hard input:
-  ∃ good ℓ ∤ m with #E(F_ℓ) < m²
-  + reduction injectivity on m-torsion
-```
-
-The B-line hard input is not obviously easier.
-
-## Why the B-line does not replace Route 4B in `Axioms.lean`
-
-For the `Axioms.lean` dependency chain, we need:
+But notice what happened: the route only becomes short after adding the strong axiom
 
 ```lean
-HasFullRationalTorsion E m → m ≤ 2
+exists_good_reduction_card_lt_sq
 ```
 
-or at least:
+which is exactly the missing global content.  Hasse alone does not prove this axiom.
+
+## If one tries to handle `m = 3` separately
+
+There are three possible “special `m = 3`” ideas.
+
+### 1. Hasse only
+
+This fails.  Hasse allows `#E(F_5) = 9` and `#E(F_7) = 9`.
+
+### 2. Finite-field full torsion implies `m | ℓ - 1`
+
+This can rule out full `3`-torsion over `F_5`, and over any `F_ℓ` with `ℓ ≠ 1 mod 3`.
+
+But this theorem is Weil-pairing/determinant content over finite fields.  It is not a Hasse-bound argument anymore.
+
+The interface would be:
 
 ```lean
-3 ≤ m → ¬ HasFullRationalTorsion E m.
+import Mathlib
+
+open scoped Classical
+
+noncomputable section
+
+namespace FLT
+
+namespace ReductionModPrimeRoute
+
+/-- Finite-field structure obstruction, essentially Weil-pairing content. -/
+axiom full_torsion_over_finite_field_implies_dvd_card_units
+    {q m : ℕ}
+    (hm : 0 < m) (hq_coprime : Nat.Coprime m q)
+    -- if `(ZMod m)^2` embeds into `E(F_q)`
+    : True
+    -- intended conclusion: `m ∣ q - 1`
+
+end ReductionModPrimeRoute
+
+end FLT
 ```
 
-Route 4B supplies exactly this from two real-torsion axioms:
+This is not attractive if the purpose is to remove the Weil pairing route.
+
+### 3. Choose a good prime in a useful congruence class
+
+For `m = 3`, one would like a good prime `ℓ ≡ 2 mod 3`.  Since the bad primes are finite, such primes exist by Dirichlet.  But formalizing this requires:
 
 ```text
+finite bad reduction set
++ Dirichlet primes in arithmetic progressions
++ finite-field full-torsion structure theorem
+```
+
+Again, this is not shorter than Route 4B.
+
+## Comparison with Route 4B
+
+### Route 4B
+
+Current Route 4B assumes:
+
+```lean
 real_mTorsion_finite
 real_mTorsion_card_le
 ```
 
-The B-line does not supply it from currently available general facts.  It supplies it only after adding a stronger global reduction obstruction axiom.
+and proves, sorry-free after those axioms:
 
-Thus, replacing Route 4B by B-line would change the axiom footprint from:
+```lean
+fullRationalTorsion_order_le_two_route4B :
+  HasFullRationalTorsion E m → m ≤ 2
+```
+
+The proof is a direct cardinality comparison:
 
 ```text
-real_mTorsion_finite
-real_mTorsion_card_le
+(Z/mZ)² ↪ E(Q) ↪ E(R)[m]
+#(Z/mZ)² = m²
+#E(R)[m] ≤ 2m
+therefore m² ≤ 2m, hence m ≤ 2.
 ```
 
-to something like:
+### Reduction route
+
+The reduction route requires at least:
 
 ```text
-good reduction / reduced curve API
-specialization injectivity on prime-to-ℓ torsion
-Hasse bound
-existence of a good ℓ ∤ m with #E(F_ℓ) < m²
+1. integral/good-reduction model API;
+2. reduced curve over F_ℓ and finite point group;
+3. reduction map E(Q) → E(F_ℓ);
+4. injectivity on prime-to-ℓ torsion;
+5. Hasse bound;
+6. additional global theorem finding a good ℓ with #E(F_ℓ) < m²,
+   or finite-field full-torsion structure + Dirichlet/Chebotarev.
 ```
 
-The last item is the real blocker.  Without it, the route cannot close.
-
-## What `Axioms.lean` should do
-
-Keep the current Route 4B replacement:
-
-```lean
-have hm_le_two : m ≤ 2 :=
-  RealTorsionBound.fullRationalTorsion_order_le_two_route4B
-    (E := E) (m := m) hm_pos hfull
-```
-
-and use it to prove:
-
-```lean
-not_hasFullRationalTorsion_of_three_le
-no_odd_prime_square_in_torsion
-```
-
-Do **not** introduce the B-line into `Axioms.lean` unless a separate file has already provided a theorem of the exact form:
-
-```lean
-theorem fullRationalTorsion_order_le_two_routeB
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    m ≤ 2
-```
-
-If that theorem exists, the `Axioms.lean` replacement body is identical to the Route 4B body with only the theorem name changed:
-
-```lean
-have hm_le_two : m ≤ 2 :=
-  ReductionModPrimeRoute.fullRationalTorsion_order_le_two_routeB
-    (E := E) (m := m) hm_pos hfull
-omega
-```
-
-But proving `fullRationalTorsion_order_le_two_routeB` is not shorter than proving the real torsion bound route.
+This is strictly more infrastructure than Route 4B for the present target.
 
 ## Final recommendation
 
-Use reduction mod primes only as a diagnostic/local obstruction or as a future optional route.  It is not the right replacement for the current `Axioms.lean` refactor.
+Do not use reduction mod primes as the main replacement for `fullRationalTorsion_order_le_two`.
 
-For the immediate architecture:
+The B-line is a good **local obstruction** and may be useful later for explicit curves or finite computations, but for the general theorem needed by `Axioms.lean`, it is not a feasible shorter path.
+
+Keep the Route 4B chain:
 
 ```text
-Keep Route 4B:
-  real_mTorsion_finite
-  real_mTorsion_card_le
-    ⇒ fullRationalTorsion_order_le_two_route4B
-    ⇒ not_hasFullRationalTorsion_of_three_le
-    ⇒ no_odd_prime_square_in_torsion
+real_mTorsion_finite
+real_mTorsion_card_le
+  ⇒ fullRationalTorsion_order_le_two_route4B
+  ⇒ not_hasFullRationalTorsion_of_three_le
+  ⇒ no_odd_prime_square_in_torsion
 ```
 
-Do not add a B-line unless you are willing to add a new hard axiom that already packages the small-good-prime/cardinality obstruction.  Hasse plus finite bad reduction alone is insufficient.
+If someone wants a reduction-based alternative later, make it a separate theorem:
+
+```lean
+ReductionModPrimeRoute.fullRationalTorsion_order_le_two_routeB
+```
+
+and require it to package the strong global good-prime obstruction.  Until that theorem exists, `Axioms.lean` should not depend on the reduction route.
