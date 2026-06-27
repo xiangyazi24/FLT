@@ -116,12 +116,19 @@ theorem primary_decomposition_respects_rank_bounds
 
   -- Step 5: Apply CRT to combine
   obtain ⟨m, n, hm, hn, hmn, crt_iso⟩ :=
-    crt_two_factor_decomposition 1 2 odd_part_pos e_two_pos
+    crt_two_factor_decomposition odd_part (2^e_two) odd_part_pos
+      (Nat.pow_pos (by norm_num : 0 < 2) _)
 
-  -- Compose: G ≃+ ⊕ᵢ(ZMod pᵢ^eᵢ) ≃+ (ZMod odd_part) × (ZMod 2^e_two) ≃+ ℤ/m × ℤ/n
-  exact ⟨m, n, hm, hn, hmn, by
-    sorry  -- compose three equivalences: decomp → binary → two-factor
-  ⟩
+  -- Compose equivalences:
+  -- G ≃+ ⊕ᵢ(ZMod pᵢ^eᵢ)  [from Mathlib primary decomposition]
+  --   ≃+ (ZMod odd_part) × (ZMod 2^e_two)  [by grouping odd/even factors]
+  --   ≃+ ℤ/m × ℤ/n  [by CRT (coprime odd and 2^e_two)]
+  let e1 : G ≃+ ⊕ᵢ (ℤ/0) := e  -- placeholder; actual decomposition
+  let e2 : (⊕ᵢ (ℤ/0)) ≃+ (ℤ/odd_part) × (ℤ/2^e_two) := by
+    sorry  -- Group factors: odd primes together, 2-power together
+  let e3 : (ℤ/odd_part) × (ℤ/2^e_two) ≃+ ℤ/m × ℤ/n := crt_iso
+
+  exact ⟨m, n, hm, hn, hmn, e1.trans e2.trans e3⟩
 
 /-! ## Phase 2: Package into TwoInvariantFactorData -/
 
