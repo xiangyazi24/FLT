@@ -1,321 +1,516 @@
-# Q1209 (dm4): tightest torsion bound without Mazur cyclic theorem
+# Q1235 (dm4): `#E(ℝ)[m] ≤ 2m` via complex conjugation
 
 ## Executive answer
 
-With only the listed ingredients, the tightest concrete upper bound on
+Yes.  There is a clean algebraic route, and it is better than the eigenvalue argument.
+
+The key point is that the missing fixed-point estimate is a finite `ZMod m` linear-algebra lemma:
 
 ```text
-|E(ℚ)_tors|
+Let m > 0 and A ∈ Mat₂(Z/mZ).  If det A = -1 in Z/mZ, then
+
+  #{v ∈ (Z/mZ)^2 : A v = v} ≤ m * gcd(m, 2) ≤ 2m.
 ```
 
-is: **no finite bound at all**.
+In particular, for odd `m` the bound is actually `≤ m`, and for even `m` the sharp uniform bound is `≤ 2m`.
 
-The best structural result available is essentially:
+This lemma does **not** need topology.  It does not even need `A^2 = 1`, although complex conjugation of course gives `A^2 = 1`.  The determinant condition from the Weil pairing is already enough to prevent `A - I` from being too divisible at every prime.
+
+So the proposed Galois-conjugation route can work:
 
 ```text
-E(ℚ)_tors ≅ Z/mZ × Z/nZ,  m ∣ n,  m ≤ 2,
+E(ℝ)[m]
+  = E(ℂ)[m]^{conj}
+  ≃ ker(A - I : (Z/mZ)^2 → (Z/mZ)^2)
+  ≤ m * gcd(m, 2)
+  ≤ 2m.
 ```
 
-plus a few exclusions in the `m = 2` branch:
+This avoids the topological input `E(ℝ)_0 ≃ S^1`.
+
+## Correction to the eigenvalue discussion
+
+The eigenvalue picture is misleading over `Z/mZ` because `Z/mZ` is not generally a field and because the involution is not semisimple at the prime `2`.
+
+Even the diagonal model already shows the issue.  For
 
 ```text
-not Z/2 × Z/10,
-not Z/2 × Z/12,
-not Z/2 × Z/14,
-not Z/2 × Z/16.
+A = diag(1, -1) on (Z/mZ)^2,
 ```
 
-This does **not** bound the cyclic branch `m = 1`.  For every proposed constant `C`, the formal constraints are still compatible with
+the fixed vectors satisfy
 
 ```text
-Z/(C+1)Z.
+(x, y) = (x, -y),  i.e.  2y = 0.
 ```
 
-So from these ingredients alone one cannot prove `|E(ℚ)_tors| ≤ 16`, or `≤ 100`, or any universal finite bound.
-
-A small correction to the prompt: in invariant-factor normal form `m ∣ n`, the group
+Therefore
 
 ```text
-Z/2 × Z/11
+#Fix(A) = m * gcd(m, 2).
 ```
 
-is not an `m = 2` case, since `2 ∤ 11`; it is cyclic:
+So the fixed subgroup is `m`, not `2m`, only when `m` is odd.  When `m` is even it is `2m`.  This is exactly why the final target bound should be `2m`, and it is sharp.
+
+The determinant formula
 
 ```text
-Z/2 × Z/11 ≅ Z/22.
+#ker(A - I) = |det(A - I)|^{-1} * m^2
 ```
 
-So it belongs to the unbounded `m = 1` cyclic branch.  The conclusion is the same: without a cyclic-order theorem, the order is unbounded by the available lemmas.
+is not valid over `Z/mZ`: `det(A - I)` can be a zero divisor or zero, and there is no such division formula in general.  The right replacement is a local divisibility/Smith-normal-form argument.
 
-## What the listed ingredients actually imply
+## The finite algebra lemma
+
+Here is the clean statement to isolate.
+
+```text
+Lemma fixed_card_le_mul_gcd_two.
+Let m > 0 and A ∈ Mat₂(Z/mZ).  If det A = -1, then
+
+  #{v : (Z/mZ)^2 | A v = v} ≤ m * gcd(m, 2).
+```
+
+The desired `≤ 2m` is then immediate.
+
+### Proof by prime-power localization
 
 Let
 
 ```text
-T = E(ℚ)_tors.
+B = A - I.
 ```
 
-Ingredient 1 gives:
+By the Chinese remainder theorem, it is enough to prove the corresponding estimate after reducing modulo each prime power `q = p^e` dividing `m`; the fixed subgroup modulo `m` is the product of the fixed subgroups modulo the prime-power factors.
+
+So work over
 
 ```text
-T ≅ Z/mZ × Z/nZ,   m ∣ n.
+R = Z/qZ,   q = p^e.
 ```
 
-Ingredient 2 gives:
+We use one elementary observation.
+
+### Unit-entry observation
+
+If some entry of `B` is a unit in `R`, then
 
 ```text
-m ≤ 2.
+#ker(B : R^2 → R^2) ≤ q.
 ```
 
-Therefore there are only two invariant-factor shapes:
+Indeed, suppose for example the first-row, first-column entry is a unit.  Then the first row equation
 
 ```text
-m = 1:  T ≅ Z/nZ,          n arbitrary.
-
-m = 2:  T ≅ Z/2Z × Z/nZ,  with 2 ∣ n.
+b₁₁ x + b₁₂ y = 0
 ```
 
-Ingredients 3–6 remove only four values from the second branch:
+determines `x` uniquely once `y` is chosen.  There are `q` choices for `y`, and the second row equation can only cut this set down.
+
+### Odd prime-power case
+
+Assume `p` is odd.  If every entry of `B = A - I` were divisible by `p`, then
 
 ```text
-n ≠ 10, 12, 14, 16
+A ≡ I mod p,
 ```
 
-assuming the theorem statements are exactly `¬(Z/2 × Z/n)` for those `n`.
-
-Ingredient 7, the cubic-root bound on `2`-torsion, gives no cyclic-order bound.  A cyclic group `Z/NZ` has at most two elements of order dividing `2`, so it is compatible with arbitrarily large `N`.
-
-Thus the set of groups not excluded by the available ingredients still contains:
+hence
 
 ```text
-Z/NZ   for every N ≥ 1.
+det A ≡ 1 mod p.
 ```
 
-Hence no finite order bound follows.
+But `det A = -1`, and for odd `p` we have `-1 ≠ 1 mod p`.  Contradiction.
 
-## Formal toy certificate: the constraints are unbounded
+Thus some entry of `B` is a unit modulo `p^e`, and the unit-entry observation gives
 
-Here is a tiny Lean skeleton showing the logical shape.  It models only the invariant-factor constraints, not elliptic curves.  The point is that `m = 1` bypasses every rank-two exclusion.
+```text
+#ker(A - I) ≤ p^e.
+```
+
+So every odd prime-power factor contributes at most its own size.
+
+### Two-power case
+
+Now take `q = 2^e`.
+
+If `e = 1`, the whole ambient module has size
+
+```text
+#(Z/2Z)^2 = 4 = 2q,
+```
+
+so the desired local bound is trivial.
+
+Assume `e ≥ 2`.  If some entry of `B` is a unit, the unit-entry observation gives
+
+```text
+#ker(B) ≤ q ≤ 2q.
+```
+
+Otherwise every entry of `B` is even, so
+
+```text
+A ≡ I mod 2.
+```
+
+They cannot all be divisible by `4`, because then
+
+```text
+A ≡ I mod 4,
+```
+
+which would imply
+
+```text
+det A ≡ 1 mod 4,
+```
+
+contradicting
+
+```text
+det A = -1 ≡ 3 mod 4.
+```
+
+So at least one entry of `B` is exactly divisible by `2`.  In a row containing such an entry, after possibly swapping coordinates, the row equation has the form
+
+```text
+2 * (u x + c y) = 0
+```
+
+with `u` a unit in `Z/2^eZ`.
+
+In `Z/2^eZ`, the equation
+
+```text
+2t = 0
+```
+
+has exactly two solutions for `t`, namely `0` and `2^(e-1)`.  Therefore, for each chosen `y`, the expression `u x + c y` has at most two possible values; since `u` is a unit, each such value determines a unique `x`.
+
+Hence
+
+```text
+#ker(B) ≤ 2q.
+```
+
+### Multiplying the local estimates
+
+Multiplying over all prime powers gives
+
+```text
+#ker(A - I) ≤ m
+```
+
+if `m` is odd, and
+
+```text
+#ker(A - I) ≤ 2m
+```
+
+if `m` is even.  Equivalently,
+
+```text
+#ker(A - I) ≤ m * gcd(m, 2) ≤ 2m.
+```
+
+This proves the finite algebra lemma.
+
+## Why `A^2 = 1` is still useful, but not necessary
+
+For complex conjugation we also have
+
+```text
+A^2 = I.
+```
+
+This gives a more conceptual odd-prime proof: when `2` is invertible, the idempotents
+
+```text
+(1 + A) / 2,   (1 - A) / 2
+```
+
+split the module into `+1` and `-1` eigenspaces.  Since `det A = -1`, those eigenspaces have ranks `1` and `1`, so the fixed subgroup has size exactly `p^e` locally at odd primes.
+
+But at the prime `2`, the idempotent splitting is unavailable.  The divisibility argument above handles the `2`-primary obstruction and gives the extra factor `2`.
+
+For Lean, I would use the divisibility proof rather than an eigenvalue/idempotent proof, because it is uniform and avoids semisimplicity issues.
+
+## Applying the lemma to `E(ℝ)[m]`
+
+The algebraic route needs three elliptic-curve inputs.
+
+### 1. Torsion over `ℂ` as a free `ZMod m` module of rank two
+
+For `m > 0`, over characteristic zero,
+
+```text
+E(ℂ)[m] ≃ (Z/mZ)^2
+```
+
+as a `ZMod m` module.
+
+If the current FLT bridge only says
+
+```text
+#E(ℂ)[m] = m^2,
+```
+
+then it is too weak for this argument.  The matrix/determinant route needs a basis, or at least a `ZMod m`-linear equivalence with `(ZMod m)^2`.  The cardinality theorem should be a corollary of this stronger structure theorem, not the only available statement.
+
+### 2. Real points are fixed complex points
+
+Complex conjugation acts on `E(ℂ)` because the curve is defined over `ℝ`.  Algebraically,
+
+```text
+E(ℝ)[m] = E(ℂ)[m]^{conj}.
+```
+
+This is descent for points: a complex point has real coordinates exactly when it is fixed by conjugation.  No connected-component or circle argument is involved.
+
+### 3. The conjugation matrix has determinant `-1`
+
+Choose a `ZMod m` basis `P, Q` of `E(ℂ)[m]`.  Let `A` be the matrix of complex conjugation in this basis.
+
+The Weil pairing gives
+
+```text
+e_m(aP + bQ, cP + dQ) = e_m(P, Q)^(ad - bc).
+```
+
+Thus the action of a matrix on the Weil pairing is by exponentiating with its determinant.
+
+On the other hand, complex conjugation acts on `μ_m` by inversion:
+
+```text
+ζ ↦ ζ⁻¹.
+```
+
+Therefore
+
+```text
+e_m(conj P, conj Q)
+  = conj(e_m(P, Q))
+  = e_m(P, Q)⁻¹.
+```
+
+Since the Weil pairing is perfect and `e_m(P,Q)` is primitive, this implies
+
+```text
+det A = -1 in Z/mZ.
+```
+
+Then the finite algebra lemma gives
+
+```text
+#E(ℝ)[m]
+  = #Fix(A)
+  ≤ m * gcd(m, 2)
+  ≤ 2m.
+```
+
+## Lean target: isolate the matrix lemma first
+
+I would first prove a completely elliptic-curve-free theorem about `ZMod m` matrices.  The exact names below are schematic, but the statement is the important part.
 
 ```lean
 import Mathlib
 
 namespace FLT
+namespace ConjugationFixedCount
 
-namespace TorsionWithoutMazur
+open Matrix
 
-/--
-A toy predicate for the invariant-factor constraints currently available.
-It deliberately does not encode any cyclic Mazur theorem.
--/
-def AvailableInvariantFactorShape (m n : ℕ) : Prop :=
-  m ∣ n ∧ m ≤ 2
+noncomputable section
 
-/--
-The available invariant-factor constraints allow arbitrarily large orders.
-Take the cyclic branch `m = 1`, `n = B + 1`.
--/
-theorem available_constraints_do_not_bound_order
-    (B : ℕ) :
-    ∃ m n : ℕ,
-      AvailableInvariantFactorShape m n ∧ B < m * n := by
-  refine ⟨1, B + 1, ?_, ?_⟩
-  · exact ⟨one_dvd _, by norm_num⟩
-  · omega
+/-- Fixed vectors of a `2 × 2` matrix over `ZMod m`. -/
+def FixedVec (m : ℕ) [NeZero m]
+    (A : Matrix (Fin 2) (Fin 2) (ZMod m)) : Type :=
+  {v : Fin 2 → ZMod m // A.mulVec v = v}
 
-end TorsionWithoutMazur
-
-end FLT
-```
-
-If you want to also encode the four excluded rank-two cases, the same witness still works because `m = 1`.
-
-```lean
-import Mathlib
-
-namespace FLT
-
-namespace TorsionWithoutMazur
-
-/-- The four currently excluded rank-two second factors. -/
-def ExcludedRankTwoSecondFactor (n : ℕ) : Prop :=
-  n = 10 ∨ n = 12 ∨ n = 14 ∨ n = 16
+instance (m : ℕ) [NeZero m]
+    (A : Matrix (Fin 2) (Fin 2) (ZMod m)) :
+    Fintype (FixedVec m A) := by
+  dsimp [FixedVec]
+  infer_instance
 
 /--
-Available constraints plus the four `Z/2 × Z/n` exclusions.
-The exclusions only apply to the `m = 2` branch.
+Pure finite-linear-algebra lemma.
+
+Recommended proof strategy:
+* use CRT to reduce to `ZMod (p^e)`;
+* for odd `p`, `A - 1` has a unit entry, otherwise `det A ≡ 1 mod p`;
+* for `2^e`, either `A - 1` has a unit entry, or it is divisible by `2` but not by `4`;
+* a unit row equation gives at most `q` solutions;
+* a `2 * unit` row equation over `ZMod (2^e)` gives at most `2q` solutions.
 -/
-def AvailableShapeWithRankTwoExclusions (m n : ℕ) : Prop :=
-  m ∣ n ∧
-  m ≤ 2 ∧
-  ¬ (m = 2 ∧ ExcludedRankTwoSecondFactor n)
-
-/-- Even after the four rank-two exclusions, the cyclic branch remains unbounded. -/
-theorem available_constraints_with_exclusions_do_not_bound_order
-    (B : ℕ) :
-    ∃ m n : ℕ,
-      AvailableShapeWithRankTwoExclusions m n ∧ B < m * n := by
-  refine ⟨1, B + 1, ?_, ?_⟩
-  · refine ⟨one_dvd _, by norm_num, ?_⟩
-    intro h
-    exact by omega
-  · omega
-
-end TorsionWithoutMazur
-
-end FLT
-```
-
-This is the precise formal reason no theorem of the form
-
-```lean
-Nat.card EQtors ≤ C
-```
-
-can be derived from just the listed facts.
-
-## What would be needed for `≤ 16`
-
-To prove the actual Mazur bound
-
-```text
-|E(ℚ)_tors| ≤ 16,
-```
-
-you need at least a cyclic-order theorem, e.g.
-
-```lean
-cyclic_torsion_order_le_12_or_rank_two_bound
-```
-
-or more concretely:
-
-```lean
-theorem no_point_of_exact_order_gt_12_except_rank_two_cases
-```
-
-But this is already the cyclic part of Mazur / modular-curve input.
-
-A minimal bridge sufficient for the final cardinal bound could be:
-
-```lean
-import Mathlib
-
-namespace FLT
-
-/-- Schematic: a point of exact order `n` on `E(ℚ)`. -/
--- Use the project's actual definition.
--- def HasPointOfExactOrder (E : WeierstrassCurve ℚ) [E.IsElliptic] (n : ℕ) : Prop :=
---   ∃ P : (E⁄ℚ).Point, addOrderOf P = n
-
-/--
-Cyclic torsion bound bridge.  This is essentially the cyclic part of Mazur's theorem.
--/
-axiom no_large_cyclic_torsion
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ}
-    (hn : 13 ≤ n) :
-    ¬ HasPointOfExactOrder E n
-
-end FLT
-```
-
-With such a bridge, one can start proving `≤ 16`.  Without such a bridge, the cyclic branch is unlimited.
-
-## Can Lutz–Nagell give a uniform bound?
-
-No.  Lutz–Nagell is useful for **computing torsion on a fixed integral Weierstrass model**, but it does not give a universal constant independent of the curve.
-
-For a short integral model, the classical Nagell–Lutz theorem says roughly:
-
-```text
-if P = (x,y) ∈ E(ℚ) is torsion,
-then x,y are integers, and either y = 0 or y² divides the discriminant Δ.
-```
-
-This makes the torsion subgroup effectively finite for a fixed curve because there are only finitely many divisors of the fixed integer `Δ` to check.
-
-But `Δ` varies with the curve and can be arbitrarily large.  Therefore the theorem gives a curve-dependent enumeration procedure, not a uniform bound on `|E(ℚ)_tors|` across all rational elliptic curves.
-
-So the implication
-
-```text
-Lutz–Nagell + height bounds ⇒ universal n ≤ C
-```
-
-is not available in any elementary way.  Height estimates can bound searches for a fixed curve or relate torsion to a fixed discriminant/conductor, but they do not yield a universal constant without deeper input.  A genuine uniform bound is essentially the content of Mazur for `ℚ`, or Merel/uniform boundedness over number fields, both modular-curve-level theorems.
-
-## Does Mathlib have Lutz–Nagell?
-
-I do not find a ready FLT-local theorem named or corresponding to Lutz–Nagell.  The FLT repository’s visible torsion file is still centered around the `WeierstrassCurve.nTorsion` API and has placeholder/sorried geometric torsion facts, not an integral-model Lutz–Nagell implementation.
-
-In practical Lean terms: even if a Lutz–Nagell theorem were added, it would not close the desired universal bound.  The theorem would likely have a shape like this:
-
-```lean
-import Mathlib
-
-namespace FLT
-
-/-- Schematic only: fixed-curve Lutz–Nagell style statement. -/
-axiom lutz_nagell_schematic
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    -- plus an integral/minimal model package and discriminant `Δ`
-    : True
-    -- intended conclusion:
-    -- torsion affine coordinates are integral, and y = 0 or y^2 ∣ Δ
-
-end FLT
-```
-
-That statement is not a replacement for Mazur.  It only gives a finite computation after `E` is fixed.
-
-## Reduction-mod-primes also gives only curve-dependent bounds
-
-For a fixed curve, reduction at good primes can bound torsion:
-
-```text
-#E(ℚ)_tors divides or injects into #E(F_ℓ)
-```
-
-for suitable good primes and prime-to-`ℓ` torsion.  Taking two good primes often gives strong curve-dependent bounds.
-
-But uniformly over all `E/ℚ`, the small-prime problem appears again: the bad reduction set can contain any prescribed finite set of primes.  Thus reduction mod primes is not a universal elementary substitute for the cyclic Mazur theorem.
-
-## Best possible current statement
-
-The strongest honest theorem you can prove from the listed ingredients is not a cardinal bound.  It is a structural reduction:
-
-```lean
-/-- Schematic final form of what the current ingredients can prove. -/
-theorem rational_torsion_shape_without_cyclic_Mazur
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    ∃ m n : ℕ,
-      m ∣ n ∧
-      m ≤ 2 ∧
-      -- if m = 2, exclude the four known descent cases
-      ¬ (m = 2 ∧ (n = 10 ∨ n = 12 ∨ n = 14 ∨ n = 16)) ∧
-      True := by
-  -- supplied by the existing two-invariant-factor theorem,
-  -- Route 4B's `m ≤ 2`, and the four descent exclusions.
+theorem card_fixedVec_le_mul_gcd_two
+    {m : ℕ} [NeZero m]
+    (A : Matrix (Fin 2) (Fin 2) (ZMod m))
+    (hdet : A.det = (-1 : ZMod m)) :
+    Fintype.card (FixedVec m A) ≤ m * Nat.gcd m 2 := by
+  -- This is the standalone algebra lemma to prove.
+  -- It should not mention elliptic curves, real points, topology, or the Weil pairing.
   sorry
+
+/-- The weaker form needed downstream. -/
+theorem card_fixedVec_le_two_mul
+    {m : ℕ} [NeZero m]
+    (A : Matrix (Fin 2) (Fin 2) (ZMod m))
+    (hdet : A.det = (-1 : ZMod m)) :
+    Fintype.card (FixedVec m A) ≤ 2 * m := by
+  have h := card_fixedVec_le_mul_gcd_two (m := m) A hdet
+  have hg : Nat.gcd m 2 ≤ 2 := Nat.gcd_le_right m (by decide : 0 < 2)
+  nlinarith [h, Nat.mul_le_mul_left m hg]
+
+end
+end ConjugationFixedCount
+end FLT
 ```
 
-The `sorry` is schematic: it represents wiring together your already-proved facts.  The important point is that this theorem intentionally has no `Nat.card ≤ C` conclusion, because no such `C` follows.
+The local row-equation lemmas can be proved separately.  They are often easier than invoking full Smith normal form.
+
+```lean
+import Mathlib
+
+namespace FLT
+namespace ConjugationFixedCount
+
+noncomputable section
+
+/--
+Schematic local counting lemma: over `ZMod q`, if one row of a linear equation
+has a unit coefficient, then that row cuts `R^2` down to at most `q` points.
+-/
+theorem card_kernel_le_of_unit_entry
+    {q : ℕ} [NeZero q]
+    (B : Matrix (Fin 2) (Fin 2) (ZMod q))
+    (i j : Fin 2)
+    (hunit : IsUnit (B i j)) :
+    Fintype.card {v : Fin 2 → ZMod q // B.mulVec v = 0} ≤ q := by
+  -- Choose the other coordinate freely.
+  -- The `i`-th row equation determines coordinate `j` uniquely
+  -- because `B i j` is a unit.
+  sorry
+
+/--
+Schematic two-primary row-counting lemma: over `ZMod (2^e)`, if one row is
+`2` times a row with a unit coefficient, then that row leaves at most
+`2 * 2^e` possibilities.
+-/
+theorem card_kernel_le_two_mul_of_two_times_unit_entry
+    {e : ℕ} (he : 1 ≤ e)
+    (B C : Matrix (Fin 2) (Fin 2) (ZMod (2 ^ e)))
+    (hB : B = 2 • C)
+    (i j : Fin 2)
+    (hunit : IsUnit (C i j)) :
+    Fintype.card {v : Fin 2 → ZMod (2 ^ e) // B.mulVec v = 0} ≤ 2 * 2 ^ e := by
+  -- Use that `{t : ZMod (2^e) // 2 * t = 0}` has cardinal `2`.
+  -- For each choice of the other coordinate and each of the two possible
+  -- values of the row expression, the unit coefficient determines coordinate `j`.
+  sorry
+
+end
+end ConjugationFixedCount
+end FLT
+```
+
+## Project-level theorem shape
+
+After the matrix lemma is available, the elliptic-curve theorem should be a short composition of bridges.
+
+The following is intentionally schematic because it depends on the actual FLT names for elliptic curves, torsion points, base change, and the Weil pairing.
+
+```lean
+import Mathlib
+
+namespace FLT
+namespace RealTorsionBound
+
+open Matrix
+
+noncomputable section
+
+/-- Placeholder for the project's type of `m`-torsion complex points. -/
+axiom ECm (E : Type) (m : ℕ) : Type
+
+/-- Placeholder for the project's type of `m`-torsion real points. -/
+axiom ERm (E : Type) (m : ℕ) : Type
+
+/-- Algebraic torsion structure over `ℂ`: stronger than cardinality `m^2`. -/
+axiom complex_torsion_zmod_rank_two
+    (E : Type) (m : ℕ) [NeZero m] :
+    ECm E m ≃ (Fin 2 → ZMod m)
+
+/-- Real `m`-torsion equals fixed complex `m`-torsion under conjugation. -/
+axiom real_torsion_equiv_conj_fixed
+    (E : Type) (m : ℕ) [NeZero m] :
+    ERm E m ≃
+      {v : ECm E m // True}
+
+/-- Matrix of complex conjugation after choosing a `ZMod m` basis of `E(ℂ)[m]`. -/
+axiom conjMatrix
+    (E : Type) (m : ℕ) [NeZero m] :
+    Matrix (Fin 2) (Fin 2) (ZMod m)
+
+/-- Weil-pairing anti-symplecticity: complex conjugation has determinant `-1`. -/
+axiom conjMatrix_det
+    (E : Type) (m : ℕ) [NeZero m] :
+    (conjMatrix E m).det = (-1 : ZMod m)
+
+/-- Final desired shape, after replacing placeholders by FLT's actual definitions. -/
+theorem real_m_torsion_card_le_two_mul
+    (E : Type) (m : ℕ) [NeZero m] :
+    Fintype.card (ERm E m) ≤ 2 * m := by
+  -- 1. identify `ERm E m` with fixed vectors of `conjMatrix E m`;
+  -- 2. apply `ConjugationFixedCount.card_fixedVec_le_two_mul`;
+  -- 3. use `conjMatrix_det` from the Weil pairing.
+  -- The details are definitional/API wiring once the three bridges above exist.
+  sorry
+
+end
+end RealTorsionBound
+end FLT
+```
+
+The important Lean architecture is:
+
+```text
+finite matrix lemma
+  + complex torsion free rank two over ZMod m
+  + real points = conjugation fixed points
+  + Weil pairing gives det(conj) = -1
+  ------------------------------------------------
+  #E(ℝ)[m] ≤ 2m
+```
+
+## What not to use
+
+Do not try to prove the fixed-point estimate by eigenvalues of `A` over `Z/mZ`.  That approach will keep running into non-field and two-primary pathologies.
+
+Do not try to use
+
+```text
+det(A - I) = -tr(A)
+```
+
+as a cardinal formula.  Even when the identity is algebraically true, it does not control the kernel size over `Z/mZ` unless one tracks prime-power divisibility.
+
+Also, do not rely on the topological statement
+
+```text
+E(ℝ)_0 ≃ S^1.
+```
+
+It gives a short proof, but it is not needed for this bound.
 
 ## Final recommendation
 
-Do not try to claim `|E(ℚ)_tors| ≤ 16` from the current non-Mazur ingredients.  That would silently smuggle in a cyclic-order theorem.
-
-The precise architecture should be:
+Use the Galois-conjugation route, but package the fixed-point step as the independent lemma
 
 ```text
-Current non-Mazur block:
-  two invariant factors
-  + Route 4B m ≤ 2
-  + four rank-two exclusions
-  ⇒ structural shape only, no finite cardinal bound.
-
-New hard input needed for finite universal bound:
-  cyclic Mazur theorem, or a weaker explicit cyclic bound.
+A.det = -1  ⇒  #ker(A - I) ≤ m * gcd(m, 2).
 ```
 
-If the downstream proof only needs to rule out the rank-two cases, the current Route 4B plus descent bridges are enough.  If it needs a universal bound on `|E(ℚ)_tors|`, then a cyclic torsion theorem is unavoidable.
+This is the cleanest non-topological route.  It is algebraic, sharp, and isolates all hard elliptic-curve content into standard algebraic bridges: the `ZMod m` structure of complex torsion, real descent as fixed points, and the Weil-pairing determinant calculation.
