@@ -109,14 +109,143 @@ theorem UV_coprime {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4)
     (hr_odd : r % 2 = 1) (hB_odd : B % 2 = 1) :
     Int.gcd (2 * r ^ 2 + B ^ 2 - 2 * s) (2 * r ^ 2 + B ^ 2 + 2 * s) = 1 := by
-  -- d | gcd(U,V) → d|4s, d|2A → d odd (U,V odd) → d|s, d|A
-  -- d²|A²-4s²=5B⁴. Any prime p|d: p|5B⁴ and p|A=2r²+B².
-  -- If p|B: p|A-B²=2r² → p|r (p odd) → gcd(r,B)≥p, contradiction.
-  -- If p∤B: p²|5B⁴ with gcd(p,B)=1 → p²|5 → p=5,25|5 impossible.
-  -- So gcd(U,V)=1.
   rw [← Int.isCoprime_iff_gcd_eq_one]
   have hA_sq_sub : (2 * r ^ 2 + B ^ 2) ^ 2 - 4 * s ^ 2 = 5 * B ^ 4 := by nlinarith [heq]
-  sorry
+  have ⟨hU_odd, hV_odd⟩ := UV_odd hr_odd hB_odd
+  -- By contradiction: suppose gcd(U,V) > 1
+  by_contra hnotcop
+  rw [Int.isCoprime_iff_gcd_eq_one] at hnotcop
+  set U := 2 * r ^ 2 + B ^ 2 - 2 * s
+  set V := 2 * r ^ 2 + B ^ 2 + 2 * s
+  -- U > 0 and V > 0
+  have hUpos := U_pos hr hB heq
+  have hVpos := V_pos hr hB heq
+  -- gcd ≠ 0 (since U ≠ 0), so gcd > 1
+  have hg_ne_zero : Int.gcd U V ≠ 0 :=
+    Nat.not_eq_zero_of_lt (Nat.pos_of_ne_zero (fun h => by simp [Int.gcd] at h; omega))
+  have hg_gt1 : 1 < Int.gcd U V := by omega
+  -- Extract a prime p dividing gcd
+  obtain ⟨p, hp, hpg⟩ := Nat.exists_prime_and_dvd hg_gt1.ne'
+  -- p | U and p | V (in ℤ), via transitivity through gcd
+  have hpU : (↑p : ℤ) ∣ U :=
+    dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_left ..)
+  have hpV : (↑p : ℤ) ∣ V :=
+    dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_right ..)
+  -- p is odd: p | U and U is odd
+  have hp_odd : p ≠ 2 := by
+    intro hp2
+    have : (2 : ℤ) ∣ U := hp2 ▸ hpU
+    rw [Int.even_iff_not_odd, not_not] at *
+    exact (Int.odd_iff.mp (Int.emod_two_eq_one_iff_odd.mp hU_odd)) (Int.even_iff_two_dvd.mpr this)
+  -- p | V + U = 2(2r²+B²) and p | V - U = 4s
+  have hp_sum : (↑p : ℤ) ∣ 2 * (2 * r ^ 2 + B ^ 2) := by
+    have : V + U = 2 * (2 * r ^ 2 + B ^ 2) := by ring
+    exact this ▸ dvd_add hpV hpU
+  have hp_diff : (↑p : ℤ) ∣ 4 * s := by
+    have : V - U = 4 * s := by ring
+    exact this ▸ dvd_sub hpV hpU
+  -- p odd, p | 2A → p | A (IsCoprime p 2)
+  have hp_prime_int : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp hp
+  have hp_not_dvd_2 : ¬ (↑p : ℤ) ∣ 2 := by
+    intro h
+    have := Int.Prime.dvd_pow' hp (show (↑p : ℤ) ∣ 2 ^ 1 from by simpa)
+    rw [Int.natCast_dvd] at this
+    exact hp_odd (Nat.le_antisymm (Nat.le_of_dvd (by norm_num) this) hp.two_le)
+  have hpA : (↑p : ℤ) ∣ (2 * r ^ 2 + B ^ 2) :=
+    (hp_prime_int.dvd_or_dvd hp_sum).resolve_left hp_not_dvd_2
+  -- p odd, p | 4s → p | s
+  have hps : (↑p : ℤ) ∣ s := by
+    have h4 : (↑p : ℤ) ∣ 4 * s := hp_diff
+    have : (↑p : ℤ) ∣ (2 * 2) * s := by ring_nf; exact h4
+    exact ((hp_prime_int.dvd_or_dvd ((hp_prime_int.dvd_or_dvd this).resolve_left
+      hp_not_dvd_2)).resolve_left hp_not_dvd_2)
+  -- p | A and p | s → p² | A² - 4s² = 5B⁴
+  have hp2_dvd : (↑p : ℤ) ^ 2 ∣ 5 * B ^ 4 := by
+    have hA2 : (↑p : ℤ) ^ 2 ∣ (2 * r ^ 2 + B ^ 2) ^ 2 := pow_dvd_pow_of_dvd hpA 2
+    have hs2 : (↑p : ℤ) ^ 2 ∣ 4 * s ^ 2 := by
+      have : (↑p : ℤ) ^ 2 ∣ s ^ 2 := pow_dvd_pow_of_dvd hps 2
+      exact dvd_mul_of_dvd_right this 4
+    rwa [show (2 * r ^ 2 + B ^ 2) ^ 2 - 4 * s ^ 2 = 5 * B ^ 4 from hA_sq_sub] at
+      dvd_sub hA2 hs2
+  -- Case split: p | B or p ∤ B
+  by_cases hpB : (↑p : ℤ) ∣ B
+  · -- Case p | B: then p | A - B² = 2r², p odd → p | r² → p | r
+    have hpB2 : (↑p : ℤ) ∣ B ^ 2 := dvd_pow hpB (by norm_num : 2 ≠ 0)
+    have hp_2r2 : (↑p : ℤ) ∣ 2 * r ^ 2 := by
+      have : (↑p : ℤ) ∣ (2 * r ^ 2 + B ^ 2) - B ^ 2 := dvd_sub hpA hpB2
+      simpa using this
+    have hpr2 : (↑p : ℤ) ∣ r ^ 2 :=
+      (hp_prime_int.dvd_or_dvd hp_2r2).resolve_left hp_not_dvd_2
+    have hpr : (↑p : ℤ) ∣ r := Int.Prime.dvd_pow' hp hpr2
+    -- p | r and p | B → p | gcd(r,B) = 1
+    have : p ∣ Int.gcd r B := by
+      rw [Int.gcd_def]
+      exact Nat.dvd_gcd (Int.natCast_dvd.mp hpr) (Int.natCast_dvd.mp hpB)
+    rw [hcop] at this
+    exact Nat.Prime.one_lt'.mp hp (Nat.le_of_dvd Nat.one_pos this)
+  · -- Case p ∤ B: p | 5B⁴ and p ∤ B → p | 5 → p = 5
+    have hp_dvd_5B4 : (↑p : ℤ) ∣ 5 * B ^ 4 := dvd_trans (dvd_pow_self (↑p) (by norm_num : 2 ≠ 0)) hp2_dvd
+    have hpB4 : ¬ (↑p : ℤ) ∣ B ^ 4 := by
+      intro h
+      exact hpB (Int.Prime.dvd_pow' hp h)
+    have hp5 : (↑p : ℤ) ∣ 5 :=
+      (hp_prime_int.dvd_or_dvd hp_dvd_5B4).resolve_right hpB4
+    -- p | 5 and p prime → p = 5
+    have hp_eq_5 : p = 5 := by
+      have h5 : Nat.Prime 5 := by norm_num
+      have : p ∣ 5 := Int.natCast_dvd.mp hp5
+      exact Nat.le_antisymm (Nat.le_of_dvd (by norm_num) this) hp.two_le |>.antisymm
+        (Nat.le_of_dvd hp.pos this) |>.symm ▸ rfl
+    -- p = 5, p² = 25 | 5B⁴ → 5 | B⁴ → 5 | B, contradicting p ∤ B
+    subst hp_eq_5
+    have h25 : (5 : ℤ) ^ 2 ∣ 5 * B ^ 4 := hp2_dvd
+    have : (5 : ℤ) ∣ B ^ 4 := by
+      have h5B4 : (5 : ℤ) * 5 ∣ 5 * B ^ 4 := by ring_nf; exact h25
+      exact (mul_dvd_mul_iff_left (by norm_num : (5 : ℤ) ≠ 0)).mp h5B4
+    exact hpB (Int.Prime.dvd_pow' (by norm_num : Nat.Prime 5) this)
+
+/-! ## Coprime factorization helpers -/
+
+/-- If a*b = c² with gcd(a,b) = 1 and a > 0, then a is a perfect square. -/
+theorem pos_sq_of_coprime_mul_sq {a b c : ℤ} (hab : Int.gcd a b = 1)
+    (heq : a * b = c ^ 2) (ha : 0 < a) : ∃ a₀ : ℤ, 0 < a₀ ∧ a = a₀ ^ 2 := by
+  obtain ⟨a₀, ha₀ | ha₀⟩ := sq_of_gcd_eq_one hab heq
+  · exact ⟨a₀.natAbs, Int.natAbs_pos.mpr (by rintro rfl; simp at ha₀; omega),
+      by rwa [← Int.natAbs_sq]⟩
+  · exact ⟨a₀.natAbs, Int.natAbs_pos.mpr (by rintro rfl; simp at ha₀; omega),
+      by rw [← Int.natAbs_sq]; linarith⟩
+
+/-- If a*b = c⁴ with gcd(a,b) = 1 and a,b > 0, then a is a perfect 4th power.
+    Apply sq_of_gcd_eq_one twice: first get a = a₁², then a₁ = α². -/
+theorem pos_fourth_of_coprime_mul_fourth {a b c : ℤ} (hab : Int.gcd a b = 1)
+    (heq : a * b = c ^ 4) (ha : 0 < a) (hb : 0 < b) :
+    ∃ α : ℤ, 0 < α ∧ a = α ^ 4 := by
+  -- Step 1: a*b = (c²)², gcd(a,b) = 1 → a = a₁²
+  have hc2 : a * b = (c ^ 2) ^ 2 := by ring_nf
+  obtain ⟨a₁, ha₁_pos, ha₁⟩ := pos_sq_of_coprime_mul_sq hab hc2 ha
+  -- Step 2: b = b₁²
+  obtain ⟨b₁, hb₁_pos, hb₁⟩ := pos_sq_of_coprime_mul_sq
+    (show Int.gcd b a = 1 by rwa [Int.gcd_comm]) (by rw [mul_comm]; exact hc2) hb
+  -- Step 3: a₁*b₁ = c² (from (a₁*b₁)² = a₁²*b₁² = a*b = c⁴ = (c²)²)
+  have hab1_sq : (a₁ * b₁) ^ 2 = (c ^ 2) ^ 2 := by nlinarith
+  have hab1_eq : a₁ * b₁ = c ^ 2 := by
+    have := sq_eq_sq_iff_eq_or_eq_neg.mp hab1_sq
+    rcases this with h | h
+    · exact h
+    · nlinarith
+  -- Step 4: gcd(a₁, b₁) = 1 (from a = a₁², b = b₁², gcd(a,b) = 1)
+  have hab1 : Int.gcd a₁ b₁ = 1 := by
+    rw [← Int.isCoprime_iff_gcd_eq_one]
+    have hcop := Int.isCoprime_iff_gcd_eq_one.mpr hab
+    rw [ha₁] at hcop
+    have hcop2 : IsCoprime (a₁ ^ 2) b := hcop
+    have hcop3 : IsCoprime a₁ b := (IsCoprime.pow_left_iff (by norm_num : 2 ≠ 0)).mp hcop2
+    rw [hb₁] at hcop3
+    exact (IsCoprime.pow_right_iff (by norm_num : 2 ≠ 0)).mp hcop3
+  -- Step 5: Apply sq_of_gcd_eq_one to a₁*b₁ = c² → a₁ = α²
+  obtain ⟨α, hα_pos, hα⟩ := pos_sq_of_coprime_mul_sq hab1 hab1_eq ha₁_pos
+  -- Step 6: a = a₁² = (α²)² = α⁴
+  exact ⟨α, hα_pos, by rw [ha₁, hα]; ring⟩
 
 /-! ## Descent step (the hard core) -/
 
