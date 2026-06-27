@@ -1,367 +1,249 @@
-# Q1149 (dm3): base-change embedding for `WeierstrassCurve.Affine.Point`
+# Q1157 (dm3): 7-smooth `n ≥ 17`, `n ≤ 100`, and what the current A-line lemmas actually exclude
 
-## Short answer
+## Executive answer
 
-Yes: for the affine nonsingular-point group API, the right map is
-
-```text
-WeierstrassCurve.Affine.Point.map
-```
-
-and the injectivity theorem is
+The 7-smooth integers `n` with `17 ≤ n ≤ 100` are:
 
 ```text
-WeierstrassCurve.Affine.Point.map_injective
+18, 20, 21, 24, 25, 27, 28, 30,
+32, 35, 36, 40, 42, 45, 48, 49,
+50, 54, 56, 60, 63, 64, 70, 72,
+75, 80, 81, 84, 90, 96, 98, 100.
 ```
 
-There is also a convenience abbreviation
+Using only the listed existing proved infrastructure, **none of these exact orders can be excluded**.
+
+The reason is uniform and important:
 
 ```text
-WeierstrassCurve.Affine.Point.baseChange
+A point of exact order n only forces a cyclic subgroup Cₙ.
 ```
 
-for the usual field-extension map.
+All listed A-line results are rank/two-invariant-factor obstructions.  They rule out some noncyclic torsion shapes, such as `Z/2 × Z/10`, `Z/2 × Z/12`, `Z/2 × Z/14`, `Z/2 × Z/16`, `(Z/p)^2` for odd `p`, and `(Z/2)^3`.  But a cyclic group `Z/n` contains none of those forbidden noncyclic subgroups.
 
-For a field extension `K/ℚ`, the map you probably want is most cleanly typed as
+For every `n` in the list, the abstract cyclic group
 
 ```text
-(W⁄ℚ).Point →+ (W⁄K).Point
+Z/n
 ```
 
-or equivalently
+satisfies all the group-theoretic consequences of the listed proved results:
 
-```text
-(W⁄ℚ).Point →+ (W.map (algebraMap ℚ K)).Point
-```
+* invariant factors are `Z/1 × Z/n`;
+* it has a point of exact order `n`;
+* it does not contain `Z/2 × Z/10`, `Z/2 × Z/12`, `Z/2 × Z/14`, or `Z/2 × Z/16`;
+* it does not contain `(Z/p)^2` for any odd prime `p`;
+* it does not contain `(Z/2)^3`;
+* its 2-torsion has size `1` if `n` is odd and `2` if `n` is even, hence certainly at most `4`.
 
-I would avoid writing the target as
+Therefore the current proved infrastructure can at best reduce many cases to the remaining cyclic case.  It cannot prove `¬ HasRationalPointOfOrder E n` for any of the 7-smooth `n ≥ 17` without an additional cyclic-order exclusion theorem.
 
-```text
-((W.map (algebraMap ℚ K))⁄K).Point
-```
-
-unless you really need that exact shape.  It is a double base change from `K` to `K`; it should simplify back to `(W.map (algebraMap ℚ K)).Point`, but it creates extra definitional/propositional-equality noise for no benefit.
-
-One important constraint: the `Point.map` group homomorphism in `Affine/Point.lean` is over **fields**.  So if your target is called `R`, you need `[Field R] [Algebra ℚ R]`.  A bare `[CommRing R]` is not enough for this group-hom API.
-
-## Source file inspected
-
-I inspected the FLT-pinned Mathlib source at revision
-
-```text
-96fd0fff3b8837985ae21dd02e712cb5df72ec05
-```
-
-in
-
-```text
-Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Point.lean
-Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Basic.lean
-Mathlib/AlgebraicGeometry/EllipticCurve/Weierstrass.lean
-```
-
-## 1. Is `Point.map` the right function? What is its exact signature?
-
-Yes, if your point type is the affine nonsingular point type `WeierstrassCurve.Affine.Point`.
-
-The relevant source block is under
-
-```text
-namespace WeierstrassCurve
-namespace Affine
-namespace Point
-```
-
-The source variables are essentially:
-
-```text
-{R S : Type*} [CommRing R] [CommRing S]
-{F K : Type*} [Field F] [Field K]
-{W' : Affine R}
-[Algebra R S]
-[Algebra R F] [Algebra S F] [IsScalarTower R S F]
-[Algebra R K] [Algebra S K] [IsScalarTower R S K]
-(f : F →ₐ[S] K)
-```
-
-and the declaration is:
-
-```text
-noncomputable def WeierstrassCurve.Affine.Point.map :
-    (W'⁄F).Point →+ (W'⁄K).Point
-```
-
-The implementation sends `0` to `0`, and sends an affine point `(x,y)` to `(f x, f y)`, transporting nonsingularity using
-
-```text
-W'.baseChange_nonsingular f.injective
-```
-
-The companion simp/transport lemmas are:
-
-```text
-WeierstrassCurve.Affine.Point.map_zero :
-  map f (0 : (W'⁄F).Point) = 0
-
-WeierstrassCurve.Affine.Point.map_some :
-  map f (some _ _ h) =
-    some _ _ ((W'.baseChange_nonsingular f.injective ..).mpr h)
-
-WeierstrassCurve.Affine.Point.map_id :
-  map (Algebra.ofId F F) P = P
-
-WeierstrassCurve.Affine.Point.map_map :
-  map g (map f P) = map (g.comp f) P
-```
-
-For ordinary scalar extension from `F` to `K`, use the abbreviation:
-
-```text
-noncomputable abbrev WeierstrassCurve.Affine.Point.baseChange
-    [Algebra F K] [IsScalarTower R F K] :
-    (W'⁄F).Point →+ (W'⁄K).Point :=
-  map (Algebra.ofId F K)
-```
-
-## 2. Is there a `Point.map_injective` theorem?
-
-Yes.  The exact theorem name is:
-
-```text
-WeierstrassCurve.Affine.Point.map_injective
-```
-
-with source shape:
-
-```text
-lemma map_injective : Function.Injective <| map (W' := W') f
-```
-
-It does **not** ask you to supply a separate proof that `f` is injective, because `f : F →ₐ[S] K` is an algebra hom between fields, and the proof uses `f.injective` internally.
-
-Be careful: the file also has a different theorem named
-
-```text
-WeierstrassCurve.Affine.CoordinateRing.map_injective
-```
-
-for coordinate rings.  That one has the shape
-
-```text
-lemma CoordinateRing.map_injective {f : R →+* S}
-    (hf : Function.Injective f) :
-    Function.Injective <| CoordinateRing.map W' f
-```
-
-The theorem you want for the point map is the namespace-qualified one:
-
-```text
-WeierstrassCurve.Affine.Point.map_injective
-```
-
-## 3. Does `W.map (algebraMap ℚ K)` automatically get `IsElliptic`?
-
-Yes.
-
-In `Mathlib/AlgebraicGeometry/EllipticCurve/Weierstrass.lean`, after `[W.IsElliptic]`, the file defines the instance:
-
-```text
-instance : (W.map f).IsElliptic := by
-  simp only [isElliptic_iff, map_Δ, W.isUnit_Δ.map]
-```
-
-So if you have
-
-```text
-W : WeierstrassCurve ℚ
-[W.IsElliptic]
-K : Type* [CommRing K]
-```
-
-then Lean should infer
-
-```text
-(W.map (algebraMap ℚ K)).IsElliptic
-```
-
-provided the necessary ring/algebra instances are available.  For the point-group base-change map, you will normally assume the stronger target hypotheses
-
-```text
-[Field K] [Algebra ℚ K]
-```
-
-because `Affine.Point.map` is a group homomorphism between point groups over fields.
-
-## 4. Imports
-
-For this API, the direct import is:
+## The complete list
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-
-noncomputable section
-```
-
-That file publicly imports `Affine.Formula`, which imports `Affine.Basic`, which imports the underlying Weierstrass/base-change material.
-
-If you use the `⁄` notation outside the `WeierstrassCurve` namespaces, you may need to open the scoped notation.  The robust options are either:
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import Mathlib
 
 noncomputable section
 
-open scoped WeierstrassCurve
-open scoped WeierstrassCurve.Affine
+namespace FLT.MazurALine
+
+/-- The 7-smooth integers `n` with `17 ≤ n ≤ 100`. -/
+def sevenSmooth_ge17_le100 : List ℕ :=
+  [18, 20, 21, 24, 25, 27, 28, 30,
+   32, 35, 36, 40, 42, 45, 48, 49,
+   50, 54, 56, 60, 63, 64, 70, 72,
+   75, 80, 81, 84, 90, 96, 98, 100]
+
+/-- Cyclic exact-order obstructions that would cover the 7-smooth window by divisibility. -/
+def neededCyclicDivisorsForSevenSmoothWindow : List ℕ :=
+  [14, 15, 16, 18, 20, 21, 24, 25, 27, 35, 49]
+
+end FLT.MazurALine
 ```
 
-or avoid the notation in fragile declarations by spelling out `WeierstrassCurve.Affine.baseChange` / `WeierstrassCurve.baseChange`.
+The second list is not currently available from the stated infrastructure.  It is the kind of cyclic Mazur input that would actually close the 7-smooth window.
 
-## Concrete Lean wrapper: rational points into a field extension
+## Why the suggested `n = 18` argument does not work
 
-This is the wrapper I would use locally.  I call the target field `K` to avoid clashing with the source-ring variable names in Mathlib.
+Suppose `P` has exact order `18`.
 
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-
-noncomputable section
-
-open scoped WeierstrassCurve
-open scoped WeierstrassCurve.Affine
-
-namespace FLT
-
-variable {K : Type*} [Field K] [Algebra ℚ K]
-
-/-- Base-change map on affine nonsingular points from `ℚ` to a field extension `K`. -/
-noncomputable def ratPointBaseChange (W : WeierstrassCurve ℚ) :
-    (W⁄ℚ).Point →+ (W⁄K).Point :=
-  WeierstrassCurve.Affine.Point.baseChange (W' := W.toAffine) ℚ K
-
-/-- The base-change map on affine nonsingular points is injective. -/
-theorem ratPointBaseChange_injective (W : WeierstrassCurve ℚ) :
-    Function.Injective (ratPointBaseChange (K := K) W) := by
-  simpa [ratPointBaseChange, WeierstrassCurve.Affine.Point.baseChange] using
-    (WeierstrassCurve.Affine.Point.map_injective
-      (W' := W.toAffine) (f := Algebra.ofId ℚ K))
-
-end FLT
-```
-
-If Lean complains about scoped notation in your local file, use this no-notation version:
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-
-noncomputable section
-
-namespace FLT
-
-variable {K : Type*} [Field K] [Algebra ℚ K]
-
-/-- Same map, avoiding the `⁄` notation. -/
-noncomputable def ratPointBaseChangeNoNotation (W : WeierstrassCurve ℚ) :
-    (WeierstrassCurve.Affine.baseChange W.toAffine ℚ).Point →+
-      (WeierstrassCurve.Affine.baseChange W.toAffine K).Point :=
-  WeierstrassCurve.Affine.Point.baseChange (W' := W.toAffine) ℚ K
-
-/-- Injectivity, no-notation version. -/
-theorem ratPointBaseChangeNoNotation_injective (W : WeierstrassCurve ℚ) :
-    Function.Injective (ratPointBaseChangeNoNotation (K := K) W) := by
-  simpa [ratPointBaseChangeNoNotation, WeierstrassCurve.Affine.Point.baseChange] using
-    (WeierstrassCurve.Affine.Point.map_injective
-      (W' := W.toAffine) (f := Algebra.ofId ℚ K))
-
-end FLT
-```
-
-## If you insist on the target `(W.map (algebraMap ℚ K)).Point`
-
-The target `(W⁄K).Point` is the preferred spelling, because
+Then:
 
 ```text
-W⁄K = W.map (algebraMap ℚ K)
+2P  has order 9,
+9P  has order 2.
 ```
 
-by definition of `WeierstrassCurve.baseChange`.
+But these points lie in the same cyclic subgroup `⟨P⟩ ≃ Z/18`.  They do **not** produce an independent `3`-torsion direction, so they do not give `(Z/3)^2`.  They also do not produce one of the forbidden groups `Z/2 × Z/10`, `Z/2 × Z/12`, `Z/2 × Z/14`, or `Z/2 × Z/16`.
 
-If another part of the project expects the explicit `map` spelling, use `simpa` to normalize the target:
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-
-noncomputable section
-
-open scoped WeierstrassCurve
-open scoped WeierstrassCurve.Affine
-
-namespace FLT
-
-variable {K : Type*} [Field K] [Algebra ℚ K]
-
-/-- Same map, with target written using `W.map (algebraMap ℚ K)`. -/
-noncomputable def ratPointBaseChangeToMapTarget (W : WeierstrassCurve ℚ) :
-    (W⁄ℚ).Point →+ (W.map (algebraMap ℚ K)).Point := by
-  simpa [WeierstrassCurve.Affine.baseChange, WeierstrassCurve.baseChange] using
-    (WeierstrassCurve.Affine.Point.baseChange (W' := W.toAffine) ℚ K)
-
-/-- Injectivity of the explicitly-targeted version. -/
-theorem ratPointBaseChangeToMapTarget_injective (W : WeierstrassCurve ℚ) :
-    Function.Injective (ratPointBaseChangeToMapTarget (K := K) W) := by
-  simpa [ratPointBaseChangeToMapTarget,
-    WeierstrassCurve.Affine.Point.baseChange,
-    WeierstrassCurve.Affine.baseChange,
-    WeierstrassCurve.baseChange] using
-    (WeierstrassCurve.Affine.Point.map_injective
-      (W' := W.toAffine) (f := Algebra.ofId ℚ K))
-
-end FLT
-```
-
-If your target is literally
+In fact, even the noncyclic abstract group
 
 ```text
-((W.map (algebraMap ℚ K))⁄K).Point
+Z/2 × Z/18
 ```
 
-then you are base-changing the already-base-changed curve from `K` to `K`.  I would first change the goal to `(W⁄K).Point` or `(W.map (algebraMap ℚ K)).Point`.  If the double-base-change shape is forced by another declaration, try:
+survives all the listed obstructions: its 2-torsion has size `4`, it has no odd `(Z/p)^2`, and the second factor has no element of order `10`, `12`, `14`, or `16`.
+
+So the current infrastructure does not exclude order `18`.
+
+## Why the suggested `n = 20` argument also does not finish
+
+Suppose `P` has exact order `20`.
+
+If the full torsion group has invariant factors
+
+```text
+E(ℚ)_tors ≃ Z/a × Z/b,   a ∣ b,
+```
+
+and `20 ∣ b`, then the listed results can rule out many noncyclic possibilities:
+
+* if an odd prime divides `a`, then `(Z/p)^2` embeds in torsion, contradicting `no_odd_prime_square_in_torsion`;
+* if `2 ∣ a`, then `Z/2 × Z/10` embeds, contradicting `no_Z2_cross_Z10`.
+
+Thus the current infrastructure can force the first invariant factor to be `a = 1` in the order-`20` case.  But that only says the torsion is cyclic in this branch.  It does **not** rule out
+
+```text
+E(ℚ)_tors ≃ Z/20.
+```
+
+So the current infrastructure does not exclude order `20` either.  What is missing is a cyclic theorem:
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-
-noncomputable section
-
-open scoped WeierstrassCurve
-open scoped WeierstrassCurve.Affine
-
-namespace FLT
-
-variable {K : Type*} [Field K] [Algebra ℚ K]
-
-noncomputable def ratPointBaseChangeToDoubleTarget (W : WeierstrassCurve ℚ) :
-    (W⁄ℚ).Point →+ ((W.map (algebraMap ℚ K))⁄K).Point := by
-  simpa [WeierstrassCurve.Affine.baseChange,
-    WeierstrassCurve.baseChange,
-    WeierstrassCurve.map_map] using
-    (WeierstrassCurve.Affine.Point.baseChange (W' := W.toAffine) ℚ K)
-
-end FLT
+-- schematic name
+no_rational_point_of_order_20 :
+  ¬ HasRationalPointOfOrder E 20
 ```
 
-The single-base-change target is cleaner and should be preferred.
+## Complete case table
 
-## Final answers to the four questions
+In the table below, “cyclic witness” means the abstract group `Z/n`, which satisfies all listed group-theoretic restrictions while still having an element of exact order `n`.  Therefore the current infrastructure cannot prove a contradiction for that row.
 
-1. **Yes.** `WeierstrassCurve.Affine.Point.map` is the right function for affine nonsingular point groups.  Its type is `(W'⁄F).Point →+ (W'⁄K).Point` for `f : F →ₐ[S] K`.
+The last column gives a cyclic exact-order divisor that would be enough to kill the row, using the elementary fact that a point of order `n` gives a point of order `d` whenever `d ∣ n`.
 
-2. **Yes.** The theorem is `WeierstrassCurve.Affine.Point.map_injective : Function.Injective <| map (W' := W') f`.
+| `n` | factorization | What the current listed lemmas do | Missing cyclic divisor theorem that would kill it |
+|---:|---|---|---|
+| 18 | `2 · 3^2` | Not excluded.  Cyclic witness `Z/18`; even `Z/2 × Z/18` also survives. | no exact order `18` |
+| 20 | `2^2 · 5` | Noncyclic first factor is ruled out, but cyclic witness `Z/20` survives. | no exact order `20` |
+| 21 | `3 · 7` | Noncyclic first factor is ruled out, but cyclic witness `Z/21` survives. | no exact order `21` |
+| 24 | `2^3 · 3` | Noncyclic first factor is ruled out by `Z/2 × Z/12`, but cyclic witness `Z/24` survives. | no exact order `24` |
+| 25 | `5^2` | Noncyclic first factor is ruled out, but cyclic witness `Z/25` survives.  `no_odd_prime_square_in_torsion` does not ban cyclic `5^2`. | no exact order `25` |
+| 27 | `3^3` | Not excluded.  Cyclic witness `Z/27`; `Z/2 × Z/54` also survives the listed obstructions. | no exact order `27` |
+| 28 | `2^2 · 7` | Noncyclic first factor is ruled out by `Z/2 × Z/14`, but cyclic witness `Z/28` survives. | no exact order `14` |
+| 30 | `2 · 3 · 5` | Noncyclic first factor is ruled out by `Z/2 × Z/10`, but cyclic witness `Z/30` survives. | no exact order `15` or `30` |
+| 32 | `2^5` | Noncyclic first factor with enough 2-power is ruled out by `Z/2 × Z/16`, but cyclic witness `Z/32` survives. | no exact order `16` |
+| 35 | `5 · 7` | Noncyclic first factor is ruled out, but cyclic witness `Z/35` survives. | no exact order `35` |
+| 36 | `2^2 · 3^2` | Noncyclic first factor is ruled out by `Z/2 × Z/12`, but cyclic witness `Z/36` survives. | no exact order `18` |
+| 40 | `2^3 · 5` | Noncyclic first factor is ruled out by `Z/2 × Z/10`, but cyclic witness `Z/40` survives. | no exact order `20` |
+| 42 | `2 · 3 · 7` | Noncyclic first factor is ruled out by `Z/2 × Z/14`, but cyclic witness `Z/42` survives. | no exact order `14` or `21` |
+| 45 | `3^2 · 5` | Noncyclic first factor is ruled out, but cyclic witness `Z/45` survives. | no exact order `15` |
+| 48 | `2^4 · 3` | Noncyclic first factor is ruled out by `Z/2 × Z/12` or `Z/2 × Z/16`, but cyclic witness `Z/48` survives. | no exact order `16` or `24` |
+| 49 | `7^2` | Noncyclic first factor is ruled out, but cyclic witness `Z/49` survives.  `no_odd_prime_square_in_torsion` does not ban cyclic `7^2`. | no exact order `49` |
+| 50 | `2 · 5^2` | Noncyclic first factor is ruled out by `Z/2 × Z/10`, but cyclic witness `Z/50` survives. | no exact order `25` |
+| 54 | `2 · 3^3` | Not excluded.  Cyclic witness `Z/54`; even `Z/2 × Z/54` also survives. | no exact order `18` or `27` |
+| 56 | `2^3 · 7` | Noncyclic first factor is ruled out by `Z/2 × Z/14`, but cyclic witness `Z/56` survives. | no exact order `14` |
+| 60 | `2^2 · 3 · 5` | Noncyclic first factor is ruled out by `Z/2 × Z/10` or `Z/2 × Z/12`, but cyclic witness `Z/60` survives. | no exact order `15`, `20`, or `24` |
+| 63 | `3^2 · 7` | Noncyclic first factor is ruled out, but cyclic witness `Z/63` survives. | no exact order `21` |
+| 64 | `2^6` | Noncyclic first factor is ruled out by `Z/2 × Z/16`, but cyclic witness `Z/64` survives. | no exact order `16` |
+| 70 | `2 · 5 · 7` | Noncyclic first factor is ruled out by `Z/2 × Z/10` or `Z/2 × Z/14`, but cyclic witness `Z/70` survives. | no exact order `14` or `35` |
+| 72 | `2^3 · 3^2` | Noncyclic first factor is ruled out by `Z/2 × Z/12`, but cyclic witness `Z/72` survives. | no exact order `18` or `24` |
+| 75 | `3 · 5^2` | Noncyclic first factor is ruled out, but cyclic witness `Z/75` survives. | no exact order `15` or `25` |
+| 80 | `2^4 · 5` | Noncyclic first factor is ruled out by `Z/2 × Z/10` or `Z/2 × Z/16`, but cyclic witness `Z/80` survives. | no exact order `16` or `20` |
+| 81 | `3^4` | Not excluded.  Cyclic witness `Z/81`; `Z/2 × Z/162` also survives the listed obstructions. | no exact order `27` |
+| 84 | `2^2 · 3 · 7` | Noncyclic first factor is ruled out by `Z/2 × Z/12` or `Z/2 × Z/14`, but cyclic witness `Z/84` survives. | no exact order `14`, `21`, or `24` |
+| 90 | `2 · 3^2 · 5` | Noncyclic first factor is ruled out by `Z/2 × Z/10`, but cyclic witness `Z/90` survives. | no exact order `15` or `18` |
+| 96 | `2^5 · 3` | Noncyclic first factor is ruled out by `Z/2 × Z/12` or `Z/2 × Z/16`, but cyclic witness `Z/96` survives. | no exact order `16` or `24` |
+| 98 | `2 · 7^2` | Noncyclic first factor is ruled out by `Z/2 × Z/14`, but cyclic witness `Z/98` survives. | no exact order `14` or `49` |
+| 100 | `2^2 · 5^2` | Noncyclic first factor is ruled out by `Z/2 × Z/10`, but cyclic witness `Z/100` survives. | no exact order `20` or `25` |
 
-3. **Yes.** With `[W.IsElliptic]`, Mathlib has an instance `: (W.map f).IsElliptic`.  Hence `(W.map (algebraMap ℚ K)).IsElliptic` is inferred.
+## The actual group-theoretic obstruction pattern
 
-4. Use:
+Let the finite rational torsion group be written using the existing invariant-factor theorem as
 
-   ```lean
-   import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+```text
+E(ℚ)_tors ≃ Z/a × Z/b,   a ∣ b.
+```
+
+If `E(ℚ)` has a point of exact order `n`, then `n ∣ b`.
+
+The listed lemmas imply the following restrictions on `a`:
+
+1. If an odd prime `p` divides `a`, then `(Z/p)^2` embeds in torsion, contradicting `no_odd_prime_square_in_torsion`.  Therefore `a` has no odd prime factor.
+2. Thus `a` is a power of `2`.
+3. If `2 ∣ a` and one of `10`, `12`, `14`, `16` divides `b`, then one of the forbidden groups
+
+   ```text
+   Z/2 × Z/10,
+   Z/2 × Z/12,
+   Z/2 × Z/14,
+   Z/2 × Z/16
    ```
 
-   and, if using `⁄` notation outside the namespace, open the appropriate scoped notation or spell out `WeierstrassCurve.Affine.baseChange` explicitly.
+   embeds in torsion.
+
+This explains why many rows in the table say that the noncyclic first factor is ruled out.  But the case `a = 1` always remains.  That is the cyclic case:
+
+```text
+E(ℚ)_tors ≃ Z/b.
+```
+
+A point of exact order `n` is perfectly compatible with this group-theoretic shape whenever `n ∣ b`.  None of the listed lemmas excludes this cyclic possibility.
+
+## What additional theorem would actually close the 7-smooth window?
+
+For the finite window `17 ≤ n ≤ 100`, prime factors at most `7`, it would be enough to add exact-order cyclic exclusions for:
+
+```text
+14, 15, 16, 18, 20, 21, 24, 25, 27, 35, 49.
+```
+
+Then every 7-smooth `n ≥ 17`, `n ≤ 100`, has one of these as a divisor.  The elementary order-divisor lemma would finish the rest:
+
+```lean
+import Mathlib
+
+noncomputable section
+
+namespace FLT.MazurALine
+
+/-
+Schematic only: use the actual project definition of `HasRationalPointOfOrder`.
+
+If `P` has exact additive order `n` and `d ∣ n`, then `(n / d) • P`
+has exact additive order `d`.
+-/
+-- theorem HasRationalPointOfOrder.of_dvd
+--     (E : WeierstrassCurve ℚ) [E.IsElliptic]
+--     {d n : ℕ} (hdpos : 0 < d) (hdn : d ∣ n)
+--     (h : HasRationalPointOfOrder E n) :
+--     HasRationalPointOfOrder E d := by
+--   ... pure group theory using `addOrderOf_nsmul` ...
+
+end FLT.MazurALine
+```
+
+That is the missing piece: not more rank-two exclusions, but cyclic exact-order exclusions.
+
+## Bottom line for the A-line
+
+The current infrastructure is useful, but it does **not** prove any of the desired exact-order exclusions for the 7-smooth `17..100` list.
+
+It proves statements of the form:
+
+```text
+certain noncyclic torsion configurations cannot occur.
+```
+
+The target statement needs statements of the form:
+
+```text
+a cyclic point of exact order d cannot occur.
+```
+
+For this finite 7-smooth range, the cyclic divisors to attack are:
+
+```text
+14, 15, 16, 18, 20, 21, 24, 25, 27, 35, 49.
+```
+
+The listed `no_Z2_cross_Z14`, `no_Z2_cross_Z16`, etc. should not be confused with `no_rational_point_of_order_14` or `no_rational_point_of_order_16`; they are strictly weaker for the present purpose because they exclude only a second independent torsion direction.
