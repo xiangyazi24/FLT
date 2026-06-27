@@ -1,326 +1,327 @@
-# Q871 (dm4): global separability of `preΨ' n` from the formal tangent of `[n]`
+# Q1136 (dm4): follow-up on `dm3`
 
-## Verdict
+## Interpretation
 
-Mathematically, yes: the clean global proof is exactly the isogeny proof.
-If `(n : K) ≠ 0`, then the multiplication map `[n] : E → E` is separable / étale, hence its kernel is reduced, and the division-polynomial zero locus has no multiple roots.
-This proof removes the even/odd circularity completely, including the characteristic-`2`, odd-`n` case.
-
-But in Lean, `formalNsmulF_coeff_one` by itself is **not** enough to jump directly to polynomial separability of `preΨ' n`.
-It proves the tangent of `[n]` at `O` is multiplication by `(n : K)`.
-To use it at a root of `preΨ' n`, you still need two bridge layers:
-
-1. **Move the formal tangent from `O` to an arbitrary torsion point `P`.**
-   This is translation-invariance of the differential of a group homomorphism.
-2. **Identify the local zero of `[n]^* t_O` at `P` with the local zero of `preΨ' n` in the `x`-coordinate.**
-   This is the division-polynomial / local-parameter bridge.
-
-So the right answer is:
-
-```text
-formalNsmulF_coeff_one
-  + dual-number translation invariance of [n]
-  + local division-polynomial unit bridge
-  ⇒ rootwise separability of all preΨ' n, simultaneously.
-```
-
-This avoids induction, but it does not avoid proving some form of the group law.  It can be done without schemes, at the formula level over `DualNumber K`, but the formula-level proof still has to prove the relevant group-homomorphism identity for `[n]` on dual-number points.
-
-## Why the formal tangent at `O` alone cannot be enough
-
-`formalNsmulF_coeff_one` says that in the formal parameter `t` at `O`,
-
-```text
-[n]_F(t) = n t + higher terms.
-```
-
-Over dual numbers, if `ε^2 = 0`, this becomes
-
-```text
-[n]_F(ε a) = ε ((n : K) * a).
-```
-
-Thus the infinitesimal kernel at `O` is trivial when `(n : K) ≠ 0`.
-
-However, a root of `preΨ' n` corresponds to a torsion point `P`, not to `O`.  A general rational self-map of a curve can have nonzero derivative at `O` and still ramify somewhere else.  The only reason `[n]` cannot do that is that `[n]` is a group homomorphism.  Therefore the missing theorem is not purely formal-group-theoretic; it is the translation-invariance of the differential of the group endomorphism `[n]`.
-
-The key identity is
-
-```text
-[n](P + Q) = [n]P + [n]Q.
-```
-
-If `P` is `n`-torsion, this gives, for `Q` infinitesimal near `O`,
-
-```text
-[n](P + Q) = [n]Q.
-```
-
-So the local behavior of `[n]` near `P` is the same as the local behavior of `[n]` near `O`, after translating by `P`.
-
-This is the whole global argument in one line.
-
-## Formula-level proof over dual numbers
-
-Yes, this can be proved without scheme theory, but only if you have enough point/formula infrastructure over `DualNumber K`.
-
-Let `Rε(a)` be the infinitesimal point near `O` with formal parameter `ε a`, and let
-
-```text
-Pε(a) := P + Rε(a).
-```
-
-Assume `n • P = O`.  Then, using the group law over dual numbers,
-
-```text
-n • Pε(a)
-  = n • (P + Rε(a))
-  = n • P + n • Rε(a)
-  = O + n • Rε(a)
-  = n • Rε(a).
-```
-
-By `formalNsmulF_coeff_one`, the formal parameter of `n • Rε(a)` is
-
-```text
-ε ((n : K) * a).
-```
-
-Therefore, if `(n : K) ≠ 0`, then
-
-```text
-n • Pε(a) = O  ⇒  a = 0.
-```
-
-This is the dual-number statement that `[n]` is unramified at the torsion point `P`.
-
-A Lean-facing abstract version would look like this, ignoring exact local names:
+The prompt says only `dm3`, so I am treating the current `scratch/_CHATGPT_DROP_dm3.md` as the object of analysis.
+That file is about the theorem
 
 ```lean
-/-- Translation-invariance of the tangent of `[n]`, stated only at torsion points. -/
-theorem nsmul_dual_no_infinitesimal_kernel_at_torsion
+theorem weil_pairing_gives_primitive_root
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
+```
+
+and asks for the shortest Lean route from full rational torsion to a rational primitive root.
+
+The main conclusion is unchanged, but there is an important connection with the newer `dm4` separability discussion:
+
+```text
+Global separability of [n] / preΨ' helps with the geometric size and reducedness of E[n],
+but it does not replace the Weil-pairing/determinant/cyclotomic-character bridge.
+```
+
+So `dm4` can support one auxiliary missing lemma in `dm3`, namely the theorem that the geometric `m`-torsion has the expected size when `(m : K) ≠ 0`; it cannot by itself prove the existence of a rational primitive `m`-th root.
+
+## Bottom line
+
+For `dm3`, the shortest honest FLT-local interface is still one of these two bridge choices:
+
+### Option A: contradiction bridge over `ℚ`
+
+```lean
+no_full_rational_torsion_of_three_le :
+  ∀ (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ},
+    3 ≤ m → ¬ HasFullRationalTorsion E m
+```
+
+Then `weil_pairing_gives_primitive_root` is just the split `m = 1`, `m = 2`, `3 ≤ m`.
+
+### Option B: determinant / cyclotomic bridge
+
+```text
+full rational m-torsion
+  ⇒ Galois action on E[m] is trivial
+  ⇒ det ρ_m is trivial
+  ⇒ χ_m is trivial
+  ⇒ μ_m ⊆ ℚ
+  ⇒ ∃ ζ : ℚ, IsPrimitiveRoot ζ m.
+```
+
+This is closer to the standard Weil-pairing proof.  But the real arithmetic theorem is still
+
+```text
+det ρ_m = χ_m,
+```
+
+which is essentially the determinant form of the Weil-pairing theorem.
+
+## What the `dm4` global separability theorem can contribute
+
+The global separability theorem from the `dm4` thread has the shape
+
+```lean
+preΨ'_rootwise_separable_of_natCast_ne_zero :
+  (n : K) ≠ 0 →
+  ∀ x : K,
+    IsRoot (W.preΨ' n) x →
+    ¬ IsRoot (derivative (W.preΨ' n)) x
+```
+
+or, more geometrically,
+
+```text
+(n : K) ≠ 0 ⇒ [n] : E → E is separable / étale.
+```
+
+This is relevant to `dm3` only through the geometric torsion-size bridge:
+
+```text
+[n] separable + degree([n]) = n²
+  ⇒ E[n](Kbar) has n² reduced points.
+```
+
+That fact is useful because `HasFullRationalTorsion E m` is usually represented as an injection
+
+```text
+ZMod m × ZMod m ↪ E(ℚ).
+```
+
+To conclude that the mod-`m` Galois representation is trivial on all of `E[m]`, one must know that the geometric `m`-torsion has no more than `m²` points.  This is exactly where separability/cardinality can help.
+
+But after this step, one still needs the determinant identity
+
+```text
+det ρ_m = χ_m.
+```
+
+Without that determinant/cyclotomic bridge, the statement “all `m`-torsion points are rational” does not produce a rational primitive `m`-th root.
+
+## Why separability alone does not prove the primitive-root theorem
+
+Separability tells us that the kernel of `[m]` is reduced when `(m : K) ≠ 0`.  Equivalently, it prevents infinitesimal torsion and multiple roots in the division-polynomial description.
+
+It does **not** identify the determinant of the Galois action on `E[m]` with the cyclotomic character.  The existence of roots of unity is not encoded in `preΨ'` alone; it comes from the alternating Weil pairing
+
+```text
+e_m : E[m] × E[m] → μ_m
+```
+
+or equivalently from the determinant formula for the mod-`m` representation.
+
+So this attempted shortcut is not valid:
+
+```text
+preΨ'_m separable
+  ⇒ E[m] is reduced
+  ⇒ full rational torsion forces μ_m ⊆ ℚ.
+```
+
+The missing implication is the last one.  It needs the pairing/determinant theorem.
+
+## The role of `Φ_n`, `preΨ'`, and missing `Ω_n`
+
+The `dm3` context also mentioned `preΨ'`, `Φ_n`, and missing `Ω_n`.
+
+For a full projective formula for `[n]P`, one normally needs all coordinate pieces:
+
+```text
+x([n]P) = Φ_n(P) / Ψ_n(P)^2,
+y([n]P) = Ω_n(P) / Ψ_n(P)^3.
+```
+
+The polynomial `preΨ' n` controls the `x`-coordinate zero locus of the division polynomial after eliminating or normalizing the `y`-factor.  It is enough for many root/separability statements about the `x`-projection, but it is not enough to build the full Galois representation on `E[n]`.
+
+For the determinant route, the clean object is not just the roots of `preΨ' n`; it is the full finite group of geometric `n`-torsion points.  Thus one eventually needs either:
+
+1. a genuine `E[n]` group-scheme / geometric torsion API, or
+2. projective `[n]` formulas including the missing `Ω_n` piece, or
+3. a trusted bridge theorem that packages this geometry.
+
+This is why `dm4` separability is valuable but not decisive for `dm3`.
+
+## Recommended Lean interface for `dm3`
+
+The best immediate code interface is to keep the hard arithmetic in one named theorem and close the target by a simple case split.
+
+Here is an abstract version that should compile independently of the exact FLT project names.  It isolates the case split from the arithmetic bridge.
+
+```lean
+import Mathlib
+
+noncomputable section
+
+/--
+Abstract case split behind the FLT-local theorem.
+
+`Full E m` stands for the project's `HasFullRationalTorsion E m`.
+The theorem says that if the `m = 1` and `m = 2` cases are known and full
+rational torsion is impossible for `m ≥ 3`, then full rational torsion implies
+a rational primitive `m`-th root.
+-/
+theorem primitive_root_of_full_by_ge3_contradiction
+    {Curve : Type*} (Full : Curve → ℕ → Prop)
+    (h1 : ∀ E : Curve, Full E 1 → ∃ ζ : ℚ, IsPrimitiveRoot ζ 1)
+    (h2 : ∀ E : Curve, Full E 2 → ∃ ζ : ℚ, IsPrimitiveRoot ζ 2)
+    (hge3 : ∀ E : Curve, ∀ {m : ℕ}, 3 ≤ m → ¬ Full E m)
+    (E : Curve) {m : ℕ} (hm : 0 < m) (hfull : Full E m) :
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
+  have hm_cases : m = 1 ∨ m = 2 ∨ 3 ≤ m := by
+    omega
+  rcases hm_cases with rfl | rfl | hm3
+  · exact h1 E hfull
+  · exact h2 E hfull
+  · exact False.elim ((hge3 E hm3) hfull)
+```
+
+The FLT-local version should look like this, with the actual project import replacing `Mathlib` if there is a more specific file.
+
+```lean
+import Mathlib
+
+noncomputable section
+
+namespace FLT
+
+/--
+Project-local bridge theorem.
+
+This is the shortest useful interface for the current target.  It can later be
+proved from any of the following:
+
+* Weil pairing nondegeneracy plus Galois equivariance;
+* determinant identity `det ρ_m = χ_m`;
+* Mazur's torsion theorem;
+* classification of the real Lie group `E(ℝ)`.
+-/
+axiom no_full_rational_torsion_of_three_le
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+    (hm3 : 3 ≤ m) :
+    ¬ HasFullRationalTorsion E m
+
+/-- These should be replaced by the existing project lemmas for `m = 1`. -/
+axiom primitive_root_from_full_torsion_one
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hfull : HasFullRationalTorsion E 1) :
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ 1
+
+/-- These should be replaced by the existing project lemmas for `m = 2`. -/
+axiom primitive_root_from_full_torsion_two
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hfull : HasFullRationalTorsion E 2) :
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ 2
+
+theorem weil_pairing_gives_primitive_root
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
+  have hm_cases : m = 1 ∨ m = 2 ∨ 3 ≤ m := by
+    omega
+  rcases hm_cases with rfl | rfl | hm3
+  · exact primitive_root_from_full_torsion_one E hfull
+  · exact primitive_root_from_full_torsion_two E hfull
+  · exact False.elim ((no_full_rational_torsion_of_three_le E hm3) hfull)
+
+end FLT
+```
+
+This is intentionally not pretending that the Weil pairing has been formalized.  It makes the missing theorem explicit and keeps the current target small.
+
+## If you want to exploit `dm4` separability inside `dm3`
+
+Then the right intermediate theorem is not directly `weil_pairing_gives_primitive_root`; it is a cardinality/free-rank theorem for geometric torsion.
+
+The desired bridge has this conceptual shape:
+
+```lean
+import Mathlib
+
+noncomputable section
+
+namespace FLT
+
+/--
+Schematic interface only: exact types depend on the project's model of geometric
+points and base change to an algebraic closure.
+
+This is the place where the `dm4` global separability theorem for `[m]` is useful.
+-/
+axiom geometric_nTorsion_card_eq_sq_of_natCast_ne_zero
     {K : Type*} [Field K]
-    (W : WeierstrassCurve K)
-    {n : ℕ} (hn : (n : K) ≠ 0)
-    {P : W.Point K} (hP : n • P = 0) :
-    ∀ a : K,
-      n • W.pointInfinitesimalTranslate P a = W.O → a = 0 := by
-  -- 1. Rewrite `pointInfinitesimalTranslate P a` as `P + Rε(a)`.
-  -- 2. Use `nsmul_add` over `DualNumber K`:
-  --      n • (P + Rε(a)) = n • P + n • Rε(a).
-  -- 3. Use `hP`.
-  -- 4. Identify `n • Rε(a)` with the formal group `[n]_F` evaluated at `ε a`.
-  -- 5. Use `formalNsmulF_coeff_one` and `ε^2 = 0`.
-  -- 6. Cancel `(n : K)` using `hn`.
-  sorry
+    (E : WeierstrassCurve K) [E.IsElliptic]
+    {m : ℕ} (hm : (m : K) ≠ 0) :
+    -- Fintype.card (E.nTorsionOverAlgClosure m) = m ^ 2
+    True
+
+/--
+Full rational torsion plus the exact geometric cardinality makes the mod-`m`
+Galois action trivial.  This is still only a bridge toward the determinant route.
+-/
+axiom galoisRep_trivial_of_full_rational_torsion
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {m : ℕ} (hm : 0 < m)
+    (hfull : HasFullRationalTorsion E m) :
+    -- ∀ σ, WeierstrassCurve.galoisRep E m σ = 1
+    True
+
+end FLT
 ```
 
-This theorem is much smaller than a full scheme-theoretic development, but it still requires a real group-law identity over dual numbers.  If the current project only has projective formulas for `[n]` over fields, then this is not yet available for free.
+The first axiom is where the `dm4` separability work can eventually pay off.  The second still needs base-change/fixed-point bookkeeping.  And after both, the determinant/cyclotomic theorem is still required.
 
-## What exactly must be proved at the formula level
+## If you prefer the determinant-shaped bridge
 
-To make the above argument work without schemes, I would isolate the following three lemmas.
-
-### 1. Dual polynomial evaluation
-
-For any polynomial `p : K[X]`,
-
-```text
-p(x + ε a) = p(x) + ε a p'(x).
-```
-
-Lean skeleton:
+The determinant-shaped bridge is the best long-term replacement for the black-box contradiction lemma.
 
 ```lean
-lemma polynomial_eval_dual
-    (p : K[X]) (x a : K) :
-    evalDual p (x + ε * a) =
-      dualOf K (p.eval x) + ε * dualOf K (a * p.derivative.eval x) := by
-  -- induction on `p`, or use `aeval` plus `derivative` API
-  sorry
+import Mathlib
+import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
+
+noncomputable section
+
+namespace FLT
+
+/-- Full rational `m`-torsion makes the geometric mod-`m` representation trivial. -/
+axiom fullRationalTorsion_trivial_galoisRep
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {m : ℕ} (hm : 0 < m)
+    (hfull : HasFullRationalTorsion E m) :
+    -- ∀ σ, WeierstrassCurve.galoisRep E m σ = 1
+    True
+
+/-- The serious arithmetic input: determinant of the mod-`m` representation is cyclotomic. -/
+axiom det_galoisRep_eq_modularCyclotomicCharacter
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {m : ℕ} (hm : 0 < m) :
+    -- ∀ σ, det (WeierstrassCurve.galoisRep E m σ) = modularCyclotomicCharacter ... σ
+    True
+
+/-- Trivial mod-`m` cyclotomic character gives a rational primitive `m`-th root. -/
+axiom exists_rat_primitiveRoot_of_trivial_modularCyclotomicCharacter
+    {m : ℕ} (hm : 0 < m) :
+    -- CyclotomicCharacterIsTrivialOverRat m →
+    True →
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
+
+end FLT
 ```
 
-Consequence:
+Among these, `det_galoisRep_eq_modularCyclotomicCharacter` is the real theorem.  The `dm4` separability theorem can help justify that `E[m]` is the expected finite rank-two object, but it cannot prove the determinant identity.
 
-```text
-p(x) = 0 and p'(x) = 0
-  ⇒ p(x + ε a) = 0 for every a.
-```
+## Final recommendation
 
-This is how a double root becomes an infinitesimal root.
+For the current FLT proof, keep `dm3`'s recommendation:
 
-### 2. Translation-invariance of `[n]` over dual numbers
+1. Prove or temporarily admit one explicit bridge:
 
-The minimal identity is not all of scheme theory.  It is this restricted group-homomorphism statement:
+   ```lean
+   no_full_rational_torsion_of_three_le
+   ```
 
-```text
-[n](P + Rε(a)) = [n]P + [n]Rε(a).
-```
+2. Close `weil_pairing_gives_primitive_root` by the elementary split `m = 1`, `m = 2`, `3 ≤ m`.
 
-For a torsion point `P`, this reduces the tangent at `P` to the formal tangent at `O`.
+3. Add a comment that the bridge is intended to be discharged later by the determinant identity `det ρ_m = χ_m`, equivalently by the Weil pairing.
 
-If you want to prove this purely from projective formulas, the target is a polynomial identity between projective triples, after substituting the dual-number coordinates and using `ε^2 = 0`.  That is feasible, but it is exactly the formula-level shadow of the group law.  There is no way around proving some version of this identity: without it, the coefficient of the formal group at `O` gives no information about ramification at other points.
+4. Treat the `dm4` global separability work as useful infrastructure for the geometric torsion cardinality theorem, not as a replacement for the arithmetic determinant theorem.
 
-### 3. Local division-polynomial unit bridge
-
-The second bridge is from `[n]` being unramified at `P` to `preΨ' n` having a simple root at `x(P)`.
-
-The right local statement is:
-
-```text
-near P,    [n]^* t_O = preΨ'_n(x) · unit
-```
-
-or, depending on the exact Mathlib normalization,
-
-```text
-near P,    [n]^* t_O = Ψ_n · unit,
-```
-
-with `Ψ_n = preΨ'_n(x)` for odd `n`, and
-
-```text
-Ψ_n = Ψ_2 · preΨ'_n(x)
-```
-
-for even `n`.
-
-The unit factor must be nonzero at `P`.  Once this is known, a double root of `preΨ' n` would force `[n]^* t_O` to have zero differential at `P`, contradicting the dual-number unramifiedness theorem above.
-
-In Lean, I would not try to hide this inside the final theorem.  I would state it explicitly as a local bridge:
-
-```lean
-/-- Local bridge between the division polynomial and the pullback of the
-formal parameter at `O` by `[n]`.  The exact statement should use the
-projective formula names already present in the repo. -/
-structure PrePsiLocalBridge
-    {K : Type*} [Field K]
-    (W : WeierstrassCurve K) (n : ℕ) (P : W.Point K) : Prop where
-  torsion_of_root :
-    (W.preΨ' n).eval P.x = 0 → n • P = W.O
-  x_unramified :
-    W.dFy P ≠ 0
-  pullback_t_eq_prePsi_mul_unit :
-    ∃ u,
-      IsUnitAt u P ∧
-      LocallyAt P
-        (fun Q => W.pullbackFormalParameterByNsmul n Q
-               = (W.preΨ' n).eval Q.x * u Q)
-```
-
-The actual field names will differ, but this is the needed shape.
-
-## Characteristic `2`
-
-The global argument is especially attractive because it handles the previous characteristic-`2` odd case uniformly.
-
-If `char K = 2` and `n` is odd, then `(n : K) ≠ 0`, so the tangent coefficient of `[n]` is still nonzero.  Thus `[n]` is separable.  There is no even/odd circularity.
-
-The remaining characteristic-`2` issue is not the `[n]` tangent; it is the `x`-coordinate bridge.  The projection to the `x`-line ramifies exactly at the fixed points of negation, i.e. at `2`-torsion points.  For odd `n`, a nonzero `n`-torsion point is not `2`-torsion, so the `x`-coordinate should still be a valid local coordinate at the relevant roots.  In Lean this should appear as a lemma of the form:
-
-```lean
-lemma preΨ'_root_not_two_torsion
-    {n : ℕ} (hn : (n : K) ≠ 0)
-    {P : W.Point K}
-    (hroot : (W.preΨ' n).eval P.x = 0) :
-    W.dFy P ≠ 0 := by
-  -- root gives `n • P = O`; if `dFy P = 0`, then `P` is 2-torsion;
-  -- combine `n • P = O` and `2 • P = O` with gcd(n,2)=1 in the relevant case.
-  sorry
-```
-
-For even `n`, `(n : K) ≠ 0` already implies `char K ≠ 2`, so the usual even division-polynomial factorization is safe.
-
-## Recommended Lean route
-
-I would not try to prove the final theorem directly from `formalNsmulF_coeff_one`.  Instead, split the work into four reusable lemmas.
-
-### Lemma A: formal tangent gives no infinitesimal kernel at `O`
-
-```lean
-theorem formal_nsmul_no_infinitesimal_kernel
-    {n : ℕ} (hn : (n : K) ≠ 0) :
-    ∀ a : K,
-      formalNsmulF W n (ε a) = 0 → a = 0 := by
-  -- use `formalNsmulF_coeff_one`; all higher terms vanish because `ε^2 = 0`
-  sorry
-```
-
-### Lemma B: translate Lemma A to every torsion point
-
-```lean
-theorem nsmul_no_infinitesimal_kernel_at_torsion
-    {n : ℕ} (hn : (n : K) ≠ 0)
-    {P : W.Point K} (hP : n • P = W.O) :
-    ∀ a : K,
-      n • W.pointInfinitesimalTranslate P a = W.O → a = 0 := by
-  -- use `[n](P + Q) = [n]P + [n]Q` over dual numbers
-  -- then reduce to Lemma A
-  sorry
-```
-
-### Lemma C: a double root gives a nonzero infinitesimal kernel vector
-
-```lean
-theorem infinitesimal_kernel_of_preΨ'_double_root
-    {n : ℕ} {x : K}
-    (hx : (W.preΨ' n).eval x = 0)
-    (hdx : (W.preΨ' n).derivative.eval x = 0) :
-    ∃ (P : W.Point K) (a : K),
-      a ≠ 0 ∧
-      P.x = x ∧
-      n • P = W.O ∧
-      n • W.pointInfinitesimalTranslate P a = W.O := by
-  -- use the local division-polynomial bridge and `p(x + ε a)` formula
-  sorry
-```
-
-For arbitrary non-algebraically-closed `K`, this lemma may need to be stated after base change to an algebraic closure or to a field extension containing a `y` over the root `x`.  That is normal.  Polynomial separability is geometric, so a base-extension statement is often cleaner than forcing every root to be `K`-rational.
-
-A robust statement is:
-
-```lean
-theorem preΨ'_map_rootwise_separable_geometric
-    {L : Type*} [Field L] [Algebra K L]
-    [IsAlgClosed L]
-    {n : ℕ} (hn : (n : L) ≠ 0) :
-    ∀ x : L,
-      IsRoot ((W.preΨ' n).map (algebraMap K L)) x →
-      ¬ IsRoot (derivative ((W.preΨ' n).map (algebraMap K L))) x := by
-  sorry
-```
-
-Then descend/specialize to the rootwise statement over `K`.
-
-### Lemma D: final simultaneous separability theorem
-
-```lean
-theorem preΨ'_rootwise_separable_of_natCast_ne_zero
-    {n : ℕ} (hn : (n : K) ≠ 0) :
-    ∀ x : K,
-      IsRoot (W.preΨ' n) x →
-      ¬ IsRoot (derivative (W.preΨ' n)) x := by
-  intro x hx hdx
-  obtain ⟨P, a, ha, hPx, hPtor, hInf⟩ :=
-    W.infinitesimal_kernel_of_preΨ'_double_root hx hdx
-  exact ha (W.nsmul_no_infinitesimal_kernel_at_torsion hn hPtor a hInf)
-```
-
-This is the desired global proof: no induction on `n`, no even/odd split, no cofactor circularity.
-
-## Practical recommendation
-
-If the repo already has a point API over arbitrary commutative algebras or at least over `DualNumber K`, then the global route is worth pursuing.  The core theorem to build is `nsmul_no_infinitesimal_kernel_at_torsion`, because it packages the entire isogeny argument without schemes.
-
-If the repo only has formal-group computations at `O` and division-polynomial recurrences over `K[X]`, then the global route will require substantial new infrastructure.  In that situation, the induction/recurrence route may still be faster, even though it is mathematically less elegant.
-
-The minimal non-scheme route is therefore:
-
-```text
-Do not formalize finite étale group schemes.
-Do formalize dual-number points and the restricted identity
-    [n](P + Rε) = [n]P + [n]Rε.
-Then prove the local unit bridge between [n]^*t_O and preΨ' n.
-```
-
-That is the formula-level version of Silverman's Exercise 3.7.  It is global in `n`, handles characteristic `2` correctly when `(n : K) ≠ 0`, and breaks the even/odd circularity for good.
+This keeps the proof dependency honest and prevents the project from hiding the Weil-pairing theorem behind division-polynomial separability lemmas.
