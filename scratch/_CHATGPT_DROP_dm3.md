@@ -1,536 +1,477 @@
-# Q1257 (dm3): Elementary proof for `w^2 = u^3 + u^2 - u`
+# Q1270 (dm3): Formalizing the real-topology obstruction to full rational `p`-torsion
 
 ## Executive answer
 
-The statement is true:
+For the target theorem
 
 ```text
-w^2 = u^3 + u^2 - u,  u,w ∈ ℚ
+(Z / pZ)^2 ↪ E(ℚ)  impossible for odd prime p,
 ```
 
-has rational `u` only
+the base-change part is easy and already has Mathlib/FLT API. The real-topology part is the hard missing theorem.
 
-```text
-u ∈ {-1, 0, 1}.
+The clean answers are:
+
+1. **Yes.** The embedding `E(ℚ) → E(ℝ)` should be built from `WeierstrassCurve.Affine.Point.map` / `Point.baseChange`. FLT already has a wrapper `WeierstrassCurve.Points.map`.
+2. `AddCircle` / `UnitAddCircle` has useful torsion-cardinality API, but Mathlib does **not** currently provide the bridge
+   ```text
+   E(ℝ)^0 ≃+ UnitAddCircle
+   ```
+   or the classification
+   ```text
+   E(ℝ) ≃ R/Z      or      E(ℝ) ≃ R/Z × Z/2Z.
+   ```
+   That bridge is essentially real elliptic-curve uniformization / compact one-dimensional Lie group theory.
+3. The division-polynomial shortcut does **not** give the needed bound by degree alone. Mathlib has division polynomial definitions and degree computations, but not the theorem that their real roots are exactly controlled by real `p`-torsion. A raw degree bound gives only the tautological `≤ p^2` bound, not `≤ 2p` or `≤ p`.
+
+So, if the goal is a small Lean dependency surface, the best real-topology replacement for Weil pairing is a **single explicit theorem/axiom**:
+
+```lean
+real_p_torsion_card_le_two_mul
 ```
 
-But the important point is this:
+or stronger:
 
-```text
-A one-shot prime-factorization argument gets you very close, but it does not finish the problem.
+```lean
+real_odd_p_torsion_card_le
 ```
 
-After clearing denominators correctly, the problem becomes two binary quartic equations. Those quartics are genus-one curves. Proving that they have only the trivial primitive solutions is essentially the same rank-zero content as the original elliptic curve. So there is no genuinely cheap local-prime-factorization proof hiding here.
+Do **not** try to formalize `E(ℝ)^0 ≃ UnitAddCircle` unless you are willing to add a large real uniformization/topological-group module.
 
-There **is** a classical elementary route, in the old Fermat/descent sense:
+## Checked files / APIs
+
+The FLT repo on branch `scratch` pins Mathlib at
 
 ```text
-normalization over ℤ
-  + coprime square-factor splitting
-  + two explicit binary-quartic descent lemmas
+96fd0fff3b8837985ae21dd02e712cb5df72ec05
 ```
 
-or, equivalently and usually cleaner,
+from `lake-manifest.json`.
 
-```text
-explicit 2-isogeny descent on
-E  : y^2 = x^3 + x^2 - x
-E' : y^2 = x^3 - 2x^2 + 5x.
+At that pinned Mathlib revision:
+
+### Point base change exists
+
+`Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Point.lean`, around the “Maps and base changes” section, has:
+
+```lean
+noncomputable def map : (W'⁄F).Point →+ (W'⁄K).Point
+
+lemma map_zero : map f (0 : (W'⁄F).Point) = 0
+lemma map_some ...
+lemma map_id (P : (W'⁄F).Point) : map (Algebra.ofId F F) P = P
+lemma map_map (P : (W'⁄F).Point) : map g (map f P) = map (g.comp f) P
+lemma map_injective : Function.Injective <| map (W' := W') f
+
+noncomputable abbrev baseChange [Algebra F K] [IsScalarTower R F K] :
+    (W'⁄F).Point →+ (W'⁄K).Point :=
+  map <| Algebra.ofId F K
 ```
 
-This uses no L-functions, no BSD, no modularity, no Selmer-group API, and no algebraic geometry. But it **is** descent. If “no descent machinery” means “do not import a general Mordell-Weil/descent library,” then yes, this is plausibly Lean-formalizable. If it means “no descent argument at all,” then I would not expect a short elementary proof: the obstruction is exactly a genus-one/rank-zero obstruction.
+The key theorem is `WeierstrassCurve.Affine.Point.map_injective`: because `f : F →ₐ[S] K` is an algebra hom between fields, Mathlib proves injectivity of the induced point map.
 
-## Label note
+### FLT already wraps the point map
 
-The exact integral model
+`FLT/EllipticCurve/Torsion.lean` defines:
 
-```text
-[0, 1, 0, -1, 0]
+```lean
+noncomputable def WeierstrassCurve.Points.map {K L : Type u} [Field K] [Field L] [Algebra k K]
+    [Algebra k L] [DecidableEq K] [DecidableEq L]
+    (f : K →ₐ[k] L) : (E⁄K).Point →+ (E⁄L).Point :=
+  WeierstrassCurve.Affine.Point.map f
 ```
 
-i.e.
+and also has `WeierstrassCurve.Points.map_id` and `WeierstrassCurve.Points.map_comp`.
 
-```text
-y^2 = x^3 + x^2 - x
+### AddCircle has torsion bounds
+
+`Mathlib/Topology/Instances/AddCircle/Defs.lean` has:
+
+```lean
+abbrev AddCircle [AddCommGroup 𝕜] (p : 𝕜) :=
+  𝕜 ⧸ zmultiples p
 ```
 
-is currently listed by LMFDB as `20.a3` / Cremona `20a2`, with rank `0` and torsion `ℤ/6ℤ`:
+and the useful torsion-cardinality theorem:
 
-```text
-https://www.lmfdb.org/EllipticCurve/Q/?jinv=16384%2F5
+```lean
+theorem AddCircle.card_torsion_le_of_isSMulRegular
+    (n : ℕ) (h0 : n ≠ 0) (hn : IsSMulRegular 𝕜 n) :
+    {x : AddCircle p | n • x = 0}.encard ≤ n
 ```
 
-The page `20.a4` is another curve in the same isogeny class; it also has rank `0` and torsion `ℤ/6ℤ`, but its displayed model is different:
+plus finiteness:
 
-```text
-https://www.lmfdb.org/EllipticCurve/Q/20/a/4
+```lean
+theorem AddCircle.finite_torsion {n : ℕ} (hn : 0 < n) :
+    { u : AddCircle p | n • u = 0 }.Finite
 ```
 
-This is only orientation. The proposed proof below does not depend on the database label.
+`Mathlib/Topology/Instances/AddCircle/Real.lean` defines:
 
-## What the direct prime-factorization argument really gives
-
-Start with
-
-```text
-w^2 = u^3 + u^2 - u.
+```lean
+abbrev UnitAddCircle :=
+  AddCircle (1 : ℝ)
 ```
 
-Write `u = a / b` in lowest terms with `b > 0`. For every prime `p | b`, the numerator
+and gives an explicit injection:
 
-```text
-a(a^2 + ab - b^2)
+```lean
+noncomputable def ZMod.toAddCircle : ZMod N →+ UnitAddCircle
+lemma ZMod.toAddCircle_injective : Function.Injective (toAddCircle : ZMod N → _)
 ```
 
-is prime to `p`, because `p ∤ a` and
+This is enough to reason about `p`-torsion **after** one has an equivalence between real elliptic-curve components and `UnitAddCircle`. It does not provide that equivalence.
 
-```text
-a^2 + ab - b^2 ≡ a^2 mod p.
+### Division polynomials exist, but not the needed real-root theorem
+
+`Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Basic.lean` defines:
+
+```lean
+WeierstrassCurve.preΨ
+WeierstrassCurve.ΨSq
+WeierstrassCurve.Ψ
+WeierstrassCurve.Φ
+WeierstrassCurve.ψ
+WeierstrassCurve.φ
 ```
 
-So
+`Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Degree.lean` computes the expected degrees, including:
 
-```text
-v_p(u^3 + u^2 - u) = -3 v_p(b).
+```lean
+WeierstrassCurve.natDegree_preΨ_le
+WeierstrassCurve.coeff_preΨ
+WeierstrassCurve.natDegree_preΨ
+WeierstrassCurve.leadingCoeff_preΨ
+WeierstrassCurve.natDegree_ΨSq_le
+WeierstrassCurve.natDegree_ΨSq
+WeierstrassCurve.natDegree_Φ
 ```
 
-Since this valuation is the valuation of a square, `3 v_p(b)` is even. Hence `v_p(b)` is even for every `p`, so the denominator of `u` is a square. Thus write
+A repository search for division-polynomial/torsion connections only points back to `Basic.lean` and `Degree.lean`; I did not find a theorem of the form “`x` is the x-coordinate of a nonzero `n`-torsion point iff `preΨ n` vanishes at `x`,” nor any theorem counting real roots of division polynomials.
 
-```text
-u = A / B^2,
-w = C / B^3,
+## (1) Constructing `E(ℚ) → E(ℝ)`
+
+Use the base-change map attached to the algebra map `ℚ →ₐ[ℚ] ℝ`.
+
+With the FLT wrapper, the intended definition is:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import FLT.EllipticCurve.Torsion
+
+noncomputable section
+
+open scoped WeierstrassCurve.Affine
+
+namespace FLT.RealTorsionSketch
+
+/-- Base change of rational points to real points. -/
+noncomputable def EQ_to_ER
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    (E⁄ℚ).Point →+ (E⁄ℝ).Point :=
+  WeierstrassCurve.Points.map E (Algebra.ofId ℚ ℝ)
+
+/-- The base-change map is injective.  The proof should reduce to
+`WeierstrassCurve.Affine.Point.map_injective`. -/
+theorem EQ_to_ER_injective
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    Function.Injective (EQ_to_ER E) := by
+  -- This is the intended proof shape.  Depending on implicit arguments,
+  -- Lean may need `(W' := E)` or the affine form of `E` made explicit.
+  simpa [EQ_to_ER, WeierstrassCurve.Points.map]
+    using (WeierstrassCurve.Affine.Point.map_injective
+      (W' := E) (f := Algebra.ofId ℚ ℝ))
+
+end FLT.RealTorsionSketch
 ```
 
-with
+If the explicit `(W' := E)` does not elaborate because the local notation chooses the affine curve differently, use Mathlib’s raw map directly and let the target type infer the curve:
 
-```text
-A, B, C ∈ ℤ,
-B > 0,
-gcd(A, B) = 1.
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+
+noncomputable section
+
+open scoped WeierstrassCurve.Affine
+
+namespace FLT.RealTorsionSketch
+
+noncomputable def EQ_to_ER_raw
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    (E⁄ℚ).Point →+ (E⁄ℝ).Point :=
+  WeierstrassCurve.Affine.Point.baseChange ℚ ℝ
+
+end FLT.RealTorsionSketch
 ```
 
-Then
+The important point: this map is algebraic base change; no topology is needed.
 
-```text
-C^2 = A^3 + A^2 B^2 - A B^4
-    = A(A^2 + A B^2 - B^4).
-```
+## (2) What is needed for `E^0(ℝ) ≃ UnitAddCircle`?
 
-The two factors on the right are coprime:
+The relevant Mathlib objects are:
 
-```text
-gcd(A, A^2 + A B^2 - B^4)
-  = gcd(A, B^4)
-  = 1.
-```
-
-So if `A ≠ 0`, the two coprime factors must separately be signed squares.
-
-If `A > 0`, then
-
-```text
-A = r^2
-A^2 + A B^2 - B^4 = s^2
-```
-
-and therefore
-
-```text
-s^2 = r^4 + r^2 B^2 - B^4.        -- Q+
-```
-
-If `A < 0`, then
-
-```text
-A = -r^2
-A^2 + A B^2 - B^4 = -s^2
-```
-
-and therefore
-
-```text
-s^2 = -r^4 + r^2 B^2 + B^4.        -- Q-
-```
-
-In both cases
-
-```text
-gcd(r, B) = 1,
-B > 0.
-```
-
-Thus the whole problem reduces to the following two primitive binary-quartic lemmas.
-
-```text
-QuarticPlus:
-  If gcd(r,B)=1, B>0, and s^2 = r^4 + r^2 B^2 - B^4,
-  then r = 1 and B = 1.
-
-QuarticMinus:
-  If gcd(r,B)=1, B>0, and s^2 = -r^4 + r^2 B^2 + B^4,
-  then r = 1 and B = 1.
+```lean
+import Mathlib.Topology.Instances.AddCircle.Real
 ```
 
 Then:
 
-```text
-A = 0      -> u = 0,
-A =  r^2  -> r = B = 1 -> u = 1,
-A = -r^2  -> r = B = 1 -> u = -1.
+```lean
+UnitAddCircle      -- definitionally `AddCircle (1 : ℝ)`
+UnitAddTorus d     -- `d → UnitAddCircle`
+ZMod.toAddCircle   -- explicit `ZMod N →+ UnitAddCircle`
+AddCircle.card_torsion_le_of_isSMulRegular
+AddCircle.finite_torsion
 ```
 
-This is the cleanest completely self-contained Diophantine reduction.
-
-The catch is that `QuarticPlus` and `QuarticMinus` are not trivial congruence lemmas. They are the rank-zero statement in binary-quartic clothing. A proof of them by infinite descent is elementary, but it is still a descent proof.
-
-## Why congruences alone are unlikely to finish it
-
-The quartics
-
-```text
-s^2 =  r^4 + r^2 B^2 - B^4
-s^2 = -r^4 + r^2 B^2 + B^4
-```
-
-have the same “shape” as elliptic-curve 2-coverings. Local congruence checks at small primes do not isolate only `r=B=1`; the obstruction is global.
-
-For example, the first quartic can be rewritten as
-
-```text
-(2r^2 + B^2)^2 - (2s)^2 = 5B^4,
-```
-
-so a factorization in `ℤ[√5]` is natural. But after the factorization one still has to prove that any nontrivial primitive solution produces a strictly smaller primitive solution. That is infinite descent, not a local valuation contradiction.
-
-Similarly, dividing by `B^4` gives
-
-```text
-(s/B^2)^2 = (r^2/B^2)^2 + (r^2/B^2) - 1,
-```
-
-which is a conic in the variable `r^2/B^2`; parametrizing the conic leaves the condition that this parameter is itself a rational square. That condition is again a genus-one condition, so the parametrization does not make the problem rational.
-
-## The clean classical proof: explicit 2-isogeny descent
-
-A very compact classical proof uses the rational 2-torsion point `(0,0)`.
-
-Let
-
-```text
-E  : y^2 = x^3 + x^2 - x        = x(x^2 + x - 1),
-E' : Y^2 = X^3 - 2X^2 + 5X     = X(X^2 - 2X + 5).
-```
-
-These are connected by a 2-isogeny
-
-```text
-φ : E -> E'
-```
-
-with kernel generated by `(0,0)`. For `x ≠ 0`, one explicit formula is
-
-```text
-φ(x,y) = ( y^2 / x^2,  y(-1 - x^2) / x^2 ).
-```
-
-The standard 2-isogeny descent map for a curve
-
-```text
-y^2 = x^3 + a x^2 + b x
-```
-
-is
-
-```text
-α(O)       = 1,
-α((0,0))   = b mod ℚ*²,
-α((x,y))   = x mod ℚ*²     if x ≠ 0.
-```
-
-For this curve, `b = -1`, so only the squareclasses
-
-```text
-1, -1
-```
-
-can occur. Both occur, for example from `O` and `(0,0)`, or from points with `x = ±1`. Thus
-
-```text
-#α(E(ℚ)) = 2.
-```
-
-For the isogenous curve `E'`, we have `a = -2`, `b = 5`, so the only possible squareclasses are
-
-```text
-±1, ±5.
-```
-
-The corresponding homogeneous spaces are
-
-```text
-R^2 = d S^4 - 2 S^2 T^2 + (5/d) T^4,
-```
-
-for squarefree `d | 5`, i.e. `d ∈ {1, 5, -1, -5}`.
-
-For `d = -1`, the right-hand side is
-
-```text
--S^4 - 2S^2T^2 - 5T^4,
-```
-
-which is negative unless `S = T = 0`, which is not a primitive point.
-
-For `d = -5`, the right-hand side is
-
-```text
--5S^4 - 2S^2T^2 - T^4,
-```
-
-again negative unless `S = T = 0`.
-
-So only
-
-```text
-1, 5
-```
-
-occur, and
-
-```text
-#α'(E'(ℚ)) = 2.
-```
-
-The elementary 2-isogeny descent formula is
-
-```text
-2^rank(E(ℚ)) = #α(E(ℚ)) * #α'(E'(ℚ)) / 4.
-```
-
-Here this gives
-
-```text
-2^rank(E(ℚ)) = 2 * 2 / 4 = 1,
-```
-
-so
-
-```text
-rank E(ℚ) = 0.
-```
-
-This is the smallest classical proof I would trust. It is descent, but it is very small descent: squareclasses, explicit quartics, and a finite exact-sequence calculation.
-
-## Torsion is elementary
-
-The point
-
-```text
-P = (-1, 1)
-```
-
-has order `6`.
-
-Indeed, using the group law on
-
-```text
-y^2 = x^3 + x^2 - x,
-```
-
-one checks
-
-```text
-2P = (1, -1),
-3P = (0, 0),
-6P = O.
-```
-
-So `E(ℚ)` has at least six torsion points:
-
-```text
-O,
-(0,0),
-(1,1),
-(1,-1),
-(-1,1),
-(-1,-1).
-```
-
-To show there are no more torsion points, use reduction modulo good primes. The discriminant of this model is
-
-```text
-Δ = 80,
-```
-
-so `3` and `7` are good primes.
-
-Counting directly:
-
-```text
-#E(𝔽_3) = 6,
-#E(𝔽_7) = 6.
-```
-
-Reduction at good primes injects prime-to-`p` torsion into `E(𝔽_p)`. Using both `p=3` and `p=7`, every rational torsion prime-power is bounded by a group of order `6`. Hence
-
-```text
-#E(ℚ)_tors | 6.
-```
-
-Since we already have a point of order `6`,
-
-```text
-E(ℚ)_tors ≅ ℤ/6ℤ.
-```
-
-Together with rank `0`, this gives exactly
-
-```text
-E(ℚ) = { O, (0,0), (1,±1), (-1,±1) }.
-```
-
-Therefore the only rational `u`-coordinates are
-
-```text
-u ∈ {-1, 0, 1}.
-```
-
-## Lean-facing recommendation
-
-For Lean, I would **not** formalize this by invoking a general elliptic-curve rank API. The smallest self-contained module is one of the following.
-
-### Option A: direct Diophantine module
-
-This avoids elliptic-curve group law almost entirely. It isolates the real work into two binary-quartic descent lemmas.
+For the group-theoretic part, the theorem you would want from `AddCircle` is only a cardinal bound:
 
 ```lean
-import Mathlib.Data.Rat.Basic
-import Mathlib.Data.Int.GCD
-import Mathlib.Tactic
+import Mathlib.Topology.Instances.AddCircle.Real
 
-namespace FLT.Diophantine20a3
+noncomputable section
 
-/-- Positive binary-quartic obstruction.
+namespace FLT.RealTorsionSketch
 
-Mathematical statement:
-if `gcd r B = 1`, `B > 0`, and
-`s^2 = r^4 + r^2 * B^2 - B^4`, then `r = 1` and `B = 1`.
+/-- This is the kind of fact already available for additive circles:
+`n`-torsion in `ℝ / ℤ` has cardinal at most `n`.
+
+The exact proof term may need minor adjustment, but the underlying theorem is
+`AddCircle.card_torsion_le_of_isSMulRegular`.
 -/
-theorem quartic_plus_only_trivial
-    (r B s : ℤ)
-    (hB : 0 < B)
-    (hr : 0 < r)
-    (hcop : Int.gcd r B = 1)
-    (h : s^2 = r^4 + r^2 * B^2 - B^4) :
-    r = 1 ∧ B = 1 := by
-  -- elementary infinite descent / Ljunggren-style binary quartic argument
-  sorry
+example (n : ℕ) (hn : n ≠ 0) :
+    {x : UnitAddCircle | n • x = 0}.encard ≤ n := by
+  exact AddCircle.card_torsion_le_of_isSMulRegular
+    (p := (1 : ℝ)) n hn
+    (.of_right_eq_zero_of_smul fun x ↦ by simp [hn])
 
-/-- Negative binary-quartic obstruction.
-
-Mathematical statement:
-if `gcd r B = 1`, `B > 0`, and
-`s^2 = -r^4 + r^2 * B^2 + B^4`, then `r = 1` and `B = 1`.
--/
-theorem quartic_minus_only_trivial
-    (r B s : ℤ)
-    (hB : 0 < B)
-    (hr : 0 < r)
-    (hcop : Int.gcd r B = 1)
-    (h : s^2 = -r^4 + r^2 * B^2 + B^4) :
-    r = 1 ∧ B = 1 := by
-  -- elementary infinite descent / isogenous binary quartic argument
-  sorry
-
-/-- Main rational-coordinate conclusion. -/
-theorem rational_u_only
-    (u w : ℚ)
-    (h : w^2 = u^3 + u^2 - u) :
-    u = -1 ∨ u = 0 ∨ u = 1 := by
-  -- 1. write u = A / B^2, w = C / B^3 in normalized form;
-  -- 2. prove C^2 = A(A^2 + A B^2 - B^4);
-  -- 3. prove the two factors are coprime;
-  -- 4. split A = 0, A > 0, A < 0;
-  -- 5. apply quartic_plus_only_trivial or quartic_minus_only_trivial.
-  sorry
-
-end FLT.Diophantine20a3
+end FLT.RealTorsionSketch
 ```
 
-This is probably the smallest theorem surface if the final FLT-side goal only needs the rational `u` values.
-
-### Option B: explicit 2-isogeny-descent certificate
-
-This is mathematically cleaner and avoids proving the two quartic lemmas separately, but it requires formalizing enough of the elliptic-curve group law and the descent exact sequence.
+But this only talks about `UnitAddCircle`. The missing theorem is the bridge:
 
 ```lean
-import Mathlib.Data.Rat.Basic
-import Mathlib.Data.Int.GCD
-import Mathlib.Tactic
-
-namespace FLT.Diophantine20a3
-
-/-- The concrete curve `E : y^2 = x^3 + x^2 - x`. -/
-def E_rhs (x : ℚ) : ℚ := x^3 + x^2 - x
-
-/-- The concrete 2-isogenous curve `E' : Y^2 = X^3 - 2X^2 + 5X`. -/
-def Eprime_rhs (x : ℚ) : ℚ := x^3 - 2*x^2 + 5*x
-
-/-- Concrete rank-zero certificate from 2-isogeny descent.
-
-This should be proved by the squareclass calculations:
-`α(E(ℚ)) = {1, -1}` and `α'(E'(ℚ)) = {1, 5}`.
--/
-theorem rank_zero_certificate : True := by
-  -- Replace `True` by the local statement that every rational point is torsion,
-  -- or by the exact quotient statement used in the local development.
-  trivial
-
-/-- Torsion points on the concrete curve. -/
-theorem rational_points_are_six
-    (u w : ℚ)
-    (h : w^2 = E_rhs u) :
-    (u, w) = (-1, 1) ∨
-    (u, w) = (-1, -1) ∨
-    (u, w) = (0, 0) ∨
-    (u, w) = (1, 1) ∨
-    (u, w) = (1, -1) := by
-  -- rank_zero_certificate + torsion by reduction mod 3 and 7
+-- Not in Mathlib / FLT currently.
+-- Schematic only.
+noncomputable def realEllipticIdentityComponentEquivAddCircle
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ERealIdentityComponent E ≃+ UnitAddCircle :=
   sorry
-
-/-- The projected `u`-coordinate statement. -/
-theorem rational_u_only
-    (u w : ℚ)
-    (h : w^2 = E_rhs u) :
-    u = -1 ∨ u = 0 ∨ u = 1 := by
-  have hp := rational_points_are_six u w h
-  rcases hp with h1 | h2 | h3 | h4 | h5
-  · left; exact congrArg Prod.fst h1
-  · left; exact congrArg Prod.fst h2
-  · right; left; exact congrArg Prod.fst h3
-  · right; right; exact congrArg Prod.fst h4
-  · right; right; exact congrArg Prod.fst h5
-
-end FLT.Diophantine20a3
 ```
 
-The placeholder `rank_zero_certificate` should not remain as `True`; it is where the local 2-isogeny descent proof goes.
+or a component-level classification:
 
-## Bottom line
+```lean
+-- Schematic only.
+axiom real_points_group_classification
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    Nonempty ((E⁄ℝ).Point ≃+ UnitAddCircle) ∨
+    Nonempty ((E⁄ℝ).Point ≃+ UnitAddCircle × ZMod 2)
+```
 
-A purely local prime-factorization proof is not enough. The denominator/gcd argument reduces the problem to two genus-one binary quartics, and those quartics are exactly where the rank-zero content lives.
+That is not a small API task. It requires proving that the real locus of a nonsingular cubic is a compact one-dimensional Lie group with one or two connected components, and identifying the identity component with the additive circle. Analytically, this is real elliptic-curve uniformization; topologically, it is compact connected one-dimensional Lie-group classification.
 
-The most Lean-plausible self-contained proof is therefore:
+## Shorter theorem boundary for the FLT use case
+
+For the FLT obstruction, do not formalize the identity component. State the exact cardinal bound you need.
+
+The strongest useful theorem is:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import FLT.EllipticCurve.Torsion
+
+noncomputable section
+
+open scoped WeierstrassCurve.Affine
+
+namespace FLT.RealTorsionSketch
+
+/-- Strong real odd-torsion bound: the real `p`-torsion is cyclic of order at most `p`.
+This is true because `E(ℝ) ≃ ℝ/ℤ` or `ℝ/ℤ × ℤ/2ℤ`, and odd torsion ignores the `ZMod 2` component.
+-/
+axiom real_odd_p_torsion_card_le
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (p : ℕ) (hp : Nat.Prime p) (hpgt : 2 < p) :
+    Nat.card (Submodule.torsionBy ℤ (E⁄ℝ).Point p) ≤ p
+
+end FLT.RealTorsionSketch
+```
+
+An even weaker theorem is enough for contradiction:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import FLT.EllipticCurve.Torsion
+
+noncomputable section
+
+open scoped WeierstrassCurve.Affine
+
+namespace FLT.RealTorsionSketch
+
+/-- Weak real odd-torsion bound sufficient to rule out `(ZMod p)^2` for `2 < p`. -/
+axiom real_p_torsion_card_le_two_mul
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (p : ℕ) (hp : Nat.Prime p) (hpgt : 2 < p) :
+    Nat.card (Submodule.torsionBy ℤ (E⁄ℝ).Point p) ≤ 2 * p
+
+end FLT.RealTorsionSketch
+```
+
+With either axiom/theorem, the final contradiction is ordinary group/cardinality bookkeeping.
+
+Schematic proof:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import Mathlib.Topology.Instances.AddCircle.Real
+import FLT.EllipticCurve.Torsion
+
+noncomputable section
+
+open scoped WeierstrassCurve.Affine
+
+namespace FLT.RealTorsionSketch
+
+noncomputable def EQ_to_ER
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    (E⁄ℚ).Point →+ (E⁄ℝ).Point :=
+  WeierstrassCurve.Points.map E (Algebra.ofId ℚ ℝ)
+
+axiom EQ_to_ER_injective
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    Function.Injective (EQ_to_ER E)
+
+axiom real_p_torsion_card_le_two_mul
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (p : ℕ) (hp : Nat.Prime p) (hpgt : 2 < p) :
+    Nat.card (Submodule.torsionBy ℤ (E⁄ℝ).Point p) ≤ 2 * p
+
+/-- Schematic: compose an injected `Fp²` in `E(ℚ)` with base change to `E(ℝ)`,
+observe its image lies in real `p`-torsion, and contradict the real cardinal bound. -/
+theorem no_Fp2_in_EQ_from_real_bound
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (p : ℕ) (hp : Nat.Prime p) (hpgt : 2 < p) :
+    ¬ ∃ f : ZMod p × ZMod p →+ (E⁄ℚ).Point, Function.Injective f := by
+  rintro ⟨f, hf⟩
+
+  -- Build an additive monoid hom into the real p-torsion subgroup.
+  let g : ZMod p × ZMod p →+ Submodule.torsionBy ℤ (E⁄ℝ).Point p :=
+  { toFun := fun x =>
+      ⟨EQ_to_ER E (f x), by
+        -- `p • x = 0` in `ZMod p × ZMod p`, so `p • f x = 0`, and maps preserve `nsmul`.
+        -- This is routine `simp`/`ext` arithmetic in `ZMod` plus `map_nsmul`.
+        sorry⟩
+    map_zero' := by
+      ext
+      simp [EQ_to_ER]
+    map_add' := by
+      intro x y
+      ext
+      simp [EQ_to_ER] }
+
+  have hg_inj : Function.Injective g := by
+    intro x y hxy
+    apply hf
+    apply EQ_to_ER_injective E
+    exact congrArg Subtype.val hxy
+
+  have hcard_domain : Nat.card (ZMod p × ZMod p) = p * p := by
+    -- `simp` should know the cardinality of `ZMod p` and products.
+    simp
+
+  have hcard_inj : Nat.card (ZMod p × ZMod p) ≤
+      Nat.card (Submodule.torsionBy ℤ (E⁄ℝ).Point p) := by
+    exact Nat.card_le_card_of_injective g hg_inj
+
+  have hreal := real_p_torsion_card_le_two_mul E p hp hpgt
+
+  -- From `p*p ≤ 2*p` and `0 < p`, get `p ≤ 2`, contradicting `2 < p`.
+  have hp_pos : 0 < p := hp.pos
+  have hp_le_two : p ≤ 2 := by
+    nlinarith [hcard_domain, hcard_inj, hreal, hp_pos]
+  omega
+
+end FLT.RealTorsionSketch
+```
+
+I would not keep `EQ_to_ER_injective` as an axiom; it is just a wrapper around `Point.map_injective`. I wrote it as an axiom in this schematic block only to keep the main cardinal proof focused.
+
+## (3) Why division polynomials do not give a short `≤ 2p` proof
+
+For odd `p`, the relevant univariate division polynomial has degree
 
 ```text
-Best if avoiding elliptic-curve APIs:
-  prove QuarticPlus and QuarticMinus by explicit infinite descent,
-  then finish by the denominator-square/gcd split.
-
-Best if allowing minimal classical EC arithmetic:
-  prove the concrete 2-isogeny descent certificate for E and E',
-  prove torsion = ℤ/6ℤ by reduction mod 3 and 7,
-  conclude the six rational points.
+(p^2 - 1) / 2.
 ```
 
-I would choose **Option A** if the target theorem only needs `u ∈ {-1,0,1}` and the Lean development wants to avoid elliptic-curve infrastructure. I would choose **Option B** if the development already has usable elliptic-curve group law and reduction modulo primes.
+A nonzero real `p`-torsion point and its negative have the same `x`-coordinate, so a naive real-root count gives at best
+
+```text
+#E(ℝ)[p] ≤ 1 + 2 * degree(ψ_p)
+           = 1 + 2 * ((p^2 - 1) / 2)
+           = p^2.
+```
+
+That is exactly the size of full geometric `p`-torsion, so it does **not** contradict an injection of `(Z / pZ)^2`.
+
+To get the true real bound
+
+```text
+#E(ℝ)[p] = p       for odd p,
+```
+
+you need more than degree. You need to know the real-root distribution of the division polynomial, or equivalently that the real group is a circle up to a harmless `Z/2` component. Proving that root distribution by Sturm theory or interlacing of division polynomials would be a substantial real-analysis/computational-polynomial project, not a short shortcut.
+
+So the division-polynomial path currently has two missing pieces:
+
+```lean
+-- Schematic, not currently in Mathlib.
+theorem prePsi_vanishes_iff_x_coord_of_nonzero_n_torsion : Prop := by
+  sorry
+
+-- Schematic, much harder: the real roots of `preΨ p` are only `(p-1)/2` many.
+theorem real_roots_prePsi_odd_prime_card : Prop := by
+  sorry
+```
+
+Mathlib’s current `DivisionPolynomial.Basic` and `DivisionPolynomial.Degree` are useful starts, but they do not yet provide those torsion/root-count theorems.
+
+## Recommended architecture
+
+If you want the **smallest formal module** for this route, use this theorem boundary:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import FLT.EllipticCurve.Torsion
+
+noncomputable section
+
+open scoped WeierstrassCurve.Affine
+
+namespace FLT.RealTorsionSketch
+
+/-- Algebraic, should be proved immediately from Mathlib `Point.map_injective`. -/
+theorem rational_points_embed_real_points
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    Function.Injective
+      (WeierstrassCurve.Points.map E (Algebra.ofId ℚ ℝ) :
+        (E⁄ℚ).Point →+ (E⁄ℝ).Point) := by
+  simpa [WeierstrassCurve.Points.map]
+    using (WeierstrassCurve.Affine.Point.map_injective
+      (W' := E) (f := Algebra.ofId ℚ ℝ))
+
+/-- The single real-topology input.  This is the only hard theorem in the real route. -/
+axiom real_odd_torsion_card_le_two_mul
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (p : ℕ) (hp : Nat.Prime p) (hpgt : 2 < p) :
+    Nat.card (Submodule.torsionBy ℤ (E⁄ℝ).Point p) ≤ 2 * p
+
+end FLT.RealTorsionSketch
+```
+
+Then the proof of “no `(ZMod p)^2` injects into `E(ℚ)`” is finite cardinal arithmetic.
+
+If the project is trying to minimize axioms, the Weil-pairing route is still much cleaner: one Weil-pairing corollary directly rules out full rational `p`-torsion over `ℚ`. The real-topology route is attractive only if `real_odd_torsion_card_le_two_mul` is actually proved; otherwise it is just a different hard axiom.
