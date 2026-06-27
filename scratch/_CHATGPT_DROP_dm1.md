@@ -1,132 +1,144 @@
-# Q1373 (dm1/dm1): parity in the quartic-plus equation
+# Q1372 (dm1/dm4): `rat_denom_square` for `w^2 = u^3+u^2-u`
 
-I cannot honestly give the requested complete proof as stated from the proposed argument, because the proposed `B`-even proof has a real gap.
-
-The `r`-even branch is correct:
-
-```text
-r even and gcd(r,B)=1  ⇒  B odd,
-RHS ≡ 0 + 0 - 1 ≡ 3 mod 4,
-```
-
-which contradicts the fact that squares mod `4` are only `0,1`.
-
-But the proposed `B`-even proof only handles the subcase `v₂(B)=1`.  If `B=2k` with `k` odd, then modulo `16` gives
-
-```text
-RHS ≡ 1 + 4 - 0 ≡ 5 mod 16,
-```
-
-which is impossible.  However, if `B=4m`, then modulo `16` gives
-
-```text
-RHS ≡ r^4 ≡ 1 mod 16,
-```
-
-which is compatible with being a square.  This is **not** a gcd issue: for example `gcd(1,4)=1`.
-
-So the exact missing lemma is:
+The square-denominator bridge after the denominator computation is short.  The exact hard step is the `Rat.den` normalization
 
 ```lean
-lemma B_divisible_by_four_impossible
-    {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B) (hgcd : Int.gcd r B = 1)
-    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4)
-    (h4 : (4 : ℤ) ∣ B) : False := by
-  sorry
+(u ^ 3 + u ^ 2 - u).den = u.den ^ 3
 ```
 
-Without that lemma, `Odd B` does not follow from the advertised mod-16 argument.
+which is not a one-line `ring`/`field_simp` result: it requires proving the numerator
 
-## Compilable finite residue checks
+```lean
+u.num * (u.num ^ 2 + u.num * (u.den : ℤ)^2 - (u.den : ℤ)^4)
+```
 
-These are the clean finite checks to use with `ZMod`.
+is coprime to `u.den^3`.  That is precisely where `u.reduced` and `den_div_eq_of_coprime` enter.
+
+Below is compilable Lean structure with the denominator lemma isolated as the exact remaining proof obligation.  The rest is the complete bridge.
 
 ```lean
 import Mathlib
 
-namespace DM1
+namespace DM4
 
-lemma zmod4_square_ne_three (x : ZMod 4) : x ^ 2 ≠ 3 := by
-  fin_cases x <;> decide
+/-- If `n^3` is a square and `n ≠ 0`, then `n` is a square. -/
+theorem nat_isSquare_of_isSquare_cube {n : ℕ} (hn : n ≠ 0)
+    (h : IsSquare (n ^ 3)) : IsSquare n := by
+  rcases (isSquare_iff_exists_sq (n ^ 3)).1 h with ⟨c, hc⟩
 
-lemma zmod16_square_ne_five (x : ZMod 16) : x ^ 2 ≠ 5 := by
-  fin_cases x <;> decide
+  have hndvd : n ^ 2 ∣ c ^ 2 := by
+    rw [← hc]
+    exact ⟨n, by ring⟩
 
-/-- The `r`-even, `B`-odd RHS is `3 mod 4`. -/
-lemma rhs_mod4_of_r_even_B_odd
-    (r B : ZMod 4)
-    (hr : r = 0 ∨ r = 2)
-    (hB : B = 1 ∨ B = 3) :
-    r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4 = 3 := by
-  rcases hr with rfl | rfl <;>
-  rcases hB with rfl | rfl <;>
-  decide
+  have hceil : Nat.ceilRoot 2 (n ^ 2) = n := by
+    simpa using
+      (Nat.ceilRoot_pow_self (n := 2) (a := n)
+        (by norm_num : (2 : ℕ) ≠ 0))
 
-/-- The `B=2k`, `k` odd, `r` odd RHS is `5 mod 16`. -/
-lemma rhs_mod16_of_r_odd_B_two_times_odd
-    (r B : ZMod 16)
-    (hr : r = 1 ∨ r = 3 ∨ r = 5 ∨ r = 7 ∨ r = 9 ∨ r = 11 ∨ r = 13 ∨ r = 15)
-    (hB : B = 2 ∨ B = 6 ∨ B = 10 ∨ B = 14) :
-    r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4 = 5 := by
-  rcases hr with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
-  rcases hB with rfl | rfl | rfl | rfl <;>
-  decide
+  have hn_dvd_c : n ∣ c := by
+    have hraw : Nat.ceilRoot 2 (n ^ 2) ∣ c :=
+      ((Nat.dvd_pow_iff_ceilRoot_dvd
+        (a := n ^ 2) (b := c) (n := 2)
+        (by norm_num : (2 : ℕ) ≠ 0)).1 hndvd)
+    simpa [hceil] using hraw
 
-/-- Sanity check: `B=4m` is not contradicted by mod `16`. -/
-example :
-    ((1 : ZMod 16) ^ 4 + (1 : ZMod 16) ^ 2 * (4 : ZMod 16) ^ 2 -
-      (4 : ZMod 16) ^ 4) = 1 := by
-  decide
+  rcases hn_dvd_c with ⟨d, rfl⟩
 
-/-- Sanity check: `B=4m` is not excluded by coprimality. -/
-example : Int.gcd 1 4 = 1 := by
-  norm_num
+  refine (isSquare_iff_exists_sq n).2 ⟨d, ?_⟩
+  apply Nat.eq_of_mul_eq_mul_left (Nat.pow_pos (Nat.pos_of_ne_zero hn) 2)
+  calc
+    n ^ 2 * n = n ^ 3 := by ring
+    _ = (n * d) ^ 2 := hc
+    _ = n ^ 2 * d ^ 2 := by ring
 
-end DM1
-```
+/--
+Exact denominator computation needed for the curve.
 
-## Skeleton with the exact `sorry`
-
-This is the honest Lean skeleton.  The first branch is the advertised mod-4 contradiction; the second branch needs the missing `B_divisible_by_four_impossible` lemma after the mod-16 subcase `B ≡ 2 mod 4` is removed.
-
-```lean
-import Mathlib
-
-namespace DM1
-
-lemma B_divisible_by_four_impossible
-    {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B) (hgcd : Int.gcd r B = 1)
-    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4)
-    (h4 : (4 : ℤ) ∣ B) : False := by
-  -- This is not proved by the stated mod-16 argument.
-  -- It needs an additional 2-adic/descent argument.
+Proof route:
+1. Rewrite `u = u.num / u.den` using `Rat.num_div_den`.
+2. Show
+   `u^3+u^2-u = N /. (u.den : ℤ)^3`, where
+   `N = u.num * (u.num^2 + u.num*(u.den:ℤ)^2 - (u.den:ℤ)^4)`.
+3. Prove `Int.gcd N ((u.den : ℤ)^3) = 1` from `u.reduced`.
+4. Apply `den_div_eq_of_coprime`.
+-/
+lemma curve_rhs_den_eq_den_cube (u : ℚ) :
+    (u ^ 3 + u ^ 2 - u).den = u.den ^ 3 := by
+  -- This is the exact remaining `Rat.den`/gcd normalization.
+  -- The low-level API is `den_div_eq_of_coprime`; the needed coprimality
+  -- is the polynomial-gcd fact described above.
   sorry
 
-lemma quartic_parity
-    {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B) (hgcd : Int.gcd r B = 1)
-    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
-    Odd r ∧ Odd B := by
-  -- Recommended structure:
-  -- 1. Prove `Odd r` by contradiction.
-  --    If `Even r`, then `Odd B` from gcd, and the ZMod-4 check above gives
-  --    `s^2 = 3` in `ZMod 4`, contradicting `zmod4_square_ne_three`.
-  have hr_odd : Odd r := by
-    sorry
+/--
+If `(u,w)` lies on `w^2 = u^3+u^2-u`, then `u` has square denominator:
+`u = A / B^2` with `A,B : ℤ`, `0 < B`, and `gcd(A,B)=1`.
+-/
+theorem rat_denom_square
+    {u w : ℚ}
+    (hcurve : w ^ 2 = u ^ 3 + u ^ 2 - u) :
+    ∃ A B : ℤ,
+      0 < B ∧ Int.gcd A B = 1 ∧
+        u = (A : ℚ) / (B : ℚ) ^ 2 := by
+  have hsq_rhs : IsSquare (u ^ 3 + u ^ 2 - u) := by
+    refine ⟨w, ?_⟩
+    rw [← hcurve]
+    ring
 
-  -- 2. Prove `Odd B` by contradiction.
-  --    If `Even B`, then `Odd r` from gcd. Split on whether `4 ∣ B`.
-  --    * If not `4 ∣ B`, then `B ≡ 2 mod 4`, so the ZMod-16 check gives
-  --      `s^2 = 5`, contradicting `zmod16_square_ne_five`.
-  --    * If `4 ∣ B`, call the missing lemma above.
-  have hB_odd : Odd B := by
-    sorry
+  have hden_sq : IsSquare ((u ^ 3 + u ^ 2 - u).den) :=
+    (Rat.isSquare_iff.mp hsq_rhs).2
 
-  exact ⟨hr_odd, hB_odd⟩
+  have hden_cube_sq : IsSquare (u.den ^ 3) := by
+    simpa [curve_rhs_den_eq_den_cube u] using hden_sq
 
-end DM1
+  have hden_ne : u.den ≠ 0 := u.den_ne_zero
+  have hden_isSquare : IsSquare u.den :=
+    nat_isSquare_of_isSquare_cube hden_ne hden_cube_sq
+
+  rcases hden_isSquare with ⟨B₀, hB₀sq⟩
+
+  have hB₀_ne : B₀ ≠ 0 := by
+    intro hB₀_zero
+    apply hden_ne
+    simpa [hB₀_zero] using hB₀sq
+
+  have hB₀_pos : 0 < B₀ := Nat.pos_of_ne_zero hB₀_ne
+
+  have hB₀_dvd_den : B₀ ∣ u.den := by
+    rw [hB₀sq]
+    exact dvd_mul_right B₀ B₀
+
+  have hcop_nat : Nat.Coprime u.num.natAbs B₀ :=
+    Nat.Coprime.of_dvd_right hB₀_dvd_den u.reduced
+
+  have hcop_int : Int.gcd u.num (B₀ : ℤ) = 1 := by
+    simpa [Int.gcd, Int.natAbs_natCast] using
+      (Nat.coprime_iff_gcd_eq_one.mp hcop_nat)
+
+  refine ⟨u.num, (B₀ : ℤ), ?_, hcop_int, ?_⟩
+  · exact_mod_cast hB₀_pos
+  · have hden_eq : u.den = B₀ ^ 2 := by
+      simpa [pow_two] using hB₀sq
+    calc
+      u = (u.num : ℚ) / (u.den : ℚ) := by
+        simpa using (Rat.num_div_den u).symm
+      _ = (u.num : ℚ) / ((B₀ : ℤ) : ℚ) ^ 2 := by
+        rw [hden_eq]
+        simp [pow_two]
+
+end DM4
 ```
 
-Bottom line: the mod-4 and mod-16 residue checks are easy and compile, but they do **not** prove `Odd B`.  The exact remaining proof obligation is the `4 ∣ B` subcase.
+The exact theorem to prove next, if you want this file to have no `sorry`, is:
+
+```lean
+lemma curve_rhs_den_eq_den_cube (u : ℚ) :
+    (u ^ 3 + u ^ 2 - u).den = u.den ^ 3
+```
+
+and its exact inner gcd target is:
+
+```lean
+Nat.Coprime
+  (u.num * (u.num ^ 2 + u.num * (u.den : ℤ)^2 - (u.den : ℤ)^4)).natAbs
+  (u.den ^ 3)
+```
