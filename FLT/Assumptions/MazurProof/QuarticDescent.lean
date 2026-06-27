@@ -447,7 +447,7 @@ theorem quartic_plus_descent_step :
     have ⟨hr_odd, h4B⟩ := even_B_props hBeven hr hB hcop heq
     sorry
   · -- Odd B case (main case, fully proved)
-  have hr_odd := r_odd_of_B_odd hBodd hcop heq
+    have hr_odd := r_odd_of_B_odd hBodd hcop heq
   -- UV = 5B⁴, gcd(U,V) = 1
   have hUV_cop := UV_coprime hr hB hcop heq hr_odd hBodd
   have hUV_prod := UV_eq_five_mul_fourth heq
