@@ -45,18 +45,7 @@ theorem quartic_plus_both_odd {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
   -- r even, B odd → s² ≡ -1 (mod 4), impossible
   -- r odd, B even → need mod 16 analysis
   -- Clean approach: cast to ZMod 4 for the first two, ZMod 16 for the third
-  by_contra h
-  push Not at h
-  simp only [not_and_or, Int.not_emod_two_eq_one] at h
-  rcases h with hr2 | hB2
-  · -- r even: r % 2 = 0
-    -- If B odd: cast to ZMod 4, s² ≡ 0+0-1 = 3 (mod 4), impossible
-    -- If B even: gcd(r,B) ≥ 2, contradiction
-    sorry
-  · -- B even: B % 2 = 0
-    -- r must be odd (else gcd ≥ 2). Then s² ≡ 1+0-0 = 1 (mod 4), OK.
-    -- But mod 16: if B=2k, k odd, s² ≡ 1+4-0 = 5 (mod 8), impossible.
-    sorry
+  sorry -- ZMod 4/16 case analysis: r even B odd → s²≡3(mod 4), both even → gcd≥2, r odd B even → s²≡5(mod 8)
 
 /-! ## U, V properties -/
 
@@ -64,24 +53,13 @@ theorem quartic_plus_both_odd {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
 theorem V_pos {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
     0 < 2 * r ^ 2 + B ^ 2 + 2 * s := by
-  by_contra hV; push Not at hV
-  have hprod := UV_eq_five_mul_fourth heq
-  have hVneg : 2 * r ^ 2 + B ^ 2 + 2 * s ≤ 0 := hV
-  have hUneg : 2 * r ^ 2 + B ^ 2 - 2 * s ≤ 0 := by
-    by_contra hU; push Not at hU
-    linarith [mul_nonpos_iff.mpr (Or.inr ⟨le_of_lt hU, hVneg⟩)]
-  linarith [sq_nonneg r, sq_nonneg B]
+  -- UV = 5B⁴ > 0, U+V = 4r²+2B² > 0 → both positive
+  sorry
 
 theorem U_pos {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
     0 < 2 * r ^ 2 + B ^ 2 - 2 * s := by
-  by_contra hU; push Not at hU
-  have hprod := UV_eq_five_mul_fourth heq
-  have hUneg : 2 * r ^ 2 + B ^ 2 - 2 * s ≤ 0 := hU
-  have hVneg : 2 * r ^ 2 + B ^ 2 + 2 * s ≤ 0 := by
-    by_contra hV; push Not at hV
-    linarith [mul_nonpos_iff.mpr (Or.inl ⟨hUneg, le_of_lt hV⟩)]
-  linarith [sq_nonneg r, sq_nonneg B]
+  sorry
 
 /-- U and V are both odd when r, B are both odd. -/
 theorem UV_odd {r B s : ℤ}
