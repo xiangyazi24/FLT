@@ -1,56 +1,105 @@
-# Q1458 (dm1/dm2): `gcd(u.num.natAbs, B₀) = 1` from a square denominator
+# Q1451 (dm1/dm3): `rat_denom_square` for `w^2 = u^3 + u^2 - u`
 
-Use `u.reduced` and shrink coprimality along the divisor `B₀ ∣ u.den`.  The stable modern Mathlib spelling is `Coprime.of_dvd_right`; the older spelling `coprime_dvd_right` also works.
+This is the drop-in shape I would use.  It is written against the FLT repo's pinned Mathlib rev `96fd0fff...`.
+
+The only outside dependency below is the lemma you said you already have:
+
+```lean
+nat_isSquare_of_isSquare_cube : ∀ {n : ℕ}, IsSquare (n ^ 3) → IsSquare n
+```
+
+If that lemma is already in scope with exactly that name, delete the `variable` line before `rat_denom_square`.
 
 ```lean
 import Mathlib
 
-namespace DM2
+namespace DM3
 
-/-- Nat-coprime form: if `u.den = B₀ * B₀`, then `u.num.natAbs` is coprime to `B₀`. -/
-lemma rat_num_natAbs_coprime_of_den_eq_mul_self (u : ℚ) {B₀ : ℕ}
-    (hB₀ : u.den = B₀ * B₀) :
-    Nat.Coprime u.num.natAbs B₀ := by
-  have hB₀_dvd_den : B₀ ∣ u.den := by
-    rw [hB₀]
-    exact ⟨B₀, rfl⟩
-  exact u.reduced.of_dvd_right hB₀_dvd_den
+/-- The denominator of `u^3 + u^2 - u` is exactly `u.den^3`. -/
+lemma den_cubic_num_den (u : ℚ) :
+    (u ^ 3 + u ^ 2 - u).den = u.den ^ 3 := by
+  let a : ℤ := u.num
+  let d : ℤ := (u.den : ℤ)
+  let N : ℤ := a ^ 3 + a ^ 2 * d - a * d ^ 2
+  let D : ℕ := u.den ^ 3
 
-/-- The exact `Nat.gcd` version. -/
-lemma rat_num_natAbs_gcd_of_den_eq_mul_self (u : ℚ) {B₀ : ℕ}
-    (hB₀ : u.den = B₀ * B₀) :
-    Nat.gcd u.num.natAbs B₀ = 1 := by
-  exact (rat_num_natAbs_coprime_of_den_eq_mul_self (u := u) hB₀).gcd_eq_one
+  have hdpos : 0 < d := by
+    exact_mod_cast u.den_pos
+  have hdq : (d : ℚ) ≠ 0 := by
+    exact_mod_cast (ne_of_gt hdpos)
+  have hDpos : 0 < D := by
+    dsimp [D]
+    positivity
+  have hDpos_int : (0 : ℤ) < (D : ℤ) := by
+    exact_mod_cast hDpos
 
-/-- If your square hypothesis is written with `^ 2` instead of `*`. -/
-lemma rat_num_natAbs_gcd_of_den_eq_sq (u : ℚ) {B₀ : ℕ}
-    (hB₀ : u.den = B₀ ^ 2) :
-    Nat.gcd u.num.natAbs B₀ = 1 := by
-  exact rat_num_natAbs_gcd_of_den_eq_mul_self (u := u)
-    (B₀ := B₀) (by simpa [pow_two] using hB₀)
+  -- `u.num` and `u.den` are coprime, as integers.
+  have hred : IsCoprime a d := by
+    simpa [a, d] using Rat.isCoprime_num_den u
 
-/-- The corresponding `Int.gcd` form, usually what the descent code wants. -/
-lemma rat_num_int_gcd_of_den_eq_mul_self (u : ℚ) {B₀ : ℕ}
-    (hB₀ : u.den = B₀ * B₀) :
-    Int.gcd u.num (B₀ : ℤ) = 1 := by
-  have hnat : Nat.gcd u.num.natAbs B₀ = 1 :=
-    rat_num_natAbs_gcd_of_den_eq_mul_self (u := u) hB₀
-  simpa [Int.gcd_eq_natAbs] using hnat
+  -- The numerator candidate is coprime to `d`.
+  have ha3copd : IsCoprime (a ^ 3) d := by
+    simpa using (hred.pow_left (m := 3))
+  have hNcopd0 : IsCoprime (a ^ 3 + d * (a ^ 2 - a * d)) d :=
+    ha3copd.add_mul_left_left (a ^ 2 - a * d)
+  have hNcopd : IsCoprime N d := by
+    convert hNcopd0 using 1
+    ring_nf [N]
 
-/-- Same `Int.gcd` form for the `^ 2` hypothesis. -/
-lemma rat_num_int_gcd_of_den_eq_sq (u : ℚ) {B₀ : ℕ}
-    (hB₀ : u.den = B₀ ^ 2) :
-    Int.gcd u.num (B₀ : ℤ) = 1 := by
-  exact rat_num_int_gcd_of_den_eq_mul_self (u := u)
-    (B₀ := B₀) (by simpa [pow_two] using hB₀)
+  -- Therefore it is coprime to `d^3`, hence to `D = u.den^3`.
+  have hNcopd3 : IsCoprime N (d ^ 3) := by
+    simpa using (hNcopd.pow_right (n := 3))
+  have hNcopD : Nat.Coprime N.natAbs D := by
+    have htmp : Nat.Coprime N.natAbs (d ^ 3).natAbs := by
+      rw [← Int.isCoprime_iff_nat_coprime]
+      exact hNcopd3
+    simpa [D, d, Int.natAbs_pow] using htmp
 
-end DM2
+  -- Rewrite the rational value with numerator `N` and denominator `D`.
+  have hu : u = (a : ℚ) / (d : ℚ) := by
+    rw [← Rat.num_div_den u]
+    simp [a, d]
+  have hD_cast : (D : ℚ) = (d : ℚ) ^ 3 := by
+    simp [D, d]
+  have hval : u ^ 3 + u ^ 2 - u = (N : ℚ) / (D : ℚ) := by
+    rw [hu, hD_cast]
+    field_simp [hdq]
+    ring_nf [N]
+
+  -- Now use the reduced-denominator theorem for rationals.
+  have hden : ((N : ℚ) / (D : ℚ)).den = D := by
+    simpa using
+      (Rat.den_div_eq_of_coprime N (D : ℤ) hDpos_int (by simpa using hNcopD))
+  rw [hval]
+  exact hden
+
+-- Delete this line if your lemma is already globally in scope.
+variable (nat_isSquare_of_isSquare_cube : ∀ {n : ℕ}, IsSquare (n ^ 3) → IsSquare n)
+
+/-- If `w^2 = u^3 + u^2 - u`, then the denominator of `u` is a square. -/
+theorem rat_denom_square {u w : ℚ}
+    (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
+    IsSquare u.den := by
+  have hsq : IsSquare (u ^ 3 + u ^ 2 - u) := by
+    refine ⟨w, ?_⟩
+    rw [← h]
+    ring
+  have hden_sq0 : IsSquare ((u ^ 3 + u ^ 2 - u).den) :=
+    (Rat.isSquare_iff.mp hsq).2
+  have hden_sq3 : IsSquare (u.den ^ 3) := by
+    simpa [den_cubic_num_den (u := u)] using hden_sq0
+  exact nat_isSquare_of_isSquare_cube hden_sq3
+
+end DM3
 ```
 
-If you want the old API spelling exactly as in your note, replace the final line of the first lemma by:
+The important denominator step is this one:
 
 ```lean
-  exact u.reduced.coprime_dvd_right hB₀_dvd_den
+have hNcopD : Nat.Coprime N.natAbs D := ...
+have hden : ((N : ℚ) / (D : ℚ)).den = D := by
+  simpa using
+    (Rat.den_div_eq_of_coprime N (D : ℤ) hDpos_int (by simpa using hNcopD))
 ```
 
-I prefer `of_dvd_right` because Mathlib has it as the forward-compatible wrapper around `coprime_dvd_right`.
+This avoids trying to use `Rat.add_den_dvd`/`mul_den_dvd`, which only give divisibility bounds and are too weak for the exact denominator.
