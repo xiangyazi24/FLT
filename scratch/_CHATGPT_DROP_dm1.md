@@ -1,144 +1,158 @@
-# Q1372 (dm1/dm4): `rat_denom_square` for `w^2 = u^3+u^2-u`
+# Q1371 (dm1/dm3): descent branch `U=a^4, V=5*b^4`
 
-The square-denominator bridge after the denominator computation is short.  The exact hard step is the `Rat.den` normalization
+Use the Pythagorean triple in the orientation
 
 ```lean
-(u ^ 3 + u ^ 2 - u).den = u.den ^ 3
+PythagoreanTriple (b ^ 2) h r
 ```
 
-which is not a one-line `ring`/`field_simp` result: it requires proving the numerator
+not `PythagoreanTriple h (b^2) r`, because `PythagoreanTriple.coprime_classification'` assumes the first leg is odd and then returns
 
 ```lean
-u.num * (u.num ^ 2 + u.num * (u.den : ℤ)^2 - (u.den : ℤ)^4)
+b^2 = m^2 - n^2,
+h = 2*m*n,
+r = m^2+n^2.
 ```
 
-is coprime to `u.den^3`.  That is precisely where `u.reduced` and `den_div_eq_of_coprime` enter.
-
-Below is compilable Lean structure with the denominator lemma isolated as the exact remaining proof obligation.  The rest is the complete bridge.
+Below is the clean branch skeleton.  The explicit `sorry` is the requested coprime square-factor split of `b^2 = (m-n)(m+n)`.  I state the already-proved local algebra facts as hypotheses: in the full proof these come from `h=(a^2-b^2)/2`, `a,b` odd, and the identity
+`4*r^2=(a^2-b^2)^2+4*b^4`.
 
 ```lean
-import Mathlib
+import Mathlib.NumberTheory.PythagoreanTriples
+import Mathlib.Tactic
 
-namespace DM4
+namespace DM3
 
-/-- If `n^3` is a square and `n ≠ 0`, then `n` is a square. -/
-theorem nat_isSquare_of_isSquare_cube {n : ℕ} (hn : n ≠ 0)
-    (h : IsSquare (n ^ 3)) : IsSquare n := by
-  rcases (isSquare_iff_exists_sq (n ^ 3)).1 h with ⟨c, hc⟩
-
-  have hndvd : n ^ 2 ∣ c ^ 2 := by
-    rw [← hc]
-    exact ⟨n, by ring⟩
-
-  have hceil : Nat.ceilRoot 2 (n ^ 2) = n := by
-    simpa using
-      (Nat.ceilRoot_pow_self (n := 2) (a := n)
-        (by norm_num : (2 : ℕ) ≠ 0))
-
-  have hn_dvd_c : n ∣ c := by
-    have hraw : Nat.ceilRoot 2 (n ^ 2) ∣ c :=
-      ((Nat.dvd_pow_iff_ceilRoot_dvd
-        (a := n ^ 2) (b := c) (n := 2)
-        (by norm_num : (2 : ℕ) ≠ 0)).1 hndvd)
-    simpa [hceil] using hraw
-
-  rcases hn_dvd_c with ⟨d, rfl⟩
-
-  refine (isSquare_iff_exists_sq n).2 ⟨d, ?_⟩
-  apply Nat.eq_of_mul_eq_mul_left (Nat.pow_pos (Nat.pos_of_ne_zero hn) 2)
-  calc
-    n ^ 2 * n = n ^ 3 := by ring
-    _ = (n * d) ^ 2 := hc
-    _ = n ^ 2 * d ^ 2 := by ring
+/-- Integer quartic-plus predicate. -/
+def QuarticPlusZ (r B s : ℤ) : Prop :=
+  0 < r ∧ 0 < B ∧ Int.gcd r B = 1 ∧
+    s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4
 
 /--
-Exact denominator computation needed for the curve.
+The only intentionally sorry'd local arithmetic lemma in this branch.
 
-Proof route:
-1. Rewrite `u = u.num / u.den` using `Rat.num_div_den`.
-2. Show
-   `u^3+u^2-u = N /. (u.den : ℤ)^3`, where
-   `N = u.num * (u.num^2 + u.num*(u.den:ℤ)^2 - (u.den:ℤ)^4)`.
-3. Prove `Int.gcd N ((u.den : ℤ)^3) = 1` from `u.reduced`.
-4. Apply `den_div_eq_of_coprime`.
+Input: primitive Pythagorean parameters with
+`b^2 = (m-n)(m+n)` and `gcd(m-n,m+n)=1`.
+Output: the square split `m-n=u^2`, `m+n=v^2`, and `b=u*v`, with the
+positivity/nondegeneracy needed for strict descent.
 -/
-lemma curve_rhs_den_eq_den_cube (u : ℚ) :
-    (u ^ 3 + u ^ 2 - u).den = u.den ^ 3 := by
-  -- This is the exact remaining `Rat.den`/gcd normalization.
-  -- The low-level API is `den_div_eq_of_coprime`; the needed coprimality
-  -- is the polynomial-gcd fact described above.
+theorem split_b_square_from_coprime_factors
+    {m n b : ℤ}
+    (hb_pos : 0 < b)
+    (hb2_mn : b ^ 2 = m ^ 2 - n ^ 2)
+    (hmn_gcd : Int.gcd m n = 1)
+    (hmn_parity :
+      (m % 2 = 0 ∧ n % 2 = 1 ∨ m % 2 = 1 ∧ n % 2 = 0)) :
+    ∃ u v : ℤ,
+      0 < u ∧ 1 < v ∧ Int.gcd v u = 1 ∧
+        m - n = u ^ 2 ∧ m + n = v ^ 2 ∧ b = u * v := by
+  -- Proof plan:
+  --   hprod : (m-n)*(m+n)=b^2 by `rw [hb2_mn]; ring`.
+  --   hcop  : Int.gcd (m-n) (m+n)=1 from `hmn_gcd` and opposite parity.
+  --   apply `Int.sq_of_gcd_eq_one hcop hprod` to both factors.
+  --   positivity kills the negative square alternatives.
+  --   `b^2=(u*v)^2` plus `b>0,u>0,v>0` gives `b=u*v`.
+  --   The `1<v` condition is the nondegenerate branch needed for strict descent;
+  --   the `v=1` branch should be handled separately as base/degenerate.
   sorry
 
 /--
-If `(u,w)` lies on `w^2 = u^3+u^2-u`, then `u` has square denominator:
-`u = A / B^2` with `A,B : ℤ`, `0 < B`, and `gcd(A,B)=1`.
+Core descent branch for the split `U=a^4`, `V=5*b^4`.
+
+The hypotheses `hhalf`, `hpy`, `hcop_hb`, and `hb2_odd_mod` are the local facts
+proved before invoking this branch:
+* `hhalf`: `2*h = a^2-b^2`, from `h=(a^2-b^2)/2` and oddness of `a,b`;
+* `hpy`: `h^2+b^4=r^2`, from `4*r^2=(a^2-b^2)^2+4*b^4`;
+* `hcop_hb`: primitivity of the Pythagorean triple;
+* `hb2_odd_mod`: the odd-leg condition needed by Mathlib's classifier.
 -/
-theorem rat_denom_square
-    {u w : ℚ}
-    (hcurve : w ^ 2 = u ^ 3 + u ^ 2 - u) :
-    ∃ A B : ℤ,
-      0 < B ∧ Int.gcd A B = 1 ∧
-        u = (A : ℚ) / (B : ℚ) ^ 2 := by
-  have hsq_rhs : IsSquare (u ^ 3 + u ^ 2 - u) := by
-    refine ⟨w, ?_⟩
-    rw [← hcurve]
+theorem descent_branch_a4_5b4
+    {a b h r B : ℤ}
+    (ha_pos : 0 < a) (hb_pos : 0 < b) (hr_pos : 0 < r) (hB_pos : 0 < B)
+    (habB : a * b = B)
+    (hhalf : 2 * h = a ^ 2 - b ^ 2)
+    (hpy : h ^ 2 + b ^ 4 = r ^ 2)
+    (hcop_hb : Int.gcd h b = 1)
+    (hb2_odd_mod : (b ^ 2) % 2 = 1) :
+    ∃ r' B' s' : ℤ,
+      QuarticPlusZ r' B' s' ∧ B'.natAbs < B.natAbs := by
+  -- 1. Build the Pythagorean triple with the odd leg first.
+  have hpt : PythagoreanTriple (b ^ 2) h r := by
+    dsimp [PythagoreanTriple]
+    rw [show (b ^ 2) * (b ^ 2) + h * h = h ^ 2 + b ^ 4 by ring]
+    rw [show r * r = r ^ 2 by ring]
+    exact hpy
+
+  -- 2. Primitive condition for the odd leg `b^2`.
+  have hb_h_coprime : IsCoprime b h :=
+    (Int.isCoprime_iff_gcd_eq_one.mpr hcop_hb).symm
+
+  have hcop_b2_h : Int.gcd (b ^ 2) h = 1 := by
+    apply Int.isCoprime_iff_gcd_eq_one.mp
+    simpa [pow_two] using (IsCoprime.mul_left hb_h_coprime hb_h_coprime)
+
+  -- 3. Classify the primitive Pythagorean triple.
+  obtain ⟨m, n, hb2_mn, hh_2mn, hr_mn, hmn_gcd, hmn_parity, hm_nonneg⟩ :=
+    hpt.coprime_classification' hcop_b2_h hb2_odd_mod hr_pos
+
+  -- 4. Split `b^2=(m-n)(m+n)` into coprime squares.
+  obtain ⟨u, v, hu_pos, hv_gt_one, hcop_vu, hsub, hadd, hb_uv⟩ :=
+    split_b_square_from_coprime_factors
+      hb_pos hb2_mn hmn_gcd hmn_parity
+
+  -- 5. Pure algebra: derive the new quartic equation
+  --      a^2 = v^4 + v^2*u^2 - u^4.
+  have h2h_vu : 2 * h = v ^ 4 - u ^ 4 := by
+    have hdiff : (m + n) ^ 2 - (m - n) ^ 2 = v ^ 4 - u ^ 4 := by
+      rw [hadd, hsub]
+      ring
+    have hmn_alg : (m + n) ^ 2 - (m - n) ^ 2 = 4 * m * n := by
+      ring
+    nlinarith [hh_2mn, hdiff, hmn_alg]
+
+  have hb_sq_uv : b ^ 2 = u ^ 2 * v ^ 2 := by
+    rw [hb_uv]
     ring
 
-  have hden_sq : IsSquare ((u ^ 3 + u ^ 2 - u).den) :=
-    (Rat.isSquare_iff.mp hsq_rhs).2
+  have hnew : a ^ 2 = v ^ 4 + v ^ 2 * u ^ 2 - u ^ 4 := by
+    nlinarith [hhalf, h2h_vu, hb_sq_uv]
 
-  have hden_cube_sq : IsSquare (u.den ^ 3) := by
-    simpa [curve_rhs_den_eq_den_cube u] using hden_sq
+  -- 6. Strict descent: B' = u, and `u < u*v = b ≤ a*b = B`.
+  have hu_lt_b : u < b := by
+    rw [hb_uv]
+    nlinarith [hu_pos, hv_gt_one]
 
-  have hden_ne : u.den ≠ 0 := u.den_ne_zero
-  have hden_isSquare : IsSquare u.den :=
-    nat_isSquare_of_isSquare_cube hden_ne hden_cube_sq
+  have hb_le_B : b ≤ B := by
+    rw [← habB]
+    nlinarith [ha_pos, hb_pos]
 
-  rcases hden_isSquare with ⟨B₀, hB₀sq⟩
+  have hu_lt_B : u < B := lt_of_lt_of_le hu_lt_b hb_le_B
 
-  have hB₀_ne : B₀ ≠ 0 := by
-    intro hB₀_zero
-    apply hden_ne
-    simpa [hB₀_zero] using hB₀sq
+  have hu_nat_lt_B_nat : u.natAbs < B.natAbs := by
+    rw [Int.natAbs_of_nonneg (le_of_lt hu_pos), Int.natAbs_of_nonneg (le_of_lt hB_pos)]
+    exact_mod_cast hu_lt_B
 
-  have hB₀_pos : 0 < B₀ := Nat.pos_of_ne_zero hB₀_ne
+  -- 7. Return the smaller quartic-plus solution `(r',B',s')=(v,u,a)`.
+  refine ⟨v, u, a, ?_, hu_nat_lt_B_nat⟩
+  constructor
+  · exact lt_trans (by norm_num : (0 : ℤ) < 1) hv_gt_one
+  constructor
+  · exact hu_pos
+  constructor
+  · exact hcop_vu
+  · -- `a^2 = v^4 + v^2*u^2 - u^4` is the quartic equation.
+    simpa [QuarticPlusZ] using hnew
 
-  have hB₀_dvd_den : B₀ ∣ u.den := by
-    rw [hB₀sq]
-    exact dvd_mul_right B₀ B₀
-
-  have hcop_nat : Nat.Coprime u.num.natAbs B₀ :=
-    Nat.Coprime.of_dvd_right hB₀_dvd_den u.reduced
-
-  have hcop_int : Int.gcd u.num (B₀ : ℤ) = 1 := by
-    simpa [Int.gcd, Int.natAbs_natCast] using
-      (Nat.coprime_iff_gcd_eq_one.mp hcop_nat)
-
-  refine ⟨u.num, (B₀ : ℤ), ?_, hcop_int, ?_⟩
-  · exact_mod_cast hB₀_pos
-  · have hden_eq : u.den = B₀ ^ 2 := by
-      simpa [pow_two] using hB₀sq
-    calc
-      u = (u.num : ℚ) / (u.den : ℚ) := by
-        simpa using (Rat.num_div_den u).symm
-      _ = (u.num : ℚ) / ((B₀ : ℤ) : ℚ) ^ 2 := by
-        rw [hden_eq]
-        simp [pow_two]
-
-end DM4
+end DM3
 ```
 
-The exact theorem to prove next, if you want this file to have no `sorry`, is:
+To call this from your full branch, first prove:
 
 ```lean
-lemma curve_rhs_den_eq_den_cube (u : ℚ) :
-    (u ^ 3 + u ^ 2 - u).den = u.den ^ 3
+hhalf : 2*h = a^2-b^2
+hpy : h^2+b^4=r^2
+hcop_hb : Int.gcd h b = 1
+hb2_odd_mod : (b^2) % 2 = 1
 ```
 
-and its exact inner gcd target is:
-
-```lean
-Nat.Coprime
-  (u.num * (u.num ^ 2 + u.num * (u.den : ℤ)^2 - (u.den : ℤ)^4)).natAbs
-  (u.den ^ 3)
-```
+Then `descent_branch_a4_5b4` returns the smaller solution `(v,u,a)` with `u.natAbs < B.natAbs`.
