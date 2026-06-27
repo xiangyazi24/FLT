@@ -79,11 +79,14 @@ lemma crt_two_factor_decomposition
     ∃ (m n : ℕ), 0 < m ∧ 0 < n ∧ m ∣ n ∧
       (ℤ/odd_part × ℤ/(2^e_two) ≃+ ℤ/m × ℤ/n) := by
   -- CRT: (ℤ/odd_part) × (ℤ/2^e_two) → (ℤ/m) × (ℤ/n) where m | n
-  -- m = odd_part, n = lcm(odd_part, 2^e_two) = odd_part * 2^e_two (coprime)
+  -- Since gcd(odd_part, 2^e_two) = 1 (odd ⊥ powers of 2):
+  -- m = odd_part, n = odd_part * 2^e_two (= lcm since coprime)
   use odd_part, odd_part * 2^e_two
   refine ⟨h_odd_pos, Nat.mul_pos h_odd_pos h_two_pos, ?_, ?_⟩
   · exact dvd_mul_right odd_part (2^e_two)
-  · sorry  -- CRT isomorphism: coprime factors combine directly
+  · -- CRT isomorphism: (ℤ/odd_part) × (ℤ/2^e_two) ≃+ ℤ/(odd_part * 2^e_two)
+    -- Requires: gcd(odd_part, 2^e_two) = 1 (proved by odd_part is odd, 2^e_two is power of 2)
+    sorry  -- ~20 LOC: Mathlib ZMod.chineseRemainder + coprime injection
 
 -- The reduction step: separate G into (odd part) ⊕ (2-part)
 lemma primary_to_binary
