@@ -1,374 +1,492 @@
-# Q1222 (dm1): Codex dispatch spec — prove `real_mTorsion_card_le`
+# Q1232 (dm1): IVT-only proof sketch for the real locus and the `E(ℝ)[m]` combinatorial partition
 
-## Mission
+## Bottom line
 
-Work in the local repo checkout:
+Yes, the **real-cubic branch classification** behind the statement “`E(ℝ)` has at most two real branches/components” can be formalized in Lean 4 with Mathlib using only generic IVT plus polynomial/root-count facts.
 
-```bash
-cd ~/repos/flt-ai
+But no, the desired torsion bound
+
+```lean
+Nat.card {P : (E⁄ℝ).Point // (m : ℕ) • P = 0} ≤ 2 * m
 ```
 
-Create exactly one new Lean file:
+cannot be proved from the x-interval partition alone. The partition gives at most two geometric regions. The estimate “each region contributes at most `m` torsion points” still needs the group/circle input: the relevant real component is a circle/torsor for a circle, and its `m`-torsion injects into `ZMod m` or has cardinal at most `m`. That is not a consequence of IVT alone.
+
+So the right Lean plan is:
+
+1. Use IVT/polynomial algebra to build a **branch index**
+   ```lean
+   branchIndex : (E⁄ℝ).Point → Fin 2
+   ```
+   from the x-coordinate and the roots of the cubic `Ψ₂Sq`.
+2. Prove a generic finite-combinatorial lemma: if each branch fiber has cardinal `≤ m`, then the whole torsion set has cardinal `≤ 2 * m`.
+3. Supply the fiber bound from a separate real-component/circle theorem. The IVT branch argument helps identify the two fibers but does not itself prove the fiber bound.
+
+## Mathlib API check
+
+Mathlib does **not** have a special theorem named `Polynomial.IVT`. It has generic IVT for continuous functions on intervals/connected sets, and polynomials are continuous.
+
+Useful checks:
+
+```lean
+import Mathlib.Topology.Order.IntermediateValue
+import Mathlib.Topology.Algebra.Polynomial
+import Mathlib.Algebra.Polynomial.Roots
+import Mathlib.Analysis.Polynomial.Order
+
+#check intermediate_value_Icc
+#check IsPreconnected.intermediate_value
+#check intermediate_value_univ
+#check mem_range_of_exists_le_of_exists_ge
+
+#check Polynomial.continuous
+#check Polynomial.continuousOn
+
+#check Polynomial.card_roots'
+#check Polynomial.card_le_degree_of_subset_roots
+#check Polynomial.finite_setOf_isRoot
+
+#check Polynomial.zero_lt_eval_of_roots_lt_of_leadingCoeff_nonneg
+#check Polynomial.zero_le_eval_of_roots_le_of_leadingCoeff_nonneg
+#check Polynomial.zero_lt_negOnePow_mul_eval_of_lt_roots_of_leadingCoeff_nonneg
+#check Polynomial.zero_le_negOnePow_mul_eval_of_le_roots_of_leadingCoeff_nonneg
+```
+
+The file `Mathlib.Analysis.Polynomial.Order` is especially relevant: it proves eventual/root-side sign lemmas for real polynomials. Those lemmas themselves use `intermediate_value_Icc`, so they are essentially packaged IVT plus polynomial algebra. If “ONLY IVT” means no real closed field machinery and no advanced curve topology, these are acceptable. If it means literally no imported lemma whose proof used anything besides IVT, then reprove the required sign lemmas locally from `intermediate_value_Icc` and `Polynomial.continuous`.
+
+## Important coordinate correction
+
+For a general Weierstrass equation in Mathlib, the curve is not literally stored as
 
 ```text
-FLT/Assumptions/MazurProof/RealTorsionProof.lean
+y^2 = f(x)
 ```
 
-Do not edit existing files. Do not add axioms, `constant`s, `opaque` declarations, `unsafe` declarations, `sorry`, `admit`, or `by native_decide` hacks. The new file must compile with `lake env lean` and must import the existing torsion-definition file.
-
-## Required import header
-
-Start the new file with this import. Add extra Mathlib imports only if needed by the proof.
-
-```lean
-import FLT.Assumptions.MazurProof.TorsionDefs
-import Mathlib.Topology.Instances.AddCircle.Real
-import Mathlib.Analysis.Normed.Group.AddCircle
-```
-
-Use the same namespace conventions already used in `FLT/Assumptions/MazurProof/TorsionDefs.lean`. If that file is namespace-free, keep this file namespace-free too.
-
-If the local checkout does not contain `FLT/Assumptions/MazurProof/TorsionDefs.lean`, stop: do **not** create a shim or replacement. The import path above is part of the task contract.
-
-## Target theorem
-
-The mathematical target is:
-
-> For an elliptic curve `E : WeierstrassCurve ℚ`, the real `m`-torsion has cardinal at most `2 * m`.
-
-The Lean statement must use additive scalar multiplication, not multiplication:
-
-```lean
-(m : ℕ) • P = 0
-```
-
-not
-
-```lean
-m * P = 0
-```
-
-The theorem must include a positivity hypothesis on `m`. Without `0 < m`, the statement is false at `m = 0`, because the `0`-torsion condition is all of `E(ℝ)`.
-
-Preferred theorem shape, unless `TorsionDefs.lean` already defines an exact target name/type that should be reused:
-
-```lean
-noncomputable section
-
-open scoped Classical
-open WeierstrassCurve
-
-/-- Real elliptic-curve `m`-torsion has at most `2 * m` points. -/
-theorem real_mTorsion_card_le
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℝ]
-    (m : ℕ) (hm : 0 < m) :
-    Nat.card {P : (E⁄ℝ).Point // (m : ℕ) • P = 0} ≤ 2 * m := by
-  -- proof here
-```
-
-If `TorsionDefs.lean` already defines an abbreviation such as `real_mTorsion E m`, use that abbreviation in the theorem statement if doing so matches the project’s expected public API. For example:
-
-```lean
--- Use only if this is the existing local API.
-theorem real_mTorsion_card_le
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℝ]
-    (m : ℕ) (hm : 0 < m) :
-    Nat.card (real_mTorsion E m) ≤ 2 * m := by
-  -- proof here
-```
-
-Before writing the proof, run local probes to discover the exact names exported by `TorsionDefs.lean`:
-
-```lean
-import FLT.Assumptions.MazurProof.TorsionDefs
-
-#check WeierstrassCurve
-#check UnitAddCircle
-#check AddCircle.card_torsion_le_of_isSMulRegular
-#check AddCircle.finite_torsion
-#check ZMod.toAddCircle
-#check ZMod.toAddCircle_injective
--- Also try these; keep whichever names exist locally.
-#check real_mTorsion
-#check real_mTorsion_card_le
-```
-
-If `real_mTorsion_card_le` is already declared in `TorsionDefs.lean` as an axiom or theorem with `sorry`, do not create a duplicate declaration with the same name. Instead, prove the same statement in the new file under the temporary name `real_mTorsion_card_le_proved`, with a comment explaining that the existing declaration should be replaced in a follow-up patch. The preferred outcome is still a public theorem named `real_mTorsion_card_le` if no conflicting declaration exists.
-
-## Mathematical proof plan
-
-Prove either of the following. Option A is preferred, but Option B is acceptable and usually easier.
-
-### Option A: construct an explicit injection
-
-Construct an injection
-
-```lean
-{P : (E⁄ℝ).Point // (m : ℕ) • P = 0} ↪ Fin 2 × ZMod m
-```
-
-and finish by cardinality:
-
-```lean
-have hcard : Nat.card (Fin 2 × ZMod m) = 2 * m := by
-  -- use `Nat.card_prod`, `Nat.card_fin`, and the local `ZMod` cardinal theorem
-  -- likely `ZMod.card` or `Nat.card_zmod`, depending on the local Mathlib version
-  ...
-exact (Nat.card_le_card_of_injective f f.injective).trans_eq hcard
-```
-
-The injection is conceptually:
+Instead, after completing the square, the relevant coordinate is
 
 ```text
-P ↦ (real connected component of P, circle m-torsion coordinate inside that component)
+u = 2*y + a₁*x + a₃
 ```
 
-The component coordinate lands in `Fin 2` because `E(ℝ)` has at most two connected components. The circle coordinate lands in `ZMod m` because each connected component is a torsor for the identity component, and the identity component is a circle whose `m`-torsion is `ZMod m`.
-
-### Option B: prove the cardinal bound directly
-
-Partition the torsion subtype by connected component:
+and the cubic is
 
 ```text
-T_i = {P : E(ℝ)[m] | componentIndex P = i},  i : Fin 2
+u^2 = Ψ₂Sq(x)
 ```
 
-For each `i : Fin 2`:
-
-* If `T_i` is empty, `Nat.card T_i = 0 ≤ m`.
-* If `T_i` is nonempty, choose `P₀ : T_i`. The map
-
-```text
-P ↦ P - P₀
-```
-
-injects `T_i` into the `m`-torsion of the identity component, because:
+where
 
 ```lean
-m • (P - P₀) = m • P - m • P₀ = 0 - 0 = 0
+(E⁄ℝ).Ψ₂Sq = 4*X^3 + b₂*X^2 + 2*b₄*X + b₆
 ```
 
-and because two points in the same connected component differ by an element of the identity component.
+This is exactly the `Ψ₂Sq` polynomial from `Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic`.
 
-Use the additive-circle theorem to show the identity-component `m`-torsion has at most `m` elements. Then sum over the two component indices:
+So in Lean the branch classifier should be based on `Ψ₂Sq.eval x ≥ 0`, not on the original `y^2` unless the curve has already been put into short Weierstrass form.
 
-```text
-Nat.card E(ℝ)[m]
-  = Σ i : Fin 2, Nat.card T_i
-  ≤ Σ i : Fin 2, m
-  = 2 * m
-```
-
-This direct proof is accepted even if it never packages the result as a single injection into `Fin 2 × ZMod m`.
-
-## Existing Mathlib facts to use
-
-Use Mathlib’s additive circle API. The relevant imported files are:
+A useful local lemma to prove is schematic like this:
 
 ```lean
-import Mathlib.Topology.Instances.AddCircle.Real
-import Mathlib.Analysis.Normed.Group.AddCircle
-```
-
-Important names to try first:
-
-```lean
-#check UnitAddCircle
-#check AddCircle.card_torsion_le_of_isSMulRegular
-#check AddCircle.finite_torsion
-#check ZMod.toAddCircle
-#check ZMod.toAddCircle_injective
-#check ZMod.toAddCircle_inj
-```
-
-`Mathlib.Topology.Instances.AddCircle.Real` defines `UnitAddCircle` as `AddCircle (1 : ℝ)` and provides the map `ZMod.toAddCircle : ZMod N →+ UnitAddCircle` with injectivity lemmas for positive `N`. Use these rather than defining a new circle model.
-
-A useful local lemma to prove early is:
-
-```lean
-private lemma unitAddCircle_mtorsion_card_le (m : ℕ) (hm : 0 < m) :
-    Nat.card {x : UnitAddCircle // (m : ℕ) • x = 0} ≤ m := by
-  -- Route 1: use `AddCircle.card_torsion_le_of_isSMulRegular` and convert `encard` to `Nat.card`.
-  -- Route 2: construct an injection into `ZMod m` using `ZMod.toAddCircle_injective`.
-  -- Prefer the route that is shortest in the local Mathlib version.
-  ...
-```
-
-For Route 1, the key regularity fact over `ℝ` is that natural-number scalar multiplication by positive `m` is injective on `ℝ`:
-
-```lean
-have hreg : IsSMulRegular ℝ m := by
-  -- likely available as `.of_right_eq_zero_of_smul`, or derivable from `nsmul_eq_zero` over `ℝ`
-  ...
-have henc : ({x : AddCircle (1 : ℝ) | (m : ℕ) • x = 0} : Set (AddCircle (1 : ℝ))).encard ≤ m := by
-  exact AddCircle.card_torsion_le_of_isSMulRegular (p := (1 : ℝ)) m hm.ne' hreg
-```
-
-Then convert the set version to the subtype version. Use local theorem search for the exact conversion lemmas:
-
-```lean
-#check Set.Finite.to_subtype
-#check Nat.card_eq_fintype_card
-#check ENat.card_eq_coe_natCard
-#check Set.encard_eq_coe_toFinset_card
-```
-
-## Real elliptic-curve component API to find or derive
-
-Search the imported FLT/Mathlib files for existing real-elliptic component facts before proving anything from scratch:
-
-```bash
-grep -R "connectedComponent\|ConnectedComponent\|componentIndex\|UnitAddCircle\|AddCircle\|real.*component\|Real.*component" \
-  FLT Mathlib .lake/packages/mathlib/Mathlib 2>/dev/null | head -200
-```
-
-The proof needs the following conceptual API. Use existing names if present; otherwise prove local private lemmas from existing Mathlib facts.
-
-```lean
--- Schematic only: do not paste these exact names unless they exist or you define them locally.
-componentIndex : (E⁄ℝ).Point → Fin 2
-same_component_iff_sub_mem_identity_component :
-  componentIndex P = componentIndex Q ↔ P - Q ∈ identityComponent E
-identityComponent_addEquiv_unitAddCircle :
-  identityComponent E ≃+ UnitAddCircle
-```
-
-The exact representation of the identity component may differ. It may be a subgroup, an additive subgroup, a connected component subtype, or a bundled topological subgroup. Use the representation already present in `TorsionDefs.lean` or nearby files.
-
-Do **not** assume the whole group `E(ℝ)` is finite. It is not. Only the `m`-torsion is finite for `m > 0`.
-
-## Implementation details and lemmas
-
-### Torsion subtype
-
-It is often helpful to define a local abbreviation if one is not already available:
-
-```lean
-private abbrev RealPoint (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℝ] :=
-  (E⁄ℝ).Point
-
-private abbrev RealMTorsion (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℝ]
-    (m : ℕ) :=
-  {P : RealPoint E // (m : ℕ) • P = 0}
-```
-
-Keep these `private` if the project already has public names.
-
-### Difference of two torsion points
-
-Use additive-group simp lemmas. A local lemma like this should be easy:
-
-```lean
-private lemma nsmul_sub_eq_zero_of_mem_mtorsion
-    {G : Type*} [AddCommGroup G] {m : ℕ}
-    {P Q : G} (hP : (m : ℕ) • P = 0) (hQ : (m : ℕ) • Q = 0) :
-    (m : ℕ) • (P - Q) = 0 := by
-  rw [nsmul_sub, hP, hQ, sub_self]
-```
-
-### Fiber injection into identity-component torsion
-
-For a fixed component `i` and chosen base point `P₀` in that fiber, define:
-
-```text
-P ↦ P - P₀
-```
-
-The codomain should be the identity-component `m`-torsion subtype. Prove:
-
-* it lands in the identity component because `P` and `P₀` are in the same component;
-* it is `m`-torsion by `nsmul_sub_eq_zero_of_mem_mtorsion`;
-* it is injective by subtract-cancellation/add-cancellation in an additive group.
-
-This avoids having to define canonical circle coordinates on every component.
-
-### Identity-component circle torsion
-
-Transport identity-component torsion across the additive equivalence/homeomorphism to `UnitAddCircle`, then use `unitAddCircle_mtorsion_card_le`.
-
-If the identity-component equivalence is only a homeomorphism, confirm it also preserves addition. The proof needs an additive equivalence or at least an injective additive map preserving `m • x = 0`.
-
-## Expected file shape
-
-The final file should look roughly like this; the middle lemmas will depend on the actual local API.
-
-```lean
-import FLT.Assumptions.MazurProof.TorsionDefs
-import Mathlib.Topology.Instances.AddCircle.Real
-import Mathlib.Analysis.Normed.Group.AddCircle
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.Analysis.Polynomial.Order
 
 noncomputable section
 
-open scoped Classical
+open Polynomial
 open WeierstrassCurve
+open scoped Polynomial.Bivariate
 
--- Use the namespace from `TorsionDefs.lean`, if any.
+/-- Schematic: on a real point, the completed-square coordinate has square `Ψ₂Sq(x)`. -/
+private lemma completed_square_eq_Ψ₂Sq
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {x y : ℝ} (hxy : (E⁄ℝ).Nonsingular x y) :
+    ((E⁄ℝ).toAffine.polynomialY.evalEval x y) ^ 2 =
+      ((E⁄ℝ).Ψ₂Sq).eval x := by
+  -- Prove by evaluating the identity `ψ₂_sq` or `C_Ψ₂Sq` at `(x,y)`
+  -- and using `hxy.left`, i.e. the Weierstrass equation at `(x,y)`.
+  -- In the division-polynomial file the identity is:
+  --   W.ψ₂ ^ 2 = C W.Ψ₂Sq + 4 * W.toAffine.polynomial
+  -- Evaluating at a point on the curve kills the final polynomial term.
+  -- The exact simp set will involve:
+  --   WeierstrassCurve.ψ₂
+  --   WeierstrassCurve.ψ₂_sq
+  --   WeierstrassCurve.Affine.evalEval_polynomialY
+  --   the equation part of `hxy`.
+  -- Fill this as the first API lemma.
+  omega -- placeholder in this sketch; do not use in final code
+```
 
-private lemma nsmul_sub_eq_zero_of_mem_mtorsion
-    {G : Type*} [AddCommGroup G] {m : ℕ}
-    {P Q : G} (hP : (m : ℕ) • P = 0) (hQ : (m : ℕ) • Q = 0) :
-    (m : ℕ) • (P - Q) = 0 := by
-  rw [nsmul_sub, hP, hQ, sub_self]
+The last line is intentionally marked as a placeholder for the sketch; the actual implementation should replace it with evaluation/simp/ring reasoning, not `omega`.
 
-private lemma unitAddCircle_mtorsion_card_le (m : ℕ) (hm : 0 < m) :
-    Nat.card {x : UnitAddCircle // (m : ℕ) • x = 0} ≤ m := by
-  -- Fill using `AddCircle.card_torsion_le_of_isSMulRegular` or `ZMod.toAddCircle_injective`.
-  ...
+## Cubic root and sign classification
 
-/-- Real elliptic-curve `m`-torsion has at most `2 * m` points. -/
-theorem real_mTorsion_card_le
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℝ]
-    (m : ℕ) (hm : 0 < m) :
-    Nat.card {P : (E⁄ℝ).Point // (m : ℕ) • P = 0} ≤ 2 * m := by
+The main algebraic classification lemma should be stated independently of elliptic curves.
+
+For a squarefree cubic `f : ℝ[X]` with positive leading coefficient, the nonnegative locus is one of two shapes:
+
+```text
+one real root r:
+  {x | 0 ≤ f(x)} = [r, ∞)
+
+three real roots r₁ < r₂ < r₃:
+  {x | 0 ≤ f(x)} = [r₁, r₂] ∪ [r₃, ∞)
+```
+
+The squarefree hypothesis is needed to rule out the double-root case. For elliptic curves it should follow from nonsingularity/discriminant nonzero, but prove that as a separate bridge lemma for `Ψ₂Sq`.
+
+Suggested shape theorem:
+
+```lean
+import Mathlib.Analysis.Polynomial.Order
+
+noncomputable section
+
+open Polynomial Set
+
+/-- The two possible nonnegative loci for a squarefree real cubic with positive leading coefficient.
+This is the useful IVT/polynomial output for the elliptic-curve branch partition. -/
+inductive CubicNonnegShape (f : ℝ[X]) : Type
+  | oneRoot
+      (r : ℝ)
+      (hr : f.IsRoot r)
+      (h_nonneg_iff : ∀ x : ℝ, 0 ≤ f.eval x ↔ r ≤ x)
+  | threeRoots
+      (r₁ r₂ r₃ : ℝ)
+      (h₁₂ : r₁ < r₂)
+      (h₂₃ : r₂ < r₃)
+      (hr₁ : f.IsRoot r₁)
+      (hr₂ : f.IsRoot r₂)
+      (hr₃ : f.IsRoot r₃)
+      (h_nonneg_iff : ∀ x : ℝ, 0 ≤ f.eval x ↔ x ∈ Icc r₁ r₂ ∨ r₃ ≤ x)
+
+/-- Schematic theorem to prove. -/
+private theorem cubic_nonneg_shape
+    (f : ℝ[X])
+    (hdeg : f.natDegree = 3)
+    (hlc : 0 < f.leadingCoeff)
+    (hsqfree : f.Squarefree) :
+    CubicNonnegShape f := by
+  -- Proof plan:
+  -- 1. `f ≠ 0` follows from `hdeg`.
+  -- 2. Existence of at least one real root follows from IVT:
+  --    show `f.eval x < 0` for some very negative `x` and `0 < f.eval y`
+  --    for some very positive `y`, then apply `intermediate_value_Icc`.
+  -- 3. `Polynomial.card_roots'` or `Polynomial.card_le_degree_of_subset_roots`
+  --    bounds the number of distinct roots by 3.
+  -- 4. `hsqfree` rules out multiplicities, hence the number of distinct real roots is 1 or 3,
+  --    not 2 with a double root.
+  -- 5. In the one-root case use the packaged sign lemmas:
+  --      * to the right of the unique root, all roots are `≤ x`, so `0 ≤ f.eval x`;
+  --      * to the left, the odd-degree/positive-leading-coefficient sign lemma gives `f.eval x ≤ 0`.
+  -- 6. In the three-root case, either factor using the three roots and compute signs of
+  --    `(x-r₁)*(x-r₂)*(x-r₃)`, or use the sign lemmas interval-by-interval.
+  -- This theorem is a real proof obligation; do not leave it as a declaration in final code.
+  fail_if_success exact (by trivial : CubicNonnegShape f)
+  -- End of sketch.
+  exact by
+    -- no actual proof supplied in this dispatch
+    -- replace this entire block in implementation
+    contradiction
+```
+
+The code above is a **shape of the desired theorem**, not final code. The key point is that this theorem is independent of elliptic curves and should be proved first.
+
+### Root count snippet
+
+This helper is close to final Lean and is often useful when avoiding root-multiset details at first:
+
+```lean
+import Mathlib.Algebra.Polynomial.Roots
+
+open Polynomial
+
+private lemma cubic_root_finset_card_le
+    (f : ℝ[X]) (hdeg : f.natDegree = 3) (Z : Finset ℝ)
+    (hZ : ∀ x ∈ Z, f.IsRoot x) :
+    Z.card ≤ 3 := by
   classical
-  -- Either construct an injection into `Fin 2 × ZMod m`,
-  -- or partition by the two connected components and bound each fiber by `m`.
-  ...
+  have hf0 : f ≠ 0 := by
+    intro hf
+    simpa [hf] using hdeg
+  have hsub : Z.val ⊆ f.roots := by
+    intro x hx
+    exact (Polynomial.mem_roots hf0).2 (hZ x hx)
+  calc
+    Z.card ≤ f.natDegree := Polynomial.card_le_degree_of_subset_roots hsub
+    _ = 3 := hdeg
 ```
 
-Replace the `...` with actual proofs. The committed file must contain no `...` placeholders.
+### IVT root-existence snippet
 
-## Acceptance checks
-
-Run all of these from `~/repos/flt-ai`:
-
-```bash
-lake env lean FLT/Assumptions/MazurProof/RealTorsionProof.lean
-```
-
-Check the new file contains no placeholders or new axioms:
-
-```bash
-! grep -nE 'sorry|admit|axiom|constant|opaque|unsafe|\.\.\.' FLT/Assumptions/MazurProof/RealTorsionProof.lean
-```
-
-Check the theorem’s axioms. Create a temporary file outside the repo, for example `/tmp/check_real_torsion.lean`:
+A generic IVT root-existence lemma can be organized like this:
 
 ```lean
-import FLT.Assumptions.MazurProof.RealTorsionProof
-#print axioms real_mTorsion_card_le
+import Mathlib.Topology.Order.IntermediateValue
+import Mathlib.Topology.Algebra.Polynomial
+
+open Polynomial Set
+
+private lemma exists_root_between_of_eval_neg_pos
+    (f : ℝ[X]) {a b : ℝ} (hab : a ≤ b)
+    (ha : f.eval a ≤ 0) (hb : 0 ≤ f.eval b) :
+    ∃ x ∈ Icc a b, f.IsRoot x := by
+  classical
+  have h0 : 0 ∈ Icc (f.eval a) (f.eval b) := ⟨ha, hb⟩
+  rcases intermediate_value_Icc hab f.continuous.continuousOn h0 with ⟨x, hx, hx0⟩
+  exact ⟨x, hx, by simpa [Polynomial.IsRoot.def] using hx0.symm⟩
 ```
 
-Then run:
+For a positive-leading cubic, produce `a` and `b` by proving the tail signs. You can do this manually from the explicit formula
 
-```bash
-lake env lean /tmp/check_real_torsion.lean
+```lean
+C 4 * X^3 + C b₂ * X^2 + C (2*b₄) * X + C b₆
 ```
 
-The only allowed axioms in the `#print axioms` output are:
+or use Mathlib’s polynomial asymptotic/sign facts. The manual route is longer but closer to “only IVT”.
+
+## Branch index for real points
+
+Once `cubic_nonneg_shape` is proved for `(E⁄ℝ).Ψ₂Sq`, define a branch index on real points.
+
+In the one-root case, all affine real points and the point at infinity are assigned to the same branch.
+
+In the three-root case, the compact oval is the interval `[r₁,r₂]`, and the unbounded branch is `[r₃,∞)` plus infinity. The condition `x ≤ r₂` distinguishes them because every real point has `Ψ₂Sq(x) ≥ 0`.
+
+Schematic code:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.Analysis.Polynomial.Order
+
+noncomputable section
+
+open Polynomial Set
+open WeierstrassCurve
+
+private def realBranchIndex
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℝ]
+    (shape : CubicNonnegShape ((E⁄ℝ).Ψ₂Sq)) :
+    (E⁄ℝ).Point → Fin 2 := by
+  intro P
+  cases shape with
+  | oneRoot r hr h_nonneg_iff =>
+      exact 0
+  | threeRoots r₁ r₂ r₃ h₁₂ h₂₃ hr₁ hr₂ hr₃ h_nonneg_iff =>
+      cases P with
+      | zero =>
+          -- Infinity belongs to the unbounded branch.
+          exact 1
+      | some x y hxy =>
+          -- Since a real point satisfies `0 ≤ Ψ₂Sq(x)`, `h_nonneg_iff x` says
+          -- `x ∈ [r₁,r₂] ∨ r₃ ≤ x`.
+          -- Use `if x ≤ r₂ then 0 else 1` as the branch classifier.
+          exact if x ≤ r₂ then 0 else 1
+```
+
+The proof that this classifier is mathematically correct is a lemma about real points:
+
+```lean
+private lemma realBranchIndex_eq_zero_iff_oval
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℝ]
+    {r₁ r₂ r₃ : ℝ} (h₁₂ : r₁ < r₂) (h₂₃ : r₂ < r₃)
+    (hshape : ∀ x : ℝ, 0 ≤ ((E⁄ℝ).Ψ₂Sq).eval x ↔ x ∈ Icc r₁ r₂ ∨ r₃ ≤ x)
+    {x y : ℝ} (hxy : (E⁄ℝ).Nonsingular x y) :
+    (if x ≤ r₂ then (0 : Fin 2) else 1) = 0 ↔ x ∈ Icc r₁ r₂ := by
+  -- Direction `→`:
+  --   if `x ≤ r₂`, then use real-point nonnegativity and `hshape x`.
+  --   The alternative `r₃ ≤ x` contradicts `x ≤ r₂` and `r₂ < r₃`.
+  -- Direction `←`:
+  --   `x ∈ Icc r₁ r₂` gives `x ≤ r₂`, so simp on the if.
+  -- Requires the completed-square lemma to get `0 ≤ Ψ₂Sq.eval x`.
+  -- This is an ordinary order proof after the algebraic lemma.
+  fail_if_success exact (by simp : (if x ≤ r₂ then (0 : Fin 2) else 1) = 0 ↔ x ∈ Icc r₁ r₂)
+  exact by contradiction
+```
+
+Again: this is proof architecture, not final Lean.
+
+## The purely finite combinatorial lemma
+
+This is the part that really is combinatorial. It does not mention topology or elliptic curves.
+
+If a finite type `T` has a branch map into `Fin 2`, and each fiber injects into `ZMod m`, then `T` injects into `Fin 2 × ZMod m`, hence `Nat.card T ≤ 2*m`.
+
+Recommended statement:
+
+```lean
+import Mathlib.Data.ZMod.Basic
+
+noncomputable section
+
+open scoped Classical
+
+/-- If every branch fiber embeds into `ZMod m`, then the whole finite type embeds into
+`Fin 2 × ZMod m`. -/
+private def embed_into_two_times_zmod
+    {T : Type*} {m : ℕ} (branch : T → Fin 2)
+    (fiberCode : ∀ i : Fin 2, {t : T // branch t = i} ↪ ZMod m) :
+    T ↪ Fin 2 × ZMod m where
+  toFun t := (branch t, fiberCode (branch t) ⟨t, rfl⟩)
+  inj' := by
+    intro a b h
+    -- `congrArg Prod.fst h` gives `branch a = branch b`.
+    -- Then transport the equality of second coordinates across that branch equality
+    -- and use `(fiberCode i).injective`.
+    -- This dependent cast is the only slightly annoying part.
+    -- Alternative: use sigma codomain `Σ i : Fin 2, ZMod m`, where the cast is more explicit.
+    -- Finish by subtype extensionality.
+    cases hbranch : branch a
+    all_goals
+      -- local proof omitted in sketch
+      admit
+
+private theorem card_le_two_mul_of_fiber_embeddings
+    {T : Type*} [Finite T] {m : ℕ} (hm : 0 < m)
+    (branch : T → Fin 2)
+    (fiberCode : ∀ i : Fin 2, {t : T // branch t = i} ↪ ZMod m) :
+    Nat.card T ≤ 2 * m := by
+  classical
+  have h := Nat.card_le_card_of_injective
+    (f := embed_into_two_times_zmod branch fiberCode)
+    (embed_into_two_times_zmod branch fiberCode).injective
+  -- Then simplify:
+  --   Nat.card (Fin 2 × ZMod m) = Nat.card (Fin 2) * Nat.card (ZMod m) = 2 * m.
+  -- Use local names for `ZMod` card: try `ZMod.card`, `Nat.card_zmod`, or simp.
+  -- Final line is typically:
+  --   simpa [Nat.card_prod, Nat.card_fin, ZMod.card] using h
+  admit
+```
+
+Do not leave `admit` in final code. I include it only to show the proof structure. In practice, if dependent equality in `embed_into_two_times_zmod` is irritating, use a sigma codomain first:
+
+```lean
+T ↪ Σ _ : Fin 2, ZMod m
+```
+
+then compose with the standard equivalence
+
+```lean
+(Σ _ : Fin 2, ZMod m) ≃ Fin 2 × ZMod m
+```
+
+or compare cardinalities directly by a finite sum over `Fin 2`.
+
+## Applying the combinatorial lemma to `E(ℝ)[m]`
+
+Let
+
+```lean
+private abbrev RealMTorsion
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℝ] (m : ℕ) :=
+  {P : (E⁄ℝ).Point // (m : ℕ) • P = 0}
+```
+
+The branch map is:
+
+```lean
+fun P : RealMTorsion E m => realBranchIndex E shape P.1
+```
+
+To finish the cardinal bound, it is enough to prove this missing theorem:
+
+```lean
+/-- Missing non-IVT input: each real branch contributes at most `m` many `m`-torsion points. -/
+private theorem real_branch_torsion_fiber_embeds_zmod
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℝ]
+    (m : ℕ) (hm : 0 < m)
+    (shape : CubicNonnegShape ((E⁄ℝ).Ψ₂Sq))
+    (i : Fin 2) :
+    {P : RealMTorsion E m // realBranchIndex E shape P.1 = i} ↪ ZMod m := by
+  -- This is where IVT is no longer enough.
+  -- Needed input:
+  --   * the branch is a connected component or a torsor for the identity component;
+  --   * the identity component is additively equivalent/homeomorphic to `UnitAddCircle`;
+  --   * `UnitAddCircle` `m`-torsion embeds into `ZMod m` or has card ≤ m.
+  -- Use `Mathlib.Topology.Instances.AddCircle.Real`:
+  --   #check UnitAddCircle
+  --   #check ZMod.toAddCircle
+  --   #check ZMod.toAddCircle_injective
+  --   #check AddCircle.card_torsion_le_of_isSMulRegular
+  -- Do not try to prove this from the x-interval partition alone.
+  admit
+```
+
+Then the final theorem is straightforward:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.Analysis.Polynomial.Order
+import Mathlib.Topology.Instances.AddCircle.Real
+
+noncomputable section
+
+open scoped Classical
+open Polynomial Set
+open WeierstrassCurve
+
+private abbrev RealMTorsion
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℝ] (m : ℕ) :=
+  {P : (E⁄ℝ).Point // (m : ℕ) • P = 0}
+
+/-- Final shape of the combinatorial proof. -/
+theorem real_mTorsion_card_le_via_branch_index
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] [DecidableEq ℝ]
+    (m : ℕ) (hm : 0 < m) :
+    Nat.card (RealMTorsion E m) ≤ 2 * m := by
+  classical
+  -- 1. Get cubic shape for `Ψ₂Sq`.
+  --    Need bridge lemmas:
+  --      * `((E⁄ℝ).Ψ₂Sq).natDegree = 3` and positive leading coefficient;
+  --      * `((E⁄ℝ).Ψ₂Sq).Squarefree` from `E.IsElliptic`.
+  let shape : CubicNonnegShape ((E⁄ℝ).Ψ₂Sq) := by
+    -- exact cubic_nonneg_shape ((E⁄ℝ).Ψ₂Sq) hdeg hlc hsqfree
+    admit
+
+  -- 2. Branch map from torsion points to at most two branches.
+  let branch : RealMTorsion E m → Fin 2 := fun P => realBranchIndex E shape P.1
+
+  -- 3. Each branch fiber embeds into `ZMod m` by the non-IVT group/circle input.
+  have fiberCode : ∀ i : Fin 2, {P : RealMTorsion E m // branch P = i} ↪ ZMod m := by
+    intro i
+    -- exact real_branch_torsion_fiber_embeds_zmod E m hm shape i
+    admit
+
+  -- 4. Pure finite combinatorics.
+  exact card_le_two_mul_of_fiber_embeddings hm branch fiberCode
+```
+
+This is the clean “combinatorial” formulation: the only topological/group-theoretic input is pushed into `real_branch_torsion_fiber_embeds_zmod`.
+
+## Why the x-interval partition alone cannot bound each fiber by `m`
+
+The interval classification says where the x-coordinate of a real point can lie. It does not describe how the elliptic-curve group law moves points inside that interval, nor does it give a cyclic coordinate on a branch.
+
+The bound “one component has at most `m` m-torsion points” is a theorem about compact connected abelian Lie groups/circles, or more concretely about an additive circle parameter. In Lean, use `UnitAddCircle`, `ZMod.toAddCircle`, or `AddCircle.card_torsion_le_of_isSMulRegular` for this part.
+
+Thus, an IVT-only proof can establish:
 
 ```text
-propext
-Classical.choice
-Quot.sound
+real points lie on at most two x-branches
 ```
 
-No additional axioms are accepted.
+but it cannot by itself establish:
 
-## Non-goals
+```text
+each branch contains at most m m-torsion points
+```
 
-* Do not prove a statement over an arbitrary field.
-* Do not use division polynomials for this task.
-* Do not weaken the target to `Set.Finite`; the target is the explicit cardinal bound `≤ 2 * m` over `ℝ`.
-* Do not introduce assumptions like “`E(ℝ)` has two components” as axioms. Use existing Mathlib/FLT theorems or prove local lemmas from existing theorems.
-* Do not create or edit any file other than `FLT/Assumptions/MazurProof/RealTorsionProof.lean`.
+The latter is the same circle-torsion input from the previous plan, just localized to each branch fiber.
+
+## Recommended implementation order
+
+1. Prove `completed_square_eq_Ψ₂Sq` for real affine points.
+2. Prove or reuse `Ψ₂Sq` cubic facts:
+   ```lean
+   ((E⁄ℝ).Ψ₂Sq).natDegree = 3
+   0 < ((E⁄ℝ).Ψ₂Sq).leadingCoeff
+   ((E⁄ℝ).Ψ₂Sq).Squarefree
+   ```
+3. Prove `cubic_nonneg_shape` for squarefree positive-leading cubics.
+4. Define `realBranchIndex` from `CubicNonnegShape`.
+5. Prove the finite combinatorial lemma reducing `Nat.card T ≤ 2*m` to fiber embeddings into `ZMod m`.
+6. Discharge the fiber embedding using the real component/circle theorem. Do not expect IVT alone to do this final step.
