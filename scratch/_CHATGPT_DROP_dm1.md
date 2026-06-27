@@ -1,112 +1,140 @@
-# Q1361 (dm1/dm4): denominator square bridge for `w^2 = u^3+u^2-u`
+# Q1363 (dm1/dm2): Pythagorean extraction for the quartic descent
 
-Below is the Lean structure that compiles once the two intended local arithmetic facts are supplied:
-
-1. `nat_isSquare_of_isSquare_cube`, which you explicitly allowed to be `sorry`.
-2. `curve_rhs_den_eq_den_cube`, the curve-specific `Rat.den` normalization
-   ```lean
-   (u^3 + u^2 - u).den = u.den^3
-   ```
-   This is exactly the step that proves the numerator of
-   `u^3+u^2-u = u.num * (u.num^2 + u.num*u.den^2 - u.den^4) / u.den^3`
-   is coprime to `u.den^3`.
+The Mathlib theorem you want for the useful output is
 
 ```lean
-import Mathlib.Data.Rat.Lemmas
+PythagoreanTriple.coprime_classification'
+```
+
+not the less convenient `isPrimitiveClassified_of_coprime`.  The important orientation is
+
+```lean
+PythagoreanTriple (b^2) h r
+```
+
+because `coprime_classification'` assumes the **first** leg is odd.  This gives `b^2 = m^2-n^2` and `h = 2mn` directly.
+
+## Compilable extraction of `m,n`
+
+```lean
+import Mathlib.NumberTheory.PythagoreanTriples
+import Mathlib.RingTheory.Int.Basic
 import Mathlib.Tactic
 
-namespace DM4
-
-/-- If `n^3` is a square and `n ≠ 0`, then `n` is a square. -/
-theorem nat_isSquare_of_isSquare_cube {n : ℕ} (hn : n ≠ 0)
-    (h : IsSquare (n ^ 3)) : IsSquare n := by
-  -- Allowed local lemma from Q1338.
-  sorry
+namespace DM2
 
 /--
-The curve-specific denominator computation.
-For `u = a/b` in lowest terms, the numerator
-`a*(a^2+a*b^2-b^4)` is coprime to `b`, hence the denominator is `b^3`.
+From `h^2 + b^4 = r^2`, with `gcd(h,b)=1`, `b` odd, and `r>0`,
+extract the primitive Pythagorean parameters in the orientation needed for the descent:
+`b^2 = m^2-n^2`, `h = 2mn`, `r = m^2+n^2`.
 -/
-lemma curve_rhs_den_eq_den_cube (u : ℚ) :
-    (u ^ 3 + u ^ 2 - u).den = u.den ^ 3 := by
-  -- This is the nontrivial `Rat.den` normalization step.
-  -- Prove it separately using `Rat.num_div_den`, `Rat.reduced`, and gcd arithmetic.
-  sorry
+lemma pythagorean_extract_mn
+    {h b r : ℤ}
+    (heq : h ^ 2 + b ^ 4 = r ^ 2)
+    (hcop : Int.gcd h b = 1)
+    (hbodd : b % 2 = 1)
+    (hrpos : 0 < r) :
+    ∃ m n : ℤ,
+      b ^ 2 = m ^ 2 - n ^ 2 ∧
+      h = 2 * m * n ∧
+      r = m ^ 2 + n ^ 2 ∧
+      Int.gcd m n = 1 ∧
+      (m % 2 = 0 ∧ n % 2 = 1 ∨ m % 2 = 1 ∧ n % 2 = 0) ∧
+      0 ≤ m := by
+  have hpt : PythagoreanTriple (b ^ 2) h r := by
+    dsimp [PythagoreanTriple]
+    rw [show (b ^ 2) * (b ^ 2) + h * h = h ^ 2 + b ^ 4 by ring]
+    rw [show r * r = r ^ 2 by ring]
+    exact heq
 
-/--
-For a rational point `(u,w)` on `w^2 = u^3+u^2-u`, the denominator of `u`
-is a square, so `u = A / B^2` in lowest terms.
--/
-theorem rat_denom_square
-    {u w : ℚ}
-    (hcurve : w ^ 2 = u ^ 3 + u ^ 2 - u) :
-    ∃ A B : ℤ,
-      0 < B ∧ Int.gcd A B = 1 ∧
-        u = (A : ℚ) / (B : ℚ) ^ 2 := by
-  -- The right-hand side is a square in `ℚ` because it equals `w^2`.
-  have hsq_rhs : IsSquare (u ^ 3 + u ^ 2 - u) := by
-    refine ⟨w, ?_⟩
-    rw [← hcurve]
-    ring
+  have hb_h_coprime : IsCoprime b h :=
+    (Int.isCoprime_iff_gcd_eq_one.mpr hcop).symm
 
-  -- `Rat.isSquare_iff` says a rational is square iff its reduced numerator
-  -- and denominator are squares.  We only need the denominator component.
-  have hden_sq : IsSquare ((u ^ 3 + u ^ 2 - u).den) :=
-    (Rat.isSquare_iff.mp hsq_rhs).2
+  have hcop_b2_h : Int.gcd (b ^ 2) h = 1 := by
+    apply Int.isCoprime_iff_gcd_eq_one.mp
+    simpa [sq] using (IsCoprime.mul_left hb_h_coprime hb_h_coprime)
 
-  have hden_cube_sq : IsSquare (u.den ^ 3) := by
-    simpa [curve_rhs_den_eq_den_cube u] using hden_sq
+  have hb2odd : (b ^ 2) % 2 = 1 := by
+    rw [sq, Int.mul_emod, hbodd]
+    decide
 
-  have hden_ne : u.den ≠ 0 := Rat.den_ne_zero u
-  have hden_isSquare : IsSquare u.den :=
-    nat_isSquare_of_isSquare_cube hden_ne hden_cube_sq
+  exact hpt.coprime_classification' hcop_b2_h hb2odd hrpos
 
-  rcases hden_isSquare with ⟨B₀, hB₀sq⟩
-
-  have hB₀_ne : B₀ ≠ 0 := by
-    intro hB₀_zero
-    apply hden_ne
-    simpa [hB₀_zero] using hB₀sq
-
-  have hB₀_pos : 0 < B₀ := Nat.pos_of_ne_zero hB₀_ne
-
-  -- Since `B₀ ∣ u.den` and `u.num` is coprime to `u.den`, it is also
-  -- coprime to `B₀`.
-  have hB₀_dvd_den : B₀ ∣ u.den := by
-    rw [hB₀sq]
-    exact dvd_mul_right B₀ B₀
-
-  have hcop_nat : Nat.Coprime u.num.natAbs B₀ :=
-    Nat.Coprime.of_dvd_right hB₀_dvd_den u.reduced
-
-  have hcop_int : Int.gcd u.num (B₀ : ℤ) = 1 := by
-    simpa [Int.gcd, Int.natAbs_natCast] using
-      (Nat.coprime_iff_gcd_eq_one.mp hcop_nat)
-
-  refine ⟨u.num, (B₀ : ℤ), ?_, hcop_int, ?_⟩
-  · exact_mod_cast hB₀_pos
-  · -- Rewrite `u = u.num/u.den` and `u.den = B₀^2`.
-    have hden_eq : u.den = B₀ ^ 2 := by
-      simpa [pow_two] using hB₀sq
-    calc
-      u = (u.num : ℚ) / (u.den : ℚ) := by
-        simpa using (Rat.num_div_den u).symm
-      _ = (u.num : ℚ) / ((B₀ : ℤ) : ℚ) ^ 2 := by
-        rw [hden_eq]
-        norm_num [pow_two]
-
-end DM4
+end DM2
 ```
 
-The important imported Mathlib facts are:
+## Factoring `(m-n)(m+n)=b^2`
+
+After the previous lemma, you get
 
 ```lean
-Rat.isSquare_iff
-Rat.num_div_den
-Rat.den_ne_zero
-Rat.reduced
-Nat.Coprime.of_dvd_right
+hb2_mn : b^2 = m^2 - n^2
+hmn_gcd : Int.gcd m n = 1
+hmn_parity : (m % 2 = 0 ∧ n % 2 = 1 ∨ m % 2 = 1 ∧ n % 2 = 0)
 ```
 
-If you want the final file to have only one `sorry`, replace `curve_rhs_den_eq_den_cube` by your denominator computation from step (1), and keep only `nat_isSquare_of_isSquare_cube` as the allowed `sorry`.
+Then the algebraic product is immediate:
+
+```lean
+have hprod : (m - n) * (m + n) = b ^ 2 := by
+  rw [hb2_mn]
+  ring
+```
+
+To apply `Int.sq_of_gcd_eq_one`, you still need to prove the standard coprime-factor lemma
+
+```lean
+have hcop_factors : Int.gcd (m - n) (m + n) = 1 := by
+  -- from `hmn_gcd` and opposite parity `hmn_parity`
+  -- any common divisor divides `2*m` and `2*n`; opposite parity removes the factor 2
+  sorry
+```
+
+Then the square split starts as follows:
+
+```lean
+obtain ⟨u0, hu0 | hu0neg⟩ := Int.sq_of_gcd_eq_one hcop_factors hprod
+```
+
+The negative branch `m-n = -u0^2` is killed by the positivity lemma `0 < m-n`; similarly for `m+n`.  In the descent proof, prove these sign facts before the split:
+
+```lean
+have hmn_sub_pos : 0 < m - n := by
+  -- from `b^2 = m^2-n^2 > 0` and the chosen orientation of the primitive triple
+  sorry
+
+have hmn_add_pos : 0 < m + n := by
+  -- follows from `0 ≤ m` and the positivity/orientation facts from classification
+  sorry
+```
+
+Once you have
+
+```lean
+hsub : m - n = u^2
+hadd : m + n = v^2
+```
+
+the remaining identities are pure algebra:
+
+```lean
+have hb_sq_uv_sq : b ^ 2 = (u * v) ^ 2 := by
+  calc
+    b ^ 2 = (m - n) * (m + n) := hprod.symm
+    _ = u ^ 2 * v ^ 2 := by rw [hsub, hadd]
+    _ = (u * v) ^ 2 := by ring
+```
+
+With `0 < b`, `0 < u`, and `0 < v`, use `eq_or_eq_neg_of_sq_eq_sq` to get `b = u*v`:
+
+```lean
+have hb_uv : b = u * v := by
+  rcases eq_or_eq_neg_of_sq_eq_sq b (u * v) hb_sq_uv_sq with h | h
+  · exact h
+  · exfalso
+    have huv_pos : 0 < u * v := mul_pos hu_pos hv_pos
+    rw [h] at hb_pos
+    linarith
+```
+
+So: the Pythagorean parametrization block above is complete.  The later `u,v` split requires two additional local lemmas: `gcd(m-n,m+n)=1` and positivity of `m±n`; those are not produced directly by `coprime_classification'`.
