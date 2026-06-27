@@ -109,8 +109,10 @@ theorem UV_coprime {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4)
     (hr_odd : r % 2 = 1) (hB_odd : B % 2 = 1) :
     Int.gcd (2 * r ^ 2 + B ^ 2 - 2 * s) (2 * r ^ 2 + B ^ 2 + 2 * s) = 1 := by
-  sorry -- prime factor analysis: any common odd prime divides s and 2r²+B²,
-        -- hence divides B⁴ (from equation) and 2r²+B², then divides r, contradicting gcd=1
+  -- Any common divisor divides V-U=4s and V+U=4r²+2B².
+  -- Since U,V odd, common divisor is odd → divides s and 2r²+B².
+  -- (2r²+B²)²-4s² = 5B⁴, so d²|5B⁴. If d|B → d|2r²→d|r→gcd≥d, contradicts gcd=1.
+  sorry
 
 /-! ## Descent step (the hard core) -/
 
