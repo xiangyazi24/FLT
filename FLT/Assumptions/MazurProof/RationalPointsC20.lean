@@ -128,7 +128,16 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
     -- The second factor must be ≤ 0, so it's -s²
     -- Then s² = -r⁴ + r²B² + B⁴, apply quartic_minus_of_plus → r = B = 1 → u = -1
     left
-    sorry -- quartic_minus_of_plus application, gcd bookkeeping
+    have hgcd_rB : Int.gcd |r| B = 1 := by
+      show Int.gcd |r| B = 1
+      rw [Int.gcd, Int.natAbs_abs]
+      rw [← Int.isCoprime_iff_gcd_eq_one] at hcop ⊢
+      rw [hrneg, show -(r ^ 2) = r * r * (-1) from by ring] at hcop
+      exact (hcop.of_mul_right).of_mul_left
+    have hr_pos : 0 < |r| := abs_pos.mpr hr0
+    -- Second factor = -s² (not s²) since A = -r² < 0 and A·second = C² ≥ 0
+    -- Then quartic_minus_of_plus gives |r| = B = 1, so A = -1, u = -1/1 = -1
+    sorry
 
 /-! ## Wiring to discharge the original axiom -/
 

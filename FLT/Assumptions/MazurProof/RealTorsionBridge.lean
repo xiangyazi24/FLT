@@ -93,7 +93,9 @@ theorem no_zmod_p_square_in_rational_points
       Nat.card {P : (E⁄ℝ).Point | (p : ℕ) • P = 0} :=
     Nat.card_le_card_of_injective toTors htoTors_inj
   simp [Nat.card_prod] at hle
-  omega
+  have : p * p ≤ 2 * p := le_trans hle hcard
+  have : 0 < p := hp.pos
+  nlinarith
 
 /-- Version for the torsion subgroup, matching the signature used in `Axioms.lean`. -/
 theorem no_odd_prime_square_in_torsion_real
