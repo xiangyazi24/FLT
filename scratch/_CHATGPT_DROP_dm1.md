@@ -1,142 +1,183 @@
-# Q1449 (dm1): `V_pos` and the clean `UV_coprime` core
+# Q1450 (dm1/dm4): coprime factorization of `5 * B^4`
 
-The key correction is: do **not** try to prove `d ∣ B` directly from `d ∣ s` and `d ∣ 2*r^2+B^2`.  The clean seam is instead:
+I would **not** look for or rely on an `Int.fourth_of_gcd_eq_one` theorem here.  The clean route is:
+
+1. move the factorization lemma to `ℕ` using positivity of `U,V,B`;
+2. split the single extra prime `5` first;
+3. after cancellation, use a generic coprime-product-is-fourth-power lemma;
+4. cast the result back to `ℤ`.
+
+The exact mathematical split is the one you sketched, with one correction about orientation:
 
 ```text
-A := 2*r^2 + B^2
-U := A - 2*s
-V := A + 2*s
+if 5 ∣ U, then U = 5*a^4 and V = b^4;
+if 5 ∣ V, then U = a^4 and V = 5*b^4.
 ```
 
-A common divisor of `U,V` divides `U+V = 2*A`.  Since `U` is odd, that common divisor is coprime to `2`, hence it divides `A`.  It also divides `U*V = 5*B^4`.  Therefore it is enough to have the separate arithmetic lemma
+So the target theorem should be proved from a reusable `Nat` helper.
 
-```lean
-Int.gcd (2 * r ^ 2 + B ^ 2) (5 * B ^ 4) = 1
-```
+## Recommended generic helper
 
-which is where the `gcd(r,B)=1` plus the mod-`5` nonresidue check belongs.  This avoids the bad `d ∣ B` shortcut and keeps `UV_coprime` small.
-
-Here is the Lean block I would drop in.  The theorem named `UV_coprime` is the reusable core: it assumes the exact `A`-coprimality seam, then proves the required `Int.gcd U V = 1`.
+Do this once over `ℕ`:
 
 ```lean
 import Mathlib
 
 namespace DM1
 
-abbrev A (r B : ℤ) : ℤ := 2 * r ^ 2 + B ^ 2
-abbrev U (r B s : ℤ) : ℤ := A r B - 2 * s
-abbrev V (r B s : ℤ) : ℤ := A r B + 2 * s
-
-lemma UV_eq_5B4_of_quartic {r B s : ℤ}
-    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
-    U r B s * V r B s = 5 * B ^ 4 := by
-  calc
-    U r B s * V r B s
-        = (2 * r ^ 2 + B ^ 2) ^ 2 - (2 * s) ^ 2 := by
-          dsimp [U, V, A]
-          ring
-    _ = 5 * B ^ 4 := by
-          nlinarith [heq]
-
-/-- Positivity of the upper factor, using only the factor-product identity. -/
-lemma V_pos_of_UV {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B)
-    (hUV : U r B s * V r B s = 5 * B ^ 4) :
-    0 < V r B s := by
-  by_contra hV
-  push_neg at hV
-  have hU_nonneg : 0 ≤ U r B s := by
-    dsimp [U, V, A] at hV ⊢
-    nlinarith [sq_nonneg r, sq_nonneg B]
-  have hprod_nonpos : U r B s * V r B s ≤ 0 :=
-    mul_nonpos_of_nonneg_of_nonpos hU_nonneg hV
-  have hprod_pos : 0 < U r B s * V r B s := by
-    rw [hUV]
-    have hB4 : 0 < B ^ 4 := pow_pos hB 4
-    nlinarith
-  nlinarith
-
-/-- Positivity of the upper factor directly from the quartic equation. -/
-theorem V_pos {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B)
-    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
-    0 < V r B s := by
-  exact V_pos_of_UV (r := r) (B := B) (s := s) hr hB
-    (UV_eq_5B4_of_quartic (r := r) (B := B) (s := s) heq)
-
-/-- If an integer divides an odd integer, then it is coprime to `2`. -/
-lemma gcd_two_eq_one_of_dvd_odd {e n : ℤ}
-    (hen : e ∣ n) (hnodd : Odd n) :
-    Int.gcd e 2 = 1 := by
-  rcases hen with ⟨q, hq⟩
-  rcases hnodd with ⟨k, hk⟩
-  rw [hq] at hk
-  have hbez : (1 : ℤ) = e * q + 2 * (-k) := by
-    nlinarith
-  exact Nat.dvd_one.mp
-    ((Int.gcd_dvd_iff (a := e) (b := 2) (n := 1)).mpr ⟨q, -k, hbez⟩)
-
-/-- A common divisor of `U,V` divides `A`, once `U` is odd. -/
-lemma common_dvd_A_of_U_odd {r B s e : ℤ}
-    (heU : e ∣ U r B s) (heV : e ∣ V r B s)
-    (hUodd : Odd (U r B s)) :
-    e ∣ A r B := by
-  have hsum : e ∣ U r B s + V r B s := dvd_add heU heV
-  have hsum_eq : U r B s + V r B s = 2 * A r B := by
-    dsimp [U, V, A]
-    ring
-  have he2A : e ∣ 2 * A r B := by
-    rwa [hsum_eq] at hsum
-  exact Int.dvd_of_dvd_mul_right_of_gcd_one he2A
-    (gcd_two_eq_one_of_dvd_odd heU hUodd)
-
 /--
-Core coprimality lemma for the quartic factors.
+Generic helper: coprime positive factors of a fourth power are fourth powers.
 
-The remaining arithmetic seam is `hAcop`.  In the full descent file, prove it separately from
-`Int.gcd r B = 1`, `B` odd, and the mod-`5` fact that
-`2*x^2 + y^2 ≠ 0` in `ZMod 5` for nonzero square classes.
+This is the lemma to prove by either:
+* iterating your existing square-product lemma twice, or
+* using `Nat.factorization`.
 -/
-theorem UV_coprime_of_A_coprime {r B s : ℤ}
-    (hUodd : Odd (U r B s))
-    (hUV : U r B s * V r B s = 5 * B ^ 4)
-    (hAcop : Int.gcd (A r B) (5 * B ^ 4) = 1) :
-    Int.gcd (U r B s) (V r B s) = 1 := by
-  have hmain : (1 : ℤ) = (Int.gcd (U r B s) (V r B s) : ℤ) := by
-    refine Int.gcd_greatest
-      (a := U r B s) (b := V r B s) (d := 1)
-      (by norm_num) (one_dvd _) (one_dvd _) ?_
-    intro e heU heV
-    have heA : e ∣ A r B :=
-      common_dvd_A_of_U_odd
-        (r := r) (B := B) (s := s) (e := e) heU heV hUodd
-    have heProd : e ∣ U r B s * V r B s := dvd_mul_of_dvd_left heU _
-    have he5B4 : e ∣ 5 * B ^ 4 := by
-      rwa [hUV] at heProd
-    have hegcd : e ∣ (Int.gcd (A r B) (5 * B ^ 4) : ℤ) :=
-      Int.dvd_coe_gcd heA he5B4
-    simpa [hAcop] using hegcd
-  exact_mod_cast hmain.symm
+lemma coprime_mul_eq_fourth_nat {x y z : ℕ}
+    (hx : 0 < x) (hy : 0 < y) (hz : 0 < z)
+    (hcop : x.Coprime y)
+    (hxy : x * y = z ^ 4) :
+    ∃ a b : ℕ,
+      0 < a ∧ 0 < b ∧ a.Coprime b ∧ a * b = z ∧
+        x = a ^ 4 ∧ y = b ^ 4 := by
+  -- Proof route A: iterate square splitting.
+  --
+  -- First use the square lemma on
+  --   x*y = (z^2)^2
+  -- to get x = x1^2, y = y1^2, x1*y1 = z^2.
+  -- Then prove x1.Coprime y1 from x.Coprime y using:
+  --   Nat.coprime_pow_left_iff
+  --   Nat.coprime_pow_right_iff
+  -- Finally apply the same square lemma to x1*y1 = z^2.
+  --
+  -- Proof route B: use Nat.factorization directly.
+  -- For every prime p, coprimality says the p-adic exponent lives entirely
+  -- in x or entirely in y.  Since x*y = z^4, that exponent is divisible by 4.
+  -- Then reconstruct a and b from factorization exponents divided by 4.
+  sorry
+```
 
-/-- Same core lemma, if oddness has already been stored as `% 2 = 1`. -/
-theorem UV_coprime {r B s : ℤ}
-    (hUodd : U r B s % 2 = 1)
-    (hUV : U r B s * V r B s = 5 * B ^ 4)
-    (hAcop : Int.gcd (A r B) (5 * B ^ 4) = 1) :
-    Int.gcd (U r B s) (V r B s) = 1 := by
-  exact UV_coprime_of_A_coprime
-    (r := r) (B := B) (s := s)
-    (Int.odd_iff.mpr hUodd) hUV hAcop
+The important point in the iterative proof is the middle coprimality step.  If the first square split gives
+
+```lean
+x = x1 ^ 2
+ y = y1 ^ 2
+```
+
+then from `hcop : x.Coprime y` you get `x1.Coprime y1` by stripping powers:
+
+```lean
+have hcop_sq : (x1 ^ 2).Coprime (y1 ^ 2) := by
+  simpa [hx1, hy1] using hcop
+have hcop_x1_y1_sq : x1.Coprime (y1 ^ 2) :=
+  (Nat.coprime_pow_left_iff (by decide : 0 < 2) x1 (y1 ^ 2)).mp hcop_sq
+have hcop_x1_y1 : x1.Coprime y1 :=
+  (Nat.coprime_pow_right_iff (by decide : 0 < 2) x1 y1).mp hcop_x1_y1_sq
+```
+
+That is the piece that makes “iterate `sq_of_gcd_eq_one` twice” legitimate.
+
+## The `5 * B^4` factorization lemma over `ℕ`
+
+After the helper above, the special factorization theorem is straightforward.
+
+```lean
+/-- Positive coprime factorization of `5 * B^4`. -/
+theorem coprime_factorization_five_fourth_nat {U V B : ℕ}
+    (hUpos : 0 < U) (hVpos : 0 < V) (hBpos : 0 < B)
+    (hcop : U.Coprime V)
+    (hUV : U * V = 5 * B ^ 4) :
+    ∃ a b : ℕ,
+      0 < a ∧ 0 < b ∧ a.Coprime b ∧ a * b = B ∧
+        ((U = a ^ 4 ∧ V = 5 * b ^ 4) ∨
+         (U = 5 * a ^ 4 ∧ V = b ^ 4)) := by
+  classical
+  have h5prime : Nat.Prime 5 := by norm_num
+  have h5prod : 5 ∣ U * V := by
+    rw [hUV]
+    exact dvd_mul_right 5 (B ^ 4)
+  rcases h5prime.dvd_mul.mp h5prod with h5U | h5V
+  · -- Branch `5 ∣ U`: write U = 5*U0 and cancel the 5.
+    let U0 : ℕ := U / 5
+    have hUeq : U = 5 * U0 := by
+      -- `Nat.div_mul_cancel` / `Nat.mul_div_right'` depending on local API.
+      exact (Nat.div_mul_cancel h5U).symm
+    have hU0pos : 0 < U0 := by
+      -- from hUpos and hUeq
+      omega
+    have hU0dvd : U0 ∣ U := by
+      refine ⟨5, ?_⟩
+      rw [mul_comm, hUeq]
+    have hcop0 : U0.Coprime V := hcop.of_dvd_left hU0dvd
+    have hcancel : U0 * V = B ^ 4 := by
+      -- Substitute U = 5*U0 in hUV and cancel the positive factor 5.
+      -- `nlinarith` after `rw [hUeq] at hUV` often works; otherwise use
+      -- `Nat.mul_left_cancel` on `5 * (U0*V) = 5 * B^4`.
+      rw [hUeq] at hUV
+      nlinarith
+    rcases coprime_mul_eq_fourth_nat hU0pos hVpos hBpos hcop0 hcancel with
+      ⟨a, b, ha, hb, habcop, hab, hU0fourth, hVfourth⟩
+    refine ⟨a, b, ha, hb, habcop, hab, Or.inr ?_⟩
+    constructor
+    · rw [hUeq, hU0fourth]
+    · exact hVfourth
+  · -- Branch `5 ∣ V`: symmetric.
+    let V0 : ℕ := V / 5
+    have hVeq : V = 5 * V0 := by
+      exact (Nat.div_mul_cancel h5V).symm
+    have hV0pos : 0 < V0 := by
+      omega
+    have hV0dvd : V0 ∣ V := by
+      refine ⟨5, ?_⟩
+      rw [mul_comm, hVeq]
+    have hcop0 : U.Coprime V0 := hcop.of_dvd_right hV0dvd
+    have hcancel : U * V0 = B ^ 4 := by
+      rw [hVeq] at hUV
+      nlinarith
+    rcases coprime_mul_eq_fourth_nat hUpos hV0pos hBpos hcop0 hcancel with
+      ⟨a, b, ha, hb, habcop, hab, hUfourth, hV0fourth⟩
+    refine ⟨a, b, ha, hb, habcop, hab, Or.inl ?_⟩
+    constructor
+    · exact hUfourth
+    · rw [hVeq, hV0fourth]
 
 end DM1
 ```
 
-The `hAcop` seam should be proved as its own lemma, not inside `UV_coprime`.  Mathematically it is:
+You may need to adjust the exact cancellation line depending on the local `Nat` API: the stable mathematical move is to rewrite `U = 5*U0` or `V = 5*V0`, reassociate to
 
-```text
-gcd(2*r^2+B^2, B) = 1     from gcd(r,B)=1 and B odd
-gcd(2*r^2+B^2, 5) = 1     from the square classes mod 5
-therefore gcd(2*r^2+B^2, 5*B^4) = 1.
+```lean
+5 * (U0 * V) = 5 * B ^ 4
 ```
 
-That is the place to use `ZMod 5` or a finite `% 5` case split.  Once that lemma is available, the factor gcd proof above is the small stable piece.
+or
+
+```lean
+5 * (U * V0) = 5 * B ^ 4
+```
+
+then apply `Nat.mul_left_cancel`.
+
+## Int wrapper shape
+
+For the quartic descent theorem itself, keep the public theorem over `ℤ`, but prove it by converting to naturals:
+
+```lean
+theorem coprime_factorization_five_fourth_int {U V B : ℤ}
+    (hUpos : 0 < U) (hVpos : 0 < V) (hBpos : 0 < B)
+    (hcop : Int.gcd U V = 1)
+    (hUV : U * V = 5 * B ^ 4) :
+    ∃ a b : ℤ,
+      0 < a ∧ 0 < b ∧ Int.gcd a b = 1 ∧ a * b = B ∧
+        ((U = a ^ 4 ∧ V = 5 * b ^ 4) ∨
+         (U = 5 * a ^ 4 ∧ V = b ^ 4)) := by
+  -- Set u := U.natAbs, v := V.natAbs, b := B.natAbs.
+  -- Positivity makes `U = (u : ℤ)`, etc.
+  -- Convert hUV and hcop to:
+  --   u * v = 5 * b ^ 4
+  --   u.Coprime v
+  -- Apply `coprime_factorization_five_fourth_nat`.
+  -- Cast the resulting natural a,b back to integers.
+  sorry
+```
+
+So the answer to your API question is: do **not** try to find a fourth-power version.  Either iterate the square-product lemma twice after splitting off the `5`, or prove the generic `Nat` helper directly with `Nat.factorization`.  The special `5*B^4` statement should then be a short branch on `5 ∣ U ∨ 5 ∣ V`.
