@@ -102,11 +102,17 @@ theorem primary_decomposition_respects_rank_bounds
   have e_two_bound : max_p_exponent G 2 ≤ 2 :=
     exponent_two_le_two G h_no_two
 
-  -- Step 3-4: Separate and combine via CRT
-  -- Compute odd_part = ∏ pᵉᵖ for odd primes (each eₚ ≤ 1)
-  -- Compute e_two = max_p_exponent G 2 (at most 2)
-  have odd_part_pos : 0 < 1 := by norm_num  -- placeholder; will be computed
-  have e_two_pos : 0 < 2 := by norm_num    -- placeholder; will be computed
+  -- Step 3: Extract odd_part and e_two from primary decomposition
+  -- odd_part = ∏_{p odd prime, eₚ ≥ 1} p^(min(eₚ, 1))
+  -- Since h_no_odd forces eₚ ≤ 1 for all odd p, this is just ∏ p for p | order(G)
+  let odd_part : ℕ := by
+    sorry  -- Compute product of odd primes dividing order(G), each with exponent 1
+  let e_two : ℕ := max_p_exponent G 2
+
+  have odd_part_pos : 0 < odd_part := by
+    sorry  -- odd_part ≥ 1 (includes at least 1, or 1 if no odd primes)
+  have e_two_pos : 0 < e_two := by
+    sorry  -- e_two ≥ 1 (G is finite, so 2^e divides it for some e ≥ 1; e_two ≤ 2)
 
   -- Step 5: Apply CRT to combine
   obtain ⟨m, n, hm, hn, hmn, crt_iso⟩ :=
