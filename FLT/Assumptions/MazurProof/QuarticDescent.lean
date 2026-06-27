@@ -441,9 +441,12 @@ theorem quartic_plus_descent_step :
       ∃ r' B' s' : ℤ, QuarticPlusZ r' B' s' ∧ ¬ BaseZ r' B' ∧
         B'.natAbs < B.natAbs := by
   intro r B s ⟨hr, hB, hcop, heq⟩ hnonbase
-  -- Odd B case (even B is similar, uses M=U/4, N=V/4)
-  -- TODO: add even B case via by_cases
-  have hBodd : B % 2 = 1 := sorry -- will be derived from the unified descent
+  rcases Int.emod_two_eq_zero_or_one B with hBeven | hBodd
+  · -- Even B case: uses M=U/4, N=V/4, same descent structure
+    -- TODO: define M, N, prove MN = 5B₁⁴, gcd(M,N) = 1, then same descent
+    have ⟨hr_odd, h4B⟩ := even_B_props hBeven hr hB hcop heq
+    sorry
+  · -- Odd B case (main case, fully proved)
   have hr_odd := r_odd_of_B_odd hBodd hcop heq
   -- UV = 5B⁴, gcd(U,V) = 1
   have hUV_cop := UV_coprime hr hB hcop heq hr_odd hBodd
