@@ -137,8 +137,14 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
       have h_le : A ^ 2 + A * B ^ 2 - B ^ 4 ≤ 0 := by nlinarith [sq_nonneg s]
       have h_ge : 0 ≤ A ^ 2 + A * B ^ 2 - B ^ 4 := by nlinarith [sq_nonneg C]
       have h_zero : A ^ 2 + A * B ^ 2 - B ^ 4 = 0 := le_antisymm h_le h_ge
-      -- gcd(A, 0) = |A| = 1, so A = 1 (since A > 0). Then B⁴ = B² + 1, no solution for B ≥ 1.
-      sorry
+      have hA1 : A = 1 := by
+        have h1 : A.natAbs = 1 := by
+          have := hcopf; rw [h_zero] at this; simpa [Int.gcd_zero_right] using this
+        rcases Int.natAbs_eq A with h | h <;> omega
+      have hB4 : B ^ 4 - B ^ 2 = 1 := by nlinarith
+      rcases le_or_lt B 1 with hB1 | hB2
+      · have : B = 1 := le_antisymm hB1 hBpos; nlinarith
+      · nlinarith [sq_nonneg (B ^ 2 - 1)]
   · -- Case A = -r² ≤ 0. Since A ≠ 0, r ≠ 0.
     have hr0 : r ≠ 0 := by intro h; rw [h] at hrneg; simp at hrneg; exact hA0 hrneg
     -- The second factor must be ≤ 0, so it's -s²
@@ -158,7 +164,19 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
     obtain ⟨s, hs⟩ := Int.sq_of_gcd_eq_one hcopf' hC'
     rcases hs with hs_pos | hs_neg
     · -- second = s²: A < 0 and C² = A·s² ≤ 0 forces s=0, then A=-1, B⁴=B²+1 (impossible)
-      exfalso; sorry
+      exfalso
+      have hA_neg : A < 0 := by rw [hrneg]; nlinarith [sq_nonneg r]
+      have h_ge : A ^ 2 + A * B ^ 2 - B ^ 4 ≥ 0 := by nlinarith [sq_nonneg s]
+      have h_le : A ^ 2 + A * B ^ 2 - B ^ 4 ≤ 0 := by nlinarith [sq_nonneg C]
+      have h_zero : A ^ 2 + A * B ^ 2 - B ^ 4 = 0 := le_antisymm h_le h_ge
+      have hAm1 : A = -1 := by
+        have h1 : A.natAbs = 1 := by
+          have := hcopf; rw [h_zero] at this; simpa [Int.gcd_zero_right] using this
+        rcases Int.natAbs_eq A with h | h <;> omega
+      have hB4 : B ^ 4 - B ^ 2 = 1 := by nlinarith
+      rcases le_or_lt B 1 with hB1 | hB2
+      · have : B = 1 := le_antisymm hB1 hBpos; nlinarith
+      · nlinarith [sq_nonneg (B ^ 2 - 1)]
     · -- second = -s²: apply quartic_minus_of_plus
       have heq : s ^ 2 = -(|r| ^ 4) + |r| ^ 2 * B ^ 2 + B ^ 4 := by
         nlinarith [hs_neg, hrneg, sq_abs r, sq_nonneg r]
