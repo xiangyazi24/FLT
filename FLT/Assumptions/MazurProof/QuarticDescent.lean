@@ -49,22 +49,22 @@ theorem quartic_plus_both_odd {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
 theorem V_pos {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
     0 < 2 * r ^ 2 + B ^ 2 + 2 * s := by
-  by_contra hV; push_neg at hV
+  by_contra hV; push Not at hV
   have hprod := UV_eq_five_mul_fourth heq
   have hVneg : 2 * r ^ 2 + B ^ 2 + 2 * s ≤ 0 := hV
   have hUneg : 2 * r ^ 2 + B ^ 2 - 2 * s ≤ 0 := by
-    by_contra hU; push_neg at hU
+    by_contra hU; push Not at hU
     linarith [mul_nonpos_iff.mpr (Or.inr ⟨le_of_lt hU, hVneg⟩)]
   linarith [sq_nonneg r, sq_nonneg B]
 
 theorem U_pos {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
     0 < 2 * r ^ 2 + B ^ 2 - 2 * s := by
-  by_contra hU; push_neg at hU
+  by_contra hU; push Not at hU
   have hprod := UV_eq_five_mul_fourth heq
   have hUneg : 2 * r ^ 2 + B ^ 2 - 2 * s ≤ 0 := hU
   have hVneg : 2 * r ^ 2 + B ^ 2 + 2 * s ≤ 0 := by
-    by_contra hV; push_neg at hV
+    by_contra hV; push Not at hV
     linarith [mul_nonpos_iff.mpr (Or.inl ⟨hUneg, le_of_lt hV⟩)]
   linarith [sq_nonneg r, sq_nonneg B]
 
