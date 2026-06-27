@@ -98,8 +98,17 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
   have hBne : (B : ℚ) ≠ 0 := Int.cast_ne_zero.mpr (ne_of_gt hBpos)
   have hB2ne : (B : ℚ) ^ 2 ≠ 0 := pow_ne_zero 2 hBne
   rw [hu] at h
-  -- wB³ is rational and (wB³)² = A(A²+AB²-B⁴) is an integer, hence wB³ ∈ ℤ
-  have hinteg : ∃ C : ℤ, C ^ 2 = A * (A ^ 2 + A * B ^ 2 - B ^ 4) := by sorry
+  -- (wB³)² = A(A²+AB²-B⁴) ∈ ℤ, and a ℚ-square equal to an integer is an ℤ-square
+  have hinteg : ∃ C : ℤ, C ^ 2 = A * (A ^ 2 + A * B ^ 2 - B ^ 4) := by
+    have hrat_sq : ∃ q : ℚ, q ^ 2 = ↑(A * (A ^ 2 + A * B ^ 2 - B ^ 4)) := by
+      refine ⟨w * (B : ℚ) ^ 3, ?_⟩
+      have := h  -- w² = (A/B²)³ + (A/B²)² - (A/B²)
+      field_simp at this ⊢
+      nlinarith
+    rcases hrat_sq with ⟨q, hq⟩
+    refine ⟨q.num, ?_⟩
+    have hnum := congrArg Rat.num hq
+    simpa [pow_two, Rat.mul_self_num, Rat.num_intCast] using hnum
   obtain ⟨C, hC⟩ := hinteg
   have hcopf := coprime_factors A B hcop
   obtain ⟨r, hrA⟩ := Int.sq_of_gcd_eq_one hcopf hC.symm
