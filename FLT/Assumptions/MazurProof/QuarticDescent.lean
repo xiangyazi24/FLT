@@ -109,9 +109,13 @@ theorem UV_coprime {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4)
     (hr_odd : r % 2 = 1) (hB_odd : B % 2 = 1) :
     Int.gcd (2 * r ^ 2 + B ^ 2 - 2 * s) (2 * r ^ 2 + B ^ 2 + 2 * s) = 1 := by
-  -- Any common divisor divides V-U=4s and V+U=4r²+2B².
-  -- Since U,V odd, common divisor is odd → divides s and 2r²+B².
-  -- (2r²+B²)²-4s² = 5B⁴, so d²|5B⁴. If d|B → d|2r²→d|r→gcd≥d, contradicts gcd=1.
+  -- d | gcd(U,V) → d|4s, d|2A → d odd (U,V odd) → d|s, d|A
+  -- d²|A²-4s²=5B⁴. Any prime p|d: p|5B⁴ and p|A=2r²+B².
+  -- If p|B: p|A-B²=2r² → p|r (p odd) → gcd(r,B)≥p, contradiction.
+  -- If p∤B: p²|5B⁴ with gcd(p,B)=1 → p²|5 → p=5,25|5 impossible.
+  -- So gcd(U,V)=1.
+  rw [← Int.isCoprime_iff_gcd_eq_one]
+  have hA_sq_sub : (2 * r ^ 2 + B ^ 2) ^ 2 - 4 * s ^ 2 = 5 * B ^ 4 := by nlinarith [heq]
   sorry
 
 /-! ## Descent step (the hard core) -/
