@@ -557,11 +557,10 @@ theorem quartic_plus_descent_step :
         · exfalso; apply hnonbase
           have hα_eq_b : α = b := le_antisymm hα_le_b (by linarith)
           have hβ1 : β = 1 := by
-            have := hb_eq; rw [hα_eq_b] at this; linarith [mul_left_cancel₀ (ne_of_gt hb) this.symm]
-          have ha1 : a = 1 := by
-            have : a * b = b := by linarith
-            exact mul_left_cancel₀ (ne_of_gt hb) (by linarith)
-          exact ⟨hβ1, by linarith [hB_eq, ha1, hα_eq_b]⟩
+            have h1 := hb_eq; rw [hα_eq_b] at h1 -- h1 : b = b * β
+            nlinarith [mul_pos hb hβ_pos]
+          have ha1 : a = 1 := by nlinarith [mul_pos ha hb]
+          exact ⟨hβ1, by rw [hB_eq, ha1, hα_eq_b]; ring⟩
         · exact hlt
       exact Int.natAbs_lt_natAbs_of_nonneg_of_lt hα_pos.le hα_lt
   · -- Case U = 5a⁴, V = b⁴ (symmetric — same structure, descent on a instead of b)
