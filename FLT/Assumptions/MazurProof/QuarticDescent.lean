@@ -91,12 +91,15 @@ theorem even_B_props {r B s : ℤ} (hB_even : B % 2 = 0) (_hr : 0 < r) (_hB : 0 
   -- r²B² ≡ 1·4 = 4 mod 8
   -- s² ≡ 1 + 4 - 0 = 5 mod 8. But s² mod 8 ∈ {0,1,4}.
   have h8 : s ^ 2 % 8 = 5 := by
-    have hr4 : (2 * j + 1) ^ 4 = 8 * (2 * j ^ 4 + 4 * j ^ 3 + 3 * j ^ 2 + j) + 1 := by ring
-    have hrB : (2 * j + 1) ^ 2 * (4 * c + 2) ^ 2 =
-      8 * (8 * c ^ 2 * j ^ 2 + 8 * c ^ 2 * j + 2 * c ^ 2 + 8 * c * j ^ 2 + 8 * c * j +
-        2 * c + j ^ 2 + j) + 4 := by ring
-    have hB4v : (4 * c + 2) ^ 4 =
-      8 * (32 * c ^ 4 + 64 * c ^ 3 + 48 * c ^ 2 + 16 * c + 2) := by ring
+    have : s ^ 2 = (2 * j + 1) ^ 4 + (2 * j + 1) ^ 2 * (4 * c + 2) ^ 2 -
+      (4 * c + 2) ^ 4 := heq
+    have : s ^ 2 = 8 * (2 * j ^ 4 + 4 * j ^ 3 + 3 * j ^ 2 + j +
+      8 * c ^ 2 * j ^ 2 + 8 * c ^ 2 * j + 2 * c ^ 2 + 8 * c * j ^ 2 + 8 * c * j +
+      2 * c + j ^ 2 + j -
+      32 * c ^ 4 - 64 * c ^ 3 - 48 * c ^ 2 - 16 * c - 2) + 5 := by linarith [
+      show (2 * j + 1) ^ 4 = 8 * (2 * j ^ 4 + 4 * j ^ 3 + 3 * j ^ 2 + j) + 1 from by ring,
+      show (2 * j + 1) ^ 2 * (4 * c + 2) ^ 2 = 8 * (8 * c ^ 2 * j ^ 2 + 8 * c ^ 2 * j + 2 * c ^ 2 + 8 * c * j ^ 2 + 8 * c * j + 2 * c + j ^ 2 + j) + 4 from by ring,
+      show (4 * c + 2) ^ 4 = 8 * (32 * c ^ 4 + 64 * c ^ 3 + 48 * c ^ 2 + 16 * c + 2) from by ring]
     omega
   -- s² % 8 ∈ {0,1,4}
   rcases Int.emod_two_eq_zero_or_one s with hs | hs
@@ -329,9 +332,10 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
   · -- 5 | F₁: F₁ = 5G, G·F₂ = C⁴, gcd(G,F₂) = 1
     obtain ⟨G, hF₁eq⟩ := h5F₁
     have hG : 0 < G := by nlinarith
-    have hprodGF₂ : G * F₂ = C ^ 4 :=
-      mul_left_cancel₀ (by norm_num : (5 : ℤ) ≠ 0)
-        (show 5 * (G * F₂) = 5 * C ^ 4 by nlinarith)
+    have hprodGF₂ : G * F₂ = C ^ 4 := by
+      apply mul_left_cancel₀ (show (5 : ℤ) ≠ 0 from by norm_num)
+      have h := hprod; rw [hF₁eq] at h
+      linarith [show (5 * G) * F₂ = 5 * (G * F₂) from by ring]
     have hcopGF₂ : IsCoprime G F₂ := (hF₁eq ▸ hcopI).of_mul_left_right
     obtain ⟨a, ha, hGa⟩ := pos_fourth_of_coprime_mul_fourth
       (Int.isCoprime_iff_gcd_eq_one.mp hcopGF₂) hprodGF₂ hG hF₂
@@ -349,9 +353,10 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
   · -- 5 | F₂: symmetric
     obtain ⟨G, hF₂eq⟩ := h5F₂
     have hG : 0 < G := by nlinarith
-    have hprodF₁G : F₁ * G = C ^ 4 :=
-      mul_left_cancel₀ (by norm_num : (5 : ℤ) ≠ 0)
-        (show 5 * (F₁ * G) = 5 * C ^ 4 by nlinarith)
+    have hprodF₁G : F₁ * G = C ^ 4 := by
+      apply mul_left_cancel₀ (show (5 : ℤ) ≠ 0 from by norm_num)
+      have h := hprod; rw [hF₂eq] at h
+      linarith [show F₁ * (5 * G) = 5 * (F₁ * G) from by ring]
     have hcopF₁G : IsCoprime F₁ G := (hF₂eq ▸ hcopI).of_mul_right_right
     obtain ⟨a, ha, hF₁a⟩ := pos_fourth_of_coprime_mul_fourth
       (Int.isCoprime_iff_gcd_eq_one.mp hcopF₁G) hprodF₁G hF₁ hG
