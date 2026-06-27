@@ -337,7 +337,8 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
       calc 5 * (G * F₂) = (5 * G) * F₂ := by ring
         _ = F₁ * F₂ := by rw [hF₁eq]
         _ = 5 * C ^ 4 := hprod
-    have hcopGF₂ : IsCoprime G F₂ := (hF₁eq ▸ hcopI).of_mul_left_right
+    have hcopGF₂ : IsCoprime G F₂ := by
+      have h := hcopI; rw [hF₁eq] at h; exact h.of_mul_left_right
     obtain ⟨a, ha, hGa⟩ := pos_fourth_of_coprime_mul_fourth
       (Int.isCoprime_iff_gcd_eq_one.mp hcopGF₂) hprodGF₂ hG hF₂
     obtain ⟨b, hb, hF₂b⟩ := pos_fourth_of_coprime_mul_fourth
@@ -349,8 +350,9 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
         ((IsCoprime.pow_right_iff (by norm_num : 0 < 4)).mp hcopGF₂)
     have hCeq : C = a * b := eq_of_pos_fourth_eq hC (mul_pos ha hb)
       (by rw [hGa, hF₂b] at hprodGF₂; nlinarith)
+    have hF₁_eq : F₁ = 5 * a ^ 4 := by rw [hF₁eq, hGa]
     exact ⟨a, b, ha, hb, Int.isCoprime_iff_gcd_eq_one.mp hab_cop, hCeq,
-      Or.inr ⟨by rw [hF₁eq, hGa], hF₂b⟩⟩
+      Or.inr ⟨hF₁_eq, hF₂b⟩⟩
   · -- 5 | F₂: symmetric
     obtain ⟨G, hF₂eq⟩ := h5F₂
     have hG : 0 < G := by nlinarith
@@ -359,7 +361,8 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
       calc 5 * (F₁ * G) = F₁ * (5 * G) := by ring
         _ = F₁ * F₂ := by rw [hF₂eq]
         _ = 5 * C ^ 4 := hprod
-    have hcopF₁G : IsCoprime F₁ G := (hF₂eq ▸ hcopI).of_mul_right_right
+    have hcopF₁G : IsCoprime F₁ G := by
+      have h := hcopI; rw [hF₂eq] at h; exact h.of_mul_right_right
     obtain ⟨a, ha, hF₁a⟩ := pos_fourth_of_coprime_mul_fourth
       (Int.isCoprime_iff_gcd_eq_one.mp hcopF₁G) hprodF₁G hF₁ hG
     obtain ⟨b, hb, hGb⟩ := pos_fourth_of_coprime_mul_fourth
@@ -371,8 +374,9 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
         ((IsCoprime.pow_right_iff (by norm_num : 0 < 4)).mp hcopF₁G)
     have hCeq : C = a * b := eq_of_pos_fourth_eq hC (mul_pos ha hb)
       (by rw [hF₁a, hGb] at hprodF₁G; nlinarith)
+    have hF₂_eq : F₂ = 5 * b ^ 4 := by rw [hF₂eq, hGb]
     exact ⟨a, b, ha, hb, Int.isCoprime_iff_gcd_eq_one.mp hab_cop, hCeq,
-      Or.inl ⟨hF₁a, by rw [hF₂eq, hGb]⟩⟩
+      Or.inl ⟨hF₁a, hF₂_eq⟩⟩
 
 /-- gcd(r-h, r+h) = 1 when r odd, h even, gcd(r,b) = 1, r² = h² + b⁴. -/
 theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
