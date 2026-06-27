@@ -45,17 +45,28 @@ theorem quartic_plus_both_odd {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
 
 /-! ## U, V properties -/
 
-/-- V > 0: follows from s² < (r²+B²)², so |s| < r²+B², so 2r²+B²+2s > 0. -/
+/-- U and V are both positive: UV = 5B⁴ > 0 and U+V = 4r²+2B² > 0 forces both positive. -/
 theorem V_pos {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
     0 < 2 * r ^ 2 + B ^ 2 + 2 * s := by
-  nlinarith [sq_nonneg (r ^ 2 + B ^ 2 - s), sq_nonneg s, sq_nonneg B, sq_nonneg r]
+  by_contra hV; push_neg at hV
+  have hprod := UV_eq_five_mul_fourth heq
+  have hVneg : 2 * r ^ 2 + B ^ 2 + 2 * s ≤ 0 := hV
+  have hUneg : 2 * r ^ 2 + B ^ 2 - 2 * s ≤ 0 := by
+    by_contra hU; push_neg at hU
+    linarith [mul_nonpos_iff.mpr (Or.inr ⟨le_of_lt hU, hVneg⟩)]
+  linarith [sq_nonneg r, sq_nonneg B]
 
-/-- U > 0: follows from s² < (r²+B²)², so |s| < r²+B². -/
 theorem U_pos {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
     0 < 2 * r ^ 2 + B ^ 2 - 2 * s := by
-  nlinarith [sq_nonneg (r ^ 2 + B ^ 2 + s), sq_nonneg s, sq_nonneg B, sq_nonneg r]
+  by_contra hU; push_neg at hU
+  have hprod := UV_eq_five_mul_fourth heq
+  have hUneg : 2 * r ^ 2 + B ^ 2 - 2 * s ≤ 0 := hU
+  have hVneg : 2 * r ^ 2 + B ^ 2 + 2 * s ≤ 0 := by
+    by_contra hV; push_neg at hV
+    linarith [mul_nonpos_iff.mpr (Or.inl ⟨hUneg, le_of_lt hV⟩)]
+  linarith [sq_nonneg r, sq_nonneg B]
 
 /-- U and V are both odd when r, B are both odd. -/
 theorem UV_odd {r B s : ℤ}
