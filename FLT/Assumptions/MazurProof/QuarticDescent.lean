@@ -291,12 +291,64 @@ theorem pos_fourth_of_coprime_mul_fourth {a b c : ℤ} (hab : Int.gcd a b = 1)
 
 /-! ## Descent step helpers (to be proved) -/
 
-/-- Coprime factorization of 5·C⁴. -/
+private theorem eq_of_pos_fourth_eq {x y : ℤ} (hx : 0 < x) (hy : 0 < y)
+    (h : x ^ 4 = y ^ 4) : x = y := by
+  have hsq : x ^ 2 = y ^ 2 := by
+    have hfact : (x ^ 2 - y ^ 2) * (x ^ 2 + y ^ 2) = 0 := by nlinarith
+    have hsum : 0 < x ^ 2 + y ^ 2 := by positivity
+    rcases mul_eq_zero.mp hfact with h | h
+    · linarith
+    · linarith
+  have hfact : (x - y) * (x + y) = 0 := by nlinarith
+  have hsum : 0 < x + y := by linarith
+  rcases mul_eq_zero.mp hfact with h | h
+  · linarith
+  · linarith
+
+/-- Coprime factorization of 5·C⁴: split into (a⁴, 5b⁴) or (5a⁴, b⁴). -/
 theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C ^ 4)
     (hcop : Int.gcd F₁ F₂ = 1) (hF₁ : 0 < F₁) (hF₂ : 0 < F₂) (hC : 0 < C) :
     ∃ a b : ℤ, 0 < a ∧ 0 < b ∧ Int.gcd a b = 1 ∧ C = a * b ∧
       ((F₁ = a ^ 4 ∧ F₂ = 5 * b ^ 4) ∨ (F₁ = 5 * a ^ 4 ∧ F₂ = b ^ 4)) := by
-  sorry
+  have hcopI := Int.isCoprime_iff_gcd_eq_one.mpr hcop
+  have h5prod : (5 : ℤ) ∣ F₁ * F₂ := ⟨C ^ 4, by linarith⟩
+  rcases Int.Prime.dvd_mul' (by norm_num : Nat.Prime 5) h5prod with h5F₁ | h5F₂
+  · -- 5 | F₁: F₁ = 5G, G·F₂ = C⁴, gcd(G,F₂) = 1
+    obtain ⟨G, hF₁eq⟩ := h5F₁
+    have hG : 0 < G := by nlinarith
+    have hprodGF₂ : G * F₂ = C ^ 4 := by nlinarith
+    have hcopGF₂ : IsCoprime G F₂ := (hF₁eq ▸ hcopI).of_mul_left_right
+    obtain ⟨a, ha, hGa⟩ := pos_fourth_of_coprime_mul_fourth
+      (Int.isCoprime_iff_gcd_eq_one.mp hcopGF₂) hprodGF₂ hG hF₂
+    obtain ⟨b, hb, hF₂b⟩ := pos_fourth_of_coprime_mul_fourth
+      (Int.isCoprime_iff_gcd_eq_one.mp hcopGF₂.symm)
+      (by rw [mul_comm]; exact hprodGF₂) hF₂ hG
+    have hab_cop : IsCoprime a b := by
+      rw [hGa, hF₂b] at hcopGF₂
+      exact (IsCoprime.pow_left_iff (by norm_num : 0 < 4)).mp
+        ((IsCoprime.pow_right_iff (by norm_num : 0 < 4)).mp hcopGF₂)
+    have hCeq : C = a * b := eq_of_pos_fourth_eq hC (mul_pos ha hb)
+      (by rw [hGa, hF₂b] at hprodGF₂; nlinarith)
+    exact ⟨a, b, ha, hb, Int.isCoprime_iff_gcd_eq_one.mp hab_cop, hCeq,
+      Or.inr ⟨by rw [hF₁eq, hGa], hF₂b⟩⟩
+  · -- 5 | F₂: symmetric
+    obtain ⟨G, hF₂eq⟩ := h5F₂
+    have hG : 0 < G := by nlinarith
+    have hprodF₁G : F₁ * G = C ^ 4 := by nlinarith
+    have hcopF₁G : IsCoprime F₁ G := (hF₂eq ▸ hcopI).of_mul_right_right
+    obtain ⟨a, ha, hF₁a⟩ := pos_fourth_of_coprime_mul_fourth
+      (Int.isCoprime_iff_gcd_eq_one.mp hcopF₁G) hprodF₁G hF₁ hG
+    obtain ⟨b, hb, hGb⟩ := pos_fourth_of_coprime_mul_fourth
+      (Int.isCoprime_iff_gcd_eq_one.mp hcopF₁G.symm)
+      (by rw [mul_comm]; exact hprodF₁G) hG hF₁
+    have hab_cop : IsCoprime a b := by
+      rw [hF₁a, hGb] at hcopF₁G
+      exact (IsCoprime.pow_left_iff (by norm_num : 0 < 4)).mp
+        ((IsCoprime.pow_right_iff (by norm_num : 0 < 4)).mp hcopF₁G)
+    have hCeq : C = a * b := eq_of_pos_fourth_eq hC (mul_pos ha hb)
+      (by rw [hF₁a, hGb] at hprodF₁G; nlinarith)
+    exact ⟨a, b, ha, hb, Int.isCoprime_iff_gcd_eq_one.mp hab_cop, hCeq,
+      Or.inl ⟨hF₁a, by rw [hF₂eq, hGb]⟩⟩
 
 /-- gcd(r-h, r+h) = 1 when r odd, h even, gcd(r,b) = 1, r² = h² + b⁴. -/
 theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
