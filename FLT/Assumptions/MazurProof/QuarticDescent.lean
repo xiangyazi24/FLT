@@ -41,7 +41,22 @@ theorem quartic_plus_both_odd {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (hcop : Int.gcd r B = 1)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
     r % 2 = 1 ∧ B % 2 = 1 := by
-  sorry -- ZMod 4/16 case analysis
+  -- Both even → gcd ≥ 2, contradiction
+  -- r even, B odd → s² ≡ -1 (mod 4), impossible
+  -- r odd, B even → need mod 16 analysis
+  -- Clean approach: cast to ZMod 4 for the first two, ZMod 16 for the third
+  by_contra h
+  push Not at h
+  simp only [not_and_or, Int.not_emod_two_eq_one] at h
+  rcases h with hr2 | hB2
+  · -- r even: r % 2 = 0
+    -- If B odd: cast to ZMod 4, s² ≡ 0+0-1 = 3 (mod 4), impossible
+    -- If B even: gcd(r,B) ≥ 2, contradiction
+    sorry
+  · -- B even: B % 2 = 0
+    -- r must be odd (else gcd ≥ 2). Then s² ≡ 1+0-0 = 1 (mod 4), OK.
+    -- But mod 16: if B=2k, k odd, s² ≡ 1+4-0 = 5 (mod 8), impossible.
+    sorry
 
 /-! ## U, V properties -/
 
