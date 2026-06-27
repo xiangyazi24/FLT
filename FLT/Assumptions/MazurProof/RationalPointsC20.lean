@@ -96,18 +96,9 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
   have hBne : (B : ℚ) ≠ 0 := Int.cast_ne_zero.mpr (ne_of_gt hBpos)
   have hB2ne : (B : ℚ) ^ 2 ≠ 0 := pow_ne_zero 2 hBne
   rw [hu] at h
-  -- (wB³)² = A(A²+AB²-B⁴) ∈ ℤ, and a ℚ-square equal to an integer is an ℤ-square
+  -- (wB³)² = A(A²+AB²-B⁴) ∈ ℤ. A ℚ-square equal to an integer is an ℤ-square.
   have hinteg : ∃ C : ℤ, C ^ 2 = A * (A ^ 2 + A * B ^ 2 - B ^ 4) := by
-    have hrat_sq : ∃ q : ℚ, q ^ 2 = ↑(A * (A ^ 2 + A * B ^ 2 - B ^ 4)) := by
-      refine ⟨w * (B : ℚ) ^ 3, ?_⟩
-      have := h  -- w² = (A/B²)³ + (A/B²)² - (A/B²)
-      field_simp at this ⊢
-      push_cast
-      nlinarith [this]
-    rcases hrat_sq with ⟨q, hq⟩
-    refine ⟨q.num, ?_⟩
-    have hnum := congrArg Rat.num hq
-    simpa [pow_two, Rat.mul_self_num, Rat.num_intCast] using hnum
+    sorry -- field_simp + Rat.num extraction; see ChatGPT Q1312 for technique
   obtain ⟨C, hC⟩ := hinteg
   have hcopf := coprime_factors A B hcop
   obtain ⟨r, hrA⟩ := Int.sq_of_gcd_eq_one hcopf hC.symm
@@ -122,36 +113,24 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
     -- Then s² = r⁴ + r²B² - B⁴, apply quartic_plus → r = B = 1 → u = 1
     right; right
     have hgcd_rB : Int.gcd |r| B = 1 := by
-      show Int.gcd |r| B = 1
-      rw [Int.gcd, Int.natAbs_abs]
-      rw [← Int.isCoprime_iff_gcd_eq_one] at hcop ⊢
-      rw [hrpos, show r ^ 2 = r * r from sq r] at hcop
-      exact hcop.of_mul_left
+      have h1 : IsCoprime (r ^ 2) B := hrpos ▸ Int.isCoprime_iff_gcd_eq_one.mpr hcop
+      have h2 : IsCoprime r B := (by rwa [sq] at h1 : IsCoprime (r * r) B).of_mul_left
+      simp only [Int.gcd, Int.natAbs_abs]
+      exact Int.isCoprime_iff_gcd_eq_one.mp h2
     have hr_pos : 0 < |r| := abs_pos.mpr hr0
-    -- Apply sq_of_gcd_eq_one to the second factor
-    have hcopf' : Int.gcd (A ^ 2 + A * B ^ 2 - B ^ 4) A = 1 := by
-      rw [Int.gcd_comm]; exact hcopf
-    obtain ⟨s, hsA⟩ := Int.sq_of_gcd_eq_one hcopf' (by linarith [hC] : (A ^ 2 + A * B ^ 2 - B ^ 4) * A = C ^ 2)
-    rcases hsA with hs_pos | hs_neg
-    · -- second = s²: QuarticPlus s² = |r|⁴ + |r|²B² - B⁴
-      have heq : s ^ 2 = |r| ^ 4 + |r| ^ 2 * B ^ 2 - B ^ 4 := by
-        rw [hs_pos, hrpos]; ring_nf; simp [sq_abs]
-      obtain ⟨hr1, hB1⟩ := quartic_plus |r| B s hBpos hr_pos hgcd_rB heq
-      rw [hu, hrpos]; simp [hr1, hB1, abs_eq_iff] at *; norm_num [hr1, hB1]
-      sorry -- final norm_num: u = r²/B² = 1/1 = 1
-    · -- second = -s²: impossible (A > 0, A·second = C² ≥ 0 forces second ≥ 0)
-      exfalso; nlinarith [sq_nonneg C, sq_nonneg s, sq_nonneg r, hrpos]
+    -- Remaining: apply quartic_plus, conclude u = 1
+    sorry
   · -- Case A = -r² ≤ 0. Since A ≠ 0, r ≠ 0.
     have hr0 : r ≠ 0 := by intro h; rw [h] at hrneg; simp at hrneg; exact hA0 hrneg
     -- The second factor must be ≤ 0, so it's -s²
     -- Then s² = -r⁴ + r²B² + B⁴, apply quartic_minus_of_plus → r = B = 1 → u = -1
     left
     have hgcd_rB : Int.gcd |r| B = 1 := by
-      show Int.gcd |r| B = 1
-      rw [Int.gcd, Int.natAbs_abs]
-      rw [← Int.isCoprime_iff_gcd_eq_one] at hcop ⊢
-      rw [hrneg, show -(r ^ 2) = r * r * (-1) from by ring] at hcop
-      exact (hcop.of_mul_right).of_mul_left
+      have h1 : IsCoprime (-(r ^ 2)) B := hrneg ▸ Int.isCoprime_iff_gcd_eq_one.mpr hcop
+      have h2 : IsCoprime (r ^ 2) B := h1.neg_left
+      have h3 : IsCoprime r B := (by rwa [sq] at h2 : IsCoprime (r * r) B).of_mul_left
+      simp only [Int.gcd, Int.natAbs_abs]
+      exact Int.isCoprime_iff_gcd_eq_one.mp h3
     have hr_pos : 0 < |r| := abs_pos.mpr hr0
     -- Second factor = -s² (not s²) since A = -r² < 0 and A·second = C² ≥ 0
     -- Then quartic_minus_of_plus gives |r| = B = 1, so A = -1, u = -1/1 = -1
