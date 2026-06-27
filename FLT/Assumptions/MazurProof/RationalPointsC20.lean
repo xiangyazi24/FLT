@@ -120,8 +120,21 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
       simp only [Int.gcd, Int.natAbs_abs]
       exact Int.isCoprime_iff_gcd_eq_one.mp h2
     have hr_pos : 0 < |r| := abs_pos.mpr hr0
-    -- Remaining: apply quartic_plus, conclude u = 1
-    sorry
+    -- Apply sq_of_gcd_eq_one to second factor
+    have hcopf' : Int.gcd (A ^ 2 + A * B ^ 2 - B ^ 4) A = 1 := by
+      rw [Int.gcd_comm]; exact hcopf
+    have hC' : (A ^ 2 + A * B ^ 2 - B ^ 4) * A = C ^ 2 := by linarith
+    obtain ⟨s, hs⟩ := Int.sq_of_gcd_eq_one hcopf' hC'
+    rcases hs with hs_pos | hs_neg
+    · -- second = s²: apply quartic_plus
+      have heq : s ^ 2 = |r| ^ 4 + |r| ^ 2 * B ^ 2 - B ^ 4 := by
+        nlinarith [hs_pos, hrpos, sq_abs r, sq_nonneg r]
+      obtain ⟨hr1, hB1⟩ := quartic_plus |r| B s hBpos hr_pos hgcd_rB heq
+      rw [hu, hrpos, show r ^ 2 = |r| ^ 2 from (sq_abs r).symm, hr1, hB1]; norm_num
+    · -- second = -s²: impossible (A = r² > 0, A · second = C² ≥ 0 → second ≥ 0)
+      exfalso
+      have hA_pos : 0 < A := by rw [hrpos]; positivity
+      nlinarith [sq_nonneg C, sq_nonneg s]
   · -- Case A = -r² ≤ 0. Since A ≠ 0, r ≠ 0.
     have hr0 : r ≠ 0 := by intro h; rw [h] at hrneg; simp at hrneg; exact hA0 hrneg
     -- The second factor must be ≤ 0, so it's -s²
@@ -135,9 +148,20 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
       simp only [Int.gcd, Int.natAbs_abs]
       exact Int.isCoprime_iff_gcd_eq_one.mp h3
     have hr_pos : 0 < |r| := abs_pos.mpr hr0
-    -- Second factor = -s² (not s²) since A = -r² < 0 and A·second = C² ≥ 0
-    -- Then quartic_minus_of_plus gives |r| = B = 1, so A = -1, u = -1/1 = -1
-    sorry
+    have hcopf' : Int.gcd (A ^ 2 + A * B ^ 2 - B ^ 4) A = 1 := by
+      rw [Int.gcd_comm]; exact hcopf
+    have hC' : (A ^ 2 + A * B ^ 2 - B ^ 4) * A = C ^ 2 := by linarith
+    obtain ⟨s, hs⟩ := Int.sq_of_gcd_eq_one hcopf' hC'
+    rcases hs with hs_pos | hs_neg
+    · -- second = s²: impossible (A = -r² < 0, A · second = C² ≥ 0 → second ≤ 0)
+      exfalso
+      have hA_neg : A < 0 := by rw [hrneg]; nlinarith [sq_nonneg r, hr0]
+      nlinarith [sq_nonneg C, sq_nonneg s]
+    · -- second = -s²: apply quartic_minus_of_plus
+      have heq : s ^ 2 = -(|r| ^ 4) + |r| ^ 2 * B ^ 2 + B ^ 4 := by
+        nlinarith [hs_neg, hrneg, sq_abs r, sq_nonneg r]
+      obtain ⟨hr1, hB1⟩ := quartic_minus_of_plus |r| B s hBpos hr_pos hgcd_rB heq
+      rw [hu, hrneg, show r ^ 2 = |r| ^ 2 from (sq_abs r).symm, hr1, hB1]; norm_num
 
 /-! ## Wiring to discharge the original axiom -/
 
