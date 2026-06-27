@@ -142,9 +142,9 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
           have := hcopf; rw [h_zero] at this; simpa [Int.gcd_zero_right] using this
         rcases Int.natAbs_eq A with h | h <;> omega
       have hB4 : B ^ 4 - B ^ 2 = 1 := by nlinarith
-      rcases le_or_lt B 1 with hB1 | hB2
-      · have : B = 1 := le_antisymm hB1 hBpos; nlinarith
-      · nlinarith [sq_nonneg (B ^ 2 - 1)]
+      by_cases hB1 : B = 1
+      · nlinarith
+      · nlinarith [sq_nonneg (B ^ 2 - 1), show 2 ≤ B by omega]
   · -- Case A = -r² ≤ 0. Since A ≠ 0, r ≠ 0.
     have hr0 : r ≠ 0 := by intro h; rw [h] at hrneg; simp at hrneg; exact hA0 hrneg
     -- The second factor must be ≤ 0, so it's -s²
@@ -174,9 +174,9 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
           have := hcopf; rw [h_zero] at this; simpa [Int.gcd_zero_right] using this
         rcases Int.natAbs_eq A with h | h <;> omega
       have hB4 : B ^ 4 - B ^ 2 = 1 := by nlinarith
-      rcases le_or_lt B 1 with hB1 | hB2
-      · have : B = 1 := le_antisymm hB1 hBpos; nlinarith
-      · nlinarith [sq_nonneg (B ^ 2 - 1)]
+      by_cases hB1 : B = 1
+      · nlinarith
+      · nlinarith [sq_nonneg (B ^ 2 - 1), show 2 ≤ B by omega]
     · -- second = -s²: apply quartic_minus_of_plus
       have heq : s ^ 2 = -(|r| ^ 4) + |r| ^ 2 * B ^ 2 + B ^ 4 := by
         nlinarith [hs_neg, hrneg, sq_abs r, sq_nonneg r]
