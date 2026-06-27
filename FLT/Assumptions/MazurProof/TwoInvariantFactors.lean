@@ -146,7 +146,15 @@ theorem primary_decomposition_respects_rank_bounds
 
 /-! ## Phase 2: Package into TwoInvariantFactorData -/
 
--- Verify the packaged data satisfies invariants
+-- Cardinality equation: G has cardinality m * n
+lemma card_of_two_invariant_factors
+    (G : Type*) [AddCommGroup G] [Finite G]
+    (m n : ℕ) (hm : 0 < m) (hn : 0 < n)
+    (e : G ≃+ ℤ/m × ℤ/n) :
+    Nat.card G = m * n := by
+  sorry  -- Compose: Nat.card_equiv e + Nat.card_prod + ZMod.card
+
+-- TwoInvariantFactorData constructor from equivalence
 def twoInvariantFactorData_of_equiv
     (G : Type*) [AddCommGroup G] [Finite G]
     (m n : ℕ) (hm : 0 < m) (hn : 0 < n) (hmn : m ∣ n)
@@ -158,29 +166,39 @@ def twoInvariantFactorData_of_equiv
   n_pos := hn
   m_divides_n := hmn
   equiv := e
-  card_eq : by
-    simp [Nat.card_equiv e, Nat.card_prod, ZMod.card]
-    ring
-  order_n : sorry  -- Verify order_n condition if needed for Mazur
+  card_eq := card_of_two_invariant_factors G m n hm hn e
+  order_n := by
+    -- order(G) = m * n (from card_eq)
+    sorry  -- ~5 LOC: verify the invariant order n condition
 
 theorem mk_two_invariant_factor_data
     (G : Type*) [AddCommGroup G] [Finite G]
-    (e : G ≃+ ℤ/m × ℤ/n) (hm : 0 < m) (hn : 0 < n) (hmn : m ∣ n) :
+    (m n : ℕ) (hm : 0 < m) (hn : 0 < n) (hmn : m ∣ n)
+    (e : G ≃+ ℤ/m × ℤ/n) :
     TwoInvariantFactorData G :=
   twoInvariantFactorData_of_equiv G m n hm hn hmn e
 
 /-! ## Phase 3: Final Assembly (Axiom 2 Discharge) -/
 
+-- Main theorem: Discharge Axiom 2 from the Mazur bound hypotheses
 theorem finite_abelian_two_invariant_factors
     (G : Type*) [AddCommGroup G] [Finite G]
     (h_no_odd : ∀ p : ℕ, Nat.Prime p → 2 < p →
       ¬ ∃ f : ZMod p × ZMod p →+ G, Function.Injective f)
     (h_no_two : ¬ ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+ G, Function.Injective f) :
     ∃ d : TwoInvariantFactorData G, True := by
-  -- Apply Phase 1: primary decomposition with bounds
-  obtain ⟨m, n, hm, hn, hmn, e⟩ := primary_decomposition_respects_rank_bounds G h_no_odd h_no_two
-  -- Apply Phase 2: package into TwoInvariantFactorData
-  let d := mk_two_invariant_factor_data G e hm hn hmn
-  exact ⟨d, trivial⟩
+  -- Phase 1: Primary decomposition with exponent bounds
+  obtain ⟨m, n, hm, hn, hmn, e⟩ :=
+    primary_decomposition_respects_rank_bounds G h_no_odd h_no_two
+  -- Phase 2: Package into TwoInvariantFactorData
+  use mk_two_invariant_factor_data G m n hm hn hmn e
+  trivial
+
+-- Axiom 2 usage: instantiate when verifying noncyclic group bounds
+def axiom_2_two_invariant_factors : ∀ (G : Type*) [AddCommGroup G] [Finite G],
+    (∀ p : ℕ, Nat.Prime p → 2 < p → ¬ ∃ f : ZMod p × ZMod p →+ G, Function.Injective f) →
+    (¬ ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+ G, Function.Injective f) →
+    ∃ d : TwoInvariantFactorData G, True :=
+  fun G _ h_no_odd h_no_two => finite_abelian_two_invariant_factors G h_no_odd h_no_two
 
 end MazurProof
