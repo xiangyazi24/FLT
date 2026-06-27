@@ -512,7 +512,8 @@ theorem quartic_plus_descent_step :
         linarith
       · -- B = 1: from α=β=1 → b=1 → a=1 (from a²=1+1-1=1) → B=1
         have hb1 : b = 1 := by rw [hb_eq, hα1, hβ1]; ring
-        have ha1 : a = 1 := by nlinarith [sq_nonneg (a - 1)]
+        have ha_sq : a ^ 2 = 1 := by rw [hnew_eq, hα1, hβ1]; norm_num
+        have ha1 : a = 1 := by linarith [sq_nonneg (a - 1)]
         rw [hB_eq, ha1, hb1]; ring
     · -- B' < B: α.natAbs < B.natAbs
       rw [hB_eq]
