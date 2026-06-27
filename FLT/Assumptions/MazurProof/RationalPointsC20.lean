@@ -78,8 +78,17 @@ theorem quartic_minus_of_plus (r B s : ℤ) (hB : 0 < B) (hr : 0 < r)
 
 Proof sketch: For prime ℓ with `vₗ(u) < 0`, ultrametric gives
 `2vₗ(w) = 3vₗ(u)`, forcing `vₗ(denominator)` even. -/
+/-- If `n ≠ 0` and `n³` is a square, then `n` is a square.
+Uses `Nat.ceilRoot` / `Nat.dvd_pow_iff_ceilRoot_dvd` from Mathlib. -/
+private theorem nat_isSquare_of_isSquare_cube {n : ℕ} (hn : n ≠ 0)
+    (h : IsSquare (n ^ 3)) : IsSquare n := by
+  sorry -- n³=c² → n²|c² → n|c (ceilRoot) → n=d² (cancel n²)
+
 axiom rat_denom_square (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
     ∃ A B : ℤ, 0 < B ∧ Int.gcd A B = 1 ∧ u = (A : ℚ) / (B : ℚ) ^ 2
+-- Proof path (ChatGPT Q1295): den_cubic_num_den shows (u³+u²-u).den = u.den³,
+-- then Rat.isSquare_iff gives u.den³ is square, then nat_isSquare_of_isSquare_cube
+-- gives u.den is square. Write u = u.num / (√den)².
 
 /-! ## Main theorem -/
 
