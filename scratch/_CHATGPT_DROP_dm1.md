@@ -1,758 +1,699 @@
-# Q1255 (dm1): complete 2-isogeny descent chain for `20.a4`
+# Q1268 (dm1): infinite descent for `s² = r⁴ + r²B² - B⁴`
 
-## Executive summary
+## Statement to prove
 
-Let
+The clean Lean statement should avoid natural-number subtraction by writing the equation as
 
 ```text
-E  : y^2 = x^3 + x^2 - x        = x(x^2 + x - 1)
-E' : Y^2 = X^3 - 2X^2 + 5X     = X(X^2 - 2X + 5)
+s² + B⁴ = r⁴ + r² B².
 ```
 
-and let
+Equivalently, over integers:
 
 ```text
-φ  : E  → E'
-φ̂ : E' → E
+s² = r⁴ + r² B² - B⁴.
 ```
 
-be the standard 2-isogeny and its dual. The rational kernel points are
+The theorem is:
 
 ```text
-ker φ(Q)  = {O, T},   T  = (0,0) ∈ E(Q)
-ker φ̂(Q) = {O, T'},  T' = (0,0) ∈ E'(Q).
+If r > 0, B > 0, gcd(r,B)=1, and s² = r⁴ + r²B² - B⁴,
+then r = B = 1 and s = ±1.
 ```
 
-The two local obstructions you verified should be used as follows:
+For a Nat-valued formalization, the conclusion is `r = 1 ∧ B = 1 ∧ s = 1` if `s : ℕ`. For an integer `s`, the conclusion is `r = 1 ∧ B = 1 ∧ s^2 = 1`, or equivalently `s = 1 ∨ s = -1`.
+
+The descent measure is `B`.
+
+## Normalization
+
+Because the equation only involves `s²`, replace `s` by `|s|`. So assume `s ≥ 0`.
+
+Define
 
 ```text
-C_E(5)(Q_5)      = ∅    via no primitive solution mod 125
-C_E'(-1)(Q_2)    = ∅    via no primitive solution mod 16
+A = 2r² + B²,
+U = A - 2s,
+V = A + 2s.
 ```
 
-The key point is that these obstructions do **not** make the two Selmer groups trivial. Each Selmer group still has the forced class coming from the rational kernel point:
+Then your factorization is
 
 ```text
-Sel^{φ̂}(E/Q)  = { 1, -1 }
-Sel^{φ}(E'/Q) = { 1,  5 }.
+U V = 5 B⁴.
 ```
 
-Then the descent exact sequence gives
+Indeed,
 
 ```text
-#(E(Q)  / φ̂(E'(Q))) = 2
-#(E'(Q) / φ(E(Q)))  = 2.
+(A - 2s)(A + 2s)
+  = A² - 4s²
+  = (2r² + B²)² - 4(r⁴ + r²B² - B⁴)
+  = 5B⁴.
 ```
 
-Finally the 2-isogeny product exact sequence gives
+Assume, as you said you have already proved, that
 
 ```text
-#(E(Q) / 2E(Q)) = (#(E'(Q)/φE(Q)) * #(E(Q)/φ̂E'(Q))) / 2
-               = (2 * 2) / 2
-               = 2.
+U > 0,
+V > 0,
+gcd(U,V) = 1,
+U and V are odd.
 ```
 
-Since `E(Q)[2] = {O,(0,0)}` has cardinal `2`, Mordell-Weil finite generation gives
+Also `s ≠ 0`, because if `s = 0`, then `U = V`, contradicting `gcd(U,V)=1` and `UV=5B⁴>1`. Thus, after replacing `s` by `|s|`,
 
 ```text
-#(E(Q) / 2E(Q)) = 2^rank(E/Q) * #E(Q)[2]
-               = 2^(rank(E/Q) + 1).
+0 < U < V.
 ```
 
-Thus
+We will use the equations
 
 ```text
-2^(rank(E/Q) + 1) = 2,
+U + V = 2A = 4r² + 2B²,
+V - U = 4s.
 ```
 
-so
+## Splitting lemma for coprime factors of `5B⁴`
+
+The main arithmetic splitting lemma is:
 
 ```text
-rank(E/Q) = 0.
+If U V = 5B⁴, gcd(U,V)=1, U,V > 0, and U,V are odd,
+then there exist positive coprime odd integers a,b with B = ab such that exactly one of the following holds:
+
+  Case I:  U = a⁴  and V = 5b⁴;
+  Case II: U = 5a⁴ and V = b⁴.
 ```
 
-This is the formalization chain. The local computations eliminate the **extra Selmer generator** in each isogeny descent; the rational 2-torsion classes remain and are exactly what makes each Selmer group have size `2`.
+This is the exact formal content of “every splitting of `5B⁴` into coprime odd factors.”
 
-## 1. The curves and the isogenies
+### Proof of the splitting lemma
 
-For a curve in the form
+Use prime valuations.
+
+For every prime `p`, since `gcd(U,V)=1`, all of the `p`-adic valuation of `UV` lies in exactly one of `U` or `V`.
+
+For `p ≠ 5`,
 
 ```text
-E_{a,b} : y^2 = x^3 + a x^2 + b x = x(x^2 + ax + b)
+v_p(UV) = v_p(5B⁴) = 4 v_p(B),
 ```
 
-with rational 2-torsion point `T = (0,0)`, the standard 2-isogenous curve is
+so the exponent of `p` in whichever factor contains it is a multiple of `4`.
+
+For `p = 5`,
 
 ```text
-E'_{a,b} : Y^2 = X^3 - 2a X^2 + (a^2 - 4b)X.
+v_5(UV) = v_5(5B⁴) = 1 + 4 v_5(B),
 ```
 
-Here `a = 1`, `b = -1`, hence
+so exactly one of `U,V` has `5`-adic valuation congruent to `1 mod 4`; the other has `5`-adic valuation congruent to `0 mod 4`.
 
-```text
-a' = -2a = -2,
-b' = a^2 - 4b = 1 - 4(-1) = 5,
+Therefore the factor carrying the extra `5` is `5` times a fourth power, and the other factor is a fourth power. Because the prime supports of `U` and `V` are disjoint, the fourth-root parts are coprime; call them `a` and `b`. Then `B=ab`.
+
+Since `U,V` are odd, both `a,b` are odd.
+
+### Lean shape
+
+Use `Nat.factorization` or `padicValNat`. The clean lemma target is:
+
+```lean
+-- Schematic target; use your local positivity/coprime predicates.
+lemma coprime_odd_factorization_five_mul_fourth
+    {U V B : ℕ}
+    (hU : 0 < U) (hV : 0 < V)
+    (hcop : Nat.Coprime U V)
+    (hoddU : Odd U) (hoddV : Odd V)
+    (hprod : U * V = 5 * B^4) :
+    ∃ a b : ℕ,
+      0 < a ∧ 0 < b ∧ Odd a ∧ Odd b ∧ Nat.Coprime a b ∧ B = a*b ∧
+        ((U = a^4 ∧ V = 5*b^4) ∨ (U = 5*a^4 ∧ V = b^4)) :=
+  -- prove by prime valuations
+  -- no `sorry` in the final file
+  by
+    -- implementation target, not a completed proof here
+    admit
 ```
 
-so
+## Primitive Pythagorean-square-leg lemma
+
+The descent uses one standard lemma, which should be proved once and reused.
+
+### Lemma
+
+Suppose
 
 ```text
-E' : Y^2 = X^3 - 2X^2 + 5X.
-```
-
-The isogeny has kernel
-
-```text
-E[φ] = {O, (0,0)}.
-```
-
-The dual isogeny has kernel
-
-```text
-E'[φ̂] = {O, (0,0)}.
-```
-
-For this specific pair, both curves have exactly one nonzero rational 2-torsion point:
-
-```text
-E(Q)[2]  = {O, (0,0)}
-E'(Q)[2] = {O, (0,0)}.
-```
-
-Indeed:
-
-```text
-E[2]  : x(x^2 + x - 1) = 0,      disc(x^2 + x - 1) = 5, not a square in Q;
-E'[2] : X(X^2 - 2X + 5) = 0,     disc(X^2 - 2X + 5) = -16, not a square in Q.
-```
-
-For the rank calculation below, the important consequences are
-
-```text
-#E(Q)[2] = 2,
-#E'[φ̂](Q) = 2,
-φ(E(Q)[2]) = {O}.
-```
-
-The last equality holds because `E(Q)[2] = ker φ(Q)` for this curve.
-
-## 2. The descent maps
-
-For
-
-```text
-E_{a,b} : y^2 = x^3 + ax^2 + bx
-```
-
-with dual isogeny `φ̂ : E' → E`, the usual 2-isogeny descent map is
-
-```text
-α_E : E(Q) → Q*/Q*²
-```
-
-given by
-
-```text
-α_E(O)       = 1,
-α_E((0,0))   = b,
-α_E((x,y))   = x mod Q*²,    if x ≠ 0.
-```
-
-Its kernel is
-
-```text
-ker α_E = φ̂(E'(Q)).
-```
-
-Therefore it induces an injection
-
-```text
-E(Q) / φ̂(E'(Q)) ↪ Q*/Q*².
-```
-
-For this curve, `b = -1`, so the rational kernel point `T = (0,0)` contributes the nontrivial class
-
-```text
-α_E(T) = -1.
-```
-
-Thus
-
-```text
-{1, -1} ⊆ image(α_E) ⊆ Sel^{φ̂}(E/Q).
-```
-
-For the isogenous curve
-
-```text
-E' : Y^2 = X^3 - 2X^2 + 5X,
-```
-
-the analogous map is
-
-```text
-α_E' : E'(Q) → Q*/Q*²
+h² + y⁴ = z²,
 ```
 
 with
 
 ```text
-α_E'(O)       = 1,
-α_E'((0,0))   = 5,
-α_E'((X,Y))   = X mod Q*²,    if X ≠ 0.
+h > 0,
+y > 0,
+gcd(h,y)=1,
+h even,
+y odd.
 ```
 
-Its kernel is
+Then there exist coprime positive odd integers `u < v` such that
 
 ```text
-ker α_E' = φ(E(Q)).
+y = uv,
+2h = v⁴ - u⁴.
 ```
 
-So it induces
+### Proof
+
+The triple
 
 ```text
-E'(Q) / φ(E(Q)) ↪ Q*/Q*²,
+h² + (y²)² = z²
 ```
 
-and the kernel point `T' = (0,0)` contributes
+is a primitive Pythagorean triple: `gcd(h,y²)=1`, `h` is even, and `y²` is odd.
+
+Therefore there are coprime integers `m > n > 0` of opposite parity such that
 
 ```text
-α_E'(T') = 5.
+h   = 2mn,
+y²  = m² - n²,
+z   = m² + n².
+```
+
+Factor
+
+```text
+y² = (m-n)(m+n).
+```
+
+The two factors `m-n` and `m+n` are coprime. Indeed any common divisor divides their sum `2m` and difference `2n`; since `gcd(m,n)=1` and both `m±n` are odd, the common divisor is `1`.
+
+Since their product is a square and they are coprime, each is a square:
+
+```text
+m-n = u²,
+m+n = v²,
+```
+
+with `u,v` positive odd, coprime, and `u < v`.
+
+Then
+
+```text
+y² = u²v²,
+```
+
+so `y=uv`, and
+
+```text
+2h = 4mn = (m+n)² - (m-n)² = v⁴ - u⁴.
+```
+
+### Lean shape
+
+```lean
+-- Schematic target.
+lemma primitive_pythagorean_square_odd_leg
+    {h y z : ℕ}
+    (hh : 0 < h) (hy : 0 < y)
+    (hcop : Nat.Coprime h y)
+    (heven : Even h) (hodd : Odd y)
+    (heq : h^2 + y^4 = z^2) :
+    ∃ u v : ℕ,
+      0 < u ∧ u < v ∧ Odd u ∧ Odd v ∧ Nat.Coprime u v ∧
+      y = u*v ∧ 2*h = v^4 - u^4 :=
+  -- use primitive Pythagorean triples, then split coprime square factors
+  by
+    admit
+```
+
+If subtraction in `2*h = v^4 - u^4` is inconvenient over `ℕ`, state it as
+
+```lean
+2*h + u^4 = v^4
+```
+
+which is better for Lean.
+
+## Descent from the splitting: Case I
+
+Assume the splitting is
+
+```text
+U = a⁴,
+V = 5b⁴,
+B = ab,
+gcd(a,b)=1,
+a,b odd.
+```
+
+Using `U+V = 4r² + 2B²`, we get
+
+```text
+a⁴ + 5b⁴ = 4r² + 2a²b².
+```
+
+Rearrange:
+
+```text
+4r² = a⁴ - 2a²b² + 5b⁴
+    = (a² - b²)² + 4b⁴.
 ```
 
 Thus
 
 ```text
-{1, 5} ⊆ image(α_E') ⊆ Sel^{φ}(E'/Q).
+r² = ((a² - b²)/2)² + b⁴.
 ```
 
-## 3. The homogeneous spaces
-
-For
+Because `a,b` are odd, `a²-b²` is divisible by `8`, so
 
 ```text
-E_{a,b} : y^2 = x^3 + ax^2 + bx,
+h = |a²-b²| / 2
 ```
 
-the squareclass `d ∈ Q*/Q*²` is represented by a principal homogeneous space, usually written in one of the equivalent quartic forms
+is a positive even integer unless `a=b`.
+
+Also
 
 ```text
-C_E(d) : N^2 = d M^4 + a M^2 Z^2 + (b/d) Z^4,
+gcd(h,b)=1.
 ```
 
-or after clearing denominators by whatever integral normalization your Lean development uses.
+Proof: if a prime divides both `h` and `b`, then because `b` is odd it divides `2h = |a²-b²|`, hence it divides `a²`, hence it divides `a`, contradicting `gcd(a,b)=1`.
 
-The exact normalization does not matter for the abstract descent argument, but the local obstruction theorem must be stated for the **same** normalization used by the descent map.
-
-For this curve, with `a = 1`, `b = -1`, the space is
+So, if `a ≠ b`, the Pythagorean-square-leg lemma applied to
 
 ```text
-C_E(d) : N^2 = d M^4 + M^2 Z^2 - d^{-1} Z^4.
+h² + b⁴ = r²
 ```
 
-For `d = 5`, an integral cleared form is
+gives coprime positive odd `u < v` with
 
 ```text
-5 N^2 = 25 M^4 + 5 M^2 Z^2 - Z^4.
+b = uv,
+2h = v⁴ - u⁴.
 ```
 
-Your computation says that this has no primitive solution modulo `125`, hence
+Since `2h = |a²-b²|`, there are two subcases.
+
+### Case I.0: `a = b`
+
+Since `gcd(a,b)=1`, this gives
 
 ```text
-C_E(5)(Q_5) = ∅.
+a = b = 1.
 ```
 
-For `E'`, with `a' = -2`, `b' = 5`, the space is
+Then
 
 ```text
-C_E'(d) : N^2 = d M^4 - 2 M^2 Z^2 + (5/d) Z^4.
+B = ab = 1.
 ```
 
-For `d = -1`, an equivalent integral form is obtained by substituting `d = -1`; use the exact integral model from your Lean code. Your computation says that the `d' = -1` space has no primitive solution modulo `16`, hence
+From
 
 ```text
-C_E'(-1)(Q_2) = ∅.
+U+V = 1 + 5 = 6 = 4r² + 2B² = 4r² + 2,
 ```
 
-The formal local step should be a lemma of this shape:
-
-```lean
--- Schematic only: use your actual homogeneous-space predicates.
-theorem no_Q5_point_C_E_5
-    (hmod : NoPrimitiveSolutionMod125_C_E_5) :
-    ¬ LocallySolubleAt 5 (C_E 5) := by
-  -- p-adic point -> clear denominators -> primitive Z_p solution
-  -- -> reduce mod 125 -> contradiction.
-  exact by
-    -- your existing exhaustive computation supplies `hmod`
-    -- and the valuation/clearing-denominators lemma supplies this implication
-    admit
-
-theorem no_Q2_point_C_Eprime_neg_one
-    (hmod : NoPrimitiveSolutionMod16_C_Eprime_neg_one) :
-    ¬ LocallySolubleAt 2 (C_Eprime (-1)) := by
-  -- same pattern, reduce a primitive 2-adic solution modulo 16
-  exact by
-    admit
-```
-
-The final committed Lean proof must not use `admit`; these are just the theorem shapes.
-
-## 4. The Selmer groups
-
-The isogeny Selmer groups are the local-solubility subgroups:
+we get
 
 ```text
-Sel^{φ̂}(E/Q)
-  = { d ∈ Q*/Q*² | C_E(d)(Q_v) ≠ ∅ for every place v },
-
-Sel^{φ}(E'/Q)
-  = { d ∈ Q*/Q*² | C_E'(d)(Q_v) ≠ ∅ for every place v }.
-```
-
-They fit into the standard Kummer/Selmer exact sequences:
-
-```text
-0 → E(Q) / φ̂(E'(Q))
-  → Sel^{φ̂}(E/Q)
-  → Ш(E'/Q)[φ̂]
-  → 0,
-```
-
-and
-
-```text
-0 → E'(Q) / φ(E(Q))
-  → Sel^{φ}(E'/Q)
-  → Ш(E/Q)[φ]
-  → 0.
-```
-
-The first injection is induced by `α_E`; the second is induced by `α_E'`.
-
-## 5. Candidate classes and the role of `d = 5`, `d' = -1`
-
-The bad primes are `2` and `5`, so the standard support lemma says Selmer classes lie in the finite squareclass group supported on
-
-```text
-S = {∞, 2, 5}.
-```
-
-Equivalently, the ambient finite group is generated by
-
-```text
-[-1], [2], [5] ∈ Q*/Q*².
-```
-
-For this specific pair, the preliminary local conditions reduce both Selmer searches to the subgroup generated by `[-1]` and `[5]`. In other words, the candidate classes are
-
-```text
-H = {1, -1, 5, -5} ⊂ Q*/Q*².
-```
-
-This candidate reduction is a necessary formal lemma. In Lean, isolate it before using the two final obstructions:
-
-```lean
--- Schematic names. Replace `SqClass` and membership predicates by your actual API.
-theorem Sel_hat_E_subset_candidates :
-    Sel_hat_E ≤ {1, -1, 5, -5} := by
-  -- support at bad primes + local tests eliminating classes involving 2
-  admit
-
-theorem Sel_phi_Eprime_subset_candidates :
-    Sel_phi_Eprime ≤ {1, -1, 5, -5} := by
-  -- same support/local reduction for E'
-  admit
-```
-
-Without this candidate-reduction lemma, the two obstructions alone are not enough: they rule out `5` in the first Selmer group and `-1` in the second, but they say nothing by themselves about classes involving `2`.
-
-Now use the forced kernel classes:
-
-```text
--1 ∈ Sel^{φ̂}(E/Q),   because α_E((0,0)) = -1;
- 5 ∈ Sel^{φ}(E'/Q),  because α_E'((0,0)) = 5.
-```
-
-### First Selmer group
-
-You verified
-
-```text
-C_E(5)(Q_5) = ∅.
-```
-
-Therefore
-
-```text
-5 ∉ Sel^{φ̂}(E/Q).
-```
-
-Since `Sel^{φ̂}(E/Q)` is a subgroup of `Q*/Q*²`, and since `-1 ∈ Sel^{φ̂}(E/Q)`, this also rules out `-5`:
-
-```text
-if -5 ∈ Sel^{φ̂}(E/Q), then (-1) * (-5) = 5 ∈ Sel^{φ̂}(E/Q), contradiction.
-```
-
-Together with the candidate reduction
-
-```text
-Sel^{φ̂}(E/Q) ⊆ {1, -1, 5, -5},
-```
-
-this proves
-
-```text
-Sel^{φ̂}(E/Q) = {1, -1}.
-```
-
-So
-
-```text
-#Sel^{φ̂}(E/Q) = 2.
-```
-
-### Second Selmer group
-
-You verified
-
-```text
-C_E'(-1)(Q_2) = ∅.
-```
-
-Therefore
-
-```text
--1 ∉ Sel^{φ}(E'/Q).
-```
-
-Since `5 ∈ Sel^{φ}(E'/Q)`, this also rules out `-5`:
-
-```text
-if -5 ∈ Sel^{φ}(E'/Q), then 5 * (-5) = -1 ∈ Sel^{φ}(E'/Q), contradiction.
-```
-
-Together with the candidate reduction
-
-```text
-Sel^{φ}(E'/Q) ⊆ {1, -1, 5, -5},
-```
-
-this proves
-
-```text
-Sel^{φ}(E'/Q) = {1, 5}.
-```
-
-So
-
-```text
-#Sel^{φ}(E'/Q) = 2.
-```
-
-## 6. From Selmer groups to the two descent quotients
-
-The exact sequences give injections
-
-```text
-E(Q) / φ̂(E'(Q))  ↪ Sel^{φ̂}(E/Q),
-E'(Q) / φ(E(Q))  ↪ Sel^{φ}(E'/Q).
-```
-
-Therefore
-
-```text
-#(E(Q) / φ̂(E'(Q))) ≤ 2,
-#(E'(Q) / φ(E(Q))) ≤ 2.
-```
-
-But each quotient has at least two elements, because the rational kernel point gives a nontrivial descent class:
-
-```text
-O, (0,0) ∈ E(Q)  map to 1, -1 in Q*/Q*²;
-O, (0,0) ∈ E'(Q) map to 1,  5 in Q*/Q*².
-```
-
-Hence
-
-```text
-#(E(Q) / φ̂(E'(Q))) = 2,
-#(E'(Q) / φ(E(Q))) = 2.
-```
-
-Equivalently, the Ш-parts in the two isogeny exact sequences are zero:
-
-```text
-Ш(E'/Q)[φ̂] = 0,
-Ш(E/Q)[φ]  = 0,
-```
-
-though this vanishing is not needed for the rank calculation.
-
-Formal Lean lemma shape:
-
-```lean
--- Schematic.
-theorem quotient_card_eq_two_of_selmer_eq_pair
-    (hSel : Sel_hat_E = {1, -1})
-    (hKernelClass : alpha_E T = -1) :
-    Nat.card (E_Q_mod_dual_image) = 2 := by
-  -- injection into Selmer gives `≤ 2`
-  -- the two classes `1` and `-1` in the image give `≥ 2`
-  admit
-```
-
-Do the analogous theorem for `E'` with `{1,5}`.
-
-## 7. The isogeny product exact sequence
-
-Let
-
-```text
-A = E(Q),
-B = E'(Q),
-ψ = φ̂.
-```
-
-The compositions satisfy
-
-```text
-ψ ∘ φ = [2] on A,
-φ ∘ ψ = [2] on B.
-```
-
-There is an exact sequence
-
-```text
-0
-→ B[ψ] / φ(A[2])
-→ B / φ(A)
-→ A / 2A
-→ A / ψ(B)
-→ 0.
-```
-
-The maps are explicit:
-
-```text
-B[ψ] / φ(A[2]) → B / φ(A)
-  is induced by inclusion B[ψ] ⊂ B,
-
-B / φ(A) → A / 2A
-  sends the class of Q ∈ B to the class of ψ(Q) ∈ A,
-
-A / 2A → A / ψ(B)
-  is the natural quotient map.
-```
-
-Exactness check:
-
-* The map `B / φ(A) → A / 2A` is well-defined because
-
-```text
-ψ(φ(P)) = 2P.
-```
-
-* Its kernel consists of classes `Q mod φ(A)` with `ψ(Q) ∈ 2A = ψ(φ(A))`. Thus `Q - φ(P) ∈ B[ψ]`, giving the kernel term `B[ψ]/φ(A[2])`.
-
-* Its cokernel is `A/ψ(B)` because `2A = ψ(φ(A)) ⊆ ψ(B)`.
-
-For our curve,
-
-```text
-B[ψ] = E'(Q)[φ̂] = {O,T'}           has cardinal 2,
-A[2] = E(Q)[2] = {O,T} = ker φ,
-φ(A[2]) = {O}.
-```
-
-Therefore
-
-```text
-#(B[ψ] / φ(A[2])) = 2.
-```
-
-Taking cardinalities in the exact sequence gives
-
-```text
-#(A / 2A)
-  = #(B / φ(A)) * #(A / ψ(B)) / #(B[ψ] / φ(A[2]))
-  = 2 * 2 / 2
-  = 2.
-```
-
-So
-
-```text
-#(E(Q) / 2E(Q)) = 2.
-```
-
-Formal Lean theorem shape:
-
-```lean
--- Schematic group-theory theorem, independent of elliptic curves.
-theorem card_mod_two_of_isogeny_quotients
-    {A B : Type*} [AddCommGroup A] [AddCommGroup B]
-    (φ : A →+ B) (ψ : B →+ A)
-    (hψφ : ψ.comp φ = AddMonoidHom.mulLeft 2) -- replace by actual API
-    (hφψ : φ.comp ψ = AddMonoidHom.mulLeft 2)
-    -- plus finite quotient hypotheses and kernel-card hypotheses
-    : Nat.card (A ⧸ AddSubgroup.map (AddMonoidHom.mulLeft 2) ⊤) = 2 := by
-  -- instantiate the exact sequence above and take cardinalities
-  admit
-```
-
-In practice it may be easier to prove the exact sequence directly for your concrete quotient definitions rather than introduce a maximally general theorem.
-
-## 8. From `#E(Q)/2E(Q) = 2` to rank zero
-
-Mordell-Weil says `E(Q)` is a finitely generated abelian group. For any finitely generated abelian group `A`,
-
-```text
-#(A / 2A) = 2^rank(A) * #A[2].
-```
-
-For our curve,
-
-```text
-#E(Q)[2] = 2.
-```
-
-Thus
-
-```text
-#(E(Q) / 2E(Q)) = 2^rank(E/Q) * 2.
-```
-
-But the isogeny calculation gave
-
-```text
-#(E(Q) / 2E(Q)) = 2.
-```
-
-Therefore
-
-```text
-2^rank(E/Q) * 2 = 2,
+r² = 1,
 ```
 
 hence
 
 ```text
-2^rank(E/Q) = 1,
+r = 1.
 ```
 
-and so
+This is exactly the base solution.
+
+### Case I.1: `a > b`
+
+Here
 
 ```text
-rank(E/Q) = 0.
+a² - b² = v⁴ - u⁴.
 ```
 
-Formal Lean theorem shape:
+Since `b=uv`, we have
+
+```text
+a² = b² + v⁴ - u⁴
+   = u²v² + v⁴ - u⁴
+   = v⁴ + v²u² - u⁴.
+```
+
+Therefore
+
+```text
+(s', r', B') = (a, v, u)
+```
+
+is a new primitive solution:
+
+```text
+s'² = r'⁴ + r'² B'² - B'⁴.
+```
+
+Primitivity follows from `gcd(u,v)=1`.
+
+The new `B'` is smaller:
+
+```text
+B' = u < uv = b ≤ ab = B.
+```
+
+So any non-base solution in this subcase descends to a smaller one.
+
+### Case I.2: `a < b`
+
+Here
+
+```text
+b² - a² = v⁴ - u⁴.
+```
+
+Since `b=uv`, we have
+
+```text
+a² = b² - (v⁴ - u⁴)
+   = u²v² - v⁴ + u⁴
+   = u⁴ + u²v² - v⁴.
+```
+
+Therefore
+
+```text
+(s', r', B') = (a, u, v)
+```
+
+is a new primitive solution:
+
+```text
+s'² = r'⁴ + r'² B'² - B'⁴.
+```
+
+Again primitivity follows from `gcd(u,v)=1`.
+
+We must check that `B' = v < B`. Since `b=uv`, it is enough to know `u > 1`; then
+
+```text
+v < uv = b ≤ ab = B.
+```
+
+Why is `u > 1`? If `u=1`, then
+
+```text
+a² = 1 + v² - v⁴.
+```
+
+But `u < v` and both are positive odd, so `v ≥ 3`, and then
+
+```text
+1 + v² - v⁴ < 0,
+```
+
+impossible for a square. Hence `u > 1`, and the descent is strict.
+
+## Descent from the splitting: Case II
+
+Assume the splitting is
+
+```text
+U = 5a⁴,
+V = b⁴,
+B = ab,
+gcd(a,b)=1,
+a,b odd.
+```
+
+Since `U < V`, we have
+
+```text
+5a⁴ < b⁴,
+```
+
+hence in particular
+
+```text
+a < b.
+```
+
+Using `U+V = 4r² + 2B²`, we get
+
+```text
+5a⁴ + b⁴ = 4r² + 2a²b².
+```
+
+Rearrange:
+
+```text
+4r² = b⁴ - 2a²b² + 5a⁴
+    = (b² - a²)² + 4a⁴.
+```
+
+Thus
+
+```text
+r² = ((b² - a²)/2)² + a⁴.
+```
+
+Set
+
+```text
+h = (b² - a²)/2.
+```
+
+Because `a,b` are odd, `h` is even. Since `a<b`, `h>0`. As above,
+
+```text
+gcd(h,a)=1.
+```
+
+Apply the Pythagorean-square-leg lemma to
+
+```text
+h² + a⁴ = r².
+```
+
+We get coprime positive odd `u < v` such that
+
+```text
+a = uv,
+2h = v⁴ - u⁴.
+```
+
+Since `2h = b² - a²`, we get
+
+```text
+b² - a² = v⁴ - u⁴.
+```
+
+Using `a=uv`,
+
+```text
+b² = a² + v⁴ - u⁴
+   = u²v² + v⁴ - u⁴
+   = v⁴ + v²u² - u⁴.
+```
+
+Therefore
+
+```text
+(s', r', B') = (b, v, u)
+```
+
+is a new primitive solution:
+
+```text
+s'² = r'⁴ + r'² B'² - B'⁴.
+```
+
+The new `B'` is strictly smaller:
+
+```text
+B' = u < uv = a ≤ ab = B.
+```
+
+Thus Case II always descends.
+
+## Infinite descent conclusion
+
+Now prove the theorem by minimal counterexample on `B`.
+
+Assume there is a primitive positive solution with not `(r=B=1)`. Choose one with minimal positive `B`.
+
+Construct `U,V`. By the splitting lemma, either Case I or Case II holds.
+
+* In Case I.0, `a=b=1`, hence `B=1` and `r=1`, contradicting that the solution was non-base.
+* In Case I.1, we construct a new primitive solution with `B' = u < B`.
+* In Case I.2, we construct a new primitive solution with `B' = v < B`.
+* In Case II, we construct a new primitive solution with `B' = u < B`.
+
+Every non-base case contradicts the minimality of `B`. Therefore there is no non-base primitive positive solution.
+
+Hence every primitive positive solution has
+
+```text
+r = 1,
+B = 1.
+```
+
+Substituting into the equation gives
+
+```text
+s² = 1,
+```
+
+so over integers
+
+```text
+s = ±1,
+```
+
+and over naturals
+
+```text
+s = 1.
+```
+
+## Lean formalization plan
+
+The final proof should be organized into small lemmas with the descent step as the core.
+
+### Suggested Nat predicate
+
+Use the subtraction-free equation.
 
 ```lean
--- Schematic; use the rank definition already present in the project.
-theorem rank_eq_zero_of_mod_two_card_eq_two_and_two_torsion_card_eq_two
-    (A : Type*) [AddCommGroup A]
-    [Module ℤ A] [Module.Finite ℤ A]
-    (hmod2 : Nat.card (A ⧸ twoMultipleSubgroup A) = 2)
-    (htwo : Nat.card {a : A // (2 : ℕ) • a = 0} = 2) :
-    moduleRankOverZ A = 0 := by
-  -- Use structure theorem / `A ≃ ℤ^r × finite torsion`.
-  -- Then `#A/2A = 2^r * #A[2]`.
-  admit
+import Mathlib
+
+noncomputable section
+
+/-- Primitive positive solutions to `s² = r⁴ + r²B² - B⁴`, written without subtraction. -/
+def IsSolution (r B s : ℕ) : Prop :=
+  0 < r ∧ 0 < B ∧ Nat.Coprime r B ∧ s^2 + B^4 = r^4 + r^2 * B^2
 ```
 
-Again, no `admit` in the final Lean proof; this is the formal target to isolate.
+### Splitting lemma target
 
-## 9. Minimal list of Lean facts to formalize
+```lean
+lemma coprime_odd_factorization_five_mul_fourth
+    {U V B : ℕ}
+    (hU : 0 < U) (hV : 0 < V)
+    (hcop : Nat.Coprime U V)
+    (hoddU : Odd U) (hoddV : Odd V)
+    (hprod : U * V = 5 * B^4) :
+    ∃ a b : ℕ,
+      0 < a ∧ 0 < b ∧ Odd a ∧ Odd b ∧ Nat.Coprime a b ∧ B = a*b ∧
+        ((U = a^4 ∧ V = 5*b^4) ∨ (U = 5*a^4 ∧ V = b^4)) := by
+  -- prime factorization / valuations
+  sorry
+```
 
-Here is the clean dependency graph.
+### Pythagorean-square-leg lemma target
 
-### Curve/isogeny facts
+State subtraction-free:
+
+```lean
+lemma primitive_pythagorean_square_odd_leg
+    {h y z : ℕ}
+    (hh : 0 < h) (hy : 0 < y)
+    (hcop : Nat.Coprime h y)
+    (heven : Even h) (hodd : Odd y)
+    (heq : h^2 + y^4 = z^2) :
+    ∃ u v : ℕ,
+      0 < u ∧ u < v ∧ Odd u ∧ Odd v ∧ Nat.Coprime u v ∧
+      y = u*v ∧ 2*h + u^4 = v^4 := by
+  -- primitive Pythagorean triple plus coprime factors of a square
+  sorry
+```
+
+### Descent-step theorem target
+
+This is the most important lemma. Once it is proved, the infinite descent is routine.
+
+```lean
+/-- Every non-base primitive solution produces a smaller primitive solution. -/
+lemma descent_step
+    {r B s : ℕ}
+    (hsol : IsSolution r B s)
+    (hnot : ¬ (r = 1 ∧ B = 1)) :
+    ∃ r' B' s' : ℕ, IsSolution r' B' s' ∧ B' < B := by
+  -- 1. Define A,U,V.
+  -- 2. Use your already-proved positivity/coprime/odd factor lemmas for U,V.
+  -- 3. Apply `coprime_odd_factorization_five_mul_fourth`.
+  -- 4. Case I: U=a^4, V=5*b^4.
+  --    * If a=b, prove base, contradict `hnot`.
+  --    * If a>b, apply `primitive_pythagorean_square_odd_leg` to `h= (a^2-b^2)/2`, `y=b`.
+  --      Return `(r',B',s')=(v,u,a)`.
+  --    * If a<b, apply it to `h= (b^2-a^2)/2`, `y=b`.
+  --      Return `(r',B',s')=(u,v,a)` and prove `u>1` to get `v<B`.
+  -- 5. Case II: U=5*a^4, V=b^4.
+  --    Use `U<V` to get `a<b`, apply the square-leg lemma to `h=(b^2-a^2)/2`, `y=a`.
+  --    Return `(r',B',s')=(v,u,b)`.
+  sorry
+```
+
+### Infinite descent theorem target
+
+Use well-founded induction on `B`.
+
+```lean
+theorem solution_eq_one
+    {r B s : ℕ} (hsol : IsSolution r B s) :
+    r = 1 ∧ B = 1 ∧ s = 1 := by
+  classical
+  -- Strong induction on B.
+  -- Inductive hypothesis: all solutions with smaller B are base.
+  -- If current solution is non-base, `descent_step` gives a smaller solution, contradiction.
+  -- Once r=B=1, the equation gives `s^2 + 1 = 2`, hence `s=1`.
+  sorry
+```
+
+The `sorry`s above mark proof obligations to implement; they are not new assumptions. The mathematical descent is complete once the three lemmas are filled.
+
+## Checklist of arithmetic facts needed in Lean
+
+1. `a,b` odd implies `a²-b²` is divisible by `8`, so `|a²-b²|/2` is even.
+2. `Nat.Coprime a b` implies `Nat.Coprime ((|a²-b²|)/2) b`, when `a,b` are odd and unequal.
+3. Primitive Pythagorean parametrization for `h² + y⁴ = z²` with `h` even, `y` odd.
+4. If coprime positive integers multiply to a square, each is a square.
+5. If `u=1`, `u<v`, and `v` is odd, then `1 + v² < v⁴`; this rules out the Case I.2 edge case.
+6. Strict descent inequalities:
 
 ```text
-E(Q)[2] = {O, (0,0)}
-E'(Q)[φ̂] = {O, (0,0)}
-φ(E(Q)[2]) = {O}
-φ̂ ∘ φ = [2]
-φ ∘ φ̂ = [2]
+Case I.1:  u < uv = b ≤ ab = B.
+Case I.2:  v < uv = b ≤ ab = B, using u > 1.
+Case II:   u < uv = a ≤ ab = B.
 ```
 
-### Descent-map facts
+## Final mathematical conclusion
+
+The factor splitting has exactly one base branch and three descent branches:
 
 ```text
-ker α_E  = φ̂(E'(Q))
-ker α_E' = φ(E(Q))
-α_E(O) = 1
-α_E((0,0)) = -1
-α_E'(O) = 1
-α_E'((0,0)) = 5
+U=a⁴, V=5b⁴, a=b  -> r=B=1.
+U=a⁴, V=5b⁴, a>b -> smaller solution (v,u,a).
+U=a⁴, V=5b⁴, a<b -> smaller solution (u,v,a).
+U=5a⁴,V=b⁴       -> smaller solution (v,u,b).
 ```
 
-### Candidate-reduction facts
+Thus a minimal non-base solution cannot exist. Therefore the only primitive positive solution is
 
 ```text
-Sel^{φ̂}(E/Q)  ⊆ {1, -1, 5, -5}
-Sel^{φ}(E'/Q) ⊆ {1, -1, 5, -5}
+r = B = 1,
 ```
 
-These include the support-at-bad-primes argument and the local checks eliminating classes involving `2`.
-
-### Local obstruction facts
+with
 
 ```text
-C_E(5)(Q_5) = ∅
-C_E'(-1)(Q_2) = ∅
+s² = 1.
 ```
-
-Your exhaustive computations supply these after the p-adic clearing-denominators lemma:
-
-```text
-no primitive solution mod 125 ⇒ no Q_5 solution,
-no primitive solution mod 16  ⇒ no Q_2 solution.
-```
-
-### Selmer conclusions
-
-```text
-Sel^{φ̂}(E/Q)  = {1, -1}
-Sel^{φ}(E'/Q) = {1, 5}
-```
-
-### Quotient-card conclusions
-
-```text
-#(E(Q)  / φ̂(E'(Q))) = 2
-#(E'(Q) / φ(E(Q)))  = 2
-```
-
-### Rank conclusion
-
-```text
-#(E(Q)/2E(Q)) = 2
-#E(Q)[2] = 2
-#(E(Q)/2E(Q)) = 2^rank(E/Q) * #E(Q)[2]
------------------------------------------------
-rank(E/Q) = 0
-```
-
-## 10. Common pitfall
-
-Do not conclude
-
-```text
-Sel^{φ̂}(E/Q) = {1}
-or
-Sel^{φ}(E'/Q) = {1}
-```
-
-from the local obstructions. That would contradict the rational kernel points. The correct conclusions are
-
-```text
-Sel^{φ̂}(E/Q)  = {1, -1}
-Sel^{φ}(E'/Q) = {1, 5}.
-```
-
-The obstruction at `d = 5` removes the extra generator in the first Selmer group. The obstruction at `d' = -1` removes the extra generator in the second Selmer group. The forced rational-kernel classes remain.
-
-If your Lean development labels the two homogeneous-space families oppositely, swap the names `φ` and `φ̂` in the display above. The cardinal calculation is invariant: the two Selmer groups must have cardinal `2` and `2`, so the product formula gives `#E(Q)/2E(Q)=2`, hence rank zero.
