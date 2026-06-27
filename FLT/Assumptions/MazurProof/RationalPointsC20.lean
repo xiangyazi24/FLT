@@ -100,10 +100,12 @@ private theorem den_cubic (u : ℚ) :
     ((u ^ 3 + u ^ 2 - u).den : ℤ) = (u.den : ℤ) ^ 3 := by
   set a : ℤ := u.num
   set d : ℤ := (u.den : ℤ)
-  have hdpos : (0 : ℤ) < d := by exact_mod_cast u.den_pos
+  have hdpos : (0 : ℤ) < d := by positivity
   have hdne : (d : ℚ) ≠ 0 := Int.cast_ne_zero.mpr (ne_of_gt hdpos)
   have hred : IsCoprime a d := by
-    rw [Int.isCoprime_iff_nat_coprime]; simpa using u.reduced
+    rw [Int.isCoprime_iff_nat_coprime]
+    simp only [a, d, Int.natAbs_natCast]
+    exact u.reduced
   -- N = a³+a²d-ad² is coprime to d³
   set N : ℤ := a ^ 3 + a ^ 2 * d - a * d ^ 2
   have hNd : IsCoprime N d := by
