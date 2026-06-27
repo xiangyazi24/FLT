@@ -1,258 +1,536 @@
-# Q1245 (dm3): Clean axiom architecture for rational torsion
+# Q1257 (dm3): Elementary proof for `w^2 = u^3 + u^2 - u`
 
 ## Executive answer
 
-Yes, the analysis is correct.
-
-Route 4B, as currently described, is **not** an axiom reduction. It replaces the single Weil-pairing corollary axiom
-
-```lean
-axiom weil_pairing_primitive_root
-    (E : WeierstrassCurve Q) [E.IsElliptic] {m : N} (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    exists zeta : Q, IsPrimitiveRoot zeta m
-```
-
-with two real-topology/cardinality axioms:
-
-```lean
-real_mTorsion_finite
-real_mTorsion_card_le
-```
-
-Unless `real_mTorsion_card_le` is actually proved, Route 4B is a net increase in the trusted axiom surface. It also obscures the mathematical dependency: the real Lie/topology argument is being used only to recover the same conclusion that the Weil pairing already gives in exactly the form needed by the B-line.
-
-So the cleanest architecture is:
+The statement is true:
 
 ```text
-B-Line: axiom weil_pairing_primitive_root   -- existing, 1 axiom
-A-Line: axiom mazur_cyclic_order_bound      -- cyclic Mazur input, 1 axiom
-Total:  2 mathematical axioms
+w^2 = u^3 + u^2 - u,  u,w ∈ ℚ
 ```
 
-Do **not** introduce Route 4B axioms unless the real-torsion cardinality bound is a theorem, not an axiom.
-
-## Why the single Weil-pairing axiom is the right B-line boundary
-
-The only B-line conclusion needed is that an elliptic curve over `Q` cannot have full rational `p`-torsion for an odd prime `p`. The proof route is:
+has rational `u` only
 
 ```text
-HasFullRationalTorsion E p
-  -> exists zeta : Q, IsPrimitiveRoot zeta p        -- Weil pairing corollary
-  -> p <= 2                                        -- primitive roots in Q have order <= 2
-  -> contradiction for 2 < p
+u ∈ {-1, 0, 1}.
 ```
 
-That is precisely the existing `weil_pairing_primitive_root` axiom plus the already-local arithmetic lemma `isPrimitiveRoot_rat_order_le_two`.
+But the important point is this:
 
-The proposed axiom name
-
-```lean
-weil_pairing_corollary
+```text
+A one-shot prime-factorization argument gets you very close, but it does not finish the problem.
 ```
 
-has the same mathematical content as the existing
+After clearing denominators correctly, the problem becomes two binary quartic equations. Those quartics are genus-one curves. Proving that they have only the trivial primitive solutions is essentially the same rank-zero content as the original elliptic curve. So there is no genuinely cheap local-prime-factorization proof hiding here.
 
-```lean
-weil_pairing_primitive_root
+There **is** a classical elementary route, in the old Fermat/descent sense:
+
+```text
+normalization over ℤ
+  + coprime square-factor splitting
+  + two explicit binary-quartic descent lemmas
 ```
 
-so introducing it as an additional axiom would be duplication. If a nicer name is desired, make it a theorem/alias, not an axiom.
+or, equivalently and usually cleaner,
 
-## Complete alternative `RealTorsionBound.lean` using one axiom
+```text
+explicit 2-isogeny descent on
+E  : y^2 = x^3 + x^2 - x
+E' : y^2 = x^3 - 2x^2 + 5x.
+```
 
-This file is logically coherent **only if** it replaces the current two-axiom Route 4B file. It should not be imported by `Axioms.lean` if it itself imports `Axioms.lean`, or that recreates the import cycle. In the recommended architecture below, this file is unnecessary because the existing `WeilPairing.lean` already provides the same wrapper.
+This uses no L-functions, no BSD, no modularity, no Selmer-group API, and no algebraic geometry. But it **is** descent. If “no descent machinery” means “do not import a general Mordell-Weil/descent library,” then yes, this is plausibly Lean-formalizable. If it means “no descent argument at all,” then I would not expect a short elementary proof: the obstruction is exactly a genus-one/rank-zero obstruction.
+
+## Label note
+
+The exact integral model
+
+```text
+[0, 1, 0, -1, 0]
+```
+
+i.e.
+
+```text
+y^2 = x^3 + x^2 - x
+```
+
+is currently listed by LMFDB as `20.a3` / Cremona `20a2`, with rank `0` and torsion `ℤ/6ℤ`:
+
+```text
+https://www.lmfdb.org/EllipticCurve/Q/?jinv=16384%2F5
+```
+
+The page `20.a4` is another curve in the same isogeny class; it also has rank `0` and torsion `ℤ/6ℤ`, but its displayed model is different:
+
+```text
+https://www.lmfdb.org/EllipticCurve/Q/20/a/4
+```
+
+This is only orientation. The proposed proof below does not depend on the database label.
+
+## What the direct prime-factorization argument really gives
+
+Start with
+
+```text
+w^2 = u^3 + u^2 - u.
+```
+
+Write `u = a / b` in lowest terms with `b > 0`. For every prime `p | b`, the numerator
+
+```text
+a(a^2 + ab - b^2)
+```
+
+is prime to `p`, because `p ∤ a` and
+
+```text
+a^2 + ab - b^2 ≡ a^2 mod p.
+```
+
+So
+
+```text
+v_p(u^3 + u^2 - u) = -3 v_p(b).
+```
+
+Since this valuation is the valuation of a square, `3 v_p(b)` is even. Hence `v_p(b)` is even for every `p`, so the denominator of `u` is a square. Thus write
+
+```text
+u = A / B^2,
+w = C / B^3,
+```
+
+with
+
+```text
+A, B, C ∈ ℤ,
+B > 0,
+gcd(A, B) = 1.
+```
+
+Then
+
+```text
+C^2 = A^3 + A^2 B^2 - A B^4
+    = A(A^2 + A B^2 - B^4).
+```
+
+The two factors on the right are coprime:
+
+```text
+gcd(A, A^2 + A B^2 - B^4)
+  = gcd(A, B^4)
+  = 1.
+```
+
+So if `A ≠ 0`, the two coprime factors must separately be signed squares.
+
+If `A > 0`, then
+
+```text
+A = r^2
+A^2 + A B^2 - B^4 = s^2
+```
+
+and therefore
+
+```text
+s^2 = r^4 + r^2 B^2 - B^4.        -- Q+
+```
+
+If `A < 0`, then
+
+```text
+A = -r^2
+A^2 + A B^2 - B^4 = -s^2
+```
+
+and therefore
+
+```text
+s^2 = -r^4 + r^2 B^2 + B^4.        -- Q-
+```
+
+In both cases
+
+```text
+gcd(r, B) = 1,
+B > 0.
+```
+
+Thus the whole problem reduces to the following two primitive binary-quartic lemmas.
+
+```text
+QuarticPlus:
+  If gcd(r,B)=1, B>0, and s^2 = r^4 + r^2 B^2 - B^4,
+  then r = 1 and B = 1.
+
+QuarticMinus:
+  If gcd(r,B)=1, B>0, and s^2 = -r^4 + r^2 B^2 + B^4,
+  then r = 1 and B = 1.
+```
+
+Then:
+
+```text
+A = 0      -> u = 0,
+A =  r^2  -> r = B = 1 -> u = 1,
+A = -r^2  -> r = B = 1 -> u = -1.
+```
+
+This is the cleanest completely self-contained Diophantine reduction.
+
+The catch is that `QuarticPlus` and `QuarticMinus` are not trivial congruence lemmas. They are the rank-zero statement in binary-quartic clothing. A proof of them by infinite descent is elementary, but it is still a descent proof.
+
+## Why congruences alone are unlikely to finish it
+
+The quartics
+
+```text
+s^2 =  r^4 + r^2 B^2 - B^4
+s^2 = -r^4 + r^2 B^2 + B^4
+```
+
+have the same “shape” as elliptic-curve 2-coverings. Local congruence checks at small primes do not isolate only `r=B=1`; the obstruction is global.
+
+For example, the first quartic can be rewritten as
+
+```text
+(2r^2 + B^2)^2 - (2s)^2 = 5B^4,
+```
+
+so a factorization in `ℤ[√5]` is natural. But after the factorization one still has to prove that any nontrivial primitive solution produces a strictly smaller primitive solution. That is infinite descent, not a local valuation contradiction.
+
+Similarly, dividing by `B^4` gives
+
+```text
+(s/B^2)^2 = (r^2/B^2)^2 + (r^2/B^2) - 1,
+```
+
+which is a conic in the variable `r^2/B^2`; parametrizing the conic leaves the condition that this parameter is itself a rational square. That condition is again a genus-one condition, so the parametrization does not make the problem rational.
+
+## The clean classical proof: explicit 2-isogeny descent
+
+A very compact classical proof uses the rational 2-torsion point `(0,0)`.
+
+Let
+
+```text
+E  : y^2 = x^3 + x^2 - x        = x(x^2 + x - 1),
+E' : Y^2 = X^3 - 2X^2 + 5X     = X(X^2 - 2X + 5).
+```
+
+These are connected by a 2-isogeny
+
+```text
+φ : E -> E'
+```
+
+with kernel generated by `(0,0)`. For `x ≠ 0`, one explicit formula is
+
+```text
+φ(x,y) = ( y^2 / x^2,  y(-1 - x^2) / x^2 ).
+```
+
+The standard 2-isogeny descent map for a curve
+
+```text
+y^2 = x^3 + a x^2 + b x
+```
+
+is
+
+```text
+α(O)       = 1,
+α((0,0))   = b mod ℚ*²,
+α((x,y))   = x mod ℚ*²     if x ≠ 0.
+```
+
+For this curve, `b = -1`, so only the squareclasses
+
+```text
+1, -1
+```
+
+can occur. Both occur, for example from `O` and `(0,0)`, or from points with `x = ±1`. Thus
+
+```text
+#α(E(ℚ)) = 2.
+```
+
+For the isogenous curve `E'`, we have `a = -2`, `b = 5`, so the only possible squareclasses are
+
+```text
+±1, ±5.
+```
+
+The corresponding homogeneous spaces are
+
+```text
+R^2 = d S^4 - 2 S^2 T^2 + (5/d) T^4,
+```
+
+for squarefree `d | 5`, i.e. `d ∈ {1, 5, -1, -5}`.
+
+For `d = -1`, the right-hand side is
+
+```text
+-S^4 - 2S^2T^2 - 5T^4,
+```
+
+which is negative unless `S = T = 0`, which is not a primitive point.
+
+For `d = -5`, the right-hand side is
+
+```text
+-5S^4 - 2S^2T^2 - T^4,
+```
+
+again negative unless `S = T = 0`.
+
+So only
+
+```text
+1, 5
+```
+
+occur, and
+
+```text
+#α'(E'(ℚ)) = 2.
+```
+
+The elementary 2-isogeny descent formula is
+
+```text
+2^rank(E(ℚ)) = #α(E(ℚ)) * #α'(E'(ℚ)) / 4.
+```
+
+Here this gives
+
+```text
+2^rank(E(ℚ)) = 2 * 2 / 4 = 1,
+```
+
+so
+
+```text
+rank E(ℚ) = 0.
+```
+
+This is the smallest classical proof I would trust. It is descent, but it is very small descent: squareclasses, explicit quartics, and a finite exact-sequence calculation.
+
+## Torsion is elementary
+
+The point
+
+```text
+P = (-1, 1)
+```
+
+has order `6`.
+
+Indeed, using the group law on
+
+```text
+y^2 = x^3 + x^2 - x,
+```
+
+one checks
+
+```text
+2P = (1, -1),
+3P = (0, 0),
+6P = O.
+```
+
+So `E(ℚ)` has at least six torsion points:
+
+```text
+O,
+(0,0),
+(1,1),
+(1,-1),
+(-1,1),
+(-1,-1).
+```
+
+To show there are no more torsion points, use reduction modulo good primes. The discriminant of this model is
+
+```text
+Δ = 80,
+```
+
+so `3` and `7` are good primes.
+
+Counting directly:
+
+```text
+#E(𝔽_3) = 6,
+#E(𝔽_7) = 6.
+```
+
+Reduction at good primes injects prime-to-`p` torsion into `E(𝔽_p)`. Using both `p=3` and `p=7`, every rational torsion prime-power is bounded by a group of order `6`. Hence
+
+```text
+#E(ℚ)_tors | 6.
+```
+
+Since we already have a point of order `6`,
+
+```text
+E(ℚ)_tors ≅ ℤ/6ℤ.
+```
+
+Together with rank `0`, this gives exactly
+
+```text
+E(ℚ) = { O, (0,0), (1,±1), (-1,±1) }.
+```
+
+Therefore the only rational `u`-coordinates are
+
+```text
+u ∈ {-1, 0, 1}.
+```
+
+## Lean-facing recommendation
+
+For Lean, I would **not** formalize this by invoking a general elliptic-curve rank API. The smallest self-contained module is one of the following.
+
+### Option A: direct Diophantine module
+
+This avoids elliptic-curve group law almost entirely. It isolates the real work into two binary-quartic descent lemmas.
 
 ```lean
-import Mathlib
-import FLT.EllipticCurve.TorsionDefs
+import Mathlib.Data.Rat.Basic
+import Mathlib.Data.Int.GCD
+import Mathlib.Tactic
 
-noncomputable section
+namespace FLT.Diophantine20a3
 
-open scoped WeierstrassCurve.Affine
+/-- Positive binary-quartic obstruction.
 
-/-- Full rational `m`-torsion gives a rational primitive `m`-th root of unity.
-
-This is the Weil-pairing corollary. If `Axioms.lean` already contains
-`weil_pairing_primitive_root` with this exact content, do not add this as a
-second axiom; use the existing axiom instead or define this as a theorem alias.
+Mathematical statement:
+if `gcd r B = 1`, `B > 0`, and
+`s^2 = r^4 + r^2 * B^2 - B^4`, then `r = 1` and `B = 1`.
 -/
-axiom weil_pairing_corollary
-    (E : WeierstrassCurve Q) [E.IsElliptic] {m : N} (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    exists zeta : Q, IsPrimitiveRoot zeta m
+theorem quartic_plus_only_trivial
+    (r B s : ℤ)
+    (hB : 0 < B)
+    (hr : 0 < r)
+    (hcop : Int.gcd r B = 1)
+    (h : s^2 = r^4 + r^2 * B^2 - B^4) :
+    r = 1 ∧ B = 1 := by
+  -- elementary infinite descent / Ljunggren-style binary quartic argument
+  sorry
 
-/-- The only consequence of the Weil-pairing corollary needed for the B-line. -/
-theorem fullRationalTorsion_order_le_two
-    (E : WeierstrassCurve Q) [E.IsElliptic] {m : N} (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    m <= 2 := by
-  rcases weil_pairing_corollary E hm hfull with ⟨zeta, hzeta⟩
-  exact isPrimitiveRoot_rat_order_le_two hzeta
-```
+/-- Negative binary-quartic obstruction.
 
-Again, the important point is that the above file has **one** axiom, but that one axiom is just the existing `weil_pairing_primitive_root` under a different name. Therefore it is not better than the current B-line axiom; it is only better than the two-axiom Route 4B attempt.
-
-## Preferred final architecture
-
-The preferred architecture is not to use `RealTorsionBound.lean` for the B-line at all. Keep the B-line axiom explicit and named.
-
-### `TorsionDefs.lean`
-
-Definitions and elementary non-axiomatic lemmas only.
-
-```lean
-import Mathlib
-
-noncomputable section
-
-open scoped WeierstrassCurve.Affine
-
--- Keep shared definitions here, for example:
---   HasFullRationalTorsion
---   any coercion/subtype helpers used by Axioms.lean and downstream files
---   isPrimitiveRoot_rat_order_le_two, if it is proved without using the B-line axiom
---
--- Do not put the Weil-pairing axiom here unless this file is explicitly the
--- project-wide axiom boundary.
-```
-
-### `Axioms.lean`
-
-This is the recommended minimal axiom boundary.
-
-```lean
-import Mathlib
-import FLT.EllipticCurve.TorsionDefs
-
-noncomputable section
-
-open scoped WeierstrassCurve.Affine
-
-/-- B-line axiom: the Weil-pairing corollary for full rational torsion. -/
-axiom weil_pairing_primitive_root
-    (E : WeierstrassCurve Q) [E.IsElliptic] {m : N} (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    exists zeta : Q, IsPrimitiveRoot zeta m
-
-/-- A-line axiom: the cyclic Mazur order bound needed by the project.
-
-Use the exact local statement already chosen for `mazur_cyclic_order_bound`.
-The intended mathematical payload is:
-
-  if `E/Q` has a rational point of exact order `n`, then `n <= 12` and `n != 11`.
+Mathematical statement:
+if `gcd r B = 1`, `B > 0`, and
+`s^2 = -r^4 + r^2 * B^2 + B^4`, then `r = 1` and `B = 1`.
 -/
-axiom mazur_cyclic_order_bound
-    -- keep the existing local binder/order API here
-    : Prop
+theorem quartic_minus_only_trivial
+    (r B s : ℤ)
+    (hB : 0 < B)
+    (hr : 0 < r)
+    (hcop : Int.gcd r B = 1)
+    (h : s^2 = -r^4 + r^2 * B^2 + B^4) :
+    r = 1 ∧ B = 1 := by
+  -- elementary infinite descent / isogenous binary quartic argument
+  sorry
 
-/-- Local wrapper for the only B-line consequence needed downstream. -/
-theorem fullRationalTorsion_order_le_two
-    (E : WeierstrassCurve Q) [E.IsElliptic] {m : N} (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    m <= 2 := by
-  rcases weil_pairing_primitive_root E hm hfull with ⟨zeta, hzeta⟩
-  exact isPrimitiveRoot_rat_order_le_two hzeta
+/-- Main rational-coordinate conclusion. -/
+theorem rational_u_only
+    (u w : ℚ)
+    (h : w^2 = u^3 + u^2 - u) :
+    u = -1 ∨ u = 0 ∨ u = 1 := by
+  -- 1. write u = A / B^2, w = C / B^3 in normalized form;
+  -- 2. prove C^2 = A(A^2 + A B^2 - B^4);
+  -- 3. prove the two factors are coprime;
+  -- 4. split A = 0, A > 0, A < 0;
+  -- 5. apply quartic_plus_only_trivial or quartic_minus_only_trivial.
+  sorry
+
+end FLT.Diophantine20a3
 ```
 
-If the actual local `mazur_cyclic_order_bound` statement is already present, keep that exact statement; the schematic `: Prop` above is only a placeholder showing where the A-line axiom belongs.
+This is probably the smallest theorem surface if the final FLT-side goal only needs the rational `u` values.
 
-### `no_odd_prime_square_in_torsion`
+### Option B: explicit 2-isogeny-descent certificate
 
-The clean theorem body should use the existing Weil-pairing axiom directly, or the local wrapper derived from it. With the wrapper in `Axioms.lean`, the body becomes:
+This is mathematically cleaner and avoids proving the two quartic lemmas separately, but it requires formalizing enough of the elliptic-curve group law and the descent exact sequence.
 
 ```lean
-import Mathlib
-import FLT.EllipticCurve.TorsionDefs
+import Mathlib.Data.Rat.Basic
+import Mathlib.Data.Int.GCD
+import Mathlib.Tactic
 
-noncomputable section
+namespace FLT.Diophantine20a3
 
-open scoped WeierstrassCurve.Affine
+/-- The concrete curve `E : y^2 = x^3 + x^2 - x`. -/
+def E_rhs (x : ℚ) : ℚ := x^3 + x^2 - x
 
-private theorem no_odd_prime_square_in_torsion
-    (E : WeierstrassCurve Q) [E.IsElliptic]
-    (p : N) (hp : Nat.Prime p) (hpgt : 2 < p) :
-    not (exists f : ZMod p x ZMod p →+ (AddCommGroup.torsion (E/Q).Point), Function.Injective f) := by
-  rintro (f, hf)
-  let incl := (AddCommGroup.torsion (E/Q).Point).subtype
-  have hincl : Function.Injective incl := Subtype.val_injective
-  have hfull : HasFullRationalTorsion E p := (incl.comp f, hincl.comp hf)
-  have hle : p <= 2 := fullRationalTorsion_order_le_two E hp.pos hfull
-  omega
+/-- The concrete 2-isogenous curve `E' : Y^2 = X^3 - 2X^2 + 5X`. -/
+def Eprime_rhs (x : ℚ) : ℚ := x^3 - 2*x^2 + 5*x
+
+/-- Concrete rank-zero certificate from 2-isogeny descent.
+
+This should be proved by the squareclass calculations:
+`α(E(ℚ)) = {1, -1}` and `α'(E'(ℚ)) = {1, 5}`.
+-/
+theorem rank_zero_certificate : True := by
+  -- Replace `True` by the local statement that every rational point is torsion,
+  -- or by the exact quotient statement used in the local development.
+  trivial
+
+/-- Torsion points on the concrete curve. -/
+theorem rational_points_are_six
+    (u w : ℚ)
+    (h : w^2 = E_rhs u) :
+    (u, w) = (-1, 1) ∨
+    (u, w) = (-1, -1) ∨
+    (u, w) = (0, 0) ∨
+    (u, w) = (1, 1) ∨
+    (u, w) = (1, -1) := by
+  -- rank_zero_certificate + torsion by reduction mod 3 and 7
+  sorry
+
+/-- The projected `u`-coordinate statement. -/
+theorem rational_u_only
+    (u w : ℚ)
+    (h : w^2 = E_rhs u) :
+    u = -1 ∨ u = 0 ∨ u = 1 := by
+  have hp := rational_points_are_six u w h
+  rcases hp with h1 | h2 | h3 | h4 | h5
+  · left; exact congrArg Prod.fst h1
+  · left; exact congrArg Prod.fst h2
+  · right; left; exact congrArg Prod.fst h3
+  · right; right; exact congrArg Prod.fst h4
+  · right; right; exact congrArg Prod.fst h5
+
+end FLT.Diophantine20a3
 ```
 
-Equivalently, without the wrapper:
+The placeholder `rank_zero_certificate` should not remain as `True`; it is where the local 2-isogeny descent proof goes.
 
-```lean
-import Mathlib
-import FLT.EllipticCurve.TorsionDefs
+## Bottom line
 
-noncomputable section
+A purely local prime-factorization proof is not enough. The denominator/gcd argument reduces the problem to two genus-one binary quartics, and those quartics are exactly where the rank-zero content lives.
 
-open scoped WeierstrassCurve.Affine
-
-private theorem no_odd_prime_square_in_torsion
-    (E : WeierstrassCurve Q) [E.IsElliptic]
-    (p : N) (hp : Nat.Prime p) (hpgt : 2 < p) :
-    not (exists f : ZMod p x ZMod p →+ (AddCommGroup.torsion (E/Q).Point), Function.Injective f) := by
-  rintro (f, hf)
-  let incl := (AddCommGroup.torsion (E/Q).Point).subtype
-  have hincl : Function.Injective incl := Subtype.val_injective
-  have hfull : HasFullRationalTorsion E p := (incl.comp f, hincl.comp hf)
-  rcases weil_pairing_primitive_root E hp.pos hfull with ⟨zeta, hzeta⟩
-  have hle : p <= 2 := isPrimitiveRoot_rat_order_le_two hzeta
-  omega
-```
-
-The second version has the smallest file-dependency footprint because it does not need a separate `RealTorsionBound.lean` or wrapper import.
-
-## Import-cycle rule
-
-The safe dependency graph is:
+The most Lean-plausible self-contained proof is therefore:
 
 ```text
-TorsionDefs.lean
-  -> Axioms.lean
-      -> downstream users
+Best if avoiding elliptic-curve APIs:
+  prove QuarticPlus and QuarticMinus by explicit infinite descent,
+  then finish by the denominator-square/gcd split.
+
+Best if allowing minimal classical EC arithmetic:
+  prove the concrete 2-isogeny descent certificate for E and E',
+  prove torsion = ℤ/6ℤ by reduction mod 3 and 7,
+  conclude the six rational points.
 ```
 
-Optional wrappers may sit downstream of `Axioms.lean`:
-
-```text
-TorsionDefs.lean
-  -> Axioms.lean
-      -> WeilPairing.lean / RealTorsionBound.lean wrappers
-      -> downstream users
-```
-
-But then `Axioms.lean` must **not** import those wrapper files.
-
-So the final rule is:
-
-```text
-Do not make Axioms.lean import RealTorsionBound.lean
-if RealTorsionBound.lean imports Axioms.lean.
-```
-
-That was the core problem with Route 4B wiring.
-
-## Final recommendation
-
-Keep the original architecture, with exactly two project-level mathematical axioms for this torsion split:
-
-```text
-1. weil_pairing_primitive_root
-   Full rational m-torsion over Q gives a rational primitive m-th root of unity.
-
-2. mazur_cyclic_order_bound
-   A rational torsion point of exact order n has n <= 12 and n != 11.
-```
-
-Do not add:
-
-```lean
-real_mTorsion_finite
-real_mTorsion_card_le
-```
-
-as axioms. Route 4B becomes valuable only after `real_mTorsion_card_le` is proved. Until then, it increases the axiom count and should not replace the existing Weil-pairing boundary.
+I would choose **Option A** if the target theorem only needs `u ∈ {-1,0,1}` and the Lean development wants to avoid elliptic-curve infrastructure. I would choose **Option B** if the development already has usable elliptic-curve group law and reduction modulo primes.
