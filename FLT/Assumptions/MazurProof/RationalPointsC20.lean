@@ -98,7 +98,27 @@ private theorem nat_isSquare_of_isSquare_cube {n : ℕ} (hn : n ≠ 0)
 /-- The denominator of `u³+u²-u` equals `u.den³`. -/
 private theorem den_cubic (u : ℚ) :
     ((u ^ 3 + u ^ 2 - u).den : ℤ) = (u.den : ℤ) ^ 3 := by
-  sorry -- IsCoprime chain: a³+a²d-ad² coprime to d³ from u.reduced, then Rat.den_div_eq_of_coprime
+  set a : ℤ := u.num
+  set d : ℤ := u.den
+  have hdpos : (0 : ℤ) < d := by exact_mod_cast u.den_pos
+  have hdne : (d : ℚ) ≠ 0 := Int.cast_ne_zero.mpr (ne_of_gt hdpos)
+  have hred : IsCoprime a d := by
+    rw [Int.isCoprime_iff_nat_coprime]; simpa using u.reduced
+  -- N = a³+a²d-ad² is coprime to d³
+  set N : ℤ := a ^ 3 + a ^ 2 * d - a * d ^ 2
+  have hNd : IsCoprime N d := by
+    have h1 : IsCoprime (a ^ 3) d := hred.pow_left
+    have h2 : IsCoprime (a ^ 3 + d * (a ^ 2 - a * d)) d := h1.add_mul_left_left _
+    convert h2 using 1; ring
+  have hNd3 : IsCoprime N (d ^ 3) := hNd.pow_right
+  have hNd3_nat : Nat.Coprime N.natAbs (d ^ 3).natAbs :=
+    Int.isCoprime_iff_nat_coprime.mp hNd3
+  -- u³+u²-u = N/d³
+  have hrepr : u ^ 3 + u ^ 2 - u = (N : ℚ) / (d ^ 3 : ℚ) := by
+    have hu : u = (a : ℚ) / (d : ℚ) := by simpa using (Rat.num_div_den u).symm
+    rw [hu]; field_simp [hdne]; simp only [N]; ring
+  rw [hrepr]
+  exact_mod_cast Rat.den_div_eq_of_coprime (by positivity) hNd3_nat
 
 /-- Rational points on `w²=u³+u²-u` have denominator that is a perfect square. -/
 theorem rat_denom_square (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
