@@ -334,8 +334,9 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
     have hG : 0 < G := by nlinarith
     have hprodGF₂ : G * F₂ = C ^ 4 := by
       apply mul_left_cancel₀ (show (5 : ℤ) ≠ 0 from by norm_num)
-      have h := hprod; rw [hF₁eq] at h
-      linarith [show (5 * G) * F₂ = 5 * (G * F₂) from by ring]
+      calc 5 * (G * F₂) = (5 * G) * F₂ := by ring
+        _ = F₁ * F₂ := by rw [hF₁eq]
+        _ = 5 * C ^ 4 := hprod
     have hcopGF₂ : IsCoprime G F₂ := (hF₁eq ▸ hcopI).of_mul_left_right
     obtain ⟨a, ha, hGa⟩ := pos_fourth_of_coprime_mul_fourth
       (Int.isCoprime_iff_gcd_eq_one.mp hcopGF₂) hprodGF₂ hG hF₂
@@ -355,8 +356,9 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
     have hG : 0 < G := by nlinarith
     have hprodF₁G : F₁ * G = C ^ 4 := by
       apply mul_left_cancel₀ (show (5 : ℤ) ≠ 0 from by norm_num)
-      have h := hprod; rw [hF₂eq] at h
-      linarith [show F₁ * (5 * G) = 5 * (F₁ * G) from by ring]
+      calc 5 * (F₁ * G) = F₁ * (5 * G) := by ring
+        _ = F₁ * F₂ := by rw [hF₂eq]
+        _ = 5 * C ^ 4 := hprod
     have hcopF₁G : IsCoprime F₁ G := (hF₂eq ▸ hcopI).of_mul_right_right
     obtain ⟨a, ha, hF₁a⟩ := pos_fourth_of_coprime_mul_fourth
       (Int.isCoprime_iff_gcd_eq_one.mp hcopF₁G) hprodF₁G hF₁ hG
@@ -396,7 +398,7 @@ theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
   have hp_ne_2 : p ≠ 2 := by
     intro hp2; subst hp2
     have : (2 : ℤ) ∣ (r - h) + h := dvd_add hpU h2h
-    have : (2 : ℤ) ∣ r := by convert this using 1; ring
+    have : (2 : ℤ) ∣ r := by rwa [show (r - h) + h = r from by ring] at this
     have : r % 2 = 0 := Int.emod_eq_zero_of_dvd this
     omega
   have hp_not_dvd_2 : ¬ (↑p : ℤ) ∣ 2 := by
@@ -406,12 +408,14 @@ theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
   -- p | r (from p | (r-h)+(r+h) = 2r, p odd)
   have hpr : (↑p : ℤ) ∣ r := by
     have : (↑p : ℤ) ∣ 2 * r := by
-      have := dvd_add hpU hpV; convert this using 1; ring
+      have h1 := dvd_add hpU hpV
+      rwa [show (r - h) + (r + h) = 2 * r from by ring] at h1
     exact (hp_prime_int.dvd_or_dvd this).resolve_left hp_not_dvd_2
   -- p | h (from p | (r+h)-(r-h) = 2h, p odd)
   have hph : (↑p : ℤ) ∣ h := by
     have : (↑p : ℤ) ∣ 2 * h := by
-      have := dvd_sub hpV hpU; convert this using 1; ring
+      have h1 := dvd_sub hpV hpU
+      rwa [show (r + h) - (r - h) = 2 * h from by ring] at h1
     exact (hp_prime_int.dvd_or_dvd this).resolve_left hp_not_dvd_2
   -- p | b (from p | r² - h² = b⁴)
   have hpb : (↑p : ℤ) ∣ b := by
