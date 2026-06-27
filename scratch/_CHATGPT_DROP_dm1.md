@@ -1,122 +1,123 @@
-# Q1384 (dm1/dm2): `den_cubic_num_den`
+# Q1383 (dm1/dm1): `both_odd` parity for quartic-plus
 
-The numerator for
+The requested case split still has a real gap.  It proves:
 
-```lean
-u ^ 3 + u ^ 2 - u
+* `r` even, `B` odd is impossible by mod `4`.
+* `r,B` both even contradict `Int.gcd r B = 1`.
+* `r` odd and `B = 2*m` with `m` odd is impossible by mod `8`.
+
+But it does **not** cover the case
+
+```text
+r odd, 4 ∣ B.
 ```
 
-over denominator `u.den^3` is
+In that case the congruence gives
 
-```lean
-u.num ^ 3 + u.num ^ 2 * (u.den : ℤ) - u.num * (u.den : ℤ) ^ 2
+```text
+r^4 + r^2*B^2 - B^4 ≡ 1 + 0 - 0 ≡ 1 mod 8,
 ```
 
-not the earlier fourth-power expression from the later quartic equation.
+which is compatible with a square.  So the advertised parity proof does not prove `B % 2 = 1`.  The exact missing lemma is the `4 ∣ B` case.
 
-Here is the intended Lean proof.  The coprimality is easiest over `IsCoprime` in `ℤ`: first prove the numerator is coprime to `u.den`, then multiply the right side three times.
+## Compilable residue checks
+
+These are the finite `ZMod` checks for the covered cases.
 
 ```lean
 import Mathlib
 
-namespace DM2
+namespace DM1
 
-/-- Numerator of `u^3+u^2-u` over denominator `u.den^3`. -/
-def cubicNum (u : ℚ) : ℤ :=
-  u.num ^ 3 + u.num ^ 2 * (u.den : ℤ) - u.num * (u.den : ℤ) ^ 2
+/-- Squares mod 4 are not `3`. -/
+lemma zmod4_sq_ne_three (x : ZMod 4) : x ^ 2 ≠ 3 := by
+  fin_cases x <;> decide
 
-/-- The cubic numerator is coprime to `u.den`. -/
-lemma cubicNum_isCoprime_den (u : ℚ) :
-    IsCoprime (cubicNum u) (u.den : ℤ) := by
-  let a : ℤ := u.num
-  let d : ℤ := u.den
+/-- Squares mod 8 are not `5`. -/
+lemma zmod8_sq_ne_five (x : ZMod 8) : x ^ 2 ≠ 5 := by
+  fin_cases x <;> decide
 
-  have had : IsCoprime a d := by
-    simpa [a, d] using Rat.isCoprime_num_den u
+/-- If `r` is even and `B` is odd, the RHS is `3 mod 4`. -/
+lemma rhs_mod4_r_even_B_odd
+    (r B : ZMod 4)
+    (hr : r = 0 ∨ r = 2)
+    (hB : B = 1 ∨ B = 3) :
+    r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4 = 3 := by
+  rcases hr with rfl | rfl <;>
+  rcases hB with rfl | rfl <;>
+  decide
 
-  have ha2d : IsCoprime (a ^ 2) d := by
-    simpa [pow_two] using (had.mul_left had)
+/-- If `r` is odd and `B = 2*m` with `m` odd, the RHS is `5 mod 8`. -/
+lemma rhs_mod8_r_odd_B_twice_odd
+    (r B : ZMod 8)
+    (hr : r = 1 ∨ r = 3 ∨ r = 5 ∨ r = 7)
+    (hB : B = 2 ∨ B = 6) :
+    r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4 = 5 := by
+  rcases hr with rfl | rfl | rfl | rfl <;>
+  rcases hB with rfl | rfl <;>
+  decide
 
-  -- `a^2 + a*d - d^2 = a^2 + d*(a-d)`, so it is coprime to `d`.
-  have hquad0 : IsCoprime (a ^ 2 + d * (a - d)) d :=
-    ha2d.add_mul_left_left (a - d)
+/-- Sanity check: `r` odd and `4 ∣ B` is not contradicted mod 8. -/
+example :
+    ((1 : ZMod 8) ^ 4 + (1 : ZMod 8) ^ 2 * (4 : ZMod 8) ^ 2 -
+      (4 : ZMod 8) ^ 4) = 1 := by
+  decide
 
-  have hquad : IsCoprime (a ^ 2 + a * d - d ^ 2) d := by
-    convert hquad0 using 1 <;> ring
+/-- Sanity check: `r` odd and `4 ∣ B` is not excluded by coprimality. -/
+example : Int.gcd 1 4 = 1 := by
+  norm_num
 
-  have hprod : IsCoprime (a * (a ^ 2 + a * d - d ^ 2)) d :=
-    had.mul_left hquad
-
-  convert hprod using 1 <;> simp [cubicNum, a, d] <;> ring
-
-/-- The cubic numerator is coprime to `u.den^3`, as an integer. -/
-lemma cubicNum_isCoprime_den_pow3 (u : ℚ) :
-    IsCoprime (cubicNum u) ((u.den : ℤ) ^ 3) := by
-  have h1 : IsCoprime (cubicNum u) (u.den : ℤ) :=
-    cubicNum_isCoprime_den u
-  have h2 : IsCoprime (cubicNum u) ((u.den : ℤ) * (u.den : ℤ)) :=
-    h1.mul_right h1
-  have h3 :
-      IsCoprime (cubicNum u)
-        ((u.den : ℤ) * ((u.den : ℤ) * (u.den : ℤ))) :=
-    h1.mul_right h2
-  convert h3 using 1 <;> ring
-
-/-- The same coprimality in the `Nat.Coprime` form used by `den_div_eq_of_coprime`. -/
-lemma cubicNum_natCoprime_den_pow3 (u : ℚ) :
-    Nat.Coprime (cubicNum u).natAbs (((u.den : ℤ) ^ 3).natAbs) := by
-  rw [Nat.coprime_iff_gcd_eq_one]
-  have hg : Int.gcd (cubicNum u) ((u.den : ℤ) ^ 3) = 1 :=
-    Int.isCoprime_iff_gcd_eq_one.mp (cubicNum_isCoprime_den_pow3 u)
-  simpa [Int.gcd_def] using hg
-
-/-- Main helper: denominator of `u^3+u^2-u` is `u.den^3`. -/
-lemma den_cubic_num_den (u : ℚ) :
-    (u ^ 3 + u ^ 2 - u).den = u.den ^ 3 := by
-  let N : ℤ := cubicNum u
-
-  have hdq : ((u.den : ℚ) ≠ 0) := by
-    exact_mod_cast u.den_ne_zero
-
-  have hdposZ : 0 < ((u.den : ℤ) ^ 3) := by
-    have hdpos : 0 < (u.den : ℤ) := by exact_mod_cast u.den_pos
-    positivity
-
-  have hrepr :
-      u ^ 3 + u ^ 2 - u = N /. ((u.den : ℤ) ^ 3) := by
-    rw [← Rat.num_div_den u]
-    rw [Rat.divInt_eq_div]
-    field_simp [hdq]
-    simp [N, cubicNum]
-    ring
-
-  rw [hrepr]
-
-  have hcop : Nat.Coprime N.natAbs (((u.den : ℤ) ^ 3).natAbs) := by
-    simpa [N] using cubicNum_natCoprime_den_pow3 u
-
-  have hden :=
-    Rat.den_div_eq_of_coprime
-      (a := N) (b := ((u.den : ℤ) ^ 3)) hdposZ hcop
-
-  have habs : (((u.den : ℤ) ^ 3).natAbs) = u.den ^ 3 := by
-    simpa using (Int.natAbs_pow (u.den : ℤ) 3)
-
-  simpa [habs] using hden
-
-end DM2
+end DM1
 ```
 
-If your local snapshot exposes the final denominator theorem unqualified, replace
+## Honest `both_odd` skeleton
+
+The following is the correct shape: all advertised residue computations are mechanical, but the `4 ∣ B` subcase must be supplied separately.
 
 ```lean
-Rat.den_div_eq_of_coprime
+import Mathlib
+
+namespace DM1
+
+/-- Exact missing case for the proposed proof of `B` odd. -/
+lemma no_solution_with_r_odd_and_four_dvd_B
+    {r B s : ℤ}
+    (hrpos : 0 < r) (hBpos : 0 < B)
+    (hr_odd : r % 2 = 1)
+    (hgcd : Int.gcd r B = 1)
+    (h4B : (4 : ℤ) ∣ B)
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    False := by
+  -- Not a mod-8 contradiction: the RHS is `1 mod 8` in this subcase.
+  -- This needs an additional 2-adic/descent argument, or another global argument.
+  sorry
+
+lemma both_odd_skeleton
+    {r B s : ℤ}
+    (hrpos : 0 < r) (hBpos : 0 < B)
+    (hgcd : Int.gcd r B = 1)
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    r % 2 = 1 ∧ B % 2 = 1 := by
+  -- 1. Prove `r % 2 = 1`.
+  --    If `r` is even, then either `B` is even, contradicting gcd=1,
+  --    or `B` is odd, and the mod-4 residue lemma gives `s^2 = 3` in `ZMod 4`.
+  have hr_odd : r % 2 = 1 := by
+    sorry
+
+  -- 2. Prove `B % 2 = 1`.
+  --    If `B` is even, then either:
+  --    * `B = 2*m` with `m` odd: use the mod-8 residue lemma, or
+  --    * `4 ∣ B`: call the missing lemma above.
+  have hB_odd : B % 2 = 1 := by
+    by_cases h4B : (4 : ℤ) ∣ B
+    · exact False.elim
+        (no_solution_with_r_odd_and_four_dvd_B hrpos hBpos hr_odd hgcd h4B heq)
+    · -- Here even `B` means `B = 2*m` with `m` odd; use `rhs_mod8_r_odd_B_twice_odd`.
+      sorry
+
+  exact ⟨hr_odd, hB_odd⟩
+
+end DM1
 ```
 
-by
-
-```lean
-den_div_eq_of_coprime
-```
-
-inside `namespace Rat`; the arguments are the same: numerator, positive integer denominator, and the `Nat.Coprime` proof.
+Bottom line: the finite residue lemmas compile, but the full `both_odd` theorem does not follow from the stated proof unless you add the missing `4 ∣ B` subcase lemma.
