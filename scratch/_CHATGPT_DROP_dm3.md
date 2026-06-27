@@ -1,390 +1,359 @@
-# Q869 (dm3): strengthening the induction hypothesis vs. a ranked pair induction
+# Q1074 (dm3): shortest Lean path for `HasFullRationalTorsion → IsPrimitiveRoot` over `ℚ`
 
 ## Bottom line
 
-Yes, there is a clean Lean setup, but I would phrase it slightly differently from ordinary lexicographic induction on `(n, flag)`.
-
-The right idea is to make two kinds of proof obligations:
+For the theorem
 
 ```lean
-SepJob.psi n      -- rootwise separability of preΨ' n
-SepJob.cof k      -- rootwise separability of the even cofactor in preΨ' (2*k)
+theorem weil_pairing_gives_primitive_root
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
 ```
 
-and then put `SepJob.cof k` **immediately before** `SepJob.psi (2*k)` in the well-founded order.  This gives exactly the dependency you want:
-
-```text
-all SepJob.psi m with m < 2k     <   SepJob.cof k   <   SepJob.psi (2k).
-```
-
-So, while proving the cofactor at index `k`, you may use separability of the nearby polynomials `preΨ'(k-2)`, `preΨ'(k-1)`, `preΨ'(k+1)`, `preΨ'(k+2)`, because they are all `< 2k` once `k ≥ 3`.  Then, while proving `preΨ'(2k)`, you may use both `SepJob.psi k` and `SepJob.cof k`.
-
-However, this only breaks the **even/cofactor** circularity.  It does **not** by itself break the earlier odd/even circularity if the odd proof still tries to prove `SepJob.psi n` by calling `SepJob.psi (2*n)`.  No well-founded order can simultaneously allow
-
-```text
-SepJob.psi n      < SepJob.psi (2*n)      -- needed by the even proof
-SepJob.psi (2*n)  < SepJob.psi n          -- needed by odd-via-even
-```
-
-for nontrivial `n`.  So the pair/ranked induction is useful only if the odd case has a direct proof, or reduces to strictly lower jobs.  In practice, that means the odd case should come from the invariant-differential / quotient identity, or from a direct polynomial identity, not by invoking separability of `preΨ'(2n)`.
-
-## Why the naive strengthened IH is almost right but awkward
-
-If the induction theorem is
-
-```text
-P n := Sep(preΨ' n) ∧ CofSep(n),
-```
-
-where `CofSep(n)` means separability of the cofactor in
-
-```text
-preΨ'(2n) = preΨ'(n) * evenCof n,
-```
-
-then the even case for `preΨ'(2k)` can indeed use `P k`, since `k < 2k`.  Thus Case B is not circular at the level of the even proof.
-
-The awkward part is proving `CofSep(k)` inside `P k`.  The cofactor formula at index `k` naturally mentions `preΨ'(k-2)`, `preΨ'(k-1)`, `preΨ'(k+1)`, and `preΨ'(k+2)`.  The terms `k+1` and `k+2` are not available from ordinary strong induction on `k`.  They are, however, smaller than `2k`, which is the ambient polynomial whose cofactor you are analyzing.
-
-So the cofactor obligation should not live at level `k`.  It should live at level `2k`, just before the main separability theorem for `2k`.
-
-## Recommended order
-
-Use a single indexed family of goals and a numeric rank.
+the key point is correct: for `m ≥ 3`, the conclusion is impossible over `ℚ`, so the hypothesis `HasFullRationalTorsion E m` must be false.  But this observation is not itself a proof of falsity.  To use `False.elim`, Lean still needs a theorem of the form
 
 ```lean
-import Mathlib.Tactic
+¬ HasFullRationalTorsion E m
+```
+
+for `3 ≤ m`.
+
+As of the FLT branch’s pinned Mathlib revision, the shortest practical proof path is therefore:
+
+1. keep the existing `m = 1` and `m = 2` proofs;
+2. for `m ≥ 3`, prove the theorem by contradiction from one bridge lemma:
+
+   ```lean
+   no_full_rational_torsion_of_three_le :
+     ∀ (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ},
+       3 ≤ m → ¬ HasFullRationalTorsion E m
+   ```
+
+3. decide later whether that bridge is justified by the Weil pairing, by determinant-of-Galois-representation, by Mazur, or by real Lie group classification.
+
+If the goal is to minimize the new formalization burden **inside FLT**, the single bridge lemma above is the shortest interface.  If the goal is to keep the bridge mathematically close to the standard proof but avoid implementing a full pairing API, then the determinant route is the best interface:
+
+```text
+full rational m-torsion
+  ⇒ mod-m Galois representation is trivial
+  ⇒ det ρ_m is trivial
+  ⇒ cyclotomic character mod m is trivial
+  ⇒ μ_m ⊆ ℚ
+  ⇒ rational primitive m-th root exists.
+```
+
+However, that is not currently just wiring together existing Mathlib declarations.  The missing hard theorem is essentially
+
+```text
+det ρ_m = χ_m.
+```
+
+Classically this theorem is usually proved using the Weil pairing.  So the determinant route avoids formalizing the *full user-facing Weil pairing API*, but it does not avoid the underlying theorem.
+
+## Important warning about the “vacuous” argument
+
+The lemma
+
+```lean
+isPrimitiveRoot_rat_order_le_two :
+  IsPrimitiveRoot ζ m → m ≤ 2
+```
+
+or an equivalent theorem is useful only **after** one has produced a rational primitive root.  It gives
+
+```text
+(∃ ζ : ℚ, IsPrimitiveRoot ζ m) → m ≤ 2.
+```
+
+It does not by itself prove
+
+```text
+¬ HasFullRationalTorsion E m.
+```
+
+Thus this would be circular:
+
+```lean
+-- Bad / circular idea:
+-- prove `¬ hfull` because otherwise the current theorem gives a primitive root,
+-- then use `¬ hfull` to prove the current theorem by exfalso.
+```
+
+A non-circular proof needs an independent bridge from `hfull` to either:
+
+```lean
+False
+```
+
+or
+
+```lean
+∃ ζ : ℚ, IsPrimitiveRoot ζ m.
+```
+
+The determinant theorem is one such bridge; the Weil pairing theorem is another formulation of essentially the same bridge.
+
+## Assessment of the proposed alternatives
+
+### 1. Determinant of the mod-`m` Galois representation
+
+Mathematically, yes.  This is the cleanest alternative interface:
+
+```text
+det ρ_m = ε_m,
+```
+
+where `ε_m` is the mod-`m` cyclotomic character.
+
+If `E[m]` is rational, the Galois action on `E[m]` is trivial, so `ρ_m σ = 1` for every `σ`.  Hence `det ρ_m σ = 1`, so `ε_m σ = 1` for every `σ`.  That means all `m`-th roots of unity are Galois-fixed, hence defined over `ℚ`.
+
+But in Lean this route still needs several nontrivial bridges.
+
+First, your hypothesis is an injection
+
+```lean
+ZMod m × ZMod m →+ (E⁄ℚ).Point
+```
+
+not an explicit equality with the geometric `m`-torsion.  To conclude that the geometric Galois representation is trivial, one needs something like:
+
+```lean
+fullRationalTorsion_trivial_galoisRep :
+  HasFullRationalTorsion E m →
+  ∀ σ, WeierstrassCurve.galoisRep E m σ = 1
+```
+
+That lemma itself needs the statement that the geometric `m`-torsion has size at most, or exactly, `m^2`, plus the base-change/fixed-point comparison between rational points and geometric torsion.
+
+Second, one needs the determinant theorem:
+
+```lean
+det_galoisRep_eq_modularCyclotomicCharacter :
+  ∀ σ, det (WeierstrassCurve.galoisRep E m σ) = χ_m σ
+```
+
+This is the serious arithmetic input.  It is precisely the determinant form of the Weil-pairing theorem.
+
+Third, one needs the descent step from trivial cyclotomic character to a rational primitive root.  Mathlib has substantial cyclotomic-character infrastructure, including `modularCyclotomicCharacter` and the comparison
+
+```lean
+IsPrimitiveRoot.autToPow_eq_modularCyclotomicCharacter
+```
+
+but this does not by itself manufacture a `ζ : ℚ`.  One still needs the Galois-fixed-implies-rational descent statement for a chosen primitive root in an algebraic closure, or an equivalent cyclotomic-field theorem.
+
+So: determinant is the best **interface**, but not a zero-sorry route.
+
+### 2. Structure of `E(ℚ)_tors`
+
+Finiteness alone does not help.  From
+
+```lean
+ZMod m × ZMod m ↪ E(ℚ)
+```
+
+we get at least `m^2` rational torsion points.  For `m ≥ 3`, that is at least `9` points.  But finiteness of the torsion subgroup gives no contradiction; a finite group can have size `9`, `16`, `25`, and so on.
+
+What would help is Mazur’s torsion theorem, or at least its corollary that `E(ℚ)_tors` never contains `ZMod m × ZMod m` for `m ≥ 3`.  That would immediately prove
+
+```lean
+no_full_rational_torsion_of_three_le
+```
+
+but Mathlib does not have Mazur’s theorem in a form that can be used here.  Formalizing Mazur is much larger than formalizing the determinant/Weil-pairing bridge.
+
+There is also a real-analytic alternative:
+
+```text
+E(ℝ) ≃ S¹        or        E(ℝ) ≃ S¹ × Z/2Z.
+```
+
+Therefore `E(ℝ)` cannot contain `(Z/mZ)^2` for `m ≥ 3`.  Since `E(ℚ) ↪ E(ℝ)`, this would also prove `¬ HasFullRationalTorsion E m`.  Mathematically this avoids the Weil pairing, but in Lean it would require a formal classification of the real Lie group of a Weierstrass elliptic curve.  That is not presently the shortest route in Mathlib.
+
+### 3. Purely number-theoretic route: Kronecker-Weber / NOS / class field theory
+
+This is not shorter in Lean.
+
+Kronecker-Weber describes abelian extensions of `ℚ`, but it does not by itself connect rational `m`-torsion on an elliptic curve to `ℚ(ζ_m)`.  That connection is again the determinant/cyclotomic-character theorem for the Galois action on `E[m]`, or an equivalent Weil-pairing statement.
+
+Néron-Ogg-Shafarevich is also much heavier than needed.  It concerns ramification and good reduction.  To extract `ζ_m ∈ ℚ` from full rational `m`-torsion, one still needs the determinant/cyclotomic relation.
+
+So these routes are mathematically valid context, but they are worse formalization targets than the determinant bridge.
+
+### 4. Wiring `galoisRep`, `nTorsion`, and `IsPrimitiveRoot.autToPow`
+
+The cyclotomic side is the part Mathlib is best prepared for.  The relevant shape is already present around:
+
+```lean
+import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
+```
+
+with declarations such as:
+
+```lean
+modularCyclotomicCharacter
+IsPrimitiveRoot.autToPow_eq_modularCyclotomicCharacter
+```
+
+But the elliptic-curve side is the blocker.  Even if your environment has declarations named
+
+```lean
+WeierstrassCurve.galoisRep
+WeierstrassCurve.nTorsion
+```
+
+and even if `galoisRep` is currently defined using `sorry`, the following theorem is not automatic:
+
+```lean
+det (WeierstrassCurve.galoisRep E m σ) = modularCyclotomicCharacter ... σ
+```
+
+Nor is this automatic from an injection into rational points:
+
+```lean
+HasFullRationalTorsion E m → WeierstrassCurve.galoisRep E m σ = 1.
+```
+
+Those are the missing bridges.
+
+My recommendation for FLT is therefore not to try to wire `galoisRep` directly unless you are willing to add the determinant theorem as a new trusted/sorried theorem.  With that theorem admitted, the remaining proof is short.  Without it, the determinant route expands into a formalization of essentially the same arithmetic content as the Weil pairing.
+
+## The shortest Lean interface
+
+The cleanest FLT-local interface is the contradiction lemma:
+
+```lean
+import Mathlib
 
 noncomputable section
 
-namespace DivisionPolynomial
-
-/-!
-Replace `PsiSep` and `CofSep` by the actual predicates in the FLT files.
-
-`PsiSep n` should mean rootwise separability of `preΨ' n`.
-`CofSep k` should mean rootwise separability of the even cofactor `evenCof k`
-appearing in `preΨ' (2*k) = preΨ' k * evenCof k`.
--/
-
-variable {K : Type*} [Field K]
-
--- Placeholder names.  In the real file, use the existing definitions.
-def PsiSep (_n : ℕ) : Prop := True
-def CofSep (_k : ℕ) : Prop := True
-
-inductive SepJob where
-  | psi : ℕ → SepJob
-  | cof : ℕ → SepJob
-  deriving DecidableEq
-
-namespace SepJob
+namespace FLT
 
 /--
-Rank the cofactor for `2*k` immediately before the main goal for `2*k`.
+Project-local bridge theorem.
 
-* `psi n` has rank `2*n + 1`.
-* `cof k` has rank `4*k`, i.e. just before `psi (2*k)`, whose rank is `4*k + 1`.
+Mathematically this can be justified by any of the following:
 
-Thus:
+* Weil pairing nondegeneracy plus Galois equivariance;
+* determinant identity `det ρ_m = χ_m`;
+* Mazur's torsion theorem;
+* classification of the real Lie group `E(ℝ)`.
 
-* `psi m < cof k` whenever `m < 2*k`;
-* `cof k < psi (2*k)`;
-* `cof j < cof k` whenever `j < k`.
+For the current FLT theorem, this is the smallest useful interface.
 -/
-def rank : SepJob → ℕ
-  | .psi n => 2 * n + 1
-  | .cof k => 4 * k
+axiom no_full_rational_torsion_of_three_le
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+    (hm3 : 3 ≤ m) :
+    ¬ HasFullRationalTorsion E m
 
-end SepJob
-
-/-- The proposition attached to each job. -/
-def SepStmt : SepJob → Prop
-  | .psi n => PsiSep (K := K) n
-  | .cof k => CofSep (K := K) k
-
-end DivisionPolynomial
+end FLT
 ```
 
-This rank is usually easier than using `Prod.Lex` explicitly.  It is just the lexicographic order on the conceptual key
-
-```text
-psi n  ↦ (n, 1)
-cof k  ↦ (2k, 0),
-```
-
-encoded as a natural number.
-
-## The proof skeleton
-
-The main theorem should be a well-founded induction over `SepJob.rank`.
+Then the target theorem becomes only a case split.  The following code shows the intended shape.  Replace the namespace and the import with the actual FLT file containing `HasFullRationalTorsion` and the existing `m = 1`, `m = 2` lemmas if they already exist.
 
 ```lean
-import Mathlib.Tactic
+import Mathlib
 
 noncomputable section
 
-namespace DivisionPolynomial
+namespace FLT
 
-variable {K : Type*} [Field K]
+/-- Existing project definition.  Do not redefine this if it already exists. -/
+-- def HasFullRationalTorsion (E : WeierstrassCurve ℚ) (m : ℕ) : Prop :=
+--   ∃ f : ZMod m × ZMod m →+ (E⁄ℚ).Point, Function.Injective f
 
--- Real project predicates go here.
-def PsiSep (_n : ℕ) : Prop := True
-def CofSep (_k : ℕ) : Prop := True
+axiom no_full_rational_torsion_of_three_le
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+    (hm3 : 3 ≤ m) :
+    ¬ HasFullRationalTorsion E m
 
-inductive SepJob where
-  | psi : ℕ → SepJob
-  | cof : ℕ → SepJob
-  deriving DecidableEq
+private theorem primitive_root_rat_one : IsPrimitiveRoot (1 : ℚ) 1 := by
+  simpa using (IsPrimitiveRoot.one : IsPrimitiveRoot (1 : ℚ) 1)
 
-namespace SepJob
+private theorem primitive_root_rat_two : IsPrimitiveRoot (-1 : ℚ) 2 := by
+  refine IsPrimitiveRoot.mk_of_lt (-1 : ℚ) (by norm_num) (by norm_num) ?_
+  intro l hl hlt hpow
+  interval_cases l
+  norm_num at hpow
 
-def rank : SepJob → ℕ
-  | .psi n => 2 * n + 1
-  | .cof k => 4 * k
+theorem weil_pairing_gives_primitive_root
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
+  have hm_cases : m = 1 ∨ m = 2 ∨ 3 ≤ m := by omega
+  rcases hm_cases with rfl | rfl | hm3
+  · exact ⟨1, primitive_root_rat_one⟩
+  · exact ⟨-1, primitive_root_rat_two⟩
+  · exact False.elim ((no_full_rational_torsion_of_three_le E hm3) hfull)
 
-end SepJob
+end FLT
+```
 
-def SepStmt : SepJob → Prop
-  | .psi n => PsiSep (K := K) n
-  | .cof k => CofSep (K := K) k
+This code intentionally keeps the hard arithmetic in one named bridge.  That makes the dependency explicit and prevents the current theorem from hiding a partial Weil-pairing formalization behind many small local `sorry`s.
 
-/- Placeholder lemma interfaces.  These are the real mathematical atoms to prove. -/
+## If you prefer the determinant-shaped bridge
 
-/-- Small `preΨ' n` cases, such as `n = 0, 1, 2`, depending on your indexing convention. -/
-axiom psiSep_small : ∀ n : ℕ, n ≤ 2 → PsiSep (K := K) n
+If you want the bridge to be less “Mazur-like” and closer to the standard Weil-pairing proof, use this as the conceptual interface instead:
 
-/-- Small even-cofactor cases where `k+2 < 2*k` is false. -/
-axiom cofSep_small : ∀ k : ℕ, k < 3 → CofSep (K := K) k
+```lean
+import Mathlib
+import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
 
-/--
-Even product step:
-`preΨ'(2*k) = preΨ'(k) * evenCof k`.
-The proof uses rootwise separability of both factors plus the no-common-root lemma.
+noncomputable section
+
+namespace FLT
+
+/-
+Schematic only: the exact type depends on the actual API of
+`WeierstrassCurve.galoisRep` and `WeierstrassCurve.nTorsion` in the project.
 -/
-axiom psiSep_even_of_sep_cof :
-    ∀ k : ℕ, 0 < k →
-      PsiSep (K := K) k →
-      CofSep (K := K) k →
-      PsiSep (K := K) (2 * k)
 
-/--
-Direct odd step.
-Important: this must not call `PsiSep (2*n)`.  It may use only strictly lower jobs.
-For example, this could be the invariant-differential / quotient-identity proof.
--/
-axiom psiSep_odd_direct :
-    ∀ k : ℕ,
-      (∀ m : ℕ, m < 2 * k + 1 → PsiSep (K := K) m) →
-      (∀ j : ℕ, 4 * j < 2 * (2 * k + 1) + 1 → CofSep (K := K) j) →
-      PsiSep (K := K) (2 * k + 1)
+/-- Full rational `m`-torsion makes the geometric mod-`m` representation trivial. -/
+axiom galoisRep_trivial_of_full_rational_torsion
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+    (hm : 0 < m) :
+    HasFullRationalTorsion E m →
+    -- ∀ σ, WeierstrassCurve.galoisRep E m σ = 1
+    True
 
-/--
-Cofactor step.
-This is where the ranking matters.  For `3 ≤ k`, the proof may use
-`PsiSep m` for every `m < 2*k`, including `k-2`, `k-1`, `k+1`, and `k+2`.
-It may also use earlier cofactor goals.
--/
-axiom cofSep_of_lower :
-    ∀ k : ℕ, 3 ≤ k →
-      (∀ m : ℕ, m < 2 * k → PsiSep (K := K) m) →
-      (∀ j : ℕ, j < k → CofSep (K := K) j) →
-      CofSep (K := K) k
+/-- Determinant of the mod-`m` representation is the mod-`m` cyclotomic character. -/
+axiom det_galoisRep_eq_modularCyclotomicCharacter
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+    (hm : 0 < m) :
+    -- ∀ σ, det (WeierstrassCurve.galoisRep E m σ) = χ_m σ
+    True
 
-/-- All jobs, proved in the ranked order. -/
-theorem allSepJob : ∀ j : SepJob, SepStmt (K := K) j := by
-  intro j
-  refine (measure_wf SepJob.rank).induction ?step j
-  intro j ih
-  cases j with
-  | psi n =>
-      by_cases hsmall : n ≤ 2
-      · exact psiSep_small n hsmall
-      · -- Split `n` by parity.  Use whatever parity split is most convenient
-        -- in the actual file.
-        rcases Nat.even_or_odd n with hEven | hOdd
-        · rcases hEven with ⟨k, hk⟩
-          subst n
-          have hkpos : 0 < k := by omega
-          exact psiSep_even_of_sep_cof k hkpos
-            (ih (.psi k) (by
-              dsimp [SepJob.rank]
-              omega))
-            (ih (.cof k) (by
-              dsimp [SepJob.rank]
-              omega))
-        · rcases hOdd with ⟨k, hk⟩
-          subst n
-          exact psiSep_odd_direct k
-            (fun m hm =>
-              ih (.psi m) (by
-                dsimp [SepJob.rank]
-                omega))
-            (fun j hj =>
-              ih (.cof j) (by
-                dsimp [SepJob.rank]
-                omega))
-  | cof k =>
-      by_cases hk : k < 3
-      · exact cofSep_small k hk
-      · have hk3 : 3 ≤ k := by omega
-        exact cofSep_of_lower k hk3
-          (fun m hm =>
-            ih (.psi m) (by
-              dsimp [SepJob.rank]
-              omega))
-          (fun j hj =>
-            ih (.cof j) (by
-              dsimp [SepJob.rank]
-              omega))
+/-- Trivial mod-`m` cyclotomic character gives a rational primitive `m`-th root. -/
+axiom exists_rat_primitiveRoot_of_trivial_modularCyclotomicCharacter
+    {m : ℕ} (hm : 0 < m) :
+    -- CyclotomicCharacterIsTrivialOverRat m →
+    True →
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
 
-/-- Main exported theorem. -/
-theorem psiSep_all (n : ℕ) : PsiSep (K := K) n :=
-  allSepJob (K := K) (.psi n)
-
-/-- Cofactor exported theorem, if useful elsewhere. -/
-theorem cofSep_all (k : ℕ) : CofSep (K := K) k :=
-  allSepJob (K := K) (.cof k)
-
-end DivisionPolynomial
+end FLT
 ```
 
-The exact syntax of `Nat.even_or_odd` may need adjustment depending on the imports and the local shape you prefer.  The important part is the ranking; the `omega` obligations are exactly the arithmetic facts you want Lean to check.
+The reason this is only schematic is that the exact determinant expression depends on how `nTorsion` is represented: as a finite additive group, a `ZMod m`-module with a transported basis, or a matrix representation.  For composite `m`, this is over the ring `ZMod m`, not over a field, so the determinant should be a determinant over `ZMod m` after choosing or transporting a rank-two basis.
 
-## Why this order matches the cofactor formula
-
-For the cofactor proof at index `k`, the hard calls look like this:
+The determinant route becomes genuinely short only after the following are available:
 
 ```lean
-have h_km2 : PsiSep (K := K) (k - 2) :=
-  ih (.psi (k - 2)) (by
-    dsimp [SepJob.rank]
-    omega)
-
-have h_km1 : PsiSep (K := K) (k - 1) :=
-  ih (.psi (k - 1)) (by
-    dsimp [SepJob.rank]
-    omega)
-
-have h_kp1 : PsiSep (K := K) (k + 1) :=
-  ih (.psi (k + 1)) (by
-    dsimp [SepJob.rank]
-    omega)
-
-have h_kp2 : PsiSep (K := K) (k + 2) :=
-  ih (.psi (k + 2)) (by
-    dsimp [SepJob.rank]
-    omega)
+fullRationalTorsion_trivial_galoisRep
+card_or_free_rank_two_nTorsion
+baseChange_rational_points_fixed_by_Gal
+det_galoisRep_eq_modularCyclotomicCharacter
+fixed_primitiveRoot_descends_to_rat
 ```
 
-These are valid under `3 ≤ k` because
+Among these, `det_galoisRep_eq_modularCyclotomicCharacter` is the real arithmetic theorem.
 
-```text
-k - 2 < 2k,
-k - 1 < 2k,
-k + 1 < 2k,
-k + 2 < 2k.
-```
+## Recommended final strategy
 
-In rank form, for example,
+For FLT, I would do this:
 
-```text
-rank (psi (k+2)) = 2*(k+2)+1 < 4*k = rank (cof k)
-```
+1. Add `no_full_rational_torsion_of_three_le` as the single explicit bridge lemma.
+2. Close `weil_pairing_gives_primitive_root` by the three-way split `m = 1`, `m = 2`, `3 ≤ m`.
+3. Put a comment on `no_full_rational_torsion_of_three_le` saying it is intended to be discharged later by the determinant identity `det ρ_m = χ_m`, equivalently by the Weil pairing.
 
-exactly when `3 ≤ k`.
-
-Then, in the even product proof,
-
-```lean
-have hψk : PsiSep (K := K) k :=
-  ih (.psi k) (by
-    dsimp [SepJob.rank]
-    omega)
-
-have hcofk : CofSep (K := K) k :=
-  ih (.cof k) (by
-    dsimp [SepJob.rank]
-    omega)
-```
-
-because
-
-```text
-rank (psi k) = 2k+1 < 4k+1 = rank (psi (2k)),
-rank (cof k) = 4k   < 4k+1 = rank (psi (2k)).
-```
-
-That is precisely the intended dependency graph.
-
-## What this does and does not prove
-
-This setup is a good Lean implementation of the strengthened induction idea, but the mathematical work is still in two atoms.
-
-First, you need a real lemma of the form
-
-```lean
-cofSep_of_lower :
-  ∀ k, 3 ≤ k →
-    (∀ m, m < 2*k → PsiSep m) →
-    (∀ j, j < k → CofSep j) →
-    CofSep k
-```
-
-This is where the cofactor formula involving `k-2`, `k-1`, `k+1`, `k+2` belongs.  The ranked induction gives you the right hypotheses for it.
-
-Second, the odd case must be genuinely direct:
-
-```lean
-psiSep_odd_direct :
-  ... → PsiSep (2*k+1)
-```
-
-It must not be implemented as
-
-```lean
-have h2n : PsiSep (2*(2*k+1)) := ...
-```
-
-because that recreates the old cycle.  The ranked induction will prevent that call: `rank (psi (2*n))` is larger than `rank (psi n)`.
-
-So the clean Lean answer is:
-
-1. Use a single `SepJob` family rather than two separate mutually recursive theorems.
-2. Rank `cof k` immediately before `psi (2*k)`.
-3. Prove the cofactor lemma from all `psi m` with `m < 2*k`.
-4. Keep the odd case direct; do not reduce odd separability to even separability of `2n`.
-
-## Practical recommendation
-
-I would add the infrastructure in this order:
-
-```lean
-inductive SepJob where
-  | psi : ℕ → SepJob
-  | cof : ℕ → SepJob
-
-namespace SepJob
-  def rank : SepJob → ℕ
-    | .psi n => 2*n + 1
-    | .cof k => 4*k
-end SepJob
-
-def SepStmt : SepJob → Prop
-  | .psi n => PsiSep n
-  | .cof k => CofSep k
-```
-
-Then prove the following standalone lemmas before doing the well-founded induction:
-
-```lean
-psiSep_small
-cofSep_small
-psiSep_even_of_sep_cof
-cofSep_of_lower
-psiSep_odd_direct
-```
-
-Once those atoms exist, the final induction should be only wiring plus `omega`.
-
-This is better than a standard `(n, flag)` lexicographic induction with `cof k` at level `k`, because the cofactor proof needs facts up to `k+2`.  The cofactor really belongs to the ambient level `2k`, not to the source level `k`.
+This is the shortest robust path because it isolates the missing mathematics in one theorem whose statement is exactly what the FLT proof needs.  Trying to use `galoisRep` directly before the determinant theorem exists will likely create more small `sorry`s, not fewer.
