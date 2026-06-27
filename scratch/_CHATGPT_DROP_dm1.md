@@ -1,780 +1,310 @@
-# Q1155 (dm1): Route 4B concrete — proving the real identity component is a circle
+# Q1171 (dm1): A-Line 7-smooth exclusion from results 1–5
 
-## Executive answer
+## Bottom line
 
-The most elementary Lean route is **not** the proposed angle parametrization.  For a general nonsingular real Weierstrass cubic, the group-coordinate on the identity component is not an elementary trigonometric angle; it is an **Abel/elliptic integral coordinate**.  Proving that this coordinate is a group isomorphism requires the invariant differential and an addition theorem, or an equivalent compact connected one-dimensional Lie-group classification theorem.
+Using only the listed results, **no** 7-smooth integer `N ≥ 17` in the supplied list is excluded merely from the existence of a rational point `P ∈ E(ℚ)` of exact order `N`.
 
-So the key point is:
-
-```text
-IVT + IFT + compactness can plausibly prove that E(ℝ) is a compact 1-manifold
-with one or two connected components.
-
-But this is not enough to prove the torsion bound.
-
-To prove #E(ℝ)[m] ≤ 2m, you need a group-theoretic circle statement:
-  E(ℝ)^0 ≃+ ℝ/ℤ
-or at least
-  #(E(ℝ)^0[m]) ≤ m.
-```
-
-The shortest honest target theorem is therefore still the direct theorem:
-
-```lean
-real_mTorsion_card_le
-  (E : WeierstrassCurve ℝ) [E.IsElliptic] (m : ℕ) :
-  Nat.card (E.nTorsion m) ≤ 2 * m
-```
-
-Internally, prove it from a **minimal topological-group package**:
+The obstruction is simple: a point of exact order `N` only gives a cyclic subgroup
 
 ```text
-1. E(ℝ)^0 is a compact connected 1-dimensional abelian Lie group.
-2. Hence E(ℝ)^0 is additively isomorphic to AddCircle 1, i.e. ℝ/ℤ.
-3. The component group E(ℝ)/E(ℝ)^0 has size ≤ 2.
+⟨P⟩ ≃ Z/N.
 ```
 
-If you do not want to build Lie groups, the honest alternative is the explicit Abel-map proof using elliptic integrals.  That is probably *more* work in Lean than a narrow `real_mTorsion_card_le` theorem.
-
-## Repository and Mathlib API check
-
-For the FLT repo, the relevant existing file is:
+In the invariant-factor decomposition
 
 ```text
-FLT/EllipticCurve/Torsion.lean
+E(ℚ)_tors ≃ Z/a × Z/b,   a ∣ b,
 ```
 
-It already provides:
-
-```lean
-abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u :=
-  Submodule.torsionBy ℤ (E⁄k).Point n
-```
-
-and the point-map infrastructure:
-
-```lean
-noncomputable def WeierstrassCurve.Points.map
-    {K L : Type u} [Field K] [Field L] [Algebra k K] [Algebra k L]
-    [DecidableEq K] [DecidableEq L]
-    (f : K →ₐ[k] L) : (E⁄K).Point →+ (E⁄L).Point :=
-  WeierstrassCurve.Affine.Point.map f
-```
-
-I did not find a dedicated real-locus file such as:
+this only forces
 
 ```text
-FLT/EllipticCurve/Real.lean
-FLT/EllipticCurve/RealTorsion.lean
+N ∣ b.
 ```
 
-so the real-topological theorem is not already packaged in FLT.
+It does **not** force `a > 1`, and it does **not** force any full square subgroup `(Z/p)^2`.
 
-The project is pinned to Mathlib revision:
+The abstract cyclic model
 
 ```text
-96fd0fff3b8837985ae21dd02e712cb5df72ec05
+E(ℚ)_tors ≃ Z/N
 ```
 
-At that revision, the relevant Mathlib API names are below.
-
-## 1. Does Mathlib have IVT?
-
-Yes.  Import:
-
-```lean
-import Mathlib.Topology.Order.IntermediateValue
-```
-
-Important names:
-
-```lean
-intermediate_value_univ
-IsPreconnected.intermediate_value
-intermediate_value_Icc
-intermediate_value_Icc'
-intermediate_value_uIcc
-intermediate_value_Ioo
-intermediate_value_Ioo'
-isPreconnected_Icc
-isConnected_Icc
-```
-
-For cubics over `ℝ`, the practical closed-interval theorem is:
-
-```lean
-intermediate_value_Icc
-```
-
-with shape:
-
-```lean
-theorem intermediate_value_Icc
-    {a b : α} (hab : a ≤ b) {f : α → δ}
-    (hf : ContinuousOn f (Icc a b)) :
-    Icc (f a) (f b) ⊆ f '' Icc a b
-```
-
-and the reversed endpoint version:
-
-```lean
-intermediate_value_Icc'
-```
-
-with conclusion:
-
-```lean
-Icc (f b) (f a) ⊆ f '' Icc a b
-```
-
-So IVT is available and usable for root-count/connectivity arguments for real cubics.
-
-## 2. Does Mathlib have IFT?
-
-Yes, but the API is Banach-space / Fréchet-derivative based.  Import:
-
-```lean
-import Mathlib.Analysis.Calculus.Implicit
-```
-
-Important names:
-
-```lean
-ImplicitFunctionData
-ImplicitFunctionData.toOpenPartialHomeomorph
-ImplicitFunctionData.implicitFunction
-ImplicitFunctionData.hasStrictFDerivAt_implicitFunction
-HasStrictFDerivAt.implicitToOpenPartialHomeomorph
-HasStrictFDerivAt.implicitFunction
-HasStrictFDerivAt.map_implicitFunction_eq
-HasStrictFDerivAt.to_implicitFunction
-```
-
-For a nonsingular level set
+satisfies all five listed constraints:
 
 ```text
-F(x, y) = 0,
+1. Z/N = Z/1 × Z/N, so it has two invariant factors with 1 ∣ N.
+2. It contains no (Z/p)^2 for any odd p.
+3. It contains no (Z/2)^3.
+4. It contains no noncyclic Z/2 × Z/d for d ∈ {10,12,14,16}.
+5. Its 2-torsion has size at most 2, hence at most 4.
 ```
 
-with nonzero derivative in one coordinate, the finite-dimensional theorem you will probably use is:
+Therefore the current result list cannot rule out a **cyclic** rational torsion subgroup of order `N`.  To exclude these `N`, one needs an additional cyclic-order obstruction, for example a Mazur cyclic-torsion theorem, a Kubert/modular-curve descent for `Z/N`, or another theorem that directly rules out points of exact order `N`.
 
-```lean
-HasStrictFDerivAt.implicitToOpenPartialHomeomorph
-```
+## Key question: does odd `p² ∣ N` force `(Z/p)^2`?
 
-or:
+No.
 
-```lean
-HasStrictFDerivAt.implicitFunction
-```
-
-The source file also mentions the smoother version:
-
-```lean
-ContDiffAt.implicitFunction
-```
-
-for equations `f : E × F → G` with invertible partial derivative in the second variable.  Use this if you want a smooth local parametrization rather than only a topological local parametrization.
-
-A schematic local-level-set code shape is:
-
-```lean
-import Mathlib.Analysis.Calculus.Implicit
-import Mathlib.Analysis.Calculus.Deriv.Polynomial
-import Mathlib.Tactic
-
-open scoped Classical Topology
-
-noncomputable section
-
-namespace FLT.RealRoute4B
-
-/-- Schematic polynomial equation for a short Weierstrass model. -/
-def F (a b : ℝ) (p : ℝ × ℝ) : ℝ :=
-  p.2 ^ 2 - (p.1 ^ 3 + a * p.1 + b)
-
-/--
-Target local chart statement.
-
-At a nonsingular point where the derivative in `y` is nonzero, the real locus
-`F a b = 0` is locally the graph of a function of `x`.
--/
-theorem local_graph_where_dFdy_ne_zero
-    (a b : ℝ) (p : ℝ × ℝ)
-    (hp : F a b p = 0)
-    (hy : (2 : ℝ) * p.2 ≠ 0) :
-    True := by
-  -- Actual proof route:
-  -- 1. prove `HasStrictFDerivAt (F a b)` at `p`;
-  -- 2. show the relevant derivative/partial derivative is surjective;
-  -- 3. apply `HasStrictFDerivAt.implicitToOpenPartialHomeomorph` or
-  --    `HasStrictFDerivAt.implicitFunction`.
-  trivial
-
-end FLT.RealRoute4B
-```
-
-This is enough for local manifold charts, but not enough for the group-isomorphism-to-circle theorem.
-
-## 3. Does Mathlib have compactness of closed bounded sets?
-
-Yes.  Imports:
-
-```lean
-import Mathlib.Topology.Order.Compact
-import Mathlib.Topology.MetricSpace.Bounded
-```
-
-Important names:
-
-```lean
-CompactIccSpace
-isCompact_Icc
-isCompact_uIcc
-isCompact_closedBall
-IsCompact.isBounded
-isCompact_of_isClosed_isBounded
-isCompact_iff_isClosed_bounded
-```
-
-The Heine--Borel style theorem is:
-
-```lean
-isCompact_of_isClosed_isBounded
-```
-
-with shape:
-
-```lean
-theorem isCompact_of_isClosed_isBounded
-    [ProperSpace α] (hc : IsClosed s) (hb : IsBounded s) :
-    IsCompact s
-```
-
-and the iff version:
-
-```lean
-isCompact_iff_isClosed_bounded
-```
-
-with shape:
-
-```lean
-theorem isCompact_iff_isClosed_bounded [T2Space α] [ProperSpace α] :
-    IsCompact s ↔ IsClosed s ∧ IsBounded s
-```
-
-Closed intervals are handled by:
-
-```lean
-isCompact_Icc
-```
-
-and `CompactIccSpace`.
-
-So, yes: Mathlib has the compactness/closed-bounded tools needed to prove compactness of bounded pieces, and closedness of zero loci can be obtained from continuity plus `isClosed_singleton` / `IsClosed.preimage` style lemmas.
-
-## 4. Why IVT + IFT + compactness are not enough
-
-They can plausibly prove this topological statement:
+If `P` has order divisible by `p²`, then a multiple of `P` gives a point of exact order `p²`, and another multiple gives a point of exact order `p`.  But all of this can live inside one cyclic group:
 
 ```text
-E(ℝ) is a compact 1-dimensional smooth manifold with one or two components,
-and each component is homeomorphic to a circle.
+Z/p² ⊂ Z/N.
 ```
 
-But the desired torsion bound is a **group** statement, not just a space statement.
-
-A homeomorphism
+The `p`-torsion inside a cyclic group `Z/p^e` is only one-dimensional over `Z/p`:
 
 ```text
-E(ℝ)^0 ≃ₜ S¹
+(Z/p^e)[p] ≃ Z/p,
 ```
 
-only says the identity component is topologically a circle.  It does not say that multiplication-by-`m` has exactly `m` kernel points.  For that, you need a topological group isomorphism
+not `(Z/p)^2`.
+
+Result 2 rules out an **independent second p-direction**.  In invariant-factor terms:
 
 ```text
-E(ℝ)^0 ≃+ AddCircle 1
+E(ℚ)_tors ≃ Z/a × Z/b,  a ∣ b.
 ```
 
-or a theorem that the multiplication-by-`m` map on `E(ℝ)^0` is a degree-`m` covering map.
-
-That requires at least one of the following extra inputs:
+If an odd prime `p` divides `a`, then `p` also divides `b`, so the torsion contains
 
 ```text
-A. classification of compact connected 1-dimensional abelian Lie groups;
-B. explicit Abel/elliptic integral coordinate, proving the group law becomes addition modulo periods;
-C. a direct covering-degree theorem for [m] on the real oval.
+Z/p × Z/p,
 ```
 
-The proposed angle parametrization hides exactly this missing step.  For a circle defined by `x² + y² = 1`, the angle is elementary.  For a nonsingular cubic, the group parameter is not elementary angle; it is an elliptic integral.
-
-## 5. The most elementary honest proof of `E(ℝ)^0 ≃+ ℝ/ℤ`
-
-The least magical route is the Abel-map route.
-
-For a real elliptic curve, let `ω` be the invariant differential.  On the identity component, define:
+contradicting result 2.  Thus result 2 implies:
 
 ```text
-u(P) = ∫_O^P ω
+no odd prime divides the first invariant factor a.
 ```
 
-where the integral is taken along the real identity component.  The total period is:
+Equivalently, `a` is a power of `2`.  But this still allows the cyclic case `a = 1`, including cyclic groups `Z/25`, `Z/27`, `Z/49`, etc.
+
+## What the current results actually imply about `Z/a × Z/b`
+
+Let
 
 ```text
-Ω = ∫ around E(ℝ)^0 ω > 0.
+T := E(ℚ)_tors ≃ Z/a × Z/b,  a ∣ b.
 ```
 
-Then the map
+From result 2:
 
 ```text
-P ↦ u(P) mod Ωℤ
+if p is odd and p ∣ a, contradiction.
 ```
 
-is a continuous group isomorphism:
+So the first invariant factor must be a 2-power:
 
 ```text
-E(ℝ)^0 ≃+ ℝ / Ωℤ.
+a = 1, 2, 4, 8, ...
 ```
 
-After rescaling by `Ω`, this is:
+From result 4:
 
 ```text
-E(ℝ)^0 ≃+ AddCircle 1.
+if 2 ∣ a and d ∈ {10,12,14,16} and d ∣ b,
+then T contains Z/2 × Z/d, contradiction.
 ```
 
-But this is not a small proof.  It needs:
+So for those `b`, result 4 can force `a = 1`, i.e. cyclicity, but it does **not** rule out the cyclic group `Z/b` itself.
+
+Results 3 and 5 do not improve this once result 1 is available: a two-invariant-factor group already has 2-rank at most 2, so it cannot contain `(Z/2)^3`; and its 2-torsion has size at most 4.
+
+## Per-integer analysis
+
+In every row, the subgroup generated by a point of exact order `N` is cyclic:
 
 ```text
-1. invariant differential on a Weierstrass curve;
-2. line/path integrals of that differential along real arcs;
-3. proof that the integral coordinate is locally a chart;
-4. proof that the integral coordinate respects the group law;
-5. proof that the period lattice is rank one;
-6. proof that the identity component is exactly one period cycle.
+⟨P⟩ ≃ Z/N.
 ```
 
-This is analytically honest, but it is not a quick Lean formalization.
+The table records whether any of results 2–4 gives a contradiction from the point alone.  The answer is always no.  Some rows have a conditional note: if the ambient torsion group has an independent 2-direction, result 4 may kill that **noncyclic** branch, but the cyclic branch remains possible under results 1–5.
 
-The alternative is a general theorem from Lie groups:
+| `N` | Structure forced by `P` | What result 2 says | What result 4 may kill | Contradiction from 1–5? |
+|---:|---|---|---|---|
+| 18 | `⟨P⟩ ≃ Z/18` | `3² ∣ 18` gives only cyclic `Z/9`, not `(Z/3)^2` | none forced | No |
+| 20 | `⟨P⟩ ≃ Z/20` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/10` is forbidden | No |
+| 21 | `⟨P⟩ ≃ Z/21` | no odd square issue | none | No |
+| 24 | `⟨P⟩ ≃ Z/24` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/12` is forbidden | No |
+| 25 | `⟨P⟩ ≃ Z/25` | `5² ∣ 25` gives cyclic `Z/25`, not `(Z/5)^2` | none | No |
+| 27 | `⟨P⟩ ≃ Z/27` | `3² ∣ 27` gives cyclic `Z/27`, not `(Z/3)^2` | none | No |
+| 28 | `⟨P⟩ ≃ Z/28` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/14` is forbidden | No |
+| 32 | `⟨P⟩ ≃ Z/32` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/16` is forbidden | No |
+| 35 | `⟨P⟩ ≃ Z/35` | no odd square issue | none | No |
+| 36 | `⟨P⟩ ≃ Z/36` | `3² ∣ 36` gives cyclic `Z/9`, not `(Z/3)^2` | if `2 ∣ a`, then `Z/2 × Z/12` is forbidden | No |
+| 40 | `⟨P⟩ ≃ Z/40` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/10` is forbidden | No |
+| 42 | `⟨P⟩ ≃ Z/42` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/14` is forbidden | No |
+| 45 | `⟨P⟩ ≃ Z/45` | `3² ∣ 45` gives cyclic `Z/9`, not `(Z/3)^2` | none | No |
+| 48 | `⟨P⟩ ≃ Z/48` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/12` and `Z/2 × Z/16` branches are forbidden | No |
+| 49 | `⟨P⟩ ≃ Z/49` | `7² ∣ 49` gives cyclic `Z/49`, not `(Z/7)^2` | none | No |
+| 50 | `⟨P⟩ ≃ Z/50` | `5² ∣ 50` gives cyclic `Z/25`, not `(Z/5)^2` | if `2 ∣ a`, then `Z/2 × Z/10` is forbidden | No |
+| 54 | `⟨P⟩ ≃ Z/54` | `3² ∣ 54` gives cyclic `Z/27`, not `(Z/3)^2` | none forced by `{10,12,14,16}` | No |
+| 56 | `⟨P⟩ ≃ Z/56` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/14` is forbidden | No |
+| 60 | `⟨P⟩ ≃ Z/60` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/10` and `Z/2 × Z/12` branches are forbidden | No |
+| 63 | `⟨P⟩ ≃ Z/63` | `3² ∣ 63` gives cyclic `Z/9`, not `(Z/3)^2` | none | No |
+| 64 | `⟨P⟩ ≃ Z/64` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/16` is forbidden | No |
+| 72 | `⟨P⟩ ≃ Z/72` | `3² ∣ 72` gives cyclic `Z/9`, not `(Z/3)^2` | if `2 ∣ a`, then `Z/2 × Z/12` is forbidden | No |
+| 75 | `⟨P⟩ ≃ Z/75` | `5² ∣ 75` gives cyclic `Z/25`, not `(Z/5)^2` | none | No |
+| 80 | `⟨P⟩ ≃ Z/80` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/10` and `Z/2 × Z/16` branches are forbidden | No |
+| 81 | `⟨P⟩ ≃ Z/81` | `3² ∣ 81` gives cyclic `Z/81`, not `(Z/3)^2` | none | No |
+| 84 | `⟨P⟩ ≃ Z/84` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/12` and `Z/2 × Z/14` branches are forbidden | No |
+| 90 | `⟨P⟩ ≃ Z/90` | `3² ∣ 90` gives cyclic `Z/9`, not `(Z/3)^2` | if `2 ∣ a`, then `Z/2 × Z/10` is forbidden | No |
+| 96 | `⟨P⟩ ≃ Z/96` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/12` and `Z/2 × Z/16` branches are forbidden | No |
+| 98 | `⟨P⟩ ≃ Z/98` | `7² ∣ 98` gives cyclic `Z/49`, not `(Z/7)^2` | if `2 ∣ a`, then `Z/2 × Z/14` is forbidden | No |
+| 100 | `⟨P⟩ ≃ Z/100` | `5² ∣ 100` gives cyclic `Z/25`, not `(Z/5)^2` | if `2 ∣ a`, then `Z/2 × Z/10` is forbidden | No |
+
+## The abstract countermodel to any proof from 1–5
+
+For each listed `N`, the abstract group
 
 ```text
-Every compact connected 1-dimensional abelian Lie group is isomorphic to AddCircle 1.
+T_N := Z/N
 ```
 
-I do not see this as an existing ready-to-use Mathlib theorem for the pinned FLT revision.  Mathlib has `AddCircle` and covering-map infrastructure, but not a ready theorem classifying real elliptic-curve identity components as `AddCircle 1`.
+has an element of exact order `N`, namely `1 mod N`, and satisfies every group-theoretic consequence in results 1–5.
 
-## 6. Useful `AddCircle` API already in Mathlib
+In invariant factors:
 
-Imports:
+```text
+T_N ≃ Z/1 × Z/N.
+```
+
+For any prime `p`, the `p`-torsion of a cyclic group is cyclic, so it has no `(Z/p)^2`.  The 2-torsion has at most two elements.  A cyclic group has no subgroup of the form `Z/2 × Z/d` with `d > 1`.
+
+Thus results 1–5 are logically compatible with the existence of a point of exact order `N` for every `N` in the list.  Any proof excluding these orders must use some result not included in 1–5.
+
+## Lean-facing group-theory shape
+
+The relevant facts can be organized as follows.  This is a proof-design sketch, not a replacement for the missing cyclic-order obstruction.
 
 ```lean
-import Mathlib.Topology.Instances.AddCircle.Real
-import Mathlib.Topology.Covering.AddCircle
-```
-
-Important names:
-
-```lean
-AddCircle
-UnitAddCircle
-UnitAddTorus
-AddCircle.compactSpace
-AddCircle.pathConnectedSpace
-ZMod.toAddCircle
-ZMod.toAddCircle_injective
-ZMod.toAddCircle_inj
-ZMod.toAddCircle_eq_zero
-AddCircle.isCoveringMap_coe
-AddCircle.isLocalHomeomorph_coe
-AddCircle.isAddQuotientCoveringMap_nsmul_of_ne_zero
-```
-
-The file `Mathlib.Topology.Instances.AddCircle.Real` gives:
-
-```lean
-abbrev UnitAddCircle := AddCircle (1 : ℝ)
-```
-
-and an injective map:
-
-```lean
-ZMod.toAddCircle : ZMod N →+ UnitAddCircle
-```
-
-with theorem:
-
-```lean
-ZMod.toAddCircle_injective : Function.Injective (ZMod.toAddCircle : ZMod N → _)
-```
-
-This is useful for the model calculation:
-
-```text
-#(UnitAddCircle[m]) = m.
-```
-
-Mathlib also has covering-map facts for `n • ·` on `AddCircle`, for example:
-
-```lean
-AddCircle.isAddQuotientCoveringMap_nsmul_of_ne_zero
-```
-
-for nonzero `n`.
-
-So once you can identify `E(ℝ)^0` with `UnitAddCircle` as a group, the torsion calculation is manageable.
-
-## 7. Suggested public theorem boundary
-
-Do **not** make the final FLT proof depend on elliptic integrals, ovals, IVT, IFT, and component arguments directly.  Hide all real analysis behind one theorem:
-
-```lean
-import FLT.EllipticCurve.Torsion
-import Mathlib.Topology.Instances.AddCircle.Real
-import Mathlib.Topology.Covering.AddCircle
-import Mathlib.Topology.Order.IntermediateValue
-import Mathlib.Analysis.Calculus.Implicit
-import Mathlib.Topology.MetricSpace.Bounded
-import Mathlib.Tactic
-
-open scoped Classical Topology
-open WeierstrassCurve WeierstrassCurve.Affine
-
-noncomputable section
-
-namespace FLT.RealRoute4B
-
-/--
-Hard real theorem for Route 4B.
-
-Recommended public API: do not expose the proof that the identity component is a
-circle.  State exactly the torsion bound needed by the FLT argument.
--/
-theorem real_mTorsion_card_le
-    (E : WeierstrassCurve ℝ) [E.IsElliptic] (m : ℕ) :
-    Nat.card (E.nTorsion m) ≤ 2 * m := by
-  -- Internal proof options:
-  -- 1. prove E(ℝ)^0 ≃+ UnitAddCircle and component group has size ≤ 2;
-  -- 2. or prove directly that multiplication-by-m has kernel size ≤ 2m.
-  sorry
-
-end FLT.RealRoute4B
-```
-
-This theorem is the correct `Route 4B` endpoint.  The final rational torsion bound should use this theorem, not the underlying topological construction.
-
-## 8. If you insist on proving the circle statement, target these lemmas
-
-Use a deliberately narrow statement.  Avoid first developing a full smooth manifold API for real elliptic curves unless the project really needs it elsewhere.
-
-```lean
-import FLT.EllipticCurve.Torsion
-import Mathlib.Topology.Instances.AddCircle.Real
-import Mathlib.Topology.Covering.AddCircle
-import Mathlib.Topology.Order.IntermediateValue
-import Mathlib.Analysis.Calculus.Implicit
-import Mathlib.Topology.MetricSpace.Bounded
-import Mathlib.Tactic
-
-open scoped Classical Topology
-open WeierstrassCurve WeierstrassCurve.Affine
-
-noncomputable section
-
-namespace FLT.RealRoute4B
-
-/-- Placeholder for the identity component of the real elliptic curve. -/
-def RealIdentityComponent (E : WeierstrassCurve ℝ) [E.IsElliptic] : Type :=
-  {P : (E⁄ℝ).Point // True}
-
-/-- Placeholder group structure; in production this is the connected component of `0`. -/
-instance (E : WeierstrassCurve ℝ) [E.IsElliptic] :
-    AddCommGroup (RealIdentityComponent E) := by
-  -- Do not literally use this dummy instance.  The production definition should
-  -- be the connected component subgroup of the topological group `(E⁄ℝ).Point`.
-  infer_instance
-
-/--
-The real identity component is the additive circle.
-
-This is the hard theorem if you choose the identity-component route.
--/
-theorem real_identityComponent_addEquiv_addCircle
-    (E : WeierstrassCurve ℝ) [E.IsElliptic] :
-    Nonempty (RealIdentityComponent E ≃+ UnitAddCircle) := by
-  -- Honest proof options:
-  -- A. compact connected 1-dimensional abelian Lie group classification;
-  -- B. explicit Abel/elliptic integral coordinate.
-  sorry
-
-/-- The component group has size at most two. -/
-theorem real_componentGroup_card_le_two
-    (E : WeierstrassCurve ℝ) [E.IsElliptic] :
-    True := by
-  -- Production statement should be a cardinal bound for
-  -- `(E⁄ℝ).Point / connectedComponent(0)` or equivalent.
-  -- This follows from the cubic having one or three real roots.
-  trivial
-
-end FLT.RealRoute4B
-```
-
-The dummy `RealIdentityComponent` above is intentionally schematic.  In production, it should be an actual subgroup/subtype built from the connected component of `0` in the topological group of real points.  The reason to show this sketch is to fix the dependency boundary: the hard theorem should be an additive equivalence to `UnitAddCircle`, not merely a homeomorphism.
-
-## 9. Group-theoretic reduction once the circle theorem exists
-
-After proving an additive equivalence with `UnitAddCircle`, the identity-component torsion calculation should be isolated as a general theorem.
-
-```lean
-import Mathlib.Topology.Instances.AddCircle.Real
-import Mathlib.Topology.Covering.AddCircle
-import Mathlib.Tactic
-
-open scoped Classical Topology
-
-noncomputable section
-
-namespace FLT.RealRoute4B
-
-/--
-Target theorem: the `m`-torsion of the additive circle has exactly `m` points.
-
-This should be proved using `ZMod.toAddCircle`, `ZMod.toAddCircle_injective`,
-and surjectivity onto the kernel of `m • ·` on `UnitAddCircle`.
--/
-theorem unitAddCircle_mTorsion_card (m : ℕ) :
-    Nat.card (Submodule.torsionBy ℤ UnitAddCircle m) = m := by
-  -- Hard but much smaller than the elliptic-curve real-locus theorem.
-  -- For `m = 0`, check the convention of `Submodule.torsionBy`; for the FLT
-  -- application you can state this only under `0 < m`.
-  sorry
-
-/-- Transport torsion cardinality across an additive equivalence. -/
-theorem torsion_card_of_addEquiv
-    {A B : Type*} [AddCommGroup A] [AddCommGroup B]
-    (e : A ≃+ B) (m : ℕ) :
-    Nat.card (Submodule.torsionBy ℤ A m) =
-      Nat.card (Submodule.torsionBy ℤ B m) := by
-  -- Build the induced equivalence on `Submodule.torsionBy`.
-  -- The proof is routine: map an element `a` to `e a` and use `map_nsmul`.
-  sorry
-
-end FLT.RealRoute4B
-```
-
-Then the real elliptic theorem becomes:
-
-```text
-#E(ℝ)[m]
-  ≤ #(component group) * #(E(ℝ)^0[m])
-  ≤ 2 * m.
-```
-
-The first inequality is an exact-sequence/cardinality lemma for the component map.  It is ordinary group theory once the component group is defined as a quotient and has cardinal at most two.
-
-## 10. Is there a shortcut using the division polynomial `ψ_m`?
-
-Not a useful one.
-
-The naive division-polynomial bound gives:
-
-```text
-#x-coordinates of nonzero m-torsion ≤ deg ψ_m ≈ m²/2,
-#points ≤ 2 deg ψ_m + 1 ≈ m²,
-```
-
-which is far too weak.
-
-To improve it to `O(m)`, you would need to prove a strong theorem such as:
-
-```text
-ψ_m has at most about m/2 real roots on a one-component real elliptic curve,
-and at most about m real roots on a two-component real elliptic curve.
-```
-
-But this is essentially the same real topology/torsion theorem in polynomial language.  The reason most roots of `ψ_m` are nonreal is that the real torus has only one or two real ovals; proving that via signs/Sturm theory for every `m` is not shorter than proving the real Lie-group picture.
-
-A Sturm-theory route would require:
-
-```text
-1. a uniform Sturm sequence for ψ_m depending on m;
-2. proof that the number of real roots is O(m);
-3. compatibility between roots of ψ_m and real torsion points;
-4. all exceptional cases around 2-torsion and point at infinity.
-```
-
-This is likely worse than the topological group route.
-
-So the answer to the shortcut question is:
-
-```text
-No: division polynomials alone do not give the 2m bound.
-A better real-root count for ψ_m is equivalent in difficulty to the real
-identity-component/circle theorem or the multiplication-by-m covering theorem.
-```
-
-## 11. Recommended Lean plan
-
-Use this three-layer plan.
-
-### Layer 1: real topological theorem, hidden behind one API
-
-```lean
-import FLT.EllipticCurve.Torsion
-import Mathlib.Topology.Instances.AddCircle.Real
-import Mathlib.Topology.Covering.AddCircle
-import Mathlib.Topology.Order.IntermediateValue
-import Mathlib.Analysis.Calculus.Implicit
-import Mathlib.Topology.MetricSpace.Bounded
-import Mathlib.Tactic
-
-open scoped Classical Topology
-open WeierstrassCurve WeierstrassCurve.Affine
-
-noncomputable section
-
-namespace FLT.RealRoute4B
-
-theorem real_mTorsion_card_le
-    (E : WeierstrassCurve ℝ) [E.IsElliptic] (m : ℕ) :
-    Nat.card (E.nTorsion m) ≤ 2 * m := by
-  -- Prove from identity component ≃+ UnitAddCircle plus component group ≤ 2.
-  sorry
-
-end FLT.RealRoute4B
-```
-
-### Layer 2: base change `ℚ → ℝ`
-
-This already follows the repo's `Points.map` design.
-
-```lean
-import FLT.EllipticCurve.Torsion
-import Mathlib.Data.Real.Basic
-import Mathlib.Tactic
+import Mathlib
 
 open scoped Classical
-open WeierstrassCurve WeierstrassCurve.Affine
 
-noncomputable section
+namespace FLT.ALine
 
-namespace FLT.RealRoute4B
-
-noncomputable abbrev ratToRealAlgHom : ℚ →ₐ[ℚ] ℝ :=
-  IsScalarTower.toAlgHom ℚ ℚ ℝ
-
-noncomputable def rationalPointToReal
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    (E⁄ℚ).Point →+ (E⁄ℝ).Point :=
-  WeierstrassCurve.Points.map E ratToRealAlgHom
-
-/-- Target local lemma: rational-to-real map on points is injective. -/
-theorem rationalPointToReal_injective
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    Function.Injective (rationalPointToReal E) := by
-  -- Expected proof: unfold `WeierstrassCurve.Affine.Point.map`, split cases,
-  -- and use injectivity of `Rat.cast : ℚ → ℝ` on affine coordinates.
+/-- Schematic: a point of exact order `N` gives only a cyclic subgroup. -/
+theorem exactOrderPoint_gives_cyclic_subgroup
+    {G : Type*} [AddCommGroup G] {N : ℕ} {P : G}
+    (hP : orderOf P = N) :
+    ∃ f : ZMod N →+ G, Function.Injective f := by
+  -- Standard construction: send `1 : ZMod N` to `P`.
+  -- The kernel is zero because `orderOf P = N`.
   sorry
 
-end FLT.RealRoute4B
-```
-
-### Layer 3: cardinality wrapper
-
-```lean
-import FLT.EllipticCurve.Torsion
-import Mathlib.Data.Real.Basic
-import Mathlib.Tactic
-
-open scoped Classical
-open WeierstrassCurve WeierstrassCurve.Affine
-
-noncomputable section
-
-namespace FLT.RealRoute4B
-
-/-- Use the project definition if it already exists. -/
-def HasFullRationalTorsion
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] (m : ℕ) : Prop :=
-  ∃ f : ZMod m × ZMod m →+ (E⁄ℚ).Point, Function.Injective f
+/--
+The theorem that would be needed, but is false from the listed assumptions alone:
+a cyclic point of order `p^2` does not force full `(Z/p)^2` torsion.
+-/
+theorem cyclic_p_square_countermodel_schematic
+    (p : ℕ) [Fact p.Prime] :
+    True := by
+  -- Model: `G = ZMod (p^2)` has an element of order `p^2`, but its p-torsion
+  -- is cyclic of order `p`, not `(ZMod p × ZMod p)`.
+  trivial
 
 /--
-Final Route 4B wrapper once `real_mTorsion_card_le` and base-change injectivity
-are available.
+Useful consequence of result 2 in invariant-factor form:
+if `T ≃ Z/a × Z/b`, `a ∣ b`, and an odd prime `p` divides `a`, then `T`
+contains `(Z/p)^2`, contradiction.
 -/
-theorem fullRationalTorsion_order_le_two
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    m ≤ 2 := by
-  rcases hfull with ⟨f, hf⟩
+theorem odd_prime_not_dvd_firstInvariant_schematic
+    {a b p : ℕ}
+    (hp : p.Prime) (hpodd : p ≠ 2)
+    (hab : a ∣ b) :
+    True := by
+  -- If `p ∣ a`, then `p ∣ b`; the two coordinate p-torsion points generate
+  -- `ZMod p × ZMod p`.
+  trivial
 
-  let g : ZMod m × ZMod m →+ (E⁄ℝ).Point :=
-    (rationalPointToReal E).comp f
+/--
+Useful consequence of result 4:
+if `2 ∣ a` and `d ∣ b` for `d ∈ {10,12,14,16}`, then `Z/a × Z/b`
+contains `Z/2 × Z/d`.
+-/
+theorem forbidden_two_by_d_branch_schematic
+    {a b d : ℕ}
+    (ha2 : 2 ∣ a) (hdb : d ∣ b) :
+    True := by
+  -- Use the coordinate subgroup of orders `2` and `d`.
+  trivial
 
-  have hg_inj : Function.Injective g := by
-    intro a b hab
-    apply hf
-    apply rationalPointToReal_injective E
-    exact hab
-
-  -- Package `g` as an injection into real m-torsion.
-  let gt : ZMod m × ZMod m → Submodule.torsionBy ℤ (E⁄ℝ).Point m :=
-    fun a => ⟨g a, by
-      change m • g a = 0
-      rw [← map_nsmul]
-      have ha : m • a = 0 := by
-        ext <;> simp
-      rw [← f.map_nsmul, ha, f.map_zero, map_zero]
-    ⟩
-
-  have hgt_inj : Function.Injective gt := by
-    intro a b h
-    apply hg_inj
-    exact Subtype.ext_iff.mp h
-
-  have hcard_lower : m * m ≤ Nat.card (Submodule.torsionBy ℤ (E⁄ℝ).Point m) := by
-    calc
-      m * m = Nat.card (ZMod m × ZMod m) := by
-        -- Usually `simp [Nat.card_prod]` or a small `ZMod` cardinal lemma.
-        sorry
-      _ ≤ Nat.card (Submodule.torsionBy ℤ (E⁄ℝ).Point m) :=
-        Nat.card_le_card_of_injective gt hgt_inj
-
-  have hreal : Nat.card (Submodule.torsionBy ℤ (E⁄ℝ).Point m) ≤ 2 * m := by
-    -- Use `real_mTorsion_card_le` stated directly for `(E⁄ℝ).Point`, or
-    -- transport from `(E.map (algebraMap ℚ ℝ)).nTorsion m`.
-    sorry
-
-  have hsq : m * m ≤ 2 * m := le_trans hcard_lower hreal
-  omega
-
-end FLT.RealRoute4B
+end FLT.ALine
 ```
 
-The only genuinely large theorem in this whole plan is:
-
-```lean
-real_mTorsion_card_le
-```
-
-Everything else is routine by comparison.
-
-## Final recommendation
-
-For a 0-sorry development, do not try to prove the `2m` bound by counting real roots of `ψ_m`.  That path only hides the same topology inside a hard real-root-count theorem.
-
-The most honest Lean path is:
+In the actual proof tree, the important negative fact is this:
 
 ```text
-1. Prove local manifold/compactness/component facts using IVT, IFT, and compactness APIs.
-2. Add one group-theoretic/topological input:
-      E(ℝ)^0 ≃+ UnitAddCircle
-   or directly:
-      #(E(ℝ)^0[m]) ≤ m.
-3. Prove component group size ≤ 2 from the real cubic root count.
-4. Package all of this as:
-      real_mTorsion_card_le : Nat.card (E.nTorsion m) ≤ 2*m.
-5. Use the existing base-change map and cardinality argument to prove the rational theorem.
+exactOrder(P) = N
 ```
 
-If the goal is the **shortest** proof of `real_mTorsion_card_le`, target the direct torsion bound as the public theorem and prove it privately from either compact connected 1-dimensional Lie-group classification or the Abel integral.  IVT + IFT + compactness alone are not enough to produce the group isomorphism `E(ℝ)^0 ≃+ ℝ/ℤ`.
+can prove only
+
+```text
+Z/N ↪ E(ℚ)_tors.
+```
+
+It cannot prove
+
+```text
+Z/p × Z/p ↪ E(ℚ)_tors
+```
+
+from `p² ∣ N`, nor can it prove
+
+```text
+Z/2 × Z/d ↪ E(ℚ)_tors
+```
+
+from `d ∣ N`.
+
+## What additional theorem would complete the exclusion?
+
+To exclude the listed `N`, add one of the following kinds of theorem.
+
+### Option A: cyclic torsion bound
+
+A direct theorem:
+
+```lean
+theorem no_point_exact_order_of_large_7smooth
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {N : ℕ} (hN : N ∈ target7SmoothList) :
+    ¬ ∃ P : (E⁄ℚ).Point, orderOf P = N := by
+  -- This is exactly what is missing.
+  sorry
+```
+
+### Option B: Mazur cyclic list
+
+Use Mazur's torsion theorem, or at least the cyclic part:
+
+```text
+If E(ℚ) has a point of order N, then N ∈ {1,2,3,4,5,6,7,8,9,10,12}.
+```
+
+This kills every listed `N ≥ 17` immediately.
+
+### Option C: Kubert/descent for `Z/N`
+
+For the 7-smooth A-line, prove separate modular-curve/descent obstructions for cyclic points:
+
+```text
+no Z/18, no Z/20, no Z/21, ..., no Z/100
+```
+
+or prove a recursive reduction that every listed `N` implies one of a smaller set of cyclic obstructions.
+
+## Final answer
+
+Result 2 does **not** kill a point of order divisible by an odd square.  A point of order `p²` gives a cyclic subgroup `Z/p²`, whose `p`-torsion is only `Z/p`.  It does not give full `(Z/p)^2`.
+
+Results 1–5 can rule out certain **noncyclic ambient torsion branches**, especially when the first invariant factor contains an odd prime or when it contains `2` and the second invariant factor is divisible by `10`, `12`, `14`, or `16`.  But they never rule out the cyclic branch
+
+```text
+E(ℚ)_tors ≃ Z/N.
+```
+
+Therefore, for every listed 7-smooth `N ≥ 17`, a point of exact order `N` remains compatible with results 1–5.  The A-line 7-smooth exclusion needs an additional theorem excluding cyclic rational torsion orders, not just full `p`-torsion or full-2-plus-`n` torsion.
