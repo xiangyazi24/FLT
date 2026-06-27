@@ -53,13 +53,24 @@ theorem quartic_plus_both_odd {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
 theorem V_pos {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
     0 < 2 * r ^ 2 + B ^ 2 + 2 * s := by
-  -- UV = 5B⁴ > 0, U+V = 4r²+2B² > 0 → both positive
-  sorry
+  have hprod := UV_eq_five_mul_fourth heq
+  suffices ¬ (2 * r ^ 2 + B ^ 2 + 2 * s ≤ 0) from lt_of_not_le this
+  intro hV
+  have hU : 2 * r ^ 2 + B ^ 2 - 2 * s ≤ 0 := by
+    by_contra hU; push_neg at hU
+    linarith [mul_nonpos_of_nonneg_of_nonpos (le_of_lt hU) hV]
+  linarith [sq_nonneg r, sq_nonneg B]
 
 theorem U_pos {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
     0 < 2 * r ^ 2 + B ^ 2 - 2 * s := by
-  sorry
+  have hprod := UV_eq_five_mul_fourth heq
+  suffices ¬ (2 * r ^ 2 + B ^ 2 - 2 * s ≤ 0) from lt_of_not_le this
+  intro hU
+  have hV : 2 * r ^ 2 + B ^ 2 + 2 * s ≤ 0 := by
+    by_contra hV; push_neg at hV
+    linarith [mul_nonpos_of_nonneg_of_nonpos (le_of_lt hV) hU]
+  linarith [sq_nonneg r, sq_nonneg B]
 
 /-- U and V are both odd when r, B are both odd. -/
 theorem UV_odd {r B s : ℤ}
