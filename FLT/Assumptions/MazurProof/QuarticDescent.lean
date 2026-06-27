@@ -58,9 +58,11 @@ theorem r_odd_of_B_odd {r B s : ℤ} (hB_odd : B % 2 = 1)
     have hs_mod : s ^ 2 % 4 = 3 := by omega
     rcases Int.emod_two_eq_zero_or_one s with hs | hs
     · obtain ⟨j, rfl⟩ : 2 ∣ s := ⟨s / 2, by omega⟩
-      have := show (2 * j) ^ 2 = 4 * j ^ 2 from by ring; omega
+      have : (2 * j) ^ 2 = 4 * j ^ 2 := by ring
+      omega
     · obtain ⟨j, rfl⟩ : ∃ j, s = 2 * j + 1 := ⟨s / 2, by omega⟩
-      have := show (2 * j + 1) ^ 2 = 4 * (j ^ 2 + j) + 1 from by ring; omega
+      have : (2 * j + 1) ^ 2 = 4 * (j ^ 2 + j) + 1 := by ring
+      omega
   · exact hr_odd
 
 /-- If B is even and gcd(r,B) = 1, then r is odd and 4 | B.
@@ -101,13 +103,16 @@ theorem even_B_props {r B s : ℤ} (hB_even : B % 2 = 0) (_hr : 0 < r) (_hB : 0 
   · obtain ⟨t, rfl⟩ : 2 ∣ s := ⟨s / 2, by omega⟩
     rcases Int.emod_two_eq_zero_or_one t with ht | ht
     · obtain ⟨u, rfl⟩ : 2 ∣ t := ⟨t / 2, by omega⟩
-      have := show (2 * (2 * u)) ^ 2 = 8 * (2 * u ^ 2) from by ring; omega
+      have : (2 * (2 * u)) ^ 2 = 8 * (2 * u ^ 2) := by ring
+      omega
     · obtain ⟨u, rfl⟩ : ∃ u, t = 2 * u + 1 := ⟨t / 2, by omega⟩
-      have := show (2 * (2 * u + 1)) ^ 2 = 8 * (2 * u ^ 2 + 2 * u) + 4 from by ring; omega
+      have : (2 * (2 * u + 1)) ^ 2 = 8 * (2 * u ^ 2 + 2 * u) + 4 := by ring
+      omega
   · obtain ⟨t, rfl⟩ : ∃ t, s = 2 * t + 1 := ⟨s / 2, by omega⟩
     rcases Int.emod_two_eq_zero_or_one t with ht | ht
     · obtain ⟨u, rfl⟩ : 2 ∣ t := ⟨t / 2, by omega⟩
-      have := show (2 * (2 * u) + 1) ^ 2 = 8 * (2 * u ^ 2 + u) + 1 from by ring; omega
+      have : (2 * (2 * u) + 1) ^ 2 = 8 * (2 * u ^ 2 + u) + 1 := by ring
+      omega
     · obtain ⟨u, rfl⟩ : ∃ u, t = 2 * u + 1 := ⟨t / 2, by omega⟩
       have := show (2 * (2 * u + 1) + 1) ^ 2 = 8 * (2 * u ^ 2 + 3 * u + 1) + 1 from by ring
       omega
