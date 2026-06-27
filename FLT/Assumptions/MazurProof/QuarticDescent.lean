@@ -46,17 +46,25 @@ private lemma quartic_eq_zmod (n : ℕ) [NeZero n] {r B s : ℤ}
 
 private lemma zmod4_sq_zero_of_even {x : ℤ} (hx : x % 2 = 0) :
     (x : ZMod 4) ^ 2 = 0 := by
-  have : x % 4 = 0 ∨ x % 4 = 2 := by omega
-  rcases this with h | h
-  · rw [(ZMod.intCast_eq_intCast_iff' x 0 4).2 (by omega)]; norm_num
-  · rw [(ZMod.intCast_eq_intCast_iff' x 2 4).2 (by omega)]; norm_num
+  have hx4 : x % 4 = 0 ∨ x % 4 = 2 := by omega
+  rcases hx4 with h | h
+  · have : (x : ZMod 4) = 0 :=
+      (ZMod.intCast_eq_intCast_iff' x (0 : ℤ) 4).2 (by rw [h]; norm_num)
+    rw [this]; norm_num
+  · have : (x : ZMod 4) = 2 :=
+      (ZMod.intCast_eq_intCast_iff' x (2 : ℤ) 4).2 (by rw [h]; norm_num)
+    rw [this]; norm_num
 
 private lemma zmod4_sq_one_of_odd {x : ℤ} (hx : x % 2 = 1) :
     (x : ZMod 4) ^ 2 = 1 := by
-  have : x % 4 = 1 ∨ x % 4 = 3 := by omega
-  rcases this with h | h
-  · rw [(ZMod.intCast_eq_intCast_iff' x 1 4).2 (by omega)]; norm_num
-  · rw [(ZMod.intCast_eq_intCast_iff' x 3 4).2 (by omega)]; norm_num
+  have hx4 : x % 4 = 1 ∨ x % 4 = 3 := by omega
+  rcases hx4 with h | h
+  · have : (x : ZMod 4) = 1 :=
+      (ZMod.intCast_eq_intCast_iff' x (1 : ℤ) 4).2 (by rw [h]; norm_num)
+    rw [this]; norm_num
+  · have : (x : ZMod 4) = 3 :=
+      (ZMod.intCast_eq_intCast_iff' x (3 : ℤ) 4).2 (by rw [h]; norm_num)
+    rw [this]; norm_num
 
 /-- If B is odd and the quartic equation holds, then r is odd.
     (Mod 4: r even + B odd → s² ≡ 3 mod 4, impossible.) -/
@@ -67,10 +75,12 @@ theorem r_odd_of_B_odd {r B s : ℤ} (hB_odd : B % 2 = 1)
   rcases Int.emod_two_eq_zero_or_one r with hr_even | hr_odd
   · exfalso
     have h4 := quartic_eq_zmod 4 heq
+    have hr4 := zmod4_sq_zero_of_even hr_even
+    have hB4 := zmod4_sq_one_of_odd hB_odd
     rw [show (r : ZMod 4) ^ 4 = ((r : ZMod 4) ^ 2) ^ 2 from by ring,
-        zmod4_sq_zero_of_even hr_even, zmod4_sq_one_of_odd hB_odd,
-        show (1 : ZMod 4) ^ 2 = 1 from by norm_num] at h4
-    simp at h4
+        show (B : ZMod 4) ^ 4 = ((B : ZMod 4) ^ 2) ^ 2 from by ring,
+        hr4, hB4] at h4
+    norm_num at h4
     exact absurd h4 (by fin_cases (s : ZMod 4) <;> decide)
   · exact hr_odd
 
@@ -95,15 +105,21 @@ theorem even_B_props {r B s : ℤ} (hB_even : B % 2 = 0) (_hr : 0 < r) (_hB : 0 
   have hr8_sq : (r : ZMod 8) ^ 2 = 1 := by
     have : r % 8 = 1 ∨ r % 8 = 3 ∨ r % 8 = 5 ∨ r % 8 = 7 := by omega
     rcases this with h | h | h | h
-    · rw [(ZMod.intCast_eq_intCast_iff' r 1 8).2 (by omega)]; norm_num
-    · rw [(ZMod.intCast_eq_intCast_iff' r 3 8).2 (by omega)]; norm_num
-    · rw [(ZMod.intCast_eq_intCast_iff' r 5 8).2 (by omega)]; norm_num
-    · rw [(ZMod.intCast_eq_intCast_iff' r 7 8).2 (by omega)]; norm_num
+    · have := (ZMod.intCast_eq_intCast_iff' r (1 : ℤ) 8).2 (by rw [h]; norm_num)
+      rw [this]; norm_num
+    · have := (ZMod.intCast_eq_intCast_iff' r (3 : ℤ) 8).2 (by rw [h]; norm_num)
+      rw [this]; norm_num
+    · have := (ZMod.intCast_eq_intCast_iff' r (5 : ℤ) 8).2 (by rw [h]; norm_num)
+      rw [this]; norm_num
+    · have := (ZMod.intCast_eq_intCast_iff' r (7 : ℤ) 8).2 (by rw [h]; norm_num)
+      rw [this]; norm_num
   have hB8_sq : (B : ZMod 8) ^ 2 = 4 := by
     have : B % 8 = 2 ∨ B % 8 = 6 := by omega
     rcases this with h | h
-    · rw [(ZMod.intCast_eq_intCast_iff' B 2 8).2 (by omega)]; norm_num
-    · rw [(ZMod.intCast_eq_intCast_iff' B 6 8).2 (by omega)]; norm_num
+    · have := (ZMod.intCast_eq_intCast_iff' B (2 : ℤ) 8).2 (by rw [h]; norm_num)
+      rw [this]; norm_num
+    · have := (ZMod.intCast_eq_intCast_iff' B (6 : ℤ) 8).2 (by rw [h]; norm_num)
+      rw [this]; norm_num
   rw [show (r : ZMod 8) ^ 4 = ((r : ZMod 8) ^ 2) ^ 2 from by ring,
       show (B : ZMod 8) ^ 4 = ((B : ZMod 8) ^ 2) ^ 2 from by ring,
       hr8_sq, hB8_sq] at h8
