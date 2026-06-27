@@ -1,36 +1,33 @@
-# Q1244 (dm2): B-line replacement by a general Weil-pairing roots-of-unity axiom
+# Q1256 (dm2): current Mathlib routes for excluding `(Z/pZ)^2 ⊂ E(Q)`
 
-## Verdict
+## Short conclusion
 
-Yes.  This is a good B-line replacement if the goal is only to rule out full rational rank-two `m`-torsion.  It avoids the real-topology statement
-
-```lean
-Set.ncard {P : (E/R).Point | (m : N) * P = 0} <= 2 * m
-```
-
-and replaces the two real-torsion axioms with one algebraic Weil-pairing corollary:
-
-```text
-full E[m](k)-rational torsion  ==>  k contains a primitive m-th root of unity.
-```
-
-For `k = Q`, the existing rational-root-of-unity lemma
+For current Mathlib, I do **not** see a sorry-free route proving, for every elliptic curve `E/Q` and odd prime `p`, that no injective homomorphism
 
 ```lean
-isPrimitiveRoot_rat_order_le_two
+ZMod p × ZMod p →+ (E/Q).Point
 ```
 
-then gives `m <= 2`.  This is exactly the obstruction needed for `no_odd_prime_square_in_torsion`.
+exists.  The obstruction is not the final field theory: Mathlib has strong roots-of-unity and cyclotomic APIs.  The missing bridge is elliptic-curve-specific: either the Weil pairing, the determinant/cyclotomic character of the torsion Galois representation, or the topology/classification of `E(R)`.
 
-The new axiom is not a theorem of the current elliptic-curve API unless the Weil pairing itself has already been formalized.  Mathlib has a strong roots-of-unity and cyclotomic API; the missing hard input is the elliptic-curve Weil pairing construction and its nondegeneracy.  So this is a cleaner axiom, not a presently automatic proof from existing elliptic-curve facts.
+The most concrete feasible route today is a **single algebraic axiom** packaging the Weil-pairing corollary:
 
-## Mathlib API status
+```lean
+axiom weil_pairing_roots_of_unity_of_zmod_square
+    {K : Type*} [Field K] [CharZero K]
+    (m : N) (hm : 0 < m)
+    (E : WeierstrassCurve K) [E.IsElliptic]
+    (h : ∃ f : ZMod m × ZMod m →+ (E/K).Point, Function.Injective f) :
+    ∃ ζ : K, IsPrimitiveRoot ζ m
+```
 
-Mathlib has the relevant field-theoretic language.
+Then the target over `Q` is immediate from the existing rational primitive-root lemma `isPrimitiveRoot_rat_order_le_two`.
 
-### 1. General primitive roots of unity
+## What Mathlib has
 
-`IsPrimitiveRoot` is already general.  It is a predicate on elements of any commutative monoid, not just on complex numbers or number fields.
+### Roots of unity / primitive roots / cyclotomic fields
+
+This side is present and is the right language for the conclusion.
 
 ```lean
 import Mathlib
@@ -41,60 +38,99 @@ import Mathlib
 #check IsPrimitiveRoot.isUnit
 #check IsPrimitiveRoot.coe_units_iff
 #check IsPrimitiveRoot.zmodEquivZPowers
-#check IsPrimitiveRoot.card_rootsOfUnity
 #check primitiveRoots
-#check mem_primitiveRoots
-```
-
-The conceptual definition is:
-
-```text
-IsPrimitiveRoot ζ m  :=  ζ^m = 1 and every exponent killing ζ is divisible by m.
-```
-
-This is exactly the target conclusion for a Weil-pairing corollary.
-
-### 2. Cyclotomic polynomial API
-
-Mathlib has cyclotomic polynomials and their primitive-root interface.
-
-```lean
-import Mathlib
-
-#check Polynomial.cyclotomic
-#check Polynomial.cyclotomic_eq_prod_X_sub_primitiveRoots
-#check Polynomial.prod_cyclotomic_eq_X_pow_sub_one
-#check Polynomial.separable_cyclotomic
-#check Polynomial.squarefree_cyclotomic
-#check Polynomial.orderOf_root_cyclotomic_dvd
-```
-
-This API is useful if later we want to reformulate `IsPrimitiveRoot ζ m` as a root of `Polynomial.cyclotomic m k`, or reason about cyclotomic extensions.
-
-### 3. Roots of unity and cyclotomic extensions
-
-Mathlib also has `rootsOfUnity`, implemented as a subgroup of units, plus cyclotomic extensions.
-
-```lean
-import Mathlib
-
 #check rootsOfUnity
-#check mem_rootsOfUnity
-#check mem_rootsOfUnity'
-#check rootsOfUnity.mkOfPowEq
-#check rootsOfUnityEquivNthRoots
+#check Polynomial.cyclotomic
 #check IsCyclotomicExtension
-#check isCyclotomicExtension_iff
-#check IsCyclotomicExtension.exists_isPrimitiveRoot
 #check IsPrimitiveRoot.adjoin_isCyclotomicExtension
 #check CyclotomicField
 ```
 
-This is enough language to state the desired field-theoretic corollary cleanly.
+So the statement `∃ ζ : K, IsPrimitiveRoot ζ m` is a natural Mathlib statement.
 
-## Recommended single axiom
+### Additive circle APIs
 
-Put this in the same namespace as the current Mazur-proof axioms.  Keep the repository’s aliases `N`, `Q`, `R`, and slash notation if those are already used in the file.
+Mathlib also has useful circle infrastructure:
+
+```lean
+import Mathlib.Analysis.Normed.Group.AddCircle
+import Mathlib.Topology.Instances.AddCircle.Real
+
+#check AddCircle
+#check UnitAddCircle
+#check ZMod.toAddCircle
+#check ZMod.toAddCircle_injective
+#check AddCircle.pathConnectedSpace
+#check AddCircle.compactSpace
+```
+
+`UnitAddCircle` is `AddCircle (1 : R)`, and `ZMod.toAddCircle` is the homomorphism sending `j mod N` to `j / N mod 1`.  This is enough to prove circle torsion facts with some work.
+
+### Division polynomial APIs
+
+Mathlib has division polynomials:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+
+#check WeierstrassCurve.ψ
+#check WeierstrassCurve.Ψ
+#check WeierstrassCurve.ΨSq
+#check WeierstrassCurve.Φ
+#check WeierstrassCurve.map_ψ
+#check WeierstrassCurve.baseChange_ψ
+```
+
+But this is not enough by itself.  The missing bridge is the theorem relating point multiplication to vanishing of the division polynomial, and even that would mostly give a `p^2`-style algebraic torsion count, not the field-of-definition obstruction needed over `Q`.
+
+## What Mathlib appears not to have
+
+### 1. Completed elliptic-curve torsion Galois representations
+
+The needed theorem would be something like:
+
+```text
+det rho_{E,p} = cyclotomic character
+```
+
+or equivalently the Galois-equivariant Weil pairing.  Current Mathlib does not appear to expose such a theorem.
+
+The FLT repository has an experimental `FLT.EllipticCurve.Torsion` file, but it contains incomplete placeholders for the finiteness/cardinality of torsion and the continuous Galois representation.  That file is therefore not a present no-axiom solution.
+
+### 2. The real topology/classification of `E(R)`
+
+The real-analytic proof is mathematically excellent:
+
+```text
+E(R) ≅ S^1 or S^1 × Z/2Z.
+For odd p, all p-torsion lies in the identity component.
+Thus E(R)[p] ≅ Z/pZ.
+So (Z/pZ)^2 cannot inject into E(R), hence cannot inject into E(Q).
+```
+
+But Mathlib does not appear to have the bridge
+
+```lean
+(E/R).Point ≃+ UnitAddCircle
+```
+
+or
+
+```lean
+(E/R).Point ≃+ UnitAddCircle × ZMod 2
+```
+
+or the weaker component theorem `#π₀(E(R)) ≤ 2`.  The existing elliptic-curve point file is algebraic: it defines nonsingular affine points and proves the group law using coordinate rings/class groups, not real analytic topology.
+
+### 3. A division-polynomial field-of-definition theorem
+
+A pure root-counting argument with `ψ_p` cannot prove the result.  Over an algebraic closure in characteristic different from `p`, the full `p`-torsion really has `p^2` points, so the division polynomial has enough roots.  The contradiction over `Q` is that full rational torsion forces the appropriate roots of unity into `Q`.
+
+There are algebraic shadows of Weil pairing via discriminants of division polynomials.  For `p = 3`, one might try an explicit quartic-discriminant argument.  For all odd primes, this becomes another form of the cyclotomic/Weil-pairing obstruction, and Mathlib does not appear to have the needed discriminant formulas.
+
+## Concrete recommended patch
+
+Use exactly one trusted B-line axiom, stated over a general characteristic-zero field.
 
 ```lean
 import Mathlib
@@ -107,77 +143,41 @@ open scoped Classical
 namespace FLT.MazurProof
 
 /--
-Weil-pairing corollary, B-line axiom.
+Weil-pairing corollary.
 
-If an elliptic curve over a characteristic-zero field has full `m`-torsion rational
-over the ground field, then the ground field contains a primitive `m`-th root of
+If `(ZMod m)^2` injects into the group of `K`-rational points of an elliptic curve
+over a characteristic-zero field `K`, then `K` contains a primitive `m`-th root of
 unity.
-
-Mathematically, choose a `ZMod m`-basis `P, Q` of `E[m](K)`.  The Weil pairing
-`e_m(P,Q)` lies in `Kˣ`, is a primitive `m`-th root of unity by nondegeneracy,
-and is fixed by Galois because `P` and `Q` are `K`-rational.
 -/
-axiom weil_pairing_roots_of_unity
+axiom weil_pairing_roots_of_unity_of_zmod_square
     {K : Type*} [Field K] [CharZero K]
     (m : N) (hm : 0 < m)
     (E : WeierstrassCurve K) [E.IsElliptic]
-    (hfull : ∃ f : ZMod m × ZMod m →+ (E/K).Point, Function.Injective f) :
+    (h : ∃ f : ZMod m × ZMod m →+ (E/K).Point, Function.Injective f) :
     ∃ ζ : K, IsPrimitiveRoot ζ m
 
-end FLT.MazurProof
-```
-
-This is deliberately the raw full-torsion hypothesis rather than a new generic `HasFullKTorsion` definition.  That keeps the change small and avoids introducing another definition parallel to `HasFullRationalTorsion`.
-
-If `(E/K).Point` does not elaborate for a type variable `K` in the local file, use the point spelling already used by Mathlib/repo for points of a `WeierstrassCurve K`.  The intended type is the additive group of `K`-rational points of `E`.
-
-## Replacement theorem over `Q`
-
-This theorem is the direct replacement for the Route 4B real-torsion bound when the downstream proof only needs to bound full rational torsion.
-
-```lean
-import Mathlib
-import FLT.Assumptions.MazurProof.TorsionDefs
-
-noncomputable section
-
-open scoped Classical
-
-namespace FLT.MazurProof
-
-/--
-Full rational `m`-torsion over `Q` forces `m <= 2`, by the Weil-pairing
-roots-of-unity axiom and the classification of rational primitive roots of unity.
--/
-theorem fullRationalTorsion_order_le_two_weil
-    (E : WeierstrassCurve Q) [E.IsElliptic]
+/-- Full rational rank-two `m`-torsion over `Q` forces `m <= 2`. -/
+theorem zmod_square_rational_torsion_order_le_two
     (m : N) (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
+    (E : WeierstrassCurve Q) [E.IsElliptic]
+    (h : ∃ f : ZMod m × ZMod m →+ (E/Q).Point, Function.Injective f) :
     m <= 2 := by
-  rcases hfull with ⟨f, hf⟩
-  rcases weil_pairing_roots_of_unity (K := Q) m hm E ⟨f, hf⟩ with ⟨ζ, hζ⟩
+  rcases weil_pairing_roots_of_unity_of_zmod_square (K := Q) m hm E h with ⟨ζ, hζ⟩
   exact isPrimitiveRoot_rat_order_le_two hζ
+
+/-- No full rational rank-two odd-prime torsion. -/
+theorem no_zmod_square_rational_torsion_of_odd_prime
+    (E : WeierstrassCurve Q) [E.IsElliptic]
+    (p : N) (hp : Nat.Prime p) (hpgt : 2 < p) :
+    ¬ (∃ f : ZMod p × ZMod p →+ (E/Q).Point, Function.Injective f) := by
+  intro h
+  have hle : p <= 2 := zmod_square_rational_torsion_order_le_two p hp.pos E h
+  omega
 
 end FLT.MazurProof
 ```
 
-If Lean does not unfold `HasFullRationalTorsion` automatically under `rcases`, use this equivalent version:
-
-```lean
-theorem fullRationalTorsion_order_le_two_weil
-    (E : WeierstrassCurve Q) [E.IsElliptic]
-    (m : N) (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    m <= 2 := by
-  change (∃ f : ZMod m × ZMod m →+ (E/Q).Point, Function.Injective f) at hfull
-  rcases hfull with ⟨f, hf⟩
-  rcases weil_pairing_roots_of_unity (K := Q) m hm E ⟨f, hf⟩ with ⟨ζ, hζ⟩
-  exact isPrimitiveRoot_rat_order_le_two hζ
-```
-
-## Concrete replacement for `no_odd_prime_square_in_torsion`
-
-Use the new Weil route instead of `fullRationalTorsion_order_le_two_route4B`.
+If the downstream theorem is stated for the torsion subtype, use the subtype inclusion:
 
 ```lean
 private theorem no_odd_prime_square_in_torsion
@@ -187,110 +187,14 @@ private theorem no_odd_prime_square_in_torsion
   rintro (f, hf)
   let incl := (AddCommGroup.torsion (E/Q).Point).subtype
   have hincl : Function.Injective incl := Subtype.val_injective
-  have hfull : HasFullRationalTorsion E p := (incl.comp f, hincl.comp hf)
-  have hle : p <= 2 := fullRationalTorsion_order_le_two_weil E p hp.pos hfull
+  have hsq : ∃ g : ZMod p × ZMod p →+ (E/Q).Point, Function.Injective g :=
+    ⟨incl.comp f, hincl.comp hf⟩
+  have hle : p <= 2 := zmod_square_rational_torsion_order_le_two p hp.pos E hsq
   omega
 ```
 
-Equivalently, inline the axiom call:
+## Why this is the best current route
 
-```lean
-private theorem no_odd_prime_square_in_torsion
-    (E : WeierstrassCurve Q) [E.IsElliptic]
-    (p : N) (hp : Nat.Prime p) (hpgt : 2 < p) :
-    not (exists f : ZMod p × ZMod p →+ (AddCommGroup.torsion (E/Q).Point), Function.Injective f) := by
-  rintro (f, hf)
-  let incl := (AddCommGroup.torsion (E/Q).Point).subtype
-  have hincl : Function.Injective incl := Subtype.val_injective
-  have hfull : HasFullRationalTorsion E p := (incl.comp f, hincl.comp hf)
-  rcases hfull with ⟨g, hg⟩
-  rcases weil_pairing_roots_of_unity (K := Q) p hp.pos E ⟨g, hg⟩ with ⟨ζ, hζ⟩
-  have hle : p <= 2 := isPrimitiveRoot_rat_order_le_two hζ
-  omega
-```
+The real route requires formalizing the topology of real elliptic curves.  The division-polynomial route requires missing multiplication/field-of-definition theorems and still tends back toward Weil pairing.  The Galois-representation route requires the determinant/cyclotomic-character theorem, which is again the Weil pairing in another form.
 
-The helper-theorem version is cleaner because it isolates the rational-field consequence of the axiom.
-
-## Import restructuring
-
-Under this approach, `Axioms.lean` should not need `RealTorsionBound.lean` for this obstruction.
-
-Recommended import shape:
-
-```lean
-import Mathlib
-import FLT.Assumptions.MazurProof.TorsionDefs
-```
-
-Then add the one new axiom and the helper theorem above.
-
-Remove or stop importing the real-topology B-line axioms:
-
-```lean
--- no longer needed for the rational full-torsion obstruction:
--- axiom real_mTorsion_finite
--- axiom real_mTorsion_card_le
--- theorem fullRationalTorsion_order_le_two_route4B  -- if it only exists to package those axioms
-```
-
-If `RealTorsionBound.lean` is still useful elsewhere, it can remain as a separate experimental file, but `Axioms.lean` should not import it for this route.  If the goal is truly “one B-line axiom”, then the old real-torsion axioms should be deleted or removed from the trusted import path.
-
-## Why this is sufficient
-
-The old real-torsion route was:
-
-```text
-(Z/m)^2 embeds into E(Q)
-  -> (Z/m)^2 embeds into E(R)[m]
-  -> m^2 <= #E(R)[m]
-  -> m^2 <= 2m
-  -> m <= 2.
-```
-
-The new field-theoretic route is shorter:
-
-```text
-(Z/m)^2 embeds into E(Q)
-  -> Q contains a primitive m-th root of unity       -- new axiom
-  -> m <= 2.                                        -- existing rational primitive-root lemma
-```
-
-For the odd-prime-square obstruction, `p` is prime and `2 < p`, so `p <= 2` contradicts `hpgt` by `omega`.
-
-## Is this axiom weaker?
-
-It is weaker in the local proof-theoretic sense relevant here: it only rules out full rank-two rational torsion.  It does not assert any global cardinality bound for all real `m`-torsion points.
-
-It is not mathematically trivial.  It packages the Weil pairing plus nondegeneracy:
-
-```text
-E[m](K) ≅ (Z/m)^2
-  -> choose basis P,Q
-  -> e_m(P,Q) is a primitive m-th root of unity in K.
-```
-
-That is a standard algebraic theorem and is much closer to the actual arithmetic obstruction than the real-topological cardinality bound.
-
-## Acceptance checks for a Codex patch
-
-After implementing this route, run:
-
-```bash
-grep -R "axiom real_mTorsion_finite\|axiom real_mTorsion_card_le" -n FLT FermatsLastTheorem scratch || true
-grep -R "axiom weil_pairing_roots_of_unity" -n FLT FermatsLastTheorem scratch || true
-grep -R "fullRationalTorsion_order_le_two_route4B\|RealTorsionBound" -n FLT FermatsLastTheorem scratch || true
-lake env lean path/to/Axioms.lean
-```
-
-Expected state:
-
-```text
-- exactly one new trusted B-line axiom: weil_pairing_roots_of_unity;
-- no imported dependency on real_mTorsion_finite or real_mTorsion_card_le for no_odd_prime_square_in_torsion;
-- no call to fullRationalTorsion_order_le_two_route4B in that theorem;
-- the target Lean file compiles cleanly.
-```
-
-## Bottom line
-
-This approach works well as an axiomatized B-line.  Mathlib already has the root-of-unity, primitive-root, and cyclotomic language needed to state and use the conclusion over general fields.  The only hard missing mathematical object is the elliptic-curve Weil pairing itself, so the clean axiom should be exactly the Weil-pairing corollary above.
+The single axiom above is exactly the missing mathematical fact, stated in already-supported Mathlib language.  It cleanly replaces the real-torsion cardinality axioms for this proof.
