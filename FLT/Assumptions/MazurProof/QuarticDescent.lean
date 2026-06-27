@@ -37,27 +37,72 @@ theorem UV_eq_five_mul_fourth {r B s : ℤ}
     (2 * r ^ 2 + B ^ 2 - 2 * s) * (2 * r ^ 2 + B ^ 2 + 2 * s) = 5 * B ^ 4 := by
   nlinarith [heq, sq_nonneg s, sq_nonneg r, sq_nonneg B]
 
-/-- If B is odd and gcd(r,B) = 1 and the quartic equation holds, then r is odd.
-    (Mod 4: r even + B odd → s² ≡ -B⁴ ≡ 3 mod 4, impossible.) -/
+private lemma quartic_eq_zmod (n : ℕ) [NeZero n] {r B s : ℤ}
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    (s : ZMod n) ^ 2 =
+      (r : ZMod n) ^ 4 + (r : ZMod n) ^ 2 * (B : ZMod n) ^ 2 -
+        (B : ZMod n) ^ 4 := by
+  have h := congrArg (fun z : ℤ => (z : ZMod n)) heq; simpa using h
+
+private lemma zmod4_sq_zero_of_even {x : ℤ} (hx : x % 2 = 0) :
+    (x : ZMod 4) ^ 2 = 0 := by
+  have : x % 4 = 0 ∨ x % 4 = 2 := by omega
+  rcases this with h | h <;>
+  · rw [(ZMod.intCast_eq_intCast_iff' x _ 4).2 (by omega)]; norm_num
+
+private lemma zmod4_sq_one_of_odd {x : ℤ} (hx : x % 2 = 1) :
+    (x : ZMod 4) ^ 2 = 1 := by
+  have : x % 4 = 1 ∨ x % 4 = 3 := by omega
+  rcases this with h | h <;>
+  · rw [(ZMod.intCast_eq_intCast_iff' x _ 4).2 (by omega)]; norm_num
+
+/-- If B is odd and the quartic equation holds, then r is odd.
+    (Mod 4: r even + B odd → s² ≡ 3 mod 4, impossible.) -/
 theorem r_odd_of_B_odd {r B s : ℤ} (hB_odd : B % 2 = 1)
-    (hcop : Int.gcd r B = 1)
+    (_hcop : Int.gcd r B = 1)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
     r % 2 = 1 := by
-  by_contra hr_even
-  push_neg at hr_even
-  have : r % 2 = 0 := by omega
-  -- Cast to ZMod 4 and derive contradiction: s² ≡ 3 (mod 4)
-  sorry
+  rcases Int.emod_two_eq_zero_or_one r with hr_even | hr_odd
+  · exfalso
+    have h4 := quartic_eq_zmod 4 heq
+    rw [show (r : ZMod 4) ^ 4 = ((r : ZMod 4) ^ 2) ^ 2 from by ring,
+        zmod4_sq_zero_of_even hr_even, zmod4_sq_one_of_odd hB_odd,
+        show (1 : ZMod 4) ^ 2 = 1 from by norm_num] at h4
+    simp at h4
+    exact absurd h4 (by fin_cases (s : ZMod 4) <;> decide)
+  · exact hr_odd
 
 /-- If B is even and gcd(r,B) = 1, then r is odd and 4 | B.
-    (gcd = 1 forces r odd; mod 8 eliminates B ≡ 2 mod 4.) -/
-theorem even_B_props {r B s : ℤ} (hB_even : B % 2 = 0) (hr : 0 < r) (hB : 0 < B)
+    (gcd = 1 forces r odd; mod 8: B ≡ 2 mod 4 → s² ≡ 5 mod 8, impossible.) -/
+theorem even_B_props {r B s : ℤ} (hB_even : B % 2 = 0) (_hr : 0 < r) (_hB : 0 < B)
     (hcop : Int.gcd r B = 1)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
     r % 2 = 1 ∧ 4 ∣ B := by
-  -- r must be odd (gcd = 1 and B even → r odd)
-  -- B ≡ 2 mod 4 → s² ≡ 5 mod 8, impossible → 4 | B
-  sorry
+  have hr_odd : r % 2 = 1 := by
+    rcases Int.emod_two_eq_zero_or_one r with hr_even | hr_odd
+    · exfalso
+      have h2r : (2 : ℤ) ∣ r := ⟨r / 2, by omega⟩
+      have h2B : (2 : ℤ) ∣ B := ⟨B / 2, by omega⟩
+      have h2g : (2 : ℤ) ∣ (Int.gcd r B : ℤ) := Int.dvd_coe_gcd h2r h2B
+      rw [hcop] at h2g; exact absurd h2g (by norm_num)
+    · exact hr_odd
+  refine ⟨hr_odd, ?_⟩
+  by_contra hnot4
+  have hB4 : B % 4 = 2 := by omega
+  have h8 := quartic_eq_zmod 8 heq
+  have hr8_sq : (r : ZMod 8) ^ 2 = 1 := by
+    have : r % 8 = 1 ∨ r % 8 = 3 ∨ r % 8 = 5 ∨ r % 8 = 7 := by omega
+    rcases this with h | h | h | h <;>
+    · rw [(ZMod.intCast_eq_intCast_iff' r _ 8).2 (by omega)]; norm_num
+  have hB8_sq : (B : ZMod 8) ^ 2 = 4 := by
+    have : B % 8 = 2 ∨ B % 8 = 6 := by omega
+    rcases this with h | h <;>
+    · rw [(ZMod.intCast_eq_intCast_iff' B _ 8).2 (by omega)]; norm_num
+  rw [show (r : ZMod 8) ^ 4 = ((r : ZMod 8) ^ 2) ^ 2 from by ring,
+      show (B : ZMod 8) ^ 4 = ((B : ZMod 8) ^ 2) ^ 2 from by ring,
+      hr8_sq, hB8_sq] at h8
+  norm_num at h8
+  exact absurd h8 (by fin_cases (s : ZMod 8) <;> decide)
 
 /-! ## U, V properties -/
 
@@ -244,24 +289,171 @@ theorem pos_fourth_of_coprime_mul_fourth {a b c : ℤ} (hab : Int.gcd a b = 1)
   -- Step 6: a = a₁² = (α²)² = α⁴
   exact ⟨α, hα_pos, by rw [ha₁, hα]; ring⟩
 
+/-! ## Descent step helpers (to be proved) -/
+
+/-- Coprime factorization of 5·C⁴. -/
+theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C ^ 4)
+    (hcop : Int.gcd F₁ F₂ = 1) (hF₁ : 0 < F₁) (hF₂ : 0 < F₂) (hC : 0 < C) :
+    ∃ a b : ℤ, 0 < a ∧ 0 < b ∧ Int.gcd a b = 1 ∧ C = a * b ∧
+      ((F₁ = a ^ 4 ∧ F₂ = 5 * b ^ 4) ∨ (F₁ = 5 * a ^ 4 ∧ F₂ = b ^ 4)) := by
+  sorry
+
+/-- gcd(r-h, r+h) = 1 when r odd, h even, gcd(r,b) = 1, r² = h² + b⁴. -/
+theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
+    (hcop_rb : Int.gcd r b = 1) (heq : r ^ 2 = h ^ 2 + b ^ 4) :
+    Int.gcd (r - h) (r + h) = 1 := by
+  rw [← Int.isCoprime_iff_gcd_eq_one]
+  have hcopI : IsCoprime r b := Int.isCoprime_iff_gcd_eq_one.mpr hcop_rb
+  have h2h : (2 : ℤ) ∣ h := Int.dvd_of_emod_eq_zero hh_even
+  by_contra hnotcop
+  rw [Int.isCoprime_iff_gcd_eq_one] at hnotcop
+  have hU_ne : (r - h) ≠ 0 := by nlinarith [sq_nonneg h, sq_nonneg b]
+  have hg_gt1 : 1 < Int.gcd (r - h) (r + h) := by
+    have : Int.gcd (r - h) (r + h) ≠ 0 := by
+      rw [Int.gcd_def]; exact Nat.gcd_ne_zero_left (Int.natAbs_ne_zero.mpr hU_ne)
+    omega
+  obtain ⟨p, hp, hpg⟩ := Nat.exists_prime_and_dvd hg_gt1.ne'
+  have hpU : (↑p : ℤ) ∣ (r - h) :=
+    dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_left ..)
+  have hpV : (↑p : ℤ) ∣ (r + h) :=
+    dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_right ..)
+  have hp_prime_int : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp hp
+  -- p ≠ 2 (r-h is odd since r odd, h even)
+  have hp_ne_2 : p ≠ 2 := by
+    intro hp2; subst hp2
+    have : (2 : ℤ) ∣ (r - h) + h := dvd_add hpU h2h
+    have : (2 : ℤ) ∣ r := by convert this using 1; ring
+    have : r % 2 = 0 := Int.emod_eq_zero_of_dvd this
+    omega
+  have hp_not_dvd_2 : ¬ (↑p : ℤ) ∣ 2 := by
+    intro h; have := Int.Prime.dvd_pow' hp (show (↑p : ℤ) ∣ 2 ^ 1 from by simpa using h)
+    rw [Int.natCast_dvd] at this
+    exact hp_ne_2 (Nat.le_antisymm (Nat.le_of_dvd (by norm_num) this) hp.two_le)
+  -- p | r (from p | (r-h)+(r+h) = 2r, p odd)
+  have hpr : (↑p : ℤ) ∣ r := by
+    have : (↑p : ℤ) ∣ 2 * r := by
+      have := dvd_add hpU hpV; convert this using 1; ring
+    exact (hp_prime_int.dvd_or_dvd this).resolve_left hp_not_dvd_2
+  -- p | h (from p | (r+h)-(r-h) = 2h, p odd)
+  have hph : (↑p : ℤ) ∣ h := by
+    have : (↑p : ℤ) ∣ 2 * h := by
+      have := dvd_sub hpV hpU; convert this using 1; ring
+    exact (hp_prime_int.dvd_or_dvd this).resolve_left hp_not_dvd_2
+  -- p | b (from p | r² - h² = b⁴)
+  have hpb : (↑p : ℤ) ∣ b := by
+    have : (↑p : ℤ) ∣ b ^ 4 := by
+      have hr2 := pow_dvd_pow_of_dvd hpr 2
+      have hh2 := pow_dvd_pow_of_dvd hph 2
+      have := dvd_sub hr2 hh2
+      rwa [show r ^ 2 - h ^ 2 = b ^ 4 from by linarith] at this
+    exact Int.Prime.dvd_pow' hp this
+  -- p | r and p | b contradicts gcd(r,b) = 1
+  exact hp_prime_int.not_unit (hcopI.isUnit_of_dvd' hpr hpb)
+
 /-! ## Descent step (the hard core) -/
 
+set_option maxHeartbeats 800000 in
 /-- From a non-base solution, produce a strictly smaller non-base solution. -/
 theorem quartic_plus_descent_step :
     ∀ {r B s : ℤ}, QuarticPlusZ r B s → ¬ BaseZ r B →
       ∃ r' B' s' : ℤ, QuarticPlusZ r' B' s' ∧ ¬ BaseZ r' B' ∧
         B'.natAbs < B.natAbs := by
   intro r B s ⟨hr, hB, hcop, heq⟩ hnonbase
-  -- Normalize: replace s by |s| (equation is s²-invariant)
-  -- After normalization: 0 ≤ |s|, and U = 2r²+B²-2|s|, V = 2r²+B²+2|s| with U ≤ V
-  -- 1. Both r, B odd (mod 4/16 analysis)
-  -- 2. UV = 5B⁴ with U,V coprime, odd, positive
-  -- 3. Factor: U=a⁴, V=5b⁴ (or swapped) with ab=B, gcd(a,b)=1
-  -- 4. 4r² = (a²-b²)² + 4b⁴ → h²+b⁴=r² where h=(a²-b²)/2
-  -- 5. Pythagorean: b²=(m-n)(m+n), gcd=1 → m-n=u², m+n=v², b=uv
-  -- 6. a² = v⁴+v²u²-u⁴ with B'=u < uv=b ≤ ab=B
-  -- 7. Non-baseness: if u=v=1 then b=1,a²=1,a=1,B=1, contradicts hnonbase
-  sorry
+  -- Odd B case (even B is similar, uses M=U/4, N=V/4)
+  -- TODO: add even B case via by_cases
+  have hBodd : B % 2 = 1 := sorry -- will be derived from the unified descent
+  have hr_odd := r_odd_of_B_odd hBodd hcop heq
+  -- UV = 5B⁴, gcd(U,V) = 1
+  have hUV_cop := UV_coprime hr hB hcop heq hr_odd hBodd
+  have hUV_prod := UV_eq_five_mul_fourth heq
+  have hUpos := U_pos hr hB heq
+  have hVpos := V_pos hr hB heq
+  -- Factor: ∃ a b, ... with (U=a⁴,V=5b⁴) ∨ (U=5a⁴,V=b⁴)
+  obtain ⟨a, b, ha, hb, hab_cop, hB_eq, hfactor⟩ :=
+    coprime_factor_5_fourth hUV_prod hUV_cop hUpos hVpos hB
+  -- Handle case U = a⁴, V = 5b⁴ (other case is symmetric)
+  rcases hfactor with ⟨hU_eq, hV_eq⟩ | ⟨hU_eq, hV_eq⟩
+  · -- Step 1: 4r² = (a²-b²)² + 4b⁴
+    have h4r2 : 4 * r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4 := by
+      nlinarith [hU_eq, hV_eq, hB_eq]
+    -- Step 2: define h = (a²-b²)/2 (integer since a,b both odd)
+    have ha_odd : a % 2 = 1 := by
+      by_contra ha_even; push_neg at ha_even
+      have : a % 2 = 0 := by omega
+      have : B % 2 = 0 := by rw [hB_eq]; omega
+      omega
+    have hb_odd : b % 2 = 1 := by
+      by_contra hb_even; push_neg at hb_even
+      have : b % 2 = 0 := by omega
+      have : B % 2 = 0 := by rw [hB_eq]; omega
+      omega
+    have h2_dvd : (2 : ℤ) ∣ (a ^ 2 - b ^ 2) := by
+      have : a ^ 2 % 2 = 1 := by omega
+      have : b ^ 2 % 2 = 1 := by omega
+      omega
+    set h := (a ^ 2 - b ^ 2) / 2 with hh_def
+    have hh_eq : a ^ 2 - b ^ 2 = 2 * h := by
+      rw [hh_def, Int.mul_ediv_cancel' h2_dvd]
+    -- Step 3: r² = h² + b⁴
+    have hr2_eq : r ^ 2 = h ^ 2 + b ^ 4 := by nlinarith
+    -- Step 4: (r-h)(r+h) = b⁴
+    have hprod_rh : (r - h) * (r + h) = b ^ 4 := by nlinarith
+    -- Step 5: r-h > 0, r+h > 0
+    have hrh_pos : 0 < r - h := by nlinarith [sq_nonneg h, sq_nonneg b]
+    have hrh_pos2 : 0 < r + h := by nlinarith [sq_nonneg h, sq_nonneg b]
+    -- Step 6: h is even (a²-b² ≡ 0 mod 4)
+    have hh_even : h % 2 = 0 := by
+      have : (a ^ 2 - b ^ 2) % 4 = 0 := by omega
+      omega
+    -- Step 7: gcd(r-h, r+h) = 1
+    have hcop_rb : Int.gcd r b = 1 := by
+      rw [← Int.isCoprime_iff_gcd_eq_one]
+      have hcop_rB := Int.isCoprime_iff_gcd_eq_one.mpr hcop
+      rw [hB_eq] at hcop_rB
+      exact (IsCoprime.mul_right_iff.mp hcop_rB).2
+    have hcop_rh := coprime_rh hr_odd hh_even hcop_rb hr2_eq
+    -- Step 8: factor (r-h)(r+h) = b⁴ with gcd = 1 → r-h = α⁴, r+h = β⁴
+    obtain ⟨α, hα_pos, hα_eq⟩ := pos_fourth_of_coprime_mul_fourth hcop_rh hprod_rh
+      hrh_pos hrh_pos2
+    obtain ⟨β, hβ_pos, hβ_eq⟩ := pos_fourth_of_coprime_mul_fourth
+      (show Int.gcd (r + h) (r - h) = 1 by rwa [Int.gcd_comm])
+      (by rw [mul_comm]; exact hprod_rh) hrh_pos2 hrh_pos
+    -- Step 9: b = αβ
+    have hb_eq : b = α * β := by
+      have : b ^ 4 = (α * β) ^ 4 := by nlinarith
+      nlinarith [sq_nonneg (b - α * β), sq_nonneg (b + α * β)]
+    -- Step 10: new equation a² = β⁴ + β²α² - α⁴
+    have hnew_eq : a ^ 2 = β ^ 4 + β ^ 2 * α ^ 2 - α ^ 4 := by
+      nlinarith [hb_eq]
+    -- Step 11: produce the new QuarticPlusZ solution (β, α, a)
+    have hcop_βα : Int.gcd β α = 1 := by
+      rw [← Int.isCoprime_iff_gcd_eq_one]
+      have := Int.isCoprime_iff_gcd_eq_one.mpr hcop_rh
+      rw [hα_eq, hβ_eq] at this
+      exact ((IsCoprime.pow_left_iff (by norm_num : 0 < 4)).mp
+        ((IsCoprime.pow_right_iff (by norm_num : 0 < 4)).mp
+          (isCoprime_comm.mp this)))
+    refine ⟨β, α, a, ⟨hβ_pos, hα_pos, hcop_βα, hnew_eq⟩, ?_, ?_⟩
+    · -- Non-base: ¬ BaseZ β α
+      intro ⟨hβ1, hα1⟩
+      apply hnonbase
+      constructor
+      · -- r = 1: from r-h = 1⁴ = 1, r+h = 1⁴ = 1 → r = 1, h = 0
+        have : r - h = 1 := by rw [hα_eq, hα1]; ring
+        have : r + h = 1 := by rw [hβ_eq, hβ1]; ring
+        linarith
+      · -- B = 1: from α=β=1 → b=1 → a=1 (from a²=1+1-1=1) → B=1
+        have hb1 : b = 1 := by rw [hb_eq, hα1, hβ1]; ring
+        have ha1 : a = 1 := by nlinarith [sq_nonneg (a - 1)]
+        rw [hB_eq, ha1, hb1]; ring
+    · -- B' < B: α.natAbs < B.natAbs
+      rw [hB_eq]
+      have hα_le_b : α ≤ b := by
+        rw [hb_eq]; exact le_mul_of_one_le_right hα_pos.le hβ_pos
+      have hb_le_ab : b ≤ a * b := le_mul_of_one_le_left hb.le ha
+      sorry -- need: α < a*b, which follows from non-baseness
+  · -- Case U = 5a⁴, V = b⁴ (symmetric descent on a)
+    sorry
 
 /-! ## Strong induction closure -/
 
