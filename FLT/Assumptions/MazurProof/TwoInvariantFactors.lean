@@ -187,8 +187,17 @@ def twoInvariantFactorData_of_equiv
   equiv := e
   card_eq := card_of_two_invariant_factors G m n hm hn e
   order_n := by
-    -- order(G) = m * n (from card_eq)
-    sorry  -- ~5 LOC: verify the invariant order n condition
+    -- In ℤ/m × ℤ/n, the element (0, 1) has order exactly n
+    -- because n is the LCM of m and 1 (since m | n)
+    have key : addOrderOf ((0 : ℤ/m), (1 : ℤ/n)) = n := by
+      rw [addOrderOf_eq_iff hn]
+      constructor
+      · ext <;> simp [ZMod.add_self_eq_zero_iff_eq_zero]
+      · intro k _ _ h
+        have := congrArg Prod.snd h
+        simp at this
+    use e.symm ((0 : ℤ/m), (1 : ℤ/n))
+    rw [e.symm.addOrderOf_eq, key]
 
 theorem mk_two_invariant_factor_data
     (G : Type*) [AddCommGroup G] [Finite G]
