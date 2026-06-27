@@ -64,6 +64,16 @@ theorem UV_odd {r B s : ℤ}
     (2 * r ^ 2 + B ^ 2 + 2 * s) % 2 = 1 := by
   constructor <;> omega
 
+/-- gcd(U, V) = 1: any common factor divides 4s and 2(2r²+B²),
+and since U,V odd the factor is odd, so it divides s and 2r²+B².
+Then gcd(r,B)=1 forces the factor to be 1. -/
+theorem UV_coprime {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
+    (hcop : Int.gcd r B = 1)
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4)
+    (hr_odd : r % 2 = 1) (hB_odd : B % 2 = 1) :
+    Int.gcd (2 * r ^ 2 + B ^ 2 - 2 * s) (2 * r ^ 2 + B ^ 2 + 2 * s) = 1 := by
+  sorry -- prime factor analysis using gcd(r,B)=1
+
 /-! ## Descent step (the hard core) -/
 
 /-- From a non-base solution, produce a strictly smaller non-base solution. -/
