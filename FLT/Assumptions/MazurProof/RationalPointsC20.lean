@@ -120,9 +120,19 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
       rw [hrpos, show r ^ 2 = r * r from sq r] at hcop
       exact hcop.of_mul_left
     have hr_pos : 0 < |r| := abs_pos.mpr hr0
-    -- Second factor = s² (not -s²) since A = r² > 0 and A·second = C² ≥ 0
-    -- Then quartic_plus gives |r| = B = 1, so A = r² = 1, u = 1/1 = 1
-    sorry
+    -- Apply sq_of_gcd_eq_one to the second factor
+    have hcopf' : Int.gcd (A ^ 2 + A * B ^ 2 - B ^ 4) A = 1 := by
+      rw [Int.gcd_comm]; exact hcopf
+    obtain ⟨s, hsA⟩ := Int.sq_of_gcd_eq_one hcopf' (by linarith [hC] : (A ^ 2 + A * B ^ 2 - B ^ 4) * A = C ^ 2)
+    rcases hsA with hs_pos | hs_neg
+    · -- second = s²: QuarticPlus s² = |r|⁴ + |r|²B² - B⁴
+      have heq : s ^ 2 = |r| ^ 4 + |r| ^ 2 * B ^ 2 - B ^ 4 := by
+        rw [hs_pos, hrpos]; ring_nf; simp [sq_abs]
+      obtain ⟨hr1, hB1⟩ := quartic_plus |r| B s hBpos hr_pos hgcd_rB heq
+      rw [hu, hrpos]; simp [hr1, hB1, abs_eq_iff] at *; norm_num [hr1, hB1]
+      sorry -- final norm_num: u = r²/B² = 1/1 = 1
+    · -- second = -s²: impossible (A > 0, A·second = C² ≥ 0 forces second ≥ 0)
+      exfalso; nlinarith [sq_nonneg C, sq_nonneg s, sq_nonneg r, hrpos]
   · -- Case A = -r² ≤ 0. Since A ≠ 0, r ≠ 0.
     have hr0 : r ≠ 0 := by intro h; rw [h] at hrneg; simp at hrneg; exact hA0 hrneg
     -- The second factor must be ≤ 0, so it's -s²
