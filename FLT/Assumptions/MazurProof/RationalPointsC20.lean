@@ -116,7 +116,7 @@ theorem rat_denom_square (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
   obtain ⟨B₀, hB₀⟩ := hden_sq'
   have hB₀_pos : 0 < B₀ := by
     rcases Nat.eq_zero_or_pos B₀ with h | h
-    · exfalso; simp [h] at hB₀; exact u.den_ne_zero hB₀
+    · simp [h] at hB₀; exact absurd hB₀ u.den_ne_zero
     · exact h
   refine ⟨u.num, (B₀ : ℤ), by exact_mod_cast hB₀_pos, ?_, ?_⟩
   · -- gcd(u.num, B₀) = 1: B₀ | u.den, and gcd(u.num, u.den) = 1
