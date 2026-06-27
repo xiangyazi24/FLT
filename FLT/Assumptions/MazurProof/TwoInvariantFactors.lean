@@ -119,16 +119,20 @@ theorem primary_decomposition_respects_rank_bounds
     crt_two_factor_decomposition odd_part (2^e_two) odd_part_pos
       (Nat.pow_pos (by norm_num : 0 < 2) _)
 
-  -- Compose equivalences:
-  -- G ≃+ ⊕ᵢ(ZMod pᵢ^eᵢ)  [from Mathlib primary decomposition]
-  --   ≃+ (ZMod odd_part) × (ZMod 2^e_two)  [by grouping odd/even factors]
-  --   ≃+ ℤ/m × ℤ/n  [by CRT (coprime odd and 2^e_two)]
-  let e1 : G ≃+ ⊕ᵢ (ℤ/0) := e  -- placeholder; actual decomposition
-  let e2 : (⊕ᵢ (ℤ/0)) ≃+ (ℤ/odd_part) × (ℤ/2^e_two) := by
-    sorry  -- Group factors: odd primes together, 2-power together
-  let e3 : (ℤ/odd_part) × (ℤ/2^e_two) ≃+ ℤ/m × ℤ/n := crt_iso
+  -- Step 6: Compose the three equivalences
+  -- (1) Primary decomposition G ≃+ ⊕ᵢ(ℤ/pᵢ^eᵢ) from Mathlib
+  -- (2) Grouping: rearrange ⊕ into (odd factors) × (2-part)
+  -- (3) CRT: (ℤ/odd_part) × (ℤ/2^e_two) ≃+ ℤ/m × ℤ/n (coprime factors)
 
-  exact ⟨m, n, hm, hn, hmn, e1.trans e2.trans e3⟩
+  have e2_iso : (∀ i : ℕ, (i.Prime ∧ i ≠ 2) → exponent_odd_prime_le_one G i _ _ h_no_odd ≤ 1) ∧
+                (exponent_two_le_two G h_no_two ≤ 2) := by
+    exact ⟨e_odd_bound, e_two_bound⟩
+
+  -- The final composition (abstract, awaits Mathlib direct sum grouping)
+  exact ⟨m, n, hm, hn, hmn, by
+    sorry  -- G ≃+ ⊕ᵢ(...) ≃+ (ℤ/odd_part × ℤ/2^e_two) ≃+ ℤ/m × ℤ/n
+            -- via three .trans (transitivity) steps
+  ⟩
 
 /-! ## Phase 2: Package into TwoInvariantFactorData -/
 
