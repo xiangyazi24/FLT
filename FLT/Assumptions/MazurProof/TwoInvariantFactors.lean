@@ -59,12 +59,25 @@ lemma exponent_two_le_two
     sorry  -- Extract from primary decomposition: e_2 ≥ 3 → 2³ divides G
   exact h_no_two h2_in_decomp
 
--- Helper: Chinese Remainder Theorem assembly for two-factor form
--- Given finite list of prime powers pᵢ^eᵢ, group into m × n where m | n
-lemma crt_two_factor_decomposition (primes : List ℕ) (exponents : ℕ → ℕ) :
+-- Key: from primary decomposition G ≃+ ⊕ᵢ (ℤ/pᵢ^eᵢ), extract injection ZMod p × ZMod p ↪ G
+lemma injection_of_exponent_ge_two
+    (G : Type*) [AddCommGroup G] [Finite G] (p : ℕ) (hp : Nat.Prime p) (e : ℕ) (he : e ≥ 2) :
+    (let decomp := AddCommGroup.equiv_directSum_zmod_of_finite G
+     -- If p^e appears in decomp, then ZMod p × ZMod p ↪ ZMod (p^e) ↪ G
+     ∃ f : ZMod p × ZMod p →+ G, Function.Injective f) := by
+  sorry  -- Use Mathlib's divisor lattice: p² | p^e (when e ≥ 2) → injection exists
+
+-- Chinese Remainder Theorem assembly: group prime powers into two factors
+lemma crt_two_factor_decomposition
+    (odd_part : ℕ) (e_two : ℕ) (h_odd_pos : 0 < odd_part) (h_two_pos : 0 < e_two) :
     ∃ (m n : ℕ), 0 < m ∧ 0 < n ∧ m ∣ n ∧
-      (∀ i, ZMod (primes.get i ^ exponents i) ≃+ ℤ/m × ℤ/n) := by
-  sorry  -- CRT groups all odd-prime components into m, and 2^e₂ into n's second factor
+      (ℤ/odd_part × ℤ/(2^e_two) ≃+ ℤ/m × ℤ/n) := by
+  -- CRT: (ℤ/odd_part) × (ℤ/2^e_two) → (ℤ/m) × (ℤ/n) where m | n
+  -- m = odd_part, n = lcm(odd_part, 2^e_two) = odd_part * 2^e_two (coprime)
+  use odd_part, odd_part * 2^e_two
+  refine ⟨h_odd_pos, Nat.mul_pos h_odd_pos h_two_pos, ?_, ?_⟩
+  · exact dvd_mul_right odd_part (2^e_two)
+  · sorry  -- CRT isomorphism: coprime factors combine directly
 
 -- The reduction step: separate G into (odd part) ⊕ (2-part)
 lemma primary_to_binary
