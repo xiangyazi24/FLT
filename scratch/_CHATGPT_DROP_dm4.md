@@ -1,239 +1,65 @@
-# Q1183 (dm4): reduction mod primes for `fullRationalTorsion_order_le_two`
+# Q1196 (dm4): proving `#E(ℝ)[m] ≤ 2m` via Weierstrass parametrization / compact group structure
 
 ## Executive answer
 
-For the general theorem
+I do **not** think the Weierstrass-`℘` route is shorter in Lean unless the `℘`-uniformization theorem itself is admitted as a large axiom.
+
+The group-structure route is conceptually right:
+
+```text
+E(ℝ) is a compact 1-dimensional abelian Lie group
+⇒ E(ℝ) ≃ S¹ or S¹ × Z/2Z
+⇒ #E(ℝ)[m] ≤ 2m.
+```
+
+But Mathlib does not currently give a ready theorem of the form
 
 ```lean
-fullRationalTorsion_order_le_two :
-  HasFullRationalTorsion E m → m ≤ 2
+compact_one_dimensional_abelian_lie_group_equiv_circle_times_finite
 ```
 
-the reduction-mod-primes route is **not concretely shorter** than the real-topology Route 4B.
-
-The reduction idea gives a valid **conditional obstruction**:
-
-```text
-if E has good reduction at ℓ,
-if ℓ ∤ m,
-if reduction is injective on m-torsion,
-and if #E(F_ℓ) < m²,
-then full rational m-torsion is impossible.
-```
-
-But it does not give the global theorem from Hasse alone.  The `m = 3` case is the first visible failure, but the real problem is broader: for a general elliptic curve over `Q`, there is no uniform small good prime available from elementary good-reduction existence.  The bad reduction set is finite, but it can contain any prescribed finite set of small primes, so fixed small primes cannot be used uniformly.
-
-So the honest feasibility comparison is:
-
-```text
-Route 4B real topology:
-  hard input = #E(R)[m] ≤ 2m.
-  After that, the desired theorem is a direct cardinality argument.
-
-Reduction mod primes:
-  hard inputs = good reduction API
-              + reduction map on points/torsion
-              + injectivity on prime-to-ℓ torsion
-              + Hasse bound
-              + an additional theorem producing a good prime ℓ with a useful
-                cardinality/divisibility obstruction.
-```
-
-The last item is not supplied by Hasse plus “bad primes are finite”.  Without it, the route cannot close.
-
-## The `m = 3` obstruction
-
-You correctly identified the issue.
-
-For full rational `m`-torsion, reduction at a good prime `ℓ ∤ m` would give
-
-```text
-m² | #E(F_ℓ)
-```
-
-and hence
-
-```text
-m² ≤ #E(F_ℓ) ≤ (sqrt ℓ + 1)².
-```
-
-For `m = 3`, Hasse alone would need
-
-```text
-(sqrt ℓ + 1)² < 9,
-```
-
-so `ℓ < 4`; only `ℓ = 2, 3` are relevant, and these may be bad reduction or divide `m`.
-
-Using small odd primes does not fix this:
-
-```text
-ℓ = 5: #E(F_5) can lie between 2 and 10; # = 9 is Hasse-allowed.
-ℓ = 7: #E(F_7) can lie between 4 and 12; # = 9 is Hasse-allowed.
-```
-
-Thus Hasse does not rule out a subgroup `(Z/3Z)²` at `ℓ = 5` or `ℓ = 7` by cardinality alone.
-
-There is a stronger finite-field fact:
-
-```text
-if E(F_q) contains full m-torsion and gcd(m,q)=1,
-then m | q - 1.
-```
-
-This would immediately rule out full `3`-torsion over `F_5`, since `3 ∤ 4`.  But this fact is essentially the finite-field Weil-pairing/determinant argument.  If the point of Route B is to avoid Weil pairing/cyclotomic arguments, this reintroduces the same mathematics in a finite-field wrapper.
-
-For `ℓ = 7`, even `3 | 7 - 1`, and Hasse still permits `#E(F_7) = 9`.  So one would then need to choose primes in other congruence classes and prove there is a good one.  That needs a Dirichlet/Chebotarev-style existence theorem plus the finite-field torsion structure theorem.  This is not shorter than Route 4B.
-
-## Larger `m` does not solve the global problem
-
-For `m = 5`, a good prime `ℓ < 16` and `ℓ ∤ 5` with Hasse bound would rule out full `5`-torsion by cardinality.  Candidates include `7, 11, 13`.
-
-For `m = 7`, a good prime `ℓ < 36` and `ℓ ∤ 7` would suffice, and there are many candidates.
-
-But for a **general** rational elliptic curve, there is no guarantee that one of those small candidate primes is good.  A rational Weierstrass model can have bad reduction at a prescribed finite set of primes after arranging the discriminant to be divisible by those primes.  Finite bad reduction says there are good primes eventually; it does not say there is one below `(m - 1)^2`.
-
-Therefore, Hasse gives this theorem:
-
-```text
-small good prime below (m - 1)^2
-  ⇒ no full rational m-torsion.
-```
-
-It does not give:
-
-```text
-m ≥ 3 ⇒ no full rational m-torsion.
-```
-
-That is the gap.
-
-## What exists in the current FLT/Mathlib environment?
-
-I checked the FLT repository through the GitHub connector.  The visible elliptic torsion file is `FLT.EllipticCurve.Torsion`, which defines
+nor a theorem of the form
 
 ```lean
-abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u :=
-  Submodule.torsionBy ℤ (E⁄k).Point n
+compact_connected_one_manifold_homeomorphic_circle
 ```
 
-and has placeholder/sorried facts such as:
+that can be imported and applied to real elliptic curves.  The local analytic API exists — in particular the implicit function theorem — but the global classification/topological-group bridge is not available as a ready-made theorem.
+
+So the recommended FLT architecture remains:
 
 ```lean
-theorem WeierstrassCurve.n_torsion_finite {n : ℕ} (hn : 0 < n) :
-    Finite (E.nTorsion n) := sorry
-
-theorem WeierstrassCurve.n_torsion_card [IsSepClosed k] {n : ℕ}
-    (hn : (n : k) ≠ 0) :
-    Nat.card (E.nTorsion n) = n^2 := sorry
+real_mTorsion_finite
+real_mTorsion_card_le
 ```
 
-I did **not** find a ready FLT-local API for:
+as the public Route 4B axioms, with `real_mTorsion_card_le` stated directly as the real torsion bound.  A future proof can use either Weierstrass uniformization or real Lie-group topology internally, but `Axioms.lean` should not depend on the internal route.
+
+## Weierstrass `℘` route: what it would require
+
+The analytic parametrization theorem is not just the formula
 
 ```text
-1. good/bad reduction of rational elliptic curves;
-2. reduction maps E(Q) → E(F_ℓ);
-3. injectivity of reduction on prime-to-ℓ torsion;
-4. Hasse bound for #E(F_ℓ).
+t ↦ (℘(t), ℘'(t)).
 ```
 
-My honest assessment for Mathlib at the pinned FLT revision is the same: there are many general ingredients in Mathlib — finite fields, Weierstrass curves, algebraic geometry, point groups — but not a ready end-to-end arithmetic-reduction stack that would make this route a short implementation.
-
-So the answers to your three concrete API questions are:
+To use it for the real torsion bound, one needs a package like:
 
 ```text
-1. Good/bad reduction of elliptic curves?
-   Not as a ready-to-use FLT-local API found here.  If Mathlib has fragments, they
-   are not wired into this project’s torsion API.
-
-2. Injection E(Q)[m] → E(F_ℓ) for good ℓ ∤ m?
-   Not found as a ready theorem.  This would require integral models, reduction
-   maps, formal group/kernel analysis, and prime-to-ℓ torsion specialization.
-
-3. Hasse bound #E(F_ℓ) = ℓ + 1 - a_ℓ with |a_ℓ| ≤ 2√ℓ?
-   Not found as a ready theorem in the FLT-facing API.  Even if available, it
-   would not close the global `m ≤ 2` theorem without a small-good-prime or
-   finite-field-structure theorem.
+1. Define a lattice Λ ⊂ ℂ attached to E.
+2. Define ℘_Λ and ℘'_Λ with convergence/meromorphicity.
+3. Prove the differential equation:
+     (℘')² = 4℘³ - g₂℘ - g₃.
+4. Prove the addition formula, so the parametrization is a group homomorphism.
+5. Prove the induced map ℂ/Λ → E(ℂ) is a group isomorphism.
+6. Identify the real locus inside ℂ/Λ.
+7. Classify the real locus as one or two circles.
+8. Count the `m`-torsion points in those real circles.
 ```
 
-## What the reduction route can prove immediately, assuming the missing APIs
+This is essentially the full complex-analytic theory of elliptic curves.  If Mathlib had all of this, it would be excellent, but it is not a small shortcut.
 
-The easy part is pure cardinality.  Here is the reusable Lean skeleton.
-
-```lean
-import Mathlib
-
-open scoped Classical
-
-noncomputable section
-
-namespace FLT
-
-namespace ReductionModPrimeRoute
-
-/--
-Pure cardinality obstruction.
-
-If `(ZMod m)^2` injects into a finite reduced point group `G`, then `G` must
-have at least `m^2` elements.  So any bound `#G < m^2` gives a contradiction.
--/
-theorem contradiction_of_reduction_card_lt_sq
-    {G : Type*} [Fintype G]
-    {m : ℕ} (hm : 0 < m)
-    (hred_card : Fintype.card G < m * m)
-    (hred_inj : ∃ g : ZMod m × ZMod m → G, Function.Injective g) :
-    False := by
-  rcases hred_inj with ⟨g, hg⟩
-  have hdom : Fintype.card (ZMod m × ZMod m) = m * m := by
-    simp [Fintype.card_prod]
-  have hle : m * m ≤ Fintype.card G := by
-    rw [← hdom]
-    exact Fintype.card_le_of_injective g hg
-  exact not_lt_of_ge hle hred_card
-
-end ReductionModPrimeRoute
-
-end FLT
-```
-
-The same proof can be written with `Nat.card` if the reduced point group is packaged as a `Finite` type rather than a `Fintype` type:
-
-```lean
-import Mathlib
-
-open scoped Classical
-
-noncomputable section
-
-namespace FLT
-
-namespace ReductionModPrimeRoute
-
-/-- `Nat.card` version of the same pure cardinality obstruction. -/
-theorem contradiction_of_reduction_natCard_lt_sq
-    {G : Type*} [Finite G]
-    {m : ℕ} (hm : 0 < m)
-    (hred_card : Nat.card G < m * m)
-    (hred_inj : ∃ g : ZMod m × ZMod m → G, Function.Injective g) :
-    False := by
-  rcases hred_inj with ⟨g, hg⟩
-  have hdom : Nat.card (ZMod m × ZMod m) = m * m := by
-    simp [Nat.card_prod]
-  have hle : m * m ≤ Nat.card G := by
-    rw [← hdom]
-    exact Nat.card_le_card_of_injective g hg
-  exact not_lt_of_ge hle hred_card
-
-end ReductionModPrimeRoute
-
-end FLT
-```
-
-This is not the hard part.  The hard part is producing `hred_inj` and a useful `hred_card` for some good prime.
-
-## Minimal B-line API if pursued anyway
-
-If you want to package the reduction route as a theorem, the honest interface should look like this.
+A minimal admitted theorem could look like this:
 
 ```lean
 import Mathlib
@@ -245,96 +71,30 @@ noncomputable section
 
 namespace FLT
 
-namespace ReductionModPrimeRoute
-
-/-- Placeholder: `E` has good reduction at the rational prime `ℓ`. -/
-axiom GoodReductionAt
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] (ℓ : ℕ) : Prop
-
-/-- Placeholder for the finite point group of the reduced curve over `F_ℓ`. -/
-axiom ReducedPointGroup
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] (ℓ : ℕ) : Type
-
-axiom reducedPointGroup_fintype
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] (ℓ : ℕ) :
-    Fintype (ReducedPointGroup E ℓ)
-
-/-- Specialization injectivity on prime-to-`ℓ` torsion. -/
-axiom fullTorsion_specializes_injectively
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m ℓ : ℕ}
-    (hm : 0 < m) (hℓprime : ℓ.Prime)
-    (hgood : GoodReductionAt E ℓ) (hℓ_not_dvd_m : ¬ ℓ ∣ m)
-    (hfull : HasFullRationalTorsion E m) :
-    ∃ g : ZMod m × ZMod m → ReducedPointGroup E ℓ,
-      Function.Injective g
+namespace RealTorsionBound
 
 /--
-A useful reduction obstruction.  This is stronger than Hasse alone unless `ℓ`
-is already known to be small relative to `m`.
+Uniformization/topological classification package for real elliptic curves.
+This is the theorem one would prove using the Weierstrass `℘`-function or real
+Lie-group topology.
 -/
-axiom exists_good_reduction_card_lt_sq
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm3 : 3 ≤ m) :
-    ∃ ℓ : ℕ,
-      ℓ.Prime ∧
-      GoodReductionAt E ℓ ∧
-      ¬ ℓ ∣ m ∧
-      Fintype.card (ReducedPointGroup E ℓ) < m * m
+axiom realPoints_circle_or_two_circles
+    (E : WeierstrassCurve ℝ) [E.IsElliptic] :
+    True
+    -- intended shape:
+    -- Nonempty (E(ℝ) ≃+ AddCircle 1) ∨
+    -- Nonempty (E(ℝ) ≃+ AddCircle 1 × ZMod 2)
 
-/--
-If the strong B-line obstruction is available, it gives the desired no-full-torsion theorem.
--/
-theorem not_hasFullRationalTorsion_of_three_le_routeB
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm3 : 3 ≤ m) :
-    ¬ HasFullRationalTorsion E m := by
-  intro hfull
-  have hm_pos : 0 < m := by omega
-  rcases exists_good_reduction_card_lt_sq (E := E) (m := m) hm3 with
-    ⟨ℓ, hℓprime, hgood, hℓ_not_dvd_m, hcard_lt⟩
-  letI : Fintype (ReducedPointGroup E ℓ) :=
-    reducedPointGroup_fintype E ℓ
-  have hred_inj :
-      ∃ g : ZMod m × ZMod m → ReducedPointGroup E ℓ,
-        Function.Injective g :=
-    fullTorsion_specializes_injectively
-      (E := E) (m := m) (ℓ := ℓ)
-      hm_pos hℓprime hgood hℓ_not_dvd_m hfull
-  exact contradiction_of_reduction_card_lt_sq
-    (G := ReducedPointGroup E ℓ) (m := m) hm_pos hcard_lt hred_inj
-
-end ReductionModPrimeRoute
+end RealTorsionBound
 
 end FLT
 ```
 
-But notice what happened: the route only becomes short after adding the strong axiom
-
-```lean
-exists_good_reduction_card_lt_sq
-```
-
-which is exactly the missing global content.  Hasse alone does not prove this axiom.
-
-## If one tries to handle `m = 3` separately
-
-There are three possible “special `m = 3`” ideas.
-
-### 1. Hasse only
-
-This fails.  Hasse allows `#E(F_5) = 9` and `#E(F_7) = 9`.
-
-### 2. Finite-field full torsion implies `m | ℓ - 1`
-
-This can rule out full `3`-torsion over `F_5`, and over any `F_ℓ` with `ℓ ≠ 1 mod 3`.
-
-But this theorem is Weil-pairing/determinant content over finite fields.  It is not a Hasse-bound argument anymore.
-
-The interface would be:
+But once the theorem is this high-level, it is cleaner to state the exact theorem needed by the FLT reduction:
 
 ```lean
 import Mathlib
+import FLT.EllipticCurve.Torsion
 
 open scoped Classical
 
@@ -342,98 +102,315 @@ noncomputable section
 
 namespace FLT
 
-namespace ReductionModPrimeRoute
+namespace RealTorsionBound
 
-/-- Finite-field structure obstruction, essentially Weil-pairing content. -/
-axiom full_torsion_over_finite_field_implies_dvd_card_units
-    {q m : ℕ}
-    (hm : 0 < m) (hq_coprime : Nat.Coprime m q)
-    -- if `(ZMod m)^2` embeds into `E(F_q)`
-    : True
-    -- intended conclusion: `m ∣ q - 1`
+/--
+Public Route 4B theorem: real `m`-torsion on an elliptic curve has at most `2m`
+points.  This is the precise statement needed downstream.
+-/
+axiom real_mTorsion_card_le
+    (E : WeierstrassCurve ℝ) [E.IsElliptic] (m : ℕ) :
+    Nat.card (E.nTorsion m) ≤ 2 * m
 
-end ReductionModPrimeRoute
+end RealTorsionBound
 
 end FLT
 ```
 
-This is not attractive if the purpose is to remove the Weil pairing route.
+That is the better public API.
 
-### 3. Choose a good prime in a useful congruence class
+## Can we avoid `℘` and use compact abelian group structure?
 
-For `m = 3`, one would like a good prime `ℓ ≡ 2 mod 3`.  Since the bad primes are finite, such primes exist by Dirichlet.  But formalizing this requires:
+Mathematically, yes.  Formally, not cheaply.
+
+The proof outline is:
 
 ```text
-finite bad reduction set
-+ Dirichlet primes in arithmetic progressions
-+ finite-field full-torsion structure theorem
+1. The real affine curve y² = f(x) is a smooth 1-manifold away from infinity.
+2. The point at infinity has a smooth chart using a local parameter such as `u = -x/y`.
+3. The projective real cubic is compact.
+4. The chord-tangent group law is continuous, indeed smooth.
+5. Therefore E(ℝ) is a compact 1-dimensional abelian Lie group.
+6. A compact connected 1-dimensional Lie group is S¹.
+7. A compact 1-dimensional abelian Lie group has finitely many components, and for a real elliptic curve the component group has order at most 2.
+8. Therefore E(ℝ) is either S¹ or S¹ × Z/2Z.
+9. Hence `#E(ℝ)[m] ≤ 2m`.
 ```
 
-Again, this is not shorter than Route 4B.
+This avoids `℘`, but it does **not** avoid serious topology.  In Lean, steps 1 and 4 are local calculus/algebra; steps 2, 3, 6, and 7 are the hard global topology/classification pieces.
 
-## Comparison with Route 4B
+## Exact Mathlib API names that do exist
 
-### Route 4B
-
-Current Route 4B assumes:
+Mathlib does have an implicit function theorem API.  The important names are in:
 
 ```lean
-real_mTorsion_finite
-real_mTorsion_card_le
+import Mathlib.Analysis.Calculus.Implicit
 ```
 
-and proves, sorry-free after those axioms:
+The exact names visible in the current Mathlib source include:
 
 ```lean
-fullRationalTorsion_order_le_two_route4B :
-  HasFullRationalTorsion E m → m ≤ 2
+import Mathlib.Analysis.Calculus.Implicit
+
+-- Main structure for the general implicit function theorem:
+#check ImplicitFunctionData
+
+-- The implicit function attached to the data:
+#check ImplicitFunctionData.implicitFunction
+
+-- The associated open partial homeomorphism:
+#check ImplicitFunctionData.toOpenPartialHomeomorph
+
+-- The differentiability theorem for the implicit function:
+#check ImplicitFunctionData.hasStrictFDerivAt_implicitFunction
+
+-- Eventual equations for the implicit function:
+#check ImplicitFunctionData.leftFun_implicitFunction
+#check ImplicitFunctionData.rightFun_implicitFunction
+#check ImplicitFunctionData.prodFun_implicitFunction
+
+-- Complemented-kernel version:
+#check HasStrictFDerivAt.implicitFunctionDataOfComplemented
+#check HasStrictFDerivAt.implicitFunctionOfComplemented
+#check HasStrictFDerivAt.implicitToOpenPartialHomeomorphOfComplemented
+
+-- Finite-dimensional codomain version:
+#check HasStrictFDerivAt.implicitToOpenPartialHomeomorph
+#check HasStrictFDerivAt.implicitFunction
+
+-- The file documentation also points to this version for a Cⁿ equation
+-- `f : E × F → G` with invertible partial derivative in the second variable:
+#check ContDiffAt.implicitFunction
 ```
 
-The proof is a direct cardinality comparison:
+So for local smoothness of a real affine Weierstrass curve, Mathlib has the right **local** tool.
+
+For example, away from points where `∂F/∂y ≠ 0`, with
 
 ```text
-(Z/mZ)² ↪ E(Q) ↪ E(R)[m]
-#(Z/mZ)² = m²
-#E(R)[m] ≤ 2m
-therefore m² ≤ 2m, hence m ≤ 2.
+F(x,y) = y² - f(x),
 ```
 
-### Reduction route
+one can locally solve for `y` as a smooth function of `x`.  Away from points where `∂F/∂x ≠ 0`, one can locally solve for `x` as a smooth function of `y`.  At a nonsingular point, one of these partials is nonzero.
 
-The reduction route requires at least:
+The schematic Lean target would be:
+
+```lean
+import Mathlib
+import Mathlib.Analysis.Calculus.Implicit
+
+open scoped Classical
+
+noncomputable section
+
+namespace FLT
+
+namespace RealTorsionBound
+
+/-- Schematic local chart theorem for an affine smooth plane curve. -/
+theorem local_chart_of_regular_level_set_schematic
+    {F : ℝ × ℝ → ℝ} {P : ℝ × ℝ}
+    (hF_smooth : ContDiffAt ℝ ⊤ F P)
+    (hregular : fderiv ℝ F P ≠ 0) :
+    True := by
+  -- Intended proof uses `ContDiffAt.implicitFunction` or the stricter
+  -- `HasStrictFDerivAt.implicitFunction` API after selecting a nonzero partial.
+  trivial
+
+end RealTorsionBound
+
+end FLT
+```
+
+This is only the beginning; it does not classify the global real point group.
+
+## Mathlib API names that I do **not** find as ready theorem statements
+
+I do **not** know of ready Mathlib declarations with these contents:
+
+```lean
+-- not found / not available as a ready theorem:
+#check compact_connected_one_manifold_homeomorphic_circle
+
+-- not found / not available as a ready theorem:
+#check compact_one_manifold_finite_disjoint_union_circles
+
+-- not found / not available as a ready theorem:
+#check compact_abelian_lie_group_equiv_torus_times_finite
+
+-- not found / not available as a ready theorem:
+#check compact_connected_one_dimensional_lie_group_equiv_circle
+
+-- not found / not available as a ready theorem:
+#check real_elliptic_curve_points_equiv_circle_or_circle_prod_zmod_two
+```
+
+These names are illustrative non-existing names: they express exactly the theorems one would want.  The point is that the global classification layer is missing as a ready API.
+
+Mathlib has manifold infrastructure, but that is different from having the classification theorem already formalized.  The available infrastructure includes concepts such as:
+
+```lean
+import Mathlib
+
+#check ChartedSpace
+#check ModelWithCorners
+#check SmoothManifoldWithCorners
+#check ContMDiff
+```
+
+These are building blocks, not the final classification of compact one-manifolds or compact abelian Lie groups.
+
+## Counting torsion once the group is known
+
+If one had a group equivalence
 
 ```text
-1. integral/good-reduction model API;
-2. reduced curve over F_ℓ and finite point group;
-3. reduction map E(Q) → E(F_ℓ);
-4. injectivity on prime-to-ℓ torsion;
-5. Hasse bound;
-6. additional global theorem finding a good ℓ with #E(F_ℓ) < m²,
-   or finite-field full-torsion structure + Dirichlet/Chebotarev.
+E(ℝ) ≃+ S¹
 ```
 
-This is strictly more infrastructure than Route 4B for the present target.
+or
+
+```text
+E(ℝ) ≃+ S¹ × Z/2Z,
+```
+
+then the torsion bound is easy.  The proof becomes pure group/cardinality theory.
+
+The relevant public theorem should not expose the topological proof.  It should be:
+
+```lean
+import Mathlib
+import FLT.EllipticCurve.Torsion
+
+open scoped Classical
+
+noncomputable section
+
+namespace FLT
+
+namespace RealTorsionBound
+
+/-- Direct real-torsion bound, independent of proof method. -/
+axiom real_mTorsion_card_le
+    (E : WeierstrassCurve ℝ) [E.IsElliptic] (m : ℕ) :
+    Nat.card (E.nTorsion m) ≤ 2 * m
+
+end RealTorsionBound
+
+end FLT
+```
+
+Internally, a future proof might use either:
+
+```text
+A. Weierstrass uniformization and real period classification;
+B. real compact Lie group / one-manifold classification;
+C. an elementary real cubic oval parametrization plus covering-degree argument.
+```
+
+But the downstream FLT code should see only `real_mTorsion_card_le`.
+
+## Why the compact group route is still heavy
+
+The compact group theorem you want is mathematically standard, but it is not a simple consequence of a generic compact abelian group structure theorem.
+
+A compact abelian group need not be a torus times a finite group.  General compact abelian groups can be much wilder.  You need **compact abelian Lie group**, or at least compact abelian group plus a finite-dimensional smooth manifold structure.
+
+So the route is really:
+
+```text
+E(ℝ) is a compact abelian Lie group of dimension 1
+⇒ identity component is a 1-dimensional compact connected abelian Lie group
+⇒ identity component is S¹
+⇒ component group has size 1 or 2 for a real elliptic curve
+⇒ #m-torsion ≤ 2m.
+```
+
+The phrase “structure theorem for compact abelian groups” is too broad and false in this naive form.  The correct theorem is for compact abelian **Lie** groups.
+
+## The most Lean-friendly real-topology axiom
+
+The best axiom is not “`E(ℝ)` is `S¹` or `S¹ × Z/2`”.  That exposes too much irrelevant structure.
+
+Use exactly what the proof needs:
+
+```lean
+import Mathlib
+import FLT.EllipticCurve.Torsion
+
+open scoped Classical
+
+noncomputable section
+
+namespace FLT
+
+namespace RealTorsionBound
+
+/--
+Hard real-topological input for Route 4B.
+
+Mathematically, this follows from the classification of the real points of an
+elliptic curve as one or two circles, or from Weierstrass uniformization.
+-/
+axiom real_mTorsion_card_le
+    (E : WeierstrassCurve ℝ) [E.IsElliptic] (m : ℕ) :
+    Nat.card (E.nTorsion m) ≤ 2 * m
+
+/-- Finiteness is a separate axiom only if the downstream cardinal API needs it. -/
+axiom real_mTorsion_finite
+    (E : WeierstrassCurve ℝ) [E.IsElliptic] (m : ℕ) :
+    Finite (E.nTorsion m)
+
+end RealTorsionBound
+
+end FLT
+```
+
+Then keep the existing Route 4B theorem:
+
+```lean
+import Mathlib
+import FLT.EllipticCurve.Torsion
+
+open scoped Classical
+
+noncomputable section
+
+namespace FLT
+
+namespace RealTorsionBound
+
+/--
+Route 4B target theorem.  The proof is cardinality comparison once the real
+`m`-torsion bound is available.
+-/
+theorem fullRationalTorsion_order_le_two_route4B
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {m : ℕ} (hm : 0 < m)
+    (hfull : HasFullRationalTorsion E m) :
+    m ≤ 2 := by
+  -- Existing proof in `RealTorsionBound.lean` should remain the implementation.
+  -- It uses `real_mTorsion_finite` and `real_mTorsion_card_le`.
+  sorry
+
+end RealTorsionBound
+
+end FLT
+```
+
+The `sorry` here is only schematic in this drop; you said the actual theorem in `RealTorsionBound.lean` is already sorry-free from the two axioms.
 
 ## Final recommendation
 
-Do not use reduction mod primes as the main replacement for `fullRationalTorsion_order_le_two`.
+Do not try to build `℘` for this step.
 
-The B-line is a good **local obstruction** and may be useful later for explicit curves or finite computations, but for the general theorem needed by `Axioms.lean`, it is not a feasible shorter path.
+Do not try to formalize the full compact-abelian-Lie-group classification just to prove `#E(ℝ)[m] ≤ 2m`.
 
-Keep the Route 4B chain:
+For the current FLT architecture, keep the direct Route 4B real torsion bound as the hard interface:
 
 ```text
 real_mTorsion_finite
 real_mTorsion_card_le
-  ⇒ fullRationalTorsion_order_le_two_route4B
-  ⇒ not_hasFullRationalTorsion_of_three_le
-  ⇒ no_odd_prime_square_in_torsion
 ```
 
-If someone wants a reduction-based alternative later, make it a separate theorem:
-
-```lean
-ReductionModPrimeRoute.fullRationalTorsion_order_le_two_routeB
-```
-
-and require it to package the strong global good-prime obstruction.  Until that theorem exists, `Axioms.lean` should not depend on the reduction route.
+This is the most honest and smallest public axiom footprint.  Later, if someone wants to remove those axioms, the likely internal proof can use the IFT API listed above for local charts, plus a substantial new global theorem classifying real elliptic curves as one or two circles.
