@@ -113,7 +113,16 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
     -- By Int.sq_of_gcd_eq_one on the other factor, it's s² (not -s²)
     -- Then s² = r⁴ + r²B² - B⁴, apply quartic_plus → r = B = 1 → u = 1
     right; right
-    sorry -- quartic_plus application, gcd bookkeeping
+    have hgcd_rB : Int.gcd |r| B = 1 := by
+      show Int.gcd |r| B = 1
+      rw [Int.gcd, Int.natAbs_abs]
+      rw [← Int.isCoprime_iff_gcd_eq_one] at hcop ⊢
+      rw [hrpos, show r ^ 2 = r * r from sq r] at hcop
+      exact hcop.of_mul_left
+    have hr_pos : 0 < |r| := abs_pos.mpr hr0
+    -- Second factor = s² (not -s²) since A = r² > 0 and A·second = C² ≥ 0
+    -- Then quartic_plus gives |r| = B = 1, so A = r² = 1, u = 1/1 = 1
+    sorry
   · -- Case A = -r² ≤ 0. Since A ≠ 0, r ≠ 0.
     have hr0 : r ≠ 0 := by intro h; rw [h] at hrneg; simp at hrneg; exact hA0 hrneg
     -- The second factor must be ≤ 0, so it's -s²
