@@ -457,18 +457,21 @@ theorem quartic_plus_descent_step :
   rcases hfactor with ⟨hU_eq, hV_eq⟩ | ⟨hU_eq, hV_eq⟩
   · -- Step 1: 4r² = (a²-b²)² + 4b⁴
     have h4r2 : 4 * r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4 := by
-      have hsum : a ^ 4 + 5 * b ^ 4 = 4 * r ^ 2 + 2 * (a * b) ^ 2 := by linarith [hU_eq, hV_eq]
-      nlinarith [hB_eq, show (a ^ 2 - b ^ 2) ^ 2 = a ^ 4 - 2 * a ^ 2 * b ^ 2 + b ^ 4 from by ring,
+      have hU := hU_eq; have hV := hV_eq
+      rw [hB_eq] at hU hV
+      nlinarith [show (a ^ 2 - b ^ 2) ^ 2 = a ^ 4 - 2 * a ^ 2 * b ^ 2 + b ^ 4 from by ring,
                  show (a * b) ^ 2 = a ^ 2 * b ^ 2 from by ring]
     -- Step 2: define h = (a²-b²)/2 (integer since a,b both odd)
     have ha_odd : a % 2 = 1 := by
       by_contra ha_even; push_neg at ha_even
-      have : a % 2 = 0 := by omega
+      have ha2 : (2 : ℤ) ∣ a := ⟨a / 2, by omega⟩
+      have : (2 : ℤ) ∣ a * b := dvd_mul_of_dvd_left ha2 b
       have : B % 2 = 0 := by rw [hB_eq]; omega
       omega
     have hb_odd : b % 2 = 1 := by
       by_contra hb_even; push_neg at hb_even
-      have : b % 2 = 0 := by omega
+      have hb2 : (2 : ℤ) ∣ b := ⟨b / 2, by omega⟩
+      have : (2 : ℤ) ∣ a * b := dvd_mul_of_dvd_right hb2 a
       have : B % 2 = 0 := by rw [hB_eq]; omega
       omega
     have h2_dvd : (2 : ℤ) ∣ (a ^ 2 - b ^ 2) := by
@@ -549,8 +552,17 @@ theorem quartic_plus_descent_step :
       have hα_le_b : α ≤ b := by
         rw [hb_eq]; exact le_mul_of_one_le_right hα_pos.le hβ_pos
       have hb_le_ab : b ≤ a * b := le_mul_of_one_le_left hb.le ha
-      sorry -- need: α < a*b, which follows from non-baseness
-  · -- Case U = 5a⁴, V = b⁴ (symmetric descent on a)
+      have hα_lt : α < a * b := by
+        rcases eq_or_lt_of_le (le_trans hα_le_b hb_le_ab) with heq_ab | hlt
+        · exfalso; apply hnonbase
+          have hα_eq_b : α = b := le_antisymm hα_le_b (by nlinarith)
+          have hβ1 : β = 1 := by nlinarith [hb_eq, hα_eq_b]
+          have ha1 : a = 1 := by nlinarith [hα_eq_b]
+          have hb1 : b = 1 := by nlinarith [hα_eq_b]
+          exact ⟨by nlinarith, by nlinarith [hB_eq]⟩
+        · exact hlt
+      exact Int.natAbs_lt_natAbs_of_nonneg_of_lt hα_pos.le hα_lt
+  · -- Case U = 5a⁴, V = b⁴ (symmetric — same structure, descent on a instead of b)
     sorry
 
 /-! ## Strong induction closure -/
