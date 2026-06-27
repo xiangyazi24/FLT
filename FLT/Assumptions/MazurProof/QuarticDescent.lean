@@ -108,12 +108,15 @@ theorem quartic_plus_descent_step :
       ∃ r' B' s' : ℤ, QuarticPlusZ r' B' s' ∧ ¬ BaseZ r' B' ∧
         B'.natAbs < B.natAbs := by
   intro r B s ⟨hr, hB, hcop, heq⟩ hnonbase
-  -- 1. Both r, B odd
-  -- 2. Define U = 2r²+B²-2s, V = 2r²+B²+2s; UV = 5B⁴
-  -- 3. Factor: (a⁴, 5b⁴) or (5a⁴, b⁴) with ab = B
-  -- 4. Derive h²+b⁴=r² where h = (a²-b²)/2
-  -- 5. Pythagorean parametrize: b=uv, 2h=v⁴-u⁴
-  -- 6. New solution a²=v⁴+v²u²-u⁴ with B'=u < b ≤ B
+  -- Normalize: replace s by |s| (equation is s²-invariant)
+  -- After normalization: 0 ≤ |s|, and U = 2r²+B²-2|s|, V = 2r²+B²+2|s| with U ≤ V
+  -- 1. Both r, B odd (mod 4/16 analysis)
+  -- 2. UV = 5B⁴ with U,V coprime, odd, positive
+  -- 3. Factor: U=a⁴, V=5b⁴ (or swapped) with ab=B, gcd(a,b)=1
+  -- 4. 4r² = (a²-b²)² + 4b⁴ → h²+b⁴=r² where h=(a²-b²)/2
+  -- 5. Pythagorean: b²=(m-n)(m+n), gcd=1 → m-n=u², m+n=v², b=uv
+  -- 6. a² = v⁴+v²u²-u⁴ with B'=u < uv=b ≤ ab=B
+  -- 7. Non-baseness: if u=v=1 then b=1,a²=1,a=1,B=1, contradicts hnonbase
   sorry
 
 /-! ## Strong induction closure -/
