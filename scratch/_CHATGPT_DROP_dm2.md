@@ -1,283 +1,130 @@
-# Q1140 (dm2): shortest honest path for `fullRationalTorsion_order_le_two`
-
-## Problem restatement
-
-You want to prove the Mazur-bound-style B-line lemma:
-
-```lean
-theorem fullRationalTorsion_order_le_two
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    m ≤ 2
-```
-
-where
-
-```lean
-HasFullRationalTorsion E m
-```
-
-means that there is an injective additive homomorphism
-
-```lean
-ZMod m × ZMod m →+ (E⁄ℚ).Point.
-```
-
-You already have the purely rational-root-of-unity endpoint:
-
-```lean
-isPrimitiveRoot_rat_order_le_two
-```
-
-morally saying that if `ζ : ℚ` is a primitive `m`th root of unity, then `m ≤ 2`.
-
-The current file proves
-
-```lean
-weil_pairing_gives_primitive_root
-```
-
-from `fullRationalTorsion_order_le_two` by cases `m = 1`, `m = 2`, and contradiction for `m ≥ 3`.  That is fine as a vacuous consequence, but it cannot also be the route to prove `fullRationalTorsion_order_le_two`: using the bound to prove the primitive-root theorem and then using the primitive-root theorem to prove the bound would be circular.
-
-The dependency should be reversed or split:
-
-```text
-minimal Weil-pairing consequence
-  -> rational primitive root exists
-  -> isPrimitiveRoot_rat_order_le_two
-  -> fullRationalTorsion_order_le_two
-  -> current vacuous theorem, if still desired
-```
-
-The key question is therefore: what is the smallest honest theorem to build that gives the Weil-pairing consequence without formalizing an entire Galois-representation stack?
+# Q1146 (dm2): A-Line prime torsion core and a practical Mazur split
 
 ## Executive answer
 
-The shortest honest path is:
+For the A-Line cyclic torsion theorem, the right split is exactly the one suggested:
 
-1. Do **not** build mod-`m` Galois representations from scratch.
-2. Do **not** try to prove the order bound from cardinality/finite torsion alone.
-3. Prove a **minimal base-field Weil pairing consequence**:
+```text
+1. finite group/order-divisor reduction;
+2. explicit composite-order exclusions;
+3. one hard prime-order theorem:
 
-   ```lean
-   theorem fullRationalTorsion_gives_primitive_root_direct
-       (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-       (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-       ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-   ```
+   no rational point of prime order p >= 11.
+```
 
-   where this theorem is proved from a Weil pairing defined over the base field on rational torsion points, not from Galois representations.
+The third item is the mathematical core of the prime part of Mazur's torsion theorem.  There is no genuinely elementary uniform proof avoiding modular curves.  Merel/Kamienny do not avoid modular curves; they are deeper modular-curve/uniform-boundedness arguments and are much larger than what is needed here.  Pure descent arguments can handle fixed small levels such as `11` and sometimes `13`, but they do not give a uniform theorem for all primes `p >= 17`.
 
-4. Then prove the bound by one line:
+So the shortest honest FLT architecture is:
 
-   ```lean
-   obtain ⟨ζ, hζ⟩ := fullRationalTorsion_gives_primitive_root_direct E hm hfull
-   exact isPrimitiveRoot_rat_order_le_two ζ hζ
-   ```
+```lean
+axiom no_point_of_prime_order_ge_11
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {p : ℕ}
+    (hp : p.Prime) (hp11 : 11 <= p) :
+    ¬ HasPointOfExactOrder E p
+```
 
-This avoids the determinant representation, avoids cyclotomic character infrastructure, and avoids Galois equivariance.  It does **not** avoid the Weil pairing itself.  Some form of Weil pairing, or an equivalent theorem, is the essential mathematical input.
+plus finite composite-order certificates.  Then derive the broad theorem
 
-The best proof architecture is to isolate that input in one theorem whose statement is exactly what the B-line needs.
+```lean
+theorem no_point_of_order_ge_17
+```
+
+by pure group theory and pure arithmetic.
+
+This is a very good split: it isolates the hardest modular-curve theorem and lets the rest of the A-Line become formal, auditable, and small.
 
 ---
 
-## Recommended Lean interface
+## (a) Can the prime-order theorem avoid modular curves?
 
-Use a small interface theorem, not a full API for Galois representations.
+### Uniform statement `p >= 11` or `p >= 13`
+
+For the uniform theorem
+
+```text
+there is no elliptic curve over Q with a rational point of prime order p >= 11,
+```
+
+all known short proofs are modular-curve proofs in substance.
+
+The reason is structural.  A pair `(E, P)` with `P` of exact order `p` is a rational noncuspidal point of the modular curve `X_1(p)`.  Proving nonexistence is exactly the assertion that
+
+```text
+X_1(p)(Q) has no noncuspidal rational points, for p >= 11.
+```
+
+That is the prime-level part of Mazur's theorem.
+
+### Merel
+
+Merel's uniform boundedness theorem is not a shortcut here.
+
+It proves that torsion over degree-`d` number fields is uniformly bounded, but:
+
+```text
+- it is much deeper than the prime-order part needed here;
+- its proof uses modular curves / geometry of modular curves;
+- it does not by itself give the sharp Q-bound excluding p = 11, 13, ...;
+- even an effective Merel-style bound would leave many primes to check unless a sharp bound is already known.
+```
+
+So Merel is a theorem one could use as a black box only if Mathlib already had a very sharp specialization to `Q`.  It is not a smaller formalization target.
+
+### Kamienny
+
+Kamienny's criterion is also modular-curve technology.  It is useful historically and mathematically for uniform boundedness, but it is not simpler than the prime Mazur theorem for the FLT purpose.
+
+### Pure descent
+
+There is no known clean descent-only proof for all primes `p >= 11` that avoids modular curves.  Descent enters after one has an explicit modular curve model, especially for fixed `N`.
+
+So the answer to (a) is:
+
+```text
+No, not uniformly.  For fixed N one can do explicit descent on X_1(N),
+but the uniform prime theorem is modular-curve content.
+```
+
+---
+
+## (b) Smallest self-contained mathematical module to formalize
+
+The smallest useful formal module is not a full formalization of Mazur's proof.  It is a narrow interface theorem plus elementary reductions.
+
+### Minimal hard axiom
+
+Use this as the core hard theorem:
 
 ```lean
 import Mathlib
 
 namespace FLT
 
-open scoped BigOperators
+/--
+A point of exact additive order `n` on `E(Q)`.
+Replace `(E⧸ℚ).Point` with the actual point type used in FLT.
+-/
+def HasPointOfExactOrder (E : WeierstrassCurve ℚ) [E.IsElliptic] (n : ℕ) : Prop :=
+  ∃ P : (E⧸ℚ).Point, addOrderOf P = n
 
 /--
-Minimal hard theorem.
-
-Mathematical proof: construct the Weil pairing over the base field on rational
-`m`-torsion points.  If `ZMod m × ZMod m` injects into `E(ℚ)`, choose the two
-standard generators `P` and `Q`; they form a full basis of `E[m]`, so
-`e_m(P,Q)` is a primitive `m`th root of unity.  Since the pairing is constructed
-over `ℚ` and evaluated on rational points, the value lies in `ℚ`.
+Prime-order Mazur core.
+Mathematical content: `X_1(p)(Q)` has no noncuspidal points for prime `p >= 11`.
+Keep this as the temporary hard axiom.
 -/
-theorem fullRationalTorsion_gives_primitive_root_direct
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
-  -- Hard proof: direct Weil pairing over the base field.
-  -- This should NOT depend on `fullRationalTorsion_order_le_two`.
-  sorry
-
-/--
-The B-line bound follows immediately from the direct Weil-pairing consequence
-and the fact that `ℚ` has no primitive roots of unity of order greater than two.
--/
-theorem fullRationalTorsion_order_le_two
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    m ≤ 2 := by
-  obtain ⟨ζ, hζ⟩ := fullRationalTorsion_gives_primitive_root_direct E hm hfull
-  exact isPrimitiveRoot_rat_order_le_two ζ hζ
+axiom no_point_of_prime_order_ge_11
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {p : ℕ}
+    (hp : p.Prime) (hp11 : 11 <= p) :
+    ¬ HasPointOfExactOrder E p
 
 end FLT
 ```
 
-If the actual theorem `isPrimitiveRoot_rat_order_le_two` has the arguments in the other order, the final line becomes one of:
+This is a better axiom than a broad `no_large_torsion` theorem because it names the actual mathematical core.
 
-```lean
-  exact isPrimitiveRoot_rat_order_le_two hζ
-```
+### Finite composite certificates
 
-or
-
-```lean
-  exact isPrimitiveRoot_rat_order_le_two ζ m hζ
-```
-
-but the logical shape is the same.
-
-For the existing theorem, keep the vacuous proof if convenient, but make sure it depends on the bound only **after** the bound has been proved from the direct pairing theorem, not the other way around.
-
----
-
-## What the direct Weil-pairing proof needs
-
-Let
-
-```lean
-hfull : HasFullRationalTorsion E m
-```
-
-unpack as
-
-```lean
-⟨f, hf_inj⟩
-```
-
-with
-
-```lean
-f : ZMod m × ZMod m →+ (E⁄ℚ).Point.
-```
-
-Define the two rational points:
-
-```lean
-P := f (1, 0)
-Q := f (0, 1)
-```
-
-Because the domain has exponent `m`, both `P` and `Q` are killed by `m`.  Because `f` is injective, `P` and `Q` each have exact order `m`, and the map from `ZMod m × ZMod m` identifies the subgroup they generate with a full rank-two `m`-torsion subgroup.
-
-The direct Weil-pairing theorem should then provide:
-
-```text
-e_m(P, Q) ∈ ℚ
-IsPrimitiveRoot (e_m(P,Q)) m
-```
-
-The hard API can be much smaller than a general Galois-representation API.  You only need:
-
-```lean
--- Schematic names only.
-noncomputable def weilPairing
-    (E : WeierstrassCurve K) [E.IsElliptic] (m : ℕ) :
-    E.mTorsion m → E.mTorsion m → Kˣ
-
--- Pairing value is an m-th root of unity.
-theorem weilPairing_pow_eq_one
-    (P Q : E.mTorsion m) :
-    (weilPairing E m P Q : K) ^ m = 1
-
--- If P,Q are a basis of E[m], the pairing value is primitive.
-theorem weilPairing_isPrimitiveRoot_of_basis
-    (hPQ : IsBasisOfTorsion E m P Q) :
-    IsPrimitiveRoot (weilPairing E m P Q : K) m
-```
-
-You do not need, for this theorem:
-
-```text
-- a Galois group,
-- a Galois action on E[m],
-- a matrix representation rho_m,
-- determinant on GL_2(ZMod m),
-- a cyclotomic character,
-- or the theorem det rho_m = chi_m.
-```
-
-The rationality of `e_m(P,Q)` is automatic if the pairing is constructed over `ℚ` and both inputs are points of `E(ℚ)`.  This is the key simplification compared to the usual textbook statement over `Qbar` plus Galois equivariance.
-
----
-
-## Route 1: direct Weil pairing construction
-
-### Existing Mathlib/FLT ingredients
-
-Mathlib already has useful elliptic-curve and polynomial infrastructure:
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.Projective
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.NumberTheory.Cyclotomic.Basic
-```
-
-Relevant existing pieces include:
-
-```text
-WeierstrassCurve
-WeierstrassCurve.IsElliptic
-WeierstrassCurve.Affine.Point / Projective point APIs
-WeierstrassCurve.preΨ'
-WeierstrassCurve.Ψ
-WeierstrassCurve.ψ
-WeierstrassCurve.Φ
-map/baseChange lemmas for the division polynomials
-IsPrimitiveRoot
-cyclotomic-polynomial/root-of-unity API
-```
-
-The division-polynomial file gives recurrences and map/base-change lemmas for `preΨ'`, `Ψ`, `ψ`, and `Φ`.  That is useful support code, but it is not itself a Weil pairing.
-
-### Missing pieces
-
-A direct pairing proof still needs real work:
-
-```text
-1. A usable rational-function/function-field layer for a Weierstrass curve.
-2. Divisors of rational functions on the curve.
-3. Miller functions or equivalent functions with prescribed divisors.
-4. Definition of e_m(P,Q).
-5. Well-definedness independent of auxiliary choices.
-6. Bilinearity and alternating/skew-symmetry.
-7. Nondegeneracy/perfectness.
-8. The theorem that a basis P,Q of E[m] gives a primitive value e_m(P,Q).
-```
-
-For the B-line theorem you can aggressively restrict the scope:
-
-```text
-- base field K = ℚ, or at most `[Field K] [CharZero K]`;
-- only m > 0;
-- only inputs that come from an injected `ZMod m × ZMod m`;
-- no Galois equivariance;
-- no Tate modules;
-- no determinant theorem;
-- no cyclotomic character.
-```
-
-### Feasibility
-
-This is the most honest and shortest mathematical route if you want to avoid building Galois representations.  It is still nontrivial, because the Weil pairing is not just a group-theory construction: it needs rational functions/divisors or an equivalent Miller-function formalization.
-
-The crucial advantage is that the target theorem only needs the **primitive-value consequence**.  You do not need to expose a large public API.  Build the smallest theorem that turns full rational torsion into a primitive root of unity.
-
-### Recommended shape of the hard theorem
-
-Instead of first building a user-facing `weilPairing` object with all its laws, you can state and prove the exact consequence:
+Use a finite predicate for the minimal forbidden composite orders:
 
 ```lean
 import Mathlib
@@ -285,277 +132,105 @@ import Mathlib
 namespace FLT
 
 /--
-Hard geometric theorem: full rational m-torsion forces a rational primitive
-m-th root of unity.
+Minimal forbidden composite divisors for cyclic torsion over `Q`, once the prime
+case `p >= 11` is separated out.
 
-This should be proved by a direct base-field Weil pairing, not by the B-line
-order bound.
+These are the composite `d` such that all proper divisors of `d` are in
+Mazur's cyclic allowed list `{1,2,3,4,5,6,7,8,9,10,12}`, but `d` itself is not.
 -/
-theorem fullRationalTorsion_gives_primitive_root_direct
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
+inductive CriticalComposite : ℕ -> Prop
+  | n14 : CriticalComposite 14
+  | n15 : CriticalComposite 15
+  | n16 : CriticalComposite 16
+  | n18 : CriticalComposite 18
+  | n20 : CriticalComposite 20
+  | n21 : CriticalComposite 21
+  | n24 : CriticalComposite 24
+  | n25 : CriticalComposite 25
+  | n27 : CriticalComposite 27
+  | n35 : CriticalComposite 35
+  | n49 : CriticalComposite 49
+
+/--
+Composite-order exclusions.  Prove these one by one using Kubert/descent
+certificates, or keep individual entries as axioms while building the certificates.
+-/
+axiom no_point_of_critical_composite_order
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ}
+    (hn : CriticalComposite n) :
+    ¬ HasPointOfExactOrder E n
+
+end FLT
+```
+
+Why this exact list?
+
+If a point has exact order `N`, then for every divisor `d | N` it gives a point of exact order `d`.  Therefore to exclude all cyclic orders not in
+
+```text
+1,2,3,4,5,6,7,8,9,10,12
+```
+
+it suffices to exclude:
+
+```text
+prime p >= 11,
+14,15,16,18,20,21,24,25,27,35,49.
+```
+
+For example:
+
+```text
+28 has divisor 14,
+30 has divisor 15,
+32 has divisor 16,
+36 has divisor 18,
+40 has divisor 20,
+42 has divisor 14 or 21,
+45 has divisor 15,
+50 has divisor 25,
+63 has divisor 21 or 27,
+70 has divisor 14 or 35.
+```
+
+The prime powers `16`, `27`, `25`, and `49` are needed to bound the exponents of `2`, `3`, `5`, and `7` after large primes have been ruled out.
+
+### Divisor reduction lemma
+
+The group-theory lemma needed is small and reusable:
+
+```lean
+import Mathlib
+
+namespace FLT
+
+/--
+Pure group theory: if an additive group has an element of exact order `n`, then
+it has an element of exact order every positive divisor `d` of `n`.
+-/
+lemma exists_exact_order_of_dvd_exact_order
+    {G : Type*} [AddGroup G] {n d : ℕ}
+    (hdpos : 0 < d) (hd : d ∣ n)
+    (hG : ∃ P : G, addOrderOf P = n) :
+    ∃ Q : G, addOrderOf Q = d := by
+  rcases hG with ⟨P, hP⟩
+  rcases hd with ⟨k, rfl⟩
+  -- Take `Q = k • P`.  The standard theorem is the additive version of
+  -- `orderOf_pow`; depending on the Mathlib name, use either `addOrderOf_nsmul`
+  -- or port the multiplicative theorem by `toAdditive`.
+  -- Expected mathematical calculation:
+  --   addOrderOf (k • P) = addOrderOf P / Nat.gcd (addOrderOf P) k
+  -- and with `addOrderOf P = d * k`, this is `d`.
   sorry
 
 end FLT
 ```
 
-Internally, the proof can introduce `weilPairing`, but the exported interface can remain this small.
+This lemma is not elliptic-curve specific.  It should be proved once in a group-theory helper file.
 
----
+### Arithmetic divisor lemma
 
-## Route 2: division-polynomial approach
-
-### What exists
-
-Mathlib has substantial division-polynomial infrastructure:
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-```
-
-The useful objects are:
-
-```text
-W.preΨ' n : K[X]
-W.preΨ n  : K[X]
-W.Ψ n     : K[X][Y]
-W.ψ n     : K[X][Y]
-W.Φ n     : K[X]
-```
-
-with recurrence lemmas such as:
-
-```text
-W.preΨ'_even
-W.preΨ'_odd
-W.ψ_even
-W.ψ_odd
-```
-
-and map/base-change lemmas:
-
-```text
-map_preΨ'
-map_Ψ
-map_ψ
-baseChange_preΨ'
-baseChange_Ψ
-baseChange_ψ
-```
-
-This API is useful for proving that certain coordinates are `m`-torsion and for building explicit multiplication-by-`m` formulas.
-
-### What would still need to be built
-
-A pure division-polynomial proof of
-
-```lean
-HasFullRationalTorsion E m -> m ≤ 2
-```
-
-would need a uniform mechanism turning rational full `m`-torsion into a rational primitive `m`th root of unity. Division polynomials alone do not provide that.
-
-They can show facts of the form:
-
-```text
-P ∈ E[m]  iff  ψ_m(P) = 0
-```
-
-or, after enough work:
-
-```text
-x-coordinates of m-torsion points are roots of preΨ'_m / Ψ_m variants.
-```
-
-But the implication
-
-```text
-all m-torsion points rational -> μ_m ⊆ ℚ
-```
-
-is not a formal consequence of the roots of the division polynomial being rational.  It is the Weil pairing theorem in another form.
-
-You might try to extract a root of unity from identities among division polynomials, but those identities are essentially Miller-function/Weil-pairing identities.  That route is likely to recreate the Weil pairing in a more painful coordinate form.
-
-### Feasibility
-
-As a shortcut to the B-line bound: poor.
-
-As support for a direct Weil-pairing implementation: useful.
-
-The division-polynomial route is attractive only if you use it to construct Miller functions and the pairing value.  It is not a standalone replacement for the pairing.
-
----
-
-## Route 3: pure number theory over `ℚ`
-
-### What exists
-
-You already have the key endpoint:
-
-```lean
-isPrimitiveRoot_rat_order_le_two
-```
-
-Mathlib also has general root-of-unity and cyclotomic infrastructure around:
-
-```lean
-import Mathlib.NumberTheory.Cyclotomic.Basic
-```
-
-and generic `IsPrimitiveRoot` API.
-
-### Why this is not enough
-
-The number-theoretic endpoint says:
-
-```text
-if ζ ∈ ℚ is primitive of order m, then m ≤ 2.
-```
-
-But the missing implication is:
-
-```text
-HasFullRationalTorsion E m -> ∃ ζ : ℚ, IsPrimitiveRoot ζ m.
-```
-
-That implication is not pure number theory.  It is an elliptic-curve theorem.
-
-Kronecker-Weber does not help by itself.  It says finite abelian extensions of `ℚ` lie in cyclotomic extensions.  The needed statement goes the other way:
-
-```text
-ℚ(μ_m) ⊆ ℚ(E[m]).
-```
-
-That inclusion is exactly the Weil-pairing/determinant theorem.
-
-Neron-Ogg-Shafarevich also does not help by itself.  If all `m`-torsion is rational, then `ℚ(E[m]) = ℚ`, which is unramified everywhere.  There is no contradiction unless you already know that `ℚ(μ_m)` sits inside `ℚ(E[m])`, again the Weil-pairing input.
-
-Finiteness of rational torsion also does not help.  It allows finite subgroups; it does not exclude a finite subgroup isomorphic to `ZMod m × ZMod m`.
-
-### Mazur's theorem
-
-Mazur's torsion theorem would immediately imply the desired result: over `ℚ`, the rational torsion subgroup is either cyclic of one of the allowed orders or has `2`-primary rank two in the known small cases.  In particular, it cannot contain `ZMod m × ZMod m` for `m ≥ 3`.
-
-But formalizing Mazur's theorem is vastly heavier than formalizing the Weil-pairing consequence.  It is not a shortcut.
-
-### Feasibility
-
-As a route to the missing lemma: not feasible unless you already have Mazur's theorem as an imported theorem.
-
-As the final step after the pairing consequence: ideal.  This is exactly where `isPrimitiveRoot_rat_order_le_two` should be used.
-
----
-
-## Route 4: determinant of Galois representation
-
-### Mathematical route
-
-The standard determinant proof is:
-
-```text
-rho_m : Gal(Qbar/Q) -> GL_2(ZMod m)
-det rho_m = cyclotomic character mod m.
-```
-
-If `E[m]` is rational, then Galois acts trivially on `E[m]`, so `rho_m` is trivial.  Hence its determinant is trivial, so the cyclotomic character is trivial.  Therefore `μ_m ⊆ ℚ`, and then `isPrimitiveRoot_rat_order_le_two` gives `m ≤ 2`.
-
-### Why this is not actually shorter in Lean
-
-This route requires:
-
-```text
-1. algebraic closure and base change of E;
-2. E[m] over Qbar as a finite ZMod m-module;
-3. the Galois action on E[m];
-4. a basis and matrix representation in GL_2(ZMod m);
-5. determinant of that representation;
-6. cyclotomic character mod m;
-7. proof that det rho_m = cyclotomic character;
-8. bridge from trivial cyclotomic character to rational primitive roots.
-```
-
-The theorem
-
-```text
-det rho_m = cyclotomic character
-```
-
-is normally proved using the Weil pairing:
-
-```text
-e_m(σP, σQ) = σ(e_m(P,Q))
-e_m(aP+bQ, cP+dQ) = e_m(P,Q)^(ad-bc)
-```
-
-Therefore the determinant theorem is not a real way around the pairing.  It is the pairing packaged as representation theory.
-
-### Feasibility
-
-If FLT already had a proved theorem
-
-```lean
-WeierstrassCurve.det_galoisRep_eq_cyclotomic
-```
-
-then the determinant route would be short.  But if the Galois representation is absent or defined with unresolved `sorry`s, proving the determinant theorem is a bigger project than the direct base-field pairing consequence.
-
-Do not build this from scratch for the B-line bound.
-
----
-
-## Route 5: reduction modulo primes or finite-field counts
-
-One might try:
-
-```text
-full rational m-torsion over ℚ
-  -> for good primes p not dividing m, injects into E(F_p)
-  -> m^2 divides #E(F_p)
-```
-
-Then hope to find a contradiction.
-
-This is not uniform in `E`.  Bad primes depend on the discriminant.  The first good prime may be large, and the Hasse bound only says
-
-```text
-#E(F_p) ≤ p + 1 + 2 sqrt p.
-```
-
-For large `p`, this gives no contradiction with fixed `m`.  To make this route work uniformly, one needs deep global input, effectively modular curves or strong torsion classification.
-
-### Feasibility
-
-Poor as a general proof.  It may prove examples, not the theorem for all elliptic curves over `ℚ`.
-
----
-
-## Route 6: finite-group structure only
-
-From an injection
-
-```lean
-ZMod m × ZMod m →+ (E⁄ℚ).Point
-```
-
-you get at least `m^2` rational torsion points.  For `m ≥ 3`, that is at least nine points.
-
-This is not contradictory.  Rational elliptic curves can have more than nine torsion points in cyclic cases, and cardinality alone cannot distinguish a cyclic group from a full rank-two subgroup.  The obstruction is specifically the presence of full level `m` structure, not just many torsion points.
-
-A finite-group-only proof would need a theorem classifying rational torsion subgroups.  That is Mazur's theorem again.
-
-### Feasibility
-
-Not useful unless Mazur's theorem is already available.
-
----
-
-## Practical recommendation for FLT
-
-Replace the current architecture with three layers.
-
-### Layer A: hard geometric input
+The number-theory lemma is also independent of elliptic curves:
 
 ```lean
 import Mathlib
@@ -563,19 +238,34 @@ import Mathlib
 namespace FLT
 
 /--
-Hard theorem, proved by direct base-field Weil pairing.
-Do not prove this using `fullRationalTorsion_order_le_two`.
+Arithmetic core of the order-divisor reduction.
+
+If `n >= 17`, then either `n` has a prime divisor `p >= 11`, or it has one of
+Mazur's minimal forbidden composite divisors.
 -/
-theorem fullRationalTorsion_gives_primitive_root_direct
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
+lemma exists_prime_ge_11_or_critical_composite_dvd
+    {n : ℕ} (hn : 17 <= n) :
+    (∃ p : ℕ, p.Prime ∧ 11 <= p ∧ p ∣ n) ∨
+      ∃ d : ℕ, CriticalComposite d ∧ d ∣ n := by
+  -- Recommended proof strategy:
+  -- 1. If there is a prime factor `p >= 11`, done.
+  -- 2. Otherwise all prime factors are in `{2,3,5,7}`.
+  -- 3. If no critical composite divides `n`, then valuations satisfy:
+  --      v2 <= 3, v3 <= 2, v5 <= 1, v7 <= 1,
+  --    plus compatibility exclusions from `14,15,18,20,21,24,35`.
+  -- 4. Enumerate the remaining possibilities and show `n <= 12`, contradiction.
+  --
+  -- This can be formalized using `Nat.factorization` and a small finite case split.
   sorry
 
 end FLT
 ```
 
-### Layer B: B-line bound
+This is much smaller than any modular-curve formalization and should be part of the non-axiomatic reduction layer.
+
+### Derived theorem: no cyclic order `>= 17`
+
+Now the broad theorem follows mechanically:
 
 ```lean
 import Mathlib
@@ -583,100 +273,423 @@ import Mathlib
 namespace FLT
 
 /--
-Full rational `m`-torsion over `ℚ` forces `m ≤ 2`.
+Derived theorem: no rational point of exact order `n >= 17`, assuming the prime
+Mazur core and the finite composite certificates.
 -/
-theorem fullRationalTorsion_order_le_two
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    m ≤ 2 := by
-  obtain ⟨ζ, hζ⟩ := fullRationalTorsion_gives_primitive_root_direct E hm hfull
-  exact isPrimitiveRoot_rat_order_le_two ζ hζ
+theorem no_point_of_order_ge_17
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ}
+    (hn : 17 <= n) :
+    ¬ HasPointOfExactOrder E n := by
+  intro hN
+  have hdiv := exists_prime_ge_11_or_critical_composite_dvd (n := n) hn
+  cases hdiv with
+  | inl hpcase =>
+      rcases hpcase with ⟨p, hp, hp11, hpdvd⟩
+      have hppos : 0 < p := hp.pos
+      have hp_point : HasPointOfExactOrder E p := by
+        -- apply the group-theory divisor lemma to the point group `(E⧸ℚ).Point`
+        -- using `hpdvd` and `hN`.
+        sorry
+      exact (no_point_of_prime_order_ge_11 E hp hp11) hp_point
+  | inr hdcase =>
+      rcases hdcase with ⟨d, hdcrit, hddvd⟩
+      have hdpos : 0 < d := by
+        cases hdcrit <;> decide
+      have hd_point : HasPointOfExactOrder E d := by
+        -- apply the same group-theory divisor lemma.
+        sorry
+      exact (no_point_of_critical_composite_order E hdcrit) hd_point
 
 end FLT
 ```
 
-### Layer C: existing vacuous primitive-root theorem, if still desired
+The only remaining `sorry`s here are not deep:
+
+```text
+- connect `HasPointOfExactOrder E n` to the generic group-theory divisor lemma;
+- prove the arithmetic divisor lemma.
+```
+
+The hard mathematics is entirely contained in:
+
+```text
+no_point_of_prime_order_ge_11
+no_point_of_critical_composite_order
+```
+
+and the latter is finite/certificate-driven.
+
+---
+
+## (c) What about primes 11 and 13 specifically?
+
+### Prime 11
+
+For `p = 11`, there is a much smaller proof than the full Mazur theorem.
+
+A rational point of order `11` gives a rational noncuspidal point on `X_1(11)`.  The curve `X_1(11)` has genus `1`.  One can use an explicit model from Tate/Kubert normal form, identify it with an elliptic curve of rank `0`, compute its rational points, and check that all rational points are cusps.
+
+This is not fully elementary in the sense of high-school algebra, but it is a finite descent/rank computation on a specific elliptic curve.  It avoids the general Mazur machinery.
+
+A feasible formal module for `p = 11` would be:
+
+```text
+1. Tate normal form for a point of order 11.
+2. Transformation to a fixed genus-one model for X_1(11).
+3. A rank-zero / finite-rational-points certificate for that model.
+4. A check that the finite rational points are all cuspidal/degenerate.
+```
+
+This is plausible if FLT already has Kubert parametrization machinery.
+
+### Prime 13
+
+For `p = 13`, the curve `X_1(13)` has genus `2`.  There are explicit hyperelliptic models, and the rational points can be determined by methods such as descent on the Jacobian plus a Mordell-Weil sieve or Chabauty-style arguments.
+
+This is still far smaller than all of Mazur's theorem, but it is not a tiny elementary descent.  It requires a rational-points certificate on a genus-two curve.
+
+A feasible formal module for `p = 13` would be:
+
+```text
+1. Tate/Kubert normal form for order 13.
+2. A map to an explicit genus-two model of X_1(13).
+3. A certified finite list of rational points on that curve.
+4. A check that all listed points are cusps/degenerate.
+```
+
+If the existing `QuarticD` infrastructure proves rational-point nonexistence or finite rational-point lists for quartic/hyperelliptic curves, it may help here.  But this is still a fixed-level modular-curve proof.
+
+### Prime `p >= 17`
+
+For all primes `p >= 17`, fixed-level descent is no longer a practical uniform strategy.  You would need one model and one rational-points computation for infinitely many modular curves `X_1(p)`.  That is exactly what Mazur's method avoids by using a general modular-curve argument.
+
+So the sensible split is:
+
+```text
+- maybe prove p = 11 explicitly;
+- maybe prove p = 13 explicitly if the genus-two infrastructure is ready;
+- keep p >= 17 as the true prime Mazur axiom;
+```
+
+or, even simpler for now:
+
+```text
+keep one axiom for all prime p >= 11.
+```
+
+The latter is cleaner while the A-Line is still being assembled.
+
+---
+
+## Can the existing Kubert/QuarticD/DescentBridge infrastructure help?
+
+Yes, but only for fixed levels and finite composite certificates.
+
+### Where it helps
+
+The user-mentioned infrastructure sounds directly relevant for:
+
+```text
+N = 14,
+N = 16,
+and probably other fixed composite critical levels if analogous files exist.
+```
+
+Kubert/Tate normal form is exactly the right entry point for turning a rational point of exact order `N` into a rational point on an explicit parameter curve.  A descent bridge can then show that this parameter curve has no nondegenerate rational points.
+
+This is the right way to prove the finite composite exclusions:
+
+```lean
+no_point_of_critical_composite_order E CriticalComposite.n14
+no_point_of_critical_composite_order E CriticalComposite.n16
+```
+
+and so on.
+
+### Where it may help
+
+It may also help for:
+
+```text
+N = 11,
+N = 13,
+N = 15,
+N = 18,
+N = 20,
+N = 21,
+N = 24,
+N = 25,
+N = 27,
+N = 35,
+N = 49.
+```
+
+For each fixed `N`, the pattern is:
+
+```text
+point of order N
+  -> Tate/Kubert parameter satisfying explicit equations and nondegeneracy conditions
+  -> rational point on a fixed auxiliary curve
+  -> descent certificate says no such rational point
+  -> contradiction.
+```
+
+The amount of work varies sharply with `N`.
+
+### Where it does not help
+
+It does not solve the uniform prime theorem
+
+```text
+no point of prime order p >= 17.
+```
+
+Kubert normal forms for arbitrary `p` would still leave infinitely many modular curves `X_1(p)`.  The missing theorem remains Mazur's prime-level argument.
+
+---
+
+## Recommended concrete plan
+
+### Phase 1: isolate definitions and reductions
+
+Create a file such as:
+
+```text
+FLT/Torsion/OrderReduction.lean
+```
+
+with:
 
 ```lean
 import Mathlib
 
 namespace FLT
 
-/--
-Once the B-line bound is known, this theorem is trivial in the `m ≥ 3` branch.
-The substantive primitive-root construction lives in
-`fullRationalTorsion_gives_primitive_root_direct`, not here.
--/
-theorem weil_pairing_gives_primitive_root_from_bound
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
-  have hmle : m ≤ 2 := fullRationalTorsion_order_le_two E hm hfull
-  -- Existing proof by cases m = 1 and m = 2.
-  -- The `m ≥ 3` branch is closed by `omega` from `hmle`.
+-- Use the actual FLT point type here.
+def HasPointOfExactOrder (E : WeierstrassCurve ℚ) [E.IsElliptic] (n : ℕ) : Prop :=
+  ∃ P : (E⧸ℚ).Point, addOrderOf P = n
+
+inductive CriticalComposite : ℕ -> Prop
+  | n14 : CriticalComposite 14
+  | n15 : CriticalComposite 15
+  | n16 : CriticalComposite 16
+  | n18 : CriticalComposite 18
+  | n20 : CriticalComposite 20
+  | n21 : CriticalComposite 21
+  | n24 : CriticalComposite 24
+  | n25 : CriticalComposite 25
+  | n27 : CriticalComposite 27
+  | n35 : CriticalComposite 35
+  | n49 : CriticalComposite 49
+
+lemma exists_exact_order_of_dvd_exact_order
+    {G : Type*} [AddGroup G] {n d : ℕ}
+    (hdpos : 0 < d) (hd : d ∣ n)
+    (hG : ∃ P : G, addOrderOf P = n) :
+    ∃ Q : G, addOrderOf Q = d := by
+  sorry
+
+lemma exists_prime_ge_11_or_critical_composite_dvd
+    {n : ℕ} (hn : 17 <= n) :
+    (∃ p : ℕ, p.Prime ∧ 11 <= p ∧ p ∣ n) ∨
+      ∃ d : ℕ, CriticalComposite d ∧ d ∣ n := by
   sorry
 
 end FLT
 ```
 
-The name `weil_pairing_gives_primitive_root_from_bound` is intentionally verbose: it prevents confusion with the actual pairing theorem.  If you keep the existing name `weil_pairing_gives_primitive_root`, make sure the project has a separate theorem whose proof really uses the pairing.
+These are not Mazur-theorem files.  They are pure reduction files.
+
+### Phase 2: introduce the hard interfaces
+
+Create:
+
+```text
+FLT/Torsion/PrimeCore.lean
+```
+
+```lean
+import Mathlib
+import FLT.Torsion.OrderReduction
+
+namespace FLT
+
+/--
+Prime-level Mazur core.  Temporary axiom.
+Future proof target: modular curves `X_1(p)` have no noncuspidal rational points
+for prime `p >= 11`.
+-/
+axiom no_point_of_prime_order_ge_11
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {p : ℕ}
+    (hp : p.Prime) (hp11 : 11 <= p) :
+    ¬ HasPointOfExactOrder E p
+
+/--
+Finite composite certificates.  Initially an axiom; replace constructor-by-constructor
+using Kubert/QuarticD/DescentBridge files.
+-/
+axiom no_point_of_critical_composite_order
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ}
+    (hn : CriticalComposite n) :
+    ¬ HasPointOfExactOrder E n
+
+end FLT
+```
+
+This is the clean axiom boundary.
+
+### Phase 3: derive the broad no-large-order theorem
+
+Create:
+
+```text
+FLT/Torsion/NoLargeOrder.lean
+```
+
+```lean
+import Mathlib
+import FLT.Torsion.OrderReduction
+import FLT.Torsion.PrimeCore
+
+namespace FLT
+
+/--
+No rational point of exact cyclic order at least 17.
+This is derived from the prime Mazur core plus finite composite exclusions.
+-/
+theorem no_point_of_order_ge_17
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ}
+    (hn : 17 <= n) :
+    ¬ HasPointOfExactOrder E n := by
+  intro hN
+  rcases exists_prime_ge_11_or_critical_composite_dvd (n := n) hn with hprime | hcomp
+  · rcases hprime with ⟨p, hp, hp11, hpdvd⟩
+    have hp_point : HasPointOfExactOrder E p := by
+      -- specialize `exists_exact_order_of_dvd_exact_order` to `(E⧸ℚ).Point`
+      -- and use `hN`.
+      sorry
+    exact (no_point_of_prime_order_ge_11 E hp hp11) hp_point
+  · rcases hcomp with ⟨d, hdcrit, hddvd⟩
+    have hdpos : 0 < d := by
+      cases hdcrit <;> decide
+    have hd_point : HasPointOfExactOrder E d := by
+      -- same divisor lemma.
+      sorry
+    exact (no_point_of_critical_composite_order E hdcrit) hd_point
+
+end FLT
+```
+
+This theorem is a good derived target.  It should not itself be an axiom.
+
+### Phase 4: replace composite axioms incrementally
+
+Use the existing infrastructure in this order:
+
+```text
+1. N = 14 via DescentBridgeN14.
+2. N = 16 via DescentBridgeN16.
+3. Add analogous certificates for N = 15,18,20,21,24,25,27,35,49 as needed.
+4. Optionally split p = 11 and p = 13 out of the prime axiom once their explicit modular-curve computations are available.
+```
+
+The prime axiom can then be narrowed over time:
+
+```lean
+axiom no_point_of_prime_order_ge_17
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {p : ℕ}
+    (hp : p.Prime) (hp17 : 17 <= p) :
+    ¬ HasPointOfExactOrder E p
+```
+
+with separate proved theorems for `11` and `13`.
+
+### Phase 5: final A-Line cyclic torsion theorem
+
+Once `no_point_of_order_ge_17` is available, the remaining low orders are finite:
+
+```text
+allowed cyclic orders: 1,2,3,4,5,6,7,8,9,10,12
+forbidden below 17: 11,13,14,15,16
+```
+
+The primes `11,13` are covered by the prime axiom.  The composites `14,15,16` are covered by the composite certificates.  Everything `>=17` is covered by `no_point_of_order_ge_17`.
+
+So the final theorem should be a case split on `n`:
+
+```lean
+import Mathlib
+import FLT.Torsion.NoLargeOrder
+
+namespace FLT
+
+/--
+A-Line cyclic torsion bound, schematic.
+-/
+theorem cyclic_torsion_order_in_mazur_list
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ}
+    (hP : HasPointOfExactOrder E n) :
+    n ∈ ({1,2,3,4,5,6,7,8,9,10,12} : Finset ℕ) := by
+  by_cases hn17 : 17 <= n
+  · exact False.elim ((no_point_of_order_ge_17 E hn17) hP)
+  · -- finite check for n < 17:
+    -- allowed: 1,2,3,4,5,6,7,8,9,10,12
+    -- forbidden: 11,13 by prime axiom; 14,15,16 by composite certificates.
+    sorry
+
+end FLT
+```
+
+The finite `n < 17` branch should be handled by `omega` plus individual contradictions.
 
 ---
 
-## The actual shortest honest route
+## Should the axiom be split?
 
-The shortest honest path is not:
+Yes.
 
-```text
-fullRationalTorsion_order_le_two by determinant of rho_m
-```
-
-unless the determinant theorem already exists.
-
-It is:
-
-```text
-construct only enough Weil pairing over ℚ
-  -> full rational m-torsion gives ζ ∈ ℚ primitive of order m
-  -> `isPrimitiveRoot_rat_order_le_two`
-  -> m ≤ 2.
-```
-
-This avoids Galois representations entirely because the pairing is evaluated on rational points and constructed over the base field.
-
-The one remaining `sorry` should therefore be moved from
+Do this:
 
 ```lean
-fullRationalTorsion_order_le_two
+axiom no_point_of_prime_order_ge_11
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {p : ℕ}
+    (hp : p.Prime) (hp11 : 11 <= p) :
+    ¬ HasPointOfExactOrder E p
 ```
 
-to
+and derive:
 
 ```lean
-fullRationalTorsion_gives_primitive_root_direct
+theorem no_point_of_order_ge_17
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ}
+    (hn : 17 <= n) :
+    ¬ HasPointOfExactOrder E n
 ```
 
-or an even smaller internal theorem saying that the Weil pairing of the two injected standard generators is primitive.
+from that axiom plus finite composite exclusions.
 
-That is the cleanest and least misleading architecture:
+This reduces the axiom to the true mathematical core and makes all remaining work transparent:
 
 ```text
-Hard geometry: Weil pairing primitive-value theorem.
-Easy number theory: Q has roots of unity only of orders 1 and 2.
-Easy conclusion: full rational torsion has m <= 2.
+- group theory: divisor of an exact-order point gives exact-order point;
+- arithmetic: large integer has either large prime divisor or critical composite divisor;
+- finite certificates: N = 14,15,16,18,20,21,24,25,27,35,49;
+- hard modular theorem: prime p >= 11.
 ```
+
+That is the cleanest plan for FLT.
 
 ## Bottom line
 
-Route ranking for FLT:
+For `p >= 11`, the simplest known uniform proof is Mazur's modular-curve proof, not a descent-only or number-theory-only argument.  For `p = 11` and `p = 13`, one can use explicit modular-curve computations; `p = 11` is comparatively small, while `p = 13` needs genus-two rational-points machinery.  The existing Kubert/QuarticD/DescentBridge infrastructure is useful for fixed levels and finite composite certificates, and may help with `11` or `13`, but it does not replace the uniform prime theorem for `p >= 17`.
+
+Therefore the concrete FLT plan is:
 
 ```text
-1. Direct base-field Weil pairing consequence: best honest route.
-2. Determinant/cyclotomic character: good interface only if already proved; otherwise larger than needed.
-3. Division polynomials alone: not enough; useful only as support for Miller/Weil pairing.
-4. Pure number theory: only supplies the final `m <= 2` step after a primitive root is produced.
-5. Mazur torsion theorem: would solve it, but is far too large and not a shortcut.
-6. Reduction mod p / finite cardinality: not uniform and not sufficient.
+1. Add `HasPointOfExactOrder` and pure divisor/order lemmas.
+2. Add `CriticalComposite` with the 11 minimal forbidden composite orders.
+3. Keep `no_point_of_prime_order_ge_11` as the single hard axiom.
+4. Prove `no_point_of_order_ge_17` from the prime axiom plus composite certificates.
+5. Replace composite axioms one by one using existing Kubert/descent files.
+6. Optionally later split off explicit proofs for p = 11 and p = 13, narrowing the hard axiom to p >= 17.
 ```
-
-So the answer is: avoid building Galois representations, but do not expect to avoid the Weil pairing or an equivalent theorem.  Build the smallest direct Weil-pairing consequence over `ℚ`, then finish `fullRationalTorsion_order_le_two` with `isPrimitiveRoot_rat_order_le_two`.
