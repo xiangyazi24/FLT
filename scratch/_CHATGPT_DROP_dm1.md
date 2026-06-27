@@ -1,53 +1,49 @@
-# Q1316 (dm1/dm2): exact tactic for the final cleared-denominator square
-
-Do **not** use `nlinarith`, `linarith`, or `linear_combination` for this final step. The robust tactic is:
+# Q1338 (dm1): `n^3` square implies `n` square
 
 ```lean
-  have hBq : (B : ℚ) ≠ 0 := by exact_mod_cast hBne
+import Mathlib.Data.Nat.Factorization.Root
+import Mathlib.Algebra.Ring.Parity
+import Mathlib.Tactic
+
+/-- If `n ≠ 0` and `n^3` is a square, then `n` is a square. -/
+theorem nat_isSquare_of_isSquare_cube {n : ℕ} (hn : n ≠ 0)
+    (h : IsSquare (n ^ 3)) : IsSquare n := by
+  rcases (isSquare_iff_exists_sq (n ^ 3)).1 h with ⟨c, hc⟩
+
+  -- From `n^3 = c^2`, get `n^2 ∣ c^2`.
+  have hndvd : n ^ 2 ∣ c ^ 2 := by
+    rw [← hc]
+    exact ⟨n, by ring⟩
+
+  -- `ceilRoot 2 (n^2) = n`.
+  have hceil : Nat.ceilRoot 2 (n ^ 2) = n := by
+    simpa using
+      (Nat.ceilRoot_pow_self (n := 2) (a := n)
+        (by norm_num : (2 : ℕ) ≠ 0))
+
+  -- By the ceil-root divisibility adjunction, `n^2 ∣ c^2` implies `n ∣ c`.
+  have hn_dvd_c : n ∣ c := by
+    have hraw : Nat.ceilRoot 2 (n ^ 2) ∣ c :=
+      ((Nat.dvd_pow_iff_ceilRoot_dvd
+        (a := n ^ 2) (b := c) (n := 2)
+        (by norm_num : (2 : ℕ) ≠ 0)).1 hndvd)
+    simpa [hceil] using hraw
+
+  rcases hn_dvd_c with ⟨d, rfl⟩
+
+  -- Cancel `n^2` from `n^3 = (n*d)^2`.
+  refine (isSquare_iff_exists_sq n).2 ⟨d, ?_⟩
+  apply Nat.eq_of_mul_eq_mul_left (Nat.pow_pos (Nat.pos_of_ne_zero hn) 2)
   calc
-    (w * (B : ℚ) ^ 3) ^ 2 = w ^ 2 * (B : ℚ) ^ 6 := by ring
-    _ = ((A * (A ^ 2 + A * B ^ 2 - B ^ 4) : ℤ) : ℚ) := by
-      rw [h]
-      field_simp [hBq]
-      ring_nf
+    n ^ 2 * n = n ^ 3 := by ring
+    _ = (n * d) ^ 2 := hc
+    _ = n ^ 2 * d ^ 2 := by ring
 ```
 
-Here is the standalone version.
+Key APIs used:
 
 ```lean
-import Mathlib
-
-namespace DM2
-
-example (A B : ℤ) (w : ℚ) (hBne : B ≠ 0)
-    (h : w ^ 2 =
-      ((A : ℚ) / (B : ℚ) ^ 2) ^ 3
-        + ((A : ℚ) / (B : ℚ) ^ 2) ^ 2
-        - (A : ℚ) / (B : ℚ) ^ 2) :
-    (w * (B : ℚ) ^ 3) ^ 2 =
-      ((A * (A ^ 2 + A * B ^ 2 - B ^ 4) : ℤ) : ℚ) := by
-  have hBq : (B : ℚ) ≠ 0 := by exact_mod_cast hBne
-  calc
-    (w * (B : ℚ) ^ 3) ^ 2 = w ^ 2 * (B : ℚ) ^ 6 := by ring
-    _ = ((A * (A ^ 2 + A * B ^ 2 - B ^ 4) : ℤ) : ℚ) := by
-      rw [h]
-      field_simp [hBq]
-      ring_nf
-
-end DM2
+Nat.ceilRoot_pow_self
+Nat.dvd_pow_iff_ceilRoot_dvd
+isSquare_iff_exists_sq
 ```
-
-If you already made a cleared hypothesis first, use this shape:
-
-```lean
-  have hBq : (B : ℚ) ≠ 0 := by exact_mod_cast hBne
-  have hclear := h
-  field_simp [hBq] at hclear
-  calc
-    (w * (B : ℚ) ^ 3) ^ 2 = w ^ 2 * (B : ℚ) ^ 6 := by ring
-    _ = ((A * (A ^ 2 + A * B ^ 2 - B ^ 4) : ℤ) : ℚ) := by
-      rw [hclear]
-      ring_nf
-```
-
-The reason this works is that the first `ring` only expands `(w * B^3)^2` into `w^2 * B^6`; the second block uses the original curve equation, clears denominators with `field_simp`, and lets `ring_nf` normalize the factored rational expression and the `Int.cast` target to the same polynomial.
