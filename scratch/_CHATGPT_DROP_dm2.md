@@ -1,200 +1,384 @@
-# Q1256 (dm2): current Mathlib routes for excluding `(Z/pZ)^2 ⊂ E(Q)`
+# Q1269 (dm2): `QuarticMinus` by descent, via `QuarticPlus` symmetry
 
-## Short conclusion
+## Statement
 
-For current Mathlib, I do **not** see a sorry-free route proving, for every elliptic curve `E/Q` and odd prime `p`, that no injective homomorphism
+Let `r, B` be positive coprime integers and suppose
 
-```lean
-ZMod p × ZMod p →+ (E/Q).Point
+```text
+s^2 = -r^4 + r^2 B^2 + B^4.
 ```
 
-exists.  The obstruction is not the final field theory: Mathlib has strong roots-of-unity and cyclotomic APIs.  The missing bridge is elliptic-curve-specific: either the Weil pairing, the determinant/cyclotomic character of the torsion Galois representation, or the topology/classification of `E(R)`.
+Equivalently,
 
-The most concrete feasible route today is a **single algebraic axiom** packaging the Weil-pairing corollary:
-
-```lean
-axiom weil_pairing_roots_of_unity_of_zmod_square
-    {K : Type*} [Field K] [CharZero K]
-    (m : N) (hm : 0 < m)
-    (E : WeierstrassCurve K) [E.IsElliptic]
-    (h : ∃ f : ZMod m × ZMod m →+ (E/K).Point, Function.Injective f) :
-    ∃ ζ : K, IsPrimitiveRoot ζ m
+```text
+s^2 = B^4 + B^2 r^2 - r^4.
 ```
 
-Then the target over `Q` is immediate from the existing rational primitive-root lemma `isPrimitiveRoot_rat_order_le_two`.
+This is exactly the `QuarticPlus` equation with the two variables swapped.  If
 
-## What Mathlib has
+```text
+QuarticPlus(x,y,z) : z^2 = x^4 + x^2 y^2 - y^4,
+```
 
-### Roots of unity / primitive roots / cyclotomic fields
+and
 
-This side is present and is the right language for the conclusion.
+```text
+QuarticMinus(r,B,s) : s^2 = -r^4 + r^2 B^2 + B^4,
+```
+
+then
+
+```text
+QuarticMinus(r,B,s)  <->  QuarticPlus(B,r,s).
+```
+
+Therefore the `QuarticMinus` theorem is not a new descent theorem.  It is the existing `QuarticPlus` infinite descent applied to `(x,y) = (B,r)`.  The descent variable for `QuarticMinus` is `r`, because `r` is the second variable in the corresponding `QuarticPlus` solution.
+
+The only positive coprime solution is
+
+```text
+r = B = 1,
+```
+
+with `s = ±1` if `s` is allowed to be signed.
+
+## Lean-facing reduction
+
+If the repository already has a theorem for `QuarticPlus`, the clean proof should be a one-line swap, not a duplicate factorization proof.
 
 ```lean
 import Mathlib
 
-#check IsPrimitiveRoot
-#check IsPrimitiveRoot.iff_def
-#check IsPrimitiveRoot.pow_eq_one_iff_dvd
-#check IsPrimitiveRoot.isUnit
-#check IsPrimitiveRoot.coe_units_iff
-#check IsPrimitiveRoot.zmodEquivZPowers
-#check primitiveRoots
-#check rootsOfUnity
-#check Polynomial.cyclotomic
-#check IsCyclotomicExtension
-#check IsPrimitiveRoot.adjoin_isCyclotomicExtension
-#check CyclotomicField
+namespace QuarticDescent
+
+/-- Schematic predicate; use the repository's actual definition. -/
+def QuarticPlus (x y z : ℤ) : Prop :=
+  z ^ 2 = x ^ 4 + x ^ 2 * y ^ 2 - y ^ 4
+
+/-- Schematic predicate; use the repository's actual definition. -/
+def QuarticMinus (r B s : ℤ) : Prop :=
+  s ^ 2 = -r ^ 4 + r ^ 2 * B ^ 2 + B ^ 4
+
+lemma quarticMinus_iff_quarticPlus_swap (r B s : ℤ) :
+    QuarticMinus r B s ↔ QuarticPlus B r s := by
+  unfold QuarticMinus QuarticPlus
+  ring_nf
+
+end QuarticDescent
 ```
 
-So the statement `∃ ζ : K, IsPrimitiveRoot ζ m` is a natural Mathlib statement.
-
-### Additive circle APIs
-
-Mathlib also has useful circle infrastructure:
-
-```lean
-import Mathlib.Analysis.Normed.Group.AddCircle
-import Mathlib.Topology.Instances.AddCircle.Real
-
-#check AddCircle
-#check UnitAddCircle
-#check ZMod.toAddCircle
-#check ZMod.toAddCircle_injective
-#check AddCircle.pathConnectedSpace
-#check AddCircle.compactSpace
-```
-
-`UnitAddCircle` is `AddCircle (1 : R)`, and `ZMod.toAddCircle` is the homomorphism sending `j mod N` to `j / N mod 1`.  This is enough to prove circle torsion facts with some work.
-
-### Division polynomial APIs
-
-Mathlib has division polynomials:
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-
-#check WeierstrassCurve.ψ
-#check WeierstrassCurve.Ψ
-#check WeierstrassCurve.ΨSq
-#check WeierstrassCurve.Φ
-#check WeierstrassCurve.map_ψ
-#check WeierstrassCurve.baseChange_ψ
-```
-
-But this is not enough by itself.  The missing bridge is the theorem relating point multiplication to vanishing of the division polynomial, and even that would mostly give a `p^2`-style algebraic torsion count, not the field-of-definition obstruction needed over `Q`.
-
-## What Mathlib appears not to have
-
-### 1. Completed elliptic-curve torsion Galois representations
-
-The needed theorem would be something like:
-
-```text
-det rho_{E,p} = cyclotomic character
-```
-
-or equivalently the Galois-equivariant Weil pairing.  Current Mathlib does not appear to expose such a theorem.
-
-The FLT repository has an experimental `FLT.EllipticCurve.Torsion` file, but it contains incomplete placeholders for the finiteness/cardinality of torsion and the continuous Galois representation.  That file is therefore not a present no-axiom solution.
-
-### 2. The real topology/classification of `E(R)`
-
-The real-analytic proof is mathematically excellent:
-
-```text
-E(R) ≅ S^1 or S^1 × Z/2Z.
-For odd p, all p-torsion lies in the identity component.
-Thus E(R)[p] ≅ Z/pZ.
-So (Z/pZ)^2 cannot inject into E(R), hence cannot inject into E(Q).
-```
-
-But Mathlib does not appear to have the bridge
-
-```lean
-(E/R).Point ≃+ UnitAddCircle
-```
-
-or
-
-```lean
-(E/R).Point ≃+ UnitAddCircle × ZMod 2
-```
-
-or the weaker component theorem `#π₀(E(R)) ≤ 2`.  The existing elliptic-curve point file is algebraic: it defines nonsingular affine points and proves the group law using coordinate rings/class groups, not real analytic topology.
-
-### 3. A division-polynomial field-of-definition theorem
-
-A pure root-counting argument with `ψ_p` cannot prove the result.  Over an algebraic closure in characteristic different from `p`, the full `p`-torsion really has `p^2` points, so the division polynomial has enough roots.  The contradiction over `Q` is that full rational torsion forces the appropriate roots of unity into `Q`.
-
-There are algebraic shadows of Weil pairing via discriminants of division polynomials.  For `p = 3`, one might try an explicit quartic-discriminant argument.  For all odd primes, this becomes another form of the cyclotomic/Weil-pairing obstruction, and Mathlib does not appear to have the needed discriminant formulas.
-
-## Concrete recommended patch
-
-Use exactly one trusted B-line axiom, stated over a general characteristic-zero field.
+The final theorem should use the existing `QuarticPlus` result like this, modulo the repository's actual integer/natural conventions:
 
 ```lean
 import Mathlib
-import FLT.Assumptions.MazurProof.TorsionDefs
 
-noncomputable section
+namespace QuarticDescent
 
-open scoped Classical
+-- Schematic theorem name and hypotheses; replace by the existing QuarticPlus theorem.
+axiom quarticPlus_only_one
+    {x y z : ℤ}
+    (hx : 0 < x) (hy : 0 < y)
+    (hcop : Int.gcd x y = 1)
+    (h : QuarticPlus x y z) :
+    x = 1 ∧ y = 1
 
-namespace FLT.MazurProof
+theorem quarticMinus_only_one
+    {r B s : ℤ}
+    (hr : 0 < r) (hB : 0 < B)
+    (hcop : Int.gcd r B = 1)
+    (h : QuarticMinus r B s) :
+    r = 1 ∧ B = 1 := by
+  have hplus : QuarticPlus B r s := (quarticMinus_iff_quarticPlus_swap r B s).1 h
+  have hcop' : Int.gcd B r = 1 := by
+    simpa [Int.gcd_comm] using hcop
+  rcases quarticPlus_only_one hB hr hcop' hplus with ⟨hB1, hr1⟩
+  exact ⟨hr1, hB1⟩
 
-/--
-Weil-pairing corollary.
-
-If `(ZMod m)^2` injects into the group of `K`-rational points of an elliptic curve
-over a characteristic-zero field `K`, then `K` contains a primitive `m`-th root of
-unity.
--/
-axiom weil_pairing_roots_of_unity_of_zmod_square
-    {K : Type*} [Field K] [CharZero K]
-    (m : N) (hm : 0 < m)
-    (E : WeierstrassCurve K) [E.IsElliptic]
-    (h : ∃ f : ZMod m × ZMod m →+ (E/K).Point, Function.Injective f) :
-    ∃ ζ : K, IsPrimitiveRoot ζ m
-
-/-- Full rational rank-two `m`-torsion over `Q` forces `m <= 2`. -/
-theorem zmod_square_rational_torsion_order_le_two
-    (m : N) (hm : 0 < m)
-    (E : WeierstrassCurve Q) [E.IsElliptic]
-    (h : ∃ f : ZMod m × ZMod m →+ (E/Q).Point, Function.Injective f) :
-    m <= 2 := by
-  rcases weil_pairing_roots_of_unity_of_zmod_square (K := Q) m hm E h with ⟨ζ, hζ⟩
-  exact isPrimitiveRoot_rat_order_le_two hζ
-
-/-- No full rational rank-two odd-prime torsion. -/
-theorem no_zmod_square_rational_torsion_of_odd_prime
-    (E : WeierstrassCurve Q) [E.IsElliptic]
-    (p : N) (hp : Nat.Prime p) (hpgt : 2 < p) :
-    ¬ (∃ f : ZMod p × ZMod p →+ (E/Q).Point, Function.Injective f) := by
-  intro h
-  have hle : p <= 2 := zmod_square_rational_torsion_order_le_two p hp.pos E h
-  omega
-
-end FLT.MazurProof
+end QuarticDescent
 ```
 
-If the downstream theorem is stated for the torsion subtype, use the subtype inclusion:
+The `axiom` in this snippet is only a placeholder for the already-proved `QuarticPlus` theorem.  Do **not** add this axiom to the repository.
 
-```lean
-private theorem no_odd_prime_square_in_torsion
-    (E : WeierstrassCurve Q) [E.IsElliptic]
-    (p : N) (hp : Nat.Prime p) (hpgt : 2 < p) :
-    not (exists f : ZMod p × ZMod p →+ (AddCommGroup.torsion (E/Q).Point), Function.Injective f) := by
-  rintro (f, hf)
-  let incl := (AddCommGroup.torsion (E/Q).Point).subtype
-  have hincl : Function.Injective incl := Subtype.val_injective
-  have hsq : ∃ g : ZMod p × ZMod p →+ (E/Q).Point, Function.Injective g :=
-    ⟨incl.comp f, hincl.comp hf⟩
-  have hle : p <= 2 := zmod_square_rational_torsion_order_le_two p hp.pos E hsq
-  omega
+## Full descent, written directly for `QuarticMinus`
+
+Here is the descent argument after performing the variable swap explicitly.
+
+Assume a positive coprime solution
+
+```text
+s^2 = B^4 + B^2 r^2 - r^4.        (1)
 ```
 
-## Why this is the best current route
+Set
 
-The real route requires formalizing the topology of real elliptic curves.  The division-polynomial route requires missing multiplication/field-of-definition theorems and still tends back toward Weil pairing.  The Galois-representation route requires the determinant/cyclotomic-character theorem, which is again the Weil pairing in another form.
+```text
+X = 2B^2 + r^2.
+```
 
-The single axiom above is exactly the missing mathematical fact, stated in already-supported Mathlib language.  It cleanly replaces the real-torsion cardinality axioms for this proof.
+Then
+
+```text
+X^2 - (2s)^2 = 5r^4,
+```
+
+so
+
+```text
+(X - 2s)(X + 2s) = 5r^4.          (2)
+```
+
+This is exactly the `QuarticPlus` factorization for the solution `(x,y,z) = (B,r,s)`.
+
+### Factor-splitting lemma
+
+Use the same factor-splitting lemma as in `QuarticPlus`, applied to `(B,r,s)`.
+
+After possibly replacing `s` by `-s`, the two positive factors in (2) may be written
+
+```text
+X - 2s = a^4,
+X + 2s = 5b^4,
+r = ab,                             (3)
+```
+
+with
+
+```text
+a > 0,
+b > 0,
+gcd(a,b) = 1.
+```
+
+This is the point where the `QuarticPlus` parity/coprimality work is used.  In direct `QuarticMinus` language, it is the same argument with `r` playing the role of the second `QuarticPlus` variable.
+
+For reference, once the parity lemma gives `r` odd, the coprimality check is short.  Both factors are odd.  If an odd prime `q` divides both factors, then `q | s` and `q | X`.  From
+
+```text
+X^2 - 4s^2 = 5r^4
+```
+
+we get `q | 5r^4`.  If `q | r`, then `q | X = 2B^2 + r^2` gives `q | B`, contradicting `gcd(r,B)=1`.  If `q = 5`, then `2B^2 + r^2 ≡ 0 mod 5`; when neither `r` nor `B` is divisible by `5`, this says `(r/B)^2 ≡ -2 ≡ 3 mod 5`, impossible because `3` is not a quadratic residue modulo `5`, and the cases `5 | r` or `5 | B` also contradict `gcd(r,B)=1` together with `X ≡ 0`.  Hence the two factors are coprime.  Since their product is `5r^4`, unique prime factorization gives (3), after choosing the sign of `s` so that the factor containing the single `5 mod 4` exponent is the larger factor.
+
+### From the factorization to a Pythagorean triple
+
+Add the two equations in (3):
+
+```text
+2X = a^4 + 5b^4.
+```
+
+Since `X = 2B^2 + r^2` and `r = ab`, this gives
+
+```text
+4B^2 + 2a^2b^2 = a^4 + 5b^4,
+```
+
+hence
+
+```text
+4B^2 = a^4 - 2a^2b^2 + 5b^4
+     = (a^2 - b^2)^2 + 4b^4.
+```
+
+Dividing by `4`,
+
+```text
+B^2 = ((a^2 - b^2)/2)^2 + b^4.      (4)
+```
+
+The two legs in (4), namely
+
+```text
+u = |a^2 - b^2| / 2,
+v = b^2,
+```
+
+are coprime, and `v` is odd.  Thus `(u,v,B)` is a primitive Pythagorean triple.  Therefore there are coprime positive integers `m > n`, of opposite parity, such that
+
+```text
+u = 2mn,
+b^2 = m^2 - n^2,
+B = m^2 + n^2.                     (5)
+```
+
+Now
+
+```text
+b^2 = (m-n)(m+n).
+```
+
+Because `m` and `n` are coprime and of opposite parity,
+
+```text
+gcd(m-n, m+n) = 1.
+```
+
+So both factors are squares:
+
+```text
+m - n = e^2,
+m + n = f^2,
+b = ef,                             (6)
+```
+
+with
+
+```text
+0 < e < f,
+gcd(e,f) = 1.
+```
+
+Using (6),
+
+```text
+m = (e^2 + f^2)/2,
+n = (f^2 - e^2)/2.
+```
+
+Since `u = |a^2 - b^2|/2 = 2mn`, we have
+
+```text
+|a^2 - b^2| = 4mn = f^4 - e^4.      (7)
+```
+
+Also `b^2 = e^2 f^2`.  There are two cases.
+
+#### Case 1: `a^2 >= b^2`
+
+Then (7) gives
+
+```text
+a^2 - b^2 = f^4 - e^4,
+```
+
+so
+
+```text
+a^2 = f^4 + e^2 f^2 - e^4.         (8)
+```
+
+Thus `(f,e,a)` is a new `QuarticPlus` solution, and equivalently `(e,f,a)` is a new `QuarticMinus` solution:
+
+```text
+a^2 = -e^4 + e^2 f^2 + f^4.
+```
+
+Its first `QuarticMinus` variable is `e`.
+
+#### Case 2: `a^2 < b^2`
+
+Then (7) gives
+
+```text
+b^2 - a^2 = f^4 - e^4,
+```
+
+so
+
+```text
+a^2 = e^4 + e^2 f^2 - f^4.         (9)
+```
+
+Thus `(e,f,a)` is a new `QuarticPlus` solution, and equivalently `(f,e,a)` is a new `QuarticMinus` solution:
+
+```text
+a^2 = -f^4 + f^2 e^2 + e^4.
+```
+
+Its first `QuarticMinus` variable is `f`.
+
+### The descent is strict
+
+The original first `QuarticMinus` variable was
+
+```text
+r = ab = aef.
+```
+
+In Case 1 the new first variable is `e`, and clearly
+
+```text
+0 < e < aef = r.
+```
+
+In Case 2 the new first variable is `f`.  Again
+
+```text
+0 < f < aef = r,
+```
+
+except possibly if `a = e = 1`; but in Case 2 that would force
+
+```text
+a^2 = e^4 + e^2 f^2 - f^4 = 1 + f^2 - f^4 < 0
+```
+
+for `f > 1`, impossible.  Since `f > e > 0`, this exception cannot occur.  Hence the descent is strict in all nontrivial cases.
+
+Therefore any nontrivial positive coprime `QuarticMinus` solution produces a smaller positive coprime `QuarticMinus` solution, with smaller first coordinate `r`.  Infinite descent on the positive integer `r` is impossible.
+
+## Base case
+
+It remains to identify the bottom solution.  If `r = 1`, then (1) becomes
+
+```text
+s^2 = B^4 + B^2 - 1.
+```
+
+Equivalently,
+
+```text
+(2B^2 + 1)^2 - (2s)^2 = 5,
+```
+
+so
+
+```text
+(2B^2 + 1 - 2s)(2B^2 + 1 + 2s) = 5.
+```
+
+Both factors are positive integers.  Hence they are `1` and `5`, so their sum is `6`:
+
+```text
+2(2B^2 + 1) = 6.
+```
+
+Thus
+
+```text
+2B^2 + 1 = 3,
+B^2 = 1,
+B = 1.
+```
+
+Then the original equation gives `s^2 = 1`.
+
+## Final conclusion
+
+Every positive coprime solution of
+
+```text
+s^2 = -r^4 + r^2B^2 + B^4
+```
+
+is forced by infinite descent to the base case.  Hence
+
+```text
+r = B = 1,
+```
+
+and then
+
+```text
+s = ±1
+```
+
+if `s` is an integer.
+
+The clean formal route is to avoid duplicating the descent: prove the swap lemma
+
+```text
+QuarticMinus(r,B,s) <-> QuarticPlus(B,r,s),
+```
+
+then apply the already-proved `QuarticPlus` theorem.
