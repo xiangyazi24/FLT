@@ -59,7 +59,7 @@ theorem V_pos {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
   have hU : 2 * r ^ 2 + B ^ 2 - 2 * s ≤ 0 := by
     by_contra hU; push Not at hU
     linarith [mul_nonpos_of_nonneg_of_nonpos (le_of_lt hU) hV]
-  linarith [sq_nonneg r, sq_nonneg B]
+  nlinarith [sq_nonneg r, sq_nonneg B, hr, hB]
 
 theorem U_pos {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
@@ -70,7 +70,7 @@ theorem U_pos {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
   have hV : 2 * r ^ 2 + B ^ 2 + 2 * s ≤ 0 := by
     by_contra hV; push Not at hV
     linarith [mul_nonpos_of_nonneg_of_nonpos (le_of_lt hV) hU]
-  linarith [sq_nonneg r, sq_nonneg B]
+  nlinarith [sq_nonneg r, sq_nonneg B, hr, hB]
 
 /-- U and V are both odd when r, B are both odd. -/
 theorem UV_odd {r B s : ℤ}
