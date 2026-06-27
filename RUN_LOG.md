@@ -20,14 +20,13 @@
 ---
 
 ## Tracking
-- [~] Compile in progress (uisai2 lake build, scratch/*.lean being built)
-  - 2554+ lines, currently: SeamE1_SeparabilityCore.lean
-  - Warnings only (linter, unused simp args), no errors yet
-- [ ] Compile completes → verify 0 sorry
-- [ ] QuarticD mapping (parallel: ChatGPT question in flight)
-- [ ] Axiom 1 strategy drafted or test case compiled
-- [ ] Commit each milestone
+- [✅] Compile green: 8761 jobs, all passed (0 sorry in main FLT lib)
+- [✅] Commit: 4cc5d22 — Axioms.lean 569L + lakefile + DOCTRINE/STRATEGY docs
+- [~] QuarticD mapping analysis: ChatGPT Q1 failed (DOM capture), analyzing manually from ROADMAP.md
+- [ ] Axiom 4 integration decision: scratch/ vs FLT/Assumptions/MazurProof/
+- [ ] Axiom 1 Weil pairing: start scaffold or detailed design
+- [ ] Next commit: QuarticD integration + Axiom 1 skeleton
 
-## Parallel Work (automode):
-- ChatGPT Q1: QuarticD d=2-7 与 Axiom 4 (Zn obstruction curves) 的映射 → in flight
-- Axiom 1 strategy: 基于 Axioms.lean 新增的 weil_pairing_primitive_root axiom 和辅助工具，制定 discharge 路径
+## Decisions Made:
+- Preserve scratch/ files as exploratory (Bridge1*, QuarticD) — decide inclusion case-by-case
+- Axiom 1: follow AXIOM1_STRATEGY.md — dispatch Weil pairing to Codex if infrastructure not in Mathlib
