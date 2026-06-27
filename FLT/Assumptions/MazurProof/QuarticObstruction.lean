@@ -40,15 +40,25 @@ Tentative mapping (TO BE VERIFIED):
   - QuarticD7 (s⁴ + 49s² - 2401 = t²) → possibly n = ?
 -/
 
--- TODO: Implement lemmas connecting QuarticD to no_degenerate_point theorems
--- Example structure (incomplete):
---
--- theorem quartic_d_gives_no_kubert_point (d : ℕ) (hd : d ∈ [2,3,4,5,6,7])
---     (E : WeierstrassCurve ℚ) [E.IsElliptic]
---     (condition : E has full 2-torsion + order d point in some form) :
---     ¬ ∃ (non-degenerate point on Kubert curve for this d) := by
---   cases' hd with hd
---   · exact quartic_no_sol_d2 ...  -- import from scratch.QuarticD2
---   · ...
+-- TODO (priority): Dispatch to Codex for Kubert theory
+-- Once d ↔ n mapping is established, wire as follows:
+
+theorem quartic_d2_supports_axiom_4_n12 :
+    ¬∃ f : ZMod 2 × ZMod 12 →+ (WeierstrassCurve ℚ)⁄ℚ.Point, Function.Injective f := by
+  sorry  -- reduce to QuarticD2 via Kubert parametrization
+  -- This should eventually use: quartic_no_sol_d2
+
+theorem quartic_d3_supports_axiom_4_n14 :
+    ¬∃ f : ZMod 2 × ZMod 14 →+ (WeierstrassCurve ℚ)⁄ℚ.Point, Function.Injective f := by
+  sorry  -- reduce to QuarticD3 via Kubert parametrization
+
+theorem quartic_d_supports_axiom_4 (n : ℕ) (hn : n ∈ [10, 12, 14, 16]) :
+    ¬∃ f : ZMod 2 × ZMod n →+ (WeierstrassCurve ℚ)⁄ℚ.Point, Function.Injective f := by
+  sorry  -- Case-split on n, use above theorems + QuarticD proofs
+  -- Cases to fill:
+  --   n = 10: quartic_no_sol_d? (need to identify which d)
+  --   n = 12: quartic_no_sol_d2 via quartic_d2_supports_axiom_4_n12
+  --   n = 14: quartic_no_sol_d3 via quartic_d3_supports_axiom_4_n14
+  --   n = 16: quartic_no_sol_d? (need to identify which d)
 
 end MazurProof
