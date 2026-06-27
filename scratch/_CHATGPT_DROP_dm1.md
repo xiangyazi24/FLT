@@ -1,318 +1,166 @@
-# Q1461 (dm1/dm4): prove oddness via the descent, not before it
+# Q1482 (dm1/dm3): `UV_coprime` prime-divisor proof
 
-Yes: handle the even-`B` case by a **separate descent branch**.  Do **not** try to add `both_odd` as an inductive hypothesis.
-
-The right strong-induction target is not
-
-```text
-all solutions have B odd
-```
-
-but rather
-
-```text
-there is no nontrivial primitive positive solution with this B.
-```
-
-Then both parity branches produce a smaller nontrivial primitive positive solution, contradicting the induction hypothesis.  Once the final theorem says every primitive positive solution has `B = 1`, oddness is an immediate corollary.
-
-## Why `both_odd` as IH does not solve the problem
-
-Suppose your induction hypothesis says “all smaller solutions have odd `B`.”  If the current solution has even `B`, the even descent below produces a smaller solution, but that smaller solution is **not guaranteed to have even denominator**.  The IH would only tell you the smaller `B'` is odd, which is not a contradiction.
-
-So the induction predicate must be stronger:
+Below is the replacement proof I would use.  It proves `IsCoprime U V` by contradiction after converting to `Nat.Coprime U.natAbs V.natAbs`, then extracts a common prime divisor via
 
 ```lean
-P(B) := every primitive positive solution with denominator B is trivial
+Nat.Prime.not_coprime_iff_dvd
 ```
 
-or equivalently
+This is the Lean-clean version of “gcd is bigger than `1`, so choose a prime divisor of the gcd.”
+
+The only local dependency is your existing
 
 ```lean
-P(B) := no primitive positive solution with denominator B and B > 1 exists.
+UV_odd : ... →
+  (2 * r ^ 2 + B ^ 2 - 2 * s) % 2 = 1 ∧
+  (2 * r ^ 2 + B ^ 2 + 2 * s) % 2 = 1
 ```
 
-Then the even branch is enough, because it produces a smaller nontrivial solution.
-
-## Even-`B` descent branch
-
-Assume
-
-```text
-s^2 = r^4 + r^2*B^2 - B^4,
-gcd(r,B)=1,
-r>0,
-B>0,
-B even.
-```
-
-Write
-
-```text
-B = 2*C.
-```
-
-Since `gcd(r,B)=1`, `r` is odd.  Mod `2` in the equation gives `s` odd.
-
-Let
-
-```text
-A = 2*r^2 + B^2,
-U = A - 2*s,
-V = A + 2*s.
-```
-
-Then
-
-```text
-U*V = A^2 - (2s)^2 = 5*B^4.
-```
-
-But in the even-`B` branch we have more divisibility:
-
-```text
-A = 2*r^2 + B^2 ≡ 2 (mod 4),
-2*s ≡ 2 (mod 4),
-```
-
-so
-
-```text
-4 | U,
-4 | V.
-```
-
-Define
-
-```text
-U₁ = U / 4,
-V₁ = V / 4.
-```
-
-Then the product normalizes perfectly:
-
-```text
-U₁*V₁ = (U*V)/16 = 5*B^4/16 = 5*C^4.
-```
-
-Also
-
-```text
-U₁ + V₁ = r^2 + 2*C^2,
-V₁ - U₁ = s.
-```
-
-So the even branch has the same `5 * fourth_power` product as the odd branch, but with `C = B/2` and the normalized factors `U₁,V₁`.
-
-## Coprimality of the normalized factors
-
-Prove
-
-```text
-gcd(U₁,V₁)=1.
-```
-
-A prime divisor `p` common to `U₁,V₁` divides both
-
-```text
-U₁ + V₁ = r^2 + 2*C^2,
-V₁ - U₁ = s,
-```
-
-and also divides
-
-```text
-U₁*V₁ = 5*C^4.
-```
-
-Now split:
-
-1. If `p | C`, then from `p | r^2 + 2*C^2` we get `p | r^2`, hence `p | r`, contradicting `gcd(r,B)=1` because `C | B`.
-
-2. If `p ∤ C`, then from `p | 5*C^4` we get `p = 5`.  Since `p ∤ C`, divide the congruence by `C^2` mod `5`:
-
-```text
-(r/C)^2 ≡ -2 ≡ 3 (mod 5),
-```
-
-impossible because the nonzero square classes mod `5` are only `1` and `4`.
-
-Therefore `gcd(U₁,V₁)=1`.
-
-## Factorization and Pythagorean step
-
-Apply the same coprime factorization lemma to
-
-```text
-U₁*V₁ = 5*C^4,
-gcd(U₁,V₁)=1.
-```
-
-You get coprime positive `a,b` with
-
-```text
-a*b = C
-```
-
-and either
-
-```text
-U₁ = a^4,     V₁ = 5*b^4,
-```
-
-or
-
-```text
-U₁ = 5*a^4,   V₁ = b^4.
-```
-
-Consider the first case.  From the sum identity,
-
-```text
-r^2 + 2*C^2 = a^4 + 5*b^4,
-C = a*b.
-```
-
-Thus
-
-```text
-r^2 = a^4 + 5*b^4 - 2*a^2*b^2
-    = (a^2 - b^2)^2 + (2*b^2)^2.
-```
-
-This is a primitive Pythagorean triple with odd hypotenuse `r`.  Hence there are coprime positive `m,n`, opposite parity, with
-
-```text
-r = m^2 + n^2,
-|a^2 - b^2| = m^2 - n^2,
-b^2 = m*n.
-```
-
-Because `gcd(m,n)=1` and `m*n` is a square, write
-
-```text
-m = x^2,
-n = y^2,
-b = x*y.
-```
-
-Now there are two sign subcases.
-
-If
-
-```text
-a^2 - b^2 = x^4 - y^4,
-```
-
-then
-
-```text
-a^2 = x^4 + x^2*y^2 - y^4.
-```
-
-So
-
-```text
-(r',B',s') = (x,y,a)
-```
-
-is a new solution of the original quartic equation.
-
-If
-
-```text
-b^2 - a^2 = x^4 - y^4,
-```
-
-then
-
-```text
-a^2 = y^4 + x^2*y^2 - x^4,
-```
-
-so
-
-```text
-(r',B',s') = (y,x,a)
-```
-
-is a new solution.
-
-In both cases the new denominator is smaller than the old one:
-
-```text
-B' ≤ max(x,y) ≤ x*y = b ≤ a*b = C = B/2 < B.
-```
-
-The second factorization case `U₁ = 5*a^4`, `V₁ = b^4` is the same with `a` and `b` interchanged; the even leg is `2*a^2` instead of `2*b^2`.
-
-## The Lean theorem shape to add
-
-This is the branch you want, not `both_odd`:
+If your local `UV_odd` has hypotheses in a slightly different order, only the single line defining `hUVodd` needs adjustment.
 
 ```lean
-/-- Even-denominator descent for the quartic equation. -/
-lemma quartic_plus_even_descent_step
-    {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B)
-    (hB_even : B % 2 = 0)
+import Mathlib
+
+namespace DM3
+
+/-- Coprimality of the two quartic descent factors in the odd case. -/
+theorem UV_coprime {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     (hcop : Int.gcd r B = 1)
-    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
-    ∃ r' B' s' : ℤ,
-      0 < r' ∧
-      0 < B' ∧
-      B' < B ∧
-      Int.gcd r' B' = 1 ∧
-      s' ^ 2 = r' ^ 4 + r' ^ 2 * B' ^ 2 - B' ^ 4 := by
-  -- 1. Write B = 2*C.
-  -- 2. Prove r and s odd.
-  -- 3. Define U,V and prove 4 | U, 4 | V.
-  -- 4. Set U₁=U/4, V₁=V/4 and prove U₁*V₁ = 5*C^4.
-  -- 5. Prove gcd(U₁,V₁)=1 using the prime-divisor/mod-5 argument.
-  -- 6. Apply the coprime factorization of 5*C^4.
-  -- 7. Apply primitive Pythagorean parametrization.
-  -- 8. Extract the smaller quartic solution as above.
-  sorry
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4)
+    (hr_odd : r % 2 = 1) (hB_odd : B % 2 = 1) :
+    Int.gcd (2 * r ^ 2 + B ^ 2 - 2 * s)
+      (2 * r ^ 2 + B ^ 2 + 2 * s) = 1 := by
+  rw [← Int.isCoprime_iff_gcd_eq_one]
+
+  let A : ℤ := 2 * r ^ 2 + B ^ 2
+  let U : ℤ := A - 2 * s
+  let V : ℤ := A + 2 * s
+
+  have hA_sq_sub : A ^ 2 - 4 * s ^ 2 = 5 * B ^ 4 := by
+    dsimp [A]
+    nlinarith [heq]
+
+  -- Existing local lemma: both factors are odd in the odd-odd case.
+  have hUVodd := UV_odd (r := r) (B := B) (s := s) hr_odd hB_odd
+  have hUodd : U % 2 = 1 := by
+    simpa [U, A] using hUVodd.1
+
+  -- Work with `Nat.Coprime` on absolute values, then use the prime-divisor criterion.
+  rw [Int.isCoprime_iff_nat_coprime]
+  by_contra hnot
+  rcases Nat.Prime.not_coprime_iff_dvd.mp hnot with
+    ⟨p, hp, hpU_nat, hpV_nat⟩
+
+  have hpU : (p : ℤ) ∣ U := Int.natCast_dvd.mpr hpU_nat
+  have hpV : (p : ℤ) ∣ V := Int.natCast_dvd.mpr hpV_nat
+
+  -- The common prime is not `2`, since it divides the odd factor `U`.
+  have hp_ne_two : p ≠ 2 := by
+    intro hp2
+    have h2U : (2 : ℤ) ∣ U := by
+      simpa [hp2] using hpU
+    have hUmod0 : U % 2 = 0 := by
+      exact Int.dvd_iff_emod_eq_zero.mp h2U
+    omega
+
+  have hp_odd_nat : Odd p := hp.odd_of_ne_two hp_ne_two
+  have hp_coprime2_nat : Nat.Coprime p 2 := by
+    simpa using (Nat.coprime_two_right.mpr hp_odd_nat)
+  have hp_coprime2 : IsCoprime (p : ℤ) (2 : ℤ) := by
+    rw [Int.isCoprime_iff_nat_coprime]
+    simpa using hp_coprime2_nat
+  have hp_coprime4 : IsCoprime (p : ℤ) ((2 : ℤ) ^ 2) :=
+    hp_coprime2.pow_right (n := 2)
+
+  -- From common divisibility, get `p ∣ s` and `p ∣ A`.
+  have hp4s : (p : ℤ) ∣ 4 * s := by
+    have h : (p : ℤ) ∣ V - U := dvd_sub hpV hpU
+    have hsub : V - U = 4 * s := by
+      dsimp [U, V, A]
+      ring
+    simpa [hsub] using h
+
+  have hp2A : (p : ℤ) ∣ 2 * A := by
+    have h : (p : ℤ) ∣ V + U := dvd_add hpV hpU
+    have hadd : V + U = 2 * A := by
+      dsimp [U, V, A]
+      ring
+    simpa [hadd] using h
+
+  have hps : (p : ℤ) ∣ s := by
+    apply hp_coprime4.dvd_of_dvd_mul_right
+    simpa [pow_two, mul_assoc, mul_comm, mul_left_comm] using hp4s
+
+  have hpA : (p : ℤ) ∣ A := by
+    apply hp_coprime2.dvd_of_dvd_mul_right
+    simpa [mul_assoc, mul_comm, mul_left_comm] using hp2A
+
+  -- Hence `p^2 ∣ A^2 - 4*s^2 = 5*B^4`.
+  have hp2_A2 : (p : ℤ) ^ 2 ∣ A ^ 2 := by
+    exact pow_dvd_pow_of_dvd hpA 2
+  have hp2_s2 : (p : ℤ) ^ 2 ∣ s ^ 2 := by
+    exact pow_dvd_pow_of_dvd hps 2
+  have hp2_4s2 : (p : ℤ) ^ 2 ∣ 4 * s ^ 2 :=
+    dvd_mul_of_dvd_right hp2_s2 4
+  have hp2_expr : (p : ℤ) ^ 2 ∣ A ^ 2 - 4 * s ^ 2 :=
+    dvd_sub hp2_A2 hp2_4s2
+  have hp2_5B4 : (p : ℤ) ^ 2 ∣ 5 * B ^ 4 := by
+    simpa [hA_sq_sub] using hp2_expr
+
+  -- Coprimality of the original primitive pair, as natural coprimality.
+  have hcopNat : Nat.Coprime r.natAbs B.natAbs := by
+    rw [Nat.coprime_iff_gcd_eq_one]
+    simpa [Int.gcd_eq_natAbs] using hcop
+
+  by_cases hpB_nat : p ∣ B.natAbs
+  · -- If `p ∣ B`, then `p ∣ r`, contradiction to `gcd(r,B)=1`.
+    have hpB : (p : ℤ) ∣ B := Int.natCast_dvd.mpr hpB_nat
+    have hpB2 : (p : ℤ) ∣ B ^ 2 := pow_dvd_pow_of_dvd hpB 2
+    have hp_two_r2 : (p : ℤ) ∣ 2 * r ^ 2 := by
+      have h : (p : ℤ) ∣ A - B ^ 2 := dvd_sub hpA hpB2
+      simpa [A] using h
+    have hpr_or :=
+      prime_two_or_dvd_of_dvd_two_mul_pow_self_two (m := r) hp
+        (by simpa [pow_two] using hp_two_r2)
+    rcases hpr_or with hp2 | hpr_nat
+    · exact hp_ne_two hp2
+    · have hp_one : p = 1 :=
+        Nat.eq_one_of_dvd_coprimes hcopNat hpr_nat hpB_nat
+      exact hp.ne_one hp_one
+  · -- If `p ∤ B`, then `p^2` is coprime to `B^4`, so `p^2 ∣ 5`, impossible.
+    have hcop_p_B_nat : Nat.Coprime p B.natAbs := by
+      by_contra hpc
+      exact hpB_nat ((hp.dvd_iff_not_coprime).mpr hpc)
+    have hcop_p_B : IsCoprime (p : ℤ) B := by
+      rw [Int.isCoprime_iff_nat_coprime]
+      simpa using hcop_p_B_nat
+    have hcop_p2_B4 : IsCoprime ((p : ℤ) ^ 2) (B ^ 4) := by
+      simpa using (hcop_p_B.pow (m := 2) (n := 4))
+    have hp2_dvd_5 : (p : ℤ) ^ 2 ∣ (5 : ℤ) :=
+      hcop_p2_B4.dvd_of_dvd_mul_right hp2_5B4
+    have hp2_dvd_5_nat : p ^ 2 ∣ 5 := by
+      have h : ((p ^ 2 : ℕ) : ℤ) ∣ (5 : ℤ) := by
+        simpa [Int.natCast_pow] using hp2_dvd_5
+      exact Int.natCast_dvd.mp h
+    have hp_ge_three : 3 ≤ p := by
+      have hp_two_le : 2 ≤ p := hp.two_le
+      omega
+    have hp_sq_ge_nine : 9 ≤ p ^ 2 := by
+      nlinarith
+    have hp_sq_le_five : p ^ 2 ≤ 5 :=
+      Nat.le_of_dvd (by norm_num) hp2_dvd_5_nat
+    omega
+
+end DM3
 ```
 
-For the final proof, use two descent-step lemmas:
+Two practical notes:
+
+1. If your local file already opened a namespace and defines `UV_coprime` there, remove `namespace DM3`/`end DM3`.
+2. If your `UV_odd` theorem takes `hr_odd`/`hB_odd` in a different order, the only line to edit is:
 
 ```lean
-lemma quartic_plus_odd_descent_step ... :
-  ∃ r' B' s', 0 < r' ∧ 0 < B' ∧ B' < B ∧ ...
-
-lemma quartic_plus_even_descent_step ... :
-  ∃ r' B' s', 0 < r' ∧ 0 < B' ∧ B' < B ∧ ...
+have hUVodd := UV_odd (r := r) (B := B) (s := s) hr_odd hB_odd
 ```
 
-Then strong induction is clean:
-
-```lean
-theorem quartic_plus_no_nontrivial_solution :
-    ∀ r B s : ℤ,
-      0 < r → 0 < B →
-      Int.gcd r B = 1 →
-      s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4 →
-      r = 1 ∧ B = 1 := by
-  -- strong induction on B.natAbs
-  -- if B = 1: direct base case
-  -- if B > 1 and B odd: odd_descent_step gives smaller solution, contradiction by IH
-  -- if B > 1 and B even: even_descent_step gives smaller solution, contradiction by IH
-  sorry
-```
-
-Strictly, the induction hypothesis should be phrased as “no nontrivial solution with smaller positive `B`.”  If your descent step only returns a smaller solution, also prove that the returned solution is nontrivial when the input has `B > 1`.  In the even branch this is automatic from the construction: if the smaller solution were `(r',B')=(1,1)`, then the Pythagorean parameters force `a=b=1` and hence `r^2=4`, contradicting `r` odd.
-
-## Bottom line
-
-You cannot safely make `both_odd` an assumption in the descent core unless an upstream theorem already proves the initial `B` is odd.  In the rational-point application, there is no obvious reason the initial square-root denominator must be odd.
-
-So the robust architecture is:
-
-```text
-final descent theorem
-  ├─ B odd  → old factor pair U,V
-  └─ B even → normalized factor pair U/4,V/4 with B/2
-```
-
-After that theorem is proved, `B` odd is a corollary, not a prerequisite.
+The proof avoids manually reasoning about `Int.gcd > 1`; `Nat.Prime.not_coprime_iff_dvd` is exactly the same prime-extraction step, but after `Int.isCoprime_iff_nat_coprime` it gives the common prime divisor in the form Lean wants.
