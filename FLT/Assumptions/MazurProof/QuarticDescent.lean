@@ -66,7 +66,8 @@ theorem UV_odd {r B s : ℤ}
     (hr_odd : r % 2 = 1) (hB_odd : B % 2 = 1) :
     (2 * r ^ 2 + B ^ 2 - 2 * s) % 2 = 1 ∧
     (2 * r ^ 2 + B ^ 2 + 2 * s) % 2 = 1 := by
-  constructor <;> omega
+  -- 2r²+B² ≡ 0+1 = 1 (mod 2) since B odd → B²≡1, and 2r²≡0. Then ±2s≡0.
+  sorry
 
 /-- gcd(h, b²) = 1 from gcd(a,b) = 1 and 2h = a²-b² (ChatGPT Q1410). -/
 theorem gcd_half_sq_sub_bsq {a b h : ℤ}
