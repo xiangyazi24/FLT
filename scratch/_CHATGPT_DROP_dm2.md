@@ -1,203 +1,286 @@
-# Q1307 (dm2): cardinal inequality into a subtype without an existing `Finite` codomain instance
+# Q1317 (dm2/dm3): first half of `quartic_plus` descent in Lean 4
 
-## Main answer
+## Important correction before the Lean code
 
-You **cannot** get a `Finite` instance for the whole codomain from an injection
+As stated, the requested local claims cannot all be proved from the theorem hypotheses exactly as written.
 
-```lean
-f : A → {x : B // P x}
+The equation is invariant under `s ↦ -s`.  For the known trivial solution
+
+```text
+r = 1, B = 1, s = -1
 ```
 
-and `[Finite A]` alone.  The direction is mathematically false: a finite type injects into an infinite type.  For example, `PUnit` injects into `{n : ℕ // True}`, but `{n : ℕ // True}` is infinite.
+we get
 
-So the exact Lean answer is:
-
-* `Finite.of_injective` pulls finiteness **backwards** along an injection:
-
-  ```lean
-  Finite.of_injective : [Finite β] → (f : α → β) → Function.Injective f → Finite α
-  ```
-
-* `Set.Finite.of_injOn` also pulls finiteness **backwards** from the target set to the source set:
-
-  ```lean
-  Set.Finite.of_injOn :
-    Set.MapsTo f s t → Set.InjOn f s → t.Finite → s.Finite
-  ```
-
-* To push finiteness **forwards** from finite `A` to the subtype, you need **surjectivity** onto the subtype:
-
-  ```lean
-  Finite.of_surjective f hsurj
-  ```
-
-  or, for sets,
-
-  ```lean
-  Set.Finite.of_surjOn f hsurjOn hs
-  ```
-
-* If you only have an injection, what becomes finite is the **range/image**, not the whole codomain.
-
-For `Nat.card`, the standard theorem really needs a finite codomain because `Nat.card` has junk value `0` on infinite types.  The theorem is:
-
-```lean
-Nat.card_le_card_of_injective {α β : Type*} [Finite β]
-    (f : α → β) (hf : Function.Injective f) :
-    Nat.card α ≤ Nat.card β
+```text
+U = 2*r^2 + B^2 - 2*s = 5,
+V = 2*r^2 + B^2 + 2*s = 1,
 ```
 
-There is no unconditional `Nat.card` version for injections into possibly infinite types.  Use `ENat.card` if the codomain might be infinite.
+so `U < V` is false.  You must either add `0 < s`, or define the descent factors using `t = |s|`.
 
-## Exact incantations
+Also, `U` and `V` are odd immediately only in the odd-`B` branch: since
+
+```text
+U ≡ V ≡ B^2  mod 2.
+```
+
+So the clean first-half descent step below is the normalized branch with extra local hypotheses
+
+```lean
+(hBodd : Odd B) (hs : 0 < s)
+```
+
+If you want the original theorem, first replace `s` by `|s|` and split/prove the parity branch for `B` separately.
+
+## Lean code: first-half scaffold
+
+This is the shape I recommend putting into the local file.  The product, oddness, positivity, and `U < V` pieces are written out.  The two genuinely arithmetic seams are isolated as named lemmas:
+
+1. `quarticPlus_gcd_UV_eq_one`: the common-divisor calculation.
+2. `coprime_factorization_5_fourth`: the coprime factorization of `5 * B^4`.
+
+Those are exactly the next local lemmas to fill; everything around them is the first-half descent scaffold.
 
 ```lean
 import Mathlib
 
-open Function
+namespace QuarticPlusFirstHalf
 
-universe u v
+/-- The quartic-plus equation. -/
+def Qeq (r B s : ℤ) : Prop :=
+  s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4
 
-section General
+/-- First descent factor. -/
+def Udef (r B s : ℤ) : ℤ :=
+  2 * r ^ 2 + B ^ 2 - 2 * s
 
-variable {A : Type u} {B : Type v} {P : B → Prop}
-variable [Finite A]
-variable (f : A → {x : B // P x})
-variable (hf : Function.Injective f)
+/-- Second descent factor. -/
+def Vdef (r B s : ℤ) : ℤ :=
+  2 * r ^ 2 + B ^ 2 + 2 * s
 
-/-- If the subtype already has a `Finite` instance, just use the Nat-card theorem. -/
-example [Finite {x : B // P x}] :
-    Nat.card A ≤ Nat.card {x : B // P x} := by
-  exact Nat.card_le_card_of_injective f hf
+/-- The data produced by the first half of the descent. -/
+structure FirstHalfData (r B s : ℤ) : Prop where
+  U : ℤ
+  V : ℤ
+  hU_def : U = Udef r B s
+  hV_def : V = Vdef r B s
+  hprod : U * V = 5 * B ^ 4
+  hgcd : Int.gcd U V = 1
+  hUodd : Odd U
+  hVodd : Odd V
+  hUpos : 0 < U
+  hUVlt : U < V
+  hfactor :
+    ∃ a b : ℤ,
+      0 < a ∧ 0 < b ∧ a * b = B ∧
+        ((U = a ^ 4 ∧ V = 5 * b ^ 4) ∨
+         (U = 5 * a ^ 4 ∧ V = b ^ 4))
 
-/-- If the ambient type `B` is finite, the subtype is finite automatically. -/
-example [Finite B] :
-    Nat.card A ≤ Nat.card {x : B // P x} := by
-  haveI : Finite {x : B // P x} := inferInstance
-  exact Nat.card_le_card_of_injective f hf
+/-- Product identity:
 
-/-- If you have set-level finiteness of `{x | P x}`, turn it into subtype finiteness. -/
-example (hPfin : Set.Finite ({x : B | P x} : Set B)) :
-    Nat.card A ≤ Nat.card {x : B // P x} := by
-  haveI : Finite {x : B // P x} := hPfin.to_subtype
-  exact Nat.card_le_card_of_injective f hf
+`(2r^2+B^2-2s)(2r^2+B^2+2s) = 5B^4`.
+-/
+lemma quarticPlus_U_mul_V
+    {r B s : ℤ} (hEq : Qeq r B s) :
+    Udef r B s * Vdef r B s = 5 * B ^ 4 := by
+  unfold Qeq at hEq
+  unfold Udef Vdef
+  calc
+    (2 * r ^ 2 + B ^ 2 - 2 * s) * (2 * r ^ 2 + B ^ 2 + 2 * s)
+        = (2 * r ^ 2 + B ^ 2) ^ 2 - (2 * s) ^ 2 := by
+          ring
+    _ = 5 * B ^ 4 := by
+          rw [show (2 * s) ^ 2 = 4 * s ^ 2 by ring, hEq]
+          ring
 
-/-- If `f` is actually surjective onto the subtype, then the finite domain makes the subtype finite. -/
-example (hsurj : Function.Surjective f) :
-    Nat.card A ≤ Nat.card {x : B // P x} := by
-  haveI : Finite {x : B // P x} := Finite.of_surjective f hsurj
-  exact Nat.card_le_card_of_injective f hf
+lemma quarticPlus_U_odd_of_B_odd
+    {r B s : ℤ} (hBodd : Odd B) :
+    Odd (Udef r B s) := by
+  rcases hBodd with ⟨k, hk⟩
+  refine ⟨r ^ 2 + 2 * k ^ 2 + 2 * k - s, ?_⟩
+  unfold Udef
+  rw [hk]
+  ring
 
-/-- With only injectivity, the range is finite, not the whole codomain. -/
-example : Set.Finite (Set.range f) := by
-  simpa [Set.image_univ] using
-    (Set.finite_univ (α := A)).image f
+lemma quarticPlus_V_odd_of_B_odd
+    {r B s : ℤ} (hBodd : Odd B) :
+    Odd (Vdef r B s) := by
+  rcases hBodd with ⟨k, hk⟩
+  refine ⟨r ^ 2 + 2 * k ^ 2 + 2 * k + s, ?_⟩
+  unfold Vdef
+  rw [hk]
+  ring
 
-/-- If the codomain may be infinite, use `ENat.card`: no finite codomain hypothesis. -/
-example :
-    (Nat.card A : ℕ∞) ≤ ENat.card {x : B // P x} := by
-  simpa [ENat.card_eq_coe_natCard A] using
-    (ENat.card_le_card_of_injective (f := f) hf)
+lemma quarticPlus_V_pos
+    {r B s : ℤ} (hr : 0 < r) (hB : 0 < B) (hs : 0 < s) :
+    0 < Vdef r B s := by
+  unfold Vdef
+  have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero r (ne_of_gt hr)
+  have hB2 : 0 < B ^ 2 := sq_pos_of_ne_zero B (ne_of_gt hB)
+  nlinarith
 
-/-- There is a `Nat.card` version without `[Finite β]`, but it needs the junk-zero side condition. -/
-example (hzero : Nat.card {x : B // P x} = 0 → Nat.card A = 0) :
-    Nat.card A ≤ Nat.card {x : B // P x} := by
-  exact Finite.card_le_of_injective' (f := f) hf hzero
+lemma quarticPlus_U_lt_V
+    {r B s : ℤ} (hs : 0 < s) :
+    Udef r B s < Vdef r B s := by
+  unfold Udef Vdef
+  nlinarith
 
-end General
+lemma quarticPlus_U_pos_of_product
+    {r B s : ℤ} (hB : 0 < B)
+    (hprod : Udef r B s * Vdef r B s = 5 * B ^ 4)
+    (hVpos : 0 < Vdef r B s) :
+    0 < Udef r B s := by
+  have hB4 : 0 < B ^ 4 := pow_pos hB 4
+  have hprodpos : 0 < Udef r B s * Vdef r B s := by
+    rw [hprod]
+    nlinarith
+  exact pos_of_mul_pos_right hprodpos (le_of_lt hVpos)
+
+/-- The common-divisor seam.
+
+Mathematical proof sketch:
+
+* A common divisor of `U` and `V` divides `V-U = 4s` and `U+V = 2(2r^2+B^2)`.
+* Since `U,V` are odd, the common divisor has no factor `2`.
+* Any odd prime common divisor divides `U*V = 5B^4`.
+* If it divides `B`, then from `U+V ≡ 4r^2 (mod p)` it divides `r`, contradicting
+  `gcd r B = 1`.
+* The remaining possible prime is `5`; the same argument rules it out when `5 ∣ B`,
+  and otherwise `25 ∤ 5B^4` rules out both `U,V` being divisible by `5`.
+
+This is the lemma to fill after the first-half scaffold is in place.
+-/
+lemma quarticPlus_gcd_UV_eq_one
+    {r B s : ℤ}
+    (hr : 0 < r) (hB : 0 < B) (hBodd : Odd B)
+    (hcop : Int.gcd r B = 1)
+    (hEq : Qeq r B s) :
+    Int.gcd (Udef r B s) (Vdef r B s) = 1 := by
+  -- This is the arithmetic seam described above.
+  -- It is intentionally isolated so the descent scaffold below is clean.
+  sorry
+
+/-- Coprime factorization of `5 * B^4`.
+
+Given positive coprime factors `U,V` with product `5 * B^4`, exactly one side carries
+an exponent-one factor `5`; every other prime exponent is a multiple of `4`.  Thus one
+factor is a fourth power and the other is `5` times a fourth power.
+
+This should be proved from `Nat.factorization`/`Int.natAbs`, or by transporting to
+positive naturals and using prime-factor exponents.
+-/
+lemma coprime_factorization_5_fourth
+    {U V B : ℤ}
+    (hB : 0 < B) (hU : 0 < U) (hV : 0 < V)
+    (hprod : U * V = 5 * B ^ 4)
+    (hcop : Int.gcd U V = 1) :
+    ∃ a b : ℤ,
+      0 < a ∧ 0 < b ∧ a * b = B ∧
+        ((U = a ^ 4 ∧ V = 5 * b ^ 4) ∨
+         (U = 5 * a ^ 4 ∧ V = b ^ 4)) := by
+  -- Prime-factorization seam.  This is where the first-half descent stops.
+  sorry
+
+/-- The normalized first-half descent step.
+
+This is the part you want inside the strong-induction step, after replacing `s` by `|s|`
+if necessary and after entering the odd-`B` branch.
+-/
+theorem quarticPlus_firstHalf_step
+    {r B s : ℤ}
+    (hr : 0 < r) (hB : 0 < B)
+    (hBodd : Odd B) (hs : 0 < s)
+    (hcop : Int.gcd r B = 1)
+    (hEq : Qeq r B s) :
+    FirstHalfData r B s := by
+  classical
+  let U : ℤ := Udef r B s
+  let V : ℤ := Vdef r B s
+
+  have hprod : U * V = 5 * B ^ 4 := by
+    dsimp [U, V]
+    exact quarticPlus_U_mul_V hEq
+
+  have hUodd : Odd U := by
+    dsimp [U]
+    exact quarticPlus_U_odd_of_B_odd hBodd
+
+  have hVodd : Odd V := by
+    dsimp [V]
+    exact quarticPlus_V_odd_of_B_odd hBodd
+
+  have hVpos : 0 < V := by
+    dsimp [V]
+    exact quarticPlus_V_pos hr hB hs
+
+  have hUpos : 0 < U := by
+    dsimp [U, V] at hprod hVpos ⊢
+    exact quarticPlus_U_pos_of_product hB hprod hVpos
+
+  have hUVlt : U < V := by
+    dsimp [U, V]
+    exact quarticPlus_U_lt_V hs
+
+  have hgcd : Int.gcd U V = 1 := by
+    dsimp [U, V]
+    exact quarticPlus_gcd_UV_eq_one hr hB hBodd hcop hEq
+
+  have hfactor :
+      ∃ a b : ℤ,
+        0 < a ∧ 0 < b ∧ a * b = B ∧
+          ((U = a ^ 4 ∧ V = 5 * b ^ 4) ∨
+           (U = 5 * a ^ 4 ∧ V = b ^ 4)) :=
+    coprime_factorization_5_fourth hB hUpos hVpos hprod hgcd
+
+  exact
+    { U := U
+      V := V
+      hU_def := rfl
+      hV_def := rfl
+      hprod := hprod
+      hgcd := hgcd
+      hUodd := hUodd
+      hVodd := hVodd
+      hUpos := hUpos
+      hUVlt := hUVlt
+      hfactor := hfactor }
+
+/-- Strong-induction wrapper on `B.natAbs`.
+
+The induction hypothesis is not used in the first-half algebraic extraction; it becomes
+relevant only after `hfactor`, when one constructs the smaller solution.
+-/
+def FirstHalfGoalAt (n : ℕ) : Prop :=
+  ∀ r B s : ℤ,
+    B.natAbs = n →
+    0 < r → 0 < B → Odd B → 0 < s →
+    Int.gcd r B = 1 → Qeq r B s →
+    FirstHalfData r B s
+
+theorem quarticPlus_firstHalf_strong_induction :
+    ∀ n : ℕ, FirstHalfGoalAt n := by
+  intro n
+  refine Nat.strongRecOn n ?step
+  intro n IH
+  intro r B s hBn hr hB hBodd hs hcop hEq
+  -- `IH` will be used only in the second half, after constructing the smaller `B'`.
+  exact quarticPlus_firstHalf_step hr hB hBodd hs hcop hEq
+
+end QuarticPlusFirstHalf
 ```
 
-## For `A = ZMod p × ZMod p`
+## How to plug this into the original theorem
 
-If `p` is positive/prime and the subtype has a finite instance, this is the clean shape:
+For the original theorem with arbitrary `s`, do **not** try to prove `U < V` using `s` directly.  Normalize first:
 
 ```lean
-import Mathlib
-
-open Function
-
-example (p : ℕ) {B : Type*} {P : B → Prop}
-    [Fact p.Prime]
-    (f : ZMod p × ZMod p → {x : B // P x})
-    (hf : Function.Injective f)
-    [Finite {x : B // P x}] :
-    p * p ≤ Nat.card {x : B // P x} := by
-  have hcard :
-      Nat.card (ZMod p × ZMod p) ≤ Nat.card {x : B // P x} := by
-    exact Nat.card_le_card_of_injective f hf
-  simpa [Nat.card_prod, Nat.card_zmod] using hcard
+let t : ℤ := |s|
+have ht_nonneg : 0 ≤ t := by
+  dsimp [t]
+  exact abs_nonneg s
 ```
 
-If Lean has trouble synthesizing finite instances for `ZMod p` from `[Fact p.Prime]`, add the local explicit instance:
+Then prove `Qeq r B t` from `Qeq r B s` using `t^2 = s^2`.  After ruling out `t = 0`, call the first-half step with `s := t`.
 
-```lean
-  haveI : NeZero p := ⟨Fact.out.ne_zero⟩
-```
-
-before the `Nat.card_le_card_of_injective` line.
-
-## If your map is into `B` instead of directly into the subtype
-
-Suppose you have
-
-```lean
-g : A → B
-hgP : ∀ a, P (g a)
-hg_inj : Function.Injective g
-```
-
-then first package it into the subtype:
-
-```lean
-let f : A → {x : B // P x} := fun a => ⟨g a, hgP a⟩
-have hf : Function.Injective f := by
-  intro a a' h
-  apply hg_inj
-  exact congrArg Subtype.val h
-```
-
-Then use one of the cases above.
-
-If you want to prove the subtype finite from the finite domain, you need surjectivity:
-
-```lean
-example {A : Type*} {B : Type*} {P : B → Prop} [Finite A]
-    (g : A → B)
-    (hgP : ∀ a, P (g a))
-    (hsurj : ∀ y : B, P y → ∃ a : A, g a = y) :
-    Finite {x : B // P x} := by
-  let f : A → {x : B // P x} := fun a => ⟨g a, hgP a⟩
-  have hf_surj : Function.Surjective f := by
-    intro y
-    rcases hsurj y.1 y.2 with ⟨a, ha⟩
-    refine ⟨a, ?_⟩
-    ext
-    exact ha
-  exact Finite.of_surjective f hf_surj
-```
-
-## Bottom line
-
-Use this when the subtype is known finite:
-
-```lean
-haveI : Finite {x : B // P x} := hPfin.to_subtype
-exact Nat.card_le_card_of_injective f hf
-```
-
-Use this when the map is surjective onto the subtype:
-
-```lean
-haveI : Finite {x : B // P x} := Finite.of_surjective f hsurj
-exact Nat.card_le_card_of_injective f hf
-```
-
-Use this when the codomain may be infinite:
-
-```lean
-have hENat : (Nat.card A : ℕ∞) ≤ ENat.card {x : B // P x} := by
-  simpa [ENat.card_eq_coe_natCard A] using
-    (ENat.card_le_card_of_injective (f := f) hf)
-```
-
-Do **not** try to prove `[Finite {x : B // P x}]` from injectivity of `A → {x : B // P x}` and `[Finite A]`; that implication is false.
+The even-`B` branch should also be separated before using the `Odd B` lemmas above.  The displayed `quarticPlus_firstHalf_step` is the odd normalized branch; it is the branch in which the classical `U,V` factorization is exactly the clean one requested.
