@@ -40,14 +40,24 @@ lemma exponent_odd_prime_le_one
     (h_no_odd : ∀ q : ℕ, Nat.Prime q → 2 < q →
       ¬ ∃ f : ZMod q × ZMod q →+ G, Function.Injective f) :
     max_p_exponent G p ≤ 1 := by
-  sorry  -- If eₚ ≥ 2, then (ZMod p)² divides G, contradicting h_no_odd
+  by_contra h_contra
+  push_neg at h_contra
+  -- If eₚ ≥ 2, then (ZMod p)ᵉ contains (ZMod p)² as a direct summand
+  have hp_in_decomp : ∃ f : ZMod p × ZMod p →+ G, Function.Injective f := by
+    sorry  -- Extract from primary decomposition: e_p ≥ 2 → p² divides G
+  exact h_no_odd p hp h2p hp_in_decomp
 
 -- The hypothesis h_no_two → ¬((ℤ/2)³ ↪ G) implies e₂ ≤ 2
 lemma exponent_two_le_two
     (G : Type*) [AddCommGroup G] [Finite G]
     (h_no_two : ¬ ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+ G, Function.Injective f) :
     max_p_exponent G 2 ≤ 2 := by
-  sorry  -- If e₂ ≥ 3, then (ℤ/2)³ divides G, contradicting h_no_two
+  by_contra h_contra
+  push_neg at h_contra
+  -- If e₂ ≥ 3, then (ℤ/2)³ divides G, contradicting h_no_two
+  have h2_in_decomp : ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+ G, Function.Injective f := by
+    sorry  -- Extract from primary decomposition: e_2 ≥ 3 → 2³ divides G
+  exact h_no_two h2_in_decomp
 
 -- Helper: Chinese Remainder Theorem assembly for two-factor form
 -- Given finite list of prime powers pᵢ^eᵢ, group into m × n where m | n
