@@ -44,21 +44,38 @@ lemma exponent_two_le_two
     max_p_exponent G 2 ≤ 2 := by
   sorry  -- If e₂ ≥ 3, then (ℤ/2)³ divides G, contradicting h_no_two
 
+-- Helper: Chinese Remainder Theorem assembly for two-factor form
+-- Given finite list of prime powers pᵢ^eᵢ, group into m × n where m | n
+lemma crt_two_factor_decomposition (primes : List ℕ) (exponents : ℕ → ℕ) :
+    ∃ (m n : ℕ), 0 < m ∧ 0 < n ∧ m ∣ n ∧
+      (∀ i, ZMod (primes.get i ^ exponents i) ≃+ ℤ/m × ℤ/n) := by
+  sorry  -- CRT groups all odd-prime components into m, and 2^e₂ into n's second factor
+
+-- The reduction step: separate G into (odd part) ⊕ (2-part)
+lemma primary_to_binary
+    (G : Type*) [AddCommGroup G] [Finite G]
+    (e_odd : ∃ G_odd : Type*, AddCommGroup G_odd ∧ Finite G_odd)
+    (e_two : ∃ G_two : Type*, AddCommGroup G_two ∧ Finite G_two) :
+    ∃ (m n : ℕ), (G ≃+ G_odd × G_two) ∧ (0 < m ∧ 0 < n ∧ m ∣ n) := by
+  sorry  -- Separates the ⊕ into binary form
+
 theorem primary_decomposition_respects_rank_bounds
     (G : Type*) [AddCommGroup G] [Finite G]
     (h_no_odd : ∀ p : ℕ, Nat.Prime p → 2 < p →
       ¬ ∃ f : ZMod p × ZMod p →+ G, Function.Injective f)
     (h_no_two : ¬ ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+ G, Function.Injective f) :
     ∃ (m n : ℕ), 0 < m ∧ 0 < n ∧ m ∣ n ∧ (G ≃+ ℤ/m × ℤ/n) := by
-  -- 1. Apply AddCommGroup.equiv_directSum_zmod_of_finite
+  -- Step 1: Primary decomposition via Mathlib
   obtain ⟨ι, e⟩ := AddCommGroup.equiv_directSum_zmod_of_finite G
-  -- 2. Collect exponents via helper
-  -- 3. For odd p: use exponent_odd_prime_le_one to get eₚ ≤ 1
-  -- 4. For p=2: use exponent_two_le_two to get e₂ ≤ 2
-  -- 5. Define m = ∏(odd p) pᵉᵖ, n = 2^e₂ * m
-  -- 6. Group the ⊕ decomposition into two factors using CRT
-  -- 7. Return the combined equivalence G ≃+ ℤ/m × ℤ/n
-  sorry  -- This is the main assembly: ~400 LOC to wire all pieces
+  -- Step 2: Extract exponent bounds
+  have e_odd_bound : ∀ p : ℕ, Nat.Prime p → 2 < p → max_p_exponent G p ≤ 1 :=
+    fun p hp h2p => exponent_odd_prime_le_one G p hp h2p h_no_odd
+  have e_two_bound : max_p_exponent G 2 ≤ 2 :=
+    exponent_two_le_two G h_no_two
+  -- Step 3: Separate odd and 2-part
+  -- Step 4: Apply CRT to group into m × n
+  -- Step 5: Combine via equivalence composition
+  sorry  -- ~200 LOC: implement steps 3-5 with CRT machinery
 
 /-! ## Phase 2: Package into TwoInvariantFactorData -/
 
