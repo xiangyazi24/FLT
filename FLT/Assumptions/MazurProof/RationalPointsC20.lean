@@ -143,7 +143,7 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
         rcases Int.natAbs_eq A with h | h <;> omega
       have hB4 : B ^ 4 - B ^ 2 = 1 := by nlinarith
       by_cases hB1 : B = 1
-      · nlinarith
+      · subst hB1; omega
       · nlinarith [sq_nonneg (B ^ 2 - 1), show 2 ≤ B by omega]
   · -- Case A = -r² ≤ 0. Since A ≠ 0, r ≠ 0.
     have hr0 : r ≠ 0 := by intro h; rw [h] at hrneg; simp at hrneg; exact hA0 hrneg
@@ -175,7 +175,7 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
         rcases Int.natAbs_eq A with h | h <;> omega
       have hB4 : B ^ 4 - B ^ 2 = 1 := by nlinarith
       by_cases hB1 : B = 1
-      · nlinarith
+      · subst hB1; omega
       · nlinarith [sq_nonneg (B ^ 2 - 1), show 2 ≤ B by omega]
     · -- second = -s²: apply quartic_minus_of_plus
       have heq : s ^ 2 = -(|r| ^ 4) + |r| ^ 2 * B ^ 2 + B ^ 4 := by
