@@ -85,24 +85,23 @@ private theorem galois_descent_roots_of_unity
   intro ζ hζ
   -- Strategy: Show that ζ is fixed by Gal(ℚ̄/ℚ), then apply fixed-point theorem
 
-  -- Step 1: All σ ∈ Gal(ℚ̄/ℚ) fix E[m]
-  -- (Follows from HasFullRationalTorsion E m meaning all torsion is ℚ-rational)
+  -- The core argument uses the non-degeneracy of the Weil pairing:
+  --   e: E[m] × E[m] → μ_m
+  --
+  -- Since E[m] is fully rational over ℚ (from HasFullRationalTorsion),
+  -- any σ ∈ Gal(ℚ̄/ℚ) acts trivially on E[m], i.e., σ(P) = P for all P ∈ E[m].
+  --
+  -- By Galois-equivariance of the pairing: σ(e(P,Q)) = e(σ(P), σ(Q)) = e(P,Q)
+  --
+  -- Non-degeneracy means: For P ≠ 0, the map Q ↦ e(P,Q) is surjective E[m] → μ_m.
+  -- Therefore σ fixes the image, hence σ fixes μ_m.
+  --
+  -- In particular, σ(ζ) = ζ for all σ ∈ Gal(ℚ̄/ℚ).
+  --
+  -- By Galois descent (fixed-point theorem), ζ ∈ ℚ.
 
-  -- Step 2: Weil pairing is Galois-equivariant
-  -- σ(e(P,Q)) = e(σ(P), σ(Q)) for the pairing e: E[m] × E[m] → μ_m
-
-  -- Step 3: Non-degeneracy extends to homomorphisms
-  -- The map φ_P : Q ↦ e(P,Q) is a bijection E[m] → Hom(E[m], μ_m)
-  -- for any P ≠ 0
-
-  -- Step 4: Trivial action on E[m] lifts to μ_m
-  -- Since σ fixes E[m], σ(φ_P) = φ_P for all P
-  -- Therefore σ(e(P,Q)) = e(P,Q), so σ fixes μ_m
-
-  -- Step 5: Apply Galois fixed-point theorem
-  -- ζ is fixed by all σ ∈ Gal(ℚ̄/ℚ)
-  -- By field theory, ζ ∈ ℚ
-
+  -- TODO: Formalize the Weil pairing and apply the descent argument
+  -- For now, we use the classical result that this holds for elliptic curves
   sorry
 
 /-! ## Main Theorem: Discharge the Weil Pairing Axiom -/
