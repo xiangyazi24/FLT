@@ -95,11 +95,32 @@ private theorem nat_isSquare_of_isSquare_cube {n : ℕ} (hn : n ≠ 0)
         _ = n * d * (n * d) := hc
         _ = n ^ 2 * (d * d) := by ring)⟩
 
-axiom rat_denom_square (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
-    ∃ A B : ℤ, 0 < B ∧ Int.gcd A B = 1 ∧ u = (A : ℚ) / (B : ℚ) ^ 2
--- Proof path (ChatGPT Q1295): den_cubic_num_den shows (u³+u²-u).den = u.den³,
--- then Rat.isSquare_iff gives u.den³ is square, then nat_isSquare_of_isSquare_cube
--- gives u.den is square. Write u = u.num / (√den)².
+/-- The denominator of `u³+u²-u` equals `u.den³`. -/
+private theorem den_cubic (u : ℚ) :
+    ((u ^ 3 + u ^ 2 - u).den : ℤ) = (u.den : ℤ) ^ 3 := by
+  sorry -- IsCoprime chain: a³+a²d-ad² coprime to d³ from u.reduced, then Rat.den_div_eq_of_coprime
+
+/-- Rational points on `w²=u³+u²-u` have denominator that is a perfect square. -/
+theorem rat_denom_square (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
+    ∃ A B : ℤ, 0 < B ∧ Int.gcd A B = 1 ∧ u = (A : ℚ) / (B : ℚ) ^ 2 := by
+  -- w² = u³+u²-u is a square in ℚ
+  have hsq : IsSquare (u ^ 3 + u ^ 2 - u) := ⟨w, by rw [← h]; ring⟩
+  -- By Rat.isSquare_iff: den is a square
+  have hden_sq : IsSquare (u ^ 3 + u ^ 2 - u).den := (Rat.isSquare_iff.mp hsq).2
+  -- den = u.den³
+  have hden_eq : (u ^ 3 + u ^ 2 - u).den = u.den ^ 3 := by exact_mod_cast den_cubic u
+  -- u.den³ is a square → u.den is a square
+  have hden3_sq : IsSquare (u.den ^ 3) := hden_eq ▸ hden_sq
+  have hden_sq' : IsSquare u.den := nat_isSquare_of_isSquare_cube u.den_ne_zero hden3_sq
+  -- Write u = u.num / B² where B² = u.den
+  obtain ⟨B₀, hB₀⟩ := hden_sq'
+  have hB₀_pos : 0 < B₀ := Nat.pos_of_ne_zero (by intro h; simp [h] at hB₀; exact u.den_ne_zero hB₀)
+  refine ⟨u.num, (B₀ : ℤ), by exact_mod_cast hB₀_pos, ?_, ?_⟩
+  · -- gcd(u.num, B₀) = 1: B₀ | u.den, and gcd(u.num, u.den) = 1
+    sorry -- from u.reduced and B₀ | u.den via Nat.Coprime.coprime_dvd_right
+  · -- u = u.num / B₀²
+    calc u = (u.num : ℚ) / (u.den : ℚ) := by simpa using (Rat.num_div_den u).symm
+      _ = (u.num : ℚ) / ((B₀ : ℚ) ^ 2) := by rw [hB₀]; push_cast; ring
 
 /-! ## Main theorem -/
 
