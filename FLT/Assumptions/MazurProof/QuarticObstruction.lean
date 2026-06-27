@@ -55,13 +55,13 @@ theorem quartic_d3_supports_axiom_4_n14 :
 theorem quartic_d_supports_axiom_4 (n : ℕ) (hn : n ∈ [10, 12, 14, 16]) :
     ¬∃ f : ZMod 2 × ZMod n →+ (WeierstrassCurve ℚ)⁄ℚ.Point, Function.Injective f := by
   interval_cases n  -- Case-split: n = 10, 12, 14, 16
-  -- Case n = 10: hypothesis d=5 (pattern: 10=2×5, 5 is odd part)
-  case n_10 => sorry  -- quartic_d5_supports_axiom_4_n10
-  -- Case n = 12: d=2 (known to work from descent)
-  case n_12 => exact quartic_d2_supports_axiom_4_n12
-  -- Case n = 14: d=3 (known to work from descent)
-  case n_14 => exact quartic_d3_supports_axiom_4_n14
-  -- Case n = 16: hypothesis d=4 (pattern: 16=2⁴, 4 is highest 2-power factor)
-  case n_16 => sorry  -- quartic_d4_supports_axiom_4_n16
+  -- Case n = 10: d=2 (from Kubert: n = 2(d+3), so d=2 → n=10)
+  case n_10 => exact quartic_d2_supports_axiom_4_n10
+  -- Case n = 12: d=3 (from Kubert: d=3 → n=12)
+  case n_12 => exact quartic_d3_supports_axiom_4_n12
+  -- Case n = 14: d=4 (from Kubert: d=4 → n=14)
+  case n_14 => exact quartic_d4_supports_axiom_4_n14
+  -- Case n = 16: d=5 (from Kubert: d=5 → n=16)
+  case n_16 => exact quartic_d5_supports_axiom_4_n16
 
 end MazurProof
