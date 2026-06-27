@@ -335,7 +335,7 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
     have hprodGF₂ : G * F₂ = C ^ 4 := by
       apply mul_left_cancel₀ (show (5 : ℤ) ≠ 0 from by norm_num)
       calc 5 * (G * F₂) = (5 * G) * F₂ := by ring
-        _ = F₁ * F₂ := by rw [hF₁eq]
+        _ = F₁ * F₂ := by rw [← hF₁eq]
         _ = 5 * C ^ 4 := hprod
     have hcopGF₂ : IsCoprime G F₂ := by
       have h := hcopI; rw [hF₁eq] at h; exact h.of_mul_left_right
@@ -359,7 +359,7 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
     have hprodF₁G : F₁ * G = C ^ 4 := by
       apply mul_left_cancel₀ (show (5 : ℤ) ≠ 0 from by norm_num)
       calc 5 * (F₁ * G) = F₁ * (5 * G) := by ring
-        _ = F₁ * F₂ := by rw [hF₂eq]
+        _ = F₁ * F₂ := by rw [← hF₂eq]
         _ = 5 * C ^ 4 := hprod
     have hcopF₁G : IsCoprime F₁ G := by
       have h := hcopI; rw [hF₂eq] at h; exact h.of_mul_right_right
