@@ -103,16 +103,26 @@ theorem primary_decomposition_respects_rank_bounds
     exponent_two_le_two G h_no_two
 
   -- Step 3: Extract odd_part and e_two from primary decomposition
-  -- odd_part = ∏_{p odd prime, eₚ ≥ 1} p^(min(eₚ, 1))
-  -- Since h_no_odd forces eₚ ≤ 1 for all odd p, this is just ∏ p for p | order(G)
+  -- odd_part = ∏_{p odd prime, eₚ ≥ 1} p^eₚ (each eₚ ≤ 1 by h_no_odd)
+  -- e_two = max_p_exponent G 2 (at most 2 by h_no_two)
+
+  have all_odd_exp_le_one : ∀ p : ℕ, Nat.Prime p → 2 < p →
+      max_p_exponent G p ≤ 1 :=
+    fun p hp h2p => exponent_odd_prime_le_one G p hp h2p h_no_odd
+
+  have two_exp_le_two : max_p_exponent G 2 ≤ 2 :=
+    exponent_two_le_two G h_no_two
+
   let odd_part : ℕ := by
-    sorry  -- Compute product of odd primes dividing order(G), each with exponent 1
+    sorry  -- ∏ p^eₚ over odd primes p where eₚ = max_p_exponent G p
+            -- (eₚ ≤ 1 for all odd p by all_odd_exp_le_one)
   let e_two : ℕ := max_p_exponent G 2
 
   have odd_part_pos : 0 < odd_part := by
-    sorry  -- odd_part ≥ 1 (includes at least 1, or 1 if no odd primes)
+    sorry  -- Product of prime powers, so ≥ 1
   have e_two_pos : 0 < e_two := by
-    sorry  -- e_two ≥ 1 (G is finite, so 2^e divides it for some e ≥ 1; e_two ≤ 2)
+    sorry  -- G is finite → 2^e | order(G) for some e ≥ 1
+            -- (and e ≤ 2 from two_exp_le_two)
 
   -- Step 5: Apply CRT to combine
   obtain ⟨m, n, hm, hn, hmn, crt_iso⟩ :=
