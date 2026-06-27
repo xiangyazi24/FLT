@@ -117,7 +117,8 @@ private theorem den_cubic (u : ℚ) :
     Int.isCoprime_iff_nat_coprime.mp hNd3
   -- u³+u²-u = N/d³
   have hrepr : u ^ 3 + u ^ 2 - u = (N : ℚ) / (d ^ 3 : ℚ) := by
-    have hu : u = (a : ℚ) / (d : ℚ) := by simpa using (Rat.num_div_den u).symm
+    have hu : u = (a : ℚ) / (d : ℚ) := by
+      simp only [a, d]; push_cast; exact (Rat.num_div_den u).symm
     rw [hu]; field_simp [hdne]; simp only [N]; ring
   rw [hrepr]
   exact_mod_cast Rat.den_div_eq_of_coprime (by positivity) hNd3_nat
