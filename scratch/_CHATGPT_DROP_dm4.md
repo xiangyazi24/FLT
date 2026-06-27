@@ -1,149 +1,343 @@
-# Q1271 (dm4): Lean skeleton for `Z2xZ10_gives_non_degenerate_E20_point`
+# Q1297 (dm4): minimal proof of `kubert_C10_square`
 
 ## Executive answer
 
-For Lean, split the task into two layers.
-
-1. **Kubert/moduli bridge**: from an arbitrary elliptic curve over `Q` with torsion containing `Z/2Z × Z/10Z`, produce a rational parameter `t` and a square root of the quadratic 2-torsion discriminant:
+Yes: the minimal mathematical proof of
 
 ```text
-∃ t s : ℚ,
-  Δ10(t) ≠ 0 ∧ s^2 = A10(t)^2 - 4 B10(t).
+kubert_C10_square:
+  E/ℚ has a subgroup ℤ/2ℤ × ℤ/10ℤ
+  → ∃ t s : ℚ, Delta10(t) ≠ 0 ∧ s^2 = A10(t)^2 - 4 * B10(t)
 ```
 
-This is the only part that really uses Kubert's theorem or the moduli interpretation of `X_1(10)`.
+is exactly:
 
-2. **Pure algebra layer**: prove directly from the explicit coefficients that
+1. Use only the **order-10 Tate/Kubert row**: if `E/ℚ` has a rational point `P` of exact order `10`, then the pointed curve `(E,P)` is ℚ-isomorphic to the explicit cyclic-10 family `W10(t)` for some `t : ℚ`, with `Delta10(t) ≠ 0`.
+2. Use only elementary algebra for the extra `2`-torsion: on
 
 ```text
-A10(t)^2 - 4 B10(t) = 256 t^5(t^2 + t - 1),
+W10(t):  y^2 = x^3 + A10(t) x^2 + B10(t) x
+       = x * (x^2 + A10(t) x + B10(t)),
 ```
 
-so, if `t ≠ 0`, setting
+the point `(0,0)` is the order-2 point `5P`. An independent rational order-2 point gives a rational root `r` of
 
 ```text
-w = s / (16 t^2)
+x^2 + A10(t) x + B10(t) = 0.
 ```
 
-gives
+Then, with
 
 ```text
-w^2 = t^3 + t^2 - t.
+s := 2*r + A10(t),
 ```
 
-Then `Δ10(t) ≠ 0` implies `t ∉ {-1, 0, 1}`, so this gives a nondegenerate rational point on
+one has
 
 ```text
-E20 : w^2 = u^3 + u^2 - u.
+s^2 = A10(t)^2 - 4*B10(t).
 ```
 
-This means you can avoid formalizing full Kubert theory **inside this lemma**.  Instead, use a smaller imported theorem/axiom whose output is the square-condition certificate above.  Everything after that is `ring_nf`, `field_simp`, and elementary case splitting on `t = -1,0,1`.
+So the square condition is not a separate modular fact. It is a one-line quadratic-root calculation.
 
-## Minimal definitions
+The genuine hard input is therefore not the square condition. The genuine hard input is the **single `C10` Tate/Kubert parametrization row**, or equivalently a theorem that transports the extra 2-torsion to a rational root of the remaining quadratic factor on `W10(t)`.
 
-You need only these explicit objects in the downstream formalization:
+You do **not** need full Kubert theory for every torsion order. But you cannot completely avoid the `C10` row if the starting hypothesis is an arbitrary elliptic curve over `ℚ` with a point of order `10`. Proving “point of order 10 ⇒ this explicit `W10(t)`” is already the relevant Kubert/Tate-normal-form theorem for this case.
 
-```text
-F10(t) = 1 + 2t - 5t^2 - 5t^4 - 2t^5 + t^6
-A10(t) = -2 F10(t)
-B10(t) = (t^2 - 1)^5 (t^2 - 4t - 1)
+## The recommended minimal theorem boundary
 
-E10(t) : y^2 = x^3 + A10(t)x^2 + B10(t)x
+For Lean, I would not try to prove the current axiom directly from a large “isomorphic to `W10(t)`” statement inside the Mazur descent file. Instead, split it at the exact boundary where the hard moduli/Tate-normal-form content ends and the easy algebra begins.
 
-Δ10(t) = 4096 t^5(t^2+t-1)(t^2-1)^10(t^2-4t-1)^2
-
-E20 : w^2 = u^3 + u^2 - u
-BadU(u) : u = -1 ∨ u = 0 ∨ u = 1
-```
-
-The only Kubert-side input needed for the target lemma is:
-
-```text
-Kubert bridge:
-  if W/Q has Z/2Z × Z/10Z torsion, then
-  ∃ t s, Δ10(t) ≠ 0 ∧ s^2 = A10(t)^2 - 4B10(t).
-```
-
-That bridge can later be replaced by a real proof using Tate normal form, the change of variables to `E10(t)`, and the fact that an independent rational order-2 point forces the remaining quadratic 2-torsion factor to split.
-
-## Can you work directly with `E_t`?
-
-Yes, for the algebraic part.
-
-Once you are on
-
-```text
-E10(t) : y^2 = x^3 + A10(t)x^2 + B10(t)x = x(x^2 + A10(t)x + B10(t)),
-```
-
-the point `(0,0)` is the rational order-2 point coming from `5P`.  Full rational 2-torsion is equivalent to the quadratic
-
-```text
-x^2 + A10(t)x + B10(t)
-```
-
-having rational roots, equivalently to
-
-```text
-A10(t)^2 - 4B10(t)
-```
-
-being a rational square.  Then the obstruction point on `E20` is immediate.
-
-But to go from an **arbitrary** `E/Q` with a point of order `10` to this specific `E10(t)` family, you still need Kubert/Tate-normal-form coverage, or you keep it as a bridge axiom.  The recommended formalization is therefore:
-
-```text
-Z2xZ10 on arbitrary W
-  -- Kubert bridge, imported/axiomatized for now
-∃ t s, Δ10(t) ≠ 0 ∧ s^2 = A10(t)^2 - 4B10(t)
-  -- proved now by explicit algebra
-∃ u w, w^2 = u^3 + u^2 - u ∧ u ∉ {-1,0,1}.
-```
-
-## How to encode `Z/2Z × Z/10Z` torsion in the `WeierstrassCurve` API
-
-There are two useful predicates.
-
-The most literal subgroup statement is an injective additive homomorphism:
+Use this as the hard bridge:
 
 ```lean
-def HasSubgroupZ2xZ10 (W : WeierstrassCurve ℚ) : Prop :=
-  ∃ φ : (ZMod 10 × ZMod 2) →+ W.Point, Function.Injective φ
+/-- Hard Tate/Kubert C10 bridge, plus the extra 2-torsion transported to W10.
+
+This is the only theorem that should depend on Tate normal form / Kubert.
+It is slightly more geometric than the square statement but still much easier to use
+than a full pointed-curve isomorphism API.
+-/
+axiom c10_extra_two_root_bridge
+    {W : WeierstrassCurve ℚ} [W.IsElliptic]
+    (h : HasSubgroupZ2xZ10 W) :
+    ∃ t r : ℚ,
+      Delta10 t ≠ 0 ∧
+      r ^ 2 + A10 t * r + B10 t = 0
 ```
 
-For actually using Kubert, the generator form is easier:
+Then prove the current axiom from that bridge by pure algebra:
 
 ```lean
-def HasGeneratorsZ2xZ10 (W : WeierstrassCurve ℚ) : Prop :=
-  ∃ P Q : W.Point,
-    addOrderOf P = 10 ∧
-    addOrderOf Q = 2 ∧
-    Q ≠ 5 • P
+lemma square_of_quadratic_root {A B r : ℚ}
+    (hr : r ^ 2 + A * r + B = 0) :
+    ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B := by
+  refine ⟨2 * r + A, ?_⟩
+  have hlin : r ^ 2 + A * r = -B := by
+    linarith
+  calc
+    (2 * r + A) ^ 2 = A ^ 2 + 4 * (r ^ 2 + A * r) := by ring
+    _ = A ^ 2 - 4 * B := by
+      rw [hlin]
+      ring
+
+theorem kubert_C10_square_from_root_bridge
+    {W : WeierstrassCurve ℚ} [W.IsElliptic]
+    (hroot : ∃ t r : ℚ,
+      Delta10 t ≠ 0 ∧
+      r ^ 2 + A10 t * r + B10 t = 0) :
+    ∃ t s : ℚ,
+      Delta10 t ≠ 0 ∧
+      s ^ 2 = A10 t ^ 2 - 4 * B10 t := by
+  rcases hroot with ⟨t, r, hΔ, hr⟩
+  rcases square_of_quadratic_root (A := A10 t) (B := B10 t) (r := r) hr with ⟨s, hs⟩
+  exact ⟨t, s, hΔ, hs⟩
+
+theorem kubert_C10_square
+    {W : WeierstrassCurve ℚ} [W.IsElliptic]
+    (h : HasSubgroupZ2xZ10 W) :
+    ∃ t s : ℚ,
+      Delta10 t ≠ 0 ∧
+      s ^ 2 = A10 t ^ 2 - 4 * B10 t := by
+  exact kubert_C10_square_from_root_bridge (c10_extra_two_root_bridge h)
 ```
 
-Here `P` is the order-`10` point, `5 • P` is the order-`2` point inside the cyclic subgroup generated by `P`, and `Q ≠ 5 • P` says that the extra order-`2` point is independent.  In an abelian group, this is the practical generator-level version of containing `Z/10Z × Z/2Z`.  You can prove equivalence with the injective-hom version later as a standalone group-theory lemma.
+This is the smallest clean proof architecture. It moves all nontrivial elliptic-curve classification into `c10_extra_two_root_bridge`, and leaves `kubert_C10_square` as a proved theorem rather than an axiom.
 
-In current mathlib, `W.Point` is the type of nonsingular points on the affine Weierstrass curve; it has an `AddCommGroup` instance over a field.  Affine points are built either as `.some x y hns`, where `hns : W.Nonsingular x y`, or, when `[W.IsElliptic]`, by `W.Point.mk h`, where `h : W.Equation x y`.
+## Why the extra 2-torsion gives the square condition
 
-## Lean 4 skeleton
+On a curve
 
-This is the skeleton I would put in the FLT codebase.  It intentionally isolates the Kubert bridge as the single imported/axiomatized theorem.  The algebraic lemmas after the bridge are the parts to prove now.
+```text
+W_A_B : y^2 = x^3 + A*x^2 + B*x = x*(x^2 + A*x + B)
+```
+
+over `ℚ`, with characteristic not `2`, negation is `(x,y) ↦ (x,-y)`. Thus an affine nonzero point has order `2` exactly when `y = 0`. The nonzero 2-torsion points are therefore the roots of
+
+```text
+x * (x^2 + A*x + B).
+```
+
+For `W10(t)`, the cyclic order-10 point `P` has `5P = (0,0)`, so the subgroup generated by `P` already accounts for the root `x = 0`. A subgroup `ℤ/2ℤ × ℤ/10ℤ` gives an additional order-2 point `Q` not equal to `(0,0)`. Hence `Q = (r,0)` with `r ≠ 0`, and the equation forces
+
+```text
+r^2 + A10(t)*r + B10(t) = 0.
+```
+
+Then
+
+```text
+(2r + A10(t))^2
+  = 4r^2 + 4A10(t)r + A10(t)^2
+  = A10(t)^2 - 4B10(t).
+```
+
+This proof uses only one extra rational root, not a full split statement. Full rational 2-torsion is stronger than needed. Since the cubic already has the rational root `0`, the existence of one more rational root implies the third root is rational as well, but the square certificate does not need that observation.
+
+## Is there a shortcut avoiding full Kubert theory?
+
+There is a useful shortcut, but not a magic one.
+
+### What you can avoid
+
+You can avoid formalizing the entire Kubert table and all torsion orders. For this axiom, you only need the `n = 10` row.
+
+A reasonable theorem is:
 
 ```lean
-import Mathlib
+theorem exists_W10_of_order_ten
+    {W : WeierstrassCurve ℚ} [W.IsElliptic]
+    (P : AffPoint W)
+    (hP : addOrderOf P = 10) :
+    ∃ t : ℚ,
+      Delta10 t ≠ 0 ∧
+      PointedCurveIsoToW10 W P t
+```
 
+But in practice I would make the conclusion even closer to what is needed:
+
+```lean
+theorem exists_W10_quadratic_root_of_Z2xZ10
+    {W : WeierstrassCurve ℚ} [W.IsElliptic]
+    (h : HasSubgroupZ2xZ10 W) :
+    ∃ t r : ℚ,
+      Delta10 t ≠ 0 ∧
+      r ^ 2 + A10 t * r + B10 t = 0
+```
+
+This avoids exposing a large pointed-isomorphism structure to downstream code.
+
+### What you cannot avoid
+
+If the input is an arbitrary curve `E/ℚ`, you still need a proof that a rational point of order `10` puts `(E,P)` into the explicit one-parameter `C10` family. Proving this directly from Tate normal form is basically the Kubert `C10` row.
+
+The proof can be elementary:
+
+1. Move `P` to `(0,0)`.
+2. Put the curve into Tate normal form
+
+   ```text
+   E(b,c): y^2 + (1-c)xy - b y = x^3 - b x^2,
+   ```
+
+   with `P = (0,0)`.
+3. Compute the multiples of `P` and impose exact order `10`.
+4. Solve the resulting equations by a rational parameter `t`.
+5. Change variables from this Tate normal form to the chosen `W10(t)` model.
+
+This is much smaller than formalizing all of Kubert, but it is still the `C10` Kubert/Tate computation. In Lean, this is likely the only serious missing proof.
+
+## Mathlib API status, June 2026
+
+Current Mathlib has good **general Weierstrass-curve infrastructure**, but it does not appear to have a ready-made Tate normal form or Kubert torsion-family API.
+
+Relevant existing API:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
+import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
+import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
+```
+
+Useful pieces:
+
+1. `WeierstrassCurve R`
+
+   ```lean
+   structure WeierstrassCurve (R) where
+     a₁ : R
+     a₂ : R
+     a₃ : R
+     a₄ : R
+     a₆ : R
+   ```
+
+   It has standard quantities:
+
+   ```lean
+   W.b₂
+   W.b₄
+   W.b₆
+   W.b₈
+   W.c₄
+   W.c₆
+   W.Δ
+   W.j
+   ```
+
+2. `WeierstrassCurve.IsElliptic`
+
+   This is the typeclass assertion that `W.Δ` is a unit. Over `ℚ`, this is equivalent to `W.Δ ≠ 0`.
+
+3. `WeierstrassCurve.VariableChange R`
+
+   This is the admissible change of variables `(u,r,s,t)`, with `u : Rˣ`, and it acts on Weierstrass curves:
+
+   ```lean
+   C • W
+   ```
+
+   Available lemmas include:
+
+   ```lean
+   WeierstrassCurve.variableChange_a₁
+   WeierstrassCurve.variableChange_a₂
+   WeierstrassCurve.variableChange_a₃
+   WeierstrassCurve.variableChange_a₄
+   WeierstrassCurve.variableChange_a₆
+   WeierstrassCurve.variableChange_Δ
+   WeierstrassCurve.variableChange_j
+   ```
+
+   It preserves ellipticity.
+
+4. Normal forms
+
+   `NormalForms.lean` has characteristic/short normal forms:
+
+   ```lean
+   WeierstrassCurve.IsCharNeTwoNF
+   WeierstrassCurve.exists_variableChange_isCharNeTwoNF
+   WeierstrassCurve.IsShortNF
+   WeierstrassCurve.exists_variableChange_isShortNF
+   WeierstrassCurve.IsCharTwoNF
+   WeierstrassCurve.IsCharThreeNF
+   ```
+
+   These are **not** Tate normal forms. They are useful for putting `a₁ = a₃ = 0` or short Weierstrass form, but they do not encode a chosen torsion point.
+
+5. Points and group law
+
+   Mathlib has affine and projective point types:
+
+   ```lean
+   WeierstrassCurve.Affine.Point
+   WeierstrassCurve.Projective.Point
+   ```
+
+   The affine point API has constructors around equation/nonsingularity, including a `Point.mk` in the elliptic case:
+
+   ```lean
+   W.Point.mk h
+   -- where h : W.Equation x y
+   ```
+
+   depending on namespace/import setup; if elaboration is fragile, use the fully-qualified affine namespace.
+
+   Projective points have an `AddCommGroup` instance and an affine/projective additive equivalence:
+
+   ```lean
+   WeierstrassCurve.Projective.Point.toAffineAddEquiv
+   ```
+
+6. 2-torsion polynomial
+
+   Mathlib defines:
+
+   ```lean
+   W.twoTorsionPolynomial
+   W.twoTorsionPolynomial_discr
+   ```
+
+   with
+
+   ```lean
+   W.twoTorsionPolynomial.discr = 16 * W.Δ
+   ```
+
+   For the model `y^2 = x^3 + A*x^2 + B*x`, this polynomial is a scalar multiple of
+
+   ```text
+   x * (x^2 + A*x + B).
+   ```
+
+   This API is useful for sanity checks and for proving nonsingularity/separability facts, but the square condition itself is easier to prove directly from a rational root of the quadratic factor.
+
+Missing or not currently available as a high-level API:
+
+```text
+TateNormalForm
+Kubert family/table
+X_1(n) moduli interpretation
+pointed Weierstrass isomorphism carrying a chosen torsion point
+ready-made theorem: full rational 2-torsion iff quadratic discriminant square
+```
+
+So if you want this fully formal, you should add a small local `TateNormalForm`/`KubertC10` file rather than expecting Mathlib to provide it.
+
+## Concrete local definitions I would add
+
+Use the chosen downstream family directly:
+
+```lean
 namespace FLT
-namespace MazurC2C10
-
-open scoped Classical
+namespace MazurC10
 
 noncomputable section
 
-/-!
-The explicit cyclic-10 family after moving the rational 2-torsion point to `(0,0)`:
-
-  E10(t) : y^2 = x^3 + A10(t) x^2 + B10(t) x.
--/
+abbrev AffPoint (W : WeierstrassCurve ℚ) :=
+  WeierstrassCurve.Affine.Point W
 
 def F10 (t : ℚ) : ℚ :=
   1 + 2 * t - 5 * t ^ 2 - 5 * t ^ 4 - 2 * t ^ 5 + t ^ 6
@@ -161,225 +355,118 @@ def W10 (t : ℚ) : WeierstrassCurve ℚ where
   a₄ := B10 t
   a₆ := 0
 
-/-- The explicit discriminant of `W10 t`. -/
 def Delta10 (t : ℚ) : ℚ :=
-  4096 * t ^ 5 * (t ^ 2 + t - 1) * (t ^ 2 - 1) ^ 10 * (t ^ 2 - 4 * t - 1) ^ 2
+  4096 * t ^ 5 * (t ^ 2 + t - 1) *
+    (t ^ 2 - 1) ^ 10 * (t ^ 2 - 4 * t - 1) ^ 2
 
-/-- The obstruction curve `E20 : w^2 = u^3 + u^2 - u`. -/
-def W20 : WeierstrassCurve ℚ where
-  a₁ := 0
-  a₂ := 1
-  a₃ := 0
-  a₄ := -1
-  a₆ := 0
+/-- Subgroup-style hypothesis.  You may prefer `ZMod 10 × ZMod 2`; the order is irrelevant. -/
+def HasSubgroupZ2xZ10 (W : WeierstrassCurve ℚ) [W.IsElliptic] : Prop :=
+  ∃ φ : (ZMod 10 × ZMod 2) →+ AffPoint W,
+    Function.Injective φ
 
-/-- The finite degenerate `u`-values on the obstruction curve. -/
-def BadU (u : ℚ) : Prop :=
-  u = -1 ∨ u = 0 ∨ u = 1
-
-/-- A nondegenerate rational point on `E20`. -/
-def NonDegenerateE20Point : Prop :=
-  ∃ u w : ℚ, W20.Equation u w ∧ ¬ BadU u
-
-/-! ### Polynomial identities -/
-
-lemma quad_disc10_identity (t : ℚ) :
-    A10 t ^ 2 - 4 * B10 t = 256 * t ^ 5 * (t ^ 2 + t - 1) := by
-  unfold A10 B10 F10
-  ring_nf
-
-lemma W10_delta_eq (t : ℚ) :
-    (W10 t).Δ = Delta10 t := by
-  unfold W10 Delta10 A10 B10 F10
-  simp [WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
-    WeierstrassCurve.b₆, WeierstrassCurve.b₈]
-  ring_nf
-
-lemma W20_equation_iff (u w : ℚ) :
-    W20.Equation u w ↔ w ^ 2 = u ^ 3 + u ^ 2 - u := by
-  rw [WeierstrassCurve.Affine.equation_iff]
-  unfold W20
-  ring_nf
-
-lemma Delta10_eq_zero_of_bad {t : ℚ} (h : BadU t) : Delta10 t = 0 := by
-  rcases h with rfl | rfl | rfl <;>
-    norm_num [Delta10]
-
-lemma not_bad_of_Delta10_ne_zero {t : ℚ} (hΔ : Delta10 t ≠ 0) : ¬ BadU t := by
-  intro hbad
-  exact hΔ (Delta10_eq_zero_of_bad hbad)
-
-lemma t_ne_zero_of_Delta10_ne_zero {t : ℚ} (hΔ : Delta10 t ≠ 0) : t ≠ 0 := by
-  intro ht
-  exact not_bad_of_Delta10_ne_zero hΔ (Or.inr (Or.inl ht))
-
-/-!
-This is the main algebraic move:
-
-  s^2 = A10(t)^2 - 4 B10(t)
-  A10(t)^2 - 4 B10(t) = 256 t^5(t^2+t-1)
-  t ≠ 0
-  w := s / (16 t^2)
-  => w^2 = t^3 + t^2 - t.
--/
-lemma obstruction_point_equation_of_square
-    {t s : ℚ}
-    (ht : t ≠ 0)
-    (hs : s ^ 2 = A10 t ^ 2 - 4 * B10 t) :
-    ∃ w : ℚ, w ^ 2 = t ^ 3 + t ^ 2 - t := by
-  refine ⟨s / (16 * t ^ 2), ?_⟩
-  have hquad := quad_disc10_identity t
-  calc
-    (s / (16 * t ^ 2)) ^ 2 = s ^ 2 / (256 * t ^ 4) := by
-      field_simp [ht]
-      ring
-    _ = (A10 t ^ 2 - 4 * B10 t) / (256 * t ^ 4) := by
-      rw [hs]
-    _ = (256 * t ^ 5 * (t ^ 2 + t - 1)) / (256 * t ^ 4) := by
-      rw [hquad]
-    _ = t ^ 3 + t ^ 2 - t := by
-      field_simp [ht]
-      ring
-
-lemma nondegenerate_E20_point_of_square
-    {t s : ℚ}
-    (hΔ : Delta10 t ≠ 0)
-    (hs : s ^ 2 = A10 t ^ 2 - 4 * B10 t) :
-    NonDegenerateE20Point := by
-  have ht : t ≠ 0 := t_ne_zero_of_Delta10_ne_zero hΔ
-  have hnotbad : ¬ BadU t := not_bad_of_Delta10_ne_zero hΔ
-  rcases obstruction_point_equation_of_square ht hs with ⟨w, hw⟩
-  exact ⟨t, w, (W20_equation_iff t w).2 hw, hnotbad⟩
-
-/-! ### Torsion predicates for the WeierstrassCurve API -/
-
-/-- Exact subgroup-style statement: `W(Q)` contains a subgroup isomorphic to `Z/10Z × Z/2Z`. -/
-def HasSubgroupZ2xZ10 (W : WeierstrassCurve ℚ) : Prop :=
-  ∃ φ : (ZMod 10 × ZMod 2) →+ W.Point, Function.Injective φ
-
-/-- Generator-style statement, easier to use with Kubert's parametrization. -/
-def HasGeneratorsZ2xZ10 (W : WeierstrassCurve ℚ) : Prop :=
-  ∃ P Q : W.Point,
+/-- Generator-style hypothesis, usually easier to connect to Tate normal form. -/
+def HasGeneratorsZ2xZ10 (W : WeierstrassCurve ℚ) [W.IsElliptic] : Prop :=
+  ∃ P Q : AffPoint W,
     addOrderOf P = 10 ∧
     addOrderOf Q = 2 ∧
     Q ≠ 5 • P
 
-/-- Optional group-theory bridge.  Prove this once, separately from elliptic curves. -/
-theorem HasGeneratorsZ2xZ10.of_subgroup
-    {W : WeierstrassCurve ℚ}
-    (h : HasSubgroupZ2xZ10 W) :
-    HasGeneratorsZ2xZ10 W := by
-  /-
-  Suggested proof:
-  * take `P = φ (1,0)` and `Q = φ (0,1)`;
-  * use injectivity of `φ` to compute `addOrderOf P = 10` and `addOrderOf Q = 2`;
-  * use injectivity again to show `Q ≠ 5 • P`.
-  -/
-  sorry
-
-/-!
-The only Kubert/moduli input needed by the downstream proof.
-
-This is much smaller than full Mazur.  It says: after applying the cyclic-10 Kubert family and using
-an independent rational order-2 point, the quadratic factor of the 2-torsion polynomial has square
-discriminant.
--/
-axiom kubert_C10_full_two_square
-    (W : WeierstrassCurve ℚ) [W.IsElliptic]
-    (h : HasGeneratorsZ2xZ10 W) :
-    ∃ t s : ℚ, Delta10 t ≠ 0 ∧ s ^ 2 = A10 t ^ 2 - 4 * B10 t
-
-/-- The desired formal replacement for the old axiom, assuming only the smaller Kubert bridge. -/
-theorem Z2xZ10_gives_non_degenerate_E20_point
-    (W : WeierstrassCurve ℚ) [W.IsElliptic]
-    (h : HasGeneratorsZ2xZ10 W) :
-    NonDegenerateE20Point := by
-  rcases kubert_C10_full_two_square W h with ⟨t, s, hΔ, hs⟩
-  exact nondegenerate_E20_point_of_square hΔ hs
-
-/-- Version with the literal subgroup predicate. -/
-theorem Z2xZ10_subgroup_gives_non_degenerate_E20_point
-    (W : WeierstrassCurve ℚ) [W.IsElliptic]
-    (h : HasSubgroupZ2xZ10 W) :
-    NonDegenerateE20Point := by
-  exact Z2xZ10_gives_non_degenerate_E20_point W (HasGeneratorsZ2xZ10.of_subgroup h)
-
 end
-end MazurC2C10
+end MazurC10
 end FLT
 ```
 
-## Optional direct-`E10(t)` square-condition lemma
-
-If you want to avoid even talking about group law while proving the algebra for the explicit family, use the quadratic-root formulation.  On
-
-```text
-E10(t) : y^2 = x(x^2 + A10(t)x + B10(t)),
-```
-
-an extra rational 2-torsion point has `x ≠ 0` and gives a rational root of
-
-```text
-x^2 + A10(t)x + B10(t) = 0.
-```
-
-A rational root immediately makes the discriminant a square:
+Then add the hard bridge at the generator level if possible:
 
 ```lean
-import Mathlib
-
-namespace FLT
-namespace MazurC2C10
-
-open scoped Classical
-
-noncomputable section
-
-/-- Coordinate-only predicate: the nonzero quadratic 2-torsion factor has a rational root. -/
-def W10HasExtraTwoRoot (t : ℚ) : Prop :=
-  ∃ x : ℚ, x ^ 2 + A10 t * x + B10 t = 0
-
-lemma square_discriminant_of_quadratic_root
-    {A B x : ℚ}
-    (hx : x ^ 2 + A * x + B = 0) :
-    ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B := by
-  refine ⟨2 * x + A, ?_⟩
-  nlinarith
-
-lemma square_condition_of_extra_two_root
-    {t : ℚ}
-    (h : W10HasExtraTwoRoot t) :
-    ∃ s : ℚ, s ^ 2 = A10 t ^ 2 - 4 * B10 t := by
-  rcases h with ⟨x, hx⟩
-  exact square_discriminant_of_quadratic_root (A := A10 t) (B := B10 t) hx
-
-end
-end MazurC2C10
-end FLT
+axiom c10_extra_two_root_bridge_of_generators
+    {W : WeierstrassCurve ℚ} [W.IsElliptic]
+    (h : HasGeneratorsZ2xZ10 W) :
+    ∃ t r : ℚ,
+      Delta10 t ≠ 0 ∧
+      r ^ 2 + A10 t * r + B10 t = 0
 ```
 
-This coordinate-only predicate is often easier than immediately proving facts about `addOrderOf` on `W10(t).Point`.  Later, prove a bridge saying that an independent rational order-2 point on `W10(t)` implies `W10HasExtraTwoRoot t`.  For a short model with `a₁ = a₃ = 0`, this bridge should come from the negation formula: a point of order `2` satisfies `P = -P`, hence its affine `y`-coordinate is `0`; then the equation factors as `x(x^2 + A10(t)x + B10(t)) = 0`.
+and keep the subgroup-to-generator conversion as pure group theory:
 
-## Recommended axiom shrink
+```lean
+theorem HasGeneratorsZ2xZ10.of_subgroup
+    {W : WeierstrassCurve ℚ} [W.IsElliptic]
+    (h : HasSubgroupZ2xZ10 W) :
+    HasGeneratorsZ2xZ10 W := by
+  -- Pure finite abelian group argument.
+  -- Take P = φ (1,0), Q = φ (0,1), compute orders using injectivity.
+  -- Then Q ≠ 5 • P by injectivity and a ZMod coordinate calculation.
+  sorry
+```
 
-Instead of keeping
+This keeps the elliptic-curve/Tate-normal-form part from being polluted by finite-group bookkeeping.
+
+## If you insist on a pointed-isomorphism statement
+
+The pointed-isomorphism route is mathematically clean but heavier in Lean because Mathlib currently gives `VariableChange` as an action on curves, not as a fully-packaged pointed elliptic-curve isomorphism API carrying points and preserving addition.
+
+A local structure would look like this:
+
+```lean
+structure PointedW10Iso
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (P : AffPoint W)
+    (t : ℚ) : Prop where
+  C : WeierstrassCurve.VariableChange ℚ
+  curve_eq : C • W = W10 t
+  delta_ne : Delta10 t ≠ 0
+  sends_P_to_P10 : Prop
+  map_add : Prop
+```
+
+But I would avoid this unless you need it elsewhere. For `kubert_C10_square`, the direct `∃ t r` bridge is strictly cheaper.
+
+## How to prove the hard bridge later
+
+A future proof of
+
+```lean
+c10_extra_two_root_bridge
+```
+
+should have the following internal structure:
+
+1. From `HasSubgroupZ2xZ10 W`, obtain a point `P` of exact order `10` and an independent point `Q` of exact order `2`.
+2. Prove the single Tate-normal-form theorem for `P`:
+
+   ```text
+   (W,P) ≅ (E(b,c),(0,0))
+   ```
+
+   where
+
+   ```text
+   E(b,c): y^2 + (1-c)xy - b y = x^3 - b x^2.
+   ```
+
+3. Compute the order-10 condition in Tate normal form and reparameterize by `t` to get the chosen `W10(t)`.
+4. Transport `Q`. Since `Q` has order `2`, its image is fixed by negation. In the final `W10(t)` model, this means `y=0`.
+5. Since `Q` is independent from `5P`, the transported point is not `(0,0)`. Its `x`-coordinate is therefore a root `r` of the quadratic factor.
+6. Output `t`, `r`, `Delta10 t ≠ 0`, and
+
+   ```text
+   r^2 + A10(t) r + B10(t) = 0.
+   ```
+
+Everything after step 6 is the two-line algebra above.
+
+## Bottom line
+
+For the Mazur torsion proof, keep `kubert_C10_square` as a small theorem proved from a single hard bridge:
 
 ```text
-axiom Z2xZ10_gives_non_degenerate_E20_point
+Z/2 × Z/10 on arbitrary E
+  → C10 Tate/Kubert row + extra 2-torsion root on W10(t)
+  → quadratic root
+  → discriminant square.
 ```
 
-as a monolithic axiom, replace it by the smaller bridge
+The shortcut is: **do not formalize full Kubert theory; formalize or axiom only the `C10` Tate-normal-form row.**
 
-```text
-axiom kubert_C10_full_two_square :
-  W has Z/2Z × Z/10Z torsion ->
-  ∃ t s, Delta10 t ≠ 0 ∧ s^2 = A10(t)^2 - 4B10(t)
-```
-
-and prove
-
-```text
-kubert_C10_full_two_square -> Z2xZ10_gives_non_degenerate_E20_point
-```
-
-inside Lean using the explicit polynomial identities above.  This isolates the true modular/Kubert input and leaves the obstruction-curve construction as auditable elementary algebra.
+But there is no shortcut that avoids the `C10` row entirely while starting from an arbitrary elliptic curve. Once you are on `W10(t)`, the full-2-torsion-to-square step is elementary and should be proved immediately in Lean, not axiomatized.
