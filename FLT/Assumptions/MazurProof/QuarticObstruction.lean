@@ -54,11 +54,14 @@ theorem quartic_d3_supports_axiom_4_n14 :
 
 theorem quartic_d_supports_axiom_4 (n : ℕ) (hn : n ∈ [10, 12, 14, 16]) :
     ¬∃ f : ZMod 2 × ZMod n →+ (WeierstrassCurve ℚ)⁄ℚ.Point, Function.Injective f := by
-  sorry  -- Case-split on n, use above theorems + QuarticD proofs
-  -- Cases to fill:
-  --   n = 10: quartic_no_sol_d? (need to identify which d)
-  --   n = 12: quartic_no_sol_d2 via quartic_d2_supports_axiom_4_n12
-  --   n = 14: quartic_no_sol_d3 via quartic_d3_supports_axiom_4_n14
-  --   n = 16: quartic_no_sol_d? (need to identify which d)
+  interval_cases n  -- Case-split: n = 10, 12, 14, 16
+  -- Case n = 10: reduce via Kubert → quartic_no_sol_d? (awaiting Q1 mapping)
+  case n_10 => sorry  -- quartic_no_sol_d? (confirm d via Q1)
+  -- Case n = 12: reduce to quartic_no_sol_d2
+  case n_12 => exact quartic_d2_supports_axiom_4_n12
+  -- Case n = 14: reduce to quartic_no_sol_d3
+  case n_14 => exact quartic_d3_supports_axiom_4_n14
+  -- Case n = 16: reduce via Kubert → quartic_no_sol_d? (awaiting Q1 mapping)
+  case n_16 => sorry  -- quartic_no_sol_d? (confirm d via Q1)
 
 end MazurProof
