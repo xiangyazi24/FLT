@@ -5,7 +5,6 @@ import FLT.Assumptions.MazurProof.DescentBridgeN16
 import FLT.Assumptions.MazurProof.GroupTheory
 import FLT.Assumptions.MazurProof.RootsOfUnity
 import FLT.Assumptions.MazurProof.TorsionFinite
-import FLT.Assumptions.MazurProof.WeilPairing
 
 /-!
 # Axioms for the Mazur torsion-bound proof scaffold
