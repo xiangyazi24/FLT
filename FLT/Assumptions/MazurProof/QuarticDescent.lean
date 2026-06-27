@@ -47,14 +47,16 @@ private lemma quartic_eq_zmod (n : ℕ) [NeZero n] {r B s : ℤ}
 private lemma zmod4_sq_zero_of_even {x : ℤ} (hx : x % 2 = 0) :
     (x : ZMod 4) ^ 2 = 0 := by
   have : x % 4 = 0 ∨ x % 4 = 2 := by omega
-  rcases this with h | h <;>
-  · rw [(ZMod.intCast_eq_intCast_iff' x _ 4).2 (by omega)]; norm_num
+  rcases this with h | h
+  · rw [(ZMod.intCast_eq_intCast_iff' x 0 4).2 (by omega)]; norm_num
+  · rw [(ZMod.intCast_eq_intCast_iff' x 2 4).2 (by omega)]; norm_num
 
 private lemma zmod4_sq_one_of_odd {x : ℤ} (hx : x % 2 = 1) :
     (x : ZMod 4) ^ 2 = 1 := by
   have : x % 4 = 1 ∨ x % 4 = 3 := by omega
-  rcases this with h | h <;>
-  · rw [(ZMod.intCast_eq_intCast_iff' x _ 4).2 (by omega)]; norm_num
+  rcases this with h | h
+  · rw [(ZMod.intCast_eq_intCast_iff' x 1 4).2 (by omega)]; norm_num
+  · rw [(ZMod.intCast_eq_intCast_iff' x 3 4).2 (by omega)]; norm_num
 
 /-- If B is odd and the quartic equation holds, then r is odd.
     (Mod 4: r even + B odd → s² ≡ 3 mod 4, impossible.) -/
@@ -92,12 +94,16 @@ theorem even_B_props {r B s : ℤ} (hB_even : B % 2 = 0) (_hr : 0 < r) (_hB : 0 
   have h8 := quartic_eq_zmod 8 heq
   have hr8_sq : (r : ZMod 8) ^ 2 = 1 := by
     have : r % 8 = 1 ∨ r % 8 = 3 ∨ r % 8 = 5 ∨ r % 8 = 7 := by omega
-    rcases this with h | h | h | h <;>
-    · rw [(ZMod.intCast_eq_intCast_iff' r _ 8).2 (by omega)]; norm_num
+    rcases this with h | h | h | h
+    · rw [(ZMod.intCast_eq_intCast_iff' r 1 8).2 (by omega)]; norm_num
+    · rw [(ZMod.intCast_eq_intCast_iff' r 3 8).2 (by omega)]; norm_num
+    · rw [(ZMod.intCast_eq_intCast_iff' r 5 8).2 (by omega)]; norm_num
+    · rw [(ZMod.intCast_eq_intCast_iff' r 7 8).2 (by omega)]; norm_num
   have hB8_sq : (B : ZMod 8) ^ 2 = 4 := by
     have : B % 8 = 2 ∨ B % 8 = 6 := by omega
-    rcases this with h | h <;>
-    · rw [(ZMod.intCast_eq_intCast_iff' B _ 8).2 (by omega)]; norm_num
+    rcases this with h | h
+    · rw [(ZMod.intCast_eq_intCast_iff' B 2 8).2 (by omega)]; norm_num
+    · rw [(ZMod.intCast_eq_intCast_iff' B 6 8).2 (by omega)]; norm_num
   rw [show (r : ZMod 8) ^ 4 = ((r : ZMod 8) ^ 2) ^ 2 from by ring,
       show (B : ZMod 8) ^ 4 = ((B : ZMod 8) ^ 2) ^ 2 from by ring,
       hr8_sq, hB8_sq] at h8
@@ -442,9 +448,8 @@ theorem quartic_plus_descent_step :
       have : B % 2 = 0 := by rw [hB_eq]; omega
       omega
     have h2_dvd : (2 : ℤ) ∣ (a ^ 2 - b ^ 2) := by
-      have : a ^ 2 % 2 = 1 := by omega
-      have : b ^ 2 % 2 = 1 := by omega
-      omega
+      have : a ^ 2 - b ^ 2 = (a - b) * (a + b) := by ring
+      rw [this]; exact dvd_mul_of_dvd_left (by omega : (2 : ℤ) ∣ (a - b)) _
     set h := (a ^ 2 - b ^ 2) / 2 with hh_def
     have hh_eq : a ^ 2 - b ^ 2 = 2 * h := by
       rw [hh_def, Int.mul_ediv_cancel' h2_dvd]
