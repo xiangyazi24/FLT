@@ -95,10 +95,10 @@ theorem even_B_props {r B s : ℤ} (hB_even : B % 2 = 0) (_hr : 0 < r) (_hB : 0 
       (4 * c + 2) ^ 4 := heq
     have : s ^ 2 = 8 * (2 * j ^ 4 + 4 * j ^ 3 + 3 * j ^ 2 + j +
       8 * c ^ 2 * j ^ 2 + 8 * c ^ 2 * j + 2 * c ^ 2 + 8 * c * j ^ 2 + 8 * c * j +
-      2 * c + j ^ 2 + j -
+      2 * c + 2 * j ^ 2 + 2 * j -
       32 * c ^ 4 - 64 * c ^ 3 - 48 * c ^ 2 - 16 * c - 2) + 5 := by linarith [
       show (2 * j + 1) ^ 4 = 8 * (2 * j ^ 4 + 4 * j ^ 3 + 3 * j ^ 2 + j) + 1 from by ring,
-      show (2 * j + 1) ^ 2 * (4 * c + 2) ^ 2 = 8 * (8 * c ^ 2 * j ^ 2 + 8 * c ^ 2 * j + 2 * c ^ 2 + 8 * c * j ^ 2 + 8 * c * j + 2 * c + j ^ 2 + j) + 4 from by ring,
+      show (2 * j + 1) ^ 2 * (4 * c + 2) ^ 2 = 8 * (8 * c ^ 2 * j ^ 2 + 8 * c ^ 2 * j + 2 * c ^ 2 + 8 * c * j ^ 2 + 8 * c * j + 2 * c + 2 * j ^ 2 + 2 * j) + 4 from by ring,
       show (4 * c + 2) ^ 4 = 8 * (32 * c ^ 4 + 64 * c ^ 3 + 48 * c ^ 2 + 16 * c + 2) from by ring]
     omega
   -- s² % 8 ∈ {0,1,4}
