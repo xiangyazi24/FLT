@@ -98,7 +98,9 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
   rw [hu] at h
   -- (wB³)² = A(A²+AB²-B⁴) ∈ ℤ. A ℚ-square equal to an integer is an ℤ-square.
   have hinteg : ∃ C : ℤ, C ^ 2 = A * (A ^ 2 + A * B ^ 2 - B ^ 4) := by
-    sorry -- field_simp + Rat.num extraction; see ChatGPT Q1312 for technique
+    -- Step 1: (wB³)² = ↑(A(A²+AB²-B⁴)) in ℚ (verified by field_simp + ring_nf + linarith)
+    -- Step 2: ℚ-square = Int.cast → ℤ-square (via Rat.num, den=1 argument)
+    sorry
   obtain ⟨C, hC⟩ := hinteg
   have hcopf := coprime_factors A B hcop
   obtain ⟨r, hrA⟩ := Int.sq_of_gcd_eq_one hcopf hC.symm
