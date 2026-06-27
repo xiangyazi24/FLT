@@ -120,7 +120,9 @@ theorem rat_denom_square (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
     · exact h
   refine ⟨u.num, (B₀ : ℤ), by exact_mod_cast hB₀_pos, ?_, ?_⟩
   · -- gcd(u.num, B₀) = 1: B₀ | u.den, and gcd(u.num, u.den) = 1
-    sorry -- from u.reduced and B₀ | u.den via Nat.Coprime.coprime_dvd_right
+    have hBdvd : B₀ ∣ u.den := ⟨B₀, hB₀⟩
+    have := u.reduced.coprime_dvd_right hBdvd
+    simpa [Int.gcd, Int.natAbs_natCast] using this
   · -- u = u.num / B₀²
     calc u = (u.num : ℚ) / (u.den : ℚ) := by simpa using (Rat.num_div_den u).symm
       _ = (u.num : ℚ) / ((B₀ : ℚ) ^ 2) := by rw [hB₀]; push_cast; ring
