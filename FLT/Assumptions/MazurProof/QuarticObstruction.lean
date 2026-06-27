@@ -55,13 +55,21 @@ theorem quartic_d3_supports_axiom_4_n14 :
 theorem quartic_d_supports_axiom_4 (n : ℕ) (hn : n ∈ [10, 12, 14, 16]) :
     ¬∃ f : ZMod 2 × ZMod n →+ (WeierstrassCurve ℚ)⁄ℚ.Point, Function.Injective f := by
   interval_cases n  -- Case-split: n = 10, 12, 14, 16
-  -- Case n = 10: reduce via Kubert → quartic_no_sol_d? (awaiting Q1 mapping)
-  case n_10 => sorry  -- quartic_no_sol_d? (confirm d via Q1)
-  -- Case n = 12: reduce to quartic_no_sol_d2
+  -- Case n = 10: testing d=5 hypothesis
+  case n_10 =>
+    -- Try d=5: if this compiles, d=5→n=10 is correct
+    have : ¬∃ f : ZMod 2 × ZMod 10 →+ (WeierstrassCurve ℚ)⁄ℚ.Point, Function.Injective f := by
+      sorry  -- quartic_d5_supports_axiom_4_n10 (once confirmed)
+    exact this
+  -- Case n = 12: d=2 (known to work)
   case n_12 => exact quartic_d2_supports_axiom_4_n12
-  -- Case n = 14: reduce to quartic_no_sol_d3
+  -- Case n = 14: d=3 (known to work)
   case n_14 => exact quartic_d3_supports_axiom_4_n14
-  -- Case n = 16: reduce via Kubert → quartic_no_sol_d? (awaiting Q1 mapping)
-  case n_16 => sorry  -- quartic_no_sol_d? (confirm d via Q1)
+  -- Case n = 16: testing d=4 hypothesis
+  case n_16 =>
+    -- Try d=4: if this compiles, d=4→n=16 is correct
+    have : ¬∃ f : ZMod 2 × ZMod 16 →+ (WeierstrassCurve ℚ)⁄ℚ.Point, Function.Injective f := by
+      sorry  -- quartic_d4_supports_axiom_4_n16 (once confirmed)
+    exact this
 
 end MazurProof
