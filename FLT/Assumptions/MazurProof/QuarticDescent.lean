@@ -382,7 +382,11 @@ theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
   have h2h : (2 : ℤ) ∣ h := Int.dvd_of_emod_eq_zero hh_even
   by_contra hnotcop
   rw [Int.isCoprime_iff_gcd_eq_one] at hnotcop
-  have hU_ne : (r - h) ≠ 0 := by nlinarith [sq_nonneg h, show 0 < b ^ 4 from by positivity]
+  have hU_ne : (r - h) ≠ 0 := by
+    intro heq_rh
+    have : r = h := by linarith
+    have : b ^ 4 = 0 := by linarith [heq]
+    linarith [show 0 < b ^ 4 from by positivity]
   have hg_gt1 : 1 < Int.gcd (r - h) (r + h) := by
     have : Int.gcd (r - h) (r + h) ≠ 0 := by
       rw [Int.gcd_def]; exact Nat.gcd_ne_zero_left (Int.natAbs_ne_zero.mpr hU_ne)
@@ -421,8 +425,9 @@ theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
     have : (↑p : ℤ) ∣ b ^ 4 := by
       have hr2 := pow_dvd_pow_of_dvd hpr 2
       have hh2 := pow_dvd_pow_of_dvd hph 2
-      have := dvd_sub hr2 hh2
-      rwa [show r ^ 2 - h ^ 2 = b ^ 4 from by linarith] at this
+      have h3 := dvd_sub hr2 hh2
+      rw [show r ^ 2 - h ^ 2 = b ^ 4 from by linarith] at h3
+      exact h3
     exact Int.Prime.dvd_pow' hp this
   -- p | r and p | b contradicts gcd(r,b) = 1
   exact hp_prime_int.not_unit (hcopI.isUnit_of_dvd' hpr hpb)
