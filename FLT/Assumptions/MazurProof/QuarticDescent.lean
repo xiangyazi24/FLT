@@ -66,12 +66,13 @@ theorem UV_odd {r B s : ℤ}
     (hr_odd : r % 2 = 1) (hB_odd : B % 2 = 1) :
     (2 * r ^ 2 + B ^ 2 - 2 * s) % 2 = 1 ∧
     (2 * r ^ 2 + B ^ 2 + 2 * s) % 2 = 1 := by
-  have hB2_odd : Odd (B ^ 2) := hB_odd.pow
+  have hBodd : Odd B := Int.odd_iff.mpr hB_odd
+  have hB2_odd : Odd (B ^ 2) := hBodd.pow
   have h_even_2r2 : Even (2 * r ^ 2) := ⟨r ^ 2, by ring⟩
   have h_even_2s : Even (2 * s) := ⟨s, by ring⟩
   have h_sum_odd : Odd (2 * r ^ 2 + B ^ 2) := h_even_2r2.add_odd hB2_odd
-  exact ⟨h_sum_odd.sub_even h_even_2s |>.emod_two_eq_one,
-         h_sum_odd.add_even h_even_2s |>.emod_two_eq_one⟩
+  exact ⟨Int.odd_iff.mp (h_sum_odd.sub_even h_even_2s),
+         Int.odd_iff.mp (h_sum_odd.add_even h_even_2s)⟩
 
 /-- gcd(h, b²) = 1 from gcd(a,b) = 1 and 2h = a²-b² (ChatGPT Q1410). -/
 theorem gcd_half_sq_sub_bsq {a b h : ℤ}
