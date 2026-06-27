@@ -348,9 +348,8 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
         ((IsCoprime.pow_right_iff (by norm_num : 0 < 4)).mp hcopGF₂)
     have hCeq : C = a * b := eq_of_pos_fourth_eq hC (mul_pos ha hb)
       (by rw [hGa, hF₂b] at hprodGF₂; nlinarith)
-    have hF₁_eq : F₁ = 5 * a ^ 4 := by rw [hF₁eq, hGa]
     exact ⟨a, b, ha, hb, Int.isCoprime_iff_gcd_eq_one.mp hab_cop, hCeq,
-      Or.inr ⟨hF₁_eq, hF₂b⟩⟩
+      Or.inr ⟨by nlinarith [hF₁eq, hGa], hF₂b⟩⟩
   · -- 5 | F₂: symmetric
     obtain ⟨G, hF₂eq⟩ := h5F₂
     have hG : 0 < G := by nlinarith
@@ -371,9 +370,8 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
         ((IsCoprime.pow_right_iff (by norm_num : 0 < 4)).mp hcopF₁G)
     have hCeq : C = a * b := eq_of_pos_fourth_eq hC (mul_pos ha hb)
       (by rw [hF₁a, hGb] at hprodF₁G; nlinarith)
-    have hF₂_eq : F₂ = 5 * b ^ 4 := by rw [hF₂eq, hGb]
     exact ⟨a, b, ha, hb, Int.isCoprime_iff_gcd_eq_one.mp hab_cop, hCeq,
-      Or.inl ⟨hF₁a, hF₂_eq⟩⟩
+      Or.inl ⟨hF₁a, by nlinarith [hF₂eq, hGb]⟩⟩
 
 /-- gcd(r-h, r+h) = 1 when r odd, h even, gcd(r,b) = 1, r² = h² + b⁴. -/
 theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
