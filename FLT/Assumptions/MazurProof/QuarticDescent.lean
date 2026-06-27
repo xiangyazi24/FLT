@@ -575,8 +575,112 @@ theorem quartic_plus_descent_step :
             rw [hB_eq, ha1, hb1]; ring
         · exact hlt
       exact Int.natAbs_lt_natAbs_of_nonneg_of_lt hα_pos.le hα_lt
-  · -- Case U = 5a⁴, V = b⁴ (symmetric — same structure, descent on a instead of b)
-    sorry
+  · -- Case U = 5a⁴, V = b⁴ (symmetric: descent on a instead of b)
+    -- 4r² = (b²-a²)² + 4a⁴
+    have h4r2 : 4 * r ^ 2 = (b ^ 2 - a ^ 2) ^ 2 + 4 * a ^ 4 := by
+      have hU := hU_eq; have hV := hV_eq; rw [hB_eq] at hU hV
+      nlinarith [show (b ^ 2 - a ^ 2) ^ 2 = b ^ 4 - 2 * b ^ 2 * a ^ 2 + a ^ 4 from by ring,
+                 show (a * b) ^ 2 = a ^ 2 * b ^ 2 from by ring]
+    have ha_odd : a % 2 = 1 := by
+      by_contra ha_even; push_neg at ha_even
+      have ha2 : (2 : ℤ) ∣ a := ⟨a / 2, by omega⟩
+      have : (2 : ℤ) ∣ a * b := dvd_mul_of_dvd_left ha2 b
+      have : B % 2 = 0 := by rw [hB_eq]; omega
+      omega
+    have hb_odd : b % 2 = 1 := by
+      by_contra hb_even; push_neg at hb_even
+      have hb2 : (2 : ℤ) ∣ b := ⟨b / 2, by omega⟩
+      have : (2 : ℤ) ∣ a * b := dvd_mul_of_dvd_right hb2 a
+      have : B % 2 = 0 := by rw [hB_eq]; omega
+      omega
+    have h2_dvd : (2 : ℤ) ∣ (b ^ 2 - a ^ 2) := by
+      have : b ^ 2 - a ^ 2 = (b - a) * (b + a) := by ring
+      rw [this]; exact dvd_mul_of_dvd_left (by omega : (2 : ℤ) ∣ (b - a)) _
+    set h := (b ^ 2 - a ^ 2) / 2 with hh_def
+    have hh_eq : b ^ 2 - a ^ 2 = 2 * h := by rw [hh_def, Int.mul_ediv_cancel' h2_dvd]
+    have hr2_eq : r ^ 2 = h ^ 2 + a ^ 4 := by
+      have : 4 * r ^ 2 = 4 * h ^ 2 + 4 * a ^ 4 := by
+        calc 4 * r ^ 2 = (b ^ 2 - a ^ 2) ^ 2 + 4 * a ^ 4 := h4r2
+          _ = (2 * h) ^ 2 + 4 * a ^ 4 := by rw [← hh_eq]
+          _ = 4 * h ^ 2 + 4 * a ^ 4 := by ring
+      linarith
+    have hprod_rh : (r - h) * (r + h) = a ^ 4 := by
+      linarith [show (r - h) * (r + h) = r ^ 2 - h ^ 2 from by ring]
+    have ha4_pos : 0 < a ^ 4 := by positivity
+    have hrh_pos : 0 < r - h := by
+      by_contra hle; push_neg at hle
+      have : 0 < r + h := by linarith
+      linarith [mul_nonpos_of_nonpos_of_nonneg hle this.le]
+    have hrh_pos2 : 0 < r + h := by linarith
+    have hh_even : h % 2 = 0 := by
+      have : (b ^ 2 - a ^ 2) % 4 = 0 := by
+        have : b ^ 2 - a ^ 2 = (b - a) * (b + a) := by ring
+        have h1 : (2 : ℤ) ∣ (b - a) := by omega
+        have h2 : (2 : ℤ) ∣ (b + a) := by omega
+        obtain ⟨m, hm⟩ := h1; obtain ⟨n, hn⟩ := h2
+        have : (b - a) * (b + a) = 4 * (m * n) := by nlinarith
+        omega
+      omega
+    have hcop_ra : Int.gcd r a = 1 := by
+      rw [← Int.isCoprime_iff_gcd_eq_one]
+      have hcop_rB := Int.isCoprime_iff_gcd_eq_one.mpr hcop; rw [hB_eq] at hcop_rB
+      exact (IsCoprime.mul_right_iff.mp hcop_rB).1
+    have hcop_rh := coprime_rh hr_odd hh_even hcop_ra ha hr2_eq
+    obtain ⟨α, hα_pos, hα_eq⟩ := pos_fourth_of_coprime_mul_fourth hcop_rh hprod_rh hrh_pos hrh_pos2
+    obtain ⟨β, hβ_pos, hβ_eq⟩ := pos_fourth_of_coprime_mul_fourth
+      (show Int.gcd (r + h) (r - h) = 1 by rwa [Int.gcd_comm])
+      (by rw [mul_comm]; exact hprod_rh) hrh_pos2 hrh_pos
+    have ha_eq : a = α * β := by
+      apply eq_of_pos_fourth_eq ha (mul_pos hα_pos hβ_pos)
+      calc a ^ 4 = (r - h) * (r + h) := hprod_rh.symm
+        _ = α ^ 4 * β ^ 4 := by rw [hα_eq, hβ_eq]
+        _ = (α * β) ^ 4 := by ring
+    have hnew_eq : b ^ 2 = β ^ 4 + β ^ 2 * α ^ 2 - α ^ 4 := by
+      have hh_val : 2 * h = β ^ 4 - α ^ 4 := by linarith [hα_eq, hβ_eq]
+      have hb2 : b ^ 2 = a ^ 2 + 2 * h := by linarith [hh_eq]
+      rw [ha_eq] at hb2
+      linarith [show (α * β) ^ 2 = α ^ 2 * β ^ 2 from by ring]
+    have hcop_βα : Int.gcd β α = 1 := by
+      rw [← Int.isCoprime_iff_gcd_eq_one]
+      have := Int.isCoprime_iff_gcd_eq_one.mpr hcop_rh
+      rw [hα_eq, hβ_eq] at this
+      exact ((IsCoprime.pow_left_iff (by norm_num : 0 < 4)).mp
+        ((IsCoprime.pow_right_iff (by norm_num : 0 < 4)).mp
+          (isCoprime_comm.mp this)))
+    refine ⟨β, α, b, ⟨hβ_pos, hα_pos, hcop_βα, hnew_eq⟩, ?_, ?_⟩
+    · intro ⟨hβ1, hα1⟩; apply hnonbase
+      have ha_sq : a ^ 2 = 1 := by rw [hnew_eq, hα1, hβ1] at *; norm_num at *; linarith
+      have ha1_val : a = 1 := by linarith [sq_nonneg (a - 1)]
+      have hb_sq : b ^ 2 = 1 := by rw [hnew_eq, hα1, hβ1]; norm_num
+      have hb1_val : b = 1 := by linarith [sq_nonneg (b - 1)]
+      constructor
+      · have : r - h = 1 := by rw [hα_eq, hα1]; ring
+        have : r + h = 1 := by rw [hβ_eq, hβ1]; ring
+        linarith
+      · rw [hB_eq, ha1_val, hb1_val]; ring
+    · rw [hB_eq]
+      have hα_le_a : α ≤ a := by rw [ha_eq]; exact le_mul_of_one_le_right hα_pos.le hβ_pos
+      have ha_le_ab : a ≤ a * b := le_mul_of_one_le_right ha.le hb
+      have hα_lt : α < a * b := by
+        rcases eq_or_lt_of_le (le_trans hα_le_a ha_le_ab) with heq_ab | hlt
+        · exfalso; apply hnonbase
+          have hα_eq_a : α = a := le_antisymm hα_le_a (by linarith)
+          have hβ1 : β = 1 := by
+            have h1 := ha_eq; rw [hα_eq_a] at h1
+            nlinarith [mul_pos ha hβ_pos]
+          have hb1 : b = 1 := by nlinarith [mul_pos ha hb]
+          have ha1 : a = 1 := by
+            have hrh1 : r + h = 1 := by rw [hβ_eq, hβ1]; ring
+            have hrh2 : r - h = a ^ 4 := by rw [hα_eq_a] at hα_eq; linarith [hα_eq]
+            have hh_val : h = (1 - a ^ 2) / 2 := by rw [hh_def, hb1]; ring_nf
+            nlinarith [sq_nonneg (a - 1), sq_nonneg a]
+          constructor
+          · have : r + h = 1 := by rw [hβ_eq, hβ1]; ring
+            have : r - h = 1 := by rw [hα_eq, hα_eq_a, ha1]; ring
+            linarith
+          · rw [hB_eq, ha1, hb1]; ring
+        · exact hlt
+      exact Int.natAbs_lt_natAbs_of_nonneg_of_lt hα_pos.le hα_lt
 
 /-! ## Strong induction closure -/
 
