@@ -1,14 +1,14 @@
-# Q1009 (dm1): prompt body missing
+# Q1014 (dm1): prompt body missing
 
 The received prompt was only:
 
 ```text
-Q1009 (dm1): dm
+Q1014 (dm1): dm1
 ```
 
-I searched the repository for `Q1009`, `dm1`, and the literal phrase `Q1009 dm1 dm`, but did not find a matching file, theorem, scratch note, or task body that identifies the intended Lean goal.
+I searched the repository for `Q1014` and `Q1014 dm1`, but did not find a matching file, theorem, scratch note, or task body that identifies the intended Lean goal.
 
-Because the actual mathematical/Lean problem statement is missing, I cannot soundly infer which theorem, file, or proof obligation this request refers to.  In particular, I cannot tell whether `dm` means one of the earlier division-polynomial/separability threads, a new division-multiplication lemma, or simply a placeholder.
+Because the actual mathematical/Lean problem statement is missing, I cannot soundly infer which theorem, file, or proof obligation this request refers to.  The label `dm1` appears to be a project/channel tag, not enough by itself to determine a target theorem or proof strategy.
 
 ## No Lean code proposed
 
@@ -20,12 +20,12 @@ I am intentionally not proposing Lean code here.  Any code would be guesswork wi
 4. the relevant error message;
 5. a short natural-language description of the desired result.
 
-## Minimal information needed to answer Q1009
+## Minimal information needed to answer Q1014
 
-Please resend Q1009 with something like:
+Please resend Q1014 with something like:
 
 ```text
-Q1009 (dm1): Lean 4, repo xiangyazi24/FLT, branch scratch/main.
+Q1014 (dm1): Lean 4, repo xiangyazi24/FLT, branch scratch/main.
 In <file>.lean, prove/fix <theorem_name>.
 Current goal/error:
 <goal or error>
