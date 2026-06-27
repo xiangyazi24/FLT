@@ -1,239 +1,200 @@
-# Q1410 / Q1402 (dm1): gcd lemma and quartic descent skeleton
+# Q1412 (dm1): gcd of the two quartic factors
 
-## Q1410: `gcd(h, b^2) = 1`
+Here is the clean Lean architecture for the requested lemma.
 
-The clean Lean route is not the long `gcd(a^2-b^2, 2*b^2)` calculation.  Instead, prove the slightly more general division-free lemma:
+The proof below uses `Int.Prime.dvd_mul'` and `Int.Prime.dvd_pow'` for the integer prime-divisibility steps.  I state the core theorem with `Odd r`/`Odd B`, and then give the exact wrapper for hypotheses `r % 2 = 1`, `B % 2 = 1`.
 
-* if `gcd a b = 1`, and
-* `2*h = a^2 - b^2`,
-
-then `gcd h (b^2) = 1`.
-
-The proof is:
-
-1. `gcd a b = 1` gives `IsCoprime a b`.
-2. Hence `IsCoprime (a^2) b` by `pow_left`.
-3. Since `a^2 = 2*h + b*b`, we get `IsCoprime (2*h + b*b) b`.
-4. Strip the `+ b*b` using `IsCoprime.of_add_mul_left_left`, giving `IsCoprime (2*h) b`.
-5. Strip the factor `2` using `IsCoprime.mul_left_iff`, giving `IsCoprime h b`.
-6. Raise the right side by `pow_right`, giving `IsCoprime h (b^2)`.
-
-Here is the code.
+Important: the hypothesis `Int.gcd r B = 1` must be present.  It is used exactly in the subclaim `p ∣ B → p ∣ r`, contradiction.
 
 ```lean
 import Mathlib
 
 namespace DM1
 
-/-- Odd squares have even difference.  This is only needed to connect the
-`h = (a^2-b^2)/2` formulation to the division-free lemma below. -/
-lemma two_dvd_sq_sub_sq_of_odd {a b : ℤ} (ha : Odd a) (hb : Odd b) :
-    (2 : ℤ) ∣ a ^ 2 - b ^ 2 := by
-  rcases ha with ⟨a0, rfl⟩
-  rcases hb with ⟨b0, rfl⟩
-  refine ⟨2 * (a0 ^ 2 + a0 - b0 ^ 2 - b0), ?_⟩
+abbrev U (r B s : ℤ) : ℤ := 2 * r ^ 2 + B ^ 2 - 2 * s
+abbrev V (r B s : ℤ) : ℤ := 2 * r ^ 2 + B ^ 2 + 2 * s
+
+lemma odd_of_emod_two_eq_one {z : ℤ} (hz : z % 2 = 1) : Odd z := by
+  obtain ⟨k, hk⟩ := exists_eq_mul_left_of_dvd (Int.dvd_self_sub_of_emod_eq hz)
+  rw [sub_eq_iff_eq_add] at hk
+  exact ⟨k, by simpa [mul_comm] using hk⟩
+
+lemma not_two_dvd_of_odd {z : ℤ} (hz : Odd z) : ¬ (2 : ℤ) ∣ z := by
+  rintro ⟨k, hk⟩
+  rcases hz with ⟨l, hl⟩
+  omega
+
+lemma U_odd_of_B_odd {r B s : ℤ} (hBodd : Odd B) : Odd (U r B s) := by
+  rcases hBodd with ⟨b0, rfl⟩
+  refine ⟨r ^ 2 + 2 * b0 ^ 2 + 2 * b0 - s, ?_⟩
+  dsimp [U]
   ring
 
-/-- The API-light core: no prime-divisor argument is needed. -/
-theorem gcd_half_sq_sub_sq_bsq_eq_one_of_twice
-    {a b h : ℤ}
-    (hab : Int.gcd a b = 1)
-    (hh : 2 * h = a ^ 2 - b ^ 2) :
-    Int.gcd h (b ^ 2) = 1 := by
-  rw [← Int.isCoprime_iff_gcd_eq_one]
+lemma V_odd_of_B_odd {r B s : ℤ} (hBodd : Odd B) : Odd (V r B s) := by
+  rcases hBodd with ⟨b0, rfl⟩
+  refine ⟨r ^ 2 + 2 * b0 ^ 2 + 2 * b0 + s, ?_⟩
+  dsimp [V]
+  ring
 
-  have hab' : IsCoprime a b :=
-    Int.isCoprime_iff_gcd_eq_one.mpr hab
+lemma prime_dvd_two_eq_two {p : ℕ} (hp : Nat.Prime p)
+    (h : (p : ℤ) ∣ (2 : ℤ)) : p = 2 := by
+  have hnat : p ∣ 2 := Int.natCast_dvd.mp h
+  exact le_antisymm (Nat.le_of_dvd (by decide : 0 < 2) hnat) hp.two_le
 
-  have ha2b : IsCoprime (a ^ 2) b := by
-    simpa using (hab'.pow_left (m := 2))
+lemma prime_dvd_five_eq_five {p : ℕ} (hp : Nat.Prime p)
+    (h : (p : ℤ) ∣ (5 : ℤ)) : p = 5 := by
+  have hnat : p ∣ 5 := Int.natCast_dvd.mp h
+  have hp_le : p ≤ 5 := Nat.le_of_dvd (by decide : 0 < 5) hnat
+  have hp_ge : 2 ≤ p := hp.two_le
+  interval_cases p <;> norm_num at hnat hp ⊢
 
-  have hrew : a ^ 2 = 2 * h + b * b := by
-    rw [hh]
+lemma prime_dvd_two_mul_right {p : ℕ} {x : ℤ}
+    (hp : Nat.Prime p) (hpne : p ≠ 2)
+    (h : (p : ℤ) ∣ 2 * x) :
+    (p : ℤ) ∣ x := by
+  rcases Int.Prime.dvd_mul' hp h with hp2 | hpx
+  · exact False.elim (hpne (prime_dvd_two_eq_two hp hp2))
+  · exact hpx
+
+lemma quartic_UV_product
+    {r B s : ℤ}
+    (hs : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    U r B s * V r B s = 5 * B ^ 4 := by
+  calc
+    U r B s * V r B s = (2 * r ^ 2 + B ^ 2) ^ 2 - (2 * s) ^ 2 := by
+      dsimp [U, V]
+      ring
+    _ = 5 * B ^ 4 := by
+      rw [hs]
+      ring
+
+/-- Core prime-divisor exclusion: no natural prime can divide both factors. -/
+lemma quartic_common_prime_UV_false
+    {r B s : ℤ} {p : ℕ}
+    (hp : Nat.Prime p)
+    (hpU : (p : ℤ) ∣ U r B s)
+    (hpV : (p : ℤ) ∣ V r B s)
+    (_hrodd : Odd r)
+    (hBodd : Odd B)
+    (hcop : Int.gcd r B = 1)
+    (hs : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    False := by
+  have hUodd : Odd (U r B s) := U_odd_of_B_odd hBodd
+
+  have hpne2 : p ≠ 2 := by
+    intro hp2
+    have h2U : (2 : ℤ) ∣ U r B s := by
+      simpa [hp2] using hpU
+    exact (not_two_dvd_of_odd hUodd) h2U
+
+  -- From `p ∣ V + U = 2 * (2*r^2 + B^2)` and `p ≠ 2`, get
+  -- `p ∣ 2*r^2 + B^2`.
+  have hp_sum_raw : (p : ℤ) ∣ V r B s + U r B s := dvd_add hpV hpU
+  have hsum_eq : V r B s + U r B s = 2 * (2 * r ^ 2 + B ^ 2) := by
+    dsimp [U, V]
     ring
+  have hp_sum : (p : ℤ) ∣ 2 * (2 * r ^ 2 + B ^ 2) := by
+    rwa [hsum_eq] at hp_sum_raw
+  have hp_A : (p : ℤ) ∣ 2 * r ^ 2 + B ^ 2 :=
+    prime_dvd_two_mul_right hp hpne2 hp_sum
 
-  have h2hb : IsCoprime (2 * h + b * b) b := by
-    simpa [hrew] using ha2b
+  -- Subclaim: `p ∤ B`; otherwise `p ∣ 2*r^2`, hence `p ∣ r`, contradicting
+  -- `gcd r B = 1`.
+  have hp_not_B : ¬ (p : ℤ) ∣ B := by
+    intro hpB
+    have hpB2 : (p : ℤ) ∣ B ^ 2 := by
+      rw [sq]
+      exact hpB.mul_right B
+    have hp2r2_raw : (p : ℤ) ∣ (2 * r ^ 2 + B ^ 2) - B ^ 2 :=
+      dvd_sub hp_A hpB2
+    have hp2r2 : (p : ℤ) ∣ 2 * r ^ 2 := by
+      have hsub_eq : (2 * r ^ 2 + B ^ 2) - B ^ 2 = 2 * r ^ 2 := by ring
+      rwa [hsub_eq] at hp2r2_raw
+    have hpr2 : (p : ℤ) ∣ r ^ 2 :=
+      prime_dvd_two_mul_right hp hpne2 hp2r2
+    have hpr : (p : ℤ) ∣ r := Int.Prime.dvd_pow' hp hpr2
+    exact hp.not_dvd_one (by
+      rw [← hcop]
+      exact Nat.dvd_gcd (Int.natCast_dvd.mp hpr) (Int.natCast_dvd.mp hpB))
 
-  have h2hb' : IsCoprime (2 * h) b := by
-    exact h2hb.of_add_mul_left_left
+  have hUV : U r B s * V r B s = 5 * B ^ 4 := quartic_UV_product hs
 
-  have hhb : IsCoprime h b := by
-    exact (IsCoprime.mul_left_iff.mp h2hb').2
+  -- Since `p ∣ U*V = 5*B^4` and `p ∤ B`, primality forces `p = 5`.
+  have hp_eq5 : p = 5 := by
+    have hpUV_left : (p : ℤ) ∣ U r B s * V r B s := dvd_mul_of_dvd_left hpU _
+    have hpUV : (p : ℤ) ∣ 5 * B ^ 4 := by
+      rwa [hUV] at hpUV_left
+    rcases Int.Prime.dvd_mul' hp hpUV with hp5 | hpB4
+    · exact prime_dvd_five_eq_five hp hp5
+    · exact False.elim (hp_not_B (Int.Prime.dvd_pow' hp hpB4))
 
-  exact hhb.pow_right (n := 2)
-
-/-- The literal `h = (a^2-b^2)/2` version. -/
-theorem gcd_sqdiff_div_two_bsq_eq_one
-    {a b : ℤ}
-    (hab : Int.gcd a b = 1)
-    (haodd : Odd a)
-    (hbodd : Odd b) :
-    Int.gcd ((a ^ 2 - b ^ 2) / 2) (b ^ 2) = 1 := by
-  apply gcd_half_sq_sub_sq_bsq_eq_one_of_twice (a := a) (b := b)
-  · exact hab
-  · have h_even : (2 : ℤ) ∣ a ^ 2 - b ^ 2 :=
-      two_dvd_sq_sub_sq_of_odd haodd hbodd
+  -- But if `p = 5`, then `5 ∣ U` and `5 ∣ V`, so `25 ∣ U*V = 5*B^4`.
+  -- Cancelling one factor `5` gives `5 ∣ B^4`, hence `5 ∣ B`, contradicting `p ∤ B`.
+  have h5U : (5 : ℤ) ∣ U r B s := by
+    simpa [hp_eq5] using hpU
+  have h5V : (5 : ℤ) ∣ V r B s := by
+    simpa [hp_eq5] using hpV
+  have h25UV : (25 : ℤ) ∣ U r B s * V r B s := by
+    rcases h5U with ⟨u, hu⟩
+    rcases h5V with ⟨v, hv⟩
+    refine ⟨u * v, ?_⟩
+    rw [hu, hv]
+    ring
+  have h25rhs : (25 : ℤ) ∣ 5 * B ^ 4 := by
+    rwa [hUV] at h25UV
+  have h5B4 : (5 : ℤ) ∣ B ^ 4 := by
+    rcases h25rhs with ⟨k, hk⟩
+    refine ⟨k, ?_⟩
+    apply mul_left_cancel₀ (by norm_num : (5 : ℤ) ≠ 0)
     calc
-      2 * ((a ^ 2 - b ^ 2) / 2)
-          = ((a ^ 2 - b ^ 2) / 2) * 2 := by ring
-      _ = a ^ 2 - b ^ 2 := Int.ediv_mul_cancel h_even
+      5 * B ^ 4 = 25 * k := hk
+      _ = 5 * (5 * k) := by ring
+  have h5B : (5 : ℤ) ∣ B :=
+    Int.Prime.dvd_pow' (by norm_num : Nat.Prime 5) h5B4
+  exact hp_not_B (by simpa [hp_eq5] using h5B)
 
-/-- Same result, stated with an explicit named integer `h`.  Positivity is
-included to match the descent context, though the gcd proof itself does not use it. -/
-theorem gcd_h_bsq_eq_one
-    {a b h : ℤ}
-    (_ha_pos : 0 < a)
-    (_hb_pos : 0 < b)
-    (haodd : Odd a)
-    (hbodd : Odd b)
-    (hab : Int.gcd a b = 1)
-    (hh : h = (a ^ 2 - b ^ 2) / 2) :
-    Int.gcd h (b ^ 2) = 1 := by
-  subst h
-  exact gcd_sqdiff_div_two_bsq_eq_one
-    (a := a) (b := b) hab haodd hbodd
+/-- The gcd theorem in the natural `Odd` form. -/
+theorem quarticPlus_gcd_UV_eq_one
+    {r B s : ℤ}
+    (hrodd : Odd r)
+    (hBodd : Odd B)
+    (hcop : Int.gcd r B = 1)
+    (hs : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    Int.gcd (U r B s) (V r B s) = 1 := by
+  rw [← Int.isCoprime_iff_gcd_eq_one, Int.isCoprime_iff_nat_coprime]
+  by_contra hnot
+  rcases Nat.Prime.not_coprime_iff_dvd.mp hnot with ⟨p, hp, hpU_abs, hpV_abs⟩
+  have hpU : (p : ℤ) ∣ U r B s := Int.natCast_dvd.mpr hpU_abs
+  have hpV : (p : ℤ) ∣ V r B s := Int.natCast_dvd.mpr hpV_abs
+  exact quartic_common_prime_UV_false
+    (r := r) (B := B) (s := s) hp hpU hpV hrodd hBodd hcop hs
 
-```
-
-## Q1402: quartic descent step skeleton
-
-This skeleton keeps the hard mathematical substeps isolated as named `sorry`s.  The new gcd lemma above is exactly the primitive-Pythagorean input.
-
-```lean
-import Mathlib
-
-namespace DM1
-
-/-- The quartic relation used in the descent.  `QuarticPlus r B s` means
-`s^2 = r^4 + r^2 B^2 - B^4`. -/
-def QuarticPlus (r B s : ℤ) : Prop :=
-  s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4
-
-/-- This is the orientation of the primitive Pythagorean classification needed
-for the descent.  It packages the parity/orientation work:
-from `h^2 + (b^2)^2 = r^2` and `gcd(h,b^2)=1`, choose the classification branch
-where the odd leg `b^2` is `m^2-n^2`. -/
-lemma pythagorean_oriented_for_odd_square
-    {h b r : ℤ}
-    (hbodd : Odd b)
-    (hpyth : PythagoreanTriple h (b ^ 2) r)
-    (hcop : Int.gcd h (b ^ 2) = 1) :
-    ∃ m n : ℤ,
-      h = 2 * m * n ∧
-      b ^ 2 = m ^ 2 - n ^ 2 ∧
-      Int.gcd m n = 1 ∧
-      (m % 2 = 0 ∧ n % 2 = 1 ∨ m % 2 = 1 ∧ n % 2 = 0) := by
-  have hprim : hpyth.IsPrimitiveClassified := by
-    exact hpyth.isPrimitiveClassified_of_coprime hcop
-  -- Hard but standard orientation step:
-  -- `b` odd implies `b^2` is odd; in the primitive classification, the odd leg
-  -- is the difference-of-squares leg, not the `2*m*n` leg.
-  rcases hprim with ⟨m, n, hmn, hmn_coprime, hmn_parity⟩
-  sorry
-
-/-- Square splitting substep: if `b^2 = (m-n)(m+n)` and the two factors are
-coprime positive odd integers, then each is a square.  The signs/orientation are
-packed into the statement to keep the descent core readable. -/
-lemma split_odd_square_factors
-    {b m n : ℤ}
-    (hbpos : 0 < b)
-    (hbmn : b ^ 2 = m ^ 2 - n ^ 2)
-    (hmn_coprime : Int.gcd m n = 1)
-    (hmn_parity : m % 2 = 0 ∧ n % 2 = 1 ∨ m % 2 = 1 ∧ n % 2 = 0) :
-    ∃ u v : ℤ,
-      0 < u ∧
-      1 < v ∧
-      b = u * v ∧
-      m - n = u ^ 2 ∧
-      m + n = v ^ 2 := by
-  -- Hard substeps:
-  -- 1. Rewrite `m^2-n^2 = (m-n)(m+n)`.
-  -- 2. Prove `Int.gcd (m-n) (m+n) = 1` using coprimality and parity.
-  -- 3. Since their product is `b^2`, each factor is a square up to sign.
-  -- 4. Use positivity/orientation to choose positive `u,v`.
-  sorry
-
-/-- Core descent skeleton.
-
-Input relation:
-`a^4 + 5 b^4 = 4 r^2 + 2 a^2 b^2`.
-
-Then
-`4 r^2 = (a^2-b^2)^2 + 4 b^4`.
-For odd `a,b`, set `h=(a^2-b^2)/2`, giving
-`r^2 = h^2 + (b^2)^2`.
-Primitive classification plus square splitting produces `b = u v`, and the
-new solution is `QuarticPlus v u a`, i.e.
-`a^2 = v^4 + v^2 u^2 - u^4`.
--/
-theorem quartic_descent_step_core_skeleton
-    {a b r : ℤ}
-    (hapos : 0 < a)
-    (hbpos : 0 < b)
-    (haodd : Odd a)
-    (hbodd : Odd b)
-    (hab : Int.gcd a b = 1)
-    (hrel : a ^ 4 + 5 * b ^ 4 = 4 * r ^ 2 + 2 * a ^ 2 * b ^ 2) :
-    ∃ u v : ℤ,
-      0 < u ∧
-      1 < v ∧
-      b = u * v ∧
-      QuarticPlus v u a ∧
-      u < b := by
-  let h : ℤ := (a ^ 2 - b ^ 2) / 2
-
-  have hh_twice : 2 * h = a ^ 2 - b ^ 2 := by
-    dsimp [h]
-    have h_even : (2 : ℤ) ∣ a ^ 2 - b ^ 2 :=
-      two_dvd_sq_sub_sq_of_odd haodd hbodd
-    calc
-      2 * ((a ^ 2 - b ^ 2) / 2)
-          = ((a ^ 2 - b ^ 2) / 2) * 2 := by ring
-      _ = a ^ 2 - b ^ 2 := Int.ediv_mul_cancel h_even
-
-  have hgcd_h_b2 : Int.gcd h (b ^ 2) = 1 := by
-    dsimp [h]
-    exact gcd_sqdiff_div_two_bsq_eq_one
-      (a := a) (b := b) hab haodd hbodd
-
-  have h_four :
-      4 * r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4 := by
-    -- Mechanical algebra from `hrel`.
-    -- Suggested proof: `ring_nf at hrel ⊢; linarith` or a `linear_combination`
-    -- after normalizing `(a*b)^2` to `a^2*b^2`.
-    sorry
-
-  have hpyth : PythagoreanTriple h (b ^ 2) r := by
-    -- Use `hh_twice` and `h_four`, then divide by `4` algebraically.
-    -- Target unfolds to `h*h + b^2*b^2 = r*r`.
-    dsimp [PythagoreanTriple]
-    sorry
-
-  obtain ⟨m, n, h_h, hb2_mn, hmn_coprime, hmn_parity⟩ :=
-    pythagorean_oriented_for_odd_square hbodd hpyth hgcd_h_b2
-
-  obtain ⟨u, v, hu_pos, hv_gt_one, hb_uv, hmn_sub, hmn_add⟩ :=
-    split_odd_square_factors hbpos hb2_mn hmn_coprime hmn_parity
-
-  refine ⟨u, v, hu_pos, hv_gt_one, hb_uv, ?_, ?_⟩
-
-  · -- New quartic solution: `QuarticPlus v u a`.
-    -- From `m-n=u^2`, `m+n=v^2`, get:
-    --   `2*m = u^2+v^2`, `2*n = v^2-u^2`.
-    -- From `h=2mn` and `h=(a^2-b^2)/2`, get:
-    --   `a^2 = b^2 + 2h`.
-    -- Substitute `b=uv`, `h=2mn`, and the formulas for `m,n`:
-    --   `a^2 = u^2 v^2 + v^4 - u^4`.
-    -- This is exactly `QuarticPlus v u a`.
-    dsimp [QuarticPlus]
-    sorry
-
-  · -- Descent of the second parameter.
-    -- Since `b = u*v`, `u > 0`, and `v > 1`, we have `u < b`.
-    sorry
+/-- Exact wrapper for hypotheses written as `r % 2 = 1`, `B % 2 = 1`. -/
+theorem quarticPlus_gcd_UV_eq_one_of_emod
+    {r B s : ℤ}
+    (hrodd : r % 2 = 1)
+    (hBodd : B % 2 = 1)
+    (hcop : Int.gcd r B = 1)
+    (hs : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    Int.gcd (2 * r ^ 2 + B ^ 2 - 2 * s)
+      (2 * r ^ 2 + B ^ 2 + 2 * s) = 1 := by
+  have hrOdd : Odd r := odd_of_emod_two_eq_one hrodd
+  have hBOdd : Odd B := odd_of_emod_two_eq_one hBodd
+  simpa [U, V] using
+    quarticPlus_gcd_UV_eq_one
+      (r := r) (B := B) (s := s) hrOdd hBOdd hcop hs
 
 end DM1
 ```
 
-The key point for downstream formalization is that Q1410 should be used as `gcd_h_bsq_eq_one` or, even better, the division-free `gcd_half_sq_sub_sq_bsq_eq_one_of_twice` when you already have `2*h = a^2-b^2` in the local context.
+The main downstream theorem to use with your current hypotheses is:
+
+```lean
+DM1.quarticPlus_gcd_UV_eq_one_of_emod
+```
+
+If your local context already stores oddness as `Odd r` and `Odd B`, use:
+
+```lean
+DM1.quarticPlus_gcd_UV_eq_one
+```
