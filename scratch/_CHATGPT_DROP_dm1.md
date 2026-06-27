@@ -1,122 +1,120 @@
-# Q1354 (dm1/dm3): the `U,V` factor lemmas
+# Q1362 (dm1): coprime factor split of `5*B^4`
 
-There are two important corrections.
-
-First, the clean proof of positivity is **not** the analytic estimate for `s`; it is algebraic:
+The lemma as stated is false over `ℤ`: you did not assume `0 < B`.  Take
 
 ```text
-U*V = 5*B^4 > 0,
-U+V = 2*(2*r^2+B^2) > 0.
+U = 1, V = 5, B = -1.
 ```
 
-A positive product says `U,V` have the same sign; a positive sum rules out both negative.
+Then `U*V = 5*B^4`, `gcd(U,V)=1`, `U,V > 0`, and both are odd.  But the requested conclusion asks for `a > 0`, `b > 0`, and `a*b = B = -1`, impossible.
 
-Second, the gcd proof is the nontrivial part. From a common odd prime divisor you get divisibility of `s` and `2*r^2+B^2`, hence it divides `5*r^4`; then coprimality with `r` leaves only the possible prime `5`, which must be excluded by a mod-5 square-residue argument. Do not expect `ring`/`linarith` to prove the gcd lemma directly.
-
-Below are the mechanical Lean pieces for (a), (b), and (d), plus the correct interface for (c).
+Here is a Lean counterexample to the exact statement shape.
 
 ```lean
 import Mathlib
 
-namespace DM3
+namespace DM1
 
-abbrev U (r B s : ℤ) : ℤ := 2 * r ^ 2 + B ^ 2 - 2 * s
-abbrev V (r B s : ℤ) : ℤ := 2 * r ^ 2 + B ^ 2 + 2 * s
+/-- The requested integer split is false without `0 < B`. -/
+theorem quartic_factor_split_statement_false :
+    ¬ (∀ U V B : ℤ,
+      U * V = 5 * B ^ 4 →
+      Int.gcd U V = 1 →
+      0 < U → 0 < V →
+      Odd U → Odd V →
+      ∃ a b : ℤ,
+        0 < a ∧ 0 < b ∧ Int.gcd a b = 1 ∧ a * b = B ∧
+        Odd a ∧ Odd b ∧
+          ((U = a ^ 4 ∧ V = 5 * b ^ 4) ∨
+           (U = 5 * a ^ 4 ∧ V = b ^ 4))) := by
+  intro h
+  have hex :=
+    h 1 5 (-1)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by norm_num)
+      (by exact ⟨0, by norm_num⟩)
+      (by exact ⟨2, by norm_num⟩)
+  rcases hex with ⟨a, b, ha, hb, _hgcd, hab, _haodd, _hbodd, _hsplit⟩
+  have hpos : 0 < a * b := mul_pos ha hb
+  rw [hab] at hpos
+  norm_num at hpos
 
-/-- (a) The basic factor identity. -/
-lemma UV_mul_eq_five_mul_B4 {r B s : ℤ}
-    (hs : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
-    U r B s * V r B s = 5 * B ^ 4 := by
-  calc
-    U r B s * V r B s = (2 * r ^ 2 + B ^ 2) ^ 2 - (2 * s) ^ 2 := by
-      dsimp [U, V]
-      ring
-    _ = 5 * B ^ 4 := by
-      rw [hs]
-      ring
-
-lemma UV_add_eq (r B s : ℤ) :
-    U r B s + V r B s = 2 * (2 * r ^ 2 + B ^ 2) := by
-  dsimp [U, V]
-  ring
-
-/-- (b) Positivity of both factors, using product positive plus sum positive. -/
-lemma UV_pos {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B)
-    (hs : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
-    0 < U r B s ∧ 0 < V r B s := by
-  have hprod : 0 < U r B s * V r B s := by
-    rw [UV_mul_eq_five_mul_B4 hs]
-    positivity
-  have hsum : 0 < U r B s + V r B s := by
-    rw [UV_add_eq]
-    positivity
-  rcases (mul_pos_iff.mp hprod) with hpos | hneg
-  · exact hpos
-  · exfalso
-    have hsum_neg : U r B s + V r B s < 0 := add_neg hneg.1 hneg.2
-    linarith
-
-/-- (d) The factor `U` is odd. -/
-lemma U_odd {r B s : ℤ} (hr_odd : Odd r) (hB_odd : Odd B) :
-    Odd (U r B s) := by
-  dsimp [U]
-  have h2r2 : Even (2 * r ^ 2) := (even_two : Even (2 : ℤ)).mul_right (r ^ 2)
-  have h2s : Even (2 * s) := (even_two : Even (2 : ℤ)).mul_right s
-  have hB2 : Odd (B ^ 2) := hB_odd.pow
-  exact (h2r2.add_odd hB2).sub_even h2s
-
-/-- (d) The factor `V` is odd. -/
-lemma V_odd {r B s : ℤ} (hr_odd : Odd r) (hB_odd : Odd B) :
-    Odd (V r B s) := by
-  dsimp [V]
-  have h2r2 : Even (2 * r ^ 2) := (even_two : Even (2 : ℤ)).mul_right (r ^ 2)
-  have h2s : Even (2 * s) := (even_two : Even (2 : ℤ)).mul_right s
-  have hB2 : Odd (B ^ 2) := hB_odd.pow
-  exact (h2r2.add_odd hB2).add_even h2s
-
-end DM3
+end DM1
 ```
 
-## The missing gcd lemma
+## Corrected statement
 
-The correct lemma to prove separately is:
+In the descent context you have `0 < B`, so state the lemma with that hypothesis:
 
 ```lean
-namespace DM3
+import Mathlib
 
-/--
-(c) The gcd lemma.  This is the real arithmetic part: it needs the common-prime
-argument plus the exclusion of the common prime `5` by a mod-5 square-residue check.
--/
-lemma UV_gcd_eq_one
-    {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B)
-    (hr_odd : Odd r) (hB_odd : Odd B)
-    (hgcd : Int.gcd r B = 1)
-    (hs : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
-    Int.gcd (U r B s) (V r B s) = 1 := by
-  -- Recommended proof structure:
-  -- 1. By contradiction, get a prime p dividing gcd(U,V).
-  -- 2. Since U,V are odd, prove p ≠ 2.
-  -- 3. From p ∣ V-U = 4*s and p ≠ 2, get p ∣ s.
-  -- 4. From p ∣ U+V = 2*(2*r^2+B^2) and p ≠ 2, get p ∣ 2*r^2+B^2.
-  -- 5. Reduce `hs` modulo p to get p ∣ 5*r^4.
-  -- 6. Use `hgcd` to prove p ∤ r, hence p ∣ 5, hence p = 5.
-  -- 7. Exclude p = 5: from `5 ∣ 2*r^2+B^2`, with gcd(r,B)=1, get
-  --      (B*r^{-1})^2 ≡ -2 ≡ 3 mod 5,
-  --    impossible because the nonzero squares mod 5 are only 1 and 4.
-  -- This is not a `ring` or `linarith` lemma; make steps 5--7 separate helpers.
+namespace DM1
+
+/-- Correct integer statement: add `0 < B`. -/
+lemma quartic_factor_split_int_correct_statement
+    {U V B : ℤ}
+    (hUV : U * V = 5 * B ^ 4)
+    (hcop : Int.gcd U V = 1)
+    (hUpos : 0 < U) (hVpos : 0 < V) (hBpos : 0 < B)
+    (hUodd : Odd U) (hVodd : Odd V) :
+    ∃ a b : ℤ,
+      0 < a ∧ 0 < b ∧ Int.gcd a b = 1 ∧ a * b = B ∧
+      Odd a ∧ Odd b ∧
+        ((U = a ^ 4 ∧ V = 5 * b ^ 4) ∨
+         (U = 5 * a ^ 4 ∧ V = b ^ 4)) := by
+  -- This is the real unique-factorization/valuation lemma.
+  -- Recommended implementation route:
+  --   1. Convert to naturals using `U.natAbs`, `V.natAbs`, `B.natAbs`.
+  --   2. Since `0 < U,V,B`, replace natAbs casts by the original integers at the end.
+  --   3. Prove the Nat split with `Nat.factorization`.
+  --   4. Cast the resulting Nat roots back to positive integers.
+  -- This proof is not currently a one-line Mathlib lemma.
   sorry
 
-end DM3
+end DM1
 ```
 
-Suggested helper names:
+## Recommended Nat lemma to prove first
+
+The cleanest formalization is a Nat lemma:
 
 ```lean
-lemma common_prime_dvd_five_of_dvd_UV ... : p ∣ 5
-lemma not_five_dvd_common_UV ... : ¬ (5 : ℤ) ∣ Int.gcd (U r B s) (V r B s)
+lemma quartic_factor_split_nat
+    {U V B : ℕ}
+    (hUV : U * V = 5 * B ^ 4)
+    (hcop : Nat.Coprime U V)
+    (hUpos : 0 < U) (hVpos : 0 < V) (hBpos : 0 < B)
+    (hUodd : Odd U) (hVodd : Odd V) :
+    ∃ a b : ℕ,
+      0 < a ∧ 0 < b ∧ Nat.Coprime a b ∧ a * b = B ∧
+      Odd a ∧ Odd b ∧
+        ((U = a ^ 4 ∧ V = 5 * b ^ 4) ∨
+         (U = 5 * a ^ 4 ∧ V = b ^ 4)) := by
+  -- Proof outline:
+  -- * Since `5 ∣ U*V`, `Nat.prime_five.dvd_mul` gives `5 ∣ U ∨ 5 ∣ V`.
+  -- * Coprimality prevents `5` from dividing both.
+  -- * If `5 ∣ V`, write `V = 5*V₀`; cancellation gives `U*V₀ = B^4`.
+  -- * Since `U` and `V₀` are coprime, all prime exponents in each are multiples of 4.
+  -- * Use `Nat.factorization` to build fourth roots `a,b` and prove `U=a^4`, `V₀=b^4`, `B=a*b`.
+  -- * The `5 ∣ U` case is symmetric.
+  sorry
 ```
 
-Once those are proved, `UV_gcd_eq_one` is short. But the full gcd proof is not available from the hypotheses by a one-line tactic.
+The hard sublemma inside the Nat proof is:
+
+```lean
+lemma coprime_mul_eq_fourth_power
+    {x y z : ℕ}
+    (hxy : x * y = z ^ 4)
+    (hcop : Nat.Coprime x y)
+    (hx : 0 < x) (hy : 0 < y) :
+    ∃ a b : ℕ, x = a ^ 4 ∧ y = b ^ 4 ∧ a * b = z := by
+  -- Prove by `Nat.factorization`: for every prime p, the exponent of p
+  -- in exactly one of x,y is the exponent in z^4, hence divisible by 4.
+  sorry
+```
+
+So the answer is: add `0 < B`; otherwise the theorem is false.  Then prove the Nat factorization lemma first and transport it back to integers.
