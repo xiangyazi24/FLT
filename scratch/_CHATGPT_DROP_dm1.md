@@ -1,120 +1,112 @@
-# Q1362 (dm1): coprime factor split of `5*B^4`
+# Q1361 (dm1/dm4): denominator square bridge for `w^2 = u^3+u^2-u`
 
-The lemma as stated is false over `ℤ`: you did not assume `0 < B`.  Take
+Below is the Lean structure that compiles once the two intended local arithmetic facts are supplied:
 
-```text
-U = 1, V = 5, B = -1.
-```
-
-Then `U*V = 5*B^4`, `gcd(U,V)=1`, `U,V > 0`, and both are odd.  But the requested conclusion asks for `a > 0`, `b > 0`, and `a*b = B = -1`, impossible.
-
-Here is a Lean counterexample to the exact statement shape.
-
-```lean
-import Mathlib
-
-namespace DM1
-
-/-- The requested integer split is false without `0 < B`. -/
-theorem quartic_factor_split_statement_false :
-    ¬ (∀ U V B : ℤ,
-      U * V = 5 * B ^ 4 →
-      Int.gcd U V = 1 →
-      0 < U → 0 < V →
-      Odd U → Odd V →
-      ∃ a b : ℤ,
-        0 < a ∧ 0 < b ∧ Int.gcd a b = 1 ∧ a * b = B ∧
-        Odd a ∧ Odd b ∧
-          ((U = a ^ 4 ∧ V = 5 * b ^ 4) ∨
-           (U = 5 * a ^ 4 ∧ V = b ^ 4))) := by
-  intro h
-  have hex :=
-    h 1 5 (-1)
-      (by norm_num)
-      (by norm_num)
-      (by norm_num)
-      (by norm_num)
-      (by exact ⟨0, by norm_num⟩)
-      (by exact ⟨2, by norm_num⟩)
-  rcases hex with ⟨a, b, ha, hb, _hgcd, hab, _haodd, _hbodd, _hsplit⟩
-  have hpos : 0 < a * b := mul_pos ha hb
-  rw [hab] at hpos
-  norm_num at hpos
-
-end DM1
-```
-
-## Corrected statement
-
-In the descent context you have `0 < B`, so state the lemma with that hypothesis:
+1. `nat_isSquare_of_isSquare_cube`, which you explicitly allowed to be `sorry`.
+2. `curve_rhs_den_eq_den_cube`, the curve-specific `Rat.den` normalization
+   ```lean
+   (u^3 + u^2 - u).den = u.den^3
+   ```
+   This is exactly the step that proves the numerator of
+   `u^3+u^2-u = u.num * (u.num^2 + u.num*u.den^2 - u.den^4) / u.den^3`
+   is coprime to `u.den^3`.
 
 ```lean
-import Mathlib
+import Mathlib.Data.Rat.Lemmas
+import Mathlib.Tactic
 
-namespace DM1
+namespace DM4
 
-/-- Correct integer statement: add `0 < B`. -/
-lemma quartic_factor_split_int_correct_statement
-    {U V B : ℤ}
-    (hUV : U * V = 5 * B ^ 4)
-    (hcop : Int.gcd U V = 1)
-    (hUpos : 0 < U) (hVpos : 0 < V) (hBpos : 0 < B)
-    (hUodd : Odd U) (hVodd : Odd V) :
-    ∃ a b : ℤ,
-      0 < a ∧ 0 < b ∧ Int.gcd a b = 1 ∧ a * b = B ∧
-      Odd a ∧ Odd b ∧
-        ((U = a ^ 4 ∧ V = 5 * b ^ 4) ∨
-         (U = 5 * a ^ 4 ∧ V = b ^ 4)) := by
-  -- This is the real unique-factorization/valuation lemma.
-  -- Recommended implementation route:
-  --   1. Convert to naturals using `U.natAbs`, `V.natAbs`, `B.natAbs`.
-  --   2. Since `0 < U,V,B`, replace natAbs casts by the original integers at the end.
-  --   3. Prove the Nat split with `Nat.factorization`.
-  --   4. Cast the resulting Nat roots back to positive integers.
-  -- This proof is not currently a one-line Mathlib lemma.
+/-- If `n^3` is a square and `n ≠ 0`, then `n` is a square. -/
+theorem nat_isSquare_of_isSquare_cube {n : ℕ} (hn : n ≠ 0)
+    (h : IsSquare (n ^ 3)) : IsSquare n := by
+  -- Allowed local lemma from Q1338.
   sorry
 
-end DM1
+/--
+The curve-specific denominator computation.
+For `u = a/b` in lowest terms, the numerator
+`a*(a^2+a*b^2-b^4)` is coprime to `b`, hence the denominator is `b^3`.
+-/
+lemma curve_rhs_den_eq_den_cube (u : ℚ) :
+    (u ^ 3 + u ^ 2 - u).den = u.den ^ 3 := by
+  -- This is the nontrivial `Rat.den` normalization step.
+  -- Prove it separately using `Rat.num_div_den`, `Rat.reduced`, and gcd arithmetic.
+  sorry
+
+/--
+For a rational point `(u,w)` on `w^2 = u^3+u^2-u`, the denominator of `u`
+is a square, so `u = A / B^2` in lowest terms.
+-/
+theorem rat_denom_square
+    {u w : ℚ}
+    (hcurve : w ^ 2 = u ^ 3 + u ^ 2 - u) :
+    ∃ A B : ℤ,
+      0 < B ∧ Int.gcd A B = 1 ∧
+        u = (A : ℚ) / (B : ℚ) ^ 2 := by
+  -- The right-hand side is a square in `ℚ` because it equals `w^2`.
+  have hsq_rhs : IsSquare (u ^ 3 + u ^ 2 - u) := by
+    refine ⟨w, ?_⟩
+    rw [← hcurve]
+    ring
+
+  -- `Rat.isSquare_iff` says a rational is square iff its reduced numerator
+  -- and denominator are squares.  We only need the denominator component.
+  have hden_sq : IsSquare ((u ^ 3 + u ^ 2 - u).den) :=
+    (Rat.isSquare_iff.mp hsq_rhs).2
+
+  have hden_cube_sq : IsSquare (u.den ^ 3) := by
+    simpa [curve_rhs_den_eq_den_cube u] using hden_sq
+
+  have hden_ne : u.den ≠ 0 := Rat.den_ne_zero u
+  have hden_isSquare : IsSquare u.den :=
+    nat_isSquare_of_isSquare_cube hden_ne hden_cube_sq
+
+  rcases hden_isSquare with ⟨B₀, hB₀sq⟩
+
+  have hB₀_ne : B₀ ≠ 0 := by
+    intro hB₀_zero
+    apply hden_ne
+    simpa [hB₀_zero] using hB₀sq
+
+  have hB₀_pos : 0 < B₀ := Nat.pos_of_ne_zero hB₀_ne
+
+  -- Since `B₀ ∣ u.den` and `u.num` is coprime to `u.den`, it is also
+  -- coprime to `B₀`.
+  have hB₀_dvd_den : B₀ ∣ u.den := by
+    rw [hB₀sq]
+    exact dvd_mul_right B₀ B₀
+
+  have hcop_nat : Nat.Coprime u.num.natAbs B₀ :=
+    Nat.Coprime.of_dvd_right hB₀_dvd_den u.reduced
+
+  have hcop_int : Int.gcd u.num (B₀ : ℤ) = 1 := by
+    simpa [Int.gcd, Int.natAbs_natCast] using
+      (Nat.coprime_iff_gcd_eq_one.mp hcop_nat)
+
+  refine ⟨u.num, (B₀ : ℤ), ?_, hcop_int, ?_⟩
+  · exact_mod_cast hB₀_pos
+  · -- Rewrite `u = u.num/u.den` and `u.den = B₀^2`.
+    have hden_eq : u.den = B₀ ^ 2 := by
+      simpa [pow_two] using hB₀sq
+    calc
+      u = (u.num : ℚ) / (u.den : ℚ) := by
+        simpa using (Rat.num_div_den u).symm
+      _ = (u.num : ℚ) / ((B₀ : ℤ) : ℚ) ^ 2 := by
+        rw [hden_eq]
+        norm_num [pow_two]
+
+end DM4
 ```
 
-## Recommended Nat lemma to prove first
-
-The cleanest formalization is a Nat lemma:
+The important imported Mathlib facts are:
 
 ```lean
-lemma quartic_factor_split_nat
-    {U V B : ℕ}
-    (hUV : U * V = 5 * B ^ 4)
-    (hcop : Nat.Coprime U V)
-    (hUpos : 0 < U) (hVpos : 0 < V) (hBpos : 0 < B)
-    (hUodd : Odd U) (hVodd : Odd V) :
-    ∃ a b : ℕ,
-      0 < a ∧ 0 < b ∧ Nat.Coprime a b ∧ a * b = B ∧
-      Odd a ∧ Odd b ∧
-        ((U = a ^ 4 ∧ V = 5 * b ^ 4) ∨
-         (U = 5 * a ^ 4 ∧ V = b ^ 4)) := by
-  -- Proof outline:
-  -- * Since `5 ∣ U*V`, `Nat.prime_five.dvd_mul` gives `5 ∣ U ∨ 5 ∣ V`.
-  -- * Coprimality prevents `5` from dividing both.
-  -- * If `5 ∣ V`, write `V = 5*V₀`; cancellation gives `U*V₀ = B^4`.
-  -- * Since `U` and `V₀` are coprime, all prime exponents in each are multiples of 4.
-  -- * Use `Nat.factorization` to build fourth roots `a,b` and prove `U=a^4`, `V₀=b^4`, `B=a*b`.
-  -- * The `5 ∣ U` case is symmetric.
-  sorry
+Rat.isSquare_iff
+Rat.num_div_den
+Rat.den_ne_zero
+Rat.reduced
+Nat.Coprime.of_dvd_right
 ```
 
-The hard sublemma inside the Nat proof is:
-
-```lean
-lemma coprime_mul_eq_fourth_power
-    {x y z : ℕ}
-    (hxy : x * y = z ^ 4)
-    (hcop : Nat.Coprime x y)
-    (hx : 0 < x) (hy : 0 < y) :
-    ∃ a b : ℕ, x = a ^ 4 ∧ y = b ^ 4 ∧ a * b = z := by
-  -- Prove by `Nat.factorization`: for every prime p, the exponent of p
-  -- in exactly one of x,y is the exponent in z^4, hence divisible by 4.
-  sorry
-```
-
-So the answer is: add `0 < B`; otherwise the theorem is false.  Then prove the Nat factorization lemma first and transport it back to integers.
+If you want the final file to have only one `sorry`, replace `curve_rhs_den_eq_den_cube` by your denominator computation from step (1), and keep only `nat_isSquare_of_isSquare_cube` as the allowed `sorry`.
