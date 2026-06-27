@@ -1,5 +1,5 @@
 import Mathlib
-import FLT.Assumptions.MazurProof.RationalPointsC20
+import Mathlib.NumberTheory.PythagoreanTriples
 
 /-!
 # Infinite descent for the binary quartic s² = r⁴ + r²B² - B⁴
