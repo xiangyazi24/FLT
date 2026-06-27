@@ -651,8 +651,7 @@ theorem quartic_plus_descent_step :
           (isCoprime_comm.mp this)))
     refine ⟨β, α, b, ⟨hβ_pos, hα_pos, hcop_βα, hnew_eq⟩, ?_, ?_⟩
     · intro ⟨hβ1, hα1⟩; apply hnonbase
-      have ha_sq : a ^ 2 = 1 := by rw [hnew_eq, hα1, hβ1] at *; norm_num at *; linarith
-      have ha1_val : a = 1 := by linarith [sq_nonneg (a - 1)]
+      have ha1_val : a = 1 := by rw [ha_eq, hα1, hβ1]; ring
       have hb_sq : b ^ 2 = 1 := by rw [hnew_eq, hα1, hβ1]; norm_num
       have hb1_val : b = 1 := by linarith [sq_nonneg (b - 1)]
       constructor
