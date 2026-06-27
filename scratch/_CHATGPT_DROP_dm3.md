@@ -1,161 +1,242 @@
-# Q1173 (dm3): replacing `weil_pairing_primitive_root` by Route 4B in `Axioms.lean`
+# Q1182 (dm3): import restructure for `TorsionDefs.lean`
 
-## Replacement idea
+## Connector note
 
-Yes: in `no_odd_prime_square_in_torsion`, the primitive-root detour is unnecessary.  Once the proof has built
+I attempted to read the file path implied by the request:
 
-```lean
-hfull : HasFullRationalTorsion E p
+```text
+FLT/Assumptions/MazurProof/Axioms.lean
 ```
 
-from the alleged embedding `(ZMod p × ZMod p) →+ E(ℚ)`, Route 4B immediately gives
+on branch `scratch`, but the GitHub connector returned `404`. Repository code search also did not find `HasFullRationalTorsion`, `TorsionStructureData`, or `weil_pairing_primitive_root`. I could read the public `FLT/Assumptions/Mazur.lean`, but not the newer `MazurProof/Axioms.lean` file referenced in the prompt.
 
-```lean
-p ≤ 2
+So the content below is the exact extraction I recommend from the signatures described in the prompt. If the unpublished `Axioms.lean` has different field names inside `TorsionStructureData`, preserve those field names exactly when doing the mechanical cut/paste. The import-cycle fix itself is independent of those field names.
+
+## Goal
+
+Break the cycle:
+
+```text
+Axioms.lean
+  imports RealTorsionBound.lean
+    imports Axioms.lean
 ```
 
-while the odd-prime hypothesis gives
+by moving only the torsion **definitions** into:
 
-```lean
-3 ≤ p
+```text
+FLT/Assumptions/MazurProof/TorsionDefs.lean
 ```
 
-and `omega` closes the contradiction.
+Then use:
 
-So the old block
+```text
+Axioms.lean
+  imports TorsionDefs.lean
+  imports RealTorsionBound.lean
 
-```lean
-  rcases weil_pairing_primitive_root E hp.pos hfull with ⟨zeta, hzeta⟩
-  have hp_le_two : p ≤ 2 := isPrimitiveRoot_rat_order_le_two hzeta
-  omega
+RealTorsionBound.lean
+  imports TorsionDefs.lean
 ```
 
-should be replaced by the Route 4B block below.
+No file below `RealTorsionBound.lean` should import `Axioms.lean` merely to see `HasFullRationalTorsion`.
 
-## Import to add
+## New file: `FLT/Assumptions/MazurProof/TorsionDefs.lean`
 
-At the top of `Axioms.lean`, add the module that contains Route 4B.  If the file is literally `FLT/RealTorsionBound.lean`, the import is:
-
-```lean
-import FLT.RealTorsionBound
-```
-
-If `RealTorsionBound.lean` lives under a subdirectory, use the corresponding module path, for example:
+Create this file:
 
 ```lean
-import FLT.EllipticCurve.RealTorsionBound
-```
+module
 
-The rest of the old primitive-root imports can stay temporarily, but after this replacement they should no longer be needed by `no_odd_prime_square_in_torsion`.
+public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+public import Mathlib.Data.ZMod.Basic
+public import Mathlib.GroupTheory.OrderOfElement
+public import Mathlib.GroupTheory.Torsion
 
-## Exact replacement for lines 573-586
+/-!
+# Torsion definitions for the Mazur-proof A-line
 
-Use this if the current context already has the `hfull : HasFullRationalTorsion E p` line, as your description indicates.
+This file contains only definitions.  It is intentionally axiom-free.
 
-```lean
-  -- Route 4B replaces the old Weil-pairing/primitive-root contradiction.
-  have hp_le_two : p ≤ 2 :=
-    fullRationalTorsion_order_le_two_route4B (E := E) (m := p) hfull
-  have hp_ge_three : 3 ≤ p := by
-    omega
-  omega
-```
+It exists to break the import cycle:
 
-This is the replacement for the old call:
+* `Axioms.lean` needs the torsion definitions and the Route 4B theorem;
+* `RealTorsionBound.lean` needs the torsion definitions;
+* therefore the shared definitions must live below both files.
+-/
 
-```lean
-  rcases weil_pairing_primitive_root E hp.pos hfull with ⟨zeta, hzeta⟩
-```
-
-No `ζ : ℚ` is introduced anymore.
-
-## If Route 4B has an explicit positivity argument
-
-If the actual theorem in `RealTorsionBound.lean` has the shape
-
-```lean
-fullRationalTorsion_order_le_two_route4B
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    m ≤ 2
-```
-
-then use this one-line variant instead:
-
-```lean
-  have hp_le_two : p ≤ 2 :=
-    fullRationalTorsion_order_le_two_route4B (E := E) (m := p) hp.pos hfull
-```
-
-and keep the rest identical:
-
-```lean
-  have hp_ge_three : 3 ≤ p := by
-    omega
-  omega
-```
-
-## If `omega` cannot derive `3 ≤ p` directly
-
-If the current proof does not already have a hypothesis like `hp_ge_three : 3 ≤ p`, but instead has a prime proof plus an oddness/non-two proof, use the expanded version.  Suppose the oddness hypothesis is named
-
-```lean
-hp_ne_two : p ≠ 2
-```
-
-Then replace the block by:
-
-```lean
-  -- Route 4B replaces the old Weil-pairing/primitive-root contradiction.
-  have hp_le_two : p ≤ 2 :=
-    fullRationalTorsion_order_le_two_route4B (E := E) (m := p) hfull
-  have hp_ge_three : 3 ≤ p := by
-    have hp_two_le : 2 ≤ p := hp.two_le
-    omega
-  omega
-```
-
-If the oddness hypothesis is instead named, for example, `hp_odd : p ≠ 2`, change only the local name:
-
-```lean
-  have hp_ge_three : 3 ≤ p := by
-    have hp_two_le : 2 ≤ p := hp.two_le
-    have hp_ne_two : p ≠ 2 := hp_odd
-    omega
-```
-
-If the oddness hypothesis is `hodd : Odd p`, use:
-
-```lean
-  have hp_ge_three : 3 ≤ p := by
-    have hp_two_le : 2 ≤ p := hp.two_le
-    have hp_ne_two : p ≠ 2 := by
-      intro hp_eq
-      subst p
-      norm_num at hodd
-    omega
-```
-
-## Full intended tail of `no_odd_prime_square_in_torsion`
-
-The tail of the proof should now look like this.  The construction of `hfull` is whatever is already present in your file immediately before line 584.
-
-```lean
-import Mathlib
-import FLT.RealTorsionBound
+@[expose] public section
 
 noncomputable section
 
--- Inside `Axioms.lean`, inside the existing namespace/context:
+open scoped WeierstrassCurve.Affine
 
--- theorem no_odd_prime_square_in_torsion ... := by
---   ...
---   have hfull : HasFullRationalTorsion E p := by
---     -- existing code converting the alleged `(ZMod p)^2` embedding into full rational p-torsion
---     ...
+/-- The torsion subset of the rational point group of an elliptic curve over `ℚ`. -/
+def torsionSet (E : WeierstrassCurve ℚ) [E.IsElliptic] : Set (E⁄ℚ).Point :=
+  (AddCommGroup.torsion (E⁄ℚ).Point : Set (E⁄ℚ).Point)
 
-  -- Route 4B replaces:
-  --   rcases weil_pairing_primitive_root E hp.pos hfull with ⟨zeta, hzeta⟩
+/--
+`E` has full rational `m`-torsion if `(ℤ/mℤ)^2` injects into the rational point group.
+-/
+def HasFullRationalTorsion (E : WeierstrassCurve ℚ) [E.IsElliptic] (m : ℕ) : Prop :=
+  ∃ f : ZMod m × ZMod m →+ (E⁄ℚ).Point, Function.Injective f
+
+/-- `E` has a rational point of exact additive order `n`. -/
+def HasRationalPointOfOrder (E : WeierstrassCurve ℚ) [E.IsElliptic] (n : ℕ) : Prop :=
+  ∃ P : (E⁄ℚ).Point, addOrderOf P = n
+
+/--
+The rational torsion subgroup of `E` has invariant-factor shape `ZMod m × ZMod n`.
+-/
+def HasTorsionStructure (E : WeierstrassCurve ℚ) [E.IsElliptic] (m n : ℕ) : Prop :=
+  Nonempty ((AddCommGroup.torsion (E⁄ℚ).Point) ≃+ (ZMod m × ZMod n))
+
+/-- `E(ℚ)` contains a subgroup isomorphic to `ZMod 2 × ZMod n`. -/
+def ContainsZ2xZn (E : WeierstrassCurve ℚ) [E.IsElliptic] (n : ℕ) : Prop :=
+  ∃ f : ZMod 2 × ZMod n →+ (E⁄ℚ).Point, Function.Injective f
+
+/--
+Data form of the rational torsion invariant-factor theorem.
+
+This packages the two invariant factors, the divisibility relation, and an additive equivalence from
+`E(ℚ)_tors` to `ZMod m × ZMod n`.
+-/
+structure TorsionStructureData (E : WeierstrassCurve ℚ) [E.IsElliptic] where
+  m : ℕ
+  n : ℕ
+  dvd : m ∣ n
+  torsionEquiv : (AddCommGroup.torsion (E⁄ℚ).Point) ≃+ (ZMod m × ZMod n)
+```
+
+### If your current `Axioms.lean` uses `HasTorsionStructure` inside `TorsionStructureData`
+
+If lines 24–62 currently define `TorsionStructureData` by storing a proof of `HasTorsionStructure E m n`, rather than an equivalence directly, use this variant instead:
+
+```lean
+/--
+Data form of the rational torsion invariant-factor theorem.
+
+This packages the two invariant factors, the divisibility relation, and the proof that the torsion
+subgroup has that invariant-factor structure.
+-/
+structure TorsionStructureData (E : WeierstrassCurve ℚ) [E.IsElliptic] where
+  m : ℕ
+  n : ℕ
+  dvd : m ∣ n
+  torsionStructure : HasTorsionStructure E m n
+```
+
+The first version is usually better, because it avoids unpacking `Nonempty` later.  But if existing code references a field named `torsionStructure`, preserve the existing field name to avoid changing downstream proofs.
+
+## Exact `Axioms.lean` changes
+
+At the top of `Axioms.lean`, add the shared definitions import:
+
+```lean
+import FLT.Assumptions.MazurProof.TorsionDefs
+```
+
+When you replace the old Weil-pairing axiom by Route 4B, also add:
+
+```lean
+import FLT.Assumptions.MazurProof.RealTorsionBound
+```
+
+So the import header should have the shape:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import Mathlib.Data.ZMod.Basic
+import Mathlib.GroupTheory.OrderOfElement
+import Mathlib.GroupTheory.Torsion
+import FLT.Assumptions.MazurProof.TorsionDefs
+import FLT.Assumptions.MazurProof.RealTorsionBound
+```
+
+You can delete redundant Mathlib imports if `Axioms.lean` no longer uses them directly.  The important imports for the cycle are:
+
+```lean
+import FLT.Assumptions.MazurProof.TorsionDefs
+import FLT.Assumptions.MazurProof.RealTorsionBound
+```
+
+Then delete the old local definitions block from `Axioms.lean`:
+
+```lean
+-- DELETE from Axioms.lean after moving to TorsionDefs.lean:
+--
+-- def torsionSet ...
+-- def HasFullRationalTorsion ...
+-- def HasRationalPointOfOrder ...
+-- def HasTorsionStructure ...
+-- def ContainsZ2xZn ...
+-- structure TorsionStructureData ...
+```
+
+Do **not** leave aliases with the same names in `Axioms.lean`; duplicate declarations will fail.  Existing uses in `Axioms.lean` should continue to resolve because the imported declarations have the same names.
+
+The top of `Axioms.lean` should look conceptually like this after the change:
+
+```lean
+module
+
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import Mathlib.Data.ZMod.Basic
+import Mathlib.GroupTheory.OrderOfElement
+import Mathlib.GroupTheory.Torsion
+import FLT.Assumptions.MazurProof.TorsionDefs
+import FLT.Assumptions.MazurProof.RealTorsionBound
+
+@[expose] public section
+
+noncomputable section
+
+open scoped WeierstrassCurve.Affine
+
+-- No torsion definitions here anymore.
+-- The first declarations in this file should now be the axioms/theorems that depend on the
+-- definitions imported from `TorsionDefs`.
+```
+
+## Exact `RealTorsionBound.lean` change
+
+Replace the import of `Axioms.lean`:
+
+```lean
+import FLT.Assumptions.MazurProof.Axioms
+```
+
+with:
+
+```lean
+import FLT.Assumptions.MazurProof.TorsionDefs
+```
+
+If `RealTorsionBound.lean` currently has other imports, keep them.  The top should look like:
+
+```lean
+module
+
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import Mathlib.Data.ZMod.Basic
+import Mathlib.GroupTheory.OrderOfElement
+import Mathlib.GroupTheory.Torsion
+import FLT.Assumptions.MazurProof.TorsionDefs
+
+@[expose] public section
+
+noncomputable section
+
+open scoped WeierstrassCurve.Affine
+```
+
+Do **not** import `Axioms.lean` anywhere in `RealTorsionBound.lean` after the restructure.
+
+## Route 4B wiring after the restructure
+
+Once the imports are acyclic, the replacement inside `Axioms.lean` can use Route 4B directly:
+
+```lean
   have hp_le_two : p ≤ 2 :=
     fullRationalTorsion_order_le_two_route4B (E := E) (m := p) hfull
   have hp_ge_three : 3 ≤ p := by
@@ -163,7 +244,7 @@ noncomputable section
   omega
 ```
 
-If the Route 4B theorem takes `hm : 0 < m`, use the variant with `hp.pos`:
+If the theorem has an explicit positivity argument, use:
 
 ```lean
   have hp_le_two : p ≤ 2 :=
@@ -173,18 +254,26 @@ If the Route 4B theorem takes `hm : 0 < m`, use the variant with `hp.pos`:
   omega
 ```
 
-## What to do with the old axiom
+## Recommended verification sequence
 
-After this change, `no_odd_prime_square_in_torsion` no longer uses
+After making the file changes, run these checks:
+
+```bash
+lake build FLT.Assumptions.MazurProof.TorsionDefs
+lake build FLT.Assumptions.MazurProof.RealTorsionBound
+lake build FLT.Assumptions.MazurProof.Axioms
+```
+
+Then confirm the old axiom is gone:
 
 ```lean
+#print axioms no_odd_prime_square_in_torsion
+```
+
+The expected result should not mention:
+
+```text
 weil_pairing_primitive_root
 ```
 
-So if that was the only remaining use, delete the axiom at line 72.  If Lean reports other uses, replace those uses similarly: first derive `HasFullRationalTorsion E m`, then call
-
-```lean
-fullRationalTorsion_order_le_two_route4B
-```
-
-and contradict the relevant lower bound on `m`.
+If `TorsionDefs.lean` builds but `Axioms.lean` fails at `TorsionStructureData.<field>`, that means the field names in the local copy of `Axioms.lean` differ from the names I had to infer.  In that case, keep the exact field names from the old structure when moving it.
