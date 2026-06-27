@@ -68,10 +68,14 @@ lemma exponent_two_le_two
 -- Key: from primary decomposition G ≃+ ⊕ᵢ (ℤ/pᵢ^eᵢ), extract injection ZMod p × ZMod p ↪ G
 lemma injection_of_exponent_ge_two
     (G : Type*) [AddCommGroup G] [Finite G] (p : ℕ) (hp : Nat.Prime p) (e : ℕ) (he : e ≥ 2) :
-    (let decomp := AddCommGroup.equiv_directSum_zmod_of_finite G
-     -- If p^e appears in decomp, then ZMod p × ZMod p ↪ ZMod (p^e) ↪ G
-     ∃ f : ZMod p × ZMod p →+ G, Function.Injective f) := by
-  sorry  -- Use Mathlib's divisor lattice: p² | p^e (when e ≥ 2) → injection exists
+    (∃ f : ZMod p × ZMod p →+ G, Function.Injective f) := by
+  -- The primary decomposition includes ZMod (p^e)
+  -- We use: p² | p^e (since e ≥ 2) and ZMod (p²) ↪ ZMod (p^e)
+  have hp_sq_dvd : p^2 ∣ p^e := by
+    have : p^(2 : ℕ) ∣ p^e := dvd_pow_self p (by omega)
+    convert this
+  -- ZMod (p²) ≃+ ZMod p × ZMod p (via Chinese Remainder Theorem, p ⊥ p? No, use decomposition)
+  sorry  -- ~30 LOC: use Mathlib's ZMod decomposition and CRT for p²
 
 -- Chinese Remainder Theorem assembly: group prime powers into two factors
 lemma crt_two_factor_decomposition
