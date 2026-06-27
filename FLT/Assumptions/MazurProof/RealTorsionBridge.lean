@@ -63,6 +63,7 @@ Proof path: establish E(ℝ) ≅ AddCircle 1 × (ℤ/kℤ), k ∈ {1,2}, then us
 axiom real_odd_torsion_le
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     (p : ℕ) (hp : Nat.Prime p) (hpgt : 2 < p) :
+    Finite {P : (E⁄ℝ).Point | (p : ℕ) • P = 0} ∧
     Nat.card {P : (E⁄ℝ).Point | (p : ℕ) • P = 0} ≤ 2 * p
 
 /-! ## Main theorem: no (ℤ/pℤ)² in E(ℚ) for odd prime p -/
@@ -77,10 +78,22 @@ theorem no_zmod_p_square_in_rational_points
   rintro ⟨f, hf⟩
   let g := (EQ_to_ER E).comp f
   have hg : Function.Injective g := (EQ_to_ER_injective E).comp hf
-  -- The image of g lies in E(ℝ)[p] since p • x = 0 in (ZMod p)².
-  -- Injection gives |(ZMod p)²| = p² ≤ |E(ℝ)[p]| ≤ 2p (axiom).
-  -- But p² > 2p for p ≥ 3, contradiction.
-  sorry
+  obtain ⟨hfin, hcard⟩ := real_odd_torsion_le E p hp hpgt
+  have htors : ∀ x : ZMod p × ZMod p, p • g x = 0 := by
+    intro x
+    show p • ((EQ_to_ER E) (f x)) = 0
+    rw [← (EQ_to_ER E).map_nsmul, ← f.map_nsmul, ZModModule.char_nsmul_eq_zero,
+        map_zero, map_zero]
+  let toTors : ZMod p × ZMod p → {P : (E⁄ℝ).Point | (p : ℕ) • P = 0} :=
+    fun x => ⟨g x, htors x⟩
+  have htoTors_inj : Function.Injective toTors := by
+    intro a b hab; exact hg (congrArg Subtype.val hab)
+  haveI : Finite {P : (E⁄ℝ).Point | (p : ℕ) • P = 0} := hfin
+  have hle : Nat.card (ZMod p × ZMod p) ≤
+      Nat.card {P : (E⁄ℝ).Point | (p : ℕ) • P = 0} :=
+    Nat.card_le_card_of_injective toTors htoTors_inj
+  simp [Nat.card_prod, ZMod.card] at hle
+  nlinarith [hp.pos]
 
 /-- Version for the torsion subgroup, matching the signature used in `Axioms.lean`. -/
 theorem no_odd_prime_square_in_torsion_real
