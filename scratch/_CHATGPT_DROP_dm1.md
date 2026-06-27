@@ -1,146 +1,132 @@
-# Q1370 (dm1/dm2): exact factor-split `sorry`
+# Q1373 (dm1/dm1): parity in the quartic-plus equation
 
-Mathlib has the machinery, but I do not know of a packaged theorem with exactly this statement.
+I cannot honestly give the requested complete proof as stated from the proposed argument, because the proposed `B`-even proof has a real gap.
 
-Use the Nat factorization API, not `Associates`, for this local descent lemma.  The relevant import is:
+The `r`-even branch is correct:
 
-```lean
-import Mathlib.Data.Nat.Factorization.Basic
+```text
+r even and gcd(r,B)=1  ⇒  B odd,
+RHS ≡ 0 + 0 - 1 ≡ 3 mod 4,
 ```
 
-Useful API names:
+which contradicts the fact that squares mod `4` are only `0,1`.
 
-```lean
-Nat.factorization
-Nat.factorization_mul
-Nat.factorization_pow
-Nat.factorization_div
-Nat.factorization_le_iff_dvd
-Nat.Prime.factorization_self
-Nat.factorization_pow_self
-Nat.Prime.dvd_mul
-Nat.Coprime
-Nat.Coprime.dvd_mul_left
-Nat.Coprime.dvd_mul_right
+But the proposed `B`-even proof only handles the subcase `v₂(B)=1`.  If `B=2k` with `k` odd, then modulo `16` gives
+
+```text
+RHS ≡ 1 + 4 - 0 ≡ 5 mod 16,
 ```
 
-There is no one-line `coprime_factors_of_five_fourth_power` theorem.  The exact `sorry` should be the Nat split lemma below.  After this Nat lemma exists, the integer statement is just transport through `natAbs` using the positivity hypotheses.
+which is impossible.  However, if `B=4m`, then modulo `16` gives
 
-## Exact `sorry` to isolate
+```text
+RHS ≡ r^4 ≡ 1 mod 16,
+```
+
+which is compatible with being a square.  This is **not** a gcd issue: for example `gcd(1,4)=1`.
+
+So the exact missing lemma is:
 
 ```lean
-import Mathlib.Data.Nat.Factorization.Basic
-import Mathlib.Data.Int.GCD
-import Mathlib.Tactic
+lemma B_divisible_by_four_impossible
+    {r B s : ℤ}
+    (hr : 0 < r) (hB : 0 < B) (hgcd : Int.gcd r B = 1)
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4)
+    (h4 : (4 : ℤ) ∣ B) : False := by
+  sorry
+```
 
-namespace DM2
+Without that lemma, `Odd B` does not follow from the advertised mod-16 argument.
 
-/--
-Nat version of the coprime factor split.
+## Compilable finite residue checks
 
-This is the exact UFD/factorization lemma to prove by `Nat.factorization`.
-It packages: the prime `5` goes to exactly one side, and all other exponents
-are multiples of `4`.
--/
-theorem quartic_factor_split_nat
-    {U V B : ℕ}
-    (hUV : U * V = 5 * B ^ 4)
-    (hcop : Nat.Coprime U V)
-    (hUpos : 0 < U) (hVpos : 0 < V) (hBpos : 0 < B)
-    (hUodd : Odd U) (hVodd : Odd V) :
-    ∃ a b : ℕ,
-      0 < a ∧ 0 < b ∧ Nat.Coprime a b ∧ a * b = B ∧
-      Odd a ∧ Odd b ∧
-        ((U = a ^ 4 ∧ V = 5 * b ^ 4) ∨
-         (U = 5 * a ^ 4 ∧ V = b ^ 4)) := by
-  -- Exact proof plan:
-  -- 1. Split on `Nat.Prime.dvd_mul Nat.prime_five` applied to `5 ∣ U*V`.
-  -- 2. Coprimality rules out `5 ∣ U` and `5 ∣ V` simultaneously.
-  -- 3. In the branch `5 ∣ V`, write `V = 5*V₀` and cancel `5` from
-  --      U*V = 5*B^4
-  --    to get `U*V₀ = B^4`.
-  -- 4. Prove `Nat.Coprime U V₀` from `Nat.Coprime U V` and `V₀ ∣ V`.
-  -- 5. Apply the internal lemma `coprime_mul_eq_fourth_power`:
-  --      if x*y=z^4 and gcd(x,y)=1, then x=a^4, y=b^4, a*b=z.
-  -- 6. The branch `5 ∣ U` is symmetric.
-  -- 7. Oddness of `a,b` follows from `a*b=B` and oddness of `B`, itself
-  --    obtained from oddness of `U*V = 5*B^4`.
+These are the clean finite checks to use with `ZMod`.
+
+```lean
+import Mathlib
+
+namespace DM1
+
+lemma zmod4_square_ne_three (x : ZMod 4) : x ^ 2 ≠ 3 := by
+  fin_cases x <;> decide
+
+lemma zmod16_square_ne_five (x : ZMod 16) : x ^ 2 ≠ 5 := by
+  fin_cases x <;> decide
+
+/-- The `r`-even, `B`-odd RHS is `3 mod 4`. -/
+lemma rhs_mod4_of_r_even_B_odd
+    (r B : ZMod 4)
+    (hr : r = 0 ∨ r = 2)
+    (hB : B = 1 ∨ B = 3) :
+    r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4 = 3 := by
+  rcases hr with rfl | rfl <;>
+  rcases hB with rfl | rfl <;>
+  decide
+
+/-- The `B=2k`, `k` odd, `r` odd RHS is `5 mod 16`. -/
+lemma rhs_mod16_of_r_odd_B_two_times_odd
+    (r B : ZMod 16)
+    (hr : r = 1 ∨ r = 3 ∨ r = 5 ∨ r = 7 ∨ r = 9 ∨ r = 11 ∨ r = 13 ∨ r = 15)
+    (hB : B = 2 ∨ B = 6 ∨ B = 10 ∨ B = 14) :
+    r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4 = 5 := by
+  rcases hr with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
+  rcases hB with rfl | rfl | rfl | rfl <;>
+  decide
+
+/-- Sanity check: `B=4m` is not contradicted by mod `16`. -/
+example :
+    ((1 : ZMod 16) ^ 4 + (1 : ZMod 16) ^ 2 * (4 : ZMod 16) ^ 2 -
+      (4 : ZMod 16) ^ 4) = 1 := by
+  decide
+
+/-- Sanity check: `B=4m` is not excluded by coprimality. -/
+example : Int.gcd 1 4 = 1 := by
+  norm_num
+
+end DM1
+```
+
+## Skeleton with the exact `sorry`
+
+This is the honest Lean skeleton.  The first branch is the advertised mod-4 contradiction; the second branch needs the missing `B_divisible_by_four_impossible` lemma after the mod-16 subcase `B ≡ 2 mod 4` is removed.
+
+```lean
+import Mathlib
+
+namespace DM1
+
+lemma B_divisible_by_four_impossible
+    {r B s : ℤ}
+    (hr : 0 < r) (hB : 0 < B) (hgcd : Int.gcd r B = 1)
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4)
+    (h4 : (4 : ℤ) ∣ B) : False := by
+  -- This is not proved by the stated mod-16 argument.
+  -- It needs an additional 2-adic/descent argument.
   sorry
 
-/--
-The inner factorization lemma.  This is often the best first target.
+lemma quartic_parity
+    {r B s : ℤ}
+    (hr : 0 < r) (hB : 0 < B) (hgcd : Int.gcd r B = 1)
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    Odd r ∧ Odd B := by
+  -- Recommended structure:
+  -- 1. Prove `Odd r` by contradiction.
+  --    If `Even r`, then `Odd B` from gcd, and the ZMod-4 check above gives
+  --    `s^2 = 3` in `ZMod 4`, contradicting `zmod4_square_ne_three`.
+  have hr_odd : Odd r := by
+    sorry
 
-For every prime `p`, use
-`Nat.factorization_mul`, `Nat.factorization_pow`, and coprimality to show the
-exponent of `p` in `x` or `y` is a multiple of `4`; then reconstruct fourth
-roots from the divided exponent functions.
--/
-theorem coprime_mul_eq_fourth_power
-    {x y z : ℕ}
-    (hxy : x * y = z ^ 4)
-    (hcop : Nat.Coprime x y)
-    (hx : 0 < x) (hy : 0 < y) :
-    ∃ a b : ℕ,
-      x = a ^ 4 ∧ y = b ^ 4 ∧ a * b = z := by
-  -- This is the core `Nat.factorization` proof.
-  -- For each prime p:
-  --   factorization(x*y)(p) = factorization(x)(p)+factorization(y)(p)
-  --   factorization(z^4)(p) = 4*factorization(z)(p)
-  --   coprime x y implies at most one of factorization(x)(p), factorization(y)(p)
-  --   is nonzero.
-  -- Hence both exponents are divisible by 4, and the quotient exponents define
-  -- `a` and `b`.
-  sorry
+  -- 2. Prove `Odd B` by contradiction.
+  --    If `Even B`, then `Odd r` from gcd. Split on whether `4 ∣ B`.
+  --    * If not `4 ∣ B`, then `B ≡ 2 mod 4`, so the ZMod-16 check gives
+  --      `s^2 = 5`, contradicting `zmod16_square_ne_five`.
+  --    * If `4 ∣ B`, call the missing lemma above.
+  have hB_odd : Odd B := by
+    sorry
 
-end DM2
+  exact ⟨hr_odd, hB_odd⟩
+
+end DM1
 ```
 
-## Integer statement using that exact Nat lemma
-
-The integer version should be stated with `0 < B`; otherwise `a*b=B` with `a,b>0` is false for negative `B`.
-
-```lean
-import Mathlib.Data.Nat.Factorization.Basic
-import Mathlib.Data.Int.GCD
-import Mathlib.Tactic
-
-namespace DM2
-
-/-- Integer version.  Prove by transporting `quartic_factor_split_nat`. -/
-theorem quartic_factor_split_int
-    {U V B : ℤ}
-    (hUV : U * V = 5 * B ^ 4)
-    (hcop : Int.gcd U V = 1)
-    (hUpos : 0 < U) (hVpos : 0 < V) (hBpos : 0 < B)
-    (hUodd : Odd U) (hVodd : Odd V) :
-    ∃ a b : ℤ,
-      0 < a ∧ 0 < b ∧ Int.gcd a b = 1 ∧ a * b = B ∧
-        ((U = a ^ 4 ∧ V = 5 * b ^ 4) ∨
-         (U = 5 * a ^ 4 ∧ V = b ^ 4)) := by
-  -- Transport route:
-  --   let Un := U.natAbs, Vn := V.natAbs, Bn := B.natAbs.
-  --   hUpos/hVpos/hBpos identify casts of these natAbs values with U,V,B.
-  --   Convert hUV to `Un*Vn = 5*Bn^4`.
-  --   Convert hcop to `Nat.Coprime Un Vn`.
-  --   Apply `quartic_factor_split_nat`.
-  --   Return `a,b : ℤ` by casting the Nat witnesses.
-  -- This is routine but verbose cast bookkeeping; the unique-factorization
-  -- content is entirely in `quartic_factor_split_nat` above.
-  sorry
-
-end DM2
-```
-
-## Bottom line
-
-Mathlib has the factorization primitives, but not the exact descent lemma.  The exact proof obligation to isolate is:
-
-```lean
-quartic_factor_split_nat
-```
-
-and inside it the only genuinely hard sublemma is:
-
-```lean
-coprime_mul_eq_fourth_power
-```
+Bottom line: the mod-4 and mod-16 residue checks are easy and compile, but they do **not** prove `Odd B`.  The exact remaining proof obligation is the `4 ∣ B` subcase.
