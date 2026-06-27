@@ -1,384 +1,240 @@
-# Q1269 (dm2): `QuarticMinus` by descent, via `QuarticPlus` symmetry
+# Q1295 (dm2): square denominator for rational points on `w^2 = u^3 + u^2 - u`
 
-## Statement
+## Honest status
 
-Let `r, B` be positive coprime integers and suppose
+I do **not** want to misrepresent this as a fully checked, sorry-free Lean file.  I cannot run Lean in this connector-only delivery mode, and the p-adic route needs one final global bridge from local parity of all denominator valuations to an actual square denominator.  The core formal route below is the one I would use in Mathlib June 2026, but the helper `nat_isSquare_of_isSquare_cube` should be checked in the target tree.
 
-```text
-s^2 = -r^4 + r^2 B^2 + B^4.
+The main point: for this theorem, a direct denominator computation is cleaner than explicitly threading the whole p-adic API through the final theorem.  It packages the same local valuation fact in the statement
+
+```lean
+(u ^ 3 + u ^ 2 - u).den = u.den ^ 3.
 ```
 
-Equivalently,
+Since the right hand side equals `w^2`, it is a square rational; `Rat.isSquare_iff` says the numerator and denominator of a square rational are squares.  Hence `u.den ^ 3` is a square natural number, so `u.den` is a square.  Writing `u.den = B^2` gives
 
-```text
-s^2 = B^4 + B^2 r^2 - r^4.
+```lean
+u = u.num / B^2.
 ```
 
-This is exactly the `QuarticPlus` equation with the two variables swapped.  If
+The proof also keeps coprimality: `Rat.reduced` gives `Nat.Coprime u.num.natAbs u.den`; since `B ∣ u.den`, we get `Nat.Coprime u.num.natAbs B`, equivalently `Int.gcd u.num B = 1`.
 
-```text
-QuarticPlus(x,y,z) : z^2 = x^4 + x^2 y^2 - y^4,
+## Mathlib APIs that are the right fit
+
+The useful existing lemmas are:
+
+```lean
+Rat.num_div_den
+Rat.reduced
+Rat.den_div_eq_of_coprime
+Rat.isSquare_iff
+Int.isCoprime_iff_nat_coprime
+IsCoprime.mul_left
+IsCoprime.mul_right
+IsCoprime.add_mul_left_left
+Nat.Coprime.coprime_dvd_right
 ```
 
-and
+For the explicitly p-adic proof, the relevant APIs are:
 
-```text
-QuarticMinus(r,B,s) : s^2 = -r^4 + r^2 B^2 + B^4,
+```lean
+padicValRat.pow
+padicValRat.mul
+padicValRat.add_eq_of_lt
+padicValRat.lt_add_of_lt
+Nat.factorization_def
+Nat.multiplicity_eq_factorization
 ```
 
-then
+but the final extraction still wants the same square-denominator bridge.
 
-```text
-QuarticMinus(r,B,s)  <->  QuarticPlus(B,r,s).
-```
+## Lean code: denominator route
 
-Therefore the `QuarticMinus` theorem is not a new descent theorem.  It is the existing `QuarticPlus` infinite descent applied to `(x,y) = (B,r)`.  The descent variable for `QuarticMinus` is `r`, because `r` is the second variable in the corresponding `QuarticPlus` solution.
-
-The only positive coprime solution is
-
-```text
-r = B = 1,
-```
-
-with `s = ±1` if `s` is allowed to be signed.
-
-## Lean-facing reduction
-
-If the repository already has a theorem for `QuarticPlus`, the clean proof should be a one-line swap, not a duplicate factorization proof.
+This is the file shape I recommend.  The first lemma is the key denominator calculation.  The second lemma is the generic arithmetic bridge: if a cube is a square, then the base is a square.  I have written it as an isolated lemma because it is reusable and should be proved once from `Nat.factorization`.
 
 ```lean
 import Mathlib
 
-namespace QuarticDescent
+open scoped BigOperators
 
-/-- Schematic predicate; use the repository's actual definition. -/
-def QuarticPlus (x y z : ℤ) : Prop :=
-  z ^ 2 = x ^ 4 + x ^ 2 * y ^ 2 - y ^ 4
+namespace Q1295_dm2
 
-/-- Schematic predicate; use the repository's actual definition. -/
-def QuarticMinus (r B s : ℤ) : Prop :=
-  s ^ 2 = -r ^ 4 + r ^ 2 * B ^ 2 + B ^ 4
+/-- The denominator calculation behind the valuation argument.
 
-lemma quarticMinus_iff_quarticPlus_swap (r B s : ℤ) :
-    QuarticMinus r B s ↔ QuarticPlus B r s := by
-  unfold QuarticMinus QuarticPlus
-  ring_nf
+If `u = a / d` in lowest terms, then
 
-end QuarticDescent
+`u^3 + u^2 - u = (a^3 + a^2*d - a*d^2) / d^3`,
+
+and the numerator is coprime to `d`, hence to `d^3`.  Therefore the reduced
+rational denominator is exactly `d^3`.
+-/
+private lemma den_cubic_num_den (u : ℚ) :
+    ((u ^ 3 + u ^ 2 - u).den : ℤ) = (u.den : ℤ) ^ 3 := by
+  classical
+  let a : ℤ := u.num
+  let d : ℤ := u.den
+  have hdpos : 0 < d := by
+    dsimp [d]
+    exact_mod_cast u.den_pos
+  have hdenpos : 0 < d ^ 3 := pow_pos hdpos 3
+  have hdne_int : d ≠ 0 := ne_of_gt hdpos
+  have hdne_rat : (d : ℚ) ≠ 0 := by
+    exact_mod_cast hdne_int
+
+  have hredZ : IsCoprime a d := by
+    rw [Int.isCoprime_iff_nat_coprime]
+    dsimp [a, d]
+    simpa using u.reduced
+
+  let N : ℤ := a ^ 3 + a ^ 2 * d - a * d ^ 2
+
+  have hcop_a3_d : IsCoprime (a ^ 3) d := by
+    have h2 : IsCoprime (a * a) d := hredZ.mul_left hredZ
+    have h3 : IsCoprime ((a * a) * a) d := h2.mul_left hredZ
+    simpa [pow_succ, pow_two, mul_assoc] using h3
+
+  have hcopN_d : IsCoprime N d := by
+    have h0 : IsCoprime (a ^ 3 + d * (a ^ 2 - a * d)) d :=
+      hcop_a3_d.add_mul_left_left (a ^ 2 - a * d)
+    dsimp [N]
+    convert h0 using 1 <;> ring
+
+  have hcopN_d3 : IsCoprime N (d ^ 3) := by
+    have h2 : IsCoprime N (d * d) := hcopN_d.mul_right hcopN_d
+    have h3 : IsCoprime N ((d * d) * d) := h2.mul_right hcopN_d
+    convert h3 using 1 <;> ring
+
+  have hcopNat : Nat.Coprime N.natAbs (d ^ 3).natAbs := by
+    exact (Int.isCoprime_iff_nat_coprime.mp hcopN_d3)
+
+  have hrepr :
+      u ^ 3 + u ^ 2 - u = (N : ℚ) / (d ^ 3 : ℚ) := by
+    have hu : u = (a : ℚ) / (d : ℚ) := by
+      dsimp [a, d]
+      simpa using (Rat.num_div_den u).symm
+    rw [hu]
+    field_simp [hdne_rat]
+    dsimp [N]
+    ring
+
+  rw [hrepr]
+  exact Rat.den_div_eq_of_coprime hdenpos hcopNat
+
+/-- Generic arithmetic bridge needed at the end.
+
+This is the small helper I would prove from `Nat.factorization`:
+`(n^3).factorization p = 3 * n.factorization p`; if `n^3 = c^2`, then this
+is also `2 * c.factorization p`, so every `n.factorization p` is even.  Then
+`b := n.factorization.prod (fun p e => p ^ (e / 2))` satisfies `b^2 = n`.
+-/
+private lemma nat_isSquare_of_isSquare_cube {n : ℕ} (hn : n ≠ 0)
+    (h : IsSquare (n ^ 3)) : IsSquare n := by
+  classical
+  -- Recommended proof body:
+  --   1. rcases h with ⟨c, hc⟩
+  --   2. prove ∀ p, Even (n.factorization p) by applying `Nat.factorization`
+  --      to `hc` and simplifying with `Nat.factorization_pow`; then `omega`.
+  --   3. define `b := n.factorization.prod (fun p e => p ^ (e / 2))`.
+  --   4. prove `b ^ 2 = n` by `Nat.eq_of_factorization_eq`, again using
+  --      `Nat.factorization_pow` and the parity statement.
+  --
+  -- I am leaving this isolated rather than hiding it inside the main theorem,
+  -- because it is exactly the global valuation-to-square bridge.
+  sorry
+
+/-- Rational points on `w^2 = u^3 + u^2 - u` have square denominator.
+
+This is the desired output form: `u = A / B^2`, with `A,B : ℤ`, `B > 0`, and
+`gcd(A,B)=1`.
+-/
+theorem exists_int_sqden_of_curve (u w : ℚ)
+    (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
+    ∃ A B : ℤ,
+      0 < B ∧ Int.gcd A B = 1 ∧ u = (A : ℚ) / (B : ℚ) ^ 2 := by
+  classical
+  let F : ℚ := u ^ 3 + u ^ 2 - u
+
+  have hF_square : IsSquare F := by
+    refine ⟨w, ?_⟩
+    dsimp [F]
+    rw [← h]
+    ring
+
+  have hdenF_square : IsSquare F.den :=
+    (Rat.isSquare_iff.mp hF_square).2
+
+  have hdenF : F.den = u.den ^ 3 := by
+    dsimp [F]
+    exact_mod_cast den_cubic_num_den u
+
+  have hcube_square : IsSquare (u.den ^ 3) := by
+    simpa [hdenF] using hdenF_square
+
+  have hden_square : IsSquare u.den :=
+    nat_isSquare_of_isSquare_cube u.den_ne_zero hcube_square
+
+  rcases hden_square with ⟨B₀, hB₀⟩
+
+  have hB₀_pos : 0 < B₀ := by
+    apply Nat.pos_of_ne_zero
+    intro hBzero
+    have : u.den = 0 := by
+      simpa [hBzero] using hB₀
+    exact u.den_ne_zero this
+
+  refine ⟨u.num, (B₀ : ℤ), ?_, ?_, ?_⟩
+  · exact_mod_cast hB₀_pos
+
+  · have hBdvd_den : B₀ ∣ u.den := by
+      rcases hB₀ with hB₀
+      refine ⟨B₀, ?_⟩
+      simpa [pow_two, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using hB₀
+    have hcopB : Nat.Coprime u.num.natAbs B₀ :=
+      u.reduced.coprime_dvd_right hBdvd_den
+    rw [Int.gcd_def]
+    simpa [Int.natAbs_natCast] using hcopB.gcd_eq_one
+
+  · calc
+      u = (u.num : ℚ) / (u.den : ℚ) := by
+        simpa using (Rat.num_div_den u).symm
+      _ = (u.num : ℚ) / ((B₀ : ℚ) ^ 2) := by
+        rw [hB₀]
+        norm_num [pow_two]
 ```
 
-The final theorem should use the existing `QuarticPlus` result like this, modulo the repository's actual integer/natural conventions:
+## If you insist on the explicit p-adic lemma
+
+The p-adic core should be stated separately as follows.  This is the precise mathematical content of the “dominant term” argument.
 
 ```lean
-import Mathlib
-
-namespace QuarticDescent
-
--- Schematic theorem name and hypotheses; replace by the existing QuarticPlus theorem.
-axiom quarticPlus_only_one
-    {x y z : ℤ}
-    (hx : 0 < x) (hy : 0 < y)
-    (hcop : Int.gcd x y = 1)
-    (h : QuarticPlus x y z) :
-    x = 1 ∧ y = 1
-
-theorem quarticMinus_only_one
-    {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B)
-    (hcop : Int.gcd r B = 1)
-    (h : QuarticMinus r B s) :
-    r = 1 ∧ B = 1 := by
-  have hplus : QuarticPlus B r s := (quarticMinus_iff_quarticPlus_swap r B s).1 h
-  have hcop' : Int.gcd B r = 1 := by
-    simpa [Int.gcd_comm] using hcop
-  rcases quarticPlus_only_one hB hr hcop' hplus with ⟨hB1, hr1⟩
-  exact ⟨hr1, hB1⟩
-
-end QuarticDescent
+private lemma padicVal_curve_rhs_of_neg
+    {p : ℕ} [Fact p.Prime] {u : ℚ}
+    (hu : padicValRat p u < 0) :
+    padicValRat p (u ^ 3 + u ^ 2 - u) = 3 * padicValRat p u := by
+  -- Since `v(u)<0`, one has
+  --   v(u^3) = 3v(u) < 2v(u) = v(u^2)
+  -- and
+  --   3v(u) < v(u).
+  -- Apply `padicValRat.add_eq_of_lt` twice, after rewriting `-u` by
+  -- `padicValRat.neg` and powers by `padicValRat.pow`.
+  -- This lemma is routine but notation-sensitive.
+  sorry
 ```
 
-The `axiom` in this snippet is only a placeholder for the already-proved `QuarticPlus` theorem.  Do **not** add this axiom to the repository.
+Then for every prime `p ∣ u.den`, `padicValRat p u = - padicValNat p u.den`, and the curve equation gives
 
-## Full descent, written directly for `QuarticMinus`
-
-Here is the descent argument after performing the variable swap explicitly.
-
-Assume a positive coprime solution
-
-```text
-s^2 = B^4 + B^2 r^2 - r^4.        (1)
+```lean
+2 * padicValRat p w = 3 * padicValRat p u
 ```
 
-Set
+so `padicValRat p u` is even, hence `padicValNat p u.den` is even.  The same global bridge as above converts even prime exponents of `u.den` into `u.den = B^2`.
 
-```text
-X = 2B^2 + r^2.
+## Bottom line
+
+The denominator route is the shortest Lean route.  The only genuinely reusable missing bridge is:
+
+```lean
+private lemma nat_isSquare_of_isSquare_cube {n : ℕ} (hn : n ≠ 0)
+    (h : IsSquare (n ^ 3)) : IsSquare n
 ```
 
-Then
-
-```text
-X^2 - (2s)^2 = 5r^4,
-```
-
-so
-
-```text
-(X - 2s)(X + 2s) = 5r^4.          (2)
-```
-
-This is exactly the `QuarticPlus` factorization for the solution `(x,y,z) = (B,r,s)`.
-
-### Factor-splitting lemma
-
-Use the same factor-splitting lemma as in `QuarticPlus`, applied to `(B,r,s)`.
-
-After possibly replacing `s` by `-s`, the two positive factors in (2) may be written
-
-```text
-X - 2s = a^4,
-X + 2s = 5b^4,
-r = ab,                             (3)
-```
-
-with
-
-```text
-a > 0,
-b > 0,
-gcd(a,b) = 1.
-```
-
-This is the point where the `QuarticPlus` parity/coprimality work is used.  In direct `QuarticMinus` language, it is the same argument with `r` playing the role of the second `QuarticPlus` variable.
-
-For reference, once the parity lemma gives `r` odd, the coprimality check is short.  Both factors are odd.  If an odd prime `q` divides both factors, then `q | s` and `q | X`.  From
-
-```text
-X^2 - 4s^2 = 5r^4
-```
-
-we get `q | 5r^4`.  If `q | r`, then `q | X = 2B^2 + r^2` gives `q | B`, contradicting `gcd(r,B)=1`.  If `q = 5`, then `2B^2 + r^2 ≡ 0 mod 5`; when neither `r` nor `B` is divisible by `5`, this says `(r/B)^2 ≡ -2 ≡ 3 mod 5`, impossible because `3` is not a quadratic residue modulo `5`, and the cases `5 | r` or `5 | B` also contradict `gcd(r,B)=1` together with `X ≡ 0`.  Hence the two factors are coprime.  Since their product is `5r^4`, unique prime factorization gives (3), after choosing the sign of `s` so that the factor containing the single `5 mod 4` exponent is the larger factor.
-
-### From the factorization to a Pythagorean triple
-
-Add the two equations in (3):
-
-```text
-2X = a^4 + 5b^4.
-```
-
-Since `X = 2B^2 + r^2` and `r = ab`, this gives
-
-```text
-4B^2 + 2a^2b^2 = a^4 + 5b^4,
-```
-
-hence
-
-```text
-4B^2 = a^4 - 2a^2b^2 + 5b^4
-     = (a^2 - b^2)^2 + 4b^4.
-```
-
-Dividing by `4`,
-
-```text
-B^2 = ((a^2 - b^2)/2)^2 + b^4.      (4)
-```
-
-The two legs in (4), namely
-
-```text
-u = |a^2 - b^2| / 2,
-v = b^2,
-```
-
-are coprime, and `v` is odd.  Thus `(u,v,B)` is a primitive Pythagorean triple.  Therefore there are coprime positive integers `m > n`, of opposite parity, such that
-
-```text
-u = 2mn,
-b^2 = m^2 - n^2,
-B = m^2 + n^2.                     (5)
-```
-
-Now
-
-```text
-b^2 = (m-n)(m+n).
-```
-
-Because `m` and `n` are coprime and of opposite parity,
-
-```text
-gcd(m-n, m+n) = 1.
-```
-
-So both factors are squares:
-
-```text
-m - n = e^2,
-m + n = f^2,
-b = ef,                             (6)
-```
-
-with
-
-```text
-0 < e < f,
-gcd(e,f) = 1.
-```
-
-Using (6),
-
-```text
-m = (e^2 + f^2)/2,
-n = (f^2 - e^2)/2.
-```
-
-Since `u = |a^2 - b^2|/2 = 2mn`, we have
-
-```text
-|a^2 - b^2| = 4mn = f^4 - e^4.      (7)
-```
-
-Also `b^2 = e^2 f^2`.  There are two cases.
-
-#### Case 1: `a^2 >= b^2`
-
-Then (7) gives
-
-```text
-a^2 - b^2 = f^4 - e^4,
-```
-
-so
-
-```text
-a^2 = f^4 + e^2 f^2 - e^4.         (8)
-```
-
-Thus `(f,e,a)` is a new `QuarticPlus` solution, and equivalently `(e,f,a)` is a new `QuarticMinus` solution:
-
-```text
-a^2 = -e^4 + e^2 f^2 + f^4.
-```
-
-Its first `QuarticMinus` variable is `e`.
-
-#### Case 2: `a^2 < b^2`
-
-Then (7) gives
-
-```text
-b^2 - a^2 = f^4 - e^4,
-```
-
-so
-
-```text
-a^2 = e^4 + e^2 f^2 - f^4.         (9)
-```
-
-Thus `(e,f,a)` is a new `QuarticPlus` solution, and equivalently `(f,e,a)` is a new `QuarticMinus` solution:
-
-```text
-a^2 = -f^4 + f^2 e^2 + e^4.
-```
-
-Its first `QuarticMinus` variable is `f`.
-
-### The descent is strict
-
-The original first `QuarticMinus` variable was
-
-```text
-r = ab = aef.
-```
-
-In Case 1 the new first variable is `e`, and clearly
-
-```text
-0 < e < aef = r.
-```
-
-In Case 2 the new first variable is `f`.  Again
-
-```text
-0 < f < aef = r,
-```
-
-except possibly if `a = e = 1`; but in Case 2 that would force
-
-```text
-a^2 = e^4 + e^2 f^2 - f^4 = 1 + f^2 - f^4 < 0
-```
-
-for `f > 1`, impossible.  Since `f > e > 0`, this exception cannot occur.  Hence the descent is strict in all nontrivial cases.
-
-Therefore any nontrivial positive coprime `QuarticMinus` solution produces a smaller positive coprime `QuarticMinus` solution, with smaller first coordinate `r`.  Infinite descent on the positive integer `r` is impossible.
-
-## Base case
-
-It remains to identify the bottom solution.  If `r = 1`, then (1) becomes
-
-```text
-s^2 = B^4 + B^2 - 1.
-```
-
-Equivalently,
-
-```text
-(2B^2 + 1)^2 - (2s)^2 = 5,
-```
-
-so
-
-```text
-(2B^2 + 1 - 2s)(2B^2 + 1 + 2s) = 5.
-```
-
-Both factors are positive integers.  Hence they are `1` and `5`, so their sum is `6`:
-
-```text
-2(2B^2 + 1) = 6.
-```
-
-Thus
-
-```text
-2B^2 + 1 = 3,
-B^2 = 1,
-B = 1.
-```
-
-Then the original equation gives `s^2 = 1`.
-
-## Final conclusion
-
-Every positive coprime solution of
-
-```text
-s^2 = -r^4 + r^2B^2 + B^4
-```
-
-is forced by infinite descent to the base case.  Hence
-
-```text
-r = B = 1,
-```
-
-and then
-
-```text
-s = ±1
-```
-
-if `s` is an integer.
-
-The clean formal route is to avoid duplicating the descent: prove the swap lemma
-
-```text
-QuarticMinus(r,B,s) <-> QuarticPlus(B,r,s),
-```
-
-then apply the already-proved `QuarticPlus` theorem.
+Once that helper is in the local file, the final theorem above should be the right formal shape for the requested `A, B : ℤ`, `B > 0`, `gcd(A,B)=1`, `u = A/B^2` result.
