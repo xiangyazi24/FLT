@@ -356,8 +356,7 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
     have hG : 0 < G := by nlinarith
     have hprodF₁G : F₁ * G = C ^ 4 := by
       have h := hprod; rw [hF₂eq] at h
-      have h2 : 5 * (F₁ * G) = 5 * C ^ 4 := by
-        nlinarith [show F₁ * (5 * G) = 5 * (F₁ * G) from by ring]
+      have h2 : 5 * (F₁ * G) = 5 * C ^ 4 := by convert h using 1; ring
       omega
     have hcopF₁G : IsCoprime F₁ G := by
       have h := hcopI; rw [hF₂eq] at h; exact h.of_mul_right_right
