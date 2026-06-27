@@ -1,96 +1,111 @@
-# Q1206 (dm1): revised `OrderReduction.lean` with one Mazur-list axiom
+# Q1219 (dm1): finiteness of elliptic-curve `m`-torsion
 
-## Conclusion
+## Result
 
-The proposed 7-smooth closure cannot be proved from the current noncyclic exclusions alone. A point of exact order `n` only gives a cyclic subgroup `Z/n`. The exclusions for full odd square torsion, large 2-rank, and specific `Z/2 × Z/d` groups do not rule out the cyclic branch.
+I cannot honestly give a non-`sorry`, import-`Mathlib`-only proof of the requested theorem from the current Mathlib division-polynomial API.
 
-So the right A-line architecture is to use one cyclic-order axiom:
+There are two separate blockers.
+
+1. The requested Lean statement as written does not parse as Lean:
+   * `N` should be `ℕ` or `Nat`.
+   * For an additive group, multiplication by a natural number is written `(m : ℕ) • P`, not `(m : N) * P`.
+   * The base-change notation used in the FLT file is `(E⁄k).Point`, not `(E/k).Point`.
+
+2. The current Mathlib division-polynomial files define the relevant polynomials, but do not yet contain the theorem connecting `m • P = 0` to the vanishing of the evaluated division polynomial at the `x`-coordinate of `P`. In particular:
+   * `Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Basic.lean` defines `preΨ`, `ΨSq`, `Ψ`, `ψ`, and `φ`.
+   * `Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Degree.lean` proves degree and nonzero results, but the key nonzero result for `ΨSq n` assumes `(n : k) ≠ 0`, so it does not by itself handle the characteristic-dividing-`m` case.
+   * The FLT repo file `FLT/EllipticCurve/Torsion.lean` already defines
+     ```lean
+     abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u :=
+       Submodule.torsionBy ℤ (E⁄k).Point n
+     ```
+     and has
+     ```lean
+     theorem WeierstrassCurve.n_torsion_finite {n : ℕ} (hn : 0 < n) :
+         Finite (E.nTorsion n) := sorry
+     ```
+     so the desired finiteness is already represented there, but not proved.
+
+The useful piece that *does* compile with import `Mathlib` only is the final reduction from a finite `ℤ`-torsion submodule to the requested `Set.Finite` statement. This is exactly the part that should be used once the division-polynomial theorem supplies the missing `Finite (Submodule.torsionBy ℤ (E⁄k).Point (m : ℤ))` instance.
+
+## Mathlib-only compilable reduction
 
 ```lean
-rational_point_order_in_mazur_list :
-  HasRationalPointOfOrder E n → MazurOrder n
+import Mathlib
+
+open WeierstrassCurve
+
+theorem mTorsion_finite_from_finite_torsionBy
+    (k : Type*) [Field k] (E : WeierstrassCurve k) [E.IsElliptic] [DecidableEq k]
+    (m : ℕ) (_hm : 0 < m)
+    (hfin : Finite (Submodule.torsionBy ℤ (E⁄k).Point (m : ℤ))) :
+    Set.Finite {P : (E⁄k).Point | (m : ℕ) • P = 0} := by
+  classical
+  haveI : Finite (Submodule.torsionBy ℤ (E⁄k).Point (m : ℤ)) := hfin
+  let val : Submodule.torsionBy ℤ (E⁄k).Point (m : ℤ) → (E⁄k).Point := fun Q => Q.1
+  refine (Set.finite_range val).subset ?_
+  intro P hP
+  refine ⟨⟨P, ?_⟩, rfl⟩
+  rw [Submodule.mem_torsionBy_iff]
+  simpa using hP
 ```
 
-where `MazurOrder n` means `n ∈ {1,2,3,4,5,6,7,8,9,10,12}`. Then every order `n ≥ 17` is excluded immediately.
+This is the clean endpoint for the division-polynomial proof: prove the finite typeclass for the `Submodule.torsionBy`, then apply this theorem.
 
-## Complete revised file
+## Wrapper that compiles in FLT, but not with import `Mathlib` only
+
+The following theorem is the exact corrected set statement, proved from the existing FLT theorem `WeierstrassCurve.n_torsion_finite`. This does **not** satisfy the requested import restriction, and it relies on the current `sorry` inside `FLT/EllipticCurve/Torsion.lean`; I include it only to show that the final wrapper from the FLT theorem is straightforward.
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.GroupTheory.OrderOfElement
-import Mathlib.Tactic
+import Mathlib
+import FLT.EllipticCurve.Torsion
 
-open scoped WeierstrassCurve.Affine
-open WeierstrassCurve WeierstrassCurve.Affine
+open WeierstrassCurve
 
-noncomputable section
-
-namespace FLT
-namespace OrderReduction
-
-/--
-`HasRationalPointOfOrder E n` means that the rational point group of `E`
-contains a point of exact additive order `n`.
-
-If the project already has this definition, delete this definition and use the
-project definition instead.
--/
-def HasRationalPointOfOrder
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] (n : ℕ) : Prop :=
-  ∃ P : (E⁄ℚ).Point, addOrderOf P = n
-
-/-- The cyclic torsion orders allowed by Mazur's theorem over `ℚ`. -/
-def MazurOrder (n : ℕ) : Prop :=
-  n = 1 ∨ n = 2 ∨ n = 3 ∨ n = 4 ∨ n = 5 ∨ n = 6 ∨
-  n = 7 ∨ n = 8 ∨ n = 9 ∨ n = 10 ∨ n = 12
-
-/--
-Single A-line axiom: a rational point of exact order `n` has order in Mazur's
-cyclic list.
-
-This replaces the attempted 7-smooth group-theory closure.  It is exactly the
-missing cyclic-order theorem; it is weaker and cleaner than importing a full
-classification of the whole rational torsion group.
--/
-axiom rational_point_order_in_mazur_list
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ} :
-    HasRationalPointOfOrder E n → MazurOrder n
-
-/-- No number at least `17` lies in Mazur's cyclic list. -/
-theorem not_mazurOrder_of_ge_17 {n : ℕ} (hn : 17 ≤ n) :
-    ¬ MazurOrder n := by
-  intro h
-  rcases h with h | h | h | h | h | h | h | h | h | h | h <;> omega
-
-/--
-Main reduction theorem: no rational point can have exact order `n ≥ 17`.
--/
-theorem no_rational_point_of_order_ge_17
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ}
-    (hn : 17 ≤ n) :
-    ¬ HasRationalPointOfOrder E n := by
-  intro h
-  exact not_mazurOrder_of_ge_17 hn
-    (rational_point_order_in_mazur_list (E := E) (n := n) h)
-
-/-- Optional predicate for the 7-smooth branch. -/
-def SevenSmooth (n : ℕ) : Prop :=
-  ∀ p : ℕ, p.Prime → p ∣ n → p = 2 ∨ p = 3 ∨ p = 5 ∨ p = 7
-
-/--
-The 7-smooth hypothesis is no longer used: the Mazur cyclic-order axiom rules
-out every exact order `n ≥ 17`, hence also every 7-smooth such `n`.
--/
-theorem no_rational_point_of_order_sevenSmooth_ge_17
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ}
-    (_h7 : SevenSmooth n) (hn : 17 ≤ n) :
-    ¬ HasRationalPointOfOrder E n :=
-  no_rational_point_of_order_ge_17 (E := E) (n := n) hn
-
-end OrderReduction
-end FLT
+theorem mTorsion_finite
+    (k : Type*) [Field k] (E : WeierstrassCurve k) [E.IsElliptic] [DecidableEq k]
+    (m : ℕ) (hm : 0 < m) :
+    Set.Finite {P : (E⁄k).Point | (m : ℕ) • P = 0} := by
+  classical
+  haveI : Finite (Submodule.torsionBy ℤ (E⁄k).Point (m : ℤ)) := by
+    simpa [WeierstrassCurve.nTorsion] using (E.n_torsion_finite (n := m) hm)
+  let val : Submodule.torsionBy ℤ (E⁄k).Point (m : ℤ) → (E⁄k).Point := fun Q => Q.1
+  refine (Set.finite_range val).subset ?_
+  intro P hP
+  refine ⟨⟨P, ?_⟩, rfl⟩
+  rw [Submodule.mem_torsionBy_iff]
+  simpa using hP
 ```
 
-## Integration note
+## What is missing for a genuine division-polynomial proof
 
-If `OrderReduction.lean` already has project-local definitions for `HasRationalPointOfOrder`, `SevenSmooth`, or the namespace, keep those and replace only the cyclic-order axiom plus the final two theorems. The important design change is that the 7-smooth branch should not try to derive a contradiction from noncyclic torsion exclusions; it should call `rational_point_order_in_mazur_list` and close by `omega`.
+A complete Mathlib-only proof of the requested theorem should add, at minimum, the following API.
+
+```lean
+import Mathlib
+
+open Polynomial
+open WeierstrassCurve
+
+/-- Missing API, schematic only: torsion points satisfy a univariate division-polynomial equation. -/
+-- theorem torsion_eval_divisionPolynomial_eq_zero
+--     (k : Type*) [Field k] (E : WeierstrassCurve k) [E.IsElliptic] [DecidableEq k]
+--     (m : ℕ) (hm : 0 < m)
+--     {x y : k} (hxy : (E⁄k).Nonsingular x y)
+--     (htors : (m : ℕ) • WeierstrassCurve.Affine.Point.some x y hxy = 0) :
+--     Polynomial.eval x ((E⁄k).ΨSq (m : ℤ)) = 0 := by
+--   ...
+
+/-- Missing API, schematic only: a nonzero polynomial controlling the `x`-coordinates exists
+in every characteristic, including the characteristic-dividing-`m` case. -/
+-- theorem exists_nonzero_divisionPolynomial_for_torsion
+--     (k : Type*) [Field k] (E : WeierstrassCurve k) [E.IsElliptic]
+--     (m : ℕ) (hm : 0 < m) :
+--     ∃ f : k[X], f ≠ 0 ∧
+--       ∀ {x y : k} (hxy : (E⁄k).Nonsingular x y),
+--         (m : ℕ) • WeierstrassCurve.Affine.Point.some x y hxy = 0 →
+--         Polynomial.eval x f = 0 := by
+--   ...
+```
+
+Once those are available, the remaining finiteness argument is standard: finitely many roots for the nonzero univariate polynomial, at most two affine points above each `x` by the existing `Y_eq_of_X_eq`/negation API, plus the point at infinity.
