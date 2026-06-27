@@ -375,14 +375,14 @@ theorem coprime_factor_5_fourth {F₁ F₂ C : ℤ} (hprod : F₁ * F₂ = 5 * C
 
 /-- gcd(r-h, r+h) = 1 when r odd, h even, gcd(r,b) = 1, r² = h² + b⁴. -/
 theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
-    (hcop_rb : Int.gcd r b = 1) (heq : r ^ 2 = h ^ 2 + b ^ 4) :
+    (hcop_rb : Int.gcd r b = 1) (hb : 0 < b) (heq : r ^ 2 = h ^ 2 + b ^ 4) :
     Int.gcd (r - h) (r + h) = 1 := by
   rw [← Int.isCoprime_iff_gcd_eq_one]
   have hcopI : IsCoprime r b := Int.isCoprime_iff_gcd_eq_one.mpr hcop_rb
   have h2h : (2 : ℤ) ∣ h := Int.dvd_of_emod_eq_zero hh_even
   by_contra hnotcop
   rw [Int.isCoprime_iff_gcd_eq_one] at hnotcop
-  have hU_ne : (r - h) ≠ 0 := by nlinarith [sq_nonneg h, sq_nonneg b]
+  have hU_ne : (r - h) ≠ 0 := by nlinarith [sq_nonneg h, show 0 < b ^ 4 from by positivity]
   have hg_gt1 : 1 < Int.gcd (r - h) (r + h) := by
     have : Int.gcd (r - h) (r + h) ≠ 0 := by
       rw [Int.gcd_def]; exact Nat.gcd_ne_zero_left (Int.natAbs_ne_zero.mpr hU_ne)
@@ -498,7 +498,7 @@ theorem quartic_plus_descent_step :
       have hcop_rB := Int.isCoprime_iff_gcd_eq_one.mpr hcop
       rw [hB_eq] at hcop_rB
       exact (IsCoprime.mul_right_iff.mp hcop_rB).2
-    have hcop_rh := coprime_rh hr_odd hh_even hcop_rb hr2_eq
+    have hcop_rh := coprime_rh hr_odd hh_even hcop_rb hb hr2_eq
     -- Step 8: factor (r-h)(r+h) = b⁴ with gcd = 1 → r-h = α⁴, r+h = β⁴
     obtain ⟨α, hα_pos, hα_eq⟩ := pos_fourth_of_coprime_mul_fourth hcop_rh hprod_rh
       hrh_pos hrh_pos2
