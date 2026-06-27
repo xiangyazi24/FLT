@@ -1,87 +1,76 @@
-# Q1501 (dm1): extracting `IsCoprime` from a product
+# Q1502 (dm1/dm2): `Int.natAbs` comparison for positive integers
 
-For a product on the **left** side,
-
-```lean
-hcopI : IsCoprime F₁ F₂
-hF₁eq : F₁ = 5 * G
-⊢ IsCoprime G F₂
-```
-
-the robust one-liner is:
+Yes: use
 
 ```lean
-exact (show IsCoprime (5 * G) F₂ from hF₁eq ▸ hcopI).of_mul_left_right
+Int.natAbs_lt_natAbs_of_nonneg_of_lt
 ```
 
-For a product on the **right** side,
+It has the exact shape you want after turning positivity into nonnegativity:
 
 ```lean
-hcopI : IsCoprime F₁ F₂
-hF₂eq : F₂ = 5 * G
-⊢ IsCoprime F₁ G
+exact Int.natAbs_lt_natAbs_of_nonneg_of_lt (le_of_lt hαpos) hlt
 ```
 
-the robust one-liner is:
+where
 
 ```lean
-exact (show IsCoprime F₁ (5 * G) from hF₂eq ▸ hcopI).of_mul_right_right
+hαpos : 0 < α
+hlt   : α < a * b
 ```
 
-The `show ... from` wrapper is the important trick: it forces Lean to see the rewritten hypothesis in the exact product shape needed by the projection lemma.
-
-Here is a minimal compilable block:
+Minimal compilable examples:
 
 ```lean
 import Mathlib
 
-section
+example {α a b : ℤ}
+    (hαpos : 0 < α)
+    (hlt : α < a * b) :
+    α.natAbs < (a * b).natAbs := by
+  exact Int.natAbs_lt_natAbs_of_nonneg_of_lt (le_of_lt hαpos) hlt
 
-variable {R : Type*} [CommSemiring R]
-variable {F₁ F₂ G : R}
-
-example (hcopI : IsCoprime F₁ F₂) (hF₁eq : F₁ = 5 * G) :
-    IsCoprime G F₂ := by
-  exact (show IsCoprime (5 * G) F₂ from hF₁eq ▸ hcopI).of_mul_left_right
-
-example (hcopI : IsCoprime F₁ F₂) (hF₂eq : F₂ = 5 * G) :
-    IsCoprime F₁ G := by
-  exact (show IsCoprime F₁ (5 * G) from hF₂eq ▸ hcopI).of_mul_right_right
-
-end
+example {α B : ℤ}
+    (hαpos : 0 < α)
+    (hlt : α < B) :
+    α.natAbs < B.natAbs := by
+  exact Int.natAbs_lt_natAbs_of_nonneg_of_lt (le_of_lt hαpos) hlt
 ```
 
-If your equality is reversed, use `.symm`:
+You do **not** need to cast through `Nat` manually.
+
+For your specific inequality, first prove the integer strict inequality `α < a*b`, then finish with the one-liner above.  A robust skeleton is:
 
 ```lean
-exact (show IsCoprime (5 * G) F₂ from hF₁eq.symm ▸ hcopI).of_mul_left_right
+-- after you have proved this:
+have hlt_int : α < a * b := by
+  -- prove by monotonicity + rule out equality with `¬ BaseZ β α`
+  -- `nlinarith` often closes once you have the equality case excluded.
+  sorry
+
+exact Int.natAbs_lt_natAbs_of_nonneg_of_lt (le_of_lt hαpos) hlt_int
 ```
 
-for
+A useful pattern for deriving the strict inequality is to first prove non-strict bounds and then rule out equality:
 
 ```lean
-hF₁eq : 5 * G = F₁
+have hβ_ge_one : 1 ≤ β := by omega
+have ha_ge_one : 1 ≤ a := by omega
+have hα_le_b : α ≤ b := by
+  -- using `b = α * β` and `1 ≤ β`
+  nlinarith
+have hb_le_ab : b ≤ a * b := by
+  -- using `1 ≤ a` and `0 < b`
+  nlinarith
+have hα_le_ab : α ≤ a * b := le_trans hα_le_b hb_le_ab
+have hneq : α ≠ a * b := by
+  -- equality forces β = 1 and a = 1; combine with `¬ BaseZ β α`
+  sorry
+have hlt_int : α < a * b := lt_of_le_of_ne hα_le_ab hneq
 ```
 
-and
+Then the natAbs target is immediate:
 
 ```lean
-exact (show IsCoprime F₁ (5 * G) from hF₂eq.symm ▸ hcopI).of_mul_right_right
+exact Int.natAbs_lt_natAbs_of_nonneg_of_lt (le_of_lt hαpos) hlt_int
 ```
-
-for
-
-```lean
-hF₂eq : 5 * G = F₂
-```
-
-Mnemonic:
-
-```lean
-.of_mul_left_left   -- from IsCoprime (a*b) c to IsCoprime a c
-.of_mul_left_right  -- from IsCoprime (a*b) c to IsCoprime b c
-.of_mul_right_left  -- from IsCoprime a (b*c) to IsCoprime a b
-.of_mul_right_right -- from IsCoprime a (b*c) to IsCoprime a c
-```
-
-So for `5 * G`, use the `_right` version to keep `G`.
