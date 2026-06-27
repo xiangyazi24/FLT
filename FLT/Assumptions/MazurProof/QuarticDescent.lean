@@ -560,7 +560,10 @@ theorem quartic_plus_descent_step :
             have h1 := hb_eq; rw [hα_eq_b] at h1 -- h1 : b = b * β
             nlinarith [mul_pos hb hβ_pos]
           have ha1 : a = 1 := by nlinarith [mul_pos ha hb]
-          exact ⟨hβ1, by rw [hB_eq, ha1, hα_eq_b]; ring⟩
+          have hb1 : b = 1 := by nlinarith [hb_eq, hβ1, hα_eq_b]
+          constructor
+          · linarith
+          · linarith [hB_eq, ha1, hα_eq_b, hb1]
         · exact hlt
       exact Int.natAbs_lt_natAbs_of_nonneg_of_lt hα_pos.le hα_lt
   · -- Case U = 5a⁴, V = b⁴ (symmetric — same structure, descent on a instead of b)
