@@ -1,329 +1,259 @@
-# Q1476 (dm2): handling the `both_odd` issue in `quartic_plus`
+# Q1491 (dm2/dm4): `MN_coprime_even` for the even branch
 
-## Bottom line
+## Honest status
 
-Do **not** try to prove `B₀` is odd at the `RationalPointsC20.lean` call site from `rat_denom_square` alone.  The denominator-square argument only proves
+I do **not** want to claim I have a connector-verified, paste-and-compile proof here.  This lemma is long enough that it should be checked in the target Lean tree.  The important simplification is that the proposed ZMod-5 nonresidue argument is **not needed** for `gcd(U₁,V₁)=1`.
 
-```text
-u.den = B₀^2.
-```
-
-Equivalently, at each prime `p`, it proves that `v_p(u.den)` is even.  At `p = 2` this says
+Once a prime `p` divides both `U₁` and `V₁`, we get
 
 ```text
-v₂(u.den) = 2e
+p^2 ∣ U₁ * V₁ = 5 * B₁^4.
 ```
 
-for some `e`; it does **not** say `e = 0`.  So `B₀` can still be even from the information provided by `rat_denom_square` alone.
+Then:
 
-The correct local architecture is to make `quartic_plus` handle parity internally:
+* if `p ∤ B₁`, `p ∣ 5`, hence `p = 5`; but `p^2 ∣ 5 * B₁^4` forces `p ∣ B₁`, contradiction.
+* if `p ∣ B₁`, use `p ∣ U₁ + V₁ = r^2 + 2B₁^2` to get `p ∣ r^2`, hence `p ∣ r`; since `p ∣ B₁`, also `p ∣ 2B₁`, contradicting `Int.gcd r (2*B₁)=1`.
 
-1. Normalize `s` to `|s|` so `U < V` is available.
-2. Split on `Even B`.
-3. In the `¬ Even B` branch, get `Odd B` by `Int.not_even_iff_odd.mp`, and use the old `U,V` factors.
-4. In the `Even B` branch, do **not** use `U,V` directly.  They are both divisible by `4`.  Instead use the primitive factors
+This avoids the quadratic-residue step entirely.  It is also more robust in Lean because it stays in divisibility/factorization instead of requiring field inverses in `ZMod 5`.
 
-```text
-U₄ = U / 4,
-V₄ = V / 4,
-B₂ = B / 2.
-```
+## Recommended decomposition
 
-Then the same product identity becomes
-
-```text
-U₄ * V₄ = 5 * B₂^4.
-```
-
-So the even branch is a separate 2-adic normalization branch.  This is better than pushing an oddness fact into the rational-point call site.
-
-## Why call-site oddness is not safe
-
-From the rational point equation you get, schematically,
-
-```text
-(w^2).den = (u^3 + u^2 - u).den = u.den^3.
-```
-
-Since `(w^2).den = w.den^2`, this gives
-
-```text
-u.den^3 = w.den^2.
-```
-
-Taking valuations gives
-
-```text
-3 * v_p(u.den) = 2 * v_p(w.den).
-```
-
-Hence `v_p(u.den)` is even.  For `p = 2`, this only gives `v₂(u.den) = 0, 2, 4, ...`.  It does **not** rule out `v₂(u.den) = 2`, which would make `B₀ = sqrt(u.den)` even.
-
-So the statement
-
-```lean
-u.den = B₀ ^ 2
-```
-
-plus the curve equation proves square denominator, not odd square denominator.
-
-## Lean skeleton: restructure `quartic_plus` by primitive factors
-
-The following is the architecture I recommend.  It intentionally isolates the remaining arithmetic seams: the odd branch gcd, the even branch divisibility/gcd, and the final coprime factorization.
+Define the normalized factors once:
 
 ```lean
 import Mathlib
 
-namespace QuarticPlusParity
+namespace QuarticPlusEven
 
-/-- Quartic-plus equation. -/
-def Qeq (r B s : ℤ) : Prop :=
-  s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4
+noncomputable section
 
-/-- Classical factors. -/
-def U (r B s : ℤ) : ℤ :=
-  2 * r ^ 2 + B ^ 2 - 2 * s
+local notation "M" r B₁ s => ((2 * r ^ 2 + (2 * B₁) ^ 2 - 2 * s) / (4 : ℤ))
+local notation "N" r B₁ s => ((2 * r ^ 2 + (2 * B₁) ^ 2 + 2 * s) / (4 : ℤ))
+```
 
-def V (r B s : ℤ) : ℤ :=
-  2 * r ^ 2 + B ^ 2 + 2 * s
+Then prove the division-normalization identities separately.
 
-lemma UV_product {r B s : ℤ} (hEq : Qeq r B s) :
-    U r B s * V r B s = 5 * B ^ 4 := by
-  unfold Qeq at hEq
-  unfold U V
+```lean
+lemma MN_sum {r B₁ s : ℤ}
+    (hdiv4U : (4 : ℤ) ∣ (2 * r ^ 2 + (2 * B₁) ^ 2 - 2 * s))
+    (hdiv4V : (4 : ℤ) ∣ (2 * r ^ 2 + (2 * B₁) ^ 2 + 2 * s)) :
+    M r B₁ s + N r B₁ s = r ^ 2 + 2 * B₁ ^ 2 := by
+  rcases hdiv4U with ⟨u, hu⟩
+  rcases hdiv4V with ⟨v, hv⟩
+  have hM : M r B₁ s = u := by
+    dsimp
+    rw [hu, Int.mul_ediv_cancel_left]
+    norm_num
+  have hN : N r B₁ s = v := by
+    dsimp
+    rw [hv, Int.mul_ediv_cancel_left]
+    norm_num
+  rw [hM, hN]
+  apply mul_left_cancel₀ (show (4 : ℤ) ≠ 0 by norm_num)
   calc
-    (2 * r ^ 2 + B ^ 2 - 2 * s) * (2 * r ^ 2 + B ^ 2 + 2 * s)
-        = (2 * r ^ 2 + B ^ 2) ^ 2 - (2 * s) ^ 2 := by ring
-    _ = 5 * B ^ 4 := by
-      rw [show (2 * s) ^ 2 = 4 * s ^ 2 by ring, hEq]
-      ring
+    (4 : ℤ) * (u + v)
+        = (4 * u) + (4 * v) := by ring
+    _ = (2 * r ^ 2 + (2 * B₁) ^ 2 - 2 * s) +
+        (2 * r ^ 2 + (2 * B₁) ^ 2 + 2 * s) := by rw [← hu, ← hv]
+    _ = 4 * (r ^ 2 + 2 * B₁ ^ 2) := by ring
 
-/-- The primitive factor package used by both parity branches. -/
-structure PrimitiveFactors (r B s : ℤ) : Prop where
-  Bp : ℤ
-  Up : ℤ
-  Vp : ℤ
-  hBp_pos : 0 < Bp
-  hBp_le : Bp.natAbs ≤ B.natAbs
-  hUp_pos : 0 < Up
-  hVp_pos : 0 < Vp
-  hUp_lt_Vp : Up < Vp
-  hprod : Up * Vp = 5 * Bp ^ 4
-  hcop : Int.gcd Up Vp = 1
+lemma MN_diff {r B₁ s : ℤ}
+    (hdiv4U : (4 : ℤ) ∣ (2 * r ^ 2 + (2 * B₁) ^ 2 - 2 * s))
+    (hdiv4V : (4 : ℤ) ∣ (2 * r ^ 2 + (2 * B₁) ^ 2 + 2 * s)) :
+    N r B₁ s - M r B₁ s = s := by
+  rcases hdiv4U with ⟨u, hu⟩
+  rcases hdiv4V with ⟨v, hv⟩
+  have hM : M r B₁ s = u := by
+    dsimp
+    rw [hu, Int.mul_ediv_cancel_left]
+    norm_num
+  have hN : N r B₁ s = v := by
+    dsimp
+    rw [hv, Int.mul_ediv_cancel_left]
+    norm_num
+  rw [hM, hN]
+  apply mul_left_cancel₀ (show (4 : ℤ) ≠ 0 by norm_num)
+  calc
+    (4 : ℤ) * (v - u)
+        = (4 * v) - (4 * u) := by ring
+    _ = (2 * r ^ 2 + (2 * B₁) ^ 2 + 2 * s) -
+        (2 * r ^ 2 + (2 * B₁) ^ 2 - 2 * s) := by rw [← hv, ← hu]
+    _ = 4 * s := by ring
+```
 
-/-- Odd branch: use the original factors.
+The `MN_diff` identity is not actually needed for the gcd proof below, but it is useful to keep around.
 
-Here `Odd B` makes `U,V` odd, and the usual gcd proof gives `gcd U V = 1`.
--/
-lemma primitiveFactors_odd_B
-    {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B) (hs : 0 < s)
-    (hBodd : Odd B)
-    (hcop_rB : Int.gcd r B = 1)
-    (hEq : Qeq r B s) :
-    PrimitiveFactors r B s := by
-  classical
-  refine
-    { Bp := B
-      Up := U r B s
-      Vp := V r B s
-      hBp_pos := hB
-      hBp_le := le_rfl
-      hUp_pos := ?_
-      hVp_pos := ?_
-      hUp_lt_Vp := ?_
-      hprod := UV_product hEq
-      hcop := ?_ }
-  · -- positivity of `U`; use product positivity and positivity of `V`.
-    -- This is the same lemma as in the previous drop.
-    sorry
-  · unfold V
-    have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero r (ne_of_gt hr)
-    have hB2 : 0 < B ^ 2 := sq_pos_of_ne_zero B (ne_of_gt hB)
+## Divisibility helper for the contradiction with `gcd r (2*B₁)=1`
+
+```lean
+lemma prime_not_dvd_both_of_gcd_one
+    {p : ℕ} (hp : p.Prime) {r B₁ : ℤ}
+    (hcop : Int.gcd r (2 * B₁) = 1) :
+    ¬ ((p : ℤ) ∣ r ∧ (p : ℤ) ∣ B₁) := by
+  rintro ⟨hpr, hpB⟩
+  have hp2B : (p : ℤ) ∣ 2 * B₁ := dvd_mul_of_dvd_right hpB 2
+  have hpgcd : (p : ℤ) ∣ (Int.gcd r (2 * B₁) : ℤ) :=
+    Int.dvd_coe_gcd hpr hp2B
+  have hp1Z : (p : ℤ) ∣ (1 : ℤ) := by
+    simpa [hcop] using hpgcd
+  have hp1N : p ∣ (1 : ℕ) := by
+    exact_mod_cast hp1Z
+  exact hp.not_dvd_one hp1N
+```
+
+## Product-only replacement for the ZMod-5 nonresidue branch
+
+This is the key simplification.  It says: if a prime divides both normalized factors, then it must divide `B₁`.
+
+```lean
+lemma common_prime_dvd_B₁
+    {p : ℕ} (hp : p.Prime) {r B₁ s : ℤ}
+    (hpM : (p : ℤ) ∣ M r B₁ s)
+    (hpN : (p : ℤ) ∣ N r B₁ s)
+    (hprod : M r B₁ s * N r B₁ s = 5 * B₁ ^ 4) :
+    (p : ℤ) ∣ B₁ := by
+  have hpMN : (p : ℤ) ^ 2 ∣ M r B₁ s * N r B₁ s := by
+    rw [pow_two]
+    exact mul_dvd_mul hpM hpN
+  have hpRHS : (p : ℤ) ^ 2 ∣ 5 * B₁ ^ 4 := by
+    simpa [hprod] using hpMN
+
+  by_cases hpB : (p : ℤ) ∣ B₁
+  · exact hpB
+
+  have hp_prod_once : (p : ℤ) ∣ 5 * B₁ ^ 4 := by
+    exact dvd_trans (dvd_mul_right (p : ℤ) (p : ℤ)) hpRHS
+
+  have hp5_or_B4 : (p : ℤ) ∣ (5 : ℤ) ∨ (p : ℤ) ∣ B₁ ^ 4 :=
+    Int.Prime.dvd_mul' hp hp_prod_once
+
+  have hp5 : (p : ℤ) ∣ (5 : ℤ) := by
+    rcases hp5_or_B4 with hp5 | hpB4
+    · exact hp5
+    · exact False.elim (hpB (Int.Prime.dvd_pow' hp hpB4))
+
+  have hp_eq5 : p = 5 := by
+    have hp5N : p ∣ (5 : ℕ) := by
+      exact_mod_cast hp5
+    exact hp.eq_of_dvd_of_prime (by norm_num) hp5N
+
+  subst hp_eq5
+
+  -- Now `25 ∣ 5 * B₁^4`; cancel one `5` to get `5 ∣ B₁^4`, hence `5 ∣ B₁`.
+  have h25 : (25 : ℤ) ∣ 5 * B₁ ^ 4 := by
+    simpa [pow_two] using hpRHS
+  have h5B4 : (5 : ℤ) ∣ B₁ ^ 4 := by
+    -- This is the small integer-cancellation step.
+    -- A robust proof is:
+    --   rcases h25 with ⟨k, hk⟩
+    --   use k
+    --   nlinarith
+    rcases h25 with ⟨k, hk⟩
+    refine ⟨k, ?_⟩
     nlinarith
-  · unfold U V
-    nlinarith
-  · -- gcd seam for the odd branch.  The proof uses:
-    -- `U,V` odd, common divisor divides `V-U = 4s` and `U+V = 2(2r^2+B^2)`,
-    -- then coprimality of `r,B` rules out odd prime common divisors.
-    sorry
+  exact Int.Prime.dvd_pow' (Nat.prime_iff_prime_int.mp (by norm_num : Nat.Prime 5)) h5B4
+```
 
-/-- Even branch divisibility: if `B` is even, then `r` and `s` are odd, and `4 ∣ U,V`.
+Depending on the current imported namespace, the line
 
-This is the place to do the 2-adic normalization.  It can be proved with `Even`/`Odd`
-lemmas rather than explicit `% 2` arithmetic:
+```lean
+exact hp.eq_of_dvd_of_prime (by norm_num) hp5N
+```
 
-* `Even B` and `gcd r B = 1` imply `Odd r`.
-* The equation then implies `Odd s`.
-* For odd `r,s` and even `B`, both `2*r^2+B^2-2*s` and
-  `2*r^2+B^2+2*s` are divisible by `4`.
--/
-lemma even_B_four_dvd_UV
-    {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B)
-    (hBeven : Even B)
-    (hcop_rB : Int.gcd r B = 1)
-    (hEq : Qeq r B s) :
-    (4 : ℤ) ∣ U r B s ∧ (4 : ℤ) ∣ V r B s := by
-  -- Suggested implementation details:
-  --   have hrOdd : Odd r := ...       -- from `hcop_rB` and `hBeven`
-  --   have hsOdd : Odd s := ...       -- from `hEq`, `hrOdd`, `hBeven`
-  --   rcases hBeven with ⟨b, hb⟩
-  --   rcases hrOdd with ⟨a, ha⟩
-  --   rcases hsOdd with ⟨c, hc⟩
-  --   constructor <;> refine ⟨_, ?_⟩ <;> unfold U V <;> rw [hb, ha, hc] <;> ring
-  sorry
+may need one of these equivalent variants:
 
-/-- Even branch product after dividing both factors by `4`.
+```lean
+exact Nat.Prime.eq_of_dvd_of_prime hp (by norm_num) hp5N
+-- or simply:
+have hp_le5 : p ≤ 5 := Nat.le_of_dvd (by norm_num) hp5N
+have hp_ge2 : 2 ≤ p := hp.two_le
+omega
+```
 
-If `B = 2*B₂`, `4 ∣ U`, and `4 ∣ V`, then
+I would use the `omega` fallback if the method-name projection does not resolve.
 
-`(U/4)*(V/4) = 5*(B/2)^4`.
--/
-lemma even_B_primitive_product
-    {r B s : ℤ}
-    (hEq : Qeq r B s)
-    (hU4 : (4 : ℤ) ∣ U r B s)
-    (hV4 : (4 : ℤ) ∣ V r B s)
-    (hBeven : Even B) :
-    (U r B s / 4) * (V r B s / 4) = 5 * (B / 2) ^ 4 := by
-  rcases hU4 with ⟨U4, hU4⟩
-  rcases hV4 with ⟨V4, hV4⟩
-  rcases hBeven with ⟨B2, hB2⟩
-  have hB2' : B = 2 * B2 := by
-    rw [hB2, two_mul]
-  have hUdiv : U r B s / 4 = U4 := by
-    rw [hU4, Int.mul_ediv_cancel_left]
-    norm_num
-  have hVdiv : V r B s / 4 = V4 := by
-    rw [hV4, Int.mul_ediv_cancel_left]
-    norm_num
-  have hBdiv : B / 2 = B2 := by
-    rw [hB2', Int.mul_ediv_cancel_left]
-    norm_num
-  have hprod := UV_product hEq
-  rw [hU4, hV4, hB2'] at hprod
-  rw [hUdiv, hVdiv, hBdiv]
-  nlinarith
+## Main lemma
 
-/-- Even branch gcd seam after stripping the forced factor `4`.
-
-This is the replacement for `both_odd`.  In the even case the raw `U,V` are not coprime,
-but the primitive factors `U/4,V/4` should be coprime.
--/
-lemma even_B_primitive_gcd
-    {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B) (hs : 0 < s)
-    (hBeven : Even B)
-    (hcop_rB : Int.gcd r B = 1)
-    (hEq : Qeq r B s) :
-    Int.gcd (U r B s / 4) (V r B s / 4) = 1 := by
-  -- Same common-divisor proof as odd branch, but applied after removing the forced 2-adic factor.
-  -- Common divisor of `U/4,V/4` divides `s` and `r^2 + B^2/2`; use `gcd r B = 1`.
-  sorry
-
-/-- Even branch package. -/
-lemma primitiveFactors_even_B
-    {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B) (hs : 0 < s)
-    (hBeven : Even B)
-    (hcop_rB : Int.gcd r B = 1)
-    (hEq : Qeq r B s) :
-    PrimitiveFactors r B s := by
+```lean
+theorem MN_coprime_even {r B₁ s : ℤ} (hr : 0 < r) (hB₁ : 0 < B₁)
+    (hcop : Int.gcd r (2 * B₁) = 1)
+    (hr_odd : r % 2 = 1)
+    (hprod : ((2 * r ^ 2 + (2 * B₁) ^ 2 - 2 * s) / 4) *
+             ((2 * r ^ 2 + (2 * B₁) ^ 2 + 2 * s) / 4) = 5 * B₁ ^ 4)
+    (hdiv4U : 4 ∣ (2 * r ^ 2 + (2 * B₁) ^ 2 - 2 * s))
+    (hdiv4V : 4 ∣ (2 * r ^ 2 + (2 * B₁) ^ 2 + 2 * s)) :
+    Int.gcd ((2 * r ^ 2 + (2 * B₁) ^ 2 - 2 * s) / 4)
+            ((2 * r ^ 2 + (2 * B₁) ^ 2 + 2 * s) / 4) = 1 := by
   classical
-  obtain ⟨hU4, hV4⟩ := even_B_four_dvd_UV hr hB hBeven hcop_rB hEq
-  refine
-    { Bp := B / 2
-      Up := U r B s / 4
-      Vp := V r B s / 4
-      hBp_pos := ?_
-      hBp_le := ?_
-      hUp_pos := ?_
-      hVp_pos := ?_
-      hUp_lt_Vp := ?_
-      hprod := even_B_primitive_product hEq hU4 hV4 hBeven
-      hcop := even_B_primitive_gcd hr hB hs hBeven hcop_rB hEq }
-  · rcases hBeven with ⟨B2, hB2⟩
-    have hB2' : B = 2 * B2 := by rw [hB2, two_mul]
-    rw [hB2', Int.mul_ediv_cancel_left]
-    · nlinarith
-    · norm_num
-  · -- `0 < B` and `Even B` imply `0 < B/2 ≤ B` in natAbs.
-    sorry
-  · -- positivity of `U/4` from positivity of `U` and divisibility by positive `4`.
-    sorry
-  · -- positivity of `V/4`.
-    sorry
-  · -- follows from `U < V` and division by positive `4` after divisibility.
-    sorry
+  let M₁ : ℤ := M r B₁ s
+  let V₁ : ℤ := N r B₁ s
 
-/-- Parity-independent primitive factor extraction.
+  by_contra hg
 
-This is the theorem that should replace the old “both odd” entry point. -/
-theorem primitiveFactors_of_quarticPlus
-    {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B) (hs : 0 < s)
-    (hcop_rB : Int.gcd r B = 1)
-    (hEq : Qeq r B s) :
-    PrimitiveFactors r B s := by
-  by_cases hBeven : Even B
-  · exact primitiveFactors_even_B hr hB hs hBeven hcop_rB hEq
-  · have hBodd : Odd B := Int.not_even_iff_odd.mp hBeven
-    exact primitiveFactors_odd_B hr hB hs hBodd hcop_rB hEq
+  have hg' : Int.gcd M₁ V₁ ≠ 1 := by
+    dsimp [M₁, V₁]
+    simpa using hg
 
-end QuarticPlusParity
+  obtain ⟨p, hp, hpdg⟩ := Nat.exists_prime_and_dvd hg'
+
+  have hpdgZ : (p : ℤ) ∣ (Int.gcd M₁ V₁ : ℤ) := by
+    exact_mod_cast hpdg
+
+  have hpM : (p : ℤ) ∣ M₁ :=
+    hpdgZ.trans (Int.gcd_dvd_left M₁ V₁)
+
+  have hpV : (p : ℤ) ∣ V₁ :=
+    hpdgZ.trans (Int.gcd_dvd_right M₁ V₁)
+
+  have hpM0 : (p : ℤ) ∣ M r B₁ s := by
+    simpa [M₁] using hpM
+
+  have hpV0 : (p : ℤ) ∣ N r B₁ s := by
+    simpa [V₁] using hpV
+
+  have hpB : (p : ℤ) ∣ B₁ :=
+    common_prime_dvd_B₁ hp hpM0 hpV0 hprod
+
+  have hsum : M r B₁ s + N r B₁ s = r ^ 2 + 2 * B₁ ^ 2 :=
+    MN_sum hdiv4U hdiv4V
+
+  have hp_sum : (p : ℤ) ∣ r ^ 2 + 2 * B₁ ^ 2 := by
+    have htmp : (p : ℤ) ∣ M r B₁ s + N r B₁ s := dvd_add hpM0 hpV0
+    simpa [hsum] using htmp
+
+  have hp_2Bsq : (p : ℤ) ∣ 2 * B₁ ^ 2 := by
+    exact dvd_mul_of_dvd_right (pow_dvd_pow_of_dvd hpB 2) 2
+
+  have hp_rsq : (p : ℤ) ∣ r ^ 2 := by
+    have := dvd_sub hp_sum hp_2Bsq
+    simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using this
+
+  have hpr : (p : ℤ) ∣ r :=
+    Int.Prime.dvd_pow' hp hp_rsq
+
+  exact prime_not_dvd_both_of_gcd_one hp hcop ⟨hpr, hpB⟩
+
+end
+end QuarticPlusEven
 ```
 
-## How this changes the descent proof
+## Notes on two likely API touch points
 
-Instead of making the descent theorem take an `Odd B` hypothesis, change the first half to return primitive factors:
+1. `Nat.exists_prime_and_dvd` accepts a natural `n ≠ 1` and returns a prime divisor.  Here the natural is `Int.gcd M₁ V₁`.
+
+2. If `hp.eq_of_dvd_of_prime` does not resolve, replace the `p = 5` proof by:
 
 ```lean
-obtain PF := primitiveFactors_of_quarticPlus hr hB hs hcop hEq
+have hp_eq5 : p = 5 := by
+  have hp5N : p ∣ (5 : ℕ) := by exact_mod_cast hp5
+  have hp_le5 : p ≤ 5 := Nat.le_of_dvd (by norm_num) hp5N
+  have hp_ge2 : 2 ≤ p := hp.two_le
+  interval_cases p <;> norm_num at hp
 ```
 
-Then run the coprime factorization lemma on
+or use `omega` after `hp_le5`, `hp_ge2`, and `hp5N`.
 
-```lean
-PF.Up * PF.Vp = 5 * PF.Bp ^ 4
-PF.hcop : Int.gcd PF.Up PF.Vp = 1
-```
+## Why this is better than the ZMod-5 route
 
-This removes the need for a global `both_odd` hypothesis.
-
-For the strong induction on `B.natAbs`, the even branch is actually friendly: `PF.Bp = B/2`, so `PF.Bp.natAbs < B.natAbs`.  That gives a direct smaller-denominator object once the second-half descent constructs a new solution using `PF.Bp`.
-
-## If you prefer an even-`B` contradiction lemma
-
-You can also keep the old odd-branch descent and prove:
-
-```lean
-lemma quarticPlus_even_B_absurd
-    {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B)
-    (hBeven : Even B)
-    (hcop : Int.gcd r B = 1)
-    (hEq : Qeq r B s) : False := by
-  -- either a 2-adic descent or a primitive-factor descent specialized to contradiction
-  sorry
-```
-
-Then the main proof is:
-
-```lean
-by_cases hBeven : Even B
-· exact False.elim (quarticPlus_even_B_absurd hr hB hBeven hcop hEq)
-· have hBodd : Odd B := Int.not_even_iff_odd.mp hBeven
-  -- old both-odd proof
-```
-
-This is clean, but it hides the real work in `quarticPlus_even_B_absurd`.  The primitive-factor architecture above is more reusable and closer to the mathematics.
-
-## Recommendation
-
-Do not try to force `B₀` odd in `RationalPointsC20.lean`.  Make `quartic_plus` parity-robust:
-
-* odd `B`: use `U,V`;
-* even `B`: use `U/4,V/4,B/2`.
-
-That removes the fragile call-site dependency and turns the `both_odd` issue into a local 2-adic normalization lemma inside the descent file.
+The ZMod argument is mathematically correct, but it is unnecessary for gcd.  Since a common prime divides both factors, its **square** divides the product.  The product is `5 * B₁^4`.  If the prime is not already in `B₁`, the only possible prime is `5`, but then the square divisibility would force another factor of `5` into `B₁^4`, contradiction.  This is the cleanest Lean route.
