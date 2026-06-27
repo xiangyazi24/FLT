@@ -425,9 +425,7 @@ theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
     have : (↑p : ℤ) ∣ b ^ 4 := by
       have hr2 := pow_dvd_pow_of_dvd hpr 2
       have hh2 := pow_dvd_pow_of_dvd hph 2
-      have h3 := dvd_sub hr2 hh2
-      rw [show r ^ 2 - h ^ 2 = b ^ 4 from by linarith] at h3
-      exact h3
+      exact (show r ^ 2 - h ^ 2 = b ^ 4 from by linarith) ▸ dvd_sub hr2 hh2
     exact Int.Prime.dvd_pow' hp this
   -- p | r and p | b contradicts gcd(r,b) = 1
   exact hp_prime_int.not_unit (hcopI.isUnit_of_dvd' hpr hpb)
