@@ -434,7 +434,7 @@ theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
 
 /-! ## Descent step (the hard core) -/
 
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 1600000 in
 /-- From a non-base solution, produce a strictly smaller non-base solution. -/
 theorem quartic_plus_descent_step :
     ∀ {r B s : ℤ}, QuarticPlusZ r B s → ¬ BaseZ r B →
@@ -555,11 +555,13 @@ theorem quartic_plus_descent_step :
       have hα_lt : α < a * b := by
         rcases eq_or_lt_of_le (le_trans hα_le_b hb_le_ab) with heq_ab | hlt
         · exfalso; apply hnonbase
-          have hα_eq_b : α = b := le_antisymm hα_le_b (by nlinarith)
-          have hβ1 : β = 1 := by nlinarith [hb_eq, hα_eq_b]
-          have ha1 : a = 1 := by nlinarith [hα_eq_b]
-          have hb1 : b = 1 := by nlinarith [hα_eq_b]
-          exact ⟨by nlinarith, by nlinarith [hB_eq]⟩
+          have hα_eq_b : α = b := le_antisymm hα_le_b (by linarith)
+          have hβ1 : β = 1 := by
+            have := hb_eq; rw [hα_eq_b] at this; linarith [mul_left_cancel₀ (ne_of_gt hb) this.symm]
+          have ha1 : a = 1 := by
+            have : a * b = b := by linarith
+            exact mul_left_cancel₀ (ne_of_gt hb) (by linarith)
+          exact ⟨hβ1, by linarith [hB_eq, ha1, hα_eq_b]⟩
         · exact hlt
       exact Int.natAbs_lt_natAbs_of_nonneg_of_lt hα_pos.le hα_lt
   · -- Case U = 5a⁴, V = b⁴ (symmetric — same structure, descent on a instead of b)
