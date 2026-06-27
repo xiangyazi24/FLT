@@ -114,7 +114,10 @@ theorem rat_denom_square (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
   have hden_sq' : IsSquare u.den := nat_isSquare_of_isSquare_cube u.den_ne_zero hden3_sq
   -- Write u = u.num / B² where B² = u.den
   obtain ⟨B₀, hB₀⟩ := hden_sq'
-  have hB₀_pos : 0 < B₀ := Nat.pos_of_ne_zero (by intro h; simp [h] at hB₀; exact u.den_ne_zero hB₀)
+  have hB₀_pos : 0 < B₀ := by
+    rcases Nat.eq_zero_or_pos B₀ with h | h
+    · exfalso; simp [h] at hB₀; exact u.den_ne_zero hB₀
+    · exact h
   refine ⟨u.num, (B₀ : ℤ), by exact_mod_cast hB₀_pos, ?_, ?_⟩
   · -- gcd(u.num, B₀) = 1: B₀ | u.den, and gcd(u.num, u.den) = 1
     sorry -- from u.reduced and B₀ | u.den via Nat.Coprime.coprime_dvd_right
