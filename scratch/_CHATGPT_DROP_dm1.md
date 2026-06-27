@@ -1,310 +1,237 @@
-# Q1171 (dm1): A-Line 7-smooth exclusion from results 1–5
+# Q1180 (dm1): concrete proof sketch for `real_mTorsion_card_le`
+
+## Repo state checked
+
+I read:
+
+```text
+FLT/EllipticCurve/Torsion.lean
+```
+
+It already has the two key ingredients needed by the B-line wrapper:
+
+```lean
+abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u :=
+  Submodule.torsionBy ℤ (E⁄k).Point n
+```
+
+and
+
+```lean
+noncomputable def WeierstrassCurve.Points.map
+    {K L : Type u} [Field K] [Field L] [Algebra k K] [Algebra k L]
+    [DecidableEq K] [DecidableEq L]
+    (f : K →ₐ[k] L) : (E⁄K).Point →+ (E⁄L).Point :=
+  WeierstrassCurve.Affine.Point.map f
+```
+
+I tried to read:
+
+```text
+FLT/Assumptions/MazurProof/RealTorsionBound.lean
+```
+
+on both `scratch` and `main`; the file was not found. I also searched for `RealTorsionBound`, `real_mTorsion_card_le`, and `MazurProof`, with no matching file visible to the connector.
 
 ## Bottom line
 
-Using only the listed results, **no** 7-smooth integer `N ≥ 17` in the supplied list is excluded merely from the existence of a rational point `P ∈ E(ℚ)` of exact order `N`.
+The division-polynomial route does not give the desired bound. The degree of the division polynomial gives a bound of order `m^2`, while the target is `2*m`. To improve the real-root count to `O(m)`, one must prove that multiplication by `m` on the real oval has degree `m`, or equivalently that the identity component of `E(ℝ)` is a circle group. That is the same real topology in another form.
 
-The obstruction is simple: a point of exact order `N` only gives a cyclic subgroup
-
-```text
-⟨P⟩ ≃ Z/N.
-```
-
-In the invariant-factor decomposition
+The shortest useful Lean theorem boundary is therefore an injection
 
 ```text
-E(ℚ)_tors ≃ Z/a × Z/b,   a ∣ b,
+E(ℝ)[m] ↪ Fin 2 × ZMod m.
 ```
 
-this only forces
+Mathematically, the first coordinate is the connected component of the point, and the second coordinate is the circle `m`-torsion coordinate inside that component. Once this injection exists, the cardinal bound is immediate.
+
+## Absolute minimum infrastructure
+
+To construct the injection honestly, build one of these packages:
 
 ```text
-N ∣ b.
+A. Direct package:
+   E(ℝ)[m] ↪ Fin 2 × ZMod m.
+
+B. Structural package:
+   component group has size ≤ 2,
+   identity component has ≤ m points killed by m,
+   each m-torsion component fiber is a torsor under identity-component m-torsion.
+
+C. Analytic/topological package:
+   E(ℝ)^0 ≃+ UnitAddCircle,
+   and component group has size ≤ 2.
 ```
 
-It does **not** force `a > 1`, and it does **not** force any full square subgroup `(Z/p)^2`.
+Package A is the smallest public API. Package B is the cleanest implementation target. Package C is the standard mathematical source. A full Weierstrass `℘` parametrization is not necessary if you can prove the identity-component torsion bound by compact connected one-dimensional abelian Lie group theory or by a direct covering-degree theorem for `[m]` on the real oval.
 
-The abstract cyclic model
+## Concrete Lean 4 proof sketch
 
-```text
-E(ℚ)_tors ≃ Z/N
-```
-
-satisfies all five listed constraints:
-
-```text
-1. Z/N = Z/1 × Z/N, so it has two invariant factors with 1 ∣ N.
-2. It contains no (Z/p)^2 for any odd p.
-3. It contains no (Z/2)^3.
-4. It contains no noncyclic Z/2 × Z/d for d ∈ {10,12,14,16}.
-5. Its 2-torsion has size at most 2, hence at most 4.
-```
-
-Therefore the current result list cannot rule out a **cyclic** rational torsion subgroup of order `N`.  To exclude these `N`, one needs an additional cyclic-order obstruction, for example a Mazur cyclic-torsion theorem, a Kubert/modular-curve descent for `Z/N`, or another theorem that directly rules out points of exact order `N`.
-
-## Key question: does odd `p² ∣ N` force `(Z/p)^2`?
-
-No.
-
-If `P` has order divisible by `p²`, then a multiple of `P` gives a point of exact order `p²`, and another multiple gives a point of exact order `p`.  But all of this can live inside one cyclic group:
-
-```text
-Z/p² ⊂ Z/N.
-```
-
-The `p`-torsion inside a cyclic group `Z/p^e` is only one-dimensional over `Z/p`:
-
-```text
-(Z/p^e)[p] ≃ Z/p,
-```
-
-not `(Z/p)^2`.
-
-Result 2 rules out an **independent second p-direction**.  In invariant-factor terms:
-
-```text
-E(ℚ)_tors ≃ Z/a × Z/b,  a ∣ b.
-```
-
-If an odd prime `p` divides `a`, then `p` also divides `b`, so the torsion contains
-
-```text
-Z/p × Z/p,
-```
-
-contradicting result 2.  Thus result 2 implies:
-
-```text
-no odd prime divides the first invariant factor a.
-```
-
-Equivalently, `a` is a power of `2`.  But this still allows the cyclic case `a = 1`, including cyclic groups `Z/25`, `Z/27`, `Z/49`, etc.
-
-## What the current results actually imply about `Z/a × Z/b`
-
-Let
-
-```text
-T := E(ℚ)_tors ≃ Z/a × Z/b,  a ∣ b.
-```
-
-From result 2:
-
-```text
-if p is odd and p ∣ a, contradiction.
-```
-
-So the first invariant factor must be a 2-power:
-
-```text
-a = 1, 2, 4, 8, ...
-```
-
-From result 4:
-
-```text
-if 2 ∣ a and d ∈ {10,12,14,16} and d ∣ b,
-then T contains Z/2 × Z/d, contradiction.
-```
-
-So for those `b`, result 4 can force `a = 1`, i.e. cyclicity, but it does **not** rule out the cyclic group `Z/b` itself.
-
-Results 3 and 5 do not improve this once result 1 is available: a two-invariant-factor group already has 2-rank at most 2, so it cannot contain `(Z/2)^3`; and its 2-torsion has size at most 4.
-
-## Per-integer analysis
-
-In every row, the subgroup generated by a point of exact order `N` is cyclic:
-
-```text
-⟨P⟩ ≃ Z/N.
-```
-
-The table records whether any of results 2–4 gives a contradiction from the point alone.  The answer is always no.  Some rows have a conditional note: if the ambient torsion group has an independent 2-direction, result 4 may kill that **noncyclic** branch, but the cyclic branch remains possible under results 1–5.
-
-| `N` | Structure forced by `P` | What result 2 says | What result 4 may kill | Contradiction from 1–5? |
-|---:|---|---|---|---|
-| 18 | `⟨P⟩ ≃ Z/18` | `3² ∣ 18` gives only cyclic `Z/9`, not `(Z/3)^2` | none forced | No |
-| 20 | `⟨P⟩ ≃ Z/20` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/10` is forbidden | No |
-| 21 | `⟨P⟩ ≃ Z/21` | no odd square issue | none | No |
-| 24 | `⟨P⟩ ≃ Z/24` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/12` is forbidden | No |
-| 25 | `⟨P⟩ ≃ Z/25` | `5² ∣ 25` gives cyclic `Z/25`, not `(Z/5)^2` | none | No |
-| 27 | `⟨P⟩ ≃ Z/27` | `3² ∣ 27` gives cyclic `Z/27`, not `(Z/3)^2` | none | No |
-| 28 | `⟨P⟩ ≃ Z/28` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/14` is forbidden | No |
-| 32 | `⟨P⟩ ≃ Z/32` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/16` is forbidden | No |
-| 35 | `⟨P⟩ ≃ Z/35` | no odd square issue | none | No |
-| 36 | `⟨P⟩ ≃ Z/36` | `3² ∣ 36` gives cyclic `Z/9`, not `(Z/3)^2` | if `2 ∣ a`, then `Z/2 × Z/12` is forbidden | No |
-| 40 | `⟨P⟩ ≃ Z/40` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/10` is forbidden | No |
-| 42 | `⟨P⟩ ≃ Z/42` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/14` is forbidden | No |
-| 45 | `⟨P⟩ ≃ Z/45` | `3² ∣ 45` gives cyclic `Z/9`, not `(Z/3)^2` | none | No |
-| 48 | `⟨P⟩ ≃ Z/48` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/12` and `Z/2 × Z/16` branches are forbidden | No |
-| 49 | `⟨P⟩ ≃ Z/49` | `7² ∣ 49` gives cyclic `Z/49`, not `(Z/7)^2` | none | No |
-| 50 | `⟨P⟩ ≃ Z/50` | `5² ∣ 50` gives cyclic `Z/25`, not `(Z/5)^2` | if `2 ∣ a`, then `Z/2 × Z/10` is forbidden | No |
-| 54 | `⟨P⟩ ≃ Z/54` | `3² ∣ 54` gives cyclic `Z/27`, not `(Z/3)^2` | none forced by `{10,12,14,16}` | No |
-| 56 | `⟨P⟩ ≃ Z/56` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/14` is forbidden | No |
-| 60 | `⟨P⟩ ≃ Z/60` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/10` and `Z/2 × Z/12` branches are forbidden | No |
-| 63 | `⟨P⟩ ≃ Z/63` | `3² ∣ 63` gives cyclic `Z/9`, not `(Z/3)^2` | none | No |
-| 64 | `⟨P⟩ ≃ Z/64` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/16` is forbidden | No |
-| 72 | `⟨P⟩ ≃ Z/72` | `3² ∣ 72` gives cyclic `Z/9`, not `(Z/3)^2` | if `2 ∣ a`, then `Z/2 × Z/12` is forbidden | No |
-| 75 | `⟨P⟩ ≃ Z/75` | `5² ∣ 75` gives cyclic `Z/25`, not `(Z/5)^2` | none | No |
-| 80 | `⟨P⟩ ≃ Z/80` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/10` and `Z/2 × Z/16` branches are forbidden | No |
-| 81 | `⟨P⟩ ≃ Z/81` | `3² ∣ 81` gives cyclic `Z/81`, not `(Z/3)^2` | none | No |
-| 84 | `⟨P⟩ ≃ Z/84` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/12` and `Z/2 × Z/14` branches are forbidden | No |
-| 90 | `⟨P⟩ ≃ Z/90` | `3² ∣ 90` gives cyclic `Z/9`, not `(Z/3)^2` | if `2 ∣ a`, then `Z/2 × Z/10` is forbidden | No |
-| 96 | `⟨P⟩ ≃ Z/96` | no odd square issue | if `2 ∣ a`, then `Z/2 × Z/12` and `Z/2 × Z/16` branches are forbidden | No |
-| 98 | `⟨P⟩ ≃ Z/98` | `7² ∣ 98` gives cyclic `Z/49`, not `(Z/7)^2` | if `2 ∣ a`, then `Z/2 × Z/14` is forbidden | No |
-| 100 | `⟨P⟩ ≃ Z/100` | `5² ∣ 100` gives cyclic `Z/25`, not `(Z/5)^2` | if `2 ∣ a`, then `Z/2 × Z/10` is forbidden | No |
-
-## The abstract countermodel to any proof from 1–5
-
-For each listed `N`, the abstract group
-
-```text
-T_N := Z/N
-```
-
-has an element of exact order `N`, namely `1 mod N`, and satisfies every group-theoretic consequence in results 1–5.
-
-In invariant factors:
-
-```text
-T_N ≃ Z/1 × Z/N.
-```
-
-For any prime `p`, the `p`-torsion of a cyclic group is cyclic, so it has no `(Z/p)^2`.  The 2-torsion has at most two elements.  A cyclic group has no subgroup of the form `Z/2 × Z/d` with `d > 1`.
-
-Thus results 1–5 are logically compatible with the existence of a point of exact order `N` for every `N` in the list.  Any proof excluding these orders must use some result not included in 1–5.
-
-## Lean-facing group-theory shape
-
-The relevant facts can be organized as follows.  This is a proof-design sketch, not a replacement for the missing cyclic-order obstruction.
+This is the wrapper I would put in the missing `RealTorsionBound.lean` file. The only hard theorem is `realMTorsion_componentCircle_code`.
 
 ```lean
-import Mathlib
+import FLT.EllipticCurve.Torsion
+import Mathlib.Topology.Instances.AddCircle.Real
+import Mathlib.Topology.Covering.AddCircle
+import Mathlib.Data.Real.Basic
+import Mathlib.Tactic
 
 open scoped Classical
+open WeierstrassCurve WeierstrassCurve.Affine
 
-namespace FLT.ALine
+noncomputable section
 
-/-- Schematic: a point of exact order `N` gives only a cyclic subgroup. -/
-theorem exactOrderPoint_gives_cyclic_subgroup
-    {G : Type*} [AddCommGroup G] {N : ℕ} {P : G}
-    (hP : orderOf P = N) :
-    ∃ f : ZMod N →+ G, Function.Injective f := by
-  -- Standard construction: send `1 : ZMod N` to `P`.
-  -- The kernel is zero because `orderOf P = N`.
+namespace FLT.RealTorsionBound
+
+/-- Real points of a rational Weierstrass curve. -/
+abbrev RealPoints (E : WeierstrassCurve ℚ) [E.IsElliptic] : Type :=
+  (E⁄ℝ).Point
+
+/-- Real points killed by `m`. -/
+abbrev RealMTorsion (E : WeierstrassCurve ℚ) [E.IsElliptic] (m : ℕ) : Type :=
+  Submodule.torsionBy ℤ (RealPoints E) m
+
+/-- Set version of the same object. -/
+def realMTorsionSet (E : WeierstrassCurve ℚ) [E.IsElliptic] (m : ℕ) :
+    Set (RealPoints E) :=
+  {P | m • P = 0}
+
+/--
+Hard Route 4B input.
+
+Construct this from:
+* the component map `E(ℝ) → π₀(E(ℝ))`, with at most two values;
+* the theorem `#E(ℝ)^0[m] ≤ m`;
+* the fact that a nonempty fiber of `E(ℝ)[m]` over a component injects into
+  `E(ℝ)^0[m]` by subtracting a chosen base point in that fiber.
+-/
+theorem realMTorsion_componentCircle_code
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ} (hm : 0 < m) :
+    ∃ code : RealMTorsion E m → Fin 2 × ZMod m, Function.Injective code := by
+  -- This is the real-topological work.
+  -- It replaces the full Weierstrass parametrization by the minimal finite
+  -- torsion coding needed for the B-line.
   sorry
 
-/--
-The theorem that would be needed, but is false from the listed assumptions alone:
-a cyclic point of order `p^2` does not force full `(Z/p)^2` torsion.
--/
-theorem cyclic_p_square_countermodel_schematic
-    (p : ℕ) [Fact p.Prime] :
-    True := by
-  -- Model: `G = ZMod (p^2)` has an element of order `p^2`, but its p-torsion
-  -- is cyclic of order `p`, not `(ZMod p × ZMod p)`.
-  trivial
+/-- Cardinal bound for real `m`-torsion. -/
+theorem real_mTorsion_card_le
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ} (hm : 0 < m) :
+    Nat.card (RealMTorsion E m) ≤ 2 * m := by
+  classical
+  rcases realMTorsion_componentCircle_code (E := E) (m := m) hm with ⟨code, hcode⟩
+  calc
+    Nat.card (RealMTorsion E m)
+        ≤ Nat.card (Fin 2 × ZMod m) :=
+          Nat.card_le_card_of_injective code hcode
+    _ = 2 * m := by
+          haveI : NeZero m := ⟨Nat.ne_of_gt hm⟩
+          -- If `simp` does not close at the pinned Mathlib revision, replace
+          -- this with the local lemma `Nat.card (ZMod m) = m`.
+          simp [Nat.card_prod]
 
-/--
-Useful consequence of result 2 in invariant-factor form:
-if `T ≃ Z/a × Z/b`, `a ∣ b`, and an odd prime `p` divides `a`, then `T`
-contains `(Z/p)^2`, contradiction.
--/
-theorem odd_prime_not_dvd_firstInvariant_schematic
-    {a b p : ℕ}
-    (hp : p.Prime) (hpodd : p ≠ 2)
-    (hab : a ∣ b) :
-    True := by
-  -- If `p ∣ a`, then `p ∣ b`; the two coordinate p-torsion points generate
-  -- `ZMod p × ZMod p`.
-  trivial
+/-- Set-`ncard` wrapper. The subtype of this set is `RealMTorsion E m`. -/
+theorem real_mTorsion_set_ncard_le
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ} (hm : 0 < m) :
+    (realMTorsionSet E m).ncard ≤ 2 * m := by
+  classical
+  -- Usual finishing pattern:
+  --   change Nat.card {P : RealPoints E // P ∈ realMTorsionSet E m} ≤ 2 * m
+  --   simpa [realMTorsionSet, RealMTorsion] using real_mTorsion_card_le (E := E) hm
+  -- The exact `Set.ncard` subtype rewrite lemma may vary, so keep
+  -- `real_mTorsion_card_le` as the primary API if possible.
+  sorry
 
-/--
-Useful consequence of result 4:
-if `2 ∣ a` and `d ∣ b` for `d ∈ {10,12,14,16}`, then `Z/a × Z/b`
-contains `Z/2 × Z/d`.
--/
-theorem forbidden_two_by_d_branch_schematic
-    {a b d : ℕ}
-    (ha2 : 2 ∣ a) (hdb : d ∣ b) :
-    True := by
-  -- Use the coordinate subgroup of orders `2` and `d`.
-  trivial
-
-end FLT.ALine
+end FLT.RealTorsionBound
 ```
 
-In the actual proof tree, the important negative fact is this:
+## Structural proof target for the hard input
 
-```text
-exactOrder(P) = N
-```
-
-can prove only
-
-```text
-Z/N ↪ E(ℚ)_tors.
-```
-
-It cannot prove
-
-```text
-Z/p × Z/p ↪ E(ℚ)_tors
-```
-
-from `p² ∣ N`, nor can it prove
-
-```text
-Z/2 × Z/d ↪ E(ℚ)_tors
-```
-
-from `d ∣ N`.
-
-## What additional theorem would complete the exclusion?
-
-To exclude the listed `N`, add one of the following kinds of theorem.
-
-### Option A: cyclic torsion bound
-
-A direct theorem:
+If you want to avoid making `realMTorsion_componentCircle_code` a black box, prove these three lemmas instead:
 
 ```lean
-theorem no_point_exact_order_of_large_7smooth
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {N : ℕ} (hN : N ∈ target7SmoothList) :
-    ¬ ∃ P : (E⁄ℚ).Point, orderOf P = N := by
-  -- This is exactly what is missing.
-  sorry
+import FLT.EllipticCurve.Torsion
+import Mathlib.Topology.Instances.AddCircle.Real
+import Mathlib.Topology.Covering.AddCircle
+import Mathlib.Data.Real.Basic
+import Mathlib.Tactic
+
+open scoped Classical
+open WeierstrassCurve WeierstrassCurve.Affine
+
+noncomputable section
+
+namespace FLT.RealTorsionBound
+
+abbrev RealPoints (E : WeierstrassCurve ℚ) [E.IsElliptic] : Type :=
+  (E⁄ℝ).Point
+
+/-- Production version: the connected component of `0` in `E(ℝ)`. -/
+-- def RealIdentityComponent ...
+
+/-- Production version: the component quotient `π₀(E(ℝ))`. -/
+-- def RealComponentGroup ...
+
+/-- Hard topology from the real cubic: at most two real components. -/
+theorem real_componentGroup_card_le_two
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    True := by
+  -- Replace `True` by `Nat.card (RealComponentGroup E) ≤ 2`.
+  trivial
+
+/-- Hard group topology: the identity component has circle-like m-torsion. -/
+theorem real_identityComponent_mTorsion_card_le
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ} (hm : 0 < m) :
+    True := by
+  -- Replace `True` by
+  --   Nat.card (Submodule.torsionBy ℤ (RealIdentityComponent E) m) ≤ m.
+  -- Prove this from `RealIdentityComponent E ≃+ UnitAddCircle`, or directly
+  -- from `[m]` being an m-fold covering of the identity oval.
+  trivial
+
+/-- Group-theory step: component fibers are torsors under identity-component torsion. -/
+theorem real_mTorsion_card_le_components
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ} (hm : 0 < m) :
+    True := by
+  -- Replace `True` by the inequality:
+  --   #E(ℝ)[m] ≤ #π₀(E(ℝ)) * #E(ℝ)^0[m].
+  -- For points P,Q in the same component fiber, P - Q lies in E(ℝ)^0[m].
+  trivial
+
+end FLT.RealTorsionBound
 ```
 
-### Option B: Mazur cyclic list
+This structural split is the best implementation plan. It avoids complex uniformization but still contains the real topology that the theorem genuinely needs.
 
-Use Mazur's torsion theorem, or at least the cyclic part:
+## Why the `℘` parametrization is not the minimum
+
+Silverman's lattice argument proves the theorem cleanly on paper, but formalizing it would require:
 
 ```text
-If E(ℚ) has a point of order N, then N ∈ {1,2,3,4,5,6,7,8,9,10,12}.
+period lattice Λ,
+Weierstrass ℘ and ℘',
+the differential equation for ℘,
+complex uniformization `ℂ/Λ ≃ E(ℂ)`,
+classification of real points in the complex torus,
+transport of the group law.
 ```
 
-This kills every listed `N ≥ 17` immediately.
+That is much larger than the B-line needs. For this project, the minimum is the finite real torsion coding theorem, not full analytic uniformization.
 
-### Option C: Kubert/descent for `Z/N`
+## Final recommendation
 
-For the 7-smooth A-line, prove separate modular-curve/descent obstructions for cyclic points:
+Create the missing file with the public theorem:
 
-```text
-no Z/18, no Z/20, no Z/21, ..., no Z/100
+```lean
+real_mTorsion_card_le
+  (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ} (hm : 0 < m) :
+  Nat.card (Submodule.torsionBy ℤ (E⁄ℝ).Point m) ≤ 2*m
 ```
 
-or prove a recursive reduction that every listed `N` implies one of a smaller set of cyclic obstructions.
+Prove it from the single hard input:
 
-## Final answer
-
-Result 2 does **not** kill a point of order divisible by an odd square.  A point of order `p²` gives a cyclic subgroup `Z/p²`, whose `p`-torsion is only `Z/p`.  It does not give full `(Z/p)^2`.
-
-Results 1–5 can rule out certain **noncyclic ambient torsion branches**, especially when the first invariant factor contains an odd prime or when it contains `2` and the second invariant factor is divisible by `10`, `12`, `14`, or `16`.  But they never rule out the cyclic branch
-
-```text
-E(ℚ)_tors ≃ Z/N.
+```lean
+realMTorsion_componentCircle_code
+  : E(ℝ)[m] ↪ Fin 2 × ZMod m.
 ```
 
-Therefore, for every listed 7-smooth `N ≥ 17`, a point of exact order `N` remains compatible with results 1–5.  The A-line 7-smooth exclusion needs an additional theorem excluding cyclic rational torsion orders, not just full `p`-torsion or full-2-plus-`n` torsion.
+Then separately build that hard input from component count plus identity-component circle torsion. Do not try to get the `2m` bound directly from `deg ψ_m`; the needed sharper real root count is equivalent in difficulty to the real oval/circle theorem.
