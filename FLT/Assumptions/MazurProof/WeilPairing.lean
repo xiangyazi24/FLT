@@ -1,177 +1,130 @@
+import FLT.Assumptions.MazurProof.Axioms
+
 /-!
-# Weil Pairing and Primitive Roots of Unity
+# Weil Pairing: Full Rational Torsion Implies Primitive Root of Unity
 
-## Statement
-If all m-torsion points of an elliptic curve E/ℚ are rational, then ℚ contains a primitive m-th root of unity.
+## Main result
 
-## Mathematical Framework
-The proof rests on three pillars:
-1. **Existence**: Primitive m-th roots exist in ℚ̄ (cyclotomic field theory)
-2. **Non-degeneracy**: The Weil pairing e: E[m] × E[m] → μ_m is non-degenerate
-3. **Galois Descent**: If E[m] is ℚ-rational, then Gal(ℚ̄/ℚ) acts trivially on μ_m
+`weil_pairing_gives_primitive_root`: If all m-torsion points of E/ℚ are
+rational (`HasFullRationalTorsion E m`), then ℚ contains a primitive m-th
+root of unity.
 
-The key insight:
-- E[m] ⊆ E(ℚ) means σ ∈ Gal(ℚ̄/ℚ) fixes all torsion points
-- By Weil pairing: E[m] ≃ Hom(E[m], μ_m) (via P ↦ (Q ↦ e(P, Q)))
-- Galois acts trivially on E[m] ⟹ acts trivially on Hom(E[m], μ_m)
-- Non-degeneracy ⟹ acts trivially on μ_m
-- Fixed points of Gal(ℚ̄/ℚ) lie in ℚ
+## Proof structure
 
-This formalizes the core property without requiring full divisor theory.
+- **m = 1, 2**: Direct construction (ζ = 1 and ζ = -1). Fully proved, 0 sorry.
+- **m ≥ 3**: Via the Weil pairing. Two named sorries remain.
+
+## The Weil pairing argument (m ≥ 3)
+
+The Weil pairing e_m : E[m] × E[m] → μ_m is bilinear, alternating,
+non-degenerate, and Galois-equivariant. If E[m] ⊆ E(ℚ), Galois acts
+trivially on E[m], hence (by equivariance) on Im(e_m). Non-degeneracy
+ensures Im(e_m) = μ_m, so μ_m ⊆ ℚ.
+
+## Named sorry obstacles
+
+1. `sorry_primitive_root_in_algebraic_closure`: A primitive m-th root of
+   unity exists in the algebraic closure of ℚ. This follows from the
+   splitting of X^m - 1 in an algebraically closed field of char 0.
+   **Difficulty: Medium** — needs connecting Mathlib's cyclotomic and
+   algebraic closure APIs.
+
+2. `sorry_weil_pairing_galois_descent`: When E[m] ⊆ E(ℚ), the primitive
+   root descends from ℚ̄ to ℚ via the Weil pairing. **Difficulty: Hard** —
+   requires formalizing:
+   (a) Weil pairing construction (divisors on curves, not in Mathlib)
+   (b) Non-degeneracy (Tate module / duality)
+   (c) Galois equivariance (functoriality of Pic⁰)
+   (d) Galois descent (Gal-fixed elements are rational)
+
+Note: over ℚ, `IsPrimitiveRoot ζ m` for m ≥ 3 is impossible
+(by `isPrimitiveRoot_rat_order_le_two`), so `HasFullRationalTorsion E m`
+is vacuously false. The Weil pairing proves this vacuity.
 -/
 
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine
-import Mathlib.FieldTheory.Galois.Basic
-import Mathlib.NumberTheory.Cyclotomic.Basic
-import Mathlib.NumberTheory.Cyclotomic.PrimitiveRoots
-import Mathlib.GroupTheory.FiniteAbelian.Duality
-import Mathlib.Algebra.GroupWithZero.InjSurj
-import Mathlib.FieldTheory.Fixed
-import FLT.EllipticCurve.Torsion
-
 open scoped WeierstrassCurve.Affine
-open scoped Function
-open Polynomial
 
 namespace MazurProof
 
-variable (m : ℕ) (hm : 0 < m)
+/-! ### Small order: direct construction of primitive roots -/
 
-/-! ## Part 1: Existence of Primitive Roots in the Algebraic Closure -/
+private lemma primitive_root_order_one : ∃ ζ : ℚ, IsPrimitiveRoot ζ 1 :=
+  ⟨1, IsPrimitiveRoot.one⟩
 
-/-- A primitive m-th root of unity exists in ℚ̄.
-The cyclotomic polynomial Φ_m(X) has degree φ(m) > 0 and its roots in ℚ̄ are
-exactly the primitive m-th roots of unity.
+private lemma neg_one_isPrimitiveRoot_two : IsPrimitiveRoot (-1 : ℚ) 2 := by
+  constructor
+  · norm_num
+  · intro l hl
+    by_contra h
+    have hodd : Odd l := by
+      rcases Nat.even_or_odd l with ⟨k, hk⟩ | ho
+      · exact absurd ⟨k, by omega⟩ h
+      · exact ho
+    linarith [hodd.neg_one_pow (α := ℚ)]
+
+private lemma primitive_root_order_two : ∃ ζ : ℚ, IsPrimitiveRoot ζ 2 :=
+  ⟨-1, neg_one_isPrimitiveRoot_two⟩
+
+/-! ### Weil pairing infrastructure (m ≥ 3) -/
+
+/--
+**Sorry 1: Primitive root exists in algebraic closure**
+
+In any algebraically closed field of characteristic 0, a primitive m-th root
+of unity exists for m ≥ 1. This follows from:
+- X^m - 1 splits completely in the algebraic closure
+- char = 0 implies X^m - 1 is separable (m distinct roots)
+- The roots form a cyclic group of order m, which has a generator
+
+**Mathlib path**: Connect `IsAlgClosed` (AlgebraicClosure ℚ) with
+`Polynomial.roots` of X^m - 1 and extract a generator of the cyclic
+root group. Key lemmas: `IsAlgClosed.exists_aeval_eq_zero`,
+`Polynomial.separable_X_pow_sub_one`, `IsCyclic` for finite subgroups
+of a field's multiplicative group.
 -/
-theorem exists_primitive_root_in_closure : ∃ ζ : ℚ̄, IsPrimitiveRoot ζ m := by
-  -- Mathlib.NumberTheory.Cyclotomic contains the machinery for cyclotomic fields
-  -- Key facts:
-  -- 1. The cyclotomic polynomial Φ_m is irreducible over ℚ for m > 0
-  -- 2. Its roots are exactly the primitive m-th roots of unity
-  -- 3. In ℚ̄ (the algebraic closure), all roots exist
-
-  -- For m = 0: no roots (vacuous)
-  rcases m with _ | m
-  · simp at hm  -- contradiction since hm : 0 < 0
-
-  -- For m ≥ 1: primitive (m+1)-th roots exist in ℚ̄
-  · -- This follows from the theory that cyclotomic polynomials split in ℚ̄
-    -- Specific Mathlib lemmas that could be used:
-    -- - Polynomial.exists_root_of_degree_pos (roots exist in algebraically closed fields)
-    -- - CyclotomicPolynomial existence theorems
-    -- - IsPrimitiveRoot definition via (ζ : ℚ̄)^(m+1) = 1 ∧ order_of ζ = m+1
-    sorry
-
-/-! ## Part 2: Galois Descent for Roots of Unity
-This is the hard part requiring the Weil pairing infrastructure.
--/
-
-/-- Core lemma: If E[m] is fully rational, then μ_m is rational.
-
-This encodes the essential property of the Weil pairing: non-degeneracy lifts
-trivial Galois action from E[m] to action on μ_m.
-
-The full proof requires:
-1. Weil pairing: e: E[m] × E[m] → μ_m with e(P,Q) = σ(e(P,Q)) = e(σ(P), σ(Q)) for σ ∈ Gal
-2. Non-degeneracy: ∀ P ∈ E[m], ∃ Q ∈ E[m] with e(P,Q) ≠ 1
-3. Descent theory: Elements of ℚ̄ fixed by Gal(ℚ̄/ℚ) are in ℚ
-
-Current status: Marked as structural sorry pending divisor theory formalization.
--/
-private theorem galois_descent_roots_of_unity
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (hfull : HasFullRationalTorsion E m) :
-    ∀ ζ : ℚ̄, IsPrimitiveRoot ζ m → ∃ ζ' : ℚ, IsPrimitiveRoot ζ' m := by
-  intro ζ hζ
-  -- Strategy: Show that ζ is fixed by Gal(ℚ̄/ℚ), then apply fixed-point theorem
-
-  -- The core argument uses the non-degeneracy of the Weil pairing:
-  --   e: E[m] × E[m] → μ_m
-  --
-  -- Since E[m] is fully rational over ℚ (from HasFullRationalTorsion),
-  -- any σ ∈ Gal(ℚ̄/ℚ) acts trivially on E[m], i.e., σ(P) = P for all P ∈ E[m].
-  --
-  -- By Galois-equivariance of the pairing: σ(e(P,Q)) = e(σ(P), σ(Q)) = e(P,Q)
-  --
-  -- Non-degeneracy means: For P ≠ 0, the map Q ↦ e(P,Q) is surjective E[m] → μ_m.
-  -- Therefore σ fixes the image, hence σ fixes μ_m.
-  --
-  -- In particular, σ(ζ) = ζ for all σ ∈ Gal(ℚ̄/ℚ).
-  --
-  -- By Galois descent (fixed-point theorem), ζ ∈ ℚ.
-
-  -- TODO: Formalize the Weil pairing and apply the descent argument
-  -- For now, we use the classical result that this holds for elliptic curves
+private lemma sorry_primitive_root_in_algebraic_closure (m : ℕ) (hm : 0 < m) :
+    ∃ ζ : AlgebraicClosure ℚ, IsPrimitiveRoot ζ m := by
   sorry
 
-/-! ## Main Theorem: Discharge the Weil Pairing Axiom -/
+/--
+**Sorry 2: Galois descent via Weil pairing**
 
-/-- The Weil pairing consequence: if E[m] is fully rational, then ℚ contains a primitive m-th root.
+If E[m] ⊆ E(ℚ) and a primitive m-th root ζ exists in ℚ̄, then ℚ contains
+a primitive m-th root. The argument:
 
-This theorem discharges the axiom `weil_pairing_primitive_root` used in the proof of the
-Mazur torsion bound. The implementation combines:
-- Existence of primitive m-th roots in ℚ̄ (cyclotomic field theory)
-- Galois descent argument using non-degeneracy of the Weil pairing
+1. The Weil pairing e_m : E[m] × E[m] → μ_m is non-degenerate and
+   Galois-equivariant: σ(e_m(P,Q)) = e_m(σP, σQ) for σ ∈ Gal(ℚ̄/ℚ).
+2. If E[m] ⊆ E(ℚ), then σP = P for all P ∈ E[m], so σ(e_m(P,Q)) = e_m(P,Q).
+3. By non-degeneracy, Im(e_m) = μ_m, so σ fixes all of μ_m.
+4. Elements of ℚ̄ fixed by Gal(ℚ̄/ℚ) lie in ℚ (Galois descent).
+
+**Obstacles** (all absent from Mathlib as of 2026-06):
+- `weil_pairing_construction`: e_m via divisor theory
+- `weil_pairing_nondegeneracy`: non-degeneracy from Tate module
+- `weil_pairing_galois_equivariance`: functoriality of Pic⁰
+- `galois_fixed_point_theorem`: Gal-fixed points of ℚ̄ = ℚ
 -/
+private lemma sorry_weil_pairing_galois_descent
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ} (hm : 2 < m)
+    (hfull : HasFullRationalTorsion E m)
+    (ζ : AlgebraicClosure ℚ) (hζ : IsPrimitiveRoot ζ m) :
+    ∃ ζ' : ℚ, IsPrimitiveRoot ζ' m := by
+  sorry
+
+/-! ### Assembly: main theorem -/
+
+/-- If all m-torsion of E/ℚ is rational, then ℚ contains a primitive m-th
+root of unity. This theorem discharges the axiom `weil_pairing_primitive_root`
+from `Axioms.lean`. -/
 theorem weil_pairing_gives_primitive_root
     (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
     (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
     ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
-  -- Obtain a primitive m-th root in ℚ̄
-  obtain ⟨ζ_bar, hζ_bar⟩ := exists_primitive_root_in_closure m hm
-  -- Apply Galois descent: it must be in ℚ
-  exact galois_descent_roots_of_unity m hm E hfull ζ_bar hζ_bar
-
-/-! ## Roadmap for Completing the Proof
-
-### Current Status
-The theorem structure is complete with the signature matching the axiom in Axioms.lean:
-```lean
-theorem weil_pairing_gives_primitive_root
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-```
-
-### Completion Tasks
-
-**Priority 1: Cyclotomic Field Existence (Medium difficulty)**
-- Goal: Fill sorry in `exists_primitive_root_in_closure`
-- Approach: Use Mathlib.NumberTheory.Cyclotomic machinery
-- Key lemmas:
-  - Roots of cyclotomic polynomials split in ℚ̄
-  - `IsPrimitiveRoot` characterization via multiplicative order
-  - Cyclotomic extension degree = φ(m)
-
-**Priority 2: Galois Descent via Weil Pairing (High difficulty)**
-- Goal: Fill sorry in `galois_descent_roots_of_unity`
-- Requires: Full Weil pairing formalization OR alternative descent argument
-- Key insight: Non-degeneracy of bilinear form lifts action from source to target
-- Mathlib resources:
-  - `FieldTheory.Galois.Basic`: Galois correspondence, fixed fields
-  - `FieldTheory.Fixed`: Fixed points of group actions
-  - `GroupTheory.FiniteAbelian.Duality`: Character group isomorphisms
-  - `LinearAlgebra.PerfectPairing`: Non-degenerate bilinear forms
-
-**Alternative Approach (if Weil pairing is too complex):**
-For small m (2, 3, 4, ...), prove directly by showing that:
-- The only m-th roots in ℚ are those whose order divides m
-- If E[m] is ℚ-rational and non-trivial, specific constraints on m follow
-- Use descent via the structure theorem for E(ℚ)_tors
-
-### Code Layout
-```
-FLT/Assumptions/MazurProof/WeilPairing.lean (this file)
-├── exists_primitive_root_in_closure (cyclotomic theory)
-├── galois_descent_roots_of_unity (Weil pairing descent)
-└── weil_pairing_gives_primitive_root (main theorem)
-```
-
-### Testing Strategy
-1. Verify compilation (no syntax errors)
-2. Check Axioms.lean integrates without issues
-3. Run `#check weil_pairing_gives_primitive_root` to validate type signature
-4. Once sorries are filled, verify `#print axioms` shows axiom is discharged
--/
+  rcases le_or_lt m 2 with hle | hgt
+  · interval_cases m
+    · exact primitive_root_order_one
+    · exact primitive_root_order_two
+  · obtain ⟨ζ, hζ⟩ := sorry_primitive_root_in_algebraic_closure m (by omega)
+    exact sorry_weil_pairing_galois_descent E hgt hfull ζ hζ
 
 end MazurProof
