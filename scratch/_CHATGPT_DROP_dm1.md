@@ -10,3 +10,5 @@ For odd m, the sharp theorem needed is: the number of real x-values satisfying t
 For even m, the raw m - 1 statement is false at m = 2; split off the cubic 2-part and bound the non-2 part by m - 2.
 
 Even count: 1 point at infinity, at most 3 affine 2-part points, and at most 2*(m - 2) other affine points, total 2*m.
+
+No shortcut.
