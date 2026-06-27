@@ -1,65 +1,53 @@
-# Q1313 (dm1/dm4): closing the cleared-denominator polynomial identity
+# Q1316 (dm1/dm2): exact tactic for the final cleared-denominator square
 
-Use `ring`/`ring_nf`, not `nlinarith`. The reliable sequence is:
+Do **not** use `nlinarith`, `linarith`, or `linear_combination` for this final step. The robust tactic is:
 
 ```lean
-  rw [h]
-  field_simp [hBq]
-  ring
+  have hBq : (B : ℚ) ≠ 0 := by exact_mod_cast hBne
+  calc
+    (w * (B : ℚ) ^ 3) ^ 2 = w ^ 2 * (B : ℚ) ^ 6 := by ring
+    _ = ((A * (A ^ 2 + A * B ^ 2 - B ^ 4) : ℤ) : ℚ) := by
+      rw [h]
+      field_simp [hBq]
+      ring_nf
 ```
 
-or, if the RHS is still an integer-cast expression, use `ring_nf` as the final step.
-
-Here is the exact standalone pattern.
+Here is the standalone version.
 
 ```lean
 import Mathlib
 
-namespace DM4
+namespace DM2
 
-example (A B : ℤ) (w : ℚ) (hB : B ≠ 0)
+example (A B : ℤ) (w : ℚ) (hBne : B ≠ 0)
     (h : w ^ 2 =
       ((A : ℚ) / (B : ℚ) ^ 2) ^ 3
         + ((A : ℚ) / (B : ℚ) ^ 2) ^ 2
         - (A : ℚ) / (B : ℚ) ^ 2) :
-    w ^ 2 * (B : ℚ) ^ 6 =
-      (A : ℚ) * ((A : ℚ) ^ 2 + (A : ℚ) * (B : ℚ) ^ 2 - (B : ℚ) ^ 4) := by
-  have hBq : (B : ℚ) ≠ 0 := by exact_mod_cast hB
-  rw [h]
-  field_simp [hBq]
-  ring
-
-/-- Same proof when the target RHS is the cast of the integer expression. -/
-example (A B : ℤ) (w : ℚ) (hB : B ≠ 0)
-    (h : w ^ 2 =
-      ((A : ℚ) / (B : ℚ) ^ 2) ^ 3
-        + ((A : ℚ) / (B : ℚ) ^ 2) ^ 2
-        - (A : ℚ) / (B : ℚ) ^ 2) :
-    w ^ 2 * (B : ℚ) ^ 6 =
+    (w * (B : ℚ) ^ 3) ^ 2 =
       ((A * (A ^ 2 + A * B ^ 2 - B ^ 4) : ℤ) : ℚ) := by
-  have hBq : (B : ℚ) ≠ 0 := by exact_mod_cast hB
-  rw [h]
-  field_simp [hBq]
-  ring_nf
+  have hBq : (B : ℚ) ≠ 0 := by exact_mod_cast hBne
+  calc
+    (w * (B : ℚ) ^ 3) ^ 2 = w ^ 2 * (B : ℚ) ^ 6 := by ring
+    _ = ((A * (A ^ 2 + A * B ^ 2 - B ^ 4) : ℤ) : ℚ) := by
+      rw [h]
+      field_simp [hBq]
+      ring_nf
 
-/-- If you already have the factored cleared form, just rewrite and `ring`. -/
-example (A B : ℤ) (w : ℚ)
-    (hclear :
-      w ^ 2 * (B : ℚ) ^ 6 =
-        (A : ℚ) * ((A : ℚ) * ((A : ℚ) + (B : ℚ) ^ 2) - (B : ℚ) ^ 4)) :
-    w ^ 2 * (B : ℚ) ^ 6 =
-      (A : ℚ) * ((A : ℚ) ^ 2 + (A : ℚ) * (B : ℚ) ^ 2 - (B : ℚ) ^ 4) := by
-  rw [hclear]
-  ring
-
-end DM4
+end DM2
 ```
 
-If your denominator hypothesis is `hBpos : 0 < B` instead of `hB : B ≠ 0`, use:
+If you already made a cleared hypothesis first, use this shape:
 
 ```lean
-  have hBq : (B : ℚ) ≠ 0 := by
-    exact_mod_cast (ne_of_gt hBpos)
+  have hBq : (B : ℚ) ≠ 0 := by exact_mod_cast hBne
+  have hclear := h
+  field_simp [hBq] at hclear
+  calc
+    (w * (B : ℚ) ^ 3) ^ 2 = w ^ 2 * (B : ℚ) ^ 6 := by ring
+    _ = ((A * (A ^ 2 + A * B ^ 2 - B ^ 4) : ℤ) : ℚ) := by
+      rw [hclear]
+      ring_nf
 ```
 
-Summary: do not use `nlinarith` here. After `field_simp`, the remaining problem is a polynomial identity over `ℚ`, so `ring` is the right closer. Use `ring_nf` when the target still contains a casted integer polynomial such as `((A * (A^2 + A*B^2 - B^4) : ℤ) : ℚ)`.
+The reason this works is that the first `ring` only expands `(w * B^3)^2` into `w^2 * B^6`; the second block uses the original curve equation, clears denominators with `field_simp`, and lets `ring_nf` normalize the factored rational expression and the `Int.cast` target to the same polynomial.
