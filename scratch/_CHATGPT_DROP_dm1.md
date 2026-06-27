@@ -1,133 +1,170 @@
-# Q1353 (dm1/dm2): status of a complete `quartic_plus` proof
+# Q1355 (dm1/dm4): refactor `no_odd_prime_square_in_torsion` through `RealTorsionBridge`
 
-I cannot honestly give a closed, compilable Lean proof of this theorem in 200 lines from the current repository and Mathlib API. The repository search index does not show a local `quartic_plus` / `QuarticPlus` theorem or the required factor-splitting and Pythagorean descent lemmas. Mathlib has `PythagoreanTriple.coprime_classification'`, but it does **not** contain the whole Ljunggren-style descent theorem as a packaged result.
+## Recommendation
 
-A fake answer with `axiom`, `admit`, or `sorry` would compile in this repo because `warn.sorry = false`, but it would not be the requested proof. The honest boundary is: the strong-induction wrapper is short and fully compilable; the arithmetic descent step is the real missing proof.
+Modify `Axioms.lean` directly, but keep the actual real-torsion theorem in `RealTorsionBridge.lean`.
 
-## Fully compilable strong-induction wrapper
+Do **not** create a parallel replacement theorem in a new file unless importing `RealTorsionBridge.lean` into `Axioms.lean` creates an import cycle. The theorem name `no_odd_prime_square_in_torsion` is part of the current API, so the clean refactor is:
 
-This is the exact structure you want. It is written over `ℤ` and uses `B.natAbs` as the induction measure.
+1. Put/keep the geometric fact in `RealTorsionBridge.lean`:
+   ```lean
+   no_zmod_p_square_in_rational_points
+   ```
+2. Import `RealTorsionBridge` in `Axioms.lean`.
+3. Replace only the proof body of `no_odd_prime_square_in_torsion`.
+4. Delete the old `HasFullRationalTorsion → weil_pairing_primitive_root` path from that proof.
 
-```lean
-import Mathlib
+This keeps downstream files unchanged: they still use `no_odd_prime_square_in_torsion`.
 
-namespace DM2
+## Core construction
 
-/-- Integer version of the quartic-plus equation. -/
-def QuarticPlusZ (r B s : ℤ) : Prop :=
-  0 < r ∧ 0 < B ∧ Int.gcd r B = 1 ∧
-    s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4
-
-/-- The base conclusion. -/
-def BaseZ (r B : ℤ) : Prop :=
-  r = 1 ∧ B = 1
-
-/--
-The descent step you must prove arithmetically: every non-base positive primitive
-solution gives a smaller non-base positive primitive solution.
--/
-def QuarticPlusDescentStepZ : Prop :=
-  ∀ {r B s : ℤ}, QuarticPlusZ r B s → ¬ BaseZ r B →
-    ∃ r' B' s' : ℤ,
-      QuarticPlusZ r' B' s' ∧ ¬ BaseZ r' B' ∧ B'.natAbs < B.natAbs
-
-/-- Once the descent step is available, the theorem follows by strong induction on `B.natAbs`. -/
-theorem quartic_plus_from_descent
-    (desc : QuarticPlusDescentStepZ)
-    {r B s : ℤ} (hsol : QuarticPlusZ r B s) :
-    r = 1 ∧ B = 1 := by
-  classical
-  have hmain : BaseZ r B := by
-    refine
-      (Nat.strong_induction_on
-        (p := fun N : ℕ =>
-          ∀ r B s : ℤ, B.natAbs = N → QuarticPlusZ r B s → BaseZ r B)
-        B.natAbs ?_) r B s rfl hsol
-    intro N ih r B s hBN hsol
-    by_cases hbase : BaseZ r B
-    · exact hbase
-    · rcases desc hsol hbase with ⟨r', B', s', hsol', hnot', hlt'⟩
-      have hltN : B'.natAbs < N := by
-        simpa [hBN] using hlt'
-      exact False.elim (hnot' (ih B'.natAbs hltN r' B' s' rfl hsol'))
-  exact hmain
-
-end DM2
-```
-
-## The missing theorem
-
-The real target is not the wrapper above but this lemma:
+If your hypothesis is an additive embedding into the torsion subtype,
 
 ```lean
-namespace DM2
-
-theorem quartic_plus_descent_step : QuarticPlusDescentStepZ := by
-  intro r B s hsol hnonbase
-  -- 1. Prove r and B odd by mod 4 analysis.
-  -- 2. Define U = 2*r^2 + B^2 - 2*s and V = 2*r^2 + B^2 + 2*s.
-  -- 3. Prove U*V = 5*B^4, U,V positive, coprime, odd.
-  -- 4. Split the coprime odd factors of 5*B^4 into (a^4, 5*b^4) or (5*a^4, b^4).
-  -- 5. In the (a^4,5*b^4) branch derive:
-  --      4*r^2 = (a^2-b^2)^2 + 4*b^4.
-  -- 6. Let h = (a^2-b^2)/2; prove h^2 + b^4 = r^2.
-  -- 7. Use `PythagoreanTriple.coprime_classification'` on the oriented triple
-  --      PythagoreanTriple ((b:ℤ)^2) h r
-  --    because the first leg must be the odd one.
-  -- 8. Split (m-n)(m+n)=b^2 into m-n=u^2 and m+n=v^2 using
-  --      Int.sq_of_gcd_eq_one.
-  -- 9. Return the smaller solution (v,u,a), or the analogous branch solution.
-  -- This is several hundred lines of arithmetic, not currently a Mathlib one-liner.
-  sorry
-
-end DM2
+ι : (ZMod p × ZMod p) ↪+ EQtors
 ```
 
-## Why the complete 200-line request is not realistic
-
-The requested proof needs at least these nontrivial local lemmas:
+where `EQtors` is a subtype of `(E⁄ℚ).Point`, build the embedding into rational points by projecting out of the subtype.
 
 ```lean
--- parity / mod 4 preparation
-lemma quarticPlus_odd_rB : ...
-
--- U,V preparation
-lemma UV_factorization : ...
-lemma UV_coprime : ...
-lemma UV_odd : ...
-lemma UV_positive : ...
-
--- coprime factor split of 5*B^4
-lemma split_five_mul_fourth_coprime_odd : ...
-
--- Pythagorean square-leg descent
-lemma pythagorean_square_leg_descent : ...
-
--- branch algebra returning a smaller non-base QuarticPlus solution
-lemma descent_branch_a4_5b4 : ...
-lemma descent_branch_5a4_b4 : ...
+/-- Forget that the image lies in the torsion subtype. -/
+noncomputable def torsionSquareEmbeddingToPointEmbedding
+    {G : Type*} [AddCommGroup G]
+    {p : ℕ}
+    {T : Type*} [AddCommGroup T]
+    [Coe T G]
+    (ι : (ZMod p × ZMod p) ↪+ T)
+    (hcoe_inj : Function.Injective (fun x : T => (x : G))) :
+    (ZMod p × ZMod p) ↪+ G where
+  toFun x := (ι x : G)
+  map_zero' := by
+    change ((ι 0 : T) : G) = 0
+    rw [map_zero]
+    rfl
+  map_add' x y := by
+    change ((ι (x + y) : T) : G) = ((ι x : T) : G) + ((ι y : T) : G)
+    rw [map_add]
+    rfl
+  inj' := by
+    intro x y hxy
+    apply ι.injective
+    exact hcoe_inj hxy
 ```
 
-Only after those exist does the final theorem become the short wrapper `quartic_plus_from_descent` above.
-
-## Practical next step
-
-Formalize the descent step as a separate theorem first:
+For a concrete subtype, you usually do not need the abstract helper. The proof is just:
 
 ```lean
-lemma quartic_plus_descent_step : QuarticPlusDescentStepZ := by
-  ...
+let ιpts : (ZMod p × ZMod p) ↪+ (E⁄ℚ).Point where
+  toFun x := (ι x).1
+  map_zero' := by
+    change (ι 0).1 = 0
+    rw [map_zero]
+    rfl
+  map_add' x y := by
+    change (ι (x + y)).1 = (ι x).1 + (ι y).1
+    rw [map_add]
+    rfl
+  inj' := by
+    intro x y hxy
+    apply ι.injective
+    exact Subtype.ext hxy
 ```
 
-Then the final theorem is just:
+The only trick is the last line: equality in the ambient point group gives equality in the torsion subtype by `Subtype.ext`.
+
+## Replacement proof shape
+
+Use this shape inside `Axioms.lean`.
 
 ```lean
-theorem quartic_plus
-    {r B s : ℤ}
-    (hr : 0 < r) (hB : 0 < B) (hgcd : Int.gcd r B = 1)
-    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
-    r = 1 ∧ B = 1 := by
-  exact quartic_plus_from_descent
-    quartic_plus_descent_step
-    ⟨hr, hB, hgcd, heq⟩
+-- Old proof path:
+--   full torsion -> Weil pairing primitive root -> p ≤ 2 -> contradiction
+-- New proof path:
+--   full torsion -> forget torsion subtype -> forbidden ZMod p square in E(ℚ)
+
+theorem no_odd_prime_square_in_torsion
+    -- keep your existing binders exactly as they are
+    -- e.g. (E : WeierstrassCurve ℚ) [E.IsElliptic] {p : ℕ} ...
+    : ¬ Nonempty ((ZMod p × ZMod p) ↪+ EQtors) := by
+  rintro ⟨ι⟩
+
+  let ιpts : (ZMod p × ZMod p) ↪+ (E⁄ℚ).Point where
+    toFun x := (ι x).1
+    map_zero' := by
+      change (ι 0).1 = 0
+      rw [map_zero]
+      rfl
+    map_add' x y := by
+      change (ι (x + y)).1 = (ι x).1 + (ι y).1
+      rw [map_add]
+      rfl
+    inj' := by
+      intro x y hxy
+      apply ι.injective
+      exact Subtype.ext hxy
+
+  exact no_zmod_p_square_in_rational_points
+    -- pass the same E, p, primality/oddness hypotheses as required by your theorem
+    ιpts
 ```
+
+If `no_zmod_p_square_in_rational_points` is stated as a negated `Nonempty`, use:
+
+```lean
+  exact no_zmod_p_square_in_rational_points ⟨ιpts⟩
+```
+
+If it is stated with a raw map and injectivity hypothesis, use:
+
+```lean
+  exact no_zmod_p_square_in_rational_points
+    (fun x => (ι x).1)
+    (by
+      intro x y hxy
+      apply ι.injective
+      exact Subtype.ext hxy)
+```
+
+If it is stated with an additive embedding, pass `ιpts` directly.
+
+## Import-cycle rule
+
+Use this decision rule:
+
+```text
+If RealTorsionBridge imports Axioms:
+  do not import RealTorsionBridge into Axioms; that creates a cycle.
+  Instead move no_zmod_p_square_in_rational_points to a lower-level file
+  that imports only elliptic-curve/torsion basics, then import that lower-level file into Axioms.
+
+If RealTorsionBridge does not import Axioms:
+  import RealTorsionBridge in Axioms and refactor the existing theorem in place.
+```
+
+The best final dependency graph is:
+
+```text
+EllipticCurve/Torsion basics
+        ↓
+RealTorsionBridge.lean       Axioms.lean
+        └──────────────────────↑
+```
+
+not
+
+```text
+Axioms.lean ↔ RealTorsionBridge.lean
+```
+
+## What to remove
+
+Remove only the old proof-local chain:
+
+```lean
+HasFullRationalTorsion E p
+weil_pairing_primitive_root
+IsPrimitiveRoot ζ p
+p ≤ 2
+```
+
+Keep the public theorem statement and all callers intact. The replacement proof should be shorter and should avoid any Weil-pairing dependency entirely.
