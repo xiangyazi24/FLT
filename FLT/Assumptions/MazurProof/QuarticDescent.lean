@@ -607,11 +607,13 @@ theorem quartic_plus_descent_step :
     have hprod_rh : (r - h) * (r + h) = a ^ 4 := by
       linarith [show (r - h) * (r + h) = r ^ 2 - h ^ 2 from by ring]
     have ha4_pos : 0 < a ^ 4 := by positivity
+    have hrh_pos2 : 0 < r + h := by
+      by_contra hle; push_neg at hle
+      have : 0 < r - h := by linarith
+      linarith [mul_nonpos_of_nonpos_of_nonneg hle this.le]
     have hrh_pos : 0 < r - h := by
       by_contra hle; push_neg at hle
-      have : 0 < r + h := by linarith
-      linarith [mul_nonpos_of_nonpos_of_nonneg hle this.le]
-    have hrh_pos2 : 0 < r + h := by linarith
+      linarith [mul_nonpos_of_nonpos_of_nonneg hle hrh_pos2.le]
     have hh_even : h % 2 = 0 := by
       have : (b ^ 2 - a ^ 2) % 4 = 0 := by
         have : b ^ 2 - a ^ 2 = (b - a) * (b + a) := by ring
