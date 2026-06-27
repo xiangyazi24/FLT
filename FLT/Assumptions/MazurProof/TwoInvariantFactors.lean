@@ -165,7 +165,13 @@ lemma card_of_two_invariant_factors
     (m n : ℕ) (hm : 0 < m) (hn : 0 < n)
     (e : G ≃+ ℤ/m × ℤ/n) :
     Nat.card G = m * n := by
-  sorry  -- Compose: Nat.card_equiv e + Nat.card_prod + ZMod.card
+  -- Use the equivalence to transfer cardinality
+  have : Nat.card G = Nat.card (ℤ/m × ℤ/n) := Nat.card_equiv e
+  rw [this]
+  -- Cardinality of product = product of cardinalities
+  rw [Nat.card_prod]
+  -- Cardinality of ℤ/m is m (from ZMod.card)
+  simp [ZMod.card]
 
 -- TwoInvariantFactorData constructor from equivalence
 def twoInvariantFactorData_of_equiv
