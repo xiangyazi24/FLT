@@ -37,35 +37,6 @@ theorem UV_eq_five_mul_fourth {r B s : ℤ}
     (2 * r ^ 2 + B ^ 2 - 2 * s) * (2 * r ^ 2 + B ^ 2 + 2 * s) = 5 * B ^ 4 := by
   nlinarith [heq, sq_nonneg s, sq_nonneg r, sq_nonneg B]
 
-private lemma quartic_eq_zmod (n : ℕ) [NeZero n] {r B s : ℤ}
-    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
-    (s : ZMod n) ^ 2 =
-      (r : ZMod n) ^ 4 + (r : ZMod n) ^ 2 * (B : ZMod n) ^ 2 -
-        (B : ZMod n) ^ 4 := by
-  have h := congrArg (fun z : ℤ => (z : ZMod n)) heq; simpa using h
-
-private lemma zmod4_sq_zero_of_even {x : ℤ} (hx : x % 2 = 0) :
-    (x : ZMod 4) ^ 2 = 0 := by
-  have hx4 : x % 4 = 0 ∨ x % 4 = 2 := by omega
-  rcases hx4 with h | h
-  · have : (x : ZMod 4) = 0 :=
-      (ZMod.intCast_eq_intCast_iff' x (0 : ℤ) 4).2 (by rw [h]; norm_num)
-    rw [this]; norm_num
-  · have : (x : ZMod 4) = 2 :=
-      (ZMod.intCast_eq_intCast_iff' x (2 : ℤ) 4).2 (by rw [h]; norm_num)
-    rw [this]; norm_num
-
-private lemma zmod4_sq_one_of_odd {x : ℤ} (hx : x % 2 = 1) :
-    (x : ZMod 4) ^ 2 = 1 := by
-  have hx4 : x % 4 = 1 ∨ x % 4 = 3 := by omega
-  rcases hx4 with h | h
-  · have : (x : ZMod 4) = 1 :=
-      (ZMod.intCast_eq_intCast_iff' x (1 : ℤ) 4).2 (by rw [h]; norm_num)
-    rw [this]; norm_num
-  · have : (x : ZMod 4) = 3 :=
-      (ZMod.intCast_eq_intCast_iff' x (3 : ℤ) 4).2 (by rw [h]; norm_num)
-    rw [this]; norm_num
-
 /-- If B is odd and the quartic equation holds, then r is odd.
     (Mod 4: r even + B odd → s² ≡ 3 mod 4, impossible.) -/
 theorem r_odd_of_B_odd {r B s : ℤ} (hB_odd : B % 2 = 1)
@@ -74,14 +45,22 @@ theorem r_odd_of_B_odd {r B s : ℤ} (hB_odd : B % 2 = 1)
     r % 2 = 1 := by
   rcases Int.emod_two_eq_zero_or_one r with hr_even | hr_odd
   · exfalso
-    have h4 := quartic_eq_zmod 4 heq
-    have hr4 := zmod4_sq_zero_of_even hr_even
-    have hB4 := zmod4_sq_one_of_odd hB_odd
-    rw [show (r : ZMod 4) ^ 4 = ((r : ZMod 4) ^ 2) ^ 2 from by ring,
-        show (B : ZMod 4) ^ 4 = ((B : ZMod 4) ^ 2) ^ 2 from by ring,
-        hr4, hB4] at h4
-    norm_num at h4
-    exact absurd h4 (by fin_cases (s : ZMod 4) <;> decide)
+    obtain ⟨k, rfl⟩ : 2 ∣ r := ⟨r / 2, by omega⟩
+    obtain ⟨m, rfl⟩ : ∃ m, B = 2 * m + 1 := ⟨B / 2, by omega⟩
+    -- 4 | s² + B⁴ (since r⁴ + r²B² = 16k⁴ + 4k²B²)
+    have h4 : 4 ∣ (s ^ 2 + (2 * m + 1) ^ 4) :=
+      ⟨4 * k ^ 4 + k ^ 2 * (2 * m + 1) ^ 2, by linarith⟩
+    -- B⁴ ≡ 1 mod 4
+    have hB4 : (2 * m + 1) ^ 4 % 4 = 1 := by
+      have : (2 * m + 1) ^ 4 = 4 * (4 * m ^ 4 + 8 * m ^ 3 + 6 * m ^ 2 + 2 * m) + 1 := by ring
+      omega
+    -- s² ≡ 3 mod 4, but squares mod 4 are 0 or 1
+    have hs_mod : s ^ 2 % 4 = 3 := by omega
+    rcases Int.emod_two_eq_zero_or_one s with hs | hs
+    · obtain ⟨j, rfl⟩ : 2 ∣ s := ⟨s / 2, by omega⟩
+      have := show (2 * j) ^ 2 = 4 * j ^ 2 from by ring; omega
+    · obtain ⟨j, rfl⟩ : ∃ j, s = 2 * j + 1 := ⟨s / 2, by omega⟩
+      have := show (2 * j + 1) ^ 2 = 4 * (j ^ 2 + j) + 1 from by ring; omega
   · exact hr_odd
 
 /-- If B is even and gcd(r,B) = 1, then r is odd and 4 | B.
@@ -101,30 +80,37 @@ theorem even_B_props {r B s : ℤ} (hB_even : B % 2 = 0) (_hr : 0 < r) (_hB : 0 
   refine ⟨hr_odd, ?_⟩
   by_contra hnot4
   have hB4 : B % 4 = 2 := by omega
-  have h8 := quartic_eq_zmod 8 heq
-  have hr8_sq : (r : ZMod 8) ^ 2 = 1 := by
-    have : r % 8 = 1 ∨ r % 8 = 3 ∨ r % 8 = 5 ∨ r % 8 = 7 := by omega
-    rcases this with h | h | h | h
-    · have := (ZMod.intCast_eq_intCast_iff' r (1 : ℤ) 8).2 (by rw [h]; norm_num)
-      rw [this]; norm_num
-    · have := (ZMod.intCast_eq_intCast_iff' r (3 : ℤ) 8).2 (by rw [h]; norm_num)
-      rw [this]; norm_num
-    · have := (ZMod.intCast_eq_intCast_iff' r (5 : ℤ) 8).2 (by rw [h]; norm_num)
-      rw [this]; norm_num
-    · have := (ZMod.intCast_eq_intCast_iff' r (7 : ℤ) 8).2 (by rw [h]; norm_num)
-      rw [this]; norm_num
-  have hB8_sq : (B : ZMod 8) ^ 2 = 4 := by
-    have : B % 8 = 2 ∨ B % 8 = 6 := by omega
-    rcases this with h | h
-    · have := (ZMod.intCast_eq_intCast_iff' B (2 : ℤ) 8).2 (by rw [h]; norm_num)
-      rw [this]; norm_num
-    · have := (ZMod.intCast_eq_intCast_iff' B (6 : ℤ) 8).2 (by rw [h]; norm_num)
-      rw [this]; norm_num
-  rw [show (r : ZMod 8) ^ 4 = ((r : ZMod 8) ^ 2) ^ 2 from by ring,
-      show (B : ZMod 8) ^ 4 = ((B : ZMod 8) ^ 2) ^ 2 from by ring,
-      hr8_sq, hB8_sq] at h8
-  norm_num at h8
-  exact absurd h8 (by fin_cases (s : ZMod 8) <;> decide)
+  obtain ⟨c, rfl⟩ : ∃ c, B = 4 * c + 2 := ⟨B / 4, by omega⟩
+  obtain ⟨j, rfl⟩ : ∃ j, r = 2 * j + 1 := ⟨r / 2, by omega⟩
+  -- 8 | s² + B⁴ - r⁴ - r²B² ... actually just compute mod 8
+  -- s² = r⁴ + r²B² - B⁴. Expand and compute mod 8.
+  -- r = 2j+1: r² = 4j²+4j+1, r⁴ ≡ 1 mod 8
+  -- B = 4c+2: B² = 16c²+16c+4 ≡ 4 mod 8, B⁴ ≡ 0 mod 16 ≡ 0 mod 8
+  -- r²B² ≡ 1·4 = 4 mod 8
+  -- s² ≡ 1 + 4 - 0 = 5 mod 8. But s² mod 8 ∈ {0,1,4}.
+  have h8 : s ^ 2 % 8 = 5 := by
+    have hr4 : (2 * j + 1) ^ 4 = 8 * (2 * j ^ 4 + 4 * j ^ 3 + 3 * j ^ 2 + j) + 1 := by ring
+    have hrB : (2 * j + 1) ^ 2 * (4 * c + 2) ^ 2 =
+      8 * (2 * c ^ 2 * (4 * j ^ 2 + 4 * j + 1) + 2 * c * (4 * j ^ 2 + 4 * j + 1) +
+        j ^ 2 + j) + 4 := by ring
+    have hB4v : (4 * c + 2) ^ 4 =
+      8 * (32 * c ^ 4 + 64 * c ^ 3 + 48 * c ^ 2 + 16 * c + 2) := by ring
+    omega
+  -- s² % 8 ∈ {0,1,4}
+  rcases Int.emod_two_eq_zero_or_one s with hs | hs
+  · obtain ⟨t, rfl⟩ : 2 ∣ s := ⟨s / 2, by omega⟩
+    rcases Int.emod_two_eq_zero_or_one t with ht | ht
+    · obtain ⟨u, rfl⟩ : 2 ∣ t := ⟨t / 2, by omega⟩
+      have := show (2 * (2 * u)) ^ 2 = 8 * (2 * u ^ 2) from by ring; omega
+    · obtain ⟨u, rfl⟩ : ∃ u, t = 2 * u + 1 := ⟨t / 2, by omega⟩
+      have := show (2 * (2 * u + 1)) ^ 2 = 8 * (2 * u ^ 2 + 2 * u) + 4 from by ring; omega
+  · obtain ⟨t, rfl⟩ : ∃ t, s = 2 * t + 1 := ⟨s / 2, by omega⟩
+    rcases Int.emod_two_eq_zero_or_one t with ht | ht
+    · obtain ⟨u, rfl⟩ : 2 ∣ t := ⟨t / 2, by omega⟩
+      have := show (2 * (2 * u) + 1) ^ 2 = 8 * (2 * u ^ 2 + u) + 1 from by ring; omega
+    · obtain ⟨u, rfl⟩ : ∃ u, t = 2 * u + 1 := ⟨t / 2, by omega⟩
+      have := show (2 * (2 * u + 1) + 1) ^ 2 = 8 * (2 * u ^ 2 + 3 * u + 1) + 1 from by ring
+      omega
 
 /-! ## U, V properties -/
 
