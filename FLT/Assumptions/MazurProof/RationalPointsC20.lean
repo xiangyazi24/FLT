@@ -74,10 +74,8 @@ theorem quartic_minus_of_plus (r B s : ℤ) (hB : 0 < B) (hr : 0 < r)
 
 /-! ## Denominator normalization -/
 
-/-- On `w² = u³ + u² - u`, the denominator of `u` (lowest terms) is a perfect square.
+-- rat_denom_square proof path: den_cubic_num_den + Rat.isSquare_iff + nat_isSquare_of_isSquare_cube
 
-Proof sketch: For prime ℓ with `vₗ(u) < 0`, ultrametric gives
-`2vₗ(w) = 3vₗ(u)`, forcing `vₗ(denominator)` even. -/
 /-- If `n ≠ 0` and `n³` is a square, then `n` is a square.
 Uses `Nat.ceilRoot` / `Nat.dvd_pow_iff_ceilRoot_dvd` from Mathlib. -/
 private theorem nat_isSquare_of_isSquare_cube {n : ℕ} (hn : n ≠ 0)
@@ -104,7 +102,8 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
       refine ⟨w * (B : ℚ) ^ 3, ?_⟩
       have := h  -- w² = (A/B²)³ + (A/B²)² - (A/B²)
       field_simp at this ⊢
-      nlinarith
+      push_cast
+      nlinarith [this]
     rcases hrat_sq with ⟨q, hq⟩
     refine ⟨q.num, ?_⟩
     have hnum := congrArg Rat.num hq
