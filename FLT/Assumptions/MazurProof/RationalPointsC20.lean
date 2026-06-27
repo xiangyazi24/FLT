@@ -80,7 +80,20 @@ theorem quartic_minus_of_plus (r B s : ℤ) (hB : 0 < B) (hr : 0 < r)
 Uses `Nat.ceilRoot` / `Nat.dvd_pow_iff_ceilRoot_dvd` from Mathlib. -/
 private theorem nat_isSquare_of_isSquare_cube {n : ℕ} (hn : n ≠ 0)
     (h : IsSquare (n ^ 3)) : IsSquare n := by
-  sorry -- n³=c² → n²|c² → n|c (ceilRoot) → n=d² (cancel n²)
+  rcases h with ⟨c, hc⟩
+  -- n² | c²: since c² = c·c = n³ = n²·n
+  have hdvd : n ^ 2 ∣ c ^ 2 := ⟨n, by rw [sq c, ← hc]; ring⟩
+  -- n | c via ceilRoot Galois connection
+  have hndvdc : n ∣ c := by
+    rwa [Nat.dvd_pow_iff_ceilRoot_dvd two_ne_zero,
+         Nat.ceilRoot_pow_self two_ne_zero] at hdvd
+  -- c = n·d, cancel n² from n³ = (n·d)² to get n = d²
+  obtain ⟨d, rfl⟩ := hndvdc
+  exact ⟨d, mul_left_cancel₀ (pow_ne_zero 2 hn)
+    (show n ^ 2 * n = n ^ 2 * (d * d) by
+      calc n ^ 2 * n = n ^ 3 := by ring
+        _ = n * d * (n * d) := hc
+        _ = n ^ 2 * (d * d) := by ring)⟩
 
 axiom rat_denom_square (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
     ∃ A B : ℤ, 0 < B ∧ Int.gcd A B = 1 ∧ u = (A : ℚ) / (B : ℚ) ^ 2
