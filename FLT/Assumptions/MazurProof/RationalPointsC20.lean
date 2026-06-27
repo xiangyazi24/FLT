@@ -114,9 +114,10 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
     right; right
     have hgcd_rB : Int.gcd |r| B = 1 := by
       have h1 : IsCoprime (r ^ 2) B := hrpos ▸ Int.isCoprime_iff_gcd_eq_one.mpr hcop
-      have h2 : IsCoprime r B := (by rwa [sq] at h1 : IsCoprime (r * r) B).of_mul_left
+      have h2 : IsCoprime (r * r) B := by rwa [sq] at h1
+      have h3 : IsCoprime r B := h2.of_mul_left
       simp only [Int.gcd, Int.natAbs_abs]
-      exact Int.isCoprime_iff_gcd_eq_one.mp h2
+      exact Int.isCoprime_iff_gcd_eq_one.mp h3
     have hr_pos : 0 < |r| := abs_pos.mpr hr0
     -- Remaining: apply quartic_plus, conclude u = 1
     sorry
@@ -127,10 +128,11 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
     left
     have hgcd_rB : Int.gcd |r| B = 1 := by
       have h1 : IsCoprime (-(r ^ 2)) B := hrneg ▸ Int.isCoprime_iff_gcd_eq_one.mpr hcop
-      have h2 : IsCoprime (r ^ 2) B := h1.neg_left
-      have h3 : IsCoprime r B := (by rwa [sq] at h2 : IsCoprime (r * r) B).of_mul_left
+      have h2 : IsCoprime (r ^ 2) B := by rwa [neg_neg] at (h1.neg_left)
+      have h3 : IsCoprime (r * r) B := by rwa [sq] at h2
+      have h4 : IsCoprime r B := h3.of_mul_left
       simp only [Int.gcd, Int.natAbs_abs]
-      exact Int.isCoprime_iff_gcd_eq_one.mp h3
+      exact Int.isCoprime_iff_gcd_eq_one.mp h4
     have hr_pos : 0 < |r| := abs_pos.mpr hr0
     -- Second factor = -s² (not s²) since A = -r² < 0 and A·second = C² ≥ 0
     -- Then quartic_minus_of_plus gives |r| = B = 1, so A = -1, u = -1/1 = -1
