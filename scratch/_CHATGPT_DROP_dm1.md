@@ -1,104 +1,36 @@
-# Q1024 (dm1): `dm3` — strengthened induction for division-polynomial separability
+# Q1025 (dm1): `dm4` — use a tangent bridge as the real cycle breaker
 
 The prompt body I received was only:
 
 ```text
-Q1024 (dm1): dm3
+Q1025 (dm1): dm4
 ```
 
-I searched the repository for `Q1024` and `dm3` and found no matching task body.  I therefore interpret `dm3` as the earlier division-polynomial/separability question about whether the even/odd circularity can be broken by strengthening the induction hypothesis to include both separability of `preΨ' n` and separability of the even cofactor in
+I searched the repository for `Q1025` and `dm4` and found no matching task body.  I therefore interpret `dm4` as the natural next step after the earlier even/odd circularity and `dm3` strengthened-induction discussion: whether the **formal-group / tangent bridge** should be used to bypass the parity induction and prove separability of the division polynomial directly.
+
+## Bottom line
+
+For Lean 4, the most robust non-circular architecture is:
 
 ```text
-preΨ'(2k) = preΨ'(k) * C_k.
+formal tangent of [n]
+  ⇒ n-torsion kernel is reduced when (n : K) ≠ 0
+  ⇒ the division-polynomial root cutout is reduced
+  ⇒ every root of preΨ n is simple
+  ⇒ no parity induction is needed for separability
 ```
 
-## Short answer
-
-The naive strengthened induction
+This is the cleanest way to break the loop
 
 ```text
-P(k) := Sep(k) ∧ CofactorSep(k)
+odd(n) → even(2n) → odd(n).
 ```
 
-is **not enough by itself**, unless `CofactorSep(k)` has an independent proof whose dependencies are strictly smaller than `k`.
+The important implementation point is: **do not try to thread the formal-group proof through the existing even/odd recurrence proof.**  Instead, add one bridge theorem with a narrow polynomial-facing API, then make both odd and even separability call that theorem.
 
-The better polynomial-only version is to index the cofactor obligation by its **ambient target size** `2k`, not by `k`.  In other words, treat `CofactorSep(k)` as an obligation of size `2k`, because it is used to prove separability of `preΨ'(2k)`.
+## Recommended theorem interface
 
-Then the right strengthened invariant is closer to:
-
-```text
-Ledger(N) :=
-  (∀ n ≤ N, Sep(n))
-  ∧
-  (∀ k, 2*k ≤ N → CofactorSep(k)).
-```
-
-This can break the **even-case** circularity if you can prove:
-
-```text
-CofactorSep(k) from Sep(j) for j < 2*k.
-```
-
-However, it still does **not** justify proving odd `Sep(n)` by calling the even theorem for `Sep(2n)`, because `2n` is outside the current induction range and the even proof of `Sep(2n)` still needs `Sep(n)` in the factor-root branch.
-
-So the strengthened induction is useful only if paired with either:
-
-1. a direct odd-step proof from the odd recurrence, or
-2. the formal-group/tangent bridge proving rootwise separability for all `n` at once.
-
-## Why `P(k) := Sep(k) ∧ CofactorSep(k)` is the wrong indexing
-
-The even factorization has the form:
-
-```text
-preΨ'(2k) = preΨ'(k) * C_k.
-```
-
-For the rootwise derivative proof of `Sep(2k)`, at a root `x` of the product, there are two branches.
-
-### Branch A: `preΨ'(k)(x) = 0`
-
-The derivative of the product reduces to
-
-```text
-(preΨ'(k))'(x) * C_k(x).
-```
-
-So this branch needs:
-
-```text
-Sep(k)
-C_k(x) ≠ 0
-```
-
-The first is genuinely a smaller separability result, since `k < 2k`.
-
-### Branch B: `C_k(x) = 0`
-
-The derivative of the product reduces to
-
-```text
-preΨ'(k)(x) * C_k'(x).
-```
-
-So this branch needs:
-
-```text
-preΨ'(k)(x) ≠ 0
-C_k'(x) ≠ 0
-```
-
-This is the cofactor-separability/disjointness obligation.
-
-The important point is that `C_k` belongs naturally to the proof of `Sep(2k)`, not to the proof of `Sep(k)`.  Its definition usually involves division-polynomial terms around `k`, such as neighboring indices in the doubling recurrence.  Those indices are generally `< 2k`, but not necessarily `< k`.
-
-So if you try to prove `CofactorSep(k)` already at stage `k`, the available IH is too small.  This is why the naive strengthened statement tends to feel circular.
-
-## Better invariant: a target-bound ledger
-
-Use an invariant parameterized by the maximum target index `N`.
-
-Schematic Lean interface:
+The parity files should depend on a theorem with this shape:
 
 ```lean
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
@@ -116,211 +48,275 @@ variable (W : WeierstrassCurve K)
 def RootwiseSep (P : K[X]) : Prop :=
   ∀ x : K, P.eval x = 0 → P.derivative.eval x ≠ 0
 
-/-- Rootwise separability of the `n`th x-division polynomial. -/
-def Sep (n : ℕ) : Prop :=
-  RootwiseSep (W.preΨ n)
-
 /--
-The even doubling cofactor `C_k` in
-`preΨ (2*k) = preΨ k * C_k`.
+Polynomial-facing tangent bridge for division polynomials.
 
-Replace this placeholder by the actual cofactor definition already used in the file.
+This is the theorem that should hide the point/formal-group geometry.  Do not
+prove it by calling the even/odd recurrence; prove it from the tangent of `[n]`.
 -/
-def DoubleCofactor (k : ℕ) : K[X] :=
-  0
-
-/-- The package needed in the cofactor-root branch of the even proof. -/
-def DoubleCofactorGood (k : ℕ) : Prop :=
-  ∀ x : K,
-    (DoubleCofactor (W := W) k).eval x = 0 →
-      (W.preΨ k).eval x ≠ 0 ∧
-      ((DoubleCofactor (W := W) k).derivative).eval x ≠ 0
-
-/-- Separability known up to target size `N`. -/
-def SepUpTo (N : ℕ) : Prop :=
-  ∀ n : ℕ, n ≤ N → Sep (W := W) n
-
-/-- Cofactor obligations whose ambient double target is at most `N`. -/
-def CofactorGoodUpTo (N : ℕ) : Prop :=
-  ∀ k : ℕ, 2 * k ≤ N → DoubleCofactorGood (W := W) k
-
-/-- The strengthened induction ledger. -/
-def SepLedger (N : ℕ) : Prop :=
-  SepUpTo (W := W) N ∧ CofactorGoodUpTo (W := W) N
-
-end WeierstrassCurve
-```
-
-The key theorem you want is not
-
-```lean
-Sep k → CofactorSep k
-```
-
-but rather:
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.Tactic
-
-open Polynomial
-open scoped Polynomial
-
-namespace WeierstrassCurve
-
-variable {K : Type*} [Field K]
-variable (W : WeierstrassCurve K)
-
--- Use the actual definitions from the previous code block / repository.
-
-/--
-Cofactor goodness for `C_k` should be proved from separability facts whose
-indices are all strictly below the ambient target `2*k`.
--/
-theorem doubleCofactorGood_of_sep_lt_double
-    (k : ℕ)
-    (hSepLower : ∀ j : ℕ, j < 2 * k → RootwiseSep (W.preΨ j)) :
-    DoubleCofactorGood (W := W) k := by
-  -- Prove by expanding the actual doubling cofactor formula.
-  -- The important admissibility condition is: every division-polynomial
-  -- separability fact used here must have index `< 2*k`, not merely `< k`.
-  sorry
-
-end WeierstrassCurve
-```
-
-Once this theorem exists, the even step is clean.
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
-import Mathlib.Tactic
-
-open Polynomial
-open scoped Polynomial
-
-namespace WeierstrassCurve
-
-variable {K : Type*} [Field K]
-variable (W : WeierstrassCurve K)
-
-/--
-Even separability from the smaller factor and the doubling cofactor package.
-This is the correct local replacement for the problematic even branch split.
--/
-theorem sep_even_of_sep_and_doubleCofactorGood
-    (k : ℕ)
-    (hSepK : RootwiseSep (W.preΨ k))
-    (hCof : DoubleCofactorGood (W := W) k)
-    (hFactor : W.preΨ (2 * k) = W.preΨ k * DoubleCofactor (W := W) k) :
-    RootwiseSep (W.preΨ (2 * k)) := by
+theorem preΨ_rootwiseSep_of_tangent
+    {n : ℕ} (hn : (n : K) ≠ 0) :
+    RootwiseSep (W.preΨ n) := by
   intro x hx
-  rw [hFactor] at hx ⊢
-  -- Product-root split:
-  --   eval (Ψ_k * C_k) x = 0
-  -- gives either `Ψ_k.eval x = 0` or `C_k.eval x = 0` over a field.
-  -- In the first branch use `hSepK` plus cofactor nonvanishing/disjointness.
-  -- In the second branch use `hCof`.
-  -- The exact proof is routine with:
-  --   Polynomial.eval_mul
-  --   Polynomial.derivative_mul
-  --   IsDomain.mul_eq_zero
-  --   mul_ne_zero
-  -- but the concrete names may differ in the current file.
+  -- Geometry hidden behind this theorem:
+  -- 1. lift the root `x` to a point `P` above `x` over a splitting field or
+  --    algebraic closure;
+  -- 2. use the division-polynomial root bridge to get `[n] P = 0`;
+  -- 3. use that the differential of `[n]` is multiplication by `(n : K)`;
+  -- 4. since `(n : K) ≠ 0`, the local equation of the kernel is reduced;
+  -- 5. descend reducedness/simple-root information back to the x-polynomial.
   sorry
 
 end WeierstrassCurve
 ```
 
-## How the induction should be organized
+The rest of the current separability development should treat this as the main theorem.  That keeps the recurrence lemmas from becoming part of the proof of the bridge, which would recreate the circularity.
 
-The safe polynomial-only proof has this shape:
+## Why this breaks the circularity
 
-```text
-Strong induction on target bound N.
-Assume SepLedger(M) for all M < N.
-Prove SepLedger(N).
-
-To prove new cofactor obligations with 2*k = N:
-  use doubleCofactorGood_of_sep_lt_double k,
-  because all required Sep(j) have j < 2*k = N,
-  hence they are available from SepLedger(N-1).
-
-To prove Sep(N):
-  if N = 2*k, use
-      sep_even_of_sep_and_doubleCofactorGood k.
-  if N is odd, do NOT call Sep(2*N).
-      use a direct odd recurrence proof, or use the formal tangent bridge.
-```
-
-This avoids using `CofactorSep(k)` before it is justified.  The cofactor obligation is introduced exactly when the ambient target `2k` enters the induction frontier.
-
-## The remaining odd obstruction
-
-This strengthened ledger solves only the even cofactor branch.  It does not make the following proof valid:
+The old proof graph was:
 
 ```text
-OddSep(n)
-  by applying EvenSep(2n)
+Sep(2k) uses Sep(k) and CofactorGood(k)
+Sep(2k+1) tries to use Sep(2(2k+1))
+Sep(2(2k+1)) uses Sep(2k+1)
 ```
 
-because `EvenSep(2n)` still has the factor-root branch:
+So the odd case depends on itself through the even case.
+
+With the tangent bridge, the graph becomes:
 
 ```text
-preΨ'(n)(x) = 0
+Sep(n)
+  ← preΨ_rootwiseSep_of_tangent(hn)
+      ← differential([n]) = n
+      ← (n : K) ≠ 0
 ```
 
-and that branch needs `Sep(n)`, which is the current odd goal.
+There is no recursive call to `Sep(n)`, `Sep(2n)`, or any cofactor statement.
 
-So the old circular dependency remains:
+## The right internal bridge decomposition
+
+Do not attempt to prove the whole bridge in one giant theorem.  Split it into four lemmas.  The names below are schematic; the point is the dependency graph.
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.Tactic
+
+open Polynomial
+open scoped Polynomial
+
+namespace WeierstrassCurve
+
+variable {K : Type*} [Field K]
+variable (W : WeierstrassCurve K)
+
+/-- Placeholder for the point type used by the existing elliptic-curve API. -/
+opaque ECPoint : Type _
+
+/-- Placeholder for the x-coordinate map. -/
+opaque xCoord : ECPoint (W := W) → K
+
+/-- Placeholder for scalar multiplication by `n`. -/
+opaque smulPoint : ℕ → ECPoint (W := W) → ECPoint (W := W)
+
+/-- Placeholder for the identity point. -/
+opaque zeroPoint : ECPoint (W := W)
+
+/-- Root of `preΨ n` gives an `n`-torsion point above that x-coordinate. -/
+theorem exists_torsion_point_of_preΨ_root
+    {n : ℕ} {x : K}
+    (hx : (W.preΨ n).eval x = 0) :
+    ∃ P : ECPoint (W := W),
+      xCoord (W := W) P = x ∧
+      smulPoint (W := W) n P = zeroPoint (W := W) := by
+  sorry
+
+/-- The tangent map of `[n]` is multiplication by `(n : K)`. -/
+theorem tangent_mulBy_eq_natCast
+    {n : ℕ} (P : ECPoint (W := W)) :
+    True := by
+  -- Replace `True` by the actual differential statement available in the
+  -- chosen formal-group/local-ring API.
+  trivial
+
+/-- If `(n : K) ≠ 0`, the local kernel of `[n]` is reduced at an `n`-torsion point. -/
+theorem torsion_kernel_reduced_at
+    {n : ℕ} (hn : (n : K) ≠ 0)
+    {P : ECPoint (W := W)}
+    (hP : smulPoint (W := W) n P = zeroPoint (W := W)) :
+    True := by
+  -- This is where `tangent_mulBy_eq_natCast` is used.
+  trivial
+
+/-- Reducedness of the torsion kernel descends to a simple root of `preΨ n`. -/
+theorem preΨ_simple_root_of_kernel_reduced
+    {n : ℕ} {x : K}
+    (hx : (W.preΨ n).eval x = 0)
+    (hred : True) :
+    (W.preΨ n).derivative.eval x ≠ 0 := by
+  -- Replace `True` by the actual reducedness statement.
+  -- This is the only place that should know how the x-division polynomial cuts
+  -- out the quotient of nonzero n-torsion by `P ↦ -P`.
+  sorry
+
+/-- The assembled polynomial-facing theorem. -/
+theorem preΨ_rootwiseSep_of_tangent_bridge
+    {n : ℕ} (hn : (n : K) ≠ 0) :
+    ∀ x : K, (W.preΨ n).eval x = 0 → (W.preΨ n).derivative.eval x ≠ 0 := by
+  intro x hx
+  rcases exists_torsion_point_of_preΨ_root (W := W) (n := n) (x := x) hx with
+    ⟨P, hxP, htor⟩
+  have hred : True := torsion_kernel_reduced_at (W := W) (n := n) hn htor
+  exact preΨ_simple_root_of_kernel_reduced (W := W) (n := n) (x := x) hx hred
+
+end WeierstrassCurve
+```
+
+The `opaque` placeholders above are not meant as final production definitions.  They show the **shape** of the dependency boundary.  In the real file, replace them with the actual point type, scalar multiplication, identity point, and tangent/local-ring API available in the development.
+
+## What must be handled carefully
+
+### 1. Work over an algebraic closure if necessary
+
+A root `x : K` of the x-division polynomial does not always come with a `K`-rational point above it.  The corresponding `y` may live in a quadratic extension.  The bridge should therefore be phrased either:
 
 ```text
-OddSep(n)
-  → EvenSep(2n)
-  → Sep(n)
+rootwise over an algebraic closure, then descend derivative nonvanishing to K
 ```
 
-The only ways out are:
-
-1. **direct odd recurrence:** prove `Sep(2m+1)` directly from the odd division-polynomial recurrence, with all separability dependencies `< 2m+1`; or
-2. **formal tangent bridge:** prove that `[n]` has nonzero tangent multiplier `(n : K)`, hence the `n`-torsion kernel is reduced, hence roots of the division polynomial are simple.
-
-## Practical recommendation
-
-For Lean, I would not use the naive statement
+or:
 
 ```text
-∀ k < n, Sep(k) ∧ CofactorSep(k)
+use the coordinate ring/local algebra directly, avoiding explicit rational points
 ```
 
-unless `CofactorSep(k)` already has a genuinely independent proof from indices `< k`.
+The algebraic-closure route is often easier conceptually, but it can create more Lean coercion/base-change work.
 
-Instead, use this three-part plan:
+### 2. The x-coordinate quotient has a ramification issue at 2-torsion
 
-1. Prove the cofactor lemma with the correct size bound:
-
-   ```lean
-   doubleCofactorGood_of_sep_lt_double
-     : (∀ j < 2*k, Sep(j)) → DoubleCofactorGood(k)
-   ```
-
-2. Use it in the even step:
-
-   ```lean
-   Sep(k) → DoubleCofactorGood(k) → Sep(2*k)
-   ```
-
-3. Do not prove odd `Sep(n)` through even `Sep(2n)`.  Either write the direct odd recurrence step, or use the formal-group/tangent bridge as the final theorem.
-
-## Final answer
-
-The strengthened induction idea is salvageable, but only if the cofactor obligation is indexed by the **double target size** `2k`, not by the smaller parameter `k`.
-
-So the answer to the `dm3` question is:
+The map
 
 ```text
-Naive D:      Sep(k) ∧ CofactorSep(k)          -- not enough / wrong size
-Better D:     Sep up to N ∧ CofactorSep(k) for 2k ≤ N
-Still needed: direct odd step or formal tangent bridge
+P ↦ x(P)
 ```
 
-This makes the even case non-circular, but it does not by itself solve the odd case if the odd proof still goes through `even(2n)`.
+identifies `P` and `-P`.  Away from 2-torsion, this is an étale quotient.  At 2-torsion, it is ramified, so the descent from point-level reducedness to x-polynomial simple roots needs a small separate argument.
+
+This is not a reason to abandon the tangent bridge.  It just means the final descent lemma should explicitly split:
+
+```text
+P ≠ -P      -- ordinary ± pair
+P = -P      -- 2-torsion branch
+```
+
+For even `n`, the 2-torsion branch is unavoidable.  It is also exactly where trying to reason only by parity recurrences tends to become messy.
+
+### 3. Keep characteristic hypotheses explicit
+
+The bridge requires the separability condition:
+
+```lean
+(n : K) ≠ 0
+```
+
+or equivalently, in characteristic language:
+
+```text
+char(K) ∤ n.
+```
+
+Use `(n : K) ≠ 0` in the polynomial theorem.  It is the most convenient Lean-facing hypothesis because it is exactly what the tangent multiplier needs.
+
+### 4. Do not make cofactor lemmas prerequisites of the tangent theorem
+
+The tangent theorem should not depend on:
+
+```text
+Sep(k)
+CofactorSep(k)
+Sep(2k)
+Sep(2k+1)
+```
+
+Otherwise the proof graph can silently reintroduce the same cycle.
+
+The cofactor work remains useful as a recurrence-level check, but not as the foundation of separability.
+
+## How to refactor the current parity proof
+
+Once the bridge theorem exists, the parity proof can become a wrapper rather than an induction.
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
+import Mathlib.Tactic
+
+open Polynomial
+open scoped Polynomial
+
+namespace WeierstrassCurve
+
+variable {K : Type*} [Field K]
+variable (W : WeierstrassCurve K)
+
+/-- Rootwise separability of a polynomial. -/
+def RootwiseSep (P : K[X]) : Prop :=
+  ∀ x : K, P.eval x = 0 → P.derivative.eval x ≠ 0
+
+/-- This is the only theorem the old parity layer should call. -/
+theorem preΨ_rootwiseSep
+    {n : ℕ} (hn : (n : K) ≠ 0) :
+    RootwiseSep (W.preΨ n) := by
+  -- Replace by the actual bridge theorem once proved/imported.
+  exact preΨ_rootwiseSep_of_tangent_bridge (W := W) (n := n) hn
+
+/-- Even case is now just a specialization, not an induction step. -/
+theorem preΨ_rootwiseSep_even
+    {k : ℕ} (hk : ((2 * k : ℕ) : K) ≠ 0) :
+    RootwiseSep (W.preΨ (2 * k)) := by
+  exact preΨ_rootwiseSep (W := W) (n := 2 * k) hk
+
+/-- Odd case is now just a specialization, not a reduction to `2n`. -/
+theorem preΨ_rootwiseSep_odd
+    {k : ℕ} (hk : (((2 * k + 1 : ℕ) : K)) ≠ 0) :
+    RootwiseSep (W.preΨ (2 * k + 1)) := by
+  exact preΨ_rootwiseSep (W := W) (n := 2 * k + 1) hk
+
+end WeierstrassCurve
+```
+
+This is the key design change: the odd theorem no longer calls the even theorem for `2n`.
+
+## If you still want a polynomial-only fallback
+
+If the tangent bridge is too large for the current stage of the development, the polynomial-only fallback is:
+
+```text
+1. keep the dm3 target-bound ledger for the even cofactor branch;
+2. prove a direct odd recurrence step;
+3. never prove odd(n) via even(2n).
+```
+
+The fallback dependency graph must look like:
+
+```text
+Sep(2k)     ← Sep(k) + CofactorGood(k)
+Sep(2k+1)   ← Sep(j) for j < 2k+1 via the odd recurrence
+```
+
+not like:
+
+```text
+Sep(2k+1) ← Sep(2(2k+1)).
+```
+
+## Final recommendation
+
+For `dm4`, I would implement the formal tangent bridge as a single polynomial-facing theorem first, even if its proof is initially a `sorry`:
+
+```lean
+preΨ_rootwiseSep_of_tangent
+  {n : ℕ} → (n : K) ≠ 0 → RootwiseSep (W.preΨ n)
+```
+
+Then refactor the existing odd/even separability statements to call that theorem.  This immediately removes the circular proof graph.  After that, fill the bridge internally using point lifting, the differential of `[n]`, reducedness of the torsion kernel, and descent from point-level reducedness to the x-division polynomial.
