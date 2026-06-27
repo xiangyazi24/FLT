@@ -1,12 +1,12 @@
-# Q1129 (dm1): prompt body missing
+# Q1133 (dm1): prompt body missing
 
 The received prompt was only:
 
 ```text
-Q1129 (dm1): dm1
+Q1133 (dm1): dm1
 ```
 
-I searched the repository for `Q1129` and `Q1129 dm1`, but did not find a matching file, theorem, scratch note, or task body that identifies the intended Lean goal.
+I searched the repository for `Q1133` and `Q1133 dm1`, but did not find a matching file, theorem, scratch note, or task body that identifies the intended Lean goal.
 
 Because the actual mathematical/Lean problem statement is missing, I cannot soundly infer which theorem, file, proof obligation, or strategy this request refers to.  The label `dm1` appears to be a project/channel tag or shorthand, but it is not enough by itself to determine a target theorem or produce reliable Lean code.
 
@@ -20,12 +20,12 @@ I am intentionally not proposing Lean code here.  Any code would be guesswork wi
 4. the relevant error message;
 5. a short natural-language description of the desired result.
 
-## Minimal information needed to answer Q1129
+## Minimal information needed to answer Q1133
 
-Please resend Q1129 with something like:
+Please resend Q1133 with something like:
 
 ```text
-Q1129 (dm1): Lean 4, repo xiangyazi24/FLT, branch scratch/main.
+Q1133 (dm1): Lean 4, repo xiangyazi24/FLT, branch scratch/main.
 In <file>.lean, prove/fix <theorem_name>.
 Current goal/error:
 <goal or error>
