@@ -165,7 +165,7 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
     rcases hs with hs_pos | hs_neg
     · -- second = s²: A < 0 and C² = A·s² ≤ 0 forces s=0, then A=-1, B⁴=B²+1 (impossible)
       exfalso
-      have hA_neg : A < 0 := by rw [hrneg]; nlinarith [sq_nonneg r]
+      have hA_neg : A < 0 := by rw [hrneg]; linarith [show 0 < r ^ 2 by positivity]
       have h_ge : A ^ 2 + A * B ^ 2 - B ^ 4 ≥ 0 := by nlinarith [sq_nonneg s]
       have h_le : A ^ 2 + A * B ^ 2 - B ^ 4 ≤ 0 := by nlinarith [sq_nonneg C]
       have h_zero : A ^ 2 + A * B ^ 2 - B ^ 4 = 0 := le_antisymm h_le h_ge
