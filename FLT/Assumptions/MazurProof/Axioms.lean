@@ -659,7 +659,18 @@ theorem no_Z2_cross_Zn_forbidden
   · exact no_Z2_cross_Z14 E
   · exact no_Z2_cross_Z16 E
 
-/-! ## Group D: cyclic order bound, the hard Mazur core -/
+/-! ## Group D: Axiom 1 — Weil pairing (Codex dispatch, awaiting WeilPairing.lean) -/
+
+/-- If all `m`-torsion points of `E` are rational, then the base field contains all `m`-th roots of unity. -/
+axiom weil_pairing_primitive_root
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] (m : ℕ) (hm : 2 < m)
+    (hfull : HasFullRationalTorsion E m) :
+    ∃ ζ : ℚ, (ζ : ℂ)^m = 1 ∧ Polynomial.minpoly ℚ ζ = CyclotomicPolynomial ℚ m
+
+-- TODO (2026-06-26, awaiting Codex B2): WeilPairing.lean should discharge this axiom
+-- via the formal Weil pairing and Galois action mechanics.
+
+/-! ## Group E: cyclic order bound, the hard Mazur core -/
 
 /-- No elliptic curve over `ℚ` has a rational point of order at least `17`. -/
 axiom no_rational_point_of_order_ge_17
