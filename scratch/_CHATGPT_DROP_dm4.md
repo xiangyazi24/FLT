@@ -1,468 +1,385 @@
-# Q1258 (dm4): Kubert `C_10`, full rational 2-torsion, and the obstruction curve
+# Q1271 (dm4): Lean skeleton for `Z2xZ10_gives_non_degenerate_E20_point`
 
 ## Executive answer
 
-There is **not** a separate nondegenerate Kubert family over `Q` for torsion containing
+For Lean, split the task into two layers.
+
+1. **Kubert/moduli bridge**: from an arbitrary elliptic curve over `Q` with torsion containing `Z/2Z × Z/10Z`, produce a rational parameter `t` and a square root of the quadratic 2-torsion discriminant:
 
 ```text
-Z/2Z × Z/10Z.
+∃ t s : ℚ,
+  Δ10(t) ≠ 0 ∧ s^2 = A10(t)^2 - 4 B10(t).
 ```
 
-The right route is:
+This is the only part that really uses Kubert's theorem or the moduli interpretation of `X_1(10)`.
+
+2. **Pure algebra layer**: prove directly from the explicit coefficients that
 
 ```text
-cyclic C_10 Kubert/Tate normal form
-  + require the remaining two 2-torsion points to be rational
-  = square condition
-  = rational point on C : w^2 = u^3 + u^2 - u.
+A10(t)^2 - 4 B10(t) = 256 t^5(t^2 + t - 1),
 ```
 
-The obstruction curve has only the rational points
+so, if `t ≠ 0`, setting
 
 ```text
-O, (0,0), (1,1), (1,-1), (-1,1), (-1,-1),
+w = s / (16 t^2)
 ```
 
-and the finite `u`-values are exactly
+gives
 
 ```text
-u ∈ {-1, 0, 1}.
+w^2 = t^3 + t^2 - t.
 ```
 
-Those are precisely degenerate/singular parameter values for the elliptic-curve family.  Hence the assumed nondegenerate `Z/2Z × Z/10Z` torsion cannot occur over `Q`.
-
-I will use `t` for the normalized Kubert parameter.  This `t` is the same affine coordinate as the `u` in the obstruction curve `w^2 = u^3 + u^2 - u`; equivalently, set `u = t`.
-
-If `τ` is Kubert's raw table parameter, then
+Then `Δ10(t) ≠ 0` implies `t ∉ {-1, 0, 1}`, so this gives a nondegenerate rational point on
 
 ```text
-t = 2τ - 1,        τ = (t + 1)/2.
+E20 : w^2 = u^3 + u^2 - u.
 ```
 
-## 1. Kubert table entry: cyclic order `10`
+This means you can avoid formalizing full Kubert theory **inside this lemma**.  Instead, use a smaller imported theorem/axiom whose output is the square-condition certificate above.  Everything after that is `ring_nf`, `field_simp`, and elementary case splitting on `t = -1,0,1`.
 
-Kubert's Tate normal form is
+## Minimal definitions
+
+You need only these explicit objects in the downstream formalization:
 
 ```text
-E(b,c) : y^2 + (1 - c)xy - b y = x^3 - b x^2,
-P = (0,0).
+F10(t) = 1 + 2t - 5t^2 - 5t^4 - 2t^5 + t^6
+A10(t) = -2 F10(t)
+B10(t) = (t^2 - 1)^5 (t^2 - 4t - 1)
+
+E10(t) : y^2 = x^3 + A10(t)x^2 + B10(t)x
+
+Δ10(t) = 4096 t^5(t^2+t-1)(t^2-1)^10(t^2-4t-1)^2
+
+E20 : w^2 = u^3 + u^2 - u
+BadU(u) : u = -1 ∨ u = 0 ∨ u = 1
 ```
 
-For the cyclic order-`10` entry, put
+The only Kubert-side input needed for the target lemma is:
 
 ```text
-δ = τ - (τ - 1)^2 = -τ^2 + 3τ - 1,
-d = τ^2 / δ,
-c = τ(d - 1),
-b = c d.
+Kubert bridge:
+  if W/Q has Z/2Z × Z/10Z torsion, then
+  ∃ t s, Δ10(t) ≠ 0 ∧ s^2 = A10(t)^2 - 4B10(t).
 ```
 
-Equivalently,
+That bridge can later be replaced by a real proof using Tate normal form, the change of variables to `E10(t)`, and the fact that an independent rational order-2 point forces the remaining quadratic 2-torsion factor to split.
+
+## Can you work directly with `E_t`?
+
+Yes, for the algebraic part.
+
+Once you are on
 
 ```text
-c = τ(τ - 1)(2τ - 1) / (-τ^2 + 3τ - 1),
-b = τ^3(τ - 1)(2τ - 1) / (-τ^2 + 3τ - 1)^2.
+E10(t) : y^2 = x^3 + A10(t)x^2 + B10(t)x = x(x^2 + A10(t)x + B10(t)),
 ```
 
-Then `P = (0,0)` has exact order `10`, away from the usual singular/degenerate parameter values.
-
-In the normalized parameter
+the point `(0,0)` is the rational order-2 point coming from `5P`.  Full rational 2-torsion is equivalent to the quadratic
 
 ```text
-t = 2τ - 1,
-g(t) = t^2 - 4t - 1,
+x^2 + A10(t)x + B10(t)
 ```
 
-this Tate normal form is
+having rational roots, equivalently to
 
 ```text
-d = -(t + 1)^2 / g(t),
-c = -t(t^2 - 1) / g(t),
-b = t(t - 1)(t + 1)^3 / g(t)^2.
+A10(t)^2 - 4B10(t)
 ```
 
-This is the cleanest answer to the literal “Kubert table entry” question.  It parameterizes curves with a rational point of order `10`, i.e. cyclic `C_10` torsion at least.  To force `Z/2Z × Z/10Z`, we add an independent rational point of order `2`, which is the square condition below.
+being a rational square.  Then the obstruction point on `E20` is immediate.
 
-## 2. Short Weierstrass coefficients in the normalized parameter
-
-After moving `5P` to `(0,0)` and transforming to the split-2-torsion-friendly model, the cyclic `10` family is isomorphic to
+But to go from an **arbitrary** `E/Q` with a point of order `10` to this specific `E10(t)` family, you still need Kubert/Tate-normal-form coverage, or you keep it as a bridge axiom.  The recommended formalization is therefore:
 
 ```text
-E_t : y^2 = x^3 + A(t)x^2 + B(t)x,
+Z2xZ10 on arbitrary W
+  -- Kubert bridge, imported/axiomatized for now
+∃ t s, Δ10(t) ≠ 0 ∧ s^2 = A10(t)^2 - 4B10(t)
+  -- proved now by explicit algebra
+∃ u w, w^2 = u^3 + u^2 - u ∧ u ∉ {-1,0,1}.
 ```
 
-with long Weierstrass coefficients
+## How to encode `Z/2Z × Z/10Z` torsion in the `WeierstrassCurve` API
 
-```text
-[a1, a2, a3, a4, a6] = [0, A(t), 0, B(t), 0],
-```
+There are two useful predicates.
 
-where
-
-```text
-F(t) = 1 + 2t - 5t^2 - 5t^4 - 2t^5 + t^6,
-A(t) = -2F(t),
-B(t) = (t^2 - 1)^5(t^2 - 4t - 1).
-```
-
-So explicitly:
-
-```text
-A(t) = -2(1 + 2t - 5t^2 - 5t^4 - 2t^5 + t^6),
-B(t) = (t^2 - 1)^5(t^2 - 4t - 1).
-```
-
-In this model,
-
-```text
-T = (0,0)
-```
-
-is the rational point of order `2`; it is `5P` under the isomorphism from the Tate normal form.
-
-The other two geometric 2-torsion points are the roots of
-
-```text
-x^2 + A(t)x + B(t) = 0.
-```
-
-Thus an independent rational order-`2` point exists exactly when
-
-```text
-A(t)^2 - 4B(t)
-```
-
-is a rational square.
-
-## 3. Discriminant and nonsingularity
-
-The quadratic-factor discriminant is
-
-```text
-A(t)^2 - 4B(t) = 256 t^5(t^2 + t - 1).
-```
-
-The Weierstrass discriminant of
-
-```text
-y^2 = x^3 + A(t)x^2 + B(t)x
-```
-
-is
-
-```text
-Δ(t) = 16 B(t)^2(A(t)^2 - 4B(t))
-     = 4096 t^5(t^2 + t - 1)(t^2 - 1)^10(t^2 - 4t - 1)^2.
-```
-
-So, as a polynomial identity, nonsingularity requires
-
-```text
-t ≠ 0,
-t^2 + t - 1 ≠ 0,
-t^2 - 1 ≠ 0,
-t^2 - 4t - 1 ≠ 0.
-```
-
-Over `Q`, the quadratics `t^2 + t - 1` and `t^2 - 4t - 1` have no rational roots.  Therefore for rational `t`, the only finite rational singular parameter values are
-
-```text
-t = -1, 0, 1.
-```
-
-## 4. The obstruction curve
-
-Suppose `E_t` has full rational `2`-torsion.  Then there is `s ∈ Q` with
-
-```text
-s^2 = A(t)^2 - 4B(t) = 256 t^5(t^2 + t - 1).
-```
-
-For a nonsingular curve, `t ≠ 0`, so we may divide by the square `(16t^2)^2`.  Set
-
-```text
-w = s / (16t^2).
-```
-
-Then
-
-```text
-w^2 = t(t^2 + t - 1) = t^3 + t^2 - t.
-```
-
-Thus the existence of an independent rational order-`2` point gives a rational point on
-
-```text
-C : w^2 = t^3 + t^2 - t.
-```
-
-Conversely, if `(t,w) ∈ C(Q)` and `t` is nondegenerate, then
-
-```text
-s = 16t^2w
-```
-
-is a rational square root of `A(t)^2 - 4B(t)`, and the two extra rational 2-torsion points are
-
-```text
-Q_+ = (F(t) + 8t^2w, 0),
-Q_- = (F(t) - 8t^2w, 0),
-```
-
-because
-
-```text
-x = (-A(t) ± s)/2 = F(t) ± 8t^2w.
-```
-
-So the full-2-torsion obstruction is **exactly** the elliptic curve
-
-```text
-C : w^2 = t^3 + t^2 - t.
-```
-
-If the coordinate is named `u` instead of `t`, this is the user's curve
-
-```text
-w^2 = u^3 + u^2 - u.
-```
-
-## 5. Degenerate values and rational points on the obstruction curve
-
-The obstruction curve is
-
-```text
-C : w^2 = u^3 + u^2 - u.
-```
-
-Its rational points are
-
-```text
-C(Q) = {O, (0,0), (1,1), (1,-1), (-1,1), (-1,-1)}.
-```
-
-The finite affine `u`-values are therefore
-
-```text
-u = -1, 0, 1.
-```
-
-These give singular curves in the `E_t` family:
-
-### `u = -1`
-
-```text
-B(-1) = 0,
-Δ(-1) = 0.
-```
-
-The cubic has a repeated root.
-
-### `u = 0`
-
-```text
-A(0) = -2,
-B(0) = 1,
-E_0 : y^2 = x^3 - 2x^2 + x = x(x - 1)^2,
-Δ(0) = 0.
-```
-
-### `u = 1`
-
-```text
-B(1) = 0,
-Δ(1) = 0.
-```
-
-The point at infinity `O ∈ C(Q)` is the compactified boundary/cusp of the parameter curve, not a finite nondegenerate parameter.
-
-Therefore there is no rational nondegenerate `t` for which `E_t` has an independent rational point of order `2`.  This proves the desired obstruction to `Z/2Z × Z/10Z` over `Q`, modulo the standard Kubert parametrization and the rational-point computation on `C`.
-
-## Sage verification code
-
-Run this with Sage.  It checks the Kubert normal form, the short-model identities, the discriminant factorization, and the rational points on the obstruction curve.
-
-```python
-from sage.all import *
-
-
-def F_value(t):
-    return 1 + 2*t - 5*t**2 - 5*t**4 - 2*t**5 + t**6
-
-
-def A_value(t):
-    return -2 * F_value(t)
-
-
-def B_value(t):
-    return (t**2 - 1)**5 * (t**2 - 4*t - 1)
-
-
-def Delta_value(t):
-    return 4096 * t**5 * (t**2 + t - 1) * (t**2 - 1)**10 * (t**2 - 4*t - 1)**2
-
-
-def check_symbolic_identities():
-    R = PolynomialRing(QQ, "t")
-    t = R.gen()
-
-    F = F_value(t)
-    A = A_value(t)
-    B = B_value(t)
-
-    quad_disc = A**2 - 4*B
-    expected_quad_disc = 256 * t**5 * (t**2 + t - 1)
-    assert quad_disc == expected_quad_disc
-
-    Delta = 16 * B**2 * quad_disc
-    expected_Delta = Delta_value(t)
-    assert Delta == expected_Delta
-
-    print("symbolic identities verified")
-    print("A(t)^2 - 4B(t) =", factor(quad_disc))
-    print("Delta(t) =", factor(Delta))
-
-
-def check_tate_order_10_over_function_field():
-    R = PolynomialRing(QQ, "t")
-    K = FractionField(R)
-    t = K.gen()
-
-    # Normalized parameter t = 2*tau - 1.
-    tau = (t + 1) / K(2)
-    delta = tau - (tau - 1)**2
-    d = tau**2 / delta
-    c = tau * (d - 1)
-    b = c * d
-
-    E = EllipticCurve(K, [1 - c, -b, -b, 0, 0])
-    P = E([K(0), K(0)])
-    O = E(0)
-
-    assert 10*P == O
-    assert 5*P != O
-
-    print("Tate normal form verified generically: P=(0,0) has order 10")
-
-
-def check_short_model_at_sample_parameters():
-    # These are cyclic C_10 examples, not full Z/2 x Z/10 examples.
-    # Full Z/2 x Z/10 would require a nondegenerate rational point on the obstruction curve,
-    # and the later check proves there is none over Q.
-    for t0 in [QQ(2), QQ(3), QQ(-2)]:
-        A = A_value(t0)
-        B = B_value(t0)
-        E = EllipticCurve(QQ, [0, A, 0, B, 0])
-        assert E.discriminant() == Delta_value(t0)
-        assert E.torsion_subgroup().order() == 10
-        print("t =", t0, "E =", E, "torsion =", E.torsion_subgroup())
-
-
-def extra_two_torsion_x_coordinates(t0, w0):
-    """
-    Given a rational point (t0,w0) on w^2 = t^3 + t^2 - t,
-    return the x-coordinates of the two extra 2-torsion points on E_t.
-
-    For Q over Q, this function will only see degenerate finite t0-values,
-    because the obstruction curve has no nondegenerate rational points.
-    """
-    t0 = QQ(t0)
-    w0 = QQ(w0)
-    assert w0**2 == t0**3 + t0**2 - t0
-    F = F_value(t0)
-    return (F + 8*t0**2*w0, F - 8*t0**2*w0)
-
-
-def check_obstruction_curve_rational_points():
-    # C : w^2 = u^3 + u^2 - u.
-    C = EllipticCurve(QQ, [0, 1, 0, -1, 0])
-
-    O = C(0)
-    expected = {
-        O,
-        C([0, 0]),
-        C([1, 1]),
-        C([1, -1]),
-        C([-1, 1]),
-        C([-1, -1]),
-    }
-
-    assert C.rank() == 0
-    pts = set(C.torsion_points())
-    assert pts == expected
-
-    finite_u_values = sorted({P[0] for P in pts if P != O})
-    assert finite_u_values == [QQ(-1), QQ(0), QQ(1)]
-
-    for P in pts:
-        if P == O:
-            continue
-        u = P[0]
-        assert Delta_value(u) == 0
-
-    print("obstruction curve:", C)
-    print("rank:", C.rank())
-    print("torsion subgroup:", C.torsion_subgroup())
-    print("C(Q):", sorted(pts, key=str))
-    print("finite u-values:", finite_u_values)
-    print("all finite rational obstruction points are degenerate parameters")
-
-
-def main():
-    check_symbolic_identities()
-    check_tate_order_10_over_function_field()
-    check_short_model_at_sample_parameters()
-    check_obstruction_curve_rational_points()
-
-
-if __name__ == "__main__":
-    main()
-```
-
-## Lean formalization target
-
-The core algebraic pieces to isolate are small polynomial identities over `Q`.
+The most literal subgroup statement is an injective additive homomorphism:
 
 ```lean
--- Schematic only: names/types should be adapted to the FLT repository.
-
-def F (t : ℚ) : ℚ :=
-  1 + 2*t - 5*t^2 - 5*t^4 - 2*t^5 + t^6
-
-def A (t : ℚ) : ℚ := -2 * F t
-
-def B (t : ℚ) : ℚ := (t^2 - 1)^5 * (t^2 - 4*t - 1)
-
-lemma quad_disc_identity (t : ℚ) :
-    A t ^ 2 - 4 * B t = 256 * t^5 * (t^2 + t - 1) := by
-  ring
-
-lemma discr_identity (t : ℚ) :
-    16 * (B t)^2 * (A t ^ 2 - 4 * B t)
-      = 4096 * t^5 * (t^2 + t - 1) * (t^2 - 1)^10 * (t^2 - 4*t - 1)^2 := by
-  rw [quad_disc_identity]
-  ring
+def HasSubgroupZ2xZ10 (W : WeierstrassCurve ℚ) : Prop :=
+  ∃ φ : (ZMod 10 × ZMod 2) →+ W.Point, Function.Injective φ
 ```
 
-Then the torsion obstruction can be expressed as:
+For actually using Kubert, the generator form is easier:
+
+```lean
+def HasGeneratorsZ2xZ10 (W : WeierstrassCurve ℚ) : Prop :=
+  ∃ P Q : W.Point,
+    addOrderOf P = 10 ∧
+    addOrderOf Q = 2 ∧
+    Q ≠ 5 • P
+```
+
+Here `P` is the order-`10` point, `5 • P` is the order-`2` point inside the cyclic subgroup generated by `P`, and `Q ≠ 5 • P` says that the extra order-`2` point is independent.  In an abelian group, this is the practical generator-level version of containing `Z/10Z × Z/2Z`.  You can prove equivalence with the injective-hom version later as a standalone group-theory lemma.
+
+In current mathlib, `W.Point` is the type of nonsingular points on the affine Weierstrass curve; it has an `AddCommGroup` instance over a field.  Affine points are built either as `.some x y hns`, where `hns : W.Nonsingular x y`, or, when `[W.IsElliptic]`, by `W.Point.mk h`, where `h : W.Equation x y`.
+
+## Lean 4 skeleton
+
+This is the skeleton I would put in the FLT codebase.  It intentionally isolates the Kubert bridge as the single imported/axiomatized theorem.  The algebraic lemmas after the bridge are the parts to prove now.
+
+```lean
+import Mathlib
+
+namespace FLT
+namespace MazurC2C10
+
+open scoped Classical
+
+noncomputable section
+
+/-!
+The explicit cyclic-10 family after moving the rational 2-torsion point to `(0,0)`:
+
+  E10(t) : y^2 = x^3 + A10(t) x^2 + B10(t) x.
+-/
+
+def F10 (t : ℚ) : ℚ :=
+  1 + 2 * t - 5 * t ^ 2 - 5 * t ^ 4 - 2 * t ^ 5 + t ^ 6
+
+def A10 (t : ℚ) : ℚ :=
+  -2 * F10 t
+
+def B10 (t : ℚ) : ℚ :=
+  (t ^ 2 - 1) ^ 5 * (t ^ 2 - 4 * t - 1)
+
+def W10 (t : ℚ) : WeierstrassCurve ℚ where
+  a₁ := 0
+  a₂ := A10 t
+  a₃ := 0
+  a₄ := B10 t
+  a₆ := 0
+
+/-- The explicit discriminant of `W10 t`. -/
+def Delta10 (t : ℚ) : ℚ :=
+  4096 * t ^ 5 * (t ^ 2 + t - 1) * (t ^ 2 - 1) ^ 10 * (t ^ 2 - 4 * t - 1) ^ 2
+
+/-- The obstruction curve `E20 : w^2 = u^3 + u^2 - u`. -/
+def W20 : WeierstrassCurve ℚ where
+  a₁ := 0
+  a₂ := 1
+  a₃ := 0
+  a₄ := -1
+  a₆ := 0
+
+/-- The finite degenerate `u`-values on the obstruction curve. -/
+def BadU (u : ℚ) : Prop :=
+  u = -1 ∨ u = 0 ∨ u = 1
+
+/-- A nondegenerate rational point on `E20`. -/
+def NonDegenerateE20Point : Prop :=
+  ∃ u w : ℚ, W20.Equation u w ∧ ¬ BadU u
+
+/-! ### Polynomial identities -/
+
+lemma quad_disc10_identity (t : ℚ) :
+    A10 t ^ 2 - 4 * B10 t = 256 * t ^ 5 * (t ^ 2 + t - 1) := by
+  unfold A10 B10 F10
+  ring_nf
+
+lemma W10_delta_eq (t : ℚ) :
+    (W10 t).Δ = Delta10 t := by
+  unfold W10 Delta10 A10 B10 F10
+  simp [WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+    WeierstrassCurve.b₆, WeierstrassCurve.b₈]
+  ring_nf
+
+lemma W20_equation_iff (u w : ℚ) :
+    W20.Equation u w ↔ w ^ 2 = u ^ 3 + u ^ 2 - u := by
+  rw [WeierstrassCurve.Affine.equation_iff]
+  unfold W20
+  ring_nf
+
+lemma Delta10_eq_zero_of_bad {t : ℚ} (h : BadU t) : Delta10 t = 0 := by
+  rcases h with rfl | rfl | rfl <;>
+    norm_num [Delta10]
+
+lemma not_bad_of_Delta10_ne_zero {t : ℚ} (hΔ : Delta10 t ≠ 0) : ¬ BadU t := by
+  intro hbad
+  exact hΔ (Delta10_eq_zero_of_bad hbad)
+
+lemma t_ne_zero_of_Delta10_ne_zero {t : ℚ} (hΔ : Delta10 t ≠ 0) : t ≠ 0 := by
+  intro ht
+  exact not_bad_of_Delta10_ne_zero hΔ (Or.inr (Or.inl ht))
+
+/-!
+This is the main algebraic move:
+
+  s^2 = A10(t)^2 - 4 B10(t)
+  A10(t)^2 - 4 B10(t) = 256 t^5(t^2+t-1)
+  t ≠ 0
+  w := s / (16 t^2)
+  => w^2 = t^3 + t^2 - t.
+-/
+lemma obstruction_point_equation_of_square
+    {t s : ℚ}
+    (ht : t ≠ 0)
+    (hs : s ^ 2 = A10 t ^ 2 - 4 * B10 t) :
+    ∃ w : ℚ, w ^ 2 = t ^ 3 + t ^ 2 - t := by
+  refine ⟨s / (16 * t ^ 2), ?_⟩
+  have hquad := quad_disc10_identity t
+  calc
+    (s / (16 * t ^ 2)) ^ 2 = s ^ 2 / (256 * t ^ 4) := by
+      field_simp [ht]
+      ring
+    _ = (A10 t ^ 2 - 4 * B10 t) / (256 * t ^ 4) := by
+      rw [hs]
+    _ = (256 * t ^ 5 * (t ^ 2 + t - 1)) / (256 * t ^ 4) := by
+      rw [hquad]
+    _ = t ^ 3 + t ^ 2 - t := by
+      field_simp [ht]
+      ring
+
+lemma nondegenerate_E20_point_of_square
+    {t s : ℚ}
+    (hΔ : Delta10 t ≠ 0)
+    (hs : s ^ 2 = A10 t ^ 2 - 4 * B10 t) :
+    NonDegenerateE20Point := by
+  have ht : t ≠ 0 := t_ne_zero_of_Delta10_ne_zero hΔ
+  have hnotbad : ¬ BadU t := not_bad_of_Delta10_ne_zero hΔ
+  rcases obstruction_point_equation_of_square ht hs with ⟨w, hw⟩
+  exact ⟨t, w, (W20_equation_iff t w).2 hw, hnotbad⟩
+
+/-! ### Torsion predicates for the WeierstrassCurve API -/
+
+/-- Exact subgroup-style statement: `W(Q)` contains a subgroup isomorphic to `Z/10Z × Z/2Z`. -/
+def HasSubgroupZ2xZ10 (W : WeierstrassCurve ℚ) : Prop :=
+  ∃ φ : (ZMod 10 × ZMod 2) →+ W.Point, Function.Injective φ
+
+/-- Generator-style statement, easier to use with Kubert's parametrization. -/
+def HasGeneratorsZ2xZ10 (W : WeierstrassCurve ℚ) : Prop :=
+  ∃ P Q : W.Point,
+    addOrderOf P = 10 ∧
+    addOrderOf Q = 2 ∧
+    Q ≠ 5 • P
+
+/-- Optional group-theory bridge.  Prove this once, separately from elliptic curves. -/
+theorem HasGeneratorsZ2xZ10.of_subgroup
+    {W : WeierstrassCurve ℚ}
+    (h : HasSubgroupZ2xZ10 W) :
+    HasGeneratorsZ2xZ10 W := by
+  /-
+  Suggested proof:
+  * take `P = φ (1,0)` and `Q = φ (0,1)`;
+  * use injectivity of `φ` to compute `addOrderOf P = 10` and `addOrderOf Q = 2`;
+  * use injectivity again to show `Q ≠ 5 • P`.
+  -/
+  sorry
+
+/-!
+The only Kubert/moduli input needed by the downstream proof.
+
+This is much smaller than full Mazur.  It says: after applying the cyclic-10 Kubert family and using
+an independent rational order-2 point, the quadratic factor of the 2-torsion polynomial has square
+discriminant.
+-/
+axiom kubert_C10_full_two_square
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (h : HasGeneratorsZ2xZ10 W) :
+    ∃ t s : ℚ, Delta10 t ≠ 0 ∧ s ^ 2 = A10 t ^ 2 - 4 * B10 t
+
+/-- The desired formal replacement for the old axiom, assuming only the smaller Kubert bridge. -/
+theorem Z2xZ10_gives_non_degenerate_E20_point
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (h : HasGeneratorsZ2xZ10 W) :
+    NonDegenerateE20Point := by
+  rcases kubert_C10_full_two_square W h with ⟨t, s, hΔ, hs⟩
+  exact nondegenerate_E20_point_of_square hΔ hs
+
+/-- Version with the literal subgroup predicate. -/
+theorem Z2xZ10_subgroup_gives_non_degenerate_E20_point
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (h : HasSubgroupZ2xZ10 W) :
+    NonDegenerateE20Point := by
+  exact Z2xZ10_gives_non_degenerate_E20_point W (HasGeneratorsZ2xZ10.of_subgroup h)
+
+end
+end MazurC2C10
+end FLT
+```
+
+## Optional direct-`E10(t)` square-condition lemma
+
+If you want to avoid even talking about group law while proving the algebra for the explicit family, use the quadratic-root formulation.  On
 
 ```text
-Assume E/Q has P of order 10 and Q of order 2 independent.
-Kubert gives a rational t with E ≅ E_t and Δ(t) ≠ 0.
-Independence of Q gives full rational 2-torsion, so ∃s, s^2 = A(t)^2 - 4B(t).
-Since Δ(t) ≠ 0, t ≠ 0.
-Set w = s / (16t^2).
-Then w^2 = t^3 + t^2 - t.
-But C(Q) = {O, (0,0), (1,±1), (-1,±1)}.
-Thus t ∈ {-1,0,1}, contradicting Δ(t) ≠ 0.
+E10(t) : y^2 = x(x^2 + A10(t)x + B10(t)),
 ```
 
-So the hard imported/certified facts are:
+an extra rational 2-torsion point has `x ≠ 0` and gives a rational root of
 
 ```text
-1. Kubert C_10 normal form covers every rational point of exact order 10.
-2. The transformed short model has coefficients A(t), B(t) above.
-3. The obstruction curve C : w^2 = u^3 + u^2 - u has exactly the six rational points listed.
+x^2 + A10(t)x + B10(t) = 0.
 ```
 
-Everything else is polynomial algebra and simple rational arithmetic.
+A rational root immediately makes the discriminant a square:
+
+```lean
+import Mathlib
+
+namespace FLT
+namespace MazurC2C10
+
+open scoped Classical
+
+noncomputable section
+
+/-- Coordinate-only predicate: the nonzero quadratic 2-torsion factor has a rational root. -/
+def W10HasExtraTwoRoot (t : ℚ) : Prop :=
+  ∃ x : ℚ, x ^ 2 + A10 t * x + B10 t = 0
+
+lemma square_discriminant_of_quadratic_root
+    {A B x : ℚ}
+    (hx : x ^ 2 + A * x + B = 0) :
+    ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B := by
+  refine ⟨2 * x + A, ?_⟩
+  nlinarith
+
+lemma square_condition_of_extra_two_root
+    {t : ℚ}
+    (h : W10HasExtraTwoRoot t) :
+    ∃ s : ℚ, s ^ 2 = A10 t ^ 2 - 4 * B10 t := by
+  rcases h with ⟨x, hx⟩
+  exact square_discriminant_of_quadratic_root (A := A10 t) (B := B10 t) hx
+
+end
+end MazurC2C10
+end FLT
+```
+
+This coordinate-only predicate is often easier than immediately proving facts about `addOrderOf` on `W10(t).Point`.  Later, prove a bridge saying that an independent rational order-2 point on `W10(t)` implies `W10HasExtraTwoRoot t`.  For a short model with `a₁ = a₃ = 0`, this bridge should come from the negation formula: a point of order `2` satisfies `P = -P`, hence its affine `y`-coordinate is `0`; then the equation factors as `x(x^2 + A10(t)x + B10(t)) = 0`.
+
+## Recommended axiom shrink
+
+Instead of keeping
+
+```text
+axiom Z2xZ10_gives_non_degenerate_E20_point
+```
+
+as a monolithic axiom, replace it by the smaller bridge
+
+```text
+axiom kubert_C10_full_two_square :
+  W has Z/2Z × Z/10Z torsion ->
+  ∃ t s, Delta10 t ≠ 0 ∧ s^2 = A10(t)^2 - 4B10(t)
+```
+
+and prove
+
+```text
+kubert_C10_full_two_square -> Z2xZ10_gives_non_degenerate_E20_point
+```
+
+inside Lean using the explicit polynomial identities above.  This isolates the true modular/Kubert input and leaves the obstruction-curve construction as auditable elementary algebra.
