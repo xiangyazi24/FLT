@@ -1,327 +1,469 @@
-# Q1136 (dm4): follow-up on `dm3`
+# Q1158 (dm4): replacing `weil_pairing_primitive_root` by the Route 4B real torsion bound
 
-## Interpretation
+## Executive answer
 
-The prompt says only `dm3`, so I am treating the current `scratch/_CHATGPT_DROP_dm3.md` as the object of analysis.
-That file is about the theorem
+Yes.  The replacement is mathematically and architecturally correct.
+
+The old dependency was:
+
+```text
+weil_pairing_primitive_root
+  + isPrimitiveRoot_rat_order_le_two
+  ⇒ no_odd_prime_square_in_torsion
+  ⇒ finite_addCommGroup_two_invariant_factors_exists
+```
+
+The Route 4B replacement is:
+
+```text
+real_mTorsion_finite
+  + real_mTorsion_card_le
+  ⇒ fullRationalTorsion_order_le_two_route4B
+  ⇒ not_hasFullRationalTorsion_of_three_le
+  ⇒ no_odd_prime_square_in_torsion
+  ⇒ finite_addCommGroup_two_invariant_factors_exists
+```
+
+So the old `weil_pairing_primitive_root` axiom can be deleted from `Axioms.lean`, provided `RealTorsionBound.lean` is a lower dependency and does **not** import `Axioms.lean`.  If it currently imports `Axioms.lean` only to get `HasFullRationalTorsion`, move that definition into a lower definition file, e.g. `FLT/EllipticCurve/FullRationalTorsion.lean`, then make both `RealTorsionBound.lean` and `Axioms.lean` import that file.
+
+The core replacement is simply:
 
 ```lean
-theorem weil_pairing_gives_primitive_root
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
+have hp_le_two : p ≤ 2 :=
+  RealTorsionBound.fullRationalTorsion_order_le_two_route4B
+    (E := E) (m := p) hp.pos hfull
+have hp_ge_three : 3 ≤ p := ...
+omega
 ```
 
-and asks for the shortest Lean route from full rational torsion to a rational primitive root.
+No primitive roots, Weil pairing, or cyclotomic character are needed for this branch.
 
-The main conclusion is unchanged, but there is an important connection with the newer `dm4` separability discussion:
+## Important dependency-cycle warning
+
+The only architectural trap is an import cycle.
+
+This is good:
 
 ```text
-Global separability of [n] / preΨ' helps with the geometric size and reducedness of E[n],
-but it does not replace the Weil-pairing/determinant/cyclotomic-character bridge.
+FullRationalTorsion.lean
+  ↓
+RealTorsionBound.lean
+  ↓
+Axioms.lean
 ```
 
-So `dm4` can support one auxiliary missing lemma in `dm3`, namely the theorem that the geometric `m`-torsion has the expected size when `(m : K) ≠ 0`; it cannot by itself prove the existence of a rational primitive `m`-th root.
-
-## Bottom line
-
-For `dm3`, the shortest honest FLT-local interface is still one of these two bridge choices:
-
-### Option A: contradiction bridge over `ℚ`
-
-```lean
-no_full_rational_torsion_of_three_le :
-  ∀ (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ},
-    3 ≤ m → ¬ HasFullRationalTorsion E m
-```
-
-Then `weil_pairing_gives_primitive_root` is just the split `m = 1`, `m = 2`, `3 ≤ m`.
-
-### Option B: determinant / cyclotomic bridge
+This is bad:
 
 ```text
-full rational m-torsion
-  ⇒ Galois action on E[m] is trivial
-  ⇒ det ρ_m is trivial
-  ⇒ χ_m is trivial
-  ⇒ μ_m ⊆ ℚ
-  ⇒ ∃ ζ : ℚ, IsPrimitiveRoot ζ m.
+Axioms.lean
+  ↓
+RealTorsionBound.lean
+  ↓
+Axioms.lean
 ```
 
-This is closer to the standard Weil-pairing proof.  But the real arithmetic theorem is still
+So before changing `Axioms.lean`, check whether `RealTorsionBound.lean` imports `Axioms.lean`.  If yes, split out the shared definitions first.
 
-```text
-det ρ_m = χ_m,
-```
+## Drop-in replacement code for `Axioms.lean`
 
-which is essentially the determinant form of the Weil-pairing theorem.
-
-## What the `dm4` global separability theorem can contribute
-
-The global separability theorem from the `dm4` thread has the shape
-
-```lean
-preΨ'_rootwise_separable_of_natCast_ne_zero :
-  (n : K) ≠ 0 →
-  ∀ x : K,
-    IsRoot (W.preΨ' n) x →
-    ¬ IsRoot (derivative (W.preΨ' n)) x
-```
-
-or, more geometrically,
-
-```text
-(n : K) ≠ 0 ⇒ [n] : E → E is separable / étale.
-```
-
-This is relevant to `dm3` only through the geometric torsion-size bridge:
-
-```text
-[n] separable + degree([n]) = n²
-  ⇒ E[n](Kbar) has n² reduced points.
-```
-
-That fact is useful because `HasFullRationalTorsion E m` is usually represented as an injection
-
-```text
-ZMod m × ZMod m ↪ E(ℚ).
-```
-
-To conclude that the mod-`m` Galois representation is trivial on all of `E[m]`, one must know that the geometric `m`-torsion has no more than `m²` points.  This is exactly where separability/cardinality can help.
-
-But after this step, one still needs the determinant identity
-
-```text
-det ρ_m = χ_m.
-```
-
-Without that determinant/cyclotomic bridge, the statement “all `m`-torsion points are rational” does not produce a rational primitive `m`-th root.
-
-## Why separability alone does not prove the primitive-root theorem
-
-Separability tells us that the kernel of `[m]` is reduced when `(m : K) ≠ 0`.  Equivalently, it prevents infinitesimal torsion and multiple roots in the division-polynomial description.
-
-It does **not** identify the determinant of the Galois action on `E[m]` with the cyclotomic character.  The existence of roots of unity is not encoded in `preΨ'` alone; it comes from the alternating Weil pairing
-
-```text
-e_m : E[m] × E[m] → μ_m
-```
-
-or equivalently from the determinant formula for the mod-`m` representation.
-
-So this attempted shortcut is not valid:
-
-```text
-preΨ'_m separable
-  ⇒ E[m] is reduced
-  ⇒ full rational torsion forces μ_m ⊆ ℚ.
-```
-
-The missing implication is the last one.  It needs the pairing/determinant theorem.
-
-## The role of `Φ_n`, `preΨ'`, and missing `Ω_n`
-
-The `dm3` context also mentioned `preΨ'`, `Φ_n`, and missing `Ω_n`.
-
-For a full projective formula for `[n]P`, one normally needs all coordinate pieces:
-
-```text
-x([n]P) = Φ_n(P) / Ψ_n(P)^2,
-y([n]P) = Ω_n(P) / Ψ_n(P)^3.
-```
-
-The polynomial `preΨ' n` controls the `x`-coordinate zero locus of the division polynomial after eliminating or normalizing the `y`-factor.  It is enough for many root/separability statements about the `x`-projection, but it is not enough to build the full Galois representation on `E[n]`.
-
-For the determinant route, the clean object is not just the roots of `preΨ' n`; it is the full finite group of geometric `n`-torsion points.  Thus one eventually needs either:
-
-1. a genuine `E[n]` group-scheme / geometric torsion API, or
-2. projective `[n]` formulas including the missing `Ω_n` piece, or
-3. a trusted bridge theorem that packages this geometry.
-
-This is why `dm4` separability is valuable but not decisive for `dm3`.
-
-## Recommended Lean interface for `dm3`
-
-The best immediate code interface is to keep the hard arithmetic in one named theorem and close the target by a simple case split.
-
-Here is an abstract version that should compile independently of the exact FLT project names.  It isolates the case split from the arithmetic bridge.
+Assuming `RealTorsionBound.lean` is in module path `FLT.EllipticCurve.RealTorsionBound`, add this import near the top of `Axioms.lean`:
 
 ```lean
 import Mathlib
+import FLT.EllipticCurve.RealTorsionBound
+
+open scoped Classical
 
 noncomputable section
 
-/--
-Abstract case split behind the FLT-local theorem.
-
-`Full E m` stands for the project's `HasFullRationalTorsion E m`.
-The theorem says that if the `m = 1` and `m = 2` cases are known and full
-rational torsion is impossible for `m ≥ 3`, then full rational torsion implies
-a rational primitive `m`-th root.
--/
-theorem primitive_root_of_full_by_ge3_contradiction
-    {Curve : Type*} (Full : Curve → ℕ → Prop)
-    (h1 : ∀ E : Curve, Full E 1 → ∃ ζ : ℚ, IsPrimitiveRoot ζ 1)
-    (h2 : ∀ E : Curve, Full E 2 → ∃ ζ : ℚ, IsPrimitiveRoot ζ 2)
-    (hge3 : ∀ E : Curve, ∀ {m : ℕ}, 3 ≤ m → ¬ Full E m)
-    (E : Curve) {m : ℕ} (hm : 0 < m) (hfull : Full E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
-  have hm_cases : m = 1 ∨ m = 2 ∨ 3 ≤ m := by
-    omega
-  rcases hm_cases with rfl | rfl | hm3
-  · exact h1 E hfull
-  · exact h2 E hfull
-  · exact False.elim ((hge3 E hm3) hfull)
+namespace FLT
 ```
 
-The FLT-local version should look like this, with the actual project import replacing `Mathlib` if there is a more specific file.
+If the physical file is instead `FLT/RealTorsionBound.lean`, use:
 
 ```lean
 import Mathlib
+import FLT.RealTorsionBound
+```
+
+The theorem bodies below are unchanged except for that import path.
+
+## Helper: Route 4B forbids full rational `m`-torsion for `m ≥ 3`
+
+Add this immediately before `no_odd_prime_square_in_torsion`, or in a small helper section above it.
+
+```lean
+import Mathlib
+import FLT.EllipticCurve.RealTorsionBound
+
+open scoped Classical
 
 noncomputable section
 
 namespace FLT
 
 /--
-Project-local bridge theorem.
+Route 4B corollary: full rational `m`-torsion is impossible for `m ≥ 3`.
 
-This is the shortest useful interface for the current target.  It can later be
-proved from any of the following:
-
-* Weil pairing nondegeneracy plus Galois equivariance;
-* determinant identity `det ρ_m = χ_m`;
-* Mazur's torsion theorem;
-* classification of the real Lie group `E(ℝ)`.
+This is the replacement for the old primitive-root contradiction.  The only
+mathematical input is the Route 4B theorem
+`fullRationalTorsion_order_le_two_route4B`, which itself depends only on the two
+real-torsion axioms `real_mTorsion_finite` and `real_mTorsion_card_le`.
 -/
-axiom no_full_rational_torsion_of_three_le
+theorem not_hasFullRationalTorsion_of_three_le
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+    (hm_pos : 0 < m) (hm3 : 3 ≤ m) :
+    ¬ HasFullRationalTorsion E m := by
+  intro hfull
+  have hm_le_two : m ≤ 2 :=
+    RealTorsionBound.fullRationalTorsion_order_le_two_route4B
+      (E := E) (m := m) hm_pos hfull
+  omega
+
+end FLT
+```
+
+If your actual theorem was stated without the positivity argument,
+
+```lean
+RealTorsionBound.fullRationalTorsion_order_le_two_route4B :
+  HasFullRationalTorsion E m → m ≤ 2
+```
+
+then use this slightly shorter wrapper instead:
+
+```lean
+import Mathlib
+import FLT.EllipticCurve.RealTorsionBound
+
+open scoped Classical
+
+noncomputable section
+
+namespace FLT
+
+theorem not_hasFullRationalTorsion_of_three_le
     (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
     (hm3 : 3 ≤ m) :
-    ¬ HasFullRationalTorsion E m
+    ¬ HasFullRationalTorsion E m := by
+  intro hfull
+  have hm_le_two : m ≤ 2 :=
+    RealTorsionBound.fullRationalTorsion_order_le_two_route4B
+      (E := E) (m := m) hfull
+  omega
 
-/-- These should be replaced by the existing project lemmas for `m = 1`. -/
-axiom primitive_root_from_full_torsion_one
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (hfull : HasFullRationalTorsion E 1) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ 1
+end FLT
+```
 
-/-- These should be replaced by the existing project lemmas for `m = 2`. -/
-axiom primitive_root_from_full_torsion_two
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (hfull : HasFullRationalTorsion E 2) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ 2
+But I recommend keeping the `hm_pos : 0 < m` version if that is how `RealTorsionBound.lean` currently proves the cardinal comparison, since `Nat.card (ZMod 0 × ZMod 0)` is the dangerous edge case.
 
-theorem weil_pairing_gives_primitive_root
+## Helper: odd prime means `3 ≤ p`
+
+If the current theorem has an `Odd p` hypothesis, use this helper.
+
+```lean
+import Mathlib
+
+open scoped Classical
+
+noncomputable section
+
+namespace FLT
+
+private lemma three_le_of_prime_odd {p : ℕ} (hp : p.Prime) (hp_odd : Odd p) :
+    3 ≤ p := by
+  rcases hp_odd with ⟨k, rfl⟩
+  have hp_two_le : 2 ≤ 2 * k + 1 := hp.two_le
+  omega
+
+end FLT
+```
+
+If the current theorem instead has a `p ≠ 2` hypothesis, use this helper.
+
+```lean
+import Mathlib
+
+open scoped Classical
+
+noncomputable section
+
+namespace FLT
+
+private lemma three_le_of_prime_ne_two {p : ℕ} (hp : p.Prime) (hp_ne_two : p ≠ 2) :
+    3 ≤ p := by
+  have hp_two_le : 2 ≤ p := hp.two_le
+  omega
+
+end FLT
+```
+
+## Replacement for `no_odd_prime_square_in_torsion`
+
+### Variant 1: theorem statement uses `Odd p`
+
+This is the most likely shape given the theorem name.
+
+```lean
+import Mathlib
+import FLT.EllipticCurve.RealTorsionBound
+
+open scoped Classical
+
+noncomputable section
+
+namespace FLT
+
+private lemma three_le_of_prime_odd {p : ℕ} (hp : p.Prime) (hp_odd : Odd p) :
+    3 ≤ p := by
+  rcases hp_odd with ⟨k, rfl⟩
+  have hp_two_le : 2 ≤ 2 * k + 1 := hp.two_le
+  omega
+
+/--
+No odd prime square can occur as full rational torsion.
+
+This used to be proved by:
+
+```text
+weil_pairing_primitive_root + isPrimitiveRoot_rat_order_le_two
+```
+
+It is now proved directly by Route 4B:
+
+```text
+HasFullRationalTorsion E p → p ≤ 2,
+```
+
+contradicting `3 ≤ p` for an odd prime.
+-/
+theorem no_odd_prime_square_in_torsion
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {p : ℕ}
+    (hp : p.Prime) (hp_odd : Odd p) :
+    ¬ HasFullRationalTorsion E p := by
+  intro hfull
+  have hp_ge_three : 3 ≤ p := three_le_of_prime_odd hp hp_odd
+  exact not_hasFullRationalTorsion_of_three_le
+    (E := E) (m := p) hp.pos hp_ge_three hfull
+
+end FLT
+```
+
+If you prefer not to introduce the wrapper theorem, the body can be inlined:
+
+```lean
+import Mathlib
+import FLT.EllipticCurve.RealTorsionBound
+
+open scoped Classical
+
+noncomputable section
+
+namespace FLT
+
+private lemma three_le_of_prime_odd {p : ℕ} (hp : p.Prime) (hp_odd : Odd p) :
+    3 ≤ p := by
+  rcases hp_odd with ⟨k, rfl⟩
+  have hp_two_le : 2 ≤ 2 * k + 1 := hp.two_le
+  omega
+
+theorem no_odd_prime_square_in_torsion
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {p : ℕ}
+    (hp : p.Prime) (hp_odd : Odd p) :
+    ¬ HasFullRationalTorsion E p := by
+  intro hfull
+  have hp_le_two : p ≤ 2 :=
+    RealTorsionBound.fullRationalTorsion_order_le_two_route4B
+      (E := E) (m := p) hp.pos hfull
+  have hp_ge_three : 3 ≤ p := three_le_of_prime_odd hp hp_odd
+  omega
+
+end FLT
+```
+
+### Variant 2: theorem statement uses `p ≠ 2`
+
+If the current `no_odd_prime_square_in_torsion` has `hp_ne_two : p ≠ 2` instead of `Odd p`, use this version.
+
+```lean
+import Mathlib
+import FLT.EllipticCurve.RealTorsionBound
+
+open scoped Classical
+
+noncomputable section
+
+namespace FLT
+
+private lemma three_le_of_prime_ne_two {p : ℕ} (hp : p.Prime) (hp_ne_two : p ≠ 2) :
+    3 ≤ p := by
+  have hp_two_le : 2 ≤ p := hp.two_le
+  omega
+
+theorem no_odd_prime_square_in_torsion
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {p : ℕ}
+    (hp : p.Prime) (hp_ne_two : p ≠ 2) :
+    ¬ HasFullRationalTorsion E p := by
+  intro hfull
+  have hp_le_two : p ≤ 2 :=
+    RealTorsionBound.fullRationalTorsion_order_le_two_route4B
+      (E := E) (m := p) hp.pos hfull
+  have hp_ge_three : 3 ≤ p := three_le_of_prime_ne_two hp hp_ne_two
+  omega
+
+end FLT
+```
+
+### Variant 3: theorem statement already has `3 ≤ p`
+
+If the current theorem already carries `hp3 : 3 ≤ p`, the replacement is only three lines.
+
+```lean
+import Mathlib
+import FLT.EllipticCurve.RealTorsionBound
+
+open scoped Classical
+
+noncomputable section
+
+namespace FLT
+
+theorem no_odd_prime_square_in_torsion
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {p : ℕ}
+    (hp : p.Prime) (hp3 : 3 ≤ p) :
+    ¬ HasFullRationalTorsion E p := by
+  intro hfull
+  have hp_le_two : p ≤ 2 :=
+    RealTorsionBound.fullRationalTorsion_order_le_two_route4B
+      (E := E) (m := p) hp.pos hfull
+  omega
+
+end FLT
+```
+
+## Literal body replacement inside the existing theorem
+
+If the existing theorem already has `hfull : HasFullRationalTorsion E p` in context, replace the old body
+
+```lean
+obtain ⟨ζ, hζ⟩ := weil_pairing_primitive_root (E := E) (m := p) ?hm hfull
+have hp_le_two := isPrimitiveRoot_rat_order_le_two hζ
+omega
+```
+
+with:
+
+```lean
+have hp_le_two : p ≤ 2 :=
+  RealTorsionBound.fullRationalTorsion_order_le_two_route4B
+    (E := E) (m := p) hp.pos hfull
+have hp_ge_three : 3 ≤ p := by
+  -- choose one of these depending on the available local hypothesis:
+  --   exact three_le_of_prime_odd hp hp_odd
+  --   exact three_le_of_prime_ne_two hp hp_ne_two
+  --   exact hp3
+  exact three_le_of_prime_odd hp hp_odd
+omega
+```
+
+That is the exact replacement for the primitive-root route.
+
+## What to delete or keep
+
+After this change, `Axioms.lean` no longer needs:
+
+```lean
+axiom weil_pairing_primitive_root ...
+```
+
+for `no_odd_prime_square_in_torsion`.
+
+If `weil_pairing_primitive_root` has no other uses, delete it entirely.
+
+The theorem
+
+```lean
+isPrimitiveRoot_rat_order_le_two
+```
+
+is no longer needed for this dependency chain either.  It can be deleted if it is unused, or kept as a harmless standalone elementary theorem if another file still imports it.
+
+The final axiom footprint becomes:
+
+```text
+real_mTorsion_finite
+real_mTorsion_card_le
+```
+
+instead of:
+
+```text
+weil_pairing_primitive_root
+```
+
+This is a genuine axiom replacement, not just a renaming: the arithmetic content moves from Weil pairing/cyclotomic roots of unity to the real Lie-group bound `#E(ℝ)[m] ≤ 2m`.
+
+## Why `finite_addCommGroup_two_invariant_factors_exists` does not need to change
+
+If `finite_addCommGroup_two_invariant_factors_exists` only depends on the theorem name
+
+```lean
+no_odd_prime_square_in_torsion
+```
+
+then it does not need any modification.  Keep the theorem statement and name exactly the same, and only replace its proof body.  The downstream chain remains:
+
+```text
+no_odd_prime_square_in_torsion
+  ⇒ finite_addCommGroup_two_invariant_factors_exists
+  ⇒ rest of proof
+```
+
+The downstream code should not see the difference.
+
+## Recommended final `Axioms.lean` organization
+
+Use this section order:
+
+```lean
+import Mathlib
+import FLT.EllipticCurve.RealTorsionBound
+
+open scoped Classical
+
+noncomputable section
+
+namespace FLT
+
+-- Existing elementary/group-theory definitions and lemmas.
+
+private lemma three_le_of_prime_odd {p : ℕ} (hp : p.Prime) (hp_odd : Odd p) :
+    3 ≤ p := by
+  rcases hp_odd with ⟨k, rfl⟩
+  have hp_two_le : 2 ≤ 2 * k + 1 := hp.two_le
+  omega
+
+theorem not_hasFullRationalTorsion_of_three_le
     (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
-  have hm_cases : m = 1 ∨ m = 2 ∨ 3 ≤ m := by
-    omega
-  rcases hm_cases with rfl | rfl | hm3
-  · exact primitive_root_from_full_torsion_one E hfull
-  · exact primitive_root_from_full_torsion_two E hfull
-  · exact False.elim ((no_full_rational_torsion_of_three_le E hm3) hfull)
+    (hm_pos : 0 < m) (hm3 : 3 ≤ m) :
+    ¬ HasFullRationalTorsion E m := by
+  intro hfull
+  have hm_le_two : m ≤ 2 :=
+    RealTorsionBound.fullRationalTorsion_order_le_two_route4B
+      (E := E) (m := m) hm_pos hfull
+  omega
+
+theorem no_odd_prime_square_in_torsion
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {p : ℕ}
+    (hp : p.Prime) (hp_odd : Odd p) :
+    ¬ HasFullRationalTorsion E p := by
+  intro hfull
+  exact not_hasFullRationalTorsion_of_three_le
+    (E := E) (m := p) hp.pos (three_le_of_prime_odd hp hp_odd) hfull
+
+-- Existing `finite_addCommGroup_two_invariant_factors_exists` follows unchanged.
 
 end FLT
 ```
 
-This is intentionally not pretending that the Weil pairing has been formalized.  It makes the missing theorem explicit and keeps the current target small.
-
-## If you want to exploit `dm4` separability inside `dm3`
-
-Then the right intermediate theorem is not directly `weil_pairing_gives_primitive_root`; it is a cardinality/free-rank theorem for geometric torsion.
-
-The desired bridge has this conceptual shape:
-
-```lean
-import Mathlib
-
-noncomputable section
-
-namespace FLT
-
-/--
-Schematic interface only: exact types depend on the project's model of geometric
-points and base change to an algebraic closure.
-
-This is the place where the `dm4` global separability theorem for `[m]` is useful.
--/
-axiom geometric_nTorsion_card_eq_sq_of_natCast_ne_zero
-    {K : Type*} [Field K]
-    (E : WeierstrassCurve K) [E.IsElliptic]
-    {m : ℕ} (hm : (m : K) ≠ 0) :
-    -- Fintype.card (E.nTorsionOverAlgClosure m) = m ^ 2
-    True
-
-/--
-Full rational torsion plus the exact geometric cardinality makes the mod-`m`
-Galois action trivial.  This is still only a bridge toward the determinant route.
--/
-axiom galoisRep_trivial_of_full_rational_torsion
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    -- ∀ σ, WeierstrassCurve.galoisRep E m σ = 1
-    True
-
-end FLT
-```
-
-The first axiom is where the `dm4` separability work can eventually pay off.  The second still needs base-change/fixed-point bookkeeping.  And after both, the determinant/cyclotomic theorem is still required.
-
-## If you prefer the determinant-shaped bridge
-
-The determinant-shaped bridge is the best long-term replacement for the black-box contradiction lemma.
-
-```lean
-import Mathlib
-import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
-
-noncomputable section
-
-namespace FLT
-
-/-- Full rational `m`-torsion makes the geometric mod-`m` representation trivial. -/
-axiom fullRationalTorsion_trivial_galoisRep
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    -- ∀ σ, WeierstrassCurve.galoisRep E m σ = 1
-    True
-
-/-- The serious arithmetic input: determinant of the mod-`m` representation is cyclotomic. -/
-axiom det_galoisRep_eq_modularCyclotomicCharacter
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm : 0 < m) :
-    -- ∀ σ, det (WeierstrassCurve.galoisRep E m σ) = modularCyclotomicCharacter ... σ
-    True
-
-/-- Trivial mod-`m` cyclotomic character gives a rational primitive `m`-th root. -/
-axiom exists_rat_primitiveRoot_of_trivial_modularCyclotomicCharacter
-    {m : ℕ} (hm : 0 < m) :
-    -- CyclotomicCharacterIsTrivialOverRat m →
-    True →
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-
-end FLT
-```
-
-Among these, `det_galoisRep_eq_modularCyclotomicCharacter` is the real theorem.  The `dm4` separability theorem can help justify that `E[m]` is the expected finite rank-two object, but it cannot prove the determinant identity.
-
-## Final recommendation
-
-For the current FLT proof, keep `dm3`'s recommendation:
-
-1. Prove or temporarily admit one explicit bridge:
-
-   ```lean
-   no_full_rational_torsion_of_three_le
-   ```
-
-2. Close `weil_pairing_gives_primitive_root` by the elementary split `m = 1`, `m = 2`, `3 ≤ m`.
-
-3. Add a comment that the bridge is intended to be discharged later by the determinant identity `det ρ_m = χ_m`, equivalently by the Weil pairing.
-
-4. Treat the `dm4` global separability work as useful infrastructure for the geometric torsion cardinality theorem, not as a replacement for the arithmetic determinant theorem.
-
-This keeps the proof dependency honest and prevents the project from hiding the Weil-pairing theorem behind division-polynomial separability lemmas.
+That is the cleanest Route 4B replacement for the old Weil-pairing call.
