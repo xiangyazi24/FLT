@@ -45,9 +45,12 @@ theorem quartic_plus_both_odd {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
   -- r even, B odd → s² ≡ -1 (mod 4), impossible
   -- r odd, B even → need mod 16 analysis
   -- Clean approach: cast to ZMod 4 for the first two, ZMod 16 for the third
-  -- Both even → gcd ≥ 2, contradiction
-  -- r even B odd → s²≡-1≡3 (mod 4), but squares mod 4 ∈ {0,1}
-  -- r odd B even → s²≡1+4c²≡5 (mod 8) when B=2c, c odd; squares mod 8 ∈ {0,1,4}
+  -- Both even → gcd ≥ 2, contradiction.
+  -- r even B odd → s²≡3 (mod 4), impossible.
+  -- r odd, B=2c, c odd → s²≡5 (mod 8), impossible.
+  -- r odd, 4|B → NOT eliminable by congruences alone (ChatGPT Q1448 verified).
+  --   Needs the descent argument itself, or a 2-adic valuation global argument.
+  --   Empirically: no solutions with B even exist for the equation with gcd=1.
   sorry
 
 /-! ## U, V properties -/
