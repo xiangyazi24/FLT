@@ -27,12 +27,18 @@ namespace MazurProof
 -- Helper: extract exponent of prime p in group G's primary decomposition
 -- If G ≃+ ⊕ᵢ (ℤ/pᵢ^eᵢ), we need eₚ for a given prime p
 def max_p_exponent (G : Type*) [AddCommGroup G] [Finite G] (p : ℕ) : ℕ := by
-  -- Implementation: use Mathlib's primary decomposition extract
-  -- For now: skeleton that returns the right value on the actual ⊕ structure
+  -- Get primary decomposition G ≃+ ⊕ᵢ (ℤ/nᵢ) from Mathlib
   have ⟨ι, decomp⟩ := AddCommGroup.equiv_directSum_zmod_of_finite G
-  -- The decomp is an equivalence to ⊕ᵢ (ℤ/nᵢ)
-  -- We need to filter for powers of p and find max exponent
-  sorry  -- ~50 LOC: filter decomp by prime p, extract and max exponents
+
+  -- The decomposition gives us nᵢ values where each nᵢ is a prime power
+  -- We need to find max exponent e such that p^e | some nᵢ
+
+  -- Strategy: for each component in the decomposition that is a power of p,
+  -- extract its exponent; return the maximum
+
+  -- For now: use Mathlib's exponent function on the order of G
+  -- Order(G) = ∏ᵢ nᵢ, so we can compute p-adic valuation
+  sorry  -- ~40 LOC: Mathlib.Data.Nat.Padic.Basic + exponent machinery
 
 -- The hypothesis h_no_odd (p, 2 < p) → ¬(ZMod p × ZMod p ↪ G) implies eₚ ≤ 1
 lemma exponent_odd_prime_le_one
