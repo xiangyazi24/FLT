@@ -99,7 +99,7 @@ private theorem nat_isSquare_of_isSquare_cube {n : ℕ} (hn : n ≠ 0)
 private theorem den_cubic (u : ℚ) :
     ((u ^ 3 + u ^ 2 - u).den : ℤ) = (u.den : ℤ) ^ 3 := by
   set a : ℤ := u.num
-  set d : ℤ := u.den
+  set d : ℤ := (u.den : ℤ)
   have hdpos : (0 : ℤ) < d := by exact_mod_cast u.den_pos
   have hdne : (d : ℚ) ≠ 0 := Int.cast_ne_zero.mpr (ne_of_gt hdpos)
   have hred : IsCoprime a d := by
