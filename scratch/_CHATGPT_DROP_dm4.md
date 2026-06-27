@@ -1,472 +1,250 @@
-# Q1297 (dm4): minimal proof of `kubert_C10_square`
+# Q1494 (dm4): complete Lean proofs for the parity/modular lemmas
 
-## Executive answer
+Below is a self-contained Mathlib proof.  I used explicit `ZMod 4` and `ZMod 8` helper lemmas, plus `omega` only to derive the possible integer remainders.
 
-Yes: the minimal mathematical proof of
+The two key contradiction facts are:
 
-```text
-kubert_C10_square:
-  E/ℚ has a subgroup ℤ/2ℤ × ℤ/10ℤ
-  → ∃ t s : ℚ, Delta10(t) ≠ 0 ∧ s^2 = A10(t)^2 - 4 * B10(t)
-```
-
-is exactly:
-
-1. Use only the **order-10 Tate/Kubert row**: if `E/ℚ` has a rational point `P` of exact order `10`, then the pointed curve `(E,P)` is ℚ-isomorphic to the explicit cyclic-10 family `W10(t)` for some `t : ℚ`, with `Delta10(t) ≠ 0`.
-2. Use only elementary algebra for the extra `2`-torsion: on
-
-```text
-W10(t):  y^2 = x^3 + A10(t) x^2 + B10(t) x
-       = x * (x^2 + A10(t) x + B10(t)),
-```
-
-the point `(0,0)` is the order-2 point `5P`. An independent rational order-2 point gives a rational root `r` of
-
-```text
-x^2 + A10(t) x + B10(t) = 0.
-```
-
-Then, with
-
-```text
-s := 2*r + A10(t),
-```
-
-one has
-
-```text
-s^2 = A10(t)^2 - 4*B10(t).
-```
-
-So the square condition is not a separate modular fact. It is a one-line quadratic-root calculation.
-
-The genuine hard input is therefore not the square condition. The genuine hard input is the **single `C10` Tate/Kubert parametrization row**, or equivalently a theorem that transports the extra 2-torsion to a rational root of the remaining quadratic factor on `W10(t)`.
-
-You do **not** need full Kubert theory for every torsion order. But you cannot completely avoid the `C10` row if the starting hypothesis is an arbitrary elliptic curve over `ℚ` with a point of order `10`. Proving “point of order 10 ⇒ this explicit `W10(t)`” is already the relevant Kubert/Tate-normal-form theorem for this case.
-
-## The recommended minimal theorem boundary
-
-For Lean, I would not try to prove the current axiom directly from a large “isomorphic to `W10(t)`” statement inside the Mazur descent file. Instead, split it at the exact boundary where the hard moduli/Tate-normal-form content ends and the easy algebra begins.
-
-Use this as the hard bridge:
+* no square in `ZMod 4` is `3`;
+* no square in `ZMod 8` is `5`.
 
 ```lean
-/-- Hard Tate/Kubert C10 bridge, plus the extra 2-torsion transported to W10.
+import Mathlib
 
-This is the only theorem that should depend on Tate normal form / Kubert.
-It is slightly more geometric than the square statement but still much easier to use
-than a full pointed-curve isomorphism API.
--/
-axiom c10_extra_two_root_bridge
-    {W : WeierstrassCurve ℚ} [W.IsElliptic]
-    (h : HasSubgroupZ2xZ10 W) :
-    ∃ t r : ℚ,
-      Delta10 t ≠ 0 ∧
-      r ^ 2 + A10 t * r + B10 t = 0
-```
+private lemma int_mod_two_cases (x : ℤ) :
+    x % 2 = 0 ∨ x % 2 = 1 := by
+  have hnonneg : 0 ≤ x % (2 : ℤ) :=
+    Int.emod_nonneg x (by norm_num : (2 : ℤ) ≠ 0)
+  have hlt : x % (2 : ℤ) < 2 :=
+    Int.emod_lt_of_pos x (by norm_num : (0 : ℤ) < 2)
+  omega
 
-Then prove the current axiom from that bridge by pure algebra:
+private lemma zmod4_sq_zero_of_even {x : ℤ} (hx : x % 2 = 0) :
+    (x : ZMod 4) ^ 2 = 0 := by
+  have hx4 : x % 4 = 0 ∨ x % 4 = 2 := by
+    have hnonneg : 0 ≤ x % (4 : ℤ) :=
+      Int.emod_nonneg x (by norm_num : (4 : ℤ) ≠ 0)
+    have hlt : x % (4 : ℤ) < 4 :=
+      Int.emod_lt_of_pos x (by norm_num : (0 : ℤ) < 4)
+    omega
+  rcases hx4 with hx4 | hx4
+  · have hxz : (x : ZMod 4) = 0 := by
+      exact (ZMod.intCast_eq_intCast_iff' x (0 : ℤ) 4).2 (by
+        rw [hx4]
+        norm_num)
+    rw [hxz]
+    norm_num
+  · have hxz : (x : ZMod 4) = 2 := by
+      exact (ZMod.intCast_eq_intCast_iff' x (2 : ℤ) 4).2 (by
+        rw [hx4]
+        norm_num)
+    rw [hxz]
+    norm_num
 
-```lean
-lemma square_of_quadratic_root {A B r : ℚ}
-    (hr : r ^ 2 + A * r + B = 0) :
-    ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B := by
-  refine ⟨2 * r + A, ?_⟩
-  have hlin : r ^ 2 + A * r = -B := by
-    linarith
+private lemma zmod4_pow4_zero_of_even {x : ℤ} (hx : x % 2 = 0) :
+    (x : ZMod 4) ^ 4 = 0 := by
+  have hsq := zmod4_sq_zero_of_even hx
   calc
-    (2 * r + A) ^ 2 = A ^ 2 + 4 * (r ^ 2 + A * r) := by ring
-    _ = A ^ 2 - 4 * B := by
-      rw [hlin]
-      ring
+    (x : ZMod 4) ^ 4 = ((x : ZMod 4) ^ 2) ^ 2 := by ring
+    _ = 0 := by
+      rw [hsq]
+      norm_num
 
-theorem kubert_C10_square_from_root_bridge
-    {W : WeierstrassCurve ℚ} [W.IsElliptic]
-    (hroot : ∃ t r : ℚ,
-      Delta10 t ≠ 0 ∧
-      r ^ 2 + A10 t * r + B10 t = 0) :
-    ∃ t s : ℚ,
-      Delta10 t ≠ 0 ∧
-      s ^ 2 = A10 t ^ 2 - 4 * B10 t := by
-  rcases hroot with ⟨t, r, hΔ, hr⟩
-  rcases square_of_quadratic_root (A := A10 t) (B := B10 t) (r := r) hr with ⟨s, hs⟩
-  exact ⟨t, s, hΔ, hs⟩
+private lemma zmod4_sq_one_of_odd {x : ℤ} (hx : x % 2 = 1) :
+    (x : ZMod 4) ^ 2 = 1 := by
+  have hx4 : x % 4 = 1 ∨ x % 4 = 3 := by
+    have hnonneg : 0 ≤ x % (4 : ℤ) :=
+      Int.emod_nonneg x (by norm_num : (4 : ℤ) ≠ 0)
+    have hlt : x % (4 : ℤ) < 4 :=
+      Int.emod_lt_of_pos x (by norm_num : (0 : ℤ) < 4)
+    omega
+  rcases hx4 with hx4 | hx4
+  · have hxz : (x : ZMod 4) = 1 := by
+      exact (ZMod.intCast_eq_intCast_iff' x (1 : ℤ) 4).2 (by
+        rw [hx4]
+        norm_num)
+    rw [hxz]
+    norm_num
+  · have hxz : (x : ZMod 4) = 3 := by
+      exact (ZMod.intCast_eq_intCast_iff' x (3 : ℤ) 4).2 (by
+        rw [hx4]
+        norm_num)
+    rw [hxz]
+    norm_num
 
-theorem kubert_C10_square
-    {W : WeierstrassCurve ℚ} [W.IsElliptic]
-    (h : HasSubgroupZ2xZ10 W) :
-    ∃ t s : ℚ,
-      Delta10 t ≠ 0 ∧
-      s ^ 2 = A10 t ^ 2 - 4 * B10 t := by
-  exact kubert_C10_square_from_root_bridge (c10_extra_two_root_bridge h)
+private lemma zmod4_pow4_one_of_odd {x : ℤ} (hx : x % 2 = 1) :
+    (x : ZMod 4) ^ 4 = 1 := by
+  have hsq := zmod4_sq_one_of_odd hx
+  calc
+    (x : ZMod 4) ^ 4 = ((x : ZMod 4) ^ 2) ^ 2 := by ring
+    _ = 1 := by
+      rw [hsq]
+      norm_num
+
+private lemma zmod4_sq_ne_three (x : ZMod 4) :
+    x ^ 2 ≠ (3 : ZMod 4) := by
+  fin_cases x <;> decide
+
+private lemma zmod8_sq_ne_five (x : ZMod 8) :
+    x ^ 2 ≠ (5 : ZMod 8) := by
+  fin_cases x <;> decide
+
+private lemma zmod8_sq_one_of_odd {x : ℤ} (hx : x % 2 = 1) :
+    (x : ZMod 8) ^ 2 = 1 := by
+  have hx8 :
+      x % 8 = 1 ∨ x % 8 = 3 ∨ x % 8 = 5 ∨ x % 8 = 7 := by
+    have hnonneg : 0 ≤ x % (8 : ℤ) :=
+      Int.emod_nonneg x (by norm_num : (8 : ℤ) ≠ 0)
+    have hlt : x % (8 : ℤ) < 8 :=
+      Int.emod_lt_of_pos x (by norm_num : (0 : ℤ) < 8)
+    omega
+  rcases hx8 with hx8 | hx8 | hx8 | hx8
+  · have hxz : (x : ZMod 8) = 1 := by
+      exact (ZMod.intCast_eq_intCast_iff' x (1 : ℤ) 8).2 (by
+        rw [hx8]
+        norm_num)
+    rw [hxz]
+    norm_num
+  · have hxz : (x : ZMod 8) = 3 := by
+      exact (ZMod.intCast_eq_intCast_iff' x (3 : ℤ) 8).2 (by
+        rw [hx8]
+        norm_num)
+    rw [hxz]
+    norm_num
+  · have hxz : (x : ZMod 8) = 5 := by
+      exact (ZMod.intCast_eq_intCast_iff' x (5 : ℤ) 8).2 (by
+        rw [hx8]
+        norm_num)
+    rw [hxz]
+    norm_num
+  · have hxz : (x : ZMod 8) = 7 := by
+      exact (ZMod.intCast_eq_intCast_iff' x (7 : ℤ) 8).2 (by
+        rw [hx8]
+        norm_num)
+    rw [hxz]
+    norm_num
+
+private lemma zmod8_pow4_one_of_odd {x : ℤ} (hx : x % 2 = 1) :
+    (x : ZMod 8) ^ 4 = 1 := by
+  have hsq := zmod8_sq_one_of_odd hx
+  calc
+    (x : ZMod 8) ^ 4 = ((x : ZMod 8) ^ 2) ^ 2 := by ring
+    _ = 1 := by
+      rw [hsq]
+      norm_num
+
+private lemma zmod8_sq_four_of_mod4_two {x : ℤ} (hx : x % 4 = 2) :
+    (x : ZMod 8) ^ 2 = 4 := by
+  have hx8 : x % 8 = 2 ∨ x % 8 = 6 := by
+    have hnonneg : 0 ≤ x % (8 : ℤ) :=
+      Int.emod_nonneg x (by norm_num : (8 : ℤ) ≠ 0)
+    have hlt : x % (8 : ℤ) < 8 :=
+      Int.emod_lt_of_pos x (by norm_num : (0 : ℤ) < 8)
+    omega
+  rcases hx8 with hx8 | hx8
+  · have hxz : (x : ZMod 8) = 2 := by
+      exact (ZMod.intCast_eq_intCast_iff' x (2 : ℤ) 8).2 (by
+        rw [hx8]
+        norm_num)
+    rw [hxz]
+    norm_num
+  · have hxz : (x : ZMod 8) = 6 := by
+      exact (ZMod.intCast_eq_intCast_iff' x (6 : ℤ) 8).2 (by
+        rw [hx8]
+        norm_num)
+    rw [hxz]
+    norm_num
+
+private lemma zmod8_pow4_zero_of_mod4_two {x : ℤ} (hx : x % 4 = 2) :
+    (x : ZMod 8) ^ 4 = 0 := by
+  have hsq := zmod8_sq_four_of_mod4_two hx
+  calc
+    (x : ZMod 8) ^ 4 = ((x : ZMod 8) ^ 2) ^ 2 := by ring
+    _ = 0 := by
+      rw [hsq]
+      norm_num
+
+private lemma quartic_eq_zmod4 {r B s : ℤ}
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    (s : ZMod 4) ^ 2 =
+      (r : ZMod 4) ^ 4 + (r : ZMod 4) ^ 2 * (B : ZMod 4) ^ 2 -
+        (B : ZMod 4) ^ 4 := by
+  have h := congrArg (fun z : ℤ => (z : ZMod 4)) heq
+  simpa using h
+
+private lemma quartic_eq_zmod8 {r B s : ℤ}
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    (s : ZMod 8) ^ 2 =
+      (r : ZMod 8) ^ 4 + (r : ZMod 8) ^ 2 * (B : ZMod 8) ^ 2 -
+        (B : ZMod 8) ^ 4 := by
+  have h := congrArg (fun z : ℤ => (z : ZMod 8)) heq
+  simpa using h
+
+theorem r_odd_of_B_odd {r B s : ℤ} (hB_odd : B % 2 = 1)
+    (hcop : Int.gcd r B = 1)
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    r % 2 = 1 := by
+  rcases int_mod_two_cases r with hr_even | hr_odd
+  · have hs3 : (s : ZMod 4) ^ 2 = (3 : ZMod 4) := by
+      calc
+        (s : ZMod 4) ^ 2 =
+            (r : ZMod 4) ^ 4 + (r : ZMod 4) ^ 2 * (B : ZMod 4) ^ 2 -
+              (B : ZMod 4) ^ 4 := quartic_eq_zmod4 heq
+        _ = (3 : ZMod 4) := by
+          rw [zmod4_pow4_zero_of_even hr_even, zmod4_sq_zero_of_even hr_even,
+            zmod4_sq_one_of_odd hB_odd, zmod4_pow4_one_of_odd hB_odd]
+          norm_num
+    exact False.elim ((zmod4_sq_ne_three (s : ZMod 4)) hs3)
+  · exact hr_odd
+
+theorem even_B_props {r B s : ℤ} (hB_even : B % 2 = 0) (hr : 0 < r) (hB : 0 < B)
+    (hcop : Int.gcd r B = 1)
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    r % 2 = 1 ∧ 4 ∣ B := by
+  have hr_odd : r % 2 = 1 := by
+    rcases int_mod_two_cases r with hr_even | hr_odd
+    · have h2r : (2 : ℤ) ∣ r := by
+        refine ⟨r / 2, ?_⟩
+        omega
+      have h2B : (2 : ℤ) ∣ B := by
+        refine ⟨B / 2, ?_⟩
+        omega
+      have h2g : (2 : ℤ) ∣ (Int.gcd r B : ℤ) :=
+        Int.dvd_coe_gcd h2r h2B
+      rw [hcop] at h2g
+      exact False.elim ((by norm_num : ¬ (2 : ℤ) ∣ (1 : ℤ)) h2g)
+    · exact hr_odd
+  refine ⟨hr_odd, ?_⟩
+  by_contra hnot4
+  have hB4_ne_zero : B % 4 ≠ 0 := by
+    intro hB4_zero
+    apply hnot4
+    refine ⟨B / 4, ?_⟩
+    omega
+  have hB4 : B % 4 = 2 := by
+    have hnonneg4 : 0 ≤ B % (4 : ℤ) :=
+      Int.emod_nonneg B (by norm_num : (4 : ℤ) ≠ 0)
+    have hlt4 : B % (4 : ℤ) < 4 :=
+      Int.emod_lt_of_pos B (by norm_num : (0 : ℤ) < 4)
+    have hnonneg2 : 0 ≤ B % (2 : ℤ) :=
+      Int.emod_nonneg B (by norm_num : (2 : ℤ) ≠ 0)
+    have hlt2 : B % (2 : ℤ) < 2 :=
+      Int.emod_lt_of_pos B (by norm_num : (0 : ℤ) < 2)
+    omega
+  have hs5 : (s : ZMod 8) ^ 2 = (5 : ZMod 8) := by
+    calc
+      (s : ZMod 8) ^ 2 =
+          (r : ZMod 8) ^ 4 + (r : ZMod 8) ^ 2 * (B : ZMod 8) ^ 2 -
+            (B : ZMod 8) ^ 4 := quartic_eq_zmod8 heq
+      _ = (5 : ZMod 8) := by
+        rw [zmod8_pow4_one_of_odd hr_odd, zmod8_sq_one_of_odd hr_odd,
+          zmod8_sq_four_of_mod4_two hB4, zmod8_pow4_zero_of_mod4_two hB4]
+        norm_num
+  exact (zmod8_sq_ne_five (s : ZMod 8)) hs5
 ```
 
-This is the smallest clean proof architecture. It moves all nontrivial elliptic-curve classification into `c10_extra_two_root_bridge`, and leaves `kubert_C10_square` as a proved theorem rather than an axiom.
+A couple of notes:
 
-## Why the extra 2-torsion gives the square condition
-
-On a curve
-
-```text
-W_A_B : y^2 = x^3 + A*x^2 + B*x = x*(x^2 + A*x + B)
+* `hcop` is not needed in `r_odd_of_B_odd`; the mod-4 contradiction alone forces `r` odd.
+* `hr` and `hB` are not needed for the stated `even_B_props`; gcd plus `B % 2 = 0` gives `r` odd, and the mod-8 contradiction gives `4 ∣ B`.
+* The proof avoids relying on a fragile global `decide` over expressions with integer casts.  The finite-field contradictions are isolated as `zmod4_sq_ne_three` and `zmod8_sq_ne_five`.
 ```
-
-over `ℚ`, with characteristic not `2`, negation is `(x,y) ↦ (x,-y)`. Thus an affine nonzero point has order `2` exactly when `y = 0`. The nonzero 2-torsion points are therefore the roots of
-
-```text
-x * (x^2 + A*x + B).
-```
-
-For `W10(t)`, the cyclic order-10 point `P` has `5P = (0,0)`, so the subgroup generated by `P` already accounts for the root `x = 0`. A subgroup `ℤ/2ℤ × ℤ/10ℤ` gives an additional order-2 point `Q` not equal to `(0,0)`. Hence `Q = (r,0)` with `r ≠ 0`, and the equation forces
-
-```text
-r^2 + A10(t)*r + B10(t) = 0.
-```
-
-Then
-
-```text
-(2r + A10(t))^2
-  = 4r^2 + 4A10(t)r + A10(t)^2
-  = A10(t)^2 - 4B10(t).
-```
-
-This proof uses only one extra rational root, not a full split statement. Full rational 2-torsion is stronger than needed. Since the cubic already has the rational root `0`, the existence of one more rational root implies the third root is rational as well, but the square certificate does not need that observation.
-
-## Is there a shortcut avoiding full Kubert theory?
-
-There is a useful shortcut, but not a magic one.
-
-### What you can avoid
-
-You can avoid formalizing the entire Kubert table and all torsion orders. For this axiom, you only need the `n = 10` row.
-
-A reasonable theorem is:
-
-```lean
-theorem exists_W10_of_order_ten
-    {W : WeierstrassCurve ℚ} [W.IsElliptic]
-    (P : AffPoint W)
-    (hP : addOrderOf P = 10) :
-    ∃ t : ℚ,
-      Delta10 t ≠ 0 ∧
-      PointedCurveIsoToW10 W P t
-```
-
-But in practice I would make the conclusion even closer to what is needed:
-
-```lean
-theorem exists_W10_quadratic_root_of_Z2xZ10
-    {W : WeierstrassCurve ℚ} [W.IsElliptic]
-    (h : HasSubgroupZ2xZ10 W) :
-    ∃ t r : ℚ,
-      Delta10 t ≠ 0 ∧
-      r ^ 2 + A10 t * r + B10 t = 0
-```
-
-This avoids exposing a large pointed-isomorphism structure to downstream code.
-
-### What you cannot avoid
-
-If the input is an arbitrary curve `E/ℚ`, you still need a proof that a rational point of order `10` puts `(E,P)` into the explicit one-parameter `C10` family. Proving this directly from Tate normal form is basically the Kubert `C10` row.
-
-The proof can be elementary:
-
-1. Move `P` to `(0,0)`.
-2. Put the curve into Tate normal form
-
-   ```text
-   E(b,c): y^2 + (1-c)xy - b y = x^3 - b x^2,
-   ```
-
-   with `P = (0,0)`.
-3. Compute the multiples of `P` and impose exact order `10`.
-4. Solve the resulting equations by a rational parameter `t`.
-5. Change variables from this Tate normal form to the chosen `W10(t)` model.
-
-This is much smaller than formalizing all of Kubert, but it is still the `C10` Kubert/Tate computation. In Lean, this is likely the only serious missing proof.
-
-## Mathlib API status, June 2026
-
-Current Mathlib has good **general Weierstrass-curve infrastructure**, but it does not appear to have a ready-made Tate normal form or Kubert torsion-family API.
-
-Relevant existing API:
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
-import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
-import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
-```
-
-Useful pieces:
-
-1. `WeierstrassCurve R`
-
-   ```lean
-   structure WeierstrassCurve (R) where
-     a₁ : R
-     a₂ : R
-     a₃ : R
-     a₄ : R
-     a₆ : R
-   ```
-
-   It has standard quantities:
-
-   ```lean
-   W.b₂
-   W.b₄
-   W.b₆
-   W.b₈
-   W.c₄
-   W.c₆
-   W.Δ
-   W.j
-   ```
-
-2. `WeierstrassCurve.IsElliptic`
-
-   This is the typeclass assertion that `W.Δ` is a unit. Over `ℚ`, this is equivalent to `W.Δ ≠ 0`.
-
-3. `WeierstrassCurve.VariableChange R`
-
-   This is the admissible change of variables `(u,r,s,t)`, with `u : Rˣ`, and it acts on Weierstrass curves:
-
-   ```lean
-   C • W
-   ```
-
-   Available lemmas include:
-
-   ```lean
-   WeierstrassCurve.variableChange_a₁
-   WeierstrassCurve.variableChange_a₂
-   WeierstrassCurve.variableChange_a₃
-   WeierstrassCurve.variableChange_a₄
-   WeierstrassCurve.variableChange_a₆
-   WeierstrassCurve.variableChange_Δ
-   WeierstrassCurve.variableChange_j
-   ```
-
-   It preserves ellipticity.
-
-4. Normal forms
-
-   `NormalForms.lean` has characteristic/short normal forms:
-
-   ```lean
-   WeierstrassCurve.IsCharNeTwoNF
-   WeierstrassCurve.exists_variableChange_isCharNeTwoNF
-   WeierstrassCurve.IsShortNF
-   WeierstrassCurve.exists_variableChange_isShortNF
-   WeierstrassCurve.IsCharTwoNF
-   WeierstrassCurve.IsCharThreeNF
-   ```
-
-   These are **not** Tate normal forms. They are useful for putting `a₁ = a₃ = 0` or short Weierstrass form, but they do not encode a chosen torsion point.
-
-5. Points and group law
-
-   Mathlib has affine and projective point types:
-
-   ```lean
-   WeierstrassCurve.Affine.Point
-   WeierstrassCurve.Projective.Point
-   ```
-
-   The affine point API has constructors around equation/nonsingularity, including a `Point.mk` in the elliptic case:
-
-   ```lean
-   W.Point.mk h
-   -- where h : W.Equation x y
-   ```
-
-   depending on namespace/import setup; if elaboration is fragile, use the fully-qualified affine namespace.
-
-   Projective points have an `AddCommGroup` instance and an affine/projective additive equivalence:
-
-   ```lean
-   WeierstrassCurve.Projective.Point.toAffineAddEquiv
-   ```
-
-6. 2-torsion polynomial
-
-   Mathlib defines:
-
-   ```lean
-   W.twoTorsionPolynomial
-   W.twoTorsionPolynomial_discr
-   ```
-
-   with
-
-   ```lean
-   W.twoTorsionPolynomial.discr = 16 * W.Δ
-   ```
-
-   For the model `y^2 = x^3 + A*x^2 + B*x`, this polynomial is a scalar multiple of
-
-   ```text
-   x * (x^2 + A*x + B).
-   ```
-
-   This API is useful for sanity checks and for proving nonsingularity/separability facts, but the square condition itself is easier to prove directly from a rational root of the quadratic factor.
-
-Missing or not currently available as a high-level API:
-
-```text
-TateNormalForm
-Kubert family/table
-X_1(n) moduli interpretation
-pointed Weierstrass isomorphism carrying a chosen torsion point
-ready-made theorem: full rational 2-torsion iff quadratic discriminant square
-```
-
-So if you want this fully formal, you should add a small local `TateNormalForm`/`KubertC10` file rather than expecting Mathlib to provide it.
-
-## Concrete local definitions I would add
-
-Use the chosen downstream family directly:
-
-```lean
-namespace FLT
-namespace MazurC10
-
-noncomputable section
-
-abbrev AffPoint (W : WeierstrassCurve ℚ) :=
-  WeierstrassCurve.Affine.Point W
-
-def F10 (t : ℚ) : ℚ :=
-  1 + 2 * t - 5 * t ^ 2 - 5 * t ^ 4 - 2 * t ^ 5 + t ^ 6
-
-def A10 (t : ℚ) : ℚ :=
-  -2 * F10 t
-
-def B10 (t : ℚ) : ℚ :=
-  (t ^ 2 - 1) ^ 5 * (t ^ 2 - 4 * t - 1)
-
-def W10 (t : ℚ) : WeierstrassCurve ℚ where
-  a₁ := 0
-  a₂ := A10 t
-  a₃ := 0
-  a₄ := B10 t
-  a₆ := 0
-
-def Delta10 (t : ℚ) : ℚ :=
-  4096 * t ^ 5 * (t ^ 2 + t - 1) *
-    (t ^ 2 - 1) ^ 10 * (t ^ 2 - 4 * t - 1) ^ 2
-
-/-- Subgroup-style hypothesis.  You may prefer `ZMod 10 × ZMod 2`; the order is irrelevant. -/
-def HasSubgroupZ2xZ10 (W : WeierstrassCurve ℚ) [W.IsElliptic] : Prop :=
-  ∃ φ : (ZMod 10 × ZMod 2) →+ AffPoint W,
-    Function.Injective φ
-
-/-- Generator-style hypothesis, usually easier to connect to Tate normal form. -/
-def HasGeneratorsZ2xZ10 (W : WeierstrassCurve ℚ) [W.IsElliptic] : Prop :=
-  ∃ P Q : AffPoint W,
-    addOrderOf P = 10 ∧
-    addOrderOf Q = 2 ∧
-    Q ≠ 5 • P
-
-end
-end MazurC10
-end FLT
-```
-
-Then add the hard bridge at the generator level if possible:
-
-```lean
-axiom c10_extra_two_root_bridge_of_generators
-    {W : WeierstrassCurve ℚ} [W.IsElliptic]
-    (h : HasGeneratorsZ2xZ10 W) :
-    ∃ t r : ℚ,
-      Delta10 t ≠ 0 ∧
-      r ^ 2 + A10 t * r + B10 t = 0
-```
-
-and keep the subgroup-to-generator conversion as pure group theory:
-
-```lean
-theorem HasGeneratorsZ2xZ10.of_subgroup
-    {W : WeierstrassCurve ℚ} [W.IsElliptic]
-    (h : HasSubgroupZ2xZ10 W) :
-    HasGeneratorsZ2xZ10 W := by
-  -- Pure finite abelian group argument.
-  -- Take P = φ (1,0), Q = φ (0,1), compute orders using injectivity.
-  -- Then Q ≠ 5 • P by injectivity and a ZMod coordinate calculation.
-  sorry
-```
-
-This keeps the elliptic-curve/Tate-normal-form part from being polluted by finite-group bookkeeping.
-
-## If you insist on a pointed-isomorphism statement
-
-The pointed-isomorphism route is mathematically clean but heavier in Lean because Mathlib currently gives `VariableChange` as an action on curves, not as a fully-packaged pointed elliptic-curve isomorphism API carrying points and preserving addition.
-
-A local structure would look like this:
-
-```lean
-structure PointedW10Iso
-    (W : WeierstrassCurve ℚ) [W.IsElliptic]
-    (P : AffPoint W)
-    (t : ℚ) : Prop where
-  C : WeierstrassCurve.VariableChange ℚ
-  curve_eq : C • W = W10 t
-  delta_ne : Delta10 t ≠ 0
-  sends_P_to_P10 : Prop
-  map_add : Prop
-```
-
-But I would avoid this unless you need it elsewhere. For `kubert_C10_square`, the direct `∃ t r` bridge is strictly cheaper.
-
-## How to prove the hard bridge later
-
-A future proof of
-
-```lean
-c10_extra_two_root_bridge
-```
-
-should have the following internal structure:
-
-1. From `HasSubgroupZ2xZ10 W`, obtain a point `P` of exact order `10` and an independent point `Q` of exact order `2`.
-2. Prove the single Tate-normal-form theorem for `P`:
-
-   ```text
-   (W,P) ≅ (E(b,c),(0,0))
-   ```
-
-   where
-
-   ```text
-   E(b,c): y^2 + (1-c)xy - b y = x^3 - b x^2.
-   ```
-
-3. Compute the order-10 condition in Tate normal form and reparameterize by `t` to get the chosen `W10(t)`.
-4. Transport `Q`. Since `Q` has order `2`, its image is fixed by negation. In the final `W10(t)` model, this means `y=0`.
-5. Since `Q` is independent from `5P`, the transported point is not `(0,0)`. Its `x`-coordinate is therefore a root `r` of the quadratic factor.
-6. Output `t`, `r`, `Delta10 t ≠ 0`, and
-
-   ```text
-   r^2 + A10(t) r + B10(t) = 0.
-   ```
-
-Everything after step 6 is the two-line algebra above.
-
-## Bottom line
-
-For the Mazur torsion proof, keep `kubert_C10_square` as a small theorem proved from a single hard bridge:
-
-```text
-Z/2 × Z/10 on arbitrary E
-  → C10 Tate/Kubert row + extra 2-torsion root on W10(t)
-  → quadratic root
-  → discriminant square.
-```
-
-The shortcut is: **do not formalize full Kubert theory; formalize or axiom only the `C10` Tate-normal-form row.**
-
-But there is no shortcut that avoids the `C10` row entirely while starting from an arbitrary elliptic curve. Once you are on `W10(t)`, the full-2-torsion-to-square step is elementary and should be proved immediately in Lean, not axiomatized.
