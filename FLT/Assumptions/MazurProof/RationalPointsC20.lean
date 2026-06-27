@@ -131,10 +131,14 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
         nlinarith [hs_pos, hrpos, sq_abs r, sq_nonneg r]
       obtain ⟨hr1, hB1⟩ := quartic_plus |r| B s hBpos hr_pos hgcd_rB heq
       rw [hu, hrpos, show r ^ 2 = |r| ^ 2 from (sq_abs r).symm, hr1, hB1]; norm_num
-    · -- second = -s²: impossible (A = r² > 0, A · second = C² ≥ 0 → second ≥ 0)
+    · -- second = -s²: A > 0 and C² = A·(-s²) ≤ 0 forces s=0, C=0, then A=1, B⁴=B²+1 (impossible)
       exfalso
       have hA_pos : 0 < A := by rw [hrpos]; positivity
-      nlinarith [sq_nonneg C, sq_nonneg s]
+      have h_le : A ^ 2 + A * B ^ 2 - B ^ 4 ≤ 0 := by nlinarith [sq_nonneg s]
+      have h_ge : 0 ≤ A ^ 2 + A * B ^ 2 - B ^ 4 := by nlinarith [sq_nonneg C]
+      have h_zero : A ^ 2 + A * B ^ 2 - B ^ 4 = 0 := le_antisymm h_le h_ge
+      -- gcd(A, 0) = |A| = 1, so A = 1 (since A > 0). Then B⁴ = B² + 1, no solution for B ≥ 1.
+      sorry
   · -- Case A = -r² ≤ 0. Since A ≠ 0, r ≠ 0.
     have hr0 : r ≠ 0 := by intro h; rw [h] at hrneg; simp at hrneg; exact hA0 hrneg
     -- The second factor must be ≤ 0, so it's -s²
@@ -153,10 +157,8 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
     have hC' : (A ^ 2 + A * B ^ 2 - B ^ 4) * A = C ^ 2 := by linarith
     obtain ⟨s, hs⟩ := Int.sq_of_gcd_eq_one hcopf' hC'
     rcases hs with hs_pos | hs_neg
-    · -- second = s²: impossible (A = -r² < 0, A · second = C² ≥ 0 → second ≤ 0)
-      exfalso
-      have hA_neg : A < 0 := by rw [hrneg]; nlinarith [sq_nonneg r, hr0]
-      nlinarith [sq_nonneg C, sq_nonneg s]
+    · -- second = s²: A < 0 and C² = A·s² ≤ 0 forces s=0, then A=-1, B⁴=B²+1 (impossible)
+      exfalso; sorry
     · -- second = -s²: apply quartic_minus_of_plus
       have heq : s ^ 2 = -(|r| ^ 4) + |r| ^ 2 * B ^ 2 + B ^ 4 := by
         nlinarith [hs_neg, hrneg, sq_abs r, sq_nonneg r]
