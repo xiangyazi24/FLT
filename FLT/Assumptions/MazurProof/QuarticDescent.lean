@@ -43,6 +43,27 @@ theorem quartic_plus_both_odd {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
     r % 2 = 1 ∧ B % 2 = 1 := by
   sorry -- ZMod 4/16 case analysis
 
+/-! ## U, V properties -/
+
+/-- V > 0: follows from s² < (r²+B²)², so |s| < r²+B², so 2r²+B²+2s > 0. -/
+theorem V_pos {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    0 < 2 * r ^ 2 + B ^ 2 + 2 * s := by
+  nlinarith [sq_nonneg (r ^ 2 + B ^ 2 - s), sq_nonneg s, sq_nonneg B, sq_nonneg r]
+
+/-- U > 0: follows from s² < (r²+B²)², so |s| < r²+B². -/
+theorem U_pos {r B s : ℤ} (hr : 0 < r) (hB : 0 < B)
+    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) :
+    0 < 2 * r ^ 2 + B ^ 2 - 2 * s := by
+  nlinarith [sq_nonneg (r ^ 2 + B ^ 2 + s), sq_nonneg s, sq_nonneg B, sq_nonneg r]
+
+/-- U and V are both odd when r, B are both odd. -/
+theorem UV_odd {r B s : ℤ}
+    (hr_odd : r % 2 = 1) (hB_odd : B % 2 = 1) :
+    (2 * r ^ 2 + B ^ 2 - 2 * s) % 2 = 1 ∧
+    (2 * r ^ 2 + B ^ 2 + 2 * s) % 2 = 1 := by
+  constructor <;> omega
+
 /-! ## Descent step (the hard core) -/
 
 /-- From a non-base solution, produce a strictly smaller non-base solution. -/
