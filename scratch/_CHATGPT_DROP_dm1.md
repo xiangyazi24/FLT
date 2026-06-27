@@ -1,6 +1,6 @@
-# Q1383 (dm1/dm1): `both_odd` parity for quartic-plus
+# Q1383 (dm1/dm1): `both_odd` parity for `quartic_plus`
 
-The requested case split still has a real gap.  It proves:
+The requested case split still has a real gap. It proves:
 
 * `r` even, `B` odd is impossible by mod `4`.
 * `r,B` both even contradict `Int.gcd r B = 1`.
@@ -18,7 +18,7 @@ In that case the congruence gives
 r^4 + r^2*B^2 - B^4 ≡ 1 + 0 - 0 ≡ 1 mod 8,
 ```
 
-which is compatible with a square.  So the advertised parity proof does not prove `B % 2 = 1`.  The exact missing lemma is the `4 ∣ B` case.
+which is compatible with a square. So the advertised parity proof does not prove `B % 2 = 1`. The exact missing lemma is the `4 ∣ B` case.
 
 ## Compilable residue checks
 
