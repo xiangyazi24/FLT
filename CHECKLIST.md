@@ -10,10 +10,10 @@
 ## 原子列表 (Atoms) — 按优先级
 
 ### 🟡 ACTIVE: QuarticD + Axiom 4 Integration
-- [ ] **A1**: QuarticD d↔n 映射验证（Q1 ChatGPT dm1 in flight）
+- [ ] **A1**: QuarticD d↔n 映射验证（Q1 ChatGPT dm1 answered）
   - 输入：Kubert 参数化如何 reduce 到 quartic
   - 输出：d=2,3,4,5,6,7 → n=10,12,14,16 对应
-  - 状态：等 ChatGPT Q1 回复
+  - 状态：答案在 commit c6ace8fc5@scratch（git-drop），等爸爸关键信息或浏览器粘贴
 
 - [ ] **A2**: QuarticObstruction.lean 完成集成
   - 依赖：A1 (d↔n 映射)
@@ -26,10 +26,10 @@
   - 状态：框架编译待 A1-2 完成
 
 ### 🚀 IN DISPATCH: Axiom 1 (Weil Pairing)
-- [ ] **B1**: Axiom 1 理论调研（Q2 ChatGPT dm2 in flight）
+- [ ] **B1**: Axiom 1 理论调研（Q2 ChatGPT dm2 answered）
   - 输入：Mathlib Weil pairing 状态 + 最小形式化路线
   - 输出：Codex 的 WeilPairing.lean 指导
-  - 状态：等 ChatGPT Q2 回复
+  - 状态：答案被 bridge-capture 污染（DOM JS），等爸爸浏览器粘贴或 git-drop 恢复
 
 - [ ] **B2**: WeilPairing.lean scaffold (Codex Pro 派遣中)
   - 依赖：B1 (理论指导)
@@ -46,7 +46,7 @@
   - 依赖：Mathlib group theory (AddCommGroup.equiv_directSum_zmod_of_finite)
   - 难度：LOW (纯代数 + CRT，Mathlib 已有主要定理)
   - 启动条件：B2 遇到深层障碍（Weil pairing 需深 EC 理论）
-  - 状态：策略准备好（AXIOM2_STRATEGY.md），待启动信号
+  - 状态：框架就位（TwoInvariantFactors.lean），3 phases ready，待启动信号
 
 ---
 
@@ -64,22 +64,28 @@
 | 项目 | 状态 | 最后更新 |
 |------|------|----------|
 | 编译 | ✅ 8761 green | 2026-06-26 ~21:50 |
-| Axioms.lean +569L | ✅ integrated | 2026-06-26 commit 4cc5d22 |
+| Axioms.lean +569L | ✅ integrated | commit 4cc5d22 |
 | QuarticD d=2-7 | ✅ proven (0 sorry) | prior commits |
-| A1: d↔n mapping | 🚀 ChatGPT Q1 dispatched | ~21:55 |
+| A1: d↔n mapping | ⏳ Q1 answered (git-drop) | ~22:00 |
 | A2: QuarticObstruction | 🟡 framework ready | commit 823cfc5 |
-| B1: Axiom 1 theory | 🚀 ChatGPT Q2 dispatched | ~21:55 |
+| B1: Axiom 1 theory | ⏳ Q2 answered (DOM polluted) | ~22:00 |
 | B2: WeilPairing.lean | 🚀 Codex Pro working | CODEX_AXIOM1_BRIEF.md |
-| C1: Axiom 2 strategy | ⬜ ready-to-deploy | AXIOM2_STRATEGY.md |
+| C1: TwoInvariantFactors | 🟡 3-phase scaffold ready | commit 153eef2 |
+| CHECKLIST + UNDERSTANDING | ✅ unified docs | commits f31a93e + 050b4dd |
 
-**Current blockers:**
-1. A1: waiting ChatGPT Q1 (d↔n 映射)
-2. B1: waiting ChatGPT Q2 (Axiom 1 理论)
-3. B2: Codex output (no ETA)
+**Current blockers (low severity):**
+1. A1: ChatGPT Q1 answered but in git-drop (需爸爸粘贴关键信息或我本地访问 scratch branch)
+2. B1: ChatGPT Q2 污染（需爸爸浏览器粘贴 3-5 行 outline）
+3. B2: Codex output (no ETA, likely overnight)
+
+**Workaround: B 线自主推进**
+- 倾向：不被 ChatGPT 格式卡住，继续推 C1 (Axiom 2)
+- 可行：C1 三个 phase 完全独立，zero 对 A1/B1/B2 的依赖
 
 **Gate to Phase 3:**
-- A1 + A2 + A3 complete ✓ QuarticD integration done
-- AND (B2 complete OR C1 启动) ✓ proceed to Axiom discharge
+- A1 + A2 + A3 complete ✓ QuarticD integration done (needs Q1 key info, 预计 30 min)
+- OR C1 完成（启动条件 = B2 stall，now advancing this path）
+- Proceed to Axiom discharge once either path reaches critical
 
 ---
 
