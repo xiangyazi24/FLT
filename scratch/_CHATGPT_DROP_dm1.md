@@ -1,69 +1,218 @@
-# Q1460 (dm1): `den_cubic` for `u^3 + u^2 - u`
+# Q1459 (dm1/dm3): even-`B` branch in `quartic_plus` descent
 
-The useful point is that `Rat.den_div_eq_of_coprime` already returns the denominator as an integer:
+Do **not** try to prove `both_odd` by local mod arithmetic; the `4 ∣ B` branch is genuinely not killed that way.  But you also do **not** need `both_odd` if you split the descent into two parity-normalized factor pairs.
 
-```lean
-Rat.den_div_eq_of_coprime
-  {a b : ℤ} (hb0 : 0 < b)
-  (h : Nat.Coprime a.natAbs b.natAbs) :
-  ((a / b : ℚ).den : ℤ) = b
+The key correction to the proposed even-`B` calculation is:
+
+```text
+when B is even, U and V are not merely even; they are divisible by 4.
 ```
 
-So the proof can target the requested `ℤ` statement directly.
+Indeed, with
 
-```lean
-import Mathlib
-
-namespace DM1
-
-/-- Denominator of the cubic expression on the curve chart. -/
-theorem den_cubic (u : ℚ) :
-    ((u ^ 3 + u ^ 2 - u).den : ℤ) = (u.den : ℤ) ^ 3 := by
-  let a : ℤ := u.num
-  let d : ℤ := (u.den : ℤ)
-  let N : ℤ := a ^ 3 + a ^ 2 * d - a * d ^ 2
-
-  have hdpos : 0 < d := by
-    exact_mod_cast u.den_pos
-  have hd3pos : 0 < d ^ 3 := pow_pos hdpos 3
-  have hdq : (d : ℚ) ≠ 0 := by
-    have hdz : d ≠ 0 := ne_of_gt hdpos
-    exact_mod_cast hdz
-
-  -- Reduced numerator/denominator for `u`, as an integer coprimality statement.
-  have hred : IsCoprime a d := by
-    simpa [a, d] using Rat.isCoprime_num_den u
-
-  -- `N ≡ a^3 (mod d)`, hence `N` is coprime to `d`.
-  have ha3copd : IsCoprime (a ^ 3) d := by
-    simpa using (hred.pow_left (m := 3))
-  have hNcopd0 : IsCoprime (a ^ 3 + d * (a ^ 2 - a * d)) d :=
-    ha3copd.add_mul_left_left (a ^ 2 - a * d)
-  have hNcopd : IsCoprime N d := by
-    convert hNcopd0 using 1
-    ring_nf [N]
-
-  -- Therefore `N` is coprime to `d^3`.
-  have hNcopd3 : IsCoprime N (d ^ 3) := by
-    simpa using (hNcopd.pow_right (n := 3))
-  have hNcopd3Nat : Nat.Coprime N.natAbs (d ^ 3).natAbs :=
-    Int.isCoprime_iff_nat_coprime.mp hNcopd3
-
-  -- Rewrite the rational expression with numerator `N` and denominator `d^3`.
-  have hu : u = (a : ℚ) / (d : ℚ) := by
-    rw [← Rat.num_div_den u]
-    simp [a, d]
-  have hval : u ^ 3 + u ^ 2 - u = (N : ℚ) / (d ^ 3 : ℚ) := by
-    rw [hu]
-    field_simp [hdq]
-    ring_nf [N]
-
-  -- Exact denominator of a reduced rational quotient.
-  rw [hval]
-  simpa [d] using
-    (Rat.den_div_eq_of_coprime (a := N) (b := d ^ 3) hd3pos hNcopd3Nat)
-
-end DM1
+```text
+A = 2*r^2 + B^2,
+U = A - 2*s,
+V = A + 2*s,
 ```
 
-The most important line is the final one: because `b = d^3` is positive and coprime to `N`, Mathlib returns the exact integer denominator immediately.
+primitive even-`B` gives `r` odd, and the equation gives `s` odd.  Since `B^2 ≡ 0 (mod 4)` and `r^2 ≡ 1 (mod 2)`, we have
+
+```text
+A = 2*r^2 + B^2 ≡ 2 (mod 4),
+2*s ≡ 2 (mod 4),
+```
+
+so
+
+```text
+4 ∣ U,    4 ∣ V.
+```
+
+Thus if `B = 2*B₁`, define
+
+```text
+U₁ = U / 4,
+V₁ = V / 4.
+```
+
+Then the product is not `20*B₁^4`; after dividing both factors by `4`, it is exactly
+
+```text
+U₁ * V₁ = (U*V)/16 = 5 * B^4 / 16 = 5 * B₁^4.
+```
+
+This is the clean replacement for `both_odd`.
+
+## Recommended restructure
+
+Use two branches.
+
+### Odd `B` branch
+
+This is the old branch:
+
+```text
+U = 2*r^2 + B^2 - 2*s,
+V = 2*r^2 + B^2 + 2*s,
+U*V = 5*B^4,
+gcd(U,V)=1,
+U,V > 0,
+U,V odd.
+```
+
+Then apply the coprime factorization lemma directly to `U,V,B`.
+
+### Even `B` branch
+
+Write `B = 2*B₁`.  Replace the factor pair by
+
+```text
+U₁ = (2*r^2 + B^2 - 2*s) / 4,
+V₁ = (2*r^2 + B^2 + 2*s) / 4.
+```
+
+Then prove the normalized package:
+
+```text
+0 < U₁,
+0 < V₁,
+U₁ * V₁ = 5 * B₁^4,
+gcd(U₁,V₁)=1.
+```
+
+The gcd proof is not the old `U,V` gcd proof.  Use:
+
+```text
+U₁ + V₁ = r^2 + 2*B₁^2,
+V₁ - U₁ = s.
+```
+
+So any common prime `p` of `U₁,V₁` divides both
+
+```text
+s
+r^2 + 2*B₁^2.
+```
+
+Also `p ∣ U₁*V₁ = 5*B₁^4`.
+
+Now split:
+
+* if `p ∣ B₁`, then `p ∣ r^2`, hence `p ∣ r`, contradicting `gcd(r,B)=1`;
+* if `p ∤ B₁`, then `p = 5`; but `5 ∣ r^2 + 2*B₁^2` gives
+
+```text
+(r/B₁)^2 ≡ -2 ≡ 3  (mod 5),
+```
+
+impossible because the nonzero square classes mod `5` are `1,4`.
+
+This proves `gcd(U₁,V₁)=1`.
+
+Then apply the **same** coprime factorization theorem to `U₁,V₁,B₁`:
+
+```text
+∃ a b,
+  0<a ∧ 0<b ∧ gcd(a,b)=1 ∧ a*b=B₁ ∧
+    ((U₁=a^4 ∧ V₁=5*b^4) ∨ (U₁=5*a^4 ∧ V₁=b^4)).
+```
+
+## What identity comes out?
+
+This is why the even branch is actually pleasant.  From
+
+```text
+U₁ + V₁ = r^2 + 2*B₁^2,
+B₁ = a*b,
+```
+
+if
+
+```text
+U₁ = a^4,
+V₁ = 5*b^4,
+```
+
+then
+
+```text
+r^2 = a^4 + 5*b^4 - 2*a^2*b^2
+    = (a^2 - b^2)^2 + (2*b^2)^2.
+```
+
+If the `5` is on the other side,
+
+```text
+U₁ = 5*a^4,
+V₁ = b^4,
+```
+
+then
+
+```text
+r^2 = 5*a^4 + b^4 - 2*a^2*b^2
+    = (b^2 - a^2)^2 + (2*a^2)^2.
+```
+
+So the even-`B` branch feeds directly into a primitive Pythagorean triple with hypotenuse `r`, not `2*r`.
+
+Compare with the odd-`B` branch: there the same calculation gives a Pythagorean triple with hypotenuse `2*r`.  That is exactly why trying to force one unified `both_odd` lemma is awkward.
+
+## Lean-level plan
+
+I would add a separate normalized lemma rather than patching `both_odd`:
+
+```lean
+/-- Even-`B` normalized factor pair.  Here `B = 2*B₁`. -/
+lemma even_B_factor_package
+    {r B B₁ s : ℤ}
+    (hB : B = 2 * B₁)
+    (hquartic : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4)
+    (hcop : Int.gcd r B = 1)
+    (hrpos : 0 < r) (hBpos : 0 < B) :
+    let U : ℤ := 2 * r ^ 2 + B ^ 2 - 2 * s
+    let V : ℤ := 2 * r ^ 2 + B ^ 2 + 2 * s
+    ∃ U₁ V₁ : ℤ,
+      U = 4 * U₁ ∧
+      V = 4 * V₁ ∧
+      0 < U₁ ∧
+      0 < V₁ ∧
+      U₁ * V₁ = 5 * B₁ ^ 4 ∧
+      Int.gcd U₁ V₁ = 1 ∧
+      U₁ + V₁ = r ^ 2 + 2 * B₁ ^ 2 ∧
+      V₁ - U₁ = s := by
+  -- parity: r odd from gcd and B even; s odd from mod 2
+  -- divisibility: `4 ∣ U`, `4 ∣ V`
+  -- product: from `(A-2s)(A+2s)=5B^4`, substitute `B=2B₁`, cancel `16`
+  -- gcd: prime-divisor argument above, with the mod-5 nonresidue lemma for `-2`
+  sorry
+```
+
+Then the descent theorem should branch as:
+
+```lean
+by_cases hBodd : B % 2 = 1
+· -- old odd-B factorization using U,V,B
+· -- even-B factorization using U/4,V/4,B/2
+```
+
+## Answer to the two strategic questions
+
+There is **not** a clean reduction of the even-`B` branch to the literal odd-`B` equation.  After dividing by `4`, the sum identity changes from
+
+```text
+(U+V)/2 = 2*r^2 + B^2
+```
+
+to
+
+```text
+U₁ + V₁ = r^2 + 2*B₁^2.
+```
+
+So it is not the same quartic chart with `B₁`.
+
+But there **is** a clean reduction to the same coprime factorization lemma for `5 * B₁^4`, and that is what the descent should use.
+
+Also, I would not try to prove “`gcd(r,B)=1` and `B` even implies no solutions” as a standalone congruence lemma.  It is true only as part of the global descent.  Locally, the `4 ∣ B` subcase survives all the small congruence tests; the correct proof is to normalize the factors by `4` and continue the descent.
