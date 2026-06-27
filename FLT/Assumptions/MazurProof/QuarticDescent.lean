@@ -385,7 +385,8 @@ theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
   have hU_ne : (r - h) ≠ 0 := by
     intro heq_rh
     have hr_eq : r = h := by linarith
-    have hb0 : b ^ 4 = 0 := by nlinarith [hr_eq, sq_nonneg (r - h)]
+    rw [hr_eq] at heq
+    have hb0 : b ^ 4 = 0 := by linarith
     linarith [show 0 < b ^ 4 from by positivity]
   have hg_gt1 : 1 < Int.gcd (r - h) (r + h) := by
     have : Int.gcd (r - h) (r + h) ≠ 0 := by
