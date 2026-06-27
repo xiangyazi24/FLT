@@ -104,7 +104,9 @@ theorem obstruction_20a4 (u w : ℚ) (h : w ^ 2 = u ^ 3 + u ^ 2 - u) :
       have := h; push_cast [n] at this ⊢; field_simp [hBne] at this ⊢; nlinarith
     -- ↑n is a ℚ-square, so n is a ℤ-square
     have hn_sq : IsSquare (n : ℚ) := ⟨w * (B : ℚ) ^ 3, by rw [← sq]; exact hrat.symm⟩
-    rwa [Rat.isSquare_intCast_iff] at hn_sq
+    rw [Rat.isSquare_intCast_iff] at hn_sq
+    obtain ⟨c, hc⟩ := hn_sq
+    exact ⟨c, by rw [sq]; linarith⟩
   obtain ⟨C, hC⟩ := hinteg
   have hcopf := coprime_factors A B hcop
   obtain ⟨r, hrA⟩ := Int.sq_of_gcd_eq_one hcopf hC.symm
