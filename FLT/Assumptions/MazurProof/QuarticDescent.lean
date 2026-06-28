@@ -583,10 +583,27 @@ theorem quartic_plus_descent_step :
       set h := a^2 - b^2
       -- (r-h)(r+h) = 4b⁴
       have hprod : ((2*j+1) - h) * ((2*j+1) + h) = 4*b^4 := by nlinarith [hr2]
-      -- u*v = b⁴ where u = (r-h)/2, v = (r+h)/2
-      -- gcd(u,v)=1 from p|u,v → p|r,b → gcd(r,b)=1
-      -- pos_fourth → α,β → new QuarticPlusZ
-      -- B' = α < b ≤ B₁ ≤ B/2 < B
+      -- h = a²-b² is odd (from gcd(a,b)=1, a*b even → mixed parity → a²-b² odd)
+      have h_odd : h % 2 = 1 := by
+        have hab_even : (a*b) % 2 = 0 := by rw [← hB₁_eq, hB₁_val]; omega
+        rcases Int.emod_two_eq_zero_or_one a with ha | ha
+        · rcases Int.emod_two_eq_zero_or_one b with hb | hb
+          · have := Int.dvd_coe_gcd ⟨a/2, by omega⟩ ⟨b/2, by omega⟩
+            rw [hab_cop] at this; exact absurd this (by norm_num)
+          · obtain ⟨t, rfl⟩ : 2∣a := ⟨a/2, by omega⟩
+            obtain ⟨u, rfl⟩ : ∃ u, b = 2*u+1 := ⟨b/2, by omega⟩
+            show (2*t)^2 - (2*u+1)^2 = _ -- unfold h
+            sorry -- ring + omega for the modular conclusion
+        · have hb_even : b % 2 = 0 := by omega
+          obtain ⟨t, rfl⟩ : ∃ t, a = 2*t+1 := ⟨a/2, by omega⟩
+          obtain ⟨u, rfl⟩ : 2∣b := ⟨b/2, by omega⟩
+          sorry -- ring + omega
+      -- r-h and r+h both even
+      have h2_sub : (2 : ℤ) ∣ ((2*j+1) - h) := by omega
+      have h2_add : (2 : ℤ) ∣ ((2*j+1) + h) := by omega
+      -- Define u = (r-h)/2, v = (r+h)/2
+      -- u*v = b⁴, gcd(u,v)=1
+      -- pos_fourth → α,β → new QuarticPlusZ → B' < B
       sorry
     · -- Case M = 5a⁴, N = b⁴: descent on a (symmetric)
       sorry
