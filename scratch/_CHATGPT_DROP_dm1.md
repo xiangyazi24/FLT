@@ -1,161 +1,70 @@
-# Q1669 (dm1): complete `gcd(M,N)=1` proof
+# Q1694 (dm1): debugging `(4*M)*(4*N)` vs `UV_eq_five_mul_fourth`
 
-Here is the proof body for the local goal
-
-```lean
-Int.gcd M N = 1
-```
-
-in the context you gave. It treats `M` and `N` as opaque; the only places where the definitions matter are the two linear consequences of `hM_val` and `hN_val`.
+The working one-liner is:
 
 ```lean
-by
-  ---------------------------------------------------------------------------
-  -- Linear consequences of the cleared definitions of M and N.
-  ---------------------------------------------------------------------------
-  have hMN_sum : M + N = (2 * j + 1) ^ 2 + 2 * B₁ ^ 2 := by
-    have h_sum :
-        4 * (M + N) = 4 * ((2 * j + 1) ^ 2 + 2 * B₁ ^ 2) := by
-      nlinarith [hM_val, hN_val, hB₁_val]
-    omega
-
-  have hNM_diff : N - M = s := by
-    have h_diff : 4 * (N - M) = 4 * s := by
-      nlinarith [hM_val, hN_val]
-    omega
-
-  ---------------------------------------------------------------------------
-  -- Prime divisor contradiction.
-  ---------------------------------------------------------------------------
-  by_contra hbad
-
-  have hgpos : 0 < Int.gcd M N := by
-    exact Int.gcd_pos_of_pos_left N hMpos
-
-  have hg_gt_one : 1 < Int.gcd M N := by
-    omega
-
-  obtain ⟨p, hp_prime, hp_dvd_g⟩ :=
-    Nat.exists_prime_and_dvd (ne_of_gt hg_gt_one)
-
-  have hpZ_prime : Prime (p : ℤ) := by
-    exact_mod_cast hp_prime
-
-  have hp_dvd_g_int : (p : ℤ) ∣ (Int.gcd M N : ℤ) := by
-    exact_mod_cast hp_dvd_g
-
-  have hpM : (p : ℤ) ∣ M := by
-    exact dvd_trans hp_dvd_g_int (Int.gcd_dvd_left M N)
-
-  have hpN : (p : ℤ) ∣ N := by
-    exact dvd_trans hp_dvd_g_int (Int.gcd_dvd_right M N)
-
-  have hp_sum_MN : (p : ℤ) ∣ M + N := by
-    exact dvd_add hpM hpN
-
-  have hp_diff_NM : (p : ℤ) ∣ N - M := by
-    exact dvd_sub hpN hpM
-
-  have hp_sum_expr :
-      (p : ℤ) ∣ (2 * j + 1) ^ 2 + 2 * B₁ ^ 2 := by
-    simpa [hMN_sum] using hp_sum_MN
-
-  have hp_s : (p : ℤ) ∣ s := by
-    simpa [hNM_diff] using hp_diff_NM
-
-  -- Since p divides both M and N, p^2 divides M*N.
-  have hp2_MN : (p : ℤ) ^ 2 ∣ M * N := by
-    rcases hpM with ⟨m, hm⟩
-    rcases hpN with ⟨n, hn⟩
-    refine ⟨m * n, ?_⟩
-    rw [hm, hn]
-    ring
-
-  have hp2_rhs : (p : ℤ) ^ 2 ∣ 5 * B₁ ^ 4 := by
-    simpa [hMN_prod] using hp2_MN
-
-  by_cases hpB₁ : (p : ℤ) ∣ B₁
-  · -------------------------------------------------------------------------
-    -- If p | B₁, then p | r from M+N = r^2 + 2B₁^2, and p | 4k from
-    -- B₁ = 2k.  This contradicts gcd(r,4k)=1.
-    -------------------------------------------------------------------------
-    have hp_B₁_sq : (p : ℤ) ∣ B₁ ^ 2 := by
-      exact pow_dvd_pow_of_dvd hpB₁ 2
-
-    have hp_two_B₁_sq : (p : ℤ) ∣ 2 * B₁ ^ 2 := by
-      exact dvd_mul_of_dvd_right hp_B₁_sq 2
-
-    have hp_r_sq : (p : ℤ) ∣ (2 * j + 1) ^ 2 := by
-      have hsub :
-          (p : ℤ) ∣ ((2 * j + 1) ^ 2 + 2 * B₁ ^ 2) - 2 * B₁ ^ 2 := by
-        exact dvd_sub hp_sum_expr hp_two_B₁_sq
-      simpa using hsub
-
-    have hp_r : (p : ℤ) ∣ 2 * j + 1 := by
-      exact hpZ_prime.dvd_of_dvd_pow hp_r_sq
-
-    have hp_2k : (p : ℤ) ∣ 2 * k := by
-      simpa [hB₁_val] using hpB₁
-
-    have hp_4k : (p : ℤ) ∣ 4 * k := by
-      have htmp : (p : ℤ) ∣ 2 * (2 * k) := by
-        exact dvd_mul_of_dvd_right hp_2k 2
-      convert htmp using 1 <;> ring
-
-    have hp_gcd : (p : ℤ) ∣ (Int.gcd (2 * j + 1) (4 * k) : ℤ) := by
-      exact Int.dvd_gcd hp_r hp_4k
-
-    have hp_one : (p : ℤ) ∣ (1 : ℤ) := by
-      simpa [hcop] using hp_gcd
-
-    have hp_one_nat : p ∣ (1 : ℕ) := by
-      exact_mod_cast hp_one
-
-    exact hp_prime.not_dvd_one hp_one_nat
-
-  · -------------------------------------------------------------------------
-    -- If p ∤ B₁, then p^2 | 5*B₁^4 forces p=5.  But then 25 | 5*B₁^4
-    -- forces 5 | B₁, contradiction.
-    -------------------------------------------------------------------------
-    have hp_rhs : (p : ℤ) ∣ 5 * B₁ ^ 4 := by
-      have hp_dvd_p2 : (p : ℤ) ∣ (p : ℤ) ^ 2 := by
-        refine ⟨(p : ℤ), ?_⟩
-        ring
-      exact dvd_trans hp_dvd_p2 hp2_rhs
-
-    rcases hpZ_prime.dvd_or_dvd hp_rhs with hp_dvd_5 | hp_dvd_B₁4
-    · have hp_nat_dvd_5 : p ∣ (5 : ℕ) := by
-        exact_mod_cast hp_dvd_5
-
-      have hp_eq_5 : p = 5 := by
-        have hp_le_five : p ≤ 5 :=
-          Nat.le_of_dvd (by norm_num : 0 < (5 : ℕ)) hp_nat_dvd_5
-        interval_cases p <;> simp at hp_prime hp_nat_dvd_5 ⊢
-
-      subst p
-
-      have h25 : (25 : ℤ) ∣ 5 * B₁ ^ 4 := by
-        norm_num at hp2_rhs ⊢
-        exact hp2_rhs
-
-      have h5_B₁4 : (5 : ℤ) ∣ B₁ ^ 4 := by
-        rcases h25 with ⟨c, hc⟩
-        refine ⟨c, ?_⟩
-        nlinarith
-
-      have h5_B₁ : (5 : ℤ) ∣ B₁ := by
-        exact (show Prime (5 : ℤ) by norm_num).dvd_of_dvd_pow h5_B₁4
-
-      exact hpB₁ h5_B₁
-
-    · have hp_B₁ : (p : ℤ) ∣ B₁ := by
-        exact hpZ_prime.dvd_of_dvd_pow hp_dvd_B₁4
-
-      exact hpB₁ hp_B₁
+have h : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
+  convert hUV using 1 <;> ring_nf [hM_val, hN_val]
 ```
 
-A few notes:
+That is the tactic you want.  Do **not** do `rw [hM_val, hN_val]; exact hUV`.  Force the comparison against `hUV`, and let `ring_nf` normalize every generated side goal using `hM_val` and `hN_val` as rewrite rules.
 
-* `hp_s` is included because it follows from the same divisor spine and matches your outline, but this particular contradiction does not need `heq` or `p ∣ s`.
-* The key special-case handling is the `p = 5` branch: from `p^2 ∣ 5*B₁^4`, after `subst p`, the proof obtains `25 ∣ 5*B₁^4`, then cancels one factor of `5` by the witness equation to get `5 ∣ B₁^4`, hence `5 ∣ B₁`.
-* If your local file already has a helper line for `Nat.exists_prime_and_dvd` in `UV_coprime`, reuse that exact `obtain` line if the imported Mathlib snapshot has a slightly different theorem signature.
+## Why `rw [hM_val, hN_val]; exact hUV` fails
+
+Your theory is close in spirit but not quite the right mechanism.  The witness used to prove `h4U : 4 ∣ exprU` is not the important thing.  `Int.mul_ediv_cancel' h4U` produces an equality whose statement is determined by the expression in the type of `h4U`; the witness proof itself is not supposed to leak a different RHS.
+
+The real issue is simpler: after `rw [hM_val, hN_val]`, Lean has an arithmetic expression that is mathematically the same as the LHS of `hUV`, but `exact hUV` requires the two proposition types to be **definitionally** the same.  `rw` does not canonicalize semiring expressions.  It just rewrites matching subterms.  If the resulting product has a different internal association/normal form from the one produced by `UV_eq_five_mul_fourth heq`, `exact` fails.
+
+`ring_nf` is the canonicalizer.  But you should not first rewrite the goal and then try `exact hUV`; instead, use `convert` so Lean generates the equality-of-middle-expression side goals, then solve all of them by normalization:
+
+```lean
+convert hUV using 1 <;> ring_nf [hM_val, hN_val]
+```
+
+## Slightly more verbose version
+
+If you want to see the generated bridge explicitly:
+
+```lean
+have h_prod_bridge :
+    (4 * M) * (4 * N) =
+      (2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 - 2 * s) *
+      (2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 + 2 * s) := by
+  ring_nf [hM_val, hN_val]
+
+have h : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
+  exact h_prod_bridge.trans hUV
+```
+
+If `.trans hUV` still complains because `h_prod_bridge` and `hUV` use differently normalized versions of the middle expression, use the same forced-normalization idiom:
+
+```lean
+have h : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
+  convert hUV using 1 <;> ring_nf [hM_val, hN_val]
+```
+
+## Alternative destructive-normalization form
+
+This also usually works, but it changes the local type of `hUV`:
+
+```lean
+have hUV' := hUV
+ring_nf [hM_val, hN_val] at hUV' ⊢
+exact hUV'
+```
+
+As a compact proof:
+
+```lean
+have h : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
+  have hUV' := hUV
+  ring_nf [hM_val, hN_val] at hUV' ⊢
+  exact hUV'
+```
+
+But the best one-liner is still:
+
+```lean
+have h : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
+  convert hUV using 1 <;> ring_nf [hM_val, hN_val]
+```
