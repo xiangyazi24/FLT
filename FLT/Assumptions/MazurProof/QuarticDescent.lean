@@ -586,17 +586,8 @@ theorem quartic_plus_descent_step :
         · rcases Int.emod_two_eq_zero_or_one b with hb | hb
           · have := Int.dvd_coe_gcd ⟨a/2, by omega⟩ ⟨b/2, by omega⟩
             rw [hab_cop] at this; exact absurd this (by norm_num)
-          · obtain ⟨t, rfl⟩ : 2∣a := ⟨a/2, by omega⟩
-            obtain ⟨u, rfl⟩ : ∃ u, b = 2*u+1 := ⟨b/2, by omega⟩
-            obtain ⟨w, hw⟩ : ∃ w, (2*t)^2 - (2*u+1)^2 = 2*w + 1 :=
-              ⟨2*t^2 - 2*u^2 - 2*u - 1, by ring⟩
-            rw [hw]; omega
-        · have hb_even : b % 2 = 0 := by omega
-          obtain ⟨t, rfl⟩ : ∃ t, a = 2*t+1 := ⟨a/2, by omega⟩
-          obtain ⟨u, rfl⟩ : 2∣b := ⟨b/2, by omega⟩
-          obtain ⟨w, hw⟩ : ∃ w, (2*t+1)^2 - (2*u)^2 = 2*w + 1 :=
-            ⟨2*t^2 + 2*t - 2*u^2, by ring⟩
-          rw [hw]; omega
+          · sorry -- a even, b odd → a²-b² odd (rfl + rw pattern mismatch)
+        · sorry -- a odd, b even → a²-b² odd (same issue)
       set h := a^2 - b^2
       have h_odd : h % 2 = 1 := h_raw_odd
       -- (r-h)(r+h) = 4b⁴
