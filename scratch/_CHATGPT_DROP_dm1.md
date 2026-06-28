@@ -1,302 +1,158 @@
-# Q1934 (dm1): the N=14 quartic with the -2 term
+# Q1993 (dm1): `DescentObstructionN16.lean`
 
-You are right about the sign and the coefficient: the quartic is
+Below is a complete Lean 4 file for the requested native-decision local obstruction checks.
 
-```text
-s^4 + D^2*s^2 - 2*D^4 = t^2,
-```
-
-not the N=10 quartic with `-D^4`.
-
-With `x = s/D` and `T = t/D^2`, this becomes
+The file uses the standard 2-isogeny quartic
 
 ```text
-T^2 = x^4 + x^2 - 2 = (x^2 - 1)*(x^2 + 2).
+C(a,b,d): d * Y^2 = d^2 * X^4 + a*d*X^2*Z^2 + b*Z^4
 ```
 
-Putting
+for curves of the form
 
 ```text
-u = x^2 = (s/D)^2,
-w = x*T = s*t/D^3,
+y^2 = x^3 + a*x^2 + b*x.
 ```
 
-gives
+For the N=16 curve it uses `a = -1, b = -1`; for the dual it uses
+`a = 2, b = 5`.  The four certified finite searches are:
 
 ```text
-w^2 = u^3 + u^2 - 2*u = u*(u - 1)*(u + 2).
+E,      d =  5, modulo 125, primitive at 5
+E,      d = -5, modulo 125, primitive at 5
+E_dual, d = -1, modulo 16,  primitive at 2
+E_dual, d = -5, modulo 16,  primitive at 2
 ```
 
-So the reduction is correct.
-
-## Important correction: conductor
-
-The curve
-
-```text
-E : w^2 = u^3 + u^2 - 2*u
-```
-
-is not conductor 14.  Its cubic has roots `0, 1, -2`, so the cubic discriminant is
-
-```text
-(0 - 1)^2*(0 + 2)^2*(1 + 2)^2 = 36.
-```
-
-For the Weierstrass equation `w^2 = cubic`, the elliptic discriminant is
-
-```text
-Delta = 16*36 = 576 = 2^6*3^2.
-```
-
-Also
-
-```text
-c4 = 112,
-```
-
-so at `p = 3` the curve has multiplicative bad reduction.  Therefore its conductor is divisible by `3`; it cannot be conductor `14`.  The conductor-14 curve that naturally appears in the N=14 parametrization is the different curve
-
-```text
-Y^2 = 4*X^3 + X^2 - 2*X + 1,
-```
-
-whose discriminant has a factor `7`.  The present curve `w^2 = u^3 + u^2 - 2u` is the full-2-torsion square-obstruction curve obtained after the additional substitution `u = x^2`.
-
-## Rational points on E
-
-The rational points on
-
-```text
-E : w^2 = u*(u - 1)*(u + 2)
-```
-
-are exactly
-
-```text
-O,
-(0,0),
-(1,0),
-(-2,0).
-```
-
-Equivalently,
-
-```text
-E(Q) = E[2](Q) ~= Z/2Z x Z/2Z.
-```
-
-So the only rational `u`-coordinates are
-
-```text
-u = 0, 1, -2.
-```
-
-For the original quartic, only `u = 1` lifts to a rational `x = s/D`, and it gives the degenerate solution
-
-```text
-s = +/- D,
-t = 0.
-```
-
-The points `u = 0` and `u = -2` do not give nonzero rational `x` satisfying `x^2 = u`; `u = 0` would force `x = 0`, and then the quartic gives `T^2 = -2`, while `u = -2` is not a rational square.
-
-Thus the primitive nondegenerate quartic has no rational solutions.
-
-## Algebraic structure
-
-The key structural point is that this is not the same descent pattern as the N=10 quartic.  The N=14 quartic factors over Q:
-
-```text
-T^2 = (x^2 - 1)*(x^2 + 2).
-```
-
-The associated elliptic curve has full rational 2-torsion:
-
-```text
-E : w^2 = u*(u - 1)*(u + 2).
-```
-
-So the natural descent is a full 2-descent, or more concretely a 2-isogeny descent using the rational 2-torsion point `(0,0)`.  The 2-isogenous curve is
-
-```text
-E' : V^2 = U^3 - 2*U^2 + 9*U.
-```
-
-The dual 2-isogeny `E' -> E` is
-
-```text
-u = V^2/(4*U^2),
-w = V*(9 - U^2)/(8*U^2).
-```
-
-The quartic
-
-```text
-C : T^2 = x^4 + x^2 - 2
-```
-
-is precisely the `d = 1` homogeneous space in this 2-isogeny descent.  Since it has the rational point `(x,T) = (1,0)`, it is birational to `E'`.  Explicitly, one birational map `C -> E'` is
-
-```text
-U = 2*x^2 + 1 - 2*T,
-V = 2*x*U.
-```
-
-The inverse on the affine chart `U != 0` is
-
-```text
-x = V/(2*U),
-T = (9 - U^2)/(4*U).
-```
-
-These formulas are useful because they show exactly why the quartic is a 2-descent object: composing
-
-```text
-C -> E' -> E
-```
-
-gives
-
-```text
-u = x^2,
-w = x*T.
-```
-
-That is exactly the substitution from the quartic to the obstruction curve.
-
-## Known proof of the rational-point statement
-
-Yes.  A standard proof is a complete 2-descent, or equivalently a 2-isogeny descent on the pair
-
-```text
-E  : w^2 = u^3 + u^2 - 2*u,
-E' : V^2 = U^3 - 2*U^2 + 9*U.
-```
-
-The descent proves
-
-```text
-rank E(Q) = 0.
-```
-
-Then the visible rational 2-torsion gives all of `E(Q)`:
-
-```text
-E(Q) = { O, (0,0), (1,0), (-2,0) }.
-```
-
-Equivalently, the isogenous curve has
-
-```text
-E'(Q) = { O, (0,0), (3,6), (3,-6) },
-```
-
-with `(3,6)` of order 4 and `2*(3,6) = (0,0)`.
-
-Transporting these four points through the birational map to the quartic gives only
-
-```text
-(x,T) = (1,0), (-1,0),
-```
-
-plus the two points at infinity on the quartic model.  Hence the affine quartic has no nontrivial rational points.
-
-## Relation to an infinite descent proof
-
-There is an infinite-descent proof in the same broad sense as the N=10 argument, but the algebraic mechanism is different.
-
-For N=10, the quartic
-
-```text
-s^4 + D^2*s^2 - D^4 = t^2
-```
-
-leads to a descent on the size parameter after converting to the obstruction curve
-
-```text
-w^2 = u^3 + u^2 - u.
-```
-
-For this N=14 quartic, the cleaner descent is the 2-isogeny descent above.  In elementary terms, starting from a primitive solution of
-
-```text
-t^2 = (s^2 - D^2)*(s^2 + 2*D^2)
-```
-
-one analyzes the two factors.  Their gcd divides `3`, because
-
-```text
-gcd(s^2 - D^2, s^2 + 2*D^2) divides 3*D^2,
-```
-
-and if `gcd(s,D)=1`, then this gcd divides `3`.  The resulting squareclass alternatives are exactly the finite 2-descent cases.  The descent says that every locally possible squareclass is already accounted for by torsion.  Any hypothetical non-torsion solution would produce a smaller solution through the covering maps, contradicting minimality.
-
-So the answer is:
-
-```text
-Yes, but not as the same one-parameter B-descent as in N=10.
-The right structure is the 2-isogeny/full-2-descent on
-w^2 = u*(u - 1)*(u + 2).
-```
-
-## Lean-verifiable algebraic identities
-
-The basic identities are all `ring` facts.
+One caution: the point list `O,(-1,0),(0,0),(1,0)` is not encoded in this file.
+For the equation exactly as written, `y^2 = x^3 - x^2 - x`, substituting
+`x = ±1` does not give `0` on the right-hand side.  The file below only
+formalizes the requested local obstruction checks from the supplied descent
+data.
 
 ```lean
-import Mathlib.Tactic
+/-
+Copyright (c) 2026.
 
-noncomputable section
+A small, self-contained native_decide file for the N = 16 obstruction curve
 
-namespace N14Quartic
+    E : y^2 = x^3 - x^2 - x
 
-example (x T : Q) (h : T^2 = x^4 + x^2 - 2) :
-    (x*T)^2 = (x^2)^3 + (x^2)^2 - 2*(x^2) := by
-  nlinarith [h]
+written in the 2-isogeny descent form
 
-example (x T : Q) :
-    let U : Q := 2*x^2 + 1 - 2*T
-    let V : Q := 2*x*U
-    T^2 = x^4 + x^2 - 2 ->
-      V^2 = U^3 - 2*U^2 + 9*U := by
-  intro U V h
-  subst U
-  subst V
-  nlinarith [h]
+    C(a,b,d) : d * Y^2 = d^2 * X^4 + a*d*X^2*Z^2 + b*Z^4.
 
-example (U V : Q) (h : V^2 = U^3 - 2*U^2 + 9*U) :
-    let x : Q := V/(2*U)
-    let T : Q := (9 - U^2)/(4*U)
-    U != 0 -> T^2 = x^4 + x^2 - 2 := by
-  intro x T hU
-  subst x
-  subst T
-  field_simp [hU]
-  nlinarith [h]
+For E we use a = -1, b = -1.
+For the dual 2-isogenous curve we use a = 2, b = 5.
 
-example (U V : Q) (h : V^2 = U^3 - 2*U^2 + 9*U) :
-    let u : Q := V^2/(4*U^2)
-    let w : Q := V*(9 - U^2)/(8*U^2)
-    U != 0 -> w^2 = u^3 + u^2 - 2*u := by
-  intro u w hU
-  subst u
-  subst w
-  field_simp [hU]
-  nlinarith [h]
+The modular obstruction check below says that there is no residue solution
+modulo n with (X,Z) primitive at the prime p dividing n.
+-/
 
-end N14Quartic
-```
+set_option maxHeartbeats 0
 
-For a formal Mazur-torsion development, I would use the theorem-level input
+namespace DescentObstructionN16
 
-```text
-E(Q) = E[2](Q)
-```
+/-- Square of a natural-number residue, computed as an integer. -/
+def sqNat (x : Nat) : Int :=
+  let xI : Int := Int.ofNat x
+  xI * xI
 
-proved once by a 2-descent certificate, and then finish the quartic obstruction by the two-line map
+/-- Fourth power of a natural-number residue, computed as an integer. -/
+def fourthNat (x : Nat) : Int :=
+  let x2 : Int := sqNat x
+  x2 * x2
 
-```text
-u = (s/D)^2,
-w = s*t/D^3.
+/--
+The integer whose congruence to zero modulo `n` is the quartic equation
+
+    d * Y^2 = d^2 * X^4 + a*d*X^2*Z^2 + b*Z^4.
+
+The variables are represented by natural numbers in `List.range n`.
+-/
+def quarticExpr (a b d : Int) (x z y : Nat) : Int :=
+  d * sqNat y -
+    ((d * d) * fourthNat x
+      + (a * d) * sqNat x * sqNat z
+      + b * fourthNat z)
+
+/-- Boolean congruence-to-zero test modulo `n`. -/
+def congruentZeroMod (n : Nat) (v : Int) : Bool :=
+  v % Int.ofNat n == 0
+
+/-- The quartic equation, reduced modulo `n`. -/
+def quarticHoldsMod (n : Nat) (a b d : Int) (x z y : Nat) : Bool :=
+  congruentZeroMod n (quarticExpr a b d x z y)
+
+/--
+Primitive-at-`p` condition for a residue pair `(x,z)`, where `p ∣ n`.
+
+Since the search only uses representatives in `List.range n`, this encodes
+
+    not (p ∣ x and p ∣ z).
+-/
+def primitiveAt (p : Nat) (x z : Nat) : Bool :=
+  !((x % p == 0) && (z % p == 0))
+
+/--
+Exhaustive finite check: there is no primitive residue solution to the quartic
+modulo `n`, where primitivity is checked at `p`.
+-/
+def noPrimitiveQuarticSolutionsMod (n p : Nat) (a b d : Int) : Bool :=
+  let residues := List.range n
+  residues.all (fun x =>
+    residues.all (fun z =>
+      (!(primitiveAt p x z)) ||
+        residues.all (fun y =>
+          !(quarticHoldsMod n a b d x z y))))
+
+/-- Proposition wrapper for the Boolean obstruction check. -/
+def NoPrimitiveSolutionMod (n p : Nat) (a b d : Int) : Prop :=
+  noPrimitiveQuarticSolutionsMod n p a b d = true
+
+/-- N = 16 obstruction curve `E : y^2 = x^3 - x^2 - x`. -/
+abbrev E_a : Int := -1
+abbrev E_b : Int := -1
+
+/-- Dual 2-isogenous curve, with `a' = -2a = 2`, `b' = a^2 - 4b = 5`. -/
+abbrev Edual_a : Int := 2
+abbrev Edual_b : Int := 5
+
+/-
+For E and d = 5, the checked equation modulo 125 is
+
+    5*Y^2 = 25*X^4 - 5*X^2*Z^2 - Z^4.
+-/
+theorem E_d5_mod125_obstruction :
+    NoPrimitiveSolutionMod 125 5 E_a E_b 5 := by
+  native_decide
+
+/-
+For E and d = -5, the checked equation modulo 125 is
+
+    -5*Y^2 = 25*X^4 + 5*X^2*Z^2 - Z^4.
+-/
+theorem E_dneg5_mod125_obstruction :
+    NoPrimitiveSolutionMod 125 5 E_a E_b (-5) := by
+  native_decide
+
+/-
+For the dual curve and d = -1, the checked equation modulo 16 is
+
+    -Y^2 = X^4 - 2*X^2*Z^2 + 5*Z^4.
+-/
+theorem Edual_dneg1_mod16_obstruction :
+    NoPrimitiveSolutionMod 16 2 Edual_a Edual_b (-1) := by
+  native_decide
+
+/-
+For the dual curve and d = -5, the checked equation modulo 16 is
+
+    -5*Y^2 = 25*X^4 - 10*X^2*Z^2 + 5*Z^4.
+-/
+theorem Edual_dneg5_mod16_obstruction :
+    NoPrimitiveSolutionMod 16 2 Edual_a Edual_b (-5) := by
+  native_decide
+
+end DescentObstructionN16
 ```
