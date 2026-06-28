@@ -479,9 +479,8 @@ theorem quartic_plus_descent_step :
       suffices h : 16 * (M * N) = 16 * (5 * B₁ ^ 4) by omega
       have h_4MN : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
         have h := hUV
-        rw [show 2*(2*j+1)^2+(4*k)^2-2*s = 4*M from hM_val.symm,
-            show 2*(2*j+1)^2+(4*k)^2+2*s = 4*N from hN_val.symm] at h
-        exact h
+        rw [← hM_val, ← hN_val] at h
+        convert h using 2 <;> ring
       calc 16 * (M * N) = (4 * M) * (4 * N) := by ring
         _ = 5 * (4 * k) ^ 4 := h_4MN
         _ = 16 * (5 * B₁ ^ 4) := by rw [hB₁_val]; ring
