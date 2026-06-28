@@ -1,199 +1,235 @@
-# Q2053 (dm3): minimal Weil-pairing axiom seam for Mazur torsion
+# Q2056 (dm3): `WeilPairing.lean` vs `WeilPairingInterface.lean`
 
 Date: 2026-06-28.
 
-Question: for the Mazur proof, we only need the consequence
+Question: `WeilPairing.lean` has
 
-```text
-if E/ℚ has full rational m-torsion, then ℚ contains a primitive m-th root of unity.
+```lean
+fullRationalTorsion_order_le_two
 ```
 
-A possible future proof would use:
+with one `sorry` at line 76.  The new `WeilPairingInterface.lean` has the abstract infrastructure and a fully proved
 
-* A1: over `ℚbar`, `E[m]` is a free `ZMod m`-module of rank `2`;
-* A2: the Weil pairing `e_m` exists and is nondegenerate alternating bilinear;
-* A3: `e_m(P,Q)` is defined over `ℚ` / fixed by Galois when `P,Q` are `ℚ`-rational.
+```lean
+primitive_root_in_base
+```
 
-Should these be three separate axioms, or one packaged axiom?
+The remaining `sorry` in `WeilPairing.lean` is mathematically the same content as the remaining
+
+```lean
+weil_interface_bridge
+```
+
+`sorry` in `WeilPairingInterface.lean`.  Should we:
+
+* A. delete `WeilPairing.lean` and wire everything through `WeilPairingInterface`;
+* B. keep `WeilPairing.lean` but have it import/use `WeilPairingInterface`;
+* C. keep both independent?
 
 ## Executive answer
 
-Use **one public axiom**, not three separate public axioms.
+Choose **B**.
 
-For the Mazur scaffold, the cleanest Lean API is exactly the theorem-level consequence already consumed downstream:
+Keep `WeilPairing.lean` as the **public Mazur-proof wrapper**, but make it import `WeilPairingInterface.lean` and use the interface theorem.  Do not keep the two files independent, and do not delete the public wrapper yet.
 
-```lean
-axiom weil_pairing_primitive_root
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
+The goal should be:
+
+```text
+WeilPairingInterface.lean
+  = abstract reusable algebra + exactly one concrete bridge gap
+
+WeilPairing.lean
+  = thin public-facing wrapper for the Mazur proof, no independent Weil-pairing sorry
 ```
 
-This is better than exposing A1, A2, and A3 separately.  A1/A2/A3 are the **future proof strategy**, not the right public interface for the Mazur torsion-bound proof.
+This gives the best combination of stable imports, clean architecture, and no duplicated mathematical seam.
 
-## Why one axiom is cleaner
+## Why not A: deleting `WeilPairing.lean`
 
-### 1. It matches exactly what `TorsionBound.lean` needs
+Deleting `WeilPairing.lean` is too aggressive unless every downstream import has already migrated and the file has no public names you want to keep.
 
-The downstream argument only needs:
+`WeilPairing.lean` likely has the more domain-specific public name:
 
 ```lean
-∃ ζ : ℚ, IsPrimitiveRoot ζ m
+fullRationalTorsion_order_le_two
 ```
 
-from:
+or a theorem shaped exactly for the Mazur torsion proof.  Even if the real proof now lives in the interface file, keeping this wrapper preserves the public API and avoids churn in downstream files.
 
-```lean
-hm : 0 < m
-hfull : HasFullRationalTorsion E m
+Deletion is only attractive after a cleanup pass confirms:
+
+```text
+grep/import graph: no file imports WeilPairing.lean
+no public theorem names in WeilPairing.lean are still used
 ```
 
-It does not need access to the pairing, to a basis of `E[m]`, to Galois-equivariance, or to any divisor/cardinality theorem.  Keeping those out of the public axiom avoids forcing the rest of the Mazur proof to depend on unfinished elliptic-curve geometry.
+Until then, deleting it creates unnecessary refactor risk.
 
-### 2. A1 is already a separate hard theorem/sorry elsewhere
+## Why not C: keeping both independent
 
-The FLT torsion scaffold already has the intended theorem:
+Keeping both independent is the worst option because it leaves two copies of the same mathematical gap:
 
-```lean
-theorem WeierstrassCurve.n_torsion_dimension [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
-    Nonempty (E.nTorsion n ≃+ (ZMod n) × (ZMod n)) := ...
+```text
+WeilPairing.lean:          sorry in fullRationalTorsion_order_le_two
+WeilPairingInterface.lean: sorry in weil_interface_bridge
 ```
 
-and the harder cardinality input behind it:
+That creates three problems:
+
+1. **Duplicate proof obligations.**  When the bridge is finally proved, one file can still accidentally retain a redundant `sorry`.
+2. **API drift.**  The two statements may slowly diverge in hypotheses, namespaces, or exact target shape.
+3. **Unclear source of truth.**  It becomes ambiguous whether future code should depend on the old direct theorem or the new abstract interface.
+
+The current situation already says the two `sorry`s are the same mathematical content.  There should be exactly one place where that content is assumed/proved.
+
+## Recommended architecture
+
+### `WeilPairingInterface.lean`: source of the abstract argument
+
+This file should contain:
 
 ```lean
-theorem WeierstrassCurve.n_torsion_card [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
-    Nat.card (E.nTorsion n) = n^2 := sorry
+-- abstract pairing/fixed-point/descent infrastructure
+primitive_root_in_base : ...
 ```
 
-Duplicating A1 as another axiom in `MazurProof/Axioms.lean` would create two theorem seams for the same mathematical fact.
-
-### 3. A2 and A3 are not small Lean statements unless the whole pairing API is fixed
-
-A2 sounds simple mathematically, but in Lean it requires choices such as:
+fully proved, plus the single bridge from concrete elliptic-curve hypotheses to the abstract theorem:
 
 ```lean
--- possible target shapes
-E.nTorsion m → E.nTorsion m → rootsOfUnity m K
-E.nTorsion m → E.nTorsion m → Kˣ
-E.nTorsion m → E.nTorsion m → K
+-- this is the one remaining geometric/Weil-pairing seam
+ theorem weil_interface_bridge
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {m : ℕ} (hm : 0 < m)
+    (hfull : HasFullRationalTorsion E m) :
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
+  -- remaining sorry here only
+  sorry
 ```
 
-and then decisions about:
+The exact theorem name can vary, but the target should be the primitive-root consequence, because that is what the Mazur proof actually consumes.
 
-* whether bilinearity is additive in both source variables and multiplicative in the target;
-* whether values are in `rootsOfUnity m K` or in units/subtypes;
-* how to state alternation: `e P P = 1`, or `e P Q * e Q P = 1`;
-* how to state nondegeneracy: trivial left radical, trivial right radical, or an isomorphism to the dual;
-* how to encode rationality/Galois equivariance across `ℚ → AlgebraicClosure ℚ`.
+### `WeilPairing.lean`: public wrapper, no independent `sorry`
 
-Those are all important future design choices, but they are noise for the current Mazur bound.
-
-### 4. Three axioms increase adapter burden
-
-If A1, A2, A3 are separate, then every later refactor has to keep three signatures synchronized with:
-
-* `WeierstrassCurve.nTorsion`;
-* the chosen `WeilPairing` definition;
-* rational-point/base-change maps;
-* Galois actions on points and roots of unity.
-
-A single theorem-level axiom localizes all that churn behind one stable statement.
-
-## Recommended public axiom
-
-Keep the public axiom exactly at the arithmetic consequence:
+This file should import the interface and define the old theorem by calling the bridge:
 
 ```lean
+import FLT.Assumptions.MazurProof.WeilPairingInterface
+import FLT.Assumptions.MazurProof.RootsOfUnity
+
 namespace MazurProof
 
 /--
-Weil-pairing consequence used in the Mazur torsion-bound scaffold.
-
-If `E/ℚ` contains full rational `m`-torsion, then `ℚ` contains a primitive
-`m`-th root of unity.  This packages the future proof from:
-
-* the rank-two structure of `E[m]` over `ℚbar`,
-* nondegeneracy/alternation/bilinearity of the Weil pairing,
-* Galois equivariance/rationality of the pairing value on rational torsion.
+Weil-pairing consequence for the Mazur proof: full rational `m`-torsion forces `m ≤ 2`.
+This is now just a wrapper around `WeilPairingInterface` plus the rational-roots-of-unity lemma.
 -/
-axiom weil_pairing_primitive_root
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
+theorem fullRationalTorsion_order_le_two
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {m : ℕ} (hm : 0 < m)
+    (hfull : HasFullRationalTorsion E m) :
+    m ≤ 2 := by
+  rcases weil_interface_bridge E hm hfull with ⟨ζ, hζ⟩
+  exact isPrimitiveRoot_rat_order_le_two hζ
 
 end MazurProof
 ```
 
-This is the cleanest Lean 4 axiom statement for the current proof.
+This removes the independent `sorry` from `WeilPairing.lean`.  The only remaining `sorry` is the bridge.
 
-## If you want a one-axiom package rather than the final consequence
+## Where should `weil_pairing_primitive_root` live?
 
-If the goal is to preserve the outline “A1+A2+A3 imply the result” inside Lean, use a **single internal structure**, not three global axioms.  The structure can live in a future `WeilPairing.lean` or `WeilPairingConsequence.lean` file, and a theorem can convert it to the public consequence.
-
-Sketch:
+For the Mazur scaffold, the most stable public statement is still:
 
 ```lean
-structure WeilPairingConsequencePackage
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] (m : ℕ) : Prop where
-  primitive_root_of_full_torsion :
-    0 < m → HasFullRationalTorsion E m → ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-```
-
-But this collapses immediately to the same theorem-level statement.  Unless we are actively proving the pure algebra step in the same file, the structure buys very little.
-
-A more proof-oriented future package would be something like:
-
-```lean
-structure WeilPairingData
-    (K : Type*) [Field K]
-    (T : Type*) [AddCommGroup T] [Module (ZMod m) T]
-    (m : ℕ) where
-  e : T → T → Kˣ
-  left_bilin : ...
-  right_bilin : ...
-  alternating : ...
-  nondegenerate_left : ...
-  values_mth_roots : ∀ P Q, ((e P Q : K) ^ m = 1)
-```
-
-and then separately prove the pure algebra lemma:
-
-```lean
-nondegenerate_alternating_pairing_basis_value_primitive :
-  ... → IsPrimitiveRoot (e P Q : K) m
-```
-
-That is worthwhile for a reusable Weil-pairing library, but it is overkill for the Mazur torsion scaffold.
-
-## How to later replace the axiom
-
-The eventual replacement path should be:
-
-```lean
--- future theorem, after formalizing Weil pairing enough
- theorem weil_pairing_primitive_root
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
-  -- 1. pass to E over AlgebraicClosure ℚ;
-  -- 2. use n_torsion_dimension/cardinality to identify E[m] with (ZMod m)^2;
-  -- 3. choose rational basis points from hfull;
-  -- 4. use nondegenerate Weil pairing to get primitive e_m(P,Q);
-  -- 5. use Galois equivariance/rationality to descend e_m(P,Q) to ℚ.
-```
-
-No downstream file should need to change when this proof replaces the axiom.
-
-## Recommendation
-
-For `MazurProof/Axioms.lean`, keep exactly one public axiom:
-
-```lean
-axiom weil_pairing_primitive_root
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
+theorem/axiom weil_pairing_primitive_root
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {m : ℕ} (hm : 0 < m)
+    (hfull : HasFullRationalTorsion E m) :
     ∃ ζ : ℚ, IsPrimitiveRoot ζ m
 ```
 
-Do not add separate A1/A2/A3 axioms to the Mazur proof API.  Treat A1/A2/A3 as the implementation plan for proving this one theorem later.
+If `Axioms.lean` currently declares this as an axiom, then after `WeilPairingInterface.lean` is wired in, the next cleanup should be:
+
+```lean
+-- remove axiom from Axioms.lean, or move it behind an import boundary
+-- replace with theorem from interface/wrapper
+```
+
+But avoid creating an import cycle.  A clean dependency graph is:
+
+```text
+Basic definitions / HasFullRationalTorsion
+        ↓
+RootsOfUnity.lean
+        ↓
+WeilPairingInterface.lean
+        ↓
+WeilPairing.lean
+        ↓
+TorsionBound.lean
+```
+
+If `HasFullRationalTorsion` currently lives in `Axioms.lean`, and `Axioms.lean` also contains the axiom you want to replace, split definitions first:
+
+```text
+Axioms.lean or Basic.lean:
+  HasFullRationalTorsion
+  HasRationalPointOfOrder
+  HasTorsionStructure
+  TorsionStructureData
+
+WeilPairingInterface.lean:
+  primitive_root_in_base
+  weil_interface_bridge
+
+WeilPairing.lean:
+  fullRationalTorsion_order_le_two wrapper
+```
+
+This prevents the interface file from importing an axiom file that it is supposed to discharge.
+
+## Exact migration plan
+
+Recommended steps:
+
+1. Make `WeilPairingInterface.lean` the source of the primitive-root bridge:
+   ```lean
+   theorem weil_interface_bridge ... : ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
+     sorry
+   ```
+
+2. In `WeilPairing.lean`, replace the line-76 `sorry` with:
+   ```lean
+   rcases weil_interface_bridge E hm hfull with ⟨ζ, hζ⟩
+   exact isPrimitiveRoot_rat_order_le_two hζ
+   ```
+
+3. Keep `fullRationalTorsion_order_le_two` in `WeilPairing.lean` for downstream compatibility.
+
+4. Do not expose separate A1/A2/A3 axioms in the Mazur proof API.  Let the bridge theorem be the single seam.
+
+5. Later, when the actual geometric Weil-pairing proof exists, replace only the body of `weil_interface_bridge`.
+
+## Naming recommendation
+
+Use names that clarify the layering:
+
+```lean
+-- in WeilPairingInterface.lean
+primitive_root_in_base              -- fully proved pure algebra
+weil_pairing_primitive_root_bridge  -- one remaining geometric bridge
+
+-- in WeilPairing.lean
+fullRationalTorsion_order_le_two    -- public Mazur-facing corollary
+```
+
+If there is already a name `weil_interface_bridge`, it is fine to keep it for now, but `weil_pairing_primitive_root_bridge` is more descriptive.
+
+## Final recommendation
+
+Choose **B**:
+
+```text
+Keep `WeilPairing.lean`, but make it import and use `WeilPairingInterface.lean`.
+```
+
+Then remove the independent `sorry` from `WeilPairing.lean`.  The only remaining `sorry` should be the concrete bridge in `WeilPairingInterface.lean`.  This keeps the public Mazur proof stable while ensuring there is exactly one source of truth for the unfinished Weil-pairing content.
