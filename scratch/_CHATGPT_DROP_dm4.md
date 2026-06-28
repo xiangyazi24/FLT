@@ -1,8 +1,52 @@
-# Q2002 (dm4): Weil-pairing minimal route for the Mazur torsion-bound proof
+# Q2014 (dm4): Mathlib division polynomials and the Weil-pairing shortcut question
+
+## Scope checked
+
+Project branch:
+
+```text
+repo:   xiangyazi24/FLT
+branch: ai-scratch
+```
+
+The project pins Mathlib at commit:
+
+```text
+96fd0fff3b8837985ae21dd02e712cb5df72ec05
+```
+
+Relevant Mathlib files at that commit:
+
+```text
+Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Basic.lean
+Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Degree.lean
+```
 
 ## Executive answer
 
-For the current axiom assembly, the best minimal route is **not** to formalize the full Weil pairing.  The right hard input is exactly the consequence already used by `TorsionBound.lean`:
+Mathlib has division-polynomial definitions, but the current API is **not** a shortcut to a formal Weil pairing.
+
+The exact division-polynomial declarations are Unicode-name based:
+
+```lean
+WeierstrassCurve.ψ₂
+WeierstrassCurve.Ψ₂Sq
+WeierstrassCurve.Ψ₃
+WeierstrassCurve.preΨ₄
+WeierstrassCurve.preΨ'
+WeierstrassCurve.preΨ
+WeierstrassCurve.ΨSq
+WeierstrassCurve.Ψ
+WeierstrassCurve.Φ
+WeierstrassCurve.ψ
+WeierstrassCurve.φ
+```
+
+I did **not** find a declaration literally named `divisionPolynomial`, nor ASCII declarations named `psi` or `phi`.
+
+Also, `ω_n` is explicitly marked TODO in the file, and I did not find a ready theorem saying that evaluating `ψ_m` at a point is equivalent to `[m]P = 0`.
+
+For the Mazur proof, the minimal route is still to axiomatize the final Weil-pairing consequence:
 
 ```lean
 axiom full_rational_torsion_forces_primitive_root
@@ -12,232 +56,218 @@ axiom full_rational_torsion_forces_primitive_root
     ∃ ζ : ℚ, IsPrimitiveRoot ζ m
 ```
 
-This is the mathematically precise shortcut:
+That is the exact implication needed downstream:
 
 ```text
-E[m](ℚ) ≅ (ℤ/mℤ)^2  ==>  μ_m ⊂ ℚ*.
+full rational m-torsion over Q  ==>  Q contains a primitive m-th root of unity.
 ```
 
-Then the existing elementary theorem
+## (1) Exact Mathlib definitions found
+
+### `ψ₂`
 
 ```lean
-isPrimitiveRoot_rat_order_le_two : IsPrimitiveRoot ζ m → m ≤ 2
+/-- The `2`-division polynomial `ψ₂ = Ψ₂`. -/
+noncomputable def ψ₂ : R[X][Y] :=
+  W.toAffine.polynomialY
 ```
 
-closes the only thing needed by `mazur_torsion_bound`.
+For a general Weierstrass curve, this is the affine polynomial `2Y + a₁X + a₃`.
 
-In other words, the current axiom
+### `Ψ₂Sq`
 
 ```lean
-axiom weil_pairing_primitive_root ...
+/-- The univariate polynomial `Ψ₂Sq` congruent to `ψ₂²`. -/
+noncomputable def Ψ₂Sq : R[X] :=
+  C 4 * X ^ 3 + C W.b₂ * X ^ 2 + C (2 * W.b₄) * X + C W.b₆
 ```
 
-is already the minimal useful interface.  I would only rename/re-document it so it is clear that this is **not** asking for a full formal Weil-pairing API.
-
-## Recommended Lean interface
-
-Replace or alias the existing axiom as follows.
+Useful lemmas include:
 
 ```lean
-/--
-Minimal Weil-pairing consequence needed for Mazur's torsion-bound proof.
+C_Ψ₂Sq
+ψ₂_sq
+Affine.CoordinateRing.mk_ψ₂_sq
+Ψ₂Sq_eq
+```
 
-This is intentionally much weaker than a formal construction of the Weil pairing.
-It packages only the standard consequence:
-if all `m`-torsion points of `E/ℚ` are rational, then `ℚ` contains a primitive
-`m`-th root of unity.
+### `Ψ₃`
 
-Geometrically, this is the determinant / exterior-square statement
-`∧² E[m] ≃ μ_m`, together with trivial Galois action on rational `m`-torsion.
--/
+```lean
+/-- The `3`-division polynomial `ψ₃ = Ψ₃`. -/
+noncomputable def Ψ₃ : R[X] :=
+  3 * X ^ 4 + C W.b₂ * X ^ 3 + 3 * C W.b₄ * X ^ 2 +
+    3 * C W.b₆ * X + C W.b₈
+```
+
+### `preΨ₄`
+
+```lean
+/-- The univariate polynomial `preΨ₄`, which is auxiliary to the 4-division polynomial
+`ψ₄ = Ψ₄ = preΨ₄ψ₂`. -/
+noncomputable def preΨ₄ : R[X] :=
+  2 * X ^ 6 + C W.b₂ * X ^ 5 + 5 * C W.b₄ * X ^ 4 +
+    10 * C W.b₆ * X ^ 3 + 10 * C W.b₈ * X ^ 2 +
+    C (W.b₂ * W.b₈ - W.b₄ * W.b₆) * X +
+    C (W.b₄ * W.b₈ - W.b₆ ^ 2)
+```
+
+### `preΨ'` and `preΨ`
+
+```lean
+noncomputable def preΨ' (n : ℕ) : R[X] :=
+  preNormEDS' (W.Ψ₂Sq ^ 2) W.Ψ₃ W.preΨ₄ n
+
+noncomputable def preΨ (n : ℤ) : R[X] :=
+  preNormEDS (W.Ψ₂Sq ^ 2) W.Ψ₃ W.preΨ₄ n
+```
+
+There are simp lemmas for `0`, `1`, `2`, `3`, `4`, negation, and the even/odd recurrences.
+
+### `ΨSq`
+
+```lean
+/-- The univariate polynomials `ΨSqₙ` congruent to `ψₙ²`. -/
+noncomputable def ΨSq (n : ℤ) : R[X] :=
+  W.preΨ n ^ 2 * if Even n then W.Ψ₂Sq else 1
+```
+
+Important coordinate-ring lemma:
+
+```lean
+Affine.CoordinateRing.mk_Ψ_sq
+```
+
+### `Ψ`
+
+```lean
+/-- The bivariate polynomials `Ψₙ` congruent to the `n`-division polynomials `ψₙ`. -/
+protected noncomputable def Ψ (n : ℤ) : R[X][Y] :=
+  C (W.preΨ n) * if Even n then W.ψ₂ else 1
+```
+
+### `Φ`
+
+```lean
+/-- The univariate polynomials `Φₙ` congruent to `φₙ`. -/
+protected noncomputable def Φ (n : ℤ) : R[X] :=
+  X * W.ΨSq n - W.preΨ (n + 1) * W.preΨ (n - 1) *
+    if Even n then 1 else W.Ψ₂Sq
+```
+
+### `ψ`
+
+```lean
+/-- The bivariate `n`-division polynomials `ψₙ`. -/
+protected noncomputable def ψ (n : ℤ) : R[X][Y] :=
+  normEDS W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) n
+```
+
+Important lemmas include:
+
+```lean
+ψ_zero, ψ_one, ψ_two, ψ_three, ψ_four
+ψ_neg, ψ_even, ψ_odd
+Affine.CoordinateRing.mk_ψ
+```
+
+### `φ`
+
+```lean
+/-- The bivariate polynomials `φₙ`. -/
+protected noncomputable def φ (n : ℤ) : R[X][Y] :=
+  C X * W.ψ n ^ 2 - W.ψ (n + 1) * W.ψ (n - 1)
+```
+
+Important lemma:
+
+```lean
+Affine.CoordinateRing.mk_φ
+```
+
+### `ω`
+
+`Basic.lean` explicitly says `TODO: the bivariate polynomials ω_n`.  So the full multiplication-by-n coordinate package is not finished in this file.
+
+### `Degree.lean`
+
+`Degree.lean` proves leading coefficient and degree statements for `preΨ`, `ΨSq`, and `Φ`, for example:
+
+```lean
+natDegree_preΨ_le
+coeff_preΨ
+natDegree_preΨ
+leadingCoeff_preΨ
+natDegree_ΨSq_le
+coeff_ΨSq
+natDegree_ΨSq
+leadingCoeff_ΨSq
+natDegree_Φ_le
+coeff_Φ
+natDegree_Φ
+leadingCoeff_Φ
+```
+
+This is degree infrastructure, not pairing infrastructure.
+
+## What I did not find
+
+I did not find ready-made declarations with names like:
+
+```lean
+mem_torsion_iff_psi_eq_zero
+psi_roots_eq_torsion
+divisionPolynomial_roots
+weil_pairing
+miller
+```
+
+The current Mathlib files define the polynomials, prove recurrence/congruence/base-change facts, and prove degree facts.  They do not currently construct the Weil pairing.
+
+## (2) Can Miller functions be defined purely using division polynomials?
+
+Not in a way that avoids the real missing work.
+
+Division polynomials mainly give the multiplication-by-n map.  Classically one has formulas of the form
+
+```text
+x([n]R) = φ_n(R) / ψ_n(R)^2
+```
+
+and a corresponding `y`-coordinate formula involving `ω_n`.  But the Miller function used in the Weil pairing is a rational function attached to a chosen point `P`, with divisor data depending on `P`.  It is normally built by products of tangent/secant line functions along an addition chain.
+
+The global polynomial `ψ_m` vanishes on the whole m-torsion locus.  It does not, by itself, give the function attached to a single divisor such as `m[P] - m[O]`.
+
+You could define a computational Miller-value function on affine points using explicit line evaluations and many nonzero-denominator hypotheses.  But proving independence of choices, bilinearity, alternatingness, Galois equivariance, and primitive-root output would essentially reprove divisor/function-field facts in coordinates.
+
+So for the Mazur proof, this is not shorter than keeping the theorem-level axiom.
+
+## (3) Is there a self-contained formula for `e_m` just from `ψ_n` evaluations?
+
+Not a clean generic one in the current Mathlib API.
+
+There are explicit computational formulas for pairings, but they use more than the standard one-point division polynomials `ψ_n`.  They need line functions, denominator choices, addition formulas, or generalized two-point objects such as elliptic nets / net polynomials.
+
+The standard `ψ_n`, `φ_n`, and `ω_n` package gives multiplication-by-n coordinates, not directly the alternating pairing
+
+```text
+E[m] × E[m] → μ_m.
+```
+
+For small `m` one can write special coordinate formulas, but that does not give a uniform formal route for arbitrary `m` in the Mazur proof.
+
+## Practical recommendation
+
+Do **not** try to discharge the Weil-pairing axiom by building Miller functions from division polynomials right now.
+
+Keep the minimal axiom:
+
+```lean
 axiom full_rational_torsion_forces_primitive_root
     (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
     (hm : 0 < m)
     (hfull : HasFullRationalTorsion E m) :
     ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-
-/-- Backwards-compatible name for the old scaffold. -/
-theorem weil_pairing_primitive_root
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m :=
-  full_rational_torsion_forces_primitive_root E hm hfull
 ```
 
-Then `TorsionBound.lean` can stay essentially unchanged:
-
-```lean
-/-- If `E` has full rational `m`-torsion, then `m ≤ 2`. -/
-theorem full_rational_torsion_order_le_two
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm : 0 < m) (hfull : HasFullRationalTorsion E m) : m ≤ 2 := by
-  rcases full_rational_torsion_forces_primitive_root E hm hfull with ⟨ζ, hζ⟩
-  exact isPrimitiveRoot_rat_order_le_two hζ
-```
-
-If the goal is to minimize the axiom count even more aggressively, one could instead axiomatize the final numerical consequence:
-
-```lean
-axiom full_rational_torsion_order_le_two_input
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    m ≤ 2
-```
-
-but I do **not** recommend this: it hides the clean split between the hard elliptic-curve input and the easy already-proved fact that `ℚ` has no primitive roots of unity of order `> 2`.
-
-## Route (1): exterior power / determinant shortcut
-
-This is the right conceptual explanation, but not a proof from pure group theory.
-
-The true theorem is not merely about the abstract module `E[m] ≅ (ℤ/mℤ)^2`.  From pure finite-module data one only gets
-
-```text
-∧² E[m] ≅ ℤ/mℤ
-```
-
-after choosing an orientation/basis.  There is no canonical map from that abstract exterior power to `μ_m` without elliptic-curve geometry.
-
-The geometric input is the canonical Galois-equivariant identification
-
-```text
-∧² E[m]  ≃  μ_m,
-```
-
-equivalently the Weil pairing
-
-```text
-e_m : E[m] × E[m] → μ_m.
-```
-
-If every point of `E[m]` is rational over `ℚ`, the Galois action on the left side is trivial.  Therefore the Galois action on `μ_m` is trivial, so all `m`-th roots of unity are rational.  In particular, there is a primitive `m`-th root in `ℚ`.
-
-For Lean, the best minimal abstraction of this route is exactly the axiom above.  A slightly lower-level version would be:
-
-```lean
-axiom exterior_square_torsion_is_cyclotomic
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ} ... :
-    -- Galois-equivariant determinant of `E[m]` is the cyclotomic character
-```
-
-but this would force you to build or import a Galois-action API, finite `ZMod m` modules, determinants, and `μ_m` as a Galois module.  That is probably more work than the current theorem-level axiom.
-
-Verdict for route (1): **best mathematical explanation; axiomatize the final implication, not the full machinery.**
-
-## Route (2): j-invariant / modular-polynomial / CM shortcut
-
-I would not use this.
-
-Reasons:
-
-1. It is much heavier than the Weil-pairing consequence.
-2. It is not the right theorem.  Full `m`-torsion over a field does **not** imply CM in general.  Take any non-CM elliptic curve and enlarge the base field to its `m`-division field; the full `m`-torsion becomes rational over that field, but the curve remains non-CM.
-3. Over `ℚ`, the obstruction is precisely the cyclotomic determinant / Weil-pairing obstruction: if the mod-`m` Galois action is trivial, its determinant is trivial, but the determinant is the mod-`m` cyclotomic character.  This says `χ_m` is trivial, i.e. `μ_m ⊂ ℚ`.
-4. Modular polynomials usually control cyclic isogenies (`X_0(m)`-type data), not full level structure (`X(m)` / ordered bases of `E[m]`).  Moving to full level structure reintroduces the same determinant/cyclotomic issue.
-
-Verdict for route (2): **not a shortcut; likely much harder and conceptually indirect.**
-
-## Route (3): Hasse-bound shortcut
-
-This is a tempting idea, and a useful local sanity check, but it cannot prove the uniform theorem needed here.
-
-What one can prove locally is:
-
-```text
-If p is a good prime for E and p ∤ m, and all E[m] points are rational,
-then E[m] injects into E(𝔽_p), hence m^2 ∣ #E(𝔽_p).
-```
-
-Together with Hasse,
-
-```text
-#E(𝔽_p) ≤ p + 1 + 2*sqrt(p) = (sqrt(p)+1)^2,
-```
-
-so
-
-```text
-m ≤ sqrt(p) + 1.
-```
-
-This is only a **curve-dependent** bound, because it depends on having a small good prime `p` with `p ∤ m`.
-
-To rule out `m ≥ 3`, one would like to use `p = 2` or `p = 3`, since
-
-```text
-p = 2 or 3 gives #E(𝔽_p) < 9,
-```
-
-contradicting `m^2 ≥ 9`.  But an elliptic curve over `ℚ` may have bad reduction at `2` and `3`.  For `m = 3`, the next prime `p = 5` already has Hasse upper bound bigger than `9`, so the simple inequality no longer contradicts full `3`-torsion.  For even `m`, one cannot use primes dividing `m`, and the remaining small primes can also be bad.
-
-More generally, large primes do not force `m` small; the Hasse upper bound grows with `p`.  The sentence
-
-```text
-for large p this forces m small
-```
-
-is backwards for this application.  Large `p` gives a weaker numerical bound.
-
-A conditional Lean lemma along this route would look like:
-
-```lean
--- schematic, not intended to compile with current project names
-axiom reduction_injective_on_prime_to_p_torsion
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m p : ℕ}
-    (hp_good : GoodReduction E p)
-    (hpm : Nat.Coprime p m)
-    (hfull : HasFullRationalTorsion E m) :
-    m ^ 2 ∣ Fintype.card (E_mod_p_points E p)
-
-axiom hasse_bound_for_reduction
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {p : ℕ} (hp_good : GoodReduction E p) :
-    Fintype.card (E_mod_p_points E p) ≤ p + 1 + 2 * Nat.sqrt p
-```
-
-But even with these heavy inputs, the universal `m ≤ 2` theorem does not follow without a uniform supply of suitably small good primes, which is false in this naive form.
-
-Verdict for route (3): **formalizable as a conditional local bound, but not sufficient for Mazur's uniform full-torsion step.**
-
-## The clean minimal replacement in `Axioms.lean`
-
-The current file has:
-
-```lean
-axiom weil_pairing_primitive_root (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-```
-
-I would rewrite only the name and docstring, not the mathematical content:
-
-```lean
-/--
-Minimal Weil-pairing consequence.
-
-This is the only Weil-pairing input needed for the torsion-bound theorem:
-full rational `m`-torsion forces `ℚ` to contain a primitive `m`-th root of unity.
-No divisor theory, Miller functions, explicit pairing construction, or bilinearity API
-is needed downstream.
--/
-axiom full_rational_torsion_forces_primitive_root
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-```
-
-Then either update `TorsionBound.lean` to use the new name, or keep the old name as a theorem alias.
-
-## Bottom line
-
-The shortest honest route is:
-
-```text
-AXIOM: full rational m-torsion over Q forces a primitive m-th root of unity in Q
-PROVED: Q has primitive roots only for m ≤ 2
-CONCLUDE: full rational m-torsion over Q implies m ≤ 2
-```
-
-This is exactly the amount of Weil-pairing theory needed by the Mazur axiom assembly.  Routes through CM/modular polynomials or Hasse bounds are not shorter and do not cleanly prove the required uniform implication.
+Document it as the determinant/cyclotomic-character consequence of the Weil pairing.  The existing division-polynomial API may eventually help formalize multiplication-by-n and torsion schemes, but it is not yet a short path to a formal Weil pairing.
