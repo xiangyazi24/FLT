@@ -1,164 +1,163 @@
-# Q1915 (dm3): dm4 — quartic `d` versus Kubert torsion order
+# Q1937 (dm4): obstruction-curve data for Mazur N = 14 and N = 16
 
-## Executive answer
+Data for axiom-discharge proofs analogous to `RationalPointsC20.lean`.
 
-No: the formula `n = 2 * (d + 3)` is **not** the right interpretation for the quartic family
+## Source anchors checked
 
-```text
-t^2 = s^4 + d^2 * s^2 - d^4.
-```
+Source: John Cremona `ecdata`, the Cremona/LMFDB elliptic-curve tables.
 
-For this exact quartic shape, **every nonzero value of `d` gives the same rational obstruction curve**, namely the listed Kubert obstruction curve for `N = 10`:
+Relevant file-format facts from `docs/file-format.txt`:
 
-```text
-E10 : w^2 = u^3 + u^2 - u.
-```
+- `AI` = reduced minimal Weierstrass coefficient vector `[a1,a2,a3,a4,a6]`.
+- `R` = rank.
+- `T` = torsion order.
+- `TOR` = torsion structure.
+- `LMFDB_LABEL` is the LMFDB label; in each isogeny class, LMFDB curve numbering is lexicographic by `[a1,a2,a3,a4,a6]`.
 
-The change of variables is
-
-```text
-u = (s / d)^2,
-w = s * t / d^3.
-```
-
-Indeed, dividing the quartic by `d^4` gives
+Concrete rows used:
 
 ```text
-(t / d^2)^2 = (s / d)^4 + (s / d)^2 - 1,
+# docs/curves.1-1000.html
+80 B 1  [0,-1,0,4,-4]    rank 0, torsion order 2
+96 A 1  [0,1,0,-2,0]     rank 0, torsion order 4
+
+# alllabels/alllabels.00000-09999
+80 b 4 -> 80.b1
+80 b 3 -> 80.b2
+80 b 2 -> 80.b3
+80 b 1 -> 80.b4
+
+96 a 1 -> 96.b3
 ```
 
-and multiplying by `(s / d)^2` gives
+## N = 14
+
+Obstruction curve:
 
 ```text
-(s * t / d^3)^2
-  = (s / d)^2 * ((s / d)^4 + (s / d)^2 - 1)
-  = u^3 + u^2 - u.
+E14 : w^2 = u^3 + u^2 - 2*u = u*(u+2)*(u-1)
 ```
 
-So the mapping is not
+Reduced Weierstrass coefficients:
 
 ```text
-d = 2 ↦ n = 10,
-d = 3 ↦ n = 12,
-d = 4 ↦ n = 14,
-d = 5 ↦ n = 16.
+[a1,a2,a3,a4,a6] = [0,1,0,-2,0]
 ```
 
-Instead, for the exact equation `s^4 + d^2*s^2 - d^4 = t^2`, the correct table is:
-
-| `d` | obstruction curve reached by the square-`u` substitution | torsion order label |
-|---:|---|---:|
-| 2 | `w^2 = u^3 + u^2 - u` | `N = 10` |
-| 3 | `w^2 = u^3 + u^2 - u` | `N = 10` |
-| 4 | `w^2 = u^3 + u^2 - u` | `N = 10` |
-| 5 | `w^2 = u^3 + u^2 - u` | `N = 10` |
-| 6 | `w^2 = u^3 + u^2 - u` | `N = 10` |
-| 7 | `w^2 = u^3 + u^2 - u` | `N = 10` |
-
-The role of `d` here is just an integral scaling / denominator-clearing parameter. It is not the torsion-order parameter.
-
-## What quartics match the other listed obstruction curves?
-
-For a curve of the form
+Database identification:
 
 ```text
-E(A,B) : w^2 = u^3 + A*u^2 + B*u,
+old Cremona label: 96a1
+LMFDB label:       96.b3
+rank:              0
+torsion order:     4
 ```
 
-using the same square substitution
+Since the cubic splits over Q with roots `-2`, `0`, and `1`, the three nontrivial rational 2-torsion points are
 
 ```text
-u = (s / D)^2,
-w = s * t / D^3
+(-2,0), (0,0), (1,0).
 ```
 
-corresponds to the quartic
+Rank is 0 and torsion order is 4, so the full Mordell-Weil group is
 
 ```text
-t^2 = s^4 + A*D^2*s^2 + B*D^4.
+E14(Q) ~= Z/2Z x Z/2Z.
 ```
 
-Applying that to the four obstruction curves in the prompt gives:
-
-| torsion order | obstruction curve | corresponding scaled quartic shape |
-|---:|---|---|
-| `N = 10` | `w^2 = u^3 + u^2 - u` | `t^2 = s^4 + D^2*s^2 - D^4` |
-| `N = 12` | `w^2 = u^3 - u^2 - 4*u + 4` | not directly of `u*(quadratic)` form because of the constant `+4`; the naive `u=(s/D)^2` trick does not give the displayed quartic family |
-| `N = 14` | `w^2 = u^3 + u^2 - 2*u` | `t^2 = s^4 + D^2*s^2 - 2*D^4` |
-| `N = 16` | `w^2 = u^3 - u^2 - u` | `t^2 = s^4 - D^2*s^2 - D^4` |
-
-Thus the displayed family with the **positive** middle term and the **coefficient `-1`** constant term is specifically the `N = 10` family.
-
-## Sanity check by `j`-invariants
-
-A quick way to see that the same quartic family cannot be separately encoding `N = 10,12,14,16` is that all curves
+All rational points:
 
 ```text
-t^2 = s^4 + d^2*s^2 - d^4
+O, (-2,0), (0,0), (1,0).
 ```
 
-are rationally equivalent after scaling `s = d*x`, `t = d^2*y`; they all reduce to
+Projective form:
 
 ```text
-y^2 = x^4 + x^2 - 1.
+[0:1:0], [-2:0:1], [0:0:1], [1:0:1].
 ```
 
-So, over `ℚ`, the value of `d` cannot change the isomorphism class of the associated genus-one curve.
+Answer to rank question: yes, rank 0.
 
-For curves `w^2 = u^3 + A*u^2 + B*u`, the invariant
+## N = 16
+
+Obstruction curve:
 
 ```text
-j = 256 * (A^2 - 3*B)^3 / (B^2 * (A^2 - 4*B))
+E16 : w^2 = u^3 - u^2 - u = u*(u^2-u-1)
 ```
 
-shows that the listed obstruction curves are not all the same rational curve. For example:
+Reduced Weierstrass coefficients:
 
 ```text
-N = 10: A =  1, B = -1, j = 16384/5
-N = 14: A =  1, B = -2, j = 21952/9
-N = 16: A = -1, B = -1, j = 16384/5
+[a1,a2,a3,a4,a6] = [0,-1,0,-1,0]
 ```
 
-`N = 10` and `N = 16` have the same `j`, but they are quadratic twists of each other; the sign of the middle term in the quartic distinguishes the square-substitution quartics above.
-
-## Warning about the stated `QuarticD2` through `QuarticD7`
-
-If `QuarticD2` through `QuarticD7` literally assert that there are no integer solutions to
+The model `[0,-1,0,-1,0]` lies in the old Cremona `80b` isogeny class. Starting with the class representative
 
 ```text
-t^2 = s^4 + d^2*s^2 - d^4
+E0 : y^2 = x^3 - x^2 + 4*x - 4    # [0,-1,0,4,-4], old 80b1
 ```
 
-with no extra hypotheses, those statements are false: for every positive `d`,
+translate the rational 2-torsion point `x = 1` to the origin by `x = X + 1`:
 
 ```text
-s = d,
-t = ± d^2
+Y^2 = X^3 + 2*X^2 + 5*X.
 ```
 
-is an immediate solution, since
+For `Y^2 = X^3 + a*X^2 + b*X`, the standard 2-isogenous curve is
 
 ```text
-d^4 + d^4 - d^4 = d^4.
+Y^2 = X^3 - 2*a*X^2 + (a^2 - 4*b)*X.
 ```
 
-This is the point `u = 1`, `w = ±1` on `E10`. If the intended lemmas exclude cuspidal/trivial points, primitive cases, or require additional side conditions, those exclusions need to be present in the theorem statements.
+With `a = 2`, `b = 5`, this is
 
-## Lean-shaped algebra check
-
-The basic algebraic reduction to the `N = 10` obstruction curve can be recorded as follows.
-
-```lean
-import Mathlib
-
-example {d s t : ℚ} (hd : d ≠ 0)
-    (h : s ^ 4 + d ^ 2 * s ^ 2 - d ^ 4 = t ^ 2) :
-    (s * t / d ^ 3) ^ 2 =
-      (s ^ 2 / d ^ 2) ^ 3 + (s ^ 2 / d ^ 2) ^ 2 - (s ^ 2 / d ^ 2) := by
-  field_simp [hd]
-  field_simp [hd] at h
-  ring_nf at h ⊢
-  nlinarith
+```text
+Y^2 = X^3 - 4*X^2 - 16*X.
 ```
 
-The conceptual takeaway for the formalization is: do not use `d` to choose among `N = 10,12,14,16` for this quartic. Use the actual cubic obstruction curve coefficients. The equation `s^4 + d^2*s^2 - d^4 = t^2` only matches the `N = 10` obstruction curve under the displayed square substitution.
+Scaling `X = 4*u`, `Y = 8*w` gives exactly
+
+```text
+w^2 = u^3 - u^2 - u.
+```
+
+So `E16` is the old Cremona `80b2` curve, and `alllabels` maps it to
+
+```text
+LMFDB label: 80.b3
+```
+
+The class has rank 0; rank is preserved under rational isogeny. For torsion, good reductions give
+
+```text
+#E16(F_3) = 2
+#E16(F_7) = 10
+```
+
+so rational torsion injects into both and has order dividing `gcd(2,10) = 2`. Since `(0,0)` is rational 2-torsion, the torsion subgroup is exactly `Z/2Z`.
+
+Equivalently, the cubic has only one rational root, `u = 0`; the quadratic factor `u^2 - u - 1` has discriminant `5`, not a square in Q.
+
+Therefore:
+
+```text
+LMFDB label: 80.b3
+E16(Q) ~= Z/2Z
+rank: 0
+```
+
+All rational points:
+
+```text
+O, (0,0).
+```
+
+Projective form:
+
+```text
+[0:1:0], [0:0:1].
+```
+
+Answer to rank question: yes, rank 0.
