@@ -534,26 +534,30 @@ theorem quartic_plus_descent_step :
         have hp_r_sq : (↑p : ℤ) ∣ (2*j+1)^2 := by
           have h := dvd_sub hp_sum hp_2B₁_sq; simpa using h
         have hp_r : (↑p : ℤ) ∣ 2*j+1 := hp_prime_int.dvd_of_dvd_pow hp_r_sq
-        have hp_4k : (↑p : ℤ) ∣ 4*k := by
-          rw [hB₁_val] at hpB₁
+        have hp_B : (↑p : ℤ) ∣ B := by
+          rw [hB₁_val] at hpB₁; rw [hBk]
           have : (↑p : ℤ) ∣ 2*(2*k) := dvd_mul_of_dvd_right hpB₁ 2
-          linarith [show 2*(2*k) = 4*k from by ring]
-        have : p ∣ Int.gcd (2*j+1) (4*k) := by
+          rwa [show 2*(2*k) = 4*k from by ring] at this
+        have : p ∣ Int.gcd (2*j+1) B := by
           rw [Int.gcd_def]
-          exact Nat.dvd_gcd (Int.natCast_dvd.mp hp_r) (Int.natCast_dvd.mp hp_4k)
+          exact Nat.dvd_gcd (Int.natCast_dvd.mp hp_r) (Int.natCast_dvd.mp hp_B)
         rw [hcop] at this
         exact absurd (Nat.le_of_dvd Nat.one_pos this) (by have := hp.two_le; omega)
-      · have hpB4 : ¬ (↑p : ℤ) ∣ B₁^4 := fun h => hpB₁ (hp_prime_int.dvd_of_dvd_pow h)
+      · have hpB4 : ¬ (↑p : ℤ) ∣ B₁^4 := fun h => hpB₁ (Int.Prime.dvd_pow' hp h)
         have hp5 : (↑p : ℤ) ∣ 5 := by
-          have : (↑p : ℤ) ∣ 5*B₁^4 := dvd_trans (dvd_pow_self (↑p) (by norm_num : 2 ≠ 0)) hp2_dvd
-          exact (hp_prime_int.dvd_or_dvd this).resolve_right hpB4
+          have hpd : (↑p : ℤ) ∣ 5*B₁^4 := by
+            have : (↑p : ℤ) ∣ (↑p : ℤ) ^ 2 := dvd_pow_self (↑p : ℤ) (by norm_num : 2 ≠ 0)
+            exact dvd_trans this hp2_dvd
+          exact (hp_prime_int.dvd_or_dvd hpd).resolve_right hpB4
         have hp_eq_5 : p = 5 := by
-          rcases (by norm_num : Nat.Prime 5).eq_one_or_self_of_dvd p (Int.natCast_dvd.mp hp5) with h | h
+          have hle : p ∣ 5 := Int.natCast_dvd.mp hp5
+          rcases (by norm_num : Nat.Prime 5).eq_one_or_self_of_dvd p hle with h | h
           · exact absurd h (by have := hp.two_le; omega)
           · exact h
         subst hp_eq_5
         have : (5 : ℤ) ∣ B₁^4 := by
-          have : (5 : ℤ)*5 ∣ 5*B₁^4 := by rw [show (5:ℤ)*5 = (5:ℤ)^2 from by ring]; exact hp2_dvd
+          have : (5 : ℤ)*5 ∣ 5*B₁^4 := by
+            show (5 : ℤ) ^ 2 ∣ 5 * B₁ ^ 4; exact hp2_dvd
           exact (mul_dvd_mul_iff_left (by norm_num : (5:ℤ) ≠ 0)).mp this
         exact hpB₁ (Int.Prime.dvd_pow' (by norm_num : Nat.Prime 5) this)
     -- Even-B descent chain (after gcd) — TODO
