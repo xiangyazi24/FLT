@@ -593,14 +593,14 @@ theorem quartic_plus_descent_step :
           · obtain ⟨t, rfl⟩ : 2∣a := ⟨a/2, by omega⟩
             obtain ⟨u, rfl⟩ : ∃ u, b = 2*u+1 := ⟨b/2, by omega⟩
             show ((2*t)^2 - (2*u+1)^2) % 2 = 1
-            have : (2*t)^2 - (2*u+1)^2 = 4*t^2 - 4*u^2 - 4*u - 1 := by ring
-            omega
+            have h_exp : (2*t)^2 - (2*u+1)^2 = 4*t^2 - 4*u^2 - 4*u - 1 := by ring
+            rw [h_exp]; omega
         · have hb_even : b % 2 = 0 := by omega
           obtain ⟨t, rfl⟩ : ∃ t, a = 2*t+1 := ⟨a/2, by omega⟩
           obtain ⟨u, rfl⟩ : 2∣b := ⟨b/2, by omega⟩
           show ((2*t+1)^2 - (2*u)^2) % 2 = 1
-          have : (2*t+1)^2 - (2*u)^2 = 4*t^2 + 4*t + 1 - 4*u^2 := by ring
-          omega
+          have h_exp : (2*t+1)^2 - (2*u)^2 = 4*t^2 + 4*t + 1 - 4*u^2 := by ring
+          rw [h_exp]; omega
       -- r-h and r+h both even
       have h2_sub : (2 : ℤ) ∣ ((2*j+1) - h) := by omega
       have h2_add : (2 : ℤ) ∣ ((2*j+1) + h) := by omega
@@ -636,8 +636,8 @@ theorem quartic_plus_descent_step :
         obtain ⟨p, hp, hpg⟩ := Nat.exists_prime_and_dvd hg_gt1.ne'
         have hpu : (↑p : ℤ) ∣ u := dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_left ..)
         have hpv : (↑p : ℤ) ∣ v := dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_right ..)
-        have hpr : (↑p : ℤ) ∣ (2*j+1) := by rwa [← huv_sum]; exact dvd_add hpu hpv
-        have hpb4 : (↑p : ℤ) ∣ b^4 := by rwa [← huv_prod]; exact dvd_mul_of_dvd_left hpu v
+        have hpr : (↑p : ℤ) ∣ (2*j+1) := by rw [← huv_sum]; exact dvd_add hpu hpv
+        have hpb4 : (↑p : ℤ) ∣ b^4 := by rw [← huv_prod]; exact dvd_mul_of_dvd_left hpu v
         have hpb : (↑p : ℤ) ∣ b := Int.Prime.dvd_pow' hp hpb4
         exact (Nat.prime_iff_prime_int.mp hp).not_unit (hcop_rb.isUnit_of_dvd' hpr hpb)
       -- pos_fourth → α,β → new QuarticPlusZ → B' < B
