@@ -477,6 +477,7 @@ theorem quartic_plus_descent_step :
     -- MN = 5 * B₁⁴ (via: 16MN = (4M)(4N) = UV = 5(4k)⁴ = 16·5B₁⁴)
     have hB₁_val : B₁ = 2 * k := by omega
     have hUV := UV_eq_five_mul_fourth heq
+    rw [hBk] at hUV  -- substitute B = 4*k in hUV so expressions match h4U/h4V
     have hMN_prod : M * N = 5 * B₁ ^ 4 := by
       suffices h : 16 * (M * N) = 16 * (5 * B₁ ^ 4) by omega
       have h1 : 4*M - (2*(2*j+1)^2+(4*k)^2-2*s) = 0 := by linarith
