@@ -479,20 +479,19 @@ theorem quartic_plus_descent_step :
     have hUV := UV_eq_five_mul_fourth heq
     have hMN_prod : M * N = 5 * B₁ ^ 4 := by
       suffices h : 16 * (M * N) = 16 * (5 * B₁ ^ 4) by omega
-      have h_4MN : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
-        have h1 : 4*M - (2*(2*j+1)^2+(4*k)^2-2*s) = 0 := by linarith
-        have h2 : 4*N - (2*(2*j+1)^2+(4*k)^2+2*s) = 0 := by linarith
-        have hp1 : (4*M - (2*(2*j+1)^2+(4*k)^2-2*s)) * (4*N) = 0 := by rw [h1]; ring
-        have hp2 : (2*(2*j+1)^2+(4*k)^2-2*s) * (4*N - (2*(2*j+1)^2+(4*k)^2+2*s)) = 0 := by
-          rw [h2]; ring
-        have h_expand : (4*M)*(4*N) =
-            (4*M - (2*(2*j+1)^2+(4*k)^2-2*s)) * (4*N) +
-            (2*(2*j+1)^2+(4*k)^2-2*s) * (4*N - (2*(2*j+1)^2+(4*k)^2+2*s)) +
-            (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := by ring
-        linarith [hUV, hp1, hp2, h_expand]
-      calc 16 * (M * N) = (4 * M) * (4 * N) := by ring
-        _ = 5 * (4 * k) ^ 4 := h_4MN
-        _ = 16 * (5 * B₁ ^ 4) := by rw [hB₁_val]; ring
+      have h1 : 4*M - (2*(2*j+1)^2+(4*k)^2-2*s) = 0 := by linarith
+      have h2 : 4*N - (2*(2*j+1)^2+(4*k)^2+2*s) = 0 := by linarith
+      have hp1 : (4*M - (2*(2*j+1)^2+(4*k)^2-2*s)) * (4*N) = 0 := by rw [h1]; ring
+      have hp2 : (2*(2*j+1)^2+(4*k)^2-2*s) * (4*N - (2*(2*j+1)^2+(4*k)^2+2*s)) = 0 := by
+        rw [h2]; ring
+      -- ring expands 16*M*N using M,N as opaque vars (after clear_value)
+      have h_ring : 16 * (M * N) =
+          (4*M - (2*(2*j+1)^2+(4*k)^2-2*s)) * (4*N) +
+          (2*(2*j+1)^2+(4*k)^2-2*s) * (4*N - (2*(2*j+1)^2+(4*k)^2+2*s)) +
+          (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := by ring
+      rw [hB₁_val]
+      linarith [hUV, hp1, hp2, h_ring,
+                show 5 * (4*k)^4 = 16 * (5 * (2*k)^4) from by ring]
     -- M, N > 0
     have hMpos : 0 < M := by
       by_contra hle; push_neg at hle
