@@ -593,14 +593,8 @@ theorem quartic_plus_descent_step :
           · obtain ⟨t, rfl⟩ : 2∣a := ⟨a/2, by omega⟩
             obtain ⟨u, rfl⟩ : ∃ u, b = 2*u+1 := ⟨b/2, by omega⟩
             show ((2*t)^2 - (2*u+1)^2) % 2 = 1
-            have h_exp : (2*t)^2 - (2*u+1)^2 = 2*(2*t^2 - 2*u^2 - 2*u - 1) + 1 := by ring
-            rw [h_exp]; omega
-        · have hb_even : b % 2 = 0 := by omega
-          obtain ⟨t, rfl⟩ : ∃ t, a = 2*t+1 := ⟨a/2, by omega⟩
-          obtain ⟨u, rfl⟩ : 2∣b := ⟨b/2, by omega⟩
-          show ((2*t+1)^2 - (2*u)^2) % 2 = 1
-          have h_exp : (2*t+1)^2 - (2*u)^2 = 2*(2*t^2 + 2*t - 2*u^2) + 1 := by ring
-          rw [h_exp]; omega
+            sorry -- ring to 2*X+1 form then omega (set h interaction issue)
+        · sorry -- symmetric case
       -- r-h and r+h both even
       have h2_sub : (2 : ℤ) ∣ ((2*j+1) - h) := by omega
       have h2_add : (2 : ℤ) ∣ ((2*j+1) + h) := by omega
@@ -640,8 +634,48 @@ theorem quartic_plus_descent_step :
         have hpb4 : (↑p : ℤ) ∣ b^4 := by rw [← huv_prod]; exact dvd_mul_of_dvd_left hpu v
         have hpb : (↑p : ℤ) ∣ b := Int.Prime.dvd_pow' hp hpb4
         exact (Nat.prime_iff_prime_int.mp hp).not_unit (hcop_rb.isUnit_of_dvd' hpr hpb)
-      -- pos_fourth → α,β → new QuarticPlusZ → B' < B
-      sorry
+      -- pos_fourth: u = α⁴, v = β⁴
+      obtain ⟨α, hα_pos, hα_eq⟩ := pos_fourth_of_coprime_mul_fourth huv_cop huv_prod hu_pos hv_pos
+      obtain ⟨β, hβ_pos, hβ_eq⟩ := pos_fourth_of_coprime_mul_fourth
+        (show Int.gcd v u = 1 by rwa [Int.gcd_comm]) (by rw [mul_comm]; exact huv_prod) hv_pos hu_pos
+      -- b = αβ
+      have hb_eq : b = α * β := by
+        apply eq_of_pos_fourth_eq hb (mul_pos hα_pos hβ_pos)
+        calc b^4 = u * v := huv_prod.symm
+          _ = α^4 * β^4 := by rw [hα_eq, hβ_eq]
+          _ = (α * β)^4 := by ring
+      -- New equation: a² = β⁴ + β²α² - α⁴
+      have hnew_eq : a^2 = β^4 + β^2 * α^2 - α^4 := by
+        have hh_val : h = β^4 - α^4 := by linarith [hα_eq, hβ_eq, huv_diff]
+        have ha2 : a^2 = b^2 + h := by simp only [h]; ring
+        rw [hb_eq] at ha2
+        linarith [show (α * β)^2 = α^2 * β^2 from by ring]
+      -- gcd(β, α) = 1
+      have hcop_βα : Int.gcd β α = 1 := by
+        rw [← Int.isCoprime_iff_gcd_eq_one]
+        have := Int.isCoprime_iff_gcd_eq_one.mpr huv_cop
+        rw [hα_eq, hβ_eq] at this
+        exact ((IsCoprime.pow_left_iff (by norm_num : 0 < 4)).mp
+          ((IsCoprime.pow_right_iff (by norm_num : 0 < 4)).mp
+            (isCoprime_comm.mp this)))
+      -- QuarticPlusZ β α a
+      refine ⟨β, α, a, ⟨hβ_pos, hα_pos, hcop_βα, hnew_eq⟩, ?_, ?_⟩
+      · -- Non-base
+        intro ⟨hβ1, hα1⟩; apply hnonbase
+        have hb1 : b = 1 := by rw [hb_eq, hα1, hβ1]; ring
+        have ha_sq : a^2 = 1 := by rw [hnew_eq, hα1, hβ1]; norm_num
+        have ha1 : a = 1 := by linarith [sq_nonneg (a - 1)]
+        rw [hBk]; constructor
+        · -- r = 1: u = v = 1, r = u+v = 2... wait, that gives r=2 which is even. Contradiction!
+          -- Actually if α=β=1: u=1, v=1, r=u+v=2. But r=2j+1 is odd. 2 is even. Contradiction!
+          exfalso; have : (2*j+1) = 2 := by linarith [huv_sum, hα_eq, hα1, hβ_eq, hβ1]; omega
+        · rfl -- B = 4k, already rfl'd
+      · -- B' < B: α.natAbs < (4*k).natAbs
+        have hα_le_b : α ≤ b := by rw [hb_eq]; exact le_mul_of_one_le_right hα_pos.le hβ_pos
+        have hb_le_B₁ : b ≤ B₁ := by rw [hB₁_eq]; exact le_mul_of_one_le_left hb.le ha
+        have hB₁_lt_B : B₁ < 4*k := by rw [hB₁_val]; nlinarith
+        have hα_lt : α < 4*k := by linarith
+        exact Int.natAbs_lt_natAbs_of_nonneg_of_lt hα_pos.le hα_lt
     · -- Case M = 5a⁴, N = b⁴: descent on a (symmetric)
       sorry
   · -- Odd B case (main case, fully proved)
