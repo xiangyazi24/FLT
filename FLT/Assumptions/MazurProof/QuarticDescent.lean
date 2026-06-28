@@ -584,7 +584,10 @@ theorem quartic_plus_descent_step :
         have hab_even : (a*b) % 2 = 0 := by rw [← hB₁_eq, hB₁_val]; omega
         rcases Int.emod_two_eq_zero_or_one a with ha | ha
         · rcases Int.emod_two_eq_zero_or_one b with hb | hb
-          · have := Int.dvd_coe_gcd ⟨a/2, by omega⟩ ⟨b/2, by omega⟩
+          · exfalso
+            have h2a : (2 : ℤ) ∣ a := ⟨a/2, by omega⟩
+            have h2b : (2 : ℤ) ∣ b := ⟨b/2, by omega⟩
+            have := Int.dvd_coe_gcd h2a h2b
             rw [hab_cop] at this; exact absurd this (by norm_num)
           · sorry -- a even, b odd → a²-b² odd (rfl + rw pattern mismatch)
         · sorry -- a odd, b even → a²-b² odd (same issue)
