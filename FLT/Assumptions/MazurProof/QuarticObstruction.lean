@@ -1,67 +1,67 @@
 import Mathlib
 import FLT.EllipticCurve.Torsion
-import scratch.QuarticD2
-import scratch.QuarticD3
-import scratch.QuarticD4
-import scratch.QuarticD5
-import scratch.QuarticD6
-import scratch.QuarticD7
+import FLT.Assumptions.MazurProof.DescentBridge
+import FLT.Assumptions.MazurProof.DescentBridgeN12
+import FLT.Assumptions.MazurProof.DescentBridgeN14
+import FLT.Assumptions.MazurProof.DescentBridgeN16
 
-/-! # Quartic Obstruction Lemmas
+/-! # Axiom 4 Assembly — Noncyclic Exclusions
 
-Supporting proofs for Axiom 4 (no ℤ/2 × ℤ/n for n ∈ {10,12,14,16}).
+Assembly of the four noncyclic exclusions for Axiom 4:
+  ¬ (ℤ/2 × ℤ/n ↪ E(ℚ)_tors)  for n ∈ {10, 12, 14, 16}.
 
-The Kubert parametrization of curves with full 2-torsion + Z/n point reduces
-to a quartic obstruction via discriminant conditions. The squeezed forms
-(QuarticD d=2-7) prove non-solvability for specific parameter families.
+Each case is proved via a separate descent bridge:
 
-TODO (2026-06-26): Verify exact mapping d ↔ n:
-  - Kubert family → parametric obstruction curve
-  - Obstruction curve → quartic form s⁴ + d²s² - d⁴ = t²
-  - Rational point ↔ non-degenerate Kubert parameter
+- **N=10**: Kubert parametrization → obstruction curve w²=u³+u²-u
+  (KubertBridgeN10.lean → DescentBridge.lean).
+  The quartic family s⁴+d²s²-d⁴=t² (d=2..7, in scratch/QuarticD*.lean) ALL
+  reduce to this same obstruction curve via u=(s/d)², w=st/d³.
+  They are auxiliary support for N=10 only, not separate N-values.
 
-Use CAS (SageMath/SymPy) to confirm equation reductions. If mapping is non-trivial,
-dispatch to Codex for the Kubert theory + reduction proofs.
+- **N=12**: Separate Kubert family with its own obstruction curve
+  w²=u³-u²-4u+4 (KubertBridgeN12.lean → DescentBridgeN12.lean).
+
+- **N=14**: Direct obstruction-point axioms (DescentBridgeN14.lean).
+  No genus-0 Kubert family; bridge uses obstruction curve w²=u³+u²-2u.
+
+- **N=16**: Direct obstruction-point axioms (DescentBridgeN16.lean).
+  No genus-0 Kubert family; bridge uses obstruction curve w²=u³-u²-u.
 -/
 
 open scoped WeierstrassCurve.Affine
 
 namespace MazurProof
 
-/-! ## Placeholder: QuarticD → Axiom 4 assembly
+/-! ## Individual case re-exports
 
-These lemmas will assemble the quartic proofs into Axiom 4's structure
-once the d ↔ n mapping is verified.
+Each theorem delegates to the corresponding descent bridge. -/
 
-Tentative mapping (TO BE VERIFIED):
-  - QuarticD2 (s⁴ + 4s² - 16 = t²) → possibly n = 12 or auxiliary form
-  - QuarticD3 (s⁴ + 9s² - 81 = t²) → possibly n = ?
-  - ...
-  - QuarticD7 (s⁴ + 49s² - 2401 = t²) → possibly n = ?
--/
+theorem noncyclic_Z2xZ10 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ ∃ f : (ZMod 2 × ZMod 10) →+ (E⁄ℚ).Point, Function.Injective f :=
+  no_Z2_cross_Z10_from_descent E
 
--- TODO (priority): Dispatch to Codex for Kubert theory
--- Once d ↔ n mapping is established, wire as follows:
+theorem noncyclic_Z2xZ12 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ ∃ f : ZMod 2 × ZMod 12 →+ (E⁄ℚ).Point, Function.Injective f :=
+  no_Z2_cross_Z12_from_descent E
 
-theorem quartic_d2_supports_axiom_4_n12 :
-    ¬∃ f : ZMod 2 × ZMod 12 →+ (WeierstrassCurve ℚ)⁄ℚ.Point, Function.Injective f := by
-  sorry  -- reduce to QuarticD2 via Kubert parametrization
-  -- This should eventually use: quartic_no_sol_d2
+theorem noncyclic_Z2xZ14 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ ∃ f : ZMod 2 × ZMod 14 →+ (E⁄ℚ).Point, Function.Injective f :=
+  no_Z2_cross_Z14_from_descent E
 
-theorem quartic_d3_supports_axiom_4_n14 :
-    ¬∃ f : ZMod 2 × ZMod 14 →+ (WeierstrassCurve ℚ)⁄ℚ.Point, Function.Injective f := by
-  sorry  -- reduce to QuarticD3 via Kubert parametrization
+theorem noncyclic_Z2xZ16 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ ∃ f : ZMod 2 × ZMod 16 →+ (E⁄ℚ).Point, Function.Injective f :=
+  no_Z2_cross_Z16_from_descent E
 
-theorem quartic_d_supports_axiom_4 (n : ℕ) (hn : n ∈ [10, 12, 14, 16]) :
-    ¬∃ f : ZMod 2 × ZMod n →+ (WeierstrassCurve ℚ)⁄ℚ.Point, Function.Injective f := by
-  interval_cases n  -- Case-split: n = 10, 12, 14, 16
-  -- Case n = 10: d=2 (from Kubert: n = 2(d+3), so d=2 → n=10)
-  case n_10 => exact quartic_d2_supports_axiom_4_n10
-  -- Case n = 12: d=3 (from Kubert: d=3 → n=12)
-  case n_12 => exact quartic_d3_supports_axiom_4_n12
-  -- Case n = 14: d=4 (from Kubert: d=4 → n=14)
-  case n_14 => exact quartic_d4_supports_axiom_4_n14
-  -- Case n = 16: d=5 (from Kubert: d=5 → n=16)
-  case n_16 => exact quartic_d5_supports_axiom_4_n16
+/-! ## Axiom 4 assembly -/
+
+/-- Axiom 4: no elliptic curve over ℚ has ℤ/2 × ℤ/n torsion for n ∈ {10,12,14,16}. -/
+theorem quartic_d_supports_axiom_4 (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (n : ℕ) (hn : n = 10 ∨ n = 12 ∨ n = 14 ∨ n = 16) :
+    ¬ ∃ f : ZMod 2 × ZMod n →+ (E⁄ℚ).Point, Function.Injective f := by
+  rcases hn with rfl | rfl | rfl | rfl
+  · exact noncyclic_Z2xZ10 E
+  · exact noncyclic_Z2xZ12 E
+  · exact noncyclic_Z2xZ14 E
+  · exact noncyclic_Z2xZ16 E
 
 end MazurProof
