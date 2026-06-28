@@ -1,52 +1,200 @@
-# Q2014 (dm4): Mathlib division polynomials and the Weil-pairing shortcut question
-
-## Scope checked
-
-Project branch:
-
-```text
-repo:   xiangyazi24/FLT
-branch: ai-scratch
-```
-
-The project pins Mathlib at commit:
-
-```text
-96fd0fff3b8837985ae21dd02e712cb5df72ec05
-```
-
-Relevant Mathlib files at that commit:
-
-```text
-Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Basic.lean
-Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Degree.lean
-```
+# Q2031 (dm4): pure-algebra Weil-pairing consequence in Lean
 
 ## Executive answer
 
-Mathlib has division-polynomial definitions, but the current API is **not** a shortcut to a formal Weil pairing.
+Yes.  The proof you described can be isolated as a small pure-algebra lemma.  The key is to **not** formalize elliptic curves, divisors, or the Weil pairing itself here.  Instead, package the abstract pairing data as follows:
 
-The exact division-polynomial declarations are Unicode-name based:
+1. a group `Γ` acting on the torsion module `T` and on an extension field/monoid `L`;
+2. a pairing `e : T → T → L`;
+3. equivariance: `σ • e P Q = e (σ • P) (σ • Q)`;
+4. all torsion points are fixed: `σ • P = P` for every `P : T`;
+5. a chosen basis pair `P,Q` such that `e P Q` is a primitive `m`-th root;
+6. a descent statement saying that every `Γ`-fixed element of `L` comes from the base field/monoid `K` through an injective monoid map `K →* L`.
 
-```lean
-WeierstrassCurve.ψ₂
-WeierstrassCurve.Ψ₂Sq
-WeierstrassCurve.Ψ₃
-WeierstrassCurve.preΨ₄
-WeierstrassCurve.preΨ'
-WeierstrassCurve.preΨ
-WeierstrassCurve.ΨSq
-WeierstrassCurve.Ψ
-WeierstrassCurve.Φ
-WeierstrassCurve.ψ
-WeierstrassCurve.φ
+Then the proof is exactly:
+
+```text
+σ(e(P,Q)) = e(σP, σQ) = e(P,Q),
 ```
 
-I did **not** find a declaration literally named `divisionPolynomial`, nor ASCII declarations named `psi` or `phi`.
+so `e(P,Q)` is fixed; descend it to `ζ : K`; transfer `IsPrimitiveRoot` back across the injective map.
 
-Also, `ω_n` is explicitly marked TODO in the file, and I did not find a ready theorem saying that evaluating `ψ_m` at a point is equivalent to `[m]P = 0`.
+The only root-of-unity API needed is `IsPrimitiveRoot` plus, optionally, `rootsOfUnity` via `IsPrimitiveRoot.toRootsOfUnity`.
 
-For the Mazur proof, the minimal route is still to axiomatize the final Weil-pairing consequence:
+## Concrete Lean 4 code
+
+This is deliberately pure algebra.  It does not mention elliptic curves.
+
+```lean
+import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+
+namespace MazurProof
+
+/-!
+# Pure algebra core of the Weil-pairing argument
+
+This file proves the abstract final step:
+
+* a Galois-equivariant pairing `e : T → T → L`,
+* all points of `T` are fixed by the Galois action,
+* for some basis pair `P,Q`, `e P Q` is a primitive `m`-th root,
+* every fixed element of `L` descends to the base `K`,
+
+imply that the base contains a primitive `m`-th root of unity.
+
+No elliptic curves, no divisors, no Miller functions.
+-/
+
+section PrimitiveRootTransport
+
+variable {K L : Type*} [CommMonoid K] [CommMonoid L]
+
+/--
+Primitive-root structure descends along an injective monoid hom.
+
+This is the tiny algebra lemma used after the fixed value of the pairing is
+identified with an element of the base field.
+-/
+theorem isPrimitiveRoot_of_injective_monoidHom
+    (ι : K →* L) (hι : Function.Injective ι)
+    {ζ : K} {m : ℕ}
+    (hζ : IsPrimitiveRoot (ι ζ) m) :
+    IsPrimitiveRoot ζ m := by
+  refine ⟨?pow_eq_one, ?dvd_of_pow_eq_one⟩
+  · apply hι
+    rw [map_pow, hζ.pow_eq_one, map_one]
+  · intro n hn
+    apply hζ.dvd_of_pow_eq_one
+    rw [← map_pow, hn, map_one]
+
+end PrimitiveRootTransport
+
+section AbstractPairing
+
+variable {K L Γ T : Type*}
+variable [CommMonoid K] [CommMonoid L]
+variable [Group Γ] [SMul Γ T] [SMul Γ L]
+
+/--
+The minimal abstract data needed from the Weil pairing.
+
+`K` is the base multiplicative monoid, typically `ℚ` or `ℚˣ` depending on the
+chosen formulation.  `L` is the ambient field/monoid containing the pairing
+values.  `Γ` is the Galois group acting on `T` and on `L`.
+
+The field-theoretic fixed-field input is isolated in `fixed_to_base`:
+every `Γ`-fixed element of `L` is in the image of `baseMap`.
+
+The mathematical assertion "nondegenerate alternating pairing on a rank-two
+free `ZMod m` module" is used here only through the one consequence
+`primitive_on_basis`: for a chosen basis `P,Q`, the value `e P Q` is primitive.
+-/
+structure AbstractWeilPairingData (K L Γ T : Type*)
+    [CommMonoid K] [CommMonoid L]
+    [Group Γ] [SMul Γ T] [SMul Γ L]
+    (m : ℕ) where
+  baseMap : K →* L
+  baseMap_injective : Function.Injective baseMap
+  fixed_to_base : ∀ z : L, (∀ σ : Γ, σ • z = z) → ∃ a : K, baseMap a = z
+  P : T
+  Q : T
+  e : T → T → L
+  T_fixed : ∀ σ : Γ, ∀ R : T, σ • R = R
+  e_equivariant : ∀ σ : Γ, ∀ R S : T, σ • e R S = e (σ • R) (σ • S)
+  primitive_on_basis : IsPrimitiveRoot (e P Q) m
+
+/--
+If a Galois-equivariant pairing is primitive on a fixed basis pair, then the
+base contains a primitive `m`-th root of unity.
+-/
+theorem primitive_root_in_base_of_abstract_weil_pairing
+    {m : ℕ}
+    (D : AbstractWeilPairingData K L Γ T m) :
+    ∃ ζ : K, IsPrimitiveRoot ζ m := by
+  let μ : L := D.e D.P D.Q
+  have hμ_fixed : ∀ σ : Γ, σ • μ = μ := by
+    intro σ
+    dsimp [μ]
+    rw [D.e_equivariant σ D.P D.Q, D.T_fixed σ D.P, D.T_fixed σ D.Q]
+  rcases D.fixed_to_base μ hμ_fixed with ⟨ζ, hζ⟩
+  refine ⟨ζ, ?_⟩
+  apply isPrimitiveRoot_of_injective_monoidHom D.baseMap D.baseMap_injective
+  simpa [μ, hζ] using D.primitive_on_basis
+
+/--
+Same conclusion, but returning an element of Mathlib's `rootsOfUnity m K`
+subgroup.  This is sometimes a more literal spelling of `μ_m ⊂ K`.
+-/
+theorem primitive_root_in_rootsOfUnity_of_abstract_weil_pairing
+    {m : ℕ} (hm : 0 < m)
+    (D : AbstractWeilPairingData K L Γ T m) :
+    ∃ ζ : rootsOfUnity m K, IsPrimitiveRoot (((ζ : rootsOfUnity m K) : Kˣ) : K) m := by
+  rcases primitive_root_in_base_of_abstract_weil_pairing D with ⟨ζ, hζ⟩
+  haveI : NeZero m := ⟨Nat.ne_of_gt hm⟩
+  refine ⟨hζ.toRootsOfUnity, ?_⟩
+  simpa using hζ
+
+end AbstractPairing
+
+end MazurProof
+```
+
+## How this corresponds to the mathematical proof
+
+The mathematical proof is exactly the Lean proof of `primitive_root_in_base_of_abstract_weil_pairing`:
+
+```lean
+  let μ : L := D.e D.P D.Q
+  have hμ_fixed : ∀ σ : Γ, σ • μ = μ := by
+    intro σ
+    dsimp [μ]
+    rw [D.e_equivariant σ D.P D.Q, D.T_fixed σ D.P, D.T_fixed σ D.Q]
+```
+
+This is the line-by-line formal version of:
+
+```text
+σ(e(P,Q)) = e(σP,σQ) = e(P,Q).
+```
+
+Then:
+
+```lean
+  rcases D.fixed_to_base μ hμ_fixed with ⟨ζ, hζ⟩
+```
+
+is the fixed-field step: the fixed value `μ` is the image of some base element `ζ`.
+
+Finally:
+
+```lean
+  apply isPrimitiveRoot_of_injective_monoidHom D.baseMap D.baseMap_injective
+  simpa [μ, hζ] using D.primitive_on_basis
+```
+
+transports `IsPrimitiveRoot` from the ambient field/monoid back to the base using injectivity of the base map.
+
+## Where the actual Weil-pairing work is hidden
+
+This pure lemma assumes:
+
+```lean
+primitive_on_basis : IsPrimitiveRoot (e P Q) m
+```
+
+In the real elliptic-curve theorem, that is where the nondegenerate alternating pairing on a free rank-two `ZMod m` module enters.  You can discharge it separately from a statement such as:
+
+```lean
+-- schematic
+axiom primitive_on_basis_of_nondegenerate_alternating_pairing
+    {m : ℕ} (T : Type*) [AddCommGroup T] [Module (ZMod m) T]
+    (b : Basis (Fin 2) (ZMod m) T)
+    (e : T → T → L)
+    -- bilinear, alternating, nondegenerate, values in rootsOfUnity m L
+    : IsPrimitiveRoot (e (b 0) (b 1)) m
+```
+
+But for the Mazur proof axiom assembly, you probably do **not** need this lower-level theorem.  The minimal useful axiom remains the elliptic-curve input:
 
 ```lean
 axiom full_rational_torsion_forces_primitive_root
@@ -56,218 +204,22 @@ axiom full_rational_torsion_forces_primitive_root
     ∃ ζ : ℚ, IsPrimitiveRoot ζ m
 ```
 
-That is the exact implication needed downstream:
+The code above is a good intermediate target if you want to split that axiom into:
 
-```text
-full rational m-torsion over Q  ==>  Q contains a primitive m-th root of unity.
-```
+1. an elliptic-curve Weil-pairing existence/nondegeneracy axiom producing `AbstractWeilPairingData`; and
+2. this fully formal pure-algebra theorem.
 
-## (1) Exact Mathlib definitions found
+## Suggested split of the current axiom
 
-### `ψ₂`
-
-```lean
-/-- The `2`-division polynomial `ψ₂ = Ψ₂`. -/
-noncomputable def ψ₂ : R[X][Y] :=
-  W.toAffine.polynomialY
-```
-
-For a general Weierstrass curve, this is the affine polynomial `2Y + a₁X + a₃`.
-
-### `Ψ₂Sq`
+Instead of one black-box axiom, use:
 
 ```lean
-/-- The univariate polynomial `Ψ₂Sq` congruent to `ψ₂²`. -/
-noncomputable def Ψ₂Sq : R[X] :=
-  C 4 * X ^ 3 + C W.b₂ * X ^ 2 + C (2 * W.b₄) * X + C W.b₆
-```
-
-Useful lemmas include:
-
-```lean
-C_Ψ₂Sq
-ψ₂_sq
-Affine.CoordinateRing.mk_ψ₂_sq
-Ψ₂Sq_eq
-```
-
-### `Ψ₃`
-
-```lean
-/-- The `3`-division polynomial `ψ₃ = Ψ₃`. -/
-noncomputable def Ψ₃ : R[X] :=
-  3 * X ^ 4 + C W.b₂ * X ^ 3 + 3 * C W.b₄ * X ^ 2 +
-    3 * C W.b₆ * X + C W.b₈
-```
-
-### `preΨ₄`
-
-```lean
-/-- The univariate polynomial `preΨ₄`, which is auxiliary to the 4-division polynomial
-`ψ₄ = Ψ₄ = preΨ₄ψ₂`. -/
-noncomputable def preΨ₄ : R[X] :=
-  2 * X ^ 6 + C W.b₂ * X ^ 5 + 5 * C W.b₄ * X ^ 4 +
-    10 * C W.b₆ * X ^ 3 + 10 * C W.b₈ * X ^ 2 +
-    C (W.b₂ * W.b₈ - W.b₄ * W.b₆) * X +
-    C (W.b₄ * W.b₈ - W.b₆ ^ 2)
-```
-
-### `preΨ'` and `preΨ`
-
-```lean
-noncomputable def preΨ' (n : ℕ) : R[X] :=
-  preNormEDS' (W.Ψ₂Sq ^ 2) W.Ψ₃ W.preΨ₄ n
-
-noncomputable def preΨ (n : ℤ) : R[X] :=
-  preNormEDS (W.Ψ₂Sq ^ 2) W.Ψ₃ W.preΨ₄ n
-```
-
-There are simp lemmas for `0`, `1`, `2`, `3`, `4`, negation, and the even/odd recurrences.
-
-### `ΨSq`
-
-```lean
-/-- The univariate polynomials `ΨSqₙ` congruent to `ψₙ²`. -/
-noncomputable def ΨSq (n : ℤ) : R[X] :=
-  W.preΨ n ^ 2 * if Even n then W.Ψ₂Sq else 1
-```
-
-Important coordinate-ring lemma:
-
-```lean
-Affine.CoordinateRing.mk_Ψ_sq
-```
-
-### `Ψ`
-
-```lean
-/-- The bivariate polynomials `Ψₙ` congruent to the `n`-division polynomials `ψₙ`. -/
-protected noncomputable def Ψ (n : ℤ) : R[X][Y] :=
-  C (W.preΨ n) * if Even n then W.ψ₂ else 1
-```
-
-### `Φ`
-
-```lean
-/-- The univariate polynomials `Φₙ` congruent to `φₙ`. -/
-protected noncomputable def Φ (n : ℤ) : R[X] :=
-  X * W.ΨSq n - W.preΨ (n + 1) * W.preΨ (n - 1) *
-    if Even n then 1 else W.Ψ₂Sq
-```
-
-### `ψ`
-
-```lean
-/-- The bivariate `n`-division polynomials `ψₙ`. -/
-protected noncomputable def ψ (n : ℤ) : R[X][Y] :=
-  normEDS W.ψ₂ (C W.Ψ₃) (C W.preΨ₄) n
-```
-
-Important lemmas include:
-
-```lean
-ψ_zero, ψ_one, ψ_two, ψ_three, ψ_four
-ψ_neg, ψ_even, ψ_odd
-Affine.CoordinateRing.mk_ψ
-```
-
-### `φ`
-
-```lean
-/-- The bivariate polynomials `φₙ`. -/
-protected noncomputable def φ (n : ℤ) : R[X][Y] :=
-  C X * W.ψ n ^ 2 - W.ψ (n + 1) * W.ψ (n - 1)
-```
-
-Important lemma:
-
-```lean
-Affine.CoordinateRing.mk_φ
-```
-
-### `ω`
-
-`Basic.lean` explicitly says `TODO: the bivariate polynomials ω_n`.  So the full multiplication-by-n coordinate package is not finished in this file.
-
-### `Degree.lean`
-
-`Degree.lean` proves leading coefficient and degree statements for `preΨ`, `ΨSq`, and `Φ`, for example:
-
-```lean
-natDegree_preΨ_le
-coeff_preΨ
-natDegree_preΨ
-leadingCoeff_preΨ
-natDegree_ΨSq_le
-coeff_ΨSq
-natDegree_ΨSq
-leadingCoeff_ΨSq
-natDegree_Φ_le
-coeff_Φ
-natDegree_Φ
-leadingCoeff_Φ
-```
-
-This is degree infrastructure, not pairing infrastructure.
-
-## What I did not find
-
-I did not find ready-made declarations with names like:
-
-```lean
-mem_torsion_iff_psi_eq_zero
-psi_roots_eq_torsion
-divisionPolynomial_roots
-weil_pairing
-miller
-```
-
-The current Mathlib files define the polynomials, prove recurrence/congruence/base-change facts, and prove degree facts.  They do not currently construct the Weil pairing.
-
-## (2) Can Miller functions be defined purely using division polynomials?
-
-Not in a way that avoids the real missing work.
-
-Division polynomials mainly give the multiplication-by-n map.  Classically one has formulas of the form
-
-```text
-x([n]R) = φ_n(R) / ψ_n(R)^2
-```
-
-and a corresponding `y`-coordinate formula involving `ω_n`.  But the Miller function used in the Weil pairing is a rational function attached to a chosen point `P`, with divisor data depending on `P`.  It is normally built by products of tangent/secant line functions along an addition chain.
-
-The global polynomial `ψ_m` vanishes on the whole m-torsion locus.  It does not, by itself, give the function attached to a single divisor such as `m[P] - m[O]`.
-
-You could define a computational Miller-value function on affine points using explicit line evaluations and many nonzero-denominator hypotheses.  But proving independence of choices, bilinearity, alternatingness, Galois equivariance, and primitive-root output would essentially reprove divisor/function-field facts in coordinates.
-
-So for the Mazur proof, this is not shorter than keeping the theorem-level axiom.
-
-## (3) Is there a self-contained formula for `e_m` just from `ψ_n` evaluations?
-
-Not a clean generic one in the current Mathlib API.
-
-There are explicit computational formulas for pairings, but they use more than the standard one-point division polynomials `ψ_n`.  They need line functions, denominator choices, addition formulas, or generalized two-point objects such as elliptic nets / net polynomials.
-
-The standard `ψ_n`, `φ_n`, and `ω_n` package gives multiplication-by-n coordinates, not directly the alternating pairing
-
-```text
-E[m] × E[m] → μ_m.
-```
-
-For small `m` one can write special coordinate formulas, but that does not give a uniform formal route for arbitrary `m` in the Mazur proof.
-
-## Practical recommendation
-
-Do **not** try to discharge the Weil-pairing axiom by building Miller functions from division polynomials right now.
-
-Keep the minimal axiom:
-
-```lean
-axiom full_rational_torsion_forces_primitive_root
+axiom full_rational_torsion_gives_abstract_weil_pairing_data
     (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
     (hm : 0 < m)
     (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
+    -- returns appropriate `AbstractWeilPairingData ℚ L Γ T m`
+    True
 ```
 
-Document it as the determinant/cyclotomic-character consequence of the Weil pairing.  The existing division-polynomial API may eventually help formalize multiplication-by-n and torsion schemes, but it is not yet a short path to a formal Weil pairing.
+Then the pure theorem above closes the field-of-definition/root-of-unity part.  In practice, since the concrete `L`, `Γ`, and `T` still require elliptic-curve/Galois infrastructure, the current direct axiom is still the shortest route.  But this Round-3 lemma cleanly separates the genuinely formal algebra from the elliptic-curve content.
