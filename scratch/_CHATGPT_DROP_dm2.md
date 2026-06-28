@@ -1,104 +1,30 @@
-# Q1572 (dm2/dm4): architecture for sharing the odd/even quartic descent
+# Q1739 (dm2/dm4): `coprime_uv` for the halved odd/odd case
 
 ## Verdict
 
-Yes, this is worth refactoring, but **not with the exact `descent_from_coprime_pair` signature proposed in the question**.
-
-Do **not** duplicate the full 130-line descent chain permanently.  The right split is:
-
-1. Keep the odd/even normalization code as thin branch-specific wrappers.
-2. Extract the genuinely common proof only after the branch has produced an **oriented fourth-power split** and the exact algebraic identity used by the descent.
-3. Make the extracted core return a descent measured against the normalized parameter `C`, not directly against the original branch parameter `B`.
-
-So the core should prove roughly:
+Do **not** try to reuse `coprime_rh` directly.  The obstruction is real: that lemma is for the unhalved factor pair and assumes the parity package in which the auxiliary `h` is even.  In the even-`B` branch here, the natural `h = a^2 - b^2` is odd, so the right pair is
 
 ```lean
-B'.natAbs < C.natAbs
+u = (r - h) / 2
+v = (r + h) / 2
 ```
 
-Then the wrappers finish the case-specific bound:
+and the proof should be based on
 
 ```lean
--- odd branch: C = B
-B'.natAbs < B.natAbs
-
--- even branch: C = B₁ and B₁ < B
-B'.natAbs < B₁.natAbs < B.natAbs
+u + v = r
+u * v = b ^ 4
 ```
 
-This avoids threading `B`, `B₁`, `/4`, and divisibility facts through the common 100-line payload.
-
-## Why the proposed boundary is too high-level
-
-The proposed theorem starts with:
+The clean lemma is therefore a new `coprime_uv_of_prod`: if you already have the product identity, it proves the gcd immediately.  I also include a wrapper `coprime_uv` for the common local identity
 
 ```lean
-private theorem descent_from_coprime_pair {r B s F₁ F₂ C : ℤ}
-    ...
-    (hF_prod : F₁ * F₂ = 5 * C ^ 4)
-    (hF_cop : Int.gcd F₁ F₂ = 1)
-    ...
-    (hC_dvd_B : C ∣ B)
-    (hsum : F₁ + F₂ = 4 * r ^ 2 + 2 * C ^ 2)
-    ...
+r ^ 2 = h ^ 2 + 4 * b ^ 4
 ```
 
-This mixes three different layers:
+which derives `u * v = b ^ 4` from oddness of `r` and `h`.
 
-1. original quartic data: `r B s`, `heq`, `hr_odd`, `hnonbase`;
-2. normalized factor-pair data: `F₁ F₂ C`, product, gcd, positivity;
-3. post-split descent data: `a b`, the `h4r2` identity, `h`, `r² = h² + b⁴`, and the new smaller solution.
-
-That makes the theorem brittle.  In particular, the `hsum` hypothesis is not stable across the odd/even normalization.
-
-For the odd raw pair
-
-```lean
-U = 2 * r ^ 2 + B ^ 2 - 2 * s
-V = 2 * r ^ 2 + B ^ 2 + 2 * s
-C = B
-```
-
-you naturally get
-
-```lean
-U + V = 4 * r ^ 2 + 2 * C ^ 2
-U * V = 5 * C ^ 4
-```
-
-But for the even normalized pair
-
-```lean
-M = U / 4
-N = V / 4
-C = B₁        -- usually B = 2 * B₁, or stronger divisibility upstream
-```
-
-the sum is typically
-
-```lean
-M + N = r ^ 2 + 2 * C ^ 2
-```
-
-not
-
-```lean
-M + N = 4 * r ^ 2 + 2 * C ^ 2.
-```
-
-So if the shared theorem assumes `F₁ + F₂ = 4*r^2 + 2*C^2`, it is secretly an odd-branch theorem.  If the even branch really has the same later identity
-
-```lean
-4 * r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4
-```
-
-then pass **that identity directly** to the shared core.  Do not force both branches through the same `hsum` statement.
-
-## Recommended extraction boundary
-
-Extract the proof after `coprime_factor_5_fourth` has produced an oriented split and after the branch-specific algebra has produced the descent identity.
-
-The common core should look like this, modulo the exact names already in the file:
+## Concrete Lean code
 
 ```lean
 import Mathlib
@@ -106,270 +32,168 @@ import Mathlib
 namespace FLT.DM4
 
 /--
-The actual branch-free descent payload.
-
-This theorem should contain the long shared chain:
-
-* define `h`, usually from `(a^2 - b^2) / 2`;
-* prove `r^2 = h^2 + b^4`;
-* prove the needed coprimality, e.g. `coprime_rh`;
-* apply the positive fourth-power/Pythagorean step;
-* build the new `QuarticPlusZ` solution;
-* prove the new solution is non-base;
-* prove the new measure is smaller than `C`.
-
-It should not know whether `C` came from `B` or from `B/2`.
+A tiny coercion helper: if a natural number, viewed as an integer, divides `1`,
+then it is `1`.
 -/
-private theorem descent_from_oriented_h4r2
-    {r C a b : ℤ}
-    (hr : 0 < r)
-    (hC : 0 < C)
-    (hcop_rC : Int.gcd r C = 1)
-    (ha : 0 < a)
-    (hb : 0 < b)
-    (hC_eq : C = a * b)
-    (hab_cop : Int.gcd a b = 1)
-    (h4r2 : 4 * r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4)
-    -- Use the exact minimal non-base/size hypothesis the shared proof really needs.
-    -- Prefer `1 < C.natAbs` or `¬ BaseZ r C` over the original `¬ BaseZ r B`.
-    (hnonbaseC : ¬ BaseZ r C) :
-    ∃ r' B' s',
-      QuarticPlusZ r' B' s' ∧
-      ¬ BaseZ r' B' ∧
-      B'.natAbs < C.natAbs := by
-  -- Move the existing shared 100-ish lines here.
-  -- This theorem should start exactly where the odd/even proofs become textually identical.
-  sorry
+private lemma nat_eq_one_of_coe_int_dvd_one {d : ℕ}
+    (hd : (d : ℤ) ∣ (1 : ℤ)) : d = 1 := by
+  rcases hd with ⟨k, hk⟩
+  have hd_nonneg : 0 ≤ (d : ℤ) := by
+    exact_mod_cast Nat.zero_le d
+  have hd_ne_zero : (d : ℤ) ≠ 0 := by
+    intro hzero
+    rw [hzero] at hk
+    norm_num at hk
+  have hd_pos : 0 < (d : ℤ) :=
+    lt_of_le_of_ne hd_nonneg (Ne.symm hd_ne_zero)
+  have hk_pos : 0 < k := by
+    nlinarith [hk, hd_pos]
+  have hk_ge_one : 1 ≤ k := by omega
+  have hd_le_one : (d : ℤ) ≤ 1 := by
+    nlinarith [hk, hd_pos, hk_ge_one]
+  have hd_ge_one : 1 ≤ (d : ℤ) := by omega
+  have hd_eq : (d : ℤ) = 1 := by omega
+  exact_mod_cast hd_eq
+
+/--
+If `a` is coprime to `b`, then it is coprime to every power of `b`.
+This is just the `Nat.Coprime.pow_right` API, transported through `Int.gcd`.
+-/
+private lemma int_gcd_pow_right_eq_one {a b : ℤ}
+    (hcop : Int.gcd a b = 1) (n : ℕ) :
+    Int.gcd a (b ^ n) = 1 := by
+  have hcopN : Nat.Coprime a.natAbs b.natAbs := by
+    simpa [Int.gcd, Nat.Coprime] using hcop
+  have hpowN : Nat.Coprime a.natAbs ((b ^ n).natAbs) := by
+    simpa [Int.natAbs_pow] using hcopN.pow_right n
+  simpa [Int.gcd, Nat.Coprime] using hpowN
+
+/--
+Useful when the branch gives `b ∣ B₁` and `gcd r B₁ = 1`.
+-/
+private lemma int_gcd_eq_one_of_right_dvd {r b B : ℤ}
+    (hcop : Int.gcd r B = 1) (hbB : b ∣ B) :
+    Int.gcd r b = 1 := by
+  let d : ℕ := Int.gcd r b
+  have hd_r : (d : ℤ) ∣ r := by
+    dsimp [d]
+    exact Int.gcd_dvd_left r b
+  have hd_b : (d : ℤ) ∣ b := by
+    dsimp [d]
+    exact Int.gcd_dvd_right r b
+  have hd_B : (d : ℤ) ∣ B := dvd_trans hd_b hbB
+  have hd_gcd : (d : ℤ) ∣ (Int.gcd r B : ℤ) :=
+    Int.dvd_coe_gcd hd_r hd_B
+  rw [hcop] at hd_gcd
+  change d = 1
+  exact nat_eq_one_of_coe_int_dvd_one hd_gcd
+
+/--
+Core halved-pair lemma.
+
+Use this version if the even branch has already established
+
+`((r - h) / 2) * ((r + h) / 2) = b ^ 4`.
+
+The proof is exactly the prime-divisor argument in gcd form:
+if `d = gcd u v`, then `d ∣ u + v = r` and `d ∣ u*v = b^4`.
+Since `gcd r b = 1`, also `gcd r (b^4) = 1`, hence `d = 1`.
+-/
+private theorem coprime_uv_of_prod {r h b : ℤ}
+    (hr_odd : r % 2 = 1) (hh_odd : h % 2 = 1)
+    (hcop : Int.gcd r b = 1)
+    (huv : ((r - h) / 2) * ((r + h) / 2) = b ^ 4) :
+    Int.gcd ((r - h) / 2) ((r + h) / 2) = 1 := by
+  let u : ℤ := (r - h) / 2
+  let v : ℤ := (r + h) / 2
+
+  have hsum : u + v = r := by
+    dsimp [u, v]
+    omega
+
+  have hprod : u * v = b ^ 4 := by
+    simpa [u, v] using huv
+
+  let d : ℕ := Int.gcd u v
+
+  have hd_u : (d : ℤ) ∣ u := by
+    dsimp [d]
+    exact Int.gcd_dvd_left u v
+  have hd_v : (d : ℤ) ∣ v := by
+    dsimp [d]
+    exact Int.gcd_dvd_right u v
+
+  have hd_r : (d : ℤ) ∣ r := by
+    have hdiv : (d : ℤ) ∣ u + v := dvd_add hd_u hd_v
+    simpa [hsum] using hdiv
+
+  have hd_b4 : (d : ℤ) ∣ b ^ 4 := by
+    have hdiv : (d : ℤ) ∣ u * v := dvd_mul_of_dvd_left hd_u v
+    simpa [hprod] using hdiv
+
+  have hcop_pow : Int.gcd r (b ^ 4) = 1 :=
+    int_gcd_pow_right_eq_one (a := r) (b := b) hcop 4
+
+  have hd_gcd : (d : ℤ) ∣ (Int.gcd r (b ^ 4) : ℤ) :=
+    Int.dvd_coe_gcd hd_r hd_b4
+  rw [hcop_pow] at hd_gcd
+
+  change d = 1
+  exact nat_eq_one_of_coe_int_dvd_one hd_gcd
+
+/--
+Wrapper form when the local identity is
+
+`r^2 = h^2 + 4*b^4`.
+
+Because `r` and `h` are both odd, `r-h` and `r+h` are both divisible by `2`,
+so the product of the halves is exactly `b^4`.
+-/
+private theorem coprime_uv {r h b : ℤ}
+    (hr_odd : r % 2 = 1) (hh_odd : h % 2 = 1)
+    (hcop : Int.gcd r b = 1)
+    (heq : r ^ 2 = h ^ 2 + 4 * b ^ 4) :
+    Int.gcd ((r - h) / 2) ((r + h) / 2) = 1 := by
+  have hminus : r - h = 2 * ((r - h) / 2) := by
+    omega
+  have hplus : r + h = 2 * ((r + h) / 2) := by
+    omega
+
+  have huv : ((r - h) / 2) * ((r + h) / 2) = b ^ 4 := by
+    have hdiff : (r - h) * (r + h) = 4 * b ^ 4 := by
+      nlinarith [heq]
+    nlinarith [hminus, hplus, hdiff]
+
+  exact coprime_uv_of_prod hr_odd hh_odd hcop huv
 
 end FLT.DM4
 ```
 
-The exact `hnonbaseC` hypothesis may be too strong or too weak depending on your current definitions.  The important rule is: **pass the precise thing the common proof needs**, not the original branch-level `hnonbase : ¬ BaseZ r B` unless the common proof literally uses that exact statement.
+## How I would use it in the even branch
 
-Very often the right replacement is one of:
-
-```lean
-( hC_gt_one : 1 < C.natAbs )
-```
-
-or
+If the local branch has only `gcd(r, B₁) = 1` and `b ∣ B₁`, first derive `gcd(r,b)=1`:
 
 ```lean
-( hb_gt_one : 1 < b.natAbs )
+have hcop_rb : Int.gcd r b = 1 :=
+  int_gcd_eq_one_of_right_dvd (r := r) (b := b) (B := B₁) hcop_rB₁ hb_dvd_B₁
 ```
 
-because the descent usually only needs to rule out the trivial/base split.
-
-## Thin odd wrapper
-
-The odd branch should do only the raw factor construction, factor split, orientation, and bound rewrite.
-
-Skeleton:
+Then call the product-form lemma if you already have `huv`:
 
 ```lean
-private theorem odd_branch_descent
-    {r B s : ℤ}
-    (hr : 0 < r)
-    (hB : 0 < B)
-    (hcop : Int.gcd r B = 1)
-    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4)
-    (hnonbase : ¬ BaseZ r B)
-    -- plus whatever parity/positivity hypotheses this branch needs
-    : ∃ r' B' s',
-      QuarticPlusZ r' B' s' ∧
-      ¬ BaseZ r' B' ∧
-      B'.natAbs < B.natAbs := by
-  let U : ℤ := 2 * r ^ 2 + B ^ 2 - 2 * s
-  let V : ℤ := 2 * r ^ 2 + B ^ 2 + 2 * s
-
-  have hUV_prod : U * V = 5 * B ^ 4 := by
-    -- branch-specific algebra from `heq`
-    sorry
-
-  have hUV_cop : Int.gcd U V = 1 := by
-    -- existing odd gcd proof
-    sorry
-
-  have hUV_pos : 0 < U ∧ 0 < V := by
-    -- existing positivity proof
-    sorry
-
-  have hUV_sum : U + V = 4 * r ^ 2 + 2 * B ^ 2 := by
-    dsimp [U, V]
-    ring
-
-  -- Run the existing fourth-power splitting lemma here.
-  -- The exact return shape depends on your current `coprime_factor_5_fourth`.
-  rcases coprime_factor_5_fourth hUV_prod hUV_cop hUV_pos with
-    | inl hsplit =>
-        rcases hsplit with ⟨a, b, ha, hb, hB_eq, hU, hV, hab_cop⟩
-        have h4r2 : 4 * r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4 := by
-          -- This is the odd branch algebra:
-          -- use hUV_sum, hU, hV, and hB_eq.
-          -- From U+V = a^4 + 5*b^4 and B = a*b,
-          -- get 4*r^2 = (a^2-b^2)^2 + 4*b^4.
-          nlinarith [hUV_sum]
-        simpa [hB_eq] using
-          descent_from_oriented_h4r2
-            (r := r) (C := B) (a := a) (b := b)
-            hr hB hcop ha hb hB_eq hab_cop h4r2 hnonbase
-    | inr hsplit =>
-        -- Same call after swapping the orientation names.
-        sorry
+have huv_cop : Int.gcd ((r - h) / 2) ((r + h) / 2) = 1 :=
+  coprime_uv_of_prod
+    (r := r) (h := h) (b := b)
+    hr_odd hh_odd hcop_rb huv
 ```
 
-The branch-specific part is allowed to be 20--40 lines.  That is fine.  The important thing is that the post-`h4r2` descent does not appear twice.
-
-## Thin even wrapper
-
-The even branch should normalize first, prove the pair facts for `M,N,C`, then call the same core with `C = B₁`.
-
-Skeleton:
+or call the wrapper if your available equation is the square identity:
 
 ```lean
-private theorem even_branch_descent
-    {r B s B₁ : ℤ}
-    (hr : 0 < r)
-    (hB : 0 < B)
-    (hB_eq : B = 2 * B₁)
-    (hB₁_pos : 0 < B₁)
-    (hB₁_lt_B : B₁.natAbs < B.natAbs)
-    (hcop : Int.gcd r B = 1)
-    (heq : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4)
-    (hnonbase_for_core : ¬ BaseZ r B₁)
-    -- plus the divisibility hypotheses giving U/4 and V/4
-    : ∃ r' B' s',
-      QuarticPlusZ r' B' s' ∧
-      ¬ BaseZ r' B' ∧
-      B'.natAbs < B.natAbs := by
-  let U : ℤ := 2 * r ^ 2 + B ^ 2 - 2 * s
-  let V : ℤ := 2 * r ^ 2 + B ^ 2 + 2 * s
-  let M : ℤ := U / 4
-  let N : ℤ := V / 4
-
-  have hMN_prod : M * N = 5 * B₁ ^ 4 := by
-    -- branch-specific `/4` algebra
-    sorry
-
-  have hMN_cop : Int.gcd M N = 1 := by
-    -- normalized gcd proof
-    sorry
-
-  have hMN_pos : 0 < M ∧ 0 < N := by
-    -- positivity after division by 4
-    sorry
-
-  have hcop_rB₁ : Int.gcd r B₁ = 1 := by
-    -- derive from hcop and B = 2*B₁, or from the exact available lemma
-    sorry
-
-  rcases coprime_factor_5_fourth hMN_prod hMN_cop hMN_pos with
-    | inl hsplit =>
-        rcases hsplit with ⟨a, b, ha, hb, hB₁_eq, hM, hN, hab_cop⟩
-        have h4r2 : 4 * r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4 := by
-          -- Do the even-specific algebra here.
-          -- Important: do not assume the odd raw sum identity unless it is actually true
-          -- for M,N,B₁.  If the normalized sum is different, prove h4r2 by the
-          -- even branch's real algebra, or move the shared core later.
-          sorry
-        rcases descent_from_oriented_h4r2
-            (r := r) (C := B₁) (a := a) (b := b)
-            hr hB₁_pos hcop_rB₁ ha hb hB₁_eq hab_cop h4r2 hnonbase_for_core with
-          ⟨r', B', s', hQ, hnon, hltB₁⟩
-        exact ⟨r', B', s', hQ, hnon, lt_trans hltB₁ hB₁_lt_B⟩
-    | inr hsplit =>
-        -- Same call after swapping the orientation names.
-        sorry
+have huv_cop : Int.gcd ((r - h) / 2) ((r + h) / 2) = 1 :=
+  coprime_uv
+    (r := r) (h := h) (b := b)
+    hr_odd hh_odd hcop_rb heq
 ```
 
-This is the cleanest way to handle the different final bound:
-
-```lean
--- core gives
-hltB₁ : B'.natAbs < B₁.natAbs
-
--- wrapper adds
-hB₁_lt_B : B₁.natAbs < B.natAbs
-
--- final
-lt_trans hltB₁ hB₁_lt_B
-```
-
-## If the even identity is not literally `h4r2`
-
-Double-check this before extracting.
-
-For `U,V` raw, the odd-style sum is:
-
-```lean
-U + V = 4 * r ^ 2 + 2 * B ^ 2
-```
-
-For `M = U/4`, `N = V/4`, and `B = 2*B₁`, the normalized sum is:
-
-```lean
-M + N = r ^ 2 + 2 * B₁ ^ 2
-```
-
-So after splitting
-
-```lean
-M = a ^ 4,
-N = 5 * b ^ 4,
-B₁ = a * b,
-```
-
-the immediate algebra gives a different-looking identity from the odd raw case.  If your current even proof still reaches exactly
-
-```lean
-4 * r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4
-```
-
-then put that even-specific derivation in the wrapper and share from there.
-
-If instead the even branch reaches a different identity, then move the extraction boundary later: start the shared theorem at the first statement that is literally identical in both branches, for example after you have already proved
-
-```lean
-r ^ 2 = h ^ 2 + b ^ 4
-```
-
-or after whatever normalized `h` identity the two branches truly share.
-
-The rule is:
-
-> The shared theorem should start at the first line where the two proofs are textually the same after renaming variables.
-
-Do not force both branches through a fake common `hsum`.
-
-## Practical recommendation
-
-Use this three-layer architecture:
-
-```lean
--- Layer 1: branch-specific normalization
-odd_branch_descent
-  -- constructs U,V,C=B and proves pair facts
-
-even_branch_descent
-  -- constructs M,N,C=B₁ and proves pair facts
-
--- Layer 2: branch-specific orientation/algebra
--- calls coprime_factor_5_fourth and proves h4r2, or whatever is the true common identity
-
--- Layer 3: branch-free descent core
-descent_from_oriented_h4r2
-  -- long shared chain; returns B'.natAbs < C.natAbs
-```
-
-This is worth the refactor because the repeated part is not 10 lines of algebra; it is the fragile descent chain involving coprimality, positivity, fourth powers, construction of the next solution, non-base, and the measure decrease.  Duplicating that means every later fix must be made twice.
-
-But keep the abstraction **low enough**:
-
-* do not pass `s` unless the common core uses `s`;
-* do not pass `heq` unless the common core uses the original quartic equation;
-* do not pass `hr_odd` unless the common core uses parity of `r`;
-* do not pass `hC_dvd_B`; instead derive and pass `Int.gcd r C = 1`;
-* do not pass a branch-specific `hsum`; pass the already-proved common identity;
-* make the core measure decrease be `< C.natAbs`, then let wrappers translate it to `< B.natAbs`.
-
-Temporary duplication is fine as a workflow if the even branch is not green yet: copy the odd proof, make the even proof compile, then extract the literal common suffix.  But the final architecture should not keep two 130-line copies.
+The key point is that this avoids the bad parity mismatch with `coprime_rh`; the proof never needs `h` to be even.
