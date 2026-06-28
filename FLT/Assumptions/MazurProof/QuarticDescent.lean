@@ -600,7 +600,11 @@ theorem quartic_plus_descent_step :
               have : (2 : ℤ) ∣ (b^2 - 1) := this ▸ dvd_mul_of_dvd_left h2b1 _
               omega
             omega
-        · -- a odd, b even → a²≡1, b²≡0 mod 2
+        · -- a odd → b must be even (from a*b even and a odd)
+          have hb_even : b % 2 = 0 := by
+            rcases Int.emod_two_eq_zero_or_one b with hb | hb
+            · exact hb
+            · exfalso; omega -- a%2=1, b%2=1 → (a*b)%2=1≠0, but hab_even says 0
           have ha2 : a^2 % 2 = 1 := by
             have h2a1 : (2 : ℤ) ∣ (a - 1) := by omega
             have : a^2 - 1 = (a-1)*(a+1) := by ring
