@@ -495,7 +495,7 @@ theorem quartic_plus_descent_step :
         congr 1 <;> linarith
       -- Chain: 16(MN) = (4M)(4N) = UV = 5(4k)⁴ = 16·5·B₁⁴
       have h1 : 16 * (M * N) = (4 * M) * (4 * N) := by ring
-      have h2 : 16 * (M * N) = 5 * (4 * k) ^ 4 := by linarith [hUV, h_prod_eq]
+      have h2 : 16 * (M * N) = 5 * (4 * k) ^ 4 := h1.trans (h_prod_eq.trans hUV)
       have h3 : 5 * (4 * k) ^ 4 = 16 * (5 * B₁ ^ 4) := by rw [hB₁_val]; ring
       omega
     -- M, N > 0
