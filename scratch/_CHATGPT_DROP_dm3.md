@@ -1,407 +1,226 @@
-# Q1995 (dm3): should `QuarticDescent.lean` and `QuarticDescentN16.lean` be unified?
+# Q2001 (dm3): Mathlib infrastructure for determinant / cyclotomic replacement of Weil pairing
+
+Date: 2026-06-28.
 
 ## Executive answer
 
-Yes, the N = 10 and N = 16 quartic descents can be unified **algebraically**.  The common signed quartic is
-
-```text
-s^2 = r^4 + eps*r^2*B^2 - B^4,
-```
-
-with
-
-```text
-eps = +1  for N = 10,
-eps = -1  for N = 16.
-```
-
-The central identity is exactly
-
-```text
-(2*r^2 + eps*B^2)^2 - (2*s)^2 = 5*B^4.
-```
-
-However, I would **not immediately replace** the two existing 0-sorry files by one fully sign-parametric file.  Since you already have
-
-```text
-QuarticDescent.lean      -- N = 10, 1128 lines, 0 sorry
-QuarticDescentN16.lean   -- N = 16,  652 lines, 0 sorry
-```
-
-the safest refactor is incremental:
-
-```text
-1. create a shared core file, e.g. QuarticDescentCore.lean;
-2. move only the sign-stable lemmas into it;
-3. keep QuarticDescent.lean and QuarticDescentN16.lean as thin specialization files;
-4. only later consider a single public theorem parameterized by eps.
-```
-
-A full unification is possible, but it will probably save less code than it first appears, because the parity front end and some normalization lemmas remain sign-sensitive.
-
-## How much code can be shared?
-
-A realistic estimate is:
-
-```text
-Definitely shareable:        55%–70%
-Better left duplicated/cased: 30%–45%
-```
-
-Given your current sizes, a good refactor might look like:
-
-```text
-QuarticDescentCore.lean       700–900 lines
-QuarticDescent.lean           150–250 lines
-QuarticDescentN16.lean        100–200 lines
-```
-
-So the total could drop from roughly
-
-```text
-1128 + 652 = 1780 lines
-```
-
-to perhaps
-
-```text
-950–1300 lines.
-```
-
-That is a meaningful cleanup, but not a reason to risk destabilizing two finished proofs unless you expect to maintain or generalize this descent further.
-
-## Best conceptual boundary for sharing
-
-The clean boundary is **after the sign-sensitive parity and factor-normalization stage**.
-
-The shared core should start from a theorem of this shape:
-
-```text
-Given eps ∈ {+1,-1}, positive coprime a,b, and
-
-  z^2 = (a^2 - eps*b^2)^2 + 4*b^4,
-
-produce a smaller primitive solution to
-
-  s^2 = r^4 + eps*r^2*B^2 - B^4.
-```
-
-This is the genuinely common descent step.  The proof is the same for both signs.
-
-The front end should remain specialized, or at least branch heavily on `eps`, because N = 10 and N = 16 differ in the parity analysis before reaching this common Pythagorean identity.
-
-## What is shared algebraically?
-
-### 1. The master identity
-
-For both signs,
-
-```text
-s^2 = r^4 + eps*r^2*B^2 - B^4
-```
-
-implies
-
-```text
-(2*r^2 + eps*B^2)^2 - (2*s)^2 = 5*B^4.
-```
-
-Indeed,
-
-```text
-(2*r^2 + eps*B^2)^2 - (2*s)^2
-= 4*r^4 + 4*eps*r^2*B^2 + B^4 - 4*s^2
-= 4*r^4 + 4*eps*r^2*B^2 + B^4
-  - 4*(r^4 + eps*r^2*B^2 - B^4)
-= 5*B^4.
-```
-
-Only `eps^2 = 1` is used.
-
-### 2. The coprime product structure
-
-The raw factors are
-
-```text
-L = 2*r^2 + eps*B^2 - 2*s,
-R = 2*r^2 + eps*B^2 + 2*s.
-```
-
-They always satisfy
-
-```text
-L*R = 5*B^4.
-```
-
-After the appropriate parity normalization, the coprime fourth-power split has the same structure for both signs:
-
-```text
-U*V = 5*C^4,
-gcd(U,V) = 1,
-```
-
-and therefore either
-
-```text
-U = a^4,      V = 5*b^4,     C = a*b,
-```
-
-or
-
-```text
-U = 5*a^4,    V = b^4,       C = a*b.
-```
-
-This factorization infrastructure should be shared.
-
-### 3. The post-factorization identity
-
-In the branch
-
-```text
-U = a^4,
-V = 5*b^4,
-C = a*b,
-```
-
-the sum of the factor equations gives the sign-parametric identity
-
-```text
-z^2 = (a^2 - eps*b^2)^2 + 4*b^4.
-```
-
-So the two concrete cases are:
-
-```text
-eps = +1:  z^2 = (a^2 - b^2)^2 + 4*b^4;
-eps = -1:  z^2 = (a^2 + b^2)^2 + 4*b^4.
-```
-
-The reversed branch gives the symmetric version
-
-```text
-z^2 = (b^2 - eps*a^2)^2 + 4*a^4.
-```
-
-This is probably the single most valuable lemma to make sign-parametric.
-
-### 4. The Pythagorean descent step
-
-From
-
-```text
-z^2 = (a^2 - eps*b^2)^2 + (2*b^2)^2,
-```
-
-the primitive Pythagorean parametrization gives coprime `m,n` with
-
-```text
-b^2 = m*n.
-```
-
-Since `m` and `n` are coprime and their product is a square,
-
-```text
-m = r'^2,
-n = B'^2.
-```
-
-The other Pythagorean equation is
-
-```text
-a^2 - eps*b^2 = r'^4 - B'^4.
-```
-
-Using `b^2 = r'^2*B'^2`, this becomes
-
-```text
-a^2 = r'^4 + eps*r'^2*B'^2 - B'^4.
-```
-
-That is the same quartic with the same sign.  Thus the descent preserves `eps`.
-
-This part should be 100% shared.
-
-## What does not share cleanly?
-
-### 1. The odd-denominator branch
-
-The parity analysis differs.
-
-For a primitive solution with `B` odd, `r` must be odd.  Then modulo `8`,
-
-```text
-r^4 + eps*r^2*B^2 - B^4 ≡ 1 + eps - 1 ≡ eps  (mod 8).
-```
-
-So:
-
-```text
-eps = +1:  possible;
-eps = -1:  impossible, since a square cannot be 7 mod 8.
-```
-
-Thus N = 10 has a real odd-`B` branch.  N = 16 does not.
-
-A sign-parametric proof can encode this with a case split on `eps`, but the bodies of the branches will not look identical.
-
-### 2. The even-denominator normalization
-
-For even `B`, primitive parity forces `r` odd.  If `B ≡ 2 mod 4`, then
-
-```text
-s^2 ≡ 1 + eps*4  (mod 8) ≡ 5  (mod 8),
-```
-
-for both signs, impossible.  Hence
-
-```text
-4 ∣ B.
-```
-
-This conclusion is shared, but the normalized factors contain `eps`:
-
-```text
-U = (r^2 + 2*eps*C^2 - s)/2,
-V = (r^2 + 2*eps*C^2 + s)/2,
-```
-
-where `B = 2*C`, depending on your file's naming convention.
-
-The proof shape is shared, but Lean may need separate simplification lemmas for `eps = +1` and `eps = -1` to keep `ring_nf`, `omega`, and `norm_num` predictable.
-
-### 3. Positivity side conditions
-
-For `eps = -1`, the Pythagorean leg is
-
-```text
-a^2 + b^2,
-```
-
-which is automatically positive.
-
-For `eps = +1`, the leg is
-
-```text
-a^2 - b^2,
-```
-
-so the N = 10 proof likely contains nontrivial ordering lemmas to prove the correct sign or choose the correct orientation.
-
-This is another reason a fully symbolic `eps` proof can become uglier than two specialized front ends.
-
-## Strong induction
-
-The same strong-induction variable works: the positive primitive denominator.
-
-If the original quartic is written as
-
-```text
-s^2 = r^4 + eps*r^2*B^2 - B^4,
-```
-
-then the descent produces a new primitive solution
-
-```text
-s'^2 = r'^4 + eps*r'^2*B'^2 - B'^4
-```
-
-with
-
-```text
-0 < B' < B.
-```
-
-In the even branch, the decrease is even stronger because one first normalizes `B = 2*C` or `B = 4*C`, and the new denominator is bounded by a proper factor coming from `C`.
-
-So there is no need for a lexicographic measure such as `(eps, B)`.  Since `eps` is preserved, ordinary strong induction on `B.natAbs` is enough.
-
-## Recommended Lean architecture
-
-I would not make every theorem take an arbitrary integer parameter `eps : ℤ`.  That tends to make parity proofs and simplification fragile.
-
-Use a tiny sign type instead:
+The closest existing Mathlib infrastructure is **not** elliptic-curve Galois representations.  It is the cyclotomic side:
+
+* `Mathlib/NumberTheory/Cyclotomic/CyclotomicCharacter.lean` already defines a mod-`n` cyclotomic character
+  ```lean
+  modularCyclotomicCharacter {n : ℕ} [NeZero n]
+      (hn : Fintype.card { x // x ∈ rootsOfUnity n L } = n) :
+      (L ≃+* L) →* (ZMod n)ˣ
+  ```
+  together with `modularCyclotomicCharacter.spec`, `.unique`, and the `p`-adic
+  ```lean
+  cyclotomicCharacter (L) (p) : (L ≃+* L) →* ℤ_[p]ˣ
+  ```
+  plus the comparison
+  ```lean
+  IsPrimitiveRoot.autToPow_eq_modularCyclotomicCharacter
+  ```
+  for `Gal(L/R)`.
+
+* `Mathlib/NumberTheory/Cyclotomic/Gal.lean` and
+  `Mathlib/NumberTheory/NumberField/Cyclotomic/Galois.lean` already identify cyclotomic Galois groups with `(ZMod n)ˣ`, for example
+  ```lean
+  IsCyclotomicExtension.autEquivPow
+  IsCyclotomicExtension.Rat.galEquivZMod
+  IsCyclotomicExtension.Rat.galEquivZMod_apply_of_pow_eq
+  ```
+  where `galEquivZMod` is the `ℚ(ζₙ)/ℚ` isomorphism sending `σ` to the exponent `a` with `σ ζ = ζ^a`.
+
+By contrast, I did **not** find a Mathlib definition of the mod-`m` Galois representation attached to an elliptic curve, nor a theorem `det ρ_E,m = χ_m`.  So the proposed determinant argument is not currently a light-weight replacement for the Weil pairing; the missing determinant identity is essentially the same mathematical input that the Weil pairing normally supplies.
+
+## Inventory by requested item
+
+### (1) Galois representations attached to elliptic curves
+
+Status: **absent / not close as a packaged object**.
+
+Existing elliptic-curve infrastructure is substantial but lower-level:
+
+* `Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Point.lean` defines nonsingular projective points and gives
+  ```lean
+  WeierstrassCurve.Projective.Point
+  instance : AddCommGroup W.Point
+  ```
+  along with base-change and map compatibility lemmas such as `map_neg`, `map_add`, `baseChange_neg`, and `baseChange_add`.
+
+* `Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Basic.lean` and `Degree.lean` contain division polynomial infrastructure.
+
+What I did not find:
 
 ```lean
-inductive QuarticSign
-  | plus
-  | minus
-
-def QuarticSign.eps : QuarticSign → ℤ
-  | .plus => 1
-  | .minus => -1
+E[m]
+rho_m
+GaloisRepresentation
+WeilPairing
+Weil pairing on E[m]
+det_rho_eq_cyclotomicCharacter
 ```
 
-Then write shared lemmas over `σ : QuarticSign`, but freely use
+In particular, the following would all still need to be built or isolated as hypotheses:
+
+1. a chosen algebraic closure `K = AlgebraicClosure ℚ` and the base-changed curve `E/K`;
+2. the finite subgroup / `ZMod m`-module of `m`-torsion points;
+3. the natural action of `Field.absoluteGaloisGroup ℚ` on that torsion module;
+4. the statement that rationality of all `m`-torsion points makes this action trivial;
+5. the determinant map out of this rank-two `ZMod m` module;
+6. the determinant/cyclotomic identity.
+
+The generic algebra for `GL` and determinants exists in Mathlib, but the bridge from elliptic-curve torsion to `GL₂(ZMod m)` does not appear to be packaged.
+
+### (2) The cyclotomic character
+
+Status: **best-existing piece**.
+
+Relevant files/names:
 
 ```lean
-cases σ <;> norm_num [QuarticSign.eps]
+Mathlib/NumberTheory/Cyclotomic/CyclotomicCharacter.lean
+  modularCyclotomicCharacter
+  modularCyclotomicCharacter.spec
+  modularCyclotomicCharacter.unique
+  modularCyclotomicCharacter'
+  cyclotomicCharacter
+  cyclotomicCharacter.spec
+  cyclotomicCharacter.toZModPow
+  IsPrimitiveRoot.autToPow_eq_modularCyclotomicCharacter
 ```
 
-at parity-heavy boundaries.
+This is the most directly reusable infrastructure for the `χ_m` side of the argument.  The mod-`m` character is phrased for automorphisms of a domain `L`, with a hypothesis that `L` contains exactly `m` roots of unity.  In an algebraically closed characteristic-zero field this hypothesis should be discharged via roots-of-unity / enough-roots-of-unity lemmas.
 
-The best file layout is:
+For cyclotomic fields over `ℚ`, there is even more specialized infrastructure:
+
+```lean
+Mathlib/NumberTheory/Cyclotomic/Gal.lean
+  IsCyclotomicExtension.autEquivPow
+  galCyclotomicEquivUnitsZMod
+  galXPowEquivUnitsZMod
+
+Mathlib/NumberTheory/NumberField/Cyclotomic/Galois.lean
+  IsCyclotomicExtension.Rat.galEquivZMod
+  IsCyclotomicExtension.Rat.galEquivZMod_apply_of_pow_eq
+  IsCyclotomicExtension.Rat.galEquivZMod_restrictNormal_apply
+```
+
+This can often replace explicit references to complex conjugation when the only goal is to obtain the `-1` element of `(ZMod m)ˣ`: use the cyclotomic Galois equivalence and the unit `-1` in `(ZMod m)ˣ`.
+
+### (3) Complex conjugation as an element of `Gal(ℚbar/ℚ)`
+
+Status: **partly present, but not as the object needed here**.
+
+Relevant existing pieces:
+
+```lean
+Mathlib/FieldTheory/Galois/Notation.lean
+  Gal(L/K)  -- notation for `L ≃ₐ[K] L`
+
+Mathlib/FieldTheory/AbsoluteGaloisGroup.lean
+  Field.absoluteGaloisGroup K := AlgebraicClosure K ≃ₐ[K] AlgebraicClosure K
+
+Mathlib/LinearAlgebra/Complex/Module.lean
+  Complex.conjAe : ℂ ≃ₐ[ℝ] ℂ
+  Complex.real_algHom_eq_id_or_conj
+```
+
+So Mathlib has complex conjugation as an `ℝ`-algebra automorphism of `ℂ`, and it has the absolute Galois group of a field.  What I did not find is a canonical declaration like
+
+```lean
+complexConjugation : Field.absoluteGaloisGroup ℚ
+```
+
+This absence is expected: `AlgebraicClosure ℚ` is an abstract chosen algebraic closure, not literally the algebraic numbers inside `ℂ`.  To get such an element one would need to choose/construct an embedding of `AlgebraicClosure ℚ` into `ℂ`, transport `Complex.conjAe`, and prove it fixes `ℚ`.  That is plausible but not currently a named off-the-shelf object.
+
+If the goal is only the classical fact that rational roots of unity have order dividing `2`, the better Mathlib route may avoid complex conjugation entirely.  In `Mathlib/NumberTheory/Cyclotomic/PrimitiveRoots.lean` there is already:
+
+```lean
+IsPrimitiveRoot.dvd_of_isCyclotomicExtension
+```
+
+which says that if a primitive `l`-th root lies in an `n`-th cyclotomic extension of `ℚ`, then
+
+```lean
+l ∣ 2 * n
+```
+
+Specializing morally to the `n = 1` cyclotomic extension gives the expected `l ∣ 2` conclusion for roots of unity in `ℚ`.  This is probably a much cheaper endpoint than constructing an explicit complex-conjugation element in `Gal(ℚbar/ℚ)`.
+
+### (4) The determinant equals cyclotomic character identity
+
+Status: **not present**.
+
+I did not find an existing theorem of the form
+
+```lean
+det (rho_m E σ) = modularCyclotomicCharacter ... σ
+```
+
+or any elliptic-curve-specific determinant/cyclotomic comparison.  Proving this identity usually uses the Weil pairing and its Galois equivariance:
 
 ```text
-QuarticDescentCore.lean
-  Sign type and eps function.
-  Signed quartic definition.
-  Master identity.
-  Shared coprime/fourth-power split wrappers.
-  Shared post-factorization identity:
-      z^2 = (a^2 - eps*b^2)^2 + 4*b^4.
-  Shared Pythagorean descent step.
-  Shared strong-induction wrapper parameterized by a sign-specific front-end step.
-
-QuarticDescent.lean
-  N = 10 front end.
-  Odd-B branch.
-  Even-B branch.
-  Calls shared core after factorization.
-
-QuarticDescentN16.lean
-  N = 16 front end.
-  Odd-B contradiction modulo 8.
-  Even-B branch.
-  Calls shared core after factorization.
+e_m(σP, σQ) = σ(e_m(P,Q)),
+e_m(P,Q)^(det ρ_m σ) = σ(e_m(P,Q)).
 ```
 
-This gets the main benefits without forcing all parity proofs into a single symbolic proof.
+Thus the proposed argument avoids using the full Weil pairing only if this determinant identity is taken as an imported theorem/axiom.  As a Mathlib development task, building `det ρ = χ` from scratch is not obviously smaller than building the Weil-pairing naturality needed for it.
 
-## Is the refactor worth it?
+## Fixed-field infrastructure
 
-My recommendation:
+For the step "trivial cyclotomic character implies all `m`-th roots of unity are rational", Mathlib has useful infinite Galois theory:
 
-```text
-Do not immediately replace the two working files.
-Do extract a shared core if you expect to maintain or modify these descents.
+```lean
+Mathlib/FieldTheory/Galois/Infinite.lean
+  InfiniteGalois.mem_range_algebraMap_iff_fixed
+  InfiniteGalois.mem_bot_iff_fixed
+  InfiniteGalois.fixedField_bot
 ```
 
-Reasons to keep the two files separate for now:
+So once the setup is phrased over a Galois extension `K/k`, an element fixed by every element of `Gal(K/k)` can be recognized as coming from the base field.  This is useful after the cyclotomic character is shown to be trivial, but it still does not supply the elliptic-curve determinant identity.
 
-```text
-* both are already 0 sorry;
-* the total size, 1780 lines, is not outrageous;
-* a sign-parametric Lean proof may be harder to debug than two concrete proofs;
-* N = 10 has a real odd-denominator branch while N = 16 does not;
-* N = 10 has the harder `a^2 - b^2` positivity/orientation bookkeeping.
+## Practical recommendation for dm3
+
+If the near-term goal is to finish the number-theoretic obstruction, separate it into two layers.
+
+### Layer A: elliptic-curve input, probably axiomatized or postponed
+
+Use a local theorem/hypothesis with a name like
+
+```lean
+axiom full_rational_torsion_implies_trivial_cyclotomicCharacter
+  (E : WeierstrassCurve ℚ) (m : ℕ) ... :
+  -- every σ acts trivially on μ_m, equivalently χ_m σ = 1
 ```
 
-Reasons to refactor into a shared core:
+or directly
 
-```text
-* the Pythagorean descent step is genuinely identical;
-* the fourth-power factor split is identical after normalization;
-* the strong-induction skeleton is identical;
-* future changes to primitive normalization or factorization certificates would otherwise need to be patched twice;
-* the sign-parametric theorem documents the mathematical unity of the N = 10 and N = 16 obstructions.
+```lean
+axiom full_rational_torsion_implies_rootsOfUnity_rational
+  ... :
+  -- every m-th root of unity in AlgebraicClosure ℚ lies in the range of ℚ
 ```
 
-So the best compromise is:
+This isolates the missing Weil-pairing/determinant theorem instead of hiding it inside an attempted proof.
 
-```text
-Keep the public N = 10 and N = 16 files as separate entry points,
-but move the middle 60% of the proof into a shared signed core.
+### Layer B: cyclotomic/rational-root endpoint, using existing Mathlib
+
+After Layer A gives `μ_m ⊂ ℚ`, use existing cyclotomic/root-of-unity infrastructure to derive `m ∣ 2`.  The names most likely to matter are:
+
+```lean
+IsPrimitiveRoot.dvd_of_isCyclotomicExtension
+Polynomial.cyclotomic.irreducible_rat
+IsCyclotomicExtension.Rat.galEquivZMod
+InfiniteGalois.mem_range_algebraMap_iff_fixed
 ```
 
-That gives you most of the maintainability win while preserving the readability and stability of the completed specialized proofs.
+## Closest-to-existing ranking
+
+1. **Cyclotomic character / cyclotomic Galois group**: very close; already in Mathlib.
+2. **Absolute Galois group and fixed-field statements**: present and usable, though with abstract `AlgebraicClosure` choices.
+3. **Complex conjugation**: exists as `Complex.conjAe` over `ℝ`; not packaged as an element of `Field.absoluteGaloisGroup ℚ`.
+4. **Elliptic-curve Galois representation `ρ_m`**: not found as a packaged object.
+5. **`det ρ_m = χ_m`**: not found; this is the major missing theorem and is morally the Weil-pairing input.
+
+Bottom line: for a Mathlib proof today, the cyclotomic half is the promising existing infrastructure.  The elliptic-curve representation/determinant half remains the hard missing infrastructure, so this is not currently a clean way to avoid formalizing Weil-pairing-level input.
