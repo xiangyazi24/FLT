@@ -1,411 +1,415 @@
-# Q1935 (dm2): N=16 quartic descent and the N=10 quadratic twist
+# Q1971 (dm2): local obstruction primes for N=14 and N=16
 
-## Verdict
+## Executive answer
 
-Yes: the N=16 quartic
-
-\[
-s^4-D^2s^2-D^4=t^2
-\]
-
-admits essentially the same infinite descent as the N=10 quartic
-
-\[
-s^4+D^2s^2-D^4=t^2.
-\]
-
-But I would **not** try to reuse the already-proved N=10 theorem by the quadratic twist relation.  The twist explains why the two obstruction curves have the same \(j\)-invariant, but it does not transport the existing integral/rational descent theorem over \(\mathbb Z\) into the N=16 statement over \(\mathbb Z\).  The twist sends the N=16 quartic to the N=10 quartic only after adjoining \(i\), i.e. after replacing \(s\) by \(i s\).  Your existing `QuarticDescent.lean` proof over integers will not apply directly to Gaussian-integer data.
-
-The clean formalization path is instead:
-
-1. copy/refactor the common N=10 descent infrastructure;
-2. introduce a sign parameter \(\varepsilon\in\{1,-1\}\) where possible;
-3. specialize \(\varepsilon=1\) for N=10 and \(\varepsilon=-1\) for N=16.
-
-The sign-parametric identity is the key:
-
-\[
-t^2=s^4+\varepsilon D^2s^2-D^4
-\quad\Longrightarrow\quad
-(2s^2+\varepsilon D^2-2t)(2s^2+\varepsilon D^2+2t)=5D^4.
-\]
-
-For N=16, \(\varepsilon=-1\), so the center is \(2s^2-D^2\), not \(2s^2+D^2\).
-
-## The obstruction-curve reduction
-
-For N=16, set
-
-\[
-u=\left(\frac{s}{D}\right)^2,\qquad
-w=\frac{s t}{D^3}.
-\]
-
-Then
-
-\[
-t^2=s^4-D^2s^2-D^4
-\]
-
-implies
-
-\[
-w^2=u^3-u^2-u.
-\]
-
-For N=10, the same substitution gives
-
-\[
-w^2=u^3+u^2-u.
-\]
-
-The two curves
-
-\[
-E_{10}: y^2=x^3+x^2-x,
-\qquad
-E_{16}: y^2=x^3-x^2-x
-\]
-
-have the same \(j\)-invariant and are quadratic twists by \(-1\).  In the usual model
-
-\[
-y^2=x^3+a x^2+b x,
-\]
-
-the \(d\)-quadratic twist is
-
-\[
-y^2=x^3+d a x^2+d^2 b x.
-\]
-
-With \(a=1,b=-1,d=-1\), this gives \(E_{16}\).
-
-Equivalently, over \(\mathbb Q(i)\), the isomorphism is
-
-\[
-(x,y)\mapsto (-x, i y).
-\]
-
-At the quartic level, this is exactly the substitution
-
-\[
-S=i s,
-\]
-
-because
-
-\[
-S^4+D^2S^2-D^4=s^4-D^2s^2-D^4.
-\]
-
-That is why the twist is conceptually right but formally awkward: it proves that an N=16 integer solution gives an N=10 solution over \(\mathbb Z[i]\), not over \(\mathbb Z\).  Unless you want to rebuild the N=10 descent over the Gaussian integers, the twist is not the cheapest reuse mechanism.
-
-## Direct N=16 descent skeleton
-
-Assume a primitive positive solution
-
-\[
-s>0,\quad D>0,\quad \gcd(s,D)=1,\quad
-s^4-D^2s^2-D^4=t^2.
-\]
-
-Replace \(t\) by \(|t|\) if needed.  Define
-
-\[
-U=2s^2-D^2-2t,\qquad
-V=2s^2-D^2+2t.
-\]
-
-Then
-
-\[
-UV=5D^4.
-\]
-
-The positivity proof is parallel to N=10: from \(t^2=s^4-D^2s^2-D^4>0\), one gets \(s^2>\frac{1+\sqrt5}{2}D^2\), hence \(2s^2-D^2>2|t|\).  Thus \(U,V>0\).
-
-The coprimality proof for \(U,V\) is also the same kind of argument as in N=10.  Once the coprime fourth-power factorization is applied, after choosing the orientation with the factor \(5\), you get
-
-\[
-U=a^4,\qquad V=5b^4,\qquad D=ab,\qquad \gcd(a,b)=1.
-\]
-
-Now sum the two factor equations:
-
-\[
-a^4+5b^4=4s^2-2D^2=4s^2-2a^2b^2.
-\]
-
-Therefore
-
-\[
-4s^2=a^4+2a^2b^2+5b^4=(a^2+b^2)^2+4b^4.
-\]
-
-So
-
-\[
-(a^2+b^2)^2+(2b^2)^2=(2s)^2.
-\]
-
-This is the N=16 analogue of the N=10 Pythagorean step.  The only sign change is:
+Yes, but the native-decide checks should be applied to the **2-covering / Selmer homogeneous spaces**, not directly to the elliptic curve equation.  A finite-field search on
 
 ```text
-N=10: h = a^2 - b^2
-N=16: h = a^2 + b^2
+w^2 = u^3 + u^2 - 2u
+w^2 = u^3 - u^2 - u
 ```
 
-Parametrize the primitive Pythagorean triple:
+will of course find the torsion reductions.  The useful checks are instead: for each non-torsion Selmer candidate, show the associated quartic covering has no primitive solution modulo a suitable prime power.
 
-\[
-a^2+b^2=p^2-q^2,\qquad b^2=pq,\qquad s=p^2+q^2.
-\]
-
-Since \(\gcd(p,q)=1\) and \(pq=b^2\), both \(p\) and \(q\) are squares up to the usual positivity convention.  Write, after renaming,
-
-\[
-p=P^2,\qquad q=Q^2,\qquad b=PQ.
-\]
-
-Then
-
-\[
-a^2+b^2=P^4-Q^4,\qquad b^2=P^2Q^2,
-\]
-
-hence
-
-\[
-a^2=P^4-P^2Q^2-Q^4.
-\]
-
-Thus
-
-\[
-P^4-Q^2P^2-Q^4=a^2,
-\]
-
-which is the same N=16 quartic again, with the smaller parameter \(Q\).  Since the old parameter is
-
-\[
-D=ab=aPQ,
-\]
-
-and \(P,Q,a>0\), the new parameter \(Q\) is strictly smaller than \(D\).  This gives the infinite descent.
-
-So the direct descent is not only possible; it is almost line-for-line the N=10 descent with the middle sign threaded through the algebra.
-
-## Best refactor target
-
-The best shared statement is a sign-parametric descent step.  Use
-
-\[
-\varepsilon^2=1
-\]
-
-and define the signed quartic predicate
-
-\[
-Q_\varepsilon(s,D,t):\quad
-s^4+\varepsilon D^2s^2-D^4=t^2.
-\]
-
-Then the two important sign-parametric identities are:
-
-\[
-(2s^2+\varepsilon D^2-2t)(2s^2+\varepsilon D^2+2t)=5D^4,
-\]
-
-and after the oriented factor split
-
-\[
-U=a^4,\qquad V=5b^4,\qquad D=ab,
-\]
-
-the sum identity becomes
-
-\[
-4s^2=(a^2-\varepsilon b^2)^2+4b^4.
-\]
-
-For \(\varepsilon=1\), this is the N=10 identity
-
-\[
-4s^2=(a^2-b^2)^2+4b^4.
-\]
-
-For \(\varepsilon=-1\), this is the N=16 identity
-
-\[
-4s^2=(a^2+b^2)^2+4b^4.
-\]
-
-The Pythagorean descent then returns a new solution of the same sign:
-
-\[
-a^2=P^4+\varepsilon P^2Q^2-Q^4.
-\]
-
-So the formal refactor can be:
+The useful primes are:
 
 ```text
-signed_quartic_factor_identity
-signed_quartic_split_sum_identity
-signed_pythagorean_descent_algebra
-
-quartic_descent_step_eps
-  (eps : ℤ) (heps : eps ^ 2 = 1)
-  ...
-
-quartic_descent_N10 := quartic_descent_step_eps  1
-quartic_descent_N16 := quartic_descent_step_eps (-1)
+N=14: p = 2 and p = 3
+N=16: p = 5 and p = 2
 ```
 
-In practice, if the current 1128-line `QuarticDescent.lean` is already stable, the safer first Lean step is probably a separate `QuarticDescent16.lean` that reuses imported helper lemmas and duplicates only the sign-sensitive proof script.  After that compiles, refactor the two files into the sign-parametric core.
+More precisely:
 
-## Ring-verification snippets
+```text
+N=14, E  side d =  3: obstruction modulo 4.
+N=14, E  side d = -3: obstruction modulo 27, if your sign conventions include it.
+N=14, E' side d =  2: obstruction modulo 8.
+N=14, E' side d = -2: obstruction modulo 8.
 
-These snippets are the algebraic core.  They are written so the coefficients can be checked by `ring`/`nlinarith`.
+N=16, E  side d =  5: obstruction modulo 125.
+N=16, E  side d = -5: obstruction modulo 125, if your sign conventions include it.
+N=16, E' side d = -1: obstruction modulo 16.
+```
+
+For N=16, this is essentially the same prime-power pattern as the N=10 proof: the `5`-cover is killed at `5^3 = 125`, and the dual `-1` cover is killed at `2^4 = 16`.
+
+For N=14, the small-prime pattern is even lighter: one side is killed 2-adically (`mod 4` or `mod 8`), and the possible negative `3`-class is killed 3-adically (`mod 27`).
+
+## Conventions for the 2-isogeny covering equations
+
+For a curve
+
+```text
+E : y^2 = x^3 + a*x^2 + b*x
+```
+
+with the rational 2-torsion point `(0,0)`, I am using the standard covering equation
+
+```text
+d * Y^2 = d^2 * X^4 + d*a*X^2*Z^2 + b*Z^4.
+```
+
+The 2-isogenous curve is
+
+```text
+E' : y^2 = x^3 - 2*a*x^2 + (a^2 - 4*b)*x.
+```
+
+Different books flip signs or replace `d` by an equivalent squareclass.  That is why I include both signs for the classes where ambiguity is likely.  The native-decide checks below are cheap enough that keeping the redundant sign checks is safer than encoding a convention mismatch.
+
+## N=14 details
+
+For
+
+```text
+E14 : y^2 = x^3 + x^2 - 2*x
+```
+
+we have
+
+```text
+a = 1,
+b = -2,
+E14' : y^2 = x^3 - 2*x^2 + 9*x.
+```
+
+The nontrivial `E14`-side class is represented by `d = 3` up to sign.  The covering is
+
+```text
+3*Y^2 = 9*X^4 + 3*X^2*Z^2 - 2*Z^4.
+```
+
+This has no primitive solution modulo `4`, where primitive means not both `X,Z` are even.
+
+If the `d = -3` class appears under your sign conventions, use the congruence
+
+```text
+-3*Y^2 = 9*X^4 - 3*X^2*Z^2 - 2*Z^4,
+```
+
+which has no primitive solution modulo `27`, where primitive means not both `X,Z` are divisible by `3`.
+
+On the dual side
+
+```text
+E14' : y^2 = x^3 - 2*x^2 + 9*x,
+```
+
+the relevant classes are `d = ±2`.  The two checks are
+
+```text
+ 2*Y^2 = 4*X^4 - 4*X^2*Z^2 + 9*Z^4     mod 8,
+-2*Y^2 = 4*X^4 + 4*X^2*Z^2 + 9*Z^4     mod 8.
+```
+
+Both have no primitive solution modulo `8`.
+
+So for N=14, the practical finite checks are:
+
+```text
+mod 4   for the E-side d=3 cover;
+mod 27  for the optional E-side d=-3 cover;
+mod 8   for both dual d=2 and d=-2 covers.
+```
+
+## N=16 details
+
+For
+
+```text
+E16 : y^2 = x^3 - x^2 - x
+```
+
+we have
+
+```text
+a = -1,
+b = -1,
+E16' : y^2 = x^3 + 2*x^2 + 5*x.
+```
+
+The `E16`-side nontrivial class is represented by `d = 5` up to sign.  The covering is
+
+```text
+5*Y^2 = 25*X^4 - 5*X^2*Z^2 - Z^4.
+```
+
+It has no primitive solution modulo `125`, where primitive means not both `X,Z` are divisible by `5`.
+
+The sign variant
+
+```text
+-5*Y^2 = 25*X^4 + 5*X^2*Z^2 - Z^4
+```
+
+is also obstructed modulo `125`.
+
+On the dual side
+
+```text
+E16' : y^2 = x^3 + 2*x^2 + 5*x,
+```
+
+the relevant class is `d = -1`.  The covering can be written as
+
+```text
+Y^2 = -X^4 + 2*X^2*Z^2 - 5*Z^4.
+```
+
+This has no primitive solution modulo `16`, where primitive means not both `X,Z` are even.
+
+If a sign convention changes the middle term, the sibling equation
+
+```text
+Y^2 = -X^4 - 2*X^2*Z^2 - 5*Z^4
+```
+
+is also obstructed modulo `16`; this is exactly the same robust pattern already used in the N=10 local-obstruction file.
+
+## Lean code: native_decide checks
+
+This is written in the same style as the existing `DescentObstruction.lean` file.
 
 ```lean
-import Mathlib
+import Mathlib.Data.ZMod.Basic
+import Mathlib.Tactic
 
-namespace QuarticDescent16Check
+namespace FLT
+namespace MazurLocalObstructionsN14N16
 
-/-- N=10 quartic predicate. -/
-def Q10 (s D t : ℤ) : Prop :=
-  s ^ 4 + D ^ 2 * s ^ 2 - D ^ 4 = t ^ 2
+/-! ## Primitive residue predicates -/
 
-/-- N=16 quartic predicate: negative middle term. -/
-def Q16 (s D t : ℤ) : Prop :=
-  s ^ 4 - D ^ 2 * s ^ 2 - D ^ 4 = t ^ 2
+def NonzeroMod2_4 (a : ZMod 4) : Bool :=
+  decide (a.val % 2 ≠ 0)
 
-/-- N=16 denominator-free map to `w^2 = u^3 - u^2 - u`. -/
-example {s D t : ℤ} (h : Q16 s D t) :
-    (s * t) ^ 2 = (s ^ 2) ^ 3 - D ^ 2 * (s ^ 2) ^ 2 - D ^ 4 * s ^ 2 := by
-  unfold Q16 at h
-  nlinarith [h]
+def PrimitiveMod2_4 (x z : ZMod 4) : Bool :=
+  NonzeroMod2_4 x || NonzeroMod2_4 z
 
-/-- N=10 denominator-free map to `w^2 = u^3 + u^2 - u`. -/
-example {s D t : ℤ} (h : Q10 s D t) :
-    (s * t) ^ 2 = (s ^ 2) ^ 3 + D ^ 2 * (s ^ 2) ^ 2 - D ^ 4 * s ^ 2 := by
-  unfold Q10 at h
-  nlinarith [h]
+def NonzeroMod2_8 (a : ZMod 8) : Bool :=
+  decide (a.val % 2 ≠ 0)
 
-/-- The sign-parametric factor identity. -/
-example {eps s D t : ℤ}
-    (heps : eps ^ 2 = 1)
-    (h : t ^ 2 = s ^ 4 + eps * D ^ 2 * s ^ 2 - D ^ 4) :
-    (2 * s ^ 2 + eps * D ^ 2 - 2 * t) *
-      (2 * s ^ 2 + eps * D ^ 2 + 2 * t) = 5 * D ^ 4 := by
-  calc
-    (2 * s ^ 2 + eps * D ^ 2 - 2 * t) *
-        (2 * s ^ 2 + eps * D ^ 2 + 2 * t)
-        = (2 * s ^ 2 + eps * D ^ 2) ^ 2 - (2 * t) ^ 2 := by ring
-    _ = 5 * D ^ 4 := by
-      rw [h]
-      nlinarith [heps]
+def PrimitiveMod2_8 (x z : ZMod 8) : Bool :=
+  NonzeroMod2_8 x || NonzeroMod2_8 z
 
-/-- The N=16 factor identity in its concrete form. -/
-example {s D t : ℤ} (h : Q16 s D t) :
-    (2 * s ^ 2 - D ^ 2 - 2 * t) *
-      (2 * s ^ 2 - D ^ 2 + 2 * t) = 5 * D ^ 4 := by
-  unfold Q16 at h
-  have h' : t ^ 2 = s ^ 4 + (-1 : ℤ) * D ^ 2 * s ^ 2 - D ^ 4 := by
-    nlinarith [h]
-  simpa using
-    (show
-      (2 * s ^ 2 + (-1 : ℤ) * D ^ 2 - 2 * t) *
-        (2 * s ^ 2 + (-1 : ℤ) * D ^ 2 + 2 * t) = 5 * D ^ 4 from
-      by
-        calc
-          (2 * s ^ 2 + (-1 : ℤ) * D ^ 2 - 2 * t) *
-              (2 * s ^ 2 + (-1 : ℤ) * D ^ 2 + 2 * t)
-              = (2 * s ^ 2 + (-1 : ℤ) * D ^ 2) ^ 2 - (2 * t) ^ 2 := by ring
-          _ = 5 * D ^ 4 := by
-            rw [h']
-            norm_num)
+def NonzeroMod2_16 (a : ZMod 16) : Bool :=
+  decide (a.val % 2 ≠ 0)
 
-/-- After the oriented split, the sign-parametric Pythagorean identity. -/
-example {eps s D t a b : ℤ}
-    (heps : eps ^ 2 = 1)
-    (hU : 2 * s ^ 2 + eps * D ^ 2 - 2 * t = a ^ 4)
-    (hV : 2 * s ^ 2 + eps * D ^ 2 + 2 * t = 5 * b ^ 4)
-    (hD : D = a * b) :
-    4 * s ^ 2 = (a ^ 2 - eps * b ^ 2) ^ 2 + 4 * b ^ 4 := by
-  nlinarith [heps, hU, hV, hD]
+def PrimitiveMod2_16 (x z : ZMod 16) : Bool :=
+  NonzeroMod2_16 x || NonzeroMod2_16 z
 
-/-- The concrete N=16 post-split identity: `h = a^2 + b^2`. -/
-example {s D t a b : ℤ}
-    (hU : 2 * s ^ 2 - D ^ 2 - 2 * t = a ^ 4)
-    (hV : 2 * s ^ 2 - D ^ 2 + 2 * t = 5 * b ^ 4)
-    (hD : D = a * b) :
-    4 * s ^ 2 = (a ^ 2 + b ^ 2) ^ 2 + 4 * b ^ 4 := by
-  nlinarith [hU, hV, hD]
+def NonzeroMod3_27 (a : ZMod 27) : Bool :=
+  decide (a.val % 3 ≠ 0)
 
-/-- The final N=16 descent algebra. -/
-example {a P Q : ℤ}
-    (h : a ^ 2 + (P * Q) ^ 2 = P ^ 4 - Q ^ 4) :
-    P ^ 4 - Q ^ 2 * P ^ 2 - Q ^ 4 = a ^ 2 := by
-  nlinarith [h]
+def PrimitiveMod3_27 (x z : ZMod 27) : Bool :=
+  NonzeroMod3_27 x || NonzeroMod3_27 z
 
-/-- The sign-parametric final descent algebra. -/
-example {eps a P Q : ℤ}
-    (h : a ^ 2 = P ^ 4 + eps * P ^ 2 * Q ^ 2 - Q ^ 4) :
-    P ^ 4 + eps * Q ^ 2 * P ^ 2 - Q ^ 4 = a ^ 2 := by
-  nlinarith [h]
+def NonzeroMod5_125 (a : ZMod 125) : Bool :=
+  decide (a.val % 5 ≠ 0)
 
-/-- Quadratic-twist isomorphism over a ring containing an element `i` with `i^2=-1`. -/
-example {R : Type*} [CommRing R] {i x y : R}
-    (hi : i ^ 2 = -1)
-    (h : y ^ 2 = x ^ 3 - x ^ 2 - x) :
-    (i * y) ^ 2 = (-x) ^ 3 + (-x) ^ 2 - (-x) := by
-  rw [show (i * y) ^ 2 = i ^ 2 * y ^ 2 by ring]
-  rw [hi, h]
-  ring
+def PrimitiveMod5_125 (x z : ZMod 125) : Bool :=
+  NonzeroMod5_125 x || NonzeroMod5_125 z
 
-/-- Quartic-level twist: `S = i*s` turns N=16 into N=10 over a ring with `i`. -/
-example {R : Type*} [CommRing R] {i s D t : R}
-    (hi : i ^ 2 = -1)
-    (h : s ^ 4 - D ^ 2 * s ^ 2 - D ^ 4 = t ^ 2) :
-    (i * s) ^ 4 + D ^ 2 * (i * s) ^ 2 - D ^ 4 = t ^ 2 := by
-  have hi4 : i ^ 4 = 1 := by
-    calc
-      i ^ 4 = (i ^ 2) ^ 2 := by ring
-      _ = (-1 : R) ^ 2 := by rw [hi]
-      _ = 1 := by ring
-  calc
-    (i * s) ^ 4 + D ^ 2 * (i * s) ^ 2 - D ^ 4
-        = i ^ 4 * s ^ 4 + D ^ 2 * (i ^ 2 * s ^ 2) - D ^ 4 := by ring
-    _ = s ^ 4 - D ^ 2 * s ^ 2 - D ^ 4 := by
-      rw [hi4, hi]
-      ring
-    _ = t ^ 2 := h
+/-! ## N = 14, E-side classes -/
 
-end QuarticDescent16Check
+/--
+For `E14 : y² = x³ + x² - 2x`, the `d = 3` covering
+
+`3Y² = 9X⁴ + 3X²Z² - 2Z⁴`
+
+has no primitive solution modulo `4`.
+-/
+set_option maxHeartbeats 0 in
+theorem N14_E_d3_no_primitive_mod4 :
+    ¬ ∃ x y z : ZMod 4,
+      PrimitiveMod2_4 x z = true ∧
+        (3 : ZMod 4) * y ^ 2 =
+          (9 : ZMod 4) * x ^ 4 +
+          (3 : ZMod 4) * x ^ 2 * z ^ 2 -
+          (2 : ZMod 4) * z ^ 4 := by
+  native_decide
+
+/--
+Optional sign variant for the `E14`-side `d = -3` class.  This one is killed
+modulo `27`.
+-/
+set_option maxHeartbeats 0 in
+theorem N14_E_dm3_no_primitive_mod27 :
+    ¬ ∃ x y z : ZMod 27,
+      PrimitiveMod3_27 x z = true ∧
+        (-3 : ZMod 27) * y ^ 2 =
+          (9 : ZMod 27) * x ^ 4 -
+          (3 : ZMod 27) * x ^ 2 * z ^ 2 -
+          (2 : ZMod 27) * z ^ 4 := by
+  native_decide
+
+/-! ## N = 14, dual-side classes -/
+
+/--
+For `E14' : y² = x³ - 2x² + 9x`, the `d = 2` covering
+
+`2Y² = 4X⁴ - 4X²Z² + 9Z⁴`
+
+has no primitive solution modulo `8`.
+-/
+set_option maxHeartbeats 0 in
+theorem N14_Ep_d2_no_primitive_mod8 :
+    ¬ ∃ x y z : ZMod 8,
+      PrimitiveMod2_8 x z = true ∧
+        (2 : ZMod 8) * y ^ 2 =
+          (4 : ZMod 8) * x ^ 4 -
+          (4 : ZMod 8) * x ^ 2 * z ^ 2 +
+          (9 : ZMod 8) * z ^ 4 := by
+  native_decide
+
+/-- Same dual side, opposite sign representative `d = -2`. -/
+set_option maxHeartbeats 0 in
+theorem N14_Ep_dm2_no_primitive_mod8 :
+    ¬ ∃ x y z : ZMod 8,
+      PrimitiveMod2_8 x z = true ∧
+        (-2 : ZMod 8) * y ^ 2 =
+          (4 : ZMod 8) * x ^ 4 +
+          (4 : ZMod 8) * x ^ 2 * z ^ 2 +
+          (9 : ZMod 8) * z ^ 4 := by
+  native_decide
+
+/-! ## N = 16, E-side classes -/
+
+/--
+For `E16 : y² = x³ - x² - x`, the `d = 5` covering
+
+`5Y² = 25X⁴ - 5X²Z² - Z⁴`
+
+has no primitive solution modulo `125`.
+-/
+set_option maxHeartbeats 0 in
+theorem N16_E_d5_no_primitive_mod125 :
+    ¬ ∃ x y z : ZMod 125,
+      PrimitiveMod5_125 x z = true ∧
+        (5 : ZMod 125) * y ^ 2 =
+          (25 : ZMod 125) * x ^ 4 -
+          (5 : ZMod 125) * x ^ 2 * z ^ 2 -
+          z ^ 4 := by
+  native_decide
+
+/-- Optional sign variant for the `E16`-side `d = -5` representative. -/
+set_option maxHeartbeats 0 in
+theorem N16_E_dm5_no_primitive_mod125 :
+    ¬ ∃ x y z : ZMod 125,
+      PrimitiveMod5_125 x z = true ∧
+        (-5 : ZMod 125) * y ^ 2 =
+          (25 : ZMod 125) * x ^ 4 +
+          (5 : ZMod 125) * x ^ 2 * z ^ 2 -
+          z ^ 4 := by
+  native_decide
+
+/-! ## N = 16, dual-side classes -/
+
+/--
+For `E16' : y² = x³ + 2x² + 5x`, the `d = -1` covering is
+
+`Y² = -X⁴ + 2X²Z² - 5Z⁴`,
+
+and it has no primitive solution modulo `16`.
+-/
+def N16_Ep_dm1_rhs_plus (x z : ZMod 16) : ZMod 16 :=
+  - x ^ 4 +
+    (2 : ZMod 16) * x ^ 2 * z ^ 2 -
+    (5 : ZMod 16) * z ^ 4
+
+set_option maxHeartbeats 0 in
+theorem N16_Ep_dm1_no_primitive_mod16_plus :
+    ¬ ∃ x y z : ZMod 16,
+      PrimitiveMod2_16 x z = true ∧
+        y ^ 2 = N16_Ep_dm1_rhs_plus x z := by
+  native_decide
+
+/-- Robust sign-convention sibling, also obstructed modulo `16`. -/
+def N16_Ep_dm1_rhs_minus (x z : ZMod 16) : ZMod 16 :=
+  - x ^ 4 -
+    (2 : ZMod 16) * x ^ 2 * z ^ 2 -
+    (5 : ZMod 16) * z ^ 4
+
+set_option maxHeartbeats 0 in
+theorem N16_Ep_dm1_no_primitive_mod16_minus :
+    ¬ ∃ x y z : ZMod 16,
+      PrimitiveMod2_16 x z = true ∧
+        y ^ 2 = N16_Ep_dm1_rhs_minus x z := by
+  native_decide
+
+/-- Package of the recommended checks for the likely sign conventions. -/
+theorem recommended_obstructions_verified :
+    (¬ ∃ x y z : ZMod 4,
+      PrimitiveMod2_4 x z = true ∧
+        (3 : ZMod 4) * y ^ 2 =
+          (9 : ZMod 4) * x ^ 4 +
+          (3 : ZMod 4) * x ^ 2 * z ^ 2 -
+          (2 : ZMod 4) * z ^ 4)
+    ∧
+    (¬ ∃ x y z : ZMod 8,
+      PrimitiveMod2_8 x z = true ∧
+        (2 : ZMod 8) * y ^ 2 =
+          (4 : ZMod 8) * x ^ 4 -
+          (4 : ZMod 8) * x ^ 2 * z ^ 2 +
+          (9 : ZMod 8) * z ^ 4)
+    ∧
+    (¬ ∃ x y z : ZMod 125,
+      PrimitiveMod5_125 x z = true ∧
+        (5 : ZMod 125) * y ^ 2 =
+          (25 : ZMod 125) * x ^ 4 -
+          (5 : ZMod 125) * x ^ 2 * z ^ 2 -
+          z ^ 4)
+    ∧
+    (¬ ∃ x y z : ZMod 16,
+      PrimitiveMod2_16 x z = true ∧
+        y ^ 2 = N16_Ep_dm1_rhs_plus x z) := by
+  exact ⟨N14_E_d3_no_primitive_mod4,
+    N14_Ep_d2_no_primitive_mod8,
+    N16_E_d5_no_primitive_mod125,
+    N16_Ep_dm1_no_primitive_mod16_plus⟩
+
+end MazurLocalObstructionsN14N16
+end FLT
 ```
 
-## Formalization recommendation
+## How I would use these files
 
-Do **not** try to prove N=16 by invoking the final N=10 descent theorem through the quadratic twist.  That route changes the base ring from \(\mathbb Z\) or \(\mathbb Q\) to \(\mathbb Z[i]\) or \(\mathbb Q(i)\), and it does not preserve the “\(u\) is a rational square” structure used by the quartic model.
-
-Do reuse the N=10 proof by extracting the shared descent lemmas:
+For N=14, create a local-obstruction file parallel to the existing N=10 one, with four native-decide lemmas:
 
 ```text
-coprime factorization of U,V
-positivity of U,V
-coprime fourth-power split of UV = 5D^4
-primitive Pythagorean parametrization
-coprime product-square split
-measure-decrease proof
+N14_E_d3_no_primitive_mod4
+N14_E_dm3_no_primitive_mod27       -- optional / convention-dependent
+N14_Ep_d2_no_primitive_mod8
+N14_Ep_dm2_no_primitive_mod8       -- optional / convention-dependent
 ```
 
-Then make the few sign-sensitive algebraic identities parametric in `eps : ℤ` with `eps ^ 2 = 1`.  The only real mathematical replacement is:
+Then the global bridge should say that these local obstructions collapse the relevant Selmer groups to the torsion-generated classes.  The finite curve-point conclusion is then:
 
 ```text
-N=10: h = a^2 - b^2
-N=16: h = a^2 + b^2
+E14(Q) = {O, (-2,0), (0,0), (1,0)}.
 ```
 
-Everything after that is the same descent mechanism.
+For N=16, reuse the N=10 local-obstruction architecture almost verbatim, changing the middle sign on the `d = 5` equation and using the plus-middle dual equation:
+
+```text
+N16_E_d5_no_primitive_mod125
+N16_Ep_dm1_no_primitive_mod16_plus
+```
+
+Then the global bridge should say that the 2-isogeny Selmer groups have the torsion sizes only, giving
+
+```text
+E16(Q) = {O, (0,0)}
+```
+
+for the exact curve `y^2 = x^3 - x^2 - x`.  If your downstream bridge uses the harmless over-approximation `{u=-1,0,1}`, that is fine, but note that `u = ±1` do not actually give affine rational points on this curve because the right-hand side is negative at `u = -1` and `u = 1`.
+
+## Bottom line
+
+Use these prime powers:
+
+```text
+N=14:  4, 8, 27   i.e. primes 2 and 3.
+N=16:  125, 16    i.e. primes 5 and 2.
+```
+
+They are exactly the kind of finite checks that `native_decide` handles well, and they match the existing N=10 proof strategy: native-decide proves the local failures of the non-torsion covering spaces; a separate descent/Selmer bridge converts those local failures into “rank zero and only the listed torsion points.”
