@@ -1,131 +1,352 @@
-# Q2026 (dm1): `WeilPairingInterface.lean`
+# Q2045 (dm1): Weil pairing Layer 2 — CoordinateRing / FunctionField API
+
+This is the exact Mathlib API I found for building Miller line and vertical functions for an affine Weierstrass curve.
+
+The relevant import is:
 
 ```lean
-import Mathlib
-
-/-!
-# Abstract Weil pairing interface
-
-This file is intentionally abstract.  It records the API needed for the
-Mazur-style full-rational-torsion obstruction, without introducing Miller
-functions, divisors, elliptic-curve coordinates, or a concrete Galois action.
-
-In applications, `E` should be instantiated by the `m`-torsion subgroup of an
-elliptic curve, or by an abstract additive group known to model that torsion.
-The codomain is Mathlib's `rootsOfUnity m K`, implemented as a subgroup of
-`Kˣ`.
--/
-
-namespace WeilPairingInterface
-
-universe u v
-
-/-- The group of `m`-th roots of unity in `K`, as implemented by Mathlib. -/
-abbrev Mu (m : ℕ) (K : Type v) [Field K] : Type v :=
-  rootsOfUnity m K
-
-/-- Coerce a root of unity, represented as a unit, back to the base field. -/
-abbrev rootValue {m : ℕ} {K : Type v} [Field K]
-    (zeta : rootsOfUnity m K) : K :=
-  ((zeta : Kˣ) : K)
-
-/-- The abstract `m`-torsion predicate on an additive group. -/
-def MTorsion (m : ℕ) (E : Type u) [AddCommGroup E] : Set E :=
-  {P : E | m • P = 0}
-
-/--
-Abstract Weil-pairing data on an additive group `E` with values in the
-`m`-th roots of unity of a field `K`.
-
-The fields say that `pairing` is multiplicatively bilinear, alternating, and
-nondegenerate in both arguments.  This is the interface layer only; no Miller
-functions or divisor constructions are included here.
--/
-structure WeilPairingData (m : ℕ) (E : Type u) [AddCommGroup E]
-    (K : Type v) [Field K] where
-  pairing : E → E → rootsOfUnity m K
-  map_zero_left : ∀ Q : E, pairing 0 Q = 1
-  map_zero_right : ∀ P : E, pairing P 0 = 1
-  map_add_left : ∀ P Q R : E,
-    pairing (P + Q) R = pairing P R * pairing Q R
-  map_add_right : ∀ P Q R : E,
-    pairing P (Q + R) = pairing P Q * pairing P R
-  alternating : ∀ P : E, pairing P P = 1
-  left_nondegenerate : ∀ P : E, (∀ Q : E, pairing P Q = 1) → P = 0
-  right_nondegenerate : ∀ Q : E, (∀ P : E, pairing P Q = 1) → Q = 0
-
-namespace WeilPairingData
-
-variable {m : ℕ} {E : Type u} [AddCommGroup E]
-variable {K : Type v} [Field K]
-
-@[simp]
-theorem pairing_zero_left (w : WeilPairingData m E K) (Q : E) :
-    w.pairing 0 Q = 1 :=
-  w.map_zero_left Q
-
-@[simp]
-theorem pairing_zero_right (w : WeilPairingData m E K) (P : E) :
-    w.pairing P 0 = 1 :=
-  w.map_zero_right P
-
-@[simp]
-theorem pairing_self (w : WeilPairingData m E K) (P : E) :
-    w.pairing P P = 1 :=
-  w.alternating P
-
-end WeilPairingData
-
-/--
-Abstract witness that the `m`-torsion is fully rational over `K`.
-
-The field `galoisFixed` is a placeholder predicate for "fixed by Galois".
-A concrete elliptic-curve development should replace or instantiate this with
-an actual Galois action and prove `all_mtorsion_fixed` from rationality of all
-`m`-torsion points.
-
-The field `primitive_on_mtorsion` is the abstract proof hook supplied by the
-standard Weil-pairing theorem: on a fully rational rank-two `m`-torsion module,
-a perfect alternating Weil pairing has a value that is a primitive `m`-th root
-of unity.  Keeping this as a field avoids committing this interface file to any
-particular basis, finite-module, or elliptic-curve implementation.
--/
-structure FullyRationalMTorsion (m : ℕ) (E : Type u) [AddCommGroup E]
-    (K : Type v) [Field K] where
-  galoisFixed : E → Prop
-  all_mtorsion_fixed : ∀ P : E, P ∈ MTorsion m E → galoisFixed P
-  primitive_on_mtorsion :
-    ∀ w : WeilPairingData m E K,
-      ∃ P Q : E,
-        P ∈ MTorsion m E ∧
-        Q ∈ MTorsion m E ∧
-        IsPrimitiveRoot (rootValue (w.pairing P Q)) m
-
-variable {m : ℕ} {E : Type u} [AddCommGroup E]
-variable {K : Type v} [Field K]
-
-/--
-If abstract Weil-pairing data exists and the `m`-torsion is fully rational,
-then the base field contains a primitive `m`-th root of unity.
-
-This is the interface-level version of the usual consequence of the Weil
-pairing.  The concrete mathematical work is isolated in
-`FullyRationalMTorsion.primitive_on_mtorsion`.
--/
-theorem weil_pairing_gives_primitive_root
-    (hPairing : Nonempty (WeilPairingData m E K))
-    (hRat : FullyRationalMTorsion m E K) :
-    ∃ zeta : K, IsPrimitiveRoot zeta m := by
-  rcases hPairing with ⟨w⟩
-  rcases hRat.primitive_on_mtorsion w with ⟨P, Q, _hP, _hQ, hprim⟩
-  exact ⟨rootValue (w.pairing P Q), hprim⟩
-
-/-- A convenience variant when the pairing data is already named. -/
-theorem WeilPairingData.exists_primitive_root
-    (w : WeilPairingData m E K)
-    (hRat : FullyRationalMTorsion m E K) :
-    ∃ zeta : K, IsPrimitiveRoot zeta m :=
-  weil_pairing_gives_primitive_root ⟨w⟩ hRat
-
-end WeilPairingInterface
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 ```
+
+`CoordinateRing` is **not** in `Affine/Basic.lean`; it is introduced in `Affine/Point.lean`.
+
+## 1. Exact type
+
+In namespace `WeierstrassCurve.Affine`, Mathlib has:
+
+```lean
+variable {R : Type r} [CommRing R] {W' : WeierstrassCurve.Affine R}
+
+/-- The affine coordinate ring `R[W] := R[X, Y] / ⟨W(X, Y)⟩`. -/
+abbrev CoordinateRing : Type r :=
+  AdjoinRoot W'.polynomial
+
+/-- The function field `R(W) := Frac(R[W])`. -/
+abbrev FunctionField : Type r :=
+  FractionRing W'.CoordinateRing
+```
+
+So, for
+
+```lean
+variable {F : Type u} [Field F] (W : WeierstrassCurve.Affine F)
+```
+
+the coordinate ring is:
+
+```lean
+W.CoordinateRing
+-- reducibly: AdjoinRoot W.polynomial
+-- mathematically: F[X][Y] / ⟨W.polynomial⟩
+```
+
+The function field is:
+
+```lean
+W.FunctionField
+-- reducibly: FractionRing W.CoordinateRing
+```
+
+Important: `W.polynomial : F[X][Y]`, where `F[X][Y]` is Mathlib's bivariate-polynomial notation for `Polynomial (Polynomial F)`.  The inner variable is `X`; the outer variable is written `Y` after
+
+```lean
+open Polynomial
+open scoped Polynomial.Bivariate
+```
+
+`AdjoinRoot` is being used with base ring `F[X]`, so `AdjoinRoot W.polynomial` is the quotient of `(F[X])[Y]` by the ideal generated by the Weierstrass equation.
+
+## 2. Constructor into the coordinate ring
+
+Mathlib wraps `AdjoinRoot.mk W.polynomial` as:
+
+```lean
+WeierstrassCurve.Affine.CoordinateRing.mk W
+-- type: F[X][Y] →+* W.CoordinateRing
+```
+
+Use it as the quotient map from bivariate polynomials to the affine coordinate ring.
+
+Raw coordinate classes:
+
+```lean
+noncomputable section
+
+open Polynomial
+open scoped Polynomial.Bivariate
+
+namespace WeierstrassCurve
+namespace Affine
+
+universe u
+
+variable {F : Type u} [Field F] (W : Affine F)
+
+/-- The class of the affine coordinate X in F[W]. -/
+noncomputable def xCR : W.CoordinateRing :=
+  CoordinateRing.mk W (C (X : F[X]) : F[X][Y])
+
+/-- The class of the affine coordinate Y in F[W]. -/
+noncomputable def yCR : W.CoordinateRing :=
+  CoordinateRing.mk W (Y : F[X][Y])
+
+/-- A general element p(X) + q(X)Y in F[W]. -/
+noncomputable def pqYCR (p q : F[X]) : W.CoordinateRing :=
+  CoordinateRing.mk W (C p + C q * (Y : F[X][Y]))
+
+end Affine
+end WeierstrassCurve
+```
+
+## 3. Built-in `X - x` and `Y - y(X)` classes
+
+Mathlib already gives the two constructors needed for vertical lines and nonvertical line equations:
+
+```lean
+CoordinateRing.XClass W x
+-- type: W.CoordinateRing
+-- definition: CoordinateRing.mk W (C (X - C x))
+
+CoordinateRing.YClass W ypoly
+-- type: W.CoordinateRing, for ypoly : F[X]
+-- definition: CoordinateRing.mk W (Y - C ypoly)
+```
+
+Thus the vertical function `X - x_P` is exactly:
+
+```lean
+CoordinateRing.XClass W xP
+```
+
+For an affine point with coordinates `(xP, yP)`, the function `Y - yP` is:
+
+```lean
+CoordinateRing.YClass W (C yP : F[X])
+```
+
+## 4. Mathlib's line-polynomial API
+
+Mathlib has:
+
+```lean
+linePolynomial (x y ℓ : F) : F[X]
+```
+
+with definition:
+
+```lean
+C ℓ * (X - C x) + C y
+```
+
+This is the polynomial `ℓ(X - x) + y`, so the actual line equation
+
+```text
+Y - (ℓ(X - xP) + yP)
+```
+
+as an element of `W.CoordinateRing` is:
+
+```lean
+CoordinateRing.YClass W (linePolynomial xP yP ℓ)
+```
+
+If you want Mathlib's built-in slope between two affine points, use:
+
+```lean
+W.slope x₁ x₂ y₁ y₂
+```
+
+It branches as follows: if the points are vertical opposites it returns `0`; otherwise it uses the tangent or secant slope.  For Miller functions, branch on the vertical case first and only use the slope in the nonvertical case.
+
+## 5. Embedding into the function field
+
+Since
+
+```lean
+W.FunctionField = FractionRing W.CoordinateRing
+```
+
+the canonical embedding is just the algebra map:
+
+```lean
+algebraMap W.CoordinateRing W.FunctionField
+-- type: W.CoordinateRing →+* W.FunctionField
+```
+
+Define a local helper:
+
+```lean
+noncomputable section
+
+open Polynomial
+open scoped Polynomial.Bivariate
+
+namespace WeierstrassCurve
+namespace Affine
+
+universe u
+
+variable {F : Type u} [Field F] (W : Affine F)
+
+/-- Coordinate-ring element as a rational function. -/
+noncomputable def crToFF (f : W.CoordinateRing) : W.FunctionField :=
+  algebraMap W.CoordinateRing W.FunctionField f
+
+/-- Vertical function X - xP as a rational function. -/
+noncomputable def verticalFF (xP : F) : W.FunctionField :=
+  crToFF W (CoordinateRing.XClass W xP)
+
+/-- Nonvertical line Y - (ℓ(X - xP) + yP) as a rational function. -/
+noncomputable def lineFF (xP yP ℓ : F) : W.FunctionField :=
+  crToFF W (CoordinateRing.YClass W (linePolynomial xP yP ℓ))
+
+/-- Quotient of two coordinate-ring functions in the function field. -/
+noncomputable def ratioFF (num den : W.CoordinateRing) : W.FunctionField :=
+  crToFF W num / crToFF W den
+
+end Affine
+end WeierstrassCurve
+```
+
+For Miller's `g(R,S) = line(R,S) / vertical(R+S)`, this means:
+
+```lean
+crToFF W lineNumerator / crToFF W verticalDenominator
+```
+
+where `lineNumerator` and `verticalDenominator` are elements of `W.CoordinateRing`.
+
+If you need the explicit localization constructor instead of field division, use `IsLocalization.mk'`:
+
+```lean
+noncomputable def ratioFF' {F : Type u} [Field F]
+    (W : WeierstrassCurve.Affine F)
+    (num den : W.CoordinateRing) (hden : den ≠ 0) : W.FunctionField :=
+  IsLocalization.mk' W.FunctionField num
+    ⟨den, mem_nonZeroDivisors_iff_ne_zero.mpr hden⟩
+```
+
+The theorem connecting this constructor to division is:
+
+```lean
+IsFractionRing.mk'_eq_div
+```
+
+which rewrites `IsLocalization.mk' K r s` as
+
+```lean
+algebraMap A K r / algebraMap A K s
+```
+
+for a fraction ring `K` of an integral domain `A`.
+
+## 6. Point-level skeleton for Miller functions
+
+A `W.Point` may be the point at infinity, so do not try to project coordinates blindly.  Pattern-match on the point.
+
+```lean
+noncomputable section
+
+open Polynomial
+open scoped Polynomial.Bivariate
+
+namespace WeierstrassCurve
+namespace Affine
+
+universe u
+
+variable {F : Type u} [Field F] (W : Affine F)
+
+/-- Vertical denominator v_P.  For O, use 1.  For affine P=(x,y), use X-x. -/
+noncomputable def verticalAtPointCR : W.Point → W.CoordinateRing
+  | 0 => 1
+  | .some x _ _ => CoordinateRing.XClass W x
+
+/--
+Line numerator for two affine points, with Miller-friendly identity cases.
+For vertical opposite affine points, this returns X-x.  Otherwise it returns
+Y - (slope*(X-x₁)+y₁).
+-/
+noncomputable def lineThroughCR (P Q : W.Point) : W.CoordinateRing := by
+  classical
+  exact
+    match P, Q with
+    | 0, _ => 1
+    | _, 0 => 1
+    | .some x₁ y₁ _h₁, .some x₂ y₂ _h₂ =>
+        if hxy : x₁ = x₂ ∧ y₁ = W.negY x₂ y₂ then
+          CoordinateRing.XClass W x₁
+        else
+          CoordinateRing.YClass W (linePolynomial x₁ y₁ (W.slope x₁ x₂ y₁ y₂))
+
+/-- Same line numerator, embedded into the function field. -/
+noncomputable def lineThroughFF (P Q : W.Point) : W.FunctionField :=
+  algebraMap W.CoordinateRing W.FunctionField (lineThroughCR W P Q)
+
+/-- Same vertical denominator, embedded into the function field. -/
+noncomputable def verticalAtPointFF (P : W.Point) : W.FunctionField :=
+  algebraMap W.CoordinateRing W.FunctionField (verticalAtPointCR W P)
+
+end Affine
+end WeierstrassCurve
+```
+
+For the actual Miller correction factor, after computing `T = P + Q`, use:
+
+```lean
+lineThroughFF W P Q / verticalAtPointFF W (P + Q)
+```
+
+with the usual caveat that this is a rational function; evaluation at a point later needs denominator nonvanishing.
+
+## 7. Proof and simplification hooks to know
+
+Useful Mathlib names:
+
+```lean
+CoordinateRing.mk W                  -- quotient map F[X][Y] →+* W.CoordinateRing
+CoordinateRing.XClass W x             -- class of X - x
+CoordinateRing.YClass W ypoly         -- class of Y - ypoly(X)
+CoordinateRing.XClass_ne_zero         -- XClass W x ≠ 0
+CoordinateRing.YClass_ne_zero         -- YClass W ypoly ≠ 0
+CoordinateRing.basis W                -- basis {1, Y} over F[X]
+CoordinateRing.basis_zero             -- basis W 0 = 1
+CoordinateRing.basis_one              -- basis W 1 = CoordinateRing.mk W Y
+CoordinateRing.exists_smul_basis_eq   -- every element is p + qY
+CoordinateRing.smul_basis_mul_Y       -- multiplication by Y in p + qY form
+
+AdjoinRoot.mk                         -- quotient map for a general polynomial
+AdjoinRoot.of                         -- base-ring map into AdjoinRoot
+AdjoinRoot.root                       -- image of X in AdjoinRoot
+AdjoinRoot.mk_eq_mk                   -- quotient equality iff polynomial difference is divisible
+AdjoinRoot.mk_eq_zero                 -- quotient class is zero iff divisible by defining polynomial
+AdjoinRoot.mk_self                    -- defining polynomial maps to zero
+AdjoinRoot.mk_C                       -- constants under mk
+AdjoinRoot.mk_X                       -- X maps to root
+
+IsLocalization.mk'                    -- explicit fraction constructor
+IsFractionRing.mk'_eq_div             -- explicit fraction equals algebraMap numerator / denominator
+IsFractionRing.div_surjective         -- every function-field element is a quotient
+```
+
+## 8. Recommended Layer-2 names
+
+For a first Miller-function file, I would introduce only these wrappers:
+
+```lean
+abbrev CR (W : WeierstrassCurve.Affine F) := W.CoordinateRing
+abbrev FF (W : WeierstrassCurve.Affine F) := W.FunctionField
+
+noncomputable def crToFF (W : WeierstrassCurve.Affine F)
+    (f : W.CoordinateRing) : W.FunctionField :=
+  algebraMap W.CoordinateRing W.FunctionField f
+
+noncomputable def verticalCR (W : WeierstrassCurve.Affine F) (x : F) : W.CoordinateRing :=
+  WeierstrassCurve.Affine.CoordinateRing.XClass W x
+
+noncomputable def lineCR (W : WeierstrassCurve.Affine F) (x y ℓ : F) : W.CoordinateRing :=
+  WeierstrassCurve.Affine.CoordinateRing.YClass W
+    (WeierstrassCurve.Affine.linePolynomial x y ℓ)
+```
+
+Then define the point-level versions by pattern matching on `W.Point` as above.
