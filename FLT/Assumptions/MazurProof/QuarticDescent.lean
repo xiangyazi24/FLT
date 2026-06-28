@@ -486,8 +486,7 @@ theorem quartic_plus_descent_step :
       -- B₁ = 4k/2 = 2k
       have hB₁_val : B₁ = 2 * k := by omega
       rw [hB₁_val]
-      rw [show 16 * (5 * (2 * k) ^ 4) = 5 * (4 * k) ^ 4 from by ring]
-      exact hUV
+      convert hUV using 1; ring
     -- M, N > 0
     have hMpos : 0 < M := by
       by_contra hle; push_neg at hle
