@@ -494,7 +494,8 @@ theorem quartic_plus_descent_step :
           (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := by
         congr 1 <;> linarith
       -- Chain: 16(MN) = (4M)(4N) = UV = 5(4k)⁴ = 16·5·B₁⁴
-      have h2 : 16 * (M * N) = 5 * (4 * k) ^ 4 := by nlinarith [h_prod_eq, hUV]
+      have h2 : 16 * (M * N) = 5 * (4 * k) ^ 4 := by
+        nlinarith [h_prod_eq, hUV, show (4*M)*(4*N) = 16*(M*N) from by ring]
       have h3 : 5 * (4 * k) ^ 4 = 16 * (5 * B₁ ^ 4) := by rw [hB₁_val]; ring
       omega
     -- M, N > 0
