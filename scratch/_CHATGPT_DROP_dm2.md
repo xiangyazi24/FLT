@@ -1,65 +1,40 @@
-# Q2027 (dm2): Miller function core for a short Weierstrass curve
+# Q2052 (dm2): Miller loop structure in Lean 4
 
-Date searched/written: 2026-06-28.
+Date: 2026-06-28.
 
-Goal: give Lean 4 definitions for the Miller-function core behind the Weil pairing, without proving the divisor identities yet.
+Goal: write the loop structure only.  The line/tangent/vertical functions are placeholders with `sorry`; the point is to get the binary double-and-add accumulator right.
 
-This uses Mathlib's existing Weierstrass-curve affine API:
+Convention in this file:
 
-* `WeierstrassCurve.Affine.CoordinateRing := AdjoinRoot W.polynomial`;
-* `WeierstrassCurve.Affine.FunctionField := FractionRing W.CoordinateRing`;
-* `CoordinateRing.mk : K[X][Y] →+* W.CoordinateRing`;
-* `CoordinateRing.XClass W x`, representing `X - x` in the coordinate ring;
-* `linePolynomial x y ℓ : K[X]`, representing `ℓ * (X - x) + y`;
-* `W.slope x₁ x₂ y₁ y₂`, Mathlib's secant/tangent slope;
-* `W.Point`, the nonsingular affine point type with the point at infinity.
+* `W : WeierstrassCurve.Affine K`.
+* `P : W.Point` is an `m`-torsion point, carried as a hypothesis `hP : m • P = 0`.
+* The output lives in `W.FunctionField`, which is Mathlib's abbreviation for `FractionRing W.CoordinateRing`.
+* Bits are processed **most-significant first**.
+* The state starts at `T = O`, accumulator `f = 1`.
+* For each bit:
+  1. double: multiply by `tangentLine(T) / verticalLine(2T)`, set `T := 2T`;
+  2. if the bit is `1`: multiply by `secantLine(T,P) / verticalLine(T+P)`, set `T := T+P`.
 
-Important convention: the total function `ellCoord W P Q` below returns `1` if either input is `O`, returns the vertical line if `Q = -P`, and otherwise returns the usual affine line
+This is a total loop skeleton.  The placeholder line functions should later be replaced by the Q2027 `ell/v` functions, with conventions at `O` chosen so the first MSB step from `T = O` is harmless.
 
-```text
-Y - (λ * (X - x_P) + y_P).
-```
-
-This is the convention needed for a total Miller core.  The divisor-correctness theorem is not included here; the intended future theorem is
-
-```text
-div(g(P,Q)) = [P] + [Q] - [P+Q] - [O]
-```
-
-where `g(P,Q) = ell(P,Q) / v(P+Q)`.
-
-## Lean 4 file
+## Lean 4 code
 
 ```lean
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.Data.Nat.Bits
 
 /-!
-# Miller-function core for Weierstrass curves
+# Miller loop skeleton
 
-This file defines the rational functions used in the Miller loop for a short
-Weierstrass curve `y^2 = x^3 + A*x + B`.
-
-The definitions are deliberately computational and do **not** prove the divisor
-formulae yet.  They live in the function field
-
-  `W.FunctionField = FractionRing W.CoordinateRing`.
-
-The main definitions are:
-
-* `shortCurve A B` for `y^2 = x^3 + A*x + B`;
-* `lineFunctionFF W x y λ` for `Y - (λ*(X-x)+y)`;
-* `verticalFunctionFF W x` for `X - x`;
-* `ellFF W P Q`, the total line/tangent/vertical function through `P,Q`;
-* `millerFunction W P m`, the binary Miller-loop accumulator for `f_{m,P}`.
+This file only defines the double-and-add Miller-loop control flow.
+The rational functions `secantLine`, `tangentLine`, and `verticalLine` are
+placeholders.  Replace them later with explicit functions in
+`W.FunctionField = FractionRing W.CoordinateRing`.
 -/
 
 namespace WeierstrassCurve
 namespace Affine
-namespace MillerCore
-
-open Polynomial
-open scoped Polynomial.Bivariate
+namespace MillerLoopSkeleton
 
 universe u
 
@@ -67,210 +42,148 @@ variable {K : Type u} [Field K] [DecidableEq K]
 
 noncomputable section
 
-/-- The short Weierstrass curve `y^2 = x^3 + A*x + B`. -/
-def shortCurve (A B : K) : Affine K where
-  a₁ := 0
-  a₂ := 0
-  a₃ := 0
-  a₄ := A
-  a₆ := B
+/--
+Placeholder for the secant line through two points, as a function in `K(W)`.
 
-/-- The point type for the short curve `y^2 = x^3 + A*x + B`. -/
-abbrev ShortPoint (A B : K) : Type u :=
-  (shortCurve (K := K) A B).Point
-
-/-- The affine coordinate ring of the short curve `y^2 = x^3 + A*x + B`. -/
-abbrev ShortCoordinateRing (A B : K) : Type u :=
-  (shortCurve (K := K) A B).CoordinateRing
-
-/-- The function field of the short curve `y^2 = x^3 + A*x + B`. -/
-abbrev ShortFunctionField (A B : K) : Type u :=
-  (shortCurve (K := K) A B).FunctionField
-
-/-- Coerce a coordinate-ring element to the function field. -/
-def coordToFF (W : Affine K) (z : W.CoordinateRing) : W.FunctionField :=
-  algebraMap W.CoordinateRing W.FunctionField z
-
-/-- Send a bivariate polynomial to the function field of `W`. -/
-def bivarToFF (W : Affine K) (F : K[X][Y]) : W.FunctionField :=
-  coordToFF W (CoordinateRing.mk W F)
-
-/-- The coordinate-ring class of `Y - (λ * (X - xP) + yP)`. -/
-def lineFunctionCoord (W : Affine K) (xP yP λ : K) : W.CoordinateRing :=
-  CoordinateRing.mk W (Y - C (linePolynomial xP yP λ))
-
-/-- The function-field element `Y - (λ * (X - xP) + yP)`. -/
-def lineFunctionFF (W : Affine K) (xP yP λ : K) : W.FunctionField :=
-  coordToFF W (lineFunctionCoord W xP yP λ)
-
-/-- The coordinate-ring class of the vertical function `X - xP`. -/
-def verticalFunctionCoord (W : Affine K) (xP : K) : W.CoordinateRing :=
-  CoordinateRing.XClass W xP
-
-/-- The function-field element `X - xP`. -/
-def verticalFunctionFF (W : Affine K) (xP : K) : W.FunctionField :=
-  coordToFF W (verticalFunctionCoord W xP)
-
-/-- Extract the `x`-coordinate of a finite affine point, returning `none` at infinity. -/
-def pointX? {W : Affine K} : W.Point → Option K
-  | .zero => none
-  | .some x _ _ => some x
-
-/-- Extract the `y`-coordinate of a finite affine point, returning `none` at infinity. -/
-def pointY? {W : Affine K} : W.Point → Option K
-  | .zero => none
-  | .some _ y _ => some y
+For the eventual implementation, this should be the line function through `P`
+and `Q`, with total conventions at `O`.
+-/
+noncomputable def secantLine (W : Affine K) (_P _Q : W.Point) : W.FunctionField := by
+  sorry
 
 /--
-The total line/tangent/vertical function in the coordinate ring.
+Placeholder for the tangent line at a point, as a function in `K(W)`.
 
-* If either input is `O`, this returns `1` by convention.
-* If `Q = -P`, this returns the vertical line `X - xP`.
-* Otherwise this returns the affine secant/tangent line
-  `Y - (λ * (X - xP) + yP)` with `λ = W.slope xP xQ yP yQ`.
+For the eventual implementation, this should be the tangent line at `P`, with a
+total convention at `O`.
 -/
-def ellCoord (W : Affine K) : W.Point → W.Point → W.CoordinateRing
-  | .zero, _ => 1
-  | _, .zero => 1
-  | .some xP yP _hP, .some xQ yQ _hQ =>
-      if _hvertical : xP = xQ ∧ yP = W.negY xQ yQ then
-        verticalFunctionCoord W xP
-      else
-        lineFunctionCoord W xP yP (W.slope xP xQ yP yQ)
-
-/-- The total line/tangent/vertical function in the function field. -/
-def ellFF (W : Affine K) (P Q : W.Point) : W.FunctionField :=
-  coordToFF W (ellCoord W P Q)
+noncomputable def tangentLine (W : Affine K) (_P : W.Point) : W.FunctionField := by
+  sorry
 
 /--
-The vertical function attached to a point.  At infinity we use the total
-Miller-core convention `v(O) = 1`.
+Placeholder for the vertical line through a point, as a function in `K(W)`.
+
+For the eventual implementation, this should be `X - x(P)` for affine `P`, with
+a total convention at `O`.
 -/
-def verticalAtPointFF (W : Affine K) : W.Point → W.FunctionField
-  | .zero => 1
-  | .some x _ _ => verticalFunctionFF W x
+noncomputable def verticalLine (W : Affine K) (_P : W.Point) : W.FunctionField := by
+  sorry
 
-/--
-The Miller quotient
-
-  `g(P,Q) = ell(P,Q) / v(P+Q)`.
-
-The future divisor theorem should say
-
-  `div(g(P,Q)) = [P] + [Q] - [P+Q] - [O]`.
--/
-def millerQuotientFF (W : Affine K) (P Q : W.Point) : W.FunctionField :=
-  ellFF W P Q / verticalAtPointFF W (P + Q)
-
-/-- State of the Miller loop: current multiple `R` and current function accumulator `f`. -/
+/-- State of the Miller loop: current multiple `T` and accumulator `f`. -/
 structure MillerState (W : Affine K) where
-  R : W.Point
-  f : W.FunctionField
+  current : W.Point
+  acc : W.FunctionField
 
-/-- Initial Miller state for the left-to-right binary loop: `R = P`, `f = 1`. -/
-def initialState (W : Affine K) (P : W.Point) : MillerState W where
-  R := P
-  f := 1
+/-- Initial state: current point `O`, accumulator `1`. -/
+def initialState (W : Affine K) : MillerState W where
+  current := 0
+  acc := 1
 
-/-- Doubling step: `(R,f) ↦ (2R, f^2 * g(R,R))`. -/
-def millerDouble (W : Affine K) (s : MillerState W) : MillerState W where
-  R := s.R + s.R
-  f := s.f ^ 2 * millerQuotientFF W s.R s.R
-
-/--
-One left-to-right Miller step for a binary digit after the leading `1`.
-
-After doubling, if the next bit is `1`, multiply by `g(2R,P)` and update
-`R := 2R + P`; if it is `0`, keep the doubled state.
--/
-def millerStepBit (W : Affine K) (P : W.Point) (b : Bool) (s : MillerState W) : MillerState W :=
-  let s₂ := millerDouble W s
-  if b then
-    { R := s₂.R + P
-      f := s₂.f * millerQuotientFF W s₂.R P }
-  else
-    s₂
+/-- The doubling update: multiply by `tangentLine(T) / verticalLine(2T)` and set `T := 2T`. -/
+def doubleStep (W : Affine K) (s : MillerState W) : MillerState W where
+  current := s.current + s.current
+  acc := s.acc ^ 2 * (tangentLine W s.current / verticalLine W (s.current + s.current))
 
 /--
-Binary digits used by the Miller loop: most-significant first, with the leading
-`1` removed.
-
-Mathlib's `Nat.bits m` is least-significant first, so we reverse it and drop the
-leading most-significant bit.
+The optional addition update for a `1` bit: multiply by
+`secantLine(T,P) / verticalLine(T+P)` and set `T := T+P`.
 -/
-def millerBits (m : ℕ) : List Bool :=
-  (Nat.bits m).reverse.drop 1
-
-/-- Run the Miller loop over an explicit list of bits. -/
-def millerLoopFromBits (W : Affine K) (P : W.Point) (bits : List Bool) : MillerState W :=
-  bits.foldl (fun s b => millerStepBit W P b s) (initialState W P)
+def addStep (W : Affine K) (P : W.Point) (s : MillerState W) : MillerState W where
+  current := s.current + P
+  acc := s.acc * (secantLine W s.current P / verticalLine W (s.current + P))
 
 /--
-The Miller function accumulator `f_{m,P}` computed from the binary expansion of
-`m`.
+Process one binary digit in the MSB-first Miller loop.
 
-For `m = 1`, this returns `1`, as expected from the normalization `f_{1,P}=1`.
-The case `m = 0` is not used in the Weil-pairing construction; with the present
-total convention it also returns the initial accumulator `1`.
+Every digit first performs a doubling step.  If the digit is `true`, it then
+performs the addition step by `P`; if the digit is `false`, it keeps the doubled
+state.
 -/
-def millerFunction (W : Affine K) (P : W.Point) (m : ℕ) : W.FunctionField :=
-  (millerLoopFromBits W P (millerBits m)).f
+def stepBit (W : Affine K) (P : W.Point) (bit : Bool) (s : MillerState W) : MillerState W :=
+  let s₂ := doubleStep W s
+  if bit then addStep W P s₂ else s₂
 
-/-- Same function, with an explicit order hypothesis carried for downstream APIs. -/
-def millerFunctionOfOrder (W : Affine K) (P : W.Point) (m : ℕ)
+/--
+Binary digits of `m`, most-significant first.
+
+Mathlib's `Nat.bits m` is least-significant first, so we reverse it.
+For `m = 0`, this returns `[]`.
+-/
+def bitsMSB (m : ℕ) : List Bool :=
+  (Nat.bits m).reverse
+
+/-- Run the Miller loop over an explicit list of MSB-first bits. -/
+def loopFromBits (W : Affine K) (P : W.Point) (bits : List Bool) : MillerState W :=
+  bits.foldl (fun s bit => stepBit W P bit s) (initialState W)
+
+/-- Run the Miller loop over the binary expansion of `m`. -/
+def loopState (W : Affine K) (P : W.Point) (m : ℕ) : MillerState W :=
+  loopFromBits W P (bitsMSB m)
+
+/--
+The Miller-loop accumulator for a point `P` satisfying `m • P = O`.
+
+The hypothesis is carried for the API and future correctness theorem; the loop
+itself only needs `P` and `m`.
+-/
+def millerLoopFunction (W : Affine K) (P : W.Point) (m : ℕ)
     (_hP : m • P = 0) : W.FunctionField :=
-  millerFunction W P m
+  (loopState W P m).acc
 
-/-- Same function, with an exact-order hypothesis carried for downstream APIs. -/
-def millerFunctionOfExactOrder (W : Affine K) (P : W.Point) (m : ℕ)
-    (_hP : addOrderOf P = m) : W.FunctionField :=
-  millerFunction W P m
+/--
+A variant returning both the final multiple and the accumulator.
+
+Future invariant target:
+if the processed prefix represents `n`, then `current = n • P` and
+`acc = f_{n,P}` with divisor `n[P] - [nP] - (n-1)[O]`.
+-/
+def millerLoopStateOfOrder (W : Affine K) (P : W.Point) (m : ℕ)
+    (_hP : m • P = 0) : MillerState W :=
+  loopState W P m
 
 /-!
-## Short-curve convenience wrappers
+## Recursive spelling
 
-These wrappers specialize the definitions above to `y^2 = x^3 + A*x + B`.
+The fold-based implementation above is usually easiest to use.  This recursive
+version is definitionally equivalent in spirit and may be more convenient for
+induction on the bit list.
 -/
 
-/-- Line function on the short curve `y^2 = x^3 + A*x + B`. -/
-def shortEllFF (A B : K) (P Q : ShortPoint (K := K) A B) : ShortFunctionField (K := K) A B :=
-  ellFF (shortCurve (K := K) A B) P Q
+def loopFromBitsRec (W : Affine K) (P : W.Point) : List Bool → MillerState W → MillerState W
+  | [], s => s
+  | bit :: bits, s => loopFromBitsRec W P bits (stepBit W P bit s)
 
-/-- Vertical function at a point on the short curve `y^2 = x^3 + A*x + B`. -/
-def shortVerticalAtPointFF (A B : K) (P : ShortPoint (K := K) A B) :
-    ShortFunctionField (K := K) A B :=
-  verticalAtPointFF (shortCurve (K := K) A B) P
+/-- Recursive loop over the binary expansion of `m`. -/
+def loopStateRec (W : Affine K) (P : W.Point) (m : ℕ) : MillerState W :=
+  loopFromBitsRec W P (bitsMSB m) (initialState W)
 
-/-- Miller quotient on the short curve `y^2 = x^3 + A*x + B`. -/
-def shortMillerQuotientFF (A B : K) (P Q : ShortPoint (K := K) A B) :
-    ShortFunctionField (K := K) A B :=
-  millerQuotientFF (shortCurve (K := K) A B) P Q
-
-/-- Miller function on the short curve `y^2 = x^3 + A*x + B`. -/
-def shortMillerFunction (A B : K) (P : ShortPoint (K := K) A B) (m : ℕ) :
-    ShortFunctionField (K := K) A B :=
-  millerFunction (shortCurve (K := K) A B) P m
+/-- Recursive Miller-loop accumulator with the torsion hypothesis carried. -/
+def millerLoopFunctionRec (W : Affine K) (P : W.Point) (m : ℕ)
+    (_hP : m • P = 0) : W.FunctionField :=
+  (loopStateRec W P m).acc
 
 end
 
-end MillerCore
+end MillerLoopSkeleton
 end Affine
 end WeierstrassCurve
 ```
 
-## Notes for the next round
+## Notes
 
-The core above is only the computational skeleton.  The next formal targets are:
-
-1. define finite divisors supported on `W.Point`;
-2. define evaluation of a function-field element at such divisors where no zero/pole conflict occurs;
-3. prove the divisor identity for `millerQuotientFF`;
-4. prove the loop invariant
+The loop above processes all bits including the leading `1`, because the state starts at `O`.  The first step therefore computes
 
 ```text
-div(f_{n,P}) = n[P] - [nP] - (n-1)[O];
+T = 2O + P = P
 ```
 
-5. define the Weil pairing by a normalized Miller evaluation and then connect it to the abstract `WeilPairingData` interface from Q2012.
+for the leading bit.  The placeholder functions must eventually satisfy the total conventions
 
-The definitions are intentionally total at `O` and in vertical cases so that the Miller loop can be written without partial functions.  Correctness theorems should state the exact mathematical hypotheses under which those total conventions agree with the divisor-theoretic formulas.
+```text
+tangentLine(O) / verticalLine(O) = 1,
+secantLine(O,P) / verticalLine(P) = 1,
+```
+
+or an equivalent normalization, so that the first step does not introduce a spurious factor.
+
+If instead one starts with `T = P`, then the usual implementation drops the leading bit.  That is the Q2027 style.  This file follows the user-requested `T = O` convention.
