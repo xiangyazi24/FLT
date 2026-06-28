@@ -482,7 +482,10 @@ theorem quartic_plus_descent_step :
           (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := by
         congr 1 <;> linarith
       have h3 : 16 * (5 * B₁ ^ 4) = 5 * (4 * k) ^ 4 := by rw [hB₁_val]; ring
-      nlinarith [hUV]
+      -- Step A: 16*(MN) = 5*(4k)^4
+      have hA : 16 * (M * N) = 5 * (4 * k) ^ 4 := by nlinarith [h1, h2, hUV]
+      -- Step B: chain with h3
+      linarith
     -- M, N > 0
     have hMpos : 0 < M := by
       by_contra hle; push_neg at hle
