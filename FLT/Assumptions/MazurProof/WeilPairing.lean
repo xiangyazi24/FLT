@@ -1,37 +1,27 @@
 import Mathlib
 import FLT.Assumptions.MazurProof.Axioms
+import FLT.Assumptions.MazurProof.WeilPairingInterface
 
 /-!
-# Weil Pairing: Simplified via Determinant of Galois Representation
+# Weil Pairing: Thin Shim over WeilPairingInterface
 
-## Main result
+## Architecture (Q2055)
 
-`weil_pairing_gives_primitive_root`: If all m-torsion points of E/ℚ are
-rational (`HasFullRationalTorsion E m`), then ℚ contains a primitive m-th
-root of unity.
+This file is a thin shim that exposes the old theorem names while delegating
+the mathematical substance to `WeilPairingInterface.lean`.
 
-## Optimized proof strategy (Q1078)
+* `fullRationalTorsion_order_le_two` delegates to `weil_interface_bridge`
+  (which carries the sorry for the EC-theoretic inputs) and then applies
+  `isPrimitiveRoot_rat_order_le_two` from `RootsOfUnity.lean`.
+* `not_hasFullRationalTorsion_of_three_le` and the casework in
+  `weil_pairing_gives_primitive_root` are fully proved (no sorry).
 
-**Key observation:** For m ≥ 3, `IsPrimitiveRoot ζ m` is impossible over ℚ
-(Mathlib's `isPrimitiveRoot_rat_order_le_two`). So we prove that
-`HasFullRationalTorsion E m → m ≤ 2`, then finish by casework on m ∈ {1,2}.
-
-**Proof route:** Instead of formalizing the full Weil pairing (divisor theory,
-non-degeneracy, Galois equivariance), use the determinant of the mod-m Galois
-representation:
-
-1. `hfull` gives m² rational m-torsion points.
-2. In characteristic zero, geometric E[m] has exactly m² points.
-3. Hence all geometric m-torsion is rational → mod-m Galois representation is trivial.
-4. det(ρ_m) = cyclotomic character ε_m.
-5. At complex conjugation, ε_m evaluates to -1.
-6. Triviality → -1 = 1 mod m → m | 2 → m ≤ 2.
-
-This avoids exposing Weil pairing internals; the obstruction is isolated in one
-targeted lemma.
+**Sorry count in this file: 0.**  The sole remaining sorry lives in
+`WeilPairingInterface.weil_interface_bridge`.
 -/
 
 open scoped WeierstrassCurve.Affine
+open MazurProof.WeilPairingInterface
 
 namespace MazurProof
 
@@ -40,26 +30,19 @@ namespace MazurProof
 private lemma primitive_root_one : IsPrimitiveRoot (1 : ℚ) 1 :=
   IsPrimitiveRoot.one
 
-private lemma primitive_root_two : IsPrimitiveRoot (-1 : ℚ) 2 := by
-  constructor
-  · norm_num
-  · intro l hl
-    by_contra h
-    have hodd : Odd l := by
-      rcases Nat.even_or_odd l with ⟨k, hk⟩ | ho
-      · exact absurd ⟨k, by omega⟩ h
-      · exact ho
-    have : l < 2 := by omega
-    interval_cases l
+private lemma primitive_root_two : IsPrimitiveRoot (-1 : ℚ) 2 where
+  pow_eq_one := by norm_num
+  dvd_of_pow_eq_one l hl := by
+    rcases Nat.even_or_odd l with ⟨k, hk⟩ | ho
+    · exact ⟨k, by omega⟩
+    · exfalso; linarith [ho.neg_one_pow (α := ℚ)]
 
 /-! ## Core obstruction: HasFullRationalTorsion E m → m ≤ 2
 
-This is the minimal hard lemma needed. It encapsulates the Galois-theoretic
-argument without exposing the full Weil pairing machinery.
-
-The proof outline uses determinant of mod-m Galois representation = cyclotomic
-character evaluated at complex conjugation. Left as a sorry pending the Galois
-representation infrastructure.
+Delegates to `WeilPairingInterface.weil_interface_bridge` (which encapsulates
+the Galois-equivariant Weil pairing construction) and then closes with
+`isPrimitiveRoot_rat_order_le_two` (the only primitive roots in ℚ have
+order ≤ 2).
 -/
 
 theorem fullRationalTorsion_order_le_two
@@ -67,13 +50,8 @@ theorem fullRationalTorsion_order_le_two
     (hm : 0 < m)
     (hfull : HasFullRationalTorsion E m) :
     m ≤ 2 := by
-  -- Core lemma: If E[m] ⊆ E(ℚ), the mod-m Galois representation is trivial.
-  -- Its determinant equals the cyclotomic character.
-  -- At complex conjugation (which acts on roots of unity by inversion),
-  -- the cyclotomic character is -1.
-  -- Triviality gives -1 = 1 mod m, so m | 2.
-  -- With 0 < m, this gives m ≤ 2.
-  sorry
+  obtain ⟨ζ, hζ⟩ := weil_interface_bridge E hm hfull
+  exact isPrimitiveRoot_rat_order_le_two hζ
 
 theorem not_hasFullRationalTorsion_of_three_le
     (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
