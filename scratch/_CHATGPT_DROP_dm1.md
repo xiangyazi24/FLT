@@ -1,58 +1,78 @@
 # Q2109 dm1
 
-I rechecked GitHub after reconnect.  The connector has access to `xiangyazi24/FLT`, but the requested file is still absent from the visible `ai-scratch` tree:
+I rechecked GitHub after reconnect.  The connector has access to `xiangyazi24/FLT`, but this file is still absent from the visible `ai-scratch` tree:
 
 ```text
 FLT/Assumptions/MazurProof/WeilPairingInterface.lean
 ```
 
-Direct fetch on `ai-scratch` returns `404 Not Found`.  Repo search finds no hits for `WeilPairingInterface`, `primitive_root_in_base`, or `left_nondegenerate`.  The `ai-scratch` head visible to the connector is `848ffbf5163603f16828def879890e51e5cc3725`.
+Direct fetch on `ai-scratch` returns `404 Not Found`.  Search also finds no hits for `WeilPairingInterface`, `primitive_root_in_base`, or `left_nondegenerate`.  The visible `ai-scratch` head is `848ffbf5163603f16828def879890e51e5cc3725`.
 
-I therefore could not inspect or edit the exact source file.  The two pure proofs should be as follows, if the goals have the expected selected-pair shape.
-
-Given a chosen pair with
+I could not inspect the exact five holes.  Conditional on the usual selected-pair goal shapes, the two pure proofs are:
 
 ```lean
-hPQ : e P Q != 1
-```
+-- Given hPQ : e P Q ≠ 1
 
-left proof:
-
-```lean
-by
+have left_nondegenerate : ¬ ∀ a, e P a = 1 := by
   intro h
   exact hPQ (h Q)
-```
 
-right proof, if the goal is `not forall a, e a Q = 1`:
-
-```lean
-by
+have right_nondegenerate : ¬ ∀ a, e a Q = 1 := by
   intro h
   exact hPQ (h P)
 ```
 
-If the right goal is instead `not forall a, e a P = 1`, first prove from bilinearity and alternatingness that
+If the second goal has the reversed orientation, `¬ ∀ a, e a P = 1`, use alternatingness.
 
 ```lean
-e Q P = (e P Q)^-1
-```
+private lemma swap_eq_inv_of_alternating
+    {T μ : Type*} [AddCommGroup T] [Group μ]
+    (e : T → T → μ)
+    (map_add_left : ∀ P Q R : T, e (P + Q) R = e P R * e Q R)
+    (map_add_right : ∀ P Q R : T, e P (Q + R) = e P Q * e P R)
+    (alternating : ∀ P : T, e P P = 1)
+    (P Q : T) :
+    e Q P = (e P Q)⁻¹ := by
+  have hdiag : e (P + Q) (P + Q) = 1 := alternating (P + Q)
+  have hprod : e P Q * e Q P = 1 := by
+    simpa [map_add_left, map_add_right, alternating P, alternating Q, mul_assoc]
+      using hdiag
+  calc
+    e Q P = (e P Q)⁻¹ * (e P Q * e Q P) := by group
+    _ = (e P Q)⁻¹ * 1 := by rw [hprod]
+    _ = (e P Q)⁻¹ := by simp
 
-by expanding `e (P + Q) (P + Q) = 1`; this gives `e P Q * e Q P = 1`.  Then `e Q P = 1` would imply `e P Q = 1`, contradicting `hPQ`.  The proof body is:
+private lemma swap_ne_one_of_ne_one
+    {T μ : Type*} [AddCommGroup T] [Group μ]
+    (e : T → T → μ)
+    (map_add_left : ∀ P Q R : T, e (P + Q) R = e P R * e Q R)
+    (map_add_right : ∀ P Q R : T, e P (Q + R) = e P Q * e P R)
+    (alternating : ∀ P : T, e P P = 1)
+    {P Q : T}
+    (hPQ : e P Q ≠ 1) :
+    e Q P ≠ 1 := by
+  intro hQP
+  have hswap := swap_eq_inv_of_alternating e map_add_left map_add_right alternating P Q
+  have hPQ_one : e P Q = 1 := by
+    calc
+      e P Q = ((e P Q)⁻¹)⁻¹ := by simp
+      _ = (e Q P)⁻¹ := by rw [← hswap]
+      _ = 1 := by simp [hQP]
+  exact hPQ hPQ_one
 
-```lean
-by
+have right_nondegenerate_reversed : ¬ ∀ a, e a P = 1 := by
   intro h
-  have hQP_ne : e Q P != 1 := by
-    intro hQP
-    -- use the lemma e Q P = (e P Q)^-1 here
-    have hPQ_one : e P Q = 1 := by
-      -- follows by rewriting with hQP
-      sorry
-    exact hPQ hPQ_one
-  exact hQP_ne (h Q)
+  have hQP : e Q P ≠ 1 :=
+    swap_ne_one_of_ne_one e map_add_left map_add_right alternating hPQ
+  exact hQP (h Q)
 ```
 
-The remaining `weil_interface_bridge`-type holes are genuine elliptic-curve content: construction of the concrete Weil pairing, its bilinearity, alternatingness, nondegeneracy/primitive value, and Galois equivariance.  They should stay as named hard seams.
+The remaining `weil_interface_bridge` holes are genuine elliptic-curve work: constructing the concrete Weil pairing, proving bilinearity/alternatingness/nondegeneracy or primitive value, Galois equivariance, and connecting full rational torsion to the abstract data.
 
-Important: if `left_nondegenerate` and `right_nondegenerate` are global statements of the form `forall P, (forall Q, e P Q = 1) -> P = 0`, they do not follow from one nontrivial value alone.  The interface then needs stronger data, such as explicit nondegeneracy fields or a basis plus primitive pairing value.
+If the file's `left_nondegenerate` and `right_nondegenerate` are global statements like
+
+```lean
+∀ P, (∀ Q, e P Q = 1) → P = 0
+```
+
+then they do not follow from one nontrivial value alone.  The interface must instead assume global nondegeneracy directly, or include a basis plus primitive pairing value.
