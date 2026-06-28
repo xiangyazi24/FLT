@@ -476,8 +476,18 @@ theorem quartic_plus_descent_step :
     have hB₁_val : B₁ = 2 * k := by omega
     have hUV := UV_eq_five_mul_fourth heq
     have hMN_prod : M * N = 5 * B₁ ^ 4 := by
-      -- MN = UV/16 = 5(4k)⁴/16 = 5B₁⁴ (algebra; Lean API for set+ediv is tricky)
-      sorry
+      -- Unfold M, N to raw ediv expressions
+      simp only [hM_def, hN_def]
+      -- Goal: (expr_U / 4) * (expr_V / 4) = 5 * B₁^4
+      -- Use: (a/c) * (b/c) = (a*b) / (c*c) when c|a and c|b
+      rw [Int.ediv_mul_ediv _ _ h4U h4V]
+      -- Goal: (expr_U * expr_V) / (4 * 4) = 5 * B₁^4
+      rw [show (4 : ℤ) * 4 = 16 from by norm_num]
+      rw [hB₁_val]
+      -- Goal: hUV.LHS / 16 = 5 * (2*k)^4
+      rw [hUV]
+      -- Goal: 5 * (4*k)^4 / 16 = 5 * (2*k)^4
+      norm_num [show (4 * k) ^ 4 = 16 * (2 * k) ^ 4 from by ring]
     -- M, N > 0
     have hMpos : 0 < M := by
       by_contra hle; push_neg at hle
