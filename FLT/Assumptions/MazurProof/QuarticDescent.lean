@@ -485,7 +485,11 @@ theorem quartic_plus_descent_step :
         have hp1 : (4*M - (2*(2*j+1)^2+(4*k)^2-2*s)) * (4*N) = 0 := by rw [h1]; ring
         have hp2 : (2*(2*j+1)^2+(4*k)^2-2*s) * (4*N - (2*(2*j+1)^2+(4*k)^2+2*s)) = 0 := by
           rw [h2]; ring
-        nlinarith [hUV, hp1, hp2]
+        have h_expand : (4*M)*(4*N) =
+            (4*M - (2*(2*j+1)^2+(4*k)^2-2*s)) * (4*N) +
+            (2*(2*j+1)^2+(4*k)^2-2*s) * (4*N - (2*(2*j+1)^2+(4*k)^2+2*s)) +
+            (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := by ring
+        linarith [hUV, hp1, hp2]
       calc 16 * (M * N) = (4 * M) * (4 * N) := by ring
         _ = 5 * (4 * k) ^ 4 := h_4MN
         _ = 16 * (5 * B₁ ^ 4) := by rw [hB₁_val]; ring
