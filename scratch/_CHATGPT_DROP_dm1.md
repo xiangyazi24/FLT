@@ -217,13 +217,13 @@ end WeierstrassCurve
 The three requested functions are the concrete names:
 
 ```lean
-verticalLine W P
+WeierstrassCurve.Affine.ShortMillerFunctions.verticalLine W P
 -- type: W.FunctionField
 
-A.fine.ShortMillerFunctions.tangentLine W P
+WeierstrassCurve.Affine.ShortMillerFunctions.tangentLine W P
 -- type: W.FunctionField
 
-secantLine W P Q
+WeierstrassCurve.Affine.ShortMillerFunctions.secantLine W P Q
 -- type: W.FunctionField
 ```
 
