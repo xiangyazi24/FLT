@@ -505,7 +505,8 @@ theorem quartic_plus_descent_step :
     -- gcd(M, N) = 1 (same prime-divisor argument)
     -- M + N = r² + 2B₁², N - M = s
     -- Any common prime p: p|s, p|r²+2B₁² → p²|5B₁⁴ → p|B₁ → p|r → gcd(r,B)≥p, contradiction
-    sorry -- MN_coprime_core: same argument as UV_coprime
+    -- gcd(M,N) = 1 + descent chain (same prime-divisor + coprime_factor + descent)
+    sorry
   · -- Odd B case (main case, fully proved)
     have hr_odd := r_odd_of_B_odd hBodd hcop heq
     -- UV = 5B⁴, gcd(U,V) = 1
