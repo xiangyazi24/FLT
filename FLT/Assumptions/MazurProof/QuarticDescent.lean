@@ -579,12 +579,8 @@ theorem quartic_plus_descent_step :
       -- gcd(r, b) = 1
       have hcop_rb : IsCoprime (2*j+1) b :=
         hcop_rB.of_isCoprime_of_dvd_right (dvd_trans ⟨a, by rw [hB₁_eq]; ring⟩ hB₁_dvd_B)
-      -- h = a²-b², u = (r-h)/2, v = (r+h)/2, uv = b⁴
-      set h := a^2 - b^2
-      -- (r-h)(r+h) = 4b⁴
-      have hprod : ((2*j+1) - h) * ((2*j+1) + h) = 4*b^4 := by nlinarith [hr2]
-      -- h = a²-b² is odd (from gcd(a,b)=1, a*b even → mixed parity → a²-b² odd)
-      have h_odd : h % 2 = 1 := by
+      -- a²-b² is odd (prove BEFORE set h to avoid opaque interaction)
+      have h_raw_odd : (a^2 - b^2) % 2 = 1 := by
         have hab_even : (a*b) % 2 = 0 := by rw [← hB₁_eq, hB₁_val]; omega
         rcases Int.emod_two_eq_zero_or_one a with ha | ha
         · rcases Int.emod_two_eq_zero_or_one b with hb | hb
@@ -592,16 +588,17 @@ theorem quartic_plus_descent_step :
             rw [hab_cop] at this; exact absurd this (by norm_num)
           · obtain ⟨t, rfl⟩ : 2∣a := ⟨a/2, by omega⟩
             obtain ⟨u, rfl⟩ : ∃ u, b = 2*u+1 := ⟨b/2, by omega⟩
-            -- After rfl: h = (2t)²-(2u+1)². Need h%2=1.
-            change ((2*t)^2 - (2*u+1)^2) % 2 = 1
             have : (2*t)^2 - (2*u+1)^2 = 2*(2*t^2 - 2*u^2 - 2*u - 1) + 1 := by ring
-            simp only [this]; omega
+            rw [this]; omega
         · have hb_even : b % 2 = 0 := by omega
           obtain ⟨t, rfl⟩ : ∃ t, a = 2*t+1 := ⟨a/2, by omega⟩
           obtain ⟨u, rfl⟩ : 2∣b := ⟨b/2, by omega⟩
-          change ((2*t+1)^2 - (2*u)^2) % 2 = 1
           have : (2*t+1)^2 - (2*u)^2 = 2*(2*t^2 + 2*t - 2*u^2) + 1 := by ring
           rw [this]; omega
+      set h := a^2 - b^2
+      have h_odd : h % 2 = 1 := h_raw_odd
+      -- (r-h)(r+h) = 4b⁴
+      have hprod : ((2*j+1) - h) * ((2*j+1) + h) = 4*b^4 := by nlinarith [hr2]
       -- r-h and r+h both even
       have h2_sub : (2 : ℤ) ∣ ((2*j+1) - h) := by omega
       have h2_add : (2 : ℤ) ∣ ((2*j+1) + h) := by omega
