@@ -604,7 +604,14 @@ theorem quartic_plus_descent_step :
           have hb_even : b % 2 = 0 := by
             rcases Int.emod_two_eq_zero_or_one b with hb | hb
             · exact hb
-            · exfalso; omega -- a%2=1, b%2=1 → (a*b)%2=1≠0, but hab_even says 0
+            · exfalso
+              have h2_dvd_ab : (2 : ℤ) ∣ (a * b) := by omega
+              have h2_ndvd_a : ¬ (2 : ℤ) ∣ a := by omega
+              have h2_ndvd_b : ¬ (2 : ℤ) ∣ b := by omega
+              have hp2 : Prime (2 : ℤ) := Int.prime_iff_natAbs_prime.mpr (by norm_num)
+              rcases hp2.dvd_or_dvd h2_dvd_ab with h | h
+              · exact h2_ndvd_a h
+              · exact h2_ndvd_b h
           have ha2 : a^2 % 2 = 1 := by
             have h2a1 : (2 : ℤ) ∣ (a - 1) := by omega
             have : a^2 - 1 = (a-1)*(a+1) := by ring
