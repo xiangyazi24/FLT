@@ -129,6 +129,10 @@ MW group = ℤ/6ℤ (rank 0), rational points u ∈ {-1, 1, 3} are all cusps.
 3. **GroupTheory.lean**: zmod_prod_contains_square ((ℤ/m)² ↪ ℤ/m × ℤ/n when m|n)
 4. **CyclotomicLayer.lean**: primitive_root_forces_le_two interface
 5. **ZModEmbedding.lean** (scratch): same as GroupTheory content
+6. **QuarticDescent.lean** (2026-06-28): quartic_plus_proved — s² = r⁴ + r²B² - B⁴
+   with gcd(r,B)=1, r,B>0 forces r=B=1. Infinite descent via QuarticPlusZ.
+   1128 lines, 0 sorry, 0 axiom. Discharges `quartic_plus` axiom in RationalPointsC20.lean.
+7. **QuarticD2-D7.lean** (scratch): quartic obstructions s⁴+d²s²-d⁴=t² for d=2..7, all 0 sorry
 
 ### Proved from axioms (skeleton):
 6. **TorsionBound.lean**: mazur_torsion_bound (|T| ≤ 16 from 6 axiom seams)
