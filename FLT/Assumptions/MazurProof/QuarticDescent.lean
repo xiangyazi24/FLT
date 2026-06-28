@@ -486,14 +486,15 @@ theorem quartic_plus_descent_step :
       -- B₁ = 4k/2 = 2k
       have hB₁_val : B₁ = 2 * k := by omega
       rw [hB₁_val]
-      nlinarith [show (4 * k) ^ 4 = 16 * (2 * k) ^ 4 from by ring]
+      have : (4 * k) ^ 4 = 16 * (2 * k) ^ 4 := by ring
+      linarith
     -- M, N > 0
     have hMpos : 0 < M := by
       by_contra hle; push_neg at hle
       have hNpos : 0 < N := by nlinarith [hN_val, sq_nonneg (2*j+1), sq_nonneg k]
       have : M * N ≤ 0 := mul_nonpos_of_nonpos_of_nonneg hle hNpos.le
       linarith [show 0 < 5 * B₁ ^ 4 from by positivity, hMN_prod]
-    have hNpos : 0 < N := by nlinarith [hN_val, sq_nonneg (2*j+1), sq_nonneg k]
+    have hNpos : 0 < N := by nlinarith [hMN_prod, show 0 < 5 * B₁ ^ 4 from by positivity]
     -- gcd(M, N) = 1 (same prime-divisor argument)
     -- M + N = r² + 2B₁², N - M = s
     -- Any common prime p: p|s, p|r²+2B₁² → p²|5B₁⁴ → p|B₁ → p|r → gcd(r,B)≥p, contradiction
