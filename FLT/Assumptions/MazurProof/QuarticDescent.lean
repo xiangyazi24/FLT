@@ -479,10 +479,14 @@ theorem quartic_plus_descent_step :
       have h_prod_eq : (4 * M) * (4 * N) =
           (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := by
         congr 1 <;> linarith
+      -- h_prod_eq and hUV share the same middle expression
+      -- but calc can't bridge them due to definitional mismatch from congr
+      -- Use: (4M)(4N) = UV_expr (h_prod_eq) and UV_expr = 5(4k)^4 (hUV)
+      -- Manually: hUV ▸ h_prod_eq gives (4M)(4N) = 5(4k)^4
+      have h_4MN : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by linarith [h_prod_eq, hUV]
       have h16 : 16 * (M * N) = 16 * (5 * (2 * k) ^ 4) :=
         calc 16 * (M * N) = (4 * M) * (4 * N) := by ring
-          _ = (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := h_prod_eq
-          _ = 5 * (4 * k) ^ 4 := hUV
+          _ = 5 * (4 * k) ^ 4 := h_4MN
           _ = 16 * (5 * (2 * k) ^ 4) := by ring
       have : M * N = 5 * (2 * k) ^ 4 := mul_left_cancel₀ (by norm_num : (16 : ℤ) ≠ 0) h16
       rwa [hB₁_val]
