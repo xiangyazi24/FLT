@@ -1,294 +1,273 @@
-# Q2055 (dm2): wiring `WeilPairingInterface` into Mazur downstream code
+# Q2076 (dm2): Hasse-only shortcut for full rational torsion?
 
 Date: 2026-06-28.
 
-Question: `WeilPairingInterface.lean` now compiles, `primitive_root_in_base` is fully proved, and the only remaining `sorry` is the bridge theorem constructing `AbstractGaloisWeilData` from an actual elliptic curve.  Should this replace the existing `WeilPairing.lean`, or should both files remain?  What is the cleanest way to connect `WeilPairingInterface.primitive_root_in_base` to downstream `TorsionBound.lean`?
+Question: can we avoid the Weil pairing in Mazur's torsion theorem by arguing as follows?
+
+```text
+If E/ℚ has E[m](ℚ) = (ℤ/mℤ)^2, then for every good prime p,
+m^2 ∣ #E(𝔽_p).
+For p = 2, Hasse gives #E(𝔽_2) ≤ 3 + 2√2 < 6,
+so m^2 ≤ 5 and m ≤ 2.
+```
+
+## Verdict
+
+This shortcut is **not correct as stated**.
+
+The divisibility step needs a prime-to-`p` injectivity theorem for reduction of torsion.  The correct statement is:
+
+```text
+If E has good reduction at p and p ∤ m,
+then the reduction map E(ℚ)[m] → E(𝔽_p) is injective.
+```
+
+Therefore full rational `m`-torsion gives
+
+```text
+m^2 ∣ #E(𝔽_p)
+```
+
+only for good primes `p` with `p ∤ m`.
+
+So the proposed `p = 2` argument:
+
+* does **not** apply to even `m`, because then `2 ∣ m`;
+* does **not** apply to a curve with bad reduction at `2`;
+* for odd `m`, works only under the extra hypothesis that `E` has good reduction at `2`.
+
+Thus it is not a uniform replacement for the Weil-pairing argument.
+
+## (1) Is `E[m](ℚ) = (ℤ/m)^2 ⇒ m^2 ∣ #E(𝔽_p)` correct?
+
+Yes, but only with the missing hypotheses:
+
+```text
+p is a good-reduction prime for E,
+p ∤ m,
+and the reduction map is a group homomorphism that is injective on m-torsion.
+```
+
+The formal argument is:
+
+```text
+E[m](ℚ) ≅ (ℤ/mℤ)^2
+  ⇒ #E[m](ℚ) = m^2.
+
+If reduction is injective on E[m](ℚ), then E(𝔽_p) contains a subgroup
+of cardinality m^2.
+
+By Lagrange, m^2 ∣ #E(𝔽_p).
+```
+
+The infrastructure required is substantial:
+
+1. A local good-reduction setup at `p`, usually via a DVR/residue field model.
+2. A reduction map on points
+
+   ```lean
+   red_p : E(ℚ_p) → Ẽ(𝔽_p)
+   ```
+
+   or a global-to-local version for rational points.
+3. Proof that `red_p` is a group homomorphism.
+4. Proof that the kernel has no torsion of order prime to `p`, hence injectivity on `m`-torsion when `p ∤ m`.
+5. A finite-subgroup/Lagrange step giving `m^2 ∣ Nat.card Ẽ(𝔽_p)`.
+
+The false part of the proposed statement is the phrase **for every good prime `p`**.  It should be **for every good prime `p` not dividing `m`**.
+
+## Why `p = 2` is not enough
+
+Hasse at `p = 2` says:
+
+```text
+#E(𝔽_2) ≤ 2 + 1 + 2√2 < 6,
+```
+
+hence, since the point count is an integer,
+
+```text
+#E(𝔽_2) ≤ 5.
+```
+
+If `E` has good reduction at `2` and `m` is odd, injectivity gives
+
+```text
+m^2 ∣ #E(𝔽_2),
+```
+
+so `m^2 ≤ 5`, hence `m ≤ 2`.
+
+But this cannot rule out the even cases
+
+```text
+m = 4, 6, 8, 10, 12,
+```
+
+because the required prime-to-`p` condition fails at `p = 2`.  It also cannot rule out an odd `m` curve whose reduction at `2` is bad.
+
+The correct Hasse-only conditional lemma is:
+
+```text
+If full rational m-torsion holds and there exists a good prime p with
+p ∤ m and p < (m - 1)^2, then contradiction.
+```
+
+Proof:
+
+```text
+m^2 ∣ #E(𝔽_p) ⇒ m^2 ≤ #E(𝔽_p).
+Hasse: #E(𝔽_p) ≤ p + 1 + 2√p = (√p + 1)^2.
+If p < (m - 1)^2, then (√p + 1)^2 < m^2.
+Contradiction.
+```
+
+This is useful for a **specific curve** if a suitable small good prime is available.  It is not a uniform theorem over all elliptic curves over `ℚ` from Hasse alone, because a curve can have bad reduction at whichever small primes the argument wants to use.
+
+## (2) Does Mathlib have the Hasse bound?
+
+I did not find a packaged elliptic-curve Hasse bound in current Mathlib under the expected searches:
+
+```text
+Hasse
+Hasse bound elliptic curve
+HasseWeil elliptic finite field
+WeierstrassCurve Hasse
+```
+
+What Mathlib **does** have is an L-function file defining the local polynomial.  In good reduction it uses the expected local coefficient
+
+```lean
+letI q : ℤ := Nat.card (IsLocalRing.ResidueField R)
+letI a : ℤ := q + 1 - (Nat.card (W'.reduction R).toAffine.Point)
+if W'.HasGoodReduction R then 1 - C a * X + C q * X ^ 2 else ...
+```
+
+So Mathlib has the point-count expression used to define `a_p` in the local Euler factor, but I did not find a theorem of the form
+
+```lean
+|a_p| ≤ 2 * Real.sqrt q
+```
+
+or an integer-square-root version of it.
+
+For this shortcut, the Hasse bound would likely need to be added as a new theorem or carried as a hypothesis/axiom.
+
+## (3) Does Mathlib have good reduction / reduction maps for EC?
+
+Mathlib has **curve-level reduction infrastructure**, but I did not find the point-reduction map or prime-to-`p` torsion injectivity theorem needed for this shortcut.
+
+The relevant file is:
+
+```lean
+Mathlib.AlgebraicGeometry.EllipticCurve.Reduction
+```
+
+It defines:
+
+```lean
+class IsIntegral (W : WeierstrassCurve K) : Prop
+class IsMinimal (W : WeierstrassCurve K) : Prop
+noncomputable def reduction (W : WeierstrassCurve K) [IsMinimal R W] :
+  WeierstrassCurve (ResidueField R)
+class HasGoodReduction (W : WeierstrassCurve K) : Prop extends IsMinimal R W
+```
+
+It also has the deprecated alias:
+
+```lean
+IsGoodReduction := HasGoodReduction
+```
+
+and the good-reduction/smooth-special-fiber bridge:
+
+```lean
+hasGoodReduction_iff_isElliptic_reduction :
+  HasGoodReduction R W ↔ (W.reduction R).IsElliptic
+```
+
+What I did **not** find in Mathlib is a ready-made API like:
+
+```lean
+reductionMapPoint : W.PointOverLocalField → (W.reduction R).toAffine.Point
+reductionMapPoint.map_add
+reductionMapPoint.injective_on_prime_to_p_torsion
+```
+
+Searches for combinations of `reduction`, `Point`, `injective`, and torsion did not turn up this package.
+
+So the infrastructure status is:
+
+```text
+available:      minimal/integral/good-reduction predicates and reduced curve;
+available:      local Euler factor using #reduction points;
+not found:      Hasse bound theorem;
+not found:      point reduction map with group-hom API;
+not found:      prime-to-p torsion injectivity of reduction.
+```
+
+## Lean-oriented theorem shape if pursuing this shortcut
+
+The clean abstraction is to separate the missing arithmetic geometry from the finite-cardinality argument.
+
+```lean
+/-- Placeholder for the reduction-injectivity theorem at a good prime. -/
+class PrimeToReductionInjectivity
+    (E : Type*) [AddCommGroup E]
+    (Ered : Type*) [AddCommGroup Ered]
+    (m p : ℕ) : Prop where
+  red : E →+ Ered
+  injective_on_mtorsion :
+    ∀ {P Q : E}, m • P = 0 → m • Q = 0 → red P = red Q → P = Q
+```
+
+Then the finite group step should be stated independently:
+
+```lean
+/-- If full m-torsion injects into a finite reduction group, then m^2 divides its order. -/
+theorem m_square_dvd_card_reduction_of_full_torsion_injective
+    {E Ered : Type*} [AddCommGroup E] [AddCommGroup Ered] [Fintype Ered]
+    {m : ℕ}
+    -- abstract full-torsion hypothesis, e.g. E[m] ≃ ZMod m × ZMod m
+    (hfull : FullRationalMTorsion E m)
+    (hinj : InjectiveOnMTorsion E Ered m) :
+    m ^ 2 ∣ Fintype.card Ered := by
+  -- group-theoretic/Lagrange proof
+  sorry
+```
+
+And the Hasse contradiction should be conditional:
+
+```lean
+theorem no_full_mtorsion_of_good_prime_hasse
+    {m p N : ℕ}
+    (hdiv : m ^ 2 ∣ N)
+    (hhasse : (N : ℝ) ≤ p + 1 + 2 * Real.sqrt p)
+    (hsmall : p < (m - 1)^2) :
+    False := by
+  -- arithmetic inequality proof
+  sorry
+```
+
+For a real Mazur formalization, however, this shortcut still needs exactly the kind of serious EC reduction infrastructure that Mathlib does not seem to expose yet.
 
 ## Recommendation
 
-Keep **both** files, but make their roles different:
+Do **not** replace the Weil-pairing step with the `p = 2` Hasse shortcut.
+
+For the Mazur proof, the Weil-pairing obstruction remains the clean theorem:
 
 ```text
-WeilPairingInterface.lean  = real abstract theorem layer
-WeilPairing.lean           = thin compatibility/shim layer exposing the old theorem name
-TorsionBound.lean          = unchanged, or nearly unchanged
+E[m](ℚ) ≅ (ℤ/mℤ)^2
+  ⇒ μ_m ⊂ ℚ
+  ⇒ m ≤ 2.
 ```
 
-Do **not** make `TorsionBound.lean` depend directly on the internals of `AbstractGaloisWeilData`.  The downstream torsion-bound proof only needs the consequence
-
-```lean
-weil_pairing_primitive_root
-```
-
-so keep that theorem name as the stable public API.
-
-The one remaining `sorry`/axiom should be concentrated in exactly one bridge theorem:
-
-```lean
-weil_interface_bridge
-```
-
-and the old `weil_pairing_primitive_root` theorem should become a proved wrapper:
-
-```lean
-theorem weil_pairing_primitive_root ... := by
-  exact primitive_root_in_base (weil_interface_bridge ...)
-```
-
-This makes the bridge axiom visibly equivalent to the old axiom, but all downstream code benefits from the already-proved abstract descent theorem.
-
-## Why keep both?
-
-`WeilPairingInterface.lean` is the right place for the abstract mathematical payload:
-
-* abstract Galois Weil data;
-* bilinearity / nondegeneracy fields;
-* Galois equivariance or base-field rationality;
-* the fully proved theorem `primitive_root_in_base`.
-
-`WeilPairing.lean` should keep the old Mazur-facing theorem name:
-
-```lean
-weil_pairing_primitive_root
-```
-
-That name is already what downstream code expects.  In the current scaffold I inspected, `TorsionBound.lean` proves
-
-```lean
-theorem full_rational_torsion_order_le_two
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm : 0 < m) (hfull : HasFullRationalTorsion E m) : m ≤ 2 := by
-  rcases weil_pairing_primitive_root E hm hfull with ⟨ζ, hζ⟩
-  exact isPrimitiveRoot_rat_order_le_two hζ
-```
-
-So the best integration is to preserve that call site.
-
-## Clean file graph
-
-The cleanest architecture is:
+The Hasse route is valuable as a conditional/local lemma:
 
 ```text
-Definitions / low-level torsion predicates
-  ↓
-WeilPairingInterface.lean
-  contains AbstractGaloisWeilData and proved primitive_root_in_base
-  contains or imports the one bridge declaration weil_interface_bridge
-  ↓
-WeilPairing.lean
-  proves the old public theorem weil_pairing_primitive_root from the interface
-  ↓
-Axioms.lean / TorsionBound.lean
-  continue using weil_pairing_primitive_root
+full rational m-torsion + suitable good prime p ∤ m + Hasse bound
+  ⇒ contradiction.
 ```
 
-There is one important cycle hazard: if `WeilPairingInterface.lean` or `WeilPairing.lean` needs the definitions
-
-```lean
-HasFullRationalTorsion
-HasRationalPointOfOrder
-HasTorsionStructure
-TorsionStructureData
-```
-
-and those are currently inside `Axioms.lean`, then do not make `Axioms.lean` import `WeilPairing.lean` unless those definitions have been split out first.
-
-The clean split is:
-
-```text
-AxiomsBasic.lean        -- only definitions: torsionSet, HasFullRationalTorsion, etc.
-WeilPairingInterface.lean imports AxiomsBasic
-WeilPairing.lean imports WeilPairingInterface
-Axioms.lean imports AxiomsBasic + WeilPairing + remaining hard inputs
-TorsionBound.lean imports Axioms
-```
-
-If you do not want a new `AxiomsBasic.lean`, then the next-best option is:
-
-```text
-WeilPairingInterface.lean imports Axioms.lean
-WeilPairing.lean imports WeilPairingInterface.lean
-TorsionBound.lean imports WeilPairing.lean directly
-```
-
-but then `Axioms.lean` must not also declare an axiom with the same name, and the dependency layering is less clean.
-
-## Concrete shim pattern
-
-Put this in `WeilPairing.lean` or refactor the existing file to this shape.  Names may need minor adjustment to your actual interface names.
-
-```lean
-import FLT.Assumptions.MazurProof.WeilPairingInterface
-
-/-!
-# Weil-pairing public API for the Mazur proof
-
-This file is intentionally a compatibility layer.  The abstract theorem is proved
-in `WeilPairingInterface.lean`; the only construction gap is the bridge from an
-actual elliptic curve with full rational `m`-torsion to `AbstractGaloisWeilData`.
--/
-
-open scoped WeierstrassCurve.Affine
-
-namespace MazurProof
-
-/--
-Bridge from an actual elliptic curve with full rational `m`-torsion to the
-abstract Galois Weil-pairing data.
-
-This is the only remaining Weil-pairing construction input.  It is equivalent in
-strength to the old `weil_pairing_primitive_root` axiom.
--/
-axiom weil_interface_bridge
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    AbstractGaloisWeilData E m
-
-/--
-Old public Mazur-facing consequence of the Weil pairing.
-
-Keep this theorem name so `TorsionBound.lean` does not need to know about the
-abstract interface.
--/
-theorem weil_pairing_primitive_root
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
-  exact primitive_root_in_base (weil_interface_bridge E hm hfull)
-
-end MazurProof
-```
-
-If `weil_interface_bridge` already lives in `WeilPairingInterface.lean`, then `WeilPairing.lean` should not redeclare it.  It should just import the interface and prove the wrapper theorem:
-
-```lean
-theorem weil_pairing_primitive_root
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
-  exact primitive_root_in_base (weil_interface_bridge E hm hfull)
-```
-
-## What to change in `Axioms.lean`
-
-Current scaffold shape has the old Group B axiom:
-
-```lean
-axiom weil_pairing_primitive_root (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-```
-
-Replace that axiom with an import of the shim theorem, or move it out entirely.  The file should no longer declare `weil_pairing_primitive_root` as an axiom.
-
-Best version:
-
-```lean
-import FLT.Assumptions.MazurProof.WeilPairing
-```
-
-and delete the Group B axiom block from `Axioms.lean`.
-
-If import cycles appear, split the basic definitions first:
-
-```text
-AxiomsBasic.lean
-```
-
-then import that basic file from both `Axioms.lean` and `WeilPairingInterface.lean`.
-
-## What to change in `TorsionBound.lean`
-
-Ideally, nothing.
-
-The current downstream proof uses exactly the correct abstraction boundary:
-
-```lean
-rcases weil_pairing_primitive_root E hm hfull with ⟨ζ, hζ⟩
-exact isPrimitiveRoot_rat_order_le_two hζ
-```
-
-Keep this.  `TorsionBound.lean` should not know about:
-
-* `AbstractGaloisWeilData`;
-* `primitive_root_in_base`;
-* the bridge theorem;
-* Weil-pairing bilinearity/nondegeneracy details.
-
-If the import graph requires one explicit import, add only the public shim:
-
-```lean
-import FLT.Assumptions.MazurProof.WeilPairing
-```
-
-Do not import `WeilPairingInterface` directly into `TorsionBound.lean` unless you are temporarily debugging.
-
-## The clean theorem chain
-
-The final proof chain should read:
-
-```text
-actual elliptic curve + full rational m-torsion
-  -- weil_interface_bridge              (only construction axiom/sorry)
-AbstractGaloisWeilData
-  -- primitive_root_in_base             (fully proved in WeilPairingInterface)
-∃ ζ : ℚ, IsPrimitiveRoot ζ m
-  -- isPrimitiveRoot_rat_order_le_two   (already downstream)
-m ≤ 2
-```
-
-In Lean shape:
-
-```lean
-have hdata : AbstractGaloisWeilData E m :=
-  weil_interface_bridge E hm hfull
-rcases primitive_root_in_base hdata with ⟨ζ, hζ⟩
-exact isPrimitiveRoot_rat_order_le_two hζ
-```
-
-but this chain should be hidden behind the old public theorem:
-
-```lean
-weil_pairing_primitive_root
-```
-
-so downstream remains stable.
-
-## Decision
-
-Use `WeilPairingInterface.lean` to replace the **mathematical content** of `WeilPairing.lean`, but do not delete or bypass `WeilPairing.lean` yet.  Turn `WeilPairing.lean` into the compatibility layer that exports the old theorem name.
-
-That gives the cleanest migration:
-
-```text
-old downstream theorem name preserved;
-old Weil-pairing axiom removed;
-new abstract theorem used;
-only one bridge axiom/sorry remains;
-TorsionBound.lean stays conceptually clean.
-```
-
-## Checklist
-
-1. Ensure `WeilPairingInterface.lean` has the fully proved theorem:
-   ```lean
-   primitive_root_in_base
-   ```
-2. Ensure there is exactly one bridge declaration:
-   ```lean
-   weil_interface_bridge
-   ```
-3. Make `WeilPairing.lean` prove:
-   ```lean
-   weil_pairing_primitive_root
-   ```
-   from those two items.
-4. Remove or stop importing the old axiom version of `weil_pairing_primitive_root` from `Axioms.lean`.
-5. Keep `TorsionBound.lean` using `weil_pairing_primitive_root`.
-6. Run:
-   ```bash
-   lake env lean FLT/Assumptions/MazurProof/WeilPairingInterface.lean
-   lake env lean FLT/Assumptions/MazurProof/WeilPairing.lean
-   lake env lean FLT/Assumptions/MazurProof/Axioms.lean
-   lake env lean FLT/Assumptions/MazurProof/TorsionBound.lean
-   ```
+But it does not provide a uniform proof by taking `p = 2`, and Mathlib currently appears to lack the two main ingredients needed to formalize it directly: Hasse's bound and prime-to-`p` injectivity of the point-reduction map.
