@@ -593,13 +593,13 @@ theorem quartic_plus_descent_step :
           · obtain ⟨t, rfl⟩ : 2∣a := ⟨a/2, by omega⟩
             obtain ⟨u, rfl⟩ : ∃ u, b = 2*u+1 := ⟨b/2, by omega⟩
             show ((2*t)^2 - (2*u+1)^2) % 2 = 1
-            have h_exp : (2*t)^2 - (2*u+1)^2 = 4*t^2 - 4*u^2 - 4*u - 1 := by ring
+            have h_exp : (2*t)^2 - (2*u+1)^2 = 2*(2*t^2 - 2*u^2 - 2*u - 1) + 1 := by ring
             rw [h_exp]; omega
         · have hb_even : b % 2 = 0 := by omega
           obtain ⟨t, rfl⟩ : ∃ t, a = 2*t+1 := ⟨a/2, by omega⟩
           obtain ⟨u, rfl⟩ : 2∣b := ⟨b/2, by omega⟩
           show ((2*t+1)^2 - (2*u)^2) % 2 = 1
-          have h_exp : (2*t+1)^2 - (2*u)^2 = 4*t^2 + 4*t + 1 - 4*u^2 := by ring
+          have h_exp : (2*t+1)^2 - (2*u)^2 = 2*(2*t^2 + 2*t - 2*u^2) + 1 := by ring
           rw [h_exp]; omega
       -- r-h and r+h both even
       have h2_sub : (2 : ℤ) ∣ ((2*j+1) - h) := by omega
