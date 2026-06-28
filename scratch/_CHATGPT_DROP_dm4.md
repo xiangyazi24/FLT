@@ -1,195 +1,320 @@
-# Q2078 (dm4): Does the Hasse-bound shortcut eliminate the Weil-pairing step, and what about `m = 4`?
+# Q2095 (dm4): ai-scratch remote state before pushing local commits
 
 Date: 2026-06-28.
 
-Question: suppose `E/ℚ` has full rational `m`-torsion, i.e.
+Repository: `xiangyazi24/FLT`.
 
-```text
-E[m](ℚ) ≃ (ZMod m)^2.
-```
+Requested question: before pushing the local `ai-scratch` branch with roughly 20 new local commits today, verify:
 
-Can we avoid the Weil pairing by reducing modulo a small prime and using Hasse?
-
-The tempting argument is:
-
-```text
-E[m](ℚ) injects into E(𝔽_p) if p ∤ m and E has good reduction at p,
-so m^2 ≤ #E(𝔽_p) ≤ p + 1 + 2√p.
-```
-
-For odd `m`, using `p = 2` would give
-
-```text
-m^2 ≤ #E(𝔽_2) ≤ 5,
-```
-
-contradicting `m ≥ 3`.  But for `m = 4`, `p = 2` is unavailable, and the first odd primes give:
-
-```text
-p = 3:  #E(𝔽_3) ≤ floor(3 + 1 + 2√3) = 7
-p = 5:  #E(𝔽_5) ≤ floor(5 + 1 + 2√5) = 10
-p = 7:  #E(𝔽_7) ≤ floor(7 + 1 + 2√7) = 13
-p = 11: #E(𝔽_11) ≤ floor(11 + 1 + 2√11) = 18
-```
-
-So full rational `4`-torsion would contradict Hasse at a **good** prime `p = 3, 5, or 7`, but not at `p = 11`.
+1. whether the full build passes on `uisai2`;
+2. whether there are uncommitted local changes;
+3. the current `sorry` count;
+4. what the remote currently has versus what the local checkout likely has.
 
 ## Executive answer
 
-The Hasse-bound shortcut does **not** uniformly replace the Weil-pairing argument.
+I can read the GitHub remote through the connector, but I **cannot** read the `uisai2` local worktree or run `lake build` there from this connector session.
 
-For `m = 4`, the shortcut proves a contradiction only if `E` has good reduction at one of
-
-```text
-3, 5, 7.
-```
-
-There is no general reason, from the bare hypothesis “full rational `4`-torsion,” that one of these primes must be a good-reduction prime unless we add more arithmetic input.  An elliptic curve can have bad reduction at any prescribed finite set of primes by having discriminant divisible by those primes, and the naive Hasse-count argument only applies at good primes.
-
-So yes: **in the current Mazur-proof scaffold, `m = 4` still needs a non-Hasse input**.  The Weil pairing is the cleanest such input:
+So the hard local facts are:
 
 ```text
-E[4](ℚ) full ⇒ μ_4 ⊂ ℚ,
+full build on uisai2:       NOT verified by this connector session
+local uncommitted changes:  NOT visible from GitHub remote
+local sorry count:          NOT directly measurable without local grep/build access
 ```
 
-which is impossible because `ℚ` has no primitive fourth root of unity.
-
-There are possible alternatives to the Weil pairing, but they are not the bare Hasse shortcut.
-
-## The hidden hypothesis: good reduction
-
-The reduction injection is not simply:
+What I **can** verify from GitHub:
 
 ```text
-p ∤ m ⇒ E[m](ℚ) ↪ E(𝔽_p).
+remote repository:          xiangyazi24/FLT
+remote ai-scratch exists:   yes
+remote ai-scratch HEAD:     848ffbf5163603f16828def879890e51e5cc3725
+remote HEAD commit message: Fix API errors in num_abs_le_one Lean drop
+remote combined statuses:   none reported
+remote workflow runs:       none reported for this commit
 ```
 
-The usual statement is:
+The remote `ai-scratch` branch therefore does **not** provide evidence of a passing build. It has no status checks or workflow runs attached to the visible remote head.
+
+Most importantly: if your local branch really has approximately 20 new commits from today, then those commits are probably **not** on remote `ai-scratch` yet. The remote head visible through GitHub is still:
 
 ```text
-if E has good reduction at p and p ∤ m,
-then reduction is injective on m-torsion.
+848ffbf5163603f16828def879890e51e5cc3725
 ```
 
-Thus, even for odd `m`, the `p = 2` shortcut only works when `E` has good reduction at `2`.  For an arbitrary elliptic curve over `ℚ`, `2` may be a bad prime.
+That head is the commit your local push should advance from, unless your local `origin/ai-scratch` is stale or you already pushed from another machine.
 
-This matters because the Mazur torsion-bound argument is about arbitrary elliptic curves over `ℚ`, not just curves with good reduction at `2`.
+## Remote branch comparison
 
-## What the Hasse shortcut actually gives
-
-For any good prime `p ∤ m`, full rational `m`-torsion gives:
+Connector comparison result:
 
 ```text
-m^2 ≤ #E(𝔽_p) ≤ p + 1 + 2√p = (√p + 1)^2.
+base: main
+head: ai-scratch
+status: diverged
+ahead_by: 115
+behind_by: 30
+main/base commit: e0fc4b3ab63b56994a3326298ecabf28f5ab8a97
+merge base:       c541ddcef7c95308113bed83c0c9460926bcb706
 ```
 
-So a contradiction occurs when:
+So remote `ai-scratch` is not a small fresh branch relative to `main`: it is already a long-lived divergent scratch branch, 115 commits ahead of `main` and 30 commits behind `main`.
+
+Connector comparison against the `scratch` branch:
 
 ```text
-m > √p + 1,
+base: scratch
+head: ai-scratch
+status: diverged
+ahead_by: 115
+behind_by: 439
+scratch/base commit: 62e615497810b1d6f38f6a1ff812161cdac32ac6
+merge base:          c541ddcef7c95308113bed83c0c9460926bcb706
 ```
 
-or equivalently:
+So `scratch` and `ai-scratch` are both divergent descendants of the same old merge base. Do **not** infer from `scratch` that `ai-scratch` contains the latest handoff notes or local Lean work.
+
+## Files remote `ai-scratch` adds relative to `main`
+
+The remote branch currently adds the Mazur scaffold under:
 
 ```text
-p < (m - 1)^2.
+FLT/Assumptions/MazurProof.lean
+FLT/Assumptions/MazurProof/Axioms.lean
+FLT/Assumptions/MazurProof/CyclotomicLayer.lean
+FLT/Assumptions/MazurProof/DOCTRINE.md
+FLT/Assumptions/MazurProof/DescentBridge.lean
+FLT/Assumptions/MazurProof/DescentBridgeN12.lean
+FLT/Assumptions/MazurProof/DescentBridgeN14.lean
+FLT/Assumptions/MazurProof/DescentBridgeN16.lean
+FLT/Assumptions/MazurProof/DescentObstruction.lean
+FLT/Assumptions/MazurProof/GroupTheory.lean
+FLT/Assumptions/MazurProof/NoncyclicN10.lean
+FLT/Assumptions/MazurProof/ObstructionCurve.lean
+FLT/Assumptions/MazurProof/RootsOfUnity.lean
+FLT/Assumptions/MazurProof/TorsionBound.lean
+FLT/Assumptions/MazurProof/TorsionFinite.lean
+FLT/Assumptions/MazurProof/UNDERSTANDING.md
 ```
 
-For `m = 4`, this means:
+It also adds many exploratory scratch files, including:
 
 ```text
-p < 9,
+scratch/CoprimeFactorSplit.lean
+scratch/CoverPrimeDivisor.lean
+scratch/DESIGN_NOTES.md
+scratch/DenominatorQuartic.lean
+scratch/Descent20a4.lean
+scratch/DescentAssembly.lean
+scratch/DescentMap.lean
+scratch/DescentN14.lean
+scratch/DescentN16.lean
+scratch/E20GoodReduction.lean
+scratch/E20_FiniteFieldCounts.lean
+scratch/E20_TorsionOrder.lean
+scratch/GitHubConnectorTest.lean
+scratch/Isogeny20a4.lean
+scratch/MazurSkeleton.lean
+scratch/MazurTest.lean
+scratch/ObstructionCurveTry.lean
+scratch/ObstructionN10Complete.lean
+scratch/PythagoreanDescentCore.lean
+scratch/ROADMAP.md
+scratch/RootsOfUnityQ.lean
+scratch/Selmer20a4.lean
+scratch/SelmerD2.lean
+scratch/TorsionBoundV2.lean
+scratch/TorsionSMul.lean
+scratch/TorsionStructureExplore.lean
+scratch/X1_13_PointCount.lean
+scratch/X1_17_PointCount.lean
+scratch/ZPhiDescentOddFinal.lean
+scratch/ZPhiDescentStep.lean
+scratch/_CHATGPT_DROP.lean
+scratch/_CHATGPT_DROP_dm1.lean
+scratch/_CHATGPT_DROP_dm1.md
+scratch/_CHATGPT_DROP_dm2.lean
+scratch/_CHATGPT_DROP_dm2.md
+scratch/check_order10.py
+scratch/order10_obstruction.py
 ```
 
-and since `p ∤ 4`, the useful primes are exactly:
+## What remote `ai-scratch` contains in the Mazur scaffold
 
-```text
-3, 5, 7.
-```
-
-Therefore:
-
-```text
-If E has full rational 4-torsion and good reduction at 3, 5, or 7,
-then Hasse gives a contradiction.
-```
-
-But this is only conditional.
-
-## Why `p = 11` no longer contradicts `m = 4`
-
-At `p = 11`, Hasse gives:
-
-```text
-#E(𝔽_11) ≤ 11 + 1 + 2√11 < 19,
-```
-
-so, since the cardinality is an integer,
-
-```text
-#E(𝔽_11) ≤ 18.
-```
-
-Full rational `4`-torsion would only force:
-
-```text
-16 ≤ #E(𝔽_11),
-```
-
-and `16 ≤ 18` is possible.  So every good prime `p ≥ 11` is too large for this single-prime Hasse contradiction.
-
-## Could we prove one of `3,5,7` is good from full rational `4`-torsion?
-
-Not by the bare reduction/Hasse argument.  Proving such a statement would require additional arithmetic information about the discriminant or reduction type of a curve with full rational `4`-torsion.
-
-Possible non-Weil alternatives include:
-
-1. **A halving criterion for full `2`-torsion.**
-   If
-   ```text
-   E : y^2 = (x-a)(x-b)(x-c)
-   ```
-   with `a,b,c ∈ ℚ`, then a rational `2`-torsion point is divisible by `2` over `ℚ` only under explicit square conditions on root differences.  Over the ordered field `ℚ`, the middle root gives opposite signs, obstructing full rational `4`-torsion.  This can prove no full rational `4`-torsion without the Weil pairing, but it is a different elliptic-curve theorem.
-
-2. **A modular-curve/full-level-4 argument.**
-   Full rational `4`-torsion is a rational full level-4 structure.  One can rule this out by analyzing the corresponding level modular curve, but this is far heavier than the Weil-pairing consequence.
-
-3. **A stronger reduction theorem with local reduction-type analysis.**
-   One could try to handle the case where `3,5,7` are all bad by studying component groups or local torsion.  This is not the simple Hasse shortcut and likely becomes more work than the Weil-pairing seam.
-
-## Does `m = 4` need the Weil pairing?
-
-For the current formalization strategy: **yes, or something morally replacing it.**
-
-More precisely:
-
-```text
-m = 4 does not necessarily need the full general Weil-pairing library,
-but it does need an additional theorem beyond Hasse + good-reduction injection.
-```
-
-The cleanest additional theorem remains the Weil-pairing consequence:
+The current remote scaffold has the top-level import file:
 
 ```lean
-axiom/theorem weil_pairing_primitive_root
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
+import FLT.Assumptions.MazurProof.RootsOfUnity
+import FLT.Assumptions.MazurProof.CyclotomicLayer
+import FLT.Assumptions.MazurProof.GroupTheory
+import FLT.Assumptions.MazurProof.Axioms
+import FLT.Assumptions.MazurProof.TorsionFinite
+import FLT.Assumptions.MazurProof.TorsionBound
+import FLT.Assumptions.MazurProof.DescentObstruction
+import FLT.Assumptions.MazurProof.DescentBridge
+import FLT.Assumptions.MazurProof.NoncyclicN10
 ```
 
-Then `m = 4` is immediately impossible because a primitive fourth root of unity cannot lie in `ℚ`.
+Important remote facts from inspected files:
 
-## Practical recommendation
+* `TorsionBound.lean` proves `full_rational_torsion_order_le_two` from `weil_pairing_primitive_root` plus the rational roots-of-unity lemma.
+* `TorsionBound.lean` proves `mazur_torsion_bound` from the axiom seams and the finite case split.
+* `Axioms.lean` defines `HasFullRationalTorsion`, `HasRationalPointOfOrder`, `HasTorsionStructure`, `TorsionStructureData`, and the main named axiom seams.
+* `DescentObstruction.lean` contains `native_decide` local obstruction checks for the `20.a4` descent computations.
+* `DescentBridge*.lean` files keep the noncyclic exclusions behind narrow bridge axioms.
 
-Do not replace the Weil-pairing seam by the Hasse shortcut globally.
+## Remote axiom seams visible in `FLT/Assumptions/MazurProof/`
 
-Instead, record the Hasse shortcut as a useful **conditional lemma**:
+From the remote files I inspected, the visible MazurProof axiom declarations are:
 
 ```text
-If E has full rational m-torsion, and E has good reduction at some p ∤ m
-with p < (m - 1)^2, then contradiction.
+Axioms.lean:
+1. rational_torsion_two_invariant_factors
+2. weil_pairing_primitive_root
+3. no_rational_point_of_order_ge_17
+
+TorsionFinite.lean:
+4. mordell_weil_fg
+
+DescentBridge.lean:
+5. obstruction_curve_20a4_points_degenerate
+6. Z2xZ10_gives_non_degenerate_E20_point
+
+DescentBridgeN12.lean:
+7. obstruction_curve_N12_points_degenerate
+8. Z2xZ12_gives_non_degenerate_N12_point
+
+DescentBridgeN14.lean:
+9. obstruction_curve_N14_points_degenerate
+10. Z2xZ14_gives_non_degenerate_N14_point
+
+DescentBridgeN16.lean:
+11. obstruction_curve_N16_points_degenerate
+12. Z2xZ16_gives_non_degenerate_N16_point
+
+ObstructionCurve.lean:
+13. E20_rational_points_complete
 ```
 
-This lemma is valuable and can discharge many cases when a suitable good small prime is known.  But it does not prove the general `m ≤ 2` result for arbitrary `E/ℚ`, and it especially does not handle `m = 4` without extra input.
+So the remote inspected Mazur scaffold has **13 visible axiom declarations** in the MazurProof files.
 
-For the Mazur proof, keep the high-level Weil-pairing consequence as the stable axiom/interface.  If later we want a no-Weil proof of the `m = 4` case, the most plausible separate target is an explicit halving criterion for full rational `2`-torsion, not the single-prime Hasse bound.
+This is an axiom count over the inspected `FLT/Assumptions/MazurProof/` files, not a full `#print axioms` transitive dependency audit.
+
+## Remote `sorry` count
+
+I cannot run a full recursive local grep from GitHub connector state. From the remote MazurProof files inspected through the connector, I did not see any literal `sorry` occurrences. The visible proofs use `native_decide`, `norm_num`, `omega`, explicit axiom declarations, and ordinary theorem proofs.
+
+Therefore the best connector-grounded statement is:
+
+```text
+remote ai-scratch MazurProof visible literal sorry count: likely 0
+remote ai-scratch full-repo sorry count: not verified by connector
+local uisai2 sorry count: not visible from connector
+```
+
+For the actual pre-push check on `uisai2`, run the commands in the next section and use the local result as authoritative.
+
+## Exact local pre-push checklist for `uisai2`
+
+Run this on `uisai2` in the FLT checkout:
+
+```bash
+git switch ai-scratch
+git fetch origin
+
+printf '\n=== branch/head ===\n'
+git status --short --branch
+git rev-parse HEAD
+git rev-parse origin/ai-scratch || true
+
+printf '\n=== local commits not on remote ===\n'
+git log --oneline --decorate origin/ai-scratch..HEAD
+
+printf '\n=== remote commits not in local ===\n'
+git log --oneline --decorate HEAD..origin/ai-scratch
+
+printf '\n=== uncommitted changes ===\n'
+git status --porcelain=v1
+
+printf '\n=== sorry count: MazurProof ===\n'
+grep -RIn --include='*.lean' '\bsorry\b' FLT/Assumptions/MazurProof scratch | tee /tmp/flt_sorry_hits.txt
+wc -l /tmp/flt_sorry_hits.txt
+
+printf '\n=== axiom declarations: MazurProof ===\n'
+grep -RIn --include='*.lean' '^axiom ' FLT/Assumptions/MazurProof | tee /tmp/flt_axiom_hits.txt
+wc -l /tmp/flt_axiom_hits.txt
+
+printf '\n=== full build ===\n'
+lake build
+```
+
+If you want a stricter sorry scan that excludes comments only approximately, use:
+
+```bash
+grep -RIn --include='*.lean' '\bsorry\b' FLT/Assumptions/MazurProof scratch \
+  | grep -v '^[^:]*:[0-9]*:[[:space:]]*--'
+```
+
+If `lake build` succeeds and `git status --porcelain=v1` is empty, then push:
+
+```bash
+git push origin ai-scratch
+```
+
+If the branch has no upstream configured:
+
+```bash
+git push -u origin ai-scratch
+```
+
+## What local likely has versus remote
+
+Given your statement that local `ai-scratch` has roughly 20 new commits today, and given that the visible remote `ai-scratch` head is still:
+
+```text
+848ffbf5163603f16828def879890e51e5cc3725
+```
+
+the likely situation is:
+
+```text
+origin/ai-scratch: old remote head at 848ffbf5163603f16828def879890e51e5cc3725
+local ai-scratch:  ahead by ~20 commits, containing today's Mazur/Weil-pairing work
+```
+
+But this is an inference from your local description plus remote state. The connector cannot prove it without access to your local `.git` directory.
+
+The local command that will settle this exactly is:
+
+```bash
+git log --oneline --decorate origin/ai-scratch..HEAD
+```
+
+If it prints the ~20 commits, those are exactly what will be pushed.
+
+## Recommended push gate
+
+Do **not** push until these three local checks pass:
+
+```text
+1. lake build                       succeeds
+2. git status --porcelain=v1        prints nothing
+3. git log origin/ai-scratch..HEAD  shows the intended local commits only
+```
+
+Then push:
+
+```bash
+git push origin ai-scratch
+```
+
+After pushing, verify:
+
+```bash
+git fetch origin
+git rev-parse HEAD
+git rev-parse origin/ai-scratch
+git log --oneline --decorate -1 origin/ai-scratch
+```
+
+The two SHA outputs should match your local HEAD.
