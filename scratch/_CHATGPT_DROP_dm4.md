@@ -1,228 +1,283 @@
-# Q1977 (dm4): `KubertBridgeN16.lean`, the N = 16 formulas, and the obstruction curve
+# Q1996 (dm4): actual axiom dependencies of `mazur_torsion_bound`
 
-## Executive correction
-
-There is a trap here: the statement
+Scope checked:
 
 ```text
-X1(16) has genus 0
+branch: ai-scratch
+main theorem file: FLT/Assumptions/MazurProof/TorsionBound.lean
+axiom assembly file: FLT/Assumptions/MazurProof/Axioms.lean
 ```
 
-is not correct for the usual modular curve `X_1(16)` parameterizing an elliptic curve together with a point of exact order `16`.
-
-The standard genus-zero list for `X_1(n)` is
-
-```text
-n = 1, 2, ..., 10, 12.
-```
-
-So `X_1(16)` is not analogous to `X_1(10)` or `X_1(12)`.  Consequently, there is no honest one-parameter rational Kubert family over `Q(t)` for a rational point of order `16` in the same sense as the N = 10 and N = 12 families.
-
-What *does* exist is a genus-zero `X_0(16)` / quadratic-field normal form.  This is probably the formula that looks like the missing N = 16 Kubert family.  It gives rational coefficients and a point of order `16` over a quadratic field, not automatically over `Q`.
-
-## The genus-zero-looking N = 16 coefficient pair
-
-The useful coefficient pair is:
-
-```text
-A16(t) = (t^4 - 1)^2 - 4*t^2*(t^4 + 1)
-       = t^8 - 4*t^6 - 2*t^4 - 4*t^2 + 1
-
-B16(t) = 16*t^8.
-```
-
-Then
-
-```text
-A16(t)^2 - 4*B16(t)
-  = (t - 1)^4 * (t + 1)^4 * (t^2 + 1)^2
-      * (t^2 - 2*t - 1) * (t^2 + 2*t - 1).
-```
-
-Equivalently, after stripping the obvious square factor, the raw square condition is
-
-```text
-Y^2 = (t^2 - 2*t - 1) * (t^2 + 2*t - 1)
-    = t^4 - 6*t^2 + 1.
-```
-
-This is **not** the same obstruction curve as
-
-```text
-w^2 = u^3 - u^2 - u        -- LMFDB 80.b3
-```
-
-under the same simple square-stripping transformation used for N = 10.  The latter curve is still the right obstruction curve already used in the N = 16 descent bridge, but the bridge from a hypothetical `ZMod 2 × ZMod 16` subgroup to a nondegenerate point on `80.b3` should be treated as the bridge axiom, not as a direct `A16^2 - 4B16` identity from the genus-zero-looking coefficient pair above.
-
-## Recommended design
-
-For `KubertBridgeN16.lean`, keep two layers separate:
-
-1. A ring-verifiable section recording the N = 16 coefficient pair and its discriminant factorization.
-2. The actual Mazur-discharge bridge axiom, landing on the obstruction curve `80.b3`:
-
-```text
-w^2 = u^3 - u^2 - u.
-```
-
-This is the robust analogue of the existing `DescentBridgeN16.lean` shape.
-
-## Complete Lean 4 file
+I traced the source-level dependency chain starting at
 
 ```lean
-import Mathlib
-import FLT.EllipticCurve.Torsion
+theorem mazur_torsion_bound (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    (AddCommGroup.torsion (E⁄ℚ).Point : Set (E⁄ℚ).Point).ncard ≤ 16
+```
 
-/-!
-# Kubert bridge for the N = 16 obstruction
+## Executive answer
 
-This file separates two facts which should not be conflated.
+In the current source, the project-level axioms actually reached by `mazur_torsion_bound` are:
 
-* There is a genus-zero-looking N = 16 coefficient pair
+1. `mordell_weil_fg`  **only through an unused `_hfinite` binding**
+2. `rational_torsion_two_invariant_factors`
+3. `weil_pairing_primitive_root`
+4. `no_rational_point_of_order_ge_17`
+5. `obstruction_curve_20a4_points_degenerate`
+6. `Z2xZ10_gives_non_degenerate_E20_point`
+7. `obstruction_curve_N12_points_degenerate`
+8. `Z2xZ12_gives_non_degenerate_N12_point`
+9. `obstruction_curve_N14_points_degenerate`
+10. `Z2xZ14_gives_non_degenerate_N14_point`
+11. `obstruction_curve_N16_points_degenerate`
+12. `Z2xZ16_gives_non_degenerate_N16_point`
 
-    A16(t) = (t^4 - 1)^2 - 4*t^2*(t^4 + 1),
-    B16(t) = 16*t^8,
+So, among the source files read here, there are **12 source-level project axioms in the dependency chain**, but `mordell_weil_fg` is not mathematically needed for the proof as written: it enters only because `mazur_torsion_bound` contains
 
-  whose discriminant has a completely ring-verifiable factorization.
-  This is the `X_0(16)` / quadratic-field normal form: it gives rational
-  coefficients and a point of order 16 over a quadratic field.
+```lean
+have _hfinite := rational_torsion_finite_alias E
+```
 
-* The actual rational obstruction used for the Mazur discharge is the curve
+and `_hfinite` is never used afterwards.  If that line and the `TorsionFinite` import are removed, the visible project-axiom dependency list should drop from 12 to 11.
 
-    w^2 = u^3 - u^2 - u,
+## Direct calls made by `mazur_torsion_bound`
 
-  LMFDB `80.b3`.  The public bridge axiom should land directly on a
-  nondegenerate rational point of this curve.
+The main theorem does these source-level calls:
 
-Do **not** advertise this as a genus-zero `X_1(16)` family over `Q(t)`.
-The usual `X_1(n)` genus-zero list is `n = 1, ..., 10, 12`, not `16`.
--/
+```lean
+have _hfinite := rational_torsion_finite_alias E
+let d := rational_torsion_two_invariant_factors E
+have hm_le : d.m ≤ 2 :=
+  full_rational_torsion_order_le_two E d.m_pos
+    (first_invariant_factor_full_torsion E d.m_pos d.n_pos d.dvd_mn d.has_structure)
+have hn_le : d.n ≤ 16 := n_le_sixteen_of_structure E d
+...
+exact no_Z2_cross_Zn_forbidden E hforbidden hcontains
+```
 
-open scoped WeierstrassCurve.Affine
+That is enough to determine the axiom graph.
 
-namespace MazurProof
-namespace KubertBridgeN16
+## Exact dependency graph
 
-/-- The rational coefficient `A` in the genus-zero-looking N = 16 normal form. -/
-def A16 (t : ℚ) : ℚ :=
-  (t ^ 4 - 1) ^ 2 - 4 * t ^ 2 * (t ^ 4 + 1)
+```text
+mazur_torsion_bound
+├─ rational_torsion_finite_alias E
+│  └─ mordell_weil_fg E
+│     NOTE: this entire branch is bound to `_hfinite` and not used later.
+│
+├─ rational_torsion_two_invariant_factors E
+│  └─ AXIOM: rational_torsion_two_invariant_factors
+│
+├─ full_rational_torsion_order_le_two E d.m_pos (...)
+│  ├─ weil_pairing_primitive_root E d.m_pos hfull
+│  │  └─ AXIOM: weil_pairing_primitive_root
+│  └─ isPrimitiveRoot_rat_order_le_two
+│     └─ proved in RootsOfUnity.lean; no project axiom
+│
+├─ first_invariant_factor_full_torsion E d.m_pos d.n_pos d.dvd_mn d.has_structure
+│  └─ zmod_prod_contains_square
+│     └─ zmod_contains_of_dvd
+│        └─ proved in GroupTheory.lean; no project axiom
+│
+├─ n_le_sixteen_of_structure E d
+│  └─ no_rational_point_of_order_ge_17 E hn d.has_point_order_n
+│     └─ AXIOM: no_rational_point_of_order_ge_17
+│
+└─ no_Z2_cross_Zn_forbidden E hforbidden hcontains
+   ├─ branch n = 10
+   │  └─ no_Z2_cross_Z10 E
+   │     └─ no_Z2_cross_Z10_from_descent E
+   │        ├─ AXIOM: Z2xZ10_gives_non_degenerate_E20_point
+   │        └─ AXIOM: obstruction_curve_20a4_points_degenerate
+   │
+   ├─ branch n = 12
+   │  └─ no_Z2_cross_Z12 E
+   │     └─ no_Z2_cross_Z12_from_descent E
+   │        ├─ AXIOM: Z2xZ12_gives_non_degenerate_N12_point
+   │        └─ AXIOM: obstruction_curve_N12_points_degenerate
+   │
+   ├─ branch n = 14
+   │  └─ no_Z2_cross_Z14 E
+   │     └─ no_Z2_cross_Z14_from_descent E
+   │        ├─ AXIOM: Z2xZ14_gives_non_degenerate_N14_point
+   │        └─ AXIOM: obstruction_curve_N14_points_degenerate
+   │
+   └─ branch n = 16
+      └─ no_Z2_cross_Z16 E
+         └─ no_Z2_cross_Z16_from_descent E
+            ├─ AXIOM: Z2xZ16_gives_non_degenerate_N16_point
+            └─ AXIOM: obstruction_curve_N16_points_degenerate
+```
 
-/-- The rational coefficient `B` in the genus-zero-looking N = 16 normal form. -/
-def B16 (t : ℚ) : ℚ :=
-  16 * t ^ 8
+Important point: all four `{10,12,14,16}` bridge branches are live because `mazur_torsion_bound` calls the generic theorem
 
-/-- Expanded form of `A16`, useful for matching external tables. -/
-theorem A16_expanded (t : ℚ) :
-    A16 t = t ^ 8 - 4 * t ^ 6 - 2 * t ^ 4 - 4 * t ^ 2 + 1 := by
-  unfold A16
-  ring
+```lean
+no_Z2_cross_Zn_forbidden
+```
 
-/-- The key ring-verifiable discriminant factorization. -/
-theorem A16_sq_sub_four_B16_factor (t : ℚ) :
-    A16 t ^ 2 - 4 * B16 t =
-      (t - 1) ^ 4 * (t + 1) ^ 4 * (t ^ 2 + 1) ^ 2 *
-        (t ^ 2 - 2 * t - 1) * (t ^ 2 + 2 * t - 1) := by
-  unfold A16 B16
-  ring
+and that theorem proof explicitly cases on the disjunction and invokes all four branch theorems.
 
-/-- The square factor in `A16^2 - 4B16`. -/
-def A16SquareFactor (t : ℚ) : ℚ :=
-  (t - 1) ^ 2 * (t + 1) ^ 2 * (t ^ 2 + 1)
+## Per-axiom notes
 
-/-- The remaining raw quartic factor after removing the square factor. -/
-def A16RawQuartic (t : ℚ) : ℚ :=
-  (t ^ 2 - 2 * t - 1) * (t ^ 2 + 2 * t - 1)
+### `mordell_weil_fg`
 
-/-- Expanded form of the raw quartic factor. -/
-theorem A16RawQuartic_expanded (t : ℚ) :
-    A16RawQuartic t = t ^ 4 - 6 * t ^ 2 + 1 := by
-  unfold A16RawQuartic
-  ring
+Declared in `TorsionFinite.lean`:
 
-/--
-If the discriminant is a square, then after dividing by the evident square
-factor one obtains the raw quartic square condition.
+```lean
+axiom mordell_weil_fg (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    AddGroup.FG (E⁄ℚ).Point
+```
 
-This theorem is deliberately stated only for the raw quartic.  It is not the
-`80.b3` obstruction curve.
--/
-theorem square_discriminant_to_raw_quartic
-    {t d : ℚ}
-    (hD : d ^ 2 = A16 t ^ 2 - 4 * B16 t)
-    (hden : A16SquareFactor t ≠ 0) :
-    (d / A16SquareFactor t) ^ 2 = A16RawQuartic t := by
-  rw [hD]
-  unfold A16SquareFactor A16RawQuartic
-  rw [A16_sq_sub_four_B16_factor]
-  field_simp [hden]
-  ring
+Reached by:
 
-/-! ## The actual N = 16 obstruction curve: LMFDB 80.b3 -/
+```text
+mazur_torsion_bound
+└─ rational_torsion_finite_alias
+   └─ mordell_weil_fg
+```
 
-/-- The N = 16 obstruction curve, LMFDB `80.b3`. -/
-def E_N16_AffineEquation (u w : ℚ) : Prop :=
-  w ^ 2 = u ^ 3 - u ^ 2 - u
+But the resulting hypothesis is stored as `_hfinite` and not used in the rest of the proof.  This is the best candidate for immediate cleanup.
 
-/-- Degenerate/cuspidal `u`-coordinates for the N = 16 obstruction. -/
-def E_N16_DegenerateParameter (u : ℚ) : Prop :=
-  u = -1 ∨ u = 0 ∨ u = 1
+### `rational_torsion_two_invariant_factors`
 
-/--
-Rational-points theorem for the obstruction curve.
+Declared in `Axioms.lean`:
 
-For LMFDB `80.b3`, the Mordell-Weil group is `Z/2Z`; the affine rational
-points are just `(0,0)`.  This degenerate predicate is intentionally a little
-larger, matching the existing bridge API.
--/
-axiom obstruction_curve_N16_points_degenerate :
-    ∀ u w : ℚ, E_N16_AffineEquation u w → E_N16_DegenerateParameter u
-
-/--
-The actual N = 16 Kubert/descent bridge needed for the Mazur discharge.
-
-A hypothetical `Z/2Z × Z/16Z` subgroup produces a nondegenerate rational
-point on the obstruction curve `w^2 = u^3 - u^2 - u`.
-
-This is the correct one-axiom interface to pair with the rational-points
-calculation for `80.b3`.
--/
-axiom Z2xZ16_gives_non_degenerate_N16_point
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (hE : ∃ f : ZMod 2 × ZMod 16 →+ (E⁄ℚ).Point, Function.Injective f) :
-    ∃ u w : ℚ,
-      E_N16_AffineEquation u w ∧ ¬ E_N16_DegenerateParameter u
-
-/-- No elliptic curve over `ℚ` has a subgroup `Z/2Z × Z/16Z`. -/
-theorem no_Z2_cross_Z16_from_kubert_bridge
+```lean
+axiom rational_torsion_two_invariant_factors
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    ¬ ∃ f : ZMod 2 × ZMod 16 →+ (E⁄ℚ).Point, Function.Injective f := by
-  intro hE
-  rcases Z2xZ16_gives_non_degenerate_N16_point E hE with
-    ⟨u, w, hcurve, hnondeg⟩
-  exact hnondeg (obstruction_curve_N16_points_degenerate u w hcurve)
-
-end KubertBridgeN16
-end MazurProof
+    TorsionStructureData E
 ```
 
-## If you want the shorter bridge-only version
+Reached directly by:
 
-If the goal is just to match the existing `DescentBridgeN16.lean`, the minimal file is:
+```text
+mazur_torsion_bound
+└─ let d := rational_torsion_two_invariant_factors E
+```
+
+This is essential: every later numeric argument uses `d.m`, `d.n`, `d.dvd_mn`, `d.has_structure`, `d.has_point_order_n`, and `d.card_eq`.
+
+### `weil_pairing_primitive_root`
+
+Declared in `Axioms.lean`:
 
 ```lean
-import Mathlib
-import FLT.EllipticCurve.Torsion
+axiom weil_pairing_primitive_root (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
+```
 
-open scoped WeierstrassCurve.Affine
+Reached by:
 
-namespace MazurProof
+```text
+mazur_torsion_bound
+└─ full_rational_torsion_order_le_two
+   └─ weil_pairing_primitive_root
+```
 
-def E_N16_AffineEquation (u w : ℚ) : Prop :=
-  w ^ 2 = u ^ 3 - u ^ 2 - u
+This is essential for proving `d.m ≤ 2`.
 
-def E_N16_DegenerateParameter (u : ℚ) : Prop :=
-  u = -1 ∨ u = 0 ∨ u = 1
+### `no_rational_point_of_order_ge_17`
 
+Declared in `Axioms.lean`:
+
+```lean
+axiom no_rational_point_of_order_ge_17
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ}
+    (hn : 17 ≤ n) :
+    ¬ HasRationalPointOfOrder E n
+```
+
+Reached by:
+
+```text
+mazur_torsion_bound
+└─ n_le_sixteen_of_structure
+   └─ no_rational_point_of_order_ge_17
+```
+
+This is essential for proving `d.n ≤ 16`.
+
+### N = 10 bridge axioms
+
+Declared in `DescentBridge.lean`:
+
+```lean
+axiom obstruction_curve_20a4_points_degenerate :
+    ∀ u w : ℚ, E20AffineEquation u w → E20DegenerateParameter u
+
+axiom Z2xZ10_gives_non_degenerate_E20_point
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : (ZMod 2 × ZMod 10) →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ u w : ℚ, E20AffineEquation u w ∧ ¬ E20DegenerateParameter u
+```
+
+Reached by:
+
+```text
+mazur_torsion_bound
+└─ no_Z2_cross_Zn_forbidden
+   └─ no_Z2_cross_Z10
+      └─ no_Z2_cross_Z10_from_descent
+         ├─ Z2xZ10_gives_non_degenerate_E20_point
+         └─ obstruction_curve_20a4_points_degenerate
+```
+
+### N = 12 bridge axioms
+
+Declared in `DescentBridgeN12.lean`:
+
+```lean
+axiom obstruction_curve_N12_points_degenerate :
+    ∀ u w : ℚ, E_N12_AffineEquation u w → E_N12_DegenerateParameter u
+
+axiom Z2xZ12_gives_non_degenerate_N12_point
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : ZMod 2 × ZMod 12 →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ u w : ℚ, E_N12_AffineEquation u w ∧ ¬ E_N12_DegenerateParameter u
+```
+
+Reached by:
+
+```text
+mazur_torsion_bound
+└─ no_Z2_cross_Zn_forbidden
+   └─ no_Z2_cross_Z12
+      └─ no_Z2_cross_Z12_from_descent
+         ├─ Z2xZ12_gives_non_degenerate_N12_point
+         └─ obstruction_curve_N12_points_degenerate
+```
+
+### N = 14 bridge axioms
+
+Declared in `DescentBridgeN14.lean`:
+
+```lean
+axiom obstruction_curve_N14_points_degenerate :
+    ∀ u w : ℚ, E_N14_AffineEquation u w → E_N14_DegenerateParameter u
+
+axiom Z2xZ14_gives_non_degenerate_N14_point
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : ZMod 2 × ZMod 14 →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ u w : ℚ, E_N14_AffineEquation u w ∧ ¬ E_N14_DegenerateParameter u
+```
+
+Reached by:
+
+```text
+mazur_torsion_bound
+└─ no_Z2_cross_Zn_forbidden
+   └─ no_Z2_cross_Z14
+      └─ no_Z2_cross_Z14_from_descent
+         ├─ Z2xZ14_gives_non_degenerate_N14_point
+         └─ obstruction_curve_N14_points_degenerate
+```
+
+### N = 16 bridge axioms
+
+Declared in `DescentBridgeN16.lean`:
+
+```lean
 axiom obstruction_curve_N16_points_degenerate :
     ∀ u w : ℚ, E_N16_AffineEquation u w → E_N16_DegenerateParameter u
 
@@ -230,26 +285,79 @@ axiom Z2xZ16_gives_non_degenerate_N16_point
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     (hE : ∃ f : ZMod 2 × ZMod 16 →+ (E⁄ℚ).Point, Function.Injective f) :
     ∃ u w : ℚ, E_N16_AffineEquation u w ∧ ¬ E_N16_DegenerateParameter u
-
-theorem no_Z2_cross_Z16_from_descent
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    ¬ ∃ f : ZMod 2 × ZMod 16 →+ (E⁄ℚ).Point, Function.Injective f := by
-  intro hE
-  rcases Z2xZ16_gives_non_degenerate_N16_point E hE with ⟨u, w, hcurve, hnondeg⟩
-  exact hnondeg (obstruction_curve_N16_points_degenerate u w hcurve)
-
-end MazurProof
 ```
+
+Reached by:
+
+```text
+mazur_torsion_bound
+└─ no_Z2_cross_Zn_forbidden
+   └─ no_Z2_cross_Z16
+      └─ no_Z2_cross_Z16_from_descent
+         ├─ Z2xZ16_gives_non_degenerate_N16_point
+         └─ obstruction_curve_N16_points_degenerate
+```
+
+## Dead or not-needed code, relative to `mazur_torsion_bound`
+
+### Semantically dead but source-referenced
+
+```lean
+have _hfinite := rational_torsion_finite_alias E
+```
+
+This line pulls in:
+
+```text
+rational_torsion_finite_alias
+└─ mordell_weil_fg
+```
+
+but `_hfinite` is never used.  The proof already gets the finite cardinality information it needs from
+
+```lean
+d.card_eq : (torsionSet E).ncard = d.m * d.n
+```
+
+inside `TorsionStructureData`.
+
+Suggested cleanup:
+
+```diff
+- import FLT.Assumptions.MazurProof.TorsionFinite
+...
+-   have _hfinite := rational_torsion_finite_alias E
+```
+
+After this cleanup, `mordell_weil_fg` should disappear from this theorem's project-axiom dependency chain.
+
+### Pure helper declarations not on the path
+
+In `RootsOfUnity.lean`, these are not used by `mazur_torsion_bound`:
+
+```lean
+rat_root_of_unity_eq_one_or_neg_one
+rat_root_of_unity_exists_eq_one_or_neg_one
+```
+
+The theorem that *is* used is only:
+
+```lean
+isPrimitiveRoot_rat_order_le_two
+```
+
+In `GroupTheory.lean`, the path used by `mazur_torsion_bound` is only:
+
+```text
+first_invariant_factor_full_torsion
+└─ zmod_prod_contains_square
+   └─ zmod_contains_of_dvd
+```
+
+The other embedding helpers in `GroupTheory.lean` are currently dead relative to this theorem, though they may be useful elsewhere.
 
 ## Bottom line
 
-Use the ring identities above if you want to record the genus-zero-looking `X_0(16)` coefficient pair.
+No declared bridge axiom for N = 10, 12, 14, or 16 is dead with respect to the current `mazur_torsion_bound`; all are reached through the generic forbidden-even case split.
 
-But for the Mazur proof, do **not** base the N = 16 discharge on a claim that `X_1(16)` is genus zero.  The safe public bridge axiom is:
-
-```text
-Z/2Z × Z/16Z torsion over Q gives a nondegenerate rational point on
-w^2 = u^3 - u^2 - u.
-```
-
-Then `RationalPoints` for LMFDB `80.b3` closes the contradiction.
+The one cleanup opportunity is the unused torsion-finiteness line.  Removing it should eliminate the `mordell_weil_fg` dependency from `mazur_torsion_bound` without changing the proof logic.
