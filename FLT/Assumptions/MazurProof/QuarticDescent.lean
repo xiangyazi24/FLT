@@ -490,9 +490,9 @@ theorem quartic_plus_descent_step :
       have hB₁_val : B₁ = 2 * k := by omega
       -- (4M)(4N) = UV = 5(4k)⁴ (direct substitution)
       have h_prod : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
-        nlinarith [hUV, hM_val, hN_val,
-                   sq_nonneg (4*M - (2*(2*j+1)^2 + (4*k)^2 - 2*s)),
-                   sq_nonneg (4*N - (2*(2*j+1)^2 + (4*k)^2 + 2*s))]
+        unfold_let M N
+        simp only [Int.mul_ediv_cancel' h4U, Int.mul_ediv_cancel' h4V]
+        exact hUV
       -- 16(MN) = 5(4k)⁴ → MN = 5(4k)⁴/16 = 5(2k)⁴ = 5B₁⁴
       have h_16 : 16 * (M * N) = 5 * (4 * k) ^ 4 := by
         linarith [show (4*M)*(4*N) = 16*(M*N) from by ring]
