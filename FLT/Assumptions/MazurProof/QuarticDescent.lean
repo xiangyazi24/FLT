@@ -485,8 +485,8 @@ theorem quartic_plus_descent_step :
       -- hUV : (2*(2j+1)²+(4k)²-2s)*(2*(2j+1)²+(4k)²+2s) = 5*(4k)⁴
       -- B₁ = 4k/2 = 2k
       have hB₁_val : B₁ = 2 * k := by omega
-      nlinarith [hUV, show 5 * (4 * k) ^ 4 = 16 * (5 * (2 * k) ^ 4) from by ring,
-                 show B₁ = 2 * k from hB₁_val]
+      rw [hB₁_val]
+      linarith [hUV, show 5 * (4 * k) ^ 4 = 16 * (5 * (2 * k) ^ 4) from by ring]
     -- M, N > 0
     have hMpos : 0 < M := by
       by_contra hle; push_neg at hle
