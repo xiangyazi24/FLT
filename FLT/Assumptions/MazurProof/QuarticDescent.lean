@@ -476,14 +476,10 @@ theorem quartic_plus_descent_step :
     have hB₁_val : B₁ = 2 * k := by omega
     have hUV := UV_eq_five_mul_fourth heq
     have hMN_prod : M * N = 5 * B₁ ^ 4 := by
-      have h_4MN : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
-        simpa only [hM_val, hN_val] using hUV
-      have h16 : 16 * (M * N) = 16 * (5 * (2 * k) ^ 4) :=
-        calc 16 * (M * N) = (4 * M) * (4 * N) := by ring
-          _ = 5 * (4 * k) ^ 4 := h_4MN
-          _ = 16 * (5 * (2 * k) ^ 4) := by ring
-      have : M * N = 5 * (2 * k) ^ 4 := mul_left_cancel₀ (by norm_num : (16 : ℤ) ≠ 0) h16
-      rwa [hB₁_val]
+      suffices h : 16 * (M * N) = 16 * (5 * B₁ ^ 4) by omega
+      calc 16 * (M * N) = (4 * M) * (4 * N) := by ring
+        _ = 5 * (4 * k) ^ 4 := by simp only [hM_val, hN_val]; linarith [hUV]
+        _ = 16 * (5 * B₁ ^ 4) := by rw [hB₁_val]; ring
     -- M, N > 0
     have hMpos : 0 < M := by
       by_contra hle; push_neg at hle
