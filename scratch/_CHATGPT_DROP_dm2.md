@@ -1,254 +1,152 @@
-# Q2093 (dm2): Constructing `x - a` in `WeierstrassCurve.Affine.FunctionField`
+# Q2110 dm2: MillerFunction.lean sorry-reduction attempt
 
 Date: 2026-06-28.
 
-## Answer
+I attempted to read:
 
-Yes: for the Miller-function layer, the coordinate-ring element representing the affine function `x - a` should be built as the class of the **inner** polynomial `X - C a`, embedded as a constant polynomial in the **outer** `Y` variable.
-
-In the Mathlib API at the FLT-pinned Mathlib revision, you should normally use the already-packaged definition:
-
-```lean
-WeierstrassCurve.Affine.CoordinateRing.XClass W a
+```text
+FLT/Assumptions/MazurProof/MillerFunction.lean
 ```
 
-This has type:
+on branch `ai-scratch` in `xiangyazi24/FLT`.  The GitHub connector returned `404 Not Found`.  Repo search also found no hits for:
 
-```lean
-W.CoordinateRing
+```text
+MillerFunction
+verticalFunction
+evalAtPoint
+lineFunction
+weilPairing_add_left
+weilPairing_pow_eq_one
 ```
 
-and it is defined by Mathlib as:
+The `main..ai-scratch` file list visible to the connector does not include `MillerFunction.lean`.  So I could not patch the exact file or verify exact field names.  Below is the correct coding guidance for the reported holes.
 
-```lean
-noncomputable def XClass (x : R) : W'.CoordinateRing :=
-  mk W' <| C <| X - C x
+## Classification of the 8 reported holes
+
+The pairing property stubs are genuinely hard unless they are currently declared as axioms/fields in an abstract interface:
+
+```text
+weilPairing_pow_eq_one
+weilPairing_add_left
+weilPairing_add_right
+weilPairing_self
+weilPairing_nondegenerate
 ```
 
-So the clean exact term for the function-field element `x - a` is:
+These are the real Weil-pairing theorems.  They require Miller divisors or a divisor-theoretic Weil pairing construction.  They cannot be proved just from the definitions of `verticalFunction` and `lineFunction`.
+
+The simp lemmas for vertical/line wrappers should be closable if the definitions are wrappers around `CoordinateRing.XClass`, `CoordinateRing.YClass`, and `algebraMap`.
+
+The requested `evalAtPoint` is subtler: evaluation is easy on the coordinate ring, but not total on the function field.  A `FunctionField` element is a fraction.  Evaluation at a point is only defined when the denominator does not vanish at the point.  Therefore a total function
 
 ```lean
-algebraMap W.CoordinateRing W.FunctionField
-  (WeierstrassCurve.Affine.CoordinateRing.XClass W a)
+W.FunctionField → F
 ```
 
-or, inside `namespace WeierstrassCurve.Affine`, simply:
+is mathematically wrong unless it returns an option/subtype or assumes a nonzero denominator evaluation.
+
+## Safe coordinate-ring evaluation
+
+For a polynomial in the outer `Y` variable with coefficients in `F[X]`, evaluation at an affine point should be:
 
 ```lean
-algebraMap W.CoordinateRing W.FunctionField
-  (CoordinateRing.XClass W a)
-```
-
-## Minimal Lean snippet
-
-This is the snippet I would put near the start of `MillerFunction.lean` to sanity-check the exact term.
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-
-noncomputable section
-
-open Polynomial
-open scoped Polynomial.Bivariate
-
-namespace WeierstrassCurve
-namespace Affine
-
-variable {F : Type*} [Field F]
-variable (W : Affine F) (a : F)
-
-/-- The coordinate-ring class of the affine function `x - a`. -/
-def xMinusA_coord : W.CoordinateRing :=
-  CoordinateRing.XClass W a
-
-/-- The same element, expanded without using `XClass`. -/
-def xMinusA_coord_expanded : W.CoordinateRing :=
-  CoordinateRing.mk W
-    (Polynomial.C ((Polynomial.X : F[X]) - Polynomial.C a))
-
-/-- The function-field element `x - a`. -/
-def xMinusA_fun : W.FunctionField :=
-  algebraMap W.CoordinateRing W.FunctionField
-    (CoordinateRing.XClass W a)
-
-/-- The same function-field element, expanded all the way to `CoordinateRing.mk`. -/
-def xMinusA_fun_expanded : W.FunctionField :=
-  algebraMap W.CoordinateRing W.FunctionField
-    (CoordinateRing.mk W
-      (Polynomial.C ((Polynomial.X : F[X]) - Polynomial.C a)))
-
-end Affine
-end WeierstrassCurve
-```
-
-If Lean has trouble inferring the source and target of `algebraMap`, use the fully qualified version:
-
-```lean
-def xMinusA_fun_fully_explicit
+noncomputable def evalBivariateAtPoint
     {F : Type*} [Field F]
-    (W : WeierstrassCurve.Affine F) (a : F) :
-    WeierstrassCurve.Affine.FunctionField W :=
-  algebraMap
-    (WeierstrassCurve.Affine.CoordinateRing W)
-    (WeierstrassCurve.Affine.FunctionField W)
-    (WeierstrassCurve.Affine.CoordinateRing.XClass W a)
+    (W : WeierstrassCurve.Affine F)
+    (P : W.Point) : F[X][X] → F :=
+  fun f => f.eval₂ (Polynomial.eval P.x) P.y
 ```
 
-## Why not `AdjoinRoot.mk (Polynomial.X - Polynomial.C a)`?
+The exact point projections may be `P.x`/`P.y` or different names in the pinned API.  Adapt those names locally.
 
-That expression is not the right shape.
-
-Mathlib has:
+The coordinate-ring map should be a ring hom induced from that evaluator.  The proof obligation is exactly that the Weierstrass equation polynomial evaluates to zero at `P`:
 
 ```lean
-abbrev CoordinateRing : Type r :=
-  AdjoinRoot W'.polynomial
-
-abbrev FunctionField : Type r :=
-  FractionRing W'.CoordinateRing
+noncomputable def evalCoordAtPoint
+    {F : Type*} [Field F]
+    (W : WeierstrassCurve.Affine F)
+    (P : W.Point) : W.CoordinateRing →+* F :=
+  AdjoinRoot.liftHom _ (evalBivariateAtPoint W P) (by
+    -- prove W.polynomial evaluates to 0 using P.property / P.2
+    -- usually: simpa [WeierstrassCurve.Affine.Equation] using P.2
+    sorry)
 ```
 
-and the natural quotient map is packaged as:
+This is the right theorem boundary for `evalAtPoint`: close the quotient-well-defined part by the point equation.  Do not define total evaluation on `W.FunctionField` without a denominator-nonvanishing hypothesis.
+
+## Partial function-field evaluation
+
+Use a subtype/option style:
 
 ```lean
-noncomputable abbrev CoordinateRing.mk : R[X][Y] →+* W'.CoordinateRing :=
-  AdjoinRoot.mk W'.polynomial
+structure RegularAt
+    {F : Type*} [Field F]
+    (W : WeierstrassCurve.Affine F)
+    (P : W.Point)
+    (f : W.FunctionField) : Prop where
+  exists_rep : ∃ a b : W.CoordinateRing,
+    f = algebraMap W.CoordinateRing W.FunctionField a /
+        algebraMap W.CoordinateRing W.FunctionField b ∧
+    evalCoordAtPoint W P b ≠ 0
 ```
 
-The polynomial passed to `CoordinateRing.mk W` lives in:
+The exact representation API for `FractionRing` will differ, but the point is invariant: the denominator must not vanish.
+
+## Wrapper simp lemmas
+
+If the file defines:
 
 ```lean
-F[X][Y]
-```
-
-that is, a polynomial in the outer variable `Y` whose coefficients are polynomials in the inner variable `X`.
-
-Therefore:
-
-* the affine `x` coordinate is the **inner** `Polynomial.X : F[X]`;
-* to view `X - C a : F[X]` as an element of `F[X][Y]`, you must wrap it in the **outer** `Polynomial.C`;
-* the outer `Polynomial.X : F[X][Y]` is the `Y` variable, not the affine `x` coordinate.
-
-So the expanded coordinate-ring expression is:
-
-```lean
-CoordinateRing.mk W
-  (Polynomial.C ((Polynomial.X : F[X]) - Polynomial.C a))
-```
-
-Equivalently, using the raw `AdjoinRoot` map:
-
-```lean
-(AdjoinRoot.mk W.polynomial)
-  (Polynomial.C ((Polynomial.X : F[X]) - Polynomial.C a))
-```
-
-But I recommend `CoordinateRing.XClass W a`, because it is exactly the API Mathlib already provides for this element.
-
-## Related API for Miller functions
-
-Mathlib also provides the analogous `Y`-side class:
-
-```lean
-CoordinateRing.YClass W p
-```
-
-where `p : F[X]`. It represents the class of:
-
-```lean
-Y - C p
-```
-
-in `W.CoordinateRing`.
-
-So for a horizontal/line-style expression `Y - p(X)` in the function field, use:
-
-```lean
-algebraMap W.CoordinateRing W.FunctionField
-  (CoordinateRing.YClass W p)
-```
-
-For a constant affine `y`-value `b : F`, use `p := Polynomial.C b`:
-
-```lean
-algebraMap W.CoordinateRing W.FunctionField
-  (CoordinateRing.YClass W (Polynomial.C b))
-```
-
-For the Miller vertical-line denominator through `x = a`, use:
-
-```lean
-algebraMap W.CoordinateRing W.FunctionField
-  (CoordinateRing.XClass W a)
-```
-
-## Practical recommendation for `MillerFunction.lean`
-
-Define small wrappers, so the later Miller-loop code does not repeatedly expose the `AdjoinRoot`/`FractionRing` plumbing:
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-
-noncomputable section
-
-open Polynomial
-open scoped Polynomial.Bivariate
-
-namespace WeierstrassCurve
-namespace Affine
-
-variable {F : Type*} [Field F]
-variable (W : Affine F)
-
-/-- Coordinate-ring class of the vertical line `x = a`, i.e. the function `x - a`. -/
 def verticalCoord (a : F) : W.CoordinateRing :=
   CoordinateRing.XClass W a
 
-/-- Function-field vertical line `x - a`. -/
 def verticalFunction (a : F) : W.FunctionField :=
   algebraMap W.CoordinateRing W.FunctionField (verticalCoord W a)
+```
 
-/-- Coordinate-ring class of `Y - p(X)`. -/
-def yMinusPolynomialCoord (p : F[X]) : W.CoordinateRing :=
+then the simp lemmas are definitional:
+
+```lean
+@[simp] theorem verticalCoord_eq (a : F) :
+    verticalCoord W a = CoordinateRing.XClass W a := rfl
+
+@[simp] theorem verticalFunction_eq (a : F) :
+    verticalFunction W a =
+      algebraMap W.CoordinateRing W.FunctionField (CoordinateRing.XClass W a) := rfl
+```
+
+For line/Y-minus-polynomial wrappers:
+
+```lean
+def lineCoord (p : F[X]) : W.CoordinateRing :=
   CoordinateRing.YClass W p
 
-/-- Function-field element `Y - p(X)`. -/
-def yMinusPolynomialFunction (p : F[X]) : W.FunctionField :=
-  algebraMap W.CoordinateRing W.FunctionField (yMinusPolynomialCoord W p)
-
-end Affine
-end WeierstrassCurve
+def lineFunction (p : F[X]) : W.FunctionField :=
+  algebraMap W.CoordinateRing W.FunctionField (lineCoord W p)
 ```
 
-Then the Miller-function code can use:
+use:
 
 ```lean
-verticalFunction W a
+@[simp] theorem lineCoord_eq (p : F[X]) :
+    lineCoord W p = CoordinateRing.YClass W p := rfl
+
+@[simp] theorem lineFunction_eq (p : F[X]) :
+    lineFunction W p =
+      algebraMap W.CoordinateRing W.FunctionField (CoordinateRing.YClass W p) := rfl
 ```
 
-for the vertical denominator `x - a`, and:
+If the actual definitions unfold through `CoordinateRing.mk`, prove by `rfl` or:
 
 ```lean
-yMinusPolynomialFunction W p
+  simp [verticalFunction, verticalCoord]
 ```
 
-for a numerator/line term `Y - p(X)`.
+## Recommended source-file structure
 
-## Bottom line
+1. Keep `verticalFunction` and `lineFunction` as small wrappers and close their simp lemmas by `rfl`/`simp`.
+2. Define `evalCoordAtPoint : W.CoordinateRing →+* F` first.
+3. Define function-field evaluation only with a nonvanishing denominator condition.
+4. Leave the five Weil-pairing property theorems as explicit hard seams until Miller divisors or divisor theory are formalized.
 
-The exact Lean term you want is:
-
-```lean
-algebraMap W.CoordinateRing W.FunctionField
-  (CoordinateRing.XClass W a)
-```
-
-The expanded version is:
-
-```lean
-algebraMap W.CoordinateRing W.FunctionField
-  (CoordinateRing.mk W
-    (Polynomial.C ((Polynomial.X : F[X]) - Polynomial.C a)))
-```
-
-Do **not** use bare `Polynomial.X - Polynomial.C a` at the outer `F[X][Y]` level: outer `Polynomial.X` is the `Y` variable. For affine `x - a`, use `C (X - C a)`, or better, Mathlib's `CoordinateRing.XClass W a`.
+Bottom line: the easy simp holes are closable; a correct coordinate-ring evaluator is closable from the point equation; total `FunctionField` evaluation and the Weil-pairing property stubs are not pure simp/API holes.
