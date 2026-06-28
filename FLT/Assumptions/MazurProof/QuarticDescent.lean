@@ -465,22 +465,22 @@ theorem quartic_plus_descent_step :
     have h4V : (4 : ℤ) ∣ (2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 + 2 * s) := by
       obtain ⟨t, rfl⟩ : ∃ t, s = 2 * t + 1 := ⟨s / 2, by omega⟩
       exact ⟨2 * j ^ 2 + 2 * j + 4 * k ^ 2 + t + 1, by ring⟩
-    -- Define M = U/4, N = V/4 (use let, NOT set, to avoid definitional unfolding)
-    let M := (2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 - 2 * s) / 4
-    let N := (2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 + 2 * s) / 4
+    -- Define M = U/4, N = V/4
+    set M := (2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 - 2 * s) / 4
+    set N := (2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 + 2 * s) / 4
     have hM_val : 4 * M = 2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 - 2 * s :=
       Int.mul_ediv_cancel' h4U
     have hN_val : 4 * N = 2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 + 2 * s :=
       Int.mul_ediv_cancel' h4V
+    -- Make M, N opaque so rw can find 4*M patterns
+    clear_value M N
     -- MN = 5 * B₁⁴ (via: 16MN = (4M)(4N) = UV = 5(4k)⁴ = 16·5B₁⁴)
     have hB₁_val : B₁ = 2 * k := by omega
     have hUV := UV_eq_five_mul_fourth heq
     have hMN_prod : M * N = 5 * B₁ ^ 4 := by
       suffices h : 16 * (M * N) = 16 * (5 * B₁ ^ 4) by omega
       have h_4MN : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
-        have h := hUV
-        rw [← hM_val, ← hN_val] at h
-        convert h using 2 <;> ring
+        rw [hM_val, hN_val]; exact hUV
       calc 16 * (M * N) = (4 * M) * (4 * N) := by ring
         _ = 5 * (4 * k) ^ 4 := h_4MN
         _ = 16 * (5 * B₁ ^ 4) := by rw [hB₁_val]; ring
