@@ -489,15 +489,14 @@ theorem quartic_plus_descent_step :
       -- MN = UV/16 = 5(4k)⁴/16 = 5·16k⁴ = 5·(2k)⁴ = 5·B₁⁴
       have hB₁_val : B₁ = 2 * k := by omega
       -- (4M)(4N) = UV = 5(4k)⁴ (direct substitution)
-      have h_prod : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
-        have : (4 * M) * (4 * N) =
+      -- (4M)(4N) = UV = 5(4k)⁴, proved by congr
+      have h_prod_eq : (4 * M) * (4 * N) =
           (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := by
-          congr 1 <;> linarith
-        linarith [hUV]
-      -- 16(MN) = 5(4k)⁴ → MN = 5(4k)⁴/16 = 5(2k)⁴ = 5B₁⁴
-      have h_16 : 16 * (M * N) = 5 * (4 * k) ^ 4 := by
-        linarith [show (4*M)*(4*N) = 16*(M*N) from by ring]
-      have h_expand : 5 * (4 * k) ^ 4 = 16 * (5 * B₁ ^ 4) := by rw [hB₁_val]; ring
+        congr 1 <;> linarith
+      -- Chain: 16(MN) = (4M)(4N) = UV = 5(4k)⁴ = 16·5·B₁⁴
+      have h1 : 16 * (M * N) = (4 * M) * (4 * N) := by ring
+      have h2 : 16 * (M * N) = 5 * (4 * k) ^ 4 := by linarith [hUV, h_prod_eq]
+      have h3 : 5 * (4 * k) ^ 4 = 16 * (5 * B₁ ^ 4) := by rw [hB₁_val]; ring
       omega
     -- M, N > 0
     have hMpos : 0 < M := by
