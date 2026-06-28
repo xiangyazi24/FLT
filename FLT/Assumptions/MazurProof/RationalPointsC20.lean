@@ -1,5 +1,6 @@
 import Mathlib
 import FLT.Assumptions.MazurProof.DescentBridge
+import FLT.Assumptions.MazurProof.QuarticDescent
 
 /-!
 # Rational points on w² = u³ + u² - u
@@ -58,9 +59,10 @@ Proof path (infinite descent on `B`):
 4. Parametrize via Pythagorean triples: `y = uv`, `2h = v⁴ - u⁴`.
 5. New solution `(v, u, ·)` satisfies QuarticPlus with `B' = u < B`.
 6. Strong induction on `B` completes the descent. -/
-axiom quartic_plus (r B s : ℤ) (hB : 0 < B) (hr : 0 < r)
+theorem quartic_plus (r B s : ℤ) (hB : 0 < B) (hr : 0 < r)
     (hcop : Int.gcd r B = 1)
-    (h : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) : r = 1 ∧ B = 1
+    (h : s ^ 2 = r ^ 4 + r ^ 2 * B ^ 2 - B ^ 4) : r = 1 ∧ B = 1 :=
+  QuarticDescent.quartic_plus_proved r B s hB hr hcop h
 
 /-! ## QuarticMinus reduces to QuarticPlus by r ↔ B swap -/
 
