@@ -480,7 +480,7 @@ theorem quartic_plus_descent_step :
           (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := by
         congr 1 <;> linarith
       have h_4MN : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
-        convert hUV using 2 <;> linarith
+        rw [h_prod_eq]; exact hUV
       have h16 : 16 * (M * N) = 16 * (5 * (2 * k) ^ 4) :=
         calc 16 * (M * N) = (4 * M) * (4 * N) := by ring
           _ = 5 * (4 * k) ^ 4 := h_4MN
