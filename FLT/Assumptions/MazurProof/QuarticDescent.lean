@@ -603,7 +603,41 @@ theorem quartic_plus_descent_step :
       have h2_sub : (2 : ℤ) ∣ ((2*j+1) - h) := by omega
       have h2_add : (2 : ℤ) ∣ ((2*j+1) + h) := by omega
       -- Define u = (r-h)/2, v = (r+h)/2
-      -- u*v = b⁴, gcd(u,v)=1
+      set u := ((2*j+1) - h) / 2
+      set v := ((2*j+1) + h) / 2
+      have hu_val : 2 * u = (2*j+1) - h := Int.mul_ediv_cancel' h2_sub
+      have hv_val : 2 * v = (2*j+1) + h := Int.mul_ediv_cancel' h2_add
+      clear_value u v
+      -- u + v = r, v - u = h
+      have huv_sum : u + v = 2*j+1 := by omega
+      have huv_diff : v - u = h := by omega
+      -- u*v = b⁴ (from (2u)(2v) = 4b⁴)
+      have huv_prod : u * v = b^4 := by
+        apply mul_left_cancel₀ (show (4 : ℤ) ≠ 0 from by norm_num)
+        have h4 : 4 * (u * v) = (2*u) * (2*v) := by ring
+        rw [h4, hu_val, hv_val]
+        rw [show (4 : ℤ) * b^4 = 4*b^4 from by ring]
+        exact hprod
+      -- u, v > 0 (from uv = b⁴ > 0 and u+v = r > 0)
+      have hb4_pos : 0 < b^4 := by positivity
+      have huv_pos_prod : 0 < u * v := by rw [huv_prod]; exact hb4_pos
+      have hu_pos : 0 < u := by nlinarith [sq_nonneg u, sq_nonneg v, huv_sum]
+      have hv_pos : 0 < v := by nlinarith [sq_nonneg u, sq_nonneg v, huv_sum]
+      -- gcd(u,v) = 1
+      have huv_cop : Int.gcd u v = 1 := by
+        rw [← Int.isCoprime_iff_gcd_eq_one]
+        by_contra hnotcop; rw [Int.isCoprime_iff_gcd_eq_one] at hnotcop
+        have hg_gt1 : 1 < Int.gcd u v := by
+          have : Int.gcd u v ≠ 0 := by
+            rw [Int.gcd_def]; exact Nat.gcd_ne_zero_left (Int.natAbs_ne_zero.mpr (ne_of_gt hu_pos))
+          omega
+        obtain ⟨p, hp, hpg⟩ := Nat.exists_prime_and_dvd hg_gt1.ne'
+        have hpu : (↑p : ℤ) ∣ u := dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_left ..)
+        have hpv : (↑p : ℤ) ∣ v := dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_right ..)
+        have hpr : (↑p : ℤ) ∣ (2*j+1) := by rwa [← huv_sum]; exact dvd_add hpu hpv
+        have hpb4 : (↑p : ℤ) ∣ b^4 := by rwa [← huv_prod]; exact dvd_mul_of_dvd_left hpu v
+        have hpb : (↑p : ℤ) ∣ b := Int.Prime.dvd_pow' hp hpb4
+        exact (Nat.prime_iff_prime_int.mp hp).not_unit (hcop_rb.isUnit_of_dvd' hpr hpb)
       -- pos_fourth → α,β → new QuarticPlusZ → B' < B
       sorry
     · -- Case M = 5a⁴, N = b⁴: descent on a (symmetric)
