@@ -560,7 +560,12 @@ theorem quartic_plus_descent_step :
             show (5 : ℤ) ^ 2 ∣ 5 * B₁ ^ 4; exact hp2_dvd
           exact (mul_dvd_mul_iff_left (by norm_num : (5:ℤ) ≠ 0)).mp this
         exact hpB₁ (Int.Prime.dvd_pow' (by norm_num : Nat.Prime 5) this)
-    -- Even-B descent chain (after gcd) — TODO
+    -- Even-B descent: coprime_factor_5_fourth → descent via u=(r-h)/2, v=(r+h)/2
+    obtain ⟨a, b, ha, hb, hab_cop, hB₁_eq, hfactor⟩ :=
+      coprime_factor_5_fourth hMN_prod hMN_cop hMpos hNpos hB₁_pos
+    -- Both branches: r² = (a²-b²)²+4b⁴ or (b²-a²)²+4a⁴
+    -- Then u*v = b⁴ or a⁴, same descent
+    -- For now: sorry the full descent (architecture is identical to odd case but with /2 layer)
     sorry
   · -- Odd B case (main case, fully proved)
     have hr_odd := r_odd_of_B_odd hBodd hcop heq
