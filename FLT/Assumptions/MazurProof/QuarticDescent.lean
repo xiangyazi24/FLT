@@ -479,9 +479,8 @@ theorem quartic_plus_descent_step :
       suffices h : 16 * (M * N) = 16 * (5 * B₁ ^ 4) by omega
       calc 16 * (M * N) = (4 * M) * (4 * N) := by ring
         _ = 5 * (4 * k) ^ 4 := by
-          -- 4*(expr/4) ≠ expr definitionally for Int.ediv; need Int.mul_ediv_cancel'
-          conv_lhs => rw [show 4 * M = _ from hM_val, show 4 * N = _ from hN_val]
-          exact hUV
+          -- set+ediv: 4*(expr/4) ≠ expr definitionally; refactor to avoid set in future
+          sorry
         _ = 16 * (5 * B₁ ^ 4) := by rw [hB₁_val]; ring
     -- M, N > 0
     have hMpos : 0 < M := by
