@@ -1,413 +1,200 @@
-# Q2013 (dm3): FLT Galois-representation infrastructure survey
+# Q2028 (dm3): MazurProof two-invariant-factor axiom vs proved theorem
 
 Date: 2026-06-28.
 
-Target searched: `ImperialCollegeLondon/FLT`, default branch `main`.
-
-Search terms used included:
+Repository/refs checked:
 
 ```text
-GaloisRepresentation
-GaloisRep
-ModularForm
-Tate module
-TateModule
-TateCurve
-adic representation
-l-adic representation
-ell-adic representation
-Weil pairing
-WeilPairing
-Pairing
-nTorsion
+repo:   xiangyazi24/FLT
+branch: ai-scratch
+files requested:
+  FLT/Assumptions/MazurProof/Axioms.lean
+  FLT/Assumptions/MazurProof/TwoInvariantFactors.lean
 ```
 
-## Executive answer
+## Fetch status
 
-The FLT project **does** have useful Galois-representation infrastructure, and it is more relevant than vanilla Mathlib for dm3.  The key generic definition is:
-
-```lean
-def GaloisRep := Γ K →ₜ* Module.End A M
-```
-
-from
+I successfully fetched:
 
 ```text
-FLT/Deformations/RepresentationTheory/GaloisRep.lean
+FLT/Assumptions/MazurProof/Axioms.lean
 ```
 
-where `Γ K` denotes `Field.absoluteGaloisGroup K`.  The file provides framing into `GL n A`, determinant, base change, local restriction, unramifiedness, Frobenius characteristic polynomials, flatness, and irreducibility wrappers.
+from `ai-scratch`.
 
-For elliptic curves specifically, the relevant file is:
+However, the requested file
 
 ```text
-FLT/EllipticCurve/Torsion.lean
+FLT/Assumptions/MazurProof/TwoInvariantFactors.lean
 ```
 
-It defines:
-
-```lean
-abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u :=
-  Submodule.torsionBy ℤ (E⁄k).Point n
-
-noncomputable instance (n : ℕ) : Module (ZMod n) (E.nTorsion n)
-
-def WeierstrassCurve.galoisRep ... (n : ℕ) (hn : 0 < n) :
-  GaloisRep K (ZMod n) ((E.map (algebraMap K (AlgebraicClosure K))).nTorsion n) := sorry
-```
-
-So the answer to “do they have mod-`m` Galois representations?” is: **yes, as a planned/stubbed definition for elliptic-curve `n`-torsion, with important supporting theorems still `sorry`.**
-
-The answer to “do they define the Tate module `T_ℓ(E)`?” is: **no, I found no `TateModule` / `T_l` definition.**  There is a `FLT/TateCurve/TateCurve.lean` file, but it is only a planning comment/stub about Tate uniformization and `p`-torsion over `Qpbar`, not a Tate-module construction.
-
-The answer to “do they have a pairing construction?” is: **no relevant implemented Weil pairing was found.**  Searches for `WeilPairing` returned no Lean definitions.  `HardlyRamified/Defs.lean` explicitly says that proving Frey-curve torsion is hardly ramified is standard but long and needs Tate-curve theory plus standard elliptic-curve facts “such as the Weil pairing.”  In the actual code, the theorem that the Frey curve torsion representation is hardly ramified is still a `sorry`.
-
-Bottom line for dm3: FLT gives us a useful target shape and some scaffolding:
-
-```lean
-WeierstrassCurve.galoisRep ... : GaloisRep K (ZMod n) E[n]
-GaloisRep.det
-IsHardlyRamified.det = cyclotomicCharacter
-```
-
-but it does **not** give a completed Weil-pairing/determinant proof.  The determinant-cyclotomic statement is built into `IsHardlyRamified` as a field/assumption, and the Frey torsion theorem that would prove it for elliptic curves is currently `sorry`.
-
-## Files under `FLT/GaloisRepresentation/`
-
-The public imports in `FLT.lean` show the following Galois-representation files:
+returned `404 Not Found` from the GitHub contents API on both `ai-scratch` and the branch-head commit I resolved for `ai-scratch`:
 
 ```text
-FLT/GaloisRepresentation/Automorphic.lean
-FLT/GaloisRepresentation/Cyclotomic.lean
-FLT/GaloisRepresentation/HardlyRamified/Defs.lean
-FLT/GaloisRepresentation/HardlyRamified/Family.lean
-FLT/GaloisRepresentation/HardlyRamified/Frey.lean
-FLT/GaloisRepresentation/HardlyRamified/Lift.lean
-FLT/GaloisRepresentation/HardlyRamified/ModThree.lean
-FLT/GaloisRepresentation/HardlyRamified/Threeadic.lean
+848ffbf5163603f16828def879890e51e5cc3725
 ```
 
-### `FLT/GaloisRepresentation/Automorphic.lean`
-
-Purpose: define automorphy of a 2-dimensional `p`-adic or mod-`p` Galois representation in the FLT-specific quaternionic setting.
-
-Key declaration:
-
-```lean
-def GaloisRep.IsAutomorphicOfLevel ... (ρ : GaloisRep F A V)
-    (S : Finset (HeightOneSpectrum (𝓞 F))) : Prop := ...
-```
-
-The definition asks for a totally definite quaternion algebra, a Hecke eigenform/eigencharacter, and good-prime compatibility:
-
-```lean
-ρ.IsUnramifiedAt v ∧
-(ρ.toLocal v (Frob v)).det = v.1.absNorm ∧
-LinearMap.trace A V (ρ.toLocal v (Frob v)) = π (HeckeAlgebra.T ...)
-```
-
-It imports `FLT.Deformations.RepresentationTheory.GaloisRep` and Mathlib cyclotomic characters.
-
-Important for us: it uses the **determinant equals cyclotomic/norm** condition as part of automorphy compatibility, but it does not prove this from an elliptic-curve pairing.
-
-### `FLT/GaloisRepresentation/Cyclotomic.lean`
-
-Purpose: a `ZHat`-valued cyclotomic character wrapper using Mathlib’s modular cyclotomic character.
-
-Key declarations:
-
-```lean
-lemma IsAlgClosed.card_rootsOfUnity (N : ℕ) [NeZero N] :
-  Fintype.card (rootsOfUnity N L) = N
-
-noncomputable def CyclotomicCharacterAux : (L ≃+* L) →* ZHat
-
-noncomputable def CyclotomicCharacterZHat : (L ≃+* L) →* ZHatˣ
-```
-
-This is potentially useful for a full-adic/cyclotomic endpoint, but the hard elliptic determinant identity is elsewhere/not implemented.
-
-### `FLT/GaloisRepresentation/HardlyRamified/Defs.lean`
-
-Purpose: define the “hardly ramified” condition for 2-dimensional mod-`ℓ` or `ℓ`-adic representations of `Gal(ℚbar/ℚ)`.
-
-Key declaration:
-
-```lean
-structure IsHardlyRamified {ℓ : ℕ} [Fact ℓ.Prime] (hℓOdd : Odd ℓ)
-    {R : Type u} ... {V : Type*} ... (hdim : Module.rank R V = 2)
-    (ρ : GaloisRep ℚ R V) : Prop where
-  det : ∀ g, ρ.det g =
-    algebraMap ℤ_[ℓ] R (cyclotomicCharacter (ℚ ᵃˡᵍ) ℓ g.toRingEquiv)
-  isUnramified : ...
-  isFlat : ...
-  isTameAtTwo : ...
-```
-
-The doc comment is crucial: it says the `p`-torsion of the Frey curve is hardly ramified, but that the full proof is long and needs the Tate curve plus standard elliptic curve facts such as the Weil pairing.
-
-This is exactly the place where our desired determinant/cyclotomic theorem would enter.  FLT currently records it as part of a larger structure, not as an implemented theorem derived from Weil pairing.
-
-### `FLT/GaloisRepresentation/HardlyRamified/Frey.lean`
-
-Purpose: state that Frey-curve `ℓ`-torsion is hardly ramified and not irreducible.
-
-Key declarations:
-
-```lean
-theorem FreyCurve.torsion_isHardlyRamified :
-  IsHardlyRamified P.hp_odd sorry
-    (P.freyCurve.galoisRep P.p (show 0 < P.p from P.hppos)) :=
-  sorry
-
-theorem FreyCurve.torsion_not_isIrreducible :
-  ¬ GaloisRep.IsIrreducible (P.freyCurve.galoisRep P.p P.hppos) :=
-  sorry
-```
-
-Important: this file imports both `FLT.FreyCurve.FreyPackage` and `FLT.EllipticCurve.Torsion`.  It is the explicit bridge from elliptic-curve torsion to the Galois-representation machine, but the bridge theorem is not proved.
-
-### `FLT/GaloisRepresentation/HardlyRamified/ModThree.lean`
-
-Purpose: state a mod-3 classification theorem for hardly ramified representations.
-
-Key declaration:
-
-```lean
-theorem mod_three ... {ρ : GaloisRep ℚ k V}
-    (hρ : IsHardlyRamified (show Odd 3 by decide) hV ρ) :
-    ∃ (π : V →ₗ[k] k) (_ : Function.Surjective π),
-    ∀ g : Γ ℚ, ∀ v : V, π (ρ g v) = π v := by
-  sorry
-```
-
-### `FLT/GaloisRepresentation/HardlyRamified/Threeadic.lean`
-
-Purpose: state a 3-adic classification/trace theorem for hardly ramified representations.
-
-Key declaration:
-
-```lean
-theorem three_adic ... {ρ : GaloisRep ℚ R V}
-    (hρ : IsHardlyRamified (show Odd 3 by decide) hV ρ) :
-    ∀ p (hp : Nat.Prime p) (hp5 : 5 ≤ p),
-      letI v := hp.toHeightOneSpectrumRingOfIntegersRat
-      (ρ.toLocal v (Frob v)).trace _ _ = 1 + p := sorry
-```
-
-### `FLT/GaloisRepresentation/HardlyRamified/Lift.lean`
-
-Purpose: state a lifting theorem from irreducible hardly ramified mod-`p` representations to characteristic-zero `p`-adic representations.
-
-Key declaration:
-
-```lean
-theorem lifts (ρ : GaloisRep ℚ k V) (hρirred : ρ.IsIrreducible)
-    (hρ : IsHardlyRamified hpodd hV ρ) :
-    ∃ R ... W ... (σ : GaloisRep ℚ R W) ...,
-      IsHardlyRamified hpodd hW σ ∧ (σ.baseChange k).conj r = ρ := sorry
-```
-
-### `FLT/GaloisRepresentation/HardlyRamified/Family.lean`
-
-Purpose: state that a hardly ramified representation lives in a compatible family.
-
-Key declaration:
-
-```lean
-theorem mem_isCompatible (hρ : IsHardlyRamified hpodd hv ρ) :
-  ∃ (E : Type v) (_ : Field E) (_ : NumberField E)
-    (σ : GaloisRepFamily ℚ E 2),
-    σ.isCompatible ∧ ... :=
-  sorry
-```
-
-This imports `FLT.Deformations.RepresentationTheory.GaloisRepFamily`.
-
-## Related non-`FLT/GaloisRepresentation` files
-
-### `FLT/Deformations/RepresentationTheory/GaloisRep.lean`
-
-This is the real core infrastructure file.
-
-Key declarations:
-
-```lean
-def GaloisRep := Γ K →ₜ* Module.End A M
-
-abbrev FramedGaloisRep := GaloisRep K A (n → A)
-
-def GaloisRep.conj
-
-def GaloisRep.frame
-
-def FramedGaloisRep.GL : FramedGaloisRep K A n ≃ (Γ K →ₜ* GL n A)
-
-def GaloisRep.det (ρ : GaloisRep K A M) : Γ K →ₜ* A
-
-def GaloisRep.baseChange
-
-abbrev GaloisRep.toLocal
-
-class GaloisRep.IsUnramifiedAt
-
-def GaloisRep.charFrob
-
-class GaloisRep.IsFlatAt
-
-def GaloisRep.IsIrreducible
-```
-
-For dm3, this is more useful than Mathlib’s current elliptic curve files because it already fixes a representation API with determinant and local/Frobenius structure.
-
-### `FLT/Deformations/RepresentationTheory/AbsoluteGaloisGroup.lean`
-
-Purpose: functoriality of absolute Galois groups.
-
-Key declarations:
-
-```lean
-noncomputable def Field.absoluteGaloisGroup.mapAux (f : K →+* L) : Γ L →* Γ K
-
-noncomputable def Field.absoluteGaloisGroup.map (f : K →+* L) : Γ L →ₜ* Γ K
-
-lemma Field.absoluteGaloisGroup.lift_map ...
-```
-
-This underlies `GaloisRep.map` / restriction of representations along field extensions.
-
-### `FLT/Deformations/RepresentationTheory/GaloisRepFamily.lean`
-
-Purpose: compatible families of Galois representations.
-
-Key declarations:
-
-```lean
-def GaloisRepFamily (K : Type*) [Field K]
-    (E : Type*) [Field E] [NumberField E] (d : ℕ) : Type _ :=
-  ∀ {p : ℕ} (_ : Fact (p.Prime)) (φ : E →+* AlgebraicClosure ℚ_[p]),
-    GaloisRep K (AlgebraicClosure ℚ_[p]) (Fin d → AlgebraicClosure ℚ_[p])
-
-def GaloisRepFamily.isCompatible ... : Prop := ...
-```
-
-### `FLT/EllipticCurve/Torsion.lean`
-
-Purpose: elliptic-curve torsion and its mod-`n` Galois representation.
-
-Key declarations:
-
-```lean
-abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u :=
-  Submodule.torsionBy ℤ (E⁄k).Point n
-
-noncomputable instance (n : ℕ) : Module (ZMod n) (E.nTorsion n)
-
-theorem WeierstrassCurve.n_torsion_finite ... := sorry
-
-theorem WeierstrassCurve.n_torsion_card ... := sorry
-
-theorem WeierstrassCurve.n_torsion_dimension ... :
-  Nonempty (E.nTorsion n ≃+ (ZMod n) × (ZMod n)) := ...
-
-def WeierstrassCurve.Points.map ...
-
-instance WeierstrassCurve.galoisRepresentationSmul ... :
-  SMul (K ≃ₐ[k] K) (E⁄K).Point
-
-instance WeierstrassCurve.galoisRepresentation ... :
-  DistribMulAction (K ≃ₐ[k] K) (E⁄K).Point := ... sorry ...
-
-def WeierstrassCurve.galoisRep ... :
-  GaloisRep K (ZMod n) ((E.map (algebraMap K (AlgebraicClosure K))).nTorsion n) := sorry
-```
-
-This is the closest thing in FLT to our desired `ρ_m : G_Q → GL₂(ZMod m)`.  However:
-
-* it is a representation on the torsion module, not immediately framed as `GL₂(ZMod m)`;
-* the rank/cardinality/finiteness API is partly `sorry`;
-* the final continuous Galois representation is `sorry`;
-* no determinant/cyclotomic theorem is proved here.
-
-### `FLT/TateCurve/TateCurve.lean`
-
-This file is not a Tate module implementation.  It is a planning stub/comment.  It says the desired Tate-uniformization input is a description of the Galois action on `Qpbar`-points of `p`-torsion of an elliptic curve over `Qp` as an explicit quotient of `Qpbar^* / q(E)^ℤ`.
-
-## Answers to the four concrete questions
-
-### (1) Do they define the Tate module `T_ℓ(E)`?
-
-No.  I found no `TateModule` or `T_l(E)` definition.  There is `FLT/TateCurve/TateCurve.lean`, but it is a prose stub about Tate uniformization and `p`-torsion, not an inverse-limit Tate-module construction.
-
-### (2) Do they have mod-`m` Galois representations?
-
-Yes, in two senses.
-
-First, generically:
-
-```lean
-GaloisRep K A M := Γ K →ₜ* Module.End A M
-```
-
-works for `A = ZMod m` and a finite `ZMod m` module `M`.
-
-Second, elliptic-curve specifically:
-
-```lean
-WeierstrassCurve.galoisRep ... (n : ℕ) ... :
-  GaloisRep K (ZMod n) E[n]
-```
-
-exists in `FLT/EllipticCurve/Torsion.lean`, but is currently `sorry`.  This is directly relevant to our desired `ρ_m`, though it is not yet a completed formal theorem.
-
-### (3) Do they have any pairing construction?
-
-No implemented Weil pairing was found.  The only relevant occurrence is a doc comment in `HardlyRamified/Defs.lean` saying that the proof that Frey-curve `p`-torsion is hardly ramified needs standard elliptic-curve facts such as the Weil pairing.  Searches for `WeilPairing` returned no code hits.
-
-### (4) What files in `FLT/GaloisRepresentation/` exist?
-
-The files imported by `FLT.lean` are:
+I also tried the obvious nearby guesses:
 
 ```text
-FLT/GaloisRepresentation/Automorphic.lean
-FLT/GaloisRepresentation/Cyclotomic.lean
-FLT/GaloisRepresentation/HardlyRamified/Defs.lean
-FLT/GaloisRepresentation/HardlyRamified/Family.lean
-FLT/GaloisRepresentation/HardlyRamified/Frey.lean
-FLT/GaloisRepresentation/HardlyRamified/Lift.lean
-FLT/GaloisRepresentation/HardlyRamified/ModThree.lean
-FLT/GaloisRepresentation/HardlyRamified/Threeadic.lean
+TwoInvariantFactor.lean
+TwoInvariantFactorData.lean
+TorsionTwoInvariantFactors.lean
+RationalTorsionTwoInvariantFactors.lean
+TorsionStructure.lean
+Torsion/TwoInvariantFactors.lean
 ```
 
-## Practical implications for dm3 Weil-pairing work
+and did not find the file.  So the axiom side below is verified from the fetched file, but the theorem-side comparison is necessarily based on the described Q1996 situation rather than a fetched theorem declaration.
 
-The FLT repo is useful because it already chose an API:
+## Verified axiom-side signature
+
+In the `Axioms.lean` that I could fetch, the relevant public structure is:
 
 ```lean
-GaloisRep K A M
-GaloisRep.det
-GaloisRep.baseChange
-GaloisRep.toLocal
-FramedGaloisRep.GL
-WeierstrassCurve.galoisRep
+structure TorsionStructureData (E : WeierstrassCurve ℚ) [E.IsElliptic] where
+  m : ℕ
+  n : ℕ
+  m_pos : 0 < m
+  n_pos : 0 < n
+  dvd_mn : m ∣ n
+  has_structure : HasTorsionStructure E m n
+  has_point_order_n : HasRationalPointOfOrder E n
+  card_eq : (torsionSet E).ncard = m * n
 ```
 
-For our `E[m](ℚ) = (ZMod m)^2 ⇒ μ_m ⊂ ℚ` goal, the most relevant existing FLT pieces are:
+and the axiom is exactly:
 
 ```lean
-WeierstrassCurve.nTorsion
-WeierstrassCurve.galoisRep
-GaloisRep.det
-CyclotomicCharacterZHat / Mathlib cyclotomicCharacter
+axiom rational_torsion_two_invariant_factors
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    TorsionStructureData E
 ```
 
-But the exact theorem we need is still absent:
+The downstream `mazur_torsion_bound` proof uses the returned object directly as a record with fields:
 
 ```lean
--- not found
-∀ σ, (E.galoisRep m).det σ = cyclotomicCharacter ... σ
+let d := rational_torsion_two_invariant_factors E
+...
+d.m
+d.n
+d.m_pos
+d.n_pos
+d.dvd_mn
+d.has_structure
+d.has_point_order_n
+d.card_eq
 ```
 
-FLT effectively treats this as part of the hard Frey-curve input: `IsHardlyRamified.det` includes determinant equals cyclotomic as a required field, and `FreyCurve.torsion_isHardlyRamified` is `sorry`.
+In particular, the downstream proof depends not merely on an abstract classification theorem, but on exactly the public `TorsionStructureData` fields expected by `Axioms.lean`.
 
-So FLT gives us a good interface to build against, but not a completed workaround for the Weil pairing.  The likely best plan is to make our local statement compatible with `GaloisRep.det` and `WeierstrassCurve.galoisRep`, while isolating the missing determinant/cyclotomic theorem as the theorem that would ultimately be supplied by Weil-pairing formalization.
+## Exact mismatch if the proved theorem returns private `TwoInvariantFactorData`
+
+If `TwoInvariantFactors.lean` proves a theorem with the same mathematical content but returning a private structure such as
+
+```lean
+private structure TwoInvariantFactorData ...
+```
+
+then it is **not definitionally the same type** as the axiom target:
+
+```lean
+TorsionStructureData E
+```
+
+Even if the private structure has fields morally corresponding to `m`, `n`, positivity, divisibility, an equivalence/classification of the torsion subgroup, and a cardinality formula, Lean will not treat
+
+```lean
+TwoInvariantFactorData E
+```
+
+as interchangeable with
+
+```lean
+TorsionStructureData E
+```
+
+because they are different structure constants.  If `TwoInvariantFactorData` is private, the mismatch is worse: downstream files cannot conveniently construct or destruct terms of that private type after importing the module.
+
+So the mismatch is a **return-type mismatch**, not just a theorem-name mismatch:
+
+```lean
+-- axiom target, verified:
+(E : WeierstrassCurve ℚ) → [E.IsElliptic] → TorsionStructureData E
+
+-- proved theorem, as described by Q1996:
+(E : WeierstrassCurve ℚ) → [E.IsElliptic] → TwoInvariantFactorData E
+-- or an existential/package involving private TwoInvariantFactorData
+```
+
+These are not directly replaceable.
+
+## Likely field-level mismatch
+
+The axiom’s `TorsionStructureData` is tailored to the current `TorsionBound.lean` proof.  Its key fields are weaker/more operational than a standard finite-abelian-group classification package:
+
+```lean
+has_structure : HasTorsionStructure E m n
+has_point_order_n : HasRationalPointOfOrder E n
+card_eq : (torsionSet E).ncard = m * n
+```
+
+where
+
+```lean
+HasTorsionStructure E m n :=
+  ∃ f : ZMod m × ZMod n →+ (E⁄ℚ).Point, Function.Injective f
+```
+
+A natural proved two-invariant-factor theorem is likely to produce something closer to an additive equivalence of the finite torsion subgroup/subtype with `ZMod m × ZMod n`, not exactly this injected-subgroup predicate into all rational points.  Converting that to the axiom shape needs small but real glue:
+
+1. turn an equivalence/classification of the torsion subgroup into an injective additive hom
+   ```lean
+   ZMod m × ZMod n →+ (E⁄ℚ).Point;
+   ```
+2. produce a rational point of exact order `n`, typically the image of `(0, 1)` under the inverse equivalence, then coerce from the torsion subtype to `(E⁄ℚ).Point`;
+3. translate the subgroup/subtype cardinality theorem into
+   ```lean
+   (torsionSet E).ncard = m * n;
+   ```
+4. copy the positivity and divisibility fields.
+
+## Can the axiom be directly replaced?
+
+No, not if the proved theorem returns a private `TwoInvariantFactorData` or any package other than `TorsionStructureData E`.
+
+It needs an adapter theorem whose exported type is exactly the axiom target:
+
+```lean
+theorem rational_torsion_two_invariant_factors_adapter
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    TorsionStructureData E := by
+  -- obtain the proved two-invariant-factor data
+  -- convert its fields to the public Axioms.lean record shape
+  -- return the public structure expected by TorsionBound.lean
+```
+
+If `TwoInvariantFactorData` is private, the adapter must be written **inside `TwoInvariantFactors.lean`**, before leaving the module where the private structure is visible, or the private structure must be made public/renamed to the public `TorsionStructureData` used by `Axioms.lean`.
+
+After that adapter exists, `Axioms.lean` can replace the axiom by importing the theorem file and defining:
+
+```lean
+theorem rational_torsion_two_invariant_factors
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    TorsionStructureData E :=
+  rational_torsion_two_invariant_factors_adapter E
+```
+
+or, better, give the adapter the exact name `rational_torsion_two_invariant_factors` and remove the axiom entirely.
+
+## Recommendation
+
+Use the public `TorsionStructureData` from `Axioms.lean` as the exported API.  Do not export a theorem whose result type mentions a private `TwoInvariantFactorData`.  Keep any lower-level/private classification package internal, and expose only:
+
+```lean
+rational_torsion_two_invariant_factors
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    TorsionStructureData E
+```
+
+That is the type `TorsionBound.lean` already consumes.
