@@ -478,7 +478,9 @@ theorem quartic_plus_descent_step :
     have hMN_prod : M * N = 5 * B₁ ^ 4 := by
       suffices h : 16 * (M * N) = 16 * (5 * B₁ ^ 4) by omega
       calc 16 * (M * N) = (4 * M) * (4 * N) := by ring
-        _ = 5 * (4 * k) ^ 4 := by simp only [hM_val, hN_val]; linarith [hUV]
+        _ = 5 * (4 * k) ^ 4 := by
+          show (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) = 5*(4*k)^4
+          exact hUV
         _ = 16 * (5 * B₁ ^ 4) := by rw [hB₁_val]; ring
     -- M, N > 0
     have hMpos : 0 < M := by
