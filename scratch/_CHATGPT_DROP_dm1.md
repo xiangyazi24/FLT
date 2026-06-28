@@ -1,411 +1,361 @@
-# Q1538 (dm1/dm2): replacing `hBodd` by an odd/even parity split
+# Q1562 (dm1): even-`B` branch for the quartic descent
 
-The least-code architecture is **option 1**, but with one important correction:
+I cannot honestly give a no-new-lemma “complete proof body” from only the helpers listed, because the stated reduction has a real mismatch.
 
-After dividing the even case by `4`, the normalized identity is not the same as the odd case.
+The line
 
-Odd case, with `U = a^4`, `V = 5*b^4`, `B = a*b`:
+```lean
+-- The descent after step 5 is IDENTICAL to the odd case
+```
+
+is false after the `U,V` division by `4`.
+
+In the odd branch, after the factor split, the identity has the shape
 
 ```lean
 4 * r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4
 ```
 
-Even case, after `M = U/4`, `N = V/4`, `B = 2*B₁`, `B₁ = a*b`:
-
-```lean
-r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4
-```
-
-So the even branch is not literally the odd branch with `U,V` replaced by `M,N`. You can reuse the **factor splitting** and most of the descent infrastructure, but the Pythagorean kernel must be the normalized even version:
-
-```lean
-r ^ 2 = h ^ 2 + (2 * b ^ 2) ^ 2
-```
-
-with
-
-```lean
-h = a ^ 2 - b ^ 2
-```
-
-not the odd-case half
+so with
 
 ```lean
 h = (a ^ 2 - b ^ 2) / 2
 ```
 
-So do not use option 3. There is no odd-case solution with smaller `B₁`; `(r,B₁,s)` does not satisfy the same quartic equation. Option 2 works but is too much copy-paste. The right split is:
+you get
 
-1. Keep your old odd proof as `odd_B_core`.
-2. Extract the shared factor-pair descent into helper lemmas.
-3. Add a sibling helper for the even-normalized identity.
-4. Replace the old `have hBodd : B % 2 = 1 := by sorry` by a `by_cases` parity split.
+```lean
+r ^ 2 = h ^ 2 + b ^ 4
+```
 
-## Parity wrapper
+and your existing helper
 
-Use this shape around your old proof body:
+```lean
+coprime_rh :
+  r odd → h even → gcd(r,b)=1 → 0 < b →
+  r ^ 2 = h ^ 2 + b ^ 4 →
+  gcd(r-h,r+h)=1
+```
+
+is applicable.
+
+In the even branch, after setting `B = 2*B₁`, `U = 4*M`, `V = 4*N`, the factor case `M = a^4`, `N = 5*b^4`, `B₁ = a*b` gives instead
+
+```lean
+r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4
+```
+
+not the odd identity. Thus the correct choice is
+
+```lean
+h = a ^ 2 - b ^ 2
+```
+
+and the factorization is
+
+```lean
+((r - h) / 2) * ((r + h) / 2) = b ^ 4
+```
+
+because `r` and `h` are both odd. So the required coprimality lemma is not `coprime_rh`; it is the half-factor version
+
+```lean
+Int.gcd ((r - h) / 2) ((r + h) / 2) = 1
+```
+
+This is a different helper. Without it, the listed helper set is not enough to close the even branch.
+
+## The helper you need
+
+Add this kernel once. The proof is exactly the even analogue of the old odd descent core.
 
 ```lean
 import Mathlib
 
--- Old proof body should be moved unchanged into this local helper/theorem.
--- It is the code that previously followed
---   have hBodd : B % 2 = 1 := by sorry
--- and used `hBodd`.
-have odd_B_core (hBodd : B % 2 = 1) :
-    ∃ r' B' s' : ℤ,
-      QuarticPlusZ r' B' s' ∧ ¬ BaseZ r' B' ∧ B'.natAbs < B.natAbs := by
-  -- paste the already-proved odd-B case here, unchanged
-  -- except remove the old local `have hBodd := ...`
-  exact odd_B_descent_already_proved
-    hr hB hcop heq hBodd hr_odd hnonbase
+/-- Even-`B` normalized descent kernel.
 
-by_cases hBodd : B % 2 = 1
-· exact odd_B_core hBodd
-· have hBeven : B % 2 = 0 := by
-    have hnonneg : 0 ≤ B % 2 :=
-      Int.emod_nonneg B (by norm_num : (2 : ℤ) ≠ 0)
-    have hlt : B % 2 < 2 :=
-      Int.emod_lt_of_pos B (by norm_num : (0 : ℤ) < 2)
-    omega
-  -- continue with the even-B branch below
-  exact even_B_core hBeven
-```
+This is the replacement for trying to reuse `coprime_rh` directly.  The input
+identity is the normalized even identity
 
-The `hBeven` block is the robust way to convert `¬ B % 2 = 1` into `B % 2 = 0` for integer parity.
+  `r^2 = (a^2-b^2)^2 + 4*b^4`.
 
-## Lean-friendly even branch: avoid `/4` where possible
+It factors
 
-Even though mathematically you can define `B₁ = B/2`, `M = U/4`, `N = V/4`, in Lean the cleaner path is to obtain witnesses from divisibility:
+  `((r-h)/2) * ((r+h)/2) = b^4`
 
-```lean
-import Mathlib
-
--- U,V are the original factors.
-let U : ℤ := 2 * r ^ 2 + B ^ 2 - 2 * s
-let V : ℤ := 2 * r ^ 2 + B ^ 2 + 2 * s
-
--- Your helper should give at least these facts.
-obtain ⟨hr_odd, hfour_dvd_B, hfour_dvd_U, hfour_dvd_V⟩ :=
-  even_B_props hr hB hcop heq hBeven
-
--- Prefer witnesses over defining by division.
-obtain ⟨B₁, hB_eq_two⟩ : ∃ B₁ : ℤ, B = 2 * B₁ := by
-  rcases hfour_dvd_B with ⟨C, hBC⟩
-  refine ⟨2 * C, ?_⟩
-  nlinarith [hBC]
-
-obtain ⟨M, hU_eq_fourM⟩ : ∃ M : ℤ, U = 4 * M := hfour_dvd_U
-obtain ⟨N, hV_eq_fourN⟩ : ∃ N : ℤ, V = 4 * N := hfour_dvd_V
-
-have hB₁_pos : 0 < B₁ := by
-  nlinarith [hB, hB_eq_two]
-
-have hB₁_natAbs_lt_B : B₁.natAbs < B.natAbs := by
-  have hB₁_lt_B : B₁ < B := by
-    nlinarith [hB₁_pos, hB_eq_two]
-  exact Int.natAbs_lt_natAbs_of_nonneg_of_lt (le_of_lt hB₁_pos) hB₁_lt_B
-```
-
-This avoids fighting `Int.ediv` and `%` simplification. If you really want `B₁ = B/2`, add it later:
-
-```lean
-have hB₁_eq_div : B₁ = B / 2 := by
-  have hmod : B % 2 = 0 := hBeven
-  have hdiv := Int.emod_add_ediv B 2
-  nlinarith
-```
-
-## Normalized `M,N` facts
-
-Assuming you already have the original product identity
-
-```lean
-hUV : U * V = 5 * B ^ 4
-```
-
-then the halved product is:
-
-```lean
-have hMN : M * N = 5 * B₁ ^ 4 := by
-  have hraw : (4 * M) * (4 * N) = 5 * (2 * B₁) ^ 4 := by
-    simpa [U, V, hU_eq_fourM, hV_eq_fourN, hB_eq_two] using hUV
-  nlinarith [hraw]
-```
-
-The sum and difference identities are cheap algebra:
-
-```lean
-have hMN_sum : M + N = r ^ 2 + 2 * B₁ ^ 2 := by
-  have hsum_raw : U + V = 4 * r ^ 2 + 2 * B ^ 2 := by
-    dsimp [U, V]
-    ring
-  have hsum_raw' : 4 * M + 4 * N = 4 * r ^ 2 + 2 * (2 * B₁) ^ 2 := by
-    simpa [hU_eq_fourM, hV_eq_fourN, hB_eq_two] using hsum_raw
-  nlinarith [hsum_raw']
-
-have hMN_diff : N - M = s := by
-  have hdiff_raw : V - U = 4 * s := by
-    dsimp [U, V]
-    ring
-  have hdiff_raw' : 4 * N - 4 * M = 4 * s := by
-    simpa [hU_eq_fourM, hV_eq_fourN] using hdiff_raw
-  nlinarith [hdiff_raw']
-```
-
-For coprimality, do **not** try to reuse `UV_coprime`, because `U,V` are both divisible by `4`. You need the same prime-divisor proof after dividing:
-
-```lean
-have hMN_cop : Int.gcd M N = 1 := by
-  -- This should be the old `UV_coprime` proof, but run on `M,N`.
-  -- Any common prime divisor of `M,N` divides `M+N = r^2 + 2*B₁^2`
-  -- and `N-M = s`; combining with the quartic equation and `gcd r B = 1`
-  -- gives a contradiction.
-  exact MN_coprime_even
-    hr hB hcop heq hB_eq_two hU_eq_fourM hV_eq_fourN hMN_sum hMN_diff
-```
-
-## Apply the same fourth-power splitter
-
-Now use your existing `coprime_factor_5_fourth` on `M*N = 5*B₁^4`:
-
-```lean
-obtain ⟨a, b, ha, hb, hab_cop, hB₁_eq, hfactor⟩ :=
-  coprime_factor_5_fourth hB₁_pos hMN_cop hMN
-
-rcases hfactor with ⟨hM_eq, hN_eq⟩ | ⟨hM_eq, hN_eq⟩
-```
-
-The two factor cases are:
-
-```lean
--- main even factor case
-hM_eq : M = a ^ 4
-hN_eq : N = 5 * b ^ 4
-hB₁_eq : B₁ = a * b
-```
-
-and
-
-```lean
--- symmetric even factor case
-hM_eq : M = 5 * a ^ 4
-hN_eq : N = b ^ 4
-hB₁_eq : B₁ = a * b
-```
-
-## Even factor case: main orientation
-
-For `M = a^4`, `N = 5*b^4`, derive the normalized identity and call the even descent core:
-
-```lean
-have hid : r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4 := by
-  calc
-    r ^ 2 = a ^ 4 + 5 * b ^ 4 - 2 * B₁ ^ 2 := by
-      nlinarith [hMN_sum, hM_eq, hN_eq]
-    _ = a ^ 4 + 5 * b ^ 4 - 2 * (a * b) ^ 2 := by
-      rw [hB₁_eq]
-    _ = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4 := by
-      ring
-
--- New solution comes from the primitive Pythagorean triple
---   (a^2-b^2)^2 + (2*b^2)^2 = r^2.
--- It returns some B' with B'.natAbs < B₁.natAbs, then we compose with B₁ < B.
-obtain ⟨r', B', s', hquartic, hnonbase', hsmall_to_B₁⟩ :=
-  descent_even_from_identity_main
-    (r := r) (Bbig := B) (C := B₁) (a := a) (b := b)
-    hr hB hB₁_pos hB_eq_two hB₁_eq ha hb hab_cop hcop hr_odd hnonbase hid
-
-exact ⟨r', B', s', hquartic, hnonbase', lt_trans hsmall_to_B₁ hB₁_natAbs_lt_B⟩
-```
-
-The helper should have this shape:
-
-```lean
-lemma descent_even_from_identity_main
-    {r Bbig C a b : ℤ}
-    (hr : 0 < r) (hBbig : 0 < Bbig) (hCpos : 0 < C)
-    (hBbig_eq : Bbig = 2 * C)
-    (hCeq : C = a * b)
+with `h = a^2-b^2`, not `(a^2-b^2)/2`.
+-/
+lemma even_descent_from_factor_main
+    {r B B₁ a b : ℤ}
+    (hr : 0 < r) (hB : 0 < B) (hB₁ : 0 < B₁)
+    (hB_eq : B = 2 * B₁)
+    (hB₁_eq : B₁ = a * b)
     (ha : 0 < a) (hb : 0 < b)
     (hab_cop : Int.gcd a b = 1)
-    (hcop : Int.gcd r Bbig = 1)
+    (hcop : Int.gcd r B = 1)
     (hr_odd : r % 2 = 1)
-    (hnonbase : ¬ BaseZ r Bbig)
+    (hnonbase : ¬ BaseZ r B)
     (hid : r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4) :
     ∃ r' B' s' : ℤ,
-      QuarticPlusZ r' B' s' ∧ ¬ BaseZ r' B' ∧ B'.natAbs < C.natAbs := by
-  -- Core proof:
-  --   let h := a^2 - b^2
-  --   h^2 + (2*b^2)^2 = r^2
-  --   primitive Pythagorean parametrization
-  --   b^2 = m*n
-  --   gcd m n = 1, m,n positive => m = α^2, n = β^2
-  --   b = α*β
-  --   a^2 = α^4 + α^2*β^2 - β^4
-  --   return ⟨α, β, a, ...⟩
-  sorry
-```
+      QuarticPlusZ r' B' s' ∧ ¬ BaseZ r' B' ∧ B'.natAbs < B₁.natAbs := by
+  let h : ℤ := a ^ 2 - b ^ 2
 
-Notice that this helper factors `b^2`, not `b^4`. That is the real difference from the odd-B branch.
+  have hr_sq : r ^ 2 = h ^ 2 + 4 * b ^ 4 := by
+    simpa [h] using hid
 
-## Even factor case: symmetric orientation
+  -- From `B = 2*B₁`, `B₁ = a*b`, `gcd r B = 1`, get `gcd r b = 1`.
+  have hb_dvd_B : b ∣ B := by
+    refine ⟨2 * a, ?_⟩
+    rw [hB_eq, hB₁_eq]
+    ring
 
-For `M = 5*a^4`, `N = b^4`, the normalized identity is:
+  have hrb_cop : Int.gcd r b = 1 := by
+    -- This is the same divisor-of-a-coprime extraction used in the odd branch.
+    -- Use your local name if different.
+    exact gcd_of_gcd_mul_right_eq_one hcop hb_dvd_B
 
-```lean
-have hsym_id : r ^ 2 = (b ^ 2 - a ^ 2) ^ 2 + 4 * a ^ 4 := by
-  calc
-    r ^ 2 = 5 * a ^ 4 + b ^ 4 - 2 * B₁ ^ 2 := by
-      nlinarith [hMN_sum, hM_eq, hN_eq]
-    _ = 5 * a ^ 4 + b ^ 4 - 2 * (a * b) ^ 2 := by
+  -- Since `B₁ = a*b` and `B = 2*B₁` with `gcd r B = 1`, exactly one of
+  -- `a,b` is even in the even case, hence `h = a^2-b^2` is odd.  Package this
+  -- as a local parity helper; it is the one parity fact the old odd branch did
+  -- not need.
+  have hh_odd : h % 2 = 1 := by
+    exact odd_diff_sq_of_coprime_product_even hB_eq hB₁_eq ha hb hab_cop hcop
+
+  -- The half-factors are integers because both `r` and `h` are odd.
+  have hleft_even : 2 ∣ r - h := by
+    exact Int.dvd_sub.mpr ⟨by simpa using hr_odd, by simpa using hh_odd⟩
+
+  have hright_even : 2 ∣ r + h := by
+    exact Int.dvd_add.mpr ⟨by simpa using hr_odd, by simpa using hh_odd⟩
+
+  have hhalf_mul : ((r - h) / 2) * ((r + h) / 2) = b ^ 4 := by
+    have hdiff : (r - h) * (r + h) = 4 * b ^ 4 := by
+      nlinarith [hr_sq]
+    have h2l : 2 * ((r - h) / 2) = r - h := by
+      exact (Int.ediv_mul_cancel hleft_even).symm
+    have h2r : 2 * ((r + h) / 2) = r + h := by
+      exact (Int.ediv_mul_cancel hright_even).symm
+    nlinarith [hdiff, h2l, h2r]
+
+  have hhalf_cop : Int.gcd ((r - h) / 2) ((r + h) / 2) = 1 := by
+    -- New required even analogue of `coprime_rh`.
+    -- The proof is the same prime-divisor argument, but after dividing the two
+    -- even factors by `2`.  A common odd prime divides both half-factors, hence
+    -- divides `r` and `h`, then from `r^2 = h^2 + 4*b^4` divides `b`, contrary
+    -- to `gcd(r,b)=1`; prime `2` is excluded because the two half-factors have
+    -- opposite parity.
+    exact coprime_half_rh hr_odd hh_odd hrb_cop hb hr_sq
+
+  obtain ⟨α, hαpos, hαfour⟩ :=
+    pos_fourth_of_coprime_mul_fourth hhalf_cop hhalf_mul
+  -- Depending on the exact signature of your helper, the previous line may be:
+  --   obtain ⟨α, β, hαpos, hβpos, hleft, hright⟩ := ...
+  -- The intended outputs are shown explicitly below.
+
+  -- Intended outputs of the fourth-power split:
+  obtain ⟨α, β, hαpos, hβpos, hleft, hright⟩ :=
+    pos_fourth_of_coprime_mul_fourth hhalf_cop hhalf_mul
+
+  -- hleft  : (r - h) / 2 = α ^ 4
+  -- hright : (r + h) / 2 = β ^ 4
+
+  have hb_eq : b = α * β := by
+    have hb4 : b ^ 4 = (α * β) ^ 4 := by
+      nlinarith [hhalf_mul, hleft, hright]
+    exact eq_of_pos_fourth_eq hb (mul_pos hαpos hβpos) hb4
+
+  have hnew_eq : a ^ 2 = β ^ 4 + β ^ 2 * α ^ 2 - α ^ 4 := by
+    have hdiff : h = β ^ 4 - α ^ 4 := by
+      have h2 : r + h - (r - h) = 2 * h := by ring
+      nlinarith [hleft, hright, h2]
+    have hb_sq : b ^ 2 = (α * β) ^ 2 := by
+      rw [hb_eq]
+    -- `h = a^2-b^2` and `h = β^4-α^4`.
+    nlinarith [hdiff, hb_sq]
+
+  refine ⟨β, α, a, ?hquartic, ?hnonbase, ?hsmall⟩
+
+  · -- QuarticPlusZ β α a
+    -- This is definition-dependent; for the usual definition it is exactly
+    -- `a^2 = β^4 + β^2*α^2 - α^4`.
+    simpa [QuarticPlusZ, mul_comm, mul_left_comm, mul_assoc] using hnew_eq
+
+  · -- non-base for the new solution
+    intro hbase
+    rcases hbase with ⟨hβ1, hα1⟩
+    have hb1 : b = 1 := by
+      rw [hb_eq, hα1, hβ1]
+      norm_num
+    have ha1 : a = 1 := by
+      -- With α=β=1, `hnew_eq` gives `a^2 = 1`; positivity gives `a=1`.
+      have : a ^ 2 = 1 := by
+        simpa [hα1, hβ1] using hnew_eq
+      nlinarith [ha]
+    have hB₁_one : B₁ = 1 := by
+      rw [hB₁_eq, ha1, hb1]
+      norm_num
+    have hB_two : B = 2 := by
+      rw [hB_eq, hB₁_one]
+      norm_num
+    -- This contradicts the original coprimality/non-base package in the same
+    -- way as the odd branch.  If your `BaseZ` is literally `r=1 ∧ B=1`, then
+    -- use the already-existing local odd-branch nonbase contradiction helper
+    -- here; in the even branch `B=2` is usually excluded earlier by the descent
+    -- minimality hypothesis or by the final equation modulo 5/8.
+    exact even_new_base_contradiction hr hB hcop heq hnonbase hB_two
+
+  · -- α.natAbs < B₁.natAbs
+    have hα_le_b : α ≤ b := by
+      rw [hb_eq]
+      nlinarith [hαpos, hβpos]
+    have hb_le_B₁ : b ≤ B₁ := by
       rw [hB₁_eq]
-    _ = (b ^ 2 - a ^ 2) ^ 2 + 4 * a ^ 4 := by
-      ring
-
-have hB₁_ba : B₁ = b * a := by
-  simpa [mul_comm] using hB₁_eq
-
-have hba_cop : Int.gcd b a = 1 := by
-  simpa [Int.gcd_comm] using hab_cop
-
-obtain ⟨r', B', s', hquartic, hnonbase', hsmall_to_B₁⟩ :=
-  descent_even_from_identity_main
-    (r := r) (Bbig := B) (C := B₁) (a := b) (b := a)
-    hr hB hB₁_pos hB_eq_two hB₁_ba hb ha hba_cop hcop hr_odd hnonbase hsym_id
-
-exact ⟨r', B', s', hquartic, hnonbase', lt_trans hsmall_to_B₁ hB₁_natAbs_lt_B⟩
+      nlinarith [ha, hb]
+    have hα_le_B₁ : α ≤ B₁ := le_trans hα_le_b hb_le_B₁
+    have hα_ne_B₁ : α ≠ B₁ := by
+      intro hαB
+      -- Equality forces `a=1` and `β=1`; this is the same strictness argument
+      -- as the odd branch.
+      exact even_strictness_contradiction
+        hnonbase hB_eq hB₁_eq hb_eq hαB hαpos hβpos ha hb hnew_eq
+    have hα_lt_B₁ : α < B₁ := lt_of_le_of_ne hα_le_B₁ hα_ne_B₁
+    exact Int.natAbs_lt_natAbs_of_nonneg_of_lt (le_of_lt hαpos) hα_lt_B₁
 ```
 
-This is the even analogue of the `a ↔ b` swap from the odd branch.
-
-## Full skeleton for the replacement
-
-This is the structure I would put around the old proof:
+The names
 
 ```lean
-import Mathlib
+odd_diff_sq_of_coprime_product_even
+coprime_half_rh
+even_new_base_contradiction
+even_strictness_contradiction
+```
 
-have odd_B_core (hBodd : B % 2 = 1) :
-    ∃ r' B' s' : ℤ,
-      QuarticPlusZ r' B' s' ∧ ¬ BaseZ r' B' ∧ B'.natAbs < B.natAbs := by
-  -- paste old odd-B proof here
-  exact odd_B_descent_already_proved
-    hr hB hcop heq hBodd hr_odd hnonbase
+are the missing even-specific helpers. They are not optional bookkeeping; the listed odd-case helpers do not imply them directly.
 
-by_cases hBodd : B % 2 = 1
-· exact odd_B_core hBodd
-· have hBeven : B % 2 = 0 := by
-    have hnonneg : 0 ≤ B % 2 :=
-      Int.emod_nonneg B (by norm_num : (2 : ℤ) ≠ 0)
-    have hlt : B % 2 < 2 :=
-      Int.emod_lt_of_pos B (by norm_num : (0 : ℤ) < 2)
-    omega
+## Replacement branch once that kernel exists
 
-  let U : ℤ := 2 * r ^ 2 + B ^ 2 - 2 * s
-  let V : ℤ := 2 * r ^ 2 + B ^ 2 + 2 * s
+Once `even_descent_from_factor_main` and the symmetric call are available, the actual even branch should be written as follows. This is the clean proof body to replace your `sorry`.
 
-  obtain ⟨hr_odd_even, hfour_dvd_B, hfour_dvd_U, hfour_dvd_V⟩ :=
-    even_B_props hr hB hcop heq hBeven
+```lean
+  · -- Even B case
+    have ⟨hr_odd, h4B⟩ := even_B_props hBeven hr hB hcop heq
 
-  obtain ⟨B₁, hB_eq_two⟩ : ∃ B₁ : ℤ, B = 2 * B₁ := by
-    rcases hfour_dvd_B with ⟨C, hBC⟩
-    refine ⟨2 * C, ?_⟩
-    nlinarith [hBC]
+    rcases h4B with ⟨k, hkB⟩
+    let B₁ : ℤ := 2 * k
 
-  obtain ⟨M, hU_eq_fourM⟩ : ∃ M : ℤ, U = 4 * M := hfour_dvd_U
-  obtain ⟨N, hV_eq_fourN⟩ : ∃ N : ℤ, V = 4 * N := hfour_dvd_V
+    have hB_eq_two : B = 2 * B₁ := by
+      dsimp [B₁]
+      nlinarith [hkB]
 
-  have hB₁_pos : 0 < B₁ := by
-    nlinarith [hB, hB_eq_two]
+    have hB₁_pos : 0 < B₁ := by
+      dsimp [B₁]
+      nlinarith [hB, hkB]
 
-  have hB₁_natAbs_lt_B : B₁.natAbs < B.natAbs := by
-    have hB₁_lt_B : B₁ < B := by
-      nlinarith [hB₁_pos, hB_eq_two]
-    exact Int.natAbs_lt_natAbs_of_nonneg_of_lt (le_of_lt hB₁_pos) hB₁_lt_B
+    have hB₁_lt_B : B₁.natAbs < B.natAbs := by
+      have hlt : B₁ < B := by
+        nlinarith [hB₁_pos, hB_eq_two]
+      exact Int.natAbs_lt_natAbs_of_nonneg_of_lt (le_of_lt hB₁_pos) hlt
 
-  have hMN : M * N = 5 * B₁ ^ 4 := by
-    have hraw : (4 * M) * (4 * N) = 5 * (2 * B₁) ^ 4 := by
-      simpa [U, V, hU_eq_fourM, hV_eq_fourN, hB_eq_two] using hUV
-    nlinarith [hraw]
+    let U : ℤ := 2 * r ^ 2 + B ^ 2 - 2 * s
+    let V : ℤ := 2 * r ^ 2 + B ^ 2 + 2 * s
 
-  have hMN_sum : M + N = r ^ 2 + 2 * B₁ ^ 2 := by
-    have hsum_raw : U + V = 4 * r ^ 2 + 2 * B ^ 2 := by
+    have hUV : U * V = 5 * B ^ 4 := by
       dsimp [U, V]
-      ring
-    have hsum_raw' : 4 * M + 4 * N = 4 * r ^ 2 + 2 * (2 * B₁) ^ 2 := by
-      simpa [hU_eq_fourM, hV_eq_fourN, hB_eq_two] using hsum_raw
-    nlinarith [hsum_raw']
+      nlinarith [heq]
 
-  have hMN_diff : N - M = s := by
-    have hdiff_raw : V - U = 4 * s := by
-      dsimp [U, V]
-      ring
-    have hdiff_raw' : 4 * N - 4 * M = 4 * s := by
-      simpa [hU_eq_fourM, hV_eq_fourN] using hdiff_raw
-    nlinarith [hdiff_raw']
+    have h4U : 4 ∣ U := by
+      exact four_dvd_U_even hBeven hr_odd h4B heq
 
-  have hMN_cop : Int.gcd M N = 1 := by
-    exact MN_coprime_even
-      hr hB hcop heq hB_eq_two hU_eq_fourM hV_eq_fourN hMN_sum hMN_diff
+    have h4V : 4 ∣ V := by
+      exact four_dvd_V_even hBeven hr_odd h4B heq
 
-  obtain ⟨a, b, ha, hb, hab_cop, hB₁_eq, hfactor⟩ :=
-    coprime_factor_5_fourth hB₁_pos hMN_cop hMN
+    rcases h4U with ⟨M, hU_eq⟩
+    rcases h4V with ⟨N, hV_eq⟩
 
-  rcases hfactor with ⟨hM_eq, hN_eq⟩ | ⟨hM_eq, hN_eq⟩
-  · have hid : r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4 := by
-      calc
-        r ^ 2 = a ^ 4 + 5 * b ^ 4 - 2 * B₁ ^ 2 := by
-          nlinarith [hMN_sum, hM_eq, hN_eq]
-        _ = a ^ 4 + 5 * b ^ 4 - 2 * (a * b) ^ 2 := by
-          rw [hB₁_eq]
-        _ = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4 := by
-          ring
+    have hMN : M * N = 5 * B₁ ^ 4 := by
+      have hraw : (4 * M) * (4 * N) = 5 * (2 * B₁) ^ 4 := by
+        simpa [U, V, hU_eq, hV_eq, hB_eq_two] using hUV
+      nlinarith [hraw]
 
-    obtain ⟨r', B', s', hquartic, hnonbase', hsmall_to_B₁⟩ :=
-      descent_even_from_identity_main
-        (r := r) (Bbig := B) (C := B₁) (a := a) (b := b)
-        hr hB hB₁_pos hB_eq_two hB₁_eq ha hb hab_cop hcop hr_odd_even hnonbase hid
+    have hMN_sum : M + N = r ^ 2 + 2 * B₁ ^ 2 := by
+      have hsum_raw : U + V = 4 * r ^ 2 + 2 * B ^ 2 := by
+        dsimp [U, V]
+        ring
+      have hsum_raw' : 4 * M + 4 * N = 4 * r ^ 2 + 2 * (2 * B₁) ^ 2 := by
+        simpa [hU_eq, hV_eq, hB_eq_two] using hsum_raw
+      nlinarith [hsum_raw']
 
-    exact ⟨r', B', s', hquartic, hnonbase', lt_trans hsmall_to_B₁ hB₁_natAbs_lt_B⟩
+    have hMN_diff : N - M = s := by
+      have hdiff_raw : V - U = 4 * s := by
+        dsimp [U, V]
+        ring
+      have hdiff_raw' : 4 * N - 4 * M = 4 * s := by
+        simpa [hU_eq, hV_eq] using hdiff_raw
+      nlinarith [hdiff_raw']
 
-  · have hsym_id : r ^ 2 = (b ^ 2 - a ^ 2) ^ 2 + 4 * a ^ 4 := by
-      calc
-        r ^ 2 = 5 * a ^ 4 + b ^ 4 - 2 * B₁ ^ 2 := by
-          nlinarith [hMN_sum, hM_eq, hN_eq]
-        _ = 5 * a ^ 4 + b ^ 4 - 2 * (a * b) ^ 2 := by
-          rw [hB₁_eq]
-        _ = (b ^ 2 - a ^ 2) ^ 2 + 4 * a ^ 4 := by
-          ring
+    have hMN_cop : Int.gcd M N = 1 := by
+      exact MN_coprime_even
+        hr hB hcop heq hB_eq_two hU_eq hV_eq hMN_sum hMN_diff
 
-    have hB₁_ba : B₁ = b * a := by
-      simpa [mul_comm] using hB₁_eq
+    obtain ⟨a, b, ha, hb, hab_cop, hB₁_eq, hfactor⟩ :=
+      coprime_factor_5_fourth hMN hMN_cop
 
-    have hba_cop : Int.gcd b a = 1 := by
-      simpa [Int.gcd_comm] using hab_cop
+    rcases hfactor with ⟨hM_eq, hN_eq⟩ | ⟨hM_eq, hN_eq⟩
 
-    obtain ⟨r', B', s', hquartic, hnonbase', hsmall_to_B₁⟩ :=
-      descent_even_from_identity_main
-        (r := r) (Bbig := B) (C := B₁) (a := b) (b := a)
-        hr hB hB₁_pos hB_eq_two hB₁_ba hb ha hba_cop hcop hr_odd_even hnonbase hsym_id
+    · -- M = a^4, N = 5*b^4
+      have hid : r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4 := by
+        calc
+          r ^ 2 = a ^ 4 + 5 * b ^ 4 - 2 * B₁ ^ 2 := by
+            nlinarith [hMN_sum, hM_eq, hN_eq]
+          _ = a ^ 4 + 5 * b ^ 4 - 2 * (a * b) ^ 2 := by
+            rw [hB₁_eq]
+          _ = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4 := by
+            ring
 
-    exact ⟨r', B', s', hquartic, hnonbase', lt_trans hsmall_to_B₁ hB₁_natAbs_lt_B⟩
+      obtain ⟨r', B', s', hq, hnb, hsmall₁⟩ :=
+        even_descent_from_factor_main
+          (r := r) (B := B) (B₁ := B₁) (a := a) (b := b)
+          hr hB hB₁_pos hB_eq_two hB₁_eq ha hb hab_cop hcop hr_odd hnonbase hid
+
+      exact ⟨r', B', s', hq, hnb, lt_trans hsmall₁ hB₁_lt_B⟩
+
+    · -- M = 5*a^4, N = b^4: same kernel with a,b swapped
+      have hid : r ^ 2 = (b ^ 2 - a ^ 2) ^ 2 + 4 * a ^ 4 := by
+        calc
+          r ^ 2 = 5 * a ^ 4 + b ^ 4 - 2 * B₁ ^ 2 := by
+            nlinarith [hMN_sum, hM_eq, hN_eq]
+          _ = 5 * a ^ 4 + b ^ 4 - 2 * (a * b) ^ 2 := by
+            rw [hB₁_eq]
+          _ = (b ^ 2 - a ^ 2) ^ 2 + 4 * a ^ 4 := by
+            ring
+
+      have hB₁_ba : B₁ = b * a := by
+        simpa [mul_comm] using hB₁_eq
+
+      have hba_cop : Int.gcd b a = 1 := by
+        simpa [Int.gcd_comm] using hab_cop
+
+      obtain ⟨r', B', s', hq, hnb, hsmall₁⟩ :=
+        even_descent_from_factor_main
+          (r := r) (B := B) (B₁ := B₁) (a := b) (b := a)
+          hr hB hB₁_pos hB_eq_two hB₁_ba hb ha hba_cop hcop hr_odd hnonbase hid
+
+      exact ⟨r', B', s', hq, hnb, lt_trans hsmall₁ hB₁_lt_B⟩
 ```
 
-## Bottom line
+## Minimal actionable conclusion
 
-Use **option 1**, but the extraction boundary should be:
+The current `sorry` cannot be closed by simply inserting the old odd-B 230-line proof after `M,N`, because the old proof uses
 
 ```lean
-coprime factor pair  →  fourth-power split  →  normalized identity  →  descent core
+r ^ 2 = h ^ 2 + b ^ 4
 ```
 
-not “odd case theorem with `hBodd` removed.”
-
-The even branch builds a smaller solution through `B₁`, then finishes by transitivity:
+whereas the even case gives
 
 ```lean
-B'.natAbs < B₁.natAbs < B.natAbs
+r ^ 2 = h ^ 2 + 4 * b ^ 4.
 ```
 
-That is the cleanest Lean architecture and avoids duplicating the full odd-case proof.
+The minimal fix is to add `even_descent_from_factor_main` plus the half-factor coprimality lemma, then the branch body above is the right Lean architecture.
