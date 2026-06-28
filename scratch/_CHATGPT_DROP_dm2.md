@@ -1,208 +1,298 @@
-# Q1892 (dm2): `dm3`
-
-## Interpretation
-
-The prompt payload after the colon is only:
-
-```text
-dm3
-```
-
-I could not find an issue `#1892`, an issue search hit for `Q1892 dm3`, or a code search hit for `Q1892 dm3` in `xiangyazi24/FLT`.  The only concrete `dm3` artifact available on the `scratch` branch is:
-
-```text
-scratch/_CHATGPT_DROP_dm3.md
-```
-
-So I interpret this Q1892 drop as a request to surface the existing dm3 response into the dm2 drop file.  The useful mathematical/Lean content is reproduced below.  If Q1892 was meant to refer to a different failing goal, then the actual theorem statement or file/line range is still missing.
+# Q1910 (dm2): Kubert-style \(N=12\), \(N=14\), and the square-obstruction curves
 
 ## Executive answer
 
-For the first helper, the `nlinarith` proof is correct, except the theorem statement needs `s` quantified.
+For \(N=12\), yes, there is a direct analogue of your \(N=10\) polynomial pair:
 
-For the coprimality helper, use the same `IsRelPrime` / prime-divisor pattern as `UV_coprime`.  The proof is shorter here:
+\[
+A_{12}(t)=2(3t^8+24t^6+6t^4-1),
+\]
 
-* a common prime divisor of `r - h` and `r + h` divides `2r` and `2h`;
-* the `p = 2` case contradicts `r % 2 = 1` and `h % 2 = 0`;
-* hence `p ∣ r` and `p ∣ h`;
-* from `r^2 = h^2 + b^4`, get `p ∣ b^4`, hence `p ∣ b`;
-* contradiction with `Int.gcd r b = 1`.
+\[
+B_{12}(t)=(t^2-1)^6(1+3t^2)^2.
+\]
 
-The second factorization lemma should be just a wrapper around the project-local `pos_fourth_of_coprime_mul_fourth` after you have `coprime_rh`.  I still did not find that lemma by connector search in `xiangyazi24/FLT`, so I give the wrapper pattern below rather than pretending to know its exact argument order.
+The factorization is:
 
-## Lean code
+\[
+A_{12}(t)^2-4B_{12}(t)
+=256t^6(t^2+1)^3(3t^2-1).
+\]
 
-```lean
-import Mathlib.RingTheory.Int.Basic
-import Mathlib.Data.Int.GCD
-import Mathlib.Data.Int.ModEq
-import Mathlib.Tactic
+For \(N=14\), the request as stated has a trap: there is **no single genus-zero one-variable polynomial pair**
 
-namespace FLT.DM3
+\[
+A_{14}(t),B_{14}(t)\in \mathbb Q[t]
+\]
 
-lemma two_dvd_of_emod_eq_zero {z : ℤ} (hz : z % 2 = 0) :
-    (2 : ℤ) ∣ z := by
-  exact Int.modEq_zero_iff_dvd.mp
-    (by simpa [Int.ModEq, hz] : z ≡ 0 [ZMOD (2 : ℤ)])
+analogous to \(N=10\) and \(N=12\).  The modular curve \(X_1(14)\) has genus \(1\), not genus \(0\), and \(X_1(2,14)\) has genus \(4\).  So a one-parameter Kubert family over \(\mathbb Q(t)\) would be a nonconstant map \(\mathbb P^1\to X_1(14)\), which is impossible in characteristic zero.
 
-lemma not_two_dvd_of_emod_eq_one {z : ℤ} (hz : z % 2 = 1) :
-    ¬ (2 : ℤ) ∣ z := by
-  intro h
-  have h0 : z % 2 = 0 := by
-    simpa [Int.ModEq] using
-      (Int.modEq_zero_iff_dvd.mpr h : z ≡ 0 [ZMOD (2 : ℤ)])
-  rw [hz] at h0
-  norm_num at h0
+What you *can* write explicitly is the order-14 family over the coordinate ring of \(X_1(14)\).  Let
 
-/--
-The algebraic identity after the first coprime factorization branch
-`U = a^4`, `V = 5*b^4`.
+\[
+z^2=1-2u+u^2+4u^3.
+\]
 
-This is pure algebra.  The variable `s` must be included in the binders.
--/
-theorem descent_identity {r a b s : ℤ}
-    (hU : 2 * r ^ 2 + (a * b) ^ 2 - 2 * s = a ^ 4)
-    (hV : 2 * r ^ 2 + (a * b) ^ 2 + 2 * s = 5 * b ^ 4) :
-    4 * r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4 := by
-  nlinarith [hU, hV]
+Then the \(x^3+Ax^2+Bx\) model is:
 
-/--
-Coprimality of `r-h` and `r+h` in the second factorization step.
+\[
+\begin{aligned}
+A_{14}(u,z)=&-2(1-4u+2u^2+10u^3-18u^4-10u^6+2u^7+u^8)\\
+&+4u^2(1-4u-2u^3+u^4)z,
+\end{aligned}
+\]
 
-Use this before applying the fourth-power factorization lemma to
-`(r-h) * (r+h) = b^4`.
--/
-theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
-    (hcop_rb : Int.gcd r b = 1) (heq : r ^ 2 = h ^ 2 + b ^ 4) :
-    Int.gcd (r - h) (r + h) = 1 := by
-  classical
+\[
+\begin{aligned}
+B_{14}(u,z)=&(1-u)^7(1+u)^3\\
+&\cdot\Big((1+u)(1-5u+6u^2+6u^3-23u^4-u^5)\\
+&\qquad\qquad-4u^2(1-4u-u^2)z\Big).
+\end{aligned}
+\]
 
-  let U : ℤ := r - h
-  let V : ℤ := r + h
-  change Int.gcd U V = 1
+Modulo the relation \(z^2=1-2u+u^2+4u^3\), the discriminant obstruction factor is:
 
-  have h2h : (2 : ℤ) ∣ h := two_dvd_of_emod_eq_zero hh_even
+\[
+\begin{aligned}
+A_{14}(u,z)^2-4B_{14}(u,z)
+=128u^7\Big(& (u^4+5u^3-19u^2+7u-2)z\\
+&-9u^5+12u^4+26u^3-20u^2+7u\Big).
+\end{aligned}
+\]
 
-  have hcopI : IsCoprime r b := by
-    apply Int.isCoprime_iff_nat_coprime.mpr
-    rw [Nat.coprime_iff_gcd_eq_one]
-    simpa [Int.gcd_def] using hcop_rb
+Changing the sign of \(z\) gives the conjugate family.
 
-  have hrel : IsRelPrime U V := by
-    intro d hdU hdV
-    by_contra hd_not_unit
+## Answers to the specific obstruction-curve questions
 
-    have hd_nat_ne_one : d.natAbs ≠ 1 := by
-      intro hdabs
-      exact hd_not_unit (Int.isUnit_iff_natAbs_eq.mpr hdabs)
+### \(N=12\)
 
-    obtain ⟨p, hp, hpd_nat⟩ := Nat.exists_prime_and_dvd hd_nat_ne_one
-    have hpd : (p : ℤ) ∣ d := Int.natCast_dvd.mpr hpd_nat
-    have hpU : (p : ℤ) ∣ U := hpd.trans hdU
-    have hpV : (p : ℤ) ∣ V := hpd.trans hdV
+Your proposed curve
 
-    have hp_ne_two : p ≠ 2 := by
-      intro hp2
-      subst p
-      have h2r : (2 : ℤ) ∣ r := by
-        have h2Uh : (2 : ℤ) ∣ U + h := dvd_add hpU h2h
-        convert h2Uh using 1
-        ring_nf [U]
-      exact (not_two_dvd_of_emod_eq_one hr_odd) h2r
+\[
+w^2=u^3-u^2-4u+4
+\]
 
-    have hpr : (p : ℤ) ∣ r := by
-      have hp2r0 : (p : ℤ) ∣ U + V := dvd_add hpU hpV
-      have hp2r : (p : ℤ) ∣ 2 * r := by
-        convert hp2r0 using 1
-        ring_nf [U, V]
-      rcases Int.Prime.dvd_mul' hp hp2r with hp_dvd_two | hpr
-      · have hp_dvd_two_nat : p ∣ (2 : ℕ) := by
-          exact_mod_cast hp_dvd_two
-        have hple2 : p ≤ 2 := Nat.le_of_dvd (by norm_num) hp_dvd_two_nat
-        exact (hp_ne_two (le_antisymm hple2 hp.two_le)).elim
-      · exact hpr
+is correct as a Weierstrass model for the \(N=12\) square obstruction.
 
-    have hph : (p : ℤ) ∣ h := by
-      have hp2h0 : (p : ℤ) ∣ V - U := dvd_sub hpV hpU
-      have hp2h : (p : ℤ) ∣ 2 * h := by
-        convert hp2h0 using 1
-        ring_nf [U, V]
-      rcases Int.Prime.dvd_mul' hp hp2h with hp_dvd_two | hph
-      · have hp_dvd_two_nat : p ∣ (2 : ℕ) := by
-          exact_mod_cast hp_dvd_two
-        have hple2 : p ≤ 2 := Nat.le_of_dvd (by norm_num) hp_dvd_two_nat
-        exact (hp_ne_two (le_antisymm hple2 hp.two_le)).elim
-      · exact hph
+From
 
-    have hpb4 : (p : ℤ) ∣ b ^ 4 := by
-      have hpr2 : (p : ℤ) ∣ r ^ 2 := pow_dvd_pow hpr 2
-      have hph2 : (p : ℤ) ∣ h ^ 2 := pow_dvd_pow hph 2
-      have hdiff_dvd : (p : ℤ) ∣ r ^ 2 - h ^ 2 := dvd_sub hpr2 hph2
-      have hdiff : r ^ 2 - h ^ 2 = b ^ 4 := by
-        nlinarith [heq]
-      simpa [hdiff] using hdiff_dvd
+\[
+A_{12}(t)^2-4B_{12}(t)=256t^6(t^2+1)^3(3t^2-1),
+\]
 
-    have hpb : (p : ℤ) ∣ b := Int.Prime.dvd_pow' hp hpb4
-    have hunitp : IsUnit (p : ℤ) := hcopI.isUnit_of_dvd' hpr hpb
-    exact (Nat.prime_iff_prime_int.mp hp).not_unit hunitp
+remove the obvious square
 
-  have hcopUV : IsCoprime U V := isRelPrime_iff_isCoprime.mp hrel
-  have hcopUV_nat : Nat.Coprime U.natAbs V.natAbs :=
-    Int.isCoprime_iff_nat_coprime.mp hcopUV
-  simpa [Int.gcd_def, Nat.coprime_iff_gcd_eq_one] using hcopUV_nat
+\[
+(16t^3(t^2+1))^2.
+\]
 
-end FLT.DM3
-```
+The remaining square condition is
 
-## Second factorization wrapper
+\[
+q^2=(t^2+1)(3t^2-1).
+\]
 
-Once the project-local fourth-power lemma is imported, the wrapper should have this shape:
+Set
+
+\[
+u=3t^2+1,\qquad w=3tq.
+\]
+
+Then
+
+\[
+w^2=u^3-u^2-4u+4.
+\]
+
+So the \(N=12\) obstruction curve is exactly the curve you wrote, up to this explicit birational change of variables.
+
+### \(N=14\)
+
+The proposed curve
+
+\[
+w^2=u^3+u^2-2u
+\]
+
+is **not** the direct analogue of the \(N=10\) or \(N=12\) discriminant-square obstruction coming from a genus-zero Kubert polynomial pair \(A_{14}(t),B_{14}(t)\), because such a pair does not exist.
+
+The actual order-14 base curve \(X_1(14)\) is genus \(1\).  A common model is the Tate/Rabarison model
+
+\[
+w^2+uw+w=u^3-u,
+\]
+
+equivalently after completing the square,
+
+\[
+z^2=4u^3+u^2-2u+1.
+\]
+
+The full \(2\)-torsion plus \(14\)-torsion modular curve is \(X_1(2,14)\), and it is genus \(4\).  One explicit bidegree-\((3,3)\) model is
+
+\[
+(u^3+u^2-2u-1)v(v+1)+(v^3+v^2-2v-1)u(u+1)=0.
+\]
+
+Thus the elliptic curve \(w^2=u^3+u^2-2u\) may be a useful auxiliary curve in some quotient or quartic calculation, but it is not the full \(N=14\) square-obstruction curve in the same sense as \(N=10\) and \(N=12\).
+
+## Which quartic is which?
+
+The quartic
+
+\[
+s^4+d^2s^2-d^4=t^2
+\]
+
+corresponds to \(N=10\), not \(N=12\) and not \(N=14\).
+
+Indeed, for \(d\neq0\), set
+
+\[
+U=\frac{s^2}{d^2},\qquad W=\frac{st}{d^3}.
+\]
+
+Then
+
+\[
+t^2=s^4+d^2s^2-d^4
+\]
+
+is equivalent to
+
+\[
+W^2=U^3+U^2-U,
+\]
+
+which is exactly your \(N=10\) obstruction curve.
+
+The analogous quartic for the cubic
+
+\[
+W^2=U^3+U^2-2U
+\]
+
+would instead be
+
+\[
+s^4+d^2s^2-2d^4=t^2.
+\]
+
+For \(N=12\), the square condition is better kept as
+
+\[
+q^2=(t^2+1)(3t^2-1),
+\]
+
+with
+
+\[
+u=3t^2+1,\qquad w=3tq,
+\]
+
+which gives
+
+\[
+w^2=u^3-u^2-4u+4.
+\]
+
+## Ring-verification snippets
+
+These are deliberately written as elementary polynomial identities.
 
 ```lean
 import Mathlib
 
-namespace FLT.DM3
+namespace KubertParamCheck
 
-/-- Expected project-local theorem shape.  Do not duplicate this if it already exists. -/
--- theorem pos_fourth_of_coprime_mul_fourth
---     {x y z : ℤ} (hx : 0 < x) (hy : 0 < y)
---     (hcop : Int.gcd x y = 1) (hmul : x * y = z ^ 4) :
---     ∃ α β : ℤ,
---       0 < α ∧ 0 < β ∧ x = α ^ 4 ∧ y = β ^ 4 ∧ z = α * β := ...
+def A12 (t : ℤ) : ℤ :=
+  2 * (3 * t ^ 8 + 24 * t ^ 6 + 6 * t ^ 4 - 1)
 
-theorem rh_fourth_factorization
-    {r h b : ℤ}
-    (hpos_left : 0 < r - h) (hpos_right : 0 < r + h)
-    (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
-    (hcop_rb : Int.gcd r b = 1)
-    (heq_sq : r ^ 2 = h ^ 2 + b ^ 4)
-    (hmul : (r - h) * (r + h) = b ^ 4) :
-    ∃ α β : ℤ,
-      0 < α ∧ 0 < β ∧
-      r - h = α ^ 4 ∧ r + h = β ^ 4 ∧ b = α * β := by
-  have hcop : Int.gcd (r - h) (r + h) = 1 :=
-    coprime_rh hr_odd hh_even hcop_rb heq_sq
-  exact pos_fourth_of_coprime_mul_fourth
-    hpos_left hpos_right hcop hmul
+def B12 (t : ℤ) : ℤ :=
+  (t ^ 2 - 1) ^ 6 * (1 + 3 * t ^ 2) ^ 2
 
-end FLT.DM3
+example (t : ℤ) :
+    A12 t ^ 2 - 4 * B12 t =
+      256 * t ^ 6 * (t ^ 2 + 1) ^ 3 * (3 * t ^ 2 - 1) := by
+  unfold A12 B12
+  ring
+
+example (t q : ℤ)
+    (hq : q ^ 2 = (t ^ 2 + 1) * (3 * t ^ 2 - 1)) :
+    (3 * t * q) ^ 2 =
+      (3 * t ^ 2 + 1) ^ 3 -
+      (3 * t ^ 2 + 1) ^ 2 -
+      4 * (3 * t ^ 2 + 1) + 4 := by
+  rw [show (3 * t * q) ^ 2 = 9 * t ^ 2 * q ^ 2 by ring]
+  rw [hq]
+  ring
+
+/-- Order-14 coordinate-ring version. -/
+def A14 (u z : ℤ) : ℤ :=
+  -2 * (1 - 4 * u + 2 * u ^ 2 + 10 * u ^ 3 - 18 * u ^ 4 -
+      10 * u ^ 6 + 2 * u ^ 7 + u ^ 8) +
+    4 * u ^ 2 * (1 - 4 * u - 2 * u ^ 3 + u ^ 4) * z
+
+def B14 (u z : ℤ) : ℤ :=
+  (1 - u) ^ 7 * (1 + u) ^ 3 *
+    ((1 + u) * (1 - 5 * u + 6 * u ^ 2 + 6 * u ^ 3 -
+        23 * u ^ 4 - u ^ 5) -
+      4 * u ^ 2 * (1 - 4 * u - u ^ 2) * z)
+
+def D14red (u z : ℤ) : ℤ :=
+  128 * u ^ 7 *
+    ((u ^ 4 + 5 * u ^ 3 - 19 * u ^ 2 + 7 * u - 2) * z -
+      9 * u ^ 5 + 12 * u ^ 4 + 26 * u ^ 3 -
+      20 * u ^ 2 + 7 * u)
+
+example (u z : ℤ)
+    (hz : z ^ 2 = 1 - 2 * u + u ^ 2 + 4 * u ^ 3) :
+    A14 u z ^ 2 - 4 * B14 u z = D14red u z := by
+  have hdiff :
+      A14 u z ^ 2 - 4 * B14 u z - D14red u z =
+        16 * u ^ 4 * (u ^ 4 - 2 * u ^ 3 - 4 * u + 1) ^ 2 *
+          (z ^ 2 - (1 - 2 * u + u ^ 2 + 4 * u ^ 3)) := by
+    unfold A14 B14 D14red
+    ring
+  have hzero : z ^ 2 - (1 - 2 * u + u ^ 2 + 4 * u ^ 3) = 0 := by
+    rw [hz]
+    ring
+  have hmain : A14 u z ^ 2 - 4 * B14 u z - D14red u z = 0 := by
+    rw [hdiff, hzero]
+    ring
+  exact sub_eq_zero.mp hmain
+
+/-- The quartic with coefficient `-d^4` is the N=10 obstruction. -/
+example (s d T : ℤ)
+    (hT : T ^ 2 = s ^ 4 + d ^ 2 * s ^ 2 - d ^ 4) :
+    (s * T) ^ 2 = s ^ 2 * (s ^ 4 + d ^ 2 * s ^ 2 - d ^ 4) := by
+  rw [hT]
+  ring
+
+/-- The coefficient `-2*d^4` gives the cubic `U^3 + U^2 - 2U` after scaling. -/
+example (s d T : ℤ)
+    (hT : T ^ 2 = s ^ 4 + d ^ 2 * s ^ 2 - 2 * d ^ 4) :
+    (s * T) ^ 2 = s ^ 2 * (s ^ 4 + d ^ 2 * s ^ 2 - 2 * d ^ 4) := by
+  rw [hT]
+  ring
+
+end KubertParamCheck
 ```
 
-If `pos_fourth_of_coprime_mul_fourth` uses `Nat` variables or returns `|b| = αβ` instead of `b = αβ`, keep `coprime_rh` unchanged and only adjust the wrapper’s casts/sign conclusion.  The gcd helper is independent of the positivity hypotheses.
+## Bottom line
 
-## If `nlinarith` does not close `descent_identity`
+Use:
 
-It should close directly.  If local normalization is weaker in the file context, use:
+```text
+N=10:  A10^2 - 4 B10 = 256 t^5 (t^2+t-1)
+       obstruction: W^2 = U^3 + U^2 - U
+       quartic: s^4 + d^2 s^2 - d^4 = t^2
 
-```lean
-import Mathlib
+N=12:  A12^2 - 4 B12 = 256 t^6 (t^2+1)^3 (3t^2-1)
+       obstruction: W^2 = U^3 - U^2 - 4U + 4
+       quartic form: q^2 = (t^2+1)(3t^2-1), with U=3t^2+1, W=3tq
 
-example {r a b s : ℤ}
-    (hU : 2 * r ^ 2 + (a * b) ^ 2 - 2 * s = a ^ 4)
-    (hV : 2 * r ^ 2 + (a * b) ^ 2 + 2 * s = 5 * b ^ 4) :
-    4 * r ^ 2 = (a ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4 := by
-  ring_nf at hU hV ⊢
-  nlinarith [hU, hV]
+N=14:  no genus-zero A14(t),B14(t) pair exists.
+       use the X1(14) coordinate-ring pair A14(u,z), B14(u,z), z^2=1-2u+u^2+4u^3.
+       full X1(2,14) is genus 4, not the elliptic curve W^2=U^3+U^2-2U.
 ```
-
-The identity is exactly the sum of the two factor equations followed by expanding `(a^2-b^2)^2`.
