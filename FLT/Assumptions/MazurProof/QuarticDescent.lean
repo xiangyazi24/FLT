@@ -434,7 +434,7 @@ theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
 
 /-! ## Descent step (the hard core) -/
 
-set_option maxHeartbeats 3200000 in
+set_option maxHeartbeats 6400000 in
 /-- From a non-base solution, produce a strictly smaller non-base solution. -/
 theorem quartic_plus_descent_step :
     ∀ {r B s : ℤ}, QuarticPlusZ r B s → ¬ BaseZ r B →
