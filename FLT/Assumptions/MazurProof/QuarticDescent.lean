@@ -490,7 +490,7 @@ theorem quartic_plus_descent_step :
           (2*(2*j+1)^2+(4*k)^2-2*s) * (4*N - (2*(2*j+1)^2+(4*k)^2+2*s)) +
           (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := by ring
       have h_rhs : 5 * (4*k)^4 = 16 * (5 * B₁^4) := by rw [hB₁_val]; ring
-      linarith [hp1, hp2, hUV, h_ring, h_rhs]
+      omega
     -- M, N > 0
     have hMpos : 0 < M := by
       by_contra hle; push_neg at hle
