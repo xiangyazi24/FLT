@@ -1,208 +1,249 @@
-# Q1914 (dm3): Weil-pairing bridge for full rational `m`-torsion
+# Q1936 (dm3): N=12 Kubert square obstruction curve
 
-## Short answer
+## Executive answer
 
-I do **not** find usable Mathlib infrastructure for the Weil pairing on elliptic curves.
-
-What Mathlib does have is adjacent infrastructure:
-
-* `Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point`: nonsingular affine points and their abelian group law;
-* `Mathlib.AlgebraicGeometry.EllipticCurve.Jacobian.Formula`: explicit Jacobian-coordinate negation/doubling/addition formulae;
-* `Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic`: division polynomials `ψₙ`, `φₙ`, etc.;
-* `Mathlib.RingTheory.RootsOfUnity.*` and `Mathlib.NumberTheory.Cyclotomic.*`: `IsPrimitiveRoot`, roots of unity, and cyclotomic material.
-
-I found no direct declaration/file for `WeilPairing`, `weilPairing`, or “Weil pairing” in Mathlib code search.  The lowercase `weil` hits I found are unrelated to elliptic-curve Weil pairing.  So the cleanest formalization path is **not** to axiomatize Mazur’s conclusion, but to axiomatize exactly the missing Weil-pairing consequence:
+For the curve
 
 ```text
-full rational m-torsion on E/Q, with m ≥ 3,
-implies the existence of ζ : ℚ with IsPrimitiveRoot ζ m.
+E12 : w^2 = u^3 - u^2 - 4*u + 4,
 ```
 
-Then your already-proved
+the LMFDB label is
 
-```lean
-isPrimitiveRoot_rat_order_le_two
+```text
+24.a1
 ```
 
-closes the desired theorem immediately.
+Equivalently, its Cremona label is `24a1`.  In Cremona/ecdata notation the entry is conductor `24`, isogeny class `A`, curve number `1`, with Weierstrass coefficients
 
-## Recommended axiom boundary
-
-Do **not** axiomatize a vague statement like “`μ_m` is in `ℚ*`” unless you have already built a `μ_m` subgroup API.  In Lean, the most useful target is simply:
-
-```lean
-∃ ζ : ℚ, IsPrimitiveRoot ζ m
+```text
+[0, -1, 0, -4, 4]
 ```
 
-This is exactly what your rational-roots-of-unity lemma consumes.  It is also the narrowest replacement point: when someone later formalizes the Weil pairing, only this one bridge axiom needs to be replaced.
+and rank `0`, torsion order `8`.
 
-I would include the hypothesis `3 ≤ m` in the bridge axiom.  Mathematically the Weil-pairing consequence works for positive `m`, but the proof of `m ≤ 2` only needs the bad case `m ≥ 3`; putting `3 ≤ m` in the axiom avoids uninteresting edge cases around `m = 0, 1, 2` and keeps the axiom minimal for the Mazur exclusion step.
+The Mordell-Weil group over `ℚ` is
 
-## Drop-in Lean scaffold
+```text
+E12(ℚ) ≃ ℤ/4ℤ × ℤ/2ℤ
+```
 
-This is intentionally generic in the elliptic-curve type and in the “full rational torsion” predicate, because your project’s actual definitions for elliptic curves over `ℚ` and `E[m](ℚ) = (ZMod m)^2` will determine those names.
+or equivalently `ℤ/2ℤ × ℤ/4ℤ`.  It is rank `0`.
+
+The affine rational points are exactly
+
+```text
+(-2, 0),
+( 1, 0),
+( 2, 0),
+( 0, 2),
+( 0,-2),
+( 4, 6),
+( 4,-6).
+```
+
+Together with the point at infinity `O`, this gives all eight rational points.
+
+## Why this is the right curve label
+
+The curve is already in generalized Weierstrass form
+
+```text
+y^2 = x^3 + a2*x^2 + a4*x + a6
+```
+
+with
+
+```text
+a1 = 0,
+a2 = -1,
+a3 = 0,
+a4 = -4,
+a6 = 4.
+```
+
+So its `a`-invariants are
+
+```text
+[0, -1, 0, -4, 4].
+```
+
+The Cremona/ecdata entry for `[0,-1,0,-4,4]` is
+
+```text
+24 A 1 [0,-1,0,-4,4] rank 0 torsion 8
+```
+
+which corresponds to LMFDB label `24.a1`.
+
+## Factorization and torsion structure
+
+The cubic factors as
+
+```text
+u^3 - u^2 - 4*u + 4 = (u - 1) * (u - 2) * (u + 2).
+```
+
+Therefore the three nonzero rational `2`-torsion points are
+
+```text
+(-2, 0), (1, 0), (2, 0).
+```
+
+There are also rational points
+
+```text
+P  = (0, 2),
+-P = (0,-2),
+Q  = (4, 6),
+-Q = (4,-6).
+```
+
+Using the group law on
+
+```text
+y^2 = x^3 - x^2 - 4*x + 4,
+```
+
+one has
+
+```text
+2*(0, 2) = (2, 0),
+```
+
+so `(0,2)` has order `4`.  Since the curve has full rational `2`-torsion and a point of order `4`, the torsion subgroup contains `ℤ/4ℤ × ℤ/2ℤ`, which has order `8`.  The database entry says the torsion order is exactly `8`, so the torsion subgroup is precisely
+
+```text
+E12(ℚ)_tors ≃ ℤ/4ℤ × ℤ/2ℤ.
+```
+
+Since the rank is `0`, this is the whole Mordell-Weil group.
+
+## Relation to the Kubert square obstruction
+
+Starting from
+
+```text
+q^2 = (t^2 + 1) * (3*t^2 - 1),
+```
+
+set
+
+```text
+u = 3*t^2 + 1,
+w = 3*t*q.
+```
+
+Then
+
+```text
+w^2 = 9*t^2*q^2
+    = 9*t^2*(t^2 + 1)*(3*t^2 - 1)
+    = (3*t^2 + 1)^3 - (3*t^2 + 1)^2 - 4*(3*t^2 + 1) + 4
+    = u^3 - u^2 - 4*u + 4.
+```
+
+Equivalently,
+
+```text
+u^3 - u^2 - 4*u + 4 = (u - 1)*(u - 2)*(u + 2)
+```
+
+and, under `u = 3*t^2 + 1`, this becomes
+
+```text
+(3*t^2)*(3*t^2 - 1)*(3*t^2 + 3)
+  = 9*t^2*(3*t^2 - 1)*(t^2 + 1).
+```
+
+So the substitution is exactly the advertised genus-one obstruction map.
+
+## Lift back to `(t,q)`
+
+The rational points on `E12` have `u`-coordinates
+
+```text
+-2, 0, 1, 2, 4.
+```
+
+For points coming from the square obstruction, one must also have
+
+```text
+u = 3*t^2 + 1.
+```
+
+Checking the listed rational points:
+
+* `u = -2` gives `t^2 = -1`, impossible over `ℚ`.
+* `u = 0` gives `t^2 = -1/3`, impossible over `ℚ`.
+* `u = 1` gives `t = 0`, but the original equation gives `q^2 = -1`, impossible over `ℚ`.
+* `u = 2` gives `t^2 = 1/3`, impossible over `ℚ`.
+* `u = 4` gives `t^2 = 1`, and the original equation gives `q^2 = 4`.
+
+Thus the only rational solutions to the square obstruction itself are the obvious finite set
+
+```text
+t =  1, q =  2,
+t =  1, q = -2,
+t = -1, q =  2,
+t = -1, q = -2.
+```
+
+These map to the two elliptic-curve points `(u,w) = (4,6)` and `(4,-6)`, depending on the sign of `t*q`.  In the Kubert parametrization these should be checked against the usual excluded/cuspidal/degenerate parameter values.  In particular, one should not state that the square obstruction has no rational solutions without those exclusions: it has the four solutions above.
+
+## Is rank zero plus torsion enough for Lean?
+
+Mathematically, yes.  The same strategy as the `N = 10` use of `20.a4` works here:
+
+1. identify the obstruction curve as `24.a1`;
+2. use the rank computation `rank E12(ℚ) = 0`;
+3. use the torsion computation `E12(ℚ)_tors ≃ ℤ/4ℤ × ℤ/2ℤ`;
+4. exhibit the eight points listed above;
+5. conclude that there are no other rational points.
+
+For Lean 4, however, the database statement is not itself a proof unless it is imported as a trusted theorem/certificate.  The formal theorem you want downstream is more like:
+
+```text
+Every rational point on w^2 = u^3 - u^2 - 4*u + 4 is one of
+O, (-2,0), (1,0), (2,0), (0,±2), (4,±6).
+```
+
+Once that theorem is available, the obstruction argument is just a finite case split on the eight points, plus the equations `u = 3*t^2 + 1` and `w = 3*t*q`.
+
+A practical Lean architecture is therefore:
 
 ```lean
 import Mathlib
 
-namespace MazurTorsionBridge
+/-- The N=12 obstruction curve RHS. -/
+def E12RHS (u : ℚ) : ℚ := u ^ 3 - u ^ 2 - 4 * u + 4
 
-/--
-Replace `ECQ` by your actual type of elliptic curves over `ℚ`, and replace
-`FullRationalMTorsion E m` by your actual predicate saying that all `m`-torsion
-is rational, equivalently that `E[m](ℚ)` is isomorphic to `(ZMod m) × (ZMod m)`.
+example : E12RHS (-2) = 0 := by norm_num [E12RHS]
+example : E12RHS (1) = 0 := by norm_num [E12RHS]
+example : E12RHS (2) = 0 := by norm_num [E12RHS]
+example : E12RHS 0 = 2 ^ 2 := by norm_num [E12RHS]
+example : E12RHS 0 = (-2) ^ 2 := by norm_num [E12RHS]
+example : E12RHS 4 = 6 ^ 2 := by norm_num [E12RHS]
+example : E12RHS 4 = (-6) ^ 2 := by norm_num [E12RHS]
 
-This is the one missing Weil-pairing bridge:
-if full `m`-torsion is rational over `ℚ`, then the Weil pairing on a rational
-basis gives a primitive `m`-th root of unity in `ℚ`.
--/
-axiom full_rational_m_torsion_gives_primitive_root
-    {ECQ : Type*} {FullRationalMTorsion : ECQ → ℕ → Prop}
-    {E : ECQ} {m : ℕ}
-    (hm : 3 ≤ m)
-    (hfull : FullRationalMTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-
-/--
-Pure Lean wrapper: the only mathematical input is the bridge axiom above plus
-the already-proved fact that `ℚ` has no primitive roots of unity of order `> 2`.
-
-The argument is by contradiction.  If `m` is not `≤ 2`, then `3 ≤ m`; the
-bridge axiom gives a primitive rational `m`-th root, and the rational-root lemma
-forces `m ≤ 2`, contradiction.
--/
-theorem full_rational_m_torsion_order_le_two_core
-    {ECQ : Type*} {FullRationalMTorsion : ECQ → ℕ → Prop}
-    {E : ECQ} {m : ℕ}
-    (rat_no_primitive_roots :
-      ∀ {ζ : ℚ} {n : ℕ}, IsPrimitiveRoot ζ n → n ≤ 2)
-    (hfull : FullRationalMTorsion E m) :
-    m ≤ 2 := by
-  by_contra hnot
-  have hm : 3 ≤ m := by omega
-  rcases full_rational_m_torsion_gives_primitive_root
-      (E := E) (m := m) hm hfull with ⟨ζ, hζ⟩
-  have hm_le_two : m ≤ 2 := rat_no_primitive_roots hζ
-  omega
-
-end MazurTorsionBridge
+example {t q : ℚ}
+    (hq : q ^ 2 = (t ^ 2 + 1) * (3 * t ^ 2 - 1)) :
+    (3 * t * q) ^ 2 =
+      (3 * t ^ 2 + 1) ^ 3 - (3 * t ^ 2 + 1) ^ 2 -
+        4 * (3 * t ^ 2 + 1) + 4 := by
+  ring_nf at hq ⊢
+  nlinarith [hq]
 ```
 
-## Version using your existing lemma name
-
-Once your theorem
+Then either prove or import a certificate theorem with the shape:
 
 ```lean
-isPrimitiveRoot_rat_order_le_two
+-- Schematic, not using a particular project-local point type.
+-- theorem E12_rat_points_complete (P : E12.Point ℚ) :
+--   P = O ∨
+--   P = affine (-2) 0 ∨ P = affine 1 0 ∨ P = affine 2 0 ∨
+--   P = affine 0 2 ∨ P = affine 0 (-2) ∨
+--   P = affine 4 6 ∨ P = affine 4 (-6) := ...
 ```
 
-is imported, the final theorem should be this small.  Adjust only the names of `ECQ` and `FullRationalMTorsion` to match your codebase.
-
-```lean
-import Mathlib
-
-namespace MazurTorsionBridge
-
--- Existing in your development:
--- theorem isPrimitiveRoot_rat_order_le_two
---     {ζ : ℚ} {m : ℕ} (hζ : IsPrimitiveRoot ζ m) : m ≤ 2 := ...
-
-axiom full_rational_m_torsion_gives_primitive_root
-    {ECQ : Type*} {FullRationalMTorsion : ECQ → ℕ → Prop}
-    {E : ECQ} {m : ℕ}
-    (hm : 3 ≤ m)
-    (hfull : FullRationalMTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-
-theorem full_rational_m_torsion_order_le_two
-    {ECQ : Type*} {FullRationalMTorsion : ECQ → ℕ → Prop}
-    {E : ECQ} {m : ℕ}
-    (hfull : FullRationalMTorsion E m) :
-    m ≤ 2 := by
-  exact full_rational_m_torsion_order_le_two_core
-    (E := E) (m := m)
-    (rat_no_primitive_roots := fun {ζ : ℚ} {n : ℕ} hζ =>
-      isPrimitiveRoot_rat_order_le_two hζ)
-    hfull
-
-end MazurTorsionBridge
-```
-
-If your lemma is stated with the order argument first, for example
-
-```lean
-isPrimitiveRoot_rat_order_le_two (m := n) hζ
-```
-
-then only the lambda body changes:
-
-```lean
-(rat_no_primitive_roots := fun {ζ : ℚ} {n : ℕ} hζ =>
-  isPrimitiveRoot_rat_order_le_two (m := n) hζ)
-```
-
-## More faithful but usually less convenient axiom
-
-If your formalization already has rational `m`-torsion bases, you could axiomatize one level lower:
-
-```lean
-import Mathlib
-
-namespace MazurTorsionBridge
-
-/-- Placeholder type for your elliptic curves over `ℚ`. -/
-variable {ECQ : Type*}
-
-/-- Placeholder type for your rational points on a curve. -/
-variable {Point : ECQ → Type*}
-
-/-- Placeholder predicate: `P` is an `m`-torsion point. -/
-variable (IsMTorsion : {E : ECQ} → Point E → ℕ → Prop)
-
-/-- Placeholder predicate: `P,Q` form a `(ZMod m)^2` basis of `E[m]`. -/
-variable (IsFullMTorsionBasis : {E : ECQ} → Point E → Point E → ℕ → Prop)
-
-/--
-Lower-level Weil-pairing axiom: evaluating the Weil pairing on a full torsion
-basis produces a primitive rational `m`-th root of unity.
--/
-axiom weil_pairing_on_rational_full_basis_is_primitive
-    {E : ECQ} {m : ℕ} {P Q : Point E}
-    (hm : 3 ≤ m)
-    (hbasis : IsFullMTorsionBasis P Q m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-
-end MazurTorsionBridge
-```
-
-But unless you need to reason about individual torsion bases elsewhere, this is more ceremony than benefit.  For the Mazur exclusion step, the theorem-shaped axiom
-
-```lean
-FullRationalMTorsion E m → ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-```
-
-is the cleanest cut.
-
-## Bottom line
-
-For the current project, I would add exactly one axiom/theorem placeholder:
-
-```lean
-axiom full_rational_m_torsion_gives_primitive_root
-    {E : ECQ} {m : ℕ}
-    (hm : 3 ≤ m)
-    (hfull : FullRationalMTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-```
-
-Then prove:
-
-```lean
-by_contra hnot
-have hm : 3 ≤ m := by omega
-rcases full_rational_m_torsion_gives_primitive_root hm hfull with ⟨ζ, hζ⟩
-have hm_le_two : m ≤ 2 := isPrimitiveRoot_rat_order_le_two hζ
-omega
-```
-
-This gives a small, auditable trusted kernel for the missing Weil-pairing input and leaves all rational-root-of-unity reasoning inside your existing Lean proof.
+The `rank 0 + torsion` computation is exactly the right mathematical certificate to justify this enumeration, just as for `N = 10`; the only formalization issue is how that certificate is represented inside Lean.
