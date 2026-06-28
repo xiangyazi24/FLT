@@ -665,15 +665,21 @@ theorem quartic_plus_descent_step :
         have hb1 : b = 1 := by rw [hb_eq, hα1, hβ1]; ring
         have ha_sq : a^2 = 1 := by rw [hnew_eq, hα1, hβ1]; norm_num
         have ha1 : a = 1 := by linarith [sq_nonneg (a - 1)]
-        rw [hBk]; constructor
-        · -- r = 1: u = v = 1, r = u+v = 2... wait, that gives r=2 which is even. Contradiction!
-          -- Actually if α=β=1: u=1, v=1, r=u+v=2. But r=2j+1 is odd. 2 is even. Contradiction!
-          exfalso; have : (2*j+1) = 2 := by linarith [huv_sum, hα_eq, hα1, hβ_eq, hβ1]; omega
-        · rfl -- B = 4k, already rfl'd
-      · -- B' < B: α.natAbs < (4*k).natAbs
+        constructor
+        · -- r = u+v = 1+1 = 2. But r = 2j+1 is odd. Contradiction.
+          exfalso
+          have : u = 1 := by rw [hα_eq, hα1]; ring
+          have : v = 1 := by rw [hβ_eq, hβ1]; ring
+          omega
+        · -- B = 1: B₁ = ab = 1, B = 2B₁ = 2. But BaseZ r B needs B=1.
+          -- Actually BaseZ (2j+1) B = BaseZ (2j+1) (4k). Needs 4k=1.
+          -- B₁=1 → 2k=1 → k=0... but k>0. Contradiction!
+          exfalso; nlinarith [hB₁_eq, hB₁_val]
+      · -- B' < B: α.natAbs < B.natAbs (B = 4k after hBk)
+        rw [hBk]
         have hα_le_b : α ≤ b := by rw [hb_eq]; exact le_mul_of_one_le_right hα_pos.le hβ_pos
         have hb_le_B₁ : b ≤ B₁ := by rw [hB₁_eq]; exact le_mul_of_one_le_left hb.le ha
-        have hB₁_lt_B : B₁ < 4*k := by rw [hB₁_val]; nlinarith
+        have hB₁_lt_4k : B₁ < 4*k := by rw [hB₁_val]; nlinarith
         have hα_lt : α < 4*k := by linarith
         exact Int.natAbs_lt_natAbs_of_nonneg_of_lt hα_pos.le hα_lt
     · -- Case M = 5a⁴, N = b⁴: descent on a (symmetric)
