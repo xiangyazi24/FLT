@@ -588,11 +588,13 @@ theorem quartic_plus_descent_step :
             rw [hab_cop] at this; exact absurd this (by norm_num)
           · obtain ⟨t, rfl⟩ : 2∣a := ⟨a/2, by omega⟩
             obtain ⟨u, rfl⟩ : ∃ u, b = 2*u+1 := ⟨b/2, by omega⟩
-            ring_nf; omega
+            have : (2 : ℤ) ∣ ((2*t)^2 - (2*u+1)^2 - 1) := ⟨2*t^2 - 2*u^2 - 2*u - 1, by ring⟩
+            omega
         · have hb_even : b % 2 = 0 := by omega
           obtain ⟨t, rfl⟩ : ∃ t, a = 2*t+1 := ⟨a/2, by omega⟩
           obtain ⟨u, rfl⟩ : 2∣b := ⟨b/2, by omega⟩
-          ring_nf; omega
+          have : (2 : ℤ) ∣ ((2*t+1)^2 - (2*u)^2 - 1) := ⟨2*t^2 + 2*t - 2*u^2, by ring⟩
+            omega
       set h := a^2 - b^2
       have h_odd : h % 2 = 1 := h_raw_odd
       -- (r-h)(r+h) = 4b⁴
