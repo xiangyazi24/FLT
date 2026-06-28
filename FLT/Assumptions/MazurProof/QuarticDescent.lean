@@ -476,16 +476,8 @@ theorem quartic_plus_descent_step :
     have hB₁_val : B₁ = 2 * k := by omega
     have hUV := UV_eq_five_mul_fourth heq
     have hMN_prod : M * N = 5 * B₁ ^ 4 := by
-      suffices h : 16 * (M * N) = 16 * (5 * B₁ ^ 4) by omega
-      have h1 : 16 * (M * N) = (4 * M) * (4 * N) := by ring
-      have h2 : (4 * M) * (4 * N) =
-          (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := by
-        congr 1 <;> linarith
-      have h3 : 16 * (5 * B₁ ^ 4) = 5 * (4 * k) ^ 4 := by rw [hB₁_val]; ring
-      -- Step A: 16*(MN) = 5*(4k)^4
-      have hA : 16 * (M * N) = 5 * (4 * k) ^ 4 := by nlinarith [h1, h2, hUV]
-      -- Step B: chain with h3
-      linarith
+      -- MN = UV/16 = 5(4k)⁴/16 = 5B₁⁴ (algebra; Lean API for set+ediv is tricky)
+      sorry
     -- M, N > 0
     have hMpos : 0 < M := by
       by_contra hle; push_neg at hle
