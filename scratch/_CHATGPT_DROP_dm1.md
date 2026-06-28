@@ -1,4 +1,4 @@
-# Q1738 (dm1): complete even-`B` descent chain for the last sorry
+# Q1738 (dm1): even-`B` descent chain for the last sorry
 
 ## Main correction
 
@@ -8,53 +8,52 @@ In the even branch the normalized pair is `M,N`, not the raw odd pair.  Therefor
 M + N = r ^ 2 + 2 * B₁ ^ 2
 ```
 
-with `r = 2*j+1`.  After the oriented split
+with `r = 2*j+1`.  After an oriented split
 
 ```lean
-M + N = A ^ 4 + 5 * b ^ 4,
-B₁ = A * b,
+M + N = A ^ 4 + 5 * d ^ 4,
+B₁ = A * d,
 ```
 
 the algebra gives
 
 ```lean
-r ^ 2 = (A ^ 2 - b ^ 2) ^ 2 + 4 * b ^ 4
+r ^ 2 = (A ^ 2 - d ^ 2) ^ 2 + 4 * d ^ 4
 ```
 
-not the odd-branch `4*r^2` identity.  This is why the even case needs the extra half-step
+not the odd-branch `4*r^2` identity.  That is exactly why the even proof needs the extra half-step
 
 ```lean
-h := A ^ 2 - b ^ 2
+h := A ^ 2 - d ^ 2
 u := (r - h) / 2
 v := (r + h) / 2
-u * v = b ^ 4
+u * v = d ^ 4
 ```
 
-before applying `pos_fourth_of_coprime_mul_fourth`.
+before `pos_fourth_of_coprime_mul_fourth`.
 
-The clean way to write line 564 is to factor out a local oriented payload.  Both branches of `coprime_factor_5_fourth` call the same payload; the second branch just swaps the two factor variables.
+The proof below factors out one local oriented payload.  The second branch of `coprime_factor_5_fourth` calls the same payload with the factor variables swapped.
 
-## Expected helper shapes
+## Helper interfaces used
 
-The code below uses the helpers in the following conceptual form.  If your local tuple order differs, only change the `rcases` patterns and the argument order of the helper calls.
+The proof uses the helpers in the following conceptual shape.  If your exact local tuple order differs, change only the `rcases` patterns and the helper argument order.
 
 ```lean
 -- coprime_factor_5_fourth hMN_prod hMN_cop hMpos hNpos hB₁_pos
--- returns one of the two oriented splits:
---   inl: ∃ a b, 0 < a ∧ 0 < b ∧ B₁ = a*b ∧ M = a^4 ∧ N = 5*b^4
---   inr: ∃ a b, 0 < a ∧ 0 < b ∧ B₁ = a*b ∧ M = 5*a^4 ∧ N = b^4
+-- returns either
+--   ∃ a b, 0<a ∧ 0<b ∧ B₁=a*b ∧ M=a^4 ∧ N=5*b^4
+-- or
+--   ∃ a b, 0<a ∧ 0<b ∧ B₁=a*b ∧ M=5*a^4 ∧ N=b^4
 
--- coprime_rh is the even-half wrapper.  It should consume:
---   0 < r, r % 2 = 1, 0 < b, Int.gcd r b = 1,
---   r^2 = h^2 + 4*b^4
--- and return positive coprime halves u,v with u*v=b^4 and r=u+v, h=v-u.
--- If your current coprime_rh only proves the gcd of the halves, keep its proof
--- and add a tiny wrapper that also packages the positivity/product identities.
+-- coprime_rh is used as the even-half package:
+--   coprime_rh hr_pos hr_odd hb_pos hcop_rb hsqh
+-- returns u,v with
+--   0<u, 0<v, gcd(u,v)=1, u*v=b^4, r=u+v, h=v-u.
 ```
 
-## Replacement proof spine
+The only ambient fact not listed in the prompt but mathematically necessary is positivity of `r = 2*j+1`.  In the surrounding proof it should be the original `0 < r` before rewriting `r` as `2*j+1`; I call it `hr_pos` below.
 
-Paste this at the last sorry.  The only ambient fact not listed in your message but mathematically necessary is positivity of `r = 2*j+1`.  In the surrounding proof it should be the original `0 < r` fact before rewriting `r` as `2*j+1`; I call it `hr_pos` below.  If your local name differs, replace that one line.
+## Replacement for the last sorry
 
 ```lean
 by
@@ -63,8 +62,6 @@ by
   let r : ℤ := 2 * j + 1
 
   have hr_pos' : 0 < r := by
-    -- Replace `hr_pos` by the local name of the original positivity fact for `r`.
-    -- If the local context still has `0 < 2*j+1` directly, `omega` closes this.
     simpa [r] using hr_pos
 
   have hr_odd' : r % 2 = 1 := by
@@ -82,11 +79,8 @@ by
   have hcop_r4k : Int.gcd r (4 * k) = 1 := by
     simpa [r, hBk] using hcop
 
-  have hnonbase_r4k : ¬ BaseZ r (4 * k) := by
-    simpa [r] using hnonbase
-
   ---------------------------------------------------------------------------
-  -- Divisor-of-the-right-parameter coprimality.  We use it with d | B₁ | 4k.
+  -- If d | B₁, then gcd(r,d)=1 because B₁ | 4k and gcd(r,4k)=1.
   ---------------------------------------------------------------------------
   have gcd_of_dvd_right :
       ∀ {d : ℤ}, 0 < d → d ∣ B₁ → Int.gcd r d = 1 := by
@@ -136,11 +130,11 @@ by
     exact hp_prime.not_dvd_one hpone_nat
 
   ---------------------------------------------------------------------------
-  -- Common oriented payload.
-  --
-  -- Inputs are the variables after choosing the orientation
-  --   M + N = A^4 + 5*d^4,   B₁ = A*d.
-  -- The second branch of coprime_factor_5_fourth calls this with A and d swapped.
+  -- Common oriented descent payload.
+  -- Inputs:
+  --   0<A, 0<d, B₁=A*d, M+N=A^4+5*d^4.
+  -- Output:
+  --   (β, α, A) is a new non-base solution and α < 4k.
   ---------------------------------------------------------------------------
   have descend_oriented :
       ∀ {A d : ℤ},
@@ -162,7 +156,7 @@ by
       gcd_of_dvd_right hdpos hd_dvd_B₁
 
     -------------------------------------------------------------------------
-    -- Even-branch algebra: r^2 = (A^2-d^2)^2 + 4*d^4.
+    -- Even normalized algebra.
     -------------------------------------------------------------------------
     have hsq : r ^ 2 = (A ^ 2 - d ^ 2) ^ 2 + 4 * d ^ 4 := by
       have hsum1 : A ^ 4 + 5 * d ^ 4 = r ^ 2 + 2 * (A * d) ^ 2 := by
@@ -181,12 +175,7 @@ by
       simpa [h] using hsq
 
     -------------------------------------------------------------------------
-    -- Half-factorization step.
-    --
-    -- This is the place where the even proof differs from the odd proof.
-    -- `coprime_rh` should package:
-    --   u = (r-h)/2, v = (r+h)/2,
-    --   0<u, 0<v, gcd(u,v)=1, u*v=d^4, r=u+v, h=v-u.
+    -- Half layer: u=(r-h)/2, v=(r+h)/2.
     -------------------------------------------------------------------------
     obtain ⟨u, v, hu_pos, hv_pos, huv_cop, huv_mul, hr_uv, hh_vu⟩ :=
       coprime_rh
@@ -194,37 +183,26 @@ by
         hr_pos' hr_odd' hdpos hcop_rd hsqh
 
     -------------------------------------------------------------------------
-    -- Since u*v=d^4 and gcd(u,v)=1, both positive factors are fourth powers.
+    -- u and v are coprime positive fourth powers.
     -------------------------------------------------------------------------
-    obtain ⟨α, β, hαpos, hβpos, hu_eq, hv_eq, hprod_eq⟩ :=
+    obtain ⟨α, β, hαpos, hβpos, hu_eq, hv_eq, hd_eq⟩ :=
       pos_fourth_of_coprime_mul_fourth
         hu_pos hv_pos huv_cop huv_mul
 
-    -- Some local versions of the expected conclusions.  If your
-    -- `pos_fourth_of_coprime_mul_fourth` already returns `d = α*β`, this is
-    -- just `exact hprod_eq`.  If it returns only the fourth-power product,
-    -- use `eq_of_pos_fourth_eq` as below.
-    have hd_eq : d = α * β := by
-      first
-      | exact hprod_eq
-      | apply eq_of_pos_fourth_eq
-        · exact hdpos
-        · nlinarith [hαpos, hβpos]
-        · calc
-            d ^ 4 = u * v := by
-              nlinarith [huv_mul]
-            _ = α ^ 4 * β ^ 4 := by
-              rw [hu_eq, hv_eq]
-            _ = (α * β) ^ 4 := by
-              ring
+    -- If your local `pos_fourth_of_coprime_mul_fourth` returns only
+    -- `(α*β)^4 = d^4`, replace `hd_eq` above by:
+    --
+    --   have hd_eq : d = α*β := by
+    --     apply eq_of_pos_fourth_eq
+    --     · exact hdpos
+    --     · nlinarith [hαpos, hβpos]
+    --     · calc
+    --         d^4 = u*v := by nlinarith [huv_mul]
+    --         _ = α^4 * β^4 := by rw [hu_eq, hv_eq]
+    --         _ = (α*β)^4 := by ring
 
     -------------------------------------------------------------------------
-    -- New quartic solution:
-    --   h = v-u = β^4-α^4
-    --   h = A^2-d^2
-    --   d = αβ
-    -- therefore
-    --   A^2 = β^4 + α^2β^2 - α^4.
+    -- New quartic equation.
     -------------------------------------------------------------------------
     have hh_eq : h = β ^ 4 - α ^ 4 := by
       nlinarith [hh_vu, hu_eq, hv_eq]
@@ -243,13 +221,10 @@ by
           ring
 
     have hQ : QuarticPlusZ β α A := by
-      -- Adjust only the simp list if `QuarticPlusZ` unfolds to the same
-      -- polynomial with a different multiplication order.
       simpa [QuarticPlusZ, mul_comm, mul_left_comm, mul_assoc] using hA_sq
 
     -------------------------------------------------------------------------
-    -- New solution is not the base solution.
-    -- If α=β=1, then the half data forces A=d=1, hence B₁=A*d=1,
+    -- Non-base: BaseZ β α would force α=β=1, hence A=d=1 and B₁=1,
     -- contradicting B₁=2*k with k>0.
     -------------------------------------------------------------------------
     have hnonbase_new : ¬ BaseZ β α := by
@@ -289,7 +264,7 @@ by
       omega
 
     -------------------------------------------------------------------------
-    -- Size drop.  We prove α < B₁ and then B₁ < 4*k.
+    -- Size drop: α < B₁ and B₁ < 4k.
     -------------------------------------------------------------------------
     have hα_lt_B₁ : α < B₁ := by
       have hB₁_expand : B₁ = A * α * β := by
@@ -350,15 +325,12 @@ by
     exact ⟨β, α, A, hQ, hnonbase_new, hdrop⟩
 
   ---------------------------------------------------------------------------
-  -- Now run the project-local coprime factorization of M*N=5*B₁^4.
+  -- Factor M*N=5*B₁^4 and feed both orientations into descend_oriented.
   ---------------------------------------------------------------------------
   rcases coprime_factor_5_fourth
       hMN_prod hMN_cop hMpos hNpos hB₁_pos with hsplit | hsplit
 
-  · -------------------------------------------------------------------------
-    -- Branch 1: M=a^4, N=5*b^4, B₁=a*b.
-    -------------------------------------------------------------------------
-    rcases hsplit with ⟨a, b, ha_pos, hb_pos, hB₁_ab, hM_a, hN_b⟩
+  · rcases hsplit with ⟨a, b, ha_pos, hb_pos, hB₁_ab, hM_a, hN_b⟩
 
     apply descend_oriented ha_pos hb_pos hB₁_ab
 
@@ -366,14 +338,10 @@ by
       M + N = a ^ 4 + 5 * b ^ 4 := by
         rw [hM_a, hN_b]
 
-  · -------------------------------------------------------------------------
-    -- Branch 2: M=5*a^4, N=b^4.  Swap orientation: A=b, d=a.
-    -------------------------------------------------------------------------
-    rcases hsplit with ⟨a, b, ha_pos, hb_pos, hB₁_ab, hM_a, hN_b⟩
+  · rcases hsplit with ⟨a, b, ha_pos, hb_pos, hB₁_ab, hM_a, hN_b⟩
 
     apply descend_oriented hb_pos ha_pos
-    · -- B₁ = b*a
-      rw [hB₁_ab]
+    · rw [hB₁_ab]
       ring
     · calc
         M + N = b ^ 4 + 5 * a ^ 4 := by
@@ -381,72 +349,9 @@ by
           ring
 ```
 
-## If `coprime_rh` only returns the gcd
+## Notes for integration
 
-If your existing helper has the older shape
-
-```lean
-coprime_rh : Int.gcd ((r-h)/2) ((r+h)/2) = 1
-```
-
-then add this wrapper next to it and keep the main proof above unchanged.  The wrapper is where all `/2` divisibility bookkeeping belongs; do not inline it into the final descent proof.
-
-```lean
-/-- Even-branch half factorization package. -/
-private theorem coprime_rh_pack
-    {r h b : ℤ}
-    (hr_pos : 0 < r) (hr_odd : r % 2 = 1)
-    (hb_pos : 0 < b)
-    (hcop_rb : Int.gcd r b = 1)
-    (hsq : r ^ 2 = h ^ 2 + 4 * b ^ 4) :
-    ∃ u v : ℤ,
-      0 < u ∧ 0 < v ∧
-      Int.gcd u v = 1 ∧
-      u * v = b ^ 4 ∧
-      r = u + v ∧
-      h = v - u := by
-  -- This is the canonical proof:
-  -- 1. `h` is odd from `hsq` mod 2 and `hr_odd`.
-  -- 2. Hence `2 ∣ r-h` and `2 ∣ r+h`; choose witnesses `u,v`.
-  -- 3. Positivity follows from `r^2 = h^2 + 4*b^4`, `hb_pos`, and `hr_pos`,
-  --    giving `-|r| < h < |r|`, hence `0 < r-h` and `0 < r+h`.
-  -- 4. `(r-h)(r+h)=4*b^4`; substituting the witnesses gives `u*v=b^4`.
-  -- 5. The gcd is your existing `coprime_rh` proof.
-  --
-  -- I would keep this as a separate helper because it is exactly the fragile
-  -- parity/division layer, whereas the descent proof above is pure algebra.
-  sorry
-```
-
-The main descent code should call the package-returning helper.  If you keep the wrapper name `coprime_rh_pack`, replace the one call in the main proof by:
-
-```lean
-obtain ⟨u, v, hu_pos, hv_pos, huv_cop, huv_mul, hr_uv, hh_vu⟩ :=
-  coprime_rh_pack
-    (r := r) (h := h) (b := d)
-    hr_pos' hr_odd' hdpos hcop_rd hsqh
-```
-
-## Why this closes the requested goal
-
-The returned witness is
-
-```lean
-r' = β,
-B' = α,
-s' = A.
-```
-
-The new quartic equation is exactly
-
-```lean
-A ^ 2 = β ^ 4 + β ^ 2 * α ^ 2 - α ^ 4
-```
-
-up to multiplication order.  The size drop is
-
-```lean
-α < B₁ = A*d = A*α*β < 4*k
-```
-
-where strictness in the first inequality is forced by the nontrivial/even normalized branch: equality would force `A=β=α=d=1`, hence `B₁=1`, contradicting `B₁=2*k` and `k>0`.
+1. The line `simpa [r] using hr_pos` is the only place that depends on the local name for positivity of `2*j+1`.
+2. If `BaseZ` is not literally a pair/proposition exposing `.1` and `.2`, replace the two lines extracting `hβ_one` and `hα_one` with the destructor already used in your odd-case proof.
+3. If `pos_fourth_of_coprime_mul_fourth` returns a fourth-power equality rather than `d = α*β`, use the `eq_of_pos_fourth_eq` block in the comment.
+4. The second factorization branch is not a new proof.  It is the same oriented proof with `(A,d)=(b,a)`.
