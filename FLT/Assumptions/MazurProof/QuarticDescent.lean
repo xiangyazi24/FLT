@@ -713,8 +713,146 @@ theorem quartic_plus_descent_step :
         have hB₁_lt_4k : B₁ < 4*k := by rw [hB₁_val]; nlinarith
         have hα_lt : α < 4*k := by linarith
         exact Int.natAbs_lt_natAbs_of_nonneg_of_lt hα_pos.le hα_lt
-    · -- Case M = 5a⁴, N = b⁴: descent on a (symmetric)
-      sorry
+    · -- Case M = 5a⁴, N = b⁴: descent on a (symmetric to first branch)
+      -- r² = (b²-a²)²+4a⁴
+      have hr2 : (2*j+1)^2 = (b^2-a^2)^2 + 4*a^4 := by
+        have hU := hM_eq; have hV := hN_eq
+        nlinarith [hMN_sum, hB₁_eq,
+          show (a*b)^2 = a^2*b^2 from by ring,
+          show (b^2-a^2)^2 = b^4 - 2*b^2*a^2 + a^4 from by ring]
+      -- gcd(r, a) = 1
+      have hcop_ra : IsCoprime (2*j+1) a :=
+        hcop_rB.of_isCoprime_of_dvd_right (dvd_trans ⟨b, hB₁_eq⟩ hB₁_dvd_B)
+      -- b²-a² is odd
+      have h_raw_odd : (b^2 - a^2) % 2 = 1 := by
+        have hab_even : (a*b) % 2 = 0 := by rw [← hB₁_eq, hB₁_val]; omega
+        rcases Int.emod_two_eq_zero_or_one a with ha | ha
+        · rcases Int.emod_two_eq_zero_or_one b with hb | hb
+          · exfalso
+            have h2a : (2 : ℤ) ∣ a := ⟨a/2, by omega⟩
+            have h2b : (2 : ℤ) ∣ b := ⟨b/2, by omega⟩
+            have := Int.dvd_coe_gcd h2a h2b
+            rw [hab_cop] at this; exact absurd this (by norm_num)
+          · -- a even, b odd → b²≡1, a²≡0 mod 2
+            have hb2 : b^2 % 2 = 1 := by
+              have h2b1 : (2 : ℤ) ∣ (b - 1) := by omega
+              have : b^2 - 1 = (b-1)*(b+1) := by ring
+              have : (2 : ℤ) ∣ (b^2 - 1) := this ▸ dvd_mul_of_dvd_left h2b1 _
+              omega
+            have ha2 : a^2 % 2 = 0 := by
+              have h2a : (2 : ℤ) ∣ a := by omega
+              have : (2 : ℤ) ∣ a^2 := dvd_pow h2a (by norm_num : 2 ≠ 0)
+              omega
+            omega
+        · -- a odd → b must be even
+          have hb_even : b % 2 = 0 := by
+            rcases Int.emod_two_eq_zero_or_one b with hb | hb
+            · exact hb
+            · exfalso
+              have h2_dvd_ab : (2 : ℤ) ∣ (a * b) := by omega
+              have h2_ndvd_a : ¬ (2 : ℤ) ∣ a := by omega
+              have h2_ndvd_b : ¬ (2 : ℤ) ∣ b := by omega
+              have hp2 : Prime (2 : ℤ) := Int.prime_iff_natAbs_prime.mpr (by norm_num)
+              rcases hp2.dvd_or_dvd h2_dvd_ab with h | h
+              · exact h2_ndvd_a h
+              · exact h2_ndvd_b h
+          have hb2 : b^2 % 2 = 0 := by
+            have h2b : (2 : ℤ) ∣ b := by omega
+            have : (2 : ℤ) ∣ b^2 := dvd_pow h2b (by norm_num : 2 ≠ 0)
+            omega
+          have ha2 : a^2 % 2 = 1 := by
+            have h2a1 : (2 : ℤ) ∣ (a - 1) := by omega
+            have : a^2 - 1 = (a-1)*(a+1) := by ring
+            have : (2 : ℤ) ∣ (a^2 - 1) := this ▸ dvd_mul_of_dvd_left h2a1 _
+            omega
+          omega
+      set h := b^2 - a^2
+      have h_odd : h % 2 = 1 := h_raw_odd
+      -- (r-h)(r+h) = 4a⁴
+      have hprod : ((2*j+1) - h) * ((2*j+1) + h) = 4*a^4 := by nlinarith [hr2]
+      -- r-h and r+h both even
+      have h2_sub : (2 : ℤ) ∣ ((2*j+1) - h) := by omega
+      have h2_add : (2 : ℤ) ∣ ((2*j+1) + h) := by omega
+      -- Define u = (r-h)/2, v = (r+h)/2
+      set u := ((2*j+1) - h) / 2
+      set v := ((2*j+1) + h) / 2
+      have hu_val : 2 * u = (2*j+1) - h := Int.mul_ediv_cancel' h2_sub
+      have hv_val : 2 * v = (2*j+1) + h := Int.mul_ediv_cancel' h2_add
+      clear_value u v
+      -- u + v = r, v - u = h
+      have huv_sum : u + v = 2*j+1 := by omega
+      have huv_diff : v - u = h := by omega
+      -- u*v = a⁴
+      have huv_prod : u * v = a^4 := by
+        apply mul_left_cancel₀ (show (4 : ℤ) ≠ 0 from by norm_num)
+        have h4 : 4 * (u * v) = (2*u) * (2*v) := by ring
+        rw [h4, hu_val, hv_val]
+        rw [show (4 : ℤ) * a^4 = 4*a^4 from by ring]
+        exact hprod
+      -- u, v > 0
+      have ha4_pos : 0 < a^4 := by positivity
+      have huv_pos_prod : 0 < u * v := by rw [huv_prod]; exact ha4_pos
+      have hu_pos : 0 < u := by nlinarith [sq_nonneg u, sq_nonneg v, huv_sum]
+      have hv_pos : 0 < v := by nlinarith [sq_nonneg u, sq_nonneg v, huv_sum]
+      -- gcd(u,v) = 1
+      have huv_cop : Int.gcd u v = 1 := by
+        rw [← Int.isCoprime_iff_gcd_eq_one]
+        by_contra hnotcop; rw [Int.isCoprime_iff_gcd_eq_one] at hnotcop
+        have hg_gt1 : 1 < Int.gcd u v := by
+          have : Int.gcd u v ≠ 0 := by
+            rw [Int.gcd_def]; exact Nat.gcd_ne_zero_left (Int.natAbs_ne_zero.mpr (ne_of_gt hu_pos))
+          omega
+        obtain ⟨p, hp, hpg⟩ := Nat.exists_prime_and_dvd hg_gt1.ne'
+        have hpu : (↑p : ℤ) ∣ u := dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_left ..)
+        have hpv : (↑p : ℤ) ∣ v := dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_right ..)
+        have hpr : (↑p : ℤ) ∣ (2*j+1) := by rw [← huv_sum]; exact dvd_add hpu hpv
+        have hpa4 : (↑p : ℤ) ∣ a^4 := by rw [← huv_prod]; exact dvd_mul_of_dvd_left hpu v
+        have hpa : (↑p : ℤ) ∣ a := Int.Prime.dvd_pow' hp hpa4
+        exact (Nat.prime_iff_prime_int.mp hp).not_unit (hcop_ra.isUnit_of_dvd' hpr hpa)
+      -- u = α⁴, v = β⁴
+      obtain ⟨α, hα_pos, hα_eq⟩ := pos_fourth_of_coprime_mul_fourth huv_cop huv_prod hu_pos hv_pos
+      obtain ⟨β, hβ_pos, hβ_eq⟩ := pos_fourth_of_coprime_mul_fourth
+        (show Int.gcd v u = 1 by rwa [Int.gcd_comm]) (by rw [mul_comm]; exact huv_prod) hv_pos hu_pos
+      -- a = αβ
+      have ha_eq : a = α * β := by
+        apply eq_of_pos_fourth_eq ha (mul_pos hα_pos hβ_pos)
+        calc a^4 = u * v := huv_prod.symm
+          _ = α^4 * β^4 := by rw [hα_eq, hβ_eq]
+          _ = (α * β)^4 := by ring
+      -- b² = β⁴ + β²α² - α⁴
+      have hnew_eq : b^2 = β^4 + β^2 * α^2 - α^4 := by
+        have hh_val : h = β^4 - α^4 := by linarith [hα_eq, hβ_eq, huv_diff]
+        have hb2 : b^2 = a^2 + h := by simp only [h]; ring
+        rw [ha_eq] at hb2
+        linarith [show (α * β)^2 = α^2 * β^2 from by ring]
+      -- gcd(β, α) = 1
+      have hcop_βα : Int.gcd β α = 1 := by
+        rw [← Int.isCoprime_iff_gcd_eq_one]
+        have := Int.isCoprime_iff_gcd_eq_one.mpr huv_cop
+        rw [hα_eq, hβ_eq] at this
+        exact ((IsCoprime.pow_left_iff (by norm_num : 0 < 4)).mp
+          ((IsCoprime.pow_right_iff (by norm_num : 0 < 4)).mp
+            (isCoprime_comm.mp this)))
+      -- QuarticPlusZ β α b
+      refine ⟨β, α, b, ⟨hβ_pos, hα_pos, hcop_βα, hnew_eq⟩, ?_, ?_⟩
+      · -- Non-base
+        intro ⟨hβ1, hα1⟩; apply hnonbase
+        have ha1 : a = 1 := by rw [ha_eq, hα1, hβ1]; ring
+        have hb_sq : b^2 = 1 := by rw [hnew_eq, hα1, hβ1]; norm_num
+        have hb1 : b = 1 := by linarith [sq_nonneg (b - 1)]
+        constructor
+        · exfalso
+          have : u = 1 := by rw [hα_eq, hα1]; ring
+          have : v = 1 := by rw [hβ_eq, hβ1]; ring
+          omega
+        · exfalso; nlinarith [hB₁_eq, hB₁_val]
+      · -- B' < B
+        rw [hBk]
+        have hα_le_a : α ≤ a := by rw [ha_eq]; exact le_mul_of_one_le_right hα_pos.le hβ_pos
+        have ha_le_B₁ : a ≤ B₁ := by rw [hB₁_eq]; exact le_mul_of_one_le_right ha.le hb
+        have hB₁_lt_4k : B₁ < 4*k := by rw [hB₁_val]; nlinarith
+        have hα_lt : α < 4*k := by linarith
+        exact Int.natAbs_lt_natAbs_of_nonneg_of_lt hα_pos.le hα_lt
   · -- Odd B case (main case, fully proved)
     have hr_odd := r_odd_of_B_odd hBodd hcop heq
     -- UV = 5B⁴, gcd(U,V) = 1
