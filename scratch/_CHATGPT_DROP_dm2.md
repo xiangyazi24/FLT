@@ -1,299 +1,276 @@
-# Q2012 (dm2): abstract Weil-pairing interface for Lean 4
+# Q2027 (dm2): Miller function core for a short Weierstrass curve
 
-Date searched: 2026-06-28.
+Date searched/written: 2026-06-28.
 
-Goal: package exactly the Weil-pairing facts needed downstream in the Mazur/FLT proof without committing to a divisor-theoretic, Miller-function, or Picard/Riemann-Roch construction.
+Goal: give Lean 4 definitions for the Miller-function core behind the Weil pairing, without proving the divisor identities yet.
 
-## Recommendation
+This uses Mathlib's existing Weierstrass-curve affine API:
 
-Use an abstract torsion type
+* `WeierstrassCurve.Affine.CoordinateRing := AdjoinRoot W.polynomial`;
+* `WeierstrassCurve.Affine.FunctionField := FractionRing W.CoordinateRing`;
+* `CoordinateRing.mk : K[X][Y] →+* W.CoordinateRing`;
+* `CoordinateRing.XClass W x`, representing `X - x` in the coordinate ring;
+* `linePolynomial x y ℓ : K[X]`, representing `ℓ * (X - x) + y`;
+* `W.slope x₁ x₂ y₁ y₂`, Mathlib's secant/tangent slope;
+* `W.Point`, the nonsingular affine point type with the point at infinity.
 
-```lean
-T : Type*
-[AddCommGroup T]
-[Module (ZMod m) T]
+Important convention: the total function `ellCoord W P Q` below returns `1` if either input is `O`, returns the vertical line if `Q = -P`, and otherwise returns the usual affine line
+
+```text
+Y - (λ * (X - x_P) + y_P).
 ```
 
-for `E[m]` in the interface.
+This is the convention needed for a total Miller core.  The divisor-correctness theorem is not included here; the intended future theorem is
 
-For actual elliptic curves in the FLT project, instantiate `T` with
-
-```lean
-E.nTorsion m
+```text
+div(g(P,Q)) = [P] + [Q] - [P+Q] - [O]
 ```
 
-where `FLT/EllipticCurve/Torsion.lean` defines
+where `g(P,Q) = ell(P,Q) / v(P+Q)`.
+
+## Lean 4 file
 
 ```lean
-abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u :=
-  Submodule.torsionBy ℤ (E⁄k).Point n
-```
-
-So: internally `E[m]` is a submodule/subtype of the elliptic-curve point group, but downstream proofs should see it as a type with `AddCommGroup` and `Module (ZMod m)`.  A bare `Subgroup` is too weak for the Mazur proof because the determinant/Galois-representation arguments are naturally `ZMod m`-linear.
-
-For prime-level Mazur arguments, `m = p` is prime, and every nonzero element of `E[p]` has exact additive order `p` once the usual structure theorem is available.  For a general composite `m`, nondegeneracy should be stated using `addOrderOf P = m`, not `P ≠ 0`.
-
-## Concrete Lean 4 proposal
-
-This is designed to use existing Mathlib types:
-
-* `rootsOfUnity m K` for `μ_m`;
-* `IsPrimitiveRoot` for primitive pairing values;
-* `AddCommGroup T` for the torsion group;
-* `Module (ZMod m) T` for the `ZMod m`-module structure;
-* `MulSemiringAction Γ K` for a Galois-type action on the target field;
-* `DistribMulAction Γ T` for the induced action on torsion points.
-
-```lean
-import Mathlib.Algebra.Module.Torsion.Basic
-import Mathlib.Algebra.Ring.Action.Basic
-import Mathlib.Data.ZMod.Basic
-import Mathlib.GroupTheory.OrderOfElement
-import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import Mathlib.Data.Nat.Bits
 
 /-!
-# Abstract Weil pairing data
+# Miller-function core for Weierstrass curves
 
-This file deliberately does not construct the Weil pairing.  It records exactly
-the properties needed by downstream Mazur/FLT arguments.
+This file defines the rational functions used in the Miller loop for a short
+Weierstrass curve `y^2 = x^3 + A*x + B`.
 
-The abstract torsion group is a type `T` with an additive group structure and a
-`ZMod m`-module structure.  In the FLT project, instantiate `T` with
-`E.nTorsion m` from `FLT.EllipticCurve.Torsion`.
+The definitions are deliberately computational and do **not** prove the divisor
+formulae yet.  They live in the function field
+
+  `W.FunctionField = FractionRing W.CoordinateRing`.
+
+The main definitions are:
+
+* `shortCurve A B` for `y^2 = x^3 + A*x + B`;
+* `lineFunctionFF W x y λ` for `Y - (λ*(X-x)+y)`;
+* `verticalFunctionFF W x` for `X - x`;
+* `ellFF W P Q`, the total line/tangent/vertical function through `P,Q`;
+* `millerFunction W P m`, the binary Miller-loop accumulator for `f_{m,P}`.
 -/
 
-namespace FLT
-namespace WeilPairingAbstract
+namespace WeierstrassCurve
+namespace Affine
+namespace MillerCore
+
+open Polynomial
+open scoped Polynomial.Bivariate
+
+universe u
+
+variable {K : Type u} [Field K] [DecidableEq K]
 
 noncomputable section
 
-/-- Coerce a value of `μ_m = rootsOfUnity m K` to its underlying field element. -/
-def rootValue {m : ℕ} {K : Type*} [CommMonoid K] (ζ : rootsOfUnity m K) : K :=
-  ((ζ : Kˣ) : K)
+/-- The short Weierstrass curve `y^2 = x^3 + A*x + B`. -/
+def shortCurve (A B : K) : Affine K where
+  a₁ := 0
+  a₂ := 0
+  a₃ := 0
+  a₄ := A
+  a₆ := B
 
-/-- A root-of-unity subgroup element is primitive when its underlying field element is primitive. -/
-def IsPrimitiveRootValue {m : ℕ} {K : Type*} [CommMonoid K]
-    (ζ : rootsOfUnity m K) : Prop :=
-  IsPrimitiveRoot (rootValue ζ) m
+/-- The point type for the short curve `y^2 = x^3 + A*x + B`. -/
+abbrev ShortPoint (A B : K) : Type u :=
+  (shortCurve (K := K) A B).Point
 
-/--
-Abstract Weil-pairing data on an abstract `m`-torsion group `T`.
+/-- The affine coordinate ring of the short curve `y^2 = x^3 + A*x + B`. -/
+abbrev ShortCoordinateRing (A B : K) : Type u :=
+  (shortCurve (K := K) A B).CoordinateRing
 
-The fields `left_kernel` and `right_kernel` are the clean group-theoretic
-nondegeneracy statements.  The primitive-root fields are the stronger form that
-is most useful in Mazur-style arguments: an exact-order-`m` torsion point pairs
-with something to give a primitive `m`-th root of unity.
+/-- The function field of the short curve `y^2 = x^3 + A*x + B`. -/
+abbrev ShortFunctionField (A B : K) : Type u :=
+  (shortCurve (K := K) A B).FunctionField
 
-For prime `m = p`, exact order can usually be replaced by `P ≠ 0`; see
-`WeilPairingPrimeData` below.
--/
-structure WeilPairingData (m : ℕ) (T K : Type*)
-    [AddCommGroup T] [Module (ZMod m) T] [Field K] where
-  /-- Exclude the degenerate `m = 0` interface. -/
-  hm_pos : 0 < m
+/-- Coerce a coordinate-ring element to the function field. -/
+def coordToFF (W : Affine K) (z : W.CoordinateRing) : W.FunctionField :=
+  algebraMap W.CoordinateRing W.FunctionField z
 
-  /-- The abstract Weil pairing `e_m : T × T → μ_m`. -/
-  pairing : T → T → rootsOfUnity m K
+/-- Send a bivariate polynomial to the function field of `W`. -/
+def bivarToFF (W : Affine K) (F : K[X][Y]) : W.FunctionField :=
+  coordToFF W (CoordinateRing.mk W F)
 
-  /-- Additivity in the first variable, written multiplicatively in the target. -/
-  pairing_zero_left : ∀ Q : T, pairing 0 Q = 1
-  pairing_add_left : ∀ P P' Q : T,
-    pairing (P + P') Q = pairing P Q * pairing P' Q
+/-- The coordinate-ring class of `Y - (λ * (X - xP) + yP)`. -/
+def lineFunctionCoord (W : Affine K) (xP yP λ : K) : W.CoordinateRing :=
+  CoordinateRing.mk W (Y - C (linePolynomial xP yP λ))
 
-  /-- Additivity in the second variable, written multiplicatively in the target. -/
-  pairing_zero_right : ∀ P : T, pairing P 0 = 1
-  pairing_add_right : ∀ P Q Q' : T,
-    pairing P (Q + Q') = pairing P Q * pairing P Q'
+/-- The function-field element `Y - (λ * (X - xP) + yP)`. -/
+def lineFunctionFF (W : Affine K) (xP yP λ : K) : W.FunctionField :=
+  coordToFF W (lineFunctionCoord W xP yP λ)
 
-  /-- Alternating property.  This implies skew-symmetry in many later settings. -/
-  alternating : ∀ P : T, pairing P P = 1
+/-- The coordinate-ring class of the vertical function `X - xP`. -/
+def verticalFunctionCoord (W : Affine K) (xP : K) : W.CoordinateRing :=
+  CoordinateRing.XClass W xP
 
-  /-- Left-kernel nondegeneracy. -/
-  left_kernel : ∀ P : T, (∀ Q : T, pairing P Q = 1) → P = 0
+/-- The function-field element `X - xP`. -/
+def verticalFunctionFF (W : Affine K) (xP : K) : W.FunctionField :=
+  coordToFF W (verticalFunctionCoord W xP)
 
-  /-- Right-kernel nondegeneracy. -/
-  right_kernel : ∀ Q : T, (∀ P : T, pairing P Q = 1) → Q = 0
+/-- Extract the `x`-coordinate of a finite affine point, returning `none` at infinity. -/
+def pointX? {W : Affine K} : W.Point → Option K
+  | .zero => none
+  | .some x _ _ => some x
 
-  /-- Primitive-root form of left nondegeneracy for exact-order-`m` points. -/
-  primitive_of_addOrderOf_eq_left :
-    ∀ {P : T}, addOrderOf P = m →
-      ∃ Q : T, IsPrimitiveRootValue (pairing P Q)
-
-  /-- Primitive-root form of right nondegeneracy for exact-order-`m` points. -/
-  primitive_of_addOrderOf_eq_right :
-    ∀ {Q : T}, addOrderOf Q = m →
-      ∃ P : T, IsPrimitiveRootValue (pairing P Q)
+/-- Extract the `y`-coordinate of a finite affine point, returning `none` at infinity. -/
+def pointY? {W : Affine K} : W.Point → Option K
+  | .zero => none
+  | .some _ y _ => some y
 
 /--
-Prime-level convenience wrapper.
+The total line/tangent/vertical function in the coordinate ring.
 
-For `p` prime, the Mazur proof usually wants the stronger statement that every
-nonzero torsion point pairs with some other torsion point to produce a primitive
-`p`-th root of unity.
+* If either input is `O`, this returns `1` by convention.
+* If `Q = -P`, this returns the vertical line `X - xP`.
+* Otherwise this returns the affine secant/tangent line
+  `Y - (λ * (X - xP) + yP)` with `λ = W.slope xP xQ yP yQ`.
 -/
-structure WeilPairingPrimeData (p : ℕ) (T K : Type*)
-    [AddCommGroup T] [Module (ZMod p) T] [Field K]
-    extends WeilPairingData p T K where
-  hp_prime : Nat.Prime p
+def ellCoord (W : Affine K) : W.Point → W.Point → W.CoordinateRing
+  | .zero, _ => 1
+  | _, .zero => 1
+  | .some xP yP _hP, .some xQ yQ _hQ =>
+      if _hvertical : xP = xQ ∧ yP = W.negY xQ yQ then
+        verticalFunctionCoord W xP
+      else
+        lineFunctionCoord W xP yP (W.slope xP xQ yP yQ)
 
-  primitive_of_ne_zero_left :
-    ∀ {P : T}, P ≠ 0 → ∃ Q : T, IsPrimitiveRootValue (pairing P Q)
-
-  primitive_of_ne_zero_right :
-    ∀ {Q : T}, Q ≠ 0 → ∃ P : T, IsPrimitiveRootValue (pairing P Q)
+/-- The total line/tangent/vertical function in the function field. -/
+def ellFF (W : Affine K) (P Q : W.Point) : W.FunctionField :=
+  coordToFF W (ellCoord W P Q)
 
 /--
-Weil-pairing data with Galois equivariance.
-
-The target equality is stated after coercing `rootsOfUnity m K` to `K`.  This
-avoids having to set up a separate action on the `rootsOfUnity` subtype: a
-`MulSemiringAction Γ K` already expresses that each `σ : Γ` acts on `K` by a
-semiring automorphism-like map.
+The vertical function attached to a point.  At infinity we use the total
+Miller-core convention `v(O) = 1`.
 -/
-structure WeilPairingGaloisData (m : ℕ) (Γ T K : Type*)
-    [Monoid Γ]
-    [AddCommGroup T] [Module (ZMod m) T] [DistribMulAction Γ T]
-    [Field K] [MulSemiringAction Γ K]
-    extends WeilPairingData m T K where
-  galois_equivariant : ∀ (σ : Γ) (P Q : T),
-    rootValue (pairing (σ • P) (σ • Q)) =
-      σ • rootValue (pairing P Q)
-
-section GaloisConsequences
-
-variable {m : ℕ} {Γ T K : Type*}
-variable [Monoid Γ]
-variable [AddCommGroup T] [Module (ZMod m) T] [DistribMulAction Γ T]
-variable [Field K] [MulSemiringAction Γ K]
-
-/-- If both torsion points are fixed by `σ`, then the pairing value is fixed by `σ`. -/
-theorem WeilPairingGaloisData.fixed_value_of_fixed_points
-    (W : WeilPairingGaloisData m Γ T K)
-    {σ : Γ} {P Q : T} (hP : σ • P = P) (hQ : σ • Q = Q) :
-    σ • rootValue (W.pairing P Q) = rootValue (W.pairing P Q) := by
-  simpa [hP, hQ] using (W.galois_equivariant σ P Q).symm
-
-end GaloisConsequences
+def verticalAtPointFF (W : Affine K) : W.Point → W.FunctionField
+  | .zero => 1
+  | .some x _ _ => verticalFunctionFF W x
 
 /--
-Alternative to Galois equivariance: pairing values descend to a base field.
+The Miller quotient
 
-This is useful when the argument only needs the conclusion that all Weil-pairing
-values are base-field rational, rather than the full equivariance formula.
+  `g(P,Q) = ell(P,Q) / v(P+Q)`.
+
+The future divisor theorem should say
+
+  `div(g(P,Q)) = [P] + [Q] - [P+Q] - [O]`.
 -/
-structure WeilPairingBaseFieldData (m : ℕ) (T k K : Type*)
-    [AddCommGroup T] [Module (ZMod m) T]
-    [Field k] [Field K] [Algebra k K]
-    extends WeilPairingData m T K where
-  /-- A base-field-valued pairing. -/
-  pairing_base : T → T → rootsOfUnity m k
+def millerQuotientFF (W : Affine K) (P Q : W.Point) : W.FunctionField :=
+  ellFF W P Q / verticalAtPointFF W (P + Q)
 
-  /-- The `K`-valued pairing is obtained from the base-field-valued one. -/
-  pairing_eq_algebraMap : ∀ P Q : T,
-    rootValue (pairing P Q) = algebraMap k K (rootValue (pairing_base P Q))
+/-- State of the Miller loop: current multiple `R` and current function accumulator `f`. -/
+structure MillerState (W : Affine K) where
+  R : W.Point
+  f : W.FunctionField
+
+/-- Initial Miller state for the left-to-right binary loop: `R = P`, `f = 1`. -/
+def initialState (W : Affine K) (P : W.Point) : MillerState W where
+  R := P
+  f := 1
+
+/-- Doubling step: `(R,f) ↦ (2R, f^2 * g(R,R))`. -/
+def millerDouble (W : Affine K) (s : MillerState W) : MillerState W where
+  R := s.R + s.R
+  f := s.f ^ 2 * millerQuotientFF W s.R s.R
+
+/--
+One left-to-right Miller step for a binary digit after the leading `1`.
+
+After doubling, if the next bit is `1`, multiply by `g(2R,P)` and update
+`R := 2R + P`; if it is `0`, keep the doubled state.
+-/
+def millerStepBit (W : Affine K) (P : W.Point) (b : Bool) (s : MillerState W) : MillerState W :=
+  let s₂ := millerDouble W s
+  if b then
+    { R := s₂.R + P
+      f := s₂.f * millerQuotientFF W s₂.R P }
+  else
+    s₂
+
+/--
+Binary digits used by the Miller loop: most-significant first, with the leading
+`1` removed.
+
+Mathlib's `Nat.bits m` is least-significant first, so we reverse it and drop the
+leading most-significant bit.
+-/
+def millerBits (m : ℕ) : List Bool :=
+  (Nat.bits m).reverse.drop 1
+
+/-- Run the Miller loop over an explicit list of bits. -/
+def millerLoopFromBits (W : Affine K) (P : W.Point) (bits : List Bool) : MillerState W :=
+  bits.foldl (fun s b => millerStepBit W P b s) (initialState W P)
+
+/--
+The Miller function accumulator `f_{m,P}` computed from the binary expansion of
+`m`.
+
+For `m = 1`, this returns `1`, as expected from the normalization `f_{1,P}=1`.
+The case `m = 0` is not used in the Weil-pairing construction; with the present
+total convention it also returns the initial accumulator `1`.
+-/
+def millerFunction (W : Affine K) (P : W.Point) (m : ℕ) : W.FunctionField :=
+  (millerLoopFromBits W P (millerBits m)).f
+
+/-- Same function, with an explicit order hypothesis carried for downstream APIs. -/
+def millerFunctionOfOrder (W : Affine K) (P : W.Point) (m : ℕ)
+    (_hP : m • P = 0) : W.FunctionField :=
+  millerFunction W P m
+
+/-- Same function, with an exact-order hypothesis carried for downstream APIs. -/
+def millerFunctionOfExactOrder (W : Affine K) (P : W.Point) (m : ℕ)
+    (_hP : addOrderOf P = m) : W.FunctionField :=
+  millerFunction W P m
 
 /-!
-## FLT elliptic-curve specialization
+## Short-curve convenience wrappers
 
-In a file that imports `FLT.EllipticCurve.Torsion`, the intended specialization is:
-
-```lean
-import FLT.EllipticCurve.Torsion
-
-namespace FLT
-namespace WeilPairingAbstract
-
-abbrev CurveWeilPairingData {K : Type*} [Field K]
-    (E : WeierstrassCurve K) [E.IsElliptic] [DecidableEq K]
-    (m : ℕ) : Type _ :=
-  WeilPairingData m (E.nTorsion m) K
-
-abbrev CurveWeilPairingPrimeData {K : Type*} [Field K]
-    (E : WeierstrassCurve K) [E.IsElliptic] [DecidableEq K]
-    (p : ℕ) : Type _ :=
-  WeilPairingPrimeData p (E.nTorsion p) K
-
-end WeilPairingAbstract
-end FLT
-```
-
-For a base curve over `k` and torsion over an extension `K`, use the torsion of
-the base-changed curve, for example schematically:
-
-```lean
-WeilPairingData m ((E.map (algebraMap k K)).nTorsion m) K
-```
-
-with the exact parameters adjusted to the surrounding FLT file.
+These wrappers specialize the definitions above to `y^2 = x^3 + A*x + B`.
 -/
 
+/-- Line function on the short curve `y^2 = x^3 + A*x + B`. -/
+def shortEllFF (A B : K) (P Q : ShortPoint (K := K) A B) : ShortFunctionField (K := K) A B :=
+  ellFF (shortCurve (K := K) A B) P Q
+
+/-- Vertical function at a point on the short curve `y^2 = x^3 + A*x + B`. -/
+def shortVerticalAtPointFF (A B : K) (P : ShortPoint (K := K) A B) :
+    ShortFunctionField (K := K) A B :=
+  verticalAtPointFF (shortCurve (K := K) A B) P
+
+/-- Miller quotient on the short curve `y^2 = x^3 + A*x + B`. -/
+def shortMillerQuotientFF (A B : K) (P Q : ShortPoint (K := K) A B) :
+    ShortFunctionField (K := K) A B :=
+  millerQuotientFF (shortCurve (K := K) A B) P Q
+
+/-- Miller function on the short curve `y^2 = x^3 + A*x + B`. -/
+def shortMillerFunction (A B : K) (P : ShortPoint (K := K) A B) (m : ℕ) :
+    ShortFunctionField (K := K) A B :=
+  millerFunction (shortCurve (K := K) A B) P m
+
 end
-end WeilPairingAbstract
-end FLT
+
+end MillerCore
+end Affine
+end WeierstrassCurve
 ```
 
-## Answer to “what type should `E[m]` be?”
+## Notes for the next round
 
-Use this hierarchy:
+The core above is only the computational skeleton.  The next formal targets are:
 
-1. **Concrete elliptic-curve type in FLT:**
-   ```lean
-   E.nTorsion m
-   ```
-   This is already defined as `Submodule.torsionBy ℤ (E⁄k).Point m`.
+1. define finite divisors supported on `W.Point`;
+2. define evaluation of a function-field element at such divisors where no zero/pole conflict occurs;
+3. prove the divisor identity for `millerQuotientFF`;
+4. prove the loop invariant
 
-2. **Interface type:**
-   ```lean
-   T : Type*
-   [AddCommGroup T]
-   [Module (ZMod m) T]
-   ```
-   This is the right abstraction boundary.  It hides whether torsion was implemented as a submodule, subgroup, kernel, or subtype.
-
-3. **Avoid a bare `Subgroup`:** it gives additive closure but not the `ZMod m` scalar action needed for linear algebra, determinants, and Galois representations.
-
-4. **Avoid hard-coding `Submodule.torsionBy` in every theorem:** use it at the instantiation boundary only.  Downstream Mazur proofs should be phrased over `T` with the group/module instances.
-
-## Why two nondegeneracy forms?
-
-For general `m`, the statement
-
-```lean
-P ≠ 0 → ∃ Q, IsPrimitiveRoot (e_m P Q) m
+```text
+div(f_{n,P}) = n[P] - [nP] - (n-1)[O];
 ```
 
-is too strong: a nonzero point of `E[m]` may have exact order a proper divisor of `m`.  The robust general statement is:
+5. define the Weil pairing by a normalized Miller evaluation and then connect it to the abstract `WeilPairingData` interface from Q2012.
 
-```lean
-addOrderOf P = m → ∃ Q, IsPrimitiveRoot (e_m P Q) m
-```
-
-For prime `p`, nonzero `p`-torsion points have exact order `p`, so `WeilPairingPrimeData` includes the convenient nonzero-point version.
-
-## Why state Galois equivariance in `K` rather than in `rootsOfUnity m K`?
-
-Mathlib defines
-
-```lean
-rootsOfUnity m K
-```
-
-as a subgroup of `Kˣ`, while
-
-```lean
-IsPrimitiveRoot ζ m
-```
-
-is a predicate on the underlying ring/field element `ζ : K`.  The helper
-
-```lean
-rootValue : rootsOfUnity m K → K
-```
-
-keeps coercions explicit.  It also lets equivariance be stated as
-
-```lean
-rootValue (e_m (σ • P) (σ • Q)) = σ • rootValue (e_m P Q)
-```
-
-using only a `MulSemiringAction Γ K`, with no separate subtype action on `rootsOfUnity` required.
+The definitions are intentionally total at `O` and in vertical cases so that the Miller loop can be written without partial functions.  Correctness theorems should state the exact mathematical hypotheses under which those total conventions agree with the divisor-theoretic formulas.
