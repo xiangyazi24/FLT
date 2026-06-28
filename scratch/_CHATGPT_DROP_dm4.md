@@ -1,225 +1,232 @@
-# Q2031 (dm4): pure-algebra Weil-pairing consequence in Lean
+# Q2048 (dm4): Weil-pairing nondegeneracy and the `#E[m] = m^2` bottleneck
+
+Date: 2026-06-28.
+
+Question: for a Weierstrass curve `y^2 = x^3 + A*x + B`, can we prove nondegeneracy of the Weil pairing `e_m` by using:
+
+1. `e_m` is alternating and bilinear;
+2. over an algebraically closed field, `E[m]` is a free `ZMod m`-module of rank `2`;
+3. a nondegenerate alternating form on `(ZMod m)^2` sends a basis pair to a primitive `m`-th root?
+
+And, specifically, does Mathlib already have the hard step `#E[m] = m^2`; if not, can we axiomatize just that one fact and derive nondegeneracy?
 
 ## Executive answer
 
-Yes.  The proof you described can be isolated as a small pure-algebra lemma.  The key is to **not** formalize elliptic curves, divisors, or the Weil pairing itself here.  Instead, package the abstract pairing data as follows:
-
-1. a group `Γ` acting on the torsion module `T` and on an extension field/monoid `L`;
-2. a pairing `e : T → T → L`;
-3. equivariance: `σ • e P Q = e (σ • P) (σ • Q)`;
-4. all torsion points are fixed: `σ • P = P` for every `P : T`;
-5. a chosen basis pair `P,Q` such that `e P Q` is a primitive `m`-th root;
-6. a descent statement saying that every `Γ`-fixed element of `L` comes from the base field/monoid `K` through an injective monoid map `K →* L`.
-
-Then the proof is exactly:
-
-```text
-σ(e(P,Q)) = e(σP, σQ) = e(P,Q),
-```
-
-so `e(P,Q)` is fixed; descend it to `ζ : K`; transfer `IsPrimitiveRoot` back across the injective map.
-
-The only root-of-unity API needed is `IsPrimitiveRoot` plus, optionally, `rootsOfUnity` via `IsPrimitiveRoot.toRootsOfUnity`.
-
-## Concrete Lean 4 code
-
-This is deliberately pure algebra.  It does not mention elliptic curves.
+Mathlib does **not** appear to have the theorem
 
 ```lean
-import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+Nat.card E[m] = m ^ 2
+```
 
-namespace MazurProof
+for elliptic curves over an algebraically closed field.  Mathlib has substantial Weierstrass-curve point and division-polynomial infrastructure, including computed leading terms/degrees of division polynomials, but I did not find a completed torsion-cardinality theorem upstream.
 
-/-!
-# Pure algebra core of the Weil-pairing argument
+The FLT project has exactly the expected scaffold in
 
-This file proves the abstract final step:
+```text
+FLT/EllipticCurve/Torsion.lean
+```
 
-* a Galois-equivariant pairing `e : T → T → L`,
-* all points of `T` are fixed by the Galois action,
-* for some basis pair `P,Q`, `e P Q` is a primitive `m`-th root,
-* every fixed element of `L` descends to the base `K`,
+namely:
 
-imply that the base contains a primitive `m`-th root of unity.
+```lean
+abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u :=
+  Submodule.torsionBy ℤ (E⁄k).Point n
 
-No elliptic curves, no divisors, no Miller functions.
--/
+noncomputable instance (n : ℕ) : Module (ZMod n) (E.nTorsion n)
 
-section PrimitiveRootTransport
+theorem WeierstrassCurve.n_torsion_card [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
+    Nat.card (E.nTorsion n) = n^2 := sorry
+```
 
-variable {K L : Type*} [CommMonoid K] [CommMonoid L]
+So the fact is known to be the desired theorem, but in the FLT repo it is still a `sorry`, and I did not find it in Mathlib.
 
-/--
-Primitive-root structure descends along an injective monoid hom.
+The important correction is: **axiomatizing only `#E[m] = m^2` is not enough to derive nondegeneracy of the actual Weil pairing.**  It is enough, in favorable cases, to help identify the group/module shape of `E[m]`, but nondegeneracy is an additional pairing-specific assertion.
 
-This is the tiny algebra lemma used after the fixed value of the pairing is
-identified with an element of the base field.
--/
-theorem isPrimitiveRoot_of_injective_monoidHom
-    (ι : K →* L) (hι : Function.Injective ι)
-    {ζ : K} {m : ℕ}
-    (hζ : IsPrimitiveRoot (ι ζ) m) :
-    IsPrimitiveRoot ζ m := by
-  refine ⟨?pow_eq_one, ?dvd_of_pow_eq_one⟩
-  · apply hι
-    rw [map_pow, hζ.pow_eq_one, map_one]
-  · intro n hn
-    apply hζ.dvd_of_pow_eq_one
-    rw [← map_pow, hn, map_one]
+## Why `#E[m] = m^2` alone is not enough
 
-end PrimitiveRootTransport
+There are two separate issues.
 
-section AbstractPairing
+### 1. For composite `m`, cardinality alone does not imply `E[m] ≃ (ZMod m)^2`
 
-variable {K L Γ T : Type*}
-variable [CommMonoid K] [CommMonoid L]
-variable [Group Γ] [SMul Γ T] [SMul Γ L]
+The type `E[m]` is killed by `m`, so it has exponent dividing `m`, and the desired cardinality is `m^2`.  But for composite `m`, a finite abelian group killed by `m` and of order `m^2` need not be `(ZMod m)^2`.
 
-/--
-The minimal abstract data needed from the Weil pairing.
+Example for `m = 4`:
 
-`K` is the base multiplicative monoid, typically `ℚ` or `ℚˣ` depending on the
-chosen formulation.  `L` is the ambient field/monoid containing the pairing
-values.  `Γ` is the Galois group acting on `T` and on `L`.
+```text
+ZMod 4 × ZMod 2 × ZMod 2
+```
 
-The field-theoretic fixed-field input is isolated in `fixed_to_base`:
-every `Γ`-fixed element of `L` is in the image of `baseMap`.
+has order `16 = 4^2` and is killed by `4`, but it is not free of rank `2` over `ZMod 4`.
 
-The mathematical assertion "nondegenerate alternating pairing on a rank-two
-free `ZMod m` module" is used here only through the one consequence
-`primitive_on_basis`: for a chosen basis `P,Q`, the value `e P Q` is primitive.
--/
-structure AbstractWeilPairingData (K L Γ T : Type*)
-    [CommMonoid K] [CommMonoid L]
-    [Group Γ] [SMul Γ T] [SMul Γ L]
-    (m : ℕ) where
-  baseMap : K →* L
-  baseMap_injective : Function.Injective baseMap
-  fixed_to_base : ∀ z : L, (∀ σ : Γ, σ • z = z) → ∃ a : K, baseMap a = z
-  P : T
-  Q : T
-  e : T → T → L
-  T_fixed : ∀ σ : Γ, ∀ R : T, σ • R = R
-  e_equivariant : ∀ σ : Γ, ∀ R S : T, σ • e R S = e (σ • R) (σ • S)
-  primitive_on_basis : IsPrimitiveRoot (e P Q) m
+This is exactly why the FLT scaffold’s group-theory lemma uses the stronger input
 
-/--
-If a Galois-equivariant pairing is primitive on a fixed basis pair, then the
-base contains a primitive `m`-th root of unity.
--/
-theorem primitive_root_in_base_of_abstract_weil_pairing
-    {m : ℕ}
-    (D : AbstractWeilPairingData K L Γ T m) :
-    ∃ ζ : K, IsPrimitiveRoot ζ m := by
-  let μ : L := D.e D.P D.Q
-  have hμ_fixed : ∀ σ : Γ, σ • μ = μ := by
-    intro σ
-    dsimp [μ]
-    rw [D.e_equivariant σ D.P D.Q, D.T_fixed σ D.P, D.T_fixed σ D.Q]
-  rcases D.fixed_to_base μ hμ_fixed with ⟨ζ, hζ⟩
-  refine ⟨ζ, ?_⟩
-  apply isPrimitiveRoot_of_injective_monoidHom D.baseMap D.baseMap_injective
-  simpa [μ, hζ] using D.primitive_on_basis
+```lean
+∀ d : ℕ, d ∣ n → Nat.card (Submodule.torsionBy ℤ A d) = d ^ r
+```
 
-/--
-Same conclusion, but returning an element of Mathlib's `rootsOfUnity m K`
-subgroup.  This is sometimes a more literal spelling of `μ_m ⊂ K`.
--/
-theorem primitive_root_in_rootsOfUnity_of_abstract_weil_pairing
+rather than only the single cardinality at `d = n`.  With cardinalities for all divisors of `n`, the finite abelian group structure can be forced into the expected `(ZMod n)^r` shape.
+
+For prime `m = p`, the single fact `#E[p] = p^2` is much closer to enough for the group shape, because `E[p]` is an `𝔽_p`-vector space killed by `p`; cardinality `p^2` then says dimension `2`.  But for arbitrary `m`, one should axiomatize either all divisor-cardinality statements or directly the rank-two module equivalence.
+
+### 2. Even if `E[m] ≃ (ZMod m)^2`, bilinear + alternating + cardinality does not imply nondegeneracy
+
+A bilinear alternating pairing can be degenerate.  The zero pairing is the simplest example:
+
+```text
+e(P, Q) = 1
+```
+
+for all `P,Q`.  It is bilinear and alternating, and it can live on a group of size `m^2`, but it is maximally degenerate.
+
+So the following implication is false:
+
+```text
+E[m] has m^2 points
++ e_m is bilinear and alternating
+⇒ e_m is nondegenerate.
+```
+
+What is true is a pure algebra lemma of this shape:
+
+```text
+T ≃ (ZMod m)^2
++ e : T × T → μ_m is bilinear and alternating
++ e is nondegenerate
+⇒ for any basis P,Q, e(P,Q) is a primitive m-th root.
+```
+
+The word “nondegenerate” in the premise is essential.  Cardinality by itself does not supply it.
+
+## What can be safely axiomatized?
+
+There are three levels of possible axioms, from weakest-useful to strongest.
+
+### Option A: Axiomatize only the module structure of torsion
+
+For pure algebra after the elliptic-curve geometry, use:
+
+```lean
+axiom elliptic_nTorsion_rank_two
+    {k : Type*} [Field k] [IsSepClosed k]
+    (E : WeierstrassCurve k) [E.IsElliptic] [DecidableEq k]
+    {m : ℕ} (hm : (m : k) ≠ 0) :
+    Nonempty (E.nTorsion m ≃+ ZMod m × ZMod m)
+```
+
+This avoids proving division-polynomial point counting, but it still does **not** prove Weil-pairing nondegeneracy.  It only gives the domain shape needed for the final linear algebra.
+
+### Option B: Axiomatize all divisor cardinalities, then derive the module structure
+
+This matches the FLT scaffold better:
+
+```lean
+axiom elliptic_nTorsion_card_all_divisors
+    {k : Type*} [Field k] [IsSepClosed k]
+    (E : WeierstrassCurve k) [E.IsElliptic] [DecidableEq k]
+    {m d : ℕ} (hd : d ∣ m) (hd_ne : (d : k) ≠ 0) :
+    Nat.card (E.nTorsion d) = d ^ 2
+```
+
+Then, using a finite-abelian-group structure theorem, derive:
+
+```lean
+Nonempty (E.nTorsion m ≃+ ZMod m × ZMod m)
+```
+
+This is better than a single `#E[m] = m^2` axiom for composite `m`.
+
+### Option C: Axiomatize the actual pairing nondegeneracy / primitive value
+
+If the immediate Mazur-torsion goal only needs a primitive root of unity in the base field from full rational torsion, then the most economical seam is not the whole point-counting theorem.  It is a Weil-pairing consequence:
+
+```lean
+axiom weil_pairing_exists_primitive_value
+    {k : Type*} [Field k]
+    (E : WeierstrassCurve k) [E.IsElliptic]
+    {m : ℕ} (hm : 0 < m) :
+    ∃ P Q : E_m, IsPrimitiveRoot (weilPairing m P Q) m
+```
+
+or, even closer to the downstream use:
+
+```lean
+axiom full_rational_torsion_implies_primitive_root
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
     {m : ℕ} (hm : 0 < m)
-    (D : AbstractWeilPairingData K L Γ T m) :
-    ∃ ζ : rootsOfUnity m K, IsPrimitiveRoot (((ζ : rootsOfUnity m K) : Kˣ) : K) m := by
-  rcases primitive_root_in_base_of_abstract_weil_pairing D with ⟨ζ, hζ⟩
-  haveI : NeZero m := ⟨Nat.ne_of_gt hm⟩
-  refine ⟨hζ.toRootsOfUnity, ?_⟩
-  simpa using hζ
-
-end AbstractPairing
-
-end MazurProof
-```
-
-## How this corresponds to the mathematical proof
-
-The mathematical proof is exactly the Lean proof of `primitive_root_in_base_of_abstract_weil_pairing`:
-
-```lean
-  let μ : L := D.e D.P D.Q
-  have hμ_fixed : ∀ σ : Γ, σ • μ = μ := by
-    intro σ
-    dsimp [μ]
-    rw [D.e_equivariant σ D.P D.Q, D.T_fixed σ D.P, D.T_fixed σ D.Q]
-```
-
-This is the line-by-line formal version of:
-
-```text
-σ(e(P,Q)) = e(σP,σQ) = e(P,Q).
-```
-
-Then:
-
-```lean
-  rcases D.fixed_to_base μ hμ_fixed with ⟨ζ, hζ⟩
-```
-
-is the fixed-field step: the fixed value `μ` is the image of some base element `ζ`.
-
-Finally:
-
-```lean
-  apply isPrimitiveRoot_of_injective_monoidHom D.baseMap D.baseMap_injective
-  simpa [μ, hζ] using D.primitive_on_basis
-```
-
-transports `IsPrimitiveRoot` from the ambient field/monoid back to the base using injectivity of the base map.
-
-## Where the actual Weil-pairing work is hidden
-
-This pure lemma assumes:
-
-```lean
-primitive_on_basis : IsPrimitiveRoot (e P Q) m
-```
-
-In the real elliptic-curve theorem, that is where the nondegenerate alternating pairing on a free rank-two `ZMod m` module enters.  You can discharge it separately from a statement such as:
-
-```lean
--- schematic
-axiom primitive_on_basis_of_nondegenerate_alternating_pairing
-    {m : ℕ} (T : Type*) [AddCommGroup T] [Module (ZMod m) T]
-    (b : Basis (Fin 2) (ZMod m) T)
-    (e : T → T → L)
-    -- bilinear, alternating, nondegenerate, values in rootsOfUnity m L
-    : IsPrimitiveRoot (e (b 0) (b 1)) m
-```
-
-But for the Mazur proof axiom assembly, you probably do **not** need this lower-level theorem.  The minimal useful axiom remains the elliptic-curve input:
-
-```lean
-axiom full_rational_torsion_forces_primitive_root
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m)
     (hfull : HasFullRationalTorsion E m) :
     ∃ ζ : ℚ, IsPrimitiveRoot ζ m
 ```
 
-The code above is a good intermediate target if you want to split that axiom into:
+This is essentially the current `weil_pairing_primitive_root` seam in the Mazur scaffold.  It bypasses the internal construction of `e_m` and focuses on the exact arithmetic consequence needed.
 
-1. an elliptic-curve Weil-pairing existence/nondegeneracy axiom producing `AbstractWeilPairingData`; and
-2. this fully formal pure-algebra theorem.
+## Minimal theorem needed for the “basis maps to primitive root” step
 
-## Suggested split of the current axiom
-
-Instead of one black-box axiom, use:
+Once one has an equivalence
 
 ```lean
-axiom full_rational_torsion_gives_abstract_weil_pairing_data
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
-    (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    -- returns appropriate `AbstractWeilPairingData ℚ L Γ T m`
-    True
+T ≃+ ZMod m × ZMod m
 ```
 
-Then the pure theorem above closes the field-of-definition/root-of-unity part.  In practice, since the concrete `L`, `Γ`, and `T` still require elliptic-curve/Galois infrastructure, the current direct axiom is still the shortest route.  But this Round-3 lemma cleanly separates the genuinely formal algebra from the elliptic-curve content.
+and an alternating bilinear pairing
+
+```lean
+e : T → T → μ_m
+```
+
+then the standard pure group-theory theorem should be phrased as:
+
+```text
+If the left/right radical of e is trivial, and P,Q are a ZMod m-basis of T,
+then e(P,Q) has order exactly m.
+```
+
+A skeletal mathematical proof:
+
+* Let `ζ = e(P,Q)`.
+* Bilinearity and alternation imply
+  ```text
+  e(aP + bQ, cP + dQ) = ζ^(a*d - b*c).
+  ```
+* If `ζ` has order `r < m`, then `rP` is nonzero in `ZMod m × ZMod m`, but it pairs trivially with both `P` and `Q`, hence with all of `T`.
+* That contradicts nondegeneracy.
+* Since the pairing values are `m`-th roots of unity, `orderOf ζ ∣ m`; therefore `orderOf ζ = m`, i.e. `ζ` is primitive.
+
+This is a good pure-algebra lemma to formalize, but it requires nondegeneracy as input.  It does not prove nondegeneracy.
+
+## Practical recommendation for dm4
+
+Do **not** try to get Weil-pairing nondegeneracy from only:
+
+```lean
+Nat.card (E.nTorsion m) = m^2
+```
+
+That fact is too weak for composite `m`, and in any case it says nothing pairing-specific.
+
+A clean formalization plan is:
+
+1. Keep the current high-level axiom/consequence for the Mazur proof:
+   ```lean
+   full rational m-torsion ⇒ ∃ ζ : ℚ, IsPrimitiveRoot ζ m
+   ```
+2. Separately build pure algebra for alternating bilinear forms on `(ZMod m)^2`:
+   ```lean
+   nondegenerate alternating pairing ⇒ basis value primitive
+   ```
+3. For the elliptic curve geometry, choose one of these as the future hard seam:
+   * `∀ d ∣ m, #E[d] = d^2`, enough for the module shape via finite abelian groups; plus
+   * a genuine Weil-pairing nondegeneracy theorem, or directly a primitive-value theorem.
+
+The most useful narrow axiom for replacing the geometric point-counting part is not just `#E[m] = m^2`; it is either:
+
+```lean
+Nonempty (E.nTorsion m ≃+ ZMod m × ZMod m)
+```
+
+or, if you want to keep the theorem close to the standard proof:
+
+```lean
+∀ d ∣ m, Nat.card (E.nTorsion d) = d^2
+```
+
+But the nondegeneracy of `e_m` still needs a separate pairing-specific input.
