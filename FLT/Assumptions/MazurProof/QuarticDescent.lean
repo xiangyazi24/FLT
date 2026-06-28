@@ -498,10 +498,18 @@ theorem quartic_plus_descent_step :
         by_contra hle; push_neg at hle
         have : 0 < r + h := by linarith
         linarith [mul_nonpos_of_nonpos_of_nonneg hle this.le]
-      have hrh_pos2 : 0 < r + h := by linarith
+      have hrh_pos2 : 0 < r + h := by
+        by_contra hle; push_neg at hle
+        linarith [mul_nonpos_of_nonpos_of_nonneg (show r - h ≤ 0 from by linarith) hle]
       -- Step 6: h is even (a²-b² ≡ 0 mod 4)
       have hh_even : h % 2 = 0 := by
-        have : (a ^ 2 - b ^ 2) % 4 = 0 := by omega
+        have : (a ^ 2 - b ^ 2) % 4 = 0 := by
+          have h1 : (2 : ℤ) ∣ (a - b) := by omega
+          have h2 : (2 : ℤ) ∣ (a + b) := by omega
+          obtain ⟨m, hm⟩ := h1; obtain ⟨n, hn⟩ := h2
+          have : (a - b) * (a + b) = 4 * (m * n) := by nlinarith
+          have : a ^ 2 - b ^ 2 = (a - b) * (a + b) := by ring
+          omega
         omega
       -- Step 7: gcd(r-h, r+h) = 1
       have hcop_rb : Int.gcd r b = 1 := by
