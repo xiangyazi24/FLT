@@ -589,21 +589,26 @@ theorem quartic_plus_descent_step :
             have h2b : (2 : ℤ) ∣ b := ⟨b/2, by omega⟩
             have := Int.dvd_coe_gcd h2a h2b
             rw [hab_cop] at this; exact absurd this (by norm_num)
-          · -- a even, b odd → a²≡0, b²≡1 mod 2 → a²-b²≡1 mod 2
+          · -- a even, b odd → a²≡0, b²≡1 mod 2
             have ha2 : a^2 % 2 = 0 := by
-              have : (2 : ℤ) ∣ a^2 := dvd_pow ⟨a/2, by omega⟩ (by norm_num : 2 ≠ 0)
+              have h2a : (2 : ℤ) ∣ a := by omega
+              have : (2 : ℤ) ∣ a^2 := dvd_pow h2a (by norm_num : 2 ≠ 0)
               omega
             have hb2 : b^2 % 2 = 1 := by
-              have : (2 : ℤ) ∣ (b^2 - 1) := dvd_mul_of_dvd_left ⟨(b-1)/2, by omega⟩ (b+1)
+              have h2b1 : (2 : ℤ) ∣ (b - 1) := by omega
+              have : b^2 - 1 = (b-1)*(b+1) := by ring
+              have : (2 : ℤ) ∣ (b^2 - 1) := this ▸ dvd_mul_of_dvd_left h2b1 _
               omega
             omega
-        · -- a odd, b even → a²≡1, b²≡0 mod 2 → a²-b²≡1 mod 2
+        · -- a odd, b even → a²≡1, b²≡0 mod 2
           have ha2 : a^2 % 2 = 1 := by
-            have : (2 : ℤ) ∣ (a^2 - 1) := dvd_mul_of_dvd_left ⟨(a-1)/2, by omega⟩ (a+1)
+            have h2a1 : (2 : ℤ) ∣ (a - 1) := by omega
+            have : a^2 - 1 = (a-1)*(a+1) := by ring
+            have : (2 : ℤ) ∣ (a^2 - 1) := this ▸ dvd_mul_of_dvd_left h2a1 _
             omega
           have hb2 : b^2 % 2 = 0 := by
-            have hb_even : b % 2 = 0 := by omega
-            have : (2 : ℤ) ∣ b^2 := dvd_pow ⟨b/2, by omega⟩ (by norm_num : 2 ≠ 0)
+            have h2b : (2 : ℤ) ∣ b := by omega
+            have : (2 : ℤ) ∣ b^2 := dvd_pow h2b (by norm_num : 2 ≠ 0)
             omega
           omega
       set h := a^2 - b^2
