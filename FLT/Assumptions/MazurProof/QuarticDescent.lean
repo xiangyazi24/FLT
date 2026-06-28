@@ -476,13 +476,8 @@ theorem quartic_plus_descent_step :
     have hB₁_val : B₁ = 2 * k := by omega
     have hUV := UV_eq_five_mul_fourth heq
     have hMN_prod : M * N = 5 * B₁ ^ 4 := by
-      have h_prod_eq : (4 * M) * (4 * N) =
-          (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := by
-        congr 1 <;> linarith
       have h_4MN : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
-        -- h_prod_eq and hUV share UV_expr but congr/set produce
-        -- different definitional forms; pure transitivity
-        sorry
+        have h := hUV; rw [← hM_val, ← hN_val] at h; exact h
       have h16 : 16 * (M * N) = 16 * (5 * (2 * k) ^ 4) :=
         calc 16 * (M * N) = (4 * M) * (4 * N) := by ring
           _ = 5 * (4 * k) ^ 4 := h_4MN
