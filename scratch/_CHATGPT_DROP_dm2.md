@@ -1,273 +1,254 @@
-# Q2076 (dm2): Hasse-only shortcut for full rational torsion?
+# Q2093 (dm2): Constructing `x - a` in `WeierstrassCurve.Affine.FunctionField`
 
 Date: 2026-06-28.
 
-Question: can we avoid the Weil pairing in Mazur's torsion theorem by arguing as follows?
+## Answer
 
-```text
-If E/ℚ has E[m](ℚ) = (ℤ/mℤ)^2, then for every good prime p,
-m^2 ∣ #E(𝔽_p).
-For p = 2, Hasse gives #E(𝔽_2) ≤ 3 + 2√2 < 6,
-so m^2 ≤ 5 and m ≤ 2.
-```
+Yes: for the Miller-function layer, the coordinate-ring element representing the affine function `x - a` should be built as the class of the **inner** polynomial `X - C a`, embedded as a constant polynomial in the **outer** `Y` variable.
 
-## Verdict
-
-This shortcut is **not correct as stated**.
-
-The divisibility step needs a prime-to-`p` injectivity theorem for reduction of torsion.  The correct statement is:
-
-```text
-If E has good reduction at p and p ∤ m,
-then the reduction map E(ℚ)[m] → E(𝔽_p) is injective.
-```
-
-Therefore full rational `m`-torsion gives
-
-```text
-m^2 ∣ #E(𝔽_p)
-```
-
-only for good primes `p` with `p ∤ m`.
-
-So the proposed `p = 2` argument:
-
-* does **not** apply to even `m`, because then `2 ∣ m`;
-* does **not** apply to a curve with bad reduction at `2`;
-* for odd `m`, works only under the extra hypothesis that `E` has good reduction at `2`.
-
-Thus it is not a uniform replacement for the Weil-pairing argument.
-
-## (1) Is `E[m](ℚ) = (ℤ/m)^2 ⇒ m^2 ∣ #E(𝔽_p)` correct?
-
-Yes, but only with the missing hypotheses:
-
-```text
-p is a good-reduction prime for E,
-p ∤ m,
-and the reduction map is a group homomorphism that is injective on m-torsion.
-```
-
-The formal argument is:
-
-```text
-E[m](ℚ) ≅ (ℤ/mℤ)^2
-  ⇒ #E[m](ℚ) = m^2.
-
-If reduction is injective on E[m](ℚ), then E(𝔽_p) contains a subgroup
-of cardinality m^2.
-
-By Lagrange, m^2 ∣ #E(𝔽_p).
-```
-
-The infrastructure required is substantial:
-
-1. A local good-reduction setup at `p`, usually via a DVR/residue field model.
-2. A reduction map on points
-
-   ```lean
-   red_p : E(ℚ_p) → Ẽ(𝔽_p)
-   ```
-
-   or a global-to-local version for rational points.
-3. Proof that `red_p` is a group homomorphism.
-4. Proof that the kernel has no torsion of order prime to `p`, hence injectivity on `m`-torsion when `p ∤ m`.
-5. A finite-subgroup/Lagrange step giving `m^2 ∣ Nat.card Ẽ(𝔽_p)`.
-
-The false part of the proposed statement is the phrase **for every good prime `p`**.  It should be **for every good prime `p` not dividing `m`**.
-
-## Why `p = 2` is not enough
-
-Hasse at `p = 2` says:
-
-```text
-#E(𝔽_2) ≤ 2 + 1 + 2√2 < 6,
-```
-
-hence, since the point count is an integer,
-
-```text
-#E(𝔽_2) ≤ 5.
-```
-
-If `E` has good reduction at `2` and `m` is odd, injectivity gives
-
-```text
-m^2 ∣ #E(𝔽_2),
-```
-
-so `m^2 ≤ 5`, hence `m ≤ 2`.
-
-But this cannot rule out the even cases
-
-```text
-m = 4, 6, 8, 10, 12,
-```
-
-because the required prime-to-`p` condition fails at `p = 2`.  It also cannot rule out an odd `m` curve whose reduction at `2` is bad.
-
-The correct Hasse-only conditional lemma is:
-
-```text
-If full rational m-torsion holds and there exists a good prime p with
-p ∤ m and p < (m - 1)^2, then contradiction.
-```
-
-Proof:
-
-```text
-m^2 ∣ #E(𝔽_p) ⇒ m^2 ≤ #E(𝔽_p).
-Hasse: #E(𝔽_p) ≤ p + 1 + 2√p = (√p + 1)^2.
-If p < (m - 1)^2, then (√p + 1)^2 < m^2.
-Contradiction.
-```
-
-This is useful for a **specific curve** if a suitable small good prime is available.  It is not a uniform theorem over all elliptic curves over `ℚ` from Hasse alone, because a curve can have bad reduction at whichever small primes the argument wants to use.
-
-## (2) Does Mathlib have the Hasse bound?
-
-I did not find a packaged elliptic-curve Hasse bound in current Mathlib under the expected searches:
-
-```text
-Hasse
-Hasse bound elliptic curve
-HasseWeil elliptic finite field
-WeierstrassCurve Hasse
-```
-
-What Mathlib **does** have is an L-function file defining the local polynomial.  In good reduction it uses the expected local coefficient
+In the Mathlib API at the FLT-pinned Mathlib revision, you should normally use the already-packaged definition:
 
 ```lean
-letI q : ℤ := Nat.card (IsLocalRing.ResidueField R)
-letI a : ℤ := q + 1 - (Nat.card (W'.reduction R).toAffine.Point)
-if W'.HasGoodReduction R then 1 - C a * X + C q * X ^ 2 else ...
+WeierstrassCurve.Affine.CoordinateRing.XClass W a
 ```
 
-So Mathlib has the point-count expression used to define `a_p` in the local Euler factor, but I did not find a theorem of the form
+This has type:
 
 ```lean
-|a_p| ≤ 2 * Real.sqrt q
+W.CoordinateRing
 ```
 
-or an integer-square-root version of it.
-
-For this shortcut, the Hasse bound would likely need to be added as a new theorem or carried as a hypothesis/axiom.
-
-## (3) Does Mathlib have good reduction / reduction maps for EC?
-
-Mathlib has **curve-level reduction infrastructure**, but I did not find the point-reduction map or prime-to-`p` torsion injectivity theorem needed for this shortcut.
-
-The relevant file is:
+and it is defined by Mathlib as:
 
 ```lean
-Mathlib.AlgebraicGeometry.EllipticCurve.Reduction
+noncomputable def XClass (x : R) : W'.CoordinateRing :=
+  mk W' <| C <| X - C x
 ```
 
-It defines:
+So the clean exact term for the function-field element `x - a` is:
 
 ```lean
-class IsIntegral (W : WeierstrassCurve K) : Prop
-class IsMinimal (W : WeierstrassCurve K) : Prop
-noncomputable def reduction (W : WeierstrassCurve K) [IsMinimal R W] :
-  WeierstrassCurve (ResidueField R)
-class HasGoodReduction (W : WeierstrassCurve K) : Prop extends IsMinimal R W
+algebraMap W.CoordinateRing W.FunctionField
+  (WeierstrassCurve.Affine.CoordinateRing.XClass W a)
 ```
 
-It also has the deprecated alias:
+or, inside `namespace WeierstrassCurve.Affine`, simply:
 
 ```lean
-IsGoodReduction := HasGoodReduction
+algebraMap W.CoordinateRing W.FunctionField
+  (CoordinateRing.XClass W a)
 ```
 
-and the good-reduction/smooth-special-fiber bridge:
+## Minimal Lean snippet
+
+This is the snippet I would put near the start of `MillerFunction.lean` to sanity-check the exact term.
 
 ```lean
-hasGoodReduction_iff_isElliptic_reduction :
-  HasGoodReduction R W ↔ (W.reduction R).IsElliptic
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+
+noncomputable section
+
+open Polynomial
+open scoped Polynomial.Bivariate
+
+namespace WeierstrassCurve
+namespace Affine
+
+variable {F : Type*} [Field F]
+variable (W : Affine F) (a : F)
+
+/-- The coordinate-ring class of the affine function `x - a`. -/
+def xMinusA_coord : W.CoordinateRing :=
+  CoordinateRing.XClass W a
+
+/-- The same element, expanded without using `XClass`. -/
+def xMinusA_coord_expanded : W.CoordinateRing :=
+  CoordinateRing.mk W
+    (Polynomial.C ((Polynomial.X : F[X]) - Polynomial.C a))
+
+/-- The function-field element `x - a`. -/
+def xMinusA_fun : W.FunctionField :=
+  algebraMap W.CoordinateRing W.FunctionField
+    (CoordinateRing.XClass W a)
+
+/-- The same function-field element, expanded all the way to `CoordinateRing.mk`. -/
+def xMinusA_fun_expanded : W.FunctionField :=
+  algebraMap W.CoordinateRing W.FunctionField
+    (CoordinateRing.mk W
+      (Polynomial.C ((Polynomial.X : F[X]) - Polynomial.C a)))
+
+end Affine
+end WeierstrassCurve
 ```
 
-What I did **not** find in Mathlib is a ready-made API like:
+If Lean has trouble inferring the source and target of `algebraMap`, use the fully qualified version:
 
 ```lean
-reductionMapPoint : W.PointOverLocalField → (W.reduction R).toAffine.Point
-reductionMapPoint.map_add
-reductionMapPoint.injective_on_prime_to_p_torsion
+def xMinusA_fun_fully_explicit
+    {F : Type*} [Field F]
+    (W : WeierstrassCurve.Affine F) (a : F) :
+    WeierstrassCurve.Affine.FunctionField W :=
+  algebraMap
+    (WeierstrassCurve.Affine.CoordinateRing W)
+    (WeierstrassCurve.Affine.FunctionField W)
+    (WeierstrassCurve.Affine.CoordinateRing.XClass W a)
 ```
 
-Searches for combinations of `reduction`, `Point`, `injective`, and torsion did not turn up this package.
+## Why not `AdjoinRoot.mk (Polynomial.X - Polynomial.C a)`?
 
-So the infrastructure status is:
+That expression is not the right shape.
 
-```text
-available:      minimal/integral/good-reduction predicates and reduced curve;
-available:      local Euler factor using #reduction points;
-not found:      Hasse bound theorem;
-not found:      point reduction map with group-hom API;
-not found:      prime-to-p torsion injectivity of reduction.
-```
-
-## Lean-oriented theorem shape if pursuing this shortcut
-
-The clean abstraction is to separate the missing arithmetic geometry from the finite-cardinality argument.
+Mathlib has:
 
 ```lean
-/-- Placeholder for the reduction-injectivity theorem at a good prime. -/
-class PrimeToReductionInjectivity
-    (E : Type*) [AddCommGroup E]
-    (Ered : Type*) [AddCommGroup Ered]
-    (m p : ℕ) : Prop where
-  red : E →+ Ered
-  injective_on_mtorsion :
-    ∀ {P Q : E}, m • P = 0 → m • Q = 0 → red P = red Q → P = Q
+abbrev CoordinateRing : Type r :=
+  AdjoinRoot W'.polynomial
+
+abbrev FunctionField : Type r :=
+  FractionRing W'.CoordinateRing
 ```
 
-Then the finite group step should be stated independently:
+and the natural quotient map is packaged as:
 
 ```lean
-/-- If full m-torsion injects into a finite reduction group, then m^2 divides its order. -/
-theorem m_square_dvd_card_reduction_of_full_torsion_injective
-    {E Ered : Type*} [AddCommGroup E] [AddCommGroup Ered] [Fintype Ered]
-    {m : ℕ}
-    -- abstract full-torsion hypothesis, e.g. E[m] ≃ ZMod m × ZMod m
-    (hfull : FullRationalMTorsion E m)
-    (hinj : InjectiveOnMTorsion E Ered m) :
-    m ^ 2 ∣ Fintype.card Ered := by
-  -- group-theoretic/Lagrange proof
-  sorry
+noncomputable abbrev CoordinateRing.mk : R[X][Y] →+* W'.CoordinateRing :=
+  AdjoinRoot.mk W'.polynomial
 ```
 
-And the Hasse contradiction should be conditional:
+The polynomial passed to `CoordinateRing.mk W` lives in:
 
 ```lean
-theorem no_full_mtorsion_of_good_prime_hasse
-    {m p N : ℕ}
-    (hdiv : m ^ 2 ∣ N)
-    (hhasse : (N : ℝ) ≤ p + 1 + 2 * Real.sqrt p)
-    (hsmall : p < (m - 1)^2) :
-    False := by
-  -- arithmetic inequality proof
-  sorry
+F[X][Y]
 ```
 
-For a real Mazur formalization, however, this shortcut still needs exactly the kind of serious EC reduction infrastructure that Mathlib does not seem to expose yet.
+that is, a polynomial in the outer variable `Y` whose coefficients are polynomials in the inner variable `X`.
 
-## Recommendation
+Therefore:
 
-Do **not** replace the Weil-pairing step with the `p = 2` Hasse shortcut.
+* the affine `x` coordinate is the **inner** `Polynomial.X : F[X]`;
+* to view `X - C a : F[X]` as an element of `F[X][Y]`, you must wrap it in the **outer** `Polynomial.C`;
+* the outer `Polynomial.X : F[X][Y]` is the `Y` variable, not the affine `x` coordinate.
 
-For the Mazur proof, the Weil-pairing obstruction remains the clean theorem:
+So the expanded coordinate-ring expression is:
 
-```text
-E[m](ℚ) ≅ (ℤ/mℤ)^2
-  ⇒ μ_m ⊂ ℚ
-  ⇒ m ≤ 2.
+```lean
+CoordinateRing.mk W
+  (Polynomial.C ((Polynomial.X : F[X]) - Polynomial.C a))
 ```
 
-The Hasse route is valuable as a conditional/local lemma:
+Equivalently, using the raw `AdjoinRoot` map:
 
-```text
-full rational m-torsion + suitable good prime p ∤ m + Hasse bound
-  ⇒ contradiction.
+```lean
+(AdjoinRoot.mk W.polynomial)
+  (Polynomial.C ((Polynomial.X : F[X]) - Polynomial.C a))
 ```
 
-But it does not provide a uniform proof by taking `p = 2`, and Mathlib currently appears to lack the two main ingredients needed to formalize it directly: Hasse's bound and prime-to-`p` injectivity of the point-reduction map.
+But I recommend `CoordinateRing.XClass W a`, because it is exactly the API Mathlib already provides for this element.
+
+## Related API for Miller functions
+
+Mathlib also provides the analogous `Y`-side class:
+
+```lean
+CoordinateRing.YClass W p
+```
+
+where `p : F[X]`. It represents the class of:
+
+```lean
+Y - C p
+```
+
+in `W.CoordinateRing`.
+
+So for a horizontal/line-style expression `Y - p(X)` in the function field, use:
+
+```lean
+algebraMap W.CoordinateRing W.FunctionField
+  (CoordinateRing.YClass W p)
+```
+
+For a constant affine `y`-value `b : F`, use `p := Polynomial.C b`:
+
+```lean
+algebraMap W.CoordinateRing W.FunctionField
+  (CoordinateRing.YClass W (Polynomial.C b))
+```
+
+For the Miller vertical-line denominator through `x = a`, use:
+
+```lean
+algebraMap W.CoordinateRing W.FunctionField
+  (CoordinateRing.XClass W a)
+```
+
+## Practical recommendation for `MillerFunction.lean`
+
+Define small wrappers, so the later Miller-loop code does not repeatedly expose the `AdjoinRoot`/`FractionRing` plumbing:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+
+noncomputable section
+
+open Polynomial
+open scoped Polynomial.Bivariate
+
+namespace WeierstrassCurve
+namespace Affine
+
+variable {F : Type*} [Field F]
+variable (W : Affine F)
+
+/-- Coordinate-ring class of the vertical line `x = a`, i.e. the function `x - a`. -/
+def verticalCoord (a : F) : W.CoordinateRing :=
+  CoordinateRing.XClass W a
+
+/-- Function-field vertical line `x - a`. -/
+def verticalFunction (a : F) : W.FunctionField :=
+  algebraMap W.CoordinateRing W.FunctionField (verticalCoord W a)
+
+/-- Coordinate-ring class of `Y - p(X)`. -/
+def yMinusPolynomialCoord (p : F[X]) : W.CoordinateRing :=
+  CoordinateRing.YClass W p
+
+/-- Function-field element `Y - p(X)`. -/
+def yMinusPolynomialFunction (p : F[X]) : W.FunctionField :=
+  algebraMap W.CoordinateRing W.FunctionField (yMinusPolynomialCoord W p)
+
+end Affine
+end WeierstrassCurve
+```
+
+Then the Miller-function code can use:
+
+```lean
+verticalFunction W a
+```
+
+for the vertical denominator `x - a`, and:
+
+```lean
+yMinusPolynomialFunction W p
+```
+
+for a numerator/line term `Y - p(X)`.
+
+## Bottom line
+
+The exact Lean term you want is:
+
+```lean
+algebraMap W.CoordinateRing W.FunctionField
+  (CoordinateRing.XClass W a)
+```
+
+The expanded version is:
+
+```lean
+algebraMap W.CoordinateRing W.FunctionField
+  (CoordinateRing.mk W
+    (Polynomial.C ((Polynomial.X : F[X]) - Polynomial.C a)))
+```
+
+Do **not** use bare `Polynomial.X - Polynomial.C a` at the outer `F[X][Y]` level: outer `Polynomial.X` is the `Y` variable. For affine `x - a`, use `C (X - C a)`, or better, Mathlib's `CoordinateRing.XClass W a`.
