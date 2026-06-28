@@ -595,7 +595,7 @@ theorem quartic_plus_descent_step :
             -- After rfl: h = (2t)²-(2u+1)². Need h%2=1.
             change ((2*t)^2 - (2*u+1)^2) % 2 = 1
             have : (2*t)^2 - (2*u+1)^2 = 2*(2*t^2 - 2*u^2 - 2*u - 1) + 1 := by ring
-            rw [this]; omega
+            simp only [this]; omega
         · have hb_even : b % 2 = 0 := by omega
           obtain ⟨t, rfl⟩ : ∃ t, a = 2*t+1 := ⟨a/2, by omega⟩
           obtain ⟨u, rfl⟩ : 2∣b := ⟨b/2, by omega⟩
