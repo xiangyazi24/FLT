@@ -451,23 +451,21 @@ theorem quartic_plus_descent_step :
     set B₁ := B / 2 with hB₁_def
     have hB₁_eq : B = 2 * B₁ := by omega
     have hB₁_pos : 0 < B₁ := by omega
-    -- s is odd (from s² = r⁴+r²B²-B⁴ with r odd and 4|B)
+    -- s is odd, 4|U, 4|V (substitute r=2j+1, B=4k, ring+omega)
+    obtain ⟨j, rfl⟩ : ∃ j, r = 2 * j + 1 := ⟨r / 2, by omega⟩
     have hs_odd : s % 2 = 1 := by
-      obtain ⟨j, rfl⟩ : ∃ j, r = 2 * j + 1 := ⟨r / 2, by omega⟩
-      have : s ^ 2 % 2 = 1 := by
-        rw [hBk] at heq
-        have : (2 * j + 1) ^ 4 % 2 = 1 := by
-          have : (2 * j + 1) ^ 4 = 16 * j ^ 4 + 32 * j ^ 3 + 24 * j ^ 2 + 8 * j + 1 := by ring
-          omega
-        omega
-      omega
-    -- 4 | U and 4 | V
-    have h4U : (4 : ℤ) ∣ (2 * r ^ 2 + B ^ 2 - 2 * s) := by
-      sorry -- substitute r=2j+1, B=4k, show 2r²+B² ≡ 2 mod 4, 2s ≡ 2 mod 4
-    have h4V : (4 : ℤ) ∣ (2 * r ^ 2 + B ^ 2 + 2 * s) := by
-      sorry -- same
-    -- Define M = U/4, N = V/4
-    -- MN = 5B₁⁴, gcd(M,N) = 1
+      rcases Int.emod_two_eq_zero_or_one s with hs | hs
+      · exfalso
+        obtain ⟨t, rfl⟩ : 2 ∣ s := ⟨s / 2, by omega⟩
+        rw [hBk] at heq; ring_nf at heq; omega
+      · exact hs
+    have h4U : (4 : ℤ) ∣ (2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 - 2 * s) := by
+      obtain ⟨t, rfl⟩ : ∃ t, s = 2 * t + 1 := ⟨s / 2, by omega⟩
+      exact ⟨2 * j ^ 2 + 2 * j + 4 * k ^ 2 - t, by ring⟩
+    have h4V : (4 : ℤ) ∣ (2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 + 2 * s) := by
+      obtain ⟨t, rfl⟩ : ∃ t, s = 2 * t + 1 := ⟨s / 2, by omega⟩
+      exact ⟨2 * j ^ 2 + 2 * j + 4 * k ^ 2 + t + 1, by ring⟩
+    -- Define M = U/4, N = V/4, prove MN = 5B₁⁴, gcd(M,N) = 1
     -- Then same descent as odd case
     sorry
   · -- Odd B case (main case, fully proved)
