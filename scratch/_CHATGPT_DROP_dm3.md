@@ -1,235 +1,444 @@
-# Q2056 (dm3): `WeilPairing.lean` vs `WeilPairingInterface.lean`
+# Q2094 (dm3): N=14 quartic descent algebra
 
 Date: 2026-06-28.
 
-Question: `WeilPairing.lean` has
-
-```lean
-fullRationalTorsion_order_le_two
-```
-
-with one `sorry` at line 76.  The new `WeilPairingInterface.lean` has the abstract infrastructure and a fully proved
-
-```lean
-primitive_root_in_base
-```
-
-The remaining `sorry` in `WeilPairing.lean` is mathematically the same content as the remaining
-
-```lean
-weil_interface_bridge
-```
-
-`sorry` in `WeilPairingInterface.lean`.  Should we:
-
-* A. delete `WeilPairing.lean` and wire everything through `WeilPairingInterface`;
-* B. keep `WeilPairing.lean` but have it import/use `WeilPairingInterface`;
-* C. keep both independent?
-
-## Executive answer
-
-Choose **B**.
-
-Keep `WeilPairing.lean` as the **public Mazur-proof wrapper**, but make it import `WeilPairingInterface.lean` and use the interface theorem.  Do not keep the two files independent, and do not delete the public wrapper yet.
-
-The goal should be:
+Question: for the N=14 quartic descent, analyze
 
 ```text
-WeilPairingInterface.lean
-  = abstract reusable algebra + exactly one concrete bridge gap
-
-WeilPairing.lean
-  = thin public-facing wrapper for the Mazur proof, no independent Weil-pairing sorry
+s^4 + D^2*s^2 - 2*D^4 = t^2.
 ```
 
-This gives the best combination of stable imports, clean architecture, and no duplicated mathematical seam.
+The coefficient is `-2*D^4`, not `-D^4` as in the nearby N=10/N=16-looking quartics.  What is the correct factorization, and does the same infinite descent pattern apply?
 
-## Why not A: deleting `WeilPairing.lean`
+## 1. Correct identities
 
-Deleting `WeilPairing.lean` is too aggressive unless every downstream import has already migrated and the file has no public names you want to keep.
-
-`WeilPairing.lean` likely has the more domain-specific public name:
-
-```lean
-fullRationalTorsion_order_le_two
-```
-
-or a theorem shaped exactly for the Mazur torsion proof.  Even if the real proof now lives in the interface file, keeping this wrapper preserves the public API and avoids churn in downstream files.
-
-Deletion is only attractive after a cleanup pass confirms:
+The clean first factorization is not the `2s^2 + D^2` identity.  It is
 
 ```text
-grep/import graph: no file imports WeilPairing.lean
-no public theorem names in WeilPairing.lean are still used
+s^4 + D^2*s^2 - 2*D^4
+  = (s^2 - D^2) * (s^2 + 2*D^2).
 ```
 
-Until then, deleting it creates unnecessary refactor risk.
-
-## Why not C: keeping both independent
-
-Keeping both independent is the worst option because it leaves two copies of the same mathematical gap:
+So any integer solution satisfies
 
 ```text
-WeilPairing.lean:          sorry in fullRationalTorsion_order_le_two
-WeilPairingInterface.lean: sorry in weil_interface_bridge
+(s^2 - D^2) * (s^2 + 2*D^2) = t^2.          (A)
 ```
 
-That creates three problems:
-
-1. **Duplicate proof obligations.**  When the bridge is finally proved, one file can still accidentally retain a redundant `sorry`.
-2. **API drift.**  The two statements may slowly diverge in hypotheses, namespaces, or exact target shape.
-3. **Unclear source of truth.**  It becomes ambiguous whether future code should depend on the old direct theorem or the new abstract interface.
-
-The current situation already says the two `sorry`s are the same mathematical content.  There should be exactly one place where that content is assumed/proved.
-
-## Recommended architecture
-
-### `WeilPairingInterface.lean`: source of the abstract argument
-
-This file should contain:
-
-```lean
--- abstract pairing/fixed-point/descent infrastructure
-primitive_root_in_base : ...
-```
-
-fully proved, plus the single bridge from concrete elliptic-curve hypotheses to the abstract theorem:
-
-```lean
--- this is the one remaining geometric/Weil-pairing seam
- theorem weil_interface_bridge
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
-  -- remaining sorry here only
-  sorry
-```
-
-The exact theorem name can vary, but the target should be the primitive-root consequence, because that is what the Mazur proof actually consumes.
-
-### `WeilPairing.lean`: public wrapper, no independent `sorry`
-
-This file should import the interface and define the old theorem by calling the bridge:
-
-```lean
-import FLT.Assumptions.MazurProof.WeilPairingInterface
-import FLT.Assumptions.MazurProof.RootsOfUnity
-
-namespace MazurProof
-
-/--
-Weil-pairing consequence for the Mazur proof: full rational `m`-torsion forces `m ≤ 2`.
-This is now just a wrapper around `WeilPairingInterface` plus the rational-roots-of-unity lemma.
--/
-theorem fullRationalTorsion_order_le_two
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    m ≤ 2 := by
-  rcases weil_interface_bridge E hm hfull with ⟨ζ, hζ⟩
-  exact isPrimitiveRoot_rat_order_le_two hζ
-
-end MazurProof
-```
-
-This removes the independent `sorry` from `WeilPairing.lean`.  The only remaining `sorry` is the bridge.
-
-## Where should `weil_pairing_primitive_root` live?
-
-For the Mazur scaffold, the most stable public statement is still:
-
-```lean
-theorem/axiom weil_pairing_primitive_root
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {m : ℕ} (hm : 0 < m)
-    (hfull : HasFullRationalTorsion E m) :
-    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
-```
-
-If `Axioms.lean` currently declares this as an axiom, then after `WeilPairingInterface.lean` is wired in, the next cleanup should be:
-
-```lean
--- remove axiom from Axioms.lean, or move it behind an import boundary
--- replace with theorem from interface/wrapper
-```
-
-But avoid creating an import cycle.  A clean dependency graph is:
+The difference-of-squares identity asked in the prompt is also correct, but it is secondary.  Compute
 
 ```text
-Basic definitions / HasFullRationalTorsion
-        ↓
-RootsOfUnity.lean
-        ↓
-WeilPairingInterface.lean
-        ↓
-WeilPairing.lean
-        ↓
-TorsionBound.lean
+(2*s^2 + D^2)^2 - (2*t)^2
+ = 4*s^4 + 4*D^2*s^2 + D^4
+   - 4*(s^4 + D^2*s^2 - 2*D^4)
+ = 9*D^4.
 ```
 
-If `HasFullRationalTorsion` currently lives in `Axioms.lean`, and `Axioms.lean` also contains the axiom you want to replace, split definitions first:
+Therefore
 
 ```text
-Axioms.lean or Basic.lean:
-  HasFullRationalTorsion
-  HasRationalPointOfOrder
-  HasTorsionStructure
-  TorsionStructureData
-
-WeilPairingInterface.lean:
-  primitive_root_in_base
-  weil_interface_bridge
-
-WeilPairing.lean:
-  fullRationalTorsion_order_le_two wrapper
+(2*s^2 + D^2 - 2*t) * (2*s^2 + D^2 + 2*t) = 9*D^4.      (B)
 ```
 
-This prevents the interface file from importing an axiom file that it is supposed to discharge.
+Equivalently,
 
-## Exact migration plan
+```text
+(2*t)^2 + (3*D^2)^2 = (2*s^2 + D^2)^2.                  (C)
+```
 
-Recommended steps:
+So yes: the prompt's second guess is right:
 
-1. Make `WeilPairingInterface.lean` the source of the primitive-root bridge:
-   ```lean
-   theorem weil_interface_bridge ... : ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
-     sorry
-   ```
+```text
+(2s^2 + D^2 - 2t)(2s^2 + D^2 + 2t) = D^4 + 8D^4 = 9D^4.
+```
 
-2. In `WeilPairing.lean`, replace the line-76 `sorry` with:
-   ```lean
-   rcases weil_interface_bridge E hm hfull with ⟨ζ, hζ⟩
-   exact isPrimitiveRoot_rat_order_le_two hζ
-   ```
+The earlier `5D^4` calculation is the coefficient-`-D^4` calculation; for N=14 the `-2D^4` contributes `+8D^4` after multiplying by `-4`.
 
-3. Keep `fullRationalTorsion_order_le_two` in `WeilPairing.lean` for downstream compatibility.
+## 2. The controlled factors are `A` and `B`
 
-4. Do not expose separate A1/A2/A3 axioms in the Mazur proof API.  Let the bridge theorem be the single seam.
+For descent, use
 
-5. Later, when the actual geometric Weil-pairing proof exists, replace only the body of `weil_interface_bridge`.
+```text
+A := s^2 - D^2,
+B := s^2 + 2*D^2.
+```
 
-## Naming recommendation
+Then
 
-Use names that clarify the layering:
+```text
+A*B = t^2,
+B - A = 3*D^2,
+A + B = 2*s^2 + D^2.
+```
+
+Assume a primitive positive nontrivial solution:
+
+```text
+D > 0,
+ gcd(s,D) = 1,
+ s > D,
+ t > 0.
+```
+
+Then
+
+```text
+gcd(A,B) = gcd(s^2 - D^2, s^2 + 2D^2)
+         = gcd(s^2 - D^2, 3D^2).
+```
+
+Because `gcd(s,D)=1`, we have `gcd(s^2 - D^2, D)=1`; hence
+
+```text
+gcd(A,B) | 3.
+```
+
+Thus the primitive split has exactly two possible branches.  Let
+
+```text
+δ := gcd(A,B) ∈ {1,3}.
+```
+
+Since `A*B` is a square and `A/δ`, `B/δ` are coprime, there are coprime positive integers `u < v` such that
+
+```text
+A = δ*u^2,
+B = δ*v^2,
+t = δ*u*v.                                             (D)
+```
+
+That is,
+
+```text
+s^2 - D^2     = δ*u^2,
+s^2 + 2*D^2   = δ*v^2.                                 (E)
+```
+
+Subtracting gives
+
+```text
+δ*(v^2 - u^2) = 3*D^2.                                 (F)
+```
+
+This is the main structural split for N=14.
+
+## 3. How identity (B) looks after the square split
+
+Using `A = δu^2`, `B = δv^2`, we get
+
+```text
+2*s^2 + D^2 = A + B = δ*(u^2 + v^2),
+2*t = 2*δ*u*v.
+```
+
+Therefore the two factors in (B) are
+
+```text
+2*s^2 + D^2 - 2*t = δ*(v-u)^2,
+2*s^2 + D^2 + 2*t = δ*(v+u)^2.                         (G)
+```
+
+Their product is
+
+```text
+δ^2*(v^2-u^2)^2
+ = δ^2*(3*D^2/δ)^2
+ = 9*D^4.
+```
+
+So the `9D^4` identity is not wrong; it is just less primitive than the `A*B=t^2` split.  The exact factorization has a hidden `δ = 1 or 3` square multiplier.
+
+## 4. The two branches
+
+### Branch δ = 3: the genuine descending branch
+
+If `δ=3`, then
+
+```text
+s^2 - D^2   = 3*u^2,
+s^2 + 2D^2  = 3*v^2.
+```
+
+Subtracting and rearranging gives
+
+```text
+D^2 = v^2 - u^2,
+s^2 = v^2 + 2*u^2.                                    (H)
+```
+
+Now `(D',s') := (u,v)` is again an N=14 solution, because
+
+```text
+s'^4 + D'^2*s'^2 - 2*D'^4
+ = v^4 + u^2*v^2 - 2*u^4
+ = (v^2-u^2)*(v^2+2u^2)
+ = D^2*s^2.
+```
+
+So
+
+```text
+(D',s',t') = (u, v, D*s)                               (I)
+```
+
+is another solution.
+
+This is a real descent in `s`, because
+
+```text
+s'^2 = v^2 = (s^2 + 2D^2)/3 < s^2
+```
+
+as soon as `s > D`.
+
+Also note the branch flip: for the new solution,
+
+```text
+s'^2 - D'^2   = v^2 - u^2 = D^2,
+s'^2 + 2D'^2  = v^2 + 2u^2 = s^2,
+```
+
+so the new solution has `δ'=1`.
+
+### Branch δ = 1: the inverse/ascent branch
+
+If `δ=1`, then
+
+```text
+s^2 - D^2   = u^2,
+s^2 + 2D^2  = v^2.
+```
+
+Subtracting and rearranging gives
+
+```text
+3D^2 = v^2 - u^2,
+3s^2 = v^2 + 2*u^2.                                  (J)
+```
+
+Again `(D',s') := (u,v)` is an N=14 solution, but now
+
+```text
+s'^4 + D'^2*s'^2 - 2*D'^4
+ = v^4 + u^2*v^2 - 2u^4
+ = (v^2-u^2)*(v^2+2u^2)
+ = (3D^2)*(3s^2)
+ = (3Ds)^2.
+```
+
+So
+
+```text
+(D',s',t') = (u, v, 3*D*s)                            (K)
+```
+
+is another solution.
+
+But this is not a descent, since
+
+```text
+s'^2 = v^2 = s^2 + 2D^2 > s^2.
+```
+
+It is exactly the inverse of the `δ=3` descent.  Starting from a `δ=1` solution and applying (K) gives a larger `δ=3` solution; applying the `δ=3` descent to that larger solution returns the original one.
+
+## 5. Consequence: the N=14 descent is not the same one-line descent
+
+For N=14, the first factorization does not by itself give a uniform smaller primitive solution.
+
+The structure is:
+
+```text
+δ = 3  gives a smaller solution (u,v,Ds).
+δ = 1  gives a larger solution (u,v,3Ds).
+```
+
+Thus a minimal counterexample, ordered by `s`, would have to lie in the `δ=1` branch.  The main split reduces the problem to ruling out the `δ=1` branch by a secondary descent/obstruction.
+
+This is the important difference from the N=10/N=16-style pattern.  The identity with `9D^4` is correct, but the coefficient `-2D^4` makes the descent branch-dependent instead of automatically descending.
+
+## 6. The secondary core: reduction to `x^4 + 10x^2y^2 + y^4 = z^2`
+
+The `δ=1` branch has a standard Pythagorean-triple reduction.
+
+In the `δ=1` branch,
+
+```text
+s^2 = u^2 + D^2,
+```
+
+with `gcd(u,D)=1`.  Modulo `4`, `D` cannot be odd, because then `s^2 + 2D^2 = v^2` would be `2` or `3 mod 4`, impossible.  Hence `D` is even, and the primitive Pythagorean parametrization gives coprime positive integers `m > n`, of opposite parity, such that
+
+```text
+D = 2mn,
+u = m^2 - n^2,
+s = m^2 + n^2.
+```
+
+The remaining condition `s^2 + 2D^2 = v^2` becomes
+
+```text
+v^2
+ = (m^2+n^2)^2 + 2*(2mn)^2
+ = m^4 + 10*m^2*n^2 + n^4.                            (L)
+```
+
+Conversely, any coprime opposite-parity positive solution of
+
+```text
+z^2 = m^4 + 10*m^2*n^2 + n^4
+```
+
+produces a primitive `δ=1` solution of the N=14 quartic by
+
+```text
+D = 2mn,
+s = m^2+n^2,
+u = m^2-n^2,
+t = u*z.
+```
+
+The `δ=3` branch gives the same auxiliary quartic from the other side.  There `D^2 = v^2-u^2`, so with the primitive Pythagorean parametrization
+
+```text
+u = 2mn,
+D = m^2-n^2,
+v = m^2+n^2,
+```
+
+and the condition `s^2 = v^2 + 2u^2` again becomes
+
+```text
+s^2 = m^4 + 10*m^2*n^2 + n^4.                         (M)
+```
+
+So the real N=14 core is the auxiliary quartic
+
+```text
+x^4 + 10*x^2*y^2 + y^4 = z^2.                         (Q10)
+```
+
+To finish an N=14 nonexistence proof by descent, isolate a lemma of the form:
+
+```text
+No coprime positive opposite-parity integers x,y,z satisfy
+z^2 = x^4 + 10*x^2*y^2 + y^4.
+```
+
+Then the N=14 quartic is killed as follows:
+
+1. Start with a primitive positive nontrivial N=14 solution.
+2. Split `A=s^2-D^2`, `B=s^2+2D^2`.
+3. Get `δ ∈ {1,3}` and `A=δu^2`, `B=δv^2`.
+4. If `δ=3`, descend once to the smaller `δ=1` solution `(u,v,Ds)`.
+5. In the `δ=1` branch, parametrize the primitive Pythagorean triple `u^2 + D^2 = s^2`.
+6. The leftover condition is exactly `(Q10)`, contradiction by the auxiliary quartic descent.
+
+## 7. Lean-facing decomposition
+
+A clean Lean interface should not try to reuse the N=10/N=16 descent as a black box.  For N=14, split the proof into these lemmas:
 
 ```lean
--- in WeilPairingInterface.lean
-primitive_root_in_base              -- fully proved pure algebra
-weil_pairing_primitive_root_bridge  -- one remaining geometric bridge
+-- algebraic identity
+n14_factor_AB :
+  s^4 + D^2*s^2 - 2*D^4 = (s^2 - D^2) * (s^2 + 2*D^2)
 
--- in WeilPairing.lean
-fullRationalTorsion_order_le_two    -- public Mazur-facing corollary
+-- difference-of-squares identity
+n14_diff_square :
+  t^2 = s^4 + D^2*s^2 - 2*D^4 ->
+  (2*s^2 + D^2 - 2*t) * (2*s^2 + D^2 + 2*t) = 9*D^4
+
+-- primitive gcd control
+gcd_n14_AB_dvd_three :
+  Nat.Coprime s D ->
+  Nat.gcd (s^2 - D^2) (s^2 + 2*D^2) ∣ 3
+
+-- square splitting, after positivity and AB=t^2
+n14_square_split :
+  ∃ δ u v,
+    (δ = 1 ∨ δ = 3) ∧
+    s^2 - D^2 = δ*u^2 ∧
+    s^2 + 2*D^2 = δ*v^2 ∧
+    t = δ*u*v
+
+-- branch transform
+n14_transform :
+  s^2 - D^2 = δ*u^2 ->
+  s^2 + 2*D^2 = δ*v^2 ->
+  δ ∈ {1,3} ->
+  v^4 + u^2*v^2 - 2*u^4 = ((3/δ)*D*s)^2
 ```
 
-If there is already a name `weil_interface_bridge`, it is fine to keep it for now, but `weil_pairing_primitive_root_bridge` is more descriptive.
+For the `δ=3` branch, add the strict decrease lemma:
 
-## Final recommendation
+```lean
+n14_delta_three_decreases :
+  s > D ->
+  s^2 + 2*D^2 = 3*v^2 ->
+  v < s
+```
 
-Choose **B**:
+For the `δ=1` branch, reduce to the auxiliary quartic:
+
+```lean
+n14_delta_one_to_Q10 :
+  s^2 - D^2 = u^2 ->
+  s^2 + 2*D^2 = v^2 ->
+  Nat.Coprime s D ->
+  ∃ m n,
+    Nat.Coprime m n ∧
+    m > n ∧
+    Odd (m+n) ∧
+    D = 2*m*n ∧
+    s = m^2+n^2 ∧
+    v^2 = m^4 + 10*m^2*n^2 + n^4
+```
+
+Then make the classical auxiliary descent its own theorem/axiom target:
+
+```lean
+no_Q10_primitive :
+  ¬ ∃ m n z : ℕ,
+    m > 0 ∧ n > 0 ∧
+    Nat.Coprime m n ∧
+    Odd (m+n) ∧
+    z^2 = m^4 + 10*m^2*n^2 + n^4
+```
+
+With `no_Q10_primitive`, the N=14 descent becomes structurally clean and avoids pretending that the `9D^4` factorization alone gives a uniform infinite descent.
+
+## Bottom line
+
+The correct identity is
 
 ```text
-Keep `WeilPairing.lean`, but make it import and use `WeilPairingInterface.lean`.
+(2s^2 + D^2 - 2t)(2s^2 + D^2 + 2t) = 9D^4.
 ```
 
-Then remove the independent `sorry` from `WeilPairing.lean`.  The only remaining `sorry` should be the concrete bridge in `WeilPairingInterface.lean`.  This keeps the public Mazur proof stable while ensuring there is exactly one source of truth for the unfinished Weil-pairing content.
+But the real descent structure is controlled by
+
+```text
+(s^2-D^2)(s^2+2D^2)=t^2,
+```
+
+with
+
+```text
+gcd(s^2-D^2, s^2+2D^2) ∈ {1,3}.
+```
+
+After square splitting:
+
+```text
+s^2-D^2   = δu^2,
+s^2+2D^2  = δv^2,
+δ ∈ {1,3}.
+```
+
+The `δ=3` branch descends to `(u,v,Ds)`.  The `δ=1` branch ascends to `(u,v,3Ds)` and must be eliminated by the secondary quartic descent
+
+```text
+z^2 = x^4 + 10x^2y^2 + y^4.
+```
+
+So: the algebraic identity is `9D^4`, yes; the same naive infinite descent does not directly work without the extra `δ=1`/auxiliary-quartic analysis.
