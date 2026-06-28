@@ -477,7 +477,7 @@ theorem quartic_plus_descent_step :
     have hUV := UV_eq_five_mul_fourth heq
     have hMN_prod : M * N = 5 * B₁ ^ 4 := by
       have h_4MN : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by
-        simp only [hM_val, hN_val]; exact hUV
+        simpa only [hM_val, hN_val] using hUV
       have h16 : 16 * (M * N) = 16 * (5 * (2 * k) ^ 4) :=
         calc 16 * (M * N) = (4 * M) * (4 * N) := by ring
           _ = 5 * (4 * k) ^ 4 := h_4MN
