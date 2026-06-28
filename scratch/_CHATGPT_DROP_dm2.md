@@ -1,174 +1,202 @@
-# Q2122 (dm2): `MillerFunction.lean` sorries and concrete replacements
+# Q2138 (dm2): Weil-pairing architecture — keep one abstract bridge axiom, make MillerFunction definitions-only
 
 Date: 2026-06-28.
 
-Source inspected:
+## Verdict
+
+Yes: this is the right architecture.
+
+For the Mazur torsion proof, the clean design is:
 
 ```text
-repo:   xiangyazi24/FLT
-branch: ai-scratch
-file:   FLT/Assumptions/MazurProof/MillerFunction.lean
+Downstream Mazur proof
+  depends on
+WeilPairingInterface.primitive_root_in_base + one bridge axiom
+  not on
+concrete Miller-function correctness theorems.
 ```
 
-## Current sorry count
+So `MillerFunction.lean` should become a **definitions-only / engineering-staging file**:
 
-The pushed file currently has **6 literal `sorry`s**, not 8.
+* it may define `verticalFunction`, `lineFunction`, `gFunction`, `millerLoop`, `MillerState`, and harmless identity simp lemmas;
+* it should **not** export theorem claims like bilinearity, `pow_eq_one`, alternating, or nondegeneracy unless those are actually proved from divisor/evaluation theory;
+* it should avoid a fake total `evalAtPoint : FunctionField W → Point W → K` if that evaluator is later used to state fake concrete Weil-pairing laws.
 
-They are:
+Then the only remaining mathematical assumption for Mazur should be the bridge axiom:
+
+```lean
+theorem weil_interface_bridge
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
+  sorry
+```
+
+That is exactly the right single seam: it says “the actual elliptic-curve Weil-pairing theorem, plus Galois equivariance, plus full rational torsion, gives a primitive root in the base.”  The rest of the Mazur torsion argument can then be developed without pretending that the Miller-function layer is already formalized.
+
+## Important count correction
+
+On current `ai-scratch`, I count **9 literal `sorry`s**, not 8:
 
 ```text
-line 198: evalAtPoint
-line 221: weilPairing_pow_eq_one
-line 227: weilPairing_add_left
-line 233: weilPairing_add_right
-line 238: weilPairing_self
-line 245: weilPairing_nondegenerate
+WeilPairingInterface.lean:
+  left_nondegenerate       -- line 87
+  right_nondegenerate      -- line 92
+  weil_interface_bridge    -- line 247
+
+MillerFunction.lean:
+  evalAtPoint              -- line 199
+  weilPairing_pow_eq_one   -- line 221
+  weilPairing_add_left     -- line 227
+  weilPairing_add_right    -- line 233
+  weilPairing_self         -- line 238
+  weilPairing_nondegenerate -- line 245
 ```
 
-The three identity simp lemmas at the bottom are already closed:
+If your intended count is “8”, then one of these has presumably already been solved or not counted locally.  But architecturally, the target should be:
 
-```lean
-@[simp]
-theorem verticalFunction_zero : verticalFunction W 0 = 1 :=
-  rfl
-
-@[simp]
-theorem lineFunction_zero_left (Q : Point W) : lineFunction W 0 Q = 1 := by
-  simp [lineFunction]
-
-@[simp]
-theorem lineFunction_zero_right (P : Point W) : lineFunction W P 0 = 1 := by
-  cases P <;> simp [lineFunction]
+```text
+0 concrete MillerFunction sorries
+0 fake derived interface sorries
+1 real bridge sorry: weil_interface_bridge
 ```
 
-So there are no remaining simp-lemma sorries to replace in the current pushed file.
-
-## Important obstruction
-
-A mathematically correct total ring-hom-style evaluator
+The two `left_nondegenerate` / `right_nondegenerate` sorries in `WeilPairingInterface` should not remain as proof holes.  With the current field
 
 ```lean
-FunctionField W → K
+nondegenerate : ∃ P Q : T, IsPrimitiveRoot (rootVal (pairing P Q)) m
 ```
 
-cannot be constructed from point evaluation on `CoordinateRing W` without a non-pole hypothesis.  The reason is that `FunctionField W = FractionRing (CoordinateRing W)`, and extending a ring hom from a domain to its fraction field via `IsFractionRing.lift` requires the coordinate-ring map to be injective, equivalently that every nonzero denominator maps to a nonzero value.  Point evaluation is not injective: for example, `X - x_R` is a nonzero coordinate-ring element but evaluates to `0` at a point with `x`-coordinate `x_R`.
+they are not derivable for an arbitrary module `T`.  Either promote them to fields of `WeilPairingData`, or delete them if unused.
 
-Therefore, the best honest replacement for the `evalAtPoint` sorry in the current skeleton is either:
+## Recommended patch: `WeilPairingInterface.lean`
 
-1. a **totalized chosen-representative evaluator** that closes the definition but should not be used to prove the final Weil-pairing laws; or
-2. a redesigned evaluator with an explicit numerator/denominator representative plus a proof that the denominator does not vanish at the point.
+### Replace the structure fields around nondegeneracy
 
-Since the requested file currently has the total signature
+Change:
 
 ```lean
-def evalAtPoint (_f : FunctionField W) (_R : Point W) : K
+  /-- Nondegeneracy: there exist `P Q : T` such that `e_m(P,Q)` is a
+      primitive `m`-th root of unity. -/
+  nondegenerate :
+    ∃ P Q : T, IsPrimitiveRoot (rootVal (pairing P Q)) m
 ```
 
-option (1) is the only way to replace that `sorry` without changing downstream type signatures.
-
-## Replacement code for the `evalAtPoint` sorry
-
-Replace the current block
+to:
 
 ```lean
-/-- Evaluate a function-field element at a point on the curve.
-...
--/
-def evalAtPoint (_f : FunctionField W) (_R : Point W) : K := by
+  /-- Existence of a primitive pairing value.  This is the fact needed for
+      `exists_primitive_root`. -/
+  exists_primitive_pairing :
+    ∃ P Q : T, IsPrimitiveRoot (rootVal (pairing P Q)) m
+  /-- Left radical is trivial.  This is part of the abstract Weil-pairing API,
+      not derivable from `exists_primitive_pairing` for an arbitrary module. -/
+  left_nondegenerate :
+    ∀ P : T, (∀ Q : T, pairing P Q = 1) → P = 0
+  /-- Right radical is trivial. -/
+  right_nondegenerate :
+    ∀ Q : T, (∀ P : T, pairing P Q = 1) → Q = 0
+```
+
+### Replace the two theorem sorries by field projections
+
+Change:
+
+```lean
+/-- Left nondegeneracy: `(∀ Q, e(P,Q) = 1) → P = 0`. -/
+theorem left_nondegenerate (w : WeilPairingData m T K) (P : T)
+    (h : ∀ Q : T, w.pairing P Q = 1) : P = 0 := by
+  sorry
+
+/-- Right nondegeneracy: `(∀ P, e(P,Q) = 1) → Q = 0`. -/
+theorem right_nondegenerate (w : WeilPairingData m T K) (Q : T)
+    (h : ∀ P : T, w.pairing P Q = 1) : Q = 0 := by
+  sorry
+```
+
+to:
+
+```lean
+/-- Left nondegeneracy: `(∀ Q, e(P,Q) = 1) → P = 0`. -/
+theorem left_nondegenerate (w : WeilPairingData m T K) (P : T)
+    (h : ∀ Q : T, w.pairing P Q = 1) : P = 0 :=
+  w.left_nondegenerate P h
+
+/-- Right nondegeneracy: `(∀ P, e(P,Q) = 1) → Q = 0`. -/
+theorem right_nondegenerate (w : WeilPairingData m T K) (Q : T)
+    (h : ∀ P : T, w.pairing P Q = 1) : Q = 0 :=
+  w.right_nondegenerate Q h
+```
+
+### Update `exists_primitive_root`
+
+Change:
+
+```lean
+  obtain ⟨P, Q, hprim⟩ := w.nondegenerate
+```
+
+to:
+
+```lean
+  obtain ⟨P, Q, hprim⟩ := w.exists_primitive_pairing
+```
+
+This removes the two fake abstract proof holes while preserving the same downstream theorem names.
+
+## Recommended patch: `MillerFunction.lean`
+
+Delete the entire concrete `WeilPairing` properties section.  In other words, remove the block beginning at:
+
+```lean
+/-! ## Function-field evaluation and the Weil pairing -/
+
+section WeilPairing
+
+variable (W : Affine K) [IsDomain (CoordinateRing W)]
+```
+
+through:
+
+```lean
+end WeilPairing
+```
+
+This removes:
+
+```lean
+def evalAtPoint ... := by
   exact sorry
+
+def weilPairing ... := ...
+
+theorem weilPairing_pow_eq_one ... := by
+  sorry
+
+theorem weilPairing_add_left ... := by
+  sorry
+
+theorem weilPairing_add_right ... := by
+  sorry
+
+theorem weilPairing_self ... := by
+  sorry
+
+theorem weilPairing_nondegenerate ... := by
+  sorry
 ```
 
-with the following code.
+Do **not** replace these theorem sorries with axioms in `MillerFunction.lean`; that would duplicate the bridge seam and make the axiom boundary less clear.
+
+The definitions-only file should keep everything up to the end of `MillerLoop`, then keep the identity simp lemmas:
 
 ```lean
-/-- Evaluate a coordinate-ring element at an affine nonsingular point.
+/-! ## Simp lemmas for identity cases -/
 
-This is the honest quotient-level evaluation map.  The proof obligation for
-`AdjoinRoot.lift` is exactly the curve equation contained in `hxy : W.Nonsingular x y`.
+section SimpLemmas
 
-Mathlib's `CoordinateRing W` is `AdjoinRoot W.polynomial`, where the base ring is
-`K[X]` and the adjoined/root variable is the outer `Y`.  So we evaluate the base
-`K[X]` by `Polynomial.evalRingHom x`, and send the root/outer variable to `y`. -/
-private def evalCoordinateAtAffine (x y : K) (hxy : W.Nonsingular x y) :
-    CoordinateRing W →+* K :=
-  AdjoinRoot.lift (f := W.polynomial) (Polynomial.evalRingHom x) y (by
-    simpa [WeierstrassCurve.Affine.Equation, Polynomial.eval₂_evalRingHom] using hxy.1)
+variable (W : Affine K)
 
-/-- Totalized evaluation of a function-field element at an affine nonsingular point.
-
-This chooses some fraction representative `num / den` using the fraction-field
-surjectivity theorem and returns `ev(num) / ev(den)`.
-
-WARNING: this closes the skeleton definition, but it is not the final mathematical
-API for Weil-pairing evaluation, because the result depends on the chosen representative
-when the chosen denominator evaluates to zero.  The final API should carry a non-pole
-hypothesis or an explicit regular representative. -/
-private def evalFunctionFieldAtAffine (f : FunctionField W)
-    (x y : K) (hxy : W.Nonsingular x y) : K := by
-  classical
-  let ev : CoordinateRing W →+* K := evalCoordinateAtAffine W x y hxy
-  let hfrac : ∃ num den : CoordinateRing W,
-      den ∈ nonZeroDivisors (CoordinateRing W) ∧
-        algebraMap (CoordinateRing W) (FunctionField W) num /
-          algebraMap (CoordinateRing W) (FunctionField W) den = f :=
-    IsFractionRing.div_surjective (A := CoordinateRing W) (K := FunctionField W) f
-  let num : CoordinateRing W := Classical.choose hfrac
-  let hden := Classical.choose_spec hfrac
-  let den : CoordinateRing W := Classical.choose hden
-  exact ev num / ev den
-
-/-- Evaluate a function-field element at a point on the curve.
-
-For affine points this uses the totalized fraction-representative evaluator above.
-For the point at infinity, this skeleton returns `0`.  A final divisor-aware API should
-replace this with a partial/regular evaluation at `O`. -/
-def evalAtPoint (f : FunctionField W) : Point W → K
-  | 0 => 0
-  | .some x y hxy => evalFunctionFieldAtAffine W f x y hxy
-```
-
-If the named-argument call to `IsFractionRing.div_surjective` does not elaborate on the pinned branch, use the following variant for the `hfrac` line:
-
-```lean
-  let hfrac : ∃ num den : CoordinateRing W,
-      den ∈ nonZeroDivisors (CoordinateRing W) ∧
-        algebraMap (CoordinateRing W) (FunctionField W) num /
-          algebraMap (CoordinateRing W) (FunctionField W) den = f :=
-    IsFractionRing.div_surjective (CoordinateRing W) f
-```
-
-That is the same theorem with explicit positional arguments.
-
-## If `AdjoinRoot.lift` elaboration needs a more explicit proof
-
-The only slightly fragile part is the `simpa` proof in `evalCoordinateAtAffine`.  If Lean does not rewrite the `eval₂` expression to `evalEval`, use this expanded version:
-
-```lean
-private def evalCoordinateAtAffine (x y : K) (hxy : W.Nonsingular x y) :
-    CoordinateRing W →+* K :=
-  AdjoinRoot.lift (f := W.polynomial) (Polynomial.evalRingHom x) y (by
-    change Polynomial.eval₂ (Polynomial.evalRingHom x) y W.polynomial = 0
-    rw [Polynomial.eval₂_evalRingHom]
-    exact hxy.1)
-```
-
-The reason this works is:
-
-```lean
-hxy.1 : W.Equation x y
-```
-
-and `W.Equation x y` is definitionally:
-
-```lean
-W.polynomial.evalEval x y = 0
-```
-
-## Replacement code for simp lemmas, if needed
-
-The current file already has these exact proofs, but if an older local branch still has sorries in the simp lemmas, use:
-
-```lean
 omit [DecidableEq K] in
 @[simp]
 theorem verticalFunction_zero : verticalFunction W 0 = 1 :=
@@ -181,65 +209,98 @@ theorem lineFunction_zero_left (Q : Point W) : lineFunction W 0 Q = 1 := by
 @[simp]
 theorem lineFunction_zero_right (P : Point W) : lineFunction W P 0 = 1 := by
   cases P <;> simp [lineFunction]
+
+end SimpLemmas
 ```
 
-## Remaining 5 sorries
+## Update the module docstring in `MillerFunction.lean`
 
-The remaining five theorem sorries should **not** be expected to close by unfolding definitions:
+The current module comment says the file defines the Weil pairing and that all proofs are `sorry`.  After this cleanup, make it explicit that this file is definitions-only:
 
 ```lean
-weilPairing_pow_eq_one
+/-!
+# Miller Function Definitions for the Weil Pairing
+
+This file defines the concrete Miller-function building blocks on an affine
+Weierstrass curve `W` over a field `K`:
+
+* `verticalFunction` — the vertical line `X - x_P` in `W.FunctionField`;
+* `lineFunction` — the line/tangent/vertical branch through two points;
+* `gFunction` — the Miller correction factor;
+* `millerLoop` and `millerLoopState` — the double-and-add Miller accumulator.
+
+This file is intentionally **definitions-only**.  It does not claim the divisor
+identities, evaluation regularity, bilinearity, root-of-unity property, or
+nondegeneracy of the concrete Weil pairing.
+
+For the Mazur torsion proof, the actual Weil-pairing input is isolated in
+`WeilPairingInterface.weil_interface_bridge`.  The concrete Miller-function layer
+is retained as future implementation scaffolding for eventually discharging that
+bridge axiom.
+-/
+```
+
+Also remove `weilPairing` from the “Main definitions” bullet list unless you keep it behind a separate explicitly partial/regular-evaluation API.
+
+## Why this is better
+
+This architecture has a clean axiom ledger:
+
+```text
+Current bad state:
+  abstract bridge sorry
+  + abstract nondegeneracy proof holes
+  + concrete Miller-function theorem holes
+  + fake/total evalAtPoint hole
+
+Recommended state:
+  one theorem seam only: weil_interface_bridge
+```
+
+That is much easier to audit.  It says exactly what remains mathematically unproved:
+
+```text
+Construct the actual elliptic-curve Weil pairing and prove its Galois-equivariant
+primitive-root consequence for full rational torsion.
+```
+
+It also avoids a dangerous intermediate state where `MillerFunction.lean` exports theorem names like
+
+```lean
 weilPairing_add_left
-weilPairing_add_right
-weilPairing_self
 weilPairing_nondegenerate
 ```
 
-They require the real Miller-function divisor theory:
+that look like real formalized elliptic-curve facts but are actually unsupported.
 
-```text
-div(verticalFunction P) = [P] + [-P] - 2[O]
-div(lineFunction P Q) = [P] + [Q] + [-(P+Q)] - 3[O]
-div(gFunction P Q) = [P] + [Q] - [P+Q] - [O]
-div(millerLoop P m) = m[P] - [mP] - (m-1)[O]
-```
+## What downstream files should import/use
 
-and a regularity/non-pole framework for all evaluations in the Weil-pairing formula.  With the current totalized evaluator, those theorem statements are not mathematically connected to the definitions strongly enough to prove.  In particular, `weilPairing_nondegenerate` is a deep theorem, not a simp/unfolding lemma.
-
-## Recommended next API change
-
-For the final version, replace the total evaluator with a regular-evaluation structure, for example:
+Downstream Mazur files should import/use:
 
 ```lean
-structure RegularEvalData (W : Affine K) [IsDomain (CoordinateRing W)] (R : Point W) where
-  num : CoordinateRing W
-  den : CoordinateRing W
-  den_nonzero : den ∈ nonZeroDivisors (CoordinateRing W)
-  den_eval_ne_zero :
-    match R with
-    | 0 => True
-    | .some x y hxy => evalCoordinateAtAffine W x y hxy den ≠ 0
-  value : FunctionField W
-  value_eq :
-    algebraMap (CoordinateRing W) (FunctionField W) num /
-      algebraMap (CoordinateRing W) (FunctionField W) den = value
+MazurProof.WeilPairingInterface.weil_interface_bridge
 ```
 
-Then define:
+or a wrapper theorem derived from it.  They should not depend on:
 
 ```lean
-def RegularEvalData.eval (D : RegularEvalData W R) : K :=
-  match R with
-  | 0 => 0
-  | .some x y hxy =>
-      evalCoordinateAtAffine W x y hxy D.num /
-        evalCoordinateAtAffine W x y hxy D.den
+MillerFunction.weilPairing_add_left
+MillerFunction.weilPairing_pow_eq_one
+MillerFunction.weilPairing_nondegenerate
 ```
 
-That is the right mathematical shape for later proving the Weil-pairing laws.
+because those concrete theorems should not exist until the divisor/evaluation layer exists.
 
-## Net effect
+## Final recommendation
 
-The code above replaces **1 of the 6 current sorries**: the `evalAtPoint` definition.
+Proceed with the cleanup:
 
-The simp lemmas are already closed.  The remaining 5 sorries are genuine theorem seams requiring divisor/evaluation theory, not local definitional unfolding.
+1. Make `MillerFunction.lean` definitions-only and remove all concrete Weil-pairing property theorem statements.
+2. Promote `left_nondegenerate` and `right_nondegenerate` to fields of `WeilPairingData`, or delete the derived theorem statements if unused.
+3. Keep exactly one `sorry` / axiom seam:
+
+```lean
+weil_interface_bridge
+```
+
+This gives the best current architecture: honest axiom boundary, no fake Miller-function claims, and a clear future path for replacing the bridge with concrete divisor/evaluation formalization.
