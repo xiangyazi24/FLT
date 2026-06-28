@@ -1,354 +1,224 @@
-# Q1956 (dm3): `QuarticDescentN16.lean` for the N = 16 square obstruction
+# Q1973 (dm4): `KubertBridgeN14.lean` and the genus-1 base
 
-## Connector note
+## Executive answer
 
-I checked the connected repository `xiangyazi24/FLT` on branch `ai-scratch` for the file named in the prompt.
+Yes: you can still write a `KubertBridgeN14.lean` whose public API reduces the N = 14 case to **one bridge axiom**, analogous in proof use to `kubert_C10_square` and `kubert_C12_square`.
 
-The branch is accessible, and I could read nearby Mazur files such as:
-
-```text
-FLT/Assumptions/MazurProof/DescentBridgeN16.lean
-scratch/DescentN16.lean
-scratch/Descent20a4.lean
-scratch/DescentN14.lean
-scratch/PythagoreanDescentCore.lean
-scratch/CoprimeFactorSplit.lean
-```
-
-But the connector did **not** find these expected paths:
+But the **shape** of the axiom should change.  For N = 10 and N = 12 the bridge can look like a square condition in one free Kubert parameter because `X1(10)` and `X1(12)` are genus 0.  For N = 14, `X1(14)` is genus 1, so there is no global rational one-parameter Kubert coordinate.  The internal parameter space is instead a pair `(r,z)` on
 
 ```text
-FLT/Assumptions/MazurProof/QuarticDescent.lean
-scratch/QuarticDescent.lean
-FLT/Assumptions/MazurProof/RationalPointsC20.lean
-scratch/RationalPointsC20.lean
+z^2 = 1 - 2*r + r^2 + 4*r^3.
 ```
 
-So I cannot honestly claim to have copied exact theorem names out of the 1128-line `QuarticDescent.lean`.  The file below is therefore written as a concrete adapter file with three small API shims at the top.  Those shims are not intended as new mathematical assumptions; they are precisely the reusable pieces that should already exist in, or be exported from, the N = 10 `QuarticDescent.lean` infrastructure:
+So the N = 14 bridge should not be named or shaped as `kubert_C14_square`.  It should be a **noncuspidal obstruction-point axiom**:
 
-1. the first coprime factor split of `5 * B^4`;
-2. the primitive Pythagorean square-leg descent for the `b`-leg;
-3. the same Pythagorean square-leg descent for the symmetric `a`-leg.
+```lean
+axiom kubert_C14_obstruction_point
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : ZMod 14 →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ u w : ℚ,
+      E_N14_AffineEquation u w ∧ ¬ E_N14_DegenerateParameter u
+```
 
-Everything after those shims is the actual N = 16 adapter and infinite-descent wrapper.
+Then the rational-points file for the obstruction curve proves that every rational point is degenerate, giving the contradiction.
 
-## Mathematical change from N = 10
+## Obstruction curve API
 
-For N = 16 the quartic is
+Use the same target obstruction curve as in the existing N = 14 descent bridge:
+
+```lean
+def E_N14_AffineEquation (u w : ℚ) : Prop :=
+  w ^ 2 = u ^ 3 + u ^ 2 - 2 * u
+
+/-- Affine cusp / degenerate `u`-coordinates on the N = 14 obstruction curve. -/
+def E_N14_DegenerateParameter (u : ℚ) : Prop :=
+  u = -2 ∨ u = 0 ∨ u = 1
+```
+
+This is the curve
 
 ```text
-t^2 = s^4 - D^2*s^2 - D^4.
+w^2 = u^3 + u^2 - 2u,
 ```
 
-The useful identity is the `ε = -1` version
+with LMFDB label `96.b3`.  Its rational points are
 
 ```text
-(2*s^2 - D^2)^2 - (2*t)^2 = 5*D^4.
+O, (-2,0), (0,0), (1,0).
 ```
 
-In a primitive solution one gets `D` even, and in fact the useful primitive branch has `D = 2*B`.  Then
+Thus the affine rational-points theorem should have this exact shape:
 
-```text
-X = (s^2 - 2*B^2 - t) / 2,
-Y = (s^2 - 2*B^2 + t) / 2
+```lean
+theorem obstruction_curve_N14_points_degenerate :
+    ∀ u w : ℚ, E_N14_AffineEquation u w → E_N14_DegenerateParameter u := by
+  -- from RationalPoints for LMFDB 96.b3 / E(Q) ~= (Z/2Z)^2
+  ...
 ```
 
-satisfy
+For the axiom-discharge skeleton, it is also fine to leave this as the existing axiom name until the rational-points proof is wired in:
 
-```text
-X * Y = 5 * B^4.
+```lean
+axiom obstruction_curve_N14_points_degenerate :
+    ∀ u w : ℚ, E_N14_AffineEquation u w → E_N14_DegenerateParameter u
 ```
 
-After the coprime `5 * fourth-power` split, either
+## The single-axiom bridge for cyclic C14
 
-```text
-X = a^4,       Y = 5*b^4,   B = a*b,
+For Mazur's cyclic torsion case, the clean single axiom is:
+
+```lean
+axiom C14_gives_non_degenerate_N14_point
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : ZMod 14 →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ u w : ℚ,
+      E_N14_AffineEquation u w ∧ ¬ E_N14_DegenerateParameter u
 ```
 
-or symmetrically
+Then the final contradiction theorem is tiny:
 
-```text
-X = 5*a^4,     Y = b^4,     B = a*b.
+```lean
+theorem no_C14_from_N14_obstruction
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ ∃ f : ZMod 14 →+ (E⁄ℚ).Point, Function.Injective f := by
+  intro hE
+  rcases C14_gives_non_degenerate_N14_point E hE with
+    ⟨u, w, hcurve, hnondeg⟩
+  exact hnondeg (obstruction_curve_N14_points_degenerate u w hcurve)
 ```
 
-The first case gives
+This is the direct analogue of the N = 10 and N = 12 bridge-discharge pattern, except that the bridge output is not a square predicate; it is a nondegenerate rational point on the genus-one obstruction curve.
 
-```text
-s^2 = (a^2 + b^2)^2 + 4*b^4.
+## Product-group variant already matching the repo's `DescentBridgeN14.lean`
+
+The repository already has the same bridge shape for the `ZMod 2 × ZMod 14` product-group target:
+
+```lean
+axiom Z2xZ14_gives_non_degenerate_N14_point
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : ZMod 2 × ZMod 14 →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ u w : ℚ, E_N14_AffineEquation u w ∧ ¬ E_N14_DegenerateParameter u
 ```
 
-Primitive Pythagorean parametrization of
+and then:
 
-```text
-s^2 = (a^2 + b^2)^2 + (2*b^2)^2
+```lean
+theorem no_Z2_cross_Z14_from_descent
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ ∃ f : ZMod 2 × ZMod 14 →+ (E⁄ℚ).Point, Function.Injective f := by
+  intro hE
+  rcases Z2xZ14_gives_non_degenerate_N14_point E hE with
+    ⟨u, w, hcurve, hnondeg⟩
+  exact hnondeg (obstruction_curve_N14_points_degenerate u w hcurve)
 ```
 
-gives coprime positive `e,f` with
+So if `KubertBridgeN14.lean` is for the cyclic Mazur case, use the `ZMod 14` axiom.  If it is for the product-group FLT branch, keep the existing `ZMod 2 × ZMod 14` source.
 
-```text
-b = e*f,
-a^2 = e^4 - e^2*f^2 - f^4.
+## More honest internal factorization of the N = 14 bridge
+
+If you want the file to expose the genus-1 Kubert geometry rather than hiding it completely, split the bridge into two facts and prove the single public axiom by composition.
+
+First define the genus-one Kubert base:
+
+```lean
+def X1_14_BaseEquation (r z : ℚ) : Prop :=
+  z ^ 2 = 1 - 2 * r + r ^ 2 + 4 * r ^ 3
+
+/-- Placeholder for excluding cusps / singular Kubert specializations. -/
+def X1_14_NonCusp (r z : ℚ) : Prop :=
+  True  -- replace by the actual denominator/discriminant side conditions
 ```
 
-Thus `(e, f, a)` is a strictly smaller N = 16 quartic solution:
+Then use a Kubert normal-form axiom landing on the base:
 
-```text
-a^2 = e^4 - f^2*e^2 - f^4.
+```lean
+axiom kubert_C14_base_point
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : ZMod 14 →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ r z : ℚ, X1_14_BaseEquation r z ∧ X1_14_NonCusp r z
 ```
 
-The second factor case is identical with `a` and `b` interchanged, giving the smaller solution `(e, f, b)`.
+and a map from the noncuspidal base point to the obstruction curve:
 
-## Proposed file: `QuarticDescentN16.lean`
+```lean
+axiom x1_14_base_to_obstruction_point
+    {r z : ℚ}
+    (hbase : X1_14_BaseEquation r z)
+    (hnoncusp : X1_14_NonCusp r z) :
+    ∃ u w : ℚ,
+      E_N14_AffineEquation u w ∧ ¬ E_N14_DegenerateParameter u
+```
+
+The public one-axiom bridge can then be a theorem:
+
+```lean
+theorem C14_gives_non_degenerate_N14_point'
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : ZMod 14 →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ u w : ℚ,
+      E_N14_AffineEquation u w ∧ ¬ E_N14_DegenerateParameter u := by
+  rcases kubert_C14_base_point E hE with ⟨r, z, hbase, hnoncusp⟩
+  exact x1_14_base_to_obstruction_point hbase hnoncusp
+```
+
+This split is mathematically clearer, but for axiom discharge the combined `C14_gives_non_degenerate_N14_point` axiom is enough.
+
+## Recommended `KubertBridgeN14.lean` skeleton
 
 ```lean
 import Mathlib
+import FLT.EllipticCurve.Torsion
 
-/-!
-# Quartic descent for the N = 16 Kubert obstruction
-
-This file proves the no-primitive-solution theorem for
-
-  t^2 = s^4 - D^2 * s^2 - D^4.
-
-It is designed as the `epsilon = -1` sibling of the existing N = 10
-`QuarticDescent.lean` file.
-
-The three declarations marked `axiom` are API shims for the reusable facts that
-should be exported from the existing quartic-descent infrastructure:
-
-* the coprime factor split of `5 * B^4`;
-* the primitive Pythagorean square-leg descent in the `b`-leg case;
-* the same Pythagorean square-leg descent in the symmetric `a`-leg case.
-
-Once those shims are replaced by the project-local theorem names, the rest of
-this file is the concrete N = 16 adapter: it packages the smaller solution and
-runs the minimal-denominator infinite descent.
--/
+open scoped WeierstrassCurve.Affine
 
 namespace MazurProof
-namespace QuarticDescentN16
 
-/-- The N = 16 quartic obstruction equation. -/
-def Q16 (s D t : ℤ) : Prop :=
-  t ^ 2 = s ^ 4 - D ^ 2 * s ^ 2 - D ^ 4
+/-! # Kubert bridge for the N = 14 obstruction -/
 
-/-- A primitive positive-denominator integral solution. -/
-structure PrimitiveSol where
-  s : ℤ
-  D : ℤ
-  t : ℤ
-  D_pos : 0 < D
-  cop : Int.gcd s D = 1
-  eqn : Q16 s D t
+def E_N14_AffineEquation (u w : ℚ) : Prop :=
+  w ^ 2 = u ^ 3 + u ^ 2 - 2 * u
+
+def E_N14_DegenerateParameter (u : ℚ) : Prop :=
+  u = -2 ∨ u = 0 ∨ u = 1
+
+/-- Rational points on LMFDB 96.b3 are all cuspidal/degenerate. -/
+axiom obstruction_curve_N14_points_degenerate :
+    ∀ u w : ℚ, E_N14_AffineEquation u w → E_N14_DegenerateParameter u
 
 /--
-First N = 16 factorization step.
+Kubert N = 14 bridge.
 
-For a primitive solution of
-
-  `t^2 = s^4 - D^2*s^2 - D^4`,
-
-one proves `D = 2*B` and then factors
-
-  `((s^2 - 2*B^2 - t)/2) * ((s^2 - 2*B^2 + t)/2) = 5*B^4`.
-
-The coprime fourth-power split gives the two symmetric cases below.
-
-This should be discharged from the same prime-divisor / fourth-power split
-infrastructure used by the N = 10 file.
+Unlike N = 10 and N = 12, this is not a one-parameter square obstruction.
+Internally it goes through the genus-one Kubert base
+`z^2 = 1 - 2*r + r^2 + 4*r^3`, then maps a noncuspidal base point
+to a nondegenerate point on `w^2 = u^3 + u^2 - 2*u`.
 -/
-axiom n16_first_factorization (S : PrimitiveSol) :
-    ∃ a b : ℤ,
-      0 < a ∧ 0 < b ∧
-      Int.gcd a b = 1 ∧
-      S.D = 2 * a * b ∧
-      (S.s ^ 2 = (a ^ 2 + b ^ 2) ^ 2 + 4 * b ^ 4 ∨
-       S.s ^ 2 = (a ^ 2 + b ^ 2) ^ 2 + 4 * a ^ 4)
+axiom C14_gives_non_degenerate_N14_point
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : ZMod 14 →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ u w : ℚ,
+      E_N14_AffineEquation u w ∧ ¬ E_N14_DegenerateParameter u
 
-/--
-Primitive Pythagorean descent for the case
+theorem no_C14_from_N14_obstruction
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ ∃ f : ZMod 14 →+ (E⁄ℚ).Point, Function.Injective f := by
+  intro hE
+  rcases C14_gives_non_degenerate_N14_point E hE with
+    ⟨u, w, hcurve, hnondeg⟩
+  exact hnondeg (obstruction_curve_N14_points_degenerate u w hcurve)
 
-  `s^2 = (a^2+b^2)^2 + 4*b^4`.
-
-The primitive triple is
-
-  `(a^2+b^2)^2 + (2*b^2)^2 = s^2`.
-
-The square-leg parametrization gives `b = e*f` and
-
-  `a^2 = e^4 - e^2*f^2 - f^4`,
-
-so `(e,f,a)` is a smaller N = 16 quartic solution.
--/
-axiom n16_pythagorean_descent_b_leg
-    {s a b : ℤ}
-    (hs : s ^ 2 = (a ^ 2 + b ^ 2) ^ 2 + 4 * b ^ 4)
-    (ha : 0 < a) (hb : 0 < b)
-    (hcop : Int.gcd a b = 1) :
-    ∃ e f : ℤ,
-      0 < e ∧ 0 < f ∧
-      Int.gcd e f = 1 ∧
-      a ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 - f ^ 4 ∧
-      f.natAbs < (2 * a * b).natAbs
-
-/--
-Symmetric primitive Pythagorean descent for the case
-
-  `s^2 = (a^2+b^2)^2 + 4*a^4`.
-
-Now the square leg is `2*a^2`, and the smaller solution is `(e,f,b)`.
--/
-axiom n16_pythagorean_descent_a_leg
-    {s a b : ℤ}
-    (hs : s ^ 2 = (a ^ 2 + b ^ 2) ^ 2 + 4 * a ^ 4)
-    (ha : 0 < a) (hb : 0 < b)
-    (hcop : Int.gcd a b = 1) :
-    ∃ e f : ℤ,
-      0 < e ∧ 0 < f ∧
-      Int.gcd e f = 1 ∧
-      b ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 - f ^ 4 ∧
-      f.natAbs < (2 * a * b).natAbs
-
-/-- The actual N = 16 descent step. -/
-theorem descent_step (S : PrimitiveSol) :
-    ∃ S' : PrimitiveSol, S'.D.natAbs < S.D.natAbs := by
-  classical
-  obtain ⟨a, b, ha_pos, hb_pos, hcop_ab, hD, hcase⟩ :=
-    n16_first_factorization S
-  rcases hcase with hb_case | ha_case
-  · obtain ⟨e, f, he_pos, hf_pos, hcop_ef, hnew, hdrop⟩ :=
-      n16_pythagorean_descent_b_leg hb_case ha_pos hb_pos hcop_ab
-    let S' : PrimitiveSol :=
-      { s := e
-        D := f
-        t := a
-        D_pos := hf_pos
-        cop := hcop_ef
-        eqn := by
-          dsimp [Q16]
-          nlinarith [hnew] }
-    refine ⟨S', ?_⟩
-    dsimp [S']
-    rw [hD]
-    exact hdrop
-  · obtain ⟨e, f, he_pos, hf_pos, hcop_ef, hnew, hdrop⟩ :=
-      n16_pythagorean_descent_a_leg ha_case ha_pos hb_pos hcop_ab
-    let S' : PrimitiveSol :=
-      { s := e
-        D := f
-        t := b
-        D_pos := hf_pos
-        cop := hcop_ef
-        eqn := by
-          dsimp [Q16]
-          nlinarith [hnew] }
-    refine ⟨S', ?_⟩
-    dsimp [S']
-    rw [hD]
-    exact hdrop
-
-/-- No infinite descent in positive denominators. -/
-private theorem no_primitive_solution_aux :
-    ¬ ∃ S : PrimitiveSol, True := by
-  classical
-  intro hnonempty_sol
-  let P : ℕ → Prop := fun n => ∃ S : PrimitiveSol, S.D.natAbs = n
-  have hP_nonempty : ∃ n : ℕ, P n := by
-    rcases hnonempty_sol with ⟨S, _⟩
-    exact ⟨S.D.natAbs, S, rfl⟩
-  let n : ℕ := Nat.find hP_nonempty
-  have hnP : P n := Nat.find_spec hP_nonempty
-  rcases hnP with ⟨S, hS⟩
-  obtain ⟨S', hlt⟩ := descent_step S
-  have hP' : P S'.D.natAbs := ⟨S', rfl⟩
-  have hmin : n ≤ S'.D.natAbs := Nat.find_min hP_nonempty hP'
-  rw [hS] at hlt
-  exact (not_lt_of_ge hmin) hlt
-
-/--
-There is no primitive integral solution to the N = 16 quartic obstruction.
-
-This is the theorem wanted for the square-`u` obstruction: after clearing
-rational denominators in `u = (s/D)^2`, one gets exactly this primitive quartic.
--/
-theorem no_primitive_quarticN16 :
-    ¬ ∃ s D t : ℤ,
-      0 < D ∧ Int.gcd s D = 1 ∧ Q16 s D t := by
-  intro h
-  rcases h with ⟨s, D, t, hD_pos, hcop, hq⟩
-  let S : PrimitiveSol :=
-    { s := s
-      D := D
-      t := t
-      D_pos := hD_pos
-      cop := hcop
-      eqn := hq }
-  exact no_primitive_solution_aux ⟨S, trivial⟩
-
-/-- A direct contradiction form convenient for downstream use. -/
-theorem quarticN16_false
-    {s D t : ℤ}
-    (hD_pos : 0 < D)
-    (hcop : Int.gcd s D = 1)
-    (hq : t ^ 2 = s ^ 4 - D ^ 2 * s ^ 2 - D ^ 4) :
-    False := by
-  exact no_primitive_quarticN16 ⟨s, D, t, hD_pos, hcop, hq⟩
-
-end QuarticDescentN16
 end MazurProof
 ```
 
-## How to replace the three shims by existing `QuarticDescent.lean` infrastructure
+## Bottom line
 
-The first shim, `n16_first_factorization`, is the only place where the sign change matters.  In the N = 10 file the corresponding identity should be the `ε = +1` factorization
+The genus-one base **does fundamentally change the bridge internals**: no single free Kubert parameter, and no natural `kubert_C14_square` theorem.
 
-```text
-(2*s^2 + D^2)^2 - (2*t)^2 = 5*D^4.
-```
-
-For N = 16, replace it by
+But it does **not** prevent a one-axiom discharge interface.  The right single axiom is:
 
 ```text
-(2*s^2 - D^2)^2 - (2*t)^2 = 5*D^4.
+C14 torsion over Q gives a nondegenerate rational point on
+E14 : w^2 = u^3 + u^2 - 2u.
 ```
 
-and, after the primitive parity branch `D = 2*B`, use
-
-```text
-((s^2 - 2*B^2 - t)/2) * ((s^2 - 2*B^2 + t)/2) = 5*B^4.
-```
-
-The remaining two shims are genuinely shared with N = 10: they are just the primitive Pythagorean-square-leg descent applied to
-
-```text
-s^2 = (a^2 + b^2)^2 + 4*b^4
-```
-
-or its symmetric version with `a` and `b` interchanged.
-
-## Why this is the right formal target
-
-The downstream N = 16 obstruction curve is
-
-```text
-w^2 = u^3 - u^2 - u.
-```
-
-For a rational square `u = (s/D)^2`, the map
-
-```text
-u = (s/D)^2,
-w = s*t/D^3
-```
-
-turns the curve equation into
-
-```text
-t^2 = s^4 - D^2*s^2 - D^4.
-```
-
-Thus `quarticN16_false` is the exact analogue of the N = 10 quartic obstruction theorem: after denominator clearing and primitive normalization, it rules out every nondegenerate square-`u` rational point on the N = 16 obstruction curve.
-
-## Caveat
-
-Because the connector did not expose the literal `QuarticDescent.lean` file, I did not bake in guessed theorem names from that file.  The code above is deliberately written so that the only project-local renaming needed is at the three shim declarations; the descent wrapper itself should not need to change.
+Then the rational-points theorem for `96.b3` immediately kills it.
