@@ -510,42 +510,52 @@ theorem quartic_plus_descent_step :
       have : 4 * (N - M) = 4 * s := by nlinarith [hM_val, hN_val]
       omega
     have hMN_cop : Int.gcd M N = 1 := by
-      by_contra hbad
+      rw [← Int.isCoprime_iff_gcd_eq_one]
+      by_contra hnotcop
+      rw [Int.isCoprime_iff_gcd_eq_one] at hnotcop
       have hg_gt1 : 1 < Int.gcd M N := by
-        have := Int.gcd_pos_of_pos_left N hMpos; omega
-      obtain ⟨p, hp, hpg⟩ := Nat.exists_prime_and_dvd (ne_of_gt hg_gt1)
-      have hpZ : Prime (p : ℤ) := by exact_mod_cast hp
-      have hpg_int : (↑p : ℤ) ∣ (Int.gcd M N : ℤ) := by exact_mod_cast hpg
-      have hpM : (↑p : ℤ) ∣ M := dvd_trans hpg_int (Int.gcd_dvd_left M N)
-      have hpN : (↑p : ℤ) ∣ N := dvd_trans hpg_int (Int.gcd_dvd_right M N)
-      have hp_sum : (↑p : ℤ) ∣ (2*j+1)^2 + 2*B₁^2 := by simpa [hMN_sum] using dvd_add hpM hpN
-      have hp_s : (↑p : ℤ) ∣ s := by simpa [hNM_diff] using dvd_sub hpN hpM
-      have hp2 : (↑p : ℤ) ^ 2 ∣ 5 * B₁ ^ 4 := by
-        rw [← hMN_prod]; exact ⟨_, by rw [show (↑p : ℤ)^2 = ↑p*↑p from by ring]; rcases hpM with ⟨a,ha⟩; rcases hpN with ⟨b,hb⟩; exact ⟨a*b, by rw [ha, hb]; ring⟩⟩.2
+        have : Int.gcd M N ≠ 0 := by
+          rw [Int.gcd_def]; exact Nat.gcd_ne_zero_left (Int.natAbs_ne_zero.mpr (ne_of_gt hMpos))
+        omega
+      obtain ⟨p, hp, hpg⟩ := Nat.exists_prime_and_dvd hg_gt1.ne'
+      have hpM : (↑p : ℤ) ∣ M := dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_left ..)
+      have hpN : (↑p : ℤ) ∣ N := dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_right ..)
+      have hp_prime_int : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp hp
+      have hp_sum : (↑p : ℤ) ∣ (2*j+1)^2 + 2*B₁^2 := by
+        have := dvd_add hpM hpN; rwa [hMN_sum] at this
+      have hp_s : (↑p : ℤ) ∣ s := by have := dvd_sub hpN hpM; rwa [hNM_diff] at this
+      have hp2_dvd : (↑p : ℤ) ^ 2 ∣ 5 * B₁ ^ 4 := by
+        have : (↑p : ℤ) ^ 2 ∣ M * N := by
+          rw [show (↑p : ℤ) ^ 2 = ↑p * ↑p from by ring]; exact mul_dvd_mul hpM hpN
+        rwa [hMN_prod] at this
       by_cases hpB₁ : (↑p : ℤ) ∣ B₁
       · have hp_B₁_sq : (↑p : ℤ) ∣ B₁^2 := dvd_pow hpB₁ (by norm_num : 2 ≠ 0)
         have hp_2B₁_sq : (↑p : ℤ) ∣ 2*B₁^2 := dvd_mul_of_dvd_right hp_B₁_sq 2
         have hp_r_sq : (↑p : ℤ) ∣ (2*j+1)^2 := by
-          have := dvd_sub hp_sum hp_2B₁_sq; convert this using 1; ring
-        have hp_r : (↑p : ℤ) ∣ 2*j+1 := hpZ.dvd_of_dvd_pow hp_r_sq
+          have h := dvd_sub hp_sum hp_2B₁_sq; simpa using h
+        have hp_r : (↑p : ℤ) ∣ 2*j+1 := hp_prime_int.dvd_of_dvd_pow hp_r_sq
         have hp_4k : (↑p : ℤ) ∣ 4*k := by
-          have : (↑p : ℤ) ∣ 2*k := by rw [hB₁_val] at hpB₁; exact hpB₁
-          have : (↑p : ℤ) ∣ 2*(2*k) := dvd_mul_of_dvd_right this 2
-          convert this using 1; ring
-        have hp_gcd : (↑p : ℤ) ∣ (Int.gcd (2*j+1) (4*k) : ℤ) := Int.dvd_gcd hp_r hp_4k
-        have : (↑p : ℤ) ∣ 1 := by simpa [hcop] using hp_gcd
-        exact hp.not_dvd_one (by exact_mod_cast this)
-      · have hp_rhs : (↑p : ℤ) ∣ 5*B₁^4 := dvd_trans (⟨↑p, by ring⟩ : (↑p : ℤ) ∣ (↑p)^2) hp2
-        rcases hpZ.dvd_or_dvd hp_rhs with hp5 | hpB4
-        · have hp5N : p ∣ (5 : ℕ) := by exact_mod_cast hp5
-          have hp_eq_5 : p = 5 := by
-            have : p ≤ 5 := Nat.le_of_dvd (by norm_num) hp5N
-            interval_cases p <;> simp_all [Nat.Prime]
-          subst hp_eq_5
-          have h25 : (25 : ℤ) ∣ 5*B₁^4 := by simpa [show (25 : ℤ) = (5 : ℤ)^2 from by norm_num] using hp2
-          have h5B4 : (5 : ℤ) ∣ B₁^4 := ⟨_, by nlinarith [h25.choose_spec]⟩
-          exact hpB₁ ((show Prime (5 : ℤ) from by norm_num).dvd_of_dvd_pow h5B4)
-        · exact hpB₁ (hpZ.dvd_of_dvd_pow hpB4)
+          rw [hB₁_val] at hpB₁
+          have : (↑p : ℤ) ∣ 2*(2*k) := dvd_mul_of_dvd_right hpB₁ 2
+          linarith [show 2*(2*k) = 4*k from by ring]
+        have : p ∣ Int.gcd (2*j+1) (4*k) := by
+          rw [Int.gcd_def]
+          exact Nat.dvd_gcd (Int.natCast_dvd.mp hp_r) (Int.natCast_dvd.mp hp_4k)
+        rw [hcop] at this
+        exact absurd (Nat.le_of_dvd Nat.one_pos this) (by have := hp.two_le; omega)
+      · have hpB4 : ¬ (↑p : ℤ) ∣ B₁^4 := fun h => hpB₁ (hp_prime_int.dvd_of_dvd_pow h)
+        have hp5 : (↑p : ℤ) ∣ 5 := by
+          have : (↑p : ℤ) ∣ 5*B₁^4 := dvd_trans (dvd_pow_self (↑p) (by norm_num : 2 ≠ 0)) hp2_dvd
+          exact (hp_prime_int.dvd_or_dvd this).resolve_right hpB4
+        have hp_eq_5 : p = 5 := by
+          rcases (by norm_num : Nat.Prime 5).eq_one_or_self_of_dvd p (Int.natCast_dvd.mp hp5) with h | h
+          · exact absurd h (by have := hp.two_le; omega)
+          · exact h
+        subst hp_eq_5
+        have : (5 : ℤ) ∣ B₁^4 := by
+          have : (5 : ℤ)*5 ∣ 5*B₁^4 := by rw [show (5:ℤ)*5 = (5:ℤ)^2 from by ring]; exact hp2_dvd
+          exact (mul_dvd_mul_iff_left (by norm_num : (5:ℤ) ≠ 0)).mp this
+        exact hpB₁ (Int.Prime.dvd_pow' (by norm_num : Nat.Prime 5) this)
     -- Even-B descent chain (after gcd) — TODO
     sorry
   · -- Odd B case (main case, fully proved)
