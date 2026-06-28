@@ -486,11 +486,12 @@ theorem quartic_plus_descent_step :
       -- B₁ = 4k/2 = 2k
       have hB₁_val : B₁ = 2 * k := by omega
       -- Prove via: 16*(M*N) = (4M)*(4N) = UV = 5*(4k)⁴ = 16*(5*(2k)⁴) = 16*(5*B₁⁴)
-      -- 16*(M*N) = (4M)(4N) = UV = 5(4k)⁴ = 16·5·(2k)⁴ = 16·5·B₁⁴
-      have h_eq : (4 * M) * (4 * N) = 5 * (4 * k) ^ 4 := by rw [hM_val, hN_val]; exact hUV
-      have h16MN : 16 * (M * N) = 5 * (4 * k) ^ 4 := by linarith [show (4*M)*(4*N) = 16*(M*N) from by ring]
-      have h_expand : 5 * (4 * k) ^ 4 = 16 * (5 * B₁ ^ 4) := by rw [hB₁_val]; ring
-      linarith
+      -- MN = UV/16 = 5(4k)⁴/16 = 5·16k⁴ = 5·(2k)⁴ = 5·B₁⁴
+      have := hUV -- : (4M-factor)*(4N-factor) = 5*(4k)⁴
+      nlinarith [hM_val, hN_val, hB₁_val,
+                 show (4 * M) * (4 * N) = 16 * (M * N) from by ring,
+                 show 5 * (4 * k) ^ 4 = 16 * (5 * (2 * k) ^ 4) from by ring,
+                 show (2 * k) ^ 4 = B₁ ^ 4 from by rw [hB₁_val]]
     -- M, N > 0
     have hMpos : 0 < M := by
       by_contra hle; push_neg at hle
