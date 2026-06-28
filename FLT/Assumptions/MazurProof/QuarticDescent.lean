@@ -465,9 +465,35 @@ theorem quartic_plus_descent_step :
     have h4V : (4 : ℤ) ∣ (2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 + 2 * s) := by
       obtain ⟨t, rfl⟩ : ∃ t, s = 2 * t + 1 := ⟨s / 2, by omega⟩
       exact ⟨2 * j ^ 2 + 2 * j + 4 * k ^ 2 + t + 1, by ring⟩
-    -- Define M = U/4, N = V/4, prove MN = 5B₁⁴, gcd(M,N) = 1
-    -- Then same descent as odd case
-    sorry
+    -- Define M = U/4, N = V/4
+    set M := (2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 - 2 * s) / 4 with hM_def
+    set N := (2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 + 2 * s) / 4 with hN_def
+    have hM_val : 4 * M = 2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 - 2 * s := by
+      rw [hM_def, Int.mul_ediv_cancel' h4U]
+    have hN_val : 4 * N = 2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 + 2 * s := by
+      rw [hN_def, Int.mul_ediv_cancel' h4V]
+    -- MN = 5 * B₁⁴
+    have hMN_prod : M * N = 5 * B₁ ^ 4 := by
+      apply mul_left_cancel₀ (show (16 : ℤ) ≠ 0 from by norm_num)
+      have : 16 * (M * N) = (4 * M) * (4 * N) := by ring
+      rw [this, hM_val, hN_val]
+      have hUV := UV_eq_five_mul_fourth heq
+      rw [hBk] at hUV ⊢
+      rw [hB₁_eq, hBk]
+      nlinarith [show (4 * k) ^ 4 = 256 * k ^ 4 from by ring,
+                 show (4 * k / 2) ^ 4 = (2 * k) ^ 4 from by omega,
+                 show (2 * k) ^ 4 = 16 * k ^ 4 from by ring]
+    -- M, N > 0
+    have hMpos : 0 < M := by
+      by_contra hle; push_neg at hle
+      have hNpos : 0 < N := by nlinarith [hN_val, sq_nonneg (2*j+1), sq_nonneg k]
+      have : M * N ≤ 0 := mul_nonpos_of_nonpos_of_nonneg hle hNpos.le
+      linarith [show 0 < 5 * B₁ ^ 4 from by positivity, hMN_prod]
+    have hNpos : 0 < N := by nlinarith [hN_val, sq_nonneg (2*j+1), sq_nonneg k]
+    -- gcd(M, N) = 1 (same prime-divisor argument)
+    -- M + N = r² + 2B₁², N - M = s
+    -- Any common prime p: p|s, p|r²+2B₁² → p²|5B₁⁴ → p|B₁ → p|r → gcd(r,B)≥p, contradiction
+    sorry -- MN_coprime_core: same argument as UV_coprime
   · -- Odd B case (main case, fully proved)
     have hr_odd := r_odd_of_B_odd hBodd hcop heq
     -- UV = 5B⁴, gcd(U,V) = 1
