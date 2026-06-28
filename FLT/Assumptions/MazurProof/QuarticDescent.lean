@@ -685,7 +685,7 @@ theorem quartic_plus_descent_step :
             · rw [hB_eq, ha1, hb1]; ring
           · exact hlt
         exact Int.natAbs_lt_natAbs_of_nonneg_of_lt hα_pos.le hα_lt
-  
+
 /-! ## Strong induction closure -/
 
 theorem quartic_plus_from_descent
