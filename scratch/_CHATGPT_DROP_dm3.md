@@ -1,226 +1,413 @@
-# Q2001 (dm3): Mathlib infrastructure for determinant / cyclotomic replacement of Weil pairing
+# Q2013 (dm3): FLT Galois-representation infrastructure survey
 
 Date: 2026-06-28.
 
-## Executive answer
+Target searched: `ImperialCollegeLondon/FLT`, default branch `main`.
 
-The closest existing Mathlib infrastructure is **not** elliptic-curve Galois representations.  It is the cyclotomic side:
-
-* `Mathlib/NumberTheory/Cyclotomic/CyclotomicCharacter.lean` already defines a mod-`n` cyclotomic character
-  ```lean
-  modularCyclotomicCharacter {n : ℕ} [NeZero n]
-      (hn : Fintype.card { x // x ∈ rootsOfUnity n L } = n) :
-      (L ≃+* L) →* (ZMod n)ˣ
-  ```
-  together with `modularCyclotomicCharacter.spec`, `.unique`, and the `p`-adic
-  ```lean
-  cyclotomicCharacter (L) (p) : (L ≃+* L) →* ℤ_[p]ˣ
-  ```
-  plus the comparison
-  ```lean
-  IsPrimitiveRoot.autToPow_eq_modularCyclotomicCharacter
-  ```
-  for `Gal(L/R)`.
-
-* `Mathlib/NumberTheory/Cyclotomic/Gal.lean` and
-  `Mathlib/NumberTheory/NumberField/Cyclotomic/Galois.lean` already identify cyclotomic Galois groups with `(ZMod n)ˣ`, for example
-  ```lean
-  IsCyclotomicExtension.autEquivPow
-  IsCyclotomicExtension.Rat.galEquivZMod
-  IsCyclotomicExtension.Rat.galEquivZMod_apply_of_pow_eq
-  ```
-  where `galEquivZMod` is the `ℚ(ζₙ)/ℚ` isomorphism sending `σ` to the exponent `a` with `σ ζ = ζ^a`.
-
-By contrast, I did **not** find a Mathlib definition of the mod-`m` Galois representation attached to an elliptic curve, nor a theorem `det ρ_E,m = χ_m`.  So the proposed determinant argument is not currently a light-weight replacement for the Weil pairing; the missing determinant identity is essentially the same mathematical input that the Weil pairing normally supplies.
-
-## Inventory by requested item
-
-### (1) Galois representations attached to elliptic curves
-
-Status: **absent / not close as a packaged object**.
-
-Existing elliptic-curve infrastructure is substantial but lower-level:
-
-* `Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Point.lean` defines nonsingular projective points and gives
-  ```lean
-  WeierstrassCurve.Projective.Point
-  instance : AddCommGroup W.Point
-  ```
-  along with base-change and map compatibility lemmas such as `map_neg`, `map_add`, `baseChange_neg`, and `baseChange_add`.
-
-* `Mathlib/AlgebraicGeometry/EllipticCurve/DivisionPolynomial/Basic.lean` and `Degree.lean` contain division polynomial infrastructure.
-
-What I did not find:
-
-```lean
-E[m]
-rho_m
-GaloisRepresentation
-WeilPairing
-Weil pairing on E[m]
-det_rho_eq_cyclotomicCharacter
-```
-
-In particular, the following would all still need to be built or isolated as hypotheses:
-
-1. a chosen algebraic closure `K = AlgebraicClosure ℚ` and the base-changed curve `E/K`;
-2. the finite subgroup / `ZMod m`-module of `m`-torsion points;
-3. the natural action of `Field.absoluteGaloisGroup ℚ` on that torsion module;
-4. the statement that rationality of all `m`-torsion points makes this action trivial;
-5. the determinant map out of this rank-two `ZMod m` module;
-6. the determinant/cyclotomic identity.
-
-The generic algebra for `GL` and determinants exists in Mathlib, but the bridge from elliptic-curve torsion to `GL₂(ZMod m)` does not appear to be packaged.
-
-### (2) The cyclotomic character
-
-Status: **best-existing piece**.
-
-Relevant files/names:
-
-```lean
-Mathlib/NumberTheory/Cyclotomic/CyclotomicCharacter.lean
-  modularCyclotomicCharacter
-  modularCyclotomicCharacter.spec
-  modularCyclotomicCharacter.unique
-  modularCyclotomicCharacter'
-  cyclotomicCharacter
-  cyclotomicCharacter.spec
-  cyclotomicCharacter.toZModPow
-  IsPrimitiveRoot.autToPow_eq_modularCyclotomicCharacter
-```
-
-This is the most directly reusable infrastructure for the `χ_m` side of the argument.  The mod-`m` character is phrased for automorphisms of a domain `L`, with a hypothesis that `L` contains exactly `m` roots of unity.  In an algebraically closed characteristic-zero field this hypothesis should be discharged via roots-of-unity / enough-roots-of-unity lemmas.
-
-For cyclotomic fields over `ℚ`, there is even more specialized infrastructure:
-
-```lean
-Mathlib/NumberTheory/Cyclotomic/Gal.lean
-  IsCyclotomicExtension.autEquivPow
-  galCyclotomicEquivUnitsZMod
-  galXPowEquivUnitsZMod
-
-Mathlib/NumberTheory/NumberField/Cyclotomic/Galois.lean
-  IsCyclotomicExtension.Rat.galEquivZMod
-  IsCyclotomicExtension.Rat.galEquivZMod_apply_of_pow_eq
-  IsCyclotomicExtension.Rat.galEquivZMod_restrictNormal_apply
-```
-
-This can often replace explicit references to complex conjugation when the only goal is to obtain the `-1` element of `(ZMod m)ˣ`: use the cyclotomic Galois equivalence and the unit `-1` in `(ZMod m)ˣ`.
-
-### (3) Complex conjugation as an element of `Gal(ℚbar/ℚ)`
-
-Status: **partly present, but not as the object needed here**.
-
-Relevant existing pieces:
-
-```lean
-Mathlib/FieldTheory/Galois/Notation.lean
-  Gal(L/K)  -- notation for `L ≃ₐ[K] L`
-
-Mathlib/FieldTheory/AbsoluteGaloisGroup.lean
-  Field.absoluteGaloisGroup K := AlgebraicClosure K ≃ₐ[K] AlgebraicClosure K
-
-Mathlib/LinearAlgebra/Complex/Module.lean
-  Complex.conjAe : ℂ ≃ₐ[ℝ] ℂ
-  Complex.real_algHom_eq_id_or_conj
-```
-
-So Mathlib has complex conjugation as an `ℝ`-algebra automorphism of `ℂ`, and it has the absolute Galois group of a field.  What I did not find is a canonical declaration like
-
-```lean
-complexConjugation : Field.absoluteGaloisGroup ℚ
-```
-
-This absence is expected: `AlgebraicClosure ℚ` is an abstract chosen algebraic closure, not literally the algebraic numbers inside `ℂ`.  To get such an element one would need to choose/construct an embedding of `AlgebraicClosure ℚ` into `ℂ`, transport `Complex.conjAe`, and prove it fixes `ℚ`.  That is plausible but not currently a named off-the-shelf object.
-
-If the goal is only the classical fact that rational roots of unity have order dividing `2`, the better Mathlib route may avoid complex conjugation entirely.  In `Mathlib/NumberTheory/Cyclotomic/PrimitiveRoots.lean` there is already:
-
-```lean
-IsPrimitiveRoot.dvd_of_isCyclotomicExtension
-```
-
-which says that if a primitive `l`-th root lies in an `n`-th cyclotomic extension of `ℚ`, then
-
-```lean
-l ∣ 2 * n
-```
-
-Specializing morally to the `n = 1` cyclotomic extension gives the expected `l ∣ 2` conclusion for roots of unity in `ℚ`.  This is probably a much cheaper endpoint than constructing an explicit complex-conjugation element in `Gal(ℚbar/ℚ)`.
-
-### (4) The determinant equals cyclotomic character identity
-
-Status: **not present**.
-
-I did not find an existing theorem of the form
-
-```lean
-det (rho_m E σ) = modularCyclotomicCharacter ... σ
-```
-
-or any elliptic-curve-specific determinant/cyclotomic comparison.  Proving this identity usually uses the Weil pairing and its Galois equivariance:
+Search terms used included:
 
 ```text
-e_m(σP, σQ) = σ(e_m(P,Q)),
-e_m(P,Q)^(det ρ_m σ) = σ(e_m(P,Q)).
+GaloisRepresentation
+GaloisRep
+ModularForm
+Tate module
+TateModule
+TateCurve
+adic representation
+l-adic representation
+ell-adic representation
+Weil pairing
+WeilPairing
+Pairing
+nTorsion
 ```
 
-Thus the proposed argument avoids using the full Weil pairing only if this determinant identity is taken as an imported theorem/axiom.  As a Mathlib development task, building `det ρ = χ` from scratch is not obviously smaller than building the Weil-pairing naturality needed for it.
+## Executive answer
 
-## Fixed-field infrastructure
-
-For the step "trivial cyclotomic character implies all `m`-th roots of unity are rational", Mathlib has useful infinite Galois theory:
+The FLT project **does** have useful Galois-representation infrastructure, and it is more relevant than vanilla Mathlib for dm3.  The key generic definition is:
 
 ```lean
-Mathlib/FieldTheory/Galois/Infinite.lean
-  InfiniteGalois.mem_range_algebraMap_iff_fixed
-  InfiniteGalois.mem_bot_iff_fixed
-  InfiniteGalois.fixedField_bot
+def GaloisRep := Γ K →ₜ* Module.End A M
 ```
 
-So once the setup is phrased over a Galois extension `K/k`, an element fixed by every element of `Gal(K/k)` can be recognized as coming from the base field.  This is useful after the cyclotomic character is shown to be trivial, but it still does not supply the elliptic-curve determinant identity.
+from
 
-## Practical recommendation for dm3
+```text
+FLT/Deformations/RepresentationTheory/GaloisRep.lean
+```
 
-If the near-term goal is to finish the number-theoretic obstruction, separate it into two layers.
+where `Γ K` denotes `Field.absoluteGaloisGroup K`.  The file provides framing into `GL n A`, determinant, base change, local restriction, unramifiedness, Frobenius characteristic polynomials, flatness, and irreducibility wrappers.
 
-### Layer A: elliptic-curve input, probably axiomatized or postponed
+For elliptic curves specifically, the relevant file is:
 
-Use a local theorem/hypothesis with a name like
+```text
+FLT/EllipticCurve/Torsion.lean
+```
+
+It defines:
 
 ```lean
-axiom full_rational_torsion_implies_trivial_cyclotomicCharacter
-  (E : WeierstrassCurve ℚ) (m : ℕ) ... :
-  -- every σ acts trivially on μ_m, equivalently χ_m σ = 1
+abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u :=
+  Submodule.torsionBy ℤ (E⁄k).Point n
+
+noncomputable instance (n : ℕ) : Module (ZMod n) (E.nTorsion n)
+
+def WeierstrassCurve.galoisRep ... (n : ℕ) (hn : 0 < n) :
+  GaloisRep K (ZMod n) ((E.map (algebraMap K (AlgebraicClosure K))).nTorsion n) := sorry
 ```
 
-or directly
+So the answer to “do they have mod-`m` Galois representations?” is: **yes, as a planned/stubbed definition for elliptic-curve `n`-torsion, with important supporting theorems still `sorry`.**
+
+The answer to “do they define the Tate module `T_ℓ(E)`?” is: **no, I found no `TateModule` / `T_l` definition.**  There is a `FLT/TateCurve/TateCurve.lean` file, but it is only a planning comment/stub about Tate uniformization and `p`-torsion over `Qpbar`, not a Tate-module construction.
+
+The answer to “do they have a pairing construction?” is: **no relevant implemented Weil pairing was found.**  Searches for `WeilPairing` returned no Lean definitions.  `HardlyRamified/Defs.lean` explicitly says that proving Frey-curve torsion is hardly ramified is standard but long and needs Tate-curve theory plus standard elliptic-curve facts “such as the Weil pairing.”  In the actual code, the theorem that the Frey curve torsion representation is hardly ramified is still a `sorry`.
+
+Bottom line for dm3: FLT gives us a useful target shape and some scaffolding:
 
 ```lean
-axiom full_rational_torsion_implies_rootsOfUnity_rational
-  ... :
-  -- every m-th root of unity in AlgebraicClosure ℚ lies in the range of ℚ
+WeierstrassCurve.galoisRep ... : GaloisRep K (ZMod n) E[n]
+GaloisRep.det
+IsHardlyRamified.det = cyclotomicCharacter
 ```
 
-This isolates the missing Weil-pairing/determinant theorem instead of hiding it inside an attempted proof.
+but it does **not** give a completed Weil-pairing/determinant proof.  The determinant-cyclotomic statement is built into `IsHardlyRamified` as a field/assumption, and the Frey torsion theorem that would prove it for elliptic curves is currently `sorry`.
 
-### Layer B: cyclotomic/rational-root endpoint, using existing Mathlib
+## Files under `FLT/GaloisRepresentation/`
 
-After Layer A gives `μ_m ⊂ ℚ`, use existing cyclotomic/root-of-unity infrastructure to derive `m ∣ 2`.  The names most likely to matter are:
+The public imports in `FLT.lean` show the following Galois-representation files:
+
+```text
+FLT/GaloisRepresentation/Automorphic.lean
+FLT/GaloisRepresentation/Cyclotomic.lean
+FLT/GaloisRepresentation/HardlyRamified/Defs.lean
+FLT/GaloisRepresentation/HardlyRamified/Family.lean
+FLT/GaloisRepresentation/HardlyRamified/Frey.lean
+FLT/GaloisRepresentation/HardlyRamified/Lift.lean
+FLT/GaloisRepresentation/HardlyRamified/ModThree.lean
+FLT/GaloisRepresentation/HardlyRamified/Threeadic.lean
+```
+
+### `FLT/GaloisRepresentation/Automorphic.lean`
+
+Purpose: define automorphy of a 2-dimensional `p`-adic or mod-`p` Galois representation in the FLT-specific quaternionic setting.
+
+Key declaration:
 
 ```lean
-IsPrimitiveRoot.dvd_of_isCyclotomicExtension
-Polynomial.cyclotomic.irreducible_rat
-IsCyclotomicExtension.Rat.galEquivZMod
-InfiniteGalois.mem_range_algebraMap_iff_fixed
+def GaloisRep.IsAutomorphicOfLevel ... (ρ : GaloisRep F A V)
+    (S : Finset (HeightOneSpectrum (𝓞 F))) : Prop := ...
 ```
 
-## Closest-to-existing ranking
+The definition asks for a totally definite quaternion algebra, a Hecke eigenform/eigencharacter, and good-prime compatibility:
 
-1. **Cyclotomic character / cyclotomic Galois group**: very close; already in Mathlib.
-2. **Absolute Galois group and fixed-field statements**: present and usable, though with abstract `AlgebraicClosure` choices.
-3. **Complex conjugation**: exists as `Complex.conjAe` over `ℝ`; not packaged as an element of `Field.absoluteGaloisGroup ℚ`.
-4. **Elliptic-curve Galois representation `ρ_m`**: not found as a packaged object.
-5. **`det ρ_m = χ_m`**: not found; this is the major missing theorem and is morally the Weil-pairing input.
+```lean
+ρ.IsUnramifiedAt v ∧
+(ρ.toLocal v (Frob v)).det = v.1.absNorm ∧
+LinearMap.trace A V (ρ.toLocal v (Frob v)) = π (HeckeAlgebra.T ...)
+```
 
-Bottom line: for a Mathlib proof today, the cyclotomic half is the promising existing infrastructure.  The elliptic-curve representation/determinant half remains the hard missing infrastructure, so this is not currently a clean way to avoid formalizing Weil-pairing-level input.
+It imports `FLT.Deformations.RepresentationTheory.GaloisRep` and Mathlib cyclotomic characters.
+
+Important for us: it uses the **determinant equals cyclotomic/norm** condition as part of automorphy compatibility, but it does not prove this from an elliptic-curve pairing.
+
+### `FLT/GaloisRepresentation/Cyclotomic.lean`
+
+Purpose: a `ZHat`-valued cyclotomic character wrapper using Mathlib’s modular cyclotomic character.
+
+Key declarations:
+
+```lean
+lemma IsAlgClosed.card_rootsOfUnity (N : ℕ) [NeZero N] :
+  Fintype.card (rootsOfUnity N L) = N
+
+noncomputable def CyclotomicCharacterAux : (L ≃+* L) →* ZHat
+
+noncomputable def CyclotomicCharacterZHat : (L ≃+* L) →* ZHatˣ
+```
+
+This is potentially useful for a full-adic/cyclotomic endpoint, but the hard elliptic determinant identity is elsewhere/not implemented.
+
+### `FLT/GaloisRepresentation/HardlyRamified/Defs.lean`
+
+Purpose: define the “hardly ramified” condition for 2-dimensional mod-`ℓ` or `ℓ`-adic representations of `Gal(ℚbar/ℚ)`.
+
+Key declaration:
+
+```lean
+structure IsHardlyRamified {ℓ : ℕ} [Fact ℓ.Prime] (hℓOdd : Odd ℓ)
+    {R : Type u} ... {V : Type*} ... (hdim : Module.rank R V = 2)
+    (ρ : GaloisRep ℚ R V) : Prop where
+  det : ∀ g, ρ.det g =
+    algebraMap ℤ_[ℓ] R (cyclotomicCharacter (ℚ ᵃˡᵍ) ℓ g.toRingEquiv)
+  isUnramified : ...
+  isFlat : ...
+  isTameAtTwo : ...
+```
+
+The doc comment is crucial: it says the `p`-torsion of the Frey curve is hardly ramified, but that the full proof is long and needs the Tate curve plus standard elliptic curve facts such as the Weil pairing.
+
+This is exactly the place where our desired determinant/cyclotomic theorem would enter.  FLT currently records it as part of a larger structure, not as an implemented theorem derived from Weil pairing.
+
+### `FLT/GaloisRepresentation/HardlyRamified/Frey.lean`
+
+Purpose: state that Frey-curve `ℓ`-torsion is hardly ramified and not irreducible.
+
+Key declarations:
+
+```lean
+theorem FreyCurve.torsion_isHardlyRamified :
+  IsHardlyRamified P.hp_odd sorry
+    (P.freyCurve.galoisRep P.p (show 0 < P.p from P.hppos)) :=
+  sorry
+
+theorem FreyCurve.torsion_not_isIrreducible :
+  ¬ GaloisRep.IsIrreducible (P.freyCurve.galoisRep P.p P.hppos) :=
+  sorry
+```
+
+Important: this file imports both `FLT.FreyCurve.FreyPackage` and `FLT.EllipticCurve.Torsion`.  It is the explicit bridge from elliptic-curve torsion to the Galois-representation machine, but the bridge theorem is not proved.
+
+### `FLT/GaloisRepresentation/HardlyRamified/ModThree.lean`
+
+Purpose: state a mod-3 classification theorem for hardly ramified representations.
+
+Key declaration:
+
+```lean
+theorem mod_three ... {ρ : GaloisRep ℚ k V}
+    (hρ : IsHardlyRamified (show Odd 3 by decide) hV ρ) :
+    ∃ (π : V →ₗ[k] k) (_ : Function.Surjective π),
+    ∀ g : Γ ℚ, ∀ v : V, π (ρ g v) = π v := by
+  sorry
+```
+
+### `FLT/GaloisRepresentation/HardlyRamified/Threeadic.lean`
+
+Purpose: state a 3-adic classification/trace theorem for hardly ramified representations.
+
+Key declaration:
+
+```lean
+theorem three_adic ... {ρ : GaloisRep ℚ R V}
+    (hρ : IsHardlyRamified (show Odd 3 by decide) hV ρ) :
+    ∀ p (hp : Nat.Prime p) (hp5 : 5 ≤ p),
+      letI v := hp.toHeightOneSpectrumRingOfIntegersRat
+      (ρ.toLocal v (Frob v)).trace _ _ = 1 + p := sorry
+```
+
+### `FLT/GaloisRepresentation/HardlyRamified/Lift.lean`
+
+Purpose: state a lifting theorem from irreducible hardly ramified mod-`p` representations to characteristic-zero `p`-adic representations.
+
+Key declaration:
+
+```lean
+theorem lifts (ρ : GaloisRep ℚ k V) (hρirred : ρ.IsIrreducible)
+    (hρ : IsHardlyRamified hpodd hV ρ) :
+    ∃ R ... W ... (σ : GaloisRep ℚ R W) ...,
+      IsHardlyRamified hpodd hW σ ∧ (σ.baseChange k).conj r = ρ := sorry
+```
+
+### `FLT/GaloisRepresentation/HardlyRamified/Family.lean`
+
+Purpose: state that a hardly ramified representation lives in a compatible family.
+
+Key declaration:
+
+```lean
+theorem mem_isCompatible (hρ : IsHardlyRamified hpodd hv ρ) :
+  ∃ (E : Type v) (_ : Field E) (_ : NumberField E)
+    (σ : GaloisRepFamily ℚ E 2),
+    σ.isCompatible ∧ ... :=
+  sorry
+```
+
+This imports `FLT.Deformations.RepresentationTheory.GaloisRepFamily`.
+
+## Related non-`FLT/GaloisRepresentation` files
+
+### `FLT/Deformations/RepresentationTheory/GaloisRep.lean`
+
+This is the real core infrastructure file.
+
+Key declarations:
+
+```lean
+def GaloisRep := Γ K →ₜ* Module.End A M
+
+abbrev FramedGaloisRep := GaloisRep K A (n → A)
+
+def GaloisRep.conj
+
+def GaloisRep.frame
+
+def FramedGaloisRep.GL : FramedGaloisRep K A n ≃ (Γ K →ₜ* GL n A)
+
+def GaloisRep.det (ρ : GaloisRep K A M) : Γ K →ₜ* A
+
+def GaloisRep.baseChange
+
+abbrev GaloisRep.toLocal
+
+class GaloisRep.IsUnramifiedAt
+
+def GaloisRep.charFrob
+
+class GaloisRep.IsFlatAt
+
+def GaloisRep.IsIrreducible
+```
+
+For dm3, this is more useful than Mathlib’s current elliptic curve files because it already fixes a representation API with determinant and local/Frobenius structure.
+
+### `FLT/Deformations/RepresentationTheory/AbsoluteGaloisGroup.lean`
+
+Purpose: functoriality of absolute Galois groups.
+
+Key declarations:
+
+```lean
+noncomputable def Field.absoluteGaloisGroup.mapAux (f : K →+* L) : Γ L →* Γ K
+
+noncomputable def Field.absoluteGaloisGroup.map (f : K →+* L) : Γ L →ₜ* Γ K
+
+lemma Field.absoluteGaloisGroup.lift_map ...
+```
+
+This underlies `GaloisRep.map` / restriction of representations along field extensions.
+
+### `FLT/Deformations/RepresentationTheory/GaloisRepFamily.lean`
+
+Purpose: compatible families of Galois representations.
+
+Key declarations:
+
+```lean
+def GaloisRepFamily (K : Type*) [Field K]
+    (E : Type*) [Field E] [NumberField E] (d : ℕ) : Type _ :=
+  ∀ {p : ℕ} (_ : Fact (p.Prime)) (φ : E →+* AlgebraicClosure ℚ_[p]),
+    GaloisRep K (AlgebraicClosure ℚ_[p]) (Fin d → AlgebraicClosure ℚ_[p])
+
+def GaloisRepFamily.isCompatible ... : Prop := ...
+```
+
+### `FLT/EllipticCurve/Torsion.lean`
+
+Purpose: elliptic-curve torsion and its mod-`n` Galois representation.
+
+Key declarations:
+
+```lean
+abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u :=
+  Submodule.torsionBy ℤ (E⁄k).Point n
+
+noncomputable instance (n : ℕ) : Module (ZMod n) (E.nTorsion n)
+
+theorem WeierstrassCurve.n_torsion_finite ... := sorry
+
+theorem WeierstrassCurve.n_torsion_card ... := sorry
+
+theorem WeierstrassCurve.n_torsion_dimension ... :
+  Nonempty (E.nTorsion n ≃+ (ZMod n) × (ZMod n)) := ...
+
+def WeierstrassCurve.Points.map ...
+
+instance WeierstrassCurve.galoisRepresentationSmul ... :
+  SMul (K ≃ₐ[k] K) (E⁄K).Point
+
+instance WeierstrassCurve.galoisRepresentation ... :
+  DistribMulAction (K ≃ₐ[k] K) (E⁄K).Point := ... sorry ...
+
+def WeierstrassCurve.galoisRep ... :
+  GaloisRep K (ZMod n) ((E.map (algebraMap K (AlgebraicClosure K))).nTorsion n) := sorry
+```
+
+This is the closest thing in FLT to our desired `ρ_m : G_Q → GL₂(ZMod m)`.  However:
+
+* it is a representation on the torsion module, not immediately framed as `GL₂(ZMod m)`;
+* the rank/cardinality/finiteness API is partly `sorry`;
+* the final continuous Galois representation is `sorry`;
+* no determinant/cyclotomic theorem is proved here.
+
+### `FLT/TateCurve/TateCurve.lean`
+
+This file is not a Tate module implementation.  It is a planning stub/comment.  It says the desired Tate-uniformization input is a description of the Galois action on `Qpbar`-points of `p`-torsion of an elliptic curve over `Qp` as an explicit quotient of `Qpbar^* / q(E)^ℤ`.
+
+## Answers to the four concrete questions
+
+### (1) Do they define the Tate module `T_ℓ(E)`?
+
+No.  I found no `TateModule` or `T_l(E)` definition.  There is `FLT/TateCurve/TateCurve.lean`, but it is a prose stub about Tate uniformization and `p`-torsion, not an inverse-limit Tate-module construction.
+
+### (2) Do they have mod-`m` Galois representations?
+
+Yes, in two senses.
+
+First, generically:
+
+```lean
+GaloisRep K A M := Γ K →ₜ* Module.End A M
+```
+
+works for `A = ZMod m` and a finite `ZMod m` module `M`.
+
+Second, elliptic-curve specifically:
+
+```lean
+WeierstrassCurve.galoisRep ... (n : ℕ) ... :
+  GaloisRep K (ZMod n) E[n]
+```
+
+exists in `FLT/EllipticCurve/Torsion.lean`, but is currently `sorry`.  This is directly relevant to our desired `ρ_m`, though it is not yet a completed formal theorem.
+
+### (3) Do they have any pairing construction?
+
+No implemented Weil pairing was found.  The only relevant occurrence is a doc comment in `HardlyRamified/Defs.lean` saying that the proof that Frey-curve `p`-torsion is hardly ramified needs standard elliptic-curve facts such as the Weil pairing.  Searches for `WeilPairing` returned no code hits.
+
+### (4) What files in `FLT/GaloisRepresentation/` exist?
+
+The files imported by `FLT.lean` are:
+
+```text
+FLT/GaloisRepresentation/Automorphic.lean
+FLT/GaloisRepresentation/Cyclotomic.lean
+FLT/GaloisRepresentation/HardlyRamified/Defs.lean
+FLT/GaloisRepresentation/HardlyRamified/Family.lean
+FLT/GaloisRepresentation/HardlyRamified/Frey.lean
+FLT/GaloisRepresentation/HardlyRamified/Lift.lean
+FLT/GaloisRepresentation/HardlyRamified/ModThree.lean
+FLT/GaloisRepresentation/HardlyRamified/Threeadic.lean
+```
+
+## Practical implications for dm3 Weil-pairing work
+
+The FLT repo is useful because it already chose an API:
+
+```lean
+GaloisRep K A M
+GaloisRep.det
+GaloisRep.baseChange
+GaloisRep.toLocal
+FramedGaloisRep.GL
+WeierstrassCurve.galoisRep
+```
+
+For our `E[m](ℚ) = (ZMod m)^2 ⇒ μ_m ⊂ ℚ` goal, the most relevant existing FLT pieces are:
+
+```lean
+WeierstrassCurve.nTorsion
+WeierstrassCurve.galoisRep
+GaloisRep.det
+CyclotomicCharacterZHat / Mathlib cyclotomicCharacter
+```
+
+But the exact theorem we need is still absent:
+
+```lean
+-- not found
+∀ σ, (E.galoisRep m).det σ = cyclotomicCharacter ... σ
+```
+
+FLT effectively treats this as part of the hard Frey-curve input: `IsHardlyRamified.det` includes determinant equals cyclotomic as a required field, and `FreyCurve.torsion_isHardlyRamified` is `sorry`.
+
+So FLT gives us a good interface to build against, but not a completed workaround for the Weil pairing.  The likely best plan is to make our local statement compatible with `GaloisRep.det` and `WeierstrassCurve.galoisRep`, while isolating the missing determinant/cyclotomic theorem as the theorem that would ultimately be supplied by Weil-pairing formalization.
