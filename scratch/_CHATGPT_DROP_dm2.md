@@ -1,189 +1,360 @@
-# Q2052 (dm2): Miller loop structure in Lean 4
+# Q2046 (dm2): Miller evaluation at an affine point
 
 Date: 2026-06-28.
 
-Goal: write the loop structure only.  The line/tangent/vertical functions are placeholders with `sorry`; the point is to get the binary double-and-add accumulator right.
+Question: for `W : WeierstrassCurve.Affine K`, how should we evaluate elements of
 
-Convention in this file:
+```lean
+W.CoordinateRing = K[X][Y] / (W.polynomial)
+W.FunctionField = FractionRing W.CoordinateRing
+```
 
-* `W : WeierstrassCurve.Affine K`.
-* `P : W.Point` is an `m`-torsion point, carried as a hypothesis `hP : m • P = 0`.
-* The output lives in `W.FunctionField`, which is Mathlib's abbreviation for `FractionRing W.CoordinateRing`.
-* Bits are processed **most-significant first**.
-* The state starts at `T = O`, accumulator `f = 1`.
-* For each bit:
-  1. double: multiply by `tangentLine(T) / verticalLine(2T)`, set `T := 2T`;
-  2. if the bit is `1`: multiply by `secantLine(T,P) / verticalLine(T+P)`, set `T := T+P`.
+at an affine point `P = (xP, yP)`?
 
-This is a total loop skeleton.  The placeholder line functions should later be replaced by the Q2027 `ell/v` functions, with conventions at `O` chosen so the first MSB step from `T = O` is harmless.
+## Short answer
 
-## Lean 4 code
+Mathlib has the bivariate polynomial evaluation API and a quotient-at-point equivalence, but I did **not** find a named direct map
+
+```lean
+W.CoordinateRing →+* K
+```
+
+such as `CoordinateRing.eval`.  The correct direct definition is to use `AdjoinRoot.lift`, because
+
+```lean
+W.CoordinateRing = AdjoinRoot W.polynomial
+```
+
+and `W.Equation xP yP` is exactly the statement that `W.polynomial` vanishes at `(xP,yP)`.
+
+For the fraction field, there is **no total evaluation homomorphism**
+
+```lean
+W.FunctionField →+* K
+```
+
+at a point.  Evaluation of a rational function is partial: a representative `num / den` may be evaluated only when `den(P) ≠ 0`.
+
+## Relevant Mathlib API
 
 ```lean
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.Data.Nat.Bits
+```
 
-/-!
-# Miller loop skeleton
+In `Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point`, Mathlib defines:
 
-This file only defines the double-and-add Miller-loop control flow.
-The rational functions `secantLine`, `tangentLine`, and `verticalLine` are
-placeholders.  Replace them later with explicit functions in
-`W.FunctionField = FractionRing W.CoordinateRing`.
--/
+```lean
+abbrev CoordinateRing : Type r :=
+  AdjoinRoot W'.polynomial
 
-namespace WeierstrassCurve
-namespace Affine
-namespace MillerLoopSkeleton
+abbrev FunctionField : Type r :=
+  FractionRing W'.CoordinateRing
+```
 
-universe u
+and wraps the quotient map as:
 
-variable {K : Type u} [Field K] [DecidableEq K]
+```lean
+CoordinateRing.mk W
+-- type: K[X][Y] →+* W.CoordinateRing
+```
+
+For bivariate polynomials, `Mathlib.Algebra.Polynomial.Bivariate` provides:
+
+```lean
+Polynomial.evalEval x y p
+-- p(x,y)
+
+Polynomial.evalEvalRingHom x y
+-- type: K[X][Y] →+* K
+```
+
+and the key bridge:
+
+```lean
+Polynomial.eval₂_evalRingHom
+-- eval₂ (Polynomial.evalRingHom x) = Polynomial.evalEval x
+```
+
+Mathlib also has a nearby quotient API:
+
+```lean
+CoordinateRing.XYIdeal W x ypoly
+CoordinateRing.quotientXYIdealEquiv
+```
+
+where
+
+```lean
+CoordinateRing.quotientXYIdealEquiv
+  (h : (W.polynomial.eval ypoly).eval x = 0) :
+  (W.CoordinateRing ⧸ CoordinateRing.XYIdeal W x ypoly) ≃ₐ[K] K
+```
+
+This is useful, but it is an equivalence after quotienting by the maximal ideal
+`⟨X - x, Y - ypoly(X)⟩`; it is not itself a named direct evaluation map from `W.CoordinateRing` to `K`.
+
+## Recommended direct coordinate-ring evaluation map
+
+Use `AdjoinRoot.lift`.  This is the cleanest definition.
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 
 noncomputable section
 
-/--
-Placeholder for the secant line through two points, as a function in `K(W)`.
+open Polynomial
+open scoped Polynomial.Bivariate
 
-For the eventual implementation, this should be the line function through `P`
-and `Q`, with total conventions at `O`.
--/
-noncomputable def secantLine (W : Affine K) (_P _Q : W.Point) : W.FunctionField := by
-  sorry
+namespace WeierstrassCurve
+namespace Affine
+namespace MillerEval
 
-/--
-Placeholder for the tangent line at a point, as a function in `K(W)`.
+universe u
 
-For the eventual implementation, this should be the tangent line at `P`, with a
-total convention at `O`.
--/
-noncomputable def tangentLine (W : Affine K) (_P : W.Point) : W.FunctionField := by
-  sorry
+variable {K : Type u} [Field K]
+variable (W : Affine K)
+variable {xP yP : K}
 
-/--
-Placeholder for the vertical line through a point, as a function in `K(W)`.
+/-- Evaluation of coordinate-ring functions at the affine point `(xP,yP)`. -/
+noncomputable def evalCR (hP : W.Equation xP yP) : W.CoordinateRing →+* K :=
+  AdjoinRoot.lift (Polynomial.evalRingHom xP) yP (by
+    -- Goal:
+    --   W.polynomial.eval₂ (Polynomial.evalRingHom xP) yP = 0
+    -- while `hP` is:
+    --   W.polynomial.evalEval xP yP = 0
+    simpa [WeierstrassCurve.Affine.Equation, Polynomial.eval₂_evalRingHom] using hP)
 
-For the eventual implementation, this should be `X - x(P)` for affine `P`, with
-a total convention at `O`.
--/
-noncomputable def verticalLine (W : Affine K) (_P : W.Point) : W.FunctionField := by
-  sorry
+/-- Evaluation commutes with the quotient map. -/
+@[simp]
+theorem evalCR_mk (hP : W.Equation xP yP) (p : K[X][Y]) :
+    evalCR W hP (CoordinateRing.mk W p) = p.evalEval xP yP := by
+  simp [evalCR, Polynomial.eval₂_evalRingHom]
 
-/-- State of the Miller loop: current multiple `T` and accumulator `f`. -/
-structure MillerState (W : Affine K) where
-  current : W.Point
-  acc : W.FunctionField
+/-- The class of `X - a` evaluates to `xP - a`. -/
+@[simp]
+theorem evalCR_XClass (hP : W.Equation xP yP) (a : K) :
+    evalCR W hP (CoordinateRing.XClass W a) = xP - a := by
+  simp [evalCR, CoordinateRing.XClass, Polynomial.eval₂_evalRingHom, Polynomial.evalEval]
 
-/-- Initial state: current point `O`, accumulator `1`. -/
-def initialState (W : Affine K) : MillerState W where
-  current := 0
-  acc := 1
+/-- The class of `Y - g(X)` evaluates to `yP - g(xP)`. -/
+@[simp]
+theorem evalCR_YClass (hP : W.Equation xP yP) (g : K[X]) :
+    evalCR W hP (CoordinateRing.YClass W g) = yP - g.eval xP := by
+  simp [evalCR, CoordinateRing.YClass, Polynomial.eval₂_evalRingHom, Polynomial.evalEval]
 
-/-- The doubling update: multiply by `tangentLine(T) / verticalLine(2T)` and set `T := 2T`. -/
-def doubleStep (W : Affine K) (s : MillerState W) : MillerState W where
-  current := s.current + s.current
-  acc := s.acc ^ 2 * (tangentLine W s.current / verticalLine W (s.current + s.current))
+/-- Explicit `a(X) + b(X)Y` constructor. -/
+noncomputable def mkPQ (p q : K[X]) : W.CoordinateRing :=
+  CoordinateRing.mk W (C p + C q * (Y : K[X][Y]))
 
-/--
-The optional addition update for a `1` bit: multiply by
-`secantLine(T,P) / verticalLine(T+P)` and set `T := T+P`.
--/
-def addStep (W : Affine K) (P : W.Point) (s : MillerState W) : MillerState W where
-  current := s.current + P
-  acc := s.acc * (secantLine W s.current P / verticalLine W (s.current + P))
+/-- Evaluation of `a(X) + b(X)Y` at `(xP,yP)`. -/
+@[simp]
+theorem evalCR_mkPQ (hP : W.Equation xP yP) (p q : K[X]) :
+    evalCR W hP (mkPQ W p q) = p.eval xP + q.eval xP * yP := by
+  simp [mkPQ, evalCR, Polynomial.eval₂_evalRingHom, Polynomial.evalEval]
 
-/--
-Process one binary digit in the MSB-first Miller loop.
-
-Every digit first performs a doubling step.  If the digit is `true`, it then
-performs the addition step by `P`; if the digit is `false`, it keeps the doubled
-state.
--/
-def stepBit (W : Affine K) (P : W.Point) (bit : Bool) (s : MillerState W) : MillerState W :=
-  let s₂ := doubleStep W s
-  if bit then addStep W P s₂ else s₂
-
-/--
-Binary digits of `m`, most-significant first.
-
-Mathlib's `Nat.bits m` is least-significant first, so we reverse it.
-For `m = 0`, this returns `[]`.
--/
-def bitsMSB (m : ℕ) : List Bool :=
-  (Nat.bits m).reverse
-
-/-- Run the Miller loop over an explicit list of MSB-first bits. -/
-def loopFromBits (W : Affine K) (P : W.Point) (bits : List Bool) : MillerState W :=
-  bits.foldl (fun s bit => stepBit W P bit s) (initialState W)
-
-/-- Run the Miller loop over the binary expansion of `m`. -/
-def loopState (W : Affine K) (P : W.Point) (m : ℕ) : MillerState W :=
-  loopFromBits W P (bitsMSB m)
-
-/--
-The Miller-loop accumulator for a point `P` satisfying `m • P = O`.
-
-The hypothesis is carried for the API and future correctness theorem; the loop
-itself only needs `P` and `m`.
--/
-def millerLoopFunction (W : Affine K) (P : W.Point) (m : ℕ)
-    (_hP : m • P = 0) : W.FunctionField :=
-  (loopState W P m).acc
-
-/--
-A variant returning both the final multiple and the accumulator.
-
-Future invariant target:
-if the processed prefix represents `n`, then `current = n • P` and
-`acc = f_{n,P}` with divisor `n[P] - [nP] - (n-1)[O]`.
--/
-def millerLoopStateOfOrder (W : Affine K) (P : W.Point) (m : ℕ)
-    (_hP : m • P = 0) : MillerState W :=
-  loopState W P m
-
-/-!
-## Recursive spelling
-
-The fold-based implementation above is usually easiest to use.  This recursive
-version is definitionally equivalent in spirit and may be more convenient for
-induction on the bit list.
--/
-
-def loopFromBitsRec (W : Affine K) (P : W.Point) : List Bool → MillerState W → MillerState W
-  | [], s => s
-  | bit :: bits, s => loopFromBitsRec W P bits (stepBit W P bit s)
-
-/-- Recursive loop over the binary expansion of `m`. -/
-def loopStateRec (W : Affine K) (P : W.Point) (m : ℕ) : MillerState W :=
-  loopFromBitsRec W P (bitsMSB m) (initialState W)
-
-/-- Recursive Miller-loop accumulator with the torsion hypothesis carried. -/
-def millerLoopFunctionRec (W : Affine K) (P : W.Point) (m : ℕ)
-    (_hP : m • P = 0) : W.FunctionField :=
-  (loopStateRec W P m).acc
-
-end
-
-end MillerLoopSkeleton
+end MillerEval
 end Affine
 end WeierstrassCurve
 ```
 
-## Notes
-
-The loop above processes all bits including the leading `1`, because the state starts at `O`.  The first step therefore computes
+The theorem `evalCR_mkPQ` is the Lean version of the rule
 
 ```text
-T = 2O + P = P
+(a(X) + b(X)Y)(xP,yP) = a(xP) + b(xP)yP.
 ```
 
-for the leading bit.  The placeholder functions must eventually satisfy the total conventions
+## Alternative definition via `quotientXYIdealEquiv`
+
+This is also mathematically clean, but slightly heavier in Lean.  It factors evaluation as
 
 ```text
-tangentLine(O) / verticalLine(O) = 1,
-secantLine(O,P) / verticalLine(P) = 1,
+F[W] → F[W] / ⟨X - xP, Y - yP⟩ ≃ F.
 ```
 
-or an equivalent normalization, so that the first step does not introduce a spurious factor.
+Skeleton:
 
-If instead one starts with `T = P`, then the usual implementation drops the leading bit.  That is the Q2027 style.  This file follows the user-requested `T = O` convention.
+```lean
+noncomputable def evalCRViaQuotient
+    {K : Type u} [Field K]
+    (W : WeierstrassCurve.Affine K)
+    {xP yP : K} (hP : W.Equation xP yP) :
+    W.CoordinateRing →ₐ[K] K :=
+  ((CoordinateRing.quotientXYIdealEquiv
+      (W' := W) (x := xP) (y := (C yP : K[X]))
+      (by
+        -- Goal: (W.polynomial.eval (C yP)).eval xP = 0
+        -- This is the same as `W.polynomial.evalEval xP yP = 0`.
+        simpa [WeierstrassCurve.Affine.Equation, Polynomial.evalEval] using hP)).toAlgHom).comp
+    (Ideal.Quotient.mkₐ K (CoordinateRing.XYIdeal W xP (C yP : K[X])))
+```
+
+I would use the `AdjoinRoot.lift` definition first.  It gives the direct simp lemma on `CoordinateRing.mk W p` immediately.
+
+## Why there is no total function-field evaluation map
+
+`W.FunctionField` is a localization/fraction ring of `W.CoordinateRing`.  A homomorphism out of a localization exists only when every localized denominator maps to a unit.  For `FractionRing W.CoordinateRing`, the denominators are all nonzero elements of `W.CoordinateRing`.
+
+At the point `(xP,yP)`, the nonzero coordinate-ring element
+
+```lean
+CoordinateRing.XClass W xP    -- the class of X - xP
+```
+
+is nonzero by
+
+```lean
+CoordinateRing.XClass_ne_zero xP
+```
+
+but it evaluates to zero:
+
+```lean
+by simpa using evalCR_XClass (W := W) hP xP
+-- evalCR W hP (CoordinateRing.XClass W xP) = 0
+```
+
+Therefore the coordinate-ring evaluation map cannot be extended to a ring homomorphism
+
+```lean
+W.FunctionField →+* K
+```
+
+because the fraction field inverts `X - xP`, while evaluation at `P` sends `X - xP` to `0`.
+
+## Recommended representation for partial rational-function evaluation
+
+For Miller evaluation, do not try to define a total evaluator on `W.FunctionField`.  Instead, carry an explicit numerator and denominator and require the denominator to be nonzero at the evaluation point.
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+
+noncomputable section
+
+open Polynomial
+open scoped Polynomial.Bivariate
+
+namespace WeierstrassCurve
+namespace Affine
+namespace MillerEval
+
+universe u
+
+variable {K : Type u} [Field K]
+variable (W : Affine K)
+variable {xP yP : K}
+
+/-- Evaluation of an explicit fraction `num / den` at an affine point. -/
+noncomputable def evalFractionAt
+    (hP : W.Equation xP yP)
+    (num den : W.CoordinateRing)
+    (hdenP : evalCR W hP den ≠ 0) : K :=
+  evalCR W hP num / evalCR W hP den
+
+/-- A presentation of a rational function that is evaluable at `(xP,yP)`. -/
+structure FractionPresentationAt
+    (hP : W.Equation xP yP)
+    (f : W.FunctionField) where
+  num : W.CoordinateRing
+  den : W.CoordinateRing
+  den_ne_zero : den ≠ 0
+  den_eval_ne_zero : evalCR W hP den ≠ 0
+  eq_mk :
+    f = IsLocalization.mk' W.FunctionField num
+      ⟨den, mem_nonZeroDivisors_iff_ne_zero.mpr den_ne_zero⟩
+
+namespace FractionPresentationAt
+
+/-- Evaluate a rational function from a denominator-nonvanishing presentation. -/
+noncomputable def value
+    {hP : W.Equation xP yP} {f : W.FunctionField}
+    (s : FractionPresentationAt W hP f) : K :=
+  evalCR W hP s.num / evalCR W hP s.den
+
+end FractionPresentationAt
+end MillerEval
+end Affine
+end WeierstrassCurve
+```
+
+Later, prove independence of presentation.  The proof path is:
+
+1. Use `IsLocalization.mk'_eq_iff_eq'` to turn equality of two fractions into a cross-multiplication equality in `W.CoordinateRing`.
+2. Apply `evalCR W hP`, a ring homomorphism, to that equality.
+3. Divide by the two nonzero evaluated denominators.
+
+A statement to add later:
+
+```lean
+theorem FractionPresentationAt.value_eq
+    {K : Type u} [Field K]
+    (W : WeierstrassCurve.Affine K)
+    {xP yP : K} {hP : W.Equation xP yP}
+    {f : W.FunctionField}
+    (s t : FractionPresentationAt W hP f) :
+    s.value W = t.value W := by
+  -- Use `s.eq_mk`, `t.eq_mk`, `IsLocalization.mk'_eq_iff_eq'`,
+  -- then apply `evalCR W hP` and field division.
+  sorry
+```
+
+## A deliberately simple Miller-loop policy
+
+For the current Miller layer, keep the evaluated loop separate from the symbolic function-field loop.
+
+Symbolic functions:
+
+```lean
+lineCR     : W.CoordinateRing
+verticalCR : W.CoordinateRing
+lineFF     : W.FunctionField := algebraMap _ _ lineCR
+verticalFF : W.FunctionField := algebraMap _ _ verticalCR
+```
+
+Evaluated functions:
+
+```lean
+lineValue     := evalCR W hP lineCR
+verticalValue := evalCR W hP verticalCR
+```
+
+Then each Miller step should require:
+
+```lean
+hvertical : verticalValue ≠ 0
+```
+
+and multiply the accumulator by:
+
+```lean
+lineValue / verticalValue
+```
+
+This avoids pretending that evaluation is a total map on `K(E)`.  It also matches the mathematics: rational functions are evaluated at points only away from their poles.
+
+## API checklist
+
+Use these names:
+
+```lean
+CoordinateRing.mk W
+CoordinateRing.XClass W x
+CoordinateRing.YClass W g
+CoordinateRing.XClass_ne_zero
+CoordinateRing.YClass_ne_zero
+CoordinateRing.quotientXYIdealEquiv
+CoordinateRing.XYIdeal
+
+Polynomial.evalEval
+Polynomial.evalEvalRingHom
+Polynomial.eval₂_evalRingHom
+Polynomial.aevalAeval
+Polynomial.coe_aevalAeval_eq_evalEval
+
+AdjoinRoot.lift
+AdjoinRoot.lift_mk
+AdjoinRoot.liftAlgHom
+
+IsLocalization.mk'
+IsLocalization.mk'_eq_iff_eq'
+IsFractionRing.div_surjective
+```
