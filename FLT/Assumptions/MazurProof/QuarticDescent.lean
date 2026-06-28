@@ -472,32 +472,17 @@ theorem quartic_plus_descent_step :
       rw [hM_def, Int.mul_ediv_cancel' h4U]
     have hN_val : 4 * N = 2 * (2 * j + 1) ^ 2 + (4 * k) ^ 2 + 2 * s := by
       rw [hN_def, Int.mul_ediv_cancel' h4V]
-    -- MN = 5 * B₁⁴
+    -- MN = 5 * B₁⁴ (via: 16MN = (4M)(4N) = UV = 5(4k)⁴ = 16·5B₁⁴)
+    have hB₁_val : B₁ = 2 * k := by omega
+    have hUV := UV_eq_five_mul_fourth heq
     have hMN_prod : M * N = 5 * B₁ ^ 4 := by
-      apply mul_left_cancel₀ (show (16 : ℤ) ≠ 0 from by norm_num)
-      have h16 : 16 * (M * N) = (4 * M) * (4 * N) := by ring
-      rw [h16, hM_val, hN_val]
-      -- Goal: (2*(2j+1)²+(4k)²-2s)*(2*(2j+1)²+(4k)²+2s) = 16*(5*B₁⁴)
-      -- LHS = UV = 5*(4k)⁴ = 5*256k⁴. RHS = 16*5*(2k)⁴ = 16*5*16k⁴ = 80*16k⁴.
-      -- Wait: B₁ = (4k)/2 = 2k. So 5*B₁⁴ = 5*(2k)⁴ = 80k⁴. 16*80k⁴ = 1280k⁴.
-      -- UV = 5*(4k)⁴ = 5*256k⁴ = 1280k⁴. ✓
-      have hUV := UV_eq_five_mul_fourth heq
-      -- hUV : (2*(2j+1)²+(4k)²-2s)*(2*(2j+1)²+(4k)²+2s) = 5*(4k)⁴
-      -- B₁ = 4k/2 = 2k
-      have hB₁_val : B₁ = 2 * k := by omega
-      -- Prove via: 16*(M*N) = (4M)*(4N) = UV = 5*(4k)⁴ = 16*(5*(2k)⁴) = 16*(5*B₁⁴)
-      -- MN = UV/16 = 5(4k)⁴/16 = 5·16k⁴ = 5·(2k)⁴ = 5·B₁⁴
-      have hB₁_val : B₁ = 2 * k := by omega
-      -- (4M)(4N) = UV = 5(4k)⁴ (direct substitution)
-      -- (4M)(4N) = UV = 5(4k)⁴, proved by congr
-      have h_prod_eq : (4 * M) * (4 * N) =
+      suffices h : 16 * (M * N) = 16 * (5 * B₁ ^ 4) by omega
+      have h1 : 16 * (M * N) = (4 * M) * (4 * N) := by ring
+      have h2 : (4 * M) * (4 * N) =
           (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := by
         congr 1 <;> linarith
-      -- Chain: 16(MN) = (4M)(4N) = UV = 5(4k)⁴ = 16·5·B₁⁴
-      have h2 : 16 * (M * N) = 5 * (4 * k) ^ 4 := by
-        nlinarith [h_prod_eq, hUV, show (4*M)*(4*N) = 16*(M*N) from by ring]
-      have h3 : 5 * (4 * k) ^ 4 = 16 * (5 * B₁ ^ 4) := by rw [hB₁_val]; ring
-      omega
+      have h3 : 16 * (5 * B₁ ^ 4) = 5 * (4 * k) ^ 4 := by rw [hB₁_val]; ring
+      nlinarith [hUV]
     -- M, N > 0
     have hMpos : 0 < M := by
       by_contra hle; push_neg at hle
