@@ -1,257 +1,220 @@
-# Q2051 (dm1): Concrete line and vertical functions in `W.FunctionField`
+# Q2075 (dm1): Can the finite Mazur obstruction use only Hasse?
 
 Date: 2026-06-28.
 
-This is the concrete Lean 4 layer for Miller line functions using Mathlib's affine Weierstrass coordinate ring API.
-
-Important type correction from Q2045: the function-field type is
-
-```lean
-W.FunctionField
-```
-
-not `W.Affine.FunctionField K`.  In Mathlib,
-
-```lean
-W.CoordinateRing = AdjoinRoot W.polynomial
-W.FunctionField = FractionRing W.CoordinateRing
-```
-
-The code below is written for the **short Weierstrass** subfamily
+Question: for the Mazur proof over `ℚ`, can we prove
 
 ```text
-y^2 = x^3 + a4*x + a6
+E[m] fully rational over ℚ  →  m ≤ 2
 ```
 
-represented in Mathlib by an affine Weierstrass curve `W : WeierstrassCurve.Affine K` with
+for
+
+```text
+m ∈ {3,4,5,6,7,8,9,10,12}
+```
+
+without the Weil pairing, using only reduction modulo a prime and the Hasse bound?
+
+Proposed argument:
+
+```text
+If E[m](ℚ) contains (ℤ/mℤ)^2, then m^2 divides #E(𝔽_p) for all good primes p.
+Hasse: #E(𝔽_p) = p + 1 - a_p with |a_p| ≤ 2√p.
+At p = 2, #E(𝔽_2) ≤ 2 + 1 + 2√2 < 6, so m^2 ≤ 5 and m ≤ 2.
+```
+
+## Verdict
+
+**No, not as stated.**  The `p = 2` proof is not a valid uniform replacement for the Weil-pairing obstruction.
+
+It becomes valid only under extra hypotheses such as:
+
+```text
+E has good reduction at 2, and 2 ∤ m.
+```
+
+That covers an odd `m` curve with good reduction at `2`, but it does not cover all elliptic curves over `ℚ`, and it does not cover even `m` at `p = 2`.
+
+The correct reduction statement is:
+
+```text
+If E has good reduction at p and p ∤ m,
+then the reduction map injects E[m](ℚ) into E(𝔽_p).
+```
+
+So, under full rational `m`-torsion, for every good prime `p ∤ m`, one gets
+
+```text
+m^2 ∣ #E(𝔽_p).
+```
+
+The condition `p ∤ m` is essential.  At primes dividing `m`, the reduction map on `m`-torsion need not be injective.
+
+The condition that `p` is a good prime is also essential.  A fixed small prime, such as `2`, can be a bad prime for `E`.
+
+## The correct Hasse-only lemma
+
+The Hasse-bound argument proves the following conditional lemma.
+
+```text
+Lemma.
+Assume E/ℚ has full rational m-torsion.
+Let p be a good prime for E with p ∤ m.
+If p < (m - 1)^2, then contradiction.
+```
+
+Proof:
+
+```text
+full rational m-torsion + good p ∤ m
+  ⇒ (ℤ/mℤ)^2 injects into E(𝔽_p)
+  ⇒ m^2 ∣ #E(𝔽_p)
+  ⇒ m^2 ≤ #E(𝔽_p)
+
+Hasse gives
+  #E(𝔽_p) ≤ p + 1 + 2√p = (√p + 1)^2.
+
+If p < (m - 1)^2, then √p + 1 < m, hence
+  #E(𝔽_p) < m^2,
+contradiction.
+```
+
+This is useful for a **specific** elliptic curve once we can exhibit one good prime `p ∤ m` with `p < (m - 1)^2`.  It is not a uniform theorem over all elliptic curves over `ℚ`, because an elliptic curve can have bad reduction at the small primes one wants to use.
+
+## What goes wrong with `p = 2`
+
+For `p = 2`, Hasse gives
+
+```text
+#E(𝔽_2) ≤ 2 + 1 + 2√2 < 6,
+```
+
+so, since the group order is an integer,
+
+```text
+#E(𝔽_2) ≤ 5.
+```
+
+If `E` has good reduction at `2` and `m` is odd, then full rational `m`-torsion would imply
+
+```text
+m^2 ∣ #E(𝔽_2),
+```
+
+hence `m^2 ≤ 5`, so `m ≤ 2`.  This rules out odd `m ≥ 3` **only for curves with good reduction at 2**.
+
+But this does not prove the Mazur obstruction uniformly:
+
+1. `E` may have bad reduction at `2`.
+2. If `m` is even, then `2 ∣ m`, so prime-to-`p` injectivity of the `m`-torsion reduction map does not apply at `p = 2`.
+
+Thus the proposed one-line proof is invalid for even values
+
+```text
+m = 4, 6, 8, 10, 12,
+```
+
+and also invalid for odd values if the curve has bad reduction at `2`.
+
+## Table for the requested finite set
+
+For each `m`, Hasse gives a contradiction at any good prime
+
+```text
+p ∤ m  and  p < (m - 1)^2.
+```
+
+Here are the first possible small primes:
+
+```text
+m = 3:   p = 2 only works, and only if E has good reduction at 2.
+
+m = 4:   p = 3,5,7 would work if one is good.
+
+m = 5:   p = 2,3,7,11,13 would work if one is good.
+
+m = 6:   p = 5,7,11,13,17,19,23 would work if one is good.
+
+m = 7:   any good p ∈ {2,3,5,11,13,17,19,23,29,31} works.
+
+m = 8:   any good odd p < 49 works.
+
+m = 9:   any good p < 64 with p ≠ 3 works.
+
+m = 10:  any good p < 81 with p ≠ 2,5 works.
+
+m = 12:  any good p < 121 with p ≠ 2,3 works.
+```
+
+This table is conditional.  It does **not** prove the desired statement for every elliptic curve over `ℚ`, because one cannot guarantee from Hasse alone that at least one of the listed small primes is a good prime for `E`.
+
+## Why this cannot replace the Weil pairing
+
+The Weil-pairing obstruction is global and field-theoretic:
+
+```text
+full rational E[m]  ⇒  μ_m ⊂ ℚ.
+```
+
+But `ℚ` contains only the roots of unity `±1`, so this forces
+
+```text
+m ≤ 2.
+```
+
+That proof does not need a good reduction prime.
+
+The Hasse argument is instead local-at-a-prime:
+
+```text
+full rational E[m] + good reduction at p + p ∤ m
+  ⇒ m^2 ∣ #E(𝔽_p)
+  ⇒ Hasse may contradict this if p is small enough.
+```
+
+It is excellent for checking a specific curve, or for ruling out full `m`-torsion for curves known to have good reduction at a suitable small prime.  It is not enough for the uniform Mazur proof over `ℚ`.
+
+## Lean-oriented lemma shape
+
+The clean abstraction to formalize is not the false `p = 2` theorem, but the conditional lemma:
 
 ```lean
-W.a₁ = 0, W.a₂ = 0, W.a₃ = 0
+/-- Hasse obstruction to full rational m-torsion at one good prime. -/
+theorem full_mtorsion_absurd_of_good_prime_hasse
+    {m p : ℕ}
+    -- E has good reduction at p
+    (hgood : GoodReduction E p)
+    -- p does not divide m
+    (hpm : ¬ p ∣ m)
+    -- full rational m-torsion injects into the reduction
+    (hinj : InjectsFullMTorsionIntoReduction E m p)
+    -- Hasse bound for the reduction
+    (hhasse : Nat.card Efp ≤ p + 1 + floor_sqrt_bound p)
+    -- small-prime condition, mathematically p < (m - 1)^2
+    (hsmall : p < (m - 1)^2) :
+    False := by
+  -- From `hinj`: m^2 ∣ #E(F_p), hence m^2 ≤ #E(F_p).
+  -- From Hasse + hsmall: #E(F_p) < m^2.
+  -- Contradiction.
+  sorry
 ```
 
-The definitions do not require these equalities as arguments, but the tangent/secant formulas are mathematically intended under that short-curve assumption.
+For actual Mathlib, the exact statement will depend on the available finite-field elliptic-curve and good-reduction API.  The mathematical lemma should have these hypotheses explicitly:
 
-## Lean 4 code
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-
-/-!
-# Concrete Miller line functions for short Weierstrass curves
-
-For a short Weierstrass curve
-
-  y^2 = x^3 + a4*x + a6,
-
-this file defines vertical, tangent, and secant line functions as elements of
-
-  W.FunctionField = FractionRing W.CoordinateRing.
-
-The point-at-infinity cases are normalized to `1`, which is convenient for the
-Miller-loop identity cases.
--/
-
-noncomputable section
-
-open Polynomial
-open scoped Polynomial.Bivariate
-
-namespace WeierstrassCurve
-namespace Affine
-namespace ShortMillerFunctions
-
-universe u
-
-variable {K : Type u} [Field K]
-variable (W : Affine K)
-
-/-- Predicate saying that a Mathlib affine Weierstrass curve is in short form. -/
-def IsShort : Prop :=
-  W.a₁ = 0 ∧ W.a₂ = 0 ∧ W.a₃ = 0
-
-/-- Embed a coordinate-ring function into the function field. -/
-noncomputable def crToFF (f : W.CoordinateRing) : W.FunctionField :=
-  algebraMap W.CoordinateRing W.FunctionField f
-
-/--
-The coordinate-ring element
-
-  `Y - (ℓ * (X - x₀) + y₀)`.
-
-This is the affine line through `(x₀,y₀)` with slope `ℓ`, before embedding into
-the function field.
--/
-noncomputable def affineLineCR (x₀ y₀ ℓ : K) : W.CoordinateRing :=
-  CoordinateRing.YClass W (linePolynomial x₀ y₀ ℓ)
-
-/--
-The function-field element
-
-  `Y - (ℓ * (X - x₀) + y₀)`.
--/
-noncomputable def affineLineFF (x₀ y₀ ℓ : K) : W.FunctionField :=
-  crToFF W (affineLineCR W x₀ y₀ ℓ)
-
-/--
-The short-Weierstrass tangent slope
-
-  `(3*x^2 + a4) / (2*y)`.
-
-This is the usual slope for `y^2 = x^3 + a4*x + a6` when `2*y ≠ 0`.
--/
-noncomputable def tangentSlope (x y : K) : K :=
-  (3 * x ^ 2 + W.a₄) / (2 * y)
-
-/--
-The short-Weierstrass secant slope
-
-  `(y₂ - y₁) / (x₂ - x₁)`.
-
-This is used only in the branch `x₁ ≠ x₂`.
--/
-noncomputable def secantSlope (x₁ y₁ x₂ y₂ : K) : K :=
-  (y₂ - y₁) / (x₂ - x₁)
-
-/--
-The vertical line through a point, as a function-field element.
-
-For `P = (x_P,y_P)`, this is `X - x_P`.  For the point at infinity, it is
-normalized to `1`.
--/
-noncomputable def verticalLine : W.Point → W.FunctionField
-  | 0 => 1
-  | .some x _ _ => crToFF W (CoordinateRing.XClass W x)
-
-/--
-The formal short-Weierstrass tangent-line formula at a point.
-
-For `P = (x_P,y_P)`, this is
-
-  `Y - y_P - ((3*x_P^2 + a4)/(2*y_P)) * (X - x_P)`.
-
-For the point at infinity, it is normalized to `1`.
-
-This definition is exactly the formula branch.  If `2*y_P = 0`, Lean's field
-inverse convention makes the slope expression total, but mathematically the
-tangent is vertical.  Use `tangentLine` below for the Miller-safe total tangent.
--/
-noncomputable def tangentLineFormula : W.Point → W.FunctionField
-  | 0 => 1
-  | .some x y _ => affineLineFF W x y (tangentSlope W x y)
-
-/--
-The Miller-safe tangent line at a point.
-
-For an affine point with `2*y_P ≠ 0`, this is the usual short-Weierstrass tangent
-line
-
-  `Y - y_P - ((3*x_P^2 + a4)/(2*y_P)) * (X - x_P)`.
-
-For an affine point with `2*y_P = 0`, the tangent is vertical, so this returns
-`X - x_P`.  For the point at infinity, it is normalized to `1`.
--/
-noncomputable def tangentLine (P : W.Point) : W.FunctionField := by
-  classical
-  cases P with
-  | zero =>
-      exact 1
-  | some x y h =>
-      by_cases hy : 2 * y = 0
-      · exact verticalLine W (.some x y h)
-      · exact affineLineFF W x y (tangentSlope W x y)
-
-/--
-The secant line through two points, as a function-field element.
-
-Normalization and branch convention:
-
-* if either point is `O`, return `1`;
-* if the two affine points have the same coordinates, return the tangent line;
-* if the two affine points have the same `x` but different `y`, return the
-  vertical line `X - x`;
-* otherwise return the ordinary secant line through the two affine points.
--/
-noncomputable def secantLine (P Q : W.Point) : W.FunctionField := by
-  classical
-  exact
-    match P, Q with
-    | 0, _ => 1
-    | _, 0 => 1
-    | .some x₁ y₁ h₁, .some x₂ y₂ _h₂ =>
-        if hsame : x₁ = x₂ ∧ y₁ = y₂ then
-          tangentLine W (.some x₁ y₁ h₁)
-        else if hx : x₁ = x₂ then
-          crToFF W (CoordinateRing.XClass W x₁)
-        else
-          affineLineFF W x₁ y₁ (secantSlope x₁ y₁ x₂ y₂)
-
-/-! ## Small simp lemmas for the normalized identity cases. -/
-
-@[simp]
-theorem verticalLine_zero : verticalLine W 0 = 1 :=
-  rfl
-
-@[simp]
-theorem tangentLineFormula_zero : tangentLineFormula W 0 = 1 :=
-  rfl
-
-@[simp]
-theorem tangentLine_zero : tangentLine W 0 = 1 := by
-  simp [tangentLine]
-
-@[simp]
-theorem secantLine_zero_left (Q : W.Point) : secantLine W 0 Q = 1 := by
-  simp [secantLine]
-
-@[simp]
-theorem secantLine_zero_right (P : W.Point) : secantLine W P 0 = 1 := by
-  cases P <;> simp [secantLine]
-
-end ShortMillerFunctions
-end Affine
-end WeierstrassCurve
+```text
+good reduction at p,
+p ∤ m,
+full rational m-torsion injects after reduction,
+p < (m - 1)^2.
 ```
 
-## Notes for the next layer
+## Bottom line
 
-The three requested functions are the concrete names:
+The proposed proof is correct only in the special case where the chosen small prime is good and prime to `m`.  It does **not** work for all the needed values in `{3,4,5,6,7,8,9,10,12}` uniformly over all elliptic curves over `ℚ`.
 
-```lean
-WeierstrassCurve.Affine.ShortMillerFunctions.verticalLine W P
--- type: W.FunctionField
+So for the Mazur proof, the Weil-pairing primitive-root obstruction is still the right clean route for
 
-WeierstrassCurve.Affine.ShortMillerFunctions.tangentLine W P
--- type: W.FunctionField
-
-WeierstrassCurve.Affine.ShortMillerFunctions.secantLine W P Q
--- type: W.FunctionField
+```text
+E[m] fully rational over ℚ  ⇒  m ≤ 2.
 ```
-
-Inside the namespace from the code block, just write:
-
-```lean
-verticalLine W P
-
-tangentLine W P
-
-secantLine W P Q
-```
-
-The implementation uses:
-
-```lean
-CoordinateRing.XClass W x
-CoordinateRing.YClass W (linePolynomial x y ℓ)
-algebraMap W.CoordinateRing W.FunctionField
-```
-
-so the functions really are elements of `FractionRing W.CoordinateRing`.
-
-For Miller's correction factor, the next definition should be:
-
-```lean
-noncomputable def gFunction (P Q : W.Point) : W.FunctionField :=
-  secantLine W P Q / verticalLine W (P + Q)
-```
-
-with the caveat that the numerator should be the tangent line when `P = Q`; the `secantLine` above already handles that by branching to `tangentLine` when the affine coordinates agree.
