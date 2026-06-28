@@ -1,662 +1,368 @@
-# Q1955 (dm2): rational-point files for N=12, N=14, N=16
+# Q1972 (dm3): sign-parametric quartic descent for `eps = ±1`
 
-## Caveat about the requested file
+## Setup
 
-I could not fetch
-
-```text
-FLT/Assumptions/MazurProof/RationalPointsC20.lean
-```
-
-from branch `ai-scratch`: the GitHub connector returned `Not Found`.  The directory
+Write the primitive quartic as
 
 ```text
-FLT/Assumptions/MazurProof
+t^2 = s^4 + eps*D^2*s^2 - D^4,
 ```
 
-exists on `ai-scratch`, and the branch compare shows related files such as
+where
 
 ```text
-FLT/Assumptions/MazurProof/DescentBridgeN12.lean
-FLT/Assumptions/MazurProof/DescentBridgeN14.lean
-FLT/Assumptions/MazurProof/DescentBridgeN16.lean
-scratch/Descent20a4.lean
-scratch/DenominatorQuartic.lean
-scratch/DescentN14.lean
-scratch/DescentN16.lean
+eps ∈ {+1, -1},    D > 0,    gcd(s,D) = 1.
 ```
 
-but not `RationalPointsC20.lean`.  So the answer below is based on the method you described, plus the available C20/N10, N14, and N16 scratch files.
-
-## Executive summary
-
-The C20/N10 proof architecture does generalize, but not uniformly as a single copy-paste file.
-
-The shared skeleton is:
-
-1. normalize a rational point as
-
-   ```text
-   u = X / Z^2,
-   w = Y / Z^3,
-   Z > 0,
-   gcd X Z = 1;
-   ```
-
-2. clear denominators to an integral homogeneous equation;
-3. split off coprime factors of a square;
-4. reduce nonintegral denominator cases to one or more binary quartics;
-5. rule out those quartics by descent or a squeeze/local obstruction;
-6. reduce to integer `u`;
-7. finish by the integer-point lemma for the curve.
-
-The curve-specific parts are the factorization of the cleared homogeneous equation and the resulting binary quartics.  In particular:
+The shared identity is exactly
 
 ```text
-N=10 / C20:  Y^2 = X * (X^2 + X Z^2 - Z^4)
-N=12:        Y^2 = (X - Z^2) * (X - 2 Z^2) * (X + 2 Z^2)
-N=14:        Y^2 = X * (X^2 + X Z^2 - 2 Z^4)
-N=16:        Y^2 = X * (X^2 - X Z^2 - Z^4)
+(2*s^2 + eps*D^2 - 2*t) * (2*s^2 + eps*D^2 + 2*t) = 5*D^4.
 ```
 
-N10 and N16 are the cleanest pair: they are the same denominator-descent family with the sign of the middle term changed.
+The `eps = +1` case is the N = 10 descent. The `eps = -1` case is the N = 16 descent.
 
-N14 is still close to N10, but the gcd of the two factors can be `2`, so the proof splits into odd/even numerator cases.
+The sign-parametric descent is real, but it should not be implemented as a blind textual replacement of `+D^2*s^2` by `eps*D^2*s^2`. There are three algebraic changes to account for.
 
-N12 is different: its cubic has three rational roots, and the direct denominator equation is a triple product.  For the Kubert square obstruction, the cleaner quartic is the 2-cover
+## 1. Parity analysis
+
+The parity analysis **does change** in the odd-denominator branch.
+
+Let `D` be the original primitive denominator. Since `gcd(s,D)=1`, the following congruence facts are decisive.
+
+### If `D` is odd
+
+If `s` were even, then modulo `4` one gets
 
 ```text
-Q12(X,Z,Y):  Y^2 = (X^2 + Z^2) * (3 X^2 - Z^2)
-            = 3 X^4 + 2 X^2 Z^2 - Z^4.
+t^2 ≡ -D^4 ≡ -1 ≡ 3  (mod 4),
 ```
 
-Also: the current `DescentBridgeN12.lean` degenerate set
+which is impossible. Thus `s` is odd.
 
-```lean
-u = -2 ∨ u = 1 ∨ u = 2
-```
-
-is too small if it is meant to describe **all** rational points on
+With `D` and `s` both odd, modulo `8` gives
 
 ```text
-w^2 = u^3 - u^2 - 4u + 4.
+s^4 + eps*D^2*s^2 - D^4 ≡ 1 + eps - 1 ≡ eps  (mod 8).
 ```
 
-That curve also has rational affine points at
+So:
 
 ```text
-u = 0, 4.
+eps = +1:  t^2 ≡ 1 (mod 8), allowed;
+eps = -1:  t^2 ≡ -1 ≡ 7 (mod 8), impossible.
 ```
 
-The correct all-rational-`u` conclusion is at least
+Therefore the odd-`D` branch exists only for N = 10. For N = 16, the odd-denominator branch is killed immediately by the mod-8 contradiction.
 
-```lean
-u = -2 ∨ u = 0 ∨ u = 1 ∨ u = 2 ∨ u = 4
-```
+### If `D` is even
 
-with `u = -2,1,2` the three 2-torsion roots and `u = 0,4` the extra non-2-torsion x-coordinates.  If the Kubert obstruction only sees the cover `u = 3*t^2+1`, then the downstream finite check should be stated on the cover, not as “all points have u in {-2,1,2}”.
-
----
-
-## 1. Steps that generalize to all four curves
-
-### A. Rational denominator normalization
-
-For every curve in this family, the equation is integral Weierstrass of the form
+Then `s` is odd. If `D ≡ 2 (mod 4)`, then `D^2 ≡ 4 (mod 8)` and `D^4 ≡ 0 (mod 8)`, so
 
 ```text
-w^2 = cubic(u),
+t^2 ≡ 1 + eps*4  (mod 8).
 ```
 
-so a rational point can be normalized as
+For both signs this is
 
 ```text
-u = X / Z^2,
-w = Y / Z^3,
-Z > 0,
-gcd X Z = 1.
+1 + 4 ≡ 5 (mod 8),
+1 - 4 ≡ -3 ≡ 5 (mod 8),
 ```
 
-This step should be factored into a common helper file, e.g.
+again impossible. Hence in the even branch one always has
 
 ```text
-RationalPointNormalization.lean
+4 ∣ D.
 ```
 
-or inside a shared namespace in the Mazur proof directory.  The output should be a structure containing `X Y Z`, positivity of `Z`, coprimality, and the cleared denominator equation.
+### Practical conclusion for an existing N = 10 file
 
-### B. Cleared denominator equation
+If your current file has lemmas of the form “`B` odd” versus “`B` even,” be careful about what `B` denotes.
 
-After normalization, each curve has an integral equation
+If `B` is the original denominator, then:
 
 ```text
-Y^2 = homogeneous_cubic(X,Z).
+eps = +1, B odd: possible; prove numerator odd and continue.
+eps = -1, B odd: impossible; close by mod 8.
+B even, either sign: primitive numerator is odd and in fact 4 ∣ B.
 ```
 
-The proof of this is always `ring_nf`/`nlinarith` after substituting `u = X/Z^2`, `w = Y/Z^3`.
+If `B` is the half-denominator in the even branch, so `D = 2*B`, then for `eps = -1` this `B` is automatically even, because the original denominator satisfies `4 ∣ D`.
 
-### C. Coprime factorization of a square
+Thus N = 16 does **not** introduce a new odd-`B` descent branch. It removes the odd branch and leaves only the even normalized branch.
 
-The common lemma shape is:
+## 2. Coprime factorization structure
 
-```lean
-import Mathlib
+The coprime factorization structure is essentially unchanged, but the 2-adic normalization must be made explicit.
 
-namespace MazurProof.Common
-
-/-- Schematic: if two coprime integer factors multiply to a square,
-then each is a signed square.  In project code you can use the existing
-`Int.sq_of_isCoprime` API directly. -/
-example {a b y : ℤ} (hcop : IsCoprime a b) (h : a * b = y ^ 2) :
-    ∃ r : ℤ, a = r ^ 2 ∨ a = -r ^ 2 := by
-  exact Int.sq_of_isCoprime hcop h
-
-end MazurProof.Common
-```
-
-This is exactly the pattern used in the available scratch files for N10, N14, and N16.
-
-### D. The descent wrapper
-
-The denominator contradiction should remain a common strong-induction wrapper:
-
-```lean
-import Mathlib
-
-namespace MazurProof.Common
-
-/-- Schematic denominator descent package.  Instantiate `BadQuartic` separately
-for N10, N12, N14, N16. -/
-axiom descent_step_for_quartic
-    (BadQuartic : ℤ → ℤ → ℤ → Prop)
-    (x z y : ℤ)
-    (hz : 2 ≤ z)
-    (hcop : Int.gcd x z = 1)
-    (h : BadQuartic x z y) :
-    ∃ x' z' y' : ℤ,
-      2 ≤ z' ∧
-      Int.gcd x' z' = 1 ∧
-      BadQuartic x' z' y' ∧
-      z'.natAbs < z.natAbs
-
-end MazurProof.Common
-```
-
-In actual files, do **not** leave this as one axiom.  The point is architectural: put the strong induction once, and prove separate `descent_step` lemmas for the specific quartics.
-
-### E. Integer endpoint
-
-Once `Z = 1`, every file reduces to an integer theorem:
+Define the raw factors
 
 ```text
-N10: w^2 = u^3 + u^2 - u       -> u ∈ {-1,0,1}
-N12: w^2 = u^3 - u^2 - 4u + 4  -> u ∈ {-2,0,1,2,4}
-N14: w^2 = u^3 + u^2 - 2u      -> u ∈ {-2,0,1}
-N16: w^2 = u^3 - u^2 - u       -> u ∈ {-1,0,1} as a harmless superset, or exactly u=0
+L = 2*s^2 + eps*D^2 - 2*t,
+R = 2*s^2 + eps*D^2 + 2*t.
 ```
 
-The existing scratch files already have the integer squeeze style for N10, N14, and N16.  N12 is better handled by a finite rational-point certificate or by a separate integer enumeration plus descent for nonintegral denominators.
-
----
-
-## 2. Steps that are curve-specific
-
-### N10 / C20
-
-Curve:
+Then
 
 ```text
-E10: w^2 = u^3 + u^2 - u.
+L*R = 5*D^4.
 ```
 
-Normalization gives
+### Odd branch
+
+This branch occurs only for `eps = +1`. Here `D,s,t` are all odd, and `L,R` are odd. The usual prime-divisor argument shows
 
 ```text
-Y^2 = X * (X^2 + X Z^2 - Z^4).
+gcd(L,R) = 1.
 ```
 
-Since
+Then the factorization of a coprime product `5*D^4` gives the two cases
 
 ```text
-gcd(X, X^2 + X Z^2 - Z^4) = 1
-```
-
-under `gcd X Z = 1`, the product-square step gives `X = ±a^2`.  In the positive branch the denominator quartic is
-
-```text
-B^2 = a^4 + Z^2 a^2 - Z^4.
-```
-
-This is the C20/N10 binary quartic already isolated in `scratch/DenominatorQuartic.lean`:
-
-```text
-t^2 = p^4 + p^2 q^2 - q^4.
-```
-
-### N12
-
-Curve:
-
-```text
-E12: w^2 = u^3 - u^2 - 4u + 4
-     = (u - 1)(u - 2)(u + 2).
-```
-
-Normalization gives
-
-```text
-Y^2 = (X - Z^2) * (X - 2 Z^2) * (X + 2 Z^2).
-```
-
-This is not the same two-factor pattern as N10.  The pairwise gcds are bounded by small constants:
-
-```text
-gcd(X - Z^2,  X - 2 Z^2) divides 1,
-gcd(X - Z^2,  X + 2 Z^2) divides 3,
-gcd(X - 2Z^2, X + 2 Z^2) divides 4.
-```
-
-So a direct denominator proof has several `2`- and `3`-adic cases.
-
-For the Kubert square obstruction, use the cleaner 2-cover quartic:
-
-```text
-Y^2 = (T^2 + D^2) * (3 T^2 - D^2)
-    = 3 T^4 + 2 D^2 T^2 - D^4.
-```
-
-The map to the elliptic curve is
-
-```text
-u = (3 T^2 + D^2) / D^2,
-w = 3 T Y / D^3.
-```
-
-For `D = 1`, the obvious solutions are `T = ±1`, `Y = ±2`, giving `u = 4`, `w = ±6`.  These are genuine rational points on E12, so they must be listed as allowed/cuspidal/degenerate for the exact rational-point theorem.
-
-Recommended theorem targets:
-
-```lean
-import Mathlib
-
-namespace MazurProof.N12
-
-/-- Exact rational u-coordinate conclusion for E12. -/
-axiom rational_u_N12
-    (u w : ℚ)
-    (h : w ^ 2 = u ^ 3 - u ^ 2 - 4 * u + 4) :
-    u = -2 ∨ u = 0 ∨ u = 1 ∨ u = 2 ∨ u = 4
-
-/-- Quartic-cover form used by the Kubert square obstruction. -/
-def N12Quartic (T D Y : ℤ) : Prop :=
-  Y ^ 2 = (T ^ 2 + D ^ 2) * (3 * T ^ 2 - D ^ 2)
-
-/-- The nontrivial denominator-descent theorem for the N12 cover. -/
-axiom no_nontrivial_N12_quartic_denominator
-    (T D Y : ℤ)
-    (hD : 2 ≤ D)
-    (hcop : Int.gcd T D = 1)
-    (h : N12Quartic T D Y) :
-    False
-
-end MazurProof.N12
-```
-
-If the downstream obstruction only produces points on the cover, `no_nontrivial_N12_quartic_denominator` plus a finite check at `D=1` may be easier than proving the full elliptic-curve rational-point classification.
-
-### N14
-
-Curve:
-
-```text
-E14: w^2 = u^3 + u^2 - 2u
-     = u(u + 2)(u - 1).
-```
-
-Normalization gives
-
-```text
-Y^2 = X * (X^2 + X Z^2 - 2 Z^4).
-```
-
-The gcd is not always `1`; it divides `2`:
-
-```text
-gcd(X, X^2 + X Z^2 - 2 Z^4) ∣ 2.
-```
-
-Therefore the denominator proof splits by parity of `X`.
-
-Odd numerator, positive branch:
-
-```text
-X = a^2,
-B^2 = a^4 + Z^2 a^2 - 2 Z^4.
-```
-
-Even numerator, positive branch: write `X = 2M`, `Y = 2Y1`; then
-
-```text
-Y1^2 = M * (2 M^2 + M Z^2 - Z^4).
-```
-
-With `M = a^2`, the quartic is
-
-```text
-B^2 = 2 a^4 + Z^2 a^2 - Z^4.
-```
-
-For completeness over all rational points, negative interval branches should also be included.  They are the sign-reflected variants:
-
-```text
-B^2 = -a^4 + Z^2 a^2 + 2 Z^4       -- odd numerator, negative branch
-B^2 = -2 a^4 + Z^2 a^2 + Z^4       -- even numerator, negative branch
-```
-
-Recommended theorem targets:
-
-```lean
-import Mathlib
-
-namespace MazurProof.N14
-
-/-- Exact rational u-coordinate conclusion for E14. -/
-axiom rational_u_N14
-    (u w : ℚ)
-    (h : w ^ 2 = u ^ 3 + u ^ 2 - 2 * u) :
-    u = -2 ∨ u = 0 ∨ u = 1
-
-/-- Odd numerator, positive branch. -/
-def N14QuarticOddPos (a D B : ℤ) : Prop :=
-  B ^ 2 = a ^ 4 + D ^ 2 * a ^ 2 - 2 * D ^ 4
-
-/-- Even numerator, positive branch. -/
-def N14QuarticEvenPos (a D B : ℤ) : Prop :=
-  B ^ 2 = 2 * a ^ 4 + D ^ 2 * a ^ 2 - D ^ 4
-
-/-- Odd numerator, negative branch. -/
-def N14QuarticOddNeg (a D B : ℤ) : Prop :=
-  B ^ 2 = -a ^ 4 + D ^ 2 * a ^ 2 + 2 * D ^ 4
-
-/-- Even numerator, negative branch. -/
-def N14QuarticEvenNeg (a D B : ℤ) : Prop :=
-  B ^ 2 = -2 * a ^ 4 + D ^ 2 * a ^ 2 + D ^ 4
-
-end MazurProof.N14
-```
-
-The existing `scratch/DescentN14.lean` proves the integer case with exactly this parity split: odd `u` gives the `a^4+a^2-2` equation, and even `u` gives the `2a^4+a^2-1` equation.
-
-### N16
-
-Curve:
-
-```text
-E16: w^2 = u^3 - u^2 - u
-     = u(u^2 - u - 1).
-```
-
-Normalization gives
-
-```text
-Y^2 = X * (X^2 - X Z^2 - Z^4).
-```
-
-Here the gcd is again clean:
-
-```text
-gcd(X, X^2 - X Z^2 - Z^4) = 1
-```
-
-under `gcd X Z = 1`.  The positive branch gives
-
-```text
-X = a^2,
-B^2 = a^4 - Z^2 a^2 - Z^4.
-```
-
-This is the N16 quartic from Q1935:
-
-```text
-s^4 - D^2 s^2 - D^4 = t^2.
-```
-
-Recommended theorem target:
-
-```lean
-import Mathlib
-
-namespace MazurProof.N16
-
-/-- A harmless superset conclusion matching the current bridge style. -/
-axiom rational_u_N16_superset
-    (u w : ℚ)
-    (h : w ^ 2 = u ^ 3 - u ^ 2 - u) :
-    u = -1 ∨ u = 0 ∨ u = 1
-
-/-- Sharper statement, if desired: the only affine rational u-coordinate is `0`. -/
-axiom rational_u_N16_exact
-    (u w : ℚ)
-    (h : w ^ 2 = u ^ 3 - u ^ 2 - u) :
-    u = 0
-
-/-- N16 denominator quartic. -/
-def N16Quartic (a D B : ℤ) : Prop :=
-  B ^ 2 = a ^ 4 - D ^ 2 * a ^ 2 - D ^ 4
-
-/-- The N16 denominator-descent theorem. -/
-axiom no_nontrivial_N16_quartic_denominator
-    (a D B : ℤ)
-    (hD : 2 ≤ D)
-    (hcop : Int.gcd a D = 1)
-    (h : N16Quartic a D B) :
-    False
-
-end MazurProof.N16
-```
-
-N16 is the best candidate for reusing the N10 binary quartic descent: use a sign parameter
-
-```text
-ε =  1  for N10,
-ε = -1  for N16,
-```
-
-and prove the common family
-
-```text
-B^2 = a^4 + ε D^2 a^2 - D^4.
-```
-
-Do not try to reuse the final N10 rational-point theorem by quadratic twist; reuse the descent internals sign-parametrically.
-
----
-
-## 3. Ring-check snippets for the curve-specific equations
-
-These are the algebraic identities I would put near the beginning of the new files so every coefficient is checked by Lean.
-
-```lean
-import Mathlib
-
-namespace MazurProof.RationalPointEquationChecks
-
-/-- N10 / C20 denominator equation. -/
-example (X Z : ℤ) :
-    X ^ 3 + X ^ 2 * Z ^ 2 - X * Z ^ 4 =
-      X * (X ^ 2 + X * Z ^ 2 - Z ^ 4) := by
-  ring
-
-/-- N12 denominator equation. -/
-example (X Z : ℤ) :
-    X ^ 3 - X ^ 2 * Z ^ 2 - 4 * X * Z ^ 4 + 4 * Z ^ 6 =
-      (X - Z ^ 2) * (X - 2 * Z ^ 2) * (X + 2 * Z ^ 2) := by
-  ring
-
-/-- N12 Kubert-cover quartic maps to E12. -/
-example (T D Y : ℤ)
-    (hY : Y ^ 2 = (T ^ 2 + D ^ 2) * (3 * T ^ 2 - D ^ 2)) :
-    (3 * T * Y) ^ 2 =
-      (3 * T ^ 2 + D ^ 2) ^ 3 -
-      (3 * T ^ 2 + D ^ 2) ^ 2 * D ^ 2 -
-      4 * (3 * T ^ 2 + D ^ 2) * D ^ 4 +
-      4 * D ^ 6 := by
-  rw [show (3 * T * Y) ^ 2 = 9 * T ^ 2 * Y ^ 2 by ring]
-  rw [hY]
-  ring
-
-/-- N14 denominator equation. -/
-example (X Z : ℤ) :
-    X ^ 3 + X ^ 2 * Z ^ 2 - 2 * X * Z ^ 4 =
-      X * (X ^ 2 + X * Z ^ 2 - 2 * Z ^ 4) := by
-  ring
-
-/-- N14 even-numerator reduction. -/
-example (M Z : ℤ) :
-    (2 * M) ^ 3 + (2 * M) ^ 2 * Z ^ 2 - 2 * (2 * M) * Z ^ 4 =
-      4 * M * (2 * M ^ 2 + M * Z ^ 2 - Z ^ 4) := by
-  ring
-
-/-- N16 denominator equation. -/
-example (X Z : ℤ) :
-    X ^ 3 - X ^ 2 * Z ^ 2 - X * Z ^ 4 =
-      X * (X ^ 2 - X * Z ^ 2 - Z ^ 4) := by
-  ring
-
-/-- N10/N16 sign-parametric denominator quartic family. -/
-def SignedQuartic (eps a D B : ℤ) : Prop :=
-  B ^ 2 = a ^ 4 + eps * D ^ 2 * a ^ 2 - D ^ 4
-
-example (a D B : ℤ) :
-    SignedQuartic 1 a D B ↔ B ^ 2 = a ^ 4 + D ^ 2 * a ^ 2 - D ^ 4 := by
-  unfold SignedQuartic
-  norm_num
-
-example (a D B : ℤ) :
-    SignedQuartic (-1) a D B ↔ B ^ 2 = a ^ 4 - D ^ 2 * a ^ 2 - D ^ 4 := by
-  unfold SignedQuartic
-  norm_num
-
-end MazurProof.RationalPointEquationChecks
-```
-
----
-
-## Suggested file plan
-
-### `RationalPointsCommon.lean`
-
-Put these shared components here:
-
-```text
-normalized rational point structure;
-clear-denominator helper;
-gcd lemmas for normalized numerator/denominator;
-product-of-coprime-factors-is-square wrappers;
-strong-induction denominator descent wrapper.
-```
-
-### `RationalPointsN12.lean`
-
-Use one of two approaches:
-
-1. Full elliptic-curve rational-point classification:
-
-   ```lean
-   theorem rational_u_N12 :
-       w^2 = u^3 - u^2 - 4u + 4 →
-       u = -2 ∨ u = 0 ∨ u = 1 ∨ u = 2 ∨ u = 4
-   ```
-
-   This is mathematically clean but requires handling the triple product or importing a rank-zero/torsion certificate for curve `24.a1`.
-
-2. Kubert-cover-only proof:
-
-   ```lean
-   theorem n12_kubert_cover_solutions :
-       q^2 = (t^2+1)(3t^2-1) →
-       t = 1 ∨ t = -1  -- with q = ±2, depending on exact statement
-   ```
-
-   This is probably easier and more directly aligned with the obstruction construction.
-
-### `RationalPointsN14.lean`
-
-Target:
-
-```lean
-theorem rational_u_N14
-    (u w : ℚ)
-    (h : w ^ 2 = u ^ 3 + u ^ 2 - 2 * u) :
-    u = -2 ∨ u = 0 ∨ u = 1
-```
-
-Use denominator normalization, then split by parity of numerator.  The required quartics are:
-
-```text
-B^2 =  a^4 + D^2 a^2 - 2D^4
-B^2 =  2a^4 + D^2 a^2 - D^4
-B^2 = -a^4 + D^2 a^2 + 2D^4
-B^2 = -2a^4 + D^2 a^2 + D^4
-```
-
-The existing integer proof in `scratch/DescentN14.lean` is the `D=1` version of the first two positive cases.
-
-### `RationalPointsN16.lean`
-
-Target, either exact or superset:
-
-```lean
-theorem rational_u_N16_exact
-    (u w : ℚ)
-    (h : w ^ 2 = u ^ 3 - u ^ 2 - u) :
-    u = 0
+L = a^4,      R = 5*b^4,     D = a*b,
 ```
 
 or
 
-```lean
-theorem rational_u_N16_superset
-    (u w : ℚ)
-    (h : w ^ 2 = u ^ 3 - u ^ 2 - u) :
-    u = -1 ∨ u = 0 ∨ u = 1
+```text
+L = 5*a^4,    R = b^4,       D = a*b,
 ```
 
-The denominator quartic is:
+up to the harmless order/sign conventions fixed by positivity.
+
+There is no corresponding odd branch for `eps = -1`.
+
+### Even branch
+
+Write
 
 ```text
-B^2 = a^4 - D^2 a^2 - D^4.
+D = 2*B.
 ```
 
-This should share most of the N10 descent after introducing the sign parameter `ε`.
-
----
-
-## Practical warning for the bridge files
-
-The current bridge-style axioms for N14 and N16 match harmless finite `u`-sets:
+In any primitive solution in the even branch, the parity analysis actually gives `B` even. The raw factors `L,R` are both divisible by `4`, so the useful normalized factors are
 
 ```text
-N14: {-2,0,1}
-N16: {-1,0,1}  -- over-approximation; exact is likely {0}
+U = L/4 = (s^2 + 2*eps*B^2 - t)/2,
+V = R/4 = (s^2 + 2*eps*B^2 + t)/2.
 ```
 
-But the N12 bridge set
+They satisfy
 
 ```text
-{-2,1,2}
+U*V = 5*B^4.
 ```
 
-cannot be the set of all rational `u` on
+The same coprimality proof works for both signs:
 
 ```text
-w^2 = u^3 - u^2 - 4u + 4,
+gcd(U,V) = 1.
 ```
 
-because `(u,w)=(0,±2)` and `(4,±6)` are rational points.  So for N12, either enlarge the finite set to
+The reason is unchanged. A common odd prime divisor of `U,V` divides their sum and difference, hence divides
 
 ```text
-{-2,0,1,2,4}
+s^2 + 2*eps*B^2
 ```
 
-or state the downstream theorem on the Kubert-cover variables `(t,q)` instead of all elliptic-curve points.
+and `t`; using the product identity and `gcd(s,D)=1`, no prime dividing `B` can occur, and the lone extra prime `5` can occur in only one coprime factor. The common factor `2` is also excluded because `U+V = s^2 + 2*eps*B^2` is odd when `s` is odd and `B` is even.
+
+Thus the same fourth-power split applies:
+
+```text
+U = a^4,      V = 5*b^4,     B = a*b,
+```
+
+or
+
+```text
+U = 5*a^4,    V = b^4,       B = a*b.
+```
+
+### Where the sign actually appears
+
+The sign appears in the next identity, after adding the two factor equations.
+
+In the branch
+
+```text
+U = a^4,    V = 5*b^4,    B = a*b,
+```
+
+the even normalized sum gives
+
+```text
+s^2 + 2*eps*a^2*b^2 = a^4 + 5*b^4,
+```
+
+hence
+
+```text
+s^2 = a^4 - 2*eps*a^2*b^2 + 5*b^4
+    = (a^2 - eps*b^2)^2 + 4*b^4.
+```
+
+So:
+
+```text
+eps = +1:  s^2 = (a^2 - b^2)^2 + 4*b^4;
+eps = -1:  s^2 = (a^2 + b^2)^2 + 4*b^4.
+```
+
+The reversed factor case gives the symmetric formula
+
+```text
+s^2 = (b^2 - eps*a^2)^2 + 4*a^4.
+```
+
+This is the key algebraic edit for N = 16: the Pythagorean leg becomes `a^2 + b^2`, not `a^2 - b^2`. Positivity is easier in the negative-sign case, because `a^2 + b^2` is automatically positive.
+
+## 3. Does the same descent return the same sign?
+
+Yes. This is the main reason the sign-parametric file is feasible.
+
+From the common post-factorization identity
+
+```text
+z^2 = (a^2 - eps*b^2)^2 + 4*b^4,
+```
+
+view this as a primitive Pythagorean triple with legs
+
+```text
+a^2 - eps*b^2,
+2*b^2,
+```
+
+or, for `eps = -1`, legs
+
+```text
+a^2 + b^2,
+2*b^2.
+```
+
+In the primitive parametrization, write
+
+```text
+b^2 = m*n,
+gcd(m,n) = 1,
+```
+
+so, since `m*n` is a square and `m,n` are coprime,
+
+```text
+m = r^2,
+n = h^2.
+```
+
+The other Pythagorean equation is
+
+```text
+a^2 - eps*b^2 = r^4 - h^4.
+```
+
+Since `b^2 = r^2*h^2`, this gives
+
+```text
+a^2 = r^4 + eps*r^2*h^2 - h^4.
+```
+
+That is exactly the same signed quartic again:
+
+```text
+a^2 = r^4 + eps*h^2*r^2 - h^4.
+```
+
+So the descent preserves `eps`.
+
+For `eps = -1` this reads
+
+```text
+a^2 = r^4 - r^2*h^2 - h^4,
+```
+
+which is the N = 16 quartic again, with new solution
+
+```text
+(s', D', t') = (r, h, a)
+```
+
+up to whichever naming convention your file uses.
+
+The reversed factor case gives the same statement with `a` and `b` interchanged.
+
+## 4. Strong induction and descent variable
+
+The strong induction still works with the same descent variable: the positive primitive denominator.
+
+In the even branch, including all of N = 16, we first write
+
+```text
+D = 2*B,
+```
+
+and after normalized factorization obtain
+
+```text
+B = a*b.
+```
+
+The Pythagorean step gives
+
+```text
+b = r*h
+```
+
+in the first branch, with
+
+```text
+0 < h < b ≤ a*b = B < D.
+```
+
+Therefore the new denominator `h` is strictly smaller than the original denominator `D`. In fact it is smaller than the normalized denominator `B = D/2`.
+
+So either of the following induction measures is valid:
+
+```text
+D.natAbs                  -- original primitive denominator;
+B.natAbs = (D/2).natAbs   -- normalized even-branch denominator.
+```
+
+If the current N = 10 proof already inducts on the original denominator, N = 16 is easier: every N = 16 solution starts in the even branch, and the descent drops below `D/2`, hence certainly below `D`.
+
+No lexicographic measure involving `eps` is needed, because the descent never changes `eps`.
+
+## Summary of required algebraic edits
+
+For a sign-parametric `QuarticDescent`, the clean branch structure is:
+
+```text
+Input: eps ∈ {+1,-1}, primitive solution to
+       t^2 = s^4 + eps*D^2*s^2 - D^4.
+
+Case D odd:
+  eps = +1: use the existing N = 10 odd-denominator branch.
+  eps = -1: contradiction modulo 8.
+
+Case D even:
+  prove 4 ∣ D for both signs;
+  write D = 2*B, with B even;
+  define U,V by dividing the raw factors by 4;
+  prove U*V = 5*B^4 and gcd(U,V)=1;
+  split into U=a^4,V=5*b^4 or U=5*a^4,V=b^4;
+  replace the N = 10 identity
+      (a^2 - b^2)^2 + 4*b^4
+    by the sign-parametric identity
+      (a^2 - eps*b^2)^2 + 4*b^4;
+  run the same Pythagorean square-leg descent;
+  obtain a smaller primitive solution with the same eps.
+```
+
+For `eps = -1`, the only genuinely new facts are:
+
+```text
+1. The odd-denominator branch is impossible modulo 8.
+2. The post-factorization Pythagorean leg is a^2 + b^2 rather than a^2 - b^2.
+3. The induction decrease is unchanged, and actually stronger in the only surviving branch.
+```
