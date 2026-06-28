@@ -566,12 +566,32 @@ theorem quartic_plus_descent_step :
     -- Helper: gcd(r, d) = 1 for any d | B₁
     have hcop_rB := Int.isCoprime_iff_gcd_eq_one.mpr hcop
     have hB₁_dvd_B : B₁ ∣ B := ⟨2, by rw [hB₁_eq]; omega⟩
-    -- TODO: fill in the descent body (~100 lines)
-    -- Architecture: rcases hfactor → for each branch:
-    --   r² = (a²-b²)²+4b⁴ → h=a²-b² → u=(r-h)/2, v=(r+h)/2 → u*v=b⁴
-    --   gcd(u,v)=1 (from p|u,v → p|r,b → gcd(r,b)|gcd(r,B)=1)
-    --   pos_fourth → α,β → new QuarticPlusZ → B' < B
-    sorry
+    -- Even-B descent: for each coprime_factor branch, the descent variable is b (or a)
+    -- The algebra gives r² = (A²-d²)²+4d⁴, then u=(r-(A²-d²))/2, v=(r+(A²-d²))/2, uv=d⁴
+    rcases hfactor with ⟨hM_eq, hN_eq⟩ | ⟨hM_eq, hN_eq⟩
+    · -- Case M = a⁴, N = 5b⁴: descent on b
+      -- r² = (a²-b²)²+4b⁴
+      have hr2 : (2*j+1)^2 = (a^2-b^2)^2 + 4*b^4 := by
+        have hU := hM_eq; have hV := hN_eq
+        nlinarith [hMN_sum, hB₁_eq,
+          show (a*b)^2 = a^2*b^2 from by ring,
+          show (a^2-b^2)^2 = a^4 - 2*a^2*b^2 + b^4 from by ring]
+      -- gcd(r, b) = 1
+      have hcop_rb : IsCoprime (2*j+1) b :=
+        hcop_rB.of_isCoprime_of_dvd_right (dvd_trans ⟨a, by rw [hB₁_eq]; ring⟩ hB₁_dvd_B)
+      -- h = a²-b², u = (r-h)/2, v = (r+h)/2, uv = b⁴
+      set h := a^2 - b^2
+      -- (r-h)(r+h) = 4b⁴
+      have hprod : ((2*j+1) - h) * ((2*j+1) + h) = 4*b^4 := by nlinarith [hr2]
+      -- r-h and r+h are both even (r odd, h odd from mixed parity)
+      have h2_rh : 2 ∣ ((2*j+1) - h) := by
+        have : B₁ = a * b := hB₁_eq
+        have hB₁_even : B₁ % 2 = 0 := by rw [hB₁_val]; omega
+        -- a*b even → one of a,b even → a²-b² odd → r-h = odd-odd = even
+        sorry -- parity argument
+      sorry -- rest of descent
+    · -- Case M = 5a⁴, N = b⁴: descent on a (symmetric)
+      sorry
   · -- Odd B case (main case, fully proved)
     have hr_odd := r_odd_of_B_odd hBodd hcop heq
     -- UV = 5B⁴, gcd(U,V) = 1
