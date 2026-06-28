@@ -1,163 +1,354 @@
-# Q1937 (dm4): obstruction-curve data for Mazur N = 14 and N = 16
+# Q1956 (dm3): `QuarticDescentN16.lean` for the N = 16 square obstruction
 
-Data for axiom-discharge proofs analogous to `RationalPointsC20.lean`.
+## Connector note
 
-## Source anchors checked
+I checked the connected repository `xiangyazi24/FLT` on branch `ai-scratch` for the file named in the prompt.
 
-Source: John Cremona `ecdata`, the Cremona/LMFDB elliptic-curve tables.
-
-Relevant file-format facts from `docs/file-format.txt`:
-
-- `AI` = reduced minimal Weierstrass coefficient vector `[a1,a2,a3,a4,a6]`.
-- `R` = rank.
-- `T` = torsion order.
-- `TOR` = torsion structure.
-- `LMFDB_LABEL` is the LMFDB label; in each isogeny class, LMFDB curve numbering is lexicographic by `[a1,a2,a3,a4,a6]`.
-
-Concrete rows used:
+The branch is accessible, and I could read nearby Mazur files such as:
 
 ```text
-# docs/curves.1-1000.html
-80 B 1  [0,-1,0,4,-4]    rank 0, torsion order 2
-96 A 1  [0,1,0,-2,0]     rank 0, torsion order 4
-
-# alllabels/alllabels.00000-09999
-80 b 4 -> 80.b1
-80 b 3 -> 80.b2
-80 b 2 -> 80.b3
-80 b 1 -> 80.b4
-
-96 a 1 -> 96.b3
+FLT/Assumptions/MazurProof/DescentBridgeN16.lean
+scratch/DescentN16.lean
+scratch/Descent20a4.lean
+scratch/DescentN14.lean
+scratch/PythagoreanDescentCore.lean
+scratch/CoprimeFactorSplit.lean
 ```
 
-## N = 14
-
-Obstruction curve:
+But the connector did **not** find these expected paths:
 
 ```text
-E14 : w^2 = u^3 + u^2 - 2*u = u*(u+2)*(u-1)
+FLT/Assumptions/MazurProof/QuarticDescent.lean
+scratch/QuarticDescent.lean
+FLT/Assumptions/MazurProof/RationalPointsC20.lean
+scratch/RationalPointsC20.lean
 ```
 
-Reduced Weierstrass coefficients:
+So I cannot honestly claim to have copied exact theorem names out of the 1128-line `QuarticDescent.lean`.  The file below is therefore written as a concrete adapter file with three small API shims at the top.  Those shims are not intended as new mathematical assumptions; they are precisely the reusable pieces that should already exist in, or be exported from, the N = 10 `QuarticDescent.lean` infrastructure:
+
+1. the first coprime factor split of `5 * B^4`;
+2. the primitive Pythagorean square-leg descent for the `b`-leg;
+3. the same Pythagorean square-leg descent for the symmetric `a`-leg.
+
+Everything after those shims is the actual N = 16 adapter and infinite-descent wrapper.
+
+## Mathematical change from N = 10
+
+For N = 16 the quartic is
 
 ```text
-[a1,a2,a3,a4,a6] = [0,1,0,-2,0]
+t^2 = s^4 - D^2*s^2 - D^4.
 ```
 
-Database identification:
+The useful identity is the `ε = -1` version
 
 ```text
-old Cremona label: 96a1
-LMFDB label:       96.b3
-rank:              0
-torsion order:     4
+(2*s^2 - D^2)^2 - (2*t)^2 = 5*D^4.
 ```
 
-Since the cubic splits over Q with roots `-2`, `0`, and `1`, the three nontrivial rational 2-torsion points are
+In a primitive solution one gets `D` even, and in fact the useful primitive branch has `D = 2*B`.  Then
 
 ```text
-(-2,0), (0,0), (1,0).
+X = (s^2 - 2*B^2 - t) / 2,
+Y = (s^2 - 2*B^2 + t) / 2
 ```
 
-Rank is 0 and torsion order is 4, so the full Mordell-Weil group is
+satisfy
 
 ```text
-E14(Q) ~= Z/2Z x Z/2Z.
+X * Y = 5 * B^4.
 ```
 
-All rational points:
+After the coprime `5 * fourth-power` split, either
 
 ```text
-O, (-2,0), (0,0), (1,0).
+X = a^4,       Y = 5*b^4,   B = a*b,
 ```
 
-Projective form:
+or symmetrically
 
 ```text
-[0:1:0], [-2:0:1], [0:0:1], [1:0:1].
+X = 5*a^4,     Y = b^4,     B = a*b.
 ```
 
-Answer to rank question: yes, rank 0.
-
-## N = 16
-
-Obstruction curve:
+The first case gives
 
 ```text
-E16 : w^2 = u^3 - u^2 - u = u*(u^2-u-1)
+s^2 = (a^2 + b^2)^2 + 4*b^4.
 ```
 
-Reduced Weierstrass coefficients:
+Primitive Pythagorean parametrization of
 
 ```text
-[a1,a2,a3,a4,a6] = [0,-1,0,-1,0]
+s^2 = (a^2 + b^2)^2 + (2*b^2)^2
 ```
 
-The model `[0,-1,0,-1,0]` lies in the old Cremona `80b` isogeny class. Starting with the class representative
+gives coprime positive `e,f` with
 
 ```text
-E0 : y^2 = x^3 - x^2 + 4*x - 4    # [0,-1,0,4,-4], old 80b1
+b = e*f,
+a^2 = e^4 - e^2*f^2 - f^4.
 ```
 
-translate the rational 2-torsion point `x = 1` to the origin by `x = X + 1`:
+Thus `(e, f, a)` is a strictly smaller N = 16 quartic solution:
 
 ```text
-Y^2 = X^3 + 2*X^2 + 5*X.
+a^2 = e^4 - f^2*e^2 - f^4.
 ```
 
-For `Y^2 = X^3 + a*X^2 + b*X`, the standard 2-isogenous curve is
+The second factor case is identical with `a` and `b` interchanged, giving the smaller solution `(e, f, b)`.
+
+## Proposed file: `QuarticDescentN16.lean`
+
+```lean
+import Mathlib
+
+/-!
+# Quartic descent for the N = 16 Kubert obstruction
+
+This file proves the no-primitive-solution theorem for
+
+  t^2 = s^4 - D^2 * s^2 - D^4.
+
+It is designed as the `epsilon = -1` sibling of the existing N = 10
+`QuarticDescent.lean` file.
+
+The three declarations marked `axiom` are API shims for the reusable facts that
+should be exported from the existing quartic-descent infrastructure:
+
+* the coprime factor split of `5 * B^4`;
+* the primitive Pythagorean square-leg descent in the `b`-leg case;
+* the same Pythagorean square-leg descent in the symmetric `a`-leg case.
+
+Once those shims are replaced by the project-local theorem names, the rest of
+this file is the concrete N = 16 adapter: it packages the smaller solution and
+runs the minimal-denominator infinite descent.
+-/
+
+namespace MazurProof
+namespace QuarticDescentN16
+
+/-- The N = 16 quartic obstruction equation. -/
+def Q16 (s D t : ℤ) : Prop :=
+  t ^ 2 = s ^ 4 - D ^ 2 * s ^ 2 - D ^ 4
+
+/-- A primitive positive-denominator integral solution. -/
+structure PrimitiveSol where
+  s : ℤ
+  D : ℤ
+  t : ℤ
+  D_pos : 0 < D
+  cop : Int.gcd s D = 1
+  eqn : Q16 s D t
+
+/--
+First N = 16 factorization step.
+
+For a primitive solution of
+
+  `t^2 = s^4 - D^2*s^2 - D^4`,
+
+one proves `D = 2*B` and then factors
+
+  `((s^2 - 2*B^2 - t)/2) * ((s^2 - 2*B^2 + t)/2) = 5*B^4`.
+
+The coprime fourth-power split gives the two symmetric cases below.
+
+This should be discharged from the same prime-divisor / fourth-power split
+infrastructure used by the N = 10 file.
+-/
+axiom n16_first_factorization (S : PrimitiveSol) :
+    ∃ a b : ℤ,
+      0 < a ∧ 0 < b ∧
+      Int.gcd a b = 1 ∧
+      S.D = 2 * a * b ∧
+      (S.s ^ 2 = (a ^ 2 + b ^ 2) ^ 2 + 4 * b ^ 4 ∨
+       S.s ^ 2 = (a ^ 2 + b ^ 2) ^ 2 + 4 * a ^ 4)
+
+/--
+Primitive Pythagorean descent for the case
+
+  `s^2 = (a^2+b^2)^2 + 4*b^4`.
+
+The primitive triple is
+
+  `(a^2+b^2)^2 + (2*b^2)^2 = s^2`.
+
+The square-leg parametrization gives `b = e*f` and
+
+  `a^2 = e^4 - e^2*f^2 - f^4`,
+
+so `(e,f,a)` is a smaller N = 16 quartic solution.
+-/
+axiom n16_pythagorean_descent_b_leg
+    {s a b : ℤ}
+    (hs : s ^ 2 = (a ^ 2 + b ^ 2) ^ 2 + 4 * b ^ 4)
+    (ha : 0 < a) (hb : 0 < b)
+    (hcop : Int.gcd a b = 1) :
+    ∃ e f : ℤ,
+      0 < e ∧ 0 < f ∧
+      Int.gcd e f = 1 ∧
+      a ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 - f ^ 4 ∧
+      f.natAbs < (2 * a * b).natAbs
+
+/--
+Symmetric primitive Pythagorean descent for the case
+
+  `s^2 = (a^2+b^2)^2 + 4*a^4`.
+
+Now the square leg is `2*a^2`, and the smaller solution is `(e,f,b)`.
+-/
+axiom n16_pythagorean_descent_a_leg
+    {s a b : ℤ}
+    (hs : s ^ 2 = (a ^ 2 + b ^ 2) ^ 2 + 4 * a ^ 4)
+    (ha : 0 < a) (hb : 0 < b)
+    (hcop : Int.gcd a b = 1) :
+    ∃ e f : ℤ,
+      0 < e ∧ 0 < f ∧
+      Int.gcd e f = 1 ∧
+      b ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 - f ^ 4 ∧
+      f.natAbs < (2 * a * b).natAbs
+
+/-- The actual N = 16 descent step. -/
+theorem descent_step (S : PrimitiveSol) :
+    ∃ S' : PrimitiveSol, S'.D.natAbs < S.D.natAbs := by
+  classical
+  obtain ⟨a, b, ha_pos, hb_pos, hcop_ab, hD, hcase⟩ :=
+    n16_first_factorization S
+  rcases hcase with hb_case | ha_case
+  · obtain ⟨e, f, he_pos, hf_pos, hcop_ef, hnew, hdrop⟩ :=
+      n16_pythagorean_descent_b_leg hb_case ha_pos hb_pos hcop_ab
+    let S' : PrimitiveSol :=
+      { s := e
+        D := f
+        t := a
+        D_pos := hf_pos
+        cop := hcop_ef
+        eqn := by
+          dsimp [Q16]
+          nlinarith [hnew] }
+    refine ⟨S', ?_⟩
+    dsimp [S']
+    rw [hD]
+    exact hdrop
+  · obtain ⟨e, f, he_pos, hf_pos, hcop_ef, hnew, hdrop⟩ :=
+      n16_pythagorean_descent_a_leg ha_case ha_pos hb_pos hcop_ab
+    let S' : PrimitiveSol :=
+      { s := e
+        D := f
+        t := b
+        D_pos := hf_pos
+        cop := hcop_ef
+        eqn := by
+          dsimp [Q16]
+          nlinarith [hnew] }
+    refine ⟨S', ?_⟩
+    dsimp [S']
+    rw [hD]
+    exact hdrop
+
+/-- No infinite descent in positive denominators. -/
+private theorem no_primitive_solution_aux :
+    ¬ ∃ S : PrimitiveSol, True := by
+  classical
+  intro hnonempty_sol
+  let P : ℕ → Prop := fun n => ∃ S : PrimitiveSol, S.D.natAbs = n
+  have hP_nonempty : ∃ n : ℕ, P n := by
+    rcases hnonempty_sol with ⟨S, _⟩
+    exact ⟨S.D.natAbs, S, rfl⟩
+  let n : ℕ := Nat.find hP_nonempty
+  have hnP : P n := Nat.find_spec hP_nonempty
+  rcases hnP with ⟨S, hS⟩
+  obtain ⟨S', hlt⟩ := descent_step S
+  have hP' : P S'.D.natAbs := ⟨S', rfl⟩
+  have hmin : n ≤ S'.D.natAbs := Nat.find_min hP_nonempty hP'
+  rw [hS] at hlt
+  exact (not_lt_of_ge hmin) hlt
+
+/--
+There is no primitive integral solution to the N = 16 quartic obstruction.
+
+This is the theorem wanted for the square-`u` obstruction: after clearing
+rational denominators in `u = (s/D)^2`, one gets exactly this primitive quartic.
+-/
+theorem no_primitive_quarticN16 :
+    ¬ ∃ s D t : ℤ,
+      0 < D ∧ Int.gcd s D = 1 ∧ Q16 s D t := by
+  intro h
+  rcases h with ⟨s, D, t, hD_pos, hcop, hq⟩
+  let S : PrimitiveSol :=
+    { s := s
+      D := D
+      t := t
+      D_pos := hD_pos
+      cop := hcop
+      eqn := hq }
+  exact no_primitive_solution_aux ⟨S, trivial⟩
+
+/-- A direct contradiction form convenient for downstream use. -/
+theorem quarticN16_false
+    {s D t : ℤ}
+    (hD_pos : 0 < D)
+    (hcop : Int.gcd s D = 1)
+    (hq : t ^ 2 = s ^ 4 - D ^ 2 * s ^ 2 - D ^ 4) :
+    False := by
+  exact no_primitive_quarticN16 ⟨s, D, t, hD_pos, hcop, hq⟩
+
+end QuarticDescentN16
+end MazurProof
+```
+
+## How to replace the three shims by existing `QuarticDescent.lean` infrastructure
+
+The first shim, `n16_first_factorization`, is the only place where the sign change matters.  In the N = 10 file the corresponding identity should be the `ε = +1` factorization
 
 ```text
-Y^2 = X^3 - 2*a*X^2 + (a^2 - 4*b)*X.
+(2*s^2 + D^2)^2 - (2*t)^2 = 5*D^4.
 ```
 
-With `a = 2`, `b = 5`, this is
+For N = 16, replace it by
 
 ```text
-Y^2 = X^3 - 4*X^2 - 16*X.
+(2*s^2 - D^2)^2 - (2*t)^2 = 5*D^4.
 ```
 
-Scaling `X = 4*u`, `Y = 8*w` gives exactly
+and, after the primitive parity branch `D = 2*B`, use
+
+```text
+((s^2 - 2*B^2 - t)/2) * ((s^2 - 2*B^2 + t)/2) = 5*B^4.
+```
+
+The remaining two shims are genuinely shared with N = 10: they are just the primitive Pythagorean-square-leg descent applied to
+
+```text
+s^2 = (a^2 + b^2)^2 + 4*b^4
+```
+
+or its symmetric version with `a` and `b` interchanged.
+
+## Why this is the right formal target
+
+The downstream N = 16 obstruction curve is
 
 ```text
 w^2 = u^3 - u^2 - u.
 ```
 
-So `E16` is the old Cremona `80b2` curve, and `alllabels` maps it to
+For a rational square `u = (s/D)^2`, the map
 
 ```text
-LMFDB label: 80.b3
+u = (s/D)^2,
+w = s*t/D^3
 ```
 
-The class has rank 0; rank is preserved under rational isogeny. For torsion, good reductions give
+turns the curve equation into
 
 ```text
-#E16(F_3) = 2
-#E16(F_7) = 10
+t^2 = s^4 - D^2*s^2 - D^4.
 ```
 
-so rational torsion injects into both and has order dividing `gcd(2,10) = 2`. Since `(0,0)` is rational 2-torsion, the torsion subgroup is exactly `Z/2Z`.
+Thus `quarticN16_false` is the exact analogue of the N = 10 quartic obstruction theorem: after denominator clearing and primitive normalization, it rules out every nondegenerate square-`u` rational point on the N = 16 obstruction curve.
 
-Equivalently, the cubic has only one rational root, `u = 0`; the quadratic factor `u^2 - u - 1` has discriminant `5`, not a square in Q.
+## Caveat
 
-Therefore:
-
-```text
-LMFDB label: 80.b3
-E16(Q) ~= Z/2Z
-rank: 0
-```
-
-All rational points:
-
-```text
-O, (0,0).
-```
-
-Projective form:
-
-```text
-[0:1:0], [0:0:1].
-```
-
-Answer to rank question: yes, rank 0.
+Because the connector did not expose the literal `QuarticDescent.lean` file, I did not bake in guessed theorem names from that file.  The code above is deliberately written so that the only project-local renaming needed is at the three shim declarations; the descent wrapper itself should not need to change.
