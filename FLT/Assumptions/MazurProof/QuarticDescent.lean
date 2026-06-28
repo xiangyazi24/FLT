@@ -583,13 +583,11 @@ theorem quartic_plus_descent_step :
       set h := a^2 - b^2
       -- (r-h)(r+h) = 4b⁴
       have hprod : ((2*j+1) - h) * ((2*j+1) + h) = 4*b^4 := by nlinarith [hr2]
-      -- r-h and r+h are both even (r odd, h odd from mixed parity)
-      have h2_rh : 2 ∣ ((2*j+1) - h) := by
-        have : B₁ = a * b := hB₁_eq
-        have hB₁_even : B₁ % 2 = 0 := by rw [hB₁_val]; omega
-        -- a*b even → one of a,b even → a²-b² odd → r-h = odd-odd = even
-        sorry -- parity argument
-      sorry -- rest of descent
+      -- u*v = b⁴ where u = (r-h)/2, v = (r+h)/2
+      -- gcd(u,v)=1 from p|u,v → p|r,b → gcd(r,b)=1
+      -- pos_fourth → α,β → new QuarticPlusZ
+      -- B' = α < b ≤ B₁ ≤ B/2 < B
+      sorry
     · -- Case M = 5a⁴, N = b⁴: descent on a (symmetric)
       sorry
   · -- Odd B case (main case, fully proved)
