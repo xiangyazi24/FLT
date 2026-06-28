@@ -434,7 +434,7 @@ theorem coprime_rh {r h b : ℤ} (hr_odd : r % 2 = 1) (hh_even : h % 2 = 0)
 
 /-! ## Descent step (the hard core) -/
 
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 3200000 in
 /-- From a non-base solution, produce a strictly smaller non-base solution. -/
 theorem quartic_plus_descent_step :
     ∀ {r B s : ℤ}, QuarticPlusZ r B s → ¬ BaseZ r B →
@@ -475,14 +475,18 @@ theorem quartic_plus_descent_step :
     -- MN = 5 * B₁⁴
     have hMN_prod : M * N = 5 * B₁ ^ 4 := by
       apply mul_left_cancel₀ (show (16 : ℤ) ≠ 0 from by norm_num)
-      have : 16 * (M * N) = (4 * M) * (4 * N) := by ring
-      rw [this, hM_val, hN_val]
+      have h16 : 16 * (M * N) = (4 * M) * (4 * N) := by ring
+      rw [h16, hM_val, hN_val]
+      -- Goal: (2*(2j+1)²+(4k)²-2s)*(2*(2j+1)²+(4k)²+2s) = 16*(5*B₁⁴)
+      -- LHS = UV = 5*(4k)⁴ = 5*256k⁴. RHS = 16*5*(2k)⁴ = 16*5*16k⁴ = 80*16k⁴.
+      -- Wait: B₁ = (4k)/2 = 2k. So 5*B₁⁴ = 5*(2k)⁴ = 80k⁴. 16*80k⁴ = 1280k⁴.
+      -- UV = 5*(4k)⁴ = 5*256k⁴ = 1280k⁴. ✓
       have hUV := UV_eq_five_mul_fourth heq
-      rw [hBk] at hUV ⊢
-      rw [hB₁_eq, hBk]
-      nlinarith [show (4 * k) ^ 4 = 256 * k ^ 4 from by ring,
-                 show (4 * k / 2) ^ 4 = (2 * k) ^ 4 from by omega,
-                 show (2 * k) ^ 4 = 16 * k ^ 4 from by ring]
+      -- hUV : (2*(2j+1)²+(4k)²-2s)*(2*(2j+1)²+(4k)²+2s) = 5*(4k)⁴
+      -- B₁ = 4k/2 = 2k
+      have hB₁_val : B₁ = 2 * k := by omega
+      rw [hB₁_val]
+      nlinarith [show (4 * k) ^ 4 = 16 * (2 * k) ^ 4 from by ring]
     -- M, N > 0
     have hMpos : 0 < M := by
       by_contra hle; push_neg at hle
