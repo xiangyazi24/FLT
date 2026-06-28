@@ -1,86 +1,145 @@
-# Q1785 (dm1): parity proof for the even product case
+# Q1811 (dm1): post-`u*v=b^4` descent tail
 
-Here is the short proof I would paste.  It avoids modular API and just splits `a` and `b` by `Int.even_or_odd`.
+Paste this after you have
 
 ```lean
-import Mathlib.Tactic
-import Mathlib.Data.Int.GCD
+huv_cop  : Int.gcd u v = 1
+huv_prod : u * v = b ^ 4
+hu_pos   : 0 < u
+hv_pos   : 0 < v
+huv_sum  : u + v = 2 * j + 1
+huv_diff : v - u = h
+```
 
-example {a b j k : ℤ}
-    (hab : a * b = 2 * k)
-    (hcop : Int.gcd a b = 1) :
-    (2 : ℤ) ∣ ((2 * j + 1) - (a ^ 2 - b ^ 2)) := by
+and `h` is the local abbreviation/definition `a^2-b^2`.
+
+The block constructs the new witness `(r',B',s') = (β, α, a)`.
+
+```lean
+by
   classical
 
-  -- Split `a` into `2*x` or `2*x+1`.
-  obtain ⟨x, hx_even | hx_odd⟩ := Int.even_or_odd a
+  ---------------------------------------------------------------------------
+  -- 1. Split the coprime positive product u*v=b^4 into fourth powers.
+  ---------------------------------------------------------------------------
+  obtain ⟨α, β, hα_pos, hβ_pos, hu_eq, hv_eq⟩ :=
+    pos_fourth_of_coprime_mul_fourth
+      hu_pos hv_pos huv_cop huv_prod
 
-  · -- a = 2*x
-    obtain ⟨y, hy_even | hy_odd⟩ := Int.even_or_odd b
+  ---------------------------------------------------------------------------
+  -- 2. Recover b = αβ from equality of fourth powers and positivity.
+  ---------------------------------------------------------------------------
+  have hαβ_pos : 0 < α * β := by
+    nlinarith [hα_pos, hβ_pos]
 
-    · -- b = 2*y: impossible, since then 2 divides gcd(a,b)=1.
-      exfalso
-
-      have h2a : (2 : ℤ) ∣ a := by
-        refine ⟨x, ?_⟩
-        rw [hx_even]
+  have hb_fourth : b ^ 4 = (α * β) ^ 4 := by
+    calc
+      b ^ 4 = u * v := by
+        nlinarith [huv_prod]
+      _ = α ^ 4 * β ^ 4 := by
+        rw [hu_eq, hv_eq]
+      _ = (α * β) ^ 4 := by
         ring
 
-      have h2b : (2 : ℤ) ∣ b := by
-        refine ⟨y, ?_⟩
-        rw [hy_even]
+  have hb_eq : b = α * β :=
+    eq_of_pos_fourth_eq hb hαβ_pos hb_fourth
+
+  ---------------------------------------------------------------------------
+  -- 3. New equation: a^2 = β^4 + α^2β^2 - α^4.
+  ---------------------------------------------------------------------------
+  have hdiff_ab : v - u = a ^ 2 - b ^ 2 := by
+    simpa [h] using huv_diff
+
+  have h_vu : a ^ 2 - b ^ 2 = β ^ 4 - α ^ 4 := by
+    nlinarith [hdiff_ab, hu_eq, hv_eq]
+
+  have hb_sq : b ^ 2 = α ^ 2 * β ^ 2 := by
+    rw [hb_eq]
+    ring
+
+  have ha_sq : a ^ 2 = β ^ 4 + α ^ 2 * β ^ 2 - α ^ 4 := by
+    calc
+      a ^ 2 = (a ^ 2 - b ^ 2) + b ^ 2 := by
+        ring
+      _ = (β ^ 4 - α ^ 4) + b ^ 2 := by
+        rw [h_vu]
+      _ = β ^ 4 + α ^ 2 * β ^ 2 - α ^ 4 := by
+        rw [hb_sq]
         ring
 
-      have h2g : (2 : ℤ) ∣ (Int.gcd a b : ℤ) := by
-        exact Int.dvd_gcd h2a h2b
+  ---------------------------------------------------------------------------
+  -- 4. Construct the new QuarticPlusZ solution.
+  ---------------------------------------------------------------------------
+  have hQ : QuarticPlusZ β α a := by
+    simpa [QuarticPlusZ, mul_comm, mul_left_comm, mul_assoc] using ha_sq
 
-      have h21 : (2 : ℤ) ∣ (1 : ℤ) := by
-        simpa [hcop] using h2g
+  ---------------------------------------------------------------------------
+  -- 5. Non-base.  If α=β=1, then u=v=1, hence 2*j+1=2, impossible.
+  -- This is even shorter than routing through the old non-base hypothesis.
+  ---------------------------------------------------------------------------
+  have hnonbase_new : ¬ BaseZ β α := by
+    intro hbase
 
-      norm_num at h21
+    have hβ_one : β = 1 := by
+      simpa [BaseZ] using hbase.1
 
-    · -- a = 2*x, b = 2*y+1.  Then odd - (even - odd) is even.
-      refine ⟨j - 2 * x ^ 2 + 2 * y ^ 2 + 2 * y + 1, ?_⟩
-      rw [hx_even, hy_odd]
-      ring
+    have hα_one : α = 1 := by
+      simpa [BaseZ] using hbase.2
 
-  · -- a = 2*x+1
-    obtain ⟨y, hy_even | hy_odd⟩ := Int.even_or_odd b
+    have hu_one : u = 1 := by
+      rw [hu_eq, hα_one]
+      norm_num
 
-    · -- a = 2*x+1, b = 2*y.  Then odd - (odd - even) is even.
-      refine ⟨j - 2 * x ^ 2 - 2 * x + 2 * y ^ 2, ?_⟩
-      rw [hx_odd, hy_even]
-      ring
+    have hv_one : v = 1 := by
+      rw [hv_eq, hβ_one]
+      norm_num
 
-    · -- both odd: impossible because a*b would be odd but `a*b = 2*k`.
-      exfalso
+    have hr_two : 2 * j + 1 = 2 := by
+      nlinarith [huv_sum, hu_one, hv_one]
 
-      let t : ℤ := 2 * x * y + x + y
+    omega
 
-      have hpar : 2 * t + 1 = 2 * k := by
-        calc
-          2 * t + 1 = a * b := by
-            dsimp [t]
-            rw [hx_odd, hy_odd]
-            ring
-          _ = 2 * k := hab
+  ---------------------------------------------------------------------------
+  -- 6. Size drop: α ≤ αβ=b ≤ ab=B₁ < B.
+  -- Uses the even-branch facts B₁=2*k and B=4*k.
+  ---------------------------------------------------------------------------
+  have hk_pos : 0 < k := by
+    -- Replace `hB₁_val` by the local name for `B₁ = 2*k`.
+    nlinarith [hB₁_val, hB₁_eq, ha, hb]
 
-      omega
+  have hα_le_b : α ≤ b := by
+    rw [hb_eq]
+    have hβ_ge_one : 1 ≤ β := by omega
+    nlinarith [hα_pos, hβ_ge_one]
+
+  have hb_le_B₁ : b ≤ B₁ := by
+    rw [hB₁_eq]
+    have ha_ge_one : 1 ≤ a := by omega
+    nlinarith [ha_ge_one, hb]
+
+  have hB₁_lt_B : B₁ < B := by
+    rw [hB₁_val, hBk]
+    nlinarith [hk_pos]
+
+  have hα_lt_B : α < B :=
+    lt_of_le_of_lt (le_trans hα_le_b hb_le_B₁) hB₁_lt_B
+
+  have hdrop : α.natAbs < B.natAbs := by
+    have hα_nonneg : 0 ≤ α := le_of_lt hα_pos
+    have hB_nonneg : 0 ≤ B := by
+      rw [hBk]
+      nlinarith [hk_pos]
+    rw [Int.natAbs_of_nonneg hα_nonneg, Int.natAbs_of_nonneg hB_nonneg]
+    exact_mod_cast hα_lt_B
+
+  exact ⟨β, α, a, hQ, hnonbase_new, hdrop⟩
 ```
 
-If your local `Int.even_or_odd` has the alternative disjunction-of-existentials shape, replace the first split by:
+If your local `pos_fourth_of_coprime_mul_fourth` also returns `b = α*β`, use this destructuring instead and delete the `eq_of_pos_fourth_eq` block:
 
 ```lean
-rcases Int.even_or_odd a with ⟨x, hx_even⟩ | ⟨x, hx_odd⟩
+obtain ⟨α, β, hα_pos, hβ_pos, hu_eq, hv_eq, hb_eq⟩ :=
+  pos_fourth_of_coprime_mul_fourth hu_pos hv_pos huv_cop huv_prod
 ```
 
-and similarly for `b`; the four branch bodies are unchanged.
-
-For the exact context with `B₁ = a*b` and `B₁ = 2*k`, first make the product equality:
-
-```lean
-have hab2 : a * b = 2 * k := by
-  rw [← hB₁_ab, hB₁_val]
-```
-
-then call the proof above with `hab := hab2`.
+If `BaseZ` is not a pair-like proposition with fields `.1` and `.2`, replace the two extraction lines with the destructor used in the odd case.  The contradiction after `α=β=1` only needs `huv_sum`, `hu_eq`, and `hv_eq`.
