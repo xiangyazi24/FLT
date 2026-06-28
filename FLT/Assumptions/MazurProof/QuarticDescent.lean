@@ -476,18 +476,16 @@ theorem quartic_plus_descent_step :
     have hB₁_val : B₁ = 2 * k := by omega
     have hUV := UV_eq_five_mul_fourth heq
     have hMN_prod : M * N = 5 * B₁ ^ 4 := by
-      -- Unfold M, N to raw ediv expressions
-      simp only [hM_def, hN_def]
-      -- Goal: (expr_U / 4) * (expr_V / 4) = 5 * B₁^4
-      -- Use: (a/c) * (b/c) = (a*b) / (c*c) when c|a and c|b
-      rw [Int.ediv_mul_ediv _ _ h4U h4V]
-      -- Goal: (expr_U * expr_V) / (4 * 4) = 5 * B₁^4
-      rw [show (4 : ℤ) * 4 = 16 from by norm_num]
-      rw [hB₁_val]
-      -- Goal: hUV.LHS / 16 = 5 * (2*k)^4
-      rw [hUV]
-      -- Goal: 5 * (4*k)^4 / 16 = 5 * (2*k)^4
-      norm_num [show (4 * k) ^ 4 = 16 * (2 * k) ^ 4 from by ring]
+      have h_prod_eq : (4 * M) * (4 * N) =
+          (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := by
+        congr 1 <;> linarith
+      have h16 : 16 * (M * N) = 16 * (5 * (2 * k) ^ 4) :=
+        calc 16 * (M * N) = (4 * M) * (4 * N) := by ring
+          _ = (2*(2*j+1)^2+(4*k)^2-2*s) * (2*(2*j+1)^2+(4*k)^2+2*s) := h_prod_eq
+          _ = 5 * (4 * k) ^ 4 := hUV
+          _ = 16 * (5 * (2 * k) ^ 4) := by ring
+      have : M * N = 5 * (2 * k) ^ 4 := mul_left_cancel₀ (by norm_num : (16 : ℤ) ≠ 0) h16
+      rwa [hB₁_val]
     -- M, N > 0
     have hMpos : 0 < M := by
       by_contra hle; push_neg at hle
