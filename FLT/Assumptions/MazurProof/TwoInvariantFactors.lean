@@ -1,232 +1,372 @@
 import Mathlib
-import FLT.Assumptions.MazurProof.Axioms
+import FLT.Assumptions.MazurProof.GroupTheory
 
-/-! # Axiom 2: Two Invariant Factor Decomposition
+/-! # Two Invariant Factor Decomposition for Finite Abelian Groups
 
-Theorem: If a finite abelian group G has:
-  - 2-rank ≤ 2 (no (ℤ/2)³ injection)
-  - odd prime p-rank ≤ 1 for all p > 2 (no (ZMod p)² injection)
+## Statement
 
-Then G ≅ ℤ/m × ℤ/n for some m | n.
+If a finite abelian group G satisfies:
+- p-rank ≤ 1 for every odd prime p (no injective ZMod p × ZMod p →+ G), and
+- 2-rank ≤ 2 (no injective ZMod 2 × ZMod 2 × ZMod 2 →+ G),
 
-This is a Mathlib-backed proof using AddCommGroup.equiv_directSum_zmod_of_finite
-and Chinese Remainder Theorem.
+then G ≃ ZMod m × ZMod n for some positive m, n with m ∣ n.
 
-Status (2026-06-26): Framework phase only. C1 in CHECKLIST.
+## Proof outline
+
+1. Primary decomposition G ≃ ⨁ᵢ ZMod(pᵢ^eᵢ) via Mathlib.
+2. Set q(i) := pᵢ^eᵢ. Let T := {i | 2 ∣ q(i)}.
+3. The rank conditions give: no odd prime divides two distinct q(i), and T.card ≤ 2.
+4. If T.card ≤ 1: all q(i) pairwise coprime → CRT gives G ≃ ZMod(∏ q(i)).
+   Take m = 1, n = ∏ q(i).
+5. If T.card = 2: T = {a, b} with q(a), q(b) both 2-powers. WLOG q(a) ∣ q(b).
+   Partition ι = {a} ∪ rest. The rest are pairwise coprime (no shared odd prime;
+   only b is even among them, so no shared factor of 2).
+   CRT collapses rest → ZMod N.
+   Then G ≃ ZMod(q(a)) × ZMod N with q(a) ∣ N.
+
+## Status
+
+Self-contained public module. The identical proof exists privately in Axioms.lean
+(lines 223-387); this file provides the public API.
 -/
 
-open scoped WeierstrassCurve.Affine
+open scoped DirectSum Function
 
 namespace MazurProof
 
-/-! ## Phase 1: Primary Decomposition + Exponent Bounds -/
+/-! ## Structure and constructor -/
 
--- The hypothesis "no (ZMod p)² injection" means the p-rank is ≤ 1 for odd p
--- and ≤ 2 for p=2. These translate to exponent bounds in the primary decomposition.
+/-- Two invariant factor data for a finite abelian group:
+    G ≃ ZMod m × ZMod n with m ∣ n, plus derived properties. -/
+structure TwoInvariantFactorData' (G : Type*) [AddCommGroup G] where
+  m : ℕ
+  n : ℕ
+  m_pos : 0 < m
+  n_pos : 0 < n
+  dvd_mn : m ∣ n
+  equiv : Nonempty (G ≃+ ZMod m × ZMod n)
+  order_n : ∃ x : G, addOrderOf x = n
+  card_eq : Nat.card G = m * n
 
--- Helper: extract exponent of prime p in group G's primary decomposition
--- If G ≃+ ⊕ᵢ (ℤ/pᵢ^eᵢ), we need eₚ for a given prime p
-def max_p_exponent (G : Type*) [AddCommGroup G] [Finite G] (p : ℕ) : ℕ := by
-  -- Get primary decomposition G ≃+ ⊕ᵢ (ℤ/nᵢ) from Mathlib
-  have ⟨ι, decomp⟩ := AddCommGroup.equiv_directSum_zmod_of_finite G
+private lemma addOrderOf_prod_zero_one' {m n : ℕ} (hn : 0 < n) :
+    addOrderOf ((0 : ZMod m), (1 : ZMod n)) = n := by
+  rw [addOrderOf_eq_iff hn]
+  constructor
+  · ext <;> simp
+  · intro k hk hkpos hzero
+    have hz : (k : ZMod n) = 0 := by
+      have h2 := congrArg Prod.snd hzero
+      simpa using h2
+    have hdvd_int : (n : ℤ) ∣ (k : ℤ) :=
+      (ZMod.intCast_zmod_eq_zero_iff_dvd (k : ℤ) n).mp (by simpa using hz)
+    have hdvd : n ∣ k := by exact_mod_cast hdvd_int
+    exact (Nat.not_le_of_gt hk) (Nat.le_of_dvd hkpos hdvd)
 
-  -- The decomposition gives us nᵢ values where each nᵢ is a prime power
-  -- We need to find max exponent e such that p^e | some nᵢ
-
-  -- Strategy: for each component in the decomposition that is a power of p,
-  -- extract its exponent; return the maximum
-
-  -- For now: use Mathlib's exponent function on the order of G
-  -- Order(G) = ∏ᵢ nᵢ, so we can compute p-adic valuation
-  sorry  -- ~40 LOC: Mathlib.Data.Nat.Padic.Basic + exponent machinery
-
--- The hypothesis h_no_odd (p, 2 < p) → ¬(ZMod p × ZMod p ↪ G) implies eₚ ≤ 1
-lemma exponent_odd_prime_le_one
-    (G : Type*) [AddCommGroup G] [Finite G] (p : ℕ) (hp : Nat.Prime p) (h2p : 2 < p)
-    (h_no_odd : ∀ q : ℕ, Nat.Prime q → 2 < q →
-      ¬ ∃ f : ZMod q × ZMod q →+ G, Function.Injective f) :
-    max_p_exponent G p ≤ 1 := by
-  by_contra h_contra
-  push_neg at h_contra
-  -- If eₚ ≥ 2, then (ZMod p)ᵉ contains (ZMod p)² as a direct summand
-  have hp_in_decomp : ∃ f : ZMod p × ZMod p →+ G, Function.Injective f := by
-    sorry  -- Extract from primary decomposition: e_p ≥ 2 → p² divides G
-  exact h_no_odd p hp h2p hp_in_decomp
-
--- The hypothesis h_no_two → ¬((ℤ/2)³ ↪ G) implies e₂ ≤ 2
-lemma exponent_two_le_two
-    (G : Type*) [AddCommGroup G] [Finite G]
-    (h_no_two : ¬ ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+ G, Function.Injective f) :
-    max_p_exponent G 2 ≤ 2 := by
-  by_contra h_contra
-  push_neg at h_contra
-  -- If e₂ ≥ 3, then (ℤ/2)³ divides G, contradicting h_no_two
-  have h2_in_decomp : ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+ G, Function.Injective f := by
-    sorry  -- Extract from primary decomposition: e_2 ≥ 3 → 2³ divides G
-  exact h_no_two h2_in_decomp
-
--- Key: from primary decomposition G ≃+ ⊕ᵢ (ℤ/pᵢ^eᵢ), extract injection ZMod p × ZMod p ↪ G
-lemma injection_of_exponent_ge_two
-    (G : Type*) [AddCommGroup G] [Finite G] (p : ℕ) (hp : Nat.Prime p) (e : ℕ) (he : e ≥ 2) :
-    (∃ f : ZMod p × ZMod p →+ G, Function.Injective f) := by
-  -- The primary decomposition includes ZMod (p^e)
-  -- We use: p² | p^e (since e ≥ 2) and ZMod (p²) ↪ ZMod (p^e)
-  have hp_sq_dvd : p^2 ∣ p^e := by
-    have : p^(2 : ℕ) ∣ p^e := dvd_pow_self p (by omega)
-    convert this
-  -- ZMod (p²) ≃+ ZMod p × ZMod p (via Chinese Remainder Theorem, p ⊥ p? No, use decomposition)
-  sorry  -- ~30 LOC: use Mathlib's ZMod decomposition and CRT for p²
-
--- Chinese Remainder Theorem assembly: group prime powers into two factors
-lemma crt_two_factor_decomposition
-    (odd_part : ℕ) (e_two : ℕ) (h_odd_pos : 0 < odd_part) (h_two_pos : 0 < e_two) :
-    ∃ (m n : ℕ), 0 < m ∧ 0 < n ∧ m ∣ n ∧
-      (ℤ/odd_part × ℤ/(2^e_two) ≃+ ℤ/m × ℤ/n) := by
-  -- CRT: (ℤ/odd_part) × (ℤ/2^e_two) → (ℤ/m) × (ℤ/n) where m | n
-  -- Since gcd(odd_part, 2^e_two) = 1 (odd ⊥ powers of 2):
-  -- m = odd_part, n = odd_part * 2^e_two (= lcm since coprime)
-  use odd_part, odd_part * 2^e_two
-  refine ⟨h_odd_pos, Nat.mul_pos h_odd_pos h_two_pos, ?_, ?_⟩
-  · exact dvd_mul_right odd_part (2^e_two)
-  · -- CRT isomorphism: (ℤ/odd_part) × (ℤ/2^e_two) ≃+ ℤ/(odd_part * 2^e_two)
-    -- Requires: gcd(odd_part, 2^e_two) = 1 (proved by odd_part is odd, 2^e_two is power of 2)
-    sorry  -- ~20 LOC: Mathlib ZMod.chineseRemainder + coprime injection
-
--- The reduction step: separate G into (odd part) ⊕ (2-part)
-lemma primary_to_binary
-    (G : Type*) [AddCommGroup G] [Finite G]
-    (e_odd : ∃ G_odd : Type*, AddCommGroup G_odd ∧ Finite G_odd)
-    (e_two : ∃ G_two : Type*, AddCommGroup G_two ∧ Finite G_two) :
-    ∃ (m n : ℕ), (G ≃+ G_odd × G_two) ∧ (0 < m ∧ 0 < n ∧ m ∣ n) := by
-  sorry  -- Separates the ⊕ into binary form
-
-theorem primary_decomposition_respects_rank_bounds
-    (G : Type*) [AddCommGroup G] [Finite G]
-    (h_no_odd : ∀ p : ℕ, Nat.Prime p → 2 < p →
-      ¬ ∃ f : ZMod p × ZMod p →+ G, Function.Injective f)
-    (h_no_two : ¬ ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+ G, Function.Injective f) :
-    ∃ (m n : ℕ), 0 < m ∧ 0 < n ∧ m ∣ n ∧ (G ≃+ ℤ/m × ℤ/n) := by
-  -- Step 1: Primary decomposition via Mathlib
-  obtain ⟨ι, e⟩ := AddCommGroup.equiv_directSum_zmod_of_finite G
-
-  -- Step 2: Extract exponent bounds
-  have e_odd_bound : ∀ p : ℕ, Nat.Prime p → 2 < p → max_p_exponent G p ≤ 1 :=
-    fun p hp h2p => exponent_odd_prime_le_one G p hp h2p h_no_odd
-  have e_two_bound : max_p_exponent G 2 ≤ 2 :=
-    exponent_two_le_two G h_no_two
-
-  -- Step 3: Extract odd_part and e_two from primary decomposition
-  -- odd_part = ∏_{p odd prime, eₚ ≥ 1} p^eₚ (each eₚ ≤ 1 by h_no_odd)
-  -- e_two = max_p_exponent G 2 (at most 2 by h_no_two)
-
-  have all_odd_exp_le_one : ∀ p : ℕ, Nat.Prime p → 2 < p →
-      max_p_exponent G p ≤ 1 :=
-    fun p hp h2p => exponent_odd_prime_le_one G p hp h2p h_no_odd
-
-  have two_exp_le_two : max_p_exponent G 2 ≤ 2 :=
-    exponent_two_le_two G h_no_two
-
-  let odd_part : ℕ := by
-    sorry  -- ∏ p^eₚ over odd primes p where eₚ = max_p_exponent G p
-            -- (eₚ ≤ 1 for all odd p by all_odd_exp_le_one)
-  let e_two : ℕ := max_p_exponent G 2
-
-  have odd_part_pos : 0 < odd_part := by
-    sorry  -- Product of prime powers, so ≥ 1
-  have e_two_pos : 0 < e_two := by
-    sorry  -- G is finite → 2^e | order(G) for some e ≥ 1
-            -- (and e ≤ 2 from two_exp_le_two)
-
-  -- Step 5: Apply CRT to combine
-  obtain ⟨m, n, hm, hn, hmn, crt_iso⟩ :=
-    crt_two_factor_decomposition odd_part (2^e_two) odd_part_pos
-      (Nat.pow_pos (by norm_num : 0 < 2) _)
-
-  -- Step 6: Compose the three equivalences
-  -- (1) Primary decomposition G ≃+ ⊕ᵢ(ℤ/pᵢ^eᵢ) from Mathlib
-  -- (2) Grouping: rearrange ⊕ into (odd factors) × (2-part)
-  -- (3) CRT: (ℤ/odd_part) × (ℤ/2^e_two) ≃+ ℤ/m × ℤ/n (coprime factors)
-
-  have e2_iso : (∀ i : ℕ, (i.Prime ∧ i ≠ 2) → exponent_odd_prime_le_one G i _ _ h_no_odd ≤ 1) ∧
-                (exponent_two_le_two G h_no_two ≤ 2) := by
-    exact ⟨e_odd_bound, e_two_bound⟩
-
-  -- The final composition (abstract, awaits Mathlib direct sum grouping)
-  exact ⟨m, n, hm, hn, hmn, by
-    sorry  -- G ≃+ ⊕ᵢ(...) ≃+ (ℤ/odd_part × ℤ/2^e_two) ≃+ ℤ/m × ℤ/n
-            -- via three .trans (transitivity) steps
-  ⟩
-
-/-! ## Phase 2: Package into TwoInvariantFactorData -/
-
--- Cardinality equation: G has cardinality m * n
-lemma card_of_two_invariant_factors
-    (G : Type*) [AddCommGroup G] [Finite G]
-    (m n : ℕ) (hm : 0 < m) (hn : 0 < n)
-    (e : G ≃+ ℤ/m × ℤ/n) :
-    Nat.card G = m * n := by
-  -- Use the equivalence to transfer cardinality
-  have : Nat.card G = Nat.card (ℤ/m × ℤ/n) := Nat.card_equiv e
-  rw [this]
-  -- Cardinality of product = product of cardinalities
-  rw [Nat.card_prod]
-  -- Cardinality of ℤ/m is m (from ZMod.card)
-  simp [ZMod.card]
-
--- TwoInvariantFactorData constructor from equivalence
-def twoInvariantFactorData_of_equiv
-    (G : Type*) [AddCommGroup G] [Finite G]
-    (m n : ℕ) (hm : 0 < m) (hn : 0 < n) (hmn : m ∣ n)
-    (e : G ≃+ ℤ/m × ℤ/n) :
-    TwoInvariantFactorData G where
+/-- Construct `TwoInvariantFactorData'` from an equivalence G ≃+ ZMod m × ZMod n. -/
+noncomputable def twoInvariantFactorDataOfEquiv'
+    (G : Type*) [AddCommGroup G] [Finite G] {m n : ℕ}
+    (hm : 0 < m) (hn : 0 < n) (hmn : m ∣ n)
+    (heq : Nonempty (G ≃+ ZMod m × ZMod n)) :
+    TwoInvariantFactorData' G where
   m := m
   n := n
   m_pos := hm
   n_pos := hn
-  m_divides_n := hmn
-  equiv := e
-  card_eq := card_of_two_invariant_factors G m n hm hn e
+  dvd_mn := hmn
+  equiv := heq
   order_n := by
-    -- In ℤ/m × ℤ/n, the element (0, 1) has order exactly n
-    -- because n is the LCM of m and 1 (since m | n)
-    have key : addOrderOf ((0 : ℤ/m), (1 : ℤ/n)) = n := by
-      rw [addOrderOf_eq_iff hn]
-      constructor
-      · ext <;> simp [ZMod.add_self_eq_zero_iff_eq_zero]
-      · intro k _ _ h
-        have := congrArg Prod.snd h
-        simp at this
-    use e.symm ((0 : ℤ/m), (1 : ℤ/n))
-    rw [e.symm.addOrderOf_eq, key]
+    rcases heq with ⟨e⟩
+    exact ⟨e.symm ((0 : ZMod m), (1 : ZMod n)), by
+      rw [e.symm.addOrderOf_eq]; exact addOrderOf_prod_zero_one' hn⟩
+  card_eq := by
+    haveI : NeZero m := ⟨Nat.ne_of_gt hm⟩
+    haveI : NeZero n := ⟨Nat.ne_of_gt hn⟩
+    rcases heq with ⟨e⟩
+    exact (Nat.card_congr e.toEquiv).trans (by simp)
 
-theorem mk_two_invariant_factor_data
-    (G : Type*) [AddCommGroup G] [Finite G]
-    (m n : ℕ) (hm : 0 < m) (hn : 0 < n) (hmn : m ∣ n)
-    (e : G ≃+ ℤ/m × ℤ/n) :
-    TwoInvariantFactorData G :=
-  twoInvariantFactorData_of_equiv G m n hm hn hmn e
+/-! ## Helpers: Pi-type splitting and CRT partition -/
 
-/-! ## Phase 3: Final Assembly (Axiom 2 Discharge) -/
+/-- Split a dependent function type by a finset into its in-set and out-of-set parts. -/
+private noncomputable def piSplitAddEquiv' {ι : Type*} [DecidableEq ι]
+    (s : Finset ι) (A : ι → Type*) [∀ i, AddCommGroup (A i)] :
+    ((i : ι) → A i) ≃+
+      (((i : {i // i ∈ s}) → A i) × ((i : {i // i ∉ s}) → A i)) where
+  toFun f := (fun i => f i, fun i => f i)
+  invFun g i := if h : i ∈ s then g.1 ⟨i, h⟩ else g.2 ⟨i, h⟩
+  left_inv f := by ext i; by_cases h : i ∈ s <;> simp [h]
+  right_inv g := by ext i <;> simp [i.property]
+  map_add' f g := by ext i <;> rfl
 
--- Main theorem: Discharge Axiom 2 from the Mazur bound hypotheses
-theorem finite_abelian_two_invariant_factors
+/-- Partition ⨁ᵢ ZMod(q(i)) into two CRT-collapsed halves:
+    ZMod(∏ᵢ∈s q(i)) × ZMod(∏ᵢ∉s q(i)), given pairwise coprimality within each half. -/
+private noncomputable def directSumPartitionEquiv' {ι : Type*} [Fintype ι]
+    [DecidableEq ι] (q : ι → ℕ) (s : Finset ι)
+    (hcop₁ : Pairwise (Nat.Coprime on fun i : {i // i ∈ s} => q i))
+    (hcop₂ : Pairwise (Nat.Coprime on fun i : {i // i ∉ s} => q i)) :
+    (⨁ i : ι, ZMod (q i)) ≃+
+      ZMod (∏ i : {i // i ∈ s}, q i) × ZMod (∏ i : {i // i ∉ s}, q i) :=
+  (DirectSum.addEquivProd (fun i : ι => ZMod (q i))).trans <|
+    (piSplitAddEquiv' s (fun i : ι => ZMod (q i))).trans <|
+      AddEquiv.prodCongr
+        (ZMod.prodEquivPi (fun i : {i // i ∈ s} => q i) hcop₁).toAddEquiv.symm
+        (ZMod.prodEquivPi (fun i : {i // i ∉ s} => q i) hcop₂).toAddEquiv.symm
+
+/-! ## Injection lemmas
+
+If a prime p divides components at distinct indices of a direct sum decomposition,
+we can inject (ZMod p)^k into G. -/
+
+/-- Two p-divisible components give an injection ZMod p × ZMod p →+ G. -/
+private theorem square_injection_from_decomposition'
+    {ι : Type*} [DecidableEq ι]
+    (G : Type*) [AddCommGroup G]
+    (n : ι → ℕ) (hn : ∀ i, 0 < n i)
+    (e : G ≃+ ⨁ k : ι, ZMod (n k))
+    (p : ℕ) (hp : Nat.Prime p)
+    (i j : ι) (hij : i ≠ j)
+    (hpi : p ∣ n i) (hpj : p ∣ n j) :
+    ∃ f : ZMod p × ZMod p →+ G, Function.Injective f := by
+  obtain ⟨gi, hgi⟩ := zmod_contains_of_dvd p (n i) hp.pos (hn i) hpi
+  obtain ⟨gj, hgj⟩ := zmod_contains_of_dvd p (n j) hp.pos (hn j) hpj
+  let fi := (DirectSum.of (fun k => ZMod (n k)) i).comp gi
+  let fj := (DirectSum.of (fun k => ZMod (n k)) j).comp gj
+  let f : ZMod p × ZMod p →+ ⨁ k : ι, ZMod (n k) :=
+    { toFun := fun xy => fi xy.1 + fj xy.2
+      map_zero' := by simp [fi, fj]
+      map_add' := by intro x y; simp [fi, fj, Prod.fst_add, Prod.snd_add]; abel }
+  have hf_inj : Function.Injective f := by
+    intro ⟨x₁, x₂⟩ ⟨y₁, y₂⟩ hxy
+    have h_eq : fi x₁ + fj x₂ = fi y₁ + fj y₂ := hxy
+    have hi_eq : (fi x₁ + fj x₂) i = (fi y₁ + fj y₂) i := by rw [h_eq]
+    have hj_eq : (fi x₁ + fj x₂) j = (fi y₁ + fj y₂) j := by rw [h_eq]
+    simp only [fi, fj, AddMonoidHom.comp_apply, DirectSum.add_apply] at hi_eq hj_eq
+    rw [DirectSum.of_eq_same, DirectSum.of_eq_of_ne _ _ _ hij, add_zero,
+        DirectSum.of_eq_same, DirectSum.of_eq_of_ne _ _ _ hij, add_zero] at hi_eq
+    rw [DirectSum.of_eq_of_ne _ _ _ (Ne.symm hij), DirectSum.of_eq_same, zero_add,
+        DirectSum.of_eq_of_ne _ _ _ (Ne.symm hij), DirectSum.of_eq_same, zero_add] at hj_eq
+    exact Prod.ext (hgi hi_eq) (hgj hj_eq)
+  exact ⟨e.symm.toAddMonoidHom.comp f, e.symm.injective.comp hf_inj⟩
+
+/-- Three p-divisible components give an injection ZMod p × ZMod p × ZMod p →+ G. -/
+private theorem cube_injection_from_decomposition'
+    {ι : Type*} [DecidableEq ι]
+    (G : Type*) [AddCommGroup G]
+    (n : ι → ℕ) (hn : ∀ i, 0 < n i)
+    (e : G ≃+ ⨁ k : ι, ZMod (n k))
+    (p : ℕ) (hp : Nat.Prime p)
+    (i j k : ι) (hij : i ≠ j) (hjk : j ≠ k) (hik : i ≠ k)
+    (hpi : p ∣ n i) (hpj : p ∣ n j) (hpk : p ∣ n k) :
+    ∃ f : ZMod p × ZMod p × ZMod p →+ G, Function.Injective f := by
+  obtain ⟨gi, hgi⟩ := zmod_contains_of_dvd p (n i) hp.pos (hn i) hpi
+  obtain ⟨gj, hgj⟩ := zmod_contains_of_dvd p (n j) hp.pos (hn j) hpj
+  obtain ⟨gk, hgk⟩ := zmod_contains_of_dvd p (n k) hp.pos (hn k) hpk
+  let fi := (DirectSum.of (fun l => ZMod (n l)) i).comp gi
+  let fj := (DirectSum.of (fun l => ZMod (n l)) j).comp gj
+  let fk := (DirectSum.of (fun l => ZMod (n l)) k).comp gk
+  let f : ZMod p × ZMod p × ZMod p →+ ⨁ l : ι, ZMod (n l) :=
+    { toFun := fun xyz => fi xyz.1 + fj xyz.2.1 + fk xyz.2.2
+      map_zero' := by simp [fi, fj, fk]
+      map_add' := by intro x y; simp [fi, fj, fk, Prod.fst_add, Prod.snd_add]; abel }
+  have hf_inj : Function.Injective f := by
+    intro ⟨x₁, x₂, x₃⟩ ⟨y₁, y₂, y₃⟩ hxy
+    have h_eq : fi x₁ + fj x₂ + fk x₃ = fi y₁ + fj y₂ + fk y₃ := hxy
+    have hi_eq : (fi x₁ + fj x₂ + fk x₃) i = (fi y₁ + fj y₂ + fk y₃) i := by rw [h_eq]
+    have hj_eq : (fi x₁ + fj x₂ + fk x₃) j = (fi y₁ + fj y₂ + fk y₃) j := by rw [h_eq]
+    have hk_eq : (fi x₁ + fj x₂ + fk x₃) k = (fi y₁ + fj y₂ + fk y₃) k := by rw [h_eq]
+    simp only [fi, fj, fk, AddMonoidHom.comp_apply, DirectSum.add_apply] at hi_eq hj_eq hk_eq
+    rw [DirectSum.of_eq_same, DirectSum.of_eq_of_ne _ _ _ hij,
+        DirectSum.of_eq_of_ne _ _ _ hik, add_zero, add_zero,
+        DirectSum.of_eq_same, DirectSum.of_eq_of_ne _ _ _ hij,
+        DirectSum.of_eq_of_ne _ _ _ hik, add_zero, add_zero] at hi_eq
+    rw [DirectSum.of_eq_of_ne _ _ _ (Ne.symm hij), DirectSum.of_eq_same,
+        DirectSum.of_eq_of_ne _ _ _ hjk, zero_add, add_zero,
+        DirectSum.of_eq_of_ne _ _ _ (Ne.symm hij), DirectSum.of_eq_same,
+        DirectSum.of_eq_of_ne _ _ _ hjk, zero_add, add_zero] at hj_eq
+    rw [DirectSum.of_eq_of_ne _ _ _ (Ne.symm hik),
+        DirectSum.of_eq_of_ne _ _ _ (Ne.symm hjk), DirectSum.of_eq_same,
+        zero_add, zero_add,
+        DirectSum.of_eq_of_ne _ _ _ (Ne.symm hik),
+        DirectSum.of_eq_of_ne _ _ _ (Ne.symm hjk), DirectSum.of_eq_same,
+        zero_add, zero_add] at hk_eq
+    exact Prod.ext (hgi hi_eq) (Prod.ext (hgj hj_eq) (hgk hk_eq))
+  exact ⟨e.symm.toAddMonoidHom.comp f, e.symm.injective.comp hf_inj⟩
+
+/-! ## Main theorem -/
+
+/-- A finite abelian group with p-rank ≤ 1 (all odd p) and 2-rank ≤ 2
+    has a two invariant factor decomposition G ≃ ZMod m × ZMod n with m ∣ n. -/
+theorem finite_abelian_two_invariant_factors_exists'
     (G : Type*) [AddCommGroup G] [Finite G]
     (h_no_odd : ∀ p : ℕ, Nat.Prime p → 2 < p →
       ¬ ∃ f : ZMod p × ZMod p →+ G, Function.Injective f)
     (h_no_two : ¬ ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+ G, Function.Injective f) :
-    ∃ d : TwoInvariantFactorData G, True := by
-  -- Phase 1: Primary decomposition with exponent bounds
-  obtain ⟨m, n, hm, hn, hmn, e⟩ :=
-    primary_decomposition_respects_rank_bounds G h_no_odd h_no_two
-  -- Phase 2: Package into TwoInvariantFactorData
-  use mk_two_invariant_factor_data G m n hm hn hmn e
-  trivial
-
--- Axiom 2 usage: instantiate when verifying noncyclic group bounds
-def axiom_2_two_invariant_factors : ∀ (G : Type*) [AddCommGroup G] [Finite G],
-    (∀ p : ℕ, Nat.Prime p → 2 < p → ¬ ∃ f : ZMod p × ZMod p →+ G, Function.Injective f) →
-    (¬ ∃ f : ZMod 2 × ZMod 2 × ZMod 2 →+ G, Function.Injective f) →
-    ∃ d : TwoInvariantFactorData G, True :=
-  fun G _ h_no_odd h_no_two => finite_abelian_two_invariant_factors G h_no_odd h_no_two
+    ∃ d : TwoInvariantFactorData' G, True := by
+  classical
+  -- Step 1: Primary decomposition from Mathlib
+  obtain ⟨ι, _hι, p, hp, exp, ⟨e⟩⟩ := AddCommGroup.equiv_directSum_zmod_of_finite G
+  let q : ι → ℕ := fun i => p i ^ exp i
+  have hqpos : ∀ i, 0 < q i := fun i => Nat.pow_pos (hp i).pos
+  -- Step 2: No odd prime can divide two distinct components
+  have hodd_rank : ∀ r : ℕ, Nat.Prime r → 2 < r → ∀ i j : ι,
+      i ≠ j → r ∣ q i → r ∣ q j → False := by
+    intro r hr hrgt i j hij hri hrj
+    exact h_no_odd r hr hrgt
+      (square_injection_from_decomposition' G q hqpos e r hr i j hij hri hrj)
+  -- Step 3: At most 2 components divisible by 2
+  let T : Finset ι := Finset.univ.filter (fun i => 2 ∣ q i)
+  have hTle2 : T.card ≤ 2 := by
+    by_contra hle
+    have h2lt : 2 < T.card := by omega
+    rcases Finset.two_lt_card.mp h2lt with ⟨i, hi, j, hj, k, hk, hij, hik, hjk⟩
+    have h2i : 2 ∣ q i := by simpa [T] using hi
+    have h2j : 2 ∣ q j := by simpa [T] using hj
+    have h2k : 2 ∣ q k := by simpa [T] using hk
+    exact h_no_two
+      (cube_injection_from_decomposition' G q hqpos e 2 Nat.prime_two
+        i j k hij hjk hik h2i h2j h2k)
+  -- Step 4: Case split on T.card
+  by_cases hTle1 : T.card ≤ 1
+  · ---- Case T.card ≤ 1: all components pairwise coprime ----
+    have hpair : Pairwise (Nat.Coprime on q) := by
+      intro i j hij
+      by_contra hcop
+      rcases Nat.Prime.not_coprime_iff_dvd.mp hcop with ⟨r, hr, hri, hrj⟩
+      by_cases hr2 : r = 2
+      · have hiT : i ∈ T := by simpa [T, hr2] using hri
+        have hjT : j ∈ T := by simpa [T, hr2] using hrj
+        have hone : 1 < T.card := Finset.one_lt_card.mpr ⟨i, hiT, j, hjT, hij⟩
+        omega
+      · have hrgt : 2 < r := by have h2le := hr.two_le; omega
+        exact hodd_rank r hr hrgt i j hij hri hrj
+    -- Partition s = ∅: m = ∏(∅) = 1, n = ∏(all)
+    have hcop₁ : Pairwise (Nat.Coprime on fun i : {i // i ∈ (∅ : Finset ι)} => q i) := by
+      intro i _ _
+      cases i with | mk _ prop => simp at prop
+    have hcop₂ : Pairwise (Nat.Coprime on fun i : {i // i ∉ (∅ : Finset ι)} => q i) := by
+      intro i j hij
+      exact hpair (fun hv => hij (Subtype.ext hv))
+    let m := ∏ i : {i // i ∈ (∅ : Finset ι)}, q i
+    let n := ∏ i : {i // i ∉ (∅ : Finset ι)}, q i
+    have hmpos : 0 < m := by simp [m]
+    have hnpos : 0 < n := by
+      dsimp [n]
+      exact Finset.prod_pos (fun i _ => hqpos i)
+    have hmn : m ∣ n := by
+      have hm : m = 1 := by simp [m]
+      rw [hm]
+      exact one_dvd n
+    exact ⟨twoInvariantFactorDataOfEquiv' G hmpos hnpos hmn
+      ⟨e.trans (directSumPartitionEquiv' q ∅ hcop₁ hcop₂)⟩, trivial⟩
+  · ---- Case T.card = 2: two even (2-power) components ----
+    have hT2 : T.card = 2 := by omega
+    rcases Finset.card_eq_two.mp hT2 with ⟨a, b, hab, hT_eq⟩
+    have haT : a ∈ T := by simp [hT_eq]
+    have hbT : b ∈ T := by simp [hT_eq]
+    have hqa_even : 2 ∣ q a := by simpa [T] using haT
+    have hqb_even : 2 ∣ q b := by simpa [T] using hbT
+    -- Both even components are powers of 2 (prime p dividing q(i)=p(i)^e(i) means p=p(i))
+    have hpa : p a = 2 := by
+      have h : 2 ∣ p a ^ exp a := by simpa [q] using hqa_even
+      exact (Nat.prime_eq_prime_of_dvd_pow Nat.prime_two (hp a) h).symm
+    have hpb : p b = 2 := by
+      have h : 2 ∣ p b ^ exp b := by simpa [q] using hqb_even
+      exact (Nat.prime_eq_prime_of_dvd_pow Nat.prime_two (hp b) h).symm
+    -- Both are 2-powers, so one divides the other
+    have hcomp : q a ∣ q b ∨ q b ∣ q a := by
+      rw [show q a = 2 ^ exp a by simp [q, hpa],
+        show q b = 2 ^ exp b by simp [q, hpb]]
+      rcases le_total (exp a) (exp b) with hle | hle
+      · exact Or.inl (Nat.pow_dvd_pow 2 hle)
+      · exact Or.inr (Nat.pow_dvd_pow 2 hle)
+    -- Helper: complement of a singleton {a} where T = {a, b} is pairwise coprime.
+    -- Any two elements outside {a} share no prime factor: an odd shared prime
+    -- contradicts hodd_rank, and 2 would force both into T but T\{a} = {b}.
+    have hpair_compl : ∀ {a b : ι}, a ≠ b → T = {a, b} →
+        Pairwise (Nat.Coprime on fun i : {i // i ∉ ({a} : Finset ι)} => q i) := by
+      intro a b hab hTab i j hij
+      by_contra hcop
+      rcases Nat.Prime.not_coprime_iff_dvd.mp hcop with ⟨r, hr, hri, hrj⟩
+      by_cases hr2 : r = 2
+      · have hiT : (i : ι) ∈ T := by simpa [T, hr2] using hri
+        have hjT : (j : ι) ∈ T := by simpa [T, hr2] using hrj
+        have hi_pair : (i : ι) ∈ ({a, b} : Finset ι) := by simpa [hTab] using hiT
+        have hj_pair : (j : ι) ∈ ({a, b} : Finset ι) := by simpa [hTab] using hjT
+        have hi_cases : (i : ι) = a ∨ (i : ι) = b := by simpa using hi_pair
+        have hj_cases : (j : ι) = a ∨ (j : ι) = b := by simpa using hj_pair
+        have hi_ne_a : (i : ι) ≠ a := by
+          intro hia
+          exact i.property (Finset.mem_singleton.mpr hia)
+        have hj_ne_a : (j : ι) ≠ a := by
+          intro hja
+          exact j.property (Finset.mem_singleton.mpr hja)
+        have hi_eq_b : (i : ι) = b := hi_cases.resolve_left hi_ne_a
+        have hj_eq_b : (j : ι) = b := hj_cases.resolve_left hj_ne_a
+        exact hij (Subtype.ext (hi_eq_b.trans hj_eq_b.symm))
+      · have hrgt : 2 < r := by have h2le := hr.two_le; omega
+        exact hodd_rank r hr hrgt (i : ι) (j : ι) (fun hv => hij (Subtype.ext hv)) hri hrj
+    -- A singleton set is vacuously pairwise coprime
+    have hpair_singleton : ∀ {a : ι},
+        Pairwise (Nat.Coprime on fun i : {i // i ∈ ({a} : Finset ι)} => q i) := by
+      intro a i j hij
+      exfalso
+      apply hij
+      ext
+      have hi : (i : ι) = a := Finset.mem_singleton.mp i.property
+      have hj : (j : ι) = a := Finset.mem_singleton.mp j.property
+      exact hi.trans hj.symm
+    rcases hcomp with hqab | hqba
+    · -- Sub-case q(a) ∣ q(b): partition s = {a}, so m = q(a), n = ∏(rest)
+      let s : Finset ι := {a}
+      have hcop₁ : Pairwise (Nat.Coprime on fun i : {i // i ∈ s} => q i) := by
+        simpa [s] using (hpair_singleton (a := a))
+      have hcop₂ : Pairwise (Nat.Coprime on fun i : {i // i ∉ s} => q i) := by
+        simpa [s] using (hpair_compl (a := a) (b := b) hab hT_eq)
+      let m := ∏ i : {i // i ∈ s}, q i
+      let n := ∏ i : {i // i ∉ s}, q i
+      have hmpos : 0 < m := by
+        dsimp [m]
+        exact Finset.prod_pos (fun i _ => hqpos i)
+      have hnpos : 0 < n := by
+        dsimp [n]
+        exact Finset.prod_pos (fun i _ => hqpos i)
+      have hmn : m ∣ n := by
+        have hm_eq : m = q a := by simp [m, s]
+        have hb_not : b ∉ s := by simp [s, hab.symm]
+        have hqbdvd : q b ∣ n := by
+          dsimp [n]
+          exact Finset.dvd_prod_of_mem
+            (s := (Finset.univ : Finset {i // i ∉ s}))
+            (f := fun i : {i // i ∉ s} => q i) (Finset.mem_univ ⟨b, hb_not⟩)
+        rw [hm_eq]
+        exact hqab.trans hqbdvd
+      exact ⟨twoInvariantFactorDataOfEquiv' G hmpos hnpos hmn
+        ⟨e.trans (directSumPartitionEquiv' q s hcop₁ hcop₂)⟩, trivial⟩
+    · -- Sub-case q(b) ∣ q(a): partition s = {b}, so m = q(b), n = ∏(rest)
+      let s : Finset ι := {b}
+      have hcop₁ : Pairwise (Nat.Coprime on fun i : {i // i ∈ s} => q i) := by
+        simpa [s] using (hpair_singleton (a := b))
+      have hT_eq' : T = {b, a} := by simpa [Finset.pair_comm] using hT_eq
+      have hcop₂ : Pairwise (Nat.Coprime on fun i : {i // i ∉ s} => q i) := by
+        simpa [s] using (hpair_compl (a := b) (b := a) hab.symm hT_eq')
+      let m := ∏ i : {i // i ∈ s}, q i
+      let n := ∏ i : {i // i ∉ s}, q i
+      have hmpos : 0 < m := by
+        dsimp [m]
+        exact Finset.prod_pos (fun i _ => hqpos i)
+      have hnpos : 0 < n := by
+        dsimp [n]
+        exact Finset.prod_pos (fun i _ => hqpos i)
+      have hmn : m ∣ n := by
+        have hm_eq : m = q b := by simp [m, s]
+        have ha_not : a ∉ s := by simp [s, hab]
+        have hqadvd : q a ∣ n := by
+          dsimp [n]
+          exact Finset.dvd_prod_of_mem
+            (s := (Finset.univ : Finset {i // i ∉ s}))
+            (f := fun i : {i // i ∉ s} => q i) (Finset.mem_univ ⟨a, ha_not⟩)
+        rw [hm_eq]
+        exact hqba.trans hqadvd
+      exact ⟨twoInvariantFactorDataOfEquiv' G hmpos hnpos hmn
+        ⟨e.trans (directSumPartitionEquiv' q s hcop₁ hcop₂)⟩, trivial⟩
 
 end MazurProof
