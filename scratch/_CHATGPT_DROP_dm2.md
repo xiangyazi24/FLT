@@ -1,360 +1,294 @@
-# Q2046 (dm2): Miller evaluation at an affine point
+# Q2055 (dm2): wiring `WeilPairingInterface` into Mazur downstream code
 
 Date: 2026-06-28.
 
-Question: for `W : WeierstrassCurve.Affine K`, how should we evaluate elements of
+Question: `WeilPairingInterface.lean` now compiles, `primitive_root_in_base` is fully proved, and the only remaining `sorry` is the bridge theorem constructing `AbstractGaloisWeilData` from an actual elliptic curve.  Should this replace the existing `WeilPairing.lean`, or should both files remain?  What is the cleanest way to connect `WeilPairingInterface.primitive_root_in_base` to downstream `TorsionBound.lean`?
 
-```lean
-W.CoordinateRing = K[X][Y] / (W.polynomial)
-W.FunctionField = FractionRing W.CoordinateRing
-```
+## Recommendation
 
-at an affine point `P = (xP, yP)`?
-
-## Short answer
-
-Mathlib has the bivariate polynomial evaluation API and a quotient-at-point equivalence, but I did **not** find a named direct map
-
-```lean
-W.CoordinateRing →+* K
-```
-
-such as `CoordinateRing.eval`.  The correct direct definition is to use `AdjoinRoot.lift`, because
-
-```lean
-W.CoordinateRing = AdjoinRoot W.polynomial
-```
-
-and `W.Equation xP yP` is exactly the statement that `W.polynomial` vanishes at `(xP,yP)`.
-
-For the fraction field, there is **no total evaluation homomorphism**
-
-```lean
-W.FunctionField →+* K
-```
-
-at a point.  Evaluation of a rational function is partial: a representative `num / den` may be evaluated only when `den(P) ≠ 0`.
-
-## Relevant Mathlib API
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-```
-
-In `Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point`, Mathlib defines:
-
-```lean
-abbrev CoordinateRing : Type r :=
-  AdjoinRoot W'.polynomial
-
-abbrev FunctionField : Type r :=
-  FractionRing W'.CoordinateRing
-```
-
-and wraps the quotient map as:
-
-```lean
-CoordinateRing.mk W
--- type: K[X][Y] →+* W.CoordinateRing
-```
-
-For bivariate polynomials, `Mathlib.Algebra.Polynomial.Bivariate` provides:
-
-```lean
-Polynomial.evalEval x y p
--- p(x,y)
-
-Polynomial.evalEvalRingHom x y
--- type: K[X][Y] →+* K
-```
-
-and the key bridge:
-
-```lean
-Polynomial.eval₂_evalRingHom
--- eval₂ (Polynomial.evalRingHom x) = Polynomial.evalEval x
-```
-
-Mathlib also has a nearby quotient API:
-
-```lean
-CoordinateRing.XYIdeal W x ypoly
-CoordinateRing.quotientXYIdealEquiv
-```
-
-where
-
-```lean
-CoordinateRing.quotientXYIdealEquiv
-  (h : (W.polynomial.eval ypoly).eval x = 0) :
-  (W.CoordinateRing ⧸ CoordinateRing.XYIdeal W x ypoly) ≃ₐ[K] K
-```
-
-This is useful, but it is an equivalence after quotienting by the maximal ideal
-`⟨X - x, Y - ypoly(X)⟩`; it is not itself a named direct evaluation map from `W.CoordinateRing` to `K`.
-
-## Recommended direct coordinate-ring evaluation map
-
-Use `AdjoinRoot.lift`.  This is the cleanest definition.
-
-```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-
-noncomputable section
-
-open Polynomial
-open scoped Polynomial.Bivariate
-
-namespace WeierstrassCurve
-namespace Affine
-namespace MillerEval
-
-universe u
-
-variable {K : Type u} [Field K]
-variable (W : Affine K)
-variable {xP yP : K}
-
-/-- Evaluation of coordinate-ring functions at the affine point `(xP,yP)`. -/
-noncomputable def evalCR (hP : W.Equation xP yP) : W.CoordinateRing →+* K :=
-  AdjoinRoot.lift (Polynomial.evalRingHom xP) yP (by
-    -- Goal:
-    --   W.polynomial.eval₂ (Polynomial.evalRingHom xP) yP = 0
-    -- while `hP` is:
-    --   W.polynomial.evalEval xP yP = 0
-    simpa [WeierstrassCurve.Affine.Equation, Polynomial.eval₂_evalRingHom] using hP)
-
-/-- Evaluation commutes with the quotient map. -/
-@[simp]
-theorem evalCR_mk (hP : W.Equation xP yP) (p : K[X][Y]) :
-    evalCR W hP (CoordinateRing.mk W p) = p.evalEval xP yP := by
-  simp [evalCR, Polynomial.eval₂_evalRingHom]
-
-/-- The class of `X - a` evaluates to `xP - a`. -/
-@[simp]
-theorem evalCR_XClass (hP : W.Equation xP yP) (a : K) :
-    evalCR W hP (CoordinateRing.XClass W a) = xP - a := by
-  simp [evalCR, CoordinateRing.XClass, Polynomial.eval₂_evalRingHom, Polynomial.evalEval]
-
-/-- The class of `Y - g(X)` evaluates to `yP - g(xP)`. -/
-@[simp]
-theorem evalCR_YClass (hP : W.Equation xP yP) (g : K[X]) :
-    evalCR W hP (CoordinateRing.YClass W g) = yP - g.eval xP := by
-  simp [evalCR, CoordinateRing.YClass, Polynomial.eval₂_evalRingHom, Polynomial.evalEval]
-
-/-- Explicit `a(X) + b(X)Y` constructor. -/
-noncomputable def mkPQ (p q : K[X]) : W.CoordinateRing :=
-  CoordinateRing.mk W (C p + C q * (Y : K[X][Y]))
-
-/-- Evaluation of `a(X) + b(X)Y` at `(xP,yP)`. -/
-@[simp]
-theorem evalCR_mkPQ (hP : W.Equation xP yP) (p q : K[X]) :
-    evalCR W hP (mkPQ W p q) = p.eval xP + q.eval xP * yP := by
-  simp [mkPQ, evalCR, Polynomial.eval₂_evalRingHom, Polynomial.evalEval]
-
-end MillerEval
-end Affine
-end WeierstrassCurve
-```
-
-The theorem `evalCR_mkPQ` is the Lean version of the rule
+Keep **both** files, but make their roles different:
 
 ```text
-(a(X) + b(X)Y)(xP,yP) = a(xP) + b(xP)yP.
+WeilPairingInterface.lean  = real abstract theorem layer
+WeilPairing.lean           = thin compatibility/shim layer exposing the old theorem name
+TorsionBound.lean          = unchanged, or nearly unchanged
 ```
 
-## Alternative definition via `quotientXYIdealEquiv`
+Do **not** make `TorsionBound.lean` depend directly on the internals of `AbstractGaloisWeilData`.  The downstream torsion-bound proof only needs the consequence
 
-This is also mathematically clean, but slightly heavier in Lean.  It factors evaluation as
+```lean
+weil_pairing_primitive_root
+```
+
+so keep that theorem name as the stable public API.
+
+The one remaining `sorry`/axiom should be concentrated in exactly one bridge theorem:
+
+```lean
+weil_interface_bridge
+```
+
+and the old `weil_pairing_primitive_root` theorem should become a proved wrapper:
+
+```lean
+theorem weil_pairing_primitive_root ... := by
+  exact primitive_root_in_base (weil_interface_bridge ...)
+```
+
+This makes the bridge axiom visibly equivalent to the old axiom, but all downstream code benefits from the already-proved abstract descent theorem.
+
+## Why keep both?
+
+`WeilPairingInterface.lean` is the right place for the abstract mathematical payload:
+
+* abstract Galois Weil data;
+* bilinearity / nondegeneracy fields;
+* Galois equivariance or base-field rationality;
+* the fully proved theorem `primitive_root_in_base`.
+
+`WeilPairing.lean` should keep the old Mazur-facing theorem name:
+
+```lean
+weil_pairing_primitive_root
+```
+
+That name is already what downstream code expects.  In the current scaffold I inspected, `TorsionBound.lean` proves
+
+```lean
+theorem full_rational_torsion_order_le_two
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {m : ℕ} (hm : 0 < m) (hfull : HasFullRationalTorsion E m) : m ≤ 2 := by
+  rcases weil_pairing_primitive_root E hm hfull with ⟨ζ, hζ⟩
+  exact isPrimitiveRoot_rat_order_le_two hζ
+```
+
+So the best integration is to preserve that call site.
+
+## Clean file graph
+
+The cleanest architecture is:
 
 ```text
-F[W] → F[W] / ⟨X - xP, Y - yP⟩ ≃ F.
+Definitions / low-level torsion predicates
+  ↓
+WeilPairingInterface.lean
+  contains AbstractGaloisWeilData and proved primitive_root_in_base
+  contains or imports the one bridge declaration weil_interface_bridge
+  ↓
+WeilPairing.lean
+  proves the old public theorem weil_pairing_primitive_root from the interface
+  ↓
+Axioms.lean / TorsionBound.lean
+  continue using weil_pairing_primitive_root
 ```
 
-Skeleton:
+There is one important cycle hazard: if `WeilPairingInterface.lean` or `WeilPairing.lean` needs the definitions
 
 ```lean
-noncomputable def evalCRViaQuotient
-    {K : Type u} [Field K]
-    (W : WeierstrassCurve.Affine K)
-    {xP yP : K} (hP : W.Equation xP yP) :
-    W.CoordinateRing →ₐ[K] K :=
-  ((CoordinateRing.quotientXYIdealEquiv
-      (W' := W) (x := xP) (y := (C yP : K[X]))
-      (by
-        -- Goal: (W.polynomial.eval (C yP)).eval xP = 0
-        -- This is the same as `W.polynomial.evalEval xP yP = 0`.
-        simpa [WeierstrassCurve.Affine.Equation, Polynomial.evalEval] using hP)).toAlgHom).comp
-    (Ideal.Quotient.mkₐ K (CoordinateRing.XYIdeal W xP (C yP : K[X])))
+HasFullRationalTorsion
+HasRationalPointOfOrder
+HasTorsionStructure
+TorsionStructureData
 ```
 
-I would use the `AdjoinRoot.lift` definition first.  It gives the direct simp lemma on `CoordinateRing.mk W p` immediately.
+and those are currently inside `Axioms.lean`, then do not make `Axioms.lean` import `WeilPairing.lean` unless those definitions have been split out first.
 
-## Why there is no total function-field evaluation map
+The clean split is:
 
-`W.FunctionField` is a localization/fraction ring of `W.CoordinateRing`.  A homomorphism out of a localization exists only when every localized denominator maps to a unit.  For `FractionRing W.CoordinateRing`, the denominators are all nonzero elements of `W.CoordinateRing`.
+```text
+AxiomsBasic.lean        -- only definitions: torsionSet, HasFullRationalTorsion, etc.
+WeilPairingInterface.lean imports AxiomsBasic
+WeilPairing.lean imports WeilPairingInterface
+Axioms.lean imports AxiomsBasic + WeilPairing + remaining hard inputs
+TorsionBound.lean imports Axioms
+```
 
-At the point `(xP,yP)`, the nonzero coordinate-ring element
+If you do not want a new `AxiomsBasic.lean`, then the next-best option is:
+
+```text
+WeilPairingInterface.lean imports Axioms.lean
+WeilPairing.lean imports WeilPairingInterface.lean
+TorsionBound.lean imports WeilPairing.lean directly
+```
+
+but then `Axioms.lean` must not also declare an axiom with the same name, and the dependency layering is less clean.
+
+## Concrete shim pattern
+
+Put this in `WeilPairing.lean` or refactor the existing file to this shape.  Names may need minor adjustment to your actual interface names.
 
 ```lean
-CoordinateRing.XClass W xP    -- the class of X - xP
+import FLT.Assumptions.MazurProof.WeilPairingInterface
+
+/-!
+# Weil-pairing public API for the Mazur proof
+
+This file is intentionally a compatibility layer.  The abstract theorem is proved
+in `WeilPairingInterface.lean`; the only construction gap is the bridge from an
+actual elliptic curve with full rational `m`-torsion to `AbstractGaloisWeilData`.
+-/
+
+open scoped WeierstrassCurve.Affine
+
+namespace MazurProof
+
+/--
+Bridge from an actual elliptic curve with full rational `m`-torsion to the
+abstract Galois Weil-pairing data.
+
+This is the only remaining Weil-pairing construction input.  It is equivalent in
+strength to the old `weil_pairing_primitive_root` axiom.
+-/
+axiom weil_interface_bridge
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {m : ℕ} (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
+    AbstractGaloisWeilData E m
+
+/--
+Old public Mazur-facing consequence of the Weil pairing.
+
+Keep this theorem name so `TorsionBound.lean` does not need to know about the
+abstract interface.
+-/
+theorem weil_pairing_primitive_root
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {m : ℕ} (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
+  exact primitive_root_in_base (weil_interface_bridge E hm hfull)
+
+end MazurProof
 ```
 
-is nonzero by
+If `weil_interface_bridge` already lives in `WeilPairingInterface.lean`, then `WeilPairing.lean` should not redeclare it.  It should just import the interface and prove the wrapper theorem:
 
 ```lean
-CoordinateRing.XClass_ne_zero xP
+theorem weil_pairing_primitive_root
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {m : ℕ} (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m := by
+  exact primitive_root_in_base (weil_interface_bridge E hm hfull)
 ```
 
-but it evaluates to zero:
+## What to change in `Axioms.lean`
+
+Current scaffold shape has the old Group B axiom:
 
 ```lean
-by simpa using evalCR_XClass (W := W) hP xP
--- evalCR W hP (CoordinateRing.XClass W xP) = 0
+axiom weil_pairing_primitive_root (E : WeierstrassCurve ℚ) [E.IsElliptic] {m : ℕ}
+    (hm : 0 < m) (hfull : HasFullRationalTorsion E m) :
+    ∃ ζ : ℚ, IsPrimitiveRoot ζ m
 ```
 
-Therefore the coordinate-ring evaluation map cannot be extended to a ring homomorphism
+Replace that axiom with an import of the shim theorem, or move it out entirely.  The file should no longer declare `weil_pairing_primitive_root` as an axiom.
+
+Best version:
 
 ```lean
-W.FunctionField →+* K
+import FLT.Assumptions.MazurProof.WeilPairing
 ```
 
-because the fraction field inverts `X - xP`, while evaluation at `P` sends `X - xP` to `0`.
+and delete the Group B axiom block from `Axioms.lean`.
 
-## Recommended representation for partial rational-function evaluation
+If import cycles appear, split the basic definitions first:
 
-For Miller evaluation, do not try to define a total evaluator on `W.FunctionField`.  Instead, carry an explicit numerator and denominator and require the denominator to be nonzero at the evaluation point.
+```text
+AxiomsBasic.lean
+```
+
+then import that basic file from both `Axioms.lean` and `WeilPairingInterface.lean`.
+
+## What to change in `TorsionBound.lean`
+
+Ideally, nothing.
+
+The current downstream proof uses exactly the correct abstraction boundary:
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-
-noncomputable section
-
-open Polynomial
-open scoped Polynomial.Bivariate
-
-namespace WeierstrassCurve
-namespace Affine
-namespace MillerEval
-
-universe u
-
-variable {K : Type u} [Field K]
-variable (W : Affine K)
-variable {xP yP : K}
-
-/-- Evaluation of an explicit fraction `num / den` at an affine point. -/
-noncomputable def evalFractionAt
-    (hP : W.Equation xP yP)
-    (num den : W.CoordinateRing)
-    (hdenP : evalCR W hP den ≠ 0) : K :=
-  evalCR W hP num / evalCR W hP den
-
-/-- A presentation of a rational function that is evaluable at `(xP,yP)`. -/
-structure FractionPresentationAt
-    (hP : W.Equation xP yP)
-    (f : W.FunctionField) where
-  num : W.CoordinateRing
-  den : W.CoordinateRing
-  den_ne_zero : den ≠ 0
-  den_eval_ne_zero : evalCR W hP den ≠ 0
-  eq_mk :
-    f = IsLocalization.mk' W.FunctionField num
-      ⟨den, mem_nonZeroDivisors_iff_ne_zero.mpr den_ne_zero⟩
-
-namespace FractionPresentationAt
-
-/-- Evaluate a rational function from a denominator-nonvanishing presentation. -/
-noncomputable def value
-    {hP : W.Equation xP yP} {f : W.FunctionField}
-    (s : FractionPresentationAt W hP f) : K :=
-  evalCR W hP s.num / evalCR W hP s.den
-
-end FractionPresentationAt
-end MillerEval
-end Affine
-end WeierstrassCurve
+rcases weil_pairing_primitive_root E hm hfull with ⟨ζ, hζ⟩
+exact isPrimitiveRoot_rat_order_le_two hζ
 ```
 
-Later, prove independence of presentation.  The proof path is:
+Keep this.  `TorsionBound.lean` should not know about:
 
-1. Use `IsLocalization.mk'_eq_iff_eq'` to turn equality of two fractions into a cross-multiplication equality in `W.CoordinateRing`.
-2. Apply `evalCR W hP`, a ring homomorphism, to that equality.
-3. Divide by the two nonzero evaluated denominators.
+* `AbstractGaloisWeilData`;
+* `primitive_root_in_base`;
+* the bridge theorem;
+* Weil-pairing bilinearity/nondegeneracy details.
 
-A statement to add later:
+If the import graph requires one explicit import, add only the public shim:
 
 ```lean
-theorem FractionPresentationAt.value_eq
-    {K : Type u} [Field K]
-    (W : WeierstrassCurve.Affine K)
-    {xP yP : K} {hP : W.Equation xP yP}
-    {f : W.FunctionField}
-    (s t : FractionPresentationAt W hP f) :
-    s.value W = t.value W := by
-  -- Use `s.eq_mk`, `t.eq_mk`, `IsLocalization.mk'_eq_iff_eq'`,
-  -- then apply `evalCR W hP` and field division.
-  sorry
+import FLT.Assumptions.MazurProof.WeilPairing
 ```
 
-## A deliberately simple Miller-loop policy
+Do not import `WeilPairingInterface` directly into `TorsionBound.lean` unless you are temporarily debugging.
 
-For the current Miller layer, keep the evaluated loop separate from the symbolic function-field loop.
+## The clean theorem chain
 
-Symbolic functions:
+The final proof chain should read:
+
+```text
+actual elliptic curve + full rational m-torsion
+  -- weil_interface_bridge              (only construction axiom/sorry)
+AbstractGaloisWeilData
+  -- primitive_root_in_base             (fully proved in WeilPairingInterface)
+∃ ζ : ℚ, IsPrimitiveRoot ζ m
+  -- isPrimitiveRoot_rat_order_le_two   (already downstream)
+m ≤ 2
+```
+
+In Lean shape:
 
 ```lean
-lineCR     : W.CoordinateRing
-verticalCR : W.CoordinateRing
-lineFF     : W.FunctionField := algebraMap _ _ lineCR
-verticalFF : W.FunctionField := algebraMap _ _ verticalCR
+have hdata : AbstractGaloisWeilData E m :=
+  weil_interface_bridge E hm hfull
+rcases primitive_root_in_base hdata with ⟨ζ, hζ⟩
+exact isPrimitiveRoot_rat_order_le_two hζ
 ```
 
-Evaluated functions:
+but this chain should be hidden behind the old public theorem:
 
 ```lean
-lineValue     := evalCR W hP lineCR
-verticalValue := evalCR W hP verticalCR
+weil_pairing_primitive_root
 ```
 
-Then each Miller step should require:
+so downstream remains stable.
 
-```lean
-hvertical : verticalValue ≠ 0
+## Decision
+
+Use `WeilPairingInterface.lean` to replace the **mathematical content** of `WeilPairing.lean`, but do not delete or bypass `WeilPairing.lean` yet.  Turn `WeilPairing.lean` into the compatibility layer that exports the old theorem name.
+
+That gives the cleanest migration:
+
+```text
+old downstream theorem name preserved;
+old Weil-pairing axiom removed;
+new abstract theorem used;
+only one bridge axiom/sorry remains;
+TorsionBound.lean stays conceptually clean.
 ```
 
-and multiply the accumulator by:
+## Checklist
 
-```lean
-lineValue / verticalValue
-```
-
-This avoids pretending that evaluation is a total map on `K(E)`.  It also matches the mathematics: rational functions are evaluated at points only away from their poles.
-
-## API checklist
-
-Use these names:
-
-```lean
-CoordinateRing.mk W
-CoordinateRing.XClass W x
-CoordinateRing.YClass W g
-CoordinateRing.XClass_ne_zero
-CoordinateRing.YClass_ne_zero
-CoordinateRing.quotientXYIdealEquiv
-CoordinateRing.XYIdeal
-
-Polynomial.evalEval
-Polynomial.evalEvalRingHom
-Polynomial.eval₂_evalRingHom
-Polynomial.aevalAeval
-Polynomial.coe_aevalAeval_eq_evalEval
-
-AdjoinRoot.lift
-AdjoinRoot.lift_mk
-AdjoinRoot.liftAlgHom
-
-IsLocalization.mk'
-IsLocalization.mk'_eq_iff_eq'
-IsFractionRing.div_surjective
-```
+1. Ensure `WeilPairingInterface.lean` has the fully proved theorem:
+   ```lean
+   primitive_root_in_base
+   ```
+2. Ensure there is exactly one bridge declaration:
+   ```lean
+   weil_interface_bridge
+   ```
+3. Make `WeilPairing.lean` prove:
+   ```lean
+   weil_pairing_primitive_root
+   ```
+   from those two items.
+4. Remove or stop importing the old axiom version of `weil_pairing_primitive_root` from `Axioms.lean`.
+5. Keep `TorsionBound.lean` using `weil_pairing_primitive_root`.
+6. Run:
+   ```bash
+   lake env lean FLT/Assumptions/MazurProof/WeilPairingInterface.lean
+   lake env lean FLT/Assumptions/MazurProof/WeilPairing.lean
+   lake env lean FLT/Assumptions/MazurProof/Axioms.lean
+   lake env lean FLT/Assumptions/MazurProof/TorsionBound.lean
+   ```
