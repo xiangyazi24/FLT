@@ -1,12 +1,12 @@
-# Q2190 Lean drop: elementary wrapper for the N=12 affine rational-points boundary
+# Q2191 Lean drop: elementary wrapper for the N=12 affine rational-points boundary
 
-This is the wrapper layer I would add in `FLT/Assumptions/MazurProof/RationalPointsN12.lean`, in namespace
+This is the elementary wrapper layer for `FLT/Assumptions/MazurProof/RationalPointsN12.lean`.  It should live in the existing namespace:
 
 ```lean
 namespace MazurProof.RationalPointsN12
 ```
 
-The intended boundary is passed as a hypothesis, not introduced as an axiom:
+The hard arithmetic theorem is **not** introduced as an axiom here.  It is passed as a hypothesis:
 
 ```lean
 ∀ u w : ℚ,
@@ -14,14 +14,16 @@ The intended boundary is passed as a hypothesis, not introduced as an axiom:
   N12DegenerateXQ u
 ```
 
-The elementary work is:
+The code below is intentionally staged into small lemmas:
 
-1. define the degenerate rational `u`-values;
-2. show a primitive square denominator `A/B^2`, `1 < B`, `gcd A B = 1`, cannot equal any integer, hence cannot equal `-2,0,1,2,4`;
-3. clear denominators from the integral model to the affine equation;
-4. wrap the rational-points boundary into `N12NoNontrivialSquareDenominatorResidual`.
+1. `N12DegenerateXQ`: the five degenerate rational `u`-values.
+2. `square_denominator_int_dvd_of_rat_eq_int`: if `A / B^2` is an integer, then `B ∣ A`.
+3. `primitive_square_denominator_ne_int`: primitive `A/B^2` with `1 < B` cannot be any integer.
+4. `primitive_square_denominator_not_N12DegenerateXQ`: five-case contradiction for `-2,0,1,2,4`.
+5. `square_denominator_rational_curve_equation`: denominator clearing from the integral model to the rational curve.
+6. `N12NoNontrivialSquareDenominatorResidual_of_affine_boundary`: wrapper from the rational-points boundary to the existing residual.
 
-## Drop-in code
+## Proposed Lean code
 
 ```lean
 import Mathlib
@@ -34,7 +36,7 @@ def N12DegenerateXQ (u : ℚ) : Prop :=
 
 /--
 If `A / B^2` is an integer and `B ≠ 0`, then `B ∣ A`.
-This is the denominator-clearing helper for the five degenerate values.
+This is the denominator-clearing helper used for all five degenerate values.
 -/
 private theorem square_denominator_int_dvd_of_rat_eq_int
     (A B m : ℤ) (hBne : B ≠ 0)
@@ -61,7 +63,7 @@ private theorem square_denominator_int_dvd_of_rat_eq_int
 
 /--
 A primitive square denominator with `1 < B` cannot represent any integer.
-This single lemma handles the five values `-2, 0, 1, 2, 4`.
+This single lemma handles `-2`, `0`, `1`, `2`, and `4`.
 -/
 theorem primitive_square_denominator_ne_int
     (A B m : ℤ)
@@ -100,7 +102,7 @@ theorem primitive_square_denominator_not_N12DegenerateXQ
 Denominator clearing from the integral square-denominator model to the rational
 affine curve equation.
 
-This is the key normalization lemma for
+This is the normalization lemma for
 `u = A/B^2`, `w = C/B^3`.
 -/
 theorem square_denominator_rational_curve_equation
@@ -116,6 +118,8 @@ theorem square_denominator_rational_curve_equation
     exact_mod_cast hBne
   have hB2 : (B : ℚ) ^ 2 ≠ 0 := pow_ne_zero 2 hBq
   have hB3 : (B : ℚ) ^ 3 ≠ 0 := pow_ne_zero 3 hBq
+  have hB4 : (B : ℚ) ^ 4 ≠ 0 := pow_ne_zero 4 hBq
+  have hB5 : (B : ℚ) ^ 5 ≠ 0 := pow_ne_zero 5 hBq
   have hB6 : (B : ℚ) ^ 6 ≠ 0 := pow_ne_zero 6 hBq
   have hCq :
       (C : ℚ) ^ 2 =
@@ -123,7 +127,7 @@ theorem square_denominator_rational_curve_equation
           ((A : ℚ) - 2 * (B : ℚ) ^ 2) *
             ((A : ℚ) + 2 * (B : ℚ) ^ 2) := by
     exact_mod_cast hC
-  field_simp [hBq, hB2, hB3, hB6]
+  field_simp [hBq, hB2, hB3, hB4, hB5, hB6]
   ring_nf at hCq ⊢
   exact hCq
 
@@ -151,29 +155,29 @@ theorem N12NoNontrivialSquareDenominatorResidual_of_affine_boundary
 end MazurProof.RationalPointsN12
 ```
 
-## If one of the brittle lines fails
+## Likely brittle lines and alternatives
 
-The helper lemmas above are intended to be sorry-free.  These are the only lines I would expect to need local editing in Mathlib v4.31.0-rc2.
+The code above is designed to be close to sorry-free under Mathlib v4.31.0-rc2, but these are the lines most likely to need local edits.
 
-### 1. `exact_mod_cast hAq'`
+### `exact_mod_cast hAq'`
 
-If this line fails in `square_denominator_int_dvd_of_rat_eq_int`, replace it with the explicit injectivity route:
+If this fails in `square_denominator_int_dvd_of_rat_eq_int`, use explicit injectivity of the integer cast to `ℚ`:
 
 ```lean
   have hAint : A = m * B ^ 2 := by
     exact Int.cast_injective hAq'
 ```
 
-If `Int.cast_injective` does not resolve the codomain, make the target explicit:
+If Lean cannot infer the codomain:
 
 ```lean
   have hAint : A = m * B ^ 2 := by
     exact (Int.cast_injective (R := ℚ)) hAq'
 ```
 
-### 2. `exact_mod_cast hC`
+### `exact_mod_cast hC`
 
-If the cast of the integral model to `ℚ` fails, use a two-step cast plus normalization:
+If the integral model does not cast cleanly to the rational equality, split it into a raw cast and a normalization step:
 
 ```lean
   have hCq0 :
@@ -185,61 +189,65 @@ If the cast of the integral model to `ℚ` fails, use a two-step cast plus norma
         ((A : ℚ) - (B : ℚ) ^ 2) *
           ((A : ℚ) - 2 * (B : ℚ) ^ 2) *
             ((A : ℚ) + 2 * (B : ℚ) ^ 2) := by
-    simpa using hCq0
-```
-
-If `simpa` is not enough, use:
-
-```lean
     push_cast at hCq0
     simpa [pow_two] using hCq0
 ```
 
-### 3. `field_simp [hBq, hB2, hB3, hB6]`
+### `field_simp [hBq, hB2, hB3, hB4, hB5, hB6]`
 
-If `field_simp` leaves side goals, add the exact nonzero denominators it asks for.  Usually these are powers of `(B : ℚ)` or products of such powers, all solved by `simp [hBq]` or `positivity`-free `pow_ne_zero`:
-
-```lean
-  have hB4 : (B : ℚ) ^ 4 ≠ 0 := pow_ne_zero 4 hBq
-  have hB5 : (B : ℚ) ^ 5 ≠ 0 := pow_ne_zero 5 hBq
-  field_simp [hBq, hB2, hB3, hB4, hB5, hB6]
-```
-
-If the post-`field_simp` goal is the same polynomial but arranged differently, keep the existing pattern:
+If `field_simp` asks for more nonzero side conditions, add the corresponding powers:
 
 ```lean
-  ring_nf at hCq ⊢
-  exact hCq
+  have hB7 : (B : ℚ) ^ 7 ≠ 0 := pow_ne_zero 7 hBq
+  have hB8 : (B : ℚ) ^ 8 ≠ 0 := pow_ne_zero 8 hBq
+  field_simp [hBq, hB2, hB3, hB4, hB5, hB6, hB7, hB8]
 ```
 
-or, if orientation is reversed:
+If the final equality is oriented the other way after `ring_nf`, use:
 
 ```lean
   exact hCq.symm
 ```
 
-### 4. `Int.dvd_coe_gcd`
-
-Your existing file already uses the correct v4.31-style call:
+If the post-`field_simp` expression keeps powers arranged differently, keep the same structure and add one more normalization line:
 
 ```lean
-Int.dvd_coe_gcd hA hB
+  ring_nf at hCq ⊢
+  nlinarith [hCq]
 ```
 
-where `hA : d ∣ A` and `hB : d ∣ B`.  Since `Int.gcd A B : ℕ`, the target should be written as
+The equality is polynomial after denominators are cleared, so `ring_nf` should usually suffice.
 
-```lean
-(d : ℤ) ∣ ((Int.gcd A B : ℕ) : ℤ)
-```
+### `Int.dvd_coe_gcd`
 
-or, as above, with `d = B`:
+The intended v4.31-style call is:
 
 ```lean
 have hBdvdgcd : B ∣ ((Int.gcd A B : ℕ) : ℤ) := by
   exact Int.dvd_coe_gcd hBdvdA (dvd_refl B)
 ```
 
-## Why this wrapper is the right cut
+where the first proof is `B ∣ A` and the second is `B ∣ B`.  If the target is written with a slightly different cast, normalize it to exactly:
+
+```lean
+B ∣ ((Int.gcd A B : ℕ) : ℤ)
+```
+
+before applying the lemma.
+
+### `Int.isUnit_iff_abs_eq`
+
+If this theorem is not imported by the local import stack, `import Mathlib` certainly provides it.  If the project file avoids `import Mathlib`, add the narrower import providing integer unit/order facts, or replace the unit step by cases on the divisor of `1`:
+
+```lean
+  rcases hBdvd1 with ⟨t, ht⟩
+  have ht' : B * t = 1 := ht.symm
+  -- Then use integer order/case analysis, or derive `|B| = 1` through `IsUnit`.
+```
+
+The `IsUnit` route is much cleaner.
+
+## Why this wrapper is the right boundary
 
 The theorem
 
@@ -247,12 +255,12 @@ The theorem
 N12NoNontrivialSquareDenominatorResidual_of_affine_boundary
 ```
 
-is exactly the desired formalization boundary: the hard arithmetic input is the affine rational-points statement, while the conversion from the integral square-denominator model to the curve and the contradiction with primitive denominator are elementary Lean code.
+is exactly the formalization cut recommended in Q2186.  The hard arithmetic input is the affine rational-points theorem; everything here is elementary denominator clearing and primitive-denominator contradiction.
 
-The proof deliberately avoids adding a global sign claim such as
+This layer deliberately avoids the false global sign statement
 
 ```lean
 B ^ 2 ∣ C - z ^ 3 ∨ B ^ 2 ∣ C + z ^ 3
 ```
 
-which is false for composite `B` because different odd prime powers may choose different CRT signs, and because `p = 2` behaves separately.
+which is not valid for composite `B`: different odd prime powers can choose different CRT signs, and the prime `2` must be handled separately.
