@@ -1,259 +1,400 @@
-# Q2185 Lean drop: prime-power splitting after the odd-prime non-common-factor lemma
+# Q2186 Lean/Math audit: honest boundary for the N=12 denominator residual
+
+This answers the route question for the curve
+
+```text
+E : w^2 = u^3 - u^2 - 4*u + 4 = (u + 2) * (u - 1) * (u - 2).
+```
+
+The short version is: the odd-prime sign-splitting lemmas are useful local infrastructure, but they are not a realistic standalone route to the full N=12 obstruction.  The honest arithmetic boundary should be either a rational-points classification for this affine curve, or a two-piece boundary consisting of denominator integrality plus integral-point degeneracy.  The eventual certificate should be a 2-descent/Selmer computation plus torsion/integral-point enumeration, not a false global sign argument.
+
+## 1. Is the denominator residual essentially equivalent to `E(ℚ)` finite/rank zero?
+
+Not literally equivalent, but it sits at almost the same arithmetic depth.
+
+The residual
+
+```lean
+def N12NoNontrivialSquareDenominatorResidual : Prop :=
+  ∀ A B C : ℤ,
+    1 < B →
+    Int.gcd A B = 1 →
+    C ^ 2 = (A - B ^ 2) * (A - 2 * B ^ 2) * (A + 2 * B ^ 2) →
+    False
+```
+
+says: if an affine rational point has primitive square-denominator form
+
+```text
+u = A / B^2,
+w = C / B^3,
+```
+
+then `B = 1`.  For an integral monic Weierstrass model, rational `u`-coordinates naturally have square denominator, so this is exactly an `x`-integrality theorem for rational points on this curve.
+
+However, `B = 1` alone does **not** classify the integral points.  It only says every rational point has integral `u`.  To get the obstruction theorem, one still needs to prove that the integral points have
+
+```text
+u ∈ {-2, 0, 1, 2, 4}
+```
+
+with the corresponding `w` values
+
+```text
+(-2, 0), (0, ±2), (1, 0), (2, 0), (4, ±6).
+```
+
+So the logical relationship is:
+
+```text
+full rational-point classification
+  ⇒ denominator residual + integral-point degeneracy
+  ⇒ obstruction-curve degeneracy.
+```
+
+The reverse implication is false as stated: denominator residual alone does not imply rank zero or the exact finite torsion list; it only excludes nonintegral `u`-coordinates.
+
+In practice, proving the denominator residual without proving something very close to rank zero / rational-point classification is unlikely.  The local prime-power sign splitting is a fragment of a descent, not a complete descent.
+
+## 2. Is there a realistic elementary continuation from the prime-power sign splitting?
+
+There is no short purely local continuation from
+
+```text
+B^2 ∣ (C - z^3) * (C + z^3)
+```
+
+to the full residual.  The odd-prime splitting proves that for each odd prime-power contribution to `B^2`, that contribution lands in exactly one of the two factors.  But the chosen sign can vary with the prime.  After CRT, one obtains a square root of `1` modulo the odd part of `B^2`, not a global sign `±1`.
+
+A possible continuation is a genuine descent.  For this curve the natural descent is the full rational 2-torsion descent, because
+
+```text
+u^3 - u^2 - 4u + 4 = (u + 2)(u - 1)(u - 2).
+```
+
+For a rational point not among the 2-torsion points, define the squareclass data
+
+```text
+δ(P) = (u + 2, u - 1, u - 2) ∈ (ℚ*/ℚ*²)^3,
+```
+
+with product a square because
+
+```text
+(u + 2)(u - 1)(u - 2) = w^2.
+```
+
+Outside the bad set
+
+```text
+S = {∞, 2, 3},
+```
+
+all valuations in the three squareclasses are even.  The prime `3` enters because the differences of the three roots include `3`, and the prime `2` enters because the model and the root differences include powers of `2`.  Thus each squareclass representative can be taken from the finite set
+
+```text
+{±1, ±2, ±3, ±6}
+```
+
+up to the product-one condition.  The corresponding covering equations are of the shape
+
+```text
+u + 2 = d₁ r₁^2,
+u - 1 = d₂ r₂^2,
+u - 2 = d₃ r₃^2,
+d₁ d₂ d₃ ∈ ℚ*²,
+```
+
+or equivalently the difference equations
+
+```text
+d₁ r₁^2 - d₂ r₂^2 = 3,
+d₁ r₁^2 - d₃ r₃^2 = 4,
+d₂ r₂^2 - d₃ r₃^2 = 1.
+```
+
+A certified finite computation would check local solubility of these covers at `∞`, `2`, and `3`, keep only the surviving Selmer classes, and show that the Selmer group has the same `𝔽₂`-dimension as the visible torsion quotient.  This proves rank zero.  Then Lutz--Nagell / torsion enumeration gives the finite point list.
+
+That route is “elementary” only in the sense that it reduces to finitely many congruence checks and explicit genus-one covers.  Mathematically and formally, it is still elliptic-curve descent.  It is not just a continuation of the denominator congruence.
+
+### Where `p = 2` enters
+
+The odd-prime lemma must not include `p = 2`.  If `2 ∣ B`, then `gcd(C,B)=1` and `gcd(z,B)=1` imply `C` and `z` are odd, hence both
+
+```text
+C - z^3,
+C + z^3
+```
+
+are even.  Thus the statement “exactly one sign receives the prime contribution” is false at `2`.  The 2-adic contribution is governed by congruences modulo `8`, `16`, etc., or by the 2-adic local condition in the 2-descent/Selmer computation.
+
+## 3. Clean Lean boundary theorem statements
+
+There are two good boundary styles.
+
+### Boundary A: one affine rational-points theorem
+
+This is the cleanest long-term theorem.  It packages the actual arithmetic fact and keeps the N=12 file independent of elliptic-curve infrastructure.
 
 ```lean
 import Mathlib
 
-/-!
-Paste this after your theorem
+namespace FLT
+namespace MazurProof
 
-  square_denominator_odd_prime_not_common_z_cube_factors
+/-- The affine N=12 obstruction curve. -/
+def N12AffineCurve (u w : ℚ) : Prop :=
+  w ^ 2 = u ^ 3 - u ^ 2 - 4 * u + 4
 
-or keep it in the same namespace/section.  The code below uses only prime-power
-divisibility.  This is shorter than `multiplicity`/`emultiplicity` for this
-local step.
--/
-
-private theorem square_denominator_nat_prime_int_prime {p : ℕ}
-    (hp : Nat.Prime p) :
-    Prime (p : ℤ) := by
-  exact Int.prime_iff_natAbs_prime.mpr (by simpa using hp)
+/-- The `u`-coordinates that are degenerate for the N=12 obstruction. -/
+def N12DegenerateX (u : ℚ) : Prop :=
+  u = (-2 : ℚ) ∨ u = 0 ∨ u = 1 ∨ u = 2 ∨ u = 4
 
 /--
-Pure Euclid/prime-power splitting over `ℤ`.
+Honest arithmetic boundary: all affine rational points on the N=12 curve are
+among the degenerate `u`-coordinates.
 
-If `p^e ∣ x*y`, `p ∣ x*y`, and `p` does not divide both `x` and `y`, then the
-whole `p^e`-divisibility lies in exactly one factor.
-
-This is the reusable core lemma.  It deliberately knows nothing about `B`,
-`C`, or `z`.
+This is weaker than listing `w`, but it is enough for the obstruction layer.
 -/
-theorem square_denominator_prime_pow_dvd_one_factor_of_not_common
-    (x y : ℤ) {p e : ℕ}
-    (hp : Nat.Prime p)
-    (hp_prod : (p : ℤ) ∣ x * y)
-    (hpow_prod : (p : ℤ) ^ e ∣ x * y)
-    (hnotcommon : ¬ (((p : ℤ) ∣ x) ∧ ((p : ℤ) ∣ y))) :
-    ((((p : ℤ) ^ e ∣ x) ∧ ¬ ((p : ℤ) ∣ y)) ∨
-      (((p : ℤ) ^ e ∣ y) ∧ ¬ ((p : ℤ) ∣ x))) := by
-  have hpZ : Prime (p : ℤ) := square_denominator_nat_prime_int_prime hp
-  rcases hpZ.dvd_or_dvd hp_prod with hx | hy
-  · have hny : ¬ ((p : ℤ) ∣ y) := by
-      intro hy
-      exact hnotcommon ⟨hx, hy⟩
-    refine Or.inl ⟨?_, hny⟩
-    -- Mathlib v4.31.0-rc2:
-    --   Prime.pow_dvd_of_dvd_mul_right hpZ e hny hpow_prod
-    -- means: if `¬ p ∣ y` and `p^e ∣ x*y`, then `p^e ∣ x`.
-    exact hpZ.pow_dvd_of_dvd_mul_right e hny hpow_prod
-  · have hnx : ¬ ((p : ℤ) ∣ x) := by
-      intro hx
-      exact hnotcommon ⟨hx, hy⟩
-    refine Or.inr ⟨?_, hnx⟩
-    -- Mathlib v4.31.0-rc2:
-    --   Prime.pow_dvd_of_dvd_mul_left hpZ e hnx hpow_prod
-    -- means: if `¬ p ∣ x` and `p^e ∣ x*y`, then `p^e ∣ y`.
-    exact hpZ.pow_dvd_of_dvd_mul_left e hnx hpow_prod
+axiom n12_affine_rational_points_degenerate_x
+    (u w : ℚ)
+    (hcurve : N12AffineCurve u w) :
+    N12DegenerateX u
 
 /--
-Specialized version for the `C ± z^3` factors, assuming the non-common-factor
-lemma has already been supplied.
-
-This is the next lemma I would actually add after your current theorem.
-The hypothesis `(p : ℤ)^e ∣ B^2` is intentionally not required to be maximal;
-for a maximal contribution, choose `e` from a factorization/valuation layer
-later.
+Stronger replaceable boundary: exact affine rational point classification.
+Use this if later files need the `w`-coordinate too.
 -/
-theorem square_denominator_odd_prime_pow_dvd_one_z_cube_factor_of_not_common
-    (B C z : ℤ) {p e : ℕ}
-    (hp : Nat.Prime p)
-    (hpB : (p : ℤ) ∣ B)
-    (hpowBsq : (p : ℤ) ^ e ∣ B ^ 2)
-    (hprod : B ^ 2 ∣ (C - z ^ 3) * (C + z ^ 3))
-    (hnotcommon :
-      ¬ (((p : ℤ) ∣ C - z ^ 3) ∧ ((p : ℤ) ∣ C + z ^ 3))) :
-    ((((p : ℤ) ^ e ∣ C - z ^ 3) ∧ ¬ ((p : ℤ) ∣ C + z ^ 3)) ∨
-      (((p : ℤ) ^ e ∣ C + z ^ 3) ∧ ¬ ((p : ℤ) ∣ C - z ^ 3))) := by
-  have hpBsq : (p : ℤ) ∣ B ^ 2 := by
-    have hBB : (p : ℤ) ∣ B * B := dvd_mul_of_dvd_left hpB B
-    simpa [pow_two] using hBB
-  have hp_prod : (p : ℤ) ∣ (C - z ^ 3) * (C + z ^ 3) :=
-    dvd_trans hpBsq hprod
-  have hpow_prod : (p : ℤ) ^ e ∣ (C - z ^ 3) * (C + z ^ 3) :=
-    dvd_trans hpowBsq hprod
-  exact
-    square_denominator_prime_pow_dvd_one_factor_of_not_common
-      (x := C - z ^ 3) (y := C + z ^ 3)
-      hp hp_prod hpow_prod hnotcommon
+axiom n12_affine_rational_points_classified
+    (u w : ℚ)
+    (hcurve : N12AffineCurve u w) :
+    (u = (-2 : ℚ) ∧ w = 0) ∨
+    (u = 0 ∧ w = 2) ∨
+    (u = 0 ∧ w = -2) ∨
+    (u = 1 ∧ w = 0) ∨
+    (u = 2 ∧ w = 0) ∨
+    (u = 4 ∧ w = 6) ∨
+    (u = 4 ∧ w = -6)
 
 /--
-The fully bundled version using your existing odd-prime non-common-factor
-lemma.  This is probably the best theorem signature for the N=12 file.
+Primitive square denominators cannot represent an integer `u` when `1 < B`.
+This is the elementary wrapper lemma needed to use the rational-point boundary.
 -/
-theorem square_denominator_odd_prime_pow_dvd_one_z_cube_factor
-    (B C z : ℤ) {p e : ℕ}
-    (hp : Nat.Prime p) (hpodd : p ≠ 2)
-    (hpB : (p : ℤ) ∣ B)
-    (hcopC : Int.gcd C B = 1)
-    (hpowBsq : (p : ℤ) ^ e ∣ B ^ 2)
-    (hprod : B ^ 2 ∣ (C - z ^ 3) * (C + z ^ 3)) :
-    ((((p : ℤ) ^ e ∣ C - z ^ 3) ∧ ¬ ((p : ℤ) ∣ C + z ^ 3)) ∨
-      (((p : ℤ) ^ e ∣ C + z ^ 3) ∧ ¬ ((p : ℤ) ∣ C - z ^ 3))) := by
-  exact
-    square_denominator_odd_prime_pow_dvd_one_z_cube_factor_of_not_common
-      (B := B) (C := C) (z := z)
-      hp hpB hpowBsq hprod
-      (square_denominator_odd_prime_not_common_z_cube_factors
-        B C z hp hpodd hpB hcopC)
+theorem primitive_square_denominator_not_degenerate_x
+    (A B : ℤ)
+    (hBgt : 1 < B)
+    (hcop : Int.gcd A B = 1) :
+    ¬ N12DegenerateX ((A : ℚ) / (B : ℚ) ^ 2) := by
+  -- Proof route:
+  --   * split the five cases `u = -2,0,1,2,4`;
+  --   * clear denominators using `field_simp` and `B ≠ 0`;
+  --   * obtain `B^2 ∣ A` up to the relevant integer value;
+  --   * in all cases get a common divisor of `A` and `B`, or directly
+  --     `B ∣ 1`, contradicting `1 < B`.
+  -- Useful APIs/tactics:
+  --   `field_simp`, `norm_num`, `Int.dvd_coe_gcd`, `exact_mod_cast`, `omega`.
+  sorry
 
 /--
-Convenience: if your local factorization data gives `(p:ℤ)^e ∣ B`, then it gives
-`(p:ℤ)^(2*e) ∣ B^2`.
+Wrapper from the affine rational-point boundary to the existing denominator
+residual target.
 -/
-private theorem square_denominator_prime_pow_sq_dvd_sq_of_pow_dvd
-    (B : ℤ) {p e : ℕ}
-    (hpeB : (p : ℤ) ^ e ∣ B) :
-    (p : ℤ) ^ (2 * e) ∣ B ^ 2 := by
-  have hsq : ((p : ℤ) ^ e) ^ 2 ∣ B ^ 2 := by
-    exact pow_dvd_pow_of_dvd hpeB 2
-  simpa [pow_mul, pow_two, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using hsq
+theorem N12NoNontrivialSquareDenominatorResidual_of_affine_boundary :
+    N12NoNontrivialSquareDenominatorResidual := by
+  intro A B C hBgt hcop hC
+  let u : ℚ := (A : ℚ) / (B : ℚ) ^ 2
+  let w : ℚ := (C : ℚ) / (B : ℚ) ^ 3
+  have hBne_int : B ≠ 0 := by omega
+  have hBne_rat : (B : ℚ) ≠ 0 := by exact_mod_cast hBne_int
+  have hcurve : N12AffineCurve u w := by
+    -- Clear denominators and use `hC`.
+    -- Typical shape:
+    --   dsimp [N12AffineCurve, u, w]
+    --   field_simp [hBne_rat]
+    --   norm_num
+    --   nlinarith [hC]
+    -- or after `field_simp`, use `ring_nf` plus `hC`.
+    sorry
+  have hdeg : N12DegenerateX u :=
+    n12_affine_rational_points_degenerate_x u w hcurve
+  exact primitive_square_denominator_not_degenerate_x A B hBgt hcop hdeg
 
-/--
-Variant to use when the data is `(p:ℤ)^e ∣ B` rather than `(p:ℤ)^e ∣ B^2`.
-The conclusion has exponent `2*e`, as expected for `B^2`.
--/
-theorem square_denominator_odd_prime_pow_from_B_dvd_one_z_cube_factor
-    (B C z : ℤ) {p e : ℕ}
-    (hp : Nat.Prime p) (hpodd : p ≠ 2) (he : 0 < e)
-    (hpowB : (p : ℤ) ^ e ∣ B)
-    (hcopC : Int.gcd C B = 1)
-    (hprod : B ^ 2 ∣ (C - z ^ 3) * (C + z ^ 3)) :
-    ((((p : ℤ) ^ (2 * e) ∣ C - z ^ 3) ∧ ¬ ((p : ℤ) ∣ C + z ^ 3)) ∨
-      (((p : ℤ) ^ (2 * e) ∣ C + z ^ 3) ∧ ¬ ((p : ℤ) ∣ C - z ^ 3))) := by
-  have hpB : (p : ℤ) ∣ B := by
-    have hp_dvd_pe : (p : ℤ) ∣ (p : ℤ) ^ e := by
-      exact dvd_pow_self (p : ℤ) (Nat.ne_of_gt he)
-    exact dvd_trans hp_dvd_pe hpowB
-  have hpowBsq : (p : ℤ) ^ (2 * e) ∣ B ^ 2 :=
-    square_denominator_prime_pow_sq_dvd_sq_of_pow_dvd B hpowB
-  exact
-    square_denominator_odd_prime_pow_dvd_one_z_cube_factor
-      (B := B) (C := C) (z := z)
-      hp hpodd hpB hcopC hpowBsq hprod
+end MazurProof
+end FLT
 ```
+
+For the existing `obstruction_curve_N12_points_degenerate`, the wrapper should be even simpler: convert the repo’s point representation to `(u,w) : ℚ × ℚ`, apply `n12_affine_rational_points_degenerate_x`, then discharge the five degenerate cases with the already-existing degeneracy predicate.  I would not make the denominator residual itself the top-level arithmetic axiom if the obstruction theorem ultimately needs point degeneracy anyway.
+
+### Boundary B: denominator integrality plus integral-point degeneracy
+
+This is the smallest local boundary if the current file is specifically blocked on `N12NoNontrivialSquareDenominatorResidual`.
 
 ```lean
 import Mathlib
 
-/-!
-A minimal per-prime/per-prime-power sign interface.  This avoids the false
-statement that one global sign works for all of `B`.
-
-Paste this after the lemmas above if downstream code wants to carry a sign as
-explicit data.
--/
-
-inductive N12LocalSign where
-  | minus
-  | plus
-deriving DecidableEq, Repr
-
-namespace N12LocalSign
+namespace FLT
+namespace MazurProof
 
 /--
-`minus` means the local prime-power contribution lands in `C - z^3`.
-`plus` means it lands in `C + z^3`.
--/
-def Holds (s : N12LocalSign) (C z : ℤ) (p e : ℕ) : Prop :=
-  match s with
-  | .minus =>
-      ((p : ℤ) ^ e ∣ C - z ^ 3) ∧ ¬ ((p : ℤ) ∣ C + z ^ 3)
-  | .plus =>
-      ((p : ℤ) ^ e ∣ C + z ^ 3) ∧ ¬ ((p : ℤ) ∣ C - z ^ 3)
+Narrow boundary: primitive square-denominator points on the N=12 curve have
+trivial denominator.
 
-end N12LocalSign
+This is exactly the hard residual as an arithmetic theorem, stated in a form
+that the current local target can consume.
+-/
+axiom n12_square_denominator_trivial
+    (A B C : ℤ)
+    (hBpos : 0 < B)
+    (hcop : Int.gcd A B = 1)
+    (hC : C ^ 2 =
+      (A - B ^ 2) * (A - 2 * B ^ 2) * (A + 2 * B ^ 2)) :
+    B = 1
+
+theorem N12NoNontrivialSquareDenominatorResidual_of_square_denominator_boundary :
+    N12NoNontrivialSquareDenominatorResidual := by
+  intro A B C hBgt hcop hC
+  have hBpos : 0 < B := by omega
+  have hB1 : B = 1 :=
+    n12_square_denominator_trivial A B C hBpos hcop hC
+  omega
 
 /--
-Existence of a local sign for one odd prime-power contribution.
-This is usually enough; do not pick one sign for all primes.
+Second boundary needed after `B = 1`: all integral points are degenerate.
+Replace `N12IntegralPointDegenerate` by the actual predicate already used in
+the FLT development.
 -/
-theorem square_denominator_odd_prime_pow_exists_local_sign
-    (B C z : ℤ) {p e : ℕ}
-    (hp : Nat.Prime p) (hpodd : p ≠ 2)
-    (hpB : (p : ℤ) ∣ B)
-    (hcopC : Int.gcd C B = 1)
-    (hpowBsq : (p : ℤ) ^ e ∣ B ^ 2)
-    (hprod : B ^ 2 ∣ (C - z ^ 3) * (C + z ^ 3)) :
-    ∃ s : N12LocalSign, s.Holds C z p e := by
-  rcases
-    square_denominator_odd_prime_pow_dvd_one_z_cube_factor
-      (B := B) (C := C) (z := z)
-      hp hpodd hpB hcopC hpowBsq hprod with hminus | hplus
-  · exact ⟨.minus, hminus⟩
-  · exact ⟨.plus, hplus⟩
+def N12IntegralPointDegenerate (A C : ℤ) : Prop :=
+  A = -2 ∧ C = 0 ∨
+  A = 0 ∧ (C = 2 ∨ C = -2) ∨
+  A = 1 ∧ C = 0 ∨
+  A = 2 ∧ C = 0 ∨
+  A = 4 ∧ (C = 6 ∨ C = -6)
 
-/--
-The global theorem should be this dependent per-prime/per-exponent statement,
-not a single global sign statement.
--/
-theorem square_denominator_odd_prime_pow_signs
-    (B C z : ℤ)
-    (hcopC : Int.gcd C B = 1)
-    (hprod : B ^ 2 ∣ (C - z ^ 3) * (C + z ^ 3)) :
-    ∀ {p e : ℕ},
-      Nat.Prime p →
-      p ≠ 2 →
-      (p : ℤ) ∣ B →
-      (p : ℤ) ^ e ∣ B ^ 2 →
-      ∃ s : N12LocalSign, s.Holds C z p e := by
-  intro p e hp hpodd hpB hpowBsq
-  exact
-    square_denominator_odd_prime_pow_exists_local_sign
-      (B := B) (C := C) (z := z)
-      hp hpodd hpB hcopC hpowBsq hprod
+axiom n12_integral_points_degenerate
+    (A C : ℤ)
+    (hC : C ^ 2 = (A - 1) * (A - 2) * (A + 2)) :
+    N12IntegralPointDegenerate A C
+
+end MazurProof
+end FLT
 ```
 
-## API notes for Mathlib v4.31.0-rc2
+Boundary A is better architecturally.  Boundary B is more convenient if you want to keep moving in the existing square-denominator file.
 
-Use `Prime.pow_dvd_of_dvd_mul_right` and `Prime.pow_dvd_of_dvd_mul_left`; you do **not** need to prove the prime-power splitting by induction unless the local import set somehow fails to expose these lemmas.
+## 4. How to make the boundary certifiable later
 
-The signatures are easy to mix up:
+The clean certificate plan is:
 
-```lean
--- If `¬ p ∣ b` and `p^n ∣ a*b`, then `p^n ∣ a`.
-#check Prime.pow_dvd_of_dvd_mul_right
--- Prime.pow_dvd_of_dvd_mul_right {p a b : M} (hp : Prime p)
---   (n : ℕ) (h : ¬ p ∣ b) (h' : p ^ n ∣ a * b) : p ^ n ∣ a
+1. **Define the curve once.**
+   Use a lightweight affine predicate first.  Later, if Mathlib’s elliptic-curve API is mature enough for your needs, connect it to a `WeierstrassCurve`/`EllipticCurve` object.
 
--- If `¬ p ∣ a` and `p^n ∣ a*b`, then `p^n ∣ b`.
-#check Prime.pow_dvd_of_dvd_mul_left
--- Prime.pow_dvd_of_dvd_mul_left {p a b : M} (hp : Prime p)
---   (n : ℕ) (h : ¬ p ∣ a) (h' : p ^ n ∣ a * b) : p ^ n ∣ b
-```
+2. **Prove nonsingularity and record bad primes.**
+   The cubic has roots `-2, 1, 2`.  Root differences are `3`, `4`, and `1`, so the bad primes are `2` and `3`.  This matches the finite squareclass set used in a 2-descent.
 
-For `p : ℕ`, keep divisibility in `ℤ` but primality in `Nat`:
+3. **Torsion enumeration.**
+   Use Lutz--Nagell or a direct torsion argument.  The visible torsion points are
 
-```lean
-have hpZ : Prime (p : ℤ) :=
-  Int.prime_iff_natAbs_prime.mpr (by simpa using hp)
-```
+   ```text
+   O,
+   (-2,0), (1,0), (2,0),
+   (0,2), (0,-2),
+   (4,6), (4,-6).
+   ```
 
-Your use of `Int.dvd_coe_gcd` is the Mathlib-friendly one in this version:
+   A Lean certificate should not merely quote PARI.  It should include either:
+   - a Lutz--Nagell finite candidate list plus evaluation of the curve equation and group-order checks, or
+   - reduction-mod-primes torsion bounds plus explicit points and group-law calculations.
 
-```lean
-have hpG : (p : ℤ) ∣ ((Int.gcd C B : ℕ) : ℤ) :=
-  Int.dvd_coe_gcd hpC hpB
-```
+4. **Rank zero by 2-descent.**
+   Since the curve has full rational 2-torsion, use the descent map
 
-That avoids the older confusion about whether `Int.dvd_coe_gcd` is an iff or a two-argument constructor-style theorem.
+   ```text
+   P ↦ (u + 2, u - 1, u - 2) mod squares.
+   ```
 
-## Why this is the right interface
+   A certifiable Selmer computation should include:
+   - the finite squareclass universe `{±1, ±2, ±3, ±6}`;
+   - the product-one condition;
+   - local solubility checks for the associated covers at `∞`, `2`, and `3`;
+   - explicit rational points on the surviving covers corresponding to visible torsion;
+   - local obstruction certificates for all nonsurviving covers, preferably as finite `ZMod (p^n)` contradictions that `native_decide`, `omega`, `norm_num`, or small custom finite-search lemmas can verify.
 
-The local theorem only assigns a sign for one odd prime-power contribution.  That is globally correct: for composite `B`, different odd primes can land in different signs.  A theorem of the form
+   The target theorem should be something like:
+
+   ```lean
+   theorem n12_two_selmer_bound_rank_zero :
+       -- schematic: the 2-Selmer image has dimension equal to the visible
+       -- torsion quotient, hence rank is zero.
+       True := by
+     -- finite certificate proof
+     trivial
+   ```
+
+   I would not expose this theorem to the N=12 obstruction file yet.  Keep the obstruction file depending only on `n12_affine_rational_points_degenerate_x` or `n12_affine_rational_points_classified`.
+
+5. **Optional integral-point certificate.**
+   If you use Boundary B, prove `n12_integral_points_degenerate` separately.  For integers,
+
+   ```text
+   C^2 = (A + 2)(A - 1)(A - 2),
+   ```
+
+   and the pairwise gcds of the three factors divide `3`, `4`, and `1`.  This reduces to finitely many squareclass cases supported at `2` and `3`.  It is much easier than the full rational-point theorem, but it only applies after the denominator theorem has already been proved.
+
+6. **PARI/Magma as evidence, not as a Lean proof.**
+   The PARI/GP data
+
+   ```text
+   conductor 24,
+   torsion [8,[4,2]],
+   rank 0,
+   affine x ∈ {-2,0,1,2,4}
+   ```
+
+   is excellent for guiding the certificate.  In Lean, either leave it behind a named axiom/theorem boundary or translate the computation into explicit finite certificates.  Do not make the proof depend on an unchecked transcript.
+
+## 5. Hidden false statements to avoid
+
+### False global sign
+
+Avoid:
 
 ```lean
 B ^ 2 ∣ C - z ^ 3 ∨ B ^ 2 ∣ C + z ^ 3
 ```
 
-is too strong without extra CRT/sign-vector hypotheses.  The `N12LocalSign` interface records exactly what the congruence proves: for every odd prime-power contribution to `B^2`, there exists a local sign, and the chosen sign may depend on `p` and `e`.
+for composite `B`.  Different odd primes can choose different signs.  The correct statement is per prime power, or equivalently a CRT sign vector / square root of `1` modulo the odd part of `B^2`.
 
-I would postpone `multiplicity` or `emultiplicity` until you need maximal exponents.  The prime-power divisibility API above is shorter and avoids `WithTop ℕ` arithmetic.
+### False inclusion of `p = 2` in the odd split
+
+Avoid any theorem saying the `2`-power contribution lands in exactly one of `C - z^3` and `C + z^3`.  When `C` and `z` are odd, both factors are even.
+
+### False equivalence with rank zero alone
+
+Rank zero alone is not a point classification unless torsion is also enumerated.  The obstruction file wants a finite list of degenerate affine points, not merely `rank = 0`.
+
+### False reliance on denominator residual alone
+
+`N12NoNontrivialSquareDenominatorResidual` only gives `B = 1`.  It does not by itself prove the integral points are exactly the degenerate points.
+
+### False “maximal contribution” language
+
+A theorem with hypothesis
+
+```lean
+(p : ℤ) ^ e ∣ B ^ 2
+```
+
+only says that this particular `p^e` divisor of `B^2` lands in one factor.  It does not say `e` is the exact valuation.  If exactness is needed later, introduce a valuation/factorization layer explicitly.
+
+## Recommendation
+
+For the current FLT formalization, introduce Boundary A if the next theorem is `obstruction_curve_N12_points_degenerate`; introduce Boundary B only if the immediate blocker is exactly `N12NoNontrivialSquareDenominatorResidual`.
+
+The prime-power sign-splitting lemmas should still be kept.  They are good local descent infrastructure and useful audit evidence.  But the honest mathematical boundary is the rational-point classification of
+
+```text
+y^2 = x^3 - x^2 - 4x + 4,
+```
+
+or a certified 2-descent plus torsion enumeration proving that classification.
