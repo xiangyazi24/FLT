@@ -1,8 +1,8 @@
-# Q: FLT Lean N12 no nonaxis residual from shifted x-cases
+# Q: FLT Lean N12 no nonaxis residual from shifted x-cases (redispatch after no-commit)
 
-I would **not** try to eliminate the `q = 3` and `q = 1/3` alternatives by proving irrationality of `√3` in this file. There is a cleaner branch-local route: in each branch, those extra shifted-x cases force `m = n` or `m = -n` directly from the branch identity and `A*C = m*n`. This avoids importing or proving rational nonsquare lemmas.
+The safest route is to **case-split on the normalized branch**, not to use only the aggregate `normalizedNonAxisFactorIdentity_to_F` output. The aggregate output forces `X ∈ {q,-q,3q,-3q}`, and then a purely squareclass proof needs rational nonsquare lemmas for `3` and `1/3`. Branch-splitting avoids those: the apparent exceptional cases `q=3` or `q=1/3` are killed by the branch identity itself.
 
-Below is paste-oriented Lean for the reusable helpers and a complete B1 branch proof. The B2/B3/B4 branch helpers should be proved by the same pattern; I list their exact target statements after the code. This is the safest next increment because the full final theorem becomes a short `rcases` once those three analogous branch helpers are present.
+Below is paste-oriented Lean with no `sorry` in the executable code. It gives the general elementary helpers, the `q=1` branch helper, and a complete B1 branch contradiction. The final theorem is then a short split once the analogous B2/B3/B4 branch contradictions are added.
 
 ```lean
 import Mathlib
@@ -53,7 +53,18 @@ theorem ratio_sq_ne_zero_of_hmn0_hA
   have hAQ : (A : ℚ) ≠ 0 := by exact_mod_cast hA
   have hdiv : (m : ℚ) / (A : ℚ) ≠ 0 := div_ne_zero hmQ hAQ
   intro hzero
-  have hpos : 0 < ((m : ℚ) / (A : ℚ)) ^ 2 := sq_pos_of_ne_zero hdiv
+  exact hdiv (sq_eq_zero_iff.mp hzero)
+
+/-- A rational square is not `-1`. -/
+theorem ratio_sq_ne_neg_one {t : ℚ} : t ^ 2 ≠ (-1 : ℚ) := by
+  intro h
+  have hnonneg : 0 ≤ t ^ 2 := sq_nonneg t
+  nlinarith
+
+/-- A rational square is not `-3`. -/
+theorem ratio_sq_ne_neg_three {t : ℚ} : t ^ 2 ≠ (-3 : ℚ) := by
+  intro h
+  have hnonneg : 0 ≤ t ^ 2 := sq_nonneg t
   nlinarith
 
 /-- Opposite parity contradicts `m = n`. -/
@@ -94,19 +105,125 @@ theorem int_ratio_sq_eq_one_cases
     have hmneg : (m : ℚ) = - (A : ℚ) := by linarith
     simpa using hmneg
 
-/-- B1 algebraic relation in normalized rational variables.
+/-- If `A*C=m*n` and `(m/A)^2=1`, then `(A,C)` equals `(m,n)` or `(-m,-n)`. -/
+theorem AC_eq_mn_or_neg_of_ratio_sq_eq_one
+    {m n A C : ℤ}
+    (hmn0 : m * n ≠ 0)
+    (hAC : A * C = m * n)
+    (hq : ((m : ℚ) / (A : ℚ)) ^ 2 = 1) :
+    (A = m ∧ C = n) ∨ (A = -m ∧ C = -n) := by
+  have hm0 : m ≠ 0 := left_ne_zero_of_mul_ne_zero hmn0
+  have hA0 : A ≠ 0 := A_ne_zero_of_hAC_hmn0 hmn0 hAC
+  rcases int_ratio_sq_eq_one_cases (m := m) (A := A) hA0 hq with hmA | hmnegA
+  · left
+    have hAeq : A = m := by omega
+    constructor
+    · exact hAeq
+    · have hmul : m * C = m * n := by simpa [hAeq] using hAC
+      exact mul_left_cancel₀ hm0 hmul
+  · right
+    have hAeq : A = -m := by omega
+    constructor
+    · exact hAeq
+    · have hmul : m * (-C) = m * n := by
+        calc
+          m * (-C) = (-m) * C := by ring
+          _ = A * C := by rw [hAeq]
+          _ = m * n := hAC
+      have hnegC : -C = n := mul_left_cancel₀ hm0 hmul
+      omega
 
-This is the same relation used internally by `branch_B1_to_F`, but exported because it
-is useful when the shifted-x boundary returns the visible point `X = 3`. -/
+/-- Under any normalized branch, the case `q=1` forces `m=n` or `m=-n`. -/
+theorem normalized_branch_q1_forces_m_eq_or_neg
+    {m n A C : ℤ}
+    (hmn0 : m * n ≠ 0)
+    (hnorm : NormalizedNonAxisFactorIdentity m n A C)
+    (hq : ((m : ℚ) / (A : ℚ)) ^ 2 = 1) :
+    m = n ∨ m = -n := by
+  rcases hnorm with ⟨hAC, hB1 | hB2 | hB3 | hB4⟩
+  · rcases AC_eq_mn_or_neg_of_ratio_sq_eq_one hmn0 hAC hq with hpair | hpair
+    · rcases hpair with ⟨hA, hC⟩
+      left
+      have hEq := hB1
+      rw [hA, hC] at hEq
+      ring_nf at hEq
+      nlinarith
+    · rcases hpair with ⟨hA, hC⟩
+      left
+      have hEq := hB1
+      rw [hA, hC] at hEq
+      ring_nf at hEq
+      nlinarith
+  · rcases AC_eq_mn_or_neg_of_ratio_sq_eq_one hmn0 hAC hq with hpair | hpair
+    · rcases hpair with ⟨hA, hC⟩
+      right
+      have hm0 : m ≠ 0 := left_ne_zero_of_mul_ne_zero hmn0
+      have hEq := hB2
+      rw [hA, hC] at hEq
+      have hprod : m * (m + n) = 0 := by
+        ring_nf at hEq
+        nlinarith
+      rcases mul_eq_zero.mp hprod with hm | hsum
+      · exact False.elim (hm0 hm)
+      · omega
+    · rcases hpair with ⟨hA, hC⟩
+      right
+      have hm0 : m ≠ 0 := left_ne_zero_of_mul_ne_zero hmn0
+      have hEq := hB2
+      rw [hA, hC] at hEq
+      have hprod : m * (m + n) = 0 := by
+        ring_nf at hEq
+        nlinarith
+      rcases mul_eq_zero.mp hprod with hm | hsum
+      · exact False.elim (hm0 hm)
+      · omega
+  · rcases AC_eq_mn_or_neg_of_ratio_sq_eq_one hmn0 hAC hq with hpair | hpair
+    · rcases hpair with ⟨hA, hC⟩
+      left
+      have hn0 : n ≠ 0 := right_ne_zero_of_mul_ne_zero hmn0
+      have hEq := hB3
+      rw [hA, hC] at hEq
+      have hprod : n * (m - n) = 0 := by
+        ring_nf at hEq
+        nlinarith
+      rcases mul_eq_zero.mp hprod with hn | hdiff
+      · exact False.elim (hn0 hn)
+      · omega
+    · rcases hpair with ⟨hA, hC⟩
+      left
+      have hn0 : n ≠ 0 := right_ne_zero_of_mul_ne_zero hmn0
+      have hEq := hB3
+      rw [hA, hC] at hEq
+      have hprod : n * (m - n) = 0 := by
+        ring_nf at hEq
+        nlinarith
+      rcases mul_eq_zero.mp hprod with hn | hdiff
+      · exact False.elim (hn0 hn)
+      · omega
+  · rcases AC_eq_mn_or_neg_of_ratio_sq_eq_one hmn0 hAC hq with hpair | hpair
+    · rcases hpair with ⟨hA, hC⟩
+      right
+      have hEq := hB4
+      rw [hA, hC] at hEq
+      ring_nf at hEq
+      nlinarith
+    · rcases hpair with ⟨hA, hC⟩
+      right
+      have hEq := hB4
+      rw [hA, hC] at hEq
+      ring_nf at hEq
+      nlinarith
+
+/-- B1 algebraic relation in normalized rational variables. -/
 theorem branch_B1_relation
     {m n A C : ℤ}
     (hAC : A * C = m * n)
     (hA : A ≠ 0)
     (hB1 : (m - n) * (m + n) = (A - C) * (3 * A - C)) :
-    let q : ℚ := ((m : ℚ) / (A : ℚ)) ^ 2
-    let r : ℚ := (C : ℚ) / (A : ℚ)
-    (q + 1) * r ^ 2 - 4 * q * r + 3 * q - q ^ 2 = 0 := by
-  intro q r
+    ((((m : ℚ) / (A : ℚ)) ^ 2 + 1) * ((C : ℚ) / (A : ℚ)) ^ 2
+      - 4 * (((m : ℚ) / (A : ℚ)) ^ 2) * ((C : ℚ) / (A : ℚ))
+      + 3 * (((m : ℚ) / (A : ℚ)) ^ 2)
+      - (((m : ℚ) / (A : ℚ)) ^ 2) ^ 2) = 0 := by
   have hAq : (A : ℚ) ≠ 0 := by exact_mod_cast hA
   have hACq : (A : ℚ) * (C : ℚ) = (m : ℚ) * (n : ℚ) := by
     exact_mod_cast hAC
@@ -120,45 +237,11 @@ theorem branch_B1_relation
       ((m : ℚ) ^ 2) * (((m : ℚ) - (n : ℚ)) * ((m : ℚ) + (n : ℚ))) =
         ((m : ℚ) ^ 2) * (((A : ℚ) - (C : ℚ)) * (3 * (A : ℚ) - (C : ℚ))) := by
     rw [hB1q]
-  field_simp [q, r, hAq]
+  field_simp [hAq]
   ring_nf at hACsq hB1mul ⊢
   nlinarith
 
-/-- In B1, the shifted-x case `q = 1` forces `m = n`. -/
-theorem branch_B1_q1_forces_m_eq_n
-    {m n A C : ℤ}
-    (hmn0 : m * n ≠ 0)
-    (hAC : A * C = m * n)
-    (hB1 : (m - n) * (m + n) = (A - C) * (3 * A - C))
-    (hq : ((m : ℚ) / (A : ℚ)) ^ 2 = 1) :
-    m = n := by
-  have hm0 : m ≠ 0 := left_ne_zero_of_mul_ne_zero hmn0
-  have hA : A ≠ 0 := A_ne_zero_of_hAC_hmn0 hmn0 hAC
-  rcases int_ratio_sq_eq_one_cases hA hq with hmA | hmnegA
-  · have hAeq : A = m := by omega
-    have hCeq : C = n := by
-      have hmul : m * C = m * n := by simpa [hAeq] using hAC
-      exact mul_left_cancel₀ hm0 hmul
-    have hEq := hB1
-    rw [hAeq, hCeq] at hEq
-    ring_nf at hEq
-    nlinarith
-  · have hAeq : A = -m := by omega
-    have hCeq : C = -n := by
-      have hmul : m * (-C) = m * n := by
-        calc
-          m * (-C) = (-m) * C := by ring
-          _ = A * C := by rw [hAeq]
-          _ = m * n := hAC
-      have hnegC : -C = n := mul_left_cancel₀ hm0 hmul
-      omega
-    have hEq := hB1
-    rw [hAeq, hCeq] at hEq
-    ring_nf at hEq
-    nlinarith
-
 /-- In B1, the shifted-x case `q = 3` also forces `m = n`.
-
 This avoids a separate rational-irrationality proof for `√3`. -/
 theorem branch_B1_q3_forces_m_eq_n
     {m n A C : ℤ}
@@ -176,6 +259,7 @@ theorem branch_B1_q3_forces_m_eq_n
     simpa [q, r] using branch_B1_relation (m := m) (n := n) (A := A) (C := C) hAC hA hB1
   have hq' : q = 3 := by simpa [q] using hq
   have hrprod : r * (r - 3) = 0 := by
+    rw [hq'] at hrel
     ring_nf at hrel ⊢
     nlinarith
   have hAq : (A : ℚ) ≠ 0 := by exact_mod_cast hA
@@ -223,7 +307,10 @@ theorem branch_B1_contra_of_F_boundary
   · have hnonneg : 0 ≤ (((m : ℚ) / (A : ℚ)) ^ 2) := sq_nonneg _
     nlinarith
   · exact ratio_sq_ne_zero_of_hmn0_hA (m := m) (n := n) (A := A) hmn0 hA hX
-  · exact opposite_parity_not_eq hpar (branch_B1_q1_forces_m_eq_n hmn0 hAC hB1 hX)
+  · have hnorm : NormalizedNonAxisFactorIdentity m n A C := ⟨hAC, Or.inl hB1⟩
+    rcases normalized_branch_q1_forces_m_eq_or_neg hmn0 hnorm hX with hmn | hmneg
+    · exact opposite_parity_not_eq hpar hmn
+    · exact opposite_parity_not_neg hpar hmneg
   · have hnonneg : 0 ≤ (((m : ℚ) / (A : ℚ)) ^ 2) := sq_nonneg _
     nlinarith
   · exact opposite_parity_not_eq hpar (branch_B1_q3_forces_m_eq_n hmn0 hAC hB1 hX)
@@ -232,16 +319,15 @@ end RationalPointsN12
 end MazurProof
 ```
 
-## Exact remaining branch-helper targets
+## Exact remaining branch interfaces
 
-Add these three helpers next. Their proofs are the same as B1, with the visible shifted-x exceptional cases handled branch-locally instead of via rational nonsquare lemmas:
+The full theorem should use the following three analogous branch contradictions. Their proofs follow the B1 pattern: use `branch_B*_to_F`; the `q=1` case is already handled by `normalized_branch_q1_forces_m_eq_or_neg`; the visible exceptional case is killed by the corresponding branch algebra.
 
 ```lean
 namespace MazurProof
 namespace RationalPointsN12
 
--- B2: `X = -q`; surviving shifted-x cases are `X = -1` (`q=1`) and
--- the visible exceptional `X = -3` (`q=3`). Both force `m = -n`.
+-- B2: `X=-q`; boundary leaves `q=1` or `q=3`; both force `m=-n`.
 -- theorem branch_B2_contra_of_F_boundary
 --     (hFbd : ∀ {X Y : ℚ}, F_N12_AffineEquation X Y →
 --       X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3)
@@ -252,8 +338,7 @@ namespace RationalPointsN12
 --     (hB2 : (m - n) * (m + n) = -((A + C) * (3 * A + C))) :
 --     False
 
--- B3: `X = 3*q`; surviving shifted-x cases are `X = 3` (`q=1`) and
--- the visible exceptional `X = 1` (`q=1/3`). Both force `m = n`.
+-- B3: `X=3*q`; boundary leaves `q=1` or `q=1/3`; both force `m=n`.
 -- theorem branch_B3_contra_of_F_boundary
 --     (hFbd : ∀ {X Y : ℚ}, F_N12_AffineEquation X Y →
 --       X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3)
@@ -264,8 +349,7 @@ namespace RationalPointsN12
 --     (hB3 : (m - n) * (m + n) = (A - C) * (A - 3 * C)) :
 --     False
 
--- B4: `X = -3*q`; surviving shifted-x cases are `X = -3` (`q=1`) and
--- the visible exceptional `X = -1` (`q=1/3`). Both force `m = -n`.
+-- B4: `X=-3*q`; boundary leaves `q=1` or `q=1/3`; both force `m=-n`.
 -- theorem branch_B4_contra_of_F_boundary
 --     (hFbd : ∀ {X Y : ℚ}, F_N12_AffineEquation X Y →
 --       X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3)
@@ -280,7 +364,7 @@ end RationalPointsN12
 end MazurProof
 ```
 
-Once those three helpers are available, the final theorem is just this split:
+After those are present, the final theorem is just:
 
 ```lean
 namespace MazurProof
@@ -306,4 +390,4 @@ end RationalPointsN12
 end MazurProof
 ```
 
-The `hcop` argument is unused in this final contradiction; keep it only because it matches the bridge theorem shape.
+`hcop` is intentionally unused; it is kept only to match the bridge theorem’s existing output shape.
