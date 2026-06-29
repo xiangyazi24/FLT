@@ -1,304 +1,382 @@
-# Q: FLT Lean N12 two-adic companion
+# Q2211 Lean drop: shifted-curve boundary for the N=12 rational-points theorem
 
-This is the 2-adic companion layer for `FLT/Assumptions/MazurProof/RationalPointsN12.lean`, in the existing namespace:
+This proposes the public theorem boundary and elementary wrappers for
+`FLT/Assumptions/MazurProof/RationalPointsN12.lean`, using the existing namespaces
 
 ```lean
+namespace MazurProof
 namespace MazurProof.RationalPointsN12
 ```
 
-It is intentionally different from the odd-prime splitting layer.  For odd primes, a prime-power contribution to `B^2` lands in exactly one of `C - z^3` or `C + z^3`.  For `p = 2`, the opposite happens: under `(2 : ℤ) ∣ B`, `Int.gcd C B = 1`, and `Int.gcd z B = 1`, both `C` and `z` are odd, so both signs are even.
+The hard arithmetic result should eventually be proved elsewhere, probably from a 2-descent / 2-isogeny computation on the shifted curve
 
-## Drop-in Lean code
+```text
+F : Y^2 = X^3 + 2X^2 - 3X = X(X + 3)(X - 1),
+```
+
+where
+
+```text
+X = u - 1,   Y = w.
+```
+
+The N=12 obstruction file should consume only a theorem such as
+
+```lean
+F_N12_rational_points_degenerate_x
+```
+
+or the stronger exact point classification, not the internals of the descent proof.
+
+## 1. Shifted curve definitions and point-list predicates
+
+Put these elementary definitions either near the existing N=12 curve wrappers or in a small public file such as
+`FLT/Assumptions/MazurProof/RationalPointsN12/Boundary.lean`.
 
 ```lean
 import Mathlib
 
 namespace MazurProof.RationalPointsN12
 
-/-- If `2 ∣ B` and `gcd x B = 1`, then `x` is not divisible by `2`. -/
-theorem square_denominator_two_not_dvd_of_gcd
-    {x B : ℤ}
-    (h2B : (2 : ℤ) ∣ B)
-    (hxB : Int.gcd x B = 1) :
-    ¬ (2 : ℤ) ∣ x := by
-  intro h2x
-  have h2gcd : (2 : ℤ) ∣ ((Int.gcd x B : ℕ) : ℤ) := by
-    exact Int.dvd_coe_gcd h2x h2B
-  have h2one : (2 : ℤ) ∣ (1 : ℤ) := by
-    simpa [hxB] using h2gcd
-  exact (by norm_num : ¬ (2 : ℤ) ∣ (1 : ℤ)) h2one
+/-- Shifted N=12 curve: `Y^2 = X^3 + 2X^2 - 3X`. -/
+def F_N12_AffineCurve (X Y : ℚ) : Prop :=
+  Y ^ 2 = X ^ 3 + 2 * X ^ 2 - 3 * X
 
-/-- Convenience version for `C` and `z` in the denominator residual context. -/
-theorem square_denominator_two_not_dvd_C_and_z
-    (B C z : ℤ)
-    (h2B : (2 : ℤ) ∣ B)
-    (hcopC : Int.gcd C B = 1)
-    (hcopz : Int.gcd z B = 1) :
-    ¬ (2 : ℤ) ∣ C ∧ ¬ (2 : ℤ) ∣ z := by
-  exact
-    ⟨square_denominator_two_not_dvd_of_gcd (x := C) (B := B) h2B hcopC,
-      square_denominator_two_not_dvd_of_gcd (x := z) (B := B) h2B hcopz⟩
+/-- The shifted `X`-coordinates corresponding to the degenerate N=12 parameters. -/
+def F_N12_DegenerateX (X : ℚ) : Prop :=
+  X = (-3 : ℚ) ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3
 
-/-- Integer parity bridge: not divisible by `2` implies `Odd`. -/
-private theorem int_odd_of_not_two_dvd {x : ℤ}
-    (hx : ¬ (2 : ℤ) ∣ x) :
-    Odd x := by
-  exact Int.not_even_iff_odd.mp (by
-    intro hxEven
-    exact hx (Even.two_dvd hxEven))
+/-- Exact affine rational point list for the shifted curve. -/
+def F_N12_ExactAffinePoint (X Y : ℚ) : Prop :=
+  (X = (-3 : ℚ) ∧ Y = 0) ∨
+  (X = 0 ∧ Y = 0) ∨
+  (X = 1 ∧ Y = 0) ∨
+  (X = -1 ∧ Y = 2) ∨
+  (X = -1 ∧ Y = -2) ∨
+  (X = 3 ∧ Y = 6) ∨
+  (X = 3 ∧ Y = -6)
 
-/-- Integer parity bridge: `Odd` implies not divisible by `2`. -/
-private theorem int_not_two_dvd_of_odd {x : ℤ}
-    (hx : Odd x) :
-    ¬ (2 : ℤ) ∣ x := by
-  intro h2x
-  have hxEven : Even x := even_iff_two_dvd.mpr h2x
-  exact (Int.not_even_iff_odd.mpr hx) hxEven
-
-/-- If `C` and `z` are odd, then both `C - z^3` and `C + z^3` are even. -/
-theorem square_denominator_two_dvd_both_z_cube_factors_of_odd
-    (C z : ℤ)
-    (hCodd : Odd C)
-    (hzodd : Odd z) :
-    ((2 : ℤ) ∣ C - z ^ 3) ∧ ((2 : ℤ) ∣ C + z ^ 3) := by
-  have hz3odd : Odd (z ^ 3) := hzodd.pow
-  exact
-    ⟨Even.two_dvd (hCodd.sub_odd hz3odd),
-      Even.two_dvd (hCodd.add_odd hz3odd)⟩
-
-/--
-The usual denominator-residual version: if `2 ∣ B` and both `C` and `z` are
-coprime to `B`, then `2` divides both signs.
--/
-theorem square_denominator_two_dvd_both_z_cube_factors
-    (B C z : ℤ)
-    (h2B : (2 : ℤ) ∣ B)
-    (hcopC : Int.gcd C B = 1)
-    (hcopz : Int.gcd z B = 1) :
-    ((2 : ℤ) ∣ C - z ^ 3) ∧ ((2 : ℤ) ∣ C + z ^ 3) := by
-  have hnot := square_denominator_two_not_dvd_C_and_z
-    (B := B) (C := C) (z := z) h2B hcopC hcopz
-  exact square_denominator_two_dvd_both_z_cube_factors_of_odd
-    (C := C) (z := z)
-    (int_odd_of_not_two_dvd hnot.1)
-    (int_odd_of_not_two_dvd hnot.2)
-
-/-- If `4 ∣ 2*x`, then `2 ∣ x`. -/
-private theorem two_dvd_of_four_dvd_two_mul {x : ℤ}
-    (h : (4 : ℤ) ∣ 2 * x) :
-    (2 : ℤ) ∣ x := by
-  rcases h with ⟨t, ht⟩
-  refine ⟨t, ?_⟩
-  nlinarith
-
-/--
-For odd `C`, both signs cannot be divisible by `4`.
-This proves the safe 2-adic bound: the shared 2-adic factor is exactly one
-factor of `2`, but this says nothing about odd common factors.
--/
-theorem square_denominator_not_four_dvd_both_z_cube_factors_of_odd
-    (C z : ℤ)
-    (hCodd : Odd C) :
-    ¬ (((4 : ℤ) ∣ C - z ^ 3) ∧ ((4 : ℤ) ∣ C + z ^ 3)) := by
-  intro hboth
-  have hsum : (4 : ℤ) ∣ (C - z ^ 3) + (C + z ^ 3) :=
-    dvd_add hboth.1 hboth.2
-  have h4_2C : (4 : ℤ) ∣ 2 * C := by
-    convert hsum using 1
-    ring
-  have h2C : (2 : ℤ) ∣ C := two_dvd_of_four_dvd_two_mul h4_2C
-  exact (int_not_two_dvd_of_odd hCodd) h2C
-
-/--
-Bundled 2-adic local statement under the usual denominator hypotheses:
-`2` divides both signs, but `4` cannot divide both signs.
--/
-theorem square_denominator_two_dvd_both_and_not_four_dvd_both
-    (B C z : ℤ)
-    (h2B : (2 : ℤ) ∣ B)
-    (hcopC : Int.gcd C B = 1)
-    (hcopz : Int.gcd z B = 1) :
-    ((2 : ℤ) ∣ C - z ^ 3) ∧
-      ((2 : ℤ) ∣ C + z ^ 3) ∧
-        ¬ (((4 : ℤ) ∣ C - z ^ 3) ∧ ((4 : ℤ) ∣ C + z ^ 3)) := by
-  have hnot := square_denominator_two_not_dvd_C_and_z
-    (B := B) (C := C) (z := z) h2B hcopC hcopz
-  have hCodd : Odd C := int_odd_of_not_two_dvd hnot.1
-  have hzodd : Odd z := int_odd_of_not_two_dvd hnot.2
-  have htwo := square_denominator_two_dvd_both_z_cube_factors_of_odd
-    (C := C) (z := z) hCodd hzodd
-  exact ⟨htwo.1, htwo.2,
-    square_denominator_not_four_dvd_both_z_cube_factors_of_odd
-      (C := C) (z := z) hCodd⟩
+/-- Exact shifted point classification implies the weaker shifted `X`-classification. -/
+theorem F_N12_DegenerateX_of_exactAffinePoint
+    {X Y : ℚ}
+    (h : F_N12_ExactAffinePoint X Y) :
+    F_N12_DegenerateX X := by
+  rcases h with h | h | h | h | h | h | h
+  · exact Or.inl h.1
+  · exact Or.inr (Or.inl h.1)
+  · exact Or.inr (Or.inr (Or.inl h.1))
+  · exact Or.inr (Or.inr (Or.inr (Or.inl h.1)))
+  · exact Or.inr (Or.inr (Or.inr (Or.inl h.1)))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr h.1)))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr h.1)))
 
 end MazurProof.RationalPointsN12
 ```
 
-## Audit of `Int.gcd (C - z^3) (C + z^3) = 2`
+The exact point list is stronger than the obstruction file needs, but it is the right certifiable arithmetic theorem to prove later.  The weak `X` theorem is the right theorem for wrappers.
 
-The statement
+## 2. Shift equivalence between `E_N12` and `F_N12`
 
-```lean
-Int.gcd (C - z ^ 3) (C + z ^ 3) = 2
+The polynomial identity is
+
+```text
+u^3 - u^2 - 4u + 4 = (u - 1)^3 + 2(u - 1)^2 - 3(u - 1).
 ```
 
-is **false from only `Odd C` and `Odd z`**.  It is also false from only the denominator-context hypotheses `(2 : ℤ) ∣ B`, `Int.gcd C B = 1`, and `Int.gcd z B = 1`.  Those hypotheses control common factors with `B`; they do not prevent `C` and `z` from sharing an odd factor away from `B`.
-
-A small Lean counterexample shape:
-
-```lean
-import Mathlib
-
-example :
-    Odd (3 : ℤ) ∧
-      Odd (3 : ℤ) ∧
-        Int.gcd ((3 : ℤ) - (3 : ℤ) ^ 3)
-          ((3 : ℤ) + (3 : ℤ) ^ 3) = 6 := by
-  norm_num
-```
-
-Here `C = 3`, `z = 3`, so the two factors are `-24` and `30`, whose integer gcd is `6`, not `2`.
-
-The correct safe theorem under only oddness is the 2-adic bound already proved above:
-
-```lean
-((2 : ℤ) ∣ C - z ^ 3) ∧
-((2 : ℤ) ∣ C + z ^ 3) ∧
-¬ (((4 : ℤ) ∣ C - z ^ 3) ∧ ((4 : ℤ) ∣ C + z ^ 3))
-```
-
-This means exactly one shared factor of `2`, but it does not rule out odd common factors.
-
-## Optional extra hypothesis for the full gcd statement
-
-A plausible correct version of the full gcd theorem requires an extra coprimality hypothesis such as:
-
-```lean
-Int.gcd C z = 1
-```
-
-or an equivalent condition ruling out odd common factors.  Before proving the full `gcd = 2`, I would add the following odd-prime exclusion lemma.  It is useful and much smaller than the final gcd theorem.
+The elementary Lean wrapper is very small.
 
 ```lean
 import Mathlib
 
 namespace MazurProof.RationalPointsN12
 
-private theorem two_adic_odd_nat_prime_int_not_dvd_two {p : ℕ}
-    (hp : Nat.Prime p) (hpodd : p ≠ 2) :
-    ¬ (p : ℤ) ∣ (2 : ℤ) := by
-  intro hp2
-  have hp2nat : p ∣ 2 := by
-    exact_mod_cast hp2
-  rcases (Nat.dvd_prime (by norm_num : Nat.Prime 2)).mp hp2nat with hp1 | hp2'
-  · exact hp.ne_one hp1
-  · exact hpodd hp2'
+/-- Moving from `E_N12` to the shifted curve by `X = u - 1`. -/
+theorem F_N12_curve_of_E_N12_curve
+    (u w : ℚ)
+    (hE : w ^ 2 = u ^ 3 - u ^ 2 - 4 * u + 4) :
+    F_N12_AffineCurve (u - 1) w := by
+  dsimp [F_N12_AffineCurve]
+  rw [hE]
+  ring
 
-/--
-With the extra hypothesis `gcd C z = 1`, no odd prime can divide both signs.
-This is the odd-part companion to the `not_four_dvd_both` 2-adic bound.
--/
-theorem square_denominator_odd_prime_not_common_z_cube_factors_of_gcd_C_z
-    (C z : ℤ) {p : ℕ}
-    (hp : Nat.Prime p) (hpodd : p ≠ 2)
-    (hcopCz : Int.gcd C z = 1) :
-    ¬ (((p : ℤ) ∣ C - z ^ 3) ∧ ((p : ℤ) ∣ C + z ^ 3)) := by
-  intro hcommon
-  have hpZ : Prime (p : ℤ) :=
-    Int.prime_iff_natAbs_prime.mpr (by simpa using hp)
-  have hpnot2 : ¬ (p : ℤ) ∣ (2 : ℤ) :=
-    two_adic_odd_nat_prime_int_not_dvd_two hp hpodd
-  have hsum : (p : ℤ) ∣ (C - z ^ 3) + (C + z ^ 3) :=
-    dvd_add hcommon.1 hcommon.2
-  have h2C : (p : ℤ) ∣ 2 * C := by
-    convert hsum using 1
-    ring
-  have hdiff : (p : ℤ) ∣ (C + z ^ 3) - (C - z ^ 3) :=
-    dvd_sub hcommon.2 hcommon.1
-  have h2z3 : (p : ℤ) ∣ 2 * z ^ 3 := by
-    convert hdiff using 1
-    ring
-  have hpC : (p : ℤ) ∣ C := by
-    rcases hpZ.dvd_or_dvd h2C with hp2 | hpC
-    · exact False.elim (hpnot2 hp2)
-    · exact hpC
-  have hpz3 : (p : ℤ) ∣ z ^ 3 := by
-    rcases hpZ.dvd_or_dvd h2z3 with hp2 | hpz3
-    · exact False.elim (hpnot2 hp2)
-    · exact hpz3
-  have hpz : (p : ℤ) ∣ z := hpZ.dvd_of_dvd_pow hpz3
-  have hpG : (p : ℤ) ∣ ((Int.gcd C z : ℕ) : ℤ) :=
-    Int.dvd_coe_gcd hpC hpz
-  have hpOne : (p : ℤ) ∣ (1 : ℤ) := by
-    simpa [hcopCz] using hpG
-  exact hpZ.not_dvd_one hpOne
+/-- Moving from the shifted curve back to `E_N12` by `u = X + 1`. -/
+theorem E_N12_curve_of_F_N12_curve
+    (X Y : ℚ)
+    (hF : F_N12_AffineCurve X Y) :
+    Y ^ 2 = (X + 1) ^ 3 - (X + 1) ^ 2 - 4 * (X + 1) + 4 := by
+  dsimp [F_N12_AffineCurve] at hF
+  rw [hF]
+  ring
 
 end MazurProof.RationalPointsN12
 ```
 
-Then the full gcd statement can be staged as a later theorem:
+## 3. Converting shifted `X` classification to `MazurProof.E_N12_DegenerateParameter u`
+
+Assuming the existing predicate is definitionally a five-value disjunction, this should be close to compiling.  If the existing predicate is not reducible by `simp`, add the displayed iff lemma next to its definition.
 
 ```lean
-/-- Later theorem, with the needed extra hypothesis. -/
-theorem gcd_z_cube_factors_eq_two_of_odd_and_gcd_C_z
-    (C z : ℤ)
-    (hCodd : Odd C)
-    (hzodd : Odd z)
-    (hcopCz : Int.gcd C z = 1) :
-    Int.gcd (C - z ^ 3) (C + z ^ 3) = 2 := by
-  -- Suggested proof route:
-  -- * use `Int.gcd_greatest` with `d = 2`;
-  -- * use `square_denominator_two_dvd_both_z_cube_factors_of_odd` for `2 ∣` both signs;
-  -- * use `square_denominator_not_four_dvd_both_z_cube_factors_of_odd` to bound the 2-part;
-  -- * use `square_denominator_odd_prime_not_common_z_cube_factors_of_gcd_C_z` to rule out odd primes;
-  -- * finish with a small integer divisor classification lemma: if every odd prime is excluded
-  --   and `4` is excluded, then any common divisor divides `2`.
-  -- I would not put this theorem in the critical path unless it is really needed.
+import Mathlib
+
+namespace MazurProof
+
+/--
+Use this only if `simp [MazurProof.E_N12_DegenerateParameter]` does not expose
+the five concrete values.  The proof should be `rfl` or `by simp [...]`,
+depending on how the predicate is currently defined.
+-/
+theorem E_N12_DegenerateParameter_iff_rat (u : ℚ) :
+    E_N12_DegenerateParameter u ↔
+      u = (-2 : ℚ) ∨ u = 0 ∨ u = 1 ∨ u = 2 ∨ u = 4 := by
+  -- Preferred if the predicate is a direct def:
+  --   rfl
+  -- Otherwise:
+  --   simp [E_N12_DegenerateParameter]
+  simp [E_N12_DegenerateParameter]
+
+end MazurProof
+
+namespace MazurProof.RationalPointsN12
+
+/-- Shifted degenerate `X = u - 1` implies original degenerate parameter `u`. -/
+theorem E_N12_DegenerateParameter_of_F_N12_DegenerateX_shift
+    {u : ℚ}
+    (hX : F_N12_DegenerateX (u - 1)) :
+    MazurProof.E_N12_DegenerateParameter u := by
+  rw [MazurProof.E_N12_DegenerateParameter_iff_rat]
+  rcases hX with hX | hX | hX | hX | hX
+  · left
+    linarith
+  · right; right; left
+    linarith
+  · right; right; right; left
+    linarith
+  · right; left
+    linarith
+  · right; right; right; right
+    linarith
+
+/-- A shifted-curve `X`-classification gives the original affine boundary. -/
+theorem E_N12_affine_boundary_of_F_N12_degenerate_x_boundary
+    (hFboundary : ∀ X Y : ℚ,
+      F_N12_AffineCurve X Y → F_N12_DegenerateX X) :
+    ∀ u w : ℚ,
+      w ^ 2 = u ^ 3 - u ^ 2 - 4 * u + 4 →
+      MazurProof.E_N12_DegenerateParameter u := by
+  intro u w hE
+  exact E_N12_DegenerateParameter_of_F_N12_DegenerateX_shift
+    (hFboundary (u - 1) w (F_N12_curve_of_E_N12_curve u w hE))
+
+/-- Exact shifted point classification gives the original affine boundary. -/
+theorem E_N12_affine_boundary_of_F_N12_exact_boundary
+    (hFexact : ∀ X Y : ℚ,
+      F_N12_AffineCurve X Y → F_N12_ExactAffinePoint X Y) :
+    ∀ u w : ℚ,
+      w ^ 2 = u ^ 3 - u ^ 2 - 4 * u + 4 →
+      MazurProof.E_N12_DegenerateParameter u := by
+  exact E_N12_affine_boundary_of_F_N12_degenerate_x_boundary
+    (fun X Y hF => F_N12_DegenerateX_of_exactAffinePoint (hFexact X Y hF))
+
+end MazurProof.RationalPointsN12
+```
+
+If `E_N12_DegenerateParameter_iff_rat` already exists under another name, use that existing theorem instead of adding a duplicate.
+
+## 4. Wrappers from boundary theorem to the denominator residual
+
+These wrappers should be in `MazurProof.RationalPointsN12`, next to the already-added
+`N12NoNontrivialSquareDenominatorResidual_of_affine_boundary`.
+
+```lean
+import Mathlib
+
+namespace MazurProof.RationalPointsN12
+
+/--
+Denominator residual from shifted `X`-coordinate classification.
+This is probably the best public wrapper for the current N=12 file.
+-/
+theorem N12NoNontrivialSquareDenominatorResidual_of_F_N12_degenerate_x_boundary
+    (hFboundary : ∀ X Y : ℚ,
+      F_N12_AffineCurve X Y → F_N12_DegenerateX X) :
+    N12NoNontrivialSquareDenominatorResidual := by
+  exact N12NoNontrivialSquareDenominatorResidual_of_affine_boundary
+    (E_N12_affine_boundary_of_F_N12_degenerate_x_boundary hFboundary)
+
+/-- Denominator residual from exact shifted affine point classification. -/
+theorem N12NoNontrivialSquareDenominatorResidual_of_F_N12_exact_boundary
+    (hFexact : ∀ X Y : ℚ,
+      F_N12_AffineCurve X Y → F_N12_ExactAffinePoint X Y) :
+    N12NoNontrivialSquareDenominatorResidual := by
+  exact N12NoNontrivialSquareDenominatorResidual_of_F_N12_degenerate_x_boundary
+    (fun X Y hF => F_N12_DegenerateX_of_exactAffinePoint (hFexact X Y hF))
+
+end MazurProof.RationalPointsN12
+```
+
+If the current wrapper `N12NoNontrivialSquareDenominatorResidual_of_affine_boundary` has its boundary hypothesis written as a local rational predicate rather than `MazurProof.E_N12_DegenerateParameter`, add this bridge once:
+
+```lean
+namespace MazurProof.RationalPointsN12
+
+/-- Adapter if the already-added wrapper expects a local `N12DegenerateXQ` predicate. -/
+theorem N12DegenerateXQ_of_E_N12_DegenerateParameter
+    {u : ℚ}
+    (h : MazurProof.E_N12_DegenerateParameter u) :
+    N12DegenerateXQ u := by
+  -- Usually:
+  --   simpa [N12DegenerateXQ] using
+  --     (MazurProof.E_N12_DegenerateParameter_iff_rat u).mp h
+  simpa [N12DegenerateXQ] using
+    (MazurProof.E_N12_DegenerateParameter_iff_rat u).mp h
+
+end MazurProof.RationalPointsN12
+```
+
+Then compose through that adapter.
+
+## 5. Public theorem names to prove elsewhere
+
+Do **not** introduce these as axioms in `RationalPointsN12.lean`.  They are theorem names for the future arithmetic file to prove.
+
+```lean
+import Mathlib
+
+namespace MazurProof.RationalPointsN12
+
+/--
+Hard arithmetic theorem, weak public form:
+all rational affine points on `F_N12` have degenerate `X`-coordinate.
+-/
+theorem F_N12_rational_points_degenerate_x
+    (X Y : ℚ)
+    (hF : F_N12_AffineCurve X Y) :
+    F_N12_DegenerateX X := by
+  -- Future proof file: rank-zero/torsion/integral-points or 2-isogeny descent.
+  -- No axiom here.
   sorry
+
+/--
+Hard arithmetic theorem, strong public form:
+exact affine rational point list for `F_N12`.
+-/
+theorem F_N12_rational_points_exact
+    (X Y : ℚ)
+    (hF : F_N12_AffineCurve X Y) :
+    F_N12_ExactAffinePoint X Y := by
+  -- Future proof file.
+  -- This theorem implies `F_N12_rational_points_degenerate_x`.
+  sorry
+
+/-- Public zero-argument theorem once the hard boundary is proved. -/
+theorem N12NoNontrivialSquareDenominatorResidual_from_F_N12 :
+    N12NoNontrivialSquareDenominatorResidual := by
+  exact N12NoNontrivialSquareDenominatorResidual_of_F_N12_exact_boundary
+    F_N12_rational_points_exact
+
+end MazurProof.RationalPointsN12
 ```
 
-## Mathlib API and tactic checklist
+In the current file, keep the wrappers parameterized.  Once `F_N12_rational_points_exact` is proved in a later file, add the final zero-argument theorem above in the public boundary file.
 
-Useful parity APIs over `ℤ`:
+## 6. Suggested future file split
+
+Recommended split:
+
+```text
+FLT/Assumptions/MazurProof/RationalPointsN12.lean
+```
+
+Contains the current denominator work and imports only the public boundary API if a closed theorem is needed.
+
+```text
+FLT/Assumptions/MazurProof/RationalPointsN12/Boundary.lean
+```
+
+Contains:
 
 ```lean
-#check Int.even_iff
-#check Int.not_even_iff_odd
-#check even_iff_two_dvd
-#check Even.two_dvd
-#check Odd.pow
-#check Odd.sub_odd
-#check Odd.add_odd
-#check Int.odd_pow
-#check Int.even_sub
-#check Int.even_add
+F_N12_AffineCurve
+F_N12_DegenerateX
+F_N12_ExactAffinePoint
+F_N12_curve_of_E_N12_curve
+E_N12_curve_of_F_N12_curve
+F_N12_DegenerateX_of_exactAffinePoint
+E_N12_DegenerateParameter_of_F_N12_DegenerateX_shift
+E_N12_affine_boundary_of_F_N12_degenerate_x_boundary
+E_N12_affine_boundary_of_F_N12_exact_boundary
+N12NoNontrivialSquareDenominatorResidual_of_F_N12_degenerate_x_boundary
+N12NoNontrivialSquareDenominatorResidual_of_F_N12_exact_boundary
 ```
 
-Useful divisibility and prime APIs matching the existing style:
+All of these are elementary and should be sorry-free.
+
+```text
+FLT/Assumptions/MazurProof/RationalPointsN12/Public.lean
+```
+
+Exports the hard theorem names after they are proved:
 
 ```lean
-#check Int.dvd_coe_gcd
-#check Int.prime_two
-#check Int.prime_iff_natAbs_prime
-#check Prime.dvd_or_dvd
-#check Prime.dvd_of_dvd_pow
+F_N12_rational_points_degenerate_x
+F_N12_rational_points_exact
+N12NoNontrivialSquareDenominatorResidual_from_F_N12
 ```
 
-Recommended tactics:
+This file may import the proof internals, but clients only use the names above.
+
+```text
+FLT/Assumptions/MazurProof/RationalPointsN12/Descent/*.lean
+```
+
+Private implementation files for the arithmetic proof, for example:
+
+```text
+Descent/BasicCurve.lean
+Descent/Torsion.lean
+Descent/TwoIsogenySelmer.lean
+Descent/LocalSolubility.lean
+Descent/PointClassification.lean
+```
+
+The N12 obstruction file should never mention Selmer groups, local covers, Magma/PARI certificates, or 2-isogeny internals directly.  It should depend only on the public theorem
 
 ```lean
-norm_num   -- small divisibility contradictions, e.g. `¬ (2 : ℤ) ∣ (1 : ℤ)`
-ring       -- after `convert ... using 1` for sums/differences of signs
-nlinarith  -- for `4 ∣ 2*x → 2 ∣ x`
-omega      -- for integer order side conditions elsewhere in the file
+F_N12_rational_points_degenerate_x
 ```
 
-The safe 2-adic companion output to use next to the odd-prime splitting is:
+or, preferably, the stronger
 
 ```lean
-(2 : ℤ) ∣ C - z ^ 3
-(2 : ℤ) ∣ C + z ^ 3
-¬ (((4 : ℤ) ∣ C - z ^ 3) ∧ ((4 : ℤ) ∣ C + z ^ 3))
+F_N12_rational_points_exact
 ```
 
-under `(2 : ℤ) ∣ B`, `Int.gcd C B = 1`, and `Int.gcd z B = 1`.
+plus the elementary wrappers above.
+
+## 7. Audit notes
+
+The shifted point list is:
+
+```text
+X = -3, 0, 1, -1, 3
+```
+
+with exact affine points
+
+```text
+(-3, 0), (0, 0), (1, 0), (-1, ±2), (3, ±6).
+```
+
+These correspond to original `u = X + 1` values
+
+```text
+u = -2, 1, 2, 0, 4,
+```
+
+which are exactly the degenerate N=12 parameters
+
+```text
+u ∈ {-2, 0, 1, 2, 4}.
+```
+
+The ordering of disjunctions in `F_N12_DegenerateX` need not match the ordering in `E_N12_DegenerateParameter`; the conversion lemma handles the reordering with `linarith`.
