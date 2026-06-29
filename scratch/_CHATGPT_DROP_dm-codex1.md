@@ -1,148 +1,172 @@
-# Q2292: Lean helper for coprime product square
-
-Target file: `FLT/Assumptions/MazurProof/RationalPointsN12.lean`.
-
-This drop answers the **coprime product square** helper request, not QuarticA/QuarticB content.  The main recommendation is to prove the Nat helper using the existing Mathlib theorem
+# Q2291: Lean helper for coprime integer factors of a square
 
 ```lean
-exists_eq_pow_of_mul_eq_pow
-```
-
-from `Mathlib.Algebra.GCDMonoid.Basic`, then pass to integers with `Int.natAbs` and the nonnegativity hypotheses.
-
-## Lean code first
-
-```lean
-import Mathlib.Algebra.GCDMonoid.Nat
-import Mathlib.Data.Int.Lemmas
+import Mathlib.Data.Int.GCD
+import Mathlib.Data.Nat.Factorization.Basic
 import Mathlib.Tactic
 
-/-- Natural-number helper: coprime factors of a square are squares.
+namespace FLT.N12
 
-This is the shortest route in current Mathlib.  The key imported theorem is
-`exists_eq_pow_of_mul_eq_pow`, specialized to `α := ℕ` and `k := 2`.
-It handles zero cases automatically: if one Nat factor is zero and the factors
-are coprime, the other factor is forced to be `1`, hence a square. -/
-theorem Nat_coprime_mul_eq_sq
-    {a b z : ℕ}
-    (hcop : Nat.Coprime a b)
-    (h : a * b = z ^ 2) :
+private noncomputable def halfFactorization (n : ℕ) : ℕ →₀ ℕ :=
+  n.factorization.mapRange (fun e => e / 2) (by simp)
+
+private theorem halfFactorization_support_prime (n : ℕ) :
+    ∀ p ∈ (halfFactorization n).support, Nat.Prime p := by
+  intro p hp
+  rw [Finsupp.mem_support_iff] at hp
+  by_contra hprime
+  exact hp (by
+    simp [halfFactorization, Nat.factorization_eq_zero_of_not_prime n hprime])
+
+private noncomputable def factorizationHalfRoot (n : ℕ) : ℕ :=
+  (halfFactorization n).prod fun p e => p ^ e
+
+private theorem factorizationHalfRoot_ne_zero (n : ℕ) :
+    factorizationHalfRoot n ≠ 0 := by
+  classical
+  rw [factorizationHalfRoot]
+  change ((halfFactorization n).support.prod fun p => p ^ halfFactorization n p) ≠ 0
+  exact Finset.prod_ne_zero_iff.mpr (by
+    intro p hp
+    exact pow_ne_zero _ ((halfFactorization_support_prime n p hp).ne_zero))
+
+private theorem factorization_factorizationHalfRoot (n : ℕ) :
+    (factorizationHalfRoot n).factorization = halfFactorization n := by
+  exact Nat.prod_pow_factorization_eq_self (halfFactorization_support_prime n)
+
+private theorem Nat_exists_sq_of_factorization_even {n : ℕ}
+    (h : ∀ p, Even (n.factorization p)) :
+    ∃ r : ℕ, n = r ^ 2 := by
+  by_cases hn : n = 0
+  · exact ⟨0, by simp [hn]⟩
+  refine ⟨factorizationHalfRoot n, ?_⟩
+  apply Nat.eq_of_factorization_eq hn (pow_ne_zero 2 (factorizationHalfRoot_ne_zero n))
+  intro p
+  have hroot : (factorizationHalfRoot n).factorization = halfFactorization n :=
+    factorization_factorizationHalfRoot n
+  calc
+    n.factorization p = 2 * (n.factorization p / 2) := by
+      rcases h p with ⟨k, hk⟩
+      omega
+    _ = (2 • halfFactorization n) p := by
+      simp [halfFactorization]
+    _ = (2 • (factorizationHalfRoot n).factorization) p := by
+      rw [← hroot]
+    _ = ((factorizationHalfRoot n) ^ 2).factorization p := by
+      simp [Nat.factorization_pow]
+
+private theorem Nat_even_factorization_of_coprime_mul_eq_sq
+    {a b z p : ℕ} (hcop : a.Coprime b) (h : a * b = z ^ 2) :
+    Even (a.factorization p) ∧ Even (b.factorization p) := by
+  have hsum : a.factorization p + b.factorization p = 2 * z.factorization p := by
+    calc
+      a.factorization p + b.factorization p = (a * b).factorization p := by
+        rw [Nat.factorization_mul_apply_of_coprime hcop]
+      _ = (z ^ 2).factorization p := by rw [h]
+      _ = (2 • z.factorization) p := by rw [Nat.factorization_pow]
+      _ = 2 * z.factorization p := by simp
+  by_cases hpa : a.factorization p = 0
+  · rw [hpa, zero_add] at hsum
+    exact ⟨by simp [hpa], ⟨z.factorization p, by omega⟩⟩
+  · have hpb : b.factorization p = 0 := by
+      by_contra hpb
+      have hpprime : Nat.Prime p := by
+        by_contra hpnot
+        exact hpa (Nat.factorization_eq_zero_of_not_prime a hpnot)
+      have hdva : p ∣ a := Nat.dvd_of_factorization_pos hpa
+      have hdvb : p ∣ b := Nat.dvd_of_factorization_pos hpb
+      have hdvg : p ∣ Nat.gcd a b := Nat.dvd_gcd hdva hdvb
+      have hgcd : Nat.gcd a b = 1 := by simpa [Nat.Coprime] using hcop
+      have hdv1 : p ∣ 1 := by simpa [hgcd] using hdvg
+      exact hpprime.not_dvd_one hdv1
+    rw [hpb, add_zero] at hsum
+    exact ⟨⟨z.factorization p, by omega⟩, by simp [hpb]⟩
+
+theorem Nat_coprime_mul_eq_sq {a b z : ℕ}
+    (hcop : a.Coprime b) (h : a * b = z ^ 2) :
     ∃ r s : ℕ, a = r ^ 2 ∧ b = s ^ 2 := by
-  have hgcd : IsUnit (GCDMonoid.gcd a b) := by
-    rw [gcd_eq_nat_gcd, hcop.gcd_eq_one]
-    exact isUnit_one
-  obtain ⟨r, hr⟩ :=
-    exists_eq_pow_of_mul_eq_pow
-      (α := ℕ) (a := a) (b := b) (c := z) (k := 2) hgcd h
-
-  have hgcd' : IsUnit (GCDMonoid.gcd b a) := by
-    rw [gcd_eq_nat_gcd, Nat.gcd_comm, hcop.gcd_eq_one]
-    exact isUnit_one
-  have h' : b * a = z ^ 2 := by
-    simpa [mul_comm] using h
-  obtain ⟨s, hs⟩ :=
-    exists_eq_pow_of_mul_eq_pow
-      (α := ℕ) (a := b) (b := a) (c := z) (k := 2) hgcd' h'
-
+  have haEven : ∀ p, Even (a.factorization p) := fun p =>
+    (Nat_even_factorization_of_coprime_mul_eq_sq (a := a) (b := b) (z := z) (p := p) hcop h).1
+  have hbEven : ∀ p, Even (b.factorization p) := fun p =>
+    (Nat_even_factorization_of_coprime_mul_eq_sq (a := a) (b := b) (z := z) (p := p) hcop h).2
+  rcases Nat_exists_sq_of_factorization_even haEven with ⟨r, hr⟩
+  rcases Nat_exists_sq_of_factorization_even hbEven with ⟨s, hs⟩
   exact ⟨r, s, hr, hs⟩
 
-/-- Integer wrapper: nonnegative coprime integer factors of a square are squares.
-
-The hypotheses `ha` and `hb` are exactly what lets us convert back from
-`natAbs` without introducing signs.  This is the version wanted by the N=12
-quartic residual split lemmas. -/
-theorem Int_coprime_mul_eq_sq_of_nonneg
-    {a b z : ℤ}
-    (ha : 0 ≤ a)
-    (hb : 0 ≤ b)
-    (hcop : Int.gcd a b = 1)
+theorem Int_coprime_mul_eq_sq_of_nonneg {a b z : ℤ}
+    (ha : 0 ≤ a) (hb : 0 ≤ b) (hcop : Int.gcd a b = 1)
     (h : a * b = z ^ 2) :
     ∃ r s : ℤ, a = r ^ 2 ∧ b = s ^ 2 := by
-  have hcopNat : Nat.Coprime a.natAbs b.natAbs := by
-    rw [Nat.coprime_iff_gcd_eq_one]
-    simpa [Int.gcd_eq_natAbs] using hcop
-
-  have hnat : a.natAbs * b.natAbs = z.natAbs ^ 2 := by
-    simpa [Int.natAbs_mul, Int.natAbs_pow] using congrArg Int.natAbs h
-
-  obtain ⟨r, s, hr, hs⟩ := Nat_coprime_mul_eq_sq hcopNat hnat
-  refine ⟨(r : ℤ), (s : ℤ), ?_, ?_⟩
-  · have ha_abs : (a.natAbs : ℤ) = a := by
-      rw [Int.natCast_natAbs, abs_of_nonneg ha]
-    rw [← ha_abs, hr]
-    norm_num
-  · have hb_abs : (b.natAbs : ℤ) = b := by
-      rw [Int.natCast_natAbs, abs_of_nonneg hb]
-    rw [← hb_abs, hs]
-    norm_num
-```
-
-If the `Nat.Coprime` rewrite is sticky in the local file because of namespace/import differences, replace only the proof of `hcopNat` by this equivalent version:
-
-```lean
-  have hcopNat : Nat.Coprime a.natAbs b.natAbs := by
+  let A : ℕ := a.natAbs
+  let B : ℕ := b.natAbs
+  let Z : ℕ := z.natAbs
+  have hnat : A * B = Z ^ 2 := by
+    change a.natAbs * b.natAbs = z.natAbs ^ 2
+    calc
+      a.natAbs * b.natAbs = (a * b).natAbs := by simpa using (Int.natAbs_mul a b).symm
+      _ = (z ^ 2).natAbs := by rw [h]
+      _ = z.natAbs ^ 2 := by simp
+  have hcopNat : A.Coprime B := by
     change Nat.gcd a.natAbs b.natAbs = 1
-    simpa [Int.gcd_eq_natAbs] using hcop
+    simpa [A, B, Int.gcd_def] using hcop
+  rcases Nat_coprime_mul_eq_sq hcopNat hnat with ⟨r, s, hr, hs⟩
+  refine ⟨(r : ℤ), (s : ℤ), ?_, ?_⟩
+  · calc
+      a = (A : ℤ) := by simpa [A] using (Int.natAbs_of_nonneg ha).symm
+      _ = (r : ℤ) ^ 2 := by simpa using congrArg (fun n : ℕ => (n : ℤ)) hr
+  · calc
+      b = (B : ℤ) := by simpa [B] using (Int.natAbs_of_nonneg hb).symm
+      _ = (s : ℤ) ^ 2 := by simpa using congrArg (fun n : ℕ => (n : ℤ)) hs
+
+end FLT.N12
 ```
 
-## Exact theorem/API facts used
+## Notes
 
-Add these temporary checks near the new helper while integrating:
+The Nat helper is the reusable core:
 
 ```lean
-#check exists_eq_pow_of_mul_eq_pow
-#check gcd_eq_nat_gcd
-#check Int.gcd_eq_natAbs
+theorem Nat_coprime_mul_eq_sq {a b z : ℕ}
+    (hcop : a.Coprime b) (h : a * b = z ^ 2) :
+    ∃ r s : ℕ, a = r ^ 2 ∧ b = s ^ 2
+```
+
+The Int wrapper is the requested API:
+
+```lean
+theorem Int_coprime_mul_eq_sq_of_nonneg {a b z : ℤ}
+    (ha : 0 ≤ a) (hb : 0 ≤ b) (hcop : Int.gcd a b = 1)
+    (h : a * b = z ^ 2) :
+    ∃ r s : ℤ, a = r ^ 2 ∧ b = s ^ 2
+```
+
+Zero cases are handled by `Nat_exists_sq_of_factorization_even`: it branches on `n = 0` before using `Nat.eq_of_factorization_eq`, because `Nat.factorization 0 = 0` and `Nat.factorization 1 = 0`.
+
+Key Mathlib APIs to check/grep:
+
+```lean
+#check Nat.factorization_mul_apply_of_coprime
+#check Nat.factorization_pow
+#check Nat.prod_pow_factorization_eq_self
+#check Nat.eq_of_factorization_eq
+#check Nat.dvd_of_factorization_pos
+#check Nat.factorization_eq_zero_of_not_prime
+#check Int.gcd_def
 #check Int.natAbs_mul
-#check Int.natAbs_pow
-#check Int.natCast_natAbs
-#check Nat.Coprime.gcd_eq_one
-#check Nat.coprime_iff_gcd_eq_one
+#check Int.natAbs_of_nonneg
 ```
-
-Expected key theorem shape:
-
-```lean
--- In `Mathlib.Algebra.GCDMonoid.Basic`:
--- theorem exists_eq_pow_of_mul_eq_pow
---     [GCDMonoid α] [Subsingleton αˣ]
---     {a b c : α}
---     (hab : IsUnit (gcd a b))
---     {k : ℕ}
---     (h : a * b = c ^ k) :
---     ∃ d : α, a = d ^ k
-```
-
-For `α := ℕ`, the hypotheses `[GCDMonoid ℕ]` and `[Subsingleton ℕˣ]` are already available after importing `Mathlib.Algebra.GCDMonoid.Nat`.  The helper calls the theorem twice: once for `a`, once after commuting the product for `b`.
-
-## Grep patterns
-
-From the repository root:
 
 ```bash
-grep -R "theorem exists_eq_pow_of_mul_eq_pow" .lake/packages/mathlib/Mathlib/Algebra/GCDMonoid/Basic.lean
-grep -R "theorem gcd_eq_nat_gcd" .lake/packages/mathlib/Mathlib/Algebra/GCDMonoid/Nat.lean
-grep -R "theorem gcd_eq_natAbs" .lake/packages/mathlib/Mathlib/Algebra/GCDMonoid/Nat.lean
-grep -R "natAbs_pow" .lake/packages/mathlib/Mathlib/Data/Int*.lean .lake/packages/mathlib/Mathlib/Data/Int -n
-grep -R "gcd_eq_one" .lake/packages/mathlib/Mathlib/Data/Nat/GCD .lake/packages/mathlib/Mathlib/Data/Nat -n
+grep -R "factorization_mul_apply_of_coprime\|prod_pow_factorization_eq_self\|eq_of_factorization_eq" .lake/packages/mathlib/Mathlib/Data/Nat/Factorization
+grep -R "dvd_of_factorization_pos\|factorization_eq_zero_of_not_prime\|factorization_pow" .lake/packages/mathlib/Mathlib/Data/Nat/Factorization
+grep -R "gcd_def\|natAbs_mul\|natAbs_of_nonneg" .lake/packages/mathlib/Mathlib/Data/Int
 ```
 
-The pinned project manifest on `ai-scratch` uses Mathlib commit `96fd0fff3b8837985ae21dd02e712cb5df72ec05`; at that revision, `Mathlib.Algebra.GCDMonoid.Nat` imports `Mathlib.Algebra.GCDMonoid.Basic` and provides the `GCDMonoid`/`NormalizedGCDMonoid` instances for both `ℕ` and `ℤ`.
-
-## Why this is robust for zero cases
-
-No manual zero split is needed.
-
-In the Nat helper, if `a = 0`, `Nat.Coprime a b` forces `b = 1`.  The equation `a * b = z ^ 2` forces `z = 0`, and `exists_eq_pow_of_mul_eq_pow` returns `a = 0 ^ 2`.  The swapped call then returns `b = 1 ^ 2`.  The case `b = 0` is symmetric.
-
-In the Int wrapper, `ha : 0 ≤ a` and `hb : 0 ≤ b` ensure that `a = (a.natAbs : ℤ)` and `b = (b.natAbs : ℤ)`.  Thus the Nat result lifts back without sign ambiguity.  Without the nonnegativity hypotheses, the statement is false as written: for example `a = -1`, `b = -1`, `z = 1` has `a * b = z ^ 2`, but neither negative factor is an integer square.
-
-## Where to place it
-
-Put the helper before the QuarticA/QuarticB split lemmas, near other elementary integer lemmas.  It is not specific to N=12, so a neutral local name like the requested
+For QuarticA/QuarticB split lemmas, prove the half-factors `A B : ℤ` satisfy `0 ≤ A`, `0 ≤ B`, `Int.gcd A B = 1`, and `A * B = W ^ 2`, then use:
 
 ```lean
-Int_coprime_mul_eq_sq_of_nonneg
+rcases Int_coprime_mul_eq_sq_of_nonneg hA_nonneg hB_nonneg hcopAB hprod
+  with ⟨r, s, hA_sq, hB_sq⟩
 ```
 
-is fine.  If the file already has a namespace for Mazur/N12 helpers, move both theorem names inside that namespace and keep the statements unchanged.
+For the QuarticB “twice squares” form, define `A := (3*u^2 - v^2)/2` and `B := (u^2 + v^2)/2`, prove `A * B = (Z/2)^2`, apply the helper, then rewrite back with `ring_nf` and the evenness/divisibility facts.
