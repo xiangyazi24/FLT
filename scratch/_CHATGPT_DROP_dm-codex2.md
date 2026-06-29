@@ -1,459 +1,407 @@
-# Q: FLT N12 direct elementary affine-boundary audit
-
-## Source check
-
-I attempted to inspect the GitHub-visible file named in the prompt:
-
-```text
-FLT/Assumptions/MazurProof/RationalPointsN12.lean
-```
-
-on branch `scratch`. The GitHub connector returned `Not Found`, and repository code search did not find `RationalPointsN12`. I therefore treat the local file path `/Users/huangx/repos/flt-ai/FLT/Assumptions/MazurProof/RationalPointsN12.lean` as ahead of, or different from, the GitHub-visible branch. The route below is stated against the equation itself and uses names intended to paste under `namespace MazurProof.RationalPointsN12`.
+# Q: FLT N12 residual B bridge to existing quartic descent
 
 ## Executive answer
 
-The point list is correct. The rational affine solutions of
+The least-new-code bridge is to make residual `B`
 
 ```text
-F : Y^2 = X^3 + 2*X^2 - 3*X = X*(X-1)*(X+3)
+Z^2 = (3*u^2 - v^2) * (u^2 + v^2)
 ```
 
-have
+produce a primitive non-axis square of the existing quartic
 
 ```text
-X ∈ {-3, 0, 1, -1, 3},
+pythagoreanQuarticRhs m n
+  = m^4 + 8*m^3*n + 2*m^2*n^2 - 8*m*n^3 + n^4.
 ```
 
-with the corresponding `Y` values
+The bridge must include the nontriviality hypothesis
 
 ```text
-(-3,0), (0,0), (1,0), (-1,±2), (3,±6).
+u^2 ≠ v^2.
 ```
 
-There is a direct elementary reduction from a rational point to primitive integer quartics. However, it does **not** give a one-line gcd/congruence proof. After clearing denominators and using the full rational 2-torsion factorization, the problem reduces to two primitive quartic residuals:
+Without it, `B` has trivial primitive solutions, for example
 
 ```text
-A(u,v,Z):  Z^2 = (u^2 - v^2) * (u^2 + 3*v^2),
-B(u,v,Z):  Z^2 = (3*u^2 - v^2) * (u^2 + v^2),
+u = v = 1,  Z = ±2,
 ```
 
-with `gcd(u,v)=1` and nonzero variables. To finish the affine theorem it suffices to prove:
+but the half-sum/half-difference step has one zero leg and cannot produce a non-axis `m*n ≠ 0` solution of `pythagoreanQuarticRhs`.
 
-```text
-A(u,v,Z) -> u^2 = v^2,
-B(u,v,Z) -> u^2 = v^2.
-```
-
-Those quartic residuals are exactly the elementary shadow of the 2-isogeny descent. Solving them directly is possible by classical infinite descent, but it is not obviously shorter in Lean than the specialized 2-isogeny route. The single hardest residual is `B`: its mod-8 split leads back to the same N=12 non-axis quartic/descent pattern already appearing elsewhere in this project.
-
-So the best Lean-friendly elementary route is:
-
-```text
-rational point on F
-  -> primitive integral cubic equation
-  -> squareclass support m ∈ {u^2, -u^2, 3u^2, -3u^2}
-  -> quartic residual A or B
-  -> quartic residual theorem
-  -> X ∈ {-3,0,1,-1,3}.
-```
-
-If the project wants the shortest boundary statement, use the two quartic residual theorems as the arithmetic boundary. If the project wants a proof with no boundary theorem, the 2-isogeny descent remains the cleaner global organization.
-
-## 1. Point-list sanity check
-
-The five `X` values give exactly the expected `Y` values:
-
-```text
-X = -3:  X*(X-1)*(X+3) = 0,
-X =  0:  X*(X-1)*(X+3) = 0,
-X =  1:  X*(X-1)*(X+3) = 0,
-X = -1:  (-1)*(-2)*(2) = 4,
-X =  3:  3*2*6 = 36.
-```
-
-A tiny Lean check:
+The exact bridge theorem I would add is:
 
 ```lean
-import Mathlib
-
-namespace MazurProof.RationalPointsN12
-
-private def F_N12_AffineEquation (X Y : ℚ) : Prop :=
-  Y ^ 2 = X ^ 3 + 2 * X ^ 2 - 3 * X
-
-lemma F_N12_rhs_factor (X : ℚ) :
-    X ^ 3 + 2 * X ^ 2 - 3 * X = X * (X - 1) * (X + 3) := by
-  ring
-
-example : F_N12_AffineEquation (-3) 0 := by norm_num [F_N12_AffineEquation]
-example : F_N12_AffineEquation 0 0 := by norm_num [F_N12_AffineEquation]
-example : F_N12_AffineEquation 1 0 := by norm_num [F_N12_AffineEquation]
-example : F_N12_AffineEquation (-1) 2 := by norm_num [F_N12_AffineEquation]
-example : F_N12_AffineEquation (-1) (-2) := by norm_num [F_N12_AffineEquation]
-example : F_N12_AffineEquation 3 6 := by norm_num [F_N12_AffineEquation]
-example : F_N12_AffineEquation 3 (-6) := by norm_num [F_N12_AffineEquation]
-
-end MazurProof.RationalPointsN12
-```
-
-## 2. Clear denominators to the primitive cubic residual
-
-For a rational affine point, use the standard monic-cubic denominator lemma. There are integers `m,n,W` with
-
-```text
-n ≠ 0,
-gcd(m,n)=1,
-X = m / n^2,
-Y = W / n^3,
-W^2 = m*(m - n^2)*(m + 3*n^2).                    (Cubic)
-```
-
-This is the first exact integer residual.
-
-Lean statement:
-
-```lean
-import Mathlib
-
-namespace MazurProof.RationalPointsN12
-
-private def F_N12_AffineEquation (X Y : ℚ) : Prop :=
-  Y ^ 2 = X ^ 3 + 2 * X ^ 2 - 3 * X
-
-/-- Pure `field_simp` identity once `X=m/n^2`, `Y=W/n^3` are chosen. -/
-lemma F_N12_clear_denoms_identity
-    (m n W : ℤ) (hn : n ≠ 0) :
-    (((W : ℚ) / (n : ℚ)^3)^2 =
-      ((m : ℚ) / (n : ℚ)^2)^3
-        + 2 * ((m : ℚ) / (n : ℚ)^2)^2
-        - 3 * ((m : ℚ) / (n : ℚ)^2)) ↔
-    W ^ 2 = m * (m - n ^ 2) * (m + 3 * n ^ 2) := by
-  constructor <;> intro h
-  · have hnq : (n : ℚ) ≠ 0 := by exact_mod_cast hn
-    field_simp [hnq] at h
-    norm_num at h
-    -- The remaining goal is a polynomial rearrangement over `ℤ` cast to `ℚ`.
-    -- In-file this usually closes by `norm_num` + `ring_nf at h ⊢`.
-    -- Replace this placeholder by the local tactic sequence that works with casts.
-    sorry
-  · have hnq : (n : ℚ) ≠ 0 := by exact_mod_cast hn
-    field_simp [hnq]
-    norm_num
-    -- Same cast/ring cleanup as above.
-    sorry
-
-/-- Standard monic-cubic denominator-square lemma specialized to `F`. -/
-/-
-theorem F_N12_rat_to_integral_cubic
-    {X Y : ℚ} (hF : F_N12_AffineEquation X Y) :
-    ∃ m n W : ℤ,
-      n ≠ 0 ∧ Int.gcd m n = 1 ∧
-      X = (m : ℚ) / (n : ℚ)^2 ∧
-      Y = (W : ℚ) / (n : ℚ)^3 ∧
-      W ^ 2 = m * (m - n ^ 2) * (m + 3 * n ^ 2)
--/
-
-end MazurProof.RationalPointsN12
-```
-
-I wrote the clearing identity with `sorry` comments because cast normalization varies by local imports; the mathematical content is a single `field_simp` plus `ring`. In the actual file, it is better to prove the polynomial identity first over `ℚ`, then move the integer-cast equality through `norm_num`.
-
-## 3. GCD structure of the primitive cubic residual
-
-Assume
-
-```text
-W^2 = m*(m-n^2)*(m+3*n^2),
-gcd(m,n)=1.
-```
-
-The factor gcds are:
-
-```text
-gcd(m, m-n^2) = 1,
-gcd(m, m+3*n^2) | 3,
-gcd(m-n^2, m+3*n^2) | 4.
-```
-
-More precisely:
-
-```text
-gcd(m, m-n^2) = gcd(m,n^2) = 1,
-gcd(m, m+3*n^2) = gcd(m,3),
-gcd(m-n^2, m+3*n^2) | 4.
-```
-
-Important warning: the three factors are **not** pairwise coprime in general. For example, with `m=3,n=1`, the factors are
-
-```text
-m = 3,
-m-n^2 = 2,
-m+3*n^2 = 6,
-```
-
-and the first and third share `3`. With `m,n` both odd, the last two factors can share powers of `2`. Therefore a route that declares all three factors to be squares is false.
-
-The useful consequence is only a squareclass support statement for `m`: every prime `p ≠ 3` dividing `m` has even valuation. Thus, if `m ≠ 0`, there is an integer `u` such that
-
-```text
-m =  u^2,
-   or m = -u^2,
-   or m =  3*u^2,
-   or m = -3*u^2.                                  (Support)
-```
-
-This is exactly the support restriction for the 2-descent map `x mod squares`, but it is obtained here by elementary gcd/valuation arithmetic.
-
-Lean statements:
-
-```lean
-import Mathlib
-
-namespace MazurProof.RationalPointsN12
-
-lemma gcd_m_m_sub_nsq
-    {m n : ℤ} (hcop : Int.gcd m n = 1) :
-    Int.gcd m (m - n ^ 2) = 1 := by
-  -- `gcd(m, m-n^2)=gcd(m,n^2)=1`.
-  sorry
-
-lemma gcd_m_m_add_three_nsq_dvd_three
-    {m n : ℤ} (hcop : Int.gcd m n = 1) :
-    Int.gcd m (m + 3 * n ^ 2) ∣ 3 := by
-  -- Common divisor divides `3*n^2`; coprime to `n`, hence divides `3`.
-  sorry
-
-lemma gcd_m_sub_m_add_three_dvd_four
-    {m n : ℤ} (hcop : Int.gcd m n = 1) :
-    Int.gcd (m - n ^ 2) (m + 3 * n ^ 2) ∣ 4 := by
-  -- Difference is `4*n^2`; common divisor is coprime to `n`.
-  sorry
-
-/-- Squareclass support of the numerator `m`. This is the elementary form of
-`δ(F(ℚ)) ⊆ {1,-1,3,-3}`. -/
-/-
-theorem cubic_residual_m_squareclass_support
-    {m n W : ℤ}
-    (hcop : Int.gcd m n = 1)
-    (hm0 : m ≠ 0)
-    (hW : W ^ 2 = m * (m - n ^ 2) * (m + 3 * n ^ 2)) :
-    ∃ u : ℤ,
-      m = u ^ 2 ∨ m = -u ^ 2 ∨ m = 3 * u ^ 2 ∨ m = -3 * u ^ 2
--/
-
-end MazurProof.RationalPointsN12
-```
-
-The support theorem is most naturally proved by prime valuations. A no-valuation version is possible but messier: repeatedly use Euclid's lemma on prime divisors of `m` and the square product.
-
-## 4. The two quartic residuals
-
-Define:
-
-```text
-A(u,v,Z) : Z^2 = (u^2 - v^2)*(u^2 + 3*v^2),
-B(u,v,Z) : Z^2 = (3*u^2 - v^2)*(u^2 + v^2).
-```
-
-Substituting the four possible squareclasses for `m` into `(Cubic)` gives only these two residual forms.
-
-### Case `m = u^2`
-
-```text
-W^2 = u^2 * (u^2 - n^2) * (u^2 + 3*n^2).
-```
-
-After proving `u | W`, write `W=u*Z` and get
-
-```text
-Z^2 = (u^2 - n^2)*(u^2 + 3*n^2) = A(u,n,Z).
-```
-
-If `A` only has the trivial primitive solutions `u^2=n^2`, then
-
-```text
-X = m/n^2 = u^2/n^2 = 1.
-```
-
-### Case `m = -3*u^2`
-
-```text
-W^2 = 9*u^2 * (n^2 - u^2) * (n^2 + 3*u^2).
-```
-
-Write `W=3*u*Z` and get
-
-```text
-Z^2 = (n^2 - u^2)*(n^2 + 3*u^2) = A(n,u,Z).
-```
-
-Then `n^2=u^2`, so
-
-```text
-X = -3*u^2/n^2 = -3.
-```
-
-### Case `m = 3*u^2`
-
-```text
-W^2 = 9*u^2 * (3*u^2 - n^2) * (u^2 + n^2).
-```
-
-Write `W=3*u*Z` and get
-
-```text
-Z^2 = (3*u^2 - n^2)*(u^2 + n^2) = B(u,n,Z).
-```
-
-Then `u^2=n^2`, so
-
-```text
-X = 3.
-```
-
-### Case `m = -u^2`
-
-```text
-W^2 = u^2 * (u^2 + n^2) * (3*n^2 - u^2).
-```
-
-Write `W=u*Z` and get
-
-```text
-Z^2 = (3*n^2 - u^2)*(n^2 + u^2) = B(n,u,Z).
-```
-
-Then `n^2=u^2`, so
-
-```text
-X = -1.
-```
-
-The substitution identities are pure `ring` facts:
-
-```lean
-import Mathlib
-
-namespace MazurProof.RationalPointsN12
-
-lemma cubic_subst_pos_one (u n : ℤ) :
-    (u ^ 2) * (u ^ 2 - n ^ 2) * (u ^ 2 + 3 * n ^ 2)
-      = u ^ 2 * ((u ^ 2 - n ^ 2) * (u ^ 2 + 3 * n ^ 2)) := by
-  ring
-
-lemma cubic_subst_neg_three (u n : ℤ) :
-    (-3 * u ^ 2) * ((-3 * u ^ 2) - n ^ 2) * ((-3 * u ^ 2) + 3 * n ^ 2)
-      = (3 * u) ^ 2 * ((n ^ 2 - u ^ 2) * (n ^ 2 + 3 * u ^ 2)) := by
-  ring
-
-lemma cubic_subst_pos_three (u n : ℤ) :
-    (3 * u ^ 2) * ((3 * u ^ 2) - n ^ 2) * ((3 * u ^ 2) + 3 * n ^ 2)
-      = (3 * u) ^ 2 * ((3 * u ^ 2 - n ^ 2) * (u ^ 2 + n ^ 2)) := by
-  ring
-
-lemma cubic_subst_neg_one (u n : ℤ) :
-    (-u ^ 2) * ((-u ^ 2) - n ^ 2) * ((-u ^ 2) + 3 * n ^ 2)
-      = u ^ 2 * ((3 * n ^ 2 - u ^ 2) * (n ^ 2 + u ^ 2)) := by
-  ring
-
-/-- Integer square cancellation helper. Mathlib may already have this as a
-`pow_dvd_pow_iff`/`sq_dvd_sq` variant; isolate the API here. -/
-/-
-theorem exists_sq_factor_of_sq_eq_sq_mul
-    {W u A : ℤ} (hu : u ≠ 0)
-    (h : W ^ 2 = u ^ 2 * A) :
-    ∃ Z : ℤ, W = u * Z ∧ Z ^ 2 = A
--/
-
-end MazurProof.RationalPointsN12
-```
-
-The helper `exists_sq_factor_of_sq_eq_sq_mul` is true for integers by prime valuations: from `u^2 | W^2`, get `u | W`; substitute `W=u*Z` and cancel `u^2` in the integral domain.
-
-## 5. Boundary residual statements that imply the affine theorem
-
-These are the cleanest elementary residuals to consume from Lean:
-
-```lean
-import Mathlib
-
-namespace MazurProof.RationalPointsN12
-
-/-- Residual A: the squareclass `1`/`-3` quartic has only the trivial primitive
-solutions relevant to the curve. -/
-/-
-theorem quartic_A_only_trivial
+/-- Nontrivial primitive residual B produces a primitive opposite-parity square
+of the existing N=12 quartic. -/
+theorem quartic_B_to_pythagoreanQuarticRhs
     {u v Z : ℤ}
     (hcop : Int.gcd u v = 1)
     (huv0 : u * v ≠ 0)
-    (hA : Z ^ 2 = (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2)) :
-    u ^ 2 = v ^ 2
--/
+    (hne : u ^ 2 ≠ v ^ 2)
+    (hB : Z ^ 2 = (3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2)) :
+    ∃ m n b : ℤ,
+      m * n ≠ 0 ∧
+      Int.gcd m n = 1 ∧
+      Odd (m + n) ∧
+      b ^ 2 = pythagoreanQuarticRhs m n
+```
 
-/-- Residual B: the squareclass `3`/`-1` quartic has only the trivial primitive
-solutions relevant to the curve. -/
-/-
-theorem quartic_B_only_trivial
+Then residual `B` is closed by your existing quartic residual package. If the existing theorem has a no-solution shape, the wrapper is:
+
+```lean
+theorem quartic_B_only_trivial_of_no_pythagoreanQuarticRhs
+    (hQnone : ∀ {m n b : ℤ},
+      m * n ≠ 0 → Int.gcd m n = 1 → Odd (m + n) →
+      b ^ 2 = pythagoreanQuarticRhs m n → False)
     {u v Z : ℤ}
     (hcop : Int.gcd u v = 1)
     (huv0 : u * v ≠ 0)
     (hB : Z ^ 2 = (3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2)) :
-    u ^ 2 = v ^ 2
--/
+    u ^ 2 = v ^ 2 := by
+  by_contra hne
+  rcases quartic_B_to_pythagoreanQuarticRhs hcop huv0 hne hB with
+    ⟨m,n,b,hmn0,hmn_cop,hmn_par,hq⟩
+  exact hQnone hmn0 hmn_cop hmn_par hq
+```
 
-/-- Reduction of the affine X-coordinate theorem to the two quartic residuals. -/
-/-
-theorem F_N12_x_coordinates_of_quartic_residuals
-    (hAonly : ∀ {u v Z : ℤ},
-      Int.gcd u v = 1 -> u * v ≠ 0 ->
-      Z ^ 2 = (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2) ->
-      u ^ 2 = v ^ 2)
-    (hBonly : ∀ {u v Z : ℤ},
-      Int.gcd u v = 1 -> u * v ≠ 0 ->
-      Z ^ 2 = (3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2) ->
-      u ^ 2 = v ^ 2) :
-    ∀ {X Y : ℚ}, F_N12_AffineEquation X Y ->
-      X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3
--/
+If `pythagorean_quartic_residual_reduction` has a reduction/package shape rather than a direct contradiction shape, use `quartic_B_to_pythagoreanQuarticRhs` as the only new bridge and feed the resulting `m,n,b` into the existing reduction chain.
+
+## 1. Residual B theorem DAG
+
+Add the lemmas in this order.
+
+```lean
+import Mathlib
+
+namespace MazurProof.RationalPointsN12
+
+-- Uses the existing project definition:
+-- def pythagoreanQuarticRhs (m n : ℤ) : ℤ :=
+--   m^4 + 8*m^3*n + 2*m^2*n^2 - 8*m*n^3 + n^4
+
+/-- Residual B. Use as a local abbreviation only if helpful. -/
+def QuarticB (u v Z : ℤ) : Prop :=
+  Z ^ 2 = (3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2)
+
+/-- The nontrivial primitive B residual has both variables odd.
+This is true even without `huv0`; if a zero case satisfied `hB`, the mod-8
+argument plus `hcop` would still contradict it. -/
+theorem quartic_B_odd_odd
+    {u v Z : ℤ}
+    (hcop : Int.gcd u v = 1)
+    (hB : QuarticB u v Z) :
+    Odd u ∧ Odd v := by
+  -- Suggested proof:
+  --   `by_cases hu : Even u`; `by_cases hv : Even v`.
+  --   both even: contradiction to `hcop`.
+  --   u odd, v even: RHS is 3 or 7 mod 8, not a square.
+  --   u even, v odd: RHS is 7 mod 8, not a square.
+  --   both odd: done.
+  -- Use `ZMod 8` and `fin_cases` for square residues `{0,1,4}`.
+  sorry
+
+/-- In residual B, after `u,v` are odd, the two factors are twice coprime squares. -/
+theorem quartic_B_split_two_squares
+    {u v Z : ℤ}
+    (hcop : Int.gcd u v = 1)
+    (hu : Odd u)
+    (hv : Odd v)
+    (hB : QuarticB u v Z) :
+    ∃ r s : ℤ,
+      3 * u ^ 2 - v ^ 2 = 2 * r ^ 2 ∧
+      u ^ 2 + v ^ 2 = 2 * s ^ 2 := by
+  -- Proof outline:
+  --   f := 3*u^2 - v^2, g := u^2 + v^2.
+  --   f ≡ 2 mod 8 and g ≡ 2 mod 8.
+  --   gcd(f,g)=2, preferably first stated with natAbs if Int.gcd signs hurt.
+  --   hB says f*g is a square.
+  --   Since g > 0 and f*g = Z^2 ≥ 0, and f ≠ 0, get f > 0.
+  --   Then f/2 and g/2 are positive coprime odd integers whose product is a square.
+  --   Therefore each half is a square.
+  sorry
+
+/-- Half-sum / half-difference decomposition for odd `u,v`, with the exact
+primitive and non-axis facts needed later. -/
+theorem odd_pair_half_decomposition_primitive
+    {u v : ℤ}
+    (hcop : Int.gcd u v = 1)
+    (hu : Odd u)
+    (hv : Odd v)
+    (hne : u ^ 2 ≠ v ^ 2) :
+    ∃ R S : ℤ,
+      u = R + S ∧
+      v = R - S ∧
+      R * S ≠ 0 ∧
+      Int.gcd R S = 1 ∧
+      Odd (R + S) := by
+  -- Construct R=(u+v)/2 and S=(u-v)/2.
+  -- Oddness gives integrality of the halves.
+  -- gcd: a common divisor of R,S divides u=R+S and v=R-S.
+  -- nonzero: R=0 gives u=-v, S=0 gives u=v; both contradict hne.
+  -- parity: R+S=u is odd.
+  sorry
+
+/-- Pythagorean step plus the twist expression. This should be the only lemma
+using the signed primitive Pythagorean parametrization. -/
+theorem primitive_pythagorean_twist_to_pythagoreanQuarticRhs
+    {R S r s : ℤ}
+    (hRS0 : R * S ≠ 0)
+    (hcop : Int.gcd R S = 1)
+    (hpar : Odd (R + S))
+    (hs : s ^ 2 = R ^ 2 + S ^ 2)
+    (hr : r ^ 2 = R ^ 2 + 4 * R * S + S ^ 2) :
+    ∃ m n : ℤ,
+      m * n ≠ 0 ∧
+      Int.gcd m n = 1 ∧
+      Odd (m + n) ∧
+      r ^ 2 = pythagoreanQuarticRhs m n := by
+  -- Apply the primitive signed Pythagorean parametrization to
+  --   s^2 = R^2 + S^2.
+  -- Since gcd(R,S)=1 and Odd(R+S), the legs have opposite parity.
+  -- The parametrization gives, up to swap and signs,
+  --   one leg = m^2 - n^2,
+  --   the other = 2*m*n.
+  -- The expression R^2 + 4RS + S^2 is symmetric in R,S.
+  -- If the product sign is negative, replace n by -n.
+  -- Then use `pythagoreanQuarticRhs_twist_identity` below.
+  sorry
+
+/-- Main bridge from residual B to the existing N=12 quartic square. -/
+theorem quartic_B_to_pythagoreanQuarticRhs
+    {u v Z : ℤ}
+    (hcop : Int.gcd u v = 1)
+    (huv0 : u * v ≠ 0)
+    (hne : u ^ 2 ≠ v ^ 2)
+    (hB : QuarticB u v Z) :
+    ∃ m n b : ℤ,
+      m * n ≠ 0 ∧
+      Int.gcd m n = 1 ∧
+      Odd (m + n) ∧
+      b ^ 2 = pythagoreanQuarticRhs m n := by
+  rcases quartic_B_odd_odd hcop hB with ⟨hu, hv⟩
+  rcases quartic_B_split_two_squares hcop hu hv hB with ⟨r,s,hr,hs⟩
+  rcases odd_pair_half_decomposition_primitive hcop hu hv hne with
+    ⟨R,S,huRS,hvRS,hRS0,hRScop,hRSpar⟩
+
+  have hsRS : s ^ 2 = R ^ 2 + S ^ 2 := by
+    -- from `u^2+v^2 = 2*s^2`, `u=R+S`, `v=R-S`.
+    -- `nlinarith` usually works after the ring identity below.
+    subst u
+    subst v
+    nlinarith [hs, half_sum_diff_sum_sq R S]
+
+  have hrRS : r ^ 2 = R ^ 2 + 4 * R * S + S ^ 2 := by
+    -- from `3*u^2-v^2 = 2*r^2`, `u=R+S`, `v=R-S`.
+    subst u
+    subst v
+    nlinarith [hr, half_sum_diff_twist_sq R S]
+
+  rcases primitive_pythagorean_twist_to_pythagoreanQuarticRhs
+      hRS0 hRScop hRSpar hsRS hrRS with
+    ⟨m,n,hmn0,hmn_cop,hmn_par,hq⟩
+  exact ⟨m,n,r,hmn0,hmn_cop,hmn_par,hq⟩
 
 end MazurProof.RationalPointsN12
 ```
 
-This is probably the most useful Lean boundary if the goal is to avoid explicit Mordell-Weil/rank formalization.
+In the actual file, if `QuarticB` is not desired, inline its definition in theorem statements.
 
-## 6. How to attack residual A
+## 2. Paste-oriented algebra identities for B
 
-Residual A is
+These are the low-risk `ring` lemmas that should be added before the skeleton above.
 
-```text
-Z^2 = (u^2 - v^2)*(u^2 + 3*v^2),
-gcd(u,v)=1,
-u*v ≠ 0.                                             (A)
+```lean
+import Mathlib
+
+namespace MazurProof.RationalPointsN12
+
+-- If the file already has `pythagoreanQuarticRhs`, do not redefine it here.
+-- This theorem assumes the existing definition.
+
+lemma half_sum_diff_sum_sq (R S : ℤ) :
+    (R + S) ^ 2 + (R - S) ^ 2 = 2 * (R ^ 2 + S ^ 2) := by
+  ring
+
+lemma half_sum_diff_twist_sq (R S : ℤ) :
+    3 * (R + S) ^ 2 - (R - S) ^ 2 =
+      2 * (R ^ 2 + 4 * R * S + S ^ 2) := by
+  ring
+
+lemma pythagoreanQuarticRhs_twist_identity (m n : ℤ) :
+    (m ^ 2 - n ^ 2) ^ 2
+      + 4 * (m ^ 2 - n ^ 2) * (2 * m * n)
+      + (2 * m * n) ^ 2
+      = pythagoreanQuarticRhs m n := by
+  unfold pythagoreanQuarticRhs
+  ring
+
+lemma pythagoreanQuarticRhs_twist_identity_neg_right (m n : ℤ) :
+    (m ^ 2 - n ^ 2) ^ 2
+      - 4 * (m ^ 2 - n ^ 2) * (2 * m * n)
+      + (2 * m * n) ^ 2
+      = pythagoreanQuarticRhs m (-n) := by
+  unfold pythagoreanQuarticRhs
+  ring
+
+lemma twist_expr_swap (A B : ℤ) :
+    A ^ 2 + 4 * A * B + B ^ 2 = B ^ 2 + 4 * B * A + A ^ 2 := by
+  ring
+
+/-- Direct substitution identity for B after half-sum variables. -/
+lemma quartic_B_half_substitution (R S : ℤ) :
+    ((3 * (R + S) ^ 2 - (R - S) ^ 2)
+      * ((R + S) ^ 2 + (R - S) ^ 2))
+    = 4 * (R ^ 2 + 4 * R * S + S ^ 2) * (R ^ 2 + S ^ 2) := by
+  ring
+
+end MazurProof.RationalPointsN12
 ```
 
-A useful identity is
+The identities intentionally avoid `/ 2`. Construct `R,S` once, prove `u=R+S` and `v=R-S`, and then all downstream algebra is pure `ring`/`nlinarith`.
 
-```text
-Z^2 + (2*v^2)^2 = (u^2 + v^2)^2.                    (A-Pyth)
+## 3. Finite congruence checks for B
+
+You can prove the parity split with `ZMod 8` in small pieces. Squares mod `8` are `0,1,4`.
+
+```lean
+import Mathlib
+
+namespace MazurProof.RationalPointsN12
+
+abbrev Z8 := ZMod 8
+
+private lemma z8_square_residue (x : Z8) :
+    x ^ 2 = 0 ∨ x ^ 2 = 1 ∨ x ^ 2 = 4 := by
+  fin_cases x <;> norm_num
+
+private lemma z8_square_ne_three (x : Z8) : x ^ 2 ≠ 3 := by
+  intro h
+  rcases z8_square_residue x with h0 | h1 | h4
+  · rw [h0] at h; norm_num at h
+  · rw [h1] at h; norm_num at h
+  · rw [h4] at h; norm_num at h
+
+private lemma z8_square_ne_seven (x : Z8) : x ^ 2 ≠ 7 := by
+  intro h
+  rcases z8_square_residue x with h0 | h1 | h4
+  · rw [h0] at h; norm_num at h
+  · rw [h1] at h; norm_num at h
+  · rw [h4] at h; norm_num at h
+
+/-- If `u` is odd and `v` is even, the B RHS is `3` or `7` mod 8. -/
+private lemma quartic_B_rhs_z8_of_odd_even
+    {u v : ℤ} (hu : Odd u) (hv : Even v) :
+    (((3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2) : ℤ) : Z8) = 3 ∨
+    (((3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2) : ℤ) : Z8) = 7 := by
+  rcases hu with ⟨a, rfl⟩
+  rcases hv with ⟨b, rfl⟩
+  -- Split parity of b; if v^2 ≡ 0 mod 8 get 3, if v^2 ≡ 4 get 7.
+  by_cases hb : Even b
+  · rcases hb with ⟨t, rfl⟩
+    left
+    ring_nf
+  · have hbodd : Odd b := not_even_iff_odd.mp hb
+    rcases hbodd with ⟨t, rfl⟩
+    right
+    ring_nf
+
+/-- If `u` is even and `v` is odd, the B RHS is `7` mod 8. -/
+private lemma quartic_B_rhs_z8_of_even_odd
+    {u v : ℤ} (hu : Even u) (hv : Odd v) :
+    (((3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2) : ℤ) : Z8) = 7 := by
+  rcases hu with ⟨a, rfl⟩
+  rcases hv with ⟨b, rfl⟩
+  by_cases ha : Even a
+  · rcases ha with ⟨t, rfl⟩
+    ring_nf
+  · have haodd : Odd a := not_even_iff_odd.mp ha
+    rcases haodd with ⟨t, rfl⟩
+    ring_nf
+
+end MazurProof.RationalPointsN12
 ```
 
-Indeed:
+The only brittle API here is the exact spelling of `not_even_iff_odd`; if it differs in the pinned Mathlib, replace it with the local parity theorem already used elsewhere in the file.
 
-```text
-(u^2+v^2)^2 - Z^2
-= u^4 + 2u^2v^2 + v^4 - (u^4 + 2u^2v^2 - 3v^4)
-= 4v^4.
+## 4. The factor split for B
+
+The split lemma should be isolated because it is the main number-theory step before Pythagorean parametrization.
+
+Recommended support lemmas:
+
+```lean
+import Mathlib
+
+namespace MazurProof.RationalPointsN12
+
+/-- The two B factors have gcd exactly 2 when `u,v` are coprime odd. -/
+/-- Prefer a natAbs version if `Int.gcd` sign normalization is annoying. -/
+theorem quartic_B_factor_gcd_eq_two
+    {u v : ℤ}
+    (hcop : Int.gcd u v = 1)
+    (hu : Odd u)
+    (hv : Odd v) :
+    Int.gcd (3 * u ^ 2 - v ^ 2) (u ^ 2 + v ^ 2) = 2 := by
+  -- Common divisor divides:
+  --   (3u^2-v^2) + (u^2+v^2) = 4u^2,
+  --   3*(u^2+v^2) - (3u^2-v^2) = 4v^2.
+  -- Since gcd(u,v)=1, the gcd divides 4.
+  -- Both factors are 2 mod 8, so gcd is exactly 2.
+  sorry
+
+/-- Positivity of the first B factor follows from the square equation. -/
+theorem quartic_B_first_factor_pos
+    {u v Z : ℤ}
+    (huv0 : u * v ≠ 0)
+    (hB : QuarticB u v Z) :
+    0 < 3 * u ^ 2 - v ^ 2 := by
+  -- `u^2 + v^2 > 0` from `huv0`.
+  -- If first factor < 0 then RHS < 0, impossible since Z^2 ≥ 0.
+  -- If first factor = 0, then `3*u^2=v^2`, impossible for nonzero integers
+  -- by a prime/divisibility or mod 3 argument.
+  sorry
+
+/-- Coprime square-product split for the B factors. -/
+theorem quartic_B_split_two_squares_explicit
+    {u v Z : ℤ}
+    (hcop : Int.gcd u v = 1)
+    (huv0 : u * v ≠ 0)
+    (hu : Odd u)
+    (hv : Odd v)
+    (hB : QuarticB u v Z) :
+    ∃ r s : ℤ,
+      3 * u ^ 2 - v ^ 2 = 2 * r ^ 2 ∧
+      u ^ 2 + v ^ 2 = 2 * s ^ 2 := by
+  -- Use the gcd=2 lemma and positivity.
+  -- Show Z is even, write Z=2*T.
+  -- Then T^2 = ((3u^2-v^2)/2) * ((u^2+v^2)/2).
+  -- The two half-factors are coprime positive odd integers.
+  -- A coprime product that is a square has square factors.
+  sorry
+
+end MazurProof.RationalPointsN12
 ```
 
-So any nontrivial A-solution gives a Pythagorean triangle whose even leg is `2*v^2`. Primitive Pythagorean parametrization splits `v^2 = r*s` with `gcd(r,s)=1`, hence `r=r0^2`, `s=s0^2`. This reduces A to the classical Eisenstein/Fermat quartic
+If `Int.gcd ... = 2` is awkward because `Int.gcd` returns a natural coerced into `ℤ` in your local API, use:
 
-```text
-C^2 = r0^4 - r0^2*s0^2 + s0^4.                     (Eis)
+```lean
+Nat.gcd ((3 * u ^ 2 - v ^ 2).natAbs) ((u ^ 2 + v ^ 2).natAbs) = 2
 ```
 
-The trivial A-solutions correspond to `r0^2=s0^2` and then `u^2=v^2`.
+and convert to the needed coprimality of halves.
 
-Lean identities:
+## 5. Residual A audit
+
+Residual `A`
+
+```text
+Z^2 = (u^2 - v^2) * (u^2 + 3*v^2)
+```
+
+does **not** appear to be least-new-code reducible to the existing N=12 `pythagoreanQuarticRhs` descent. It is the other 2-cover and naturally leads to an Eisenstein / FLT3-style quartic.
+
+The basic identity is:
 
 ```lean
 import Mathlib
@@ -466,246 +414,192 @@ lemma quartic_A_pythagorean_identity (u v Z : ℤ)
   rw [hA]
   ring
 
-lemma eisenstein_quartic_identity (r s : ℤ) :
-    (r ^ 2 - s ^ 2) ^ 2 + (r * s) ^ 2
-      = r ^ 4 - r ^ 2 * s ^ 2 + s ^ 4 := by
-  ring
+/-- Eisenstein quartic naturally produced by residual A. -/
+def eisensteinQuarticRhs (r s : ℤ) : ℤ :=
+  r ^ 4 - r ^ 2 * s ^ 2 + s ^ 4
 
-/-- Classical Fermat/Eisenstein residual that would close residual A. -/
-/-
-theorem eisenstein_quartic_square_only_trivial
-    {r s C : ℤ}
-    (hcop : Int.gcd r s = 1)
-    (hrs0 : r * s ≠ 0)
-    (hC : C ^ 2 = r ^ 4 - r ^ 2 * s ^ 2 + s ^ 4) :
-    r ^ 2 = s ^ 2
--/
-
-end MazurProof.RationalPointsN12
-```
-
-This is a known classical infinite descent, closely related to the elementary proof of FLT exponent `3` in `ℤ[ω]`. If the repo already has an FLT3 or Eisenstein-integer descent component, residual A should be routed there.
-
-## 7. How to attack residual B
-
-Residual B is
-
-```text
-Z^2 = (3*u^2 - v^2)*(u^2 + v^2),
-gcd(u,v)=1,
-u*v ≠ 0.                                             (B)
-```
-
-A quick mod-8 analysis shows a nontrivial solution must have `u,v` both odd.
-
-If `u` and `v` have opposite parity, then:
-
-```text
-u odd,  v even -> RHS ≡ 3 * 1 * 1 = 3 mod 8,
-u even, v odd  -> RHS ≡ (-1) * 1 = 7 mod 8,
-```
-
-not a square. Both even is excluded by gcd. Hence both are odd.
-
-For odd coprime `u,v`, the two factors in B satisfy
-
-```text
-3*u^2 - v^2 ≡ 2 mod 8,
-u^2 + v^2   ≡ 2 mod 8,
-gcd(3*u^2 - v^2, u^2 + v^2) = 2.
-```
-
-Therefore the halves are coprime odd squares:
-
-```text
-3*u^2 - v^2 = 2*r^2,
-u^2 + v^2   = 2*s^2.                              (Bsplit)
-```
-
-Set
-
-```text
-R = (u+v)/2,
-S = (u-v)/2.
-```
-
-Then
-
-```text
-s^2 = R^2 + S^2,
-r^2 = R^2 + 4*R*S + S^2.                            (Btwist)
-```
-
-Parametrizing the primitive Pythagorean equation `s^2=R^2+S^2` produces
-
-```text
-r^2 = p^4 + 8*p^3*q + 2*p^2*q^2 - 8*p*q^3 + q^4.   (Q12)
-```
-
-This is precisely the N=12 quartic square equation that appears in the non-axis signed-cover descent. Thus direct residual B is not an elementary shortcut; it is the same hard descent in a different coordinate system.
-
-Lean statements:
-
-```lean
-import Mathlib
-
-namespace MazurProof.RationalPointsN12
-
-lemma quartic_B_opposite_parity_impossible
-    {u v Z : ℤ}
-    (hcop : Int.gcd u v = 1)
-    (hB : Z ^ 2 = (3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2)) :
-    ¬ ((Odd u ∧ Even v) ∨ (Even u ∧ Odd v)) := by
-  -- Cast to `ZMod 8` or use `% 8`; squares are `0,1,4` mod 8.
-  sorry
-
-lemma quartic_B_split
-    {u v Z : ℤ}
-    (hcop : Int.gcd u v = 1)
-    (hu : Odd u) (hv : Odd v)
-    (hB : Z ^ 2 = (3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2)) :
-    ∃ r s : ℤ,
-      3 * u ^ 2 - v ^ 2 = 2 * r ^ 2 ∧
-      u ^ 2 + v ^ 2 = 2 * s ^ 2 := by
-  -- The two factors are `2 mod 8`, have gcd `2`, and their product is a square.
-  sorry
-
-lemma quartic_B_half_sum_id_1 (u v : ℤ) :
-    u ^ 2 + v ^ 2 = 2 * (((u + v) / 2) ^ 2 + ((u - v) / 2) ^ 2) := by
-  -- This exact statement needs parity hypotheses for `/`; better introduce
-  -- `R S` by equations `u=R+S`, `v=R-S` in Lean.
-  sorry
-
-lemma quartic_B_twist_identity (R S : ℤ) :
-    3 * (R + S) ^ 2 - (R - S) ^ 2
-      = 2 * (R ^ 2 + 4 * R * S + S ^ 2) := by
-  ring
-
-/-- The N=12 quartic produced from the Pythagorean parametrization. -/
-def Q12 (p q : ℤ) : ℤ :=
-  p ^ 4 + 8 * p ^ 3 * q + 2 * p ^ 2 * q ^ 2 - 8 * p * q ^ 3 + q ^ 4
-
-lemma pythagorean_twist_to_Q12_identity (p q : ℤ) :
-    (p ^ 2 - q ^ 2) ^ 2
-      + 4 * (p ^ 2 - q ^ 2) * (2 * p * q)
-      + (2 * p * q) ^ 2
-      = Q12 p q := by
-  unfold Q12
+lemma eisensteinQuartic_basic_identity (r s : ℤ) :
+    (r ^ 2 + s ^ 2) ^ 2 - (r * s) ^ 2 = eisensteinQuarticRhs r s := by
+  unfold eisensteinQuarticRhs
   ring
 
 end MazurProof.RationalPointsN12
 ```
 
-In Lean, do not use integer division by `2` in the main theorem if avoidable. Instead, after `u,v` are odd, introduce integers `R,S` satisfying
-
-```text
-u = R + S,
-v = R - S
-```
-
-using `R=(u+v)/2`, `S=(u-v)/2` only in a construction lemma. The identities then become pure `ring`.
-
-## 8. Final theorem skeleton consuming the residuals
-
-This is the intended final Lean shape for the direct route:
+A clean new residual theorem to introduce is either the direct A theorem:
 
 ```lean
-import Mathlib
-
-namespace MazurProof.RationalPointsN12
-
-private def F_N12_AffineEquation (X Y : ℚ) : Prop :=
-  Y ^ 2 = X ^ 3 + 2 * X ^ 2 - 3 * X
-
-/-- X-coordinate version requested in Q2271, reduced to two elementary quartic residuals. -/
-/-
-theorem F_N12_x_coordinates
-    (hAonly : ∀ {u v Z : ℤ},
-      Int.gcd u v = 1 -> u * v ≠ 0 ->
-      Z ^ 2 = (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2) ->
-      u ^ 2 = v ^ 2)
-    (hBonly : ∀ {u v Z : ℤ},
-      Int.gcd u v = 1 -> u * v ≠ 0 ->
-      Z ^ 2 = (3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2) ->
-      u ^ 2 = v ^ 2)
-    {X Y : ℚ}
-    (hF : F_N12_AffineEquation X Y) :
-    X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3 := by
-  -- 1. Use `F_N12_rat_to_integral_cubic` to get m,n,W.
-  -- 2. If m=0, then X=0.
-  -- 3. Otherwise use `cubic_residual_m_squareclass_support`.
-  -- 4. Four squareclass cases:
-  --    m= u^2    -> A(u,n) -> X=1.
-  --    m=-3u^2  -> A(n,u) -> X=-3.
-  --    m= 3u^2  -> B(u,n) -> X=3.
-  --    m=-u^2   -> B(n,u) -> X=-1.
-  sorry
--/
-
-end MazurProof.RationalPointsN12
-```
-
-This theorem is deliberately parameterized by the two quartic residual solvers. That lets you integrate the denominator/gcd/squareclass work now and postpone the genuinely hard descent.
-
-## 9. Why this is not shorter than 2-isogeny descent
-
-The full 2-torsion factorization gives a nice elementary numerator squareclass support statement, but that statement only says
-
-```text
-X mod squares ∈ {1,-1,3,-3}.
-```
-
-It does **not** determine `X`. The remaining condition is exactly the solvability of the homogeneous spaces represented by A and B. Solving A and B is what a 2-descent does.
-
-The specialized 2-isogeny route has an advantage: the dual curve
-
-```text
-F' : Y^2 = X^3 - 4X^2 + 16X
-```
-
-has squareclass support `{1,2}`, and the nontrivial class `2` is killed immediately by the mod-16 lemma
-
-```text
-W^2 ≠ 2*m^4 - 4*m^2*n^2 + 8*n^4
-```
-
-for primitive `m,n`. This is shorter than proving both A and B directly from scratch.
-
-So my adversarial conclusion is:
-
-```text
-A direct elementary route exists, but the first genuinely hard residual is quartic_B_only_trivial.
-The cleanest proof of quartic_B_only_trivial is essentially the N=12 descent already under discussion.
-```
-
-## 10. The single hardest residual left
-
-The hardest residual to dispatch next is:
-
-```lean
-import Mathlib
-
-namespace MazurProof.RationalPointsN12
-
-/-- Hard residual B. This is the direct-factorization shadow of the N=12 descent. -/
-/-
-theorem quartic_B_only_trivial
+/-- Direct residual A boundary. -/
+theorem quartic_A_only_trivial
     {u v Z : ℤ}
     (hcop : Int.gcd u v = 1)
     (huv0 : u * v ≠ 0)
-    (hB : Z ^ 2 = (3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2)) :
+    (hA : Z ^ 2 = (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2)) :
     u ^ 2 = v ^ 2
--/
+```
+
+or the more reusable Eisenstein/FLT3 theorem:
+
+```lean
+/-- Eisenstein quartic boundary, equivalent to the classical FLT3 descent. -/
+theorem eisensteinQuartic_only_trivial
+    {r s C : ℤ}
+    (hcop : Int.gcd r s = 1)
+    (hrs0 : r * s ≠ 0)
+    (hC : C ^ 2 = eisensteinQuarticRhs r s) :
+    r ^ 2 = s ^ 2
+```
+
+I would add `quartic_A_only_trivial` as the local boundary if the only consumer is `F`. If the repo already has an FLT3/Eisenstein-integer descent, route A through `eisensteinQuartic_only_trivial` instead.
+
+Caution: the previous quick derivation “A gives a primitive Pythagorean triple and hence immediately an Eisenstein quartic” hides parity/gcd cases. The identity
+
+```text
+Z^2 + (2*v^2)^2 = (u^2+v^2)^2
+```
+
+is always true, but the associated Pythagorean triple may have a common factor `2` when `u,v` are both odd. That is manageable, but it should be handled as a separate parity split rather than assumed primitive.
+
+## 6. False assumptions and safe hypotheses
+
+### B really does force `u,v` odd under gcd and the square equation
+
+This part of the previous answer is correct, with a slightly more precise mod-8 table:
+
+```text
+u odd,  v even:
+  if v^2 ≡ 0 mod 8, RHS ≡ 3 mod 8;
+  if v^2 ≡ 4 mod 8, RHS ≡ 7 mod 8.
+
+u even, v odd:
+  RHS ≡ 7 mod 8.
+
+u,v both even:
+  impossible from gcd(u,v)=1.
+
+therefore u,v both odd.
+```
+
+Squares mod `8` are only `0,1,4`.
+
+### Need `u^2 ≠ v^2` for the bridge to non-axis Q12
+
+Without this, residual B has primitive solutions:
+
+```text
+u = v = ±1,      Z = ±2,
+u = -v = ±1,     Z = ±2.
+```
+
+In these cases one of
+
+```text
+R = (u+v)/2,
+S = (u-v)/2
+```
+
+is zero. The Pythagorean parametrization then has `m*n=0`, which does not match the non-axis hypotheses used by `pythagorean_quartic_residual_reduction` and the signed-cover residual code.
+
+So the bridge theorem must be nontrivial:
+
+```lean
+(hne : u ^ 2 ≠ v ^ 2)
+```
+
+and the consumer theorem proves `u^2=v^2` by contradiction.
+
+### Need `u*v ≠ 0` for clean positivity and descent statements
+
+The zero cases are actually inconsistent with `hcop` and `hB`, but keeping
+
+```lean
+(huv0 : u * v ≠ 0)
+```
+
+makes positivity and non-axis statements painless. Since the F-boundary reduction has nonzero variables in the nonzero-X cases, this is a safe hypothesis.
+
+### Do not assume fixed signs in the Pythagorean parametrization
+
+The parametrization of
+
+```text
+s^2 = R^2 + S^2
+```
+
+gives legs only up to swap and sign. The twist
+
+```text
+R^2 + 4*R*S + S^2
+```
+
+is symmetric in `R,S`, but it is sensitive to the sign of `R*S`. If the product sign is negative, replace the final quartic parameter `n` by `-n`; this changes
+
+```text
+pythagoreanQuarticRhs m n
+```
+
+to the required cross-term sign. This is why the Pythagorean bridge theorem should produce `∃ m n`, not try to prescribe them.
+
+## 7. Final least-new-code integration pattern
+
+The direct F-boundary can consume A and B as follows.
+
+```lean
+import Mathlib
+
+namespace MazurProof.RationalPointsN12
+
+/-- B is closed by existing N=12 quartic machinery. -/
+theorem quartic_B_only_trivial_of_existing_Q12
+    (hQnone : ∀ {m n b : ℤ},
+      m * n ≠ 0 → Int.gcd m n = 1 → Odd (m + n) →
+      b ^ 2 = pythagoreanQuarticRhs m n → False)
+    {u v Z : ℤ}
+    (hcop : Int.gcd u v = 1)
+    (huv0 : u * v ≠ 0)
+    (hB : QuarticB u v Z) :
+    u ^ 2 = v ^ 2 := by
+  by_contra hne
+  rcases quartic_B_to_pythagoreanQuarticRhs hcop huv0 hne hB with
+    ⟨m,n,b,hmn0,hmn_cop,hmn_par,hq⟩
+  exact hQnone hmn0 hmn_cop hmn_par hq
+
+/-- A remains the only genuinely new arithmetic boundary for the direct F route,
+unless the repo already has an Eisenstein/FLT3 descent theorem. -/
+theorem F_x_coordinates_of_A_and_existing_Q12
+    (hAonly : ∀ {u v Z : ℤ},
+      Int.gcd u v = 1 → u * v ≠ 0 →
+      Z ^ 2 = (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2) →
+      u ^ 2 = v ^ 2)
+    (hQnone : ∀ {m n b : ℤ},
+      m * n ≠ 0 → Int.gcd m n = 1 → Odd (m + n) →
+      b ^ 2 = pythagoreanQuarticRhs m n → False) :
+    -- replace by the local target statement:
+    True := by
+  -- Use the existing rational-to-integral/cubic support code.
+  -- Squareclass m = u^2      -> A(u,n) -> X=1.
+  -- Squareclass m = -3*u^2   -> A(n,u) -> X=-3.
+  -- Squareclass m = 3*u^2    -> B(u,n), closed by existing Q12 -> X=3.
+  -- Squareclass m = -u^2     -> B(n,u), closed by existing Q12 -> X=-1.
+  trivial
 
 end MazurProof.RationalPointsN12
 ```
 
-The next best ChatGPT question is:
+Replace `hQnone` by the actual existing theorem if `pythagorean_quartic_residual_reduction` already directly closes primitive opposite-parity squares. If it only packages a residual, the bridge theorem still has the right output: feed `m,n,b` to the existing reduction and then to the already-proved signed/non-axis contradiction chain.
+
+## 8. Best next question
+
+The best next focused question is not about B; B now has a clear bridge to existing code. Ask for A:
 
 ```text
-Prove the primitive integer residual
-  Z^2 = (3*u^2 - v^2)*(u^2 + v^2), gcd(u,v)=1, u*v≠0 -> u^2=v^2,
-by a Lean-friendly infinite descent. Start with the mod-8 proof that u,v are odd, split the two 2 mod 8 factors into 2*squares, set R=(u+v)/2 and S=(u-v)/2, and show how the resulting Pythagorean parametrization gives a strictly smaller solution or reduces to the existing N=12 Q12 residual.
+Prove the primitive residual
+  Z^2 = (u^2 - v^2)*(u^2 + 3*v^2), gcd(u,v)=1, u*v≠0 -> u^2=v^2
+in a Lean-friendly way. Handle the parity cases in the Pythagorean identity
+  Z^2 + (2*v^2)^2 = (u^2+v^2)^2,
+then reduce to the Eisenstein quartic
+  C^2 = r^4 - r^2*s^2 + s^4
+or directly give an infinite descent.
 ```
 
-If that residual is accepted as a boundary, the requested `X ∈ {-3,0,1,-1,3}` theorem becomes mostly denominator clearing, gcd support, four `ring` substitutions, and rational arithmetic.
+That is the single remaining genuinely new arithmetic residual for the direct elementary F-boundary route.
