@@ -1,8 +1,77 @@
-# Q: FLT Lean N12 no nonaxis residual from shifted x-cases (redispatch after no-commit)
+# Q2268: Lean plan for `F_N12_AffineEquation` boundary
 
-The safest route is to **case-split on the normalized branch**, not to use only the aggregate `normalizedNonAxisFactorIdentity_to_F` output. The aggregate output forces `X ∈ {q,-q,3q,-3q}`, and then a purely squareclass proof needs rational nonsquare lemmas for `3` and `1/3`. Branch-splitting avoids those: the apparent exceptional cases `q=3` or `q=1/3` are killed by the branch identity itself.
+## Executive recommendation
 
-Below is paste-oriented Lean with no `sorry` in the executable code. It gives the general elementary helpers, the `q=1` branch helper, and a complete B1 branch contradiction. The final theorem is then a short split once the analogous B2/B3/B4 branch contradictions are added.
+Do not make `RationalPointsN12.lean` depend on a fully formalized elliptic-curve group, rank, or Selmer-group API. For this file, expose the 2-isogeny descent only through an elementary covering statement over `ℤ`, plus one hard residual theorem classifying four quartic covers.
+
+The current file should consume exactly this shape:
+
+```lean
+F_N12_AffineEquation X Y
+  ⟹ X = 0 ∨ ∃ d u v z : ℤ,
+       d ∈ {-3,-1,1,3}
+     ∧ X = d * (u/v)^2
+     ∧ z^2 = d*u^4 + 2*u^2*v^2 + (-3/d)*v^4
+  ⟹ X ∈ {-3,0,1,-1,3}
+```
+
+This is the cleanest Lean boundary between already-available algebra and the remaining mathematics. It avoids formalizing isogenies, Mordell-Weil rank, Selmer exact sequences, and torsion subgroup infrastructure inside the N12 file.
+
+---
+
+## A. Mathematical proof obligation
+
+The curve is
+
+```text
+F : y² = x³ + 2x² - 3x = x(x-1)(x+3).
+```
+
+It has full rational 2-torsion at `x = -3, 0, 1`, and the visible affine rational points are
+
+```text
+(-3,0), (0,0), (1,0), (-1,±2), (3,±6).
+```
+
+The desired theorem is exactly that every affine rational point has one of those five `x`-coordinates.
+
+### Recommended residual split
+
+Introduce two residual theorems.
+
+The first theorem is the elementary descent lift. It says that any nonzero affine point lands on one of four quartic homogeneous spaces. This is the part that can be proved with `Rat.num`, `Rat.den`, denominator-square, gcd, and valuations.
+
+The second theorem is the genuinely hard descent classification of those four quartics. It is where the infinite descent, FLT4-style argument, or 2-isogeny descent proof should live.
+
+The four quartics are:
+
+```text
+d =  1 : z² =  u⁴ + 2u²v² - 3v⁴ = (u²-v²)(u²+3v²)
+d = -1 : z² = -u⁴ + 2u²v² + 3v⁴ = (3v²-u²)(u²+v²)
+d =  3 : z² = 3u⁴ + 2u²v² - v⁴ = (3u²-v²)(u²+v²)
+d = -3 : z² = -3u⁴ + 2u²v² + v⁴ = (v²-u²)(3u²+v²)
+```
+
+The hard classification theorem should prove that a primitive nonzero solution forces `u² = v²`, hence `x = d`, for `d ∈ {-3,-1,1,3}`. The separate case `x = 0` is already one of the boundary values.
+
+### Why this is better than exposing Selmer groups
+
+The 2-isogeny story for
+
+```text
+E  : y² = x³ + 2x² - 3x
+E' : y² = x³ - 4x² + 16x
+```
+
+is mathematically natural. But a literal Lean implementation would need quotient squareclasses, isogeny maps, homogeneous spaces, exactness, rank, torsion, and then a bridge back to affine coordinates. That is far more infrastructure than this file needs.
+
+Instead, let any future isogeny proof establish the two elementary-looking residual theorems below. The N12 file then remains just rational arithmetic plus a small boundary wrapper.
+
+---
+
+## B. Lean wiring that can be added now
+
+The following block is intended to be paste-oriented. If placed in a new file, import the current N12 file instead of redefining `F_N12_AffineEquation`. If placed at the bottom of `RationalPointsN12.lean`, omit the import line that would import itself.
 
 ```lean
 import Mathlib
@@ -10,384 +79,373 @@ import Mathlib
 namespace MazurProof
 namespace RationalPointsN12
 
-/-- From `A*C = m*n` and `m*n ≠ 0`, the normalizing denominator `A` is nonzero. -/
-theorem A_ne_zero_of_hAC_hmn0
-    {m n A C : ℤ}
-    (hmn0 : m * n ≠ 0)
-    (hAC : A * C = m * n) :
-    A ≠ 0 := by
-  intro hA
-  apply hmn0
-  rw [← hAC, hA, zero_mul]
+/-- Boundary predicate for the shifted N12 curve. -/
+def F_N12_XBoundary (X : ℚ) : Prop :=
+  X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3
 
-/-- From `A*C = m*n` and `m*n ≠ 0`, the normalized factor `C` is nonzero. -/
-theorem C_ne_zero_of_hAC_hmn0
-    {m n A C : ℤ}
-    (hmn0 : m * n ≠ 0)
-    (hAC : A * C = m * n) :
-    C ≠ 0 := by
-  intro hC
-  apply hmn0
-  rw [← hAC, hC, mul_zero]
+/-- The right hand side of `F` factors completely over `ℚ`. -/
+theorem F_N12_rhs_factor (X : ℚ) :
+    X ^ 3 + 2 * X ^ 2 - 3 * X = X * (X - 1) * (X + 3) := by
+  ring
 
-/-- Left factor of a nonzero product is nonzero. -/
-theorem left_ne_zero_of_mul_ne_zero {m n : ℤ} (hmn0 : m * n ≠ 0) : m ≠ 0 := by
-  intro hm
-  apply hmn0
-  simp [hm]
+/-- Factorized form of the affine equation. -/
+theorem F_N12_AffineEquation_factor_iff (X Y : ℚ) :
+    F_N12_AffineEquation X Y ↔ Y ^ 2 = X * (X - 1) * (X + 3) := by
+  unfold F_N12_AffineEquation
+  rw [F_N12_rhs_factor]
 
-/-- Right factor of a nonzero product is nonzero. -/
-theorem right_ne_zero_of_mul_ne_zero {m n : ℤ} (hmn0 : m * n ≠ 0) : n ≠ 0 := by
-  intro hn
-  apply hmn0
-  simp [hn]
+/-- The four squareclass representatives that occur in the descent. -/
+def F_N12_D (d : ℤ) : Prop :=
+  d = -3 ∨ d = -1 ∨ d = 1 ∨ d = 3
 
-/-- The rational square `((m : ℚ)/(A : ℚ))^2` is nonzero under the bridge hypotheses. -/
-theorem ratio_sq_ne_zero_of_hmn0_hA
-    {m n A : ℤ}
-    (hmn0 : m * n ≠ 0)
-    (hA : A ≠ 0) :
-    ((m : ℚ) / (A : ℚ)) ^ 2 ≠ 0 := by
-  have hm0 : m ≠ 0 := left_ne_zero_of_mul_ne_zero hmn0
-  have hmQ : (m : ℚ) ≠ 0 := by exact_mod_cast hm0
-  have hAQ : (A : ℚ) ≠ 0 := by exact_mod_cast hA
-  have hdiv : (m : ℚ) / (A : ℚ) ≠ 0 := div_ne_zero hmQ hAQ
-  intro hzero
-  exact hdiv (sq_eq_zero_iff.mp hzero)
+/-- Integer value of `-3/d` on the allowed representatives. The fallback `0` is never used
+under `F_N12_D d`, but makes the definition total. -/
+def F_N12_BoverD (d : ℤ) : ℤ :=
+  if d = -3 then 1
+  else if d = -1 then 3
+  else if d = 1 then -3
+  else if d = 3 then -1
+  else 0
 
-/-- A rational square is not `-1`. -/
-theorem ratio_sq_ne_neg_one {t : ℚ} : t ^ 2 ≠ (-1 : ℚ) := by
-  intro h
-  have hnonneg : 0 ≤ t ^ 2 := sq_nonneg t
-  nlinarith
+@[simp] theorem F_N12_BoverD_neg_three : F_N12_BoverD (-3) = 1 := by
+  simp [F_N12_BoverD]
 
-/-- A rational square is not `-3`. -/
-theorem ratio_sq_ne_neg_three {t : ℚ} : t ^ 2 ≠ (-3 : ℚ) := by
-  intro h
-  have hnonneg : 0 ≤ t ^ 2 := sq_nonneg t
-  nlinarith
+@[simp] theorem F_N12_BoverD_neg_one : F_N12_BoverD (-1) = 3 := by
+  simp [F_N12_BoverD]
 
-/-- Opposite parity contradicts `m = n`. -/
-theorem opposite_parity_not_eq
-    {m n : ℤ}
-    (hpar : (m % 2 = 0 ∧ n % 2 = 1) ∨ (m % 2 = 1 ∧ n % 2 = 0))
-    (h : m = n) :
-    False := by
-  omega
+@[simp] theorem F_N12_BoverD_one : F_N12_BoverD 1 = -3 := by
+  simp [F_N12_BoverD]
 
-/-- Opposite parity contradicts `m = -n`. -/
-theorem opposite_parity_not_neg
-    {m n : ℤ}
-    (hpar : (m % 2 = 0 ∧ n % 2 = 1) ∨ (m % 2 = 1 ∧ n % 2 = 0))
-    (h : m = -n) :
-    False := by
-  omega
+@[simp] theorem F_N12_BoverD_three : F_N12_BoverD 3 = -1 := by
+  simp [F_N12_BoverD]
 
-/-- If `(m/A)^2 = 1` over `ℚ`, then `m = A` or `m = -A` over `ℤ`. -/
-theorem int_ratio_sq_eq_one_cases
-    {m A : ℤ}
-    (hA : A ≠ 0)
-    (hq : ((m : ℚ) / (A : ℚ)) ^ 2 = 1) :
-    m = A ∨ m = -A := by
-  have hAQ : (A : ℚ) ≠ 0 := by exact_mod_cast hA
-  have hsq : (m : ℚ) ^ 2 = (A : ℚ) ^ 2 := by
-    field_simp [hAQ] at hq
-    simpa using hq
-  have hprod : ((m : ℚ) - (A : ℚ)) * ((m : ℚ) + (A : ℚ)) = 0 := by
-    ring_nf
-    nlinarith
-  rcases mul_eq_zero.mp hprod with hsub | hsum
-  · left
-    apply Int.cast_injective
-    linarith
-  · right
-    apply Int.cast_injective
-    have hmneg : (m : ℚ) = - (A : ℚ) := by linarith
-    simpa using hmneg
+/-- The four descent quartics, uniformly written as
+`z² = d*u⁴ + 2*u²*v² + (-3/d)*v⁴`. -/
+def F_N12_Quartic (d u v z : ℤ) : Prop :=
+  z ^ 2 = d * u ^ 4 + 2 * u ^ 2 * v ^ 2 + F_N12_BoverD d * v ^ 4
 
-/-- If `A*C=m*n` and `(m/A)^2=1`, then `(A,C)` equals `(m,n)` or `(-m,-n)`. -/
-theorem AC_eq_mn_or_neg_of_ratio_sq_eq_one
-    {m n A C : ℤ}
-    (hmn0 : m * n ≠ 0)
-    (hAC : A * C = m * n)
-    (hq : ((m : ℚ) / (A : ℚ)) ^ 2 = 1) :
-    (A = m ∧ C = n) ∨ (A = -m ∧ C = -n) := by
-  have hm0 : m ≠ 0 := left_ne_zero_of_mul_ne_zero hmn0
-  have hA0 : A ≠ 0 := A_ne_zero_of_hAC_hmn0 hmn0 hAC
-  rcases int_ratio_sq_eq_one_cases (m := m) (A := A) hA0 hq with hmA | hmnegA
-  · left
-    have hAeq : A = m := by omega
-    constructor
-    · exact hAeq
-    · have hmul : m * C = m * n := by simpa [hAeq] using hAC
-      exact mul_left_cancel₀ hm0 hmul
-  · right
-    have hAeq : A = -m := by omega
-    constructor
-    · exact hAeq
-    · have hmul : m * (-C) = m * n := by
-        calc
-          m * (-C) = (-m) * C := by ring
-          _ = A * C := by rw [hAeq]
-          _ = m * n := hAC
-      have hnegC : -C = n := mul_left_cancel₀ hm0 hmul
-      omega
+/-- A nonzero affine point lifted to one of the four integral quartic covers. -/
+def F_N12_QuarticCert (X : ℚ) : Prop :=
+  ∃ d u v z : ℤ,
+    F_N12_D d ∧
+    Nat.Coprime u.natAbs v.natAbs ∧
+    u ≠ 0 ∧
+    v ≠ 0 ∧
+    X = (d : ℚ) * (u : ℚ) ^ 2 / (v : ℚ) ^ 2 ∧
+    F_N12_Quartic d u v z
 
-/-- Under any normalized branch, the case `q=1` forces `m=n` or `m=-n`. -/
-theorem normalized_branch_q1_forces_m_eq_or_neg
-    {m n A C : ℤ}
-    (hmn0 : m * n ≠ 0)
-    (hnorm : NormalizedNonAxisFactorIdentity m n A C)
-    (hq : ((m : ℚ) / (A : ℚ)) ^ 2 = 1) :
-    m = n ∨ m = -n := by
-  rcases hnorm with ⟨hAC, hB1 | hB2 | hB3 | hB4⟩
-  · rcases AC_eq_mn_or_neg_of_ratio_sq_eq_one hmn0 hAC hq with hpair | hpair
-    · rcases hpair with ⟨hA, hC⟩
-      left
-      have hEq := hB1
-      rw [hA, hC] at hEq
-      ring_nf at hEq
-      nlinarith
-    · rcases hpair with ⟨hA, hC⟩
-      left
-      have hEq := hB1
-      rw [hA, hC] at hEq
-      ring_nf at hEq
-      nlinarith
-  · rcases AC_eq_mn_or_neg_of_ratio_sq_eq_one hmn0 hAC hq with hpair | hpair
-    · rcases hpair with ⟨hA, hC⟩
-      right
-      have hm0 : m ≠ 0 := left_ne_zero_of_mul_ne_zero hmn0
-      have hEq := hB2
-      rw [hA, hC] at hEq
-      have hprod : m * (m + n) = 0 := by
-        ring_nf at hEq
-        nlinarith
-      rcases mul_eq_zero.mp hprod with hm | hsum
-      · exact False.elim (hm0 hm)
-      · omega
-    · rcases hpair with ⟨hA, hC⟩
-      right
-      have hm0 : m ≠ 0 := left_ne_zero_of_mul_ne_zero hmn0
-      have hEq := hB2
-      rw [hA, hC] at hEq
-      have hprod : m * (m + n) = 0 := by
-        ring_nf at hEq
-        nlinarith
-      rcases mul_eq_zero.mp hprod with hm | hsum
-      · exact False.elim (hm0 hm)
-      · omega
-  · rcases AC_eq_mn_or_neg_of_ratio_sq_eq_one hmn0 hAC hq with hpair | hpair
-    · rcases hpair with ⟨hA, hC⟩
-      left
-      have hn0 : n ≠ 0 := right_ne_zero_of_mul_ne_zero hmn0
-      have hEq := hB3
-      rw [hA, hC] at hEq
-      have hprod : n * (m - n) = 0 := by
-        ring_nf at hEq
-        nlinarith
-      rcases mul_eq_zero.mp hprod with hn | hdiff
-      · exact False.elim (hn0 hn)
-      · omega
-    · rcases hpair with ⟨hA, hC⟩
-      left
-      have hn0 : n ≠ 0 := right_ne_zero_of_mul_ne_zero hmn0
-      have hEq := hB3
-      rw [hA, hC] at hEq
-      have hprod : n * (m - n) = 0 := by
-        ring_nf at hEq
-        nlinarith
-      rcases mul_eq_zero.mp hprod with hn | hdiff
-      · exact False.elim (hn0 hn)
-      · omega
-  · rcases AC_eq_mn_or_neg_of_ratio_sq_eq_one hmn0 hAC hq with hpair | hpair
-    · rcases hpair with ⟨hA, hC⟩
-      right
-      have hEq := hB4
-      rw [hA, hC] at hEq
-      ring_nf at hEq
-      nlinarith
-    · rcases hpair with ⟨hA, hC⟩
-      right
-      have hEq := hB4
-      rw [hA, hC] at hEq
-      ring_nf at hEq
-      nlinarith
+/-- Residual theorem 1: elementary descent lift.
 
-/-- B1 algebraic relation in normalized rational variables. -/
-theorem branch_B1_relation
-    {m n A C : ℤ}
-    (hAC : A * C = m * n)
-    (hA : A ≠ 0)
-    (hB1 : (m - n) * (m + n) = (A - C) * (3 * A - C)) :
-    ((((m : ℚ) / (A : ℚ)) ^ 2 + 1) * ((C : ℚ) / (A : ℚ)) ^ 2
-      - 4 * (((m : ℚ) / (A : ℚ)) ^ 2) * ((C : ℚ) / (A : ℚ))
-      + 3 * (((m : ℚ) / (A : ℚ)) ^ 2)
-      - (((m : ℚ) / (A : ℚ)) ^ 2) ^ 2) = 0 := by
-  have hAq : (A : ℚ) ≠ 0 := by exact_mod_cast hA
-  have hACq : (A : ℚ) * (C : ℚ) = (m : ℚ) * (n : ℚ) := by
-    exact_mod_cast hAC
-  have hB1q :
-      ((m : ℚ) - (n : ℚ)) * ((m : ℚ) + (n : ℚ)) =
-        ((A : ℚ) - (C : ℚ)) * (3 * (A : ℚ) - (C : ℚ)) := by
-    exact_mod_cast hB1
-  have hACsq : ((A : ℚ) * (C : ℚ)) ^ 2 = ((m : ℚ) * (n : ℚ)) ^ 2 := by
-    rw [hACq]
-  have hB1mul :
-      ((m : ℚ) ^ 2) * (((m : ℚ) - (n : ℚ)) * ((m : ℚ) + (n : ℚ))) =
-        ((m : ℚ) ^ 2) * (((A : ℚ) - (C : ℚ)) * (3 * (A : ℚ) - (C : ℚ))) := by
-    rw [hB1q]
-  field_simp [hAq]
-  ring_nf at hACsq hB1mul ⊢
-  nlinarith
+Expected proof ingredients:
+* write `X = X.num / X.den` and prove the denominator is a square;
+* write `X = m / n²`, `Y = k / n³`, with `Nat.Coprime m.natAbs n.natAbs`;
+* obtain `k² = m * (m - n²) * (m + 3*n²)`;
+* use pairwise gcd information to prove the squarefree part of `m` is one of
+  `-3, -1, 1, 3`;
+* write `m = d*u²` and divide by `(d*u)²` to get the quartic equation.
+-/
+axiom F_N12_descent_lift_to_quartic :
+    ∀ {X Y : ℚ}, F_N12_AffineEquation X Y →
+      X = 0 ∨ F_N12_QuarticCert X
 
-/-- In B1, the shifted-x case `q = 3` also forces `m = n`.
-This avoids a separate rational-irrationality proof for `√3`. -/
-theorem branch_B1_q3_forces_m_eq_n
-    {m n A C : ℤ}
-    (hmn0 : m * n ≠ 0)
-    (hAC : A * C = m * n)
-    (hB1 : (m - n) * (m + n) = (A - C) * (3 * A - C))
-    (hq : ((m : ℚ) / (A : ℚ)) ^ 2 = 3) :
-    m = n := by
-  have hm0 : m ≠ 0 := left_ne_zero_of_mul_ne_zero hmn0
-  have hC0 : C ≠ 0 := C_ne_zero_of_hAC_hmn0 hmn0 hAC
-  have hA : A ≠ 0 := A_ne_zero_of_hAC_hmn0 hmn0 hAC
-  let q : ℚ := ((m : ℚ) / (A : ℚ)) ^ 2
-  let r : ℚ := (C : ℚ) / (A : ℚ)
-  have hrel : (q + 1) * r ^ 2 - 4 * q * r + 3 * q - q ^ 2 = 0 := by
-    simpa [q, r] using branch_B1_relation (m := m) (n := n) (A := A) (C := C) hAC hA hB1
-  have hq' : q = 3 := by simpa [q] using hq
-  have hrprod : r * (r - 3) = 0 := by
-    rw [hq'] at hrel
-    ring_nf at hrel ⊢
-    nlinarith
-  have hAq : (A : ℚ) ≠ 0 := by exact_mod_cast hA
-  have hCq_ne : (C : ℚ) ≠ 0 := by exact_mod_cast hC0
-  have hr_ne_zero : r ≠ 0 := by
-    dsimp [r]
-    exact div_ne_zero hCq_ne hAq
-  have hr : r = 3 := by
-    rcases mul_eq_zero.mp hrprod with hr0 | hr3
-    · exact False.elim (hr_ne_zero hr0)
-    · linarith
-  have hCq : (C : ℚ) = 3 * (A : ℚ) := by
-    have hmul := congrArg (fun z : ℚ => z * (A : ℚ)) hr
-    dsimp [r] at hmul
-    field_simp [hAq] at hmul
-    linarith
-  have hq_sq : (m : ℚ) ^ 2 = 3 * (A : ℚ) ^ 2 := by
-    dsimp [q] at hq'
-    field_simp [hAq] at hq'
-    nlinarith
-  have hACq : (A : ℚ) * (C : ℚ) = (m : ℚ) * (n : ℚ) := by
-    exact_mod_cast hAC
-  have hm2mn : (m : ℚ) ^ 2 = (m : ℚ) * (n : ℚ) := by
-    nlinarith
-  have hmQ : (m : ℚ) ≠ 0 := by exact_mod_cast hm0
-  have hmq : (m : ℚ) = (n : ℚ) := by
-    have hmul : (m : ℚ) * (m : ℚ) = (m : ℚ) * (n : ℚ) := by
-      simpa [pow_two] using hm2mn
-    exact mul_left_cancel₀ hmQ hmul
-  exact_mod_cast hmq
+/-- Residual theorem 2: classification of the four quartic covers.
 
-/-- Complete B1 branch contradiction from the shifted x-coordinate boundary. -/
-theorem branch_B1_contra_of_F_boundary
-    (hFbd : ∀ {X Y : ℚ}, F_N12_AffineEquation X Y →
-      X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3)
-    {m n A C : ℤ}
-    (hmn0 : m * n ≠ 0)
-    (hpar : (m % 2 = 0 ∧ n % 2 = 1) ∨ (m % 2 = 1 ∧ n % 2 = 0))
-    (hAC : A * C = m * n)
-    (hB1 : (m - n) * (m + n) = (A - C) * (3 * A - C)) :
-    False := by
-  have hA : A ≠ 0 := A_ne_zero_of_hAC_hmn0 hmn0 hAC
-  obtain ⟨Y, hY⟩ := branch_B1_to_F (m := m) (n := n) (A := A) (C := C) hAC hA hB1
-  rcases hFbd hY with hX | hX | hX | hX | hX
-  · have hnonneg : 0 ≤ (((m : ℚ) / (A : ℚ)) ^ 2) := sq_nonneg _
-    nlinarith
-  · exact ratio_sq_ne_zero_of_hmn0_hA (m := m) (n := n) (A := A) hmn0 hA hX
-  · have hnorm : NormalizedNonAxisFactorIdentity m n A C := ⟨hAC, Or.inl hB1⟩
-    rcases normalized_branch_q1_forces_m_eq_or_neg hmn0 hnorm hX with hmn | hmneg
-    · exact opposite_parity_not_eq hpar hmn
-    · exact opposite_parity_not_neg hpar hmneg
-  · have hnonneg : 0 ≤ (((m : ℚ) / (A : ℚ)) ^ 2) := sq_nonneg _
-    nlinarith
-  · exact opposite_parity_not_eq hpar (branch_B1_q3_forces_m_eq_n hmn0 hAC hB1 hX)
+This is the hard mathematical theorem. It can be proved by an elementary infinite descent
+on the factored quartics, or by a formal 2-isogeny descent packaged to produce this exact
+integer statement. -/
+axiom F_N12_quartic_solution_residual :
+    ∀ {d u v z : ℤ},
+      F_N12_D d →
+      Nat.Coprime u.natAbs v.natAbs →
+      u ≠ 0 →
+      v ≠ 0 →
+      F_N12_Quartic d u v z →
+        (d = -3 ∧ u ^ 2 = v ^ 2) ∨
+        (d = -1 ∧ u ^ 2 = v ^ 2) ∨
+        (d = 1 ∧ u ^ 2 = v ^ 2) ∨
+        (d = 3 ∧ u ^ 2 = v ^ 2)
+
+/-- If `u² = v²`, then the rational `x = d*u²/v²` is just `d`. -/
+private theorem F_N12_x_eq_of_int_sq_eq
+    {d u v : ℤ} (hv : v ≠ 0) (hsq : u ^ 2 = v ^ 2) :
+    (d : ℚ) * (u : ℚ) ^ 2 / (v : ℚ) ^ 2 = (d : ℚ) := by
+  have hvq : (v : ℚ) ≠ 0 := by
+    exact_mod_cast hv
+  have hsqQ : (u : ℚ) ^ 2 = (v : ℚ) ^ 2 := by
+    exact_mod_cast hsq
+  rw [hsqQ]
+  field_simp [hvq]
+
+/-- The quartic residual implies the desired boundary for a certified point. -/
+theorem F_N12_boundary_of_quartic_cert {X : ℚ}
+    (hcert : F_N12_QuarticCert X) :
+    F_N12_XBoundary X := by
+  rcases hcert with ⟨d, u, v, z, hd, hcop, hu, hv, hx, hq⟩
+  rcases F_N12_quartic_solution_residual hd hcop hu hv hq with hneg3 | hneg1 | hone | hthree
+  · rcases hneg3 with ⟨hd', huv⟩
+    subst d
+    left
+    rw [hx]
+    exact F_N12_x_eq_of_int_sq_eq (d := -3) hv huv
+  · rcases hneg1 with ⟨hd', huv⟩
+    subst d
+    right; right; right; left
+    rw [hx]
+    exact F_N12_x_eq_of_int_sq_eq (d := -1) hv huv
+  · rcases hone with ⟨hd', huv⟩
+    subst d
+    right; right; left
+    rw [hx]
+    exact F_N12_x_eq_of_int_sq_eq (d := 1) hv huv
+  · rcases hthree with ⟨hd', huv⟩
+    subst d
+    right; right; right; right
+    rw [hx]
+    exact F_N12_x_eq_of_int_sq_eq (d := 3) hv huv
+
+/-- Main boundary theorem for the shifted affine curve. -/
+theorem F_N12_AffineEquation_boundary
+    {X Y : ℚ} (h : F_N12_AffineEquation X Y) :
+    X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3 := by
+  rcases F_N12_descent_lift_to_quartic h with hx0 | hcert
+  · right; left
+    exact hx0
+  · exact F_N12_boundary_of_quartic_cert hcert
 
 end RationalPointsN12
 end MazurProof
 ```
 
-## Exact remaining branch interfaces
+### Small algebra lemmas worth adding immediately
 
-The full theorem should use the following three analogous branch contradictions. Their proofs follow the B1 pattern: use `branch_B*_to_F`; the `q=1` case is already handled by `normalized_branch_q1_forces_m_eq_or_neg`; the visible exceptional case is killed by the corresponding branch algebra.
+These lemmas do not solve the descent, but they make the residual theorem easy to connect to existing branch-to-`F` wrappers.
 
 ```lean
+import Mathlib
+
 namespace MazurProof
 namespace RationalPointsN12
 
--- B2: `X=-q`; boundary leaves `q=1` or `q=3`; both force `m=-n`.
--- theorem branch_B2_contra_of_F_boundary
---     (hFbd : ∀ {X Y : ℚ}, F_N12_AffineEquation X Y →
---       X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3)
---     {m n A C : ℤ}
---     (hmn0 : m * n ≠ 0)
---     (hpar : (m % 2 = 0 ∧ n % 2 = 1) ∨ (m % 2 = 1 ∧ n % 2 = 0))
---     (hAC : A * C = m * n)
---     (hB2 : (m - n) * (m + n) = -((A + C) * (3 * A + C))) :
---     False
+@[simp] theorem F_N12_affine_neg_three :
+    F_N12_AffineEquation (-3) 0 := by
+  norm_num [F_N12_AffineEquation]
 
--- B3: `X=3*q`; boundary leaves `q=1` or `q=1/3`; both force `m=n`.
--- theorem branch_B3_contra_of_F_boundary
---     (hFbd : ∀ {X Y : ℚ}, F_N12_AffineEquation X Y →
---       X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3)
---     {m n A C : ℤ}
---     (hmn0 : m * n ≠ 0)
---     (hpar : (m % 2 = 0 ∧ n % 2 = 1) ∨ (m % 2 = 1 ∧ n % 2 = 0))
---     (hAC : A * C = m * n)
---     (hB3 : (m - n) * (m + n) = (A - C) * (A - 3 * C)) :
---     False
+@[simp] theorem F_N12_affine_zero :
+    F_N12_AffineEquation 0 0 := by
+  norm_num [F_N12_AffineEquation]
 
--- B4: `X=-3*q`; boundary leaves `q=1` or `q=1/3`; both force `m=-n`.
--- theorem branch_B4_contra_of_F_boundary
---     (hFbd : ∀ {X Y : ℚ}, F_N12_AffineEquation X Y →
---       X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3)
---     {m n A C : ℤ}
---     (hmn0 : m * n ≠ 0)
---     (hpar : (m % 2 = 0 ∧ n % 2 = 1) ∨ (m % 2 = 1 ∧ n % 2 = 0))
---     (hAC : A * C = m * n)
---     (hB4 : (m - n) * (m + n) = -((A + C) * (A + 3 * C))) :
---     False
+@[simp] theorem F_N12_affine_one :
+    F_N12_AffineEquation 1 0 := by
+  norm_num [F_N12_AffineEquation]
+
+@[simp] theorem F_N12_affine_neg_one_pos :
+    F_N12_AffineEquation (-1) 2 := by
+  norm_num [F_N12_AffineEquation]
+
+@[simp] theorem F_N12_affine_neg_one_neg :
+    F_N12_AffineEquation (-1) (-2) := by
+  norm_num [F_N12_AffineEquation]
+
+@[simp] theorem F_N12_affine_three_pos :
+    F_N12_AffineEquation 3 6 := by
+  norm_num [F_N12_AffineEquation]
+
+@[simp] theorem F_N12_affine_three_neg :
+    F_N12_AffineEquation 3 (-6) := by
+  norm_num [F_N12_AffineEquation]
+
+/-- Rational substitution identity behind the quartic cover.
+For integral use, instantiate `d,u,v,Y : ℚ`, then prove the left side is an integer square
+from the primitive denominator facts. -/
+theorem F_N12_squareclass_substitution_identity
+    {d u v Y : ℚ}
+    (hd : d ≠ 0) (hu : u ≠ 0) (hv : v ≠ 0)
+    (h : F_N12_AffineEquation (d * u ^ 2 / v ^ 2) Y) :
+    (Y * v ^ 3 / (d * u)) ^ 2 =
+      d * u ^ 4 + 2 * u ^ 2 * v ^ 2 - (3 / d) * v ^ 4 := by
+  unfold F_N12_AffineEquation at h
+  field_simp [hd, hu, hv] at h ⊢
+  ring_nf at h ⊢
+  exact h
+
+/-- Quartic factorization, `d = 1`. -/
+theorem F_N12_quartic_one_factor {u v z : ℤ}
+    (h : F_N12_Quartic 1 u v z) :
+    z ^ 2 = (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2) := by
+  have h' : z ^ 2 = u ^ 4 + 2 * u ^ 2 * v ^ 2 - 3 * v ^ 4 := by
+    simpa [F_N12_Quartic, F_N12_BoverD] using h
+  rw [h']
+  ring
+
+/-- Quartic factorization, `d = -1`. -/
+theorem F_N12_quartic_neg_one_factor {u v z : ℤ}
+    (h : F_N12_Quartic (-1) u v z) :
+    z ^ 2 = (3 * v ^ 2 - u ^ 2) * (u ^ 2 + v ^ 2) := by
+  have h' : z ^ 2 = -u ^ 4 + 2 * u ^ 2 * v ^ 2 + 3 * v ^ 4 := by
+    simpa [F_N12_Quartic, F_N12_BoverD] using h
+  rw [h']
+  ring
+
+/-- Quartic factorization, `d = 3`. -/
+theorem F_N12_quartic_three_factor {u v z : ℤ}
+    (h : F_N12_Quartic 3 u v z) :
+    z ^ 2 = (3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2) := by
+  have h' : z ^ 2 = 3 * u ^ 4 + 2 * u ^ 2 * v ^ 2 - v ^ 4 := by
+    simpa [F_N12_Quartic, F_N12_BoverD] using h
+  rw [h']
+  ring
+
+/-- Quartic factorization, `d = -3`. -/
+theorem F_N12_quartic_neg_three_factor {u v z : ℤ}
+    (h : F_N12_Quartic (-3) u v z) :
+    z ^ 2 = (v ^ 2 - u ^ 2) * (3 * u ^ 2 + v ^ 2) := by
+  have h' : z ^ 2 = -3 * u ^ 4 + 2 * u ^ 2 * v ^ 2 + v ^ 4 := by
+    simpa [F_N12_Quartic, F_N12_BoverD] using h
+  rw [h']
+  ring
 
 end RationalPointsN12
 end MazurProof
 ```
 
-After those are present, the final theorem is just:
+The connection to any existing branch wrapper is then one line. If an existing lemma has produced
 
 ```lean
+hF : F_N12_AffineEquation X Y
+```
+
+then use
+
+```lean
+have hX : X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3 :=
+  F_N12_AffineEquation_boundary hF
+```
+
+No branch-specific descent facts should be duplicated.
+
+---
+
+## C. Exact elementary finite-case reduction statements
+
+Here is the recommended theorem set if you want to prove the lift theorem incrementally rather than as one large residual.
+
+```lean
+import Mathlib
+
 namespace MazurProof
 namespace RationalPointsN12
 
--- theorem no_NonAxisFactorIdentityResidual_of_F_boundary
---     (hFbd : ∀ {X Y : ℚ}, F_N12_AffineEquation X Y →
---       X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3)
---     {m n a c : ℤ}
---     (hmn0 : m * n ≠ 0)
---     (hcop : Int.gcd m n = 1)
---     (hpar : (m % 2 = 0 ∧ n % 2 = 1) ∨ (m % 2 = 1 ∧ n % 2 = 0))
---     (hres : NonAxisFactorIdentityResidual m n a c) :
---     False := by
---   obtain ⟨A, C, hnorm⟩ := nonAxisFactorIdentityResidual_normalize hres
---   rcases hnorm with ⟨hAC, hB1 | hB2 | hB3 | hB4⟩
---   · exact branch_B1_contra_of_F_boundary hFbd hmn0 hpar hAC hB1
---   · exact branch_B2_contra_of_F_boundary hFbd hmn0 hpar hAC hB2
---   · exact branch_B3_contra_of_F_boundary hFbd hmn0 hpar hAC hB3
---   · exact branch_B4_contra_of_F_boundary hFbd hmn0 hpar hAC hB4
+/-- Denominator-square lemma for integral monic Weierstrass equations. -/
+axiom F_N12_x_den_is_square :
+    ∀ {X Y : ℚ}, F_N12_AffineEquation X Y →
+      ∃ v : ℤ, v ≠ 0 ∧ (X.den : ℤ) = v ^ 2
+
+/-- Squareclass restriction for the numerator of `X`.
+This is the key finite squareclass statement. -/
+axiom F_N12_x_num_squareclass :
+    ∀ {X Y : ℚ}, F_N12_AffineEquation X Y → X ≠ 0 →
+      ∃ d u v : ℤ,
+        F_N12_D d ∧
+        Nat.Coprime u.natAbs v.natAbs ∧
+        u ≠ 0 ∧
+        v ≠ 0 ∧
+        X = (d : ℚ) * (u : ℚ) ^ 2 / (v : ℚ) ^ 2
+
+/-- Integral square lift after the squareclass restriction. -/
+axiom F_N12_squareclass_to_integral_quartic :
+    ∀ {X Y : ℚ} {d u v : ℤ},
+      F_N12_AffineEquation X Y →
+      F_N12_D d →
+      Nat.Coprime u.natAbs v.natAbs →
+      u ≠ 0 →
+      v ≠ 0 →
+      X = (d : ℚ) * (u : ℚ) ^ 2 / (v : ℚ) ^ 2 →
+        ∃ z : ℤ, F_N12_Quartic d u v z
+
+/-- The composed elementary descent lift. -/
+theorem F_N12_descent_lift_to_quartic_from_parts
+    {X Y : ℚ} (h : F_N12_AffineEquation X Y) :
+    X = 0 ∨ F_N12_QuarticCert X := by
+  by_cases hx : X = 0
+  · exact Or.inl hx
+  · rcases F_N12_x_num_squareclass h hx with ⟨d, u, v, hd, hcop, hu, hv, hX⟩
+    rcases F_N12_squareclass_to_integral_quartic h hd hcop hu hv hX with ⟨z, hz⟩
+    exact Or.inr ⟨d, u, v, z, hd, hcop, hu, hv, hX, hz⟩
 
 end RationalPointsN12
 end MazurProof
 ```
 
-`hcop` is intentionally unused; it is kept only to match the bridge theorem’s existing output shape.
+The proof of `F_N12_x_num_squareclass` is elementary and should not require elliptic curves. The core calculation is:
+
+```text
+X = m/n²,  Y = k/n³,
+gcd(m,n)=1,
+k² = m(m-n²)(m+3n²).
+```
+
+Then:
+
+```text
+gcd(m, m-n²) = 1,
+gcd(m, m+3n²) ∣ 3,
+gcd(m-n², m+3n²) ∣ 4.
+```
+
+Therefore any odd prime other than `3` has even valuation in `m`; the 2-adic valuation of `m` is also even; hence the squarefree part of `m` is one of `±1, ±3`.
+
+That proves the finite rational squareclass reduction. It does not, by itself, classify the quartic solutions.
+
+---
+
+## D. Shorter elementary route?
+
+For this specific curve, the shortest Lean-friendly route is not a literal formal 2-isogeny rank computation. It is the same mathematics expressed as the four quartic covers above.
+
+Reasons:
+
+1. The curve has full rational 2-torsion, so the elementary numerator/denominator descent gives the same squareclass representatives `±1, ±3` without quotienting by `ℚˣ/(ℚˣ)²`.
+2. The four quartics factor into products of binary quadratic forms. Their classification can be attacked with `Nat.Coprime`, parity, `Int.gcd`, valuations, and infinite descent.
+3. A literal 2-isogeny route would still need to solve the same homogeneous spaces, but it would also require formalizing much more elliptic-curve API.
+
+I would not try to prove the final boundary by only a finite table of modular checks. Each quartic has the known local/global solution with `u² = v²`, so congruences alone cannot simply rule out the whole cover. Some descent or a packaged theorem such as an FLT4/Fermat-right-triangle style residual is needed.
+
+A possible future strengthening is to prove each quartic residual separately:
+
+```lean
+axiom F_N12_quartic_one_residual :
+    ∀ {u v z : ℤ},
+      Nat.Coprime u.natAbs v.natAbs → u ≠ 0 → v ≠ 0 →
+      F_N12_Quartic 1 u v z → u ^ 2 = v ^ 2
+
+axiom F_N12_quartic_neg_one_residual :
+    ∀ {u v z : ℤ},
+      Nat.Coprime u.natAbs v.natAbs → u ≠ 0 → v ≠ 0 →
+      F_N12_Quartic (-1) u v z → u ^ 2 = v ^ 2
+
+axiom F_N12_quartic_three_residual :
+    ∀ {u v z : ℤ},
+      Nat.Coprime u.natAbs v.natAbs → u ≠ 0 → v ≠ 0 →
+      F_N12_Quartic 3 u v z → u ^ 2 = v ^ 2
+
+axiom F_N12_quartic_neg_three_residual :
+    ∀ {u v z : ℤ},
+      Nat.Coprime u.natAbs v.natAbs → u ≠ 0 → v ≠ 0 →
+      F_N12_Quartic (-3) u v z → u ^ 2 = v ^ 2
+```
+
+Then combine these into `F_N12_quartic_solution_residual` by cases on `F_N12_D d`. This is often easier for Lean because each branch has its own factorization lemma and its own parity/gcd normalization.
+
+---
+
+## E. Suggested implementation order
+
+1. Add `F_N12_XBoundary`, `F_N12_rhs_factor`, `F_N12_D`, `F_N12_BoverD`, `F_N12_Quartic`, and `F_N12_QuarticCert`.
+2. Add the two residual axioms or theorem declarations:
+   * `F_N12_descent_lift_to_quartic`
+   * `F_N12_quartic_solution_residual`
+3. Prove the wrapper `F_N12_AffineEquation_boundary` immediately.
+4. Replace `F_N12_descent_lift_to_quartic` with the three smaller elementary lemmas once numerator/denominator work is done.
+5. Attack the four quartic residuals one at a time, using the factor lemmas.
+
+This gives the current file a stable endpoint now while keeping the hard mathematics isolated in precise, auditable theorem statements.
