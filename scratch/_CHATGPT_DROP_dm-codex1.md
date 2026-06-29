@@ -1,80 +1,210 @@
-# Q2268: Lean plan for `F_N12_AffineEquation` boundary
+# Q2274: Lean plan for the `F_N12_AffineEquation` boundary
 
 ## Executive recommendation
 
-Do not make `RationalPointsN12.lean` depend on a fully formalized elliptic-curve group, rank, or Selmer-group API. For this file, expose the 2-isogeny descent only through an elementary covering statement over `ℤ`, plus one hard residual theorem classifying four quartic covers.
-
-The current file should consume exactly this shape:
+Do not make `FLT/Assumptions/MazurProof/RationalPointsN12.lean` depend on a formal elliptic-curve group, rank calculation, Selmer group API, or Sage/Magma certificate. For this curve, the clean Lean boundary is an elementary-looking descent certificate:
 
 ```lean
 F_N12_AffineEquation X Y
-  ⟹ X = 0 ∨ ∃ d u v z : ℤ,
-       d ∈ {-3,-1,1,3}
-     ∧ X = d * (u/v)^2
+  -> X = 0 ∨ ∃ d u v z : ℤ,
+       d ∈ {-3, -1, 1, 3}
+     ∧ X = d * (u / v)^2
      ∧ z^2 = d*u^4 + 2*u^2*v^2 + (-3/d)*v^4
-  ⟹ X ∈ {-3,0,1,-1,3}
 ```
 
-This is the cleanest Lean boundary between already-available algebra and the remaining mathematics. It avoids formalizing isogenies, Mordell-Weil rank, Selmer exact sequences, and torsion subgroup infrastructure inside the N12 file.
-
----
-
-## A. Mathematical proof obligation
+Then one residual theorem classifies the four integral quartics. This is exactly what a 2-isogeny descent should output, but the current N12 file only sees rational and integer arithmetic.
 
 The curve is
 
 ```text
-F : y² = x³ + 2x² - 3x = x(x-1)(x+3).
+F : y² = x³ + 2x² - 3x = x(x - 1)(x + 3).
 ```
 
-It has full rational 2-torsion at `x = -3, 0, 1`, and the visible affine rational points are
+The expected affine rational points are
 
 ```text
 (-3,0), (0,0), (1,0), (-1,±2), (3,±6).
 ```
 
-The desired theorem is exactly that every affine rational point has one of those five `x`-coordinates.
+So the boundary theorem is the statement that every affine rational point has `x`-coordinate in `{-3,0,1,-1,3}`.
 
-### Recommended residual split
+---
 
-Introduce two residual theorems.
+## A. Mathematical proof obligation
 
-The first theorem is the elementary descent lift. It says that any nonzero affine point lands on one of four quartic homogeneous spaces. This is the part that can be proved with `Rat.num`, `Rat.den`, denominator-square, gcd, and valuations.
+### A1. The exact residual interface to introduce
 
-The second theorem is the genuinely hard descent classification of those four quartics. It is where the infinite descent, FLT4-style argument, or 2-isogeny descent proof should live.
+Use two auxiliary theorems. The first is the elementary descent lift from a rational point to a quartic cover. The second is the genuinely hard residual classification of those covers.
 
-The four quartics are:
+```lean
+/-- Squareclass representatives for the `x`-coordinate in the 2-isogeny descent. -/
+def F_N12_D (d : ℤ) : Prop :=
+  d = -3 ∨ d = -1 ∨ d = 1 ∨ d = 3
 
-```text
-d =  1 : z² =  u⁴ + 2u²v² - 3v⁴ = (u²-v²)(u²+3v²)
-d = -1 : z² = -u⁴ + 2u²v² + 3v⁴ = (3v²-u²)(u²+v²)
-d =  3 : z² = 3u⁴ + 2u²v² - v⁴ = (3u²-v²)(u²+v²)
-d = -3 : z² = -3u⁴ + 2u²v² + v⁴ = (v²-u²)(3u²+v²)
+/-- Integer value of `-3/d` for `d ∈ {-3,-1,1,3}`. -/
+def F_N12_BoverD (d : ℤ) : ℤ :=
+  if d = -3 then 1
+  else if d = -1 then 3
+  else if d = 1 then -3
+  else if d = 3 then -1
+  else 0
+
+/-- The homogeneous quartic cover attached to `x = d*(u/v)^2`. -/
+def F_N12_Quartic (d u v z : ℤ) : Prop :=
+  z ^ 2 = d * u ^ 4 + 2 * u ^ 2 * v ^ 2 + F_N12_BoverD d * v ^ 4
+
+/-- The certificate consumed by the N12 boundary wrapper. -/
+def F_N12_QuarticCert (X : ℚ) : Prop :=
+  ∃ d u v z : ℤ,
+    F_N12_D d ∧
+    Nat.Coprime u.natAbs v.natAbs ∧
+    u ≠ 0 ∧
+    v ≠ 0 ∧
+    X = (d : ℚ) * (u : ℚ) ^ 2 / (v : ℚ) ^ 2 ∧
+    F_N12_Quartic d u v z
+
+/-- Residual theorem 1: elementary descent lift from a rational affine point. -/
+axiom F_N12_descent_lift_to_quartic :
+    ∀ {X Y : ℚ}, F_N12_AffineEquation X Y ->
+      X = 0 ∨ F_N12_QuarticCert X
+
+/-- Residual theorem 2: the hard classification of the four quartic covers. -/
+axiom F_N12_quartic_solution_residual :
+    ∀ {d u v z : ℤ},
+      F_N12_D d ->
+      Nat.Coprime u.natAbs v.natAbs ->
+      u ≠ 0 ->
+      v ≠ 0 ->
+      F_N12_Quartic d u v z ->
+      u ^ 2 = v ^ 2
 ```
 
-The hard classification theorem should prove that a primitive nonzero solution forces `u² = v²`, hence `x = d`, for `d ∈ {-3,-1,1,3}`. The separate case `x = 0` is already one of the boundary values.
+This is the smallest useful interface. It is not a black-box declaration of the desired boundary theorem. It exposes the actual descent objects and leaves a precise, independently provable integer Diophantine residual.
 
-### Why this is better than exposing Selmer groups
-
-The 2-isogeny story for
+The four residual quartics are exactly:
 
 ```text
-E  : y² = x³ + 2x² - 3x
-E' : y² = x³ - 4x² + 16x
+d =  1 : z² =  u⁴ + 2u²v² - 3v⁴ = (u² - v²)(u² + 3v²)
+d = -1 : z² = -u⁴ + 2u²v² + 3v⁴ = (3v² - u²)(u² + v²)
+d =  3 : z² = 3u⁴ + 2u²v² - v⁴ = (3u² - v²)(u² + v²)
+d = -3 : z² = -3u⁴ + 2u²v² + v⁴ = (v² - u²)(3u² + v²)
 ```
 
-is mathematically natural. But a literal Lean implementation would need quotient squareclasses, isogeny maps, homogeneous spaces, exactness, rank, torsion, and then a bridge back to affine coordinates. That is far more infrastructure than this file needs.
+The residual theorem says that any primitive nonzero integral solution on one of these covers has `u² = v²`. Then `X = d*u²/v² = d`, giving `X ∈ {-3,-1,1,3}`. The missing branch `X = 0` is already handled by the descent lift.
 
-Instead, let any future isogeny proof establish the two elementary-looking residual theorems below. The N12 file then remains just rational arithmetic plus a small boundary wrapper.
+### A2. How this matches the 2-isogeny story
+
+For an elliptic curve
+
+```text
+E : y² = x³ + a*x² + b*x
+```
+
+with kernel generated by `(0,0)`, the standard 2-isogenous curve is
+
+```text
+E' : y² = x³ - 2a*x² + (a² - 4b)*x.
+```
+
+Here `a = 2` and `b = -3`, hence
+
+```text
+E' : y² = x³ - 4x² + 16x.
+```
+
+The connecting map for the isogeny sends a non-kernel point to the squareclass of `x`. For this curve the relevant squareclass representatives are `-3,-1,1,3`. Rather than formalizing the isogeny and exactness, prove the concrete output: nonzero `X` has the form `d*(u/v)^2` with `d` in that list, and the original equation is equivalent to the corresponding quartic.
+
+### A3. Can the boundary be reduced to finite rational squareclass cases by elementary arithmetic?
+
+Yes. The reduction to the four squareclasses is elementary. A granular proof can be organized through these statements.
+
+```lean
+/-- Integral model after clearing denominators from a rational point. -/
+def F_N12_IntEquation (m n k : ℤ) : Prop :=
+  k ^ 2 = m * (m - n ^ 2) * (m + 3 * n ^ 2)
+
+/-- Primitive integral coordinates for `X = m/n²`, `Y = k/n³`. -/
+def F_N12_PrimitiveModel (X Y : ℚ) (m n k : ℤ) : Prop :=
+  n > 0 ∧
+  Nat.Coprime m.natAbs n.natAbs ∧
+  X = (m : ℚ) / (n : ℚ) ^ 2 ∧
+  Y = (k : ℚ) / (n : ℚ) ^ 3 ∧
+  F_N12_IntEquation m n k
+
+/-- Denominator-square theorem for rational points on the monic cubic. -/
+theorem F_N12_rat_to_primitive_model :
+    ∀ {X Y : ℚ}, F_N12_AffineEquation X Y ->
+      ∃ m n k : ℤ, F_N12_PrimitiveModel X Y m n k := by
+  -- Proof outline:
+  -- 1. Use `Rat.num`, `Rat.den`, `Rat.reduced` for `X` and `Y`.
+  -- 2. Compare valuations in
+  --      Y² = X*(X-1)*(X+3).
+  -- 3. Because the cubic is monic with integral coefficients, the denominator
+  --    of `X` is a square and the denominator of `Y` is the corresponding cube.
+  -- 4. Package as `X = m/n²`, `Y = k/n³`.
+  sorry
+
+/-- The squarefree part of `m` is one of `-3,-1,1,3`, unless `m = 0`. -/
+theorem F_N12_int_model_squareclass :
+    ∀ {X Y m n k : ℤ},
+      F_N12_PrimitiveModel X Y m n k ->
+      m = 0 ∨ ∃ d u : ℤ,
+        F_N12_D d ∧ u ≠ 0 ∧ m = d * u ^ 2 := by
+  -- Proof outline:
+  -- From k² = m*(m-n²)*(m+3n²) and gcd(m,n)=1:
+  -- * if p is odd and p ≠ 3 and p ∣ m, then p divides neither
+  --   m-n² nor m+3n², so v_p(m) is even;
+  -- * if p = 2 and 2 ∣ m, then n is odd and the other two factors are odd,
+  --   so v_2(m) is even;
+  -- * only the sign and the parity of v_3(m) remain.
+  -- Hence the squarefree part of m is one of ±1, ±3.
+  sorry
+
+/-- Convert the squareclass factorization `m = d*u²` into the quartic cover. -/
+theorem F_N12_int_model_to_quartic :
+    ∀ {X Y m n k d u : ℤ},
+      F_N12_PrimitiveModel X Y m n k ->
+      F_N12_D d ->
+      u ≠ 0 ->
+      m = d * u ^ 2 ->
+      ∃ z : ℤ,
+        X = (d : ℚ) * (u : ℚ) ^ 2 / (n : ℚ) ^ 2 ∧
+        F_N12_Quartic d u n z := by
+  -- Algebra outline:
+  -- Substitute m = d*u² into
+  --   k² = m*(m-n²)*(m+3n²).
+  -- Since d ∈ {±1,±3}, divide by `(d*u)²`.
+  -- The resulting equation is
+  --   z² = d*u⁴ + 2*u²*n² + (-3/d)*n⁴.
+  sorry
+```
+
+Those three statements prove `F_N12_descent_lift_to_quartic`. They use only normalized rational numerators and denominators, integer gcds, valuations/parity, and basic modular reasoning. No Mordell-Weil group, Selmer group, or global rank API is needed.
+
+The only non-elementary-looking theorem left is the quartic classification. Even that theorem can be attacked by elementary infinite descent on the factored quartics, but it is the real mathematical work.
+
+### A4. A shorter route for this specific curve
+
+The shortest Lean route is not to formalize the isogeny. It is to formalize the quartic covers directly. This is essentially a 2-isogeny descent, but stated as four integer equations.
+
+Other possible approaches are less attractive in Lean:
+
+* Full rational 2-torsion gives simultaneous squareclass data for `X`, `X - 1`, and `X + 3`, but this becomes an intersection of quadrics. It is equivalent to a 2-descent and introduces more variables and more bookkeeping than the single quartic-cover interface.
+* A chord-and-tangent or height-descent proof would need a formal elliptic-curve group law, height estimates, torsion calculations, and a rank-zero argument. That is more infrastructure than the N12 file should carry.
+* A congruent-number or Legendre-curve transformation is possible because the roots are `-3,0,1`, but it still requires proving the transformed curve has exactly the corresponding rational points. In Lean this again becomes either a rank computation or the same quartic descent in disguise.
+
+So the recommended route is: prove the squareclass lift elementarily, then prove the four quartic residuals elementarily or by a separately packaged 2-isogeny descent theorem whose output is exactly `F_N12_quartic_solution_residual`.
 
 ---
 
 ## B. Lean wiring that can be added now
 
-The following block is intended to be paste-oriented. If placed in a new file, import the current N12 file instead of redefining `F_N12_AffineEquation`. If placed at the bottom of `RationalPointsN12.lean`, omit the import line that would import itself.
+The following block is paste-oriented. If it goes in a new file, import the current N12 file. If it goes at the bottom of `RationalPointsN12.lean`, omit the self-import and keep the namespace consistent with the file.
 
 ```lean
 import Mathlib
+-- If this is a separate helper file, use the project import instead:
+-- import FLT.Assumptions.MazurProof.RationalPointsN12
 
 namespace MazurProof
 namespace RationalPointsN12
@@ -98,8 +228,8 @@ theorem F_N12_AffineEquation_factor_iff (X Y : ℚ) :
 def F_N12_D (d : ℤ) : Prop :=
   d = -3 ∨ d = -1 ∨ d = 1 ∨ d = 3
 
-/-- Integer value of `-3/d` on the allowed representatives. The fallback `0` is never used
-under `F_N12_D d`, but makes the definition total. -/
+/-- Integer value of `-3/d` on the allowed representatives.
+The fallback `0` is never used under `F_N12_D d`, but makes the definition total. -/
 def F_N12_BoverD (d : ℤ) : ℤ :=
   if d = -3 then 1
   else if d = -1 then 3
@@ -137,33 +267,28 @@ def F_N12_QuarticCert (X : ℚ) : Prop :=
 /-- Residual theorem 1: elementary descent lift.
 
 Expected proof ingredients:
-* write `X = X.num / X.den` and prove the denominator is a square;
-* write `X = m / n²`, `Y = k / n³`, with `Nat.Coprime m.natAbs n.natAbs`;
-* obtain `k² = m * (m - n²) * (m + 3*n²)`;
-* use pairwise gcd information to prove the squarefree part of `m` is one of
-  `-3, -1, 1, 3`;
-* write `m = d*u²` and divide by `(d*u)²` to get the quartic equation.
+* write the rational point as `X = m/n²`, `Y = k/n³`;
+* prove `k² = m*(m-n²)*(m+3*n²)`;
+* use gcd and valuation parity to show `m = d*u²` with `d ∈ {-3,-1,1,3}`;
+* divide by `(d*u)²` to get the quartic equation.
 -/
 axiom F_N12_descent_lift_to_quartic :
-    ∀ {X Y : ℚ}, F_N12_AffineEquation X Y →
+    ∀ {X Y : ℚ}, F_N12_AffineEquation X Y ->
       X = 0 ∨ F_N12_QuarticCert X
 
 /-- Residual theorem 2: classification of the four quartic covers.
 
-This is the hard mathematical theorem. It can be proved by an elementary infinite descent
-on the factored quartics, or by a formal 2-isogeny descent packaged to produce this exact
+This is the hard mathematical theorem. It can be proved by elementary infinite descent on the
+factored quartics, or by a separately formalized 2-isogeny descent packaged to produce this
 integer statement. -/
 axiom F_N12_quartic_solution_residual :
     ∀ {d u v z : ℤ},
-      F_N12_D d →
-      Nat.Coprime u.natAbs v.natAbs →
-      u ≠ 0 →
-      v ≠ 0 →
-      F_N12_Quartic d u v z →
-        (d = -3 ∧ u ^ 2 = v ^ 2) ∨
-        (d = -1 ∧ u ^ 2 = v ^ 2) ∨
-        (d = 1 ∧ u ^ 2 = v ^ 2) ∨
-        (d = 3 ∧ u ^ 2 = v ^ 2)
+      F_N12_D d ->
+      Nat.Coprime u.natAbs v.natAbs ->
+      u ≠ 0 ->
+      v ≠ 0 ->
+      F_N12_Quartic d u v z ->
+      u ^ 2 = v ^ 2
 
 /-- If `u² = v²`, then the rational `x = d*u²/v²` is just `d`. -/
 private theorem F_N12_x_eq_of_int_sq_eq
@@ -176,32 +301,31 @@ private theorem F_N12_x_eq_of_int_sq_eq
   rw [hsqQ]
   field_simp [hvq]
 
+/-- Any allowed squareclass representative is a boundary `x`-coordinate. -/
+theorem F_N12_XBoundary_of_D {d : ℤ} (hd : F_N12_D d) :
+    F_N12_XBoundary (d : ℚ) := by
+  rcases hd with rfl | rfl | rfl | rfl
+  · left
+    norm_num
+  · right; right; right; left
+    norm_num
+  · right; right; left
+    norm_num
+  · right; right; right; right
+    norm_num
+
 /-- The quartic residual implies the desired boundary for a certified point. -/
 theorem F_N12_boundary_of_quartic_cert {X : ℚ}
     (hcert : F_N12_QuarticCert X) :
     F_N12_XBoundary X := by
   rcases hcert with ⟨d, u, v, z, hd, hcop, hu, hv, hx, hq⟩
-  rcases F_N12_quartic_solution_residual hd hcop hu hv hq with hneg3 | hneg1 | hone | hthree
-  · rcases hneg3 with ⟨hd', huv⟩
-    subst d
-    left
+  have hsq : u ^ 2 = v ^ 2 :=
+    F_N12_quartic_solution_residual hd hcop hu hv hq
+  have hx' : X = (d : ℚ) := by
     rw [hx]
-    exact F_N12_x_eq_of_int_sq_eq (d := -3) hv huv
-  · rcases hneg1 with ⟨hd', huv⟩
-    subst d
-    right; right; right; left
-    rw [hx]
-    exact F_N12_x_eq_of_int_sq_eq (d := -1) hv huv
-  · rcases hone with ⟨hd', huv⟩
-    subst d
-    right; right; left
-    rw [hx]
-    exact F_N12_x_eq_of_int_sq_eq (d := 1) hv huv
-  · rcases hthree with ⟨hd', huv⟩
-    subst d
-    right; right; right; right
-    rw [hx]
-    exact F_N12_x_eq_of_int_sq_eq (d := 3) hv huv
+    exact F_N12_x_eq_of_int_sq_eq (d := d) hv hsq
+  rw [hx']
+  exact F_N12_XBoundary_of_D hd
 
 /-- Main boundary theorem for the shifted affine curve. -/
 theorem F_N12_AffineEquation_boundary
@@ -216,12 +340,13 @@ end RationalPointsN12
 end MazurProof
 ```
 
-### Small algebra lemmas worth adding immediately
+### Point-checking wrappers
 
-These lemmas do not solve the descent, but they make the residual theorem easy to connect to existing branch-to-`F` wrappers.
+These are useful sanity checks and can be tagged simp locally.
 
 ```lean
 import Mathlib
+-- import FLT.Assumptions.MazurProof.RationalPointsN12
 
 namespace MazurProof
 namespace RationalPointsN12
@@ -254,198 +379,290 @@ namespace RationalPointsN12
     F_N12_AffineEquation 3 (-6) := by
   norm_num [F_N12_AffineEquation]
 
-/-- Rational substitution identity behind the quartic cover.
-For integral use, instantiate `d,u,v,Y : ℚ`, then prove the left side is an integer square
-from the primitive denominator facts. -/
-theorem F_N12_squareclass_substitution_identity
-    {d u v Y : ℚ}
-    (hd : d ≠ 0) (hu : u ≠ 0) (hv : v ≠ 0)
-    (h : F_N12_AffineEquation (d * u ^ 2 / v ^ 2) Y) :
-    (Y * v ^ 3 / (d * u)) ^ 2 =
-      d * u ^ 4 + 2 * u ^ 2 * v ^ 2 - (3 / d) * v ^ 4 := by
-  unfold F_N12_AffineEquation at h
-  field_simp [hd, hu, hv] at h ⊢
-  ring_nf at h ⊢
-  exact h
-
-/-- Quartic factorization, `d = 1`. -/
-theorem F_N12_quartic_one_factor {u v z : ℤ}
-    (h : F_N12_Quartic 1 u v z) :
-    z ^ 2 = (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2) := by
-  have h' : z ^ 2 = u ^ 4 + 2 * u ^ 2 * v ^ 2 - 3 * v ^ 4 := by
-    simpa [F_N12_Quartic, F_N12_BoverD] using h
-  rw [h']
-  ring
-
-/-- Quartic factorization, `d = -1`. -/
-theorem F_N12_quartic_neg_one_factor {u v z : ℤ}
-    (h : F_N12_Quartic (-1) u v z) :
-    z ^ 2 = (3 * v ^ 2 - u ^ 2) * (u ^ 2 + v ^ 2) := by
-  have h' : z ^ 2 = -u ^ 4 + 2 * u ^ 2 * v ^ 2 + 3 * v ^ 4 := by
-    simpa [F_N12_Quartic, F_N12_BoverD] using h
-  rw [h']
-  ring
-
-/-- Quartic factorization, `d = 3`. -/
-theorem F_N12_quartic_three_factor {u v z : ℤ}
-    (h : F_N12_Quartic 3 u v z) :
-    z ^ 2 = (3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2) := by
-  have h' : z ^ 2 = 3 * u ^ 4 + 2 * u ^ 2 * v ^ 2 - v ^ 4 := by
-    simpa [F_N12_Quartic, F_N12_BoverD] using h
-  rw [h']
-  ring
-
-/-- Quartic factorization, `d = -3`. -/
-theorem F_N12_quartic_neg_three_factor {u v z : ℤ}
-    (h : F_N12_Quartic (-3) u v z) :
-    z ^ 2 = (v ^ 2 - u ^ 2) * (3 * u ^ 2 + v ^ 2) := by
-  have h' : z ^ 2 = -3 * u ^ 4 + 2 * u ^ 2 * v ^ 2 + v ^ 4 := by
-    simpa [F_N12_Quartic, F_N12_BoverD] using h
-  rw [h']
-  ring
-
 end RationalPointsN12
 end MazurProof
 ```
 
-The connection to any existing branch wrapper is then one line. If an existing lemma has produced
+### Algebraic identity behind the quartic cover
 
-```lean
-hF : F_N12_AffineEquation X Y
-```
-
-then use
-
-```lean
-have hX : X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3 :=
-  F_N12_AffineEquation_boundary hF
-```
-
-No branch-specific descent facts should be duplicated.
-
----
-
-## C. Exact elementary finite-case reduction statements
-
-Here is the recommended theorem set if you want to prove the lift theorem incrementally rather than as one large residual.
+This identity is often the easiest way to connect a squareclass certificate to the original curve. It is over `ℚ`, so `field_simp` and `ring` should handle it.
 
 ```lean
 import Mathlib
+-- import FLT.Assumptions.MazurProof.RationalPointsN12
 
 namespace MazurProof
 namespace RationalPointsN12
 
-/-- Denominator-square lemma for integral monic Weierstrass equations. -/
-axiom F_N12_x_den_is_square :
-    ∀ {X Y : ℚ}, F_N12_AffineEquation X Y →
-      ∃ v : ℤ, v ≠ 0 ∧ (X.den : ℤ) = v ^ 2
+/-- Rational substitution identity behind the quartic cover.
+If `X = d*u²/v²` and `Y = d*u*z/v³`, then the affine equation is equivalent to
+`z² = d*u⁴ + 2*u²*v² - (3/d)*v⁴`. -/
+theorem F_N12_squareclass_substitution_identity
+    {d u v z : ℚ}
+    (hd : d ≠ 0) (hu : u ≠ 0) (hv : v ≠ 0) :
+    F_N12_AffineEquation
+        (d * u ^ 2 / v ^ 2)
+        (d * u * z / v ^ 3)
+      ↔ z ^ 2 = d * u ^ 4 + 2 * u ^ 2 * v ^ 2 - (3 / d) * v ^ 4 := by
+  unfold F_N12_AffineEquation
+  constructor
+  · intro h
+    field_simp [hd, hu, hv] at h ⊢
+    ring_nf at h ⊢
+    exact h
+  · intro h
+    field_simp [hd, hu, hv] at h ⊢
+    ring_nf at h ⊢
+    exact h
 
-/-- Squareclass restriction for the numerator of `X`.
-This is the key finite squareclass statement. -/
-axiom F_N12_x_num_squareclass :
-    ∀ {X Y : ℚ}, F_N12_AffineEquation X Y → X ≠ 0 →
-      ∃ d u v : ℤ,
-        F_N12_D d ∧
-        Nat.Coprime u.natAbs v.natAbs ∧
-        u ≠ 0 ∧
-        v ≠ 0 ∧
-        X = (d : ℚ) * (u : ℚ) ^ 2 / (v : ℚ) ^ 2
-
-/-- Integral square lift after the squareclass restriction. -/
-axiom F_N12_squareclass_to_integral_quartic :
-    ∀ {X Y : ℚ} {d u v : ℤ},
-      F_N12_AffineEquation X Y →
-      F_N12_D d →
-      Nat.Coprime u.natAbs v.natAbs →
-      u ≠ 0 →
-      v ≠ 0 →
-      X = (d : ℚ) * (u : ℚ) ^ 2 / (v : ℚ) ^ 2 →
-        ∃ z : ℤ, F_N12_Quartic d u v z
-
-/-- The composed elementary descent lift. -/
-theorem F_N12_descent_lift_to_quartic_from_parts
-    {X Y : ℚ} (h : F_N12_AffineEquation X Y) :
-    X = 0 ∨ F_N12_QuarticCert X := by
-  by_cases hx : X = 0
-  · exact Or.inl hx
-  · rcases F_N12_x_num_squareclass h hx with ⟨d, u, v, hd, hcop, hu, hv, hX⟩
-    rcases F_N12_squareclass_to_integral_quartic h hd hcop hu hv hX with ⟨z, hz⟩
-    exact Or.inr ⟨d, u, v, z, hd, hcop, hu, hv, hX, hz⟩
+/-- Same identity with the right hand side factored. -/
+theorem F_N12_substitution_factor_identity
+    {d u v z : ℚ}
+    (hd : d ≠ 0) (hu : u ≠ 0) (hv : v ≠ 0) :
+    F_N12_AffineEquation
+        (d * u ^ 2 / v ^ 2)
+        (d * u * z / v ^ 3)
+      ↔ d * z ^ 2 = (d * u ^ 2 - v ^ 2) * (d * u ^ 2 + 3 * v ^ 2) := by
+  unfold F_N12_AffineEquation
+  constructor
+  · intro h
+    field_simp [hd, hu, hv] at h ⊢
+    ring_nf at h ⊢
+    exact h
+  · intro h
+    field_simp [hd, hu, hv] at h ⊢
+    ring_nf at h ⊢
+    exact h
 
 end RationalPointsN12
 end MazurProof
 ```
 
-The proof of `F_N12_x_num_squareclass` is elementary and should not require elliptic curves. The core calculation is:
+If `field_simp` leaves side goals in the project because of a local import set, add explicit nonzero lemmas for `v ^ 2`, `v ^ 3`, and `d ^ 2 * u ^ 2`; all are immediate from `hd`, `hu`, and `hv` by `pow_ne_zero` and `mul_ne_zero`.
 
-```text
-X = m/n²,  Y = k/n³,
-gcd(m,n)=1,
-k² = m(m-n²)(m+3n²).
-```
+### Connecting existing branch-to-F wrappers
 
-Then:
-
-```text
-gcd(m, m-n²) = 1,
-gcd(m, m+3n²) ∣ 3,
-gcd(m-n², m+3n²) ∣ 4.
-```
-
-Therefore any odd prime other than `3` has even valuation in `m`; the 2-adic valuation of `m` is also even; hence the squarefree part of `m` is one of `±1, ±3`.
-
-That proves the finite rational squareclass reduction. It does not, by itself, classify the quartic solutions.
-
----
-
-## D. Shorter elementary route?
-
-For this specific curve, the shortest Lean-friendly route is not a literal formal 2-isogeny rank computation. It is the same mathematics expressed as the four quartic covers above.
-
-Reasons:
-
-1. The curve has full rational 2-torsion, so the elementary numerator/denominator descent gives the same squareclass representatives `±1, ±3` without quotienting by `ℚˣ/(ℚˣ)²`.
-2. The four quartics factor into products of binary quadratic forms. Their classification can be attacked with `Nat.Coprime`, parity, `Int.gcd`, valuations, and infinite descent.
-3. A literal 2-isogeny route would still need to solve the same homogeneous spaces, but it would also require formalizing much more elliptic-curve API.
-
-I would not try to prove the final boundary by only a finite table of modular checks. Each quartic has the known local/global solution with `u² = v²`, so congruences alone cannot simply rule out the whole cover. Some descent or a packaged theorem such as an FLT4/Fermat-right-triangle style residual is needed.
-
-A possible future strengthening is to prove each quartic residual separately:
+If the file already has a theorem of the shape
 
 ```lean
-axiom F_N12_quartic_one_residual :
-    ∀ {u v z : ℤ},
-      Nat.Coprime u.natAbs v.natAbs → u ≠ 0 → v ≠ 0 →
-      F_N12_Quartic 1 u v z → u ^ 2 = v ^ 2
-
-axiom F_N12_quartic_neg_one_residual :
-    ∀ {u v z : ℤ},
-      Nat.Coprime u.natAbs v.natAbs → u ≠ 0 → v ≠ 0 →
-      F_N12_Quartic (-1) u v z → u ^ 2 = v ^ 2
-
-axiom F_N12_quartic_three_residual :
-    ∀ {u v z : ℤ},
-      Nat.Coprime u.natAbs v.natAbs → u ≠ 0 → v ≠ 0 →
-      F_N12_Quartic 3 u v z → u ^ 2 = v ^ 2
-
-axiom F_N12_quartic_neg_three_residual :
-    ∀ {u v z : ℤ},
-      Nat.Coprime u.natAbs v.natAbs → u ≠ 0 → v ≠ 0 →
-      F_N12_Quartic (-3) u v z → u ^ 2 = v ^ 2
+theorem branch_to_F
+    {a b c : ℚ} (hbranch : SomeBranchCondition a b c) :
+    ∃ X Y : ℚ, F_N12_AffineEquation X Y ∧ X = someX a b c := by
+  ...
 ```
 
-Then combine these into `F_N12_quartic_solution_residual` by cases on `F_N12_D d`. This is often easier for Lean because each branch has its own factorization lemma and its own parity/gcd normalization.
+then the boundary theorem is consumed as follows.
+
+```lean
+namespace MazurProof
+namespace RationalPointsN12
+
+/-- Generic wrapper: any construction that lands on `F` lands on a boundary `X`. -/
+theorem F_N12_boundary_of_exists_affine
+    {X : ℚ}
+    (h : ∃ Y : ℚ, F_N12_AffineEquation X Y) :
+    F_N12_XBoundary X := by
+  rcases h with ⟨Y, hF⟩
+  exact F_N12_AffineEquation_boundary hF
+
+/-- Generic wrapper for a normalized branch map whose `X` coordinate is named. -/
+theorem F_N12_boundary_of_branch_X
+    {X Y : ℚ}
+    (hF : F_N12_AffineEquation X Y) :
+    F_N12_XBoundary X := by
+  exact F_N12_AffineEquation_boundary hF
+
+/-- If an existing branch theorem returns an affine point and an equality for its `X`, rewrite it. -/
+theorem F_N12_boundary_of_branch_image
+    {X X0 Y : ℚ}
+    (hF : F_N12_AffineEquation X Y)
+    (hX : X = X0) :
+    F_N12_XBoundary X0 := by
+  subst X0
+  exact F_N12_AffineEquation_boundary hF
+
+end RationalPointsN12
+end MazurProof
+```
+
+Depending on the orientation of the branch equality, use either `rw [hX]` or `rw [← hX]`. Keeping `F_N12_XBoundary` as a definition makes downstream wrappers easier than repeatedly constructing the raw five-way disjunction.
 
 ---
 
-## E. Suggested implementation order
+## C. Hard residuals worth proving next
 
-1. Add `F_N12_XBoundary`, `F_N12_rhs_factor`, `F_N12_D`, `F_N12_BoverD`, `F_N12_Quartic`, and `F_N12_QuarticCert`.
-2. Add the two residual axioms or theorem declarations:
+### C1. Prove the elementary lift theorem first
+
+Target theorem:
+
+```lean
+theorem F_N12_descent_lift_to_quartic :
+    ∀ {X Y : ℚ}, F_N12_AffineEquation X Y ->
+      X = 0 ∨ F_N12_QuarticCert X
+```
+
+Recommended sublemmas:
+
+```lean
+theorem F_N12_den_square_of_affine :
+    ∀ {X Y : ℚ}, F_N12_AffineEquation X Y ->
+      ∃ m n k : ℤ,
+        n > 0 ∧
+        Nat.Coprime m.natAbs n.natAbs ∧
+        X = (m : ℚ) / (n : ℚ) ^ 2 ∧
+        Y = (k : ℚ) / (n : ℚ) ^ 3 ∧
+        k ^ 2 = m * (m - n ^ 2) * (m + 3 * n ^ 2)
+
+theorem F_N12_m_squareclass_pm_one_pm_three :
+    ∀ {m n k : ℤ},
+      n > 0 ->
+      Nat.Coprime m.natAbs n.natAbs ->
+      k ^ 2 = m * (m - n ^ 2) * (m + 3 * n ^ 2) ->
+      m = 0 ∨ ∃ d u : ℤ,
+        F_N12_D d ∧ u ≠ 0 ∧ m = d * u ^ 2
+
+theorem F_N12_quartic_of_m_squareclass :
+    ∀ {m n k d u : ℤ},
+      n > 0 ->
+      Nat.Coprime m.natAbs n.natAbs ->
+      k ^ 2 = m * (m - n ^ 2) * (m + 3 * n ^ 2) ->
+      F_N12_D d ->
+      u ≠ 0 ->
+      m = d * u ^ 2 ->
+      ∃ z : ℤ,
+        F_N12_Quartic d u n z
+```
+
+These are plausible with Mathlib integer arithmetic:
+
+* `Rat.num`, `Rat.den`, and reducedness lemmas for the denominator step.
+* `Nat.Coprime`, `Int.gcd`, and `Int.natAbs` for primitive models.
+* `padicValNat` or a small custom prime-exponent parity lemma for the squareclass of `m`.
+* Modular parity for excluding a factor `2` from the squareclass.
+* Special handling at `3`, which is exactly why `±3` appears.
+
+### C2. Prove the four quartic cases as separate named theorems
+
+Instead of proving the uniform residual in one large proof, split it into four named theorems. This is much easier to work on and much easier for Lean to simplify.
+
+```lean
+theorem F_N12_quartic_residual_one
+    {u v z : ℤ}
+    (hcop : Nat.Coprime u.natAbs v.natAbs)
+    (hu : u ≠ 0) (hv : v ≠ 0)
+    (h : z ^ 2 = u ^ 4 + 2 * u ^ 2 * v ^ 2 - 3 * v ^ 4) :
+    u ^ 2 = v ^ 2 := by
+  -- Equivalent factorization:
+  --   z² = (u² - v²)*(u² + 3v²)
+  -- Then use gcd control plus descent.
+  sorry
+
+theorem F_N12_quartic_residual_neg_one
+    {u v z : ℤ}
+    (hcop : Nat.Coprime u.natAbs v.natAbs)
+    (hu : u ≠ 0) (hv : v ≠ 0)
+    (h : z ^ 2 = -u ^ 4 + 2 * u ^ 2 * v ^ 2 + 3 * v ^ 4) :
+    u ^ 2 = v ^ 2 := by
+  -- Factorization:
+  --   z² = (3v² - u²)*(u² + v²)
+  sorry
+
+theorem F_N12_quartic_residual_three
+    {u v z : ℤ}
+    (hcop : Nat.Coprime u.natAbs v.natAbs)
+    (hu : u ≠ 0) (hv : v ≠ 0)
+    (h : z ^ 2 = 3 * u ^ 4 + 2 * u ^ 2 * v ^ 2 - v ^ 4) :
+    u ^ 2 = v ^ 2 := by
+  -- Factorization:
+  --   z² = (3u² - v²)*(u² + v²)
+  sorry
+
+theorem F_N12_quartic_residual_neg_three
+    {u v z : ℤ}
+    (hcop : Nat.Coprime u.natAbs v.natAbs)
+    (hu : u ≠ 0) (hv : v ≠ 0)
+    (h : z ^ 2 = -3 * u ^ 4 + 2 * u ^ 2 * v ^ 2 + v ^ 4) :
+    u ^ 2 = v ^ 2 := by
+  -- Factorization:
+  --   z² = (v² - u²)*(3u² + v²)
+  sorry
+```
+
+Then assemble the uniform theorem by cases on `F_N12_D d`:
+
+```lean
+theorem F_N12_quartic_solution_residual_from_cases :
+    ∀ {d u v z : ℤ},
+      F_N12_D d ->
+      Nat.Coprime u.natAbs v.natAbs ->
+      u ≠ 0 ->
+      v ≠ 0 ->
+      F_N12_Quartic d u v z ->
+      u ^ 2 = v ^ 2 := by
+  intro d u v z hd hcop hu hv hq
+  rcases hd with rfl | rfl | rfl | rfl
+  · -- d = -3
+    apply F_N12_quartic_residual_neg_three hcop hu hv
+    simpa [F_N12_Quartic] using hq
+  · -- d = -1
+    apply F_N12_quartic_residual_neg_one hcop hu hv
+    simpa [F_N12_Quartic] using hq
+  · -- d = 1
+    apply F_N12_quartic_residual_one hcop hu hv
+    simpa [F_N12_Quartic] using hq
+  · -- d = 3
+    apply F_N12_quartic_residual_three hcop hu hv
+    simpa [F_N12_Quartic] using hq
+```
+
+### C3. Prove and register the factorizations
+
+These are zero-risk algebra lemmas and should be added immediately.
+
+```lean
+theorem F_N12_quartic_factor_one (u v : ℤ) :
+    u ^ 4 + 2 * u ^ 2 * v ^ 2 - 3 * v ^ 4 =
+      (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2) := by
+  ring
+
+theorem F_N12_quartic_factor_neg_one (u v : ℤ) :
+    -u ^ 4 + 2 * u ^ 2 * v ^ 2 + 3 * v ^ 4 =
+      (3 * v ^ 2 - u ^ 2) * (u ^ 2 + v ^ 2) := by
+  ring
+
+theorem F_N12_quartic_factor_three (u v : ℤ) :
+    3 * u ^ 4 + 2 * u ^ 2 * v ^ 2 - v ^ 4 =
+      (3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2) := by
+  ring
+
+theorem F_N12_quartic_factor_neg_three (u v : ℤ) :
+    -3 * u ^ 4 + 2 * u ^ 2 * v ^ 2 + v ^ 4 =
+      (v ^ 2 - u ^ 2) * (3 * u ^ 2 + v ^ 2) := by
+  ring
+```
+
+### C4. What not to put in `RationalPointsN12.lean`
+
+Do not put the following in the current file unless the project already has mature infrastructure for them:
+
+* definitions of elliptic curves as groups;
+* the explicit 2-isogeny maps and dual-isogeny exact sequence;
+* Selmer groups as quotients of `ℚˣ/(ℚˣ)²`;
+* a formal rank-zero computation;
+* Sage/Magma output with no checkable certificate.
+
+All of that can live behind the residual theorem. The N12 file should consume only the two residuals above and then finish by `rcases`, `rw`, `field_simp`, `ring`, and `norm_num`.
+
+---
+
+## Summary of deliverables for the next Lean pass
+
+1. Add `F_N12_XBoundary`, `F_N12_D`, `F_N12_BoverD`, `F_N12_Quartic`, and `F_N12_QuarticCert`.
+2. Temporarily introduce the two residual declarations:
    * `F_N12_descent_lift_to_quartic`
    * `F_N12_quartic_solution_residual`
-3. Prove the wrapper `F_N12_AffineEquation_boundary` immediately.
-4. Replace `F_N12_descent_lift_to_quartic` with the three smaller elementary lemmas once numerator/denominator work is done.
-5. Attack the four quartic residuals one at a time, using the factor lemmas.
+3. Prove the wrapper theorem `F_N12_AffineEquation_boundary` now.
+4. Replace `F_N12_descent_lift_to_quartic` with elementary `Rat.num`/`Rat.den` and valuation/gcd lemmas.
+5. Replace `F_N12_quartic_solution_residual` with four factored quartic descent proofs.
 
-This gives the current file a stable endpoint now while keeping the hard mathematics isolated in precise, auditable theorem statements.
+This keeps the current file useful immediately while isolating the true mathematical frontier in precise, reviewable theorem statements.
