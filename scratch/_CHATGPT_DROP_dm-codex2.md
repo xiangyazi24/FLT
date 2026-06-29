@@ -1,206 +1,397 @@
-# Q2180 dm-codex2 — N=12 Kubert-cover residual audit
+# Q2200 dm-codex2 — N=12 non-axis factor-identity residual audit
 
-## Verdict
+## Source note
 
-I do **not** believe there is an integer counterexample under
+I attempted to inspect the exact files named in the prompt through the GitHub connector:
 
 ```text
-m*n ≠ 0,  gcd(m,n)=1,  and m,n have opposite parity.
+FLT/Assumptions/MazurProof/RationalPointsN12.lean
+FLT/Assumptions/MazurProof/KubertBridgeN12.lean
 ```
 
-The eight residual cases are impossible, but the shortest proof is **not** a local modular contradiction on the displayed factor identities. The right next step is an infinite descent. The descent briefly leaves the residual interface and returns to the original square equation for a strictly smaller primitive pair; then the already-proved square-to-residual reduction is invoked again.
+The connector returned `Not Found` for those paths on the checked remote refs, and GitHub code search did not find `NonAxisFactorIdentityResidual`, `factorIdentityResidual`, or `RationalPointsN12`. The repository itself is accessible and writable, and `FLT.lean` / `FLT/Assumptions/Mazur.lean` are present on the remote. So this audit is based on the mathematical interface in the prompt and on the already-checked wrapper names you supplied, not on exact source-line inspection. If these files exist only in the local worktree `/Users/huangx/repos/flt-ai` or on an unindexed/unpushed branch, the route below is still the one I would formalize, but theorem names may need small adaptation.
 
-The key invariant is the four-way factorization forced by
+## Executive verdict
+
+The non-axis factor-identity residual is very likely **impossible** under the intended primitive non-axis hypotheses, but not for a cheap reason such as matching the two factors or a direct mod-3/mod-4 contradiction in the original variables.
+
+The real content is a classical infinite descent on the same binary quartic square equation that produced the residual. The factor identity is useful because, together with
 
 ```text
-a*c = m*n
+a*c = ± m*n,
 ```
 
-after proving `gcd(a,c)=1`. All eight signs and swaps fold to one normal case:
+it gives a four-corner coprime decomposition. After one mod-8 check, a discriminant calculation produces two quadratic equations, one Pythagorean and one twisted Pythagorean. The primitive Pythagorean parametrization then gives a strictly smaller primitive solution of the original quartic square equation.
+
+So the closure should be organized as:
 
 ```text
-NormalResidual(M,N,A,C):
-  A*C = M*N,
-  (M-N)(M+N) = (A-C)(3A-C),
-  M*N ≠ 0,
-  gcd(M,N)=1,
-  M,N opposite parity.
+signed factor residual
+  -> normalized residual
+  -> four-corner coprime decomposition x,y,z,w
+  -> mod 8: the unique even corner is z
+  -> discriminant square in x,w
+  -> split into 3*x^2 - w^2 = 2*u^2 and x^2 + w^2 = 2*v^2
+  -> set R=(x+w)/2, S=(x-w)/2
+  -> primitive Pythagorean parametrization
+  -> smaller solution of the original N=12 quartic square equation
+  -> well-founded descent using the already-proved square-to-residual wrapper
 ```
 
-From this normal case the descent is forced.
+This means `NonAxisFactorIdentityResidual` can be closed, but the proof should probably depend on the already-checked reduction from the quartic square equation back to a factor-identity residual. Trying to prove every residual false by an isolated finite case split will probably stall.
 
-## A. Counterexample audit
+## 1. Exact arithmetic content behind the identities
 
-No counterexample survives the normalization below. Small primitive opposite-parity pairs such as `(±2,±1)`, `(±1,±2)`, `(±3,±2)`, `(±4,±1)`, `(±5,±2)`, `(±5,±4)` already fail by direct factor-pair inspection, but that is not the proof. The proof below handles all signs and all sizes.
-
-Two warnings from the audit:
-
-1. If the opposite-parity hypothesis is dropped, trivial degeneracies appear, for example `m=n=a=c=1` gives a zero factor identity. So parity is genuinely used.
-2. It is false that equality of products of two coprime factor pairs lets you identify the individual factors. For example `3*10 = 5*6` with both pairs coprime. A route that tries to prove `m-n = ±(a-c)` or `m+n = ±(3a-c)` is not sound.
-
-## B. The proof route
-
-Write
+Let
 
 ```text
-H(m,n) = m^2 + 4mn - n^2
-Q(m,n) = m^4 + 8m^3n + 2m^2n^2 - 8mn^3 + n^4.
+H(m,n)  = m^2 + 4*m*n - n^2,
+Q12(m,n)= m^4 + 8*m^3*n + 2*m^2*n^2 - 8*m*n^3 + n^4.
 ```
 
 Then
 
 ```text
-Q(m,n) = H(m,n)^2 - 12*(m*n)^2.
+Q12(m,n) = H(m,n)^2 - 12*(m*n)^2.
 ```
 
-### Step 1: fold the eight cases to one normal case
-
-Use only these transformations:
+The representative normal factor identity is
 
 ```text
-(a,c) ↦ (c,a)                 -- swaps the coefficient 3 side
-c ↦ -c                        -- converts ac=-mn to ac=mn
-(m,n,a,c) ↦ (n,-m,a,-c)       -- converts the negative H sign to positive H sign
+a*c = m*n,
+(m - n)*(m + n) = (a - c)*(3*a - c).              (N)
 ```
 
-More explicitly, each residual case maps to `NormalResidual(M,N,A,C)` as follows:
+Expanding the second equation and using `a*c = m*n` gives
 
-| residual case | `(M,N,A,C)` |
-|---|---|
-| P1 | `(m,n,a,c)` |
-| P2 | `(n,-m,a,-c)` |
-| P3 | `(m,n,c,a)` |
-| P4 | `(n,-m,c,-a)` |
-| N5 | `(m,n,a,-c)` |
-| N6 | `(n,-m,a,c)` |
-| N7 | `(m,n,-c,a)` |
-| N8 | `(n,-m,c,a)` |
+```text
+m^2 - n^2 = 3*a^2 - 4*a*c + c^2,
+H(m,n) = m^2 + 4*m*n - n^2 = 3*a^2 + c^2.
+```
 
-These transformations preserve `M*N ≠ 0`, primitivity, opposite parity, and `|M*N|=|m*n|`.
+Consequently
 
-So downstream there is only one case:
+```text
+Q12(m,n) = (3*a^2 + c^2)^2 - 12*(a*c)^2
+          = (c^2 - 3*a^2)^2.
+```
+
+Thus each normalized residual is not just a random factor identity: it reconstructs a square witness for the N=12 quartic. In the signed/swapped residual cases the square witness is one of
+
+```text
+c^2 - 3*a^2,
+a^2 - 3*c^2,
+```
+
+up to sign, and the sign does not matter after squaring.
+
+Conceptually, the residual is the arithmetic of the genus-one quartic
+
+```text
+Y^2 = X^4 + 8*X^3 + 2*X^2 - 8*X + 1,
+```
+
+in homogeneous form. It is also the norm equation
+
+```text
+b^2 = H(m,n)^2 - 12*(m*n)^2
+```
+
+with a primitive signed split in the quadratic order attached to `√3`. The factor identities encode one branch of the split.
+
+## 2. Fold all signed/swapped cases once
+
+Do not keep eight cases alive downstream. Normalize first.
+
+A good normal residual is:
+
+```text
+NormalResidual(M,N,A,C) : Prop :=
+  M*N ≠ 0 ∧
+  gcd(M,N)=1 ∧
+  M,N have opposite parity ∧
+  A*C = M*N ∧
+  (M-N)*(M+N) = (A-C)*(3*A-C).
+```
+
+The eight cases fold by the following substitutions. In each row, `(M,N,A,C)` satisfies the normal residual and `|M*N| = |m*n|`.
+
+| case | product | factor identity | normalized `(M,N,A,C)` |
+|---|---:|---|---|
+| P1 | `a*c=m*n` | `(a-c)*(3a-c)` | `(m,n,a,c)` |
+| P2 | `a*c=m*n` | `-(a+c)*(3a+c)` | `(n,-m,a,-c)` |
+| P3 | `a*c=m*n` | `(a-c)*(a-3c)` | `(m,n,c,a)` |
+| P4 | `a*c=m*n` | `-(a+c)*(a+3c)` | `(n,-m,c,-a)` |
+| N5 | `a*c=-m*n` | `(a+c)*(3a+c)` | `(m,n,a,-c)` |
+| N6 | `a*c=-m*n` | `-(a-c)*(3a-c)` | `(n,-m,a,c)` |
+| N7 | `a*c=-m*n` | `(a+c)*(a+3c)` | `(m,n,-c,a)` |
+| N8 | `a*c=-m*n` | `-(a-c)*(a-3c)` | `(n,-m,c,a)` |
+
+These substitutions preserve nonzero product, primitivity, opposite parity, and descent measure `Int.natAbs (m*n)`.
+
+## 3. First gcd/parity facts
+
+From the normal residual:
 
 ```text
 A*C = M*N,
-M^2 - N^2 = (A-C)(3A-C).
+(M-N)*(M+N) = (A-C)*(3*A-C),
+gcd(M,N)=1,
+M,N opposite parity.
 ```
 
-Equivalently,
-
-```text
-H(M,N) = 3*A^2 + C^2.
-```
-
-This also reconstructs a square witness:
-
-```text
-Q(M,N) = (C^2 - 3*A^2)^2.
-```
-
-So the residual is not detached from the original square equation.
-
-### Step 2: recover `gcd(A,C)=1`
-
-Let `d | A` and `d | C`. Then `d | A*C = M*N`. Also both linear factors `(A-C)` and `(3A-C)` are divisible by `d`, hence `d | M^2-N^2`.
-
-But `gcd(M,N)=1` implies
-
-```text
-gcd(M*N, M^2-N^2) = 1.
-```
-
-Therefore `d=±1`, so
+The first necessary lemma is
 
 ```text
 gcd(A,C)=1.
 ```
 
-Since `M,N` have opposite parity, `M*N` is even. Thus `A*C` is even. Together with `gcd(A,C)=1`, this gives `A,C` opposite parity.
-
-### Step 3: split `A*C=M*N` into four coprime corners
-
-Because both `(M,N)` and `(A,C)` are primitive and `A*C=M*N`, there are nonzero pairwise coprime integers `x,y,z,w` such that
+Proof: if `d | A` and `d | C`, then `d | A*C = M*N`. Also `d | A-C` and `d | 3*A-C`, hence `d | (M-N)*(M+N) = M^2-N^2`. But
 
 ```text
-M = x*y,
-N = z*w,
-A = x*z,
-C = y*w.
+gcd(M*N, M^2-N^2)=1
 ```
 
-This is the crucial invariant. Think of each prime of `M*N` being assigned independently to the `M/N` side and to the `A/C` side.
+for primitive `M,N`. Therefore `d` is a unit.
 
-The normal identity becomes
+Since `M,N` have opposite parity, `M*N` is even. Hence `A*C` is even. With `gcd(A,C)=1`, this implies `A,C` have opposite parity.
+
+Two useful linear gcd lemmas are then true:
 
 ```text
-(x*y - z*w)(x*y + z*w) = (x*z - y*w)(3*x*z - y*w),
+gcd(M-N, M+N)=1,
+gcd(A-C, 3*A-C)=1.
 ```
 
-or, after expansion as a quadratic in `y`,
+For the second, any common divisor divides
 
 ```text
-(x^2 - w^2)*y^2 + 4*x*z*w*y - z^2*(3*x^2 + w^2) = 0.        (E)
+(3*A-C) - (A-C) = 2*A,
+3*(A-C) - (3*A-C) = -2*C.
 ```
 
-Exactly one of `x,y,z,w` is even: opposite parity of `M,N` gives one even among `xy,zw`, and opposite parity of `A,C` gives one even among `xz,yw`; pairwise coprimality prevents two even variables.
+Since `A,C` are coprime and opposite parity, both linear factors are odd, so the common divisor is a unit.
 
-A mod-8 check of the normal equation forces the even variable to be **z**.
+These gcds are useful, but they do **not** justify matching factors one by one. Equality of products of coprime pairs does not imply the pairs are equal up to units.
 
-| even variable | contradiction modulo 8? |
-|---|---|
-| `x` | left side is `7`, right side is `1` |
-| `y` | left and right differ by `4` |
-| `z` | possible |
-| `w` | left side is `1`, right side is `3` |
+## 4. False tempting generalizations and counterexamples
 
-Thus
+### 4.1 Factor matching is false
+
+The implication
 
 ```text
-z is even, and x,y,w are odd.
+gcd(u,v)=1, gcd(r,s)=1, u*v=r*s
+  -> u=±r and v=±s, up to swap
 ```
 
-### Step 4: the discriminant gives a square product independent of `y,z`
+is false. For example,
 
-If `x^2=w^2`, then pairwise coprimality and oddness give `|x|=|w|=1`. Equation (E) reduces to
+```text
+3*35 = 5*21,
+gcd(3,35)=1,
+gcd(5,21)=1.
+```
+
+This even fits the linear shapes without the product relation `a*c=m*n`:
+
+```text
+m-n = 3,   m+n = 35        -> m=19, n=16,
+a-c = 5,   3*a-c = 21      -> a=8,  c=3.
+```
+
+Then
+
+```text
+(m-n)*(m+n) = (a-c)*(3*a-c) = 105,
+gcd(19,16)=1,
+19,16 have opposite parity,
+gcd(8,3)=1,
+8,3 have opposite parity,
+```
+
+but
+
+```text
+a*c = 24 ≠ 304 = m*n.
+```
+
+So the `a*c=±m*n` equation is essential. Do not formalize a bogus factor-matching route.
+
+### 4.2 Dropping opposite parity makes the residual false
+
+Without opposite parity, there are immediate degeneracies. In the normal case,
+
+```text
+m=n=a=c=1
+```
+
+gives
+
+```text
+a*c=m*n=1,
+(m-n)*(m+n)=0,
+(a-c)*(3*a-c)=0.
+```
+
+Thus the theorem must retain opposite parity, or must retain the original non-axis hypotheses that imply it.
+
+### 4.3 The displayed factor identity alone has many primitive solutions
+
+The identity
+
+```text
+(m-n)*(m+n) = (a-c)*(3*a-c)
+```
+
+is not the hard theorem. It has many primitive opposite-parity solutions if `a*c=m*n` is omitted. The example above, `(m,n,a,c)=(19,16,8,3)`, is already one.
+
+### 4.4 Do not expect a direct fixed-modulus obstruction in `m,n,a,c`
+
+The structural congruence obstruction appears only after the four-corner decomposition below. In the original variables, the signed cases and the factor reassignment hide the obstruction. A direct `omega`/`norm_num` search over `m,n,a,c mod 8` is unlikely to close the residual unless it first encodes the coprime corner decomposition.
+
+## 5. The descent in detail
+
+Work in the normalized case and rename variables back to `m,n,a,c` for readability:
+
+```text
+a*c = m*n,
+(m-n)*(m+n) = (a-c)*(3*a-c),
+m*n ≠ 0,
+gcd(m,n)=1,
+m,n opposite parity.
+```
+
+### 5.1 Four-corner decomposition
+
+Because both pairs `(m,n)` and `(a,c)` are primitive and `a*c=m*n`, there are nonzero pairwise coprime integers `x,y,z,w` such that
+
+```text
+m = x*y,
+n = z*w,
+a = x*z,
+c = y*w.                                            (C)
+```
+
+This is the key invariant. Each prime divisor of `m*n` is assigned independently to one of four boxes according to whether it lies in the `m/n` side and in the `a/c` side.
+
+Substituting (C) into the normal factor identity gives
+
+```text
+(x*y - z*w)*(x*y + z*w)
+  = (x*z - y*w)*(3*x*z - y*w).                       (F)
+```
+
+Expanded as a quadratic equation in `y`, this is
+
+```text
+(x^2 - w^2)*y^2 + 4*x*z*w*y - z^2*(3*x^2 + w^2) = 0. (E)
+```
+
+### 5.2 Unique even corner and the mod-8 check
+
+The opposite parity of `m,n` says `x*y` and `z*w` have opposite parity. The opposite parity of `a,c` says `x*z` and `y*w` have opposite parity. Pairwise coprimality implies that at most one of `x,y,z,w` is even. Therefore exactly one corner is even.
+
+The factor equation (F) decides which corner it is. With exactly one even variable, all odd squares are `1 mod 8`. The finite check is:
+
+| even corner | LHS `(xy)^2-(zw)^2 mod 8` | RHS `(xz-yw)*(3xz-yw) mod 8` | result |
+|---|---:|---:|---|
+| `x` | `7` or `3` | `1` or `5` | impossible |
+| `y` | `7` or `3` | `3` or `7` with opposite choice | impossible |
+| `z` | `1` or `5` | `1` or `5` with same choice | possible |
+| `w` | `1` or `5` | `3` or `7` | impossible |
+
+So the normal case forces
+
+```text
+z is even,
+x,y,w are odd.                                      (P)
+```
+
+This is the finite congruence check to formalize next.
+
+### 5.3 Discriminant square
+
+First rule out `x^2=w^2`. Since `x,w` are coprime odd integers, `x^2=w^2` would imply `|x|=|w|=1`. Equation (E) would reduce to
+
+```text
+4*x*z*w*y = 4*z^2,
+```
+
+hence
 
 ```text
 z = x*w*y,
 ```
 
-contradicting `z` even and `y` odd. Hence
+contradicting `z` even and `x,w,y` odd. Thus
 
 ```text
-x^2 ≠ w^2.
+x^2 ≠ w^2.                                           (Aneq)
 ```
 
-Since (E) has the integer root `y`, its discriminant is a square:
+Now view (E) as a quadratic in `y`. Its discriminant is
 
 ```text
-D = 4*z^2*(3*x^2 - w^2)*(x^2 + w^2).
+Δ = 4*z^2*(3*x^2 - w^2)*(x^2 + w^2).                (D)
 ```
 
-Because `z ≠ 0`, this implies
+Because `y` is an integer root,
 
 ```text
-(3*x^2 - w^2)*(x^2 + w^2) is a square.                (1)
+Δ = (2*(x^2-w^2)*y + 4*x*z*w)^2.
 ```
 
-Now `x,w` are odd and coprime. Therefore
+To divide by `(2*z)^2` in Lean, first prove the useful invariant
 
 ```text
-gcd(3*x^2 - w^2, x^2 + w^2) = 2,
+z ∣ x^2 - w^2.                                      (Zdiv)
+```
+
+This follows from (E) modulo `z`:
+
+```text
+(x^2-w^2)*y^2 ≡ 0 mod z,
+```
+
+and `gcd(y,z)=1`. Hence the square root of `Δ` is divisible by `2*z`, and there is an integer `T` such that
+
+```text
+T^2 = (3*x^2 - w^2)*(x^2 + w^2).                   (Sprod)
+```
+
+### 5.4 Split the square product
+
+Since `x,w` are coprime odd integers,
+
+```text
 3*x^2 - w^2 ≡ 2 mod 8,
-x^2 + w^2 ≡ 2 mod 8.
+x^2 + w^2   ≡ 2 mod 8.
 ```
 
-So the two half-factors are coprime odd squares. There exist odd coprime integers `u,v` with
+Also
 
 ```text
-3*x^2 - w^2 = 2*u^2,                                  (2)
-x^2 + w^2 = 2*v^2.                                    (3)
+gcd(3*x^2 - w^2, x^2 + w^2) = 2.
 ```
 
-### Step 5: convert to a smaller square solution
+Indeed any common divisor divides
+
+```text
+(3*x^2-w^2) + (x^2+w^2) = 4*x^2,
+3*(x^2+w^2) - (3*x^2-w^2) = 4*w^2,
+```
+
+and `gcd(x,w)=1`; the two factors are exactly `2 mod 8`, so the gcd is exactly `2`.
+
+Therefore their halves are coprime odd integers whose product is a square. Since `x^2+w^2>0`, equation (Sprod) also forces `3*x^2-w^2>0`. Hence there are odd coprime integers `u,v` such that
+
+```text
+3*x^2 - w^2 = 2*u^2,                                (U)
+x^2 + w^2   = 2*v^2.                                (V)
+```
+
+### 5.5 Pythagorean conversion
 
 Set
 
@@ -209,396 +400,568 @@ R = (x+w)/2,
 S = (x-w)/2.
 ```
 
-Since `x,w` are odd, `R,S` are integers. Since `gcd(x,w)=1`, `gcd(R,S)=1`. Since `x^2≠w^2`, both `R` and `S` are nonzero. Equation (3) gives
+Because `x,w` are odd, `R,S` are integers. Because `gcd(x,w)=1`,
 
 ```text
-R^2 + S^2 = v^2.
+gcd(R,S)=1.
 ```
 
-Equation (2), using `x=R+S` and `w=R-S`, gives
+Because `x,w` are odd, `R,S` have opposite parity. Because `x^2≠w^2`, both are nonzero.
+
+Equation (V) gives
 
 ```text
-u^2 = R^2 + 4*R*S + S^2.                              (4)
+R^2 + S^2 = v^2.                                    (Py)
 ```
 
-The primitive Pythagorean parametrization of `R^2+S^2=v^2` gives coprime opposite-parity nonzero integers `p,q` such that, up to swapping the two legs and changing signs,
+Equation (U), using `x=R+S` and `w=R-S`, gives
 
 ```text
-R = p^2 - q^2,
-S = 2*p*q.
+u^2 = R^2 + 4*R*S + S^2.                            (Tw)
 ```
 
-The expression in (4) is invariant under the allowed swap, and sign changes are absorbed by replacing `q` by `-q`. Consequently
+The primitive Pythagorean parametrization gives coprime opposite-parity nonzero integers `p,q` such that, after swapping the legs and choosing signs,
 
 ```text
-u^2 = p^4 + 8*p^3*q + 2*p^2*q^2 - 8*p*q^3 + q^4
-    = Q(p,q).                                         (5)
+{R,S} = {p^2 - q^2, 2*p*q}
 ```
 
-Moreover `p*q ≠ 0`, `gcd(p,q)=1`, and `p,q` have opposite parity.
-
-Finally the measure drops. From the Pythagorean parametrization,
+as signed legs. The expression `R^2 + 4*R*S + S^2` is symmetric in `R,S`; the remaining sign is absorbed by replacing `q` by `-q`. Therefore
 
 ```text
-2*|p*q| ≤ p^2+q^2 = |v|.
+u^2 = (p^2-q^2)^2 + 4*(p^2-q^2)*(2*p*q) + (2*p*q)^2
+    = p^4 + 8*p^3*q + 2*p^2*q^2 - 8*p*q^3 + q^4
+    = Q12(p,q).                                     (Qsmall)
 ```
 
-From (3),
+Moreover
 
 ```text
-v^2 = (x^2+w^2)/2 < x^2*w^2
+p*q ≠ 0,
+gcd(p,q)=1,
+p,q have opposite parity.
 ```
 
-because `x,w` are nonzero odd and `x^2≠w^2`. Hence `|p*q| < |x*w|`. Since `z` is even and `y` is nonzero,
+### 5.6 Strict descent measure
+
+Use the measure
 
 ```text
-|M*N| = |x*y*z*w| ≥ 2*|x*w|.
+μ(m,n) = Int.natAbs (m*n).
 ```
 
-Therefore
+From the Pythagorean parametrization,
 
 ```text
-|p*q| < |M*N| = |m*n|.
+2*|p*q| ≤ p^2 + q^2 = |v|.
 ```
 
-So any residual solution gives a strictly smaller primitive opposite-parity solution of the original square equation `b^2 = Q(p,q)`.
+From (V),
 
-### Step 6: close by minimal descent
+```text
+v^2 = (x^2+w^2)/2.
+```
 
-The formal closure should be:
+Since `x,w` are nonzero odd and `x^2≠w^2`,
 
-1. Define `SquareSol(m,n,b)` to mean
+```text
+(x^2+w^2)/2 < x^2*w^2,
+```
 
-   ```text
-   m*n ≠ 0,
-   gcd(m,n)=1,
-   m,n opposite parity,
-   b^2 = Q(m,n).
-   ```
+so
 
-2. Use the already-proved reduction:
+```text
+|v| < |x*w|.
+```
 
-   ```text
-   SquareSol(m,n,b) -> ∃ a c, Residual(m,n,a,c).
-   ```
+Finally, from the corner decomposition,
 
-3. Prove the new descent lemma:
+```text
+|m*n| = |x*y*z*w|.
+```
 
-   ```text
-   Residual(m,n,a,c) plus primitive/parity side conditions
-     -> ∃ p q b', SquareSol(p,q,b') ∧ |p*q| < |m*n|.
-   ```
+Here `z` is even and nonzero, and `y` is nonzero, hence
 
-4. Take a minimal `SquareSol` by the natural-number measure `Int.natAbs (m*n)`. The reduction gives a residual; the descent gives a smaller square solution; contradiction.
+```text
+|m*n| ≥ 2*|x*w|.
+```
 
-This proves no square solution, and then the residual is impossible because every residual reconstructs a square witness for its `(m,n)`.
+Thus
 
-## C. Lean theorem package
+```text
+|p*q| < |m*n|.
+```
 
-The following is the interface I would formalize. I use `import Mathlib` deliberately here so the snippet is self-contained with all imports; in the project you can replace it by narrower imports after the statements stabilize.
+So one normalized residual gives a strictly smaller primitive opposite-parity solution of the original quartic square equation.
+
+## 6. Lean-oriented lemma DAG
+
+Below is the theorem package I would aim for. The exact namespace can be changed to match the project. The statements are intentionally integer-only and isolate API-heavy facts.
 
 ```lean
 import Mathlib
 
-namespace FLT.Kubert12
+namespace FLT.Kubert.N12
 
-/-- The linear form used in the N=12 obstruction. -/
-def H (m n : ℤ) : ℤ :=
+/-- The quadratic form appearing in the N=12 split. -/
+def H12 (m n : ℤ) : ℤ :=
   m^2 + 4*m*n - n^2
 
-/-- The quartic whose square-ness is being obstructed. -/
-def Q (m n : ℤ) : ℤ :=
+/-- The homogeneous quartic square equation. -/
+def Q12 (m n : ℤ) : ℤ :=
   m^4 + 8*m^3*n + 2*m^2*n^2 - 8*m*n^3 + n^4
 
-/-- Use this rather than fighting over the exact Int coprime API. -/
-def IntCoprime (x y : ℤ) : Prop :=
-  Int.gcd x y = 1
-
-/-- For integers, opposite parity is equivalent to the sum being odd. -/
+/-- Opposite parity, phrased in a way that is convenient over `ℤ`. -/
 def OppParity (x y : ℤ) : Prop :=
   Odd (x + y)
 
+/-- Primitive non-axis input pair. -/
+def PrimOppNonAxis (m n : ℤ) : Prop :=
+  m*n ≠ 0 ∧ IsCoprime m n ∧ OppParity m n
+
 /-- Descent measure. -/
-def meas (m n : ℤ) : ℕ :=
+def n12Measure (m n : ℤ) : ℕ :=
   (m*n).natAbs
 
-lemma Q_eq_H_sq_sub (m n : ℤ) :
-    Q m n = H m n ^ 2 - 12*(m*n)^2 := by
-  unfold Q H
+/-- The original quartic square solution. -/
+def SquareSol12 (m n b : ℤ) : Prop :=
+  PrimOppNonAxis m n ∧ b^2 = Q12 m n
+
+lemma Q12_eq_H12_sq_sub (m n : ℤ) :
+    Q12 m n = H12 m n ^ 2 - 12*(m*n)^2 := by
+  unfold Q12 H12
   ring
 
-/-- One normalized residual case. All eight original cases fold to this. -/
-def NormalResidual (m n a c : ℤ) : Prop :=
-  m*n ≠ 0 ∧
-  IntCoprime m n ∧
-  OppParity m n ∧
+/-- The single normal residual after signs/swaps have been removed. -/
+def NormalResidual12 (m n a c : ℤ) : Prop :=
+  PrimOppNonAxis m n ∧
   a*c = m*n ∧
   (m-n)*(m+n) = (a-c)*(3*a-c)
 
-/-- The original eight residual cases, without repeating the common side conditions. -/
-inductive Residual (m n a c : ℤ) : Prop where
-| P1
-    (hprod : a*c = m*n)
-    (hfac  : (m-n)*(m+n) =  (a-c)*(3*a-c)) : Residual m n a c
-| P2
-    (hprod : a*c = m*n)
-    (hfac  : (m-n)*(m+n) = -(a+c)*(3*a+c)) : Residual m n a c
-| P3
-    (hprod : a*c = m*n)
-    (hfac  : (m-n)*(m+n) =  (a-c)*(a-3*c)) : Residual m n a c
-| P4
-    (hprod : a*c = m*n)
-    (hfac  : (m-n)*(m+n) = -(a+c)*(a+3*c)) : Residual m n a c
-| N5
-    (hprod : a*c = -m*n)
-    (hfac  : (m-n)*(m+n) =  (a+c)*(3*a+c)) : Residual m n a c
-| N6
-    (hprod : a*c = -m*n)
-    (hfac  : (m-n)*(m+n) = -(a-c)*(3*a-c)) : Residual m n a c
-| N7
-    (hprod : a*c = -m*n)
-    (hfac  : (m-n)*(m+n) =  (a+c)*(a+3*c)) : Residual m n a c
-| N8
-    (hprod : a*c = -m*n)
-    (hfac  : (m-n)*(m+n) = -(a-c)*(a-3*c)) : Residual m n a c
+/-- Replace this with the project's existing residual/disjunction if it already exists. -/
+inductive FactorIdentityResidual12 (m n a c : ℤ) : Prop where
+| P1 (hprod : a*c = m*n)
+     (hfac : (m-n)*(m+n) = (a-c)*(3*a-c))
+| P2 (hprod : a*c = m*n)
+     (hfac : (m-n)*(m+n) = -(a+c)*(3*a+c))
+| P3 (hprod : a*c = m*n)
+     (hfac : (m-n)*(m+n) = (a-c)*(a-3*c))
+| P4 (hprod : a*c = m*n)
+     (hfac : (m-n)*(m+n) = -(a+c)*(a+3*c))
+| N5 (hprod : a*c = -m*n)
+     (hfac : (m-n)*(m+n) = (a+c)*(3*a+c))
+| N6 (hprod : a*c = -m*n)
+     (hfac : (m-n)*(m+n) = -(a-c)*(3*a-c))
+| N7 (hprod : a*c = -m*n)
+     (hfac : (m-n)*(m+n) = (a+c)*(a+3*c))
+| N8 (hprod : a*c = -m*n)
+     (hfac : (m-n)*(m+n) = -(a-c)*(a-3*c))
 
-/-- Normalization table for the eight residual cases. -/
-theorem residual_normalizes
+/-- Normalize the eight residual cases to one case, preserving the measure. -/
+theorem residual12_normalizes
+    {m n a c : ℤ}
+    (hprim : PrimOppNonAxis m n)
+    (h : FactorIdentityResidual12 m n a c) :
+    ∃ M N A C : ℤ,
+      NormalResidual12 M N A C ∧ n12Measure M N = n12Measure m n := by
+  -- Constructor split; the substitution table is in the markdown audit.
+  -- Each branch is `refine ⟨..., ..., ..., ..., ?_, ?_⟩` followed by `ring_nf`.
+  sorry
+
+/-- In the normal case, the residual reconstructs a square of `Q12`. -/
+theorem normalResidual12_to_square
+    {m n a c : ℤ}
+    (h : NormalResidual12 m n a c) :
+    (c^2 - 3*a^2)^2 = Q12 m n := by
+  -- From `(m-n)*(m+n)=(a-c)*(3*a-c)` and `a*c=m*n`, derive
+  -- `H12 m n = 3*a^2+c^2`; then use `Q12_eq_H12_sq_sub`.
+  sorry
+
+/-- The eight-case residual also reconstructs a square witness. -/
+theorem residual12_to_square
+    {m n a c : ℤ}
+    (hprim : PrimOppNonAxis m n)
+    (h : FactorIdentityResidual12 m n a c) :
+    ∃ b : ℤ, b^2 = Q12 m n := by
+  rcases residual12_normalizes hprim h with ⟨M,N,A,C,hN,hmeas⟩
+  -- If `M,N` is `(m,n)` this is direct. If it is `(n,-m)`, use
+  -- the separate ring lemma `Q12 n (-m) = Q12 m n`.
+  -- Alternatively prove the square reconstruction by an eight-case `ring_nf` split.
+  sorry
+
+end FLT.Kubert.N12
+```
+
+### 6.1 Small gcd/parity lemmas first
+
+```lean
+import Mathlib
+
+namespace FLT.Kubert.N12
+
+lemma coprime_mul_sq_sub_sq
+    {m n : ℤ} (hcop : IsCoprime m n) :
+    IsCoprime (m*n) (m^2 - n^2) := by
+  -- Prime/divisibility proof: a common divisor of `m*n` and `m^2-n^2`
+  -- divides both `m` and `n` locally.
+  sorry
+
+lemma coprime_sub_add_of_prim_opp
+    {m n : ℤ} (hcop : IsCoprime m n) (hpar : OppParity m n) :
+    IsCoprime (m-n) (m+n) := by
+  -- Common divisor divides `2*m` and `2*n`; parity makes both factors odd.
+  sorry
+
+lemma normalResidual12_coprime_ac
+    {m n a c : ℤ} (h : NormalResidual12 m n a c) :
+    IsCoprime a c := by
+  -- If `d | a,c`, then `d | a*c=m*n` and `d | m^2-n^2`.
+  -- Use `coprime_mul_sq_sub_sq`.
+  sorry
+
+lemma normalResidual12_oppParity_ac
+    {m n a c : ℤ} (h : NormalResidual12 m n a c) :
+    OppParity a c := by
+  -- `a*c=m*n` is even because `m,n` have opposite parity; combine with
+  -- `normalResidual12_coprime_ac`.
+  sorry
+
+lemma coprime_a_sub_c_three_a_sub_c
+    {a c : ℤ} (hcop : IsCoprime a c) (hpar : OppParity a c) :
+    IsCoprime (a-c) (3*a-c) := by
+  -- Common divisor divides `2*a` and `2*c`; parity makes both factors odd.
+  sorry
+
+end FLT.Kubert.N12
+```
+
+### 6.2 Four-corner decomposition lemmas
+
+```lean
+import Mathlib
+
+namespace FLT.Kubert.N12
+
+def PairwiseCoprime4 (x y z w : ℤ) : Prop :=
+  IsCoprime x y ∧ IsCoprime x z ∧ IsCoprime x w ∧
+  IsCoprime y z ∧ IsCoprime y w ∧ IsCoprime z w
+
+/-- Cross decomposition of `a*c=m*n` for two primitive pairs. -/
+theorem cross_decomposition
     {m n a c : ℤ}
     (hmn0 : m*n ≠ 0)
-    (hcop : IntCoprime m n)
-    (hpar : OppParity m n)
-    (h : Residual m n a c) :
-    ∃ M N A C : ℤ,
-      NormalResidual M N A C ∧ meas M N = meas m n := by
-  -- Eight constructor cases. Each is a `ring` verification using the table:
-  -- P1 -> (m,n,a,c)
-  -- P2 -> (n,-m,a,-c)
-  -- P3 -> (m,n,c,a)
-  -- P4 -> (n,-m,c,-a)
-  -- N5 -> (m,n,a,-c)
-  -- N6 -> (n,-m,a,c)
-  -- N7 -> (m,n,-c,a)
-  -- N8 -> (n,-m,c,a)
-  sorry
-
-/-- Any residual already gives a square witness for the original quartic. -/
-theorem residual_to_square
-    {m n a c : ℤ}
-    (h : Residual m n a c) :
-    ∃ b : ℤ, b^2 = Q m n := by
-  -- Cases P1/N5 give `H = 3*a^2+c^2` and `b = c^2-3*a^2`.
-  -- Cases P2/N6 give `H = -(3*a^2+c^2)` and the same `b`.
-  -- Cases P3/N7 give `H = a^2+3*c^2` and `b = a^2-3*c^2`.
-  -- Cases P4/N8 give `H = -(a^2+3*c^2)` and the same `b`.
-  -- Then use `Q_eq_H_sq_sub` and `a*c = ±m*n`.
-  sorry
-
-/-- Pairwise coprimality for the four corner factors. -/
-def PairwiseCoprime4 (x y z w : ℤ) : Prop :=
-  IntCoprime x y ∧ IntCoprime x z ∧ IntCoprime x w ∧
-  IntCoprime y z ∧ IntCoprime y w ∧ IntCoprime z w
-
-/-- Recover `gcd(a,c)=1` from the normalized residual. -/
-theorem normal_coprime_ac
-    {m n a c : ℤ}
-    (h : NormalResidual m n a c) :
-    IntCoprime a c := by
-  -- If `d | a,c`, then `d | a*c = m*n` and `d | m^2-n^2`.
-  -- But `gcd(m*n, m^2-n^2)=1` follows from `gcd(m,n)=1`.
-  sorry
-
-/-- Four-corner factorization of `a*c=m*n` for two primitive pairs. -/
-theorem cross_factorization
-    {m n a c : ℤ}
-    (hmn : IntCoprime m n)
-    (hac : IntCoprime a c)
+    (hmn : IsCoprime m n)
+    (hac : IsCoprime a c)
     (hprod : a*c = m*n) :
     ∃ x y z w : ℤ,
       m = x*y ∧ n = z*w ∧ a = x*z ∧ c = y*w ∧
       x*y*z*w ≠ 0 ∧ PairwiseCoprime4 x y z w := by
-  -- Construct by assigning every prime of `m*n` to one of four boxes:
-  --   divides m/a -> x, divides m/c -> y, divides n/a -> z, divides n/c -> w.
-  -- A concrete Lean construction can use `x = gcd(m,a)` and divisibility.
+  -- Concrete construction: take `x` to be the signed gcd/common divisor of `m` and `a`,
+  -- write `m=x*y`, `a=x*z`, then use `a*c=m*n` and `IsCoprime y z` to prove
+  -- `z | n`; write `n=z*w`; then prove `c=y*w`.
   sorry
 
-/-- In the normal residual, the unique even corner is `z`. -/
-theorem normal_cross_even
+lemma cross_identity_quadratic
+    (x y z w : ℤ) :
+    ((x*y - z*w)*(x*y + z*w)
+      = (x*z - y*w)*(3*(x*z) - y*w)) ↔
+    (x^2 - w^2)*y^2 + 4*x*z*w*y - z^2*(3*x^2 + w^2) = 0 := by
+  constructor <;> intro h <;> nlinarith [h]
+
+/-- The parity hypotheses imply exactly one even corner; the equation forces it to be `z`. -/
+theorem cross_even_corner_is_z
     {x y z w : ℤ}
     (hnz : x*y*z*w ≠ 0)
     (hpair : PairwiseCoprime4 x y z w)
-    (hpar : OppParity (x*y) (z*w))
+    (hparMN : OppParity (x*y) (z*w))
+    (hparAC : OppParity (x*z) (y*w))
     (heq : (x*y - z*w)*(x*y + z*w)
          = (x*z - y*w)*(3*(x*z) - y*w)) :
     Even z ∧ Odd x ∧ Odd y ∧ Odd w := by
-  -- Pairwise coprimality plus `OppParity (xy) (zw)` gives exactly one even corner.
-  -- Check the four possible even corners modulo 8.
-  -- x even: LHS=7, RHS=1.
-  -- y even: LHS and RHS differ by 4.
-  -- w even: LHS=1, RHS=3.
-  -- Therefore z is even.
+  -- First prove exactly one of `x,y,z,w` is even.
+  -- Then four cases modulo 8 using the table in the audit.
   sorry
 
-/-- The quadratic discriminant step. -/
-theorem normal_cross_discriminant_square
+end FLT.Kubert.N12
+```
+
+Note: the `nlinarith [h]` in `cross_identity_quadratic` may need to be replaced by `ring_nf at h ⊢` depending on the local simplifier state. The lemma itself is a pure `ring` fact.
+
+### 6.3 Discriminant and square-splitting lemmas
+
+```lean
+import Mathlib
+
+namespace FLT.Kubert.N12
+
+lemma cross_z_dvd_xsq_sub_wsq
+    {x y z w : ℤ}
+    (hyz : IsCoprime y z)
+    (heqQ : (x^2 - w^2)*y^2 + 4*x*z*w*y - z^2*(3*x^2 + w^2) = 0) :
+    z ∣ x^2 - w^2 := by
+  -- Reduce `heqQ` modulo/divisibility by `z`:
+  -- `z | (x^2-w^2)*y^2`, then cancel `y^2` using `IsCoprime y z`.
+  sorry
+
+lemma cross_xsq_ne_wsq
     {x y z w : ℤ}
     (hnz : x*y*z*w ≠ 0)
     (hpair : PairwiseCoprime4 x y z w)
-    (hz : Even z)
-    (hx : Odd x) (hy : Odd y) (hw : Odd w)
-    (heq : (x*y - z*w)*(x*y + z*w)
-         = (x*z - y*w)*(3*(x*z) - y*w)) :
-    x^2 ≠ w^2 ∧
-    ∃ T : ℤ, T^2 = (3*x^2 - w^2)*(x^2 + w^2) := by
-  -- Expanded equation:
-  --   (x^2-w^2)y^2 + 4*x*z*w*y - z^2*(3*x^2+w^2)=0.
-  -- If x^2=w^2, then |x|=|w|=1 and the equation gives z=x*w*y,
-  -- contradicting z even and y odd.
-  -- Otherwise the discriminant is a square:
-  --   4*z^2*(3*x^2-w^2)*(x^2+w^2).
-  -- Cancel the square factor `(2*z)^2`.
+    (hz : Even z) (hx : Odd x) (hy : Odd y) (hw : Odd w)
+    (heqQ : (x^2 - w^2)*y^2 + 4*x*z*w*y - z^2*(3*x^2 + w^2) = 0) :
+    x^2 ≠ w^2 := by
+  -- If equal, coprime nonzero `x,w` force `x^2=w^2=1`.
+  -- Then `heqQ` gives `z=x*w*y`, contradicting z even and x,w,y odd.
   sorry
 
-/-- Split the square product into two square half-factors. -/
-theorem quartic_square_split
+lemma cross_discriminant_square
+    {x y z w : ℤ}
+    (hnz : x*y*z*w ≠ 0)
+    (hpair : PairwiseCoprime4 x y z w)
+    (hz : Even z) (hx : Odd x) (hy : Odd y) (hw : Odd w)
+    (heq : (x*y - z*w)*(x*y + z*w)
+         = (x*z - y*w)*(3*(x*z) - y*w)) :
+    ∃ T : ℤ, T^2 = (3*x^2 - w^2)*(x^2 + w^2) := by
+  -- Use `cross_identity_quadratic` to get `heqQ`.
+  -- Discriminant identity:
+  -- `(2*(x^2-w^2)*y + 4*x*z*w)^2
+  --    = 4*z^2*(3*x^2 - w^2)*(x^2 + w^2)`.
+  -- Use `cross_z_dvd_xsq_sub_wsq` to divide the square root by `2*z`.
+  sorry
+
+lemma gcd_two_quadratic_factors
+    {x w : ℤ} (hcop : IsCoprime x w) (hx : Odd x) (hw : Odd w) :
+    Nat.gcd ((3*x^2 - w^2).natAbs) ((x^2 + w^2).natAbs) = 2 := by
+  -- Common divisor divides `4*x^2` and `4*w^2`; both factors are `2 mod 8`.
+  sorry
+
+lemma square_product_split_2mod8
     {x w T : ℤ}
-    (hcop : IntCoprime x w)
-    (hx : Odd x) (hw : Odd w)
+    (hcop : IsCoprime x w) (hx : Odd x) (hw : Odd w)
     (hT : T^2 = (3*x^2 - w^2)*(x^2 + w^2)) :
     ∃ u v : ℤ,
       3*x^2 - w^2 = 2*u^2 ∧
       x^2 + w^2 = 2*v^2 := by
-  -- The two factors have gcd exactly 2 and are both 2 mod 8.
-  -- Therefore their halves are coprime odd factors whose product is a square.
+  -- Halves are coprime odd integers and their product is a square.
+  -- Positivity of `3*x^2-w^2` follows from `hT` and `x^2+w^2>0`.
   sorry
 
-/-- The Pythagorean-to-quartic conversion. -/
-theorem twisted_pythagorean_to_Q
+end FLT.Kubert.N12
+```
+
+### 6.4 Pythagorean parametrization and descent
+
+```lean
+import Mathlib
+
+namespace FLT.Kubert.N12
+
+lemma half_sum_diff_coprime
+    {x w R S : ℤ}
+    (hR : R = (x+w)/2) (hS : S = (x-w)/2)
+    (hx : Odd x) (hw : Odd w) (hcop : IsCoprime x w) :
+    IsCoprime R S := by
+  -- Better in Lean: introduce `R,S` by equations `x=R+S`, `w=R-S`
+  -- instead of using integer division heavily.
+  sorry
+
+/-- Signed primitive Pythagorean parametrization in the exact form needed here. -/
+theorem primitive_pythagorean_to_Q12
     {R S u v : ℤ}
-    (hRS : IntCoprime R S)
+    (hRS0 : R*S ≠ 0)
+    (hcop : IsCoprime R S)
     (hpar : OppParity R S)
-    (hR0 : R ≠ 0)
-    (hS0 : S ≠ 0)
     (hv : R^2 + S^2 = v^2)
     (hu : u^2 = R^2 + 4*R*S + S^2) :
     ∃ p q : ℤ,
-      p*q ≠ 0 ∧
-      IntCoprime p q ∧
-      OppParity p q ∧
-      u^2 = Q p q := by
-  -- Primitive Pythagorean parametrization gives, up to swap/sign,
-  --   R = p^2-q^2, S = 2*p*q.
-  -- In both orientations,
-  --   R^2 + 4*R*S + S^2
-  -- becomes `Q p q`, after possibly replacing q by -q.
+      p*q ≠ 0 ∧ IsCoprime p q ∧ OppParity p q ∧ u^2 = Q12 p q := by
+  -- Apply primitive Pythagorean parametrization to `R^2+S^2=v^2`.
+  -- The two signed legs are `p^2-q^2` and `2*p*q`, up to swap/sign.
+  -- Swap is harmless because `R^2+4RS+S^2` is symmetric; sign is absorbed by `q ↦ -q`.
   sorry
 
-/-- Main new descent lemma from the normalized residual. -/
-theorem normal_residual_descent_to_square
-    {m n a c : ℤ}
-    (h : NormalResidual m n a c) :
-    ∃ p q b : ℤ,
-      p*q ≠ 0 ∧
-      IntCoprime p q ∧
-      OppParity p q ∧
-      b^2 = Q p q ∧
-      meas p q < meas m n := by
-  -- 1. `normal_coprime_ac`.
-  -- 2. `cross_factorization` gives `m=xy,n=zw,a=xz,c=yw`.
-  -- 3. `normal_cross_even` forces z even.
-  -- 4. `normal_cross_discriminant_square` and `quartic_square_split` give u,v.
-  -- 5. Let R=(x+w)/2 and S=(x-w)/2.
-  -- 6. `twisted_pythagorean_to_Q` gives p,q,b=u.
-  -- 7. The measure inequality is:
-  --      2*|p*q| ≤ p^2+q^2 = |v|,
-  --      v^2 = (x^2+w^2)/2 < x^2*w^2,
-  --      and |m*n| = |x*y*z*w| ≥ 2*|x*w| because z is even.
+lemma pythagorean_measure_bound
+    {p q v x w : ℤ}
+    (hpq : p*q ≠ 0)
+    (hv : v^2 = (x^2 + w^2)/2)
+    (hvw : (p^2 + q^2)^2 = v^2)
+    (hx0 : x ≠ 0) (hw0 : w ≠ 0) (hne : x^2 ≠ w^2) :
+    2*(p*q).natAbs < (x*w).natAbs := by
+  -- Equivalent integer absolute-value proof:
+  -- `2*|p*q| ≤ p^2+q^2 = |v|`, and `|v| < |x*w|`.
   sorry
 
-/-- Descent lemma for the original eight residual cases. -/
-theorem residual_descent_to_square
+/-- Main descent from the normalized residual to a smaller quartic square solution. -/
+theorem normalResidual12_descent_square
     {m n a c : ℤ}
-    (hmn0 : m*n ≠ 0)
-    (hcop : IntCoprime m n)
-    (hpar : OppParity m n)
-    (h : Residual m n a c) :
+    (h : NormalResidual12 m n a c) :
     ∃ p q b : ℤ,
-      p*q ≠ 0 ∧
-      IntCoprime p q ∧
-      OppParity p q ∧
-      b^2 = Q p q ∧
-      meas p q < meas m n := by
-  rcases residual_normalizes hmn0 hcop hpar h with ⟨M,N,A,C,hN,hmeas⟩
-  rcases normal_residual_descent_to_square hN with
-    ⟨p,q,b,hpq0,hpqcop,hpqpar,hb,hlt⟩
-  refine ⟨p,q,b,hpq0,hpqcop,hpqpar,hb,?_⟩
+      SquareSol12 p q b ∧ n12Measure p q < n12Measure m n := by
+  -- 1. `normalResidual12_coprime_ac` and `normalResidual12_oppParity_ac`.
+  -- 2. `cross_decomposition` gives `m=xy,n=zw,a=xz,c=yw`.
+  -- 3. `cross_even_corner_is_z` gives `z` even and `x,y,w` odd.
+  -- 4. `cross_discriminant_square` gives square product in `x,w`.
+  -- 5. `square_product_split_2mod8` gives `u,v`.
+  -- 6. Define `R,S` by `x=R+S`, `w=R-S`.
+  -- 7. `primitive_pythagorean_to_Q12` gives `p,q,b=u`.
+  -- 8. Measure inequality: `|p*q| < |m*n|`.
+  sorry
+
+/-- Descent from the original eight-case residual. -/
+theorem residual12_descent_square
+    {m n a c : ℤ}
+    (hprim : PrimOppNonAxis m n)
+    (h : FactorIdentityResidual12 m n a c) :
+    ∃ p q b : ℤ,
+      SquareSol12 p q b ∧ n12Measure p q < n12Measure m n := by
+  rcases residual12_normalizes hprim h with ⟨M,N,A,C,hN,hmeas⟩
+  rcases normalResidual12_descent_square hN with ⟨p,q,b,hsol,hlt⟩
+  refine ⟨p,q,b,hsol,?_⟩
   simpa [hmeas] using hlt
 
-/-- The square-solution record used for the final minimal descent. -/
-def SquareSol (m n b : ℤ) : Prop :=
-  m*n ≠ 0 ∧ IntCoprime m n ∧ OppParity m n ∧ b^2 = Q m n
+end FLT.Kubert.N12
+```
 
-/-- Final closure, parameterized by the already-proved square-to-residual reduction. -/
-theorem no_square_of_reduction_and_descent
-    (reduce : ∀ {m n b : ℤ}, SquareSol m n b -> ∃ a c : ℤ, Residual m n a c) :
-    ¬ ∃ m n b : ℤ, SquareSol m n b := by
-  -- Well-founded descent on `meas m n`.
-  -- Pick a SquareSol with minimal measure using Nat.find / wellFounded_lt.
-  -- Apply `reduce`, then `residual_descent_to_square`, contradicting minimality.
+### 6.5 Final well-founded closure
+
+The descent returns a smaller **quartic square solution**, not immediately a smaller displayed residual. Therefore the final closure should use the already-checked reduction wrapper from square solutions to residuals.
+
+```lean
+import Mathlib
+
+namespace FLT.Kubert.N12
+
+/-- Clean final theorem parameterized by the already-proved reduction. -/
+theorem no_squareSol12_of_square_to_residual
+    (square_to_residual :
+      ∀ {m n b : ℤ}, SquareSol12 m n b -> ∃ a c : ℤ, FactorIdentityResidual12 m n a c) :
+    ¬ ∃ m n b : ℤ, SquareSol12 m n b := by
+  -- Well-founded descent on `n12Measure m n`.
+  -- Pick a solution of minimal measure.
+  -- Apply `square_to_residual`, then `residual12_descent_square`, contradiction.
   sorry
 
-/-- Consequently, the residual itself is impossible. -/
-theorem no_residual_of_reduction_and_descent
-    (reduce : ∀ {m n b : ℤ}, SquareSol m n b -> ∃ a c : ℤ, Residual m n a c) :
+/-- Residual impossibility, using the square-to-residual reduction. -/
+theorem no_factorIdentityResidual12
+    (square_to_residual :
+      ∀ {m n b : ℤ}, SquareSol12 m n b -> ∃ a c : ℤ, FactorIdentityResidual12 m n a c) :
     ¬ ∃ m n a c : ℤ,
-      m*n ≠ 0 ∧ IntCoprime m n ∧ OppParity m n ∧ Residual m n a c := by
-  intro hres
-  rcases hres with ⟨m,n,a,c,hmn0,hcop,hpar,hR⟩
-  rcases residual_to_square hR with ⟨b,hb⟩
-  exact no_square_of_reduction_and_descent reduce ⟨m,n,b,hmn0,hcop,hpar,hb⟩
+      PrimOppNonAxis m n ∧ FactorIdentityResidual12 m n a c := by
+  intro h
+  rcases h with ⟨m,n,a,c,hprim,hres⟩
+  rcases residual12_to_square hprim hres with ⟨b,hb⟩
+  exact no_squareSol12_of_square_to_residual square_to_residual ⟨m,n,b,hprim,hb⟩
 
-end FLT.Kubert12
+end FLT.Kubert.N12
 ```
 
-## D. Did the residual lose crucial structure?
-
-Not fatally. The residual still contains enough structure to reconstruct a square witness and to start the descent. However, it is the wrong final interface if you try to prove `Residual -> False` by a local congruence-only argument.
-
-What should be retained in the Lean interface:
-
-1. Keep a theorem of the form
-
-   ```text
-   SquareSol(m,n,b) -> ∃ a c, Residual(m,n,a,c)
-   ```
-
-   The new descent returns a smaller `SquareSol`, not immediately a smaller displayed residual. You close the loop by invoking this reduction again.
-
-2. It is worth carrying the derived facts
-
-   ```text
-   gcd(a,c)=1,
-   a,c opposite parity,
-   the relevant 3-side nondivisibility from gcd(r,s)=1
-   ```
-
-   even though the first two are recoverable from the residual. Carrying them will shorten the Lean proof.
-
-3. Do not keep all eight cases alive downstream. Normalize once to `NormalResidual`; otherwise the proof becomes eight copies of the same descent with sign noise.
-
-4. Keep `Q_eq_H_sq_sub` and `residual_to_square` near the residual definition. They are the bridge showing the residual did not lose the square witness.
-
-The adversarial conclusion is: the residual is not false for a cheap reason. The breakthrough is the chain
+In the project, `square_to_residual` should be instantiated by the already-checked chain around
 
 ```text
-Residual
-  -> normalized case
-  -> four-corner factorization x,y,z,w
-  -> mod 8 forces z even
-  -> discriminant square in x,w
-  -> two half-square equations
-  -> primitive Pythagorean parametrization
-  -> smaller Q-square solution.
+factorIdentityResidual_of_square_12
+rationalCoverSignedResidual_factorIdentityResidual
+bridge_N12_factorIdentityResidual
 ```
 
-That is the route I would formalize next.
+depending on which one has the exact `SquareSol12 -> FactorIdentityResidual12` shape.
+
+## 7. If this should remain an arithmetic boundary
+
+If the project does not want to formalize the full descent right now, the cleanest boundary is **not** the eight-case factor residual. The cleanest boundary is the quartic square theorem:
+
+```lean
+import Mathlib
+
+namespace FLT.Kubert.N12
+
+def H12 (m n : ℤ) : ℤ :=
+  m^2 + 4*m*n - n^2
+
+def Q12 (m n : ℤ) : ℤ :=
+  m^4 + 8*m^3*n + 2*m^2*n^2 - 8*m*n^3 + n^4
+
+def OppParity (x y : ℤ) : Prop :=
+  Odd (x + y)
+
+/-- Arithmetic boundary for the N=12 non-axis quartic. -/
+axiom no_primitive_nonaxis_Q12_square :
+  ¬ ∃ m n b : ℤ,
+    m*n ≠ 0 ∧ IsCoprime m n ∧ OppParity m n ∧ b^2 = Q12 m n
+
+end FLT.Kubert.N12
+```
+
+This boundary is mathematically cleaner because:
+
+1. every residual reconstructs a square witness;
+2. the descent naturally produces a smaller square witness;
+3. the statement is the genus-one/quartic rational-points assertion behind the N=12 cover;
+4. the eight signed factor identities are an implementation artifact of the split, not the natural arithmetic endpoint.
+
+If you prefer a rational-points boundary, use the affine quartic:
+
+```text
+Y^2 = X^4 + 8*X^3 + 2*X^2 - 8*X + 1,
+```
+
+with the assertion that all rational points correspond to axis/degenerate cases after the Kubert map. But for Lean integration with the current integer residual, the primitive integer square theorem above is probably easier.
+
+I would not describe this as Mazur-hard. It is a genus-one descent, and the descent above is elementary. The hard part in Lean is not the theorem's mathematical depth; it is organizing the coprime decomposition and signed Pythagorean parametrization without drowning in integer-unit bookkeeping.
+
+## 8. What structure must be retained in the Lean interface
+
+The residual has not lost fatal structure, but the interface should retain or quickly derive these facts:
+
+```text
+m*n ≠ 0,
+gcd(m,n)=1,
+m,n opposite parity,
+a*c = ±m*n,
+the exact signed factor identity,
+square_to_residual reduction for the smaller quartic solution.
+```
+
+Helpful derived facts worth caching as fields or lemmas:
+
+```text
+gcd(a,c)=1,
+a,c opposite parity,
+gcd(m-n,m+n)=1,
+gcd(a-c,3*a-c)=1       -- in the normalized branch
+residual_to_square       -- reconstructs b^2 = Q12(m,n)
+```
+
+The original `r,s` split does not need to remain in the final descent once it has produced the residual, except that it may already contain `gcd(a,c)=1` and parity facts. Keeping those as explicit hypotheses can save proof work, but they are recoverable from the residual plus primitive hypotheses.
+
+The one thing that **must** remain available is the loop-closing theorem:
+
+```text
+SquareSol12(m,n,b) -> ∃ a c, FactorIdentityResidual12(m,n,a,c).
+```
+
+Without that theorem, the descent from a residual only gives a smaller square solution, not a contradiction to the residual statement itself.
+
+## 9. Recommended immediate formalization order
+
+1. Define `NormalResidual12` and prove the eight-case normalization table by `ring`.
+2. Prove `Q12_eq_H12_sq_sub` and `normalResidual12_to_square`.
+3. Prove `normalResidual12_coprime_ac` and `normalResidual12_oppParity_ac`.
+4. Prove the four-corner decomposition from `a*c=m*n` with primitive pairs.
+5. Prove the mod-8 corner lemma `cross_even_corner_is_z`.
+6. Prove the quadratic expansion and `z ∣ x^2-w^2`.
+7. Prove the discriminant square product.
+8. Prove the `2 mod 8` square-product split.
+9. Prove the signed primitive Pythagorean parametrization in exactly the needed form.
+10. Prove the measure inequality.
+11. Close by well-founded descent using `factorIdentityResidual_of_square_12` or whichever checked wrapper has the square-to-residual shape.
+
+The most error-prone Lean points will be:
+
+```text
+- signed gcd/cross decomposition over ℤ;
+- cancelling `z^2` from the discriminant square, which is why `z ∣ x^2-w^2` should be a separate lemma;
+- signed primitive Pythagorean parametrization;
+- absolute-value/natAbs inequalities for the descent measure.
+```
+
+The core mathematical route is sound only if all primitive/parity/non-axis hypotheses are present. If the current `NonAxisFactorIdentityResidual` theorem statement omits any of them, add them or prove a wrapper theorem that supplies them from the signed-cover context before attempting the descent.
