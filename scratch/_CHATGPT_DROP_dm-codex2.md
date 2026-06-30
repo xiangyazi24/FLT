@@ -1,124 +1,224 @@
-# Q2679 dm-codex2: positive square factors
+# Q2686 dm-codex2: N=12 Eisenstein residual audit
 
-Target file requested: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`.
+Scope: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`, in namespace `MazurProof.RationalPointsN12`.  This is based on the residual interfaces in the prompt; the connector-visible `main`/`scratch` refs still do not expose the target Lean file itself.
 
-The connector-visible refs did not expose that target file, so this is written as a standalone scratch under `import Mathlib.Tactic`.  It is namespace-neutral: paste it at top level, or inside the target file's existing namespace.  The first proof uses the upstream Mathlib GCD-monoid square-factor theorem rather than relying on a repository-local `Int.sq_of_isCoprime`; the negative associate branch is removed by `Int.eq_of_associated_of_nonneg` and the hypotheses `0 < x`, `0 < y`.
+## Recommendation
+
+Attack **raw branch descent** next, but split it before trying to prove the current all-in-one residual.  This gives the most mathematical progress because it is the first place where the now-proved positive square-factor lemmas should eliminate a major part of the descent.  It also stress-tests whether `EisensteinSqBranch` exposes the right raw-branch data before the more delicate divided-by-3 branch is attempted.
+
+I would not attack `NormalizedBadParamStatement` first.  It is broad and mostly bookkeeping-heavy: primitive denominator clearing, gcd transport, the `3`-adic branch decision, and symmetry all interact.  A raw-branch descent proof will determine the exact extraction lemmas that the parametrization must provide.  I would also delay `DividedSquareBranchUnitOrDescendsStatement` until the raw branch skeleton is stable, since divided branch descent should reuse the same four-square/AP descent core plus extra `3`-adic normalization.
+
+## Current statement audit
+
+1. `DescentFromBranchUnorderedStatement` is the right mathematical target **only if** `EisensteinSqBranch` is genuinely the non-divided/raw branch and therefore excludes the trivial unit branch.  If `EisensteinSqBranch 1 1 1 m n` is admissible for some `m n`, then the current statement is too strong/false, because `NormalizedEisensteinBad A' N' S'` should force `0 < N'`, while `N' < 1` is impossible in the usual normalized-positive setting.  Either prove the no-unit lemma below or replace the current residual by the nonunit/unit-or-descends interface below.
+
+2. The word `Unordered` is potentially misleading.  The inequality `N' < N` is measured against the **second argument of the branch orientation**, not necessarily the original normalized denominator.  This is fine for final assembly only if the swapped cases are called as `DescentFromBranchUnorderedStatement` on `(N, A, S)` and the assembly separately uses the normalized inequality, typically `A < N`, to conclude `N' < original N`.
+
+3. `DividedSquareBranchUnitOrDescendsStatement` has the correct high-level shape.  For proof engineering, split it into a nonunit descent lemma and derive the current disjunction by `by_cases hunit : A = 1 ∧ N = 1 ∧ S = 1`.
+
+4. `NormalizedBadParamStatement` should not be strengthened into a huge theorem carrying every positivity/coprimality/parity fact.  Keep its branch-result shape, but add branch extraction lemmas.  If `EisensteinSqBranch` does not let you prove the factorization/coprimality lemmas below, then the branch predicate is too weak as an interface for descent.
+
+## Interface repair / compatibility layer
 
 ```lean
 import Mathlib.Tactic
 
-/-- If two positive coprime integers multiply to a square, then both are squares. -/
-def PosSqOfCoprimeMulSqStatement : Prop :=
-  ∀ {x y z : ℤ}, 0 < x -> 0 < y -> IsCoprime x y -> z^2 = x*y ->
-    ∃ a b : ℤ, 0 < a ∧ 0 < b ∧ x = a^2 ∧ y = b^2
+namespace MazurProof.RationalPointsN12
 
-private lemma q2679_isUnit_gcd_of_isCoprime_int {x y : ℤ}
-    (h : IsCoprime x y) : IsUnit (gcd x y) := by
-  exact (gcd_isUnit_iff_isRelPrime (a := x) (b := y)).mpr h.isRelPrime
+/-- Raw branch cannot be the unit solution.  Prove this if you want to keep
+`DescentFromBranchUnorderedStatement` exactly as currently stated. -/
+def RawSqBranchNoUnitStatement : Prop :=
+  ∀ {A N S m n : ℤ},
+    PositivePrimitiveEisensteinBadUnordered A N S →
+    EisensteinSqBranch A N S m n →
+    ¬ (A = 1 ∧ N = 1 ∧ S = 1)
 
-private lemma q2679_eq_sq_of_pos_of_associated_sq {x a : ℤ}
-    (hx : 0 < x) (h : Associated (a ^ 2) x) : x = a ^ 2 := by
-  exact (Int.eq_of_associated_of_nonneg h (sq_nonneg a) (le_of_lt hx)).symm
+/-- Safer raw-branch target: descent only after the unit case is excluded. -/
+def RawSqBranchNonunitDescendsStatement : Prop :=
+  ∀ {A N S m n : ℤ},
+    PositivePrimitiveEisensteinBadUnordered A N S →
+    ¬ (A = 1 ∧ N = 1 ∧ S = 1) →
+    EisensteinSqBranch A N S m n →
+    ∃ A' N' S' : ℤ,
+      NormalizedEisensteinBad A' N' S' ∧ N' < N
 
-/-- Proof of `PosSqOfCoprimeMulSqStatement`. -/
-theorem posSqOfCoprimeMulSqStatement : PosSqOfCoprimeMulSqStatement := by
-  intro x y z hx hy hcop hsq
-  have hxy : x * y = z ^ 2 := hsq.symm
-  have hyx : y * x = z ^ 2 := by
-    rw [mul_comm]
-    exact hxy
-  have hunit_xy : IsUnit (gcd x y) :=
-    q2679_isUnit_gcd_of_isCoprime_int hcop
-  have hunit_yx : IsUnit (gcd y x) :=
-    q2679_isUnit_gcd_of_isCoprime_int hcop.symm
-  rcases exists_associated_pow_of_mul_eq_pow
-      (a := x) (b := y) (c := z) (k := 2) hunit_xy hxy with ⟨a, ha_assoc⟩
-  rcases exists_associated_pow_of_mul_eq_pow
-      (a := y) (b := x) (c := z) (k := 2) hunit_yx hyx with ⟨b, hb_assoc⟩
-  have hx_sq : x = a ^ 2 := q2679_eq_sq_of_pos_of_associated_sq hx ha_assoc
-  have hy_sq : y = b ^ 2 := q2679_eq_sq_of_pos_of_associated_sq hy hb_assoc
-  have ha_ne : a ≠ 0 := by
-    intro ha0
-    have hx0 : x = 0 := by
-      rw [hx_sq, ha0]
-      norm_num
-    exact (ne_of_gt hx) hx0
-  have hb_ne : b ≠ 0 := by
-    intro hb0
-    have hy0 : y = 0 := by
-      rw [hy_sq, hb0]
-      norm_num
-    exact (ne_of_gt hy) hy0
-  refine ⟨|a|, |b|, abs_pos.mpr ha_ne, abs_pos.mpr hb_ne, ?_, ?_⟩
-  · calc
-      x = a ^ 2 := hx_sq
-      _ = |a| ^ 2 := (sq_abs a).symm
-  · calc
-      y = b ^ 2 := hy_sq
-      _ = |b| ^ 2 := (sq_abs b).symm
+/-- Symmetric with the divided branch residual, and robust if the raw branch
+predicate accidentally admits the unit solution. -/
+def RawSqBranchUnitOrDescendsStatement : Prop :=
+  ∀ {A N S m n : ℤ},
+    PositivePrimitiveEisensteinBadUnordered A N S →
+    EisensteinSqBranch A N S m n →
+    (A = 1 ∧ N = 1 ∧ S = 1) ∨
+      ∃ A' N' S' : ℤ,
+        NormalizedEisensteinBad A' N' S' ∧ N' < N
 
-/-- The requested two-adic variant. -/
-def PosTwoSqOfGcdTwoMulSqStatement : Prop :=
-  ∀ {x y z : ℤ}, 0 < x -> 0 < y -> 2∣x -> 2∣y ->
-    IsCoprime (x/2) (y/2) -> z^2=x*y ->
-    ∃ a b, 0<a ∧ 0<b ∧ x=2*a^2 ∧ y=2*b^2
+/-- Compatibility target: this is what lets the current residual be retained. -/
+def RawSqBranchBridgeToCurrentStatement : Prop :=
+  RawSqBranchNoUnitStatement →
+  RawSqBranchNonunitDescendsStatement →
+  DescentFromBranchUnorderedStatement
 
-private lemma q2679_eq_two_mul_ediv_two {x : ℤ} (hx2 : (2 : ℤ) ∣ x) :
-    x = 2 * (x / 2) := by
-  calc
-    x = x / 2 * 2 := (Int.ediv_mul_cancel hx2).symm
-    _ = 2 * (x / 2) := by ring
+/-- Proof-engineering split for the divided branch. -/
+def DividedSquareBranchNonunitDescendsStatement : Prop :=
+  ∀ {A N S m n : ℤ},
+    PositivePrimitiveEisensteinBadUnordered A N S →
+    ¬ (A = 1 ∧ N = 1 ∧ S = 1) →
+    DividedSquareBranch A N S m n →
+    ∃ A' N' S' : ℤ,
+      NormalizedEisensteinBad A' N' S' ∧ N' < N
 
-private lemma q2679_pos_ediv_two_of_pos_of_dvd {x : ℤ}
-    (hx : 0 < x) (hx2 : (2 : ℤ) ∣ x) : 0 < x / 2 := by
-  have hx_eq : x = 2 * (x / 2) := q2679_eq_two_mul_ediv_two hx2
-  nlinarith
+/-- The current divided residual follows from the nonunit version by `by_cases`. -/
+def DividedSquareBranchBridgeStatement : Prop :=
+  DividedSquareBranchNonunitDescendsStatement →
+  DividedSquareBranchUnitOrDescendsStatement
 
-private lemma q2679_sq_ediv_two_eq_of_sq_eq_mul
-    {x y z : ℤ} (hx2 : (2 : ℤ) ∣ x) (hy2 : (2 : ℤ) ∣ y)
-    (hz2 : (2 : ℤ) ∣ z) (hsq : z ^ 2 = x * y) :
-    (z / 2) ^ 2 = (x / 2) * (y / 2) := by
-  have hx_eq : x = 2 * (x / 2) := q2679_eq_two_mul_ediv_two hx2
-  have hy_eq : y = 2 * (y / 2) := q2679_eq_two_mul_ediv_two hy2
-  have hz_eq : z = 2 * (z / 2) := q2679_eq_two_mul_ediv_two hz2
-  have h4 :
-      (4 : ℤ) * ((z / 2) ^ 2) =
-        (4 : ℤ) * ((x / 2) * (y / 2)) := by
-    calc
-      (4 : ℤ) * ((z / 2) ^ 2) = (2 * (z / 2)) ^ 2 := by ring
-      _ = z ^ 2 := by rw [← hz_eq]
-      _ = x * y := hsq
-      _ = (2 * (x / 2)) * (2 * (y / 2)) := by
-        rw [← hx_eq, ← hy_eq]
-      _ = (4 : ℤ) * ((x / 2) * (y / 2)) := by ring
-  exact mul_left_cancel₀ (by norm_num : (4 : ℤ) ≠ 0) h4
-
-/-- Proof of `PosTwoSqOfGcdTwoMulSqStatement`. -/
-theorem posTwoSqOfGcdTwoMulSqStatement : PosTwoSqOfGcdTwoMulSqStatement := by
-  intro x y z hx hy hx2 hy2 hcop hsq
-  have hz_sq_even : (2 : ℤ) ∣ z ^ 2 := by
-    rw [hsq]
-    exact dvd_mul_of_dvd_left hx2 y
-  have hz2 : (2 : ℤ) ∣ z := by
-    exact (show Prime (2 : ℤ) by norm_num).dvd_of_dvd_pow hz_sq_even
-  have hx_div_pos : 0 < x / 2 := q2679_pos_ediv_two_of_pos_of_dvd hx hx2
-  have hy_div_pos : 0 < y / 2 := q2679_pos_ediv_two_of_pos_of_dvd hy hy2
-  have hsq_div : (z / 2) ^ 2 = (x / 2) * (y / 2) :=
-    q2679_sq_ediv_two_eq_of_sq_eq_mul hx2 hy2 hz2 hsq
-  rcases posSqOfCoprimeMulSqStatement hx_div_pos hy_div_pos hcop hsq_div with
-    ⟨a, b, ha_pos, hb_pos, hx_div_sq, hy_div_sq⟩
-  refine ⟨a, b, ha_pos, hb_pos, ?_, ?_⟩
-  · calc
-      x = 2 * (x / 2) := q2679_eq_two_mul_ediv_two hx2
-      _ = 2 * a ^ 2 := by rw [hx_div_sq]
-  · calc
-      y = 2 * (y / 2) := q2679_eq_two_mul_ediv_two hy2
-      _ = 2 * b ^ 2 := by rw [hy_div_sq]
+end MazurProof.RationalPointsN12
 ```
 
-Notes:
+## Raw branch decomposition: exact Lean-facing targets
 
-* The key Mathlib API is `exists_associated_pow_of_mul_eq_pow`; over `ℤ`, this gives `Associated (a^2) x`, i.e. a possible sign ambiguity.
-* `Int.eq_of_associated_of_nonneg` removes that ambiguity because `a^2 ≥ 0` and the hypotheses give `0 ≤ x`, `0 ≤ y`.
-* The witnesses are `|a|` and `|b|`, making their positivity immediate from `x > 0`, `y > 0`.
-* For the two-adic variant, `2 ∣ z` follows from `2 ∣ z^2` and primality of `(2 : ℤ)`, then division by two reduces the equation to the first theorem.
+The raw branch should be reduced to four positive square factors.  The two products to expose are
+
+* plus product: `(A + N)^2 = (m + n) * (m + 3*n)`;
+* minus product: `(A - N)^2 = (m - 3*n) * (m - n)`.
+
+Then use the already-proved square-factor lemmas twice.  The parity cases are exact:
+
+* if `m` and `n` have opposite parity, all four factors are odd and the relevant factor pairs are coprime, so use `PosSqOfCoprimeMulSqStatement` on both products;
+* if `m` and `n` are both odd, all four factors are divisible by `2`, the halves are coprime, so use `PosTwoSqOfGcdTwoMulSqStatement` on both products;
+* `m` and `n` both even must be impossible from primitivity/coprimality of the raw branch.
+
+```lean
+import Mathlib.Tactic
+
+namespace MazurProof.RationalPointsN12
+
+/-- First raw-branch extraction: the two products of positive factors whose
+products are squares.  This should be a mostly `unfold EisensteinSqBranch` +
+`ring_nf` lemma plus positivity from the branch inequalities/nonunit case. -/
+def RawSqBranchFactorizationStatement : Prop :=
+  ∀ {A N S m n : ℤ},
+    PositivePrimitiveEisensteinBadUnordered A N S →
+    ¬ (A = 1 ∧ N = 1 ∧ S = 1) →
+    EisensteinSqBranch A N S m n →
+      0 < m - 3 * n ∧
+      0 < m - n ∧
+      0 < m + n ∧
+      0 < m + 3 * n ∧
+      (A - N)^2 = (m - 3 * n) * (m - n) ∧
+      (A + N)^2 = (m + n) * (m + 3 * n)
+
+/-- Second raw-branch extraction: exact parity/coprimality inputs for the two
+positive square-factor lemmas.  In the odd-odd case, the coprimality is after
+halving both factors. -/
+def RawSqBranchParityCoprimeInputsStatement : Prop :=
+  ∀ {A N S m n : ℤ},
+    PositivePrimitiveEisensteinBadUnordered A N S →
+    EisensteinSqBranch A N S m n →
+      ((((Odd m ∧ Even n) ∨ (Even m ∧ Odd n)) →
+          IsCoprime (m - 3 * n) (m - n) ∧
+          IsCoprime (m + n) (m + 3 * n)) ∧
+       ((Odd m ∧ Odd n) →
+          (2 : ℤ) ∣ m - 3 * n ∧
+          (2 : ℤ) ∣ m - n ∧
+          (2 : ℤ) ∣ m + n ∧
+          (2 : ℤ) ∣ m + 3 * n ∧
+          IsCoprime ((m - 3 * n) / 2) ((m - n) / 2) ∧
+          IsCoprime ((m + n) / 2) ((m + 3 * n) / 2)) ∧
+       ¬ (Even m ∧ Even n))
+
+/-- Opposite-parity square split.  This is exactly where
+`PosSqOfCoprimeMulSqStatement` should be invoked twice, with `z = A - N` and
+`z = A + N`. -/
+def RawSqBranchOppParitySquareSplitStatement : Prop :=
+  ∀ {A N S m n : ℤ},
+    PositivePrimitiveEisensteinBadUnordered A N S →
+    ¬ (A = 1 ∧ N = 1 ∧ S = 1) →
+    EisensteinSqBranch A N S m n →
+    ((Odd m ∧ Even n) ∨ (Even m ∧ Odd n)) →
+    ∃ r s t u : ℤ,
+      0 < r ∧ 0 < s ∧ 0 < t ∧ 0 < u ∧
+      m - 3 * n = r^2 ∧
+      m - n = s^2 ∧
+      m + n = t^2 ∧
+      m + 3 * n = u^2
+
+/-- Odd-odd square split.  This is exactly where
+`PosTwoSqOfGcdTwoMulSqStatement` should be invoked twice, with `z = A - N` and
+`z = A + N`. -/
+def RawSqBranchOddOddSquareSplitStatement : Prop :=
+  ∀ {A N S m n : ℤ},
+    PositivePrimitiveEisensteinBadUnordered A N S →
+    ¬ (A = 1 ∧ N = 1 ∧ S = 1) →
+    EisensteinSqBranch A N S m n →
+    Odd m ∧ Odd n →
+    ∃ r s t u : ℤ,
+      0 < r ∧ 0 < s ∧ 0 < t ∧ 0 < u ∧
+      m - 3 * n = 2 * r^2 ∧
+      m - n = 2 * s^2 ∧
+      m + n = 2 * t^2 ∧
+      m + 3 * n = 2 * u^2
+
+/-- The genuinely hard remaining descent after square-factor splitting:
+from four scaled squares in arithmetic progression, construct the smaller
+normalized Eisenstein bad triple.  This is the mathematical core of the raw
+branch after the two square-factor lemmas have done their work. -/
+def RawSqBranchAPDescentStatement : Prop :=
+  ∀ {A N S m n e r s t u : ℤ},
+    PositivePrimitiveEisensteinBadUnordered A N S →
+    EisensteinSqBranch A N S m n →
+    (e = 1 ∨ e = 2) →
+    0 < r → 0 < s → 0 < t → 0 < u →
+    m - 3 * n = e * r^2 →
+    m - n = e * s^2 →
+    m + n = e * t^2 →
+    m + 3 * n = e * u^2 →
+    ∃ A' N' S' : ℤ,
+      NormalizedEisensteinBad A' N' S' ∧ N' < N
+
+/-- The intended proof graph for raw descent.  After these pieces are proved,
+the current raw residual should be a short parity split plus calls to the AP
+core. -/
+def RawSqBranchDescentFromPiecesStatement : Prop :=
+  RawSqBranchFactorizationStatement →
+  RawSqBranchParityCoprimeInputsStatement →
+  RawSqBranchOppParitySquareSplitStatement →
+  RawSqBranchOddOddSquareSplitStatement →
+  RawSqBranchAPDescentStatement →
+  RawSqBranchNonunitDescendsStatement
+
+end MazurProof.RationalPointsN12
+```
+
+## Proof obligations for the chosen target
+
+For `RawSqBranchFactorizationStatement`, unfold `EisensteinSqBranch` and prove the two displayed product identities by `ring_nf`.  The positivity goals are the important part: prove `0 < m - 3*n`, `0 < m - n`, `0 < m + n`, and `0 < m + 3*n` from the branch inequalities and nonunit hypothesis.  If this cannot be done, the raw branch predicate is missing a strict-orientation/nondegeneracy field or extraction lemma.
+
+For `RawSqBranchParityCoprimeInputsStatement`, prove the usual gcd transport facts: any common divisor of `m+n` and `m+3*n`, or of `m-3*n` and `m-n`, divides `2*m` and `2*n`.  In the opposite-parity case the factors are odd, so the possible factor `2` is eliminated and the gcd is a unit.  In the odd-odd case the original factors are all even, and the same divisibility argument after dividing by `2` gives coprime halves.  The both-even case should contradict primitive/coprime branch data.
+
+For `RawSqBranchOppParitySquareSplitStatement`, apply the proved `PosSqOfCoprimeMulSqStatement` to the minus product with `x = m - 3*n`, `y = m - n`, `z = A - N`, and to the plus product with `x = m + n`, `y = m + 3*n`, `z = A + N`.
+
+For `RawSqBranchOddOddSquareSplitStatement`, apply the proved `PosTwoSqOfGcdTwoMulSqStatement` to the same two products.  The hypotheses `(2 : ℤ) ∣ x`, `(2 : ℤ) ∣ y`, and `IsCoprime (x/2) (y/2)` are exactly the outputs of `RawSqBranchParityCoprimeInputsStatement`.
+
+For `RawSqBranchAPDescentStatement`, do not mix the square-factor proof with the descent construction.  Treat the data
+
+```lean
+m - 3 * n = e * r^2
+m - n     = e * s^2
+m + n     = e * t^2
+m + 3 * n = e * u^2
+```
+
+as the four scaled squares in arithmetic progression.  The obligation is to construct explicit `A' N' S'` satisfying `NormalizedEisensteinBad A' N' S'` and prove the strict measure bound `N' < N`.  This is now the mathematically hardest subgoal inside raw descent; the factor-square part should be routine once the two local positive square-factor lemmas are used.
+
+## Exact next Lean target
+
+Add the interface block above, then prove in this order:
+
+1. `RawSqBranchFactorizationStatement`.
+2. `RawSqBranchParityCoprimeInputsStatement`.
+3. `RawSqBranchOppParitySquareSplitStatement` and `RawSqBranchOddOddSquareSplitStatement` using the already-proved positive square-factor lemmas.
+4. `RawSqBranchAPDescentStatement`.
+5. `RawSqBranchDescentFromPiecesStatement`, then either `RawSqBranchBridgeToCurrentStatement` or switch the final assembly to consume `RawSqBranchUnitOrDescendsStatement`.
+
+This sequence gives the biggest mathematical payoff: after step 3, all remaining raw-branch difficulty is isolated in one classical four-square/AP descent statement, and the same AP core can be reused when attacking the divided-by-3 branch.
