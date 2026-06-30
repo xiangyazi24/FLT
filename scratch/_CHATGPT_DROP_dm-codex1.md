@@ -1,12 +1,18 @@
-# Q2632 (dm-codex1): EulerSquarePairDescent constructive descent
+# Q2638 (dm-codex1): adversarial audit of `EulerSquarePairDescent`
 
-Target file: `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`
+Target repo path mentioned by requester: `/Users/huangx/repos/flt-ai`  
+Target Lean file: `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`
 
-This drop is only about `EulerSquarePairDescent`.  I am not using or discussing the already-checked AP-to-Euler construction.
+This audit is only about `EulerSquarePairDescent`.  I am not discussing the already-checked AP-to-Euler construction.
 
-## 1. Adversarial verdict on the proposed smaller pair
+## Verdict
 
-The proposed smaller pair
+The route described is mathematically sound, provided the implementation really has the following two non-negotiable points:
+
+1. `F.A` is the **half common factor** `a` from `k = 2*a`, not the original common refinement factor `k`.
+2. `Even a` is proved from the balance equation, not from the original parity of `U` and `Up` alone.
+
+Under those conventions the descended object
 
 ```lean
 F.A = a
@@ -15,170 +21,333 @@ F.B = b
 F.C = c
 ```
 
-is mathematically correct **only with the following naming convention**:
+is the right smaller `EulerSquarePair`, and the square extraction orientation
 
 ```lean
-U  = 2 * a * b
-V  = c * d
-Up = 2 * a * c
-Vp = b * d
+M = 4*a^2 + d^2 = c^2
+N = 16*a^2 + d^2 = b^2
 ```
 
-That is, `a` must be **half of the common refinement factor** in the two coprime factorizations of `E.A`.
+matches the fields `C = c` and `B = b`.
 
-If the Nat refinement theorem first returns
+## 1. Descent target: `F.A * F.D < E.A * E.D`
+
+The target is exactly the interface currently stated by the file:
 
 ```lean
-U  = k * b
-V  = c * d
-Up = k * c
-Vp = b * d
+def EulerSquarePairDescent : Prop :=
+  ∀ E : EulerSquarePair, ∃ F : EulerSquarePair, F.A * F.D < E.A * E.D
 ```
 
-then the descent factor is not `k`; it is `a` where `k = 2 * a`.  The final smaller pair is `(a,d,b,c)`, not `(k,d,b,c)`.
-
-The subtle parity point is important:
-
-* From `Even U`, `Odd b`, and `U = k*b`, we can prove `Even k`.
-* Writing `k = 2*a`, we **cannot** prove `Even a` from the original parity/refinement data alone.
-* Example showing the false step: `k = 2`, `a = 1`, `b = c = d = 1` has `U = Up = 2`, `V = Vp = 1`, and all pairwise coprimalities, but `a` is odd.
-* The proof that the new Euler `A` is even must come **after** the square-factor balance gives
+So proving
 
 ```lean
-c^2 = 4*a^2 + d^2
+a * d < E.A * E.D
 ```
 
-with `Odd d`.  If `a` were odd, then modulo `8` the right side would be `4 + 1 = 5`, impossible for an integer square.  So `Even a` is a post-balance lemma, not a refinement/parity-transfer lemma.
+is sufficient because the constructed `F` has `F.A = a` and `F.D = d`.
 
-The negative signed-orientation branch is harmless.  In both branches we get the same equality
+This is also mathematically adequate for infinite descent, as long as the downstream contradiction uses the positive integer measure `A*D`.  Every `EulerSquarePair` has `0 < A` and `0 < D`, hence `0 < A*D`, so a strict descent in `A*D` transfers to a strict descent in the corresponding natural measure.
+
+In fact, the implementation can prove a slightly stronger intermediate inequality:
 
 ```lean
-U^2 - V^2 = 4*Up^2 - Vp^2
+a * d < E.A
 ```
 
-because both sides equal either `E.D` or `-E.D`.  Therefore both branches produce the same refinement equation
+because
+
+```lean
+E.A = U * V = (2*a*b) * (c*d) = 2*a*b*c*d
+```
+
+and `a,b,c,d` are all positive.  Since `0 < E.D`, over integers we have `1 ≤ E.D`, so
+
+```lean
+E.A ≤ E.A * E.D
+```
+
+and therefore
+
+```lean
+a * d < E.A * E.D.
+```
+
+A very Lean-friendly proof is to factor directly:
+
+```lean
+E.A * E.D = (a*d) * (2*b*c*E.D)
+```
+
+and prove `1 < 2*b*c*E.D` from `0 < b`, `0 < c`, and `0 < E.D`.  But I would still expose the stronger `a*d < E.A` as a small helper, because it isolates the descent arithmetic from the `D` multiplier.
+
+There is no need to change the interface to `< E.A`.  If a later theorem wants descent by `E.A` specifically, this construction can also give it, but the hard interface you quoted is product descent.
+
+## 2. No circularity in `even_of_descent_balance`
+
+Using
+
+```lean
+even_of_descent_balance
+```
+
+before square extraction is not circular, provided its inputs are only:
+
+```lean
+Odd b
+Odd c
+Odd d
+b^2 * (4*a^2 + d^2) = c^2 * (16*a^2 + d^2)
+```
+
+The parity argument is independent of `square_factor_balance_int` and independent of the construction of `F`.
+
+Modulo `8`, odd squares are `1`.  Thus the balance equation gives
+
+```text
+1 * (4*a^2 + 1) ≡ 1 * (16*a^2 + 1)  (mod 8)
+```
+
+so
+
+```text
+4*a^2 + 1 ≡ 1  (mod 8),
+```
+
+hence `4*a^2 ≡ 0 (mod 8)`.  If `a` were odd then `a^2 ≡ 1 (mod 8)`, giving `4*a^2 ≡ 4 (mod 8)`, contradiction.  Therefore `Even a`.
+
+This proof uses only the refinement balance equation and oddness of `b,c,d`.  It does not depend on knowing that either cofactor is a square.  So there is no circularity.
+
+One implementation caveat: if your proof of `even_of_descent_balance` internally calls `square_factor_balance_int`, then it is not the direct parity lemma described above.  That would not be a mathematical circularity in the final theorem, but it would make the dependency DAG less clean.  The clean version is the direct mod-`8` proof.
+
+## 3. Cofactor orientation and square-factor balance
+
+The orientation described is correct.
+
+You have the balance equation in the form
+
+```lean
+hbal : b^2 * M = c^2 * N
+```
+
+where
+
+```lean
+M = 4*a^2 + d^2
+N = 16*a^2 + d^2
+```
+
+The checked theorem
+
+```lean
+square_factor_balance_int
+  (hb hc hM hN : positives)
+  (hbc : IsCoprime b c)
+  (hMN : IsCoprime M N)
+  (h : b^2*M = c^2*N) : M = c^2 ∧ N = b^2
+```
+
+then gives exactly
+
+```lean
+4*a^2 + d^2 = c^2
+16*a^2 + d^2 = b^2
+```
+
+which are the required equations for
+
+```lean
+F.C = c
+F.B = b
+```
+
+because `EulerSquarePair` expects
+
+```lean
+hB : B^2 = 16*A^2 + D^2
+hC : C^2 = 4*A^2 + D^2
+```
+
+So there is no `b/c` swap if the equation is passed to `square_factor_balance_int` as
 
 ```lean
 b^2 * (4*a^2 + d^2) = c^2 * (16*a^2 + d^2)
 ```
 
-and hence the same descended square pair.
+Do not commute or symmetrize the balance equation itself before applying `square_factor_balance_int`.  The only likely `.symm` needed is for the coprimality theorem if its local statement returns
 
-## 2. Lean-friendly proof DAG
+```lean
+IsCoprime (16*a^2 + d^2) (4*a^2 + d^2)
+```
 
-Use the following DAG for `eulerSquarePairDescent_constructive`.
+but the balance theorem wants
 
-1. Call `signed_even_odd_params_same_orientation E`, obtaining `U V Up Vp` and the two parameterizations.
-2. Prove the common product equality:
+```lean
+IsCoprime (4*a^2 + d^2) (16*a^2 + d^2).
+```
 
-   ```lean
-   U * V = Up * Vp
-   ```
+That `.symm` is harmless.  Swapping `M` and `N` in the balance theorem is not harmless.
 
-   by transitivity through `E.A`.
-3. Apply an integer wrapper around `two_coprime_factorizations_refine_nat`, returning positive integers `k b c d` with
+## 4. Nat refinement wrapper via `natAbs`
 
-   ```lean
-   U  = k * b
-   V  = c * d
-   Up = k * c
-   Vp = b * d
-   ```
+There is no mathematical issue with wrapping the Nat refinement through `natAbs`, because all four inputs are strictly positive integers:
 
-   and pairwise coprimalities.
-4. Transfer parity:
+```lean
+0 < U, 0 < V, 0 < Up, 0 < Vp
+```
 
-   * from `Odd V` and `V = c*d`, get `Odd c` and `Odd d`;
-   * from `Odd Vp` and `Vp = b*d`, get `Odd b`;
-   * from `Even U`, `U = k*b`, and `Odd b`, get `Even k`;
-   * since `0 < k`, write `k = 2*a` with `0 < a`.
-5. Rewrite the refinement equations as
+The wrapper should prove, once and for all:
 
-   ```lean
-   U  = 2 * a * b
-   V  = c * d
-   Up = 2 * a * c
-   Vp = b * d
-   ```
+```lean
+(U.natAbs : ℤ) = U
+(V.natAbs : ℤ) = V
+(Up.natAbs : ℤ) = Up
+(Vp.natAbs : ℤ) = Vp
+```
 
-6. Use the signed-orientation adapter around `refinement_equation_of_same_orientation` to prove
+Then the product equality transfers cleanly:
 
-   ```lean
-   hbal : b^2 * (4*a^2 + d^2) = c^2 * (16*a^2 + d^2)
-   ```
+```lean
+U * V = Up * Vp
+```
 
-7. Set
+to
 
-   ```lean
-   M := 4*a^2 + d^2
-   N := 16*a^2 + d^2
-   ```
+```lean
+U.natAbs * V.natAbs = Up.natAbs * Vp.natAbs
+```
 
-   Prove `0 < M`, `0 < N`, and
+using `Int.natAbs_mul` or by casting back to `ℤ` after positivity normalization.
 
-   ```lean
-   IsCoprime M N
-   ```
+Likewise, the coprimality transfer is sign-safe because there are no negative representatives left.  The returned Nat factors can be cast back to positive integers, giving positive `k,b,c,d`.
 
-   from `IsCoprime a d` and `Odd d`.
-8. Apply the checked auxiliary theorem
+The implementation detail to watch is not the math; it is simplification control.  I would keep all `toNat`/`natAbs` casts inside `two_coprime_factorizations_refine_int_pos`, and never let them leak into the main descent proof.
 
-   ```lean
-   square_factor_balance_int
-   ```
+## 5. Hidden weaknesses to check before trusting the final theorem
 
-   with `hbpos hcpos hMpos hNpos hbccop hMNcop hbal`, obtaining
+The route is sound, but these are the places I would inspect adversarially in the Lean code.
 
-   ```lean
-   M = c^2
-   N = b^2
-   ```
+### 5.1 `IsCoprime a d` must be derived from `IsCoprime k d`
 
-9. Convert these into the Euler equations for `F`:
+The Nat/Int refinement gives pairwise coprimality for `k,b,c,d`, not automatically for the half-factor `a`.
 
-   ```lean
-   c^2 = 4*a^2 + d^2
-   b^2 = 16*a^2 + d^2
-   ```
+After proving
 
-10. Prove `Even a` from `c^2 = 4*a^2 + d^2` and `Odd d` by the mod-`8` lemma.
-11. Construct
+```lean
+k = 2*a
+```
 
-   ```lean
-   F : EulerSquarePair :=
-   { A := a, D := d, B := b, C := c, ... }
-   ```
+you still need a lemma of the form:
 
-12. Prove descent using only positivity:
+```lean
+private lemma coprime_of_coprime_two_mul_left {a d : ℤ}
+    (h : IsCoprime (2 * a) d) : IsCoprime a d := by
+  -- divisibility/gcd/Bézout proof, depending on the local IsCoprime API
+  sorry
+```
 
-   ```lean
-   E.A = 2*a*b*c*d
-   0 < E.D
-   0 < a, 0 < b, 0 < c, 0 < d
-   ```
+This does not require `Odd d`; any common divisor of `a` and `d` is a common divisor of `2*a` and `d`.
 
-   Then `a*d < E.A * E.D` because `E.A * E.D = a*d * (2*b*c*E.D)` and `2*b*c*E.D > 1`.
+### 5.2 `Even a` cannot come from refinement parity alone
 
-## 3. Hidden missing hypotheses / likely false steps
+The false inference would be:
 
-These are the implementation traps I would fix before trying the final theorem.
+```lean
+Even U
+U = k*b
+Odd b
+k = 2*a
+-- therefore Even a
+```
 
-1. **Do not try to prove `Even a` immediately after refinement.**  That is false if `a` is the half-common factor.  The correct proof uses the balanced square equation and `Odd d`.
-2. **The balance theorem needs `IsCoprime M N`.**  This is not automatic from `IsCoprime b c`.  Add a dedicated lemma proving
+This is false.  Example: `a=1`, `k=2`, `b=1`.
 
-   ```lean
-   IsCoprime (4*a^2 + d^2) (16*a^2 + d^2)
-   ```
+So the implementation should contain no lemma that tries to prove `Even a` from `Even k` or from both `U` and `Up` being even.  The first valid proof of `Even a` is the mod-`8` balance proof.
 
-   from `IsCoprime a d` and `Odd d`.
-3. **You need an Int-facing refinement wrapper.**  The checked theorem is Nat-facing; the descent theorem data are positive integers.  Do the Nat conversion once in a private wrapper and keep the main descent proof purely over `ℤ`.
-4. **The negative orientation branch should not branch the whole descent.**  Adapt both signed branches immediately into the same balance equation, then continue linearly.
-5. **The descent inequality should not use the sign/orientation formula for `E.D`.**  It only needs the structure field `0 < E.D` and the factorization of `E.A`.
-6. **If `IsCoprime` is sign-sensitive in local lemmas**, normalize signs in the Int wrapper by using positivity and `toNat`; after that all factors are positive.
+### 5.3 The signed-orientation branch should collapse immediately
 
-## 4. Code skeleton
+From `signed_even_odd_params_same_orientation E`, there are two cases:
 
-The following is the Lean-facing skeleton I would add.  The helper lemmas marked with `sorry` are the intended explicit auxiliary lemmas; the main descent proof then has no further mathematical branching.  Field accessor names for `EulerSquarePair` may need the local names from the existing structure, but the theorem statement should be this one.
+```lean
+E.D  = U^2 - V^2 ∧ E.D  = 4*Up^2 - Vp^2
+-D   = U^2 - V^2 ∧ -D   = 4*Up^2 - Vp^2
+```
+
+Both imply the same equality:
+
+```lean
+U^2 - V^2 = 4*Up^2 - Vp^2
+```
+
+The proof should convert both branches to this common equality or to a common call of `refinement_equation_of_same_orientation`.  Do not duplicate the full descent after the branch.
+
+If `refinement_equation_of_same_orientation` is parameterized by a signed `D`, instantiate it with `E.D` in the positive branch and with `-E.D` in the negative branch.
+
+### 5.4 Cofactor coprimality must not rely on an already constructed `F`
+
+You said `euler_cofactor_coprime` gives cofactor coprimality from `Odd d` and `IsCoprime a d`.  That is exactly what is needed.
+
+But if the local theorem is instead a method that requires an existing `EulerSquarePair`, then using it here would be circular because constructing that `EulerSquarePair` requires the cofactor equations and `Even a`.  The safe shape is a standalone lemma like:
+
+```lean
+private lemma euler_cofactor_coprime_core
+    {a d : ℤ}
+    (hodd : Odd d)
+    (hcop : IsCoprime a d) :
+    IsCoprime (16*a^2 + d^2) (4*a^2 + d^2) := by
+  ...
+```
+
+Then use `.symm` if `square_factor_balance_int` wants the opposite order.
+
+### 5.5 Positivity of the cofactors should come only from `0 < d`
+
+For `square_factor_balance_int`, the cofactor positivity assumptions can be proved without knowing anything about `a`:
+
+```lean
+0 < 4*a^2 + d^2
+0 < 16*a^2 + d^2
+```
+
+because `0 < d`, hence `0 < d^2`, and `a^2 ≥ 0`.
+
+This is useful because it avoids accidentally depending on later square extraction or on `Even a`.
+
+### 5.6 Strict descent should use integer positivity carefully
+
+Over `ℤ`, from `0 < E.D` you need either `have hEDge : 1 ≤ E.D := by omega` or a direct positive-factor proof.
+
+A robust proof shape is:
+
+```lean
+have hEA : E.A = 2 * a * b * c * d := by
+  -- from E.A = U*V, U=2*a*b, V=c*d
+  ring_nf at *
+
+have hsmallEA : a * d < E.A := by
+  rw [hEA]
+  -- all factors positive; equivalently `1 < 2*b*c`
+  nlinarith [hapos, hbpos, hcpos, hdpos]
+
+have hEApos : 0 < E.A := E.hA
+have hEDge : 1 ≤ E.D := by omega
+have hEA_le_mul : E.A ≤ E.A * E.D := by
+  nlinarith
+
+exact lt_of_lt_of_le hsmallEA hEA_le_mul
+```
+
+Or prove the direct factorization:
+
+```lean
+E.A * E.D = (a*d) * (2*b*c*E.D)
+```
+
+and show `1 < 2*b*c*E.D`.
+
+## 6. Lean-facing helper skeleton
+
+The following is not meant to replace the implementation you already have; it records the auxiliary shapes I would expect to see.  The imports are included so this can be pasted into a Lean-facing note or scratch file.
 
 ```lean
 import FLT.Assumptions.MazurProof.N12EulerAux
@@ -186,12 +355,6 @@ import Mathlib.Tactic
 
 namespace MazurProof.RationalPointsN12
 
-/--
-Integer-facing wrapper around the checked Nat refinement theorem.
-
-Use `two_coprime_factorizations_refine_nat` internally.  The main descent proof
-should not have to see `toNat` casts.
--/
 private theorem two_coprime_factorizations_refine_int_pos
     {U V Up Vp : ℤ}
     (hUpos : 0 < U) (hVpos : 0 < V)
@@ -204,28 +367,16 @@ private theorem two_coprime_factorizations_refine_int_pos
       U = k * b ∧ V = c * d ∧ Up = k * c ∧ Vp = b * d ∧
       IsCoprime k b ∧ IsCoprime k c ∧ IsCoprime k d ∧
       IsCoprime b c ∧ IsCoprime b d ∧ IsCoprime c d := by
-  /-
-  Implementation outline:
-  * set `u := U.toNat`, `v := V.toNat`, `up := Up.toNat`, `vp := Vp.toNat`;
-  * use positivity to rewrite `(U.toNat : ℤ) = U`, etc.;
-  * cast `hprod` to the Nat product equality;
-  * convert `IsCoprime U V` and `IsCoprime Up Vp` to the Nat coprimalities
-    required by `two_coprime_factorizations_refine_nat`;
-  * call `two_coprime_factorizations_refine_nat`;
-  * cast the returned positive Nat factors back to Int;
-  * convert all returned Nat coprimalities to `IsCoprime` over `ℤ`.
-  -/
+  -- wrapper around `two_coprime_factorizations_refine_nat`
+  -- keep all `natAbs`/`toNat` casts confined here
   sorry
 
 private lemma odd_factors_of_odd_mul_int {x y : ℤ}
     (hxy : Odd (x * y)) : Odd x ∧ Odd y := by
-  -- Use the local parity API if it already has this.  Otherwise prove by
-  -- contradiction: if one factor is even, the product is even.
   sorry
 
 private lemma even_left_of_even_mul_odd_int {x y : ℤ}
     (hxy : Even (x * y)) (hy : Odd y) : Even x := by
-  -- If `x` were odd, then `x*y` would be odd, contradicting `hxy`.
   sorry
 
 private lemma even_pos_as_two_mul {k : ℤ}
@@ -233,16 +384,11 @@ private lemma even_pos_as_two_mul {k : ℤ}
     ∃ a : ℤ, 0 < a ∧ k = 2 * a := by
   rcases hkeven with ⟨a, ha⟩
   refine ⟨a, ?_, ?_⟩
-  · -- Depending on the local `Even` witness shape, `ha` is either
-    -- `k = a + a` or `k = 2*a`; both are discharged by linear arithmetic.
-    nlinarith
+  · nlinarith
   · nlinarith
 
 private lemma coprime_of_coprime_two_mul_left {a d : ℤ}
     (h : IsCoprime (2 * a) d) : IsCoprime a d := by
-  -- Any common divisor of `a` and `d` is also a common divisor of `2*a` and `d`.
-  -- This is usually a one-line divisibility/gcd argument using the local
-  -- `IsCoprime` API.
   sorry
 
 private lemma pos_four_sq_add_sq_of_pos_right {a d : ℤ}
@@ -259,217 +405,75 @@ private lemma pos_sixteen_sq_add_sq_of_pos_right {a d : ℤ}
   have hasq : 0 ≤ a ^ 2 := sq_nonneg a
   nlinarith
 
-/--
-Cofactor coprimality needed by `square_factor_balance_int`.
-
-Mathematics:
-if a prime divides both cofactors, it divides their difference `12*a^2` and
-also `4*(4*a^2+d^2) - (16*a^2+d^2) = 3*d^2`.  Since `a ⟂ d`, only primes
-`2` or `3` can survive.  Odd `d` makes both cofactors odd, ruling out `2`.
-Modulo `3`, the condition would force `a^2 + d^2 ≡ 0`, impossible unless
-`3 ∣ a` and `3 ∣ d`, contradicting coprimality.
--/
-private lemma coprime_four_sq_add_odd_sq_sixteen_sq_add_odd_sq
-    {a d : ℤ}
-    (had : IsCoprime a d)
-    (hdodd : Odd d) :
-    IsCoprime (4 * a ^ 2 + d ^ 2) (16 * a ^ 2 + d ^ 2) := by
-  sorry
-
-/-- The new descent `A` is even, but only after the balance equation. -/
-private lemma even_of_sq_eq_four_sq_add_odd_sq
-    {a d c : ℤ}
-    (hdodd : Odd d)
-    (hc : c ^ 2 = 4 * a ^ 2 + d ^ 2) :
+private lemma even_of_descent_balance
+    {a b c d : ℤ}
+    (hbodd : Odd b) (hcodd : Odd c) (hdodd : Odd d)
+    (hbal : b ^ 2 * (4 * a ^ 2 + d ^ 2)
+          = c ^ 2 * (16 * a ^ 2 + d ^ 2)) :
     Even a := by
-  /-
-  Prove modulo 8.
-
-  Suggested support lemmas:
-    * `odd_sq_mod_eight_int : Odd x → x^2 % 8 = 1`
-    * `sq_mod_eight_ne_five_int : x^2 % 8 ≠ 5`
-
-  If `a` is odd, then `a^2 ≡ 1 (mod 8)`, hence `4*a^2 ≡ 4`, and odd `d`
-  gives `d^2 ≡ 1`.  Then `c^2 ≡ 5 (mod 8)`, impossible.
-  -/
+  -- Direct mod-8 proof.  Do not call `square_factor_balance_int` here.
   sorry
 
-private lemma descent_product_lt
-    {EA ED a b c d : ℤ}
+private lemma descent_product_lt_of_refinement
+    {E_A E_D a b c d : ℤ}
+    (hEA : E_A = 2 * a * b * c * d)
     (hapos : 0 < a) (hbpos : 0 < b) (hcpos : 0 < c) (hdpos : 0 < d)
-    (hEDpos : 0 < ED)
-    (hEA : EA = 2 * a * b * c * d) :
-    a * d < EA * ED := by
-  have hadpos : 0 < a * d := mul_pos hapos hdpos
-  have hbcpos : 0 < b * c := mul_pos hbpos hcpos
-  have hbcEDpos : 0 < b * c * ED := mul_pos hbcpos hEDpos
-  have hbcED_ge_one : (1 : ℤ) ≤ b * c * ED := by omega
-  have hfactor_gt_one : (1 : ℤ) < 2 * (b * c * ED) := by nlinarith
-  calc
-    a * d < (a * d) * (2 * (b * c * ED)) := by
-      nlinarith [hadpos, hfactor_gt_one]
-    _ = (2 * a * b * c * d) * ED := by ring
-    _ = EA * ED := by rw [hEA]
-
-/--
-Signed-orientation adapter.  This keeps the negative branch out of the main
-proof.  If the existing `refinement_equation_of_same_orientation` has a
-slightly different argument order, adjust only this adapter.
--/
-private lemma balance_equation_of_signed_orientation
-    {D U V Up Vp a b c d : ℤ}
-    (hU : U = 2 * a * b)
-    (hV : V = c * d)
-    (hUp : Up = 2 * a * c)
-    (hVp : Vp = b * d)
-    (horient :
-      (D = U ^ 2 - V ^ 2 ∧ D = 4 * Up ^ 2 - Vp ^ 2) ∨
-      (-D = U ^ 2 - V ^ 2 ∧ -D = 4 * Up ^ 2 - Vp ^ 2)) :
-    b ^ 2 * (4 * a ^ 2 + d ^ 2) =
-      c ^ 2 * (16 * a ^ 2 + d ^ 2) := by
-  rcases horient with hpos | hneg
-  · exact refinement_equation_of_same_orientation hU hV hUp hVp hpos.1 hpos.2
-  · exact refinement_equation_of_same_orientation hU hV hUp hVp hneg.1 hneg.2
-
-/-- Constructive Euler descent. -/
-theorem eulerSquarePairDescent_constructive :
-    EulerSquarePairDescent := by
-  intro E
-
-  obtain ⟨U, V, Up, Vp,
-      hUpos, hVpos, hUppos, hVppos,
-      hUVcop, hUpVpcop,
-      hUeven, hVodd, hUpeven, hVpodd,
-      hEA_UV, hEA_UpVp,
-      hCparam, hBparam,
-      horient⟩ :=
-    signed_even_odd_params_same_orientation E
-
-  have hprod : U * V = Up * Vp := by
-    exact hEA_UV.symm.trans hEA_UpVp
-
-  obtain ⟨k, b, c, d,
-      hkpos, hbpos, hcpos, hdpos,
-      hU_kb, hV_cd, hUp_kc, hVp_bd,
-      hkb_cop, hkc_cop, hkd_cop,
-      hbc_cop, hbd_cop, hcd_cop⟩ :=
-    two_coprime_factorizations_refine_int_pos
-      hUpos hVpos hUppos hVppos hUVcop hUpVpcop hprod
-
-  have hcd_odd : Odd (c * d) := by
-    simpa [hV_cd] using hVodd
-  have hcodd : Odd c := (odd_factors_of_odd_mul_int hcd_odd).1
-  have hdodd : Odd d := (odd_factors_of_odd_mul_int hcd_odd).2
-
-  have hbd_odd : Odd (b * d) := by
-    simpa [hVp_bd] using hVpodd
-  have hbodd : Odd b := (odd_factors_of_odd_mul_int hbd_odd).1
-
-  have hkb_even : Even (k * b) := by
-    simpa [hU_kb] using hUeven
-  have hkeven : Even k :=
-    even_left_of_even_mul_odd_int hkb_even hbodd
-
-  obtain ⟨a, hapos, hk_eq_twoa⟩ :=
-    even_pos_as_two_mul hkpos hkeven
-
-  have hU : U = 2 * a * b := by
-    calc
-      U = k * b := hU_kb
-      _ = (2 * a) * b := by rw [hk_eq_twoa]
-      _ = 2 * a * b := by ring
-
-  have hUp : Up = 2 * a * c := by
-    calc
-      Up = k * c := hUp_kc
-      _ = (2 * a) * c := by rw [hk_eq_twoa]
-      _ = 2 * a * c := by ring
-
-  have htwoad_cop : IsCoprime (2 * a) d := by
-    simpa [hk_eq_twoa] using hkd_cop
-  have had_cop : IsCoprime a d :=
-    coprime_of_coprime_two_mul_left htwoad_cop
-
-  have hbal :
-      b ^ 2 * (4 * a ^ 2 + d ^ 2) =
-        c ^ 2 * (16 * a ^ 2 + d ^ 2) := by
-    exact balance_equation_of_signed_orientation
-      (D := E.D) hU hV_cd hUp hVp_bd horient
-
-  let M : ℤ := 4 * a ^ 2 + d ^ 2
-  let N : ℤ := 16 * a ^ 2 + d ^ 2
-
-  have hMpos : 0 < M := by
-    dsimp [M]
-    exact pos_four_sq_add_sq_of_pos_right hdpos
-
-  have hNpos : 0 < N := by
-    dsimp [N]
-    exact pos_sixteen_sq_add_sq_of_pos_right hdpos
-
-  have hMNcop : IsCoprime M N := by
-    dsimp [M, N]
-    exact coprime_four_sq_add_odd_sq_sixteen_sq_add_odd_sq had_cop hdodd
-
-  have hbalMN : b ^ 2 * M = c ^ 2 * N := by
-    dsimp [M, N]
-    exact hbal
-
-  obtain ⟨hM_eq_csq, hN_eq_bsq⟩ :=
-    square_factor_balance_int
-      hbpos hcpos hMpos hNpos hbc_cop hMNcop hbalMN
-
-  have hC_F : c ^ 2 = 4 * a ^ 2 + d ^ 2 := by
-    simpa [M] using hM_eq_csq.symm
-
-  have hB_F : b ^ 2 = 16 * a ^ 2 + d ^ 2 := by
-    simpa [N] using hN_eq_bsq.symm
-
-  have haeven : Even a :=
-    even_of_sq_eq_four_sq_add_odd_sq hdodd hC_F
-
-  have hEA_factor : E.A = 2 * a * b * c * d := by
-    calc
-      E.A = U * V := hEA_UV
-      _ = (2 * a * b) * (c * d) := by rw [hU, hV_cd]
-      _ = 2 * a * b * c * d := by ring
-
-  let F : EulerSquarePair :=
-    { A := a
-      D := d
-      B := b
-      C := c
-      hApos := hapos
-      hDpos := hdpos
-      hBpos := hbpos
-      hCpos := hcpos
-      hDodd := hdodd
-      hAeven := haeven
-      hADcop := had_cop
-      hB := hB_F
-      hC := hC_F }
-
-  refine ⟨F, ?_⟩
-  have hlt : a * d < E.A * E.D :=
-    descent_product_lt
-      hapos hbpos hcpos hdpos E.hDpos hEA_factor
-  simpa [F] using hlt
+    (hEDpos : 0 < E_D) :
+    a * d < E_A * E_D := by
+  have hsmallEA : a * d < E_A := by
+    rw [hEA]
+    nlinarith
+  have hEApos : 0 < E_A := by
+    rw [hEA]
+    nlinarith
+  have hEDge : 1 ≤ E_D := by omega
+  have hEAle : E_A ≤ E_A * E_D := by
+    nlinarith
+  exact lt_of_lt_of_le hsmallEA hEAle
 
 end MazurProof.RationalPointsN12
 ```
 
-## 5. Implementation note on field names
+## 7. Validation commands I would run
 
-The only intentionally uncertain names in the skeleton are structure field accessors such as `hApos`, `hDpos`, `hADcop`, and `E.hDpos`.  Replace those with the actual field names in `EulerSquarePair` if they differ.  The mathematical interfaces that matter are:
+From the local checkout:
 
-```lean
-A D B C : ℤ
-0 < A, 0 < D, 0 < B, 0 < C
-Odd D
-Even A
-IsCoprime A D
-B^2 = 16*A^2 + D^2
-C^2 = 4*A^2 + D^2
+```bash
+cd /Users/huangx/repos/flt-ai
+
+# Fast single-file check of the target implementation.
+lake env lean FLT/Assumptions/MazurProof/N12FourSquaresAP.lean
+
+# Check the auxiliary file that provides square_factor_balance_int.
+lake env lean FLT/Assumptions/MazurProof/N12EulerAux.lean
+
+# Module-level build checks, if the package exposes these module names.
+lake build FLT.Assumptions.MazurProof.N12EulerAux
+lake build FLT.Assumptions.MazurProof.N12FourSquaresAP
+
+# Whole-project check if the single-file/module checks pass.
+lake build
+
+# Audit that the constructive theorem and its wrappers did not introduce new placeholders.
+rg -n "sorry|admit|axiom|set_option autoImplicit true" \
+  FLT/Assumptions/MazurProof/N12FourSquaresAP.lean \
+  FLT/Assumptions/MazurProof/N12EulerAux.lean
+
+# Optional: check exactly what changed before committing.
+git diff -- FLT/Assumptions/MazurProof/N12FourSquaresAP.lean \
+             FLT/Assumptions/MazurProof/N12EulerAux.lean
+git diff --check
 ```
 
-Everything else in the theorem should remain as above: refine with common factor `k`, split `k = 2*a`, balance, prove `Even a`, construct `F=(a,d,b,c)`, and prove the strict inequality by positivity.
+## Final audit answer
+
+I would treat the implementation as sound if it typechecks and the direct inspection confirms:
+
+* `a` is introduced by `k = 2*a` and `F.A = a`.
+* `Even a` is proved by the direct mod-`8` balance lemma, not by refinement parity alone.
+* `IsCoprime a d` is explicitly derived from the refinement coprimality for `k` and `d`.
+* `square_factor_balance_int` is applied with `M = 4*a^2+d^2`, `N = 16*a^2+d^2`, and the balance equation in the order `b^2*M = c^2*N`.
+* The signed-orientation branch is collapsed to the common balance equation before the rest of the descent.
+* The descent inequality proves `F.A*F.D = a*d < E.A*E.D`, preferably via the stronger intermediate `a*d < E.A`.
+
+No correction to the mathematical construction is needed under those conditions.
