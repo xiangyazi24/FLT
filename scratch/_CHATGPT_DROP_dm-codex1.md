@@ -1,559 +1,461 @@
-# Q2699 (dm-codex1): next theorem after raw square branch factor extraction
+# Q2704 (dm-codex1): raw square factors to `EulerSquarePair`
 
 Repo/branch requested: `xiangyazi24/FLT@scratch`  
-Target Lean area: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`  
+Target downstream Lean area: new file importing `N12QuarticEisenstein` and `N12FourSquaresAP`  
 Namespace: `MazurProof.RationalPointsN12`
 
-Connector status: the GitHub connector returned `404` for the target file and also for the named files `N12FourSquaresAP.lean`, `N12EulerAux.lean`, and `N12CheckedDescentBridge.lean` on `scratch`; repository code search also returned no hits for `FourSquaresAP`, `EulerAux`, or `CheckedDescentBridge`. So I cannot certify existing theorem names from the connector. The audit below is based on the exact checked interfaces in the prompt.
+This is self-contained Lean/math design, as requested. I did **not** inspect the unpushed local file. The route is mathematically sound, with one important correction in wording: the constructors do not follow from `RawSqBranchEvenFactors/OddFactors` alone; they also use the branch `IsCoprime m n` and the parity side of the factorization disjunction.
 
-## Executive verdict
+## Audit verdict
 
-`RawSqBranchEvenFactors m n` or `RawSqBranchOddFactors m n` alone is **not** enough to prove the current residual conclusions as stated, because those conclusions mention `N` via `f < N`, while the raw factor packages mention only `m n`. Also, the raw packages do not store the secondary coprimality needed to split `r-c` and `r+c` into squares.
+### Even raw factors
 
-With the original `EisensteinSqBranch A N S m n`, positivity of the normalized bad object, and the factor package, the current residuals are mathematically plausible. The Lean-friendly next theorem should be a **secondary Euler split** from the raw factor package, not a direct use of `e = c, f = r`.
-
-The tempting assignments are false:
-
-* even case, taking `e = c`, `f = r` would require
-  ```text
-  b^2 = c^4 - c^2*r^2 + r^4,
-  ```
-  but the factor package gives only
-  ```text
-  b^2 = r^2 + 3*c^2.
-  ```
-* odd case, taking `e = a`, `f = b` would require
-  ```text
-  q^2 = a^4 - a^2*b^2 + b^4,
-  ```
-  but the factor package gives `r^2 = 3*a^2 + b^2` and `c^2 = b^2 - a^2`.
-
-The actual formulas come from splitting `r-c` and `r+c` once more.
-
-## 1. Even `n`: exact algebra and formulas
-
-Rename the witnesses in `RawSqBranchEvenFactors` as `a b c r` to avoid clashing with the residual witness named `d`:
+From
 
 ```text
-0 < a, 0 < b, 0 < c, 0 < r,
 m - n = a^2,
 m + n = b^2,
 n = 2*c^2,
-2*m - n = 2*r^2.
+2*m - n = 2*d^2
+```
+
+we get
+
+```text
+d^2 = a^2 + c^2,
+b^2 = a^2 + 4*c^2.
+```
+
+Since `m` is odd and `n` is even, `m-n` is odd, hence `a` is odd. Then `a^2 + c^2 = d^2` forces `d` odd and `4 ∣ c`. If `c = 4*t`, define
+
+```text
+E.A = 2*t       -- i.e. c/2, and it is even
+E.D = a
+E.B = b
+E.C = d
 ```
 
 Then
 
 ```text
-m = c^2 + r^2,
-a^2 = r^2 - c^2 = (r-c)*(r+c),
-b^2 = r^2 + 3*c^2.
+E.B^2 = b^2 = a^2 + 4*c^2 = a^2 + 16*(2*t)^2 = 16*E.A^2 + E.D^2,
+E.C^2 = d^2 = a^2 + c^2 = a^2 + 4*(2*t)^2 = 4*E.A^2 + E.D^2.
 ```
 
-Since `a > 0`, we get `r^2 > c^2`, hence `c < r` from positivity. From the branch coprimality and parity one should prove `IsCoprime (r-c) (r+c)`. Since both factors are positive and their product is the square `a^2`, apply `posSqOfCoprimeMulSqStatement` a second time to obtain
+The `hADcop` field is not automatic from the factor package; it comes from `IsCoprime m n`:
 
 ```text
-r - c = e^2,
-r + c = f^2,
-0 < e,
-0 < f,
-IsCoprime e f.
+IsCoprime m n
+⇒ IsCoprime (m-n) n
+⇒ IsCoprime a n
+⇒ IsCoprime a c
+⇒ IsCoprime (c/2) a.
 ```
 
-Then `e < f` because `f^2 - e^2 = 2*c > 0`. The residual square witness is **the old factor-root `b`**, not `r`:
+### Odd raw factors
+
+From
 
 ```text
-e^4 - e^2*f^2 + f^4
-  = (r-c)^2 - (r-c)*(r+c) + (r+c)^2
-  = r^2 + 3*c^2
-  = b^2.
-```
-
-For the bound, the branch equation gives
-
-```text
-N^2 = n*(2*m-n) = (2*c^2)*(2*r^2) = (2*c*r)^2.
-```
-
-If `PositivePrimitiveEisensteinBadUnordered A N S` gives `0 < N`, then `N = 2*c*r`. Since `f^2 = r+c` and `0 < c < r`,
-
-```text
-r + c < 2*c*r = N,
-```
-
-and with `0 < f`, `f ≤ f^2`, so `f < N`.
-
-Therefore the current `DescentBranchNEvenStatement` conclusion can be produced from the even factors, but only after this secondary split:
-
-```text
-residual e := secondary root of r-c,
-residual f := secondary root of r+c,
-residual d := b.
-```
-
-### Lean-checkable even algebra identities
-
-```lean
-import Mathlib.Tactic
-import FLT.Assumptions.MazurProof.N12QuarticEisenstein
-
-namespace MazurProof.RationalPointsN12
-
-/-- Algebra extracted from `RawSqBranchEvenFactors` after opening its witnesses.
-Here `r` is the positive root in `2*m - n = 2*r^2`. -/
-theorem rawEvenFactors_core_identities
-    {m n a b c r : ℤ}
-    (hma : m - n = a ^ 2)
-    (hmb : m + n = b ^ 2)
-    (hnc : n = 2 * c ^ 2)
-    (h2mr : 2 * m - n = 2 * r ^ 2) :
-    m = c ^ 2 + r ^ 2 ∧
-      a ^ 2 = r ^ 2 - c ^ 2 ∧
-      b ^ 2 = r ^ 2 + 3 * c ^ 2 := by
-  have hm : m = c ^ 2 + r ^ 2 := by
-    nlinarith
-  constructor
-  · exact hm
-  constructor
-  · calc
-      a ^ 2 = m - n := by rw [hma]
-      _ = r ^ 2 - c ^ 2 := by
-        rw [hm, hnc]
-        ring
-  · calc
-      b ^ 2 = m + n := by rw [hmb]
-      _ = r ^ 2 + 3 * c ^ 2 := by
-        rw [hm, hnc]
-        ring
-
-/-- The even secondary split gives the Eisenstein quartic square. -/
-theorem rawEven_secondary_quartic_identity
-    {b c r e f : ℤ}
-    (he : r - c = e ^ 2)
-    (hf : r + c = f ^ 2)
-    (hb : b ^ 2 = r ^ 2 + 3 * c ^ 2) :
-    b ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4 := by
-  calc
-    b ^ 2 = r ^ 2 + 3 * c ^ 2 := hb
-    _ = (r - c) ^ 2 - (r - c) * (r + c) + (r + c) ^ 2 := by ring
-    _ = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4 := by
-      rw [he, hf]
-      ring
-
-end MazurProof.RationalPointsN12
-```
-
-## 2. Odd `n`: exact algebra and formulas
-
-Rename the witnesses in `RawSqBranchOddFactors` as `a b c r`:
-
-```text
-0 < a, 0 < b, 0 < c, 0 < r,
 m - n = 2*a^2,
 m + n = 2*b^2,
 n = c^2,
-2*m - n = r^2.
+2*m - n = d^2
+```
+
+we get
+
+```text
+b^2 = a^2 + c^2,
+d^2 = 4*a^2 + c^2.
+```
+
+Since `n` is odd and `n = c^2`, `c` is odd. Then `c^2 + a^2 = b^2` forces `b` odd and `4 ∣ a`. If `a = 4*t`, define
+
+```text
+E.A = 2*t       -- i.e. a/2, and it is even
+E.D = c
+E.B = d
+E.C = b
 ```
 
 Then
 
 ```text
-m = a^2 + b^2,
-c^2 = b^2 - a^2,
-r^2 = 3*a^2 + b^2,
-r^2 - c^2 = 4*a^2,
-r^2 + 3*c^2 = 4*b^2.
+E.B^2 = d^2 = 4*a^2 + c^2 = 16*(2*t)^2 + c^2 = 16*E.A^2 + E.D^2,
+E.C^2 = b^2 = a^2 + c^2 = 4*(2*t)^2 + c^2 = 4*E.A^2 + E.D^2.
 ```
 
-Since `a > 0`, `r^2 > c^2`, hence `c < r`. Since this is the odd branch, `c` and `r` are odd, so `r-c` and `r+c` are divisible by `2`. Define the positive halves
+Again, `hADcop` comes from the branch coprimality:
 
 ```text
-x = (r-c)/2,
-y = (r+c)/2.
+IsCoprime m n
+⇒ IsCoprime (m-n) n
+⇒ IsCoprime (2*a^2) c^2
+⇒ IsCoprime a c
+⇒ IsCoprime (a/2) c.
 ```
 
-Equivalently, in Lean avoid division and state
+## Pasteable Lean for the downstream file
 
-```text
-r - c = 2*x,
-r + c = 2*y.
-```
-
-Then
-
-```text
-x*y = ((r-c)*(r+c))/4 = (r^2-c^2)/4 = a^2.
-```
-
-With the branch coprimality one should prove `IsCoprime x y`. Apply `posSqOfCoprimeMulSqStatement` to `a^2 = x*y`, giving
-
-```text
-x = e^2,
-y = f^2,
-```
-
-or, division-free,
-
-```text
-r - c = 2*e^2,
-r + c = 2*f^2.
-```
-
-The residual square witness is **the old factor-root `b`**:
-
-```text
-4*(e^4 - e^2*f^2 + f^4)
-  = (2*e^2)^2 - (2*e^2)*(2*f^2) + (2*f^2)^2
-  = (r-c)^2 - (r-c)*(r+c) + (r+c)^2
-  = r^2 + 3*c^2
-  = 4*b^2,
-```
-
-hence
-
-```text
-b^2 = e^4 - e^2*f^2 + f^4.
-```
-
-For the bound,
-
-```text
-N^2 = n*(2*m-n) = c^2*r^2 = (c*r)^2.
-```
-
-With `0 < N`, `N = c*r`. Since `f^2 = (r+c)/2` and `0 < c < r`,
-
-```text
-(r+c)/2 < c*r = N,
-```
-
-so `f < N`.
-
-Thus the current `DescentBranchNOddMOddStatement` conclusion can be produced from odd factors with formulas
-
-```text
-residual e := secondary root of (r-c)/2,
-residual f := secondary root of (r+c)/2,
-residual b := b.
-```
-
-### Lean-checkable odd algebra identities
+The helper names are prefixed with `q2704_` to avoid collisions with local helpers already added to `N12QuarticEisenstein.lean`.
 
 ```lean
 import Mathlib.Tactic
 import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+import FLT.Assumptions.MazurProof.N12FourSquaresAP
 
 namespace MazurProof.RationalPointsN12
 
-/-- Algebra extracted from `RawSqBranchOddFactors` after opening its witnesses.
-Here `r` is the positive root in `2*m - n = r^2`. -/
-theorem rawOddFactors_core_identities
-    {m n a b c r : ℤ}
+/-! ## 1. No `EulerSquarePair` from strict descent -/
+
+private lemma q2704_natAbs_lt_natAbs_of_pos_lt {x y : ℤ}
+    (hx : 0 < x) (hy : 0 < y) (hxy : x < y) :
+    x.natAbs < y.natAbs := by
+  rcases Int.eq_succ_of_zero_lt hx with ⟨x0, rfl⟩
+  rcases Int.eq_succ_of_zero_lt hy with ⟨y0, rfl⟩
+  norm_num at hxy ⊢
+  exact_mod_cast hxy
+
+/-- A strict descent on the positive product `A*D` rules out existence of any
+`EulerSquarePair`. -/
+theorem no_eulerSquarePair_of_descent
+    (hdesc : EulerSquarePairDescent) :
+    ¬ Nonempty EulerSquarePair := by
+  rintro ⟨E0⟩
+  let P : ℕ → Prop := fun k => ∃ E : EulerSquarePair, k = (E.A * E.D).natAbs
+  have hP : ∃ k : ℕ, P k := ⟨(E0.A * E0.D).natAbs, E0, rfl⟩
+  let k : ℕ := Nat.find hP
+  have hkP : P k := Nat.find_spec hP
+  rcases hkP with ⟨E, hkE⟩
+  rcases hdesc E with ⟨F, hlt⟩
+  have hFmem : P ((F.A * F.D).natAbs) := ⟨F, rfl⟩
+  have hmin : k ≤ (F.A * F.D).natAbs := Nat.find_min' hP hFmem
+  have hFpos : 0 < F.A * F.D := mul_pos F.hApos F.hDpos
+  have hEpos : 0 < E.A * E.D := mul_pos E.hApos E.hDpos
+  have hmeasure : (F.A * F.D).natAbs < (E.A * E.D).natAbs :=
+    q2704_natAbs_lt_natAbs_of_pos_lt hFpos hEpos hlt
+  have hlt_k : (F.A * F.D).natAbs < k := by
+    simpa [hkE] using hmeasure
+  exact (not_lt_of_ge hmin) hlt_k
+
+/-! ## 2. Parity and mod-8 divisibility helpers -/
+
+private lemma q2704_odd_sub_even {x y : ℤ}
+    (hx : Odd x) (hy : Even y) : Odd (x - y) := by
+  rcases hx with ⟨a, ha⟩
+  rcases hy with ⟨b, hb⟩
+  refine ⟨a - b, ?_⟩
+  rw [ha, hb]
+  ring
+
+private lemma q2704_odd_of_sq_eq_odd {x y : ℤ}
+    (hx : Odd x) (h : x = y ^ 2) : Odd y := by
+  rcases Int.even_or_odd y with hyEven | hyOdd
+  · exfalso
+    rcases hx with ⟨r, hx⟩
+    rcases hyEven with ⟨s, hy⟩
+    rw [hx, hy] at h
+    ring_nf at h
+    omega
+  · exact hyOdd
+
+/-- In `x^2 + z^2 = y^2`, if `x` is odd then `y` is odd. -/
+private lemma q2704_odd_right_of_odd_left_sq_add_sq_eq_sq {x y z : ℤ}
+    (hx : Odd x) (h : x ^ 2 + z ^ 2 = y ^ 2) : Odd y := by
+  rcases Int.even_or_odd y with hyEven | hyOdd
+  · exfalso
+    rcases hx with ⟨r, hx⟩
+    rcases hyEven with ⟨s, hy⟩
+    rcases Int.even_or_odd z with hzEven | hzOdd
+    · rcases hzEven with ⟨t, hz⟩
+      rw [hx, hy, hz] at h
+      ring_nf at h
+      omega
+    · rcases hzOdd with ⟨t, hz⟩
+      rw [hx, hy, hz] at h
+      ring_nf at h
+      omega
+  · exact hyOdd
+
+/-- Robust mod-8 lemma: if `x,y` are odd and `x^2 + z^2 = y^2`, then `4 ∣ z`.
+
+Proof is by parity cases on `z` and on the half of `z`; it avoids depending on
+any specialized modular-square API. -/
+theorem q2704_four_dvd_of_odd_odd_sq_add_sq_eq_sq {x y z : ℤ}
+    (hx : Odd x) (hy : Odd y) (h : x ^ 2 + z ^ 2 = y ^ 2) :
+    (4 : ℤ) ∣ z := by
+  rcases hx with ⟨r, hx⟩
+  rcases hy with ⟨s, hy⟩
+  rcases Int.even_or_odd z with hzEven | hzOdd
+  · rcases hzEven with ⟨t, hz⟩
+    rcases Int.even_or_odd t with htEven | htOdd
+    · rcases htEven with ⟨u, ht⟩
+      refine ⟨u, ?_⟩
+      rw [hz, ht]
+      ring
+    · exfalso
+      rcases htOdd with ⟨u, ht⟩
+      rw [hx, hy, hz, ht] at h
+      ring_nf at h
+      omega
+  · exfalso
+    rcases hzOdd with ⟨t, hz⟩
+    rw [hx, hy, hz] at h
+    ring_nf at h
+    omega
+
+/-! ## 3. Coprimality helpers for the `hADcop` field -/
+
+private lemma q2704_isCoprime_m_sub_n_n {m n : ℤ}
+    (hcop : IsCoprime m n) : IsCoprime (m - n) n := by
+  have h0 : IsCoprime (m - (1 : ℤ) * n) n :=
+    (IsCoprime.sub_mul_right_left_iff (x := m) (y := n) (z := (1 : ℤ))).2 hcop
+  simpa [one_mul] using h0
+
+private lemma q2704_isCoprime_sq_left {x y : ℤ}
+    (h : IsCoprime (x ^ 2) y) : IsCoprime x y := by
+  have h' : IsCoprime (x * x) y := by
+    simpa [pow_two] using h
+  exact h'.of_mul_left_left
+
+private lemma q2704_isCoprime_sq_right {x y : ℤ}
+    (h : IsCoprime x (y ^ 2)) : IsCoprime x y := by
+  have h' : IsCoprime x (y * y) := by
+    simpa [pow_two] using h
+  exact h'.of_mul_right_left
+
+/-- Even branch coprimality bridge:
+`IsCoprime m n`, `m-n=a^2`, `n=2*c^2`, `c=2*A0` imply
+`IsCoprime A0 a`. -/
+private lemma q2704_isCoprime_A_a_of_even_raw
+    {m n a c A0 : ℤ}
+    (hcop : IsCoprime m n)
+    (hma : m - n = a ^ 2)
+    (hnc : n = 2 * c ^ 2)
+    (hcA : c = 2 * A0) :
+    IsCoprime A0 a := by
+  have hmn : IsCoprime (m - n) n := q2704_isCoprime_m_sub_n_n hcop
+  have ha_n : IsCoprime a n := by
+    apply q2704_isCoprime_sq_left
+    simpa [hma] using hmn
+  have ha_2c2 : IsCoprime a ((2 : ℤ) * c ^ 2) := by
+    simpa [hnc] using ha_n
+  have ha_c2 : IsCoprime a (c ^ 2) := ha_2c2.of_mul_right_right
+  have ha_c : IsCoprime a c := q2704_isCoprime_sq_right ha_c2
+  have hA_dvd_c : A0 ∣ c := ⟨2, by rw [hcA]; ring⟩
+  exact ha_c.symm.of_isCoprime_of_dvd_left hA_dvd_c
+
+/-- Odd branch coprimality bridge:
+`IsCoprime m n`, `m-n=2*a^2`, `n=c^2`, `a=2*A0` imply
+`IsCoprime A0 c`. -/
+private lemma q2704_isCoprime_A_c_of_odd_raw
+    {m n a c A0 : ℤ}
+    (hcop : IsCoprime m n)
+    (hma : m - n = 2 * a ^ 2)
+    (hnc : n = c ^ 2)
+    (haA : a = 2 * A0) :
+    IsCoprime A0 c := by
+  have hmn : IsCoprime (m - n) n := q2704_isCoprime_m_sub_n_n hcop
+  have h2a2_c2 : IsCoprime ((2 : ℤ) * a ^ 2) (c ^ 2) := by
+    simpa [hma, hnc] using hmn
+  have ha2_c2 : IsCoprime (a ^ 2) (c ^ 2) := h2a2_c2.of_mul_left_right
+  have ha_c2 : IsCoprime a (c ^ 2) := q2704_isCoprime_sq_left ha2_c2
+  have ha_c : IsCoprime a c := q2704_isCoprime_sq_right ha_c2
+  have hA_dvd_a : A0 ∣ a := ⟨2, by rw [haA]; ring⟩
+  exact ha_c.of_isCoprime_of_dvd_left hA_dvd_a
+
+/-! ## 4. Algebra extracted from factor packages -/
+
+private lemma q2704_even_core_identities
+    {m n a b c d : ℤ}
+    (hma : m - n = a ^ 2)
+    (hmb : m + n = b ^ 2)
+    (hnc : n = 2 * c ^ 2)
+    (h2md : 2 * m - n = 2 * d ^ 2) :
+    d ^ 2 = a ^ 2 + c ^ 2 ∧ b ^ 2 = a ^ 2 + 4 * c ^ 2 := by
+  constructor <;> nlinarith
+
+private lemma q2704_odd_core_identities
+    {m n a b c d : ℤ}
     (hma : m - n = 2 * a ^ 2)
     (hmb : m + n = 2 * b ^ 2)
     (hnc : n = c ^ 2)
-    (h2mr : 2 * m - n = r ^ 2) :
-    m = a ^ 2 + b ^ 2 ∧
-      c ^ 2 = b ^ 2 - a ^ 2 ∧
-      r ^ 2 = 3 * a ^ 2 + b ^ 2 ∧
-      r ^ 2 - c ^ 2 = 4 * a ^ 2 ∧
-      r ^ 2 + 3 * c ^ 2 = 4 * b ^ 2 := by
-  have hm : m = a ^ 2 + b ^ 2 := by
+    (h2md : 2 * m - n = d ^ 2) :
+    b ^ 2 = a ^ 2 + c ^ 2 ∧ d ^ 2 = 4 * a ^ 2 + c ^ 2 := by
+  constructor <;> nlinarith
+
+/-! ## 5. Constructors from raw factors to `EulerSquarePair` -/
+
+/-- Even raw factors construct an `EulerSquarePair` with
+`A = c/2`, `D = a`, `B = b`, `C = d`.  The proof avoids division by writing
+`c = 4*t` and setting `A = 2*t`. -/
+theorem rawEvenFactors_to_eulerSquarePair
+    {X N S m n : ℤ}
+    (hbranch : EisensteinSqBranch X N S m n)
+    (hnEven : Even n)
+    (hf : RawSqBranchEvenFactors m n) :
+    Nonempty EulerSquarePair := by
+  have hmOdd : Odd m := rawSqBranchMParityStatement hbranch
+  rcases hbranch with ⟨hnpos, hnm, hcop, hX, hN, hS⟩
+  rcases hf with
+    ⟨a, b, c, d, hapos, hbpos, hcpos, hdpos, hma, hmb, hnc, h2md⟩
+  have hcore := q2704_even_core_identities hma hmb hnc h2md
+  have hdsq : d ^ 2 = a ^ 2 + c ^ 2 := hcore.1
+  have hbsq : b ^ 2 = a ^ 2 + 4 * c ^ 2 := hcore.2
+  have hmnaOdd : Odd (m - n) := q2704_odd_sub_even hmOdd hnEven
+  have haOdd : Odd a := q2704_odd_of_sq_eq_odd hmnaOdd hma
+  have hsum : a ^ 2 + c ^ 2 = d ^ 2 := by nlinarith
+  have hdOdd : Odd d := q2704_odd_right_of_odd_left_sq_add_sq_eq_sq haOdd hsum
+  have hc4 : (4 : ℤ) ∣ c :=
+    q2704_four_dvd_of_odd_odd_sq_add_sq_eq_sq haOdd hdOdd hsum
+  rcases hc4 with ⟨t, hc4⟩
+  let A0 : ℤ := 2 * t
+  have hcA : c = 2 * A0 := by
+    dsimp [A0]
+    rw [hc4]
+    ring
+  have hA0pos : 0 < A0 := by
+    dsimp [A0]
     nlinarith
-  have hc : c ^ 2 = b ^ 2 - a ^ 2 := by
-    calc
-      c ^ 2 = n := by rw [hnc]
-      _ = b ^ 2 - a ^ 2 := by nlinarith
-  have hr : r ^ 2 = 3 * a ^ 2 + b ^ 2 := by
-    calc
-      r ^ 2 = 2 * m - n := by rw [h2mr]
-      _ = 3 * a ^ 2 + b ^ 2 := by
-        rw [hm]
-        nlinarith
-  constructor
-  · exact hm
-  constructor
-  · exact hc
-  constructor
-  · exact hr
-  constructor
-  · nlinarith
-  · nlinarith
-
-/-- The odd secondary split gives the Eisenstein quartic square.  The hypotheses
-are division-free: `r-c = 2*e^2` and `r+c = 2*f^2`. -/
-theorem rawOdd_secondary_quartic_identity
-    {b c r e f : ℤ}
-    (he : r - c = 2 * e ^ 2)
-    (hf : r + c = 2 * f ^ 2)
-    (hb4 : r ^ 2 + 3 * c ^ 2 = 4 * b ^ 2) :
-    b ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4 := by
-  have h4 : 4 * (e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4) = r ^ 2 + 3 * c ^ 2 := by
-    calc
-      4 * (e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4)
-          = (2 * e ^ 2) ^ 2 - (2 * e ^ 2) * (2 * f ^ 2) + (2 * f ^ 2) ^ 2 := by ring
-      _ = (r - c) ^ 2 - (r - c) * (r + c) + (r + c) ^ 2 := by
-        rw [← he, ← hf]
-      _ = r ^ 2 + 3 * c ^ 2 := by ring
-  nlinarith
-
-end MazurProof.RationalPointsN12
-```
-
-## 3. Lean-friendly next residuals
-
-The current residuals are not necessarily false, but they are too coarse for the next proof step. They hide:
-
-1. raw factor extraction;
-2. secondary split of `r-c` and `r+c` or their halves;
-3. conversion of the quartic triple to `NormalizedEisensteinBad`.
-
-The next residuals should consume the checked factor packages directly.
-
-```lean
-import Mathlib.Tactic
-import FLT.Assumptions.MazurProof.N12QuarticEisenstein
-
-namespace MazurProof.RationalPointsN12
-
-/-- Even raw-factor package implies the current branch-descent triple.
-The output witness `q` is the `b` from `RawSqBranchEvenFactors`; the output
-`e,f` come from the secondary split `r-c=e^2`, `r+c=f^2`. -/
-def RawSqBranchEvenFactorsToDescentTripleStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    EisensteinSqBranch A N S m n →
-    RawSqBranchEvenFactors m n →
-    ∃ e f q : ℤ,
-      0 < e ∧ e < f ∧ 0 < q ∧ IsCoprime e f ∧
-      q ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4 ∧ f < N
-
-/-- Odd raw-factor package implies the current branch-descent triple.
-The output witness `q` is the `b` from `RawSqBranchOddFactors`; the output
-`e,f` come from the secondary split `r-c=2*e^2`, `r+c=2*f^2`. -/
-def RawSqBranchOddFactorsToDescentTripleStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    EisensteinSqBranch A N S m n →
-    RawSqBranchOddFactors m n →
-    ∃ e f q : ℤ,
-      0 < e ∧ e < f ∧ 0 < q ∧ IsCoprime e f ∧
-      q ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4 ∧ f < N
-
-end MazurProof.RationalPointsN12
-```
-
-Then the existing residuals become thin parity wrappers around `rawSqBranchFactorizationStatement`.
-
-```lean
-import Mathlib.Tactic
-import FLT.Assumptions.MazurProof.N12QuarticEisenstein
-
-namespace MazurProof.RationalPointsN12
-
-private lemma even_int_iff_two_dvd {n : ℤ} : Even n ↔ (2 : ℤ) ∣ n := by
-  constructor
-  · rintro ⟨k, hk⟩
-    refine ⟨k, ?_⟩
-    rw [hk]
+  have hA0even : Even A0 := by
+    refine ⟨t, ?_⟩
+    dsimp [A0]
     ring
-  · rintro ⟨k, hk⟩
-    refine ⟨k, ?_⟩
-    rw [hk]
+  have hAD : IsCoprime A0 a :=
+    q2704_isCoprime_A_a_of_even_raw hcop hma hnc hcA
+  have hBfield : b ^ 2 = 16 * A0 ^ 2 + a ^ 2 := by
+    calc
+      b ^ 2 = a ^ 2 + 4 * c ^ 2 := hbsq
+      _ = 16 * A0 ^ 2 + a ^ 2 := by
+        rw [hcA]
+        ring
+  have hCfield : d ^ 2 = 4 * A0 ^ 2 + a ^ 2 := by
+    calc
+      d ^ 2 = a ^ 2 + c ^ 2 := hdsq
+      _ = 4 * A0 ^ 2 + a ^ 2 := by
+        rw [hcA]
+        ring
+  exact ⟨{
+    A := A0
+    D := a
+    B := b
+    C := d
+    hApos := hA0pos
+    hDpos := hapos
+    hDodd := haOdd
+    hAeven := hA0even
+    hADcop := hAD
+    hBpos := hbpos
+    hCpos := hdpos
+    hB := hBfield
+    hC := hCfield }⟩
+
+/-- Odd raw factors construct an `EulerSquarePair` with
+`A = a/2`, `D = c`, `B = d`, `C = b`.  The proof avoids division by writing
+`a = 4*t` and setting `A = 2*t`. -/
+theorem rawOddFactors_to_eulerSquarePair
+    {X N S m n : ℤ}
+    (hbranch : EisensteinSqBranch X N S m n)
+    (hnOdd : Odd n)
+    (hf : RawSqBranchOddFactors m n) :
+    Nonempty EulerSquarePair := by
+  rcases hbranch with ⟨hnpos, hnm, hcop, hX, hN, hS⟩
+  rcases hf with
+    ⟨a, b, c, d, hapos, hbpos, hcpos, hdpos, hma, hmb, hnc, h2md⟩
+  have hcore := q2704_odd_core_identities hma hmb hnc h2md
+  have hbsq : b ^ 2 = a ^ 2 + c ^ 2 := hcore.1
+  have hdsq : d ^ 2 = 4 * a ^ 2 + c ^ 2 := hcore.2
+  have hcOdd : Odd c := q2704_odd_of_sq_eq_odd hnOdd hnc
+  have hsum : c ^ 2 + a ^ 2 = b ^ 2 := by nlinarith
+  have hbOdd : Odd b := q2704_odd_right_of_odd_left_sq_add_sq_eq_sq hcOdd hsum
+  have ha4 : (4 : ℤ) ∣ a :=
+    q2704_four_dvd_of_odd_odd_sq_add_sq_eq_sq hcOdd hbOdd hsum
+  rcases ha4 with ⟨t, ha4⟩
+  let A0 : ℤ := 2 * t
+  have haA : a = 2 * A0 := by
+    dsimp [A0]
+    rw [ha4]
     ring
+  have hA0pos : 0 < A0 := by
+    dsimp [A0]
+    nlinarith
+  have hA0even : Even A0 := by
+    refine ⟨t, ?_⟩
+    dsimp [A0]
+    ring
+  have hAD : IsCoprime A0 c :=
+    q2704_isCoprime_A_c_of_odd_raw hcop hma hnc haA
+  have hBfield : d ^ 2 = 16 * A0 ^ 2 + c ^ 2 := by
+    calc
+      d ^ 2 = 4 * a ^ 2 + c ^ 2 := hdsq
+      _ = 16 * A0 ^ 2 + c ^ 2 := by
+        rw [haA]
+        ring
+  have hCfield : b ^ 2 = 4 * A0 ^ 2 + c ^ 2 := by
+    calc
+      b ^ 2 = a ^ 2 + c ^ 2 := hbsq
+      _ = 4 * A0 ^ 2 + c ^ 2 := by
+        rw [haA]
+        ring
+  exact ⟨{
+    A := A0
+    D := c
+    B := d
+    C := b
+    hApos := hA0pos
+    hDpos := hcpos
+    hDodd := hcOdd
+    hAeven := hA0even
+    hADcop := hAD
+    hBpos := hdpos
+    hCpos := hbpos
+    hB := hBfield
+    hC := hCfield }⟩
 
-private lemma odd_int_not_two_dvd {n : ℤ} (hn : Odd n) : ¬ (2 : ℤ) ∣ n := by
-  rintro ⟨k, hk⟩
-  rcases hn with ⟨j, hj⟩
-  rw [hk] at hj
-  omega
+/-! ## 6. Final raw branch contradiction from factor packages -/
 
-/-- Existing even-`n` residual from the factor-package residual. -/
-theorem descentBranchNEvenStatement_from_rawFactors
-    (hEven : RawSqBranchEvenFactorsToDescentTripleStatement) :
-    DescentBranchNEvenStatement := by
-  intro A N S m n hbad hbranch hnEvenDiv
-  rcases rawSqBranchFactorizationStatement hbranch with hEvenFac | hOddFac
-  · exact hEven hbad hbranch hEvenFac.2
-  · exact False.elim (odd_int_not_two_dvd hOddFac.1 hnEvenDiv)
-
-/-- Existing odd-`n`, odd-`m` residual from the factor-package residual.
-The `¬ 2 ∣ m` hypothesis is redundant after `rawSqBranchMParityStatement`. -/
-theorem descentBranchNOddMOddStatement_from_rawFactors
-    (hOdd : RawSqBranchOddFactorsToDescentTripleStatement) :
-    DescentBranchNOddMOddStatement := by
-  intro A N S m n hbad hbranch hnOddDiv hmOddDiv
-  rcases rawSqBranchFactorizationStatement hbranch with hEvenFac | hOddFac
-  · exact False.elim (hnOddDiv ((even_int_iff_two_dvd).1 hEvenFac.1))
-  · exact hOdd hbad hbranch hOddFac.2
-
-end MazurProof.RationalPointsN12
-```
-
-## 4. Secondary split statements that should be proved next
-
-These are the real mathematical middle layer. They are more Lean-friendly than trying to prove the current branch residuals monolithically.
-
-```lean
-import Mathlib.Tactic
-import FLT.Assumptions.MazurProof.N12QuarticEisenstein
-
-namespace MazurProof.RationalPointsN12
-
-/-- The second split needed in the even branch.  This is essentially another
-application of `posSqOfCoprimeMulSqStatement` to `a^2 = (r-c)*(r+c)`. -/
-def RawEvenSecondarySplitStatement : Prop :=
-  ∀ {a c r : ℤ},
-    0 < c → c < r →
-    IsCoprime (r - c) (r + c) →
-    a ^ 2 = (r - c) * (r + c) →
-    ∃ e f : ℤ,
-      0 < e ∧ 0 < f ∧ e < f ∧ IsCoprime e f ∧
-      r - c = e ^ 2 ∧ r + c = f ^ 2
-
-/-- The second split needed in the odd branch, division-free.  The variables
-`x,y` are the halves of `r-c` and `r+c`. -/
-def RawOddSecondarySplitStatement : Prop :=
-  ∀ {a c r x y : ℤ},
-    0 < c → c < r →
-    r - c = 2 * x → r + c = 2 * y →
-    0 < x → 0 < y →
-    IsCoprime x y →
-    a ^ 2 = x * y →
-    ∃ e f : ℤ,
-      0 < e ∧ 0 < f ∧ e < f ∧ IsCoprime e f ∧
-      x = e ^ 2 ∧ y = f ^ 2
-
-/-- Even branch: all gcd/parity work needed to feed `RawEvenSecondarySplitStatement`.
-This should be proved from `EisensteinSqBranch`, `RawSqBranchEvenFactors`, and
-`rawSqBranchMParityStatement`. -/
-def RawEvenSecondarySplitInputStatement : Prop :=
-  ∀ {A N S m n a b c r : ℤ},
-    EisensteinSqBranch A N S m n →
-    0 < a → 0 < b → 0 < c → 0 < r →
-    m - n = a ^ 2 → m + n = b ^ 2 →
-    n = 2 * c ^ 2 → 2 * m - n = 2 * r ^ 2 →
-    0 < c ∧ c < r ∧ IsCoprime (r - c) (r + c) ∧
-      a ^ 2 = (r - c) * (r + c)
-
-/-- Odd branch: all gcd/parity work needed to feed `RawOddSecondarySplitStatement`.
-This should be proved from `EisensteinSqBranch`, `RawSqBranchOddFactors`, and
-`rawSqBranchMParityStatement`. -/
-def RawOddSecondarySplitInputStatement : Prop :=
-  ∀ {A N S m n a b c r : ℤ},
-    EisensteinSqBranch A N S m n →
-    0 < a → 0 < b → 0 < c → 0 < r →
-    m - n = 2 * a ^ 2 → m + n = 2 * b ^ 2 →
-    n = c ^ 2 → 2 * m - n = r ^ 2 →
-    ∃ x y : ℤ,
-      0 < c ∧ c < r ∧
-      r - c = 2 * x ∧ r + c = 2 * y ∧
-      0 < x ∧ 0 < y ∧ IsCoprime x y ∧
-      a ^ 2 = x * y
+/-- Once `eulerSquarePairDescent` is imported, either raw factor package is impossible. -/
+theorem rawSqBranchDescentFromFactorsStatement :
+    RawSqBranchDescentFromFactorsStatement := by
+  intro X N S m n hbranch hfac
+  have hno : ¬ Nonempty EulerSquarePair :=
+    no_eulerSquarePair_of_descent eulerSquarePairDescent
+  apply hno
+  rcases hfac with hEven | hOdd
+  · exact rawEvenFactors_to_eulerSquarePair hbranch hEven.1 hEven.2
+  · exact rawOddFactors_to_eulerSquarePair hbranch hOdd.1 hOdd.2
 
 end MazurProof.RationalPointsN12
 ```
 
-## 5. Corrected residuals targeting `NormalizedEisensteinBad`
+## Notes if one field fails locally
 
-If the final assembly wants `NormalizedEisensteinBad`, the best bridge is to separate “quartic triple found” from “normalized bad object built”. The bridge is probably what `N12CheckedDescentBridge.lean` should contain if it exists.
-
-```lean
-import Mathlib.Tactic
-import FLT.Assumptions.MazurProof.N12QuarticEisenstein
-
-namespace MazurProof.RationalPointsN12
-
-/-- Bridge from a smaller positive primitive Eisenstein-quartic triple to the
-project's normalized bad predicate.  Expected construction: `A' = e`, `N' = f`,
-`S' = q`. -/
-def QuarticTripleToNormalizedEisensteinBadBelowStatement : Prop :=
-  ∀ {e f q N : ℤ},
-    0 < e → e < f → 0 < q → IsCoprime e f →
-    q ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4 →
-    f < N →
-    ∃ A' N' S' : ℤ,
-      NormalizedEisensteinBad A' N' S' ∧ N' < N
-
-/-- Even raw factors directly imply a normalized descent, after the secondary split
-and the quartic-triple bridge. -/
-def RawSqBranchEvenFactorsToNormalizedDescentStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    EisensteinSqBranch A N S m n →
-    RawSqBranchEvenFactors m n →
-    ∃ A' N' S' : ℤ,
-      NormalizedEisensteinBad A' N' S' ∧ N' < N
-
-/-- Odd raw factors directly imply a normalized descent, after the secondary split
-and the quartic-triple bridge. -/
-def RawSqBranchOddFactorsToNormalizedDescentStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    EisensteinSqBranch A N S m n →
-    RawSqBranchOddFactors m n →
-    ∃ A' N' S' : ℤ,
-      NormalizedEisensteinBad A' N' S' ∧ N' < N
-
-end MazurProof.RationalPointsN12
-```
-
-This is the clean final shape. The existing `DescentBranchNEvenStatement` and `DescentBranchNOddMOddStatement` are still usable as compatibility wrappers, but they should not be the theorem one proves directly after `rawSqBranchFactorizationStatement`.
-
-## 6. Reuse audit for `N12FourSquaresAP`, `N12EulerAux`, `N12CheckedDescentBridge`
-
-I could not inspect those files through the connector: direct fetches returned `404`, and code search returned no hits for their names. So I cannot honestly say “there is already theorem `X`”.
-
-Mathematically, the reusable theorem should **not** be a four-squares-in-AP theorem at this step. The required step is an Euler-style secondary split:
-
-* even: from
-  ```text
-  a^2 = (r-c)*(r+c),  b^2 = r^2 + 3*c^2
-  ```
-  split `r-c=e^2`, `r+c=f^2`, then prove
-  ```text
-  b^2 = e^4 - e^2*f^2 + f^4;
-  ```
-* odd: from
-  ```text
-  a^2 = ((r-c)/2)*((r+c)/2),  4*b^2 = r^2 + 3*c^2
-  ```
-  split `(r-c)/2=e^2`, `(r+c)/2=f^2`, then prove
-  ```text
-  b^2 = e^4 - e^2*f^2 + f^4.
-  ```
-
-So if reuse exists, I would expect it in `N12EulerAux.lean` under a theorem shaped like one of these:
+The most likely local mismatch is not mathematical; it is an API/name mismatch around `IsCoprime` destructors. The exact facts needed for `hADcop` are these two lemmas:
 
 ```lean
-def EulerEvenSecondaryDescentShape : Prop :=
-  ∀ {a b c r : ℤ},
-    0 < a → 0 < b → 0 < c → 0 < r → c < r →
-    IsCoprime (r - c) (r + c) →
-    a ^ 2 = (r - c) * (r + c) →
-    b ^ 2 = r ^ 2 + 3 * c ^ 2 →
-    ∃ e f : ℤ,
-      0 < e ∧ e < f ∧ IsCoprime e f ∧
-      b ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4
+-- even branch
+IsCoprime m n →
+m - n = a ^ 2 →
+n = 2 * c ^ 2 →
+c = 2 * A0 →
+IsCoprime A0 a
 
-def EulerOddSecondaryDescentShape : Prop :=
-  ∀ {a b c r x y : ℤ},
-    0 < a → 0 < b → 0 < c → 0 < r → c < r →
-    r - c = 2 * x → r + c = 2 * y →
-    0 < x → 0 < y → IsCoprime x y →
-    a ^ 2 = x * y →
-    r ^ 2 + 3 * c ^ 2 = 4 * b ^ 2 →
-    ∃ e f : ℤ,
-      0 < e ∧ e < f ∧ IsCoprime e f ∧
-      b ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4
+-- odd branch
+IsCoprime m n →
+m - n = 2 * a ^ 2 →
+n = c ^ 2 →
+a = 2 * A0 →
+IsCoprime A0 c
 ```
 
-`N12CheckedDescentBridge.lean`, if available, is the likely place for the `QuarticTripleToNormalizedEisensteinBadBelowStatement` bridge. `N12FourSquaresAP.lean` is probably not the right tool for this raw branch step; it is more relevant to ruling out or collapsing arithmetic progressions of squares, whereas here the required descent is the explicit split of `r±c`.
+Both are proved above using only Bezout-coprime monotonicity under divisors and the standard facts
+`IsCoprime (x*y) z → IsCoprime x z`, `IsCoprime (x*y) z → IsCoprime y z`, and their right-hand versions.
 
-## 7. Recommended immediate implementation order
+The other possible local mismatch is `Nat.find` syntax; the proof is intentionally written on the predicate
 
-1. Prove the two algebra identity theorems above; they should be quick `ring`/`nlinarith` checks.
-2. Prove `RawEvenSecondarySplitInputStatement` and `RawOddSecondarySplitInputStatement`; these are gcd/parity bookkeeping from the branch and factor packages.
-3. Prove `RawEvenSecondarySplitStatement` and `RawOddSecondarySplitStatement` via `posSqOfCoprimeMulSqStatement`.
-4. Prove `RawSqBranchEvenFactorsToDescentTripleStatement` and `RawSqBranchOddFactorsToDescentTripleStatement` using the explicit formulas.
-5. Either keep the existing residuals as wrappers, or replace the descent-facing residuals with the normalized versions using `QuarticTripleToNormalizedEisensteinBadBelowStatement`.
+```lean
+P k := ∃ E : EulerSquarePair, k = (E.A * E.D).natAbs
+```
+
+so it does not require a custom well-founded relation or quotienting by equality of structures.
