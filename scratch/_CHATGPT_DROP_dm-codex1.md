@@ -1,606 +1,271 @@
-# Q2548: audited descent route for primitive centered four-square APs
+# Q2570: next EulerSquarePair coprimality layer
 
-## Bottom line
-
-The Q2536 route is the right one.  The direct published descent is Alf van der Poorten, *Fermat's Four Squares Theorem*, arXiv:0712.3850.  In the notation of the current Lean project, his proof translates cleanly as
-
-```text
-primitive centered AP
-  -> EulerSquarePair(A,D): 4*A^2 + D^2 and 16*A^2 + D^2 are squares, with N = A*D
-  -> smaller EulerSquarePair(a,d), with |a*d| < |A*D|
-  -> smaller primitive centered AP with N' = a*d.
-```
-
-There is no polynomial one-line construction of roots of the smaller AP from the original roots.  The descent necessarily passes through Pythagorean parametrization and coprime square-product extraction.
-
-One important correction: the residual
+Target namespace:
 
 ```lean
-def PrimitiveCenteredFourSqAPDescent : Prop :=
-  ∀ S : PrimitiveCenteredFourSqAP,
-    ∃ T : PrimitiveCenteredFourSqAP, T.N.natAbs < S.N.natAbs
+namespace MazurProof.RationalPointsN12.EulerSquarePair
 ```
 
-is false if `PrimitiveCenteredFourSqAP` permits the degenerate constant case `S.N = 0`, since no natural number is `< 0`.  The true theorem must either be
+I could not inspect the user-local `N12FourSquaresAP.lean` because this layer appears to be local/unpushed, so the code below assumes the names in the prompt are exactly available by dot notation:
 
 ```lean
-∀ S : PrimitiveCenteredFourSqAP,
-  S.N ≠ 0 → ∃ T : PrimitiveCenteredFourSqAP, T.N.natAbs < S.N.natAbs
+E.centerX_coprime_stepN
+E.fm2_odd
+E.fp2_odd
+E.fm6_odd
+E.fp6_odd
+E.three_coprime_centerX
 ```
 
-or the structure must already include nontriviality, e.g. `N ≠ 0`.
+The main API point: `IsCoprime` is a Bezout predicate, but current Mathlib has the needed transport lemmas:
+
+```lean
+h.symm
+h.mul_right
+h.add_mul_right_left
+h.mul_add_right_right
+IsCoprime.dvd_of_dvd_mul_left
+IsCoprime.dvd_of_dvd_mul_right
+```
+
+The orientation pitfall is that
+
+```lean
+h.dvd_of_dvd_mul_left : IsCoprime x y -> x ∣ y*z -> x ∣ z
+h.dvd_of_dvd_mul_right : IsCoprime x z -> x ∣ y*z -> x ∣ y
+```
+
+so “left/right” names refer to which multiplicand is stripped, not to which conclusion is returned.
 
 ---
 
-## 1. Normalized centered AP data
+## 1. Reusable `Int` coprime/stripping lemmas
 
-Use roots `p,q,r,s` and center `X` with
+Paste this near the current elementary number-theory helper layer.
 
-```text
-p^2 = X - 6*N
-q^2 = X - 2*N
-r^2 = X + 2*N
-s^2 = X + 6*N
+```lean
+import Mathlib
+
+namespace MazurProof.RationalPointsN12.EulerSquarePair
+
+/-- An odd integer is Bezout-coprime to `2`. -/
+lemma isCoprime_two_of_odd {m : ℤ} (hm : Odd m) :
+    IsCoprime m (2 : ℤ) := by
+  rcases hm with ⟨k, hk⟩
+  change ∃ u v : ℤ, u * m + v * (2 : ℤ) = 1
+  refine ⟨1, -k, ?_⟩
+  rw [hk]
+  ring
+
+/-- Any integer divisor of an odd integer is odd. -/
+lemma odd_of_dvd_odd {d m : ℤ} (hm : Odd m) (hdm : d ∣ m) :
+    Odd d := by
+  rcases hdm with ⟨k, rfl⟩
+  exact hm.of_mul_left
+
+/-- Any integer divisor of an odd integer is coprime to `2`. -/
+lemma isCoprime_two_of_dvd_odd {d m : ℤ} (hm : Odd m) (hdm : d ∣ m) :
+    IsCoprime d (2 : ℤ) :=
+  isCoprime_two_of_odd (odd_of_dvd_odd hm hdm)
+
+/-- An odd integer is coprime to `4`. -/
+lemma isCoprime_four_of_odd {m : ℤ} (hm : Odd m) :
+    IsCoprime m (4 : ℤ) := by
+  have h2 : IsCoprime m (2 : ℤ) := isCoprime_two_of_odd hm
+  have h22 : IsCoprime m ((2 : ℤ) * 2) := h2.mul_right h2
+  simpa using h22
+
+/-- Strip a factor `2` from the right of a divisibility hypothesis. -/
+lemma dvd_of_dvd_two_mul_of_isCoprime_two {d x : ℤ}
+    (hd2 : IsCoprime d (2 : ℤ)) (h : d ∣ (2 : ℤ) * x) :
+    d ∣ x :=
+  hd2.dvd_of_dvd_mul_left h
+
+/-- Strip a factor `4` from the right of a divisibility hypothesis. -/
+lemma dvd_of_dvd_four_mul_of_isCoprime_two {d x : ℤ}
+    (hd2 : IsCoprime d (2 : ℤ)) (h : d ∣ (4 : ℤ) * x) :
+    d ∣ x := by
+  have hd4 : IsCoprime d (4 : ℤ) := by
+    have h22 : IsCoprime d ((2 : ℤ) * 2) := hd2.mul_right hd2
+    simpa using h22
+  exact hd4.dvd_of_dvd_mul_left h
+
+/-- Strip a factor `12 = 4*3` from the right of a divisibility hypothesis. -/
+lemma dvd_of_dvd_twelve_mul_of_isCoprime_two_three {d x : ℤ}
+    (hd2 : IsCoprime d (2 : ℤ))
+    (hd3 : IsCoprime d (3 : ℤ))
+    (h : d ∣ (12 : ℤ) * x) :
+    d ∣ x := by
+  have hd4 : IsCoprime d (4 : ℤ) := by
+    have h22 : IsCoprime d ((2 : ℤ) * 2) := hd2.mul_right hd2
+    simpa using h22
+  have hd12 : IsCoprime d (12 : ℤ) := by
+    have h43 : IsCoprime d ((4 : ℤ) * 3) := hd4.mul_right hd3
+    simpa using h43
+  exact hd12.dvd_of_dvd_mul_left h
 ```
 
-so the common difference is
-
-```text
-q^2 - p^2 = r^2 - q^2 = s^2 - r^2 = 4*N.
-```
-
-The available identities
-
-```text
-p^2 + r^2 = 2*q^2,
-q^2 + s^2 = 2*r^2,
-(r-p)(r+p) = 8*N,
-(s-q)(s+q) = 8*N
-```
-
-are exactly compatible with this centering.
-
-For descent, normalize signs as follows.
-
-```text
-N > 0,
-X > 6*N,
-p,q,r,s odd,
-the four roots are pairwise coprime.
-```
-
-If the original `N < 0`, reverse the AP.  This replaces `N` by `-N` and preserves `N.natAbs`.  Signs of `p,q,r,s` do not matter.
-
-Because the roots are odd, odd squares are `1 mod 8`, hence the common difference `4*N` is divisible by `8`; therefore
-
-```text
-N is even.
-```
-
-This parity is useful below: after `N = A*D` with `D` odd, it implies `A` is even.
+If `hm.of_mul_left` is not available in the exact pinned Mathlib, replace only `odd_of_dvd_odd` with the local parity theorem already used in the primitive-root layer.  The rest of the layer does not depend on any special parity API.
 
 ---
 
-## 2. From primitive centered AP to EulerSquarePair
+## 2. Coprimality of the middle pair
 
-Let
+This proof avoids a custom “common divisor” theorem.  It uses:
 
-```text
-Y = p*q*r*s.
+1. `fm2 = centerX - 2*stepN`, hence `fm2` is coprime to `stepN` by adding a multiple of `stepN` to `centerX`.
+2. `fm2` is odd, hence coprime to `4`.
+3. Therefore `fm2` is coprime to `4*stepN`.
+4. `fp2 = fm2 + 4*stepN`, hence `fm2` is coprime to `fp2`.
+
+```lean
+/-- `fm2` is coprime to the step parameter. -/
+lemma fm2_coprime_stepN (E : EulerSquarePair) :
+    IsCoprime E.fm2 E.stepN := by
+  have h := E.centerX_coprime_stepN.add_mul_right_left (z := (-2 : ℤ))
+  convert h using 1 <;> (simp [fm2]; ring)
+
+/-- The two middle factors are coprime. -/
+theorem fm2_coprime_fp2 (E : EulerSquarePair) :
+    IsCoprime E.fm2 E.fp2 := by
+  have hN : IsCoprime E.fm2 E.stepN := fm2_coprime_stepN E
+  have h4 : IsCoprime E.fm2 (4 : ℤ) := isCoprime_four_of_odd E.fm2_odd
+  have h4N : IsCoprime E.fm2 ((4 : ℤ) * E.stepN) := h4.mul_right hN
+  have h := h4N.mul_add_right_right (z := (1 : ℤ))
+  convert h using 1 <;> (simp [fm2, fp2]; ring)
 ```
 
-Then
+This is stronger/cleaner than proving arbitrary-divisor stripping inside the final theorem, but it is exactly the same math: a common divisor of `fm2` and `fp2` divides `4*stepN`, and the oddness of `fm2` strips the `4`.
 
-```text
-Y^2 = (X^2 - 36*N^2) * (X^2 - 4*N^2)
+---
+
+## 3. Coprimality of the outer pair
+
+The outer case is the same, except the difference is `12*stepN`, and one must also remove the possible factor `3`.  The existing theorem
+
+```lean
+E.three_coprime_centerX : IsCoprime (3 : ℤ) E.centerX
 ```
 
-and therefore
+is used after symmetry and adding the multiple `-2*stepN*3`:
 
-```text
-Y^2 + (16*N^2)^2 = (X^2 - 20*N^2)^2.        (1)
+```lean
+E.fm6 = E.centerX + ((-2 : ℤ) * E.stepN) * 3.
 ```
 
-Indeed,
+```lean
+/-- `fm6` is coprime to the step parameter. -/
+lemma fm6_coprime_stepN (E : EulerSquarePair) :
+    IsCoprime E.fm6 E.stepN := by
+  have h := E.centerX_coprime_stepN.add_mul_right_left (z := (-6 : ℤ))
+  convert h using 1 <;> (simp [fm6]; ring)
 
-```text
-(X^2 - 20*N^2)^2 - (16*N^2)^2
-= X^4 - 40*X^2*N^2 + 144*N^4
-= (X^2 - 36*N^2)(X^2 - 4*N^2).
+/-- `fm6` is coprime to `3`, using `centerX` coprime to `3`. -/
+lemma fm6_coprime_three (E : EulerSquarePair) :
+    IsCoprime E.fm6 (3 : ℤ) := by
+  have hcx3 : IsCoprime E.centerX (3 : ℤ) := E.three_coprime_centerX.symm
+  have h := hcx3.add_mul_right_left (z := (-2 : ℤ) * E.stepN)
+  convert h using 1 <;> (simp [fm6]; ring)
+
+/-- An odd integer coprime to `3` is coprime to `12`. -/
+lemma isCoprime_twelve_of_odd_of_isCoprime_three {m : ℤ}
+    (hm : Odd m) (h3 : IsCoprime m (3 : ℤ)) :
+    IsCoprime m (12 : ℤ) := by
+  have h4 : IsCoprime m (4 : ℤ) := isCoprime_four_of_odd hm
+  have h43 : IsCoprime m ((4 : ℤ) * 3) := h4.mul_right h3
+  simpa using h43
+
+/-- The two outer factors are coprime. -/
+theorem fm6_coprime_fp6 (E : EulerSquarePair) :
+    IsCoprime E.fm6 E.fp6 := by
+  have hN : IsCoprime E.fm6 E.stepN := fm6_coprime_stepN E
+  have h3 : IsCoprime E.fm6 (3 : ℤ) := fm6_coprime_three E
+  have h12 : IsCoprime E.fm6 (12 : ℤ) :=
+    isCoprime_twelve_of_odd_of_isCoprime_three E.fm6_odd h3
+  have h12N : IsCoprime E.fm6 ((12 : ℤ) * E.stepN) := h12.mul_right hN
+  have h := h12N.mul_add_right_right (z := (1 : ℤ))
+  convert h using 1 <;> (simp [fm6, fp6]; ring)
+
+end MazurProof.RationalPointsN12.EulerSquarePair
 ```
 
-Primitive hypotheses give
+If `simp [fm2, fp2]` or `simp [fm6, fp6]` unfolds too much or too little in the local file, replace the final `convert` lines by explicit equalities:
 
-```text
-gcd(16*N^2, Y) = 1.
+```lean
+  have hfp2 : E.fp2 = (1 : ℤ) * E.fm2 + (4 : ℤ) * E.stepN := by
+    simp [fm2, fp2]
+    ring
+  simpa [hfp2] using h
 ```
 
-Reason: roots are odd, and if an odd prime divides both `N` and one root, the centered equations force it to divide all four roots, contradicting primitivity.
+and similarly
 
-Thus `(16*N^2, Y, X^2 - 20*N^2)` is a primitive Pythagorean triple.  Use the parametrization with even leg `4*u*v`:
-
-```text
-16*N^2 = 4*u*v,
-Y = ±(4*u^2 - v^2),
-X^2 - 20*N^2 = 4*u^2 + v^2,
-gcd(2*u, v) = 1,
-v odd,
-u > 0,
-v > 0.
-```
-
-From `u*v = 4*N^2` and `gcd(u,v)=1`, square extraction gives
-
-```text
-u = 4*A^2,
-v = D^2,
-N = A*D,
-D odd,
-gcd(A,D)=1.
-```
-
-Since `N` is even and `D` is odd, `A` is even.
-
-Now use
-
-```text
-X^2 - 20*N^2 = 4*u^2 + v^2,
-N^2 = u*v/4.
-```
-
-Then
-
-```text
-X^2 = 4*u^2 + 5*u*v + v^2 = (4*u + v)(u + v).
-```
-
-Substituting `u = 4*A^2`, `v = D^2`,
-
-```text
-X^2 = (16*A^2 + D^2) * (4*A^2 + D^2).       (2)
-```
-
-The two factors are coprime:
-
-```text
-gcd(16*A^2 + D^2, 4*A^2 + D^2) = 1.
-```
-
-Reason: any common prime divides their difference `12*A^2`; since it also divides `4*A^2 + D^2` and `gcd(A,D)=1`, it can only be `2` or `3`; `D` odd excludes `2`, and squares mod `3` exclude `3` unless both `A,D` are divisible by `3`.
-
-Therefore both factors in (2) are squares.  There exist odd positive integers `B,C` such that
-
-```text
-B^2 = 16*A^2 + D^2,
-C^2 = 4*A^2 + D^2.                           (E)
-```
-
-This is the EulerSquarePair package.
-
-### Lean-facing intermediate theorem
-
-```text
-AP_to_EulerSquarePair:
-Given a nontrivial primitive centered four-square AP with N > 0,
-there exist A,D,B,C such that
-  N = A*D,
-  A ≠ 0,
-  D ≠ 0,
-  A is even,
-  D is odd,
-  gcd(A,D)=1,
-  B^2 = 16*A^2 + D^2,
-  C^2 = 4*A^2 + D^2.
+```lean
+  have hfp6 : E.fp6 = (1 : ℤ) * E.fm6 + (12 : ℤ) * E.stepN := by
+    simp [fm6, fp6]
+    ring
+  simpa [hfp6] using h
 ```
 
 ---
 
-## 3. Descent on EulerSquarePair
+## 4. Square extraction from coprime product
 
-Assume the EulerSquarePair data
+I do **not** know of a stock Mathlib theorem with exactly the requested integer interface:
 
-```text
-A ≠ 0,
-D ≠ 0,
-A even,
-D odd,
-gcd(A,D)=1,
-B^2 = 16*A^2 + D^2,
-C^2 = 4*A^2 + D^2.
+```lean
+x * y = z^2, 0 < x, 0 < y, IsCoprime x y ⟹ x and y are integer squares.
 ```
 
-The two equations are primitive Pythagorean triples:
+The next local theorem should be stated first over `Nat`, then wrapped for positive `Int` factors.  This is the shortest useful frontier:
 
-```text
-(2*A)^2 + D^2 = C^2,
-(4*A)^2 + D^2 = B^2.
+```lean
+/-- Coprime natural factors of a square are squares. -/
+theorem Nat.exists_sq_and_sq_of_coprime_mul_eq_sq
+    {x y z : ℕ}
+    (hcop : x.Coprime y)
+    (h : x * y = z ^ 2) :
+    ∃ r s : ℕ, x = r ^ 2 ∧ y = s ^ 2 := by
+  -- Suggested proof: compare prime multiplicities using `Nat.factorization`.
+  -- For every prime p, coprimality gives `x.factorization p = 0` or
+  -- `y.factorization p = 0`; the equality to `z^2` gives even valuation
+  -- on the nonzero side.  Then use extensionality of factorization.
+  -- This is the next genuine local lemma; do not mix it into the AP layer.
+  sorry
+
+/-- Positive integer wrapper for coprime factors of a square. -/
+theorem Int.exists_sq_and_sq_of_mul_eq_sq_of_pos_of_isCoprime
+    {x y z : ℤ}
+    (hx : 0 < x)
+    (hy : 0 < y)
+    (hcop : IsCoprime x y)
+    (h : x * y = z ^ 2) :
+    ∃ r s : ℤ, x = r ^ 2 ∧ y = s ^ 2 := by
+  -- Convert to `Nat` using `Int.toNat` or `Int.natAbs`, then use the Nat lemma.
+  -- Positivity avoids sign ambiguity for x,y.
+  sorry
 ```
 
-### First parametrization
+For the immediate `EulerSquarePair` reconstruction, the intended usage after proving the local wrapper is:
 
-From `(2*A)^2 + D^2 = C^2`, choose coprime integers `U,V`, of opposite parity, with the even one named `U`, such that
-
-```text
-A = U*V,
-σ*D = U^2 - V^2,
-U even,
-V odd,
-gcd(U,V)=1,
-σ ∈ {+1,-1}.
+```lean
+have hmid_prod : E.fm2 * E.fp2 = (E.D ^ 2 + 8 * E.A ^ 2) ^ 2 :=
+  E.middle_factor_product_square
+have hmid_coprime : IsCoprime E.fm2 E.fp2 := fm2_coprime_fp2 E
+rcases Int.exists_sq_and_sq_of_mul_eq_sq_of_pos_of_isCoprime
+    E.fm2_pos E.fp2_pos hmid_coprime hmid_prod with
+  ⟨q, r, hq, hr⟩
 ```
 
-The sign `σ` is forced by `D mod 4`: since `U` is even and `V` odd,
+and for the outer pair:
 
-```text
-U^2 - V^2 ≡ -1 mod 4.
+```lean
+have hout_prod : E.fm6 * E.fp6 = (E.D ^ 2 - 8 * E.A ^ 2) ^ 2 :=
+  E.outer_factor_product_square
+have hout_coprime : IsCoprime E.fm6 E.fp6 := fm6_coprime_fp6 E
+rcases Int.exists_sq_and_sq_of_mul_eq_sq_of_pos_of_isCoprime
+    E.fm6_pos E.fp6_pos hout_coprime hout_prod with
+  ⟨p, s, hp, hs⟩
 ```
 
-So `σ*D` is the representative of `±D` congruent to `-1 mod 4`.
-
-### Second parametrization
-
-From `(4*A)^2 + D^2 = B^2`, use the parametrization with even leg `4*U'*V'`:
-
-```text
-A = U'*V',
-τ*D = 4*U'^2 - V'^2,
-U' even,
-V' odd,
-gcd(2*U', V')=1,
-τ ∈ {+1,-1}.
-```
-
-Again
-
-```text
-4*U'^2 - V'^2 ≡ -1 mod 4,
-```
-
-so the sign is the same as before:
-
-```text
-τ = σ.
-```
-
-This same-sign fact is important.  It is the sign point that can silently break the descent if omitted.
-
-### Refining the two factorizations of `A`
-
-We have two coprime factorizations of the same even integer:
-
-```text
-A = U*V = U'*V'.
-```
-
-With `U,U'` even and `V,V'` odd, refine the prime allocations as follows.  There exist integers `a,b,c,d`, nonzero, with `2*a,b,c,d` pairwise coprime, such that after sign changes
-
-```text
-U  = 2*a*b,
-V  = c*d,
-U' = 2*a*c,
-V' = b*d.
-```
-
-Consequently
-
-```text
-A = 2*a*b*c*d.                               (3)
-```
-
-Substitute these into the two expressions for the same signed `D`:
-
-```text
-σ*D = 4*a^2*b^2 - c^2*d^2,
-σ*D = 16*a^2*c^2 - b^2*d^2.                 (4)
-```
-
-Equating the right sides gives
-
-```text
-4*a^2*b^2 - c^2*d^2 = 16*a^2*c^2 - b^2*d^2.
-```
-
-Rearrange:
-
-```text
-b^2 * (4*a^2 + d^2) = c^2 * (16*a^2 + d^2). (5)
-```
-
-The factors on the right are coprime:
-
-```text
-gcd(4*a^2 + d^2, 16*a^2 + d^2) = 1.
-```
-
-Reason: a common prime divides `12*a^2`.  Since `gcd(a,d)=1`, it can only be `2` or `3`; `d` odd excludes `2`, and the mod-`3` square check excludes `3`.
-
-Also `gcd(b,c)=1`.  Therefore (5) forces square extraction:
-
-```text
-c^2 = 4*a^2 + d^2,
-b^2 = 16*a^2 + d^2.                         (E')
-```
-
-Thus `(a,d)` is a new EulerSquarePair.
-
-### Strict inequality
-
-From (3),
-
-```text
-A = 2*a*b*c*d.
-```
-
-Since `a,d` are nonzero and
-
-```text
-c^2 = 4*a^2 + d^2 > d^2,
-b^2 = 16*a^2 + d^2 > d^2,
-```
-
-we have `|b| > 1` and `|c| > 1`.  Hence
-
-```text
-|a*d| < |2*a*b*c*d| = |A|.
-```
-
-Since `D` is a nonzero integer,
-
-```text
-|A| ≤ |A*D|.
-```
-
-Therefore
-
-```text
-0 < |a*d| < |A*D|.                           (6)
-```
-
-This is the required descent inequality.  If the original AP has `N = A*D`, then the smaller parameter is
-
-```text
-N' = a*d,
-|N'| < |N|.
-```
-
-### Lean-facing intermediate theorem
-
-```text
-EulerSquarePair_descent:
-Assume
-  A ≠ 0, D ≠ 0,
-  A even, D odd,
-  gcd(A,D)=1,
-  B^2 = 16*A^2 + D^2,
-  C^2 = 4*A^2 + D^2.
-Then there exist a,d,b,c such that
-  a*d ≠ 0,
-  2*a, b, c, d are pairwise coprime,
-  d is odd,
-  b^2 = 16*a^2 + d^2,
-  c^2 = 4*a^2 + d^2,
-  |a*d| < |A*D|.
-```
-
-This is the core classical descent step.
-
----
-
-## 4. Reconstructing the smaller centered AP from EulerSquarePair(a,d)
-
-Now assume
-
-```text
-b^2 = 16*a^2 + d^2,
-c^2 = 4*a^2 + d^2,
-a*d ≠ 0,
-2*a,b,c,d pairwise coprime,
-d odd.
-```
-
-Choose signs so that
-
-```text
-N' = |a*d| > 0,
-X' = |b*c| > 0.
-```
-
-Equivalently, in an integer implementation, replace `a,d,b,c` by sign variants so that `a*d > 0` and `b*c > 0`.  The square equations are unchanged.
-
-Define
-
-```text
-N' = a*d,
-X' = b*c.
-```
-
-With the positive-sign convention, `N' > 0` and `X' > 0`.
-
-The product identities are
-
-```text
-(X' - 2*N') * (X' + 2*N')
-  = (b*c)^2 - 4*a^2*d^2
-  = (d^2 + 8*a^2)^2,                         (7)
-```
-
-and
-
-```text
-(X' - 6*N') * (X' + 6*N')
-  = (b*c)^2 - 36*a^2*d^2
-  = (d^2 - 8*a^2)^2.                         (8)
-```
-
-The required positivity is automatic:
-
-```text
-X'^2 - 36*N'^2 = (d^2 - 8*a^2)^2 > 0,
-```
-
-where equality would imply `d^2 = 8*a^2`, impossible for nonzero integers.  Thus
-
-```text
-X' > 6*N' > 0.
-```
-
-Now prove the gcds:
-
-```text
-gcd(X' - 2*N', X' + 2*N') = 1,
-gcd(X' - 6*N', X' + 6*N') = 1.
-```
-
-For the inner pair, any common divisor divides both `2*X' = 2*b*c` and `4*N' = 4*a*d`.  The two factors are odd, so it divides both `b*c` and `a*d`; pairwise coprimality excludes this.
-
-For the outer pair, any common divisor divides both `2*b*c` and `12*a*d`.  Again the factors are odd; pairwise coprimality excludes all primes except possibly `3`.  But `3` cannot divide `b` or `c`, since
-
-```text
-b^2 = 16*a^2 + d^2 ≡ a^2 + d^2 mod 3,
-c^2 = 4*a^2 + d^2  ≡ a^2 + d^2 mod 3,
-```
-
-and `a^2 + d^2 ≠ 0 mod 3` unless `3` divides both `a` and `d`, contradicting `gcd(a,d)=1`.
-
-By (7), (8), positivity, and coprime-product square extraction, all four numbers
-
-```text
-X' - 6*N',
-X' - 2*N',
-X' + 2*N',
-X' + 6*N'
-```
-
-are integer squares.  Choose roots `p',q',r',s'` by square extraction:
-
-```text
-p'^2 = X' - 6*N',
-q'^2 = X' - 2*N',
-r'^2 = X' + 2*N',
-s'^2 = X' + 6*N'.                            (9)
-```
-
-Then
-
-```text
-q'^2 - p'^2 = 4*N',
-r'^2 - q'^2 = 4*N',
-s'^2 - r'^2 = 4*N'.
-```
-
-So `(p',q',r',s',N')` is a centered four-square AP.
-
-The same divisor arguments, applied to differences among the four centered values, give primitivity and odd roots.  In particular, all four values are odd because `X' = b*c` is odd and `2*N'`, `6*N'` are even; hence all roots are odd.
-
-### Lean-facing intermediate theorem
-
-```text
-EulerSquarePair_to_PrimitiveCenteredAP:
-Assume
-  a*d ≠ 0,
-  2*a,b,c,d pairwise coprime,
-  d odd,
-  b^2 = 16*a^2 + d^2,
-  c^2 = 4*a^2 + d^2.
-Then there exists T : PrimitiveCenteredFourSqAP such that
-  T.N = a*d        -- after sign normalization, or T.N.natAbs = |a*d|
-```
-
-For an integer-valued Lean implementation that avoids sign clutter, state the conclusion as
-
-```text
-∃ T : PrimitiveCenteredFourSqAP, T.N.natAbs = (a*d).natAbs.
-```
-
-That is enough for the final inequality.
-
----
-
-## 5. Final descent theorem DAG
-
-The clean proof of the corrected residual is:
-
-```text
-Input: S : PrimitiveCenteredFourSqAP, S.N ≠ 0.
-
-1. Normalize S so N > 0.
-
-2. Apply AP_to_EulerSquarePair:
-     obtain A,D,B,C with
-       S.N = A*D,
-       B^2 = 16*A^2 + D^2,
-       C^2 = 4*A^2 + D^2,
-       gcd(A,D)=1,
-       A even, D odd.
-
-3. Apply EulerSquarePair_descent:
-     obtain a,d,b,c with
-       b^2 = 16*a^2 + d^2,
-       c^2 = 4*a^2 + d^2,
-       |a*d| < |A*D| = |S.N|.
-
-4. Apply EulerSquarePair_to_PrimitiveCenteredAP:
-     obtain T : PrimitiveCenteredFourSqAP with
-       T.N.natAbs = |a*d|.
-
-5. Conclude
-       T.N.natAbs < S.N.natAbs.
-```
-
-Thus the precise replacement for the currently too-strong residual is:
-
-```text
-PrimitiveCenteredFourSqAPDescent_nontrivial:
-  ∀ S : PrimitiveCenteredFourSqAP,
-    S.N ≠ 0 →
-      ∃ T : PrimitiveCenteredFourSqAP,
-        T.N.natAbs < S.N.natAbs.
-```
-
-If the existing `PrimitiveCenteredFourSqAP` type already includes `N ≠ 0`, then the original residual follows directly.
-
----
-
-## 6. Where `(xy-wz)(xy+wz)=2Δ^2` fits
-
-For the original roots, with
-
-```text
-Δ = q^2 - p^2 = 4*N,
-```
-
-the checked identity is
-
-```text
-(q*r - p*s) * (q*r + p*s) = 2*Δ^2 = 32*N^2.
-```
-
-This identity is correct and useful for local gcd bookkeeping, but it is not by itself the descent map.  The descent map uses the larger Pythagorean triple
-
-```text
-(16*N^2)^2 + (p*q*r*s)^2 = (X^2 - 20*N^2)^2,
-```
-
-then obtains the concordant/Euler square pair
-
-```text
-D^2 + 4*A^2 = C^2,
-D^2 + 16*A^2 = B^2,
-N = A*D,
-```
-
-and finally descends by the explicit factorization
-
-```text
-U  = 2*a*b,
-V  = c*d,
-U' = 2*a*c,
-V' = b*d,
-A  = 2*a*b*c*d,
-σ*D = 4*a^2*b^2 - c^2*d^2
-    = 16*a^2*c^2 - b^2*d^2,
-N' = a*d,
-|N'| < |N|.
-```
-
-These are the formulas to formalize.
+Those two `rcases` are the clean next layer after the coprimality theorems above.
