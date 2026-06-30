@@ -1,565 +1,351 @@
-# Q2452-RETRY primitive centered four-square AP normalization
+# Q2496 Euler auxiliary factor refinement
 
 ## Verdict
 
-The proposed final reduction statement
+The arithmetic refinement is **true mathematically**: two positive coprime factorizations
 
-```lean
-def ArbitraryAP_to_primitive_centered : Prop :=
-  ∀ {w x y z : ℤ},
-    IntFourSqAP w x y z →
-    ¬ FourSqAPConst w x y z →
-    Nonempty PrimitiveCenteredFourSqAP
+```text
+A = U*V = U'*V',   IsCoprime U V,   IsCoprime U' V'
 ```
 
-is **true as a mathematical normalization target**.  There is no counterexample coming from parity, sign choices, reversal, or gcd division.  After reversing to make the square common difference positive and dividing all four roots by their common root gcd, the normalized roots are automatically odd and pairwise coprime.
+refine into the four intersection factors
 
-However, the strong structure with six pairwise gcd fields and four oddness fields should **not** be the first object constructed from the input.  The Lean-feasible route is:
+```text
+alpha = part common to U and U'
+b     = part common to U and V'
+c     = part common to V and U'
+d     = part common to V and V'
+```
 
-1. construct a positive primitive AP of four squares using one global root-gcd condition;
-2. prove parity and pairwise coprimality as separate lemmas from that weak primitive object;
-3. center the AP using `Δ = 4*N`;
-4. package the strong `PrimitiveCenteredFourSqAP` at the end.
+with
 
-Sign choices are irrelevant for this normalization layer: squares, `Int.gcd`, `natAbs`, and oddness modulo `2` are unchanged by replacing a root by its negative.  Reversal is only needed to make the common difference positive.
+```text
+U  = alpha*b,   V  = c*d,
+U' = alpha*c,   V' = b*d,
+A  = alpha*b*c*d.
+```
 
-One warning: the `Nonempty PrimitiveCenteredFourSqAP` conclusion forgets provenance.  That is enough if the downstream contradiction is `¬ Nonempty PrimitiveCenteredFourSqAP`.  If later code needs to relate the normalized roots back to the input, use the stronger intermediate theorem carrying the scale and reversal data, then derive this provenance-free theorem by forgetting fields.
+Under the parity hypotheses of the requested theorem, `alpha` is even, so writing `alpha = 2*a` gives exactly
+
+```text
+U  = 2*a*b,   V  = c*d,
+U' = 2*a*c,   V' = b*d,
+A  = 2*a*b*c*d.
+```
+
+So there is no mathematical counterexample to the intended theorem.
+
+The Lean issue is different: the requested declaration
+
+```lean
+theorem two_coprime_factorizations_refine_even_pos ... :
+    RefinedFactors A U V U' V'
+```
+
+is the wrong interface for a data-valued result.  `RefinedFactors ...` is a `Type`, not a `Prop`.  Use one of these instead:
+
+1. a Prop-valued theorem
+
+```lean
+theorem two_coprime_factorizations_refine_even_pos_nonempty ... :
+    Nonempty (RefinedFactors A U V U' V')
+```
+
+2. or, after proving that theorem, a data-valued wrapper
+
+```lean
+noncomputable def two_coprime_factorizations_refine_even_pos_data ... :
+    RefinedFactors A U V U' V' :=
+  Classical.choice (two_coprime_factorizations_refine_even_pos_nonempty ...)
+```
+
+This also avoids the `propRecLargeElim` failure: it is legal to eliminate Prop-valued existentials while proving a Prop such as `Nonempty ...`; it is not legal to `rcases` a Prop existential directly while constructing arbitrary Type-level data unless you go through `Classical.choice` or define the witnesses explicitly.
+
+The full simultaneous gcd-intersection refinement is a real lemma, not a one-line Mathlib call.  I would not try to prove the adjusted final theorem in one shot.  First prove a raw positive coprime factorization refinement with shared factor `alpha`; then use the compile-ready helper below to halve an even `alpha` and produce the requested `RefinedFactors`.
 
 ---
 
-## Base definitions
+## Corrected theorem targets
 
-A clean statement-layer file can start with only tactic and elementary integer imports.
+Use these as the statement-layer targets.
+
+```lean
+/-- Raw refinement of two positive coprime factorizations.  No parity yet. -/
+def two_coprime_factorizations_refine_raw_pos_statement : Prop :=
+  ∀ {A U V U' V' : ℤ},
+    A = U * V →
+    A = U' * V' →
+    0 < U → 0 < V → 0 < U' → 0 < V' →
+    IsCoprime U V →
+    IsCoprime U' V' →
+    Nonempty (RawRefinedFactors A U V U' V')
+
+/-- Final parity-refined statement.  This is the Prop-valued version of the requested target. -/
+def two_coprime_factorizations_refine_even_pos_statement : Prop :=
+  ∀ {A U V U' V' : ℤ},
+    0 < A →
+    A = U * V →
+    A = U' * V' →
+    0 < U → 0 < V → 0 < U' → 0 < V' →
+    Even U → Even U' →
+    Odd V → Odd V' →
+    IsCoprime U V →
+    IsCoprime U' V' →
+    Nonempty (RefinedFactors A U V U' V')
+```
+
+The intended proof route is:
+
+1. Prove `two_coprime_factorizations_refine_raw_pos_statement`, defining the raw factors by gcd intersections, for example
+   ```text
+   alpha = gcd U U'
+   b     = gcd U V'
+   c     = gcd V U'
+   d     = gcd V V'
+   ```
+   with casts/absolute values handled carefully.
+2. Prove `Even alpha` from `Even U`, `U = alpha*b`, `Odd V'`, and `V' = b*d`.
+3. Apply `RawRefinedFactors.toRefined_nonempty` below.
+
+---
+
+## Compile-ready helper code
+
+This code is designed to compile as a small local file.  It fixes the Type/Prop split and gives the first reusable helper layer: positive coprime factorizations plus conversion from a raw four-factor refinement with even shared factor to the requested `RefinedFactors`.
 
 ```lean
 import Mathlib.Tactic
-import Mathlib.Data.Int.GCD
-import Mathlib.Data.ZMod.Basic
+import Mathlib.RingTheory.Int.Basic
 
-namespace FLT
+structure PairwiseCoprime2abcd (a b c d : ℤ) : Prop where
+  hab : IsCoprime a b
+  hac : IsCoprime a c
+  had : IsCoprime a d
+  hbc : IsCoprime b c
+  hbd : IsCoprime b d
+  hcd : IsCoprime c d
 
-/-- Four integer squares are in arithmetic progression. -/
-def IntFourSqAP (w x y z : ℤ) : Prop :=
-  x^2 - w^2 = y^2 - x^2 ∧ y^2 - x^2 = z^2 - y^2
+structure RefinedFactors (A U V U' V' : ℤ) where
+  a : ℤ
+  b : ℤ
+  c : ℤ
+  d : ℤ
+  ha_pos : 0 < a
+  hb_pos : 0 < b
+  hc_pos : 0 < c
+  hd_pos : 0 < d
+  hU : U = 2 * a * b
+  hV : V = c * d
+  hU' : U' = 2 * a * c
+  hV' : V' = b * d
+  hA : A = 2 * a * b * c * d
+  hpair : PairwiseCoprime2abcd a b c d
 
-/-- The square AP is constant.  Roots may differ by signs. -/
-def FourSqAPConst (w x y z : ℤ) : Prop :=
-  w^2 = x^2 ∧ x^2 = y^2 ∧ y^2 = z^2
+/-- A Type-valued package for one positive coprime factorization `A = left*right`. -/
+structure PosCoprimeFactorization (A : ℤ) where
+  left : ℤ
+  right : ℤ
+  hleft_pos : 0 < left
+  hright_pos : 0 < right
+  hmul : A = left * right
+  hcop : IsCoprime left right
 
-/-- GCD of the four roots, using absolute values. -/
-def rootGCD4 (a b c d : ℤ) : ℕ :=
-  Nat.gcd a.natAbs (Nat.gcd b.natAbs (Nat.gcd c.natAbs d.natAbs))
+namespace PosCoprimeFactorization
+
+/-- Pack explicit positive coprime factors as data. -/
+def ofFactors {A L R : ℤ}
+    (hmul : A = L * R)
+    (hLpos : 0 < L)
+    (hRpos : 0 < R)
+    (hcop : IsCoprime L R) :
+    PosCoprimeFactorization A where
+  left := L
+  right := R
+  hleft_pos := hLpos
+  hright_pos := hRpos
+  hmul := hmul
+  hcop := hcop
+
+@[simp] theorem ofFactors_left {A L R : ℤ}
+    (hmul : A = L * R)
+    (hLpos : 0 < L)
+    (hRpos : 0 < R)
+    (hcop : IsCoprime L R) :
+    (ofFactors hmul hLpos hRpos hcop).left = L := rfl
+
+@[simp] theorem ofFactors_right {A L R : ℤ}
+    (hmul : A = L * R)
+    (hLpos : 0 < L)
+    (hRpos : 0 < R)
+    (hcop : IsCoprime L R) :
+    (ofFactors hmul hLpos hRpos hcop).right = R := rfl
+
+/-- Positivity of the product follows from positivity of both factors. -/
+theorem A_pos {A : ℤ} (F : PosCoprimeFactorization A) : 0 < A := by
+  rw [F.hmul]
+  exact mul_pos F.hleft_pos F.hright_pos
+
+/-- Swap the two factors. -/
+def swap {A : ℤ} (F : PosCoprimeFactorization A) : PosCoprimeFactorization A where
+  left := F.right
+  right := F.left
+  hleft_pos := F.hright_pos
+  hright_pos := F.hleft_pos
+  hmul := by
+    rw [F.hmul, mul_comm]
+  hcop := F.hcop.symm
+
+/-- Pack the two input factorizations of the Euler auxiliary step. -/
+def twoFromInputs {A U V U' V' : ℤ}
+    (hUV : A = U * V)
+    (hU'V' : A = U' * V')
+    (hUpos : 0 < U) (hVpos : 0 < V)
+    (hU'pos : 0 < U') (hV'pos : 0 < V')
+    (hUVcop : IsCoprime U V)
+    (hU'V'cop : IsCoprime U' V') :
+    PosCoprimeFactorization A × PosCoprimeFactorization A :=
+  ⟨ofFactors hUV hUpos hVpos hUVcop,
+   ofFactors hU'V' hU'pos hV'pos hU'V'cop⟩
+
+end PosCoprimeFactorization
+
+/-- Raw four-intersection refinement of two coprime factorizations.
+
+Think of `alpha` as the shared `U`/`U'` part.  The final requested factor `a`
+will be `alpha/2` after parity proves `Even alpha`.
+-/
+structure RawRefinedFactors (A U V U' V' : ℤ) where
+  alpha : ℤ
+  b : ℤ
+  c : ℤ
+  d : ℤ
+  halpha_pos : 0 < alpha
+  hb_pos : 0 < b
+  hc_pos : 0 < c
+  hd_pos : 0 < d
+  hU : U = alpha * b
+  hV : V = c * d
+  hU' : U' = alpha * c
+  hV' : V' = b * d
+  hA : A = alpha * b * c * d
+  hpair : PairwiseCoprime2abcd alpha b c d
+
+namespace RawRefinedFactors
+
+/-- If the shared raw factor `alpha` is even, halve it and obtain the requested
+`RefinedFactors` package.
+
+The conclusion is `Nonempty ...` on purpose: this permits eliminating the
+`Even alpha` witness, which is a Prop-valued existential, without hitting
+`propRecLargeElim`.
+-/
+theorem toRefined_nonempty {A U V U' V' : ℤ}
+    (R : RawRefinedFactors A U V U' V')
+    (halpha_even : Even R.alpha) :
+    Nonempty (RefinedFactors A U V U' V') := by
+  rcases halpha_even with ⟨a, ha⟩
+  have ha_pos : 0 < a := by
+    nlinarith [R.halpha_pos, ha]
+  have ha_dvd_alpha : a ∣ R.alpha := by
+    refine ⟨2, ?_⟩
+    rw [ha]
+    ring
+  refine ⟨{
+    a := a
+    b := R.b
+    c := R.c
+    d := R.d
+    ha_pos := ha_pos
+    hb_pos := R.hb_pos
+    hc_pos := R.hc_pos
+    hd_pos := R.hd_pos
+    hU := ?_
+    hV := R.hV
+    hU' := ?_
+    hV' := R.hV'
+    hA := ?_
+    hpair := ?_
+  }⟩
+  · rw [R.hU, ha]
+    ring
+  · rw [R.hU', ha]
+    ring
+  · rw [R.hA, ha]
+    ring
+  · exact {
+      hab := R.hpair.hab.of_isCoprime_of_dvd_left ha_dvd_alpha
+      hac := R.hpair.hac.of_isCoprime_of_dvd_left ha_dvd_alpha
+      had := R.hpair.had.of_isCoprime_of_dvd_left ha_dvd_alpha
+      hbc := R.hpair.hbc
+      hbd := R.hpair.hbd
+      hcd := R.hpair.hcd
+    }
+
+/-- Data-valued wrapper, if a downstream construction really wants data rather
+than a Prop-level `Nonempty`. -/
+noncomputable def toRefined {A U V U' V' : ℤ}
+    (R : RawRefinedFactors A U V U' V')
+    (halpha_even : Even R.alpha) :
+    RefinedFactors A U V U' V' :=
+  Classical.choice (RawRefinedFactors.toRefined_nonempty R halpha_even)
+
+end RawRefinedFactors
 ```
-
-For construction, use a weak positive primitive object first.
-
-```lean
-structure PositivePrimitiveFourSqAP where
-  p q r s : ℤ
-  Δ : ℤ
-  hΔpos : 0 < Δ
-  hpq : q^2 - p^2 = Δ
-  hqr : r^2 - q^2 = Δ
-  hrs : s^2 - r^2 = Δ
-  hroot : rootGCD4 p q r s = 1
-```
-
-For centering, separate the weak centered object from the final strong package.
-
-```lean
-structure WeakPrimitiveCenteredFourSqAP where
-  X : ℤ
-  N : ℤ
-  hNpos : 0 < N
-  p q r s : ℤ
-  hp : p^2 = X - 6*N
-  hq : q^2 = X - 2*N
-  hr : r^2 = X + 2*N
-  hs : s^2 = X + 6*N
-  hroot : rootGCD4 p q r s = 1
-
-structure PrimitiveCenteredFourSqAP extends WeakPrimitiveCenteredFourSqAP where
-  hpq_gcd : Int.gcd p q = 1
-  hpr_gcd : Int.gcd p r = 1
-  hps_gcd : Int.gcd p s = 1
-  hqr_gcd : Int.gcd q r = 1
-  hqs_gcd : Int.gcd q s = 1
-  hrs_gcd : Int.gcd r s = 1
-  hp_odd : p % 2 = 1
-  hq_odd : q % 2 = 1
-  hr_odd : r % 2 = 1
-  hs_odd : s % 2 = 1
-```
-
-If you want to keep the user-proposed non-extended structure exactly, use the same fields and replace the final `extends` constructor by a direct record constructor.  The mathematics and theorem DAG below are unchanged.
 
 ---
 
-## DAG 1: adjacent equality forces constant
+## Next proof obligation: raw gcd-intersection refinement
 
-This part is purely linear algebra over the square terms and should close with `nlinarith`.
+The next honest lemma to prove is the raw refinement theorem:
 
 ```lean
-theorem intFourSqAP_const_of_adjacent_eq
-    {w x y z : ℤ}
-    (hAP : IntFourSqAP w x y z)
-    (hzero : w^2 = x^2 ∨ x^2 = y^2 ∨ y^2 = z^2) :
-    FourSqAPConst w x y z := by
-  unfold IntFourSqAP FourSqAPConst at *
-  rcases hAP with ⟨h1, h2⟩
-  rcases hzero with h | h | h <;> nlinarith
-
-theorem intFourSqAP_diff_ne_zero_of_nonconst
-    {w x y z : ℤ}
-    (hAP : IntFourSqAP w x y z)
-    (hnonconst : ¬ FourSqAPConst w x y z) :
-    x^2 - w^2 ≠ 0 := by
-  intro hdiff
-  apply hnonconst
-  exact intFourSqAP_const_of_adjacent_eq hAP (Or.inl (by nlinarith))
+-- statement shape only; prove after the helper above is in place
+theorem two_coprime_factorizations_refine_raw_pos
+    {A U V U' V' : ℤ}
+    (hUV : A = U * V)
+    (hU'V' : A = U' * V')
+    (hUpos : 0 < U) (hVpos : 0 < V)
+    (hU'pos : 0 < U') (hV'pos : 0 < V')
+    (hUVcop : IsCoprime U V)
+    (hU'V'cop : IsCoprime U' V') :
+    Nonempty (RawRefinedFactors A U V U' V') := by
+  -- define alpha,b,c,d from gcd intersections and prove the identities
+  -- alpha = gcd U U'
+  -- b     = gcd U V'
+  -- c     = gcd V U'
+  -- d     = gcd V V'
+  -- This is the genuine gcd bookkeeping lemma; do not try to fold it into
+  -- the final parity theorem.
+  ...
 ```
 
-Useful variant if the later branch starts with another adjacent difference:
+For this lemma, the useful APIs are:
 
 ```lean
-theorem intFourSqAP_const_of_common_diff_zero
-    {w x y z : ℤ}
-    (hAP : IntFourSqAP w x y z)
-    (hdiff : x^2 - w^2 = 0) :
-    FourSqAPConst w x y z := by
-  exact intFourSqAP_const_of_adjacent_eq hAP (Or.inl (by nlinarith))
-```
-
-Edge case handled here: if the common difference is zero, the four **squares** are constant.  No root sign conclusion is needed.
-
----
-
-## DAG 2: reverse AP to make positive common difference
-
-```lean
-theorem intFourSqAP_reverse
-    {w x y z : ℤ}
-    (hAP : IntFourSqAP w x y z) :
-    IntFourSqAP z y x w := by
-  unfold IntFourSqAP at *
-  rcases hAP with ⟨h1, h2⟩
-  constructor <;> nlinarith
-```
-
-Recommended theorem shape:
-
-```lean
-theorem intFourSqAP_or_reverse_positive_diff
-    {w x y z : ℤ}
-    (hAP : IntFourSqAP w x y z)
-    (hnonconst : ¬ FourSqAPConst w x y z) :
-    ∃ p q r s Δ : ℤ,
-      0 < Δ ∧
-      q^2 - p^2 = Δ ∧
-      r^2 - q^2 = Δ ∧
-      s^2 - r^2 = Δ ∧
-      (((p = w ∧ q = x ∧ r = y ∧ s = z) ∧ Δ = x^2 - w^2) ∨
-       ((p = z ∧ q = y ∧ r = x ∧ s = w) ∧ Δ = w^2 - x^2)) := by
-  classical
-  let δ : ℤ := x^2 - w^2
-  have hδne : δ ≠ 0 := by
-    dsimp [δ]
-    exact intFourSqAP_diff_ne_zero_of_nonconst hAP hnonconst
-  rcases lt_trichotomy (0 : ℤ) δ with hpos | hzero | hneg
-  · refine ⟨w, x, y, z, δ, hpos, ?_, ?_, ?_, Or.inl ?_⟩
-    · dsimp [δ]
-    · unfold IntFourSqAP at hAP; rcases hAP with ⟨h1, h2⟩; dsimp [δ]; nlinarith
-    · unfold IntFourSqAP at hAP; rcases hAP with ⟨h1, h2⟩; dsimp [δ]; nlinarith
-    · exact ⟨⟨rfl, rfl, rfl, rfl⟩, rfl⟩
-  · exact False.elim (hδne hzero.symm)
-  · refine ⟨z, y, x, w, -δ, by nlinarith, ?_, ?_, ?_, Or.inr ?_⟩
-    · unfold IntFourSqAP at hAP; rcases hAP with ⟨h1, h2⟩; dsimp [δ]; nlinarith
-    · unfold IntFourSqAP at hAP; rcases hAP with ⟨h1, h2⟩; dsimp [δ]; nlinarith
-    · dsimp [δ]; nlinarith
-    · exact ⟨⟨rfl, rfl, rfl, rfl⟩, by dsimp [δ]; ring⟩
-```
-
-This is intentionally provenance-carrying.  The final `Nonempty` theorem can forget the last disjunction.
-
----
-
-## DAG 3: divide by the common root gcd
-
-The exact gcd notion needed is the gcd of the **four roots**, not the gcd of the four square terms and not six pairwise gcds.
-
-Use helper lemmas for `rootGCD4` first:
-
-```lean
-theorem rootGCD4_dvd_left (a b c d : ℤ) :
-    rootGCD4 a b c d ∣ a.natAbs := by
-  unfold rootGCD4
-  exact Nat.gcd_dvd_left _ _
-
-theorem rootGCD4_dvd_second (a b c d : ℤ) :
-    rootGCD4 a b c d ∣ b.natAbs := by
-  unfold rootGCD4
-  exact Nat.dvd_trans (Nat.gcd_dvd_right _ _) (Nat.gcd_dvd_left _ _)
-
-theorem rootGCD4_dvd_third (a b c d : ℤ) :
-    rootGCD4 a b c d ∣ c.natAbs := by
-  unfold rootGCD4
-  exact Nat.dvd_trans
-    (Nat.dvd_trans (Nat.gcd_dvd_right _ _) (Nat.gcd_dvd_left _ _))
-    (Nat.gcd_dvd_right _ _)
-
-theorem rootGCD4_dvd_fourth (a b c d : ℤ) :
-    rootGCD4 a b c d ∣ d.natAbs := by
-  unfold rootGCD4
-  exact Nat.dvd_trans
-    (Nat.dvd_trans (Nat.gcd_dvd_right _ _) (Nat.gcd_dvd_right _ _))
-    (Nat.gcd_dvd_right _ _)
-
-theorem dvd_rootGCD4 {k : ℕ} {a b c d : ℤ}
-    (ha : k ∣ a.natAbs) (hb : k ∣ b.natAbs)
-    (hc : k ∣ c.natAbs) (hd : k ∣ d.natAbs) :
-    k ∣ rootGCD4 a b c d := by
-  unfold rootGCD4
-  exact Nat.dvd_gcd ha (Nat.dvd_gcd hb (Nat.dvd_gcd hc hd))
-```
-
-The division theorem should expose the scale and the divided difference:
-
-```lean
-theorem positive_four_sq_AP_divide_root_gcd
-    {a b c d Δ : ℤ}
-    (hΔpos : 0 < Δ)
-    (hab : b^2 - a^2 = Δ)
-    (hbc : c^2 - b^2 = Δ)
-    (hcd : d^2 - c^2 = Δ) :
-    ∃ g : ℕ, 0 < g ∧
-    ∃ p q r s Δ' : ℤ,
-      0 < Δ' ∧
-      a = (g : ℤ) * p ∧
-      b = (g : ℤ) * q ∧
-      c = (g : ℤ) * r ∧
-      d = (g : ℤ) * s ∧
-      Δ = (g : ℤ)^2 * Δ' ∧
-      q^2 - p^2 = Δ' ∧
-      r^2 - q^2 = Δ' ∧
-      s^2 - r^2 = Δ' ∧
-      rootGCD4 p q r s = 1 := by
-  -- proof outline below
-  sorry
-```
-
-Implementation outline:
-
-* Let `G := rootGCD4 a b c d`, `g := (G : ℤ)`.
-* Prove `0 < G`.  If `G = 0`, then all four `natAbs` values are zero, so all roots are zero; then `Δ = 0`, contradicting `hΔpos`.
-* Use `rootGCD4_dvd_*` and `Int.natCast_dvd` / `Int.natAbs_dvd`-style conversions to obtain integer quotients `p q r s` with `a = (G:ℤ)*p`, etc.  In current mathlib, examples of this pattern use `Int.natCast_dvd.mpr` after a natural divisibility fact for `natAbs`.
-* After substitution, `hab` gives `Δ = (G:ℤ)^2 * (q^2 - p^2)`.  Define `Δ' := q^2 - p^2`; the other two equations follow by `nlinarith` or `ring_nf` after substitution.
-* `0 < Δ'` follows from `Δ = (G:ℤ)^2 * Δ'`, `0 < Δ`, and `0 < (G:ℤ)^2`.
-* `rootGCD4 p q r s = 1`: if a natural `k` divides all four quotient `natAbs`s, then `G*k` divides all four original `natAbs`s, so `G*k ∣ G` by `dvd_rootGCD4`; since `G > 0`, cancel to get `k = 1`.  Equivalently prove `rootGCD4 p q r s ∣ 1` and use `Nat.dvd_one.mp`.
-
-Useful APIs in the pinned mathlib style:
-
-```lean
+Int.isCoprime_iff_nat_coprime
+Int.gcd_def
+Int.natAbs_mul
+Int.natCast_dvd
 Nat.gcd_dvd_left
 Nat.gcd_dvd_right
 Nat.dvd_gcd
-Nat.dvd_one.mp
-Int.gcd_def
-Int.natAbs_mul
-Int.natAbs_eq_zero
-Int.natCast_dvd
-Int.ediv_mul_cancel
-Int.gcd_eq_gcd_ab
-Int.gcd_greatest
+IsCoprime.mul_left
+IsCoprime.mul_right
+IsCoprime.of_mul_left_left
+IsCoprime.of_mul_left_right
+IsCoprime.of_mul_right_left
+IsCoprime.of_mul_right_right
+IsCoprime.of_isCoprime_of_dvd_left
+IsCoprime.of_isCoprime_of_dvd_right
 ```
 
-This is the only bookkeeping-heavy part.  Do not try to prove the pairwise gcd fields during this division step.
+Proof plan for the raw lemma:
 
----
+1. Work primarily with natural absolute values, because all factors are positive.
+2. Define the four intersections by gcds.
+3. Use `IsCoprime U V` to show a prime-power cannot appear in both `U` and `V`; use `IsCoprime U' V'` similarly for the second factorization.
+4. Prove the row/column identities `U = alpha*b`, `V = c*d`, `U' = alpha*c`, `V' = b*d`.
+5. Prove pairwise coprimality of `alpha,b,c,d` from the row/column coprimality constraints.
+6. Then parity is separate: from `U = alpha*b`, `Even U`, and oddness of `b` obtained from `V' = b*d` and `Odd V'`, prove `Even alpha` and call `RawRefinedFactors.toRefined_nonempty`.
 
-## DAG 4: parity and divisibility by `4`/`8`
-
-For any four-square AP, the common square residues modulo `4` are constant.  In the primitive case they cannot all be `0`, so all roots are odd.  Then odd squares are `1` modulo `8`, so the primitive common difference is divisible by `8`.
-
-Recommended theorem shape:
-
-```lean
-theorem positivePrimitiveFourSqAP_odd_and_dvd8
-    (A : PositivePrimitiveFourSqAP) :
-    A.p % 2 = 1 ∧ A.q % 2 = 1 ∧ A.r % 2 = 1 ∧ A.s % 2 = 1 ∧
-    (8 : ℤ) ∣ A.Δ := by
-  -- finite residue proof, preferably with ZMod 4 and ZMod 8 or with omega cases
-  sorry
-```
-
-Break it into two finite lemmas:
-
-```lean
-theorem four_sq_AP_mod4_same
-    {p q r s Δ : ℤ}
-    (hpq : q^2 - p^2 = Δ)
-    (hqr : r^2 - q^2 = Δ)
-    (hrs : s^2 - r^2 = Δ) :
-    p^2 % 4 = q^2 % 4 ∧
-    q^2 % 4 = r^2 % 4 ∧
-    r^2 % 4 = s^2 % 4 ∧
-    (4 : ℤ) ∣ Δ := by
-  -- finite check: square residues mod 4 are only 0 or 1, and a length-4 AP in {0,1}
-  -- has step 0 mod 4.
-  sorry
-
-theorem odd_sq_sub_dvd8
-    {a b Δ : ℤ}
-    (ha : a % 2 = 1)
-    (hb : b % 2 = 1)
-    (hΔ : b^2 - a^2 = Δ) :
-    (8 : ℤ) ∣ Δ := by
-  -- finite check: odd square is 1 mod 8.
-  sorry
-```
-
-Proof details for `positivePrimitiveFourSqAP_odd_and_dvd8`:
-
-1. From `four_sq_AP_mod4_same`, all four square residues are equal modulo `4`.
-2. If that common residue is `0`, prove all four roots are even.  Then `2 ∣ rootGCD4 p q r s`, contradicting `hroot = 1`.
-3. Therefore the common residue is `1`, and every root has `% 2 = 1`.
-4. Apply `odd_sq_sub_dvd8` to `q^2 - p^2 = Δ`.
-
-Useful APIs/tactics:
-
-```lean
-Int.emod_two_eq_zero_or_one
-Int.dvd_of_emod_eq_zero
-Int.emod_eq_emod_iff_emod_sub_eq_zero
-ZMod
-fin_cases
-norm_num
-omega
-```
-
-The statement `p % 2 = 1` is correct even for negative odd roots because Lean's integer remainder modulo a positive integer is nonnegative.
-
----
-
-## DAG 5: pairwise gcd is derived, not assumed
-
-This is the main edge-case audit.  Pairwise gcd `= 1` is indeed forced by global root gcd plus the four-square AP and oddness.
-
-Recommended theorem shape:
-
-```lean
-theorem positivePrimitiveFourSqAP_pairwise_gcd
-    (A : PositivePrimitiveFourSqAP)
-    (hp_odd : A.p % 2 = 1)
-    (hq_odd : A.q % 2 = 1)
-    (hr_odd : A.r % 2 = 1)
-    (hs_odd : A.s % 2 = 1) :
-    Int.gcd A.p A.q = 1 ∧
-    Int.gcd A.p A.r = 1 ∧
-    Int.gcd A.p A.s = 1 ∧
-    Int.gcd A.q A.r = 1 ∧
-    Int.gcd A.q A.s = 1 ∧
-    Int.gcd A.r A.s = 1 := by
-  -- prime divisor argument below
-  sorry
-```
-
-Prime-divisor proof:
-
-* Adjacent pairs: if an odd prime `ℓ` divides two adjacent roots, then `ℓ ∣ Δ`; the recurrence `next^2 = previous^2 + Δ` forces `ℓ` to divide all four roots.  This contradicts `rootGCD4 = 1`.
-* Distance-two pairs: if `ℓ` divides roots two steps apart, then `ℓ ∣ 2*Δ`.  Oddness excludes `ℓ = 2`, so `ℓ ∣ Δ`, and again all roots are forced divisible by `ℓ`.
-* Endpoint pair `(p,s)`: if `ℓ ∣ p` and `ℓ ∣ s`, then `ℓ ∣ 3*Δ`.  For `ℓ ≠ 3`, conclude `ℓ ∣ Δ`.  For the exceptional prime `ℓ = 3`, use square residues modulo `3`: from `p ≡ s ≡ 0`, the middle equations give `q^2 ≡ Δ` and `r^2 ≡ -Δ`; if `3 ∤ Δ`, one of `Δ` and `-Δ` is the nonsquare residue modulo `3`, impossible.  Hence `3 ∣ Δ`, and then `q,r` are also divisible by `3`.
-
-This special `ℓ = 3` endpoint case is the only nontrivial edge case in the pairwise proof.  It is why a naive one-line argument from `s^2 - p^2 = 3*Δ` is incomplete.
-
-Useful APIs/patterns:
-
-```lean
-Int.isCoprime_iff_gcd_eq_one
-Nat.Prime.not_coprime_iff_dvd
-Nat.Prime.dvd_of_dvd_mul_left
-Nat.Prime.dvd_of_dvd_mul_right
-Int.natCast_dvd
-Int.dvd_coe_gcd
-Int.Prime.dvd_of_dvd_pow'
-Nat.prime_two
-Nat.prime_three
-```
-
-A robust Lean implementation strategy is to prove pairwise coprimality as `IsCoprime A.p A.q` etc., then convert each one with `Int.isCoprime_iff_gcd_eq_one.mp`.
-
----
-
-## DAG 6: centering
-
-Centering only needs `4 ∣ Δ`; the stronger `8 ∣ Δ` from primitivity is harmless.
-
-```lean
-theorem positivePrimitiveFourSqAP_to_weak_centered
-    (A : PositivePrimitiveFourSqAP)
-    (h4 : (4 : ℤ) ∣ A.Δ) :
-    Nonempty WeakPrimitiveCenteredFourSqAP := by
-  rcases h4 with ⟨N, hΔN⟩  -- hΔN : A.Δ = 4 * N
-  have hNpos : 0 < N := by
-    have h4pos : (0 : ℤ) < 4 := by norm_num
-    nlinarith [A.hΔpos]
-  let X : ℤ := A.p^2 + 6*N
-  refine ⟨{
-    X := X
-    N := N
-    hNpos := hNpos
-    p := A.p
-    q := A.q
-    r := A.r
-    s := A.s
-    hp := ?_
-    hq := ?_
-    hr := ?_
-    hs := ?_
-    hroot := A.hroot
-  }⟩
-  · dsimp [X]; ring
-  · dsimp [X]
-    have : A.q^2 = A.p^2 + 4*N := by nlinarith [A.hpq]
-    nlinarith
-  · dsimp [X]
-    have hq' : A.q^2 = A.p^2 + 4*N := by nlinarith [A.hpq]
-    have hr' : A.r^2 = A.p^2 + 8*N := by nlinarith [A.hqr, hq']
-    nlinarith
-  · dsimp [X]
-    have hq' : A.q^2 = A.p^2 + 4*N := by nlinarith [A.hpq]
-    have hr' : A.r^2 = A.p^2 + 8*N := by nlinarith [A.hqr, hq']
-    have hs' : A.s^2 = A.p^2 + 12*N := by nlinarith [A.hrs, hr']
-    nlinarith
-```
-
-The algebra is:
-
-```text
-Δ = 4N,
-q^2 = p^2 + 4N = (p^2 + 6N) - 2N,
-r^2 = p^2 + 8N = (p^2 + 6N) + 2N,
-s^2 = p^2 + 12N = (p^2 + 6N) + 6N.
-```
-
-Since `0 < Δ = 4N`, `N` is positive.  No sign condition on roots is needed.
-
----
-
-## Final assembly theorem shapes
-
-First assemble the weak positive primitive AP from arbitrary input:
-
-```lean
-theorem arbitraryAP_to_positivePrimitive
-    {w x y z : ℤ}
-    (hAP : IntFourSqAP w x y z)
-    (hnonconst : ¬ FourSqAPConst w x y z) :
-    Nonempty PositivePrimitiveFourSqAP := by
-  rcases intFourSqAP_or_reverse_positive_diff hAP hnonconst with
-    ⟨a, b, c, d, Δ, hΔpos, hab, hbc, hcd, hprov⟩
-  rcases positive_four_sq_AP_divide_root_gcd hΔpos hab hbc hcd with
-    ⟨g, hgpos, p, q, r, s, Δ', hΔ'pos, ha, hb, hc, hd, hΔscale,
-      hpq, hqr, hrs, hroot⟩
-  exact ⟨{
-    p := p, q := q, r := r, s := s, Δ := Δ'
-    hΔpos := hΔ'pos
-    hpq := hpq, hqr := hqr, hrs := hrs
-    hroot := hroot
-  }⟩
-```
-
-Then assemble weak centered:
-
-```lean
-theorem arbitraryAP_to_weak_primitive_centered
-    {w x y z : ℤ}
-    (hAP : IntFourSqAP w x y z)
-    (hnonconst : ¬ FourSqAPConst w x y z) :
-    Nonempty WeakPrimitiveCenteredFourSqAP := by
-  rcases arbitraryAP_to_positivePrimitive hAP hnonconst with ⟨A⟩
-  rcases positivePrimitiveFourSqAP_odd_and_dvd8 A with
-    ⟨hpodd, hqodd, hrodd, hsodd, h8⟩
-  have h4 : (4 : ℤ) ∣ A.Δ := by
-    rcases h8 with ⟨k, hk⟩
-    refine ⟨2*k, ?_⟩
-    nlinarith
-  exact positivePrimitiveFourSqAP_to_weak_centered A h4
-```
-
-Finally package the strong object:
-
-```lean
-theorem weak_centered_to_positivePrimitive
-    (C : WeakPrimitiveCenteredFourSqAP) :
-    PositivePrimitiveFourSqAP := by
-  refine {
-    p := C.p, q := C.q, r := C.r, s := C.s, Δ := 4*C.N
-    hΔpos := by nlinarith [C.hNpos]
-    hpq := by nlinarith [C.hp, C.hq]
-    hqr := by nlinarith [C.hq, C.hr]
-    hrs := by nlinarith [C.hr, C.hs]
-    hroot := C.hroot
-  }
-
-theorem weak_centered_to_strong
-    (C : WeakPrimitiveCenteredFourSqAP) :
-    Nonempty PrimitiveCenteredFourSqAP := by
-  let A := weak_centered_to_positivePrimitive C
-  rcases positivePrimitiveFourSqAP_odd_and_dvd8 A with
-    ⟨hpodd, hqodd, hrodd, hsodd, h8⟩
-  rcases positivePrimitiveFourSqAP_pairwise_gcd A hpodd hqodd hrodd hsodd with
-    ⟨hpq, hpr, hps, hqr, hqs, hrs⟩
-  exact ⟨{
-    C with
-    hpq_gcd := hpq
-    hpr_gcd := hpr
-    hps_gcd := hps
-    hqr_gcd := hqr
-    hqs_gcd := hqs
-    hrs_gcd := hrs
-    hp_odd := hpodd
-    hq_odd := hqodd
-    hr_odd := hrodd
-    hs_odd := hsodd
-  }⟩
-
-theorem arbitraryAP_to_primitive_centered
-    {w x y z : ℤ}
-    (hAP : IntFourSqAP w x y z)
-    (hnonconst : ¬ FourSqAPConst w x y z) :
-    Nonempty PrimitiveCenteredFourSqAP := by
-  rcases arbitraryAP_to_weak_primitive_centered hAP hnonconst with ⟨C⟩
-  exact weak_centered_to_strong C
-```
-
-If the public API must be the `Prop` alias exactly:
-
-```lean
-def ArbitraryAP_to_primitive_centered : Prop :=
-  ∀ {w x y z : ℤ},
-    IntFourSqAP w x y z →
-    ¬ FourSqAPConst w x y z →
-    Nonempty PrimitiveCenteredFourSqAP
-
-theorem arbitraryAP_to_primitive_centered_prop :
-    ArbitraryAP_to_primitive_centered := by
-  intro w x y z hAP hnonconst
-  exact arbitraryAP_to_primitive_centered hAP hnonconst
-```
-
----
-
-## Edge-case audit summary
-
-1. **Adjacent equality**: if any adjacent square equality holds, the AP is constant by `nlinarith`.  This excludes zero common difference.
-2. **Negative common difference**: reverse `(w,x,y,z)` to `(z,y,x,w)`.  The AP condition is preserved and the common difference changes sign.
-3. **Root gcd division**: divide by `rootGCD4`, the gcd of the four root absolute values.  This is the exact primitive notion needed.  Pairwise gcds are not appropriate at this stage.
-4. **Gcd nonzero**: positive common difference implies not all roots are zero, hence `0 < rootGCD4`.
-5. **Divided common difference**: if each root is divisible by `g`, then each square difference is divisible by `g^2`; define the new difference after division.
-6. **Parity**: modulo `4`, a length-four AP of square residues must have step `0`; in the primitive case the common residue cannot be `0`, or all roots would be even and `2 ∣ rootGCD4`.  Thus all roots are odd, and then `8 ∣ Δ`.
-7. **Pairwise gcds**: all six pairwise gcds are forced by the global root gcd plus oddness.  The endpoint pair has a real `3`-prime exception that must be handled by a mod-`3` square-residue argument.
-8. **Centering**: with `Δ = 4N`, set `X = p^2 + 6N`.  Then the four square equations are exactly `X - 6N`, `X - 2N`, `X + 2N`, `X + 6N`, and `N > 0` follows from `Δ > 0`.
-
-Bottom line: the original strong `PrimitiveCenteredFourSqAP` conditions are achievable; the corrected Lean design is to introduce a weak/global-gcd primitive layer and derive oddness plus pairwise coprimality before constructing the strong centered record.
-
-end FLT
+Bottom line: the exact arithmetic theorem is true, but the compile-feasible Lean interface should be `Nonempty (RefinedFactors ...)` plus a raw four-intersection refinement helper.  The code above is the compile-ready first layer and directly fixes the earlier `Prop`/`Type` and `propRecLargeElim` failures.
