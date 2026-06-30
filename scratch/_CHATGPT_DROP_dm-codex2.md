@@ -1,604 +1,326 @@
-# Q2559 Euler pair factor-square extraction layer
+# Q2561 `three_coprime_centerX` for `EulerSquarePair`
 
-This note is for `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`, after the local helper layer already has:
-
-```lean
-@[simp] def centerX (E : EulerSquarePair) : ℤ := E.B * E.C
-@[simp] def stepN   (E : EulerSquarePair) : ℤ := E.A * E.D
-@[simp] def fm6     (E : EulerSquarePair) : ℤ := E.centerX - 6 * E.stepN
-@[simp] def fm2     (E : EulerSquarePair) : ℤ := E.centerX - 2 * E.stepN
-@[simp] def fp2     (E : EulerSquarePair) : ℤ := E.centerX + 2 * E.stepN
-@[simp] def fp6     (E : EulerSquarePair) : ℤ := E.centerX + 6 * E.stepN
-```
-
-and checked positivity/parity helpers:
-
-```lean
-stepN_pos, stepN_even, centerX_pos,
-B_odd, C_odd, centerX_odd,
-fp2_pos, fp6_pos, fm2_pos_of_fm6_pos
-```
-
-The next reconstruction layer has four independent pieces:
-
-1. prove `fm6_pos`, hence `fm2_pos`;
-2. prove the two factor coprimality lemmas;
-3. use a square-product extraction lemma for positive coprime integer factors;
-4. package roots for `fm2`, `fp2`, `fm6`, `fp6`.
-
-The adversarial point is important: the outer coprimality
-
-```lean
-IsCoprime E.fm6 E.fp6
-```
-
-is **not** a consequence of only `centerX_coprime_stepN`, parity, and positivity.  One also needs the derived lemma
-
-```lean
-three_coprime_centerX (E) : IsCoprime (3 : ℤ) E.centerX
-```
-
-or an equivalent statement.  Without it, the model example `X = 15`, `N = 2` has `gcd(X,N)=1`, `X` odd, `N` even, `X - 6N = 3`, `X + 6N = 27`, so the outer pair is not coprime.  This example is not asserted to come from an `EulerSquarePair`; it shows exactly why the `3`-lemma cannot be skipped.
-
-## 1. Product identities in factor form
-
-Keep the checked algebra identities separate from the factor form consumed by the extraction lemma.
-
-```lean
-namespace EulerSquarePair
-
--- If your checked theorem already has this exact statement, keep that theorem name.
-theorem middle_factor_product_square (E : EulerSquarePair) :
-    E.fm2 * E.fp2 = (E.D ^ 2 + 8 * E.A ^ 2) ^ 2 := by
-  -- From the checked identity
-  --   (B*C)^2 - (2*(A*D))^2 = (D^2 + 8*A^2)^2
-  -- plus `(x-y)*(x+y) = x^2-y^2`.
-  -- Expected proof:
-  --   dsimp [fm2, fp2, centerX, stepN]
-  --   calc ... := by ring
-  --        _ = ... := eulerPair_middle_product_square E
-  -- Do not duplicate if already present locally.
-  -- fill with existing checked theorem and `ring`.
-  omega -- placeholder line to delete; this block is a target shape, not pasteable as-is.
-
--- If your checked theorem already has this exact statement, keep that theorem name.
-theorem outer_factor_product_square (E : EulerSquarePair) :
-    E.fm6 * E.fp6 = (E.D ^ 2 - 8 * E.A ^ 2) ^ 2 := by
-  -- Same pattern from the checked outer identity.
-  -- fill with existing checked theorem and `ring`.
-  omega -- placeholder line to delete; this block is a target shape, not pasteable as-is.
-
-end EulerSquarePair
-```
-
-The two theorem statements above are the stable API to use below.  Do not paste the `omega` placeholders; they are only there to keep the target shape visually explicit in this note.  If you want pasteable code, write the `calc` proof against your actual checked theorem names.
-
-## 2. Positivity of `fm6`
-
-The extra lemma needed for `fm6_pos` is:
-
-```lean
-theorem Dsq_sub_8Asq_ne_zero (E : EulerSquarePair) :
-    E.D ^ 2 - 8 * E.A ^ 2 ≠ 0
-```
-
-It follows by parity: `D^2` is odd and `8*A^2` is even, hence the difference is odd and cannot be zero.  This uses only `E.hDodd`; `E.hAeven` is not needed.
-
-A robust proof shape, assuming the earlier local `odd_sq_of_odd_int` helper from Q2555 exists:
-
-```lean
-namespace EulerSquarePair
-
-private theorem even_eight_mul_sq (a : ℤ) : Even (8 * a ^ 2) := by
-  refine ⟨4 * a ^ 2, ?_⟩
-  ring
-
-private theorem odd_sub_even_ne_zero {a b : ℤ}
-    (ha : Odd a) (hb : Even b) : a - b ≠ 0 := by
-  intro hzero
-  rcases ha with ⟨u, hu⟩
-  rcases hb with ⟨v, hv⟩
-  rw [hu, hv] at hzero
-  omega
-
-theorem Dsq_sub_8Asq_ne_zero (E : EulerSquarePair) :
-    E.D ^ 2 - 8 * E.A ^ 2 ≠ 0 := by
-  exact odd_sub_even_ne_zero (odd_sq_of_odd_int E.hDodd) (even_eight_mul_sq E.A)
-
-end EulerSquarePair
-```
-
-Then `fm6_pos` comes from the outer product identity plus `fp6_pos`:
-
-```lean
-namespace EulerSquarePair
-
-theorem fm6_pos (E : EulerSquarePair) : 0 < E.fm6 := by
-  have hprod : E.fm6 * E.fp6 = (E.D ^ 2 - 8 * E.A ^ 2) ^ 2 :=
-    outer_factor_product_square E
-  have hsqpos : 0 < (E.D ^ 2 - 8 * E.A ^ 2) ^ 2 := by
-    exact sq_pos_of_ne_zero (Dsq_sub_8Asq_ne_zero E)
-  have hmulpos : 0 < E.fm6 * E.fp6 := by
-    rw [hprod]
-    exact hsqpos
-  have hfp6 : 0 < E.fp6 := fp6_pos E
-  by_contra hnot
-  have hfm6_nonpos : E.fm6 ≤ 0 := le_of_not_gt hnot
-  have hfp6_nonneg : 0 ≤ E.fp6 := le_of_lt hfp6
-  have hmul_nonpos : E.fm6 * E.fp6 ≤ 0 :=
-    mul_nonpos_of_nonpos_of_nonneg hfm6_nonpos hfp6_nonneg
-  linarith
-
-theorem fm2_pos (E : EulerSquarePair) : 0 < E.fm2 :=
-  fm2_pos_of_fm6_pos E (fm6_pos E)
-
-end EulerSquarePair
-```
-
-API names to check if needed:
-
-```lean
-#check sq_pos_of_ne_zero
-#check mul_nonpos_of_nonpos_of_nonneg
-#check le_of_not_gt
-```
-
-If `sq_pos_of_ne_zero` is not available for `ℤ` in your snapshot, replace it with a tiny local lemma:
-
-```lean
--- target only:
--- theorem int_sq_pos_of_ne_zero {z : ℤ} (hz : z ≠ 0) : 0 < z ^ 2
-```
-
-and prove it by cases `z < 0`, `z = 0`, `0 < z`, or by `nlinarith [sq_nonneg z]` after excluding equality.
-
-## 3. Oddness of the four factors
-
-You need these for stripping powers of `2` from common divisors.
-
-```lean
-namespace EulerSquarePair
-
--- These should compile if `Odd.add`, `Odd.sub`, and an even-multiple lemma are available.
--- Otherwise expand witnesses manually.
-theorem fm2_odd (E : EulerSquarePair) : Odd E.fm2 := by
-  dsimp [fm2]
-  exact (centerX_odd E).sub (Even.mul_left (2 : ℤ) (stepN_even E))
-
-theorem fp2_odd (E : EulerSquarePair) : Odd E.fp2 := by
-  dsimp [fp2]
-  exact (centerX_odd E).add (Even.mul_left (2 : ℤ) (stepN_even E))
-
-theorem fm6_odd (E : EulerSquarePair) : Odd E.fm6 := by
-  dsimp [fm6]
-  exact (centerX_odd E).sub (Even.mul_left (6 : ℤ) (stepN_even E))
-
-theorem fp6_odd (E : EulerSquarePair) : Odd E.fp6 := by
-  dsimp [fp6]
-  exact (centerX_odd E).add (Even.mul_left (6 : ℤ) (stepN_even E))
-
-end EulerSquarePair
-```
-
-If `Even.mul_left` has the opposite orientation, use explicit witnesses from `stepN_even` instead:
-
-```lean
--- Given `stepN = 2*k`, prove `2*stepN`, `6*stepN` even by witnesses.
-```
-
-## 4. Divisor-stripping helpers for `IsCoprime`
-
-The factor coprimality proofs are clean if you isolate these helpers.  They are small and reusable.
-
-```lean
-namespace EulerSquarePair
-
--- API-sensitive target.  Search/check first:
-#check IsCoprime.dvd_of_dvd_mul_left
-#check IsCoprime.dvd_of_dvd_mul_right
-#check Odd.isCoprime_two
-#check Odd.coprime_two
-
--- Target statement, not fake code:
--- theorem isCoprime_two_of_dvd_odd {d m : ℤ}
---     (hm : Odd m) (hdm : d ∣ m) : IsCoprime d (2 : ℤ)
--- Proof route: `Odd m` gives `IsCoprime m 2`; then use divisor monotonicity
--- of `IsCoprime` on the left because `d ∣ m`.
-
--- Target statement, not fake code:
--- theorem dvd_of_dvd_two_mul_of_coprime_two {d x : ℤ}
---     (hd2 : IsCoprime d (2 : ℤ)) (h : d ∣ 2 * x) : d ∣ x
--- Proof route: use `IsCoprime.dvd_of_dvd_mul_left/right`, depending on API orientation.
-
--- Target statement, not fake code:
--- theorem dvd_of_dvd_four_mul_of_coprime_two {d x : ℤ}
---     (hd2 : IsCoprime d (2 : ℤ)) (h : d ∣ 4 * x) : d ∣ x
--- Proof route: derive `IsCoprime d (4 : ℤ)` from `hd2.pow_right 2`, then strip `4`.
-
--- Target statement, not fake code:
--- theorem dvd_of_dvd_twelve_mul_of_coprime_two_three {d x : ℤ}
---     (hd2 : IsCoprime d (2 : ℤ))
---     (hd3 : IsCoprime d (3 : ℤ))
---     (h : d ∣ 12 * x) : d ∣ x
--- Proof route: combine `hd2` and `hd3` to get `IsCoprime d (12 : ℤ)`;
--- then strip `12`.
-
-end EulerSquarePair
-```
-
-The exact method names to search are:
-
-```lean
-#check IsCoprime.of_dvd_left
-#check IsCoprime.of_dvd_right
-#check IsCoprime.mul_right
-#check IsCoprime.pow_right
-#check IsCoprime.dvd_of_dvd_mul_left
-#check IsCoprime.dvd_of_dvd_mul_right
-```
-
-If the method names differ, prove the helpers directly from the divisor criterion for `IsCoprime`.
-
-## 5. Middle factor coprimality
-
-Dependency:
-
-```text
-centerX_coprime_stepN
-fm2_odd
-common divisor algebra:
-  d | fm2, d | fp2
-  ⇒ d | fm2 + fp2 = 2*centerX
-  ⇒ d | fp2 - fm2 = 4*stepN
-strip powers of 2 using oddness
-  ⇒ d | centerX, d | stepN
-centerX_coprime_stepN
-  ⇒ IsUnit d
-```
-
-Target theorem:
-
-```lean
-namespace EulerSquarePair
-
-theorem fm2_coprime_fp2 (E : EulerSquarePair) : IsCoprime E.fm2 E.fp2 := by
-  intro d hdfm hdfp
-  have hd2 : IsCoprime d (2 : ℤ) :=
-    isCoprime_two_of_dvd_odd (fm2_odd E) hdfm
-
-  have hsum : d ∣ E.fm2 + E.fp2 := dvd_add hdfm hdfp
-  have h2X : d ∣ 2 * E.centerX := by
-    convert hsum using 1
-    dsimp [fm2, fp2]
-    ring
-  have hdX : d ∣ E.centerX :=
-    dvd_of_dvd_two_mul_of_coprime_two hd2 h2X
-
-  have hdiff : d ∣ E.fp2 - E.fm2 := dvd_sub hdfp hdfm
-  have h4N : d ∣ 4 * E.stepN := by
-    convert hdiff using 1
-    dsimp [fm2, fp2]
-    ring
-  have hdN : d ∣ E.stepN :=
-    dvd_of_dvd_four_mul_of_coprime_two hd2 h4N
-
-  exact (centerX_coprime_stepN E) hdX hdN
-
-end EulerSquarePair
-```
-
-This proof is structurally exact.  It compiles once the four small stripping helpers from §4 are provided with the local Mathlib method names.
-
-## 6. The required `3`-lemma for the outer pair
-
-You need:
+Target in `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`:
 
 ```lean
 theorem three_coprime_centerX (E : EulerSquarePair) :
     IsCoprime (3 : ℤ) E.centerX
 ```
 
-This is not an extra structure field.  It is derived from `E.hB`, `E.hC`, and `E.hADcop` by a modulo-3 square argument.
-
-Suggested theorem DAG:
+where `E.centerX = E.B * E.C`.  The clean local decomposition is:
 
 ```lean
-namespace EulerSquarePair
+theorem not_three_dvd_B (E : EulerSquarePair) : ¬ (3 : ℤ) ∣ E.B
+theorem not_three_dvd_C (E : EulerSquarePair) : ¬ (3 : ℤ) ∣ E.C
 
--- Target statement, proof via ZMod 3 or prime divisibility.
--- theorem three_coprime_B (E : EulerSquarePair) : IsCoprime (3 : ℤ) E.B
--- If `3 | B`, then modulo 3 the equation
---   B^2 = 16*A^2 + D^2
--- gives `0 = A^2 + D^2` in `ZMod 3`.
--- Over `ZMod 3`, squares are `0` or `1`, so this forces `A = 0` and `D = 0`
--- modulo 3, contradicting `E.hADcop`.
+theorem three_coprime_B (E : EulerSquarePair) : IsCoprime (3 : ℤ) E.B
+theorem three_coprime_C (E : EulerSquarePair) : IsCoprime (3 : ℤ) E.C
 
--- Target statement, same proof with `C^2 = 4*A^2 + D^2`.
--- theorem three_coprime_C (E : EulerSquarePair) : IsCoprime (3 : ℤ) E.C
-
--- Then combine:
--- theorem three_coprime_centerX (E : EulerSquarePair) :
---     IsCoprime (3 : ℤ) E.centerX := by
---   dsimp [centerX]
---   exact (three_coprime_B E).mul_right (three_coprime_C E)
-
-end EulerSquarePair
+theorem three_coprime_centerX (E : EulerSquarePair) :
+    IsCoprime (3 : ℤ) E.centerX
 ```
 
-API names to check for the modulo-3 proof:
+The only API-sensitive bridge is the standard prime bridge
 
 ```lean
-#check ZMod
-#check Int.cast_zmod_eq_zero_iff_dvd
-#check IsCoprime
-#check IsCoprime.symm
+¬ (3 : ℤ) ∣ x  ⟹  IsCoprime (3 : ℤ) x.
 ```
 
-Alternatively prove `¬ (3 : ℤ) ∣ E.B` and use a prime/coprime API.  Search:
+Everything else is a small `ZMod 3` computation.
+
+## 0. APIs to check
+
+The `ZMod` APIs below are current Mathlib names:
 
 ```lean
-#check Prime.coprime_iff_not_dvd
+#check ZMod.intCast_zmod_eq_zero_iff_dvd
+-- theorem ZMod.intCast_zmod_eq_zero_iff_dvd (a : ℤ) (b : ℕ) :
+--   (a : ZMod b) = 0 ↔ (b : ℤ) ∣ a
+
+#check ZMod.isUnit_iff_coprime
+#check ZMod.coprime_mod_iff_coprime
+#check ZMod.isUnit_prime_iff_not_dvd
+#check ZMod.isUnit_prime_of_not_dvd
+```
+
+For the final `IsCoprime` bridge over `ℤ`, check these locally:
+
+```lean
 #check Int.prime_three
 #check Nat.prime_three
+#check Prime.isCoprime_iff_not_dvd
+#check Prime.coprime_iff_not_dvd
+#check Irreducible.isCoprime_iff_not_dvd
+#check Int.isUnit_iff
 ```
 
-Again, the warning is adversarial: without this lemma or equivalent, the outer coprimality claim is false in the abstract `X,N` algebra.
+In many Mathlib snapshots, the bridge can be implemented as one of:
 
-## 7. Outer factor coprimality
+```lean
+-- likely shape 1
+theorem isCoprime_three_int_of_not_dvd {x : ℤ}
+    (hx : ¬ (3 : ℤ) ∣ x) : IsCoprime (3 : ℤ) x := by
+  exact (show Prime (3 : ℤ) by norm_num).isCoprime_iff_not_dvd.mpr hx
 
-Dependency:
-
-```text
-centerX_coprime_stepN
-three_coprime_centerX
-fm6_odd
-common divisor algebra:
-  d | fm6, d | fp6
-  ⇒ d | fm6 + fp6 = 2*centerX
-  ⇒ d | fp6 - fm6 = 12*stepN
-strip 2 from the first divisor relation
-  ⇒ d | centerX
-from d | centerX and IsCoprime 3 centerX
-  ⇒ IsCoprime d 3
-from fm6 odd and d | fm6
-  ⇒ IsCoprime d 2
-strip 12 from the second divisor relation
-  ⇒ d | stepN
-centerX_coprime_stepN
-  ⇒ IsUnit d
+-- likely shape 2, if the lemma is named without the `is` prefix
+theorem isCoprime_three_int_of_not_dvd {x : ℤ}
+    (hx : ¬ (3 : ℤ) ∣ x) : IsCoprime (3 : ℤ) x := by
+  exact (show Prime (3 : ℤ) by norm_num).coprime_iff_not_dvd.mpr hx
 ```
 
-Target theorem:
+Do not paste both.  Use `#check` to select the available method name.  If neither name exists, keep the theorem statement and prove it from the divisor criterion for `IsCoprime` plus `Prime`/`Irreducible` divisibility of `3`.
+
+## 1. Local `ZMod 3` square fact
+
+This is the finite-field fact needed twice.  It avoids developing a general theorem about quadratic residues.
+
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.ZMod.Basic
+```
 
 ```lean
 namespace EulerSquarePair
 
-theorem fm6_coprime_fp6 (E : EulerSquarePair) : IsCoprime E.fm6 E.fp6 := by
-  intro d hdfm hdfp
-  have hd2 : IsCoprime d (2 : ℤ) :=
-    isCoprime_two_of_dvd_odd (fm6_odd E) hdfm
-
-  have hsum : d ∣ E.fm6 + E.fp6 := dvd_add hdfm hdfp
-  have h2X : d ∣ 2 * E.centerX := by
-    convert hsum using 1
-    dsimp [fm6, fp6]
-    ring
-  have hdX : d ∣ E.centerX :=
-    dvd_of_dvd_two_mul_of_coprime_two hd2 h2X
-
-  have hd3 : IsCoprime d (3 : ℤ) := by
-    -- From `three_coprime_centerX E : IsCoprime 3 centerX`
-    -- and `hdX : d ∣ centerX`.
-    -- Search/check: `IsCoprime.of_dvd_right`, `IsCoprime.of_dvd_left`.
-    -- Exact orientation depends on local API; no fake code here.
-    -- mathematically: any common divisor of d and 3 also divides centerX and 3.
-    exact isCoprime_three_of_dvd_centerX E hdX
-
-  have hdiff : d ∣ E.fp6 - E.fm6 := dvd_sub hdfp hdfm
-  have h12N : d ∣ 12 * E.stepN := by
-    convert hdiff using 1
-    dsimp [fm6, fp6]
-    ring
-  have hdN : d ∣ E.stepN :=
-    dvd_of_dvd_twelve_mul_of_coprime_two_three hd2 hd3 h12N
-
-  exact (centerX_coprime_stepN E) hdX hdN
+private theorem zmod3_sq_add_sq_eq_zero
+    {x y : ZMod 3} (h : x ^ 2 + y ^ 2 = 0) :
+    x = 0 ∧ y = 0 := by
+  revert h
+  fin_cases x <;> fin_cases y <;> decide
 
 end EulerSquarePair
 ```
 
-The only non-expanded helper in that theorem is:
+If `decide` does not reduce the finite cases in your local snapshot, replace the last line by:
 
 ```lean
--- target only:
--- theorem isCoprime_three_of_dvd_centerX
---     (E : EulerSquarePair) {d : ℤ} (hdX : d ∣ E.centerX) :
---     IsCoprime d (3 : ℤ)
+  fin_cases x <;> fin_cases y <;> native_decide
 ```
 
-It follows by divisor monotonicity from `three_coprime_centerX E`, after applying symmetry if needed.
-
-## 8. Square-product extraction lemma
-
-Do **not** infer individual squares from `a*b = z^2` alone.  The needed lemma is positive + coprime.
-
-Search/check the Mathlib API first:
+or by:
 
 ```lean
-#check Int.sq_of_isCoprime
-#check Nat.sq_of_coprime
-#check Nat.Coprime
-#check IsSquare
+  fin_cases x <;> fin_cases y <;> norm_num
 ```
 
-I could not confirm a current top-level name from the connector, so the robust local interface should be this wrapper:
+The theorem statement is the stable part.
 
-```lean
--- Target theorem.  Implement once, preferably as a local wrapper over Mathlib's
--- `Int.sq_of_isCoprime` if `#check Int.sq_of_isCoprime` succeeds.
-theorem exists_pos_sq_factors_of_isCoprime_mul_eq_sq
-    {a b z : ℤ}
-    (ha : 0 < a)
-    (hb : 0 < b)
-    (hab : IsCoprime a b)
-    (hmul : a * b = z ^ 2) :
-    ∃ r s : ℤ, 0 < r ∧ 0 < s ∧ r ^ 2 = a ∧ s ^ 2 = b
-```
+## 2. Tiny contradiction helper for `E.hADcop`
 
-Implementation route:
-
-```text
-1. Use Mathlib's coprime square-product theorem to get `∃ r0, r0^2 = a`
-   and `∃ s0, s0^2 = b`.
-2. Normalize signs by `r = |r0|`, `s = |s0|`.
-3. Positivity follows because `a,b > 0`, so the roots are nonzero.
-4. `(|r0|)^2 = r0^2` by `sq_abs` or a small `ring_nf`/case proof.
-```
-
-If no integer theorem is available, convert to naturals using positivity:
-
-```text
-an := a.toNat, bn := b.toNat, zn := z.natAbs
-an * bn = zn^2
-Nat.Coprime an bn
-```
-
-then use the natural-number coprime square-factor theorem, and cast back to `ℤ`.
-
-Optional odd-enhanced wrapper for AP roots:
-
-```lean
--- Target theorem, after `odd_of_sq_odd_int` is already local.
-theorem exists_pos_odd_sq_factors_of_isCoprime_mul_eq_sq
-    {a b z : ℤ}
-    (ha : 0 < a)
-    (hb : 0 < b)
-    (haodd : Odd a)
-    (hbodd : Odd b)
-    (hab : IsCoprime a b)
-    (hmul : a * b = z ^ 2) :
-    ∃ r s : ℤ,
-      0 < r ∧ 0 < s ∧ Odd r ∧ Odd s ∧
-      r ^ 2 = a ∧ s ^ 2 = b
-```
-
-This simply calls the positive wrapper and proves root oddness from `r^2 = a`, `s^2 = b`, and oddness of `a,b`.
-
-## 9. Root extraction statements
-
-Once the preceding lemmas are in place, the middle extraction is direct:
+This is only used after deriving `3 ∣ A` and `3 ∣ D`.
 
 ```lean
 namespace EulerSquarePair
 
-theorem middle_roots (E : EulerSquarePair) :
-    ∃ q r : ℤ,
-      0 < q ∧ 0 < r ∧ Odd q ∧ Odd r ∧
-      q ^ 2 = E.fm2 ∧ r ^ 2 = E.fp2 := by
-  exact exists_pos_odd_sq_factors_of_isCoprime_mul_eq_sq
-    (fm2_pos E)
-    (fp2_pos E)
-    (fm2_odd E)
-    (fp2_odd E)
-    (fm2_coprime_fp2 E)
-    (middle_factor_product_square E)
+private theorem not_isUnit_three_int : ¬ IsUnit (3 : ℤ) := by
+  norm_num [Int.isUnit_iff]
 
 end EulerSquarePair
 ```
 
-The outer extraction is the same, using `fm6_pos`, `fp6_pos`, and the `3`-aware coprimality theorem:
+If `Int.isUnit_iff` has moved in your snapshot, run:
+
+```lean
+#check Int.isUnit_iff
+#check isUnit_iff_exists_inv
+```
+
+A fallback is to let `norm_num` try it without the rewrite:
+
+```lean
+private theorem not_isUnit_three_int : ¬ IsUnit (3 : ℤ) := by
+  norm_num
+```
+
+## 3. Prove `3 ∤ B`
+
+The robust proof is:
+
+1. Assume `3 ∣ B`.
+2. Cast `E.hB` to `ZMod 3`; since `16 = 1` in `ZMod 3`, get
+   `(B : ZMod 3)^2 = (A : ZMod 3)^2 + (D : ZMod 3)^2`.
+3. `3 ∣ B` gives `(B : ZMod 3) = 0` via `ZMod.intCast_zmod_eq_zero_iff_dvd`.
+4. The square fact gives `(A : ZMod 3) = 0` and `(D : ZMod 3) = 0`.
+5. Convert back to `3 ∣ A`, `3 ∣ D`.
+6. Contradict `E.hADcop` because it would imply `IsUnit (3 : ℤ)`.
+
+Likely pasteable code:
 
 ```lean
 namespace EulerSquarePair
 
-theorem outer_roots (E : EulerSquarePair) :
-    ∃ p s : ℤ,
-      0 < p ∧ 0 < s ∧ Odd p ∧ Odd s ∧
-      p ^ 2 = E.fm6 ∧ s ^ 2 = E.fp6 := by
-  exact exists_pos_odd_sq_factors_of_isCoprime_mul_eq_sq
-    (fm6_pos E)
-    (fp6_pos E)
-    (fm6_odd E)
-    (fp6_odd E)
-    (fm6_coprime_fp6 E)
-    (outer_factor_product_square E)
+theorem not_three_dvd_B (E : EulerSquarePair) : ¬ (3 : ℤ) ∣ E.B := by
+  intro h3B
+
+  have hBz :
+      (E.B : ZMod 3) ^ 2 =
+        (E.A : ZMod 3) ^ 2 + (E.D : ZMod 3) ^ 2 := by
+    have h := congrArg (fun z : ℤ => (z : ZMod 3)) E.hB
+    norm_num at h
+    simpa using h
+
+  have hB0 : (E.B : ZMod 3) = 0 := by
+    exact (ZMod.intCast_zmod_eq_zero_iff_dvd E.B 3).2 h3B
+
+  have hsum : (E.A : ZMod 3) ^ 2 + (E.D : ZMod 3) ^ 2 = 0 := by
+    simpa [hB0] using hBz.symm
+
+  obtain ⟨hA0, hD0⟩ := zmod3_sq_add_sq_eq_zero hsum
+
+  have h3A : (3 : ℤ) ∣ E.A := by
+    simpa using (ZMod.intCast_zmod_eq_zero_iff_dvd E.A 3).1 hA0
+  have h3D : (3 : ℤ) ∣ E.D := by
+    simpa using (ZMod.intCast_zmod_eq_zero_iff_dvd E.D 3).1 hD0
+
+  exact not_isUnit_three_int (E.hADcop h3A h3D)
 
 end EulerSquarePair
 ```
 
-Then combine all four roots into a local data package:
+If `norm_num at h` does not simplify the casted equation enough, replace the `hBz` block with this slightly more explicit variant:
 
 ```lean
-structure EulerPairRootData (E : EulerSquarePair) where
-  p q r s : ℤ
-  hp_pos : 0 < p
-  hq_pos : 0 < q
-  hr_pos : 0 < r
-  hs_pos : 0 < s
-  hp_odd : Odd p
-  hq_odd : Odd q
-  hr_odd : Odd r
-  hs_odd : Odd s
-  hp_sq : p ^ 2 = E.fm6
-  hq_sq : q ^ 2 = E.fm2
-  hr_sq : r ^ 2 = E.fp2
-  hs_sq : s ^ 2 = E.fp6
+  have hBz0 :
+      (E.B : ZMod 3) ^ 2 =
+        (16 : ZMod 3) * (E.A : ZMod 3) ^ 2 + (E.D : ZMod 3) ^ 2 := by
+    exact_mod_cast E.hB
+  have hBz :
+      (E.B : ZMod 3) ^ 2 =
+        (E.A : ZMod 3) ^ 2 + (E.D : ZMod 3) ^ 2 := by
+    norm_num at hBz0 ⊢
+    simpa using hBz0
+```
 
+## 4. Prove `3 ∤ C`
+
+Same proof, using `E.hC`; `4 = 1` in `ZMod 3`.
+
+```lean
 namespace EulerSquarePair
 
-theorem rootData (E : EulerSquarePair) : EulerPairRootData E := by
-  obtain ⟨q, r, hqpos, hrpos, hqodd, hrodd, hqsq, hrsq⟩ := middle_roots E
-  obtain ⟨p, s, hppos, hspos, hpodd, hsodd, hpsq, hssq⟩ := outer_roots E
-  exact
-    { p := p, q := q, r := r, s := s
-      hp_pos := hppos, hq_pos := hqpos, hr_pos := hrpos, hs_pos := hspos
-      hp_odd := hpodd, hq_odd := hqodd, hr_odd := hrodd, hs_odd := hsodd
-      hp_sq := hpsq, hq_sq := hqsq, hr_sq := hrsq, hs_sq := hssq }
+theorem not_three_dvd_C (E : EulerSquarePair) : ¬ (3 : ℤ) ∣ E.C := by
+  intro h3C
+
+  have hCz :
+      (E.C : ZMod 3) ^ 2 =
+        (E.A : ZMod 3) ^ 2 + (E.D : ZMod 3) ^ 2 := by
+    have h := congrArg (fun z : ℤ => (z : ZMod 3)) E.hC
+    norm_num at h
+    simpa using h
+
+  have hC0 : (E.C : ZMod 3) = 0 := by
+    exact (ZMod.intCast_zmod_eq_zero_iff_dvd E.C 3).2 h3C
+
+  have hsum : (E.A : ZMod 3) ^ 2 + (E.D : ZMod 3) ^ 2 = 0 := by
+    simpa [hC0] using hCz.symm
+
+  obtain ⟨hA0, hD0⟩ := zmod3_sq_add_sq_eq_zero hsum
+
+  have h3A : (3 : ℤ) ∣ E.A := by
+    simpa using (ZMod.intCast_zmod_eq_zero_iff_dvd E.A 3).1 hA0
+  have h3D : (3 : ℤ) ∣ E.D := by
+    simpa using (ZMod.intCast_zmod_eq_zero_iff_dvd E.D 3).1 hD0
+
+  exact not_isUnit_three_int (E.hADcop h3A h3D)
 
 end EulerSquarePair
 ```
 
-This data is enough for the square equations of `PrimitiveCenteredFourSqAP`.  The pairwise gcd fields among `p,q,r,s` still need the six cross-coprimality facts among `fm6`, `fm2`, `fp2`, `fp6`, plus the standard lemma that coprime square values imply coprime roots.
+## 5. Bridge to `IsCoprime` and multiply
 
-## 10. Minimal dependency DAG
+After choosing the available prime bridge from §0, the final layer is short.
+
+```lean
+namespace EulerSquarePair
+
+-- Local bridge target.  Implement with the available prime/coprime API.
+-- Do not leave it as an axiom; this is a small theorem.
+theorem isCoprime_three_int_of_not_dvd {x : ℤ}
+    (hx : ¬ (3 : ℤ) ∣ x) : IsCoprime (3 : ℤ) x := by
+  exact (show Prime (3 : ℤ) by norm_num).isCoprime_iff_not_dvd.mpr hx
+
+theorem three_coprime_B (E : EulerSquarePair) : IsCoprime (3 : ℤ) E.B := by
+  exact isCoprime_three_int_of_not_dvd (not_three_dvd_B E)
+
+theorem three_coprime_C (E : EulerSquarePair) : IsCoprime (3 : ℤ) E.C := by
+  exact isCoprime_three_int_of_not_dvd (not_three_dvd_C E)
+
+theorem three_coprime_centerX (E : EulerSquarePair) :
+    IsCoprime (3 : ℤ) E.centerX := by
+  dsimp [centerX]
+  exact (three_coprime_B E).mul_right (three_coprime_C E)
+
+end EulerSquarePair
+```
+
+If `.isCoprime_iff_not_dvd` is not the method name, replace only the bridge theorem by the `.coprime_iff_not_dvd` variant:
+
+```lean
+theorem isCoprime_three_int_of_not_dvd {x : ℤ}
+    (hx : ¬ (3 : ℤ) ∣ x) : IsCoprime (3 : ℤ) x := by
+  exact (show Prime (3 : ℤ) by norm_num).coprime_iff_not_dvd.mpr hx
+```
+
+If both method names fail, keep the proven `not_three_dvd_B` and `not_three_dvd_C` and implement this exact helper by the divisor criterion:
+
+```lean
+theorem isCoprime_three_int_of_not_dvd {x : ℤ}
+    (hx : ¬ (3 : ℤ) ∣ x) : IsCoprime (3 : ℤ) x
+```
+
+Proof route for the fallback helper:
 
 ```text
-outer_factor_product_square
-Dsq_sub_8Asq_ne_zero
-fp6_pos
-  ⇒ fm6_pos
-fm6_pos
-fm2_pos_of_fm6_pos
-  ⇒ fm2_pos
-
-centerX_coprime_stepN
-fm2_odd / fp2_odd
-strip-2 divisor helpers
-  ⇒ fm2_coprime_fp2
-
-three_coprime_centerX
-centerX_coprime_stepN
-fm6_odd / fp6_odd
-strip-2 and strip-12 divisor helpers
-  ⇒ fm6_coprime_fp6
-
-middle_factor_product_square
-fm2_pos, fp2_pos, fm2_coprime_fp2
-square-product extraction
-  ⇒ middle_roots
-
-outer_factor_product_square
-fm6_pos, fp6_pos, fm6_coprime_fp6
-square-product extraction
-  ⇒ outer_roots
+intro d hd3 hdx
+Since `3` is prime and `d ∣ 3`, either `IsUnit d` or `Associated d 3`.
+If `Associated d 3`, then `3 ∣ d`; with `d ∣ x`, get `3 ∣ x`, contradiction.
+Therefore `IsUnit d`.
 ```
 
-The genuine new arithmetic subfrontiers are therefore:
+Search terms for that fallback are:
 
 ```lean
-centerX_coprime_stepN        -- from Q2557 layer
-three_coprime_centerX        -- needed only for the outer pair
-exists_pos_sq_factors_of_isCoprime_mul_eq_sq
+#check Prime.eq_or_eq_of_dvd_mul
+#check Prime.dvd_or_dvd
+#check Irreducible.isUnit_or_isUnit
+#check Associated.dvd_iff_dvd_left
+#check Associated.dvd_iff_dvd_right
 ```
 
-Everything else is local algebra, parity, or divisor bookkeeping.
+## 6. Integer-mod alternative if ZMod casting is awkward
+
+If the casted `ZMod` equations fight simplification, the same proof can be done with integer divisibility:
+
+```text
+Assume 3 | B.
+From E.hB, 3 | B^2 and 3 | 15*A^2, so:
+  B^2 = 16*A^2 + D^2
+  ⇒ 3 | A^2 + D^2.
+Modulo 3, use the integer residue lemma:
+  3 | x^2 + y^2 ⇒ 3 | x ∧ 3 | y.
+Then contradict E.hADcop.
+```
+
+Target helper for that route:
+
+```lean
+theorem three_dvd_sq_add_sq_iff {x y : ℤ} :
+    (3 : ℤ) ∣ x ^ 2 + y ^ 2 ↔ (3 : ℤ) ∣ x ∧ (3 : ℤ) ∣ y
+```
+
+Proof should still use `ZMod.intCast_zmod_eq_zero_iff_dvd` internally plus `zmod3_sq_add_sq_eq_zero`; it just hides the casts from the main `not_three_dvd_B/C` proofs.
+
+## Summary
+
+The recommended implementation order is:
+
+1. Add `zmod3_sq_add_sq_eq_zero`.
+2. Add `not_isUnit_three_int`.
+3. Prove `not_three_dvd_B` and `not_three_dvd_C` by casting `E.hB`, `E.hC` to `ZMod 3`.
+4. Add the local bridge
+   ```lean
+   isCoprime_three_int_of_not_dvd {x : ℤ} :
+     ¬ (3 : ℤ) ∣ x → IsCoprime (3 : ℤ) x
+   ```
+   using the available prime/coprime API.
+5. Define `three_coprime_B`, `three_coprime_C`, and combine with `.mul_right` to get `three_coprime_centerX`.
