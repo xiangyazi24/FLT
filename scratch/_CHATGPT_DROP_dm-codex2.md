@@ -1,528 +1,450 @@
-# Q2408 (dm-codex2): Lean-realistic plan for E1 nonzero-Y squareclass extraction
+# Q2418 (dm-codex2): EulerAux descent step DAG
 
-## Executive split
+## Core descent formula
 
-For the N=12 route, do **not** try to prove the full extraction in one theorem.  The smallest honest split is:
-
-1. **Hard arithmetic residual A:** prove that the three E1 factors have even `p`-adic valuation away from `2,3`.
-2. **Hard arithmetic residual B:** convert “even valuation away from `2,3`” into an explicit representative `d ∈ {±1,±2,±3,±6}` and a rational square factor.
-3. **Algebraic wrappers:** from three squareclass reps, build the rational cover equations, clear to integer `A B C T`, normalize primitive, and derive the two integer cover equations.
-
-The one-shot theorem requested by the route should remain:
-
-```lean
-def E1FullCoverSquareclassExtractionIntStatement : Prop :=
-  ∀ {X Y : ℚ}, E1 X Y → Y ≠ 0 → E1FullCoverIntData X Y
-```
-
-but internally I would implement it from the smaller residuals below.
-
-## Mathlib APIs to use
-
-### Rational normalization
-
-Use `Rat.num`/`Rat.den` rather than inventing your own reduced fraction structure.
-
-Likely local checks:
-
-```lean
-import Mathlib.Data.Rat.Lemmas
-
-#check Rat.num
-#check Rat.den
-#check Rat.den_nz
-#check Rat.den_pos
-#check Rat.num_ne_zero
-#check Rat.num_divInt_den
-#check Rat.num_den_mk
-#check Rat.add_num_den
-#check Rat.sub_intCast_den
-#check Rat.add_intCast_den
-#check Rat.isSquare_iff
-#check Rat.isSquare_intCast_iff
-```
-
-Important pattern:
-
-```lean
--- q = q.num /. q.den, where `/.` is Rat.divInt notation.
-conv_lhs => rw [← q.num_divInt_den]
-```
-
-For the E1 reduced denominator route, set
-
-```lean
-let N : ℤ := X.num
-let D : ℤ := X.den
-```
-
-Then use the same denominator for all three factors:
-
-```lean
-X     = N /. D
-X - 1 = (N - D) /. D
-X + 3 = (N + 3 * D) /. D
-```
-
-Do **not** rely on the normalized numerator of `X-1` being literally `N-D`; instead, rewrite valuations using `padicValRat.defn` with the displayed `q = n /. d` equality.  This avoids fighting normalization.
-
-### Padic valuation / multiplicity
-
-Use the current `padicValRat` API, not a new valuation.
-
-Likely checks:
-
-```lean
-import Mathlib.NumberTheory.Padics.PadicVal.Basic
-import Mathlib.NumberTheory.Multiplicity
-
-#check padicValRat
-#check padicValRat.defn
-#check padicValRat.mul
-#check padicValRat.pow
-#check padicValRat.div
-#check padicValRat.add_eq_min
-#check padicValRat.of_int_multiplicity
-#check padicValRat.multiplicity_sub_multiplicity
-#check multiplicity
-#check multiplicity_mul
-#check emultiplicity
-#check FiniteMultiplicity
-#check Nat.prime_iff_prime_int
-```
-
-The crucial already-available facts are:
-
-```lean
-padicValRat.mul  -- vp(q*r) = vp(q)+vp(r), q,r nonzero
-padicValRat.pow  -- vp(q^k) = k*vp(q)
-padicValRat.div  -- vp(q/r) = vp(q)-vp(r), q,r nonzero
-padicValRat.defn -- vp(n /. d) = multiplicity p n - multiplicity p d
-```
-
-The parity equation from the curve should be proved as:
-
-```lean
-2 * padicValRat p Y =
-  padicValRat p X + padicValRat p (X - 1) + padicValRat p (X + 3)
-```
-
-by rewriting `hE : Y^2 = X*(X-1)*(X+3)`, using nonzero factors, and applying `padicValRat.pow`/`padicValRat.mul`.
-
-### Avoiding `UniqueFactorizationMonoid` where possible
-
-For the explicit representative `d ∈ {±1,±2,±3,±6}`, the most robust route is **not** a generic UFM theorem.  Use `Rat.num`/`Rat.den`, `Rat.isSquare_iff`, and integer multiplicity/parity.  Generic names worth searching only if needed:
-
-```lean
-#check UniqueFactorizationMonoid
-#check Associated
-#check associated
-```
-
-But I would keep the UFM/factorization conversion as a named residual first.  It is independent of E1 and can be proved later by integer factorization.
-
-## Code skeleton: definitions and residual interfaces
-
-```lean
-import Mathlib.Data.Rat.Lemmas
-import Mathlib.NumberTheory.Padics.PadicVal.Basic
-import Mathlib.NumberTheory.Multiplicity
-
-namespace MazurProof.RationalPointsN12
-
-/-- The curve `E1 : Y^2 = X(X-1)(X+3)`. -/
-def E1 (X Y : ℚ) : Prop :=
-  Y ^ 2 = X * (X - 1) * (X + 3)
-
-/-- Chosen representatives for rational squareclasses supported at `2` and `3`. -/
-def S23 : List ℤ := [1, -1, 2, -2, 3, -3, 6, -6]
-
-def InS23 (d : ℤ) : Prop := d ∈ S23
-
-def IsRatSquare (q : ℚ) : Prop := ∃ r : ℚ, q = r ^ 2
-
-/-- Quotient-free squareclass representative: `q = d*r^2`, with `r ≠ 0`. -/
-def SquareclassBy (q : ℚ) (d : ℤ) : Prop :=
-  ∃ r : ℚ, r ≠ 0 ∧ q = (d : ℚ) * r ^ 2
-
-/-- Explicit supported squareclass data. -/
-def SquareclassSupportedOn23 (q : ℚ) : Prop :=
-  q ≠ 0 ∧ ∃ d : ℤ, InS23 d ∧ SquareclassBy q d
-
-/-- Valuation-only support predicate.  This is easier to prove from the E1
-equation and reduced-denominator gcd facts than the explicit `S23` statement. -/
-def ValEvenAway23 (q : ℚ) : Prop :=
-  q ≠ 0 ∧
-    ∀ p : ℕ, p.Prime → p ≠ 2 → p ≠ 3 →
-      padicValRat p q % 2 = 0
-
-/-- Rational cover equations before integer denominator clearing. -/
-def CoverQ (d0 d1 d3 : ℤ) (A B C T : ℚ) : Prop :=
-  (d0 : ℚ) * A ^ 2 - (d1 : ℚ) * B ^ 2 = T ^ 2 ∧
-    (d3 : ℚ) * C ^ 2 - (d0 : ℚ) * A ^ 2 = (3 : ℚ) * T ^ 2
-
-/-- Integer cover equations used by the finite local obstruction layer. -/
-def CoverInt (d0 d1 d3 A B C T : ℤ) : Prop :=
-  d0 * A ^ 2 - d1 * B ^ 2 = T ^ 2 ∧
-    d3 * C ^ 2 - d0 * A ^ 2 = (3 : ℤ) * T ^ 2
-
-/-- Global primitive projective condition. -/
-def PrimitiveInt4 (A B C T : ℤ) : Prop :=
-  ∀ p : ℕ, p.Prime →
-    ¬ ((p : ℤ) ∣ A ∧ (p : ℤ) ∣ B ∧ (p : ℤ) ∣ C ∧ (p : ℤ) ∣ T)
-
-/-- Rational full cover data. -/
-def E1FullCoverQData (X Y : ℚ) : Prop :=
-  ∃ d0 d1 d3 : ℤ,
-    InS23 d0 ∧ InS23 d1 ∧ InS23 d3 ∧
-    IsRatSquare (((d0 * d1 * d3 : ℤ) : ℚ)) ∧
-    ∃ A B C T : ℚ,
-      T ≠ 0 ∧ A ≠ 0 ∧ B ≠ 0 ∧ C ≠ 0 ∧
-      X = (d0 : ℚ) * (A / T) ^ 2 ∧
-      X - 1 = (d1 : ℚ) * (B / T) ^ 2 ∧
-      X + 3 = (d3 : ℚ) * (C / T) ^ 2 ∧
-      CoverQ d0 d1 d3 A B C T
-
-/-- Integer full cover data. -/
-def E1FullCoverIntData (X Y : ℚ) : Prop :=
-  ∃ d0 d1 d3 : ℤ,
-    InS23 d0 ∧ InS23 d1 ∧ InS23 d3 ∧
-    IsRatSquare (((d0 * d1 * d3 : ℤ) : ℚ)) ∧
-    ∃ A B C T : ℤ,
-      T ≠ 0 ∧ A ≠ 0 ∧ B ≠ 0 ∧ C ≠ 0 ∧
-      PrimitiveInt4 A B C T ∧
-      X = (d0 : ℚ) * (((A : ℚ) / (T : ℚ)) ^ 2) ∧
-      X - 1 = (d1 : ℚ) * (((B : ℚ) / (T : ℚ)) ^ 2) ∧
-      X + 3 = (d3 : ℚ) * (((C : ℚ) / (T : ℚ)) ^ 2) ∧
-      CoverInt d0 d1 d3 A B C T
-
-/-- Hard residual A: the E1 equation forces even valuations away from `2,3`. -/
-def E1FactorValEvenAway23Statement : Prop :=
-  ∀ {X Y : ℚ}, E1 X Y → Y ≠ 0 →
-    ValEvenAway23 X ∧ ValEvenAway23 (X - 1) ∧ ValEvenAway23 (X + 3)
-
-/-- Hard residual B: even valuations away from `2,3` give one of the eight
-explicit squareclass representatives.  This is independent of E1. -/
-def RatSquareclassSupportedOn23OfValEvenAway23Statement : Prop :=
-  ∀ {q : ℚ}, ValEvenAway23 q → SquareclassSupportedOn23 q
-
-/-- Algebraic wrapper target: three explicit squareclasses on the E1 factors
-produce rational cover data.  This should be proved now. -/
-def E1FullCoverQDataOfFactorSquareclassesStatement : Prop :=
-  ∀ {X Y : ℚ}, E1 X Y → Y ≠ 0 →
-    SquareclassSupportedOn23 X →
-    SquareclassSupportedOn23 (X - 1) →
-    SquareclassSupportedOn23 (X + 3) →
-      E1FullCoverQData X Y
-
-/-- Algebraic wrapper target: rational cover data can be cleared to primitive
-integer cover data.  This is denominator/gcd plumbing, not E1 arithmetic. -/
-def E1FullCoverIntDataOfQDataStatement : Prop :=
-  ∀ {X Y : ℚ}, E1FullCoverQData X Y → E1FullCoverIntData X Y
-
-/-- Final requested interface. -/
-def E1FullCoverSquareclassExtractionIntStatement : Prop :=
-  ∀ {X Y : ℚ}, E1 X Y → Y ≠ 0 → E1FullCoverIntData X Y
-
-/-- No hard proof hidden here: this is just the dependency composition shape. -/
-def E1FullCoverSquareclassExtractionInt_from_parts : Prop :=
-  E1FactorValEvenAway23Statement →
-  RatSquareclassSupportedOn23OfValEvenAway23Statement →
-  E1FullCoverQDataOfFactorSquareclassesStatement →
-  E1FullCoverIntDataOfQDataStatement →
-  E1FullCoverSquareclassExtractionIntStatement
-
-end MazurProof.RationalPointsN12
-```
-
-I recommend keeping `E1FullCoverSquareclassExtractionInt_from_parts` as a `def ... : Prop` until each component is implemented; do not add a theorem with a fake proof.  When the components exist as theorems, the composition proof is a short `intro`/`rcases` wrapper.
-
-## Residual A implementation plan: E1 factors have even valuations away from 2,3
-
-### Step A0: nonzero factors
-
-From `E1 X Y` and `Y ≠ 0`, prove:
-
-```lean
-X ≠ 0
-X - 1 ≠ 0
-X + 3 ≠ 0
-```
-
-This is easy algebra: if any factor is zero, RHS is zero, so `Y^2=0`, contradiction.
-
-Suggested theorem target:
-
-```lean
-def E1NonzeroFactorStatement : Prop :=
-  ∀ {X Y : ℚ}, E1 X Y → Y ≠ 0 →
-    X ≠ 0 ∧ X - 1 ≠ 0 ∧ X + 3 ≠ 0
-```
-
-This should be proved now with `unfold E1`, `nlinarith`, and `sq_eq_zero_iff`.
-
-### Step A1: common reduced denominator for X
-
-Set:
-
-```lean
-let N : ℤ := X.num
-let D : ℤ := X.den
-```
-
-Use:
-
-```lean
-X = N /. D
-X - 1 = (N - D) /. D
-X + 3 = (N + 3 * D) /. D
-```
-
-For `X`, use `X.num_divInt_den`.  For the shifts, start from `X = N /. D` and ring-normalize rational division; or use `Rat.sub_intCast_den`/`Rat.add_intCast_den` for denominator facts, but `padicValRat.defn` works with any proof of `q = n /. d`, so normalized numerator equality is not required.
-
-Suggested helper statement:
-
-```lean
-def RatShiftNumDenSameDenStatement : Prop :=
-  ∀ X : ℚ,
-    let N : ℤ := X.num
-    let D : ℤ := X.den
-    X = N /. D ∧
-    X - 1 = (N - D) /. D ∧
-    X + 3 = (N + 3 * D) /. D
-```
-
-This is algebraic and should be proved now.  Watch notation: `/.` is `Rat.divInt`; if notation is unavailable, use `Rat.divInt` explicitly.
-
-### Step A2: gcd facts among numerator forms
-
-For `N = X.num`, `D = X.den`, use `X.reduced` or direct `Rat` reducedness facts.  The exact object behind `q.reduced` is visible in `Rat.mul_self_num` proofs: Mathlib uses `q.reduced.mul_right ...`, so `X.reduced` should be the key coprimality witness.
-
-Needed integer facts:
+Normalize first to positive data
 
 ```text
-gcd(N,D)=1,
-gcd(N-D,D)=1,
-gcd(N+3D,D)=1,
-gcd(N,N-D)=1,
-gcd(N,N+3D) ∣ 3,
-gcd(N-D,N+3D) ∣ 4.
+A0 = |A|,    D0 = |D|,    S0 = |S|,    R0 = |R|.
 ```
 
-Lean-friendly targets, preferably with `IsCoprime` rather than raw gcd:
-
-```lean
-def E1ReducedNumeratorGcdFactsStatement : Prop :=
-  ∀ N D : ℤ,
-    D ≠ 0 → IsCoprime N D →
-      IsCoprime (N - D) D ∧
-      IsCoprime (N + 3 * D) D ∧
-      IsCoprime N (N - D) ∧
-      ((Int.gcd N (N + 3 * D) : ℤ) ∣ (3 : ℤ)) ∧
-      ((Int.gcd (N - D) (N + 3 * D) : ℤ) ∣ (4 : ℤ))
-```
-
-This is not conceptually hard.  It is pure Bezout/gcd algebra.  Prove it with `IsCoprime.add_mul_left_left`, `IsCoprime.add_mul_right_right`, `Int.isCoprime_iff_gcd_eq_one`, and divisibility from linear combinations.
-
-### Step A3: valuation parity
-
-For a fixed prime `p ≠ 2,3`, rewrite:
-
-```lean
-padicValRat p X       = multiplicity (p:ℤ) N       - multiplicity (p:ℤ) D
-padicValRat p (X - 1) = multiplicity (p:ℤ) (N-D)   - multiplicity (p:ℤ) D
-padicValRat p (X + 3) = multiplicity (p:ℤ) (N+3D) - multiplicity (p:ℤ) D
-```
-
-using:
-
-```lean
-padicValRat.defn p hq hqdf
-```
-
-where `hqdf : q = n /. d` and `hq : q ≠ 0`.
-
-Then split cases:
-
-* If `(p:ℤ) ∤ D`, the denominator valuation is zero.  The gcd facts imply at most one numerator among `N`, `N-D`, `N+3D` has positive multiplicity.  Since the sum of the three valuations is `2*vp(Y)`, the unique possibly nonzero valuation is even.
-* If `(p:ℤ) ∣ D`, then none of `N`, `N-D`, `N+3D` is divisible by `p`, so all numerator multiplicities are zero.  The three valuations are all `-multiplicity p D`; their sum is `-3*multiplicity p D`, which is even.  Since `3` is odd, `multiplicity p D` is even, so all three valuations are even.
-
-This is the genuine p-adic proof.  It is the first named residual I would keep if time is limited:
-
-```lean
-def E1FactorValEvenAway23Statement : Prop :=
-  ∀ {X Y : ℚ}, E1 X Y → Y ≠ 0 →
-    ValEvenAway23 X ∧ ValEvenAway23 (X - 1) ∧ ValEvenAway23 (X + 3)
-```
-
-## Residual B implementation plan: valuation support to `S23`
-
-The target is:
-
-```lean
-def RatSquareclassSupportedOn23OfValEvenAway23Statement : Prop :=
-  ∀ {q : ℚ}, ValEvenAway23 q → SquareclassSupportedOn23 q
-```
-
-Proof idea:
-
-1. Write `q = q.num /. q.den` with `q.num ≠ 0`, `q.den > 0`.
-2. Separate sign using `q.num.sign` or cases on `q < 0`.
-3. For numerator and denominator, remove square factors prime-by-prime.  Since all primes except `2,3` have even valuation in the rational quotient, their parity cancels into the square factor.
-4. The only possible nonsquare residue after cancellation is `± 2^a * 3^b` with `a,b ∈ {0,1}`.
-5. Choose `d ∈ [1,-1,2,-2,3,-3,6,-6]`; produce `r : ℚ` with `q = d*r^2`.
-
-Useful APIs:
-
-```lean
-#check Rat.isSquare_iff
-#check Rat.isSquare_intCast_iff
-#check padicValRat.multiplicity_sub_multiplicity
-#check multiplicity
-#check UniqueFactorizationMonoid
-#check Associated
-```
-
-This is independent of E1.  If you want a smaller version than full valuation-to-squareclass, use this direct squareclass residual:
-
-```lean
-def RatSquareclassS23Residual : Prop :=
-  ∀ {q : ℚ}, q ≠ 0 →
-    (∀ p : ℕ, p.Prime → p ≠ 2 → p ≠ 3 → padicValRat p q % 2 = 0) →
-      ∃ d : ℤ, InS23 d ∧ SquareclassBy q d
-```
-
-This is likely the hardest standalone arithmetic theorem after Residual A.
-
-## Algebraic wrapper: three squareclasses imply rational cover data
-
-Given:
+Then
 
 ```text
-X     = d0*r0^2,
-X - 1 = d1*r1^2,
-X + 3 = d3*r3^2,
+S0^2 = (2*A0)^2 + D0^2,
+R0^2 = (4*A0)^2 + D0^2,
+gcd(A0,D0)=1,
+D0 odd,
+A0 ≠ 0, D0 ≠ 0.
 ```
 
-with all `rᵢ ≠ 0`, choose a common nonzero denominator:
+From `S0^2 = (2*A0)^2 + D0^2`, primitive Pythagorean classification gives coprime parameters `U,V` with
 
 ```text
-r0 = A/T,  r1 = B/T,  r3 = C/T.
+U*V = A0,
+U^2 - V^2 = ε*D0,     ε ∈ {1,-1},
+U even, V odd.
 ```
 
-Then the cover equations are just subtraction:
+The choice `U even, V odd` is deliberate.  If Mathlib returns the even parameter second, swap the names and absorb the sign into `ε`.
+
+From `R0^2 = (4*A0)^2 + D0^2`, primitive classification gives coprime parameters `U',V'` with
 
 ```text
-d0*(A/T)^2 - d1*(B/T)^2 = 1,
-d3*(C/T)^2 - d0*(A/T)^2 = 3.
+U'*V' = A0,
+4*U'^2 - V'^2 = η*D0,     η ∈ {1,-1},
+U' even, V' odd.
 ```
 
-Multiplying by `T^2` gives `CoverQ` in the normalization used above:
-
-```lean
-(d0 : ℚ) * A ^ 2 - (d1 : ℚ) * B ^ 2 = T ^ 2
-(d3 : ℚ) * C ^ 2 - (d0 : ℚ) * A ^ 2 = (3 : ℚ) * T ^ 2
-```
-
-The product-square condition follows from the curve:
+Here `2*U'` is the even Pythagorean parameter for the second triangle, because
 
 ```text
-Y^2 = d0*d1*d3*(r0*r1*r3)^2
+4*A0 = 2*(2*U')*V'.
+```
+
+This is the main place where an off-by-two error can enter.
+
+Since both
+
+```text
+U^2 - V^2        ≡ -1 mod 4,
+4*U'^2 - V'^2   ≡ -1 mod 4,
+```
+
+and `D0` is odd, the signs are equal: `ε = η`.  Then the two factorizations `U*V = U'*V' = A0`, with `U,U'` even and `V,V'` odd, refine to pairwise coprime integers `2a,b,c,d` such that
+
+```text
+U  = 2*a*b,     V  = c*d,
+U' = 2*a*c,     V' = b*d,
+A0 = 2*a*b*c*d,
+```
+
+with `a,b,c,d` nonzero and `b,c,d` odd.  Substituting gives
+
+```text
+ε*D0 = 4*a^2*b^2 - c^2*d^2
+ε*D0 = 16*a^2*c^2 - b^2*d^2.
+```
+
+Subtracting yields
+
+```text
+b^2 * (4*a^2 + d^2) = c^2 * (16*a^2 + d^2).      (★)
+```
+
+The two factors
+
+```text
+M = 4*a^2 + d^2,
+N = 16*a^2 + d^2
+```
+
+are positive and coprime.  Any common prime divisor divides `N-M = 12*a^2`; since it also divides `M`, it cannot divide `a`, hence it divides `12`.  It is not `2` because `d` is odd, and it is not `3` because `a^2+d^2` is not `0 mod 3` when `gcd(a,d)=1`.  Thus `gcd(M,N)=1`.
+
+From `(★)` and `gcd(M,N)=1`, the prime exponents of `M` and `N` are even, so both are squares.  Equivalently, use a dedicated lemma `coprime_ratio_square_imp_squares`.  Therefore there are `s,r` with
+
+```text
+s^2 = 4*a^2 + d^2,
+r^2 = 16*a^2 + d^2.
+```
+
+Hence `(a,d)` is a new `EulerAux` solution.  The descent is strict because
+
+```text
+A0 = 2*a*b*c*d,    D0 ≥ 1,    |b| ≥ 1,    |c| ≥ 1,
 ```
 
 so
 
 ```text
-d0*d1*d3 = (Y/(r0*r1*r3))^2.
+|a*d| < |A*D| = A0*D0.
 ```
 
-This wrapper is algebraic.  It should be proved now once the common-denominator helper is available.
+## Hidden flaw in `U=2ab, V=cd, U'=2ac, V'=bd`
 
-Suggested helper residual only if denominator code gets annoying:
-
-```lean
-def RatCommonDenom3NonzeroStatement : Prop :=
-  ∀ r0 r1 r3 : ℚ,
-    r0 ≠ 0 → r1 ≠ 0 → r3 ≠ 0 →
-      ∃ A B C T : ℤ,
-        T ≠ 0 ∧ A ≠ 0 ∧ B ≠ 0 ∧ C ≠ 0 ∧
-        r0 = (A : ℚ) / (T : ℚ) ∧
-        r1 = (B : ℚ) / (T : ℚ) ∧
-        r3 = (C : ℚ) / (T : ℚ)
-```
-
-This is not mathematically hard.  Construct `T` as a product or lcm of the three denominators, for example:
+The formula is correct **only** with the following convention:
 
 ```text
-T = r0.den * r1.den * r3.den
-A = r0.num * r1.den * r3.den
-B = r1.num * r0.den * r3.den
-C = r3.num * r0.den * r1.den
+first triple:   D = U^2 - V^2,       2A = 2UV,
+second triple:  D = 4U'^2 - V'^2,    4A = 4U'V'.
 ```
 
-using `Rat.num_divInt_den`, `Rat.den_pos`, and `Rat.den_nz`.
+Thus `2U'` is the actual even parameter in the second Pythagorean triple.  If one writes the second odd leg as `U'^2 - V'^2`, the formula is off by a factor of `4`.  The sign also cannot be ignored: one must prove the two signs agree, best by the mod-4 argument above.
 
-## Algebraic wrapper: rational cover data to primitive integer cover data
+## Lean theorem DAG
 
-After `RatCommonDenom3NonzeroStatement`, you already have integer `A B C T` satisfying the rational equations.  Cast equality from `ℚ` back to `ℤ` by clearing the nonzero denominator.  The equations are polynomial with integer coefficients, so this is straightforward with `norm_num`, `ring`, and `exact_mod_cast` where possible.
-
-Primitive normalization:
-
-1. Let `g` be a positive common divisor of `A,B,C,T`, e.g. iterated gcd of natAbs values.
-2. Write `A = g*A'`, `B = g*B'`, `C = g*C'`, `T = g*T'`.
-3. Divide both homogeneous quadratic equations by `g^2`.
-4. Prove no prime divides all `A',B',C',T'`.
-5. Nonzero is preserved because original coordinates are nonzero and `g ≠ 0`.
-
-This is algebraic but can be tedious.  If needed, isolate it as:
+Use `Prop` wrappers first, then replace them by theorems as they are proved.  This avoids fake `sorry` scaffolding.
 
 ```lean
-def PrimitiveNormalizeCoverIntStatement : Prop :=
-  ∀ {d0 d1 d3 A B C T : ℤ},
-    T ≠ 0 → A ≠ 0 → B ≠ 0 → C ≠ 0 →
-    CoverInt d0 d1 d3 A B C T →
-      ∃ A' B' C' T' : ℤ,
-        T' ≠ 0 ∧ A' ≠ 0 ∧ B' ≠ 0 ∧ C' ≠ 0 ∧
-        PrimitiveInt4 A' B' C' T' ∧
-        CoverInt d0 d1 d3 A' B' C' T'
+import Mathlib.NumberTheory.PythagoreanTriples
+import Mathlib.NumberTheory.FLT.Four
+import Mathlib.Data.Int.Parity
+
+namespace MazurProof.RationalPointsN12
+
+/-- Local auxiliary condition for Euler/van der Poorten descent. -/
+def EulerAux (A D : ℤ) : Prop :=
+  A ≠ 0 ∧ D ≠ 0 ∧ Odd D ∧ Nat.Coprime A.natAbs D.natAbs ∧
+    ∃ S R : ℤ, S ^ 2 = 4 * A ^ 2 + D ^ 2 ∧
+      R ^ 2 = 16 * A ^ 2 + D ^ 2
+
+/-- Pairwise coprimality for four integer parameters, stated on `natAbs`. -/
+def PairwiseCoprime4 (w x y z : ℤ) : Prop :=
+  Nat.Coprime w.natAbs x.natAbs ∧
+  Nat.Coprime w.natAbs y.natAbs ∧
+  Nat.Coprime w.natAbs z.natAbs ∧
+  Nat.Coprime x.natAbs y.natAbs ∧
+  Nat.Coprime x.natAbs z.natAbs ∧
+  Nat.Coprime y.natAbs z.natAbs
+
+/-- Normalized positive form extracted from `EulerAux A D`. -/
+def EulerAuxPositiveData (A0 D0 S0 R0 : ℤ) : Prop :=
+  0 < A0 ∧ 0 < D0 ∧ 0 < S0 ∧ 0 < R0 ∧ Odd D0 ∧
+  Nat.Coprime A0.natAbs D0.natAbs ∧
+  S0 ^ 2 = 4 * A0 ^ 2 + D0 ^ 2 ∧
+  R0 ^ 2 = 16 * A0 ^ 2 + D0 ^ 2
+
+/-- Algebraic normalization by absolute values. -/
+def EulerAux_abs_normalize_statement : Prop :=
+  ∀ {A D : ℤ}, EulerAux A D →
+    ∃ A0 D0 S0 R0 : ℤ,
+      EulerAuxPositiveData A0 D0 S0 R0 ∧
+      A0 = (A.natAbs : ℤ) ∧ D0 = (D.natAbs : ℤ)
+
+/-- `A0` is even.  This is a mod-8 consequence of
+`S0^2 = 4*A0^2 + D0^2` and `D0` odd. -/
+def EulerAuxPositiveData_even_A_statement : Prop :=
+  ∀ {A0 D0 S0 R0 : ℤ}, EulerAuxPositiveData A0 D0 S0 R0 → Even A0
+
+/-- First primitive Pythagorean parametrization, with the even parameter named
+`U`.  The sign `eps` records whether the even square is larger than the odd
+square. -/
+def Euler_first_params_statement : Prop :=
+  ∀ {A0 D0 S0 R0 : ℤ}, EulerAuxPositiveData A0 D0 S0 R0 → Even A0 →
+    ∃ eps U V : ℤ,
+      (eps = 1 ∨ eps = -1) ∧
+      U ≠ 0 ∧ V ≠ 0 ∧ Even U ∧ Odd V ∧
+      Nat.Coprime U.natAbs V.natAbs ∧
+      U * V = A0 ∧
+      U ^ 2 - V ^ 2 = eps * D0
+
+/-- Second primitive Pythagorean parametrization.  Here `2*Up` is the even
+Pythagorean parameter, so the odd leg is `4*Up^2 - Vp^2`. -/
+def Euler_second_params_statement : Prop :=
+  ∀ {A0 D0 S0 R0 : ℤ}, EulerAuxPositiveData A0 D0 S0 R0 → Even A0 →
+    ∃ eta Up Vp : ℤ,
+      (eta = 1 ∨ eta = -1) ∧
+      Up ≠ 0 ∧ Vp ≠ 0 ∧ Even Up ∧ Odd Vp ∧
+      Nat.Coprime Up.natAbs Vp.natAbs ∧
+      Up * Vp = A0 ∧
+      4 * Up ^ 2 - Vp ^ 2 = eta * D0
+
+/-- The two signs in the first and second parametrizations agree.  The proof is
+by reducing both displayed odd-leg formulas modulo `4`. -/
+def Euler_param_signs_agree_statement : Prop :=
+  ∀ {D0 eps eta U V Up Vp : ℤ},
+    Odd D0 →
+    (eps = 1 ∨ eps = -1) → (eta = 1 ∨ eta = -1) →
+    Even U → Odd V → Odd Vp →
+    U ^ 2 - V ^ 2 = eps * D0 →
+    4 * Up ^ 2 - Vp ^ 2 = eta * D0 →
+      eps = eta
+
+/-- Refinement of the two coprime factorizations of the same even integer.
+This is the factor-splitting lemma behind
+`U=2ab, V=cd, Up=2ac, Vp=bd`. -/
+def Euler_factor_refinement_statement : Prop :=
+  ∀ {A0 U V Up Vp : ℤ},
+    0 < A0 →
+    U * V = A0 → Up * Vp = A0 →
+    U ≠ 0 → V ≠ 0 → Up ≠ 0 → Vp ≠ 0 →
+    Even U → Even Up → Odd V → Odd Vp →
+    Nat.Coprime U.natAbs V.natAbs →
+    Nat.Coprime Up.natAbs Vp.natAbs →
+      ∃ a b c d : ℤ,
+        a ≠ 0 ∧ b ≠ 0 ∧ c ≠ 0 ∧ d ≠ 0 ∧
+        Odd b ∧ Odd c ∧ Odd d ∧
+        PairwiseCoprime4 (2 * a) b c d ∧
+        U = 2 * a * b ∧ V = c * d ∧
+        Up = 2 * a * c ∧ Vp = b * d ∧
+        A0 = 2 * a * b * c * d
+
+/-- The refined parameters give the two signed formulas for `D0`. -/
+def Euler_refined_D_formulas_statement : Prop :=
+  ∀ {D0 eps U V Up Vp a b c d : ℤ},
+    U = 2 * a * b → V = c * d →
+    Up = 2 * a * c → Vp = b * d →
+    U ^ 2 - V ^ 2 = eps * D0 →
+    4 * Up ^ 2 - Vp ^ 2 = eps * D0 →
+      eps * D0 = 4 * a ^ 2 * b ^ 2 - c ^ 2 * d ^ 2 ∧
+      eps * D0 = 16 * a ^ 2 * c ^ 2 - b ^ 2 * d ^ 2
+
+/-- Coprimality of the two new Euler factors. -/
+def Euler_new_factors_coprime_statement : Prop :=
+  ∀ {a d : ℤ},
+    a ≠ 0 → d ≠ 0 → Odd d → Nat.Coprime a.natAbs d.natAbs →
+      Nat.Coprime (4 * a ^ 2 + d ^ 2).natAbs
+        (16 * a ^ 2 + d ^ 2).natAbs
+
+/-- From `b^2*M = c^2*N` with coprime positive `M,N`, conclude `M,N` are
+squares.  This is the most reusable number-theoretic sublemma; it can be
+proved by prime multiplicities, or by adapting `Int.sq_of_gcd_eq_one`. -/
+def coprime_ratio_square_imp_squares_statement : Prop :=
+  ∀ {b c M N : ℤ},
+    b ≠ 0 → c ≠ 0 → 0 < M → 0 < N →
+    Nat.Coprime M.natAbs N.natAbs →
+    b ^ 2 * M = c ^ 2 * N →
+      ∃ s r : ℤ, s ^ 2 = M ∧ r ^ 2 = N
+
+/-- The actual local construction of the smaller EulerAux pair from refined
+parameters.  The smaller pair is exactly `(a,d)`. -/
+def Euler_refined_params_to_smaller_statement : Prop :=
+  ∀ {A0 D0 eps a b c d : ℤ},
+    0 < A0 → 0 < D0 →
+    (eps = 1 ∨ eps = -1) →
+    a ≠ 0 → b ≠ 0 → c ≠ 0 → d ≠ 0 →
+    Odd d → PairwiseCoprime4 (2 * a) b c d →
+    A0 = 2 * a * b * c * d →
+    eps * D0 = 4 * a ^ 2 * b ^ 2 - c ^ 2 * d ^ 2 →
+    eps * D0 = 16 * a ^ 2 * c ^ 2 - b ^ 2 * d ^ 2 →
+      EulerAux a d ∧ (a * d).natAbs < (A0 * D0).natAbs
+
+/-- Final descent statement, composed from the above lemmas. -/
+def EulerAux_descent_step_statement : Prop :=
+  ∀ {A D : ℤ}, EulerAux A D →
+    ∃ a d : ℤ, EulerAux a d ∧ (a * d).natAbs < (A * D).natAbs
+
+end MazurProof.RationalPointsN12
 ```
 
-This residual is not genuinely hard; it is just gcd normalization.
+## Proof plan for the hard theorem
 
-## Recommended theorem DAG
+### 1. Normalize signs by absolute values
 
-Use this DAG in the file:
+Prove `EulerAux_abs_normalize_statement` directly.  Replace witnesses `S,R` by `S.natAbs`, `R.natAbs`; use `Int.natAbs_mul_self` or `sq_abs`-style lemmas plus `ring_nf`.  The final descent bound is stated in `natAbs`, so no sign information is lost.
+
+### 2. Prove `A0` even
+
+Use the first square equation modulo `8`:
+
+```text
+D0 odd → D0^2 ≡ 1 mod 8.
+A0 odd → 4*A0^2 ≡ 4 mod 8.
+```
+
+Then `S0^2 ≡ 5 mod 8`, impossible because integer squares modulo `8` are `0,1,4`.  This is a small finite `ZMod 8` lemma.
+
+Suggested helper:
 
 ```lean
--- Easy algebra, prove now.
-E1NonzeroFactorStatement
-RatShiftNumDenSameDenStatement
-E1ReducedNumeratorGcdFactsStatement
-RatCommonDenom3NonzeroStatement
-E1FullCoverQDataOfFactorSquareclassesStatement
-PrimitiveNormalizeCoverIntStatement
-E1FullCoverIntDataOfQDataStatement
-
--- Genuine arithmetic residuals.
-E1FactorValEvenAway23Statement
-RatSquareclassSupportedOn23OfValEvenAway23Statement
-
--- Final composition.
-E1FullCoverSquareclassExtractionIntStatement
+def sq_mod8_mem_statement : Prop :=
+  ∀ z : ZMod 8, z ^ 2 = 0 ∨ z ^ 2 = 1 ∨ z ^ 2 = 4
 ```
 
-If you need the smallest single residual for the current N=12 build, use only:
+This can be proved by `fin_cases z <;> decide`.
+
+### 3. Pythagorean parametrizations
+
+Use Mathlib’s `PythagoreanTriple` API:
 
 ```lean
-def E1FullCoverSquareclassExtractionIntStatement : Prop :=
-  ∀ {X Y : ℚ}, E1 X Y → Y ≠ 0 → E1FullCoverIntData X Y
+#check PythagoreanTriple
+#check PythagoreanTriple.coprime_classification
+#check PythagoreanTriple.coprime_classification'
 ```
 
-If you want the smallest honest split that still exposes progress, use the two genuine arithmetic residuals:
+For the first triangle, build
 
 ```lean
-def E1FactorValEvenAway23Statement : Prop := ...
-def RatSquareclassSupportedOn23OfValEvenAway23Statement : Prop := ...
+have htri1 : PythagoreanTriple D0 (2*A0) S0 := by
+  unfold PythagoreanTriple
+  nlinarith [hS]
 ```
 
-Everything after those two should be treated as Lean plumbing rather than mathematics.
+Use `PythagoreanTriple.coprime_classification'` with:
+
+```text
+gcd(D0, 2*A0)=1,
+D0 % 2 = 1,
+0 < S0.
+```
+
+The gcd follows from `Nat.Coprime A0.natAbs D0.natAbs` and `D0` odd.  If the classification returns `D0 = m^2-n^2`, `2*A0 = 2*m*n`, choose the even one among `m,n` as `U` and the odd one as `V`; if this swaps order, record the sign `eps=-1`.
+
+For the second triangle, build
+
+```lean
+have htri2 : PythagoreanTriple D0 (4*A0) R0 := by
+  unfold PythagoreanTriple
+  nlinarith [hR]
+```
+
+Again classify.  Since `4*A0 = 2*m*n`, the even parameter is divisible by `2`; write it as `2*Up`, with the odd parameter `Vp`.  Then
+
+```text
+Up*Vp = A0,
+4*Up^2 - Vp^2 = eta*D0.
+```
+
+This is a common place for a Lean proof to become long: isolate divisibility of the even parameter by `2` as a separate lemma, using `A0` even and the product equation.
+
+### 4. Prove sign agreement
+
+This is short and should not be residual.  From `Even U`, `Odd V`, and `Odd Vp`:
+
+```text
+U^2 - V^2 ≡ -1 mod 4,
+4*Up^2 - Vp^2 ≡ -1 mod 4.
+```
+
+Both equal a sign times `D0`.  Since `D0` is odd, multiplication by `D0` distinguishes `1` from `-1` modulo `4`.  Therefore `eps=eta`.
+
+### 5. Factor refinement
+
+This is one of the hardest Lean lemmas, but it is pure arithmetic.  Work with positive natural absolute values if possible.
+
+Constructive formulas:
+
+```text
+a = gcd(U/2, Up/2),
+b = (U/2)/a,
+c = (Up/2)/a,
+d = V/c = Vp/b.
+```
+
+Then prove:
+
+```text
+U  = 2ab,
+V  = cd,
+Up = 2ac,
+Vp = bd.
+```
+
+The proof uses:
+
+```lean
+Nat.Coprime.dvd_of_dvd_mul_left
+Nat.Coprime.dvd_of_dvd_mul_right
+Nat.gcd_dvd_left
+Nat.gcd_dvd_right
+Nat.coprime_div_gcd_div_gcd
+```
+
+For sign-safety, first replace `U,V,Up,Vp` by positive parameters.  Since `U*V=A0>0` and `Up*Vp=A0>0`, the two factors in each pair have the same sign; flipping both signs preserves the square-difference formula and product.  State a normalization lemma if needed:
+
+```lean
+def normalize_factor_pair_sign_statement : Prop :=
+  ∀ {U V A0 : ℤ}, 0 < A0 → U * V = A0 →
+    ∃ U1 V1 : ℤ, 0 < U1 ∧ 0 < V1 ∧
+      U1 * V1 = A0 ∧ U1 ^ 2 = U ^ 2 ∧ V1 ^ 2 = V ^ 2
+```
+
+### 6. Prove the new factors are coprime and square
+
+From pairwise coprime `2a,b,c,d`, get:
+
+```text
+gcd(a,d)=1, d odd.
+```
+
+For
+
+```text
+M = 4a^2+d^2,
+N = 16a^2+d^2,
+```
+
+prove `gcd(M,N)=1` as described above.  Then subtract the two `D0` formulas to get
+
+```text
+b^2*M = c^2*N.
+```
+
+Use `coprime_ratio_square_imp_squares_statement` to get `S,R` for the new `EulerAux a d`.
+
+This `coprime_ratio_square_imp_squares_statement` is the second hardest standalone lemma.  It is very similar in spirit to Mathlib’s `Int.sq_of_gcd_eq_one`, used in `Mathlib.NumberTheory.FLT.Four`, and can probably be proved by adapting that lemma or by prime multiplicity parity.
+
+### 7. Strict descent bound
+
+Use
+
+```text
+A0 = 2*a*b*c*d,
+D0 ≠ 0,
+b ≠ 0,
+c ≠ 0.
+```
+
+Then
+
+```text
+|A*D| = A0*D0 = 2*|a|*|b|*|c|*|d|*D0
+```
+
+and `|b|,|c|,D0 ≥ 1`, so
+
+```text
+|a*d| < |A*D|.
+```
+
+This part is easy `natAbs` arithmetic after the sign normalization.
+
+## Hardest lemmas to isolate
+
+1. `Euler_factor_refinement_statement`: splitting two coprime factorizations into `U=2ab`, `V=cd`, `Up=2ac`, `Vp=bd`.  This is pure gcd/divisibility but will be the longest Lean proof.
+2. `coprime_ratio_square_imp_squares_statement`: from `b^2*M = c^2*N` and `gcd(M,N)=1`, prove `M,N` squares.  Use `Int.sq_of_gcd_eq_one` or multiplicity parity.
+3. The Pythagorean parameter normalization for the second triangle: converting the even parameter to `2*Up` and proving `Up*Vp=A0` without losing signs.
+
+Everything else is algebra, parity, or `natAbs` bookkeeping.
+
+## Non-circularity
+
+This descent uses only:
+
+- primitive Pythagorean triple classification,
+- gcd/factorization arithmetic,
+- parity/modular square facts,
+- infinite descent via the strict `natAbs` measure.
+
+It does **not** use the elliptic curve finite-point theorem, the N=12 rational point theorem, or any E1 point classification.
