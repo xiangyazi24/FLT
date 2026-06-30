@@ -1,199 +1,143 @@
-# Q2366 (dm-codex2): fast integer-to-rational bridge for Eisenstein quartic
+# Q2377 (dm-codex2): local E24/E1 shift and point-list plumbing
 
 ```lean
 import FLT.Assumptions.MazurProof.RationalPointsN12
 
 namespace MazurProof.RationalPointsN12
 
-/--
-Tiny denominator lemma: no `field_simp`; only `div_pow` and the polynomial
-identity `(n^2)^2 = n^4`.
+/-!
+If `E24` or `E24XCoordinateClassification` already exist from Q2368, do not
+re-add those duplicate `def`s.  The theorem proofs below are otherwise local
+and should be pasteable unchanged.
 -/
-theorem rat_sq_div_sq_eq_div_four (c n : ℚ) :
-    (c / n ^ 2) ^ 2 = c ^ 2 / n ^ 4 := by
-  rw [div_pow]
-  rw [show (n ^ 2) ^ 2 = n ^ 4 by ring]
 
-/--
-After multiplication by `n^4`, the rational quartic RHS is the homogeneous
-integer numerator.  This is the main anti-blowup lemma: all cancellation is
-explicit and local.
--/
-theorem rat_quartic_eisenstein_rhs_mul_denom
-    (m n : ℚ) (hn : n ≠ 0) :
-    ((m / n) ^ 4 - (m / n) ^ 2 + 1) * n ^ 4 =
-      m ^ 4 - m ^ 2 * n ^ 2 + n ^ 4 := by
-  have hn2 : n ^ 2 ≠ 0 := pow_ne_zero 2 hn
-  have hn4 : n ^ 4 ≠ 0 := pow_ne_zero 4 hn
-  have hterm2 : (m ^ 2 / n ^ 2) * n ^ 4 = m ^ 2 * n ^ 2 := by
-    calc
-      (m ^ 2 / n ^ 2) * n ^ 4
-          = (m ^ 2 / n ^ 2) * (n ^ 2 * n ^ 2) := by
-              rw [show n ^ 4 = n ^ 2 * n ^ 2 by ring]
-      _ = ((m ^ 2 / n ^ 2) * n ^ 2) * n ^ 2 := by ring
-      _ = m ^ 2 * n ^ 2 := by
-          rw [div_mul_cancel₀ (m ^ 2) hn2]
+/-- The shifted hard residual curve. -/
+def E24 (U V : ℚ) : Prop :=
+  V ^ 2 = U ^ 3 - U ^ 2 - 4 * U + 4
+
+/-- The convenient translated curve, with `X = U - 1`. -/
+def E1 (X Y : ℚ) : Prop :=
+  Y ^ 2 = X ^ 3 + 2 * X ^ 2 - 3 * X
+
+/-- Full affine rational point list for `E1`.  This is the hard input. -/
+def E1AffinePointList : Prop :=
+  ∀ {X Y : ℚ}, E1 X Y →
+    (X = -3 ∧ Y = 0) ∨
+    (X = 0 ∧ Y = 0) ∨
+    (X = 1 ∧ Y = 0) ∨
+    (X = -1 ∧ Y = 2) ∨
+    (X = -1 ∧ Y = -2) ∨
+    (X = 3 ∧ Y = 6) ∨
+    (X = 3 ∧ Y = -6)
+
+/-- Full affine rational point list for `E24`. -/
+def E24AffineRationalPoints : Prop :=
+  ∀ {U V : ℚ}, E24 U V →
+    (U = -2 ∧ V = 0) ∨
+    (U = 1 ∧ V = 0) ∨
+    (U = 2 ∧ V = 0) ∨
+    (U = 0 ∧ V = 2) ∨
+    (U = 0 ∧ V = -2) ∨
+    (U = 4 ∧ V = 6) ∨
+    (U = 4 ∧ V = -6)
+
+/-- X-coordinate-only classification for `E24`. -/
+def E24XCoordinateClassification : Prop :=
+  ∀ {U V : ℚ}, E24 U V →
+    U = -2 ∨ U = 0 ∨ U = 1 ∨ U = 2 ∨ U = 4
+
+/-- Forward translation: `E24(U,V)` gives `E1(U-1,V)`. -/
+theorem e1_of_e24_shift {U V : ℚ}
+    (h : E24 U V) :
+    E1 (U - 1) V := by
+  unfold E24 E1 at *
   calc
-    ((m / n) ^ 4 - (m / n) ^ 2 + 1) * n ^ 4
-        = (m ^ 4 / n ^ 4 - m ^ 2 / n ^ 2 + 1) * n ^ 4 := by
-            rw [div_pow, div_pow]
-    _ = (m ^ 4 / n ^ 4) * n ^ 4 -
-          (m ^ 2 / n ^ 2) * n ^ 4 + 1 * n ^ 4 := by
-            ring
-    _ = m ^ 4 - m ^ 2 * n ^ 2 + n ^ 4 := by
-        rw [div_mul_cancel₀ (m ^ 4) hn4, hterm2]
-        ring
+    V ^ 2 = U ^ 3 - U ^ 2 - 4 * U + 4 := h
+    _ = (U - 1) ^ 3 + 2 * (U - 1) ^ 2 - 3 * (U - 1) := by
+      ring
 
-/--
-Division form of the previous lemma.  The only cancellation is by the single
-nonzero denominator `n^4`.
--/
-theorem rat_quartic_eisenstein_rhs_eq_div
-    (m n : ℚ) (hn : n ≠ 0) :
-    (m / n) ^ 4 - (m / n) ^ 2 + 1 =
-      (m ^ 4 - m ^ 2 * n ^ 2 + n ^ 4) / n ^ 4 := by
-  have hn4 : n ^ 4 ≠ 0 := pow_ne_zero 4 hn
-  apply mul_right_cancel₀ hn4
+/-- Reverse translation, useful for sanity checks and alternative wrappers. -/
+theorem e24_of_e1_shift {X Y : ℚ}
+    (h : E1 X Y) :
+    E24 (X + 1) Y := by
+  unfold E1 E24 at *
   calc
-    ((m / n) ^ 4 - (m / n) ^ 2 + 1) * n ^ 4
-        = m ^ 4 - m ^ 2 * n ^ 2 + n ^ 4 :=
-            rat_quartic_eisenstein_rhs_mul_denom m n hn
-    _ = ((m ^ 4 - m ^ 2 * n ^ 2 + n ^ 4) / n ^ 4) * n ^ 4 := by
-        exact (div_mul_cancel₀ (m ^ 4 - m ^ 2 * n ^ 2 + n ^ 4) hn4).symm
+    Y ^ 2 = X ^ 3 + 2 * X ^ 2 - 3 * X := h
+    _ = (X + 1) ^ 3 - (X + 1) ^ 2 - 4 * (X + 1) + 4 := by
+      ring
 
-/--
-Integer homogeneous Eisenstein quartic equation gives the affine rational C12
-equation at `x = m/n`, `y = c/n^2`.
-
-This avoids `field_simp` at the final large expression.  The proof only casts
-the integer identity, rewrites the LHS by `rat_sq_div_sq_eq_div_four`, and
-rewrites the RHS by `rat_quartic_eisenstein_rhs_eq_div`.
--/
-theorem int_to_ratQuarticEisenstein
-    {m n c : ℤ}
-    (h : c ^ 2 = m ^ 4 - m ^ 2 * n ^ 2 + n ^ 4)
-    (hn : n ≠ 0) :
-    ((c : ℚ) / (n : ℚ) ^ 2) ^ 2 =
-      ((m : ℚ) / (n : ℚ)) ^ 4 -
-        ((m : ℚ) / (n : ℚ)) ^ 2 + 1 := by
-  have hnQ : (n : ℚ) ≠ 0 := by
-    exact_mod_cast hn
-  have hQ :
-      (c : ℚ) ^ 2 =
-        (m : ℚ) ^ 4 - (m : ℚ) ^ 2 * (n : ℚ) ^ 2 + (n : ℚ) ^ 4 := by
-    exact_mod_cast h
+/-- Tiny linear helper for converting an `E1` `X`-coordinate to an `E24` `U`. -/
+theorem rat_eq_of_sub_one_eq_add_one {U A B : ℚ}
+    (hUA : U - 1 = A) (hAB : A + 1 = B) :
+    U = B := by
   calc
-    ((c : ℚ) / (n : ℚ) ^ 2) ^ 2
-        = (c : ℚ) ^ 2 / (n : ℚ) ^ 4 :=
-            rat_sq_div_sq_eq_div_four (c : ℚ) (n : ℚ)
-    _ = ((m : ℚ) ^ 4 - (m : ℚ) ^ 2 * (n : ℚ) ^ 2 + (n : ℚ) ^ 4) /
-          (n : ℚ) ^ 4 := by
-            rw [hQ]
-    _ = ((m : ℚ) / (n : ℚ)) ^ 4 -
-          ((m : ℚ) / (n : ℚ)) ^ 2 + 1 := by
-            rw [← rat_quartic_eisenstein_rhs_eq_div (m : ℚ) (n : ℚ) hnQ]
+    U = (U - 1) + 1 := by ring
+    _ = A + 1 := by rw [hUA]
+    _ = B := hAB
 
-/-- If `m/n = 0` over `ℚ` and `n ≠ 0`, then `m = 0` over `ℤ`. -/
-theorem int_eq_zero_of_rat_div_eq_zero
-    {m n : ℤ}
-    (hn : n ≠ 0)
-    (h : (m : ℚ) / (n : ℚ) = 0) :
-    m = 0 := by
-  have hnQ : (n : ℚ) ≠ 0 := by
-    exact_mod_cast hn
-  have hmQ : (m : ℚ) = 0 := by
-    calc
-      (m : ℚ) = ((m : ℚ) / (n : ℚ)) * (n : ℚ) := by
-        exact (div_mul_cancel₀ (m : ℚ) hnQ).symm
-      _ = 0 := by
-        simp [h]
-  exact_mod_cast hmQ
+/-- Translate the hard `E1` full point list into the full `E24` point list. -/
+theorem E24AffineRationalPoints_of_E1AffineRationalPoints
+    (hpts : E1AffinePointList) :
+    E24AffineRationalPoints := by
+  intro U V hE24
+  have hE1 : E1 (U - 1) V := e1_of_e24_shift hE24
+  rcases hpts (X := U - 1) (Y := V) hE1 with
+      h_m3 | h_0 | h_1 | h_neg1_pos | h_neg1_neg | h_3_pos | h_3_neg
+  · rcases h_m3 with ⟨hX, hY⟩
+    exact Or.inl ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩
+  · rcases h_0 with ⟨hX, hY⟩
+    exact Or.inr (Or.inl ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩)
+  · rcases h_1 with ⟨hX, hY⟩
+    exact Or.inr (Or.inr (Or.inl ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩))
+  · rcases h_neg1_pos with ⟨hX, hY⟩
+    exact Or.inr (Or.inr (Or.inr (Or.inl ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩)))
+  · rcases h_neg1_neg with ⟨hX, hY⟩
+    exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩))))
+  · rcases h_3_pos with ⟨hX, hY⟩
+    exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩)))))
+  · rcases h_3_neg with ⟨hX, hY⟩
+    exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩)))))
 
-/-- If `(m/n)^2 = 1` over `ℚ` and `n ≠ 0`, then `m^2 = n^2` over `ℤ`. -/
-theorem int_sq_eq_sq_of_rat_div_sq_eq_one
-    {m n : ℤ}
-    (hn : n ≠ 0)
-    (h : ((m : ℚ) / (n : ℚ)) ^ 2 = 1) :
-    m ^ 2 = n ^ 2 := by
-  have hnQ : (n : ℚ) ≠ 0 := by
-    exact_mod_cast hn
-  have hnQ2 : (n : ℚ) ^ 2 ≠ 0 := pow_ne_zero 2 hnQ
-  have hmnQ : (m : ℚ) ^ 2 = (n : ℚ) ^ 2 := by
-    calc
-      (m : ℚ) ^ 2
-          = (((m : ℚ) / (n : ℚ)) ^ 2) * (n : ℚ) ^ 2 := by
-              rw [div_pow]
-              exact (div_mul_cancel₀ ((m : ℚ) ^ 2) hnQ2).symm
-      _ = 1 * (n : ℚ) ^ 2 := by
-          rw [h]
-      _ = (n : ℚ) ^ 2 := by
-          ring
-  exact_mod_cast hmnQ
+/-- Full `E24` affine list implies the X-coordinate-only classification. -/
+theorem e24_xCoordinateClassification_of_e24_points
+    (hpts : E24AffineRationalPoints) :
+    E24XCoordinateClassification := by
+  intro U V hE24
+  rcases hpts (U := U) (V := V) hE24 with
+      h_m2 | h_1 | h_2 | h_0_pos | h_0_neg | h_4_pos | h_4_neg
+  · exact Or.inl h_m2.1
+  · exact Or.inr (Or.inr (Or.inl h_1.1))
+  · exact Or.inr (Or.inr (Or.inr (Or.inl h_2.1)))
+  · exact Or.inr (Or.inl h_0_pos.1)
+  · exact Or.inr (Or.inl h_0_neg.1)
+  · exact Or.inr (Or.inr (Or.inr (Or.inr h_4_pos.1)))
+  · exact Or.inr (Or.inr (Or.inr (Or.inr h_4_neg.1)))
 
-/--
-Wrapper from rational C12 classification to the homogeneous integer
-classification frontier.
-
-Use this when the rational theorem is available in the form
-`∀ {x y : ℚ}, y^2 = x^4 - x^2 + 1 → x = 0 ∨ x^2 = 1`.
--/
-theorem eisensteinQuarticSquareClassification_of_ratC12
-    (hRat : ∀ {x y : ℚ},
-      y ^ 2 = x ^ 4 - x ^ 2 + 1 → x = 0 ∨ x ^ 2 = 1) :
-    EisensteinQuarticSquareClassification := by
-  intro m n c h
-  by_cases hn : n = 0
-  · exact Or.inr (Or.inl hn)
-  · have hrat :
-        ((c : ℚ) / (n : ℚ) ^ 2) ^ 2 =
-          ((m : ℚ) / (n : ℚ)) ^ 4 -
-            ((m : ℚ) / (n : ℚ)) ^ 2 + 1 :=
-        int_to_ratQuarticEisenstein (m := m) (n := n) (c := c) h hn
-    have hx :
-        (m : ℚ) / (n : ℚ) = 0 ∨
-          ((m : ℚ) / (n : ℚ)) ^ 2 = 1 :=
-      hRat
-        (x := (m : ℚ) / (n : ℚ))
-        (y := (c : ℚ) / (n : ℚ) ^ 2)
-        hrat
-    rcases hx with hx0 | hx1
-    · exact Or.inl (int_eq_zero_of_rat_div_eq_zero hn hx0)
-    · exact Or.inr (Or.inr (int_sq_eq_sq_of_rat_div_sq_eq_one hn hx1))
+/-- Direct wrapper from the hard `E1` point-list theorem to `E24` X-coordinates. -/
+theorem e24_xCoordinateClassification_of_e1_points
+    (hpts : E1AffinePointList) :
+    E24XCoordinateClassification := by
+  exact e24_xCoordinateClassification_of_e24_points
+    (E24AffineRationalPoints_of_E1AffineRationalPoints hpts)
 
 end MazurProof.RationalPointsN12
 ```
 
 ## Notes
 
-The code avoids the slow path entirely.  There is no global `field_simp` and no large `ring_nf` on the original rational expression.  The only denominator cancellation happens in these two tiny places:
+The polynomial shift is exactly
 
 ```lean
-div_mul_cancel₀ (m ^ 2) hn2
-div_mul_cancel₀ (m ^ 4) hn4
+(U - 1)^3 + 2*(U - 1)^2 - 3*(U - 1)
+  = U^3 - U^2 - 4*U + 4.
 ```
 
-and once in the final single-denominator lemma by `mul_right_cancel₀ hn4`.
-
-The shape to test incrementally is:
-
-1. `rat_sq_div_sq_eq_div_four`
-2. `rat_quartic_eisenstein_rhs_mul_denom`
-3. `rat_quartic_eisenstein_rhs_eq_div`
-4. `int_to_ratQuarticEisenstein`
-5. the two back-conversion helpers
-6. `eisensteinQuarticSquareClassification_of_ratC12`
-
-If `exact_mod_cast h` in `int_to_ratQuarticEisenstein` is sensitive in the repo context, replace only that block by the more explicit variant below:
+So `e1_of_e24_shift` is just `unfold` plus a single tiny `ring` goal.  The point-list conversion uses no point type, no torsion API, and no hard arithmetic.  The only coordinate arithmetic after the hard `E1AffinePointList` theorem is the local helper
 
 ```lean
-  have hQ' :
-      ((c ^ 2 : ℤ) : ℚ) =
-        ((m ^ 4 - m ^ 2 * n ^ 2 + n ^ 4 : ℤ) : ℚ) := by
-    exact_mod_cast h
-  have hQ :
-      (c : ℚ) ^ 2 =
-        (m : ℚ) ^ 4 - (m : ℚ) ^ 2 * (n : ℚ) ^ 2 + (n : ℚ) ^ 4 := by
-    simpa using hQ'
+U - 1 = A → A + 1 = B → U = B
 ```
 
-That fallback is still fast because it only asks the simplifier to commute casts through one fixed polynomial identity; it does not search through field denominators.
+with `norm_num` closing the seven rational constants.
+
+If Q2368 already defined `E24XCoordinateClassification` with a different disjunction order, keep `E24AffineRationalPoints_of_E1AffineRationalPoints` unchanged and adjust only the final seven `Or.inr` nestings in `e24_xCoordinateClassification_of_e24_points`.
