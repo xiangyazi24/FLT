@@ -1,153 +1,131 @@
-# Q2658 Cyclotomic/PID route audit
+# Q2664 checked Eisenstein triple layer
 
-Mathlib pin: `96fd0fff3b8837985ae21dd02e712cb5df72ec05`.
+Target file: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`.
 
-Conclusion: Mathlib has the third-cyclotomic PID/UFD and unit-classification tools, but this route is unlikely to be shorter than the elementary descent for the N=12 residual.  The missing work is not PID/UFD; it is the concrete Eisenstein-integer layer: representing `A^2 + N^2*w`, proving the norm/product formula, proving the two conjugate factors are coprime from `IsCoprime A N`, removing the associated unit, and extracting integer coordinates from a square in the ring of integers.
-
-## Imports and API checks
-
-At this pin, use `Mathlib.RingTheory.UniqueFactorizationDomain.Basic`; the monolithic import `Mathlib.RingTheory.UniqueFactorizationDomain` is not a file.
+This is a self-contained checked layer: it imports only `Mathlib.Tactic`, defines the intended elementary predicates, and proves the five requested lemmas without `sorry`/axioms.  If the target file already has the definitions, omit the definition block and paste only the helper lemma plus theorem bodies.
 
 ```lean
-import Mathlib.NumberTheory.NumberField.Cyclotomic.PID
-import Mathlib.NumberTheory.NumberField.Cyclotomic.Three
-import Mathlib.NumberTheory.FLT.Three
-import Mathlib.NumberTheory.NumberField.Norm
-import Mathlib.RingTheory.UniqueFactorizationDomain.Basic
+import Mathlib.Tactic
 
-noncomputable section
+namespace MazurProof.RationalPointsN12
 
-open scoped NumberField
-open NumberField
-open IsCyclotomicExtension.Rat.Three
+/-- Eisenstein norm equation in integer coordinates. -/
+def EisensteinTriple (X Y Z : ℤ) : Prop :=
+  Z ^ 2 = X ^ 2 - X * Y + Y ^ 2
 
-#check IsCyclotomicExtension.Rat.finrank
-#check IsCyclotomicExtension.Rat.three_pid
-#check IsCyclotomicExtension.Rat.cyclotomicRing_isIntegralClosure_of_prime
-#check IsPrimitiveRoot.adjoinEquivRingOfIntegersOfPrimePow
-#check IsPrimitiveRoot.integralPowerBasisOfPrimePow
+/-- One of the two symmetric Eisenstein parametrizations. -/
+def EisensteinParam (X Y Z m n : ℤ) : Prop :=
+  Z = m ^ 2 - m * n + n ^ 2 ∧
+    ((X = m ^ 2 - n ^ 2 ∧ Y = 2 * m * n - n ^ 2) ∨
+      (Y = m ^ 2 - n ^ 2 ∧ X = 2 * m * n - n ^ 2))
 
-#check IsPrimitiveRoot.toInteger
-#check IsPrimitiveRoot.coe_toInteger
-#check IsPrimitiveRoot.toInteger_isPrimitiveRoot
-#check IsPrimitiveRoot.toInteger_cube_eq_one
-#check IsCyclotomicExtension.Rat.Three.coe_eta
-#check IsCyclotomicExtension.Rat.Three.eta_sq
-#check IsCyclotomicExtension.Rat.Three.eta_sq_add_eta_add_one
+/-- Parametrized triple, except for the unit exceptional triple. -/
+def EisensteinTripleParamOrUnit (X Y Z : ℤ) : Prop :=
+  (X = 1 ∧ Y = 1 ∧ Z = 1) ∨ ∃ m n : ℤ, EisensteinParam X Y Z m n
 
-#check IsCyclotomicExtension.Rat.Three.Units.mem
-#check IsCyclotomicExtension.Rat.Three.eq_one_or_neg_one_of_unit_of_congruent
+/-- A tiny integer helper avoiding any fragile `Int` unit API. -/
+private lemma int_pos_eq_one_of_mul_eq_one {x y : ℤ}
+    (hx : 0 < x) (hxy : x * y = 1) :
+    x = 1 := by
+  have hypos : 0 < y := by
+    by_contra hy_not
+    have hy_nonpos : y ≤ 0 := le_of_not_gt hy_not
+    have hprod_nonpos : x * y ≤ 0 :=
+      mul_nonpos_of_nonneg_of_nonpos (le_of_lt hx) hy_nonpos
+    nlinarith [hxy, hprod_nonpos]
+  have hxle : x ≤ 1 := by
+    by_contra hx_not
+    have hx_ge_two : (2 : ℤ) ≤ x := by omega
+    have hy_ge_one : (1 : ℤ) ≤ y := by omega
+    have hprod_ge_two : (2 : ℤ) ≤ x * y := by
+      calc
+        (2 : ℤ) = 2 * 1 := by ring
+        _ ≤ x * y := by
+          exact mul_le_mul hx_ge_two hy_ge_one (by norm_num) (by omega)
+    nlinarith [hxy, hprod_ge_two]
+  omega
 
-#check RingOfIntegers.norm
-#check RingOfIntegers.coe_norm
-#check RingOfIntegers.norm_algebraMap
-#check RingOfIntegers.isUnit_norm
-#check Algebra.coe_norm_int
+/-- The parametrization identities satisfy the Eisenstein norm equation. -/
+theorem eisensteinParam_triple {X Y Z m n : ℤ}
+    (h : EisensteinParam X Y Z m n) :
+    EisensteinTriple X Y Z := by
+  rcases h with ⟨hZ, hcases⟩
+  rcases hcases with hXY | hYX
+  · rcases hXY with ⟨hX, hY⟩
+    unfold EisensteinTriple
+    rw [hZ, hX, hY]
+    ring
+  · rcases hYX with ⟨hY, hX⟩
+    unfold EisensteinTriple
+    rw [hZ, hX, hY]
+    ring
 
-#check PrincipalIdealRing.to_uniqueFactorizationMonoid
-#check exists_associated_pow_of_mul_eq_pow'
-#check exists_associated_pow_of_associated_pow_mul
-#check UniqueFactorizationMonoid.factors_mul
-#check UniqueFactorizationMonoid.factors_pow
+/-- The Eisenstein norm equation is symmetric in `X` and `Y`. -/
+theorem eisensteinTriple_symm {X Y Z : ℤ}
+    (h : EisensteinTriple X Y Z) :
+    EisensteinTriple Y X Z := by
+  unfold EisensteinTriple at h ⊢
+  rw [h]
+  ring
+
+/-- The parametrization predicate is symmetric in `X` and `Y`. -/
+theorem eisensteinParam_symm {X Y Z m n : ℤ}
+    (h : EisensteinParam X Y Z m n) :
+    EisensteinParam Y X Z m n := by
+  rcases h with ⟨hZ, hcases⟩
+  refine ⟨hZ, ?_⟩
+  rcases hcases with hXY | hYX
+  · rcases hXY with ⟨hX, hY⟩
+    exact Or.inr ⟨hX, hY⟩
+  · rcases hYX with ⟨hY, hX⟩
+    exact Or.inl ⟨hY, hX⟩
+
+/-- If a positive primitive Eisenstein triple has `X = Y`, it is the unit triple. -/
+theorem eisensteinTriple_unit_of_eq {X Y Z : ℤ}
+    (hXpos : 0 < X) (hZpos : 0 < Z)
+    (hcop : IsCoprime X Y)
+    (htri : EisensteinTriple X Y Z)
+    (hXY : X = Y) :
+    X = 1 ∧ Y = 1 ∧ Z = 1 := by
+  subst Y
+  rcases hcop with ⟨r, s, hrs⟩
+  have hXmul : X * (r + s) = 1 := by
+    rw [← hrs]
+    ring
+  have hXone : X = 1 := int_pos_eq_one_of_mul_eq_one hXpos hXmul
+  have hZpow : Z ^ 2 = 1 := by
+    unfold EisensteinTriple at htri
+    calc
+      Z ^ 2 = X ^ 2 - X * X + X ^ 2 := htri
+      _ = 1 := by
+        rw [hXone]
+        norm_num
+  have hZmul : Z * Z = 1 := by
+    simpa [pow_two] using hZpow
+  have hZone : Z = 1 := int_pos_eq_one_of_mul_eq_one hZpos hZmul
+  exact ⟨hXone, hXone, hZone⟩
+
+/-- Factor identity with `P = 2*Z - (2*X-Y)` and `Q = 2*Z + (2*X-Y)`. -/
+theorem eisensteinTriple_factor_identity {X Y Z : ℤ}
+    (h : EisensteinTriple X Y Z) :
+    (2 * Z - (2 * X - Y)) * (2 * Z + (2 * X - Y)) = 3 * Y ^ 2 := by
+  unfold EisensteinTriple at h
+  calc
+    (2 * Z - (2 * X - Y)) * (2 * Z + (2 * X - Y))
+        = 4 * Z ^ 2 - (2 * X - Y) ^ 2 := by ring
+    _ = 3 * Y ^ 2 := by
+      rw [h]
+      ring
+
+-- Useful API checks if you later prefer a gcd/unit-flavored proof of the unit case.
+#check Int.isCoprime_iff_gcd_eq_one
+#check isCoprime_self
+
+end MazurProof.RationalPointsN12
 ```
 
-Important available theorem shapes:
+Notes:
 
-```lean
--- PID for third cyclotomic ring of integers:
--- IsCyclotomicExtension.Rat.three_pid
---   (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {3} ℚ K] :
---     IsPrincipalIdealRing (𝓞 K)
-
--- Unit list for the third cyclotomic ring of integers:
--- IsCyclotomicExtension.Rat.Three.Units.mem
---   (hζ : IsPrimitiveRoot ζ 3) (u : (𝓞 K)ˣ) :
---     u ∈ [1, -1, eta, -eta, eta ^ 2, -eta ^ 2]
-
--- Unit congruence lemma:
--- IsCyclotomicExtension.Rat.Three.eq_one_or_neg_one_of_unit_of_congruent
---   (hζ : IsPrimitiveRoot ζ 3) (u : (𝓞 K)ˣ)
---   (hcong : ∃ n : ℤ, (hζ.toInteger - 1) ^ 2 ∣ (u - n : 𝓞 K)) :
---     u = 1 ∨ u = -1
-
--- Coprime product equal to a power gives one factor associated to a power:
--- exists_associated_pow_of_mul_eq_pow'
---   (hab : IsCoprime a b) (h : a * b = c ^ k) :
---     ∃ d, Associated (d ^ k) a
-```
-
-## Minimal representation skeleton
-
-```lean
-import Mathlib.NumberTheory.NumberField.Cyclotomic.PID
-import Mathlib.NumberTheory.NumberField.Cyclotomic.Three
-import Mathlib.NumberTheory.NumberField.Norm
-import Mathlib.RingTheory.UniqueFactorizationDomain.Basic
-
-noncomputable section
-
-open scoped NumberField
-open NumberField
-open IsCyclotomicExtension.Rat.Three
-
-section ThirdCyclotomic
-
-variable {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {3} ℚ K]
-variable {zeta : K} (hzeta : IsPrimitiveRoot zeta 3)
-
-local notation3 "eta" => (IsPrimitiveRoot.isUnit (hzeta.toInteger_isPrimitiveRoot) (by decide)).unit
-local notation3 "lam" => hzeta.toInteger - 1
-
-def eisensteinAlpha (A N : ℤ) : 𝓞 K :=
-  algebraMap ℤ (𝓞 K) (A ^ 2) + algebraMap ℤ (𝓞 K) (N ^ 2) * (eta : 𝓞 K)
-
-def eisensteinAlphaConj (A N : ℤ) : 𝓞 K :=
-  algebraMap ℤ (𝓞 K) (A ^ 2) + algebraMap ℤ (𝓞 K) (N ^ 2) * (eta : 𝓞 K) ^ 2
-
-#check (hzeta.toInteger : 𝓞 K)
-#check (eta : (𝓞 K)ˣ)
-#check (lam : 𝓞 K)
-#check (IsCyclotomicExtension.Rat.three_pid K : IsPrincipalIdealRing (𝓞 K))
-#check (PrincipalIdealRing.to_uniqueFactorizationMonoid (R := 𝓞 K))
-#check (IsCyclotomicExtension.Rat.Three.eta_sq hzeta)
-#check (IsCyclotomicExtension.Rat.Three.eta_sq_add_eta_add_one hzeta)
-#check (IsCyclotomicExtension.Rat.Three.Units.mem hzeta (1 : (𝓞 K)ˣ))
-#check (IsCyclotomicExtension.Rat.Three.eq_one_or_neg_one_of_unit_of_congruent hzeta)
-#check (eisensteinAlpha hzeta (1 : ℤ) (1 : ℤ) : 𝓞 K)
-#check (eisensteinAlphaConj hzeta (1 : ℤ) (1 : ℤ) : 𝓞 K)
-#check (Algebra.norm ℤ (eisensteinAlpha hzeta (1 : ℤ) (1 : ℤ)) : ℤ)
-#check (RingOfIntegers.norm ℚ (eisensteinAlpha hzeta (1 : ℤ) (1 : ℤ)) : 𝓞 ℚ)
-
-end ThirdCyclotomic
-```
-
-## Residual theorem statements to isolate if pursuing this route
-
-```lean
--- Product with the formal conjugate.  Prefer proving this before a direct norm theorem.
--- theorem eisensteinAlpha_mul_conj
---     {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {3} ℚ K]
---     {zeta : K} (hzeta : IsPrimitiveRoot zeta 3) (A N : ℤ) :
---     eisensteinAlpha hzeta A N * eisensteinAlphaConj hzeta A N =
---       algebraMap ℤ (𝓞 K) (A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4)
-
--- The real gate: this is not currently a specialized Mathlib lemma.
--- theorem eisensteinAlpha_coprime_conj
---     {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {3} ℚ K]
---     {zeta : K} (hzeta : IsPrimitiveRoot zeta 3) {A N : ℤ}
---     (hAN : IsCoprime A N) (hN : N ≠ 0) :
---     IsCoprime (eisensteinAlpha hzeta A N) (eisensteinAlphaConj hzeta A N)
-
--- Then existing UFD extraction applies via `exists_associated_pow_of_mul_eq_pow'`.
--- theorem eisensteinAlpha_associated_square_of_quartic
---     {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {3} ℚ K]
---     {zeta : K} (hzeta : IsPrimitiveRoot zeta 3) {A N S : ℤ}
---     (hcopAB : IsCoprime (eisensteinAlpha hzeta A N) (eisensteinAlphaConj hzeta A N))
---     (hprod : eisensteinAlpha hzeta A N * eisensteinAlphaConj hzeta A N =
---       (algebraMap ℤ (𝓞 K) S) ^ 2) :
---     ∃ gamma : 𝓞 K, Associated (gamma ^ 2) (eisensteinAlpha hzeta A N)
-```
-
-## Recommendation
-
-The cyclotomic route is theoretically viable but likely longer here.  Mathlib has the PID, UFD, and unit APIs, but the proof still needs custom lemmas for the product formula, conjugate coprimality, unit removal, and coordinate extraction from `gamma : 𝓞 K` using `IsPrimitiveRoot.integralPowerBasisOfPrimePow`.  The current elementary descent route stays in `ℤ`/`ℕ` and should be less fragile for this repo.
+* The factor identity necessarily assumes `EisensteinTriple X Y Z`; otherwise `P*Q = 3*Y^2` is not true in general.
+* `eisensteinTriple_unit_of_eq` destructs the `IsCoprime` witness directly.  After `X = Y`, Bezout gives `X * (r+s) = 1`; positivity forces `X = 1`, and then the triple equation plus `0 < Z` forces `Z = 1`.
+* `Mathlib.Tactic` imports `Mathlib.Tactic.NormNum.IsCoprime`, which imports `Mathlib.RingTheory.Coprime.Lemmas`, so `IsCoprime`, `Int.isCoprime_iff_gcd_eq_one`, and `isCoprime_self` are available under this import at the current pin.
