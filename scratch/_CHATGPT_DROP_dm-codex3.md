@@ -1,412 +1,415 @@
-# Q2605: common refinement for `EulerSquarePairDescent`
+# Q2609: theorem DAG for `PrimitiveCenteredToEulerSquarePair`
 
-Target: `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`, theorem family `EulerSquarePairDescent`.
+Target file family: `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`.
+Namespace: `MazurProof.RationalPointsN12`.
 
-## Bottom line
-
-This common-refinement step should **not** be treated as a paper-scale residual. It can be proved cleanly as a local Mathlib-style lemma over `Nat` using `Nat.gcd`. The key current Mathlib API is:
-
-```lean
--- in Mathlib.Data.Nat.GCD.Basic
--- theorem Nat.gcd_mul_gcd_eq_iff_dvd_mul_of_coprime
---     {x n m : Nat} (hcop : Nat.Coprime n m) :
---     Nat.gcd x n * Nat.gcd x m = x <-> x ∣ n * m
-```
-
-This theorem makes the four-corner decomposition almost direct. A `Nat.factorization` proof is also possible, but it is longer and less ergonomic for this particular target.
-
-Recommended local import if not already available through existing imports:
+Goal:
 
 ```lean
-import Mathlib.Data.Nat.GCD.Basic
+def PrimitiveCenteredToEulerSquarePair : Prop :=
+  forall S : PrimitiveCenteredFourSqAP, exists E : EulerSquarePair, S.N = E.A * E.D
 ```
 
-If later using the factorization proof route instead, add:
+The construction should use **one** primitive Pythagorean triple, coming from the checked identity
 
 ```lean
-import Mathlib.Data.Nat.Factorization.Basic
+theorem primitiveCentered_big_pyth_identity (S) :
+  (S.X^2 - 20*S.N^2)^2 = (S.p*S.q*S.r*S.s)^2 + (16*S.N^2)^2
 ```
 
-## 1. Minimal Nat theorem statement
+and then split the coprime product in the parametrization.
 
-Use the product equality directly; the common integer `A` is not needed in the core theorem. Positivity avoids all zero corner pathologies.
+## 0. Import/API boundary
+
+Use Mathlib's Pythagorean triple API:
 
 ```lean
--- Suggested local theorem statement.
--- theorem two_coprime_factorizations_refine_nat
---     {U V Up Vp : Nat}
---     (hUpos : 0 < U) (hVpos : 0 < V)
---     (hUppos : 0 < Up) (hVppos : 0 < Vp)
---     (hEq : U * V = Up * Vp)
---     (hUV : Nat.Coprime U V)
---     (hUpVp : Nat.Coprime Up Vp) :
---     exists a b c d : Nat,
---       0 < a /\ 0 < b /\ 0 < c /\ 0 < d /\
---       U = a * b /\ V = c * d /\
---       Up = a * c /\ Vp = b * d /\
---       Nat.Coprime a b /\ Nat.Coprime a c /\ Nat.Coprime a d /\
---       Nat.Coprime b c /\ Nat.Coprime b d /\ Nat.Coprime c d
+import Mathlib.NumberTheory.PythagoreanTriples
 ```
 
-If the surrounding proof has `A = U*V` and `A = Up*Vp`, make a thin wrapper:
+The useful Mathlib theorem is:
 
 ```lean
--- Suggested wrapper.
--- theorem two_coprime_factorizations_refine_nat_of_common_value
---     {A U V Up Vp : Nat}
---     (hUpos : 0 < U) (hVpos : 0 < V)
---     (hUppos : 0 < Up) (hVppos : 0 < Vp)
---     (hUVeq : A = U * V) (hUpVpeq : A = Up * Vp)
---     (hUV : Nat.Coprime U V)
---     (hUpVp : Nat.Coprime Up Vp) :
---     exists a b c d : Nat,
---       0 < a /\ 0 < b /\ 0 < c /\ 0 < d /\
---       U = a * b /\ V = c * d /\
---       Up = a * c /\ Vp = b * d /\
---       Nat.Coprime a b /\ Nat.Coprime a c /\ Nat.Coprime a d /\
---       Nat.Coprime b c /\ Nat.Coprime b d /\ Nat.Coprime c d
+-- PythagoreanTriple.coprime_classification'
+--   {x y z : Int} (h : PythagoreanTriple x y z)
+--   (h_coprime : Int.gcd x y = 1) (h_parity : x % 2 = 1)
+--   (h_pos : 0 < z) :
+--   exists m n,
+--     x = m ^ 2 - n ^ 2 /\
+--     y = 2 * m * n /\
+--     z = m ^ 2 + n ^ 2 /\
+--     Int.gcd m n = 1 /\
+--     ((m % 2 = 0 /\ n % 2 = 1) \/ (m % 2 = 1 /\ n % 2 = 0)) /\
+--     0 <= m
 ```
 
-The wrapper just sets `hEq : U*V = Up*Vp` by rewriting with `hUVeq` and `hUpVpeq`.
+## 1. The Pythagorean triple to parametrize
 
-## 2. GCD proof strategy
-
-Define the four corners by gcds:
+For `S : PrimitiveCenteredFourSqAP`, set
 
 ```text
-a := Nat.gcd U Up
-b := Nat.gcd U Vp
-c := Nat.gcd V Up
-d := Nat.gcd V Vp
+O := S.p * S.q * S.r * S.s
+Y := 16 * S.N^2
+Z := S.X^2 - 20 * S.N^2
 ```
 
-Then prove the four product equations with `Nat.gcd_mul_gcd_eq_iff_dvd_mul_of_coprime`.
-
-### `U = a*b`
-
-Use `hUpVp : Nat.Coprime Up Vp` and the fact that `U ∣ Up*Vp`, which follows from `hEq`:
+Then parametrize the primitive triple
 
 ```text
-U ∣ Up*Vp, since Up*Vp = U*V.
-Nat.gcd U Up * Nat.gcd U Vp = U.
+O^2 + Y^2 = Z^2.
 ```
 
-This is exactly:
+Use odd leg first, even leg second:
 
 ```lean
--- have hU_dvd : U ∣ Up * Vp := by
---   exact ⟨V, hEq.symm⟩
--- have hU_corner : Nat.gcd U Up * Nat.gcd U Vp = U :=
---   (Nat.gcd_mul_gcd_eq_iff_dvd_mul_of_coprime hUpVp).2 hU_dvd
+-- theorem primitiveCentered_big_pyth_triple (S : PrimitiveCenteredFourSqAP) :
+--     PythagoreanTriple
+--       (S.p * S.q * S.r * S.s)
+--       (16 * S.N ^ 2)
+--       (S.X ^ 2 - 20 * S.N ^ 2)
 ```
 
-Then rewrite by the definitions of `a,b` and take `.symm` if the target is `U = a*b`.
+Proof: unfold `PythagoreanTriple`; use `primitiveCentered_big_pyth_identity S` and `ring_nf` to flip the equality into Mathlib's `x*x + y*y = z*z` convention.
 
-### `V = c*d`
+### Positivity of the hypotenuse
 
-Similarly, `V ∣ Up*Vp` because `Up*Vp = U*V`, and the same coprimality `hUpVp` gives:
+Do **not** use `abs (S.X^2 - 20*S.N^2)`. It is already positive. From
 
 ```text
-Nat.gcd V Up * Nat.gcd V Vp = V.
+S.p^2 = S.X - 6*S.N
 ```
 
-### `Up = a*c`
-
-Use `hUV : Nat.Coprime U V` and `Up ∣ U*V`, from `hEq`:
+and `S.p^2 >= 0`, get `S.X >= 6*S.N`; since `S.N > 0`,
 
 ```text
-Nat.gcd Up U * Nat.gcd Up V = Up.
+S.X^2 - 20*S.N^2 >= 36*S.N^2 - 20*S.N^2 = 16*S.N^2 > 0.
 ```
 
-Then commute gcds:
-
-```text
-Nat.gcd Up U = Nat.gcd U Up = a,
-Nat.gcd Up V = Nat.gcd V Up = c.
-```
-
-Expected simp/rw helpers: `Nat.gcd_comm`, `mul_comm`, `mul_left_comm`, `mul_assoc`.
-
-### `Vp = b*d`
-
-Use `hUV : Nat.Coprime U V` and `Vp ∣ U*V`, from `hEq`:
-
-```text
-Nat.gcd Vp U * Nat.gcd Vp V = Vp.
-```
-
-Commute gcds to obtain `b*d`.
-
-### Positivity of the corners
-
-Use `Nat.gcd_pos_of_pos_left` or `Nat.gcd_pos_of_pos_right`. For example:
+Suggested helper:
 
 ```lean
--- have ha_pos : 0 < Nat.gcd U Up := Nat.gcd_pos_of_pos_left Up hUpos
--- have hb_pos : 0 < Nat.gcd U Vp := Nat.gcd_pos_of_pos_left Vp hUpos
--- have hc_pos : 0 < Nat.gcd V Up := Nat.gcd_pos_of_pos_left Up hVpos
--- have hd_pos : 0 < Nat.gcd V Vp := Nat.gcd_pos_of_pos_left Vp hVpos
+-- theorem primitiveCentered_big_hyp_pos (S : PrimitiveCenteredFourSqAP) :
+--     0 < S.X ^ 2 - 20 * S.N ^ 2
 ```
 
-## 3. Pairwise coprimalities among the corners
+This avoids the main absolute-value/sign trap.
 
-The Nat theorem can return all six pairwise coprimalities essentially for free.
+### Odd leg parity
 
-Use divisibility of the gcd corners and `Nat.Coprime.of_dvd` / `.of_dvd_left` / `.of_dvd_right`.
-
-The divisibilities are:
-
-```text
-a | U and a | Up
-b | U and b | Vp
-c | V and c | Up
-d | V and d | Vp
-```
-
-Then derive:
-
-```text
-Coprime a b  from hUpVp, since a | Up and b | Vp.
-Coprime a c  from hUV,   since a | U  and c | V.
-Coprime a d  from hUV,   since a | U  and d | V.
-Coprime b c  from hUV,   since b | U  and c | V.
-Coprime b d  from hUV,   since b | U  and d | V.
-Coprime c d  from hUpVp, since c | Up and d | Vp.
-```
-
-For the later Euler descent, the two most important outputs are:
-
-```text
-Coprime b c   -- needed for square-factor balance from b^2*M = c^2*N.
-Coprime a d   -- needed for coprimality of cofactors 4*a^2+d^2 and 16*a^2+d^2,
-                  and for the smaller Euler pair field hADcop.
-```
-
-The other four pairwise coprimalities are cheap and useful for cleanup/parity wrappers, so include them in the theorem output.
-
-## 4. Factorization proof route, if preferred
-
-A `Nat.factorization` proof is standard but longer. The shape is:
-
-```text
-For every prime p,
-  v_p(U) + v_p(V) = v_p(Up) + v_p(Vp).
-Since gcd(U,V)=1, at most one of v_p(U),v_p(V) is nonzero.
-Since gcd(Up,Vp)=1, at most one of v_p(Up),v_p(Vp) is nonzero.
-Therefore the exponent mass for p lies in exactly one of the four intersections:
-  U∩Up, U∩Vp, V∩Up, V∩Vp.
-```
-
-Relevant APIs if you go this way:
+Use the four mod fields directly:
 
 ```lean
--- Nat.factorization_mul
--- Nat.factorization_le_iff_dvd
--- Nat.factorization_prime_le_iff_dvd
--- Nat.factorization_eq_zero_iff
--- Nat.Coprime
--- Finsupp.ext
+-- theorem primitiveCentered_root_product_mod_two (S : PrimitiveCenteredFourSqAP) :
+--     (S.p * S.q * S.r * S.s) % 2 = 1
 ```
 
-I recommend the gcd route instead. It is shorter and avoids a pointwise `Finsupp` proof.
+Proof: repeated `Int.mul_emod`, `S.hp_odd`, `S.hq_odd`, `S.hr_odd`, `S.hs_odd`, then `norm_num`/`decide`.
 
-## 5. Positive `Int` wrapper
+## 2. Primitive gcd obligation for the big triple
 
-The Euler parameters live in `Int`. Do not prove the refinement primarily over `Int`; lift positive variables to `Nat`, apply the Nat theorem, then cast back.
-
-Recommended positive-Int wrapper:
+Need:
 
 ```lean
--- Suggested local wrapper.
--- theorem two_coprime_factorizations_refine_int_pos
---     {U V Up Vp : Int}
---     (hUpos : 0 < U) (hVpos : 0 < V)
---     (hUppos : 0 < Up) (hVppos : 0 < Vp)
---     (hEq : U * V = Up * Vp)
---     (hUV : IsCoprime U V)
---     (hUpVp : IsCoprime Up Vp) :
---     exists a b c d : Int,
---       0 < a /\ 0 < b /\ 0 < c /\ 0 < d /\
---       U = a * b /\ V = c * d /\
---       Up = a * c /\ Vp = b * d /\
---       IsCoprime a b /\ IsCoprime a c /\ IsCoprime a d /\
---       IsCoprime b c /\ IsCoprime b d /\ IsCoprime c d
+-- theorem primitiveCentered_big_triple_coprime (S : PrimitiveCenteredFourSqAP) :
+--     Int.gcd (S.p * S.q * S.r * S.s) (16 * S.N ^ 2) = 1
 ```
 
-Implementation notes:
+Break this into local lemmas.
 
-1. Set
-
-```text
-u := U.toNat, v := V.toNat, up := Up.toNat, vp := Vp.toNat.
-```
-
-2. Use positivity to rewrite casts:
-
-```text
-(u : Int) = U, etc.
-```
-
-Expected API: `Int.toNat_of_nonneg` with `le_of_lt hUpos`.
-
-3. Convert `hEq` to a Nat equality. If `exact_mod_cast` sees the `toNat` rewrites, it usually closes; otherwise prove by casting both sides to `Int` and using the positivity rewrites.
-
-4. Convert `IsCoprime U V` and `IsCoprime Up Vp` to `Nat.Coprime u v` and `Nat.Coprime up vp`. If the current file does not already have this, isolate tiny wrappers:
+First, adjacent square gaps:
 
 ```lean
--- theorem nat_coprime_of_int_isCoprime_pos
---     {x y : Int} (hx : 0 < x) (hy : 0 < y) (hxy : IsCoprime x y) :
---     Nat.Coprime x.toNat y.toNat
+-- theorem primitiveCentered_gap_pq (S : PrimitiveCenteredFourSqAP) :
+--     S.q ^ 2 - S.p ^ 2 = 4 * S.N
 --
--- theorem int_isCoprime_of_nat_coprime_pos
---     {x y : Int} (hx : 0 < x) (hy : 0 < y)
---     (hxy : Nat.Coprime x.toNat y.toNat) :
---     IsCoprime x y
+-- theorem primitiveCentered_gap_qr (S : PrimitiveCenteredFourSqAP) :
+--     S.r ^ 2 - S.q ^ 2 = 4 * S.N
+--
+-- theorem primitiveCentered_gap_rs (S : PrimitiveCenteredFourSqAP) :
+--     S.s ^ 2 - S.r ^ 2 = 4 * S.N
 ```
 
-5. Apply the Nat theorem and cast witnesses back with `a := (an : Int)`, etc.
+Each is a direct subtraction of `hp,hq,hr,hs` followed by `ring`/`nlinarith`.
 
-This wrapper is routine but may be more annoying than the Nat core because of `Int.toNat`/`IsCoprime` conversion. Keep it separate.
-
-## 6. Parity-specialized wrapper for the Euler route
-
-After Pythagorean parametrization, the Euler route has:
-
-```text
-U, Up even;
-V, Vp odd;
-A = U*V = Up*Vp.
-```
-
-The desired refinement is:
-
-```text
-U  = 2*a*b,
-V  = c*d,
-Up = 2*a*c,
-Vp = b*d.
-```
-
-Prove it by applying the positive-Int wrapper first, giving temporary corners
-
-```text
-U  = alpha*beta,
-V  = gamma*delta,
-Up = alpha*gamma,
-Vp = beta*delta.
-```
-
-Then:
-
-1. `V = gamma*delta` and `Odd V` imply `Odd gamma` and `Odd delta`.
-2. `Vp = beta*delta` and `Odd Vp` imply `Odd beta`.
-3. `U = alpha*beta`, `Even U`, and `Odd beta` imply `Even alpha`.
-4. Write `alpha = 2*a`. Since `alpha > 0` and even, get `0 < a`.
-5. Set `b := beta`, `c := gamma`, `d := delta`.
-
-Suggested statement:
+Then prove a reusable adjacent-root-to-step coprimality lemma:
 
 ```lean
--- Suggested Euler-facing theorem.
--- theorem two_coprime_factorizations_refine_even_even_odd_odd_int_pos
---     {U V Up Vp : Int}
---     (hUpos : 0 < U) (hVpos : 0 < V)
---     (hUppos : 0 < Up) (hVppos : 0 < Vp)
---     (hEq : U * V = Up * Vp)
---     (hUV : IsCoprime U V)
---     (hUpVp : IsCoprime Up Vp)
---     (hUeven : Even U) (hUpeven : Even Up)
---     (hVodd : Odd V) (hVpodd : Odd Vp) :
---     exists a b c d : Int,
---       0 < a /\ 0 < b /\ 0 < c /\ 0 < d /\
---       U = 2 * a * b /\ V = c * d /\
---       Up = 2 * a * c /\ Vp = b * d /\
---       IsCoprime a b /\ IsCoprime a c /\ IsCoprime a d /\
---       IsCoprime b c /\ IsCoprime b d /\ IsCoprime c d /\
---       Odd b /\ Odd c /\ Odd d
+-- theorem gcd_left_step_of_adjacent_square_gap
+--     {u v N : Int}
+--     (huv : Int.gcd u v = 1)
+--     (hgap : v ^ 2 - u ^ 2 = 4 * N) :
+--     Int.gcd u N = 1
+--
+-- theorem gcd_right_step_of_adjacent_square_gap
+--     {u v N : Int}
+--     (huv : Int.gcd u v = 1)
+--     (hgap : v ^ 2 - u ^ 2 = 4 * N) :
+--     Int.gcd v N = 1
 ```
 
-For the final Euler descent, you can project just:
+Mathematical proof: a prime divisor of `u` and `N` divides `v^2 = u^2 + 4N`, hence divides `v`, contradicting `Int.gcd u v = 1`. The right version is symmetric using `u^2 = v^2 - 4N`.
 
-```text
-0<a,b,c,d,
-U=2ab, V=cd, Up=2ac, Vp=bd,
-IsCoprime a d,
-IsCoprime b c,
-Odd b, Odd c, Odd d.
-```
-
-But returning all six coprimalities avoids re-proving divisibility projections later.
-
-## 7. Residual recommendation
-
-I would not mark the Nat core as a hard residual; it should be a manageable local lemma using `Nat.gcd_mul_gcd_eq_iff_dvd_mul_of_coprime`.
-
-If you need to unblock the descent while another worker fills in the local arithmetic, use this exact residual boundary:
+Apply these to get:
 
 ```lean
--- RESIDUAL, finite standard gcd lemma.
--- theorem two_coprime_factorizations_refine_even_even_odd_odd_int_pos
---     {U V Up Vp : Int}
---     (hUpos : 0 < U) (hVpos : 0 < V)
---     (hUppos : 0 < Up) (hVppos : 0 < Vp)
---     (hEq : U * V = Up * Vp)
---     (hUV : IsCoprime U V)
---     (hUpVp : IsCoprime Up Vp)
---     (hUeven : Even U) (hUpeven : Even Up)
---     (hVodd : Odd V) (hVpodd : Odd Vp) :
---     exists a b c d : Int,
---       0 < a /\ 0 < b /\ 0 < c /\ 0 < d /\
---       U = 2 * a * b /\ V = c * d /\
---       Up = 2 * a * c /\ Vp = b * d /\
---       IsCoprime a b /\ IsCoprime a c /\ IsCoprime a d /\
---       IsCoprime b c /\ IsCoprime b d /\ IsCoprime c d /\
---       Odd b /\ Odd c /\ Odd d
+-- theorem primitiveCentered_p_coprime_N (S : PrimitiveCenteredFourSqAP) :
+--     Int.gcd S.p S.N = 1
+-- theorem primitiveCentered_q_coprime_N (S : PrimitiveCenteredFourSqAP) :
+--     Int.gcd S.q S.N = 1
+-- theorem primitiveCentered_r_coprime_N (S : PrimitiveCenteredFourSqAP) :
+--     Int.gcd S.r S.N = 1
+-- theorem primitiveCentered_s_coprime_N (S : PrimitiveCenteredFourSqAP) :
+--     Int.gcd S.s S.N = 1
 ```
 
-This is mathematically finite/standard because it is only unique prime-factor distribution across two coprime bipartitions of the same positive integer. The gcd proof avoids explicit prime factorization and should be the first implementation attempt.
+Only adjacent gcd fields are needed here: `hpq`, `hqr`, `hrs`. The non-adjacent gcd fields are not essential for this direction.
 
-## 8. Exact later use in `EulerSquarePairDescent`
+Then combine:
 
-After signed Pythagorean parameters give
+```lean
+-- theorem primitiveCentered_root_product_coprime_N (S : PrimitiveCenteredFourSqAP) :
+--     Int.gcd (S.p * S.q * S.r * S.s) S.N = 1
+--
+-- theorem primitiveCentered_root_product_coprime_sixteen (S : PrimitiveCenteredFourSqAP) :
+--     Int.gcd (S.p * S.q * S.r * S.s) 16 = 1
+--
+-- theorem primitiveCentered_big_triple_coprime (S : PrimitiveCenteredFourSqAP) :
+--     Int.gcd (S.p * S.q * S.r * S.s) (16 * S.N ^ 2) = 1
+```
+
+For the last step, use product/power coprimality: coprime to `N` gives coprime to `N^2`, and oddness gives coprime to `16`.
+
+## 3. Evenness of `S.N`
+
+This is required later to make the Euler `A` even. It is easy but must not be skipped.
+
+```lean
+-- theorem primitiveCentered_N_even (S : PrimitiveCenteredFourSqAP) :
+--     Even S.N
+```
+
+Proof: from `primitiveCentered_gap_pq S`,
 
 ```text
-E.A = U*V = Up*Vp,
-U,Up even,
-V,Vp odd,
-IsCoprime U V,
-IsCoprime Up Vp,
+S.q^2 - S.p^2 = 4*S.N.
 ```
 
-apply the parity-specialized wrapper to get:
+Since `S.p` and `S.q` are odd, odd squares are `1 mod 8`, hence `8 | S.q^2 - S.p^2`; therefore `2 | S.N`. In Lean, isolate the mod-8 arithmetic:
+
+```lean
+-- theorem even_step_of_odd_adjacent_square_gap
+--     {p q N : Int}
+--     (hp : p % 2 = 1) (hq : q % 2 = 1)
+--     (hgap : q ^ 2 - p ^ 2 = 4 * N) :
+--     Even N
+```
+
+## 4. Parametrization output and square split
+
+Apply `PythagoreanTriple.coprime_classification'` to
 
 ```text
-U  = 2*a*b,
-V  = c*d,
-Up = 2*a*c,
-Vp = b*d.
+x = O, y = 16*S.N^2, z = Z.
 ```
 
-Then the signed-D formulas become:
+Obtain `m n : Int` with
 
 ```text
-D = epsC * ((2*a*b)^2 - (c*d)^2),
-D = epsB * (4*(2*a*c)^2 - (b*d)^2).
+O = m^2 - n^2,
+16*S.N^2 = 2*m*n,
+Z = m^2 + n^2,
+Int.gcd m n = 1,
+opposite parity,
+0 <= m.
 ```
 
-The important refinement outputs downstream are:
+From `16*S.N^2 = 2*m*n`, derive
 
 ```text
-IsCoprime b c
-IsCoprime a d
-Odd b, Odd c, Odd d
-0 < a,b,c,d
+m*n = 8*S.N^2.
 ```
 
-They feed the same-orientation mod-4 argument, the balance equation
+Also prove `0 < m` and `0 < n`: `16*S.N^2 > 0`, `2*m*n > 0`, and Mathlib gives `0 <= m`; if `m=0` the even leg is zero, contradiction, and then `n>0` follows from positive product.
+
+The key arithmetic residual is the coprime product split.
+
+```lean
+-- RESIDUAL, finite standard prime-factorization/valuation lemma.
+-- theorem coprime_product_eq_eight_square_split_int
+--     {N m n : Int}
+--     (hNpos : 0 < N)
+--     (hNeven : Even N)
+--     (hmpos : 0 < m) (hnpos : 0 < n)
+--     (hmn : m * n = 8 * N ^ 2)
+--     (hmn_coprime : Int.gcd m n = 1)
+--     (hparity :
+--       (m % 2 = 0 /\ n % 2 = 1) \/
+--       (m % 2 = 1 /\ n % 2 = 0)) :
+--     exists A D : Int,
+--       0 < A /\ 0 < D /\
+--       Even A /\ Odd D /\ IsCoprime A D /\
+--       N = A * D /\
+--       ((m = 8 * A ^ 2 /\ n = D ^ 2) \/
+--        (m = D ^ 2 /\ n = 8 * A ^ 2))
+```
+
+This lemma is mathematically standard: because `m,n` are coprime and `m*n = 8*N^2`, each prime's valuation goes wholly into exactly one of `m,n`; the odd parameter is a square `D^2`, and the even parameter is `8*A^2`. The hypothesis `Even N` is necessary for `Even A`; without it the statement is false, e.g. `N=1` gives the split `1 * 8` and `A=1`.
+
+This gives the desired candidate Euler parameters `A,D`, with
 
 ```text
-b^2 * (4*a^2 + d^2) = c^2 * (16*a^2 + d^2),
+S.N = A*D,
+A > 0,
+D > 0,
+A even,
+D odd,
+IsCoprime A D.
 ```
 
-and the final square-factor extraction for the smaller Euler pair.
+## 5. Recovering the Euler square factors `B,C`
+
+From parametrization and the split, we know
+
+```text
+Z = m^2+n^2 = D^4 + 64*A^4
+```
+
+in either split case. Since `Z = S.X^2 - 20*S.N^2` and `S.N = A*D`, get
+
+```text
+S.X^2 = D^4 + 20*A^2*D^2 + 64*A^4
+      = (D^2 + 16*A^2) * (D^2 + 4*A^2).
+```
+
+Use this algebra helper:
+
+```lean
+-- theorem center_square_eq_euler_cofactor_product_of_big_split
+--     {X N m n A D : Int}
+--     (hZ : X ^ 2 - 20 * N ^ 2 = m ^ 2 + n ^ 2)
+--     (hN : N = A * D)
+--     (hsplit :
+--       (m = 8 * A ^ 2 /\ n = D ^ 2) \/
+--       (m = D ^ 2 /\ n = 8 * A ^ 2)) :
+--     X ^ 2 = (16 * A ^ 2 + D ^ 2) * (4 * A ^ 2 + D ^ 2)
+```
+
+Proof: cases on `hsplit`; `nlinarith` or `ring_nf` after substitutions.
+
+Then prove the two cofactors are coprime:
+
+```lean
+-- theorem euler_cofactor_coprime
+--     {A D : Int}
+--     (hAD : IsCoprime A D)
+--     (hDodd : Odd D) :
+--     IsCoprime (16 * A ^ 2 + D ^ 2) (4 * A ^ 2 + D ^ 2)
+```
+
+Mathematical proof: a common prime divisor divides the difference `12*A^2`. It cannot divide `A`, because then it divides `D`. Thus it can only be `2` or `3`. `2` is excluded since `D` is odd, so both cofactors are odd. `3` is excluded because modulo `3` the two cofactors are both `A^2 + D^2`; with `gcd(A,D)=1`, this is never `0 mod 3`.
+
+Now extract the square roots:
+
+```lean
+-- theorem euler_cofactors_are_squares_of_center_square
+--     {A D X : Int}
+--     (hApos : 0 < A) (hDpos : 0 < D)
+--     (hDodd : Odd D)
+--     (hAD : IsCoprime A D)
+--     (hXsq : X ^ 2 = (16 * A ^ 2 + D ^ 2) * (4 * A ^ 2 + D ^ 2)) :
+--     exists B C : Int,
+--       0 < B /\ 0 < C /\
+--       B ^ 2 = 16 * A ^ 2 + D ^ 2 /\
+--       C ^ 2 = 4 * A ^ 2 + D ^ 2
+```
+
+Proof route: use `euler_cofactor_coprime` and the standard coprime-product-square extraction lemma. Positivity of the factors is immediate from `A,D > 0`. Choose positive roots by taking absolute values if the extraction lemma returns arbitrary signed roots.
+
+## 6. Final constructor theorem
+
+A good final wrapper is:
+
+```lean
+-- theorem primitiveCentered_to_eulerSquarePair (S : PrimitiveCenteredFourSqAP) :
+--     exists E : EulerSquarePair, S.N = E.A * E.D
+```
+
+Implementation skeleton:
+
+```text
+1. Let O := S.p*S.q*S.r*S.s, Y := 16*S.N^2, Z := S.X^2 - 20*S.N^2.
+2. Prove `PythagoreanTriple O Y Z` from `primitiveCentered_big_pyth_identity`.
+3. Prove `Int.gcd O Y = 1` from root-step coprimality and root oddness.
+4. Prove `O % 2 = 1` and `0 < Z`.
+5. Apply `PythagoreanTriple.coprime_classification'`.
+6. Derive `m*n = 8*S.N^2`, `m>0`, `n>0`.
+7. Prove `Even S.N`.
+8. Apply `coprime_product_eq_eight_square_split_int` to obtain `A,D`.
+9. Use `Z = m^2+n^2`, `S.N=A*D`, and the split to prove
+   `S.X^2 = (16*A^2+D^2)*(4*A^2+D^2)`.
+10. Apply `euler_cofactors_are_squares_of_center_square` to obtain positive `B,C`.
+11. Construct
+
+   E := { A := A, D := D, B := B, C := C,
+          hApos := ..., hDpos := ..., hDodd := ..., hAeven := ...,
+          hADcop := ..., hBpos := ..., hCpos := ...,
+          hB := ..., hC := ... }
+
+12. The required equality is exactly `S.N = E.A * E.D`, from the split theorem.
+```
+
+## 7. Hidden sign and absolute-value choices
+
+These are the places where false statements can creep in:
+
+1. **Do not use an absolute-value hypotenuse unless necessary.** Here `S.X^2 - 20*S.N^2 > 0`, so the Mathlib positive-hypotenuse theorem applies directly.
+
+2. **Do not assume `S.p*S.q*S.r*S.s > 0`.** The odd leg may be negative. This is fine: `PythagoreanTriple.coprime_classification'` permits a negative odd leg and returns `m^2-n^2 = O`, which records the sign through the order of `m,n`.
+
+3. **Do not state the `8*N^2` split with `A` even unless `Even N` is supplied.** `Even S.N` follows from the AP odd-square gap and must be part of the dependency chain.
+
+4. **Do not require `X = B*C` for the EulerSquarePair structure.** It is probably true with positive roots and `X>0`, but the structure only needs the two square equations. Avoiding `X=B*C` keeps the construction shorter.
+
+5. **The signs of extracted square roots for `B,C` are irrelevant only if you choose positive roots.** If the local square-extraction lemma returns arbitrary roots, define `B := |b0|`, `C := |c0|` and use factor positivity to prove strict positivity.
+
+## 8. Dependency DAG
+
+Minimal DAG:
+
+```text
+PrimitiveCentered fields
+  -> gap lemmas pq/qr/rs
+  -> root-step gcd lemmas
+  -> root_product_coprime_N
+  -> root_product_coprime_16
+  -> big_triple_coprime
+
+PrimitiveCentered fields
+  -> root_product_mod_two
+  -> big_hyp_pos
+  -> big_pyth_triple
+  -> PythagoreanTriple.coprime_classification'
+  -> m,n with 16*N^2 = 2mn and gcd(m,n)=1
+
+odd adjacent square gap
+  -> Even S.N
+
+m,n data + Even S.N
+  -> coprime_product_eq_eight_square_split_int
+  -> A,D with S.N=A*D, A even, D odd, gcd(A,D)=1
+
+Z=m^2+n^2 + split + S.N=A*D
+  -> center_square_eq_euler_cofactor_product_of_big_split
+  -> X^2=(16A^2+D^2)(4A^2+D^2)
+
+A,D data
+  -> euler_cofactor_coprime
+  -> euler_cofactors_are_squares_of_center_square
+  -> positive B,C
+
+A,D,B,C
+  -> EulerSquarePair
+  -> S.N = E.A*E.D
+```
+
+The only residual I would mark as genuinely nontrivial is `coprime_product_eq_eight_square_split_int`; it is standard finite valuation arithmetic. The remaining helpers are local gcd/parity/algebra lemmas and should be implementable without axioms or paper-scale work.
