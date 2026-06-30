@@ -1,6 +1,4 @@
-# Q2445 Int square_factor_balance Lean code
-
-Place this after the already-proved `nat_square_factor_balance` theorem, in the same namespace or with the theorem name qualified.
+# Q2445-RETRY Int square_factor_balance Lean code
 
 ```lean
 import Mathlib.Tactic
@@ -8,19 +6,6 @@ import Mathlib.RingTheory.Int.Basic
 import Mathlib.Data.Int.Lemmas
 
 namespace EulerAux
-
-#check Int.isCoprime_iff_nat_coprime
-#check Int.natAbs_mul
-#check Int.natAbs_pow
-#check Int.natAbs_eq_zero
-#check Int.natAbs_inj_of_nonneg_of_nonneg
-
-/-- Convert integer coprimality to the Nat coprimality shape expected by
-`nat_square_factor_balance`. -/
-theorem nat_coprime_natAbs_of_isCoprime_int {a b : ℤ}
-    (h : IsCoprime a b) :
-    Nat.Coprime a.natAbs b.natAbs :=
-  Int.isCoprime_iff_nat_coprime.mp h
 
 /-- Positive integers have nonzero `natAbs`. -/
 theorem natAbs_ne_zero_of_pos {z : ℤ} (hz : 0 < z) :
@@ -36,7 +21,7 @@ theorem natAbs_square_balance_eq
   have h' := congrArg Int.natAbs h
   simpa [Int.natAbs_mul, Int.natAbs_pow] using h'
 
-/-- Cast back from a positive integer whose `natAbs` is a square. -/
+/-- Cast back from a positive integer whose `natAbs` is the square of a `natAbs`. -/
 theorem int_eq_sq_of_pos_of_natAbs_eq_sq_natAbs
     {x y : ℤ}
     (hx : 0 < x)
@@ -47,7 +32,7 @@ theorem int_eq_sq_of_pos_of_natAbs_eq_sq_natAbs
   exact (Int.natAbs_inj_of_nonneg_of_nonneg
     (le_of_lt hx) (sq_nonneg y)).mp hxy'
 
-/-- Cleaner wrapper if the local context already has Nat coprimality of `natAbs`s. -/
+/-- Variant using the exact Nat coprimality shape needed by `nat_square_factor_balance`. -/
 theorem square_factor_balance_int_natAbs
     {b c M N : ℤ}
     (hb : 0 < b) (hc : 0 < c) (hM : 0 < M) (hN : 0 < N)
@@ -64,9 +49,10 @@ theorem square_factor_balance_int_natAbs
     int_eq_sq_of_pos_of_natAbs_eq_sq_natAbs hM hMabs,
     int_eq_sq_of_pos_of_natAbs_eq_sq_natAbs hN hNabs⟩
 
-/-- Desired EulerAux integer wrapper.  No statement change is needed: `IsCoprime` over
-`ℤ` converts directly to `Nat.Coprime` of `natAbs`s via
-`Int.isCoprime_iff_nat_coprime`. -/
+/-- Desired EulerAux integer wrapper.
+
+The `IsCoprime` hypotheses convert exactly by
+`Int.isCoprime_iff_nat_coprime.mp`. -/
 theorem square_factor_balance_int
     {b c M N : ℤ}
     (hb : 0 < b) (hc : 0 < c) (hM : 0 < M) (hN : 0 < N)
@@ -74,11 +60,9 @@ theorem square_factor_balance_int
     (h : b^2 * M = c^2 * N) :
     M = c^2 ∧ N = b^2 := by
   exact square_factor_balance_int_natAbs hb hc hM hN
-    (nat_coprime_natAbs_of_isCoprime_int hbc)
-    (nat_coprime_natAbs_of_isCoprime_int hMN)
+    (Int.isCoprime_iff_nat_coprime.mp hbc)
+    (Int.isCoprime_iff_nat_coprime.mp hMN)
     h
 
 end EulerAux
 ```
-
-If `nat_square_factor_balance` is not in namespace `EulerAux`, replace the call by its qualified name. The desired `IsCoprime` theorem itself does not need to be changed.
