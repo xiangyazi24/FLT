@@ -1,306 +1,309 @@
-# Q2450 two coprime factorizations refinement Lean route
+# Q2491 RootGCD4Division Lean route
 
-## Verdict
-
-The stated theorem is true under the given hypotheses.  In fact, `hApos` and `hV'odd` are redundant for this exact refinement: positivity of `U,V,U',V'`, the two product equations, evenness of `U,U'`, oddness of `V`, and the two coprimality hypotheses already drive the construction.  Keep the redundant hypotheses anyway for interface stability with the Q2448/Q2450 EulerAux route.
-
-A useful sanity check: if the second coprimality hypothesis is dropped, the statement is false.  Example:
+The GitHub `main` branch did not contain `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean` at the requested path, so this is written against exactly the definitions in the prompt.  The theorem is true as stated.  The clean proof is to choose
 
 ```lean
-A = 18, U = 2, V = 9, U' = 6, V' = 3
+g = (rootGCD4 w x y z : ℤ),
+p = w / g, q = x / g, r = y / g, s = z / g,
+Δ' = Δ / g^2.
 ```
 
-Then `A = U*V = U'*V'`, both first factors are even and both second factors are odd, and `IsCoprime U V` holds, but `IsCoprime U' V'` fails.  The desired refinement would force the common `b` factor to sit in `V'` while also remaining coprime to `U'`, which is impossible in this example.
-
-## Best Lean route: stay in `ℤ`, use `Int.exists_gcd_one`
-
-Do not start with `Nat` unless you want extra `natAbs` bookkeeping.  The clean route is:
-
-1. Set `g : ℤ := (Int.gcd U U' : ℤ)`.
-2. Use `Int.exists_gcd_one` to get
-   `U = b*g`, `U' = c*g`, and `Int.gcd b c = 1`.
-3. Convert `Int.gcd b c = 1` to `IsCoprime b c` using
-   `Int.isCoprime_iff_gcd_eq_one.mpr`.
-4. Since `2 ∣ U` and `2 ∣ U'`, prove `2 ∣ g` by `Int.dvd_coe_gcd`; write `g = 2*a`.
-5. Cancel `g` from `U*V = U'*V'` to get `b*V = c*V'`.
-6. Euclid with `IsCoprime b c` gives `c ∣ V` and `b ∣ V'`; write `V = c*d`, then cancel `c` to prove `V' = b*d`.
-7. Project all pairwise coprimalities using `IsCoprime.mono` from the two original coprime factorizations.
-
-The important point is that the pairwise facts involving `b` come from the *second* factorization, while the pairwise facts involving `c` come from the *first* factorization:
-
-```text
-IsCoprime (2*a) b : from IsCoprime U' V', since 2*a ∣ U' and b ∣ V'
-IsCoprime (2*a) c : from IsCoprime U V,  since 2*a ∣ U  and c ∣ V
-IsCoprime (2*a) d : from IsCoprime U V,  since 2*a ∣ U  and d ∣ V
-IsCoprime b c     : from gcd-quotients by g = gcd U U'
-IsCoprime b d     : from IsCoprime U V,  since b ∣ U and d ∣ V
-IsCoprime c d     : from IsCoprime U' V', since c ∣ U' and d ∣ V'
-```
-
-## Compile-oriented patch
-
-This is the first patch I would try.  It is intentionally local: no Pythagorean-triple dependencies and no square-balance descent assumptions.
+The only real bookkeeping is proving that the quotient tuple is primitive.  The helper `rootGCD4_eq_one_of_common_factor` below proves that if a positive natural `g` is exactly the four-root gcd and all four entries are `g` times signed quotients, then the signed quotient tuple has `rootGCD4 = 1`.
 
 ```lean
-import Mathlib.RingTheory.Coprime.Lemmas
-import Mathlib.Algebra.Ring.Int.Parity
+import Mathlib.RingTheory.Int.Basic
 import Mathlib.Tactic
 
-namespace EulerAux
+/-- Integer four-square arithmetic progression, in square-difference form. -/
+def IntFourSqAP (w x y z : ℤ) : Prop :=
+  x ^ 2 - w ^ 2 = y ^ 2 - x ^ 2 ∧ y ^ 2 - x ^ 2 = z ^ 2 - y ^ 2
 
-def PairwiseCoprime2abcd (a b c d : ℤ) : Prop :=
-  IsCoprime (2*a) b ∧
-  IsCoprime (2*a) c ∧
-  IsCoprime (2*a) d ∧
-  IsCoprime b c ∧
-  IsCoprime b d ∧
-  IsCoprime c d
+/-- Constant four-square progression. -/
+def FourSqAPConst (w x y z : ℤ) : Prop :=
+  w ^ 2 = x ^ 2 ∧ x ^ 2 = y ^ 2 ∧ y ^ 2 = z ^ 2
 
-structure RefinedFactors (A U V U' V' : ℤ) where
-  a b c d : ℤ
-  hapos : 0 < a
-  hbpos : 0 < b
-  hcpos : 0 < c
-  hdpos : 0 < d
-  hU : U = 2*a*b
-  hV : V = c*d
-  hU' : U' = 2*a*c
-  hV' : V' = b*d
-  hA : A = 2*a*b*c*d
-  hdodd : Odd d
-  hpair : PairwiseCoprime2abcd a b c d
+/-- GCD of the four signed roots, implemented as a natural gcd of absolute values. -/
+def rootGCD4 (a b c d : ℤ) : ℕ :=
+  Nat.gcd a.natAbs (Nat.gcd b.natAbs (Nat.gcd c.natAbs d.natAbs))
+
+/-- Primitive normalization residual for a nonconstant four-square AP. -/
+def RootGCD4Division : Prop :=
+  ∀ {w x y z Δ : ℤ},
+    0 < Δ →
+    x ^ 2 - w ^ 2 = Δ →
+    y ^ 2 - x ^ 2 = Δ →
+    z ^ 2 - y ^ 2 = Δ →
+      ∃ g p q r s Δ' : ℤ,
+        0 < g ∧ 0 < Δ' ∧
+        w = g * p ∧ x = g * q ∧ y = g * r ∧ z = g * s ∧
+        q ^ 2 - p ^ 2 = Δ' ∧
+        r ^ 2 - q ^ 2 = Δ' ∧
+        s ^ 2 - r ^ 2 = Δ' ∧
+        rootGCD4 p q r s = 1
+
+/-- The four-root gcd divides the first absolute value. -/
+theorem rootGCD4_dvd_natAbs_w (w x y z : ℤ) :
+    rootGCD4 w x y z ∣ w.natAbs := by
+  dsimp [rootGCD4]
+  exact Nat.gcd_dvd_left _ _
+
+/-- The four-root gcd divides the second absolute value. -/
+theorem rootGCD4_dvd_natAbs_x (w x y z : ℤ) :
+    rootGCD4 w x y z ∣ x.natAbs := by
+  dsimp [rootGCD4]
+  exact (Nat.gcd_dvd_right _ _).trans (Nat.gcd_dvd_left _ _)
+
+/-- The four-root gcd divides the third absolute value. -/
+theorem rootGCD4_dvd_natAbs_y (w x y z : ℤ) :
+    rootGCD4 w x y z ∣ y.natAbs := by
+  dsimp [rootGCD4]
+  have h1 :
+      Nat.gcd w.natAbs (Nat.gcd x.natAbs (Nat.gcd y.natAbs z.natAbs)) ∣
+        Nat.gcd x.natAbs (Nat.gcd y.natAbs z.natAbs) :=
+    Nat.gcd_dvd_right _ _
+  have h2 : Nat.gcd x.natAbs (Nat.gcd y.natAbs z.natAbs) ∣
+      Nat.gcd y.natAbs z.natAbs :=
+    Nat.gcd_dvd_right _ _
+  have h3 : Nat.gcd y.natAbs z.natAbs ∣ y.natAbs :=
+    Nat.gcd_dvd_left _ _
+  exact h1.trans (h2.trans h3)
+
+/-- The four-root gcd divides the fourth absolute value. -/
+theorem rootGCD4_dvd_natAbs_z (w x y z : ℤ) :
+    rootGCD4 w x y z ∣ z.natAbs := by
+  dsimp [rootGCD4]
+  have h1 :
+      Nat.gcd w.natAbs (Nat.gcd x.natAbs (Nat.gcd y.natAbs z.natAbs)) ∣
+        Nat.gcd x.natAbs (Nat.gcd y.natAbs z.natAbs) :=
+    Nat.gcd_dvd_right _ _
+  have h2 : Nat.gcd x.natAbs (Nat.gcd y.natAbs z.natAbs) ∣
+      Nat.gcd y.natAbs z.natAbs :=
+    Nat.gcd_dvd_right _ _
+  have h3 : Nat.gcd y.natAbs z.natAbs ∣ z.natAbs :=
+    Nat.gcd_dvd_right _ _
+  exact h1.trans (h2.trans h3)
+
+/-- Integer divisibility form for the first root. -/
+theorem rootGCD4_dvd_w (w x y z : ℤ) :
+    (rootGCD4 w x y z : ℤ) ∣ w := by
+  rw [Int.natCast_dvd]
+  exact rootGCD4_dvd_natAbs_w w x y z
+
+/-- Integer divisibility form for the second root. -/
+theorem rootGCD4_dvd_x (w x y z : ℤ) :
+    (rootGCD4 w x y z : ℤ) ∣ x := by
+  rw [Int.natCast_dvd]
+  exact rootGCD4_dvd_natAbs_x w x y z
+
+/-- Integer divisibility form for the third root. -/
+theorem rootGCD4_dvd_y (w x y z : ℤ) :
+    (rootGCD4 w x y z : ℤ) ∣ y := by
+  rw [Int.natCast_dvd]
+  exact rootGCD4_dvd_natAbs_y w x y z
+
+/-- Integer divisibility form for the fourth root. -/
+theorem rootGCD4_dvd_z (w x y z : ℤ) :
+    (rootGCD4 w x y z : ℤ) ∣ z := by
+  rw [Int.natCast_dvd]
+  exact rootGCD4_dvd_natAbs_z w x y z
+
+/-- A positive first square gap forces the root gcd to be positive. -/
+theorem rootGCD4_pos_of_first_gap {w x y z Δ : ℤ}
+    (hΔpos : 0 < Δ)
+    (hxw : x ^ 2 - w ^ 2 = Δ) :
+    0 < rootGCD4 w x y z := by
+  apply Nat.pos_of_ne_zero
+  intro hzero
+  have hw0 : w = 0 := by
+    rcases rootGCD4_dvd_w w x y z with ⟨k, hk⟩
+    simpa [hzero] using hk
+  have hx0 : x = 0 := by
+    rcases rootGCD4_dvd_x w x y z with ⟨k, hk⟩
+    simpa [hzero] using hk
+  rw [hw0, hx0] at hxw
+  norm_num at hxw
+  nlinarith
+
+/-- The square of the four-root gcd divides the first square gap. -/
+theorem rootGCD4_sq_dvd_gap_xw (w x y z : ℤ) :
+    ((rootGCD4 w x y z : ℤ) ^ 2) ∣ x ^ 2 - w ^ 2 := by
+  rcases rootGCD4_dvd_x w x y z with ⟨qx, hx⟩
+  rcases rootGCD4_dvd_w w x y z with ⟨qw, hw⟩
+  refine ⟨qx ^ 2 - qw ^ 2, ?_⟩
+  rw [hx, hw]
+  ring
+
+/-- If the first square gap is named `Δ`, then the gcd square divides `Δ`. -/
+theorem rootGCD4_sq_dvd_delta_of_first_gap {w x y z Δ : ℤ}
+    (hxw : x ^ 2 - w ^ 2 = Δ) :
+    ((rootGCD4 w x y z : ℤ) ^ 2) ∣ Δ := by
+  rw [← hxw]
+  exact rootGCD4_sq_dvd_gap_xw w x y z
 
 /--
-Common refinement of two positive coprime factorizations whose first factors are even
-and whose second factors are odd.
-
-The proof uses `g = gcd U U'`, writes `U = b*g`, `U' = c*g`, proves
-`g = 2*a`, then obtains the common tail `d` from `b*V = c*V'`.
+If `g` is the positive four-root gcd and `w,x,y,z` are all `g` times
+signed quotients, then the quotient tuple is primitive.
 -/
-theorem two_coprime_factorizations_refine_even_pos
-    {A U V U' V' : ℤ}
-    (hApos : 0 < A)
-    (hUV : A = U*V)
-    (hU'V' : A = U'*V')
-    (hUpos : 0 < U) (hVpos : 0 < V)
-    (hU'pos : 0 < U') (hV'pos : 0 < V')
-    (hUeven : Even U) (hU'even : Even U')
-    (hVodd : Odd V) (hV'odd : Odd V')
-    (hUVcop : IsCoprime U V)
-    (hU'V'cop : IsCoprime U' V') :
-    RefinedFactors A U V U' V' := by
-  -- These two hypotheses are kept for caller compatibility, but this proof does not need them.
-  have _hApos_keep : 0 < A := hApos
-  have _hV'odd_keep : Odd V' := hV'odd
+theorem rootGCD4_eq_one_of_common_factor
+    {w x y z p q r s : ℤ} {g : ℕ}
+    (hgpos : 0 < g)
+    (hgroot : g = rootGCD4 w x y z)
+    (hw : w = (g : ℤ) * p)
+    (hx : x = (g : ℤ) * q)
+    (hy : y = (g : ℤ) * r)
+    (hz : z = (g : ℤ) * s) :
+    rootGCD4 p q r s = 1 := by
+  let K : ℕ := rootGCD4 p q r s
+  have hKp : K ∣ p.natAbs := by
+    dsimp [K]
+    exact rootGCD4_dvd_natAbs_w p q r s
+  have hKq : K ∣ q.natAbs := by
+    dsimp [K]
+    exact rootGCD4_dvd_natAbs_x p q r s
+  have hKr : K ∣ r.natAbs := by
+    dsimp [K]
+    exact rootGCD4_dvd_natAbs_y p q r s
+  have hKs : K ∣ s.natAbs := by
+    dsimp [K]
+    exact rootGCD4_dvd_natAbs_z p q r s
 
-  let g : ℤ := (Int.gcd U U' : ℤ)
+  have hKg_w : K * g ∣ w.natAbs := by
+    have hwa : w.natAbs = g * p.natAbs := by
+      rw [hw, Int.natAbs_mul]
+      simp
+    rcases hKp with ⟨t, ht⟩
+    refine ⟨t, ?_⟩
+    rw [hwa, ht]
+    ring
+  have hKg_x : K * g ∣ x.natAbs := by
+    have hxa : x.natAbs = g * q.natAbs := by
+      rw [hx, Int.natAbs_mul]
+      simp
+    rcases hKq with ⟨t, ht⟩
+    refine ⟨t, ?_⟩
+    rw [hxa, ht]
+    ring
+  have hKg_y : K * g ∣ y.natAbs := by
+    have hya : y.natAbs = g * r.natAbs := by
+      rw [hy, Int.natAbs_mul]
+      simp
+    rcases hKr with ⟨t, ht⟩
+    refine ⟨t, ?_⟩
+    rw [hya, ht]
+    ring
+  have hKg_z : K * g ∣ z.natAbs := by
+    have hza : z.natAbs = g * s.natAbs := by
+      rw [hz, Int.natAbs_mul]
+      simp
+    rcases hKs with ⟨t, ht⟩
+    refine ⟨t, ?_⟩
+    rw [hza, ht]
+    ring
 
-  have hgposNat : 0 < Int.gcd U U' :=
-    Int.gcd_pos_of_ne_zero_left U' (ne_of_gt hUpos)
+  have hKg_root : K * g ∣ rootGCD4 w x y z := by
+    dsimp [rootGCD4]
+    exact Nat.dvd_gcd hKg_w (Nat.dvd_gcd hKg_x (Nat.dvd_gcd hKg_y hKg_z))
+  have hKg_g : K * g ∣ g := by
+    simpa [← hgroot] using hKg_root
+  rcases hKg_g with ⟨t, ht⟩
+  have hKt : 1 = K * t := by
+    have hmul : g * 1 = g * (K * t) := by
+      calc
+        g * 1 = g := by ring
+        _ = (K * g) * t := ht.symm
+        _ = g * (K * t) := by ring
+    exact Nat.eq_of_mul_eq_mul_left hgpos hmul
+  have hK_dvd_one : K ∣ 1 := ⟨t, hKt.symm⟩
+  have hK_one : K = 1 := Nat.dvd_one.mp hK_dvd_one
+  simpa [K] using hK_one
+
+/-- Full primitive division theorem for the four-square AP normalization layer. -/
+theorem rootGCD4Division : RootGCD4Division := by
+  intro w x y z Δ hΔpos hxw hyx hzy
+  let gn : ℕ := rootGCD4 w x y z
+  let g : ℤ := (gn : ℤ)
+  let p : ℤ := w / g
+  let q : ℤ := x / g
+  let r : ℤ := y / g
+  let s : ℤ := z / g
+  let Δ' : ℤ := Δ / (g ^ 2)
+
+  have hgnpos : 0 < gn := by
+    dsimp [gn]
+    exact rootGCD4_pos_of_first_gap hΔpos hxw
   have hgpos : 0 < g := by
     dsimp [g]
-    exact_mod_cast hgposNat
+    exact_mod_cast hgnpos
 
-  -- `Int.exists_gcd_one` gives primitive quotients by the positive integer gcd.
-  obtain ⟨b, c, hbc_gcd, hU_bg0, hU'_cg0⟩ :=
-    Int.exists_gcd_one (m := U) (n := U') hgposNat
+  have hgw : g ∣ w := by
+    simpa [g, gn] using rootGCD4_dvd_w w x y z
+  have hgx : g ∣ x := by
+    simpa [g, gn] using rootGCD4_dvd_x w x y z
+  have hgy : g ∣ y := by
+    simpa [g, gn] using rootGCD4_dvd_y w x y z
+  have hgz : g ∣ z := by
+    simpa [g, gn] using rootGCD4_dvd_z w x y z
 
-  have hU_bg : U = b * g := by
-    simpa [g] using hU_bg0
-  have hU'_cg : U' = c * g := by
-    simpa [g] using hU'_cg0
+  have hw : w = g * p := by
+    dsimp [p]
+    simpa [mul_comm] using (Int.ediv_mul_cancel hgw).symm
+  have hx : x = g * q := by
+    dsimp [q]
+    simpa [mul_comm] using (Int.ediv_mul_cancel hgx).symm
+  have hy : y = g * r := by
+    dsimp [r]
+    simpa [mul_comm] using (Int.ediv_mul_cancel hgy).symm
+  have hz : z = g * s := by
+    dsimp [s]
+    simpa [mul_comm] using (Int.ediv_mul_cancel hgz).symm
 
-  have hbpos : 0 < b := by
-    have hprod : 0 < b * g := by
-      simpa [hU_bg] using hUpos
-    exact pos_of_mul_pos_right hprod (le_of_lt hgpos)
-  have hcpos : 0 < c := by
-    have hprod : 0 < c * g := by
-      simpa [hU'_cg] using hU'pos
-    exact pos_of_mul_pos_right hprod (le_of_lt hgpos)
+  have hΔdvd : g ^ 2 ∣ Δ := by
+    simpa [g, gn] using
+      rootGCD4_sq_dvd_delta_of_first_gap (w := w) (x := x) (y := y) (z := z) hxw
+  have hΔscale : Δ = g ^ 2 * Δ' := by
+    dsimp [Δ']
+    simpa [mul_comm] using (Int.ediv_mul_cancel hΔdvd).symm
+  have hΔ'pos : 0 < Δ' := by
+    have hprod : 0 < g ^ 2 * Δ' := by
+      simpa [hΔscale] using hΔpos
+    exact pos_of_mul_pos_left hprod (sq_nonneg g)
 
-  have hbc : IsCoprime b c := by
-    exact Int.isCoprime_iff_gcd_eq_one.mpr hbc_gcd
-
-  -- Since both `U` and `U'` are even, their integer gcd is even.
-  have h2g : (2 : ℤ) ∣ g := by
-    dsimp [g]
-    exact Int.dvd_coe_gcd hUeven.two_dvd hU'even.two_dvd
-  obtain ⟨a, hg2a⟩ := h2g
-
-  have hapos : 0 < a := by
-    nlinarith [hgpos, hg2a]
-
-  have hU_final : U = 2*a*b := by
+  have hpq : q ^ 2 - p ^ 2 = Δ' := by
+    apply mul_left_cancel₀ (pow_ne_zero 2 (ne_of_gt hgpos))
     calc
-      U = b * g := hU_bg
-      _ = b * (2*a) := by rw [hg2a]
-      _ = 2*a*b := by ring
-
-  have hU'_final : U' = 2*a*c := by
+      g ^ 2 * (q ^ 2 - p ^ 2) = (g * q) ^ 2 - (g * p) ^ 2 := by ring
+      _ = x ^ 2 - w ^ 2 := by rw [← hx, ← hw]
+      _ = Δ := hxw
+      _ = g ^ 2 * Δ' := hΔscale
+  have hrq : r ^ 2 - q ^ 2 = Δ' := by
+    apply mul_left_cancel₀ (pow_ne_zero 2 (ne_of_gt hgpos))
     calc
-      U' = c * g := hU'_cg
-      _ = c * (2*a) := by rw [hg2a]
-      _ = 2*a*c := by ring
-
-  -- Cancel the common gcd from the equality of the two products.
-  have hg_ne : g ≠ 0 := ne_of_gt hgpos
-  have hgEq : g * (b * V) = g * (c * V') := by
+      g ^ 2 * (r ^ 2 - q ^ 2) = (g * r) ^ 2 - (g * q) ^ 2 := by ring
+      _ = y ^ 2 - x ^ 2 := by rw [← hy, ← hx]
+      _ = Δ := hyx
+      _ = g ^ 2 * Δ' := hΔscale
+  have hsr : s ^ 2 - r ^ 2 = Δ' := by
+    apply mul_left_cancel₀ (pow_ne_zero 2 (ne_of_gt hgpos))
     calc
-      g * (b * V) = (b * g) * V := by ring
-      _ = U * V := by rw [← hU_bg]
-      _ = A := hUV.symm
-      _ = U' * V' := hU'V'
-      _ = (c * g) * V' := by rw [← hU'_cg]
-      _ = g * (c * V') := by ring
-  have hcommon : b * V = c * V' :=
-    mul_left_cancel₀ hg_ne hgEq
+      g ^ 2 * (s ^ 2 - r ^ 2) = (g * s) ^ 2 - (g * r) ^ 2 := by ring
+      _ = z ^ 2 - y ^ 2 := by rw [← hz, ← hy]
+      _ = Δ := hzy
+      _ = g ^ 2 * Δ' := hΔscale
 
-  -- Euclid on the primitive quotients: `c | V` and `b | V'`.
-  have hc_dvd_V : c ∣ V := by
-    have hc_dvd_bV : c ∣ b * V := by
-      rw [hcommon]
-      exact ⟨V', by ring⟩
-    exact hbc.symm.dvd_of_dvd_mul_left hc_dvd_bV
+  have hprim : rootGCD4 p q r s = 1 := by
+    exact rootGCD4_eq_one_of_common_factor
+      (g := gn) (w := w) (x := x) (y := y) (z := z)
+      (p := p) (q := q) (r := r) (s := s)
+      hgnpos rfl
+      (by simpa [g] using hw)
+      (by simpa [g] using hx)
+      (by simpa [g] using hy)
+      (by simpa [g] using hz)
 
-  have hb_dvd_V' : b ∣ V' := by
-    have hb_dvd_cV' : b ∣ c * V' := by
-      rw [← hcommon]
-      exact ⟨V, by ring⟩
-    exact hbc.dvd_of_dvd_mul_left hb_dvd_cV'
-
-  obtain ⟨d, hV_cd⟩ := hc_dvd_V
-
-  have hdpos : 0 < d := by
-    have hprod : 0 < c * d := by
-      simpa [hV_cd] using hVpos
-    exact pos_of_mul_pos_left hprod (le_of_lt hcpos)
-
-  have hV'_bd : V' = b * d := by
-    have hcEq : c * (b * d) = c * V' := by
-      calc
-        c * (b * d) = b * (c * d) := by ring
-        _ = b * V := by rw [← hV_cd]
-        _ = c * V' := hcommon
-    have hbd : b * d = V' :=
-      mul_left_cancel₀ (ne_of_gt hcpos) hcEq
-    exact hbd.symm
-
-  have hdodd : Odd d := by
-    have hcdodd : Odd (c * d) := by
-      simpa [hV_cd] using hVodd
-    exact Int.Odd.of_mul_right hcdodd
-
-  have hA_final : A = 2*a*b*c*d := by
-    calc
-      A = U * V := hUV
-      _ = (2*a*b) * (c*d) := by rw [hU_final, hV_cd]
-      _ = 2*a*b*c*d := by ring
-
-  -- Divisibility projections used by `IsCoprime.mono`.
-  have h2a_dvd_U : 2*a ∣ U := by
-    rw [hU_final]
-    exact ⟨b, by ring⟩
-  have hb_dvd_U : b ∣ U := by
-    rw [hU_final]
-    exact ⟨2*a, by ring⟩
-  have h2a_dvd_U' : 2*a ∣ U' := by
-    rw [hU'_final]
-    exact ⟨c, by ring⟩
-  have hc_dvd_U' : c ∣ U' := by
-    rw [hU'_final]
-    exact ⟨2*a, by ring⟩
-  have hd_dvd_V : d ∣ V := by
-    rw [hV_cd]
-    exact ⟨c, by ring⟩
-  have hd_dvd_V' : d ∣ V' := by
-    rw [hV'_bd]
-    exact ⟨b, by ring⟩
-
-  have h2ab : IsCoprime (2*a) b :=
-    IsCoprime.mono h2a_dvd_U' hb_dvd_V' hU'V'cop
-  have h2ac : IsCoprime (2*a) c :=
-    IsCoprime.mono h2a_dvd_U hc_dvd_V hUVcop
-  have h2ad : IsCoprime (2*a) d :=
-    IsCoprime.mono h2a_dvd_U hd_dvd_V hUVcop
-  have hbd : IsCoprime b d :=
-    IsCoprime.mono hb_dvd_U hd_dvd_V hUVcop
-  have hcd : IsCoprime c d :=
-    IsCoprime.mono hc_dvd_U' hd_dvd_V' hU'V'cop
-
-  exact
-  { a := a
-    b := b
-    c := c
-    d := d
-    hapos := hapos
-    hbpos := hbpos
-    hcpos := hcpos
-    hdpos := hdpos
-    hU := hU_final
-    hV := hV_cd
-    hU' := hU'_final
-    hV' := hV'_bd
-    hA := hA_final
-    hdodd := hdodd
-    hpair := ⟨h2ab, h2ac, h2ad, hbc, hbd, hcd⟩ }
-
-end EulerAux
+  exact ⟨g, p, q, r, s, Δ', hgpos, hΔ'pos,
+    hw, hx, hy, hz, hpq, hrq, hsr, hprim⟩
 ```
 
-## API checklist
+If you paste this into the existing `N12FourSquaresAP.lean` after the definitions already present there, remove the repeated definitions at the top of the block and keep the helper theorems plus `rootGCD4Division`.
 
-These are the key Mathlib APIs used above.
-
-```lean
--- gcd positivity and primitive quotient split
-Int.gcd_pos_of_ne_zero_left
-Int.exists_gcd_one
-
--- gcd divisibility and parity
-Int.dvd_coe_gcd
-Even.two_dvd
-
--- gcd=1 to Bezout-style coprime
-Int.isCoprime_iff_gcd_eq_one
-
--- Euclid and coprime projections
-IsCoprime.symm
-IsCoprime.dvd_of_dvd_mul_left
-IsCoprime.mono
-
--- odd product projection over integers
-Int.Odd.of_mul_right
--- equivalently, use: (Int.odd_mul.mp h).2
-
--- ordered-domain cancellation/sign helpers
-mul_left_cancel₀
-pos_of_mul_pos_right
-pos_of_mul_pos_left
-```
-
-If one of the divisibility/coprime projection elaborations is fragile in your local Mathlib snapshot, replace the affected line by the fully explicit form below:
-
-```lean
-exact IsCoprime.mono
-  (x := 2*a) (y := U') (z := b) (w := V')
-  h2a_dvd_U' hb_dvd_V' hU'V'cop
-```
-
-and similarly for the other projections.
-
-## Why not the Nat-first route?
-
-A Nat version is also true, but it is not shorter once the caller theorem is over `ℤ`.  The Nat proof would use:
-
-```lean
-Nat.gcd_dvd_left
-Nat.gcd_dvd_right
-Nat.gcd_div_gcd_div_gcd
-Nat.Coprime.dvd_mul_left
-Nat.Coprime.of_dvd
-Nat.odd_mul / Nat.Odd.of_mul_right
-Nat.Coprime.isCoprime
-```
-
-Then the integer theorem would need a cast layer through positive `natAbs` values.  The direct integer proof above avoids that cast layer and uses `Int.exists_gcd_one`, which already packages the primitive quotients by the integer gcd.
+The route is deliberately independent of any N=12 elliptic-curve layer: it only uses `Nat.gcd`, `Int.natCast_dvd`, `Int.ediv_mul_cancel`, `Int.natAbs_mul`, and elementary ordered-ring arithmetic.
