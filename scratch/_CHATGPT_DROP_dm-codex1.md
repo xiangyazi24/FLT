@@ -1,462 +1,226 @@
-# Q2614: residuals for `PrimitiveCenteredToEulerSquarePair`
+# Q2618: compile-oriented proof of `euler_cofactor_coprime`
 
-This answers only the two residuals in the prompt.
-
-The right split is:
-
-* Residual A should be proved by a Nat theorem for coprime positive factors of `8*N^2`, then wrapped to `Int` using positivity.
-* Residual B should be split into:
-  1. an Euler cofactor coprimality lemma, and
-  2. positive coprime-product square extraction.
-
-I would **not** try to prove either residual inline in the AP-to-Euler assembly theorem.
-
----
-
-## 1. Residual A: Nat theorem to isolate
-
-The clean theorem is this Nat version.  It includes the exact parity conclusions needed by the `Int` residual.
+Target theorem:
 
 ```lean
-import Mathlib.Tactic
-
-/--
-Coprime positive factors of `8*N^2`, with exactly one even factor.
-The even factor is `8` times a square and the odd factor is a square.
-The hypothesis `Even N` is used only to prove `Even A` after `N = A*D` and `Odd D`.
--/
-theorem Nat.coprime_product_eq_eight_square_split
-    {N m n : ℕ}
-    (hNpos : 0 < N)
-    (hNeven : Even N)
-    (hmpos : 0 < m) (hnpos : 0 < n)
-    (hmn : m * n = 8 * N ^ 2)
-    (hmn_coprime : Nat.Coprime m n)
-    (hparity : (Even m ∧ Odd n) ∨ (Odd m ∧ Even n)) :
-    ∃ A D : ℕ,
-      0 < A ∧ 0 < D ∧ Even A ∧ Odd D ∧ Nat.Coprime A D ∧
-      N = A * D ∧
-      ((m = 8 * A ^ 2 ∧ n = D ^ 2) ∨
-       (m = D ^ 2 ∧ n = 8 * A ^ 2))
-```
-
-### Proof route for the Nat theorem
-
-Do the two parity cases separately.
-
-### Case 1: `Even m`, `Odd n`
-
-1. Prove `8 ∣ m`.
-
-   Reason: `m*n = 8*N^2` and `n` is odd, so `n` is coprime to `8`; therefore `8 ∣ m*n` implies `8 ∣ m`.
-
-   Useful local helper:
-
-   ```lean
-   theorem Nat.coprime_eight_of_odd {n : ℕ} (hn : Odd n) :
-       Nat.Coprime 8 n
-   ```
-
-   Then use:
-
-   ```lean
-   (Nat.Coprime.dvd_of_dvd_mul_right ?hcop ?hdvd)
-   ```
-
-   Orientation pitfall: if `hcop : Nat.Coprime 8 n`, then to strip `n` from `8 ∣ m*n`, use the version returning `8 ∣ m`.  In many current snapshots this is:
-
-   ```lean
-   exact hcop.dvd_of_dvd_mul_right h8_dvd_mn
-   ```
-
-   If orientation fails, try:
-
-   ```lean
-   exact hcop.symm.dvd_of_dvd_mul_left h8_dvd_mn
-   ```
-
-2. Write `m = 8*m8`; cancel the `8` in
-
-   ```text
-   (8*m8)*n = 8*N^2
-   ```
-
-   to obtain
-
-   ```lean
-   m8 * n = N ^ 2
-   ```
-
-   Use `mul_left_cancel₀ (by norm_num : (8:ℕ) ≠ 0)` after normalizing associativity.
-
-3. Prove `Nat.Coprime m8 n` from `Nat.Coprime m n` and `m = 8*m8`.
-
-   Useful helper:
-
-   ```lean
-   theorem Nat.Coprime.of_dvd_left {a b c : ℕ}
-       (hcop : Nat.Coprime a c) (hba : b ∣ a) : Nat.Coprime b c
-   ```
-
-   If this exact theorem is not present, the one-line prime-divisor proof is easier than API hunting.
-
-4. Apply the standard square-product extraction theorem:
-
-   ```lean
-   /-- Local residual if Mathlib does not already have this exact statement. -/
-   theorem Nat.exists_sq_and_sq_of_coprime_mul_eq_sq
-       {x y z : ℕ}
-       (hcop : Nat.Coprime x y)
-       (h : x * y = z ^ 2) :
-       ∃ r s : ℕ, x = r ^ 2 ∧ y = s ^ 2
-   ```
-
-   This gives
-
-   ```text
-   m8 = A^2,
-   n = D^2.
-   ```
-
-5. From
-
-   ```text
-   A^2 * D^2 = N^2
-   ```
-
-   and positivity, prove
-
-   ```text
-   N = A*D.
-   ```
-
-   Nat lemma to use/isolate:
-
-   ```lean
-   theorem Nat.eq_of_sq_eq_sq_of_pos {a b : ℕ}
-       (ha : 0 < a) (hb : 0 < b) (h : a ^ 2 = b ^ 2) : a = b
-   ```
-
-   If not present, prove by `nlinarith [sq_lt_sq.mpr ...]` or use `Nat.sqrt` only locally.
-
-6. Prove `Odd D` from `Odd n` and `n = D^2`.
-
-   ```lean
-   theorem Nat.odd_of_sq_odd {D : ℕ} (h : Odd (D ^ 2)) : Odd D
-   ```
-
-   This follows from `Odd.of_mul_left` after `pow_two`.
-
-7. Prove `Even A` from `Even N`, `N = A*D`, and `Odd D`.
-
-   If `D` is odd, it is coprime to `2`; from `2 ∣ A*D` strip `D` to get `2 ∣ A`.
-
-8. Prove `Nat.Coprime A D` from `Nat.Coprime (A^2) (D^2)` or directly from `Nat.Coprime m8 n`.
-
-   Useful helper:
-
-   ```lean
-   theorem Nat.coprime_of_coprime_sq_sq {A D : ℕ}
-       (h : Nat.Coprime (A ^ 2) (D ^ 2)) : Nat.Coprime A D
-   ```
-
-### Case 2: `Odd m`, `Even n`
-
-Same proof with `m,n` swapped.  The conclusion is the second disjunct:
-
-```text
-m = D^2,
-n = 8*A^2.
-```
-
----
-
-## 2. Int wrapper for Residual A
-
-The `Int` theorem in the prompt should be a wrapper around the Nat theorem above.  Use positivity to avoid sign ambiguity.
-
-```lean
-theorem coprime_product_eq_eight_square_split_int
-    {N m n : Int}
-    (hNpos : 0 < N)
-    (hNeven : Even N)
-    (hmpos : 0 < m) (hnpos : 0 < n)
-    (hmn : m * n = 8 * N ^ 2)
-    (hmn_coprime : Int.gcd m n = 1)
-    (hparity : (m % 2 = 0 ∧ n % 2 = 1) ∨ (m % 2 = 1 ∧ n % 2 = 0)) :
-    ∃ A D : Int,
-      0 < A ∧ 0 < D ∧ Even A ∧ Odd D ∧ IsCoprime A D ∧
-      N = A * D ∧
-      ((m = 8 * A ^ 2 ∧ n = D ^ 2) ∨
-       (m = D ^ 2 ∧ n = 8 * A ^ 2))
-```
-
-### Wrapper proof hints
-
-Let
-
-```lean
-let NN : ℕ := N.natAbs
-let mm : ℕ := m.natAbs
-let nn : ℕ := n.natAbs
-```
-
-Because of positivity, you can rewrite back with:
-
-```lean
-Int.natAbs_of_nonneg (le_of_lt hNpos)
-Int.natAbs_of_nonneg (le_of_lt hmpos)
-Int.natAbs_of_nonneg (le_of_lt hnpos)
-```
-
-Convert the product equation using:
-
-```lean
-Int.natAbs_mul
-Int.natAbs_pow
-```
-
-Convert the gcd hypothesis using the fact that `Int.gcd m n` is `Nat.gcd m.natAbs n.natAbs`.  In many Mathlib snapshots this is by simplification:
-
-```lean
-have hcopNat : Nat.Coprime mm nn := by
-  simpa [Int.gcd, mm, nn, Nat.Coprime] using hmn_coprime
-```
-
-If `simp [Int.gcd]` does not unfold, use the project’s existing `Int.gcd_def`/`Int.gcd_eq_natAbs` lemma; this is exactly the kind of wrapper proof already appearing in the file.
-
-Convert `m % 2 = 1` to `Odd mm` using `Int.odd_iff` and positivity.  Convert `m % 2 = 0` to `Even mm` using `Int.not_odd_iff_even` or a tiny local parity wrapper.
-
-After applying `Nat.coprime_product_eq_eight_square_split`, lift `A,D : ℕ` back to `Int` by coercion.  Positivity of Nat witnesses gives positive Int witnesses.
-
----
-
-## 3. Residual B: Euler cofactor coprimality
-
-Define the two cofactors locally:
-
-```lean
-def eulerLeft (A D : ℤ) : ℤ := 16 * A ^ 2 + D ^ 2
-def eulerRight (A D : ℤ) : ℤ := 4 * A ^ 2 + D ^ 2
-```
-
-The cofactor gcd lemma should be local and reusable.
-
-```lean
-/-- The two Euler cofactors are coprime. -/
 theorem euler_cofactor_coprime
-    {A D : ℤ}
+    {A D : Int}
     (hDodd : Odd D)
     (hAD : IsCoprime A D) :
     IsCoprime (16 * A ^ 2 + D ^ 2) (4 * A ^ 2 + D ^ 2)
 ```
 
-### Proof route for `euler_cofactor_coprime`
-
-Use the factor-coprime transport style already present in the file.
-
-Let
+This proof follows route (1): prove the left cofactor
 
 ```text
-F = 16*A^2 + D^2,
-G = 4*A^2 + D^2.
+F = 16*A^2 + D^2
 ```
 
-Then
+is coprime to `12*A^2`, then transport coprimality to
 
 ```text
-F - G = 12*A^2,
-G = F - 12*A^2.
+G = F - 12*A^2 = 4*A^2 + D^2.
 ```
 
-So it suffices to prove
-
-```text
-IsCoprime F (12*A^2).
-```
-
-Break it into:
+The code uses only local Bezout helpers plus the existing local theorem
 
 ```lean
-lemma euler_left_coprime_A
-    {A D : ℤ} (hAD : IsCoprime A D) :
-    IsCoprime (16 * A ^ 2 + D ^ 2) A
-
-lemma euler_left_coprime_A_sq
-    {A D : ℤ} (hAD : IsCoprime A D) :
-    IsCoprime (16 * A ^ 2 + D ^ 2) (A ^ 2)
-
-lemma euler_left_odd
-    {A D : ℤ} (hDodd : Odd D) :
-    Odd (16 * A ^ 2 + D ^ 2)
-
-lemma euler_left_coprime_four
-    {A D : ℤ} (hDodd : Odd D) :
-    IsCoprime (16 * A ^ 2 + D ^ 2) (4 : ℤ)
-
-lemma euler_left_coprime_three
-    {A D : ℤ} (hAD : IsCoprime A D) :
-    IsCoprime (16 * A ^ 2 + D ^ 2) (3 : ℤ)
+zmod3_sq_add_sq_eq_zero {x y : ZMod 3} (h : x^2 + y^2 = 0) : x=0 ∧ y=0
 ```
 
-The only slightly annoying sublemma is `euler_left_coprime_three`.  Prove it by contradiction: if `3 ∣ F`, then in `ZMod 3`,
+which you said is already in this namespace.
 
-```text
-0 = 16*A^2 + D^2 = A^2 + D^2.
-```
+---
 
-Squares in `ZMod 3` are `0` or `1`; therefore both `A` and `D` are `0 mod 3`, contradicting `IsCoprime A D`.  If you want to avoid `ZMod`, use `% 3` case splitting on `A % 3` and `D % 3`; there are only nine cases and `omega`/`norm_num` closes them.
+## Code
 
-With those helpers:
+Paste inside `namespace MazurProof.RationalPointsN12.EulerSquarePair`.
 
 ```lean
-/-- Odd plus not divisible by `3` gives coprime to `12`; then multiply by `A^2`. -/
-theorem euler_left_coprime_twelve_mul_A_sq
-    {A D : ℤ}
-    (hDodd : Odd D)
-    (hAD : IsCoprime A D) :
-    IsCoprime (16 * A ^ 2 + D ^ 2) (12 * A ^ 2) := by
-  have hA2 : IsCoprime (16 * A ^ 2 + D ^ 2) (A ^ 2) :=
-    euler_left_coprime_A_sq hAD
-  have h4 : IsCoprime (16 * A ^ 2 + D ^ 2) (4 : ℤ) :=
-    euler_left_coprime_four hDodd
-  have h3 : IsCoprime (16 * A ^ 2 + D ^ 2) (3 : ℤ) :=
-    euler_left_coprime_three hAD
-  have h12 : IsCoprime (16 * A ^ 2 + D ^ 2) ((4 : ℤ) * 3) :=
-    h4.mul_right h3
-  have h12' : IsCoprime (16 * A ^ 2 + D ^ 2) (12 : ℤ) := by
-    simpa using h12
-  have h : IsCoprime (16 * A ^ 2 + D ^ 2) ((12 : ℤ) * (A ^ 2)) :=
-    h12'.mul_right hA2
-  simpa using h
-```
+import Mathlib.Tactic
+import Mathlib.Data.ZMod.Basic
 
-Then the final cofactor lemma is:
+namespace MazurProof.RationalPointsN12.EulerSquarePair
 
-```lean
-theorem euler_cofactor_coprime
-    {A D : ℤ}
-    (hDodd : Odd D)
-    (hAD : IsCoprime A D) :
-    IsCoprime (16 * A ^ 2 + D ^ 2) (4 * A ^ 2 + D ^ 2) := by
-  have hF12A : IsCoprime (16 * A ^ 2 + D ^ 2) (12 * A ^ 2) :=
-    euler_left_coprime_twelve_mul_A_sq hDodd hAD
-  -- `G = F + (-1) * (12*A^2)`.
-  -- If the local file has `isCoprime_self_add_right_int`, use it:
-  have h := isCoprime_self_add_right_int (x := 16 * A ^ 2 + D ^ 2)
-    (z := -(12 * A ^ 2)) ?hneg
-  · convert h using 1 <;> ring
-  · -- `hneg : IsCoprime F (-(12*A^2))`
-    simpa using hF12A.neg_right
-```
+private theorem q2618_isCoprime_mul_right_int {a b c : ℤ}
+    (hab : IsCoprime a b) (hac : IsCoprime a c) :
+    IsCoprime a (b * c) := by
+  rcases hab with ⟨u, v, huv⟩
+  rcases hac with ⟨r, s, hrs⟩
+  refine ⟨u * r * a + u * s * c + v * r * b, v * s, ?_⟩
+  calc
+    (u * r * a + u * s * c + v * r * b) * a + (v * s) * (b * c)
+        = (u * a + v * b) * (r * a + s * c) := by ring
+    _ = 1 := by rw [huv, hrs]; ring
 
-If `neg_right` is not available for `IsCoprime`, avoid negatives by proving the transport lemma directly:
-
-```lean
-lemma isCoprime_self_sub_right_int {x z : ℤ}
-    (h : IsCoprime x z) : IsCoprime x (x - z) := by
+private theorem q2618_isCoprime_self_sub_right_int {x z : ℤ}
+    (h : IsCoprime x z) :
+    IsCoprime x (x - z) := by
   rcases h with ⟨u, v, huv⟩
   refine ⟨u + v, -v, ?_⟩
   calc
     (u + v) * x + (-v) * (x - z) = u * x + v * z := by ring
     _ = 1 := huv
-```
 
-Then:
+private theorem q2618_isCoprime_two_of_odd_int {m : ℤ} (hm : Odd m) :
+    IsCoprime m (2 : ℤ) := by
+  rcases hm with ⟨k, hk⟩
+  refine ⟨1, -k, ?_⟩
+  rw [hk]
+  ring
 
-```lean
-theorem euler_cofactor_coprime
+private theorem q2618_isCoprime_four_of_odd_int {m : ℤ} (hm : Odd m) :
+    IsCoprime m (4 : ℤ) := by
+  have h2 : IsCoprime m (2 : ℤ) := q2618_isCoprime_two_of_odd_int hm
+  have h22 : IsCoprime m ((2 : ℤ) * 2) :=
+    q2618_isCoprime_mul_right_int h2 h2
+  simpa using h22
+
+private theorem q2618_euler_left_odd {A D : ℤ} (hDodd : Odd D) :
+    Odd (16 * A ^ 2 + D ^ 2) := by
+  rcases hDodd with ⟨k, hk⟩
+  refine ⟨8 * A ^ 2 + 2 * k ^ 2 + 2 * k, ?_⟩
+  rw [hk]
+  ring
+
+/-- `16*A^2 + D^2` is coprime to `A`. -/
+private theorem q2618_euler_left_coprime_A
+    {A D : ℤ} (hAD : IsCoprime A D) :
+    IsCoprime (16 * A ^ 2 + D ^ 2) A := by
+  rcases hAD with ⟨u, v, huv⟩
+  refine ⟨v ^ 2, u ^ 2 * A + 2 * u * v * D - 16 * v ^ 2 * A, ?_⟩
+  calc
+    v ^ 2 * (16 * A ^ 2 + D ^ 2)
+        + (u ^ 2 * A + 2 * u * v * D - 16 * v ^ 2 * A) * A
+        = (u * A + v * D) ^ 2 := by ring
+    _ = 1 := by rw [huv]; ring
+
+private theorem q2618_euler_left_coprime_A_sq
+    {A D : ℤ} (hAD : IsCoprime A D) :
+    IsCoprime (16 * A ^ 2 + D ^ 2) (A ^ 2) := by
+  have hA : IsCoprime (16 * A ^ 2 + D ^ 2) A :=
+    q2618_euler_left_coprime_A hAD
+  have hAA : IsCoprime (16 * A ^ 2 + D ^ 2) (A * A) :=
+    q2618_isCoprime_mul_right_int hA hA
+  simpa [pow_two] using hAA
+
+/-- A local wrapper for the standard ZMod divisibility test. -/
+private theorem q2618_zmod3_zero_iff_three_dvd (x : ℤ) :
+    ((x : ZMod 3) = 0) ↔ (3 : ℤ) ∣ x := by
+  simpa using (ZMod.intCast_zmod_eq_zero_iff_dvd x 3)
+
+/-- `3` does not divide `16*A^2 + D^2` if `A,D` are coprime. -/
+private theorem q2618_not_three_dvd_euler_left
+    {A D : ℤ} (hAD : IsCoprime A D) :
+    ¬ (3 : ℤ) ∣ 16 * A ^ 2 + D ^ 2 := by
+  intro h3
+  have hcast0 : (((16 * A ^ 2 + D ^ 2 : ℤ) : ZMod 3) = 0) :=
+    (q2618_zmod3_zero_iff_three_dvd (16 * A ^ 2 + D ^ 2)).2 h3
+  have hsum : (A : ZMod 3) ^ 2 + (D : ZMod 3) ^ 2 = 0 := by
+    norm_num at hcast0
+    simpa [Int.cast_add, Int.cast_mul, Int.cast_pow] using hcast0
+  rcases zmod3_sq_add_sq_eq_zero hsum with ⟨hA0, hD0⟩
+  have h3A : (3 : ℤ) ∣ A :=
+    (q2618_zmod3_zero_iff_three_dvd A).1 hA0
+  have h3D : (3 : ℤ) ∣ D :=
+    (q2618_zmod3_zero_iff_three_dvd D).1 hD0
+  rcases hAD with ⟨u, v, huv⟩
+  have h31 : (3 : ℤ) ∣ (1 : ℤ) := by
+    rw [← huv]
+    exact dvd_add (dvd_mul_of_dvd_right h3A u) (dvd_mul_of_dvd_right h3D v)
+  norm_num at h31
+
+/-- If `3 ∤ n`, then `n` and `3` are Bezout-coprime. -/
+private theorem q2618_isCoprime_three_right_of_not_dvd {n : ℤ}
+    (hn : ¬ (3 : ℤ) ∣ n) :
+    IsCoprime n (3 : ℤ) := by
+  have hnot0 : n % 3 ≠ 0 := by
+    intro h0
+    exact hn (Int.dvd_iff_emod_eq_zero.mpr h0)
+  have hcases : n % 3 = 1 ∨ n % 3 = 2 := by
+    have hnonneg : 0 ≤ n % 3 :=
+      Int.emod_nonneg n (by norm_num : (3 : ℤ) ≠ 0)
+    have hlt : n % 3 < 3 :=
+      Int.emod_lt_of_pos n (by norm_num : (0 : ℤ) < 3)
+    omega
+  rcases hcases with h1 | h2
+  · refine ⟨1, -(n / 3), ?_⟩
+    have hdiv := Int.ediv_add_emod n 3
+    rw [h1] at hdiv
+    omega
+  · refine ⟨-1, n / 3 + 1, ?_⟩
+    have hdiv := Int.ediv_add_emod n 3
+    rw [h2] at hdiv
+    omega
+
+private theorem q2618_euler_left_coprime_three
+    {A D : ℤ} (hAD : IsCoprime A D) :
+    IsCoprime (16 * A ^ 2 + D ^ 2) (3 : ℤ) :=
+  q2618_isCoprime_three_right_of_not_dvd
+    (q2618_not_three_dvd_euler_left hAD)
+
+private theorem q2618_euler_left_coprime_twelve_mul_A_sq
     {A D : ℤ}
+    (hDodd : Odd D) (hAD : IsCoprime A D) :
+    IsCoprime (16 * A ^ 2 + D ^ 2) (12 * A ^ 2) := by
+  have hA2 : IsCoprime (16 * A ^ 2 + D ^ 2) (A ^ 2) :=
+    q2618_euler_left_coprime_A_sq hAD
+  have h4 : IsCoprime (16 * A ^ 2 + D ^ 2) (4 : ℤ) :=
+    q2618_isCoprime_four_of_odd_int (q2618_euler_left_odd hDodd)
+  have h3 : IsCoprime (16 * A ^ 2 + D ^ 2) (3 : ℤ) :=
+    q2618_euler_left_coprime_three hAD
+  have h12raw : IsCoprime (16 * A ^ 2 + D ^ 2) ((4 : ℤ) * 3) :=
+    q2618_isCoprime_mul_right_int h4 h3
+  have h12 : IsCoprime (16 * A ^ 2 + D ^ 2) (12 : ℤ) := by
+    simpa using h12raw
+  have h : IsCoprime (16 * A ^ 2 + D ^ 2) ((12 : ℤ) * (A ^ 2)) :=
+    q2618_isCoprime_mul_right_int h12 hA2
+  simpa using h
+
+/-- The two Euler cofactors are coprime. -/
+theorem euler_cofactor_coprime
+    {A D : Int}
     (hDodd : Odd D)
     (hAD : IsCoprime A D) :
     IsCoprime (16 * A ^ 2 + D ^ 2) (4 * A ^ 2 + D ^ 2) := by
   have hF12A : IsCoprime (16 * A ^ 2 + D ^ 2) (12 * A ^ 2) :=
-    euler_left_coprime_twelve_mul_A_sq hDodd hAD
-  have h := isCoprime_self_sub_right_int hF12A
+    q2618_euler_left_coprime_twelve_mul_A_sq hDodd hAD
+  have h := q2618_isCoprime_self_sub_right_int hF12A
   convert h using 1 <;> ring
-```
 
-This is the version I recommend.
+end MazurProof.RationalPointsN12.EulerSquarePair
+```
 
 ---
 
-## 4. Residual B: square extraction into `B,C`
+## API notes
 
-Use the same positive coprime-product square extraction interface as in Q2603.
-
-```lean
-/-- Positive integer square extraction from a coprime product equal to a square. -/
-theorem Int.exists_pos_sq_and_sq_of_mul_eq_sq_of_pos_of_isCoprime
-    {x y z : ℤ}
-    (hx : 0 < x)
-    (hy : 0 < y)
-    (hxy : IsCoprime x y)
-    (h : z ^ 2 = x * y) :
-    ∃ r s : ℤ,
-      0 < r ∧ 0 < s ∧
-      r ^ 2 = x ∧ s ^ 2 = y
-```
-
-This can be proved by converting to Nat and using:
+1. The only Mathlib name that may vary by snapshot is the ZMod bridge:
 
 ```lean
-theorem Nat.exists_sq_and_sq_of_coprime_mul_eq_sq
-    {x y z : ℕ}
-    (hcop : Nat.Coprime x y)
-    (h : x * y = z ^ 2) :
-    ∃ r s : ℕ, x = r ^ 2 ∧ y = s ^ 2
+ZMod.intCast_zmod_eq_zero_iff_dvd
 ```
 
-Now the target residual becomes straightforward.
+If your pinned Mathlib has the arguments reversed, replace the local wrapper by:
 
 ```lean
-theorem euler_cofactors_are_squares_of_center_square
-    {A D X : Int}
-    (hApos : 0 < A) (hDpos : 0 < D)
-    (hDodd : Odd D)
-    (hAD : IsCoprime A D)
-    (hXsq : X ^ 2 = (16 * A ^ 2 + D ^ 2) * (4 * A ^ 2 + D ^ 2)) :
-    ∃ B C : Int,
-      0 < B ∧ 0 < C ∧
-      B ^ 2 = 16 * A ^ 2 + D ^ 2 ∧
-      C ^ 2 = 4 * A ^ 2 + D ^ 2 := by
-  have hLpos : 0 < 16 * A ^ 2 + D ^ 2 := by
-    nlinarith [sq_nonneg A, sq_pos_of_ne_zero (ne_of_gt hDpos)]
-  have hRpos : 0 < 4 * A ^ 2 + D ^ 2 := by
-    nlinarith [sq_nonneg A, sq_pos_of_ne_zero (ne_of_gt hDpos)]
-  have hcop : IsCoprime (16 * A ^ 2 + D ^ 2) (4 * A ^ 2 + D ^ 2) :=
-    euler_cofactor_coprime hDodd hAD
-  exact Int.exists_pos_sq_and_sq_of_mul_eq_sq_of_pos_of_isCoprime
-    hLpos hRpos hcop hXsq
+private theorem q2618_zmod3_zero_iff_three_dvd (x : ℤ) :
+    ((x : ZMod 3) = 0) ↔ (3 : ℤ) ∣ x := by
+  simpa using (ZMod.intCast_zmod_eq_zero_iff_dvd 3 x)
 ```
 
-This is the exact dependency shape I recommend.
-
----
-
-## 5. Summary of what to prove locally versus residual
-
-### Local in `N12FourSquaresAP.lean`
+If the theorem is not in the `ZMod` namespace in your snapshot, search for:
 
 ```lean
-isCoprime_self_sub_right_int
-euler_left_coprime_A
-euler_left_coprime_A_sq
-euler_left_odd
-euler_left_coprime_four
-euler_left_coprime_three
-euler_left_coprime_twelve_mul_A_sq
-euler_cofactor_coprime
-euler_cofactors_are_squares_of_center_square
+#check ZMod.intCast_zmod_eq_zero_iff_dvd
+#check intCast_zmod_eq_zero_iff_dvd
+#check ZMod.intCast_eq_zero_iff_dvd
 ```
 
-### Genuine reusable residuals
+2. If your file already has `isCoprime_three_int_of_not_dvd`, you can replace `q2618_isCoprime_three_right_of_not_dvd` by that helper.  The needed orientation is:
 
 ```lean
-Nat.exists_sq_and_sq_of_coprime_mul_eq_sq
-Int.exists_pos_sq_and_sq_of_mul_eq_sq_of_pos_of_isCoprime
-Nat.coprime_product_eq_eight_square_split
-coprime_product_eq_eight_square_split_int
+¬ (3 : ℤ) ∣ n → IsCoprime n (3 : ℤ)
 ```
 
-If you already have the Nat square-product extraction theorem in another file, then Residual B is no longer hard; only the mod-3 cofactor coprimality lemma remains mildly tedious.
+If your existing helper returns `IsCoprime (3 : ℤ) n`, use `.symm`.
