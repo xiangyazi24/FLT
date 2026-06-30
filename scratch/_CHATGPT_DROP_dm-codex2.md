@@ -1,175 +1,224 @@
-# Q2516 WeakPrimitiveAPPairwise final assembly route
+# Q2531 PrimitiveCenteredFourSqAP vs FLT-four route
 
-This drop gives a paste-after-definitions assembly block for `WeakPrimitiveAPPairwise`, with distinct names.  It does two things:
+## Verdict
 
-1. gives a compile-oriented endpoint reduction from `Int.gcd p s ≠ 1` to a common prime divisor of `p` and `s`;
-2. gives the final six-field assembly theorem, parameterized by the adjacent, distance-two, and endpoint component helpers.  If the Q2506/Q2512 helper signatures in your file are narrower, wrap them with lambdas and ignore the unused hypotheses.
-
-The code assumes it is pasted inside the existing namespace `MazurProof.RationalPointsN12`, after the definitions of `rootGCD4` and `WeakPrimitiveAPPairwise`.
-
-Required imports if not already present:
+There is no small direct algebraic substitution from the current
+`PrimitiveCenteredFourSqAP` fields to Mathlib's `not_fermat_42` target.
+The centered four-square AP gives two primitive Pythagorean triangles with the
+same integer area `N`, and it gives identities of the form
 
 ```lean
-import Mathlib.RingTheory.Int.Basic
+q ^ 4 = (p*r) ^ 2 + (4*N) ^ 2
+r ^ 4 = (q*s) ^ 2 + (4*N) ^ 2
+```
+
+but those are sums of two **squares** equal to a square, not sums of two
+**fourth powers** equal to a square.  The pairwise gcd and oddness hypotheses do
+not make `p*r`, `q*s`, or `4*N` squares.  Turning this data into a Fermat-4
+contradiction is essentially the classical infinite descent/concordant-forms
+argument, not a one-line bridge.
+
+Mathlib's exposed theorem is exactly:
+
+```lean
+theorem not_fermat_42 {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) :
+    a ^ 4 + b ^ 4 ≠ c ^ 2
+```
+
+so a direct FLT-four route would need an honest construction of nonzero
+`a b : ℤ` and `c : ℤ` with `a^4 + b^4 = c^2`.  The natural identities below do
+not supply such `a,b,c`.
+
+## Pasteable algebra ledger
+
+The following lemmas are the exact identities I would add around the current
+`PrimitiveCenteredFourSqAP` structure.  They are useful for the descent route and
+also show precisely why the naive FLT-four bridge stops short.
+
+```lean
+import Mathlib.NumberTheory.FLT.Four
 import Mathlib.Tactic
-```
 
-## Paste-after-definitions code
+namespace MazurProof.RationalPointsN12
 
-```lean
-/-- If an integer gcd is not `1`, some natural prime divides both integers. -/
-private theorem n12_common_prime_of_int_gcd_ne_one {a b : ℤ}
-    (h : Int.gcd a b ≠ 1) :
-    ∃ ℓ : ℕ, Nat.Prime ℓ ∧ (ℓ : ℤ) ∣ a ∧ (ℓ : ℤ) ∣ b := by
-  obtain ⟨ℓ, hℓprime, hℓdvd⟩ := Nat.exists_prime_and_dvd h
-  have hga : Int.gcd a b ∣ a.natAbs := by
-    rw [Int.gcd_def]
-    exact Nat.gcd_dvd_left _ _
-  have hgb : Int.gcd a b ∣ b.natAbs := by
-    rw [Int.gcd_def]
-    exact Nat.gcd_dvd_right _ _
-  have hℓaNat : ℓ ∣ a.natAbs := hℓdvd.trans hga
-  have hℓbNat : ℓ ∣ b.natAbs := hℓdvd.trans hgb
-  have hℓa : (ℓ : ℤ) ∣ a := by
-    rw [Int.natCast_dvd]
-    exact hℓaNat
-  have hℓb : (ℓ : ℤ) ∣ b := by
-    rw [Int.natCast_dvd]
-    exact hℓbNat
-  exact ⟨ℓ, hℓprime, hℓa, hℓb⟩
+/-- The common square gap is `4*N`. -/
+theorem primitiveCentered_gap_pq (S : PrimitiveCenteredFourSqAP) :
+    S.q ^ 2 - S.p ^ 2 = 4 * S.N := by
+  nlinarith [S.hp, S.hq]
 
-/--
-Endpoint gcd from the endpoint prime-propagation contradiction.
+theorem primitiveCentered_gap_qr (S : PrimitiveCenteredFourSqAP) :
+    S.r ^ 2 - S.q ^ 2 = 4 * S.N := by
+  nlinarith [S.hq, S.hr]
 
-Use this after proving the genuine endpoint arithmetic lemma:
-any natural prime dividing both endpoints `p` and `s` contradicts the AP equations
-and primitive four-root gcd.  The prime-propagation proof is exactly where the
-`ℓ ≠ 3` cancellation and `ℓ = 3` residue check belong.
--/
-theorem n12_endpoint_ps_gcd_eq_one_of_no_common_prime
-    {p q r s Δ : ℤ}
-    (hpq : q ^ 2 - p ^ 2 = Δ)
-    (hqr : r ^ 2 - q ^ 2 = Δ)
-    (hrs : s ^ 2 - r ^ 2 = Δ)
-    (hroot : rootGCD4 p q r s = 1)
-    (hp_odd : p % 2 = 1)
-    (hs_odd : s % 2 = 1)
-    (hprime :
-      ∀ ℓ : ℕ,
-        Nat.Prime ℓ →
-        (ℓ : ℤ) ∣ p →
-        (ℓ : ℤ) ∣ s →
-          False) :
-    Int.gcd p s = 1 := by
-  -- Keep the endpoint AP/parity hypotheses visible for the local prime-propagation wrapper.
-  have _hpq_keep := hpq
-  have _hqr_keep := hqr
-  have _hrs_keep := hrs
-  have _hroot_keep := hroot
-  have _hp_odd_keep := hp_odd
-  have _hs_odd_keep := hs_odd
-  by_contra hne
-  obtain ⟨ℓ, hℓprime, hℓp, hℓs⟩ :=
-    n12_common_prime_of_int_gcd_ne_one (a := p) (b := s) hne
-  exact hprime ℓ hℓprime hℓp hℓs
+theorem primitiveCentered_gap_rs (S : PrimitiveCenteredFourSqAP) :
+    S.s ^ 2 - S.r ^ 2 = 4 * S.N := by
+  nlinarith [S.hr, S.hs]
 
-/-- Uniform component-helper type for one pairwise gcd field. -/
-private def N12PairwiseComponentHelper (i j : ℤ → ℤ → ℤ → ℤ → ℤ) : Prop :=
-  ∀ {p q r s Δ : ℤ},
-    q ^ 2 - p ^ 2 = Δ →
-    r ^ 2 - q ^ 2 = Δ →
-    s ^ 2 - r ^ 2 = Δ →
-    rootGCD4 p q r s = 1 →
-    p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
-      Int.gcd (i p q r s) (j p q r s) = 1
+/-- The left three squares form a three-square AP: `p^2, q^2, r^2`. -/
+theorem primitiveCentered_three_left (S : PrimitiveCenteredFourSqAP) :
+    S.p ^ 2 + S.r ^ 2 = 2 * S.q ^ 2 := by
+  nlinarith [S.hp, S.hq, S.hr]
+
+/-- The right three squares form a three-square AP: `q^2, r^2, s^2`. -/
+theorem primitiveCentered_three_right (S : PrimitiveCenteredFourSqAP) :
+    S.q ^ 2 + S.s ^ 2 = 2 * S.r ^ 2 := by
+  nlinarith [S.hq, S.hr, S.hs]
+
+/-- Endpoint symmetry of the centered AP. -/
+theorem primitiveCentered_outer_inner_sum (S : PrimitiveCenteredFourSqAP) :
+    S.p ^ 2 + S.s ^ 2 = S.q ^ 2 + S.r ^ 2 := by
+  nlinarith [S.hp, S.hq, S.hr, S.hs]
+
+/-- Pythagorean identity from the left three-square AP, without division by `2`. -/
+theorem primitiveCentered_halfsum_left_num (S : PrimitiveCenteredFourSqAP) :
+    (S.r - S.p) ^ 2 + (S.r + S.p) ^ 2 = (2 * S.q) ^ 2 := by
+  have h := primitiveCentered_three_left S
+  nlinarith
+
+/-- Pythagorean identity from the right three-square AP, without division by `2`. -/
+theorem primitiveCentered_halfsum_right_num (S : PrimitiveCenteredFourSqAP) :
+    (S.s - S.q) ^ 2 + (S.s + S.q) ^ 2 = (2 * S.r) ^ 2 := by
+  have h := primitiveCentered_three_right S
+  nlinarith
+
+/-- Numerator area identity for the left half-sum triangle. -/
+theorem primitiveCentered_halfsum_left_area_num (S : PrimitiveCenteredFourSqAP) :
+    (S.r - S.p) * (S.r + S.p) = 8 * S.N := by
+  nlinarith [S.hp, S.hr]
+
+/-- Numerator area identity for the right half-sum triangle. -/
+theorem primitiveCentered_halfsum_right_area_num (S : PrimitiveCenteredFourSqAP) :
+    (S.s - S.q) * (S.s + S.q) = 8 * S.N := by
+  nlinarith [S.hq, S.hs]
 
 /--
-Final assembly of all six gcd fields.
-
-Feed in the three adjacent helpers, two distance-two helpers, and the endpoint helper.
-This theorem is deliberately parameterized so it is independent of the exact Q2506/Q2512
-local theorem names.
+The tempting Fermat-shape identity.  This is only a Pythagorean triple
+`(p*r, 4*N, q^2)`, not a `Fermat42` solution.
 -/
-theorem n12_weakPrimitiveAPPairwise_from_component_helpers
-    (hpq_pair :
-      ∀ {p q r s Δ : ℤ},
-        q ^ 2 - p ^ 2 = Δ →
-        r ^ 2 - q ^ 2 = Δ →
-        s ^ 2 - r ^ 2 = Δ →
-        rootGCD4 p q r s = 1 →
-        p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
-          Int.gcd p q = 1)
-    (hpr_pair :
-      ∀ {p q r s Δ : ℤ},
-        q ^ 2 - p ^ 2 = Δ →
-        r ^ 2 - q ^ 2 = Δ →
-        s ^ 2 - r ^ 2 = Δ →
-        rootGCD4 p q r s = 1 →
-        p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
-          Int.gcd p r = 1)
-    (hps_pair :
-      ∀ {p q r s Δ : ℤ},
-        q ^ 2 - p ^ 2 = Δ →
-        r ^ 2 - q ^ 2 = Δ →
-        s ^ 2 - r ^ 2 = Δ →
-        rootGCD4 p q r s = 1 →
-        p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
-          Int.gcd p s = 1)
-    (hqr_pair :
-      ∀ {p q r s Δ : ℤ},
-        q ^ 2 - p ^ 2 = Δ →
-        r ^ 2 - q ^ 2 = Δ →
-        s ^ 2 - r ^ 2 = Δ →
-        rootGCD4 p q r s = 1 →
-        p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
-          Int.gcd q r = 1)
-    (hqs_pair :
-      ∀ {p q r s Δ : ℤ},
-        q ^ 2 - p ^ 2 = Δ →
-        r ^ 2 - q ^ 2 = Δ →
-        s ^ 2 - r ^ 2 = Δ →
-        rootGCD4 p q r s = 1 →
-        p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
-          Int.gcd q s = 1)
-    (hrs_pair :
-      ∀ {p q r s Δ : ℤ},
-        q ^ 2 - p ^ 2 = Δ →
-        r ^ 2 - q ^ 2 = Δ →
-        s ^ 2 - r ^ 2 = Δ →
-        rootGCD4 p q r s = 1 →
-        p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
-          Int.gcd r s = 1) :
-    WeakPrimitiveAPPairwise := by
-  intro p q r s Δ hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd
-  exact
-    ⟨ hpq_pair hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd
-    , hpr_pair hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd
-    , hps_pair hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd
-    , hqr_pair hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd
-    , hqs_pair hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd
-    , hrs_pair hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd ⟩
+theorem primitiveCentered_q4_pyth (S : PrimitiveCenteredFourSqAP) :
+    S.q ^ 4 = (S.p * S.r) ^ 2 + (4 * S.N) ^ 2 := by
+  have hpq : S.q ^ 2 = S.p ^ 2 + 4 * S.N := by
+    nlinarith [primitiveCentered_gap_pq S]
+  have hqr : S.r ^ 2 = S.q ^ 2 + 4 * S.N := by
+    nlinarith [primitiveCentered_gap_qr S]
+  calc
+    S.q ^ 4 = (S.q ^ 2) ^ 2 := by ring
+    _ = (S.p ^ 2 + 4 * S.N) ^ 2 := by rw [hpq]
+    _ = S.p ^ 2 * (S.q ^ 2 + 4 * S.N) + (4 * S.N) ^ 2 := by
+      rw [hpq]
+      ring
+    _ = S.p ^ 2 * S.r ^ 2 + (4 * S.N) ^ 2 := by rw [hqr]
+    _ = (S.p * S.r) ^ 2 + (4 * S.N) ^ 2 := by ring
+
+/-- Same tempting-but-insufficient identity on the right. -/
+theorem primitiveCentered_r4_pyth (S : PrimitiveCenteredFourSqAP) :
+    S.r ^ 4 = (S.q * S.s) ^ 2 + (4 * S.N) ^ 2 := by
+  have hqr : S.r ^ 2 = S.q ^ 2 + 4 * S.N := by
+    nlinarith [primitiveCentered_gap_qr S]
+  have hrs : S.s ^ 2 = S.r ^ 2 + 4 * S.N := by
+    nlinarith [primitiveCentered_gap_rs S]
+  calc
+    S.r ^ 4 = (S.r ^ 2) ^ 2 := by ring
+    _ = (S.q ^ 2 + 4 * S.N) ^ 2 := by rw [hqr]
+    _ = S.q ^ 2 * (S.r ^ 2 + 4 * S.N) + (4 * S.N) ^ 2 := by
+      rw [hqr]
+      ring
+    _ = S.q ^ 2 * S.s ^ 2 + (4 * S.N) ^ 2 := by rw [hrs]
+    _ = (S.q * S.s) ^ 2 + (4 * S.N) ^ 2 := by ring
+
+end MazurProof.RationalPointsN12
 ```
 
-## How to connect local Q2506/Q2512/Q2513 helpers
+## Why the direct `not_fermat_42` substitutions fail
 
-After your local endpoint prime-propagation helper is available, make a wrapper with this shape:
+The only obvious candidates are these two Pythagorean triples:
 
 ```lean
--- expected endpoint wrapper shape
--- theorem n12_endpoint_ps_pair
---     {p q r s Δ : ℤ}
---     (hpq : q ^ 2 - p ^ 2 = Δ)
---     (hqr : r ^ 2 - q ^ 2 = Δ)
---     (hrs : s ^ 2 - r ^ 2 = Δ)
---     (hroot : rootGCD4 p q r s = 1)
---     (hp_odd : p % 2 = 1)
---     (hs_odd : s % 2 = 1) :
---     Int.gcd p s = 1 :=
---   n12_endpoint_ps_gcd_eq_one_of_no_common_prime
---     hpq hqr hrs hroot hp_odd hs_odd
---     (fun ℓ hℓ hℓp hℓs =>
---       n12_endpoint_no_common_prime hpq hqr hrs hroot hp_odd hs_odd ℓ hℓ hℓp hℓs)
+(p*r)^2 + (4*N)^2 = (q^2)^2
+(q*s)^2 + (4*N)^2 = (r^2)^2
 ```
 
-Then close the target by passing your five existing component wrappers plus `n12_endpoint_ps_pair` to
-`n12_weakPrimitiveAPPairwise_from_component_helpers`.  If an adjacent or distance-two helper only needs a subset of the hypotheses, pass it through a lambda and ignore the rest.
+To feed Mathlib's `not_fermat_42`, one would need either
+
+```lean
+p*r = a^2      and      4*N = b^2
+```
+
+or
+
+```lean
+q*s = a^2      and      4*N = b^2
+```
+
+for some nonzero integers `a,b`.  The structure only gives pairwise coprimality
+among `p,q,r,s` and oddness of the roots; it gives no squarehood of `p*r`,
+`q*s`, or `N`.  In fact, the half-sum identities show the actual natural output
+is a pair of primitive right triangles of area `N`:
+
+```lean
+A = (r - p) / 2,  B = (r + p) / 2,  A^2 + B^2 = q^2,  A*B = 2*N
+C = (s - q) / 2,  D = (s + q) / 2,  C^2 + D^2 = r^2,  C*D = 2*N
+```
+
+This is the concordant-forms/infinite-descent configuration.  It is not a
+square-area triangle unless an extra theorem proves `N` is a square, and such a
+theorem is false in general for a single primitive Pythagorean triangle of area
+`N`.
+
+## Honest residual options
+
+### Preferred residual, matching the file's current theorem
+
+Keep the existing descent interface.  This is the mathematically honest next
+frontier:
+
+```lean
+-- Already defined in the file:
+-- def PrimitiveCenteredFourSqAPDescent : Prop :=
+--   ∀ S : PrimitiveCenteredFourSqAP,
+--     ∃ T : PrimitiveCenteredFourSqAP, T.N.natAbs < S.N.natAbs
+
+-- Target to prove next:
+-- theorem primitiveCenteredFourSqAP_descent : PrimitiveCenteredFourSqAPDescent := ...
+```
+
+Then the already checked theorem
+
+```lean
+-- theorem no_primitiveCenteredFourSqAP_of_descent
+--     (hdesc : PrimitiveCenteredFourSqAPDescent) :
+--     ¬ Nonempty PrimitiveCenteredFourSqAP := ...
+```
+
+is exactly the right final closure.
+
+### FLT-four bridge residual, if you still want a `not_fermat_42` closure
+
+This wrapper is compile-ready, but the bridge hypothesis is as hard as the
+descent; it is not supplied by the elementary identities above.
+
+```lean
+import Mathlib.NumberTheory.FLT.Four
+
+namespace MazurProof.RationalPointsN12
+
+/-- A direct bridge strong enough to use Mathlib's `not_fermat_42`. -/
+def PrimitiveCenteredFourSqAPToFermat42 : Prop :=
+  ∀ S : PrimitiveCenteredFourSqAP,
+    ∃ a b c : ℤ, a ≠ 0 ∧ b ≠ 0 ∧ a ^ 4 + b ^ 4 = c ^ 2
+
+/-- If such a bridge is proved, Mathlib FLT-four closes the AP contradiction. -/
+theorem no_primitiveCenteredFourSqAP_of_fermat42_bridge
+    (hbridge : PrimitiveCenteredFourSqAPToFermat42) :
+    ¬ Nonempty PrimitiveCenteredFourSqAP := by
+  rintro ⟨S⟩
+  rcases hbridge S with ⟨a, b, c, ha, hb, hEq⟩
+  exact (not_fermat_42 (a := a) (b := b) (c := c) ha hb) hEq
+
+end MazurProof.RationalPointsN12
+```
+
+Do not treat `PrimitiveCenteredFourSqAPToFermat42` as a small algebra lemma unless
+you have explicit formulas for `a,b,c` and proofs that the two summands are
+fourth powers.  The centered AP data currently gives only the Pythagorean-square
+identities above.
