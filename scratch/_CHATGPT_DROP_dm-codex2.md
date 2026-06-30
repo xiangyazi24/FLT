@@ -1,274 +1,241 @@
-# Q2608 `EulerSquarePair` signed even/odd parameter wrappers
+# Q2619 / Q2616 Nat eight-square coprime split
 
-Target file: `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`.
-
-Target namespace:
+Target theorem:
 
 ```lean
-namespace MazurProof.RationalPointsN12.EulerSquarePair
+theorem Nat.coprime_product_eq_eight_square_split
+    {N m n : Nat}
+    (hNpos : 0 < N)
+    (hNeven : Even N)
+    (hmpos : 0 < m) (hnpos : 0 < n)
+    (hmn : m * n = 8 * N ^ 2)
+    (hmn_coprime : Nat.Coprime m n)
+    (hparity : (Even m ∧ Odd n) ∨ (Odd m ∧ Even n)) :
+    ∃ A D : Nat,
+      0 < A ∧ 0 < D ∧ Even A ∧ Odd D ∧ Nat.Coprime A D ∧
+      N = A * D ∧
+      ((m = 8 * A ^ 2 ∧ n = D ^ 2) ∨
+       (m = D ^ 2 ∧ n = 8 * A ^ 2))
 ```
 
-This drop assumes the current file already contains the structure `EulerSquarePair` and the checked lemmas named in the prompt:
+The clean route is not to fight `Nat.factorization` directly in the final theorem.  Divide the even factor by `8`, reduce to a coprime product equal to a square, and use the already-imported `Int.sq_of_gcd_eq_one` from `Mathlib.NumberTheory.FLT.Four` for square extraction.
 
-```lean
-D_mod_two_eq_one
-D_coprime_twoA
-D_coprime_fourA
-gcd_D_twoA_eq_one
-gcd_D_fourA_eq_one
-pythagorean_D_twoA_C
-pythagorean_D_fourA_B
-pythagorean_D_twoA_C_params
-pythagorean_D_fourA_B_params
-```
-
-The snippets below do not redefine the structure.  Paste them in the existing namespace.  They use only `Mathlib.NumberTheory.FLT.Four` and `Mathlib.Tactic`.
+Paste this in a convenient file/namespace.  The names are under `namespace Nat`, so the final theorem has the requested fully-qualified name.
 
 ```lean
 import Mathlib.NumberTheory.FLT.Four
 import Mathlib.Tactic
 
-namespace MazurProof.RationalPointsN12.EulerSquarePair
+namespace Nat
 
-lemma q2608_int_cancel_two_mul {a b : ℤ}
-    (h : (2 : ℤ) * a = 2 * b) :
-    a = b := by
-  exact (mul_left_inj' (show (2 : ℤ) ≠ 0 by norm_num)).mp h
-
-lemma q2608_int_cancel_four_mul {a b : ℤ}
-    (h : (4 : ℤ) * a = 4 * b) :
-    a = b := by
-  exact (mul_left_inj' (show (4 : ℤ) ≠ 0 by norm_num)).mp h
-
-lemma q2608_eq_mul_of_two_mul_eq_two_mul_mul {A m n : ℤ}
-    (h : (2 : ℤ) * A = 2 * m * n) :
-    A = m * n := by
-  apply q2608_int_cancel_two_mul
-  calc
-    (2 : ℤ) * A = 2 * m * n := h
-    _ = 2 * (m * n) := by ring
-
-lemma q2608_two_mul_eq_mul_of_four_mul_eq_two_mul_mul {A m n : ℤ}
-    (h : (4 : ℤ) * A = 2 * m * n) :
-    (2 : ℤ) * A = m * n := by
-  apply q2608_int_cancel_two_mul
-  calc
-    (2 : ℤ) * (2 * A) = 4 * A := by ring
-    _ = 2 * m * n := h
-    _ = 2 * (m * n) := by ring
-
-lemma q2608_even_of_emod_two_eq_zero {x : ℤ}
-    (hx : x % 2 = 0) :
-    Even x := by
-  exact even_iff_two_dvd.mpr (Int.dvd_of_emod_eq_zero hx)
-
-lemma q2608_odd_of_emod_two_eq_one {x : ℤ}
-    (hx : x % 2 = 1) :
-    Odd x :=
-  Int.odd_iff.mpr hx
-
-lemma q2608_even_left_of_even_mul_of_odd_right {a b : ℤ}
-    (hab : Even (a * b)) (hb : Odd b) :
-    Even a := by
-  by_contra haEven
-  have haOdd : Odd a := Int.not_even_iff_odd.mp haEven
-  have hOdd : Odd (a * b) := Int.odd_mul.mpr ⟨haOdd, hb⟩
-  exact (Int.not_odd_iff_even.mpr hab) hOdd
-
-/--
-Halve the even parameter in the second Pythagorean parametrization.
-
-Use this with `(R,S) = (m,n)` in the `m`-even branch, and with
-`(R,S) = (n,m)` in the `n`-even branch after rewriting
-`4*A = 2*m*n` to `4*A = 2*n*m`.
-
-Inputs:
-* `0 < A`, `Even A` from the Euler square pair;
-* `0 ≤ R`, coming from `0 ≤ m`, or derived for `R = n` in the swapped branch;
-* `R % 2 = 0`, `Odd S`;
-* `4*A = 2*R*S`.
-
-Outputs:
-* `R = 2*Up`;
-* `0 < Up`;
-* `Even Up`, using `Even A` and oddness of `S`;
-* `A = Up*S`.
--/
-lemma q2608_halve_even_factor_in_fourA
-    {A R S : ℤ}
-    (hApos : 0 < A) (hAeven : Even A)
-    (hRnonneg : 0 ≤ R) (hReven : R % 2 = 0) (hSodd : Odd S)
-    (h4A : (4 : ℤ) * A = 2 * R * S) :
-    ∃ Up : ℤ, R = 2 * Up ∧ 0 < Up ∧ Even Up ∧ A = Up * S := by
-  rcases Int.dvd_of_emod_eq_zero hReven with ⟨Up, hUp⟩
-  have hA : A = Up * S := by
-    apply q2608_int_cancel_four_mul
+lemma exists_sq_of_coprime_mul_eq_sq_left
+    {a b c : ℕ}
+    (ha : 0 < a)
+    (hcop : Nat.Coprime a b)
+    (h : a * b = c ^ 2) :
+    ∃ A : ℕ, a = A ^ 2 := by
+  have hcopInt : Int.gcd (a : ℤ) (b : ℤ) = 1 := by
+    rw [Int.gcd_natCast_natCast]
+    exact Nat.coprime_iff_gcd_eq_one.mp hcop
+  have hInt : (a : ℤ) * (b : ℤ) = (c : ℤ) ^ 2 := by
+    exact_mod_cast h
+  obtain ⟨u, hu | hu⟩ := Int.sq_of_gcd_eq_one hcopInt hInt
+  · refine ⟨u.natAbs, ?_⟩
     calc
-      (4 : ℤ) * A = 2 * R * S := h4A
-      _ = 4 * (Up * S) := by
-        rw [hUp]
-        ring
-  have hUp_nonneg : 0 ≤ Up := by
-    omega
-  have hUp_ne : Up ≠ 0 := by
-    intro h0
-    have hA0 : A = 0 := by
-      rw [hA, h0, zero_mul]
-    exact (ne_of_gt hApos) hA0
-  have hUp_pos : 0 < Up :=
-    lt_of_le_of_ne hUp_nonneg (Ne.symm hUp_ne)
-  have hUpEven : Even Up := by
-    apply q2608_even_left_of_even_mul_of_odd_right
-    · rw [← hA]
-      exact hAeven
-    · exact hSodd
-  exact ⟨Up, hUp, hUp_pos, hUpEven, hA⟩
+      a = Int.natAbs (a : ℤ) := by simp
+      _ = Int.natAbs (u ^ 2) := by rw [hu]
+      _ = u.natAbs ^ 2 := by rw [Int.natAbs_pow]
+  · exfalso
+    have hapos : (0 : ℤ) < (a : ℤ) := by exact_mod_cast ha
+    rw [hu] at hapos
+    nlinarith [sq_nonneg u]
 
 /--
-Signed even/odd parameters for the `(D, 2*A, C)` Pythagorean triple.
-
-The Mathlib classification returns `D = m^2 - n^2`, `2*A = 2*m*n`,
-and exactly one of `m,n` even.  If `m` is even, take `(U,V,eps) = (m,n,1)`.
-If `n` is even, take `(U,V,eps) = (n,m,-1)`.
+If two positive coprime natural numbers multiply to a square, then both are
+squares, and the square root of the product is the product of the square roots.
 -/
-theorem C_signed_even_odd_params (E : EulerSquarePair) :
-    ∃ U V eps : ℤ,
-      0 < U ∧ 0 < V ∧ IsCoprime U V ∧ Even U ∧ Odd V ∧
-      (eps = 1 ∨ eps = -1) ∧
-      E.A = U * V ∧
-      E.D = eps * (U ^ 2 - V ^ 2) ∧
-      E.C = U ^ 2 + V ^ 2 := by
-  obtain ⟨m, n, hD, h2A, hC, hgcd, hparity, hm_nonneg⟩ :=
-    pythagorean_D_twoA_C_params E
-  have hA_mn : E.A = m * n :=
-    q2608_eq_mul_of_two_mul_eq_two_mul_mul h2A
-  have hcopmn : IsCoprime m n :=
-    Int.isCoprime_iff_gcd_eq_one.mpr hgcd
-  rcases hparity with hmn | hmn
-  · -- `m` even, `n` odd: keep Mathlib's orientation.
-    have hmEven : Even m := q2608_even_of_emod_two_eq_zero hmn.1
-    have hnOdd : Odd n := q2608_odd_of_emod_two_eq_one hmn.2
-    have hm_ne : m ≠ 0 := by
-      intro hm0
-      have hA0 : E.A = 0 := by
-        rw [hA_mn, hm0, zero_mul]
-      exact (ne_of_gt E.hApos) hA0
-    have hm_pos : 0 < m :=
-      lt_of_le_of_ne hm_nonneg (Ne.symm hm_ne)
-    have hn_pos : 0 < n := by
-      have hmn_pos : 0 < m * n := by
-        rw [← hA_mn]
-        exact E.hApos
-      exact (mul_pos_iff_of_pos_left hm_pos).mp hmn_pos
-    refine ⟨m, n, 1, hm_pos, hn_pos, hcopmn, hmEven, hnOdd, Or.inl rfl,
-      hA_mn, ?_, hC⟩
-    rw [hD]
+lemma coprime_mul_eq_square_split
+    {a b c : ℕ}
+    (ha : 0 < a) (hb : 0 < b)
+    (hcop : Nat.Coprime a b)
+    (h : a * b = c ^ 2) :
+    ∃ A D : ℕ,
+      0 < A ∧ 0 < D ∧
+      a = A ^ 2 ∧ b = D ^ 2 ∧ c = A * D := by
+  obtain ⟨A, hA⟩ :=
+    Nat.exists_sq_of_coprime_mul_eq_sq_left (a := a) (b := b) (c := c) ha hcop h
+  obtain ⟨D, hD⟩ :=
+    Nat.exists_sq_of_coprime_mul_eq_sq_left (a := b) (b := a) (c := c) hb hcop.symm
+      (by simpa [mul_comm] using h)
+  have hApos : 0 < A := by
+    by_contra hAz
+    have hA0 : A = 0 := by omega
+    have ha0 : a = 0 := by
+      rw [hA, hA0]
+      norm_num
+    exact (ne_of_gt ha) ha0
+  have hDpos : 0 < D := by
+    by_contra hDz
+    have hD0 : D = 0 := by omega
+    have hb0 : b = 0 := by
+      rw [hD, hD0]
+      norm_num
+    exact (ne_of_gt hb) hb0
+  have hsq : (A * D) ^ 2 = c ^ 2 := by
+    calc
+      (A * D) ^ 2 = A ^ 2 * D ^ 2 := by ring
+      _ = a * b := by rw [← hA, ← hD]
+      _ = c ^ 2 := h
+  have hAD_eq_c : A * D = c :=
+    (Nat.pow_left_injective (by norm_num : (2 : ℕ) ≠ 0)) hsq
+  exact ⟨A, D, hApos, hDpos, hA, hD, hAD_eq_c.symm⟩
+
+lemma coprime_eight_left_of_odd {n : ℕ} (hn : Odd n) : Nat.Coprime 8 n := by
+  have h2 : Nat.Coprime 2 n := Nat.coprime_two_left.mpr hn
+  have h23 : Nat.Coprime (2 ^ 3) n := h2.pow_left 3
+  simpa using h23
+
+/--
+The oriented case: the left factor is the even factor and the right factor is odd.
+The `Even m` hypothesis is retained for caller symmetry; the proof only needs `Odd n`
+to force all factors of `8` into `m`.
+-/
+lemma coprime_product_eq_eight_square_split_even_left
+    {N m n : ℕ}
+    (hNpos : 0 < N)
+    (hNeven : Even N)
+    (hmpos : 0 < m) (hnpos : 0 < n)
+    (hmn : m * n = 8 * N ^ 2)
+    (hmn_coprime : Nat.Coprime m n)
+    (_hm_even : Even m) (hn_odd : Odd n) :
+    ∃ A D : ℕ,
+      0 < A ∧ 0 < D ∧ Even A ∧ Odd D ∧ Nat.Coprime A D ∧
+      N = A * D ∧
+      m = 8 * A ^ 2 ∧ n = D ^ 2 := by
+  have h8copn : Nat.Coprime 8 n := Nat.coprime_eight_left_of_odd hn_odd
+  have h8dvd_mn : 8 ∣ m * n := by
+    rw [hmn]
+    exact dvd_mul_right 8 (N ^ 2)
+  have h8dvd_m : 8 ∣ m := (h8copn.dvd_mul_right).mp h8dvd_mn
+  let M : ℕ := m / 8
+  have hm_eq : m = 8 * M := by
+    dsimp [M]
+    rw [mul_comm, Nat.div_mul_cancel h8dvd_m]
+  have hquot : M * n = N ^ 2 := by
+    have hmul : 8 * (M * n) = 8 * N ^ 2 := by
+      calc
+        8 * (M * n) = (8 * M) * n := by ring
+        _ = m * n := by rw [← hm_eq]
+        _ = 8 * N ^ 2 := hmn
+    exact (mul_left_inj' (show (8 : ℕ) ≠ 0 by norm_num)).mp hmul
+  have hMpos : 0 < M := by
+    by_contra hMnot
+    have hM0 : M = 0 := by omega
+    have hN0 : N ^ 2 = 0 := by
+      rw [← hquot, hM0]
+      norm_num
+    exact (pow_ne_zero 2 (ne_of_gt hNpos)) hN0
+  have hMdvdm : M ∣ m := by
+    refine ⟨8, ?_⟩
+    rw [hm_eq]
     ring
-  · -- `n` even, `m` odd: swap parameters and flip the sign.
-    have hmOdd : Odd m := q2608_odd_of_emod_two_eq_one hmn.1
-    have hnEven : Even n := q2608_even_of_emod_two_eq_zero hmn.2
-    have hm_ne : m ≠ 0 := by
-      intro hm0
-      have hA0 : E.A = 0 := by
-        rw [hA_mn, hm0, zero_mul]
-      exact (ne_of_gt E.hApos) hA0
-    have hm_pos : 0 < m :=
-      lt_of_le_of_ne hm_nonneg (Ne.symm hm_ne)
-    have hn_pos : 0 < n := by
-      have hmn_pos : 0 < m * n := by
-        rw [← hA_mn]
-        exact E.hApos
-      exact (mul_pos_iff_of_pos_left hm_pos).mp hmn_pos
-    refine ⟨n, m, -1, hn_pos, hm_pos, hcopmn.symm, hnEven, hmOdd, Or.inr rfl,
-      ?_, ?_, ?_⟩
-    · rw [hA_mn]
-      ring
-    · rw [hD]
-      ring
-    · rw [hC]
-      ring
+  have hcopMn : Nat.Coprime M n := hmn_coprime.of_dvd_left hMdvdm
+  obtain ⟨A, D, hApos, hDpos, hM, hDsq, hN⟩ :=
+    Nat.coprime_mul_eq_square_split hMpos hnpos hcopMn hquot
+  have hDodd : Odd D := by
+    have hcopD2 : Nat.Coprime D 2 := by
+      have hcopDsq2 : Nat.Coprime (D ^ 2) 2 := by
+        rw [← hDsq]
+        exact Nat.coprime_two_right.mpr hn_odd
+      rwa [Nat.coprime_pow_left_iff (by norm_num : (0 : ℕ) < 2)] at hcopDsq2
+    exact Nat.coprime_two_right.mp hcopD2
+  have hAeven : Even A := by
+    have h2dvdAD : 2 ∣ A * D := by
+      rw [← hN]
+      exact even_iff_two_dvd.mp hNeven
+    have hcop2D : Nat.Coprime 2 D := Nat.coprime_two_left.mpr hDodd
+    exact even_iff_two_dvd.mpr ((hcop2D.dvd_mul_right).mp h2dvdAD)
+  have hcopAD : Nat.Coprime A D := by
+    have hcopSquares : Nat.Coprime (A ^ 2) (D ^ 2) := by
+      simpa [hM, hDsq] using hcopMn
+    rwa [Nat.coprime_pow_left_iff (by norm_num : (0 : ℕ) < 2),
+      Nat.coprime_pow_right_iff (by norm_num : (0 : ℕ) < 2)] at hcopSquares
+  refine ⟨A, D, hApos, hDpos, hAeven, hDodd, hcopAD, hN, ?_, hDsq⟩
+  rw [hm_eq, hM]
 
 /--
-Signed even/odd parameters for the `(D, 4*A, B)` Pythagorean triple.
-
-The Mathlib classification returns `D = m^2 - n^2`, `4*A = 2*m*n`,
-and exactly one of `m,n` even.  If `m` is even, write `m = 2*Up` and
-use `(Up,Vp,eps) = (Up,n,1)`.  If `n` is even, write `n = 2*Up` and
-use `(Up,Vp,eps) = (Up,m,-1)`.
+Coprime split of a positive product `m*n = 8*N^2`, with the `8` forced onto
+whichever factor is even by the supplied parity alternative.
 -/
-theorem B_signed_even_odd_params (E : EulerSquarePair) :
-    ∃ Up Vp eps : ℤ,
-      0 < Up ∧ 0 < Vp ∧ IsCoprime Up Vp ∧ Even Up ∧ Odd Vp ∧
-      (eps = 1 ∨ eps = -1) ∧
-      E.A = Up * Vp ∧
-      E.D = eps * (4 * Up ^ 2 - Vp ^ 2) ∧
-      E.B = 4 * Up ^ 2 + Vp ^ 2 := by
-  obtain ⟨m, n, hD, h4A, hB, hgcd, hparity, hm_nonneg⟩ :=
-    pythagorean_D_fourA_B_params E
-  have hcopmn : IsCoprime m n :=
-    Int.isCoprime_iff_gcd_eq_one.mpr hgcd
-  rcases hparity with hmn | hmn
-  · -- `m` even, `n` odd.
-    have hnOdd : Odd n := q2608_odd_of_emod_two_eq_one hmn.2
-    obtain ⟨Up, hUp, hUp_pos, hUpEven, hA_Upn⟩ :=
-      q2608_halve_even_factor_in_fourA
-        (A := E.A) (R := m) (S := n)
-        E.hApos E.hAeven hm_nonneg hmn.1 hnOdd h4A
-    have hn_pos : 0 < n := by
-      have hprod : 0 < Up * n := by
-        rw [← hA_Upn]
-        exact E.hApos
-      exact (mul_pos_iff_of_pos_left hUp_pos).mp hprod
-    have hcopUpn : IsCoprime Up n := by
-      have hcop2Upn : IsCoprime (2 * Up) n := by
-        simpa [hUp] using hcopmn
-      exact IsCoprime.of_mul_left_right hcop2Upn
-    refine ⟨Up, n, 1, hUp_pos, hn_pos, hcopUpn, hUpEven, hnOdd, Or.inl rfl,
-      hA_Upn, ?_, ?_⟩
-    · rw [hD, hUp]
-      ring
-    · rw [hB, hUp]
-      ring
-  · -- `n` even, `m` odd.
-    have hmOdd : Odd m := q2608_odd_of_emod_two_eq_one hmn.1
-    have h2A_mn : (2 : ℤ) * E.A = m * n :=
-      q2608_two_mul_eq_mul_of_four_mul_eq_two_mul_mul h4A
-    have hm_ne : m ≠ 0 := by
-      intro hm0
-      subst m
-      norm_num at hmn
-    have hm_pos : 0 < m :=
-      lt_of_le_of_ne hm_nonneg (Ne.symm hm_ne)
-    have hn_pos : 0 < n := by
-      have hmn_pos : 0 < m * n := by
-        rw [← h2A_mn]
-        exact mul_pos (by norm_num : (0 : ℤ) < 2) E.hApos
-      exact (mul_pos_iff_of_pos_left hm_pos).mp hmn_pos
-    have h4A_nm : (4 : ℤ) * E.A = 2 * n * m := by
-      rw [h4A]
-      ring
-    obtain ⟨Up, hUp, hUp_pos, hUpEven, hA_Upm⟩ :=
-      q2608_halve_even_factor_in_fourA
-        (A := E.A) (R := n) (S := m)
-        E.hApos E.hAeven (le_of_lt hn_pos) hmn.2 hmOdd h4A_nm
-    have hcopUpm : IsCoprime Up m := by
-      have hcopm2Up : IsCoprime m (2 * Up) := by
-        simpa [hUp] using hcopmn
-      exact (IsCoprime.of_mul_right_right hcopm2Up).symm
-    refine ⟨Up, m, -1, hUp_pos, hm_pos, hcopUpm, hUpEven, hmOdd, Or.inr rfl,
-      hA_Upm, ?_, ?_⟩
-    · rw [hD, hUp]
-      ring
-    · rw [hB, hUp]
-      ring
+theorem coprime_product_eq_eight_square_split
+    {N m n : ℕ}
+    (hNpos : 0 < N)
+    (hNeven : Even N)
+    (hmpos : 0 < m) (hnpos : 0 < n)
+    (hmn : m * n = 8 * N ^ 2)
+    (hmn_coprime : Nat.Coprime m n)
+    (hparity : (Even m ∧ Odd n) ∨ (Odd m ∧ Even n)) :
+    ∃ A D : ℕ,
+      0 < A ∧ 0 < D ∧ Even A ∧ Odd D ∧ Nat.Coprime A D ∧
+      N = A * D ∧
+      ((m = 8 * A ^ 2 ∧ n = D ^ 2) ∨
+       (m = D ^ 2 ∧ n = 8 * A ^ 2)) := by
+  rcases hparity with hleft | hright
+  · obtain ⟨A, D, hApos, hDpos, hAeven, hDodd, hcopAD, hN, hm8, hnD⟩ :=
+      Nat.coprime_product_eq_eight_square_split_even_left
+        (hNpos := hNpos) (hNeven := hNeven)
+        (hmpos := hmpos) (hnpos := hnpos)
+        (hmn := hmn) (hmn_coprime := hmn_coprime)
+        hleft.1 hleft.2
+    exact ⟨A, D, hApos, hDpos, hAeven, hDodd, hcopAD, hN, Or.inl ⟨hm8, hnD⟩⟩
+  · obtain ⟨A, D, hApos, hDpos, hAeven, hDodd, hcopAD, hN, hn8, hmD⟩ :=
+      Nat.coprime_product_eq_eight_square_split_even_left
+        (N := N) (m := n) (n := m)
+        (hNpos := hNpos) (hNeven := hNeven)
+        (hmpos := hnpos) (hnpos := hmpos)
+        (hmn := by simpa [mul_comm] using hmn)
+        (hmn_coprime := hmn_coprime.symm)
+        hright.2 hright.1
+    exact ⟨A, D, hApos, hDpos, hAeven, hDodd, hcopAD, hN, Or.inr ⟨hmD, hn8⟩⟩
 
-end MazurProof.RationalPointsN12.EulerSquarePair
+end Nat
 ```
 
-## Implementation notes
+## Lemma DAG
 
-* `q2608_eq_mul_of_two_mul_eq_two_mul_mul` handles the `2*A = 2*m*n` cancellation in the `C` wrapper.
-* `q2608_two_mul_eq_mul_of_four_mul_eq_two_mul_mul` handles the first cancellation from `4*A = 2*m*n` to `2*A = m*n`; this is useful in the swapped `B` branch to prove the even parameter `n` is positive.
-* `q2608_halve_even_factor_in_fourA` is the requested clean lemma for the `B` case: from `R` even, `S` odd, `0 ≤ R`, `Even A`, and `4*A = 2*R*S`, it produces `R = 2*Up`, `0 < Up`, `Even Up`, and `A = Up*S`.
-* Positivity is obtained as follows.  In the `C` wrapper, `0 ≤ m` plus `A = m*n` and `A > 0` gives `m > 0`, hence `n > 0`.  In the swapped `C` branch, `m > 0` still comes from `0 ≤ m` and `A > 0`, then `n > 0` follows from `A = m*n`.  In the `B` wrapper, the `m`-even branch gets `Up > 0` from `0 ≤ m`, `m = 2*Up`, and `A = Up*n`; the `n`-even branch first proves `m > 0`, then `n > 0` from `2*A = m*n`, and then applies the halving lemma with `R = n`.
-* The sign convention is encoded by the explicit integer `eps`.  Swapping the Pythagorean parameters changes `m^2 - n^2` to `-(n^2 - m^2)`, so the swapped branches use `eps = -1`.
+The intended dependency graph is:
+
+```text
+Nat.exists_sq_of_coprime_mul_eq_sq_left
+  uses Int.sq_of_gcd_eq_one
+
+Nat.coprime_mul_eq_square_split
+  uses exists_sq_of_coprime_mul_eq_sq_left twice
+  uses Nat.pow_left_injective to identify c = A*D
+
+Nat.coprime_eight_left_of_odd
+  uses Nat.coprime_two_left and Coprime.pow_left
+
+Nat.coprime_product_eq_eight_square_split_even_left
+  uses coprime_eight_left_of_odd to prove 8 | m
+  sets M = m / 8
+  proves M*n = N^2
+  applies coprime_mul_eq_square_split to M and n
+  proves Odd D from n = D^2 and Odd n
+  proves Even A from N = A*D, Even N, Odd D
+  proves Coprime A D by rewriting Coprime (A^2) (D^2)
+
+Nat.coprime_product_eq_eight_square_split
+  splits on the parity disjunction
+  applies the even-left lemma directly or with m/n swapped
+```
+
+If a local Mathlib version has a slightly different method name for the `Nat.Coprime` divisibility helpers, the only expected substitutions are:
+
+```lean
+(h8copn.dvd_mul_right).mp h8dvd_mn
+-- can be replaced by
+h8copn.dvd_of_dvd_mul_right h8dvd_mn
+```
+
+and similarly for the line extracting `2 ∣ A` from `2 ∣ A*D`.
