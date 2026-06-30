@@ -1,132 +1,51 @@
-# Q2448 EulerAux descent shortest DAG after helpers
+# Q2450 two coprime factorizations refinement Lean route
 
-## 0. Normalize the seed once
+## Verdict
 
-Use a positive odd common leg.  If the current file still carries a signed `D`, do the sign-normalization before this DAG and call the normalized leg `B`.
+The stated theorem is true under the given hypotheses.  In fact, `hApos` and `hV'odd` are redundant for this exact refinement: positivity of `U,V,U',V'`, the two product equations, evenness of `U,U'`, oddness of `V`, and the two coprimality hypotheses already drive the construction.  Keep the redundant hypotheses anyway for interface stability with the Q2448/Q2450 EulerAux route.
+
+A useful sanity check: if the second coprimality hypothesis is dropped, the statement is false.  Example:
 
 ```lean
-import Mathlib.NumberTheory.PythagoreanTriples
-import Mathlib.RingTheory.Int.Basic
+A = 18, U = 2, V = 9, U' = 6, V' = 3
+```
+
+Then `A = U*V = U'*V'`, both first factors are even and both second factors are odd, and `IsCoprime U V` holds, but `IsCoprime U' V'` fails.  The desired refinement would force the common `b` factor to sit in `V'` while also remaining coprime to `U'`, which is impossible in this example.
+
+## Best Lean route: stay in `ℤ`, use `Int.exists_gcd_one`
+
+Do not start with `Nat` unless you want extra `natAbs` bookkeeping.  The clean route is:
+
+1. Set `g : ℤ := (Int.gcd U U' : ℤ)`.
+2. Use `Int.exists_gcd_one` to get
+   `U = b*g`, `U' = c*g`, and `Int.gcd b c = 1`.
+3. Convert `Int.gcd b c = 1` to `IsCoprime b c` using
+   `Int.isCoprime_iff_gcd_eq_one.mpr`.
+4. Since `2 ∣ U` and `2 ∣ U'`, prove `2 ∣ g` by `Int.dvd_coe_gcd`; write `g = 2*a`.
+5. Cancel `g` from `U*V = U'*V'` to get `b*V = c*V'`.
+6. Euclid with `IsCoprime b c` gives `c ∣ V` and `b ∣ V'`; write `V = c*d`, then cancel `c` to prove `V' = b*d`.
+7. Project all pairwise coprimalities using `IsCoprime.mono` from the two original coprime factorizations.
+
+The important point is that the pairwise facts involving `b` come from the *second* factorization, while the pairwise facts involving `c` come from the *first* factorization:
+
+```text
+IsCoprime (2*a) b : from IsCoprime U' V', since 2*a ∣ U' and b ∣ V'
+IsCoprime (2*a) c : from IsCoprime U V,  since 2*a ∣ U  and c ∣ V
+IsCoprime (2*a) d : from IsCoprime U V,  since 2*a ∣ U  and d ∣ V
+IsCoprime b c     : from gcd-quotients by g = gcd U U'
+IsCoprime b d     : from IsCoprime U V,  since b ∣ U and d ∣ V
+IsCoprime c d     : from IsCoprime U' V', since c ∣ U' and d ∣ V'
+```
+
+## Compile-oriented patch
+
+This is the first patch I would try.  It is intentionally local: no Pythagorean-triple dependencies and no square-balance descent assumptions.
+
+```lean
+import Mathlib.RingTheory.Coprime.Lemmas
+import Mathlib.Algebra.Ring.Int.Parity
 import Mathlib.Tactic
 
-namespace EulerAux
-
-structure EulerAuxWitness (A B S R : ℤ) : Prop where
-  hApos : 0 < A
-  hBpos : 0 < B
-  hBodd : Odd B
-  hAB : IsCoprime A B
-  hSpos : 0 < S
-  hRpos : 0 < R
-  hS : S^2 = (2*A)^2 + B^2
-  hR : R^2 = (4*A)^2 + B^2
-
-end EulerAux
-```
-
-Pure algebra adapters from equations to triples:
-
-```lean
-namespace EulerAux
-
-theorem witness_left_triple {A B S R : ℤ} (W : EulerAuxWitness A B S R) :
-    PythagoreanTriple B (2*A) S := by
-  dsimp [PythagoreanTriple]
-  nlinarith [W.hS]
-
-theorem witness_right_triple {A B S R : ℤ} (W : EulerAuxWitness A B S R) :
-    PythagoreanTriple B (4*A) R := by
-  dsimp [PythagoreanTriple]
-  nlinarith [W.hR]
-
-end EulerAux
-```
-
-## 1. Two-triangle parametrization theorem
-
-Use the existing `twoA_triangle_param_with_A` twice.  The right triangle is applied with `A := 2*A` because its even leg is `4*A = 2*(2*A)`.
-
-Expected helper shape:
-
-```lean
-namespace EulerAux
-
-theorem twoA_triangle_param_with_A
-    {A B C : ℤ}
-    (htri : PythagoreanTriple B (2*A) C)
-    (hcop : IsCoprime B (2*A))
-    (hBodd : Odd B)
-    (hCpos : 0 < C) :
-    ∃ m n : ℤ,
-      0 < m ∧ 0 < n ∧
-      B = m^2 - n^2 ∧
-      A = m*n ∧
-      C = m^2 + n^2 ∧
-      IsCoprime m n ∧
-      ((Even m ∧ Odd n) ∨ (Odd m ∧ Even n)) := by
-  -- already supplied/being validated from `PythagoreanTriple.coprime_classification'`
-  sorry
-
-end EulerAux
-```
-
-The first new assembly theorem should not expose classifier case splits.  It should expose exactly the two coprime factorizations needed by refinement.
-
-```lean
-namespace EulerAux
-
-structure EulerAuxParam (A B S R : ℤ) where
-  U V U' V' : ℤ
-  hUpos : 0 < U
-  hVpos : 0 < V
-  hU'pos : 0 < U'
-  hV'pos : 0 < V'
-  hUeven : Even U
-  hVodd : Odd V
-  hU'even : Even U'
-  hV'odd : Odd V'
-  hUV_coprime : IsCoprime U V
-  hU'V'_coprime : IsCoprime U' V'
-  hA_left : A = U*V
-  hA_right : A = U'*V'
-  hB_left : B = U^2 - V^2
-  hB_right : B = (2*U')^2 - V'^2
-  hS : S = U^2 + V^2
-  hR : R = (2*U')^2 + V'^2
-
-/-- Two-triangle parametrization in the exact shape consumed by common-refinement. -/
-theorem EulerAux_param
-    {A B S R : ℤ}
-    (W : EulerAuxWitness A B S R) :
-    EulerAuxParam A B S R := by
-  -- left: apply `twoA_triangle_param_with_A` to
-  --   `PythagoreanTriple B (2*A) S`.
-  -- choose orientation so `U` is even and `V` is odd; if the classifier returns
-  -- the odd/even order, swap the parameters and replace `B` by the already
-  -- normalized positive common leg convention before this theorem.
-  --
-  -- right: apply `twoA_triangle_param_with_A` to
-  --   `PythagoreanTriple B (2*(2*A)) R`.
-  -- it returns `2*A = M*N`, with one of `M,N` even and the other odd.
-  -- orient so `M` is even and write `M = 2*U'`.
-  -- Since `A = U*V` with `U` even and `V` odd, `A` is even.  Since
-  -- `A = U'*V'` and `V'` is odd, `U'` is even.
-  --
-  -- Pure local parity lemmas needed here:
-  --   `even_left_of_even_mul_odd : Even (x*y) -> Odd y -> Even x`
-  --   `pos_of_mul_pos_left/right` for the positive factors.
-  sorry
-
-end EulerAux
-```
-
-If sign normalization is not yet separated, replace the two `hB_*` fields by fields for `normOddLeg B`; the rest of the DAG is unchanged.
-
-## 2. Positive common-refinement theorem
-
-Prefer this positive statement over the older signed statement.  It avoids all sign repair before the descent algebra.
-
-```lean
 namespace EulerAux
 
 def PairwiseCoprime2abcd (a b c d : ℤ) : Prop :=
@@ -151,7 +70,13 @@ structure RefinedFactors (A U V U' V' : ℤ) where
   hdodd : Odd d
   hpair : PairwiseCoprime2abcd a b c d
 
-/-- Positive version of the two-coprime-factorization common refinement. -/
+/--
+Common refinement of two positive coprime factorizations whose first factors are even
+and whose second factors are odd.
+
+The proof uses `g = gcd U U'`, writes `U = b*g`, `U' = c*g`, proves
+`g = 2*a`, then obtains the common tail `d` from `b*V = c*V'`.
+-/
 theorem two_coprime_factorizations_refine_even_pos
     {A U V U' V' : ℤ}
     (hApos : 0 < A)
@@ -164,182 +89,218 @@ theorem two_coprime_factorizations_refine_even_pos
     (hUVcop : IsCoprime U V)
     (hU'V'cop : IsCoprime U' V') :
     RefinedFactors A U V U' V' := by
-  -- Proof source:
-  --   signed common-refinement of two coprime factorizations,
-  --   then positivity fixes all unit/sign choices.
-  --
-  -- This is the only remaining factor-refinement lemma.  It is independent of
-  -- Pythagorean triples and independent of square balance.
-  sorry
+  -- These two hypotheses are kept for caller compatibility, but this proof does not need them.
+  have _hApos_keep : 0 < A := hApos
+  have _hV'odd_keep : Odd V' := hV'odd
+
+  let g : ℤ := (Int.gcd U U' : ℤ)
+
+  have hgposNat : 0 < Int.gcd U U' :=
+    Int.gcd_pos_of_ne_zero_left U' (ne_of_gt hUpos)
+  have hgpos : 0 < g := by
+    dsimp [g]
+    exact_mod_cast hgposNat
+
+  -- `Int.exists_gcd_one` gives primitive quotients by the positive integer gcd.
+  obtain ⟨b, c, hbc_gcd, hU_bg0, hU'_cg0⟩ :=
+    Int.exists_gcd_one (m := U) (n := U') hgposNat
+
+  have hU_bg : U = b * g := by
+    simpa [g] using hU_bg0
+  have hU'_cg : U' = c * g := by
+    simpa [g] using hU'_cg0
+
+  have hbpos : 0 < b := by
+    have hprod : 0 < b * g := by
+      simpa [hU_bg] using hUpos
+    exact pos_of_mul_pos_right hprod (le_of_lt hgpos)
+  have hcpos : 0 < c := by
+    have hprod : 0 < c * g := by
+      simpa [hU'_cg] using hU'pos
+    exact pos_of_mul_pos_right hprod (le_of_lt hgpos)
+
+  have hbc : IsCoprime b c := by
+    exact Int.isCoprime_iff_gcd_eq_one.mpr hbc_gcd
+
+  -- Since both `U` and `U'` are even, their integer gcd is even.
+  have h2g : (2 : ℤ) ∣ g := by
+    dsimp [g]
+    exact Int.dvd_coe_gcd hUeven.two_dvd hU'even.two_dvd
+  obtain ⟨a, hg2a⟩ := h2g
+
+  have hapos : 0 < a := by
+    nlinarith [hgpos, hg2a]
+
+  have hU_final : U = 2*a*b := by
+    calc
+      U = b * g := hU_bg
+      _ = b * (2*a) := by rw [hg2a]
+      _ = 2*a*b := by ring
+
+  have hU'_final : U' = 2*a*c := by
+    calc
+      U' = c * g := hU'_cg
+      _ = c * (2*a) := by rw [hg2a]
+      _ = 2*a*c := by ring
+
+  -- Cancel the common gcd from the equality of the two products.
+  have hg_ne : g ≠ 0 := ne_of_gt hgpos
+  have hgEq : g * (b * V) = g * (c * V') := by
+    calc
+      g * (b * V) = (b * g) * V := by ring
+      _ = U * V := by rw [← hU_bg]
+      _ = A := hUV.symm
+      _ = U' * V' := hU'V'
+      _ = (c * g) * V' := by rw [← hU'_cg]
+      _ = g * (c * V') := by ring
+  have hcommon : b * V = c * V' :=
+    mul_left_cancel₀ hg_ne hgEq
+
+  -- Euclid on the primitive quotients: `c | V` and `b | V'`.
+  have hc_dvd_V : c ∣ V := by
+    have hc_dvd_bV : c ∣ b * V := by
+      rw [hcommon]
+      exact ⟨V', by ring⟩
+    exact hbc.symm.dvd_of_dvd_mul_left hc_dvd_bV
+
+  have hb_dvd_V' : b ∣ V' := by
+    have hb_dvd_cV' : b ∣ c * V' := by
+      rw [← hcommon]
+      exact ⟨V, by ring⟩
+    exact hbc.dvd_of_dvd_mul_left hb_dvd_cV'
+
+  obtain ⟨d, hV_cd⟩ := hc_dvd_V
+
+  have hdpos : 0 < d := by
+    have hprod : 0 < c * d := by
+      simpa [hV_cd] using hVpos
+    exact pos_of_mul_pos_left hprod (le_of_lt hcpos)
+
+  have hV'_bd : V' = b * d := by
+    have hcEq : c * (b * d) = c * V' := by
+      calc
+        c * (b * d) = b * (c * d) := by ring
+        _ = b * V := by rw [← hV_cd]
+        _ = c * V' := hcommon
+    have hbd : b * d = V' :=
+      mul_left_cancel₀ (ne_of_gt hcpos) hcEq
+    exact hbd.symm
+
+  have hdodd : Odd d := by
+    have hcdodd : Odd (c * d) := by
+      simpa [hV_cd] using hVodd
+    exact Int.Odd.of_mul_right hcdodd
+
+  have hA_final : A = 2*a*b*c*d := by
+    calc
+      A = U * V := hUV
+      _ = (2*a*b) * (c*d) := by rw [hU_final, hV_cd]
+      _ = 2*a*b*c*d := by ring
+
+  -- Divisibility projections used by `IsCoprime.mono`.
+  have h2a_dvd_U : 2*a ∣ U := by
+    rw [hU_final]
+    exact ⟨b, by ring⟩
+  have hb_dvd_U : b ∣ U := by
+    rw [hU_final]
+    exact ⟨2*a, by ring⟩
+  have h2a_dvd_U' : 2*a ∣ U' := by
+    rw [hU'_final]
+    exact ⟨c, by ring⟩
+  have hc_dvd_U' : c ∣ U' := by
+    rw [hU'_final]
+    exact ⟨2*a, by ring⟩
+  have hd_dvd_V : d ∣ V := by
+    rw [hV_cd]
+    exact ⟨c, by ring⟩
+  have hd_dvd_V' : d ∣ V' := by
+    rw [hV'_bd]
+    exact ⟨b, by ring⟩
+
+  have h2ab : IsCoprime (2*a) b :=
+    IsCoprime.mono h2a_dvd_U' hb_dvd_V' hU'V'cop
+  have h2ac : IsCoprime (2*a) c :=
+    IsCoprime.mono h2a_dvd_U hc_dvd_V hUVcop
+  have h2ad : IsCoprime (2*a) d :=
+    IsCoprime.mono h2a_dvd_U hd_dvd_V hUVcop
+  have hbd : IsCoprime b d :=
+    IsCoprime.mono hb_dvd_U hd_dvd_V hUVcop
+  have hcd : IsCoprime c d :=
+    IsCoprime.mono hc_dvd_U' hd_dvd_V' hU'V'cop
+
+  exact
+  { a := a
+    b := b
+    c := c
+    d := d
+    hapos := hapos
+    hbpos := hbpos
+    hcpos := hcpos
+    hdpos := hdpos
+    hU := hU_final
+    hV := hV_cd
+    hU' := hU'_final
+    hV' := hV'_bd
+    hA := hA_final
+    hdodd := hdodd
+    hpair := ⟨h2ab, h2ac, h2ad, hbc, hbd, hcd⟩ }
 
 end EulerAux
 ```
 
-This theorem is the clean replacement for the older signed statement
-`P = 2*a*b`, `Q = c*d`, `U = 2*a*c`, `V = b*d`.
+## API checklist
 
-## 3. Algebraic balance identity and square-balance use
-
-From parametrization and refinement:
+These are the key Mathlib APIs used above.
 
 ```lean
-namespace EulerAux
+-- gcd positivity and primitive quotient split
+Int.gcd_pos_of_ne_zero_left
+Int.exists_gcd_one
 
-theorem EulerAux_balance_identity
-    {B a b c d : ℤ}
-    (hB_left : B = (2*a*b)^2 - (c*d)^2)
-    (hB_right : B = (2*(2*a*c))^2 - (b*d)^2) :
-    b^2 * (4*a^2 + d^2) = c^2 * (16*a^2 + d^2) := by
-  nlinarith [hB_left, hB_right]
+-- gcd divisibility and parity
+Int.dvd_coe_gcd
+Even.two_dvd
 
-/-- The remaining gcd lemma for the two balanced cofactors. -/
-theorem coprime_four_sq_add_d_sq_sixteen_sq_add_d_sq
-    {a d : ℤ}
-    (hapos : 0 < a)
-    (hdpos : 0 < d)
-    (had : IsCoprime a d)
-    (hdodd : Odd d) :
-    IsCoprime (4*a^2 + d^2) (16*a^2 + d^2) := by
-  -- Prime-divisor proof:
-  --   any prime divisor of both divides their difference `12*a^2`;
-  --   using `IsCoprime a d`, it cannot divide `a`, hence it divides `12`;
-  --   oddness rules out `2`; modulo `3`, `a^2 + d^2` is never `0` when
-  --   `a,d` are coprime, so `3` is ruled out.
-  -- This is small number theory, not descent.
-  sorry
+-- gcd=1 to Bezout-style coprime
+Int.isCoprime_iff_gcd_eq_one
 
-theorem EulerAux_square_balance_consequence
-    {a b c d : ℤ}
-    (hapos : 0 < a) (hbpos : 0 < b) (hcpos : 0 < c) (hdpos : 0 < d)
-    (hbc : IsCoprime b c)
-    (had : IsCoprime a d)
-    (hdodd : Odd d)
-    (hbal : b^2 * (4*a^2 + d^2) = c^2 * (16*a^2 + d^2)) :
-    (4*a^2 + d^2 = c^2) ∧ (16*a^2 + d^2 = b^2) := by
-  have hMpos : 0 < 4*a^2 + d^2 := by nlinarith [sq_pos_of_ne_zero (ne_of_gt hdpos)]
-  have hNpos : 0 < 16*a^2 + d^2 := by nlinarith [sq_pos_of_ne_zero (ne_of_gt hdpos)]
-  have hMN : IsCoprime (4*a^2 + d^2) (16*a^2 + d^2) :=
-    coprime_four_sq_add_d_sq_sixteen_sq_add_d_sq hapos hdpos had hdodd
-  -- `square_factor_balance_int` returns `M = c^2 ∧ N = b^2`.
-  exact square_factor_balance_int hbpos hcpos hMpos hNpos hbc hMN hbal
+-- Euclid and coprime projections
+IsCoprime.symm
+IsCoprime.dvd_of_dvd_mul_left
+IsCoprime.mono
 
-end EulerAux
+-- odd product projection over integers
+Int.Odd.of_mul_right
+-- equivalently, use: (Int.odd_mul.mp h).2
+
+-- ordered-domain cancellation/sign helpers
+mul_left_cancel₀
+pos_of_mul_pos_right
+pos_of_mul_pos_left
 ```
 
-Required coprimality projections from `PairwiseCoprime2abcd`:
+If one of the divisibility/coprime projection elaborations is fragile in your local Mathlib snapshot, replace the affected line by the fully explicit form below:
 
 ```lean
-namespace EulerAux
-
-theorem pairwise_bc {a b c d : ℤ} (h : PairwiseCoprime2abcd a b c d) :
-    IsCoprime b c := h.2.2.2.1
-
-theorem pairwise_ad {a b c d : ℤ} (h : PairwiseCoprime2abcd a b c d) :
-    IsCoprime a d := by
-  -- From `IsCoprime (2*a) d` by divisibility descent `a ∣ 2*a`.
-  exact h.2.2.1.of_dvd_left ⟨2, by ring⟩
-
-end EulerAux
+exact IsCoprime.mono
+  (x := 2*a) (y := U') (z := b) (w := V')
+  h2a_dvd_U' hb_dvd_V' hU'V'cop
 ```
 
-## 4. Descent step and measure decrease
+and similarly for the other projections.
 
-The new witness is
+## Why not the Nat-first route?
+
+A Nat version is also true, but it is not shorter once the caller theorem is over `ℤ`.  The Nat proof would use:
 
 ```lean
-Anew = a
-Bnew = d
-Snew = c
-Rnew = b
+Nat.gcd_dvd_left
+Nat.gcd_dvd_right
+Nat.gcd_div_gcd_div_gcd
+Nat.Coprime.dvd_mul_left
+Nat.Coprime.of_dvd
+Nat.odd_mul / Nat.Odd.of_mul_right
+Nat.Coprime.isCoprime
 ```
 
-because square-balance gives
-
-```lean
-c^2 = (2*a)^2 + d^2
-b^2 = (4*a)^2 + d^2.
-```
-
-Skeleton:
-
-```lean
-namespace EulerAux
-
-theorem EulerAux_measure_decrease
-    {A a b c d : ℤ}
-    (hA : A = 2*a*b*c*d)
-    (hapos : 0 < a) (hbpos : 0 < b) (hcpos : 0 < c) (hdpos : 0 < d) :
-    a < A := by
-  have hb1 : 1 ≤ b := by omega
-  have hc1 : 1 ≤ c := by omega
-  have hd1 : 1 ≤ d := by omega
-  nlinarith
-
-theorem EulerAux_descent_step
-    {A B S R : ℤ}
-    (W : EulerAuxWitness A B S R) :
-    ∃ Anew Bnew Snew Rnew : ℤ,
-      EulerAuxWitness Anew Bnew Snew Rnew ∧ Anew < A := by
-  let P := EulerAux_param W
-  let F := two_coprime_factorizations_refine_even_pos
-    W.hApos
-    P.hA_left P.hA_right
-    P.hUpos P.hVpos P.hU'pos P.hV'pos
-    P.hUeven P.hU'even P.hVodd P.hV'odd
-    P.hUV_coprime P.hU'V'_coprime
-
-  have hB_left_refined : B = (2*F.a*F.b)^2 - (F.c*F.d)^2 := by
-    -- rewrite `P.hB_left` by `F.hU`, `F.hV`
-    nlinarith [P.hB_left, F.hU, F.hV]
-
-  have hB_right_refined : B = (2*(2*F.a*F.c))^2 - (F.b*F.d)^2 := by
-    -- rewrite `P.hB_right` by `F.hU'`, `F.hV'`
-    nlinarith [P.hB_right, F.hU', F.hV']
-
-  have hbal :
-      F.b^2 * (4*F.a^2 + F.d^2) =
-        F.c^2 * (16*F.a^2 + F.d^2) :=
-    EulerAux_balance_identity hB_left_refined hB_right_refined
-
-  have hsq :
-      (4*F.a^2 + F.d^2 = F.c^2) ∧
-        (16*F.a^2 + F.d^2 = F.b^2) :=
-    EulerAux_square_balance_consequence
-      F.hapos F.hbpos F.hcpos F.hdpos
-      (pairwise_bc F.hpair)
-      (pairwise_ad F.hpair)
-      F.hdodd
-      hbal
-
-  refine ⟨F.a, F.d, F.c, F.b, ?_, ?_⟩
-  · refine ⟨F.hapos, F.hdpos, F.hdodd, ?_, F.hcpos, F.hbpos, ?_, ?_⟩
-    · exact pairwise_ad F.hpair
-    · -- `F.c^2 = (2*F.a)^2 + F.d^2`
-      nlinarith [hsq.1]
-    · -- `F.b^2 = (4*F.a)^2 + F.d^2`
-      nlinarith [hsq.2]
-  · exact EulerAux_measure_decrease F.hA F.hapos F.hbpos F.hcpos F.hdpos
-
-end EulerAux
-```
-
-## 5. What is pure Lean algebra vs. real descent
-
-```text
-Pure Lean algebra/order after helpers:
-  - `witness_left_triple`, `witness_right_triple`.
-  - rewriting parametrized equations by refined factors.
-  - `EulerAux_balance_identity`.
-  - positivity of `4*a^2+d^2`, `16*a^2+d^2`.
-  - constructing `EulerAuxWitness a d c b` from square-balance output.
-  - `EulerAux_measure_decrease` from `A = 2*a*b*c*d` and positivity.
-
-Small number-theory lemmas still needed:
-  - `two_coprime_factorizations_refine_even_pos` if not already proved.
-  - `coprime_four_sq_add_d_sq_sixteen_sq_add_d_sq`.
-
-Real mathematical descent endpoint:
-  - `EulerAux_descent_step` plus well-founded/minimal-counterexample packaging:
-      from any witness, produce a strictly smaller witness.
-  - final contradiction by choosing a witness with minimal positive `A`.
-```
+Then the integer theorem would need a cast layer through positive `natAbs` values.  The direct integer proof above avoids that cast layer and uses `Int.exists_gcd_one`, which already packages the primitive quotients by the integer gcd.
