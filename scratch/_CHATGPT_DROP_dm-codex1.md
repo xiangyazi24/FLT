@@ -1,4 +1,6 @@
-# Q2570: next EulerSquarePair coprimality layer
+# Q2576: EulerSquarePair → PrimitiveCenteredFourSqAP helper layer
+
+I could not inspect the user-local `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean` because this layer appears to be local/unpushed, so the final record field labels may need to be adjusted to the actual structure.  The helper lemmas below are written to avoid the most fragile `IsCoprime.add_mul_*` API names by using direct Bezout proofs.
 
 Target namespace:
 
@@ -6,266 +8,350 @@ Target namespace:
 namespace MazurProof.RationalPointsN12.EulerSquarePair
 ```
 
-I could not inspect the user-local `N12FourSquaresAP.lean` because this layer appears to be local/unpushed, so the code below assumes the names in the prompt are exactly available by dot notation:
+The code assumes the local names from the prompt:
 
 ```lean
+E.centerX, E.stepN, E.fm6, E.fm2, E.fp2, E.fp6
 E.centerX_coprime_stepN
-E.fm2_odd
-E.fp2_odd
-E.fm6_odd
-E.fp6_odd
 E.three_coprime_centerX
+E.fm6_odd, E.fm2_odd, E.fp2_odd, E.fp6_odd
+E.fm6_square, E.fm2_square, E.fp2_square, E.fp6_square
+fm2_coprime_fp2 E
+fm6_coprime_fp6 E
 ```
-
-The main API point: `IsCoprime` is a Bezout predicate, but current Mathlib has the needed transport lemmas:
-
-```lean
-h.symm
-h.mul_right
-h.add_mul_right_left
-h.mul_add_right_right
-IsCoprime.dvd_of_dvd_mul_left
-IsCoprime.dvd_of_dvd_mul_right
-```
-
-The orientation pitfall is that
-
-```lean
-h.dvd_of_dvd_mul_left : IsCoprime x y -> x ∣ y*z -> x ∣ z
-h.dvd_of_dvd_mul_right : IsCoprime x z -> x ∣ y*z -> x ∣ y
-```
-
-so “left/right” names refer to which multiplicand is stripped, not to which conclusion is returned.
 
 ---
 
-## 1. Reusable `Int` coprime/stripping lemmas
+## 1. Robust local Bezout helpers
 
-Paste this near the current elementary number-theory helper layer.
+These helpers are useful because they avoid depending on the exact orientation of Mathlib’s transport lemmas.
 
 ```lean
 import Mathlib
 
 namespace MazurProof.RationalPointsN12.EulerSquarePair
 
+/-- Transport coprimality by replacing the left argument by `x + k*y`. -/
+lemma isCoprime_add_mul_left_int {x y k : ℤ}
+    (h : IsCoprime x y) :
+    IsCoprime (x + k * y) y := by
+  rcases h with ⟨u, v, huv⟩
+  refine ⟨u, v - u * k, ?_⟩
+  calc
+    u * (x + k * y) + (v - u * k) * y = u * x + v * y := by ring
+    _ = 1 := huv
+
+/-- If `x` is coprime to `z`, then it is coprime to `x + z`. -/
+lemma isCoprime_self_add_right_int {x z : ℤ}
+    (h : IsCoprime x z) :
+    IsCoprime x (x + z) := by
+  rcases h with ⟨u, v, huv⟩
+  refine ⟨u - v, v, ?_⟩
+  calc
+    (u - v) * x + v * (x + z) = u * x + v * z := by ring
+    _ = 1 := huv
+
+/-- Bezout proof that coprimality with each factor gives coprimality with the product. -/
+lemma isCoprime_mul_right_int {a b c : ℤ}
+    (hab : IsCoprime a b) (hac : IsCoprime a c) :
+    IsCoprime a (b * c) := by
+  rcases hab with ⟨u, v, huv⟩
+  rcases hac with ⟨r, s, hrs⟩
+  refine ⟨u * r * a + u * s * c + v * r * b, v * s, ?_⟩
+  calc
+    (u * r * a + u * s * c + v * r * b) * a + (v * s) * (b * c)
+        = (u * a + v * b) * (r * a + s * c) := by ring
+    _ = 1 := by rw [huv, hrs]; ring
+
 /-- An odd integer is Bezout-coprime to `2`. -/
-lemma isCoprime_two_of_odd {m : ℤ} (hm : Odd m) :
+lemma isCoprime_two_of_odd_int {m : ℤ} (hm : Odd m) :
     IsCoprime m (2 : ℤ) := by
   rcases hm with ⟨k, hk⟩
-  change ∃ u v : ℤ, u * m + v * (2 : ℤ) = 1
   refine ⟨1, -k, ?_⟩
   rw [hk]
   ring
 
-/-- Any integer divisor of an odd integer is odd. -/
-lemma odd_of_dvd_odd {d m : ℤ} (hm : Odd m) (hdm : d ∣ m) :
-    Odd d := by
-  rcases hdm with ⟨k, rfl⟩
-  exact hm.of_mul_left
-
-/-- Any integer divisor of an odd integer is coprime to `2`. -/
-lemma isCoprime_two_of_dvd_odd {d m : ℤ} (hm : Odd m) (hdm : d ∣ m) :
-    IsCoprime d (2 : ℤ) :=
-  isCoprime_two_of_odd (odd_of_dvd_odd hm hdm)
-
-/-- An odd integer is coprime to `4`. -/
-lemma isCoprime_four_of_odd {m : ℤ} (hm : Odd m) :
+lemma isCoprime_four_of_odd_int {m : ℤ} (hm : Odd m) :
     IsCoprime m (4 : ℤ) := by
-  have h2 : IsCoprime m (2 : ℤ) := isCoprime_two_of_odd hm
-  have h22 : IsCoprime m ((2 : ℤ) * 2) := h2.mul_right h2
+  have h2 : IsCoprime m (2 : ℤ) := isCoprime_two_of_odd_int hm
+  have h22 : IsCoprime m ((2 : ℤ) * 2) :=
+    isCoprime_mul_right_int h2 h2
   simpa using h22
 
-/-- Strip a factor `2` from the right of a divisibility hypothesis. -/
-lemma dvd_of_dvd_two_mul_of_isCoprime_two {d x : ℤ}
-    (hd2 : IsCoprime d (2 : ℤ)) (h : d ∣ (2 : ℤ) * x) :
-    d ∣ x :=
-  hd2.dvd_of_dvd_mul_left h
-
-/-- Strip a factor `4` from the right of a divisibility hypothesis. -/
-lemma dvd_of_dvd_four_mul_of_isCoprime_two {d x : ℤ}
-    (hd2 : IsCoprime d (2 : ℤ)) (h : d ∣ (4 : ℤ) * x) :
-    d ∣ x := by
-  have hd4 : IsCoprime d (4 : ℤ) := by
-    have h22 : IsCoprime d ((2 : ℤ) * 2) := hd2.mul_right hd2
-    simpa using h22
-  exact hd4.dvd_of_dvd_mul_left h
-
-/-- Strip a factor `12 = 4*3` from the right of a divisibility hypothesis. -/
-lemma dvd_of_dvd_twelve_mul_of_isCoprime_two_three {d x : ℤ}
-    (hd2 : IsCoprime d (2 : ℤ))
-    (hd3 : IsCoprime d (3 : ℤ))
-    (h : d ∣ (12 : ℤ) * x) :
-    d ∣ x := by
-  have hd4 : IsCoprime d (4 : ℤ) := by
-    have h22 : IsCoprime d ((2 : ℤ) * 2) := hd2.mul_right hd2
-    simpa using h22
-  have hd12 : IsCoprime d (12 : ℤ) := by
-    have h43 : IsCoprime d ((4 : ℤ) * 3) := hd4.mul_right hd3
-    simpa using h43
-  exact hd12.dvd_of_dvd_mul_left h
+lemma isCoprime_eight_of_odd_int {m : ℤ} (hm : Odd m) :
+    IsCoprime m (8 : ℤ) := by
+  have h4 : IsCoprime m (4 : ℤ) := isCoprime_four_of_odd_int hm
+  have h2 : IsCoprime m (2 : ℤ) := isCoprime_two_of_odd_int hm
+  have h42 : IsCoprime m ((4 : ℤ) * 2) :=
+    isCoprime_mul_right_int h4 h2
+  simpa using h42
 ```
-
-If `hm.of_mul_left` is not available in the exact pinned Mathlib, replace only `odd_of_dvd_odd` with the local parity theorem already used in the primitive-root layer.  The rest of the layer does not depend on any special parity API.
 
 ---
 
-## 2. Coprimality of the middle pair
+## 2. Shift-to-step coprimality lemmas
 
-This proof avoids a custom “common divisor” theorem.  It uses:
-
-1. `fm2 = centerX - 2*stepN`, hence `fm2` is coprime to `stepN` by adding a multiple of `stepN` to `centerX`.
-2. `fm2` is odd, hence coprime to `4`.
-3. Therefore `fm2` is coprime to `4*stepN`.
-4. `fp2 = fm2 + 4*stepN`, hence `fm2` is coprime to `fp2`.
+These are the common first step for all cross-factor coprimality proofs.
 
 ```lean
-/-- `fm2` is coprime to the step parameter. -/
-lemma fm2_coprime_stepN (E : EulerSquarePair) :
-    IsCoprime E.fm2 E.stepN := by
-  have h := E.centerX_coprime_stepN.add_mul_right_left (z := (-2 : ℤ))
-  convert h using 1 <;> (simp [fm2]; ring)
-
-/-- The two middle factors are coprime. -/
-theorem fm2_coprime_fp2 (E : EulerSquarePair) :
-    IsCoprime E.fm2 E.fp2 := by
-  have hN : IsCoprime E.fm2 E.stepN := fm2_coprime_stepN E
-  have h4 : IsCoprime E.fm2 (4 : ℤ) := isCoprime_four_of_odd E.fm2_odd
-  have h4N : IsCoprime E.fm2 ((4 : ℤ) * E.stepN) := h4.mul_right hN
-  have h := h4N.mul_add_right_right (z := (1 : ℤ))
-  convert h using 1 <;> (simp [fm2, fp2]; ring)
-```
-
-This is stronger/cleaner than proving arbitrary-divisor stripping inside the final theorem, but it is exactly the same math: a common divisor of `fm2` and `fp2` divides `4*stepN`, and the oddness of `fm2` strips the `4`.
-
----
-
-## 3. Coprimality of the outer pair
-
-The outer case is the same, except the difference is `12*stepN`, and one must also remove the possible factor `3`.  The existing theorem
-
-```lean
-E.three_coprime_centerX : IsCoprime (3 : ℤ) E.centerX
-```
-
-is used after symmetry and adding the multiple `-2*stepN*3`:
-
-```lean
-E.fm6 = E.centerX + ((-2 : ℤ) * E.stepN) * 3.
-```
-
-```lean
-/-- `fm6` is coprime to the step parameter. -/
 lemma fm6_coprime_stepN (E : EulerSquarePair) :
     IsCoprime E.fm6 E.stepN := by
-  have h := E.centerX_coprime_stepN.add_mul_right_left (z := (-6 : ℤ))
+  have h := isCoprime_add_mul_left_int
+    (x := E.centerX) (y := E.stepN) (k := (-6 : ℤ))
+    E.centerX_coprime_stepN
   convert h using 1 <;> (simp [fm6]; ring)
 
-/-- `fm6` is coprime to `3`, using `centerX` coprime to `3`. -/
-lemma fm6_coprime_three (E : EulerSquarePair) :
-    IsCoprime E.fm6 (3 : ℤ) := by
-  have hcx3 : IsCoprime E.centerX (3 : ℤ) := E.three_coprime_centerX.symm
-  have h := hcx3.add_mul_right_left (z := (-2 : ℤ) * E.stepN)
-  convert h using 1 <;> (simp [fm6]; ring)
+lemma fm2_coprime_stepN (E : EulerSquarePair) :
+    IsCoprime E.fm2 E.stepN := by
+  have h := isCoprime_add_mul_left_int
+    (x := E.centerX) (y := E.stepN) (k := (-2 : ℤ))
+    E.centerX_coprime_stepN
+  convert h using 1 <;> (simp [fm2]; ring)
 
-/-- An odd integer coprime to `3` is coprime to `12`. -/
-lemma isCoprime_twelve_of_odd_of_isCoprime_three {m : ℤ}
-    (hm : Odd m) (h3 : IsCoprime m (3 : ℤ)) :
-    IsCoprime m (12 : ℤ) := by
-  have h4 : IsCoprime m (4 : ℤ) := isCoprime_four_of_odd hm
-  have h43 : IsCoprime m ((4 : ℤ) * 3) := h4.mul_right h3
-  simpa using h43
+lemma fp2_coprime_stepN (E : EulerSquarePair) :
+    IsCoprime E.fp2 E.stepN := by
+  have h := isCoprime_add_mul_left_int
+    (x := E.centerX) (y := E.stepN) (k := (2 : ℤ))
+    E.centerX_coprime_stepN
+  convert h using 1 <;> (simp [fp2]; ring)
 
-/-- The two outer factors are coprime. -/
-theorem fm6_coprime_fp6 (E : EulerSquarePair) :
-    IsCoprime E.fm6 E.fp6 := by
+lemma fp6_coprime_stepN (E : EulerSquarePair) :
+    IsCoprime E.fp6 E.stepN := by
+  have h := isCoprime_add_mul_left_int
+    (x := E.centerX) (y := E.stepN) (k := (6 : ℤ))
+    E.centerX_coprime_stepN
+  convert h using 1 <;> (simp [fp6]; ring)
+```
+
+If the local file already has `fm2_coprime_stepN` etc. from Q2570, reuse those and omit this block.
+
+---
+
+## 3. Cross-factor coprimality lemmas
+
+No `3`-stripping is needed for these four cross pairs, because the factor differences are only `4*N` or `8*N`:
+
+```text
+fm2 = fm6 + 4*N
+fp2 = fm6 + 8*N
+fp6 = fm2 + 8*N
+fp6 = fp2 + 4*N
+```
+
+```lean
+/-- `fm6` and `fm2` differ by `4*stepN`. -/
+theorem fm6_coprime_fm2 (E : EulerSquarePair) :
+    IsCoprime E.fm6 E.fm2 := by
   have hN : IsCoprime E.fm6 E.stepN := fm6_coprime_stepN E
-  have h3 : IsCoprime E.fm6 (3 : ℤ) := fm6_coprime_three E
-  have h12 : IsCoprime E.fm6 (12 : ℤ) :=
-    isCoprime_twelve_of_odd_of_isCoprime_three E.fm6_odd h3
-  have h12N : IsCoprime E.fm6 ((12 : ℤ) * E.stepN) := h12.mul_right hN
-  have h := h12N.mul_add_right_right (z := (1 : ℤ))
-  convert h using 1 <;> (simp [fm6, fp6]; ring)
+  have h4 : IsCoprime E.fm6 (4 : ℤ) := isCoprime_four_of_odd_int E.fm6_odd
+  have h4N : IsCoprime E.fm6 ((4 : ℤ) * E.stepN) :=
+    isCoprime_mul_right_int h4 hN
+  have h := isCoprime_self_add_right_int h4N
+  convert h using 1 <;> (simp [fm6, fm2]; ring)
 
-end MazurProof.RationalPointsN12.EulerSquarePair
+/-- `fm6` and `fp2` differ by `8*stepN`. -/
+theorem fm6_coprime_fp2 (E : EulerSquarePair) :
+    IsCoprime E.fm6 E.fp2 := by
+  have hN : IsCoprime E.fm6 E.stepN := fm6_coprime_stepN E
+  have h8 : IsCoprime E.fm6 (8 : ℤ) := isCoprime_eight_of_odd_int E.fm6_odd
+  have h8N : IsCoprime E.fm6 ((8 : ℤ) * E.stepN) :=
+    isCoprime_mul_right_int h8 hN
+  have h := isCoprime_self_add_right_int h8N
+  convert h using 1 <;> (simp [fm6, fp2]; ring)
+
+/-- `fm2` and `fp6` differ by `8*stepN`. -/
+theorem fm2_coprime_fp6 (E : EulerSquarePair) :
+    IsCoprime E.fm2 E.fp6 := by
+  have hN : IsCoprime E.fm2 E.stepN := fm2_coprime_stepN E
+  have h8 : IsCoprime E.fm2 (8 : ℤ) := isCoprime_eight_of_odd_int E.fm2_odd
+  have h8N : IsCoprime E.fm2 ((8 : ℤ) * E.stepN) :=
+    isCoprime_mul_right_int h8 hN
+  have h := isCoprime_self_add_right_int h8N
+  convert h using 1 <;> (simp [fm2, fp6]; ring)
+
+/-- `fp2` and `fp6` differ by `4*stepN`. -/
+theorem fp2_coprime_fp6 (E : EulerSquarePair) :
+    IsCoprime E.fp2 E.fp6 := by
+  have hN : IsCoprime E.fp2 E.stepN := fp2_coprime_stepN E
+  have h4 : IsCoprime E.fp2 (4 : ℤ) := isCoprime_four_of_odd_int E.fp2_odd
+  have h4N : IsCoprime E.fp2 ((4 : ℤ) * E.stepN) :=
+    isCoprime_mul_right_int h4 hN
+  have h := isCoprime_self_add_right_int h4N
+  convert h using 1 <;> (simp [fp2, fp6]; ring)
 ```
 
-If `simp [fm2, fp2]` or `simp [fm6, fp6]` unfolds too much or too little in the local file, replace the final `convert` lines by explicit equalities:
+The already-proved endpoint/middle pair lemmas are still needed separately:
 
 ```lean
-  have hfp2 : E.fp2 = (1 : ℤ) * E.fm2 + (4 : ℤ) * E.stepN := by
-    simp [fm2, fp2]
-    ring
-  simpa [hfp2] using h
-```
-
-and similarly
-
-```lean
-  have hfp6 : E.fp6 = (1 : ℤ) * E.fm6 + (12 : ℤ) * E.stepN := by
-    simp [fm6, fp6]
-    ring
-  simpa [hfp6] using h
+-- fm2_coprime_fp2 E : IsCoprime E.fm2 E.fp2
+-- fm6_coprime_fp6 E : IsCoprime E.fm6 E.fp6
 ```
 
 ---
 
-## 4. Square extraction from coprime product
+## 4. Root gcd from factor coprimality
 
-I do **not** know of a stock Mathlib theorem with exactly the requested integer interface:
-
-```lean
-x * y = z^2, 0 < x, 0 < y, IsCoprime x y ⟹ x and y are integer squares.
-```
-
-The next local theorem should be stated first over `Nat`, then wrapped for positive `Int` factors.  This is the shortest useful frontier:
+The proof does **not** need a power-coprime API.  A Bezout certificate for `x,y`, after rewriting `x=p^2`, `y=q^2`, immediately gives a Bezout certificate for `p,q`:
 
 ```lean
-/-- Coprime natural factors of a square are squares. -/
-theorem Nat.exists_sq_and_sq_of_coprime_mul_eq_sq
-    {x y z : ℕ}
-    (hcop : x.Coprime y)
-    (h : x * y = z ^ 2) :
-    ∃ r s : ℕ, x = r ^ 2 ∧ y = s ^ 2 := by
-  -- Suggested proof: compare prime multiplicities using `Nat.factorization`.
-  -- For every prime p, coprimality gives `x.factorization p = 0` or
-  -- `y.factorization p = 0`; the equality to `z^2` gives even valuation
-  -- on the nonzero side.  Then use extensionality of factorization.
-  -- This is the next genuine local lemma; do not mix it into the AP layer.
-  sorry
+/-- If two square values are coprime, then the corresponding roots are coprime. -/
+lemma roots_isCoprime_of_sq_eq_of_isCoprime
+    {p q x y : ℤ}
+    (hp : p ^ 2 = x) (hq : q ^ 2 = y)
+    (hxy : IsCoprime x y) :
+    IsCoprime p q := by
+  rcases hxy with ⟨a, b, hab⟩
+  rw [← hp, ← hq] at hab
+  refine ⟨a * p, b * q, ?_⟩
+  calc
+    (a * p) * p + (b * q) * q = a * (p ^ 2) + b * (q ^ 2) := by ring
+    _ = 1 := hab
 
-/-- Positive integer wrapper for coprime factors of a square. -/
-theorem Int.exists_sq_and_sq_of_mul_eq_sq_of_pos_of_isCoprime
-    {x y z : ℤ}
-    (hx : 0 < x)
-    (hy : 0 < y)
-    (hcop : IsCoprime x y)
-    (h : x * y = z ^ 2) :
-    ∃ r s : ℤ, x = r ^ 2 ∧ y = s ^ 2 := by
-  -- Convert to `Nat` using `Int.toNat` or `Int.natAbs`, then use the Nat lemma.
-  -- Positivity avoids sign ambiguity for x,y.
-  sorry
+/-- GCD version used by `PrimitiveCenteredFourSqAP`. -/
+lemma root_gcd_eq_one_of_sq_eq_of_isCoprime
+    {p q x y : ℤ}
+    (hp : p ^ 2 = x) (hq : q ^ 2 = y)
+    (hxy : IsCoprime x y) :
+    Int.gcd p q = 1 := by
+  exact isCoprime_iff_gcd_eq_one.mp
+    (roots_isCoprime_of_sq_eq_of_isCoprime hp hq hxy)
 ```
 
-For the immediate `EulerSquarePair` reconstruction, the intended usage after proving the local wrapper is:
+API pitfall: if the local file uses the `IsRelPrime` route, replace the final theorem body by the existing project idiom.  The statement above is the right reusable interface.  The usual current-Mathlib conversion is exactly:
 
 ```lean
-have hmid_prod : E.fm2 * E.fp2 = (E.D ^ 2 + 8 * E.A ^ 2) ^ 2 :=
-  E.middle_factor_product_square
-have hmid_coprime : IsCoprime E.fm2 E.fp2 := fm2_coprime_fp2 E
-rcases Int.exists_sq_and_sq_of_mul_eq_sq_of_pos_of_isCoprime
-    E.fm2_pos E.fp2_pos hmid_coprime hmid_prod with
-  ⟨q, r, hq, hr⟩
+isCoprime_iff_gcd_eq_one.mp h
 ```
 
-and for the outer pair:
+---
+
+## 5. Root parity/mod-2 from odd square value
+
+This uses the fact that an odd product has odd factors.  The final API is `Int.odd_iff : Odd n ↔ n % 2 = 1`.
 
 ```lean
-have hout_prod : E.fm6 * E.fp6 = (E.D ^ 2 - 8 * E.A ^ 2) ^ 2 :=
-  E.outer_factor_product_square
-have hout_coprime : IsCoprime E.fm6 E.fp6 := fm6_coprime_fp6 E
-rcases Int.exists_sq_and_sq_of_mul_eq_sq_of_pos_of_isCoprime
-    E.fm6_pos E.fp6_pos hout_coprime hout_prod with
-  ⟨p, s, hp, hs⟩
+/-- If `p^2` is an odd integer, then `p % 2 = 1`. -/
+lemma root_emod_two_eq_one_of_sq_eq_odd
+    {p x : ℤ}
+    (hp : p ^ 2 = x) (hx : Odd x) :
+    p % 2 = 1 := by
+  have hp2odd : Odd (p ^ 2) := by
+    simpa [hp] using hx
+  have hmulodd : Odd (p * p) := by
+    simpa [pow_two] using hp2odd
+  have hpodd : Odd p := hmulodd.of_mul_left
+  exact Int.odd_iff.mp hpodd
 ```
 
-Those two `rcases` are the clean next layer after the coprimality theorems above.
+Fallback if `Odd.of_mul_left` is not found in the pinned Mathlib:
+
+```lean
+  have hpodd : Odd p := by
+    rcases hmulodd with ⟨k, hk⟩
+    by_contra hpnot
+    have hpeven : Even p := Int.not_odd_iff_even.mp hpnot
+    rcases hpeven with ⟨t, ht⟩
+    rw [ht] at hk
+    have : ¬ Odd ((2 * t) * (2 * t)) := by
+      exact not_odd_iff_even.mpr ⟨2 * t * t, by ring⟩
+    exact this ⟨k, hk⟩
+```
+
+The first version is the preferred one.
+
+---
+
+## 6. Construction skeleton
+
+The following is the intended proof shape.  The field labels in the record literal must be adjusted if `PrimitiveCenteredFourSqAP` uses different names.
+
+```lean
+theorem eulerSquarePairToPrimitiveCentered_constructive (E : EulerSquarePair) :
+    ∃ T : PrimitiveCenteredFourSqAP, T.N = E.A * E.D := by
+  rcases E.fm6_square with ⟨p, hp⟩
+  rcases E.fm2_square with ⟨q, hq⟩
+  rcases E.fp2_square with ⟨r, hr⟩
+  rcases E.fp6_square with ⟨s, hs⟩
+
+  refine ⟨{
+    X := E.centerX
+    N := E.stepN
+    p := p
+    q := q
+    r := r
+    s := s
+
+    hp := by
+      -- target: p^2 = X - 6*N
+      simpa [fm6] using hp
+    hq := by
+      -- target: q^2 = X - 2*N
+      simpa [fm2] using hq
+    hr := by
+      -- target: r^2 = X + 2*N
+      simpa [fp2] using hr
+    hs := by
+      -- target: s^2 = X + 6*N
+      simpa [fp6] using hs
+
+    hpq_coprime :=
+      root_gcd_eq_one_of_sq_eq_of_isCoprime hp hq (fm6_coprime_fm2 E)
+    hpr_coprime :=
+      root_gcd_eq_one_of_sq_eq_of_isCoprime hp hr (fm6_coprime_fp2 E)
+    hps_coprime :=
+      root_gcd_eq_one_of_sq_eq_of_isCoprime hp hs (fm6_coprime_fp6 E)
+    hqr_coprime :=
+      root_gcd_eq_one_of_sq_eq_of_isCoprime hq hr (fm2_coprime_fp2 E)
+    hqs_coprime :=
+      root_gcd_eq_one_of_sq_eq_of_isCoprime hq hs (fm2_coprime_fp6 E)
+    hrs_coprime :=
+      root_gcd_eq_one_of_sq_eq_of_isCoprime hr hs (fp2_coprime_fp6 E)
+
+    hp_odd := root_emod_two_eq_one_of_sq_eq_odd hp E.fm6_odd
+    hq_odd := root_emod_two_eq_one_of_sq_eq_odd hq E.fm2_odd
+    hr_odd := root_emod_two_eq_one_of_sq_eq_odd hr E.fp2_odd
+    hs_odd := root_emod_two_eq_one_of_sq_eq_odd hs E.fp6_odd
+  }, ?_⟩
+
+  -- final target: constructed `T.N = E.A * E.D`
+  simp [stepN]
+```
+
+If the structure fields are literally named as in the prompt rather than with proof-oriented labels, use this map:
+
+```text
+hp/hq/hr/hs             -> whatever fields state p^2/q^2/r^2/s^2
+hpq_coprime             -> field for Int.gcd p q = 1
+hpr_coprime             -> field for Int.gcd p r = 1
+hps_coprime             -> field for Int.gcd p s = 1
+hqr_coprime             -> field for Int.gcd q r = 1
+hqs_coprime             -> field for Int.gcd q s = 1
+hrs_coprime             -> field for Int.gcd r s = 1
+hp_odd/hq_odd/hr_odd/hs_odd -> fields for p%2=q%2=r%2=s%2=1
+```
+
+The important orientation is:
+
+```lean
+p^2 = E.fm6
+q^2 = E.fm2
+r^2 = E.fp2
+s^2 = E.fp6
+```
+
+so the six gcd calls pair exactly with:
+
+```lean
+fm6_coprime_fm2
+fm6_coprime_fp2
+fm6_coprime_fp6
+fm2_coprime_fp2
+fm2_coprime_fp6
+fp2_coprime_fp6
+```
+
+end namespace when pasted into the file:
+
+```lean
+end MazurProof.RationalPointsN12.EulerSquarePair
+```
