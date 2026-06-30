@@ -1,74 +1,106 @@
-# Q2335: `QuarticAPrimitiveParitySplit`
+# Q2339: final dependency assembly for `QuarticAParamBridge`
 
 ```lean
-import Mathlib
+-- In a separate check file, keep this import.  If this block is pasted
+-- directly at the end of `FLT/Assumptions/MazurProof/RationalPointsN12.lean`,
+-- omit the import line.
+import FLT.Assumptions.MazurProof.RationalPointsN12
 
 namespace MazurProof.RationalPointsN12
 
--- Included only so this snippet checks standalone.  In the project file,
--- keep the existing definitions and paste only the two lemmas and theorem.
-def QuarticA (u v Z : ℤ) : Prop :=
-  Z ^ 2 = u ^ 4 + 2 * u ^ 2 * v ^ 2 - 3 * v ^ 4
+/-- Checked assembly of the odd/odd bridge from the divided-triple primitive
+lemma and the primitive divided-triple classification lemma. -/
+theorem quarticAOddOddRSDataTheorem_checked :
+    QuarticAOddOddRSDataTheorem := by
+  exact
+    QuarticAOddOddRSDataTheorem_of_dividedPrimitive_and_classification
+      quarticAOddOddDividedTriplePrimitive
+      quarticA_oddOddRSDataOfPrimitiveDividedTripleTheorem
 
-def QuarticAPrimitiveParitySplit : Prop :=
-  ∀ {u v Z : ℤ},
-    Int.gcd u v = 1 →
-    u * v ≠ 0 →
-    QuarticA u v Z →
-    (((Odd u ∧ Even v) ∨ (Even u ∧ Odd v)) ∨ (Odd u ∧ Odd v))
+/-- Checked project-facing odd/odd parameter bridge. -/
+theorem quarticAOddOddParamBridge_checked :
+    QuarticAOddOddParamBridge := by
+  exact
+    QuarticAOddOddParamBridge_of_RSDataTheorem
+      quarticAOddOddRSDataTheorem_checked
 
-/-- If an integer is even, then its natural absolute value is divisible by `2`. -/
-lemma quarticA_natAbs_two_dvd_of_even {z : ℤ} (hz : Even z) :
-    (2 : ℕ) ∣ z.natAbs := by
-  have h2z : (2 : ℤ) ∣ z := (even_iff_two_dvd.mp hz)
-  rcases h2z with ⟨k, hk⟩
-  refine ⟨k.natAbs, ?_⟩
-  calc
-    z.natAbs = ((2 : ℤ) * k).natAbs := by simpa [hk]
-    _ = (2 : ℤ).natAbs * k.natAbs := by
-      simpa using (Int.natAbs_mul (2 : ℤ) k)
-    _ = 2 * k.natAbs := by norm_num
+/-- Checked project-facing opposite-parity parameter bridge. -/
+theorem quarticAOppParityParamBridge_checked :
+    QuarticAOppParityParamBridge := by
+  refine quarticAOppParityParamBridge_of_leg_coprime ?_
+  intro u v Z hcop huv0 hne hopp hA
+  exact
+    quarticA_oppParity_leg_coprime
+      (u := u) (v := v) (Z := Z)
+      hcop huv0 hne hopp hA
 
-/-- A primitive integer pair cannot have both entries even. -/
-lemma quarticA_not_even_even_of_int_gcd_eq_one {u v : ℤ}
-    (hcop : Int.gcd u v = 1) :
-    ¬ (Even u ∧ Even v) := by
-  rintro ⟨hu, hv⟩
-  have huNat : (2 : ℕ) ∣ u.natAbs := quarticA_natAbs_two_dvd_of_even hu
-  have hvNat : (2 : ℕ) ∣ v.natAbs := quarticA_natAbs_two_dvd_of_even hv
-  have hgNat : (2 : ℕ) ∣ Nat.gcd u.natAbs v.natAbs :=
-    Nat.dvd_gcd huNat hvNat
-  have hcopNat : Nat.gcd u.natAbs v.natAbs = 1 := by
-    simpa [Int.gcd_eq_natAbs] using hcop
-  rw [hcopNat] at hgNat
-  norm_num at hgNat
-
-theorem quarticAPrimitiveParitySplit : QuarticAPrimitiveParitySplit := by
-  intro u v Z hcop _huv0 _hA
-  rcases Int.even_or_odd u with huEven | huOdd
-  · rcases Int.even_or_odd v with hvEven | hvOdd
-    · exfalso
-      exact quarticA_not_even_even_of_int_gcd_eq_one
-        (u := u) (v := v) hcop ⟨huEven, hvEven⟩
-    · exact Or.inl (Or.inr ⟨huEven, hvOdd⟩)
-  · rcases Int.even_or_odd v with hvEven | hvOdd
-    · exact Or.inl (Or.inl ⟨huOdd, hvEven⟩)
-    · exact Or.inr ⟨huOdd, hvOdd⟩
+/-- Final checked `QuarticA` parameter bridge assembled from parity cases. -/
+theorem quarticAParamBridge_checked :
+    QuarticAParamBridge := by
+  exact
+    quarticA_paramBridge_of_parity_cases
+      quarticAPrimitiveParitySplit_proof
+      quarticAOppParityParamBridge_checked
+      quarticAOddOddParamBridge_checked
 
 end MazurProof.RationalPointsN12
 ```
 
-Notes:
+The same code can be written without the intermediate `quarticAOddOddRSDataTheorem_checked` theorem, but keeping it makes the dependency graph explicit and gives a useful local target if a later name changes.
 
-* `QuarticA` and `u * v ≠ 0` are not used.  The theorem is purely parity exhaustion plus `Int.gcd u v = 1`.
-* The both-even contradiction is proved by passing from `Even z` to `(2 : ℕ) ∣ z.natAbs`, then using `Nat.dvd_gcd` and `Int.gcd_eq_natAbs` to contradict `Int.gcd u v = 1`.
-* If the local Mathlib exposes `Int.gcd` by definitional unfolding rather than the rewrite theorem, replace
-  ```lean
-  simpa [Int.gcd_eq_natAbs] using hcop
-  ```
-  with
-  ```lean
-  simpa [Int.gcd] using hcop
-  ```
-  in `quarticA_not_even_even_of_int_gcd_eq_one`.
-* If an older local file does not have the global theorem `even_iff_two_dvd` in scope, the intended replacement is the same first step by definition/witness expansion: obtain `⟨k, hk⟩ : (2 : ℤ) ∣ z`, then finish with `Int.natAbs_mul` exactly as above.
+Dependency audit:
+
+```text
+quarticAOddOddDividedTriplePrimitive
+quarticA_oddOddRSDataOfPrimitiveDividedTripleTheorem
+  └─ QuarticAOddOddRSDataTheorem_of_dividedPrimitive_and_classification
+       └─ quarticAOddOddRSDataTheorem_checked
+            └─ QuarticAOddOddParamBridge_of_RSDataTheorem
+                 └─ quarticAOddOddParamBridge_checked
+
+quarticA_oppParity_leg_coprime
+  └─ quarticAOppParityParamBridge_of_leg_coprime
+       └─ quarticAOppParityParamBridge_checked
+
+quarticAPrimitiveParitySplit_proof
+quarticAOppParityParamBridge_checked
+quarticAOddOddParamBridge_checked
+  └─ quarticA_paramBridge_of_parity_cases
+       └─ quarticAParamBridge_checked
+```
+
+There is no hidden circular dependency in this assembly as long as the three leaf theorems below are proved independently of `quarticAParamBridge_checked` and its two checked bridge wrappers:
+
+```lean
+quarticAPrimitiveParitySplit_proof
+quarticA_oppParity_leg_coprime
+quarticAOddOddDividedTriplePrimitive
+quarticA_oddOddRSDataOfPrimitiveDividedTripleTheorem
+```
+
+No extra hypothesis is missing from the final assembly.  The nondegeneracy hypothesis `u ^ 2 ≠ v ^ 2` is consumed by the branch bridge definitions and by the leg-coprime wrapper interface, not by the primitive parity split.  No `Z` sign normalization or separate `Z ≠ 0` assumption is needed for these wrappers.
+
+The argument order used above matches the project-facing theorem statements in the prompt:
+
+```lean
+quarticA_paramBridge_of_parity_cases
+  (hParity : QuarticAPrimitiveParitySplit)
+  (hOpp : QuarticAOppParityParamBridge)
+  (hOddOdd : QuarticAOddOddParamBridge)
+
+quarticAOppParityParamBridge_of_leg_coprime
+  (hlegcop_of_quarticA :
+    ∀ {u v Z : ℤ},
+      Int.gcd u v = 1 → u * v ≠ 0 → u ^ 2 ≠ v ^ 2 →
+      ((Odd u ∧ Even v) ∨ (Even u ∧ Odd v)) → QuarticA u v Z →
+      Int.gcd Z (2 * v ^ 2) = 1)
+
+QuarticAOddOddParamBridge_of_RSDataTheorem
+  (hRSTheorem : QuarticAOddOddRSDataTheorem)
+
+QuarticAOddOddRSDataTheorem_of_dividedPrimitive_and_classification
+  (hprim : QuarticAOddOddDividedTriplePrimitiveTheorem)
+  (hclass : QuarticAOddOddRSDataOfPrimitiveDividedTripleTheorem)
+```
+
+The `intro u v Z ...` line in `quarticAOppParityParamBridge_checked` deliberately introduces the implicit variables of the leg-coprime functional hypothesis.  This avoids relying on binder names in `quarticAOppParityParamBridge_of_leg_coprime` and is usually more robust than passing the theorem by a named argument.
