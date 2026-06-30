@@ -1,174 +1,175 @@
-# Q2505 WeakPrimitiveAPParity Lean route
+# Q2516 WeakPrimitiveAPPairwise final assembly route
 
-Use the integer parity route, not `ZMod 4`.  The proof below is meant to be pasted after the current definitions inside the existing namespace
+This drop gives a paste-after-definitions assembly block for `WeakPrimitiveAPPairwise`, with distinct names.  It does two things:
+
+1. gives a compile-oriented endpoint reduction from `Int.gcd p s ≠ 1` to a common prime divisor of `p` and `s`;
+2. gives the final six-field assembly theorem, parameterized by the adjacent, distance-two, and endpoint component helpers.  If the Q2506/Q2512 helper signatures in your file are narrower, wrap them with lambdas and ignore the unused hypotheses.
+
+The code assumes it is pasted inside the existing namespace `MazurProof.RationalPointsN12`, after the definitions of `rootGCD4` and `WeakPrimitiveAPPairwise`.
+
+Required imports if not already present:
 
 ```lean
-namespace MazurProof.RationalPointsN12
-```
-
-Do not repeat the namespace or the definitions of `rootGCD4` / `WeakPrimitiveAPParity` when pasting into the current file.
-
-Required imports, if the file does not already have them:
-
-```lean
-import Mathlib.Algebra.Ring.Int.Parity
+import Mathlib.RingTheory.Int.Basic
 import Mathlib.Tactic
 ```
 
-Paste-after-definitions code:
+## Paste-after-definitions code
 
 ```lean
-private theorem n12_sq_eq_four_mul_of_even {n : ℤ} (hn : Even n) :
-    ∃ k : ℤ, n ^ 2 = 4 * k := by
-  rcases hn with ⟨t, rfl⟩
-  refine ⟨t ^ 2, ?_⟩
-  ring
-
-private theorem n12_sq_eq_four_mul_add_one_of_odd {n : ℤ} (hn : Odd n) :
-    ∃ k : ℤ, n ^ 2 = 4 * k + 1 := by
-  rcases hn with ⟨t, rfl⟩
-  refine ⟨t ^ 2 + t, ?_⟩
-  ring
-
-private theorem n12_sq_eq_eight_mul_add_one_of_odd {n : ℤ} (hn : Odd n) :
-    ∃ k : ℤ, n ^ 2 = 8 * k + 1 := by
-  rcases hn with ⟨t, rfl⟩
-  rcases Int.two_dvd_mul_add_one t with ⟨u, hu⟩
-  refine ⟨u, ?_⟩
-  calc
-    (2 * t + 1) ^ 2 = 4 * (t * (t + 1)) + 1 := by ring
-    _ = 4 * (2 * u) + 1 := by rw [hu]
-    _ = 8 * u + 1 := by ring
-
-private theorem n12_eight_dvd_sq_sub_sq_of_odd {a b : ℤ}
-    (ha : Odd a) (hb : Odd b) :
-    (8 : ℤ) ∣ a ^ 2 - b ^ 2 := by
-  rcases n12_sq_eq_eight_mul_add_one_of_odd ha with ⟨A, hA⟩
-  rcases n12_sq_eq_eight_mul_add_one_of_odd hb with ⟨B, hB⟩
-  refine ⟨A - B, ?_⟩
-  rw [hA, hB]
-  ring
+/-- If an integer gcd is not `1`, some natural prime divides both integers. -/
+private theorem n12_common_prime_of_int_gcd_ne_one {a b : ℤ}
+    (h : Int.gcd a b ≠ 1) :
+    ∃ ℓ : ℕ, Nat.Prime ℓ ∧ (ℓ : ℤ) ∣ a ∧ (ℓ : ℤ) ∣ b := by
+  obtain ⟨ℓ, hℓprime, hℓdvd⟩ := Nat.exists_prime_and_dvd h
+  have hga : Int.gcd a b ∣ a.natAbs := by
+    rw [Int.gcd_def]
+    exact Nat.gcd_dvd_left _ _
+  have hgb : Int.gcd a b ∣ b.natAbs := by
+    rw [Int.gcd_def]
+    exact Nat.gcd_dvd_right _ _
+  have hℓaNat : ℓ ∣ a.natAbs := hℓdvd.trans hga
+  have hℓbNat : ℓ ∣ b.natAbs := hℓdvd.trans hgb
+  have hℓa : (ℓ : ℤ) ∣ a := by
+    rw [Int.natCast_dvd]
+    exact hℓaNat
+  have hℓb : (ℓ : ℤ) ∣ b := by
+    rw [Int.natCast_dvd]
+    exact hℓbNat
+  exact ⟨ℓ, hℓprime, hℓa, hℓb⟩
 
 /--
-Parity classifier for the midpoint equation of three squares in arithmetic progression.
-If `a^2, b^2, c^2` are in arithmetic progression, then `a,b,c` are either all
-odd or all even.
+Endpoint gcd from the endpoint prime-propagation contradiction.
+
+Use this after proving the genuine endpoint arithmetic lemma:
+any natural prime dividing both endpoints `p` and `s` contradicts the AP equations
+and primitive four-root gcd.  The prime-propagation proof is exactly where the
+`ℓ ≠ 3` cancellation and `ℓ = 3` residue check belong.
 -/
-private theorem n12_all_odd_or_all_even_of_sq_add_sq_eq_two_sq
-    {a b c : ℤ}
-    (h : a ^ 2 + c ^ 2 = 2 * b ^ 2) :
-    (Odd a ∧ Odd b ∧ Odd c) ∨ (Even a ∧ Even b ∧ Even c) := by
-  rcases Int.even_or_odd a with haEven | haOdd
-  · rcases Int.even_or_odd b with hbEven | hbOdd
-    · rcases Int.even_or_odd c with hcEven | hcOdd
-      · exact Or.inr ⟨haEven, hbEven, hcEven⟩
-      · exfalso
-        rcases n12_sq_eq_four_mul_of_even haEven with ⟨A, hA⟩
-        rcases n12_sq_eq_four_mul_of_even hbEven with ⟨B, hB⟩
-        rcases n12_sq_eq_four_mul_add_one_of_odd hcOdd with ⟨C, hC⟩
-        rw [hA, hB, hC] at h
-        omega
-    · rcases Int.even_or_odd c with hcEven | hcOdd
-      · exfalso
-        rcases n12_sq_eq_four_mul_of_even haEven with ⟨A, hA⟩
-        rcases n12_sq_eq_four_mul_add_one_of_odd hbOdd with ⟨B, hB⟩
-        rcases n12_sq_eq_four_mul_of_even hcEven with ⟨C, hC⟩
-        rw [hA, hB, hC] at h
-        omega
-      · exfalso
-        rcases n12_sq_eq_four_mul_of_even haEven with ⟨A, hA⟩
-        rcases n12_sq_eq_four_mul_add_one_of_odd hbOdd with ⟨B, hB⟩
-        rcases n12_sq_eq_four_mul_add_one_of_odd hcOdd with ⟨C, hC⟩
-        rw [hA, hB, hC] at h
-        omega
-  · rcases Int.even_or_odd b with hbEven | hbOdd
-    · rcases Int.even_or_odd c with hcEven | hcOdd
-      · exfalso
-        rcases n12_sq_eq_four_mul_add_one_of_odd haOdd with ⟨A, hA⟩
-        rcases n12_sq_eq_four_mul_of_even hbEven with ⟨B, hB⟩
-        rcases n12_sq_eq_four_mul_of_even hcEven with ⟨C, hC⟩
-        rw [hA, hB, hC] at h
-        omega
-      · exfalso
-        rcases n12_sq_eq_four_mul_add_one_of_odd haOdd with ⟨A, hA⟩
-        rcases n12_sq_eq_four_mul_of_even hbEven with ⟨B, hB⟩
-        rcases n12_sq_eq_four_mul_add_one_of_odd hcOdd with ⟨C, hC⟩
-        rw [hA, hB, hC] at h
-        omega
-    · rcases Int.even_or_odd c with hcEven | hcOdd
-      · exfalso
-        rcases n12_sq_eq_four_mul_add_one_of_odd haOdd with ⟨A, hA⟩
-        rcases n12_sq_eq_four_mul_add_one_of_odd hbOdd with ⟨B, hB⟩
-        rcases n12_sq_eq_four_mul_of_even hcEven with ⟨C, hC⟩
-        rw [hA, hB, hC] at h
-        omega
-      · exact Or.inl ⟨haOdd, hbOdd, hcOdd⟩
+theorem n12_endpoint_ps_gcd_eq_one_of_no_common_prime
+    {p q r s Δ : ℤ}
+    (hpq : q ^ 2 - p ^ 2 = Δ)
+    (hqr : r ^ 2 - q ^ 2 = Δ)
+    (hrs : s ^ 2 - r ^ 2 = Δ)
+    (hroot : rootGCD4 p q r s = 1)
+    (hp_odd : p % 2 = 1)
+    (hs_odd : s % 2 = 1)
+    (hprime :
+      ∀ ℓ : ℕ,
+        Nat.Prime ℓ →
+        (ℓ : ℤ) ∣ p →
+        (ℓ : ℤ) ∣ s →
+          False) :
+    Int.gcd p s = 1 := by
+  -- Keep the endpoint AP/parity hypotheses visible for the local prime-propagation wrapper.
+  have _hpq_keep := hpq
+  have _hqr_keep := hqr
+  have _hrs_keep := hrs
+  have _hroot_keep := hroot
+  have _hp_odd_keep := hp_odd
+  have _hs_odd_keep := hs_odd
+  by_contra hne
+  obtain ⟨ℓ, hℓprime, hℓp, hℓs⟩ :=
+    n12_common_prime_of_int_gcd_ne_one (a := p) (b := s) hne
+  exact hprime ℓ hℓprime hℓp hℓs
 
-private theorem n12_rootGCD4_ne_one_of_all_even {p q r s : ℤ}
-    (hp : Even p) (hq : Even q) (hr : Even r) (hs : Even s) :
-    rootGCD4 p q r s ≠ 1 := by
-  have h2p : 2 ∣ p.natAbs := by
-    have hpAbs : Even p.natAbs := by
-      rwa [Int.natAbs_even]
-    exact even_iff_two_dvd.mp hpAbs
-  have h2q : 2 ∣ q.natAbs := by
-    have hqAbs : Even q.natAbs := by
-      rwa [Int.natAbs_even]
-    exact even_iff_two_dvd.mp hqAbs
-  have h2r : 2 ∣ r.natAbs := by
-    have hrAbs : Even r.natAbs := by
-      rwa [Int.natAbs_even]
-    exact even_iff_two_dvd.mp hrAbs
-  have h2s : 2 ∣ s.natAbs := by
-    have hsAbs : Even s.natAbs := by
-      rwa [Int.natAbs_even]
-    exact even_iff_two_dvd.mp hsAbs
-  have h2g : 2 ∣ rootGCD4 p q r s := by
-    dsimp [rootGCD4]
-    exact Nat.dvd_gcd h2p (Nat.dvd_gcd h2q (Nat.dvd_gcd h2r h2s))
-  intro hprim
-  have hbad : (2 : ℕ) ∣ 1 := by
-    simpa [hprim] using h2g
-  norm_num at hbad
+/-- Uniform component-helper type for one pairwise gcd field. -/
+private def N12PairwiseComponentHelper (i j : ℤ → ℤ → ℤ → ℤ → ℤ) : Prop :=
+  ∀ {p q r s Δ : ℤ},
+    q ^ 2 - p ^ 2 = Δ →
+    r ^ 2 - q ^ 2 = Δ →
+    s ^ 2 - r ^ 2 = Δ →
+    rootGCD4 p q r s = 1 →
+    p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
+      Int.gcd (i p q r s) (j p q r s) = 1
 
-/-- Weak primitive four-square APs have odd roots and square gap divisible by `8`. -/
-theorem weakPrimitiveAPParity : WeakPrimitiveAPParity := by
-  intro p q r s Δ hpq hrq hsr hprim
-  have hpqr : p ^ 2 + r ^ 2 = 2 * q ^ 2 := by
-    nlinarith [hpq, hrq]
-  have hqrs : q ^ 2 + s ^ 2 = 2 * r ^ 2 := by
-    nlinarith [hrq, hsr]
-  rcases n12_all_odd_or_all_even_of_sq_add_sq_eq_two_sq hpqr with hpqrOdd | hpqrEven
-  · rcases hpqrOdd with ⟨hpOdd, hqOdd, hrOdd⟩
-    rcases n12_all_odd_or_all_even_of_sq_add_sq_eq_two_sq hqrs with hqrsOdd | hqrsEven
-    · rcases hqrsOdd with ⟨_hqOdd2, _hrOdd2, hsOdd⟩
-      have h8 : (8 : ℤ) ∣ Δ := by
-        rw [← hpq]
-        exact n12_eight_dvd_sq_sub_sq_of_odd hqOdd hpOdd
-      exact ⟨Int.odd_iff.mp hpOdd,
-        Int.odd_iff.mp hqOdd,
-        Int.odd_iff.mp hrOdd,
-        Int.odd_iff.mp hsOdd,
-        h8⟩
-    · rcases hqrsEven with ⟨hqEven2, _hrEven2, _hsEven⟩
-      exfalso
-      exact (Int.not_even_iff_odd.mpr hqOdd) hqEven2
-  · rcases hpqrEven with ⟨hpEven, hqEven, hrEven⟩
-    rcases n12_all_odd_or_all_even_of_sq_add_sq_eq_two_sq hqrs with hqrsOdd | hqrsEven
-    · rcases hqrsOdd with ⟨hqOdd2, _hrOdd2, _hsOdd⟩
-      exfalso
-      exact (Int.not_even_iff_odd.mpr hqOdd2) hqEven
-    · rcases hqrsEven with ⟨_hqEven2, _hrEven2, hsEven⟩
-      exfalso
-      exact n12_rootGCD4_ne_one_of_all_even hpEven hqEven hrEven hsEven hprim
+/--
+Final assembly of all six gcd fields.
+
+Feed in the three adjacent helpers, two distance-two helpers, and the endpoint helper.
+This theorem is deliberately parameterized so it is independent of the exact Q2506/Q2512
+local theorem names.
+-/
+theorem n12_weakPrimitiveAPPairwise_from_component_helpers
+    (hpq_pair :
+      ∀ {p q r s Δ : ℤ},
+        q ^ 2 - p ^ 2 = Δ →
+        r ^ 2 - q ^ 2 = Δ →
+        s ^ 2 - r ^ 2 = Δ →
+        rootGCD4 p q r s = 1 →
+        p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
+          Int.gcd p q = 1)
+    (hpr_pair :
+      ∀ {p q r s Δ : ℤ},
+        q ^ 2 - p ^ 2 = Δ →
+        r ^ 2 - q ^ 2 = Δ →
+        s ^ 2 - r ^ 2 = Δ →
+        rootGCD4 p q r s = 1 →
+        p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
+          Int.gcd p r = 1)
+    (hps_pair :
+      ∀ {p q r s Δ : ℤ},
+        q ^ 2 - p ^ 2 = Δ →
+        r ^ 2 - q ^ 2 = Δ →
+        s ^ 2 - r ^ 2 = Δ →
+        rootGCD4 p q r s = 1 →
+        p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
+          Int.gcd p s = 1)
+    (hqr_pair :
+      ∀ {p q r s Δ : ℤ},
+        q ^ 2 - p ^ 2 = Δ →
+        r ^ 2 - q ^ 2 = Δ →
+        s ^ 2 - r ^ 2 = Δ →
+        rootGCD4 p q r s = 1 →
+        p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
+          Int.gcd q r = 1)
+    (hqs_pair :
+      ∀ {p q r s Δ : ℤ},
+        q ^ 2 - p ^ 2 = Δ →
+        r ^ 2 - q ^ 2 = Δ →
+        s ^ 2 - r ^ 2 = Δ →
+        rootGCD4 p q r s = 1 →
+        p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
+          Int.gcd q s = 1)
+    (hrs_pair :
+      ∀ {p q r s Δ : ℤ},
+        q ^ 2 - p ^ 2 = Δ →
+        r ^ 2 - q ^ 2 = Δ →
+        s ^ 2 - r ^ 2 = Δ →
+        rootGCD4 p q r s = 1 →
+        p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
+          Int.gcd r s = 1) :
+    WeakPrimitiveAPPairwise := by
+  intro p q r s Δ hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd
+  exact
+    ⟨ hpq_pair hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd
+    , hpr_pair hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd
+    , hps_pair hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd
+    , hqr_pair hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd
+    , hqs_pair hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd
+    , hrs_pair hpq hqr hrs hroot hp_odd hq_odd hr_odd hs_odd ⟩
 ```
 
-Why this is preferable to the proposed `ZMod 4` proof: all congruence facts are replaced by explicit integer normal forms
+## How to connect local Q2506/Q2512/Q2513 helpers
+
+After your local endpoint prime-propagation helper is available, make a wrapper with this shape:
 
 ```lean
-Even n  -> ∃ k, n^2 = 4*k
-Odd n   -> ∃ k, n^2 = 4*k + 1
-Odd n   -> ∃ k, n^2 = 8*k + 1
+-- expected endpoint wrapper shape
+-- theorem n12_endpoint_ps_pair
+--     {p q r s Δ : ℤ}
+--     (hpq : q ^ 2 - p ^ 2 = Δ)
+--     (hqr : r ^ 2 - q ^ 2 = Δ)
+--     (hrs : s ^ 2 - r ^ 2 = Δ)
+--     (hroot : rootGCD4 p q r s = 1)
+--     (hp_odd : p % 2 = 1)
+--     (hs_odd : s % 2 = 1) :
+--     Int.gcd p s = 1 :=
+--   n12_endpoint_ps_gcd_eq_one_of_no_common_prime
+--     hpq hqr hrs hroot hp_odd hs_odd
+--     (fun ℓ hℓ hℓp hℓs =>
+--       n12_endpoint_no_common_prime hpq hqr hrs hroot hp_odd hs_odd ℓ hℓ hℓp hℓs)
 ```
 
-and the impossible mixed-parity midpoint cases close by `omega` after rewriting.  The only Mathlib parity APIs used are `Int.even_or_odd`, `Int.natAbs_even`, `Int.odd_iff`, `Int.not_even_iff_odd`, and `Int.two_dvd_mul_add_one`.
+Then close the target by passing your five existing component wrappers plus `n12_endpoint_ps_pair` to
+`n12_weakPrimitiveAPPairwise_from_component_helpers`.  If an adjacent or distance-two helper only needs a subset of the hypotheses, pass it through a lambda and ignore the rest.
