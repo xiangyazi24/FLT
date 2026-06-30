@@ -1,438 +1,375 @@
-# Q2714 dm-codex2: divided branch vs RationalPointsN12 half-factor infrastructure
-
-Target requested: `FLT/Assumptions/MazurProof/RationalPointsN12.lean`, especially the pythagorean quartic half-factor lemmas, and the local WIP divided branch in `N12QuarticEisenstein.lean`.
+# Q2724 dm-codex2: N12FourSquaresAP route for the divided branch
 
 ## Connector audit status
 
-I could not confirm the exact Lean statements of the named theorems from the connected repo. The connector has write access, and the `scratch` branch exists, but the requested file path
+I could not confirm the requested existing Lean file from the connected repository. Through the GitHub connector:
 
-```text
-FLT/Assumptions/MazurProof/RationalPointsN12.lean
-```
+- `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean` returned `404` on `scratch`.
+- The same path had previously returned `404` on the default branch.
+- Code search in `xiangyazi24/FLT` for `N12FourSquaresAP`, `FourSquaresAP`, and `pythagoreanQuarticRhs` returned no hits.
 
-was not present at that path on either `scratch` or `main` through `fetch_file`. Code search for the exact names also returned no hits. Therefore I am **not** claiming checked `#check` output for the listed APIs below. Where I refer to existing names, I treat them as theorem roles inferred from the names in the prompt; the Lean code blocks are proposed bridge/interface statements to add once the real imported file is visible.
+So I cannot honestly name an already-existing theorem from `N12FourSquaresAP.lean`. The answer below therefore gives the exact wrapper/interface I would add and the concrete proof route. Where a theorem is described as “use this”, it means “make this the local API boundary and prove it from the actual AP theorem once the WIP file is visible”; I am not claiming repo-confirmed `#check` output for that theorem name.
 
-## Executive answer
+## 1. Four-squares AP theorem/interface to use
 
-The existing pythagorean quartic half-factor infrastructure is probably reusable only as an **upstream half-factor interface for the original Eisenstein quartic in `(A,N,S)`**, not as a direct proof of the divided branch residual.
-
-The divided branch should first be reparametrized by the integral linear change
-
-```text
-u = (m+n)/3,
-v = (2*m-n)/3,
-```
-
-which is valid because `3 ∣ m+n` and, modulo `3`, `2*m-n = 2*(m+n)-3*n` is also divisible by `3`. Then
-
-```text
-m = u+v,
-n = 2*u-v,
-m-n = 2*v-u,
-```
-
-and `DividedSquareBranch` becomes the denominator-free crossed-square system
-
-```text
-0 < u, 0 < v, 0 < 2*u-v, 0 < 2*v-u,
-IsCoprime u v,
-A^2 = u * (2*v-u),
-N^2 = v * (2*u-v),
-S = u^2 - u*v + v^2.
-```
-
-That crossed-square system is the right next bridge target. It cleanly exposes what the existing `r*s = 3*m^2*n^2` split sees, and what it does **not** see.
-
-## 1. Existing theorem roles that look reusable
-
-Because I could not confirm exact signatures from the repo, the following are **not asserted APIs**. They are the theorem roles suggested by the names and by the standard identity
-
-```text
-(m^2+n^2)^2 - (m^4 - m^2*n^2 + n^4) = 3*m^2*n^2.
-```
-
-The likely reusable roles are:
-
-1. `pythagoreanQuarticRhs`: expected to be the Eisenstein quartic RHS, morally
-
-```lean
-pythagoreanQuarticRhs m n = m^4 - m^2*n^2 + n^4
-```
-
-2. `pythagoreanQuarticCenter`: expected to be the Pythagorean center, morally
-
-```lean
-pythagoreanQuarticCenter m n = m^2 + n^2
-```
-
-3. `pythagorean_quartic_half_factorization_of_opposite_mod`: expected to package a factorization of
-
-```text
-(center - b) * (center + b) = 3*m^2*n^2
-```
-
-or a half-factor variant when parity forces `center ± b` to be even.
-
-4. `pythagorean_quartic_half_factor_gcd_dvd_three`, `..._gcd_eq_one_or_three`, `..._gcd_eq_one`: expected to prove that the two half factors are coprime except possibly for the controlled factor `3`.
-
-5. `pythagorean_quartic_half_factor_split` and `..._signed_split_of_nonzero`: expected to turn the product/gcd information into square-vs-`3*square` alternatives, with signs/nonzero hypotheses handled.
-
-6. `kubert_cover_pythagorean_half_factors`: likely the highest-level wrapper. It may be directly useful if it returns raw square-factor data or an `EulerSquarePair`-style package from a hypothesis of the form
-
-```lean
-b^2 = pythagoreanQuarticRhs m n
-```
-
-plus positivity/coprimality/nonzero hypotheses. It is **not** directly usable for `DividedSquareBranch` unless it can be instantiated at `(m,n,b) = (A,N,S)` and returns data in the exact descent interface expected downstream.
-
-## 2. Can `DividedSquareBranch` be transformed into `b^2 = pythagoreanQuarticRhs m n`?
-
-There are two different transformations; only one is likely the existing pythagorean infrastructure.
-
-### 2a. Original Eisenstein quartic: yes, with `(m,n,b) = (A,N,S)`
-
-If `pythagoreanQuarticRhs x y` is the Eisenstein quartic `x^4 - x^2*y^2 + y^4`, then the residual hypothesis
-
-```lean
-PositivePrimitiveEisensteinBadUnordered A N S
-```
-
-should already imply
-
-```lean
-S^2 = pythagoreanQuarticRhs A N
-```
-
-independently of the divided branch. This is the input shape for the half-factor infrastructure.
-
-The corresponding half factors are
-
-```text
-r = A^2 + N^2 - S,
-s = A^2 + N^2 + S,
-r*s = 3*A^2*N^2.
-```
-
-Under the divided branch, these factors have the following exact forms:
-
-```text
-A^2 + N^2 - S = n * (m-n),
-3 * (A^2 + N^2 + S) = (m+n) * (2*m-n),
-```
-
-and, using `3 ∣ m+n`, equivalently
-
-```text
-A^2 + N^2 + S = ((m+n) * (2*m-n)) / 3.
-```
-
-So the half-factor infrastructure can recognize the original quartic, but it sees only the product split in `(A,N,S)`. It does not by itself prove the crossed square decomposition of the four branch factors.
-
-### 2b. Branch quartic in the branch parameters: yes, but likely not the same RHS
-
-Multiplying the two divided branch square equations gives
-
-```text
-(3*A*N)^2 = n * (m-n) * (m+n) * (2*m-n).
-```
-
-This is a quartic in the branch parameters `(m,n)`, but it is not the standard Eisenstein quartic `m^4 - m^2*n^2 + n^4`. It can be written as
-
-```text
-n * (m-n) * (m+n) * (2*m-n)
-  = (m^2 - m*n + n^2)^2 - (m^2 - 2*m*n)^2.
-```
-
-Thus, with `b = 3*A*N` and center `m^2 - m*n + n^2`, the branch equation is a different Pythagorean-style quartic. Existing lemmas named around `pythagoreanQuarticRhs` are reusable here only if that RHS was defined for this four-linear-factor quartic rather than for the Eisenstein quartic. The `r*s = 3*m^2*n^2` clue strongly suggests it was the original Eisenstein quartic, not this branch quartic.
-
-## 3. Is the `r*s = 3*m^2*n^2` split the divided-by-3 sector?
-
-It is the **same upstream identity**, but not the same Lean object as the divided branch.
-
-For the original quartic in variables `(A,N)`:
-
-```text
-(A^2+N^2-S) * (A^2+N^2+S) = 3*A^2*N^2.
-```
-
-This is the `r*s = 3*m^2*n^2` phenomenon, with variable names `(m,n)` in the old theorem corresponding to `(A,N)` in the WIP residual.
-
-The divided branch is a crossed refinement of this split. Define
-
-```text
-u = (m+n)/3,
-v = (2*m-n)/3.
-```
-
-Then
-
-```text
-m = u+v,
-n = 2*u-v,
-m-n = 2*v-u,
-```
-
-and the divided branch equations become
-
-```text
-A^2 = u * (2*v-u),
-N^2 = v * (2*u-v),
-S = u^2 - u*v + v^2.
-```
-
-The original half factors become
-
-```text
-A^2 + N^2 - S = (2*u-v) * (2*v-u),
-A^2 + N^2 + S = 3*u*v.
-```
-
-So the existing split sees
-
-```text
-r = (2*u-v) * (2*v-u),
-s = 3*u*v,
-r*s = 3*A^2*N^2,
-```
-
-whereas the divided branch square equations are crossed:
-
-```text
-A^2 = u * (2*v-u),
-N^2 = v * (2*u-v).
-```
-
-That is why the half-factor split is not automatically a proof of `DividedSquareBranchUnitOrDescendsStatement`. It reduces the problem if it returns usable raw square-factor data; otherwise, the genuinely new hard part is the crossed-square descent.
-
-## 4. Minimal new bridge theorem statements
-
-These are the bridge statements I would add. They avoid depending on unconfirmed exact signatures of the existing pythagorean theorems, but they are designed to connect to them once the file is visible.
+For the divided `m` even branch, the downstream code should not depend on the internal shape of the four-squares AP proof. The minimal API should be this wrapper:
 
 ```lean
 import Mathlib.Tactic
--- In the actual repo, replace/extend this with:
--- import FLT.Assumptions.MazurProof.RationalPointsN12
--- import FLT.Assumptions.MazurProof.N12QuarticEisenstein
 
 namespace MazurProof.RationalPointsN12
 
-/-- Denominator-free linear reparametrization of the divided branch.
+/-- No nonconstant four integer squares in arithmetic progression, in the exact
+midpoint form needed by the divided `m` even branch.
 
-This is the first bridge to prove.  It removes all `/ 3` noise from the divided branch.
-The intended witnesses are
-`u = (m+n)/3` and `v = (2*m-n)/3`.
--/
-def DividedSquareBranchReparamStatement : Prop :=
+The two hypotheses say that `c^2, b^2, d^2, a^2` are in arithmetic progression.
+The conclusion is deliberately only equality of squares; signs are handled later
+from the positive factor package. -/
+def FourSquaresAPCollapseStatement : Prop :=
+  ∀ {a b c d : ℤ},
+    c ^ 2 + d ^ 2 = 2 * b ^ 2 →
+    b ^ 2 + a ^ 2 = 2 * d ^ 2 →
+    a ^ 2 = d ^ 2 ∧ d ^ 2 = b ^ 2 ∧ b ^ 2 = c ^ 2
+
+end MazurProof.RationalPointsN12
+```
+
+If the existing file has a theorem for a centered primitive AP, prove this wrapper from it once, then make all divided-branch code depend only on `FourSquaresAPCollapseStatement` or on the theorem implementation of that statement, e.g.
+
+```lean
+theorem four_squares_ap_collapse_of_midpoint :
+    FourSquaresAPCollapseStatement := by
+  -- prove from the existing centered/primitive AP theorem
+```
+
+I would **not** thread a primitive/centered AP theorem directly into the divided branch. The divided branch naturally produces the two midpoint identities above; any primitive normalization is an implementation detail of the AP file.
+
+## 2. Lean-friendly skeleton for `DividedMEvenFactorsUnitStatement`
+
+The target statement from your WIP is:
+
+```lean
+def DividedMEvenFactorsUnitStatement : Prop :=
   ∀ {A N S m n : ℤ},
+    PositivePrimitiveEisensteinBadUnordered A N S →
     DividedSquareBranch A N S m n →
-      ∃ u v : ℤ,
-        0 < u ∧ 0 < v ∧ 0 < 2*u - v ∧ 0 < 2*v - u ∧
-        IsCoprime u v ∧
-        m = u + v ∧ n = 2*u - v ∧
-        A^2 = u * (2*v - u) ∧
-        N^2 = v * (2*u - v) ∧
-        S = u^2 - u*v + v^2
+    Even m →
+    DividedSqBranchMEvenFactors m n →
+    A = 1 ∧ N = 1 ∧ S = 1
+```
 
-/-- Divided branch as a crossed half-factor split for the original Eisenstein quartic.
+The proof should split into three small bridges.
 
-This is the direct connection to the `r*s = 3*m^2*n^2` infrastructure, after
-renaming the old theorem's variables `(m,n)` to the WIP variables `(A,N)`.
--/
-def DividedSquareBranchHalfFactorBridgeStatement : Prop :=
-  ∀ {A N S u v : ℤ},
-    0 < u → 0 < v → 0 < 2*u - v → 0 < 2*v - u →
-    A^2 = u * (2*v - u) →
-    N^2 = v * (2*u - v) →
-    S = u^2 - u*v + v^2 →
-      A^2 + N^2 - S = (2*u - v) * (2*v - u) ∧
-      A^2 + N^2 + S = 3*u*v ∧
-      (A^2 + N^2 - S) * (A^2 + N^2 + S) = 3*A^2*N^2
+### Bridge A: `MEvenFactors` gives the two AP midpoint identities
 
-/-- Adapter from the normalized bad tuple to the pythagorean quartic API.
+```lean
+import Mathlib.Tactic
 
-Use this only if `pythagoreanQuarticRhs` is confirmed to be
-`x^4 - x^2*y^2 + y^4`.  The proof should simply unfold the bad tuple's quartic
-identity and the RHS definition.
--/
-def PositivePrimitiveBadToPythagoreanQuarticStatement : Prop :=
+namespace MazurProof.RationalPointsN12
+
+/-- Exact AP identities extracted from the `m` even divided factor package. -/
+def DividedMEvenFactorsAPIdentitiesStatement : Prop :=
+  ∀ {m n a b c d : ℤ},
+    m - n = a ^ 2 →
+    m + n = 3 * b ^ 2 →
+    n = c ^ 2 →
+    2 * m - n = 3 * d ^ 2 →
+    c ^ 2 + d ^ 2 = 2 * b ^ 2 ∧
+      b ^ 2 + a ^ 2 = 2 * d ^ 2
+
+end MazurProof.RationalPointsN12
+```
+
+The proof body is just `nlinarith` after destructing the factor package:
+
+```lean
+rcases hf with ⟨a, b, c, d, ha, hb, hc, hd, hmn, hmpn, hn, h2mn⟩
+
+have hap1 : c ^ 2 + d ^ 2 = 2 * b ^ 2 := by
+  nlinarith [hmpn, hn, h2mn]
+
+have hap2 : b ^ 2 + a ^ 2 = 2 * d ^ 2 := by
+  nlinarith [hmn, hmpn, h2mn]
+```
+
+Algebra check:
+
+- From `m+n = 3*b^2`, `n = c^2`, and `2*m-n = 3*d^2`, subtracting the last equation from twice the first gives `3*c^2 + 3*d^2 = 6*b^2`, hence `c^2+d^2=2*b^2`.
+- From `m-n = a^2`, `m+n = 3*b^2`, and `2*m-n = 3*d^2`, the identity `2*(2*m-n) = (m+n) + 3*(m-n)` gives `2*d^2 = b^2+a^2`.
+
+### Bridge B: AP collapse plus coprimality gives `m = 2`, `n = 1`
+
+```lean
+import Mathlib.Tactic
+
+namespace MazurProof.RationalPointsN12
+
+/-- The `m` even divided factor package collapses to the unique coprime solution
+`m = 2`, `n = 1`, assuming the four-squares AP collapse wrapper. -/
+def DividedMEvenFactorsMNUnitStatement : Prop :=
+  ∀ {m n : ℤ},
+    IsCoprime m n →
+    DividedSqBranchMEvenFactors m n →
+    m = 2 ∧ n = 1
+
+end MazurProof.RationalPointsN12
+```
+
+Core proof skeleton:
+
+```lean
+rcases hf with ⟨a, b, c, d, ha, hb, hc, hd, hmn, hmpn, hn, h2mn⟩
+
+have hap1 : c ^ 2 + d ^ 2 = 2 * b ^ 2 := by
+  nlinarith [hmpn, hn, h2mn]
+have hap2 : b ^ 2 + a ^ 2 = 2 * d ^ 2 := by
+  nlinarith [hmn, hmpn, h2mn]
+
+-- Use the wrapper from the AP file.
+have hsq : a ^ 2 = d ^ 2 ∧ d ^ 2 = b ^ 2 ∧ b ^ 2 = c ^ 2 :=
+  four_squares_ap_collapse_of_midpoint hap1 hap2
+
+have ha2c2 : a ^ 2 = c ^ 2 := by
+  calc
+    a ^ 2 = d ^ 2 := hsq.1
+    _ = b ^ 2 := hsq.2.1
+    _ = c ^ 2 := hsq.2.2
+
+have hn_a : n = a ^ 2 := by
+  calc
+    n = c ^ 2 := hn
+    _ = a ^ 2 := ha2c2.symm
+
+have hm_a : m = 2 * a ^ 2 := by
+  nlinarith [hmn, hn_a]
+
+have ha2_dvd_m : a ^ 2 ∣ m := by
+  refine ⟨2, ?_⟩
+  rw [hm_a]
+  ring
+
+have ha2_dvd_n : a ^ 2 ∣ n := by
+  refine ⟨1, ?_⟩
+  rw [hn_a]
+  ring
+
+-- Mathlib API expected here:
+have ha2_unit : IsUnit (a ^ 2) :=
+  hcop.isUnit_of_dvd ha2_dvd_m ha2_dvd_n
+
+have ha2_pos : 0 < a ^ 2 := by
+  positivity
+
+have ha2_one : a ^ 2 = 1 := by
+  rw [Int.isUnit_iff] at ha2_unit
+  rcases ha2_unit with ha2_one | ha2_neg_one
+  · exact ha2_one
+  · have : (0 : ℤ) < -1 := by
+      simpa [ha2_neg_one] using ha2_pos
+    omega
+
+have hn1 : n = 1 := by
+  rw [hn_a, ha2_one]
+
+have hm2 : m = 2 := by
+  rw [hm_a, ha2_one]
+  norm_num
+```
+
+Notes:
+
+- `Even m` is not used once `DividedSqBranchMEvenFactors m n` has been produced. It is still harmless in `DividedMEvenFactorsUnitStatement`, because it documents which split branch produced the factor package.
+- If `hcop.isUnit_of_dvd` is not found under method notation, use the namespace form for the same Mathlib theorem, usually `IsCoprime.isUnit_of_dvd hcop ha2_dvd_m ha2_dvd_n`.
+- The only nontrivial Mathlib dependency in this bridge is the `IsCoprime` common-divisor-to-unit API.
+
+### Bridge C: `m = 2`, `n = 1` and divided branch equations give `A=N=S=1`
+
+This bridge should not know anything about APs or factor packages.
+
+```lean
+import Mathlib.Tactic
+
+namespace MazurProof.RationalPointsN12
+
+/-- Positivity projection needed from `PositivePrimitiveEisensteinBadUnordered`.
+If the local definition is a conjunction, this should be a one-line `rcases`/`aesop` lemma. -/
+def PositivePrimitiveEisensteinBadUnorderedPosStatement : Prop :=
   ∀ {A N S : ℤ},
     PositivePrimitiveEisensteinBadUnordered A N S →
-      S^2 = pythagoreanQuarticRhs A N
+    0 < A ∧ 0 < N ∧ 0 < S
 
-/-- The real hard bridge: crossed divided square pair gives the divided residual.
-
-This is equivalent in difficulty to the divided branch residual, but much more
-Lean-friendly because all divisibility by `3` has been absorbed into `u,v` and all
-positivity hypotheses are explicit.
--/
-def CrossedDividedSquarePairUnitOrDescendsStatement : Prop :=
-  ∀ {A N S u v : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    0 < u → 0 < v → 0 < 2*u - v → 0 < 2*v - u →
-    IsCoprime u v →
-    A^2 = u * (2*v - u) →
-    N^2 = v * (2*u - v) →
-    S = u^2 - u*v + v^2 →
-      (A = 1 ∧ N = 1 ∧ S = 1) ∨
-        ∃ A' N' S' : ℤ,
-          NormalizedEisensteinBad A' N' S' ∧ N' < N
-
-/-- Small assembly bridge from the reparametrized crossed system back to the current residual. -/
-def DividedResidualFromCrossedBridgeStatement : Prop :=
-  DividedSquareBranchReparamStatement →
-  CrossedDividedSquarePairUnitOrDescendsStatement →
-  DividedSquareBranchUnitOrDescendsStatement
+/-- Once the divided branch reaches `(m,n)=(2,1)`, the branch equations force
+`A=N=S=1`. -/
+def DividedSquareBranchUnitOfMNStatement : Prop :=
+  ∀ {A N S m n : ℤ},
+    0 < A →
+    0 < N →
+    DividedSquareBranch A N S m n →
+    m = 2 →
+    n = 1 →
+    A = 1 ∧ N = 1 ∧ S = 1
 
 end MazurProof.RationalPointsN12
 ```
 
-### Proof obligations for `DividedSquareBranchReparamStatement`
-
-Unpack
+The branch-equation proof body is essentially:
 
 ```lean
-hdiv : DividedSquareBranch A N S m n
+rcases hbr with ⟨hnpos, hnm, hcop, h3, hAeq, hNeq, hSeq⟩
+
+have hA_sq : A ^ 2 = 1 := by
+  rw [hm2, hn1] at hAeq
+  norm_num at hAeq
+  exact hAeq
+
+have hN_sq : N ^ 2 = 1 := by
+  rw [hm2, hn1] at hNeq
+  norm_num at hNeq
+  exact hNeq
+
+have hA1 : A = 1 := by
+  rcases (sq_eq_one_iff.mp hA_sq) with hA1 | hAneg
+  · exact hA1
+  · omega
+
+have hN1 : N = 1 := by
+  rcases (sq_eq_one_iff.mp hN_sq) with hN1 | hNneg
+  · exact hN1
+  · omega
+
+have hS1 : S = 1 := by
+  rw [hm2, hn1] at hSeq
+  norm_num at hSeq
+  omega
+
+exact ⟨hA1, hN1, hS1⟩
 ```
 
-and set
-
-```text
-u = (m+n)/3,
-v = (2*m-n)/3.
-```
-
-Obligations:
-
-1. `3 ∣ 2*m-n` from `3 ∣ m+n`:
-
-```text
-2*m - n = 2*(m+n) - 3*n.
-```
-
-2. `m = u+v` and `n = 2*u-v` by linear algebra over `ℤ` after clearing denominators.
-
-3. Positivity:
-
-```text
-0 < m+n      -> 0 < u,
-0 < 2*m-n    -> 0 < v,
-0 < n        -> 0 < 2*u-v,
-0 < m-n      -> 0 < 2*v-u.
-```
-
-4. Coprimality:
-
-```text
-IsCoprime m n → IsCoprime u v
-```
-
-because any common divisor of `u,v` divides `m = u+v` and `n = 2*u-v`.
-
-5. Square equations:
-
-```text
-3*A^2 = (m-n)*(m+n) = (2*v-u)*(3*u),
-3*N^2 = n*(2*m-n)   = (2*u-v)*(3*v),
-```
-
-then cancel the nonzero factor `3`.
-
-6. Center equation:
-
-```text
-3*S = m^2 - m*n + n^2
-    = 3*(u^2 - u*v + v^2).
-```
-
-### Proof obligations for `DividedSquareBranchHalfFactorBridgeStatement`
-
-These are pure `ring_nf` consequences of the crossed system:
-
-```text
-A^2 + N^2 - S
-= u*(2v-u) + v*(2u-v) - (u^2-uv+v^2)
-= (2u-v)*(2v-u),
-
-A^2 + N^2 + S
-= u*(2v-u) + v*(2u-v) + (u^2-uv+v^2)
-= 3uv.
-```
-
-Then multiply the two identities and rewrite with
-
-```text
-A^2*N^2 = u*v*(2v-u)*(2u-v).
-```
-
-## 5. What this says about reuse
-
-The best route is:
-
-1. Prove `DividedSquareBranchReparamStatement`.
-2. Prove `DividedSquareBranchHalfFactorBridgeStatement`.
-3. Try to instantiate the existing half-factor split theorem with `(m,n,b) = (A,N,S)`.
-4. If the existing split returns raw branch data, add a wrapper from that data to the already-closed raw descent path.
-5. If the existing split only returns existential `r,s` with product `3*A^2*N^2`, it is too weak for the divided residual; prove `CrossedDividedSquarePairUnitOrDescendsStatement` directly.
-
-In other words, the half-factor infrastructure can reduce bookkeeping and expose the product split, but the mathematically hardest missing theorem is still the crossed-square descent/unit theorem unless `kubert_cover_pythagorean_half_factors` already proves a no-nontrivial-solution theorem for `S^2 = pythagoreanQuarticRhs A N` in the exact normalized positive primitive setting.
-
-## Suspicious or too-weak current statements
-
-1. Any theorem that returns only
+Then the final `DividedMEvenFactorsUnitStatement` proof is only orchestration:
 
 ```lean
-∃ r s, r*s = 3*m^2*n^2
+intro A N S m n hprim hbr hmEven hf
+obtain ⟨hApos, hNpos, hSpos⟩ := positivePrimitiveEisensteinBadUnordered_pos hprim
+rcases hbr with ⟨hnpos, hnm, hcop, h3, hAeq, hNeq, hSeq⟩
+have hbr_saved : DividedSquareBranch A N S m n :=
+  ⟨hnpos, hnm, hcop, h3, hAeq, hNeq, hSeq⟩
+obtain ⟨hm2, hn1⟩ := divided_mEven_factors_mn_unit hcop hf
+exact dividedSquareBranch_unit_of_m_eq_two_n_eq_one hApos hNpos hbr_saved hm2 hn1
 ```
 
-is too weak for this task unless it also returns the definitional equalities tying `r,s` to `center ± b` or to the half factors, plus positivity/sign and gcd information.
+## 3. Lean-friendly proof of the mod-4 lemma
 
-2. `pythagorean_quartic_half_factor_gcd_eq_one` may be too specialized if it assumes a parity/mod condition that is not stable under the divided reparametrization. The crossed variables `u,v,2*u-v,2*v-u` need separate parity handling.
+This one is independent of the project definitions and should live near the MOdd contradiction.
 
-3. `kubert_cover_pythagorean_half_factors` is only directly useful if its conclusion is close to either an existing raw branch package, an `EulerSquarePair`, or a contradiction/unit alternative. If it is stated in terms of a cover map or rational-point existence without exposing integer square-factor data, it will need a wrapper theorem.
+```lean
+import Mathlib.Tactic
 
-4. `DividedSquareBranchUnitOrDescendsStatement` has the same orientation risk as the raw residual: it concludes `N' < N`. If final assembly applies it to a swapped branch `DividedSquareBranch N A S m n`, the result is `N' < A`, not `N' < N`. This is fine only if the assembly measure is symmetric, such as `max A N`, or if the caller orients `A ≤ N` before using the residual.
+theorem no_oddC_three_square_sum {a b c : ℤ} :
+    Odd c → a ^ 2 + c ^ 2 = 3 * b ^ 2 → False := by
+  intro hc h
+  rcases hc with ⟨k, rfl⟩
+  rcases Int.even_or_odd a with ha | ha
+  · rcases ha with ⟨r, rfl⟩
+    rcases Int.even_or_odd b with hb | hb
+    · rcases hb with ⟨s, rfl⟩
+      ring_nf at h
+      omega
+    · rcases hb with ⟨s, rfl⟩
+      ring_nf at h
+      omega
+  · rcases ha with ⟨r, rfl⟩
+    rcases Int.even_or_odd b with hb | hb
+    · rcases hb with ⟨s, rfl⟩
+      ring_nf at h
+      omega
+    · rcases hb with ⟨s, rfl⟩
+      ring_nf at h
+      omega
+```
 
-Recommended orientation-safe variant:
+If `Int.even_or_odd` is not in the imported namespace in this project, the same proof usually works with the unqualified theorem:
+
+```lean
+rcases even_or_odd a with ha | ha
+```
+
+The proof is just the mod-4 argument encoded by parity witnesses:
+
+- `c` odd gives `c^2 ≡ 1 mod 4`.
+- `a^2` is `0` or `1 mod 4`, so `a^2+c^2` is `1` or `2 mod 4`.
+- `3*b^2` is `0` or `3 mod 4`.
+- No residue matches.
+
+For the MOdd factor package, the bridge theorem should be:
 
 ```lean
 import Mathlib.Tactic
 
 namespace MazurProof.RationalPointsN12
 
-/-- Divided residual with descent below a symmetric height. -/
-def DividedSquareBranchUnitOrDescendsBelowMaxStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    DividedSquareBranch A N S m n →
-    (A = 1 ∧ N = 1 ∧ S = 1) ∨
-      ∃ A' N' S' : ℤ,
-        NormalizedEisensteinBad A' N' S' ∧ N' < max A N
+/-- The odd-`m` divided factor package is impossible once the divided branch has
+forced `n` odd. -/
+def DividedMOddFactorsImpossibleStatement : Prop :=
+  ∀ {m n : ℤ},
+    Odd n →
+    DividedSqBranchMOddFactors m n →
+    False
 
 end MazurProof.RationalPointsN12
 ```
 
-## Bottom line
-
-The next mathematically hardest Lean target for this divided sector is **not** to call the existing pythagorean half-factor split directly. It is to prove the denominator-free crossed-square bridge
+Core proof skeleton:
 
 ```lean
-DividedSquareBranchReparamStatement
+rcases hf with ⟨a, b, c, d, ha, hb, hc, hd, hmn, hmpn, hn, h2mn⟩
+
+have hodd_c : Odd c := by
+  -- From `Odd n` and `n = c^2`.
+  -- A robust route is contraposition: if `Even c`, then `Even (c^2)`, hence `Even n`.
+  -- This contradicts `Odd n`.
+
+have hsum : a ^ 2 + c ^ 2 = 3 * b ^ 2 := by
+  -- From `m-n = 2*a^2`, `m+n = 6*b^2`, and `n = c^2`.
+  nlinarith [hmn, hmpn, hn]
+
+exact no_oddC_three_square_sum hodd_c hsum
 ```
 
-and then the crossed descent/unit theorem
+Algebra check for `hsum`:
+
+`m-n = 2*a^2`, `m+n = 6*b^2`, and `n=c^2` imply
+`(m+n) - (m-n) = 2*n`, hence `6*b^2 - 2*a^2 = 2*c^2`, so `a^2+c^2=3*b^2`.
+
+## 4. Shorter existing theorem?
+
+I cannot name a shorter existing theorem from the connected repo, because the requested file and theorem names were not visible to the connector. In the local WIP, search for a theorem whose conclusion is equivalent to one of these shapes:
 
 ```lean
-CrossedDividedSquarePairUnitOrDescendsStatement
+∀ {a b c d : ℤ},
+  c ^ 2 + d ^ 2 = 2 * b ^ 2 →
+  b ^ 2 + a ^ 2 = 2 * d ^ 2 →
+  a ^ 2 = d ^ 2 ∧ d ^ 2 = b ^ 2 ∧ b ^ 2 = c ^ 2
 ```
 
-or to show that `kubert_cover_pythagorean_half_factors` already implies that crossed theorem through a thin wrapper. The decisive algebraic substitutions are
+or a direct contradiction form:
 
-```text
-u = (m+n)/3,
-v = (2*m-n)/3,
-A^2 = u*(2*v-u),
-N^2 = v*(2*u-v),
-S = u^2-u*v+v^2,
-A^2+N^2-S = (2*u-v)*(2*v-u),
-A^2+N^2+S = 3*u*v.
+```lean
+∀ {a b c d : ℤ},
+  c ^ 2 + d ^ 2 = 2 * b ^ 2 →
+  b ^ 2 + a ^ 2 = 2 * d ^ 2 →
+  ¬ (a ^ 2 ≠ b ^ 2 ∨ b ^ 2 ≠ c ^ 2 ∨ c ^ 2 ≠ d ^ 2)
 ```
+
+If the existing theorem only handles primitive centered APs, it is not the ideal downstream interface. Wrap it once into the midpoint theorem above.
+
+## Suspicious/stale/too-weak points for this task
+
+1. `Even m` in `DividedMEvenFactorsUnitStatement` is redundant after `DividedSqBranchMEvenFactors m n` has been produced. It is not false, just unnecessary for the unit proof.
+
+2. Any AP theorem that concludes equality of the variables themselves, e.g. `a=b`, without positivity/sign hypotheses is too strong. The safe core conclusion is equality of squares. In this divided branch, factor positivity can then turn square equality into variable equality if needed, but the unit proof only needs `a^2=1`.
+
+3. Any AP theorem requiring primitive hypotheses on `a,b,c,d` is too low-level for this branch. The branch naturally gives coprimality of `m,n`, not an immediately convenient primitive AP package for `a,b,c,d`. The wrapper should absorb primitive normalization internally.
+
+4. The MOdd contradiction should not be routed through the four-squares AP theorem. It is strictly shorter as the mod-4 lemma `no_oddC_three_square_sum` after deriving `a^2+c^2=3*b^2` with `c` odd.
+
+5. If there is a theorem in `N12FourSquaresAP.lean` phrased only over `ℕ`, it is usable but stale for this file: add an integer wrapper rather than pushing casts through the divided branch.
