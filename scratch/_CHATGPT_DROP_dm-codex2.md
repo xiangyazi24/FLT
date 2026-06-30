@@ -1,313 +1,229 @@
-# Q2571 same-orientation step for Euler square pairs
+# Q2604 Lean wrappers for `EulerSquarePairDescent`
 
-Target family: `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`.
+Target file: `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`.
 
-Connector note: the requested target Lean path was not fetchable through the GitHub contents API on `main` or `scratch` during this drop, so the statements below are deliberately self-contained and use only `Mathlib`-level `Int`/`Nat` formulations. They should be pasted into the local namespace/file and renamed to match the existing `EulerSquarePair` API.
+The GitHub contents API did not expose the target Lean file on `scratch` during this drop, so the code below is a standalone snippet.  In the real target file, omit the `structure EulerSquarePair` block if it is already present and paste the lemmas into the local namespace.
 
-## 1. Same-orientation proof
-
-Let
-
-```text
-X  = U^2 - V^2,
-Y  = 4*U'^2 - V'^2.
-```
-
-With the parity convention `U` even and `V` odd,
-
-```text
-U = 2u, V = 2v+1
-X = 4u^2 - (2v+1)^2
-  = 4*(u^2 - v^2 - v) - 1.
-```
-
-So `X` is `-1 mod 4`, equivalently `3 mod 4`.  Similarly, for the second triple, if `V'` is odd,
-
-```text
-Y = 4*U'^2 - (2v'+1)^2
-  = 4*(U'^2 - v'^2 - v') - 1,
-```
-
-so `Y` is also `-1 mod 4`.  Notice that the evenness of `U'` is part of the Pythagorean parametrization route, but is not needed for this particular congruence because of the leading factor `4`.
-
-Now assume the signed equations are
-
-```text
-D = X or -D = X,
-D = Y or -D = Y.
-```
-
-The mixed choices are impossible.  For example, if `X = D` and `Y = -D`, then for some integers `m,n`,
-
-```text
-D  = 4m - 1,
--D = 4n - 1.
-```
-
-Adding gives `0 = 4*(m+n) - 2`, i.e. `2 = 4*(m+n)`, impossible.  The other mixed case is the same.  Therefore either both expressions equal `D`, or both equal `-D`.
-
-This is a **mod 4** proof.  Do not use mod 8 for the same-orientation step: `4*U'^2 - V'^2` is always `7 mod 8` when `V'` is odd, but `U^2 - V^2` is `3 mod 8` or `7 mod 8` depending on `U/2`.  A mod-8 proof would introduce a false extra divisibility convention on `U`.
-
-The positivity and oddness of `D` are still important upstream: they are used to obtain the primitive Pythagorean parametrizations and the parity conventions.  But once the signed equations and parities are already present, the core sign-comparison lemma is even stronger and does not need `D > 0` or `Odd D`.
-
-## 2. Lean-facing same-orientation lemmas over `Int`
-
-These snippets avoid finite sign types.  They use signed equations of the form `D = expr` or `-D = expr`.
+The important convention is that `PythagoreanTriple.coprime_classification'` must be applied with `x = D`, not with the even leg as `x`, because the theorem requires `x % 2 = 1`.  Thus we classify `(D, 2*A, C)` and `(D, 4*A, B)`.
 
 ```lean
 import Mathlib
 
-namespace N12FourSquaresAP
+namespace EulerSquarePairDescent
 
-lemma int_even_sq_sub_odd_sq_eq_four_mul_sub_one
-    {U V : ℤ}
-    (hU : ∃ u : ℤ, U = 2 * u)
-    (hV : ∃ v : ℤ, V = 2 * v + 1) :
-    ∃ m : ℤ, U ^ 2 - V ^ 2 = 4 * m - 1 := by
-  rcases hU with ⟨u, rfl⟩
-  rcases hV with ⟨v, rfl⟩
-  refine ⟨u ^ 2 - v ^ 2 - v, ?_⟩
+structure EulerSquarePair where
+  A D B C : ℤ
+  hApos : 0 < A
+  hDpos : 0 < D
+  hDodd : Odd D
+  hAeven : Even A
+  hADcop : IsCoprime A D
+  hBpos : 0 < B
+  hCpos : 0 < C
+  hB : B ^ 2 = 16 * A ^ 2 + D ^ 2
+  hC : C ^ 2 = 4 * A ^ 2 + D ^ 2
+
+lemma D_mod_two_eq_one (E : EulerSquarePair) : E.D % 2 = 1 :=
+  Int.odd_iff.mp E.hDodd
+
+lemma D_coprime_two (E : EulerSquarePair) : IsCoprime E.D (2 : ℤ) := by
+  rcases E.hDodd with ⟨k, hk⟩
+  refine ⟨1, -k, ?_⟩
+  rw [hk]
   ring
 
-lemma int_four_mul_sq_sub_odd_sq_eq_four_mul_sub_one
-    {U V : ℤ}
-    (hV : ∃ v : ℤ, V = 2 * v + 1) :
-    ∃ m : ℤ, 4 * U ^ 2 - V ^ 2 = 4 * m - 1 := by
-  rcases hV with ⟨v, rfl⟩
-  refine ⟨U ^ 2 - v ^ 2 - v, ?_⟩
-  ring
+lemma gcd_D_twoA_eq_one (E : EulerSquarePair) :
+    Int.gcd E.D (2 * E.A) = 1 := by
+  apply Int.isCoprime_iff_gcd_eq_one.mp
+  exact IsCoprime.mul_right (D_coprime_two E) (isCoprime_comm.mp E.hADcop)
 
-lemma int_same_sign_of_four_mul_sub_one
-    {D x y : ℤ}
-    (hx4 : ∃ m : ℤ, x = 4 * m - 1)
-    (hy4 : ∃ n : ℤ, y = 4 * n - 1)
-    (hxD : x = D ∨ x = -D)
-    (hyD : y = D ∨ y = -D) :
-    (x = D ∧ y = D) ∨ (x = -D ∧ y = -D) := by
-  rcases hx4 with ⟨m, hx4⟩
-  rcases hy4 with ⟨n, hy4⟩
-  rcases hxD with hxD | hxD
-  · rcases hyD with hyD | hyD
-    · exact Or.inl ⟨hxD, hyD⟩
-    · exfalso
-      subst x
-      subst y
-      omega
-  · rcases hyD with hyD | hyD
-    · exfalso
-      subst x
-      subst y
-      omega
-    · exact Or.inr ⟨hxD, hyD⟩
+lemma gcd_D_fourA_eq_one (E : EulerSquarePair) :
+    Int.gcd E.D (4 * E.A) = 1 := by
+  apply Int.isCoprime_iff_gcd_eq_one.mp
+  have hD2 : IsCoprime E.D (2 : ℤ) := D_coprime_two E
+  have hD4 : IsCoprime E.D (4 : ℤ) := by
+    have h : IsCoprime E.D ((2 : ℤ) * (2 : ℤ)) :=
+      IsCoprime.mul_right hD2 hD2
+    simpa using h
+  exact IsCoprime.mul_right hD4 (isCoprime_comm.mp E.hADcop)
 
-lemma int_same_orientation_of_pythagorean_signed_forms
-    {D U V Up Vp : ℤ}
-    (hUeven : ∃ u : ℤ, U = 2 * u)
-    (hVodd : ∃ v : ℤ, V = 2 * v + 1)
-    (hVpodd : ∃ v : ℤ, Vp = 2 * v + 1)
-    (h1 : D = U ^ 2 - V ^ 2 ∨ -D = U ^ 2 - V ^ 2)
-    (h2 : D = 4 * Up ^ 2 - Vp ^ 2 ∨ -D = 4 * Up ^ 2 - Vp ^ 2) :
-    (D = U ^ 2 - V ^ 2 ∧ D = 4 * Up ^ 2 - Vp ^ 2) ∨
-      (-D = U ^ 2 - V ^ 2 ∧ -D = 4 * Up ^ 2 - Vp ^ 2) := by
-  have hx4 : ∃ m : ℤ, U ^ 2 - V ^ 2 = 4 * m - 1 :=
-    int_even_sq_sub_odd_sq_eq_four_mul_sub_one
-      (U := U) (V := V) hUeven hVodd
-  have hy4 : ∃ n : ℤ, 4 * Up ^ 2 - Vp ^ 2 = 4 * n - 1 :=
-    int_four_mul_sq_sub_odd_sq_eq_four_mul_sub_one
-      (U := Up) (V := Vp) hVpodd
-  have hxD : U ^ 2 - V ^ 2 = D ∨ U ^ 2 - V ^ 2 = -D := by
-    rcases h1 with h1 | h1
-    · exact Or.inl h1.symm
-    · exact Or.inr h1.symm
-  have hyD : 4 * Up ^ 2 - Vp ^ 2 = D ∨
-      4 * Up ^ 2 - Vp ^ 2 = -D := by
-    rcases h2 with h2 | h2
-    · exact Or.inl h2.symm
-    · exact Or.inr h2.symm
-  have hs := int_same_sign_of_four_mul_sub_one
-    (D := D) (x := U ^ 2 - V ^ 2) (y := 4 * Up ^ 2 - Vp ^ 2)
-    hx4 hy4 hxD hyD
-  rcases hs with hs | hs
-  · rcases hs with ⟨hx, hy⟩
-    exact Or.inl ⟨hx.symm, hy.symm⟩
-  · rcases hs with ⟨hx, hy⟩
-    exact Or.inr ⟨hx.symm, hy.symm⟩
+lemma pythagorean_D_twoA_C (E : EulerSquarePair) :
+    PythagoreanTriple E.D (2 * E.A) E.C := by
+  unfold PythagoreanTriple
+  calc
+    E.D * E.D + (2 * E.A) * (2 * E.A)
+        = 4 * E.A ^ 2 + E.D ^ 2 := by ring
+    _ = E.C ^ 2 := by rw [← E.hC]
+    _ = E.C * E.C := by ring
 
-lemma int_refinement_equation_of_same_orientation
-    {D U V Up Vp a b c d : ℤ}
-    (hU : U = 2 * a * b)
-    (hV : V = c * d)
-    (hUp : Up = 2 * a * c)
-    (hVp : Vp = b * d)
-    (hsame :
-      (D = U ^ 2 - V ^ 2 ∧ D = 4 * Up ^ 2 - Vp ^ 2) ∨
-        (-D = U ^ 2 - V ^ 2 ∧ -D = 4 * Up ^ 2 - Vp ^ 2)) :
-    b ^ 2 * (4 * a ^ 2 + d ^ 2) =
-      c ^ 2 * (16 * a ^ 2 + d ^ 2) := by
-  have heq : U ^ 2 - V ^ 2 = 4 * Up ^ 2 - Vp ^ 2 := by
-    rcases hsame with hsame | hsame
-    · rw [← hsame.1, ← hsame.2]
-    · rw [← hsame.1, ← hsame.2]
-  subst U
-  subst V
-  subst Up
-  subst Vp
-  ring_nf at heq ⊢
-  nlinarith [heq]
+lemma pythagorean_D_fourA_B (E : EulerSquarePair) :
+    PythagoreanTriple E.D (4 * E.A) E.B := by
+  unfold PythagoreanTriple
+  calc
+    E.D * E.D + (4 * E.A) * (4 * E.A)
+        = 16 * E.A ^ 2 + E.D ^ 2 := by ring
+    _ = E.B ^ 2 := by rw [← E.hB]
+    _ = E.B * E.B := by ring
 
-end N12FourSquaresAP
+lemma two_mul_left_cancel_int {a b : ℤ} (h : (2 : ℤ) * a = 2 * b) : a = b := by
+  exact (mul_left_inj' (show (2 : ℤ) ≠ 0 by norm_num)).mp h
+
+lemma left_mod_two_eq_zero_of_even_mul_of_right_mod_two_eq_one
+    {a b : ℤ} (hab : Even (a * b)) (hb : b % 2 = 1) :
+    a % 2 = 0 := by
+  have hnot : ¬ Odd a := by
+    intro ha
+    have hbOdd : Odd b := Int.odd_iff.mpr hb
+    have hOdd : Odd (a * b) := Int.odd_mul.mpr ⟨ha, hbOdd⟩
+    exact (Int.not_odd_iff_even.mpr hab) hOdd
+  exact Int.not_odd_iff.mp hnot
+
+/--
+Classification of `(D, 2*A, C)`, normalized so the parameter multiplying the odd
+parameter is the even one.  The price of this normalization is a signed formula
+for the odd leg.
+-/
+lemma twoA_classification_signed_params (E : EulerSquarePair) :
+    ∃ U V : ℤ,
+      E.A = U * V ∧
+      E.C = U ^ 2 + V ^ 2 ∧
+      Int.gcd U V = 1 ∧
+      U % 2 = 0 ∧
+      V % 2 = 1 ∧
+      (E.D = U ^ 2 - V ^ 2 ∨ -E.D = U ^ 2 - V ^ 2) := by
+  obtain ⟨m, n, hD, h2A, hCsum, hmn_gcd, hmn_parity, _hm_nonneg⟩ :=
+    PythagoreanTriple.coprime_classification'
+      (pythagorean_D_twoA_C E)
+      (gcd_D_twoA_eq_one E)
+      (D_mod_two_eq_one E)
+      E.hCpos
+  have hA_mn : E.A = m * n := by
+    apply two_mul_left_cancel_int
+    calc
+      (2 : ℤ) * E.A = 2 * m * n := h2A
+      _ = 2 * (m * n) := by ring
+  rcases hmn_parity with hmn | hmn
+  · refine ⟨m, n, hA_mn, hCsum, hmn_gcd, hmn.1, hmn.2, Or.inl hD⟩
+  · refine ⟨n, m, ?_, ?_, ?_, hmn.2, hmn.1, Or.inr ?_⟩
+    · calc
+        E.A = m * n := hA_mn
+        _ = n * m := by ring
+    · rw [hCsum]
+      ring
+    · rw [Int.gcd_comm]
+      exact hmn_gcd
+    · rw [hD]
+      ring
+
+/--
+Classification of `(D, 4*A, B)`.  Mathlib gives `4*A = 2*m*n`, hence
+`2*A = m*n`.  Since exactly one of `m,n` is even, halve the even parameter.
+The resulting `Up` satisfies `A = Up*Vp` and the odd-leg formula is signed:
+`D = 4*Up^2 - Vp^2` or `-D = 4*Up^2 - Vp^2`.
+
+The extra conclusion `Up % 2 = 0` uses `E.hAeven` and `Vp % 2 = 1`.
+-/
+lemma fourA_classification_signed_params (E : EulerSquarePair) :
+    ∃ Up Vp : ℤ,
+      E.A = Up * Vp ∧
+      E.B = 4 * Up ^ 2 + Vp ^ 2 ∧
+      Int.gcd Up Vp = 1 ∧
+      Up % 2 = 0 ∧
+      Vp % 2 = 1 ∧
+      (E.D = 4 * Up ^ 2 - Vp ^ 2 ∨ -E.D = 4 * Up ^ 2 - Vp ^ 2) := by
+  obtain ⟨m, n, hD, h4A, hBsum, hmn_gcd, hmn_parity, _hm_nonneg⟩ :=
+    PythagoreanTriple.coprime_classification'
+      (pythagorean_D_fourA_B E)
+      (gcd_D_fourA_eq_one E)
+      (D_mod_two_eq_one E)
+      E.hBpos
+  have h2A_mn : (2 : ℤ) * E.A = m * n := by
+    apply two_mul_left_cancel_int
+    calc
+      (2 : ℤ) * (2 * E.A) = 4 * E.A := by ring
+      _ = 2 * m * n := h4A
+      _ = 2 * (m * n) := by ring
+  have hmn_coprime : IsCoprime m n :=
+    Int.isCoprime_iff_gcd_eq_one.mpr hmn_gcd
+  rcases hmn_parity with hmn | hmn
+  · rcases Int.dvd_of_emod_eq_zero hmn.1 with ⟨Up, hUp⟩
+    have hA : E.A = Up * n := by
+      apply two_mul_left_cancel_int
+      calc
+        (2 : ℤ) * E.A = m * n := h2A_mn
+        _ = 2 * (Up * n) := by
+          rw [hUp]
+          ring
+    have hB' : E.B = 4 * Up ^ 2 + n ^ 2 := by
+      rw [hBsum, hUp]
+      ring
+    have hD' : E.D = 4 * Up ^ 2 - n ^ 2 := by
+      rw [hD, hUp]
+      ring
+    have hcop : Int.gcd Up n = 1 := by
+      have hcop2Upn : IsCoprime (2 * Up) n := by
+        simpa [hUp] using hmn_coprime
+      have hcopUpn : IsCoprime Up n :=
+        IsCoprime.of_mul_left_right hcop2Upn
+      exact Int.isCoprime_iff_gcd_eq_one.mp hcopUpn
+    have hUpEven : Up % 2 = 0 := by
+      apply left_mod_two_eq_zero_of_even_mul_of_right_mod_two_eq_one
+      · rw [← hA]
+        exact E.hAeven
+      · exact hmn.2
+    refine ⟨Up, n, hA, hB', hcop, hUpEven, hmn.2, Or.inl hD'⟩
+  · rcases Int.dvd_of_emod_eq_zero hmn.2 with ⟨Up, hUp⟩
+    have hA : E.A = Up * m := by
+      apply two_mul_left_cancel_int
+      calc
+        (2 : ℤ) * E.A = m * n := h2A_mn
+        _ = 2 * (Up * m) := by
+          rw [hUp]
+          ring
+    have hB' : E.B = 4 * Up ^ 2 + m ^ 2 := by
+      rw [hBsum, hUp]
+      ring
+    have hD' : -E.D = 4 * Up ^ 2 - m ^ 2 := by
+      rw [hD, hUp]
+      ring
+    have hcop : Int.gcd Up m = 1 := by
+      have hcopm2Up : IsCoprime m (2 * Up) := by
+        simpa [hUp] using hmn_coprime
+      have hcopmUp : IsCoprime m Up :=
+        IsCoprime.of_mul_right_right hcopm2Up
+      exact Int.isCoprime_iff_gcd_eq_one.mp hcopmUp.symm
+    have hUpEven : Up % 2 = 0 := by
+      apply left_mod_two_eq_zero_of_even_mul_of_right_mod_two_eq_one
+      · rw [← hA]
+        exact E.hAeven
+      · exact hmn.1
+    refine ⟨Up, m, hA, hB', hcop, hUpEven, hmn.1, Or.inr hD'⟩
+
+end EulerSquarePairDescent
 ```
 
-If the local file already has `Even U` and `Odd V` fields, make a thin wrapper that converts them into the explicit witnesses `∃ u, U = 2*u` and `∃ v, V = 2*v+1`.  I recommend keeping the core lemma above in the explicit-witness form because it avoids fighting Lean's `%` normalization and keeps the proof `ring`/`omega` only.
+## Notes on the wrappers
 
-A repository-facing theorem can include `hDodd : Odd D` or `0 < D`; those hypotheses are harmless but not needed by the core sign lemma after the signed forms are established.
+1. `D_mod_two_eq_one` should use `Int.odd_iff.mp E.hDodd`.  This is exactly the parity hypothesis expected by `PythagoreanTriple.coprime_classification'`.
 
-## 3. Convention audit
+2. `D_coprime_two` is often the cleanest bridge from oddness to coprimality: if `D = 2*k + 1`, then `1*D + (-k)*2 = 1`.  Then `IsCoprime.mul_right` combines coprimality with `2` or `4` and with `A`.
 
-The stated parametrization is correct **only with signs**.
+3. The Pythagorean triples are produced with `unfold PythagoreanTriple` and `ring`, rewriting `E.hC` and `E.hB` in the middle of a `calc`.
 
-For `(2A)^2 + D^2 = C^2`, with the even Pythagorean parameter named `U` and the odd one named `V`, the odd leg is
+4. For `(D, 2*A, C)`, Mathlib gives `2*A = 2*m*n`, so cancellation gives `A = m*n`.  Reordering to make the first parameter even may flip the sign of the odd-leg formula.  This is why the wrapper concludes
 
-```text
-U^2 - V^2.
+```lean
+E.D = U ^ 2 - V ^ 2 ∨ -E.D = U ^ 2 - V ^ 2
 ```
 
-Because `U` is even and `V` is odd, this expression is `3 mod 4`.  Therefore:
+with `U % 2 = 0` and `V % 2 = 1`.
 
-* if `D ≡ 3 mod 4`, then `D = U^2 - V^2`;
-* if `D ≡ 1 mod 4`, then `D = V^2 - U^2`, equivalently `-D = U^2 - V^2`.
+5. For `(D, 4*A, B)`, Mathlib gives `4*A = 2*m*n`, so cancellation gives `2*A = m*n`.  Halving the even one of `m,n` gives `A = Up*Vp` and
 
-So a convention that always writes `D = U^2 - V^2` is wrong unless one has separately fixed `D ≡ 3 mod 4` or chosen the parameter order to make that true.
-
-For `(4A)^2 + D^2 = B^2`, the even leg is `4A = 2*(2U')*V'`, so the signed odd leg is
-
-```text
-(2U')^2 - V'^2 = 4*U'^2 - V'^2.
+```lean
+E.D = 4 * Up ^ 2 - Vp ^ 2 ∨ -E.D = 4 * Up ^ 2 - Vp ^ 2
 ```
 
-Thus the signed formula
+The theorem `fourA_classification_signed_params` is the clean post-classification algebra wrapper requested for the second triple.
 
-```text
-τ*D = 4*U'^2 - V'^2
-```
-
-is the right one.  If `D ≡ 1 mod 4`, the positive equation is instead
-
-```text
-D = V'^2 - 4*U'^2.
-```
-
-The same-orientation lemma says exactly that the first and second signed odd legs lie on the same side of `D`:
-
-```text
-D  = U^2 - V^2      and D  = 4*U'^2 - V'^2,
-```
-
-or
-
-```text
--D = U^2 - V^2      and -D = 4*U'^2 - V'^2.
-```
-
-Equivalently, the absolute-value conventions open consistently.
-
-Also note that the second formula is not `U'^2 - V'^2`; the factor `4` is essential because the even Pythagorean parameter is `2U'`.
-
-## 4. Path from same orientation to the refinement equation
-
-After same orientation, the two signed odd legs are equal:
-
-```text
-U^2 - V^2 = 4*U'^2 - V'^2.
-```
-
-The common refinement should be applied to the equality of products after dividing the even parameters by `2`:
-
-```text
-A = U*V = U'*V',
-U  = 2X,
-U' = 2X',
-
-X*V = X'*V'.
-```
-
-With `gcd(X,V)=1` and `gcd(X',V')=1`, isolate a `Nat` factorization theorem of this shape:
-
-```text
-Nat.coprime_product_refinement:
-  0 < X -> 0 < V -> 0 < X' -> 0 < V' ->
-  Nat.Coprime X V -> Nat.Coprime X' V' ->
-  X * V = X' * V' ->
-  ∃ a b c d : ℕ,
-    X = a*b ∧ V = c*d ∧ X' = a*c ∧ V' = b*d.
-```
-
-Then returning to the original even parameters gives
-
-```text
-U  = 2*a*b,
-V  = c*d,
-U' = 2*a*c,
-V' = b*d.
-```
-
-Substitute these into the equal-oriented odd-leg equation:
-
-```text
-(2ab)^2 - (cd)^2 = 4*(2ac)^2 - (bd)^2.
-```
-
-Expanding and rearranging gives
-
-```text
-b^2*(4*a^2 + d^2) = c^2*(16*a^2 + d^2),
-```
-
-which is the `int_refinement_equation_of_same_orientation` lemma above.
-
-For the final square extraction, isolate a second `Nat` residual if Mathlib does not already have the valuation version you want:
-
-```text
-Nat.eq_squares_of_coprime_cross_square_mul:
-  Nat.Coprime b c ->
-  Nat.Coprime X Y ->
-  b^2 * X = c^2 * Y ->
-  ∃ r s : ℕ, X = r^2 ∧ Y = s^2.
-```
-
-Use it with
-
-```text
-X = 4*a^2 + d^2,
-Y = 16*a^2 + d^2.
-```
-
-The required coprimality `Nat.Coprime X Y` follows from
-
-```text
-gcd(4*a^2 + d^2, 16*a^2 + d^2) | 12*a^2
-```
-
-and also divides `d^2`; with `Nat.Coprime a d`, it divides `12`.  Since both `X` and `Y` are odd, the gcd is not divisible by `2`.  The only remaining possible prime is `3`, and mod `3` gives
-
-```text
-4*a^2 + d^2 ≡ a^2 + d^2,
-16*a^2 + d^2 ≡ a^2 + d^2.
-```
-
-If `3` divided both, then `a^2 + d^2 ≡ 0 mod 3`.  This forces `3 | a` and `3 | d`, contradicting `Nat.Coprime a d`.  Hence the gcd is `1`.
-
-Once the extraction gives
-
-```text
-4*a^2 + d^2  = r^2,
-16*a^2 + d^2 = s^2,
-```
-
-the smaller Euler pair is `(A_new,D_new,B_new,C_new) = (a,d,s,r)`.  Positivity and `d` odd come from the positive refinement factors.  The parity `a` even follows from the square congruence: if `a` were odd and `d` is odd, then
-
-```text
-4*a^2 + d^2 ≡ 4 + 1 ≡ 5 mod 8,
-```
-
-not a square.  Finally, `A = 2*a*b*c*d`, with positive `b,c,d`, gives `a < A`, so this is the intended descent.
+6. The proof of `Up % 2 = 0` does not come directly from Pythagorean classification.  It uses `E.hAeven`, `A = Up*Vp`, and `Vp % 2 = 1`: if `Up` were odd, then `Up*Vp` would be odd by `Int.odd_mul`, contradicting `Even A`.
