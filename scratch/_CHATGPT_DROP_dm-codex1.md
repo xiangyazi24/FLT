@@ -1,391 +1,357 @@
-# Q2650 (dm-codex1): independent `RatQuarticEisensteinDegenerate` route
+# Q2653 (dm-codex1): independent `RatQuarticEisensteinDegenerate` route
 
 Repo path mentioned by requester: `/Users/huangx/repos/flt-ai`  
-GitHub repo/branch: `xiangyazi24/FLT`, branch `scratch`  
-Goal: prove
+GitHub repo/branch: `xiangyazi24/FLT`, branch `scratch`
+
+Target already reduced in the project:
 
 ```lean
 def RatQuarticEisensteinDegenerate : Prop :=
   ∀ {t s : ℚ}, s ^ 2 = t ^ 4 - t ^ 2 + 1 → t = 0 ∨ t ^ 2 = 1
 ```
 
-without using the E24/E1 finite-point theorem, `RationalPointsN12`, or the full-cover residual loop.
+Constraint respected by this plan: do not use `RationalPointsN12`, the E24/E1 finite-point theorem, or full-cover residual theorems.  The only recommended Mathlib reuse is elementary arithmetic, rational denominator APIs, Pythagorean triples, and possibly existing cyclotomic/PID infrastructure if choosing the algebraic-number-theory route.
 
-## Executive answer
+## 1. Classical equivalence and exact integer theorem
 
-1. Yes: the rational theorem is exactly the primitive homogeneous Eisenstein/Ljunggren quartic
-   `S^2 = A^4 - A^2*N^2 + N^4`, with `gcd A N = 1` and `N ≠ 0`.  In Eisenstein notation, if `ω^2 + ω + 1 = 0`, then
-   `A^4 - A^2*N^2 + N^4 = Norm (A^2 + N^2*ω)`.
-2. I did not find a ready Mathlib theorem classifying this quartic under names like Ljunggren/Eisenstein/quartic norm.  Mathlib has useful ingredients, not the classification.
-3. Do **not** plan to derive it from `not_fermat_42` by denominator clearing.  `not_fermat_42` forbids `a^4 + b^4 = c^2`; the cleared target is an Eisenstein norm-square.  A bridge from this norm-square to FLT4 would itself be a nontrivial new descent.
-4. Best Lean target: prove the primitive integer theorem below, then obtain the rational theorem by a small denominator-clearing file.
+`x^4 - x^2 + 1` is `Φ₁₂(x)`.  Homogenizing at `t = A/N` gives
 
-## 1. Exact integer theorem to target
+```text
+N^4 * (t^4 - t^2 + 1) = A^4 - A^2*N^2 + N^4.
+```
 
-The theorem needed by Lean should be primitive.  The non-primitive version is optional; the rational denominator reduction naturally gives primitive `A,N`.
+This is the Eisenstein norm form
+
+```text
+A^4 - A^2*N^2 + N^4 = Norm(A^2 + N^2*ω),   ω^2 + ω + 1 = 0,
+```
+
+because `Norm(a + bω) = a^2 - a*b + b^2`.  I would call the Lean target the primitive homogeneous Eisenstein quartic.  It is adjacent to, but not literally the usual Ljunggren equation `Y^2 = X^4 + X^2 + 1` unless an additional proved transformation is supplied.  Do not target the plus-sign Ljunggren theorem as a black box.
+
+The exact integer theorem to target is:
 
 ```lean
-import Mathlib.Tactic
-import Mathlib.RingTheory.Int.Basic
+import Mathlib.Data.Rat.Lemmas
 import Mathlib.NumberTheory.PythagoreanTriples
+import Mathlib.RingTheory.Int.Basic
+import Mathlib.Tactic.LinearCombination
 
 namespace MazurProof.RationalPointsN12
 
-/-- Primitive homogeneous Eisenstein/Ljunggren quartic obstruction. -/
-def IntQuarticEisensteinPrimitive : Prop :=
-  ∀ {A N S : ℤ},
-    IsCoprime A N →
-    N ≠ 0 →
-    S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4 →
-    A = 0 ∨ A ^ 2 = N ^ 2
-
-/-- Bad primitive solution, for a minimal-descent proof. -/
-def EisensteinQuarticBad (A N S : ℤ) : Prop :=
-  IsCoprime A N ∧
-  A ≠ 0 ∧ N ≠ 0 ∧ A ^ 2 ≠ N ^ 2 ∧
+/-- Primitive cleared Eisenstein quartic datum. -/
+def PrimitiveEisensteinQuarticDatum (A N S : ℤ) : Prop :=
+  N ≠ 0 ∧
+  Int.gcd A N = 1 ∧
   S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
 
-/-- Descent step sufficient to prove `IntQuarticEisensteinPrimitive`. -/
-def EisensteinQuarticDescentStep : Prop :=
+/-- Main independent integer theorem. -/
+def PrimitiveEisensteinQuarticTheorem : Prop :=
   ∀ {A N S : ℤ},
-    EisensteinQuarticBad A N S →
+    PrimitiveEisensteinQuarticDatum A N S →
+    A = 0 ∨ A ^ 2 = N ^ 2
+
+/-- Normalized positive bad solution used for descent. -/
+def NormalizedEisensteinBad (A N S : ℤ) : Prop :=
+  0 < A ∧ A < N ∧
+  Int.gcd A N = 1 ∧
+  0 < S ∧
+  S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
+
+/-- Bounded descent theorem sufficient to prove the primitive theorem. -/
+def NormalizedEisensteinDescent : Prop :=
+  ∀ {A N S : ℤ},
+    NormalizedEisensteinBad A N S →
     ∃ A' N' S' : ℤ,
-      EisensteinQuarticBad A' N' S' ∧
+      NormalizedEisensteinBad A' N' S' ∧
       Int.natAbs A' + Int.natAbs N' < Int.natAbs A + Int.natAbs N
 
 end MazurProof.RationalPointsN12
 ```
 
-Then prove:
+Then prove `PrimitiveEisensteinQuarticTheorem` by: primitive bad solution → sign/swap normalization → minimal normalized bad solution by measure `Int.natAbs A + Int.natAbs N` → contradict `NormalizedEisensteinDescent`.
+
+## 2. Why `not_fermat_42` is not a direct solution
+
+Mathlib has:
 
 ```lean
--- theorem no_eisensteinQuarticBad_of_descent
---     (hdesc : EisensteinQuarticDescentStep) :
---     ¬ ∃ A N S : ℤ, EisensteinQuarticBad A N S
-
--- theorem intQuarticEisensteinPrimitive_of_descent
---     (hdesc : EisensteinQuarticDescentStep) :
---     IntQuarticEisensteinPrimitive
-```
-
-The last two are routine well-founded/minimal-counterexample wrappers over the measure
-`Int.natAbs A + Int.natAbs N`.
-
-## 2. Rational/integer equivalence
-
-Classically, `RatQuarticEisensteinDegenerate` and `IntQuarticEisensteinPrimitive` are equivalent.
-
-### Integer theorem implies rational theorem
-
-Use `A = t.num`, `N = (t.den : ℤ)`.  From `Rat.reduced`, get `IsCoprime A N`; from `Rat.den_nz`, get `N ≠ 0`.
-
-Main denominator lemma:
-
-```lean
-import Mathlib.Tactic
-import Mathlib.Data.Rat.Defs
-import Mathlib.RingTheory.Int.Basic
-
-namespace MazurProof.RationalPointsN12
-
-/-- If a rational square is an integer, then the rational number is an integer. -/
-def RatSquareIntegral : Prop :=
-  ∀ {q : ℚ} {m : ℤ}, q ^ 2 = (m : ℚ) → ∃ z : ℤ, q = z
-
-/-- Denominator-cleared quartic datum from a rational point. -/
-def RatQuarticToPrimitiveIntDatum : Prop :=
-  ∀ {t s : ℚ},
-    s ^ 2 = t ^ 4 - t ^ 2 + 1 →
-    ∃ A N S : ℤ,
-      IsCoprime A N ∧
-      N ≠ 0 ∧
-      t = (A : ℚ) / (N : ℚ) ∧
-      S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
-
-end MazurProof.RationalPointsN12
-```
-
-Proof DAG for `RatQuarticToPrimitiveIntDatum`:
-
-1. Set `A := t.num`, `N := (t.den : ℤ)`.
-2. Rewrite `t = A / N` using `Rat.num_div_den`.
-3. Let `P : ℤ := A^4 - A^2*N^2 + N^4`.
-4. From `s^2 = t^4 - t^2 + 1`, prove
-   ```lean
-   (s * (N : ℚ) ^ 2) ^ 2 = (P : ℚ)
-   ```
-   by `field_simp [Rat.den_nz]` and `ring`.
-5. Apply `RatSquareIntegral` to `q := s * (N : ℚ)^2`, obtaining `S : ℤ`.
-6. Cast back to `ℤ` to get `S^2 = P`.
-
-Then:
-
-```lean
--- theorem ratQuarticEisensteinDegenerate_of_intQuarticEisensteinPrimitive
---     (hZ : IntQuarticEisensteinPrimitive) :
---     RatQuarticEisensteinDegenerate
-```
-
-Proof: obtain `A,N,S`; apply `hZ`; translate `A = 0` to `t = 0`, and `A^2 = N^2` to `t^2 = 1` using `N ≠ 0`.
-
-### Rational theorem implies integer theorem
-
-For completeness, the reverse direction is immediate:
-
-```lean
--- theorem intQuarticEisensteinPrimitive_of_ratQuarticEisensteinDegenerate
---     (hQ : RatQuarticEisensteinDegenerate) :
---     IntQuarticEisensteinPrimitive
-```
-
-Given primitive `A,N,S`, set `t := (A : ℚ)/(N : ℚ)` and `s := (S : ℚ)/(N : ℚ)^2`; clear denominators, apply `hQ`, and use `N ≠ 0`.
-
-## 3. Why `not_fermat_42` is not enough
-
-Mathlib’s FLT4 theorem has the shape:
-
-```lean
--- in Mathlib.NumberTheory.FLT.Four
+-- Mathlib.NumberTheory.FLT.Four
 -- theorem not_fermat_42 {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) :
 --   a ^ 4 + b ^ 4 ≠ c ^ 2
 ```
 
-The cleared Eisenstein target is instead:
+The cleared target is not of that shape.  It rewrites as both
 
 ```text
-S^2 = A^4 - A^2*N^2 + N^4.
+S^2 = A^4 - A^2*N^2 + N^4
+S^2 = (A^2 - N^2)^2 + (A*N)^2
+(A^2 + N^2)^2 = S^2 + 3*(A*N)^2
 ```
 
-Useful identity:
+The Pythagorean form has one square leg, `A^2 - N^2`, but the other leg is only `A*N`, not a square or fourth power.  `not_fermat_42` would apply only after proving additional splitting that is essentially the missing descent.  Therefore:
 
-```text
-(A^2 + N^2) * S^2 = A^6 + N^6.
-```
+* Do **not** use `not_fermat_42` as the main dependency.
+* It is fine to imitate the proof architecture of `Mathlib/NumberTheory/FLT/Four.lean`.
+* Reuse underlying tools such as `PythagoreanTriple.coprime_classification`, `PythagoreanTriple.coprime_classification'`, `Int.sq_of_gcd_eq_one`, `Int.sq_of_isCoprime`, `Nat.find`, and `linear_combination`.
 
-This does **not** produce `u^4 + v^4 = w^2`; it leaves the extra factor `A^2 + N^2`.  Therefore `not_fermat_42` is not a short denominator-clearing dependency.  It is still reasonable to reuse Mathlib lemmas that FLT4 uses, especially:
+## 3. Rational denominator clearing and primitive reduction
+
+Use `A = t.num`, `N = (t.den : ℤ)`.  The denominator is positive, and `Rat.reduced` gives coprimality of numerator and denominator.
+
+Best denominator-clearing lemma:
 
 ```lean
--- Int.sq_of_gcd_eq_one
--- PythagoreanTriple.coprime_classification
--- PythagoreanTriple.coprime_classification'
+import Mathlib.Data.Rat.Lemmas
+import Mathlib.RingTheory.Int.Basic
+import Mathlib.Tactic
+
+namespace MazurProof.RationalPointsN12
+
+/-- If an integer is a rational square, then it is an integer square. -/
+def IntSquareOfRatSquareInt : Prop :=
+  ∀ {q : ℚ} {m : ℤ},
+    q ^ 2 = (m : ℚ) → ∃ z : ℤ, z ^ 2 = m
+
+/-- Denominator-cleared primitive integer point from a rational quartic point. -/
+def RatQuarticToPrimitiveInt : Prop :=
+  ∀ {t s : ℚ},
+    s ^ 2 = t ^ 4 - t ^ 2 + 1 →
+    ∃ A N S : ℤ,
+      Int.gcd A N = 1 ∧
+      N ≠ 0 ∧
+      t = (A : ℚ) / (N : ℚ) ∧
+      S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
+
+/-- Integer theorem supplies the required rational theorem. -/
+def RatQuarticFromPrimitiveInt : Prop :=
+  PrimitiveEisensteinQuarticTheorem →
+  RatQuarticEisensteinDegenerate
+
+end MazurProof.RationalPointsN12
 ```
 
-but not to make `not_fermat_42` the main theorem dependency.
+Proof notes:
 
-## 4. Concrete integer-descent proof DAG
+1. For `IntSquareOfRatSquareInt`, use `Rat.isSquare_intCast_iff` from `Mathlib.Data.Rat.Lemmas`.  From `q^2 = (m : ℚ)`, obtain `IsSquare (m : ℚ)`, then `IsSquare m`.
+2. For `RatQuarticToPrimitiveInt`, set `A := t.num`, `N := (t.den : ℤ)`, `P := A^4 - A^2*N^2 + N^4`.
+3. Rewrite `t = A/N` using `Rat.num_divInt_den`/`Rat.num_div_den` APIs.
+4. From the quartic equation prove in `ℚ`:
 
-There are two Lean-feasible variants.  The first is more “Mathlib algebraic number theory”; the second keeps the theorem as an explicit integer descent.
+   ```lean
+   (s * (N : ℚ) ^ 2) ^ 2 = (P : ℚ)
+   ```
 
-### Route A: Eisenstein PID/UFD route using existing Mathlib
+   using `field_simp` with `Rat.den_nz`, then `ring`.
+5. Apply `IntSquareOfRatSquareInt` to get `S^2 = P` in `ℤ`.
+6. Apply `PrimitiveEisensteinQuarticTheorem`; translate `A = 0` to `t = 0`, and `A^2 = N^2` to `t^2 = 1` by clearing `N ≠ 0`.
 
-Relevant Mathlib facts already exist:
+The reverse implication is also easy and useful for tests: from primitive `A,N,S`, set `t = (A:ℚ)/(N:ℚ)`, `s = (S:ℚ)/(N:ℚ)^2`.
+
+## 4. Concrete independent descent DAG
+
+Define the integer Eisenstein-triple conic locally:
+
+```lean
+import Mathlib.Data.Rat.Lemmas
+import Mathlib.RingTheory.Int.Basic
+import Mathlib.Tactic.LinearCombination
+
+namespace MazurProof.RationalPointsN12
+
+/-- `Z^2 = X^2 - X*Y + Y^2`, the Eisenstein norm conic. -/
+def EisensteinTriple (X Y Z : ℤ) : Prop :=
+  Z ^ 2 = X ^ 2 - X * Y + Y ^ 2
+
+/-- One positive primitive parametrization, up to swapping `X` and `Y`. -/
+def EisensteinParam (X Y Z m n : ℤ) : Prop :=
+  Z = m ^ 2 - m * n + n ^ 2 ∧
+  ((X = m ^ 2 - n ^ 2 ∧ Y = 2 * m * n - n ^ 2) ∨
+   (Y = m ^ 2 - n ^ 2 ∧ X = 2 * m * n - n ^ 2))
+
+/-- Positive primitive classification of Eisenstein triples. -/
+def EisensteinTripleClassification : Prop :=
+  ∀ {X Y Z : ℤ},
+    0 < X → 0 < Y → 0 < Z →
+    Int.gcd X Y = 1 →
+    EisensteinTriple X Y Z →
+    ∃ m n : ℤ,
+      0 < n ∧ n < m ∧
+      Int.gcd m n = 1 ∧
+      ¬ (3 : ℤ) ∣ m + n ∧
+      EisensteinParam X Y Z m n
+
+/-- Classification plus square-side splitting gives a smaller bad solution. -/
+def EisensteinSquareSidesDescentCore : Prop :=
+  ∀ {A N S m n : ℤ},
+    0 < A → A < N → Int.gcd A N = 1 →
+    0 < n → n < m → Int.gcd m n = 1 → ¬ (3 : ℤ) ∣ m + n →
+    EisensteinParam (A ^ 2) (N ^ 2) S m n →
+    ∃ A' N' S' : ℤ,
+      NormalizedEisensteinBad A' N' S' ∧
+      Int.natAbs A' + Int.natAbs N' < Int.natAbs A + Int.natAbs N
+
+end MazurProof.RationalPointsN12
+```
+
+DAG to prove `NormalizedEisensteinDescent`:
+
+1. From `NormalizedEisensteinBad A N S`, get
+
+   ```lean
+   EisensteinTriple (A ^ 2) (N ^ 2) S
+   Int.gcd (A ^ 2) (N ^ 2) = 1
+   0 < A ^ 2
+   0 < N ^ 2
+   0 < S
+   ```
+
+   The triple equation is just `ring`; coprimality follows from `Int.gcd A N = 1` and `.pow`/prime-divisor arguments.
+
+2. Apply `EisensteinTripleClassification` to obtain `m,n` and `EisensteinParam (A^2) (N^2) S m n`.
+
+3. Prove the finite square-factor splitting lemmas needed by `EisensteinSquareSidesDescentCore`:
+
+   ```lean
+   -- factors from A^2 = m^2 - n^2 = (m-n)*(m+n)
+   -- factors from N^2 = n*(2*m-n)
+   -- gcd controls: gcd(m-n,m+n) ∣ 2, gcd n (2*m-n) ∣ 2, and 3 ∤ m+n
+   -- conclusion: each factor is a square or twice a square, by parity cases.
+   ```
+
+   Use `Int.sq_of_gcd_eq_one` / `Int.sq_of_isCoprime` after dividing out the controlled factor `2`.  This is the same kind of casework as `Fermat42.not_minimal`, but for the Eisenstein parametrization.
+
+4. The algebraic core should be isolated as `EisensteinSquareSidesDescentCore`.  It is the only genuinely hard local theorem.  Its output is another primitive solution with a strictly smaller measure, so no elliptic-curve finite-point theorem enters.
+
+5. Close the descent with a minimal-counterexample wrapper copied structurally from `Fermat42.exists_minimal`:
+
+   ```lean
+   -- def badMeasure (A N : ℤ) : ℕ := Int.natAbs A + Int.natAbs N
+   -- use Nat.find on {m | ∃ A N S, NormalizedEisensteinBad A N S ∧ m = badMeasure A N}
+   -- apply NormalizedEisensteinDescent to contradict minimality
+   ```
+
+## 5. Alternative Route A: use Eisenstein PID infrastructure
+
+This is still independent of E1/E24 rational-point theorems, but heavier.  Mathlib’s FLT3 development imports the third-cyclotomic PID machinery:
 
 ```lean
 import Mathlib.NumberTheory.NumberField.Cyclotomic.PID
 import Mathlib.NumberTheory.NumberField.Cyclotomic.Three
 ```
 
-Useful existing APIs:
+Possible theorem shape:
 
 ```lean
--- IsCyclotomicExtension.Rat.three_pid
--- IsCyclotomicExtension.Rat.Three.Units.mem
--- IsCyclotomicExtension.Rat.Three.eq_one_or_neg_one_of_unit_of_congruent
--- IsCyclotomicExtension.Rat.Three.eta_sq
--- IsCyclotomicExtension.Rat.Three.eta_sq_add_eta_add_one
-```
-
-Proof skeleton:
-
-1. Work in `𝓞 K` for a third cyclotomic field, with `ω = ζ₃` and `ω^2 + ω + 1 = 0`.
-2. Define
-   ```text
-   α = A^2 + N^2 * ω.
-   ```
-   Its norm is `A^4 - A^2*N^2 + N^4 = S^2`.
-3. Prove primitive coprimality:
-   ```lean
-   -- lemma eis_alpha_coprime_conj
-   --   IsCoprime A N → IsCoprime α (star α)
-   ```
-   The only possible common Eisenstein prime is above `3`; exclude it because primitive `A,N` cannot satisfy `3 ∣ A^2 + N^2` unless both are divisible by `3`.
-4. In a PID/UFD, if `α * star α` is a square and `α` is coprime to `star α`, then `α` is associated to a square:
-   ```lean
-   -- lemma eis_alpha_associated_square
-   --   IsCoprime α (star α) → norm α = S^2 → ∃ u β, IsUnit u ∧ α = u * β^2
-   ```
-   Search for `exists_associated_pow_of_mul_eq_pow`; this is what `Int.sq_of_gcd_eq_one` uses internally.
-5. Reduce the unit using the six Eisenstein units.  Since unit squares have index two in the unit group, reduce to:
-   ```text
-   α = β^2   or   α = -β^2.
-   ```
-6. Finish with an integer coefficient-square descent:
-   ```lean
-   -- theorem eis_unit_square_coeffs_trivial
-   --   IsCoprime A N → N ≠ 0 →
-   --   (∃ r s, (A^2, N^2) = coeffs ((r + s*ω)^2)) ∨
-   --   (∃ r s, (A^2, N^2) = coeffs (-(r + s*ω)^2)) →
-   --   A = 0 ∨ A^2 = N^2
-   ```
-
-This route is independent of the E1 finite-point theorem, but it imports heavy number-field infrastructure.  It may still be faster than formalizing a Euclidean algorithm for Eisenstein integers from scratch.
-
-### Route B: explicit integer descent, no number-field import
-
-Prove the same square-in-Eisenstein conclusion by elementary factorization in integers.
-
-Core factorization:
-
-```text
-(A^2 + N^2 + S) * (A^2 + N^2 - S) = 3 * A^2 * N^2.
-```
-
-Suggested helper lemmas:
-
-```lean
-import Mathlib.Tactic
-import Mathlib.RingTheory.Int.Basic
-import Mathlib.NumberTheory.PythagoreanTriples
-
-namespace MazurProof.RationalPointsN12
-
-/-- Primitive quartic solutions have numerator/denominator coprime to `S`. -/
-def EisensteinQuarticCoprimeSideLemmas : Prop :=
+/-- In `ℤ[ω]`, primitive `α` with square norm is associated to a square. -/
+def EisensteinNormSquareAssociatedSquare : Prop :=
   ∀ {A N S : ℤ},
-    IsCoprime A N →
+    Int.gcd A N = 1 →
     S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4 →
-    IsCoprime A S ∧ IsCoprime N S
-
-/-- GCD control for the two factors `A^2+N^2±S`. -/
-def EisensteinQuarticFactorGcdControl : Prop :=
-  ∀ {A N S : ℤ},
-    IsCoprime A N →
-    S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4 →
-    -- exact statement should case-split powers of `2` and `3`
+    -- α = A^2 + N^2*ω, expanded in the chosen Mathlib cyclotomic-integer representation
     True
-
-/-- The hard bounded descent step. -/
-def EisensteinQuarticDescentTheorem : Prop :=
-  EisensteinQuarticDescentStep
-
-end MazurProof.RationalPointsN12
 ```
 
-Concrete descent target:
+Concrete Route A steps:
 
-```lean
--- theorem eisensteinQuartic_descent_step : EisensteinQuarticDescentStep
-```
+1. Work in `𝓞 K`, `[NumberField K]`, `[IsCyclotomicExtension {3} ℚ K]`, with `ω = ζ₃`.
+2. Define `α = A^2 + N^2 * ω`; prove `norm α = A^4 - A^2*N^2 + N^4`.
+3. Prove `IsCoprime α (star α)` from `Int.gcd A N = 1`; the only delicate common prime is above `3`.
+4. Use the existing UFD/PID associated-power lemma behind `Int.sq_of_gcd_eq_one`, e.g. grep `exists_associated_pow_of_mul_eq_pow`.
+5. Reduce units using `IsCyclotomicExtension.Rat.Three.Units.mem` and related unit congruence lemmas.
+6. Expanding `α = unit * β^2` gives the same square-side splitting/descent as Route B.
 
-Recommended construction shape:
-
-1. Normalize a bad solution by signs and symmetry so `0 < |A| ≤ |N|`, `A ≠ 0`, `A^2 ≠ N^2`.
-2. Use the factorization above and primitive gcd facts to show the factors `A^2+N^2±S` are, up to controlled factors `1,2,3,6`, squares times the square parts of `A` and `N`.
-3. Equivalently derive the coefficient-square form
-   ```text
-   A^2 + N^2*ω = ±(r + s*ω)^2
-   ```
-   without introducing an Eisenstein-integer type.
-4. Expanding `(r+sω)^2 = (r^2-s^2) + (2rs-s^2)ω`, reduce to products of coprime integer factors that are squares using `Int.sq_of_gcd_eq_one`.
-5. Produce a smaller primitive bad solution `(A',N',S')` with
-   ```text
-   |A'| + |N'| < |A| + |N|.
-   ```
-6. Close by minimal counterexample.
-
-This route has more parity/gcd casework but the dependencies stay close to `N12DoubleLegDegenerate.lean`: `Mathlib.Tactic`, `Mathlib.RingTheory.Int.Basic`, and possibly `Mathlib.NumberTheory.PythagoreanTriples`.
-
-## 5. File layout recommendation
-
-Add a new independent file, for example:
-
-```lean
--- FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean
-import Mathlib.Tactic
-import Mathlib.RingTheory.Int.Basic
-import Mathlib.NumberTheory.PythagoreanTriples
--- optional, only for Route A:
--- import Mathlib.NumberTheory.NumberField.Cyclotomic.PID
--- import Mathlib.NumberTheory.NumberField.Cyclotomic.Three
-
--- Do NOT import:
--- import FLT.Assumptions.MazurProof.RationalPointsN12
--- import any E24/E1 finite-point terminal theorem
-```
-
-Then have `N12DoubleLegDegenerate.lean` import this new file, or keep the current conditional theorem and add a separate theorem supplying `RatQuarticEisensteinDegenerate` from the new file.
+I would try Route B first unless the project already imports cyclotomic number fields elsewhere; Route A may spend more effort on typeclass and representation issues than on the actual quartic descent.
 
 ## 6. Mathlib files/API to grep first
 
-Project is pinned to Mathlib rev `96fd0fff3b8837985ae21dd02e712cb5df72ec05` in `lakefile.toml`.
-
-Grep these first:
+Project pin from `lakefile.toml`: Mathlib rev `96fd0fff3b8837985ae21dd02e712cb5df72ec05`.
 
 ```text
-Mathlib/NumberTheory/FLT/Four.lean
-  not_fermat_42
-  Fermat42
-  Fermat42.exists_minimal
-  Fermat42.not_minimal
+Mathlib/Data/Rat/Lemmas.lean
+  Rat.isSquare_iff
+  Rat.isSquare_intCast_iff
+  Rat.mul_self_num
+  Rat.mul_self_den
+  Rat.num_den_mk
+  Rat.num_divInt_den
 
 Mathlib/NumberTheory/PythagoreanTriples.lean
   PythagoreanTriple.coprime_classification
   PythagoreanTriple.coprime_classification'
   PythagoreanTriple.classification
+  PythagoreanTriple.even_odd_of_coprime
 
 Mathlib/RingTheory/Int/Basic.lean
   Int.sq_of_gcd_eq_one
   Int.sq_of_isCoprime
   Int.eq_pow_of_mul_eq_pow_odd
+  Int.Prime.dvd_mul'
+  Int.Prime.dvd_pow'
 
+Mathlib/NumberTheory/FLT/Four.lean
+  Fermat42.exists_minimal
+  Fermat42.coprime_of_minimal
+  Fermat42.not_minimal
+  not_fermat_42       -- proof pattern only; not the desired dependency
+
+Mathlib/NumberTheory/FLT/Three.lean
 Mathlib/NumberTheory/NumberField/Cyclotomic/PID.lean
-  IsCyclotomicExtension.Rat.three_pid
-
 Mathlib/NumberTheory/NumberField/Cyclotomic/Three.lean
+  IsCyclotomicExtension.Rat.three_pid
   IsCyclotomicExtension.Rat.Three.Units.mem
   IsCyclotomicExtension.Rat.Three.eq_one_or_neg_one_of_unit_of_congruent
   IsCyclotomicExtension.Rat.Three.eta_sq
   IsCyclotomicExtension.Rat.Three.eta_sq_add_eta_add_one
 
 Mathlib/NumberTheory/Zsqrtd/Basic.lean
-  Zsqrtd.norm
-  Zsqrtd.norm_mul
-  Zsqrtd.intCast_dvd
+Mathlib/NumberTheory/Zsqrtd/GaussianInt.lean
+  useful norm examples, but no ready `EisensteinInt` classifier found
 ```
 
-Search notes:
+Search notes from this pass:
 
 ```text
-Ljunggren             -- no ready classification found
-Eisenstein quartic    -- no ready classification found
-x^4 - x^2*y^2 + y^4  -- no ready classification found
-not_fermat_42         -- exists, but wrong equation shape
+Ljunggren                    -- no ready Mathlib classifier found
+Eisenstein quartic           -- no ready Mathlib classifier found
+RatQuartic                   -- no ready Mathlib classifier found
+x^4 - x^2*y^2 + y^4          -- no ready Mathlib classifier found
+not_fermat_42                -- exists in FLT/Four; wrong final shape
+EisensteinInt                -- no obvious dedicated Mathlib type found
 ```
 
-## 7. Minimal next Lean milestone
+## 7. Recommended implementation seam
 
-Prove these first, in this order:
+Add a new file independent of the N12 finite-point route, for example:
 
 ```lean
--- 1. local denominator lemma
--- lemma Rat.exists_int_eq_of_sq_eq_int
---     {q : ℚ} {m : ℤ} (h : q ^ 2 = (m : ℚ)) : ∃ z : ℤ, q = z
+-- FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean
+import Mathlib.Data.Rat.Lemmas
+import Mathlib.NumberTheory.PythagoreanTriples
+import Mathlib.RingTheory.Int.Basic
+import Mathlib.Tactic.LinearCombination
 
--- 2. rational-to-primitive-integer data
--- lemma ratQuartic_to_primitive_intDatum
---     {t s : ℚ} (h : s ^ 2 = t ^ 4 - t ^ 2 + 1) :
---     ∃ A N S : ℤ,
---       IsCoprime A N ∧ N ≠ 0 ∧
---       t = (A : ℚ) / (N : ℚ) ∧
---       S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
-
--- 3. wrapper
--- theorem ratQuarticEisensteinDegenerate_of_intQuarticEisensteinPrimitive
---     (hZ : IntQuarticEisensteinPrimitive) :
---     RatQuarticEisensteinDegenerate
-
--- 4. hard theorem
--- theorem intQuarticEisensteinPrimitive : IntQuarticEisensteinPrimitive
+-- no imports of:
+--   FLT.Assumptions.MazurProof.RationalPointsN12
+--   E24/E1 finite-point terminal theorem files
+--   full-cover residual theorem files
 ```
 
-Once milestone 1–3 are checked, the project has a clean seam: all remaining difficulty is the standalone integer descent theorem, with no dependency on E1 finite-point classification.
+First milestones to check:
+
+```lean
+-- 1. integer-square extraction from rational square
+-- theorem intSquare_of_ratSquare_int : IntSquareOfRatSquareInt
+
+-- 2. denominator clearing
+-- theorem ratQuartic_to_primitive_int : RatQuarticToPrimitiveInt
+
+-- 3. wrapper from integer theorem to project theorem
+-- theorem ratQuarticEisensteinDegenerate_of_primitive
+--     (hZ : PrimitiveEisensteinQuarticTheorem) :
+--     RatQuarticEisensteinDegenerate
+
+-- 4. hard independent theorem
+-- theorem primitiveEisensteinQuartic : PrimitiveEisensteinQuarticTheorem
+```
+
+Once milestones 1–3 compile, the project has a clean hard seam: all remaining work is the standalone primitive integer descent, with no dependency on E1 finite-point classification.
