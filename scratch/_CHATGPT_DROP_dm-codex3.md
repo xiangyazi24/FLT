@@ -1,138 +1,169 @@
-# Q2506 WeakPrimitiveAPPairwise adjacent-pair Lean helper
-
-This round gives a no-`sorry` adjacent-pair helper for the hard `WeakPrimitiveAPPairwise` residual. Paste the code below after the existing `rootGCD4` definition in `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`.
-
-The `(p,q)` adjacent case is easier than the endpoint case and does **not** need the oddness assumptions: if a prime `ℓ` divides both `p` and `q`, then `ℓ ∣ Δ`; from `r^2 = q^2 + Δ` and `s^2 = r^2 + Δ`, primality propagates `ℓ` to `r` and `s`, contradicting `rootGCD4 = 1`.
-
 ```lean
-import Mathlib
+lemma int_even_sq_modEq_zero_mod_four {x : ℤ} (hx : Even x) :
+    x ^ 2 ≡ 0 [ZMOD 4] := by
+  rcases hx with ⟨k, rfl⟩
+  rw [Int.modEq_zero_iff_dvd]
+  use k ^ 2
+  ring
 
-/-- Exact bridge used below: a natural divisor of `x.natAbs` is the same as its
-integer cast dividing `x`.  This is just `Int.natCast_dvd`. -/
-theorem nat_dvd_natAbs_iff_int_dvd {n : ℕ} {x : ℤ} :
-    n ∣ x.natAbs ↔ ((n : ℤ) ∣ x) := by
-  exact Int.natCast_dvd.symm
+lemma int_odd_sq_modEq_one_mod_four {x : ℤ} (hx : Odd x) :
+    x ^ 2 ≡ 1 [ZMOD 4] := by
+  rcases hx with ⟨k, rfl⟩
+  rw [Int.modEq_iff_dvd]
+  use -(k * (k + 1))
+  ring
 
-/-- If a Nat prime divides all four roots, it contradicts `rootGCD4 = 1`. -/
-theorem false_of_nat_prime_dvd_all_roots_of_rootGCD4_eq_one
-    {p q r s : ℤ} {ℓ : ℕ}
+lemma int_odd_sq_modEq_one_mod_eight {x : ℤ} (hx : Odd x) :
+    x ^ 2 ≡ 1 [ZMOD 8] := by
+  rcases hx with ⟨k, rfl⟩
+  rw [Int.modEq_iff_dvd]
+  have h2 : (2 : ℤ) ∣ k * (k + 1) := Int.two_dvd_mul_add_one k
+  rcases h2 with ⟨t, ht⟩
+  use -t
+  calc
+    1 - (2 * k + 1) ^ 2 = -4 * (k * (k + 1)) := by ring
+    _ = 8 * (-t) := by
+      rw [ht]
+      ring
+
+lemma int_delta_modEq_zero_mod_four_of_same_parity
+    {x y Δ : ℤ}
+    (hxy : y ^ 2 - x ^ 2 = Δ)
+    (hpar : (Even x ∧ Even y) ∨ (Odd x ∧ Odd y)) :
+    Δ ≡ 0 [ZMOD 4] := by
+  rw [← hxy]
+  rcases hpar with ⟨hx, hy⟩ | ⟨hx, hy⟩
+  · simpa using
+      (int_even_sq_modEq_zero_mod_four hy).sub
+        (int_even_sq_modEq_zero_mod_four hx)
+  · simpa using
+      (int_odd_sq_modEq_one_mod_four hy).sub
+        (int_odd_sq_modEq_one_mod_four hx)
+
+lemma int_delta_modEq_one_mod_four_of_even_odd
+    {x y Δ : ℤ}
+    (hxy : y ^ 2 - x ^ 2 = Δ)
+    (hx : Even x) (hy : Odd y) :
+    Δ ≡ 1 [ZMOD 4] := by
+  rw [← hxy]
+  simpa using
+    (int_odd_sq_modEq_one_mod_four hy).sub
+      (int_even_sq_modEq_zero_mod_four hx)
+
+lemma int_delta_modEq_neg_one_mod_four_of_odd_even
+    {x y Δ : ℤ}
+    (hxy : y ^ 2 - x ^ 2 = Δ)
+    (hx : Odd x) (hy : Even y) :
+    Δ ≡ -1 [ZMOD 4] := by
+  rw [← hxy]
+  simpa using
+    (int_even_sq_modEq_zero_mod_four hy).sub
+      (int_odd_sq_modEq_one_mod_four hx)
+
+lemma int_square_ap_triple_all_even_or_all_odd
+    {x y z Δ : ℤ}
+    (hxy : y ^ 2 - x ^ 2 = Δ)
+    (hyz : z ^ 2 - y ^ 2 = Δ) :
+    (Even x ∧ Even y ∧ Even z) ∨ (Odd x ∧ Odd y ∧ Odd z) := by
+  rcases Int.even_or_odd x with hxE | hxO
+  · rcases Int.even_or_odd y with hyE | hyO
+    · rcases Int.even_or_odd z with hzE | hzO
+      · exact Or.inl ⟨hxE, hyE, hzE⟩
+      · exfalso
+        have h0 : Δ ≡ 0 [ZMOD 4] :=
+          int_delta_modEq_zero_mod_four_of_same_parity hxy (Or.inl ⟨hxE, hyE⟩)
+        have h1 : Δ ≡ 1 [ZMOD 4] :=
+          int_delta_modEq_one_mod_four_of_even_odd hyz hyE hzO
+        have hc : (0 : ℤ) ≡ 1 [ZMOD 4] := h0.symm.trans h1
+        norm_num [Int.ModEq] at hc
+    · rcases Int.even_or_odd z with hzE | hzO
+      · exfalso
+        have h1 : Δ ≡ 1 [ZMOD 4] :=
+          int_delta_modEq_one_mod_four_of_even_odd hxy hxE hyO
+        have hn1 : Δ ≡ -1 [ZMOD 4] :=
+          int_delta_modEq_neg_one_mod_four_of_odd_even hyz hyO hzE
+        have hc : (1 : ℤ) ≡ -1 [ZMOD 4] := h1.symm.trans hn1
+        norm_num [Int.ModEq] at hc
+      · exfalso
+        have h1 : Δ ≡ 1 [ZMOD 4] :=
+          int_delta_modEq_one_mod_four_of_even_odd hxy hxE hyO
+        have h0 : Δ ≡ 0 [ZMOD 4] :=
+          int_delta_modEq_zero_mod_four_of_same_parity hyz (Or.inr ⟨hyO, hzO⟩)
+        have hc : (1 : ℤ) ≡ 0 [ZMOD 4] := h1.symm.trans h0
+        norm_num [Int.ModEq] at hc
+  · rcases Int.even_or_odd y with hyE | hyO
+    · rcases Int.even_or_odd z with hzE | hzO
+      · exfalso
+        have hn1 : Δ ≡ -1 [ZMOD 4] :=
+          int_delta_modEq_neg_one_mod_four_of_odd_even hxy hxO hyE
+        have h0 : Δ ≡ 0 [ZMOD 4] :=
+          int_delta_modEq_zero_mod_four_of_same_parity hyz (Or.inl ⟨hyE, hzE⟩)
+        have hc : (-1 : ℤ) ≡ 0 [ZMOD 4] := hn1.symm.trans h0
+        norm_num [Int.ModEq] at hc
+      · exfalso
+        have hn1 : Δ ≡ -1 [ZMOD 4] :=
+          int_delta_modEq_neg_one_mod_four_of_odd_even hxy hxO hyE
+        have h1 : Δ ≡ 1 [ZMOD 4] :=
+          int_delta_modEq_one_mod_four_of_even_odd hyz hyE hzO
+        have hc : (-1 : ℤ) ≡ 1 [ZMOD 4] := hn1.symm.trans h1
+        norm_num [Int.ModEq] at hc
+    · rcases Int.even_or_odd z with hzE | hzO
+      · exfalso
+        have h0 : Δ ≡ 0 [ZMOD 4] :=
+          int_delta_modEq_zero_mod_four_of_same_parity hxy (Or.inr ⟨hxO, hyO⟩)
+        have hn1 : Δ ≡ -1 [ZMOD 4] :=
+          int_delta_modEq_neg_one_mod_four_of_odd_even hyz hyO hzE
+        have hc : (0 : ℤ) ≡ -1 [ZMOD 4] := h0.symm.trans hn1
+        norm_num [Int.ModEq] at hc
+      · exact Or.inr ⟨hxO, hyO, hzO⟩
+
+lemma two_dvd_natAbs_of_even_int {x : ℤ} (hx : Even x) :
+    2 ∣ x.natAbs := by
+  have hxNat : Even x.natAbs := (Int.natAbs_even (n := x)).2 hx
+  exact even_iff_two_dvd.mp hxNat
+
+lemma false_of_all_even_roots_of_rootGCD4_eq_one
+    {p q r s : ℤ}
     (hroot : rootGCD4 p q r s = 1)
-    (hℓ : ℓ.Prime)
-    (hp : ℓ ∣ p.natAbs)
-    (hq : ℓ ∣ q.natAbs)
-    (hr : ℓ ∣ r.natAbs)
-    (hs : ℓ ∣ s.natAbs) :
+    (hp : Even p) (hq : Even q) (hr : Even r) (hs : Even s) :
     False := by
-  have hℓroot : ℓ ∣ rootGCD4 p q r s := by
+  have hp2 : 2 ∣ p.natAbs := two_dvd_natAbs_of_even_int hp
+  have hq2 : 2 ∣ q.natAbs := two_dvd_natAbs_of_even_int hq
+  have hr2 : 2 ∣ r.natAbs := two_dvd_natAbs_of_even_int hr
+  have hs2 : 2 ∣ s.natAbs := two_dvd_natAbs_of_even_int hs
+  have h2root : 2 ∣ rootGCD4 p q r s := by
     unfold rootGCD4
-    exact Nat.dvd_gcd hp (Nat.dvd_gcd hq (Nat.dvd_gcd hr hs))
-  have hℓone : ℓ ∣ (1 : ℕ) := by
-    simpa [hroot] using hℓroot
-  have hle : ℓ ≤ 1 := Nat.le_of_dvd (by decide : 0 < (1 : ℕ)) hℓone
-  exact (not_lt_of_ge hle) hℓ.one_lt
+    exact Nat.dvd_gcd hp2 (Nat.dvd_gcd hq2 (Nat.dvd_gcd hr2 hs2))
+  have h21 : 2 ∣ (1 : ℕ) := by
+    simpa [hroot] using h2root
+  norm_num at h21
 
-/-- Adjacent-pair propagation for `(p,q)`: any Nat prime dividing `p` and `q`
-propagates to all four roots in a four-square AP. -/
-theorem nat_prime_dvd_all_roots_of_dvd_pq_weak_ap
-    {p q r s Δ : ℤ} {ℓ : ℕ}
-    (hℓ : ℓ.Prime)
-    (hpq : q ^ 2 - p ^ 2 = Δ)
-    (hqr : r ^ 2 - q ^ 2 = Δ)
-    (hrs : s ^ 2 - r ^ 2 = Δ)
-    (hp : ℓ ∣ p.natAbs)
-    (hq : ℓ ∣ q.natAbs) :
-    ℓ ∣ p.natAbs ∧ ℓ ∣ q.natAbs ∧ ℓ ∣ r.natAbs ∧ ℓ ∣ s.natAbs := by
-  have hpZ : ((ℓ : ℤ) ∣ p) := Int.natCast_dvd.mpr hp
-  have hqZ : ((ℓ : ℤ) ∣ q) := Int.natCast_dvd.mpr hq
-  have hp2Z : ((ℓ : ℤ) ∣ p ^ 2) := pow_dvd_pow_of_dvd hpZ 2
-  have hq2Z : ((ℓ : ℤ) ∣ q ^ 2) := pow_dvd_pow_of_dvd hqZ 2
-  have hDeltaZ : ((ℓ : ℤ) ∣ Δ) := by
-    rw [← hpq]
-    exact Int.dvd_sub hq2Z hp2Z
-  have hr2Z : ((ℓ : ℤ) ∣ r ^ 2) := by
-    have hr_sq : r ^ 2 = q ^ 2 + Δ := by
-      nlinarith [hqr]
-    rw [hr_sq]
-    exact Int.dvd_add hq2Z hDeltaZ
-  have hr : ℓ ∣ r.natAbs := Int.Prime.dvd_pow hℓ hr2Z
-  have hs2Z : ((ℓ : ℤ) ∣ s ^ 2) := by
-    have hs_sq : s ^ 2 = r ^ 2 + Δ := by
-      nlinarith [hrs]
-    rw [hs_sq]
-    exact Int.dvd_add hr2Z hDeltaZ
-  have hs : ℓ ∣ s.natAbs := Int.Prime.dvd_pow hℓ hs2Z
-  exact ⟨hp, hq, hr, hs⟩
-
-/-- The adjacent `(p,q)` gcd residual.  This is the first reusable piece of
-`WeakPrimitiveAPPairwise`; it needs no parity hypotheses. -/
-theorem int_gcd_pq_eq_one_of_weak_ap
-    {p q r s Δ : ℤ}
-    (hpq : q ^ 2 - p ^ 2 = Δ)
-    (hqr : r ^ 2 - q ^ 2 = Δ)
-    (hrs : s ^ 2 - r ^ 2 = Δ)
-    (hroot : rootGCD4 p q r s = 1) :
-    Int.gcd p q = 1 := by
-  rw [Int.gcd_def]
-  apply Nat.coprime_iff_gcd_eq_one.mp
-  refine Nat.coprime_of_dvd' ?_
-  intro ℓ hℓ hp hq
-  exact False.elim <|
-    false_of_nat_prime_dvd_all_roots_of_rootGCD4_eq_one
-      hroot hℓ
-      (nat_prime_dvd_all_roots_of_dvd_pq_weak_ap hℓ hpq hqr hrs hp hq).1
-      (nat_prime_dvd_all_roots_of_dvd_pq_weak_ap hℓ hpq hqr hrs hp hq).2.1
-      (nat_prime_dvd_all_roots_of_dvd_pq_weak_ap hℓ hpq hqr hrs hp hq).2.2.1
-      (nat_prime_dvd_all_roots_of_dvd_pq_weak_ap hℓ hpq hqr hrs hp hq).2.2.2
+theorem weakPrimitiveAPParity_short : WeakPrimitiveAPParity := by
+  intro p q r s Δ hpq hqr hrs hroot
+  have hpqr := int_square_ap_triple_all_even_or_all_odd hpq hqr
+  have hqrs := int_square_ap_triple_all_even_or_all_odd hqr hrs
+  rcases hpqr with hpqrE | hpqrO
+  · rcases hqrs with hqrsE | hqrsO
+    · exact False.elim <|
+        false_of_all_even_roots_of_rootGCD4_eq_one
+          hroot hpqrE.1 hpqrE.2.1 hpqrE.2.2 hqrsE.2.2
+    · exact False.elim <| (Int.not_even_iff_odd.mpr hqrsO.1) hpqrE.2.1
+  · rcases hqrs with hqrsE | hqrsO
+    · exact False.elim <| (Int.not_even_iff_odd.mpr hpqrO.2.1) hqrsE.1
+    · have hp1 : p % 2 = 1 := Int.odd_iff.mp hpqrO.1
+      have hq1 : q % 2 = 1 := Int.odd_iff.mp hpqrO.2.1
+      have hr1 : r % 2 = 1 := Int.odd_iff.mp hpqrO.2.2
+      have hs1 : s % 2 = 1 := Int.odd_iff.mp hqrsO.2.2
+      have h8Δ : (8 : ℤ) ∣ Δ := by
+        have hq8 : q ^ 2 ≡ 1 [ZMOD 8] :=
+          int_odd_sq_modEq_one_mod_eight hpqrO.2.1
+        have hp8 : p ^ 2 ≡ 1 [ZMOD 8] :=
+          int_odd_sq_modEq_one_mod_eight hpqrO.1
+        have hdiff : q ^ 2 - p ^ 2 ≡ 0 [ZMOD 8] := by
+          simpa using hq8.sub hp8
+        have hΔ : Δ ≡ 0 [ZMOD 8] := by
+          rw [← hpq]
+          exact hdiff
+        exact Int.modEq_zero_iff_dvd.mp hΔ
+      exact ⟨hp1, hq1, hr1, hs1, h8Δ⟩
 ```
-
-A slightly cleaner variant avoids recomputing the propagation tuple in the last theorem:
-
-```lean
-theorem int_gcd_pq_eq_one_of_weak_ap'
-    {p q r s Δ : ℤ}
-    (hpq : q ^ 2 - p ^ 2 = Δ)
-    (hqr : r ^ 2 - q ^ 2 = Δ)
-    (hrs : s ^ 2 - r ^ 2 = Δ)
-    (hroot : rootGCD4 p q r s = 1) :
-    Int.gcd p q = 1 := by
-  rw [Int.gcd_def]
-  apply Nat.coprime_iff_gcd_eq_one.mp
-  refine Nat.coprime_of_dvd' ?_
-  intro ℓ hℓ hp hq
-  rcases nat_prime_dvd_all_roots_of_dvd_pq_weak_ap hℓ hpq hqr hrs hp hq with
-    ⟨hp', hq', hr', hs'⟩
-  exact False.elim <|
-    false_of_nat_prime_dvd_all_roots_of_rootGCD4_eq_one
-      hroot hℓ hp' hq' hr' hs'
-```
-
-Use either `int_gcd_pq_eq_one_of_weak_ap` or the primed version, not both, if you want to avoid duplicate theorem clutter.
-
-## Exact APIs used
-
-These are the important current Mathlib APIs to check if your local snapshot differs:
-
-```lean
-#check Int.natCast_dvd
--- `((n : ℤ) ∣ x) ↔ n ∣ x.natAbs`; use `.mpr` from Nat divisibility to Int divisibility.
-
-#check Int.Prime.dvd_pow
--- Nat prime `p`, integer divisibility `(p : ℤ) ∣ n^k` implies `p ∣ n.natAbs`.
-
-#check pow_dvd_pow_of_dvd
--- Turns `(ℓ : ℤ) ∣ p` into `(ℓ : ℤ) ∣ p^2`.
-
-#check Int.dvd_sub
-#check Int.dvd_add
-#check Nat.dvd_gcd
-#check Nat.coprime_of_dvd'
-#check Nat.coprime_iff_gcd_eq_one
-#check Int.gcd_def
-```
-
-## How to extend
-
-The same adjacent argument proves `Int.gcd q r = 1` and `Int.gcd r s = 1` by renaming variables / shifting the AP equations. The non-adjacent pairs are the remaining work:
-
-* `(p,r)` and `(q,s)` need cancellation from `ℓ ∣ 2*Δ`; parity rules out `ℓ = 2`.
-* `(p,s)` needs cancellation from `ℓ ∣ 3*Δ`, with a special `ZMod 3` finite-case branch when `ℓ = 3`.
