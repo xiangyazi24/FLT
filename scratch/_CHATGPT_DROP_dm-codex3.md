@@ -1,428 +1,410 @@
-# Q2659: Eisenstein triple parametrization audit
+# Q2671: adversarial audit of the elementary Eisenstein-quartic descent branch
 
-Target file: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`.
-This note is independent of elliptic curves and `RationalPointsN12`.
+Target repo: `flt-ai`; likely target file: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`.
 
 ## Verdict
 
-The proposed theorem is **false as stated**. The exceptional primitive positive triple
+The **raw branch** formulas are sound, but only under the raw branch hypotheses
 
 ```lean
-(X, Y, Z) = (1, 1, 1)
+A ^ 2 = (m - n) * (m + n)
+N ^ 2 = n * (2 * m - n)
+S = m ^ 2 - m * n + n ^ 2
+0 < n ∧ n < m ∧ Int.gcd m n = 1
 ```
 
-satisfies
+Within that branch, the parity split is correct:
+
+* `n` even: descent works; the smaller solution is `(e, f, d)` with `0 < e < f`, `gcd e f = 1`, and `f < N`.
+* `n` odd and `m` even: impossible.
+* `n` odd and `m` odd: descent works; the smaller solution is `(e, f, b)` with `0 < e < f`, `gcd e f = 1`, and `f < N`.
+
+However, this is **not yet a global descent** for primitive Eisenstein quartics. Two things are missing:
+
+1. **Unit sector:** `(A,N,S)=(1,1,1)` is primitive and has no smaller positive solution. Any theorem must either exclude it or return it as the base case.
+2. **Divided-by-3 Eisenstein sector:** primitive Eisenstein triples are not exhausted by the raw formulas. There is also the sector
+   ```lean
+   3 * A ^ 2 = (m - n) * (m + n)
+   3 * N ^ 2 = n * (2 * m - n)
+   3 * S     = m ^ 2 - m * n + n ^ 2
+   (3 : ℤ) ∣ m + n
+   ```
+   possibly after swapping `A` and `N`. This sector cannot be ignored merely because the triple is primitive. For ordinary Eisenstein triples, `(X,Y,Z)=(8,3,7)` comes from a divided-by-3 parametrization. For quartic-square triples, the unit `(1,1,1)` comes from `m=2,n=1`. A global proof must either prove the divided sector has only the unit square case, or give a descent for that sector too.
+
+So the corrected roadmap is:
 
 ```lean
-Z ^ 2 = X ^ 2 - X * Y + Y ^ 2
-0 < X, 0 < Y, 0 < Z, Int.gcd X Y = 1
+primitive quartic
+  -> unit
+   ∨ raw branch for (A,N)
+   ∨ raw branch for (N,A)
+   ∨ divided-by-3 branch for (A,N)
+   ∨ divided-by-3 branch for (N,A)
 ```
 
-but it cannot satisfy the requested parametrization with `0 < n ∧ n < m`: the equation
-`Z = m ^ 2 - m * n + n ^ 2 = 1` has no solution with `0 < n < m` that also gives
-`X = Y = 1` through the displayed formulas.
+Then prove descent for both raw orientations, and separately dispatch the divided branch.
 
-Use this corrected statement instead:
+## Recommended Lean setup
 
 ```lean
-theorem eisensteinTriple_primitive_param_or_unit
-    {X Y Z : ℤ} (hX : 0 < X) (hY : 0 < Y) (hZ : 0 < Z)
-    (hcop : Int.gcd X Y = 1)
-    (hE : EisensteinTriple X Y Z) :
-    (X = 1 ∧ Y = 1 ∧ Z = 1) ∨
-      ∃ m n : ℤ, 0 < n ∧ n < m ∧ Int.gcd m n = 1 ∧ ¬ (3 : ℤ) ∣ m + n ∧
-        EisensteinParam X Y Z m n
-```
-
-Equivalently, if the caller already knows `X ≠ Y`, then the original existential conclusion is valid:
-
-```lean
-theorem eisensteinTriple_primitive_param_of_ne
-    {X Y Z : ℤ} (hX : 0 < X) (hY : 0 < Y) (hZ : 0 < Z)
-    (hcop : Int.gcd X Y = 1) (hXY : X ≠ Y)
-    (hE : EisensteinTriple X Y Z) :
-    ∃ m n : ℤ, 0 < n ∧ n < m ∧ Int.gcd m n = 1 ∧ ¬ (3 : ℤ) ∣ m + n ∧
-      EisensteinParam X Y Z m n
-```
-
-## Recommended imports and APIs
-
-```lean
-import Mathlib.NumberTheory.PythagoreanTriples
 import Mathlib.RingTheory.Int.Basic
 import Mathlib.RingTheory.Coprime.Lemmas
 import Mathlib.Data.Int.ModEq
 import Mathlib.Algebra.Ring.Int.Parity
 import Mathlib.Tactic
-```
 
-Useful APIs to `#check`/grep:
-
-```lean
-#check PythagoreanTriple.coprime_classification
-#check PythagoreanTriple.coprime_classification'
-#check PythagoreanTriple.classification
-#check Int.sq_of_gcd_eq_one
-#check Int.sq_of_isCoprime
-#check Int.isCoprime_iff_gcd_eq_one
-#check Nat.Prime.not_coprime_iff_dvd
-#check Int.Prime.dvd_natAbs_of_coe_dvd_sq
-#check Int.natCast_dvd
-#check Int.ModEq
-#check Int.modEq_iff_dvd
-#check Int.emod_two_eq_zero_or_one
-#check Int.odd_iff
-#check Int.not_even_iff_odd
-#check Int.two_dvd_mul_add_one
-#check eq_or_eq_neg_of_sq_eq_sq
-```
-
-`PythagoreanTriples` is a good model for the rational-parametrization style, but it does **not** directly classify
-`x ^ 2 + 3 * y ^ 2 = z ^ 2`. For this theorem, the most Lean-friendly route is the elementary
-factorization of
-
-```lean
-(2 * Z - (2 * X - Y)) * (2 * Z + (2 * X - Y)) = 3 * Y ^ 2
-```
-
-when `Y` is odd, and the symmetric argument when `X` is odd.
-
-## Definitions
-
-```lean
 namespace MazurProof.QuarticEisenstein
 
-def EisensteinTriple (X Y Z : ℤ) : Prop :=
-  Z ^ 2 = X ^ 2 - X * Y + Y ^ 2
+def EisensteinQuartic (A N S : ℤ) : Prop :=
+  S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
 
-def EisensteinParam (X Y Z m n : ℤ) : Prop :=
-  Z = m ^ 2 - m * n + n ^ 2 ∧
-  ((X = m ^ 2 - n ^ 2 ∧ Y = 2 * m * n - n ^ 2) ∨
-   (Y = m ^ 2 - n ^ 2 ∧ X = 2 * m * n - n ^ 2))
+structure RawSquareBranch (A N S m n : ℤ) : Prop where
+  n_pos : 0 < n
+  n_lt_m : n < m
+  cop_mn : Int.gcd m n = 1
+  hA : A ^ 2 = (m - n) * (m + n)
+  hN : N ^ 2 = n * (2 * m - n)
+  hS : S = m ^ 2 - m * n + n ^ 2
+
+structure DividedSquareBranch (A N S m n : ℤ) : Prop where
+  n_pos : 0 < n
+  n_lt_m : n < m
+  cop_mn : Int.gcd m n = 1
+  three_dvd : (3 : ℤ) ∣ m + n
+  hA : 3 * A ^ 2 = (m - n) * (m + n)
+  hN : 3 * N ^ 2 = n * (2 * m - n)
+  hS : 3 * S = m ^ 2 - m * n + n ^ 2
 ```
 
-## First easy lemmas
-
-These are direct and should compile with `ring`/`nlinarith` after minor local namespace adjustment.
+The branch equation itself gives the quartic equation:
 
 ```lean
-lemma EisensteinParam.triple {X Y Z m n : ℤ}
-    (h : EisensteinParam X Y Z m n) :
-    EisensteinTriple X Y Z := by
-  rcases h with ⟨hZ, hXY | hYX⟩
-  · rcases hXY with ⟨hX, hY⟩
-    subst Z; subst X; subst Y
-    unfold EisensteinTriple
-    ring
-  · rcases hYX with ⟨hY, hX⟩
-    subst Z; subst X; subst Y
-    unfold EisensteinTriple
-    ring
-
-lemma EisensteinTriple.symm {X Y Z : ℤ}
-    (h : EisensteinTriple X Y Z) : EisensteinTriple Y X Z := by
-  unfold EisensteinTriple at h ⊢
-  nlinarith
-
-lemma EisensteinParam.symm {X Y Z m n : ℤ}
-    (h : EisensteinParam X Y Z m n) : EisensteinParam Y X Z m n := by
-  rcases h with ⟨hZ, hXY | hYX⟩
-  · exact ⟨hZ, Or.inr ⟨hXY.1, hXY.2⟩⟩
-  · exact ⟨hZ, Or.inl ⟨hYX.1, hYX.2⟩⟩
-```
-
-The unit exception is also worth isolating:
-
-```lean
-lemma EisensteinTriple.unit_of_eq
-    {X Y Z : ℤ} (hX : 0 < X) (hZ : 0 < Z)
-    (hcop : Int.gcd X Y = 1) (hE : EisensteinTriple X Y Z)
-    (hXY : X = Y) : X = 1 ∧ Y = 1 ∧ Z = 1 := by
-  subst Y
-  unfold EisensteinTriple at hE
-  have hZsq : Z ^ 2 = X ^ 2 := by nlinarith
-  have hZX : Z = X := by
-    rcases eq_or_eq_neg_of_sq_eq_sq Z X hZsq with h | h
-    · exact h
-    · nlinarith
-  subst Z
-  have hXabs : X.natAbs = 1 := by
-    -- Usually:
-    --   simpa [Int.gcd_self] using hcop
-    -- If `Int.gcd_self` is not found in this import set, prove it by
-    -- `Nat.dvd_antisymm` from `Int.gcd_dvd_left/right` and `Int.dvd_coe_gcd`.
-    sorry
-  have hX1 : X = 1 := by
-    have hnonneg : 0 ≤ X := le_of_lt hX
-    -- `Int.natAbs_inj_of_nonneg_of_nonneg` is available from `Mathlib.Data.Int.Lemmas`.
-    -- Alternatively `omega` closes this after `have : (X.natAbs : ℤ) = 1 := by exact_mod_cast hXabs`.
-    have : (X.natAbs : ℤ) = 1 := by exact_mod_cast hXabs
-    omega
-  exact ⟨hX1, hX1, hX1⟩
-```
-
-## Odd-second branch: the main local classification
-
-The plan is to prove the parametrization when the second coordinate is odd. If the original `Y` is
-even, primitive coprimality forces `X` odd, so run this lemma on the swapped triple and then use
-`EisensteinParam.symm`.
-
-```lean
-private def P (X Y Z : ℤ) : ℤ := 2 * Z - (2 * X - Y)
-private def Q (X Y Z : ℤ) : ℤ := 2 * Z + (2 * X - Y)
-
-lemma eisenstein_factor_identity {X Y Z : ℤ}
-    (hE : EisensteinTriple X Y Z) :
-    P X Y Z * Q X Y Z = 3 * Y ^ 2 := by
-  unfold P Q EisensteinTriple at hE ⊢
-  nlinarith
-
-lemma eisenstein_factor_pos_left {X Y Z : ℤ}
-    (hY : 0 < Y) (hZ : 0 < Z) (hE : EisensteinTriple X Y Z) :
-    0 < P X Y Z := by
-  unfold P
-  -- Use `(2*Z)^2 - (2*X-Y)^2 = 3*Y^2 > 0`, hence `abs (2*X-Y) < 2*Z`.
-  -- If `2*X-Y ≤ 0`, this is immediate; otherwise compare squares with `sq_lt_sq`.
-  sorry
-
-lemma eisenstein_factor_pos_right {X Y Z : ℤ}
-    (hY : 0 < Y) (hZ : 0 < Z) (hE : EisensteinTriple X Y Z) :
-    0 < Q X Y Z := by
-  unfold Q
-  -- Same proof as `eisenstein_factor_pos_left`, using `-(2*X-Y) < 2*Z`.
-  sorry
-
-lemma eisenstein_factor_odd_left {X Y Z : ℤ}
-    (hYodd : Odd Y) : Odd (P X Y Z) := by
-  unfold P
-  -- `2*Z - 2*X` is even; even + odd is odd.
-  simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using
-    ((even_two_mul (Z - X)).add_odd hYodd)
-
-lemma eisenstein_factor_odd_right {X Y Z : ℤ}
-    (hYodd : Odd Y) : Odd (Q X Y Z) := by
-  unfold Q
-  -- `2*Z + 2*X` is even; even - odd is odd.
-  simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using
-    ((even_two_mul (Z + X)).add_odd hYodd)
-```
-
-The next lemma chooses the correct mod-3 sign. This is where the exceptional unit is used. Without
-excluding `(1,1,1)`, it is false: for `(1,1,1)`, `P = 1` and `Q = 3`.
-
-```lean
-lemma three_dvd_P_of_primitive_odd_second_nonunit
-    {X Y Z : ℤ} (hX : 0 < X) (hY : 0 < Y) (hZ : 0 < Z)
-    (hcop : Int.gcd X Y = 1) (hYodd : Odd Y)
-    (hE : EisensteinTriple X Y Z)
-    (hnotunit : ¬ (X = 1 ∧ Y = 1 ∧ Z = 1)) :
-    (3 : ℤ) ∣ P X Y Z := by
-  -- Work modulo 3.
-  -- From `hE`, `Z^2 ≡ (X+Y)^2 [ZMOD 3]`.
-  -- Hence `3 ∣ Z - (X+Y)` or `3 ∣ Z + (X+Y)`.
-  -- The second sign implies the unit case under positivity + primitivity; rule it out by `hnotunit`.
-  -- Then `3 ∣ Z - X - Y`, equivalent by `ring` to `3 ∣ 2*Z - (2*X - Y)`.
-  -- APIs: `Int.modEq_iff_dvd`, `Int.ModEq.pow`, `Int.ModEq.add`, `Int.ModEq.sub`, `norm_num`.
+theorem RawSquareBranch.quartic {A N S m n : ℤ}
+    (h : RawSquareBranch A N S m n) : EisensteinQuartic A N S := by
+  unfold EisensteinQuartic
+  rw [h.hS]
+  -- Use h.hA and h.hN; `nlinarith` or `ring_nf` after substituting.
+  -- One robust route:
+  --   have hA' : A ^ 2 = m ^ 2 - n ^ 2 := by nlinarith [h.hA]
+  --   have hN' : N ^ 2 = 2*m*n - n ^ 2 := by nlinarith [h.hN]
+  --   nlinarith [hA', hN']
   sorry
 ```
 
-Now extract squares from the factorization. This is the core lemma to make robust. It should use
-`Int.sq_of_gcd_eq_one` exactly as in your other square-extraction work.
+## Raw branch audit details
+
+### Common factor facts
+
+From `0 < n`, `n < m`, and `Int.gcd m n = 1`:
 
 ```lean
-lemma coprime_P_div3_Q_of_primitive_odd_second
-    {X Y Z : ℤ} (hX : 0 < X) (hY : 0 < Y) (hZ : 0 < Z)
-    (hcop : Int.gcd X Y = 1) (hYodd : Odd Y)
-    (hE : EisensteinTriple X Y Z)
-    (hP3 : (3 : ℤ) ∣ P X Y Z) :
-    Int.gcd (P X Y Z / 3) (Q X Y Z) = 1 := by
-  -- Prime-divisor proof.
-  -- Assume a Nat prime `p` divides both. Cast to Int with `Int.natCast_dvd`.
-  -- Use `P*Q = 3*Y^2`, the definitions of `P,Q`, and `hcop` to force `p ∣ X` and `p ∣ Y`, contradiction.
-  -- For `p = 3`, use the chosen sign `hP3` and primitive/nonunit sign lemma to show `¬3 ∣ Q`.
-  -- APIs: `Nat.Prime.not_coprime_iff_dvd`, `Int.Prime.dvd_natAbs_of_coe_dvd_sq`,
-  -- `Int.dvd_coe_gcd`, `Int.natCast_dvd`, `Int.gcd_dvd_left`, `Int.gcd_dvd_right`.
+-- gcd(m-n,m+n) divides 2.
+-- If m,n have opposite parity, it is 1.
+-- If m,n are both odd, it is 2.
+
+-- gcd(n,2*m-n) divides 2.
+-- If n is odd, it is 1.
+-- If n is even, then m is odd and it is 2.
+```
+
+For Lean, prove these as small divisibility/gcd lemmas before square extraction. Suggested residual statements:
+
+```lean
+theorem gcd_m_sub_n_m_add_n_eq_one_of_opp_parity
+    {m n : ℤ} (hn : 0 < n) (hnm : n < m) (hcop : Int.gcd m n = 1)
+    (hpar : Even m ∧ Odd n ∨ Odd m ∧ Even n) :
+    Int.gcd (m - n) (m + n) = 1 := by
+  -- Prime divisor of both divides 2*m and 2*n, hence divides 2.
+  -- Opposite parity makes both factors odd, so 2 cannot divide either.
   sorry
 
-lemma square_extraction_odd_second
-    {X Y Z : ℤ} (hX : 0 < X) (hY : 0 < Y) (hZ : 0 < Z)
-    (hcop : Int.gcd X Y = 1) (hYodd : Odd Y)
-    (hE : EisensteinTriple X Y Z)
-    (hnotunit : ¬ (X = 1 ∧ Y = 1 ∧ Z = 1)) :
-    ∃ n t : ℤ,
-      0 < n ∧ 0 < t ∧ Odd n ∧ Odd t ∧ Int.gcd n t = 1 ∧
-      P X Y Z = 3 * n ^ 2 ∧ Q X Y Z = t ^ 2 ∧ Y = n * t := by
-  have hP3 : (3 : ℤ) ∣ P X Y Z :=
-    three_dvd_P_of_primitive_odd_second_nonunit hX hY hZ hcop hYodd hE hnotunit
-  have hPpos : 0 < P X Y Z := eisenstein_factor_pos_left hY hZ hE
-  have hQpos : 0 < Q X Y Z := eisenstein_factor_pos_right hY hZ hE
-  have hPQ : P X Y Z * Q X Y Z = 3 * Y ^ 2 := eisenstein_factor_identity hE
-  have hcopPQ : Int.gcd (P X Y Z / 3) (Q X Y Z) = 1 :=
-    coprime_P_div3_Q_of_primitive_odd_second hX hY hZ hcop hYodd hE hP3
-  have hprod : (P X Y Z / 3) * Q X Y Z = Y ^ 2 := by
-    -- Use `hP3` to rewrite `P = 3 * (P/3)`, then cancel 3 in `hPQ`.
-    have hPdiv : 3 * (P X Y Z / 3) = P X Y Z := by
-      exact (Int.ediv_mul_cancel hP3).symm
-    nlinarith
-  obtain ⟨n0, hn0 | hn0⟩ := Int.sq_of_gcd_eq_one hcopPQ hprod
-  · obtain ⟨t0, ht0 | ht0⟩ := Int.sq_of_gcd_eq_one (by simpa [Int.gcd_comm] using hcopPQ) (by simpa [mul_comm] using hprod)
-    · let n := |n0|
-      let t := |t0|
-      refine ⟨n, t, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-      · -- `0 < n` from `P/3 > 0` and `P/3 = n0^2`.
-        sorry
-      · -- `0 < t` from `Q > 0` and `Q = t0^2`.
-        sorry
-      · -- Oddness from `P` odd and `P = 3*n^2`.
-        sorry
-      · -- Oddness from `Q` odd and `Q = t^2`.
-        sorry
-      · -- gcd from `hcopPQ`, after `abs`.
-        sorry
-      · calc
-          P X Y Z = 3 * (P X Y Z / 3) := by rw [Int.ediv_mul_cancel hP3, mul_comm]
-          _ = 3 * n ^ 2 := by
-            -- `hn0 : P/3 = n0^2`, `n = |n0|`.
-            simp [n, hn0, sq_abs]
-      · calc
-          Q X Y Z = t ^ 2 := by
-            -- `ht0 : Q = t0^2`, `t = |t0|`.
-            simp [t, ht0, sq_abs]
-      · -- From `Y^2 = (n*t)^2` and positivity, `Y = n*t`.
-        have hYsq : Y ^ 2 = (n * t) ^ 2 := by
-          -- combine `hprod`, `hn0`, `ht0`.
-          sorry
-        rcases eq_or_eq_neg_of_sq_eq_sq Y (n * t) hYsq with h | h
-        · exact h
-        · have hntpos : 0 < n * t := mul_pos ‹0 < n› ‹0 < t›
-          nlinarith
-    · -- Negative square branch contradicts `0 < Q`.
-      exfalso
-      have : Q X Y Z ≤ 0 := by rw [ht0]; exact neg_nonpos.mpr (sq_nonneg t0)
-      nlinarith
-  · -- Negative square branch contradicts `0 < P/3`.
-    exfalso
-    have hPdivpos : 0 < P X Y Z / 3 := by
-      -- `P = 3*(P/3)` and `0<P`.
-      sorry
-    have : P X Y Z / 3 ≤ 0 := by rw [hn0]; exact neg_nonpos.mpr (sq_nonneg n0)
-    nlinarith
+theorem gcd_m_sub_n_m_add_n_eq_two_of_odd_odd
+    {m n : ℤ} (hn : 0 < n) (hnm : n < m) (hcop : Int.gcd m n = 1)
+    (hm : Odd m) (hnodd : Odd n) :
+    Int.gcd (m - n) (m + n) = 2 := by
+  -- Same divisibility bound, and both factors are even but not divisible by 4 together.
+  sorry
+
+theorem gcd_n_two_m_sub_n_eq_one_of_odd_n
+    {m n : ℤ} (hcop : Int.gcd m n = 1) (hnodd : Odd n) :
+    Int.gcd n (2 * m - n) = 1 := by
+  -- Common prime divides n and 2*m, hence divides 2; odd n excludes 2.
+  sorry
+
+theorem gcd_half_n_half_two_m_sub_n_eq_one_of_even_n
+    {m n : ℤ} (hn : 0 < n) (hcop : Int.gcd m n = 1) (hneven : Even n) :
+    Int.gcd (n / 2) ((2 * m - n) / 2) = 1 := by
+  -- First show m odd; both n and 2*m-n have exactly one common factor 2.
+  sorry
 ```
 
-Finally convert `n,t` to `m,n` by `t = 2*m - n`. Since both `n` and `t` are odd, `(t+n)/2` is an integer and is the desired `m`.
+Use `Int.sq_of_gcd_eq_one` or the earlier helper
+`Int.exists_pos_sq_and_sq_of_mul_eq_sq_of_pos_of_isCoprime` for the square extractions.
+
+## Case I: `n` even
+
+Correct formulas:
 
 ```lean
-lemma odd_second_param_nonunit
-    {X Y Z : ℤ} (hX : 0 < X) (hY : 0 < Y) (hZ : 0 < Z)
-    (hcop : Int.gcd X Y = 1) (hYodd : Odd Y)
-    (hE : EisensteinTriple X Y Z)
-    (hnotunit : ¬ (X = 1 ∧ Y = 1 ∧ Z = 1)) :
-    ∃ m n : ℤ, 0 < n ∧ n < m ∧ Int.gcd m n = 1 ∧ ¬ (3 : ℤ) ∣ m + n ∧
-      (Z = m ^ 2 - m * n + n ^ 2 ∧
-       X = m ^ 2 - n ^ 2 ∧ Y = 2 * m * n - n ^ 2) := by
-  obtain ⟨n, t, hnpos, htpos, hnodd, htodd, hntcop, hP, hQ, hYnt⟩ :=
-    square_extraction_odd_second hX hY hZ hcop hYodd hE hnotunit
-  have htn_even : Even (t + n) := htodd.add_odd hnodd
-  let m : ℤ := (t + n) / 2
-  have hm_def : 2 * m = t + n := by
-    -- `htn_even` and `Int.ediv_mul_cancel`.
-    rcases htn_even with ⟨k, hk⟩
-    change 2 * ((t + n) / 2) = t + n
-    rw [hk]
-    ring
-  have ht_eq : t = 2 * m - n := by nlinarith
-
-  have hY_formula : Y = 2 * m * n - n ^ 2 := by
-    rw [hYnt, ht_eq]
-    ring
-  have hX_formula : X = m ^ 2 - n ^ 2 := by
-    -- Subtract `P = 3*n^2` from `Q = t^2`:
-    -- `4*X - 2*Y = t^2 - 3*n^2`, then use `Y=n*t` and `t=2*m-n`.
-    unfold P Q at hP hQ
-    nlinarith [hY_formula]
-  have hZ_formula : Z = m ^ 2 - m * n + n ^ 2 := by
-    -- Add `P = 3*n^2` and `Q = t^2`:
-    -- `4*Z = t^2 + 3*n^2`, then use `t=2*m-n`.
-    unfold P Q at hP hQ
-    nlinarith
-  have hmn_coprime : Int.gcd m n = 1 := by
-    -- Since `t = 2*m-n`, `gcd n t = gcd n (2*m)`.
-    -- Also `n` is odd, so `gcd n 2 = 1`; conclude from `hntcop`.
-    -- Useful APIs: `Int.gcd_add_mul_left_left/right`, `Int.isCoprime_two_left/right`,
-    -- `Int.isCoprime_iff_gcd_eq_one`.
-    sorry
-  have hmn_gt : n < m := by
-    -- From `X = m^2 - n^2` and `0 < X`, with `0 < n` and `0 < m`.
-    -- A simpler route: prove `n < t` from `X = (t^2 - n^2)/4`, then `2*m=t+n`.
-    sorry
-  have h3 : ¬ (3 : ℤ) ∣ m + n := by
-    -- If `3 ∣ m+n`, then `3 ∣ t = 2*m-n`; hence `3 ∣ Q = t^2`.
-    -- This contradicts the coprime/extraction lemma, since `P = 3*n^2` is the only factor carrying 3.
-    sorry
-  exact ⟨m, n, hnpos, hmn_gt, hmn_coprime, h3,
-    hZ_formula, hX_formula, hY_formula⟩
+n = 2 * c ^ 2
+2 * m - n = 2 * d ^ 2
+m - n = a ^ 2
+m + n = b ^ 2
+b - a = 2 * e ^ 2
+b + a = 2 * f ^ 2
+c = e * f
 ```
 
-## Final corrected theorem
+Then
 
 ```lean
-theorem eisensteinTriple_primitive_param_or_unit
-    {X Y Z : ℤ} (hX : 0 < X) (hY : 0 < Y) (hZ : 0 < Z)
-    (hcop : Int.gcd X Y = 1)
-    (hE : EisensteinTriple X Y Z) :
-    (X = 1 ∧ Y = 1 ∧ Z = 1) ∨
-      ∃ m n : ℤ, 0 < n ∧ n < m ∧ Int.gcd m n = 1 ∧ ¬ (3 : ℤ) ∣ m + n ∧
-        EisensteinParam X Y Z m n := by
-  by_cases hXY : X = Y
-  · left
-    exact EisensteinTriple.unit_of_eq hX hZ hcop hE hXY
-  · right
-    -- Primitive parity split. If both were even, gcd would not be 1.
-    -- If both are odd, that is allowed; choose the `Y`-odd branch.
-    rcases Int.even_or_odd Y with hYeven | hYodd
-    · have hXodd : Odd X := by
-        by_contra hXnotodd
-        have hXeven : Even X := Int.not_odd_iff_even.mp hXnotodd
-        -- `2 ∣ X` and `2 ∣ Y` contradict `Int.gcd X Y = 1`.
-        have hbad : 2 ∣ (Int.gcd X Y : ℤ) :=
-          Int.dvd_coe_gcd hXeven.two_dvd hYeven.two_dvd
-        rw [hcop] at hbad
-        norm_num at hbad
-      obtain ⟨m, n, hn, hnm, hmn, h3, hZ, hY_formula, hX_formula⟩ :=
-        odd_second_param_nonunit hY hX hZ (by simpa [Int.gcd_comm] using hcop)
-          hXodd hE.symm ?_
-      · exact ⟨m, n, hn, hnm, hmn, h3,
-          ⟨hZ, Or.inr ⟨hY_formula, hX_formula⟩⟩⟩
-      · intro hunit_swapped
-        exact hXY hunit_swapped.2.1.symm.trans hunit_swapped.1
-    · obtain ⟨m, n, hn, hnm, hmn, h3, hZ, hX_formula, hY_formula⟩ :=
-        odd_second_param_nonunit hX hY hZ hcop hYodd hE ?_
-      · exact ⟨m, n, hn, hnm, hmn, h3,
-          ⟨hZ, Or.inl ⟨hX_formula, hY_formula⟩⟩⟩
-      · intro hunit
-        exact hXY hunit.1.trans hunit.2.1.symm
+d ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4
+N = 2 * e * f * d
+0 < e ∧ e < f
+Int.gcd e f = 1
+f < N
+```
 
-/-- Original theorem with the needed non-unit hypothesis. -/
-theorem eisensteinTriple_primitive_param_of_ne
-    {X Y Z : ℤ} (hX : 0 < X) (hY : 0 < Y) (hZ : 0 < Z)
-    (hcop : Int.gcd X Y = 1) (hXY : X ≠ Y)
-    (hE : EisensteinTriple X Y Z) :
-    ∃ m n : ℤ, 0 < n ∧ n < m ∧ Int.gcd m n = 1 ∧ ¬ (3 : ℤ) ∣ m + n ∧
-      EisensteinParam X Y Z m n := by
-  rcases eisensteinTriple_primitive_param_or_unit hX hY hZ hcop hE with hunit | hparam
-  · exact (hXY (hunit.1.trans hunit.2.1.symm)).elim
-  · exact hparam
+The proposed smaller triple `(e,f,|d|)` is sound; in Lean choose the positive root `d`, so no `abs` is needed.
+
+Residual theorem statement:
+
+```lean
+theorem raw_branch_even_n_descends
+    {A N S m n : ℤ} (hNpos : 0 < N)
+    (h : RawSquareBranch A N S m n) (hneven : Even n) :
+    ∃ e f d : ℤ,
+      0 < e ∧ e < f ∧ 0 < d ∧ Int.gcd e f = 1 ∧
+      f < N ∧ EisensteinQuartic e f d ∧
+      ∃ a b c : ℤ,
+        0 < a ∧ 0 < b ∧ 0 < c ∧
+        n = 2 * c ^ 2 ∧
+        2 * m - n = 2 * d ^ 2 ∧
+        m - n = a ^ 2 ∧
+        m + n = b ^ 2 ∧
+        b - a = 2 * e ^ 2 ∧
+        b + a = 2 * f ^ 2 ∧
+        c = e * f := by
+  -- 1. `hneven` + `h.cop_mn` gives `Odd m`.
+  -- 2. Extract `n/2 = c^2`, `(2*m-n)/2 = d^2` from h.hN.
+  -- 3. Extract `m-n = a^2`, `m+n = b^2` from h.hA.
+  -- 4. Since `b^2-a^2 = 2*n = 4*c^2`, get
+  --      ((b-a)/2) * ((b+a)/2) = c^2.
+  -- 5. The two factors are coprime, hence squares: `(b-a)/2=e^2`, `(b+a)/2=f^2`.
+  -- 6. Ring gives `d^2 = e^4 - e^2*f^2 + f^4`.
+  -- 7. Positivity gives `0<e<f`, `N=2*e*f*d`, hence `f<N`.
+  sorry
+```
+
+A particularly useful local identity for the final ring step:
+
+```lean
+example {a b c d e f m n : ℤ}
+    (hn : n = 2 * c ^ 2)
+    (hd : 2 * m - n = 2 * d ^ 2)
+    (ha : m - n = a ^ 2)
+    (hb : m + n = b ^ 2)
+    (hba : b - a = 2 * e ^ 2)
+    (hab : b + a = 2 * f ^ 2) :
+    d ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4 := by
+  nlinarith [hn, hd, ha, hb, hba, hab]
+```
+
+## Case II: `n` odd and `m` even
+
+This case really is impossible. The clean contradiction is:
+
+* `m-n` and `m+n` are positive, odd, coprime factors of `A^2`.
+* Hence `m-n = a^2` and `m+n = b^2` with `a,b` odd.
+* Odd squares are `1 mod 8`, so `2*n = (m+n)-(m-n)` is divisible by `8`.
+* Thus `4 ∣ n`, contradicting `Odd n`.
+
+Residual theorem statement:
+
+```lean
+theorem raw_branch_n_odd_m_even_impossible
+    {A N S m n : ℤ}
+    (h : RawSquareBranch A N S m n) (hnodd : Odd n) (hmeven : Even m) :
+    False := by
+  -- Extract squares from `(m-n)*(m+n)=A^2` using gcd=1.
+  -- Then use odd-square mod 8.
+  -- Reusable helper:
+  --   odd_sq_modEq_one_mod_eight : Odd x -> x^2 ≡ 1 [ZMOD 8]
+  sorry
+```
+
+Use this robust helper, already useful elsewhere:
+
+```lean
+private theorem odd_sq_modEq_one_mod_eight {x : ℤ} (hx : Odd x) :
+    x ^ 2 ≡ 1 [ZMOD 8] := by
+  rcases hx with ⟨k, rfl⟩
+  rw [Int.modEq_iff_dvd]
+  rcases Int.two_dvd_mul_add_one k with ⟨t, ht⟩
+  refine ⟨-t, ?_⟩
+  calc
+    1 - (2 * k + 1) ^ 2 = -4 * (k * (k + 1)) := by ring
+    _ = 8 * (-t) := by
+      rw [ht]
+      ring
+```
+
+## Case III: `n` odd and `m` odd
+
+Correct formulas:
+
+```lean
+n = c ^ 2
+2 * m - n = d ^ 2
+m - n = 2 * a ^ 2
+m + n = 2 * b ^ 2
+d - c = 2 * e ^ 2
+d + c = 2 * f ^ 2
+a = e * f
+```
+
+Then
+
+```lean
+b ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4
+N = c * d = (f ^ 2 - e ^ 2) * (f ^ 2 + e ^ 2)
+0 < e ∧ e < f
+Int.gcd e f = 1
+f < N
+```
+
+The proposed smaller triple `(e,f,|b|)` is sound; again choose `0 < b`, so no `abs` is needed.
+
+Residual theorem statement:
+
+```lean
+theorem raw_branch_odd_odd_descends
+    {A N S m n : ℤ} (hNpos : 0 < N)
+    (h : RawSquareBranch A N S m n) (hnodd : Odd n) (hmodd : Odd m) :
+    ∃ e f b : ℤ,
+      0 < e ∧ e < f ∧ 0 < b ∧ Int.gcd e f = 1 ∧
+      f < N ∧ EisensteinQuartic e f b ∧
+      ∃ a c d : ℤ,
+        0 < a ∧ 0 < c ∧ 0 < d ∧
+        n = c ^ 2 ∧
+        2 * m - n = d ^ 2 ∧
+        m - n = 2 * a ^ 2 ∧
+        m + n = 2 * b ^ 2 ∧
+        d - c = 2 * e ^ 2 ∧
+        d + c = 2 * f ^ 2 ∧
+        a = e * f := by
+  -- 1. Extract `n=c^2`, `2*m-n=d^2` from h.hN, since gcd is 1.
+  -- 2. Extract `(m-n)/2=a^2`, `(m+n)/2=b^2` from h.hA, since common gcd is 2.
+  -- 3. From `d^2-c^2 = 2*(m-n) = 4*a^2`, split
+  --      ((d-c)/2) * ((d+c)/2) = a^2.
+  -- 4. The two factors are coprime, hence squares: `(d-c)/2=e^2`, `(d+c)/2=f^2`.
+  -- 5. Ring gives `b^2 = e^4 - e^2*f^2 + f^4`.
+  -- 6. Positivity gives `0<e<f`, `N=(f^2-e^2)*(f^2+e^2)`, hence `f<N`.
+  sorry
+```
+
+Useful local identity:
+
+```lean
+example {a b c d e f m n : ℤ}
+    (hn : n = c ^ 2)
+    (hd : 2 * m - n = d ^ 2)
+    (ha : m - n = 2 * a ^ 2)
+    (hb : m + n = 2 * b ^ 2)
+    (hda : d - c = 2 * e ^ 2)
+    (had : d + c = 2 * f ^ 2) :
+    b ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4 := by
+  nlinarith [hn, hd, ha, hb, hda, had]
+```
+
+## Combined raw-branch descent
+
+This is the theorem the proposed branch actually supports:
+
+```lean
+theorem raw_square_branch_descends
+    {A N S m n : ℤ} (hNpos : 0 < N)
+    (h : RawSquareBranch A N S m n) :
+    ∃ A' N' S' : ℤ,
+      0 < A' ∧ 0 < N' ∧ 0 < S' ∧
+      Int.gcd A' N' = 1 ∧ N' < N ∧ EisensteinQuartic A' N' S' := by
+  rcases Int.even_or_odd n with hneven | hnodd
+  · obtain ⟨e, f, d, he, hef, hd, hef_cop, hfN, hquartic, _⟩ :=
+      raw_branch_even_n_descends hNpos h hneven
+    exact ⟨e, f, d, he, lt_trans he hef, hd, hef_cop, hfN, hquartic⟩
+  · rcases Int.even_or_odd m with hmeven | hmodd
+    · exact (raw_branch_n_odd_m_even_impossible h hnodd hmeven).elim
+    · obtain ⟨e, f, b, he, hef, hb, hef_cop, hfN, hquartic, _⟩ :=
+        raw_branch_odd_odd_descends hNpos h hnodd hmodd
+      exact ⟨e, f, b, he, lt_trans he hef, hb, hef_cop, hfN, hquartic⟩
+```
+
+If the branch is obtained with `A` and `N` swapped, the same theorem gives a smaller second coordinate relative to the swapped old second coordinate, i.e. `N' < A` in the original names. Therefore a global minimal-counterexample proof should minimize a symmetric measure such as `max A N` or `A * N`, or explicitly swap the original counterexample before applying the branch.
+
+## Missing divided-by-3 sector
+
+This is the part the proposed descent does **not** cover. Do not silently assume it away.
+
+A corrected parametrization theorem for primitive quartic-square Eisenstein triples should return these alternatives:
+
+```lean
+theorem primitive_quartic_square_param_branches
+    {A N S : ℤ} (hA : 0 < A) (hN : 0 < N) (hS : 0 < S)
+    (hcop : Int.gcd A N = 1)
+    (hQ : EisensteinQuartic A N S) :
+    (A = 1 ∧ N = 1 ∧ S = 1) ∨
+      (∃ m n : ℤ, RawSquareBranch A N S m n) ∨
+      (∃ m n : ℤ, RawSquareBranch N A S m n) ∨
+      (∃ m n : ℤ, DividedSquareBranch A N S m n) ∨
+      (∃ m n : ℤ, DividedSquareBranch N A S m n) := by
+  -- This must come from the corrected Eisenstein-triple parametrization.
+  -- The raw branches correspond to `¬ (3 : ℤ) ∣ m+n`.
+  -- The divided branches correspond to `(3 : ℤ) ∣ m+n`.
+  sorry
+```
+
+To finish a global descent, prove one of the following residual theorems. The first is stronger; the second is enough.
+
+```lean
+/-- Strong obstruction: no non-unit divided branch has both coordinates squares. -/
+theorem divided_square_branch_unit
+    {A N S m n : ℤ} (hA : 0 < A) (hN : 0 < N) (hS : 0 < S)
+    (hcop : Int.gcd A N = 1)
+    (h : DividedSquareBranch A N S m n) :
+    A = 1 ∧ N = 1 ∧ S = 1 := by
+  -- Not implied by parity alone. This is a real residual theorem.
+  -- Start from:
+  --   3*A^2 = (m-n)*(m+n), 3*N^2 = n*(2*m-n), 3 ∣ m+n.
+  -- The prime 3 occurs in `m+n` and `2*m-n`, not in `m-n` or `n`.
+  -- Analyze the remaining gcd-1 or gcd-2 factors as in the raw branch.
+  sorry
+
+/-- Weaker but sufficient: the divided branch either is the unit or descends. -/
+theorem divided_square_branch_unit_or_descends
+    {A N S m n : ℤ} (hA : 0 < A) (hN : 0 < N) (hS : 0 < S)
+    (hcop : Int.gcd A N = 1)
+    (h : DividedSquareBranch A N S m n) :
+    (A = 1 ∧ N = 1 ∧ S = 1) ∨
+      ∃ A' N' S' : ℤ,
+        0 < A' ∧ 0 < N' ∧ 0 < S' ∧
+        Int.gcd A' N' = 1 ∧ N' < N ∧ EisensteinQuartic A' N' S' := by
+  -- Use this if the strong obstruction is not convenient.
+  sorry
+```
+
+## Bottom line
+
+The proposed case formulas are **correct for the raw branch** and the inequalities `f < N` are valid in Cases I and III. The smaller triples are primitive and nontrivial if positive square roots are chosen.
+
+But the proof is not globally sound until the unit and divided-by-3 sectors are added to the statement and handled. The safest Lean roadmap is:
+
+1. Prove `raw_branch_even_n_descends`.
+2. Prove `raw_branch_n_odd_m_even_impossible`.
+3. Prove `raw_branch_odd_odd_descends`.
+4. Combine them into `raw_square_branch_descends`.
+5. Fix the Eisenstein parametrization theorem so it returns raw/divided/swapped/unit branches.
+6. Prove `divided_square_branch_unit` or `divided_square_branch_unit_or_descends`.
+7. Only then state the global primitive Eisenstein quartic descent theorem.
 
 end MazurProof.QuarticEisenstein
 ```
-
-## Practical implementation order
-
-1. Add `EisensteinParam.triple`, `EisensteinTriple.symm`, and `EisensteinParam.symm`.
-2. Add `EisensteinTriple.unit_of_eq`; this fixes the false original theorem.
-3. Prove the algebraic factor identity and positivity of `P,Q`.
-4. Prove the mod-3 sign lemma `three_dvd_P_of_primitive_odd_second_nonunit`.
-5. Prove `coprime_P_div3_Q_of_primitive_odd_second` by prime-divisor contradiction.
-6. Use `Int.sq_of_gcd_eq_one` in `square_extraction_odd_second`.
-7. Convert `n,t` to `m,n` using `m=(t+n)/2` in `odd_second_param_nonunit`.
-8. Finish by parity-splitting on `Y`; if `Y` is even, apply the odd-second theorem to `(Y,X,Z)` and wrap with the swapped branch of `EisensteinParam`.
