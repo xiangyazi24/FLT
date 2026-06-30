@@ -1,61 +1,113 @@
-# Q2449-RETRY AP-to-FLT4 bridge proof route
+# Q2452 primitive centered four-square AP normalization
 
-## Executive answer
+## Verdict
 
-The proposed residual
+The intended normalization is mathematically correct, but the proposed structure is **too strong for the first construction step**.  After reversing, dividing by the common gcd of the four roots, and centering, one can indeed derive:
 
-```lean
-def FourSquaresAPToFermat42Bridge : Prop :=
-  ∀ {w x y z : ℤ},
-    IntFourSqAP w x y z →
-    ¬ (w ^ 2 = x ^ 2 ∧ x ^ 2 = y ^ 2 ∧ y ^ 2 = z ^ 2) →
-    ∃ a b c : ℤ,
-      a ≠ 0 ∧ b ≠ 0 ∧ a ^ 4 + b ^ 4 = c ^ 2
-```
+* positive common difference;
+* common difference divisible by `4` (in fact by `8` once roots are odd);
+* all primitive roots odd;
+* pairwise coprimality of the primitive roots.
 
-is not the right Lean frontier.  Since the antecedent is expected to be impossible, the statement is classically true only vacuously after proving the four-square-AP theorem itself.  I do not know a direct algebraic construction of such `a,b,c` from an arbitrary nonconstant four-square AP.  The standard AP algebra gives a Pythagorean triangle with one **square** leg, not an equation `a^4 + b^4 = c^2`.
+However, for Lean this should be built in two layers:
 
-The corrected route is:
+1. construct a **weak primitive centered AP** with a single global root-gcd condition;
+2. prove parity and pairwise-coprime lemmas from that weak object;
+3. package the strong `PrimitiveCenteredFourSqAP` only after those lemmas are available.
 
-```lean
-arbitrary integer AP
-  → primitive positive/centered four-square AP
-  → Pythagorean triple identity
-  → Pythagorean parameterization and gcd splitting
-  → descent to a smaller primitive centered AP
-  → contradiction by well-founded descent
-```
-
-So the useful residual should be a primitive-centered descent theorem, not `FourSquaresAPToFermat42Bridge`.
+There is no genuine counterexample to the proposed strong conditions.  The issue is proof engineering: pairwise `Int.gcd p q = 1` fields are awkward to construct directly during gcd division.  They should be derived from a global root gcd plus AP equations.
 
 ---
 
-## 0. Base definitions
+## Recommended definitions
+
+Keep the public AP predicates:
 
 ```lean
-import Mathlib.NumberTheory.FLT.Four
-import Mathlib.NumberTheory.PythagoreanTriples
 import Mathlib.Tactic
+import Mathlib.NumberTheory.PythagoreanTriples
 
 def IntFourSqAP (w x y z : ℤ) : Prop :=
   x^2 - w^2 = y^2 - x^2 ∧ y^2 - x^2 = z^2 - y^2
 
 def FourSqAPConst (w x y z : ℤ) : Prop :=
-  w ^ 2 = x ^ 2 ∧ x ^ 2 = y ^ 2 ∧ y ^ 2 = z ^ 2
+  w^2 = x^2 ∧ x^2 = y^2 ∧ y^2 = z^2
 ```
 
-The final integer theorem should be shaped as:
+Use a global root gcd for the first normalization layer:
 
 ```lean
-def FourIntSquaresAPConst : Prop :=
-  ∀ {w x y z : ℤ}, IntFourSqAP w x y z → FourSqAPConst w x y z
+def rootGCD4 (a b c d : ℤ) : ℕ :=
+  Nat.gcd a.natAbs (Nat.gcd b.natAbs (Nat.gcd c.natAbs d.natAbs))
+
+structure WeakPrimitiveCenteredFourSqAP where
+  X : ℤ
+  N : ℤ
+  hNpos : 0 < N
+  p : ℤ
+  q : ℤ
+  r : ℤ
+  s : ℤ
+  hp : p^2 = X - 6*N
+  hq : q^2 = X - 2*N
+  hr : r^2 = X + 2*N
+  hs : s^2 = X + 6*N
+  hroot : rootGCD4 p q r s = 1
+```
+
+Then define the strong structure as a derived package:
+
+```lean
+structure PrimitiveCenteredFourSqAP extends WeakPrimitiveCenteredFourSqAP where
+  hpq : Int.gcd p q = 1
+  hpr : Int.gcd p r = 1
+  hps : Int.gcd p s = 1
+  hqr : Int.gcd q r = 1
+  hqs : Int.gcd q s = 1
+  hrs : Int.gcd r s = 1
+  hp_odd : p % 2 = 1
+  hq_odd : q % 2 = 1
+  hr_odd : r % 2 = 1
+  hs_odd : s % 2 = 1
+```
+
+This is the clean theorem target:
+
+```lean
+def ArbitraryAP_to_weak_primitive_centered : Prop :=
+  ∀ {w x y z : ℤ},
+    IntFourSqAP w x y z →
+    ¬ FourSqAPConst w x y z →
+    Nonempty WeakPrimitiveCenteredFourSqAP
+
+def WeakPrimitiveCentered_to_strong : Prop :=
+  ∀ S : WeakPrimitiveCenteredFourSqAP,
+    Nonempty PrimitiveCenteredFourSqAP
+
+def ArbitraryAP_to_primitive_centered : Prop :=
+  ∀ {w x y z : ℤ},
+    IntFourSqAP w x y z →
+    ¬ FourSqAPConst w x y z →
+    Nonempty PrimitiveCenteredFourSqAP
+```
+
+Then the final wrapper is tiny:
+
+```lean
+theorem ArbitraryAP_to_primitive_centered_of_weak
+    (hweak : ArbitraryAP_to_weak_primitive_centered)
+    (hstrong : WeakPrimitiveCentered_to_strong) :
+    ArbitraryAP_to_primitive_centered := by
+  intro w x y z hAP hnonconst
+  rcases hweak hAP hnonconst with ⟨S⟩
+  exact hstrong S
 ```
 
 ---
 
-## 1. Edge cases and AP algebra
+## DAG step 1: adjacent equality forces constant
 
-### 1.1 Adjacent repeat closes immediately
+This is compile-ready and should close with `nlinarith`.
 
 ```lean
 theorem intFourSqAP_const_of_adjacent_eq
@@ -68,9 +120,24 @@ theorem intFourSqAP_const_of_adjacent_eq
   rcases hzero with h | h | h <;> nlinarith
 ```
 
-This is pure `nlinarith`.
+Useful companion:
 
-### 1.2 Reversal handles negative common difference
+```lean
+theorem intFourSqAP_nonconst_commonDiff_ne_zero
+    {w x y z : ℤ}
+    (hAP : IntFourSqAP w x y z)
+    (hnonconst : ¬ FourSqAPConst w x y z) :
+    x^2 - w^2 ≠ 0 := by
+  intro h
+  apply hnonconst
+  apply intFourSqAP_const_of_adjacent_eq hAP
+  left
+  nlinarith
+```
+
+---
+
+## DAG step 2: reverse AP to make positive common difference
 
 ```lean
 theorem intFourSqAP_reverse
@@ -82,386 +149,276 @@ theorem intFourSqAP_reverse
   constructor <;> nlinarith
 ```
 
-Also pure `nlinarith`.
-
-### 1.3 Centering convention
-
-For a positive common difference divisible by `4`, set the four square terms as
-
-```text
-p^2 = X - 6*N
-q^2 = X - 2*N
-r^2 = X + 2*N
-s^2 = X + 6*N
-```
-
-so their common difference is `4*N`.
-
-The centering equations are all `ring`/`nlinarith`; the only nontrivial work is proving that a nonconstant primitive AP can be normalized so the common difference is positive and divisible by `4`.
-
----
-
-## 2. Correct primitive positive statement
-
-Use this as the honest normalized object:
+Recommended normalized theorem shape:
 
 ```lean
-structure PrimitiveCenteredFourSqAP where
-  X : ℤ
-  N : ℤ
-  hNpos : 0 < N
-  p : ℤ
-  q : ℤ
-  r : ℤ
-  s : ℤ
-  hp : p^2 = X - 6*N
-  hq : q^2 = X - 2*N
-  hr : r^2 = X + 2*N
-  hs : s^2 = X + 6*N
-  hp0 : p ≠ 0
-  hq0 : q ≠ 0
-  hr0 : r ≠ 0
-  hs0 : s ≠ 0
-  -- primitive normalization: pairwise coprime roots
-  hpq : Int.gcd p q = 1
-  hpr : Int.gcd p r = 1
-  hps : Int.gcd p s = 1
-  hqr : Int.gcd q r = 1
-  hqs : Int.gcd q s = 1
-  hrs : Int.gcd r s = 1
-  -- parity normalization in the primitive nonconstant case
-  hp_odd : p % 2 = 1
-  hq_odd : q % 2 = 1
-  hr_odd : r % 2 = 1
-  hs_odd : s % 2 = 1
-```
-
-Reduction from arbitrary AP:
-
-```lean
-def ArbitraryAP_to_primitive_centered : Prop :=
+def AP_or_reversed_positive_diff : Prop :=
   ∀ {w x y z : ℤ},
     IntFourSqAP w x y z →
     ¬ FourSqAPConst w x y z →
-    Nonempty PrimitiveCenteredFourSqAP
+    ∃ p q r s Δ : ℤ,
+      0 < Δ ∧
+      q^2 - p^2 = Δ ∧
+      r^2 - q^2 = Δ ∧
+      s^2 - r^2 = Δ ∧
+      ((p = w ∧ q = x ∧ r = y ∧ s = z) ∨
+       (p = z ∧ q = y ∧ r = x ∧ s = w))
 ```
 
-This reduction is not `ring`; it is normalization bookkeeping:
-
-1. Define `δ = x^2 - w^2`.
-2. If `δ = 0`, close by `intFourSqAP_const_of_adjacent_eq`.
-3. If `δ < 0`, reverse the quadruple using `intFourSqAP_reverse`.
-4. Divide the roots by their common gcd.  The AP difference divides by `g^2`.
-5. In the primitive nonconstant case, prove all roots are odd and the common difference is divisible by `4`.  This is a parity/mod-8 and gcd argument.
-6. Write the positive common difference as `4*N` and define the centered `X` by the average convention above.
-
-The only hard pieces in this reduction are gcd/divisibility normalization and the primitive parity lemma.  The centering equalities are `ring`/`nlinarith`.
+Proof: set `δ = x^2 - w^2`; if `0 < δ`, use original order; if `δ < 0`, use reversed order; `δ ≠ 0` follows from the previous step.  This is `lt_trichotomy` plus `nlinarith`.
 
 ---
 
-## 3. Exact AP-to-Pythagorean equations
+## DAG step 3: divide by the common root gcd
 
-For a primitive centered AP, define
+Use `rootGCD4`, not six pairwise gcds, for the division step.
 
-```lean
-Y = p*q*r*s
-E = 16*N^2
-H = X^2 - 20*N^2
-```
-
-The central product identity is:
+The exact theorem should be:
 
 ```lean
-theorem centered_product_identity
-    {X N p q r s : ℤ}
-    (hp : p^2 = X - 6*N)
-    (hq : q^2 = X - 2*N)
-    (hr : r^2 = X + 2*N)
-    (hs : s^2 = X + 6*N) :
-    (p*q*r*s)^2 = (X^2 - 36*N^2) * (X^2 - 4*N^2) := by
-  nlinarith [hp, hq, hr, hs]
+def RootGCD4Division : Prop :=
+  ∀ {w x y z Δ : ℤ},
+    0 < Δ →
+    x^2 - w^2 = Δ →
+    y^2 - x^2 = Δ →
+    z^2 - y^2 = Δ →
+    ∃ g p q r s Δ' : ℤ,
+      0 < g ∧ 0 < Δ' ∧
+      w = g*p ∧ x = g*q ∧ y = g*r ∧ z = g*s ∧
+      q^2 - p^2 = Δ' ∧
+      r^2 - q^2 = Δ' ∧
+      s^2 - r^2 = Δ' ∧
+      rootGCD4 p q r s = 1
 ```
 
-If `nlinarith` is slow, split into two `ring` identities:
+Implementation route:
 
 ```lean
-have hps : (p*s)^2 = X^2 - 36*N^2 := by nlinarith [hp, hs]
-have hqr : (q*r)^2 = X^2 - 4*N^2 := by nlinarith [hq, hr]
--- then normalize `(p*q*r*s)^2 = (p*s)^2 * (q*r)^2` by `ring`.
+let G : ℕ := rootGCD4 w x y z
+let g : ℤ := (G : ℤ)
 ```
 
-The exact Pythagorean identity is:
+Key facts:
+
+* `G ≠ 0`: because `Δ > 0` implies not all roots are zero.
+* `G ∣ w.natAbs`, `G ∣ x.natAbs`, `G ∣ y.natAbs`, `G ∣ z.natAbs` by repeated `Nat.gcd_dvd_left/right`.
+* Convert those to integer divisibility and choose quotients `p q r s`.
+* `g^2 ∣ Δ` because `Δ = x^2 - w^2` and both `x,w` are multiples of `g`.
+* Set `Δ' = Δ / g^2` and prove the new AP equations by `ring` after substituting `w = g*p`, etc.
+* `rootGCD4 p q r s = 1`: if a natural `d` divides all four quotients, then `G*d` divides all four original roots, contradicting maximality of `G` unless `d=1`.
+
+Useful APIs:
 
 ```lean
-theorem centered_pythagorean_identity
-    {X N Y : ℤ}
-    (hY : Y^2 = (X^2 - 36*N^2) * (X^2 - 4*N^2)) :
-    Y^2 + (16*N^2)^2 = (X^2 - 20*N^2)^2 := by
-  rw [hY]
-  ring
+Nat.gcd_dvd_left
+Nat.gcd_dvd_right
+Nat.dvd_gcd
+Int.natAbs_mul
+Int.natAbs_eq_zero
+Int.natAbs_dvd
+Int.dvd_natAbs
+Int.ofNat_dvd
+Int.natCast_dvd_natCast
+Int.ediv_mul_cancel
+mul_pos
+pow_pos
 ```
 
-Thus:
-
-```lean
-def CenteredAP_to_pythagorean_triple : Prop :=
-  ∀ S : PrimitiveCenteredFourSqAP,
-    PythagoreanTriple (S.p*S.q*S.r*S.s) (16*S.N^2) (S.X^2 - 20*S.N^2)
-```
-
-Proof is `centered_product_identity`, `centered_pythagorean_identity`, then unfold `PythagoreanTriple` and `ring`.
+This is gcd bookkeeping; it is not `ring`/`nlinarith` only.
 
 ---
 
-## 4. Why this is not yet `a^4 + b^4 = c^2`
+## DAG step 4: parity and divisibility by 4/8
 
-The exact equation from the AP is
+The primitive parity theorem should be stated for the weak normalized roots.
+
+```lean
+def WeakPrimitiveAPParity : Prop :=
+  ∀ {p q r s Δ : ℤ},
+    q^2 - p^2 = Δ →
+    r^2 - q^2 = Δ →
+    s^2 - r^2 = Δ →
+    rootGCD4 p q r s = 1 →
+    p % 2 = 1 ∧ q % 2 = 1 ∧ r % 2 = 1 ∧ s % 2 = 1 ∧ 8 ∣ Δ
+```
+
+Why true:
+
+1. Squares mod `4` are only `0` or `1`.
+2. A length-four arithmetic progression in `{0,1}` modulo `4` must be constant modulo `4`; otherwise one of the four residues is `2` or `3`.
+3. Hence `p^2,q^2,r^2,s^2` have the same residue mod `4`, and `4 ∣ Δ`.
+4. If the common square residue is `0`, then all roots are even, contradicting `rootGCD4 p q r s = 1`.
+5. Therefore all roots are odd, i.e. `% 2 = 1` in Lean's nonnegative remainder convention.
+6. Odd squares are `1 mod 8`, hence `8 ∣ Δ`.
+
+Useful implementation options:
+
+* Use `ZMod 4` / `ZMod 8` and `fin_cases`, or
+* use integer `%` with `omega`/`omega`-style finite case splits.
+
+Useful APIs:
+
+```lean
+Int.emod_two_eq_zero_or_one
+Int.dvd_of_emod_eq_zero
+Int.emod_eq_emod_iff_emod_sub_eq_zero
+ZMod
+Fin
+fin_cases
+omega
+```
+
+For a low-friction proof, I recommend two finite residue lemmas:
+
+```lean
+def four_sq_AP_mod4_constant_residue : Prop :=
+  ∀ {a b c d δ : ℤ},
+    b^2 - a^2 = δ → c^2 - b^2 = δ → d^2 - c^2 = δ →
+    a^2 % 4 = b^2 % 4 ∧ b^2 % 4 = c^2 % 4 ∧ c^2 % 4 = d^2 % 4
+
+def odd_sq_diff_dvd8 : Prop :=
+  ∀ {a b δ : ℤ},
+    a % 2 = 1 → b % 2 = 1 → b^2 - a^2 = δ → 8 ∣ δ
+```
+
+The first is a finite mod-4 check.  The second is a finite mod-8 check.
+
+---
+
+## DAG step 5: derive pairwise coprimality from weak primitive data
+
+This is true, but should be a separate theorem rather than a constructor obligation during gcd division.
+
+```lean
+def WeakPrimitiveAPPairwise : Prop :=
+  ∀ {p q r s Δ : ℤ},
+    q^2 - p^2 = Δ →
+    r^2 - q^2 = Δ →
+    s^2 - r^2 = Δ →
+    rootGCD4 p q r s = 1 →
+    p % 2 = 1 → q % 2 = 1 → r % 2 = 1 → s % 2 = 1 →
+    Int.gcd p q = 1 ∧
+    Int.gcd p r = 1 ∧
+    Int.gcd p s = 1 ∧
+    Int.gcd q r = 1 ∧
+    Int.gcd q s = 1 ∧
+    Int.gcd r s = 1
+```
+
+Proof idea by prime divisors:
+
+* If an odd prime `ℓ` divides two roots at distance `1`, then `ℓ ∣ Δ`, hence `ℓ` divides all four square terms and all four roots, contradicting `rootGCD4 = 1`.
+* If the distance is `2`, then `ℓ ∣ 2*Δ`; since roots are odd, `ℓ ≠ 2`, so `ℓ ∣ Δ`, and again `ℓ` divides all roots.
+* If the distance is `3`, then `ℓ ∣ 3*Δ`.  If `ℓ ≠ 3`, conclude `ℓ ∣ Δ`.  If `ℓ = 3`, use square residues mod `3`: from endpoints divisible by `3`, both middle terms force `Δ` and `2*Δ` to be quadratic residues mod `3`; this is impossible unless `3 ∣ Δ`.  Then all four roots are divisible by `3`, contradiction.
+
+Useful APIs:
+
+```lean
+Nat.Prime
+Nat.Prime.dvd_of_dvd_mul_left
+Nat.Prime.dvd_of_dvd_mul_right
+Nat.Prime.not_dvd_one
+Nat.dvd_gcd
+Int.natAbs_dvd_natAbs
+Int.dvd_natAbs
+Int.ofNat_dvd
+Int.gcd_eq_zero_iff
+Int.isCoprime_iff_gcd_eq_one
+```
+
+For Lean, it may be easier to prove pairwise as `Nat.Coprime p.natAbs q.natAbs` first, then convert to `Int.gcd p q = 1`.
+
+---
+
+## DAG step 6: centering
+
+Once the primitive positive AP has common difference `Δ > 0` and `4 ∣ Δ`, centering is pure algebra.
+
+```lean
+def PositivePrimitiveAP_to_centered_weak : Prop :=
+  ∀ {p q r s Δ : ℤ},
+    0 < Δ →
+    q^2 - p^2 = Δ →
+    r^2 - q^2 = Δ →
+    s^2 - r^2 = Δ →
+    rootGCD4 p q r s = 1 →
+    4 ∣ Δ →
+    Nonempty WeakPrimitiveCenteredFourSqAP
+```
+
+Proof skeleton:
+
+```lean
+intro p q r s Δ hΔpos hpq hqr hrs hroot h4
+rcases h4 with ⟨N, hΔ⟩       -- Δ = 4*N, or maybe Δ = N*4 depending on rcases orientation
+have hNpos : 0 < N := by nlinarith
+let X : ℤ := p^2 + 6*N
+refine ⟨{
+  X := X
+  N := N
+  hNpos := hNpos
+  p := p
+  q := q
+  r := r
+  s := s
+  hp := by dsimp [X]; ring
+  hq := by dsimp [X]; nlinarith
+  hr := by dsimp [X]; nlinarith
+  hs := by dsimp [X]; nlinarith
+  hroot := hroot
+}⟩
+```
+
+The identities are:
 
 ```text
-(p*q*r*s)^2 + (16*N^2)^2 = (X^2 - 20*N^2)^2.
+q^2 = p^2 + 4N = (p^2 + 6N) - 2N,
+r^2 = p^2 + 8N = (p^2 + 6N) + 2N,
+s^2 = p^2 + 12N = (p^2 + 6N) + 6N.
 ```
 
-Equivalently,
-
-```text
-(p*q*r*s)^2 + (4*N)^4 = (X^2 - 20*N^2)^2.
-```
-
-Only the second leg is visibly a fourth power.  The first leg is the square of `p*q*r*s`; it is not generally a fourth power.  The primitive normalization gives the roots `p,q,r,s` pairwise coprime and odd; it does **not** imply that each of `p,q,r,s` is itself a square.  Therefore the AP algebra does not produce a direct instance of
-
-```lean
-a ^ 4 + b ^ 4 = c ^ 2
-```
-
-by `ring`.
-
-So the proposed `FourSquaresAPToFermat42Bridge` should not be used as the next local theorem unless you are willing to prove it by first proving the four-square-AP theorem, making it vacuous.
+All of this is `ring`/`nlinarith`.
 
 ---
 
-## 5. Correct descent theorem DAG
+## Final theorem assembly
 
-### 5.1 Primitive centered descent residual
-
-```lean
-def PrimitiveCenteredFourSqAPDescent : Prop :=
-  ∀ S : PrimitiveCenteredFourSqAP,
-    ∃ T : PrimitiveCenteredFourSqAP, T.N.natAbs < S.N.natAbs
-```
-
-This is the genuine hard mathematical frontier.
-
-### 5.2 No primitive AP from descent
+A good implementation target is:
 
 ```lean
-theorem no_primitive_centered_from_descent
-    (hdesc : PrimitiveCenteredFourSqAPDescent) :
-    ¬ Nonempty PrimitiveCenteredFourSqAP := by
-  intro hne
-  classical
-  let Sset : Set ℕ := {n | ∃ S : PrimitiveCenteredFourSqAP, n = S.N.natAbs}
-  have hS : Sset.Nonempty := by
-    rcases hne with ⟨S⟩
-    exact ⟨S.N.natAbs, ⟨S, rfl⟩⟩
-  let m := Nat.find hS
-  have hm : m ∈ Sset := Nat.find_spec hS
-  rcases hm with ⟨S, hmS⟩
-  rcases hdesc S with ⟨T, hlt⟩
-  have hTmem : T.N.natAbs ∈ Sset := ⟨T, rfl⟩
-  have hmin : m ≤ T.N.natAbs := Nat.find_min' hS hTmem
-  rw [hmS] at hmin
-  exact not_lt_of_ge hmin hlt
+def ArbitraryAP_to_weak_primitive_centered_DAG : Prop :=
+  AP_or_reversed_positive_diff →
+  RootGCD4Division →
+  WeakPrimitiveAPParity →
+  PositivePrimitiveAP_to_centered_weak →
+  ArbitraryAP_to_weak_primitive_centered
+
+def WeakPrimitiveCentered_to_strong_DAG : Prop :=
+  WeakPrimitiveAPParity →
+  WeakPrimitiveAPPairwise →
+  WeakPrimitiveCentered_to_strong
 ```
 
-This is compile-oriented and contains no mathematical hard work.
-
-### 5.3 Integer AP theorem from normalization and descent
+The strong final statement requested by the user is then:
 
 ```lean
-theorem fourIntSquaresAPConst_of_descent
-    (hnorm : ArbitraryAP_to_primitive_centered)
-    (hdesc : PrimitiveCenteredFourSqAPDescent) :
-    FourIntSquaresAPConst := by
-  intro w x y z hAP
-  by_contra hnot
-  have hno := no_primitive_centered_from_descent hdesc
-  exact hno (hnorm hAP hnot)
+def ArbitraryAP_to_primitive_centered_DAG : Prop :=
+  ArbitraryAP_to_weak_primitive_centered_DAG →
+  WeakPrimitiveCentered_to_strong_DAG →
+  ArbitraryAP_to_primitive_centered
 ```
 
-Here `FourIntSquaresAPConst` is:
-
-```lean
-def FourIntSquaresAPConst : Prop :=
-  ∀ {w x y z : ℤ}, IntFourSqAP w x y z → FourSqAPConst w x y z
-```
+In actual Lean, implement the named theorem bodies rather than these `Prop` aliases, but these statement shapes isolate the hard parts cleanly.
 
 ---
 
-## 6. Sub-DAG for the descent step
+## Edge-case audit
 
-The descent theorem should be decomposed into these exact targets.
+1. **Adjacent equality.**  If any of `w^2=x^2`, `x^2=y^2`, or `y^2=z^2` holds, the AP is constant by `nlinarith`.
+2. **Negative common difference.**  Reverse the quadruple.  Squares are unchanged and AP remains valid with positive difference.
+3. **All zero / all constant.**  Excluded by `¬ FourSqAPConst`; also needed to ensure the root gcd is nonzero.
+4. **Zero among primitive roots.**  Impossible after parity: primitive roots are odd.  Before parity, a zero root would be even; mod-4 AP forces all roots even, contradicting `rootGCD4=1`.
+5. **Nonprimitive scaling.**  Divide the roots by `rootGCD4`; square differences divide by its square.  Constantness lifts back through multiplication by `g^2`.
+6. **Pairwise gcd.**  Pairwise gcd `=1` is achievable, but it is a derived consequence of global root gcd plus AP plus parity.  Do not make it part of the first normalization constructor.
 
-### D1. Primitive Pythagorean triple classification
-
-```lean
-def CenteredAP_pythagorean_classification : Prop :=
-  ∀ S : PrimitiveCenteredFourSqAP,
-    ∃ m n : ℤ,
-      S.p*S.q*S.r*S.s = m^2 - n^2 ∧
-      16*S.N^2 = 2*m*n ∧
-      S.X^2 - 20*S.N^2 = m^2 + n^2 ∧
-      Int.gcd m n = 1 ∧
-      ((m % 2 = 0 ∧ n % 2 = 1) ∨ (m % 2 = 1 ∧ n % 2 = 0)) ∧
-      0 ≤ m
-```
-
-This uses:
-
-```lean
-PythagoreanTriple.coprime_classification'
-```
-
-Required supporting lemmas:
-
-```lean
-def CenteredAP_pythagorean_coprime : Prop :=
-  ∀ S : PrimitiveCenteredFourSqAP,
-    Int.gcd (S.p*S.q*S.r*S.s) (16*S.N^2) = 1
-
-def CenteredAP_pythagorean_odd : Prop :=
-  ∀ S : PrimitiveCenteredFourSqAP,
-    (S.p*S.q*S.r*S.s) % 2 = 1
-
-def CenteredAP_pythagorean_hyp_pos : Prop :=
-  ∀ S : PrimitiveCenteredFourSqAP,
-    0 < S.X^2 - 20*S.N^2
-```
-
-`CenteredAP_pythagorean_odd` is parity simplification from `hp_odd hq_odd hr_odd hs_odd`.  The coprime lemma is gcd bookkeeping using pairwise coprimality and the fact any prime dividing `N` also divides differences among the square terms.  Hypotenuse positivity follows from the Pythagorean identity and nonzero legs.
-
-### D2. Square even-leg split
-
-From
-
-```lean
-16*N^2 = 2*m*n
-Int.gcd m n = 1
-opposite parity of m,n
-```
-
-one obtains a square-factor split of the coprime factors.  State it independently:
-
-```lean
-def SquareEvenLegSplit : Prop :=
-  ∀ {N m n : ℤ},
-    0 < N →
-    16*N^2 = 2*m*n →
-    Int.gcd m n = 1 →
-    ((m % 2 = 0 ∧ n % 2 = 1) ∨ (m % 2 = 1 ∧ n % 2 = 0)) →
-    ∃ A D : ℤ,
-      A ≠ 0 ∧ D ≠ 0 ∧ Odd D ∧
-      -- exact orientation can be swapped depending on which of m,n is even
-      ((m = 8*A^2 ∧ n = D^2) ∨ (n = 8*A^2 ∧ m = D^2)) ∧
-      N.natAbs = (A*D).natAbs
-```
-
-This is gcd/factorization work, not `ring`.  It is a standard “coprime factors of a square are squares” lemma plus parity bookkeeping.
-
-### D3. Square-pair extraction
-
-After substituting the split back into
-
-```lean
-S.p*S.q*S.r*S.s = m^2 - n^2
-S.X^2 - 20*S.N^2 = m^2 + n^2
-```
-
-extract the pair of square witnesses:
-
-```lean
-def CenteredAP_to_square_pair : Prop :=
-  ∀ S : PrimitiveCenteredFourSqAP,
-    ∃ A D R T : ℤ,
-      A ≠ 0 ∧ D ≠ 0 ∧ Odd D ∧
-      S.N.natAbs = (A*D).natAbs ∧
-      R^2 = 4*A^2 + D^2 ∧
-      T^2 = 16*A^2 + D^2
-```
-
-This contains ring algebra plus the square-factor split above.  It is the clean interface to the classical descent.
-
-### D4. Square-pair descent
-
-```lean
-def SquarePairDescent : Prop :=
-  ∀ {A D R T : ℤ},
-    A ≠ 0 → D ≠ 0 → Odd D →
-    R^2 = 4*A^2 + D^2 →
-    T^2 = 16*A^2 + D^2 →
-    ∃ A' D' R' T' : ℤ,
-      A' ≠ 0 ∧ D' ≠ 0 ∧ Odd D' ∧
-      R'^2 = 4*A'^2 + D'^2 ∧
-      T'^2 = 16*A'^2 + D'^2 ∧
-      (A'*D').natAbs < (A*D).natAbs
-```
-
-This is the real descent core.  It is not `ring`; it requires Pythagorean parametrization, two coprime factorization refinements, and an inequality decrease.
-
-### D5. Rebuild a smaller primitive AP
-
-```lean
-def SquarePair_to_primitive_centered_AP : Prop :=
-  ∀ {A D R T : ℤ},
-    A ≠ 0 → D ≠ 0 → Odd D →
-    R^2 = 4*A^2 + D^2 →
-    T^2 = 16*A^2 + D^2 →
-    ∃ S : PrimitiveCenteredFourSqAP,
-      S.N.natAbs = (A*D).natAbs
-```
-
-Most equations here are `ring`; primitive normalization may need gcd cleanup.
-
-Then:
-
-```lean
-def PrimitiveCenteredFourSqAPDescent_from_square_pair : Prop :=
-  CenteredAP_to_square_pair →
-  SquarePairDescent →
-  SquarePair_to_primitive_centered_AP →
-  PrimitiveCenteredFourSqAPDescent
-```
-
----
-
-## 7. Edge cases checklist
-
-1. **Signs.**  Replace roots by `natAbs` or choose sign-normalized integer roots during primitive normalization.  AP depends only on squares.
-2. **Negative common difference.**  Reverse `(w,x,y,z)` to `(z,y,x,w)`.
-3. **Zero common difference / repeated adjacent squares.**  Close by `intFourSqAP_const_of_adjacent_eq` with `nlinarith`.
-4. **Zero root in a primitive nonconstant AP.**  Excluded by the primitive parity lemma: primitive nonconstant roots are odd, hence nonzero.
-5. **Nonprimitive scaling.**  Divide all four roots by their common gcd; the common square difference divides by `g^2`; constantness lifts back after multiplying by `g^2`.
-6. **Pairwise coprimality.**  After primitive normalization, if an odd prime divides two roots, it divides their square difference and then all four roots; contradiction.  Prime `2` is excluded by oddness.
-
----
-
-## 8. If insisting on `not_fermat_42`
-
-The exact AP equation you get is
-
-```lean
-(p*q*r*s)^2 + (16*N^2)^2 = (X^2 - 20*N^2)^2
-```
-
-or
-
-```text
-(p*q*r*s)^2 + (4*N)^4 = (X^2 - 20*N^2)^2.
-```
-
-This is **not** an instance of
-
-```lean
-a^4 + b^4 = c^2
-```
-
-unless one can also prove `p*q*r*s` is a square.  Primitive AP hypotheses do not give that.  Therefore there is no short direct `not_fermat_42` call from the four-square AP algebra.  The correct proof target is the primitive descent DAG above.
+Bottom line: `ArbitraryAP_to_primitive_centered` is true with the proposed strong structure, but the Lean-feasible route should prove `ArbitraryAP_to_weak_primitive_centered` first and then derive the strong pairwise/odd fields separately.
