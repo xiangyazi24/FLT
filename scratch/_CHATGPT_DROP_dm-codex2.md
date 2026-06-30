@@ -1,129 +1,124 @@
-# Q2670 normalize bad Eisenstein quartic counterexample
+# Q2679 dm-codex2: positive square factors
 
-Target file: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`.
+Target file requested: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`.
 
-The code below is standalone under `import Mathlib.Tactic`.  If the three definitions already exist in the target file, omit the definition block and paste only the private helpers plus `normalizedOfBadStatement`.
+The connector-visible refs did not expose that target file, so this is written as a standalone scratch under `import Mathlib.Tactic`.  It is namespace-neutral: paste it at top level, or inside the target file's existing namespace.  The first proof uses the upstream Mathlib GCD-monoid square-factor theorem rather than relying on a repository-local `Int.sq_of_isCoprime`; the negative associate branch is removed by `Int.eq_of_associated_of_nonneg` and the hypotheses `0 < x`, `0 < y`.
 
 ```lean
 import Mathlib.Tactic
 
-namespace MazurProof.RationalPointsN12
+/-- If two positive coprime integers multiply to a square, then both are squares. -/
+def PosSqOfCoprimeMulSqStatement : Prop :=
+  ∀ {x y z : ℤ}, 0 < x -> 0 < y -> IsCoprime x y -> z^2 = x*y ->
+    ∃ a b : ℤ, 0 < a ∧ 0 < b ∧ x = a^2 ∧ y = b^2
 
-/-- A primitive nontrivial counterexample to the Eisenstein quartic residual. -/
-def EisensteinQuarticBad (A N S : ℤ) : Prop :=
-  IsCoprime A N ∧ A ≠ 0 ∧ N ≠ 0 ∧ A ^ 2 ≠ N ^ 2 ∧
-    S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
+private lemma q2679_isUnit_gcd_of_isCoprime_int {x y : ℤ}
+    (h : IsCoprime x y) : IsUnit (gcd x y) := by
+  exact (gcd_isUnit_iff_isRelPrime (a := x) (b := y)).mpr h.isRelPrime
 
-/-- Normalized positive counterexample, with `0 < A < N` and `0 < S`. -/
-def NormalizedEisensteinBad (A N S : ℤ) : Prop :=
-  0 < A ∧ A < N ∧ 0 < S ∧ IsCoprime A N ∧
-    S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
+private lemma q2679_eq_sq_of_pos_of_associated_sq {x a : ℤ}
+    (hx : 0 < x) (h : Associated (a ^ 2) x) : x = a ^ 2 := by
+  exact (Int.eq_of_associated_of_nonneg h (sq_nonneg a) (le_of_lt hx)).symm
 
-/-- Every bad counterexample can be normalized. -/
-def NormalizedOfBadStatement : Prop :=
-  ∀ {A N S : ℤ}, EisensteinQuarticBad A N S →
-    ∃ A0 N0 S0 : ℤ, NormalizedEisensteinBad A0 N0 S0
+/-- Proof of `PosSqOfCoprimeMulSqStatement`. -/
+theorem posSqOfCoprimeMulSqStatement : PosSqOfCoprimeMulSqStatement := by
+  intro x y z hx hy hcop hsq
+  have hxy : x * y = z ^ 2 := hsq.symm
+  have hyx : y * x = z ^ 2 := by
+    rw [mul_comm]
+    exact hxy
+  have hunit_xy : IsUnit (gcd x y) :=
+    q2679_isUnit_gcd_of_isCoprime_int hcop
+  have hunit_yx : IsUnit (gcd y x) :=
+    q2679_isUnit_gcd_of_isCoprime_int hcop.symm
+  rcases exists_associated_pow_of_mul_eq_pow
+      (a := x) (b := y) (c := z) (k := 2) hunit_xy hxy with ⟨a, ha_assoc⟩
+  rcases exists_associated_pow_of_mul_eq_pow
+      (a := y) (b := x) (c := z) (k := 2) hunit_yx hyx with ⟨b, hb_assoc⟩
+  have hx_sq : x = a ^ 2 := q2679_eq_sq_of_pos_of_associated_sq hx ha_assoc
+  have hy_sq : y = b ^ 2 := q2679_eq_sq_of_pos_of_associated_sq hy hb_assoc
+  have ha_ne : a ≠ 0 := by
+    intro ha0
+    have hx0 : x = 0 := by
+      rw [hx_sq, ha0]
+      norm_num
+    exact (ne_of_gt hx) hx0
+  have hb_ne : b ≠ 0 := by
+    intro hb0
+    have hy0 : y = 0 := by
+      rw [hy_sq, hb0]
+      norm_num
+    exact (ne_of_gt hy) hy0
+  refine ⟨|a|, |b|, abs_pos.mpr ha_ne, abs_pos.mpr hb_ne, ?_, ?_⟩
+  · calc
+      x = a ^ 2 := hx_sq
+      _ = |a| ^ 2 := (sq_abs a).symm
+  · calc
+      y = b ^ 2 := hy_sq
+      _ = |b| ^ 2 := (sq_abs b).symm
 
-private lemma q2670_quartic_pos {A N : ℤ}
-    (hA : A ≠ 0) (hN : N ≠ 0) :
-    0 < A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4 := by
-  have hA2pos : 0 < A ^ 2 := sq_pos_of_ne_zero hA
-  have hN2pos : 0 < N ^ 2 := sq_pos_of_ne_zero hN
-  have hprod : 0 < A ^ 2 * N ^ 2 := mul_pos hA2pos hN2pos
-  have hsq : 0 ≤ (A ^ 2 - N ^ 2) ^ 2 := sq_nonneg _
-  have hid :
-      A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4 =
-        (A ^ 2 - N ^ 2) ^ 2 + A ^ 2 * N ^ 2 := by
-    ring
-  rw [hid]
-  exact add_pos_of_nonneg_of_pos hsq hprod
+/-- The requested two-adic variant. -/
+def PosTwoSqOfGcdTwoMulSqStatement : Prop :=
+  ∀ {x y z : ℤ}, 0 < x -> 0 < y -> 2∣x -> 2∣y ->
+    IsCoprime (x/2) (y/2) -> z^2=x*y ->
+    ∃ a b, 0<a ∧ 0<b ∧ x=2*a^2 ∧ y=2*b^2
 
-private lemma q2670_abs_quartic {A N S : ℤ}
-    (hS : S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4) :
-    |S| ^ 2 = |A| ^ 4 - |A| ^ 2 * |N| ^ 2 + |N| ^ 4 := by
-  have hS2 : |S| ^ 2 = S ^ 2 := sq_abs S
-  have hA2 : |A| ^ 2 = A ^ 2 := sq_abs A
-  have hN2 : |N| ^ 2 = N ^ 2 := sq_abs N
-  have hA4 : |A| ^ 4 = A ^ 4 := by
-    calc
-      |A| ^ 4 = (|A| ^ 2) ^ 2 := by ring
-      _ = (A ^ 2) ^ 2 := by rw [hA2]
-      _ = A ^ 4 := by ring
-  have hN4 : |N| ^ 4 = N ^ 4 := by
-    calc
-      |N| ^ 4 = (|N| ^ 2) ^ 2 := by ring
-      _ = (N ^ 2) ^ 2 := by rw [hN2]
-      _ = N ^ 4 := by ring
+private lemma q2679_eq_two_mul_ediv_two {x : ℤ} (hx2 : (2 : ℤ) ∣ x) :
+    x = 2 * (x / 2) := by
   calc
-    |S| ^ 2 = S ^ 2 := hS2
-    _ = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4 := hS
-    _ = |A| ^ 4 - |A| ^ 2 * |N| ^ 2 + |N| ^ 4 := by
-      rw [hA4, hA2, hN2, hN4]
+    x = x / 2 * 2 := (Int.ediv_mul_cancel hx2).symm
+    _ = 2 * (x / 2) := by ring
 
-private lemma q2670_abs_coprime {A N : ℤ}
-    (hcop : IsCoprime A N) :
-    IsCoprime |A| |N| := by
-  have hcopNat : Nat.Coprime A.natAbs N.natAbs :=
-    Int.isCoprime_iff_nat_coprime.mp hcop
-  have hcopCast : IsCoprime (A.natAbs : ℤ) (N.natAbs : ℤ) :=
-    Nat.Coprime.isCoprime hcopNat
-  simpa only [Nat.cast_natAbs] using hcopCast
+private lemma q2679_pos_ediv_two_of_pos_of_dvd {x : ℤ}
+    (hx : 0 < x) (hx2 : (2 : ℤ) ∣ x) : 0 < x / 2 := by
+  have hx_eq : x = 2 * (x / 2) := q2679_eq_two_mul_ediv_two hx2
+  nlinarith
 
-private lemma q2670_abs_ne_of_sq_ne {A N : ℤ}
-    (hneq : A ^ 2 ≠ N ^ 2) :
-    |A| ≠ |N| := by
-  intro hAbs
-  have hsq : A ^ 2 = N ^ 2 := by
+private lemma q2679_sq_ediv_two_eq_of_sq_eq_mul
+    {x y z : ℤ} (hx2 : (2 : ℤ) ∣ x) (hy2 : (2 : ℤ) ∣ y)
+    (hz2 : (2 : ℤ) ∣ z) (hsq : z ^ 2 = x * y) :
+    (z / 2) ^ 2 = (x / 2) * (y / 2) := by
+  have hx_eq : x = 2 * (x / 2) := q2679_eq_two_mul_ediv_two hx2
+  have hy_eq : y = 2 * (y / 2) := q2679_eq_two_mul_ediv_two hy2
+  have hz_eq : z = 2 * (z / 2) := q2679_eq_two_mul_ediv_two hz2
+  have h4 :
+      (4 : ℤ) * ((z / 2) ^ 2) =
+        (4 : ℤ) * ((x / 2) * (y / 2)) := by
     calc
-      A ^ 2 = |A| ^ 2 := (sq_abs A).symm
-      _ = |N| ^ 2 := by rw [hAbs]
-      _ = N ^ 2 := sq_abs N
-  exact hneq hsq
+      (4 : ℤ) * ((z / 2) ^ 2) = (2 * (z / 2)) ^ 2 := by ring
+      _ = z ^ 2 := by rw [← hz_eq]
+      _ = x * y := hsq
+      _ = (2 * (x / 2)) * (2 * (y / 2)) := by
+        rw [← hx_eq, ← hy_eq]
+      _ = (4 : ℤ) * ((x / 2) * (y / 2)) := by ring
+  exact mul_left_cancel₀ (by norm_num : (4 : ℤ) ≠ 0) h4
 
-/-- Proof of the normalization statement. -/
-theorem normalizedOfBadStatement : NormalizedOfBadStatement := by
-  intro A N S hbad
-  rcases hbad with ⟨hcop, hAne, hNne, hsq_ne, hS⟩
-  have hAabspos : 0 < |A| := abs_pos.mpr hAne
-  have hNabspos : 0 < |N| := abs_pos.mpr hNne
-  have hSsqpos : 0 < S ^ 2 := by
-    rw [hS]
-    exact q2670_quartic_pos hAne hNne
-  have hSne : S ≠ 0 := by
-    intro h0
-    rw [h0] at hSsqpos
-    norm_num at hSsqpos
-  have hSabspos : 0 < |S| := abs_pos.mpr hSne
-  have hquartAbs :
-      |S| ^ 2 = |A| ^ 4 - |A| ^ 2 * |N| ^ 2 + |N| ^ 4 :=
-    q2670_abs_quartic hS
-  have hcopAbs : IsCoprime |A| |N| := q2670_abs_coprime hcop
-  have hAbs_ne : |A| ≠ |N| := q2670_abs_ne_of_sq_ne hsq_ne
-  rcases lt_or_gt_of_ne hAbs_ne with hlt | hgt
-  · refine ⟨|A|, |N|, |S|, ?_⟩
-    exact ⟨hAabspos, hlt, hSabspos, hcopAbs, hquartAbs⟩
-  · refine ⟨|N|, |A|, |S|, ?_⟩
-    have hquartSwap :
-        |S| ^ 2 = |N| ^ 4 - |N| ^ 2 * |A| ^ 2 + |A| ^ 4 := by
-      rw [hquartAbs]
-      ring
-    exact ⟨hNabspos, hgt, hSabspos, hcopAbs.symm, hquartSwap⟩
-
--- API checks for the exact names used above.
-#check abs_pos
-#check sq_abs
-#check Int.isCoprime_iff_nat_coprime
-#check Nat.Coprime.isCoprime
-#check Nat.cast_natAbs
-#check lt_or_gt_of_ne
-
-end MazurProof.RationalPointsN12
+/-- Proof of `PosTwoSqOfGcdTwoMulSqStatement`. -/
+theorem posTwoSqOfGcdTwoMulSqStatement : PosTwoSqOfGcdTwoMulSqStatement := by
+  intro x y z hx hy hx2 hy2 hcop hsq
+  have hz_sq_even : (2 : ℤ) ∣ z ^ 2 := by
+    rw [hsq]
+    exact dvd_mul_of_dvd_left hx2 y
+  have hz2 : (2 : ℤ) ∣ z := by
+    exact (show Prime (2 : ℤ) by norm_num).dvd_of_dvd_pow hz_sq_even
+  have hx_div_pos : 0 < x / 2 := q2679_pos_ediv_two_of_pos_of_dvd hx hx2
+  have hy_div_pos : 0 < y / 2 := q2679_pos_ediv_two_of_pos_of_dvd hy hy2
+  have hsq_div : (z / 2) ^ 2 = (x / 2) * (y / 2) :=
+    q2679_sq_ediv_two_eq_of_sq_eq_mul hx2 hy2 hz2 hsq
+  rcases posSqOfCoprimeMulSqStatement hx_div_pos hy_div_pos hcop hsq_div with
+    ⟨a, b, ha_pos, hb_pos, hx_div_sq, hy_div_sq⟩
+  refine ⟨a, b, ha_pos, hb_pos, ?_, ?_⟩
+  · calc
+      x = 2 * (x / 2) := q2679_eq_two_mul_ediv_two hx2
+      _ = 2 * a ^ 2 := by rw [hx_div_sq]
+  · calc
+      y = 2 * (y / 2) := q2679_eq_two_mul_ediv_two hy2
+      _ = 2 * b ^ 2 := by rw [hy_div_sq]
 ```
 
 Notes:
 
-* The positivity of `S0` comes from the identity
-  `A^4 - A^2*N^2 + N^4 = (A^2 - N^2)^2 + A^2*N^2`, which is positive when `A` and `N` are nonzero.
-* `A^2 ≠ N^2` is converted to `|A| ≠ |N|`; linear order then gives either `|A| < |N|` or the swapped case.
-* Coprimality is preserved by absolute values via
-  `Int.isCoprime_iff_nat_coprime`, `Nat.Coprime.isCoprime`, and `Nat.cast_natAbs`.
+* The key Mathlib API is `exists_associated_pow_of_mul_eq_pow`; over `ℤ`, this gives `Associated (a^2) x`, i.e. a possible sign ambiguity.
+* `Int.eq_of_associated_of_nonneg` removes that ambiguity because `a^2 ≥ 0` and the hypotheses give `0 ≤ x`, `0 ≤ y`.
+* The witnesses are `|a|` and `|b|`, making their positivity immediate from `x > 0`, `y > 0`.
+* For the two-adic variant, `2 ∣ z` follows from `2 ∣ z^2` and primality of `(2 : ℤ)`, then division by two reduces the equation to the first theorem.
