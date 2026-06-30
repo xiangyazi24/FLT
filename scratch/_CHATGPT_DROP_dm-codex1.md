@@ -1,6 +1,10 @@
-# Q2576: EulerSquarePair → PrimitiveCenteredFourSqAP helper layer
+# Q2603: `PrimitiveCenteredFourSqAP → EulerSquarePair` theorem DAG
 
-I could not inspect the user-local `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean` because this layer appears to be local/unpushed, so the final record field labels may need to be adjusted to the actual structure.  The helper lemmas below are written to avoid the most fragile `IsCoprime.add_mul_*` API names by using direct Bezout proofs.
+Target file:
+
+```text
+FLT/Assumptions/MazurProof/N12FourSquaresAP.lean
+```
 
 Target namespace:
 
@@ -8,350 +12,629 @@ Target namespace:
 namespace MazurProof.RationalPointsN12.EulerSquarePair
 ```
 
-The code assumes the local names from the prompt:
-
-```lean
-E.centerX, E.stepN, E.fm6, E.fm2, E.fp2, E.fp6
-E.centerX_coprime_stepN
-E.three_coprime_centerX
-E.fm6_odd, E.fm2_odd, E.fp2_odd, E.fp6_odd
-E.fm6_square, E.fm2_square, E.fp2_square, E.fp6_square
-fm2_coprime_fp2 E
-fm6_coprime_fp6 E
-```
-
----
-
-## 1. Robust local Bezout helpers
-
-These helpers are useful because they avoid depending on the exact orientation of Mathlib’s transport lemmas.
-
-```lean
-import Mathlib
-
-namespace MazurProof.RationalPointsN12.EulerSquarePair
-
-/-- Transport coprimality by replacing the left argument by `x + k*y`. -/
-lemma isCoprime_add_mul_left_int {x y k : ℤ}
-    (h : IsCoprime x y) :
-    IsCoprime (x + k * y) y := by
-  rcases h with ⟨u, v, huv⟩
-  refine ⟨u, v - u * k, ?_⟩
-  calc
-    u * (x + k * y) + (v - u * k) * y = u * x + v * y := by ring
-    _ = 1 := huv
-
-/-- If `x` is coprime to `z`, then it is coprime to `x + z`. -/
-lemma isCoprime_self_add_right_int {x z : ℤ}
-    (h : IsCoprime x z) :
-    IsCoprime x (x + z) := by
-  rcases h with ⟨u, v, huv⟩
-  refine ⟨u - v, v, ?_⟩
-  calc
-    (u - v) * x + v * (x + z) = u * x + v * z := by ring
-    _ = 1 := huv
-
-/-- Bezout proof that coprimality with each factor gives coprimality with the product. -/
-lemma isCoprime_mul_right_int {a b c : ℤ}
-    (hab : IsCoprime a b) (hac : IsCoprime a c) :
-    IsCoprime a (b * c) := by
-  rcases hab with ⟨u, v, huv⟩
-  rcases hac with ⟨r, s, hrs⟩
-  refine ⟨u * r * a + u * s * c + v * r * b, v * s, ?_⟩
-  calc
-    (u * r * a + u * s * c + v * r * b) * a + (v * s) * (b * c)
-        = (u * a + v * b) * (r * a + s * c) := by ring
-    _ = 1 := by rw [huv, hrs]; ring
-
-/-- An odd integer is Bezout-coprime to `2`. -/
-lemma isCoprime_two_of_odd_int {m : ℤ} (hm : Odd m) :
-    IsCoprime m (2 : ℤ) := by
-  rcases hm with ⟨k, hk⟩
-  refine ⟨1, -k, ?_⟩
-  rw [hk]
-  ring
-
-lemma isCoprime_four_of_odd_int {m : ℤ} (hm : Odd m) :
-    IsCoprime m (4 : ℤ) := by
-  have h2 : IsCoprime m (2 : ℤ) := isCoprime_two_of_odd_int hm
-  have h22 : IsCoprime m ((2 : ℤ) * 2) :=
-    isCoprime_mul_right_int h2 h2
-  simpa using h22
-
-lemma isCoprime_eight_of_odd_int {m : ℤ} (hm : Odd m) :
-    IsCoprime m (8 : ℤ) := by
-  have h4 : IsCoprime m (4 : ℤ) := isCoprime_four_of_odd_int hm
-  have h2 : IsCoprime m (2 : ℤ) := isCoprime_two_of_odd_int hm
-  have h42 : IsCoprime m ((4 : ℤ) * 2) :=
-    isCoprime_mul_right_int h4 h2
-  simpa using h42
-```
-
----
-
-## 2. Shift-to-step coprimality lemmas
-
-These are the common first step for all cross-factor coprimality proofs.
-
-```lean
-lemma fm6_coprime_stepN (E : EulerSquarePair) :
-    IsCoprime E.fm6 E.stepN := by
-  have h := isCoprime_add_mul_left_int
-    (x := E.centerX) (y := E.stepN) (k := (-6 : ℤ))
-    E.centerX_coprime_stepN
-  convert h using 1 <;> (simp [fm6]; ring)
-
-lemma fm2_coprime_stepN (E : EulerSquarePair) :
-    IsCoprime E.fm2 E.stepN := by
-  have h := isCoprime_add_mul_left_int
-    (x := E.centerX) (y := E.stepN) (k := (-2 : ℤ))
-    E.centerX_coprime_stepN
-  convert h using 1 <;> (simp [fm2]; ring)
-
-lemma fp2_coprime_stepN (E : EulerSquarePair) :
-    IsCoprime E.fp2 E.stepN := by
-  have h := isCoprime_add_mul_left_int
-    (x := E.centerX) (y := E.stepN) (k := (2 : ℤ))
-    E.centerX_coprime_stepN
-  convert h using 1 <;> (simp [fp2]; ring)
-
-lemma fp6_coprime_stepN (E : EulerSquarePair) :
-    IsCoprime E.fp6 E.stepN := by
-  have h := isCoprime_add_mul_left_int
-    (x := E.centerX) (y := E.stepN) (k := (6 : ℤ))
-    E.centerX_coprime_stepN
-  convert h using 1 <;> (simp [fp6]; ring)
-```
-
-If the local file already has `fm2_coprime_stepN` etc. from Q2570, reuse those and omit this block.
-
----
-
-## 3. Cross-factor coprimality lemmas
-
-No `3`-stripping is needed for these four cross pairs, because the factor differences are only `4*N` or `8*N`:
+The safe route is exactly the classical route in the prompt, but it should be split into three genuine interfaces plus AP-specific local gcd/parity lemmas:
 
 ```text
-fm2 = fm6 + 4*N
-fp2 = fm6 + 8*N
-fp6 = fm2 + 8*N
-fp6 = fp2 + 4*N
+PrimitiveCenteredFourSqAP S
+  -> primitive Pythagorean triple
+       (16*N^2)^2 + Y^2 = (X^2 - 20*N^2)^2
+  -> u,v with 16*N^2 = 4*u*v and X^2 - 20*N^2 = 4*u^2 + v^2
+  -> square extraction u=4*A^2, v=D^2, N=A*D
+  -> X^2 = (16*A^2+D^2)*(4*A^2+D^2)
+  -> coprime factor square extraction gives B,C.
 ```
 
-```lean
-/-- `fm6` and `fm2` differ by `4*stepN`. -/
-theorem fm6_coprime_fm2 (E : EulerSquarePair) :
-    IsCoprime E.fm6 E.fm2 := by
-  have hN : IsCoprime E.fm6 E.stepN := fm6_coprime_stepN E
-  have h4 : IsCoprime E.fm6 (4 : ℤ) := isCoprime_four_of_odd_int E.fm6_odd
-  have h4N : IsCoprime E.fm6 ((4 : ℤ) * E.stepN) :=
-    isCoprime_mul_right_int h4 hN
-  have h := isCoprime_self_add_right_int h4N
-  convert h using 1 <;> (simp [fm6, fm2]; ring)
-
-/-- `fm6` and `fp2` differ by `8*stepN`. -/
-theorem fm6_coprime_fp2 (E : EulerSquarePair) :
-    IsCoprime E.fm6 E.fp2 := by
-  have hN : IsCoprime E.fm6 E.stepN := fm6_coprime_stepN E
-  have h8 : IsCoprime E.fm6 (8 : ℤ) := isCoprime_eight_of_odd_int E.fm6_odd
-  have h8N : IsCoprime E.fm6 ((8 : ℤ) * E.stepN) :=
-    isCoprime_mul_right_int h8 hN
-  have h := isCoprime_self_add_right_int h8N
-  convert h using 1 <;> (simp [fm6, fp2]; ring)
-
-/-- `fm2` and `fp6` differ by `8*stepN`. -/
-theorem fm2_coprime_fp6 (E : EulerSquarePair) :
-    IsCoprime E.fm2 E.fp6 := by
-  have hN : IsCoprime E.fm2 E.stepN := fm2_coprime_stepN E
-  have h8 : IsCoprime E.fm2 (8 : ℤ) := isCoprime_eight_of_odd_int E.fm2_odd
-  have h8N : IsCoprime E.fm2 ((8 : ℤ) * E.stepN) :=
-    isCoprime_mul_right_int h8 hN
-  have h := isCoprime_self_add_right_int h8N
-  convert h using 1 <;> (simp [fm2, fp6]; ring)
-
-/-- `fp2` and `fp6` differ by `4*stepN`. -/
-theorem fp2_coprime_fp6 (E : EulerSquarePair) :
-    IsCoprime E.fp2 E.fp6 := by
-  have hN : IsCoprime E.fp2 E.stepN := fp2_coprime_stepN E
-  have h4 : IsCoprime E.fp2 (4 : ℤ) := isCoprime_four_of_odd_int E.fp2_odd
-  have h4N : IsCoprime E.fp2 ((4 : ℤ) * E.stepN) :=
-    isCoprime_mul_right_int h4 hN
-  have h := isCoprime_self_add_right_int h4N
-  convert h using 1 <;> (simp [fp2, fp6]; ring)
-```
-
-The already-proved endpoint/middle pair lemmas are still needed separately:
-
-```lean
--- fm2_coprime_fp2 E : IsCoprime E.fm2 E.fp2
--- fm6_coprime_fp6 E : IsCoprime E.fm6 E.fp6
-```
+The important warning is that the Pythagorean and coprime-product square-extraction lemmas are the genuine reusable residuals unless your current Mathlib/project already has them.  The AP-specific gcd facts should be local lemmas.
 
 ---
 
-## 4. Root gcd from factor coprimality
+## 0. Local notation
 
-The proof does **not** need a power-coprime API.  A Bezout certificate for `x,y`, after rewriting `x=p^2`, `y=q^2`, immediately gives a Bezout certificate for `p,q`:
-
-```lean
-/-- If two square values are coprime, then the corresponding roots are coprime. -/
-lemma roots_isCoprime_of_sq_eq_of_isCoprime
-    {p q x y : ℤ}
-    (hp : p ^ 2 = x) (hq : q ^ 2 = y)
-    (hxy : IsCoprime x y) :
-    IsCoprime p q := by
-  rcases hxy with ⟨a, b, hab⟩
-  rw [← hp, ← hq] at hab
-  refine ⟨a * p, b * q, ?_⟩
-  calc
-    (a * p) * p + (b * q) * q = a * (p ^ 2) + b * (q ^ 2) := by ring
-    _ = 1 := hab
-
-/-- GCD version used by `PrimitiveCenteredFourSqAP`. -/
-lemma root_gcd_eq_one_of_sq_eq_of_isCoprime
-    {p q x y : ℤ}
-    (hp : p ^ 2 = x) (hq : q ^ 2 = y)
-    (hxy : IsCoprime x y) :
-    Int.gcd p q = 1 := by
-  exact isCoprime_iff_gcd_eq_one.mp
-    (roots_isCoprime_of_sq_eq_of_isCoprime hp hq hxy)
-```
-
-API pitfall: if the local file uses the `IsRelPrime` route, replace the final theorem body by the existing project idiom.  The statement above is the right reusable interface.  The usual current-Mathlib conversion is exactly:
+Introduce this local abbreviation if it is not already present:
 
 ```lean
-isCoprime_iff_gcd_eq_one.mp h
+namespace PrimitiveCenteredFourSqAP
+
+def Y (S : PrimitiveCenteredFourSqAP) : ℤ :=
+  S.p * S.q * S.r * S.s
+
+end PrimitiveCenteredFourSqAP
 ```
+
+Use `S.Y` below for readability.
 
 ---
 
-## 5. Root parity/mod-2 from odd square value
+## 1. AP identities and positivity needed for the big triple
 
-This uses the fact that an odd product has odd factors.  The final API is `Int.odd_iff : Odd n ↔ n % 2 = 1`.
-
-```lean
-/-- If `p^2` is an odd integer, then `p % 2 = 1`. -/
-lemma root_emod_two_eq_one_of_sq_eq_odd
-    {p x : ℤ}
-    (hp : p ^ 2 = x) (hx : Odd x) :
-    p % 2 = 1 := by
-  have hp2odd : Odd (p ^ 2) := by
-    simpa [hp] using hx
-  have hmulodd : Odd (p * p) := by
-    simpa [pow_two] using hp2odd
-  have hpodd : Odd p := hmulodd.of_mul_left
-  exact Int.odd_iff.mp hpodd
-```
-
-Fallback if `Odd.of_mul_left` is not found in the pinned Mathlib:
+These are local, routine `ring`/`nlinarith` lemmas.
 
 ```lean
-  have hpodd : Odd p := by
-    rcases hmulodd with ⟨k, hk⟩
-    by_contra hpnot
-    have hpeven : Even p := Int.not_odd_iff_even.mp hpnot
-    rcases hpeven with ⟨t, ht⟩
-    rw [ht] at hk
-    have : ¬ Odd ((2 * t) * (2 * t)) := by
-      exact not_odd_iff_even.mpr ⟨2 * t * t, by ring⟩
-    exact this ⟨k, hk⟩
+/-- Difference identity from the centered equations. -/
+lemma q_sq_sub_p_sq_eq_fourN (S : PrimitiveCenteredFourSqAP) :
+    S.q ^ 2 - S.p ^ 2 = 4 * S.N
+
+/-- Difference identity from the centered equations. -/
+lemma r_sq_sub_q_sq_eq_fourN (S : PrimitiveCenteredFourSqAP) :
+    S.r ^ 2 - S.q ^ 2 = 4 * S.N
+
+/-- Difference identity from the centered equations. -/
+lemma s_sq_sub_r_sq_eq_fourN (S : PrimitiveCenteredFourSqAP) :
+    S.s ^ 2 - S.r ^ 2 = 4 * S.N
+
+/-- Odd-root fields imply the roots are nonzero. -/
+lemma p_ne_zero (S : PrimitiveCenteredFourSqAP) : S.p ≠ 0
+lemma q_ne_zero (S : PrimitiveCenteredFourSqAP) : S.q ≠ 0
+lemma r_ne_zero (S : PrimitiveCenteredFourSqAP) : S.r ≠ 0
+lemma s_ne_zero (S : PrimitiveCenteredFourSqAP) : S.s ≠ 0
+
+/-- The left endpoint value is positive, so `X > 6*N`. -/
+lemma sixN_lt_X (S : PrimitiveCenteredFourSqAP) :
+    6 * S.N < S.X
+
+/-- Therefore the big hypotenuse `X^2 - 20*N^2` is positive. -/
+lemma bigHyp_pos (S : PrimitiveCenteredFourSqAP) :
+    0 < S.X ^ 2 - 20 * S.N ^ 2
 ```
 
-The first version is the preferred one.
+Proof hints:
 
----
+* `p_ne_zero`: from `S.p % 2 = 1`; if `S.p = 0`, then `0 % 2 = 0`.
+* `sixN_lt_X`: rewrite `S.hp`; `0 < S.p^2` because `p ≠ 0`; then `nlinarith`.
+* `bigHyp_pos`: from `0 < S.N` and `6N < X`, get `X^2 > 36N^2`, hence `X^2 - 20N^2 > 0`.
 
-## 6. Construction skeleton
-
-The following is the intended proof shape.  The field labels in the record literal must be adjusted if `PrimitiveCenteredFourSqAP` uses different names.
+The big triple identity itself:
 
 ```lean
-theorem eulerSquarePairToPrimitiveCentered_constructive (E : EulerSquarePair) :
-    ∃ T : PrimitiveCenteredFourSqAP, T.N = E.A * E.D := by
-  rcases E.fm6_square with ⟨p, hp⟩
-  rcases E.fm2_square with ⟨q, hq⟩
-  rcases E.fp2_square with ⟨r, hr⟩
-  rcases E.fp6_square with ⟨s, hs⟩
-
-  refine ⟨{
-    X := E.centerX
-    N := E.stepN
-    p := p
-    q := q
-    r := r
-    s := s
-
-    hp := by
-      -- target: p^2 = X - 6*N
-      simpa [fm6] using hp
-    hq := by
-      -- target: q^2 = X - 2*N
-      simpa [fm2] using hq
-    hr := by
-      -- target: r^2 = X + 2*N
-      simpa [fp2] using hr
-    hs := by
-      -- target: s^2 = X + 6*N
-      simpa [fp6] using hs
-
-    hpq_coprime :=
-      root_gcd_eq_one_of_sq_eq_of_isCoprime hp hq (fm6_coprime_fm2 E)
-    hpr_coprime :=
-      root_gcd_eq_one_of_sq_eq_of_isCoprime hp hr (fm6_coprime_fp2 E)
-    hps_coprime :=
-      root_gcd_eq_one_of_sq_eq_of_isCoprime hp hs (fm6_coprime_fp6 E)
-    hqr_coprime :=
-      root_gcd_eq_one_of_sq_eq_of_isCoprime hq hr (fm2_coprime_fp2 E)
-    hqs_coprime :=
-      root_gcd_eq_one_of_sq_eq_of_isCoprime hq hs (fm2_coprime_fp6 E)
-    hrs_coprime :=
-      root_gcd_eq_one_of_sq_eq_of_isCoprime hr hs (fp2_coprime_fp6 E)
-
-    hp_odd := root_emod_two_eq_one_of_sq_eq_odd hp E.fm6_odd
-    hq_odd := root_emod_two_eq_one_of_sq_eq_odd hq E.fm2_odd
-    hr_odd := root_emod_two_eq_one_of_sq_eq_odd hr E.fp2_odd
-    hs_odd := root_emod_two_eq_one_of_sq_eq_odd hs E.fp6_odd
-  }, ?_⟩
-
-  -- final target: constructed `T.N = E.A * E.D`
-  simp [stepN]
+lemma big_pythagorean_identity (S : PrimitiveCenteredFourSqAP) :
+    (S.Y) ^ 2 + (16 * S.N ^ 2) ^ 2 =
+      (S.X ^ 2 - 20 * S.N ^ 2) ^ 2
 ```
 
-If the structure fields are literally named as in the prompt rather than with proof-oriented labels, use this map:
+Proof hint: expand `S.Y^2` as the product of the four centered square values:
 
 ```text
-hp/hq/hr/hs             -> whatever fields state p^2/q^2/r^2/s^2
-hpq_coprime             -> field for Int.gcd p q = 1
-hpr_coprime             -> field for Int.gcd p r = 1
-hps_coprime             -> field for Int.gcd p s = 1
-hqr_coprime             -> field for Int.gcd q r = 1
-hqs_coprime             -> field for Int.gcd q s = 1
-hrs_coprime             -> field for Int.gcd r s = 1
-hp_odd/hq_odd/hr_odd/hs_odd -> fields for p%2=q%2=r%2=s%2=1
+Y^2 = p^2*q^2*r^2*s^2
+    = (X-6N)(X-2N)(X+2N)(X+6N)
+    = (X^2 - 36N^2)(X^2 - 4N^2).
 ```
 
-The important orientation is:
+Then `ring` closes:
+
+```text
+(X^2 - 36N^2)(X^2 - 4N^2) + (16N^2)^2
+= (X^2 - 20N^2)^2.
+```
+
+---
+
+## 2. Primitive gcd of the big triple
+
+Goal:
 
 ```lean
-p^2 = E.fm6
-q^2 = E.fm2
-r^2 = E.fp2
-s^2 = E.fp6
+lemma bigLeg_coprime_Y (S : PrimitiveCenteredFourSqAP) :
+    IsCoprime (16 * S.N ^ 2) S.Y
 ```
 
-so the six gcd calls pair exactly with:
+Do this with local lemmas, not inside the Pythagorean theorem.
+
+### 2.1 Oddness of `Y` and coprimality with powers of `2`
 
 ```lean
-fm6_coprime_fm2
-fm6_coprime_fp2
-fm6_coprime_fp6
-fm2_coprime_fp2
-fm2_coprime_fp6
-fp2_coprime_fp6
+lemma p_odd (S : PrimitiveCenteredFourSqAP) : Odd S.p
+lemma q_odd (S : PrimitiveCenteredFourSqAP) : Odd S.q
+lemma r_odd (S : PrimitiveCenteredFourSqAP) : Odd S.r
+lemma s_odd (S : PrimitiveCenteredFourSqAP) : Odd S.s
+
+lemma Y_odd (S : PrimitiveCenteredFourSqAP) : Odd S.Y
+
+lemma sixteen_coprime_Y (S : PrimitiveCenteredFourSqAP) :
+    IsCoprime (16 : ℤ) S.Y
 ```
 
-end namespace when pasted into the file:
+Proof hints:
+
+* `p_odd`: `Int.odd_iff.mpr S.hp_odd` if the field is `S.hp_odd : S.p % 2 = 1`.
+* `Y_odd`: repeated `Odd.mul`.
+* `sixteen_coprime_Y`: use the local helper from Q2576, or prove Bezout from oddness; orientation can be fixed with `.symm`.
+
+### 2.2 `N` is coprime to each root
+
+State the four root lemmas explicitly:
 
 ```lean
-end MazurProof.RationalPointsN12.EulerSquarePair
+lemma N_coprime_p (S : PrimitiveCenteredFourSqAP) :
+    IsCoprime S.N S.p
+
+lemma N_coprime_q (S : PrimitiveCenteredFourSqAP) :
+    IsCoprime S.N S.q
+
+lemma N_coprime_r (S : PrimitiveCenteredFourSqAP) :
+    IsCoprime S.N S.r
+
+lemma N_coprime_s (S : PrimitiveCenteredFourSqAP) :
+    IsCoprime S.N S.s
 ```
+
+Proof pattern for `N_coprime_p`:
+
+* Use a prime-divisor criterion for `Int.gcd = 1`/`IsCoprime`.
+* If a natural prime `ℓ` divides both `N` and `p`, then from
+
+```text
+p^2 = X - 6N
+```
+
+  it divides `X`.
+* Then from
+
+```text
+q^2 = X - 2N,
+r^2 = X + 2N,
+s^2 = X + 6N
+```
+
+  it divides `q^2,r^2,s^2`, hence `q,r,s` by primality.
+* This contradicts any pairwise root gcd field, for example `Int.gcd p q = 1`.
+
+The same proof works for `q,r,s`: a prime dividing `N` and one root divides `X`, hence all roots.
+
+Useful local criterion if not already present:
+
+```lean
+/-- Prime-divisor criterion for proving integer Bezout coprimality. -/
+lemma isCoprime_int_of_no_common_nat_prime
+    {a b : ℤ}
+    (hno : ∀ ℓ : ℕ, Nat.Prime ℓ →
+      (ℓ : ℤ) ∣ a → (ℓ : ℤ) ∣ b → False) :
+    IsCoprime a b
+```
+
+This is a local lemma; it is small and often easier than fighting `Int.gcd` APIs.
+
+### 2.3 `N` is coprime to `Y`, hence `16*N^2` is coprime to `Y`
+
+```lean
+lemma N_coprime_Y (S : PrimitiveCenteredFourSqAP) :
+    IsCoprime S.N S.Y
+
+lemma Nsq_coprime_Y (S : PrimitiveCenteredFourSqAP) :
+    IsCoprime (S.N ^ 2) S.Y
+
+lemma bigLeg_coprime_Y (S : PrimitiveCenteredFourSqAP) :
+    IsCoprime (16 * S.N ^ 2) S.Y
+```
+
+Proof hints:
+
+* `N_coprime_Y`: combine `N_coprime_p/q/r/s` using `IsCoprime.mul_right`, or use the direct Bezout helper `isCoprime_mul_right_int` from Q2576 repeatedly.
+* `Nsq_coprime_Y`: either `h.pow_left` if available, or use `isCoprime_mul_left` with `N_coprime_Y` twice.
+* `bigLeg_coprime_Y`: combine `sixteen_coprime_Y` and `Nsq_coprime_Y` on the left; if orientation is awkward, prove the product version with direct Bezout.
+
+This proves the primitive input for the Pythagorean step.
+
+---
+
+## 3. Primitive Pythagorean parametrization interface
+
+This should be isolated as a genuine reusable theorem.  Do **not** bury it in AP code.
+
+### Residual theorem signature
+
+```lean
+/--
+Primitive Pythagorean parametrization in the form needed here.
+The first leg `a` is the even leg; `b` is the odd leg.
+Only `a = 4*u*v` and `c = 4*u^2+v^2` are needed downstream.
+-/
+theorem primitive_pythagorean_even_leg_four_param_int
+    {a b c : ℤ}
+    (ha : 0 < a)
+    (hb : 0 < b)
+    (hc : 0 < c)
+    (hbOdd : Odd b)
+    (hab : IsCoprime a b)
+    (hpyth : a ^ 2 + b ^ 2 = c ^ 2) :
+    ∃ u v : ℤ,
+      0 < u ∧ 0 < v ∧
+      Odd v ∧
+      IsCoprime (2 * u) v ∧
+      a = 4 * u * v ∧
+      c = 4 * u ^ 2 + v ^ 2
+```
+
+For the AP, apply it with:
+
+```text
+a = 16*S.N^2
+b = |S.Y|
+c = S.X^2 - 20*S.N^2
+```
+
+Inputs:
+
+```lean
+lemma bigLeg_pos (S : PrimitiveCenteredFourSqAP) :
+    0 < 16 * S.N ^ 2
+
+lemma Y_abs_pos (S : PrimitiveCenteredFourSqAP) :
+    0 < |S.Y|
+
+lemma absY_odd (S : PrimitiveCenteredFourSqAP) :
+    Odd |S.Y|
+
+lemma bigLeg_coprime_absY (S : PrimitiveCenteredFourSqAP) :
+    IsCoprime (16 * S.N ^ 2) |S.Y|
+```
+
+`absY_odd` and `bigLeg_coprime_absY` are harmless wrappers around `Y_odd` and `bigLeg_coprime_Y`.
+
+After parametrization, normalize the result as:
+
+```text
+16*N^2 = 4*u*v,
+X^2 - 20*N^2 = 4*u^2 + v^2,
+0<u, 0<v, Odd v, IsCoprime (2*u) v.
+```
+
+Then cancel `4`:
+
+```lean
+lemma uv_eq_four_N_sq_of_big_leg
+    {N u v : ℤ}
+    (h : 16 * N ^ 2 = 4 * u * v) :
+    u * v = 4 * N ^ 2
+```
+
+Proof hint: `nlinarith` or `ring_nf` plus integral-domain cancellation by `4`.  Because this is over `ℤ`, `nlinarith` usually closes it.
+
+---
+
+## 4. Extracting `A,D` from `u*v = 4*N^2`
+
+This is the second genuine reusable interface.  State it over positive integers to avoid sign ambiguity.
+
+### AP parity needed for `A` even
+
+First prove locally:
+
+```lean
+lemma N_even_of_primitive_centered (S : PrimitiveCenteredFourSqAP) :
+    Even S.N
+```
+
+Proof hint: from `q^2 - p^2 = 4*N` and `p,q` odd.  Odd squares are congruent to `1 mod 8`, hence `8 ∣ q^2-p^2`, hence `2 ∣ N`.
+
+A small reusable lemma is useful:
+
+```lean
+lemma odd_sq_sub_odd_sq_dvd_eight
+    {a b : ℤ} (ha : Odd a) (hb : Odd b) :
+    (8 : ℤ) ∣ b ^ 2 - a ^ 2
+```
+
+Then combine with `q_sq_sub_p_sq_eq_fourN`.
+
+### Residual theorem signature
+
+```lean
+/--
+Coprime square extraction specialized to `u*v = 4*N^2`.
+The positivity hypotheses are essential; without them the signs of `A,D` are ambiguous.
+-/
+theorem extract_AD_of_coprime_uv_eq_four_square
+    {u v N : ℤ}
+    (hu : 0 < u)
+    (hv : 0 < v)
+    (hN : 0 < N)
+    (hNeven : Even N)
+    (hvOdd : Odd v)
+    (huv_cop : IsCoprime u v)
+    (huv : u * v = 4 * N ^ 2) :
+    ∃ A D : ℤ,
+      0 < A ∧ 0 < D ∧
+      Even A ∧ Odd D ∧
+      IsCoprime A D ∧
+      u = 4 * A ^ 2 ∧
+      v = D ^ 2 ∧
+      N = A * D
+```
+
+Proof route:
+
+1. Convert to `Nat` using positivity.
+2. Use the natural theorem “coprime factors of a square are squares”:
+
+```lean
+/-- Local residual if Mathlib does not have the exact theorem. -/
+theorem Nat.exists_sq_and_sq_of_coprime_mul_eq_sq
+    {x y z : ℕ}
+    (hcop : x.Coprime y)
+    (h : x * y = z ^ 2) :
+    ∃ r s : ℕ, x = r ^ 2 ∧ y = s ^ 2
+```
+
+3. Apply it to `u*v = (2*N)^2`.
+4. Get `u=U^2`, `v=D^2`, and from positivity get `U*D = 2*N`.
+5. Since `v` is odd, `D` is odd.
+6. From `U*D = 2*N` and `D` odd, get `U=2*A` and `N=A*D`.
+7. From `N` even and `D` odd, get `A` even.
+8. From `IsCoprime u v`, get `IsCoprime U D`, hence `IsCoprime A D`.
+
+Do not claim `u=4*A^2` without the positivity and parity steps above; that is where sign mistakes usually enter.
+
+For the Pythagorean output you have `IsCoprime (2*u) v`; derive the required `IsCoprime u v` by stripping the left factor:
+
+```lean
+lemma isCoprime_of_two_mul_left
+    {u v : ℤ} (h : IsCoprime (2 * u) v) :
+    IsCoprime u v
+```
+
+Proof hint: if `a*(2u)+b*v=1`, then `(2a)*u+b*v=1`.
+
+---
+
+## 5. Deriving the Euler factor product
+
+After extracting `A,D`, you have:
+
+```text
+N = A*D,
+u = 4*A^2,
+v = D^2,
+X^2 - 20*N^2 = 4*u^2 + v^2.
+```
+
+The ring lemma should be local:
+
+```lean
+lemma center_square_eq_euler_factor_product
+    {X N u v A D : ℤ}
+    (hN : N = A * D)
+    (hu : u = 4 * A ^ 2)
+    (hv : v = D ^ 2)
+    (hc : X ^ 2 - 20 * N ^ 2 = 4 * u ^ 2 + v ^ 2) :
+    X ^ 2 = (16 * A ^ 2 + D ^ 2) * (4 * A ^ 2 + D ^ 2)
+```
+
+Proof hint: substitute and `ring`/`nlinarith`.
+
+---
+
+## 6. Coprimality of the two Euler factors
+
+This is local, not a global residual.
+
+```lean
+/-- The two Euler factors are coprime. -/
+lemma euler_factors_coprime
+    {A D : ℤ}
+    (hAD : IsCoprime A D)
+    (hDodd : Odd D) :
+    IsCoprime (16 * A ^ 2 + D ^ 2) (4 * A ^ 2 + D ^ 2)
+```
+
+Proof hint using the factor-coprime style already in the file:
+
+* Let
+
+```text
+F = 16*A^2 + D^2,
+G = 4*A^2 + D^2.
+```
+
+* A common divisor of `F,G` divides:
+
+```text
+F - G = 12*A^2,
+4*G - F = 3*D^2.
+```
+
+* Use `IsCoprime A D` to eliminate common odd primes not dividing `12`.
+* `D` odd makes both `F,G` odd, excluding `2`.
+* Exclude `3` by the mod-3 square check:
+
+```text
+F ≡ A^2 + D^2 (mod 3),
+G ≡ A^2 + D^2 (mod 3).
+```
+
+If `3` divided a common factor, then `A^2 + D^2 ≡ 0 mod 3`, which forces `3∣A` and `3∣D`, contradicting `IsCoprime A D`.
+
+Useful local sublemmas:
+
+```lean
+lemma euler_factor_left_odd {A D : ℤ} (hDodd : Odd D) :
+    Odd (16 * A ^ 2 + D ^ 2)
+
+lemma euler_factor_right_odd {A D : ℤ} (hDodd : Odd D) :
+    Odd (4 * A ^ 2 + D ^ 2)
+
+lemma three_not_dvd_euler_factor_left
+    {A D : ℤ} (hAD : IsCoprime A D) :
+    ¬ (3 : ℤ) ∣ 16 * A ^ 2 + D ^ 2
+
+lemma three_not_dvd_euler_factor_right
+    {A D : ℤ} (hAD : IsCoprime A D) :
+    ¬ (3 : ℤ) ∣ 4 * A ^ 2 + D ^ 2
+```
+
+The `3` lemmas can be proved by `ZMod 3` or by integer `% 3`; `ZMod 3` is usually cleaner.
+
+---
+
+## 7. Square extraction into positive `B,C`
+
+This is the third reusable square-extraction interface.  It can be proved from the same `Nat.exists_sq_and_sq_of_coprime_mul_eq_sq` theorem.
+
+```lean
+/-- Positive integer square extraction from a coprime product equal to a square. -/
+theorem Int.exists_pos_sq_and_sq_of_mul_eq_sq_of_pos_of_isCoprime
+    {x y z : ℤ}
+    (hx : 0 < x)
+    (hy : 0 < y)
+    (hxy : IsCoprime x y)
+    (h : z ^ 2 = x * y) :
+    ∃ r s : ℤ,
+      0 < r ∧ 0 < s ∧
+      r ^ 2 = x ∧ s ^ 2 = y
+```
+
+Then specialize it:
+
+```lean
+lemma euler_factor_left_pos {A D : ℤ} (hDpos : 0 < D) :
+    0 < 16 * A ^ 2 + D ^ 2
+
+lemma euler_factor_right_pos {A D : ℤ} (hDpos : 0 < D) :
+    0 < 4 * A ^ 2 + D ^ 2
+
+lemma extract_BC_from_center_square
+    {X A D : ℤ}
+    (hApos : 0 < A)
+    (hDpos : 0 < D)
+    (hDodd : Odd D)
+    (hAD : IsCoprime A D)
+    (hX : X ^ 2 = (16 * A ^ 2 + D ^ 2) * (4 * A ^ 2 + D ^ 2)) :
+    ∃ B C : ℤ,
+      0 < B ∧ 0 < C ∧
+      B ^ 2 = 16 * A ^ 2 + D ^ 2 ∧
+      C ^ 2 = 4 * A ^ 2 + D ^ 2
+```
+
+Proof hint:
+
+* `hcop := euler_factors_coprime hAD hDodd`.
+* Apply `Int.exists_pos_sq_and_sq_of_mul_eq_sq_of_pos_of_isCoprime` to `hX`.
+* The order of `x,y` should match the desired fields: `B` for `16*A^2+D^2`, `C` for `4*A^2+D^2`.
+
+---
+
+## 8. Final assembly statement
+
+Once the three residual interfaces are available, the actual target is just assembly.
+
+```lean
+/-- Final assembly from a primitive centered AP to an Euler square pair. -/
+theorem primitiveCenteredToEulerSquarePair_constructive
+    (S : PrimitiveCenteredFourSqAP) :
+    ∃ E : EulerSquarePair, S.N = E.A * E.D
+```
+
+Proof outline:
+
+1. Set
+
+```text
+a = 16*S.N^2,
+b = |S.Y|,
+c = S.X^2 - 20*S.N^2.
+```
+
+2. Apply `primitive_pythagorean_even_leg_four_param_int` using:
+
+```text
+big_pythagorean_identity,
+bigLeg_pos,
+Y_abs_pos,
+bigHyp_pos,
+absY_odd,
+bigLeg_coprime_absY.
+```
+
+Get `u,v` with:
+
+```text
+16*N^2 = 4*u*v,
+X^2 - 20*N^2 = 4*u^2 + v^2,
+0<u, 0<v, Odd v, IsCoprime (2*u) v.
+```
+
+3. Cancel `4` to get `u*v = 4*N^2`.
+
+4. Apply `extract_AD_of_coprime_uv_eq_four_square` using:
+
+```text
+0<u, 0<v, 0<N,
+N_even_of_primitive_centered S,
+Odd v,
+IsCoprime u v,
+u*v = 4*N^2.
+```
+
+Get:
+
+```text
+0<A, 0<D, Even A, Odd D, IsCoprime A D,
+u = 4*A^2, v = D^2, N = A*D.
+```
+
+5. Use `center_square_eq_euler_factor_product` to get:
+
+```text
+X^2 = (16*A^2 + D^2)*(4*A^2 + D^2).
+```
+
+6. Apply `extract_BC_from_center_square` to get positive `B,C` satisfying the two Euler equations.
+
+7. Build:
+
+```lean
+⟨{
+  A := A
+  D := D
+  B := B
+  C := C
+  hApos := hApos
+  hDpos := hDpos
+  hDodd := hDodd
+  hAeven := hAeven
+  hADcop := hADcop
+  hBpos := hBpos
+  hCpos := hCpos
+  hB := hB
+  hC := hC
+}, by simpa [hN]⟩
+```
+
+where `hN : S.N = A*D`.
+
+---
+
+## 9. What should be residual versus local
+
+### Genuine residuals if Mathlib/project lacks them
+
+These are mathematically standard but nontrivial enough to isolate:
+
+```lean
+primitive_pythagorean_even_leg_four_param_int
+Nat.exists_sq_and_sq_of_coprime_mul_eq_sq
+Int.exists_pos_sq_and_sq_of_mul_eq_sq_of_pos_of_isCoprime
+extract_AD_of_coprime_uv_eq_four_square
+```
+
+The `Int` square extraction and `extract_AD` can both be built from the `Nat` lemma, so the true primitive residual is often just:
+
+```lean
+Nat.exists_sq_and_sq_of_coprime_mul_eq_sq
+```
+
+plus the Pythagorean parametrization.
+
+### Local AP/Euler lemmas
+
+These should be proved in `N12FourSquaresAP.lean` near the current helper layer:
+
+```lean
+big_pythagorean_identity
+bigLeg_coprime_Y
+N_even_of_primitive_centered
+euler_factors_coprime
+center_square_eq_euler_factor_product
+extract_BC_from_center_square
+```
+
+None of these should require new axioms or classical number theory beyond prime-divisor bookkeeping, mod 8/mod 3 arithmetic, and the coprime square-product theorem.
