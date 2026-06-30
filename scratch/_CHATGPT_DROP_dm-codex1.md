@@ -1,499 +1,595 @@
-# Q2657 (dm-codex1): explicit descent for the primitive Eisenstein quartic
+# Q2663 (dm-codex1): primitive quartic → non-unit Eisenstein parametrization interface
 
-Repo path mentioned by requester: `/Users/huangx/repos/flt-ai`  
-GitHub repo/branch: `xiangyazi24/FLT@scratch`
+Repo/branch requested: `xiangyazi24/FLT@scratch`  
+Target Lean area: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`  
+Namespace assumed from prompt: `MazurProof.RationalPointsN12`
 
-Target:
+## Verdict
 
-```lean
-import Mathlib.NumberTheory.PythagoreanTriples
-import Mathlib.RingTheory.Coprime.Lemmas
-import Mathlib.Tactic.LinearCombination
-import Mathlib.Tactic.Ring
-import Mathlib.Tactic.Linarith
+The unit branch of the primitive Eisenstein triple parametrization is safe: for the quartic use
 
-namespace MazurProof.RationalPointsN12
-
-def IntQuarticEisensteinPrimitive : Prop :=
-  ∀ {A N S : ℤ},
-    IsCoprime A N → N ≠ 0 →
-    S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4 →
-    A = 0 ∨ A ^ 2 = N ^ 2
-
-def EisensteinQuarticBad (A N S : ℤ) : Prop :=
-  IsCoprime A N ∧ A ≠ 0 ∧ N ≠ 0 ∧ A ^ 2 ≠ N ^ 2 ∧
-  S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
-
-end MazurProof.RationalPointsN12
+```text
+X = A^2,  Y = N^2,  Z = |S|,
+Z^2 = X^2 - X*Y + Y^2.
 ```
 
-The route below is independent of `RationalPointsN12`, E1/E24 finite-point theorems, and full-cover residuals.
+The exceptional primitive triple `(X,Y,Z) = (1,1,1)` implies `A^2 = N^2`, exactly the degenerate conclusion, so a primitive bad quartic solution always enters the **non-unit** parametrization branch.
+
+The non-unit parametrization gives very concrete square-side factor equations, but I do **not** know a verified closed-form smaller quartic triple `(A',N',S')` that follows immediately from those equations. The tempting step “each factor is a square, therefore descend” is false without parity/gcd splitting; after the split one obtains simultaneous Pythagorean/Pell-type constraints, not an automatic new quartic solution. The honest Lean boundary should isolate this remaining descent as a small integer-algebra theorem, not hide it in the parametrization theorem.
+
+---
 
 ## 1. Normalized bad solution
 
-Use a positive ordered bad solution and descend on the larger side `N`.
+Use signs and symmetry to reduce every bad solution to positive ordered coordinates.
 
 ```lean
+import Mathlib.Data.Int.GCD
+import Mathlib.Data.Int.ModEq
+import Mathlib.Tactic
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
 namespace MazurProof.RationalPointsN12
 
-/-- Positive ordered primitive bad solution. -/
-def NormalizedEisensteinBad (A N S : ℤ) : Prop :=
-  0 < A ∧ A < N ∧ 0 < S ∧ IsCoprime A N ∧
-  S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
-
-/-- A branch of the square-sided Eisenstein-conic parametrization. -/
-def EisensteinSqBranch (A N S m n : ℤ) : Prop :=
-  0 < n ∧ n < m ∧ IsCoprime m n ∧
-  A ^ 2 = (m - n) * (m + n) ∧
-  N ^ 2 = n * (2 * m - n) ∧
-  S = m ^ 2 - m * n + n ^ 2
-
-/-- Unordered positive form, useful for the swapped conic branch. -/
-def PositivePrimitiveEisensteinBadUnordered (A N S : ℤ) : Prop :=
-  0 < A ∧ 0 < N ∧ 0 < S ∧ IsCoprime A N ∧ A ^ 2 ≠ N ^ 2 ∧
+/-- Positive ordered primitive non-degenerate quartic counterexample. -/
+def NormalizedEisensteinQuarticBad (A N S : ℤ) : Prop :=
+  0 < A ∧ 0 < N ∧ A < N ∧ 0 < S ∧
+  IsCoprime A N ∧
   S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
 
 end MazurProof.RationalPointsN12
 ```
 
-Reduction from `EisensteinQuarticBad`:
+Recommended wrappers:
 
 ```lean
 namespace MazurProof.RationalPointsN12
 
-/-- The sign/order normalization statement to prove first. -/
-def NormalizedOfBadStatement : Prop :=
-  ∀ {A N S : ℤ}, EisensteinQuarticBad A N S →
-    ∃ A0 N0 S0 : ℤ, NormalizedEisensteinBad A0 N0 S0
+/-- Absolute values and, if necessary, swapping `A,N` normalize a bad solution. -/
+theorem normalized_bad_of_bad {A N S : ℤ}
+    (h : EisensteinQuarticBad A N S) :
+    ∃ A0 N0 S0 : ℤ, NormalizedEisensteinQuarticBad A0 N0 S0 := by
+  -- Implementation plan:
+  -- * set a = |A|, n = |N|, z = |S|;
+  -- * use equation invariance under signs;
+  -- * bad gives a ≠ 0, n ≠ 0, a^2 ≠ n^2, hence a ≠ n;
+  -- * if a < n keep `(a,n,z)`, otherwise use symmetry and take `(n,a,z)`;
+  -- * `z > 0` follows from
+  --   `A^4 - A^2*N^2 + N^4 = (A^2 - N^2)^2 + A^2*N^2 > 0`.
+  sorry
+
+/-- It suffices to rule out normalized bad solutions. -/
+theorem no_bad_of_no_normalized_bad
+    (hNo : ∀ {A N S : ℤ}, NormalizedEisensteinQuarticBad A N S → False) :
+    ∀ {A N S : ℤ}, EisensteinQuarticBad A N S → False := by
+  intro A N S hbad
+  rcases normalized_bad_of_bad hbad with ⟨A0, N0, S0, hnorm⟩
+  exact hNo hnorm
+
+/-- Final primitive theorem from absence of bad solutions. -/
+theorem intQuarticEisensteinPrimitive_of_no_bad
+    (hNo : ∀ {A N S : ℤ}, EisensteinQuarticBad A N S → False) :
+    IntQuarticEisensteinPrimitive := by
+  intro A N S hcop hN hEq
+  by_cases hA : A = 0
+  · exact Or.inl hA
+  by_cases hdeg : A ^ 2 = N ^ 2
+  · exact Or.inr hdeg
+  exfalso
+  exact hNo ⟨hcop, hA, hN, hdeg, hEq⟩
 
 end MazurProof.RationalPointsN12
 ```
 
-Proof: replace `(A,N,S)` by `(|A|,|N|,|S|)`, swap the first two coordinates if needed, and use `A^2 ≠ N^2` to get strict order.  The quartic is symmetric in `A,N` and invariant under signs.  `S ≠ 0` follows because `x^2 - x*y + y^2 > 0` for `(x,y)=(A^2,N^2)` not both zero.
+The two `sorry`s above are intended theorem skeletons. The actual proof of `normalized_bad_of_bad` is local algebra/order over `ℤ`; it does not need any elliptic curve or full-cover result.
 
-## 2. Parametrization target
+### Parity and mod-3 facts to prove immediately
 
-For a normalized solution, put `X=A^2`, `Y=N^2`.  Then
-
-```text
-S^2 = X^2 - X Y + Y^2.
-```
-
-The branch needed for descent is
-
-```text
-X = m^2 - n^2 = (m-n)(m+n),
-Y = 2mn - n^2 = n(2m-n),
-S = m^2 - mn + n^2,
-0 < n < m,
-gcd(m,n)=1.
-```
-
-The identity is purely algebraic:
+For normalized bad `(A,N,S)`:
 
 ```lean
 namespace MazurProof.RationalPointsN12
 
-lemma eisenstein_param_identity (m n : ℤ) :
-    (m ^ 2 - m*n + n ^ 2) ^ 2 =
-      ((m-n)*(m+n)) ^ 2
-        - ((m-n)*(m+n)) * (n*(2*m-n))
-        + (n*(2*m-n)) ^ 2 := by
-  ring
+/-- Quartic as an Eisenstein-conic equation for square sides. -/
+theorem quartic_as_eisenstein_conic {A N S : ℤ}
+    (h : S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4) :
+    S ^ 2 = (A ^ 2) ^ 2 - (A ^ 2) * (N ^ 2) + (N ^ 2) ^ 2 := by
+  -- `ring_nf` after rewriting `h`.
+  sorry
 
-/-- Parametrization statement.  The disjunction handles the symmetric branch. -/
-def NormalizedBadParamStatement : Prop :=
-  ∀ {A N S : ℤ}, NormalizedEisensteinBad A N S →
-    ∃ m n : ℤ,
-      EisensteinSqBranch A N S m n ∨ EisensteinSqBranch N A S m n
+/-- Quartic as a primitive Pythagorean triple. Useful for parity checks. -/
+theorem quartic_as_pythagorean {A N S : ℤ}
+    (h : S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4) :
+    S ^ 2 = (A ^ 2 - N ^ 2) ^ 2 + (A * N) ^ 2 := by
+  -- `ring_nf` after rewriting `h`.
+  sorry
+
+/-- `S` is odd in every primitive solution. -/
+theorem normalized_bad_odd_S {A N S : ℤ}
+    (h : NormalizedEisensteinQuarticBad A N S) : Odd S := by
+  -- Since `IsCoprime A N`, not both `A,N` are even.
+  -- Mod 2: `A^4 - A^2*N^2 + N^4 ≡ 1` in all allowed parity cases.
+  sorry
+
+/-- If exactly one of `A,N` is even, the even one is divisible by 4. -/
+theorem normalized_bad_even_coord_divisible_by_four {A N S : ℤ}
+    (h : NormalizedEisensteinQuarticBad A N S) :
+    (Even A ∧ Odd N → (4 : ℤ) ∣ A) ∧
+    (Odd A ∧ Even N → (4 : ℤ) ∣ N) := by
+  -- Mod 16: if the even coordinate is `2 mod 4`, then
+  -- RHS is `13 mod 16`, not a square.
+  sorry
+
+/-- The ramified prime over 3 is absent for primitive square sides. -/
+theorem normalized_bad_not_three_dvd_S {A N S : ℤ}
+    (h : NormalizedEisensteinQuarticBad A N S) : ¬ (3 : ℤ) ∣ S := by
+  -- Squares mod 3 are 0 or 1; `IsCoprime A N` prevents both 0.
+  -- Hence `A^4 - A^2*N^2 + N^4 ≡ 1 mod 3`.
+  sorry
+
+/-- Also `3 ∤ A^2 + N^2`; useful for the Eisenstein gcd/conjugate step. -/
+theorem normalized_bad_not_three_dvd_square_sum {A N S : ℤ}
+    (h : NormalizedEisensteinQuarticBad A N S) :
+    ¬ (3 : ℤ) ∣ A ^ 2 + N ^ 2 := by
+  -- Squares mod 3 and coprimality: possible pairs are `(1,0)`, `(0,1)`, `(1,1)`,
+  -- giving sums `1,1,2`, never `0`.
+  sorry
 
 end MazurProof.RationalPointsN12
 ```
 
-Lean-feasible proof choices:
+---
 
-* Elementary conic proof by rational slope, then normalize the primitive branch.
-* Or Eisenstein-integer square extraction in `𝓞 ℚ(ζ₃)`, using the PID/UFD API.  The latter avoids the annoying `/3` conic parametrization case by choosing the sector of the square root.
+## 2. Positive primitive Eisenstein triple and unit branch
 
-Important 3-divisibility point: in the branch used above one must have `¬ (3 : ℤ) ∣ m+n`.  If `3 ∣ m+n`, then `m ≡ -n (mod 3)` and both raw factors `m^2-n^2` and `n(2m-n)` are divisible by `3`; in the square-sided primitive branch this would force `3 ∣ A` and `3 ∣ N`.  If a rational-slope proof returns the usual primitive formulas divided by `3`, do not feed that directly to the descent below; first reparametrize by the Eisenstein unit/sector argument, or add a separate `/3` branch lemma.  This is the main place a hidden false proof can enter.
-
-## 3. GCD and square-splitting lemmas
-
-Use local wrappers around `Int.sq_of_gcd_eq_one`, following the pattern in `Mathlib/NumberTheory/FLT/Four.lean`.
+Define a minimal triple predicate. This is just the conic, not the hard theorem.
 
 ```lean
 namespace MazurProof.RationalPointsN12
 
-/-- Positive coprime product-square splitting. -/
-def PosSqOfCoprimeMulSqStatement : Prop :=
-  ∀ {x y z : ℤ}, 0 < x → 0 < y → IsCoprime x y → z ^ 2 = x*y →
-    ∃ a b : ℤ, 0 < a ∧ 0 < b ∧ x = a ^ 2 ∧ y = b ^ 2
+/-- Positive primitive integral solution of `Z^2 = X^2 - X*Y + Y^2`. -/
+def PositivePrimitiveEisensteinTriple (X Y Z : ℤ) : Prop :=
+  0 < X ∧ 0 < Y ∧ 0 < Z ∧ IsCoprime X Y ∧
+  Z ^ 2 = X ^ 2 - X * Y + Y ^ 2
 
-/-- Positive product-square splitting when both factors have exactly one factor 2. -/
-def PosTwoSqOfGcdTwoMulSqStatement : Prop :=
-  ∀ {x y z : ℤ}, 0 < x → 0 < y → 2 ∣ x → 2 ∣ y →
-    IsCoprime (x/2) (y/2) → z ^ 2 = x*y →
-    ∃ a b : ℤ, 0 < a ∧ 0 < b ∧ x = 2*a ^ 2 ∧ y = 2*b ^ 2
+/-- A normalized quartic bad solution gives a positive primitive Eisenstein triple. -/
+theorem eisensteinTriple_of_normalized_bad {A N S : ℤ}
+    (h : NormalizedEisensteinQuarticBad A N S) :
+    PositivePrimitiveEisensteinTriple (A ^ 2) (N ^ 2) S := by
+  -- Positivity: from `0 < A`, `0 < N`, `0 < S`.
+  -- Primitive: `IsCoprime A N` implies `IsCoprime (A^2) (N^2)`.
+  -- Equation: `quartic_as_eisenstein_conic h.eq`.
+  sorry
+
+/-- The parametrization's unit exception is exactly degenerate for square sides. -/
+theorem unit_branch_degenerate_for_square_sides {A N S : ℤ}
+    (hX : A ^ 2 = 1) (hY : N ^ 2 = 1) :
+    A ^ 2 = N ^ 2 := by
+  exact hX.trans hY.symm
+
+/-- Therefore a normalized bad solution cannot be in the unit branch `(1,1,1)`. -/
+theorem normalized_bad_not_unit_branch {A N S : ℤ}
+    (h : NormalizedEisensteinQuarticBad A N S) :
+    ¬ (A ^ 2 = 1 ∧ N ^ 2 = 1 ∧ S = 1) := by
+  intro hu
+  have hdeg : A ^ 2 = N ^ 2 := unit_branch_degenerate_for_square_sides hu.1 hu.2.1
+  have hlt : A ^ 2 < N ^ 2 := by
+    -- from `0 < A`, `A < N`.
+    sorry
+  exact (ne_of_lt hlt) hdeg
 
 end MazurProof.RationalPointsN12
 ```
 
-GCD facts for `0<n<m`, `gcd(m,n)=1`:
+The only nontrivial local lemma above is monotonicity of square on positive integers.
 
-```text
-gcd(n, 2m-n) = 1  if n is odd,
-gcd(n, 2m-n) = 2  if n is even; then m is odd.
+---
 
-gcd(m-n, m+n) = 1  if m,n have opposite parity,
-gcd(m-n, m+n) = 2  if m,n are both odd.
-```
+## 3. Corrected non-unit Eisenstein parametrization and square-side equations
 
-Also needed later:
+A Lean-friendly parametrization should **not** silently choose one unit associate. Use a unit branch plus three positive non-unit branches.
 
-```text
-if a,b odd and gcd(a,b)=1, then gcd((b-a)/2, (b+a)/2)=1;
-if c,d odd and gcd(c,d)=1, then gcd((d-c)/2, (d+c)/2)=1.
-```
-
-## 4. Exact descent formulas from one branch
-
-Assume
-
-```text
-A^2 = (m-n)(m+n),
-N^2 = n(2m-n),
-S   = m^2 - mn + n^2,
-0 < n < m,
-gcd(m,n)=1.
-```
-
-### Case I: `n` even
-
-Then `m` is odd.  Split the `N` side using gcd `2`:
-
-```text
-n       = 2 c^2,
-2m - n = 2 d^2,
-N       = ± 2 c d.
-```
-
-Split the `A` side.  Since `m±n` are positive odd coprime factors:
-
-```text
-m - n = a^2,
-m + n = b^2,
-A     = ± a b.
-```
-
-Now
-
-```text
-b^2 - a^2 = 2n = 4c^2,
-(b-a)(b+a) = 4c^2.
-```
-
-Since `a,b` are odd and coprime, split the half-factors:
-
-```text
-(b-a)/2 = e^2,
-(b+a)/2 = f^2,
-c = e f,
-0 < e < f,
-gcd(e,f)=1.
-```
-
-Therefore
-
-```text
-a = f^2 - e^2,
-b = f^2 + e^2,
-c = e f.
-```
-
-The smaller solution is
-
-```text
-A' = e,
-N' = f,
-S' = |d|.
-```
-
-Algebra:
-
-```text
-d^2 = (2m-n)/2
-    = m - n/2
-    = (a^2+b^2)/2 - c^2
-    = ((f^2-e^2)^2 + (f^2+e^2)^2)/2 - e^2 f^2
-    = e^4 - e^2 f^2 + f^4.
-```
-
-Thus
-
-```text
-S'^2 = A'^4 - A'^2 N'^2 + N'^4.
-```
-
-Primitive/nontrivial/smaller:
-
-```text
-gcd(e,f)=1,
-0 < e < f,
-N = 2 e f |d|,
-so f < N.
-```
-
-Lean theorem shape:
+For `q = m^2 - n^2`, `r = 2*m*n - n^2`, `z = m^2 - m*n + n^2`, the square in `ℤ[ω]` gives `(q,r,z)`. Multiplication by units yields the positive associate branches:
 
 ```lean
 namespace MazurProof.RationalPointsN12
 
-def DescentBranchNEvenStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    EisensteinSqBranch A N S m n → 2 ∣ n →
-    ∃ e f d : ℤ,
-      0 < e ∧ e < f ∧ 0 < d ∧ IsCoprime e f ∧
-      d ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4 ∧ f < N
+/-- First positive associate of an Eisenstein square. -/
+def EisensteinParamBranch0 (X Y Z m n : ℤ) : Prop :=
+  IsCoprime m n ∧
+  X = m ^ 2 - n ^ 2 ∧
+  Y = 2 * m * n - n ^ 2 ∧
+  Z = m ^ 2 - m * n + n ^ 2
+
+/-- Second positive associate. -/
+def EisensteinParamBranch1 (X Y Z m n : ℤ) : Prop :=
+  IsCoprime m n ∧
+  X = 2 * m * n - n ^ 2 ∧
+  Y = 2 * m * n - m ^ 2 ∧
+  Z = m ^ 2 - m * n + n ^ 2
+
+/-- Third positive associate. -/
+def EisensteinParamBranch2 (X Y Z m n : ℤ) : Prop :=
+  IsCoprime m n ∧
+  X = m ^ 2 - 2 * m * n ∧
+  Y = m ^ 2 - n ^ 2 ∧
+  Z = m ^ 2 - m * n + n ^ 2
+
+/-- Non-unit parametrization branch for a positive primitive Eisenstein triple. -/
+def NonunitEisensteinParam (X Y Z m n : ℤ) : Prop :=
+  EisensteinParamBranch0 X Y Z m n ∨
+  EisensteinParamBranch1 X Y Z m n ∨
+  EisensteinParamBranch2 X Y Z m n
+
+/-- Shape of the corrected parametrization theorem: unit branch or non-unit branch. -/
+def EisensteinTripleParamTheorem : Prop :=
+  ∀ {X Y Z : ℤ},
+    PositivePrimitiveEisensteinTriple X Y Z →
+    (X = 1 ∧ Y = 1 ∧ Z = 1) ∨
+      ∃ m n : ℤ, NonunitEisensteinParam X Y Z m n
 
 end MazurProof.RationalPointsN12
 ```
 
-### Case II: `n` odd and `m` even — impossible
+Given `X=A^2`, `Y=N^2`, `Z=S`, the branch equations are:
 
-Split the two products into odd coprime square factors:
-
-```text
-n       = c^2,
-2m - n = d^2,
-m - n  = a^2,
-m + n  = b^2.
-```
-
-Then
+### Branch 0
 
 ```text
-b^2 - a^2 = 2n = 2c^2.
+A^2 = m^2 - n^2 = (m-n)(m+n)
+N^2 = 2mn - n^2 = n(2m-n)
+S   = m^2 - mn + n^2
 ```
 
-But `a,b,c` are odd, so modulo `4`:
+### Branch 1
 
 ```text
-b^2 - a^2 ≡ 1 - 1 ≡ 0,
-2c^2       ≡ 2,
+A^2 = 2mn - n^2 = n(2m-n)
+N^2 = 2mn - m^2 = m(2n-m)
+S   = m^2 - mn + n^2
 ```
 
-contradiction.  Mod `8` is even cleaner: an odd-square difference is divisible by `8`, while `2c^2 ≡ 2 (mod 8)`.
+### Branch 2
+
+```text
+A^2 = m^2 - 2mn = m(m-2n)
+N^2 = m^2 - n^2 = (m-n)(m+n)
+S   = m^2 - mn + n^2
+```
+
+Lean wrappers:
 
 ```lean
 namespace MazurProof.RationalPointsN12
 
-def BranchNOddMEvenImpossibleStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    EisensteinSqBranch A N S m n → ¬ 2 ∣ n → 2 ∣ m → False
+theorem branch0_square_side_factors {A N S m n : ℤ}
+    (hp : EisensteinParamBranch0 (A ^ 2) (N ^ 2) S m n) :
+    A ^ 2 = (m - n) * (m + n) ∧
+    N ^ 2 = n * (2 * m - n) ∧
+    S = m ^ 2 - m * n + n ^ 2 := by
+  -- `rcases hp with ⟨hcop, hX, hY, hZ⟩`; `ring_nf`.
+  sorry
+
+theorem branch1_square_side_factors {A N S m n : ℤ}
+    (hp : EisensteinParamBranch1 (A ^ 2) (N ^ 2) S m n) :
+    A ^ 2 = n * (2 * m - n) ∧
+    N ^ 2 = m * (2 * n - m) ∧
+    S = m ^ 2 - m * n + n ^ 2 := by
+  sorry
+
+theorem branch2_square_side_factors {A N S m n : ℤ}
+    (hp : EisensteinParamBranch2 (A ^ 2) (N ^ 2) S m n) :
+    A ^ 2 = m * (m - 2 * n) ∧
+    N ^ 2 = (m - n) * (m + n) ∧
+    S = m ^ 2 - m * n + n ^ 2 := by
+  sorry
 
 end MazurProof.RationalPointsN12
 ```
 
-### Case III: `n` odd and `m` odd
+### GCD facts needed for factor extraction
 
-Split the `N` side with gcd `1`:
-
-```text
-n       = c^2,
-2m - n = d^2,
-N       = ± c d.
-```
-
-Split the `A` side with gcd `2`:
+For `IsCoprime m n`:
 
 ```text
-m - n = 2 a^2,
-m + n = 2 b^2,
-A     = ± 2 a b.
+gcd(m-n, m+n) ∣ 2
+gcd(n, 2m-n) = gcd(n, 2)
+gcd(m, 2n-m) = gcd(m, 2)
+gcd(m, m-2n) = gcd(m, 2)
 ```
 
-Then
+Lean theorem shapes:
+
+```lean
+namespace MazurProof.RationalPointsN12
+
+theorem gcd_sub_add_dvd_two {m n : ℤ} (hcop : IsCoprime m n) :
+    ∀ d : ℤ, d ∣ m - n → d ∣ m + n → d ∣ (2 : ℤ) := by
+  -- `d ∣ (m+n)+(m-n)=2m` and `d ∣ (m+n)-(m-n)=2n`;
+  -- combine with `IsCoprime m n`.
+  sorry
+
+theorem gcd_n_two_mul_sub_dvd_two {m n : ℤ} (hcop : IsCoprime m n) :
+    ∀ d : ℤ, d ∣ n → d ∣ 2 * m - n → d ∣ (2 : ℤ) := by
+  -- `d ∣ 2*m`; coprimality with `n` leaves only factor `2`.
+  sorry
+
+theorem gcd_m_two_mul_sub_dvd_two {m n : ℤ} (hcop : IsCoprime m n) :
+    ∀ d : ℤ, d ∣ m → d ∣ 2 * n - m → d ∣ (2 : ℤ) := by
+  sorry
+
+theorem gcd_m_sub_two_mul_dvd_two {m n : ℤ} (hcop : IsCoprime m n) :
+    ∀ d : ℤ, d ∣ m → d ∣ m - 2 * n → d ∣ (2 : ℤ) := by
+  sorry
+
+end MazurProof.RationalPointsN12
+```
+
+### Square-up-to-2 extraction lemmas
+
+These are reusable and independent of Eisenstein integers.
+
+```lean
+namespace MazurProof.RationalPointsN12
+
+/-- Coprime positive factors whose product is a square are squares. -/
+theorem coprime_factors_of_square {u v a : ℤ}
+    (hu : 0 < u) (hv : 0 < v)
+    (hcop : IsCoprime u v)
+    (hmul : u * v = a ^ 2) :
+    ∃ r s : ℤ, 0 ≤ r ∧ 0 ≤ s ∧ u = r ^ 2 ∧ v = s ^ 2 ∧ a ^ 2 = (r * s) ^ 2 := by
+  -- Best proved via `Int.factorization`/unique factorization, or move to `ℕ`.
+  sorry
+
+/-- Even factors with only common divisor 2 whose product is a square are twice squares. -/
+theorem two_coprime_factors_of_square {u v a : ℤ}
+    (hu : 0 < u) (hv : 0 < v)
+    (hu2 : (2 : ℤ) ∣ u) (hv2 : (2 : ℤ) ∣ v)
+    (hcommon : ∀ d : ℤ, d ∣ u → d ∣ v → d ∣ (2 : ℤ))
+    (hmul : u * v = a ^ 2) :
+    ∃ r s : ℤ, 0 ≤ r ∧ 0 ≤ s ∧ u = 2 * r ^ 2 ∧ v = 2 * s ^ 2 ∧ a ^ 2 = (2 * r * s) ^ 2 := by
+  -- Divide both factors by 2, prove the quotients are coprime, then use
+  -- `coprime_factors_of_square` on `u/2 * v/2 = (a/2)^2`.
+  sorry
+
+end MazurProof.RationalPointsN12
+```
+
+### Parity split example: branch 0
+
+Branch 0 already illustrates why there is no immediate one-line descent.
+
+If `m,n` are both odd, then `(m-n)` and `(m+n)` are even with common divisor exactly `2`, while `n` and `2m-n` are odd and coprime. The square-side equations become
 
 ```text
-n = b^2 - a^2 = c^2,
-d^2 - c^2 = (2m-n) - n = 2(m-n) = 4a^2.
+m - n = 2*a^2
+m + n = 2*b^2
+n     = c^2
+2m-n = d^2
+A     = ± 2ab
+N     = ± cd
 ```
 
-Since `c,d` are odd and coprime, split the half-factors:
+Algebraically:
 
 ```text
-(d-c)/2 = e^2,
-(d+c)/2 = f^2,
-a = e f,
-0 < e < f,
-gcd(e,f)=1.
+m = a^2 + b^2
+n = b^2 - a^2 = c^2
+d^2 = 2m - n = 3a^2 + b^2
 ```
 
-Therefore
-
-```text
-c = f^2 - e^2,
-d = f^2 + e^2.
-```
-
-The smaller solution is
-
-```text
-A' = e,
-N' = f,
-S' = |b|.
-```
-
-Algebra:
+Equivalently, using `b^2 = a^2 + c^2`,
 
 ```text
 b^2 = a^2 + c^2
-    = e^2 f^2 + (f^2 - e^2)^2
-    = e^4 - e^2 f^2 + f^4.
+d^2 = 4a^2 + c^2.
 ```
 
-Thus
+This is a simultaneous Pythagorean/Pell-type system. It is useful, but it is **not** yet a smaller quartic solution.
+
+If `m` is odd and `n` is even, then `(m-n)` and `(m+n)` are odd and coprime, while `n` and `2m-n` are even with common divisor `2`. The equations become
 
 ```text
-S'^2 = A'^4 - A'^2 N'^2 + N'^4.
+m - n = a^2
+m + n = b^2
+n     = 2*c^2
+2m-n = 2*d^2
+A     = ± ab
+N     = ± 2cd
 ```
 
-Primitive/nontrivial/smaller:
+Then
 
 ```text
-gcd(e,f)=1,
-0 < e < f,
-N = |c d| = (f^2-e^2)(f^2+e^2) = f^4-e^4,
-so f < N.
+b^2 - a^2 = 4c^2
+d^2 = a^2 + c^2.
 ```
+
+If `m` is even and `n` is odd`, all four factors in branch 0 are odd. Then the equations would force
+
+```text
+m - n = a^2
+m + n = b^2
+n     = c^2
+2m-n = d^2
+```
+
+and hence `b^2 - a^2 = 2c^2`. Here `a,b,c` are odd, so the left side is `0 mod 8` while the right side is `2 mod 8`; contradiction. This is a good Lean lemma.
+
+Analogous tables should be generated for branches 1 and 2 by the same `gcd ∣ 2` lemmas.
+
+### 3-divisibility after parametrization
+
+Since `S = m^2 - mn + n^2` in every branch and normalized bad gives `3 ∤ S`, prove:
 
 ```lean
 namespace MazurProof.RationalPointsN12
 
-def DescentBranchNOddMOddStatement : Prop :=
+/-- For coprime `m,n`, the Eisenstein norm is divisible by 3 iff `m+n` is. -/
+theorem three_dvd_eisenstein_norm_iff {m n : ℤ} (hcop : IsCoprime m n) :
+    ((3 : ℤ) ∣ m ^ 2 - m * n + n ^ 2) ↔ (3 : ℤ) ∣ m + n := by
+  -- Work modulo 3; coprimality excludes `m ≡ n ≡ 0`.
+  sorry
+
+/-- In a non-unit parametrization from a normalized bad solution, `3 ∤ m+n`. -/
+theorem normalized_bad_param_not_three_dvd_m_add_n {A N S m n : ℤ}
+    (hbad : NormalizedEisensteinQuarticBad A N S)
+    (hp : NonunitEisensteinParam (A ^ 2) (N ^ 2) S m n) :
+    ¬ (3 : ℤ) ∣ m + n := by
+  -- Use `S = m^2 - mn + n^2` from any branch, then
+  -- `normalized_bad_not_three_dvd_S` and `three_dvd_eisenstein_norm_iff`.
+  sorry
+
+end MazurProof.RationalPointsN12
+```
+
+---
+
+## 4. Smaller quartic solution formulas: status and honest residual boundary
+
+I do **not** have a verified formula
+
+```text
+(A,N,S,m,n) ↦ (A',N',S')
+```
+
+that can be safely committed as the classical descent step from the square-side equations above.
+
+The concrete obstruction is that the corrected parametrization gives products such as
+
+```text
+A^2 = (m-n)(m+n),   N^2 = n(2m-n),
+```
+
+but the gcds are only controlled up to `2`, and unit associates move the products among three branches. After parity splitting, one gets systems like
+
+```text
+b^2 = a^2 + c^2,
+d^2 = 4a^2 + c^2,
+```
+
+or
+
+```text
+b^2 - a^2 = 4c^2,
+d^2 = a^2 + c^2,
+```
+
+not an immediate new solution of
+
+```text
+S'^2 = A'^4 - A'^2*N'^2 + N'^4.
+```
+
+Therefore the smallest honest residual theorem is the square-parametrization descent step:
+
+```lean
+namespace MazurProof.RationalPointsN12
+
+/-- The remaining independent descent theorem.
+
+It starts only after:
+* quartic bad solution has been normalized;
+* square sides have been converted to a positive primitive Eisenstein triple;
+* the unit branch has been eliminated;
+* a non-unit parametrization has been obtained.
+
+This theorem must be proved by elementary integer algebra/number theory only.
+It must not import `RationalPointsN12`, E1/E24 finite-point theorems, or full-cover residuals.
+-/
+def EisensteinSquareParamDescent : Prop :=
   ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    EisensteinSqBranch A N S m n → ¬ 2 ∣ n → ¬ 2 ∣ m →
-    ∃ e f b : ℤ,
-      0 < e ∧ e < f ∧ 0 < b ∧ IsCoprime e f ∧
-      b ^ 2 = e ^ 4 - e ^ 2 * f ^ 2 + f ^ 4 ∧ f < N
+    NormalizedEisensteinQuarticBad A N S →
+    NonunitEisensteinParam (A ^ 2) (N ^ 2) S m n →
+    ∃ A' N' S' : ℤ,
+      NormalizedEisensteinQuarticBad A' N' S' ∧
+      Int.natAbs N' < Int.natAbs N
 
-end MazurProof.RationalPointsN12
-```
-
-## 5. Combined branch descent
-
-The branch theorem should be unordered: it descends relative to the branch-second coordinate.  This makes the swapped conic branch painless.
-
-```lean
-namespace MazurProof.RationalPointsN12
-
-def DescentFromBranchUnorderedStatement : Prop :=
+/-- Less constructive but smaller boundary: no non-unit square-side parametrization exists. -/
+def EisensteinParamSquaresImpossible : Prop :=
   ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    EisensteinSqBranch A N S m n →
-    ∃ A' N' S' : ℤ,
-      NormalizedEisensteinBad A' N' S' ∧ N' < N
-
-def NormalizedDescentStatement : Prop :=
-  ∀ {A N S : ℤ}, NormalizedEisensteinBad A N S →
-    ∃ A' N' S' : ℤ,
-      NormalizedEisensteinBad A' N' S' ∧ N' < N
+    NormalizedEisensteinQuarticBad A N S →
+    NonunitEisensteinParam (A ^ 2) (N ^ 2) S m n → False
 
 end MazurProof.RationalPointsN12
 ```
 
-Proof of `DescentFromBranchUnorderedStatement`:
+`EisensteinParamSquaresImpossible` is almost the original theorem after parametrization, so it is less illuminating. `EisensteinSquareParamDescent` is better because it gives a well-founded proof by descending on `N`.
 
-```text
-if 2 ∣ n:
-  use Case I with (A',N',S')=(e,f,|d|)
-else if 2 ∣ m:
-  contradiction by Case II
-else:
-  use Case III with (A',N',S')=(e,f,|b|)
-```
+---
 
-Proof of `NormalizedDescentStatement`:
-
-```text
-obtain branch for (A,N) or (N,A).
-if branch is (A,N), apply unordered branch descent and get N' < N.
-if branch is (N,A), apply unordered branch descent and get N' < A, then use A < N.
-```
-
-## 6. Infinite descent wrapper
+## 5. Wrappers provable now, assuming only parametrization plus residual descent
 
 ```lean
 namespace MazurProof.RationalPointsN12
 
-def NotNormalizedBadStatement : Prop :=
-  ¬ ∃ A N S : ℤ, NormalizedEisensteinBad A N S
+/-- Parametrization plus unit elimination gives a non-unit parametrization. -/
+theorem nonunit_param_of_normalized_bad
+    (hParam : EisensteinTripleParamTheorem)
+    {A N S : ℤ}
+    (hbad : NormalizedEisensteinQuarticBad A N S) :
+    ∃ m n : ℤ, NonunitEisensteinParam (A ^ 2) (N ^ 2) S m n := by
+  have htri : PositivePrimitiveEisensteinTriple (A ^ 2) (N ^ 2) S :=
+    eisensteinTriple_of_normalized_bad hbad
+  rcases hParam htri with hunit | hnonunit
+  · exfalso
+    exact normalized_bad_not_unit_branch hbad hunit
+  · exact hnonunit
 
-def IntQuarticEisensteinPrimitiveFromDescentStatement : Prop :=
-  NormalizedOfBadStatement →
-  NormalizedBadParamStatement →
-  DescentFromBranchUnorderedStatement →
-  IntQuarticEisensteinPrimitive
+/-- Descent eliminates normalized bad solutions. -/
+theorem no_normalized_bad_of_param_descent
+    (hParam : EisensteinTripleParamTheorem)
+    (hDesc : EisensteinSquareParamDescent) :
+    ∀ {A N S : ℤ}, NormalizedEisensteinQuarticBad A N S → False := by
+  -- Use well-founded induction on `Int.natAbs N`.
+  -- For a normalized bad `(A,N,S)`, get `m,n` from `nonunit_param_of_normalized_bad`.
+  -- Apply `hDesc` to get normalized bad `(A',N',S')` with `natAbs N' < natAbs N`.
+  -- Contradict the induction hypothesis.
+  intro A N S hbad
+  classical
+  -- Suggested implementation shape:
+  --   refine Nat.lt_wfRel.wf.induction (a := Int.natAbs N) ?step ?
+  -- It may be cleaner to state an auxiliary theorem by induction on `k`:
+  --   `∀ k, (∀ bad with natAbs N < k, False) → ...`
+  sorry
+
+/-- Final theorem from corrected Eisenstein parametrization and square-param descent. -/
+theorem intQuarticEisensteinPrimitive_of_eisenstein_square_param_descent
+    (hParam : EisensteinTripleParamTheorem)
+    (hDesc : EisensteinSquareParamDescent) :
+    IntQuarticEisensteinPrimitive := by
+  apply intQuarticEisensteinPrimitive_of_no_bad
+  apply no_bad_of_no_normalized_bad
+  exact no_normalized_bad_of_param_descent hParam hDesc
+
+/-- Alternative final theorem if the residual is the direct impossibility boundary. -/
+theorem intQuarticEisensteinPrimitive_of_param_squares_impossible
+    (hParam : EisensteinTripleParamTheorem)
+    (hImpossible : EisensteinParamSquaresImpossible) :
+    IntQuarticEisensteinPrimitive := by
+  apply intQuarticEisensteinPrimitive_of_no_bad
+  apply no_bad_of_no_normalized_bad
+  intro A N S hbad
+  rcases nonunit_param_of_normalized_bad hParam hbad with ⟨m, n, hp⟩
+  exact hImpossible hbad hp
 
 end MazurProof.RationalPointsN12
 ```
 
-Minimal-counterexample proof: copy the structure of `Fermat42.exists_minimal` from `Mathlib.NumberTheory.FLT.Four`.  Let
+---
 
-```text
-M = { q : ℕ | ∃ A N S, NormalizedEisensteinBad A N S ∧ q = N.natAbs }.
-```
+## Implementation priorities
 
-Choose `q0 = Nat.find`.  `NormalizedDescentStatement` gives a new normalized bad solution with `N' < N`, hence `N'.natAbs < N.natAbs`, contradicting minimality.
+1. Prove normalization and the `PositivePrimitiveEisensteinTriple` wrapper.
+2. Implement or import the primitive Eisenstein triple parametrization with an explicit unit branch and three unit-associate non-unit branches.
+3. Prove `normalized_bad_not_unit_branch`; this closes the Q2659 unit-exception issue.
+4. Add the branch factor equations and the gcd/2/parity/3 lemmas.
+5. Leave exactly one named residual boundary, preferably `EisensteinSquareParamDescent`, until the explicit smaller-solution formulas are verified.
 
-## 7. Can this be replaced by `not_fermat_42`?
+## False steps to avoid
 
-No direct derivation.  The identity
-
-```text
-S^2 = (N^2-A^2)^2 + (A N)^2
-```
-
-gives a primitive Pythagorean triple, but neither leg is generally a fourth power or even a square.  Applying `not_fermat_42` would require extra splitting that is essentially the descent above.  It is safe to reuse the elementary proof patterns and lemmas from `FLT/Four.lean`; do not use `not_fermat_42` itself as the proof of this theorem.
-
-## 8. Mathlib grep targets
-
-Pinned mathlib in this repo: `96fd0fff3b8837985ae21dd02e712cb5df72ec05`.
-
-```text
-Mathlib/NumberTheory/FLT/Four.lean
-  Fermat42.exists_minimal
-  Fermat42.not_minimal
-  not_fermat_42
-  Int.sq_of_gcd_eq_one usage pattern
-  Int.isCoprime_of_sq_sum
-  Int.isCoprime_of_sq_sum'
-
-Mathlib/NumberTheory/PythagoreanTriples.lean
-  PythagoreanTriple
-  PythagoreanTriple.coprime_classification
-  PythagoreanTriple.coprime_classification'
-
-Mathlib/RingTheory/Coprime/Lemmas.lean
-  IsCoprime.mul_left / mul_right / pow
-  IsCoprime.of_mul_left_left
-  Int.isCoprime_iff_gcd_eq_one
-
-Mathlib/NumberTheory/NumberField/Cyclotomic/Three.lean
-  IsCyclotomicExtension.Rat.Three.Units.mem
-  IsCyclotomicExtension.Rat.Three.eta_sq
-  IsCyclotomicExtension.Rat.Three.eq_one_or_neg_one_of_unit_of_congruent
-
-Mathlib/NumberTheory/NumberField/Cyclotomic/PID.lean
-  IsCyclotomicExtension.Rat.three_pid
-```
-
-## 9. Gaps / false-step checklist
-
-* The naive “Eisenstein square extraction immediately gives a smaller solution” is false: it produces the plus-sign quartic `a^4+a^2c^2+c^4` unless the second parity-dependent factorization is performed.
-* The rational conic parametrization has a possible common-factor-`3` presentation.  For the descent above, prove a no-`/3` square-root branch via Eisenstein unit/sector choice, or add a separate `/3` branch lemma.  Do not silently divide by `3` and then reuse the formulas above.
-* The hardest Lean pieces are the local gcd/parity square-splitting lemmas, not the final `ring` identities.
-* No step should import or use `RationalPointsN12`, E1/E24 finite-point results, or full-cover residual classifications.
+* Do not assume the parametrization has only one branch; unit associates matter.
+* Do not treat the unit exception as a bad solution; for square sides it implies `A^2=N^2`.
+* Do not conclude `(m-n)`, `(m+n)`, `n`, and `(2m-n)` are all squares without checking parity and common divisor `2`.
+* Do not claim a smaller quartic solution from the systems `b^2=a^2+c^2`, `d^2=4a^2+c^2` unless the actual formulas for `(A',N',S')` and the strict measure decrease are written and algebraically checked.
+* Do not use `RationalPointsN12`, E1/E24 finite-point theorems, or full-cover residuals in any file proving `EisensteinTripleParamTheorem`, the factor lemmas, or `EisensteinSquareParamDescent`.
