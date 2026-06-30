@@ -1,229 +1,274 @@
-# Q2604 Lean wrappers for `EulerSquarePairDescent`
+# Q2608 `EulerSquarePair` signed even/odd parameter wrappers
 
 Target file: `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`.
 
-The GitHub contents API did not expose the target Lean file on `scratch` during this drop, so the code below is a standalone snippet.  In the real target file, omit the `structure EulerSquarePair` block if it is already present and paste the lemmas into the local namespace.
-
-The important convention is that `PythagoreanTriple.coprime_classification'` must be applied with `x = D`, not with the even leg as `x`, because the theorem requires `x % 2 = 1`.  Thus we classify `(D, 2*A, C)` and `(D, 4*A, B)`.
+Target namespace:
 
 ```lean
-import Mathlib
+namespace MazurProof.RationalPointsN12.EulerSquarePair
+```
 
-namespace EulerSquarePairDescent
+This drop assumes the current file already contains the structure `EulerSquarePair` and the checked lemmas named in the prompt:
 
-structure EulerSquarePair where
-  A D B C : ℤ
-  hApos : 0 < A
-  hDpos : 0 < D
-  hDodd : Odd D
-  hAeven : Even A
-  hADcop : IsCoprime A D
-  hBpos : 0 < B
-  hCpos : 0 < C
-  hB : B ^ 2 = 16 * A ^ 2 + D ^ 2
-  hC : C ^ 2 = 4 * A ^ 2 + D ^ 2
+```lean
+D_mod_two_eq_one
+D_coprime_twoA
+D_coprime_fourA
+gcd_D_twoA_eq_one
+gcd_D_fourA_eq_one
+pythagorean_D_twoA_C
+pythagorean_D_fourA_B
+pythagorean_D_twoA_C_params
+pythagorean_D_fourA_B_params
+```
 
-lemma D_mod_two_eq_one (E : EulerSquarePair) : E.D % 2 = 1 :=
-  Int.odd_iff.mp E.hDodd
+The snippets below do not redefine the structure.  Paste them in the existing namespace.  They use only `Mathlib.NumberTheory.FLT.Four` and `Mathlib.Tactic`.
 
-lemma D_coprime_two (E : EulerSquarePair) : IsCoprime E.D (2 : ℤ) := by
-  rcases E.hDodd with ⟨k, hk⟩
-  refine ⟨1, -k, ?_⟩
-  rw [hk]
-  ring
+```lean
+import Mathlib.NumberTheory.FLT.Four
+import Mathlib.Tactic
 
-lemma gcd_D_twoA_eq_one (E : EulerSquarePair) :
-    Int.gcd E.D (2 * E.A) = 1 := by
-  apply Int.isCoprime_iff_gcd_eq_one.mp
-  exact IsCoprime.mul_right (D_coprime_two E) (isCoprime_comm.mp E.hADcop)
+namespace MazurProof.RationalPointsN12.EulerSquarePair
 
-lemma gcd_D_fourA_eq_one (E : EulerSquarePair) :
-    Int.gcd E.D (4 * E.A) = 1 := by
-  apply Int.isCoprime_iff_gcd_eq_one.mp
-  have hD2 : IsCoprime E.D (2 : ℤ) := D_coprime_two E
-  have hD4 : IsCoprime E.D (4 : ℤ) := by
-    have h : IsCoprime E.D ((2 : ℤ) * (2 : ℤ)) :=
-      IsCoprime.mul_right hD2 hD2
-    simpa using h
-  exact IsCoprime.mul_right hD4 (isCoprime_comm.mp E.hADcop)
-
-lemma pythagorean_D_twoA_C (E : EulerSquarePair) :
-    PythagoreanTriple E.D (2 * E.A) E.C := by
-  unfold PythagoreanTriple
-  calc
-    E.D * E.D + (2 * E.A) * (2 * E.A)
-        = 4 * E.A ^ 2 + E.D ^ 2 := by ring
-    _ = E.C ^ 2 := by rw [← E.hC]
-    _ = E.C * E.C := by ring
-
-lemma pythagorean_D_fourA_B (E : EulerSquarePair) :
-    PythagoreanTriple E.D (4 * E.A) E.B := by
-  unfold PythagoreanTriple
-  calc
-    E.D * E.D + (4 * E.A) * (4 * E.A)
-        = 16 * E.A ^ 2 + E.D ^ 2 := by ring
-    _ = E.B ^ 2 := by rw [← E.hB]
-    _ = E.B * E.B := by ring
-
-lemma two_mul_left_cancel_int {a b : ℤ} (h : (2 : ℤ) * a = 2 * b) : a = b := by
+lemma q2608_int_cancel_two_mul {a b : ℤ}
+    (h : (2 : ℤ) * a = 2 * b) :
+    a = b := by
   exact (mul_left_inj' (show (2 : ℤ) ≠ 0 by norm_num)).mp h
 
-lemma left_mod_two_eq_zero_of_even_mul_of_right_mod_two_eq_one
-    {a b : ℤ} (hab : Even (a * b)) (hb : b % 2 = 1) :
-    a % 2 = 0 := by
-  have hnot : ¬ Odd a := by
-    intro ha
-    have hbOdd : Odd b := Int.odd_iff.mpr hb
-    have hOdd : Odd (a * b) := Int.odd_mul.mpr ⟨ha, hbOdd⟩
-    exact (Int.not_odd_iff_even.mpr hab) hOdd
-  exact Int.not_odd_iff.mp hnot
+lemma q2608_int_cancel_four_mul {a b : ℤ}
+    (h : (4 : ℤ) * a = 4 * b) :
+    a = b := by
+  exact (mul_left_inj' (show (4 : ℤ) ≠ 0 by norm_num)).mp h
+
+lemma q2608_eq_mul_of_two_mul_eq_two_mul_mul {A m n : ℤ}
+    (h : (2 : ℤ) * A = 2 * m * n) :
+    A = m * n := by
+  apply q2608_int_cancel_two_mul
+  calc
+    (2 : ℤ) * A = 2 * m * n := h
+    _ = 2 * (m * n) := by ring
+
+lemma q2608_two_mul_eq_mul_of_four_mul_eq_two_mul_mul {A m n : ℤ}
+    (h : (4 : ℤ) * A = 2 * m * n) :
+    (2 : ℤ) * A = m * n := by
+  apply q2608_int_cancel_two_mul
+  calc
+    (2 : ℤ) * (2 * A) = 4 * A := by ring
+    _ = 2 * m * n := h
+    _ = 2 * (m * n) := by ring
+
+lemma q2608_even_of_emod_two_eq_zero {x : ℤ}
+    (hx : x % 2 = 0) :
+    Even x := by
+  exact even_iff_two_dvd.mpr (Int.dvd_of_emod_eq_zero hx)
+
+lemma q2608_odd_of_emod_two_eq_one {x : ℤ}
+    (hx : x % 2 = 1) :
+    Odd x :=
+  Int.odd_iff.mpr hx
+
+lemma q2608_even_left_of_even_mul_of_odd_right {a b : ℤ}
+    (hab : Even (a * b)) (hb : Odd b) :
+    Even a := by
+  by_contra haEven
+  have haOdd : Odd a := Int.not_even_iff_odd.mp haEven
+  have hOdd : Odd (a * b) := Int.odd_mul.mpr ⟨haOdd, hb⟩
+  exact (Int.not_odd_iff_even.mpr hab) hOdd
 
 /--
-Classification of `(D, 2*A, C)`, normalized so the parameter multiplying the odd
-parameter is the even one.  The price of this normalization is a signed formula
-for the odd leg.
+Halve the even parameter in the second Pythagorean parametrization.
+
+Use this with `(R,S) = (m,n)` in the `m`-even branch, and with
+`(R,S) = (n,m)` in the `n`-even branch after rewriting
+`4*A = 2*m*n` to `4*A = 2*n*m`.
+
+Inputs:
+* `0 < A`, `Even A` from the Euler square pair;
+* `0 ≤ R`, coming from `0 ≤ m`, or derived for `R = n` in the swapped branch;
+* `R % 2 = 0`, `Odd S`;
+* `4*A = 2*R*S`.
+
+Outputs:
+* `R = 2*Up`;
+* `0 < Up`;
+* `Even Up`, using `Even A` and oddness of `S`;
+* `A = Up*S`.
 -/
-lemma twoA_classification_signed_params (E : EulerSquarePair) :
-    ∃ U V : ℤ,
-      E.A = U * V ∧
-      E.C = U ^ 2 + V ^ 2 ∧
-      Int.gcd U V = 1 ∧
-      U % 2 = 0 ∧
-      V % 2 = 1 ∧
-      (E.D = U ^ 2 - V ^ 2 ∨ -E.D = U ^ 2 - V ^ 2) := by
-  obtain ⟨m, n, hD, h2A, hCsum, hmn_gcd, hmn_parity, _hm_nonneg⟩ :=
-    PythagoreanTriple.coprime_classification'
-      (pythagorean_D_twoA_C E)
-      (gcd_D_twoA_eq_one E)
-      (D_mod_two_eq_one E)
-      E.hCpos
-  have hA_mn : E.A = m * n := by
-    apply two_mul_left_cancel_int
+lemma q2608_halve_even_factor_in_fourA
+    {A R S : ℤ}
+    (hApos : 0 < A) (hAeven : Even A)
+    (hRnonneg : 0 ≤ R) (hReven : R % 2 = 0) (hSodd : Odd S)
+    (h4A : (4 : ℤ) * A = 2 * R * S) :
+    ∃ Up : ℤ, R = 2 * Up ∧ 0 < Up ∧ Even Up ∧ A = Up * S := by
+  rcases Int.dvd_of_emod_eq_zero hReven with ⟨Up, hUp⟩
+  have hA : A = Up * S := by
+    apply q2608_int_cancel_four_mul
     calc
-      (2 : ℤ) * E.A = 2 * m * n := h2A
-      _ = 2 * (m * n) := by ring
-  rcases hmn_parity with hmn | hmn
-  · refine ⟨m, n, hA_mn, hCsum, hmn_gcd, hmn.1, hmn.2, Or.inl hD⟩
-  · refine ⟨n, m, ?_, ?_, ?_, hmn.2, hmn.1, Or.inr ?_⟩
-    · calc
-        E.A = m * n := hA_mn
-        _ = n * m := by ring
-    · rw [hCsum]
+      (4 : ℤ) * A = 2 * R * S := h4A
+      _ = 4 * (Up * S) := by
+        rw [hUp]
+        ring
+  have hUp_nonneg : 0 ≤ Up := by
+    omega
+  have hUp_ne : Up ≠ 0 := by
+    intro h0
+    have hA0 : A = 0 := by
+      rw [hA, h0, zero_mul]
+    exact (ne_of_gt hApos) hA0
+  have hUp_pos : 0 < Up :=
+    lt_of_le_of_ne hUp_nonneg (Ne.symm hUp_ne)
+  have hUpEven : Even Up := by
+    apply q2608_even_left_of_even_mul_of_odd_right
+    · rw [← hA]
+      exact hAeven
+    · exact hSodd
+  exact ⟨Up, hUp, hUp_pos, hUpEven, hA⟩
+
+/--
+Signed even/odd parameters for the `(D, 2*A, C)` Pythagorean triple.
+
+The Mathlib classification returns `D = m^2 - n^2`, `2*A = 2*m*n`,
+and exactly one of `m,n` even.  If `m` is even, take `(U,V,eps) = (m,n,1)`.
+If `n` is even, take `(U,V,eps) = (n,m,-1)`.
+-/
+theorem C_signed_even_odd_params (E : EulerSquarePair) :
+    ∃ U V eps : ℤ,
+      0 < U ∧ 0 < V ∧ IsCoprime U V ∧ Even U ∧ Odd V ∧
+      (eps = 1 ∨ eps = -1) ∧
+      E.A = U * V ∧
+      E.D = eps * (U ^ 2 - V ^ 2) ∧
+      E.C = U ^ 2 + V ^ 2 := by
+  obtain ⟨m, n, hD, h2A, hC, hgcd, hparity, hm_nonneg⟩ :=
+    pythagorean_D_twoA_C_params E
+  have hA_mn : E.A = m * n :=
+    q2608_eq_mul_of_two_mul_eq_two_mul_mul h2A
+  have hcopmn : IsCoprime m n :=
+    Int.isCoprime_iff_gcd_eq_one.mpr hgcd
+  rcases hparity with hmn | hmn
+  · -- `m` even, `n` odd: keep Mathlib's orientation.
+    have hmEven : Even m := q2608_even_of_emod_two_eq_zero hmn.1
+    have hnOdd : Odd n := q2608_odd_of_emod_two_eq_one hmn.2
+    have hm_ne : m ≠ 0 := by
+      intro hm0
+      have hA0 : E.A = 0 := by
+        rw [hA_mn, hm0, zero_mul]
+      exact (ne_of_gt E.hApos) hA0
+    have hm_pos : 0 < m :=
+      lt_of_le_of_ne hm_nonneg (Ne.symm hm_ne)
+    have hn_pos : 0 < n := by
+      have hmn_pos : 0 < m * n := by
+        rw [← hA_mn]
+        exact E.hApos
+      exact (mul_pos_iff_of_pos_left hm_pos).mp hmn_pos
+    refine ⟨m, n, 1, hm_pos, hn_pos, hcopmn, hmEven, hnOdd, Or.inl rfl,
+      hA_mn, ?_, hC⟩
+    rw [hD]
+    ring
+  · -- `n` even, `m` odd: swap parameters and flip the sign.
+    have hmOdd : Odd m := q2608_odd_of_emod_two_eq_one hmn.1
+    have hnEven : Even n := q2608_even_of_emod_two_eq_zero hmn.2
+    have hm_ne : m ≠ 0 := by
+      intro hm0
+      have hA0 : E.A = 0 := by
+        rw [hA_mn, hm0, zero_mul]
+      exact (ne_of_gt E.hApos) hA0
+    have hm_pos : 0 < m :=
+      lt_of_le_of_ne hm_nonneg (Ne.symm hm_ne)
+    have hn_pos : 0 < n := by
+      have hmn_pos : 0 < m * n := by
+        rw [← hA_mn]
+        exact E.hApos
+      exact (mul_pos_iff_of_pos_left hm_pos).mp hmn_pos
+    refine ⟨n, m, -1, hn_pos, hm_pos, hcopmn.symm, hnEven, hmOdd, Or.inr rfl,
+      ?_, ?_, ?_⟩
+    · rw [hA_mn]
       ring
-    · rw [Int.gcd_comm]
-      exact hmn_gcd
     · rw [hD]
       ring
+    · rw [hC]
+      ring
 
 /--
-Classification of `(D, 4*A, B)`.  Mathlib gives `4*A = 2*m*n`, hence
-`2*A = m*n`.  Since exactly one of `m,n` is even, halve the even parameter.
-The resulting `Up` satisfies `A = Up*Vp` and the odd-leg formula is signed:
-`D = 4*Up^2 - Vp^2` or `-D = 4*Up^2 - Vp^2`.
+Signed even/odd parameters for the `(D, 4*A, B)` Pythagorean triple.
 
-The extra conclusion `Up % 2 = 0` uses `E.hAeven` and `Vp % 2 = 1`.
+The Mathlib classification returns `D = m^2 - n^2`, `4*A = 2*m*n`,
+and exactly one of `m,n` even.  If `m` is even, write `m = 2*Up` and
+use `(Up,Vp,eps) = (Up,n,1)`.  If `n` is even, write `n = 2*Up` and
+use `(Up,Vp,eps) = (Up,m,-1)`.
 -/
-lemma fourA_classification_signed_params (E : EulerSquarePair) :
-    ∃ Up Vp : ℤ,
+theorem B_signed_even_odd_params (E : EulerSquarePair) :
+    ∃ Up Vp eps : ℤ,
+      0 < Up ∧ 0 < Vp ∧ IsCoprime Up Vp ∧ Even Up ∧ Odd Vp ∧
+      (eps = 1 ∨ eps = -1) ∧
       E.A = Up * Vp ∧
-      E.B = 4 * Up ^ 2 + Vp ^ 2 ∧
-      Int.gcd Up Vp = 1 ∧
-      Up % 2 = 0 ∧
-      Vp % 2 = 1 ∧
-      (E.D = 4 * Up ^ 2 - Vp ^ 2 ∨ -E.D = 4 * Up ^ 2 - Vp ^ 2) := by
-  obtain ⟨m, n, hD, h4A, hBsum, hmn_gcd, hmn_parity, _hm_nonneg⟩ :=
-    PythagoreanTriple.coprime_classification'
-      (pythagorean_D_fourA_B E)
-      (gcd_D_fourA_eq_one E)
-      (D_mod_two_eq_one E)
-      E.hBpos
-  have h2A_mn : (2 : ℤ) * E.A = m * n := by
-    apply two_mul_left_cancel_int
-    calc
-      (2 : ℤ) * (2 * E.A) = 4 * E.A := by ring
-      _ = 2 * m * n := h4A
-      _ = 2 * (m * n) := by ring
-  have hmn_coprime : IsCoprime m n :=
-    Int.isCoprime_iff_gcd_eq_one.mpr hmn_gcd
-  rcases hmn_parity with hmn | hmn
-  · rcases Int.dvd_of_emod_eq_zero hmn.1 with ⟨Up, hUp⟩
-    have hA : E.A = Up * n := by
-      apply two_mul_left_cancel_int
-      calc
-        (2 : ℤ) * E.A = m * n := h2A_mn
-        _ = 2 * (Up * n) := by
-          rw [hUp]
-          ring
-    have hB' : E.B = 4 * Up ^ 2 + n ^ 2 := by
-      rw [hBsum, hUp]
-      ring
-    have hD' : E.D = 4 * Up ^ 2 - n ^ 2 := by
-      rw [hD, hUp]
-      ring
-    have hcop : Int.gcd Up n = 1 := by
+      E.D = eps * (4 * Up ^ 2 - Vp ^ 2) ∧
+      E.B = 4 * Up ^ 2 + Vp ^ 2 := by
+  obtain ⟨m, n, hD, h4A, hB, hgcd, hparity, hm_nonneg⟩ :=
+    pythagorean_D_fourA_B_params E
+  have hcopmn : IsCoprime m n :=
+    Int.isCoprime_iff_gcd_eq_one.mpr hgcd
+  rcases hparity with hmn | hmn
+  · -- `m` even, `n` odd.
+    have hnOdd : Odd n := q2608_odd_of_emod_two_eq_one hmn.2
+    obtain ⟨Up, hUp, hUp_pos, hUpEven, hA_Upn⟩ :=
+      q2608_halve_even_factor_in_fourA
+        (A := E.A) (R := m) (S := n)
+        E.hApos E.hAeven hm_nonneg hmn.1 hnOdd h4A
+    have hn_pos : 0 < n := by
+      have hprod : 0 < Up * n := by
+        rw [← hA_Upn]
+        exact E.hApos
+      exact (mul_pos_iff_of_pos_left hUp_pos).mp hprod
+    have hcopUpn : IsCoprime Up n := by
       have hcop2Upn : IsCoprime (2 * Up) n := by
-        simpa [hUp] using hmn_coprime
-      have hcopUpn : IsCoprime Up n :=
-        IsCoprime.of_mul_left_right hcop2Upn
-      exact Int.isCoprime_iff_gcd_eq_one.mp hcopUpn
-    have hUpEven : Up % 2 = 0 := by
-      apply left_mod_two_eq_zero_of_even_mul_of_right_mod_two_eq_one
-      · rw [← hA]
-        exact E.hAeven
-      · exact hmn.2
-    refine ⟨Up, n, hA, hB', hcop, hUpEven, hmn.2, Or.inl hD'⟩
-  · rcases Int.dvd_of_emod_eq_zero hmn.2 with ⟨Up, hUp⟩
-    have hA : E.A = Up * m := by
-      apply two_mul_left_cancel_int
-      calc
-        (2 : ℤ) * E.A = m * n := h2A_mn
-        _ = 2 * (Up * m) := by
-          rw [hUp]
-          ring
-    have hB' : E.B = 4 * Up ^ 2 + m ^ 2 := by
-      rw [hBsum, hUp]
+        simpa [hUp] using hcopmn
+      exact IsCoprime.of_mul_left_right hcop2Upn
+    refine ⟨Up, n, 1, hUp_pos, hn_pos, hcopUpn, hUpEven, hnOdd, Or.inl rfl,
+      hA_Upn, ?_, ?_⟩
+    · rw [hD, hUp]
       ring
-    have hD' : -E.D = 4 * Up ^ 2 - m ^ 2 := by
-      rw [hD, hUp]
+    · rw [hB, hUp]
       ring
-    have hcop : Int.gcd Up m = 1 := by
+  · -- `n` even, `m` odd.
+    have hmOdd : Odd m := q2608_odd_of_emod_two_eq_one hmn.1
+    have h2A_mn : (2 : ℤ) * E.A = m * n :=
+      q2608_two_mul_eq_mul_of_four_mul_eq_two_mul_mul h4A
+    have hm_ne : m ≠ 0 := by
+      intro hm0
+      subst m
+      norm_num at hmn
+    have hm_pos : 0 < m :=
+      lt_of_le_of_ne hm_nonneg (Ne.symm hm_ne)
+    have hn_pos : 0 < n := by
+      have hmn_pos : 0 < m * n := by
+        rw [← h2A_mn]
+        exact mul_pos (by norm_num : (0 : ℤ) < 2) E.hApos
+      exact (mul_pos_iff_of_pos_left hm_pos).mp hmn_pos
+    have h4A_nm : (4 : ℤ) * E.A = 2 * n * m := by
+      rw [h4A]
+      ring
+    obtain ⟨Up, hUp, hUp_pos, hUpEven, hA_Upm⟩ :=
+      q2608_halve_even_factor_in_fourA
+        (A := E.A) (R := n) (S := m)
+        E.hApos E.hAeven (le_of_lt hn_pos) hmn.2 hmOdd h4A_nm
+    have hcopUpm : IsCoprime Up m := by
       have hcopm2Up : IsCoprime m (2 * Up) := by
-        simpa [hUp] using hmn_coprime
-      have hcopmUp : IsCoprime m Up :=
-        IsCoprime.of_mul_right_right hcopm2Up
-      exact Int.isCoprime_iff_gcd_eq_one.mp hcopmUp.symm
-    have hUpEven : Up % 2 = 0 := by
-      apply left_mod_two_eq_zero_of_even_mul_of_right_mod_two_eq_one
-      · rw [← hA]
-        exact E.hAeven
-      · exact hmn.1
-    refine ⟨Up, m, hA, hB', hcop, hUpEven, hmn.1, Or.inr hD'⟩
+        simpa [hUp] using hcopmn
+      exact (IsCoprime.of_mul_right_right hcopm2Up).symm
+    refine ⟨Up, m, -1, hUp_pos, hm_pos, hcopUpm, hUpEven, hmOdd, Or.inr rfl,
+      hA_Upm, ?_, ?_⟩
+    · rw [hD, hUp]
+      ring
+    · rw [hB, hUp]
+      ring
 
-end EulerSquarePairDescent
+end MazurProof.RationalPointsN12.EulerSquarePair
 ```
 
-## Notes on the wrappers
+## Implementation notes
 
-1. `D_mod_two_eq_one` should use `Int.odd_iff.mp E.hDodd`.  This is exactly the parity hypothesis expected by `PythagoreanTriple.coprime_classification'`.
-
-2. `D_coprime_two` is often the cleanest bridge from oddness to coprimality: if `D = 2*k + 1`, then `1*D + (-k)*2 = 1`.  Then `IsCoprime.mul_right` combines coprimality with `2` or `4` and with `A`.
-
-3. The Pythagorean triples are produced with `unfold PythagoreanTriple` and `ring`, rewriting `E.hC` and `E.hB` in the middle of a `calc`.
-
-4. For `(D, 2*A, C)`, Mathlib gives `2*A = 2*m*n`, so cancellation gives `A = m*n`.  Reordering to make the first parameter even may flip the sign of the odd-leg formula.  This is why the wrapper concludes
-
-```lean
-E.D = U ^ 2 - V ^ 2 ∨ -E.D = U ^ 2 - V ^ 2
-```
-
-with `U % 2 = 0` and `V % 2 = 1`.
-
-5. For `(D, 4*A, B)`, Mathlib gives `4*A = 2*m*n`, so cancellation gives `2*A = m*n`.  Halving the even one of `m,n` gives `A = Up*Vp` and
-
-```lean
-E.D = 4 * Up ^ 2 - Vp ^ 2 ∨ -E.D = 4 * Up ^ 2 - Vp ^ 2
-```
-
-The theorem `fourA_classification_signed_params` is the clean post-classification algebra wrapper requested for the second triple.
-
-6. The proof of `Up % 2 = 0` does not come directly from Pythagorean classification.  It uses `E.hAeven`, `A = Up*Vp`, and `Vp % 2 = 1`: if `Up` were odd, then `Up*Vp` would be odd by `Int.odd_mul`, contradicting `Even A`.
+* `q2608_eq_mul_of_two_mul_eq_two_mul_mul` handles the `2*A = 2*m*n` cancellation in the `C` wrapper.
+* `q2608_two_mul_eq_mul_of_four_mul_eq_two_mul_mul` handles the first cancellation from `4*A = 2*m*n` to `2*A = m*n`; this is useful in the swapped `B` branch to prove the even parameter `n` is positive.
+* `q2608_halve_even_factor_in_fourA` is the requested clean lemma for the `B` case: from `R` even, `S` odd, `0 ≤ R`, `Even A`, and `4*A = 2*R*S`, it produces `R = 2*Up`, `0 < Up`, `Even Up`, and `A = Up*S`.
+* Positivity is obtained as follows.  In the `C` wrapper, `0 ≤ m` plus `A = m*n` and `A > 0` gives `m > 0`, hence `n > 0`.  In the swapped `C` branch, `m > 0` still comes from `0 ≤ m` and `A > 0`, then `n > 0` follows from `A = m*n`.  In the `B` wrapper, the `m`-even branch gets `Up > 0` from `0 ≤ m`, `m = 2*Up`, and `A = Up*n`; the `n`-even branch first proves `m > 0`, then `n > 0` from `2*A = m*n`, and then applies the halving lemma with `R = n`.
+* The sign convention is encoded by the explicit integer `eps`.  Swapping the Pythagorean parameters changes `m^2 - n^2` to `-(n^2 - m^2)`, so the swapped branches use `eps = -1`.
