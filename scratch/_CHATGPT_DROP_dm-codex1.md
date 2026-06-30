@@ -1,417 +1,520 @@
-# Q2533: four-square AP versus `not_fermat_42`
+# Q2544: explicit descent for primitive centered four-square APs
 
-## Verdict
+## Source and high-level verdict
 
-I would **not** try to prove `FourSquaresAPToFermat42Bridge` by a one-line algebraic construction of
+The most usable descent I found is Alf van der Poorten's direct proof in *Fermat's Four Squares Theorem*, arXiv:0712.3850.  It is exactly the classical Fermat/Euler descent, phrased through the two concordant forms
 
-```lean
-a b c : ℤ, a ≠ 0 ∧ b ≠ 0 ∧ a ^ 4 + b ^ 4 = c ^ 2
-```
+\[
+D^2+4A^2 \quad\text{and}\quad D^2+16A^2.
+\]
 
-from a nonconstant arithmetic progression
+This gives a clean Lean frontier:
 
-```lean
-w^2, x^2, y^2, z^2.
-```
+1. Convert a primitive centered four-square AP with common difference `4N` to a pair `(A,D)` with `N = A D` and both `D^2+4A^2`, `D^2+16A^2` squares.
+2. Descend the pair `(A,D)` to a smaller pair `(a,d)` with `|a d| < |A D|` and the same square-form property.
+3. Convert `(a,d)` back to a primitive centered four-square AP with `N' = a d`.
 
-The honest situation is:
+So the explicit descent is **not** an AP-to-Fermat42 substitution.  The right intermediate theorem is a descent for the concordant-form package.
 
-* The AP hypotheses give several clean ring identities.
-* The most useful identities are factor/product identities such as
-  `(x*y - w*z) * (x*y + w*z) = 2 * (y^2 - x^2)^2`.
-* Those identities do **not** directly say that either factor is a square, nor do they directly give a sum of two fourth powers.
-* Turning them into a contradiction requires the classical Fermat descent for four squares in arithmetic progression, with primitive normalization, parity, gcd/factor extraction, and a smaller counterexample.
+Important correction for the residual:
 
-So the best Lean architecture is:
+\[
+\forall S : \texttt{PrimitiveCenteredFourSqAP},\ \exists T,\ |T.N| < |S.N|
+\]
 
-1. Prove and keep the ring identities below as local lemmas.
-2. Do **not** pretend that `FourSquaresAPToFermat42Bridge` has a constructive polynomial substitution.
-3. Add/use a classical descent theorem whose conclusion is directly
-   `FourSqAPConst w x y z`.
-4. If the existing file really needs the `FourSquaresAPToFermat42Bridge` Prop, close it **vacuously** from the no-four-square-AP theorem.
-
-In other words, the correct mathematical bridge is not
-
-```lean
-nonconstant four-square AP → explicit Fermat42 solution
-```
-
-but rather
-
-```lean
-Fermat descent / no-four-square-AP → no nonconstant four-square AP
-```
-
-and then the existential bridge is only an ex-falso wrapper.
+is false if `PrimitiveCenteredFourSqAP` permits the degenerate constant case `N = 0`.  The residual must either have `S.N ≠ 0`, or `PrimitiveCenteredFourSqAP` must already exclude `N = 0`.
 
 ---
 
-## Notation
+## Normalization
 
-Given
+Start from a primitive centered AP with roots `p,q,r,s` and center `X`:
 
-```lean
-hAP : IntFourSqAP w x y z
-```
+\[
+p^2 = X - 6N,\qquad
+q^2 = X - 2N,\qquad
+r^2 = X + 2N,\qquad
+s^2 = X + 6N.
+\]
 
-the common difference can be taken as
+Equivalently the common difference is `4N`:
 
-```lean
-Δ = y ^ 2 - x ^ 2
-```
+\[
+q^2-p^2 = r^2-q^2 = s^2-r^2 = 4N.
+\]
 
-and the AP hypotheses imply
+Your checked identities
 
-```text
-x^2 - w^2 = Δ,
-y^2 - x^2 = Δ,
-z^2 - y^2 = Δ.
-```
+\[
+p^2+r^2=2q^2,\qquad q^2+s^2=2r^2,
+\]
+
+and
+
+\[
+(r-p)(r+p)=8N,\qquad (s-q)(s+q)=8N
+\]
+
+are consistent with this normalization.
+
+For the descent, normalize by sign/reversal as follows.
+
+* Replace roots by absolute values when convenient; only their squares matter.
+* If `N < 0`, reverse the progression.  This replaces `N` by `-N` and does not change `N.natAbs`.
+* Work with `N > 0`, `X > 6N`, roots odd, and pairwise coprime.
+
+Then
+
+\[
+X = \frac{q^2+r^2}{2}=q^2+2N=r^2-2N.
+\]
+
+---
+
+## AP to concordant forms
+
+Let
+
+\[
+Y = p q r s.
+\]
+
+Then
+
+\[
+Y^2
+= (X^2-4N^2)(X^2-36N^2)
+= (X^2-20N^2)^2 - (16N^2)^2.
+\]
 
 Thus
 
+\[
+(16N^2)^2 + Y^2 = (X^2-20N^2)^2.
+\]
+
+Under the primitive hypotheses this is a primitive Pythagorean triple, with even leg `16N^2`.  Hence there are coprime integers `2u` and `v`, with `v` odd, such that
+
+\[
+4uv = 16N^2,
+\]
+
+\[
+Y = \pm(4u^2-v^2),
+\]
+
+\[
+X^2-20N^2 = 4u^2+v^2.
+\]
+
+Since `uv = 4N^2`, `gcd(u,v)=1`, and `v` is odd, square-factor extraction gives
+
+\[
+u = 4A^2,\qquad v = D^2,
+\]
+
+with `D` odd and
+
+\[
+N = A D
+\]
+
+after choosing positive signs.
+
+Now
+
+\[
+X^2-20N^2 = 4u^2+v^2
+\]
+
+and `uv = 4N^2` imply
+
+\[
+X^2 = 4u^2+5uv+v^2 = (4u+v)(u+v).
+\]
+
+Substituting `u = 4A^2`, `v = D^2` gives
+
+\[
+X^2 = (16A^2+D^2)(4A^2+D^2).
+\]
+
+The two factors are coprime under the primitive hypotheses, so both are squares.  Thus there exist integers `B,C` such that
+
+\[
+B^2 = 16A^2+D^2,
+\]
+
+\[
+C^2 = 4A^2+D^2.
+\]
+
+This is the first key intermediate theorem.
+
+### Suggested theorem statement
+
 ```text
-x^2 = w^2 + Δ,
-y^2 = w^2 + 2Δ,
-z^2 = w^2 + 3Δ.
+CenteredAP_to_concordant_forms:
+Given a nonconstant primitive centered four-square AP with N > 0,
+there exist integers A,D,B,C such that
+  N = A*D,
+  D is odd,
+  gcd(A,D)=1,
+  B^2 = 16*A^2 + D^2,
+  C^2 = 4*A^2 + D^2.
 ```
 
-These are the identities that should drive the Lean proof scripts.
+This is exactly the Euler/concordant-forms reduction: `D^2+(2A)^2` and `D^2+(4A)^2` are both squares.
 
 ---
 
-## Ring identities worth adding
+## Concordant-form descent
 
-The following snippets use only the local definitions from the question plus `nlinarith`/`ring`.
+Assume now that
 
-```lean
-import Mathlib
+\[
+C^2 = 4A^2+D^2,
+\]
 
-/-- The first three squares in a four-square AP form a symmetric three-square AP. -/
-theorem IntFourSqAP_left_three
-    {w x y z : ℤ}
-    (h : IntFourSqAP w x y z) :
-    w ^ 2 + y ^ 2 = 2 * x ^ 2 := by
-  nlinarith [h.1]
+\[
+B^2 = 16A^2+D^2,
+\]
 
-/-- The last three squares in a four-square AP form a symmetric three-square AP. -/
-theorem IntFourSqAP_right_three
-    {w x y z : ℤ}
-    (h : IntFourSqAP w x y z) :
-    x ^ 2 + z ^ 2 = 2 * y ^ 2 := by
-  nlinarith [h.2]
+with `gcd(A,D)=1`, `D` odd, and `A D ≠ 0`.
 
-/-- The outer-pair and middle-pair sums agree. -/
-theorem IntFourSqAP_outer_sum
-    {w x y z : ℤ}
-    (h : IntFourSqAP w x y z) :
-    w ^ 2 + z ^ 2 = x ^ 2 + y ^ 2 := by
-  nlinarith [h.1, h.2]
+The first equation is the primitive Pythagorean triple
 
-/-- The full outer difference is three times the common difference. -/
-theorem IntFourSqAP_outer_diff
-    {w x y z : ℤ}
-    (h : IntFourSqAP w x y z) :
-    z ^ 2 - w ^ 2 = 3 * (y ^ 2 - x ^ 2) := by
-  nlinarith [h.1, h.2]
+\[
+(2A)^2 + D^2 = C^2.
+\]
+
+Hence there are coprime `U,V`, of opposite parity, such that, after choosing the sign of `D`,
+
+\[
+A = U V,
+\]
+
+\[
+D = \pm(U^2 - V^2).
+\]
+
+The second equation is the primitive Pythagorean triple
+
+\[
+(4A)^2 + D^2 = B^2.
+\]
+
+Parametrize it as
+
+\[
+A = U' V',
+\]
+
+\[
+D = \pm(4U'^2 - V'^2),
+\]
+
+with `gcd(2U',V')=1` and `V'` odd.
+
+Because `A = UV = U'V'` in two coprime factorizations, and the even part lies in `U` and `U'`, there are pairwise coprime integers
+
+\[
+2a,\ b,\ c,\ d
+\]
+
+such that, after harmless sign changes,
+
+\[
+U = 2ab,\qquad V = cd,
+\]
+
+\[
+U' = 2ac,\qquad V' = bd.
+\]
+
+Thus
+
+\[
+A = UV = U'V' = 2abcd.
+\]
+
+The two formulae for `D` become, with a common sign,
+
+\[
+\pm D = 4a^2b^2 - c^2d^2
+      = 16a^2c^2 - b^2d^2.
+\]
+
+Equating the two right-hand sides gives
+
+\[
+4a^2b^2 - c^2d^2 = 16a^2c^2 - b^2d^2.
+\]
+
+Rearrange this as
+
+\[
+b^2(4a^2+d^2)=c^2(16a^2+d^2).
+\]
+
+Since `2a,b,c,d` are pairwise coprime, one has
+
+\[
+\gcd(4a^2+d^2,\ 16a^2+d^2)=1.
+\]
+
+The only possible common prime would divide `12a^2` and `d^2`; by `gcd(a,d)=1` it must divide `12`; parity excludes `2`, and modulo `3` excludes `3` unless both `a,d` are divisible by `3`, which is impossible.
+
+Therefore the reduced rational equality
+
+\[
+\frac{4a^2+d^2}{16a^2+d^2}=\left(\frac{c}{b}\right)^2
+\]
+
+forces both factors to be squares.  In fact, after choosing signs,
+
+\[
+c^2 = 4a^2+d^2,
+\]
+
+\[
+b^2 = 16a^2+d^2.
+\]
+
+So `(a,d)` is a new concordant-form solution of the same type.
+
+The descent inequality is immediate from
+
+\[
+A = 2abcd.
+\]
+
+Indeed
+
+\[
+|ad| < |A| \le |AD|.
+\]
+
+Since the original centered AP had `N = AD`, the new candidate has
+
+\[
+N' = ad,
+\]
+
+and
+
+\[
+|N'| = |ad| < |AD| = |N|.
+\]
+
+### Suggested theorem statement
+
+```text
+concordant_forms_descent:
+Assume gcd(A,D)=1, D odd, A*D ≠ 0, and
+  B^2 = 16*A^2 + D^2,
+  C^2 = 4*A^2 + D^2.
+Then there exist a,d,b,c such that
+  2*a, b, c, d are pairwise coprime,
+  d is odd,
+  b^2 = 16*a^2 + d^2,
+  c^2 = 4*a^2 + d^2,
+  0 < |a*d| < |A*D|.
 ```
 
-The main useful factor identity is the `xy ± wz` one:
-
-```lean
-import Mathlib
-
-/--
-The clean square-product identity coming from four squares in AP.
-This is often the first identity used in the descent route.
--/
-theorem IntFourSqAP_xy_wz_factor
-    {w x y z : ℤ}
-    (h : IntFourSqAP w x y z) :
-    (x * y - w * z) * (x * y + w * z) =
-      2 * (y ^ 2 - x ^ 2) ^ 2 := by
-  let Δ : ℤ := y ^ 2 - x ^ 2
-  have hx2 : x ^ 2 = w ^ 2 + Δ := by
-    dsimp [Δ]
-    nlinarith [h.1]
-  have hy2 : y ^ 2 = w ^ 2 + 2 * Δ := by
-    dsimp [Δ]
-    nlinarith [h.1]
-  have hz2 : z ^ 2 = w ^ 2 + 3 * Δ := by
-    dsimp [Δ]
-    nlinarith [h.1, h.2]
-  calc
-    (x * y - w * z) * (x * y + w * z)
-        = x ^ 2 * y ^ 2 - w ^ 2 * z ^ 2 := by ring
-    _ = (w ^ 2 + Δ) * (w ^ 2 + 2 * Δ)
-          - w ^ 2 * (w ^ 2 + 3 * Δ) := by
-        rw [hx2, hy2, hz2]
-    _ = 2 * Δ ^ 2 := by ring
-    _ = 2 * (y ^ 2 - x ^ 2) ^ 2 := by rfl
-```
-
-Two related identities are also useful for auditing candidate transformations:
-
-```lean
-import Mathlib
-
-/-- Another factor identity: `xz ± wy`. -/
-theorem IntFourSqAP_xz_wy_factor
-    {w x y z : ℤ}
-    (h : IntFourSqAP w x y z) :
-    (x * z - w * y) * (x * z + w * y) =
-      (y ^ 2 - x ^ 2) * (x ^ 2 + y ^ 2) := by
-  let Δ : ℤ := y ^ 2 - x ^ 2
-  have hx2 : x ^ 2 = w ^ 2 + Δ := by
-    dsimp [Δ]
-    nlinarith [h.1]
-  have hy2 : y ^ 2 = w ^ 2 + 2 * Δ := by
-    dsimp [Δ]
-    nlinarith [h.1]
-  have hz2 : z ^ 2 = w ^ 2 + 3 * Δ := by
-    dsimp [Δ]
-    nlinarith [h.1, h.2]
-  calc
-    (x * z - w * y) * (x * z + w * y)
-        = x ^ 2 * z ^ 2 - w ^ 2 * y ^ 2 := by ring
-    _ = (y ^ 2 - x ^ 2) * (x ^ 2 + y ^ 2) := by
-        rw [hx2, hy2, hz2]
-        ring
-
-/-- Another factor identity: `yz ± wx`. -/
-theorem IntFourSqAP_yz_wx_factor
-    {w x y z : ℤ}
-    (h : IntFourSqAP w x y z) :
-    (y * z - w * x) * (y * z + w * x) =
-      2 * (y ^ 2 - x ^ 2) * (x ^ 2 + y ^ 2) := by
-  let Δ : ℤ := y ^ 2 - x ^ 2
-  have hx2 : x ^ 2 = w ^ 2 + Δ := by
-    dsimp [Δ]
-    nlinarith [h.1]
-  have hy2 : y ^ 2 = w ^ 2 + 2 * Δ := by
-    dsimp [Δ]
-    nlinarith [h.1]
-  have hz2 : z ^ 2 = w ^ 2 + 3 * Δ := by
-    dsimp [Δ]
-    nlinarith [h.1, h.2]
-  calc
-    (y * z - w * x) * (y * z + w * x)
-        = y ^ 2 * z ^ 2 - w ^ 2 * x ^ 2 := by ring
-    _ = 2 * (y ^ 2 - x ^ 2) * (x ^ 2 + y ^ 2) := by
-        rw [hx2, hy2, hz2]
-        ring
-```
-
-These identities are sign-robust: no positivity assumptions are needed.
+This is the real descent step.
 
 ---
 
-## Nonconstant means the common difference is nonzero
+## Concordant forms back to a smaller centered AP
 
-This is a useful small lemma. It is often better than repeatedly unpacking `¬ FourSqAPConst`.
+Now suppose the descent has produced `a,d,b,c` with
 
-```lean
-import Mathlib
+\[
+b^2 = 16a^2+d^2,
+\]
 
-/-- If the common difference is zero, the AP is constant as squares. -/
-theorem FourSqAPConst_of_IntFourSqAP_commonDiff_zero
-    {w x y z : ℤ}
-    (hAP : IntFourSqAP w x y z)
-    (hΔ : y ^ 2 - x ^ 2 = 0) :
-    FourSqAPConst w x y z := by
-  have hwx : w ^ 2 = x ^ 2 := by nlinarith [hAP.1, hΔ]
-  have hxy : x ^ 2 = y ^ 2 := by nlinarith [hΔ]
-  have hyz : y ^ 2 = z ^ 2 := by nlinarith [hAP.2, hΔ]
-  exact ⟨hwx, hxy, hyz⟩
+\[
+c^2 = 4a^2+d^2.
+\]
 
-/-- In a nonconstant four-square AP, the common difference is nonzero. -/
-theorem IntFourSqAP_commonDiff_ne_zero_of_nonconst
-    {w x y z : ℤ}
-    (hAP : IntFourSqAP w x y z)
-    (hnon : ¬ FourSqAPConst w x y z) :
-    y ^ 2 - x ^ 2 ≠ 0 := by
-  intro hΔ
-  exact hnon (FourSqAPConst_of_IntFourSqAP_commonDiff_zero hAP hΔ)
+Define the smaller center and common-difference parameter by
+
+\[
+X' = b c,
+\]
+
+\[
+N' = a d.
+\]
+
+The four square **values** in the smaller centered progression are
+
+\[
+X' - 6N',\qquad X' - 2N',\qquad X' + 2N',\qquad X' + 6N'.
+\]
+
+The product identities that make them squares are:
+
+\[
+(X'-2N')(X'+2N')
+= (bc)^2 - 4a^2d^2
+= (d^2+8a^2)^2,
+\]
+
+and
+
+\[
+(X'-6N')(X'+6N')
+= (bc)^2 - 36a^2d^2
+= (d^2-8a^2)^2.
+\]
+
+The relevant gcd facts are:
+
+\[
+\gcd(X'-2N', X'+2N')=1,
+\]
+
+\[
+\gcd(X'-6N', X'+6N')=1.
+\]
+
+For the outer pair, the only extra possible common divisor is `3`; modulo `3` and `gcd(a,d)=1` exclude it.  Hence each factor in both products is itself a square.
+
+Therefore choose integers `p',q',r',s'` satisfying
+
+\[
+p'^2 = X' - 6N',
+\]
+
+\[
+q'^2 = X' - 2N',
+\]
+
+\[
+r'^2 = X' + 2N',
+\]
+
+\[
+s'^2 = X' + 6N'.
+\]
+
+Then
+
+\[
+q'^2-p'^2 = r'^2-q'^2 = s'^2-r'^2 = 4N'.
+\]
+
+So the constructed `T` is a centered four-square AP with
+
+\[
+T.N = N' = ad,
+\]
+
+and the descent inequality is
+
+\[
+|T.N| = |ad| < |AD| = |N| = |S.N|.
+\]
+
+### Suggested theorem statement
+
+```text
+concordant_forms_to_centered_AP:
+Assume gcd(a,d)=1, d odd, a*d ≠ 0, and
+  b^2 = 16*a^2 + d^2,
+  c^2 = 4*a^2 + d^2.
+Let
+  X' = b*c,
+  N' = a*d.
+Then the four integers
+  X' - 6*N', X' - 2*N', X' + 2*N', X' + 6*N'
+are squares and form a primitive centered four-square AP with parameter N'.
 ```
+
+This statement is enough to build the `T : PrimitiveCenteredFourSqAP` required by the residual.  The roots `p',q',r',s'` are obtained by square extraction from the product/gcd identities above; they are not simple polynomial expressions in `a,d,b,c`.
 
 ---
 
-## Why the tempting candidates do not give `a^4 + b^4 = c^2`
+## Relation to `(xy-wz)(xy+wz)=2Δ^2`
 
-The most tempting direct candidate is to use the two visible differences
+For the original roots `p,q,r,s`, with common difference
 
-```text
-z^2 - w^2 = 3Δ,
-y^2 - x^2 = Δ.
-```
+\[
+\Delta = q^2-p^2 = 4N,
+\]
 
-But then
+the standard identity is
 
-```text
-(z^2 - w^2)^4 + (y^2 - x^2)^4 = 82 * Δ^4,
-```
+\[
+(qr-ps)(qr+ps)
+= q^2r^2-p^2s^2
+= 2\Delta^2
+= 32N^2.
+\]
 
-not a square identity.
+This identity is correct and useful for local algebra/gcd checks, but by itself it only gives a product of two factors equal to twice a square.  It does not directly produce the smaller progression.  The van der Poorten/Euler descent packages the needed square extraction through the Pythagorean triple
 
-Lean form:
+\[
+(16N^2)^2 + (pqrs)^2 = (X^2-20N^2)^2
+\]
 
-```lean
-import Mathlib
+and then through the concordant forms
 
-/-- The obvious outer/middle-difference candidate gives coefficient `82`, not a square. -/
-theorem IntFourSqAP_outer_middle_candidate_value
-    {w x y z : ℤ}
-    (h : IntFourSqAP w x y z) :
-    (z ^ 2 - w ^ 2) ^ 4 + (y ^ 2 - x ^ 2) ^ 4 =
-      82 * (y ^ 2 - x ^ 2) ^ 4 := by
-  have hz : z ^ 2 - w ^ 2 = 3 * (y ^ 2 - x ^ 2) :=
-    IntFourSqAP_outer_diff h
-  rw [hz]
-  ring
-```
+\[
+D^2+4A^2,\qquad D^2+16A^2.
+\]
 
-Equivalently, using products such as
-
-```text
-(z - w)(z + w) = z^2 - w^2,
-(y - x)(y + x) = y^2 - x^2
-```
-
-does not change the obstruction: it is still the same `3Δ` and `Δ` pair.
-
-The identity
-
-```text
-(x*y - w*z)(x*y + w*z) = 2Δ^2
-```
-
-is the useful one, but it is a **product** identity. To turn it into square roots one needs primitive normalization, gcd control, parity control, and then a descent/extraction lemma. That is exactly the classical Fermat four-squares descent, not a local ring calculation.
+That is the route I would formalize.
 
 ---
 
-## Recommended theorem architecture
+## Final Lean-facing DAG
 
-Use the following theorem as the real mathematical frontier/input:
+Use the following theorem DAG rather than trying to prove the residual in one step.
 
-```lean
-import Mathlib
-
-/-- Classical Fermat descent: four integral squares in AP are constant. -/
-theorem fourSqAP_const_of_IntFourSqAP
-    {w x y z : ℤ}
-    (hAP : IntFourSqAP w x y z) :
-    FourSqAPConst w x y z := by
-  -- This is the genuine Fermat descent theorem.
-  -- It should not be replaced by a fake one-step `a^4 + b^4 = c^2` construction.
-  sorry
+```text
+Primitive centered AP S, S.N ≠ 0
+  -> normalize N > 0 by reversal/signs
+  -> AP_to_concordant_forms:
+       ∃ A D B C,
+         S.N = A*D,
+         gcd(A,D)=1,
+         D odd,
+         B^2 = 16*A^2 + D^2,
+         C^2 = 4*A^2 + D^2
+  -> concordant_forms_descent:
+       ∃ a d b c,
+         0 < |a*d| < |A*D|,
+         b^2 = 16*a^2 + d^2,
+         c^2 = 4*a^2 + d^2,
+         primitive parity/gcd package
+  -> concordant_forms_to_centered_AP:
+       construct T with T.N = a*d
+  -> T.N.natAbs < S.N.natAbs.
 ```
 
-If you specifically want to route through Mathlib's `not_fermat_42`, the missing theorem should be stated explicitly as a descent theorem:
+The genuinely hard classical proof obligation is `concordant_forms_descent`.  Its explicit formulas are the factorization
 
-```lean
-import Mathlib
+\[
+U = 2ab,\quad V = cd,\quad U' = 2ac,\quad V' = bd,
+\]
 
-/--
-Classical descent package connecting Mathlib's Fermat-4 theorem to no four-square AP.
-This is not just a substitution lemma; it includes the primitive/gcd/parity/descent work.
--/
-theorem fourSqAP_const_of_not_fermat_42
-    (hF42 : ∀ {a b c : ℤ}, a ≠ 0 → b ≠ 0 → ¬ a ^ 4 + b ^ 4 = c ^ 2)
-    {w x y z : ℤ}
-    (hAP : IntFourSqAP w x y z) :
-    FourSqAPConst w x y z := by
-  -- Classical descent proof goes here.
-  -- The ring identities above are useful support lemmas, but are not sufficient alone.
-  sorry
-```
+leading to
 
-Then your existing bridge Prop can be closed as a vacuous wrapper:
+\[
+A = 2abcd,
+\]
 
-```lean
-import Mathlib
+\[
+\pm D = 4a^2b^2 - c^2d^2 = 16a^2c^2 - b^2d^2,
+\]
 
-/--
-If no nonconstant four-square AP exists, the existential Fermat42 bridge is vacuous.
-This is the honest way to prove the current Prop-shaped bridge.
--/
-theorem FourSquaresAPToFermat42Bridge_of_no_fourSqAP
-    (hNoAP : ∀ {w x y z : ℤ},
-      IntFourSqAP w x y z → FourSqAPConst w x y z) :
-    FourSquaresAPToFermat42Bridge := by
-  intro w x y z hAP hnon
-  exact False.elim (hnon (hNoAP hAP))
-```
+and hence to the smaller pair
 
-If the file already imports Mathlib's theorem as
-
-```lean
-not_fermat_42 : a ≠ 0 → b ≠ 0 → ¬ a ^ 4 + b ^ 4 = c ^ 2
-```
-
-then the final shape should be:
-
-```lean
-import Mathlib
-
-theorem FourSquaresAPToFermat42Bridge_of_fermat_descent :
-    FourSquaresAPToFermat42Bridge := by
-  apply FourSquaresAPToFermat42Bridge_of_no_fourSqAP
-  intro w x y z hAP
-  exact fourSqAP_const_of_not_fermat_42
-    (fun {a b c} ha hb => not_fermat_42 ha hb)
-    hAP
-```
-
-Depending on the actual implicit arguments of `not_fermat_42` in your Mathlib version, the last line may need one of these equivalent spellings:
-
-```lean
-  exact fourSqAP_const_of_not_fermat_42
-    (fun {a b c : ℤ} ha hb => not_fermat_42 (a := a) (b := b) (c := c) ha hb)
-    hAP
-```
-
-or, if `not_fermat_42` is already specialized to integers with explicit variables in context:
-
-```lean
-  exact fourSqAP_const_of_not_fermat_42
-    (by
-      intro a b c ha hb
-      exact not_fermat_42 ha hb)
-    hAP
-```
-
----
-
-## Minimal descent-frontier statement if you want to formalize it internally
-
-A good internal frontier is a strict descent step on a primitive, parity-normalized counterexample. For example:
-
-```lean
-import Mathlib
-
-def fourSqAPHeight (w x y z : ℤ) : ℕ :=
-  w.natAbs + x.natAbs + y.natAbs + z.natAbs
-
-/--
-Primitive/parity-normalized Fermat descent step.
-The exact construction of `w' x' y' z'` is the hard classical part.
--/
-theorem primitive_fourSqAP_descent_step
-    {w x y z : ℤ}
-    (hAP : IntFourSqAP w x y z)
-    (hnon : ¬ FourSqAPConst w x y z)
-    -- Replace these by the primitive/parity predicates already present in the file.
-    (hprim : True)
-    (hparity : True) :
-    ∃ w' x' y' z' : ℤ,
-      IntFourSqAP w' x' y' z' ∧
-      ¬ FourSqAPConst w' x' y' z' ∧
-      fourSqAPHeight w' x' y' z' < fourSqAPHeight w x y z := by
-  -- Hard descent construction.
-  -- The factor identity `(xy-wz)(xy+wz)=2Δ^2` is one of the inputs.
-  sorry
-```
-
-Then the global no-AP theorem is a well-founded/minimal-counterexample wrapper around this descent step, plus normalization by root gcd and signs/parity.
-
-This is the honest shape: the algebraic lemmas are small and buildable, while the descent theorem is the genuine mathematical frontier. The current existential bridge should not be used as if it contained a direct formula for `a,b,c`.
+\[
+N' = ad,
+\qquad
+|N'| < |N|.
+\]
