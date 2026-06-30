@@ -1,11 +1,32 @@
-# Q2446 denominator clearing Lean compile fix
+# Q2447 four integer squares AP theorem Lean route
 
-Below is a corrected standalone denominator-clearing core.  The two syntax fixes are:
+## 1. Mathlib status
 
-* separate the integer fields in `RatIntScale4`; do not write `W X Y Z : ℤ` on one structure-field line;
-* use `Nonempty (RatIntScale4 w x y z)` or `∃ s : RatIntScale4 w x y z, True`, not a bare `∃ s : RatIntScale4 w x y z`.
+I do not see a direct Mathlib theorem named like “four integer squares in arithmetic progression are constant”.  The relevant existing Mathlib theorem is the FLT exponent-4 core:
 
 ```lean
+import Mathlib.NumberTheory.FLT.Four
+
+#check Fermat42
+#check not_fermat_42
+#check fermatLastTheoremFour
+```
+
+The useful theorem is:
+
+```lean
+not_fermat_42 {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) :
+  a ^ 4 + b ^ 4 ≠ c ^ 2
+```
+
+So Mathlib does not appear to provide the AP theorem directly, but it already provides the descent hard core needed to prove it.  The shortest Lean route should reduce the nonconstant four-square AP theorem to `not_fermat_42`, not reprove Fermat descent.
+
+## 2. Recommended theorem layer
+
+Put this in a small auxiliary file, for example:
+
+```lean
+import Mathlib.NumberTheory.FLT.Four
 import Mathlib.Data.Rat.Lemmas
 import Mathlib.Tactic
 
@@ -13,125 +34,174 @@ import Mathlib.Tactic
 def IntFourSqAP (a b c d : ℤ) : Prop :=
   b^2 - a^2 = c^2 - b^2 ∧ c^2 - b^2 = d^2 - c^2
 
-/-- A common nonzero integer scaling of four rationals to four integers. -/
-structure RatIntScale4 (w x y z : ℚ) where
-  M : ℤ
-  hM : M ≠ 0
-  W : ℤ
-  X : ℤ
-  Y : ℤ
-  Z : ℤ
-  hW : (W : ℚ) = (M : ℚ) * w
-  hX : (X : ℚ) = (M : ℚ) * x
-  hY : (Y : ℚ) = (M : ℚ) * y
-  hZ : (Z : ℚ) = (M : ℚ) * z
+/-- Integer version of Fermat/Euler: four integer squares in AP are constant. -/
+def FourIntSquaresAPConst : Prop :=
+  ∀ {w x y z : ℤ},
+    IntFourSqAP w x y z →
+    w ^ 2 = x ^ 2 ∧ x ^ 2 = y ^ 2 ∧ y ^ 2 = z ^ 2
 
-/-- If `M` is the product of the four reduced denominators, then scaling the
-first rational by `M` is integral.  The other three coordinates are obtained by
-permuting the arguments. -/
-private lemma rat_scale_by_four_den_product
-    (q r s t : ℚ) :
-    (((q.num * (r.den : ℤ) * (s.den : ℤ) * (t.den : ℤ) : ℤ) : ℚ)
-      = ((((q.den * r.den * s.den * t.den : ℕ) : ℤ) : ℚ) * q)) := by
-  calc
-    (((q.num * (r.den : ℤ) * (s.den : ℤ) * (t.den : ℤ) : ℤ) : ℚ)
-        = (q.num : ℚ) * (r.den : ℚ) * (s.den : ℚ) * (t.den : ℚ) := by
-          norm_cast
-    _ = ((q.den : ℚ) * q) * (r.den : ℚ) * (s.den : ℚ) * (t.den : ℚ) := by
-          rw [← Rat.den_mul_eq_num q]
-    _ = ((((q.den * r.den * s.den * t.den : ℕ) : ℤ) : ℚ) * q) := by
-          norm_cast
-          ring
+/-- Rational version used by the N=12 route. -/
+def FourRatSquaresAPConst : Prop :=
+  ∀ {w x y z : ℚ},
+    x ^ 2 - w ^ 2 = y ^ 2 - x ^ 2 →
+    y ^ 2 - x ^ 2 = z ^ 2 - y ^ 2 →
+    w ^ 2 = x ^ 2 ∧ x ^ 2 = y ^ 2 ∧ y ^ 2 = z ^ 2
 
-/-- Denominator-clearing object for four rationals. -/
-theorem rat_int_scale4_nonempty (w x y z : ℚ) :
-    Nonempty (RatIntScale4 w x y z) := by
-  refine ⟨
-    { M := ((w.den * x.den * y.den * z.den : ℕ) : ℤ)
-      hM := by
-        exact Int.ofNat_ne_zero.2
-          (mul_ne_zero
-            (mul_ne_zero
-              (mul_ne_zero (Rat.den_ne_zero w) (Rat.den_ne_zero x))
-              (Rat.den_ne_zero y))
-            (Rat.den_ne_zero z))
-      W := w.num * (x.den : ℤ) * (y.den : ℤ) * (z.den : ℤ)
-      X := x.num * (w.den : ℤ) * (y.den : ℤ) * (z.den : ℤ)
-      Y := y.num * (w.den : ℤ) * (x.den : ℤ) * (z.den : ℤ)
-      Z := z.num * (w.den : ℤ) * (x.den : ℤ) * (y.den : ℤ)
-      hW := by
-        simpa [mul_assoc, mul_left_comm, mul_comm]
-          using rat_scale_by_four_den_product w x y z
-      hX := by
-        simpa [mul_assoc, mul_left_comm, mul_comm]
-          using rat_scale_by_four_den_product x w y z
-      hY := by
-        simpa [mul_assoc, mul_left_comm, mul_comm]
-          using rat_scale_by_four_den_product y w x z
-      hZ := by
-        simpa [mul_assoc, mul_left_comm, mul_comm]
-          using rat_scale_by_four_den_product z w x y }⟩
+/-- The single new hard bridge needed if using Mathlib's FLT4 theorem.
 
-/-- Existential wrapper for callers that prefer an `Exists` theorem. -/
-theorem rat_int_scale4_exists (w x y z : ℚ) :
-    ∃ s : RatIntScale4 w x y z, True := by
-  rcases rat_int_scale4_nonempty w x y z with ⟨s⟩
-  exact ⟨s, trivial⟩
+This is the theorem to prove by AP algebra / Pythagorean-triple reduction.  Once this
+exists, the actual integer AP theorem is a tiny wrapper around `not_fermat_42`. -/
+def FourSquaresAPToFermat42Bridge : Prop :=
+  ∀ {w x y z : ℤ},
+    IntFourSqAP w x y z →
+    ¬ (w ^ 2 = x ^ 2 ∧ x ^ 2 = y ^ 2 ∧ y ^ 2 = z ^ 2) →
+    ∃ a b c : ℤ,
+      a ≠ 0 ∧ b ≠ 0 ∧ a ^ 4 + b ^ 4 = c ^ 2
 
-/-- Cast a scaled square difference back to the rational square difference. -/
-private lemma ratIntScale4_sq_sub_cast
-    {A B M : ℤ} {a b : ℚ}
-    (hA : (A : ℚ) = (M : ℚ) * a)
-    (hB : (B : ℚ) = (M : ℚ) * b) :
-    ((A^2 - B^2 : ℤ) : ℚ) = (M : ℚ)^2 * (a^2 - b^2) := by
-  calc
-    ((A^2 - B^2 : ℤ) : ℚ) = (A : ℚ)^2 - (B : ℚ)^2 := by
-      norm_cast
-    _ = ((M : ℚ) * a)^2 - ((M : ℚ) * b)^2 := by
-      rw [hA, hB]
-    _ = (M : ℚ)^2 * (a^2 - b^2) := by
-      ring
-
-/-- Transport rational square-AP equations to the scaled integer quadruple. -/
-theorem intFourSqAP_of_ratIntScale4
-    {w x y z : ℚ} (s : RatIntScale4 w x y z)
-    (h1 : x^2 - w^2 = y^2 - x^2)
-    (h2 : y^2 - x^2 = z^2 - y^2) :
-    IntFourSqAP s.W s.X s.Y s.Z := by
-  constructor
-  · exact Rat.intCast_injective (by
-      calc
-        ((s.X^2 - s.W^2 : ℤ) : ℚ)
-            = (s.M : ℚ)^2 * (x^2 - w^2) := by
-              exact ratIntScale4_sq_sub_cast s.hX s.hW
-        _ = (s.M : ℚ)^2 * (y^2 - x^2) := by
-              rw [h1]
-        _ = ((s.Y^2 - s.X^2 : ℤ) : ℚ) := by
-              exact (ratIntScale4_sq_sub_cast s.hY s.hX).symm)
-  · exact Rat.intCast_injective (by
-      calc
-        ((s.Y^2 - s.X^2 : ℤ) : ℚ)
-            = (s.M : ℚ)^2 * (y^2 - x^2) := by
-              exact ratIntScale4_sq_sub_cast s.hY s.hX
-        _ = (s.M : ℚ)^2 * (z^2 - y^2) := by
-              rw [h2]
-        _ = ((s.Z^2 - s.Y^2 : ℤ) : ℚ) := by
-              exact (ratIntScale4_sq_sub_cast s.hZ s.hY).symm)
+/-- Once the AP-to-FLT4 bridge is proved, Mathlib closes the integer theorem. -/
+theorem fourIntSquaresAPConst_of_fermat42_bridge
+    (hbridge : FourSquaresAPToFermat42Bridge) :
+    FourIntSquaresAPConst := by
+  intro w x y z hap
+  by_contra hconst
+  rcases hbridge hap hconst with ⟨a, b, c, ha, hb, h42⟩
+  exact (not_fermat_42 ha hb) h42
 ```
 
-Optional bridge pattern, if the local file has a contradiction theorem named in this style:
+This code has no `sorry` and gives the right interface: the remaining hard theorem is exactly `FourSquaresAPToFermat42Bridge`.
+
+## 3. Bridge from integer AP to the rational residual
+
+Paste the following after the Q2446 denominator-clearing file, i.e. after these names are available:
 
 ```lean
-/-- Example shape only: adapt the names to the local constants. -/
-theorem no_four_rat_squares_AP_from_no_four_int_squares_AP
-    (FourIntSquaresAPConst : ∀ a b c d : ℤ, IntFourSqAP a b c d → False)
-    {w x y z : ℚ}
-    (h1 : x^2 - w^2 = y^2 - x^2)
-    (h2 : y^2 - x^2 = z^2 - y^2) :
-    False := by
-  rcases rat_int_scale4_nonempty w x y z with ⟨s⟩
-  exact FourIntSquaresAPConst s.W s.X s.Y s.Z
-    (intFourSqAP_of_ratIntScale4 s h1 h2)
+#check RatIntScale4
+#check rat_int_scale4_nonempty
+#check intFourSqAP_of_ratIntScale4
 ```
 
-I would paste only the first code block if the file does not already have the local `FourIntSquaresAPConst` theorem name fixed.
+Then the rational residual follows from `FourIntSquaresAPConst` by cancellation of the common nonzero scale.
+
+```lean
+/-- If two scaled integer coordinates have equal squares, cancel the nonzero
+rational scale and get equality of the original rational squares. -/
+private lemma rat_sq_eq_of_scaled_sq_eq
+    {M W X : ℤ} {w x : ℚ}
+    (hM : M ≠ 0)
+    (hW : (W : ℚ) = (M : ℚ) * w)
+    (hX : (X : ℚ) = (M : ℚ) * x)
+    (hWX : W ^ 2 = X ^ 2) :
+    w ^ 2 = x ^ 2 := by
+  have hMq : (M : ℚ) ≠ 0 := by
+    exact_mod_cast hM
+  have hM2 : (M : ℚ) ^ 2 ≠ 0 := pow_ne_zero 2 hMq
+  apply mul_left_cancel₀ hM2
+  calc
+    (M : ℚ) ^ 2 * w ^ 2 = ((M : ℚ) * w) ^ 2 := by ring
+    _ = (W : ℚ) ^ 2 := by rw [← hW]
+    _ = ((W ^ 2 : ℤ) : ℚ) := by norm_cast
+    _ = ((X ^ 2 : ℤ) : ℚ) := by
+          exact congrArg (fun n : ℤ => (n : ℚ)) hWX
+    _ = (X : ℚ) ^ 2 := by norm_cast
+    _ = ((M : ℚ) * x) ^ 2 := by rw [hX]
+    _ = (M : ℚ) ^ 2 * x ^ 2 := by ring
+
+/-- Denominator clearing plus the integer AP theorem gives the rational theorem. -/
+theorem fourRatSquaresAPConst_of_fourIntSquaresAPConst
+    (hInt : FourIntSquaresAPConst) :
+    FourRatSquaresAPConst := by
+  intro w x y z h1 h2
+  rcases rat_int_scale4_nonempty w x y z with ⟨s⟩
+  have hsap : IntFourSqAP s.W s.X s.Y s.Z :=
+    intFourSqAP_of_ratIntScale4 s h1 h2
+  rcases hInt hsap with ⟨hWX, hXY, hYZ⟩
+  exact ⟨
+    rat_sq_eq_of_scaled_sq_eq s.hM s.hW s.hX hWX,
+    rat_sq_eq_of_scaled_sq_eq s.hM s.hX s.hY hXY,
+    rat_sq_eq_of_scaled_sq_eq s.hM s.hY s.hZ hYZ⟩
+```
+
+The final N=12 assumption can then be discharged by:
+
+```lean
+theorem fourRatSquaresAPConst_from_fermat42_bridge
+    (hbridge : FourSquaresAPToFermat42Bridge) :
+    FourRatSquaresAPConst := by
+  exact fourRatSquaresAPConst_of_fourIntSquaresAPConst
+    (fourIntSquaresAPConst_of_fermat42_bridge hbridge)
+```
+
+## 4. What should the hard core be?
+
+Best route: **reduce to Mathlib's `not_fermat_42`**.  Do not reprove Fermat descent inside `RationalPointsN12.lean`.  The Mathlib file `Mathlib.NumberTheory.FLT.Four` already contains the infinite descent for `a^4 + b^4 = c^2`, and the AP theorem should be a wrapper around it.
+
+The clean hard target is therefore:
+
+```lean
+FourSquaresAPToFermat42Bridge
+```
+
+Implementation choices for that bridge:
+
+1. **Pythagorean-triple route, preferred if staying elementary.**
+   Convert a nonconstant four-square AP into the standard Fermat right-triangle obstruction, then into `a^4 + b^4 = c^2`.  This should use:
+
+   ```lean
+   import Mathlib.NumberTheory.PythagoreanTriples
+   import Mathlib.NumberTheory.FLT.Four
+
+   #check PythagoreanTriple
+   #check PythagoreanTriple.coprime_classification'
+   #check not_fermat_42
+   ```
+
+   This is the most compatible route with Mathlib, because `not_fermat_42` itself is proved from Pythagorean-triple descent.
+
+2. **Quartic residual route, acceptable only if the local `QuarticDescent.lean` already proves the Ljunggren/Eisenstein nontrivial quartic.**
+   Use this route only if the local repo already has a theorem with a shape like:
+
+   ```lean
+   def QuarticAConst : Prop :=
+     ∀ {m n c : ℤ},
+       m ≠ 0 → n ≠ 0 →
+       Nat.Coprime m.natAbs n.natAbs →
+       c ^ 2 = m ^ 4 - m ^ 2 * n ^ 2 + n ^ 4 →
+       m ^ 2 = n ^ 2
+   ```
+
+   Then isolate the AP-to-quartic bridge as:
+
+   ```lean
+   def FourSquaresAPToQuarticABridge : Prop :=
+     ∀ {w x y z : ℤ},
+       IntFourSqAP w x y z →
+       ¬ (w ^ 2 = x ^ 2 ∧ x ^ 2 = y ^ 2 ∧ y ^ 2 = z ^ 2) →
+       ∃ m n c : ℤ,
+         m ≠ 0 ∧ n ≠ 0 ∧
+         Nat.Coprime m.natAbs n.natAbs ∧
+         c ^ 2 = m ^ 4 - m ^ 2 * n ^ 2 + n ^ 4 ∧
+         m ^ 2 ≠ n ^ 2
+   ```
+
+   This is more work unless `QuarticDescent.lean` already has the final constant/classification theorem.  `QuarticDescentN16.lean` is not the shortest dependency for N=12 four-square AP; keep it out unless a theorem is already imported there.
+
+## 5. Recommended file structure
+
+Shortest low-cycle structure:
+
+```text
+FLT/Assumptions/MazurProof/FourSquaresAP.lean
+  imports Mathlib.NumberTheory.FLT.Four
+  defines IntFourSqAP, FourIntSquaresAPConst, FourSquaresAPToFermat42Bridge
+  proves fourIntSquaresAPConst_of_fermat42_bridge
+
+FLT/Assumptions/MazurProof/N12APNorm.lean
+  imports FourSquaresAP.lean and the Q2446 denominator-clearing code
+  proves fourRatSquaresAPConst_of_fourIntSquaresAPConst
+
+FLT/Assumptions/MazurProof/RationalPointsN12.lean
+  imports N12APNorm.lean
+  consumes FourRatSquaresAPConst
+```
+
+This keeps the genuine mathematical frontier explicit and small: prove `FourSquaresAPToFermat42Bridge`, then everything from integer AP to the rational residual is routine Lean algebra and denominator clearing.
