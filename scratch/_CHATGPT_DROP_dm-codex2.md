@@ -1,131 +1,129 @@
-# Q2664 checked Eisenstein triple layer
+# Q2670 normalize bad Eisenstein quartic counterexample
 
 Target file: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`.
 
-This is a self-contained checked layer: it imports only `Mathlib.Tactic`, defines the intended elementary predicates, and proves the five requested lemmas without `sorry`/axioms.  If the target file already has the definitions, omit the definition block and paste only the helper lemma plus theorem bodies.
+The code below is standalone under `import Mathlib.Tactic`.  If the three definitions already exist in the target file, omit the definition block and paste only the private helpers plus `normalizedOfBadStatement`.
 
 ```lean
 import Mathlib.Tactic
 
 namespace MazurProof.RationalPointsN12
 
-/-- Eisenstein norm equation in integer coordinates. -/
-def EisensteinTriple (X Y Z : ℤ) : Prop :=
-  Z ^ 2 = X ^ 2 - X * Y + Y ^ 2
+/-- A primitive nontrivial counterexample to the Eisenstein quartic residual. -/
+def EisensteinQuarticBad (A N S : ℤ) : Prop :=
+  IsCoprime A N ∧ A ≠ 0 ∧ N ≠ 0 ∧ A ^ 2 ≠ N ^ 2 ∧
+    S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
 
-/-- One of the two symmetric Eisenstein parametrizations. -/
-def EisensteinParam (X Y Z m n : ℤ) : Prop :=
-  Z = m ^ 2 - m * n + n ^ 2 ∧
-    ((X = m ^ 2 - n ^ 2 ∧ Y = 2 * m * n - n ^ 2) ∨
-      (Y = m ^ 2 - n ^ 2 ∧ X = 2 * m * n - n ^ 2))
+/-- Normalized positive counterexample, with `0 < A < N` and `0 < S`. -/
+def NormalizedEisensteinBad (A N S : ℤ) : Prop :=
+  0 < A ∧ A < N ∧ 0 < S ∧ IsCoprime A N ∧
+    S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
 
-/-- Parametrized triple, except for the unit exceptional triple. -/
-def EisensteinTripleParamOrUnit (X Y Z : ℤ) : Prop :=
-  (X = 1 ∧ Y = 1 ∧ Z = 1) ∨ ∃ m n : ℤ, EisensteinParam X Y Z m n
+/-- Every bad counterexample can be normalized. -/
+def NormalizedOfBadStatement : Prop :=
+  ∀ {A N S : ℤ}, EisensteinQuarticBad A N S →
+    ∃ A0 N0 S0 : ℤ, NormalizedEisensteinBad A0 N0 S0
 
-/-- A tiny integer helper avoiding any fragile `Int` unit API. -/
-private lemma int_pos_eq_one_of_mul_eq_one {x y : ℤ}
-    (hx : 0 < x) (hxy : x * y = 1) :
-    x = 1 := by
-  have hypos : 0 < y := by
-    by_contra hy_not
-    have hy_nonpos : y ≤ 0 := le_of_not_gt hy_not
-    have hprod_nonpos : x * y ≤ 0 :=
-      mul_nonpos_of_nonneg_of_nonpos (le_of_lt hx) hy_nonpos
-    nlinarith [hxy, hprod_nonpos]
-  have hxle : x ≤ 1 := by
-    by_contra hx_not
-    have hx_ge_two : (2 : ℤ) ≤ x := by omega
-    have hy_ge_one : (1 : ℤ) ≤ y := by omega
-    have hprod_ge_two : (2 : ℤ) ≤ x * y := by
-      calc
-        (2 : ℤ) = 2 * 1 := by ring
-        _ ≤ x * y := by
-          exact mul_le_mul hx_ge_two hy_ge_one (by norm_num) (by omega)
-    nlinarith [hxy, hprod_ge_two]
-  omega
-
-/-- The parametrization identities satisfy the Eisenstein norm equation. -/
-theorem eisensteinParam_triple {X Y Z m n : ℤ}
-    (h : EisensteinParam X Y Z m n) :
-    EisensteinTriple X Y Z := by
-  rcases h with ⟨hZ, hcases⟩
-  rcases hcases with hXY | hYX
-  · rcases hXY with ⟨hX, hY⟩
-    unfold EisensteinTriple
-    rw [hZ, hX, hY]
+private lemma q2670_quartic_pos {A N : ℤ}
+    (hA : A ≠ 0) (hN : N ≠ 0) :
+    0 < A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4 := by
+  have hA2pos : 0 < A ^ 2 := sq_pos_of_ne_zero hA
+  have hN2pos : 0 < N ^ 2 := sq_pos_of_ne_zero hN
+  have hprod : 0 < A ^ 2 * N ^ 2 := mul_pos hA2pos hN2pos
+  have hsq : 0 ≤ (A ^ 2 - N ^ 2) ^ 2 := sq_nonneg _
+  have hid :
+      A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4 =
+        (A ^ 2 - N ^ 2) ^ 2 + A ^ 2 * N ^ 2 := by
     ring
-  · rcases hYX with ⟨hY, hX⟩
-    unfold EisensteinTriple
-    rw [hZ, hX, hY]
-    ring
+  rw [hid]
+  exact add_pos_of_nonneg_of_pos hsq hprod
 
-/-- The Eisenstein norm equation is symmetric in `X` and `Y`. -/
-theorem eisensteinTriple_symm {X Y Z : ℤ}
-    (h : EisensteinTriple X Y Z) :
-    EisensteinTriple Y X Z := by
-  unfold EisensteinTriple at h ⊢
-  rw [h]
-  ring
-
-/-- The parametrization predicate is symmetric in `X` and `Y`. -/
-theorem eisensteinParam_symm {X Y Z m n : ℤ}
-    (h : EisensteinParam X Y Z m n) :
-    EisensteinParam Y X Z m n := by
-  rcases h with ⟨hZ, hcases⟩
-  refine ⟨hZ, ?_⟩
-  rcases hcases with hXY | hYX
-  · rcases hXY with ⟨hX, hY⟩
-    exact Or.inr ⟨hX, hY⟩
-  · rcases hYX with ⟨hY, hX⟩
-    exact Or.inl ⟨hY, hX⟩
-
-/-- If a positive primitive Eisenstein triple has `X = Y`, it is the unit triple. -/
-theorem eisensteinTriple_unit_of_eq {X Y Z : ℤ}
-    (hXpos : 0 < X) (hZpos : 0 < Z)
-    (hcop : IsCoprime X Y)
-    (htri : EisensteinTriple X Y Z)
-    (hXY : X = Y) :
-    X = 1 ∧ Y = 1 ∧ Z = 1 := by
-  subst Y
-  rcases hcop with ⟨r, s, hrs⟩
-  have hXmul : X * (r + s) = 1 := by
-    rw [← hrs]
-    ring
-  have hXone : X = 1 := int_pos_eq_one_of_mul_eq_one hXpos hXmul
-  have hZpow : Z ^ 2 = 1 := by
-    unfold EisensteinTriple at htri
+private lemma q2670_abs_quartic {A N S : ℤ}
+    (hS : S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4) :
+    |S| ^ 2 = |A| ^ 4 - |A| ^ 2 * |N| ^ 2 + |N| ^ 4 := by
+  have hS2 : |S| ^ 2 = S ^ 2 := sq_abs S
+  have hA2 : |A| ^ 2 = A ^ 2 := sq_abs A
+  have hN2 : |N| ^ 2 = N ^ 2 := sq_abs N
+  have hA4 : |A| ^ 4 = A ^ 4 := by
     calc
-      Z ^ 2 = X ^ 2 - X * X + X ^ 2 := htri
-      _ = 1 := by
-        rw [hXone]
-        norm_num
-  have hZmul : Z * Z = 1 := by
-    simpa [pow_two] using hZpow
-  have hZone : Z = 1 := int_pos_eq_one_of_mul_eq_one hZpos hZmul
-  exact ⟨hXone, hXone, hZone⟩
-
-/-- Factor identity with `P = 2*Z - (2*X-Y)` and `Q = 2*Z + (2*X-Y)`. -/
-theorem eisensteinTriple_factor_identity {X Y Z : ℤ}
-    (h : EisensteinTriple X Y Z) :
-    (2 * Z - (2 * X - Y)) * (2 * Z + (2 * X - Y)) = 3 * Y ^ 2 := by
-  unfold EisensteinTriple at h
+      |A| ^ 4 = (|A| ^ 2) ^ 2 := by ring
+      _ = (A ^ 2) ^ 2 := by rw [hA2]
+      _ = A ^ 4 := by ring
+  have hN4 : |N| ^ 4 = N ^ 4 := by
+    calc
+      |N| ^ 4 = (|N| ^ 2) ^ 2 := by ring
+      _ = (N ^ 2) ^ 2 := by rw [hN2]
+      _ = N ^ 4 := by ring
   calc
-    (2 * Z - (2 * X - Y)) * (2 * Z + (2 * X - Y))
-        = 4 * Z ^ 2 - (2 * X - Y) ^ 2 := by ring
-    _ = 3 * Y ^ 2 := by
-      rw [h]
-      ring
+    |S| ^ 2 = S ^ 2 := hS2
+    _ = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4 := hS
+    _ = |A| ^ 4 - |A| ^ 2 * |N| ^ 2 + |N| ^ 4 := by
+      rw [hA4, hA2, hN2, hN4]
 
--- Useful API checks if you later prefer a gcd/unit-flavored proof of the unit case.
-#check Int.isCoprime_iff_gcd_eq_one
-#check isCoprime_self
+private lemma q2670_abs_coprime {A N : ℤ}
+    (hcop : IsCoprime A N) :
+    IsCoprime |A| |N| := by
+  have hcopNat : Nat.Coprime A.natAbs N.natAbs :=
+    Int.isCoprime_iff_nat_coprime.mp hcop
+  have hcopCast : IsCoprime (A.natAbs : ℤ) (N.natAbs : ℤ) :=
+    Nat.Coprime.isCoprime hcopNat
+  simpa only [Nat.cast_natAbs] using hcopCast
+
+private lemma q2670_abs_ne_of_sq_ne {A N : ℤ}
+    (hneq : A ^ 2 ≠ N ^ 2) :
+    |A| ≠ |N| := by
+  intro hAbs
+  have hsq : A ^ 2 = N ^ 2 := by
+    calc
+      A ^ 2 = |A| ^ 2 := (sq_abs A).symm
+      _ = |N| ^ 2 := by rw [hAbs]
+      _ = N ^ 2 := sq_abs N
+  exact hneq hsq
+
+/-- Proof of the normalization statement. -/
+theorem normalizedOfBadStatement : NormalizedOfBadStatement := by
+  intro A N S hbad
+  rcases hbad with ⟨hcop, hAne, hNne, hsq_ne, hS⟩
+  have hAabspos : 0 < |A| := abs_pos.mpr hAne
+  have hNabspos : 0 < |N| := abs_pos.mpr hNne
+  have hSsqpos : 0 < S ^ 2 := by
+    rw [hS]
+    exact q2670_quartic_pos hAne hNne
+  have hSne : S ≠ 0 := by
+    intro h0
+    rw [h0] at hSsqpos
+    norm_num at hSsqpos
+  have hSabspos : 0 < |S| := abs_pos.mpr hSne
+  have hquartAbs :
+      |S| ^ 2 = |A| ^ 4 - |A| ^ 2 * |N| ^ 2 + |N| ^ 4 :=
+    q2670_abs_quartic hS
+  have hcopAbs : IsCoprime |A| |N| := q2670_abs_coprime hcop
+  have hAbs_ne : |A| ≠ |N| := q2670_abs_ne_of_sq_ne hsq_ne
+  rcases lt_or_gt_of_ne hAbs_ne with hlt | hgt
+  · refine ⟨|A|, |N|, |S|, ?_⟩
+    exact ⟨hAabspos, hlt, hSabspos, hcopAbs, hquartAbs⟩
+  · refine ⟨|N|, |A|, |S|, ?_⟩
+    have hquartSwap :
+        |S| ^ 2 = |N| ^ 4 - |N| ^ 2 * |A| ^ 2 + |A| ^ 4 := by
+      rw [hquartAbs]
+      ring
+    exact ⟨hNabspos, hgt, hSabspos, hcopAbs.symm, hquartSwap⟩
+
+-- API checks for the exact names used above.
+#check abs_pos
+#check sq_abs
+#check Int.isCoprime_iff_nat_coprime
+#check Nat.Coprime.isCoprime
+#check Nat.cast_natAbs
+#check lt_or_gt_of_ne
 
 end MazurProof.RationalPointsN12
 ```
 
 Notes:
 
-* The factor identity necessarily assumes `EisensteinTriple X Y Z`; otherwise `P*Q = 3*Y^2` is not true in general.
-* `eisensteinTriple_unit_of_eq` destructs the `IsCoprime` witness directly.  After `X = Y`, Bezout gives `X * (r+s) = 1`; positivity forces `X = 1`, and then the triple equation plus `0 < Z` forces `Z = 1`.
-* `Mathlib.Tactic` imports `Mathlib.Tactic.NormNum.IsCoprime`, which imports `Mathlib.RingTheory.Coprime.Lemmas`, so `IsCoprime`, `Int.isCoprime_iff_gcd_eq_one`, and `isCoprime_self` are available under this import at the current pin.
+* The positivity of `S0` comes from the identity
+  `A^4 - A^2*N^2 + N^4 = (A^2 - N^2)^2 + A^2*N^2`, which is positive when `A` and `N` are nonzero.
+* `A^2 ≠ N^2` is converted to `|A| ≠ |N|`; linear order then gives either `|A| < |N|` or the swapped case.
+* Coprimality is preserved by absolute values via
+  `Int.isCoprime_iff_nat_coprime`, `Nat.Coprime.isCoprime`, and `Nat.cast_natAbs`.
