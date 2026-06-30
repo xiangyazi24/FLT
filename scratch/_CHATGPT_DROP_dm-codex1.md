@@ -1,8 +1,6 @@
 # Q2360 (dm-codex1): Lean reduction from integer Eisenstein quartic to rational x-classification
 
-## Goal
-
-You have the integer classification target
+This is the connector-only git drop for the requested Lean/math consultation. The goal is to reduce the homogeneous integer statement
 
 ```lean
 def EisensteinQuarticSquareClassification : Prop :=
@@ -11,7 +9,7 @@ def EisensteinQuarticSquareClassification : Prop :=
     m = 0 ∨ n = 0 ∨ m ^ 2 = n ^ 2
 ```
 
-and want to reduce it to the rational affine quartic x-coordinate classification
+to the rational affine quartic x-coordinate statement
 
 ```lean
 def RatQuarticEisenstein (x y : ℚ) : Prop :=
@@ -21,21 +19,35 @@ def RatQuarticEisensteinXClassification : Prop :=
   ∀ {x y : ℚ}, RatQuarticEisenstein x y → x = 0 ∨ x ^ 2 = 1
 ```
 
-The reduction is exactly: if `n ≠ 0`, divide the homogeneous equation by `n^4` and set
+The reduction is exactly the expected division by `n^4`: for `n ≠ 0`, set
 
 ```lean
 x = (m : ℚ) / (n : ℚ)
 y = (c : ℚ) / (n : ℚ) ^ 2
 ```
 
-Then `x = 0` gives `m = 0`, and `x ^ 2 = 1` gives `m ^ 2 = n ^ 2`. The `n = 0` case is handled before forming `m/n`.
+Then the homogeneous equation becomes `y^2 = x^4 - x^2 + 1`. In the classification wrapper, split first on `n = 0`; otherwise apply the rational theorem to `x = m/n`. The branch `x = 0` gives `m = 0`, and the branch `x^2 = 1` gives `m^2 = n^2`.
 
 ## Lean code
 
-The code below is meant to be pasted in the same namespace as the three definitions above. In the project file, you probably already have enough imports; standalone, `import Mathlib` is sufficient for `field_simp`, `ring_nf`, and `exact_mod_cast`.
+Paste this in the same namespace as the existing project definitions. If the file already has the three definitions, omit the repeated definition block below and keep the helper lemmas plus the two requested theorems.
 
 ```lean
 import Mathlib
+
+/-- Rational affine Eisenstein quartic. -/
+def RatQuarticEisenstein (x y : ℚ) : Prop :=
+  y ^ 2 = x ^ 4 - x ^ 2 + 1
+
+/-- The rational x-coordinate classification needed for the homogeneous integer result. -/
+def RatQuarticEisensteinXClassification : Prop :=
+  ∀ {x y : ℚ}, RatQuarticEisenstein x y → x = 0 ∨ x ^ 2 = 1
+
+/-- Homogeneous integer Eisenstein quartic square classification. -/
+def EisensteinQuarticSquareClassification : Prop :=
+  ∀ {m n c : ℤ},
+    c ^ 2 = m ^ 4 - m ^ 2 * n ^ 2 + n ^ 4 →
+    m = 0 ∨ n = 0 ∨ m ^ 2 = n ^ 2
 
 /-- Divide the homogeneous integer equation by `n^4` and view it as a rational point
 on `y^2 = x^4 - x^2 + 1`, with `x = m/n` and `y = c/n^2`. -/
@@ -105,12 +117,12 @@ theorem eisensteinQuarticSquareClassification_of_rat_x
 
 ## Notes and sanity checks
 
-1. The proof deliberately splits on `n = 0` first. The rational point construction only happens in the `n ≠ 0` branch.
+1. The wrapper deliberately splits on `n = 0` before forming the rational point. This avoids any hidden denominator obligation.
 
-2. The conclusion from the rational branch `x ^ 2 = 1` is `m ^ 2 = n ^ 2`, not `m = n`. This correctly keeps the `m = -n` diagonal case.
+2. The conclusion from the rational branch `x ^ 2 = 1` is `m ^ 2 = n ^ 2`, not `m = n`. This keeps both diagonal possibilities `m = n` and `m = -n`.
 
-3. The rational classification theorem must not be strengthened to `x = 0 ∨ x = 1`; `x = -1` is also a rational point and corresponds to `m = -n`.
+3. The rational x-classification must not be strengthened to `x = 0 ∨ x = 1`; the point with `x = -1` is real and corresponds to `m = -n`.
 
-4. The reduction does not require coprimality of `m,n`. It uses only the nonzero denominator `n ≠ 0` and the homogeneous equation.
+4. No coprimality assumption on `m,n` is needed for this reduction. The only denominator hypothesis is `n ≠ 0`.
 
-5. The theorem proves exactly the current integer interface: `m = 0 ∨ n = 0 ∨ m ^ 2 = n ^ 2`. It does not rule out diagonal residuals, which are genuine solutions.
+5. This proves exactly the current integer interface `m = 0 ∨ n = 0 ∨ m ^ 2 = n ^ 2`. It intentionally does not rule out diagonal residuals, since those are genuine solutions.
