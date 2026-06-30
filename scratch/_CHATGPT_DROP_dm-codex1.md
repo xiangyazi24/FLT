@@ -1,479 +1,476 @@
-# Q2638 (dm-codex1): adversarial audit of `EulerSquarePairDescent`
+# Q2641 (dm-codex1): checked AP-constant wiring plan
 
-Target repo path mentioned by requester: `/Users/huangx/repos/flt-ai`  
-Target Lean file: `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`
+Repo path mentioned by requester: `/Users/huangx/repos/flt-ai`  
+Lean project: `FLT`  
+Main files involved:
 
-This audit is only about `EulerSquarePairDescent`.  I am not discussing the already-checked AP-to-Euler construction.
+* `FLT/Assumptions/MazurProof/N12E1CoverResiduals.lean`
+* `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`
+* `FLT/Assumptions/MazurProof/N12CheckedDescentBridge.lean`
 
-## Verdict
-
-The route described is mathematically sound, provided the implementation really has the following two non-negotiable points:
-
-1. `F.A` is the **half common factor** `a` from `k = 2*a`, not the original common refinement factor `k`.
-2. `Even a` is proved from the balance equation, not from the original parity of `U` and `Up` alone.
-
-Under those conventions the descended object
+This answer is only about import-layer wiring and theorem shapes after the checked proofs
 
 ```lean
-F.A = a
-F.D = d
-F.B = b
-F.C = c
+fourRatSquaresAPConst_checked : FourRatSquaresAPConst
+fourIntSquaresAPConst_checked : FourIntSquaresAPConst
+primitiveCenteredFourSqAPDescent_checked : PrimitiveCenteredFourSqAPDescent
 ```
 
-is the right smaller `EulerSquarePair`, and the square extraction orientation
+have been proved in `N12FourSquaresAP.lean`.
 
-```lean
-M = 4*a^2 + d^2 = c^2
-N = 16*a^2 + d^2 = b^2
-```
+## Short verdict
 
-matches the fields `C = c` and `B = b`.
+Use the downstream bridge.  Do **not** make `N12E1CoverResiduals.lean` import `N12FourSquaresAP.lean`.
 
-## 1. Descent target: `F.A * F.D < E.A * E.D`
+The cleanest plan is:
 
-The target is exactly the interface currently stated by the file:
+1. Keep `N12E1CoverResiduals.lean` as the conditional/upstream residual layer.  Its theorems should continue to take
 
-```lean
-def EulerSquarePairDescent : Prop :=
-  ∀ E : EulerSquarePair, ∃ F : EulerSquarePair, F.A * F.D < E.A * E.D
-```
+   ```lean
+   (hAP : FourRatSquaresAPConst)
+   ```
 
-So proving
+   explicitly.
 
-```lean
-a * d < E.A * E.D
-```
+2. Keep `N12CheckedDescentBridge.lean` importing `N12FourSquaresAP.lean`.  Put the checked inhabitants, the generic adapter, and the no-`hAP` wrappers for the two nonzero covers there.
 
-is sufficient because the constructed `F` has `F.A = a` and `F.D = d`.
+3. For `N12E1FullCoverExtraction` or rational-point boundary closing theorems, either make those files terminal downstream consumers, or create separate terminal files such as
 
-This is also mathematically adequate for infinite descent, as long as the downstream contradiction uses the positive integer measure `A*D`.  Every `EulerSquarePair` has `0 < A` and `0 < D`, hence `0 < A*D`, so a strict descent in `A*D` transfers to a strict descent in the corresponding natural measure.
+   ```lean
+   N12E1FullCoverExtractionChecked.lean
+   N12RationalPointBoundaryChecked.lean
+   ```
 
-In fact, the implementation can prove a slightly stronger intermediate inequality:
+   that import the bridge and discharge only `hAP` using `fourRatSquaresAPConst_checked`.
 
-```lean
-a * d < E.A
-```
+Do not push checked facts back upstream into `N12E1CoverResiduals.lean`.
 
-because
+## Dependency direction
 
-```lean
-E.A = U * V = (2*a*b) * (c*d) = 2*a*b*c*d
-```
-
-and `a,b,c,d` are all positive.  Since `0 < E.D`, over integers we have `1 ≤ E.D`, so
-
-```lean
-E.A ≤ E.A * E.D
-```
-
-and therefore
-
-```lean
-a * d < E.A * E.D.
-```
-
-A very Lean-friendly proof is to factor directly:
-
-```lean
-E.A * E.D = (a*d) * (2*b*c*E.D)
-```
-
-and prove `1 < 2*b*c*E.D` from `0 < b`, `0 < c`, and `0 < E.D`.  But I would still expose the stronger `a*d < E.A` as a small helper, because it isolates the descent arithmetic from the `D` multiplier.
-
-There is no need to change the interface to `< E.A`.  If a later theorem wants descent by `E.A` specifically, this construction can also give it, but the hard interface you quoted is product descent.
-
-## 2. No circularity in `even_of_descent_balance`
-
-Using
-
-```lean
-even_of_descent_balance
-```
-
-before square extraction is not circular, provided its inputs are only:
-
-```lean
-Odd b
-Odd c
-Odd d
-b^2 * (4*a^2 + d^2) = c^2 * (16*a^2 + d^2)
-```
-
-The parity argument is independent of `square_factor_balance_int` and independent of the construction of `F`.
-
-Modulo `8`, odd squares are `1`.  Thus the balance equation gives
+The safe dependency graph is:
 
 ```text
-1 * (4*a^2 + 1) ≡ 1 * (16*a^2 + 1)  (mod 8)
+N12E1CoverResiduals
+  defines CoverQ, FourRatSquaresAPConst, DoubleLegCoverDegenerate
+  proves conditional cover residuals requiring hAP
+        │
+        ▼
+N12FourSquaresAP
+  imports N12E1CoverResiduals
+  proves fourRatSquaresAPConst_checked, fourIntSquaresAPConst_checked,
+  primitiveCenteredFourSqAPDescent_checked
+        │
+        ▼
+N12CheckedDescentBridge
+  imports N12FourSquaresAP
+  exposes checked adapters and no-hAP cover wrappers
+        │
+        ▼
+N12E1FullCoverExtractionChecked / RationalPointBoundaryChecked
+  terminal downstream wrappers that discharge hAP only
 ```
 
-so
+Forbidden dependency:
 
 ```text
-4*a^2 + 1 ≡ 1  (mod 8),
+N12E1CoverResiduals ──imports──▶ N12FourSquaresAP
 ```
 
-hence `4*a^2 ≡ 0 (mod 8)`.  If `a` were odd then `a^2 ≡ 1 (mod 8)`, giving `4*a^2 ≡ 4 (mod 8)`, contradiction.  Therefore `Even a`.
+That would immediately create the cycle
 
-This proof uses only the refinement balance equation and oddness of `b,c,d`.  It does not depend on knowing that either cofactor is a square.  So there is no circularity.
-
-One implementation caveat: if your proof of `even_of_descent_balance` internally calls `square_factor_balance_int`, then it is not the direct parity lemma described above.  That would not be a mathematical circularity in the final theorem, but it would make the dependency DAG less clean.  The clean version is the direct mod-`8` proof.
-
-## 3. Cofactor orientation and square-factor balance
-
-The orientation described is correct.
-
-You have the balance equation in the form
-
-```lean
-hbal : b^2 * M = c^2 * N
+```text
+N12E1CoverResiduals → N12FourSquaresAP → N12E1CoverResiduals.
 ```
 
-where
+Also avoid the less obvious cycle
 
-```lean
-M = 4*a^2 + d^2
-N = 16*a^2 + d^2
+```text
+N12FourSquaresAP
+  → N12E1CoverResiduals
+  → N12E1FullCoverExtraction
+  → N12CheckedDescentBridge
+  → N12FourSquaresAP
 ```
 
-The checked theorem
+If `N12E1FullCoverExtraction.lean` is currently upstream of anything used by `N12FourSquaresAP.lean`, do not edit it to import the checked bridge.  Add a new checked terminal wrapper file instead.
+
+## Recommended contents of `N12CheckedDescentBridge.lean`
+
+This file should be tiny and boring.  It should import the constructive proof file and export checked versions of the residual inputs.
 
 ```lean
-square_factor_balance_int
-  (hb hc hM hN : positives)
-  (hbc : IsCoprime b c)
-  (hMN : IsCoprime M N)
-  (h : b^2*M = c^2*N) : M = c^2 ∧ N = b^2
-```
-
-then gives exactly
-
-```lean
-4*a^2 + d^2 = c^2
-16*a^2 + d^2 = b^2
-```
-
-which are the required equations for
-
-```lean
-F.C = c
-F.B = b
-```
-
-because `EulerSquarePair` expects
-
-```lean
-hB : B^2 = 16*A^2 + D^2
-hC : C^2 = 4*A^2 + D^2
-```
-
-So there is no `b/c` swap if the equation is passed to `square_factor_balance_int` as
-
-```lean
-b^2 * (4*a^2 + d^2) = c^2 * (16*a^2 + d^2)
-```
-
-Do not commute or symmetrize the balance equation itself before applying `square_factor_balance_int`.  The only likely `.symm` needed is for the coprimality theorem if its local statement returns
-
-```lean
-IsCoprime (16*a^2 + d^2) (4*a^2 + d^2)
-```
-
-but the balance theorem wants
-
-```lean
-IsCoprime (4*a^2 + d^2) (16*a^2 + d^2).
-```
-
-That `.symm` is harmless.  Swapping `M` and `N` in the balance theorem is not harmless.
-
-## 4. Nat refinement wrapper via `natAbs`
-
-There is no mathematical issue with wrapping the Nat refinement through `natAbs`, because all four inputs are strictly positive integers:
-
-```lean
-0 < U, 0 < V, 0 < Up, 0 < Vp
-```
-
-The wrapper should prove, once and for all:
-
-```lean
-(U.natAbs : ℤ) = U
-(V.natAbs : ℤ) = V
-(Up.natAbs : ℤ) = Up
-(Vp.natAbs : ℤ) = Vp
-```
-
-Then the product equality transfers cleanly:
-
-```lean
-U * V = Up * Vp
-```
-
-to
-
-```lean
-U.natAbs * V.natAbs = Up.natAbs * Vp.natAbs
-```
-
-using `Int.natAbs_mul` or by casting back to `ℤ` after positivity normalization.
-
-Likewise, the coprimality transfer is sign-safe because there are no negative representatives left.  The returned Nat factors can be cast back to positive integers, giving positive `k,b,c,d`.
-
-The implementation detail to watch is not the math; it is simplification control.  I would keep all `toNat`/`natAbs` casts inside `two_coprime_factorizations_refine_int_pos`, and never let them leak into the main descent proof.
-
-## 5. Hidden weaknesses to check before trusting the final theorem
-
-The route is sound, but these are the places I would inspect adversarially in the Lean code.
-
-### 5.1 `IsCoprime a d` must be derived from `IsCoprime k d`
-
-The Nat/Int refinement gives pairwise coprimality for `k,b,c,d`, not automatically for the half-factor `a`.
-
-After proving
-
-```lean
-k = 2*a
-```
-
-you still need a lemma of the form:
-
-```lean
-private lemma coprime_of_coprime_two_mul_left {a d : ℤ}
-    (h : IsCoprime (2 * a) d) : IsCoprime a d := by
-  -- divisibility/gcd/Bézout proof, depending on the local IsCoprime API
-  sorry
-```
-
-This does not require `Odd d`; any common divisor of `a` and `d` is a common divisor of `2*a` and `d`.
-
-### 5.2 `Even a` cannot come from refinement parity alone
-
-The false inference would be:
-
-```lean
-Even U
-U = k*b
-Odd b
-k = 2*a
--- therefore Even a
-```
-
-This is false.  Example: `a=1`, `k=2`, `b=1`.
-
-So the implementation should contain no lemma that tries to prove `Even a` from `Even k` or from both `U` and `Up` being even.  The first valid proof of `Even a` is the mod-`8` balance proof.
-
-### 5.3 The signed-orientation branch should collapse immediately
-
-From `signed_even_odd_params_same_orientation E`, there are two cases:
-
-```lean
-E.D  = U^2 - V^2 ∧ E.D  = 4*Up^2 - Vp^2
--D   = U^2 - V^2 ∧ -D   = 4*Up^2 - Vp^2
-```
-
-Both imply the same equality:
-
-```lean
-U^2 - V^2 = 4*Up^2 - Vp^2
-```
-
-The proof should convert both branches to this common equality or to a common call of `refinement_equation_of_same_orientation`.  Do not duplicate the full descent after the branch.
-
-If `refinement_equation_of_same_orientation` is parameterized by a signed `D`, instantiate it with `E.D` in the positive branch and with `-E.D` in the negative branch.
-
-### 5.4 Cofactor coprimality must not rely on an already constructed `F`
-
-You said `euler_cofactor_coprime` gives cofactor coprimality from `Odd d` and `IsCoprime a d`.  That is exactly what is needed.
-
-But if the local theorem is instead a method that requires an existing `EulerSquarePair`, then using it here would be circular because constructing that `EulerSquarePair` requires the cofactor equations and `Even a`.  The safe shape is a standalone lemma like:
-
-```lean
-private lemma euler_cofactor_coprime_core
-    {a d : ℤ}
-    (hodd : Odd d)
-    (hcop : IsCoprime a d) :
-    IsCoprime (16*a^2 + d^2) (4*a^2 + d^2) := by
-  ...
-```
-
-Then use `.symm` if `square_factor_balance_int` wants the opposite order.
-
-### 5.5 Positivity of the cofactors should come only from `0 < d`
-
-For `square_factor_balance_int`, the cofactor positivity assumptions can be proved without knowing anything about `a`:
-
-```lean
-0 < 4*a^2 + d^2
-0 < 16*a^2 + d^2
-```
-
-because `0 < d`, hence `0 < d^2`, and `a^2 ≥ 0`.
-
-This is useful because it avoids accidentally depending on later square extraction or on `Even a`.
-
-### 5.6 Strict descent should use integer positivity carefully
-
-Over `ℤ`, from `0 < E.D` you need either `have hEDge : 1 ≤ E.D := by omega` or a direct positive-factor proof.
-
-A robust proof shape is:
-
-```lean
-have hEA : E.A = 2 * a * b * c * d := by
-  -- from E.A = U*V, U=2*a*b, V=c*d
-  ring_nf at *
-
-have hsmallEA : a * d < E.A := by
-  rw [hEA]
-  -- all factors positive; equivalently `1 < 2*b*c`
-  nlinarith [hapos, hbpos, hcpos, hdpos]
-
-have hEApos : 0 < E.A := E.hA
-have hEDge : 1 ≤ E.D := by omega
-have hEA_le_mul : E.A ≤ E.A * E.D := by
-  nlinarith
-
-exact lt_of_lt_of_le hsmallEA hEA_le_mul
-```
-
-Or prove the direct factorization:
-
-```lean
-E.A * E.D = (a*d) * (2*b*c*E.D)
-```
-
-and show `1 < 2*b*c*E.D`.
-
-## 6. Lean-facing helper skeleton
-
-The following is not meant to replace the implementation you already have; it records the auxiliary shapes I would expect to see.  The imports are included so this can be pasted into a Lean-facing note or scratch file.
-
-```lean
-import FLT.Assumptions.MazurProof.N12EulerAux
-import Mathlib.Tactic
+import FLT.Assumptions.MazurProof.N12FourSquaresAP
 
 namespace MazurProof.RationalPointsN12
 
-private theorem two_coprime_factorizations_refine_int_pos
-    {U V Up Vp : ℤ}
-    (hUpos : 0 < U) (hVpos : 0 < V)
-    (hUppos : 0 < Up) (hVppos : 0 < Vp)
-    (hUV : IsCoprime U V)
-    (hUpVp : IsCoprime Up Vp)
-    (hprod : U * V = Up * Vp) :
-    ∃ k b c d : ℤ,
-      0 < k ∧ 0 < b ∧ 0 < c ∧ 0 < d ∧
-      U = k * b ∧ V = c * d ∧ Up = k * c ∧ Vp = b * d ∧
-      IsCoprime k b ∧ IsCoprime k c ∧ IsCoprime k d ∧
-      IsCoprime b c ∧ IsCoprime b d ∧ IsCoprime c d := by
-  -- wrapper around `two_coprime_factorizations_refine_nat`
-  -- keep all `natAbs`/`toNat` casts confined here
-  sorry
+/-- Checked inhabitant of the rational four-squares AP obstruction. -/
+theorem checked_FourRatSquaresAPConst : FourRatSquaresAPConst :=
+  fourRatSquaresAPConst_checked
 
-private lemma odd_factors_of_odd_mul_int {x y : ℤ}
-    (hxy : Odd (x * y)) : Odd x ∧ Odd y := by
-  sorry
+/-- Checked inhabitant of the integer four-squares AP obstruction. -/
+theorem checked_FourIntSquaresAPConst : FourIntSquaresAPConst :=
+  fourIntSquaresAPConst_checked
 
-private lemma even_left_of_even_mul_odd_int {x y : ℤ}
-    (hxy : Even (x * y)) (hy : Odd y) : Even x := by
-  sorry
+/-- Checked primitive-centered descent inhabitant. -/
+theorem checked_PrimitiveCenteredFourSqAPDescent :
+    PrimitiveCenteredFourSqAPDescent :=
+  primitiveCenteredFourSqAPDescent_checked
 
-private lemma even_pos_as_two_mul {k : ℤ}
-    (hkpos : 0 < k) (hkeven : Even k) :
-    ∃ a : ℤ, 0 < a ∧ k = 2 * a := by
-  rcases hkeven with ⟨a, ha⟩
-  refine ⟨a, ?_, ?_⟩
-  · nlinarith
-  · nlinarith
-
-private lemma coprime_of_coprime_two_mul_left {a d : ℤ}
-    (h : IsCoprime (2 * a) d) : IsCoprime a d := by
-  sorry
-
-private lemma pos_four_sq_add_sq_of_pos_right {a d : ℤ}
-    (hdpos : 0 < d) : 0 < 4 * a ^ 2 + d ^ 2 := by
-  have hdne : d ≠ 0 := ne_of_gt hdpos
-  have hdsq : 0 < d ^ 2 := sq_pos_of_ne_zero hdne
-  have hasq : 0 ≤ a ^ 2 := sq_nonneg a
-  nlinarith
-
-private lemma pos_sixteen_sq_add_sq_of_pos_right {a d : ℤ}
-    (hdpos : 0 < d) : 0 < 16 * a ^ 2 + d ^ 2 := by
-  have hdne : d ≠ 0 := ne_of_gt hdpos
-  have hdsq : 0 < d ^ 2 := sq_pos_of_ne_zero hdne
-  have hasq : 0 ≤ a ^ 2 := sq_nonneg a
-  nlinarith
-
-private lemma even_of_descent_balance
-    {a b c d : ℤ}
-    (hbodd : Odd b) (hcodd : Odd c) (hdodd : Odd d)
-    (hbal : b ^ 2 * (4 * a ^ 2 + d ^ 2)
-          = c ^ 2 * (16 * a ^ 2 + d ^ 2)) :
-    Even a := by
-  -- Direct mod-8 proof.  Do not call `square_factor_balance_int` here.
-  sorry
-
-private lemma descent_product_lt_of_refinement
-    {E_A E_D a b c d : ℤ}
-    (hEA : E_A = 2 * a * b * c * d)
-    (hapos : 0 < a) (hbpos : 0 < b) (hcpos : 0 < c) (hdpos : 0 < d)
-    (hEDpos : 0 < E_D) :
-    a * d < E_A * E_D := by
-  have hsmallEA : a * d < E_A := by
-    rw [hEA]
-    nlinarith
-  have hEApos : 0 < E_A := by
-    rw [hEA]
-    nlinarith
-  have hEDge : 1 ≤ E_D := by omega
-  have hEAle : E_A ≤ E_A * E_D := by
-    nlinarith
-  exact lt_of_lt_of_le hsmallEA hEAle
+/-- Generic adapter: consume any theorem that only still needs `FourRatSquaresAPConst`. -/
+theorem of_checked_FourRatSquaresAPConst {P : Prop}
+    (h : FourRatSquaresAPConst → P) : P :=
+  h checked_FourRatSquaresAPConst
 
 end MazurProof.RationalPointsN12
 ```
 
-## 7. Validation commands I would run
+The generic adapter is useful for large downstream theorems whose remaining binders you do not want to restate.  I would keep it.
 
-From the local checkout:
+## Add no-argument wrappers for the two nonzero cover residuals
+
+Yes: add wrappers in `N12CheckedDescentBridge.lean` for the two nonzero cover residuals.  They are useful downstream because most later files should not have to mention `FourRatSquaresAPConst` anymore.
+
+The most robust Lean shape is to let Lean infer the full dependent function type after applying the first argument `hAP`.  This avoids duplicating long binders and is resilient if the conditional theorem signatures change slightly.
+
+```lean
+import FLT.Assumptions.MazurProof.N12FourSquaresAP
+
+namespace MazurProof.RationalPointsN12
+
+/-- Checked no-`hAP` version of `coverQ_3_2_6_AP_const`. -/
+theorem coverQ_3_2_6_AP_const_checked :=
+  coverQ_3_2_6_AP_const checked_FourRatSquaresAPConst
+
+/-- Checked no-`hAP` version of `coverQ_neg1_neg2_2_AP_const`. -/
+theorem coverQ_neg1_neg2_2_AP_const_checked :=
+  coverQ_neg1_neg2_2_AP_const checked_FourRatSquaresAPConst
+
+/-- Checked no-`hAP` version of `coverQ_3_2_6_forces_X_eq_three`. -/
+theorem coverQ_3_2_6_forces_X_eq_three_checked :=
+  coverQ_3_2_6_forces_X_eq_three checked_FourRatSquaresAPConst
+
+/-- Checked no-`hAP` version of `coverQ_neg1_neg2_2_forces_X_eq_neg_one`. -/
+theorem coverQ_neg1_neg2_2_forces_X_eq_neg_one_checked :=
+  coverQ_neg1_neg2_2_forces_X_eq_neg_one checked_FourRatSquaresAPConst
+
+end MazurProof.RationalPointsN12
+```
+
+This is the version I would implement first.
+
+If you prefer explicit types for documentation, the first two wrappers should elaborate to the following shapes, assuming the source theorem binders are exactly the obvious `CoverQ` binders after `hAP`:
+
+```lean
+import FLT.Assumptions.MazurProof.N12FourSquaresAP
+
+namespace MazurProof.RationalPointsN12
+
+/-- Explicit-type version, if the source theorem has this binder shape. -/
+theorem coverQ_3_2_6_AP_const_checked_explicit
+    {A B C T : ℚ}
+    (hQ : CoverQ 3 2 6 A B C T) :
+    T ^ 2 = C ^ 2 ∧ C ^ 2 = A ^ 2 ∧ A ^ 2 = B ^ 2 :=
+  coverQ_3_2_6_AP_const checked_FourRatSquaresAPConst hQ
+
+/-- Explicit-type version, if the source theorem has this binder shape. -/
+theorem coverQ_neg1_neg2_2_AP_const_checked_explicit
+    {A B C T : ℚ}
+    (hQ : CoverQ (-1) (-2) 2 A B C T) :
+    A ^ 2 = B ^ 2 ∧ B ^ 2 = T ^ 2 ∧ T ^ 2 = C ^ 2 :=
+  coverQ_neg1_neg2_2_AP_const checked_FourRatSquaresAPConst hQ
+
+end MazurProof.RationalPointsN12
+```
+
+For the two `forces_X` theorems, I would initially use the inferred wrapper form:
+
+```lean
+theorem coverQ_3_2_6_forces_X_eq_three_checked :=
+  coverQ_3_2_6_forces_X_eq_three checked_FourRatSquaresAPConst
+
+theorem coverQ_neg1_neg2_2_forces_X_eq_neg_one_checked :=
+  coverQ_neg1_neg2_2_forces_X_eq_neg_one checked_FourRatSquaresAPConst
+```
+
+Then run
+
+```lean
+#check coverQ_3_2_6_forces_X_eq_three_checked
+#check coverQ_neg1_neg2_2_forces_X_eq_neg_one_checked
+```
+
+and only expand the explicit statement if downstream readability really needs it.
+
+## Higher-level checked modules
+
+For full cover extraction or the rational-point boundary, I would not mutate an upstream conditional file unless you have verified that nothing in the AP-descent proof imports it.  The safest pattern is a new terminal checked module.
+
+Skeleton:
+
+```lean
+import FLT.Assumptions.MazurProof.N12CheckedDescentBridge
+import FLT.Assumptions.MazurProof.N12E1FullCoverExtraction
+-- import the finite-point / rational-boundary module only if it is downstream
+-- and does not feed back into N12FourSquaresAP.
+
+namespace MazurProof.RationalPointsN12
+
+/-!
+This file is terminal/downstream.  It may discharge
+`FourRatSquaresAPConst` using `checked_FourRatSquaresAPConst`, but it should
+not be imported by `N12E1CoverResiduals` or `N12FourSquaresAP`.
+-/
+
+/-- Generic checked full-cover adapter.  Use this when the downstream theorem
+still has a leading `FourRatSquaresAPConst` assumption. -/
+theorem of_checked_full_cover {P : Prop}
+    (h : FourRatSquaresAPConst → P) : P :=
+  h checked_FourRatSquaresAPConst
+
+/-- If the full-cover theorem also requires `DoubleLegCoverDegenerate`, keep
+that assumption explicit.  The checked AP theorem does not discharge it. -/
+theorem of_checked_full_cover_with_double_leg {P : Prop}
+    (h : FourRatSquaresAPConst → DoubleLegCoverDegenerate → P)
+    (hDL : DoubleLegCoverDegenerate) : P :=
+  h checked_FourRatSquaresAPConst hDL
+
+end MazurProof.RationalPointsN12
+```
+
+Then for each concrete downstream theorem, use a one-line wrapper:
+
+```lean
+import FLT.Assumptions.MazurProof.N12CheckedDescentBridge
+import FLT.Assumptions.MazurProof.N12E1FullCoverExtraction
+
+namespace MazurProof.RationalPointsN12
+
+/-- Pattern: checked wrapper around a conditional extraction theorem. -/
+theorem e1FullCoverExtraction_checked :=
+  e1FullCoverExtraction checked_FourRatSquaresAPConst
+
+/-- Pattern: checked wrapper around a conditional theorem that also needs
+`DoubleLegCoverDegenerate`.  Keep `hDL` explicit. -/
+theorem e1FullCoverExtraction_checked_with_double_leg
+    (hDL : DoubleLegCoverDegenerate) :=
+  e1FullCoverExtraction checked_FourRatSquaresAPConst hDL
+
+end MazurProof.RationalPointsN12
+```
+
+The exact theorem names `e1FullCoverExtraction` and binder order above are placeholders for the declarations already in your file.  The important shape is:
+
+```lean
+someConditionalTheorem checked_FourRatSquaresAPConst ...
+```
+
+not
+
+```lean
+-- bad upstream move
+-- prove or import checked_FourRatSquaresAPConst inside N12E1CoverResiduals
+```
+
+## Circularity warnings
+
+### `DoubleLegCoverDegenerate`
+
+`DoubleLegCoverDegenerate` is a separate proposition defined in `N12E1CoverResiduals.lean`.  The checked theorem
+
+```lean
+fourRatSquaresAPConst_checked : FourRatSquaresAPConst
+```
+
+only discharges `FourRatSquaresAPConst`.  It does **not** discharge
+
+```lean
+DoubleLegCoverDegenerate
+```
+
+unless you have a separate checked theorem proving that proposition.
+
+Therefore do not write terminal wrappers that silently remove both assumptions unless the second checked inhabitant exists:
+
+```lean
+-- Only valid if this has actually been proved somewhere downstream-safe:
+-- doubleLegCoverDegenerate_checked : DoubleLegCoverDegenerate
+```
+
+Until then, wrappers should look like:
+
+```lean
+theorem downstream_checked
+    (hDL : DoubleLegCoverDegenerate)
+    ... : Result :=
+  downstream_conditional checked_FourRatSquaresAPConst hDL ...
+```
+
+### E24/E1 finite-point theorem
+
+Keep the E24/E1 finite-point theorem layer conditional if it is used upstream in any route that helps prove `fourRatSquaresAPConst_checked`.  A final theorem may combine:
+
+```lean
+checked_FourRatSquaresAPConst
+```
+
+with a finite-point theorem, but only in a terminal downstream module.
+
+Safe pattern:
+
+```text
+conditional finite-point theorem
+        │
+        ▼
+terminal checked boundary wrapper
+```
+
+Dangerous pattern:
+
+```text
+finite-point theorem imports checked bridge
+        │
+        ▼
+N12FourSquaresAP imports finite-point theorem
+        │
+        ▼
+cycle back to checked bridge / N12FourSquaresAP
+```
+
+If in doubt, keep the existing finite-point theorem file assumption-parametric and add a `...Checked.lean` wrapper file that imports both the finite-point theorem and `N12CheckedDescentBridge.lean`.
+
+## Recommended theorem inventory
+
+I would aim for this inventory after the wiring pass.
+
+In `N12E1CoverResiduals.lean`:
+
+```lean
+def CoverQ (d0 d1 d3 : ℤ) (A B C T : ℚ) : Prop := ...
+def FourRatSquaresAPConst : Prop := ...
+def DoubleLegCoverDegenerate : Prop := ...
+
+theorem coverQ_3_2_6_AP_const
+    (hAP : FourRatSquaresAPConst) ... :
+    T ^ 2 = C ^ 2 ∧ C ^ 2 = A ^ 2 ∧ A ^ 2 = B ^ 2 := ...
+
+theorem coverQ_neg1_neg2_2_AP_const
+    (hAP : FourRatSquaresAPConst) ... :
+    A ^ 2 = B ^ 2 ∧ B ^ 2 = T ^ 2 ∧ T ^ 2 = C ^ 2 := ...
+
+theorem coverQ_3_2_6_forces_X_eq_three
+    (hAP : FourRatSquaresAPConst) ... : X = 3 := ...
+
+theorem coverQ_neg1_neg2_2_forces_X_eq_neg_one
+    (hAP : FourRatSquaresAPConst) ... : X = -1 := ...
+```
+
+In `N12FourSquaresAP.lean`:
+
+```lean
+import FLT.Assumptions.MazurProof.N12E1CoverResiduals
+
+namespace MazurProof.RationalPointsN12
+
+theorem fourRatSquaresAPConst_checked : FourRatSquaresAPConst := ...
+theorem fourIntSquaresAPConst_checked : FourIntSquaresAPConst := ...
+theorem primitiveCenteredFourSqAPDescent_checked :
+    PrimitiveCenteredFourSqAPDescent := ...
+
+end MazurProof.RationalPointsN12
+```
+
+In `N12CheckedDescentBridge.lean`:
+
+```lean
+import FLT.Assumptions.MazurProof.N12FourSquaresAP
+
+namespace MazurProof.RationalPointsN12
+
+theorem checked_FourRatSquaresAPConst : FourRatSquaresAPConst :=
+  fourRatSquaresAPConst_checked
+
+theorem checked_FourIntSquaresAPConst : FourIntSquaresAPConst :=
+  fourIntSquaresAPConst_checked
+
+theorem checked_PrimitiveCenteredFourSqAPDescent :
+    PrimitiveCenteredFourSqAPDescent :=
+  primitiveCenteredFourSqAPDescent_checked
+
+theorem of_checked_FourRatSquaresAPConst {P : Prop}
+    (h : FourRatSquaresAPConst → P) : P :=
+  h checked_FourRatSquaresAPConst
+
+theorem coverQ_3_2_6_AP_const_checked :=
+  coverQ_3_2_6_AP_const checked_FourRatSquaresAPConst
+
+theorem coverQ_neg1_neg2_2_AP_const_checked :=
+  coverQ_neg1_neg2_2_AP_const checked_FourRatSquaresAPConst
+
+theorem coverQ_3_2_6_forces_X_eq_three_checked :=
+  coverQ_3_2_6_forces_X_eq_three checked_FourRatSquaresAPConst
+
+theorem coverQ_neg1_neg2_2_forces_X_eq_neg_one_checked :=
+  coverQ_neg1_neg2_2_forces_X_eq_neg_one checked_FourRatSquaresAPConst
+
+end MazurProof.RationalPointsN12
+```
+
+In a terminal checked full-cover file, only if needed:
+
+```lean
+import FLT.Assumptions.MazurProof.N12CheckedDescentBridge
+import FLT.Assumptions.MazurProof.N12E1FullCoverExtraction
+
+namespace MazurProof.RationalPointsN12
+
+-- Pattern only: keep non-AP assumptions explicit.
+theorem someFullCoverTheorem_checked
+    (hDL : DoubleLegCoverDegenerate)
+    ... : Result :=
+  someFullCoverTheorem checked_FourRatSquaresAPConst hDL ...
+
+end MazurProof.RationalPointsN12
+```
+
+## Validation commands
+
+Run these from the local checkout:
 
 ```bash
 cd /Users/huangx/repos/flt-ai
 
-# Fast single-file check of the target implementation.
+# Upstream conditional residual layer should still check without importing the checked proof.
+lake env lean FLT/Assumptions/MazurProof/N12E1CoverResiduals.lean
+
+# Constructive proof file containing the checked AP constants.
 lake env lean FLT/Assumptions/MazurProof/N12FourSquaresAP.lean
 
-# Check the auxiliary file that provides square_factor_balance_int.
-lake env lean FLT/Assumptions/MazurProof/N12EulerAux.lean
+# Bridge file with generic adapter and no-hAP wrappers.
+lake env lean FLT/Assumptions/MazurProof/N12CheckedDescentBridge.lean
 
-# Module-level build checks, if the package exposes these module names.
-lake build FLT.Assumptions.MazurProof.N12EulerAux
+# If you add terminal wrappers, check those too.
+lake env lean FLT/Assumptions/MazurProof/N12E1FullCoverExtractionChecked.lean
+lake env lean FLT/Assumptions/MazurProof/N12RationalPointBoundaryChecked.lean
+
+# Module builds, if these module names are exposed in the package.
+lake build FLT.Assumptions.MazurProof.N12E1CoverResiduals
 lake build FLT.Assumptions.MazurProof.N12FourSquaresAP
+lake build FLT.Assumptions.MazurProof.N12CheckedDescentBridge
 
-# Whole-project check if the single-file/module checks pass.
+# Whole project catches accidental import cycles.
 lake build
 
-# Audit that the constructive theorem and its wrappers did not introduce new placeholders.
-rg -n "sorry|admit|axiom|set_option autoImplicit true" \
-  FLT/Assumptions/MazurProof/N12FourSquaresAP.lean \
-  FLT/Assumptions/MazurProof/N12EulerAux.lean
+# Confirm the residual layer did not acquire a back-import.
+rg -n "N12FourSquaresAP|N12CheckedDescentBridge" \
+  FLT/Assumptions/MazurProof/N12E1CoverResiduals.lean
 
-# Optional: check exactly what changed before committing.
-git diff -- FLT/Assumptions/MazurProof/N12FourSquaresAP.lean \
-             FLT/Assumptions/MazurProof/N12EulerAux.lean
-git diff --check
+# Inspect inferred wrapper types.
+rg -n "coverQ_.*_checked|checked_FourRatSquaresAPConst" \
+  FLT/Assumptions/MazurProof/N12CheckedDescentBridge.lean
 ```
 
-## Final audit answer
+## Final recommendation
 
-I would treat the implementation as sound if it typechecks and the direct inspection confirms:
+Implement options **1 and 2** now: keep the generic adapter and add no-argument wrappers in `N12CheckedDescentBridge.lean`.
 
-* `a` is introduced by `k = 2*a` and `F.A = a`.
-* `Even a` is proved by the direct mod-`8` balance lemma, not by refinement parity alone.
-* `IsCoprime a d` is explicitly derived from the refinement coprimality for `k` and `d`.
-* `square_factor_balance_int` is applied with `M = 4*a^2+d^2`, `N = 16*a^2+d^2`, and the balance equation in the order `b^2*M = c^2*N`.
-* The signed-orientation branch is collapsed to the common balance equation before the rest of the descent.
-* The descent inequality proves `F.A*F.D = a*d < E.A*E.D`, preferably via the stronger intermediate `a*d < E.A`.
-
-No correction to the mathematical construction is needed under those conditions.
+Use option **3** only as a terminal downstream wrapper layer.  Do not make existing upstream extraction/residual files import the checked bridge unless you have verified they are not in the import cone of `N12FourSquaresAP.lean`.
