@@ -1,143 +1,163 @@
-# Q2377 (dm-codex2): local E24/E1 shift and point-list plumbing
+# Q2380 (dm-codex2): C12 to E24 local bridge
 
 ```lean
-import FLT.Assumptions.MazurProof.RationalPointsN12
+import Mathlib
 
 namespace MazurProof.RationalPointsN12
 
-/-!
-If `E24` or `E24XCoordinateClassification` already exist from Q2368, do not
-re-add those duplicate `def`s.  The theorem proofs below are otherwise local
-and should be pasteable unchanged.
--/
+/-- The rational quartic `C12`: `y^2 = x^4 - x^2 + 1`. -/
+def RatQuarticEisenstein (x y : ℚ) : Prop :=
+  y ^ 2 = x ^ 4 - x ^ 2 + 1
 
-/-- The shifted hard residual curve. -/
+/-- The elliptic curve model used for the `N = 12` obstruction. -/
 def E24 (U V : ℚ) : Prop :=
   V ^ 2 = U ^ 3 - U ^ 2 - 4 * U + 4
 
-/-- The convenient translated curve, with `X = U - 1`. -/
-def E1 (X Y : ℚ) : Prop :=
-  Y ^ 2 = X ^ 3 + 2 * X ^ 2 - 3 * X
+/-- The `U` coordinate of the standard rational map `C12 -> E24`. -/
+def C12ToE24U (x y : ℚ) : ℚ :=
+  2 * (y + 1) / x ^ 2
 
-/-- Full affine rational point list for `E1`.  This is the hard input. -/
-def E1AffinePointList : Prop :=
-  ∀ {X Y : ℚ}, E1 X Y →
-    (X = -3 ∧ Y = 0) ∨
-    (X = 0 ∧ Y = 0) ∨
-    (X = 1 ∧ Y = 0) ∨
-    (X = -1 ∧ Y = 2) ∨
-    (X = -1 ∧ Y = -2) ∨
-    (X = 3 ∧ Y = 6) ∨
-    (X = 3 ∧ Y = -6)
+/-- The `V` coordinate of the standard rational map `C12 -> E24`. -/
+def C12ToE24V (x y : ℚ) : ℚ :=
+  x * (C12ToE24U x y ^ 2 - 4) / 2
 
-/-- Full affine rational point list for `E24`. -/
-def E24AffineRationalPoints : Prop :=
-  ∀ {U V : ℚ}, E24 U V →
-    (U = -2 ∧ V = 0) ∨
-    (U = 1 ∧ V = 0) ∨
-    (U = 2 ∧ V = 0) ∨
-    (U = 0 ∧ V = 2) ∨
-    (U = 0 ∧ V = -2) ∨
-    (U = 4 ∧ V = 6) ∨
-    (U = 4 ∧ V = -6)
+/-- Residual hard input: the possible `U`-coordinates on `E24`.
 
-/-- X-coordinate-only classification for `E24`. -/
+The disjunction order is intentionally
+`U = -2`, `U = 1`, `U = 2`, `U = 0`, `U = 4`.
+-/
 def E24XCoordinateClassification : Prop :=
   ∀ {U V : ℚ}, E24 U V →
-    U = -2 ∨ U = 0 ∨ U = 1 ∨ U = 2 ∨ U = 4
+    U = -2 ∨ U = 1 ∨ U = 2 ∨ U = 0 ∨ U = 4
 
-/-- Forward translation: `E24(U,V)` gives `E1(U-1,V)`. -/
-theorem e1_of_e24_shift {U V : ℚ}
-    (h : E24 U V) :
-    E1 (U - 1) V := by
-  unfold E24 E1 at *
+private lemma c12_to_e24_U_relation_clear_den {x y : ℚ}
+    (hC : RatQuarticEisenstein x y) :
+    (2 * (y + 1)) ^ 2 - 4 * (x ^ 2) ^ 2 =
+      4 * (2 * (y + 1)) - 4 * x ^ 2 := by
+  unfold RatQuarticEisenstein at hC
+  ring_nf at hC ⊢
+  nlinarith
+
+/-- The denominator-cleared relation for the `U` coordinate of the map. -/
+theorem c12_to_e24_U_relation {x y : ℚ}
+    (hC : RatQuarticEisenstein x y) (hx : x ≠ 0) :
+    x ^ 2 * (C12ToE24U x y ^ 2 - 4) =
+      4 * (C12ToE24U x y - 1) := by
+  set u : ℚ := C12ToE24U x y with hu
+  set z : ℚ := x ^ 2 with hz
+  set a : ℚ := 2 * (y + 1) with ha
+  have hz_ne : z ≠ 0 := by
+    rw [hz]
+    exact pow_ne_zero 2 hx
+  have hu_mul : u * z = a := by
+    rw [hu, hz, ha]
+    unfold C12ToE24U
+    exact div_mul_cancel₀ (2 * (y + 1)) (pow_ne_zero 2 hx)
+  have hclear : a ^ 2 - 4 * z ^ 2 = 4 * a - 4 * z := by
+    rw [ha, hz]
+    exact c12_to_e24_U_relation_clear_den hC
+  apply mul_right_cancel₀ hz_ne
   calc
-    V ^ 2 = U ^ 3 - U ^ 2 - 4 * U + 4 := h
-    _ = (U - 1) ^ 3 + 2 * (U - 1) ^ 2 - 3 * (U - 1) := by
+    (z * (u ^ 2 - 4)) * z = (u * z) ^ 2 - 4 * z ^ 2 := by
+      ring
+    _ = a ^ 2 - 4 * z ^ 2 := by
+      rw [hu_mul]
+    _ = 4 * a - 4 * z := hclear
+    _ = (4 * (u - 1)) * z := by
+      rw [← hu_mul]
       ring
 
-/-- Reverse translation, useful for sanity checks and alternative wrappers. -/
-theorem e24_of_e1_shift {X Y : ℚ}
-    (h : E1 X Y) :
-    E24 (X + 1) Y := by
-  unfold E1 E24 at *
+private lemma e24_of_U_relation {x U : ℚ}
+    (hrel : x ^ 2 * (U ^ 2 - 4) = 4 * (U - 1)) :
+    E24 U (x * (U ^ 2 - 4) / 2) := by
+  unfold E24
   calc
-    Y ^ 2 = X ^ 3 + 2 * X ^ 2 - 3 * X := h
-    _ = (X + 1) ^ 3 - (X + 1) ^ 2 - 4 * (X + 1) + 4 := by
+    (x * (U ^ 2 - 4) / 2) ^ 2
+        = (x ^ 2 * (U ^ 2 - 4)) * (U ^ 2 - 4) / 4 := by
+      ring
+    _ = (4 * (U - 1)) * (U ^ 2 - 4) / 4 := by
+      rw [hrel]
+    _ = U ^ 3 - U ^ 2 - 4 * U + 4 := by
       ring
 
-/-- Tiny linear helper for converting an `E1` `X`-coordinate to an `E24` `U`. -/
-theorem rat_eq_of_sub_one_eq_add_one {U A B : ℚ}
-    (hUA : U - 1 = A) (hAB : A + 1 = B) :
-    U = B := by
-  calc
-    U = (U - 1) + 1 := by ring
-    _ = A + 1 := by rw [hUA]
-    _ = B := hAB
+/-- The rational map from the nonzero-`x` part of `C12` lands on `E24`. -/
+theorem c12_to_e24_map_correct {x y : ℚ}
+    (hC : RatQuarticEisenstein x y) (hx : x ≠ 0) :
+    E24 (C12ToE24U x y) (C12ToE24V x y) := by
+  unfold C12ToE24V
+  exact e24_of_U_relation (x := x) (U := C12ToE24U x y)
+    (c12_to_e24_U_relation hC hx)
 
-/-- Translate the hard `E1` full point list into the full `E24` point list. -/
-theorem E24AffineRationalPoints_of_E1AffineRationalPoints
-    (hpts : E1AffinePointList) :
-    E24AffineRationalPoints := by
-  intro U V hE24
-  have hE1 : E1 (U - 1) V := e1_of_e24_shift hE24
-  rcases hpts (X := U - 1) (Y := V) hE1 with
-      h_m3 | h_0 | h_1 | h_neg1_pos | h_neg1_neg | h_3_pos | h_3_neg
-  · rcases h_m3 with ⟨hX, hY⟩
-    exact Or.inl ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩
-  · rcases h_0 with ⟨hX, hY⟩
-    exact Or.inr (Or.inl ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩)
-  · rcases h_1 with ⟨hX, hY⟩
-    exact Or.inr (Or.inr (Or.inl ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩))
-  · rcases h_neg1_pos with ⟨hX, hY⟩
-    exact Or.inr (Or.inr (Or.inr (Or.inl ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩)))
-  · rcases h_neg1_neg with ⟨hX, hY⟩
-    exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩))))
-  · rcases h_3_pos with ⟨hX, hY⟩
-    exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩)))))
-  · rcases h_3_neg with ⟨hX, hY⟩
-    exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ⟨rat_eq_of_sub_one_eq_add_one hX (by norm_num), hY⟩)))))
+private lemma c12_relation_false_of_U_eq_neg_two {x U : ℚ}
+    (hrel : x ^ 2 * (U ^ 2 - 4) = 4 * (U - 1))
+    (hU : U = -2) : False := by
+  rw [hU] at hrel
+  norm_num at hrel
 
-/-- Full `E24` affine list implies the X-coordinate-only classification. -/
-theorem e24_xCoordinateClassification_of_e24_points
-    (hpts : E24AffineRationalPoints) :
-    E24XCoordinateClassification := by
-  intro U V hE24
-  rcases hpts (U := U) (V := V) hE24 with
-      h_m2 | h_1 | h_2 | h_0_pos | h_0_neg | h_4_pos | h_4_neg
-  · exact Or.inl h_m2.1
-  · exact Or.inr (Or.inr (Or.inl h_1.1))
-  · exact Or.inr (Or.inr (Or.inr (Or.inl h_2.1)))
-  · exact Or.inr (Or.inl h_0_pos.1)
-  · exact Or.inr (Or.inl h_0_neg.1)
-  · exact Or.inr (Or.inr (Or.inr (Or.inr h_4_pos.1)))
-  · exact Or.inr (Or.inr (Or.inr (Or.inr h_4_neg.1)))
+private lemma c12_relation_false_of_U_eq_one {x U : ℚ}
+    (hx : x ≠ 0)
+    (hrel : x ^ 2 * (U ^ 2 - 4) = 4 * (U - 1))
+    (hU : U = 1) : False := by
+  rw [hU] at hrel
+  norm_num at hrel
+  have hx2_zero : x ^ 2 = 0 := by
+    nlinarith
+  exact (pow_ne_zero 2 hx) hx2_zero
 
-/-- Direct wrapper from the hard `E1` point-list theorem to `E24` X-coordinates. -/
-theorem e24_xCoordinateClassification_of_e1_points
-    (hpts : E1AffinePointList) :
-    E24XCoordinateClassification := by
-  exact e24_xCoordinateClassification_of_e24_points
-    (E24AffineRationalPoints_of_E1AffineRationalPoints hpts)
+private lemma c12_relation_false_of_U_eq_two {x U : ℚ}
+    (hrel : x ^ 2 * (U ^ 2 - 4) = 4 * (U - 1))
+    (hU : U = 2) : False := by
+  rw [hU] at hrel
+  norm_num at hrel
+
+private lemma c12_relation_x_sq_eq_one_of_U_eq_zero {x U : ℚ}
+    (hrel : x ^ 2 * (U ^ 2 - 4) = 4 * (U - 1))
+    (hU : U = 0) :
+    x ^ 2 = 1 := by
+  rw [hU] at hrel
+  norm_num at hrel
+  nlinarith
+
+private lemma c12_relation_x_sq_eq_one_of_U_eq_four {x U : ℚ}
+    (hrel : x ^ 2 * (U ^ 2 - 4) = 4 * (U - 1))
+    (hU : U = 4) :
+    x ^ 2 = 1 := by
+  rw [hU] at hrel
+  norm_num at hrel
+  nlinarith
+
+/-- The `E24` `U`-coordinate classification forces the original quartic `x` to be
+zero or satisfy `x^2 = 1`. -/
+theorem ratQuarticEisensteinXClassification_of_e24_x
+    (hE24x : E24XCoordinateClassification)
+    {x y : ℚ}
+    (hC : RatQuarticEisenstein x y) :
+    x = 0 ∨ x ^ 2 = 1 := by
+  by_cases hx : x = 0
+  · exact Or.inl hx
+  · have hrel :
+        x ^ 2 * (C12ToE24U x y ^ 2 - 4) =
+          4 * (C12ToE24U x y - 1) :=
+      c12_to_e24_U_relation hC hx
+    have hE24 : E24 (C12ToE24U x y) (C12ToE24V x y) :=
+      c12_to_e24_map_correct hC hx
+    rcases hE24x hE24 with hU_neg_two | hU_one | hU_two | hU_zero | hU_four
+    · exact False.elim (c12_relation_false_of_U_eq_neg_two hrel hU_neg_two)
+    · exact False.elim (c12_relation_false_of_U_eq_one hx hrel hU_one)
+    · exact False.elim (c12_relation_false_of_U_eq_two hrel hU_two)
+    · exact Or.inr (c12_relation_x_sq_eq_one_of_U_eq_zero hrel hU_zero)
+    · exact Or.inr (c12_relation_x_sq_eq_one_of_U_eq_four hrel hU_four)
 
 end MazurProof.RationalPointsN12
 ```
 
-## Notes
+## Brief fragile-line notes
 
-The polynomial shift is exactly
-
-```lean
-(U - 1)^3 + 2*(U - 1)^2 - 3*(U - 1)
-  = U^3 - U^2 - 4*U + 4.
-```
-
-So `e1_of_e24_shift` is just `unfold` plus a single tiny `ring` goal.  The point-list conversion uses no point type, no torsion API, and no hard arithmetic.  The only coordinate arithmetic after the hard `E1AffinePointList` theorem is the local helper
-
-```lean
-U - 1 = A → A + 1 = B → U = B
-```
-
-with `norm_num` closing the seven rational constants.
-
-If Q2368 already defined `E24XCoordinateClassification` with a different disjunction order, keep `E24AffineRationalPoints_of_E1AffineRationalPoints` unchanged and adjust only the final seven `Or.inr` nestings in `e24_xCoordinateClassification_of_e24_points`.
+- If this is pasted directly into `FLT/Assumptions/MazurProof/RationalPointsN12.lean`, omit the `import Mathlib` line if the file already has stronger local imports.
+- The only polynomial normalization in the quartic part is isolated in `c12_to_e24_U_relation_clear_den`; after `ring_nf at hC ⊢`, the goal is the cleared identity equivalent to `hC`.
+- In `c12_to_e24_U_relation`, after `apply mul_right_cancel₀ hz_ne`, the expected goal shape is
+  ```lean
+  (z * (u ^ 2 - 4)) * z = (4 * (u - 1)) * z
+  ```
+  and the `calc` block uses only `hu_mul : u * z = a` plus `ring`.
+- The final classification branches intentionally follow the residual order `-2, 1, 2, 0, 4`; the `U = 0` and `U = 4` branches reduce by `norm_num at hrel` to linear equations in `x ^ 2`, then `nlinarith` proves `x ^ 2 = 1`.
