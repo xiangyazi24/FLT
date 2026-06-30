@@ -1,133 +1,202 @@
-# Q2512 distance-two pair helper for WeakPrimitiveAPPairwise
+# Q2515 corrected raw Euler factor refinement
 
-## Verdict
+## Fix summary
 
-Use the prime-divisor route, but make the proof modular.  The key helpers are:
+The three local failures from Q2504 are real and should be fixed as follows.
 
-1. `int_odd_mod_two_not_dvd`: turns `a % 2 = 1` into `¬ (2 : ℤ) ∣ a`.
-2. `prime_dvd_rootGCD4_of_dvd_all`: packages the contradiction with `hroot : rootGCD4 p q r s = 1`.
-3. `weakPrimitiveAP_distanceTwo_gcd_pr_eq_one`: proves `Int.gcd p r = 1`.
+1. Do **not** write multiple structure fields on one line in this file.  Use one field per line:
+   ```lean
+   alpha : ℤ
+   b : ℤ
+   c : ℤ
+   d : ℤ
+   ```
+   This avoids the dependent-field parse that made `alpha` look like a function.
 
-I could not fetch `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean` from GitHub `main`; it appears not to be present on the remote branch available to the connector.  The code below is therefore written as a standalone paste-in block.  If `rootGCD4` is already defined in the current file, omit the local `def rootGCD4` line.
+2. Do **not** prove the integer row helper by rewriting `U` with a casted equality and then calling `simp`; that rewrites `U` inside the gcd arguments.  Use a `calc` chain and cast the Nat equality with `congrArg`.
+
+3. Avoid the missing `gcd_pos_of_ne_zero_left`.  The helper `int_gcd_pos_of_left_pos` below proves positivity directly from `Nat.gcd_dvd_left` and `Int.natAbs_eq_zero`.
+
+Below is the corrected no-`sorry`, no-`axiom` patch.
 
 ```lean
 import Mathlib.Tactic
-import Mathlib.Data.Int.ModEq
-import Mathlib.Data.Nat.Prime.Basic
+import Mathlib.Data.Int.GCD
+import Mathlib.Data.Nat.GCD.Basic
 import Mathlib.RingTheory.Int.Basic
 
-/-- Omit this if already present in `N12FourSquaresAP.lean`. -/
-def rootGCD4 (a b c d : ℤ) : ℕ :=
-  Nat.gcd a.natAbs (Nat.gcd b.natAbs (Nat.gcd c.natAbs d.natAbs))
+structure PairwiseCoprime2abcd (a b c d : ℤ) : Prop where
+  hab : IsCoprime a b
+  hac : IsCoprime a c
+  had : IsCoprime a d
+  hbc : IsCoprime b c
+  hbd : IsCoprime b d
+  hcd : IsCoprime c d
 
-/-- Integer oddness in the local `% 2 = 1` form rules out divisibility by `2`. -/
-theorem int_odd_mod_two_not_dvd {a : ℤ} (ha : a % 2 = 1) :
-    ¬ (2 : ℤ) ∣ a := by
-  intro h2a
-  have hmodEq : a ≡ 0 [ZMOD (2 : ℤ)] := Int.modEq_zero_iff_dvd.mpr h2a
-  have hmod0 : a % 2 = 0 := by
-    simpa [Int.ModEq] using hmodEq
-  rw [hmod0] at ha
-  norm_num at ha
+structure RawRefinedFactors (A U V U' V' : ℤ) where
+  alpha : ℤ
+  b : ℤ
+  c : ℤ
+  d : ℤ
+  halpha_pos : 0 < alpha
+  hb_pos : 0 < b
+  hc_pos : 0 < c
+  hd_pos : 0 < d
+  hU : U = alpha * b
+  hV : V = c * d
+  hU' : U' = alpha * c
+  hV' : V' = b * d
+  hA : A = alpha * b * c * d
+  hpair : PairwiseCoprime2abcd alpha b c d
 
-/-- A natural prime dividing all four roots divides `rootGCD4`. -/
-theorem prime_dvd_rootGCD4_of_dvd_all
-    {ℓ : ℕ} {p q r s : ℤ}
-    (hℓp : ℓ ∣ p.natAbs)
-    (hℓq : ℓ ∣ q.natAbs)
-    (hℓr : ℓ ∣ r.natAbs)
-    (hℓs : ℓ ∣ s.natAbs) :
-    ℓ ∣ rootGCD4 p q r s := by
-  unfold rootGCD4
-  exact Nat.dvd_gcd hℓp (Nat.dvd_gcd hℓq (Nat.dvd_gcd hℓr hℓs))
+/-- Positivity of the integer gcd cast, proved without relying on the unavailable
+`gcd_pos_of_ne_zero_left` name. -/
+theorem int_gcd_pos_of_left_pos {a b : ℤ} (ha : 0 < a) :
+    0 < (Int.gcd a b : ℤ) := by
+  have hg_ne : Int.gcd a b ≠ 0 := by
+    intro hg
+    have hdvd : Int.gcd a b ∣ a.natAbs := by
+      rw [Int.gcd_def]
+      exact Nat.gcd_dvd_left _ _
+    have ha_abs_zero : a.natAbs = 0 := by
+      rw [hg] at hdvd
+      simpa using hdvd
+    have ha_zero : a = 0 := Int.natAbs_eq_zero.mp ha_abs_zero
+    exact (ne_of_gt ha) ha_zero
+  have hg_pos_nat : 0 < Int.gcd a b := Nat.pos_of_ne_zero hg_ne
+  exact_mod_cast hg_pos_nat
 
-/-- If an odd natural prime divides `2 * Δ`, then it divides `Δ`.
+/-- Natural-number row identity: if `U*V = U'*V'` and `U'` is coprime to `V'`,
+then the `U` row splits as `gcd U U' * gcd U V'`. -/
+theorem nat_rowU_gcd_mul_gcd_of_mul_eq_mul_of_coprime
+    {U V U' V' : ℕ}
+    (hmul : U * V = U' * V')
+    (hcop : Nat.Coprime U' V') :
+    Nat.gcd U U' * Nat.gcd U V' = U := by
+  exact
+    (Nat.gcd_mul_gcd_eq_iff_dvd_mul_of_coprime
+      (x := U) (n := U') (m := V') hcop).2 ⟨V, hmul.symm⟩
 
-The input prime is natural, but divisibility is over `ℤ`, which is the convenient
-form for the AP equations.
+/-- Integer row identity, transported through `natAbs`.
+
+The proof deliberately avoids rewriting `U` in-place, because that rewrites inside
+`Int.gcd U U'` and `Int.gcd U V'`. -/
+theorem int_rowU_gcd_mul_gcd_of_two_factorizations
+    {A U V U' V' : ℤ}
+    (hUV : A = U * V)
+    (hU'V' : A = U' * V')
+    (hUpos : 0 < U)
+    (hU'V'cop : IsCoprime U' V') :
+    U = (Int.gcd U U' : ℤ) * (Int.gcd U V' : ℤ) := by
+  have hmulZ : U * V = U' * V' := hUV.symm.trans hU'V'
+  have hmulN : U.natAbs * V.natAbs = U'.natAbs * V'.natAbs := by
+    simpa [Int.natAbs_mul] using congrArg Int.natAbs hmulZ
+  have hcopN : Nat.Coprime U'.natAbs V'.natAbs :=
+    Int.isCoprime_iff_nat_coprime.mp hU'V'cop
+  have hrowN :
+      Nat.gcd U.natAbs U'.natAbs * Nat.gcd U.natAbs V'.natAbs = U.natAbs :=
+    nat_rowU_gcd_mul_gcd_of_mul_eq_mul_of_coprime hmulN hcopN
+  calc
+    U = (U.natAbs : ℤ) :=
+      (Int.natAbs_of_nonneg (le_of_lt hUpos)).symm
+    _ = ((Nat.gcd U.natAbs U'.natAbs * Nat.gcd U.natAbs V'.natAbs : ℕ) : ℤ) :=
+      congrArg (fun n : ℕ => (n : ℤ)) hrowN.symm
+    _ = (Nat.gcd U.natAbs U'.natAbs : ℤ) *
+        (Nat.gcd U.natAbs V'.natAbs : ℤ) := by
+      rw [Int.natCast_mul]
+    _ = (Int.gcd U U' : ℤ) * (Int.gcd U V' : ℤ) := by
+      simp [Int.gcd_def]
+
+/-- Raw refinement of two positive coprime factorizations.
+
+The four factors are the four gcd intersections:
+
+* `alpha = gcd U U'`
+* `b     = gcd U V'`
+* `c     = gcd V U'`
+* `d     = gcd V V'`
 -/
-theorem natPrime_dvd_of_dvd_two_mul_int_of_ne_two
-    {ℓ : ℕ} {Δ : ℤ}
-    (hℓprime : Nat.Prime ℓ)
-    (hℓne2 : ℓ ≠ 2)
-    (hℓtwoΔ : (ℓ : ℤ) ∣ 2 * Δ) :
-    (ℓ : ℤ) ∣ Δ := by
-  have hcases : (ℓ : ℤ) ∣ (2 : ℤ) ∨ (ℓ : ℤ) ∣ Δ :=
-    Int.Prime.dvd_mul' hℓprime hℓtwoΔ
-  rcases hcases with hℓtwo | hℓΔ
-  · exfalso
-    have hℓdvd2Nat : ℓ ∣ (2 : ℕ) := by
-      simpa using (Int.natCast_dvd.mp hℓtwo)
-    have hℓle2 : ℓ ≤ 2 := Nat.le_of_dvd (by norm_num) hℓdvd2Nat
-    have h2leℓ : 2 ≤ ℓ := hℓprime.two_le
-    exact hℓne2 (le_antisymm hℓle2 h2leℓ)
-  · exact hℓΔ
-
-/-- Distance-two coprimality for the first and third roots in a primitive
-four-square AP.
-
-Mathematical route: if a natural prime `ℓ` divides `p` and `r`, then it divides
-`r^2 - p^2 = 2*Δ`.  If `ℓ = 2`, this contradicts `p % 2 = 1`.  If `ℓ ≠ 2`,
-then `ℓ ∣ Δ`; the AP equations propagate divisibility to `q` and `s`, so `ℓ`
-divides `rootGCD4 p q r s = 1`, impossible.
--/
-theorem weakPrimitiveAP_distanceTwo_gcd_pr_eq_one
-    {p q r s Δ : ℤ}
-    (hpq : q^2 - p^2 = Δ)
-    (hqr : r^2 - q^2 = Δ)
-    (hrs : s^2 - r^2 = Δ)
-    (hroot : rootGCD4 p q r s = 1)
-    (hp_odd : p % 2 = 1)
-    (_hr_odd : r % 2 = 1) :
-    Int.gcd p r = 1 := by
-  by_contra hbad
-  have hbadNat : ¬ Nat.Coprime p.natAbs r.natAbs := by
-    intro hcop
-    apply hbad
-    simpa [Int.gcd_def, Nat.Coprime] using hcop
-  rcases Nat.Prime.not_coprime_iff_dvd.mp hbadNat with
-    ⟨ℓ, hℓprime, hℓpNat, hℓrNat⟩
-  have hℓp : (ℓ : ℤ) ∣ p := Int.natCast_dvd.mpr hℓpNat
-  have hℓr : (ℓ : ℤ) ∣ r := Int.natCast_dvd.mpr hℓrNat
-
-  by_cases hℓeq2 : ℓ = 2
-  · subst ℓ
-    have h2p : (2 : ℤ) ∣ p := by simpa using hℓp
-    exact int_odd_mod_two_not_dvd hp_odd h2p
-
-  have hℓ_r2_sub_p2 : (ℓ : ℤ) ∣ r^2 - p^2 := by
-    exact dvd_sub (pow_dvd_pow_of_dvd hℓr 2) (pow_dvd_pow_of_dvd hℓp 2)
-  have hrp_twoDelta : r^2 - p^2 = 2 * Δ := by
-    nlinarith
-  have hℓ_twoDelta : (ℓ : ℤ) ∣ 2 * Δ := by
-    rwa [hrp_twoDelta] at hℓ_r2_sub_p2
-  have hℓΔ : (ℓ : ℤ) ∣ Δ :=
-    natPrime_dvd_of_dvd_two_mul_int_of_ne_two hℓprime hℓeq2 hℓ_twoDelta
-
-  have hℓq : (ℓ : ℤ) ∣ q := by
-    apply Int.Prime.dvd_pow' hℓprime
-    have hq2 : q^2 = p^2 + Δ := by
-      nlinarith
-    rw [hq2]
-    exact dvd_add (pow_dvd_pow_of_dvd hℓp 2) hℓΔ
-
-  have hℓs : (ℓ : ℤ) ∣ s := by
-    apply Int.Prime.dvd_pow' hℓprime
-    have hs2 : s^2 = r^2 + Δ := by
-      nlinarith
-    rw [hs2]
-    exact dvd_add (pow_dvd_pow_of_dvd hℓr 2) hℓΔ
-
-  have hℓroot : ℓ ∣ rootGCD4 p q r s :=
-    prime_dvd_rootGCD4_of_dvd_all
-      (Int.natCast_dvd.mp hℓp)
-      (Int.natCast_dvd.mp hℓq)
-      (Int.natCast_dvd.mp hℓr)
-      (Int.natCast_dvd.mp hℓs)
-  have hℓone : ℓ ∣ (1 : ℕ) := by
-    simpa [hroot] using hℓroot
-  have hℓeq1 : ℓ = 1 := Nat.dvd_one.mp hℓone
-  exact hℓprime.ne_one hℓeq1
+theorem two_coprime_factorizations_refine_raw_pos
+    {A U V U' V' : ℤ}
+    (hUV : A = U * V)
+    (hU'V' : A = U' * V')
+    (hUpos : 0 < U) (hVpos : 0 < V)
+    (hU'pos : 0 < U') (hV'pos : 0 < V')
+    (hUVcop : IsCoprime U V)
+    (hU'V'cop : IsCoprime U' V') :
+    Nonempty (RawRefinedFactors A U V U' V') := by
+  let alpha : ℤ := (Int.gcd U U' : ℤ)
+  let b : ℤ := (Int.gcd U V' : ℤ)
+  let c : ℤ := (Int.gcd V U' : ℤ)
+  let d : ℤ := (Int.gcd V V' : ℤ)
+  have hUrow : U = alpha * b := by
+    dsimp [alpha, b]
+    exact int_rowU_gcd_mul_gcd_of_two_factorizations hUV hU'V' hUpos hU'V'cop
+  have hVU : A = V * U := by
+    rw [mul_comm]
+    exact hUV
+  have hVrow : V = c * d := by
+    dsimp [c, d]
+    exact int_rowU_gcd_mul_gcd_of_two_factorizations hVU hU'V' hVpos hU'V'cop
+  have hU'row0 : U' = (Int.gcd U' U : ℤ) * (Int.gcd U' V : ℤ) :=
+    int_rowU_gcd_mul_gcd_of_two_factorizations hU'V' hUV hU'pos hUVcop
+  have hU'row : U' = alpha * c := by
+    dsimp [alpha, c]
+    simpa [Int.gcd_def, Nat.gcd_comm] using hU'row0
+  have hV'U' : A = V' * U' := by
+    rw [mul_comm]
+    exact hU'V'
+  have hV'row0 : V' = (Int.gcd V' U : ℤ) * (Int.gcd V' V : ℤ) :=
+    int_rowU_gcd_mul_gcd_of_two_factorizations hV'U' hUV hV'pos hUVcop
+  have hV'row : V' = b * d := by
+    dsimp [b, d]
+    simpa [Int.gcd_def, Nat.gcd_comm] using hV'row0
+  have halpha_pos : 0 < alpha := by
+    dsimp [alpha]
+    exact int_gcd_pos_of_left_pos hUpos
+  have hb_pos : 0 < b := by
+    dsimp [b]
+    exact int_gcd_pos_of_left_pos hUpos
+  have hc_pos : 0 < c := by
+    dsimp [c]
+    exact int_gcd_pos_of_left_pos hVpos
+  have hd_pos : 0 < d := by
+    dsimp [d]
+    exact int_gcd_pos_of_left_pos hVpos
+  have hpair : PairwiseCoprime2abcd alpha b c d := by
+    refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+    · dsimp [alpha, b]
+      exact IsCoprime.mono (Int.gcd_dvd_right U U') (Int.gcd_dvd_right U V') hU'V'cop
+    · dsimp [alpha, c]
+      exact IsCoprime.mono (Int.gcd_dvd_left U U') (Int.gcd_dvd_left V U') hUVcop
+    · dsimp [alpha, d]
+      exact IsCoprime.mono (Int.gcd_dvd_right U U') (Int.gcd_dvd_right V V') hU'V'cop
+    · dsimp [b, c]
+      exact IsCoprime.mono (Int.gcd_dvd_left U V') (Int.gcd_dvd_left V U') hUVcop
+    · dsimp [b, d]
+      exact IsCoprime.mono (Int.gcd_dvd_left U V') (Int.gcd_dvd_left V V') hUVcop
+    · dsimp [c, d]
+      exact IsCoprime.mono (Int.gcd_dvd_right V U') (Int.gcd_dvd_right V V') hU'V'cop
+  refine ⟨{
+    alpha := alpha
+    b := b
+    c := c
+    d := d
+    halpha_pos := halpha_pos
+    hb_pos := hb_pos
+    hc_pos := hc_pos
+    hd_pos := hd_pos
+    hU := hUrow
+    hV := hVrow
+    hU' := hU'row
+    hV' := hV'row
+    hA := ?_
+    hpair := hpair
+  }⟩
+  calc
+    A = U * V := hUV
+    _ = (alpha * b) * (c * d) := by rw [hUrow, hVrow]
+    _ = alpha * b * c * d := by ring
 ```
 
-For the `q,s` distance-two pair, either duplicate the theorem with the roles shifted, or call the same theorem on the reversed AP after proving the corresponding permutation of `rootGCD4`.  The proof above intentionally only needs the oddness of the first root in the pair; `_hr_odd` is kept in the signature so it matches the `WeakPrimitiveAPPairwise` data flow.
+If anything still fails locally, isolate the first three theorems (`int_gcd_pos_of_left_pos`, `nat_rowU_gcd_mul_gcd_of_mul_eq_mul_of_coprime`, and `int_rowU_gcd_mul_gcd_of_two_factorizations`) first.  They are independent of the final raw structure package and directly fix the row-helper rewrite bug.
