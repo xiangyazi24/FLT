@@ -1,658 +1,540 @@
-# Q2417 (dm-codex1): non-circular E24 classification from an E1 full-2-cover certificate
+# Q2418-RETRY EulerAux descent step
 
-Goal in the local file:
+This drop is only about Euler's descent for the auxiliary condition
 
 ```lean
-def E24 (U V : ℚ) : Prop :=
-  V^2 = U^3 - U^2 - 4*U + 4
-
-def E24XCoordinateClassification : Prop :=
-  ∀ {U V : ℚ}, E24 U V → U = -2 ∨ U = 1 ∨ U = 2 ∨ U = 0 ∨ U = 4
+def EulerAux (A D : ℤ) : Prop :=
+  A ≠ 0 ∧ D ≠ 0 ∧ Odd D ∧ Nat.Coprime A.natAbs D.natAbs ∧
+  ∃ S R : ℤ, S^2 = 4*A^2 + D^2 ∧ R^2 = 16*A^2 + D^2
 ```
 
-Shortest honest route:
+Goal:
 
-```text
-independent arithmetic inputs
-  (FourRatSquaresAPConst + degenerate-cover obstruction + finite S23 local obstructions)
-        |
-        v
-E1 full-2-cover certificate for Y≠0
-        |
-        v
-E1 X-coordinate classification: X ∈ {-3,0,1,-1,3}
-        |
-        v  shift U = X+1
-E24 U-coordinate classification: U ∈ {-2,1,2,0,4}
+```lean
+theorem EulerAux_descent_step {A D : ℤ} (hAD : EulerAux A D) :
+  ∃ a d : ℤ, EulerAux a d ∧ (a*d).natAbs < (A*D).natAbs
 ```
 
-Do **not** use the current local `doubleLeg_of_ratQuarticEisenstein` if its `RatQuarticEisensteinXClassification` is produced from `E24XCoordinateClassification`.  That is circular.
+The classical descent is the simultaneous Pythagorean-parameter descent for two primitive right triangles with the same odd leg `D` and even legs `2A` and `4A`.
 
 ---
 
-## 1. Exact shift/birational relation between E24 and E1
+## 1. Pythagorean parametrizations and sign/parity normalization
 
-There is no nontrivial birational map needed here.  It is the translation
-
-```text
-X = U - 1,
-Y = V,
-```
-
-with inverse
+From `EulerAux A D` choose `S R` with
 
 ```text
-U = X + 1,
-V = Y.
+S^2 = (2A)^2 + D^2,
+R^2 = (4A)^2 + D^2.
 ```
 
-Indeed
+Because `Odd D` and `Nat.Coprime A.natAbs D.natAbs`, both triples are primitive:
 
 ```text
-X(X-1)(X+3) at X=U-1
-  = (U-1)(U-2)(U+2)
-  = U^3 - U^2 - 4U + 4.
+gcd(2A,D)=1,
+gcd(4A,D)=1.
 ```
 
-So define:
+Let `E` be the unique choice among `{D,-D}` satisfying
+
+```text
+E ≡ -1 (mod 4).        -- equivalently E % 4 = 3 in Lean's Int.mod convention
+```
+
+This uniqueness uses `Odd D`: exactly one of `D` and `-D` is `3 mod 4`.
+
+Normalize the first primitive triple by taking the even parameter first:
+
+```text
+A = P*Q,
+E = P^2 - Q^2,
+S^2 = (P^2 + Q^2)^2,
+Even P,
+Odd Q,
+gcd(P,Q)=1.
+```
+
+Here `P` is even and `Q` is odd, so `P^2 - Q^2 ≡ -1 (mod 4)`, matching `E`.
+
+Normalize the second primitive triple as the `4uv` variant:
+
+```text
+A = U*V,
+E = 4*U^2 - V^2,
+R^2 = (4*U^2 + V^2)^2,
+Odd V,
+gcd(2U,V)=1.
+```
+
+Since the first parametrization already implies `A=P*Q` with `P` even and `Q` odd, `A` is even.  In the second parametrization `V` is odd and `A=U*V`, hence `U` is even.
+
+Lean-facing combined parametrization theorem:
 
 ```lean
 import Mathlib.Tactic
+import Mathlib.Data.Int.Parity
 
 namespace MazurProof.RationalPointsN12
 
-/-- Shifted E24 curve. -/
-def E1 (X Y : ℚ) : Prop :=
-  Y^2 = X * (X - 1) * (X + 3)
-
-/-- Existing curve. -/
-def E24 (U V : ℚ) : Prop :=
-  V^2 = U^3 - U^2 - 4*U + 4
-
-/-- E24 shifts to E1 by `X=U-1`, `Y=V`. -/
-theorem E24_to_E1_shift {U V : ℚ} (h : E24 U V) :
-    E1 (U - 1) V := by
-  unfold E24 E1 at h ⊢
-  nlinarith [h]
-
-/-- Inverse shift: E1 shifts to E24 by `U=X+1`, `V=Y`. -/
-theorem E1_to_E24_shift {X Y : ℚ} (h : E1 X Y) :
-    E24 (X + 1) Y := by
-  unfold E24 E1 at h ⊢
-  nlinarith [h]
-
-end MazurProof.RationalPointsN12
-```
-
-If `nlinarith` does not expand the cubic in your local Mathlib, replace each proof by:
-
-```lean
-  unfold E24 E1 at h ⊢
-  ring_nf at h ⊢
-  exact h
-```
-
-or, for the forward direction, `ring_nf at h ⊢` followed by `simpa using h`.
-
----
-
-## 2. E1 theorem sufficient for E24
-
-The E1 X-coordinate theorem is sufficient:
-
-```lean
-namespace MazurProof.RationalPointsN12
-
-/-- X-coordinate classification on the shifted curve. -/
-def E1XCoordinateClassification : Prop :=
-  ∀ {X Y : ℚ}, E1 X Y → X = -3 ∨ X = 0 ∨ X = 1 ∨ X = -1 ∨ X = 3
-
-/-- Optional stronger affine point list.  This is more than E24 needs. -/
-def E1AffinePointList : Prop :=
-  ∀ {X Y : ℚ}, E1 X Y →
-    (X = -3 ∧ Y = 0) ∨
-    (X = 0 ∧ Y = 0) ∨
-    (X = 1 ∧ Y = 0) ∨
-    (X = -1 ∧ (Y = 2 ∨ Y = -2)) ∨
-    (X = 3 ∧ (Y = 6 ∨ Y = -6))
-
-/-- Strong point list implies the X-coordinate list. -/
-theorem E1XCoordinateClassification_of_affinePointList
-    (hList : E1AffinePointList) :
-    E1XCoordinateClassification := by
-  intro X Y hE1
-  rcases hList hE1 with
-    ⟨hX, hY⟩ | ⟨hX, hY⟩ | ⟨hX, hY⟩ | ⟨hX, hY⟩ | ⟨hX, hY⟩
-  · exact Or.inl hX
-  · exact Or.inr (Or.inl hX)
-  · exact Or.inr (Or.inr (Or.inl hX))
-  · exact Or.inr (Or.inr (Or.inr (Or.inl hX)))
-  · exact Or.inr (Or.inr (Or.inr (Or.inr hX)))
-
-/-- E1 X-coordinate classification transfers to the existing E24 U-coordinate list. -/
-theorem E24XCoordinateClassification_of_E1X
-    (hE1X : E1XCoordinateClassification) :
-    E24XCoordinateClassification := by
-  intro U V hE24
-  have hE1 : E1 (U - 1) V := E24_to_E1_shift hE24
-  rcases hE1X hE1 with hXm3 | hX0 | hX1 | hXm1 | hX3
-  · left
-    nlinarith [hXm3]
-  · right; left
-    nlinarith [hX0]
-  · right; right; left
-    nlinarith [hX1]
-  · right; right; right; left
-    nlinarith [hXm1]
-  · right; right; right; right
-    nlinarith [hX3]
-
-end MazurProof.RationalPointsN12
-```
-
-Coordinate correspondence:
-
-```text
-E1 X=-3  <-> E24 U=-2
-E1 X= 0  <-> E24 U= 1
-E1 X= 1  <-> E24 U= 2
-E1 X=-1  <-> E24 U= 0
-E1 X= 3  <-> E24 U= 4
-```
-
-Thus the E1 X-coordinate theorem is the exact sufficient target.  You do not need the Y-coordinate list to prove `E24XCoordinateClassification`.
-
----
-
-## 3. Full-cover certificate and squareclass triples
-
-### 3.1 Cover equations
-
-Use the existing cover equations:
-
-```lean
-namespace MazurProof.RationalPointsN12
-
-def CoverQ (d0 d1 d3 : ℤ) (A B C T : ℚ) : Prop :=
-  (d0 : ℚ)*A^2 - (d1 : ℚ)*B^2 = T^2 ∧
-  (d3 : ℚ)*C^2 - (d0 : ℚ)*A^2 = (3:ℚ)*T^2
-
-end MazurProof.RationalPointsN12
-```
-
-Interpretation for an E1 point with `Y ≠ 0`:
-
-```text
-X     = d0 * (A/T)^2,
-X - 1 = d1 * (B/T)^2,
-X + 3 = d3 * (C/T)^2.
-```
-
-The two cover equations are just the cleared identities
-
-```text
-X - (X-1) = 1,
-(X+3) - X = 3.
-```
-
-The product condition comes from
-
-```text
-Y^2 = X(X-1)(X+3),
-```
-
-so `d0*d1*d3` is a squareclass one.  Valuation parity away from `{2,3}` gives representatives in
-
-```text
-S23 = {±1, ±2, ±3, ±6}.
-```
-
-### 3.2 Squareclass extraction interface
-
-This is the non-smuggling extraction theorem.  It says only that a nonzero E1 point gives a cover datum; it does not classify `X`.
-
-```lean
-namespace MazurProof.RationalPointsN12
-
-def S23Rep (d : ℤ) : Prop :=
-  d = 1 ∨ d = 2 ∨ d = 3 ∨ d = 6 ∨ d = -1 ∨ d = -2 ∨ d = -3 ∨ d = -6
-
-/-- Product-one in `ℚ*/ℚ*^2`, encoded as the finite table over S23.
-For implementation, make this a decidable finite predicate rather than an existential square. -/
-def S23ProductOne (d0 d1 d3 : ℤ) : Prop :=
-  -- Placeholder definition shape.  Recommended implementation: finite disjunction over the 64 table entries.
-  S23Rep d0 ∧ S23Rep d1 ∧ S23Rep d3 ∧
-  ((d0 = 1 ∧ d1 = 1 ∧ d3 = 1) ∨ True)
-
-/-- Full-cover extraction for `Y≠0` on E1.
-This is valuation/denominator-clearing plumbing, not a classification theorem. -/
-def E1FullCoverExtraction : Prop :=
-  ∀ {X Y : ℚ},
-    E1 X Y → Y ≠ 0 →
-      ∃ d0 d1 d3 : ℤ,
-      ∃ A B C T : ℚ,
-        S23Rep d0 ∧ S23Rep d1 ∧ S23Rep d3 ∧
-        S23ProductOne d0 d1 d3 ∧
-        A ≠ 0 ∧ B ≠ 0 ∧ C ≠ 0 ∧ T ≠ 0 ∧
-        CoverQ d0 d1 d3 A B C T ∧
-        X = (d0 : ℚ) * (A / T)^2
-
-end MazurProof.RationalPointsN12
-```
-
-Important implementation note: do **not** literally keep the placeholder `S23ProductOne` above.  Replace it by either:
-
-* a finite 64-entry disjunction/table; or
-* a Boolean/decidable squareclass-vector predicate using sign, parity at 2, parity at 3.
-
-The extraction theorem is the place to prove valuation parity and denominator clearing.
-
-### 3.3 Surviving residual triples
-
-After sign and finite local congruence obstructions, only four product-one S23 triples should remain:
-
-```text
-(1,1,1)       degenerate residual: only zero coordinate cover solutions
-(-3,-1,3)     degenerate residual: only zero coordinate cover solutions
-(-1,-2,2)     AP residual, forces X=-1
-(3,2,6)       AP residual, forces X=3
-```
-
-All other 60 product-one triples are obstructed:
-
-* 32 by real sign directly: product-one sign patterns `+--` and `-+-`;
-* 28 by finite primitive projective congruence, the same finite table from Q2378/Q2408.
-
-The same-sign finite-congruence obstruction lists are:
-
-```text
-+++ nonresidual finite-congruence triples:
-(1,2,2), (1,3,3), (1,6,6),
-(2,1,2), (2,2,1), (2,3,6), (2,6,3),
-(3,1,3), (3,3,1), (3,6,2),
-(6,1,6), (6,2,3), (6,3,2), (6,6,1)
-
---+ nonresidual finite-congruence triples:
-(-1,-1,1), (-1,-3,3), (-1,-6,6),
-(-2,-1,2), (-2,-2,1), (-2,-3,6), (-2,-6,3),
-(-3,-2,6), (-3,-3,1), (-3,-6,2),
-(-6,-1,6), (-6,-2,3), (-6,-3,2), (-6,-6,1)
-```
-
-The two AP residuals are handled by the Q2403 wrappers using the independent theorem
-
-```lean
-def FourRatSquaresAPConst : Prop :=
-  ∀ {w x y z : ℚ},
-    x^2 - w^2 = y^2 - x^2 →
-    y^2 - x^2 = z^2 - y^2 →
-      w^2 = x^2 ∧ x^2 = y^2 ∧ y^2 = z^2
-```
-
-The two degenerate residuals need an **independent** obstruction, not the current downstream `doubleLeg_of_ratQuarticEisenstein`.
-
----
-
-## 4. Minimal Lean interfaces for the arithmetic certificate
-
-### 4.1 Local/non-AP obstruction interface
-
-This is the clean way to avoid smuggling the final E1 theorem while hiding the finite table implementation behind one theorem.
-
-```lean
-namespace MazurProof.RationalPointsN12
-
-def APResidualTriple (d0 d1 d3 : ℤ) : Prop :=
-  (d0 = 3 ∧ d1 = 2 ∧ d3 = 6) ∨
-  (d0 = -1 ∧ d1 = -2 ∧ d3 = 2)
-
-/-- Non-AP product-one S23 covers have no nonzero rational solution.
-This theorem is assembled from:
-1. 32 sign obstructions,
-2. 28 finite primitive-projective congruence obstructions,
-3. two degenerate residual obstructions `(1,1,1)` and `(-3,-1,3)`.
-It is not the final E1 theorem: it speaks only about cover equations and nonzero cover variables. -/
-def S23NonAPCoverNoNonzero : Prop :=
-  ∀ {d0 d1 d3 : ℤ} {A B C T : ℚ},
-    S23Rep d0 → S23Rep d1 → S23Rep d3 →
-    S23ProductOne d0 d1 d3 →
-    ¬ APResidualTriple d0 d1 d3 →
-    A ≠ 0 → B ≠ 0 → C ≠ 0 → T ≠ 0 →
-    CoverQ d0 d1 d3 A B C T → False
-
-end MazurProof.RationalPointsN12
-```
-
-This is a compact producer theorem for the full-cover assembly.  Internally prove it from the finite table; externally it is a cover-equation theorem, not an E1 coordinate theorem.
-
-### 4.2 Degenerate residual obstruction without circularity
-
-The two degenerate triples can be killed by `DoubleLegRightTrianglesDegenerate`, but the producer of that theorem must be independent.
-
-```lean
-namespace MazurProof.RationalPointsN12
-
-def DoubleLegRightTrianglesDegenerate : Prop :=
-  ∀ {x y h k : ℚ},
-    h^2 = x^2 + y^2 →
-    k^2 = (2*x)^2 + y^2 →
-      x = 0 ∨ y = 0
-
-/-- `(1,1,1)` has no cover solution with all variables nonzero. -/
-theorem coverQ_1_1_1_no_nonzero_of_doubleLeg
-    (hDL : DoubleLegRightTrianglesDegenerate)
-    {A B C T : ℚ}
-    (hA : A ≠ 0) (hB : B ≠ 0) (hC : C ≠ 0) (hT : T ≠ 0)
-    (h : CoverQ 1 1 1 A B C T) : False := by
-  unfold CoverQ at h
-  rcases h with ⟨h1, h2⟩
-  norm_num at h1 h2
-  have hpy1 : A^2 = T^2 + B^2 := by nlinarith [h1]
-  have hpy2 : C^2 = (2*T)^2 + B^2 := by nlinarith [h1, h2]
-  rcases hDL hpy1 hpy2 with hT0 | hB0
-  · exact hT hT0
-  · exact hB hB0
-
-/-- `(-3,-1,3)` has no cover solution with all variables nonzero. -/
-theorem coverQ_neg3_neg1_3_no_nonzero_of_doubleLeg
-    (hDL : DoubleLegRightTrianglesDegenerate)
-    {A B C T : ℚ}
-    (hA : A ≠ 0) (hB : B ≠ 0) (hC : C ≠ 0) (hT : T ≠ 0)
-    (h : CoverQ (-3) (-1) 3 A B C T) : False := by
-  unfold CoverQ at h
-  rcases h with ⟨h1, h2⟩
-  norm_num at h1 h2
-  have hpy1 : T^2 = A^2 + C^2 := by nlinarith [h2]
-  have hpy2 : B^2 = (2*A)^2 + C^2 := by nlinarith [h1, h2]
-  rcases hDL hpy1 hpy2 with hA0 | hC0
-  · exact hA hA0
-  · exact hC hC0
-
-end MazurProof.RationalPointsN12
-```
-
-Allowed independent producers for `DoubleLegRightTrianglesDegenerate`:
-
-* a direct Fermat/Pythagorean descent proof;
-* an external Eisenstein quartic theorem proved without E24/E1;
-* a theorem derived from the same independent descent package as Q2407.
-
-Disallowed producer in this route:
-
-```text
-E24XCoordinateClassification
-  -> C12/E24 map
-  -> RatQuarticEisensteinXClassification
-  -> doubleLeg_of_ratQuarticEisenstein
-  -> degenerate cover obstruction
-  -> E1 point list
-  -> E24XCoordinateClassification
-```
-
-That is circular.
-
-### 4.3 AP residual wrappers
-
-Use the Q2403 wrappers as plumbing:
-
-```lean
-namespace MazurProof.RationalPointsN12
-
--- Already planned/proved in Q2403:
-theorem coverQ_3_2_6_forces_X_eq_three
-    (hAP : FourRatSquaresAPConst)
-    {A B C T X : ℚ}
-    (hT : T ≠ 0)
-    (hX : X = (3:ℚ) * (A / T)^2)
-    (hcover : CoverQ 3 2 6 A B C T) :
-    X = 3 := by
-  -- existing Q2403 code
-  sorry
-
--- Already planned/proved in Q2403:
-theorem coverQ_neg1_neg2_2_forces_X_eq_neg_one
-    (hAP : FourRatSquaresAPConst)
-    {A B C T X : ℚ}
-    (hT : T ≠ 0)
-    (hX : X = (-1:ℚ) * (A / T)^2)
-    (hcover : CoverQ (-1) (-2) 2 A B C T) :
-    X = -1 := by
-  -- existing Q2403 code
+/-- Euler auxiliary condition. -/
+def EulerAux (A D : ℤ) : Prop :=
+  A ≠ 0 ∧ D ≠ 0 ∧ Odd D ∧ Nat.Coprime A.natAbs D.natAbs ∧
+  ∃ S R : ℤ, S^2 = 4*A^2 + D^2 ∧ R^2 = 16*A^2 + D^2
+
+/-- Sign-normalized simultaneous parametrization of the two primitive triples
+`S^2=(2A)^2+D^2` and `R^2=(4A)^2+D^2`.
+
+This packages the ordinary primitive Pythagorean parametrization twice and aligns
+both odd legs to the unique `E ∈ {D,-D}` with `E ≡ -1 mod 4`. -/
+theorem EulerAux_param
+    {A D : ℤ}
+    (hAD : EulerAux A D) :
+    ∃ E P Q U V : ℤ,
+      (E = D ∨ E = -D) ∧
+      Even P ∧ Odd Q ∧ Even U ∧ Odd V ∧
+      Nat.Coprime P.natAbs Q.natAbs ∧
+      Nat.Coprime (2*U).natAbs V.natAbs ∧
+      A = P*Q ∧
+      A = U*V ∧
+      E = P^2 - Q^2 ∧
+      E = 4*U^2 - V^2 := by
+  -- HARD-ish but standard: call primitive Pythagorean parametrization twice.
+  -- First triple: even leg `2A`, odd leg `D`, parameters `P,Q` with P even.
+  -- Second triple: even leg `4A`, odd leg `D`, parameters `2U,V` with V odd.
+  -- Align signs by the mod-4 normalization of `E`.
   sorry
 
 end MazurProof.RationalPointsN12
 ```
 
-Those wrappers consume only `FourRatSquaresAPConst`; they do not depend on E24 or the quartic classifier.
+Implementation detail: if Mathlib's Pythagorean API is Nat-oriented, prove a local Int wrapper once by applying it to `natAbs (2*A)`, `D.natAbs`, `S.natAbs`, then reintroduce signs by changing signs of `P`/`U`.
 
 ---
 
-## 5. Full-cover assembly to E1 X-coordinate classification
+## 2. Precise construction of the smaller `(a,d)`
 
-Split E1 into `Y=0` and `Y≠0`.
+We now have two coprime factorizations of the same integer:
 
-### 5.1 Torsion branch `Y=0`
+```text
+A = P*Q = U*V,
+Even P, Even U,
+Odd Q, Odd V,
+gcd(P,Q)=1,
+gcd(U,V)=1.
+```
+
+Refine the two factorizations into a `2×2` grid.  There exist integers `a b c d` such that
+
+```text
+P = 2*a*b,
+Q = c*d,
+U = 2*a*c,
+V = b*d,
+A = 2*a*b*c*d,
+```
+
+and `2a`, `b`, `c`, `d` are pairwise coprime.  In particular:
+
+```text
+a ≠ 0,
+b ≠ 0,
+c ≠ 0,
+d ≠ 0,
+Odd d,
+gcd(a,d)=1.
+```
+
+This `a,d` is the smaller Euler auxiliary pair.
+
+Why the grid refinement is true:
+
+```text
+g := gcd(P,U)              -- even
+P = g*b, U = g*c, gcd(b,c)=1
+P*Q = U*V  =>  b*Q = c*V
+so c | Q and b | V
+Q = c*d, V = b*d
+g is even, write g = 2*a.
+```
+
+All coprimality facts come from `gcd(P,Q)=1` and `gcd(U,V)=1`.
+
+Lean statements:
 
 ```lean
 namespace MazurProof.RationalPointsN12
 
-/-- The `Y=0` branch on E1 gives the three roots. -/
-theorem E1_X_of_Y_eq_zero {X : ℚ}
-    (h : E1 X 0) :
-    X = -3 ∨ X = 0 ∨ X = 1 := by
-  unfold E1 at h
-  norm_num at h
-  have hprod : X * (X - 1) * (X + 3) = 0 := by nlinarith [h]
-  have hleft : X * (X - 1) = 0 ∨ X + 3 = 0 := by
-    exact mul_eq_zero.mp hprod
-  rcases hleft with h01 | hm3
-  · have h0or1 : X = 0 ∨ X - 1 = 0 := mul_eq_zero.mp h01
-    rcases h0or1 with h0 | h1
-    · exact Or.inr (Or.inl h0)
-    · right; right; nlinarith [h1]
-  · left; nlinarith [hm3]
+/-- Pairwise coprime package for the four factors `2a,b,c,d`.
+You can replace this by a structure if preferred. -/
+def PairwiseCoprime2abcd (a b c d : ℤ) : Prop :=
+  Nat.Coprime (2*a).natAbs b.natAbs ∧
+  Nat.Coprime (2*a).natAbs c.natAbs ∧
+  Nat.Coprime (2*a).natAbs d.natAbs ∧
+  Nat.Coprime b.natAbs c.natAbs ∧
+  Nat.Coprime b.natAbs d.natAbs ∧
+  Nat.Coprime c.natAbs d.natAbs
+
+/-- HARD LEMMA 1: refine two coprime factorizations of `A` into a square grid.
+This is the main gcd bookkeeping lemma. -/
+theorem two_coprime_factorizations_refine_even
+    {A P Q U V : ℤ}
+    (hPQ : A = P*Q)
+    (hUV : A = U*V)
+    (hP_even : Even P)
+    (hU_even : Even U)
+    (hQ_odd : Odd Q)
+    (hV_odd : Odd V)
+    (hcopPQ : Nat.Coprime P.natAbs Q.natAbs)
+    (hcopUV : Nat.Coprime U.natAbs V.natAbs)
+    (hA : A ≠ 0) :
+    ∃ a b c d : ℤ,
+      P = 2*a*b ∧
+      Q = c*d ∧
+      U = 2*a*c ∧
+      V = b*d ∧
+      A = 2*a*b*c*d ∧
+      a ≠ 0 ∧ b ≠ 0 ∧ c ≠ 0 ∧ d ≠ 0 ∧
+      Odd d ∧
+      PairwiseCoprime2abcd a b c d := by
+  -- Gcd-splitting proof.
+  -- Let g = gcd(P,U) with sign chosen so P=g*b and U=g*c.
+  -- Since P,U are even and Q,V odd, g is even; write g=2a.
+  -- From b*Q=c*V and gcd(b,c)=1, write Q=c*d and V=b*d.
+  sorry
 
 end MazurProof.RationalPointsN12
 ```
 
-### 5.2 Nonzero branch from full-cover certificate
+This factor-refinement lemma is one of the two hardest Lean lemmas in the descent.
+
+---
+
+## 3. Key algebra identity: the new two squares
+
+Substitute the grid refinement into the aligned odd-leg equations:
+
+```text
+E = P^2 - Q^2 = (2ab)^2 - (cd)^2
+  = 4*a^2*b^2 - c^2*d^2,
+
+E = 4*U^2 - V^2 = 4*(2ac)^2 - (bd)^2
+  = 16*a^2*c^2 - b^2*d^2.
+```
+
+Equating these gives
+
+```text
+4*a^2*b^2 - c^2*d^2 = 16*a^2*c^2 - b^2*d^2.
+```
+
+Rearrange:
+
+```text
+b^2 * (4*a^2 + d^2) = c^2 * (16*a^2 + d^2).       (★)
+```
+
+Set
+
+```text
+M := 4*a^2 + d^2,
+N := 16*a^2 + d^2.
+```
+
+From pairwise coprimality of `2a,b,c,d`:
+
+```text
+gcd(b,c)=1,
+gcd(M,N)=1.
+```
+
+The gcd proof for `M,N` is small but important:
+
+```text
+common divisor of M,N divides N-M = 12*a^2,
+and also divides 4*M - N = 3*d^2.
+Since gcd(a,d)=1, it divides 12 and 3 only.
+Both M,N are odd because d is odd, so no factor 2.
+Modulo 3, if 3 divides both then a^2+d^2 ≡ 0 mod 3,
+which forces 3|a and 3|d, impossible from gcd(a,d)=1.
+Therefore gcd(M,N)=1.
+```
+
+From `(★)`, `gcd(b,c)=1`, and `gcd(M,N)=1`, the only possibility is
+
+```text
+M = c^2,
+N = b^2.
+```
+
+Thus
+
+```text
+c^2 = 4*a^2 + d^2,
+b^2 = 16*a^2 + d^2.
+```
+
+So `(a,d)` satisfies `EulerAux`, with witnesses
+
+```text
+S' = c,
+R' = b.
+```
+
+Lean statements:
 
 ```lean
 namespace MazurProof.RationalPointsN12
 
-/-- Nonzero E1 branch: full cover plus arithmetic certificate gives `X=-1` or `X=3`. -/
-theorem E1_nonzeroY_X_of_fullCoverCertificate
-    (hExtract : E1FullCoverExtraction)
-    (hNoNonAP : S23NonAPCoverNoNonzero)
-    (hAP : FourRatSquaresAPConst)
-    {X Y : ℚ}
-    (hE1 : E1 X Y)
-    (hY : Y ≠ 0) :
-    X = -1 ∨ X = 3 := by
-  rcases hExtract hE1 hY with
-    ⟨d0, d1, d3, A, B, C, T,
-      hd0, hd1, hd3, hprod,
-      hA, hB, hC, hT, hcover, hX⟩
-  by_cases hres : APResidualTriple d0 d1 d3
-  · unfold APResidualTriple at hres
-    rcases hres with h326 | hn112
-    · rcases h326 with ⟨rfl, rfl, rfl⟩
-      right
-      exact coverQ_3_2_6_forces_X_eq_three hAP hT hX hcover
-    · rcases hn112 with ⟨rfl, rfl, rfl⟩
-      left
-      exact coverQ_neg1_neg2_2_forces_X_eq_neg_one hAP hT hX hcover
-  · exfalso
-    exact hNoNonAP hd0 hd1 hd3 hprod hres hA hB hC hT hcover
+/-- The rearrangement after substituting the factor grid. -/
+theorem EulerAux_key_identity
+    {a b c d E : ℤ}
+    (hE1 : E = 4*a^2*b^2 - c^2*d^2)
+    (hE2 : E = 16*a^2*c^2 - b^2*d^2) :
+    b^2 * (4*a^2 + d^2) = c^2 * (16*a^2 + d^2) := by
+  nlinarith [hE1, hE2]
 
-/-- E1 X-coordinate classification from the full-cover arithmetic certificate. -/
-theorem E1XCoordinateClassification_of_fullCoverCertificate
-    (hExtract : E1FullCoverExtraction)
-    (hNoNonAP : S23NonAPCoverNoNonzero)
-    (hAP : FourRatSquaresAPConst) :
-    E1XCoordinateClassification := by
-  intro X Y hE1
-  by_cases hY : Y = 0
-  · have hroot : X = -3 ∨ X = 0 ∨ X = 1 := by
-      simpa [hY] using E1_X_of_Y_eq_zero (X := X) (by simpa [hY] using hE1)
-    rcases hroot with hm3 | h0 | h1
-    · exact Or.inl hm3
-    · exact Or.inr (Or.inl h0)
-    · exact Or.inr (Or.inr (Or.inl h1))
-  · have hnon : X = -1 ∨ X = 3 :=
-      E1_nonzeroY_X_of_fullCoverCertificate hExtract hNoNonAP hAP hE1 hY
-    rcases hnon with hm1 | h3
-    · exact Or.inr (Or.inr (Or.inr (Or.inl hm1)))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr h3)))
+/-- HARD LEMMA 2a: the two new factors are coprime. -/
+theorem coprime_new_factors
+    {a d : ℤ}
+    (had : Nat.Coprime a.natAbs d.natAbs)
+    (hd_odd : Odd d) :
+    Nat.Coprime (4*a^2 + d^2).natAbs (16*a^2 + d^2).natAbs := by
+  -- Show a common prime divisor divides 12*a^2 and 3*d^2.
+  -- Exclude 2 by oddness of both factors.
+  -- Exclude 3 using square residues mod 3 and gcd(a,d)=1.
+  sorry
 
-/-- Final replacement producer for the old residual `E24XCoordinateClassification`. -/
-theorem E24XCoordinateClassification_of_E1FullCoverCertificate
-    (hExtract : E1FullCoverExtraction)
-    (hNoNonAP : S23NonAPCoverNoNonzero)
-    (hAP : FourRatSquaresAPConst) :
-    E24XCoordinateClassification := by
-  exact E24XCoordinateClassification_of_E1X
-    (E1XCoordinateClassification_of_fullCoverCertificate hExtract hNoNonAP hAP)
+/-- HARD LEMMA 2b: if `b²*M = c²*N`, with the cross-coprimality conditions,
+then `M=c²` and `N=b²`.  This is best proved over Nat after positivity. -/
+theorem square_factor_balance
+    {b c M N : ℤ}
+    (hb : b ≠ 0) (hc : c ≠ 0)
+    (hMpos : 0 < M) (hNpos : 0 < N)
+    (hbc : Nat.Coprime b.natAbs c.natAbs)
+    (hMN : Nat.Coprime M.natAbs N.natAbs)
+    (h : b^2 * M = c^2 * N) :
+    M = c^2 ∧ N = b^2 := by
+  -- Convert to Nat using positivity.
+  -- From h and gcd(b,c)=1, get c^2 | M and b^2 | N.
+  -- Write M=c^2*q and N=b^2*q.
+  -- Then q divides gcd(M,N), hence q=1.
+  sorry
+
+/-- Algebraic core: after the grid refinement, `(a,d)` has the required two
+square witnesses. -/
+theorem EulerAux_new_squares_from_grid
+    {a b c d E : ℤ}
+    (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hd : d ≠ 0)
+    (hd_odd : Odd d)
+    (hpair : PairwiseCoprime2abcd a b c d)
+    (hE1 : E = 4*a^2*b^2 - c^2*d^2)
+    (hE2 : E = 16*a^2*c^2 - b^2*d^2) :
+    c^2 = 4*a^2 + d^2 ∧ b^2 = 16*a^2 + d^2 := by
+  have hkey : b^2 * (4*a^2 + d^2) = c^2 * (16*a^2 + d^2) :=
+    EulerAux_key_identity hE1 hE2
+  have had : Nat.Coprime a.natAbs d.natAbs := by
+    -- from `Nat.Coprime (2*a).natAbs d.natAbs`
+    rcases hpair with ⟨h2ab, h2ac, h2ad, hbc, hbd, hcd⟩
+    -- use coprime of a with d as a factor of 2*a
+    sorry
+  have hbc : Nat.Coprime b.natAbs c.natAbs := by
+    exact hpair.2.2.2.1
+  have hMN : Nat.Coprime (4*a^2 + d^2).natAbs (16*a^2 + d^2).natAbs :=
+    coprime_new_factors had hd_odd
+  have hMpos : 0 < 4*a^2 + d^2 := by nlinarith [sq_nonneg a, sq_nonneg d, hd]
+  have hNpos : 0 < 16*a^2 + d^2 := by nlinarith [sq_nonneg a, sq_nonneg d, hd]
+  have hbal := square_factor_balance hb hc hMpos hNpos hbc hMN hkey
+  exact ⟨hbal.1.symm, hbal.2.symm⟩
 
 end MazurProof.RationalPointsN12
 ```
 
-The only arithmetic assumptions exposed to the final E24 wrapper are:
+The two hardest local arithmetic lemmas are:
 
 ```text
-hExtract : E1FullCoverExtraction
-hNoNonAP : S23NonAPCoverNoNonzero
-hAP      : FourRatSquaresAPConst
+two_coprime_factorizations_refine_even
+square_factor_balance
 ```
 
-`hNoNonAP` itself should be produced by finite local obstruction table plus the independent degenerate-cover obstruction.  It should not be an axiom in the final theorem file unless you are deliberately staging the finite-certificate proof.
+`coprime_new_factors` is also nontrivial but short: it is a prime-divisibility / mod-3 lemma.
 
 ---
 
-## 6. Recommended theorem DAG for a new module
+## 4. Strict measure decrease
 
-Suggested module split:
-
-```text
-RationalPointsN12/E1Shift.lean
-  E1
-  E24_to_E1_shift
-  E1_to_E24_shift
-  E24XCoordinateClassification_of_E1X
-
-RationalPointsN12/E1CoverDefs.lean
-  CoverQ
-  S23Rep
-  S23ProductOne
-  APResidualTriple
-  E1FullCoverExtraction
-
-RationalPointsN12/E1CoverExtraction.lean
-  valuation parity away from {2,3}
-  denominator clearing
-  theorem e1FullCoverExtraction : E1FullCoverExtraction
-
-RationalPointsN12/E1CoverLocalObstructions.lean
-  sign obstructions for 32 triples
-  finite ZMod certificates for 28 triples
-  independent degenerate residual obstruction for (1,1,1), (-3,-1,3)
-  theorem s23NonAPCoverNoNonzero : S23NonAPCoverNoNonzero
-
-RationalPointsN12/FourSquaresAP.lean
-  independent Fermat/Euler descent theorem
-  theorem fourRatSquaresAPConst : FourRatSquaresAPConst
-
-RationalPointsN12/E1CoverAssembly.lean
-  Q2403 AP wrappers
-  E1_X_of_Y_eq_zero
-  E1_nonzeroY_X_of_fullCoverCertificate
-  E1XCoordinateClassification_of_fullCoverCertificate
-  E24XCoordinateClassification_of_E1FullCoverCertificate
-```
-
-Dependency DAG:
+From the grid refinement:
 
 ```text
-FourSquaresAP.lean      E1CoverLocalObstructions.lean      E1CoverExtraction.lean
-       \                         |                                /
-        \                        |                               /
-         v                       v                              v
-                 E1CoverAssembly.lean
-                         |
-                         v
-                 E24XCoordinateClassification
+A = 2*a*b*c*d.
 ```
 
-No path should go through:
+Then
 
 ```text
-E24XCoordinateClassification -> RatQuarticEisensteinXClassification
+A*D = (a*d) * (2*b*c*D).
 ```
 
-when proving `E24XCoordinateClassification` itself.
-
----
-
-## 7. Circularity flags
-
-### Circular in the current local situation
-
-You wrote:
+Since `b,c,D` are nonzero,
 
 ```text
-Existing C12→E24 map plus E24XCoordinateClassification proves the Eisenstein quartic x-classification.
+|(2*b*c*D)| ≥ 2.
 ```
 
-Therefore this path is circular for proving E24:
+Since `a,d` are nonzero,
 
 ```text
-E24XCoordinateClassification
-  -> RatQuarticEisensteinXClassification
-  -> doubleLeg_of_ratQuarticEisenstein
-  -> degenerate cover obstruction
-  -> E1 full-cover point list
-  -> E24XCoordinateClassification
+|a*d| > 0.
 ```
 
-Do not use `doubleLeg_of_ratQuarticEisenstein` in `E1CoverLocalObstructions.lean` unless the `RatQuarticEisensteinXClassification` argument is explicitly imported from an independent theorem, not from E24.
-
-### Safe alternatives
-
-Safe producers for the degenerate cover obstruction:
-
-1. Prove `DoubleLegRightTrianglesDegenerate` independently by Pythagorean/Euler descent.
-2. Prove the two degenerate cover no-nonzero theorems directly by the same descent.
-3. Import an external Eisenstein quartic theorem only if its proof path is independent of E24/E1.
-
-Safe producer for AP residuals:
+Therefore
 
 ```text
-FourRatSquaresAPConst
+|a*d| < |a*d| * |2*b*c*D| = |A*D|.
 ```
 
-proved by Q2407's independent Fermat/Euler descent, not by E1 rational points.
-
----
-
-## 8. Final shortest honest route
-
-The final replacement theorem should look like this:
+Lean statement:
 
 ```lean
-theorem E24XCoordinateClassification_nonCircular
-    (hExtract : E1FullCoverExtraction)
-    (hNoNonAP : S23NonAPCoverNoNonzero)
-    (hAP : FourRatSquaresAPConst) :
-    E24XCoordinateClassification :=
-  E24XCoordinateClassification_of_E1FullCoverCertificate hExtract hNoNonAP hAP
+namespace MazurProof.RationalPointsN12
+
+/-- Strict descent of the measure `natAbs (A*D)` from `A=2abcd`. -/
+theorem EulerAux_measure_decrease_from_grid
+    {A D a b c d : ℤ}
+    (hAgrid : A = 2*a*b*c*d)
+    (hD : D ≠ 0)
+    (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0) (hd : d ≠ 0) :
+    (a*d).natAbs < (A*D).natAbs := by
+  -- Rewrite `A*D = (a*d) * (2*b*c*D)` and use natAbs_mul.
+  -- Let n=(a*d).natAbs > 0 and m=(2*b*c*D).natAbs ≥ 2.
+  -- Then n < n*m.
+  sorry
+
+end MazurProof.RationalPointsN12
 ```
 
-Then separately instantiate the three inputs with independent producers:
+---
+
+## 5. Final descent-step assembly
+
+The proof is now mechanical:
+
+1. Use `EulerAux_param` to get `E,P,Q,U,V`.
+2. Use `two_coprime_factorizations_refine_even` to get `a,b,c,d`.
+3. Substitute into the two odd-leg equations to get the two expressions for `E`.
+4. Use `EulerAux_new_squares_from_grid` to get the new square witnesses `c,b`.
+5. Package `EulerAux a d`.
+6. Use `EulerAux_measure_decrease_from_grid`.
+
+Lean assembly skeleton:
 
 ```lean
-#check e1FullCoverExtraction             -- valuation + denominator clearing
-#check s23NonAPCoverNoNonzero            -- finite local table + independent degenerate obstruction
-#check fourRatSquaresAPConst             -- independent Fermat/Euler descent
+namespace MazurProof.RationalPointsN12
+
+/-- Final Euler auxiliary descent step. -/
+theorem EulerAux_descent_step {A D : ℤ} (hAD : EulerAux A D) :
+    ∃ a d : ℤ, EulerAux a d ∧ (a*d).natAbs < (A*D).natAbs := by
+  rcases hAD with ⟨hA0, hD0, hDodd, hADcop, S, R, hS, hR⟩
+  rcases EulerAux_param (A := A) (D := D)
+      ⟨hA0, hD0, hDodd, hADcop, S, R, hS, hR⟩ with
+    ⟨E, P, Q, U, V,
+      hEpm, hPeven, hQodd, hUeven, hVodd,
+      hcopPQ, hcop2UV, hAPQ, hAUV, hEPQ, hEUV⟩
+
+  have hcopUV : Nat.Coprime U.natAbs V.natAbs := by
+    -- follows from `Nat.Coprime (2*U).natAbs V.natAbs`
+    sorry
+
+  rcases two_coprime_factorizations_refine_even
+      hAPQ hAUV hPeven hUeven hQodd hVodd hcopPQ hcopUV hA0 with
+    ⟨a, b, c, d,
+      hP, hQ, hU, hV, hAgrid,
+      ha0, hb0, hc0, hd0, hdodd, hpair⟩
+
+  have hE1 : E = 4*a^2*b^2 - c^2*d^2 := by
+    -- substitute P=2ab and Q=cd into E=P²-Q²
+    rw [hEPQ, hP, hQ]
+    ring
+  have hE2 : E = 16*a^2*c^2 - b^2*d^2 := by
+    -- substitute U=2ac and V=bd into E=4U²-V²
+    rw [hEUV, hU, hV]
+    ring
+
+  have hsquares : c^2 = 4*a^2 + d^2 ∧ b^2 = 16*a^2 + d^2 :=
+    EulerAux_new_squares_from_grid ha0 hb0 hc0 hd0 hdodd hpair hE1 hE2
+
+  have hacop : Nat.Coprime a.natAbs d.natAbs := by
+    -- from `PairwiseCoprime2abcd`: gcd(2a,d)=1 implies gcd(a,d)=1
+    sorry
+
+  have hnew : EulerAux a d := by
+    refine ⟨ha0, hd0, hdodd, hacop, ?_⟩
+    refine ⟨c, b, ?_, ?_⟩
+    · exact hsquares.1.symm
+    · exact hsquares.2.symm
+
+  have hdrop : (a*d).natAbs < (A*D).natAbs :=
+    EulerAux_measure_decrease_from_grid hAgrid hD0 ha0 hb0 hc0 hd0
+
+  exact ⟨a, d, hnew, hdrop⟩
+
+end MazurProof.RationalPointsN12
 ```
 
-This route proves the old `E24XCoordinateClassification` residual from an E1 full-2-cover certificate without using the E24-derived quartic classifier or any E1 point classification as an input.
+The remaining `sorry`s in this skeleton correspond exactly to small reusable gcd projections or the hard lemmas already isolated above:
+
+```text
+EulerAux_param                              -- standard Pythagorean parametrization twice
+hcopUV from hcop2UV                         -- easy gcd projection
+two_coprime_factorizations_refine_even      -- hard gcd-splitting lemma
+EulerAux_new_squares_from_grid              -- hard balance/gcd lemma, with sublemmas
+hacop from PairwiseCoprime2abcd             -- easy gcd projection
+EulerAux_measure_decrease_from_grid          -- easy Nat inequality
+```
+
+---
+
+## 6. Minimal theorem DAG
+
+```text
+Primitive Pythagorean parametrization over ℤ
+  |
+  v
+EulerAux_param
+  |
+  v
+two_coprime_factorizations_refine_even       [HARD]
+  |
+  v
+EulerAux_key_identity                         [ring/nlinarith]
+  |
+  +--> coprime_new_factors                    [mod 4 / mod 3 gcd]
+  +--> square_factor_balance                  [HARD divisibility balance]
+  |
+  v
+EulerAux_new_squares_from_grid
+  |
+  +--> EulerAux_measure_decrease_from_grid    [easy Nat inequality]
+  |
+  v
+EulerAux_descent_step
+```
+
+This is the classical descent step in a Lean-friendly form.  The actual smaller pair is precisely the `(a,d)` appearing in the grid refinement
+
+```text
+P=2ab, Q=cd, U=2ac, V=bd.
+```
+
+The new square witnesses are precisely
+
+```text
+S' = c,
+R' = b,
+```
+
+because the key identity plus coprimality force
+
+```text
+c^2 = 4*a^2 + d^2,
+b^2 = 16*a^2 + d^2.
+```
