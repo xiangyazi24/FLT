@@ -1,357 +1,611 @@
-# Q2653 (dm-codex1): independent `RatQuarticEisensteinDegenerate` route
+# Q2656 (dm-codex1): Lean-feasible route for `IntQuarticEisensteinPrimitive`
 
 Repo path mentioned by requester: `/Users/huangx/repos/flt-ai`  
 GitHub repo/branch: `xiangyazi24/FLT`, branch `scratch`
 
-Target already reduced in the project:
-
-```lean
-def RatQuarticEisensteinDegenerate : Prop :=
-  ∀ {t s : ℚ}, s ^ 2 = t ^ 4 - t ^ 2 + 1 → t = 0 ∨ t ^ 2 = 1
-```
-
-Constraint respected by this plan: do not use `RationalPointsN12`, the E24/E1 finite-point theorem, or full-cover residual theorems.  The only recommended Mathlib reuse is elementary arithmetic, rational denominator APIs, Pythagorean triples, and possibly existing cyclotomic/PID infrastructure if choosing the algebraic-number-theory route.
-
-## 1. Classical equivalence and exact integer theorem
-
-`x^4 - x^2 + 1` is `Φ₁₂(x)`.  Homogenizing at `t = A/N` gives
+Pinned Mathlib revision from `lake-manifest.json` on `scratch`:
 
 ```text
-N^4 * (t^4 - t^2 + 1) = A^4 - A^2*N^2 + N^4.
+96fd0fff3b8837985ae21dd02e712cb5df72ec05
 ```
 
-This is the Eisenstein norm form
-
-```text
-A^4 - A^2*N^2 + N^4 = Norm(A^2 + N^2*ω),   ω^2 + ω + 1 = 0,
-```
-
-because `Norm(a + bω) = a^2 - a*b + b^2`.  I would call the Lean target the primitive homogeneous Eisenstein quartic.  It is adjacent to, but not literally the usual Ljunggren equation `Y^2 = X^4 + X^2 + 1` unless an additional proved transformation is supplied.  Do not target the plus-sign Ljunggren theorem as a black box.
-
-The exact integer theorem to target is:
-
-```lean
-import Mathlib.Data.Rat.Lemmas
-import Mathlib.NumberTheory.PythagoreanTriples
-import Mathlib.RingTheory.Int.Basic
-import Mathlib.Tactic.LinearCombination
-
-namespace MazurProof.RationalPointsN12
-
-/-- Primitive cleared Eisenstein quartic datum. -/
-def PrimitiveEisensteinQuarticDatum (A N S : ℤ) : Prop :=
-  N ≠ 0 ∧
-  Int.gcd A N = 1 ∧
-  S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
-
-/-- Main independent integer theorem. -/
-def PrimitiveEisensteinQuarticTheorem : Prop :=
-  ∀ {A N S : ℤ},
-    PrimitiveEisensteinQuarticDatum A N S →
-    A = 0 ∨ A ^ 2 = N ^ 2
-
-/-- Normalized positive bad solution used for descent. -/
-def NormalizedEisensteinBad (A N S : ℤ) : Prop :=
-  0 < A ∧ A < N ∧
-  Int.gcd A N = 1 ∧
-  0 < S ∧
-  S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
-
-/-- Bounded descent theorem sufficient to prove the primitive theorem. -/
-def NormalizedEisensteinDescent : Prop :=
-  ∀ {A N S : ℤ},
-    NormalizedEisensteinBad A N S →
-    ∃ A' N' S' : ℤ,
-      NormalizedEisensteinBad A' N' S' ∧
-      Int.natAbs A' + Int.natAbs N' < Int.natAbs A + Int.natAbs N
-
-end MazurProof.RationalPointsN12
-```
-
-Then prove `PrimitiveEisensteinQuarticTheorem` by: primitive bad solution → sign/swap normalization → minimal normalized bad solution by measure `Int.natAbs A + Int.natAbs N` → contradict `NormalizedEisensteinDescent`.
-
-## 2. Why `not_fermat_42` is not a direct solution
-
-Mathlib has:
-
-```lean
--- Mathlib.NumberTheory.FLT.Four
--- theorem not_fermat_42 {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) :
---   a ^ 4 + b ^ 4 ≠ c ^ 2
-```
-
-The cleared target is not of that shape.  It rewrites as both
-
-```text
-S^2 = A^4 - A^2*N^2 + N^4
-S^2 = (A^2 - N^2)^2 + (A*N)^2
-(A^2 + N^2)^2 = S^2 + 3*(A*N)^2
-```
-
-The Pythagorean form has one square leg, `A^2 - N^2`, but the other leg is only `A*N`, not a square or fourth power.  `not_fermat_42` would apply only after proving additional splitting that is essentially the missing descent.  Therefore:
-
-* Do **not** use `not_fermat_42` as the main dependency.
-* It is fine to imitate the proof architecture of `Mathlib/NumberTheory/FLT/Four.lean`.
-* Reuse underlying tools such as `PythagoreanTriple.coprime_classification`, `PythagoreanTriple.coprime_classification'`, `Int.sq_of_gcd_eq_one`, `Int.sq_of_isCoprime`, `Nat.find`, and `linear_combination`.
-
-## 3. Rational denominator clearing and primitive reduction
-
-Use `A = t.num`, `N = (t.den : ℤ)`.  The denominator is positive, and `Rat.reduced` gives coprimality of numerator and denominator.
-
-Best denominator-clearing lemma:
-
-```lean
-import Mathlib.Data.Rat.Lemmas
-import Mathlib.RingTheory.Int.Basic
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-/-- If an integer is a rational square, then it is an integer square. -/
-def IntSquareOfRatSquareInt : Prop :=
-  ∀ {q : ℚ} {m : ℤ},
-    q ^ 2 = (m : ℚ) → ∃ z : ℤ, z ^ 2 = m
-
-/-- Denominator-cleared primitive integer point from a rational quartic point. -/
-def RatQuarticToPrimitiveInt : Prop :=
-  ∀ {t s : ℚ},
-    s ^ 2 = t ^ 4 - t ^ 2 + 1 →
-    ∃ A N S : ℤ,
-      Int.gcd A N = 1 ∧
-      N ≠ 0 ∧
-      t = (A : ℚ) / (N : ℚ) ∧
-      S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4
-
-/-- Integer theorem supplies the required rational theorem. -/
-def RatQuarticFromPrimitiveInt : Prop :=
-  PrimitiveEisensteinQuarticTheorem →
-  RatQuarticEisensteinDegenerate
-
-end MazurProof.RationalPointsN12
-```
-
-Proof notes:
-
-1. For `IntSquareOfRatSquareInt`, use `Rat.isSquare_intCast_iff` from `Mathlib.Data.Rat.Lemmas`.  From `q^2 = (m : ℚ)`, obtain `IsSquare (m : ℚ)`, then `IsSquare m`.
-2. For `RatQuarticToPrimitiveInt`, set `A := t.num`, `N := (t.den : ℤ)`, `P := A^4 - A^2*N^2 + N^4`.
-3. Rewrite `t = A/N` using `Rat.num_divInt_den`/`Rat.num_div_den` APIs.
-4. From the quartic equation prove in `ℚ`:
-
-   ```lean
-   (s * (N : ℚ) ^ 2) ^ 2 = (P : ℚ)
-   ```
-
-   using `field_simp` with `Rat.den_nz`, then `ring`.
-5. Apply `IntSquareOfRatSquareInt` to get `S^2 = P` in `ℤ`.
-6. Apply `PrimitiveEisensteinQuarticTheorem`; translate `A = 0` to `t = 0`, and `A^2 = N^2` to `t^2 = 1` by clearing `N ≠ 0`.
-
-The reverse implication is also easy and useful for tests: from primitive `A,N,S`, set `t = (A:ℚ)/(N:ℚ)`, `s = (S:ℚ)/(N:ℚ)^2`.
-
-## 4. Concrete independent descent DAG
-
-Define the integer Eisenstein-triple conic locally:
-
-```lean
-import Mathlib.Data.Rat.Lemmas
-import Mathlib.RingTheory.Int.Basic
-import Mathlib.Tactic.LinearCombination
-
-namespace MazurProof.RationalPointsN12
-
-/-- `Z^2 = X^2 - X*Y + Y^2`, the Eisenstein norm conic. -/
-def EisensteinTriple (X Y Z : ℤ) : Prop :=
-  Z ^ 2 = X ^ 2 - X * Y + Y ^ 2
-
-/-- One positive primitive parametrization, up to swapping `X` and `Y`. -/
-def EisensteinParam (X Y Z m n : ℤ) : Prop :=
-  Z = m ^ 2 - m * n + n ^ 2 ∧
-  ((X = m ^ 2 - n ^ 2 ∧ Y = 2 * m * n - n ^ 2) ∨
-   (Y = m ^ 2 - n ^ 2 ∧ X = 2 * m * n - n ^ 2))
-
-/-- Positive primitive classification of Eisenstein triples. -/
-def EisensteinTripleClassification : Prop :=
-  ∀ {X Y Z : ℤ},
-    0 < X → 0 < Y → 0 < Z →
-    Int.gcd X Y = 1 →
-    EisensteinTriple X Y Z →
-    ∃ m n : ℤ,
-      0 < n ∧ n < m ∧
-      Int.gcd m n = 1 ∧
-      ¬ (3 : ℤ) ∣ m + n ∧
-      EisensteinParam X Y Z m n
-
-/-- Classification plus square-side splitting gives a smaller bad solution. -/
-def EisensteinSquareSidesDescentCore : Prop :=
-  ∀ {A N S m n : ℤ},
-    0 < A → A < N → Int.gcd A N = 1 →
-    0 < n → n < m → Int.gcd m n = 1 → ¬ (3 : ℤ) ∣ m + n →
-    EisensteinParam (A ^ 2) (N ^ 2) S m n →
-    ∃ A' N' S' : ℤ,
-      NormalizedEisensteinBad A' N' S' ∧
-      Int.natAbs A' + Int.natAbs N' < Int.natAbs A + Int.natAbs N
-
-end MazurProof.RationalPointsN12
-```
-
-DAG to prove `NormalizedEisensteinDescent`:
-
-1. From `NormalizedEisensteinBad A N S`, get
-
-   ```lean
-   EisensteinTriple (A ^ 2) (N ^ 2) S
-   Int.gcd (A ^ 2) (N ^ 2) = 1
-   0 < A ^ 2
-   0 < N ^ 2
-   0 < S
-   ```
-
-   The triple equation is just `ring`; coprimality follows from `Int.gcd A N = 1` and `.pow`/prime-divisor arguments.
-
-2. Apply `EisensteinTripleClassification` to obtain `m,n` and `EisensteinParam (A^2) (N^2) S m n`.
-
-3. Prove the finite square-factor splitting lemmas needed by `EisensteinSquareSidesDescentCore`:
-
-   ```lean
-   -- factors from A^2 = m^2 - n^2 = (m-n)*(m+n)
-   -- factors from N^2 = n*(2*m-n)
-   -- gcd controls: gcd(m-n,m+n) ∣ 2, gcd n (2*m-n) ∣ 2, and 3 ∤ m+n
-   -- conclusion: each factor is a square or twice a square, by parity cases.
-   ```
-
-   Use `Int.sq_of_gcd_eq_one` / `Int.sq_of_isCoprime` after dividing out the controlled factor `2`.  This is the same kind of casework as `Fermat42.not_minimal`, but for the Eisenstein parametrization.
-
-4. The algebraic core should be isolated as `EisensteinSquareSidesDescentCore`.  It is the only genuinely hard local theorem.  Its output is another primitive solution with a strictly smaller measure, so no elliptic-curve finite-point theorem enters.
-
-5. Close the descent with a minimal-counterexample wrapper copied structurally from `Fermat42.exists_minimal`:
-
-   ```lean
-   -- def badMeasure (A N : ℤ) : ℕ := Int.natAbs A + Int.natAbs N
-   -- use Nat.find on {m | ∃ A N S, NormalizedEisensteinBad A N S ∧ m = badMeasure A N}
-   -- apply NormalizedEisensteinDescent to contradict minimality
-   ```
-
-## 5. Alternative Route A: use Eisenstein PID infrastructure
-
-This is still independent of E1/E24 rational-point theorems, but heavier.  Mathlib’s FLT3 development imports the third-cyclotomic PID machinery:
+Target:
 
 ```lean
 import Mathlib.NumberTheory.NumberField.Cyclotomic.PID
 import Mathlib.NumberTheory.NumberField.Cyclotomic.Three
-```
-
-Possible theorem shape:
-
-```lean
-/-- In `ℤ[ω]`, primitive `α` with square norm is associated to a square. -/
-def EisensteinNormSquareAssociatedSquare : Prop :=
-  ∀ {A N S : ℤ},
-    Int.gcd A N = 1 →
-    S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4 →
-    -- α = A^2 + N^2*ω, expanded in the chosen Mathlib cyclotomic-integer representation
-    True
-```
-
-Concrete Route A steps:
-
-1. Work in `𝓞 K`, `[NumberField K]`, `[IsCyclotomicExtension {3} ℚ K]`, with `ω = ζ₃`.
-2. Define `α = A^2 + N^2 * ω`; prove `norm α = A^4 - A^2*N^2 + N^4`.
-3. Prove `IsCoprime α (star α)` from `Int.gcd A N = 1`; the only delicate common prime is above `3`.
-4. Use the existing UFD/PID associated-power lemma behind `Int.sq_of_gcd_eq_one`, e.g. grep `exists_associated_pow_of_mul_eq_pow`.
-5. Reduce units using `IsCyclotomicExtension.Rat.Three.Units.mem` and related unit congruence lemmas.
-6. Expanding `α = unit * β^2` gives the same square-side splitting/descent as Route B.
-
-I would try Route B first unless the project already imports cyclotomic number fields elsewhere; Route A may spend more effort on typeclass and representation issues than on the actual quartic descent.
-
-## 6. Mathlib files/API to grep first
-
-Project pin from `lakefile.toml`: Mathlib rev `96fd0fff3b8837985ae21dd02e712cb5df72ec05`.
-
-```text
-Mathlib/Data/Rat/Lemmas.lean
-  Rat.isSquare_iff
-  Rat.isSquare_intCast_iff
-  Rat.mul_self_num
-  Rat.mul_self_den
-  Rat.num_den_mk
-  Rat.num_divInt_den
-
-Mathlib/NumberTheory/PythagoreanTriples.lean
-  PythagoreanTriple.coprime_classification
-  PythagoreanTriple.coprime_classification'
-  PythagoreanTriple.classification
-  PythagoreanTriple.even_odd_of_coprime
-
-Mathlib/RingTheory/Int/Basic.lean
-  Int.sq_of_gcd_eq_one
-  Int.sq_of_isCoprime
-  Int.eq_pow_of_mul_eq_pow_odd
-  Int.Prime.dvd_mul'
-  Int.Prime.dvd_pow'
-
-Mathlib/NumberTheory/FLT/Four.lean
-  Fermat42.exists_minimal
-  Fermat42.coprime_of_minimal
-  Fermat42.not_minimal
-  not_fermat_42       -- proof pattern only; not the desired dependency
-
-Mathlib/NumberTheory/FLT/Three.lean
-Mathlib/NumberTheory/NumberField/Cyclotomic/PID.lean
-Mathlib/NumberTheory/NumberField/Cyclotomic/Three.lean
-  IsCyclotomicExtension.Rat.three_pid
-  IsCyclotomicExtension.Rat.Three.Units.mem
-  IsCyclotomicExtension.Rat.Three.eq_one_or_neg_one_of_unit_of_congruent
-  IsCyclotomicExtension.Rat.Three.eta_sq
-  IsCyclotomicExtension.Rat.Three.eta_sq_add_eta_add_one
-
-Mathlib/NumberTheory/Zsqrtd/Basic.lean
-Mathlib/NumberTheory/Zsqrtd/GaussianInt.lean
-  useful norm examples, but no ready `EisensteinInt` classifier found
-```
-
-Search notes from this pass:
-
-```text
-Ljunggren                    -- no ready Mathlib classifier found
-Eisenstein quartic           -- no ready Mathlib classifier found
-RatQuartic                   -- no ready Mathlib classifier found
-x^4 - x^2*y^2 + y^4          -- no ready Mathlib classifier found
-not_fermat_42                -- exists in FLT/Four; wrong final shape
-EisensteinInt                -- no obvious dedicated Mathlib type found
-```
-
-## 7. Recommended implementation seam
-
-Add a new file independent of the N12 finite-point route, for example:
-
-```lean
--- FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean
-import Mathlib.Data.Rat.Lemmas
+import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
+import Mathlib.NumberTheory.NumberField.Norm
+import Mathlib.RingTheory.PrincipalIdealDomain
+import Mathlib.NumberTheory.FLT.Four
 import Mathlib.NumberTheory.PythagoreanTriples
-import Mathlib.RingTheory.Int.Basic
-import Mathlib.Tactic.LinearCombination
 
--- no imports of:
---   FLT.Assumptions.MazurProof.RationalPointsN12
---   E24/E1 finite-point terminal theorem files
---   full-cover residual theorem files
+-- project-local target shape:
+def IntQuarticEisensteinPrimitive : Prop :=
+  ∀ {A N S : ℤ}, IsCoprime A N → N ≠ 0 →
+    S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4 → A = 0 ∨ A ^ 2 = N ^ 2
 ```
 
-First milestones to check:
+## Verdict
+
+Use the cyclotomic/PID route over `𝓞 (CyclotomicField 3 ℚ)`.  Pinned Mathlib has the crucial infrastructure:
+
+* ring of integers of the third cyclotomic field;
+* PID instance for that ring;
+* explicit unit list `{±1, ±η, ±η^2}`;
+* `η^2 = -η - 1`;
+* Kummer-style congruence lemma for units;
+* generic PID/UFD square extraction from coprime factors.
+
+There is no obvious dedicated `EisensteinInt`/pair type in pinned Mathlib.  The shortest Lean path is therefore to work directly in `𝓞 K`, with `K = CyclotomicField 3 ℚ`, and add a thin coefficient layer for elements `a + bη`.
+
+The critical missing work is not PID square extraction.  It is the final **unit coefficient case analysis** after proving `A^2 + N^2η` is associated to a square.
+
+## 1. Exact Mathlib API / grep targets
+
+### Main cyclotomic files
+
+```bash
+grep -R "namespace IsCyclotomicExtension.Rat.Three" \
+  .lake/packages/mathlib/Mathlib/NumberTheory/NumberField/Cyclotomic/Three.lean
+
+grep -R "theorem three_pid" \
+  .lake/packages/mathlib/Mathlib/NumberTheory/NumberField/Cyclotomic/PID.lean
+
+grep -R "integralPowerBasisOfPrimePow\|toInteger" \
+  .lake/packages/mathlib/Mathlib/NumberTheory/NumberField/Cyclotomic/Basic.lean
+
+grep -R "galEquivZMod" \
+  .lake/packages/mathlib/Mathlib/NumberTheory/NumberField/Cyclotomic/Galois.lean
+
+grep -R "def norm\|coe_norm_int\|norm_algebraMap" \
+  .lake/packages/mathlib/Mathlib/NumberTheory/NumberField/Norm.lean
+```
+
+### Names/signatures to use
+
+From `Mathlib.NumberTheory.NumberField.Cyclotomic.Three`:
 
 ```lean
--- 1. integer-square extraction from rational square
--- theorem intSquare_of_ratSquare_int : IntSquareOfRatSquareInt
+namespace IsCyclotomicExtension.Rat.Three
 
--- 2. denominator clearing
--- theorem ratQuartic_to_primitive_int : RatQuarticToPrimitiveInt
+variable {K : Type*} [Field K]
+variable {ζ : K} (hζ : IsPrimitiveRoot ζ 3) (u : (𝓞 K)ˣ)
 
--- 3. wrapper from integer theorem to project theorem
--- theorem ratQuarticEisensteinDegenerate_of_primitive
---     (hZ : PrimitiveEisensteinQuarticTheorem) :
---     RatQuarticEisensteinDegenerate
+local notation3 "η" =>
+  (IsPrimitiveRoot.isUnit (hζ.toInteger_isPrimitiveRoot) (by decide)).unit
+local notation3 "λ" => hζ.toInteger - 1
 
--- 4. hard independent theorem
--- theorem primitiveEisensteinQuartic : PrimitiveEisensteinQuarticTheorem
+lemma coe_eta : (η : 𝓞 K) = hζ.toInteger := rfl
+
+lemma eta_sq : (η ^ 2 : 𝓞 K) = -η - 1
+
+lemma eta_sq_add_eta_add_one : (η : 𝓞 K) ^ 2 + η + 1 = 0
+
+theorem Units.mem [NumberField K] [IsCyclotomicExtension {3} ℚ K] :
+  u ∈ [1, -1, η, -η, η ^ 2, -η ^ 2]
+
+theorem eq_one_or_neg_one_of_unit_of_congruent
+    [NumberField K] [IsCyclotomicExtension {3} ℚ K]
+    (hcong : ∃ n : ℤ, λ ^ 2 ∣ (u - n : 𝓞 K)) :
+    u = 1 ∨ u = -1
+
+lemma lambda_dvd_or_dvd_sub_one_or_dvd_add_one
+    [NumberField K] [IsCyclotomicExtension {3} ℚ K] (x : 𝓞 K) :
+    λ ∣ x ∨ λ ∣ x - 1 ∨ λ ∣ x + 1
+
+lemma cube_sub_one_eq_mul (x : 𝓞 K) :
+    x ^ 3 - 1 = (x - 1) * (x - η) * (x - η ^ 2)
+
+lemma lambda_pow_four_dvd_cube_sub_one_or_add_one_of_lambda_not_dvd
+    [NumberField K] [IsCyclotomicExtension {3} ℚ K]
+    {x : 𝓞 K} (h : ¬ λ ∣ x) :
+    λ ^ 4 ∣ x ^ 3 - 1 ∨ λ ^ 4 ∣ x ^ 3 + 1
+
+end IsCyclotomicExtension.Rat.Three
 ```
 
-Once milestones 1–3 compile, the project has a clean hard seam: all remaining work is the standalone primitive integer descent, with no dependency on E1 finite-point classification.
+From `Mathlib.NumberTheory.NumberField.Cyclotomic.PID`:
+
+```lean
+namespace IsCyclotomicExtension.Rat
+
+variable (K : Type*) [Field K] [NumberField K]
+
+theorem three_pid [IsCyclotomicExtension {3} ℚ K] :
+  IsPrincipalIdealRing (𝓞 K)
+
+end IsCyclotomicExtension.Rat
+```
+
+From `Mathlib.NumberTheory.NumberField.Cyclotomic.Basic`:
+
+```lean
+namespace IsCyclotomicExtension.Rat
+
+theorem finrank [NeZero k] [IsCyclotomicExtension {k} ℚ K] :
+  Module.finrank ℚ K = k.totient
+
+theorem isIntegralClosure_adjoin_singleton_of_prime
+    [IsCyclotomicExtension {p} ℚ K]
+    (hζ : IsPrimitiveRoot ζ p) :
+  IsIntegralClosure (Algebra.adjoin ℤ ({ζ} : Set K)) ℤ K
+
+end IsCyclotomicExtension.Rat
+
+namespace IsPrimitiveRoot
+
+abbrev toInteger {k : ℕ} [NeZero k] (hζ : IsPrimitiveRoot ζ k) : 𝓞 K :=
+  ⟨ζ, hζ.isIntegral (NeZero.pos _)⟩
+
+noncomputable def integralPowerBasisOfPrimePow
+    [IsCyclotomicExtension {p ^ k} ℚ K]
+    (hζ : IsPrimitiveRoot ζ (p ^ k)) :
+  PowerBasis ℤ (𝓞 K)
+
+end IsPrimitiveRoot
+```
+
+From `Mathlib.NumberTheory.NumberField.Norm`:
+
+```lean
+theorem Algebra.coe_norm_int {K : Type*} [Field K] [NumberField K] (x : 𝓞 K) :
+  (Algebra.norm ℤ x : ℚ) = Algebra.norm ℚ (x : K)
+
+namespace RingOfIntegers
+
+noncomputable def norm : 𝓞 L →* 𝓞 K
+
+@[simp] lemma coe_norm (x : 𝓞 L) :
+  norm K x = Algebra.norm K (x : L)
+
+theorem norm_algebraMap (x : 𝓞 K) :
+  norm K (algebraMap (𝓞 K) (𝓞 L) x) = x ^ finrank K L
+
+end RingOfIntegers
+```
+
+From `Mathlib.RingTheory.PrincipalIdealDomain`:
+
+```lean
+namespace PrincipalIdealRing
+
+instance (priority := 100) to_uniqueFactorizationMonoid
+    [CommRing R] [IsDomain R] [IsPrincipalIdealRing R] :
+  UniqueFactorizationMonoid R
+
+end PrincipalIdealRing
+
+theorem exists_associated_pow_of_mul_eq_pow'
+    [CommRing R] [IsDomain R] [IsBezout R]
+    {a b c : R} (hab : IsCoprime a b) {k : ℕ}
+    (h : a * b = c ^ k) :
+  ∃ d : R, Associated (d ^ k) a
+
+theorem exists_associated_pow_of_associated_pow_mul
+    [CommRing R] [IsDomain R] [IsBezout R]
+    {a b c : R} (hab : IsCoprime a b) {k : ℕ}
+    (h : Associated (c ^ k) (a * b)) :
+  ∃ d : R, Associated (d ^ k) a
+```
+
+Useful elementary files:
+
+```bash
+grep -R "theorem not_fermat_42\|def Fermat42" \
+  .lake/packages/mathlib/Mathlib/NumberTheory/FLT/Four.lean
+
+grep -R "sq_of_gcd_eq_one\|sq_of_isCoprime" \
+  .lake/packages/mathlib/Mathlib/RingTheory/Int/Basic.lean
+
+grep -R "coprime_classification'\|def PythagoreanTriple" \
+  .lake/packages/mathlib/Mathlib/NumberTheory/PythagoreanTriples.lean
+```
+
+## 2. Norm expression
+
+Classically, this is the homogeneous square-value equation for the cyclotomic polynomial `Φ₁₂`:
+
+```text
+A^4 - A^2*N^2 + N^4 = Norm_{ℚ(ζ₃)/ℚ}(A^2 + N^2*η),
+where η^2 + η + 1 = 0.
+```
+
+Do not start with the abstract `RingOfIntegers.norm` unless needed.  The product identity is shorter and avoids coercion noise:
+
+```lean
+import Mathlib.NumberTheory.NumberField.Cyclotomic.PID
+import Mathlib.NumberTheory.NumberField.Cyclotomic.Three
+import Mathlib.NumberTheory.NumberField.Norm
+import Mathlib.RingTheory.PrincipalIdealDomain
+
+open NumberField
+open IsCyclotomicExtension.Rat.Three
+
+noncomputable section
+
+namespace EisensteinQuarticPlan
+
+local notation "K₃" => CyclotomicField 3 ℚ
+
+variable {K : Type*} [Field K] [NumberField K]
+variable [IsCyclotomicExtension {3} ℚ K]
+variable {ζ : K} (hζ : IsPrimitiveRoot ζ 3)
+
+local notation3 "η" =>
+  (IsPrimitiveRoot.isUnit (hζ.toInteger_isPrimitiveRoot) (by decide)).unit
+local notation3 "λ" => hζ.toInteger - 1
+
+-- Pseudo-code / target statement: fill proof by `rw [eta_sq]` and `ring`.
+-- def alpha (A N : ℤ) : 𝓞 K :=
+--   ((A ^ 2 : ℤ) : 𝓞 K) + ((N ^ 2 : ℤ) : 𝓞 K) * (η : 𝓞 K)
+--
+-- def alphaConj (A N : ℤ) : 𝓞 K :=
+--   ((A ^ 2 : ℤ) : 𝓞 K) + ((N ^ 2 : ℤ) : 𝓞 K) * ((η : 𝓞 K) ^ 2)
+--
+-- theorem alpha_mul_alphaConj (A N : ℤ) :
+--   alpha hζ A N * alphaConj hζ A N =
+--     ((A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4 : ℤ) : 𝓞 K)
+--
+-- theorem alpha_mul_alphaConj_eq_square
+--     {A N S : ℤ}
+--     (h : S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4) :
+--   alpha hζ A N * alphaConj hζ A N = (((S : ℤ) : 𝓞 K) ^ 2)
+
+end EisensteinQuarticPlan
+```
+
+If using `RingOfIntegers.norm`, first prove the same identity and then identify `alphaConj` with the nontrivial Galois conjugate.  `galEquivZMod` and `galEquivZMod_smul_of_pow_eq` in `Cyclotomic/Galois.lean` are the likely route, but the direct product identity is simpler.
+
+## 3. Proof DAG
+
+### Layer A: coefficient model `a + bη`
+
+Add a local coefficient API instead of introducing a new ring type.
+
+```lean
+import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
+import Mathlib.NumberTheory.NumberField.Cyclotomic.Three
+
+open NumberField
+open IsCyclotomicExtension.Rat.Three
+
+noncomputable section
+
+namespace EisensteinQuarticPlan
+
+variable {K : Type*} [Field K] [NumberField K]
+variable [IsCyclotomicExtension {3} ℚ K]
+variable {ζ : K} (hζ : IsPrimitiveRoot ζ 3)
+
+local notation3 "η" =>
+  (IsPrimitiveRoot.isUnit (hζ.toInteger_isPrimitiveRoot) (by decide)).unit
+
+-- theorem shape: every algebraic integer is uniquely `a + bη`.
+-- Prove using `hζ.integralPowerBasisOfPrimePow` with `3 = 3^1`, or via
+-- `isIntegralClosure_adjoin_singleton_of_prime` plus `finrank = 2`.
+--
+-- theorem exists_eta_coords (x : 𝓞 K) :
+--   ∃ a b : ℤ, x = ((a : ℤ) : 𝓞 K) + ((b : ℤ) : 𝓞 K) * (η : 𝓞 K)
+--
+-- theorem eta_coords_ext {a b c d : ℤ}
+--     (h : ((a : ℤ) : 𝓞 K) + ((b : ℤ) : 𝓞 K) * (η : 𝓞 K)
+--        = ((c : ℤ) : 𝓞 K) + ((d : ℤ) : 𝓞 K) * (η : 𝓞 K)) :
+--   a = c ∧ b = d
+
+end EisensteinQuarticPlan
+```
+
+This coefficient layer is mandatory for the final unit cases.  It is also useful for the coprimality proof.
+
+### Layer B: exclude the ramified prime `λ`
+
+Key quotient fact: modulo `λ`, `η ≡ 1`, so
+
+```text
+A^2 + N^2η ≡ A^2 + N^2 mod λ.
+```
+
+Primitive `(A,N)` implies `3 ∤ A^2 + N^2`: if one of `A,N` is divisible by `3`, the other contributes `1`; if neither is divisible by `3`, both squares are `1`, so the sum is `2` modulo `3`.
+
+```lean
+import Mathlib.NumberTheory.NumberField.Cyclotomic.Three
+import Mathlib.Data.ZMod.Basic
+
+-- theorem shape:
+-- theorem three_not_dvd_sq_add_sq_of_isCoprime
+--     {A N : ℤ} (hcop : IsCoprime A N) :
+--   ¬ (3 : ℤ) ∣ A ^ 2 + N ^ 2
+--
+-- theorem lambda_not_dvd_alpha_of_isCoprime
+--     {A N : ℤ} (hcop : IsCoprime A N) :
+--   ¬ (hζ.toInteger - 1) ∣ alpha hζ A N
+```
+
+Implementation notes:
+
+* Grep `toInteger_sub_one_dvd_prime'`, `norm_toInteger_sub_one_of_prime_ne_two'`, and `card_quotient_toInteger_sub_one` in cyclotomic files.
+* If quotient transport is painful, prove directly: from `λ ∣ alpha`, use `λ ∣ η - 1`, rewrite `alpha - (A^2+N^2)` as a multiple of `λ`, hence `λ ∣ ((A^2+N^2 : ℤ) : 𝓞 K)`.  Then use the norm/divisibility lemma already used in FLT3: `Ideal.norm_dvd_iff` together with `hζ.norm_toInteger_sub_one_of_prime_ne_two'`.
+
+### Layer C: coprime factors
+
+Target:
+
+```lean
+import Mathlib.NumberTheory.NumberField.Cyclotomic.PID
+import Mathlib.NumberTheory.NumberField.Cyclotomic.Three
+import Mathlib.RingTheory.PrincipalIdealDomain
+
+-- theorem shape:
+-- theorem alpha_coprime_alphaConj_of_isCoprime
+--     {A N : ℤ} (hcop : IsCoprime A N) :
+--   IsCoprime (alpha hζ A N) (alphaConj hζ A N)
+```
+
+Adversarial check: this is the first nontrivial algebraic-number-theory lemma, but it should not be the worst one.
+
+Proof outline:
+
+1. Use `isCoprime_of_irreducible_dvd` or `isCoprime_of_prime_dvd` from `PrincipalIdealDomain.lean`.
+2. Let irreducible `p` divide both `alpha` and `alphaConj`.
+3. Then `p` divides their difference:
+
+   ```text
+   alpha - alphaConj = N^2 * (η - η^2).
+   ```
+
+4. Also take a linear combination to get divisibility of something proportional to `A^2 * (η - η^2)`.
+5. Because `IsCoprime A N`, any common divisor must lie over the ramified prime above `3`, i.e. be associated to `λ`.
+6. But `lambda_not_dvd_alpha_of_isCoprime` excludes `λ ∣ alpha`.
+
+Useful local lemmas to add:
+
+```lean
+-- theorem shape:
+-- theorem eta_sub_eta_sq_associated_lambda_unit :
+--   Associated ((η : 𝓞 K) - (η : 𝓞 K) ^ 2) (hζ.toInteger - 1)
+--
+-- theorem irreducible_dvd_intCast_sq_of_dvd_alpha_and_alphaConj
+--     {p : 𝓞 K} (hp : Irreducible p)
+--     (hpα : p ∣ alpha hζ A N) (hpαc : p ∣ alphaConj hζ A N) :
+--   p ∣ ((A ^ 2 : ℤ) : 𝓞 K) ∧ p ∣ ((N ^ 2 : ℤ) : 𝓞 K) ∨
+--   p ∣ (hζ.toInteger - 1)
+```
+
+### Layer D: square extraction in the PID
+
+This part is already essentially in Mathlib.
+
+```lean
+import Mathlib.NumberTheory.NumberField.Cyclotomic.PID
+import Mathlib.RingTheory.PrincipalIdealDomain
+
+-- theorem shape:
+-- theorem alpha_associated_square_of_solution
+--     {A N S : ℤ}
+--     (hcop : IsCoprime A N)
+--     (hEq : S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4) :
+--   ∃ β : 𝓞 K, Associated (β ^ 2) (alpha hζ A N) := by
+--   classical
+--   haveI : IsPrincipalIdealRing (𝓞 K) := IsCyclotomicExtension.Rat.three_pid K
+--   -- `IsPrincipalIdealRing` gives `IsBezout` and UFD instances.
+--   -- apply `exists_associated_pow_of_mul_eq_pow'`
+--   --   (alpha_coprime_alphaConj_of_isCoprime hζ hcop)
+--   --   (alpha_mul_alphaConj_eq_square hζ hEq)
+```
+
+Then convert associatedness into a unit equation:
+
+```lean
+-- theorem shape:
+-- theorem alpha_eq_unit_mul_square_of_solution
+--     {A N S : ℤ}
+--     (hcop : IsCoprime A N)
+--     (hEq : S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4) :
+--   ∃ (u : (𝓞 K)ˣ) (β : 𝓞 K),
+--     alpha hζ A N = (u : 𝓞 K) * β ^ 2
+```
+
+### Layer E: enumerate units and compare coefficients
+
+This is the hard missing lemma.
+
+```lean
+import Mathlib.NumberTheory.NumberField.Cyclotomic.Three
+
+-- theorem shape:
+-- theorem unit_square_coeffs_force_degenerate
+--     {A N x y : ℤ} {u : (𝓞 K)ˣ}
+--     (hcop : IsCoprime A N)
+--     (hu : u ∈ [1, -1, η, -η, η ^ 2, -η ^ 2])
+--     (h : alpha hζ A N =
+--       (u : 𝓞 K) *
+--       (((x : ℤ) : 𝓞 K) + ((y : ℤ) : 𝓞 K) * (η : 𝓞 K)) ^ 2) :
+--   A = 0 ∨ A ^ 2 = N ^ 2
+```
+
+Coefficient formulas to prove once by `rw [eta_sq]`; `ring`:
+
+```text
+(x + yη)^2       = (x^2 - y^2)      + (2xy - y^2)η
+η*(x + yη)^2     = (y^2 - 2xy)      + (x^2 - 2xy)η
+η^2*(x + yη)^2   = (2xy - x^2)      + (y^2 - x^2)η
+```
+
+The negative-unit cases negate both coefficients.  Since
+
+```text
+alpha(A,N) = A^2 + N^2η,
+```
+
+each unit case gives two integer equations.  The final integer lemma should be isolated, with no cyclotomic imports:
+
+```lean
+import Mathlib.RingTheory.Int.Basic
+import Mathlib.Data.ZMod.Basic
+
+-- theorem shape; one version per unit case is easiest to debug.
+-- theorem coeff_case_one
+--     {A N x y : ℤ} (hcop : IsCoprime A N)
+--     (hA : A ^ 2 = x ^ 2 - y ^ 2)
+--     (hN : N ^ 2 = 2 * x * y - y ^ 2) :
+--   A = 0 ∨ A ^ 2 = N ^ 2
+--
+-- theorem coeff_case_eta
+--     {A N x y : ℤ} (hcop : IsCoprime A N)
+--     (hA : A ^ 2 = y ^ 2 - 2 * x * y)
+--     (hN : N ^ 2 = x ^ 2 - 2 * x * y) :
+--   A = 0 ∨ A ^ 2 = N ^ 2
+--
+-- theorem coeff_case_eta_sq
+--     {A N x y : ℤ} (hcop : IsCoprime A N)
+--     (hA : A ^ 2 = 2 * x * y - x ^ 2)
+--     (hN : N ^ 2 = y ^ 2 - x ^ 2) :
+--   A = 0 ∨ A ^ 2 = N ^ 2
+```
+
+Recommended proof style for those integer cases:
+
+* use parity/mod-3/mod-4 first to kill negative-unit cases where both coefficients are nonpositive or impossible for squares;
+* use `Int.sq_of_isCoprime` / `Int.sq_of_gcd_eq_one` when a product of coprime integers is a square;
+* use `PythagoreanTriple.coprime_classification'` when an equation becomes a primitive Pythagorean triple.
+
+This coefficient block is where most Lean time will be spent.  Keep it isolated from cyclotomic imports so `ring`, `omega`, `nlinarith`, and `ZMod` debugging stays fast.
+
+### Final assembly
+
+```lean
+import Mathlib.NumberTheory.NumberField.Cyclotomic.PID
+import Mathlib.NumberTheory.NumberField.Cyclotomic.Three
+import Mathlib.RingTheory.PrincipalIdealDomain
+
+-- theorem shape:
+-- theorem intQuarticEisensteinPrimitive_cyclotomic :
+--   IntQuarticEisensteinPrimitive := by
+--   intro A N S hcop hN hEq
+--   classical
+--   let K := CyclotomicField 3 ℚ
+--   let hζ := IsCyclotomicExtension.zeta_spec 3 ℚ K
+--   haveI : NumberField K := IsCyclotomicExtension.numberField {3} ℚ K
+--   haveI : IsPrincipalIdealRing (𝓞 K) := IsCyclotomicExtension.Rat.three_pid K
+--   obtain ⟨u, β, hβ⟩ := alpha_eq_unit_mul_square_of_solution hζ hcop hEq
+--   obtain ⟨x, y, hxy⟩ := exists_eta_coords hζ β
+--   rw [hxy] at hβ
+--   exact unit_square_coeffs_force_degenerate hζ hcop (Units.mem hζ u) hβ
+```
+
+## 4. Can this be derived from `not_fermat_42`?
+
+No direct derivation.
+
+Mathlib FLT4 gives:
+
+```lean
+def Fermat42 (a b c : ℤ) : Prop :=
+  a ≠ 0 ∧ b ≠ 0 ∧ a ^ 4 + b ^ 4 = c ^ 2
+
+theorem not_fermat_42 {a b c : ℤ} (ha : a ≠ 0) (hb : b ≠ 0) :
+  a ^ 4 + b ^ 4 ≠ c ^ 2
+```
+
+Our equation rewrites as:
+
+```text
+S^2 = A^4 - A^2*N^2 + N^4
+    = (A^2 - N^2)^2 + (A*N)^2.
+```
+
+That is a Pythagorean triple with legs `A^2 - N^2` and `A*N`, not a Fermat42 equation with two fourth-power legs.  Applying `not_fermat_42` would require proving extra square/fourth-power structure for the legs; that is essentially the missing descent/classification work.  So `not_fermat_42` is useful as an API source, not as a theorem that closes this target.
+
+Useful APIs from the FLT4 neighborhood:
+
+```lean
+-- from Mathlib.RingTheory.Int.Basic
+theorem Int.sq_of_gcd_eq_one {a b c : ℤ}
+    (h : Int.gcd a b = 1) (heq : a * b = c ^ 2) :
+  ∃ a0 : ℤ, a = a0 ^ 2 ∨ a = -a0 ^ 2
+
+theorem Int.sq_of_isCoprime {a b c : ℤ}
+    (h : IsCoprime a b) (heq : a * b = c ^ 2) :
+  ∃ a0 : ℤ, a = a0 ^ 2 ∨ a = -a0 ^ 2
+
+-- from Mathlib.NumberTheory.PythagoreanTriples
+def PythagoreanTriple (x y z : ℤ) : Prop :=
+  x * x + y * y = z * z
+
+theorem PythagoreanTriple.coprime_classification'
+    {x y z : ℤ} (h : PythagoreanTriple x y z)
+    (h_coprime : Int.gcd x y = 1) (h_parity : x % 2 = 1) (h_pos : 0 < z) :
+  ∃ m n,
+    x = m ^ 2 - n ^ 2 ∧
+      y = 2 * m * n ∧
+        z = m ^ 2 + n ^ 2 ∧
+          Int.gcd m n = 1 ∧
+            (m % 2 = 0 ∧ n % 2 = 1 ∨ m % 2 = 1 ∧ n % 2 = 0) ∧ 0 ≤ m
+```
+
+## 5. Hardest missing lemma ranking
+
+1. **Hardest: unit coefficient case.**  After `alpha = u * β^2`, enumerate six units and prove the resulting integer coefficient equations force `A=0 ∨ A^2=N^2`.  This is independent of E1/full-cover and should be implemented as pure integer lemmas.
+2. **Medium: `alpha`/`alphaConj` coprime.**  Needs careful handling of the ramified prime `λ`.  The Mathlib cyclotomic file has enough local lemmas, but the proof will involve divisibility and associatedness.
+3. **Easy: square extraction.**  `IsCyclotomicExtension.Rat.three_pid` plus `exists_associated_pow_of_mul_eq_pow'` is exactly the required PID/UFD tool.
+4. **Easy: norm/product identity.**  One `rw [eta_sq]`; `ring` lemma.
+
+## 6. Elementary fallback if cyclotomic API becomes too heavy
+
+I do **not** recommend replacing the cyclotomic/PID plan with a raw elementary descent.  A safe fallback is only to use elementary number theory for the coefficient cases after the PID step.
+
+If a fully elementary route is still desired, target a separate theorem around the conic identity:
+
+```text
+S^2 = A^4 - A^2*N^2 + N^4
+⇔ S^2 + 3*(A*N)^2 = (A^2 + N^2)^2.
+```
+
+The first elementary theorem should be a parametrization of primitive solutions to `X^2 + 3Y^2 = Z^2`, not a vague descent:
+
+```lean
+import Mathlib.RingTheory.Int.Basic
+import Mathlib.Data.ZMod.Basic
+
+-- theorem shape:
+-- theorem primitive_X_sq_add_three_Y_sq_param
+--     {X Y Z : ℤ}
+--     (hcop : IsCoprime X Y)
+--     (hZ : 0 < Z)
+--     (h : X ^ 2 + 3 * Y ^ 2 = Z ^ 2) :
+--   ∃ r t : ℤ,
+--     X = r ^ 2 - 3 * t ^ 2 ∧
+--     Y = 2 * r * t ∧
+--     Z = r ^ 2 + 3 * t ^ 2 ∧
+--     IsCoprime r t
+```
+
+Then specialize:
+
+```lean
+-- theorem shape:
+-- theorem eisenstein_quartic_conic_param
+--     {A N S : ℤ}
+--     (hcop : IsCoprime A N)
+--     (hpos : 0 < A ^ 2 + N ^ 2)
+--     (h : S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4) :
+--   ∃ r t : ℤ,
+--     S = r ^ 2 - 3 * t ^ 2 ∧
+--     A * N = 2 * r * t ∧
+--     A ^ 2 + N ^ 2 = r ^ 2 + 3 * t ^ 2 ∧
+--     IsCoprime r t
+```
+
+This gives explicit parameters, but it does not yet give a verified smaller triple `(A',N',S')`.  I would reject any proposed elementary descent that does not provide checked formulas and a strictly decreasing measure.  In contrast, the cyclotomic plan reduces the problem to finite unit cases and pure integer lemmas without invoking E1/E24/full-cover residuals.
+
+## Recommended implementation order
+
+1. `EisensteinCoords.lean`: `exists_eta_coords`, `eta_coords_ext`, coordinate formulas for `β^2`, `η*β^2`, `η^2*β^2`.
+2. `EisensteinNorm.lean`: `alpha`, `alphaConj`, `alpha_mul_alphaConj`.
+3. `EisensteinCoprime.lean`: `lambda_not_dvd_alpha_of_isCoprime`, `alpha_coprime_alphaConj_of_isCoprime`.
+4. `EisensteinSquare.lean`: `alpha_eq_unit_mul_square_of_solution` using `three_pid` and `exists_associated_pow_of_mul_eq_pow'`.
+5. `EisensteinCoeffCases.lean`: pure integer coefficient cases.
+6. `N12QuarticEisenstein.lean`: assemble `IntQuarticEisensteinPrimitive`.
+
+This route is independent of the E1 finite-point theorem and of the full-cover residual theorem.  It uses only local cyclotomic arithmetic, PID/UFD extraction, and elementary integer lemmas.
