@@ -1,172 +1,172 @@
-# Q2291: Lean helper for coprime integer factors of a square
+# Q2297: `QuarticB` wrapper via existing helpers
 
 ```lean
-import Mathlib.Data.Int.GCD
-import Mathlib.Data.Nat.Factorization.Basic
-import Mathlib.Tactic
+-- Paste this below the listed helpers in
+-- FLT/Assumptions/MazurProof/RationalPointsN12.lean,
+-- inside `namespace MazurProof.RationalPointsN12`.
 
-namespace FLT.N12
+lemma odd_odd_split_as_sum_diff {u v : ℤ}
+    (hu : Odd u) (hv : Odd v) :
+    ∃ R S : ℤ, u = R + S ∧ v = R - S ∧ Odd (R + S) := by
+  rcases hu with ⟨U, hU⟩
+  rcases hv with ⟨V, hV⟩
+  refine ⟨U + V + 1, U - V, ?_, ?_, ?_⟩
+  · rw [hU]
+    ring
+  · rw [hV]
+    ring
+  · exact ⟨U, by ring⟩
 
-private noncomputable def halfFactorization (n : ℕ) : ℕ →₀ ℕ :=
-  n.factorization.mapRange (fun e => e / 2) (by simp)
-
-private theorem halfFactorization_support_prime (n : ℕ) :
-    ∀ p ∈ (halfFactorization n).support, Nat.Prime p := by
-  intro p hp
-  rw [Finsupp.mem_support_iff] at hp
-  by_contra hprime
-  exact hp (by
-    simp [halfFactorization, Nat.factorization_eq_zero_of_not_prime n hprime])
-
-private noncomputable def factorizationHalfRoot (n : ℕ) : ℕ :=
-  (halfFactorization n).prod fun p e => p ^ e
-
-private theorem factorizationHalfRoot_ne_zero (n : ℕ) :
-    factorizationHalfRoot n ≠ 0 := by
-  classical
-  rw [factorizationHalfRoot]
-  change ((halfFactorization n).support.prod fun p => p ^ halfFactorization n p) ≠ 0
-  exact Finset.prod_ne_zero_iff.mpr (by
-    intro p hp
-    exact pow_ne_zero _ ((halfFactorization_support_prime n p hp).ne_zero))
-
-private theorem factorization_factorizationHalfRoot (n : ℕ) :
-    (factorizationHalfRoot n).factorization = halfFactorization n := by
-  exact Nat.prod_pow_factorization_eq_self (halfFactorization_support_prime n)
-
-private theorem Nat_exists_sq_of_factorization_even {n : ℕ}
-    (h : ∀ p, Even (n.factorization p)) :
-    ∃ r : ℕ, n = r ^ 2 := by
-  by_cases hn : n = 0
-  · exact ⟨0, by simp [hn]⟩
-  refine ⟨factorizationHalfRoot n, ?_⟩
-  apply Nat.eq_of_factorization_eq hn (pow_ne_zero 2 (factorizationHalfRoot_ne_zero n))
-  intro p
-  have hroot : (factorizationHalfRoot n).factorization = halfFactorization n :=
-    factorization_factorizationHalfRoot n
-  calc
-    n.factorization p = 2 * (n.factorization p / 2) := by
-      rcases h p with ⟨k, hk⟩
-      omega
-    _ = (2 • halfFactorization n) p := by
-      simp [halfFactorization]
-    _ = (2 • (factorizationHalfRoot n).factorization) p := by
-      rw [← hroot]
-    _ = ((factorizationHalfRoot n) ^ 2).factorization p := by
-      simp [Nat.factorization_pow]
-
-private theorem Nat_even_factorization_of_coprime_mul_eq_sq
-    {a b z p : ℕ} (hcop : a.Coprime b) (h : a * b = z ^ 2) :
-    Even (a.factorization p) ∧ Even (b.factorization p) := by
-  have hsum : a.factorization p + b.factorization p = 2 * z.factorization p := by
-    calc
-      a.factorization p + b.factorization p = (a * b).factorization p := by
-        rw [Nat.factorization_mul_apply_of_coprime hcop]
-      _ = (z ^ 2).factorization p := by rw [h]
-      _ = (2 • z.factorization) p := by rw [Nat.factorization_pow]
-      _ = 2 * z.factorization p := by simp
-  by_cases hpa : a.factorization p = 0
-  · rw [hpa, zero_add] at hsum
-    exact ⟨by simp [hpa], ⟨z.factorization p, by omega⟩⟩
-  · have hpb : b.factorization p = 0 := by
-      by_contra hpb
-      have hpprime : Nat.Prime p := by
-        by_contra hpnot
-        exact hpa (Nat.factorization_eq_zero_of_not_prime a hpnot)
-      have hdva : p ∣ a := Nat.dvd_of_factorization_pos hpa
-      have hdvb : p ∣ b := Nat.dvd_of_factorization_pos hpb
-      have hdvg : p ∣ Nat.gcd a b := Nat.dvd_gcd hdva hdvb
-      have hgcd : Nat.gcd a b = 1 := by simpa [Nat.Coprime] using hcop
-      have hdv1 : p ∣ 1 := by simpa [hgcd] using hdvg
-      exact hpprime.not_dvd_one hdv1
-    rw [hpb, add_zero] at hsum
-    exact ⟨⟨z.factorization p, by omega⟩, by simp [hpb]⟩
-
-theorem Nat_coprime_mul_eq_sq {a b z : ℕ}
-    (hcop : a.Coprime b) (h : a * b = z ^ 2) :
-    ∃ r s : ℕ, a = r ^ 2 ∧ b = s ^ 2 := by
-  have haEven : ∀ p, Even (a.factorization p) := fun p =>
-    (Nat_even_factorization_of_coprime_mul_eq_sq (a := a) (b := b) (z := z) (p := p) hcop h).1
-  have hbEven : ∀ p, Even (b.factorization p) := fun p =>
-    (Nat_even_factorization_of_coprime_mul_eq_sq (a := a) (b := b) (z := z) (p := p) hcop h).2
-  rcases Nat_exists_sq_of_factorization_even haEven with ⟨r, hr⟩
-  rcases Nat_exists_sq_of_factorization_even hbEven with ⟨s, hs⟩
-  exact ⟨r, s, hr, hs⟩
-
-theorem Int_coprime_mul_eq_sq_of_nonneg {a b z : ℤ}
-    (ha : 0 ≤ a) (hb : 0 ≤ b) (hcop : Int.gcd a b = 1)
-    (h : a * b = z ^ 2) :
-    ∃ r s : ℤ, a = r ^ 2 ∧ b = s ^ 2 := by
-  let A : ℕ := a.natAbs
-  let B : ℕ := b.natAbs
-  let Z : ℕ := z.natAbs
-  have hnat : A * B = Z ^ 2 := by
-    change a.natAbs * b.natAbs = z.natAbs ^ 2
-    calc
-      a.natAbs * b.natAbs = (a * b).natAbs := by simpa using (Int.natAbs_mul a b).symm
-      _ = (z ^ 2).natAbs := by rw [h]
-      _ = z.natAbs ^ 2 := by simp
-  have hcopNat : A.Coprime B := by
-    change Nat.gcd a.natAbs b.natAbs = 1
-    simpa [A, B, Int.gcd_def] using hcop
-  rcases Nat_coprime_mul_eq_sq hcopNat hnat with ⟨r, s, hr, hs⟩
-  refine ⟨(r : ℤ), (s : ℤ), ?_, ?_⟩
+lemma split_mul_ne_zero_of_sq_ne {u v R S : ℤ}
+    (hu : u = R + S)
+    (hv : v = R - S)
+    (hsqne : u ^ 2 ≠ v ^ 2) :
+    R * S ≠ 0 := by
+  intro hRS
+  apply hsqne
+  rcases mul_eq_zero.mp hRS with hR | hS
   · calc
-      a = (A : ℤ) := by simpa [A] using (Int.natAbs_of_nonneg ha).symm
-      _ = (r : ℤ) ^ 2 := by simpa using congrArg (fun n : ℕ => (n : ℤ)) hr
+      u ^ 2 = (R + S) ^ 2 := by rw [hu]
+      _ = (R - S) ^ 2 := by rw [hR]; ring
+      _ = v ^ 2 := by rw [hv]
   · calc
-      b = (B : ℤ) := by simpa [B] using (Int.natAbs_of_nonneg hb).symm
-      _ = (s : ℤ) ^ 2 := by simpa using congrArg (fun n : ℕ => (n : ℤ)) hs
+      u ^ 2 = (R + S) ^ 2 := by rw [hu]
+      _ = (R - S) ^ 2 := by rw [hS]; ring
+      _ = v ^ 2 := by rw [hv]
 
-end FLT.N12
+lemma int_gcd_of_coprime_sum_diff {u v R S : ℤ}
+    (hcop : Int.gcd u v = 1)
+    (hu : u = R + S)
+    (hv : v = R - S) :
+    Int.gcd R S = 1 := by
+  have hgcd_uv : Int.gcd (R + S) (R - S) = 1 := by
+    simpa [hu, hv] using hcop
+  have hbez : ∃ x y : ℤ, (1 : ℤ) = (R + S) * x + (R - S) * y := by
+    exact (Int.gcd_dvd_iff (a := R + S) (b := R - S) (n := 1)).mp
+      (by simpa [hgcd_uv])
+  have hEqInt : (1 : ℤ) = (Int.gcd R S : ℤ) := by
+    refine Int.gcd_greatest (a := R) (b := S) (d := 1) ?_ ?_ ?_ ?_
+    · norm_num
+    · simp
+    · simp
+    · intro e heR heS
+      rcases hbez with ⟨x, y, hxy⟩
+      have he_sum : e ∣ R + S := dvd_add heR heS
+      have he_diff : e ∣ R - S := dvd_sub heR heS
+      rw [hxy]
+      exact dvd_add
+        (dvd_mul_of_dvd_left he_sum x)
+        (dvd_mul_of_dvd_left he_diff y)
+  exact Int.ofNat_inj.mp hEqInt.symm
+
+-- This is the requested final wrapper, but with the necessary extra
+-- non-degeneracy hypothesis `hsqne : u ^ 2 ≠ v ^ 2`.
+theorem quartic_B_to_pythagoreanQuarticRhs
+    {u v Z : ℤ}
+    (hcop : Int.gcd u v = 1)
+    (hu : Odd u) (hv : Odd v)
+    (huv0 : u * v ≠ 0)
+    (hne : 3 * u ^ 2 - v ^ 2 ≠ 0)
+    (hsqne : u ^ 2 ≠ v ^ 2)
+    (hB : QuarticB u v Z) :
+    ∃ m n b : ℤ,
+      m * n ≠ 0 ∧ Int.gcd m n = 1 ∧ Odd (m + n) ∧
+      b ^ 2 = pythagoreanQuarticRhs m n := by
+  rcases quarticB_twist_factor_halves_odd hu hv with ⟨A, hA, hAOdd⟩
+  rcases quarticB_sum_factor_halves_odd hu hv with ⟨B, hBhalf, _hBOdd⟩
+
+  have hZsq_four : Z ^ 2 = 4 * (A * B) := by
+    calc
+      Z ^ 2 = (3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2) := by
+        simpa [QuarticB] using hB
+      _ = (2 * A) * (2 * B) := by rw [hA, hBhalf]
+      _ = 4 * (A * B) := by ring
+
+  have hZeven : Even Z := even_of_sq_eq_four_mul hZsq_four
+  rcases hZeven with ⟨c, hZc⟩
+
+  have hABsq : A * B = c ^ 2 := by
+    have h4 : 4 * (A * B) = 4 * c ^ 2 := by
+      calc
+        4 * (A * B) = Z ^ 2 := by rw [hZsq_four]
+        _ = (2 * c) ^ 2 := by
+          rw [hZc]
+          ring
+        _ = 4 * c ^ 2 := by ring
+    nlinarith
+
+  have hleft_pos : 0 < 3 * u ^ 2 - v ^ 2 :=
+    quarticB_left_factor_pos huv0 hne hB
+  have hsum_pos : 0 < u ^ 2 + v ^ 2 :=
+    quarticB_sum_sq_pos_of_mul_ne_zero huv0
+  have hA_nonneg : 0 ≤ A := by nlinarith [hA, hleft_pos]
+  have hB_nonneg : 0 ≤ B := by nlinarith [hBhalf, hsum_pos]
+
+  have hcopAB : Int.gcd A B = 1 :=
+    quarticB_half_factors_coprime hcop hAOdd hA hBhalf
+
+  rcases int_coprime_mul_eq_sq_of_nonneg hA_nonneg hB_nonneg hcopAB hABsq
+    with ⟨r, s, hr, hs⟩
+
+  have hsplit₁ : 3 * u ^ 2 - v ^ 2 = 2 * r ^ 2 := by
+    calc
+      3 * u ^ 2 - v ^ 2 = 2 * A := hA
+      _ = 2 * r ^ 2 := by rw [hr]
+  have hsplit₂ : u ^ 2 + v ^ 2 = 2 * s ^ 2 := by
+    calc
+      u ^ 2 + v ^ 2 = 2 * B := hBhalf
+      _ = 2 * s ^ 2 := by rw [hs]
+
+  rcases odd_odd_split_as_sum_diff hu hv with ⟨R, S, huRS, hvRS, hpar⟩
+  have hRS0 : R * S ≠ 0 :=
+    split_mul_ne_zero_of_sq_ne huRS hvRS hsqne
+  have hcopRS : Int.gcd R S = 1 :=
+    int_gcd_of_coprime_sum_diff hcop huRS hvRS
+
+  exact quartic_B_split_halves_to_pythagoreanQuarticRhs
+    hsplit₁ hsplit₂ huRS hvRS hRS0 hcopRS hpar
 ```
 
-## Notes
+## Why the extra `u ^ 2 ≠ v ^ 2` hypothesis is needed
 
-The Nat helper is the reusable core:
+Step 5 cannot produce `R * S ≠ 0` from the originally stated assumptions. If `u = R + S` and `v = R - S`, then `R = 0` gives `u = -v`, and `S = 0` gives `u = v`; both are exactly the degeneracies covered by `u ^ 2 = v ^ 2`.
+
+A concrete Lean-checkable obstruction is `u = v = 1`, `Z = 2`:
 
 ```lean
-theorem Nat_coprime_mul_eq_sq {a b z : ℕ}
-    (hcop : a.Coprime b) (h : a * b = z ^ 2) :
-    ∃ r s : ℕ, a = r ^ 2 ∧ b = s ^ 2
+example :
+    Int.gcd (1 : ℤ) 1 = 1 ∧
+    Odd (1 : ℤ) ∧ Odd (1 : ℤ) ∧
+    (1 : ℤ) * 1 ≠ 0 ∧
+    3 * (1 : ℤ) ^ 2 - 1 ^ 2 ≠ 0 ∧
+    QuarticB 1 1 2 := by
+  norm_num [QuarticB]
+
+example {R S : ℤ}
+    (hu : (1 : ℤ) = R + S)
+    (hv : (1 : ℤ) = R - S) :
+    R * S = 0 := by
+  have hS : S = 0 := by nlinarith
+  simp [hS]
 ```
 
-The Int wrapper is the requested API:
+So the existing helper
 
 ```lean
-theorem Int_coprime_mul_eq_sq_of_nonneg {a b z : ℤ}
-    (ha : 0 ≤ a) (hb : 0 ≤ b) (hcop : Int.gcd a b = 1)
-    (h : a * b = z ^ 2) :
-    ∃ r s : ℤ, a = r ^ 2 ∧ b = s ^ 2
+quartic_B_split_halves_to_pythagoreanQuarticRhs
 ```
 
-Zero cases are handled by `Nat_exists_sq_of_factorization_even`: it branches on `n = 0` before using `Nat.eq_of_factorization_eq`, because `Nat.factorization 0 = 0` and `Nat.factorization 1 = 0`.
+requires either the strengthened wrapper above, or a separate proof branch for the degenerate cases `u = v` and `u = -v` that does not go through `R * S ≠ 0`.
 
-Key Mathlib APIs to check/grep:
+## Notes on the proof
+
+The `R,S` split is division-free: if `u = 2U + 1` and `v = 2V + 1`, take
 
 ```lean
-#check Nat.factorization_mul_apply_of_coprime
-#check Nat.factorization_pow
-#check Nat.prod_pow_factorization_eq_self
-#check Nat.eq_of_factorization_eq
-#check Nat.dvd_of_factorization_pos
-#check Nat.factorization_eq_zero_of_not_prime
-#check Int.gcd_def
-#check Int.natAbs_mul
-#check Int.natAbs_of_nonneg
+R = U + V + 1
+S = U - V
 ```
 
-```bash
-grep -R "factorization_mul_apply_of_coprime\|prod_pow_factorization_eq_self\|eq_of_factorization_eq" .lake/packages/mathlib/Mathlib/Data/Nat/Factorization
-grep -R "dvd_of_factorization_pos\|factorization_eq_zero_of_not_prime\|factorization_pow" .lake/packages/mathlib/Mathlib/Data/Nat/Factorization
-grep -R "gcd_def\|natAbs_mul\|natAbs_of_nonneg" .lake/packages/mathlib/Mathlib/Data/Int
-```
+Then `R + S = u` and `R - S = v` by `ring`, and `Odd (R + S)` is witnessed by `U`.
 
-For QuarticA/QuarticB split lemmas, prove the half-factors `A B : ℤ` satisfy `0 ≤ A`, `0 ≤ B`, `Int.gcd A B = 1`, and `A * B = W ^ 2`, then use:
-
-```lean
-rcases Int_coprime_mul_eq_sq_of_nonneg hA_nonneg hB_nonneg hcopAB hprod
-  with ⟨r, s, hA_sq, hB_sq⟩
-```
-
-For the QuarticB “twice squares” form, define `A := (3*u^2 - v^2)/2` and `B := (u^2 + v^2)/2`, prove `A * B = (Z/2)^2`, apply the helper, then rewrite back with `ring_nf` and the evenness/divisibility facts.
+The gcd lemma uses Bezout from `Int.gcd_dvd_iff`: since `Int.gcd (R + S) (R - S) = 1`, any common divisor of `R` and `S` divides both `R + S` and `R - S`, hence divides `1`; `Int.gcd_greatest` then gives `Int.gcd R S = 1`.
