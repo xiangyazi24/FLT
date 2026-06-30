@@ -1,27 +1,27 @@
-# Q2693 (dm-codex1): raw square branch parity/factorization Lean plan
+# Q2693 (dm-codex1): raw square branch parity/factorization Lean code
 
 Repo/branch requested: `xiangyazi24/FLT@scratch`  
 Target Lean area: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`  
 Namespace: `MazurProof.RationalPointsN12`
 
-Connector note: the GitHub connector still does not expose the target Lean file at the requested path, so I cannot honestly claim this was compiled against the repository checkout. The code below is written against the exact interfaces from the prompt. The helper layer avoids `sorry` and avoids new axioms. The only intentionally isolated uncertainty is the final adapter from the already-proved square-factor theorem names to the local adapter signatures; if the theorem argument order in the file differs, only that adapter block should need adjustment.
+Connector note: the GitHub connector still does not expose the target Lean file at the requested path, so I cannot honestly claim this was compiled against the repository checkout. The code below is written against the exact interfaces from the prompt. The helper layer avoids `sorry` and new axioms. The final factorization is isolated through two adapter propositions so that any mismatch in the checked square-factor theorem argument order is confined to a tiny adapter block.
 
-## Mathematical structure
+## Structure
 
-The branch gives two square products:
+The branch gives exactly these square products:
 
 ```text
 A^2 = (m - n) * (m + n)
 N^2 = n * (2*m - n)
 ```
 
-The correct split is:
+The factor split should be:
 
-* `m` is odd.
-* If `n` is even, then `m-n` and `m+n` are odd and coprime; `n` and `2*m-n` are even with coprime halves.
-* If `n` is odd, then `m-n` and `m+n` are even with coprime halves; `n` and `2*m-n` are odd and coprime.
+* prove `Odd m`;
+* if `Even n`, use `PosSqOfCoprimeMulSqStatement` on `(m-n, m+n)` and `PosTwoSqOfGcdTwoMulSqStatement` on `(n, 2*m-n)`;
+* if `Odd n`, use `PosTwoSqOfGcdTwoMulSqStatement` on `(m-n, m+n)` and `PosSqOfCoprimeMulSqStatement` on `(n, 2*m-n)`.
 
-The helpers below prove exactly those parity/coprimality facts using the `IsCoprime` Bezout definition, not `Int.gcd`.
+The helpers use the Bezout definition of `IsCoprime`, not `Int.gcd`.
 
 ## Pasteable helper layer and `rawSqBranchMParityStatement`
 
@@ -33,7 +33,7 @@ import FLT.Assumptions.MazurProof.N12QuarticEisenstein
 
 namespace MazurProof.RationalPointsN12
 
-/-! ### Basic `Even`/`Odd`/`2 ∣ _` conversions over `ℤ` -/
+/-! ### Explicit `Even`/`Odd`/`2 ∣ _` conversions over `ℤ`. -/
 
 lemma two_dvd_of_even_int {x : ℤ} (hx : Even x) : (2 : ℤ) ∣ x := by
   rcases hx with ⟨k, hk⟩
@@ -58,7 +58,7 @@ lemma odd_of_not_two_dvd_int {x : ℤ} (hx : ¬ (2 : ℤ) ∣ x) : Odd x := by
   · exact False.elim (hx (two_dvd_of_even_int hxEven))
   · exact hxOdd
 
-/-! ### Small modular fact: an integer square is never `3 mod 4`. -/
+/-! ### A square is not `3 mod 4`. -/
 
 lemma int_sq_ne_four_mul_add_three (a k : ℤ) : a ^ 2 ≠ 4 * k + 3 := by
   intro h
@@ -94,7 +94,7 @@ lemma odd_of_isCoprime_even_left {m n : ℤ}
   · exact False.elim ((not_isCoprime_of_even_even hm hnEven) hcop)
   · exact hnOdd
 
-/-! ### Parity transport lemmas for the four branch factors. -/
+/-! ### Parity transport for the four branch factors. -/
 
 lemma odd_sub_even_int {m n : ℤ} (hm : Odd m) (hn : Even n) : Odd (m - n) := by
   rcases hm with ⟨a, ha⟩
@@ -233,7 +233,7 @@ end MazurProof.RationalPointsN12
 
 ## Factorization assembly from square-factor adapters
 
-This is the robust part: it proves the residual factorization from two adapter signatures matching exactly what this branch needs. It contains no `sorry` and does not depend on the internal argument order of the checked square-factor theorem constants.
+The proof below is the requested residual assembly modulo the exact already-proved theorem signatures. It is often the most stable way to land this: first prove the two tiny adapters from the checked theorem constants, then this proof should not need to know their internal statement order.
 
 ```lean
 import Mathlib.Tactic
@@ -250,8 +250,8 @@ def PosSqFactorAdapter : Prop :=
     ∃ a b : ℤ, 0 < a ∧ 0 < b ∧ x = a ^ 2 ∧ y = b ^ 2
 
 /-- Adapter shape for `posTwoSqOfGcdTwoMulSqStatement`, phrased with explicit
-positive halves. If the checked theorem in the file is phrased with `x / 2`,
-prove this adapter once from that theorem and use the assembly unchanged. -/
+positive halves. If the checked theorem is phrased with `x / 2` and `y / 2`,
+prove this adapter once from that theorem and keep the assembly unchanged. -/
 def PosTwoFactorAdapter : Prop :=
   ∀ {x y z u v : ℤ},
     0 < x → 0 < y →
@@ -260,8 +260,7 @@ def PosTwoFactorAdapter : Prop :=
     z ^ 2 = x * y →
     ∃ a b : ℤ, 0 < a ∧ 0 < b ∧ x = 2 * a ^ 2 ∧ y = 2 * b ^ 2
 
-/-- Branch factorization from the two already-proved square-factor lemmas,
-with those lemmas supplied through stable local adapters. -/
+/-- Branch factorization from the two square-factor adapters. -/
 theorem rawSqBranchFactorizationStatement_from_squareFactorAdapters
     (hSq : PosSqFactorAdapter)
     (hTwo : PosTwoFactorAdapter) :
@@ -333,7 +332,7 @@ end MazurProof.RationalPointsN12
 
 ## Expected adapter instantiation from the checked theorem constants
 
-If the checked theorem constants have the natural argument order matching the statement names, this should close the final theorem. If the existing `PosTwoSqOfGcdTwoMulSqStatement` is phrased with `Even x`, `Even y`, and `IsCoprime (x / 2) (y / 2)` instead of explicit halves, keep the previous assembly theorem unchanged and only replace the proof of `posTwoFactorAdapter_checked`.
+If the checked theorem constants have the natural argument order matching the statement names, this closes the final residual. If `PosTwoSqOfGcdTwoMulSqStatement` is phrased with `Even x`, `Even y`, and `IsCoprime (x / 2) (y / 2)` instead of explicit halves, replace only the proof of `posTwoFactorAdapter_checked`.
 
 ```lean
 import Mathlib.Tactic
@@ -356,13 +355,3 @@ theorem rawSqBranchFactorizationStatement : RawSqBranchFactorizationStatement :=
 
 end MazurProof.RationalPointsN12
 ```
-
-## Notes on exact theorem dependencies
-
-The proof of `rawSqBranchMParityStatement` uses only:
-
-* `Int.even_or_odd`;
-* `omega`, `ring`, and `ring_nf`;
-* the Bezout definition of `IsCoprime`.
-
-The factorization assembly uses the square-factor theorems only through the two adapter propositions. This is deliberate: it keeps all branch-specific parity/gcd bookkeeping local and makes any mismatch in the global square-factor lemma signatures a one-line adapter problem, not a reason to rewrite the branch proof.
