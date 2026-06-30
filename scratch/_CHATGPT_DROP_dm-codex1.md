@@ -1,160 +1,159 @@
-# Q2310: `QuarticA` opposite-parity branch
+# Q2324: `QuarticA` opposite-parity leg coprime
 
 ```lean
 import Mathlib.NumberTheory.PythagoreanTriples
+import Mathlib.Algebra.Ring.Int.Parity
+import Mathlib.RingTheory.Int.Basic
 import Mathlib.Tactic
 import FLT.Assumptions.MazurProof.RationalPointsN12
 
 namespace MazurProof.RationalPointsN12
 
-lemma quarticA_int_sum_sq_pos_of_mul_ne_zero {u v : ℤ}
-    (huv0 : u * v ≠ 0) :
-    0 < u ^ 2 + v ^ 2 := by
-  have hu0 : u ≠ 0 := left_ne_zero_of_mul huv0
-  exact add_pos_of_pos_of_nonneg (sq_pos_of_ne_zero hu0) (sq_nonneg v)
+/--
+In the opposite-parity branch both QuarticA factors are odd, hence their
+product is odd.  This is the parity fact that rules out a common factor `2`
+between `Z` and `2 * v ^ 2`.
+-/
+lemma quarticA_oppParity_factor_product_odd {u v : ℤ}
+    (hopp : (Odd u ∧ Even v) ∨ (Even u ∧ Odd v)) :
+    Odd ((u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2)) := by
+  rcases hopp with h | h
+  · rcases h with ⟨hu, hv⟩
+    have hu2 : Odd (u ^ 2) := by
+      simpa using (hu.pow : Odd (u ^ 2))
+    have hv2 : Even (v ^ 2) := by
+      simpa using ((Int.even_pow' (m := v) (n := 2) (by decide)).2 hv)
+    have hleft : Odd (u ^ 2 - v ^ 2) := hu2.sub_even hv2
+    have h3v2 : Even (3 * v ^ 2) := hv2.mul_left 3
+    have hright : Odd (u ^ 2 + 3 * v ^ 2) := hu2.add_even h3v2
+    exact hleft.mul hright
+  · rcases h with ⟨hu, hv⟩
+    have hu2 : Even (u ^ 2) := by
+      simpa using ((Int.even_pow' (m := u) (n := 2) (by decide)).2 hu)
+    have hv2 : Odd (v ^ 2) := by
+      simpa using (hv.pow : Odd (v ^ 2))
+    have hleft : Odd (u ^ 2 - v ^ 2) := hu2.sub_odd hv2
+    have hthree : Odd (3 : ℤ) := ⟨1, by norm_num⟩
+    have h3v2 : Odd (3 * v ^ 2) := hthree.mul hv2
+    have hright : Odd (u ^ 2 + 3 * v ^ 2) := hu2.add_odd h3v2
+    exact hleft.mul hright
 
-lemma quarticA_even_square_leg_mod_two (v : ℤ) :
-    (2 * v ^ 2) % 2 = 0 := by
-  simpa using Int.mul_emod_right (2 : ℤ) (v ^ 2)
-
-lemma quarticA_first_leg_mod_two_eq_one_of_second_leg_even
-    {x y z : ℤ}
-    (htrip : PythagoreanTriple x y z)
-    (hcop : Int.gcd x y = 1)
-    (hy : y % 2 = 0) :
-    x % 2 = 1 := by
-  obtain hbad | hgood := htrip.even_odd_of_coprime hcop
-  · rw [hy] at hbad
-    exact False.elim (zero_ne_one hbad.2)
-  · exact hgood.1
+/-- QuarticA plus opposite parity forces `Z` odd. -/
+lemma quarticA_oppParity_Z_odd {u v Z : ℤ}
+    (hopp : (Odd u ∧ Even v) ∨ (Even u ∧ Odd v))
+    (hA : QuarticA u v Z) :
+    Odd Z := by
+  have hAeq :
+      Z ^ 2 = (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2) := by
+    simpa [QuarticA] using hA
+  have hZ2 : Odd (Z ^ 2) := by
+    rw [hAeq]
+    exact quarticA_oppParity_factor_product_odd (u := u) (v := v) hopp
+  exact ((Int.odd_pow' (m := Z) (n := 2) (by decide)).1 hZ2)
 
 /--
-The core Pythagorean extraction.  The second leg is `2 * v ^ 2`, and after
-primitive classification it is forced to be the even leg `2 * m * n`.
--/
-theorem quarticA_evenLegParams_of_pythagorean_leg_coprime
-    {u v Z : ℤ}
-    (huv0 : u * v ≠ 0)
-    (htrip : PythagoreanTriple Z (2 * v ^ 2) (u ^ 2 + v ^ 2))
-    (hlegcop : Int.gcd Z (2 * v ^ 2) = 1) :
-    ∃ r s : ℤ,
-      r * s ≠ 0 ∧ Int.gcd r s = 1 ∧
-      r * s = v ^ 2 ∧
-      r ^ 2 + s ^ 2 = u ^ 2 + v ^ 2 := by
-  have hZmod : Z % 2 = 1 :=
-    quarticA_first_leg_mod_two_eq_one_of_second_leg_even
-      htrip hlegcop (quarticA_even_square_leg_mod_two v)
-  have hsum_pos : 0 < u ^ 2 + v ^ 2 :=
-    quarticA_int_sum_sq_pos_of_mul_ne_zero huv0
-  obtain ⟨m, n, _hZ, h2v, hsum, hgcd, _hmnpar, _hm_nonneg⟩ :=
-    PythagoreanTriple.coprime_classification'
-      htrip hlegcop hZmod hsum_pos
-  have hprod : m * n = v ^ 2 := by
-    have htwo : 2 * (m * n) = 2 * (v ^ 2) := by
-      calc
-        2 * (m * n) = 2 * m * n := by ring
-        _ = 2 * v ^ 2 := h2v.symm
-    exact mul_left_cancel₀ (by norm_num : (2 : ℤ) ≠ 0) htwo
-  have hmn0 : m * n ≠ 0 := by
-    have hv0 : v ≠ 0 := right_ne_zero_of_mul huv0
-    have hvsq0 : v ^ 2 ≠ 0 := pow_ne_zero 2 hv0
-    simpa [hprod] using hvsq0
-  exact ⟨m, n, hmn0, hgcd, hprod, hsum.symm⟩
+A direct primitive-leg coprimality proof for the QuarticA Pythagorean triple
+`(Z, 2 * v ^ 2, u ^ 2 + v ^ 2)`.
 
-/--
-Same extraction, with the full opposite-parity branch hypotheses in the
-interface.  The only extra input is the primitive Pythagorean-leg coprimality
-lemma for the QuarticA construction.
+The hypotheses `u * v ≠ 0` and `u ^ 2 ≠ v ^ 2` are not used for this gcd
+statement; they are kept to match the project-facing bridge interface.
 -/
-theorem quarticA_evenLegParams_of_oppParity_with_leg_coprime
-    {u v Z : ℤ}
-    (_hcop : Int.gcd u v = 1)
-    (huv0 : u * v ≠ 0)
-    (_hne : u ^ 2 ≠ v ^ 2)
-    (_hopp : (Odd u ∧ Even v) ∨ (Even u ∧ Odd v))
-    (hA : QuarticA u v Z)
-    (hlegcop : Int.gcd Z (2 * v ^ 2) = 1) :
-    ∃ r s : ℤ,
-      r * s ≠ 0 ∧ Int.gcd r s = 1 ∧
-      r * s = v ^ 2 ∧
-      r ^ 2 + s ^ 2 = u ^ 2 + v ^ 2 := by
-  exact quarticA_evenLegParams_of_pythagorean_leg_coprime
-    (u := u) (v := v) (Z := Z)
-    huv0 (quarticA_pythagoreanTriple hA) hlegcop
-
-theorem quarticA_eisensteinParam_of_oppParity_with_leg_coprime
+theorem quarticA_oppParity_leg_coprime
     {u v Z : ℤ}
     (hcop : Int.gcd u v = 1)
-    (huv0 : u * v ≠ 0)
-    (hne : u ^ 2 ≠ v ^ 2)
+    (_huv0 : u * v ≠ 0)
+    (_hne : u ^ 2 ≠ v ^ 2)
     (hopp : (Odd u ∧ Even v) ∨ (Even u ∧ Odd v))
-    (hA : QuarticA u v Z)
-    (hlegcop : Int.gcd Z (2 * v ^ 2) = 1) :
-    QuarticAEisensteinParam u v := by
-  obtain ⟨r, s, hrs0, hrs_coprime, hprod, hhyp⟩ :=
-    quarticA_evenLegParams_of_oppParity_with_leg_coprime
-      (u := u) (v := v) (Z := Z)
-      hcop huv0 hne hopp hA hlegcop
-  exact quarticA_eisensteinParam_from_evenLegParams
-    (u := u) (v := v) (r := r) (s := s)
-    hrs0 hrs_coprime hprod hhyp
-
-/--
-Small remaining project-specific input, stated as a parameter rather than an
-axiom.  If the file already has this under another name, apply this theorem to
-that existing lemma.
--/
-theorem quarticAOppParityParamBridge_of_leg_coprime
-    (hlegcop_of_quarticA :
-      ∀ {u v Z : ℤ},
-        Int.gcd u v = 1 →
-        u * v ≠ 0 →
-        u ^ 2 ≠ v ^ 2 →
-        ((Odd u ∧ Even v) ∨ (Even u ∧ Odd v)) →
-        QuarticA u v Z →
-        Int.gcd Z (2 * v ^ 2) = 1) :
-    QuarticAOppParityParamBridge := by
-  dsimp [QuarticAOppParityParamBridge]
-  intro u v Z hcop huv0 hne hopp hA
-  exact quarticA_eisensteinParam_of_oppParity_with_leg_coprime
-    (u := u) (v := v) (Z := Z)
-    hcop huv0 hne hopp hA
-    (hlegcop_of_quarticA
-      (u := u) (v := v) (Z := Z)
-      hcop huv0 hne hopp hA)
+    (hA : QuarticA u v Z) :
+    Int.gcd Z (2 * v ^ 2) = 1 := by
+  rw [Int.gcd_eq_natAbs, ← Nat.coprime_iff_gcd_eq_one]
+  refine Nat.coprime_of_dvd' ?_
+  intro p hp hpZ hpLeg
+  have hpZ_int : (p : ℤ) ∣ Z := by
+    rwa [Int.natCast_dvd]
+  have hpLeg_int : (p : ℤ) ∣ 2 * v ^ 2 := by
+    rwa [Int.natCast_dvd]
+  rcases prime_two_or_dvd_of_dvd_two_mul_pow_self_two hp hpLeg_int with rfl | hpv_nat
+  · exfalso
+    have hZodd : Odd Z := quarticA_oppParity_Z_odd (u := u) (v := v) (Z := Z) hopp hA
+    have hZeven : Even Z := even_iff_two_dvd.mpr hpZ_int
+    exact (Int.not_odd_iff_even.mpr hZeven) hZodd
+  · have hAeq :
+        Z ^ 2 = (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2) := by
+      simpa [QuarticA] using hA
+    have hpv_int : (p : ℤ) ∣ v := by
+      rwa [Int.natCast_dvd]
+    have hpZ2 : (p : ℤ) ∣ Z ^ 2 := by
+      simpa [pow_two] using dvd_mul_of_dvd_left hpZ_int Z
+    have hprod :
+        (p : ℤ) ∣ (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2) := by
+      rwa [← hAeq]
+    have hpv2 : (p : ℤ) ∣ v ^ 2 := by
+      simpa [pow_two] using dvd_mul_of_dvd_left hpv_int v
+    have hpv4 : (p : ℤ) ∣ v ^ 4 := by
+      exact dvd_trans hpv2 ⟨v ^ 2, by ring⟩
+    have hterm1 : (p : ℤ) ∣ 2 * u ^ 2 * v ^ 2 := by
+      exact dvd_mul_of_dvd_right hpv2 (2 * u ^ 2)
+    have hterm2 : (p : ℤ) ∣ 3 * v ^ 4 := by
+      exact dvd_mul_of_dvd_right hpv4 3
+    have htail : (p : ℤ) ∣ 2 * u ^ 2 * v ^ 2 - 3 * v ^ 4 :=
+      dvd_sub hterm1 hterm2
+    have hfac_expand :
+        (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2) =
+          u ^ 4 + 2 * u ^ 2 * v ^ 2 - 3 * v ^ 4 := by
+      ring
+    rw [hfac_expand] at hprod
+    have hpu4' :
+        (p : ℤ) ∣
+          (u ^ 4 + 2 * u ^ 2 * v ^ 2 - 3 * v ^ 4) -
+            (2 * u ^ 2 * v ^ 2 - 3 * v ^ 4) :=
+      dvd_sub hprod htail
+    have hpu4 : (p : ℤ) ∣ u ^ 4 := by
+      convert hpu4' using 1
+      ring
+    have hpu_int : (p : ℤ) ∣ u := Int.Prime.dvd_pow' hp hpu4
+    have hpu_nat : p ∣ u.natAbs := by
+      rwa [← Int.natCast_dvd]
+    have hp_gcd : p ∣ Int.gcd u v := by
+      rw [Int.gcd_eq_natAbs]
+      exact Nat.dvd_gcd hpu_nat hpv_nat
+    simpa [hcop] using hp_gcd
 
 end MazurProof.RationalPointsN12
 ```
 
-## Answers to the branch questions
+## Answers to the critical questions
 
-1. In the primitive opposite-parity branch, `2 * v ^ 2` is the even leg, so it corresponds to `2 * m * n`, not to `m ^ 2 - n ^ 2`.  The code above uses `PythagoreanTriple.coprime_classification'`, which orients the classification from `Z % 2 = 1` and `0 < u ^ 2 + v ^ 2`; therefore the second-leg equation returned is exactly
+1. **Which classification leg is `2 * v ^ 2`?**  In the opposite-parity branch, `Z` is odd by `quarticA_oppParity_Z_odd`, while `2 * v ^ 2` is even.  Therefore, in the primitive Pythagorean classification of
+   ```lean
+   PythagoreanTriple Z (2 * v ^ 2) (u ^ 2 + v ^ 2)
+   ```
+   the second leg `2 * v ^ 2` is the even leg `2 * m * n`.  If using `PythagoreanTriple.coprime_classification.mp` directly, the returned first disjunction is the usable one:
+   ```lean
+   Z = m ^ 2 - n ^ 2 ∧ 2 * v ^ 2 = 2 * m * n
+   ```
+   The swapped disjunction would make `Z = 2 * m * n`, hence `Z` even, contradicting `Odd Z`.
+
+2. **Can `r * s = v ^ 2` be obtained exactly?**  Yes, after the orientation is fixed.  From
    ```lean
    h2v : 2 * v ^ 2 = 2 * m * n
    ```
-
-2. Yes, after that orientation we get `m * n = v ^ 2` exactly by cancelling the nonzero integer factor `2`:
+   one gets exactly
    ```lean
-   exact mul_left_cancel₀ (by norm_num : (2 : ℤ) ≠ 0) htwo
+   have hprod : m * n = v ^ 2 := by
+     have htwo : (2 : ℤ) * (m * n) = 2 * (v ^ 2) := by
+       calc
+         (2 : ℤ) * (m * n) = 2 * m * n := by ring
+         _ = 2 * v ^ 2 := h2v.symm
+         _ = 2 * (v ^ 2) := by ring
+     exact mul_left_cancel₀ (by norm_num : (2 : ℤ) ≠ 0) htwo
    ```
-   There is no sign ambiguity at this point.  If one uses `PythagoreanTriple.coprime_classification.mp` directly instead of the primed theorem, the disjunction has an orientation branch where the second leg is `m ^ 2 - n ^ 2`; that branch must be rejected by parity.  The primed theorem packages that rejection.
+   There is no sign ambiguity in this product equation.  The classification theorem’s sign ambiguity is on the hypotenuse equation `z = ±(m ^ 2 + n ^ 2)`, not on the leg equation.
 
-3. This branch does not need `Z` sign normalization and does not need an explicit `Z ≠ 0` hypothesis.  The only positivity needed for `coprime_classification'` is the hypotenuse positivity
+3. **Does the branch need `Z` sign normalized or `Z ≠ 0`?**  No.  The gcd lemma above does not use sign normalization for `Z`, and it does not require an explicit `Z ≠ 0`.  In fact, opposite parity plus `QuarticA u v Z` already gives `Odd Z`, hence `Z ≠ 0` if needed later.  The hypotheses `u * v ≠ 0` and `u ^ 2 ≠ v ^ 2` are not needed for this particular gcd statement, though they may still belong in the safe bridge interface.
+
+4. **Is the target `Int.gcd Z (2 * v ^ 2) = 1` correct?**  Yes.  It is not `2`.  The factor `2` is excluded because `Z` is odd.  Any odd prime divisor common to `Z` and `2 * v ^ 2` divides `v`; using
    ```lean
-   0 < u ^ 2 + v ^ 2
+   Z ^ 2 = (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2)
    ```
-   which follows from `u * v ≠ 0`.  The sign of `Z` is allowed to be either sign of `m ^ 2 - n ^ 2`.
-
-4. The one hard project-specific lemma still needed for a closed proof of `QuarticAOppParityParamBridge` is not parity/orientation; it is primitive-leg coprimality for the Pythagorean triple produced by QuarticA.  Exact type:
-   ```lean
-   ∀ {u v Z : ℤ},
-     Int.gcd u v = 1 →
-     u * v ≠ 0 →
-     u ^ 2 ≠ v ^ 2 →
-     ((Odd u ∧ Even v) ∨ (Even u ∧ Odd v)) →
-     QuarticA u v Z →
-     Int.gcd Z (2 * v ^ 2) = 1
-   ```
-   Once that lemma is available, `quarticAOppParityParamBridge_of_leg_coprime` proves the full bridge.
-
-`u ^ 2 ≠ v ^ 2` and the explicit opposite-parity hypothesis are not used in the local Pythagorean extraction above; they belong naturally in the project-specific leg-coprimality lemma and in the safe bridge interface.
+   and reducing the right-hand side modulo that prime gives divisibility of `u ^ 4`, hence divisibility of `u`, contradicting `Int.gcd u v = 1`.
