@@ -1,294 +1,438 @@
-# Q2687 dm-codex2: N=12 Eisenstein quartic residual audit
+# Q2714 dm-codex2: divided branch vs RationalPointsN12 half-factor infrastructure
 
-Target requested: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`, namespace `MazurProof.RationalPointsN12`.
+Target requested: `FLT/Assumptions/MazurProof/RationalPointsN12.lean`, especially the pythagorean quartic half-factor lemmas, and the local WIP divided branch in `N12QuarticEisenstein.lean`.
 
-Connector note: the GitHub connector did not expose the target Lean file at the requested path on `scratch` or on the default branch, so this audit is based on the exact residual interfaces supplied in the prompt. The drop below is therefore an interface/proof-obligation proposal, not a checked edit of the target Lean file.
+## Connector audit status
 
-## Recommendation
+I could not confirm the exact Lean statements of the named theorems from the connected repo. The connector has write access, and the `scratch` branch exists, but the requested file path
 
-Attack `DescentFromBranchUnorderedStatement` next, but do not attack it in its current unordered form. Split it into an ordered raw-branch descent interface plus parity-extraction lemmas.
-
-Reason: `NormalizedBadParamStatement` is mostly factor-gcd/parity bookkeeping once the two positive square-factor lemmas are available. The divided branch is genuinely delicate because it has an exceptional unit alternative and a 3-adic case distinction. Raw branch descent is the first place where the infinite descent construction itself is tested. Proving it next gives the largest mathematical progress and will also validate whether the branch predicates carry enough data for the final assembly.
-
-The current raw residual is asymmetric:
-
-```lean
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-def DescentFromBranchUnorderedStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    EisensteinSqBranch A N S m n →
-    ∃ A' N' S' : ℤ,
-      NormalizedEisensteinBad A' N' S' ∧ N' < N
-
-end MazurProof.RationalPointsN12
+```text
+FLT/Assumptions/MazurProof/RationalPointsN12.lean
 ```
 
-Despite the name, this is not really unordered: it promises descent below the second input `N`. That is safe only if the caller has already oriented the pair so that the second input is the descent measure. If final assembly handles the alternative `EisensteinSqBranch N A S m n` by applying the same statement to `(N,A,S)`, the conclusion becomes `N' < A`, not `N' < N`. That is fine for a `max A N` measure, or if the assembly also knows `A < N`, but it is not enough for a proof by minimal denominator `N` without an extra ordering bridge.
+was not present at that path on either `scratch` or `main` through `fetch_file`. Code search for the exact names also returned no hits. Therefore I am **not** claiming checked `#check` output for the listed APIs below. Where I refer to existing names, I treat them as theorem roles inferred from the names in the prompt; the Lean code blocks are proposed bridge/interface statements to add once the real imported file is visible.
 
-## Interface change I recommend
+## Executive answer
 
-Make the orientation explicit. Keep the old residual only as a compatibility wrapper if the assembly already supplies the order.
+The existing pythagorean quartic half-factor infrastructure is probably reusable only as an **upstream half-factor interface for the original Eisenstein quartic in `(A,N,S)`**, not as a direct proof of the divided branch residual.
 
-```lean
-import Mathlib.Tactic
+The divided branch should first be reparametrized by the integral linear change
 
-namespace MazurProof.RationalPointsN12
-
-/-- Raw branch descent with the descent measure exposed explicitly.
-
-This is the preferred target.  The hypothesis `A ≤ N` is the missing contract
-behind the current name `DescentFromBranchUnorderedStatement`.
--/
-def DescentFromBranchOrderedStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    A ≤ N →
-    EisensteinSqBranch A N S m n →
-    ∃ A' N' S' : ℤ,
-      NormalizedEisensteinBad A' N' S' ∧ N' < N
-
-/-- Symmetric version, useful if final assembly descends by height rather than by
-second coordinate. -/
-def DescentFromBranchBelowMaxStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    EisensteinSqBranch A N S m n →
-    ∃ A' N' S' : ℤ,
-      NormalizedEisensteinBad A' N' S' ∧ N' < max A N
-
-end MazurProof.RationalPointsN12
+```text
+u = (m+n)/3,
+v = (2*m-n)/3,
 ```
 
-If the final assembly minimizes the denominator coordinate, use `DescentFromBranchOrderedStatement`. If it minimizes height, use `DescentFromBranchBelowMaxStatement` and make the divided residual match the same measure.
+which is valid because `3 ∣ m+n` and, modulo `3`, `2*m-n = 2*(m+n)-3*n` is also divisible by `3`. Then
 
-## Lean-friendly decomposition for raw branch descent
-
-The key is to separate branch unpacking from the actual descent construction. The branch predicate should not be forced to store positive signs for `m n`; use extraction lemmas that return positive square roots `u v`.
-
-The raw branch should be reduced to these two parity-normalized factor packages. In the following statements the raw branch is oriented so that
-
-`U = A^2 + N^2 - S`,
-
-`V = (A^2 + N^2 + S) / 3`,
-
-and the raw factor identity is `U * V = (A * N)^2`.
-
-### 1. Odd raw branch extraction
-
-```lean
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-/-- Odd raw branch extraction.
-
-Proof obligation:
-* derive positivity of the two branch factors;
-* prove `IsCoprime U V` from primitive/unordered data;
-* use `PosSqOfCoprimeMulSqStatement` on
-  `x = A^2 + N^2 - S`,
-  `y = (A^2 + N^2 + S) / 3`,
-  `z = A * N`;
-* clear the `/ 3` denominator to rewrite the second square as
-  `A^2 + N^2 + S = 3 * v^2`.
--/
-def RawBranchOddSquareDataStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    EisensteinSqBranch A N S m n →
-    ¬ (2 : ℤ) ∣ A * N →
-    ∃ u v : ℤ,
-      0 < u ∧ 0 < v ∧
-        A^2 + N^2 - S = u^2 ∧
-        A^2 + N^2 + S = 3 * v^2 ∧
-        A * N = u * v
-
-end MazurProof.RationalPointsN12
+```text
+m = u+v,
+n = 2*u-v,
+m-n = 2*v-u,
 ```
 
-Parity in this case: `¬ (2 : ℤ) ∣ A * N` means both `A` and `N` are odd, since primitive excludes both even and the negated divisibility excludes exactly-one-even. Then `A^2 + N^2` is even and the normalized bad equation forces `S` odd, so `A^2 + N^2 ± S` are odd. The raw branch puts the factor `3` on the plus factor, and the two reduced factors `U,V` are coprime. This is exactly the input shape of `PosSqOfCoprimeMulSqStatement`.
+and `DividedSquareBranch` becomes the denominator-free crossed-square system
 
-### 2. Even raw branch extraction
-
-```lean
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-/-- Even raw branch extraction.
-
-Proof obligation:
-* primitive data plus `(2 : ℤ) ∣ A * N` gives exactly one of `A,N` even;
-* the two raw reduced factors
-  `U = A^2 + N^2 - S` and
-  `V = (A^2 + N^2 + S) / 3`
-  are both even;
-* prove `IsCoprime (U / 2) (V / 2)`;
-* use `PosTwoSqOfGcdTwoMulSqStatement` on `U,V,A*N`;
-* clear the `/ 3` denominator to get the displayed `6 * v^2` equation.
--/
-def RawBranchEvenTwoSquareDataStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    EisensteinSqBranch A N S m n →
-    (2 : ℤ) ∣ A * N →
-    ∃ u v : ℤ,
-      0 < u ∧ 0 < v ∧
-        A^2 + N^2 - S = 2 * u^2 ∧
-        A^2 + N^2 + S = 6 * v^2 ∧
-        A * N = 2 * u * v
-
-end MazurProof.RationalPointsN12
+```text
+0 < u, 0 < v, 0 < 2*u-v, 0 < 2*v-u,
+IsCoprime u v,
+A^2 = u * (2*v-u),
+N^2 = v * (2*u-v),
+S = u^2 - u*v + v^2.
 ```
 
-Parity in this case: primitive data excludes both `A,N` even, so `(2 : ℤ) ∣ A * N` means exactly one is even. Then `A^2 + N^2` and `S` are odd, hence the raw factors `A^2 + N^2 ± S` are even. Since `3` is odd, `V = (A^2 + N^2 + S) / 3` is even as well. The reduced half-factors are coprime, so `PosTwoSqOfGcdTwoMulSqStatement` gives `U = 2*u^2` and `V = 2*v^2`, hence the original plus factor is `6*v^2`.
+That crossed-square system is the right next bridge target. It cleanly exposes what the existing `r*s = 3*m^2*n^2` split sees, and what it does **not** see.
 
-### 3. Odd raw descent core
+## 1. Existing theorem roles that look reusable
+
+Because I could not confirm exact signatures from the repo, the following are **not asserted APIs**. They are the theorem roles suggested by the names and by the standard identity
+
+```text
+(m^2+n^2)^2 - (m^4 - m^2*n^2 + n^4) = 3*m^2*n^2.
+```
+
+The likely reusable roles are:
+
+1. `pythagoreanQuarticRhs`: expected to be the Eisenstein quartic RHS, morally
+
+```lean
+pythagoreanQuarticRhs m n = m^4 - m^2*n^2 + n^4
+```
+
+2. `pythagoreanQuarticCenter`: expected to be the Pythagorean center, morally
+
+```lean
+pythagoreanQuarticCenter m n = m^2 + n^2
+```
+
+3. `pythagorean_quartic_half_factorization_of_opposite_mod`: expected to package a factorization of
+
+```text
+(center - b) * (center + b) = 3*m^2*n^2
+```
+
+or a half-factor variant when parity forces `center ± b` to be even.
+
+4. `pythagorean_quartic_half_factor_gcd_dvd_three`, `..._gcd_eq_one_or_three`, `..._gcd_eq_one`: expected to prove that the two half factors are coprime except possibly for the controlled factor `3`.
+
+5. `pythagorean_quartic_half_factor_split` and `..._signed_split_of_nonzero`: expected to turn the product/gcd information into square-vs-`3*square` alternatives, with signs/nonzero hypotheses handled.
+
+6. `kubert_cover_pythagorean_half_factors`: likely the highest-level wrapper. It may be directly useful if it returns raw square-factor data or an `EulerSquarePair`-style package from a hypothesis of the form
+
+```lean
+b^2 = pythagoreanQuarticRhs m n
+```
+
+plus positivity/coprimality/nonzero hypotheses. It is **not** directly usable for `DividedSquareBranch` unless it can be instantiated at `(m,n,b) = (A,N,S)` and returns data in the exact descent interface expected downstream.
+
+## 2. Can `DividedSquareBranch` be transformed into `b^2 = pythagoreanQuarticRhs m n`?
+
+There are two different transformations; only one is likely the existing pythagorean infrastructure.
+
+### 2a. Original Eisenstein quartic: yes, with `(m,n,b) = (A,N,S)`
+
+If `pythagoreanQuarticRhs x y` is the Eisenstein quartic `x^4 - x^2*y^2 + y^4`, then the residual hypothesis
+
+```lean
+PositivePrimitiveEisensteinBadUnordered A N S
+```
+
+should already imply
+
+```lean
+S^2 = pythagoreanQuarticRhs A N
+```
+
+independently of the divided branch. This is the input shape for the half-factor infrastructure.
+
+The corresponding half factors are
+
+```text
+r = A^2 + N^2 - S,
+s = A^2 + N^2 + S,
+r*s = 3*A^2*N^2.
+```
+
+Under the divided branch, these factors have the following exact forms:
+
+```text
+A^2 + N^2 - S = n * (m-n),
+3 * (A^2 + N^2 + S) = (m+n) * (2*m-n),
+```
+
+and, using `3 ∣ m+n`, equivalently
+
+```text
+A^2 + N^2 + S = ((m+n) * (2*m-n)) / 3.
+```
+
+So the half-factor infrastructure can recognize the original quartic, but it sees only the product split in `(A,N,S)`. It does not by itself prove the crossed square decomposition of the four branch factors.
+
+### 2b. Branch quartic in the branch parameters: yes, but likely not the same RHS
+
+Multiplying the two divided branch square equations gives
+
+```text
+(3*A*N)^2 = n * (m-n) * (m+n) * (2*m-n).
+```
+
+This is a quartic in the branch parameters `(m,n)`, but it is not the standard Eisenstein quartic `m^4 - m^2*n^2 + n^4`. It can be written as
+
+```text
+n * (m-n) * (m+n) * (2*m-n)
+  = (m^2 - m*n + n^2)^2 - (m^2 - 2*m*n)^2.
+```
+
+Thus, with `b = 3*A*N` and center `m^2 - m*n + n^2`, the branch equation is a different Pythagorean-style quartic. Existing lemmas named around `pythagoreanQuarticRhs` are reusable here only if that RHS was defined for this four-linear-factor quartic rather than for the Eisenstein quartic. The `r*s = 3*m^2*n^2` clue strongly suggests it was the original Eisenstein quartic, not this branch quartic.
+
+## 3. Is the `r*s = 3*m^2*n^2` split the divided-by-3 sector?
+
+It is the **same upstream identity**, but not the same Lean object as the divided branch.
+
+For the original quartic in variables `(A,N)`:
+
+```text
+(A^2+N^2-S) * (A^2+N^2+S) = 3*A^2*N^2.
+```
+
+This is the `r*s = 3*m^2*n^2` phenomenon, with variable names `(m,n)` in the old theorem corresponding to `(A,N)` in the WIP residual.
+
+The divided branch is a crossed refinement of this split. Define
+
+```text
+u = (m+n)/3,
+v = (2*m-n)/3.
+```
+
+Then
+
+```text
+m = u+v,
+n = 2*u-v,
+m-n = 2*v-u,
+```
+
+and the divided branch equations become
+
+```text
+A^2 = u * (2*v-u),
+N^2 = v * (2*u-v),
+S = u^2 - u*v + v^2.
+```
+
+The original half factors become
+
+```text
+A^2 + N^2 - S = (2*u-v) * (2*v-u),
+A^2 + N^2 + S = 3*u*v.
+```
+
+So the existing split sees
+
+```text
+r = (2*u-v) * (2*v-u),
+s = 3*u*v,
+r*s = 3*A^2*N^2,
+```
+
+whereas the divided branch square equations are crossed:
+
+```text
+A^2 = u * (2*v-u),
+N^2 = v * (2*u-v).
+```
+
+That is why the half-factor split is not automatically a proof of `DividedSquareBranchUnitOrDescendsStatement`. It reduces the problem if it returns usable raw square-factor data; otherwise, the genuinely new hard part is the crossed-square descent.
+
+## 4. Minimal new bridge theorem statements
+
+These are the bridge statements I would add. They avoid depending on unconfirmed exact signatures of the existing pythagorean theorems, but they are designed to connect to them once the file is visible.
 
 ```lean
 import Mathlib.Tactic
+-- In the actual repo, replace/extend this with:
+-- import FLT.Assumptions.MazurProof.RationalPointsN12
+-- import FLT.Assumptions.MazurProof.N12QuarticEisenstein
 
 namespace MazurProof.RationalPointsN12
 
-/-- The odd raw descent core, after all gcd/parity/square-factor bookkeeping has
-been eliminated.
+/-- Denominator-free linear reparametrization of the divided branch.
 
-This is one of the two genuinely mathematical cores.  The proof should define
-explicit descendants from `A,N,u,v`, prove the Eisenstein quartic identity for
-the descendants, prove normalization/primitive conditions, and prove the strict
-bound `N' < N` using `A ≤ N` and positivity.
+This is the first bridge to prove.  It removes all `/ 3` noise from the divided branch.
+The intended witnesses are
+`u = (m+n)/3` and `v = (2*m-n)/3`.
 -/
-def RawOddDescentCoreStatement : Prop :=
+def DividedSquareBranchReparamStatement : Prop :=
+  ∀ {A N S m n : ℤ},
+    DividedSquareBranch A N S m n →
+      ∃ u v : ℤ,
+        0 < u ∧ 0 < v ∧ 0 < 2*u - v ∧ 0 < 2*v - u ∧
+        IsCoprime u v ∧
+        m = u + v ∧ n = 2*u - v ∧
+        A^2 = u * (2*v - u) ∧
+        N^2 = v * (2*u - v) ∧
+        S = u^2 - u*v + v^2
+
+/-- Divided branch as a crossed half-factor split for the original Eisenstein quartic.
+
+This is the direct connection to the `r*s = 3*m^2*n^2` infrastructure, after
+renaming the old theorem's variables `(m,n)` to the WIP variables `(A,N)`.
+-/
+def DividedSquareBranchHalfFactorBridgeStatement : Prop :=
+  ∀ {A N S u v : ℤ},
+    0 < u → 0 < v → 0 < 2*u - v → 0 < 2*v - u →
+    A^2 = u * (2*v - u) →
+    N^2 = v * (2*u - v) →
+    S = u^2 - u*v + v^2 →
+      A^2 + N^2 - S = (2*u - v) * (2*v - u) ∧
+      A^2 + N^2 + S = 3*u*v ∧
+      (A^2 + N^2 - S) * (A^2 + N^2 + S) = 3*A^2*N^2
+
+/-- Adapter from the normalized bad tuple to the pythagorean quartic API.
+
+Use this only if `pythagoreanQuarticRhs` is confirmed to be
+`x^4 - x^2*y^2 + y^4`.  The proof should simply unfold the bad tuple's quartic
+identity and the RHS definition.
+-/
+def PositivePrimitiveBadToPythagoreanQuarticStatement : Prop :=
+  ∀ {A N S : ℤ},
+    PositivePrimitiveEisensteinBadUnordered A N S →
+      S^2 = pythagoreanQuarticRhs A N
+
+/-- The real hard bridge: crossed divided square pair gives the divided residual.
+
+This is equivalent in difficulty to the divided branch residual, but much more
+Lean-friendly because all divisibility by `3` has been absorbed into `u,v` and all
+positivity hypotheses are explicit.
+-/
+def CrossedDividedSquarePairUnitOrDescendsStatement : Prop :=
   ∀ {A N S u v : ℤ},
     PositivePrimitiveEisensteinBadUnordered A N S →
-    A ≤ N →
-    0 < u →
-    0 < v →
-    A^2 + N^2 - S = u^2 →
-    A^2 + N^2 + S = 3 * v^2 →
-    A * N = u * v →
-    ∃ A' N' S' : ℤ,
-      NormalizedEisensteinBad A' N' S' ∧ N' < N
+    0 < u → 0 < v → 0 < 2*u - v → 0 < 2*v - u →
+    IsCoprime u v →
+    A^2 = u * (2*v - u) →
+    N^2 = v * (2*u - v) →
+    S = u^2 - u*v + v^2 →
+      (A = 1 ∧ N = 1 ∧ S = 1) ∨
+        ∃ A' N' S' : ℤ,
+          NormalizedEisensteinBad A' N' S' ∧ N' < N
+
+/-- Small assembly bridge from the reparametrized crossed system back to the current residual. -/
+def DividedResidualFromCrossedBridgeStatement : Prop :=
+  DividedSquareBranchReparamStatement →
+  CrossedDividedSquarePairUnitOrDescendsStatement →
+  DividedSquareBranchUnitOrDescendsStatement
 
 end MazurProof.RationalPointsN12
 ```
 
-The core proof should not mention the original branch variables `m n`; signs have already been normalized to positive `u v`. The obligations are purely algebraic: descendant formula, quartic identity, primitive normalization, positivity, and the strict inequality.
+### Proof obligations for `DividedSquareBranchReparamStatement`
 
-### 4. Even raw descent core
+Unpack
+
+```lean
+hdiv : DividedSquareBranch A N S m n
+```
+
+and set
+
+```text
+u = (m+n)/3,
+v = (2*m-n)/3.
+```
+
+Obligations:
+
+1. `3 ∣ 2*m-n` from `3 ∣ m+n`:
+
+```text
+2*m - n = 2*(m+n) - 3*n.
+```
+
+2. `m = u+v` and `n = 2*u-v` by linear algebra over `ℤ` after clearing denominators.
+
+3. Positivity:
+
+```text
+0 < m+n      -> 0 < u,
+0 < 2*m-n    -> 0 < v,
+0 < n        -> 0 < 2*u-v,
+0 < m-n      -> 0 < 2*v-u.
+```
+
+4. Coprimality:
+
+```text
+IsCoprime m n → IsCoprime u v
+```
+
+because any common divisor of `u,v` divides `m = u+v` and `n = 2*u-v`.
+
+5. Square equations:
+
+```text
+3*A^2 = (m-n)*(m+n) = (2*v-u)*(3*u),
+3*N^2 = n*(2*m-n)   = (2*u-v)*(3*v),
+```
+
+then cancel the nonzero factor `3`.
+
+6. Center equation:
+
+```text
+3*S = m^2 - m*n + n^2
+    = 3*(u^2 - u*v + v^2).
+```
+
+### Proof obligations for `DividedSquareBranchHalfFactorBridgeStatement`
+
+These are pure `ring_nf` consequences of the crossed system:
+
+```text
+A^2 + N^2 - S
+= u*(2v-u) + v*(2u-v) - (u^2-uv+v^2)
+= (2u-v)*(2v-u),
+
+A^2 + N^2 + S
+= u*(2v-u) + v*(2u-v) + (u^2-uv+v^2)
+= 3uv.
+```
+
+Then multiply the two identities and rewrite with
+
+```text
+A^2*N^2 = u*v*(2v-u)*(2u-v).
+```
+
+## 5. What this says about reuse
+
+The best route is:
+
+1. Prove `DividedSquareBranchReparamStatement`.
+2. Prove `DividedSquareBranchHalfFactorBridgeStatement`.
+3. Try to instantiate the existing half-factor split theorem with `(m,n,b) = (A,N,S)`.
+4. If the existing split returns raw branch data, add a wrapper from that data to the already-closed raw descent path.
+5. If the existing split only returns existential `r,s` with product `3*A^2*N^2`, it is too weak for the divided residual; prove `CrossedDividedSquarePairUnitOrDescendsStatement` directly.
+
+In other words, the half-factor infrastructure can reduce bookkeeping and expose the product split, but the mathematically hardest missing theorem is still the crossed-square descent/unit theorem unless `kubert_cover_pythagorean_half_factors` already proves a no-nontrivial-solution theorem for `S^2 = pythagoreanQuarticRhs A N` in the exact normalized positive primitive setting.
+
+## Suspicious or too-weak current statements
+
+1. Any theorem that returns only
+
+```lean
+∃ r s, r*s = 3*m^2*n^2
+```
+
+is too weak for this task unless it also returns the definitional equalities tying `r,s` to `center ± b` or to the half factors, plus positivity/sign and gcd information.
+
+2. `pythagorean_quartic_half_factor_gcd_eq_one` may be too specialized if it assumes a parity/mod condition that is not stable under the divided reparametrization. The crossed variables `u,v,2*u-v,2*v-u` need separate parity handling.
+
+3. `kubert_cover_pythagorean_half_factors` is only directly useful if its conclusion is close to either an existing raw branch package, an `EulerSquarePair`, or a contradiction/unit alternative. If it is stated in terms of a cover map or rational-point existence without exposing integer square-factor data, it will need a wrapper theorem.
+
+4. `DividedSquareBranchUnitOrDescendsStatement` has the same orientation risk as the raw residual: it concludes `N' < N`. If final assembly applies it to a swapped branch `DividedSquareBranch N A S m n`, the result is `N' < A`, not `N' < N`. This is fine only if the assembly measure is symmetric, such as `max A N`, or if the caller orients `A ≤ N` before using the residual.
+
+Recommended orientation-safe variant:
 
 ```lean
 import Mathlib.Tactic
 
 namespace MazurProof.RationalPointsN12
 
-/-- The even raw descent core, after the `2 * square` extraction.
-
-This is the same descent construction as the odd core, but with the parity-normalized
-factor equations `2*u^2` and `6*v^2`.  It should be proved separately rather than
-hidden behind `ring_nf` inside the final raw descent theorem.
--/
-def RawEvenDescentCoreStatement : Prop :=
-  ∀ {A N S u v : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    A ≤ N →
-    0 < u →
-    0 < v →
-    A^2 + N^2 - S = 2 * u^2 →
-    A^2 + N^2 + S = 6 * v^2 →
-    A * N = 2 * u * v →
-    ∃ A' N' S' : ℤ,
-      NormalizedEisensteinBad A' N' S' ∧ N' < N
-
-end MazurProof.RationalPointsN12
-```
-
-The even core is where most denominator-clearing mistakes show up. Keeping it separate prevents the proof from silently using the odd formulas in the exactly-one-even case.
-
-### 5. Ordered raw branch assembly from the four pieces
-
-```lean
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-/-- The small assembly theorem for raw branch descent.
-
-This should be a short proof: split on `(2 : ℤ) ∣ A * N`, call the corresponding
-extraction lemma, then call the corresponding core descent lemma.
--/
-def RawBranchDescentFromParityPiecesStatement : Prop :=
-  RawBranchOddSquareDataStatement →
-  RawBranchEvenTwoSquareDataStatement →
-  RawOddDescentCoreStatement →
-  RawEvenDescentCoreStatement →
-  DescentFromBranchOrderedStatement
-
-end MazurProof.RationalPointsN12
-```
-
-This last statement is intentionally just glue. If it is not a short proof, the square-factor extraction lemmas are still too weak.
-
-## Exact proof obligations for the recommended target
-
-For `RawBranchOddSquareDataStatement`:
-
-1. Define `U := A^2 + N^2 - S` and `V := (A^2 + N^2 + S) / 3`.
-2. Prove `0 < U` and `0 < V` from the branch equations/normalization.
-3. Prove `IsCoprime U V`. The only allowed common prime is already accounted for by the explicit raw `3` on the plus factor; parity is odd here.
-4. Prove `(A * N)^2 = U * V`.
-5. Apply `PosSqOfCoprimeMulSqStatement` and clear the `/ 3` equality.
-
-For `RawBranchEvenTwoSquareDataStatement`:
-
-1. Use primitive data to turn `(2 : ℤ) ∣ A * N` into exactly-one-even for `A,N`.
-2. Prove `(2 : ℤ) ∣ U` and `(2 : ℤ) ∣ V`.
-3. Prove `IsCoprime (U / 2) (V / 2)`.
-4. Prove `(A * N)^2 = U * V`.
-5. Apply `PosTwoSqOfGcdTwoMulSqStatement` and clear the `/ 3` equality.
-
-For the two core descents:
-
-1. Give explicit formulas for `A' N' S'` in terms of `A,N,u,v`.
-2. Prove `NormalizedEisensteinBad A' N' S'` field by field: positivity, primitive gcd, normalized congruence/parity conditions, and the quartic equation.
-3. Prove the strict inequality `N' < N`. This should be a separate inequality lemma if it needs more than `nlinarith` after positivity and order hypotheses.
-4. Avoid using branch predicates inside these core proofs; all branch content should be in the extraction lemmas.
-
-## Statements to fix or watch
-
-1. `DescentFromBranchUnorderedStatement` is misnamed and probably too strong as written unless the second coordinate is always the chosen measure. Replace it with `DescentFromBranchOrderedStatement` or with the symmetric `DescentFromBranchBelowMaxStatement`.
-
-2. `DividedSquareBranchUnitOrDescendsStatement` has the same orientation issue. The ordered version should be:
-
-```lean
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-def DividedSquareBranchUnitOrDescendsOrderedStatement : Prop :=
+/-- Divided residual with descent below a symmetric height. -/
+def DividedSquareBranchUnitOrDescendsBelowMaxStatement : Prop :=
   ∀ {A N S m n : ℤ},
     PositivePrimitiveEisensteinBadUnordered A N S →
-    A ≤ N →
     DividedSquareBranch A N S m n →
     (A = 1 ∧ N = 1 ∧ S = 1) ∨
       ∃ A' N' S' : ℤ,
-        NormalizedEisensteinBad A' N' S' ∧ N' < N
+        NormalizedEisensteinBad A' N' S' ∧ N' < max A N
 
 end MazurProof.RationalPointsN12
 ```
 
-If the assembly uses height instead of denominator, make the conclusion `N' < max A N` instead.
-
-3. The unit alternative `(A = 1 ∧ N = 1 ∧ S = 1)` is only correct if the positive/normalized hypotheses force `0 < S`. If `S` is allowed to be negative in any residual, the correct unit alternative is either `A = 1 ∧ N = 1 ∧ S^2 = 1` or two signed cases. Given the stated positive primitive name, `S = 1` is probably intended, but the proof should expose the positivity fact explicitly.
-
-4. `NormalizedBadParamStatement` is acceptable as a branch frontier only if each branch predicate is sign-insensitive or carries enough equations to recover positive roots. If `EisensteinSqBranch` or `DividedSquareBranch` stores linear equations involving `m n`, add local extraction lemmas that replace `m n` by positive `u v`; do not make downstream descent depend on arbitrary signs of existential branch parameters.
-
-5. The final assembly needs an explicit bridge from `NormalizedEisensteinBad A N S` to `PositivePrimitiveEisensteinBadUnordered A N S` and the chosen order/height measure. If that bridge is not already a theorem, add it as an assembly prerequisite rather than burying it inside each residual.
-
 ## Bottom line
 
-The next target should be raw branch descent, but with the ordered interface above. Prove the two extraction lemmas first using the already-proved square-factor lemmas, then prove the two parity-specific descent cores. After that, `RawBranchDescentFromParityPiecesStatement` should be only a parity split and two applications. This isolates the real mathematical descent from gcd/parity bookkeeping and prevents another stale/mismatched assembly layer.
+The next mathematically hardest Lean target for this divided sector is **not** to call the existing pythagorean half-factor split directly. It is to prove the denominator-free crossed-square bridge
+
+```lean
+DividedSquareBranchReparamStatement
+```
+
+and then the crossed descent/unit theorem
+
+```lean
+CrossedDividedSquarePairUnitOrDescendsStatement
+```
+
+or to show that `kubert_cover_pythagorean_half_factors` already implies that crossed theorem through a thin wrapper. The decisive algebraic substitutions are
+
+```text
+u = (m+n)/3,
+v = (2*m-n)/3,
+A^2 = u*(2*v-u),
+N^2 = v*(2*u-v),
+S = u^2-u*v+v^2,
+A^2+N^2-S = (2*u-v)*(2*v-u),
+A^2+N^2+S = 3*u*v.
+```
