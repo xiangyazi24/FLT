@@ -1,326 +1,313 @@
-# Q2561 `three_coprime_centerX` for `EulerSquarePair`
+# Q2571 same-orientation step for Euler square pairs
 
-Target in `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`:
+Target family: `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`.
 
-```lean
-theorem three_coprime_centerX (E : EulerSquarePair) :
-    IsCoprime (3 : ℤ) E.centerX
-```
+Connector note: the requested target Lean path was not fetchable through the GitHub contents API on `main` or `scratch` during this drop, so the statements below are deliberately self-contained and use only `Mathlib`-level `Int`/`Nat` formulations. They should be pasted into the local namespace/file and renamed to match the existing `EulerSquarePair` API.
 
-where `E.centerX = E.B * E.C`.  The clean local decomposition is:
+## 1. Same-orientation proof
 
-```lean
-theorem not_three_dvd_B (E : EulerSquarePair) : ¬ (3 : ℤ) ∣ E.B
-theorem not_three_dvd_C (E : EulerSquarePair) : ¬ (3 : ℤ) ∣ E.C
-
-theorem three_coprime_B (E : EulerSquarePair) : IsCoprime (3 : ℤ) E.B
-theorem three_coprime_C (E : EulerSquarePair) : IsCoprime (3 : ℤ) E.C
-
-theorem three_coprime_centerX (E : EulerSquarePair) :
-    IsCoprime (3 : ℤ) E.centerX
-```
-
-The only API-sensitive bridge is the standard prime bridge
-
-```lean
-¬ (3 : ℤ) ∣ x  ⟹  IsCoprime (3 : ℤ) x.
-```
-
-Everything else is a small `ZMod 3` computation.
-
-## 0. APIs to check
-
-The `ZMod` APIs below are current Mathlib names:
-
-```lean
-#check ZMod.intCast_zmod_eq_zero_iff_dvd
--- theorem ZMod.intCast_zmod_eq_zero_iff_dvd (a : ℤ) (b : ℕ) :
---   (a : ZMod b) = 0 ↔ (b : ℤ) ∣ a
-
-#check ZMod.isUnit_iff_coprime
-#check ZMod.coprime_mod_iff_coprime
-#check ZMod.isUnit_prime_iff_not_dvd
-#check ZMod.isUnit_prime_of_not_dvd
-```
-
-For the final `IsCoprime` bridge over `ℤ`, check these locally:
-
-```lean
-#check Int.prime_three
-#check Nat.prime_three
-#check Prime.isCoprime_iff_not_dvd
-#check Prime.coprime_iff_not_dvd
-#check Irreducible.isCoprime_iff_not_dvd
-#check Int.isUnit_iff
-```
-
-In many Mathlib snapshots, the bridge can be implemented as one of:
-
-```lean
--- likely shape 1
-theorem isCoprime_three_int_of_not_dvd {x : ℤ}
-    (hx : ¬ (3 : ℤ) ∣ x) : IsCoprime (3 : ℤ) x := by
-  exact (show Prime (3 : ℤ) by norm_num).isCoprime_iff_not_dvd.mpr hx
-
--- likely shape 2, if the lemma is named without the `is` prefix
-theorem isCoprime_three_int_of_not_dvd {x : ℤ}
-    (hx : ¬ (3 : ℤ) ∣ x) : IsCoprime (3 : ℤ) x := by
-  exact (show Prime (3 : ℤ) by norm_num).coprime_iff_not_dvd.mpr hx
-```
-
-Do not paste both.  Use `#check` to select the available method name.  If neither name exists, keep the theorem statement and prove it from the divisor criterion for `IsCoprime` plus `Prime`/`Irreducible` divisibility of `3`.
-
-## 1. Local `ZMod 3` square fact
-
-This is the finite-field fact needed twice.  It avoids developing a general theorem about quadratic residues.
-
-```lean
-import Mathlib.Tactic
-import Mathlib.Data.ZMod.Basic
-```
-
-```lean
-namespace EulerSquarePair
-
-private theorem zmod3_sq_add_sq_eq_zero
-    {x y : ZMod 3} (h : x ^ 2 + y ^ 2 = 0) :
-    x = 0 ∧ y = 0 := by
-  revert h
-  fin_cases x <;> fin_cases y <;> decide
-
-end EulerSquarePair
-```
-
-If `decide` does not reduce the finite cases in your local snapshot, replace the last line by:
-
-```lean
-  fin_cases x <;> fin_cases y <;> native_decide
-```
-
-or by:
-
-```lean
-  fin_cases x <;> fin_cases y <;> norm_num
-```
-
-The theorem statement is the stable part.
-
-## 2. Tiny contradiction helper for `E.hADcop`
-
-This is only used after deriving `3 ∣ A` and `3 ∣ D`.
-
-```lean
-namespace EulerSquarePair
-
-private theorem not_isUnit_three_int : ¬ IsUnit (3 : ℤ) := by
-  norm_num [Int.isUnit_iff]
-
-end EulerSquarePair
-```
-
-If `Int.isUnit_iff` has moved in your snapshot, run:
-
-```lean
-#check Int.isUnit_iff
-#check isUnit_iff_exists_inv
-```
-
-A fallback is to let `norm_num` try it without the rewrite:
-
-```lean
-private theorem not_isUnit_three_int : ¬ IsUnit (3 : ℤ) := by
-  norm_num
-```
-
-## 3. Prove `3 ∤ B`
-
-The robust proof is:
-
-1. Assume `3 ∣ B`.
-2. Cast `E.hB` to `ZMod 3`; since `16 = 1` in `ZMod 3`, get
-   `(B : ZMod 3)^2 = (A : ZMod 3)^2 + (D : ZMod 3)^2`.
-3. `3 ∣ B` gives `(B : ZMod 3) = 0` via `ZMod.intCast_zmod_eq_zero_iff_dvd`.
-4. The square fact gives `(A : ZMod 3) = 0` and `(D : ZMod 3) = 0`.
-5. Convert back to `3 ∣ A`, `3 ∣ D`.
-6. Contradict `E.hADcop` because it would imply `IsUnit (3 : ℤ)`.
-
-Likely pasteable code:
-
-```lean
-namespace EulerSquarePair
-
-theorem not_three_dvd_B (E : EulerSquarePair) : ¬ (3 : ℤ) ∣ E.B := by
-  intro h3B
-
-  have hBz :
-      (E.B : ZMod 3) ^ 2 =
-        (E.A : ZMod 3) ^ 2 + (E.D : ZMod 3) ^ 2 := by
-    have h := congrArg (fun z : ℤ => (z : ZMod 3)) E.hB
-    norm_num at h
-    simpa using h
-
-  have hB0 : (E.B : ZMod 3) = 0 := by
-    exact (ZMod.intCast_zmod_eq_zero_iff_dvd E.B 3).2 h3B
-
-  have hsum : (E.A : ZMod 3) ^ 2 + (E.D : ZMod 3) ^ 2 = 0 := by
-    simpa [hB0] using hBz.symm
-
-  obtain ⟨hA0, hD0⟩ := zmod3_sq_add_sq_eq_zero hsum
-
-  have h3A : (3 : ℤ) ∣ E.A := by
-    simpa using (ZMod.intCast_zmod_eq_zero_iff_dvd E.A 3).1 hA0
-  have h3D : (3 : ℤ) ∣ E.D := by
-    simpa using (ZMod.intCast_zmod_eq_zero_iff_dvd E.D 3).1 hD0
-
-  exact not_isUnit_three_int (E.hADcop h3A h3D)
-
-end EulerSquarePair
-```
-
-If `norm_num at h` does not simplify the casted equation enough, replace the `hBz` block with this slightly more explicit variant:
-
-```lean
-  have hBz0 :
-      (E.B : ZMod 3) ^ 2 =
-        (16 : ZMod 3) * (E.A : ZMod 3) ^ 2 + (E.D : ZMod 3) ^ 2 := by
-    exact_mod_cast E.hB
-  have hBz :
-      (E.B : ZMod 3) ^ 2 =
-        (E.A : ZMod 3) ^ 2 + (E.D : ZMod 3) ^ 2 := by
-    norm_num at hBz0 ⊢
-    simpa using hBz0
-```
-
-## 4. Prove `3 ∤ C`
-
-Same proof, using `E.hC`; `4 = 1` in `ZMod 3`.
-
-```lean
-namespace EulerSquarePair
-
-theorem not_three_dvd_C (E : EulerSquarePair) : ¬ (3 : ℤ) ∣ E.C := by
-  intro h3C
-
-  have hCz :
-      (E.C : ZMod 3) ^ 2 =
-        (E.A : ZMod 3) ^ 2 + (E.D : ZMod 3) ^ 2 := by
-    have h := congrArg (fun z : ℤ => (z : ZMod 3)) E.hC
-    norm_num at h
-    simpa using h
-
-  have hC0 : (E.C : ZMod 3) = 0 := by
-    exact (ZMod.intCast_zmod_eq_zero_iff_dvd E.C 3).2 h3C
-
-  have hsum : (E.A : ZMod 3) ^ 2 + (E.D : ZMod 3) ^ 2 = 0 := by
-    simpa [hC0] using hCz.symm
-
-  obtain ⟨hA0, hD0⟩ := zmod3_sq_add_sq_eq_zero hsum
-
-  have h3A : (3 : ℤ) ∣ E.A := by
-    simpa using (ZMod.intCast_zmod_eq_zero_iff_dvd E.A 3).1 hA0
-  have h3D : (3 : ℤ) ∣ E.D := by
-    simpa using (ZMod.intCast_zmod_eq_zero_iff_dvd E.D 3).1 hD0
-
-  exact not_isUnit_three_int (E.hADcop h3A h3D)
-
-end EulerSquarePair
-```
-
-## 5. Bridge to `IsCoprime` and multiply
-
-After choosing the available prime bridge from §0, the final layer is short.
-
-```lean
-namespace EulerSquarePair
-
--- Local bridge target.  Implement with the available prime/coprime API.
--- Do not leave it as an axiom; this is a small theorem.
-theorem isCoprime_three_int_of_not_dvd {x : ℤ}
-    (hx : ¬ (3 : ℤ) ∣ x) : IsCoprime (3 : ℤ) x := by
-  exact (show Prime (3 : ℤ) by norm_num).isCoprime_iff_not_dvd.mpr hx
-
-theorem three_coprime_B (E : EulerSquarePair) : IsCoprime (3 : ℤ) E.B := by
-  exact isCoprime_three_int_of_not_dvd (not_three_dvd_B E)
-
-theorem three_coprime_C (E : EulerSquarePair) : IsCoprime (3 : ℤ) E.C := by
-  exact isCoprime_three_int_of_not_dvd (not_three_dvd_C E)
-
-theorem three_coprime_centerX (E : EulerSquarePair) :
-    IsCoprime (3 : ℤ) E.centerX := by
-  dsimp [centerX]
-  exact (three_coprime_B E).mul_right (three_coprime_C E)
-
-end EulerSquarePair
-```
-
-If `.isCoprime_iff_not_dvd` is not the method name, replace only the bridge theorem by the `.coprime_iff_not_dvd` variant:
-
-```lean
-theorem isCoprime_three_int_of_not_dvd {x : ℤ}
-    (hx : ¬ (3 : ℤ) ∣ x) : IsCoprime (3 : ℤ) x := by
-  exact (show Prime (3 : ℤ) by norm_num).coprime_iff_not_dvd.mpr hx
-```
-
-If both method names fail, keep the proven `not_three_dvd_B` and `not_three_dvd_C` and implement this exact helper by the divisor criterion:
-
-```lean
-theorem isCoprime_three_int_of_not_dvd {x : ℤ}
-    (hx : ¬ (3 : ℤ) ∣ x) : IsCoprime (3 : ℤ) x
-```
-
-Proof route for the fallback helper:
+Let
 
 ```text
-intro d hd3 hdx
-Since `3` is prime and `d ∣ 3`, either `IsUnit d` or `Associated d 3`.
-If `Associated d 3`, then `3 ∣ d`; with `d ∣ x`, get `3 ∣ x`, contradiction.
-Therefore `IsUnit d`.
+X  = U^2 - V^2,
+Y  = 4*U'^2 - V'^2.
 ```
 
-Search terms for that fallback are:
-
-```lean
-#check Prime.eq_or_eq_of_dvd_mul
-#check Prime.dvd_or_dvd
-#check Irreducible.isUnit_or_isUnit
-#check Associated.dvd_iff_dvd_left
-#check Associated.dvd_iff_dvd_right
-```
-
-## 6. Integer-mod alternative if ZMod casting is awkward
-
-If the casted `ZMod` equations fight simplification, the same proof can be done with integer divisibility:
+With the parity convention `U` even and `V` odd,
 
 ```text
-Assume 3 | B.
-From E.hB, 3 | B^2 and 3 | 15*A^2, so:
-  B^2 = 16*A^2 + D^2
-  ⇒ 3 | A^2 + D^2.
-Modulo 3, use the integer residue lemma:
-  3 | x^2 + y^2 ⇒ 3 | x ∧ 3 | y.
-Then contradict E.hADcop.
+U = 2u, V = 2v+1
+X = 4u^2 - (2v+1)^2
+  = 4*(u^2 - v^2 - v) - 1.
 ```
 
-Target helper for that route:
+So `X` is `-1 mod 4`, equivalently `3 mod 4`.  Similarly, for the second triple, if `V'` is odd,
+
+```text
+Y = 4*U'^2 - (2v'+1)^2
+  = 4*(U'^2 - v'^2 - v') - 1,
+```
+
+so `Y` is also `-1 mod 4`.  Notice that the evenness of `U'` is part of the Pythagorean parametrization route, but is not needed for this particular congruence because of the leading factor `4`.
+
+Now assume the signed equations are
+
+```text
+D = X or -D = X,
+D = Y or -D = Y.
+```
+
+The mixed choices are impossible.  For example, if `X = D` and `Y = -D`, then for some integers `m,n`,
+
+```text
+D  = 4m - 1,
+-D = 4n - 1.
+```
+
+Adding gives `0 = 4*(m+n) - 2`, i.e. `2 = 4*(m+n)`, impossible.  The other mixed case is the same.  Therefore either both expressions equal `D`, or both equal `-D`.
+
+This is a **mod 4** proof.  Do not use mod 8 for the same-orientation step: `4*U'^2 - V'^2` is always `7 mod 8` when `V'` is odd, but `U^2 - V^2` is `3 mod 8` or `7 mod 8` depending on `U/2`.  A mod-8 proof would introduce a false extra divisibility convention on `U`.
+
+The positivity and oddness of `D` are still important upstream: they are used to obtain the primitive Pythagorean parametrizations and the parity conventions.  But once the signed equations and parities are already present, the core sign-comparison lemma is even stronger and does not need `D > 0` or `Odd D`.
+
+## 2. Lean-facing same-orientation lemmas over `Int`
+
+These snippets avoid finite sign types.  They use signed equations of the form `D = expr` or `-D = expr`.
 
 ```lean
-theorem three_dvd_sq_add_sq_iff {x y : ℤ} :
-    (3 : ℤ) ∣ x ^ 2 + y ^ 2 ↔ (3 : ℤ) ∣ x ∧ (3 : ℤ) ∣ y
+import Mathlib
+
+namespace N12FourSquaresAP
+
+lemma int_even_sq_sub_odd_sq_eq_four_mul_sub_one
+    {U V : ℤ}
+    (hU : ∃ u : ℤ, U = 2 * u)
+    (hV : ∃ v : ℤ, V = 2 * v + 1) :
+    ∃ m : ℤ, U ^ 2 - V ^ 2 = 4 * m - 1 := by
+  rcases hU with ⟨u, rfl⟩
+  rcases hV with ⟨v, rfl⟩
+  refine ⟨u ^ 2 - v ^ 2 - v, ?_⟩
+  ring
+
+lemma int_four_mul_sq_sub_odd_sq_eq_four_mul_sub_one
+    {U V : ℤ}
+    (hV : ∃ v : ℤ, V = 2 * v + 1) :
+    ∃ m : ℤ, 4 * U ^ 2 - V ^ 2 = 4 * m - 1 := by
+  rcases hV with ⟨v, rfl⟩
+  refine ⟨U ^ 2 - v ^ 2 - v, ?_⟩
+  ring
+
+lemma int_same_sign_of_four_mul_sub_one
+    {D x y : ℤ}
+    (hx4 : ∃ m : ℤ, x = 4 * m - 1)
+    (hy4 : ∃ n : ℤ, y = 4 * n - 1)
+    (hxD : x = D ∨ x = -D)
+    (hyD : y = D ∨ y = -D) :
+    (x = D ∧ y = D) ∨ (x = -D ∧ y = -D) := by
+  rcases hx4 with ⟨m, hx4⟩
+  rcases hy4 with ⟨n, hy4⟩
+  rcases hxD with hxD | hxD
+  · rcases hyD with hyD | hyD
+    · exact Or.inl ⟨hxD, hyD⟩
+    · exfalso
+      subst x
+      subst y
+      omega
+  · rcases hyD with hyD | hyD
+    · exfalso
+      subst x
+      subst y
+      omega
+    · exact Or.inr ⟨hxD, hyD⟩
+
+lemma int_same_orientation_of_pythagorean_signed_forms
+    {D U V Up Vp : ℤ}
+    (hUeven : ∃ u : ℤ, U = 2 * u)
+    (hVodd : ∃ v : ℤ, V = 2 * v + 1)
+    (hVpodd : ∃ v : ℤ, Vp = 2 * v + 1)
+    (h1 : D = U ^ 2 - V ^ 2 ∨ -D = U ^ 2 - V ^ 2)
+    (h2 : D = 4 * Up ^ 2 - Vp ^ 2 ∨ -D = 4 * Up ^ 2 - Vp ^ 2) :
+    (D = U ^ 2 - V ^ 2 ∧ D = 4 * Up ^ 2 - Vp ^ 2) ∨
+      (-D = U ^ 2 - V ^ 2 ∧ -D = 4 * Up ^ 2 - Vp ^ 2) := by
+  have hx4 : ∃ m : ℤ, U ^ 2 - V ^ 2 = 4 * m - 1 :=
+    int_even_sq_sub_odd_sq_eq_four_mul_sub_one
+      (U := U) (V := V) hUeven hVodd
+  have hy4 : ∃ n : ℤ, 4 * Up ^ 2 - Vp ^ 2 = 4 * n - 1 :=
+    int_four_mul_sq_sub_odd_sq_eq_four_mul_sub_one
+      (U := Up) (V := Vp) hVpodd
+  have hxD : U ^ 2 - V ^ 2 = D ∨ U ^ 2 - V ^ 2 = -D := by
+    rcases h1 with h1 | h1
+    · exact Or.inl h1.symm
+    · exact Or.inr h1.symm
+  have hyD : 4 * Up ^ 2 - Vp ^ 2 = D ∨
+      4 * Up ^ 2 - Vp ^ 2 = -D := by
+    rcases h2 with h2 | h2
+    · exact Or.inl h2.symm
+    · exact Or.inr h2.symm
+  have hs := int_same_sign_of_four_mul_sub_one
+    (D := D) (x := U ^ 2 - V ^ 2) (y := 4 * Up ^ 2 - Vp ^ 2)
+    hx4 hy4 hxD hyD
+  rcases hs with hs | hs
+  · rcases hs with ⟨hx, hy⟩
+    exact Or.inl ⟨hx.symm, hy.symm⟩
+  · rcases hs with ⟨hx, hy⟩
+    exact Or.inr ⟨hx.symm, hy.symm⟩
+
+lemma int_refinement_equation_of_same_orientation
+    {D U V Up Vp a b c d : ℤ}
+    (hU : U = 2 * a * b)
+    (hV : V = c * d)
+    (hUp : Up = 2 * a * c)
+    (hVp : Vp = b * d)
+    (hsame :
+      (D = U ^ 2 - V ^ 2 ∧ D = 4 * Up ^ 2 - Vp ^ 2) ∨
+        (-D = U ^ 2 - V ^ 2 ∧ -D = 4 * Up ^ 2 - Vp ^ 2)) :
+    b ^ 2 * (4 * a ^ 2 + d ^ 2) =
+      c ^ 2 * (16 * a ^ 2 + d ^ 2) := by
+  have heq : U ^ 2 - V ^ 2 = 4 * Up ^ 2 - Vp ^ 2 := by
+    rcases hsame with hsame | hsame
+    · rw [← hsame.1, ← hsame.2]
+    · rw [← hsame.1, ← hsame.2]
+  subst U
+  subst V
+  subst Up
+  subst Vp
+  ring_nf at heq ⊢
+  nlinarith [heq]
+
+end N12FourSquaresAP
 ```
 
-Proof should still use `ZMod.intCast_zmod_eq_zero_iff_dvd` internally plus `zmod3_sq_add_sq_eq_zero`; it just hides the casts from the main `not_three_dvd_B/C` proofs.
+If the local file already has `Even U` and `Odd V` fields, make a thin wrapper that converts them into the explicit witnesses `∃ u, U = 2*u` and `∃ v, V = 2*v+1`.  I recommend keeping the core lemma above in the explicit-witness form because it avoids fighting Lean's `%` normalization and keeps the proof `ring`/`omega` only.
 
-## Summary
+A repository-facing theorem can include `hDodd : Odd D` or `0 < D`; those hypotheses are harmless but not needed by the core sign lemma after the signed forms are established.
 
-The recommended implementation order is:
+## 3. Convention audit
 
-1. Add `zmod3_sq_add_sq_eq_zero`.
-2. Add `not_isUnit_three_int`.
-3. Prove `not_three_dvd_B` and `not_three_dvd_C` by casting `E.hB`, `E.hC` to `ZMod 3`.
-4. Add the local bridge
-   ```lean
-   isCoprime_three_int_of_not_dvd {x : ℤ} :
-     ¬ (3 : ℤ) ∣ x → IsCoprime (3 : ℤ) x
-   ```
-   using the available prime/coprime API.
-5. Define `three_coprime_B`, `three_coprime_C`, and combine with `.mul_right` to get `three_coprime_centerX`.
+The stated parametrization is correct **only with signs**.
+
+For `(2A)^2 + D^2 = C^2`, with the even Pythagorean parameter named `U` and the odd one named `V`, the odd leg is
+
+```text
+U^2 - V^2.
+```
+
+Because `U` is even and `V` is odd, this expression is `3 mod 4`.  Therefore:
+
+* if `D ≡ 3 mod 4`, then `D = U^2 - V^2`;
+* if `D ≡ 1 mod 4`, then `D = V^2 - U^2`, equivalently `-D = U^2 - V^2`.
+
+So a convention that always writes `D = U^2 - V^2` is wrong unless one has separately fixed `D ≡ 3 mod 4` or chosen the parameter order to make that true.
+
+For `(4A)^2 + D^2 = B^2`, the even leg is `4A = 2*(2U')*V'`, so the signed odd leg is
+
+```text
+(2U')^2 - V'^2 = 4*U'^2 - V'^2.
+```
+
+Thus the signed formula
+
+```text
+τ*D = 4*U'^2 - V'^2
+```
+
+is the right one.  If `D ≡ 1 mod 4`, the positive equation is instead
+
+```text
+D = V'^2 - 4*U'^2.
+```
+
+The same-orientation lemma says exactly that the first and second signed odd legs lie on the same side of `D`:
+
+```text
+D  = U^2 - V^2      and D  = 4*U'^2 - V'^2,
+```
+
+or
+
+```text
+-D = U^2 - V^2      and -D = 4*U'^2 - V'^2.
+```
+
+Equivalently, the absolute-value conventions open consistently.
+
+Also note that the second formula is not `U'^2 - V'^2`; the factor `4` is essential because the even Pythagorean parameter is `2U'`.
+
+## 4. Path from same orientation to the refinement equation
+
+After same orientation, the two signed odd legs are equal:
+
+```text
+U^2 - V^2 = 4*U'^2 - V'^2.
+```
+
+The common refinement should be applied to the equality of products after dividing the even parameters by `2`:
+
+```text
+A = U*V = U'*V',
+U  = 2X,
+U' = 2X',
+
+X*V = X'*V'.
+```
+
+With `gcd(X,V)=1` and `gcd(X',V')=1`, isolate a `Nat` factorization theorem of this shape:
+
+```text
+Nat.coprime_product_refinement:
+  0 < X -> 0 < V -> 0 < X' -> 0 < V' ->
+  Nat.Coprime X V -> Nat.Coprime X' V' ->
+  X * V = X' * V' ->
+  ∃ a b c d : ℕ,
+    X = a*b ∧ V = c*d ∧ X' = a*c ∧ V' = b*d.
+```
+
+Then returning to the original even parameters gives
+
+```text
+U  = 2*a*b,
+V  = c*d,
+U' = 2*a*c,
+V' = b*d.
+```
+
+Substitute these into the equal-oriented odd-leg equation:
+
+```text
+(2ab)^2 - (cd)^2 = 4*(2ac)^2 - (bd)^2.
+```
+
+Expanding and rearranging gives
+
+```text
+b^2*(4*a^2 + d^2) = c^2*(16*a^2 + d^2),
+```
+
+which is the `int_refinement_equation_of_same_orientation` lemma above.
+
+For the final square extraction, isolate a second `Nat` residual if Mathlib does not already have the valuation version you want:
+
+```text
+Nat.eq_squares_of_coprime_cross_square_mul:
+  Nat.Coprime b c ->
+  Nat.Coprime X Y ->
+  b^2 * X = c^2 * Y ->
+  ∃ r s : ℕ, X = r^2 ∧ Y = s^2.
+```
+
+Use it with
+
+```text
+X = 4*a^2 + d^2,
+Y = 16*a^2 + d^2.
+```
+
+The required coprimality `Nat.Coprime X Y` follows from
+
+```text
+gcd(4*a^2 + d^2, 16*a^2 + d^2) | 12*a^2
+```
+
+and also divides `d^2`; with `Nat.Coprime a d`, it divides `12`.  Since both `X` and `Y` are odd, the gcd is not divisible by `2`.  The only remaining possible prime is `3`, and mod `3` gives
+
+```text
+4*a^2 + d^2 ≡ a^2 + d^2,
+16*a^2 + d^2 ≡ a^2 + d^2.
+```
+
+If `3` divided both, then `a^2 + d^2 ≡ 0 mod 3`.  This forces `3 | a` and `3 | d`, contradicting `Nat.Coprime a d`.  Hence the gcd is `1`.
+
+Once the extraction gives
+
+```text
+4*a^2 + d^2  = r^2,
+16*a^2 + d^2 = s^2,
+```
+
+the smaller Euler pair is `(A_new,D_new,B_new,C_new) = (a,d,s,r)`.  Positivity and `d` odd come from the positive refinement factors.  The parity `a` even follows from the square congruence: if `a` were odd and `d` is odd, then
+
+```text
+4*a^2 + d^2 ≡ 4 + 1 ≡ 5 mod 8,
+```
+
+not a square.  Finally, `A = 2*a*b*c*d`, with positive `b,c,d`, gives `a < A`, so this is the intended descent.
