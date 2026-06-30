@@ -1,26 +1,10 @@
-# Q2607: Nat refinement of two factorizations
+# Q2610: exact Nat factorization refinement helper
 
-Target helper:
+This answers only the Nat factor-refinement problem.
 
-```lean
-theorem two_coprime_factorizations_refine_nat
-    {A U V Up Vp : Nat}
-    (hUV : A = U * V) (hUpVp : A = Up * Vp)
-    (hcopUV : Nat.Coprime U V)
-    (hcopUpVp : Nat.Coprime Up Vp) :
-    exists a b c d : Nat,
-      U = a * b /\ V = c * d /\ Up = a * c /\ Vp = b * d
-```
+The clean proof is to first prove a positive-left refinement that does **not** require coprimality of `U,V` and `Up,Vp`, then wrap the exact theorem by handling the degenerate zero cases using the two `Nat.Coprime` hypotheses.
 
-For the positive integer variables needed in the Euler-square-pair descent, use the following stronger positive theorem.  It does **not** need either coprimality hypothesis: any equality of positive-left factorizations
-
-```text
-U*V = Up*Vp,  0<U, 0<Up
-```
-
-has the matrix refinement.  This avoids all zero-case clutter and is exactly what the later positive `Int` wrapper needs.
-
-The construction is the expected one:
+The positive construction is:
 
 ```text
 a = gcd U Up,
@@ -28,26 +12,26 @@ U = a*b,
 Up = a*c,
 gcd b c = 1,
 b*V = c*Vp,
-therefore b | Vp,
+b | Vp,
 Vp = b*d,
 V = c*d.
 ```
+
+The exact theorem in the prompt is true, but the zero cases are real.  For example, `U=0` forces `V=1` from `Nat.Coprime U V`, and then `Up*Vp=0`; the second coprimality condition forces either `(Up,Vp)=(0,1)` or `(1,0)`.
 
 ---
 
 ## Lean code
 
-Paste this near the local Nat/Int arithmetic helper layer.  It uses only `Mathlib` and no axioms/sorries.
+Paste under `import Mathlib.Tactic` in the current namespace.  No `sorry`, no axioms.
 
 ```lean
-import Mathlib
-
-namespace MazurProof.RationalPointsN12
+import Mathlib.Tactic
 
 /--
-Positive-left version of the refinement of two factorizations.
-This is stronger than the coprime version needed later: the hypotheses
-`Nat.Coprime U V` and `Nat.Coprime Up Vp` are not needed once `U,Up > 0`.
+Positive-left refinement of two factorizations.
+This is the main theorem used in positive `Int` wrappers.
+It does not require `Nat.Coprime U V` or `Nat.Coprime Up Vp`.
 -/
 theorem two_factorizations_refine_nat_pos
     {U V Up Vp : Nat}
@@ -56,8 +40,10 @@ theorem two_factorizations_refine_nat_pos
     ∃ a b c d : Nat,
       U = a * b ∧ V = c * d ∧ Up = a * c ∧ Vp = b * d := by
   let a : Nat := Nat.gcd U Up
-  have haU_dvd : a ∣ U := Nat.gcd_dvd_left U Up
-  have haUp_dvd : a ∣ Up := Nat.gcd_dvd_right U Up
+  have haU_dvd : a ∣ U := by
+    simpa [a] using Nat.gcd_dvd_left U Up
+  have haUp_dvd : a ∣ Up := by
+    simpa [a] using Nat.gcd_dvd_right U Up
   rcases haU_dvd with ⟨b, hbU⟩
   rcases haUp_dvd with ⟨c, hcUp⟩
 
@@ -68,13 +54,16 @@ theorem two_factorizations_refine_nat_pos
     omega
 
   have hbc : Nat.Coprime b c := by
-    have hgcd_mul : Nat.gcd U Up = a * Nat.gcd b c := by
-      rw [hbU, hcUp]
-      simpa [Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc]
-        using (Nat.gcd_mul_left a b c)
+    have hgcd_mul : a * Nat.gcd b c = a := by
+      calc
+        a * Nat.gcd b c = Nat.gcd (a * b) (a * c) := by
+          simpa [Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc]
+            using (Nat.gcd_mul_left a b c).symm
+        _ = Nat.gcd U Up := by rw [← hbU, ← hcUp]
+        _ = a := rfl
     have hcancel : Nat.gcd b c = 1 := by
       have hmul_cancel : a * Nat.gcd b c = a * 1 := by
-        simpa [a] using hgcd_mul.symm
+        simpa using hgcd_mul
       exact mul_left_cancel₀ (Nat.ne_of_gt ha_pos) hmul_cancel
     simpa [Nat.Coprime] using hcancel
 
@@ -111,76 +100,101 @@ theorem two_factorizations_refine_nat_pos
   exact ⟨a, b, c, d, hbU, hV, hcUp, hVp⟩
 
 /--
-The requested coprime-factorization refinement, with the positivity hypotheses
-that are available in the later positive `Int` descent wrapper.
-The coprimality assumptions are intentionally unused: the positive refinement
-above is stronger.
+The exact zero-allowed theorem requested in Q2610.
+The coprimality hypotheses are only needed in the zero cases.
 -/
-theorem two_coprime_factorizations_refine_nat_pos
+theorem two_coprime_factorizations_refine_nat
     {A U V Up Vp : Nat}
-    (hU : 0 < U) (hUp : 0 < Up)
     (hUV : A = U * V) (hUpVp : A = Up * Vp)
-    (_hcopUV : Nat.Coprime U V)
-    (_hcopUpVp : Nat.Coprime Up Vp) :
+    (hcopUV : Nat.Coprime U V)
+    (hcopUpVp : Nat.Coprime Up Vp) :
     ∃ a b c d : Nat,
       U = a * b ∧ V = c * d ∧ Up = a * c ∧ Vp = b * d := by
-  apply two_factorizations_refine_nat_pos hU hUp
-  calc
-    U * V = A := hUV.symm
-    _ = Up * Vp := hUpVp
-
-end MazurProof.RationalPointsN12
+  by_cases hU0 : U = 0
+  · have hV1 : V = 1 := by
+      simpa [Nat.Coprime, hU0] using hcopUV
+    have hA0 : A = 0 := by
+      simp [hUV, hU0]
+    have hUpVp0 : Up * Vp = 0 := by
+      have h : Up * Vp = A := hUpVp.symm
+      simpa [hA0] using h
+    rcases (mul_eq_zero.mp hUpVp0) with hUp0 | hVp0
+    · have hVp1 : Vp = 1 := by
+        simpa [Nat.Coprime, hUp0] using hcopUpVp
+      refine ⟨0, 1, 1, 1, ?_, ?_, ?_, ?_⟩
+      · simp [hU0]
+      · simp [hV1]
+      · simp [hUp0]
+      · simp [hVp1]
+    · have hUp1 : Up = 1 := by
+        simpa [Nat.Coprime, hVp0] using hcopUpVp
+      refine ⟨1, 0, 1, 1, ?_, ?_, ?_, ?_⟩
+      · simp [hU0]
+      · simp [hV1]
+      · simp [hUp1]
+      · simp [hVp0]
+  · by_cases hUp0 : Up = 0
+    · have hVp1 : Vp = 1 := by
+        simpa [Nat.Coprime, hUp0] using hcopUpVp
+      have hA0 : A = 0 := by
+        simp [hUpVp, hUp0]
+      have hUV0 : U * V = 0 := by
+        have h : U * V = A := hUV.symm
+        simpa [hA0] using h
+      have hV0 : V = 0 := by
+        rcases (mul_eq_zero.mp hUV0) with hUz | hVz
+        · exact False.elim (hU0 hUz)
+        · exact hVz
+      have hU1 : U = 1 := by
+        simpa [Nat.Coprime, hV0] using hcopUV
+      refine ⟨1, 1, 0, 1, ?_, ?_, ?_, ?_⟩
+      · simp [hU1]
+      · simp [hV0]
+      · simp [hUp0]
+      · simp [hVp1]
+    · apply two_factorizations_refine_nat_pos
+      · exact Nat.pos_of_ne_zero hU0
+      · exact Nat.pos_of_ne_zero hUp0
+      · calc
+          U * V = A := hUV.symm
+          _ = Up * Vp := hUpVp
 ```
 
 ---
 
-## API notes and fallbacks
+## API notes
 
-1. `Nat.gcd_mul_left` is the key gcd API used above.  Its expected shape is:
+The Euclid step used above is:
 
 ```lean
-Nat.gcd (a * b) (a * c) = a * Nat.gcd b c
+hbc.dvd_of_dvd_mul_left : b ∣ c * Vp → b ∣ Vp
 ```
 
-The `simpa [Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc]` wrapper is there to handle harmless associativity/commutativity orientation.
+for `hbc : Nat.Coprime b c`.
 
-2. `Nat.Coprime.dvd_of_dvd_mul_left` is used in the Euclid step:
+If a local Mathlib snapshot has the orientation named differently, replace the single line
 
 ```lean
-have hb_dvd_cVp : b ∣ c * Vp := ⟨V, hbVcVp.symm⟩
 exact hbc.dvd_of_dvd_mul_left hb_dvd_cVp
 ```
 
-If the local Mathlib orientation differs, try the symmetric spelling:
+by one of these equivalent spellings:
+
+```lean
+exact Nat.Coprime.dvd_of_dvd_mul_left hbc hb_dvd_cVp
+```
+
+or, if only the right-stripping theorem is available:
 
 ```lean
 exact hbc.symm.dvd_of_dvd_mul_right hb_dvd_cVp
 ```
 
-but in current Mathlib-style APIs the displayed `dvd_of_dvd_mul_left` is the intended one: for `hbc : Nat.Coprime b c`, it strips the left factor `c` from a divisibility of `c * Vp`.
-
-3. The literal zero-allowed theorem in the prompt is true under the two coprime-factorization hypotheses, but it is not the theorem I recommend using for the Euler descent.  Its proof is mostly degenerate case work:
-
-```text
-U=0 forces V=1 from Coprime U V;
-then Up*Vp=0 and Coprime Up Vp forces either (Up,Vp)=(0,1) or (1,0),
-and similarly for the Up=0 branch.
-```
-
-Since the later `Int` variables `U,V,Up,Vp` are positive in the descent parametrization, the positive theorem above is the clean interface to wrap.
-
-4. If you still want the exact zero-allowed theorem, prove it as a thin wrapper:
+The zero split uses generic `mul_eq_zero.mp`; if your environment prefers the Nat namespace spelling, use:
 
 ```lean
--- sketch only, because the positive theorem is the useful interface
-by_cases hU0 : U = 0
-  -- use `hcopUV` to get `V=1`, split `Up*Vp=0`.
-by_cases hUp0 : Up = 0
-  -- symmetric.
--- positive branch:
-exact two_coprime_factorizations_refine_nat_pos
-  (Nat.pos_of_ne_zero hU0) (Nat.pos_of_ne_zero hUp0)
-  hUV hUpVp hcopUV hcopUpVp
+Nat.mul_eq_zero.mp hUpVp0
+Nat.mul_eq_zero.mp hUV0
 ```
 
-The positive theorem avoids these zero branches entirely.
+but current Mathlib under `import Mathlib.Tactic` should accept `mul_eq_zero.mp`.
