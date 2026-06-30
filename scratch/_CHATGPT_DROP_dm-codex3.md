@@ -4,7 +4,7 @@ Target: compact drop-in Lean for the four Nat lemmas.
 
 API audit notes:
 
-* `Nat.pow_left_injective` is not the right name to rely on here. If root equality from `a ^ 2 = b ^ 2` is ever needed, use `Nat.pow_left_inj` with the base hypothesis, for example `Nat.pow_left_inj (by norm_num : 1 < 2)`. The code below avoids this entirely.
+* `Nat.pow_left_injective` is not the right name to rely on here. For fixed nonzero exponent/root injectivity, use `Nat.pow_left_inj`, for example `(Nat.pow_left_inj (by norm_num : (2 : ℕ) ≠ 0)).mp h`; the root-namespace theorem `pow_left_inj (M := ℕ)` is also available from the torsion-free API. The code below avoids this entirely.
 * `Nat.coprime_pow_left_iff` and `Nat.coprime_pow_right_iff` do exist, but the first argument is the positive exponent: `Nat.coprime_pow_left_iff (by norm_num : 0 < 2) a b` and similarly on the right. The code below avoids them.
 * `hcop.dvd_mul_right` exists, but its receiver must have the divisor as the left coprime argument: `H : Nat.Coprime k n` gives `k ∣ m * n ↔ k ∣ m`. If your hypothesis is oriented differently, use `.symm` first.
 * `hmn_coprime.of_dvd_left hdvd` is valid. The explicit form is `Nat.Coprime.of_dvd_left hdvd hmn_coprime`.
