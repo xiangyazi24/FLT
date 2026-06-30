@@ -1,172 +1,160 @@
-# Q2297: `QuarticB` wrapper via existing helpers
+# Q2310: `QuarticA` opposite-parity branch
 
 ```lean
--- Paste this below the listed helpers in
--- FLT/Assumptions/MazurProof/RationalPointsN12.lean,
--- inside `namespace MazurProof.RationalPointsN12`.
+import Mathlib.NumberTheory.PythagoreanTriples
+import Mathlib.Tactic
+import FLT.Assumptions.MazurProof.RationalPointsN12
 
-lemma odd_odd_split_as_sum_diff {u v : ℤ}
-    (hu : Odd u) (hv : Odd v) :
-    ∃ R S : ℤ, u = R + S ∧ v = R - S ∧ Odd (R + S) := by
-  rcases hu with ⟨U, hU⟩
-  rcases hv with ⟨V, hV⟩
-  refine ⟨U + V + 1, U - V, ?_, ?_, ?_⟩
-  · rw [hU]
-    ring
-  · rw [hV]
-    ring
-  · exact ⟨U, by ring⟩
+namespace MazurProof.RationalPointsN12
 
-lemma split_mul_ne_zero_of_sq_ne {u v R S : ℤ}
-    (hu : u = R + S)
-    (hv : v = R - S)
-    (hsqne : u ^ 2 ≠ v ^ 2) :
-    R * S ≠ 0 := by
-  intro hRS
-  apply hsqne
-  rcases mul_eq_zero.mp hRS with hR | hS
-  · calc
-      u ^ 2 = (R + S) ^ 2 := by rw [hu]
-      _ = (R - S) ^ 2 := by rw [hR]; ring
-      _ = v ^ 2 := by rw [hv]
-  · calc
-      u ^ 2 = (R + S) ^ 2 := by rw [hu]
-      _ = (R - S) ^ 2 := by rw [hS]; ring
-      _ = v ^ 2 := by rw [hv]
+lemma quarticA_int_sum_sq_pos_of_mul_ne_zero {u v : ℤ}
+    (huv0 : u * v ≠ 0) :
+    0 < u ^ 2 + v ^ 2 := by
+  have hu0 : u ≠ 0 := left_ne_zero_of_mul huv0
+  exact add_pos_of_pos_of_nonneg (sq_pos_of_ne_zero hu0) (sq_nonneg v)
 
-lemma int_gcd_of_coprime_sum_diff {u v R S : ℤ}
-    (hcop : Int.gcd u v = 1)
-    (hu : u = R + S)
-    (hv : v = R - S) :
-    Int.gcd R S = 1 := by
-  have hgcd_uv : Int.gcd (R + S) (R - S) = 1 := by
-    simpa [hu, hv] using hcop
-  have hbez : ∃ x y : ℤ, (1 : ℤ) = (R + S) * x + (R - S) * y := by
-    exact (Int.gcd_dvd_iff (a := R + S) (b := R - S) (n := 1)).mp
-      (by simpa [hgcd_uv])
-  have hEqInt : (1 : ℤ) = (Int.gcd R S : ℤ) := by
-    refine Int.gcd_greatest (a := R) (b := S) (d := 1) ?_ ?_ ?_ ?_
-    · norm_num
-    · simp
-    · simp
-    · intro e heR heS
-      rcases hbez with ⟨x, y, hxy⟩
-      have he_sum : e ∣ R + S := dvd_add heR heS
-      have he_diff : e ∣ R - S := dvd_sub heR heS
-      rw [hxy]
-      exact dvd_add
-        (dvd_mul_of_dvd_left he_sum x)
-        (dvd_mul_of_dvd_left he_diff y)
-  exact Int.ofNat_inj.mp hEqInt.symm
+lemma quarticA_even_square_leg_mod_two (v : ℤ) :
+    (2 * v ^ 2) % 2 = 0 := by
+  simpa using Int.mul_emod_right (2 : ℤ) (v ^ 2)
 
--- This is the requested final wrapper, but with the necessary extra
--- non-degeneracy hypothesis `hsqne : u ^ 2 ≠ v ^ 2`.
-theorem quartic_B_to_pythagoreanQuarticRhs
+lemma quarticA_first_leg_mod_two_eq_one_of_second_leg_even
+    {x y z : ℤ}
+    (htrip : PythagoreanTriple x y z)
+    (hcop : Int.gcd x y = 1)
+    (hy : y % 2 = 0) :
+    x % 2 = 1 := by
+  obtain hbad | hgood := htrip.even_odd_of_coprime hcop
+  · rw [hy] at hbad
+    exact False.elim (zero_ne_one hbad.2)
+  · exact hgood.1
+
+/--
+The core Pythagorean extraction.  The second leg is `2 * v ^ 2`, and after
+primitive classification it is forced to be the even leg `2 * m * n`.
+-/
+theorem quarticA_evenLegParams_of_pythagorean_leg_coprime
+    {u v Z : ℤ}
+    (huv0 : u * v ≠ 0)
+    (htrip : PythagoreanTriple Z (2 * v ^ 2) (u ^ 2 + v ^ 2))
+    (hlegcop : Int.gcd Z (2 * v ^ 2) = 1) :
+    ∃ r s : ℤ,
+      r * s ≠ 0 ∧ Int.gcd r s = 1 ∧
+      r * s = v ^ 2 ∧
+      r ^ 2 + s ^ 2 = u ^ 2 + v ^ 2 := by
+  have hZmod : Z % 2 = 1 :=
+    quarticA_first_leg_mod_two_eq_one_of_second_leg_even
+      htrip hlegcop (quarticA_even_square_leg_mod_two v)
+  have hsum_pos : 0 < u ^ 2 + v ^ 2 :=
+    quarticA_int_sum_sq_pos_of_mul_ne_zero huv0
+  obtain ⟨m, n, _hZ, h2v, hsum, hgcd, _hmnpar, _hm_nonneg⟩ :=
+    PythagoreanTriple.coprime_classification'
+      htrip hlegcop hZmod hsum_pos
+  have hprod : m * n = v ^ 2 := by
+    have htwo : 2 * (m * n) = 2 * (v ^ 2) := by
+      calc
+        2 * (m * n) = 2 * m * n := by ring
+        _ = 2 * v ^ 2 := h2v.symm
+    exact mul_left_cancel₀ (by norm_num : (2 : ℤ) ≠ 0) htwo
+  have hmn0 : m * n ≠ 0 := by
+    have hv0 : v ≠ 0 := right_ne_zero_of_mul huv0
+    have hvsq0 : v ^ 2 ≠ 0 := pow_ne_zero 2 hv0
+    simpa [hprod] using hvsq0
+  exact ⟨m, n, hmn0, hgcd, hprod, hsum.symm⟩
+
+/--
+Same extraction, with the full opposite-parity branch hypotheses in the
+interface.  The only extra input is the primitive Pythagorean-leg coprimality
+lemma for the QuarticA construction.
+-/
+theorem quarticA_evenLegParams_of_oppParity_with_leg_coprime
+    {u v Z : ℤ}
+    (_hcop : Int.gcd u v = 1)
+    (huv0 : u * v ≠ 0)
+    (_hne : u ^ 2 ≠ v ^ 2)
+    (_hopp : (Odd u ∧ Even v) ∨ (Even u ∧ Odd v))
+    (hA : QuarticA u v Z)
+    (hlegcop : Int.gcd Z (2 * v ^ 2) = 1) :
+    ∃ r s : ℤ,
+      r * s ≠ 0 ∧ Int.gcd r s = 1 ∧
+      r * s = v ^ 2 ∧
+      r ^ 2 + s ^ 2 = u ^ 2 + v ^ 2 := by
+  exact quarticA_evenLegParams_of_pythagorean_leg_coprime
+    (u := u) (v := v) (Z := Z)
+    huv0 (quarticA_pythagoreanTriple hA) hlegcop
+
+theorem quarticA_eisensteinParam_of_oppParity_with_leg_coprime
     {u v Z : ℤ}
     (hcop : Int.gcd u v = 1)
-    (hu : Odd u) (hv : Odd v)
     (huv0 : u * v ≠ 0)
-    (hne : 3 * u ^ 2 - v ^ 2 ≠ 0)
-    (hsqne : u ^ 2 ≠ v ^ 2)
-    (hB : QuarticB u v Z) :
-    ∃ m n b : ℤ,
-      m * n ≠ 0 ∧ Int.gcd m n = 1 ∧ Odd (m + n) ∧
-      b ^ 2 = pythagoreanQuarticRhs m n := by
-  rcases quarticB_twist_factor_halves_odd hu hv with ⟨A, hA, hAOdd⟩
-  rcases quarticB_sum_factor_halves_odd hu hv with ⟨B, hBhalf, _hBOdd⟩
+    (hne : u ^ 2 ≠ v ^ 2)
+    (hopp : (Odd u ∧ Even v) ∨ (Even u ∧ Odd v))
+    (hA : QuarticA u v Z)
+    (hlegcop : Int.gcd Z (2 * v ^ 2) = 1) :
+    QuarticAEisensteinParam u v := by
+  obtain ⟨r, s, hrs0, hrs_coprime, hprod, hhyp⟩ :=
+    quarticA_evenLegParams_of_oppParity_with_leg_coprime
+      (u := u) (v := v) (Z := Z)
+      hcop huv0 hne hopp hA hlegcop
+  exact quarticA_eisensteinParam_from_evenLegParams
+    (u := u) (v := v) (r := r) (s := s)
+    hrs0 hrs_coprime hprod hhyp
 
-  have hZsq_four : Z ^ 2 = 4 * (A * B) := by
-    calc
-      Z ^ 2 = (3 * u ^ 2 - v ^ 2) * (u ^ 2 + v ^ 2) := by
-        simpa [QuarticB] using hB
-      _ = (2 * A) * (2 * B) := by rw [hA, hBhalf]
-      _ = 4 * (A * B) := by ring
+/--
+Small remaining project-specific input, stated as a parameter rather than an
+axiom.  If the file already has this under another name, apply this theorem to
+that existing lemma.
+-/
+theorem quarticAOppParityParamBridge_of_leg_coprime
+    (hlegcop_of_quarticA :
+      ∀ {u v Z : ℤ},
+        Int.gcd u v = 1 →
+        u * v ≠ 0 →
+        u ^ 2 ≠ v ^ 2 →
+        ((Odd u ∧ Even v) ∨ (Even u ∧ Odd v)) →
+        QuarticA u v Z →
+        Int.gcd Z (2 * v ^ 2) = 1) :
+    QuarticAOppParityParamBridge := by
+  dsimp [QuarticAOppParityParamBridge]
+  intro u v Z hcop huv0 hne hopp hA
+  exact quarticA_eisensteinParam_of_oppParity_with_leg_coprime
+    (u := u) (v := v) (Z := Z)
+    hcop huv0 hne hopp hA
+    (hlegcop_of_quarticA
+      (u := u) (v := v) (Z := Z)
+      hcop huv0 hne hopp hA)
 
-  have hZeven : Even Z := even_of_sq_eq_four_mul hZsq_four
-  rcases hZeven with ⟨c, hZc⟩
-
-  have hABsq : A * B = c ^ 2 := by
-    have h4 : 4 * (A * B) = 4 * c ^ 2 := by
-      calc
-        4 * (A * B) = Z ^ 2 := by rw [hZsq_four]
-        _ = (2 * c) ^ 2 := by
-          rw [hZc]
-          ring
-        _ = 4 * c ^ 2 := by ring
-    nlinarith
-
-  have hleft_pos : 0 < 3 * u ^ 2 - v ^ 2 :=
-    quarticB_left_factor_pos huv0 hne hB
-  have hsum_pos : 0 < u ^ 2 + v ^ 2 :=
-    quarticB_sum_sq_pos_of_mul_ne_zero huv0
-  have hA_nonneg : 0 ≤ A := by nlinarith [hA, hleft_pos]
-  have hB_nonneg : 0 ≤ B := by nlinarith [hBhalf, hsum_pos]
-
-  have hcopAB : Int.gcd A B = 1 :=
-    quarticB_half_factors_coprime hcop hAOdd hA hBhalf
-
-  rcases int_coprime_mul_eq_sq_of_nonneg hA_nonneg hB_nonneg hcopAB hABsq
-    with ⟨r, s, hr, hs⟩
-
-  have hsplit₁ : 3 * u ^ 2 - v ^ 2 = 2 * r ^ 2 := by
-    calc
-      3 * u ^ 2 - v ^ 2 = 2 * A := hA
-      _ = 2 * r ^ 2 := by rw [hr]
-  have hsplit₂ : u ^ 2 + v ^ 2 = 2 * s ^ 2 := by
-    calc
-      u ^ 2 + v ^ 2 = 2 * B := hBhalf
-      _ = 2 * s ^ 2 := by rw [hs]
-
-  rcases odd_odd_split_as_sum_diff hu hv with ⟨R, S, huRS, hvRS, hpar⟩
-  have hRS0 : R * S ≠ 0 :=
-    split_mul_ne_zero_of_sq_ne huRS hvRS hsqne
-  have hcopRS : Int.gcd R S = 1 :=
-    int_gcd_of_coprime_sum_diff hcop huRS hvRS
-
-  exact quartic_B_split_halves_to_pythagoreanQuarticRhs
-    hsplit₁ hsplit₂ huRS hvRS hRS0 hcopRS hpar
+end MazurProof.RationalPointsN12
 ```
 
-## Why the extra `u ^ 2 ≠ v ^ 2` hypothesis is needed
+## Answers to the branch questions
 
-Step 5 cannot produce `R * S ≠ 0` from the originally stated assumptions. If `u = R + S` and `v = R - S`, then `R = 0` gives `u = -v`, and `S = 0` gives `u = v`; both are exactly the degeneracies covered by `u ^ 2 = v ^ 2`.
+1. In the primitive opposite-parity branch, `2 * v ^ 2` is the even leg, so it corresponds to `2 * m * n`, not to `m ^ 2 - n ^ 2`.  The code above uses `PythagoreanTriple.coprime_classification'`, which orients the classification from `Z % 2 = 1` and `0 < u ^ 2 + v ^ 2`; therefore the second-leg equation returned is exactly
+   ```lean
+   h2v : 2 * v ^ 2 = 2 * m * n
+   ```
 
-A concrete Lean-checkable obstruction is `u = v = 1`, `Z = 2`:
+2. Yes, after that orientation we get `m * n = v ^ 2` exactly by cancelling the nonzero integer factor `2`:
+   ```lean
+   exact mul_left_cancel₀ (by norm_num : (2 : ℤ) ≠ 0) htwo
+   ```
+   There is no sign ambiguity at this point.  If one uses `PythagoreanTriple.coprime_classification.mp` directly instead of the primed theorem, the disjunction has an orientation branch where the second leg is `m ^ 2 - n ^ 2`; that branch must be rejected by parity.  The primed theorem packages that rejection.
 
-```lean
-example :
-    Int.gcd (1 : ℤ) 1 = 1 ∧
-    Odd (1 : ℤ) ∧ Odd (1 : ℤ) ∧
-    (1 : ℤ) * 1 ≠ 0 ∧
-    3 * (1 : ℤ) ^ 2 - 1 ^ 2 ≠ 0 ∧
-    QuarticB 1 1 2 := by
-  norm_num [QuarticB]
+3. This branch does not need `Z` sign normalization and does not need an explicit `Z ≠ 0` hypothesis.  The only positivity needed for `coprime_classification'` is the hypotenuse positivity
+   ```lean
+   0 < u ^ 2 + v ^ 2
+   ```
+   which follows from `u * v ≠ 0`.  The sign of `Z` is allowed to be either sign of `m ^ 2 - n ^ 2`.
 
-example {R S : ℤ}
-    (hu : (1 : ℤ) = R + S)
-    (hv : (1 : ℤ) = R - S) :
-    R * S = 0 := by
-  have hS : S = 0 := by nlinarith
-  simp [hS]
-```
+4. The one hard project-specific lemma still needed for a closed proof of `QuarticAOppParityParamBridge` is not parity/orientation; it is primitive-leg coprimality for the Pythagorean triple produced by QuarticA.  Exact type:
+   ```lean
+   ∀ {u v Z : ℤ},
+     Int.gcd u v = 1 →
+     u * v ≠ 0 →
+     u ^ 2 ≠ v ^ 2 →
+     ((Odd u ∧ Even v) ∨ (Even u ∧ Odd v)) →
+     QuarticA u v Z →
+     Int.gcd Z (2 * v ^ 2) = 1
+   ```
+   Once that lemma is available, `quarticAOppParityParamBridge_of_leg_coprime` proves the full bridge.
 
-So the existing helper
-
-```lean
-quartic_B_split_halves_to_pythagoreanQuarticRhs
-```
-
-requires either the strengthened wrapper above, or a separate proof branch for the degenerate cases `u = v` and `u = -v` that does not go through `R * S ≠ 0`.
-
-## Notes on the proof
-
-The `R,S` split is division-free: if `u = 2U + 1` and `v = 2V + 1`, take
-
-```lean
-R = U + V + 1
-S = U - V
-```
-
-Then `R + S = u` and `R - S = v` by `ring`, and `Odd (R + S)` is witnessed by `U`.
-
-The gcd lemma uses Bezout from `Int.gcd_dvd_iff`: since `Int.gcd (R + S) (R - S) = 1`, any common divisor of `R` and `S` divides both `R + S` and `R - S`, hence divides `1`; `Int.gcd_greatest` then gives `Int.gcd R S = 1`.
+`u ^ 2 ≠ v ^ 2` and the explicit opposite-parity hypothesis are not used in the local Pythagorean extraction above; they belong naturally in the project-specific leg-coprimality lemma and in the safe bridge interface.
