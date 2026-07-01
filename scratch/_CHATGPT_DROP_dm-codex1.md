@@ -1,31 +1,77 @@
-# Q2890 (dm-codex1): performance plan for `tateC12_variableChange_eq_shortW`
+# Q2899 (dm-codex1): attacking `projectivePointAddEquivOfVariableChange`
 
 Target file: `FLT/Assumptions/MazurProof/KubertBridgeN12.lean`  
 Requested namespace: `MazurProof.KubertBridgeN12`
 
-Current target:
+Current residual:
 
 ```lean
-theorem tateC12_variableChange_eq_shortW
-    (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    tateC12ToShortVariableChange q hq1 • tateC12W q =
-      shortW (A12 q) (B12 q)
+axiom projectivePointAddEquivOfVariableChange
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
+    WeierstrassCurve.Projective.Point (WeierstrassCurve.toProjective W) ≃+
+      WeierstrassCurve.Projective.Point (WeierstrassCurve.toProjective (C • W))
 ```
 
-The performance issue is caused by asking Lean to do five rational-function coefficient proofs plus all `VariableChange` unfolding in one `ext; simp; field_simp; ring_nf`.  The robust route is:
+## Bottom line
 
-1. define scalar helper expressions `u`, `s`, and the five inner variable-change brackets;
-2. prove four small zero/scale identities about those brackets;
-3. prove each coefficient separately using `WeierstrassCurve.variableChange_a₁` through `variableChange_a₆`;
-4. assemble the curve equality by `ext` with no algebra left.
+In the Mathlib revision pinned by this FLT repo (`96fd0fff...`), I do **not** see an existing point-level map induced by `WeierstrassCurve.VariableChange`.  The available APIs are:
 
-Do **not** run a final global `simp` after `field_simp`; that is what tends to generate and then repeatedly normalize side goals like `1 + q = 0 ∨ True`.  Instead, provide denominator facts explicitly, clear denominators once inside each small lemma, and finish with `ring` rather than `ring_nf` whenever possible.
+* curve-level `VariableChange` action and coefficient formulas:
+  `WeierstrassCurve.variableChange_a₁`, `variableChange_a₂`, `variableChange_a₃`, `variableChange_a₄`, `variableChange_a₆`, `variableChange_Δ`;
+* affine/projective base-change maps for ring homomorphisms, not Weierstrass variable changes;
+* `WeierstrassCurve.Projective.Point.toAffineAddEquiv`, which is the key way to avoid re-proving the projective group law;
+* affine point constructors and group law in `WeierstrassCurve.Affine.Point`.
 
-## 0. Recommended local setup
+So the best attack is:
 
-Use the existing local definitions if already present.  The following definitions are written so the coefficient lemmas can avoid unfolding the full `VariableChange` structure repeatedly.
+1. shrink the current projective residual to an **affine** variable-change `AddEquiv`;
+2. prove the projective theorem from that affine theorem using `Projective.Point.toAffineAddEquiv`;
+3. then shrink the affine residual further to one explicit `map_add` lemma for a coordinate map, after checking nonsingularity preservation and inverse laws.
+
+The affine path still has a group-law preservation theorem to prove; `toAffineAddEquiv` avoids projective quotient/group-law work, but it does not magically prove that a new affine coordinate map preserves `+`.
+
+## APIs to grep/check locally
+
+```bash
+grep -R "def toAffineAddEquiv\|toAffineLift_add" .lake/packages/mathlib/Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Point.lean
+grep -R "def add : W.Point\|lemma add_some\|lemma add_of_Y_eq" .lake/packages/mathlib/Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Point.lean
+grep -R "variableChange_a₁\|variableChange_Δ\|structure VariableChange" .lake/packages/mathlib/Mathlib/AlgebraicGeometry/EllipticCurve/VariableChange.lean
+grep -R "nonsingular_iff_variableChange\|equation_iff_variableChange" .lake/packages/mathlib/Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Basic.lean
+grep -R "protected lemma map_add\|baseChange_add" .lake/packages/mathlib/Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Point.lean
+```
+
+Useful `#check`s:
 
 ```lean
+#check WeierstrassCurve.VariableChange
+#check WeierstrassCurve.VariableChange.inv_def
+#check WeierstrassCurve.variableChange_a₁
+#check WeierstrassCurve.variableChange_a₂
+#check WeierstrassCurve.variableChange_a₃
+#check WeierstrassCurve.variableChange_a₄
+#check WeierstrassCurve.variableChange_a₆
+#check WeierstrassCurve.variableChange_Δ
+#check WeierstrassCurve.Affine.equation_iff_variableChange
+#check WeierstrassCurve.Affine.nonsingular_iff_variableChange
+#check WeierstrassCurve.Projective.Point.toAffineAddEquiv
+#check WeierstrassCurve.Projective.Point.toAffineLift_add
+#check WeierstrassCurve.Projective.map_add
+#check WeierstrassCurve.Projective.baseChange_add
+```
+
+Interpretation:
+
+* `Projective.map_add` and `Projective.baseChange_add` are for coefficient ring maps/base-change, not for `VariableChange`.
+* `Affine.equation_iff_variableChange` and `Affine.nonsingular_iff_variableChange` handle the special translation putting an affine point at the origin; they are useful diagnostics but do not directly give arbitrary `C : VariableChange ℚ` point transport.
+* I would not spend time searching for a hidden `VariableChange.Point.map` unless the greps above reveal something new.  The natural map appears not to exist yet.
+
+## Stage 1: replace the projective residual by an affine residual
+
+This is immediately better than the current axiom because all projective quotient/infinity work becomes checked by Mathlib's existing `toAffineAddEquiv`.
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 import Mathlib.Tactic
 
@@ -35,437 +81,546 @@ namespace MazurProof.KubertBridgeN12
 
 noncomputable section
 
-/-- Tate normal form `y² + (1-c)xy - b y = x³ - b x²`. -/
-def tateW (b c : ℚ) : WeierstrassCurve ℚ :=
-  { a₁ := 1 - c
-    a₂ := -b
-    a₃ := -b
-    a₄ := 0
-    a₆ := 0 }
+/--
+Smaller residual than the current projective axiom: an admissible Weierstrass variable
+change induces an additive equivalence on affine nonsingular point groups.
 
-def tateC12_b (q : ℚ) : ℚ :=
-  q * (q - 1) * (q ^ 2 + 1) * (3 * q ^ 2 + 1) / (q + 1) ^ 4
+This avoids projective quotient representatives and relies on the checked Mathlib
+projective-to-affine additive equivalence to recover the projective theorem.
+-/
+axiom affinePointAddEquivOfVariableChange
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
+    WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W) ≃+
+      WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine (C • W))
 
-def tateC12_c (q : ℚ) : ℚ :=
-  q * (q - 1) * (3 * q ^ 2 + 1) / (q + 1) ^ 3
-
-def tateC12W (q : ℚ) : WeierstrassCurve ℚ :=
-  tateW (tateC12_b q) (tateC12_c q)
-
-def tateC12_x6 (q : ℚ) : ℚ :=
-  (q - 1) * (3 * q ^ 2 + 1) / (4 * (q + 1))
-
-def tateC12_y6 (q : ℚ) : ℚ :=
-  (q - 1) ^ 2 * (3 * q ^ 2 + 1) ^ 2 / (8 * (q + 1) ^ 3)
-
-/-- The Mathlib variable-change scale.  Its inverse powers appear in the transformed coefficients. -/
-def tateC12_u (q : ℚ) : ℚ :=
-  1 / (2 * (q + 1) ^ 3)
-
-/-- The shear killing `a₁`, since Mathlib has `a₁' = u⁻¹ * (a₁ + 2s)`. -/
-def tateC12_s (q : ℚ) : ℚ :=
-  (tateC12_c q - 1) / 2
-
-lemma tateC12_u_ne_zero (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    tateC12_u q ≠ 0 := by
-  unfold tateC12_u
-  exact div_ne_zero one_ne_zero
-    (mul_ne_zero (by norm_num : (2 : ℚ) ≠ 0) (pow_ne_zero 3 hq1))
-
-noncomputable def tateC12ToShortVariableChange
-    (q : ℚ) (hq1 : q + 1 ≠ 0) : WeierstrassCurve.VariableChange ℚ :=
-  { u := Units.mk0 (tateC12_u q) (tateC12_u_ne_zero q hq1)
-    r := tateC12_x6 q
-    s := tateC12_s q
-    t := tateC12_y6 q }
-```
-
-If these definitions already exist in your scratch test, keep the existing names and only add the helper lemmas below.
-
-## 1. Denominator and cancellation helpers
-
-The common failure mode is that `field_simp [hq1]` knows `q + 1 ≠ 0` but later sees denominators normalized as `1 + q`.  Add both orientations and the powers explicitly.
-
-```lean
-private lemma one_add_ne_zero_of_add_one_ne_zero {q : ℚ}
-    (hq1 : q + 1 ≠ 0) : 1 + q ≠ 0 := by
-  simpa [add_comm] using hq1
-
-private lemma q_add_one_pow_ne_zero (q : ℚ) (hq1 : q + 1 ≠ 0) (n : ℕ) :
-    (q + 1) ^ n ≠ 0 :=
-  pow_ne_zero n hq1
-
-private lemma one_add_q_pow_ne_zero (q : ℚ) (hq1 : q + 1 ≠ 0) (n : ℕ) :
-    (1 + q) ^ n ≠ 0 :=
-  pow_ne_zero n (one_add_ne_zero_of_add_one_ne_zero hq1)
-
-private lemma two_mul_q_add_one_pow_three_ne_zero (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    2 * (q + 1) ^ 3 ≠ 0 := by
-  exact mul_ne_zero (by norm_num : (2 : ℚ) ≠ 0) (pow_ne_zero 3 hq1)
-
-private lemma four_mul_q_add_one_ne_zero (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    4 * (q + 1) ≠ 0 := by
-  exact mul_ne_zero (by norm_num : (4 : ℚ) ≠ 0) hq1
-
-private lemma eight_mul_q_add_one_pow_three_ne_zero (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    8 * (q + 1) ^ 3 ≠ 0 := by
-  exact mul_ne_zero (by norm_num : (8 : ℚ) ≠ 0) (pow_ne_zero 3 hq1)
-
-private lemma inv_sq_mul_sq_cancel {x y : ℚ} (hx : x ≠ 0) :
-    x⁻¹ ^ 2 * (x ^ 2 * y) = y := by
-  field_simp [hx]
-  ring
-
-private lemma inv_four_mul_four_cancel {x y : ℚ} (hx : x ≠ 0) :
-    x⁻¹ ^ 4 * (x ^ 4 * y) = y := by
-  field_simp [hx]
-  ring
-```
-
-In the coefficient algebra lemmas, start with this local block when `field_simp` needs denominator facts:
-
-```lean
-  have hq1' : 1 + q ≠ 0 := one_add_ne_zero_of_add_one_ne_zero hq1
-  have hq1_2 : (q + 1) ^ 2 ≠ 0 := pow_ne_zero 2 hq1
-  have hq1_3 : (q + 1) ^ 3 ≠ 0 := pow_ne_zero 3 hq1
-  have hq1_4 : (q + 1) ^ 4 ≠ 0 := pow_ne_zero 4 hq1
-  have h1q_2 : (1 + q) ^ 2 ≠ 0 := pow_ne_zero 2 hq1'
-  have h1q_3 : (1 + q) ^ 3 ≠ 0 := pow_ne_zero 3 hq1'
-  have h1q_4 : (1 + q) ^ 4 ≠ 0 := pow_ne_zero 4 hq1'
-```
-
-Then use:
-
-```lean
-  field_simp [tateC12_b, tateC12_c, tateC12_x6, tateC12_y6,
-    tateC12_u, tateC12_s,
-    hq1, hq1', hq1_2, hq1_3, hq1_4, h1q_2, h1q_3, h1q_4,
-    two_mul_q_add_one_pow_three_ne_zero q hq1,
-    four_mul_q_add_one_ne_zero q hq1,
-    eight_mul_q_add_one_pow_three_ne_zero q hq1]
-  ring
-```
-
-Only use `ring_nf` if this exact `field_simp; ring` pair fails.  In my experience with this kind of goal, `ring` is faster after denominators are explicitly cleared.
-
-## 2. Inner coefficient expressions
-
-The Mathlib formulas are:
-
-```lean
-WeierstrassCurve.variableChange_a₁
-WeierstrassCurve.variableChange_a₂
-WeierstrassCurve.variableChange_a₃
-WeierstrassCurve.variableChange_a₄
-WeierstrassCurve.variableChange_a₆
-```
-
-For the Tate curve, the inner brackets are the following.  Prove identities about these definitions, not about the full transformed curve.
-
-```lean
-private def tateC12_a1_inner (q : ℚ) : ℚ :=
-  (1 - tateC12_c q) + 2 * tateC12_s q
-
-private def tateC12_a2_inner (q : ℚ) : ℚ :=
-  -tateC12_b q - tateC12_s q * (1 - tateC12_c q) +
-    3 * tateC12_x6 q - tateC12_s q ^ 2
-
-private def tateC12_a3_inner (q : ℚ) : ℚ :=
-  -tateC12_b q + tateC12_x6 q * (1 - tateC12_c q) +
-    2 * tateC12_y6 q
-
-private def tateC12_a4_inner (q : ℚ) : ℚ :=
-  0 - tateC12_s q * (-tateC12_b q) +
-    2 * tateC12_x6 q * (-tateC12_b q) -
-    (tateC12_y6 q + tateC12_x6 q * tateC12_s q) * (1 - tateC12_c q) +
-    3 * tateC12_x6 q ^ 2 - 2 * tateC12_s q * tateC12_y6 q
-
-private def tateC12_a6_inner (q : ℚ) : ℚ :=
-  0 + tateC12_x6 q * 0 + tateC12_x6 q ^ 2 * (-tateC12_b q) +
-    tateC12_x6 q ^ 3 - tateC12_y6 q * (-tateC12_b q) -
-    tateC12_y6 q ^ 2 - tateC12_x6 q * tateC12_y6 q * (1 - tateC12_c q)
-```
-
-The five desired identities are:
-
-```lean
-private lemma tateC12_a1_inner_zero (q : ℚ) :
-    tateC12_a1_inner q = 0 := by
-  unfold tateC12_a1_inner tateC12_s
-  ring
-
-private lemma tateC12_a3_inner_zero (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    tateC12_a3_inner q = 0 := by
-  unfold tateC12_a3_inner
-  have hq1' : 1 + q ≠ 0 := one_add_ne_zero_of_add_one_ne_zero hq1
-  have hq1_2 : (q + 1) ^ 2 ≠ 0 := pow_ne_zero 2 hq1
-  have hq1_3 : (q + 1) ^ 3 ≠ 0 := pow_ne_zero 3 hq1
-  have hq1_4 : (q + 1) ^ 4 ≠ 0 := pow_ne_zero 4 hq1
-  have h1q_2 : (1 + q) ^ 2 ≠ 0 := pow_ne_zero 2 hq1'
-  have h1q_3 : (1 + q) ^ 3 ≠ 0 := pow_ne_zero 3 hq1'
-  have h1q_4 : (1 + q) ^ 4 ≠ 0 := pow_ne_zero 4 hq1'
-  field_simp [tateC12_b, tateC12_c, tateC12_x6, tateC12_y6,
-    tateC12_u, tateC12_s,
-    hq1, hq1', hq1_2, hq1_3, hq1_4, h1q_2, h1q_3, h1q_4,
-    two_mul_q_add_one_pow_three_ne_zero q hq1,
-    four_mul_q_add_one_ne_zero q hq1,
-    eight_mul_q_add_one_pow_three_ne_zero q hq1]
-  ring
-
-private lemma tateC12_a6_inner_zero (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    tateC12_a6_inner q = 0 := by
-  unfold tateC12_a6_inner
-  have hq1' : 1 + q ≠ 0 := one_add_ne_zero_of_add_one_ne_zero hq1
-  have hq1_2 : (q + 1) ^ 2 ≠ 0 := pow_ne_zero 2 hq1
-  have hq1_3 : (q + 1) ^ 3 ≠ 0 := pow_ne_zero 3 hq1
-  have hq1_4 : (q + 1) ^ 4 ≠ 0 := pow_ne_zero 4 hq1
-  have h1q_2 : (1 + q) ^ 2 ≠ 0 := pow_ne_zero 2 hq1'
-  have h1q_3 : (1 + q) ^ 3 ≠ 0 := pow_ne_zero 3 hq1'
-  have h1q_4 : (1 + q) ^ 4 ≠ 0 := pow_ne_zero 4 hq1'
-  field_simp [tateC12_b, tateC12_c, tateC12_x6, tateC12_y6,
-    tateC12_u, tateC12_s,
-    hq1, hq1', hq1_2, hq1_3, hq1_4, h1q_2, h1q_3, h1q_4,
-    two_mul_q_add_one_pow_three_ne_zero q hq1,
-    four_mul_q_add_one_ne_zero q hq1,
-    eight_mul_q_add_one_pow_three_ne_zero q hq1]
-  ring
-
-/-- `a₂' = u⁻² * inner = A12`; prove the scaled inner form first. -/
-private lemma tateC12_a2_inner_scaled (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    tateC12_a2_inner q = tateC12_u q ^ 2 * A12 q := by
-  unfold tateC12_a2_inner
-  have hq1' : 1 + q ≠ 0 := one_add_ne_zero_of_add_one_ne_zero hq1
-  have hq1_2 : (q + 1) ^ 2 ≠ 0 := pow_ne_zero 2 hq1
-  have hq1_3 : (q + 1) ^ 3 ≠ 0 := pow_ne_zero 3 hq1
-  have hq1_4 : (q + 1) ^ 4 ≠ 0 := pow_ne_zero 4 hq1
-  have h1q_2 : (1 + q) ^ 2 ≠ 0 := pow_ne_zero 2 hq1'
-  have h1q_3 : (1 + q) ^ 3 ≠ 0 := pow_ne_zero 3 hq1'
-  have h1q_4 : (1 + q) ^ 4 ≠ 0 := pow_ne_zero 4 hq1'
-  field_simp [tateC12_b, tateC12_c, tateC12_x6, tateC12_y6,
-    tateC12_u, tateC12_s, A12,
-    hq1, hq1', hq1_2, hq1_3, hq1_4, h1q_2, h1q_3, h1q_4,
-    two_mul_q_add_one_pow_three_ne_zero q hq1,
-    four_mul_q_add_one_ne_zero q hq1,
-    eight_mul_q_add_one_pow_three_ne_zero q hq1]
-  ring
-
-/-- `a₄' = u⁻⁴ * inner = B12`; prove the scaled inner form first. -/
-private lemma tateC12_a4_inner_scaled (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    tateC12_a4_inner q = tateC12_u q ^ 4 * B12 q := by
-  unfold tateC12_a4_inner
-  have hq1' : 1 + q ≠ 0 := one_add_ne_zero_of_add_one_ne_zero hq1
-  have hq1_2 : (q + 1) ^ 2 ≠ 0 := pow_ne_zero 2 hq1
-  have hq1_3 : (q + 1) ^ 3 ≠ 0 := pow_ne_zero 3 hq1
-  have hq1_4 : (q + 1) ^ 4 ≠ 0 := pow_ne_zero 4 hq1
-  have h1q_2 : (1 + q) ^ 2 ≠ 0 := pow_ne_zero 2 hq1'
-  have h1q_3 : (1 + q) ^ 3 ≠ 0 := pow_ne_zero 3 hq1'
-  have h1q_4 : (1 + q) ^ 4 ≠ 0 := pow_ne_zero 4 hq1'
-  field_simp [tateC12_b, tateC12_c, tateC12_x6, tateC12_y6,
-    tateC12_u, tateC12_s, B12,
-    hq1, hq1', hq1_2, hq1_3, hq1_4, h1q_2, h1q_3, h1q_4,
-    two_mul_q_add_one_pow_three_ne_zero q hq1,
-    four_mul_q_add_one_ne_zero q hq1,
-    eight_mul_q_add_one_pow_three_ne_zero q hq1]
-  ring
-```
-
-If one of the scaled lemmas is still slow, use this further split:
-
-```lean
--- Instead of proving the full `a4_inner_scaled` directly, prove denominator-cleared form:
-private lemma tateC12_a4_inner_scaled_cleared (q : ℚ) :
-    (2 * (q + 1) ^ 3) ^ 4 * tateC12_a4_inner q = B12 q := by
-  -- Here there are no inverse powers of `u`; this often reduces faster.
-  -- Then derive `tateC12_a4_inner_scaled` using `field_simp [tateC12_u, hq1]`.
-  unfold tateC12_a4_inner
-  -- field_simp [...]
-  -- ring
-  admit
-```
-
-Use that only if needed; the main scaled lemma above is usually enough once the five coefficient goals are separated.
-
-## 3. Coefficient lemmas using Mathlib's `variableChange_aᵢ`
-
-These are intentionally tiny.  If a coefficient lemma fails, it pinpoints either a formula mismatch or a Mathlib convention mismatch.
-
-The only mildly fragile line is the `simp only [Units.val_mk0, Units.val_inv_eq_inv_val]`.  If your local Mathlib names the unit-coercion simp lemma differently, remove that line and replace the following `change` by whatever Lean prints after `rw [WeierstrassCurve.variableChange_a₂]`.
-
-```lean
-private lemma tateC12_variableChange_a1
-    (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    (tateC12ToShortVariableChange q hq1 • tateC12W q).a₁ =
-      (shortW (A12 q) (B12 q)).a₁ := by
-  rw [WeierstrassCurve.variableChange_a₁]
-  simp only [shortW, tateC12ToShortVariableChange, tateC12W, tateW,
-    Units.val_mk0, Units.val_inv_eq_inv_val]
-  change (tateC12_u q)⁻¹ * tateC12_a1_inner q = 0
-  rw [tateC12_a1_inner_zero q]
-  ring
-
-private lemma tateC12_variableChange_a2
-    (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    (tateC12ToShortVariableChange q hq1 • tateC12W q).a₂ =
-      (shortW (A12 q) (B12 q)).a₂ := by
-  rw [WeierstrassCurve.variableChange_a₂]
-  simp only [shortW, tateC12ToShortVariableChange, tateC12W, tateW,
-    Units.val_mk0, Units.val_inv_eq_inv_val]
-  change (tateC12_u q)⁻¹ ^ 2 * tateC12_a2_inner q = A12 q
-  rw [tateC12_a2_inner_scaled q hq1]
-  exact inv_sq_mul_sq_cancel (x := tateC12_u q) (y := A12 q)
-    (tateC12_u_ne_zero q hq1)
-
-private lemma tateC12_variableChange_a3
-    (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    (tateC12ToShortVariableChange q hq1 • tateC12W q).a₃ =
-      (shortW (A12 q) (B12 q)).a₃ := by
-  rw [WeierstrassCurve.variableChange_a₃]
-  simp only [shortW, tateC12ToShortVariableChange, tateC12W, tateW,
-    Units.val_mk0, Units.val_inv_eq_inv_val]
-  change (tateC12_u q)⁻¹ ^ 3 * tateC12_a3_inner q = 0
-  rw [tateC12_a3_inner_zero q hq1]
-  ring
-
-private lemma tateC12_variableChange_a4
-    (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    (tateC12ToShortVariableChange q hq1 • tateC12W q).a₄ =
-      (shortW (A12 q) (B12 q)).a₄ := by
-  rw [WeierstrassCurve.variableChange_a₄]
-  simp only [shortW, tateC12ToShortVariableChange, tateC12W, tateW,
-    Units.val_mk0, Units.val_inv_eq_inv_val]
-  change (tateC12_u q)⁻¹ ^ 4 * tateC12_a4_inner q = B12 q
-  rw [tateC12_a4_inner_scaled q hq1]
-  exact inv_four_mul_four_cancel (x := tateC12_u q) (y := B12 q)
-    (tateC12_u_ne_zero q hq1)
-
-private lemma tateC12_variableChange_a6
-    (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    (tateC12ToShortVariableChange q hq1 • tateC12W q).a₆ =
-      (shortW (A12 q) (B12 q)).a₆ := by
-  rw [WeierstrassCurve.variableChange_a₆]
-  simp only [shortW, tateC12ToShortVariableChange, tateC12W, tateW,
-    Units.val_mk0, Units.val_inv_eq_inv_val]
-  change (tateC12_u q)⁻¹ ^ 6 * tateC12_a6_inner q = 0
-  rw [tateC12_a6_inner_zero q hq1]
-  ring
-```
-
-Now the final theorem is just structure extensionality.  There should be no `field_simp`, no `ring_nf`, and no global `simp` here.
-
-```lean
-theorem tateC12_variableChange_eq_shortW
-    (q : ℚ) (hq1 : q + 1 ≠ 0) :
-    tateC12ToShortVariableChange q hq1 • tateC12W q =
-      shortW (A12 q) (B12 q) := by
-  ext
-  · exact tateC12_variableChange_a1 q hq1
-  · exact tateC12_variableChange_a2 q hq1
-  · exact tateC12_variableChange_a3 q hq1
-  · exact tateC12_variableChange_a4 q hq1
-  · exact tateC12_variableChange_a6 q hq1
+/-- Checked wrapper: projective point equivalence follows from the affine one. -/
+noncomputable def projectivePointAddEquivOfVariableChange_from_affine
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
+    WeierstrassCurve.Projective.Point (WeierstrassCurve.toProjective W) ≃+
+      WeierstrassCurve.Projective.Point (WeierstrassCurve.toProjective (C • W)) := by
+  classical
+  exact
+    ((WeierstrassCurve.Projective.Point.toAffineAddEquiv
+        (WeierstrassCurve.toProjective W)).trans
+      (affinePointAddEquivOfVariableChange W C)).trans
+      (WeierstrassCurve.Projective.Point.toAffineAddEquiv
+        (WeierstrassCurve.toProjective (C • W))).symm
 
 end
 end MazurProof.KubertBridgeN12
 ```
 
-If `ext` produces goals in a different order, Lean will show it immediately.  Reorder the five `exact` lines accordingly; the coefficient theorem names make this painless.
-
-## 4. Detecting a direction or scaling mismatch
-
-The coefficient lemmas are also diagnostics.
-
-### `a₁` failure
-
-Mathlib's convention is:
-
-```text
-a₁' = u⁻¹ * (a₁ + 2s)
-```
-
-For Tate C12, `a₁ = 1 - c`, so killing `a₁` requires:
-
-```text
-s = (c - 1)/2
-```
-
-If `a₁` fails and the residual is `2 - 2c` or similar, the sign of `s` is wrong.  Do **not** debug `a₂/a₄` until `a₁` is exactly zero.
-
-### `a₃` failure
-
-Mathlib's convention is:
-
-```text
-a₃' = u⁻³ * (a₃ + r*a₁ + 2t)
-```
-
-With `a₃ = -b`, this says the point used for translation must satisfy:
-
-```text
--b + x6*(1-c) + 2*y6 = 0.
-```
-
-If `a₃` fails by a sign, try `t := -tateC12_y6 q`.  If it fails by a different rational factor, the formula for `y6` is mismatched with the `q`-parameter.
-
-### `a₆` failure
-
-The `a₆` bracket is the translated point equation.  If `a₁` and `a₃` pass but `a₆` fails, then `(x6,y6)` is not actually the point being translated to the origin under the Mathlib direction.  The likely fixes are:
-
-```text
-r := x6,  t := y6      -- current Mathlib direction: old X,Y = u²X + r, u³Y + u²sX + t
-r := x6,  t := -y6     -- if the listed y-coordinate uses the opposite branch
-r := -x6, t := -y6     -- if the translation direction was read backwards
-```
-
-Only one of these should make `a₃_inner_zero` and `a₆_inner_zero` both true.
-
-### `a₂/a₄` failure after `a₁/a₃/a₆` pass
-
-Then the translation is right and only the scale `u` is wrong.  Since Mathlib has:
-
-```text
-a₂' = u⁻² * inner₂
-a₄' = u⁻⁴ * inner₄
-```
-
-if the result differs by powers of `2*(q+1)^3`, invert `u`:
+If Lean complains about definitional equality between
 
 ```lean
-def tateC12_u_alt (q : ℚ) : ℚ := 2 * (q + 1) ^ 3
+(WeierstrassCurve.toProjective W).toAffine.Point
 ```
 
-The scaled inner lemmas will make the mismatch visible:
+and
 
 ```lean
-tateC12_a2_inner q = tateC12_u q ^ 2 * A12 q
-tateC12_a4_inner q = tateC12_u q ^ 4 * B12 q
+WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W)
 ```
 
-If these become instead `u⁻² * A12` and `u⁻⁴ * B12`, the direction of scaling is reversed.
+insert `change` wrappers around the two `toAffineAddEquiv` terms.  `toProjective` and `toAffine` are abbreviations, so this should usually elaborate after `classical`.
 
-## 5. Extra performance notes
+## Stage 2: define the explicit affine coordinate maps
 
-1. Mark the big algebra lemmas `private`, but **do not** mark them `[simp]`.  Large `[simp]` lemmas over rational functions will slow unrelated goals.
-2. Use `simp only [...]` in coefficient lemmas.  Avoid `simp [defs]` there; it can unfold `A12`, `B12`, and the entire curve structure unnecessarily.
-3. Keep `field_simp` inside the inner lemmas only.  The final theorem should be linear-time elaboration.
-4. If one inner lemma is still slow, make a denominator-cleared theorem first, for example:
+Mathlib's variable-change convention is old coordinates as functions of new coordinates:
+
+```text
+X_old = u^2 X_new + r,
+Y_old = u^3 Y_new + u^2 s X_new + t.
+```
+
+Since the wanted direction is from points on `W` to points on `C • W`, use the inverse coordinate formulas:
+
+```text
+X_new = u^{-2}(X_old - r),
+Y_new = u^{-3}(Y_old - s(X_old - r) - t).
+```
+
+Pasteable skeleton:
 
 ```lean
-private lemma tateC12_a2_inner_scaled_cleared (q : ℚ) :
-    (2 * (q + 1) ^ 3) ^ 2 * tateC12_a2_inner q = A12 q := by
-  unfold tateC12_a2_inner
-  field_simp [tateC12_b, tateC12_c, tateC12_x6, tateC12_y6,
-    tateC12_s, A12]
+namespace MazurProof.KubertBridgeN12
+
+noncomputable section
+
+private def vcNewX (C : WeierstrassCurve.VariableChange ℚ) (x : ℚ) : ℚ :=
+  ((C.u⁻¹ : ℚ) ^ 2) * (x - C.r)
+
+private def vcNewY (C : WeierstrassCurve.VariableChange ℚ) (x y : ℚ) : ℚ :=
+  ((C.u⁻¹ : ℚ) ^ 3) * (y - C.s * (x - C.r) - C.t)
+
+private def vcOldX (C : WeierstrassCurve.VariableChange ℚ) (x : ℚ) : ℚ :=
+  ((C.u : ℚ) ^ 2) * x + C.r
+
+private def vcOldY (C : WeierstrassCurve.VariableChange ℚ) (x y : ℚ) : ℚ :=
+  ((C.u : ℚ) ^ 3) * y + ((C.u : ℚ) ^ 2) * C.s * x + C.t
+
+private lemma vc_unit_ne_zero (C : WeierstrassCurve.VariableChange ℚ) :
+    (C.u : ℚ) ≠ 0 :=
+  C.u.ne_zero
+
+private lemma vc_unit_inv_ne_zero (C : WeierstrassCurve.VariableChange ℚ) :
+    (C.u⁻¹ : ℚ) ≠ 0 :=
+  C.u⁻¹.ne_zero
+
+private lemma vcOldX_newX (C : WeierstrassCurve.VariableChange ℚ) (x : ℚ) :
+    vcOldX C (vcNewX C x) = x := by
+  unfold vcOldX vcNewX
+  field_simp [vc_unit_ne_zero C]
   ring
+
+private lemma vcOldY_newXY (C : WeierstrassCurve.VariableChange ℚ) (x y : ℚ) :
+    vcOldY C (vcNewX C x) (vcNewY C x y) = y := by
+  unfold vcOldY vcNewX vcNewY
+  field_simp [vc_unit_ne_zero C]
+  ring
+
+private lemma vcNewX_oldX (C : WeierstrassCurve.VariableChange ℚ) (x : ℚ) :
+    vcNewX C (vcOldX C x) = x := by
+  unfold vcNewX vcOldX
+  field_simp [vc_unit_ne_zero C]
+  ring
+
+private lemma vcNewY_oldXY (C : WeierstrassCurve.VariableChange ℚ) (x y : ℚ) :
+    vcNewY C (vcOldX C x) (vcOldY C x y) = y := by
+  unfold vcNewY vcOldX vcOldY
+  field_simp [vc_unit_ne_zero C]
+  ring
+
+end
+end MazurProof.KubertBridgeN12
 ```
 
-then derive `tateC12_a2_inner_scaled` with one small `field_simp [tateC12_u, hq1]` proof.  This sometimes beats asking `field_simp` to clear both the Tate denominators and the `u^2` denominator in the same pass.
-
-5. For profiling, temporarily wrap only the slow inner lemma:
+If `field_simp [vc_unit_ne_zero C]` does not see the inverse coercions, add:
 
 ```lean
-set_option profiler true in
-private lemma tateC12_a4_inner_scaled ... := by
-  ...
+have hu : (C.u : ℚ) ≠ 0 := C.u.ne_zero
+have hui : ((C.u : ℚ)⁻¹) ≠ 0 := inv_ne_zero hu
+field_simp [vcNewX, vcNewY, vcOldX, vcOldY, hu, hui]
+ring
 ```
 
-Do not profile the final `ext` theorem; if the plan above is followed, it should not be the bottleneck.
+## Stage 3: preserve equation and nonsingularity
+
+Do this with polynomial-value identities, not by trying to simplify the whole `Nonsingular` proposition at once.
+
+The expected identities are:
+
+```text
+F_{C•W}(X_new,Y_new) = u^{-6} F_W(X_old,Y_old),
+(F_{C•W})_X(X_new,Y_new) = u^{-4}(F_X(X_old,Y_old) + s F_Y(X_old,Y_old)),
+(F_{C•W})_Y(X_new,Y_new) = u^{-3}F_Y(X_old,Y_old).
+```
+
+Lean declarations:
+
+```lean
+namespace MazurProof.KubertBridgeN12
+
+noncomputable section
+
+private lemma vc_eval_polynomial_forward
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    (x y : ℚ) :
+    (WeierstrassCurve.toAffine (C • W)).polynomial.evalEval
+        (vcNewX C x) (vcNewY C x y) =
+      ((C.u⁻¹ : ℚ) ^ 6) *
+        (WeierstrassCurve.toAffine W).polynomial.evalEval x y := by
+  -- Expand only the affine polynomial and the five variable-change coefficients.
+  -- Avoid unfolding unrelated point/group-law definitions.
+  simp only [WeierstrassCurve.Affine.evalEval_polynomial,
+    WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₂,
+    WeierstrassCurve.variableChange_a₃,
+    WeierstrassCurve.variableChange_a₄,
+    WeierstrassCurve.variableChange_a₆,
+    vcNewX, vcNewY]
+  field_simp [vc_unit_ne_zero C]
+  ring
+
+private lemma vc_eval_polynomialX_forward
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    (x y : ℚ) :
+    (WeierstrassCurve.toAffine (C • W)).polynomialX.evalEval
+        (vcNewX C x) (vcNewY C x y) =
+      ((C.u⁻¹ : ℚ) ^ 4) *
+        ((WeierstrassCurve.toAffine W).polynomialX.evalEval x y +
+          C.s * (WeierstrassCurve.toAffine W).polynomialY.evalEval x y) := by
+  simp only [WeierstrassCurve.Affine.evalEval_polynomialX,
+    WeierstrassCurve.Affine.evalEval_polynomialY,
+    WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₂,
+    WeierstrassCurve.variableChange_a₃,
+    WeierstrassCurve.variableChange_a₄,
+    vcNewX, vcNewY]
+  field_simp [vc_unit_ne_zero C]
+  ring
+
+private lemma vc_eval_polynomialY_forward
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    (x y : ℚ) :
+    (WeierstrassCurve.toAffine (C • W)).polynomialY.evalEval
+        (vcNewX C x) (vcNewY C x y) =
+      ((C.u⁻¹ : ℚ) ^ 3) *
+        (WeierstrassCurve.toAffine W).polynomialY.evalEval x y := by
+  simp only [WeierstrassCurve.Affine.evalEval_polynomialY,
+    WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₃,
+    vcNewX, vcNewY]
+  field_simp [vc_unit_ne_zero C]
+  ring
+
+private theorem vc_nonsingular_forward
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    {x y : ℚ}
+    (h : (WeierstrassCurve.toAffine W).Nonsingular x y) :
+    (WeierstrassCurve.toAffine (C • W)).Nonsingular
+      (vcNewX C x) (vcNewY C x y) := by
+  rcases h with ⟨hEq, hDeriv⟩
+  constructor
+  · -- equation preservation
+    rw [WeierstrassCurve.Affine.Equation, vc_eval_polynomial_forward W C x y, hEq, mul_zero]
+  · -- derivative nonvanishing.  Use the triangular derivative transformation.
+    rw [vc_eval_polynomialX_forward W C x y, vc_eval_polynomialY_forward W C x y]
+    have hu3 : ((C.u⁻¹ : ℚ) ^ 3) ≠ 0 := pow_ne_zero 3 (vc_unit_inv_ne_zero C)
+    have hu4 : ((C.u⁻¹ : ℚ) ^ 4) ≠ 0 := pow_ne_zero 4 (vc_unit_inv_ne_zero C)
+    rcases hDeriv with hX | hY
+    · by_cases hY0 : (WeierstrassCurve.toAffine W).polynomialY.evalEval x y = 0
+      · left
+        intro hbad
+        apply hX
+        have : (WeierstrassCurve.toAffine W).polynomialX.evalEval x y +
+            C.s * (WeierstrassCurve.toAffine W).polynomialY.evalEval x y = 0 := by
+          exact (mul_eq_zero.mp hbad).resolve_left hu4
+        simpa [hY0] using this
+      · right
+        exact mul_ne_zero hu3 hY0
+    · right
+      exact mul_ne_zero hu3 hY
+
+private theorem vc_nonsingular_backward
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    {x y : ℚ}
+    (h : (WeierstrassCurve.toAffine (C • W)).Nonsingular x y) :
+    (WeierstrassCurve.toAffine W).Nonsingular
+      (vcOldX C x) (vcOldY C x y) := by
+  -- Either prove direct backward polynomial identities, or use the forward theorem for `C⁻¹`
+  -- plus the group-action identity `C⁻¹ • (C • W) = W`.
+  -- Direct identities are less elegant but often easier to elaborate.
+  -- Skeleton for the direct route:
+  sorry
+
+end
+end MazurProof.KubertBridgeN12
+```
+
+For `vc_nonsingular_backward`, I recommend first writing the direct backward analogues:
+
+```lean
+private lemma vc_eval_polynomial_backward ...
+private lemma vc_eval_polynomialX_backward ...
+private lemma vc_eval_polynomialY_backward ...
+```
+
+with expected identities
+
+```text
+F_W(X_old,Y_old) = u^6 F_{C•W}(X_new,Y_new),
+F_X(old) = u^4 (F'_X(new) - s*u^3? / u^4? ...)
+F_Y(old) = u^3 F'_Y(new).
+```
+
+But you can avoid derivative algebra for the backward direction by applying the forward theorem to `C⁻¹` and then rewriting:
+
+```lean
+have h' := vc_nonsingular_forward (C • W) C⁻¹ h
+-- h' has target `toAffine (C⁻¹ • (C • W))` at coordinates computed by `C⁻¹`.
+-- Rewrite curve by `inv_smul_smul C W` and coordinates by coordinate-inverse lemmas.
+```
+
+This may need `simpa [vcNewX, vcNewY, vcOldX, vcOldY, WeierstrassCurve.VariableChange.inv_def]` plus `field_simp [C.u.ne_zero]` coordinate helper lemmas.  If that gets annoying, the direct backward lemmas are safer.
+
+## Stage 4: define the affine point maps and prove bijection
+
+Once nonsingularity preservation exists, this part is routine casework on `Affine.Point`.
+
+```lean
+namespace MazurProof.KubertBridgeN12
+
+noncomputable section
+
+private def affineVariableChangeMap
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
+    WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W) →
+      WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine (C • W))
+  | 0 => 0
+  | WeierstrassCurve.Affine.Point.some x y h =>
+      WeierstrassCurve.Affine.Point.some (vcNewX C x) (vcNewY C x y)
+        (vc_nonsingular_forward W C h)
+
+private def affineVariableChangeInv
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
+    WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine (C • W)) →
+      WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W)
+  | 0 => 0
+  | WeierstrassCurve.Affine.Point.some x y h =>
+      WeierstrassCurve.Affine.Point.some (vcOldX C x) (vcOldY C x y)
+        (vc_nonsingular_backward W C h)
+
+private theorem affineVariableChange_left_inv
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
+    Function.LeftInverse (affineVariableChangeInv W C) (affineVariableChangeMap W C) := by
+  intro P
+  cases P with
+  | zero => rfl
+  | some x y h =>
+      simp [affineVariableChangeMap, affineVariableChangeInv,
+        WeierstrassCurve.Affine.Point.some.injEq,
+        vcOldX_newX, vcOldY_newXY]
+
+private theorem affineVariableChange_right_inv
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
+    Function.RightInverse (affineVariableChangeInv W C) (affineVariableChangeMap W C) := by
+  intro P
+  cases P with
+  | zero => rfl
+  | some x y h =>
+      simp [affineVariableChangeMap, affineVariableChangeInv,
+        WeierstrassCurve.Affine.Point.some.injEq,
+        vcNewX_oldX, vcNewY_oldXY]
+
+private noncomputable def affineVariableChangeEquiv
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
+    WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W) ≃
+      WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine (C • W)) where
+  toFun := affineVariableChangeMap W C
+  invFun := affineVariableChangeInv W C
+  left_inv := affineVariableChange_left_inv W C
+  right_inv := affineVariableChange_right_inv W C
+
+end
+end MazurProof.KubertBridgeN12
+```
+
+If the `cases P with | zero | some` syntax differs locally, use:
+
+```lean
+  rcases P with (_ | ⟨x, y, h⟩)
+```
+
+matching the constructors in `Affine.Point.lean`.
+
+## Stage 5: the only hard part — `map_add'`
+
+After Stage 4, the remaining mathematical content is exactly:
+
+```lean
+namespace MazurProof.KubertBridgeN12
+
+noncomputable section
+
+/--
+Smallest honest residual after the coordinate-map work: the explicit affine variable-change map
+preserves the chord-and-tangent group law.
+-/
+axiom affineVariableChangeMap_add
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    (P Q : WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W)) :
+    affineVariableChangeMap W C (P + Q) =
+      affineVariableChangeMap W C P + affineVariableChangeMap W C Q
+
+noncomputable def affinePointAddEquivOfVariableChange_from_map_add
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
+    WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W) ≃+
+      WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine (C • W)) where
+  toEquiv := affineVariableChangeEquiv W C
+  map_add' := affineVariableChangeMap_add W C
+
+end
+end MazurProof.KubertBridgeN12
+```
+
+This is already a much smaller residual than the current projective axiom:
+
+* no projective quotient representatives;
+* no point at infinity cases except `0` in affine point type;
+* no nonsingularity preservation;
+* no inverse/bijection proof;
+* only preservation of the already-defined affine group law remains.
+
+### How to prove `affineVariableChangeMap_add` later
+
+Do it by split lemmas, not a single `cases P; cases Q; simp; ring_nf`.
+
+Needed coordinate identities:
+
+```lean
+private lemma vc_negY
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    (x y : ℚ) :
+    vcNewY C x ((WeierstrassCurve.toAffine W).negY x y) =
+      (WeierstrassCurve.toAffine (C • W)).negY (vcNewX C x) (vcNewY C x y) := by
+  -- unfold `Affine.negY`; use variableChange_a₁/a₃; field_simp; ring
+  sorry
+
+private lemma vc_add_vertical_condition_iff
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    (x₁ y₁ x₂ y₂ : ℚ) :
+    (vcNewX C x₁ = vcNewX C x₂ ∧
+      vcNewY C x₁ y₁ =
+        (WeierstrassCurve.toAffine (C • W)).negY (vcNewX C x₂) (vcNewY C x₂ y₂)) ↔
+    (x₁ = x₂ ∧ y₁ = (WeierstrassCurve.toAffine W).negY x₂ y₂) := by
+  -- Use injectivity of `x ↦ vcNewX C x`, coordinate inverse lemmas, and `vc_negY`.
+  sorry
+```
+
+For nonvertical addition, show transformed line slope and output coordinates agree.  Use Mathlib names from `Affine/Formula.lean`:
+
+```lean
+#check WeierstrassCurve.Affine.slope
+#check WeierstrassCurve.Affine.addX
+#check WeierstrassCurve.Affine.addY
+#check WeierstrassCurve.Affine.negAddY
+```
+
+Expected lemmas:
+
+```lean
+private lemma vc_slope
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    {x₁ y₁ x₂ y₂ : ℚ}
+    (hnot : ¬(x₁ = x₂ ∧ y₁ = (WeierstrassCurve.toAffine W).negY x₂ y₂)) :
+    -- statement depends on Mathlib's exact slope convention;
+    -- derive by expanding `Affine.slope` after splitting `x₁ = x₂` vs `x₁ ≠ x₂`.
+    True := by
+  trivial
+
+private lemma vc_addX
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    {x₁ y₁ x₂ y₂ : ℚ} :
+    vcNewX C
+      ((WeierstrassCurve.toAffine W).addX x₁ x₂
+        ((WeierstrassCurve.toAffine W).slope x₁ x₂ y₁ y₂)) =
+      (WeierstrassCurve.toAffine (C • W)).addX
+        (vcNewX C x₁) (vcNewX C x₂)
+        ((WeierstrassCurve.toAffine (C • W)).slope
+          (vcNewX C x₁) (vcNewX C x₂) (vcNewY C x₁ y₁) (vcNewY C x₂ y₂)) := by
+  -- split `x₁ = x₂`; expand `slope`, `addX`, coefficient formulas; field_simp; ring
+  sorry
+
+private lemma vc_addY
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    {x₁ y₁ x₂ y₂ : ℚ} :
+    vcNewY C x₁
+      ((WeierstrassCurve.toAffine W).addY x₁ x₂ y₁
+        ((WeierstrassCurve.toAffine W).slope x₁ x₂ y₁ y₂)) =
+      (WeierstrassCurve.toAffine (C • W)).addY
+        (vcNewX C x₁) (vcNewX C x₂) (vcNewY C x₁ y₁)
+        ((WeierstrassCurve.toAffine (C • W)).slope
+          (vcNewX C x₁) (vcNewX C x₂) (vcNewY C x₁ y₁) (vcNewY C x₂ y₂)) := by
+  -- similar but usually larger than `vc_addX`
+  sorry
+```
+
+Then the proof of `affineVariableChangeMap_add` becomes casework:
+
+```lean
+theorem affineVariableChangeMap_add_checked
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    (P Q : WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W)) :
+    affineVariableChangeMap W C (P + Q) =
+      affineVariableChangeMap W C P + affineVariableChangeMap W C Q := by
+  rcases P with (_ | ⟨x₁, y₁, h₁⟩)
+  · simp [affineVariableChangeMap]
+  rcases Q with (_ | ⟨x₂, y₂, h₂⟩)
+  · simp [affineVariableChangeMap]
+  by_cases hvert : x₁ = x₂ ∧ y₁ = (WeierstrassCurve.toAffine W).negY x₂ y₂
+  · -- both sides are zero by vertical-condition compatibility
+    simp [WeierstrassCurve.Affine.Point.add_of_Y_eq hvert.1 hvert.2,
+      affineVariableChangeMap, vc_add_vertical_condition_iff, hvert]
+  · -- both sides are the same `some`, by `vc_addX` and `vc_addY`
+    rw [WeierstrassCurve.Affine.Point.add_some hvert]
+    rw [WeierstrassCurve.Affine.Point.add_some]
+    · simp [affineVariableChangeMap, WeierstrassCurve.Affine.Point.some.injEq,
+        vc_addX, vc_addY]
+    · -- transformed pair is not vertical
+      exact (vc_add_vertical_condition_iff W C x₁ y₁ x₂ y₂).not.mpr hvert
+```
+
+This is the direct formal route.  It is work, but each lemma is algebraic and local.
+
+## Alternative route: coordinate-ring/class-group proof of `map_add'`
+
+`Affine.Point.toClass` is a group hom into the class group and is injective.  A variable change should induce an isomorphism of coordinate rings, hence a class-group equivalence, and then `map_add'` can be proved by injectivity of `toClass` rather than by slope formulas.
+
+This may be elegant but likely requires more infrastructure:
+
+```lean
+-- Not currently in Mathlib as far as I can see:
+noncomputable def coordinateRingEquivOfVariableChange
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
+    (WeierstrassCurve.toAffine W).CoordinateRing ≃+*
+      (WeierstrassCurve.toAffine (C • W)).CoordinateRing := by
+  -- induced by X ↦ u² X + r, Y ↦ u³Y + u²sX + t, or inverse direction
+  sorry
+```
+
+Then prove compatibility with `XYIdeal'`.  This may avoid the chord/tangent formulas, but it is probably a larger detour than the affine formula route.
+
+## Direct projective coordinate map, if needed
+
+If you decide not to go through affine charts, the forward projective representative map from `W` to `C • W` should be the homogeneous inverse coordinate change:
+
+```lean
+private def vcProjectiveNew
+    (C : WeierstrassCurve.VariableChange ℚ) (P : Fin 3 → ℚ) : Fin 3 → ℚ :=
+  ![((C.u⁻¹ : ℚ) ^ 2) * (P 0 - C.r * P 2),
+    ((C.u⁻¹ : ℚ) ^ 3) * (P 1 - C.s * (P 0 - C.r * P 2) - C.t * P 2),
+    P 2]
+```
+
+You would then need:
+
+```lean
+lemma vcProjectiveNew_equiv {P Q : Fin 3 → ℚ}
+    (h : P ≈ Q) : vcProjectiveNew C P ≈ vcProjectiveNew C Q := by ...
+
+lemma vcProjectiveNew_nonsingular
+    {P : Fin 3 → ℚ}
+    (h : (WeierstrassCurve.toProjective W).Nonsingular P) :
+    (WeierstrassCurve.toProjective (C • W)).Nonsingular (vcProjectiveNew C P) := by ...
+```
+
+This can produce a projective `Equiv`, but proving `map_add'` at the projective level would mean matching Mathlib's projective addition formulas.  I would avoid this unless there is a later reason to need the projective coordinate map itself.
+
+## Recommended replacement hierarchy
+
+Best immediate improvement:
+
+```lean
+axiom affinePointAddEquivOfVariableChange
+```
+
+and make `projectivePointAddEquivOfVariableChange` a theorem via `toAffineAddEquiv`.
+
+Next improvement:
+
+```lean
+axiom affineVariableChangeMap_add
+```
+
+with explicit checked coordinate map, nonsingularity preservation, and inverse laws.
+
+Final target:
+
+```lean
+theorem affineVariableChangeMap_add_checked ...
+```
+
+proved from `vc_negY`, `vc_add_vertical_condition_iff`, `vc_addX`, and `vc_addY`.
+
+This staged plan gives a real path from the current projective axiom to a single algebraic group-law compatibility lemma, then to no residual at all.
