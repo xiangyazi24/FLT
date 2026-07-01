@@ -1,402 +1,358 @@
-# Q2874 dm-codex2: Kubert N12 torsion transport API skeleton
+# Q2902 dm-codex2: audit of `N12FourSquaresAP.lean`
 
-Namespace: `MazurProof.RationalPointsN12`.
+Repo target: `xiangyazi24/FLT`, local file under audit: `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean`.
 
-Target file: `FLT/Assumptions/MazurProof/KubertBridgeN12.lean`.
+I could not fetch `N12FourSquaresAP.lean` or the named declarations from the canonical GitHub branch through the connector, so this is a design/math audit based on the route and declaration names in the prompt rather than a line-by-line local read.
 
-I could not fetch `KubertBridgeN12.lean` or the named local WIP declarations from `xiangyazi24/FLT@scratch`; the skeleton below is therefore self-contained and uses the type names from the prompt.
+## Executive audit result
 
-## 1. Best residual type
+Assuming the local single-file check really has no `axiom`, `sorry`, or imported theorem equivalent to the final AP theorem, the route is mathematically plausible and is the right architecture for the N=12 residual:
 
-For the downstream Kubert C proof, the most convenient normal-form residual is **not** a curve-isomorphism object. The minimal checkable residual is an additive homomorphism on point groups plus injectivity:
-
-```lean
-∃ t : ℚ,
-  B12 t ≠ 0 ∧
-  ∃ φ : (E⁄ℚ).Point →+
-      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)),
-    Function.Injective φ
+```text
+integer 4-square AP
+  -> primitive centered 4-square AP
+  -> EulerSquarePair
+  -> smaller EulerSquarePair
+  -> primitive centered 4-square AP
+  -> infinite descent
+  -> no nonconstant integer/rational 4-square AP
 ```
 
-This is exactly what the final step needs: if `f22` is an injected full-two subgroup on `(E⁄ℚ).Point`, then `φ.comp f22` is an injected full-two subgroup on the short normal form.
+The highest-risk points are not Lean syntax; they are normalization and descent-measure correctness:
 
-If the normal-form theorem naturally proves an equivalence, use an `AddEquiv`; but immediately wrap it into the same residual shape:
+1. arbitrary integer AP -> centered primitive AP may secretly require parity/divisibility facts;
+2. `PrimitiveCenteredFourSqAP` may be too strong or accidentally vacuous;
+3. `EulerSquarePair` may encode an orientation/sign convention that is not preserved by the two bridge maps;
+4. the descent metric may fail to be strictly smaller after `natAbs`/sign normalization;
+5. the final infinite-descent theorem may only rule out primitive centered AP, while the rational/integer theorem needs nonconstant preservation through denominator clearing and primitive normalization.
 
-```lean
--- If `e : (E⁄ℚ).Point ≃+ WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t))`
-let φ : (E⁄ℚ).Point →+
-    WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)) :=
-  e.toAddMonoidHom
-have hφ : Function.Injective φ := by
-  intro P Q hPQ
-  exact e.injective hPQ
+I do not see a mathematical reason the route must fail, but these are the exact places where a checked-looking development can accidentally prove a vacuous intermediate or a weaker final theorem.
+
+## Prioritized checklist
+
+### P0. Import/circularity audit
+
+Inspect the imports and namespace around the final theorem first.
+
+Must verify:
+
+```text
+fourRatSquaresAPConst_checked
+  does not import/use
+    fourRatSquaresAPConst_checked
+    fourIntSquaresAPConst_checked
+    primitiveCenteredFourSqAPDescent_checked
+    or any assumption theorem equivalent to no four-square AP
+  except through the intended local descent chain.
 ```
 
-Why this is better than exposing a variable-change object downstream:
-
-* it avoids depending on the exact Mathlib curve-isomorphism API in the Kubert obstruction file;
-* it is enough for `square_discriminant_of_full_two_torsion_on_shortW`;
-* it lets the hard normal-form proof live in a separate file with whatever curve-map API is most convenient.
-
-Recommended residual declaration:
-
-```lean
-open scoped WeierstrassCurve.Affine
-
-namespace MazurProof.RationalPointsN12
-
-/-- Minimal residual output of the Kubert normal-form reduction. -/
-structure KubertNormalFormTransport (E : WeierstrassCurve ℚ) where
-  t : ℚ
-  hB : B12 t ≠ 0
-  φ : (E⁄ℚ).Point →+
-    WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t))
-  φ_injective : Function.Injective φ
-
-/-- Residual theorem shape if the normal form is available under a C12 injection. -/
-def KubertC12NormalFormResidual : Prop :=
-  ∀ {E : WeierstrassCurve ℚ}
-    (f12 : ZMod 2 × ZMod 12 →+ (E⁄ℚ).Point),
-    Function.Injective f12 →
-      ∃ nt : KubertNormalFormTransport E, True
-
-end MazurProof.RationalPointsN12
-```
-
-The terminal `True` is optional; it is useful if the residual later needs to return side conditions without changing call sites.
-
-## 2. Pure composition lemma
-
-This is the exact generic lemma I would put near the top of `KubertBridgeN12.lean`.
-
-```lean
-import Mathlib.Tactic
-
-open scoped WeierstrassCurve.Affine
-
-namespace MazurProof.RationalPointsN12
-
-/-- Transport an injected full-two subgroup through any injective additive hom. -/
-theorem compose_full_two_torsion_injection_through_addMonoidHom
-    {P Q : Type*} [AddMonoid P] [AddMonoid Q]
-    (f : ZMod 2 × ZMod 2 →+ P)
-    (hf : Function.Injective f)
-    (φ : P →+ Q)
-    (hφ : Function.Injective φ) :
-    Function.Injective (φ.comp f) := by
-  intro x y hxy
-  apply hf
-  apply hφ
-  simpa using hxy
-
-end MazurProof.RationalPointsN12
-```
-
-If Lean unfolds the composition differently, replace the final line by:
-
-```lean
-  simpa [AddMonoidHom.comp_apply] using hxy
-```
-
-This theorem avoids any curve-specific API. The point groups only need their existing additive monoid/group instances.
-
-## 3. If the input is C12 torsion, extract full-two torsion separately
-
-For the final bridge, prefer to pass an already-extracted
-
-```lean
-f22 : ZMod 2 × ZMod 2 →+ (E⁄ℚ).Point
-hf22 : Function.Injective f22
-```
-
-to the normal-form square-discriminant step.
-
-If you do want to extract it from
-
-```lean
-f12 : ZMod 2 × ZMod 12 →+ (E⁄ℚ).Point
-hf12 : Function.Injective f12
-```
-
-put that in a separate group-only lemma. The required inclusion sends the second `ZMod 2` generator to `6 : ZMod 12`.
-
-```lean
-namespace MazurProof.RationalPointsN12
-
-abbrev FullTwoDomain : Type := ZMod 2 × ZMod 2
-abbrev C12Domain : Type := ZMod 2 × ZMod 12
-
--- Preferred if `ZMod.lift` is available in the pinned Mathlib.
--- Check exact signature with:
---   #check ZMod.lift
---   #check ZMod.lift_apply
---
--- def zmod2_to_zmod12_six : ZMod 2 →+ ZMod 12 :=
---   ZMod.lift (2 : ℕ) (6 : ZMod 12) (by norm_num)
-
-/-- Inclusion of the full-two subgroup into `ZMod 2 × ZMod 12`.
-    Fill `zmod2_to_zmod12_six` using the local `ZMod.lift` API. -/
-def fullTwoIntoC12
-    (ι : ZMod 2 →+ ZMod 12) :
-    FullTwoDomain →+ C12Domain where
-  toFun x := (x.1, ι x.2)
-  map_zero' := by
-    ext <;> simp
-  map_add' := by
-    intro x y
-    ext <;> simp [map_add]
-
-theorem fullTwoIntoC12_injective
-    (ι : ZMod 2 →+ ZMod 12)
-    (hι0 : ι 0 = 0)
-    (hι1 : ι 1 = (6 : ZMod 12)) :
-    Function.Injective (fullTwoIntoC12 ι) := by
-  intro x y hxy
-  apply Prod.ext
-  · exact congrArg Prod.fst hxy
-  · -- Since the domain is `ZMod 2`, it is enough to split into two cases.
-    -- This version is deliberately robust to local `ZMod` extensionality names.
-    have hsecond : ι x.2 = ι y.2 := congrArg Prod.snd hxy
-    fin_cases x.2 <;> fin_cases y.2 <;> simp [hι0, hι1] at hsecond ⊢
-
-/-- Full-two injection obtained from C12 injection. -/
-def fullTwoInjection_of_C12
-    {P : Type*} [AddMonoid P]
-    (ι : ZMod 2 →+ ZMod 12)
-    (f12 : C12Domain →+ P) :
-    FullTwoDomain →+ P :=
-  f12.comp (fullTwoIntoC12 ι)
-
-theorem fullTwoInjection_of_C12_injective
-    {P : Type*} [AddMonoid P]
-    (ι : ZMod 2 →+ ZMod 12)
-    (hι0 : ι 0 = 0)
-    (hι1 : ι 1 = (6 : ZMod 12))
-    (f12 : C12Domain →+ P)
-    (hf12 : Function.Injective f12) :
-    Function.Injective (fullTwoInjection_of_C12 ι f12) := by
-  exact hf12.comp (fullTwoIntoC12_injective ι hι0 hι1)
-
-end MazurProof.RationalPointsN12
-```
-
-If `ZMod.lift` is missing or awkward, define `ι` by `fin_cases` locally and prove its hom law by four cases. Keep that case split out of the Kubert square step.
-
-Likely discovery commands:
-
-```lean
-#check ZMod.lift
-#check ZMod.castHom
-#check ZMod.val
-#check ZMod.natCast_zmod_val
-```
-
-`ZMod.castHom` is **not** the right map from `ZMod 2` to `ZMod 12`: a ring hom `ZMod n →+* ZMod m` exists in the divisibility direction `m ∣ n`, so it will not produce the subgroup map sending `1 ↦ 6`.
-
-## 4. Kubert square-discriminant bridge skeleton
-
-Use this when the full-two injection on `E` has already been extracted.
-
-```lean
-import Mathlib.Tactic
-
-open scoped WeierstrassCurve.Affine
-
-namespace MazurProof.RationalPointsN12
-
-/--
-Core transport step.  The theorem target should be exactly the target of
-
-  #check square_discriminant_of_full_two_torsion_on_shortW
-
-with `A := A12 t`, `B := B12 t`.
--/
-theorem kubert_C12_square_from_normal_form_residual
-    {E : WeierstrassCurve ℚ} {t : ℚ}
-    (hB : B12 t ≠ 0)
-    (f22 : ZMod 2 × ZMod 2 →+ (E⁄ℚ).Point)
-    (hf22 : Function.Injective f22)
-    (φ : (E⁄ℚ).Point →+
-      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)))
-    (hφ : Function.Injective φ) :
-    -- Paste the exact conclusion printed by:
-    --   #check square_discriminant_of_full_two_torsion_on_shortW
-    -- Expected shape, depending on the local theorem:
-    --   IsSquare (short_discriminant (A12 t) (B12 t))
-    -- or
-    --   ∃ u : ℚ, u ^ 2 = -(4 * (A12 t)^3 + 27 * (B12 t)^2)
-    by
-      exact square_discriminant_of_full_two_torsion_on_shortW
-        (hB := hB)
-        (φ.comp f22)
-        (compose_full_two_torsion_injection_through_addMonoidHom
-          f22 hf22 φ hφ) := by
-  let g : ZMod 2 × ZMod 2 →+
-      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)) :=
-    φ.comp f22
-  have hg : Function.Injective g :=
-    compose_full_two_torsion_injection_through_addMonoidHom
-      f22 hf22 φ hφ
-  exact square_discriminant_of_full_two_torsion_on_shortW
-    (hB := hB) g hg
-
-end MazurProof.RationalPointsN12
-```
-
-The unusual theorem header above shows the key point: because I cannot see the local return type of `square_discriminant_of_full_two_torsion_on_shortW`, fill the theorem conclusion from `#check` and keep the proof body exactly as shown. In a real file it should look like this after filling the target:
-
-```lean
-theorem kubert_C12_square_from_normal_form_residual
-    {E : WeierstrassCurve ℚ} {t : ℚ}
-    (hB : B12 t ≠ 0)
-    (f22 : ZMod 2 × ZMod 2 →+ (E⁄ℚ).Point)
-    (hf22 : Function.Injective f22)
-    (φ : (E⁄ℚ).Point →+
-      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)))
-    (hφ : Function.Injective φ) :
-    <the exact square-discriminant conclusion at `A12 t`, `B12 t`> := by
-  let g : ZMod 2 × ZMod 2 →+
-      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)) :=
-    φ.comp f22
-  have hg : Function.Injective g := by
-    exact compose_full_two_torsion_injection_through_addMonoidHom
-      f22 hf22 φ hφ
-  exact square_discriminant_of_full_two_torsion_on_shortW
-    (hB := hB) g hg
-```
-
-If the checked theorem has explicit `A`/`B` parameters, use:
-
-```lean
-  exact square_discriminant_of_full_two_torsion_on_shortW
-    (A := A12 t) (B := B12 t) (hB := hB) g hg
-```
-
-If it has explicit `t`, use:
-
-```lean
-  exact square_discriminant_of_full_two_torsion_on_shortW
-    (t := t) (hB := hB) g hg
-```
-
-## 5. Bridge using the residual structure
-
-This version consumes the recommended residual package.
-
-```lean
-namespace MazurProof.RationalPointsN12
-
-/-- Normal-form residual plus full-two torsion gives the short-form square discriminant. -/
-theorem kubert_C12_square_from_transport_package
-    {E : WeierstrassCurve ℚ}
-    (nt : KubertNormalFormTransport E)
-    (f22 : ZMod 2 × ZMod 2 →+ (E⁄ℚ).Point)
-    (hf22 : Function.Injective f22) :
-    -- Fill with an existential using the exact local square-discriminant conclusion:
-    -- ∃ t : ℚ, <square-discriminant conclusion for `A12 t`, `B12 t`>
-    ∃ t : ℚ, True := by
-  refine ⟨nt.t, ?_⟩
-  -- Replace `True` by:
-  -- exact kubert_C12_square_from_normal_form_residual
-  --   (E := E) (t := nt.t) nt.hB f22 hf22 nt.φ nt.φ_injective
-  trivial
-
-end MazurProof.RationalPointsN12
-```
-
-In the actual file, do not leave `True`; use the exact result proposition from the checked theorem. The construction of `g` and `hg` is independent of that proposition.
-
-## 6. If the normal-form theorem gives an `AddEquiv`
-
-Use this tiny adapter and then call the same theorem.
-
-```lean
-namespace MazurProof.RationalPointsN12
-
-theorem kubert_C12_square_from_normal_form_addEquiv
-    {E : WeierstrassCurve ℚ} {t : ℚ}
-    (hB : B12 t ≠ 0)
-    (f22 : ZMod 2 × ZMod 2 →+ (E⁄ℚ).Point)
-    (hf22 : Function.Injective f22)
-    (e : (E⁄ℚ).Point ≃+
-      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t))) :
-    -- Same exact target as `kubert_C12_square_from_normal_form_residual`.
-    <the exact square-discriminant conclusion at `A12 t`, `B12 t`> := by
-  let φ : (E⁄ℚ).Point →+
-      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)) :=
-    e.toAddMonoidHom
-  have hφ : Function.Injective φ := by
-    intro P Q hPQ
-    exact e.injective hPQ
-  exact kubert_C12_square_from_normal_form_residual
-    (E := E) (t := t) hB f22 hf22 φ hφ
-
-end MazurProof.RationalPointsN12
-```
-
-If Lean does not simplify coercions from `φ` to `e`, use:
-
-```lean
-  have hφ : Function.Injective φ := by
-    intro P Q hPQ
-    exact e.injective (by simpa [φ] using hPQ)
-```
-
-## 7. Mathlib curve-isomorphism / variable-change API discovery
-
-The current downstream bridge should not depend on these names, but the normal-form producer may use them.
-
-Start with these `#check`s inside the repo, after the imports already used in Weierstrass files:
-
-```lean
-open scoped WeierstrassCurve.Affine
-
-#check WeierstrassCurve
-#check WeierstrassCurve.Affine.Point
-#check WeierstrassCurve.Affine.Point.baseChange
-#check WeierstrassCurve.Affine.Point.map_injective
-#check WeierstrassCurve.Points.map
-#check WeierstrassCurve.Points.map
-#check Algebra.ofId
-```
-
-Then search Mathlib locally:
+Concrete checks:
 
 ```bash
-rg "structure .*Variable|def .*Variable|VariableChange" .lake/packages/mathlib/Mathlib -n
-rg "Affine.Point.*map|def .*baseChange|map_injective" .lake/packages/mathlib/Mathlib -n
-rg "WeierstrassCurve.*AddEquiv|Affine.Point.*AddEquiv|toAddMonoidHom" .lake/packages/mathlib/Mathlib -n
-rg "namespace WeierstrassCurve" .lake/packages/mathlib/Mathlib/AlgebraicGeometry -n
+rg "axiom|constant|opaque|unsafe|sorry|admit" FLT/Assumptions/MazurProof/N12FourSquaresAP.lean
+rg "fourRatSquaresAPConst_checked|fourIntSquaresAPConst_checked|PrimitiveCenteredFourSqAP" FLT/Assumptions/MazurProof -n
+lake env lean FLT/Assumptions/MazurProof/N12FourSquaresAP.lean
 ```
 
-Likely imports to try, depending on the repo’s pinned Mathlib layout:
+Counter-risk: a helper with a harmless name like `EulerSquarePair.noInfiniteDescent` or `fourSquaresAP_classical` may already contain the final result. If that helper is imported, the local descent proof is not an independent residual closure.
+
+### P1. `PrimitiveCenteredFourSqAP` is non-vacuous and has the right nonconstant field
+
+Inspect the definition directly.
+
+Checklist:
+
+* It must encode four integer squares in AP, not four arbitrary AP terms.
+* It should include the nonconstant datum in a form equivalent to nonzero common difference or unequal square values.
+* Its primitive condition should be on the square roots, not on the square values in a way that is too strong or too weak.
+* It must not require impossible parity/sign conditions unless those are proved in the normalization theorem.
+* It should permit the expected local shape after centering, up to reversal/sign changes.
+
+Concrete theorem to inspect:
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine
-import Mathlib.AlgebraicGeometry.EllipticCurve.Group
+primitiveCenteredFourSqAPDescent_checked
 ```
 
-If those are too broad, use the imports already present in files where these appeared:
+Make sure its input is not already impossible because of an over-strong field in `PrimitiveCenteredFourSqAP`.
+
+Counter-risk: if `PrimitiveCenteredFourSqAP` requires, for example, a positive root ordering incompatible with sign choices after centering, then `primitiveCenteredFourSqAPDescent_checked` is vacuous even though it compiles.
+
+### P2. Arbitrary integer AP -> primitive centered AP preserves nonconstancy
+
+Inspect the theorem that starts the chain from arbitrary integer four-square AP.
+
+It should prove something like:
 
 ```lean
-WeierstrassCurve.Affine.Point.baseChange ℚ ℝ
-WeierstrassCurve.Affine.Point.map_injective (W' := E) (f := Algebra.ofId ℚ ℝ)
-WeierstrassCurve.Points.map E (Algebra.ofId ℚ ℝ)
+integerFourSqAP_nonconstant_to_primitiveCentered :
+  FourIntSquaresAP a b c d -> Nonconstant ->
+    ∃ P : PrimitiveCenteredFourSqAP, metric P > 0
 ```
 
-The robust workflow is:
+Critical details:
 
-1. In the producer file, turn the curve variable change into either
-   `AddEquiv` or `AddMonoidHom + Function.Injective` on point groups.
-2. Export only that residual hom/injectivity pair to `KubertBridgeN12.lean`.
-3. In `KubertBridgeN12.lean`, compose via `φ.comp f22` and apply `square_discriminant_of_full_two_torsion_on_shortW`.
+* common denominator/primitive division must not divide by zero;
+* if all four square values are equal, the theorem should not produce a nonconstant centered object;
+* if the original AP has integer square values, any centering requiring halves or quarters must be justified by modular arithmetic of squares.
 
-## 8. Syntax pitfalls
+The dangerous parity point is that the center of four terms in AP is usually a half-integer:
 
-* Do not write `(shortW A B).Point`. Use
-  `WeierstrassCurve.Affine.Point (shortW A B)`.
-* For the source curve, use the existing local spelling `(E⁄ℚ).Point` if that already has the group instance expected by the injection theorem.
-* `AddMonoidHom.comp` order is `φ.comp f`, meaning `x ↦ φ (f x)`.
-* If `Function.Injective (φ.comp f)` does not close by `hφ.comp hf`, use the explicit proof in Section 2.
-* Keep the full-two extraction from `ZMod 2 × ZMod 12` separate from normal-form transport; it is group-only and should not import Weierstrass geometry.
+```text
+s0, s0+r, s0+2r, s0+3r
+center = s0 + 3r/2
+```
+
+A centered integer model normally needs either a doubled-center formulation or a proof that the relevant doubled quantities are integral. If the file uses an undoubled center, inspect the mod-2/mod-4 lemma that justifies it.
+
+Counter-risk: a proof may silently use integer division `/ 2` or `/ 4` and then prove identities only after truncation-specific simplification. The theorem still compiles but may represent a different object than the intended centered AP.
+
+### P3. `primitiveCenteredToEulerSquarePair_constructive`
+
+Inspect algebraic identities and sign/orientation.
+
+Must verify:
+
+* the constructed `EulerSquarePair` fields are not all zero;
+* primitivity of the Euler pair follows from primitivity of the centered AP, not from a hidden stronger condition;
+* every division by `2`, `gcd`, or a parity factor is justified by a divisibility lemma;
+* the Euler equations match exactly the descent theorem’s expected orientation.
+
+Recommended local strengthening:
+
+```lean
+theorem primitiveCenteredToEulerSquarePair_metric_pos
+    (P : PrimitiveCenteredFourSqAP) :
+    0 < eulerMetric (primitiveCenteredToEulerSquarePair_constructive P)
+```
+
+and, if the constructor returns an existential:
+
+```lean
+theorem primitiveCenteredToEulerSquarePair_constructive_nontrivial
+    (P : PrimitiveCenteredFourSqAP) :
+    ∃ E : EulerSquarePair,
+      E = primitiveCenteredToEulerSquarePair_constructive P ∧
+      0 < eulerMetric E
+```
+
+Counter-risk: sign reversal can turn the intended descent metric negative before `natAbs`; then a later theorem may compare the wrong natural measure.
+
+### P4. `eulerSquarePairDescent_constructive`
+
+This is the most important theorem to audit.
+
+The theorem must expose, not merely imply internally:
+
+```lean
+∃ E' : EulerSquarePair,
+  eulerMetric E' < eulerMetric E
+```
+
+where `eulerMetric : EulerSquarePair -> ℕ` is a well-founded natural-valued measure and `0 < eulerMetric E` is known for every nontrivial pair.
+
+Inspect for these mistakes:
+
+* strict `<` accidentally proved for an integer expression before `natAbs`, but the recursive/noetherian argument uses `natAbs` later;
+* metric can become `0` for a valid nontrivial pair;
+* descent map returns a pair equivalent to the original under sign or swap, so the strict inequality only holds because the metric was not invariant under that normalization;
+* primitivity of the descended pair is lost or reproved using a false gcd claim;
+* descent requires a hidden positivity/order condition not included in `EulerSquarePair`.
+
+Recommended strengthening theorem:
+
+```lean
+theorem eulerSquarePairDescent_constructive_strict_metric
+    (E : EulerSquarePair) :
+    let E' := eulerSquarePairDescent_constructive E
+    eulerMetric E' < eulerMetric E
+```
+
+If descent returns an existential:
+
+```lean
+theorem eulerSquarePairDescent_constructive_spec
+    (E : EulerSquarePair) :
+    ∃ E' : EulerSquarePair,
+      eulerMetric E' < eulerMetric E ∧
+      0 < eulerMetric E'
+```
+
+Counter-risk: many Euler descents prove a smaller positive integer such as a smaller hypotenuse or smaller sum. If the formal metric is instead one coordinate’s `natAbs`, a sign/swap convention can break the strict-decrease proof.
+
+### P5. `eulerSquarePairToPrimitiveCentered`
+
+This inverse bridge should not be used to hide any descent algebra. It should explicitly build a valid primitive centered AP from the descended Euler pair.
+
+Inspect:
+
+* it preserves nonconstancy;
+* it produces a primitive centered object satisfying the same definition consumed by `primitiveCenteredToEulerSquarePair_constructive`;
+* it does not require a choice of square root not justified by the Euler equations;
+* signs of generated roots are irrelevant or explicitly normalized.
+
+Recommended round-trip sanity theorem:
+
+```lean
+theorem euler_to_centered_to_euler_metric_control
+    (E : EulerSquarePair) :
+    eulerMetric (primitiveCenteredToEulerSquarePair_constructive
+      (eulerSquarePairToPrimitiveCentered E)) <= eulerMetric E
+```
+
+If exact round-trip is too strong, metric control plus validity is enough.
+
+Counter-risk: the inverse construction may produce a centered AP that corresponds to a sign-reversed or swapped Euler pair. That is fine only if the next descent metric is invariant or controlled under that symmetry.
+
+### P6. `primitiveCenteredFourSqAPDescent_checked`
+
+This theorem should combine P3-P5 into a genuine descent on primitive centered AP.
+
+Expected shape:
+
+```lean
+theorem primitiveCenteredFourSqAPDescent_checked
+    (P : PrimitiveCenteredFourSqAP) :
+    ∃ P' : PrimitiveCenteredFourSqAP,
+      centeredMetric P' < centeredMetric P
+```
+
+or a contradiction by well-founded descent.
+
+Inspect exactly which metric it uses. If it uses an Euler metric of the associated pair, then the statement should expose that metric and prove it is positive for every primitive centered AP.
+
+Counter-risk: if `primitiveCenteredFourSqAPDescent_checked` returns a smaller Euler pair but not a smaller centered AP, the later infinite-descent theorem may be applying well-foundedness to the wrong sequence.
+
+### P7. Final rational theorem `fourRatSquaresAPConst_checked`
+
+Inspect clearing denominators:
+
+For rationals `x0 x1 x2 x3`, if `x0^2, x1^2, x2^2, x3^2` are AP, choose a common nonzero denominator `D` and set integer roots
+
+```text
+A_i = D * x_i
+```
+
+Then `A_i^2` are integer squares in AP. The proof must show:
+
+* `D ≠ 0`;
+* each `A_i` is integer by construction;
+* if the rational square AP is nonconstant, the integer square AP is nonconstant;
+* if the integer result gives equal square values, division by `D^2` gives equal rational square values.
+
+Counter-risk: nonconstancy of roots is not the same as nonconstancy of square values. For example `1` and `-1` have equal squares. The final theorem should state constancy of the four square values, not equality of the four rational roots, unless extra sign normalization is present.
+
+## 2-3 small sanity theorems to add
+
+These are deliberately small and should not require new mathematics. They increase confidence that the formal chain is not vacuous or metric-misaligned.
+
+### Sanity theorem 1: primitive centered objects have positive metric
+
+```lean
+/-- A primitive centered nonconstant AP has positive descent measure. -/
+theorem primitiveCenteredFourSqAP_metric_pos
+    (P : PrimitiveCenteredFourSqAP) :
+    0 < centeredMetric P := by
+  -- Should unfold `centeredMetric` and use the nonconstant/common-difference field.
+  -- If this is not provable, the metric is probably not the right descent measure.
+  ...
+```
+
+If the file does not have `centeredMetric`, define one explicitly and use it in the descent theorem.
+
+### Sanity theorem 2: Euler descent is strictly decreasing in the exported metric
+
+```lean
+/-- The constructive Euler descent strictly decreases the metric consumed by well-foundedness. -/
+theorem eulerSquarePairDescent_metric_strict
+    (E : EulerSquarePair) :
+    eulerMetric (eulerSquarePairDescent_constructive E) < eulerMetric E := by
+  -- This should be a direct projection from the descent theorem.
+  -- If it requires substantial reproving, the descent theorem is underspecified.
+  ...
+```
+
+If `eulerSquarePairDescent_constructive` returns an existential, use:
+
+```lean
+theorem eulerSquarePairDescent_exists_metric_strict
+    (E : EulerSquarePair) :
+    ∃ E' : EulerSquarePair,
+      eulerMetric E' < eulerMetric E := by
+  ...
+```
+
+### Sanity theorem 3: rational clearing preserves and reflects constant square values
+
+```lean
+/-- Denominator clearing does not change whether the four square values are constant. -/
+theorem fourRatSquaresAP_clear_den_const_iff
+    (x0 x1 x2 x3 : ℚ) :
+    -- Replace `D`/integer roots by the local denominator-clearing construction.
+    -- The intended statement is:
+    -- integer cleared squares are constant ↔ rational square values are constant.
+    True := by
+  trivial
+```
+
+In real local terms, the theorem should say: after constructing integer roots `A_i = D*x_i`,
+
+```lean
+A0 ^ 2 = A1 ^ 2 ∧ A1 ^ 2 = A2 ^ 2 ∧ A2 ^ 2 = A3 ^ 2
+  ↔
+x0 ^ 2 = x1 ^ 2 ∧ x1 ^ 2 = x2 ^ 2 ∧ x2 ^ 2 = x3 ^ 2
+```
+
+using `D ≠ 0`. This catches the common final-step error of proving equality of roots rather than equality of square values.
+
+## Concrete likely flaw to look for first
+
+The most likely real bug class is **descent metric mismatch**:
+
+```text
+primitiveCenteredToEulerSquarePair_constructive P = E
+Euler descent gives E' with eulerMetric E' < eulerMetric E
+EulerSquarePairToPrimitiveCentered E' = P'
+```
+
+This does not automatically imply
+
+```text
+centeredMetric P' < centeredMetric P
+```
+
+unless the file proves that `centeredMetric` is exactly the Euler metric after conversion, or that the conversions preserve/control the chosen metric.
+
+If `primitiveCenteredFourSqAPDescent_checked` is stated only as a contradiction and hides the metric comparison, strengthen it to expose the metric. The audit question I would answer from the file is:
+
+```text
+Which natural number does well-founded induction descend on, and where is strict decrease for that exact natural number proved after all conversions and normalizations?
+```
+
+If that exact theorem is absent, add it before trusting the final rational AP theorem.
+
+## Minimal confidence checklist before using this residual downstream
+
+Before treating `fourRatSquaresAPConst_checked` as a stable residual closure for N=12, confirm these facts by direct `#check`/inspection:
+
+```lean
+#check PrimitiveCenteredFourSqAP
+#check EulerSquarePair
+#check primitiveCenteredToEulerSquarePair_constructive
+#check eulerSquarePairDescent_constructive
+#check eulerSquarePairToPrimitiveCentered
+#check primitiveCenteredFourSqAPDescent_checked
+#check fourRatSquaresAPConst_checked
+```
+
+Then verify the exported theorem statements include, or are backed by, these exact ingredients:
+
+```text
+1. nonconstant integer AP -> exists primitive centered AP with positive metric;
+2. primitive centered AP -> EulerSquarePair with positive metric;
+3. EulerSquarePair -> smaller EulerSquarePair for the same metric used in induction;
+4. smaller EulerSquarePair -> primitive centered AP without losing validity/nonconstancy;
+5. rational denominator clearing preserves nonconstant square-value AP.
+```
+
+If all five are present as checked theorems, I would rate the formalization design as sound. If any of (1), (3), or (5) is only implicit inside a large proof, those are the first places to factor out small sanity theorems.
