@@ -1,286 +1,212 @@
-# Q2822 (dm-codex1): route for `SquareclassSupportedOn23OfEvenPadicOutside23Statement`
+# Q2833 (dm-codex1): `rat_exists_sq_of_pos_even_padicValRat`
 
 Repo/branch requested: `xiangyazi24/FLT@scratch`  
-Local worktree: `/Users/huangx/repos/flt-ai`  
 Namespace: `MazurProof.RationalPointsN12`
 
-## Verdict
+## Short answer
 
-The statement is true as written because `EvenPadicOutside23 q` includes `q ≠ 0`.
+I did not find a ready Mathlib theorem saying “a positive rational with even `padicValRat` at every prime is a square.” The realistic route is a small theorem DAG:
 
-Without `q ≠ 0`, it would be false for your `SquareclassBy`, because `SquareclassBy 0 d` requires
+1. Convert `padicValRat p t` to numerator/denominator prime exponents with `padicValRat_def` / `padicValRat.multiplicity_sub_multiplicity`.
+2. Use `t.reduced : t.num.natAbs.Coprime t.den` to show each prime occurs in at most one of `t.num.natAbs` and `t.den`.
+3. Deduce both `t.num.natAbs.factorization p` and `t.den.factorization p` are even.
+4. Prove a natural-number lemma: nonzero `n` with even `n.factorization p` for every `p` is a square.
+5. Build `r = (a : ℚ) / (b : ℚ)` from `t.num.natAbs = a^2` and `t.den = b^2`.
 
-```lean
-∃ r : ℚ, r ≠ 0 ∧ 0 = (d : ℚ) * r ^ 2
-```
+The hardest block is the natural square lemma via `Nat.factorization`; the rest is API plumbing around `Rat.num`, `Rat.den`, and parity casts.
 
-and every `d ∈ S23` is nonzero.
-
-The shortest realistic Lean route is **not** to construct a full rational squarefree kernel directly. Instead:
-
-1. Define the `{±1,±2,±3,±6}` representative `d` from the sign of `q` and the parities of `padicValRat 2 q` and `padicValRat 3 q`.
-2. Prove `q / d` is positive and has even `p`-adic valuation for **every** prime `p`.
-3. Use a standalone theorem: a positive rational whose `p`-adic valuation is even at every prime is a rational square.
-4. Multiply back by `d`.
-
-This isolates the genuinely hard part into one reusable theorem about positive rationals.
-
-Mathlib APIs confirmed useful from `Mathlib.NumberTheory.Padics.PadicVal.Basic`:
+Useful current Mathlib APIs I checked:
 
 ```lean
-padicValRat.defn
+padicValRat_def
 padicValRat.multiplicity_sub_multiplicity
 padicValRat.mul
 padicValRat.pow
-padicValRat.inv
 padicValRat.div
-```
-
-For rational numerator/denominator work, useful APIs include:
-
-```lean
+padicValRat.inv
 Rat.num_ne_zero
 Rat.den_ne_zero
 Rat.num_divInt_den
 Rat.pow_eq_divInt
-Rat.div_def'
-q.reduced        -- field of the Rat structure: q.num.natAbs.Coprime q.den
+Nat.factorization_def
+Nat.prod_factorization_pow_eq_self
+Nat.prod_pow_factorization_eq_self
+Nat.eq_of_factorization_eq
+Nat.factorization_pow
+Nat.factorization_eq_zero_of_not_prime
+Int.even_coe_nat
 ```
 
-I found no ready-made Mathlib theorem named like `Rat.isSquare_intCast_iff` or `padicValRat square even`, so expect to prove the square criterion below.
-
-## Imports
+Imports I would add for this isolated file:
 
 ```lean
 import Mathlib.NumberTheory.Padics.PadicVal.Basic
+import Mathlib.Data.Nat.Factorization.Basic
 import Mathlib.Data.Rat.Lemmas
-import Mathlib.Data.Nat.Prime.Basic
+import Mathlib.Algebra.Group.Int.Even
 import Mathlib.Tactic
+```
 
+## Lemma DAG and code skeleton
+
+### 1. Natural square criterion from even factorization
+
+This is the clean core lemma. State it with all `p`, not only primes; non-prime factorization is `0` anyway.
+
+```lean
 namespace MazurProof.RationalPointsN12
-```
 
-Your local file already imports `Mathlib.NumberTheory.Padics.PadicVal.Basic` and `Mathlib.Tactic`; add `Mathlib.Data.Rat.Lemmas` only if the `Rat.num`/`Rat.den` lemmas are not already available transitively.
+/-- Half the prime-factorization of `n`. -/
+noncomputable def halfFactorization (n : ℕ) : ℕ →₀ ℕ :=
+  n.factorization.mapRange (fun e => e / 2) (by simp)
 
-## Step 1: choose the representative `d ∈ S23`
+/-- Candidate square root built from half exponents. -/
+noncomputable def sqrtOfEvenFactorization (n : ℕ) : ℕ :=
+  (halfFactorization n).prod (fun p e => p ^ e)
 
-Use parity of the valuations at `2` and `3`, and the sign of `q`.
-
-```lean
-/-- The signed squareclass representative supported on `{2,3}`.
-It is one of `±1, ±2, ±3, ±6`. -/
-noncomputable def sqclass23Rep (q : ℚ) : ℤ :=
-  (if q < 0 then (-1 : ℤ) else 1) *
-  (if Even (padicValRat 2 q) then (1 : ℤ) else 2) *
-  (if Even (padicValRat 3 q) then (1 : ℤ) else 3)
-```
-
-The first small finite lemma is just cases on the three `if`s:
-
-```lean
-theorem sqclass23Rep_mem (q : ℚ) : InS23 (sqclass23Rep q) := by
-  unfold sqclass23Rep InS23 S23
-  by_cases hs : q < 0 <;>
-  by_cases h2 : Even (padicValRat 2 q) <;>
-  by_cases h3 : Even (padicValRat 3 q) <;>
-  simp [hs, h2, h3]
-
-theorem sqclass23Rep_ne_zero (q : ℚ) : sqclass23Rep q ≠ 0 := by
-  unfold sqclass23Rep
-  by_cases hs : q < 0 <;>
-  by_cases h2 : Even (padicValRat 2 q) <;>
-  by_cases h3 : Even (padicValRat 3 q) <;>
-  norm_num [hs, h2, h3]
-```
-
-You also want a cast version:
-
-```lean
-theorem sqclass23Rep_rat_ne_zero (q : ℚ) :
-    ((sqclass23Rep q : ℤ) : ℚ) ≠ 0 := by
-  exact_mod_cast sqclass23Rep_ne_zero q
-```
-
-## Step 2: `q / d` is positive
-
-Since `d` has the same sign as `q`, `q / d` is positive.
-
-```lean
-theorem sqclass23Rep_same_sign {q : ℚ} (hq0 : q ≠ 0) :
-    0 < q / ((sqclass23Rep q : ℤ) : ℚ) := by
-  unfold sqclass23Rep
-  by_cases hqneg : q < 0
-  · -- d is negative; q / d is positive.
-    by_cases h2 : Even (padicValRat 2 q) <;>
-    by_cases h3 : Even (padicValRat 3 q) <;>
-    norm_num [hqneg, h2, h3]
-    positivity
-  · have hqpos : 0 < q := lt_of_le_of_ne (le_of_not_gt hqneg) (Ne.symm hq0)
-    by_cases h2 : Even (padicValRat 2 q) <;>
-    by_cases h3 : Even (padicValRat 3 q) <;>
-    norm_num [hqneg, h2, h3]
-    positivity
-```
-
-If `positivity` does not close the negative case, replace it by `have : 0 < -q := neg_pos.mpr hqneg` and `field_simp`.
-
-## Step 3: valuation parity of `q / d`
-
-First prove the valuation of the finite representative. It is easier to expose only parity, not exact valuations.
-
-```lean
-/-- Outside `{2,3}`, the chosen representative has zero valuation. -/
-theorem even_padicValRat_sqclass23Rep_outside23
-    {p : ℕ} [Fact p.Prime] (hp2 : p ≠ 2) (hp3 : p ≠ 3) (q : ℚ) :
-    Even (padicValRat p (((sqclass23Rep q : ℤ) : ℚ))) := by
-  unfold sqclass23Rep
-  by_cases hs : q < 0 <;>
-  by_cases h2 : Even (padicValRat 2 q) <;>
-  by_cases h3 : Even (padicValRat 3 q) <;>
-  -- all cases reduce to valuations of ±1, ±2, ±3, ±6 at p outside {2,3}
-  -- use `padicValRat.mul`, `padicValRat.neg`, `padicValRat.of_int`, and
-  -- `padicValInt.eq_zero_of_not_dvd`; `norm_num [hp2, hp3]` often closes.
-  norm_num [hs, h2, h3, hp2, hp3]
-
-/-- At `2`, subtracting the chosen factor makes the valuation even. -/
-theorem even_padicValRat_div_sqclass23Rep_at_two
-    {q : ℚ} (hq0 : q ≠ 0) :
-    Even (padicValRat 2 (q / (((sqclass23Rep q : ℤ) : ℚ)))) := by
-  have hd0 : (((sqclass23Rep q : ℤ) : ℚ)) ≠ 0 := sqclass23Rep_rat_ne_zero q
-  rw [padicValRat.div hq0 hd0]
-  unfold sqclass23Rep
-  by_cases hs : q < 0 <;>
-  by_cases h2 : Even (padicValRat 2 q) <;>
-  by_cases h3 : Even (padicValRat 3 q) <;>
-  -- if h2, the representative has 2-valuation 0; otherwise 1.
-  -- In both cases `v2(q)-v2(d)` is even.
-  norm_num [hs, h2, h3]
-
-/-- At `3`, subtracting the chosen factor makes the valuation even. -/
-theorem even_padicValRat_div_sqclass23Rep_at_three
-    {q : ℚ} (hq0 : q ≠ 0) :
-    Even (padicValRat 3 (q / (((sqclass23Rep q : ℤ) : ℚ)))) := by
-  have hd0 : (((sqclass23Rep q : ℤ) : ℚ)) ≠ 0 := sqclass23Rep_rat_ne_zero q
-  rw [padicValRat.div hq0 hd0]
-  unfold sqclass23Rep
-  by_cases hs : q < 0 <;>
-  by_cases h2 : Even (padicValRat 2 q) <;>
-  by_cases h3 : Even (padicValRat 3 q) <;>
-  norm_num [hs, h2, h3]
-
-/-- All prime valuations of `q / sqclass23Rep q` are even. -/
-theorem even_padicValRat_div_sqclass23Rep_all
-    {q : ℚ}
-    (hq : EvenPadicOutside23 q) :
-    ∀ p : ℕ, Fact p.Prime →
-      Even (padicValRat p (q / (((sqclass23Rep q : ℤ) : ℚ)))) := by
-  intro p hp
-  rcases hq with ⟨hq0, houtside⟩
-  by_cases hp2 : p = 2
-  · subst hp2
-    exact even_padicValRat_div_sqclass23Rep_at_two hq0
-  · by_cases hp3 : p = 3
-    · subst hp3
-      exact even_padicValRat_div_sqclass23Rep_at_three hq0
-    · have hd0 : (((sqclass23Rep q : ℤ) : ℚ)) ≠ 0 := sqclass23Rep_rat_ne_zero q
-      rw [padicValRat.div hq0 hd0]
-      exact Even.sub (houtside p hp hp2 hp3)
-        (even_padicValRat_sqclass23Rep_outside23 hp2 hp3 q)
-```
-
-The exact valuation lemmas for `2` and `3` may need a little more manual `padicValRat.mul` rewriting than the skeleton shows, but they are finite eight-case goals and are not the hard part.
-
-## Step 4: positive rational with all valuations even is a square
-
-This is the main reusable theorem. It is the only genuinely substantial sublemma.
-
-```lean
-/-- Positive rational square criterion via all prime valuations. -/
-theorem rat_exists_sq_of_pos_even_padicValRat
-    {t : ℚ}
-    (htpos : 0 < t)
-    (hval : ∀ p : ℕ, Fact p.Prime → Even (padicValRat p t)) :
-    ∃ r : ℚ, r ≠ 0 ∧ t = r ^ 2 := by
-  -- Prove by numerator/denominator.
-  -- This is the recommended hard lemma to isolate.
-  -- See the DAG below.
-  sorry
-```
-
-### DAG for this square criterion
-
-Use `Rat.num`/`Rat.den`, not a global rational UFD proof.
-
-#### 4.1 Even exponents for numerator and denominator separately
-
-For `t > 0`, `t.num` is positive and `t.den` is positive. Since `t.num.natAbs` and `t.den` are coprime, a prime cannot occur in both. Therefore evenness of
-
-```lean
-padicValRat p t = padicValInt p t.num - padicValNat p t.den
-```
-
-forces both individual exponents to be even.
-
-```lean
-theorem rat_num_den_even_of_even_padicValRat
-    {t : ℚ}
-    (htpos : 0 < t)
-    (hval : ∀ p : ℕ, Fact p.Prime → Even (padicValRat p t)) :
-    (∀ p : ℕ, Fact p.Prime → Even (padicValInt p t.num)) ∧
-    (∀ p : ℕ, Fact p.Prime → Even (padicValNat p t.den)) := by
-  -- APIs:
-  --   padicValRat_def
-  --   padicValRat.multiplicity_sub_multiplicity
-  --   t.reduced : t.num.natAbs.Coprime t.den
-  --   padicValInt.eq_zero_iff / padicValNat.eq_zero_iff
-  -- Route for each prime p:
-  --   by_cases hpnum : (p:ℤ) ∣ t.num
-  --   · coprimality implies ¬ p ∣ t.den, so denominator valuation is 0.
-  --     Then hval gives numerator valuation even.
-  --   · numerator valuation is 0, and hval gives denominator valuation even
-  --     because `0 - vden` even iff `vden` even.
-  sorry
-```
-
-#### 4.2 Natural number square criterion from even prime exponents
-
-This is a clean `Nat.factorization` lemma.
-
-```lean
-/-- A natural number is a square if every prime exponent in its factorization is even. -/
-theorem nat_exists_sq_of_even_prime_factorization
-    {n : ℕ}
-    (h : ∀ p : ℕ, Fact p.Prime → Even (n.factorization p)) :
+/-- If every exponent in the factorization of a nonzero natural is even,
+then the natural is a square. -/
+theorem nat_exists_sq_of_even_factorization
+    {n : ℕ} (hn : n ≠ 0)
+    (hEven : ∀ p : ℕ, Even (n.factorization p)) :
     ∃ a : ℕ, n = a ^ 2 := by
-  -- Use `Nat.factorization`.
-  -- Define `a.factorization p = n.factorization p / 2` on primes in support.
-  -- More practical in Mathlib: use `n.factorization` as a finsupp and the theorem
-  -- `Nat.prod_factorization_eq_self` / equivalent, then construct
-  --   a = n.factorization.prod fun p e => p ^ (e / 2)
-  -- and prove by factorization extensionality.
-  -- API names to look for if exact names differ:
-  --   Nat.factorization
-  --   Nat.factorization_mul
-  --   Nat.factorization_pow
-  --   Nat.factorization_eq_zero_of_not_dvd
-  --   Nat.prod_factorization_eq_self
-  sorry
+  classical
+  let f : ℕ →₀ ℕ := halfFactorization n
+  let a : ℕ := f.prod (fun p e => p ^ e)
+  have hf_prime : ∀ p ∈ f.support, Nat.Prime p := by
+    intro p hp
+    -- `p ∈ f.support` implies `p ∈ n.factorization.support`, hence prime.
+    -- Use `support_mapRange`/`Finsupp.mem_support_iff` and
+    -- `Nat.prime_of_mem_primeFactors` or the support of `n.factorization`.
+    -- Skeleton:
+    --   have hp0 : n.factorization p ≠ 0 := ...
+    --   exact Nat.prime_of_mem_primeFactors (by simpa using hp0)
+    sorry
+  have hfac_a : a.factorization = f := by
+    -- This is exactly the API from `Data.Nat.Factorization.Defs`:
+    -- `Nat.prod_pow_factorization_eq_self hf_prime`.
+    simpa [a] using (Nat.prod_pow_factorization_eq_self (f := f) hf_prime)
+  have ha_ne : a ≠ 0 := by
+    -- product of positive prime powers over finite support.
+    -- Alternatively derive from `hfac_a` and `f` if needed.
+    dsimp [a]
+    exact Finsupp.prod_ne_zero_iff.mpr (by intro p hp; exact pow_ne_zero _ (hf_prime p hp).ne_zero)
+  refine ⟨a, ?_⟩
+  apply Nat.eq_of_factorization_eq hn (pow_ne_zero 2 ha_ne)
+  intro p
+  have hpow : (a ^ 2).factorization p = 2 * a.factorization p := by
+    -- `Nat.factorization_pow a 2` gives `(a^2).factorization = 2 • a.factorization`.
+    simpa [Finsupp.smul_apply, two_mul] using congrFun (congrArg DFunLike.coe (Nat.factorization_pow a 2)) p
+  rw [hpow, hfac_a]
+  -- Now the goal is `n.factorization p = 2 * (n.factorization p / 2)`.
+  -- Because `hEven p` says `n.factorization p = 2*k`, `omega` closes.
+  dsimp [f, halfFactorization]
+  -- Expected simplifier: `Finsupp.mapRange_apply`.
+  -- If it does not fire, rewrite it manually.
+  rcases hEven p with ⟨k, hk⟩
+  simp [Finsupp.mapRange_apply]
+  omega
 ```
 
-You can also state it using `IsSquare n` if the local file imports an `IsSquare` API:
+Notes:
+
+* If `Finsupp.mapRange_apply` has a different name locally, avoid it by defining `f` as an explicit finitely-supported function using `n.factorization` and proving extensional equality once.
+* The exact line for `hfac_a` is the intended Mathlib API: `Nat.prod_pow_factorization_eq_self` proves `(f.prod (·^·)).factorization = f` when the support of `f` consists of primes.
+* `Nat.factorization_pow` is marked `[simp]`, so `simp [hfac_a, halfFactorization]` may close the exponent calculation after `rcases hEven p`.
+
+If the `hf_prime` support proof is annoying, use the equivalence API instead:
 
 ```lean
-theorem nat_isSquare_of_even_prime_factorization
-    {n : ℕ}
-    (h : ∀ p : ℕ, Fact p.Prime → Even (n.factorization p)) :
-    IsSquare n := by
-  rcases nat_exists_sq_of_even_prime_factorization h with ⟨a, ha⟩
-  exact ⟨a, ha⟩
+-- Given `hf_prime : ∀ p ∈ f.support, Nat.Prime p`,
+-- `(Nat.factorizationEquiv.symm ⟨f, hf_prime⟩).1` is definitionally a positive
+-- natural with factorization `f`.
+-- `Nat.factorizationEquiv_symm_apply_coe` rewrites it to `f.prod (·^·)`.
 ```
 
-#### 4.3 Convert numerator/denominator squares into a rational square
+### 2. Convert `padicValRat` evenness into numerator/denominator evenness
+
+This is the main numerator/denominator API lemma.
 
 ```lean
+/-- Even rational valuations force even exponents in numerator and denominator
+separately, because the rational is in lowest terms. -/
+theorem rat_num_den_factorization_even_of_even_padicValRat
+    {t : ℚ}
+    (htpos : 0 < t)
+    (hval : ∀ p : ℕ, Fact p.Prime → Even (padicValRat p t)) :
+    (∀ p : ℕ, Even (t.num.natAbs.factorization p)) ∧
+    (∀ p : ℕ, Even (t.den.factorization p)) := by
+  constructor
+  · intro p
+    by_cases hp : p.Prime
+    · haveI : Fact p.Prime := ⟨hp⟩
+      have hv : Even (padicValRat p t) := hval p inferInstance
+      have hred : Nat.Coprime t.num.natAbs t.den := t.reduced
+      by_cases hpnum : p ∣ t.num.natAbs
+      · have hpden : ¬ p ∣ t.den := by
+          intro hpd
+          have hpgcd : p ∣ Nat.gcd t.num.natAbs t.den := Nat.dvd_gcd hpnum hpd
+          have hpone : p ∣ 1 := by simpa [Nat.Coprime] using (by simpa [hred.gcd_eq_one] using hpgcd)
+          exact hp.not_dvd_one hpone
+        have hden0 : t.den.factorization p = 0 := Nat.factorization_eq_zero_of_not_dvd hpden
+        have hvdef : padicValRat p t = (t.num.natAbs.factorization p : ℤ) - (t.den.factorization p : ℤ) := by
+          -- Use definitions; `padicValInt p t.num = padicValNat p t.num.natAbs`.
+          -- `Nat.factorization_def _ hp` rewrites factorization to `padicValNat`.
+          simp [padicValRat_def, padicValInt, Nat.factorization_def, hp]
+        have : Even ((t.num.natAbs.factorization p : ℤ)) := by
+          simpa [hvdef, hden0] using hv
+        exact (Int.even_coe_nat _).mp this
+      · have hnum0 : t.num.natAbs.factorization p = 0 := Nat.factorization_eq_zero_of_not_dvd hpnum
+        have hvdef : padicValRat p t = (t.num.natAbs.factorization p : ℤ) - (t.den.factorization p : ℤ) := by
+          simp [padicValRat_def, padicValInt, Nat.factorization_def, hp]
+        -- Here `hv` says `Even (0 - denExp)`, equivalent to `Even denExp`.
+        -- This branch is for numerator; it is zero, hence even.
+        simp [hnum0]
+    · simpa [Nat.factorization_eq_zero_of_not_prime t.num.natAbs hp]
+  · intro p
+    by_cases hp : p.Prime
+    · haveI : Fact p.Prime := ⟨hp⟩
+      have hv : Even (padicValRat p t) := hval p inferInstance
+      have hred : Nat.Coprime t.num.natAbs t.den := t.reduced
+      by_cases hpden : p ∣ t.den
+      · have hpnum : ¬ p ∣ t.num.natAbs := by
+          intro hpn
+          have hpgcd : p ∣ Nat.gcd t.num.natAbs t.den := Nat.dvd_gcd hpn hpden
+          have hpone : p ∣ 1 := by simpa [Nat.Coprime] using (by simpa [hred.gcd_eq_one] using hpgcd)
+          exact hp.not_dvd_one hpone
+        have hnum0 : t.num.natAbs.factorization p = 0 := Nat.factorization_eq_zero_of_not_dvd hpnum
+        have hvdef : padicValRat p t = (t.num.natAbs.factorization p : ℤ) - (t.den.factorization p : ℤ) := by
+          simp [padicValRat_def, padicValInt, Nat.factorization_def, hp]
+        have : Even (-(t.den.factorization p : ℤ)) := by
+          simpa [hvdef, hnum0] using hv
+        have : Even ((t.den.factorization p : ℤ)) := by
+          simpa using this.neg
+        exact (Int.even_coe_nat _).mp this
+      · have hden0 : t.den.factorization p = 0 := Nat.factorization_eq_zero_of_not_dvd hpden
+        simp [hden0]
+    · simpa [Nat.factorization_eq_zero_of_not_prime t.den hp]
+```
+
+The two lines involving `hred.gcd_eq_one` may need adaptation. If `t.reduced` is literally `t.num.natAbs.Coprime t.den`, then `hred : Nat.Coprime ...`; use whichever local simp works:
+
+```lean
+have hpgcd : p ∣ Nat.gcd t.num.natAbs t.den := Nat.dvd_gcd hpnum hpden
+have hpone : p ∣ 1 := by
+  simpa [Nat.Coprime] using (by simpa [hred] using hpgcd)
+```
+
+or:
+
+```lean
+rw [hred] at hpgcd
+exact hp.not_dvd_one hpgcd
+```
+
+### 3. Turn numerator/denominator squares into a rational square
+
+```lean
+/-- If numerator absolute value and denominator are natural squares, and `t>0`,
+then `t` is a rational square. -/
 theorem rat_exists_sq_of_num_den_squares
     {t : ℚ}
     (htpos : 0 < t)
@@ -289,16 +215,55 @@ theorem rat_exists_sq_of_num_den_squares
     ∃ r : ℚ, r ≠ 0 ∧ t = r ^ 2 := by
   rcases hnum with ⟨a, ha⟩
   rcases hden with ⟨b, hb⟩
+  have hnum_pos : 0 < t.num := by
+    -- `t > 0` and `t.den > 0` imply `t.num > 0`.
+    -- If there is no direct API, use `Rat.num_divInt_den` and positivity.
+    -- Common local APIs may include `Rat.num_pos` or be proved by `linarith`.
+    sorry
+  have hb_ne : (b : ℚ) ≠ 0 := by
+    have hden_ne : t.den ≠ 0 := t.den_ne_zero
+    intro hb0
+    have : t.den = 0 := by
+      rw [hb, show b ^ 2 = 0 by exact Nat.pow_eq_zero (by exact_mod_cast hb0) (by norm_num)]
+    exact hden_ne this
   refine ⟨(a : ℚ) / (b : ℚ), ?_, ?_⟩
-  · -- nonzero: t>0 implies num and den are nonzero, hence a,b nonzero
-    -- use `ha`, `hb`, `Rat.den_ne_zero`, and positivity of t.num from htpos.
-    sorry
-  · -- since t>0, `t.num = (a:ℤ)^2`, not negative.
-    -- use `Rat.num_divInt_den`, `Rat.pow_eq_divInt`, `ha`, `hb`.
-    sorry
+  · -- nonzero follows from numerator nonzero and b nonzero.
+    have ha_ne : (a : ℚ) ≠ 0 := by
+      intro ha0
+      have hnum0 : t.num.natAbs = 0 := by
+        rw [ha]
+        norm_num [ha0]
+      have : t.num = 0 := Int.natAbs_eq_zero.mp hnum0
+      linarith
+    exact div_ne_zero ha_ne hb_ne
+  · -- Since `t.num > 0`, `t.num = (a:ℤ)^2`, not the negative square.
+    have hnum_eq : t.num = (a : ℤ) ^ 2 := by
+      have hcast : ((t.num.natAbs : ℕ) : ℤ) = ((a ^ 2 : ℕ) : ℤ) := by rw [ha]
+      have hnatabs : ((t.num.natAbs : ℕ) : ℤ) = t.num := Int.natAbs_of_nonneg (le_of_lt hnum_pos)
+      rw [hnatabs] at hcast
+      simpa using hcast
+    -- Now use `Rat.num_divInt_den` and `Rat.pow_eq_divInt`.
+    calc
+      t = t.num /. t.den := by rw [Rat.num_divInt_den]
+      _ = ((a : ℤ) ^ 2) /. ((b : ℕ) ^ 2) := by rw [hnum_eq, hb]
+      _ = ((a : ℚ) / (b : ℚ)) ^ 2 := by
+        -- Use `Rat.pow_eq_divInt` or `field_simp [hb_ne]`; final goal is pure casts.
+        field_simp [hb_ne]
+        ring
 ```
 
-Then assemble:
+The only nontrivial local nuisance is proving `hnum_pos`. I would isolate it:
+
+```lean
+theorem Rat.num_pos_of_pos {t : ℚ} (ht : 0 < t) : 0 < t.num := by
+  -- If not already in Mathlib under a nearby name.
+  -- Use `t = t.num /. t.den`, `0 < t.den`, and order of `Rat.divInt`.
+  sorry
+```
+
+If Mathlib has `Rat.num_pos` / `Rat.num_pos_iff_pos`, use it and delete the helper.
+
+### 4. Assemble the generic rational theorem
 
 ```lean
 theorem rat_exists_sq_of_pos_even_padicValRat
@@ -306,109 +271,72 @@ theorem rat_exists_sq_of_pos_even_padicValRat
     (htpos : 0 < t)
     (hval : ∀ p : ℕ, Fact p.Prime → Even (padicValRat p t)) :
     ∃ r : ℚ, r ≠ 0 ∧ t = r ^ 2 := by
-  rcases rat_num_den_even_of_even_padicValRat htpos hval with ⟨hnumEven, hdenEven⟩
+  have ht_ne : t ≠ 0 := ne_of_gt htpos
+  have hnum_ne : t.num.natAbs ≠ 0 := by
+    exact Int.natAbs_ne_zero.mpr (Rat.num_ne_zero.mpr ht_ne)
+  have hden_ne : t.den ≠ 0 := t.den_ne_zero
+  rcases rat_num_den_factorization_even_of_even_padicValRat htpos hval with
+    ⟨hnumEven, hdenEven⟩
   have hnumSq : ∃ a : ℕ, t.num.natAbs = a ^ 2 :=
-    nat_exists_sq_of_even_prime_factorization (by
-      intro p hp
-      -- `padicValInt p t.num` is `padicValNat p t.num.natAbs`.
-      simpa [padicValInt] using hnumEven p hp)
+    nat_exists_sq_of_even_factorization hnum_ne hnumEven
   have hdenSq : ∃ b : ℕ, t.den = b ^ 2 :=
-    nat_exists_sq_of_even_prime_factorization (by
-      intro p hp
-      simpa using hdenEven p hp)
+    nat_exists_sq_of_even_factorization hden_ne hdenEven
   exact rat_exists_sq_of_num_den_squares htpos hnumSq hdenSq
 ```
 
-This theorem is useful beyond this residual; keep it generic.
+This is the theorem you need downstream.
 
-## Step 5: final residual assembly
+## If you want a more “compilable now” split
 
-Now the target theorem is short.
-
-```lean
-theorem squareclassSupportedOn23OfEvenPadicOutside23_checked :
-    SquareclassSupportedOn23OfEvenPadicOutside23Statement := by
-  intro q hq
-  rcases hq with ⟨hq0, houtside⟩
-  let d : ℤ := sqclass23Rep q
-  have hdmem : InS23 d := by
-    simpa [d] using sqclass23Rep_mem q
-  have hd0 : ((d : ℤ) : ℚ) ≠ 0 := by
-    simpa [d] using sqclass23Rep_rat_ne_zero q
-  have htpos : 0 < q / ((d : ℤ) : ℚ) := by
-    simpa [d] using sqclass23Rep_same_sign hq0
-  have hteven : ∀ p : ℕ, Fact p.Prime →
-      Even (padicValRat p (q / ((d : ℤ) : ℚ))) := by
-    simpa [d] using even_padicValRat_div_sqclass23Rep_all (q := q) ⟨hq0, houtside⟩
-  rcases rat_exists_sq_of_pos_even_padicValRat htpos hteven with ⟨r, hr0, hsq⟩
-  refine ⟨hq0, d, hdmem, ?_⟩
-  refine ⟨r, hr0, ?_⟩
-  -- hsq : q / d = r^2
-  -- goal : q = d * r^2
-  field_simp [hd0] at hsq ⊢
-  exact hsq
-```
-
-Depending on `field_simp`, the last lines may need:
+The most robust way to land this in Lean is not to try the full theorem in one commit. Add these in order:
 
 ```lean
-  calc
-    q = ((d : ℚ)) * (q / ((d : ℚ))) := by field_simp [hd0]
-    _ = ((d : ℚ)) * r ^ 2 := by rw [hsq]
+theorem nat_exists_sq_of_even_factorization
+    {n : ℕ} (hn : n ≠ 0)
+    (hEven : ∀ p : ℕ, Even (n.factorization p)) :
+    ∃ a : ℕ, n = a ^ 2
+
+theorem rat_num_den_factorization_even_of_even_padicValRat
+    {t : ℚ}
+    (htpos : 0 < t)
+    (hval : ∀ p : ℕ, Fact p.Prime → Even (padicValRat p t)) :
+    (∀ p : ℕ, Even (t.num.natAbs.factorization p)) ∧
+    (∀ p : ℕ, Even (t.den.factorization p))
+
+theorem rat_exists_sq_of_num_den_squares
+    {t : ℚ}
+    (htpos : 0 < t)
+    (hnum : ∃ a : ℕ, t.num.natAbs = a ^ 2)
+    (hden : ∃ b : ℕ, t.den = b ^ 2) :
+    ∃ r : ℚ, r ≠ 0 ∧ t = r ^ 2
 ```
 
-## Alternative: direct numerator/denominator squarefree kernel
-
-If the `Nat.factorization` square criterion is more convenient than all-prime `padicValRat` parity, you can skip `sqclass23Rep` first and build the squarefree kernel of `q.num` and `q.den`.
-
-Target theorem:
-
-```lean
-theorem rat_squareclass_supported23_of_even_outside23_num_den
-    {q : ℚ}
-    (hq0 : q ≠ 0)
-    (hout : ∀ p : ℕ, Fact p.Prime → p ≠ 2 → p ≠ 3 →
-      Even (padicValRat p q)) :
-    ∃ d : ℤ, InS23 d ∧ ∃ r : ℚ, r ≠ 0 ∧ q = (d : ℚ) * r ^ 2 := by
-  -- Build d by sign and parity of v2/v3 exactly as above, then apply the
-  -- positive all-even square criterion to q/d.
-  -- This is usually shorter than separately constructing squarefree kernels
-  -- for numerator and denominator.
-  sorry
-```
-
-The direct kernel route is conceptually fine, but it duplicates the same proof work: you must still show every prime outside `{2,3}` has even exponent in both numerator and denominator. The `q/d` square criterion centralizes that work.
+Then the target theorem is a four-line assembly. This decomposition avoids mixing factorization extensionality, rational numerator signs, and `padicValRat` rewriting in a single proof state.
 
 ## Pitfalls
 
-1. **The statement needs `q ≠ 0`.** Your definition includes it; keep it threaded through every lemma.
-2. **All-even valuations alone do not imply a rational square.** Example: `-1` has all valuations even but is not a square in `ℚ`. The square criterion must assume `0 < t`. This is why `d` includes the sign of `q`.
-3. **Parity at `2` and `3` can be negative.** Use `Even (padicValRat p q)` over `ℤ`, not `Nat` parity. Subtracting `1` changes parity correctly even for negative valuations.
-4. **Do not try to decide `d` from numerator divisibility only.** Denominator exponents matter; `padicValRat 2 q` and `padicValRat 3 q` already encode numerator minus denominator.
-5. **Keep `rat_exists_sq_of_pos_even_padicValRat` generic.** It will also be useful for product-squareclass and future descent bridges.
-6. **The finite membership proof for `d ∈ S23` is trivial only if `S23` is unfolded.** Your `S23` order is `[1, -1, 2, -2, 3, -3, 6, -6]`; the `simp` proof above matches that.
+* `htpos` is essential. Even valuations alone would allow `t = -1`, which is not a square in `ℚ`.
+* Use `t.num.natAbs`, not `t.num`, for natural factorization. Recover the positive sign of `t.num` only at the final rational construction step.
+* `padicValRat p t` is an integer difference. When one side of the reduced fraction has `p`-valuation zero, use parity of `n` or `-n` and `Int.even_coe_nat` to convert back to Nat parity.
+* Do not assume `Nat.factorization p = padicValNat p n` without `p.Prime`; use `Nat.factorization_def n hp` in prime branches and `Nat.factorization_eq_zero_of_not_prime` otherwise.
+* `t.reduced` is the key reason numerator and denominator exponents do not both appear. Without reduced numerator/denominator, evenness of the difference would not force each side even.
 
-## Minimal lemma DAG
+## Mathlib names to try first
 
-```text
-sqclass23Rep
-  ├─ sqclass23Rep_mem
-  ├─ sqclass23Rep_rat_ne_zero
-  ├─ sqclass23Rep_same_sign
-  └─ even_padicValRat_div_sqclass23Rep_all
-        ├─ at p=2 finite cases
-        ├─ at p=3 finite cases
-        └─ outside 2,3 from hypothesis and valuation of d = 0
-
-rat_exists_sq_of_pos_even_padicValRat
-  ├─ rat_num_den_even_of_even_padicValRat
-  │    ├─ padicValRat_def / multiplicity_sub_multiplicity
-  │    └─ q.reduced coprimality of num/den
-  ├─ nat_exists_sq_of_even_prime_factorization
-  └─ rat_exists_sq_of_num_den_squares
-
-squareclassSupportedOn23OfEvenPadicOutside23_checked
-  └─ choose d = sqclass23Rep q, square-root q/d, multiply back
+```lean
+#check padicValRat_def
+#check padicValRat.multiplicity_sub_multiplicity
+#check Nat.factorization_def
+#check Nat.factorization_pow
+#check Nat.prod_factorization_pow_eq_self
+#check Nat.prod_pow_factorization_eq_self
+#check Nat.eq_of_factorization_eq
+#check Nat.factorization_eq_zero_of_not_prime
+#check Int.even_coe_nat
+#check Rat.num_ne_zero
+#check Rat.den_ne_zero
+#check Rat.num_divInt_den
+#check Rat.pow_eq_divInt
 ```
 
-This is the shortest route I would expect to survive Lean implementation without a large bespoke rational squarefree-kernel development.
+I did not find a direct existing theorem for the final square criterion; the lemma DAG above is the shortest realistic route against current Mathlib APIs.
