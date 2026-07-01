@@ -1,369 +1,226 @@
-# Q2970 (dm-codex1): direct affine group-law route for `ψ₄` core at `3P`
+# Q2974 (dm-codex1): Tate C12 `ψ₂(2·3P)` computation and affine doubling glue
 
-This answer uses only the self-contained Tate normal form data in the prompt.
+Target file: `FLT/Assumptions/MazurProof/KubertBridgeN12.lean`  
+Namespace: `MazurProof.KubertBridgeN12`
 
-Curve:
-
-```text
-W : y^2 + (1-c)xy - b y = x^3 - b x^2
-```
-
-so
-
-```lean
-a1 = 1 - c
- a2 = -b
- a3 = -b
- a4 = 0
- a6 = 0
-```
-
-For `Q = 3P = (c, b-c)`, the tangent denominator is exactly
-
-```lean
-ψ₂(Q) = 2*(b-c) + (1-c)*c - b = b - c - c^2.
-```
-
-Thus your already-proved exact-order consequence
-
-```lean
-h6 : b - c - c^2 ≠ 0
-```
-
-is precisely the non-vertical-tangent / `Q` not 2-torsion hypothesis needed to use affine doubling formulas.
-
-## Explicit formulas
-
-Let
-
-```lean
-d = b - c - c^2
-n = 2*c^2 + c - b*c - b
-λ = n / d
-ν = (b^2 - b*c - c^3) / d
-```
-
-where `λ` is the tangent slope at `Q`, and `ν = y_Q - λ*x_Q` is the tangent-line intercept.  Then
-
-```lean
-2Q = (x₂, y₂)
-```
-
-with
-
-```lean
-x₂ = (b - c) * (b^2 - b*c - c^3) / d^2
-
-y₂ = c * (b - c)^2 * (2*b^2 - b*c^2 - 3*b*c + c^2) / d^3
-```
-
-The relevant 2-torsion expression at `2Q` is
-
-```lean
-ψ₂(2Q) = 2*y₂ + (1-c)*x₂ - b.
-```
-
-A direct simplification gives
-
-```lean
-ψ₂(2Q) = tatePsi4CoreAt3P(b,c) / d^3.
-```
-
-Therefore, if `4Q = 0`, then `2Q` is 2-torsion, so `ψ₂(2Q)=0`; since `d≠0`, this forces
-
-```lean
-tatePsi4CoreAt3P(b,c) = 0.
-```
-
-No division by `b-c` occurs.  The only affine-doubling denominator is `d = b-c-c^2`.  The hypothesis `c≠0` is not needed for `ψ₄`-core vanishing itself; it is only needed if you later rewrite
-
-```lean
-tatePsi4CoreAt3P(b,c) = c * tateC12_K b c
-```
-
-and want to divide by `c` to get `tateC12_K b c = 0`.
-
-## Ring/field part: pasteable scratch code
-
-This is the computation layer.  If your file already has `tatePsi4CoreAt3P`, replace `tatePsi4CoreAt3P_scratch` below with the existing name and keep the same proofs, using `simpa [tatePsi4CoreAt3P, ...]` where necessary.
+Below is the insertion I recommend.  The arithmetic theorem is fully direct and should close with `field_simp; ring`.  The group-law lemma is written in a robust `of_some` form: it takes the nonsingularity proof of the already-known point `(c,b-c)` as an implicit argument.  This avoids depending on the private proof term used internally by `tateP3`.  After this lemma is in the file, the wrapper for your concrete `tateP3 b c hb` should be just `simpa [tateP3]` if `tateP3` is reducible.
 
 ```lean
 import FLT.Assumptions.MazurProof.KubertBridgeN12
 import Mathlib.Tactic
 
+open scoped WeierstrassCurve.Affine
+
 namespace MazurProof.KubertBridgeN12
 
 noncomputable section
 
-private def tatePsi4CoreAt3P_scratch (b c : ℚ) : ℚ :=
-  let b2 : ℚ := (1 - c)^2 - 4*b
-  let b4 : ℚ := b*(c - 1)
-  let b6 : ℚ := b^2
-  let b8 : ℚ := -b^3
-  2*c^6 + b2*c^5 + 5*b4*c^4 + 10*b6*c^3 + 10*b8*c^2 +
-    (b2*b8 - b4*b6)*c + (b4*b8 - b6^2)
+/-- The usual `ψ₂ = 2y + a₁x + a₃` on the Tate normal form
+`a₁=1-c`, `a₃=-b`. -/
+def tatePsi2 (b c x y : ℚ) : ℚ :=
+  2 * y + (1 - c) * x - b
 
-private def tateDoubleDenAt3P_scratch (b c : ℚ) : ℚ :=
-  b - c - c^2
+/-- The tangent denominator at `3P = (c,b-c)`. -/
+def tateDouble3P_D (b c : ℚ) : ℚ :=
+  b - c - c ^ 2
 
-private def tateDoubleNumAt3P_scratch (b c : ℚ) : ℚ :=
-  2*c^2 + c - b*c - b
+/-- The tangent slope at `3P = (c,b-c)`. -/
+def tateDouble3P_L (b c : ℚ) : ℚ :=
+  (2 * c ^ 2 - b * c + c - b) / tateDouble3P_D b c
 
-private def tateDoubleSlopeAt3P_scratch (b c : ℚ) : ℚ :=
-  tateDoubleNumAt3P_scratch b c / tateDoubleDenAt3P_scratch b c
+/-- The x-coordinate of `2(3P)`, written through the tangent slope. -/
+def tateDouble3P_x (b c : ℚ) : ℚ :=
+  let L := tateDouble3P_L b c
+  L ^ 2 + (1 - c) * L + b - 2 * c
 
-private def tateDoubleInterceptAt3P_scratch (b c : ℚ) : ℚ :=
-  (b^2 - b*c - c^3) / tateDoubleDenAt3P_scratch b c
+/-- The y-coordinate of `2(3P)`, written through the tangent line and final negation. -/
+def tateDouble3P_y (b c : ℚ) : ℚ :=
+  let L := tateDouble3P_L b c
+  let x := tateDouble3P_x b c
+  - (L * (x - c) + (b - c)) - (1 - c) * x + b
 
-private def tateX2Q_scratch (b c : ℚ) : ℚ :=
-  (b - c) * (b^2 - b*c - c^3) /
-    (tateDoubleDenAt3P_scratch b c)^2
-
-private def tateY2Q_scratch (b c : ℚ) : ℚ :=
-  c * (b - c)^2 * (2*b^2 - b*c^2 - 3*b*c + c^2) /
-    (tateDoubleDenAt3P_scratch b c)^3
-
-/-- At `Q=(c,b-c)`, `ψ₂(Q)` is exactly the h6 denominator. -/
-private lemma tate_psi2_at_3P_scratch (b c : ℚ) :
-    2*(b - c) + (1 - c)*c - b = tateDoubleDenAt3P_scratch b c := by
-  dsimp [tateDoubleDenAt3P_scratch]
+@[simp] theorem tatePsi2_at_3P_eq_D (b c : ℚ) :
+    tatePsi2 b c c (b - c) = tateDouble3P_D b c := by
+  simp [tatePsi2, tateDouble3P_D]
   ring
 
-/-- Tangent numerator at `Q=(c,b-c)`. -/
-private lemma tate_tangent_num_at_3P_scratch (b c : ℚ) :
-    3*c^2 + 2*(-b)*c + 0 - (1 - c)*(b - c) =
-      tateDoubleNumAt3P_scratch b c := by
-  dsimp [tateDoubleNumAt3P_scratch]
+/-- Closed form for the tangent slope after unfolding Mathlib's formula. -/
+theorem tateDouble3P_slope_formula
+    {b c : ℚ} (hD : tateDouble3P_D b c ≠ 0) :
+    ((tateW b c)⁄ℚ).slope c c (b - c) (b - c) = tateDouble3P_L b c := by
+  have hD0 : b - c - c ^ 2 ≠ 0 := by
+    simpa [tateDouble3P_D] using hD
+  have hY_ne : b - c ≠ ((tateW b c)⁄ℚ).negY c (b - c) := by
+    intro h
+    apply hD0
+    -- `negY c (b-c)` is `c^2` on this Tate curve.
+    simp [tateW, WeierstrassCurve.Affine.negY] at h
+    linarith
+  rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl hY_ne]
+  simp [tateW, tateDouble3P_L, tateDouble3P_D, hD0]
+  field_simp [hD0]
   ring
 
-/-- The tangent-line intercept `ν = y_Q - λ*x_Q`. -/
-private lemma tate_tangent_intercept_at_3P_scratch
-    {b c : ℚ} (hd : tateDoubleDenAt3P_scratch b c ≠ 0) :
-    (b - c) - tateDoubleSlopeAt3P_scratch b c * c =
-      tateDoubleInterceptAt3P_scratch b c := by
-  dsimp [tateDoubleSlopeAt3P_scratch, tateDoubleInterceptAt3P_scratch,
-    tateDoubleNumAt3P_scratch, tateDoubleDenAt3P_scratch] at hd ⊢
-  field_simp [hd]
+/-- Mathlib's `addX` coordinate agrees with `tateDouble3P_x`. -/
+theorem tateDouble3P_addX_formula
+    {b c : ℚ} (hD : tateDouble3P_D b c ≠ 0) :
+    ((tateW b c)⁄ℚ).addX c c (((tateW b c)⁄ℚ).slope c c (b - c) (b - c)) =
+      tateDouble3P_x b c := by
+  rw [tateDouble3P_slope_formula (b := b) (c := c) hD]
+  simp [tateW, tateDouble3P_x]
   ring
 
-/-- Doubling x-coordinate from `x(2Q)=λ^2+a1*λ-a2-2*x_Q`. -/
-private lemma tate_double_x_at_3P_scratch
-    {b c : ℚ} (hd : tateDoubleDenAt3P_scratch b c ≠ 0) :
-    tateDoubleSlopeAt3P_scratch b c ^ 2 +
-        (1 - c) * tateDoubleSlopeAt3P_scratch b c + b - 2*c =
-      tateX2Q_scratch b c := by
-  dsimp [tateDoubleSlopeAt3P_scratch, tateX2Q_scratch,
-    tateDoubleNumAt3P_scratch, tateDoubleDenAt3P_scratch] at hd ⊢
-  have hd2 : (b - c - c^2)^2 ≠ 0 := pow_ne_zero 2 hd
-  field_simp [hd, hd2]
+/-- Mathlib's `addY` coordinate agrees with `tateDouble3P_y`. -/
+theorem tateDouble3P_addY_formula
+    {b c : ℚ} (hD : tateDouble3P_D b c ≠ 0) :
+    ((tateW b c)⁄ℚ).addY c c (b - c)
+        (((tateW b c)⁄ℚ).slope c c (b - c) (b - c)) =
+      tateDouble3P_y b c := by
+  rw [tateDouble3P_slope_formula (b := b) (c := c) hD]
+  simp [tateW, tateDouble3P_y, tateDouble3P_x]
   ring
 
-/-- Doubling y-coordinate from `y(2Q)=-(λ+a1)*x(2Q)-ν-a3`. -/
-private lemma tate_double_y_at_3P_scratch
-    {b c : ℚ} (hd : tateDoubleDenAt3P_scratch b c ≠ 0) :
-    - (tateDoubleSlopeAt3P_scratch b c + (1 - c)) *
-          tateX2Q_scratch b c - tateDoubleInterceptAt3P_scratch b c + b =
-      tateY2Q_scratch b c := by
-  dsimp [tateDoubleSlopeAt3P_scratch, tateDoubleInterceptAt3P_scratch,
-    tateX2Q_scratch, tateY2Q_scratch,
-    tateDoubleNumAt3P_scratch, tateDoubleDenAt3P_scratch] at hd ⊢
-  have hd2 : (b - c - c^2)^2 ≠ 0 := pow_ne_zero 2 hd
-  have hd3 : (b - c - c^2)^3 ≠ 0 := pow_ne_zero 3 hd
-  field_simp [hd, hd2, hd3]
+/-- Pure arithmetic: `ψ₂(2·3P)=c*K/D^3`. -/
+theorem tatePsi2_double3P_eq_core_div
+    {b c : ℚ} (hD : tateDouble3P_D b c ≠ 0) :
+    tatePsi2 b c (tateDouble3P_x b c) (tateDouble3P_y b c) =
+      c * tateC12_K b c / (tateDouble3P_D b c) ^ 3 := by
+  have hD0 : b - c - c ^ 2 ≠ 0 := by
+    simpa [tateDouble3P_D] using hD
+  have hD2 : (b - c - c ^ 2) ^ 2 ≠ 0 := pow_ne_zero 2 hD0
+  have hD3 : (b - c - c ^ 2) ^ 3 ≠ 0 := pow_ne_zero 3 hD0
+  simp [tatePsi2, tateDouble3P_y, tateDouble3P_x, tateDouble3P_L,
+    tateDouble3P_D, tateC12_K]
+  field_simp [hD0, hD2, hD3]
   ring
 
-/-- The decisive computation: `ψ₂(2Q)=ψ₄core(Q)/ψ₂(Q)^3`. -/
-private lemma tate_double_psi2_core_at_3P_scratch
-    {b c : ℚ} (hd : tateDoubleDenAt3P_scratch b c ≠ 0) :
-    2 * tateY2Q_scratch b c + (1 - c) * tateX2Q_scratch b c - b =
-      tatePsi4CoreAt3P_scratch b c /
-        (tateDoubleDenAt3P_scratch b c)^3 := by
-  dsimp [tateY2Q_scratch, tateX2Q_scratch, tatePsi4CoreAt3P_scratch,
-    tateDoubleDenAt3P_scratch] at hd ⊢
-  have hd2 : (b - c - c^2)^2 ≠ 0 := pow_ne_zero 2 hd
-  have hd3 : (b - c - c^2)^3 ≠ 0 := pow_ne_zero 3 hd
-  field_simp [hd, hd2, hd3]
-  ring
+/-- Same arithmetic theorem, using the already-existing core identity name. -/
+theorem tatePsi2_double3P_eq_psi4Core_div
+    {b c : ℚ} (hD : tateDouble3P_D b c ≠ 0) :
+    tatePsi2 b c (tateDouble3P_x b c) (tateDouble3P_y b c) =
+      tatePsi4CoreAt3P b c / (tateDouble3P_D b c) ^ 3 := by
+  rw [tatePsi4CoreAt3P_eq_c_mul_K]
+  exact tatePsi2_double3P_eq_core_div (b := b) (c := c) hD
 
-/-- Algebraic extraction: if `2Q` is 2-torsion, the core vanishes. -/
-private lemma tatePsi4CoreAt3P_eq_zero_of_double_psi2_scratch
-    {b c : ℚ} (hd : tateDoubleDenAt3P_scratch b c ≠ 0)
-    (hpsi2_2Q :
-      2 * tateY2Q_scratch b c + (1 - c) * tateX2Q_scratch b c - b = 0) :
-    tatePsi4CoreAt3P_scratch b c = 0 := by
-  have hrel := tate_double_psi2_core_at_3P_scratch (b := b) (c := c) hd
-  rw [hpsi2_2Q] at hrel
-  have hquot :
-      tatePsi4CoreAt3P_scratch b c /
-        (tateDoubleDenAt3P_scratch b c)^3 = 0 := by
+/-- If the arithmetic identity is zero on the left, the `ψ₄` core vanishes. -/
+theorem tatePsi4CoreAt3P_eq_zero_of_tatePsi2_double3P_eq_zero
+    {b c : ℚ} (hD : tateDouble3P_D b c ≠ 0)
+    (hpsi : tatePsi2 b c (tateDouble3P_x b c) (tateDouble3P_y b c) = 0) :
+    tatePsi4CoreAt3P b c = 0 := by
+  have hrel := tatePsi2_double3P_eq_psi4Core_div (b := b) (c := c) hD
+  rw [hpsi] at hrel
+  have hD3 : (tateDouble3P_D b c) ^ 3 ≠ 0 := pow_ne_zero 3 hD
+  have hquot : tatePsi4CoreAt3P b c / (tateDouble3P_D b c) ^ 3 = 0 := by
     simpa using hrel.symm
-  have hd3 : (tateDoubleDenAt3P_scratch b c)^3 ≠ 0 := pow_ne_zero 3 hd
-  have hmul := congrArg
-    (fun z : ℚ => z * (tateDoubleDenAt3P_scratch b c)^3) hquot
-  field_simp [hd3] at hmul
+  have hmul := congrArg (fun z : ℚ => z * (tateDouble3P_D b c) ^ 3) hquot
+  field_simp [hD3] at hmul
   simpa [mul_comm, mul_left_comm, mul_assoc] using hmul
 
-/-- Useful bridge to the `K` polynomial already in `KubertBridgeN12`. -/
-private lemma tatePsi4CoreAt3P_eq_c_mul_K_scratch (b c : ℚ) :
-    tatePsi4CoreAt3P_scratch b c = c * tateC12_K b c := by
-  dsimp [tatePsi4CoreAt3P_scratch, tateC12_K]
-  ring
+/--
+Affine group-law computation, independent of the internal proof term inside `tateP3`.
+
+Use this with the nonsingularity proof already carried by your `tateP3` definition.  If
+`tateP3` unfolds to `Point.some c (b-c) hQ`, the concrete wrapper is usually:
+
+```lean
+  simpa [tateP3] using
+    (tateP3_add_self_eq_tateDouble3P_of_some (b := b) (c := c) (hQ := hQ) hD)
+```
+-/
+theorem tateP3_add_self_eq_tateDouble3P_of_some
+    {b c : ℚ}
+    {hQ : ((tateW b c)⁄ℚ).Nonsingular c (b - c)}
+    (hD : tateDouble3P_D b c ≠ 0) :
+    ∃ h2Q : ((tateW b c)⁄ℚ).Nonsingular
+        (tateDouble3P_x b c) (tateDouble3P_y b c),
+      WeierstrassCurve.Affine.Point.some c (b - c) hQ +
+          WeierstrassCurve.Affine.Point.some c (b - c) hQ =
+        WeierstrassCurve.Affine.Point.some
+          (tateDouble3P_x b c) (tateDouble3P_y b c) h2Q := by
+  classical
+  let W := (tateW b c)⁄ℚ
+  have hD0 : b - c - c ^ 2 ≠ 0 := by
+    simpa [tateDouble3P_D] using hD
+  have hY_ne : b - c ≠ W.negY c (b - c) := by
+    intro h
+    apply hD0
+    simp [W, tateW, WeierstrassCurve.Affine.negY] at h
+    linarith
+  have hx : W.addX c c (W.slope c c (b - c) (b - c)) = tateDouble3P_x b c := by
+    simpa [W] using tateDouble3P_addX_formula (b := b) (c := c) hD
+  have hy : W.addY c c (b - c) (W.slope c c (b - c) (b - c)) =
+      tateDouble3P_y b c := by
+    simpa [W] using tateDouble3P_addY_formula (b := b) (c := c) hD
+  have h2Qraw : W.Nonsingular
+      (W.addX c c (W.slope c c (b - c) (b - c)))
+      (W.addY c c (b - c) (W.slope c c (b - c) (b - c))) :=
+    WeierstrassCurve.Affine.nonsingular_add
+      (W := W) hQ hQ (fun hxy => hY_ne hxy.right)
+  have h2Q : W.Nonsingular (tateDouble3P_x b c) (tateDouble3P_y b c) := by
+    simpa [hx, hy] using h2Qraw
+  refine ⟨h2Q, ?_⟩
+  have hadd := WeierstrassCurve.Affine.Point.add_self_of_Y_ne
+      (W := W) (x₁ := c) (y₁ := b - c) (h₁ := hQ) hY_ne
+  simpa [W, hx, hy] using hadd
 
 end
 
 end MazurProof.KubertBridgeN12
 ```
 
-## Group-law glue: Lean-friendly theorem sequence
+## If the `simp [tateW]` lines need local adjustment
 
-The preceding lemmas isolate all arithmetic.  The group-law part should be a short wrapper around your existing affine-add/doubling API.
-
-### 1. `Q` is not 2-torsion, so affine tangent doubling applies
+The only fragile lines are the ones unfolding the affine coefficients of `(tateW b c)⁄ℚ`:
 
 ```lean
--- `h6` from exact order is exactly this denominator.
-have hd : tateDoubleDenAt3P_scratch b c ≠ 0 := by
-  simpa [tateDoubleDenAt3P_scratch] using h6
-
--- Tangent data at Q=(c,b-c):
-have hden := tate_psi2_at_3P_scratch b c
-have hnum := tate_tangent_num_at_3P_scratch b c
-have hnu  := tate_tangent_intercept_at_3P_scratch (b := b) (c := c) hd
-have hx2  := tate_double_x_at_3P_scratch (b := b) (c := c) hd
-have hy2  := tate_double_y_at_3P_scratch (b := b) (c := c) hd
+simp [tateW, WeierstrassCurve.Affine.negY] at h
+simp [tateW, tateDouble3P_L, tateDouble3P_D, hD0]
+simp [tateW, tateDouble3P_x]
+simp [tateW, tateDouble3P_y, tateDouble3P_x]
 ```
 
-Use these to prove your coordinate lemma for the mathlib affine group law:
+If your local coercion from `WeierstrassCurve ℚ` to affine curve does not reduce by `simp [tateW]`, replace those lines by the local simp lemmas for the five coefficients of `tateW`, e.g.
 
 ```lean
--- Shape only: replace `AffinePoint`/`some`/`affineDouble` by the names in your file.
-lemma tate_double_3P_coordinates
-    (hb : b ≠ 0) (hd : tateDoubleDenAt3P_scratch b c ≠ 0) :
-    2 • Q =
-      AffinePoint.some (tateX2Q_scratch b c) (tateY2Q_scratch b c) h2Q_nonsing := by
-  -- unfold Q, Tate curve coefficients, affine doubling formula
-  -- denominator side condition is `hd`
-  -- x-coordinate: `tate_double_x_at_3P_scratch hd`
-  -- y-coordinate: `tate_double_y_at_3P_scratch hd`
-  -- all remaining goals are `ring`/`field_simp [hd]`
-  sorry
+simp [tateW_a1, tateW_a2, tateW_a3, tateW_a4, tateW_a6,
+  WeierstrassCurve.Affine.negY]
 ```
 
-The important point is that there is no branch split on `b-c`; only the tangent denominator `d=b-c-c^2` is used.
-
-### 2. `4Q=0` forces `ψ₂(2Q)=0`
-
-For any generalized Weierstrass affine point `R=(x,y)`, negation is
+or, if the coefficient projections are reducible but the base-change notation is not, use:
 
 ```lean
--(x,y) = (x, -y - a1*x - a3).
+change (2 * c ^ 2 - b * c + c - b) / (b - c - c ^ 2) = _
 ```
 
-Hence, if `2 • R = 0`, then `R = -R`, and coordinate equality gives
+right after `rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl hY_ne]`, then close with `field_simp [hD0]; ring`.
+
+## Concrete wrapper for your `tateP3`
+
+If `tateP3 b c hb` unfolds to `WeierstrassCurve.Affine.Point.some c (b-c) _`, this wrapper should compile:
 
 ```lean
-2*y + a1*x + a3 = 0.
+theorem tateP3_add_self_eq_tateDouble3P
+    {b c : ℚ} (hb : b ≠ 0) (hD : tateDouble3P_D b c ≠ 0) :
+    ∃ h2Q : ((tateW b c)⁄ℚ).Nonsingular
+        (tateDouble3P_x b c) (tateDouble3P_y b c),
+      tateP3 b c hb + tateP3 b c hb =
+        WeierstrassCurve.Affine.Point.some
+          (tateDouble3P_x b c) (tateDouble3P_y b c) h2Q := by
+  -- This is the exact line that may need adjustment if `tateP3` is opaque.
+  simpa [tateP3] using
+    (tateP3_add_self_eq_tateDouble3P_of_some (b := b) (c := c) hD)
 ```
 
-For the Tate curve, `a1=1-c`, `a3=-b`, so this becomes
+If that final `simpa [tateP3]` fails because `tateP3` hides its nonsingularity proof behind an opaque theorem, keep the `of_some` theorem above and call it at the construction site where that proof is available.  Do not reprove the group law: the Mathlib line is precisely
 
 ```lean
-2*y + (1-c)*x - b = 0.
+WeierstrassCurve.Affine.Point.add_self_of_Y_ne
 ```
 
-Lean skeleton:
+with non-vertical hypothesis
 
 ```lean
-lemma psi2_eq_zero_of_affine_two_torsion
-    {W : WeierstrassCurve ℚ} {x y : ℚ}
-    (hxy : (W⁄ℚ).Nonsingular x y)
-    (h2 : (2 : ℕ) • WeierstrassCurve.Affine.Point.some x y hxy = 0) :
-    2*y + W.a1*x + W.a3 = 0 := by
-  let R : (W⁄ℚ).Point := WeierstrassCurve.Affine.Point.some x y hxy
-  have hRadd : R + R = 0 := by
-    simpa [R, two_nsmul] using h2
-  have hReqNeg : R = -R := by
-    calc
-      R = R + 0 := by simp
-      _ = R + (R + -R) := by simp
-      _ = (R + R) + -R := by abel
-      _ = 0 + -R := by rw [hRadd]
-      _ = -R := by simp
-  -- Now simplify affine negation.  In current mathlib this is usually a `simpa`
-  -- after unfolding/simping the affine point negation constructor.
-  simpa [R, WeierstrassCurve.Affine.Point.neg, add_comm, add_left_comm, add_assoc,
-    two_mul] using hReqNeg
+b - c ≠ ((tateW b c)⁄ℚ).negY c (b - c)
 ```
 
-If the final `simpa` does not find the negation theorem by that name, search for the simp lemma used by your existing affine negation code; the coordinate equation needed is exactly
-
-```lean
-y = -y - W.a1*x - W.a3
-```
-
-and `ring` turns it into `2*y + W.a1*x + W.a3 = 0`.
-
-Now specialize to `R=2Q`.  Since `4Q=0`, we have `2(2Q)=0`:
-
-```lean
-lemma tate_double_3P_psi2_zero_of_fourQ
-    (h2Qcoord :
-      2 • Q = AffinePoint.some (tateX2Q_scratch b c) (tateY2Q_scratch b c) h2Q)
-    (h4Q : (4 : ℕ) • Q = 0) :
-    2 * tateY2Q_scratch b c + (1-c) * tateX2Q_scratch b c - b = 0 := by
-  have htwo_twoQ :
-      (2 : ℕ) • (AffinePoint.some (tateX2Q_scratch b c)
-        (tateY2Q_scratch b c) h2Q) = 0 := by
-    -- rewrite `2 • (2 • Q)` as `4 • Q`, then use `h4Q`
-    simpa [h2Qcoord, two_nsmul, add_assoc] using h4Q
-  -- Apply `psi2_eq_zero_of_affine_two_torsion` to the Tate curve.
-  -- The Tate coefficients reduce to `a1=1-c`, `a3=-b` by `simp`.
-  simpa [tate curve coefficients] using
-    psi2_eq_zero_of_affine_two_torsion (W := W) h2Q htwo_twoQ
-```
-
-### 3. Final assembly
-
-The final proof is then only the arithmetic extraction lemma:
-
-```lean
-theorem tatePsi4CoreAt3P_eq_zero_of_fourQ
-    (hb : b ≠ 0)
-    (h6 : b - c - c^2 ≠ 0)
-    (h2Qcoord :
-      2 • Q = AffinePoint.some (tateX2Q_scratch b c) (tateY2Q_scratch b c) h2Q)
-    (h4Q : (4 : ℕ) • Q = 0) :
-    tatePsi4CoreAt3P_scratch b c = 0 := by
-  have hd : tateDoubleDenAt3P_scratch b c ≠ 0 := by
-    simpa [tateDoubleDenAt3P_scratch] using h6
-  have hpsi2_2Q :
-      2 * tateY2Q_scratch b c + (1-c) * tateX2Q_scratch b c - b = 0 :=
-    tate_double_3P_psi2_zero_of_fourQ
-      (b := b) (c := c) (Q := Q) h2Qcoord h4Q
-  exact tatePsi4CoreAt3P_eq_zero_of_double_psi2_scratch
-    (b := b) (c := c) hd hpsi2_2Q
-```
-
-If your target uses the existing non-scratch name, the last line becomes:
-
-```lean
-  have hcore_scratch := tatePsi4CoreAt3P_eq_zero_of_double_psi2_scratch
-    (b := b) (c := c) hd hpsi2_2Q
-  simpa [tatePsi4CoreAt3P_scratch, tatePsi4CoreAt3P] using hcore_scratch
-```
-
-## Direct computation summary
-
-The complete computational identity is:
-
-```lean
-2 *
-  (c * (b - c)^2 * (2*b^2 - b*c^2 - 3*b*c + c^2) / (b - c - c^2)^3)
-+ (1-c) *
-  ((b - c) * (b^2 - b*c - c^3) / (b - c - c^2)^2)
-- b
-=
-  tatePsi4CoreAt3P(b,c) / (b - c - c^2)^3.
-```
-
-So `4Q=0` supplies the left side as zero, and `b-c-c^2≠0` clears the denominator.  This is the cleanest direct affine route to the `ψ₄`-core residual.
+which is equivalent by `ring` to `b - c - c^2 ≠ 0`.
