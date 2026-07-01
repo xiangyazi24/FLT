@@ -1,392 +1,274 @@
-# Q2914 (dm-codex1): audit of final Kubert/Tate residual
+# Q2921 (dm-codex1): next split of `kubert_C12_tate_curve_normal_form`
 
 Target file: `FLT/Assumptions/MazurProof/KubertBridgeN12.lean`  
 Namespace: `MazurProof.KubertBridgeN12`
 
-Current final residual:
+Current only residual:
 
 ```lean
-axiom kubert_C12_tate_projective_normal_form
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
-    KubertC12TateProjectiveModel E
-```
-
-where `KubertC12TateProjectiveModel E` returns a parameter `q`, `TateC12Good q`, and an additive equivalence from `(E⁄ℚ).Point` to projective points on `tateC12W q`.
-
-## Shortest honest shrink
-
-Now that `projectivePointAddEquivOfVariableChange` is a theorem, the remaining residual should **not** return an `AddEquiv`.  The strictly smaller honest residual is curve-level:
-
-```lean
-structure KubertC12TateCurveModel (E : WeierstrassCurve ℚ) where
-  q : ℚ
-  hgood : TateC12Good q
-  C : WeierstrassCurve.VariableChange ℚ
-  hCurve : C • E = tateC12W q
-
 axiom kubert_C12_tate_curve_normal_form
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
     KubertC12TateCurveModel E
 ```
 
-This is the best immediate replacement.  It contains exactly the missing Kubert/Tate classification: an elliptic curve over `ℚ` with a rational point of exact order `12` is `ℚ`-isomorphic, by an admissible Weierstrass variable change, to the C12 Tate family.
+The next bounded shrink should split this into:
 
-The old projective package can then be rebuilt by checked plumbing:
+* **A. marked-point Tate normal form**: from an exact-order-12 point on `E`, produce some Tate normal form `tateW b c`, with the distinguished origin on `tateW b c` still having exact order 12;
+* **B. Kubert C12 table inside Tate normal form**: classify the pairs `(b,c)` for which the distinguished origin on `tateW b c` has exact order 12.
 
-```lean
-noncomputable def projectivePointAddEquivOfVariableChangeEq
-    (E E' : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
-    (hC : C • E = E') :
-    (E⁄ℚ).Point ≃+
-      WeierstrassCurve.Projective.Point (WeierstrassCurve.toProjective E') := by
-  subst hC
-  -- In the current file this should be definally the same domain.  If Lean refuses,
-  -- insert a `change` to the exact type printed by the goal.
-  change (E⁄ℚ).Point ≃+
-    WeierstrassCurve.Projective.Point (WeierstrassCurve.toProjective (C • E))
-  exact projectivePointAddEquivOfVariableChange E C
+This removes the C12 parameter table from the coordinate-normalization problem.
 
-/-- Rebuild the previous residual interface from the smaller curve-level residual. -/
-theorem kubert_C12_tate_projective_normal_form_from_curve
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
-    KubertC12TateProjectiveModel E := by
-  rcases kubert_C12_tate_curve_normal_form E P hP with ⟨q, hgood, C, hC⟩
-  exact
-    { q := q
-      hgood := hgood
-      pointAddEquiv := projectivePointAddEquivOfVariableChangeEq E (tateC12W q) C hC }
-```
+## Support definitions
 
-If the actual field name in `KubertC12TateProjectiveModel` is `pointAddEquiv` but the parameter field is `q` or `t`, adjust the record labels only.
-
-## Exact mathematical theorem still missing
-
-The mathematical theorem is Kubert/Tate normal form for a marked point of exact order `12` over `ℚ`:
-
-* Tate normal form:
+Add these if not already present.
 
 ```lean
-def tateW (b c : ℚ) : WeierstrassCurve ℚ :=
-  { a₁ := 1 - c
-    a₂ := -b
-    a₃ := -b
-    a₄ := 0
-    a₆ := 0 }
-```
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
+import Mathlib.GroupTheory.OrderOfElement
+import Mathlib.Tactic
 
-* Distinguished point: `(0,0)` on `tateW b c`.
+open scoped WeierstrassCurve.Affine
 
-* C12 parameterization:
+namespace MazurProof.KubertBridgeN12
 
-```lean
-def tateC12_b (q : ℚ) : ℚ :=
-  q * (q - 1) * (q ^ 2 + 1) * (3 * q ^ 2 + 1) / (q + 1) ^ 4
+noncomputable section
 
-def tateC12_c (q : ℚ) : ℚ :=
-  q * (q - 1) * (3 * q ^ 2 + 1) / (q + 1) ^ 3
-
-def tateC12W (q : ℚ) : WeierstrassCurve ℚ :=
-  tateW (tateC12_b q) (tateC12_c q)
-```
-
-* Classification theorem, in its marked form:
-
-```lean
-structure KubertC12TateMarkedModel
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) where
-  q : ℚ
-  hgood : TateC12Good q
-  C : WeierstrassCurve.VariableChange ℚ
-  hCurve : C • E = tateC12W q
-  hP_origin :
-    projectivePointAddEquivOfVariableChangeEq E (tateC12W q) C hCurve P =
-      tateC12OriginProjective q hgood
-
-/-- Strong marked Kubert theorem.  This is the actual classical theorem. -/
-axiom kubert_C12_tate_marked_normal_form
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
-    KubertC12TateMarkedModel E P
-```
-
-Then the weaker curve-level residual is a theorem:
-
-```lean
-theorem kubert_C12_tate_curve_normal_form_from_marked
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
-    KubertC12TateCurveModel E := by
-  rcases kubert_C12_tate_marked_normal_form E P hP with ⟨q, hgood, C, hCurve, _hP⟩
-  exact ⟨q, hgood, C, hCurve⟩
-```
-
-For downstream N12, **use the curve-level residual**, not the marked one.  The marked theorem is the clean proof target, but the downstream proof only needs the curve isomorphism to `tateC12W q`.
-
-## Checkable support lemmas to add now
-
-These are algebra/Lean plumbing, not Kubert content.
-
-```lean
-/-- `TateC12Good` implies the Tate `b` coefficient is nonzero. -/
-theorem tateC12_b_ne_zero_of_good {q : ℚ}
-    (h : TateC12Good q) : tateC12_b q ≠ 0 := by
-  -- unfold `tateC12_b`; use all factor nonzero fields from `h`, plus denominator.
-  -- The exact field names depend on your current `TateC12Good` structure.
-  unfold tateC12_b
-  field_simp [h.hq_add_one]
-  repeat' apply mul_ne_zero
-  · exact h.hq_ne_zero
-  · exact h.hq_sub_one
-  · exact h.hq_sq_add_one
-  · exact h.hthree_q_sq_add_one
-
-/-- `(0,0)` is nonsingular on `tateW b c` when `b ≠ 0`. -/
+/-- `(0,0)` is nonsingular on Tate normal form when `b ≠ 0`. -/
 theorem tateW_origin_nonsingular {b c : ℚ} (hb : b ≠ 0) :
     (WeierstrassCurve.toAffine (tateW b c)).Nonsingular 0 0 := by
-  -- `Affine.nonsingular_zero` says `a₆=0 ∧ (a₃≠0 ∨ a₄≠0)`.
   rw [WeierstrassCurve.Affine.nonsingular_zero]
   simp [tateW, hb]
 
+/-- The distinguished Tate point `(0,0)`. -/
 noncomputable def tateOriginAffine (b c : ℚ) (hb : b ≠ 0) :
     WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine (tateW b c)) :=
   WeierstrassCurve.Affine.Point.some 0 0 (tateW_origin_nonsingular (b := b) (c := c) hb)
 
-noncomputable def tateC12OriginAffine (q : ℚ) (h : TateC12Good q) :
-    WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine (tateC12W q)) := by
-  simpa [tateC12W] using
-    tateOriginAffine (tateC12_b q) (tateC12_c q) (tateC12_b_ne_zero_of_good h)
-
-noncomputable def tateC12OriginProjective (q : ℚ) (h : TateC12Good q) :
-    WeierstrassCurve.Projective.Point (WeierstrassCurve.toProjective (tateC12W q)) :=
-  WeierstrassCurve.Affine.Point.toProjective (tateC12OriginAffine q h)
-```
-
-Order is preserved by the checked point equivalences; add a generic helper if Mathlib does not already have one.
-
-```lean
-#check AddEquiv.addOrderOf_eq
-#check addOrderOf_eq_card_of_forall_mem_zmultiples
-
-/-- If not already available as an API lemma, prove once and reuse. -/
+/-- Additive equivalences preserve additive order.  Use a Mathlib lemma if one exists locally. -/
 theorem addOrderOf_apply_addEquiv
     {A B : Type*} [AddGroup A] [AddGroup B]
     (e : A ≃+ B) (P : A) :
     addOrderOf (e P) = addOrderOf P := by
-  -- First try:
-  -- simpa using e.addOrderOf_eq P
-  -- If the name differs, prove by extensionality of `n • P = 0`:
-  -- `map_nsmul`, `e.map_zero`, and `e.injective` are enough.
+  -- Try first in your local file:
+  --   simpa using e.addOrderOf_eq P
+  -- If that name is unavailable, prove by the defining characterization of `addOrderOf`:
+  -- `n • e P = 0 ↔ n • P = 0`, using `map_nsmul`, `map_zero`, and `e.injective`.
   sorry
 ```
 
-Use it to move the order-12 assumption to the Tate origin in the marked theorem proof:
+If you do not want a new order lemma yet, keep `addOrderOf_apply_addEquiv` as a tiny local residual.  It is Lean plumbing, not mathematical content.
+
+## A. Marked-point Tate normal form residual
+
+Use this as the first new residual.  It has no C12 table content and no hidden point-group equivalence field.
 
 ```lean
-theorem tate_origin_order12_of_marked_model
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12)
-    (M : KubertC12TateMarkedModel E P) :
-    addOrderOf (tateC12OriginProjective M.q M.hgood) = 12 := by
-  rw [← M.hP_origin]
-  simpa [hP] using
-    addOrderOf_apply_addEquiv
-      (projectivePointAddEquivOfVariableChangeEq E (tateC12W M.q) M.C M.hCurve) P
-```
+/--
+Tate normal form produced from the marked exact-order-12 point.
 
-## Staged proof plan
-
-### Stage 1: Replace current residual by curve-level residual
-
-This is pure Lean plumbing and should be done immediately:
-
-```lean
-structure KubertC12TateCurveModel ...
-axiom kubert_C12_tate_curve_normal_form ...
-theorem kubert_C12_tate_projective_normal_form_from_curve ...
-```
-
-This removes the now-checked point-transport infrastructure from the residual.
-
-### Stage 2: Formalize Tate origin and basic algebra
-
-Add:
-
-```lean
-tateC12_b_ne_zero_of_good
-tateW_origin_nonsingular
-tateOriginAffine
-tateC12OriginAffine
-tateC12OriginProjective
-addOrderOf_apply_addEquiv
-```
-
-This is checkable with current Mathlib APIs.
-
-### Stage 3: Split the classical Kubert theorem into two missing pieces
-
-#### 3A. Marked Tate normal form at a rational point
-
-This is mostly Lean plumbing plus standard coordinate algebra.  No Kubert table yet.
-
-```lean
-structure TateNormalFormAtPoint
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) where
+The field `hOriginOrder` is the only marked-point trace needed downstream: after the
+coordinate change, the distinguished Tate point `(0,0)` has exact order 12.
+-/
+structure TateNormalFormAtOrder12 (E : WeierstrassCurve ℚ) [E.IsElliptic] where
   b c : ℚ
   hb : b ≠ 0
+  hDelta : (tateW b c).Δ ≠ 0
   C : WeierstrassCurve.VariableChange ℚ
   hCurve : C • E = tateW b c
-  hP_origin :
-    projectivePointAddEquivOfVariableChangeEq E (tateW b c) C hCurve P =
-      WeierstrassCurve.Affine.Point.toProjective (tateOriginAffine b c hb)
+  hOriginOrder : addOrderOf (tateOriginAffine b c hb) = 12
 
-/-- Every nonzero rational point can be moved to `(0,0)` and then to Tate normal form. -/
-theorem tate_normal_form_at_point_of_addOrder12
+/--
+Residual A: coordinate-normalization of a marked rational point of exact order 12 into
+Tate normal form.
+
+This should eventually be provable from current Mathlib APIs plus the checked variable-change
+point equivalences.  It is not the Kubert table.
+-/
+axiom tate_normal_form_at_point_of_addOrder12
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
-    TateNormalFormAtPoint E P := by
-  -- Route:
-  -- 1. `P ≠ 0` from `addOrderOf P = 12`.
-  -- 2. Use `Projective.Point.toAffineAddEquiv` to get an affine nonzero point.
-  -- 3. Case split on `Affine.Point`; zero contradicts `P ≠ 0`; `some x y h` gives coordinates.
-  -- 4. First variable change `VariableChange.mk 1 x 0 y` moves the point to `(0,0)`;
-  --    Mathlib has `Affine.equation_iff_variableChange` and `nonsingular_iff_variableChange`
-  --    for this translation.
-  -- 5. Further scale/shear to the standard Tate equation
-  --    `y² + (1-c)xy - by = x³ - bx²`.
-  -- 6. Use the already checked variable-change point equivalence to record `hP_origin`.
+    TateNormalFormAtOrder12 E
+```
+
+### Why A is plausible from current APIs
+
+This is coordinate plumbing plus small order-exclusion lemmas.
+
+Suggested proof route:
+
+```lean
+/-- Exact order 12 points are nonzero. -/
+theorem point_ne_zero_of_addOrderOf_eq_12
+    {G : Type*} [AddGroup G] {P : G} (hP : addOrderOf P = 12) : P ≠ 0 := by
+  intro hzero
+  subst hzero
+  -- `addOrderOf_zero` should close this; otherwise unfold/order APIs.
+  simpa using hP
+```
+
+Then for `P : (E⁄ℚ).Point`:
+
+1. Case split on the affine point.  The zero case contradicts `addOrderOf P = 12`.  The `some x y h` case gives rational coordinates.
+2. Translate `P` to `(0,0)` using
+
+```lean
+C0 : WeierstrassCurve.VariableChange ℚ :=
+  { u := 1, r := x, s := 0, t := y }
+```
+
+Mathlib already has `WeierstrassCurve.Affine.equation_iff_variableChange` and `nonsingular_iff_variableChange` for the special translation-to-origin move.
+
+3. On the translated curve `W0 = C0 • E`, prove `W0.a₆ = 0` and the transported origin has order 12 using your checked `affinePointAddEquivOfVariableChange`.
+4. Since the origin is not order 2, prove `W0.a₃ ≠ 0`.  In coordinates, origin has negation `(0,-a₃)`, so if `a₃ = 0`, then `(0,0)` is 2-torsion.
+5. Kill `a₄` while fixing the origin with a shear
+
+```lean
+C1 : WeierstrassCurve.VariableChange ℚ :=
+  { u := 1, r := 0, s := W0.a₄ / W0.a₃, t := 0 }
+```
+
+because `a₄' = a₄ - s*a₃` when `r=t=0`.
+
+6. Let the resulting coefficients after `C1` be `a₁₁ a₂₁ a₃₁` with `a₄=0`, `a₆=0`, `a₃₁≠0`.  To reach Tate form we need `a₂'=a₃'=-b`.  A final scale with
+
+```lean
+u = a₃₁ / a₂₁
+```
+
+works if `a₂₁ ≠ 0`.  The missing small order-exclusion lemma is: if this `a₂₁ = 0`, then the origin has order 3 or 4, contradicting exact order 12.  This is still coordinate algebra with the pinned affine addition formulas.
+
+Use bounded sublemmas:
+
+```lean
+/-- On a curve with `(0,0)` and `a₆=0`, if `a₃=0`, then the origin is 2-torsion. -/
+theorem origin_order_two_if_a3_eq_zero
+    (W : WeierstrassCurve ℚ)
+    (h6 : W.a₆ = 0)
+    (h3 : W.a₃ = 0)
+    (hO : (WeierstrassCurve.toAffine W).Nonsingular 0 0) :
+    (2 : ℕ) • (WeierstrassCurve.Affine.Point.some 0 0 hO) = 0 := by
+  -- Use `Affine.Point.add_of_Y_eq`; `negY 0 0 = 0` when `a₃=0`.
+  sorry
+
+/-- The scale denominator needed to make `a₂'=a₃'` is nonzero for an exact-order-12 origin. -/
+theorem tate_scale_denominator_ne_zero_of_origin_order12
+    (W : WeierstrassCurve ℚ)
+    (h6 : W.a₆ = 0)
+    (h4 : W.a₄ = 0)
+    (h3 : W.a₃ ≠ 0)
+    (hO : (WeierstrassCurve.toAffine W).Nonsingular 0 0)
+    (hOrder : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 12) :
+    W.a₂ ≠ 0 := by
+  -- Prove by contradiction using explicit `2O`, `3O`, or `4O` formulas on the simplified curve.
+  -- This is the only nontrivial local group-law algebra in A.
   sorry
 ```
 
-What is missing here is not deep number theory; it is a carefully written coordinate normalization and marked-point transport proof.
+I would not block the split on proving A.  Introduce A as a residual now, then attack the sublemmas above.
 
-#### 3B. Kubert C12 parameterization inside Tate normal form
+## B. Kubert C12 table inside Tate normal form
 
-This is the real mathematical core.
+This is the genuine Kubert table row and should remain residual for now.
 
 ```lean
-/-- Kubert table row for `N = 12`, stated only for Tate normal form. -/
-axiom kubert_C12_parameter_of_tate_origin_order12
+/--
+Residual B: Kubert's C12 table row, isolated to Tate normal form.
+
+No arbitrary elliptic curve, no point transport, no projective equivalence.  Just the
+classification of Tate parameters `(b,c)` for which `(0,0)` has exact order 12.
+-/
+axiom kubert_C12_table_of_tate_origin_order12
     (b c : ℚ) (hb : b ≠ 0)
-    [hEll : (tateW b c).IsElliptic]
-    (hOrder : addOrderOf
-      (WeierstrassCurve.Affine.Point.toProjective (tateOriginAffine b c hb)) = 12) :
+    (hDelta : (tateW b c).Δ ≠ 0)
+    (hOrder : addOrderOf (tateOriginAffine b c hb) = 12) :
     ∃ q : ℚ, TateC12Good q ∧ b = tateC12_b q ∧ c = tateC12_c q
 ```
 
-This residual is strictly smaller and more honest than the current one: it is just the Kubert table calculation for a Tate curve whose distinguished point is already known to have exact order `12`.
+This is strictly smaller than `kubert_C12_tate_curve_normal_form`: it assumes the curve is already in Tate normal form and the marked point is already `(0,0)`.
 
-Use it to get the marked C12 theorem:
+## Rebuild current curve-level residual from A+B
 
 ```lean
-theorem kubert_C12_tate_marked_normal_form_from_tate_and_parameter
+/-- Reconstruct the existing curve-level residual from the two smaller residuals. -/
+theorem kubert_C12_tate_curve_normal_form_from_split
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
-    KubertC12TateMarkedModel E P := by
+    KubertC12TateCurveModel E := by
   rcases tate_normal_form_at_point_of_addOrder12 E P hP with
-    ⟨b, c, hb, C, hCurve, hP_origin⟩
-  haveI : (tateW b c).IsElliptic := by
-    -- Transport ellipticity across `C • E = tateW b c`.
-    -- `VariableChange` already has an instance `(C • E).IsElliptic` from `[E.IsElliptic]`.
-    subst hCurve
-    infer_instance
-  have hOrder : addOrderOf
-      (WeierstrassCurve.Affine.Point.toProjective (tateOriginAffine b c hb)) = 12 := by
-    rw [← hP_origin]
-    simpa [hP] using
-      addOrderOf_apply_addEquiv
-        (projectivePointAddEquivOfVariableChangeEq E (tateW b c) C hCurve) P
-  rcases kubert_C12_parameter_of_tate_origin_order12 b c hb hOrder with
+    ⟨b, c, hb, hDelta, C, hCurve, hOriginOrder⟩
+  rcases kubert_C12_table_of_tate_origin_order12 b c hb hDelta hOriginOrder with
     ⟨q, hgood, hbq, hcq⟩
-  have hCurveC12 : C • E = tateC12W q := by
-    rw [hCurve]
-    ext <;> simp [tateC12W, tateW, hbq, hcq]
-  refine ⟨q, hgood, C, hCurveC12, ?_⟩
-  -- `hP_origin` target mentions `tateW b c`; rewrite by `hbq`, `hcq`.
-  -- This may need `subst hbq; subst hcq` instead of `simpa`.
-  simpa [tateC12W, hbq, hcq] using hP_origin
+  refine
+    { q := q
+      hgood := hgood
+      C := C
+      hCurve := ?_ }
+  rw [hCurve, hbq, hcq]
+  rfl
 ```
 
-### Stage 4: Remove the Kubert table residual
-
-To replace `kubert_C12_parameter_of_tate_origin_order12`, prove explicit multiple formulas for `(0,0)` on `tateW b c`, then solve the exact-order-12 equations.
-
-Start with checked low multiples:
+If the final `rfl` fails because `tateC12W` is not reducible enough, use:
 
 ```lean
-/-- `2(0,0) = (b, b*c)` on Tate normal form. -/
-theorem tate_origin_two
-    {b c : ℚ} (hb : b ≠ 0) :
-    (2 : ℕ) • (WeierstrassCurve.Affine.Point.toProjective (tateOriginAffine b c hb)) =
-      WeierstrassCurve.Affine.Point.toProjective
-        (WeierstrassCurve.Affine.Point.some b (b * c) (by
-          -- prove nonsingularity of `(b,b*c)` from ellipticity or direct algebra
-          sorry)) := by
-  -- Use `Affine.Point.add_self_of_Y_ne` or `add_some`, expand `slope`, `addX`, `addY`.
-  sorry
-
-/-- `3(0,0) = (c, b-c)` on Tate normal form. -/
-theorem tate_origin_three
-    {b c : ℚ} (hb : b ≠ 0) :
-    (3 : ℕ) • (WeierstrassCurve.Affine.Point.toProjective (tateOriginAffine b c hb)) =
-      WeierstrassCurve.Affine.Point.toProjective
-        (WeierstrassCurve.Affine.Point.some c (b - c) (by
-          sorry)) := by
-  sorry
+  simp [tateC12W]
 ```
 
-These two formulas are safe: they follow directly from the pinned affine formulas.  Do **not** write later `4P`, `6P`, `12P` formulas from memory unless verified in Lean/Python; the Kubert table proof should be driven by computed lemmas from `Affine.slope/addX/addY` and then simplified.
-
-Expected final table theorem shape:
+or:
 
 ```lean
-theorem tate_origin_order12_iff_exists_C12_parameter
-    {b c : ℚ} (hb : b ≠ 0) [(tateW b c).IsElliptic] :
-    addOrderOf (WeierstrassCurve.Affine.Point.toProjective (tateOriginAffine b c hb)) = 12 ↔
-      ∃ q : ℚ, TateC12Good q ∧ b = tateC12_b q ∧ c = tateC12_c q := by
-  -- Hard Kubert table algebra.
+  change tateW (tateC12_b q) (tateC12_c q) = tateC12W q
+  rfl
+```
+
+Then replace the old axiom by:
+
+```lean
+theorem kubert_C12_tate_curve_normal_form
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
+    KubertC12TateCurveModel E :=
+  kubert_C12_tate_curve_normal_form_from_split E P hP
+```
+
+## Later attack on residual B
+
+Prove low-multiple formulas in `tateW b c`, then solve the order-12 equations.
+
+Start with declarations like:
+
+```lean
+/-- First low multiple on Tate normal form.  Verify the coordinate formula in Lean. -/
+theorem tate_origin_two_formula
+    {b c : ℚ} (hb : b ≠ 0) :
+    (2 : ℕ) • tateOriginAffine b c hb =
+      -- fill with the point produced by `Affine.Point.some` after computing `addX/addY`
+      (by
+        -- placeholder target; derive by expanding `Affine.Point.add_some`
+        exact tateOriginAffine b c hb) := by
+  -- Do not trust handwritten coordinates until checked by `simp [Affine.slope/addX/addY]`.
   sorry
 ```
 
-## What current Mathlib can support
+Recommended order:
 
-Likely checkable from current APIs:
+1. prove `2O`, `3O`, `4O`, `6O` formulas on `tateW b c` using `Affine.Point.add_some`, `slope`, `addX`, `addY`;
+2. prove `12O = 0` iff the Kubert polynomial relation holds;
+3. solve the rational parametrization to obtain `q`, `b = tateC12_b q`, `c = tateC12_c q` and `TateC12Good q`.
 
-* variable-change point transport: already proved locally;
-* rebuilding projective `AddEquiv` from curve-level variable-change equality;
-* order preservation under `AddEquiv`;
-* affine coordinate extraction from nonzero projective points using `Projective.Point.toAffineAddEquiv`;
-* moving a marked affine point to `(0,0)` using `VariableChange.mk 1 x 0 y`;
-* basic Tate origin nonsingularity and first low multiple formulas.
-
-Genuine missing infrastructure/content:
-
-* no Mathlib Kubert/Tate torsion normal form theorem;
-* no Mathlib row for `N=12` in Kubert's table;
-* no ready theorem saying an arbitrary rational point can be normalized to Tate normal form while tracking that point;
-* no ready exact-order-12 classification for the Tate distinguished point.
+This is genuine Kubert-table mathematics; do not hide it in the coordinate-normal-form residual.
 
 ## False shortcuts to avoid
 
-* Do **not** use `NormalForms.toShortNF` as a substitute for Kubert/Tate classification.  It changes equation shape; it does not classify rational torsion or produce the C12 parameter.
-* Do **not** prove only that `tateC12W q` has a point of order `12`.  Downstream needs the converse direction from an arbitrary order-12 point to the family.
-* Do **not** use equality of `j`-invariants as a replacement.  Over `ℚ`, twists can share `j`; this does not give the required rational variable change or point-group equivalence.
-* Do **not** keep an `AddEquiv` in the residual now that variable-change point transport is checked.  The residual should be curve-level or, better, a marked Tate/Kubert table statement.
-* Do **not** omit denominator/nondegeneracy fields.  `TateC12Good q` is part of the theorem, not a cosmetic condition; it prevents singular curves and invalid rational substitutions.
+* Do not replace B by proving only that `tateC12W q` has an order-12 point.  The needed direction is converse: arbitrary Tate form with origin order 12 lies in the C12 row.
+* Do not use equality of `j` invariants to get `C`; twists share `j`.
+* Do not keep an additive equivalence in any new residual.  Variable-change point transport is already checked.
+* Do not omit `hDelta`; singular Tate curves can have misleading formal group-law artifacts.
 
-## Recommended endpoint for now
+## Recommended immediate implementation
 
-Replace the remaining residual by this single axiom:
+Add A and B as the only new residuals, prove `kubert_C12_tate_curve_normal_form_from_split`, and make the old `kubert_C12_tate_curve_normal_form` a theorem.  Then the remaining axioms will distinguish cleanly:
 
-```lean
-axiom kubert_C12_tate_curve_normal_form
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
-    KubertC12TateCurveModel E
-```
-
-Then make `kubert_C12_tate_projective_normal_form` a theorem.  This is the shortest honest shrink that preserves the downstream N12 proof and isolates the remaining mathematical content as Kubert's C12 classification, rather than bundling it with point-transport plumbing that is now already checked.
+* `tate_normal_form_at_point_of_addOrder12`: Lean/coordinate-normalization plumbing, probably provable from current APIs;
+* `kubert_C12_table_of_tate_origin_order12`: genuine Kubert C12 table row.
