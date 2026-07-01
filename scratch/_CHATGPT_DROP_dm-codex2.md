@@ -1,493 +1,518 @@
-# Q2945 dm-codex2: continue Kubert residual A after translating order-12 point to origin
+# Q2959 dm-codex2: shrinking Kubert C12 Tate-table residual B
 
 Namespace: `MazurProof.KubertBridgeN12`.
 
 Target file: `FLT/Assumptions/MazurProof/KubertBridgeN12.lean`.
 
-I could not fetch the local WIP file through the GitHub connector, so this answer is written against the declarations in the prompt. The checkable parts are: killing `a₄`, preserving origin/order through the variable-change additive equivalence, and scaling to Tate normal form. The only part I would keep as a residual is the affine group-law fact excluding `a₂ = 0` from exact order `12`.
+I could not fetch the local WIP file through the GitHub connector. This is written against the declarations in the prompt and the usual Mathlib affine Weierstrass group-law API.
 
-## 0. API probes to paste first
+## Executive recommendation
 
-Paste these near the local work area to confirm theorem orientation.
+Do **not** try to prove the whole residual
 
 ```lean
-#check WeierstrassCurve.VariableChange
-#check WeierstrassCurve.VariableChange.mk
-#check WeierstrassCurve.variableChange_a₁
-#check WeierstrassCurve.variableChange_a₂
-#check WeierstrassCurve.variableChange_a₃
-#check WeierstrassCurve.variableChange_a₄
-#check WeierstrassCurve.variableChange_a₆
-#check affinePointAddEquivOfVariableChange
+kubert_C12_table_of_tate_origin_order12
+```
+
+directly. Replace it by three small order-to-algebra lemmas:
+
+```lean
+theorem tate_c_ne_zero_of_origin_order12 : c ≠ 0
+theorem tate_sixP_den_ne_zero_of_origin_order12 : b - c - c ^ 2 ≠ 0
+theorem tateC12_K_eq_zero_of_origin_order12 : tateC12_K b c = 0
+```
+
+Then the axiom replacement is one line using the checked theorem you already have:
+
+```lean
+kubert_C12_table_of_tate_K b c hb hDelta hOrder hc h6 hK
+```
+
+The feasible proof route is:
+
+```text
+1. Prove the explicit Tate group-law formula 3P = (c, b-c).
+2. Use the negation formula to prove:
+   c = 0              -> 3P = -P       -> 4P = 0  -> order divides 4, contradiction to 12.
+   b-c-c^2 = 0        -> 3P = -3P      -> 6P = 0  -> order divides 6, contradiction to 12.
+3. From order 12, Q := 3P satisfies 4Q = 0.
+4. Use a division-polynomial/core lemma:
+   4Q = 0 and Q=(c,b-c) -> tatePsi4CoreAt3P b c = 0.
+5. Use checked `tatePsi4CoreAt3P_eq_c_mul_K` and `c≠0` to get `K=0`.
+```
+
+The first theorem to attack is therefore **`tate_three_nsmul_origin_eq`**. It immediately unlocks `c≠0`, `b-c-c²≠0`, and feeds the `ψ₄` vanishing statement.
+
+## 0. API probes
+
+Paste these in `KubertBridgeN12.lean` near the scratch area.
+
+```lean
+#check tateW
+#check tateOriginAffine
+#check tateC12_K
+#check tatePsi4CoreAt3P
+#check tatePsi4CoreAt3P_eq_c_mul_K
+#check kubert_C12_table_of_tate_K
+#check kubert_C12_table_of_tate_origin_order12
+
 #check addOrderOf
-#check origin_a3_ne_zero_of_addOrderOf_eq_12
+#check addOrderOf_dvd_iff_nsmul_eq_zero
+#check nsmul_eq_zero_iff_dvd_addOrderOf
+#check addOrderOf_nsmul_eq_zero
+
+#check WeierstrassCurve.Affine.Point.add
+#check WeierstrassCurve.Affine.Point.neg
+#check WeierstrassCurve.Affine.Point.some
+#check WeierstrassCurve.Affine.Point.ext
 ```
 
-The snippets below assume the usual Mathlib variable-change convention:
+Search if names differ:
 
-```text
-x = u^2 x' + r,
-y = u^3 y' + u^2 s x' + t,
+```bash
+rg "addOrderOf_dvd|nsmul_eq_zero.*addOrderOf|divisionPolynomial|psi|Division" \
+  .lake/packages/mathlib/Mathlib -n
+rg "tatePsi4CoreAt3P|tateC12_K|tateOriginAffine|tateW" \
+  FLT/Assumptions/MazurProof/KubertBridgeN12.lean scratch -n
 ```
 
-so the coefficient formulas are:
+## 1. Final axiom replacement wrapper
 
-```text
-u*a1' = a1 + 2*s
-u^2*a2' = a2 - s*a1 + 3*r - s^2
-u^3*a3' = a3 + r*a1 + 2*t
-u^4*a4' = a4 - s*a3 + 2*r*a2 - (t+r*s)*a1 + 3*r^2 - 2*s*t
-u^6*a6' = a6 + r*a4 + r^2*a2 + r^3 - t*a3 - t^2 - r*t*a1
-```
-
-This matches the intended `killA4VC` with `s = W.a₄/W.a₃`: with `u=1,r=0,t=0`, the new `a₄` is `a₄ - s*a₃ = 0`.
-
-## 1. Kill `a₄`
+This is the target wrapper after proving the three order-to-algebra lemmas.
 
 ```lean
 import Mathlib.Tactic
--- existing imports from KubertBridgeN12.lean
+-- existing imports of KubertBridgeN12.lean
 
 namespace MazurProof.KubertBridgeN12
 
-open scoped WeierstrassCurve.Affine
-
-noncomputable def killA4VC (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0) :
-    WeierstrassCurve.VariableChange ℚ :=
-  WeierstrassCurve.VariableChange.mk 1 0 (W.a₄ / W.a₃) 0
-
-noncomputable abbrev killA4W (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0) :
-    WeierstrassCurve ℚ :=
-  W.variableChange (killA4VC W h3)
-
-@[simp] theorem killA4VC_u (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0) :
-    (killA4VC W h3).u = 1 := rfl
-
-@[simp] theorem killA4VC_r (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0) :
-    (killA4VC W h3).r = 0 := rfl
-
-@[simp] theorem killA4VC_s (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0) :
-    (killA4VC W h3).s = W.a₄ / W.a₃ := rfl
-
-@[simp] theorem killA4VC_t (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0) :
-    (killA4VC W h3).t = 0 := rfl
-
-/-- Killing `a₄`: this should close by the Mathlib coefficient formula plus `field_simp`. -/
-theorem killA4W_a4_eq_zero (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0) :
-    (killA4W W h3).a₄ = 0 := by
-  -- If `variableChange_a₄` rewrites in the opposite direction, replace `rw` by `simpa ... using`.
-  rw [killA4W, killA4VC, WeierstrassCurve.variableChange_a₄]
-  field_simp [h3]
-  ring
-
-/-- The same variable change preserves `a₆=0` because `r=t=0,u=1`. -/
-theorem killA4W_a6_eq_zero
-    (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0) (h6 : W.a₆ = 0) :
-    (killA4W W h3).a₆ = 0 := by
-  rw [killA4W, killA4VC, WeierstrassCurve.variableChange_a₆]
-  simp [h6]
-
-/-- The `a₃` coefficient is unchanged. -/
-theorem killA4W_a3_eq
-    (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0) :
-    (killA4W W h3).a₃ = W.a₃ := by
-  rw [killA4W, killA4VC, WeierstrassCurve.variableChange_a₃]
-  simp
-
-/-- Hence the translated/killed model still has nonzero `a₃`. -/
-theorem killA4W_a3_ne_zero
-    (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0) :
-    (killA4W W h3).a₃ ≠ 0 := by
-  simpa [killA4W_a3_eq W h3] using h3
+/-- Checked replacement for residual B once the three order-to-algebra lemmas are proved. -/
+noncomputable def kubert_C12_table_of_tate_origin_order12_checked
+    (b c : ℚ) (hb : b ≠ 0)
+    (hDelta : (tateW b c).Δ ≠ 0)
+    (hOrder : addOrderOf (tateOriginAffine b c hb) = 12) :
+    KubertC12TateTableModel b c hb hDelta hOrder := by
+  have hc : c ≠ 0 :=
+    tate_c_ne_zero_of_origin_order12 b c hb hDelta hOrder
+  have h6 : b - c - c ^ 2 ≠ 0 :=
+    tate_sixP_den_ne_zero_of_origin_order12 b c hb hDelta hOrder
+  have hK : tateC12_K b c = 0 :=
+    tateC12_K_eq_zero_of_origin_order12 b c hb hDelta hOrder
+  exact kubert_C12_table_of_tate_K b c hb hDelta hOrder hc h6 hK
 
 end MazurProof.KubertBridgeN12
 ```
 
-If `rw [WeierstrassCurve.variableChange_a₄]` fails because the theorem has explicit arguments, use:
+Once this checks, replace call sites of the axiom by `kubert_C12_table_of_tate_origin_order12_checked`, then delete or deprecate the axiom.
 
-```lean
-  rw [killA4W, killA4VC]
-  simp only [WeierstrassCurve.variableChange_a₄]
-  field_simp [h3]
-  ring
+## 2. Group-law points to expose
+
+The local formulas you want are:
+
+```text
+P  = (0,0)
+2P = (b, b*c)
+3P = (c, b-c)
+-P = (0,b)
+-(3P) = (c,c^2)
 ```
 
-If the theorem gives a multiplied formula such as
+For the Tate normal form
 
-```lean
-(killA4VC W h3).u ^ 4 * (killA4W W h3).a₄ = ...
+```text
+y² + (1-c)xy - b*y = x³ - b*x²
 ```
 
-then prove the multiplied RHS is zero and use `norm_num` for `u=1`:
+negation is
 
-```lean
-  have h := WeierstrassCurve.variableChange_a₄ W (killA4VC W h3)
-  norm_num [killA4W, killA4VC] at h
-  field_simp [h3] at h
-  simpa using h
+```text
+-(x,y) = (x, -y - (1-c)*x + b).
 ```
 
-## 2. Preserve origin nonsingular/order 12 under `killA4VC`
+So for `Q=(c,b-c)`,
 
-The clean route is to use the local additive equivalence attached to a variable change. You need a small “map origin to origin” lemma because `r=t=0`.
+```text
+-Q = (c, -(b-c) - (1-c)c + b) = (c,c²).
+```
+
+Define point constructors only if they are not already present locally.
 
 ```lean
 namespace MazurProof.KubertBridgeN12
 
 open scoped WeierstrassCurve.Affine
 
-/-- Direct origin nonsingularity after killing `a₄`.  Prefer a direct proof if the local
-    nonsingular predicate unfolds well; otherwise get it from the point equivalence below. -/
-theorem killA4W_origin_nonsingular
-    (W : WeierstrassCurve ℚ)
-    (hO : WeierstrassCurve.Affine.Nonsingular (WeierstrassCurve.toAffine W) 0 0)
-    (h6 : W.a₆ = 0)
-    (h3 : W.a₃ ≠ 0) :
+/-- Point `(b, b*c)` on the Tate model.  Proof should be direct `simp [tateW]; ring`. -/
+theorem tate_twoP_nonsingular
+    (b c : ℚ) (hb : b ≠ 0) (hDelta : (tateW b c).Δ ≠ 0) :
     WeierstrassCurve.Affine.Nonsingular
-      (WeierstrassCurve.toAffine (killA4W W h3)) 0 0 := by
-  -- Robust direct route: at `(0,0)`, the affine equation uses `a₆=0`,
-  -- and nonsingularity follows because the y-partial is `a₃`, still nonzero.
-  -- If the local API has a point/nonsingular simplifier, this usually works:
-  --   unfold killA4W
-  --   simpa [WeierstrassCurve.Affine.Nonsingular,
-  --     killA4W_a6_eq_zero W h3 h6, killA4W_a3_eq W h3,
-  --     killA4W_a4_eq_zero W h3] using h3
-  -- If not, use the existing variable-change point equivalence to transport `hO`.
-  -- The exact proof depends on the local shape of `Affine.Nonsingular`.
-  simpa [killA4W_a6_eq_zero W h3 h6, killA4W_a3_eq W h3,
-    killA4W_a4_eq_zero W h3]
-    using hO
+      (WeierstrassCurve.toAffine (tateW b c)) b (b * c) := by
+  -- Usually either follows from `hDelta` plus curve equation, or direct nonsingularity.
+  -- Try:
+  --   simp [WeierstrassCurve.Affine.Nonsingular, tateW, hb, hDelta]
+  --   constructor goals by ring/field_simp.
+  -- If this is painful, avoid exposing this theorem and prove 2P equality by `ext` using
+  -- the point returned by the addition formula.
+  ...
 
-/-- The variable-change additive equivalence sends the origin to the origin when `r=t=0`. -/
-theorem affinePointAddEquivOfVariableChange_killA4_origin
-    (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0)
-    (hO : WeierstrassCurve.Affine.Nonsingular (WeierstrassCurve.toAffine W) 0 0)
-    (hO' : WeierstrassCurve.Affine.Nonsingular
-      (WeierstrassCurve.toAffine (killA4W W h3)) 0 0) :
-    affinePointAddEquivOfVariableChange W (killA4VC W h3)
-        (WeierstrassCurve.Affine.Point.some 0 0 hO)
-      = WeierstrassCurve.Affine.Point.some 0 0 hO' := by
-  -- The variable change has `r=t=0`; coordinates are unchanged at `(0,0)`.
-  -- Usually:
-  ext <;> simp [affinePointAddEquivOfVariableChange, killA4VC, killA4W]
+/-- Point `(c, b-c)` on the Tate model. -/
+theorem tate_threeP_nonsingular
+    (b c : ℚ) (hb : b ≠ 0) (hDelta : (tateW b c).Δ ≠ 0) :
+    WeierstrassCurve.Affine.Nonsingular
+      (WeierstrassCurve.toAffine (tateW b c)) c (b - c) := by
+  -- Same note as above.
+  ...
 
-/-- Additive equivalences preserve `addOrderOf`. -/
-theorem addOrderOf_apply_addEquiv
-    {G H : Type*} [AddGroup G] [AddGroup H]
-    (e : G ≃+ H) (P : G) :
-    addOrderOf (e P) = addOrderOf P := by
-  -- Try first:
-  --   simpa using e.addOrderOf_eq P
-  -- or:
-  --   simpa using (AddEquiv.addOrderOf_eq e P)
-  -- Fallback proof by the standard injective hom lemma:
-  exact e.toAddMonoidHom.addOrderOf_of_injective e.injective P
+noncomputable def tateTwoPAffine
+    (b c : ℚ) (hb : b ≠ 0) (hDelta : (tateW b c).Δ ≠ 0) :
+    WeierstrassCurve.Affine.Point (tateW b c) :=
+  WeierstrassCurve.Affine.Point.some b (b * c)
+    (tate_twoP_nonsingular b c hb hDelta)
 
-/-- Killing `a₄` preserves exact order 12 of the origin. -/
-theorem killA4W_origin_order12
-    (W : WeierstrassCurve ℚ)
-    (hO : WeierstrassCurve.Affine.Nonsingular (WeierstrassCurve.toAffine W) 0 0)
-    (h6 : W.a₆ = 0)
-    (h3 : W.a₃ ≠ 0)
-    (hOrder : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 12) :
-    ∃ hO' : WeierstrassCurve.Affine.Nonsingular
-      (WeierstrassCurve.toAffine (killA4W W h3)) 0 0,
-      addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO') = 12 := by
-  let hO' := killA4W_origin_nonsingular W hO h6 h3
-  refine ⟨hO', ?_⟩
-  let e := affinePointAddEquivOfVariableChange W (killA4VC W h3)
-  have hmap := affinePointAddEquivOfVariableChange_killA4_origin W h3 hO hO'
-  calc
-    addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO')
-        = addOrderOf (e (WeierstrassCurve.Affine.Point.some 0 0 hO)) := by rw [hmap]
-    _ = addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) := by
-          exact addOrderOf_apply_addEquiv e _
-    _ = 12 := hOrder
+noncomputable def tateThreePAffine
+    (b c : ℚ) (hb : b ≠ 0) (hDelta : (tateW b c).Δ ≠ 0) :
+    WeierstrassCurve.Affine.Point (tateW b c) :=
+  WeierstrassCurve.Affine.Point.some c (b - c)
+    (tate_threeP_nonsingular b c hb hDelta)
 
 end MazurProof.KubertBridgeN12
 ```
 
-If `affinePointAddEquivOfVariableChange` is oriented the other way, invert it:
+If the local point type is `WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine (tateW b c))` instead of `Point (tateW b c)`, use the spelling already accepted by `tateOriginAffine`.
 
-```lean
-let e := (affinePointAddEquivOfVariableChange W (killA4VC W h3)).symm
-```
+## 3. First theorem to attack: `3P = (c,b-c)`
 
-and swap the equality in the `hmap` lemma.
-
-## 3. Isolate `a₂ ≠ 0` as the only hard residual
-
-Mathematically, after `a₂=0`, `a₄=0`, `a₆=0`, and `a₃≠0`, the tangent at `(0,0)` is `y=0`, which intersects with multiplicity three at the origin. Hence `2P = -P` and `3P = 0`; exact order `12` is impossible.
-
-This is the minimal residual theorem to isolate:
+Do not start from the K polynomial. Prove the affine group-law formula first.
 
 ```lean
 namespace MazurProof.KubertBridgeN12
 
-/-- Hard affine group-law residual: if `a₂=a₄=a₆=0`, then the origin has order dividing `3`. -/
-def OriginOrderDividesThreeWhenA2A4A6ZeroStatement : Prop :=
-  ∀ (W : WeierstrassCurve ℚ)
-    (hO : WeierstrassCurve.Affine.Nonsingular (WeierstrassCurve.toAffine W) 0 0),
-    W.a₂ = 0 → W.a₄ = 0 → W.a₆ = 0 →
-      (3 : ℕ) • WeierstrassCurve.Affine.Point.some 0 0 hO = 0
+/-- Doubling formula for the Tate origin. -/
+theorem tate_two_nsmul_origin_eq
+    (b c : ℚ) (hb : b ≠ 0) (hDelta : (tateW b c).Δ ≠ 0) :
+    (2 : ℕ) • tateOriginAffine b c hb = tateTwoPAffine b c hb hDelta := by
+  -- Expected denominator in the tangent formula is `-b`, nonzero by `hb`.
+  have hden : (-b : ℚ) ≠ 0 := by simpa using neg_ne_zero.mpr hb
+  -- Route:
+  --   change tateOriginAffine b c hb + tateOriginAffine b c hb = _
+  --   unfold tateOriginAffine tateTwoPAffine
+  --   simp [WeierstrassCurve.Affine.Point.add, WeierstrassCurve.Affine.Point.neg,
+  --     tateW, hb, hden]
+  --   ext <;> field_simp [hb] <;> ring
+  -- Depending on local API, the addition formula may have named lemmas for same-x/double case.
+  change tateOriginAffine b c hb + tateOriginAffine b c hb = tateTwoPAffine b c hb hDelta
+  ext <;> simp [tateOriginAffine, tateTwoPAffine, tateW, hb, hden] <;> field_simp [hb] <;> ring
 
-/-- This is the usable exclusion theorem. -/
-theorem origin_a2_ne_zero_of_a4_a6_origin_order12
-    (h3div : OriginOrderDividesThreeWhenA2A4A6ZeroStatement)
-    (W : WeierstrassCurve ℚ)
-    (hO : WeierstrassCurve.Affine.Nonsingular (WeierstrassCurve.toAffine W) 0 0)
-    (h4 : W.a₄ = 0) (h6 : W.a₆ = 0)
-    (hOrder : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 12) :
-    W.a₂ ≠ 0 := by
-  intro h2
-  have h3smul : (3 : ℕ) • WeierstrassCurve.Affine.Point.some 0 0 hO = 0 :=
-    h3div W hO h2 h4 h6
-  -- Standard API variants to try:
-  --   exact (addOrderOf_dvd_iff_nsmul_eq_zero.mp ?)
-  --   have hdiv : addOrderOf (...) ∣ 3 := addOrderOf_dvd_iff_nsmul_eq_zero.mpr h3smul
-  have hdiv : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) ∣ 3 := by
-    exact addOrderOf_dvd_iff_nsmul_eq_zero.mpr h3smul
+/-- Addition formula `2P + P = 3P = (c,b-c)`. -/
+theorem tate_three_nsmul_origin_eq
+    (b c : ℚ) (hb : b ≠ 0) (hDelta : (tateW b c).Δ ≠ 0) :
+    (3 : ℕ) • tateOriginAffine b c hb = tateThreePAffine b c hb hDelta := by
+  have h2 := tate_two_nsmul_origin_eq b c hb hDelta
+  -- Expected denominator in adding `(b,bc)` to `(0,0)` is `b`, nonzero by `hb`.
+  -- Route:
+  --   change (2 • P) + P = _
+  --   rw [h2]
+  --   unfold tateOriginAffine tateTwoPAffine tateThreePAffine
+  --   simp [Point.add, tateW, hb]
+  --   ext <;> field_simp [hb] <;> ring
+  change (2 : ℕ) • tateOriginAffine b c hb + tateOriginAffine b c hb =
+    tateThreePAffine b c hb hDelta
+  rw [h2]
+  ext <;> simp [tateOriginAffine, tateTwoPAffine, tateThreePAffine, tateW, hb] <;>
+    field_simp [hb] <;> ring
+
+end MazurProof.KubertBridgeN12
+```
+
+If `ext` does not work because affine points include an infinity constructor, first force both sides to be `some` via the addition formula branch. The branch conditions should be only `hb`/`-b≠0`.
+
+The failed scratch attempts likely got stuck because the `Point.add` simplifier split into vertical/tangent branches. Add the denominator facts explicitly before `simp`:
+
+```lean
+have hb0 : b ≠ 0 := hb
+have hnb0 : -b ≠ 0 := by simpa using neg_ne_zero.mpr hb
+have hb_ne_0x : b - 0 ≠ 0 := by simpa using hb
+simp [hb0, hnb0, hb_ne_0x]
+```
+
+## 4. Negation formulas
+
+These are much easier than addition and should be direct.
+
+```lean
+namespace MazurProof.KubertBridgeN12
+
+/-- Under `c=0`, `3P=(0,b)=-P`. -/
+theorem tate_three_nsmul_origin_eq_neg_origin_of_c_eq_zero
+    (b c : ℚ) (hb : b ≠ 0) (hDelta : (tateW b c).Δ ≠ 0)
+    (hc0 : c = 0) :
+    (3 : ℕ) • tateOriginAffine b c hb = - tateOriginAffine b c hb := by
+  rw [tate_three_nsmul_origin_eq b c hb hDelta]
+  subst c
+  -- both sides are `(0,b)` by the Tate negation formula.
+  ext <;> simp [tateOriginAffine, tateThreePAffine, tateW]
+
+/-- If `b-c-c^2=0`, then `3P` is a 2-torsion point: `3P = -3P`. -/
+theorem tate_three_nsmul_origin_eq_neg_self_of_six_den_eq_zero
+    (b c : ℚ) (hb : b ≠ 0) (hDelta : (tateW b c).Δ ≠ 0)
+    (h6zero : b - c - c ^ 2 = 0) :
+    (3 : ℕ) • tateOriginAffine b c hb =
+      - ((3 : ℕ) • tateOriginAffine b c hb) := by
+  rw [tate_three_nsmul_origin_eq b c hb hDelta]
+  -- RHS negation of `(c,b-c)` has y-coordinate `c^2`.
+  -- `h6zero` rewrites `b-c = c^2`.
+  have hy : b - c = c ^ 2 := by linarith
+  ext <;> simp [tateThreePAffine, tateW, hy] <;> ring
+
+end MazurProof.KubertBridgeN12
+```
+
+## 5. Order-theory utilities
+
+These proofs avoid curve-specific APIs.
+
+```lean
+namespace MazurProof.KubertBridgeN12
+
+private theorem nsmul_eq_zero_of_addOrderOf_eq
+    {G : Type*} [AddMonoid G] {P : G} {n : ℕ}
+    (h : addOrderOf P = n) :
+    n • P = 0 := by
+  -- `addOrderOf_dvd_iff_nsmul_eq_zero : addOrderOf P ∣ n ↔ n • P = 0`
+  exact (addOrderOf_dvd_iff_nsmul_eq_zero.mp (by rw [h]))
+
+private theorem order12_not_dvd_four
+    {G : Type*} [AddMonoid G] {P : G}
+    (hOrder : addOrderOf P = 12) :
+    ¬ (4 : ℕ) • P = 0 := by
+  intro h4
+  have hdiv : addOrderOf P ∣ 4 := addOrderOf_dvd_iff_nsmul_eq_zero.mpr h4
+  rw [hOrder] at hdiv
+  norm_num at hdiv
+
+private theorem order12_not_dvd_six
+    {G : Type*} [AddMonoid G] {P : G}
+    (hOrder : addOrderOf P = 12) :
+    ¬ (6 : ℕ) • P = 0 := by
+  intro h6
+  have hdiv : addOrderOf P ∣ 6 := addOrderOf_dvd_iff_nsmul_eq_zero.mpr h6
   rw [hOrder] at hdiv
   norm_num at hdiv
 
 end MazurProof.KubertBridgeN12
 ```
 
-If `addOrderOf_dvd_iff_nsmul_eq_zero` is not the exact name, search:
+If `addOrderOf_dvd_iff_nsmul_eq_zero` has the opposite `.mp`/`.mpr` orientation in the local Mathlib, the goal messages will make the swap obvious.
 
-```lean
-#check addOrderOf_dvd_iff_nsmul_eq_zero
-#check addOrderOf_dvd_iff
-#check nsmul_eq_zero_iff_dvd_addOrderOf
-#check AddMonoid.addOrderOf_dvd_iff
-```
-
-A direct proof route for the residual with affine APIs, if you want to attack it now:
-
-```lean
--- Desired direct API-level target:
-theorem origin_three_nsmul_eq_zero_of_a2_a4_a6_eq_zero
-    (W : WeierstrassCurve ℚ)
-    (hO : WeierstrassCurve.Affine.Nonsingular (WeierstrassCurve.toAffine W) 0 0)
-    (h2 : W.a₂ = 0) (h4 : W.a₄ = 0) (h6 : W.a₆ = 0) :
-    (3 : ℕ) • WeierstrassCurve.Affine.Point.some 0 0 hO = 0 := by
-  -- Route:
-  -- 1. Let P = some 0 0 hO.
-  -- 2. Use the affine doubling formula at P.
-  --    The tangent slope is λ = a₄/a₃ = 0 because h4=0 and hO + h6 imply a₃≠0.
-  -- 3. The tangent line is y=0, and with h2,h4,h6 the cubic on y=0 is x^3=0.
-  -- 4. Therefore 2P = -P.
-  -- 5. Then 3P = P + 2P = P + (-P) = 0.
-  -- Likely APIs to inspect:
-  --   #check WeierstrassCurve.Affine.Point.neg
-  --   #check WeierstrassCurve.Affine.Point.add
-  --   #check WeierstrassCurve.Affine.Point.add_def
-  --   #check WeierstrassCurve.Affine.Point.double
-  --   #check WeierstrassCurve.Affine.Point.two_nsmul
-  --   #check WeierstrassCurve.Affine.Point.ext
-  -- Keep this isolated; do not block the coefficient normalization on it.
-  admit
-```
-
-Do not put the `admit` in the actual file; keep `OriginOrderDividesThreeWhenA2A4A6ZeroStatement` as the explicit residual until the group-law API proof is done.
-
-## 4. Scaling to Tate normal form
-
-After killing `a₄`, assume:
-
-```lean
-W.a₄ = 0, W.a₆ = 0, W.a₃ ≠ 0, W.a₂ ≠ 0.
-```
-
-Use the scaling variable change
-
-```text
-u = W.a₃ / W.a₂, r=s=t=0.
-```
-
-Then the scaled coefficients are:
-
-```text
-a1' = W.a₁ / u = W.a₁ * W.a₂ / W.a₃
-a2' = W.a₂ / u^2 = W.a₂^3 / W.a₃^2
-a3' = W.a₃ / u^3 = W.a₂^3 / W.a₃^2
-a4' = 0
-a6' = 0
-```
-
-For Tate normal form in the usual convention
-
-```text
-y^2 + (1-c)xy - b y = x^3 - b x^2,
-```
-
-the coefficients are
-
-```text
-a1 = 1-c, a2 = -b, a3 = -b, a4 = 0, a6 = 0.
-```
-
-Therefore set
-
-```text
-b = - W.a₂^3 / W.a₃^2,
-c = 1 - W.a₁ * W.a₂ / W.a₃.
-```
-
-Lean skeleton:
+## 6. Derive `c ≠ 0`
 
 ```lean
 namespace MazurProof.KubertBridgeN12
 
-noncomputable def scaleToTateVC
-    (W : WeierstrassCurve ℚ) (h2 : W.a₂ ≠ 0) (h3 : W.a₃ ≠ 0) :
-    WeierstrassCurve.VariableChange ℚ :=
-  WeierstrassCurve.VariableChange.mk (W.a₃ / W.a₂) 0 0 0
-
-noncomputable abbrev scaleToTateW
-    (W : WeierstrassCurve ℚ) (h2 : W.a₂ ≠ 0) (h3 : W.a₃ ≠ 0) :
-    WeierstrassCurve ℚ :=
-  W.variableChange (scaleToTateVC W h2 h3)
-
-noncomputable def tate_b_of_W (W : WeierstrassCurve ℚ) : ℚ :=
-  - W.a₂ ^ 3 / W.a₃ ^ 2
-
-noncomputable def tate_c_of_W (W : WeierstrassCurve ℚ) : ℚ :=
-  1 - W.a₁ * W.a₂ / W.a₃
-
-@[simp] theorem scaleToTateVC_u
-    (W : WeierstrassCurve ℚ) (h2 : W.a₂ ≠ 0) (h3 : W.a₃ ≠ 0) :
-    (scaleToTateVC W h2 h3).u = W.a₃ / W.a₂ := rfl
-
-/-- New `a₁` after scaling. -/
-theorem scaleToTateW_a1
-    (W : WeierstrassCurve ℚ) (h2 : W.a₂ ≠ 0) (h3 : W.a₃ ≠ 0) :
-    (scaleToTateW W h2 h3).a₁ = W.a₁ * W.a₂ / W.a₃ := by
-  rw [scaleToTateW, scaleToTateVC, WeierstrassCurve.variableChange_a₁]
-  field_simp [h2, h3]
-  ring
-
-/-- New `a₂` after scaling. -/
-theorem scaleToTateW_a2
-    (W : WeierstrassCurve ℚ) (h2 : W.a₂ ≠ 0) (h3 : W.a₃ ≠ 0) :
-    (scaleToTateW W h2 h3).a₂ = W.a₂ ^ 3 / W.a₃ ^ 2 := by
-  rw [scaleToTateW, scaleToTateVC, WeierstrassCurve.variableChange_a₂]
-  field_simp [h2, h3]
-  ring
-
-/-- New `a₃` after scaling. -/
-theorem scaleToTateW_a3
-    (W : WeierstrassCurve ℚ) (h2 : W.a₂ ≠ 0) (h3 : W.a₃ ≠ 0) :
-    (scaleToTateW W h2 h3).a₃ = W.a₂ ^ 3 / W.a₃ ^ 2 := by
-  rw [scaleToTateW, scaleToTateVC, WeierstrassCurve.variableChange_a₃]
-  field_simp [h2, h3]
-  ring
-
-/-- New `a₄` after scaling. -/
-theorem scaleToTateW_a4
-    (W : WeierstrassCurve ℚ) (h2 : W.a₂ ≠ 0) (h3 : W.a₃ ≠ 0)
-    (h4 : W.a₄ = 0) :
-    (scaleToTateW W h2 h3).a₄ = 0 := by
-  rw [scaleToTateW, scaleToTateVC, WeierstrassCurve.variableChange_a₄]
-  simp [h4]
-
-/-- New `a₆` after scaling. -/
-theorem scaleToTateW_a6
-    (W : WeierstrassCurve ℚ) (h2 : W.a₂ ≠ 0) (h3 : W.a₃ ≠ 0)
-    (h6 : W.a₆ = 0) :
-    (scaleToTateW W h2 h3).a₆ = 0 := by
-  rw [scaleToTateW, scaleToTateVC, WeierstrassCurve.variableChange_a₆]
-  simp [h6]
-
-/-- Coefficient equality with the local Tate normal form. -/
-theorem scaleToTateW_eq_tateW
-    (W : WeierstrassCurve ℚ)
-    (h2 : W.a₂ ≠ 0) (h3 : W.a₃ ≠ 0)
-    (h4 : W.a₄ = 0) (h6 : W.a₆ = 0) :
-    scaleToTateW W h2 h3 = tateW (tate_b_of_W W) (tate_c_of_W W) := by
-  -- Use whatever extensionality theorem is available for `WeierstrassCurve`.
-  -- Usually `ext <;> ...` works if the structure fields are exposed.
-  ext <;>
-    simp [scaleToTateW_a1, scaleToTateW_a2, scaleToTateW_a3,
-      scaleToTateW_a4, scaleToTateW_a6,
-      tateW, tate_b_of_W, tate_c_of_W, h2, h3, h4, h6] <;>
-    field_simp [h2, h3] <;>
-    ring
+theorem tate_c_ne_zero_of_origin_order12
+    (b c : ℚ) (hb : b ≠ 0)
+    (hDelta : (tateW b c).Δ ≠ 0)
+    (hOrder : addOrderOf (tateOriginAffine b c hb) = 12) :
+    c ≠ 0 := by
+  intro hc0
+  let P := tateOriginAffine b c hb
+  have h3neg : (3 : ℕ) • P = -P := by
+    simpa [P] using
+      tate_three_nsmul_origin_eq_neg_origin_of_c_eq_zero b c hb hDelta hc0
+  have h4P : (4 : ℕ) • P = 0 := by
+    -- `4P = 3P + P = -P + P = 0`.
+    change ((3 : ℕ) + 1) • P = 0
+    rw [add_nsmul, h3neg]
+    simp
+  exact order12_not_dvd_four hOrder h4P
 
 end MazurProof.KubertBridgeN12
 ```
 
-If `tateW b c` uses the opposite sign convention
-
-```text
-y^2 + (1-c)xy - b y = x^3 - b x^2
-```
-
-then the above `b = -a2'` is correct. If local `tateW` was defined with `a₂=b, a₃=b`, change to:
-
-```lean
-noncomputable def tate_b_of_W (W : WeierstrassCurve ℚ) : ℚ :=
-  W.a₂ ^ 3 / W.a₃ ^ 2
-```
-
-and the `field_simp/ring` proof will immediately reveal the sign.
-
-## 5. End-to-end residual A package
-
-Once `origin_a2_ne_zero_of_a4_a6_origin_order12` is available, residual A should produce a Tate normal form from the translated-origin curve.
+## 7. Derive `b - c - c² ≠ 0`
 
 ```lean
 namespace MazurProof.KubertBridgeN12
 
-structure OriginOrder12A4A6Killed where
-  W : WeierstrassCurve ℚ
-  hO : WeierstrassCurve.Affine.Nonsingular (WeierstrassCurve.toAffine W) 0 0
-  hOrder : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 12
-  h3 : W.a₃ ≠ 0
-  h4 : W.a₄ = 0
-  h6 : W.a₆ = 0
-
-noncomputable def OriginOrder12A4A6Killed.toTate_b (S : OriginOrder12A4A6Killed) : ℚ :=
-  tate_b_of_W S.W
-
-noncomputable def OriginOrder12A4A6Killed.toTate_c (S : OriginOrder12A4A6Killed) : ℚ :=
-  tate_c_of_W S.W
-
-/-- Final coefficient-normalization step, with only the `a₂≠0` theorem consumed. -/
-theorem originOrder12A4A6Killed_scale_to_tate
-    (hA2 : ∀ (W : WeierstrassCurve ℚ)
-      (hO : WeierstrassCurve.Affine.Nonsingular (WeierstrassCurve.toAffine W) 0 0),
-      W.a₄ = 0 → W.a₆ = 0 →
-      addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 12 →
-      W.a₂ ≠ 0)
-    (S : OriginOrder12A4A6Killed) :
-    ∃ h2 : S.W.a₂ ≠ 0,
-      scaleToTateW S.W h2 S.h3 =
-        tateW (OriginOrder12A4A6Killed.toTate_b S)
-              (OriginOrder12A4A6Killed.toTate_c S) := by
-  let h2 : S.W.a₂ ≠ 0 := hA2 S.W S.hO S.h4 S.h6 S.hOrder
-  exact ⟨h2, scaleToTateW_eq_tateW S.W h2 S.h3 S.h4 S.h6⟩
+theorem tate_sixP_den_ne_zero_of_origin_order12
+    (b c : ℚ) (hb : b ≠ 0)
+    (hDelta : (tateW b c).Δ ≠ 0)
+    (hOrder : addOrderOf (tateOriginAffine b c hb) = 12) :
+    b - c - c ^ 2 ≠ 0 := by
+  intro h6zero
+  let P := tateOriginAffine b c hb
+  have h3self : (3 : ℕ) • P = - ((3 : ℕ) • P) := by
+    simpa [P] using
+      tate_three_nsmul_origin_eq_neg_self_of_six_den_eq_zero b c hb hDelta h6zero
+  have h6P : (6 : ℕ) • P = 0 := by
+    -- `6P = 2*(3P) = 3P + 3P = -3P + 3P = 0`.
+    have htwo : (2 : ℕ) • ((3 : ℕ) • P) = 0 := by
+      rw [two_nsmul, h3self]
+      simp
+    simpa [nsmul_nsmul, mul_comm, mul_left_comm, mul_assoc] using htwo
+  exact order12_not_dvd_six hOrder h6P
 
 end MazurProof.KubertBridgeN12
 ```
 
-This keeps the frontier honest:
+## 8. Vanishing of the `ψ₄` core at `3P`
 
-```text
-checked now:
-  translate origin order-12 point to `(0,0)`
-  prove a₃ ≠ 0
-  kill a₄ while preserving a₆=0 and order 12
-  scale to Tate form once a₂ ≠ 0
+This is the second theorem to attack after `3P=(c,b-c)`. It should be smaller than the current residual B.
 
-residual only:
-  a₂ ≠ 0 from exact order 12 when a₄=a₆=0
+Preferred statement:
+
+```lean
+namespace MazurProof.KubertBridgeN12
+
+/-- Division-polynomial/core interface at `Q=3P`.  This is the key small replacement for residual B. -/
+theorem tatePsi4CoreAt3P_eq_zero_of_origin_order12
+    (b c : ℚ) (hb : b ≠ 0)
+    (hDelta : (tateW b c).Δ ≠ 0)
+    (hOrder : addOrderOf (tateOriginAffine b c hb) = 12) :
+    tatePsi4CoreAt3P b c = 0 := by
+  let P := tateOriginAffine b c hb
+  let Q := (3 : ℕ) • P
+  have h12P : (12 : ℕ) • P = 0 := by
+    exact nsmul_eq_zero_of_addOrderOf_eq hOrder
+  have h4Q : (4 : ℕ) • Q = 0 := by
+    dsimp [Q, P]
+    -- `4 • (3 • P) = 12 • P`.
+    simpa [nsmul_nsmul, mul_comm, mul_left_comm, mul_assoc] using h12P
+
+  have hQcoords : Q = tateThreePAffine b c hb hDelta := by
+    dsimp [Q, P]
+    exact tate_three_nsmul_origin_eq b c hb hDelta
+
+  -- Now use the local division-polynomial theorem.  You may have to create this
+  -- as a small lemma if Mathlib only gives a general theorem.
+  exact tatePsi4CoreAt3P_eq_zero_of_four_nsmul_threeP_eq_zero
+    b c hb hDelta hQcoords h4Q
+
+end MazurProof.KubertBridgeN12
 ```
 
-## 6. Practical order of edits
+The missing helper should have this precise shape:
 
-1. Add `killA4VC`, `killA4W_a4_eq_zero`, `killA4W_a6_eq_zero`, `killA4W_a3_eq`.
-2. Add origin/order preservation through `affinePointAddEquivOfVariableChange`.
-3. Add `OriginOrderDividesThreeWhenA2A4A6ZeroStatement` and the wrapper `origin_a2_ne_zero_of_a4_a6_origin_order12` consuming it.
-4. Add `scaleToTateVC`, `tate_b_of_W`, `tate_c_of_W`, and `scaleToTateW_eq_tateW`.
-5. Only then attack the residual group-law lemma proving `3 • (0,0)=0` under `a₂=a₄=a₆=0`.
+```lean
+namespace MazurProof.KubertBridgeN12
+
+/-- Local bridge from `4Q=0` to vanishing of the specialized 4-division core at `Q=(c,b-c)`. -/
+theorem tatePsi4CoreAt3P_eq_zero_of_four_nsmul_threeP_eq_zero
+    (b c : ℚ) (hb : b ≠ 0)
+    (hDelta : (tateW b c).Δ ≠ 0)
+    {Q : WeierstrassCurve.Affine.Point (tateW b c)}
+    (hQcoords : Q = tateThreePAffine b c hb hDelta)
+    (h4Q : (4 : ℕ) • Q = 0) :
+    tatePsi4CoreAt3P b c = 0 := by
+  -- Route A: use Mathlib division-polynomial API if available.
+  -- Search for a theorem of the form:
+  --   `n • Point.some x y h = 0 -> divisionPolynomial n x = 0`
+  -- or:
+  --   `divisionPolynomial 4` evaluated at `(c,b-c)`.
+  --
+  -- Route B: if there is no useful API, prove this by direct affine group law:
+  --   1. Expand `2Q` for `Q=(c,b-c)`.
+  --   2. Show `4Q=0` forces the denominator/numerator core to vanish.
+  --   3. The numerator is exactly `tatePsi4CoreAt3P b c` by your existing polynomial definitions.
+  --
+  -- Keep this theorem as the only remaining local algebra target; do not put it as an axiom.
+  ...
+
+end MazurProof.KubertBridgeN12
+```
+
+This helper is not a new axiom: it is the targeted theorem to prove with Mathlib APIs or direct affine calculation. It is much smaller than `kubert_C12_table_of_tate_origin_order12` because it only says “order 4 at the already-computed point makes the already-defined core vanish.”
+
+Likely Mathlib probes for Route A:
+
+```lean
+#check WeierstrassCurve.divisionPolynomial
+#check WeierstrassCurve.Affine.divisionPolynomial
+#check WeierstrassCurve.Affine.Point.divisionPolynomial
+#check WeierstrassCurve.Affine.Point.nsmul_eq_zero_iff_divisionPolynomial_eq_zero
+#check WeierstrassCurve.Affine.Point.divisionPolynomial_eq_zero_of_nsmul_eq_zero
+```
+
+If no theorem exists, route B is still feasible because `Q=(c,b-c)` and `4Q=0` is only one specialized calculation.
+
+## 9. Derive `K=0`
+
+This part is already easy because you have `tatePsi4CoreAt3P_eq_c_mul_K`.
+
+```lean
+namespace MazurProof.KubertBridgeN12
+
+theorem tateC12_K_eq_zero_of_origin_order12
+    (b c : ℚ) (hb : b ≠ 0)
+    (hDelta : (tateW b c).Δ ≠ 0)
+    (hOrder : addOrderOf (tateOriginAffine b c hb) = 12) :
+    tateC12_K b c = 0 := by
+  have hc : c ≠ 0 :=
+    tate_c_ne_zero_of_origin_order12 b c hb hDelta hOrder
+  have hpsi : tatePsi4CoreAt3P b c = 0 :=
+    tatePsi4CoreAt3P_eq_zero_of_origin_order12 b c hb hDelta hOrder
+  have hprod : c * tateC12_K b c = 0 := by
+    -- theorem checked locally: `tatePsi4CoreAt3P b c = c * tateC12_K b c`
+    simpa [tatePsi4CoreAt3P_eq_c_mul_K] using hpsi
+  exact (mul_eq_zero.mp hprod).resolve_left hc
+
+end MazurProof.KubertBridgeN12
+```
+
+If `simpa [tatePsi4CoreAt3P_eq_c_mul_K]` does not rewrite because the theorem is not tagged as a simp theorem or is oriented, use:
+
+```lean
+  have hcore : tatePsi4CoreAt3P b c = c * tateC12_K b c :=
+    tatePsi4CoreAt3P_eq_c_mul_K b c
+  rw [hcore] at hpsi
+  exact (mul_eq_zero.mp hpsi).resolve_left hc
+```
+
+## 10. Smaller replacement residual, if needed temporarily
+
+If division-polynomial vanishing is not done today, shrink residual B to exactly this statement:
+
+```lean
+def TateC12Psi4VanishesFromOriginOrder12Statement : Prop :=
+  ∀ (b c : ℚ) (hb : b ≠ 0)
+    (hDelta : (tateW b c).Δ ≠ 0)
+    (hOrder : addOrderOf (tateOriginAffine b c hb) = 12),
+    tatePsi4CoreAt3P b c = 0
+```
+
+Then the replacement wrapper consumes this **one small residual**:
+
+```lean
+noncomputable def kubert_C12_table_of_tate_origin_order12_from_psi4_residual
+    (hPsi : TateC12Psi4VanishesFromOriginOrder12Statement)
+    (b c : ℚ) (hb : b ≠ 0)
+    (hDelta : (tateW b c).Δ ≠ 0)
+    (hOrder : addOrderOf (tateOriginAffine b c hb) = 12) :
+    KubertC12TateTableModel b c hb hDelta hOrder := by
+  have hc : c ≠ 0 := tate_c_ne_zero_of_origin_order12 b c hb hDelta hOrder
+  have h6 : b - c - c ^ 2 ≠ 0 :=
+    tate_sixP_den_ne_zero_of_origin_order12 b c hb hDelta hOrder
+  have hpsi : tatePsi4CoreAt3P b c = 0 := hPsi b c hb hDelta hOrder
+  have hK : tateC12_K b c = 0 := by
+    have hcore : tatePsi4CoreAt3P b c = c * tateC12_K b c :=
+      tatePsi4CoreAt3P_eq_c_mul_K b c
+    rw [hcore] at hpsi
+    exact (mul_eq_zero.mp hpsi).resolve_left hc
+  exact kubert_C12_table_of_tate_K b c hb hDelta hOrder hc h6 hK
+```
+
+This is a strict improvement over the current axiom: it leaves only the order-12-to-ψ₄-vanishing bridge, not the table algebra or the exceptional denominators.
+
+## 11. Practical edit order
+
+1. Prove `tate_two_nsmul_origin_eq`.
+2. Prove `tate_three_nsmul_origin_eq`.
+3. Prove the two negation consequences:
+   * `tate_three_nsmul_origin_eq_neg_origin_of_c_eq_zero`
+   * `tate_three_nsmul_origin_eq_neg_self_of_six_den_eq_zero`
+4. Add `tate_c_ne_zero_of_origin_order12` and `tate_sixP_den_ne_zero_of_origin_order12`.
+5. Prove or temporarily isolate `tatePsi4CoreAt3P_eq_zero_of_origin_order12`.
+6. Add `tateC12_K_eq_zero_of_origin_order12`.
+7. Replace the residual axiom by `kubert_C12_table_of_tate_origin_order12_checked`.
+
+The only genuinely hard proof is step 5 if Mathlib lacks a convenient division-polynomial theorem. Steps 1-4 are group-law coordinate calculations and order-divisibility arguments; steps 6-7 are already algebraic wrappers around checked code.
