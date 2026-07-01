@@ -1,532 +1,748 @@
-# Q2721 (dm-codex1): RationalPointsN12 half-factor audit for the divided-by-3 branch
+# Q2726 (dm-codex1): normalized Eisenstein parametrization route
 
 Repo/branch requested: `xiangyazi24/FLT@scratch`  
-Target file requested for inspection: `FLT/Assumptions/MazurProof/RationalPointsN12.lean`  
-Local WIP frontier from prompt: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`
-
-## Connector status and scope of this audit
-
-I attempted to inspect the requested file through the GitHub connector.
-
-Confirmed connector facts:
-
-* `README.md`, `FLT.lean`, and `FLT/Assumptions/Mazur.lean` are readable on the connected repo default branch.
-* `FLT/Assumptions/MazurProof/RationalPointsN12.lean` returned `404 Not Found` on `main`.
-* The same path returned `404 Not Found` on `scratch`.
-* Connector code search for the listed symbols returned no results.
-* The remote `scratch` branch exists and `scratch/_CHATGPT_DROP_dm-codex1.md` is writable.
-
-Therefore I cannot honestly quote exact existing theorem statements from `RationalPointsN12.lean`. In the sections below, anything labelled **confirmed** is derived from the definitions in the prompt and elementary algebra. Anything labelled **target** is a Lean-facing bridge statement that should be checked against the local WIP file once that file is available in the branch. I do not claim those target statements are existing APIs.
-
-## Executive answer
-
-The divided branch does **not** directly provide a hypothesis of the form
-
-```text
-b^2 = pythagoreanQuarticRhs m n
-```
-
-for the original branch variables `m n`. Its native algebra is instead
-
-```text
-3*A^2 = (m-n)*(m+n),
-3*N^2 = n*(2*m-n),
-3*S   = m^2 - m*n + n^2.
-```
-
-The forced factor `3` goes into `m+n` in the first product and into `2*m-n` in the second product. After the honest parity split, two cases die mod `4`; the sole survivor is
-
-```text
-m - n   = a^2,
-m + n   = 3*b^2,
-n       = c^2,
-2*m - n = 3*d^2,
-```
-
-and this is exactly four positive squares in arithmetic progression:
-
-```text
-c^2, b^2, d^2, a^2.
-```
-
-So the reusable mathematical object is not a raw-branch `EulerSquarePair` immediately. It is a `NoNonconstantFourSquaresAP` residual, or a bridge from four-square AP to whatever `RationalPointsN12.lean` proves via the pythagorean/Ljunggren quartic.
-
-If the existing `RationalPointsN12.lean` half-factor infrastructure ultimately proves the standard no-nonconstant-four-squares-in-AP obstruction, then it is useful. But it is one bridge away: the variables in the `pythagoreanQuarticRhs` theorem would be new parameters obtained from the four-square AP, not the original divided-branch `m n`.
-
-## 1. Existing theorem inventory: what can and cannot be confirmed
-
-Because the requested file is not visible through the connector, I cannot confirm exact statement shapes for these names:
-
-```text
-pythagoreanQuarticRhs
-pythagoreanQuarticCenter
-pythagorean_quartic_half_factorization_of_opposite_mod
-pythagorean_quartic_half_factor_gcd_dvd_three
-pythagorean_quartic_half_factor_gcd_eq_one_or_three
-pythagorean_quartic_half_factor_gcd_eq_one
-pythagorean_quartic_half_factor_split
-pythagorean_quartic_half_factor_signed_split_of_nonzero
-kubert_cover_pythagorean_half_factors
-```
-
-The names strongly suggest the usual half-factor route for a pythagorean/Ljunggren quartic: from a square value of a quartic, introduce a center, factor a difference of squares, prove the half-factor gcd is `1` or `3`, then split the two factors into square packages. A typical mathematical shape is
-
-```text
-B^2 = pythagoreanQuarticRhs u v
-```
-
-plus primitive/opposite-parity/nonzero hypotheses, leading to half factors `r s` with a product such as
-
-```text
-r * s = 3 * u^2 * v^2.
-```
-
-That is a **target role**, not a confirmed API. The directly reusable theorem, if present, would be whichever existing result exposes the conclusion as one of the following:
-
-```text
-No nonconstant four integer squares are in arithmetic progression.
-```
-
-or
-
-```text
-Every primitive pythagorean-quartic square solution is the unit/degenerate one.
-```
-
-A theorem that only starts from `B^2 = pythagoreanQuarticRhs u v` is not directly reusable until a new bridge constructs such `u v B` from the divided branch's middle parity package.
-
-## 2. Confirmed algebra from `DividedSquareBranch`
-
-From the prompt:
+Lean project context: `flt-ai`  
+Target frontier: `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean`  
+Target statement:
 
 ```lean
 import FLT.Assumptions.MazurProof.N12QuarticEisenstein
 
--- Prompt-local definition, repeated here only for reference.
-def DividedSquareBranch_ref (A N S m n : ℤ) : Prop :=
+#check NormalizedBadParamStatement
+```
+
+## Connector status
+
+I retried the GitHub connector after the follow-up. The connector can read the repo and can write `scratch/_CHATGPT_DROP_dm-codex1.md`, but the local WIP Lean files named in the prompt are still not visible through the connector:
+
+* `FLT/Assumptions/MazurProof/N12QuarticEisenstein.lean` returned `404 Not Found` on `scratch`.
+* Code search for `NormalizedBadParamStatement`, `EisensteinTriple`, `EisensteinParam`, and `eisensteinTriple_factor_identity` returned no results.
+* The remote `scratch` branch exists and this file is writable.
+
+So I cannot honestly confirm exact theorem signatures from the repo. Below, **existing name references are not confirmed APIs**; the route is the mathematically correct Lean-facing proof design from the definitions and identity in the prompt.
+
+## Executive route
+
+The proof of `NormalizedBadParamStatement` should not factor `A + N` or `A - N`. The correct starting point is the conic/Eisenstein-triple factor identity for
+
+```text
+X = A^2,   Y = N^2,   Z = S,
+Z^2 = X^2 - X*Y + Y^2.
+```
+
+Use the identity, oriented at the `Y` side,
+
+```text
+U = 2*Z - (2*X - Y),
+V = 2*Z + (2*X - Y),
+U*V = 3*Y^2.
+```
+
+For the normalized square-side case this is exactly
+
+```text
+(2*S - (2*A^2 - N^2)) * (2*S + (2*A^2 - N^2)) = 3*N^4.
+```
+
+A primitive positive triple forces a square split of this product in exactly two ways:
+
+```text
+raw:      U = 3*r^2,   V = s^2,
+divided:  U = r^2,    V = 3*s^2.
+```
+
+The raw split gives the ordinary branch after setting
+
+```text
+n = r,
+2*m - n = s,
+m = (r + s)/2.
+```
+
+The divided split gives the divided-by-3 branch after setting
+
+```text
+n = r,
+(2*m - n)/3 = s,
+2*m - n = 3*s,
+m = (r + 3*s)/2.
+```
+
+The same argument with `X` and `Y` swapped gives the two square-side orientations accepted by `NormalizedBadParamStatement`:
+
+```text
+EisensteinSqBranch A N S m n,
+EisensteinSqBranch N A S m n,
+DividedSquareBranch A N S m n,
+DividedSquareBranch N A S m n.
+```
+
+In fact the `Y`-oriented factor identity alone usually gives either the `(A,N)` raw/divided branch. The swapped disjuncts are still useful because they match symmetric parametrization lemmas and make the target robust.
+
+## 1. Exact parametrization theorem needed
+
+A minimal generic theorem should be stated for a primitive positive Eisenstein triple, then specialized to `X=A^2`, `Y=N^2`, `Z=S`.
+
+Suggested Prop interfaces:
+
+```lean
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
+/-- Primitive positive integer solution of `Z^2 = X^2 - X*Y + Y^2`. -/
+def PrimitivePositiveEisensteinTriple (X Y Z : ℤ) : Prop :=
+  0 < X ∧ 0 < Y ∧ 0 < Z ∧
+  IsCoprime X Y ∧
+  Z ^ 2 = X ^ 2 - X * Y + Y ^ 2
+
+/-- Undivided Eisenstein parametrization. -/
+def EisensteinRawParam (X Y Z m n : ℤ) : Prop :=
+  0 < n ∧ n < m ∧ IsCoprime m n ∧
+  X = (m - n) * (m + n) ∧
+  Y = n * (2 * m - n) ∧
+  Z = m ^ 2 - m * n + n ^ 2
+
+/-- Divided-by-3 Eisenstein parametrization. -/
+def EisensteinDividedParam (X Y Z m n : ℤ) : Prop :=
   0 < n ∧ n < m ∧ IsCoprime m n ∧ (3 : ℤ) ∣ m + n ∧
-  3 * A ^ 2 = (m - n) * (m + n) ∧
-  3 * N ^ 2 = n * (2 * m - n) ∧
-  3 * S = m ^ 2 - m * n + n ^ 2
+  3 * X = (m - n) * (m + n) ∧
+  3 * Y = n * (2 * m - n) ∧
+  3 * Z = m ^ 2 - m * n + n ^ 2
 ```
 
-Write
+The theorem needed is:
 
-```text
-x = m - n,
-y = m + n,
-z = n,
-w = 2*m - n.
+```lean
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
+/-- Target converse parametrization for primitive positive Eisenstein triples.
+The unit branch is included for the full primitive-positive theorem; it is
+excluded later by normalized hypotheses such as `A < N` or `A^2 ≠ N^2`. -/
+theorem primitivePositiveEisensteinTriple_param_or_unit
+    {X Y Z : ℤ}
+    (h : PrimitivePositiveEisensteinTriple X Y Z) :
+    (X = 1 ∧ Y = 1 ∧ Z = 1) ∨
+      ∃ m n : ℤ,
+        EisensteinRawParam X Y Z m n ∨
+        EisensteinRawParam Y X Z m n ∨
+        EisensteinDividedParam X Y Z m n ∨
+        EisensteinDividedParam Y X Z m n := by
+  sorry
 ```
 
-From `0 < n` and `n < m`, all four are positive. From `IsCoprime m n`:
+For `NormalizedBadParamStatement`, specialize this with
 
 ```text
-gcd(x,z) = 1,
-gcd(y,z) = 1,
-gcd(x,w) = 1,
-gcd(x,y) ∣ 2,
-gcd(z,w) = gcd(n,2).
+X = A^2,
+Y = N^2,
+Z = S.
 ```
 
-The `3`-adic facts forced by `3 ∣ m+n` and `IsCoprime m n` are:
+The unit branch gives `A^2 = N^2 = 1`; with normalized `0 < A < N`, or with the local `A^2 ≠ N^2` hypothesis, it is impossible. Therefore the remaining disjunction is exactly the target branch disjunction.
 
-```text
-3 ∤ n,
-3 ∤ m,
-3 ∤ (m-n),
-3 ∣ (m+n),
-3 ∣ (2*m-n).
+A direct square-side wrapper is also reasonable:
+
+```lean
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
+/-- Square-side version of the primitive parametrization. This is the closest
+mathematical shape to `NormalizedBadParamStatement`. -/
+theorem primitivePositiveSquareEisenstein_param_or_unit
+    {A N S : ℤ}
+    (hA : 0 < A) (hN : 0 < N) (hS : 0 < S)
+    (hcop : IsCoprime A N)
+    (heq : S ^ 2 = A ^ 4 - A ^ 2 * N ^ 2 + N ^ 4) :
+    (A = 1 ∧ N = 1 ∧ S = 1) ∨
+      ∃ m n : ℤ,
+        EisensteinSqBranch A N S m n ∨
+        EisensteinSqBranch N A S m n ∨
+        DividedSquareBranch A N S m n ∨
+        DividedSquareBranch N A S m n := by
+  sorry
 ```
 
-The tempting statement `3 ∤ (2*m-n)` is false. In fact the opposite is forced, because
+This is the theorem that should feed the final normalized statement.
+
+## 2. Where the raw and divided branches come from
+
+Let
 
 ```text
-2*m - n = 2*(m+n) - 3*n.
+X = A^2,
+Y = N^2,
+Z = S,
+U = 2*Z - (2*X - Y),
+V = 2*Z + (2*X - Y).
 ```
 
-The cross-gcd is exact:
+The given identity is
 
 ```text
-gcd(m+n, 2*m-n) = 3.
+U*V = 3*Y^2.
 ```
 
-Reason: a common divisor of `m+n` and `2*m-n` divides
+Since `X,Y,Z` are positive and satisfy the triple equation,
 
 ```text
-(m+n) + (2*m-n) = 3*m,
-2*(m+n) - (2*m-n) = 3*n,
+(2*Z)^2 - (2*X - Y)^2 = 3*Y^2 > 0,
 ```
 
-and any prime other than `3` would divide both `m` and `n`. Since both factors are divisible by `3`, the gcd is exactly `3`.
+so `U > 0` and `V > 0`.
 
-The square equations refine the location of the nonsquare `3`:
+### Raw split
+
+Suppose
 
 ```text
-v_3(m+n)    = 1 + 2*v_3(A),
-v_3(2*m-n) = 1 + 2*v_3(N),
-min(v_3(m+n), v_3(2*m-n)) = 1.
+U = 3*r^2,
+V = s^2,
+0 < r,
+0 < s,
+2 ∣ r + s,
+s > r.
 ```
 
-So the nonsquare `3` in `3*A^2` goes to `m+n`, and the nonsquare `3` in `3*N^2` goes to `2*m-n`. Extra powers of `3` may occur, but only as square powers beyond the first.
-
-A small counterexample to the false shortcut `3 ∤ (2*m-n)` is the unit branch:
+Set
 
 ```text
-m = 2, n = 1, A = 1, N = 1, S = 1.
+n = r,
+m = (r + s)/2.
 ```
 
 Then
 
 ```text
-3 ∣ m+n = 3,
-3 ∣ 2*m-n = 3,
-3 ∤ m-n = 1,
-3*A^2 = 1*3,
-3*N^2 = 1*3,
-3*S   = 4 - 2 + 1 = 3.
+2*m - n = s,
+m - n = (s - r)/2,
+m + n = (s + 3*r)/2.
 ```
 
-This unit is excluded by `PositivePrimitiveEisensteinBadUnordered` because that hypothesis contains `A^2 ≠ N^2`, but it is exactly the explicit unit exception in `DividedSquareBranchUnitOrDescendsStatement`.
-
-## 3. Can the branch become `b^2 = pythagoreanQuarticRhs m n`?
-
-### Directly, with the original `m n`: no confirmed route
-
-The branch gives the Eisenstein-center identity
+The identities recovered from `U+V=4Z`, `V-U=2*(2X-Y)`, and `Y=r*s` are
 
 ```text
-(m^2 - m*n + n^2)^2
-  = (m^2 - n^2)^2
-    - (m^2 - n^2)*(2*m*n - n^2)
-    + (2*m*n - n^2)^2.
+Y = n * (2*m - n),
+X = (m - n) * (m + n),
+Z = m^2 - m*n + n^2.
 ```
 
-Using
+For `X=A^2`, `Y=N^2`, this is exactly
 
 ```text
-m^2 - n^2     = 3*A^2,
-2*m*n - n^2   = 3*N^2,
-m^2 - m*n+n^2 = 3*S,
+A^2 = (m - n) * (m + n),
+N^2 = n * (2*m - n),
+S   = m^2 - m*n + n^2.
 ```
 
-this becomes the already-known Eisenstein quartic
+That is `EisensteinSqBranch A N S m n`.
+
+### Divided split
+
+Suppose
 
 ```text
-S^2 = A^4 - A^2*N^2 + N^4.
+U = r^2,
+V = 3*s^2,
+0 < r,
+0 < s,
+2 ∣ r + s,
+3*s > r.
 ```
 
-That is not a pythagorean/Ljunggren quartic square in the original `m n`. In particular, the branch supplies square factorizations of two linear products; it does not supply a new `B` with
+Set
 
 ```text
-B^2 = pythagoreanQuarticRhs m n.
+n = r,
+m = (r + 3*s)/2.
 ```
 
-### Denominator-free normalization: useful but not raw and not Kubert directly
-
-Since `3 ∣ m+n` and `3 ∣ 2*m-n`, introduce `p q` by
+Then
 
 ```text
-m+n     = 3*p,
-2*m - n = 3*q.
+2*m - n = 3*s,
+m - n = (3*s - r)/2,
+m + n = 3*(r + s)/2.
 ```
 
-Then exactly
+In particular,
 
 ```text
-m     = p + q,
-n     = 2*p - q,
-m - n = 2*q - p,
-S     = p^2 - p*q + q^2,
-A^2   = p * (2*q - p),
-N^2   = q * (2*p - q).
+3 ∣ m + n.
 ```
 
-This is often the cleanest Lean bridge because it removes literal division by `3`. But it is still not the raw branch. The raw branch has factors like
+The recovered identities are
 
 ```text
-A^2 = (M-N)*(M+N),
-N^2 = N*(2*M-N),
+3*Y = n * (2*m - n),
+3*X = (m - n) * (m + n),
+3*Z = m^2 - m*n + n^2.
 ```
 
-whereas the reduced divided branch has the crossed form
+For `X=A^2`, `Y=N^2`, this is exactly
 
 ```text
-A^2 = p*(2*q-p),
-N^2 = q*(2*p-q).
+3*A^2 = (m - n) * (m + n),
+3*N^2 = n * (2*m - n),
+3*S   = m^2 - m*n + n^2,
+3 ∣ m+n.
 ```
 
-No linear renaming of `p q` turns both equations into the raw branch with the same positivity hypotheses.
+That is `DividedSquareBranch A N S m n`.
 
-## 4. Which split is the divided-by-3 sector?
+### Swapped square-side orientation
 
-The honest factorization of the divided branch has three parity sectors.
-
-### Sector E: `m` odd, `n` even
+The equation is symmetric in `X` and `Y`. Applying the same construction to
 
 ```text
-m - n     = a^2,
-m + n     = 3*b^2,
-n         = 2*c^2,
-2*m - n   = 6*d^2,
-A         = a*b,
-N         = 2*c*d.
+X' = Y,
+Y' = X,
+Z' = Z
 ```
 
-The identities are
+uses the factor identity
 
 ```text
-a^2 + c^2 = 3*d^2,
-b^2       = c^2 + d^2.
+(2*Z - (2*Y - X)) * (2*Z + (2*Y - X)) = 3*X^2.
 ```
 
-This sector is impossible mod `4`: `a` is odd, so `a^2+c^2` is `1` or `2` mod `4`, while `3*d^2` is `0` or `3` mod `4`.
-
-### Sector M: `m` even, `n` odd — the real residual
+This gives the swapped branches:
 
 ```text
-m - n     = a^2,
-m + n     = 3*b^2,
-n         = c^2,
-2*m - n   = 3*d^2,
-A         = a*b,
-N         = c*d.
+EisensteinSqBranch N A S m n,
+DividedSquareBranch N A S m n.
 ```
 
-The identities are
+There is also an explicit parameter symmetry. If
 
 ```text
-a^2 + 2*c^2 = 3*b^2,
-2*a^2 + c^2 = 3*d^2.
+RawParam X Y Z m n
 ```
 
-Equivalently,
+then
 
 ```text
-c^2, b^2, d^2, a^2
+RawParam Y X Z m (m-n)
 ```
 
-are four squares in arithmetic progression:
+because
 
 ```text
-b^2 - c^2 = d^2 - b^2,
-d^2 - b^2 = a^2 - d^2.
+m - (m-n) = n,
+m + (m-n) = 2*m - n,
+(m-n) * (2*m - (m-n)) = (m-n) * (m+n).
 ```
 
-This is the sector that should be connected to `RationalPointsN12.lean` if that file proves a pythagorean/Ljunggren quartic obstruction.
-
-### Sector O: `m` odd, `n` odd
+The divided branch has the same symmetry: if `3 ∣ m+n`, then for `n' = m-n`,
 
 ```text
-m - n     = 2*a^2,
-m + n     = 6*b^2,
-n         = c^2,
-2*m - n   = 3*d^2,
-A         = 2*a*b,
-N         = c*d.
+m+n' = 2*m-n = 2*(m+n) - 3*n,
 ```
 
-The identities are
+so `3 ∣ m+n'` as well, and the divided formulas swap the two sides.
+
+## 3. Gcd, parity, and positivity assumptions needed
+
+The primitive-positive input should be exactly:
 
 ```text
-a^2 + c^2 = 3*b^2,
-a^2 + b^2 = d^2.
+0 < X, 0 < Y, 0 < Z,
+IsCoprime X Y,
+Z^2 = X^2 - X*Y + Y^2.
 ```
 
-This sector is impossible mod `4`: `c` is odd, so `a^2+c^2` is `1` or `2` mod `4`, while `3*b^2` is `0` or `3` mod `4`.
-
-### Relation to the `r*s = 3*m^2*n^2` split
-
-The split
+For the normalized square case, use:
 
 ```text
-r * s = 3 * m^2 * n^2
+X = A^2,
+Y = N^2,
+Z = S,
+0 < A, 0 < N, 0 < S,
+IsCoprime A N.
 ```
 
-is not the same as the original divided-branch allocation of the prime `3`. In the divided branch, the first-order allocation is
+Then prove `IsCoprime (A^2) (N^2)` as a small preliminary lemma.
+
+For the factor identity, the necessary local facts are:
 
 ```text
-3 goes into m+n,
-3 goes into 2*m-n.
+U = 2*Z - (2*X - Y),
+V = 2*Z + (2*X - Y),
+U > 0,
+V > 0,
+U*V = 3*Y^2,
+U+V = 4*Z,
+V-U = 2*(2*X-Y).
 ```
 
-The `r*s = 3*m^2*n^2` half-factor split is the standard difference-of-squares split attached to a pythagorean/Ljunggren quartic. It becomes relevant only after the middle sector has been converted to four squares in AP and then parametrized into the quartic variables used by `RationalPointsN12.lean`.
+The gcd/valuation facts that make the square split true are:
 
-So the answer is:
+```text
+If an odd prime p ≠ 3 divides both U and V, then p divides X and Y.
+If 3 divides both U and V, then 3 divides X and Y.
+If 2 divides both U and V, then gcd(U,V) has exactly a factor 4 at 2.
+```
 
-* Same prime and same classical obstruction at the residual level.
-* Different variables and different first algebraic step.
-* A bridge theorem is needed; do not feed the original divided-branch `m n` directly to `pythagoreanQuarticRhs` or `kubert_cover_*` unless the local file has an explicitly matching theorem.
+Equivalently, for primitive triples:
 
-## 5. Minimal new bridge statements
+```text
+if Y is odd,  gcd(U,V) = 1,
+if Y is even, gcd(U,V) = 4.
+```
 
-These are target statements. Place them in the namespace where the local `DividedSquareBranch` and `PositivePrimitiveEisensteinBadUnordered` live. The imports assume the local WIP file exists.
+The `gcd = 4` case is real and must not be thrown away. Example:
+
+```text
+X = 5, Y = 8, Z = 7.
+U = 2*7 - (2*5 - 8) = 12,
+V = 2*7 + (2*5 - 8) = 16,
+gcd(U,V) = 4.
+```
+
+This triple is primitive and comes from the raw parameters `m=3`, `n=2`.
+
+From `U*V = 3*Y^2` and the primitive gcd facts, every prime exponent in `U` and `V` is even except for the single nonsquare factor `3`, which lies in exactly one of `U,V`. Therefore:
+
+```text
+U = 3*r^2, V = s^2
+```
+
+or
+
+```text
+U = r^2, V = 3*s^2.
+```
+
+Parity needed to define `m` is automatic. Since `U` and `V` have the same parity (`U+V=4Z`), the positive square roots `r,s` have the same parity, so
+
+```text
+2 ∣ r+s.
+```
+
+For raw:
+
+```text
+m = (r+s)/2,
+n = r.
+```
+
+The inequality `n < m` is equivalent to `r < s`, and this follows from `X > 0` because
+
+```text
+X = (s-r)*(s+3*r)/4.
+```
+
+For divided:
+
+```text
+m = (r+3*s)/2,
+n = r.
+```
+
+The inequality `n < m` is equivalent to `r < 3*s`, and this follows from `X > 0` because
+
+```text
+X = (3*s-r)*(s+r)/4.
+```
+
+The branch coprimality `IsCoprime m n` follows from primitive `IsCoprime X Y` and the branch formulas. In the raw case, any common divisor of `m,n` divides both
+
+```text
+X = (m-n)*(m+n),
+Y = n*(2*m-n),
+```
+
+so it divides `gcd(X,Y)`. In the divided case, handle the prime `3` separately: if `3 ∣ m` and `3 ∣ n`, then both `X` and `Y` are divisible by `3` because the divided numerators are divisible by `9`, contradicting primitive `IsCoprime X Y`; primes other than `3` are easier because they divide `X` and `Y` directly.
+
+The divided branch condition `3 ∣ m+n` is not an assumption; it is produced by the divided split:
+
+```text
+m+n = 3*(r+s)/2.
+```
+
+The raw branch condition `3 ∤ m+n` is not needed for `EisensteinSqBranch`, but for a primitive raw triple it follows automatically: if `3 ∣ m+n`, then `X`, `Y`, and `Z` are all divisible by `3`.
+
+## 4. What may already exist in the repo
+
+I could not confirm the file or symbols through the connector. Based on the names in the prompt:
+
+* `EisensteinTriple` probably packages `Z^2 = X^2 - X*Y + Y^2`, possibly with positivity or primitiveness.
+* `EisensteinParam` probably packages the raw parametrization
+  `X = m^2-n^2`, `Y = 2*m*n-n^2`, `Z = m^2-m*n+n^2`.
+* `eisensteinParam_triple` likely proves the forward direction: parameters produce a triple.
+* `eisensteinTriple_factor_identity` is the key starting lemma:
+  `(2*Z - (2*X-Y))*(2*Z + (2*X-Y)) = 3*Y^2`.
+
+If the local WIP already has a theorem like one of these, it is essentially the missing theorem:
 
 ```lean
 import FLT.Assumptions.MazurProof.N12QuarticEisenstein
--- If available on the local WIP branch, also import:
--- import FLT.Assumptions.MazurProof.RationalPointsN12
 
-/-- Four integer squares in arithmetic progression, written without division. -/
-def FourSquaresAP (r s t u : ℤ) : Prop :=
-  s ^ 2 - r ^ 2 = t ^ 2 - s ^ 2 ∧
-  t ^ 2 - s ^ 2 = u ^ 2 - t ^ 2
-
-/-- The residual theorem needed after the divided-branch split. -/
-def NoNonconstantFourSquaresAP : Prop :=
-  ∀ {r s t u : ℤ},
-    0 < r → 0 < s → 0 < t → 0 < u →
-    FourSquaresAP r s t u →
-    r = s ∧ s = t ∧ t = u
-
-/-- Denominator-free form of the divided branch after setting
-`m+n = 3*p` and `2*m-n = 3*q`. -/
-def DividedReducedBranch (A N S p q : ℤ) : Prop :=
-  0 < p ∧ 0 < q ∧ 0 < 2 * q - p ∧ 0 < 2 * p - q ∧
-  IsCoprime p q ∧
-  A ^ 2 = p * (2 * q - p) ∧
-  N ^ 2 = q * (2 * p - q) ∧
-  S = p ^ 2 - p * q + q ^ 2
-
-/-- Middle parity square package for the divided branch. -/
-def DividedMiddlePackage (A N S m n a b c d : ℤ) : Prop :=
-  0 < a ∧ 0 < b ∧ 0 < c ∧ 0 < d ∧
-  m - n = a ^ 2 ∧
-  m + n = 3 * b ^ 2 ∧
-  n = c ^ 2 ∧
-  2 * m - n = 3 * d ^ 2 ∧
-  A = a * b ∧
-  N = c * d ∧
-  3 * S = m ^ 2 - m * n + n ^ 2
-```
-
-Core bridge targets:
-
-```lean
-import FLT.Assumptions.MazurProof.N12QuarticEisenstein
--- import FLT.Assumptions.MazurProof.RationalPointsN12
-
-/-- Extract the denominator-free reduced branch. -/
-theorem dividedSquareBranch_to_reduced
-    {A N S m n : ℤ}
-    (hpos : PositivePrimitiveEisensteinBadUnordered A N S)
-    (hbr : DividedSquareBranch A N S m n) :
-    ∃ p q : ℤ,
-      m + n = 3 * p ∧
-      2 * m - n = 3 * q ∧
-      m = p + q ∧
-      n = 2 * p - q ∧
-      DividedReducedBranch A N S p q := by
-  sorry
-
-/-- The two non-middle parity sectors are contradictory by mod `4`; the
-middle sector yields a four-square AP package. -/
-theorem dividedSquareBranch_middlePackage_or_contradiction
-    {A N S m n : ℤ}
-    (hpos : PositivePrimitiveEisensteinBadUnordered A N S)
-    (hbr : DividedSquareBranch A N S m n) :
-    ∃ a b c d : ℤ,
-      DividedMiddlePackage A N S m n a b c d ∧
-      FourSquaresAP c b d a := by
-  sorry
-
-/-- The middle package is constant if no four nonconstant positive squares are
-in arithmetic progression. -/
-theorem dividedMiddlePackage_unit_of_noFourSquaresAP
-    (hAP : NoNonconstantFourSquaresAP)
-    {A N S m n a b c d : ℤ}
-    (hpos : PositivePrimitiveEisensteinBadUnordered A N S)
-    (hpkg : DividedMiddlePackage A N S m n a b c d)
-    (hap : FourSquaresAP c b d a) :
-    A = 1 ∧ N = 1 ∧ S = 1 := by
-  sorry
-
-/-- Final divided branch close, using the AP obstruction rather than a new
-descent object. -/
-theorem dividedSquareBranch_unit_of_noFourSquaresAP
-    (hAP : NoNonconstantFourSquaresAP)
-    {A N S m n : ℤ}
-    (hpos : PositivePrimitiveEisensteinBadUnordered A N S)
-    (hbr : DividedSquareBranch A N S m n) :
-    A = 1 ∧ N = 1 ∧ S = 1 := by
-  sorry
-
-/-- Immediate wrapper for the WIP statement. This proves the left disjunct;
-it does not need to construct a new descent triple. -/
-theorem dividedSquareBranchUnitOrDescends_of_noFourSquaresAP
-    (hAP : NoNonconstantFourSquaresAP) :
-    DividedSquareBranchUnitOrDescendsStatement := by
-  intro A N S m n hpos hbr
-  exact Or.inl (dividedSquareBranch_unit_of_noFourSquaresAP hAP hpos hbr)
-```
-
-If the local `RationalPointsN12.lean` has a theorem that closes the pythagorean/Ljunggren quartic, add this bridge rather than trying to rewrite the original divided branch into that theorem:
-
-```lean
-import FLT.Assumptions.MazurProof.N12QuarticEisenstein
-import FLT.Assumptions.MazurProof.RationalPointsN12
-
-/-- Target bridge: expose the pythagorean-quartic/Kubert work as the exact AP
-obstruction needed by the divided branch. Fill in the proof using the actual
-local theorem names and hypotheses from `RationalPointsN12.lean`. -/
-theorem noNonconstantFourSquaresAP_of_kubertPythagoreanHalfFactors :
-    NoNonconstantFourSquaresAP := by
+-- Possible existing/target shape, not confirmed from the connected repo.
+theorem positivePrimitiveEisensteinTriple_param_or_unit
+    {X Y Z : ℤ}
+    (h : PrimitivePositiveEisensteinTriple X Y Z) :
+    (X = 1 ∧ Y = 1 ∧ Z = 1) ∨
+      ∃ m n : ℤ,
+        EisensteinRawParam X Y Z m n ∨
+        EisensteinRawParam Y X Z m n ∨
+        EisensteinDividedParam X Y Z m n ∨
+        EisensteinDividedParam Y X Z m n := by
   sorry
 ```
 
-If the existing endpoint is instead phrased as an `EulerSquarePair` descent, use this bridge shape:
+If only `eisensteinParam_triple` exists, it is the wrong direction for this frontier. The frontier needs the converse parametrization plus square-side specialization.
 
-```lean
-import FLT.Assumptions.MazurProof.N12QuarticEisenstein
--- import the file that defines `EulerSquarePair` and its descent theorem
-
-/-- Target bridge from the AP residual to the already checked Euler descent.
-Use the actual local `EulerSquarePair` fields; this shape deliberately avoids
-any false `A±N` shortcut. -/
-theorem fourSquaresAP_constant_or_eulerSquarePair
-    {c b d a : ℤ}
-    (hc : 0 < c) (hb : 0 < b) (hd : 0 < d) (ha : 0 < a)
-    (hap : FourSquaresAP c b d a) :
-    (c = b ∧ b = d ∧ d = a) ∨
-      ∃ P Q, EulerSquarePair P Q := by
-  sorry
-```
-
-The key implementation detail is that the signs of `A` and `N` are not determined by the square equations alone. Use `PositivePrimitiveEisensteinBadUnordered` to get `0 < A` and `0 < N` before concluding `A = a*b` and `N = c*d`. Without positivity, the unit branch also permits `A = -1` or `N = -1` at the level of `DividedSquareBranch` alone.
-
-## 6. Suspicious or too-weak points to check in `RationalPointsN12.lean`
-
-Since I could not fetch the file, these are audit checks rather than accusations.
-
-1. **Repository visibility is stale.** The requested file is absent from both `main` and `scratch` through the connector. Before relying on these theorem names in CI, push the local WIP branch containing `RationalPointsN12.lean` or merge it into the working branch.
-
-2. **`gcd_eq_one` may be too specialized.** A half-factor proof that first shows `gcd = 1 ∨ gcd = 3` and then has a theorem named `gcd_eq_one` needs careful hypothesis checking. The divided branch has a forced common factor `3` between the original factors `m+n` and `2*m-n`. If a bridge to the quartic lands in the `gcd = 3` case, a theorem that only exposes `gcd = 1` will be too weak or inapplicable.
-
-3. **`signed_split_of_nonzero` may not provide positivity.** For the divided branch, the final unit proof needs positive square roots so that `A = a*b` and `N = c*d`, not merely `A^2 = (a*b)^2`. If the existing split is signed, add a normalization lemma using `0 < A`, `0 < N`, and positivity of the linear factors.
-
-4. **`kubert_cover_pythagorean_half_factors` may be too monolithic.** If it proves only a final rational-points statement, expose a small corollary with the exact shape `NoNonconstantFourSquaresAP`. That is the minimal reusable interface for the divided branch.
-
-5. **Avoid original-variable reuse.** Any theorem requiring `B^2 = pythagoreanQuarticRhs m n` should not be fed the original divided-branch `m n` unless the local file contains a proved lemma doing exactly that. The honest bridge changes variables via the middle square package/four-square AP.
-
-## 7. Recommended Lean route
-
-Use the following route, in this order:
+If only a raw converse exists, it is too weak. The primitive triple
 
 ```text
-DividedSquareBranch
-  → prove 3 ∤ n, 3 ∤ m, 3 ∤ (m-n), 3 ∣ (2*m-n), gcd(m+n,2*m-n)=3
-  → introduce p,q with m+n=3p and 2m-n=3q
-  → get A^2=p*(2q-p), N^2=q*(2p-q), S=p^2-pq+q^2
-  → split by parity
-  → mod-4 contradiction for m odd/n even
-  → mod-4 contradiction for m odd/n odd
-  → middle package m even/n odd
-  → obtain c^2,b^2,d^2,a^2 in AP
-  → apply `NoNonconstantFourSquaresAP`
-  → constant AP
-  → coprimality forces a=b=c=d=1
-  → m=2, n=1, A=1, N=1, S=1
-  → `Or.inl` for `DividedSquareBranchUnitOrDescendsStatement`
+X = 8, Y = 3, Z = 7
 ```
 
-This route is Lean-friendly because each step is local and checkable: integer divisibility/gcd lemmas, parity cases, two small mod-4 contradictions, one exposed AP obstruction, and final unit normalization. It avoids the false shortcuts through `A+N` or `A-N` and does not pretend that the divided branch is the raw branch under rescaling.
+satisfies
+
+```text
+7^2 = 8^2 - 8*3 + 3^2,
+IsCoprime 8 3,
+```
+
+and is not raw. It is the divided case from `m=5`, `n=1`:
+
+```text
+3*8 = (5-1)*(5+1),
+3*3 = 1*(2*5-1),
+3*7 = 5^2 - 5*1 + 1^2,
+3 ∣ 5+1.
+```
+
+If a half-factor theorem assumes `gcd(U,V)=1`, it is false for even `Y`; the example `(X,Y,Z)=(5,8,7)` has `gcd(U,V)=4`.
+
+## 5. Lean implementation DAG
+
+### Layer 0: primitive-square boilerplate
+
+```lean
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
+/-- `IsCoprime A N` lifts to the square sides. -/
+theorem IsCoprime.sq_sq_int {A N : ℤ}
+    (h : IsCoprime A N) : IsCoprime (A ^ 2) (N ^ 2) := by
+  sorry
+
+/-- Normalized bad data gives a primitive positive Eisenstein triple on
+`X=A^2`, `Y=N^2`, `Z=S`. -/
+theorem NormalizedEisensteinBad.to_primitiveTriple
+    {A N S : ℤ}
+    (h : NormalizedEisensteinBad A N S) :
+    PrimitivePositiveEisensteinTriple (A ^ 2) (N ^ 2) S := by
+  sorry
+```
+
+### Layer 1: factor identity and positivity
+
+Use the existing `eisensteinTriple_factor_identity` if available. Add generic wrappers:
+
+```lean
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
+/-- The two half factors are positive. -/
+theorem eisensteinTriple_halfFactors_pos
+    {X Y Z : ℤ}
+    (h : PrimitivePositiveEisensteinTriple X Y Z) :
+    0 < 2 * Z - (2 * X - Y) ∧
+    0 < 2 * Z + (2 * X - Y) := by
+  sorry
+
+/-- Product identity, oriented at the `Y` side. Use the existing
+`eisensteinTriple_factor_identity` here if it has this shape. -/
+theorem eisensteinTriple_halfFactors_mul
+    {X Y Z : ℤ}
+    (h : PrimitivePositiveEisensteinTriple X Y Z) :
+    (2 * Z - (2 * X - Y)) * (2 * Z + (2 * X - Y)) = 3 * Y ^ 2 := by
+  sorry
+```
+
+### Layer 2: gcd and square split
+
+This is the arithmetic heart. Keep it independent of `A,N,S`.
+
+```lean
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
+/-- Common divisors of the half factors are only the harmless `2`-adic part;
+the possible common `3` is excluded by primitiveness. -/
+theorem eisensteinTriple_halfFactors_gcd_eq_one_or_four
+    {X Y Z : ℤ}
+    (h : PrimitivePositiveEisensteinTriple X Y Z) :
+    Nat.gcd
+      (Int.natAbs (2 * Z - (2 * X - Y)))
+      (Int.natAbs (2 * Z + (2 * X - Y))) = 1 ∨
+    Nat.gcd
+      (Int.natAbs (2 * Z - (2 * X - Y)))
+      (Int.natAbs (2 * Z + (2 * X - Y))) = 4 := by
+  sorry
+
+/-- Square split of `U*V = 3*Y^2` under the primitive half-factor gcd facts. -/
+theorem eisensteinTriple_halfFactors_square_split
+    {X Y Z : ℤ}
+    (h : PrimitivePositiveEisensteinTriple X Y Z) :
+    ∃ r s : ℤ,
+      0 < r ∧ 0 < s ∧ (2 : ℤ) ∣ r + s ∧
+      ((2 * Z - (2 * X - Y) = 3 * r ^ 2 ∧
+        2 * Z + (2 * X - Y) = s ^ 2 ∧
+        Y = r * s ∧
+        r < s) ∨
+       (2 * Z - (2 * X - Y) = r ^ 2 ∧
+        2 * Z + (2 * X - Y) = 3 * s ^ 2 ∧
+        Y = r * s ∧
+        r < 3 * s)) := by
+  sorry
+```
+
+Notes for this layer:
+
+* Work in `Nat` valuations if the project has stronger support there.
+* Convert back to `ℤ` only after obtaining positive square roots.
+* Do not state `gcd = 1` alone; `gcd = 4` is necessary.
+
+### Layer 3: construct raw/divided parameters from the split
+
+```lean
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
+/-- Raw square split gives raw Eisenstein parameters. -/
+theorem rawParam_of_halfFactors_rawSplit
+    {X Y Z r s : ℤ}
+    (hr : 0 < r) (hs : 0 < s)
+    (hpar : (2 : ℤ) ∣ r + s)
+    (hrs : r < s)
+    (hU : 2 * Z - (2 * X - Y) = 3 * r ^ 2)
+    (hV : 2 * Z + (2 * X - Y) = s ^ 2)
+    (hY : Y = r * s)
+    (hprim : IsCoprime X Y) :
+    ∃ m n : ℤ, EisensteinRawParam X Y Z m n := by
+  -- set `n = r`, `m = (r+s)/2`
+  sorry
+
+/-- Divided square split gives divided Eisenstein parameters. -/
+theorem dividedParam_of_halfFactors_dividedSplit
+    {X Y Z r s : ℤ}
+    (hr : 0 < r) (hs : 0 < s)
+    (hpar : (2 : ℤ) ∣ r + s)
+    (hrs : r < 3 * s)
+    (hU : 2 * Z - (2 * X - Y) = r ^ 2)
+    (hV : 2 * Z + (2 * X - Y) = 3 * s ^ 2)
+    (hY : Y = r * s)
+    (hprim : IsCoprime X Y) :
+    ∃ m n : ℤ, EisensteinDividedParam X Y Z m n := by
+  -- set `n = r`, `m = (r+3*s)/2`
+  sorry
+```
+
+### Layer 4: generic primitive parametrization
+
+```lean
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
+/-- Generic primitive-positive parametrization. -/
+theorem primitivePositiveEisensteinTriple_param_or_unit
+    {X Y Z : ℤ}
+    (h : PrimitivePositiveEisensteinTriple X Y Z) :
+    (X = 1 ∧ Y = 1 ∧ Z = 1) ∨
+      ∃ m n : ℤ,
+        EisensteinRawParam X Y Z m n ∨
+        EisensteinRawParam Y X Z m n ∨
+        EisensteinDividedParam X Y Z m n ∨
+        EisensteinDividedParam Y X Z m n := by
+  -- Apply `eisensteinTriple_halfFactors_square_split h`.
+  -- Convert raw split to `EisensteinRawParam X Y Z`.
+  -- Convert divided split to `EisensteinDividedParam X Y Z`.
+  -- Swapped disjuncts are optional here; they can be filled by symmetry or left unused.
+  sorry
+```
+
+The unit branch can be proven separately as a degenerate lemma if the square split lands in `r=s=1` and `X=Y`, or simply included as a convenient disjunct in a stronger theorem. In the normalized target it is impossible.
+
+### Layer 5: square-side wrapper matching existing branch definitions
+
+```lean
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
+/-- Translate generic raw parameters on square sides into the local raw branch. -/
+theorem rawParam_sqSides_iff_branch
+    {A N S m n : ℤ} :
+    EisensteinRawParam (A ^ 2) (N ^ 2) S m n ↔
+      EisensteinSqBranch A N S m n := by
+  sorry
+
+/-- Translate generic divided parameters on square sides into the local divided branch. -/
+theorem dividedParam_sqSides_iff_branch
+    {A N S m n : ℤ} :
+    EisensteinDividedParam (A ^ 2) (N ^ 2) S m n ↔
+      DividedSquareBranch A N S m n := by
+  sorry
+```
+
+### Layer 6: final normalized statement
+
+```lean
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
+/-- Final frontier: normalized bad square-side triple has one of the four
+accepted square branches. -/
+theorem normalizedBadParamStatement_checked :
+    NormalizedBadParamStatement := by
+  intro A N S hbad
+  have htri : PrimitivePositiveEisensteinTriple (A ^ 2) (N ^ 2) S :=
+    NormalizedEisensteinBad.to_primitiveTriple hbad
+  rcases primitivePositiveEisensteinTriple_param_or_unit htri with hunit | hparam
+  · -- Contradict normalized `A < N` or `A^2 ≠ N^2`.
+    -- From `hunit`, get `A = 1` and `N = 1`, hence contradiction.
+    exfalso
+    sorry
+  · rcases hparam with ⟨m, n, hcases⟩
+    refine ⟨m, n, ?_⟩
+    -- Convert each generic `RawParam`/`DividedParam` disjunct to the local
+    -- `EisensteinSqBranch`/`DividedSquareBranch` disjunct.
+    sorry
+```
+
+## 6. Common false shortcuts to avoid
+
+1. **Do not use `A+N` or `A-N` product shortcuts.** The factor identity controls
+
+```text
+2*S ± (2*A^2 - N^2),
+```
+
+not `A ± N`.
+
+2. **Do not drop the divided branch.** The primitive triple `(8,3,7)` is divided, not raw.
+
+3. **Do not assert `gcd(U,V)=1`.** The even primitive triple `(5,8,7)` gives `gcd(U,V)=4`.
+
+4. **Do not assume the swapped orientation is mathematically different.** It is the same conic parametrization under `n ↦ m-n`, but including both orientations makes the final statement match the downstream branch closures.
+
+5. **Do not make the unit branch disappear silently.** For the full primitive-positive theorem, `(1,1,1)` is real. For normalized `0<A<N`, it is excluded and should be discharged explicitly.
+
+## 7. Minimal final theorem set
+
+The smallest Lean-checkable set that should unlock `NormalizedBadParamStatement` is:
+
+```lean
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
+#check eisensteinTriple_factor_identity
+
+-- New/target lemmas:
+#check IsCoprime.sq_sq_int
+#check NormalizedEisensteinBad.to_primitiveTriple
+#check eisensteinTriple_halfFactors_pos
+#check eisensteinTriple_halfFactors_gcd_eq_one_or_four
+#check eisensteinTriple_halfFactors_square_split
+#check rawParam_of_halfFactors_rawSplit
+#check dividedParam_of_halfFactors_dividedSplit
+#check primitivePositiveEisensteinTriple_param_or_unit
+#check rawParam_sqSides_iff_branch
+#check dividedParam_sqSides_iff_branch
+#check normalizedBadParamStatement_checked
+```
+
+If local WIP already has `EisensteinTriple`/`EisensteinParam`, reuse those names rather than introducing duplicates. The key missing theorem is the **converse primitive parametrization with both raw and divided cases**; `eisensteinParam_triple` alone is only the forward direction and will not prove the frontier.
