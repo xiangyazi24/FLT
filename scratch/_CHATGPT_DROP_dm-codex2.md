@@ -1,375 +1,528 @@
-# Q2724 dm-codex2: N12FourSquaresAP route for the divided branch
+# Q2729 dm-codex2: primitive Eisenstein triple parametrization audit
 
-## Connector audit status
+Repo target: `xiangyazi24/FLT`, namespace `MazurProof.RationalPointsN12`.
 
-I could not confirm the requested existing Lean file from the connected repository. Through the GitHub connector:
+This answers the residual around
 
-- `FLT/Assumptions/MazurProof/N12FourSquaresAP.lean` returned `404` on `scratch`.
-- The same path had previously returned `404` on the default branch.
-- Code search in `xiangyazi24/FLT` for `N12FourSquaresAP`, `FourSquaresAP`, and `pythagoreanQuarticRhs` returned no hits.
+```lean
+def EisensteinTriple (X Y Z : ℤ) : Prop :=
+  Z ^ 2 = X ^ 2 - X * Y + Y ^ 2
+```
 
-So I cannot honestly name an already-existing theorem from `N12FourSquaresAP.lean`. The answer below therefore gives the exact wrapper/interface I would add and the concrete proof route. Where a theorem is described as “use this”, it means “make this the local API boundary and prove it from the actual AP theorem once the WIP file is visible”; I am not claiming repo-confirmed `#check` output for that theorem name.
+and the proposed full/raw/divided parametrization.
 
-## 1. Four-squares AP theorem/interface to use
+## 1. Verdict: the statement is true, but the unit alternative is unnecessary
 
-For the divided `m` even branch, the downstream code should not depend on the internal shape of the four-squares AP proof. The minimal API should be this wrapper:
+The stated theorem
+
+```lean
+def EisensteinTriplePrimitiveParamOrUnit : Prop :=
+  ∀ {X Y Z : ℤ},
+    0 < X → 0 < Y → 0 < Z →
+    IsCoprime X Y →
+    EisensteinTriple X Y Z →
+    EisensteinTripleParamOrUnit X Y Z
+```
+
+is mathematically true. I do **not** see a missing `X < Y`, `X ≠ Y`, parity, or sign hypothesis.
+
+Important details:
+
+* `X < Y` is not needed. The conic slope `Y/(Z+X)` always produces a parameter with `0 < n < m`. The first, non-swapped orientation already covers both relative orders of `X` and `Y`; the swapped alternative in `EisensteinParam` is redundant but harmless.
+* `X ≠ Y` is not needed. If `X = Y`, the equation gives `Z^2 = X^2`; with `0 < Z` and `IsCoprime X Y`, this forces `X = Y = Z = 1`.
+* No parity hypothesis is needed. This is not the classical Pythagorean parametrization; the only exceptional common factor is `3`, not `2`.
+* The positivity assumption `0 < Z` is necessary. Without it, the parametrization with positive `m,n` gives the positive representative for `Z`, while the equation itself is invariant under `Z ↦ -Z`.
+
+A stronger and cleaner residual is actually true:
 
 ```lean
 import Mathlib.Tactic
 
 namespace MazurProof.RationalPointsN12
 
-/-- No nonconstant four integer squares in arithmetic progression, in the exact
-midpoint form needed by the divided `m` even branch.
-
-The two hypotheses say that `c^2, b^2, d^2, a^2` are in arithmetic progression.
-The conclusion is deliberately only equality of squares; signs are handled later
-from the positive factor package. -/
-def FourSquaresAPCollapseStatement : Prop :=
-  ∀ {a b c d : ℤ},
-    c ^ 2 + d ^ 2 = 2 * b ^ 2 →
-    b ^ 2 + a ^ 2 = 2 * d ^ 2 →
-    a ^ 2 = d ^ 2 ∧ d ^ 2 = b ^ 2 ∧ b ^ 2 = c ^ 2
+/-- Stronger than the current `...OrUnit`: the unit `(1,1,1)` is itself in
+the divided-by-3 sector, with `(m,n) = (2,1)`. -/
+def EisensteinTriplePrimitiveFullParamStatement : Prop :=
+  ∀ {X Y Z : ℤ},
+    0 < X → 0 < Y → 0 < Z →
+    IsCoprime X Y →
+    EisensteinTriple X Y Z →
+    ∃ m n : ℤ, EisensteinFullParam X Y Z m n
 
 end MazurProof.RationalPointsN12
 ```
 
-If the existing file has a theorem for a centered primitive AP, prove this wrapper from it once, then make all divided-branch code depend only on `FourSquaresAPCollapseStatement` or on the theorem implementation of that statement, e.g.
+If keeping the current `EisensteinTripleParamOrUnit` interface, the unit branch needs one tiny downstream bridge: `(1,1,1)` gives `EisensteinFullParam 1 1 1 2 1`, and in the quartic bridge it gives `DividedSquareBranch 1 1 1 2 1`.
 
-```lean
-theorem four_squares_ap_collapse_of_midpoint :
-    FourSquaresAPCollapseStatement := by
-  -- prove from the existing centered/primitive AP theorem
+## 2. Elementary proof route; no Eisenstein UFD needed
+
+The full theorem is an elementary rational-conic parametrization. No unique factorization in `ℤ[ω]` is needed.
+
+Use the rational slope through the rational point `(1,0,1)` on the conic:
+
+```text
+Z^2 = X^2 - X*Y + Y^2.
 ```
 
-I would **not** thread a primitive/centered AP theorem directly into the divided branch. The divided branch naturally produces the two midpoint identities above; any primitive normalization is an implementation detail of the AP file.
+For a positive primitive solution, define the reduced slope by
 
-## 2. Lean-friendly skeleton for `DividedMEvenFactorsUnitStatement`
-
-The target statement from your WIP is:
-
-```lean
-def DividedMEvenFactorsUnitStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    DividedSquareBranch A N S m n →
-    Even m →
-    DividedSqBranchMEvenFactors m n →
-    A = 1 ∧ N = 1 ∧ S = 1
+```text
+n / m = Y / (Z + X),       with gcd(m,n)=1 and 0<n<m.
 ```
 
-The proof should split into three small bridges.
+The inequality `Y < Z+X` follows from
 
-### Bridge A: `MEvenFactors` gives the two AP midpoint identities
+```text
+Z^2 - (Y-X)^2 = X*Y > 0.
+```
+
+Then
+
+```text
+m*Y = n*(Z+X).
+```
+
+Since `IsCoprime m n`, Euclid divisibility gives an integer `C` such that
+
+```text
+Y = n*C,
+Z + X = m*C.
+```
+
+Substitute `Z = m*C - X` and `Y = n*C` into the conic:
+
+```text
+(m*C - X)^2 = X^2 - X*(n*C) + (n*C)^2.
+```
+
+After cancellation,
+
+```text
+(m^2 - n^2) * C = (2*m - n) * X.        (★)
+```
+
+The only possible common divisor of
+
+```text
+m^2 - n^2        and        2*m - n
+```
+
+is `1` or `3`. More precisely, under `IsCoprime m n` and `0<n<m`:
+
+```text
+gcd(m^2-n^2, 2*m-n) = 1      if ¬ 3 ∣ m+n,
+gcd(m^2-n^2, 2*m-n) = 3      if   3 ∣ m+n.
+```
+
+So equation `(★)` gives two cases.
+
+### Raw case: `¬ 3 ∣ m+n`
+
+The two factors in `(★)` are coprime, hence
+
+```text
+C = k*(2*m - n),
+X = k*(m^2 - n^2).
+```
+
+Then
+
+```text
+Y = n*C = k*(2*m*n - n^2),
+Z = m*C - X = k*(m^2 - m*n + n^2).
+```
+
+Because `k` divides both `X` and `Y`, and `IsCoprime X Y`, positivity forces `k=1`. Thus
+
+```text
+X = m^2 - n^2,
+Y = 2*m*n - n^2,
+Z = m^2 - m*n + n^2,
+¬ 3 ∣ m+n.
+```
+
+This is exactly the raw branch of `EisensteinFullParam`.
+
+### Divided case: `3 ∣ m+n`
+
+Now the common divisor of `m^2-n^2` and `2*m-n` is exactly `3`. The same slope equation becomes coprime after dividing both factors by `3`:
+
+```text
+((m^2 - n^2)/3) * C = ((2*m - n)/3) * X.
+```
+
+Hence
+
+```text
+C = k*((2*m - n)/3),
+X = k*((m^2 - n^2)/3).
+```
+
+Then
+
+```text
+Y = k*((2*m*n - n^2)/3),
+Z = k*((m^2 - m*n + n^2)/3).
+```
+
+Again `k` divides both `X` and `Y`, so primitivity and positivity force `k=1`. Multiplying by `3` gives exactly the divided sector:
+
+```text
+3*X = m^2 - n^2,
+3*Y = 2*m*n - n^2,
+3*Z = m^2 - m*n + n^2,
+3 ∣ m+n.
+```
+
+The swapped orientation in the current definition is not needed for this derivation, but it is safe to keep.
+
+## 3. Lean decomposition: exact interfaces
+
+Here is a Lean-friendly decomposition into small targets. These are designed as local theorem interfaces, not axioms. The proof scripts are intended to use `ring`, `nlinarith`, Euclid divisibility for `IsCoprime`, and positivity/unit handling in `ℤ`.
 
 ```lean
 import Mathlib.Tactic
 
 namespace MazurProof.RationalPointsN12
 
-/-- Exact AP identities extracted from the `m` even divided factor package. -/
-def DividedMEvenFactorsAPIdentitiesStatement : Prop :=
-  ∀ {m n a b c d : ℤ},
-    m - n = a ^ 2 →
-    m + n = 3 * b ^ 2 →
-    n = c ^ 2 →
-    2 * m - n = 3 * d ^ 2 →
-    c ^ 2 + d ^ 2 = 2 * b ^ 2 ∧
-      b ^ 2 + a ^ 2 = 2 * d ^ 2
-
-end MazurProof.RationalPointsN12
-```
-
-The proof body is just `nlinarith` after destructing the factor package:
-
-```lean
-rcases hf with ⟨a, b, c, d, ha, hb, hc, hd, hmn, hmpn, hn, h2mn⟩
-
-have hap1 : c ^ 2 + d ^ 2 = 2 * b ^ 2 := by
-  nlinarith [hmpn, hn, h2mn]
-
-have hap2 : b ^ 2 + a ^ 2 = 2 * d ^ 2 := by
-  nlinarith [hmn, hmpn, h2mn]
-```
-
-Algebra check:
-
-- From `m+n = 3*b^2`, `n = c^2`, and `2*m-n = 3*d^2`, subtracting the last equation from twice the first gives `3*c^2 + 3*d^2 = 6*b^2`, hence `c^2+d^2=2*b^2`.
-- From `m-n = a^2`, `m+n = 3*b^2`, and `2*m-n = 3*d^2`, the identity `2*(2*m-n) = (m+n) + 3*(m-n)` gives `2*d^2 = b^2+a^2`.
-
-### Bridge B: AP collapse plus coprimality gives `m = 2`, `n = 1`
-
-```lean
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-/-- The `m` even divided factor package collapses to the unique coprime solution
-`m = 2`, `n = 1`, assuming the four-squares AP collapse wrapper. -/
-def DividedMEvenFactorsMNUnitStatement : Prop :=
-  ∀ {m n : ℤ},
-    IsCoprime m n →
-    DividedSqBranchMEvenFactors m n →
-    m = 2 ∧ n = 1
-
-end MazurProof.RationalPointsN12
-```
-
-Core proof skeleton:
-
-```lean
-rcases hf with ⟨a, b, c, d, ha, hb, hc, hd, hmn, hmpn, hn, h2mn⟩
-
-have hap1 : c ^ 2 + d ^ 2 = 2 * b ^ 2 := by
-  nlinarith [hmpn, hn, h2mn]
-have hap2 : b ^ 2 + a ^ 2 = 2 * d ^ 2 := by
-  nlinarith [hmn, hmpn, h2mn]
-
--- Use the wrapper from the AP file.
-have hsq : a ^ 2 = d ^ 2 ∧ d ^ 2 = b ^ 2 ∧ b ^ 2 = c ^ 2 :=
-  four_squares_ap_collapse_of_midpoint hap1 hap2
-
-have ha2c2 : a ^ 2 = c ^ 2 := by
-  calc
-    a ^ 2 = d ^ 2 := hsq.1
-    _ = b ^ 2 := hsq.2.1
-    _ = c ^ 2 := hsq.2.2
-
-have hn_a : n = a ^ 2 := by
-  calc
-    n = c ^ 2 := hn
-    _ = a ^ 2 := ha2c2.symm
-
-have hm_a : m = 2 * a ^ 2 := by
-  nlinarith [hmn, hn_a]
-
-have ha2_dvd_m : a ^ 2 ∣ m := by
-  refine ⟨2, ?_⟩
-  rw [hm_a]
+/-- Raw algebra identity for the Eisenstein conic parametrization. -/
+theorem eisenstein_param_identity_raw (m n : ℤ) :
+    (m ^ 2 - m * n + n ^ 2) ^ 2 =
+      (m ^ 2 - n ^ 2) ^ 2 -
+        (m ^ 2 - n ^ 2) * (2 * m * n - n ^ 2) +
+          (2 * m * n - n ^ 2) ^ 2 := by
   ring
 
-have ha2_dvd_n : a ^ 2 ∣ n := by
-  refine ⟨1, ?_⟩
-  rw [hn_a]
-  ring
-
--- Mathlib API expected here:
-have ha2_unit : IsUnit (a ^ 2) :=
-  hcop.isUnit_of_dvd ha2_dvd_m ha2_dvd_n
-
-have ha2_pos : 0 < a ^ 2 := by
-  positivity
-
-have ha2_one : a ^ 2 = 1 := by
-  rw [Int.isUnit_iff] at ha2_unit
-  rcases ha2_unit with ha2_one | ha2_neg_one
-  · exact ha2_one
-  · have : (0 : ℤ) < -1 := by
-      simpa [ha2_neg_one] using ha2_pos
-    omega
-
-have hn1 : n = 1 := by
-  rw [hn_a, ha2_one]
-
-have hm2 : m = 2 := by
-  rw [hm_a, ha2_one]
-  norm_num
-```
-
-Notes:
-
-- `Even m` is not used once `DividedSqBranchMEvenFactors m n` has been produced. It is still harmless in `DividedMEvenFactorsUnitStatement`, because it documents which split branch produced the factor package.
-- If `hcop.isUnit_of_dvd` is not found under method notation, use the namespace form for the same Mathlib theorem, usually `IsCoprime.isUnit_of_dvd hcop ha2_dvd_m ha2_dvd_n`.
-- The only nontrivial Mathlib dependency in this bridge is the `IsCoprime` common-divisor-to-unit API.
-
-### Bridge C: `m = 2`, `n = 1` and divided branch equations give `A=N=S=1`
-
-This bridge should not know anything about APs or factor packages.
-
-```lean
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-/-- Positivity projection needed from `PositivePrimitiveEisensteinBadUnordered`.
-If the local definition is a conjunction, this should be a one-line `rcases`/`aesop` lemma. -/
-def PositivePrimitiveEisensteinBadUnorderedPosStatement : Prop :=
-  ∀ {A N S : ℤ},
-    PositivePrimitiveEisensteinBadUnordered A N S →
-    0 < A ∧ 0 < N ∧ 0 < S
-
-/-- Once the divided branch reaches `(m,n)=(2,1)`, the branch equations force
-`A=N=S=1`. -/
-def DividedSquareBranchUnitOfMNStatement : Prop :=
-  ∀ {A N S m n : ℤ},
-    0 < A →
-    0 < N →
-    DividedSquareBranch A N S m n →
-    m = 2 →
-    n = 1 →
-    A = 1 ∧ N = 1 ∧ S = 1
-
-end MazurProof.RationalPointsN12
-```
-
-The branch-equation proof body is essentially:
-
-```lean
-rcases hbr with ⟨hnpos, hnm, hcop, h3, hAeq, hNeq, hSeq⟩
-
-have hA_sq : A ^ 2 = 1 := by
-  rw [hm2, hn1] at hAeq
-  norm_num at hAeq
-  exact hAeq
-
-have hN_sq : N ^ 2 = 1 := by
-  rw [hm2, hn1] at hNeq
-  norm_num at hNeq
-  exact hNeq
-
-have hA1 : A = 1 := by
-  rcases (sq_eq_one_iff.mp hA_sq) with hA1 | hAneg
-  · exact hA1
-  · omega
-
-have hN1 : N = 1 := by
-  rcases (sq_eq_one_iff.mp hN_sq) with hN1 | hNneg
-  · exact hN1
-  · omega
-
-have hS1 : S = 1 := by
-  rw [hm2, hn1] at hSeq
-  norm_num at hSeq
-  omega
-
-exact ⟨hA1, hN1, hS1⟩
-```
-
-Then the final `DividedMEvenFactorsUnitStatement` proof is only orchestration:
-
-```lean
-intro A N S m n hprim hbr hmEven hf
-obtain ⟨hApos, hNpos, hSpos⟩ := positivePrimitiveEisensteinBadUnordered_pos hprim
-rcases hbr with ⟨hnpos, hnm, hcop, h3, hAeq, hNeq, hSeq⟩
-have hbr_saved : DividedSquareBranch A N S m n :=
-  ⟨hnpos, hnm, hcop, h3, hAeq, hNeq, hSeq⟩
-obtain ⟨hm2, hn1⟩ := divided_mEven_factors_mn_unit hcop hf
-exact dividedSquareBranch_unit_of_m_eq_two_n_eq_one hApos hNpos hbr_saved hm2 hn1
-```
-
-## 3. Lean-friendly proof of the mod-4 lemma
-
-This one is independent of the project definitions and should live near the MOdd contradiction.
-
-```lean
-import Mathlib.Tactic
-
-theorem no_oddC_three_square_sum {a b c : ℤ} :
-    Odd c → a ^ 2 + c ^ 2 = 3 * b ^ 2 → False := by
-  intro hc h
-  rcases hc with ⟨k, rfl⟩
-  rcases Int.even_or_odd a with ha | ha
-  · rcases ha with ⟨r, rfl⟩
-    rcases Int.even_or_odd b with hb | hb
-    · rcases hb with ⟨s, rfl⟩
-      ring_nf at h
-      omega
-    · rcases hb with ⟨s, rfl⟩
-      ring_nf at h
-      omega
-  · rcases ha with ⟨r, rfl⟩
-    rcases Int.even_or_odd b with hb | hb
-    · rcases hb with ⟨s, rfl⟩
-      ring_nf at h
-      omega
-    · rcases hb with ⟨s, rfl⟩
-      ring_nf at h
-      omega
-```
-
-If `Int.even_or_odd` is not in the imported namespace in this project, the same proof usually works with the unqualified theorem:
-
-```lean
-rcases even_or_odd a with ha | ha
-```
-
-The proof is just the mod-4 argument encoded by parity witnesses:
-
-- `c` odd gives `c^2 ≡ 1 mod 4`.
-- `a^2` is `0` or `1 mod 4`, so `a^2+c^2` is `1` or `2 mod 4`.
-- `3*b^2` is `0` or `3 mod 4`.
-- No residue matches.
-
-For the MOdd factor package, the bridge theorem should be:
-
-```lean
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-/-- The odd-`m` divided factor package is impossible once the divided branch has
-forced `n` odd. -/
-def DividedMOddFactorsImpossibleStatement : Prop :=
+/-- Divisibility of all three raw parametrizing polynomials in the `3 ∣ m+n`
+sector. This is the algebraic source of the divided branch. -/
+def EisensteinDividedSectorDivisibilityStatement : Prop :=
   ∀ {m n : ℤ},
-    Odd n →
-    DividedSqBranchMOddFactors m n →
-    False
+    (3 : ℤ) ∣ m + n →
+      (3 : ℤ) ∣ m ^ 2 - n ^ 2 ∧
+      (3 : ℤ) ∣ 2 * m * n - n ^ 2 ∧
+      (3 : ℤ) ∣ m ^ 2 - m * n + n ^ 2
+
+/-- The reduced conic slope.  Here `n/m = Y/(Z+X)`. -/
+def EisensteinReducedSlopeStatement : Prop :=
+  ∀ {X Y Z : ℤ},
+    0 < X → 0 < Y → 0 < Z →
+    EisensteinTriple X Y Z →
+    ∃ m n : ℤ,
+      0 < n ∧ n < m ∧ IsCoprime m n ∧
+      m * Y = n * (Z + X)
+
+/-- The only possible common factor in the raw slope denominator is excluded
+by `¬ 3 ∣ m+n`. -/
+def EisensteinDenominatorGcdRawStatement : Prop :=
+  ∀ {m n : ℤ},
+    0 < n → n < m → IsCoprime m n →
+    ¬ (3 : ℤ) ∣ m + n →
+    IsCoprime (m ^ 2 - n ^ 2) (2 * m - n)
+
+/-- In the `3 ∣ m+n` sector, the common factor is exactly the factor `3` that
+is divided out. -/
+def EisensteinDenominatorGcdDividedStatement : Prop :=
+  ∀ {m n : ℤ},
+    0 < n → n < m → IsCoprime m n →
+    (3 : ℤ) ∣ m + n →
+    IsCoprime ((m ^ 2 - n ^ 2) / 3) ((2 * m - n) / 3)
+
+/-- Solving the slope equation in the raw sector, before primitivity kills the
+scale factor. -/
+def EisensteinSlopeScaleRawStatement : Prop :=
+  ∀ {X Y Z m n : ℤ},
+    0 < X → 0 < Y → 0 < Z →
+    EisensteinTriple X Y Z →
+    0 < n → n < m → IsCoprime m n →
+    m * Y = n * (Z + X) →
+    ¬ (3 : ℤ) ∣ m + n →
+    ∃ k : ℤ,
+      0 < k ∧
+      X = k * (m ^ 2 - n ^ 2) ∧
+      Y = k * (2 * m * n - n ^ 2) ∧
+      Z = k * (m ^ 2 - m * n + n ^ 2)
+
+/-- Solving the slope equation in the divided sector, before primitivity kills
+the scale factor. -/
+def EisensteinSlopeScaleDividedStatement : Prop :=
+  ∀ {X Y Z m n : ℤ},
+    0 < X → 0 < Y → 0 < Z →
+    EisensteinTriple X Y Z →
+    0 < n → n < m → IsCoprime m n →
+    m * Y = n * (Z + X) →
+    (3 : ℤ) ∣ m + n →
+    ∃ k : ℤ,
+      0 < k ∧
+      X = k * ((m ^ 2 - n ^ 2) / 3) ∧
+      Y = k * ((2 * m * n - n ^ 2) / 3) ∧
+      Z = k * ((m ^ 2 - m * n + n ^ 2) / 3)
+
+/-- The generic primitivity step: a positive common scale in a coprime pair is
+`1`. -/
+def PositivePrimitiveScaleOneStatement : Prop :=
+  ∀ {X Y U V k : ℤ},
+    0 < k → IsCoprime X Y →
+    X = k * U → Y = k * V →
+    k = 1
+
+/-- Cleaner final theorem: no unit alternative is needed because the unit is in
+the divided sector with `(m,n)=(2,1)`. -/
+def EisensteinTriplePrimitiveFullParamStatement : Prop :=
+  ∀ {X Y Z : ℤ},
+    0 < X → 0 < Y → 0 < Z →
+    IsCoprime X Y →
+    EisensteinTriple X Y Z →
+    ∃ m n : ℤ, EisensteinFullParam X Y Z m n
 
 end MazurProof.RationalPointsN12
 ```
 
-Core proof skeleton:
+### Constructor lemmas for `EisensteinFullParam`
+
+These are small enough to prove by constructor/`simp` once the scaled formulas are available.
 
 ```lean
-rcases hf with ⟨a, b, c, d, ha, hb, hc, hd, hmn, hmpn, hn, h2mn⟩
+import Mathlib.Tactic
 
-have hodd_c : Odd c := by
-  -- From `Odd n` and `n = c^2`.
-  -- A robust route is contraposition: if `Even c`, then `Even (c^2)`, hence `Even n`.
-  -- This contradicts `Odd n`.
+namespace MazurProof.RationalPointsN12
 
-have hsum : a ^ 2 + c ^ 2 = 3 * b ^ 2 := by
-  -- From `m-n = 2*a^2`, `m+n = 6*b^2`, and `n = c^2`.
-  nlinarith [hmn, hmpn, hn]
+/-- Raw constructor, choosing the first orientation of `EisensteinParam`. -/
+def EisensteinFullParamOfRawStatement : Prop :=
+  ∀ {X Y Z m n : ℤ},
+    0 < n → n < m → IsCoprime m n →
+    ¬ (3 : ℤ) ∣ m + n →
+    Z = m ^ 2 - m * n + n ^ 2 →
+    X = m ^ 2 - n ^ 2 →
+    Y = 2 * m * n - n ^ 2 →
+    EisensteinFullParam X Y Z m n
 
-exact no_oddC_three_square_sum hodd_c hsum
+/-- Divided constructor, choosing the first orientation. -/
+def EisensteinFullParamOfDividedStatement : Prop :=
+  ∀ {X Y Z m n : ℤ},
+    0 < n → n < m → IsCoprime m n →
+    (3 : ℤ) ∣ m + n →
+    3 * Z = m ^ 2 - m * n + n ^ 2 →
+    3 * X = m ^ 2 - n ^ 2 →
+    3 * Y = 2 * m * n - n ^ 2 →
+    EisensteinFullParam X Y Z m n
+
+/-- Unit is not an exceptional mathematical case; it is parametrized by the
+`3 ∣ m+n` branch with `(m,n)=(2,1)`. -/
+def EisensteinFullParamUnitStatement : Prop :=
+  EisensteinFullParam 1 1 1 2 1
+
+end MazurProof.RationalPointsN12
 ```
 
-Algebra check for `hsum`:
-
-`m-n = 2*a^2`, `m+n = 6*b^2`, and `n=c^2` imply
-`(m+n) - (m-n) = 2*n`, hence `6*b^2 - 2*a^2 = 2*c^2`, so `a^2+c^2=3*b^2`.
-
-## 4. Shorter existing theorem?
-
-I cannot name a shorter existing theorem from the connected repo, because the requested file and theorem names were not visible to the connector. In the local WIP, search for a theorem whose conclusion is equivalent to one of these shapes:
+Expected proof of the unit statement is just normalization of the definition:
 
 ```lean
-∀ {a b c d : ℤ},
-  c ^ 2 + d ^ 2 = 2 * b ^ 2 →
-  b ^ 2 + a ^ 2 = 2 * d ^ 2 →
-  a ^ 2 = d ^ 2 ∧ d ^ 2 = b ^ 2 ∧ b ^ 2 = c ^ 2
+-- theorem eisensteinFullParam_unit : EisensteinFullParam 1 1 1 2 1 := by
+--   norm_num [EisensteinFullParam, EisensteinParam]
 ```
 
-or a direct contradiction form:
+I leave this as a `Statement` interface above because local simplification of `IsCoprime (2:ℤ) 1` can vary slightly depending on imported simp lemmas, but mathematically the proof is immediate.
+
+## 4. How `m,n` are recovered and normalized
+
+The intended Lean recovery lemma is exactly `EisensteinReducedSlopeStatement`. Internally it should be proved by applying a reduced-ratio lemma to the positive integers
+
+```text
+u = Y,
+v = Z + X.
+```
+
+The separate reduced-ratio lemma can be stated without any Eisenstein content:
 
 ```lean
-∀ {a b c d : ℤ},
-  c ^ 2 + d ^ 2 = 2 * b ^ 2 →
-  b ^ 2 + a ^ 2 = 2 * d ^ 2 →
-  ¬ (a ^ 2 ≠ b ^ 2 ∨ b ^ 2 ≠ c ^ 2 ∨ c ^ 2 ≠ d ^ 2)
+import Mathlib.Tactic
+
+namespace MazurProof.RationalPointsN12
+
+/-- Reduced positive integer ratio: if `0<u<v`, write `u/v = n/m` with
+`0<n<m` and `IsCoprime m n`. -/
+def ExistsReducedPositiveRatioStatement : Prop :=
+  ∀ {u v : ℤ},
+    0 < u → u < v →
+    ∃ m n : ℤ,
+      0 < n ∧ n < m ∧ IsCoprime m n ∧
+      m * u = n * v
+
+end MazurProof.RationalPointsN12
 ```
 
-If the existing theorem only handles primitive centered APs, it is not the ideal downstream interface. Wrap it once into the midpoint theorem above.
+The proof should choose the gcd-normalized pair
 
-## Suspicious/stale/too-weak points for this task
+```text
+n = u / gcd(u,v),
+m = v / gcd(u,v),
+```
 
-1. `Even m` in `DividedMEvenFactorsUnitStatement` is redundant after `DividedSqBranchMEvenFactors m n` has been produced. It is not false, just unnecessary for the unit proof.
+with positive integer gcd interpreted through `natAbs`/`Int.gcd` APIs.
 
-2. Any AP theorem that concludes equality of the variables themselves, e.g. `a=b`, without positivity/sign hypotheses is too strong. The safe core conclusion is equality of squares. In this divided branch, factor positivity can then turn square equality into variable equality if needed, but the unit proof only needs `a^2=1`.
+For the Eisenstein-specific bound `Y < Z+X`, prove the identity
 
-3. Any AP theorem requiring primitive hypotheses on `a,b,c,d` is too low-level for this branch. The branch naturally gives coprimality of `m,n`, not an immediately convenient primitive AP package for `a,b,c,d`. The wrapper should absorb primitive normalization internally.
+```text
+Z^2 - (Y-X)^2 = X*Y
+```
 
-4. The MOdd contradiction should not be routed through the four-squares AP theorem. It is strictly shorter as the mod-4 lemma `no_oddC_three_square_sum` after deriving `a^2+c^2=3*b^2` with `c` odd.
+from `EisensteinTriple X Y Z`. Since `X*Y>0`, if `Y ≥ X`, then `Z > Y-X`; if `Y < X`, the inequality `Y < Z+X` is immediate from `0<Z` and `0<X`.
 
-5. If there is a theorem in `N12FourSquaresAP.lean` phrased only over `ℕ`, it is usable but stale for this file: add an integer wrapper rather than pushing casts through the divided branch.
+## 5. Origin and correctness of the `3 ∣ m+n` divided sector
+
+The divided sector comes from the only possible common divisor in the two factors of `(★)`:
+
+```text
+(m^2 - n^2) * C = (2*m - n) * X.
+```
+
+For coprime `m,n`, any common divisor of `m^2-n^2` and `2*m-n` divides `3`. Moreover,
+
+```text
+3 ∣ (2*m - n)    ↔    3 ∣ (m+n)
+```
+
+because modulo `3`, `2 ≡ -1`. Also
+
+```text
+m^2 - n^2 = (m-n)*(m+n),
+2*m*n - n^2 = n*(2*m-n),
+m^2 - m*n + n^2 = (m+n)^2 - 3*m*n.
+```
+
+Thus `3 ∣ m+n` implies all three raw expressions are divisible by `3`:
+
+```text
+3 ∣ m^2-n^2,
+3 ∣ 2*m*n-n^2,
+3 ∣ m^2-m*n+n^2.
+```
+
+After dividing the raw formulas by this forced common factor, the primitive formulas are exactly:
+
+```text
+3*X = m^2 - n^2,
+3*Y = 2*m*n - n^2,
+3*Z = m^2 - m*n + n^2.
+```
+
+So the formulas in `EisensteinFullParam` are correct.
+
+The unit example verifies the sector:
+
+```text
+m=2, n=1,
+m+n=3,
+m^2-n^2=3,
+2*m*n-n^2=3,
+m^2-m*n+n^2=3,
+```
+
+hence `X=Y=Z=1`.
+
+## 6. Suspicious or suboptimal current statements
+
+### `EisensteinTripleParamOrUnit` is true but too weak as a downstream interface
+
+It is true, but it is not the best assembly interface. Since `(1,1,1)` is itself covered by `EisensteinFullParam 1 1 1 2 1`, the downstream code is cleaner with
+
+```lean
+def EisensteinTriplePrimitiveFullParamStatement : Prop :=
+  ∀ {X Y Z : ℤ},
+    0 < X → 0 < Y → 0 < Z →
+    IsCoprime X Y →
+    EisensteinTriple X Y Z →
+    ∃ m n : ℤ, EisensteinFullParam X Y Z m n
+```
+
+If you keep `EisensteinTriplePrimitiveParamOrUnit`, add a local bridge from the unit case to the divided branch.
+
+### Swapped orientation is redundant but harmless
+
+The slope `n/m = Y/(Z+X)` always yields the first orientation
+
+```text
+X = m^2 - n^2,
+Y = 2*m*n - n^2
+```
+
+or its divided-by-3 version. If a human initially writes the swapped orientation with parameters `(m,n)`, the slope recovery simply returns `(m, m-n)`, which converts it back to the first orientation.
+
+Keeping the swapped alternatives is fine because they match existing branch APIs, but no proof should depend on them.
+
+### Do not introduce parity cases
+
+Any parity split here is stale/misleading. The exceptional denominator is `3`, arising from the Eisenstein norm/conic denominator, not `2`.
+
+## 7. Minimum honest residual and downstream bridge
+
+The minimum honest residual for the parametrization frontier should be one of these:
+
+```lean
+-- Preferred stronger residual.
+def EisensteinTriplePrimitiveFullParamStatement : Prop :=
+  ∀ {X Y Z : ℤ},
+    0 < X → 0 < Y → 0 < Z →
+    IsCoprime X Y →
+    EisensteinTriple X Y Z →
+    ∃ m n : ℤ, EisensteinFullParam X Y Z m n
+```
+
+or, if you keep the current theorem:
+
+```lean
+-- Current residual, plus one unit bridge.
+def EisensteinTriplePrimitiveParamOrUnit : Prop :=
+  ∀ {X Y Z : ℤ},
+    0 < X → 0 < Y → 0 < Z →
+    IsCoprime X Y →
+    EisensteinTriple X Y Z →
+    EisensteinTripleParamOrUnit X Y Z
+```
+
+The downstream `NormalizedBadParamStatement` bridge can be proved assuming only the current `EisensteinTriplePrimitiveParamOrUnit`, provided the unit case is converted to `m=2,n=1` in the divided branch.
+
+Suggested bridge interface:
+
+```lean
+import Mathlib.Tactic
+
+namespace MazurProof.RationalPointsN12
+
+/-- Unit branch for the quartic square variables. -/
+def UnitGivesDividedSquareBranchStatement : Prop :=
+  DividedSquareBranch 1 1 1 2 1
+
+/-- The theorem actually needed by the N=12 assembly layer. -/
+def NormalizedBadParamBridgeFromTripleParamOrUnitStatement : Prop :=
+  EisensteinTriplePrimitiveParamOrUnit →
+  NormalizedBadParamStatement
+
+end MazurProof.RationalPointsN12
+```
+
+Proof obligations for this bridge:
+
+1. From `NormalizedEisensteinBad A N S`, extract positivity and primitivity of `A,N,S`.
+2. Apply the triple parametrization theorem to
+
+   ```text
+   X = A^2,
+   Y = N^2,
+   Z = S.
+   ```
+
+3. Prove `IsCoprime (A^2) (N^2)` from `IsCoprime A N` using the standard pow/square coprimality API.
+4. Rewrite `EisensteinTriple (A^2) (N^2) S` from the quartic identity
+
+   ```text
+   S^2 = A^4 - A^2*N^2 + N^4.
+   ```
+
+5. Raw first orientation gives `EisensteinSqBranch A N S m n`.
+6. Raw swapped orientation gives `EisensteinSqBranch N A S m n`.
+7. Divided first orientation gives `DividedSquareBranch A N S m n`.
+8. Divided swapped orientation gives `DividedSquareBranch N A S m n`.
+9. Unit case gives `A=N=S=1` by positivity and square equality, then use `DividedSquareBranch 1 1 1 2 1`.
+
+Thus the assembly bridge does **not** need the full internal conic proof. It only needs the external residual plus the unit-to-divided branch bridge.
