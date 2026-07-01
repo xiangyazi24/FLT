@@ -1,317 +1,402 @@
-# Q2823 dm-codex2: `E1FactorEvenPadicOutside23Statement` skeleton
+# Q2874 dm-codex2: Kubert N12 torsion transport API skeleton
 
 Namespace: `MazurProof.RationalPointsN12`.
 
-The local WIP helpers named in the prompt are enough. The cleanest proof is to prove one local valuation lemma for the triple
+Target file: `FLT/Assumptions/MazurProof/KubertBridgeN12.lean`.
+
+I could not fetch `KubertBridgeN12.lean` or the named local WIP declarations from `xiangyazi24/FLT@scratch`; the skeleton below is therefore self-contained and uses the type names from the prompt.
+
+## 1. Best residual type
+
+For the downstream Kubert C proof, the most convenient normal-form residual is **not** a curve-isomorphism object. The minimal checkable residual is an additive homomorphism on point groups plus injectivity:
 
 ```lean
-vX   := padicValRat p X
-vXm1 := padicValRat p (X - 1)
-vXp3 := padicValRat p (X + 3)
+∃ t : ℚ,
+  B12 t ≠ 0 ∧
+  ∃ φ : (E⁄ℚ).Point →+
+      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)),
+    Function.Injective φ
 ```
 
-and then project its three `Even` conclusions into the three `EvenPadicOutside23` fields.
+This is exactly what the final step needs: if `f22` is an injected full-two subgroup on `(E⁄ℚ).Point`, then `φ.comp f22` is an injected full-two subgroup on the short normal form.
 
-## 1. Math check
-
-The pure integer lemma is exactly the right shape.
-
-The false shortcut would be: “outside `2,3`, at most one of the three valuations is nonzero.” That is false when all three valuations are equal and negative. Example pattern: `vX = vXm1 = vXp3 = -2` is compatible with all pairwise unit-difference constraints.
-
-Your lemma instead uses the correct local facts:
-
-* if two factors differ by a `p`-adic unit and their valuations are strictly unequal, the smaller valuation is `0`;
-* two such factors cannot both have positive valuation;
-* the curve equation makes `vX + vXm1 + vXp3` even.
-
-This covers the equal-negative case: if `vX = vXm1 = vXp3 = n < 0`, then the sum condition says `3*n` is even, hence `n` is even.
-
-## 2. Pairwise difference equalities
-
-Use these six equalities for the strict-inequality hypotheses:
+If the normal-form theorem naturally proves an equivalence, use an `AddEquiv`; but immediately wrap it into the same residual shape:
 
 ```lean
-X - (X - 1) = (1 : ℚ)
-(X - 1) - X = (-1 : ℚ)
-X - (X + 3) = (-3 : ℚ)
-(X + 3) - X = (3 : ℚ)
-(X - 1) - (X + 3) = (-4 : ℚ)
-(X + 3) - (X - 1) = (4 : ℚ)
+-- If `e : (E⁄ℚ).Point ≃+ WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t))`
+let φ : (E⁄ℚ).Point →+
+    WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)) :=
+  e.toAddMonoidHom
+have hφ : Function.Injective φ := by
+  intro P Q hPQ
+  exact e.injective hPQ
 ```
 
-For the three `not_both_pos` hypotheses, it is enough to use the forward differences
+Why this is better than exposing a variable-change object downstream:
+
+* it avoids depending on the exact Mathlib curve-isomorphism API in the Kubert obstruction file;
+* it is enough for `square_discriminant_of_full_two_torsion_on_shortW`;
+* it lets the hard normal-form proof live in a separate file with whatever curve-map API is most convenient.
+
+Recommended residual declaration:
 
 ```lean
-X - (X - 1) = 1
-X - (X + 3) = -3
-(X - 1) - (X + 3) = -4
+open scoped WeierstrassCurve.Affine
+
+namespace MazurProof.RationalPointsN12
+
+/-- Minimal residual output of the Kubert normal-form reduction. -/
+structure KubertNormalFormTransport (E : WeierstrassCurve ℚ) where
+  t : ℚ
+  hB : B12 t ≠ 0
+  φ : (E⁄ℚ).Point →+
+    WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t))
+  φ_injective : Function.Injective φ
+
+/-- Residual theorem shape if the normal form is available under a C12 injection. -/
+def KubertC12NormalFormResidual : Prop :=
+  ∀ {E : WeierstrassCurve ℚ}
+    (f12 : ZMod 2 × ZMod 12 →+ (E⁄ℚ).Point),
+    Function.Injective f12 →
+      ∃ nt : KubertNormalFormTransport E, True
+
+end MazurProof.RationalPointsN12
 ```
 
-with unit valuation of `1`, `-3`, `-4` respectively.
+The terminal `True` is optional; it is useful if the residual later needs to return side conditions without changing call sites.
 
-## 3. Tiny local valuation-zero helpers
+## 2. Pure composition lemma
 
-You already have `padicValRat_three_of_prime_ne_three` and `padicValRat_four_of_prime_ne_two`. The only nuisance is negative signs. In most current Mathlib/WIP contexts, `simpa` knows neg-invariance for `padicValRat`; if not, add a local helper using the local neg theorem name.
+This is the exact generic lemma I would put near the top of `KubertBridgeN12.lean`.
 
 ```lean
-private theorem padicValRat_one_eq_zero (p : ℕ) [Fact p.Prime] :
-    padicValRat p (1 : ℚ) = 0 := by
-  simp
+import Mathlib.Tactic
 
-private theorem padicValRat_neg_one_eq_zero (p : ℕ) [Fact p.Prime] :
-    padicValRat p (-1 : ℚ) = 0 := by
-  simp
+open scoped WeierstrassCurve.Affine
 
-private theorem padicValRat_neg_three_of_prime_ne_three
-    {p : ℕ} [Fact p.Prime] (hp3 : p ≠ 3) :
-    padicValRat p (-3 : ℚ) = 0 := by
-  simpa using (padicValRat_three_of_prime_ne_three (p := p) hp3)
+namespace MazurProof.RationalPointsN12
 
-private theorem padicValRat_neg_four_of_prime_ne_two
-    {p : ℕ} [Fact p.Prime] (hp2 : p ≠ 2) :
-    padicValRat p (-4 : ℚ) = 0 := by
-  simpa using (padicValRat_four_of_prime_ne_two (p := p) hp2)
+/-- Transport an injected full-two subgroup through any injective additive hom. -/
+theorem compose_full_two_torsion_injection_through_addMonoidHom
+    {P Q : Type*} [AddMonoid P] [AddMonoid Q]
+    (f : ZMod 2 × ZMod 2 →+ P)
+    (hf : Function.Injective f)
+    (φ : P →+ Q)
+    (hφ : Function.Injective φ) :
+    Function.Injective (φ.comp f) := by
+  intro x y hxy
+  apply hf
+  apply hφ
+  simpa using hxy
+
+end MazurProof.RationalPointsN12
 ```
 
-If either negative lemma fails, replace its proof by the local neg API. Common names are usually one of these shapes:
+If Lean unfolds the composition differently, replace the final line by:
 
 ```lean
--- Example repair if needed; adapt theorem name to local Mathlib.
--- simpa using (padicValRat.neg (p := p) (q := (3 : ℚ))).trans
---   (padicValRat_three_of_prime_ne_three (p := p) hp3)
+  simpa [AddMonoidHom.comp_apply] using hxy
 ```
 
-## 4. Sum-even lemma from the curve equation
+This theorem avoids any curve-specific API. The point groups only need their existing additive monoid/group instances.
 
-The curve equation gives
+## 3. If the input is C12 torsion, extract full-two torsion separately
+
+For the final bridge, prefer to pass an already-extracted
 
 ```lean
-2 * padicValRat p Y =
-  padicValRat p X + padicValRat p (X - 1) + padicValRat p (X + 3)
+f22 : ZMod 2 × ZMod 2 →+ (E⁄ℚ).Point
+hf22 : Function.Injective f22
 ```
 
-using `padicValRat.pow` on `Y^2` and `padicValRat.mul` twice on the right-hand product.
+to the normal-form square-discriminant step.
 
-Skeleton:
+If you do want to extract it from
 
 ```lean
-private theorem e1_padic_factor_sum_even
-    {X Y : ℚ} {p : ℕ} [Fact p.Prime]
-    (hE : E1FullCoverCurve X Y) (hY : Y ≠ 0)
-    (hX0 : X ≠ 0) (hXm10 : X - 1 ≠ 0) (hXp30 : X + 3 ≠ 0) :
-    Even (padicValRat p X + padicValRat p (X - 1) + padicValRat p (X + 3)) := by
-  have hcurve : Y ^ 2 = X * (X - 1) * (X + 3) := by
-    simpa [E1FullCoverCurve] using hE
-
-  have hYpow : padicValRat p (Y ^ 2) = 2 * padicValRat p Y := by
-    -- If the local theorem requires nonzero, pass `hY` as the final argument.
-    simpa using (padicValRat.pow (p := p) (q := Y) (n := 2))
-
-  have hprod :
-      padicValRat p (X * (X - 1) * (X + 3)) =
-        padicValRat p X + padicValRat p (X - 1) + padicValRat p (X + 3) := by
-    -- Variant A: if `padicValRat.mul` has no explicit nonzero hypotheses.
-    rw [padicValRat.mul, padicValRat.mul]
-    ring
-
-    -- Variant B: if the local theorem requires nonzero hypotheses, use this instead:
-    -- have hXXm1 : X * (X - 1) ≠ 0 := mul_ne_zero hX0 hXm10
-    -- rw [padicValRat.mul (p := p) (q := X * (X - 1)) (r := X + 3) hXXm1 hXp30]
-    -- rw [padicValRat.mul (p := p) (q := X) (r := X - 1) hX0 hXm10]
-    -- ring
-
-  have hsum_eq :
-      padicValRat p X + padicValRat p (X - 1) + padicValRat p (X + 3) =
-        2 * padicValRat p Y := by
-    calc
-      padicValRat p X + padicValRat p (X - 1) + padicValRat p (X + 3)
-          = padicValRat p (X * (X - 1) * (X + 3)) := hprod.symm
-      _ = padicValRat p (Y ^ 2) := by rw [← hcurve]
-      _ = 2 * padicValRat p Y := hYpow
-
-  -- `Even` on integers is normally existential; this avoids relying on a named parity lemma.
-  refine ⟨padicValRat p Y, ?_⟩
-  omega
+f12 : ZMod 2 × ZMod 12 →+ (E⁄ℚ).Point
+hf12 : Function.Injective f12
 ```
 
-If the `Even` constructor in the local file expects `n = r + r` rather than `n = 2*r`, the final `omega` still closes the witness goal.
-
-## 5. Main valuation-triple lemma
-
-This is the shortest useful helper. It packages the sum-even fact and all nine pairwise hypotheses for your pure integer lemma.
+put that in a separate group-only lemma. The required inclusion sends the second `ZMod 2` generator to `6 : ZMod 12`.
 
 ```lean
-private theorem e1_padic_factors_even_outside23
-    {X Y : ℚ} {p : ℕ} [Fact p.Prime]
-    (hE : E1FullCoverCurve X Y) (hY : Y ≠ 0)
-    (hp2 : p ≠ 2) (hp3 : p ≠ 3) :
-    Even (padicValRat p X) ∧
-      Even (padicValRat p (X - 1)) ∧
-      Even (padicValRat p (X + 3)) := by
-  obtain ⟨hX0, hXm10, hXp30⟩ :=
-    e1FullCoverCurve_factors_ne_zero (X := X) (Y := Y) hE hY
+namespace MazurProof.RationalPointsN12
 
-  let vX : ℤ := padicValRat p X
-  let vXm1 : ℤ := padicValRat p (X - 1)
-  let vXp3 : ℤ := padicValRat p (X + 3)
+abbrev FullTwoDomain : Type := ZMod 2 × ZMod 2
+abbrev C12Domain : Type := ZMod 2 × ZMod 12
 
-  have hsum : Even (vX + vXm1 + vXp3) := by
-    dsimp [vX, vXm1, vXp3]
-    exact e1_padic_factor_sum_even
-      (X := X) (Y := Y) (p := p) hE hY hX0 hXm10 hXp30
+-- Preferred if `ZMod.lift` is available in the pinned Mathlib.
+-- Check exact signature with:
+--   #check ZMod.lift
+--   #check ZMod.lift_apply
+--
+-- def zmod2_to_zmod12_six : ZMod 2 →+ ZMod 12 :=
+--   ZMod.lift (2 : ℕ) (6 : ZMod 12) (by norm_num)
 
-  have hv1 : padicValRat p (1 : ℚ) = 0 := padicValRat_one_eq_zero p
-  have hvm1 : padicValRat p (-1 : ℚ) = 0 := padicValRat_neg_one_eq_zero p
-  have hv3 : padicValRat p (3 : ℚ) = 0 :=
-    padicValRat_three_of_prime_ne_three (p := p) hp3
-  have hvm3 : padicValRat p (-3 : ℚ) = 0 :=
-    padicValRat_neg_three_of_prime_ne_three (p := p) hp3
-  have hv4 : padicValRat p (4 : ℚ) = 0 :=
-    padicValRat_four_of_prime_ne_two (p := p) hp2
-  have hvm4 : padicValRat p (-4 : ℚ) = 0 :=
-    padicValRat_neg_four_of_prime_ne_two (p := p) hp2
+/-- Inclusion of the full-two subgroup into `ZMod 2 × ZMod 12`.
+    Fill `zmod2_to_zmod12_six` using the local `ZMod.lift` API. -/
+def fullTwoIntoC12
+    (ι : ZMod 2 →+ ZMod 12) :
+    FullTwoDomain →+ C12Domain where
+  toFun x := (x.1, ι x.2)
+  map_zero' := by
+    ext <;> simp
+  map_add' := by
+    intro x y
+    ext <;> simp [map_add]
 
-  have hab_lt : vX < vXm1 → vX = 0 := by
-    intro hlt
-    dsimp [vX, vXm1] at hlt ⊢
-    exact padicValRat_left_eq_zero_of_lt_of_sub_val_zero
-      (p := p) (a := X) (b := X - 1) (c := (1 : ℚ))
-      (by ring) (by norm_num) hv1 hlt
+theorem fullTwoIntoC12_injective
+    (ι : ZMod 2 →+ ZMod 12)
+    (hι0 : ι 0 = 0)
+    (hι1 : ι 1 = (6 : ZMod 12)) :
+    Function.Injective (fullTwoIntoC12 ι) := by
+  intro x y hxy
+  apply Prod.ext
+  · exact congrArg Prod.fst hxy
+  · -- Since the domain is `ZMod 2`, it is enough to split into two cases.
+    -- This version is deliberately robust to local `ZMod` extensionality names.
+    have hsecond : ι x.2 = ι y.2 := congrArg Prod.snd hxy
+    fin_cases x.2 <;> fin_cases y.2 <;> simp [hι0, hι1] at hsecond ⊢
 
-  have hba_lt : vXm1 < vX → vXm1 = 0 := by
-    intro hlt
-    dsimp [vX, vXm1] at hlt ⊢
-    exact padicValRat_left_eq_zero_of_lt_of_sub_val_zero
-      (p := p) (a := X - 1) (b := X) (c := (-1 : ℚ))
-      (by ring) (by norm_num) hvm1 hlt
+/-- Full-two injection obtained from C12 injection. -/
+def fullTwoInjection_of_C12
+    {P : Type*} [AddMonoid P]
+    (ι : ZMod 2 →+ ZMod 12)
+    (f12 : C12Domain →+ P) :
+    FullTwoDomain →+ P :=
+  f12.comp (fullTwoIntoC12 ι)
 
-  have hac_lt : vX < vXp3 → vX = 0 := by
-    intro hlt
-    dsimp [vX, vXp3] at hlt ⊢
-    exact padicValRat_left_eq_zero_of_lt_of_sub_val_zero
-      (p := p) (a := X) (b := X + 3) (c := (-3 : ℚ))
-      (by ring) (by norm_num) hvm3 hlt
+theorem fullTwoInjection_of_C12_injective
+    {P : Type*} [AddMonoid P]
+    (ι : ZMod 2 →+ ZMod 12)
+    (hι0 : ι 0 = 0)
+    (hι1 : ι 1 = (6 : ZMod 12))
+    (f12 : C12Domain →+ P)
+    (hf12 : Function.Injective f12) :
+    Function.Injective (fullTwoInjection_of_C12 ι f12) := by
+  exact hf12.comp (fullTwoIntoC12_injective ι hι0 hι1)
 
-  have hca_lt : vXp3 < vX → vXp3 = 0 := by
-    intro hlt
-    dsimp [vX, vXp3] at hlt ⊢
-    exact padicValRat_left_eq_zero_of_lt_of_sub_val_zero
-      (p := p) (a := X + 3) (b := X) (c := (3 : ℚ))
-      (by ring) (by norm_num) hv3 hlt
-
-  have hbc_lt : vXm1 < vXp3 → vXm1 = 0 := by
-    intro hlt
-    dsimp [vXm1, vXp3] at hlt ⊢
-    exact padicValRat_left_eq_zero_of_lt_of_sub_val_zero
-      (p := p) (a := X - 1) (b := X + 3) (c := (-4 : ℚ))
-      (by ring) (by norm_num) hvm4 hlt
-
-  have hcb_lt : vXp3 < vXm1 → vXp3 = 0 := by
-    intro hlt
-    dsimp [vXm1, vXp3] at hlt ⊢
-    exact padicValRat_left_eq_zero_of_lt_of_sub_val_zero
-      (p := p) (a := X + 3) (b := X - 1) (c := (4 : ℚ))
-      (by ring) (by norm_num) hv4 hlt
-
-  have hab_pos : ¬ (0 < vX ∧ 0 < vXm1) := by
-    dsimp [vX, vXm1]
-    exact padicValRat_not_both_pos_of_sub_val_zero
-      (p := p) (a := X) (b := X - 1) (c := (1 : ℚ))
-      (by ring) (by norm_num) hv1
-
-  have hac_pos : ¬ (0 < vX ∧ 0 < vXp3) := by
-    dsimp [vX, vXp3]
-    exact padicValRat_not_both_pos_of_sub_val_zero
-      (p := p) (a := X) (b := X + 3) (c := (-3 : ℚ))
-      (by ring) (by norm_num) hvm3
-
-  have hbc_pos : ¬ (0 < vXm1 ∧ 0 < vXp3) := by
-    dsimp [vXm1, vXp3]
-    exact padicValRat_not_both_pos_of_sub_val_zero
-      (p := p) (a := X - 1) (b := X + 3) (c := (-4 : ℚ))
-      (by ring) (by norm_num) hvm4
-
-  have h := even_each_of_sum_even_of_pairwise_unit_val
-    (a := vX) (b := vXm1) (c := vXp3)
-    hsum hab_lt hba_lt hac_lt hca_lt hbc_lt hcb_lt
-    hab_pos hac_pos hbc_pos
-
-  simpa [vX, vXm1, vXp3] using h
+end MazurProof.RationalPointsN12
 ```
 
-Tactic notes:
+If `ZMod.lift` is missing or awkward, define `ι` by `fin_cases` locally and prove its hom law by four cases. Keep that case split out of the Kubert square step.
 
-* The six difference goals are all closed by `ring`.
-* The nonzero constants are closed by `norm_num`.
-* The final `simpa [vX, vXm1, vXp3]` unfolds the local abbreviations.
-* If `dsimp` does not unfold the `let` values under inequalities, replace `dsimp [vX, vXm1, vXp3]` by `change padicValRat p X < padicValRat p (X - 1) → padicValRat p X = 0` in the relevant branch.
-
-## 6. Final theorem skeleton
+Likely discovery commands:
 
 ```lean
-theorem e1FactorEvenPadicOutside23Statement_proof :
-    E1FactorEvenPadicOutside23Statement := by
-  intro X Y hE hY
-  obtain ⟨hX0, hXm10, hXp30⟩ :=
-    e1FullCoverCurve_factors_ne_zero (X := X) (Y := Y) hE hY
-
-  refine ⟨?_, ?_, ?_⟩
-
-  · refine ⟨hX0, ?_⟩
-    intro p hpFact hp2 hp3
-    letI : Fact p.Prime := hpFact
-    exact (e1_padic_factors_even_outside23
-      (X := X) (Y := Y) (p := p) hE hY hp2 hp3).1
-
-  · refine ⟨hXm10, ?_⟩
-    intro p hpFact hp2 hp3
-    letI : Fact p.Prime := hpFact
-    exact (e1_padic_factors_even_outside23
-      (X := X) (Y := Y) (p := p) hE hY hp2 hp3).2.1
-
-  · refine ⟨hXp30, ?_⟩
-    intro p hpFact hp2 hp3
-    letI : Fact p.Prime := hpFact
-    exact (e1_padic_factors_even_outside23
-      (X := X) (Y := Y) (p := p) hE hY hp2 hp3).2.2
+#check ZMod.lift
+#check ZMod.castHom
+#check ZMod.val
+#check ZMod.natCast_zmod_val
 ```
 
-If the file wants a theorem with the exact proposition name, use the local naming convention, for example:
+`ZMod.castHom` is **not** the right map from `ZMod 2` to `ZMod 12`: a ring hom `ZMod n →+* ZMod m` exists in the divisibility direction `m ∣ n`, so it will not produce the subgroup map sending `1 ↦ 6`.
+
+## 4. Kubert square-discriminant bridge skeleton
+
+Use this when the full-two injection on `E` has already been extracted.
 
 ```lean
-theorem E1FactorEvenPadicOutside23Statement_proved :
-    E1FactorEvenPadicOutside23Statement := by
-  exact e1FactorEvenPadicOutside23Statement_proof
+import Mathlib.Tactic
+
+open scoped WeierstrassCurve.Affine
+
+namespace MazurProof.RationalPointsN12
+
+/--
+Core transport step.  The theorem target should be exactly the target of
+
+  #check square_discriminant_of_full_two_torsion_on_shortW
+
+with `A := A12 t`, `B := B12 t`.
+-/
+theorem kubert_C12_square_from_normal_form_residual
+    {E : WeierstrassCurve ℚ} {t : ℚ}
+    (hB : B12 t ≠ 0)
+    (f22 : ZMod 2 × ZMod 2 →+ (E⁄ℚ).Point)
+    (hf22 : Function.Injective f22)
+    (φ : (E⁄ℚ).Point →+
+      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)))
+    (hφ : Function.Injective φ) :
+    -- Paste the exact conclusion printed by:
+    --   #check square_discriminant_of_full_two_torsion_on_shortW
+    -- Expected shape, depending on the local theorem:
+    --   IsSquare (short_discriminant (A12 t) (B12 t))
+    -- or
+    --   ∃ u : ℚ, u ^ 2 = -(4 * (A12 t)^3 + 27 * (B12 t)^2)
+    by
+      exact square_discriminant_of_full_two_torsion_on_shortW
+        (hB := hB)
+        (φ.comp f22)
+        (compose_full_two_torsion_injection_through_addMonoidHom
+          f22 hf22 φ hφ) := by
+  let g : ZMod 2 × ZMod 2 →+
+      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)) :=
+    φ.comp f22
+  have hg : Function.Injective g :=
+    compose_full_two_torsion_injection_through_addMonoidHom
+      f22 hf22 φ hφ
+  exact square_discriminant_of_full_two_torsion_on_shortW
+    (hB := hB) g hg
+
+end MazurProof.RationalPointsN12
 ```
 
-## 7. Shortest assembly variant
-
-To avoid recomputing the triple lemma three times, package it inside the final theorem:
+The unusual theorem header above shows the key point: because I cannot see the local return type of `square_discriminant_of_full_two_torsion_on_shortW`, fill the theorem conclusion from `#check` and keep the proof body exactly as shown. In a real file it should look like this after filling the target:
 
 ```lean
-theorem e1FactorEvenPadicOutside23Statement_proof :
-    E1FactorEvenPadicOutside23Statement := by
-  intro X Y hE hY
-  obtain ⟨hX0, hXm10, hXp30⟩ :=
-    e1FullCoverCurve_factors_ne_zero (X := X) (Y := Y) hE hY
-  refine ⟨⟨hX0, ?_⟩, ⟨hXm10, ?_⟩, ⟨hXp30, ?_⟩⟩
-  · intro p hpFact hp2 hp3
-    letI : Fact p.Prime := hpFact
-    exact (e1_padic_factors_even_outside23 (X := X) (Y := Y) (p := p) hE hY hp2 hp3).1
-  · intro p hpFact hp2 hp3
-    letI : Fact p.Prime := hpFact
-    exact (e1_padic_factors_even_outside23 (X := X) (Y := Y) (p := p) hE hY hp2 hp3).2.1
-  · intro p hpFact hp2 hp3
-    letI : Fact p.Prime := hpFact
-    exact (e1_padic_factors_even_outside23 (X := X) (Y := Y) (p := p) hE hY hp2 hp3).2.2
+theorem kubert_C12_square_from_normal_form_residual
+    {E : WeierstrassCurve ℚ} {t : ℚ}
+    (hB : B12 t ≠ 0)
+    (f22 : ZMod 2 × ZMod 2 →+ (E⁄ℚ).Point)
+    (hf22 : Function.Injective f22)
+    (φ : (E⁄ℚ).Point →+
+      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)))
+    (hφ : Function.Injective φ) :
+    <the exact square-discriminant conclusion at `A12 t`, `B12 t`> := by
+  let g : ZMod 2 × ZMod 2 →+
+      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)) :=
+    φ.comp f22
+  have hg : Function.Injective g := by
+    exact compose_full_two_torsion_injection_through_addMonoidHom
+      f22 hf22 φ hφ
+  exact square_discriminant_of_full_two_torsion_on_shortW
+    (hB := hB) g hg
 ```
 
-## 8. Likely API adjustments
+If the checked theorem has explicit `A`/`B` parameters, use:
 
-The only likely nontrivial API adjustments are:
+```lean
+  exact square_discriminant_of_full_two_torsion_on_shortW
+    (A := A12 t) (B := B12 t) (hB := hB) g hg
+```
 
-1. `padicValRat.pow` may require a nonzero hypothesis for `Y`; pass `hY` if Lean reports a missing argument.
-2. `padicValRat.mul` may require nonzero hypotheses. Use `hX0`, `hXm10`, `hXp30`, and `mul_ne_zero hX0 hXm10`.
-3. `padicValRat (-q)` simplification may not fire. Add a one-line neg-invariance helper using the local theorem name; after that `-3` and `-4` are immediate from your existing `three`/`four` lemmas.
-4. If `Even` unfolds to `∃ k, n = k + k`, `omega` closes the witness goal after `refine ⟨padicValRat p Y, ?_⟩`.
-5. Do not use `nlinarith` for valuation parity. Use `omega` because all valuation expressions are integers.
+If it has explicit `t`, use:
+
+```lean
+  exact square_discriminant_of_full_two_torsion_on_shortW
+    (t := t) (hB := hB) g hg
+```
+
+## 5. Bridge using the residual structure
+
+This version consumes the recommended residual package.
+
+```lean
+namespace MazurProof.RationalPointsN12
+
+/-- Normal-form residual plus full-two torsion gives the short-form square discriminant. -/
+theorem kubert_C12_square_from_transport_package
+    {E : WeierstrassCurve ℚ}
+    (nt : KubertNormalFormTransport E)
+    (f22 : ZMod 2 × ZMod 2 →+ (E⁄ℚ).Point)
+    (hf22 : Function.Injective f22) :
+    -- Fill with an existential using the exact local square-discriminant conclusion:
+    -- ∃ t : ℚ, <square-discriminant conclusion for `A12 t`, `B12 t`>
+    ∃ t : ℚ, True := by
+  refine ⟨nt.t, ?_⟩
+  -- Replace `True` by:
+  -- exact kubert_C12_square_from_normal_form_residual
+  --   (E := E) (t := nt.t) nt.hB f22 hf22 nt.φ nt.φ_injective
+  trivial
+
+end MazurProof.RationalPointsN12
+```
+
+In the actual file, do not leave `True`; use the exact result proposition from the checked theorem. The construction of `g` and `hg` is independent of that proposition.
+
+## 6. If the normal-form theorem gives an `AddEquiv`
+
+Use this tiny adapter and then call the same theorem.
+
+```lean
+namespace MazurProof.RationalPointsN12
+
+theorem kubert_C12_square_from_normal_form_addEquiv
+    {E : WeierstrassCurve ℚ} {t : ℚ}
+    (hB : B12 t ≠ 0)
+    (f22 : ZMod 2 × ZMod 2 →+ (E⁄ℚ).Point)
+    (hf22 : Function.Injective f22)
+    (e : (E⁄ℚ).Point ≃+
+      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t))) :
+    -- Same exact target as `kubert_C12_square_from_normal_form_residual`.
+    <the exact square-discriminant conclusion at `A12 t`, `B12 t`> := by
+  let φ : (E⁄ℚ).Point →+
+      WeierstrassCurve.Affine.Point (shortW (A12 t) (B12 t)) :=
+    e.toAddMonoidHom
+  have hφ : Function.Injective φ := by
+    intro P Q hPQ
+    exact e.injective hPQ
+  exact kubert_C12_square_from_normal_form_residual
+    (E := E) (t := t) hB f22 hf22 φ hφ
+
+end MazurProof.RationalPointsN12
+```
+
+If Lean does not simplify coercions from `φ` to `e`, use:
+
+```lean
+  have hφ : Function.Injective φ := by
+    intro P Q hPQ
+    exact e.injective (by simpa [φ] using hPQ)
+```
+
+## 7. Mathlib curve-isomorphism / variable-change API discovery
+
+The current downstream bridge should not depend on these names, but the normal-form producer may use them.
+
+Start with these `#check`s inside the repo, after the imports already used in Weierstrass files:
+
+```lean
+open scoped WeierstrassCurve.Affine
+
+#check WeierstrassCurve
+#check WeierstrassCurve.Affine.Point
+#check WeierstrassCurve.Affine.Point.baseChange
+#check WeierstrassCurve.Affine.Point.map_injective
+#check WeierstrassCurve.Points.map
+#check WeierstrassCurve.Points.map
+#check Algebra.ofId
+```
+
+Then search Mathlib locally:
+
+```bash
+rg "structure .*Variable|def .*Variable|VariableChange" .lake/packages/mathlib/Mathlib -n
+rg "Affine.Point.*map|def .*baseChange|map_injective" .lake/packages/mathlib/Mathlib -n
+rg "WeierstrassCurve.*AddEquiv|Affine.Point.*AddEquiv|toAddMonoidHom" .lake/packages/mathlib/Mathlib -n
+rg "namespace WeierstrassCurve" .lake/packages/mathlib/Mathlib/AlgebraicGeometry -n
+```
+
+Likely imports to try, depending on the repo’s pinned Mathlib layout:
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine
+import Mathlib.AlgebraicGeometry.EllipticCurve.Group
+```
+
+If those are too broad, use the imports already present in files where these appeared:
+
+```lean
+WeierstrassCurve.Affine.Point.baseChange ℚ ℝ
+WeierstrassCurve.Affine.Point.map_injective (W' := E) (f := Algebra.ofId ℚ ℝ)
+WeierstrassCurve.Points.map E (Algebra.ofId ℚ ℝ)
+```
+
+The robust workflow is:
+
+1. In the producer file, turn the curve variable change into either
+   `AddEquiv` or `AddMonoidHom + Function.Injective` on point groups.
+2. Export only that residual hom/injectivity pair to `KubertBridgeN12.lean`.
+3. In `KubertBridgeN12.lean`, compose via `φ.comp f22` and apply `square_discriminant_of_full_two_torsion_on_shortW`.
+
+## 8. Syntax pitfalls
+
+* Do not write `(shortW A B).Point`. Use
+  `WeierstrassCurve.Affine.Point (shortW A B)`.
+* For the source curve, use the existing local spelling `(E⁄ℚ).Point` if that already has the group instance expected by the injection theorem.
+* `AddMonoidHom.comp` order is `φ.comp f`, meaning `x ↦ φ (f x)`.
+* If `Function.Injective (φ.comp f)` does not close by `hφ.comp hf`, use the explicit proof in Section 2.
+* Keep the full-two extraction from `ZMod 2 × ZMod 12` separate from normal-form transport; it is group-only and should not import Weierstrass geometry.
