@@ -1,384 +1,354 @@
-# Q2934 (dm-codex1): next checkable targets for residual A
+# Q2944 (dm-codex1): pure algebra parametrization for `tateC12_K = 0`
 
 Target file: `FLT/Assumptions/MazurProof/KubertBridgeN12.lean`  
 Namespace: `MazurProof.KubertBridgeN12`
 
-Current residual A:
+## Main answer
+
+Use the inverse parameter
 
 ```lean
-axiom tate_normal_form_at_point_of_addOrder12
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
-    TateNormalFormAtOrder12 E
+q = -1 - 2 * (b - c)^2 / (c * (b - c - c^2))
 ```
 
-The next bounded targets are:
-
-1. extract the nonzero affine coordinates of `P`;
-2. translate those coordinates to the origin and transport order 12;
-3. normalize an origin-marked curve with `a₆=0` toward Tate form: first kill `a₄`, then scale to make `a₂=a₃=-b`.
-
-Below, use the exact local notation in your file.  Since you said `(E⁄ℚ).Point` is the affine point group notation under `open scoped WeierstrassCurve.Affine`, the case split should be on `WeierstrassCurve.Affine.Point.zero` / `.some`.
-
-## 1. Extract affine coordinates from `P`
+Equivalently, with
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
-import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
-import Mathlib.GroupTheory.OrderOfElement
-import Mathlib.Tactic
+r = (b - c) / c,
+```
 
-open scoped WeierstrassCurve.Affine
+this is
+
+```lean
+q = (2 * r^2 + r - c) / (c - r).
+```
+
+The denominator needed for the displayed inverse formula is exactly
+
+```lean
+c * (b - c - c^2) ≠ 0,
+```
+
+so the hypotheses `hc : c ≠ 0` and `h6 : b - c - c^2 ≠ 0` are the right pole-removal hypotheses.  The remaining denominator `q + 1` is nonzero because `hK` and `hc` imply `b - c ≠ 0`, equivalently `r ≠ 0`, and then
+
+```lean
+q + 1 = 2 * r^2 / (c - r).
+```
+
+No extra side condition is needed for the rational parametrization over `ℚ` beyond the current `hb`, `hc`, `h6`, and `hK`.  The only caveat is the field
+
+```lean
+hthree_q_sq_sub_one : 3 * q^2 - 1 ≠ 0
+```
+
+inside `TateC12Good`: over `ℚ` this is an independent rational no-square lemma, not a consequence of the quartic algebra.  If this parametrization is ever generalized from `ℚ` to an arbitrary field containing `sqrt (1/3)`, then `3*q^2 - 1 ≠ 0` must be supplied by the exact-order side condition; `K=0`, `b≠0`, `c≠0`, and `b-c-c^2≠0` do not force it over such a field.
+
+The core algebra is best done through the auxiliary variable `r = (b-c)/c`.  The quartic becomes a quadratic-in-`c` relation:
+
+```lean
+tateC12_K b c =
+  c^4 *
+    (c^2 - c * r * (r^2 + 3*r + 2) +
+      r^2 * (3*r^2 + 3*r + 1)).
+```
+
+For
+
+```lean
+q = (2*r^2 + r - c)/(c-r),
+```
+
+the two decisive identities are
+
+```lean
+q * (q - 1) / (q + 1) = r
+r * (3*q^2 + 1) / (q + 1)^2 = c
+```
+
+under the single relation
+
+```lean
+c^2 - c * r * (r^2 + 3*r + 2) +
+  r^2 * (3*r^2 + 3*r + 1) = 0.
+```
+
+Then
+
+```lean
+tateC12_c q
+  = (q * (q - 1) / (q + 1)) * ((3*q^2 + 1) / (q + 1)^2)
+  = c
+```
+
+and
+
+```lean
+b = c * (1 + r)
+  = tateC12_c q * ((q^2 + 1)/(q + 1))
+  = tateC12_b q.
+```
+
+## Lean insertion snippets
+
+These snippets are intended to be pasted into `KubertBridgeN12.lean` after the definitions of `tateC12_K`, `tateC12_b`, and `tateC12_c`.
+
+```lean
+import Mathlib.Tactic
 
 namespace MazurProof.KubertBridgeN12
 
 noncomputable section
 
-structure AffineMarkedPointOfOrder12
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) where
-  x0 : ℚ
-  y0 : ℚ
-  hxy : (E⁄ℚ).Nonsingular x0 y0
-  hP_eq : P = WeierstrassCurve.Affine.Point.some x0 y0 hxy
-  hOrder : addOrderOf (WeierstrassCurve.Affine.Point.some x0 y0 hxy) = 12
+private def tateC12_rInv (b c : ℚ) : ℚ :=
+  (b - c) / c
 
-theorem affineMarkedPointOfOrder12_of_addOrder12
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
-    AffineMarkedPointOfOrder12 E P := by
-  have hP_ne_zero : P ≠ 0 := by
-    intro hzero
-    subst hzero
-    -- `simp` should reduce `addOrderOf 0` to `1`.
-    norm_num at hP
-  cases P with
-  | zero => exact (hP_ne_zero rfl).elim
-  | some x0 y0 hxy =>
-      exact
-        { x0 := x0
-          y0 := y0
-          hxy := hxy
-          hP_eq := rfl
-          hOrder := hP }
-```
+private def tateC12_qInv (b c : ℚ) : ℚ :=
+  -1 - 2 * (b - c)^2 / (c * (b - c - c^2))
 
-If `norm_num at hP` does not simplify `addOrderOf 0`, use:
-
-```lean
-    have hzeroOrder : addOrderOf (0 : (E⁄ℚ).Point) = 1 := by simp
-    rw [hzeroOrder] at hP
-    norm_num at hP
-```
-
-## 2. Translate the marked affine point to the origin
-
-Mathlib's `VariableChange` convention is
-
-```text
-X_old = u^2 X_new + r,
-Y_old = u^3 Y_new + u^2 s X_new + t.
-```
-
-So to send old point `(x0,y0)` to new origin `(0,0)`, use `u=1, r=x0, s=0, t=y0`.
-
-```lean
-noncomputable def translatePointToOriginVC (x0 y0 : ℚ) :
-    WeierstrassCurve.VariableChange ℚ :=
-  { u := 1
-    r := x0
-    s := 0
-    t := y0 }
-
-/-- The translated curve has `a₆=0`, because the old point lies on `E`. -/
-theorem translatePointToOrigin_a6
-    (E : WeierstrassCurve ℚ) {x0 y0 : ℚ}
-    (hxy : (E⁄ℚ).Nonsingular x0 y0) :
-    ((translatePointToOriginVC x0 y0) • E).a₆ = 0 := by
-  have hEq := hxy.left
-  -- If this line fails because `E⁄ℚ` is not definally `E`, replace `hEq` by `simpa` first:
-  -- have hEqE : (WeierstrassCurve.toAffine E).Equation x0 y0 := by simpa using hxy.left
-  rw [WeierstrassCurve.Affine.equation_iff'] at hEq
-  rw [WeierstrassCurve.variableChange_a₆]
-  simp [translatePointToOriginVC]
-  linear_combination (norm := ring) -hEq
-
-/-- The marked point becomes the new origin and remains nonsingular. -/
-theorem translatePointToOrigin_origin_nonsingular
-    (E : WeierstrassCurve ℚ) {x0 y0 : ℚ}
-    (hxy : (E⁄ℚ).Nonsingular x0 y0) :
-    (((translatePointToOriginVC x0 y0) • E)⁄ℚ).Nonsingular 0 0 := by
-  -- Mathlib has exactly the special translation lemma:
-  -- `WeierstrassCurve.Affine.nonsingular_iff_variableChange`.
-  simpa [translatePointToOriginVC] using
-    (WeierstrassCurve.Affine.nonsingular_iff_variableChange
-      (W := E⁄ℚ) x0 y0).mp hxy
-```
-
-If the target produced by `nonsingular_iff_variableChange` is `(translatePointToOriginVC x0 y0 • (E⁄ℚ)).Nonsingular 0 0` instead of `(((translatePointToOriginVC x0 y0) • E)⁄ℚ).Nonsingular 0 0`, add a small base-change/defeq adapter:
-
-```lean
-theorem translatePointToOrigin_origin_nonsingular_toAffine
-    (E : WeierstrassCurve ℚ) {x0 y0 : ℚ}
-    (hxy : (E⁄ℚ).Nonsingular x0 y0) :
-    (WeierstrassCurve.toAffine ((translatePointToOriginVC x0 y0) • E)).Nonsingular 0 0 := by
-  simpa using translatePointToOrigin_origin_nonsingular E hxy
-```
-
-### Order transport after translation
-
-This uses your checked `affinePointAddEquivOfVariableChange` and explicit coordinate map.
-
-```lean
-/-- The explicit variable-change map sends `(x0,y0)` to `(0,0)`. -/
-theorem affineVariableChangeMap_translate_origin
-    (E : WeierstrassCurve ℚ) {x0 y0 : ℚ}
-    (hxy : (E⁄ℚ).Nonsingular x0 y0) :
-    affineVariableChangeMap E (translatePointToOriginVC x0 y0)
-      (WeierstrassCurve.Affine.Point.some x0 y0 hxy) =
-    WeierstrassCurve.Affine.Point.some 0 0
-      (translatePointToOrigin_origin_nonsingular E hxy) := by
-  -- This should be just the already checked coordinate map with `u=1,r=x0,s=0,t=y0`.
-  simp [affineVariableChangeMap, translatePointToOriginVC, vcNewX, vcNewY]
-
-/-- Exact order 12 is transported to the new origin. -/
-theorem translatePointToOrigin_origin_order12
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {x0 y0 : ℚ} (hxy : (E⁄ℚ).Nonsingular x0 y0)
-    (hOrder : addOrderOf (WeierstrassCurve.Affine.Point.some x0 y0 hxy) = 12) :
-    addOrderOf
-      (WeierstrassCurve.Affine.Point.some 0 0
-        (translatePointToOrigin_origin_nonsingular E hxy)) = 12 := by
-  let C := translatePointToOriginVC x0 y0
-  let e := affinePointAddEquivOfVariableChange E C
-  have hmap : e (WeierstrassCurve.Affine.Point.some x0 y0 hxy) =
-      WeierstrassCurve.Affine.Point.some 0 0
-        (translatePointToOrigin_origin_nonsingular E hxy) := by
-    simpa [e, C] using affineVariableChangeMap_translate_origin E hxy
-  rw [← hmap]
-  simpa [hOrder] using
-    addOrderOf_apply_addEquiv e
-      (WeierstrassCurve.Affine.Point.some x0 y0 hxy)
-```
-
-If `affinePointAddEquivOfVariableChange` has target `(C • E⁄ℚ).Point` but your explicit map theorem target is written with `toAffine`, use a `change` before `have hmap` and let `simpa` close the definitional equalities.
-
-Bundle the checkable translation result:
-
-```lean
-structure TranslatedOriginOrder12 (E : WeierstrassCurve ℚ) [E.IsElliptic] where
-  x0 : ℚ
-  y0 : ℚ
-  hxy : (E⁄ℚ).Nonsingular x0 y0
-  C0 : WeierstrassCurve.VariableChange ℚ
-  hC0 : C0 = translatePointToOriginVC x0 y0
-  hA6 : (C0 • E).a₆ = 0
-  hO : ((C0 • E)⁄ℚ).Nonsingular 0 0
-  hOriginOrder :
-    addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 12
-
-theorem translate_order12_point_to_origin
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
-    TranslatedOriginOrder12 E := by
-  rcases affineMarkedPointOfOrder12_of_addOrder12 E P hP with
-    ⟨x0, y0, hxy, hP_eq, hOrder⟩
-  refine
-    { x0 := x0
-      y0 := y0
-      hxy := hxy
-      C0 := translatePointToOriginVC x0 y0
-      hC0 := rfl
-      hA6 := translatePointToOrigin_a6 E hxy
-      hO := translatePointToOrigin_origin_nonsingular E hxy
-      hOriginOrder := translatePointToOrigin_origin_order12 E hxy hOrder }
-```
-
-This theorem is the next high-value checkable target: it removes affine extraction and translation from residual A.
-
-## 3. Origin-preserving coordinate changes toward Tate form
-
-Now work with an arbitrary curve `W` with origin `(0,0)` of exact order 12.
-
-### 3.1 Kill `a₄` using `s = a₄/a₃`
-
-Your new lemma `origin_a3_ne_zero_of_addOrderOf_eq_12` supplies `a₃ ≠ 0`.
-
-```lean
-noncomputable def killA4VC (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0) :
-    WeierstrassCurve.VariableChange ℚ :=
-  { u := 1
-    r := 0
-    s := W.a₄ / W.a₃
-    t := 0 }
-
-theorem killA4_a4
-    (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0) :
-    ((killA4VC W h3) • W).a₄ = 0 := by
-  rw [WeierstrassCurve.variableChange_a₄]
-  simp [killA4VC]
-  field_simp [h3]
+private lemma tateC12_K_r_identity
+    (b c : ℚ) (hc : c ≠ 0) :
+    let r : ℚ := tateC12_rInv b c
+    tateC12_K b c =
+      c^4 *
+        (c^2 - c * r * (r^2 + 3*r + 2) +
+          r^2 * (3*r^2 + 3*r + 1)) := by
+  dsimp [tateC12_rInv]
+  field_simp [hc, tateC12_K]
   ring
 
-theorem killA4_a6
-    (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0)
-    (h6 : W.a₆ = 0) :
-    ((killA4VC W h3) • W).a₆ = 0 := by
-  rw [WeierstrassCurve.variableChange_a₆]
-  simp [killA4VC, h6]
+private lemma tateC12_qInv_rform
+    (b c : ℚ) (hc : c ≠ 0) (h6 : b - c - c^2 ≠ 0) :
+    let r : ℚ := tateC12_rInv b c
+    tateC12_qInv b c = (2*r^2 + r - c) / (c - r) := by
+  dsimp [tateC12_qInv, tateC12_rInv]
+  field_simp [hc, h6]
+  ring
 
-theorem killA4_a3_ne_zero
-    (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0) :
-    ((killA4VC W h3) • W).a₃ ≠ 0 := by
-  rw [WeierstrassCurve.variableChange_a₃]
-  simp [killA4VC, h3]
-
-/-- The origin remains the origin under `killA4VC`. -/
-theorem killA4_origin_nonsingular
-    (W : WeierstrassCurve ℚ) (h3 : W.a₃ ≠ 0)
-    (hO : (W⁄ℚ).Nonsingular 0 0) :
-    (((killA4VC W h3) • W)⁄ℚ).Nonsingular 0 0 := by
-  -- Use the explicit variable-change map or direct formula with `r=0,t=0`.
-  -- Easiest is to apply `vc_nonsingular_forward` to `(0,0)` and simplify coordinates.
-  simpa [killA4VC, vcNewX, vcNewY] using
-    (vc_nonsingular_forward W (killA4VC W h3) hO)
-
-theorem killA4_origin_order12
-    (W : WeierstrassCurve ℚ) [W.IsElliptic]
-    (h3 : W.a₃ ≠ 0)
-    (hO : (W⁄ℚ).Nonsingular 0 0)
-    (hOrder : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 12) :
-    addOrderOf
-      (WeierstrassCurve.Affine.Point.some 0 0
-        (killA4_origin_nonsingular W h3 hO)) = 12 := by
-  let C := killA4VC W h3
-  let e := affinePointAddEquivOfVariableChange W C
-  have hmap : e (WeierstrassCurve.Affine.Point.some 0 0 hO) =
-      WeierstrassCurve.Affine.Point.some 0 0
-        (killA4_origin_nonsingular W h3 hO) := by
-    simp [e, C, affineVariableChangeMap, killA4VC, vcNewX, vcNewY]
-  rw [← hmap]
-  simpa [hOrder] using
-    addOrderOf_apply_addEquiv e (WeierstrassCurve.Affine.Point.some 0 0 hO)
-```
-
-This second block should also be checkable now.
-
-### 3.2 Scale to Tate form once `a₂ ≠ 0`
-
-After `a₆=0`, `a₄=0`, `a₃≠0`, the remaining normalization is pure scaling with `r=s=t=0`.  To make `a₂'=a₃'`, choose
-
-```text
-u = a₃/a₂.
-```
-
-This requires `a₂ ≠ 0`.  Proving `a₂ ≠ 0` from exact order 12 is the next genuine group-law exclusion.  Keep it as a small residual if needed.
-
-```lean
-/-- Small remaining mathematical exclusion: after origin and `a₄=0`, exact order 12 forces `a₂≠0`. -/
-axiom origin_a2_ne_zero_of_a4_a6_origin_order12
-    (W : WeierstrassCurve ℚ)
-    (h6 : W.a₆ = 0)
-    (h4 : W.a₄ = 0)
-    (h3 : W.a₃ ≠ 0)
-    (hO : (W⁄ℚ).Nonsingular 0 0)
-    (hOrder : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 12) :
-    W.a₂ ≠ 0
-
-noncomputable def scaleToTateVC
-    (W : WeierstrassCurve ℚ) (h2 : W.a₂ ≠ 0) :
-    WeierstrassCurve.VariableChange ℚ :=
-  { u := Units.mk0 (W.a₃ / W.a₂) (by
-      exact div_ne_zero (by
-        -- This proof needs `W.a₃ ≠ 0`; either add it as an argument or infer it at call sites.
-        -- Prefer the version below with both `h2` and `h3`.
-        sorry) h2)
-    r := 0
-    s := 0
-    t := 0 }
-```
-
-Use this less awkward version:
-
-```lean
-noncomputable def scaleToTateVC'
-    (W : WeierstrassCurve ℚ) (h2 : W.a₂ ≠ 0) (h3 : W.a₃ ≠ 0) :
-    WeierstrassCurve.VariableChange ℚ :=
-  { u := Units.mk0 (W.a₃ / W.a₂) (div_ne_zero h3 h2)
-    r := 0
-    s := 0
-    t := 0 }
-
-def tateBOfOriginNormal (W : WeierstrassCurve ℚ) : ℚ :=
-  - W.a₂ ^ 3 / W.a₃ ^ 2
-
-def tateCOfOriginNormal (W : WeierstrassCurve ℚ) : ℚ :=
-  1 - W.a₁ * W.a₂ / W.a₃
-
-/-- Pure coefficient algebra: once `a₄=a₆=0` and `a₂,a₃≠0`, scaling gives Tate form. -/
-theorem scaleToTate_eq_tateW
-    (W : WeierstrassCurve ℚ)
-    (h2 : W.a₂ ≠ 0) (h3 : W.a₃ ≠ 0)
-    (h4 : W.a₄ = 0) (h6 : W.a₆ = 0) :
-    (scaleToTateVC' W h2 h3) • W =
-      tateW (tateBOfOriginNormal W) (tateCOfOriginNormal W) := by
-  ext <;>
-    simp [scaleToTateVC', tateW, tateBOfOriginNormal, tateCOfOriginNormal,
-      WeierstrassCurve.variableChange_a₁,
-      WeierstrassCurve.variableChange_a₂,
-      WeierstrassCurve.variableChange_a₃,
-      WeierstrassCurve.variableChange_a₄,
-      WeierstrassCurve.variableChange_a₆,
-      h2, h3, h4, h6] <;>
-    field_simp [h2, h3] <;>
+private lemma tateC12_c_sub_r_ne_zero
+    (b c : ℚ) (hc : c ≠ 0) (h6 : b - c - c^2 ≠ 0) :
+    c - tateC12_rInv b c ≠ 0 := by
+  have hrewrite : c - tateC12_rInv b c = -(b - c - c^2) / c := by
+    dsimp [tateC12_rInv]
+    field_simp [hc]
     ring
+  rw [hrewrite]
+  exact div_ne_zero (neg_ne_zero.mpr h6) hc
+
+private lemma tateC12_r_ne_zero_of_K
+    {b c : ℚ} (hc : c ≠ 0) (hK : tateC12_K b c = 0) :
+    tateC12_rInv b c ≠ 0 := by
+  let r : ℚ := tateC12_rInv b c
+  have hKid := tateC12_K_r_identity b c hc
+  have hF : c^2 - c * r * (r^2 + 3*r + 2) +
+      r^2 * (3*r^2 + 3*r + 1) = 0 := by
+    have hc4 : c^4 ≠ 0 := pow_ne_zero 4 hc
+    have hmul : c^4 *
+        (c^2 - c * r * (r^2 + 3*r + 2) +
+          r^2 * (3*r^2 + 3*r + 1)) = 0 := by
+      simpa [r, hK] using hKid.symm
+    exact (mul_eq_zero.mp hmul).resolve_left hc4
+  intro hr0
+  have hc2 : c^2 = 0 := by
+    simpa [r, hr0] using hF
+  exact hc (sq_eq_zero_iff.mp hc2)
+
+/-- Ring certificate 1: the inverse parameter recovers `r=(b-c)/c`. -/
+private lemma tateC12_qInv_recovers_r
+    {r c : ℚ}
+    (hF : c^2 - c * r * (r^2 + 3*r + 2) +
+      r^2 * (3*r^2 + 3*r + 1) = 0)
+    (hr : r ≠ 0) (hcr : c - r ≠ 0) :
+    let q : ℚ := (2*r^2 + r - c) / (c - r)
+    q * (q - 1) / (q + 1) = r := by
+  dsimp
+  field_simp [hr, hcr]
+  ring_nf at hF ⊢
+  exact hF
+
+/-- Ring certificate 2: the inverse parameter recovers `c`. -/
+private lemma tateC12_qInv_recovers_c
+    {r c : ℚ}
+    (hF : c^2 - c * r * (r^2 + 3*r + 2) +
+      r^2 * (3*r^2 + 3*r + 1) = 0)
+    (hr : r ≠ 0) (hcr : c - r ≠ 0) :
+    let q : ℚ := (2*r^2 + r - c) / (c - r)
+    r * (3*q^2 + 1) / (q + 1)^2 = c := by
+  dsimp
+  field_simp [hr, hcr]
+  ring_nf at hF ⊢
+  exact hF
+
+private lemma tateC12_qInv_add_one_ne_zero
+    {r c : ℚ} (hr : r ≠ 0) (hcr : c - r ≠ 0) :
+    let q : ℚ := (2*r^2 + r - c) / (c - r)
+    q + 1 ≠ 0 := by
+  dsimp
+  have hq1 : (2*r^2 + r - c) / (c - r) + 1 = 2*r^2 / (c - r) := by
+    field_simp [hcr]
+    ring
+  rw [hq1]
+  exact div_ne_zero (mul_ne_zero (by norm_num) (pow_ne_zero 2 hr)) hcr
+
+private lemma tateC12_c_factor_identity
+    (q : ℚ) (hq1 : q + 1 ≠ 0) :
+    tateC12_c q =
+      (q * (q - 1) / (q + 1)) *
+        ((3*q^2 + 1) / (q + 1)^2) := by
+  field_simp [tateC12_c, hq1]
+  ring
+
+private lemma tateC12_b_factor_identity
+    (q : ℚ) (hq1 : q + 1 ≠ 0) :
+    tateC12_b q = tateC12_c q * ((q^2 + 1) / (q + 1)) := by
+  field_simp [tateC12_b, tateC12_c, hq1]
+  ring
+
+private lemma tateC12_b_eq_c_mul_one_add_r
+    (b c : ℚ) (hc : c ≠ 0) :
+    b = c * (1 + tateC12_rInv b c) := by
+  dsimp [tateC12_rInv]
+  field_simp [hc]
+  ring
 ```
 
-This theorem is pure algebra and should be checkable.  It cleanly identifies the next true obstruction: proving `a₂≠0` in the origin-normalized, `a₄=0` situation from exact order 12.
+## Core parametrization theorem
 
-## Minimal intermediate normal-form structure
-
-If full `TateNormalFormAtOrder12` is too big to prove at once, introduce this checked intermediate target:
+I recommend first proving the core theorem without the three rational/no-square `TateC12Good` decorations.  This is the clean algebraic residual.
 
 ```lean
-structure OriginA4KilledOrder12 (E : WeierstrassCurve ℚ) [E.IsElliptic] where
-  W : WeierstrassCurve ℚ
-  C : WeierstrassCurve.VariableChange ℚ
-  hCurve : C • E = W
-  hA6 : W.a₆ = 0
-  hA4 : W.a₄ = 0
-  hA3 : W.a₃ ≠ 0
-  hO : (W⁄ℚ).Nonsingular 0 0
-  hOriginOrder : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 12
-
-theorem origin_a4_killed_order12_of_point_order12
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
-    OriginA4KilledOrder12 E := by
-  -- 1. `translate_order12_point_to_origin` gives W0 = C0•E, a6=0, origin order 12.
-  -- 2. `origin_a3_ne_zero_of_addOrderOf_eq_12` gives W0.a3≠0.
-  -- 3. Apply `killA4VC W0 h3`, compose variable changes, and use the killA4 lemmas.
-  -- 4. Use `mul_smul` for variable-change composition.
-  sorry
+theorem tateC12_K_parametrization_core
+    {b c : ℚ}
+    (hc : c ≠ 0) (h6 : b - c - c^2 ≠ 0)
+    (hK : tateC12_K b c = 0) :
+    ∃ q : ℚ,
+      q ≠ 0 ∧ q - 1 ≠ 0 ∧ q + 1 ≠ 0 ∧
+      b = tateC12_b q ∧ c = tateC12_c q := by
+  let r : ℚ := tateC12_rInv b c
+  let q : ℚ := tateC12_qInv b c
+  have hq_rform : q = (2*r^2 + r - c) / (c - r) := by
+    simpa [q, r] using tateC12_qInv_rform b c hc h6
+  have hcr : c - r ≠ 0 := by
+    simpa [r] using tateC12_c_sub_r_ne_zero b c hc h6
+  have hr : r ≠ 0 := by
+    simpa [r] using tateC12_r_ne_zero_of_K (b := b) (c := c) hc hK
+  have hKid := tateC12_K_r_identity b c hc
+  have hF : c^2 - c * r * (r^2 + 3*r + 2) +
+      r^2 * (3*r^2 + 3*r + 1) = 0 := by
+    have hc4 : c^4 ≠ 0 := pow_ne_zero 4 hc
+    have hmul : c^4 *
+        (c^2 - c * r * (r^2 + 3*r + 2) +
+          r^2 * (3*r^2 + 3*r + 1)) = 0 := by
+      simpa [r, hK] using hKid.symm
+    exact (mul_eq_zero.mp hmul).resolve_left hc4
+  have hqr : q * (q - 1) / (q + 1) = r := by
+    rw [hq_rform]
+    simpa using tateC12_qInv_recovers_r (r := r) (c := c) hF hr hcr
+  have hqc : r * (3*q^2 + 1) / (q + 1)^2 = c := by
+    rw [hq_rform]
+    simpa using tateC12_qInv_recovers_c (r := r) (c := c) hF hr hcr
+  have hq1 : q + 1 ≠ 0 := by
+    rw [hq_rform]
+    simpa using tateC12_qInv_add_one_ne_zero (r := r) (c := c) hr hcr
+  have hc_param : c = tateC12_c q := by
+    calc
+      c = r * (3*q^2 + 1) / (q + 1)^2 := by rw [hqc]
+      _ = (q * (q - 1) / (q + 1)) *
+          ((3*q^2 + 1) / (q + 1)^2) := by rw [hqr]
+      _ = tateC12_c q := by rw [tateC12_c_factor_identity q hq1]
+  have hratio : (q^2 + 1) / (q + 1) = 1 + r := by
+    calc
+      (q^2 + 1) / (q + 1)
+          = q * (q - 1) / (q + 1) + 1 := by
+              field_simp [hq1]
+              ring
+      _ = r + 1 := by rw [hqr]
+      _ = 1 + r := by ring
+  have hb_param : b = tateC12_b q := by
+    calc
+      b = c * (1 + r) := tateC12_b_eq_c_mul_one_add_r b c hc
+      _ = tateC12_c q * ((q^2 + 1) / (q + 1)) := by
+            rw [← hc_param, hratio]
+      _ = tateC12_b q := by rw [tateC12_b_factor_identity q hq1]
+  have hq0 : q ≠ 0 := by
+    intro hq0
+    have hr0 : r = 0 := by
+      simpa [hq0] using hqr.symm
+    exact hr hr0
+  have hq_sub_one : q - 1 ≠ 0 := by
+    intro hq_sub
+    have hqeq : q = 1 := sub_eq_zero.mp hq_sub
+    have hr0 : r = 0 := by
+      simpa [hqeq] using hqr.symm
+    exact hr hr0
+  exact ⟨q, hq0, hq_sub_one, hq1, hb_param, hc_param⟩
 ```
 
-Then final Tate form is obtained from `OriginA4KilledOrder12` plus the single residual `origin_a2_ne_zero_of_a4_a6_origin_order12` and the checked algebra lemma `scaleToTate_eq_tateW`.
+## Assembling `TateC12Good`
 
-## Summary of genuinely mathematical steps
-
-Checkable now:
-
-* affine extraction from `P`;
-* translation to origin and `a₆=0`;
-* origin order transport through the checked variable-change `AddEquiv`;
-* `a₃≠0` from your new order-two exclusion lemma;
-* killing `a₄` by `s=a₄/a₃`;
-* scaling to `tateW b c` assuming `a₂≠0`.
-
-Leave as a small residual for now:
+For the current theorem exactly as stated, use the core theorem and fill the remaining `TateC12Good` fields.  The positivity fields are easy over `ℚ`; the `3*q^2 - 1` field is a standalone no-rational-square lemma.
 
 ```lean
-origin_a2_ne_zero_of_a4_a6_origin_order12
+private lemma rat_three_mul_sq_sub_one_ne_zero (q : ℚ) :
+    (3 : ℚ) * q^2 - 1 ≠ 0 := by
+  intro h
+  have hsq : q^2 = (1 : ℚ) / 3 := by
+    nlinarith
+  have hs : IsSquare ((1 : ℚ) / 3) := ⟨q, hsq.symm⟩
+  -- `norm_num` knows that `1/3` is not a rational square in recent Mathlib.
+  -- If this does not fire in the local Mathlib snapshot, replace this line by
+  -- the existing squareclass/no-square lemma used elsewhere in the FLT descent files.
+  norm_num at hs
+
+theorem tateC12_K_parametrization
+    {b c : ℚ}
+    (hb : b ≠ 0) (hc : c ≠ 0) (h6 : b - c - c^2 ≠ 0)
+    (hK : tateC12_K b c = 0) :
+    ∃ q : ℚ, TateC12Good q ∧ b = tateC12_b q ∧ c = tateC12_c q := by
+  rcases tateC12_K_parametrization_core (b := b) (c := c) hc h6 hK with
+    ⟨q, hq0, hqsub, hqadd, hbq, hcq⟩
+  have hq_sq_add_one : q^2 + 1 ≠ 0 := by
+    have hpos : (0 : ℚ) < q^2 + 1 := by nlinarith [sq_nonneg q]
+    exact ne_of_gt hpos
+  have hone_add_three_q_sq : 1 + 3 * q^2 ≠ 0 := by
+    have hpos : (0 : ℚ) < 1 + 3 * q^2 := by nlinarith [sq_nonneg q]
+    exact ne_of_gt hpos
+  refine ⟨q, ?_, hbq, hcq⟩
+  exact
+    { hq_ne_zero := hq0
+      hq_sub_one := hqsub
+      hq_add_one := hqadd
+      hq_sq_add_one := hq_sq_add_one
+      hone_add_three_q_sq := hone_add_three_q_sq
+      hthree_q_sq_sub_one := rat_three_mul_sq_sub_one_ne_zero q }
 ```
 
-This is a bounded group-law exclusion lemma, much smaller than the original `tate_normal_form_at_point_of_addOrder12` axiom.
+## Why this is the right inverse
+
+Starting from the known parametrization,
+
+```lean
+c = q*(q-1)*(3*q^2+1)/(q+1)^3
+b = c * (q^2+1)/(q+1),
+```
+
+one gets
+
+```lean
+b - c = c * q*(q-1)/(q+1)
+```
+
+and a direct simplification gives
+
+```lean
+b - c - c^2 = -2 * q^3 * (q-1)^3 * (3*q^2+1) / (q+1)^6.
+```
+
+Therefore
+
+```lean
+q + 1 = -2 * (b - c)^2 / (c * (b - c - c^2)),
+```
+
+which is exactly the displayed inverse formula for `q`.
+
+The pole `b - c - c^2 = 0` is therefore not an accidental artifact of the derivation; it is the natural missing denominator of the inverse map.  In the Tate-normal-form/order-12 pipeline it should be discharged upstream from the exact-order/non-lower-order hypotheses; in this pure algebra theorem it is correctly present as `h6`.
