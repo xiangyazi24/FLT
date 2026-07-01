@@ -1,46 +1,28 @@
-# Q2899 (dm-codex1): attacking `projectivePointAddEquivOfVariableChange`
+# Q2901 (dm-codex1): shrink `affinePointAddEquivOfVariableChange` to explicit map + `map_add`
 
 Target file: `FLT/Assumptions/MazurProof/KubertBridgeN12.lean`  
 Requested namespace: `MazurProof.KubertBridgeN12`
 
-Current residual:
+Goal: replace the residual
 
 ```lean
-axiom projectivePointAddEquivOfVariableChange
+axiom affinePointAddEquivOfVariableChange
     (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
-    WeierstrassCurve.Projective.Point (WeierstrassCurve.toProjective W) ≃+
-      WeierstrassCurve.Projective.Point (WeierstrassCurve.toProjective (C • W))
+    WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W) ≃+
+      WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine (C • W))
 ```
 
-## Bottom line
+by explicit coordinate maps, checked nonsingularity preservation and inverse laws, leaving only:
 
-In the Mathlib revision pinned by this FLT repo (`96fd0fff...`), I do **not** see an existing point-level map induced by `WeierstrassCurve.VariableChange`.  The available APIs are:
-
-* curve-level `VariableChange` action and coefficient formulas:
-  `WeierstrassCurve.variableChange_a₁`, `variableChange_a₂`, `variableChange_a₃`, `variableChange_a₄`, `variableChange_a₆`, `variableChange_Δ`;
-* affine/projective base-change maps for ring homomorphisms, not Weierstrass variable changes;
-* `WeierstrassCurve.Projective.Point.toAffineAddEquiv`, which is the key way to avoid re-proving the projective group law;
-* affine point constructors and group law in `WeierstrassCurve.Affine.Point`.
-
-So the best attack is:
-
-1. shrink the current projective residual to an **affine** variable-change `AddEquiv`;
-2. prove the projective theorem from that affine theorem using `Projective.Point.toAffineAddEquiv`;
-3. then shrink the affine residual further to one explicit `map_add` lemma for a coordinate map, after checking nonsingularity preservation and inverse laws.
-
-The affine path still has a group-law preservation theorem to prove; `toAffineAddEquiv` avoids projective quotient/group-law work, but it does not magically prove that a new affine coordinate map preserves `+`.
-
-## APIs to grep/check locally
-
-```bash
-grep -R "def toAffineAddEquiv\|toAffineLift_add" .lake/packages/mathlib/Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Point.lean
-grep -R "def add : W.Point\|lemma add_some\|lemma add_of_Y_eq" .lake/packages/mathlib/Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Point.lean
-grep -R "variableChange_a₁\|variableChange_Δ\|structure VariableChange" .lake/packages/mathlib/Mathlib/AlgebraicGeometry/EllipticCurve/VariableChange.lean
-grep -R "nonsingular_iff_variableChange\|equation_iff_variableChange" .lake/packages/mathlib/Mathlib/AlgebraicGeometry/EllipticCurve/Affine/Basic.lean
-grep -R "protected lemma map_add\|baseChange_add" .lake/packages/mathlib/Mathlib/AlgebraicGeometry/EllipticCurve/Projective/Point.lean
+```lean
+axiom affineVariableChangeMap_add
 ```
 
-Useful `#check`s:
+for the explicit affine coordinate map.
+
+## API checks
+
+Run these first in the file or in a scratch Lean file:
 
 ```lean
 #check WeierstrassCurve.VariableChange
@@ -50,27 +32,26 @@ Useful `#check`s:
 #check WeierstrassCurve.variableChange_a₃
 #check WeierstrassCurve.variableChange_a₄
 #check WeierstrassCurve.variableChange_a₆
-#check WeierstrassCurve.variableChange_Δ
-#check WeierstrassCurve.Affine.equation_iff_variableChange
-#check WeierstrassCurve.Affine.nonsingular_iff_variableChange
-#check WeierstrassCurve.Projective.Point.toAffineAddEquiv
-#check WeierstrassCurve.Projective.Point.toAffineLift_add
-#check WeierstrassCurve.Projective.map_add
-#check WeierstrassCurve.Projective.baseChange_add
+#check WeierstrassCurve.Affine.Nonsingular
+#check WeierstrassCurve.Affine.Equation
+#check WeierstrassCurve.Affine.evalEval_polynomial
+#check WeierstrassCurve.Affine.evalEval_polynomialX
+#check WeierstrassCurve.Affine.evalEval_polynomialY
+#check WeierstrassCurve.Affine.Point.some
+#check WeierstrassCurve.Affine.Point.some.injEq
 ```
 
-Interpretation:
+If `Units.val_inv_eq_inv_val` is not found by your local import set, search with:
 
-* `Projective.map_add` and `Projective.baseChange_add` are for coefficient ring maps/base-change, not for `VariableChange`.
-* `Affine.equation_iff_variableChange` and `Affine.nonsingular_iff_variableChange` handle the special translation putting an affine point at the origin; they are useful diagnostics but do not directly give arbitrary `C : VariableChange ℚ` point transport.
-* I would not spend time searching for a hidden `VariableChange.Point.map` unless the greps above reveal something new.  The natural map appears not to exist yet.
+```bash
+grep -R "val_inv_eq_inv_val" .lake/packages/mathlib/Mathlib | head
+```
 
-## Stage 1: replace the projective residual by an affine residual
+or replace each use by `simp` after `have hu : (C.u : ℚ) ≠ 0 := C.u.ne_zero`.
 
-This is immediately better than the current axiom because all projective quotient/infinity work becomes checked by Mathlib's existing `toAffineAddEquiv`.
+## Pasteable staged code
 
 ```lean
-import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
 import Mathlib.Tactic
@@ -81,147 +62,68 @@ namespace MazurProof.KubertBridgeN12
 
 noncomputable section
 
+/-! ### 1. Coordinate maps -/
+
 /--
-Smaller residual than the current projective axiom: an admissible Weierstrass variable
-change induces an additive equivalence on affine nonsingular point groups.
-
-This avoids projective quotient representatives and relies on the checked Mathlib
-projective-to-affine additive equivalence to recover the projective theorem.
+Forward affine point map from `W` to `C • W`.
+Mathlib's variable change convention is
+`X_old = u^2 X_new + r`, `Y_old = u^3 Y_new + u^2 s X_new + t`,
+so the forward map on points uses the inverse coordinate formulas.
 -/
-axiom affinePointAddEquivOfVariableChange
-    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
-    WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W) ≃+
-      WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine (C • W))
-
-/-- Checked wrapper: projective point equivalence follows from the affine one. -/
-noncomputable def projectivePointAddEquivOfVariableChange_from_affine
-    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
-    WeierstrassCurve.Projective.Point (WeierstrassCurve.toProjective W) ≃+
-      WeierstrassCurve.Projective.Point (WeierstrassCurve.toProjective (C • W)) := by
-  classical
-  exact
-    ((WeierstrassCurve.Projective.Point.toAffineAddEquiv
-        (WeierstrassCurve.toProjective W)).trans
-      (affinePointAddEquivOfVariableChange W C)).trans
-      (WeierstrassCurve.Projective.Point.toAffineAddEquiv
-        (WeierstrassCurve.toProjective (C • W))).symm
-
-end
-end MazurProof.KubertBridgeN12
-```
-
-If Lean complains about definitional equality between
-
-```lean
-(WeierstrassCurve.toProjective W).toAffine.Point
-```
-
-and
-
-```lean
-WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W)
-```
-
-insert `change` wrappers around the two `toAffineAddEquiv` terms.  `toProjective` and `toAffine` are abbreviations, so this should usually elaborate after `classical`.
-
-## Stage 2: define the explicit affine coordinate maps
-
-Mathlib's variable-change convention is old coordinates as functions of new coordinates:
-
-```text
-X_old = u^2 X_new + r,
-Y_old = u^3 Y_new + u^2 s X_new + t.
-```
-
-Since the wanted direction is from points on `W` to points on `C • W`, use the inverse coordinate formulas:
-
-```text
-X_new = u^{-2}(X_old - r),
-Y_new = u^{-3}(Y_old - s(X_old - r) - t).
-```
-
-Pasteable skeleton:
-
-```lean
-namespace MazurProof.KubertBridgeN12
-
-noncomputable section
-
 private def vcNewX (C : WeierstrassCurve.VariableChange ℚ) (x : ℚ) : ℚ :=
   ((C.u⁻¹ : ℚ) ^ 2) * (x - C.r)
 
 private def vcNewY (C : WeierstrassCurve.VariableChange ℚ) (x y : ℚ) : ℚ :=
   ((C.u⁻¹ : ℚ) ^ 3) * (y - C.s * (x - C.r) - C.t)
 
+/-- Inverse affine coordinate map from `C • W` back to `W`. -/
 private def vcOldX (C : WeierstrassCurve.VariableChange ℚ) (x : ℚ) : ℚ :=
   ((C.u : ℚ) ^ 2) * x + C.r
 
 private def vcOldY (C : WeierstrassCurve.VariableChange ℚ) (x y : ℚ) : ℚ :=
   ((C.u : ℚ) ^ 3) * y + ((C.u : ℚ) ^ 2) * C.s * x + C.t
 
-private lemma vc_unit_ne_zero (C : WeierstrassCurve.VariableChange ℚ) :
+private lemma vc_u_ne_zero (C : WeierstrassCurve.VariableChange ℚ) :
     (C.u : ℚ) ≠ 0 :=
   C.u.ne_zero
 
-private lemma vc_unit_inv_ne_zero (C : WeierstrassCurve.VariableChange ℚ) :
+private lemma vc_u_inv_ne_zero (C : WeierstrassCurve.VariableChange ℚ) :
     (C.u⁻¹ : ℚ) ≠ 0 :=
   C.u⁻¹.ne_zero
 
-private lemma vcOldX_newX (C : WeierstrassCurve.VariableChange ℚ) (x : ℚ) :
+private lemma vcOldX_vcNewX (C : WeierstrassCurve.VariableChange ℚ) (x : ℚ) :
     vcOldX C (vcNewX C x) = x := by
+  have hu : (C.u : ℚ) ≠ 0 := vc_u_ne_zero C
   unfold vcOldX vcNewX
-  field_simp [vc_unit_ne_zero C]
+  simp only [Units.val_inv_eq_inv_val]
+  field_simp [hu]
   ring
 
-private lemma vcOldY_newXY (C : WeierstrassCurve.VariableChange ℚ) (x y : ℚ) :
+private lemma vcOldY_vcNewXY (C : WeierstrassCurve.VariableChange ℚ) (x y : ℚ) :
     vcOldY C (vcNewX C x) (vcNewY C x y) = y := by
+  have hu : (C.u : ℚ) ≠ 0 := vc_u_ne_zero C
   unfold vcOldY vcNewX vcNewY
-  field_simp [vc_unit_ne_zero C]
+  simp only [Units.val_inv_eq_inv_val]
+  field_simp [hu]
   ring
 
-private lemma vcNewX_oldX (C : WeierstrassCurve.VariableChange ℚ) (x : ℚ) :
+private lemma vcNewX_vcOldX (C : WeierstrassCurve.VariableChange ℚ) (x : ℚ) :
     vcNewX C (vcOldX C x) = x := by
+  have hu : (C.u : ℚ) ≠ 0 := vc_u_ne_zero C
   unfold vcNewX vcOldX
-  field_simp [vc_unit_ne_zero C]
+  simp only [Units.val_inv_eq_inv_val]
+  field_simp [hu]
   ring
 
-private lemma vcNewY_oldXY (C : WeierstrassCurve.VariableChange ℚ) (x y : ℚ) :
+private lemma vcNewY_vcOldXY (C : WeierstrassCurve.VariableChange ℚ) (x y : ℚ) :
     vcNewY C (vcOldX C x) (vcOldY C x y) = y := by
+  have hu : (C.u : ℚ) ≠ 0 := vc_u_ne_zero C
   unfold vcNewY vcOldX vcOldY
-  field_simp [vc_unit_ne_zero C]
+  simp only [Units.val_inv_eq_inv_val]
+  field_simp [hu]
   ring
 
-end
-end MazurProof.KubertBridgeN12
-```
-
-If `field_simp [vc_unit_ne_zero C]` does not see the inverse coercions, add:
-
-```lean
-have hu : (C.u : ℚ) ≠ 0 := C.u.ne_zero
-have hui : ((C.u : ℚ)⁻¹) ≠ 0 := inv_ne_zero hu
-field_simp [vcNewX, vcNewY, vcOldX, vcOldY, hu, hui]
-ring
-```
-
-## Stage 3: preserve equation and nonsingularity
-
-Do this with polynomial-value identities, not by trying to simplify the whole `Nonsingular` proposition at once.
-
-The expected identities are:
-
-```text
-F_{C•W}(X_new,Y_new) = u^{-6} F_W(X_old,Y_old),
-(F_{C•W})_X(X_new,Y_new) = u^{-4}(F_X(X_old,Y_old) + s F_Y(X_old,Y_old)),
-(F_{C•W})_Y(X_new,Y_new) = u^{-3}F_Y(X_old,Y_old).
-```
-
-Lean declarations:
-
-```lean
-namespace MazurProof.KubertBridgeN12
-
-noncomputable section
+/-! ### 2. Polynomial identities for the forward map -/
 
 private lemma vc_eval_polynomial_forward
     (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
@@ -230,16 +132,15 @@ private lemma vc_eval_polynomial_forward
         (vcNewX C x) (vcNewY C x y) =
       ((C.u⁻¹ : ℚ) ^ 6) *
         (WeierstrassCurve.toAffine W).polynomial.evalEval x y := by
-  -- Expand only the affine polynomial and the five variable-change coefficients.
-  -- Avoid unfolding unrelated point/group-law definitions.
+  have hu : (C.u : ℚ) ≠ 0 := vc_u_ne_zero C
   simp only [WeierstrassCurve.Affine.evalEval_polynomial,
     WeierstrassCurve.variableChange_a₁,
     WeierstrassCurve.variableChange_a₂,
     WeierstrassCurve.variableChange_a₃,
     WeierstrassCurve.variableChange_a₄,
     WeierstrassCurve.variableChange_a₆,
-    vcNewX, vcNewY]
-  field_simp [vc_unit_ne_zero C]
+    vcNewX, vcNewY, Units.val_inv_eq_inv_val]
+  field_simp [hu]
   ring
 
 private lemma vc_eval_polynomialX_forward
@@ -250,14 +151,15 @@ private lemma vc_eval_polynomialX_forward
       ((C.u⁻¹ : ℚ) ^ 4) *
         ((WeierstrassCurve.toAffine W).polynomialX.evalEval x y +
           C.s * (WeierstrassCurve.toAffine W).polynomialY.evalEval x y) := by
+  have hu : (C.u : ℚ) ≠ 0 := vc_u_ne_zero C
   simp only [WeierstrassCurve.Affine.evalEval_polynomialX,
     WeierstrassCurve.Affine.evalEval_polynomialY,
     WeierstrassCurve.variableChange_a₁,
     WeierstrassCurve.variableChange_a₂,
     WeierstrassCurve.variableChange_a₃,
     WeierstrassCurve.variableChange_a₄,
-    vcNewX, vcNewY]
-  field_simp [vc_unit_ne_zero C]
+    vcNewX, vcNewY, Units.val_inv_eq_inv_val]
+  field_simp [hu]
   ring
 
 private lemma vc_eval_polynomialY_forward
@@ -267,12 +169,74 @@ private lemma vc_eval_polynomialY_forward
         (vcNewX C x) (vcNewY C x y) =
       ((C.u⁻¹ : ℚ) ^ 3) *
         (WeierstrassCurve.toAffine W).polynomialY.evalEval x y := by
+  have hu : (C.u : ℚ) ≠ 0 := vc_u_ne_zero C
   simp only [WeierstrassCurve.Affine.evalEval_polynomialY,
     WeierstrassCurve.variableChange_a₁,
     WeierstrassCurve.variableChange_a₃,
-    vcNewX, vcNewY]
-  field_simp [vc_unit_ne_zero C]
+    vcNewX, vcNewY, Units.val_inv_eq_inv_val]
+  field_simp [hu]
   ring
+
+/-! ### 3. Polynomial identities for the backward map -/
+
+private lemma vc_eval_polynomial_backward
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    (x y : ℚ) :
+    (WeierstrassCurve.toAffine W).polynomial.evalEval
+        (vcOldX C x) (vcOldY C x y) =
+      ((C.u : ℚ) ^ 6) *
+        (WeierstrassCurve.toAffine (C • W)).polynomial.evalEval x y := by
+  have hu : (C.u : ℚ) ≠ 0 := vc_u_ne_zero C
+  simp only [WeierstrassCurve.Affine.evalEval_polynomial,
+    WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₂,
+    WeierstrassCurve.variableChange_a₃,
+    WeierstrassCurve.variableChange_a₄,
+    WeierstrassCurve.variableChange_a₆,
+    vcOldX, vcOldY, Units.val_inv_eq_inv_val]
+  field_simp [hu]
+  ring
+
+private lemma vc_eval_polynomialY_backward
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    (x y : ℚ) :
+    (WeierstrassCurve.toAffine W).polynomialY.evalEval
+        (vcOldX C x) (vcOldY C x y) =
+      ((C.u : ℚ) ^ 3) *
+        (WeierstrassCurve.toAffine (C • W)).polynomialY.evalEval x y := by
+  have hu : (C.u : ℚ) ≠ 0 := vc_u_ne_zero C
+  simp only [WeierstrassCurve.Affine.evalEval_polynomialY,
+    WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₃,
+    vcOldX, vcOldY, Units.val_inv_eq_inv_val]
+  field_simp [hu]
+  ring
+
+/--
+Backward `X` derivative identity in the triangular form needed for nonsingularity.
+This avoids solving for `F_X` explicitly until after the `F_Y = 0` case split.
+-/
+private lemma vc_eval_polynomialX_add_sY_backward
+    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
+    (x y : ℚ) :
+    (WeierstrassCurve.toAffine W).polynomialX.evalEval
+        (vcOldX C x) (vcOldY C x y) +
+      C.s * (WeierstrassCurve.toAffine W).polynomialY.evalEval
+        (vcOldX C x) (vcOldY C x y) =
+      ((C.u : ℚ) ^ 4) *
+        (WeierstrassCurve.toAffine (C • W)).polynomialX.evalEval x y := by
+  have hu : (C.u : ℚ) ≠ 0 := vc_u_ne_zero C
+  simp only [WeierstrassCurve.Affine.evalEval_polynomialX,
+    WeierstrassCurve.Affine.evalEval_polynomialY,
+    WeierstrassCurve.variableChange_a₁,
+    WeierstrassCurve.variableChange_a₂,
+    WeierstrassCurve.variableChange_a₃,
+    WeierstrassCurve.variableChange_a₄,
+    vcOldX, vcOldY, Units.val_inv_eq_inv_val]
+  field_simp [hu]
+  ring
+
+/-! ### 4. Nonsingularity preservation -/
 
 private theorem vc_nonsingular_forward
     (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
@@ -282,21 +246,22 @@ private theorem vc_nonsingular_forward
       (vcNewX C x) (vcNewY C x y) := by
   rcases h with ⟨hEq, hDeriv⟩
   constructor
-  · -- equation preservation
-    rw [WeierstrassCurve.Affine.Equation, vc_eval_polynomial_forward W C x y, hEq, mul_zero]
-  · -- derivative nonvanishing.  Use the triangular derivative transformation.
-    rw [vc_eval_polynomialX_forward W C x y, vc_eval_polynomialY_forward W C x y]
-    have hu3 : ((C.u⁻¹ : ℚ) ^ 3) ≠ 0 := pow_ne_zero 3 (vc_unit_inv_ne_zero C)
-    have hu4 : ((C.u⁻¹ : ℚ) ^ 4) ≠ 0 := pow_ne_zero 4 (vc_unit_inv_ne_zero C)
+  · rw [WeierstrassCurve.Affine.Equation] at hEq ⊢
+    rw [vc_eval_polynomial_forward W C x y, hEq, mul_zero]
+  · rw [vc_eval_polynomialX_forward W C x y,
+        vc_eval_polynomialY_forward W C x y]
+    have hu3 : ((C.u⁻¹ : ℚ) ^ 3) ≠ 0 := pow_ne_zero 3 (vc_u_inv_ne_zero C)
+    have hu4 : ((C.u⁻¹ : ℚ) ^ 4) ≠ 0 := pow_ne_zero 4 (vc_u_inv_ne_zero C)
     rcases hDeriv with hX | hY
     · by_cases hY0 : (WeierstrassCurve.toAffine W).polynomialY.evalEval x y = 0
       · left
         intro hbad
         apply hX
-        have : (WeierstrassCurve.toAffine W).polynomialX.evalEval x y +
-            C.s * (WeierstrassCurve.toAffine W).polynomialY.evalEval x y = 0 := by
+        have hsum :
+            (WeierstrassCurve.toAffine W).polynomialX.evalEval x y +
+              C.s * (WeierstrassCurve.toAffine W).polynomialY.evalEval x y = 0 := by
           exact (mul_eq_zero.mp hbad).resolve_left hu4
-        simpa [hY0] using this
+        simpa [hY0] using hsum
       · right
         exact mul_ne_zero hu3 hY0
     · right
@@ -308,56 +273,40 @@ private theorem vc_nonsingular_backward
     (h : (WeierstrassCurve.toAffine (C • W)).Nonsingular x y) :
     (WeierstrassCurve.toAffine W).Nonsingular
       (vcOldX C x) (vcOldY C x y) := by
-  -- Either prove direct backward polynomial identities, or use the forward theorem for `C⁻¹`
-  -- plus the group-action identity `C⁻¹ • (C • W) = W`.
-  -- Direct identities are less elegant but often easier to elaborate.
-  -- Skeleton for the direct route:
-  sorry
+  rcases h with ⟨hEq, hDeriv⟩
+  constructor
+  · rw [WeierstrassCurve.Affine.Equation] at hEq ⊢
+    rw [vc_eval_polynomial_backward W C x y, hEq, mul_zero]
+  · have hu3 : ((C.u : ℚ) ^ 3) ≠ 0 := pow_ne_zero 3 (vc_u_ne_zero C)
+    have hu4 : ((C.u : ℚ) ^ 4) ≠ 0 := pow_ne_zero 4 (vc_u_ne_zero C)
+    rcases hDeriv with hX | hY
+    · by_cases hY0 :
+          (WeierstrassCurve.toAffine (C • W)).polynomialY.evalEval x y = 0
+      · left
+        intro hOldX0
+        have hOldY0 :
+            (WeierstrassCurve.toAffine W).polynomialY.evalEval
+              (vcOldX C x) (vcOldY C x y) = 0 := by
+          rw [vc_eval_polynomialY_backward W C x y, hY0, mul_zero]
+        have hsum : ((C.u : ℚ) ^ 4) *
+            (WeierstrassCurve.toAffine (C • W)).polynomialX.evalEval x y = 0 := by
+          rw [← vc_eval_polynomialX_add_sY_backward W C x y,
+            hOldX0, hOldY0, mul_zero, add_zero]
+        exact (mul_ne_zero hu4 hX) hsum
+      · right
+        rw [vc_eval_polynomialY_backward W C x y]
+        exact mul_ne_zero hu3 hY0
+    · right
+      rw [vc_eval_polynomialY_backward W C x y]
+      exact mul_ne_zero hu3 hY
 
-end
-end MazurProof.KubertBridgeN12
-```
-
-For `vc_nonsingular_backward`, I recommend first writing the direct backward analogues:
-
-```lean
-private lemma vc_eval_polynomial_backward ...
-private lemma vc_eval_polynomialX_backward ...
-private lemma vc_eval_polynomialY_backward ...
-```
-
-with expected identities
-
-```text
-F_W(X_old,Y_old) = u^6 F_{C•W}(X_new,Y_new),
-F_X(old) = u^4 (F'_X(new) - s*u^3? / u^4? ...)
-F_Y(old) = u^3 F'_Y(new).
-```
-
-But you can avoid derivative algebra for the backward direction by applying the forward theorem to `C⁻¹` and then rewriting:
-
-```lean
-have h' := vc_nonsingular_forward (C • W) C⁻¹ h
--- h' has target `toAffine (C⁻¹ • (C • W))` at coordinates computed by `C⁻¹`.
--- Rewrite curve by `inv_smul_smul C W` and coordinates by coordinate-inverse lemmas.
-```
-
-This may need `simpa [vcNewX, vcNewY, vcOldX, vcOldY, WeierstrassCurve.VariableChange.inv_def]` plus `field_simp [C.u.ne_zero]` coordinate helper lemmas.  If that gets annoying, the direct backward lemmas are safer.
-
-## Stage 4: define the affine point maps and prove bijection
-
-Once nonsingularity preservation exists, this part is routine casework on `Affine.Point`.
-
-```lean
-namespace MazurProof.KubertBridgeN12
-
-noncomputable section
+/-! ### 5. Affine point maps and inverse laws -/
 
 private def affineVariableChangeMap
     (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
     WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W) →
       WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine (C • W))
-  | 0 => 0
+  | WeierstrassCurve.Affine.Point.zero => 0
   | WeierstrassCurve.Affine.Point.some x y h =>
       WeierstrassCurve.Affine.Point.some (vcNewX C x) (vcNewY C x y)
         (vc_nonsingular_forward W C h)
@@ -366,7 +315,7 @@ private def affineVariableChangeInv
     (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
     WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine (C • W)) →
       WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W)
-  | 0 => 0
+  | WeierstrassCurve.Affine.Point.zero => 0
   | WeierstrassCurve.Affine.Point.some x y h =>
       WeierstrassCurve.Affine.Point.some (vcOldX C x) (vcOldY C x y)
         (vc_nonsingular_backward W C h)
@@ -380,7 +329,7 @@ private theorem affineVariableChange_left_inv
   | some x y h =>
       simp [affineVariableChangeMap, affineVariableChangeInv,
         WeierstrassCurve.Affine.Point.some.injEq,
-        vcOldX_newX, vcOldY_newXY]
+        vcOldX_vcNewX, vcOldY_vcNewXY]
 
 private theorem affineVariableChange_right_inv
     (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
@@ -391,7 +340,7 @@ private theorem affineVariableChange_right_inv
   | some x y h =>
       simp [affineVariableChangeMap, affineVariableChangeInv,
         WeierstrassCurve.Affine.Point.some.injEq,
-        vcNewX_oldX, vcNewY_oldXY]
+        vcNewX_vcOldX, vcNewY_vcOldXY]
 
 private noncomputable def affineVariableChangeEquiv
     (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
@@ -402,30 +351,11 @@ private noncomputable def affineVariableChangeEquiv
   left_inv := affineVariableChange_left_inv W C
   right_inv := affineVariableChange_right_inv W C
 
-end
-end MazurProof.KubertBridgeN12
-```
-
-If the `cases P with | zero | some` syntax differs locally, use:
-
-```lean
-  rcases P with (_ | ⟨x, y, h⟩)
-```
-
-matching the constructors in `Affine.Point.lean`.
-
-## Stage 5: the only hard part — `map_add'`
-
-After Stage 4, the remaining mathematical content is exactly:
-
-```lean
-namespace MazurProof.KubertBridgeN12
-
-noncomputable section
+/-! ### 6. New smaller residual: only addition preservation -/
 
 /--
-Smallest honest residual after the coordinate-map work: the explicit affine variable-change map
-preserves the chord-and-tangent group law.
+The only residual left after the explicit coordinate map, nonsingularity preservation,
+and inverse laws are checked.
 -/
 axiom affineVariableChangeMap_add
     (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
@@ -433,7 +363,11 @@ axiom affineVariableChangeMap_add
     affineVariableChangeMap W C (P + Q) =
       affineVariableChangeMap W C P + affineVariableChangeMap W C Q
 
-noncomputable def affinePointAddEquivOfVariableChange_from_map_add
+/--
+Replacement for the old `affinePointAddEquivOfVariableChange` axiom.
+Call sites should not need to change if the old axiom had this exact name.
+-/
+noncomputable def affinePointAddEquivOfVariableChange
     (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
     WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W) ≃+
       WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine (C • W)) where
@@ -444,183 +378,105 @@ end
 end MazurProof.KubertBridgeN12
 ```
 
-This is already a much smaller residual than the current projective axiom:
+## If a proof line fails: local adaptation notes
 
-* no projective quotient representatives;
-* no point at infinity cases except `0` in affine point type;
-* no nonsingularity preservation;
-* no inverse/bijection proof;
-* only preservation of the already-defined affine group law remains.
+### `Units.val_inv_eq_inv_val`
 
-### How to prove `affineVariableChangeMap_add` later
+If this simp lemma is not in scope, replace the start of each algebra proof with:
 
-Do it by split lemmas, not a single `cases P; cases Q; simp; ring_nf`.
+```lean
+  have hu : (C.u : ℚ) ≠ 0 := C.u.ne_zero
+  have hui : ((C.u : ℚ)⁻¹) ≠ 0 := inv_ne_zero hu
+  simp only [WeierstrassCurve.Affine.evalEval_polynomial, ...]
+  change _ = _
+  field_simp [hu, hui]
+  ring
+```
 
-Needed coordinate identities:
+or add this local lemma:
+
+```lean
+private lemma coe_units_inv (u : ℚˣ) : ((u⁻¹ : ℚˣ) : ℚ) = (u : ℚ)⁻¹ := by
+  exact Units.val_inv_eq_inv_val u
+```
+
+and include `coe_units_inv` in the `simp only` lists.
+
+### Constructor/case syntax
+
+If `cases P with | zero | some` does not work in the local namespace, use:
+
+```lean
+  rcases P with (_ | ⟨x, y, h⟩)
+```
+
+The affine point constructors in this Mathlib revision are:
+
+```lean
+WeierstrassCurve.Affine.Point.zero
+WeierstrassCurve.Affine.Point.some (x y : ℚ) (h : W.Nonsingular x y)
+```
+
+### `simp` on proof arguments of `some`
+
+If proof irrelevance does not close the inverse-law goals, use:
+
+```lean
+      rw [WeierstrassCurve.Affine.Point.some.injEq]
+      exact ⟨vcOldX_vcNewX C x, vcOldY_vcNewXY C x y⟩
+```
+
+and similarly for the right inverse.
+
+## Verification order
+
+1. Paste only Sections 1--3 and run:
+
+```bash
+lake env lean FLT/Assumptions/MazurProof/KubertBridgeN12.lean
+```
+
+The likely first failures are in `field_simp`; fix those by adding `hu`/`hui` or `coe_units_inv` as above.
+
+2. Add Section 4 (`vc_nonsingular_forward/backward`).  These proofs should not require any group law facts.
+
+3. Add Section 5.  If `Point.some.injEq` is awkward, prove inverse laws by `rw [Point.some.injEq]` explicitly.
+
+4. Replace the old axiom with Section 6.  Downstream projective equivalence code using `Projective.Point.toAffineAddEquiv` should continue to work unchanged.
+
+## Later attack on the remaining `map_add` residual
+
+The next residual is local and concrete:
+
+```lean
+affineVariableChangeMap_add
+```
+
+Attack it with three algebra lemmas:
 
 ```lean
 private lemma vc_negY
     (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
     (x y : ℚ) :
     vcNewY C x ((WeierstrassCurve.toAffine W).negY x y) =
-      (WeierstrassCurve.toAffine (C • W)).negY (vcNewX C x) (vcNewY C x y) := by
-  -- unfold `Affine.negY`; use variableChange_a₁/a₃; field_simp; ring
+      (WeierstrassCurve.toAffine (C • W)).negY
+        (vcNewX C x) (vcNewY C x y) := by
+  -- simp only [WeierstrassCurve.Affine.negY, variableChange_a₁, variableChange_a₃,
+  --   vcNewX, vcNewY, Units.val_inv_eq_inv_val]
+  -- field_simp [C.u.ne_zero]
+  -- ring
   sorry
 
-private lemma vc_add_vertical_condition_iff
+private lemma vc_vertical_iff
     (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
     (x₁ y₁ x₂ y₂ : ℚ) :
     (vcNewX C x₁ = vcNewX C x₂ ∧
       vcNewY C x₁ y₁ =
-        (WeierstrassCurve.toAffine (C • W)).negY (vcNewX C x₂) (vcNewY C x₂ y₂)) ↔
+        (WeierstrassCurve.toAffine (C • W)).negY
+          (vcNewX C x₂) (vcNewY C x₂ y₂)) ↔
     (x₁ = x₂ ∧ y₁ = (WeierstrassCurve.toAffine W).negY x₂ y₂) := by
-  -- Use injectivity of `x ↦ vcNewX C x`, coordinate inverse lemmas, and `vc_negY`.
+  -- Use `vcOldX_vcNewX`, `vcOldY_vcNewXY`, and `vc_negY`.
   sorry
 ```
 
-For nonvertical addition, show transformed line slope and output coordinates agree.  Use Mathlib names from `Affine/Formula.lean`:
-
-```lean
-#check WeierstrassCurve.Affine.slope
-#check WeierstrassCurve.Affine.addX
-#check WeierstrassCurve.Affine.addY
-#check WeierstrassCurve.Affine.negAddY
-```
-
-Expected lemmas:
-
-```lean
-private lemma vc_slope
-    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
-    {x₁ y₁ x₂ y₂ : ℚ}
-    (hnot : ¬(x₁ = x₂ ∧ y₁ = (WeierstrassCurve.toAffine W).negY x₂ y₂)) :
-    -- statement depends on Mathlib's exact slope convention;
-    -- derive by expanding `Affine.slope` after splitting `x₁ = x₂` vs `x₁ ≠ x₂`.
-    True := by
-  trivial
-
-private lemma vc_addX
-    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
-    {x₁ y₁ x₂ y₂ : ℚ} :
-    vcNewX C
-      ((WeierstrassCurve.toAffine W).addX x₁ x₂
-        ((WeierstrassCurve.toAffine W).slope x₁ x₂ y₁ y₂)) =
-      (WeierstrassCurve.toAffine (C • W)).addX
-        (vcNewX C x₁) (vcNewX C x₂)
-        ((WeierstrassCurve.toAffine (C • W)).slope
-          (vcNewX C x₁) (vcNewX C x₂) (vcNewY C x₁ y₁) (vcNewY C x₂ y₂)) := by
-  -- split `x₁ = x₂`; expand `slope`, `addX`, coefficient formulas; field_simp; ring
-  sorry
-
-private lemma vc_addY
-    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
-    {x₁ y₁ x₂ y₂ : ℚ} :
-    vcNewY C x₁
-      ((WeierstrassCurve.toAffine W).addY x₁ x₂ y₁
-        ((WeierstrassCurve.toAffine W).slope x₁ x₂ y₁ y₂)) =
-      (WeierstrassCurve.toAffine (C • W)).addY
-        (vcNewX C x₁) (vcNewX C x₂) (vcNewY C x₁ y₁)
-        ((WeierstrassCurve.toAffine (C • W)).slope
-          (vcNewX C x₁) (vcNewX C x₂) (vcNewY C x₁ y₁) (vcNewY C x₂ y₂)) := by
-  -- similar but usually larger than `vc_addX`
-  sorry
-```
-
-Then the proof of `affineVariableChangeMap_add` becomes casework:
-
-```lean
-theorem affineVariableChangeMap_add_checked
-    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ)
-    (P Q : WeierstrassCurve.Affine.Point (WeierstrassCurve.toAffine W)) :
-    affineVariableChangeMap W C (P + Q) =
-      affineVariableChangeMap W C P + affineVariableChangeMap W C Q := by
-  rcases P with (_ | ⟨x₁, y₁, h₁⟩)
-  · simp [affineVariableChangeMap]
-  rcases Q with (_ | ⟨x₂, y₂, h₂⟩)
-  · simp [affineVariableChangeMap]
-  by_cases hvert : x₁ = x₂ ∧ y₁ = (WeierstrassCurve.toAffine W).negY x₂ y₂
-  · -- both sides are zero by vertical-condition compatibility
-    simp [WeierstrassCurve.Affine.Point.add_of_Y_eq hvert.1 hvert.2,
-      affineVariableChangeMap, vc_add_vertical_condition_iff, hvert]
-  · -- both sides are the same `some`, by `vc_addX` and `vc_addY`
-    rw [WeierstrassCurve.Affine.Point.add_some hvert]
-    rw [WeierstrassCurve.Affine.Point.add_some]
-    · simp [affineVariableChangeMap, WeierstrassCurve.Affine.Point.some.injEq,
-        vc_addX, vc_addY]
-    · -- transformed pair is not vertical
-      exact (vc_add_vertical_condition_iff W C x₁ y₁ x₂ y₂).not.mpr hvert
-```
-
-This is the direct formal route.  It is work, but each lemma is algebraic and local.
-
-## Alternative route: coordinate-ring/class-group proof of `map_add'`
-
-`Affine.Point.toClass` is a group hom into the class group and is injective.  A variable change should induce an isomorphism of coordinate rings, hence a class-group equivalence, and then `map_add'` can be proved by injectivity of `toClass` rather than by slope formulas.
-
-This may be elegant but likely requires more infrastructure:
-
-```lean
--- Not currently in Mathlib as far as I can see:
-noncomputable def coordinateRingEquivOfVariableChange
-    (W : WeierstrassCurve ℚ) (C : WeierstrassCurve.VariableChange ℚ) :
-    (WeierstrassCurve.toAffine W).CoordinateRing ≃+*
-      (WeierstrassCurve.toAffine (C • W)).CoordinateRing := by
-  -- induced by X ↦ u² X + r, Y ↦ u³Y + u²sX + t, or inverse direction
-  sorry
-```
-
-Then prove compatibility with `XYIdeal'`.  This may avoid the chord/tangent formulas, but it is probably a larger detour than the affine formula route.
-
-## Direct projective coordinate map, if needed
-
-If you decide not to go through affine charts, the forward projective representative map from `W` to `C • W` should be the homogeneous inverse coordinate change:
-
-```lean
-private def vcProjectiveNew
-    (C : WeierstrassCurve.VariableChange ℚ) (P : Fin 3 → ℚ) : Fin 3 → ℚ :=
-  ![((C.u⁻¹ : ℚ) ^ 2) * (P 0 - C.r * P 2),
-    ((C.u⁻¹ : ℚ) ^ 3) * (P 1 - C.s * (P 0 - C.r * P 2) - C.t * P 2),
-    P 2]
-```
-
-You would then need:
-
-```lean
-lemma vcProjectiveNew_equiv {P Q : Fin 3 → ℚ}
-    (h : P ≈ Q) : vcProjectiveNew C P ≈ vcProjectiveNew C Q := by ...
-
-lemma vcProjectiveNew_nonsingular
-    {P : Fin 3 → ℚ}
-    (h : (WeierstrassCurve.toProjective W).Nonsingular P) :
-    (WeierstrassCurve.toProjective (C • W)).Nonsingular (vcProjectiveNew C P) := by ...
-```
-
-This can produce a projective `Equiv`, but proving `map_add'` at the projective level would mean matching Mathlib's projective addition formulas.  I would avoid this unless there is a later reason to need the projective coordinate map itself.
-
-## Recommended replacement hierarchy
-
-Best immediate improvement:
-
-```lean
-axiom affinePointAddEquivOfVariableChange
-```
-
-and make `projectivePointAddEquivOfVariableChange` a theorem via `toAffineAddEquiv`.
-
-Next improvement:
-
-```lean
-axiom affineVariableChangeMap_add
-```
-
-with explicit checked coordinate map, nonsingularity preservation, and inverse laws.
-
-Final target:
-
-```lean
-theorem affineVariableChangeMap_add_checked ...
-```
-
-proved from `vc_negY`, `vc_add_vertical_condition_iff`, `vc_addX`, and `vc_addY`.
-
-This staged plan gives a real path from the current projective axiom to a single algebraic group-law compatibility lemma, then to no residual at all.
+Then split the nonvertical case into `x₁ = x₂` and `x₁ ≠ x₂`, expand Mathlib's affine `slope`, `addX`, `addY`, and finish each branch by `field_simp [C.u.ne_zero] <;> ring`.
