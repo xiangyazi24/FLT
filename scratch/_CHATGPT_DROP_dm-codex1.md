@@ -1,50 +1,103 @@
 ```lean
 import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+import Mathlib.Algebra.Group.Int.Units
 import Mathlib.RingTheory.PrincipalIdealDomain
 
 namespace MazurProof.RationalPointsN12
 
-private theorem three_mul_dvd_three_mul_of_dvd {d a : ℤ}
-    (h : d ∣ a) :
-    3 * d ∣ 3 * a := by
-  rcases h with ⟨k, hk⟩
-  refine ⟨k, ?_⟩
-  rw [hk]
-  ring
+theorem positive_unit_eq_one {k : ℤ} (hk : 0 < k) (hu : IsUnit k) :
+    k = 1 := by
+  rcases Int.isUnit_eq_one_or hu with h | h
+  · exact h
+  · have : (0 : ℤ) < -1 := by
+      simpa [h] using hk
+    norm_num at this
 
-private theorem isUnit_of_three_mul_dvd_three {d : ℤ}
-    (h : 3 * d ∣ (3 : ℤ)) :
-    IsUnit d := by
-  rcases h with ⟨k, hk⟩
-  have hcancel : (1 : ℤ) = d * k := by
-    apply mul_left_cancel₀ (show (3 : ℤ) ≠ 0 by decide)
+private theorem isUnit_of_common_scale {X Y A B k : ℤ}
+    (hXY : IsCoprime X Y)
+    (hX : X = A * k)
+    (hY : Y = B * k) :
+    IsUnit k := by
+  have hkX : k ∣ X := by
+    refine ⟨A, ?_⟩
+    rw [hX]
+    ring
+  have hkY : k ∣ Y := by
+    refine ⟨B, ?_⟩
+    rw [hY]
+    ring
+  exact hXY.isUnit_of_dvd' hkX hkY
+
+theorem eisenstein_scale_kill_raw {X Y Z m n C : ℤ}
+    (hXY : IsCoprime X Y)
+    (hnpos : 0 < n) (hYpos : 0 < Y)
+    (hEBpos : 0 < eisensteinEB m n)
+    (hEAEB : IsCoprime (eisensteinEA m n) (eisensteinEB m n))
+    (hZeq : eisensteinEB m n * Z = (m ^ 2 - m * n + n ^ 2) * C)
+    (hXeq : eisensteinEB m n * X = eisensteinEA m n * C)
+    (hYC : Y = n * C) :
+    C = eisensteinEB m n ∧ X = eisensteinEA m n ∧
+      Y = 2 * m * n - n ^ 2 ∧ Z = m ^ 2 - m * n + n ^ 2 := by
+  have hEBne : eisensteinEB m n ≠ 0 := ne_of_gt hEBpos
+
+  -- Euclid: from `EB * X = EA * C` and `IsCoprime EA EB`, get `EB ∣ C`.
+  have hEB_dvd_EA_C : eisensteinEB m n ∣ eisensteinEA m n * C := by
+    refine ⟨X, ?_⟩
+    exact hXeq.symm
+  have hEB_dvd_C : eisensteinEB m n ∣ C :=
+    hEAEB.symm.dvd_of_dvd_mul_left hEB_dvd_EA_C
+  rcases hEB_dvd_C with ⟨k, hkC⟩
+
+  -- Positivity of the scale `k`.
+  have hCpos : 0 < C := by
+    have hprod : 0 < n * C := by
+      simpa [hYC] using hYpos
+    exact pos_of_mul_pos_left hprod (le_of_lt hnpos)
+  have hkpos : 0 < k := by
+    have hprod : 0 < eisensteinEB m n * k := by
+      simpa [hkC] using hCpos
+    exact pos_of_mul_pos_left hprod (le_of_lt hEBpos)
+
+  -- Cancel `EB` to get the common scale on `X`.
+  have hXk : X = eisensteinEA m n * k := by
+    apply mul_left_cancel₀ hEBne
     calc
-      (3 : ℤ) * 1 = 3 := by ring
-      _ = (3 * d) * k := hk
-      _ = 3 * (d * k) := by ring
-  exact IsUnit.of_mul_eq_one k hcancel.symm
+      eisensteinEB m n * X = eisensteinEA m n * C := hXeq
+      _ = eisensteinEA m n * (eisensteinEB m n * k) := by rw [hkC]
+      _ = eisensteinEB m n * (eisensteinEA m n * k) := by ring
 
-theorem eisenstein_factor_coprime_divided_witness {m n EA' EB' : ℤ}
-    (hmn : IsCoprime m n)
-    (hEA : eisensteinEA m n = 3 * EA')
-    (hEB : eisensteinEB m n = 3 * EB') :
-    IsCoprime EA' EB' := by
-  apply IsRelPrime.isCoprime
-  intro d hdA hdB
-  have hdEA3' : 3 * d ∣ 3 * EA' :=
-    three_mul_dvd_three_mul_of_dvd hdA
-  have hdEB3' : 3 * d ∣ 3 * EB' :=
-    three_mul_dvd_three_mul_of_dvd hdB
-  have hdEA : 3 * d ∣ eisensteinEA m n := by
-    simpa [hEA] using hdEA3'
-  have hdEB : 3 * d ∣ eisensteinEB m n := by
-    simpa [hEB] using hdEB3'
-  have hd3 : 3 * d ∣ (3 : ℤ) :=
-    eisenstein_common_dvd_three (d := 3 * d) (m := m) (n := n)
-      hmn hdEA hdEB
-  exact isUnit_of_three_mul_dvd_three hd3
+  -- Use `Y = n*C` and `C = EB*k` to get the same scale on `Y`.
+  have hYk : Y = (2 * m * n - n ^ 2) * k := by
+    calc
+      Y = n * C := hYC
+      _ = n * (eisensteinEB m n * k) := by rw [hkC]
+      _ = (2 * m * n - n ^ 2) * k := by
+          unfold eisensteinEB
+          ring
+
+  -- No coprimality of `EA` and `2mn-n^2` is needed: `k` divides both `X` and `Y`.
+  have hkUnit : IsUnit k :=
+    isUnit_of_common_scale hXY hXk hYk
+  have hk1 : k = 1 := positive_unit_eq_one hkpos hkUnit
+
+  have hCfinal : C = eisensteinEB m n := by
+    simpa [hk1] using hkC
+  have hXfinal : X = eisensteinEA m n := by
+    simpa [hk1] using hXk
+  have hYfinal : Y = 2 * m * n - n ^ 2 := by
+    simpa [hk1] using hYk
+
+  -- Finally cancel `EB` in the `Z` equation after `C = EB`.
+  have hZfinal : Z = m ^ 2 - m * n + n ^ 2 := by
+    apply mul_left_cancel₀ hEBne
+    calc
+      eisensteinEB m n * Z = (m ^ 2 - m * n + n ^ 2) * C := hZeq
+      _ = (m ^ 2 - m * n + n ^ 2) * eisensteinEB m n := by rw [hCfinal]
+      _ = eisensteinEB m n * (m ^ 2 - m * n + n ^ 2) := by ring
+
+  exact ⟨hCfinal, hXfinal, hYfinal, hZfinal⟩
 
 end MazurProof.RationalPointsN12
 ```
 
-API notes: `IsRelPrime.isCoprime` comes from `Mathlib.RingTheory.PrincipalIdealDomain`. The cancellation step is the local helper `isUnit_of_three_mul_dvd_three`: it rewrites `(3*d) ∣ 3` as `3 = (3*d)*k`, cancels the nonzero left factor `3` with `mul_left_cancel₀`, gets `1 = d*k`, and returns `IsUnit.of_mul_eq_one k`.
+API notes: `positive_unit_eq_one` uses `Int.isUnit_eq_one_or` from `Mathlib.Algebra.Group.Int.Units`. `isUnit_of_common_scale` is the requested minimal common-scale helper: it proves `IsUnit k` from `IsCoprime X Y`, `X = A*k`, and `Y = B*k`, with no `IsCoprime A B` hypothesis.
