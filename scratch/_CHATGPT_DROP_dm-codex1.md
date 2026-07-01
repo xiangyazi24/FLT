@@ -1,318 +1,473 @@
-# Q3006 (dm-codex1): C10 Tate row to `shortW (A10 T) (B10 T)`
+# Q3008 (dm-codex1): corrected C10 Tate-parameter `p` to short-family `T`
 
-The exact same-parameter statement is **false**.  The `t` in the Tate row
-
-```lean
-tateC10_b t = t^3*(t-1)*(2*t-1)/(t^2-3*t+1)^2
-tateC10_c t = -t*(t-1)*(2*t-1)/(t^2-3*t+1)
-```
-
-is not the `t` used by the short family `A10/B10`.  The required reparameterization is
+Assumed local imports for the snippets below:
 
 ```lean
-p = (T - 1) / (2*T)     -- Tate-row parameter
-T = 1 / (1 - 2*p)       -- short-family parameter
+import FLT.Assumptions.MazurProof.KubertBridgeN10
+import FLT.Assumptions.MazurProof.KubertTateCommon
 ```
 
-With this change, there is a clean rational variable change.
+Lean-name uncertainty: I am using the names from the prompt and the previous N10 scratch drop: `tateC10_den`, `tateC10_b`, `tateC10_c`, `tateW`, `shortW`, `A10`, `B10`, and `Delta10`.  The exact local name of the variable-change discriminant lemma may differ; I give both the direct factor route and the variable-change route.
 
-## 1. Counterexample to the same-parameter theorem
+## Executive answer
 
-At the same parameter value `t = 2`:
-
-```text
-Tate row parameter p=2:
-  tateC10_b 2 = 24
-  tateC10_c 2 = 6
-  after completing square and shifting the 5P root:
-    A0 = 25/4
-    B0 = -32
-    Δ_tate = 16*B0^2*(A0^2 - 4*B0) = 2^10 * 3^5 * 11
-
-Short family parameter T=2:
-  Δ_short = Delta10 2 = 2^17 * 3^10 * 5^3
-```
-
-A rational variable change satisfies a discriminant scaling by a twelfth power of the `u`-coordinate.  The ratio
-
-```text
-Δ_short / Δ_tate = 2^7 * 3^5 * 5^3 / 11
-```
-
-is not a twelfth power in `ℚ` (nor is its reciprocal).  So
+For a Tate-row parameter `p`, the corrected short-family parameter is
 
 ```lean
-∃ C, C • tateW (tateC10_b t) (tateC10_c t) = shortW (A10 t) (B10 t)
+def tateC10_pToShortParam (p : ℚ) : ℚ :=
+  1 / (1 - 2*p)
 ```
 
-is false for same `t`.
-
-## 2. Corrected definitions
-
-Use `T` for the short-family parameter and `p` for the Tate-row parameter.
+The extra fact needed for the parameter change is
 
 ```lean
-def tateC10_shortQ (T : ℚ) : ℚ :=
-  T ^ 2 - 4*T - 1
+1 - 2*p ≠ 0
+```
 
-/-- Convert the short-family parameter to the Tate-row parameter. -/
+Equivalently, `2*p - 1 ≠ 0`.  This is **not** implied by `tateC10_den p ≠ 0` alone.  It **is** implied by Tate discriminant nonzero, provided you have the C10 Tate discriminant factorization.
+
+A clean final interface should not mention the false same-parameter statement.  It should output `T = 1/(1-2*p)` and prove/assume a corrected variable change
+
+```lean
+C • tateW (tateC10_b p) (tateC10_c p) =
+  shortW (A10 (tateC10_pToShortParam p))
+         (B10 (tateC10_pToShortParam p))
+```
+
+with `C.u ≠ 0`.
+
+## 1. `1 - 2*p ≠ 0`: false from `hden` alone, true from `hDelta`
+
+Assume the local denominator is
+
+```lean
+-- already present locally, included here only for readability
+-- def tateC10_den (p : ℚ) : ℚ := p^2 - 3*p + 1
+```
+
+Then `hden` alone does not exclude `p = 1/2`:
+
+```lean
+example :
+    tateC10_den ((1 : ℚ) / 2) ≠ 0 ∧
+    1 - 2 * ((1 : ℚ) / 2) = 0 := by
+  norm_num [tateC10_den]
+```
+
+So the theorem
+
+```lean
+theorem one_sub_two_mul_p_ne_zero
+    {p : ℚ} (hden : tateC10_den p ≠ 0) :
+    1 - 2*p ≠ 0
+```
+
+is false.
+
+The correct theorem uses Tate discriminant nonzero.  First add/prove the factorization:
+
+```lean
+theorem tateC10_delta_factor
+    (p : ℚ) (hden : tateC10_den p ≠ 0) :
+    (tateW (tateC10_b p) (tateC10_c p)).Δ =
+      p^10 * (p - 1)^10 * (2*p - 1)^5 *
+        (4*p^2 - 2*p - 1) / (tateC10_den p)^10 := by
+  -- Expand the generalized Weierstrass discriminant of
+  --   y^2 + (1-c)xy - b y = x^3 - b x^2
+  -- with
+  --   b = p^3*(p-1)*(2*p-1)/(tateC10_den p)^2
+  --   c = -p*(p-1)*(2*p-1)/(tateC10_den p)
+  dsimp [tateW, tateC10_b, tateC10_c, tateC10_den]
+  field_simp [hden]
+  ring
+```
+
+Then derive the parameter denominator from `hDelta`:
+
+```lean
+theorem one_sub_two_mul_p_ne_zero_of_tateC10_delta_ne_zero
+    {p : ℚ}
+    (hden : tateC10_den p ≠ 0)
+    (hDelta : (tateW (tateC10_b p) (tateC10_c p)).Δ ≠ 0) :
+    1 - 2*p ≠ 0 := by
+  intro hbad
+  have h2 : 2*p - 1 = 0 := by
+    linarith
+  have hDz : (tateW (tateC10_b p) (tateC10_c p)).Δ = 0 := by
+    rw [tateC10_delta_factor p hden]
+    simp [h2]
+  exact hDelta hDz
+```
+
+If you do not want to formalize `tateC10_delta_factor` immediately, the honest temporary assumption is exactly
+
+```lean
+(hpT : 1 - 2*p ≠ 0)
+```
+
+not something weaker involving only `hden`.
+
+## 2. Inverse parameter identity: `T = 1/(1-2*p)` gives `(T-1)/(2*T)=p`
+
+Use this helper definition:
+
+```lean
+def tateC10_pToShortParam (p : ℚ) : ℚ :=
+  1 / (1 - 2*p)
+```
+
+The inverse theorem needs only `1 - 2*p ≠ 0`:
+
+```lean
+theorem T_of_p_shortToTateParam
+    {p : ℚ} (hpT : 1 - 2*p ≠ 0) :
+    let T : ℚ := tateC10_pToShortParam p
+    (T - 1) / (2*T) = p := by
+  dsimp [tateC10_pToShortParam]
+  have hT : (1 / (1 - 2*p) : ℚ) ≠ 0 := one_div_ne_zero hpT
+  have h2T : (2 * (1 / (1 - 2*p)) : ℚ) ≠ 0 := by
+    exact mul_ne_zero (by norm_num) hT
+  field_simp [hpT, hT, h2T]
+  ring
+```
+
+If the file already has
+
+```lean
 def tateC10_shortToTateParam (T : ℚ) : ℚ :=
   (T - 1) / (2*T)
 ```
 
-Useful closed forms:
+then the preferred theorem is:
 
 ```lean
-theorem tateC10_den_shortToTateParam
-    {T : ℚ} (hT : T ≠ 0) :
-    tateC10_den (tateC10_shortToTateParam T) =
-      - tateC10_shortQ T / (4*T^2) := by
-  dsimp [tateC10_den, tateC10_shortToTateParam, tateC10_shortQ]
-  field_simp [hT]
-  ring
-
-theorem tateC10_b_shortToTateParam
-    {T : ℚ} (hT : T ≠ 0) (hQ : tateC10_shortQ T ≠ 0) :
-    tateC10_b (tateC10_shortToTateParam T) =
-      (T - 1)^3 * (T + 1) / (T * (tateC10_shortQ T)^2) := by
-  have hden : tateC10_den (tateC10_shortToTateParam T) ≠ 0 := by
-    rw [tateC10_den_shortToTateParam (T := T) hT]
-    exact div_ne_zero (neg_ne_zero.mpr hQ)
-      (mul_ne_zero (by norm_num : (4 : ℚ) ≠ 0) (pow_ne_zero 2 hT))
-  dsimp [tateC10_b, tateC10_shortToTateParam, tateC10_shortQ]
-  field_simp [hT, hQ, hden]
-  ring
-
-theorem tateC10_c_shortToTateParam
-    {T : ℚ} (hT : T ≠ 0) (hQ : tateC10_shortQ T ≠ 0) :
-    tateC10_c (tateC10_shortToTateParam T) =
-      (T^2 - 1) / (T * tateC10_shortQ T) := by
-  have hden : tateC10_den (tateC10_shortToTateParam T) ≠ 0 := by
-    rw [tateC10_den_shortToTateParam (T := T) hT]
-    exact div_ne_zero (neg_ne_zero.mpr hQ)
-      (mul_ne_zero (by norm_num : (4 : ℚ) ≠ 0) (pow_ne_zero 2 hT))
-  dsimp [tateC10_c, tateC10_shortToTateParam, tateC10_shortQ]
-  field_simp [hT, hQ, hden]
+theorem tateC10_shortToTateParam_pToShortParam
+    {p : ℚ} (hpT : 1 - 2*p ≠ 0) :
+    tateC10_shortToTateParam (tateC10_pToShortParam p) = p := by
+  dsimp [tateC10_shortToTateParam, tateC10_pToShortParam]
+  have hT : (1 / (1 - 2*p) : ℚ) ≠ 0 := one_div_ne_zero hpT
+  have h2T : (2 * (1 / (1 - 2*p)) : ℚ) ≠ 0 := by
+    exact mul_ne_zero (by norm_num) hT
+  field_simp [hpT, hT, h2T]
   ring
 ```
 
-## 3. Explicit variable change
-
-Use the standard Mathlib convention already used in `KubertTateCommon` / N12:
-
-```text
-x_old = u^2*x_new + r
-y_old = u^3*y_new + u^2*s*x_new + tau
-```
-
-Let `p = (T-1)/(2T)`, `b = tateC10_b p`, `c = tateC10_c p`, and
+Useful derived facts:
 
 ```lean
-u   = 1 / (2*T*(T^2 - 4*T - 1))
-r   = - (T - 1)^3 * (T + 1) / (4*T^2*(T^2 - 4*T - 1))
-s   = (c - 1) / 2
-tau = (b - r*(1 - c)) / 2
+theorem tateC10_pToShortParam_ne_zero
+    {p : ℚ} (hpT : 1 - 2*p ≠ 0) :
+    tateC10_pToShortParam p ≠ 0 := by
+  dsimp [tateC10_pToShortParam]
+  exact one_div_ne_zero hpT
+
+theorem two_mul_p_sub_one_ne_zero_of_one_sub_two_mul_ne_zero
+    {p : ℚ} (hpT : 1 - 2*p ≠ 0) :
+    2*p - 1 ≠ 0 := by
+  intro h
+  apply hpT
+  linarith
 ```
 
-Equivalently, in the Tate parameter `p`:
+## 3. Proving `Delta10 T ≠ 0`
+
+There are two Lean-friendly routes.
+
+### Route A: use variable-change discriminant transport
+
+Define the corrected variable change in `p`-coordinates:
 
 ```lean
-u   = (2*p - 1)^3 / (8 * tateC10_den p)
-r   = -p^3 * (p - 1) / tateC10_den p
-s   = (c - 1) / 2
-tau = (b - r*(1 - c)) / 2
-```
-
-Lean definition using the short parameter:
-
-```lean
-noncomputable def tateC10_paramToShortVC (T : ℚ) :
+noncomputable def tateC10_pToShortVC (p : ℚ) :
     WeierstrassCurve.VariableChange ℚ :=
-  let p : ℚ := tateC10_shortToTateParam T
   let b : ℚ := tateC10_b p
   let c : ℚ := tateC10_c p
-  let r0 : ℚ :=
-    - (T - 1)^3 * (T + 1) / (4*T^2*tateC10_shortQ T)
-  { u := 1 / (2*T*tateC10_shortQ T)
+  let r0 : ℚ := -p^3 * (p - 1) / tateC10_den p
+  { u := (2*p - 1)^3 / (8 * tateC10_den p)
     r := r0
     s := (c - 1) / 2
     t := (b - r0 * (1 - c)) / 2 }
 ```
 
-If your local `VariableChange` field is named `t` (as in N12 snippets), the definition above is correct.  If it is named `t₁`/`tau` locally, only rename that field.
+If your local `VariableChange` field is named `tau`/`t₁` instead of `t`, only rename that final field.
 
-## 4. Corrected theorem statement
-
-This is the corrected version of the residual.  The old theorem with same `t` should be replaced by this.
+The `u`-nonzero proof needs `hden` and `hpT`:
 
 ```lean
-theorem tateC10_param_to_shortW_of_tate_delta
-    (T : ℚ)
-    (hT : T ≠ 0)
-    (hQ : tateC10_shortQ T ≠ 0)
-    (hDeltaTate :
-      (tateW
-        (tateC10_b (tateC10_shortToTateParam T))
-        (tateC10_c (tateC10_shortToTateParam T))).Δ ≠ 0) :
-    Delta10 T ≠ 0 ∧
-      ∃ C : WeierstrassCurve.VariableChange ℚ,
-        C • tateW
-          (tateC10_b (tateC10_shortToTateParam T))
-          (tateC10_c (tateC10_shortToTateParam T)) =
-        shortW (A10 T) (B10 T) := by
-  let C := tateC10_paramToShortVC T
+theorem tateC10_pToShortVC_u_ne_zero
+    {p : ℚ}
+    (hden : tateC10_den p ≠ 0)
+    (hpT : 1 - 2*p ≠ 0) :
+    (tateC10_pToShortVC p).u ≠ 0 := by
+  have h2 : 2*p - 1 ≠ 0 :=
+    two_mul_p_sub_one_ne_zero_of_one_sub_two_mul_ne_zero hpT
+  dsimp [tateC10_pToShortVC]
+  exact div_ne_zero
+    (pow_ne_zero 3 h2)
+    (mul_ne_zero (by norm_num) hden)
+```
+
+The corrected coefficient theorem is:
+
+```lean
+theorem tateC10_p_to_shortW
+    {p : ℚ}
+    (hden : tateC10_den p ≠ 0)
+    (hpT : 1 - 2*p ≠ 0) :
+    tateC10_pToShortVC p •
+        tateW (tateC10_b p) (tateC10_c p) =
+      shortW (A10 (tateC10_pToShortParam p))
+             (B10 (tateC10_pToShortParam p)) := by
+  have h2 : 2*p - 1 ≠ 0 :=
+    two_mul_p_sub_one_ne_zero_of_one_sub_two_mul_ne_zero hpT
+  ext <;>
+    dsimp [tateC10_pToShortVC, tateC10_pToShortParam,
+      tateC10_b, tateC10_c, tateC10_den,
+      tateW, shortW, A10, B10, F10] <;>
+    field_simp [hden, hpT, h2] <;>
+    ring
+```
+
+Then `Delta10 T ≠ 0` follows from the local discriminant-transport lemma:
+
+```lean
+theorem Delta10_pToShortParam_ne_zero_of_tate_delta
+    {p : ℚ}
+    (hden : tateC10_den p ≠ 0)
+    (hDelta : (tateW (tateC10_b p) (tateC10_c p)).Δ ≠ 0) :
+    Delta10 (tateC10_pToShortParam p) ≠ 0 := by
+  have hpT : 1 - 2*p ≠ 0 :=
+    one_sub_two_mul_p_ne_zero_of_tateC10_delta_ne_zero hden hDelta
+  let C := tateC10_pToShortVC p
+  have hCu : C.u ≠ 0 := by
+    simpa [C] using tateC10_pToShortVC_u_ne_zero hden hpT
   have hCurve :
-      C • tateW
-          (tateC10_b (tateC10_shortToTateParam T))
-          (tateC10_c (tateC10_shortToTateParam T)) =
-        shortW (A10 T) (B10 T) := by
-    -- If `ext` gives the five Weierstrass coefficients, this closes directly.
-    ext <;>
-      dsimp [C, tateC10_paramToShortVC, tateC10_shortToTateParam,
-        tateC10_shortQ, tateC10_b, tateC10_c, tateC10_den,
-        tateW, shortW, A10, B10, F10] <;>
-      field_simp [hT, hQ] <;>
-      ring
-  refine ⟨?_, ⟨C, hCurve⟩⟩
-  have hShortDelta : (shortW (A10 T) (B10 T)).Δ ≠ 0 := by
-    -- Use the common/N12 variable-change discriminant wrapper if available.
-    -- Typical local name from N12/common:
-    --   delta_ne_zero_of_variableChange_eq
-    --   tateW_delta_ne_zero_of_variableChange_eq
-    --   variableChange_delta_ne_zero_of_curve_eq
-    exact delta_ne_zero_of_variableChange_eq
-      (W := tateW
-          (tateC10_b (tateC10_shortToTateParam T))
-          (tateC10_c (tateC10_shortToTateParam T)))
-      (V := shortW (A10 T) (B10 T))
-      (C := C) hDeltaTate hCurve
-  have hDeltaEq : (shortW (A10 T) (B10 T)).Δ = Delta10 T := by
+      C • tateW (tateC10_b p) (tateC10_c p) =
+        shortW (A10 (tateC10_pToShortParam p))
+               (B10 (tateC10_pToShortParam p)) := by
+    simpa [C] using tateC10_p_to_shortW hden hpT
+  have hShortDelta :
+      (shortW (A10 (tateC10_pToShortParam p))
+              (B10 (tateC10_pToShortParam p))).Δ ≠ 0 := by
+    -- Replace this with the exact local lemma name/signature.
+    -- It should use hCu, hDelta, and hCurve.
+    exact discriminant_ne_zero_of_variableChange_eq
+      (C := C) hCu hDelta hCurve
+  have hDeltaEq :
+      (shortW (A10 (tateC10_pToShortParam p))
+              (B10 (tateC10_pToShortParam p))).Δ =
+        Delta10 (tateC10_pToShortParam p) := by
     dsimp [shortW, A10, B10, F10, Delta10]
     ring
   simpa [hDeltaEq] using hShortDelta
 ```
 
-If the discriminant wrapper takes the equality in the opposite direction or requires `C.u ≠ 0`, use:
+The only uncertain identifier above is `discriminant_ne_zero_of_variableChange_eq`; in the local files it may have the equality reversed or may package `hCu` differently.
+
+### Route B: use direct discriminant identities
+
+This route avoids relying on the variable-change discriminant API.
+
+For `T = 1/(1-2*p)`, the short discriminant factors transform as follows:
+
+```text
+T^2 - 1       = -4*p*(p - 1)/(2*p - 1)^2
+T^2 - 4*T - 1 = -4*(p^2 - 3*p + 1)/(2*p - 1)^2
+T^2 + T - 1   = -(4*p^2 - 2*p - 1)/(2*p - 1)^2
+```
+
+Lean statements:
 
 ```lean
-  have hCu : C.u ≠ 0 := by
-    dsimp [C, tateC10_paramToShortVC, tateC10_shortQ]
-    exact div_ne_zero (by norm_num : (1 : ℚ) ≠ 0)
-      (mul_ne_zero (mul_ne_zero (by norm_num : (2 : ℚ) ≠ 0) hT) hQ)
+theorem pToShort_sq_sub_one
+    {p : ℚ} (hpT : 1 - 2*p ≠ 0) :
+    (tateC10_pToShortParam p)^2 - 1 =
+      -4*p*(p - 1)/(2*p - 1)^2 := by
+  have h2 : 2*p - 1 ≠ 0 :=
+    two_mul_p_sub_one_ne_zero_of_one_sub_two_mul_ne_zero hpT
+  dsimp [tateC10_pToShortParam]
+  field_simp [hpT, h2]
+  ring
+
+theorem pToShort_shortQ
+    {p : ℚ} (hpT : 1 - 2*p ≠ 0) :
+    (tateC10_pToShortParam p)^2 - 4*(tateC10_pToShortParam p) - 1 =
+      -4*tateC10_den p/(2*p - 1)^2 := by
+  have h2 : 2*p - 1 ≠ 0 :=
+    two_mul_p_sub_one_ne_zero_of_one_sub_two_mul_ne_zero hpT
+  dsimp [tateC10_pToShortParam, tateC10_den]
+  field_simp [hpT, h2]
+  ring
+
+theorem pToShort_phi
+    {p : ℚ} (hpT : 1 - 2*p ≠ 0) :
+    (tateC10_pToShortParam p)^2 + (tateC10_pToShortParam p) - 1 =
+      -(4*p^2 - 2*p - 1)/(2*p - 1)^2 := by
+  have h2 : 2*p - 1 ≠ 0 :=
+    two_mul_p_sub_one_ne_zero_of_one_sub_two_mul_ne_zero hpT
+  dsimp [tateC10_pToShortParam]
+  field_simp [hpT, h2]
+  ring
 ```
 
-Then call your local wrapper with `hCu`.
-
-## 5. Coefficient identities behind the proof
-
-With `p=(T-1)/(2T)`, `Q=T^2-4T-1`, and `D=p^2-3p+1`, the key identities are:
+Assuming the current `Delta10` factorization is
 
 ```text
-D = -Q/(4*T^2)
-2*p - 1 = -1/T
-b = tateC10_b p = (T-1)^3*(T+1)/(T*Q^2)
-c = tateC10_c p = (T^2-1)/(T*Q)
-r = -p^3*(p-1)/D = -(T-1)^3*(T+1)/(4*T^2*Q)
-u = (2*p-1)^3/(8*D) = 1/(2*T*Q)
+Delta10 T = 4096*T^5*(T^2 + T - 1)*(T^2 - 1)^10*(T^2 - 4*T - 1)^2,
 ```
 
-After completing square and shifting by the `5P` root `r`, the unscaled short coefficients are:
-
-```text
-A0 = 3*r + ((1-c)^2 - 4*b)/4
-B0 = 3*r^2 + ((1-c)^2 - 4*b)*r/2 + b*(c-1)/2
-```
-
-and the scaling identities are:
-
-```text
-A0 / u^2 = A10(T)
-B0 / u^4 = B10(T)
-```
-
-Those are exactly what `field_simp [hT,hQ]; ring` proves in Lean.
-
-## 6. Sympy verification script
-
-This is an exact rational check of the coefficient formulas and discriminant identity.
-
-```python
-import sympy as sp
-T = sp.symbols('T')
-Q = T**2 - 4*T - 1
-p = (T - 1)/(2*T)
-D = p**2 - 3*p + 1
-
-F10 = 1 + 2*T - 5*T**2 - 5*T**4 - 2*T**5 + T**6
-A10 = -2*F10
-B10 = (T**2 - 1)**5 * (T**2 - 4*T - 1)
-Delta10 = 4096*T**5*(T**2 + T - 1)*(T**2 - 1)**10*(T**2 - 4*T - 1)**2
-
-b = p**3*(p - 1)*(2*p - 1)/D**2
-c = -p*(p - 1)*(2*p - 1)/D
-
-a1 = 1 - c
-a2 = -b
-a3 = -b
-a4 = 0
-a6 = 0
-
-u = 1/(2*T*Q)
-r = - (T - 1)**3 * (T + 1)/(4*T**2*Q)
-s = (c - 1)/2
-tau = (b - r*(1 - c))/2
-
-# Mathlib/standard generalized Weierstrass change:
-# x_old = u^2*x_new + r
-# y_old = u^3*y_new + u^2*s*x_new + tau
-a1p = (a1 + 2*s)/u
-a2p = (a2 - s*a1 + 3*r - s**2)/u**2
-a3p = (a3 + r*a1 + 2*tau)/u**3
-a4p = (a4 - s*a3 + 2*r*a2 - (tau + r*s)*a1 + 3*r**2 - 2*s*tau)/u**4
-a6p = (a6 + r*a4 + r**2*a2 + r**3 - tau*a3 - tau**2 - r*tau*a1)/u**6
-
-assert sp.factor(D + Q/(4*T**2)) == 0
-assert sp.factor(2*p - 1 + 1/T) == 0
-assert sp.factor(b - (T-1)**3*(T+1)/(T*Q**2)) == 0
-assert sp.factor(c - (T**2-1)/(T*Q)) == 0
-assert sp.factor(a1p) == 0
-assert sp.factor(a2p - A10) == 0
-assert sp.factor(a3p) == 0
-assert sp.factor(a4p - B10) == 0
-assert sp.factor(a6p) == 0
-
-Delta_short = 16*B10**2*(A10**2 - 4*B10)
-assert sp.factor(Delta_short - Delta10) == 0
-
-# Same-parameter counterexample at t=2
-p2 = sp.Rational(2)
-D2 = p2**2 - 3*p2 + 1
-b2 = p2**3*(p2-1)*(2*p2-1)/D2**2
-c2 = -p2*(p2-1)*(2*p2-1)/D2
-r2 = -p2**3*(p2-1)/D2
-A0_2 = 3*r2 + ((1-c2)**2 - 4*b2)/4
-B0_2 = 3*r2**2 + ((1-c2)**2 - 4*b2)*r2/2 + b2*(c2-1)/2
-Delta_tate_2 = sp.factor(16*B0_2**2*(A0_2**2 - 4*B0_2))
-Delta_short_2 = sp.factor(Delta10.subs(T, 2))
-print(b2, c2, A0_2, B0_2)
-print(sp.factor(Delta_tate_2), sp.factor(Delta_short_2), sp.factor(Delta_short_2/Delta_tate_2))
-# Output ratio: 2^7 * 3^5 * 5^3 / 11, not a 12th power.
-```
-
-## 7. Denominators/exclusions
-
-For the corrected theorem, add these hypotheses explicitly:
+the exact substitution identity is
 
 ```lean
-hT : T ≠ 0
-hQ : T^2 - 4*T - 1 ≠ 0
+theorem Delta10_pToShortParam_factor
+    {p : ℚ} (hpT : 1 - 2*p ≠ 0) :
+    Delta10 (tateC10_pToShortParam p) =
+      (2 : ℚ)^36 * p^10 * (p - 1)^10 *
+        (tateC10_den p)^2 * (4*p^2 - 2*p - 1) /
+        (2*p - 1)^31 := by
+  have h2 : 2*p - 1 ≠ 0 :=
+    two_mul_p_sub_one_ne_zero_of_one_sub_two_mul_ne_zero hpT
+  dsimp [Delta10, tateC10_pToShortParam, tateC10_den]
+  field_simp [hpT, h2]
+  ring
 ```
 
-They imply the Tate denominator for `p=(T-1)/(2T)` is nonzero.  The remaining short discriminant factors
+Combining this with the Tate factorization gives the cleaner scaling identity
+
+```lean
+theorem Delta10_pToShortParam_eq_scaled_tate_delta
+    {p : ℚ}
+    (hden : tateC10_den p ≠ 0)
+    (hpT : 1 - 2*p ≠ 0) :
+    Delta10 (tateC10_pToShortParam p) =
+      ((8 * tateC10_den p) / (2*p - 1)^3)^12 *
+        (tateW (tateC10_b p) (tateC10_c p)).Δ := by
+  have h2 : 2*p - 1 ≠ 0 :=
+    two_mul_p_sub_one_ne_zero_of_one_sub_two_mul_ne_zero hpT
+  rw [Delta10_pToShortParam_factor hpT,
+      tateC10_delta_factor p hden]
+  field_simp [hden, h2]
+  ring
+```
+
+Then nonzero is immediate:
+
+```lean
+theorem Delta10_pToShortParam_ne_zero_of_tate_delta_direct
+    {p : ℚ}
+    (hden : tateC10_den p ≠ 0)
+    (hDelta : (tateW (tateC10_b p) (tateC10_c p)).Δ ≠ 0) :
+    Delta10 (tateC10_pToShortParam p) ≠ 0 := by
+  have hpT : 1 - 2*p ≠ 0 :=
+    one_sub_two_mul_p_ne_zero_of_tateC10_delta_ne_zero hden hDelta
+  have h2 : 2*p - 1 ≠ 0 :=
+    two_mul_p_sub_one_ne_zero_of_one_sub_two_mul_ne_zero hpT
+  rw [Delta10_pToShortParam_eq_scaled_tate_delta hden hpT]
+  exact mul_ne_zero
+    (pow_ne_zero 12
+      (div_ne_zero
+        (mul_ne_zero (by norm_num) hden)
+        (pow_ne_zero 3 h2)))
+    hDelta
+```
+
+## 4. Factor correspondence
+
+Let
 
 ```text
-T^2 - 1
-T^2 + T - 1
+D(p) = tateC10_den p = p^2 - 3*p + 1,
+K(p) = 4*p^2 - 2*p - 1,
+T = 1/(1-2*p).
 ```
 
-should not be assumed from `hT,hQ`; they follow from `hDeltaTate` via the variable-change/discriminant equality.  This is why the honest theorem should keep `hDeltaTate` as an input and derive `Delta10 T ≠ 0` after proving the curve equality.
+The C10 Tate discriminant factor is
+
+```text
+Δ_Tate(p) = p^10*(p-1)^10*(2p-1)^5*K(p)/D(p)^10.
+```
+
+The short discriminant factor is
+
+```text
+Delta10(T) = 4096*T^5*(T^2+T-1)*(T^2-1)^10*(T^2-4*T-1)^2.
+```
+
+Under `T = 1/(1-2*p)`:
+
+| short-family factor | Tate-parameter expression | meaning |
+| --- | --- | --- |
+| `T` | `1/(1-2*p)` | never zero for finite valid `p`; `T=0` is the inverse map's pole, not a finite Tate parameter |
+| `T^2 - 1` | `-4*p*(p-1)/(2p-1)^2` | zeros `p=0` and `p=1`; these are Tate discriminant zeros |
+| `T^2 - 4*T - 1` | `-4*D(p)/(2p-1)^2` | zero exactly when `tateC10_den p=0`; this is excluded by `hden` |
+| `T^2 + T - 1` | `-K(p)/(2p-1)^2` | the remaining Tate discriminant factor `K(p)=4p^2-2p-1` |
+| parameter pole | `2p-1=0`, i.e. `p=1/2` | `T` undefined/infinite; also a Tate discriminant zero via `(2p-1)^5` |
+
+So, from `hden` and `hDelta`, you get:
+
+```text
+p ≠ 0, p ≠ 1, p ≠ 1/2, K(p) ≠ 0, D(p) ≠ 0.
+```
+
+For Lean, you do not need to prove all of those separately if you use the scaled discriminant identity above.
+
+## 5. Minimal honest residual interface
+
+The current projective-normal-form residual should be replaced by a corrected Tate-to-short residual using `T = 1/(1-2*p)`.  The minimal useful single residual is:
+
+```lean
+theorem tateC10_corrected_tate_to_short_residual
+    {p : ℚ}
+    (hden : tateC10_den p ≠ 0)
+    (hDelta : (tateW (tateC10_b p) (tateC10_c p)).Δ ≠ 0) :
+    let T : ℚ := tateC10_pToShortParam p
+    Delta10 T ≠ 0 ∧
+      ∃ C : WeierstrassCurve.VariableChange ℚ,
+        C.u ≠ 0 ∧
+        C • tateW (tateC10_b p) (tateC10_c p) =
+          shortW (A10 T) (B10 T) := by
+  intro T
+  have hpT : 1 - 2*p ≠ 0 :=
+    one_sub_two_mul_p_ne_zero_of_tateC10_delta_ne_zero hden hDelta
+  refine ⟨?_, ⟨tateC10_pToShortVC p, ?_, ?_⟩⟩
+  · simpa [T] using Delta10_pToShortParam_ne_zero_of_tate_delta_direct hden hDelta
+  · simpa using tateC10_pToShortVC_u_ne_zero hden hpT
+  · simpa [T] using tateC10_p_to_shortW hden hpT
+```
+
+If you want the residual to be smaller and easier to discharge later, split it into the two algebraic pieces:
+
+```lean
+theorem tateC10_p_to_shortW_residual
+    {p : ℚ}
+    (hden : tateC10_den p ≠ 0)
+    (hpT : 1 - 2*p ≠ 0) :
+    tateC10_pToShortVC p •
+        tateW (tateC10_b p) (tateC10_c p) =
+      shortW (A10 (tateC10_pToShortParam p))
+             (B10 (tateC10_pToShortParam p))
+
+ theorem Delta10_pToShortParam_ne_zero_residual
+    {p : ℚ}
+    (hden : tateC10_den p ≠ 0)
+    (hDelta : (tateW (tateC10_b p) (tateC10_c p)).Δ ≠ 0) :
+    Delta10 (tateC10_pToShortParam p) ≠ 0
+```
+
+Then the checked upstream theorem
+
+```lean
+tateC10_param_of_origin_order10 :
+  let p := tateC10_tInv b c
+  den(p) ≠ 0 ∧ b = tateC10_b p ∧ c = tateC10_c p
+```
+
+can be followed by:
+
+1. set `p := tateC10_tInv b c`,
+2. use the reconstructed `hden`, `b = ...`, `c = ...`,
+3. transport the original Tate discriminant hypothesis to `hDelta : (tateW (tateC10_b p) (tateC10_c p)).Δ ≠ 0`,
+4. define `T := tateC10_pToShortParam p`,
+5. apply the corrected residual above.
+
+No theorem should state or assume that the same parameter `p`/`t` gives `shortW (A10 p) (B10 p)`.  The only honest short-family parameter obtained from the Tate row is `T = 1/(1-2*p)`.
