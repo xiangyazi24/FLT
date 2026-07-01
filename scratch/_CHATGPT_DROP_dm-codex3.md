@@ -1,177 +1,125 @@
-# Q2740: reduced rational-slope code for primitive Eisenstein triples
+# Q2744: slope scale equations and coprime scale extraction
 
-Target namespace: `MazurProof.RationalPointsN12`.
+Target file: `FLT/Assumptions/MazurProof/N12ParamBridge.lean`.
+Namespace: `MazurProof.RationalPointsN12`.
 
-The code below assumes the existing local definition
+Important correction: the requested `eisenstein_scale_equations_of_slope` signature without a nonzero scale hypothesis is false. Example: take
 
 ```lean
-def EisensteinTriple (X Y Z : ℤ) : Prop :=
-  Z ^ 2 = X ^ 2 - X * Y + Y ^ 2
+X = 1, Y = 0, Z = -1, m = 1, n = 0, C = 0.
 ```
 
-Paste the following after that definition. The only nontrivial inequality is `Y < Z + X`; it is proved from
+Then `EisensteinTriple X Y Z`, `Y = n*C`, and `Z+X = m*C` all hold, but
 
 ```lean
-Z ^ 2 - (Y - X) ^ 2 = X * Y > 0
+(2*m-n)*Z = -2 ≠ 0 = (m^2-m*n+n^2)*C.
 ```
 
-and `abs_lt_of_sq_lt_sq`.
+In the intended positive slope application, `C` is nonzero, usually positive. The compile-ready lemma below adds `hC : C ≠ 0`.
 
-## API inventory
-
-```lean
-#check abs_lt_of_sq_lt_sq
-#check Rat.num_pos
-#check Rat.num_lt_denom_iff
-#check Rat.num_div_den
-#check Rat.reduced
-#check Rat.intCast_injective
-#check Int.isCoprime_iff_gcd_eq_one
-```
-
-If your checkout has renamed the rational reconstruction lemma, replace
+## Code
 
 ```lean
-(Rat.num_div_den q).symm
-```
-
-by the local equivalent, usually one of:
-
-```lean
-(Rat.num_divInt_den q).symm
-q.num_divInt_den.symm
-```
-
-## Drop-in Lean code
-
-```lean
-import Mathlib.Algebra.Order.Field.Rat
-import Mathlib.Algebra.Order.Ring.Abs
-import Mathlib.Data.Rat.Lemmas
 import Mathlib.RingTheory.Coprime.Lemmas
 import Mathlib.Tactic
 
 namespace MazurProof.RationalPointsN12
 
-noncomputable def eisensteinSlope (X Y Z : ℤ) : ℚ :=
-  (Y : ℚ) / (Z + X : ℤ)
+/-- Algebraic scale equations from the reduced Eisenstein slope.
 
-noncomputable def eisenstein_m (X Y Z : ℤ) : ℤ :=
-  ((eisensteinSlope X Y Z).den : ℤ)
-
-noncomputable def eisenstein_n (X Y Z : ℤ) : ℤ :=
-  (eisensteinSlope X Y Z).num
-
-lemma eisenstein_Z_add_X_pos {X Y Z : ℤ}
-    (hX : 0 < X) (hZ : 0 < Z) :
-    0 < Z + X := by
-  nlinarith
-
-lemma eisenstein_Y_lt_Z_add_X {X Y Z : ℤ}
-    (hX : 0 < X) (hY : 0 < Y) (hZ : 0 < Z)
-    (hE : EisensteinTriple X Y Z) :
-    Y < Z + X := by
-  have hsq_lt : (Y - X) ^ 2 < Z ^ 2 := by
-    have hdiff : Z ^ 2 - (Y - X) ^ 2 = X * Y := by
-      unfold EisensteinTriple at hE
-      rw [hE]
-      ring
-    have hxypos : 0 < X * Y := mul_pos hX hY
-    nlinarith
-  have habs : |Y - X| < Z :=
-    abs_lt_of_sq_lt_sq hsq_lt (le_of_lt hZ)
-  have hYXlt : Y - X < Z :=
-    lt_of_le_of_lt (le_abs_self (Y - X)) habs
-  nlinarith
-
-lemma eisenstein_slope_pos_lt_one {X Y Z : ℤ}
-    (hX : 0 < X) (hY : 0 < Y) (hZ : 0 < Z)
-    (hE : EisensteinTriple X Y Z) :
-    0 < (Y : ℚ) / (Z + X : ℤ) ∧
-      (Y : ℚ) / (Z + X : ℤ) < 1 := by
-  have hdenZ : 0 < Z + X := eisenstein_Z_add_X_pos hX hZ
-  have hdenQ : (0 : ℚ) < ((Z + X : ℤ) : ℚ) := by
-    exact_mod_cast hdenZ
-  have hYQ : (0 : ℚ) < (Y : ℚ) := by
-    exact_mod_cast hY
-  have hYltZ : Y < Z + X := eisenstein_Y_lt_Z_add_X hX hY hZ hE
-  have hYltQ : (Y : ℚ) < ((Z + X : ℤ) : ℚ) := by
-    exact_mod_cast hYltZ
-  constructor
-  · exact div_pos hYQ hdenQ
+The extra hypothesis `C ≠ 0` is necessary: without it the statement is false. -/
+theorem eisenstein_scale_equations_of_slope_of_ne_zero {X Y Z m n C : ℤ}
+    (hC : C ≠ 0)
+    (hE : EisensteinTriple X Y Z)
+    (hY : Y = n * C)
+    (hW : Z + X = m * C) :
+    (2 * m - n) * Z = (m ^ 2 - m * n + n ^ 2) * C ∧
+      (2 * m - n) * X = (m ^ 2 - n ^ 2) * C ∧
+      (2 * m - n) * Y = (2 * m * n - n ^ 2) * C := by
+  have hE0 : Z ^ 2 = X ^ 2 - X * Y + Y ^ 2 := by
+    unfold EisensteinTriple at hE
+    nlinarith [hE]
+  have hXeq : X = m * C - Z := by
+    nlinarith [hW]
+  have hE1 :
+      Z ^ 2 = (m * C - Z) ^ 2 - (m * C - Z) * (n * C) + (n * C) ^ 2 := by
+    simpa [hXeq, hY] using hE0
+  have h1zero :
+      C * (((2 * m - n) * Z) - ((m ^ 2 - m * n + n ^ 2) * C)) = 0 := by
+    nlinarith [hE1]
+  have h1diff :
+      ((2 * m - n) * Z) - ((m ^ 2 - m * n + n ^ 2) * C) = 0 := by
+    exact (mul_eq_zero.mp h1zero).resolve_left hC
+  have h1 : (2 * m - n) * Z = (m ^ 2 - m * n + n ^ 2) * C :=
+    sub_eq_zero.mp h1diff
+  refine ⟨h1, ?_, ?_⟩
   · calc
-      (Y : ℚ) / ((Z + X : ℤ) : ℚ)
-          < ((Z + X : ℤ) : ℚ) / ((Z + X : ℤ) : ℚ) := by
-            exact div_lt_div_of_pos_right hYltQ hdenQ
-      _ = 1 := by
-            exact div_self (ne_of_gt hdenQ)
+      (2 * m - n) * X
+          = (2 * m - n) * (Z + X) - (2 * m - n) * Z := by ring
+      _ = (2 * m - n) * (m * C) - (2 * m - n) * Z := by rw [hW]
+      _ = (2 * m - n) * (m * C) - (m ^ 2 - m * n + n ^ 2) * C := by rw [h1]
+      _ = (m ^ 2 - n ^ 2) * C := by ring
+  · calc
+      (2 * m - n) * Y
+          = (2 * m - n) * (n * C) := by rw [hY]
+      _ = (2 * m * n - n ^ 2) * C := by ring
 
-lemma eisenstein_mn_pos_coprime {X Y Z : ℤ}
-    (hX : 0 < X) (hY : 0 < Y) (hZ : 0 < Z)
-    (hE : EisensteinTriple X Y Z) :
-    0 < eisenstein_n X Y Z ∧
-      eisenstein_n X Y Z < eisenstein_m X Y Z ∧
-      IsCoprime (eisenstein_m X Y Z) (eisenstein_n X Y Z) := by
-  let q : ℚ := eisensteinSlope X Y Z
-  have hq : 0 < q ∧ q < 1 := by
-    simpa [q, eisensteinSlope] using
-      eisenstein_slope_pos_lt_one hX hY hZ hE
-  have hnpos : 0 < q.num :=
-    (Rat.num_pos (a := q)).2 hq.1
-  have hnltm : q.num < (q.den : ℤ) :=
-    (Rat.num_lt_denom_iff (q := q)).2 hq.2
-  have hcop_gcd : Int.gcd ((q.den : ℤ)) q.num = 1 := by
-    rw [Int.gcd_comm]
-    exact q.reduced
-  have hcop : IsCoprime ((q.den : ℤ)) q.num :=
-    Int.isCoprime_iff_gcd_eq_one.mpr hcop_gcd
-  exact ⟨by simpa [eisenstein_n, q] using hnpos,
-    by simpa [eisenstein_m, eisenstein_n, q] using hnltm,
-    by simpa [eisenstein_m, eisenstein_n, q] using hcop⟩
+/-- Positive-scale wrapper. -/
+theorem eisenstein_scale_equations_of_slope_of_pos {X Y Z m n C : ℤ}
+    (hCpos : 0 < C)
+    (hE : EisensteinTriple X Y Z)
+    (hY : Y = n * C)
+    (hW : Z + X = m * C) :
+    (2 * m - n) * Z = (m ^ 2 - m * n + n ^ 2) * C ∧
+      (2 * m - n) * X = (m ^ 2 - n ^ 2) * C ∧
+      (2 * m - n) * Y = (2 * m * n - n ^ 2) * C := by
+  exact eisenstein_scale_equations_of_slope_of_ne_zero
+    (ne_of_gt hCpos) hE hY hW
 
-/-- Cross multiplication for the reduced slope.
+/-- If `a` and `b` are coprime and `a*C = b*X`, then the common scale is unique.
 
-No Eisenstein equation is needed here; only `0 < Z + X`, supplied by `hX,hZ`, is used to keep the
-slope denominator nonzero. -/
-lemma eisenstein_mn_cross_mul {X Y Z : ℤ}
-    (hX : 0 < X) (hZ : 0 < Z) :
-    eisenstein_m X Y Z * Y = eisenstein_n X Y Z * (Z + X) := by
-  let q : ℚ := eisensteinSlope X Y Z
-  have hdenZ : 0 < Z + X := eisenstein_Z_add_X_pos hX hZ
-  have hdenQ : (0 : ℚ) < ((Z + X : ℤ) : ℚ) := by
-    exact_mod_cast hdenZ
-  have hden_ne_Q : (((Z + X : ℤ) : ℚ)) ≠ 0 := ne_of_gt hdenQ
-  have hqden_pos_Q : (0 : ℚ) < (q.den : ℚ) := by
-    exact_mod_cast (Rat.pos q)
-  have hqden_ne_Q : (q.den : ℚ) ≠ 0 := ne_of_gt hqden_pos_Q
-  have hqeq :
-      (Y : ℚ) / ((Z + X : ℤ) : ℚ) = (q.num : ℚ) / (q.den : ℚ) := by
-    simpa [q, eisensteinSlope] using (Rat.num_div_den q).symm
-  have hcrossQ :
-      (Y : ℚ) * (q.den : ℚ) =
-        (q.num : ℚ) * ((Z + X : ℤ) : ℚ) := by
-    field_simp [hden_ne_Q, hqden_ne_Q] at hqeq
-    simpa [mul_comm, mul_left_comm, mul_assoc] using hqeq
-  have hcrossZ : Y * (q.den : ℤ) = q.num * (Z + X) := by
-    apply Rat.intCast_injective
-    norm_cast
-    simpa [mul_comm, mul_left_comm, mul_assoc] using hcrossQ
-  simpa [eisenstein_m, eisenstein_n, q, mul_comm, mul_left_comm, mul_assoc] using hcrossZ
+Divisibility orientation used here:
+`hab.dvd_of_dvd_mul_left` consumes `a ∣ b * X` and returns `a ∣ X` from
+`hab : IsCoprime a b`. -/
+theorem coprime_mul_eq_mul_scale {a b C X : ℤ}
+    (hab : IsCoprime a b) (ha : 0 < a) (hXpos : 0 < X)
+    (h : a * C = b * X) :
+    ∃ k : ℤ, 0 < k ∧ X = k * a ∧ C = k * b := by
+  have ha_ne : a ≠ 0 := ne_of_gt ha
+  have hadvd : a ∣ b * X := by
+    refine ⟨C, ?_⟩
+    exact h.symm
+  have ha_dvd_X : a ∣ X := hab.dvd_of_dvd_mul_left hadvd
+  rcases ha_dvd_X with ⟨k, hk⟩
+  refine ⟨k, ?_, ?_, ?_⟩
+  · have hmulpos : 0 < a * k := by
+      simpa [hk] using hXpos
+    exact pos_of_mul_pos_left hmulpos (le_of_lt ha)
+  · calc
+      X = a * k := hk
+      _ = k * a := by ring
+  · have hCeq_mul : a * C = a * (k * b) := by
+      calc
+        a * C = b * X := h
+        _ = b * (a * k) := by rw [hk]
+        _ = a * (k * b) := by ring
+    exact mul_left_cancel₀ ha_ne hCeq_mul
 
 end MazurProof.RationalPointsN12
 ```
 
-## If `field_simp` is too aggressive in your local checkout
+## If dot notation for the coprime API fails
 
-Replace the proof of `hcrossQ` by this equivalent version; it uses the same nonzero-denominator facts but keeps rewriting local:
+Replace this line:
 
 ```lean
-  have hcrossQ :
-      (Y : ℚ) * (q.den : ℚ) =
-        (q.num : ℚ) * ((Z + X : ℤ) : ℚ) := by
-    have h := hqeq
-    field_simp [hden_ne_Q, hqden_ne_Q] at h
-    simpa [mul_comm, mul_left_comm, mul_assoc] using h
+  have ha_dvd_X : a ∣ X := hab.dvd_of_dvd_mul_left hadvd
 ```
 
-The rest of `eisenstein_mn_cross_mul` is unchanged.
+with the fully explicit form:
+
+```lean
+  have ha_dvd_X : a ∣ X := IsCoprime.dvd_of_dvd_mul_left hab hadvd
+```
+
+The orientation is: from `hab : IsCoprime a b`, a proof of `a ∣ b * X` gives `a ∣ X`.
