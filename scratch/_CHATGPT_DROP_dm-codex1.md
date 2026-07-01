@@ -1,11 +1,42 @@
-# Q2863 (dm-codex1): performance-aware `shortW` full-two algebra layer
+# Q2872 (dm-codex1): Kubert C12 square residual split
 
 Target local file: `FLT/Assumptions/MazurProof/KubertBridgeN12.lean`  
 Namespace: `MazurProof.RationalPointsN12`
 
-The main performance fix is: **do not prove the full-two source extraction directly over EC points**. Prove one tiny generic finite-source lemma over an arbitrary additive commutative monoid, then instantiate it with `((shortW A B)⁄ℚ).Point`. This avoids repeatedly elaborating affine point/group-law instances while doing `ZMod 2 × ZMod 2` casework.
+I could not see the local in-progress `KubertBridgeN12.lean` through the canonical GitHub branch, so this answer is keyed to the prompt-provided checked state and to the current Mathlib APIs named in the prompt: `WeierstrassCurve.Affine.Point`, `WeierstrassCurve.Projective.Point`, and `(E⁄ℚ).Point`.
+
+## Executive recommendation
+
+Do **not** leave the residual as the old square-discriminant axiom. Split it as follows:
+
+1. Keep the already-checked group extraction:
+   - from `ZMod 2 × ZMod 12` injection, get `∃ P : (E⁄ℚ).Point, addOrderOf P = 12`;
+   - from the same injection, get `∃ g : (ZMod 2 × ZMod 2) →+ (E⁄ℚ).Point, Function.Injective g`.
+2. Leave only the cyclic-12 Kubert/Tate-normal-form model theorem as a residual. It should return not merely equations, but also a point-group additive equivalence from `(E⁄ℚ).Point` to the projective point group of the concrete short model.
+3. Prove the full-two transport `C` in Lean by composing:
+
+```text
+ZMod 2 × ZMod 2 --g--> (E⁄ℚ).Point
+                --Kubert add-equivalence--> Projective.Point (shortW A B)
+                --Projective.Point.toAffineAddEquiv--> Affine.Point (shortW A B)
+```
+
+This uses existing Mathlib APIs and avoids inventing projection syntax such as `(shortW A B).Point`.
+
+The key point is: Mathlib has `WeierstrassCurve.VariableChange` as an action on curves, but I do **not** see a ready-made point-level `AddEquiv` for an arbitrary variable change. Therefore, if the Kubert residual only returns raw coordinate-change data, the transport of the full-two subgroup is still a residual. If the Kubert residual returns the additive equivalence below, then `C` is fully checked and tiny.
+
+## Pasteable Lean design
+
+Place this below the existing definitions of `shortW`, `A12`, `B12`, `Delta12`, and the checked theorem
 
 ```lean
+square_discriminant_of_full_two_torsion_on_shortW
+```
+
+or adapt the import list to the imports already present in `KubertBridgeN12.lean`.
+
+```lean
+import Mathlib.AlgebraicGeometry.EllipticCurve.Projective.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.Data.ZMod.Basic
 import Mathlib.GroupTheory.OrderOfElement
@@ -15,223 +46,234 @@ open scoped WeierstrassCurve
 
 namespace MazurProof.RationalPointsN12
 
-noncomputable def shortW (A B : ℚ) : WeierstrassCurve ℚ :=
-  { a₁ := 0
-    a₂ := A
-    a₃ := 0
-    a₄ := B
-    a₆ := 0 }
+/--
+The remaining cyclic-12 Kubert/Tate-normal-form output needed for the N=12 bridge.
 
-/-- Use this abbreviation to prevent Lean from repeatedly unfolding the base-change target. -/
-abbrev shortWQ (A B : ℚ) : WeierstrassCurve ℚ := (shortW A B)⁄ℚ
+This deliberately includes a point-group additive equivalence.  That is the honest interface
+at which the later full-two transport becomes a checked Lean composition instead of another
+geometric residual.
 
-/-! ## Fast source-side group extraction -/
+The target point type is written with the actual Mathlib namespace:
+`WeierstrassCurve.Projective.Point (WeierstrassCurve.toProjective (shortW A B))`.
+Do not replace this by `(shortW A B).Point`.
+-/
+structure KubertC12ShortWModel (E : WeierstrassCurve ℚ) where
+  t : ℚ
+  hDelta : Delta12 t ≠ 0
+  hB : B12 t ≠ 0
+  pointAddEquiv :
+    (E⁄ℚ).Point ≃+
+      WeierstrassCurve.Projective.Point
+        (WeierstrassCurve.toProjective (shortW (A12 t) (B12 t)))
 
-private abbrev V4 : Type := ZMod 2 × ZMod 2
+/--
+Smallest recommended replacement residual for the old `kubert_C12_square` axiom.
 
-private abbrev e10 : V4 := ((1, 0) : ZMod 2 × ZMod 2)
-private abbrev e01 : V4 := ((0, 1) : ZMod 2 × ZMod 2)
+Mathematically this is exactly the cyclic-12 Kubert/Tate-normal-form theorem, strengthened
+only by exposing the induced additive equivalence on rational point groups.  It no longer
+mentions full rational 2-torsion and no longer asserts the square-discriminant conclusion.
+-/
+axiom kubertC12ShortWModel_of_order12
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
+    KubertC12ShortWModel E
 
-private theorem e10_ne_zero : e10 ≠ 0 := by
-  native_decide
+/--
+Checked part C: transport a full-two subgroup through the Kubert additive equivalence and
+then through Mathlib's projective-to-affine additive equivalence.
 
-private theorem e01_ne_zero : e01 ≠ 0 := by
-  native_decide
+The target type is the one required by the checked theorem
+`square_discriminant_of_full_two_torsion_on_shortW`.
+-/
+noncomputable def fullTwoAffineOfProjectiveAddEquiv
+    {E : WeierstrassCurve ℚ} {A B : ℚ}
+    (φ : (E⁄ℚ).Point ≃+
+      WeierstrassCurve.Projective.Point
+        (WeierstrassCurve.toProjective (shortW A B)))
+    (g : (ZMod 2 × ZMod 2) →+ (E⁄ℚ).Point) :
+    (ZMod 2 × ZMod 2) →+
+      WeierstrassCurve.Affine.Point (shortW A B) :=
+  ((WeierstrassCurve.Projective.Point.toAffineAddEquiv
+      (WeierstrassCurve.toProjective (shortW A B))).toAddMonoidHom).comp
+    (φ.toAddMonoidHom.comp g)
 
-private theorem e10_ne_e01 : e10 ≠ e01 := by
-  native_decide
-
-private theorem two_nsmul_e10 : 2 • e10 = 0 := by
-  ext <;> norm_num [e10]
-
-private theorem two_nsmul_e01 : 2 • e01 = 0 := by
-  ext <;> norm_num [e01]
-
-/-- Exact replacement for the slow `rw [← map_nsmul]` branches.
-This uses only `congrArg g hsrc`; `simp` rewrites both sides by `map_nsmul`/`map_zero`. -/
-private theorem map_two_nsmul_eq_zero
-    {G : Type*} [AddCommMonoid G]
-    (g : V4 →+ G) {x : V4} (hsrc : 2 • x = 0) :
-    2 • g x = 0 := by
-  have h := congrArg g hsrc
-  simpa using h
-
-/-- Fast generic V4 extraction.  No elliptic-curve point constructors appear here. -/
-private theorem exists_v4_image_ne_zero_ne
-    {G : Type*} [AddCommMonoid G]
-    (g : V4 →+ G) (hg : Function.Injective g)
-    {P0 : G} (hP0 : P0 ≠ 0) :
-    ∃ Q : G, Q ≠ 0 ∧ Q ≠ P0 ∧ 2 • Q = 0 := by
-  by_cases h10 : g e10 = P0
-  · refine ⟨g e01, ?_, ?_, ?_⟩
-    · intro hz
-      have hEq : g e01 = g 0 := by simpa using hz
-      exact e01_ne_zero (hg hEq)
-    · intro h01
-      have hEq : g e10 = g e01 := h10.trans h01.symm
-      exact e10_ne_e01 (hg hEq)
-    · exact map_two_nsmul_eq_zero g two_nsmul_e01
-  · refine ⟨g e10, ?_, h10, ?_⟩
-    · intro hz
-      have hEq : g e10 = g 0 := by simpa using hz
-      exact e10_ne_zero (hg hEq)
-    · exact map_two_nsmul_eq_zero g two_nsmul_e10
-
-/-! ## Fast coordinate lemmas for `shortWQ` -/
-
-@[simp] theorem shortWQ_equation_iff {A B x y : ℚ} :
-    (shortWQ A B).Equation x y ↔ y ^ 2 = x ^ 3 + A * x ^ 2 + B * x := by
-  rw [WeierstrassCurve.Affine.equation_iff]
-  simp [shortWQ, shortW]
-
-@[simp] theorem shortWQ_negY {A B x y : ℚ} :
-    (shortWQ A B).negY x y = -y := by
-  simp [shortWQ, shortW, WeierstrassCurve.Affine.negY]
-
-@[simp] theorem shortWQ_nonsingular_zero_iff {A B : ℚ} :
-    (shortWQ A B).Nonsingular 0 0 ↔ B ≠ 0 := by
-  rw [WeierstrassCurve.Affine.nonsingular_zero]
-  simp [shortWQ, shortW]
-
-noncomputable def shortWQ_zeroTwoPoint {A B : ℚ} (hB : B ≠ 0) :
-    (shortWQ A B).Point :=
-  WeierstrassCurve.Affine.Point.some 0 0
-    ((shortWQ_nonsingular_zero_iff (A := A) (B := B)).mpr hB)
-
-@[simp] theorem shortWQ_zeroTwoPoint_ne_zero {A B : ℚ} (hB : B ≠ 0) :
-    shortWQ_zeroTwoPoint (A := A) (B := B) hB ≠ 0 := by
-  exact WeierstrassCurve.Affine.Point.some_ne_zero _
-
-/-- Exact `y = 0` lemma with the real `negY` shape.  The key is the `intro hneg;
-simp [shortWQ, shortW, WeierstrassCurve.Affine.negY] at hneg; linarith` block. -/
-theorem shortWQ_y_eq_zero_of_two_nsmul_eq_zero
-    {A B x y : ℚ} {h : (shortWQ A B).Nonsingular x y}
-    (h2 : 2 • (WeierstrassCurve.Affine.Point.some x y h : (shortWQ A B).Point) = 0) :
-    y = 0 := by
-  rw [two_nsmul] at h2
-  by_contra hy0
-  have hy : y ≠ (shortWQ A B).negY x y := by
-    intro hneg
-    simp [shortWQ, shortW, WeierstrassCurve.Affine.negY] at hneg
-    linarith
-  have hadd :=
-    WeierstrassCurve.Affine.Point.add_self_of_Y_ne
-      (W := shortWQ A B) (h₁ := h) hy
-  rw [hadd] at h2
-  exact WeierstrassCurve.Affine.Point.some_ne_zero _ h2
-
-/-- Point-coordinate step.  If this is the only remaining slow theorem, use the
-residual boundary below. -/
-theorem exists_quadratic_root_of_two_torsion_ne_zeroTwoPoint
-    {A B : ℚ} (hB : B ≠ 0)
-    {Q : (shortWQ A B).Point}
-    (hQ0 : Q ≠ 0)
-    (hQP0 : Q ≠ shortWQ_zeroTwoPoint (A := A) (B := B) hB)
-    (h2Q : 2 • Q = 0) :
-    ∃ x : ℚ, x ≠ 0 ∧ x ^ 2 + A * x + B = 0 := by
-  rcases Q with _ | ⟨x, y, hxy⟩
-  · exact False.elim (hQ0 rfl)
-  · have hy0 : y = 0 :=
-      shortWQ_y_eq_zero_of_two_nsmul_eq_zero
-        (A := A) (B := B) (x := x) (y := y) h2Q
-    have hx0 : x ≠ 0 := by
-      intro hx
-      apply hQP0
-      subst x
-      subst y
-      simp [shortWQ_zeroTwoPoint]
-    have heq : y ^ 2 = x ^ 3 + A * x ^ 2 + B * x :=
-      (shortWQ_equation_iff (A := A) (B := B) (x := x) (y := y)).mp hxy.1
-    refine ⟨x, hx0, ?_⟩
-    subst y
-    have hprod : x * (x ^ 2 + A * x + B) = 0 := by
-      calc
-        x * (x ^ 2 + A * x + B) = x ^ 3 + A * x ^ 2 + B * x := by ring
-        _ = 0 := by nlinarith
-    exact (mul_eq_zero.mp hprod).resolve_left hx0
-
-/-- Fast polynomial endgame. -/
-theorem exists_square_discriminant_of_quadratic_root
-    {A B x : ℚ} (hx : x ^ 2 + A * x + B = 0) :
-    ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B := by
-  refine ⟨2 * x + A, ?_⟩
-  nlinarith
-
-/-- Desired theorem.  The only EC-point group extraction is the single fast generic
-`exists_v4_image_ne_zero_ne` instantiation. -/
-theorem square_discriminant_of_full_two_torsion_on_shortW
-    {A B : ℚ} (hB : B ≠ 0)
-    (g : (ZMod 2 × ZMod 2) →+ (shortWQ A B).Point)
+/--
+The transported full-two map is injective because it is a composition of injective maps.
+-/
+theorem fullTwoAffineOfProjectiveAddEquiv_injective
+    {E : WeierstrassCurve ℚ} {A B : ℚ}
+    (φ : (E⁄ℚ).Point ≃+
+      WeierstrassCurve.Projective.Point
+        (WeierstrassCurve.toProjective (shortW A B)))
+    (g : (ZMod 2 × ZMod 2) →+ (E⁄ℚ).Point)
     (hg : Function.Injective g) :
-    ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B := by
-  rcases exists_v4_image_ne_zero_ne
-      (g := g) (hg := hg)
-      (P0 := shortWQ_zeroTwoPoint (A := A) (B := B) hB)
-      (shortWQ_zeroTwoPoint_ne_zero (A := A) (B := B) hB) with
-    ⟨Q, hQ0, hQP0, h2Q⟩
-  rcases exists_quadratic_root_of_two_torsion_ne_zeroTwoPoint
-      (A := A) (B := B) hB hQ0 hQP0 h2Q with
-    ⟨x, hx0, hx⟩
-  exact exists_square_discriminant_of_quadratic_root hx
+    Function.Injective
+      (fullTwoAffineOfProjectiveAddEquiv (E := E) (A := A) (B := B) φ g) := by
+  intro u v huv
+  apply hg
+  apply φ.injective
+  exact
+    (WeierstrassCurve.Projective.Point.toAffineAddEquiv
+      (WeierstrassCurve.toProjective (shortW A B))).injective huv
+
+/--
+Assembly theorem after the checked group-extraction layer.
+
+This is the theorem that actually replaces the old square-discriminant axiom internally:
+it uses only
+* extracted order-12 point,
+* extracted full-two injection,
+* the smaller cyclic-12 Kubert model residual,
+* the checked affine full-two square-discriminant theorem.
+-/
+theorem kubert_C12_square_of_extracted_torsion
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hP12 : ∃ P : (E⁄ℚ).Point, addOrderOf P = 12)
+    (hFull2 : ∃ g : (ZMod 2 × ZMod 2) →+ (E⁄ℚ).Point,
+      Function.Injective g) :
+    ∃ t s : ℚ, Delta12 t ≠ 0 ∧ s ^ 2 = A12 t ^ 2 - 4 * B12 t := by
+  rcases hP12 with ⟨P, hP⟩
+  rcases hFull2 with ⟨g, hg⟩
+  let M := kubertC12ShortWModel_of_order12 E P hP
+  let gAff :
+      (ZMod 2 × ZMod 2) →+
+        WeierstrassCurve.Affine.Point (shortW (A12 M.t) (B12 M.t)) :=
+    fullTwoAffineOfProjectiveAddEquiv
+      (E := E) (A := A12 M.t) (B := B12 M.t) M.pointAddEquiv g
+  have hgAff : Function.Injective gAff := by
+    simpa [gAff] using
+      fullTwoAffineOfProjectiveAddEquiv_injective
+        (E := E) (A := A12 M.t) (B := B12 M.t) M.pointAddEquiv g hg
+  rcases square_discriminant_of_full_two_torsion_on_shortW
+      (A := A12 M.t) (B := B12 M.t) M.hB gAff hgAff with ⟨s, hs⟩
+  exact ⟨M.t, s, M.hDelta, hs⟩
 
 end MazurProof.RationalPointsN12
 ```
 
-## Exact replacement for the two source 2-torsion branches
-
-Use this instead of `rw [← map_nsmul]; ext` in EC-point goals:
+If the line
 
 ```lean
-have hsrc : 2 • ((0, 1) : ZMod 2 × ZMod 2) = 0 := by
-  ext <;> norm_num
-have h := congrArg g hsrc
-simpa using h
+exact
+  (WeierstrassCurve.Projective.Point.toAffineAddEquiv
+    (WeierstrassCurve.toProjective (shortW A B))).injective huv
 ```
 
-and similarly:
+fails to elaborate because Lean does not unfold the `AddMonoidHom.comp` coercions aggressively enough, replace the proof body by this more explicit variant:
 
 ```lean
-have hsrc : 2 • ((1, 0) : ZMod 2 × ZMod 2) = 0 := by
-  ext <;> norm_num
-have h := congrArg g hsrc
-simpa using h
-```
-
-The helper `map_two_nsmul_eq_zero` packages exactly this pattern.
-
-## If the EC coordinate theorem is still too slow
-
-Do **not** reintroduce the original Kubert axiom. Use this much smaller residual boundary:
-
-```lean
-def ShortWFullTwoPointResidual : Prop :=
-  ∀ {A B : ℚ} (hB : B ≠ 0)
-    {Q : (shortWQ A B).Point},
-      Q ≠ 0 →
-      Q ≠ shortWQ_zeroTwoPoint (A := A) (B := B) hB →
-      2 • Q = 0 →
-        ∃ x : ℚ, x ≠ 0 ∧ x ^ 2 + A * x + B = 0
-
-theorem square_discriminant_of_full_two_torsion_on_shortW_of_pointResidual
-    (hres : ShortWFullTwoPointResidual)
-    {A B : ℚ} (hB : B ≠ 0)
-    (g : (ZMod 2 × ZMod 2) →+ (shortWQ A B).Point)
+theorem fullTwoAffineOfProjectiveAddEquiv_injective
+    {E : WeierstrassCurve ℚ} {A B : ℚ}
+    (φ : (E⁄ℚ).Point ≃+
+      WeierstrassCurve.Projective.Point
+        (WeierstrassCurve.toProjective (shortW A B)))
+    (g : (ZMod 2 × ZMod 2) →+ (E⁄ℚ).Point)
     (hg : Function.Injective g) :
-    ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B := by
-  rcases exists_v4_image_ne_zero_ne
-      (g := g) (hg := hg)
-      (P0 := shortWQ_zeroTwoPoint (A := A) (B := B) hB)
-      (shortWQ_zeroTwoPoint_ne_zero (A := A) (B := B) hB) with
-    ⟨Q, hQ0, hQP0, h2Q⟩
-  rcases hres hB hQ0 hQP0 h2Q with ⟨x, hx0, hx⟩
-  exact exists_square_discriminant_of_quadratic_root hx
+    Function.Injective
+      (fullTwoAffineOfProjectiveAddEquiv (E := E) (A := A) (B := B) φ g) := by
+  intro u v huv
+  change
+    (WeierstrassCurve.Projective.Point.toAffineAddEquiv
+      (WeierstrassCurve.toProjective (shortW A B))) (φ (g u)) =
+    (WeierstrassCurve.Projective.Point.toAffineAddEquiv
+      (WeierstrassCurve.toProjective (shortW A B))) (φ (g v)) at huv
+  exact hg <| φ.injective <|
+    (WeierstrassCurve.Projective.Point.toAffineAddEquiv
+      (WeierstrassCurve.toProjective (shortW A B))).injective huv
 ```
 
-This residual is the smallest honest boundary: it contains only the affine group-law fact “a nonzero 2-torsion point not `(0,0)` has nonzero `x` satisfying `x² + A*x + B = 0`.” The remaining source extraction and polynomial discriminant endgame are fast and local.
+## Wrapper for the old hypothesis shape
 
-## Known/proposed status
+Your local file already has checked extraction theorems from
 
-* Known from your local report: `shortWQ_equation_iff` closes after `rw [equation_iff]; simp [shortWQ, shortW]`; no `ring_nf` needed.
-* Known source-branch replacement: the `hsrc; congrArg g hsrc; simpa` pattern avoids `ext` on EC points.
-* Known y-shape fix: the `hy` proof must use `simp [shortWQ, shortW, WeierstrassCurve.Affine.negY] at hneg; linarith`.
-* Proposed but should be small: `exists_quadratic_root_of_two_torsion_ne_zeroTwoPoint`; if this is slow, use `ShortWFullTwoPointResidual` above.
+```lean
+hE : ∃ f : (ZMod 2 × ZMod 12) →+ (E⁄ℚ).Point, Function.Injective f
+```
+
+to both `hP12` and `hFull2`. Since their names were not given in the prompt, keep the old theorem name as a thin wrapper like this, replacing the two placeholder names by the checked local declarations.
+
+```lean
+theorem kubert_C12_square_from_residuals
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : (ZMod 2 × ZMod 12) →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ t s : ℚ, Delta12 t ≠ 0 ∧ s ^ 2 = A12 t ^ 2 - 4 * B12 t := by
+  exact kubert_C12_square_of_extracted_torsion E
+    (/* existing checked theorem: order-12 point extracted from hE */)
+    (/* existing checked theorem: full-two injection extracted from hE */)
+```
+
+A realistic filled version will look like this:
+
+```lean
+theorem kubert_C12_square_from_residuals
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : (ZMod 2 × ZMod 12) →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ t s : ℚ, Delta12 t ≠ 0 ∧ s ^ 2 = A12 t ^ 2 - 4 * B12 t := by
+  exact kubert_C12_square_of_extracted_torsion E
+    (exists_order12_point_of_zmod2_zmod12_injective E hE)
+    (exists_full_two_injection_of_zmod2_zmod12_injective E hE)
+```
+
+where the two identifiers in the final two lines should be replaced by the actual checked theorem names in your file.
+
+## Why this is the smallest honest residual
+
+The old residual was:
+
+```lean
+axiom kubert_C12_square
+  (E : WeierstrassCurve ℚ) [E.IsElliptic]
+  (hE : ∃ f : (ZMod 2 × ZMod 12) →+ (E⁄ℚ).Point, Function.Injective f) :
+  ∃ t s : ℚ, Delta12 t ≠ 0 ∧ s ^ 2 = A12 t ^ 2 - 4 * B12 t
+```
+
+That axiom bundled four distinct tasks: group extraction, cyclic-12 Kubert parametrization, transport of full 2-torsion, and the short-Weierstrass square-discriminant algebra.
+
+After your checked work, the only part that should remain residual is:
+
+```lean
+axiom kubertC12ShortWModel_of_order12
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
+    KubertC12ShortWModel E
+```
+
+This residual says only: an elliptic curve over `ℚ` with a rational point of order `12` is additively equivalent, on rational points, to the cyclic-12 Kubert short model
+
+```lean
+shortW (A12 t) (B12 t)
+```
+
+with `Delta12 t ≠ 0` and `B12 t ≠ 0`.
+
+Everything involving the extracted `ZMod 2 × ZMod 2` subgroup and the square condition
+
+```lean
+s ^ 2 = A12 t ^ 2 - 4 * B12 t
+```
+
+is then checked by composition plus your existing theorem
+
+```lean
+square_discriminant_of_full_two_torsion_on_shortW
+```
+
+## If you insist on a raw coordinate-isomorphism residual instead
+
+A residual of the form “there exists a `VariableChange ℚ` taking `E` to the Kubert short model” is mathematically natural, but it is not currently the most useful Lean interface. Mathlib's `VariableChange` file gives the action on curves and invariant quantities, while the checked point-group bridge you need would still have to be built.
+
+So either:
+
+1. prove a new Mathlib/local theorem turning a `VariableChange` equality into
+
+```lean
+(E⁄ℚ).Point ≃+
+  WeierstrassCurve.Projective.Point
+    (WeierstrassCurve.toProjective (shortW A B))
+```
+
+or
+
+2. keep that additive equivalence as part of the Kubert residual, as recommended above.
+
+Option 2 is the smallest clean reduction of the present axiom because it removes the full-two and square-discriminant content without forcing a premature formalization of all variable-change point maps.
