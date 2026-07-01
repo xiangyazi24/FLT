@@ -1,362 +1,604 @@
-# Q2768 dm-codex2: finite mod-`2^k` obstruction certificates for `CoverInt`
+# Q2803 dm-codex2: proof plan for `CommonDenomSquareclassRepsToPrimitiveCoverIntStatement`
 
-This is written as a Lean-oriented checklist plus code skeletons. I recommend using `ZMod m`, not `Fin m`, for the certificate search: the two cover equations are ring equations, integer coefficients including negative ones cast cleanly into `ZMod m`, and `native_decide` can enumerate `ZMod 4`, `ZMod 8`, `ZMod 16` directly.
+Namespace: `MazurProof.RationalPointsN12`.
 
-The only subtle bridge is the primitive condition. For modulus `m = 4/8/16`, primitive over integers implies **not all four residues are even**, not “not all residues are nonzero modulo `m`”. In `ZMod m`, define “even residue” as membership in the image of multiplication by `2`.
+Target file: `FLT/Assumptions/MazurProof/N12E1FullCoverExtraction.lean`.
 
-## 0. Minimal imports and base definitions
+I could not inspect the local worktree file through the GitHub connector; the plan below is based on the definitions in the prompt.
 
-If `CoverInt` and `PrimitiveInt4` are already defined in your file, keep those and import only the obstruction helpers.
+## 1. Truth value of the statement
+
+The statement is mathematically true as written, assuming the displayed definitions are exactly the active local definitions.
+
+Given
 
 ```lean
-import Mathlib.Tactic
-import Mathlib.Data.ZMod.Basic
+X = (d0 : ℚ) * r0 ^ 2
+X - 1 = (d1 : ℚ) * r1 ^ 2
+X + 3 = (d3 : ℚ) * r3 ^ 2
+E1FullCoverCurve X Y
+Y ≠ 0
+r0 ≠ 0, r1 ≠ 0, r3 ≠ 0
+```
 
+the cover equations follow after choosing a common nonzero integer denominator `T` with
+
+```lean
+r0 = (A : ℚ) / (T : ℚ)
+r1 = (B : ℚ) / (T : ℚ)
+r3 = (C : ℚ) / (T : ℚ)
+```
+
+Then subtracting the squareclass equations gives
+
+```lean
+d0 * A ^ 2 - d1 * B ^ 2 = T ^ 2
+d3 * C ^ 2 - d0 * A ^ 2 = 3 * T ^ 2
+```
+
+A four-variable gcd normalization makes `(A,B,C,T)` primitive, and homogeneity preserves the cover equations. Nonzero-ness of `A,B,C,T` survives because `r0,r1,r3` and the common denominator are nonzero.
+
+`ProductSquareclassCondition d0 d1 d3` follows from the curve equation:
+
+```lean
+Y ^ 2 = X * (X - 1) * (X + 3)
+      = ((d0*d1*d3 : ℤ) : ℚ) * (r0*r1*r3)^2
+```
+
+so
+
+```lean
+((d0*d1*d3 : ℤ) : ℚ) = (Y / (r0*r1*r3))^2
+```
+
+with nonzero witness because `Y`, `r0`, `r1`, `r3` are nonzero.
+
+No extra hypothesis is missing.
+
+## 2. Minimal lemma DAG
+
+Keep these helpers local to `N12E1FullCoverExtraction.lean` or move only the generic gcd/rat-denominator helpers to a small utility file if multiple N=12 files need them.
+
+### DAG overview
+
+| order | lemma | purpose |
+|---:|---|---|
+| 1 | `productSquareclassCondition_of_curve_squareclasses` | prove `ProductSquareclassCondition d0 d1 d3` from curve + three squareclass reps |
+| 2 | `rat_common_den3` | construct integer `A0 B0 C0 T0` for three nonzero rationals with common denominator |
+| 3 | `rawCoverInt_of_common_den_squareclasses` | prove raw `CoverInt d0 d1 d3 A0 B0 C0 T0` |
+| 4 | `gcd4` + API lemmas | common divisor/greatest common divisor of four integers |
+| 5 | `primitive_div_gcd4_data` | divide by `gcd4` to obtain primitive nonzero data and equalities `A0=g*A`, etc. |
+| 6 | `coverInt_div_common_factor` | homogeneous cover equations descend after common division |
+| 7 | `primitiveCoverInt_of_rawCoverInt` | package normalized primitive cover data |
+| 8 | final residual theorem | assemble `E1FullCoverIntData X Y` |
+
+### Exact target signatures
+
+```lean
 namespace MazurProof.RationalPointsN12
 
-/-- Integer cover equations.  Delete this if already defined. -/
-def CoverInt (d0 d1 d3 A B C T : ℤ) : Prop :=
-  d0 * A ^ 2 - d1 * B ^ 2 = T ^ 2 ∧
-  d3 * C ^ 2 - d0 * A ^ 2 = 3 * T ^ 2
+private theorem productSquareclassCondition_of_curve_squareclasses
+    {X Y : ℚ} {d0 d1 d3 : ℤ} {r0 r1 r3 : ℚ}
+    (hE : E1FullCoverCurve X Y) (hY : Y ≠ 0)
+    (hr0nz : r0 ≠ 0) (hr1nz : r1 ≠ 0) (hr3nz : r3 ≠ 0)
+    (h0 : X = (d0 : ℚ) * r0 ^ 2)
+    (h1 : X - 1 = (d1 : ℚ) * r1 ^ 2)
+    (h3 : X + 3 = (d3 : ℚ) * r3 ^ 2) :
+    ProductSquareclassCondition d0 d1 d3
 
-/-- Integer projective primitivity.  Delete this if already defined. -/
-def PrimitiveInt4 (A B C T : ℤ) : Prop :=
-  ∀ p : ℕ, p.Prime →
-    ¬ ((p : ℤ) ∣ A ∧ (p : ℤ) ∣ B ∧ (p : ℤ) ∣ C ∧ (p : ℤ) ∣ T)
+private theorem rat_common_den3
+    {r0 r1 r3 : ℚ}
+    (hr0nz : r0 ≠ 0) (hr1nz : r1 ≠ 0) (hr3nz : r3 ≠ 0) :
+    ∃ A0 B0 C0 T0 : ℤ,
+      T0 ≠ 0 ∧ A0 ≠ 0 ∧ B0 ≠ 0 ∧ C0 ≠ 0 ∧
+      r0 = (A0 : ℚ) / (T0 : ℚ) ∧
+      r1 = (B0 : ℚ) / (T0 : ℚ) ∧
+      r3 = (C0 : ℚ) / (T0 : ℚ)
+
+private theorem rawCoverInt_of_common_den_squareclasses
+    {X : ℚ} {d0 d1 d3 A0 B0 C0 T0 : ℤ}
+    (hT0 : T0 ≠ 0)
+    (hr0 : X = (d0 : ℚ) * (((A0 : ℚ) / (T0 : ℚ)) ^ 2))
+    (hr1 : X - 1 = (d1 : ℚ) * (((B0 : ℚ) / (T0 : ℚ)) ^ 2))
+    (hr3 : X + 3 = (d3 : ℚ) * (((C0 : ℚ) / (T0 : ℚ)) ^ 2)) :
+    CoverInt d0 d1 d3 A0 B0 C0 T0
+
+private def gcd4 (A B C T : ℤ) : ℕ :=
+  Nat.gcd (Nat.gcd (Nat.gcd A.natAbs B.natAbs) C.natAbs) T.natAbs
+
+private theorem gcd4_pos_of_T_ne_zero
+    {A B C T : ℤ} (hT : T ≠ 0) : 0 < gcd4 A B C T
+
+private theorem gcd4_dvd_A {A B C T : ℤ} :
+    ((gcd4 A B C T : ℕ) : ℤ) ∣ A
+private theorem gcd4_dvd_B {A B C T : ℤ} :
+    ((gcd4 A B C T : ℕ) : ℤ) ∣ B
+private theorem gcd4_dvd_C {A B C T : ℤ} :
+    ((gcd4 A B C T : ℕ) : ℤ) ∣ C
+private theorem gcd4_dvd_T {A B C T : ℤ} :
+    ((gcd4 A B C T : ℕ) : ℤ) ∣ T
+
+private theorem common_dvd_gcd4
+    {A B C T d : ℤ}
+    (hdA : d ∣ A) (hdB : d ∣ B) (hdC : d ∣ C) (hdT : d ∣ T) :
+    d ∣ ((gcd4 A B C T : ℕ) : ℤ)
+
+private theorem primitive_div_gcd4_data
+    {A0 B0 C0 T0 : ℤ}
+    (hT0 : T0 ≠ 0) :
+    ∃ A B C T : ℤ,
+      T ≠ 0 ∧
+      (A0 ≠ 0 → A ≠ 0) ∧
+      (B0 ≠ 0 → B ≠ 0) ∧
+      (C0 ≠ 0 → C ≠ 0) ∧
+      PrimitiveInt4 A B C T ∧
+      A0 = ((gcd4 A0 B0 C0 T0 : ℕ) : ℤ) * A ∧
+      B0 = ((gcd4 A0 B0 C0 T0 : ℕ) : ℤ) * B ∧
+      C0 = ((gcd4 A0 B0 C0 T0 : ℕ) : ℤ) * C ∧
+      T0 = ((gcd4 A0 B0 C0 T0 : ℕ) : ℤ) * T
+
+private theorem coverInt_div_common_factor
+    {d0 d1 d3 A0 B0 C0 T0 A B C T g : ℤ}
+    (hg : g ≠ 0)
+    (hA : A0 = g * A) (hB : B0 = g * B)
+    (hC : C0 = g * C) (hT : T0 = g * T)
+    (hcover : CoverInt d0 d1 d3 A0 B0 C0 T0) :
+    CoverInt d0 d1 d3 A B C T
+
+private theorem primitiveCoverInt_of_rawCoverInt
+    {d0 d1 d3 A0 B0 C0 T0 : ℤ}
+    (hT0 : T0 ≠ 0) (hA0 : A0 ≠ 0) (hB0 : B0 ≠ 0) (hC0 : C0 ≠ 0)
+    (hcover0 : CoverInt d0 d1 d3 A0 B0 C0 T0) :
+    ∃ A B C T : ℤ,
+      T ≠ 0 ∧ A ≠ 0 ∧ B ≠ 0 ∧ C ≠ 0 ∧
+      PrimitiveInt4 A B C T ∧
+      (A0 : ℚ) / (T0 : ℚ) = (A : ℚ) / (T : ℚ) ∧
+      (B0 : ℚ) / (T0 : ℚ) = (B : ℚ) / (T : ℚ) ∧
+      (C0 : ℚ) / (T0 : ℚ) = (C : ℚ) / (T : ℚ) ∧
+      CoverInt d0 d1 d3 A B C T
 
 end MazurProof.RationalPointsN12
 ```
 
-## 1. Finite cover predicate over `ZMod m`
+## 3. Hard lemma proof skeletons and API hints
 
-Use a natural modulus. Add `[NeZero m]` so `ZMod m` is finite; for literals `4`, `8`, `16`, Lean usually infers this instance.
+### 3.1 Product squareclass condition
 
-```lean
-import Mathlib.Tactic
-import Mathlib.Data.ZMod.Basic
-
-namespace MazurProof.RationalPointsN12
-
-/-- The cover equations reduced modulo `m`. -/
-def coverMod (m : ℕ) [NeZero m]
-    (d0 d1 d3 : ℤ) (a b c t : ZMod m) : Prop :=
-  (d0 : ZMod m) * a ^ 2 - (d1 : ZMod m) * b ^ 2 = t ^ 2 ∧
-  (d3 : ZMod m) * c ^ 2 - (d0 : ZMod m) * a ^ 2 = (3 : ZMod m) * t ^ 2
-
-/-- Optional `Fin m` wrapper.  Prefer `ZMod m` unless you have a reason not to. -/
-def coverModFin (m : ℕ) [NeZero m]
-    (d0 d1 d3 : ℤ) (a b c t : Fin m) : Prop :=
-  coverMod m d0 d1 d3
-    ((a.val : ℕ) : ZMod m)
-    ((b.val : ℕ) : ZMod m)
-    ((c.val : ℕ) : ZMod m)
-    ((t.val : ℕ) : ZMod m)
-
-end MazurProof.RationalPointsN12
-```
-
-Notes:
-
-* Do not reduce `d0`, `d1`, `d3` by hand. Write `(d0 : ZMod m)` and let `norm_num`/kernel reduction handle it.
-* Negative coefficients are fine: `(-1 : ℤ)` casts to the class `m-1` in `ZMod m`.
-* Avoid `%` in the core definitions. `%` on negative integers quickly leads to `Int.emod`/`Nat.mod` coercion goals.
-
-## 2. Primitive residue condition for moduli `2^k`
-
-For `m = 4/8/16`, “even modulo `m`” means the residue is in the image of multiplication by `2`, i.e. `x = 2*y` for some `y : ZMod m`. Then primitive means **not all** four residues are even.
+Proof idea: use witness `Y / (r0*r1*r3)`.
 
 ```lean
-import Mathlib.Tactic
-import Mathlib.Data.ZMod.Basic
-
-namespace MazurProof.RationalPointsN12
-
-/-- `x` is an even residue modulo `m`: it lies in the image of multiplication by `2`. -/
-def evenResidue (m : ℕ) [NeZero m] (x : ZMod m) : Prop :=
-  ∃ y : ZMod m, x = (2 : ZMod m) * y
-
-/-- Correct primitive residue test for moduli `2^k`: at least one coordinate is odd. -/
-def primitiveMod2 (m : ℕ) [NeZero m] (a b c t : ZMod m) : Prop :=
-  ¬ (evenResidue m a ∧ evenResidue m b ∧ evenResidue m c ∧ evenResidue m t)
-
-/-- Local obstruction predicate: no primitive mod-`2` residue tuple solves the mod-`m` cover. -/
-def localObstruction (m : ℕ) [NeZero m] (d0 d1 d3 : ℤ) : Prop :=
-  ∀ a b c t : ZMod m,
-    primitiveMod2 m a b c t →
-      ¬ coverMod m d0 d1 d3 a b c t
-
-/-- Equivalent existential form, sometimes convenient for debugging with `#eval decide`. -/
-def badTupleExists (m : ℕ) [NeZero m] (d0 d1 d3 : ℤ) : Prop :=
-  ∃ a b c t : ZMod m,
-    primitiveMod2 m a b c t ∧ coverMod m d0 d1 d3 a b c t
-
-end MazurProof.RationalPointsN12
-```
-
-For `m = 2`, `evenResidue 2 x` is just `x = 0`. For `m = 4/8/16`, it is `{0,2}`, `{0,2,4,6}`, `{0,2,4,6,8,10,12,14}` respectively. This is exactly what primitive integer tuples give after reduction: at least one of `A,B,C,T` is odd.
-
-Do **not** use `a ≠ 0 ∨ b ≠ 0 ∨ c ≠ 0 ∨ t ≠ 0` modulo `4/8/16`; an even but nonzero residue such as `2 : ZMod 8` still corresponds to an even integer coordinate.
-
-## 3. Bridge: integer cover gives `coverMod`
-
-This part is pure cast/ring API. The safest pattern is `congrArg (fun z : ℤ => (z : ZMod m))` followed by `simpa [coverMod]`.
-
-```lean
-import Mathlib.Tactic
-import Mathlib.Data.ZMod.Basic
-
-namespace MazurProof.RationalPointsN12
-
-theorem coverInt_to_coverMod
-    {m : ℕ} [NeZero m]
-    {d0 d1 d3 A B C T : ℤ}
-    (h : CoverInt d0 d1 d3 A B C T) :
-    coverMod m d0 d1 d3
-      (A : ZMod m) (B : ZMod m) (C : ZMod m) (T : ZMod m) := by
-  rcases h with ⟨h₁, h₂⟩
-  constructor
-  · have h₁' := congrArg (fun z : ℤ => (z : ZMod m)) h₁
-    simpa [coverMod] using h₁'
-  · have h₂' := congrArg (fun z : ℤ => (z : ZMod m)) h₂
-    simpa [coverMod] using h₂'
-
-end MazurProof.RationalPointsN12
-```
-
-If `simpa [coverMod]` leaves powers in a different shape, add `[pow_two]`:
-
-```lean
-simpa [coverMod, pow_two] using h₁'
-```
-
-Do not introduce `A % m` here. Casting to `ZMod m` is the intended API.
-
-## 4. Bridge: primitive integers give `primitiveMod2`
-
-Key generic lemma: if `m` is even and `(A : ZMod m)` is an even residue, then `A` is divisible by `2` in `ℤ`.
-
-The proof uses the standard `ZMod` API:
-
-```lean
-#check ZMod.natCast_zmod_val
-#check ZMod.intCast_zmod_eq_zero_iff_dvd
-```
-
-Expected helper shape:
-
-```lean
-import Mathlib.Tactic
-import Mathlib.Data.ZMod.Basic
-
-namespace MazurProof.RationalPointsN12
-
-/-- If an integer reduces to an even residue modulo an even modulus, then the integer is even. -/
-theorem dvd_two_of_evenResidue_intCast
-    {m : ℕ} [NeZero m] (hm2 : 2 ∣ m) {A : ℤ}
-    (hA : evenResidue m (A : ZMod m)) :
-    (2 : ℤ) ∣ A := by
-  rcases hA with ⟨y, hy⟩
-
-  -- Replace the abstract residue `y` by its canonical integer representative.
-  have hyval : ((y.val : ℤ) : ZMod m) = y := by
-    -- Usually works in current mathlib:
-    exact_mod_cast (ZMod.natCast_zmod_val y)
-
-  -- `A` is congruent modulo `m` to the even integer `2*y.val`.
-  have hzero : ((A - 2 * (y.val : ℤ) : ℤ) : ZMod m) = 0 := by
+private theorem productSquareclassCondition_of_curve_squareclasses
+    {X Y : ℚ} {d0 d1 d3 : ℤ} {r0 r1 r3 : ℚ}
+    (hE : E1FullCoverCurve X Y) (hY : Y ≠ 0)
+    (hr0nz : r0 ≠ 0) (hr1nz : r1 ≠ 0) (hr3nz : r3 ≠ 0)
+    (h0 : X = (d0 : ℚ) * r0 ^ 2)
+    (h1 : X - 1 = (d1 : ℚ) * r1 ^ 2)
+    (h3 : X + 3 = (d3 : ℚ) * r3 ^ 2) :
+    ProductSquareclassCondition d0 d1 d3 := by
+  refine ⟨Y / (r0 * r1 * r3), ?_, ?_⟩
+  · field_simp [hY, hr0nz, hr1nz, hr3nz]
+  · have hcurve : Y ^ 2 = X * (X - 1) * (X + 3) := by
+      simpa [E1FullCoverCurve] using hE
     calc
-      ((A - 2 * (y.val : ℤ) : ℤ) : ZMod m)
-          = (A : ZMod m) - (2 : ZMod m) * ((y.val : ℤ) : ZMod m) := by
-              norm_num
-      _ = (A : ZMod m) - (2 : ZMod m) * y := by rw [hyval]
-      _ = 0 := by
-              rw [hy]
+      (((d0 * d1 * d3 : ℤ) : ℚ))
+          = Y ^ 2 / (r0 * r1 * r3) ^ 2 := by
+              field_simp [hr0nz, hr1nz, hr3nz]
+              rw [hcurve, h0, h1, h3]
               ring
+      _ = (Y / (r0 * r1 * r3)) ^ 2 := by
+              field_simp [hr0nz, hr1nz, hr3nz]
+              ring
+```
 
-  -- Turn zero in `ZMod m` into divisibility by `m`.
-  have hm_dvd : (m : ℤ) ∣ A - 2 * (y.val : ℤ) := by
-    exact (ZMod.intCast_zmod_eq_zero_iff_dvd
-      (n := m) (a := A - 2 * (y.val : ℤ))).mp hzero
+Likely tactic repairs if `field_simp` is too aggressive:
 
-  -- Since `m` is even, the congruence to an even integer makes `A` even.
-  rcases hm2 with ⟨q, hq⟩
-  rcases hm_dvd with ⟨r, hr⟩
-  refine ⟨(q : ℤ) * r + (y.val : ℤ), ?_⟩
-  have hqz : (m : ℤ) = 2 * (q : ℤ) := by
+```lean
+have hrprod : r0 * r1 * r3 ≠ 0 := by
+  exact mul_ne_zero (mul_ne_zero hr0nz hr1nz) hr3nz
+field_simp [hrprod]
+ring_nf
+```
+
+### 3.2 Common denominator for three rationals
+
+Avoid abstract `Exists` denominator APIs if they are awkward. Use `Rat.num` and `Rat.den` directly.
+
+Recommended definitions inside the proof:
+
+```lean
+let T0 : ℤ := (r0.den : ℤ) * (r1.den : ℤ) * (r3.den : ℤ)
+let A0 : ℤ := r0.num * (r1.den : ℤ) * (r3.den : ℤ)
+let B0 : ℤ := r1.num * (r0.den : ℤ) * (r3.den : ℤ)
+let C0 : ℤ := r3.num * (r0.den : ℤ) * (r1.den : ℤ)
+```
+
+Then prove
+
+```lean
+r0 = (A0 : ℚ) / (T0 : ℚ)
+r1 = (B0 : ℚ) / (T0 : ℚ)
+r3 = (C0 : ℚ) / (T0 : ℚ)
+```
+
+using the local Rat API. The names to check in the pinned Mathlib are usually:
+
+```lean
+#check Rat.num
+#check Rat.den
+#check Rat.den_nz
+#check Rat.num_div_den
+#check Rat.num_ne_zero
+```
+
+Skeleton:
+
+```lean
+private theorem rat_common_den3
+    {r0 r1 r3 : ℚ}
+    (hr0nz : r0 ≠ 0) (hr1nz : r1 ≠ 0) (hr3nz : r3 ≠ 0) :
+    ∃ A0 B0 C0 T0 : ℤ,
+      T0 ≠ 0 ∧ A0 ≠ 0 ∧ B0 ≠ 0 ∧ C0 ≠ 0 ∧
+      r0 = (A0 : ℚ) / (T0 : ℚ) ∧
+      r1 = (B0 : ℚ) / (T0 : ℚ) ∧
+      r3 = (C0 : ℚ) / (T0 : ℚ) := by
+  let T0 : ℤ := (r0.den : ℤ) * (r1.den : ℤ) * (r3.den : ℤ)
+  let A0 : ℤ := r0.num * (r1.den : ℤ) * (r3.den : ℤ)
+  let B0 : ℤ := r1.num * (r0.den : ℤ) * (r3.den : ℤ)
+  let C0 : ℤ := r3.num * (r0.den : ℤ) * (r1.den : ℤ)
+  refine ⟨A0, B0, C0, T0, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · dsimp [T0]
+    positivity
+  · dsimp [A0]
+    exact mul_ne_zero (mul_ne_zero (by exact Rat.num_ne_zero.mpr hr0nz) (by positivity)) (by positivity)
+  · dsimp [B0]
+    exact mul_ne_zero (mul_ne_zero (by exact Rat.num_ne_zero.mpr hr1nz) (by positivity)) (by positivity)
+  · dsimp [C0]
+    exact mul_ne_zero (mul_ne_zero (by exact Rat.num_ne_zero.mpr hr3nz) (by positivity)) (by positivity)
+  · dsimp [A0, T0]
+    rw [Rat.num_div_den r0]
+    field_simp [Rat.den_nz]
+    ring
+  · dsimp [B0, T0]
+    rw [Rat.num_div_den r1]
+    field_simp [Rat.den_nz]
+    ring
+  · dsimp [C0, T0]
+    rw [Rat.num_div_den r3]
+    field_simp [Rat.den_nz]
+    ring
+```
+
+If `Rat.num_ne_zero.mpr` has a different orientation, replace with:
+
+```lean
+have : r0.num ≠ 0 := by
+  intro hnum
+  apply hr0nz
+  rw [Rat.ext_iff]
+  simp [hnum]
+```
+
+or search:
+
+```lean
+#check Rat.num_eq_zero
+#check Rat.num_ne_zero
+```
+
+### 3.3 Raw cover from common denominator equations
+
+This proof is robust: subtract squareclass equations and clear `T0^2`.
+
+```lean
+private theorem rawCoverInt_of_common_den_squareclasses
+    {X : ℚ} {d0 d1 d3 A0 B0 C0 T0 : ℤ}
+    (hT0 : T0 ≠ 0)
+    (hr0 : X = (d0 : ℚ) * (((A0 : ℚ) / (T0 : ℚ)) ^ 2))
+    (hr1 : X - 1 = (d1 : ℚ) * (((B0 : ℚ) / (T0 : ℚ)) ^ 2))
+    (hr3 : X + 3 = (d3 : ℚ) * (((C0 : ℚ) / (T0 : ℚ)) ^ 2)) :
+    CoverInt d0 d1 d3 A0 B0 C0 T0 := by
+  constructor
+  · norm_num [CoverInt]
+    -- Prove equality in ℚ after casting, then exact_mod_cast if needed.
+    have hq : ((d0 * A0 ^ 2 - d1 * B0 ^ 2 : ℤ) : ℚ) = (T0 ^ 2 : ℤ) := by
+      have hdiff :
+          (1 : ℚ) =
+            (d0 : ℚ) * (((A0 : ℚ) / (T0 : ℚ)) ^ 2) -
+            (d1 : ℚ) * (((B0 : ℚ) / (T0 : ℚ)) ^ 2) := by
+        linarith
+      have hT0q : (T0 : ℚ) ≠ 0 := by exact_mod_cast hT0
+      field_simp [hT0q] at hdiff ⊢
+      ring_nf at hdiff ⊢
+      exact hdiff.symm
     exact_mod_cast hq
-  calc
-    A = (A - 2 * (y.val : ℤ)) + 2 * (y.val : ℤ) := by ring
-    _ = (m : ℤ) * r + 2 * (y.val : ℤ) := by rw [hr]
-    _ = 2 * ((q : ℤ) * r + (y.val : ℤ)) := by
-          rw [hqz]
-          ring
+  · have hq : ((d3 * C0 ^ 2 - d0 * A0 ^ 2 : ℤ) : ℚ) = ((3 * T0 ^ 2 : ℤ) : ℚ) := by
+      have hdiff :
+          (3 : ℚ) =
+            (d3 : ℚ) * (((C0 : ℚ) / (T0 : ℚ)) ^ 2) -
+            (d0 : ℚ) * (((A0 : ℚ) / (T0 : ℚ)) ^ 2) := by
+        linarith
+      have hT0q : (T0 : ℚ) ≠ 0 := by exact_mod_cast hT0
+      field_simp [hT0q] at hdiff ⊢
+      ring_nf at hdiff ⊢
+      exact hdiff.symm
+    exact_mod_cast hq
+```
 
-/-- Integer primitivity implies the finite mod-`2` primitive condition. -/
-theorem primitiveInt4_to_primitiveMod2
-    {m : ℕ} [NeZero m] (hm2 : 2 ∣ m)
-    {A B C T : ℤ}
-    (hprim : PrimitiveInt4 A B C T) :
-    primitiveMod2 m (A : ZMod m) (B : ZMod m) (C : ZMod m) (T : ZMod m) := by
-  intro hall
-  rcases hall with ⟨hA, hB, hC, hT⟩
-  exact hprim 2 (by norm_num) ⟨
-    dvd_two_of_evenResidue_intCast (m := m) hm2 hA,
-    dvd_two_of_evenResidue_intCast (m := m) hm2 hB,
-    dvd_two_of_evenResidue_intCast (m := m) hm2 hC,
-    dvd_two_of_evenResidue_intCast (m := m) hm2 hT⟩
+If `exact_mod_cast` struggles with powers, state the integer goal and use `norm_num`/`ring_nf` after converting the rational equality. A reliable fallback is:
+
+```lean
+norm_num at hq
+exact hq
+```
+
+because `Int.cast_inj` into `ℚ` is available.
+
+### 3.4 Four-variable gcd normalization
+
+Use a small local gcd utility. Do not try to use `Int.gcd` directly if its `Nat` return type causes sign clutter; `natAbs` makes positivity and divisibility cleaner.
+
+```lean
+private def gcd4 (A B C T : ℤ) : ℕ :=
+  Nat.gcd (Nat.gcd (Nat.gcd A.natAbs B.natAbs) C.natAbs) T.natAbs
+```
+
+API targets:
+
+```lean
+#check Int.natAbs
+#check Int.natAbs_dvd_natAbs
+#check Int.dvd_natAbs
+#check Nat.gcd_dvd_left
+#check Nat.gcd_dvd_right
+#check Nat.dvd_gcd
+#check Int.ediv_mul_cancel
+#check Int.mul_ediv_cancel'
+```
+
+Recommended proof shape for divisibility projections:
+
+```lean
+private theorem gcd4_dvd_A {A B C T : ℤ} :
+    ((gcd4 A B C T : ℕ) : ℤ) ∣ A := by
+  -- prove `(gcd4 A B C T) ∣ A.natAbs` by Nat gcd projections;
+  -- then convert to integer divisibility of `A` using natAbs API.
+  -- Skeleton:
+  -- have hnat : gcd4 A B C T ∣ A.natAbs := ...
+  -- exact Int.ofNat_dvd.mp hnat  -- if available
+  -- or use `Int.dvd_natAbs` / `Int.natAbs_dvd_natAbs` bridge.
+  ...
+```
+
+Because API names vary across pinned Mathlib versions, an often easier route is to define a predicate-level gcd package and prove it by Nat gcd once:
+
+```lean
+private def IsGCD4 (g A B C T : ℤ) : Prop :=
+  0 < g ∧ g ∣ A ∧ g ∣ B ∧ g ∣ C ∧ g ∣ T ∧
+    ∀ d : ℤ, d ∣ A → d ∣ B → d ∣ C → d ∣ T → d ∣ g
+```
+
+Then prove one theorem:
+
+```lean
+private theorem exists_isGCD4 {A B C T : ℤ} (hT : T ≠ 0) :
+    ∃ g : ℤ, IsGCD4 g A B C T
+```
+
+This can still use `g = gcd4 A B C T`, but downstream normalization only consumes the `IsGCD4` package and becomes much cleaner.
+
+### 3.5 Primitive normalization by gcd
+
+This is the key primitive step. I recommend proving it from the abstract `IsGCD4` package, then using the concrete gcd theorem only once.
+
+```lean
+private theorem primitive_div_isGCD4
+    {A0 B0 C0 T0 g : ℤ}
+    (hg : IsGCD4 g A0 B0 C0 T0) :
+    ∃ A B C T : ℤ,
+      A0 = g * A ∧ B0 = g * B ∧ C0 = g * C ∧ T0 = g * T ∧
+      PrimitiveInt4 A B C T := by
+  rcases hg with ⟨hgpos, hgA, hgB, hgC, hgT, hgreat⟩
+  rcases hgA with ⟨A, hA⟩
+  rcases hgB with ⟨B, hB⟩
+  rcases hgC with ⟨C, hC⟩
+  rcases hgT with ⟨T, hT⟩
+  refine ⟨A, B, C, T, hA.symm, hB.symm, hC.symm, hT.symm, ?_⟩
+  intro p hp hall
+  rcases hall with ⟨hpA, hpB, hpC, hpT⟩
+
+  -- `p*g` divides each original coordinate.
+  have hpgA : ((p : ℤ) * g) ∣ A0 := by
+    rcases hpA with ⟨a, ha⟩
+    refine ⟨a, ?_⟩
+    rw [hA, ha]
+    ring
+  have hpgB : ((p : ℤ) * g) ∣ B0 := by
+    rcases hpB with ⟨b, hb⟩
+    refine ⟨b, ?_⟩
+    rw [hB, hb]
+    ring
+  have hpgC : ((p : ℤ) * g) ∣ C0 := by
+    rcases hpC with ⟨c, hc⟩
+    refine ⟨c, ?_⟩
+    rw [hC, hc]
+    ring
+  have hpgT : ((p : ℤ) * g) ∣ T0 := by
+    rcases hpT with ⟨t, ht⟩
+    refine ⟨t, ?_⟩
+    rw [hT, ht]
+    ring
+
+  have hpg_dvd_g : ((p : ℤ) * g) ∣ g := hgreat ((p : ℤ) * g) hpgA hpgB hpgC hpgT
+  rcases hpg_dvd_g with ⟨k, hk⟩
+  have hg_ne : g ≠ 0 := ne_of_gt hgpos
+  have hpunit : IsUnit (p : ℤ) := by
+    -- hk : g = (p*g)*k.  Cancel nonzero g to get `1 = p*k`.
+    have hcancel : (1 : ℤ) = (p : ℤ) * k := by
+      apply mul_left_cancel₀ hg_ne
+      calc
+        g * 1 = g := by ring
+        _ = (p : ℤ) * g * k := hk
+        _ = g * ((p : ℤ) * k) := by ring
+    exact ⟨k, hcancel.symm⟩
+
+  -- Contradict primality of `p`: a prime natural is not a unit as an integer.
+  have hpgt1 : 1 < p := hp.one_lt
+  rcases Int.isUnit_iff.mp hpunit with hp_one | hp_neg_one
+  · have : (p : ℤ) ≠ 1 := by exact_mod_cast (ne_of_gt hpgt1)
+    exact this hp_one
+  · have : (0 : ℤ) < (p : ℤ) := by exact_mod_cast hp.pos
+    linarith
+```
+
+This proof avoids needing to reason about `A0 / g` directly. It extracts quotient witnesses from divisibility and proves they are primitive.
+
+Nonzero after normalization:
+
+```lean
+private theorem nonzero_of_eq_g_mul
+    {x g y : ℤ} (hx : x ≠ 0) (hg : g ≠ 0) (hxy : x = g * y) : y ≠ 0 := by
+  intro hy
+  apply hx
+  rw [hxy, hy]
+  ring
+```
+
+Rational ratio preservation after normalization:
+
+```lean
+private theorem rat_div_eq_of_common_factor
+    {x t g y u : ℤ}
+    (hg : g ≠ 0) (hu : u ≠ 0)
+    (hx : x = g * y) (ht : t = g * u) :
+    (x : ℚ) / (t : ℚ) = (y : ℚ) / (u : ℚ) := by
+  have hgq : (g : ℚ) ≠ 0 := by exact_mod_cast hg
+  have huq : (u : ℚ) ≠ 0 := by exact_mod_cast hu
+  rw [hx, ht]
+  field_simp [hgq, huq]
+  ring
+```
+
+### 3.6 Homogeneous cover equation descends
+
+```lean
+private theorem coverInt_div_common_factor
+    {d0 d1 d3 A0 B0 C0 T0 A B C T g : ℤ}
+    (hg : g ≠ 0)
+    (hA : A0 = g * A) (hB : B0 = g * B)
+    (hC : C0 = g * C) (hT : T0 = g * T)
+    (hcover : CoverInt d0 d1 d3 A0 B0 C0 T0) :
+    CoverInt d0 d1 d3 A B C T := by
+  rcases hcover with ⟨h1, h2⟩
+  constructor
+  · have hmul : g ^ 2 * (d0 * A ^ 2 - d1 * B ^ 2 - T ^ 2) = 0 := by
+      rw [hA, hB, hT] at h1
+      nlinarith [h1]
+    have hg2 : g ^ 2 ≠ 0 := pow_ne_zero 2 hg
+    have hzero : d0 * A ^ 2 - d1 * B ^ 2 - T ^ 2 = 0 :=
+      (mul_eq_zero.mp hmul).resolve_left hg2
+    linarith
+  · have hmul : g ^ 2 * (d3 * C ^ 2 - d0 * A ^ 2 - 3 * T ^ 2) = 0 := by
+      rw [hA, hC, hT] at h2
+      nlinarith [h2]
+    have hg2 : g ^ 2 ≠ 0 := pow_ne_zero 2 hg
+    have hzero : d3 * C ^ 2 - d0 * A ^ 2 - 3 * T ^ 2 = 0 :=
+      (mul_eq_zero.mp hmul).resolve_left hg2
+    linarith
+```
+
+If `nlinarith` is slow, replace the two `hmul` blocks by `ring_nf at h1 ⊢` and exact the normalized expression.
+
+## 4. Final residual theorem skeleton
+
+```lean
+namespace MazurProof.RationalPointsN12
+
+theorem commonDenomSquareclassRepsToPrimitiveCoverInt :
+    CommonDenomSquareclassRepsToPrimitiveCoverIntStatement := by
+  intro X Y d0 d1 d3 r0 r1 r3 hE hY hd0 hd1 hd3 hr0nz hr1nz hr3nz h0 h1 h3
+
+  have hprod : ProductSquareclassCondition d0 d1 d3 :=
+    productSquareclassCondition_of_curve_squareclasses
+      (X:=X) (Y:=Y) (d0:=d0) (d1:=d1) (d3:=d3)
+      (r0:=r0) (r1:=r1) (r3:=r3)
+      hE hY hr0nz hr1nz hr3nz h0 h1 h3
+
+  obtain ⟨A0, B0, C0, T0, hT0, hA0, hB0, hC0, hr0, hr1, hr3⟩ :=
+    rat_common_den3 (r0:=r0) (r1:=r1) (r3:=r3) hr0nz hr1nz hr3nz
+
+  have h0' : X = (d0 : ℚ) * (((A0 : ℚ) / (T0 : ℚ)) ^ 2) := by
+    rw [h0, hr0]
+  have h1' : X - 1 = (d1 : ℚ) * (((B0 : ℚ) / (T0 : ℚ)) ^ 2) := by
+    rw [h1, hr1]
+  have h3' : X + 3 = (d3 : ℚ) * (((C0 : ℚ) / (T0 : ℚ)) ^ 2) := by
+    rw [h3, hr3]
+
+  have hcover0 : CoverInt d0 d1 d3 A0 B0 C0 T0 :=
+    rawCoverInt_of_common_den_squareclasses
+      (X:=X) (d0:=d0) (d1:=d1) (d3:=d3)
+      (A0:=A0) (B0:=B0) (C0:=C0) (T0:=T0)
+      hT0 h0' h1' h3'
+
+  obtain ⟨A, B, C, T, hT, hA, hB, hC, hprim, hrat0, hrat1, hrat3, hcover⟩ :=
+    primitiveCoverInt_of_rawCoverInt
+      (d0:=d0) (d1:=d1) (d3:=d3)
+      (A0:=A0) (B0:=B0) (C0:=C0) (T0:=T0)
+      hT0 hA0 hB0 hC0 hcover0
+
+  refine ⟨d0, d1, d3, hd0, hd1, hd3, hprod, A, B, C, T,
+    hT, hA, hB, hC, hprim, ?_, ?_, ?_, hcover⟩
+  · rw [h0, hr0, hrat0]
+  · rw [h1, hr1, hrat1]
+  · rw [h3, hr3, hrat3]
 
 end MazurProof.RationalPointsN12
 ```
 
-If the exact theorem name for the divisibility bridge differs in your pinned Mathlib, search for these names:
+If the local theorem must have exactly the proposition name, use whichever naming style the file uses. Avoid naming the theorem exactly the same as the `def` if Lean complains about name shadowing; a good theorem name is:
 
 ```lean
-#check ZMod.intCast_zmod_eq_zero_iff_dvd
-#check ZMod.intCast_eq_intCast_iff_dvd_sub
-#check Int.ModEq
+theorem commonDenomSquareclassRepsToPrimitiveCoverIntStatement_proof :
+    CommonDenomSquareclassRepsToPrimitiveCoverIntStatement := by
+  ...
 ```
 
-The fallback is to prove `A ≡ 2*y.val [ZMOD m]`, use the `Int.ModEq` divisibility characterization, and then combine it with `2 ∣ m`.
+## 5. Import/cycle guidance
 
-## 5. Integer solution gives a checked finite tuple
-
-Useful combined bridge theorem:
+Do not import `N12FourSquaresAP` into `N12E1FullCoverExtraction.lean`. This proof only needs:
 
 ```lean
 import Mathlib.Tactic
-import Mathlib.Data.ZMod.Basic
+```
 
+plus whatever local file currently defines the displayed E1 full-cover definitions. If gcd helpers are reused elsewhere, move only generic lemmas to a low-level file such as:
+
+```text
+FLT/Assumptions/MazurProof/IntGcd4RatClearDenoms.lean
+```
+
+That utility should import only `Mathlib.Tactic`, not downstream N=12 obstruction or AP files. Suggested contents:
+
+```lean
 namespace MazurProof.RationalPointsN12
 
-theorem intCoverPrimitive_to_modTuple
-    {m : ℕ} [NeZero m] (hm2 : 2 ∣ m)
-    {d0 d1 d3 A B C T : ℤ}
-    (hcover : CoverInt d0 d1 d3 A B C T)
-    (hprim : PrimitiveInt4 A B C T) :
-    coverMod m d0 d1 d3
-      (A : ZMod m) (B : ZMod m) (C : ZMod m) (T : ZMod m) ∧
-    primitiveMod2 m
-      (A : ZMod m) (B : ZMod m) (C : ZMod m) (T : ZMod m) := by
-  exact ⟨
-    coverInt_to_coverMod (m := m) hcover,
-    primitiveInt4_to_primitiveMod2 (m := m) hm2 hprim⟩
+private def gcd4 ...
+private def IsGCD4 ...
+private theorem exists_isGCD4 ...
+private theorem primitive_div_isGCD4 ...
+private theorem rat_div_eq_of_common_factor ...
+private theorem rat_common_den3 ...
 
 end MazurProof.RationalPointsN12
 ```
 
-## 6. Main soundness theorem for a certificate
+Keep `CoverInt`, `PrimitiveInt4`, `E1FullCoverCurve`, and `E1FullCoverIntData` in the extraction/full-cover files, not in the generic utility, to avoid dependency cycles.
 
-Once a fixed triple has a `native_decide` proof of `localObstruction m d0 d1 d3`, the following theorem turns it into a no-primitive-integer-solution statement.
+## 6. Main API pitfalls
 
-```lean
-import Mathlib.Tactic
-import Mathlib.Data.ZMod.Basic
-
-namespace MazurProof.RationalPointsN12
-
-theorem noPrimitiveIntCover_of_localObstruction
-    {m : ℕ} [NeZero m] (hm2 : 2 ∣ m)
-    {d0 d1 d3 : ℤ}
-    (hcert : localObstruction m d0 d1 d3) :
-    ¬ ∃ A B C T : ℤ,
-      CoverInt d0 d1 d3 A B C T ∧ PrimitiveInt4 A B C T := by
-  rintro ⟨A, B, C, T, hcover, hprim⟩
-  exact hcert
-    (A : ZMod m) (B : ZMod m) (C : ZMod m) (T : ZMod m)
-    (primitiveInt4_to_primitiveMod2 (m := m) hm2 hprim)
-    (coverInt_to_coverMod (m := m) hcover)
-
-end MazurProof.RationalPointsN12
-```
-
-## 7. Fixed certificate shape with `native_decide`
-
-For each fixed triple `(d0,d1,d3)` and modulus `m`, write one local certificate theorem, then apply the soundness theorem.
-
-Template:
-
-```lean
-import Mathlib.Tactic
-import Mathlib.Data.ZMod.Basic
-
-namespace MazurProof.RationalPointsN12
-
--- Replace these constants by the actual fixed triple.
--- The constants must be concrete numerals for `native_decide` to close the finite search.
-
-/-- Example shape only: replace `D0`, `D1`, `D3` by concrete integer numerals. -/
--- theorem cert_mod16_D0_D1_D3 :
---     localObstruction 16 (D0 : ℤ) (D1 : ℤ) (D3 : ℤ) := by
---   native_decide
-
-/-- Example shape only: derived integer no-solution theorem. -/
--- theorem no_primitive_cover_D0_D1_D3 :
---     ¬ ∃ A B C T : ℤ,
---       CoverInt (D0 : ℤ) (D1 : ℤ) (D3 : ℤ) A B C T ∧
---       PrimitiveInt4 A B C T :=
---   noPrimitiveIntCover_of_localObstruction
---     (m := 16) (hm2 := by norm_num) cert_mod16_D0_D1_D3
-
-end MazurProof.RationalPointsN12
-```
-
-A real certificate looks like this, with actual numerals:
-
-```lean
--- theorem cert_mod8_neg1_5_13 :
---     localObstruction 8 (-1 : ℤ) (5 : ℤ) (13 : ℤ) := by
---   native_decide
---
--- theorem no_primitive_cover_neg1_5_13 :
---     ¬ ∃ A B C T : ℤ,
---       CoverInt (-1 : ℤ) (5 : ℤ) (13 : ℤ) A B C T ∧
---       PrimitiveInt4 A B C T :=
---   noPrimitiveIntCover_of_localObstruction
---     (m := 8) (hm2 := by norm_num) cert_mod8_neg1_5_13
-```
-
-Do not leave `D0 D1 D3` as variables in the certificate theorem; then the proposition is not finite/computable in the intended way and is generally false.
-
-## 8. Performance-friendly variants
-
-The generic `evenResidue` predicate is clean and sound, but its decidability searches for a witness `y : ZMod m`. For `m ≤ 16`, this is usually fine. If many certificates become slow, use a fixed-modulus fast parity predicate and prove it equivalent to `evenResidue` by finite checking.
-
-```lean
-import Mathlib.Tactic
-import Mathlib.Data.ZMod.Basic
-
-namespace MazurProof.RationalPointsN12
-
-/-- Fast fixed-modulus parity test using the canonical representative. -/
-def evenResidueVal (m : ℕ) [NeZero m] (x : ZMod m) : Prop :=
-  x.val % 2 = 0
-
--- These fixed equivalences are finite and can often be closed by native computation.
--- Use them to rewrite the certificate predicate if generic `evenResidue` is slow.
--- theorem evenResidue_iff_val_4 (x : ZMod 4) :
---     evenResidue 4 x ↔ evenResidueVal 4 x := by
---   native_decide
---
--- theorem evenResidue_iff_val_8 (x : ZMod 8) :
---     evenResidue 8 x ↔ evenResidueVal 8 x := by
---   native_decide
---
--- theorem evenResidue_iff_val_16 (x : ZMod 16) :
---     evenResidue 16 x ↔ evenResidueVal 16 x := by
---   native_decide
-
-end MazurProof.RationalPointsN12
-```
-
-If you use `evenResidueVal` directly in the soundness theorem, still prove the integer bridge through `evenResidue`, or prove the analogous lemma from `x.val % 2 = 0` using `ZMod.intCast_zmod_eq_zero_iff_dvd`. The mathematical reason is the same: `A` differs from the canonical representative by a multiple of even `m`.
-
-## 9. Pitfalls checklist
-
-* **`ZMod 0` is not finite.** Keep `[NeZero m]`; for `4`, `8`, `16` it is inferred.
-* **Do not use `%` for integer reduction.** Prefer `(A : ZMod m)`. Negative integers plus `%` create avoidable `Int.emod` obligations.
-* **`m=4/8/16` is not prime.** The primitive residue condition is not “not all zero modulo `m`”; it is “not all even residues”.
-* **Do not require every coordinate to be nonzero.** Primitive projective tuples may have some zero coordinates.
-* **Do not require a coordinate to be a unit unless you prove the equivalence.** For `2^k`, “odd residue” is equivalent to unit, but `primitiveMod2` avoids this extra API.
-* **Use concrete numeral coefficients in certificates.** `native_decide` is for fixed triples, not symbolic triples.
-* **For cover equation casting, use `congrArg` into `ZMod m`.** This keeps all ring-normalization local and avoids manual congruence modulo `m`.
-* **For the primitive bridge, use only the prime `2`.** `PrimitiveInt4` is stronger than needed; the local obstruction modulo `2^k` only consumes the `p=2` case.
+* `Rat.den` is a `Nat`; cast it through `ℤ` for integer numerator construction and through `ℚ` for `field_simp`.
+* `Rat.num` may be zero iff the rational is zero. Use `Rat.num_ne_zero` / `Rat.num_eq_zero`, or prove the local fact by `Rat.ext` if names differ.
+* Avoid integer `/` for primitive normalization unless you have divisibility packaged. Extract quotient witnesses from `g ∣ A0`, etc.; this avoids fragile `ediv` simplification.
+* For proving primitive after gcd division, use the maximality clause `∀ d, d∣A0→d∣B0→d∣C0→d∣T0→d∣g`. Then a prime dividing all quotients gives `(p:ℤ)*g ∣ g`, contradicting `p.Prime`.
+* For nonzero normalized coordinates, use `x = g*y`, `x ≠ 0`, `g ≠ 0`; do not reason through `/`.
+* For cover descent, exploit homogeneity of degree two; substitute `A0=g*A`, etc., get `g^2 * residual = 0`, and cancel `g^2`.
+* `ProductSquareclassCondition` should be proved before denominator clearing; it is cleaner in `ℚ` and uses `Y ≠ 0` plus `r0*r1*r3 ≠ 0`.
