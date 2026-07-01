@@ -1,9 +1,9 @@
-# Q2855 (dm-codex1): short Weierstrass full-2 algebra layer audit
+# Q2863 (dm-codex1): performance-aware `shortW` full-two algebra layer
 
 Target local file: `FLT/Assumptions/MazurProof/KubertBridgeN12.lean`  
 Namespace: `MazurProof.RationalPointsN12`
 
-## 0. Exact API names/shapes to check
+The main performance fix is: **do not prove the full-two source extraction directly over EC points**. Prove one tiny generic finite-source lemma over an arbitrary additive commutative monoid, then instantiate it with `((shortW A B)⁄ℚ).Point`. This avoids repeatedly elaborating affine point/group-law instances while doing `ZMod 2 × ZMod 2` casework.
 
 ```lean
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
@@ -11,42 +11,8 @@ import Mathlib.Data.ZMod.Basic
 import Mathlib.GroupTheory.OrderOfElement
 import Mathlib.Tactic
 
-#check WeierstrassCurve
-#check WeierstrassCurve.IsElliptic
-#check WeierstrassCurve.twoTorsionPolynomial
-#check WeierstrassCurve.twoTorsionPolynomial_discr
-#check WeierstrassCurve.twoTorsionPolynomial_discr_ne_zero_of_isElliptic
+open scoped WeierstrassCurve
 
-#check WeierstrassCurve.Affine.Equation
-#check WeierstrassCurve.Affine.Nonsingular
-#check WeierstrassCurve.Affine.equation_iff
-#check WeierstrassCurve.Affine.nonsingular_iff
-#check WeierstrassCurve.Affine.nonsingular_zero
-#check WeierstrassCurve.Affine.negY
-
-#check WeierstrassCurve.Affine.Point
-#check WeierstrassCurve.Affine.Point.zero
-#check WeierstrassCurve.Affine.Point.some
-#check WeierstrassCurve.Affine.Point.mk
-#check WeierstrassCurve.Affine.pointEquiv
-#check WeierstrassCurve.Affine.pointEquiv_zero
-#check WeierstrassCurve.Affine.pointEquiv_some
-#check WeierstrassCurve.Affine.Point.some_ne_zero
-#check WeierstrassCurve.Affine.Point.neg_some
-#check WeierstrassCurve.Affine.Point.add_self_of_Y_eq
-#check WeierstrassCurve.Affine.Point.add_self_of_Y_ne
-#check WeierstrassCurve.Affine.Point.xRep
-#check WeierstrassCurve.Affine.Point.xRep_eq_xRep_iff
-
-#check addOrderOf_injective
-#check ZMod.addOrderOf_one
-```
-
-Important: `WeierstrassCurve.twoTorsionPolynomial` currently has discriminant support, but I did **not** find a ready theorem saying “nonzero 2-torsion points over `F` are exactly roots of `twoTorsionPolynomial`.” For this task, the affine point constructors and group-law lemmas are more direct than the polynomial API.
-
-## 1. Short curve definition
-
-```lean
 namespace MazurProof.RationalPointsN12
 
 noncomputable def shortW (A B : ℚ) : WeierstrassCurve ℚ :=
@@ -55,294 +21,217 @@ noncomputable def shortW (A B : ℚ) : WeierstrassCurve ℚ :=
     a₃ := 0
     a₄ := B
     a₆ := 0 }
-```
 
-For this curve,
+/-- Use this abbreviation to prevent Lean from repeatedly unfolding the base-change target. -/
+abbrev shortWQ (A B : ℚ) : WeierstrassCurve ℚ := (shortW A B)⁄ℚ
 
-```text
-Equation x y ↔ y^2 = x^3 + A*x^2 + B*x
-negY x y = -y
-(0,0) is nonsingular iff B ≠ 0
-```
+/-! ## Fast source-side group extraction -/
 
-Useful local simp lemmas:
+private abbrev V4 : Type := ZMod 2 × ZMod 2
 
-```lean
-@[simp] theorem shortW_equation_iff {A B x y : ℚ} :
-    (shortW A B).Equation x y ↔ y ^ 2 = x ^ 3 + A * x ^ 2 + B * x := by
-  rw [WeierstrassCurve.Affine.equation_iff]
-  simp [shortW]
-  ring_nf
+private abbrev e10 : V4 := ((1, 0) : ZMod 2 × ZMod 2)
+private abbrev e01 : V4 := ((0, 1) : ZMod 2 × ZMod 2)
 
-@[simp] theorem shortW_negY {A B x y : ℚ} :
-    (shortW A B).negY x y = -y := by
-  simp [shortW, WeierstrassCurve.Affine.negY]
+private theorem e10_ne_zero : e10 ≠ 0 := by
+  native_decide
 
-@[simp] theorem shortW_nonsingular_zero_iff {A B : ℚ} :
-    (shortW A B).Nonsingular 0 0 ↔ B ≠ 0 := by
-  rw [WeierstrassCurve.Affine.nonsingular_zero]
-  simp [shortW]
-```
+private theorem e01_ne_zero : e01 ≠ 0 := by
+  native_decide
 
-If `ring_nf` struggles in `shortW_equation_iff`, use:
+private theorem e10_ne_e01 : e10 ≠ e01 := by
+  native_decide
 
-```lean
-  rw [WeierstrassCurve.Affine.equation_iff]
-  simp only [shortW]
-  norm_num
-  ring
-```
+private theorem two_nsmul_e10 : 2 • e10 = 0 := by
+  ext <;> norm_num [e10]
 
-## 2. The distinguished point `(0,0)`
+private theorem two_nsmul_e01 : 2 • e01 = 0 := by
+  ext <;> norm_num [e01]
 
-Avoid `Point.mk` unless you have `[shortW A B).IsElliptic]`. You only need `B ≠ 0`, so construct the nonsingular point directly with `.some`.
+/-- Exact replacement for the slow `rw [← map_nsmul]` branches.
+This uses only `congrArg g hsrc`; `simp` rewrites both sides by `map_nsmul`/`map_zero`. -/
+private theorem map_two_nsmul_eq_zero
+    {G : Type*} [AddCommMonoid G]
+    (g : V4 →+ G) {x : V4} (hsrc : 2 • x = 0) :
+    2 • g x = 0 := by
+  have h := congrArg g hsrc
+  simpa using h
 
-```lean
-noncomputable def shortW_zeroTwoPoint {A B : ℚ} (hB : B ≠ 0) :
-    (shortW A B).Point :=
-  WeierstrassCurve.Affine.Point.some 0 0
-    ((shortW_nonsingular_zero_iff (A := A) (B := B)).mpr hB)
-
-@[simp] theorem shortW_zeroTwoPoint_ne_zero {A B : ℚ} (hB : B ≠ 0) :
-    shortW_zeroTwoPoint (A := A) (B := B) hB ≠ 0 := by
-  exact WeierstrassCurve.Affine.Point.some_ne_zero _
-```
-
-If your local statement is written with `(shortW A B ⁄ ℚ).Point`, then either:
-
-```lean
-change ((shortW A B).Point) at *
-```
-
-when the base-change is defeq over `ℚ`, or define `shortWQ A B := shortW A B ⁄ ℚ` and repeat the same lemmas with `simp [shortWQ, shortW]`.
-
-## 3. Extracting a nonzero 2-torsion point not equal to `(0,0)` from the injected `ZMod 2 × ZMod 2`
-
-This part is small group theory and should compile. The point is: if `g(1,0)` is not `(0,0)`, use it; otherwise use `g(0,1)`, which cannot also be `(0,0)` by injectivity.
-
-```lean
-private theorem zmod2x2_pair_ne_10_00 :
-    ((1, 0) : ZMod 2 × ZMod 2) ≠ 0 := by
-  intro h
-  have := congrArg Prod.fst h
-  norm_num at this
-
-private theorem zmod2x2_pair_ne_01_00 :
-    ((0, 1) : ZMod 2 × ZMod 2) ≠ 0 := by
-  intro h
-  have := congrArg Prod.snd h
-  norm_num at this
-
-private theorem zmod2x2_pair_ne_10_01 :
-    ((1, 0) : ZMod 2 × ZMod 2) ≠ (0, 1) := by
-  intro h
-  have := congrArg Prod.fst h
-  norm_num at this
-
-/-- A full `ZMod 2 × ZMod 2` injection gives a nonzero 2-torsion point not equal
-`(0,0)`. This is the exact group-theoretic extraction needed for the algebra layer. -/
-theorem exists_two_torsion_ne_zeroTwoPoint_of_fullTwo
-    {A B : ℚ} (hB : B ≠ 0)
-    (g : (ZMod 2 × ZMod 2) →+ (shortW A B).Point)
-    (hg : Function.Injective g) :
-    ∃ Q : (shortW A B).Point,
-      Q ≠ 0 ∧ Q ≠ shortW_zeroTwoPoint (A := A) (B := B) hB ∧ 2 • Q = 0 := by
-  let P0 := shortW_zeroTwoPoint (A := A) (B := B) hB
-  by_cases h10 : g ((1, 0) : ZMod 2 × ZMod 2) = P0
-  · refine ⟨g ((0, 1) : ZMod 2 × ZMod 2), ?_, ?_, ?_⟩
+/-- Fast generic V4 extraction.  No elliptic-curve point constructors appear here. -/
+private theorem exists_v4_image_ne_zero_ne
+    {G : Type*} [AddCommMonoid G]
+    (g : V4 →+ G) (hg : Function.Injective g)
+    {P0 : G} (hP0 : P0 ≠ 0) :
+    ∃ Q : G, Q ≠ 0 ∧ Q ≠ P0 ∧ 2 • Q = 0 := by
+  by_cases h10 : g e10 = P0
+  · refine ⟨g e01, ?_, ?_, ?_⟩
     · intro hz
-      have : ((0, 1) : ZMod 2 × ZMod 2) = 0 := hg (by simpa using hz)
-      exact zmod2x2_pair_ne_01_00 this
+      have hEq : g e01 = g 0 := by simpa using hz
+      exact e01_ne_zero (hg hEq)
     · intro h01
-      have hEq : g ((1, 0) : ZMod 2 × ZMod 2) = g ((0, 1) : ZMod 2 × ZMod 2) := by
-        rw [h10, h01]
-      exact zmod2x2_pair_ne_10_01 (hg hEq)
-    · rw [← map_nsmul]
-      norm_num
-  · refine ⟨g ((1, 0) : ZMod 2 × ZMod 2), ?_, h10, ?_⟩
+      have hEq : g e10 = g e01 := h10.trans h01.symm
+      exact e10_ne_e01 (hg hEq)
+    · exact map_two_nsmul_eq_zero g two_nsmul_e01
+  · refine ⟨g e10, ?_, h10, ?_⟩
     · intro hz
-      have : ((1, 0) : ZMod 2 × ZMod 2) = 0 := hg (by simpa using hz)
-      exact zmod2x2_pair_ne_10_00 this
-    · rw [← map_nsmul]
-      norm_num
-```
+      have hEq : g e10 = g 0 := by simpa using hz
+      exact e10_ne_zero (hg hEq)
+    · exact map_two_nsmul_eq_zero g two_nsmul_e10
 
-If `norm_num` does not prove `2 • ((1,0) : ZMod 2 × ZMod 2) = 0`, use:
+/-! ## Fast coordinate lemmas for `shortWQ` -/
 
-```lean
-      ext <;> norm_num
-```
+@[simp] theorem shortWQ_equation_iff {A B x y : ℚ} :
+    (shortWQ A B).Equation x y ↔ y ^ 2 = x ^ 3 + A * x ^ 2 + B * x := by
+  rw [WeierstrassCurve.Affine.equation_iff]
+  simp [shortWQ, shortW]
 
-inside a `change g (2 • ((1,0) : ZMod 2 × ZMod 2)) = 0` step.
+@[simp] theorem shortWQ_negY {A B x y : ℚ} :
+    (shortWQ A B).negY x y = -y := by
+  simp [shortWQ, shortW, WeierstrassCurve.Affine.negY]
 
-## 4. Point-level 2-torsion on the short curve gives `y=0`
+@[simp] theorem shortWQ_nonsingular_zero_iff {A B : ℚ} :
+    (shortWQ A B).Nonsingular 0 0 ↔ B ≠ 0 := by
+  rw [WeierstrassCurve.Affine.nonsingular_zero]
+  simp [shortWQ, shortW]
 
-This is the smallest Mathlib-affine API lemma. It uses `Point.add_self_of_Y_ne` by contradiction.
+noncomputable def shortWQ_zeroTwoPoint {A B : ℚ} (hB : B ≠ 0) :
+    (shortWQ A B).Point :=
+  WeierstrassCurve.Affine.Point.some 0 0
+    ((shortWQ_nonsingular_zero_iff (A := A) (B := B)).mpr hB)
 
-```lean
-theorem shortW_y_eq_zero_of_two_nsmul_eq_zero
-    {A B x y : ℚ} {h : (shortW A B).Nonsingular x y}
-    (h2 : 2 • (WeierstrassCurve.Affine.Point.some x y h : (shortW A B).Point) = 0) :
+@[simp] theorem shortWQ_zeroTwoPoint_ne_zero {A B : ℚ} (hB : B ≠ 0) :
+    shortWQ_zeroTwoPoint (A := A) (B := B) hB ≠ 0 := by
+  exact WeierstrassCurve.Affine.Point.some_ne_zero _
+
+/-- Exact `y = 0` lemma with the real `negY` shape.  The key is the `intro hneg;
+simp [shortWQ, shortW, WeierstrassCurve.Affine.negY] at hneg; linarith` block. -/
+theorem shortWQ_y_eq_zero_of_two_nsmul_eq_zero
+    {A B x y : ℚ} {h : (shortWQ A B).Nonsingular x y}
+    (h2 : 2 • (WeierstrassCurve.Affine.Point.some x y h : (shortWQ A B).Point) = 0) :
     y = 0 := by
   rw [two_nsmul] at h2
   by_contra hy0
-  have hy : y ≠ (shortW A B).negY x y := by
-    simp [shortW_negY]
+  have hy : y ≠ (shortWQ A B).negY x y := by
+    intro hneg
+    simp [shortWQ, shortW, WeierstrassCurve.Affine.negY] at hneg
     linarith
-  have hadd := WeierstrassCurve.Affine.Point.add_self_of_Y_ne (W := shortW A B) (h₁ := h) hy
+  have hadd :=
+    WeierstrassCurve.Affine.Point.add_self_of_Y_ne
+      (W := shortWQ A B) (h₁ := h) hy
   rw [hadd] at h2
   exact WeierstrassCurve.Affine.Point.some_ne_zero _ h2
-```
 
-The theorem uses only public names:
-
-```lean
-WeierstrassCurve.Affine.Point.add_self_of_Y_ne
-WeierstrassCurve.Affine.Point.some_ne_zero
-two_nsmul
-```
-
-## 5. A nonzero 2-torsion point not `(0,0)` gives a nonzero quadratic root
-
-This is the main point-destructor lemma. It cases on `Q`; the zero case contradicts `Q≠0`; the affine case uses the previous lemma and the curve equation.
-
-```lean
+/-- Point-coordinate step.  If this is the only remaining slow theorem, use the
+residual boundary below. -/
 theorem exists_quadratic_root_of_two_torsion_ne_zeroTwoPoint
     {A B : ℚ} (hB : B ≠ 0)
-    {Q : (shortW A B).Point}
+    {Q : (shortWQ A B).Point}
     (hQ0 : Q ≠ 0)
-    (hQP0 : Q ≠ shortW_zeroTwoPoint (A := A) (B := B) hB)
+    (hQP0 : Q ≠ shortWQ_zeroTwoPoint (A := A) (B := B) hB)
     (h2Q : 2 • Q = 0) :
     ∃ x : ℚ, x ≠ 0 ∧ x ^ 2 + A * x + B = 0 := by
   rcases Q with _ | ⟨x, y, hxy⟩
   · exact False.elim (hQ0 rfl)
-  · have hy0 : y = 0 := shortW_y_eq_zero_of_two_nsmul_eq_zero (A := A) (B := B) (x := x) (y := y) h2Q
+  · have hy0 : y = 0 :=
+      shortWQ_y_eq_zero_of_two_nsmul_eq_zero
+        (A := A) (B := B) (x := x) (y := y) h2Q
     have hx0 : x ≠ 0 := by
       intro hx
       apply hQP0
       subst x
       subst y
-      -- both sides are `.some 0 0 _`; proof irrelevance closes the nonsingularity proof.
-      rfl
+      simp [shortWQ_zeroTwoPoint]
     have heq : y ^ 2 = x ^ 3 + A * x ^ 2 + B * x :=
-      (shortW_equation_iff (A := A) (B := B) (x := x) (y := y)).mp hxy.1
+      (shortWQ_equation_iff (A := A) (B := B) (x := x) (y := y)).mp hxy.1
     refine ⟨x, hx0, ?_⟩
     subst y
-    have : x * (x ^ 2 + A * x + B) = 0 := by
-      nlinarith [heq]
-    exact (mul_eq_zero.mp this).resolve_left hx0
-```
+    have hprod : x * (x ^ 2 + A * x + B) = 0 := by
+      calc
+        x * (x ^ 2 + A * x + B) = x ^ 3 + A * x ^ 2 + B * x := by ring
+        _ = 0 := by nlinarith
+    exact (mul_eq_zero.mp hprod).resolve_left hx0
 
-If the `rfl` in the `hQP0` proof does not close because of proof-irrelevance elaboration, use:
-
-```lean
-      apply Eq.ndrec
-      rfl
-```
-
-or simply:
-
-```lean
-      simp [shortW_zeroTwoPoint]
-```
-
-## 6. Quadratic root gives discriminant square
-
-This part is fully elementary and should be checked locally.
-
-```lean
+/-- Fast polynomial endgame. -/
 theorem exists_square_discriminant_of_quadratic_root
     {A B x : ℚ} (hx : x ^ 2 + A * x + B = 0) :
     ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B := by
   refine ⟨2 * x + A, ?_⟩
   nlinarith
-```
 
-## 7. Final desired theorem, in the directly checkable shape
-
-```lean
+/-- Desired theorem.  The only EC-point group extraction is the single fast generic
+`exists_v4_image_ne_zero_ne` instantiation. -/
 theorem square_discriminant_of_full_two_torsion_on_shortW
     {A B : ℚ} (hB : B ≠ 0)
-    (g : (ZMod 2 × ZMod 2) →+ (shortW A B).Point)
+    (g : (ZMod 2 × ZMod 2) →+ (shortWQ A B).Point)
     (hg : Function.Injective g) :
     ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B := by
-  rcases exists_two_torsion_ne_zeroTwoPoint_of_fullTwo hB g hg with ⟨Q, hQ0, hQP0, h2Q⟩
-  rcases exists_quadratic_root_of_two_torsion_ne_zeroTwoPoint hB hQ0 hQP0 h2Q with ⟨x, hx0, hx⟩
+  rcases exists_v4_image_ne_zero_ne
+      (g := g) (hg := hg)
+      (P0 := shortWQ_zeroTwoPoint (A := A) (B := B) hB)
+      (shortWQ_zeroTwoPoint_ne_zero (A := A) (B := B) hB) with
+    ⟨Q, hQ0, hQP0, h2Q⟩
+  rcases exists_quadratic_root_of_two_torsion_ne_zeroTwoPoint
+      (A := A) (B := B) hB hQ0 hQP0 h2Q with
+    ⟨x, hx0, hx⟩
   exact exists_square_discriminant_of_quadratic_root hx
+
+end MazurProof.RationalPointsN12
 ```
 
-For the exact target with `(shortW A B ⁄ ℚ).Point`, add a wrapper:
+## Exact replacement for the two source 2-torsion branches
+
+Use this instead of `rw [← map_nsmul]; ext` in EC-point goals:
 
 ```lean
-theorem square_discriminant_of_full_two_torsion_on_shortW_baseChange
+have hsrc : 2 • ((0, 1) : ZMod 2 × ZMod 2) = 0 := by
+  ext <;> norm_num
+have h := congrArg g hsrc
+simpa using h
+```
+
+and similarly:
+
+```lean
+have hsrc : 2 • ((1, 0) : ZMod 2 × ZMod 2) = 0 := by
+  ext <;> norm_num
+have h := congrArg g hsrc
+simpa using h
+```
+
+The helper `map_two_nsmul_eq_zero` packages exactly this pattern.
+
+## If the EC coordinate theorem is still too slow
+
+Do **not** reintroduce the original Kubert axiom. Use this much smaller residual boundary:
+
+```lean
+def ShortWFullTwoPointResidual : Prop :=
+  ∀ {A B : ℚ} (hB : B ≠ 0)
+    {Q : (shortWQ A B).Point},
+      Q ≠ 0 →
+      Q ≠ shortWQ_zeroTwoPoint (A := A) (B := B) hB →
+      2 • Q = 0 →
+        ∃ x : ℚ, x ≠ 0 ∧ x ^ 2 + A * x + B = 0
+
+theorem square_discriminant_of_full_two_torsion_on_shortW_of_pointResidual
+    (hres : ShortWFullTwoPointResidual)
     {A B : ℚ} (hB : B ≠ 0)
-    (g : (ZMod 2 × ZMod 2) →+ ((shortW A B)⁄ℚ).Point)
+    (g : (ZMod 2 × ZMod 2) →+ (shortWQ A B).Point)
     (hg : Function.Injective g) :
     ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B := by
-  -- In most local snapshots this is defeq; otherwise use `Point.map_id`/baseChange
-  -- transport. Try this first:
-  change ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B
-  exact square_discriminant_of_full_two_torsion_on_shortW (A := A) (B := B) hB g hg
-```
-
-If the type is not defeq, define `shortWQ A B := (shortW A B)⁄ℚ` and duplicate the `shortW_*` simp lemmas for `shortWQ`; all algebra is identical.
-
-## 8. Why not use `twoTorsionPolynomial` directly?
-
-`WeierstrassCurve.twoTorsionPolynomial` is available and for `shortW A B` simplifies to the cubic
-
-```lean
-4 * X^3 + 4*A*X^2 + 4*B*X
-```
-
-because
-
-```text
-b₂ = 4A, b₄ = 2B, b₆ = 0,
-twoTorsionPolynomial = ⟨4, b₂, 2*b₄, b₆⟩.
-```
-
-But Mathlib currently appears to provide only the discriminant relation:
-
-```lean
-#check WeierstrassCurve.twoTorsionPolynomial_discr
-#check WeierstrassCurve.twoTorsionPolynomial_discr_ne_zero_of_isElliptic
-```
-
-I did not find a public theorem of the form:
-
-```lean
-P ≠ 0 → 2 • P = 0 ↔
-  ∃ x, W.twoTorsionPolynomial.toPoly.eval x = 0 ∧ P.xRep = ![x, 1]
-```
-
-So the smallest honest residual boundary, if the direct point proof above becomes too slow, is:
-
-```lean
-def ShortWFullTwoAlgebraResidual : Prop :=
-  ∀ {A B : ℚ}, B ≠ 0 →
-    (∃ g : (ZMod 2 × ZMod 2) →+ (shortW A B).Point, Function.Injective g) →
-      ∃ x : ℚ, x ≠ 0 ∧ x ^ 2 + A * x + B = 0
-
-theorem square_discriminant_of_shortW_residual
-    (hres : ShortWFullTwoAlgebraResidual) {A B : ℚ} (hB : B ≠ 0)
-    (g : (ZMod 2 × ZMod 2) →+ (shortW A B).Point)
-    (hg : Function.Injective g) :
-    ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B := by
-  rcases hres hB ⟨g, hg⟩ with ⟨x, hx0, hx⟩
+  rcases exists_v4_image_ne_zero_ne
+      (g := g) (hg := hg)
+      (P0 := shortWQ_zeroTwoPoint (A := A) (B := B) hB)
+      (shortWQ_zeroTwoPoint_ne_zero (A := A) (B := B) hB) with
+    ⟨Q, hQ0, hQP0, h2Q⟩
+  rcases hres hB hQ0 hQP0 h2Q with ⟨x, hx0, hx⟩
   exact exists_square_discriminant_of_quadratic_root hx
 ```
 
-This residual is much smaller and more honest than the original Kubert axiom: it is purely the affine group-law statement that full rational 2-torsion supplies a nonzero root of the quadratic factor.
+This residual is the smallest honest boundary: it contains only the affine group-law fact “a nonzero 2-torsion point not `(0,0)` has nonzero `x` satisfying `x² + A*x + B = 0`.” The remaining source extraction and polynomial discriminant endgame are fast and local.
 
-## 9. Recommended next step
+## Known/proposed status
 
-Try to compile the direct chain in this order:
-
-1. `shortW_equation_iff`, `shortW_negY`, `shortW_nonsingular_zero_iff`.
-2. `exists_two_torsion_ne_zeroTwoPoint_of_fullTwo`.
-3. `shortW_y_eq_zero_of_two_nsmul_eq_zero`.
-4. `exists_quadratic_root_of_two_torsion_ne_zeroTwoPoint`.
-5. `square_discriminant_of_full_two_torsion_on_shortW`.
-
-The likely friction points are only base-change defeq and proof-irrelevance around `.some 0 0 h`; both are local API issues, not mathematical gaps.
+* Known from your local report: `shortWQ_equation_iff` closes after `rw [equation_iff]; simp [shortWQ, shortW]`; no `ring_nf` needed.
+* Known source-branch replacement: the `hsrc; congrArg g hsrc; simpa` pattern avoids `ext` on EC points.
+* Known y-shape fix: the `hy` proof must use `simp [shortWQ, shortW, WeierstrassCurve.Affine.negY] at hneg; linarith`.
+* Proposed but should be small: `exists_quadratic_root_of_two_torsion_ne_zeroTwoPoint`; if this is slow, use `ShortWFullTwoPointResidual` above.
