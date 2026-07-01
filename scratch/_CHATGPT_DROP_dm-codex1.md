@@ -1,353 +1,474 @@
-# Q2987 (dm-codex1): replacing `tate_normal_form_at_point_of_addOrder12`
+# Q2994 (dm-codex1): shrinking/replacing `kubert_C10_square`
 
-I could not inspect the current local worktree through the GitHub connector: the accessible GitHub search did not expose the current `KubertBridgeN12.lean` contents, so this answer is based on the checked declarations you listed.  The conclusion is still sharp:
+I could not inspect the current local `KubertBridgeN10.lean` through the GitHub connector: the accessible GitHub contents API returned `404` for the path, so this plan is based on the self-contained declarations in the prompt and on the N12 route you described.
 
-**The later variable-change lemmas should already prove the axiom, after moving them above the first downstream use of the axiom.**  The axiom should be replaced by an assembly theorem that chains:
+The right N10 replacement is strictly parallel to the now-eliminated N12 bridge, but the arithmetic is easier.  The residual should be split into:
 
-1. affine extraction of `P`,
-2. translation of `P` to `(0,0)`,
-3. origin-normal `a₄=0` cleanup,
-4. scaling to the Tate model,
-5. composition of the three variable changes,
-6. order transport to `tateOriginAffine`.
+1. group extraction from `ZMod 2 × ZMod 10`;
+2. order-10 Tate normalization;
+3. the C10 Tate table row;
+4. conversion to the checked `shortW (A10 t) (B10 t)` family;
+5. a general short-model lemma: full rational 2-torsion gives a square quadratic discriminant.
 
-The only pieces that may still be missing are tiny wrappers, not new mathematics:
+The best intermediate shrink is to replace `kubert_C10_square` by only the Tate/short conversion residual, leaving group extraction and full-2 square as checked general lemmas.
 
-- a wrapper that `tateBOfOriginNormal` is nonzero;
-- a wrapper that the scaled Tate curve has nonzero discriminant because it is variable-change equivalent to an elliptic curve;
-- a wrapper transporting the origin order through `scaleToTateVC`, if it is not already present;
-- possibly a variable-change composition rewrite, if `mul_smul`/`one_smul` does not fire for `WeierstrassCurve.VariableChange`.
+## 1. C10 Tate row
 
-## Declaration-order change
-
-Do **not** import a new file that imports `KubertBridgeN12.lean`; that creates the wrong direction.  Instead reorder declarations in `KubertBridgeN12.lean`:
-
-```text
-basic Tate definitions: tateW, tateOriginAffine, tateP3, ...
-TateNormalFormAtOrder12 structure
-variable-change helper block:
-  AffineMarkedPointOfOrder12
-  affineMarkedPointOfOrder12_of_addOrder12
-  translatePointToOriginVC
-  translate_order12_point_to_origin
-  killA4VC and killA4_* lemmas
-  scaleToTateVC, tateBOfOriginNormal, tateCOfOriginNormal
-  scaleToTate_eq_tateW
-  order-transport wrappers
-replacement theorem tate_normal_form_at_point_of_addOrder12
-kubert_C12_tate_curve_normal_form and downstream code
-```
-
-The theorem must be declared before `kubert_C12_tate_curve_normal_form`.
-
-## Core replacement theorem
-
-This is the intended replacement for the axiom.  It assumes the helper names from your file.  If your `scaleToTateVC` takes only `h3` and not `h2`, use the shorter variant noted below.
+Use the same Tate normal form as N12:
 
 ```lean
--- Replace the axiom with this theorem after moving the helper block above it.
-theorem tate_normal_form_at_point_of_addOrder12
+-- y^2 + (1-c)xy - b y = x^3 - b x^2
+-- P=(0,0)
+```
+
+For C10, the one-parameter table row can be written as follows.
+
+```lean
+def tateC10_den (t : ℚ) : ℚ :=
+  t ^ 2 - 3 * t + 1
+
+def tateC10_b (t : ℚ) : ℚ :=
+  t ^ 3 * (t - 1) * (2 * t - 1) / (tateC10_den t) ^ 2
+
+def tateC10_c (t : ℚ) : ℚ :=
+  - t * (t - 1) * (2 * t - 1) / tateC10_den t
+```
+
+The inverse parameter on the nondegenerate table component is
+
+```lean
+def tateC10_tInv (b c : ℚ) : ℚ :=
+  c ^ 2 / (b - c)
+```
+
+The table condition is most Lean-friendly if encoded as the `5P` two-torsion numerator.  Let `d=b-c`.  The computation of `5P = 2P+3P` gives
+
+```lean
+def tateC10_K (b c : ℚ) : ℚ :=
+  let d : ℚ := b - c
+  - d ^ 3 + (3 * c ^ 2 - c) * d ^ 2 + (3 * c ^ 3 - c ^ 4) * d - 2 * c ^ 5
+```
+
+The exact table lemmas to add are:
+
+```lean
+theorem tateC10_K_of_param
+    (t : ℚ) (hden : tateC10_den t ≠ 0) :
+    tateC10_K (tateC10_b t) (tateC10_c t) = 0 := by
+  dsimp [tateC10_K, tateC10_b, tateC10_c, tateC10_den]
+  field_simp [hden]
+  ring
+
+theorem tateC10_param_of_K
+    {b c : ℚ}
+    (hc : c ≠ 0) (hbc : b - c ≠ 0)
+    (hK : tateC10_K b c = 0) :
+    let t := tateC10_tInv b c
+    tateC10_den t ≠ 0 ∧
+      b = tateC10_b t ∧ c = tateC10_c t := by
+  intro t
+  -- Recommended proof route:
+  --   set u = (b-c)/c;
+  --   K=0 becomes
+  --     (u+2)c^2 - 3*u*(u+1)*c + u^2*(u+1) = 0;
+  --   with t=c/u=c^2/(b-c), solve by field_simp/ring.
+  -- The closed forms are:
+  --   u = - (t-1)*(2*t-1)/(t^2-3*t+1)
+  --   c = - t*(t-1)*(2*t-1)/(t^2-3*t+1)
+  --   b = t^3*(t-1)*(2*t-1)/(t^2-3*t+1)^2
+  have hu_ne : (b - c) / c ≠ 0 := by
+    exact div_ne_zero hbc hc
+  have ht_eq : t = c ^ 2 / (b - c) := rfl
+  -- If `field_simp` leaves inverse powers, introduce the two local facts below:
+  have hbc' : b - c ≠ 0 := hbc
+  have hc2 : c ^ 2 ≠ 0 := pow_ne_zero 2 hc
+  -- The rest should be a local algebra block.  I recommend proving these as three
+  -- private lemmas first:
+  --   tateC10_den_tInv_ne_zero_of_K
+  --   tateC10_b_tInv_eq_of_K
+  --   tateC10_c_tInv_eq_of_K
+  -- each with `field_simp [hc, hbc, hK]` followed by `ring_nf at hK ⊢; nlinarith`.
+  exact tateC10_param_of_K_algebra hc hbc hK
+```
+
+I would actually implement the inverse theorem through three private algebra lemmas instead of one large `field_simp` proof:
+
+```lean
+private theorem tateC10_K_as_conic
+    {b c : ℚ} (hc : c ≠ 0) :
+    let u : ℚ := (b - c) / c
+    tateC10_K b c =
+      c ^ 3 *
+        (-(u ^ 3) + (3*c - 1) * u ^ 2 + (3*c - c ^ 2) * u - 2*c ^ 2) := by
+  intro u
+  dsimp [tateC10_K]
+  field_simp [hc]
+  ring
+
+private theorem tateC10_conic_param_forward
+    (t : ℚ) (hden : tateC10_den t ≠ 0) :
+    let u : ℚ := - (t - 1) * (2*t - 1) / tateC10_den t
+    let c : ℚ := - t * (t - 1) * (2*t - 1) / tateC10_den t
+    -(u ^ 3) + (3*c - 1) * u ^ 2 + (3*c - c ^ 2) * u - 2*c ^ 2 = 0 := by
+  intro u c
+  dsimp [tateC10_den]
+  field_simp [hden]
+  ring
+
+private theorem tateC10_conic_param_inverse
+    {u c : ℚ} (hu : u ≠ 0)
+    (hconic : -(u ^ 3) + (3*c - 1) * u ^ 2 + (3*c - c ^ 2) * u - 2*c ^ 2 = 0) :
+    let t : ℚ := c / u
+    tateC10_den t ≠ 0 ∧
+      u = - (t - 1) * (2*t - 1) / tateC10_den t ∧
+      c = - t * (t - 1) * (2*t - 1) / tateC10_den t := by
+  intro t
+  -- This is the same line-through-(0,0) parametrization:
+  --   c = t*u
+  -- substituted into
+  --   (u+2)c^2 - 3u(u+1)c + u^2(u+1)=0.
+  -- The denominator is `t^2 - 3t + 1`.
+  exact tateC10_conic_param_inverse_algebra hu hconic
+```
+
+The last two `*_algebra` placeholders are not mathematical residuals; they should be private `field_simp; ring_nf; nlinarith` lemmas.  If you want the smallest possible git step, add them as temporary local axioms/residuals, not the global `kubert_C10_square`.
+
+## 2. Direct `5P` computation giving the table condition
+
+The key affine computation is:
+
+```lean
+def tateC10_5P_D (b c : ℚ) : ℚ := b - c
+
+def tateC10_5P_L (b c : ℚ) : ℚ :=
+  (b - c - b*c) / (c - b)
+
+def tateC10_5P_nu (b c : ℚ) : ℚ :=
+  b * (c ^ 2 + c - b) / (c - b)
+
+def tateC10_5P_x (b c : ℚ) : ℚ :=
+  - b * c * (b - c - c ^ 2) / (b - c) ^ 2
+
+def tateC10_5P_y (b c : ℚ) : ℚ :=
+  - (tateC10_5P_L b c + (1 - c)) * tateC10_5P_x b c -
+    tateC10_5P_nu b c + b
+```
+
+Then:
+
+```lean
+theorem tateC10_psi2_5P_eq_K_div
+    {b c : ℚ} (hb : b ≠ 0) (hbc : b - c ≠ 0) :
+    tatePsi2 b c (tateC10_5P_x b c) (tateC10_5P_y b c) =
+      b * tateC10_K b c / (b - c) ^ 3 := by
+  have hbc2 : (b - c) ^ 2 ≠ 0 := pow_ne_zero 2 hbc
+  have hbc3 : (b - c) ^ 3 ≠ 0 := pow_ne_zero 3 hbc
+  dsimp [tatePsi2, tateC10_5P_x, tateC10_5P_y, tateC10_5P_L,
+    tateC10_5P_nu, tateC10_K]
+  field_simp [hbc, hbc2, hbc3]
+  ring
+```
+
+Order 10 gives `5P` two-torsion, hence the left side is zero.  The only denominator is `b-c`; if `b=c`, then the original Tate point has order 5, not 10, so exact order 10 supplies `b-c≠0`.
+
+Recommended wrappers:
+
+```lean
+theorem tateC10_b_sub_c_ne_zero_of_origin_order10
+    {b c : ℚ} (hb : b ≠ 0)
+    (hOrd : addOrderOf (tateOriginAffine b c hb) = 10) :
+    b - c ≠ 0 := by
+  intro hbc
+  have hbc_eq : b = c := sub_eq_zero.mp hbc
+  -- Existing N12-style Tate table/multiple facts should prove order 5 when b=c.
+  have h5 : addOrderOf (tateOriginAffine b c hb) = 5 := by
+    exact tate_origin_order_eq_five_of_b_eq_c hb hbc_eq
+  omega
+
+theorem tateC10_K_eq_zero_of_origin_order10
+    {b c : ℚ} (hb : b ≠ 0)
+    (hOrd : addOrderOf (tateOriginAffine b c hb) = 10) :
+    tateC10_K b c = 0 := by
+  have hbc : b - c ≠ 0 :=
+    tateC10_b_sub_c_ne_zero_of_origin_order10 (b := b) (c := c) hb hOrd
+  have hpsi : tatePsi2 b c (tateC10_5P_x b c) (tateC10_5P_y b c) = 0 := by
+    -- group-law route:
+    --   prove `5 • tateOriginAffine b c hb` has coordinates
+    --     `(tateC10_5P_x b c, tateC10_5P_y b c)`;
+    --   exact order 10 gives `2 • (5P)=0`;
+    --   for Tate form, affine 2-torsion is `tatePsi2=0`.
+    exact tatePsi2_5P_eq_zero_of_origin_order10 hb hOrd
+  have hrel := tateC10_psi2_5P_eq_K_div (b := b) (c := c) hb hbc
+  rw [hpsi] at hrel
+  have hbc3 : (b - c) ^ 3 ≠ 0 := pow_ne_zero 3 hbc
+  have hbden : b / (b - c) ^ 3 ≠ 0 := div_ne_zero hb hbc3
+  -- From `0 = b*K/(b-c)^3`, clear denominators.
+  field_simp [hb, hbc, hbc3] at hrel
+  exact hrel
+```
+
+This is the C10 analog of the N12 `ψ₄`-core step.  It is small and computational.
+
+## 3. Short model and the square discriminant
+
+For the current file, keep using the existing `A10`, `B10`, `Delta10`, and checked:
+
+```lean
+quad_disc_identity : A10 t ^ 2 - 4 * B10 t = 256 * t ^ 5 * (t ^ 2 + t - 1)
+```
+
+The universal C10 short-model theorem should be stated as:
+
+```lean
+theorem tateC10_param_to_shortW
+    (t : ℚ) (hgood : TateC10Good t) :
+    ∃ C : WeierstrassCurve.VariableChange ℚ,
+      C • tateW (tateC10_b t) (tateC10_c t) = shortW (A10 t) (B10 t) := by
+  -- This is pure coordinate conversion from the Tate row to the current N10 short family.
+  -- Expected proof: unfold `shortW`, `A10`, `B10`, `tateW`, `tateC10_b`, `tateC10_c`,
+  -- the explicit variable change, then `field_simp [hgood.den_ne] ; ring`.
+  exact tateC10_param_to_shortW_algebra t hgood
+```
+
+If `A10/B10` use a different parameter than the `t` above, do **not** change the group-law proof.  Add a parameter-change theorem:
+
+```lean
+def tateC10_to_A10_param (t : ℚ) : ℚ :=
+  -- fill with the local file's parameter, if different
+  t
+
+theorem tateC10_param_to_shortW_reparam
+    (t : ℚ) (hgood : TateC10Good t) :
+    ∃ C : WeierstrassCurve.VariableChange ℚ,
+      C • tateW (tateC10_b t) (tateC10_c t) =
+        shortW (A10 (tateC10_to_A10_param t))
+               (B10 (tateC10_to_A10_param t)) := by
+  -- field_simp/ring
+  exact tateC10_param_to_shortW_algebra_reparam t hgood
+```
+
+### General square lemma for short models
+
+This is the key replacement for the “full 2-torsion forces square discriminant” part of the axiom.
+
+```lean
+theorem short_quad_disc_square_of_quadratic_root
+    {A B r : ℚ} (hr : r ^ 2 + A * r + B = 0) :
+    ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B := by
+  refine ⟨A + 2 * r, ?_⟩
+  nlinarith [hr]
+```
+
+For the actual curve:
+
+```lean
+theorem shortW_square_of_extra_two_torsion
+    {A B : ℚ}
+    (h_extra_root : ∃ r : ℚ, r ≠ 0 ∧ r ^ 2 + A * r + B = 0) :
+    ∃ s : ℚ, s ^ 2 = A ^ 2 - 4 * B := by
+  rcases h_extra_root with ⟨r, _hr0, hr⟩
+  exact short_quad_disc_square_of_quadratic_root hr
+```
+
+The group-theoretic bridge from `ZMod 2 × ZMod 10` should produce `h_extra_root` after transporting the two independent 2-torsion points to `shortW (A10 t) (B10 t)`.  In a short model
+
+```text
+y^2 = x^3 + A*x^2 + B*x = x*(x^2 + A*x + B),
+```
+
+2-torsion has `y=0`.  The known cyclic-10 point supplies the root `x=0` (`5P`).  Any independent 2-torsion point must have `x≠0`, hence gives a root of `x^2 + A*x + B`.
+
+Lean skeleton:
+
+```lean
+theorem extra_quadratic_root_of_full_two_shortW
+    {A B : ℚ}
+    (hfull : FullRationalTwoTorsion (shortW A B)) :
+    ∃ r : ℚ, r ≠ 0 ∧ r ^ 2 + A * r + B = 0 := by
+  -- Extract a nonzero 2-torsion point not equal to `(0,0)`.
+  rcases hfull.exists_two_torsion_ne_origin with ⟨R, hR2, hRne0, hRneOrigin⟩
+  rcases R with _ | ⟨x, y, hxy⟩
+  · contradiction
+  have hy : y = 0 := by
+    -- on shortW, `2R=0` gives `R=-R`; negation is `(x,-y)`;
+    -- char zero gives `2*y=0`, hence y=0.
+    exact shortW_y_eq_zero_of_two_torsion (A := A) (B := B) hxy hR2
+  have hcurve : y ^ 2 = x ^ 3 + A * x ^ 2 + B * x := by
+    exact shortW_affine_equation hxy
+  have hxpoly : x * (x ^ 2 + A * x + B) = 0 := by
+    nlinarith [hcurve, hy]
+  have hx0 : x ≠ 0 := by
+    intro hx
+    apply hRneOrigin
+    -- point equality to `(0,0)` by `hx` and `hy` plus proof irrelevance.
+    ext <;> simp [hx, hy]
+  have hquad : x ^ 2 + A * x + B = 0 := by
+    exact (mul_eq_zero.mp hxpoly).resolve_left hx0
+  exact ⟨x, hx0, hquad⟩
+```
+
+This lemma is independent of N10 and should live in a common short-Weierstrass helper section.
+
+## 4. Group extraction from `ZMod 2 × ZMod 10`
+
+Add small group lemmas rather than coding them inline.
+
+```lean
+theorem exact_order10_point_of_ZMod2_prod_ZMod10_injection
+    {G : Type*} [AddCommGroup G]
+    (f : (ZMod 2 × ZMod 10) →+ G) (hf : Function.Injective f) :
+    ∃ P : G, addOrderOf P = 10 := by
+  refine ⟨f (0, 1), ?_⟩
+  -- `addOrderOf (0,1) = 10`; injective hom preserves exact order.
+  simpa using addOrderOf_map_of_injective f hf (0, 1)
+
+theorem full_two_of_ZMod2_prod_ZMod10_injection
+    {G : Type*} [AddCommGroup G]
+    (f : (ZMod 2 × ZMod 10) →+ G) (hf : Function.Injective f) :
+    FullTwoSubgroup G := by
+  -- The three nonzero 2-torsion elements are `(1,0)`, `(0,5)`, `(1,5)`.
+  -- Their images are distinct by `hf` and have order 2.
+  exact fullTwoSubgroup_of_three_distinct_order_two
+    (f (1,0)) (f (0,5)) (f (1,5))
+    (by simpa using addOrderOf_map_of_injective f hf (1,0))
+    (by simpa using addOrderOf_map_of_injective f hf (0,5))
+    (by simpa using addOrderOf_map_of_injective f hf (1,5))
+    (by intro h; exact by simpa using hf h)
+    (by intro h; exact by simpa using hf h)
+    (by intro h; exact by simpa using hf h)
+```
+
+Use the local names already present for the project’s “full two torsion” structure, if any.  If there is no such structure, use a theorem that directly returns a transported extra quadratic root after normalization.
+
+## 5. Proposed final theorem chain
+
+The replacement for `kubert_C10_square` should become:
+
+```lean
+theorem kubert_C10_square_no_axiom
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 12) :
-    TateNormalFormAtOrder12 E := by
-  classical
+    (hE : ∃ f : (ZMod 2 × ZMod 10) →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ t s : ℚ, Delta10 t ≠ 0 ∧ s ^ 2 = A10 t ^ 2 - 4 * B10 t := by
+  rcases hE with ⟨f, hf⟩
+  rcases exact_order10_point_of_ZMod2_prod_ZMod10_injection f hf with ⟨P, hP10⟩
 
-  -- 1. Translate the chosen order-12 point to the origin.
-  rcases translate_order12_point_to_origin E P hP with
-    ⟨x0, y0, hxy, C0, hC0, hA6_0, hO0, hOrd0⟩
+  -- N12-normalization machinery generalized to exact order 10.
+  rcases tate_normal_form_at_point_of_addOrder10 E P hP10 with
+    ⟨b, c, hb, hDelta, C0, hCurve0, hOriginOrder10⟩
 
-  let E0 : WeierstrassCurve ℚ := C0 • E
-  haveI : E0.IsElliptic := by
-    -- If this does not infer, use the `variableChange_isElliptic` lemma already
-    -- used by the additive-equivalence infrastructure.
-    dsimp [E0]
-    infer_instance
+  have hK : tateC10_K b c = 0 :=
+    tateC10_K_eq_zero_of_origin_order10 (b := b) (c := c) hb hOriginOrder10
 
-  -- Exact order 12 at the origin forces the origin not to be 2-torsion.
-  have h3_0 : E0.a₃ ≠ 0 := by
-    simpa [E0] using
-      (origin_a3_ne_zero_of_addOrderOf_eq_12
-        (W := E0) hO0 hOrd0)
+  have hc : c ≠ 0 := tate_c_ne_zero_of_origin_order10 (b := b) (c := c) hb hOriginOrder10
+  have hbc : b - c ≠ 0 :=
+    tateC10_b_sub_c_ne_zero_of_origin_order10 (b := b) (c := c) hb hOriginOrder10
 
-  -- 2. Kill a₄ while fixing the origin.
-  let C1 : WeierstrassCurve.VariableChange ℚ := killA4VC E0 h3_0
-  let E1 : WeierstrassCurve ℚ := C1 • E0
-  haveI : E1.IsElliptic := by
-    dsimp [E1, C1]
-    infer_instance
+  let t : ℚ := tateC10_tInv b c
+  rcases tateC10_param_of_K (b := b) (c := c) hc hbc hK with
+    ⟨hden, hbparam, hcparam⟩
 
-  have hA4_1 : E1.a₄ = 0 := by
-    simpa [E1, C1] using killA4_a4 E0 h3_0
-  have hA6_1 : E1.a₆ = 0 := by
-    simpa [E1, C1] using killA4_a6 E0 h3_0 hA6_0
-  have hO1 : (E1⁄ℚ).Nonsingular 0 0 := by
-    simpa [E1, C1] using killA4_origin_nonsingular E0 h3_0 hO0
-  have hOrd1 :
-      addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO1) = 12 := by
-    simpa [E1, C1] using killA4_origin_order12 E0 h3_0 hO0 hOrd0
-  have h3_1 : E1.a₃ ≠ 0 := by
-    simpa [E1, C1] using killA4_a3_ne_zero E0 h3_0
+  have hgood : TateC10Good t := by
+    exact TateC10Good.of_param_data hden hbparam hcparam hDelta
 
-  -- This is needed if `scaleToTateVC` uses u = a₃/a₂.  If your local
-  -- `scaleToTateVC` signature does not require h2, delete h2_1 from the calls.
-  have h2_1 : E1.a₂ ≠ 0 := by
-    simpa [E1] using
-      (origin_a2_ne_zero_of_addOrderOf_eq_12
-        (W := E1) hO1 hOrd1)
+  rcases tateC10_param_to_shortW t hgood with ⟨C1, hShort⟩
 
-  -- 3. Scale the origin-normal curve to Tate normal form.
-  let b : ℚ := tateBOfOriginNormal E1 h2_1 h3_1
-  let c : ℚ := tateCOfOriginNormal E1 h2_1 h3_1
-  let C2 : WeierstrassCurve.VariableChange ℚ := scaleToTateVC E1 h2_1 h3_1
+  have hfull_short : FullRationalTwoTorsion (shortW (A10 t) (B10 t)) := by
+    -- Transport full 2-torsion through C0 and C1 additive equivalences.
+    exact full_two_transport_variableChange_two_steps
+      (f := f) (hf := hf) (C0 := C0) (C1 := C1)
+      (hCurve0 := hCurve0) (hShort := hShort)
 
-  have hb : b ≠ 0 := by
-    simpa [b] using tateBOfOriginNormal_ne_zero E1 h2_1 h3_1
+  rcases extra_quadratic_root_of_full_two_shortW hfull_short with ⟨r, hr0, hr⟩
+  rcases short_quad_disc_square_of_quadratic_root (A := A10 t) (B := B10 t) hr with
+    ⟨s, hs⟩
 
-  have hCurve2 : C2 • E1 = tateW b c := by
-    simpa [E1, C2, b, c] using
-      (scaleToTate_eq_tateW
-        (W := E1) hA4_1 hA6_1 h2_1 h3_1)
+  have hDelta10 : Delta10 t ≠ 0 := by
+    -- Either from hgood, or from non-singularity transported to shortW.
+    exact Delta10_ne_zero_of_TateC10Good hgood
 
-  have hOriginOrder2 : addOrderOf (tateOriginAffine b c hb) = 12 := by
-    simpa [E1, C2, b, c, tateOriginAffine] using
-      (scaleToTate_origin_order12
-        (W := E1) (hA4 := hA4_1) (hA6 := hA6_1)
-        (h2 := h2_1) (h3 := h3_1)
-        (hO := hO1) (hOrd := hOrd1))
-
-  -- 4. Compose the variable changes.  With the standard monoid action convention,
-  -- `(C2 * C1 * C0) • E = C2 • (C1 • (C0 • E))`.
-  let C : WeierstrassCurve.VariableChange ℚ := C2 * C1 * C0
-
-  have hCurve : C • E = tateW b c := by
-    dsimp [C, E1, E0]
-    -- If this line fails, use the explicit composition wrapper below.
-    rw [mul_smul, mul_smul]
-    exact hCurve2
-
-  have hDelta : (tateW b c).Δ ≠ 0 := by
-    exact tateW_delta_ne_zero_of_variableChange_eq
-      (W := E1) (C := C2) (b := b) (c := c) hCurve2
-
-  exact
-    { b := b
-      c := c
-      hb := hb
-      hDelta := hDelta
-      C := C
-      hCurve := hCurve
-      hOriginOrder := hOriginOrder2 }
+  exact ⟨t, s, hDelta10, hs⟩
 ```
 
-### If `scaleToTateVC` takes only `h3`
+## 6. Reuse N12 helpers or copy?
 
-Use this local substitution in the scaling block:
-
-```lean
-  let b : ℚ := tateBOfOriginNormal E1 h3_1
-  let c : ℚ := tateCOfOriginNormal E1 h3_1
-  let C2 : WeierstrassCurve.VariableChange ℚ := scaleToTateVC E1 h3_1
-
-  have hb : b ≠ 0 := by
-    simpa [b] using tateBOfOriginNormal_ne_zero E1 h3_1
-
-  have hCurve2 : C2 • E1 = tateW b c := by
-    simpa [E1, C2, b, c] using
-      (scaleToTate_eq_tateW
-        (W := E1) hA4_1 hA6_1 h3_1)
-
-  have hOriginOrder2 : addOrderOf (tateOriginAffine b c hb) = 12 := by
-    simpa [E1, C2, b, c, tateOriginAffine] using
-      (scaleToTate_origin_order12
-        (W := E1) (hA4 := hA4_1) (hA6 := hA6_1)
-        (h3 := h3_1) (hO := hO1) (hOrd := hOrd1))
-```
-
-## Small missing wrappers, if the file does not already have them
-
-### 1. `a₂ ≠ 0` at an order-12 origin
-
-This is needed only if your scaling uses `u = a₃/a₂`.  It is a tiny order obstruction: if `a₂=0` after `a₄=a₆=0`, then the origin has order dividing `3`, not `12`.
-
-```lean
-theorem origin_a2_ne_zero_of_addOrderOf_eq_12
-    (W : WeierstrassCurve ℚ) [W.IsElliptic]
-    (hO : (W⁄ℚ).Nonsingular 0 0)
-    (hOrd : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 12) :
-    W.a₂ ≠ 0 := by
-  intro h2
-  -- Existing group-law API route:
-  -- with a₄=0 in the post-killA4 use site, doubling gives x(2O)=-a₂=0;
-  -- hence 2O has the same x-coordinate as O, and the line calculation gives 3O=0.
-  -- Prefer proving the specialized lemma below after killA4, because it has fewer fields.
-  exact origin_a2_ne_zero_of_addOrderOf_eq_12_of_a4_a6
-    (W := W) hO hOrd h2
-```
-
-A more local statement, usually easier to prove and sufficient for the assembly theorem, is:
-
-```lean
-theorem origin_a2_ne_zero_of_addOrderOf_eq_12_of_a4_a6
-    (W : WeierstrassCurve ℚ) [W.IsElliptic]
-    (hO : (W⁄ℚ).Nonsingular 0 0)
-    (hOrd : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 12)
-    (hA4 : W.a₄ = 0) (hA6 : W.a₆ = 0) :
-    W.a₂ ≠ 0 := by
-  intro h2
-  -- Skeleton using existing affine-add lemmas, no new math:
-  -- 1. `Point.add_self_of_Y_ne` at `(0,0)` uses `W.a₃ ≠ 0`, already available
-  --    from `origin_a3_ne_zero_of_addOrderOf_eq_12`.
-  -- 2. Under `hA4,hA6,h2`, the formula gives `2O = -O`.
-  -- 3. Hence `3O=0`, so `addOrderOf O ∣ 3`, contradicting `hOrd = 12`.
-  have h3 : W.a₃ ≠ 0 := origin_a3_ne_zero_of_addOrderOf_eq_12 (W := W) hO hOrd
-  have hthree : (3 : ℕ) • WeierstrassCurve.Affine.Point.some 0 0 hO = 0 := by
-    exact origin_three_nsmul_eq_zero_of_a2_eq_zero_a4_eq_zero_a6_eq_zero
-      (W := W) hO h2 hA4 hA6 h3
-  have hdiv : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) ∣ 3 := by
-    exact addOrderOf_dvd_of_nsmul_eq_zero hthree
-  rw [hOrd] at hdiv
-  norm_num at hdiv
-```
-
-If you already have a lemma named differently, use that instead.  The assembly theorem only needs the final `E1.a₂ ≠ 0`.
-
-### 2. `b ≠ 0`
-
-If `tateBOfOriginNormal` is the standard normalized value
+Do **not** import `KubertBridgeN12.lean` into `KubertBridgeN10.lean` unless you verify there is no import cycle.  The better layout is:
 
 ```text
-b = - E1.a₂ ^ 3 / E1.a₃ ^ 2
+KubertTateNormalForm.lean
+  order-agnostic variable-change/affine-point machinery:
+    affine extraction
+    translate to origin
+    killA4
+    scale to Tate
+    additive equivalence/order transport
+    shortW full-two square lemmas
+
+KubertBridgeN12.lean imports KubertTateNormalForm
+KubertBridgeN10.lean imports KubertTateNormalForm
 ```
 
-then the proof is just `field_simp`.
+If you want the smallest patch, copy the N12 helper block into N10 under N10 names.  But the cleaner long-term move is a common helper file because N10 needs exactly the same variable-change infrastructure; only the exact order-specific obstruction lemmas change from `12` to `10`.
+
+The order-specific missing lemmas for N10 are:
 
 ```lean
-theorem tateBOfOriginNormal_ne_zero
-    (W : WeierstrassCurve ℚ) (h2 : W.a₂ ≠ 0) (h3 : W.a₃ ≠ 0) :
-    tateBOfOriginNormal W h2 h3 ≠ 0 := by
-  simp [tateBOfOriginNormal]
-  exact div_ne_zero
-    (neg_ne_zero.mpr (pow_ne_zero 3 h2))
-    (pow_ne_zero 2 h3)
-```
-
-If your local definition uses the opposite sign, the same proof works after deleting `neg_ne_zero.mpr`.
-
-### 3. Discriminant nonzero for the Tate target
-
-This wrapper is the cleanest way to fill the `hDelta` field.  It avoids unfolding the large discriminant polynomial.
-
-```lean
-theorem tateW_delta_ne_zero_of_variableChange_eq
+theorem origin_a3_ne_zero_of_addOrderOf_eq_10
     (W : WeierstrassCurve ℚ) [W.IsElliptic]
-    (C : WeierstrassCurve.VariableChange ℚ)
-    {b c : ℚ} (hCurve : C • W = tateW b c) :
-    (tateW b c).Δ ≠ 0 := by
-  rw [← hCurve]
-  -- Prefer an existing lemma if present:
-  --   exact variableChange_delta_ne_zero (W := W) (C := C)
-  -- If not, the direct discriminant formula route is:
-  rw [WeierstrassCurve.variableChange_Δ]
-  -- Depending on the local formula, this is either `C.u ^ 12 * W.Δ`
-  -- or `W.Δ / C.u ^ 12`.  In both cases `field_simp` closes from
-  -- the nonzero `u` built into the variable-change/equivalence API and `W.Δ_ne_zero`.
-  field_simp
-```
-
-If the last two lines need exact local names, use whichever one of these is already present in the file:
-
-```lean
-  exact WeierstrassCurve.variableChange_delta_ne_zero (W := W) (C := C)
-```
-
-or
-
-```lean
-  exact (show (C • W).Δ ≠ 0 from inferInstance.Δ_ne_zero)
-```
-
-or
-
-```lean
-  haveI : (C • W).IsElliptic := by infer_instance
-  exact WeierstrassCurve.IsElliptic.delta_ne_zero (C • W)
-```
-
-The important point: this is a wrapper around existing ellipticity/variable-change infrastructure, not a Tate-specific calculation.
-
-### 4. Origin order through `scaleToTateVC`
-
-If not already present, prove this once and use it in the assembly theorem.
-
-```lean
-theorem scaleToTate_origin_order12
-    (W : WeierstrassCurve ℚ) [W.IsElliptic]
-    (hA4 : W.a₄ = 0) (hA6 : W.a₆ = 0)
-    (h2 : W.a₂ ≠ 0) (h3 : W.a₃ ≠ 0)
     (hO : (W⁄ℚ).Nonsingular 0 0)
-    (hOrd : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 12) :
-    addOrderOf
-      (tateOriginAffine
-        (tateBOfOriginNormal W h2 h3)
-        (tateCOfOriginNormal W h2 h3)
-        (tateBOfOriginNormal_ne_zero W h2 h3)) = 12 := by
-  classical
-  let C := scaleToTateVC W h2 h3
-  let b := tateBOfOriginNormal W h2 h3
-  let c := tateCOfOriginNormal W h2 h3
-  have hCurve : C • W = tateW b c := by
-    simpa [C, b, c] using scaleToTate_eq_tateW (W := W) hA4 hA6 h2 h3
-  have hO' : ((C • W)⁄ℚ).Nonsingular 0 0 := by
-    simpa [C] using scaleToTate_origin_nonsingular (W := W) h2 h3 hO
-  have hmap :
-      affineVariableChangeMap W C
-        (WeierstrassCurve.Affine.Point.some 0 0 hO) =
-      WeierstrassCurve.Affine.Point.some 0 0 hO' := by
-    simpa [C, scaleToTateVC, vcNewX, vcNewY]
-      using scaleToTate_origin_map (W := W) h2 h3 hO
-  let e := affinePointAddEquivOfVariableChange W C
-  have hOrd' : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO') = 12 := by
-    rw [← hmap]
-    simpa [e, hOrd] using
-      addOrderOf_apply_addEquiv e
-        (WeierstrassCurve.Affine.Point.some 0 0 hO)
-  -- Transport across `hCurve` and proof irrelevance for the nonsingularity proof.
-  simpa [b, c, hCurve, tateOriginAffine] using hOrd'
+    (hOrd : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 10) :
+    W.a₃ ≠ 0
+
+theorem origin_a2_ne_zero_of_addOrderOf_eq_10_of_a4_a6
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (hO : (W⁄ℚ).Nonsingular 0 0)
+    (hOrd : addOrderOf (WeierstrassCurve.Affine.Point.some 0 0 hO) = 10)
+    (hA4 : W.a₄ = 0) (hA6 : W.a₆ = 0) :
+    W.a₂ ≠ 0
+
+theorem tate_normal_form_at_point_of_addOrder10
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 10) :
+    TateNormalFormAtOrder10 E
 ```
 
-If your `scaleToTateVC` takes only `h3`, delete `h2` from the statement and calls.
+These should be cloned from the N12 proofs with the final divisibility contradictions changed from `12 ∣ n` to `10 ∣ n`.  The same group-law degeneracy facts apply: `a₃=0` makes the origin 2-torsion; the post-`killA4` `a₂=0` degeneracy gives order dividing 3 or 5 depending on the local formula, in either case contradicting exact order 10.
 
-### 5. Variable-change composition wrapper if `rw [mul_smul, mul_smul]` fails
+## 7. Smallest honest residual if full elimination is too large
 
-If `VariableChange` is not registered as a monoid action in your local Mathlib snapshot, add this explicit wrapper using the composition operation already used by your additive-equivalence lemmas.
+The smallest replacement residual, strictly smaller than the current axiom, is:
 
 ```lean
-theorem variableChange_three_smul
-    (E : WeierstrassCurve ℚ)
-    (C0 C1 C2 : WeierstrassCurve.VariableChange ℚ) :
-    (C2 * C1 * C0) • E = C2 • (C1 • (C0 • E)) := by
-  rw [mul_smul, mul_smul]
+/-- Pure Tate/table residual only: no arbitrary curve, no full group injection. -/
+axiom tateC10_order10_to_short_param
+    {b c : ℚ} (hb : b ≠ 0) (hDelta : (tateW b c).Δ ≠ 0)
+    (hOrd : addOrderOf (tateOriginAffine b c hb) = 10) :
+    ∃ t : ℚ,
+      Delta10 t ≠ 0 ∧
+      ∃ C : WeierstrassCurve.VariableChange ℚ,
+        C • tateW b c = shortW (A10 t) (B10 t)
 ```
 
-Then replace the `hCurve` proof by:
+Then prove the rest now:
 
 ```lean
-  have hCurve : C • E = tateW b c := by
-    dsimp [C]
-    rw [variableChange_three_smul]
-    simpa [E1, E0] using hCurve2
+theorem kubert_C10_square_of_tate_residual
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (hE : ∃ f : (ZMod 2 × ZMod 10) →+ (E⁄ℚ).Point, Function.Injective f) :
+    ∃ t s : ℚ, Delta10 t ≠ 0 ∧ s ^ 2 = A10 t ^ 2 - 4 * B10 t := by
+  -- checked group extraction + checked order-10 Tate normal form + residual above
+  -- + checked full-two transport + checked shortW square lemma.
+  exact kubert_C10_square_from_tateC10_order10_to_short_param hE
 ```
 
-## Why this shrinks the residual correctly
+This residual is much smaller than `kubert_C10_square`: it is only the cyclic-10 Tate table/short-model conversion.  It no longer talks about arbitrary curves or the full `ZMod 2 × ZMod 10` embedding.
 
-The old axiom asserts existence of a Tate normal form with an order-12 origin.  The checked later infrastructure already gives exactly that:
+The next smaller residual after that is purely algebraic:
 
-- `affineMarkedPointOfOrder12_of_addOrder12` removes the point-at-infinity case;
-- `translate_order12_point_to_origin` produces a variable change `C0`, an origin on `C0 • E`, `a₆=0`, and order `12` at the origin;
-- `killA4VC` produces `C1` with `a₄=0`, preserves `a₆=0`, and transports the origin order;
-- `scaleToTate_eq_tateW` produces `C2 • (C1 • (C0 • E)) = tateW b c`;
-- the `b ≠ 0` field is just the nonzero denominator/numerator fact in the scaling formula;
-- the `hDelta` field follows from ellipticity under variable change;
-- the `hOriginOrder` field follows from additive equivalence/order preservation and the fact that `killA4VC` and `scaleToTateVC` fix `(0,0)`.
+```lean
+axiom tateC10_param_to_shortW_algebra
+    (t : ℚ) (hgood : TateC10Good t) :
+    ∃ C : WeierstrassCurve.VariableChange ℚ,
+      C • tateW (tateC10_b t) (tateC10_c t) = shortW (A10 t) (B10 t)
+```
 
-So the axiom is not mathematically needed anymore.  At most, the file needs the small wrappers above and a declaration-order move.
+Everything else above should be checkable using the N12 infrastructure and `ring`/`field_simp`.
