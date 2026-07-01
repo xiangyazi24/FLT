@@ -1,499 +1,623 @@
-# Q2739 dm-codex2: arithmetic lemmas for the primitive Eisenstein conic slope
+# Q2743 dm-codex2: Lean DAG for `EisensteinTriplePrimitiveFullParamStatement`
 
-Namespace assumed: `MazurProof.RationalPointsN12`.
+Namespace assumed throughout: `MazurProof.RationalPointsN12`.
 
-Let
+I could not inspect the unpushed local WIP at `/Users/huangx/repos/flt-ai` through the GitHub connector. This DAG is therefore keyed to the facts in the prompt and to the exposed shape of `EisensteinFullParam` you described.
+
+## Audit result
+
+The route is sound provided `EisensteinTriple X Y Z` unfolds to the minus-sign Eisenstein equation
+
+```lean
+X ^ 2 - X * Y + Y ^ 2 = Z ^ 2
+```
+
+not the plus-sign equation. The listed identities with `2*m - n` and `m^2 - m*n + n^2` are exactly the minus-sign case.
+
+Hidden pitfalls to avoid:
+
+1. `common divisors of EA, EB divide 3` is not enough. You still need either:
+   * raw: `IsCoprime EA EB`, using `¬ (3 : ℤ) ∣ m+n`, or
+   * divided: quotient coprimality after writing `EA = 3*EA'`, `EB = 3*EB'`.
+2. Do not use integer `/` for the divided sector. Introduce quotient witnesses from `3 ∣ m+n`.
+3. The algebra step needs `C ≠ 0`, obtained from `Y = n*C`, `0 < Y`, `0 < n`.
+4. The primitive scale kill first proves the scale is an integer. Primitive-ness alone does not make `C / EB` meaningful in Lean.
+5. No swapped branch is needed if `eisenstein_slope_cross` is `m * Y = n * (Z + X)`: the same slope orientation gives the left `(X,Y)` disjunct. The swapped alternative is harmless fallback only.
+6. The unit triple `(1,1,1)` is the divided case with `(m,n)=(2,1)`, `EB=3`, `C=1`.
+
+## Notation and imports
+
+All snippets below are intended inside `FLT/Assumptions/MazurProof/N12ParamBridge.lean` above the frontier theorem. If making a temporary helper file, use:
 
 ```lean
 import Mathlib.Tactic
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
 
 namespace MazurProof.RationalPointsN12
 
 private abbrev EA (m n : ℤ) : ℤ := m ^ 2 - n ^ 2
 private abbrev EB (m n : ℤ) : ℤ := 2 * m - n
+private abbrev EC (m n : ℤ) : ℤ := 2 * m * n - n ^ 2
+private abbrev EZ (m n : ℤ) : ℤ := m ^ 2 - m * n + n ^ 2
 
 end MazurProof.RationalPointsN12
 ```
 
-In the text below I write
+## Implementation DAG
 
-```text
-A = EA m n = m^2 - n^2,
-B = EB m n = 2*m - n.
-```
+| order | lemma | kind | output used later |
+|---:|---|---|---|
+| 1 | `eisenstein_EC_eq_n_mul_EB` | pure algebra | `EC m n = n * EB m n` |
+| 2 | `eisenstein_EB_pos` | linear arithmetic | `0 < EB m n` from `0<n`, `n<m` |
+| 3 | `eisenstein_C_of_cross` | divisibility API | `∃ C, Y=n*C ∧ Z+X=m*C ∧ 0<C` |
+| 4 | `eisenstein_core_identities_eq` | pure algebra + `C≠0` cancellation | `EB*Z=EZ*C`, `EB*X=EA*C`, `EB*Y=EC*C` |
+| 5 | `eisenstein_EA_EB_common_dvd_three` | divisibility API | every common divisor of `EA`, `EB` divides `3` |
+| 6 | `eisenstein_factor_raw` | divisibility API | `IsCoprime (EA m n) (EB m n)` under `¬3∣m+n` |
+| 7 | `eisenstein_factor_divided` | divisibility API | witnesses `EA=3*EA'`, `EB=3*EB'`, `0<EB'`, `IsCoprime EA' EB'` |
+| 8 | `eisenstein_scale_kill_raw` | exact scale kill | `C=EB`, `X=EA`, `Y=EC`, `Z=EZ` |
+| 9 | `eisenstein_scale_kill_divided` | exact scale kill | `C=EB'`, `3X=EA`, `3Y=EC`, `3Z=EZ` |
+| 10 | frontier theorem | assembly | raw or divided `EisensteinFullParam` |
 
-The slope equation is
-
-```text
-A * C = B * X.
-```
-
-The correct arithmetic structure is:
-
-* every common divisor of `A` and `B` divides `3`;
-* `3 ∣ B ↔ 3 ∣ m+n`;
-* therefore the raw sector `¬ 3 ∣ m+n` has `IsCoprime A B`;
-* the divided sector `3 ∣ m+n` has `IsCoprime (A/3) (B/3)`;
-* in both sectors the scale factor `k` is killed by `IsCoprime X Y` and `Y = n*C`.
-
-No coprimality between `n` and `B`, or between `A` and `n*B`, is needed.
-
-## 1. Atomic divisibility identities
-
-These are the exact small algebra lemmas I would add first.
+## Lemmas 1-4: decomposition and algebra
 
 ```lean
 import Mathlib.Tactic
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
 
 namespace MazurProof.RationalPointsN12
 
 private abbrev EA (m n : ℤ) : ℤ := m ^ 2 - n ^ 2
 private abbrev EB (m n : ℤ) : ℤ := 2 * m - n
+private abbrev EC (m n : ℤ) : ℤ := 2 * m * n - n ^ 2
+private abbrev EZ (m n : ℤ) : ℤ := m ^ 2 - m * n + n ^ 2
 
-/-- The exceptional divisor `3` occurs exactly when `3 ∣ m+n`. -/
-theorem eisenstein_EB_three_dvd_iff {m n : ℤ} :
-    (3 : ℤ) ∣ EB m n ↔ (3 : ℤ) ∣ m + n := by
-  constructor
-  · rintro ⟨t, ht⟩
-    refine ⟨2 * t - (m - n), ?_⟩
-    rw [show EB m n = 3 * t from ht]
-    change m + n = 3 * (2 * t - (m - n))
-    ring
-  · rintro ⟨t, ht⟩
-    refine ⟨2 * t - n, ?_⟩
-    rw [show m + n = 3 * t from ht]
-    change EB m n = 3 * (2 * t - n)
-    ring
-
-/-- If `3 ∣ m+n`, then the first slope factor is divisible by `3`. -/
-theorem eisenstein_EA_three_dvd_of_sum {m n : ℤ}
-    (h3 : (3 : ℤ) ∣ m + n) :
-    (3 : ℤ) ∣ EA m n := by
-  rcases h3 with ⟨t, ht⟩
-  refine ⟨(m - n) * t, ?_⟩
-  calc
-    EA m n = (m - n) * (m + n) := by
-      unfold EA
-      ring
-    _ = (m - n) * (3 * t) := by rw [ht]
-    _ = 3 * ((m - n) * t) := by ring
-
-/-- If `3 ∣ m+n`, then the second slope factor is divisible by `3`. -/
-theorem eisenstein_EB_three_dvd_of_sum {m n : ℤ}
-    (h3 : (3 : ℤ) ∣ m + n) :
-    (3 : ℤ) ∣ EB m n :=
-  (eisenstein_EB_three_dvd_iff).2 h3
-
-/-- Main linear identity for the common-divisor argument. -/
-theorem eisenstein_common_divisor_identity (m n : ℤ) :
-    (2 * m + n) * EB m n - EA m n = 3 * m ^ 2 := by
-  unfold EA EB
+private theorem eisenstein_EC_eq_n_mul_EB (m n : ℤ) :
+    EC m n = n * EB m n := by
+  unfold EC EB
   ring
 
-/-- Positivity of the first factor from `0<n<m`. -/
-theorem eisenstein_EA_pos {m n : ℤ} (hn0 : 0 < n) (hnm : n < m) :
-    0 < EA m n := by
-  have hmn : 0 < m - n := by omega
-  have hmpn : 0 < m + n := by omega
-  calc
-    0 < (m - n) * (m + n) := by positivity
-    _ = EA m n := by
-      unfold EA
-      ring
-
-/-- Positivity of the second factor from `0<n<m`. -/
-theorem eisenstein_EB_pos {m n : ℤ} (hn0 : 0 < n) (hnm : n < m) :
+private theorem eisenstein_EB_pos {m n : ℤ} (hnpos : 0 < n) (hnm : n < m) :
     0 < EB m n := by
   unfold EB
   omega
 
-end MazurProof.RationalPointsN12
-```
-
-## 2. Common divisors of `A` and `B` divide `3`
-
-This is the core lemma. The proof avoids any false assumption such as `IsCoprime A (n*B)`.
-
-```lean
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-private abbrev EA (m n : ℤ) : ℤ := m ^ 2 - n ^ 2
-private abbrev EB (m n : ℤ) : ℤ := 2 * m - n
-
-/-- Any divisor of `EB m n` is coprime to `m`, provided `m` and `n` are
-coprime.  Proof idea: a common divisor of `d` and `m` divides `EB m n` and
-`2*m`, hence divides `n = 2*m - EB m n`; then use `IsCoprime m n`. -/
-theorem eisenstein_common_divisor_coprime_m {d m n : ℤ}
-    (hmn : IsCoprime m n) (hdB : d ∣ EB m n) :
-    IsCoprime d m := by
-  -- Lean proof route:
-  --   refine isCoprime_of_forall_dvd ?_
-  --   intro e hed hem
-  --   have heB : e ∣ EB m n := dvd_trans hed hdB
-  --   have he2m : e ∣ 2 * m := dvd_mul_of_dvd_right hem 2
-  --   have hen : e ∣ n := by
-  --     -- `n = 2*m - EB m n`
-  --     have : 2 * m - EB m n = n := by unfold EB; ring
-  --     exact this ▸ dvd_sub he2m heB
-  --   exact hmn.isUnit_of_dvd hem hen
-  -- Replace `isCoprime_of_forall_dvd` by the local common-divisor constructor
-  -- available in the file if its name differs.
-  exact by
-    classical
-    -- This is intentionally the only API-sensitive line in the package.
-    -- In Mathlib terms, prove by the common-divisor characterization of
-    -- `IsCoprime`; no number theory is hidden here.
-    sorry
-
-/-- Every common divisor of `m^2-n^2` and `2*m-n` divides `3`. -/
-theorem eisenstein_common_dvd_three {d m n : ℤ}
+/--
+From `m*Y = n*(Z+X)` and `IsCoprime m n`, get the common scale `C`.
+Likely API names:
+* `IsCoprime.dvd_of_dvd_mul_left`
+* `IsCoprime.dvd_of_dvd_mul_right`
+If the product orientation differs, normalize by `simpa [mul_comm, mul_left_comm, mul_assoc]`.
+-/
+private theorem eisenstein_C_of_cross
+    {X Y Z m n : ℤ}
+    (hnpos : 0 < n)
     (hmn : IsCoprime m n)
-    (hdA : d ∣ EA m n) (hdB : d ∣ EB m n) :
-    d ∣ (3 : ℤ) := by
-  have hd3m2 : d ∣ 3 * m ^ 2 := by
-    have hlin : (2 * m + n) * EB m n - EA m n = 3 * m ^ 2 :=
-      eisenstein_common_divisor_identity m n
-    rw [← hlin]
-    exact dvd_sub (dvd_mul_of_dvd_right hdB (2 * m + n)) hdA
-  have hdm : IsCoprime d m := eisenstein_common_divisor_coprime_m hmn hdB
-  -- From `IsCoprime d m`, also `IsCoprime d (m^2)`, and hence a divisor of
-  -- `3*m^2` must divide `3`.
-  exact (hdm.pow_right 2).dvd_of_dvd_mul_right hd3m2
+    (hYpos : 0 < Y)
+    (hcross : m * Y = n * (Z + X)) :
+    ∃ C : ℤ, Y = n * C ∧ Z + X = m * C ∧ 0 < C := by
+  have hn0 : n ≠ 0 := ne_of_gt hnpos
+  have hn_dvd_mY : n ∣ m * Y := ⟨Z + X, hcross⟩
+  have hn_dvd_Y : n ∣ Y := by
+    -- exact (hmn.symm.dvd_of_dvd_mul_left hn_dvd_mY)
+    -- or: exact (hmn.symm.dvd_of_dvd_mul_right (by simpa [mul_comm] using hn_dvd_mY))
+    exact hmn.symm.dvd_of_dvd_mul_left hn_dvd_mY
+  rcases hn_dvd_Y with ⟨C, hYC⟩
+  have hZXC : Z + X = m * C := by
+    apply mul_left_cancel₀ hn0
+    calc
+      n * (Z + X) = m * Y := hcross.symm
+      _ = m * (n * C) := by rw [hYC]
+      _ = n * (m * C) := by ring
+  have hCpos : 0 < C := by
+    have hmul : 0 < n * C := by simpa [hYC] using hYpos
+    exact pos_of_mul_pos_left hmul (le_of_lt hnpos)
+  exact ⟨C, hYC, hZXC, hCpos⟩
+
+/--
+Pure algebra core for the minus-sign Eisenstein equation.
+Keep this equation-level lemma separate from the `EisensteinTriple` adapter.
+-/
+private theorem eisenstein_core_identities_eq
+    {X Y Z m n C : ℤ}
+    (hEq : X ^ 2 - X * Y + Y ^ 2 = Z ^ 2)
+    (hYC : Y = n * C)
+    (hZXC : Z + X = m * C)
+    (hCne : C ≠ 0) :
+    EB m n * Z = EZ m n * C ∧
+    EB m n * X = EA m n * C ∧
+    EB m n * Y = EC m n * C := by
+  have hXlin : X = m * C - Z := by omega
+  have hZeq : EB m n * Z = EZ m n * C := by
+    have hprod : C * ((EB m n * Z) - (EZ m n * C)) = 0 := by
+      subst Y
+      rw [hXlin] at hEq
+      unfold EB EZ
+      ring_nf at hEq ⊢
+      exact hEq
+    have hsub : (EB m n * Z) - (EZ m n * C) = 0 :=
+      (mul_eq_zero.mp hprod).resolve_left hCne
+    exact sub_eq_zero.mp hsub
+  have hXeq : EB m n * X = EA m n * C := by
+    rw [hXlin]
+    calc
+      EB m n * (m * C - Z)
+          = (EB m n * m - EZ m n) * C := by
+              rw [hZeq]
+              ring
+      _ = EA m n * C := by
+              unfold EA EB EZ
+              ring
+  have hYeq : EB m n * Y = EC m n * C := by
+    rw [hYC]
+    unfold EB EC
+    ring
+  exact ⟨hZeq, hXeq, hYeq⟩
+
+/--
+Adapter: replace the first argument by whatever projection/unfolding gives
+`X^2 - X*Y + Y^2 = Z^2` from local `EisensteinTriple`.
+-/
+-- private theorem eisenstein_core_identities
+--     {X Y Z m n C : ℤ}
+--     (htri : EisensteinTriple X Y Z)
+--     (hYC : Y = n * C)
+--     (hZXC : Z + X = m * C)
+--     (hCne : C ≠ 0) :
+--     EB m n * Z = EZ m n * C ∧
+--     EB m n * X = EA m n * C ∧
+--     EB m n * Y = EC m n * C := by
+--   exact eisenstein_core_identities_eq (X:=X) (Y:=Y) (Z:=Z) (m:=m) (n:=n) (C:=C)
+--     (by simpa [EisensteinTriple] using htri) hYC hZXC hCne
 
 end MazurProof.RationalPointsN12
 ```
 
-The first lemma above contains a `sorry` only to indicate the exact API-sensitive constructor point. Do **not** keep it as a residual; the proof is a four-line common-divisor proof once the local `IsCoprime` constructor name is chosen. If you prefer to avoid that API entirely, prove the same lemma from a Bezout witness for `IsCoprime m n`.
+If `ring_nf at hEq ⊢; exact hEq` in `hprod` produces the negative factor instead, replace the target factor by `C * ((EZ m n * C) - (EB m n * Z)) = 0` and finish with `eq_comm`/`sub_eq_zero.mp`. The dependency is still purely algebraic.
 
-A Bezout-flavored proof is also possible: if `u*m + v*n = 1`, then using `n = 2*m - EB m n`,
-
-```text
-u*m + v*(2*m - EB) = (u+2*v)*m - v*EB = 1,
-```
-
-so any divisor of `EB` coprime with `m` is explicit.
-
-## 3. Raw and divided coprimality statements
-
-The raw sector theorem should be stated as `IsCoprime`; that is more useful than an `Int.gcd` equality.
+## Lemmas 5-7: factor coprimality
 
 ```lean
 import Mathlib.Tactic
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
 
 namespace MazurProof.RationalPointsN12
 
 private abbrev EA (m n : ℤ) : ℤ := m ^ 2 - n ^ 2
 private abbrev EB (m n : ℤ) : ℤ := 2 * m - n
+private abbrev EC (m n : ℤ) : ℤ := 2 * m * n - n ^ 2
+private abbrev EZ (m n : ℤ) : ℤ := m ^ 2 - m * n + n ^ 2
 
-/-- Integer divisors of `3` are either units or multiples of `3`. -/
-theorem int_isUnit_or_three_dvd_of_dvd_three {d : ℤ}
-    (hd : d ∣ (3 : ℤ)) : IsUnit d ∨ (3 : ℤ) ∣ d := by
-  -- Lean proof route:
-  --   obtain ⟨q, hq⟩ := hd
-  --   Since `d*q = 3`, use `Int.natAbs_mul`, `norm_num`, or finite divisor
-  --   classification for divisors of the prime integer `3`.
-  --   The four possibilities are `d = 1, -1, 3, -3`.
-  --   Return `IsUnit d` in the first two cases and `3 ∣ d` in the last two.
-  -- This is a tiny local integer lemma; do not make it a mathematical residual.
-  exact by
-    classical
-    sorry
+/-- Divisibility API lemma: from `gcd(m,n)=1`, get `gcd(m,2m-n)=1`. -/
+private theorem eisenstein_coprime_m_EB {m n : ℤ}
+    (hmn : IsCoprime m n) :
+    IsCoprime m (EB m n) := by
+  -- Best route: use Bezout form of `hmn`.
+  -- If `a*m + b*n = 1`, then `(a + 2*b)*m - b*(2*m-n) = 1`.
+  -- Implement with the local `IsCoprime` Bezout constructor/projection.
+  -- Expected finishing line after obtaining the Bezout witnesses: `ring_nf [EB]`.
+  admit
 
-/-- Raw sector: the two slope factors are coprime. -/
-theorem eisenstein_factor_coprime_raw {m n : ℤ}
+/-- Every common divisor of `EA` and `EB` divides `3`. -/
+private theorem eisenstein_EA_EB_common_dvd_three
+    {m n d : ℤ}
+    (hmn : IsCoprime m n)
+    (hdEA : d ∣ EA m n)
+    (hdEB : d ∣ EB m n) :
+    d ∣ (3 : ℤ) := by
+  -- 1. `d ∣ (2m-n)*(2m+n) = 4m^2-n^2` from `hdEB`.
+  have hd4 : d ∣ 4 * m ^ 2 - n ^ 2 := by
+    have h := dvd_mul_of_dvd_left hdEB (2 * m + n)
+    convert h using 1 <;> unfold EB <;> ring
+  -- 2. subtract `EA = m^2-n^2`, so `d ∣ 3*m^2`.
+  have hd3m2 : d ∣ 3 * m ^ 2 := by
+    have h := dvd_sub hd4 hdEA
+    convert h using 1 <;> unfold EA <;> ring
+  -- 3. `IsCoprime m EB`; since `d ∣ EB`, also `IsCoprime m d`.
+  have hmEB : IsCoprime m (EB m n) := eisenstein_coprime_m_EB hmn
+  have hmd : IsCoprime m d := by
+    -- API variants: `hmEB.isCoprime_of_dvd_right hdEB`,
+    -- `hmEB.coprime_dvd_right hdEB`, or prove from common-divisor definition.
+    exact hmEB.isCoprime_of_dvd_right hdEB
+  -- 4. Since `d` is coprime to `m^2`, Euclid gives `d ∣ 3`.
+  have hdm2 : IsCoprime d (m ^ 2) := by
+    -- API variants: `hmd.symm.pow_right 2`, `hmd.symm.pow_left 2`.
+    simpa [pow_two] using hmd.symm.mul_right hmd.symm
+  exact hdm2.dvd_of_dvd_mul_right (by simpa [mul_comm, mul_left_comm, mul_assoc] using hd3m2)
+
+/-- Raw sector factor coprimality. -/
+private theorem eisenstein_factor_raw
+    {m n : ℤ}
     (hmn : IsCoprime m n)
     (h3 : ¬ (3 : ℤ) ∣ m + n) :
     IsCoprime (EA m n) (EB m n) := by
-  -- Use the common-divisor characterization of `IsCoprime`.
-  -- Let `d` divide both factors.
-  -- `eisenstein_common_dvd_three hmn hdA hdB` gives `d ∣ 3`.
-  -- `int_isUnit_or_three_dvd_of_dvd_three` gives either `IsUnit d` or `3 ∣ d`.
-  -- In the second case, `3 ∣ EB m n`, hence `3 ∣ m+n`, contradiction.
-  -- The remaining case is exactly the common-divisor criterion.
-  exact by
-    classical
-    sorry
+  -- Prove common-divisor criterion for `IsCoprime EA EB`.
+  -- For a common divisor `d`, `eisenstein_EA_EB_common_dvd_three` gives `d ∣ 3`.
+  -- Also `d ∣ EB`. If `d` is nonunit, then a prime factor `3` divides `EB`.
+  -- But `3 ∣ EB ↔ 3 ∣ m+n` because
+  --   2*(m+n) = EB + 3*n
+  -- and `IsCoprime (3:ℤ) 2`.
+  -- Contradiction to `h3`; hence every common divisor is a unit.
+  admit
 
-/-- Divided sector: after removing the forced common factor `3`, the two slope
-factors are coprime. -/
-theorem eisenstein_factor_coprime_divided {m n : ℤ}
+/-- Divided sector quotient witnesses and quotient coprimality. Avoid `/`. -/
+private theorem eisenstein_factor_divided
+    {m n : ℤ}
     (hmn : IsCoprime m n)
+    (hEBpos : 0 < EB m n)
     (h3 : (3 : ℤ) ∣ m + n) :
-    IsCoprime ((EA m n) / 3) ((EB m n) / 3) := by
-  -- Common-divisor proof.
-  -- Let `d` divide both quotients.
-  -- First get exact quotient identities from divisibility:
-  have hA3 : (3 : ℤ) ∣ EA m n := eisenstein_EA_three_dvd_of_sum h3
-  have hB3 : (3 : ℤ) ∣ EB m n := eisenstein_EB_three_dvd_of_sum h3
-  -- For a common divisor `d` of the quotients, `3*d` divides both original
-  -- factors.  Then `eisenstein_common_dvd_three` gives `3*d ∣ 3`.
-  -- Cancel the nonzero factor `3` to obtain `d ∣ 1`, hence `IsUnit d`.
-  -- In code, after `obtain ⟨q, hq⟩ : 3*d ∣ 3`, rewrite
-  --   `3 = (3*d)*q`
-  -- as
-  --   `3 * 1 = 3 * (d*q)`
-  -- and use `mul_left_cancel₀ (by norm_num : (3:ℤ) ≠ 0)`.
-  exact by
-    classical
-    sorry
-
-end MazurProof.RationalPointsN12
-```
-
-If you want the `Int.gcd` version, make it a wrapper around the `IsCoprime` lemmas, not the primary API:
-
-```lean
--- API names vary slightly across Mathlib versions, but this should be only a wrapper.
-def EisensteinFactorGcdRawStatement : Prop :=
-  ∀ {m n : ℤ},
-    IsCoprime m n →
-    ¬ (3 : ℤ) ∣ m + n →
-    Int.gcd (EA m n) (EB m n) = 1
-```
-
-## 4. Generic scale-splitting lemma
-
-This is the reusable Euclid step. It is exactly where `IsCoprime.dvd_of_dvd_mul_left/right` belongs.
-
-```lean
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-/-- If `a` and `b` are coprime and `a*C = b*X`, then both sides have a common
-scale `k`.  The positivity of `a` and `X` gives `k>0`. -/
-theorem coprime_mul_eq_mul_scale {a b C X : ℤ}
-    (hab : IsCoprime a b) (ha : 0 < a) (hXpos : 0 < X)
-    (h : a * C = b * X) :
-    ∃ k : ℤ, 0 < k ∧ X = k * a ∧ C = k * b := by
-  have ha_dvd_bX : a ∣ b * X := ⟨C, h.symm⟩
-  -- Depending on orientation in the local Mathlib, this line may be either
-  -- `hab.dvd_of_dvd_mul_left ha_dvd_bX` or
-  -- `hab.dvd_of_dvd_mul_right ha_dvd_bX` after rewriting `b*X = X*b`.
-  have ha_dvd_X : a ∣ X := hab.dvd_of_dvd_mul_left ha_dvd_bX
-  rcases ha_dvd_X with ⟨k, hXak⟩
-  have hcancel : a * C = a * (b * k) := by
-    calc
-      a * C = b * X := h
-      _ = b * (a * k) := by rw [hXak]
-      _ = a * (b * k) := by ring
-  have hC : C = b * k :=
-    mul_left_cancel₀ (ne_of_gt ha) hcancel
-  have hXka : X = k * a := by
-    rw [hXak]
+    ∃ EA' EB' : ℤ,
+      EA m n = 3 * EA' ∧
+      EB m n = 3 * EB' ∧
+      0 < EB' ∧
+      IsCoprime EA' EB' := by
+  rcases h3 with ⟨s, hs⟩
+  refine ⟨(m - n) * s, 2 * s - n, ?_, ?_, ?_, ?_⟩
+  · unfold EA
+    rw [hs]
     ring
-  have hCkb : C = k * b := by
-    rw [hC]
+  · unfold EB
+    rw [hs]
     ring
-  have hkpos : 0 < k := by
-    have hk_mul_pos : 0 < k * a := by
-      simpa [hXka] using hXpos
-    exact pos_of_mul_pos_right hk_mul_pos (le_of_lt ha)
-  exact ⟨k, hkpos, hXka, hCkb⟩
-
-end MazurProof.RationalPointsN12
-```
-
-## 5. Raw sector scale theorem
-
-```lean
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-private abbrev EA (m n : ℤ) : ℤ := m ^ 2 - n ^ 2
-private abbrev EB (m n : ℤ) : ℤ := 2 * m - n
-
-/-- Raw sector scale extraction from
-`(m^2-n^2)*C = (2*m-n)*X`. -/
-theorem eisenstein_slope_scale_raw {m n X C : ℤ}
-    (hn0 : 0 < n) (hnm : n < m)
-    (hmn : IsCoprime m n) (hXpos : 0 < X)
-    (hEq : EA m n * C = EB m n * X)
-    (h3 : ¬ (3 : ℤ) ∣ m + n) :
-    ∃ k : ℤ,
-      0 < k ∧
-      X = k * EA m n ∧
-      C = k * EB m n := by
-  have hApos : 0 < EA m n := eisenstein_EA_pos hn0 hnm
-  have hAB : IsCoprime (EA m n) (EB m n) :=
-    eisenstein_factor_coprime_raw hmn h3
-  exact coprime_mul_eq_mul_scale hAB hApos hXpos hEq
-
-end MazurProof.RationalPointsN12
-```
-
-This is the exact conclusion wanted in the raw sector.
-
-## 6. Divided sector scale theorem
-
-The divided sector has the **same scale conclusion** after replacing `A,B` by `A/3,B/3`.
-
-```lean
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-private abbrev EA (m n : ℤ) : ℤ := m ^ 2 - n ^ 2
-private abbrev EB (m n : ℤ) : ℤ := 2 * m - n
-
-/-- Exact quotient identity for a known divisor.  If this name does not exist in
-local Mathlib, prove it once from `Int.ediv_eq_of_eq_mul_right`/`ediv_mul_cancel`. -/
-def ExactDivByThreeIdentityStatement : Prop :=
-  ∀ {a : ℤ}, (3 : ℤ) ∣ a → a = 3 * (a / 3)
-
-/-- Divided sector scale extraction from
-`(m^2-n^2)*C = (2*m-n)*X`. -/
-theorem eisenstein_slope_scale_divided {m n X C : ℤ}
-    (hn0 : 0 < n) (hnm : n < m)
-    (hmn : IsCoprime m n) (hXpos : 0 < X)
-    (hEq : EA m n * C = EB m n * X)
-    (h3 : (3 : ℤ) ∣ m + n) :
-    ∃ k : ℤ,
-      0 < k ∧
-      X = k * ((EA m n) / 3) ∧
-      C = k * ((EB m n) / 3) := by
-  have hA3 : (3 : ℤ) ∣ EA m n := eisenstein_EA_three_dvd_of_sum h3
-  have hB3 : (3 : ℤ) ∣ EB m n := eisenstein_EB_three_dvd_of_sum h3
-
-  -- Replace these two lines by the local exact-division lemma if needed.
-  have hAeq : EA m n = 3 * ((EA m n) / 3) := by
-    exact (Int.mul_ediv_cancel' hA3).symm
-  have hBeq : EB m n = 3 * ((EB m n) / 3) := by
-    exact (Int.mul_ediv_cancel' hB3).symm
-
-  have hEq0 : ((EA m n) / 3) * C = ((EB m n) / 3) * X := by
-    apply mul_left_cancel₀ (by norm_num : (3 : ℤ) ≠ 0)
-    calc
-      3 * (((EA m n) / 3) * C)
-          = (EA m n) * C := by rw [hAeq]; ring
-      _ = (EB m n) * X := hEq
-      _ = 3 * (((EB m n) / 3) * X) := by rw [hBeq]; ring
-
-  have hApos : 0 < EA m n := eisenstein_EA_pos hn0 hnm
-  have hA0pos : 0 < (EA m n) / 3 := by
-    -- From `EA = 3*(EA/3)` and `0 < EA`.
+  · have : 0 < 3 * (2 * s - n) := by
+      simpa [EB, hs] using hEBpos
     nlinarith
-
-  have hAB0 : IsCoprime ((EA m n) / 3) ((EB m n) / 3) :=
-    eisenstein_factor_coprime_divided hmn h3
-  exact coprime_mul_eq_mul_scale hAB0 hA0pos hXpos hEq0
-
-end MazurProof.RationalPointsN12
-```
-
-Notes:
-
-* The quotient positivity `hA0pos` is justified by `EA = 3*(EA/3)` and `EA>0`.
-* No separate positivity of `B/3` is needed for `coprime_mul_eq_mul_scale`.
-* If `Int.mul_ediv_cancel'` is not the local exact API, the residual should be the tiny `ExactDivByThreeIdentityStatement` above, not a mathematical theorem.
-
-## 7. Killing the scale by `Y = n*C` and `IsCoprime X Y`
-
-This works identically in raw and divided sectors.
-
-```lean
-import Mathlib.Tactic
-
-namespace MazurProof.RationalPointsN12
-
-/-- A positive common scale in a coprime pair is `1`.  This is the only place
-where `Y = n*C` is used. -/
-theorem eisenstein_scale_eq_one_of_coprimeXY {X Y C k U V n : ℤ}
-    (hXY : IsCoprime X Y) (hkpos : 0 < k)
-    (hX : X = k * U) (hC : C = k * V)
-    (hY : Y = n * C) :
-    k = 1 := by
-  have hk_dvd_X : k ∣ X := ⟨U, hX⟩
-  have hk_dvd_Y : k ∣ Y := by
-    refine ⟨n * V, ?_⟩
-    rw [hY, hC]
-    ring
-  have hk_unit : IsUnit k := hXY.isUnit_of_dvd hk_dvd_X hk_dvd_Y
-  rw [Int.isUnit_iff] at hk_unit
-  rcases hk_unit with hk1 | hkm1
-  · exact hk1
-  · omega
+  · -- quotient coprimality:
+    -- Let `d ∣ (m-n)*s` and `d ∣ 2*s-n`.
+    -- Then `3*d ∣ EA m n` and `3*d ∣ EB m n` by the two quotient equations.
+    -- `eisenstein_EA_EB_common_dvd_three` gives `3*d ∣ 3`.
+    -- Cancel nonzero `3` to get `IsUnit d`.
+    -- Use the same common-divisor criterion for `IsCoprime`.
+    admit
 
 end MazurProof.RationalPointsN12
 ```
 
-Crucial point: in the divided sector, once you have
+The two `admit` blocks above are not mathematical gaps; they are API-finding blocks. They should be implemented with the repo/mathlib `IsCoprime` constructors. If the local API is awkward, prove the raw and divided factor lemmas through `Int.gcd`/`natAbs` instead, but keep their signatures unchanged.
 
-```text
-X = k * (A/3),
-C = k * (B/3),
-Y = n*C,
-```
+## Lemmas 8-9: exact scale killing
 
-then `k ∣ X` and `k ∣ Y` exactly as in the raw sector. There is no weaker scale conclusion; the divided sector still gives `k=1`.
+This is the exact primitive step requested. It uses only:
 
-## 8. Assembled raw and divided final forms
+* `EB*X = EA*C`,
+* `Y = n*C`,
+* factor coprimality (`IsCoprime EA EB`, or quotient coprimality),
+* `IsCoprime X Y`,
+* positivity to rule out scale `-1`.
 
-These are convenient downstream wrappers.
+### Raw scale kill
 
 ```lean
 import Mathlib.Tactic
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
 
 namespace MazurProof.RationalPointsN12
 
 private abbrev EA (m n : ℤ) : ℤ := m ^ 2 - n ^ 2
 private abbrev EB (m n : ℤ) : ℤ := 2 * m - n
+private abbrev EC (m n : ℤ) : ℤ := 2 * m * n - n ^ 2
+private abbrev EZ (m n : ℤ) : ℤ := m ^ 2 - m * n + n ^ 2
 
-/-- Raw sector after primitivity kills the scale. -/
-theorem eisenstein_slope_raw_scale_one {m n X Y C : ℤ}
-    (hn0 : 0 < n) (hnm : n < m)
-    (hmn : IsCoprime m n)
-    (hXpos : 0 < X)
+private theorem eisenstein_scale_kill_raw
+    {X Y Z m n C : ℤ}
     (hXY : IsCoprime X Y)
-    (hY : Y = n * C)
-    (hEq : EA m n * C = EB m n * X)
-    (h3 : ¬ (3 : ℤ) ∣ m + n) :
-    X = EA m n ∧ C = EB m n := by
-  obtain ⟨k, hkpos, hXk, hCk⟩ :=
-    eisenstein_slope_scale_raw hn0 hnm hmn hXpos hEq h3
-  have hk1 : k = 1 :=
-    eisenstein_scale_eq_one_of_coprimeXY hXY hkpos hXk hCk hY
-  subst k
-  simp at hXk hCk
-  exact ⟨hXk, hCk⟩
+    (hnpos : 0 < n)
+    (hYpos : 0 < Y)
+    (hEBpos : 0 < EB m n)
+    (hEAEB : IsCoprime (EA m n) (EB m n))
+    (hZeq : EB m n * Z = EZ m n * C)
+    (hXeq : EB m n * X = EA m n * C)
+    (hYC : Y = n * C) :
+    C = EB m n ∧ X = EA m n ∧ Y = EC m n ∧ Z = EZ m n := by
+  have hEBne : EB m n ≠ 0 := ne_of_gt hEBpos
+  have hCpos : 0 < C := by
+    have hmul : 0 < n * C := by simpa [hYC] using hYpos
+    exact pos_of_mul_pos_left hmul (le_of_lt hnpos)
 
-/-- Divided sector after primitivity kills the scale. -/
-theorem eisenstein_slope_divided_scale_one {m n X Y C : ℤ}
-    (hn0 : 0 < n) (hnm : n < m)
-    (hmn : IsCoprime m n)
-    (hXpos : 0 < X)
-    (hXY : IsCoprime X Y)
-    (hY : Y = n * C)
-    (hEq : EA m n * C = EB m n * X)
-    (h3 : (3 : ℤ) ∣ m + n) :
-    X = (EA m n) / 3 ∧ C = (EB m n) / 3 := by
-  obtain ⟨k, hkpos, hXk, hCk⟩ :=
-    eisenstein_slope_scale_divided hn0 hnm hmn hXpos hEq h3
-  have hk1 : k = 1 :=
-    eisenstein_scale_eq_one_of_coprimeXY hXY hkpos hXk hCk hY
-  subst k
-  simp at hXk hCk
-  exact ⟨hXk, hCk⟩
+  -- Euclid: `EB ∣ C` from `EB*X = EA*C` and `IsCoprime EA EB`.
+  have hEBdvdC : EB m n ∣ C := by
+    have hdiv : EB m n ∣ EA m n * C := ⟨X, hXeq.symm⟩
+    -- Product orientation may require the right/left variant plus `simpa [mul_comm]`.
+    exact hEAEB.symm.dvd_of_dvd_mul_left hdiv
+  rcases hEBdvdC with ⟨k, hC⟩
+
+  have hkpos : 0 < k := by
+    have hmul : 0 < EB m n * k := by simpa [hC] using hCpos
+    exact pos_of_mul_pos_left hmul (le_of_lt hEBpos)
+
+  -- Cancel the nonzero `EB`: `X = EA*k`.
+  have hXk : X = EA m n * k := by
+    apply mul_left_cancel₀ hEBne
+    calc
+      EB m n * X = EA m n * C := hXeq
+      _ = EA m n * (EB m n * k) := by rw [hC]
+      _ = EB m n * (EA m n * k) := by ring
+
+  have hYk : Y = (n * EB m n) * k := by
+    rw [hYC, hC]
+    ring
+
+  have hkdvdX : k ∣ X := ⟨EA m n, by rw [hXk]; ring⟩
+  have hkdvdY : k ∣ Y := ⟨n * EB m n, by rw [hYk]; ring⟩
+
+  have hkunit : IsUnit k := hXY.isUnit_of_dvd hkdvdX hkdvdY
+  have hk : k = 1 := by
+    rcases Int.isUnit_iff.mp hkunit with hk | hk
+    · exact hk
+    · omega
+
+  have hCraw : C = EB m n := by
+    rw [hC, hk]
+    ring
+  have hXraw : X = EA m n := by
+    rw [hXk, hk]
+    ring
+  have hYraw : Y = EC m n := by
+    rw [hYk, hk]
+    rw [eisenstein_EC_eq_n_mul_EB]
+    ring
+  have hZraw : Z = EZ m n := by
+    apply mul_left_cancel₀ hEBne
+    calc
+      EB m n * Z = EZ m n * C := hZeq
+      _ = EZ m n * EB m n := by rw [hCraw]
+      _ = EB m n * EZ m n := by ring
+
+  exact ⟨hCraw, hXraw, hYraw, hZraw⟩
 
 end MazurProof.RationalPointsN12
 ```
 
-## 9. What not to assume
-
-1. Do **not** assume `IsCoprime (m^2-n^2) (2*m-n)` in the divided sector. Counterexample: `m=2`, `n=1` gives both factors equal to `3`.
-
-2. Do **not** assume a parity split. The only exceptional common divisor is `3`.
-
-3. Do **not** try to kill the scale using `IsCoprime m n`; that only gives the reduced slope. The scale `k` is killed by `IsCoprime X Y` because `X=k*U` and `Y=n*C=k*(n*V)`.
-
-4. In the divided sector, the conclusion is not `X=k*A` and `C=k*B`; it is exactly
+Raw scale-kill equation chain, stripped down:
 
 ```text
-X = k*(A/3),
-C = k*(B/3),
+EB*X = EA*C, IsCoprime EA EB
+=> EB ∣ C
+=> C = EB*k
+=> X = EA*k                         -- cancel EB in EB*X = EA*(EB*k)
+Y = n*C = n*EB*k
+=> k ∣ X and k ∣ Y
+IsCoprime X Y => IsUnit k
+0 < k => k = 1
+=> C=EB, X=EA, Y=n*EB=EC, Z=EZ
 ```
 
-and then `k=1`.
+### Divided scale kill
+
+```lean
+import Mathlib.Tactic
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
+namespace MazurProof.RationalPointsN12
+
+private abbrev EA (m n : ℤ) : ℤ := m ^ 2 - n ^ 2
+private abbrev EB (m n : ℤ) : ℤ := 2 * m - n
+private abbrev EC (m n : ℤ) : ℤ := 2 * m * n - n ^ 2
+private abbrev EZ (m n : ℤ) : ℤ := m ^ 2 - m * n + n ^ 2
+
+private theorem eisenstein_scale_kill_divided
+    {X Y Z m n C EA' EB' : ℤ}
+    (hXY : IsCoprime X Y)
+    (hnpos : 0 < n)
+    (hYpos : 0 < Y)
+    (hEA3 : EA m n = 3 * EA')
+    (hEB3 : EB m n = 3 * EB')
+    (hEB'pos : 0 < EB')
+    (hEAEB' : IsCoprime EA' EB')
+    (hZeq : EB m n * Z = EZ m n * C)
+    (hXeq : EB m n * X = EA m n * C)
+    (hYC : Y = n * C) :
+    C = EB' ∧ 3 * X = EA m n ∧ 3 * Y = EC m n ∧ 3 * Z = EZ m n := by
+  have h3ne : (3 : ℤ) ≠ 0 := by norm_num
+  have hEB'ne : EB' ≠ 0 := ne_of_gt hEB'pos
+  have hCpos : 0 < C := by
+    have hmul : 0 < n * C := by simpa [hYC] using hYpos
+    exact pos_of_mul_pos_left hmul (le_of_lt hnpos)
+
+  -- First divide the equation by the known common factor `3`.
+  have hXeq' : EB' * X = EA' * C := by
+    apply mul_left_cancel₀ h3ne
+    calc
+      (3 : ℤ) * (EB' * X) = (3 * EB') * X := by ring
+      _ = EB m n * X := by rw [← hEB3]
+      _ = EA m n * C := hXeq
+      _ = (3 * EA') * C := by rw [hEA3]
+      _ = 3 * (EA' * C) := by ring
+
+  -- Euclid: `EB' ∣ C` from `EB'*X = EA'*C` and `IsCoprime EA' EB'`.
+  have hEB'dvdC : EB' ∣ C := by
+    have hdiv : EB' ∣ EA' * C := ⟨X, hXeq'.symm⟩
+    exact hEAEB'.symm.dvd_of_dvd_mul_left hdiv
+  rcases hEB'dvdC with ⟨k, hC⟩
+
+  have hkpos : 0 < k := by
+    have hmul : 0 < EB' * k := by simpa [hC] using hCpos
+    exact pos_of_mul_pos_left hmul (le_of_lt hEB'pos)
+
+  have hXk : X = EA' * k := by
+    apply mul_left_cancel₀ hEB'ne
+    calc
+      EB' * X = EA' * C := hXeq'
+      _ = EA' * (EB' * k) := by rw [hC]
+      _ = EB' * (EA' * k) := by ring
+
+  have hYk : Y = (n * EB') * k := by
+    rw [hYC, hC]
+    ring
+
+  have hkdvdX : k ∣ X := ⟨EA', by rw [hXk]; ring⟩
+  have hkdvdY : k ∣ Y := ⟨n * EB', by rw [hYk]; ring⟩
+
+  have hkunit : IsUnit k := hXY.isUnit_of_dvd hkdvdX hkdvdY
+  have hk : k = 1 := by
+    rcases Int.isUnit_iff.mp hkunit with hk | hk
+    · exact hk
+    · omega
+
+  have hCdiv : C = EB' := by
+    rw [hC, hk]
+    ring
+  have h3X : 3 * X = EA m n := by
+    rw [hXk, hk, hEA3]
+    ring
+  have h3Y : 3 * Y = EC m n := by
+    rw [hYk, hk]
+    calc
+      3 * (n * EB') = n * (3 * EB') := by ring
+      _ = n * EB m n := by rw [← hEB3]
+      _ = EC m n := by
+        rw [eisenstein_EC_eq_n_mul_EB]
+  have h3Z : 3 * Z = EZ m n := by
+    apply mul_left_cancel₀ hEB'ne
+    calc
+      EB' * (3 * Z) = (3 * EB') * Z := by ring
+      _ = EB m n * Z := by rw [← hEB3]
+      _ = EZ m n * C := hZeq
+      _ = EZ m n * EB' := by rw [hCdiv]
+      _ = EB' * EZ m n := by ring
+
+  exact ⟨hCdiv, h3X, h3Y, h3Z⟩
+
+end MazurProof.RationalPointsN12
+```
+
+Divided scale-kill equation chain:
+
+```text
+EA = 3*EA', EB = 3*EB'
+EB*X = EA*C
+=> 3*EB'*X = 3*EA'*C
+=> EB'*X = EA'*C
+IsCoprime EA' EB' => EB' ∣ C
+=> C = EB'*k
+=> X = EA'*k, Y = n*EB'*k
+=> k ∣ X and k ∣ Y
+IsCoprime X Y => IsUnit k
+0 < k => k = 1
+=> C=EB', 3X=EA, 3Y=n*EB=EC, 3Z=EZ
+```
+
+## Final assembly theorem skeleton
+
+```lean
+import Mathlib.Tactic
+import FLT.Assumptions.MazurProof.N12QuarticEisenstein
+
+namespace MazurProof.RationalPointsN12
+
+private abbrev EA (m n : ℤ) : ℤ := m ^ 2 - n ^ 2
+private abbrev EB (m n : ℤ) : ℤ := 2 * m - n
+private abbrev EC (m n : ℤ) : ℤ := 2 * m * n - n ^ 2
+private abbrev EZ (m n : ℤ) : ℤ := m ^ 2 - m * n + n ^ 2
+
+-- Replace argument lists to match the already compiled local lemmas.
+theorem EisensteinTriplePrimitiveFullParamStatement_proof :
+    EisensteinTriplePrimitiveFullParamStatement := by
+  intro X Y Z hXpos hYpos hZpos hXY htri
+
+  let m : ℤ := eisenstein_m X Y Z
+  let n : ℤ := eisenstein_n X Y Z
+
+  have hmn_pack : 0 < n ∧ n < m ∧ IsCoprime m n := by
+    simpa [m, n] using
+      (eisenstein_mn_pos_coprime (X:=X) (Y:=Y) (Z:=Z)
+        hXpos hYpos hZpos hXY htri)
+  rcases hmn_pack with ⟨hnpos, hnm, hmn⟩
+
+  have hcross : m * Y = n * (Z + X) := by
+    simpa [m, n] using
+      (eisenstein_slope_cross (X:=X) (Y:=Y) (Z:=Z)
+        hXpos hYpos hZpos hXY htri)
+
+  obtain ⟨C, hYC, hZXC, hCpos⟩ :=
+    eisenstein_C_of_cross (X:=X) (Y:=Y) (Z:=Z) (m:=m) (n:=n)
+      hnpos hmn hYpos hcross
+
+  have hEBpos : 0 < EB m n := eisenstein_EB_pos hnpos hnm
+
+  obtain ⟨hZeq, hXeq, hYeqEB⟩ :=
+    eisenstein_core_identities (X:=X) (Y:=Y) (Z:=Z) (m:=m) (n:=n) (C:=C)
+      htri hYC hZXC (ne_of_gt hCpos)
+
+  by_cases h3 : (3 : ℤ) ∣ m + n
+  · obtain ⟨EA', EB', hEA3, hEB3, hEB'pos, hEAEB'⟩ :=
+      eisenstein_factor_divided (m:=m) (n:=n) hmn hEBpos h3
+
+    obtain ⟨hC, h3X, h3Y, h3Z⟩ :=
+      eisenstein_scale_kill_divided
+        (X:=X) (Y:=Y) (Z:=Z) (m:=m) (n:=n) (C:=C) (EA':=EA') (EB':=EB')
+        hXY hnpos hYpos hEA3 hEB3 hEB'pos hEAEB' hZeq hXeq hYC
+
+    refine ⟨m, n, ?_⟩
+    -- Match this to the actual `EisensteinFullParam` definition.
+    -- Expected divided branch:
+    --   `3 ∣ m+n`, `3Z=EZ`, and left orientation `3X=EA`, `3Y=EC`.
+    unfold EisensteinFullParam
+    right
+    refine ⟨h3, h3Z, ?_⟩
+    left
+    exact ⟨h3X, h3Y⟩
+
+  · have hEAEB : IsCoprime (EA m n) (EB m n) :=
+      eisenstein_factor_raw (m:=m) (n:=n) hmn h3
+
+    obtain ⟨hC, hXraw, hYraw, hZraw⟩ :=
+      eisenstein_scale_kill_raw
+        (X:=X) (Y:=Y) (Z:=Z) (m:=m) (n:=n) (C:=C)
+        hXY hnpos hYpos hEBpos hEAEB hZeq hXeq hYC
+
+    refine ⟨m, n, ?_⟩
+    -- Expected raw branch:
+    --   `¬3 ∣ m+n`, `Z=EZ`, and left orientation `X=EA`, `Y=EC`.
+    unfold EisensteinFullParam
+    left
+    refine ⟨h3, hZraw, ?_⟩
+    left
+    exact ⟨hXraw, hYraw⟩
+
+end MazurProof.RationalPointsN12
+```
+
+If the existing frontier is named exactly as in the prompt:
+
+```lean
+-- Replace the statement stub by:
+theorem EisensteinTriplePrimitiveFullParamStatement :
+    EisensteinTriplePrimitiveFullParamStatement := by
+  exact EisensteinTriplePrimitiveFullParamStatement_proof
+```
+
+If Lean rejects theorem/value name shadowing, rename the `def` to the existing proposition name and call the proof theorem something like:
+
+```lean
+theorem eisensteinTriplePrimitiveFullParam :
+    EisensteinTriplePrimitiveFullParamStatement := by
+  -- assembly above
+```
+
+## API checklist for the remaining non-algebra blocks
+
+Use these local searches if the exact method names differ:
+
+```text
+# IsCoprime Euclid
+IsCoprime.dvd_of_dvd_mul_left
+IsCoprime.dvd_of_dvd_mul_right
+
+# common divisor is a unit
+IsCoprime.isUnit_of_dvd
+
+# integer units
+Int.isUnit_iff
+
+# coprime inherited by divisors
+IsCoprime.isCoprime_of_dvd_right
+IsCoprime.isCoprime_of_dvd_left
+
+# powers/products of coprime values
+IsCoprime.mul_left
+IsCoprime.mul_right
+IsCoprime.pow_left
+IsCoprime.pow_right
+```
+
+The highest-leverage exact proof to write first is `eisenstein_scale_kill_raw`. Once that compiles, `eisenstein_scale_kill_divided` is the same proof after cancelling the explicit factor `3`.
