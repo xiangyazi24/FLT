@@ -1,62 +1,142 @@
-# Q3009 (dm-codex1): Lean-friendly C10 Tate discriminant factorization
+# Q3010 (dm-codex1): denominator-cancellation proof shape for C10 Tate discriminant
 
 Target file: `FLT/Assumptions/MazurProof/KubertBridgeN10.lean`.
 
-I could not fetch that exact file through the connector path, but the algebra below only uses the definitions stated in the prompt.  The proof strategy should be independent of surrounding project code.  The only local-name uncertainty is the exact namespace/name of the Mathlib Weierstrass auxiliary invariants (`b₂`, `b₄`, `b₆`, `b₈`, `Δ`).  I use the names from the prompt.
-
-## Main recommendation
-
-Do **not** prove the full factorization by expanding
+I could not fetch the exact local working file through the connector, and I did not run a local Lean check.  The snippet below is designed to avoid the failure mode you described: it never asks `field_simp` to understand that
 
 ```lean
-(tateW (tateC10_b p) (tateC10_c p)).Δ
+1 - p * 3 + p ^ 2
 ```
 
-after substituting `b(p), c(p)`.  First prove the compact denominator-free Tate-normal-form discriminant formula
-
-```text
-Δ(tateW b c) = b^3 * (16*b^2 + (1 - 20*c - 8*c^2)*b + c*(c-1)^3).
-```
-
-Then substitute the C10 `b(p), c(p)` through two small numerator lemmas:
-
-```text
-den^6 * b(p)^3 = p^9*(p-1)^3*(2p-1)^3,
-
-den^4 * core(b(p),c(p))
-  = p*(p-1)^7*(2p-1)^2*(4p^2 - 2p - 1).
-```
-
-Finally combine them by `ring`:
-
-```text
-den^10 * Δ =
-  p^10*(p-1)^10*(2p-1)^5*(4p^2 - 2p - 1).
-```
-
-Only after that divide by `den^10`.  This keeps `field_simp` out of the huge expression.
-
-## Suggested Lean code
-
-If this is inserted directly into `KubertBridgeN10.lean`, omit the imports.  If testing in a scratch Lean file, use imports like:
+is the same denominator as `tateC10_den p`.  Instead, it first binds
 
 ```lean
-import FLT.Assumptions.MazurProof.KubertBridgeN10
-import FLT.Assumptions.MazurProof.KubertTateCommon
+D := tateC10_den p
 ```
 
-### 1. Name the compact core
+and clears denominators in generic lemmas whose denominator is exactly the variable `D`.
+
+The most important compile target is `tateC10_b_cube_num`; that proof uses no `field_simp` at all.
+
+## Patchable Lean snippet
+
+Drop this inside `namespace MazurProof.KubertBridgeN10`, after the definitions of `tateC10_den`, `tateC10_b`, `tateC10_c`, and `tateW`.
 
 ```lean
 /-- The compact residual factor in the discriminant of the Tate normal form
 `y^2 + (1-c)xy - b y = x^3 - b x^2`. -/
 def tateWDeltaCore (b c : ℚ) : ℚ :=
   16 * b ^ 2 + (1 - 20 * c - 8 * c ^ 2) * b + c * (c - 1) ^ 3
+
+/-- Pure denominator cancellation for `(N / D^2)^3`, avoiding `field_simp`.
+This is the robust replacement for the exploding direct proof of `tateC10_b_cube_num`. -/
+private theorem clear_cube_div_sq (N D : ℚ) (hD : D ≠ 0) :
+    D ^ 6 * (N / D ^ 2) ^ 3 = N ^ 3 := by
+  have hD6 : D ^ 6 ≠ 0 := pow_ne_zero 6 hD
+  calc
+    D ^ 6 * (N / D ^ 2) ^ 3
+        = D ^ 6 * (N ^ 3 / (D ^ 2) ^ 3) := by
+            rw [div_pow]
+    _ = D ^ 6 * (N ^ 3 / D ^ 6) := by
+            rw [show (D ^ 2) ^ 3 = D ^ 6 by ring]
+    _ = N ^ 3 := by
+            rw [div_eq_mul_inv]
+            calc
+              D ^ 6 * (N ^ 3 * (D ^ 6)⁻¹)
+                  = N ^ 3 * (D ^ 6 * (D ^ 6)⁻¹) := by
+                      ring
+              _ = N ^ 3 * 1 := by
+                      rw [mul_inv_cancel₀ hD6]
+              _ = N ^ 3 := by
+                      ring
+
+/-- Numerator identity for the cube of the C10 Tate `b` parameter.
+This proof does not call `field_simp`, so it should not leave inverse factors. -/
+theorem tateC10_b_cube_num
+    (p : ℚ) (hden : tateC10_den p ≠ 0) :
+    (tateC10_den p) ^ 6 * (tateC10_b p) ^ 3 =
+      p ^ 9 * (p - 1) ^ 3 * (2 * p - 1) ^ 3 := by
+  let D : ℚ := tateC10_den p
+  let N : ℚ := p ^ 3 * (p - 1) * (2 * p - 1)
+  have hD : D ≠ 0 := by
+    simpa [D] using hden
+  calc
+    (tateC10_den p) ^ 6 * (tateC10_b p) ^ 3
+        = D ^ 6 * (N / D ^ 2) ^ 3 := by
+            simp [D, N, tateC10_b]
+    _ = N ^ 3 := clear_cube_div_sq N D hD
+    _ = p ^ 9 * (p - 1) ^ 3 * (2 * p - 1) ^ 3 := by
+            dsimp [N]
+            ring
 ```
 
-### 2. Prove the arbitrary `b,c` formula first
+That should be the first lemma to add/check.  If this compiles, add the core-clearing version below.
 
-This is the high-value lemma.  It contains no divisions, so `ring` should close it.
+## Core numerator lemma without expanding rational functions at the top level
+
+The trick is to clear the generic denominator before substituting the actual polynomial denominator.
+
+```lean
+/-- Polynomial numerator after clearing the denominator in `tateWDeltaCore`. -/
+def tateWDeltaCoreNum (B C D : ℚ) : ℚ :=
+  16 * B ^ 2 + B * (D ^ 2 - 20 * C * D - 8 * C ^ 2) + C * (C - D) ^ 3
+
+/-- Generic clearing lemma for the core.  This uses `field_simp` only with the
+literal denominator variable `D`, not with the expanded polynomial `tateC10_den p`.
+So the canonical-form mismatch `(1 - p*3 + p^2)⁻¹` cannot arise here. -/
+private theorem clear_core_den4 (B C D : ℚ) (hD : D ≠ 0) :
+    D ^ 4 * tateWDeltaCore (B / D ^ 2) (C / D) =
+      tateWDeltaCoreNum B C D := by
+  have hD2 : D ^ 2 ≠ 0 := pow_ne_zero 2 hD
+  have hD3 : D ^ 3 ≠ 0 := pow_ne_zero 3 hD
+  have hD4 : D ^ 4 ≠ 0 := pow_ne_zero 4 hD
+  dsimp [tateWDeltaCore, tateWDeltaCoreNum]
+  field_simp [hD, hD2, hD3, hD4]
+  ring
+
+/-- Numerator identity for the compact residual core. -/
+theorem tateC10_deltaCore_num
+    (p : ℚ) (hden : tateC10_den p ≠ 0) :
+    (tateC10_den p) ^ 4 *
+        tateWDeltaCore (tateC10_b p) (tateC10_c p) =
+      p * (p - 1) ^ 7 * (2 * p - 1) ^ 2 *
+        (4 * p ^ 2 - 2 * p - 1) := by
+  let D : ℚ := tateC10_den p
+  let B : ℚ := p ^ 3 * (p - 1) * (2 * p - 1)
+  let C : ℚ := -p * (p - 1) * (2 * p - 1)
+  have hD : D ≠ 0 := by
+    simpa [D] using hden
+  have hb : tateC10_b p = B / D ^ 2 := by
+    simp [B, D, tateC10_b]
+  have hc : tateC10_c p = C / D := by
+    simp [C, D, tateC10_c]
+  calc
+    (tateC10_den p) ^ 4 *
+        tateWDeltaCore (tateC10_b p) (tateC10_c p)
+        = D ^ 4 * tateWDeltaCore (B / D ^ 2) (C / D) := by
+            rw [hb, hc]
+            simp [D]
+    _ = tateWDeltaCoreNum B C D := clear_core_den4 B C D hD
+    _ = p * (p - 1) ^ 7 * (2 * p - 1) ^ 2 *
+        (4 * p ^ 2 - 2 * p - 1) := by
+            dsimp [tateWDeltaCoreNum, B, C, D, tateC10_den]
+            ring
+```
+
+If `clear_core_den4` still leaves inverses, try replacing its proof with:
+
+```lean
+  dsimp [tateWDeltaCore, tateWDeltaCoreNum]
+  ring_nf
+  field_simp [hD]
+  ring
+```
+
+but I would try the displayed `field_simp [hD, hD2, hD3, hD4]; ring` version first, because the expression is generic in `D` and much smaller than the original expanded rational function.
+
+## Optional arbitrary Tate-normal-form discriminant lemma
+
+This is the compact discriminant formula that should close with plain polynomial algebra.
 
 ```lean
 theorem tateW_delta_factored (b c : ℚ) :
@@ -68,7 +148,7 @@ theorem tateW_delta_factored (b c : ℚ) :
   ring
 ```
 
-If the `simp` unfolds too much or misses the local notation, prove the same fact from the four invariants:
+If projection simplification is brittle locally, split it as follows:
 
 ```lean
 theorem tateW_b₂ (b c : ℚ) :
@@ -99,57 +179,9 @@ theorem tateW_delta_factored' (b c : ℚ) :
   ring
 ```
 
-Use whichever variant matches the local projection notation.
+## Full numerator and divided factorization
 
-### 3. Small numerator lemma for `b(p)^3`
-
-```lean
-theorem tateC10_b_cube_num
-    (p : ℚ) (hden : tateC10_den p ≠ 0) :
-    (tateC10_den p) ^ 6 * (tateC10_b p) ^ 3 =
-      p ^ 9 * (p - 1) ^ 3 * (2 * p - 1) ^ 3 := by
-  dsimp [tateC10_b, tateC10_den] at *
-  field_simp [hden]
-  ring
-```
-
-This should stay small because it only sees one rational function.
-
-### 4. Small numerator lemma for the residual core
-
-```lean
-theorem tateC10_deltaCore_num
-    (p : ℚ) (hden : tateC10_den p ≠ 0) :
-    (tateC10_den p) ^ 4 *
-        tateWDeltaCore (tateC10_b p) (tateC10_c p) =
-      p * (p - 1) ^ 7 * (2 * p - 1) ^ 2 *
-        (4 * p ^ 2 - 2 * p - 1) := by
-  dsimp [tateWDeltaCore, tateC10_b, tateC10_c, tateC10_den] at *
-  field_simp [hden]
-  ring
-```
-
-This is the only moderately large algebra step, but it is far smaller than the full discriminant.  If it is still slow, split it once more by naming the numerator of the core:
-
-```lean
-def tateC10_deltaCoreNum (p : ℚ) : ℚ :=
-  p * (p - 1) ^ 7 * (2 * p - 1) ^ 2 *
-    (4 * p ^ 2 - 2 * p - 1)
-
-theorem tateC10_deltaCore_num'
-    (p : ℚ) (hden : tateC10_den p ≠ 0) :
-    (tateC10_den p) ^ 4 *
-        tateWDeltaCore (tateC10_b p) (tateC10_c p) =
-      tateC10_deltaCoreNum p := by
-  dsimp [tateC10_deltaCoreNum,
-    tateWDeltaCore, tateC10_b, tateC10_c, tateC10_den] at *
-  field_simp [hden]
-  ring
-```
-
-### 5. Prove the multiplied/numerator discriminant identity
-
-This is the most Lean-friendly theorem to use downstream.  It has no division on the right.
+After `tateC10_b_cube_num`, `tateC10_deltaCore_num`, and `tateW_delta_factored` compile, the final identities should be light.
 
 ```lean
 theorem tateC10_delta_num
@@ -171,13 +203,7 @@ theorem tateC10_delta_num
         (4 * p ^ 2 - 2 * p - 1) := by
           rw [tateC10_b_cube_num p hden, tateC10_deltaCore_num p hden]
           ring
-```
 
-This theorem is often enough for zero/nonzero arguments.  For example, to show `p = 1/2` forces zero, it is better to use either `tateW_delta_factored` and `tateC10_b (1/2)=0`, or this numerator theorem plus `den(1/2)≠0`; no full rational-function factorization is needed.
-
-### 6. Derive the divided factorization only at the end
-
-```lean
 theorem tateC10_delta_factor
     (p : ℚ) (hden : tateC10_den p ≠ 0) :
     (tateW (tateC10_b p) (tateC10_c p)).Δ =
@@ -185,97 +211,34 @@ theorem tateC10_delta_factor
         (4 * p ^ 2 - 2 * p - 1) / (tateC10_den p) ^ 10 := by
   have hden10 : (tateC10_den p) ^ 10 ≠ 0 := pow_ne_zero 10 hden
   have hnum := tateC10_delta_num p hden
-  calc
-    (tateW (tateC10_b p) (tateC10_c p)).Δ
-        = ((tateC10_den p) ^ 10 *
-            (tateW (tateC10_b p) (tateC10_c p)).Δ) /
-            (tateC10_den p) ^ 10 := by
-            field_simp [hden10]
-            ring
-    _ = p ^ 10 * (p - 1) ^ 10 * (2 * p - 1) ^ 5 *
-        (4 * p ^ 2 - 2 * p - 1) / (tateC10_den p) ^ 10 := by
-          rw [hnum]
+  rw [← hnum]
+  field_simp [hden10]
 ```
 
-This last proof uses `field_simp` only on the trivial identity `x = den^10*x/den^10`, so it should not explode.
+The last `field_simp` is safe: the only denominator is literally `(tateC10_den p)^10`, and `hden10` matches it exactly.
 
-## Very small direct proof for `p = 1/2`
+## Why this avoids the inverse-term problem
 
-If all you need at some point is the pole exclusion, do this rather than using the full theorem:
+The bad proof makes `field_simp` normalize the expanded denominator.  It sees expressions such as
 
 ```lean
-theorem tateC10_delta_half_zero :
-    (tateW (tateC10_b ((1 : ℚ) / 2))
-           (tateC10_c ((1 : ℚ) / 2))).Δ = 0 := by
-  rw [tateW_delta_factored]
-  have hb : tateC10_b ((1 : ℚ) / 2) = 0 := by
-    norm_num [tateC10_b, tateC10_den]
-  simp [hb]
+(t ^ 2 - 3*t + 1)⁻¹
 ```
 
-The `simp [hb]` closes because the arbitrary formula has a factor `b^3`.
-
-## Sympy verification script
-
-This verifies both the arbitrary `b,c` formula and the two numerator identities.
-
-```python
-import sympy as sp
-
-b, c, p = sp.symbols('b c p')
-
-# Tate normal form: y^2 + (1-c)xy - b y = x^3 - b x^2
-a1 = 1 - c
-a2 = -b
-a3 = -b
-a4 = 0
-a6 = 0
-
-b2 = a1**2 + 4*a2
-b4 = a1*a3 + 2*a4
-b6 = a3**2 + 4*a6
-b8 = a1**2*a6 + 4*a2*a6 - a1*a3*a4 + a2*a3**2 - a4**2
-Delta = -b2**2*b8 - 8*b4**3 - 27*b6**2 + 9*b2*b4*b6
-core = 16*b**2 + (1 - 20*c - 8*c**2)*b + c*(c - 1)**3
-
-assert sp.factor(Delta - b**3*core) == 0
-print('Delta(tateW b c) =', sp.factor(Delta))
-
-D = p**2 - 3*p + 1
-bp = p**3*(p - 1)*(2*p - 1)/D**2
-cp = -p*(p - 1)*(2*p - 1)/D
-K = 4*p**2 - 2*p - 1
-
-corep = core.subs({b: bp, c: cp})
-assert sp.factor(D**6 * bp**3 - p**9*(p - 1)**3*(2*p - 1)**3) == 0
-assert sp.factor(D**4 * corep - p*(p - 1)**7*(2*p - 1)**2*K) == 0
-
-Deltap = Delta.subs({b: bp, c: cp})
-assert sp.factor(D**10 * Deltap - p**10*(p - 1)**10*(2*p - 1)**5*K) == 0
-assert sp.factor(Deltap - p**10*(p - 1)**10*(2*p - 1)**5*K/D**10) == 0
-print('C10 factorization verified')
-```
-
-## If one lemma still times out
-
-If `tateC10_deltaCore_num` is still slow in Lean, split the core numerator by common subexpressions rather than by expanding `Δ`.  For example:
+and later the ring normalizer sees the same polynomial as
 
 ```lean
-def tateC10_A (p : ℚ) : ℚ := p * (p - 1) * (2 * p - 1)
-def tateC10_Bnum (p : ℚ) : ℚ := p ^ 3 * (p - 1) * (2 * p - 1)
-def tateC10_Cnum (p : ℚ) : ℚ := - tateC10_A p
+(1 - t*3 + t^2)⁻¹
 ```
 
-Then prove:
+which is not syntactically tied to `hden` anymore.
+
+The robust proof never clears denominators after expanding `tateC10_den p`.  It first rewrites
 
 ```lean
-theorem tateC10_b_eq_Bnum_div (p : ℚ) :
-    tateC10_b p = tateC10_Bnum p / (tateC10_den p) ^ 2 := by
-  simp [tateC10_b, tateC10_Bnum]
-
-theorem tateC10_c_eq_Cnum_div (p : ℚ) :
-    tateC10_c p = tateC10_Cnum p / tateC10_den p := by
-  simp [tateC10_c, tateC10_Cnum, tateC10_A]
+D = tateC10_den p,
+B = p^3*(p-1)*(2*p-1),
+C = -p*(p-1)*(2*p-1),
 ```
 
-and run `field_simp` after rewriting only these two equalities.  In practice, however, the two numerator lemmas above should already be much smaller than the naive full-discriminant proof.
+proves denominator cancellation for `B/D^2` and `C/D`, and only then unfolds `D,B,C` in a denominator-free polynomial goal.  The final `ring` goals are polynomial, not rational-function normalization goals.
