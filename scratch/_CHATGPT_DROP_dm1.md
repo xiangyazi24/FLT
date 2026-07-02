@@ -1,510 +1,1029 @@
-# Q3074 (dm1): independent analysis of the `tau` boundary failure
+# Q3077 (dm1): tau-boundary, half-theta truncation, and strip flux
 
 Date: 2026-07-02
 
-## Executive diagnosis
+## Executive answer
 
-The data are exactly what I would expect from a **correct bulk involution** applied to a support set that is not actually closed under that involution.
-
-Let `A_e` be the supported atoms at coefficient/index `e`, let
+Yes: after the change of variables
 
 ```text
-tau(l,u,v) = (-l-2, 1-v, 1-u),
+m = l + 1,
+t = u + v - 1,
+d = u - v,
 ```
 
-and let `K(a)` be the colored key `(hblock, anchor)` of an atom. The intended proof uses
+the involution is the central reflection
 
 ```text
-K(tau(a)) = K(a),        sign(tau(a)) = -sign(a).
+tau(m,t,d) = (-m,-t,d).
 ```
 
-That proves `keyWeight = 0` only on the part of the fiber where `A_e` is `tau`-stable. The exact obstruction is the `tau`-boundary
+The late failures are therefore not caused by a bad bulk involution. They are caused by the fact that the actual coefficient extractor is not a bilateral theta alone. It is a bilateral theta plus one-sided corrections. The bilateral term lives on a tau-stable lattice. The missing-half term and the strip terms live on half-spaces or oriented intervals whose endpoints are anchored at `j = 0` or `l = 0`, not at the tau center. Those anchored half-spaces create a boundary flux.
+
+The right diagnostic object is not the full atom weight first. It is the orbit residual of the one-sided part:
 
 ```text
-partial_tau A_e = { a in A_e : tau(a) notin A_e }.
+boundaryResidual(a) = oneSided(a) + oneSided(tau(a))
 ```
 
-For every noncentral key `k`, the actual identity is
+in the convention where the stored atom contribution is already signed. If the code stores the atom sign separately, the same test appears as
 
 ```text
-keyWeight_e(k) = sum_{a in partial_tau A_e, K(a)=k} sign(a).
+boundaryResidual(a) = sign(a) * (oneSidedBody(a) - oneSidedBody(tau(a))).
 ```
 
-So the failure at
+In either convention, the bilateral part drops out of the orbit residual. Thus the exact tau-boundary is the set of tau-orbits for which this residual is nonzero. The keywise failure is the sum of those residuals over the key fiber.
+
+The `e = 11763` atom
 
 ```text
-e = 11763,
-k = (-6,-17),
-a = (l,u,v,color) = (-5,-8,-12,holdU)
+(l,u,v,color) = (-5,-8,-12,holdU)
 ```
 
-is not a mysterious failure of the sign-reversing idea. It is a one-point signed boundary flux. Its formal `tau` partner is
+has
 
 ```text
-tau(a) = (3,13,9,tauColor(holdU)),
+m = -4,
+t = -21,
+d = 4,
+u = -8,
+v = -12.
 ```
 
-with the obvious caveat that the exact target color depends on the color rule. That partner has the same colored key and opposite sign, but it lies outside the root-packet support at `e=11763`.
-
-One important consistency note: the prompt says the conjecture survives for all `e < 11763`, but it also reports a failure at `e=90`. Those two statements cannot both be literally true unless the earlier checks were excluding the boundary shell or using a filtered notion of failure. I therefore interpret the mystery as: **after ignoring the already-known `hblock = +/-1` boundary shell, why does the first deeper unbalanced fiber appear so late?** Under that interpretation, the answer is: because the deeper fibers lie inside a temporarily `tau`-symmetric core of the support until the moving boundary reaches them.
-
-## 1. Why it survives so long, and the clean threshold formula
-
-The right abstraction is not “does `tau` preserve the key?” but rather:
+Its tau image is
 
 ```text
-Does `tau` preserve the supported subset of each key fiber?
+(m,t,d) = (4,21,4),
+(l,u,v) = (3,13,9).
 ```
 
-For a fixed colored key `k`, the ambient fiber is usually one-dimensional after the two key coordinates are fixed. Choose an integer parameter `t` on that fiber:
+The bilateral contribution is not the mystery. The one-sided body has already become asymmetric:
 
 ```text
-a = a_k(t).
+oddBilat          = -2
+oddMissingSigned  = +1
+stripUSigned      = +2
+stripVSigned      =  0
+total             = +1
 ```
 
-The involution then has the form
+That is the signature of a boundary orbit: the bilateral part is trying to cancel in the symmetrized packet, while the one-sided correction has a leftover flux.
+
+## 1. Exact prediction of tau-unpaired atoms
+
+Let `A_e` be the atoms contributing to coefficient `e`, and write the signed contribution as
 
 ```text
-tau(a_k(t)) = a_k(s_k - t)
+W_e(a) = W_bil(a) + W_miss(a) + W_U(a) + W_V(a).
 ```
 
-for some integer center parameter `s_k`. If `t` is literally `l`, then `s_k = -2` because `l -> -l-2`, i.e. reflection about `l=-1`.
-
-Now suppose the root packet cuts out a finite interval, perhaps with a congruence condition,
+Here:
 
 ```text
-T_e(k) = { t in r_k + M Z : L_e(k) <= t <= R_e(k) }.
+W_bil   = oddBilat,
+W_miss  = oddMissingSigned,
+W_U     = stripUSigned,
+W_V     = stripVSigned.
 ```
 
-Then the fiber is `tau`-stable if and only if
+The structural claim from the code analysis is
 
 ```text
-T_e(k) = s_k - T_e(k).
+W_bil(a) + W_bil(tau(a)) = 0
 ```
 
-Ignoring the harmless residue bookkeeping for the moment, this is the endpoint condition
+on the symmetrized lattice. Therefore, for a two-point tau orbit, the only possible obstruction is
 
 ```text
-L_e(k) + R_e(k) = s_k.
+R_partial(a)
+  = W_miss(a) + W_miss(tau(a))
+  + W_U(a)    + W_U(tau(a))
+  + W_V(a)    + W_V(tau(a))
 ```
 
-In the literal `l`-coordinate this becomes
+with the same signed-weight convention as above. Equivalently, if the code stores body values before multiplying by the atom sign, replace the plus signs by the corresponding signed difference:
 
 ```text
-L_e(k) + R_e(k) = -2.
+R_partial(a)
+  = sign(a) * (
+        body_miss(a) - body_miss(tau(a))
+      + body_U(a)    - body_U(tau(a))
+      + body_V(a)    - body_V(tau(a))
+    ).
 ```
 
-This is the clean local threshold test. A left-side boundary defect appears when
+Then the exact keywise identity is
 
 ```text
-there exists t with L_e(k) <= t <= R_e(k) but s_k - t > R_e(k),
+keyWeight_e(k)
+  = sum over tau-orbit representatives a with K(a)=k of R_partial(a).
 ```
 
-which is equivalent to
+So the exact prediction rule is:
 
 ```text
-L_e(k) + R_e(k) < s_k.
+a tau-orbit is dangerous  <=>  R_partial(a) != 0,
+a key fails               <=>  the dangerous-orbit residuals in that key do not sum to 0.
 ```
 
-A right-side boundary defect appears when
+This distinction matters. A single atom can have a nonzero one-sided term and still be harmless if its tau mate has the opposite one-sided term. The unpaired atoms are not merely the atoms where `oddMissingSigned` or `stripUSigned` is nonzero. They are the atoms where the tau-orbit residual of the one-sided part is nonzero.
+
+### Missing-half component
+
+Use
 
 ```text
-there exists t with L_e(k) <= t <= R_e(k) but s_k - t < L_e(k),
+b = 2l + 1 = 2m - 1.
 ```
 
-which is equivalent to
+Under tau,
 
 ```text
-L_e(k) + R_e(k) > s_k.
+b' = 2(-l-2) + 1 = -b - 2 = -2m - 1.
 ```
 
-Thus the support is protected for small `e` precisely while every noncentral key fiber under consideration has symmetric endpoints, or while any endpoint asymmetry contributes only in excluded/canceling boundary shells.
-
-For the reported singleton at `e=11763`, the atom has `l=-5` and the missing partner has `l=3`. Therefore the relevant support interval contains `-5` but not `3`. In the `l`-interval picture this means the right endpoint is at most `2` while the left side has already reached `-5`. The support window has shifted/rounded far enough away from the `tau` center `-1` to expose a one-atom overhang.
-
-A clean threshold formula should be written as follows. For a shell depth `m`, define
+Thus, away from the central point `m = 0`, the sign side switches:
 
 ```text
-F_m = min { e : there exists a noncentral key k with |hblock(k)| = m and keyWeight_e(k) != 0 }.
+m >= 1  =>  b >= 1   and b' <= -3,
+m <= -1 =>  b <= -3  and b' >= 1.
 ```
 
-Equivalently,
+At `m = 0`, one has `l = -1`, `b = -1`, and tau fixes `l`. This is the central exceptional line.
+
+The prompt says the missing-half code uses
 
 ```text
-F_m = min { e : exists a supported atom a with |hblock(K(a))| = m,
-                 tau(a) unsupported,
-                 and the signed tau-boundary mass at K(a) does not cancel }.
+b >= 0  ->  partial_neg_coeff,
+b <  0  ->  partial_pos_coeff.
 ```
 
-If the support endpoints come from root-packet inequalities, then `L_e(k)` and `R_e(k)` are floor/ceiling functions of algebraic roots, often square-root expressions in `e`. The threshold is therefore obtained by solving
+Therefore define a side selector for roots `j` of the relevant j-quadratic:
 
 ```text
-L_e(k) + R_e(k) != s_k
+P_m(j) = 1_{j < 0}   if m >= 1,
+P_m(j) = 1_{j >= 0}  if m <= 0.
 ```
 
-with the congruence/color restrictions imposed. This is usually a finite union of integer quadratic minimization problems, one for each boundary face and residue class. In favorable cases it collapses to a piecewise quadratic quasipolynomial in the shell parameter.
-
-So the protection for small `e` is not a theorem-level phenomenon; it is a geometry-of-numbers gap. The first lattice point in the defective collar simply occurs late.
-
-## 2. Is the inward growth a wavefront?
-
-Yes, with one qualification: it is a wavefront in the **first-hit envelope**, not necessarily in the set of every individual failing `e`.
-
-The natural wavefront function is
+The exact missing-half boundary is then
 
 ```text
-m_max(E) = max { |hblock(k)| : exists e <= E and keyWeight_e(k) != 0 }.
+D_miss(a)
+  = sum over bilateral roots j at a of eps(j) * P_m(j)
+    + sum over bilateral roots j' at tau(a) of eps'(j') * P_{-m}(j').
 ```
 
-The data fit this picture:
+Equivalently, if the bilateral root map `j -> j_tau` is known from the quadratic, this becomes the pointwise test
 
 ```text
-e = 90:       failures already occur, but only in hblock = +/-1.
-e in [80,459]: reported failures remain in hblock = +/-1.
-e = 702:      first reported deeper failure, at hblock = -2.
-e = 11763:    a much deeper failure appears, at hblock = -6.
+D_miss(a)
+  = sum_j eps(j) * (P_m(j) - P_{-m}(j_tau)).
 ```
 
-This is exactly what happens when the support has a `tau`-symmetric interior and an asymmetric collar. As `e` grows, the collar intersects key fibers farther from the outer shell. The wavefront is the projection of the root-packet boundary into `(hblock, anchor)` space.
+The missing-half boundary therefore occurs exactly where the tau-paired roots lie on different sides of the `j = 0` cut, or where one side of the root pair is absent because the discriminant/integrality condition fails after the shifted transformation of the linear coefficient.
 
-I would not model the front as depending only on `|hblock|`. The `e=11763` example has key `(-6,-17)`, so the anchor is also moving. The true first-hit function is two-dimensional:
+This is already an exact prediction method: solve the full bilateral root equation, apply the two half-line selectors, and keep precisely those tau-orbits with nonzero `D_miss`.
+
+### Strip component
+
+The strip function is best written as an oriented interval. Let
 
 ```text
-F(h,a0) = min { e : keyWeight_e((h,a0)) != 0 }.
+H(x) = 1 if x >= 0, otherwise 0.
 ```
 
-Then the shell front is the projection
+Then for integer `N,x`,
 
 ```text
-F_m = min_{anchor a0, color packet} F(+/-m,a0).
+strip0(N,x) = H(x) - H(x - N).
 ```
 
-This distinction matters because a visually clean shell pattern can be a projection of a slanted boundary curve in the `(hblock, anchor)` plane.
-
-Prediction strategy:
-
-1. For each root-packet support inequality, identify the face on which `tau(a)` first fails support.
-2. Parameterize atoms on that face.
-3. Minimize the coefficient/index expression `e` subject to fixed `hblock` and the key congruences.
-4. The resulting minima are the predicted breakdown values `F_m`.
-
-This should be dramatically cheaper and more revealing than scanning all atoms, because boundary minimization has one fewer free variable.
-
-## 3. Boundary compensation: the discrete Stokes form
-
-There is an exact compensation term. Define
+This is exactly the implementation-level rule:
 
 ```text
-B_e(k) = sum_{a in A_e, K(a)=k, tau(a) notin A_e} sign(a).
+N > 0:  strip0(N,x) = +1 if 0 <= x < N, else 0,
+N < 0:  strip0(N,x) = -1 if N <= x < 0, else 0,
+N = 0:  strip0(N,x) = 0.
 ```
 
-Then the true fiber identity is
+Equivalently, with
 
 ```text
-keyWeight_e(k) = B_e(k).
+I(N) = [1,N]      if N > 0,
+I(N) = [N+1,0]    if N < 0,
+I(N) = empty      if N = 0,
 ```
 
-Equivalently, the rescued cancellation statement is
+one has
 
 ```text
-keyWeight_e(k) - B_e(k) = 0.
+strip0(N,m-1) = sgn(N) * 1_{m in I(N)}.
 ```
 
-This is the discrete Stokes interpretation. The bulk consists of complete two-point `tau`-orbits. Complete orbits have zero divergence because their signs cancel. The only contribution is flux through the boundary of the support region.
+Here the endpoint convention follows directly from `0 <= l < N` with `l = m - 1`: if `N > 0`, then `m = 1,...,N`. If your code has an extra upper-shift convention, replace `I(N)` by the corresponding shifted interval. The formulas below are unchanged in form.
 
-A more structural version is obtained by augmenting the support:
+Now put
 
 ```text
-A_e^sym = A_e union tau(A_e).
+U = u = (t+d+1)/2,
+V = v = (t-d+1)/2.
 ```
 
-The augmented set is `tau`-stable, so its noncentral key weights cancel. Hence the original supported sum is exactly the negative of the missing mirror contribution. In formulas,
+Under tau,
 
 ```text
-0 = sum_{a in A_e^sym, K(a)=k} sign(a)
-  = keyWeight_e(k) + sum_{a in tau(A_e) \ A_e, K(a)=k} sign(a).
+U_tau = 1 - v = (d-t+1)/2,
+V_tau = 1 - u = (1-t-d)/2.
 ```
 
-Using `sign(tau(a)) = -sign(a)`, this is the same boundary formula above.
-
-This gives a principled rescue:
+The U-strip itself is
 
 ```text
-correctedKeyWeight_e(k) = keyWeight_e(k) - B_e(k).
+S_U(m,t,d) = strip0(U,m-1)
+           = H(m-1) - H(m-1-U).
 ```
 
-The remaining mathematical task is to express `B_e(k)` in a closed form. Since boundary atoms lie on root-packet faces, `B_e` should be a lower-dimensional q-series: a sum over boundary faces, colors, and congruence classes. If the boundary faces themselves telescope in `anchor` or `hblock`, then the final correction may be a small number of one-dimensional false-theta/Appell-Lerch-type edge sums.
-
-The reported `e=11763` grand total `-23` is also meaningful in this language. It says that after summing over the displayed noncentral rows, the total boundary flux is `-23`. Therefore the boundary terms are not merely local artifacts that cancel globally, unless an omitted central sector contributes `+23` or the displayed total is over a truncated subset.
-
-## 4. Can a modified involution pair the boundary atoms?
-
-Not on the same atom set while preserving the same key and sign data.
-
-A sign-reversing involution on a finite key fiber implies equal positive and negative signed mass in that fiber. Therefore it forces
+Its tau pullback is
 
 ```text
-keyWeight_e(k) = 0.
+S_U(tau(m,t,d))
+  = strip0(U_tau,-m-1)
+  = H(-m-1) - H(-m-1-U_tau).
 ```
 
-At `e=11763`, the key `(-6,-17)` has `keyWeight = 1`. That is a parity/mass obstruction. There is no fixed-point-free sign-reversing involution of the existing atoms in that key fiber.
-
-There are only three possible ways out:
-
-1. **Add mirror atoms.** Enlarge the support to `A_e union tau(A_e)` by adding phantom/missing boundary partners. Then `tau` works perfectly, and the original expression equals the boundary correction.
-2. **Weaken the invariant.** Pair across different keys or across central/noncentral sectors. This cannot prove the original keywise conjecture, but it might prove a coarser aggregate identity if the aggregate signed mass is zero.
-3. **Change the object being counted.** Modify colors, weights, or support conventions so that the problematic boundary mass is removed or transferred. This is not a modified involution on the original atoms; it is a modified theorem.
-
-A piecewise involution of the form
+Thus the same-component U-strip residual is the explicit function
 
 ```text
-modifiedTau = T_lambda o tau
+R_U(m,t,d)
+  = S_U(m,t,d) - S_U(tau(m,t,d))
+  = H(m-1) - H(m-1-U)
+    - H(-m-1) + H(-m-1-U_tau).
 ```
 
-where `T_lambda` is a key-preserving lattice translation is worth testing only if the boundary fiber contains opposite-signed atoms that can absorb the defect. The single-key weight `1` says that such a complete pairing cannot exist inside `K=(-6,-17)` for the current support.
-
-There is a tempting set-theoretic trick: reflect the actual support interval `[L,R]` about its own midpoint, `t -> L+R-t`, rather than reflecting about the algebraic `tau` center `s_k/2`. That pairs the finite set as a set. But it will generally fail to be the q-series involution: it need not reverse the sign, preserve the colored root-packet data, or match the transformations used in the summand. The observed nonzero key weight proves that no such reflection can be a valid sign-reversing involution for the current weighted fiber.
-
-## 5. Is `e = 11763 = 9 * 1307` arithmetic?
-
-The factor `9` is a serious clue; the factor `1307` is less likely to be intrinsically meaningful until the boundary quadratic form is identified.
-
-The relevant observed values are all divisible by `9`:
+In interval language,
 
 ```text
-90    = 9 * 10,
-702   = 9 * 78,
-11763 = 9 * 1307.
+R_U(m,t,d)
+  = sgn(U)     * 1_{m in I(U)}
+    - sgn(U_tau) * 1_{m in -I(U_tau)}.
 ```
 
-That suggests the defective boundary family may live on an `e == 0 mod 9` residue class. This would be natural if the root-packet support or the coefficient exponent is controlled by quadratic forms with denominator `3` or `9`, or if an integrality condition requires a discriminant to be a square in a residue class modulo `9`.
-
-What I would test is not “is 1307 special?” but rather:
+Here
 
 ```text
-For every tau-boundary atom, what is e mod 9?
-For every first-hit shell value F_m, what is F_m mod 9?
-For each failed support face, which residues mod 9 are allowed?
+-I([a,b]) = [-b,-a].
 ```
 
-If all deep boundary failures lie in one residue class, then the residue is structural. If only the first few examples are `0 mod 9`, then the pattern may be a sampling artifact.
-
-The quotient `1307` should be interpreted as the value of the reduced boundary form after dividing out the common modulus. In other words, I would expect a formula of the schematic shape
+Therefore the U-strip boundary is exactly the oriented symmetric difference
 
 ```text
-e = 9 * Q_boundary(parameters) + r_face,
+I(U)  versus  -I(U_tau).
 ```
 
-with `r_face = 0` for the observed defective face. The number `1307` is then probably `Q_boundary` evaluated at the primitive boundary parameters corresponding to `(-5,-8,-12,holdU)`.
-
-A useful diagnostic is to compute, for the bad atom and its missing partner, every linear form used by the support inequalities. The failed inequality should reveal whether `11763/9 = 1307` is a norm, a discriminant quotient, or just the minimized value of a face polynomial.
-
-## 6. Analogies with known late-failure phenomena
-
-This phenomenon is very familiar in sign-reversing combinatorics.
-
-The closest analogies are:
-
-* **Franklin-type involutions for partition identities.** Almost every object cancels, but boundary/staircase objects remain unpaired. Those exceptional objects occur at sparse quadratic indices, such as generalized pentagonal numbers.
-* **Reflection-principle and Weyl-denominator cancellations.** Interior lattice points cancel under reflections. Points on or beyond walls produce boundary terms, singular weights, or chamber corrections.
-* **Finite/truncated q-series identities.** Infinite products or bilateral sums often have exact involutions, while finite root windows introduce edge terms. The edge terms can remain invisible for a long initial range.
-* **Indefinite theta and false/mock theta decompositions.** A sign function cuts the lattice by cones. Reflections cancel the bulk, but cone boundaries produce lower-dimensional correction series.
-* **Ehrhart/quasipolynomial first-hit effects.** The first lattice point in a thin rational cone or boundary collar can occur very late, and its occurrence is governed by congruence classes. This gives exactly the illusion of a true identity verified through a long finite range.
-
-So the “late failure” is not pathological. It is a standard warning sign: a proposed involution is valid on the ambient algebraic expression but not on the truncated/integer support region.
-
-## What I would investigate first
-
-First, I would stop summing whole fibers and directly audit the `tau`-boundary. For every supported atom, record whether the partner is supported, which support inequality fails for the partner, and the residue of `e` modulo `9`, `18`, and `27`.
-
-The first concrete target should be the atom
+The V-strip formula is identical:
 
 ```text
-(-5,-8,-12,holdU) at e = 11763.
+R_V(m,t,d)
+  = S_V(m,t,d) - S_V(tau(m,t,d))
+  = H(m-1) - H(m-1-V)
+    - H(-m-1) + H(-m-1-V_tau),
 ```
 
-Compute its missing partner
+or
 
 ```text
-(3,13,9,tauColor(holdU))
+R_V(m,t,d)
+  = sgn(V)       * 1_{m in I(V)}
+    - sgn(V_tau) * 1_{m in -I(V_tau)}.
 ```
 
-and identify the exact failed support face. Once that face is known, repeat the calculation for `e=90` and `e=702`. If the same face, after translating shell/anchor parameters, explains all three, then the wavefront has a single governing boundary formula. If different faces are involved, the compensation term is a sum of several face contributions.
-
-Second, I would compute first-hit tables:
+If the color map sends a U-strip term to a V-strip term, use the cross residual instead:
 
 ```text
-F(hblock)              = first e with any nonzero keyWeight at that hblock,
-F(abs(hblock))         = first e with any nonzero keyWeight at that shell depth,
-F(hblock, anchor)      = first e for the exact key,
-F(face, hblock)        = first e caused by each failed support face.
+R_{U->V}(m,t,d)
+  = S_U(m,t,d) - S_V(tau(m,t,d))
+  = strip0(U,m-1) - strip0(V_tau,-m-1).
 ```
 
-Third, I would fit these first-hit values to the boundary minimization problem, not to the full atom enumeration. The boundary problem is lower-dimensional and should expose the formula.
+Likewise,
 
-Here is the instrumentation I would add. It is deliberately written to audit the involution boundary rather than to re-prove the identity by brute-force summation.
+```text
+R_{V->U}(m,t,d)
+  = strip0(V,m-1) - strip0(U_tau,-m-1).
+```
+
+The important point is the shift
+
+```text
+x = m - 1,
+x_tau = -m - 1 = -x - 2.
+```
+
+The strip is anchored at `x = 0`, i.e. `l = 0` or `m = 1`. But the tau center is `m = 0`, i.e. `l = -1`. Hence the mirror of the strip is displaced by one lattice unit. This is the concrete reason the strip is not tau-symmetric.
+
+For the `e = 11763` atom,
+
+```text
+m = -4,
+t = -21,
+d = 4,
+U = -8,
+V = -12,
+U_tau = 13,
+V_tau = 9.
+```
+
+So
+
+```text
+I(U)       = [-7,0],
+-I(U_tau) = [-13,-1].
+```
+
+The point `m = -4` lies in both intervals, but the orientations are opposite:
+
+```text
+sgn(U)     = -1,
+sgn(U_tau) = +1.
+```
+
+Thus the strip defect is not merely a support-membership defect. It is an oriented-boundary defect. Depending on the global sign/color convention, this is exactly the source of a signed contribution of magnitude `2`, matching the reported `stripUSigned = +2` up to the sign convention used by the body printer.
+
+### Minimal exact classifier
+
+The classifier I would use is this:
 
 ```python
-from __future__ import annotations
-
-from collections import Counter, defaultdict
 from dataclasses import dataclass
-from typing import Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Mapping, Optional, Sequence, Tuple
+from typing import Callable, Iterable, Optional, Sequence
 
-
-@dataclass(frozen=True, order=True)
+@dataclass(frozen=True)
 class Atom:
     l: int
     u: int
     v: int
     color: str
 
+@dataclass(frozen=True)
+class MTD:
+    m: int
+    t: int
+    d: int
+    color: str
 
-Key = Tuple[int, int]
-Face = str
+def tau_color(color: str) -> str:
+    # Replace this with the actual color map from the implementation.
+    # The mathematical tests below do not assume which colors swap.
+    return color
 
-
-def tau_atom(atom: Atom, tau_color: Callable[[str], str]) -> Atom:
-    """The proposed bulk involution on atoms."""
+def tau_atom(a: Atom) -> Atom:
     return Atom(
-        l=-atom.l - 2,
-        u=1 - atom.v,
-        v=1 - atom.u,
-        color=tau_color(atom.color),
+        l=-a.l - 2,
+        u=1 - a.v,
+        v=1 - a.u,
+        color=tau_color(a.color),
     )
 
+def to_mtd(a: Atom) -> MTD:
+    return MTD(
+        m=a.l + 1,
+        t=a.u + a.v - 1,
+        d=a.u - a.v,
+        color=a.color,
+    )
 
-def boundary_audit_for_e(
-    e: int,
-    atoms_at_e: Iterable[Atom],
-    key_of: Callable[[Atom], Key],
-    sign_of: Callable[[Atom], int],
-    tau_color: Callable[[str], str],
-    failed_faces: Callable[[int, Atom], Tuple[Face, ...]],
-) -> Dict[str, object]:
-    """
-    Audit tau-cancellation at one e.
+def from_mtd(x: MTD) -> Atom:
+    # u and v are integral exactly when t+d+1 and t-d+1 are even.
+    u_num = x.t + x.d + 1
+    v_num = x.t - x.d + 1
+    if u_num % 2 or v_num % 2:
+        raise ValueError('nonintegral u or v from m,t,d')
+    return Atom(
+        l=x.m - 1,
+        u=u_num // 2,
+        v=v_num // 2,
+        color=x.color,
+    )
 
-    `atoms_at_e` must be the actual supported atoms at coefficient/index e.
-    `failed_faces(e, atom)` should return the support inequalities that fail for `atom`.
-    For a missing tau partner, calling `failed_faces(e, tau(atom))` identifies the boundary face.
-    """
-    atoms: FrozenSet[Atom] = frozenset(atoms_at_e)
+def H_ge0(n: int) -> int:
+    return 1 if n >= 0 else 0
 
-    key_weight: DefaultDict[Key, int] = defaultdict(int)
-    boundary_weight: DefaultDict[Key, int] = defaultdict(int)
-    boundary_count_by_key: Counter[Key] = Counter()
-    boundary_count_by_face: Counter[Tuple[Face, int, int]] = Counter()
-    residue_count_by_face: Counter[Tuple[Face, int]] = Counter()
-    missing_examples: DefaultDict[Key, List[Tuple[Atom, Atom, Tuple[Face, ...]]]] = defaultdict(list)
+def strip0(N: int, x: int) -> int:
+    # Oriented half-open interval: +[0,N) for N>0, -[N,0) for N<0.
+    return H_ge0(x) - H_ge0(x - N)
 
-    for atom in atoms:
-        key = key_of(atom)
-        sgn = sign_of(atom)
-        partner = tau_atom(atom, tau_color)
-        key_weight[key] += sgn
+def interval_I(N: int) -> Optional[tuple[int, int]]:
+    # Returns the closed integer m-interval for strip0(N,m-1).
+    if N > 0:
+        return (1, N)
+    if N < 0:
+        return (N + 1, 0)
+    return None
 
-        if partner not in atoms:
-            faces = failed_faces(e, partner)
-            boundary_weight[key] += sgn
-            boundary_count_by_key[key] += 1
+def in_interval(m: int, interval: Optional[tuple[int, int]]) -> bool:
+    if interval is None:
+        return False
+    lo, hi = interval
+    return lo <= m <= hi
 
-            hblock, anchor = key
-            if not faces:
-                boundary_count_by_face[("UNKNOWN", hblock, anchor)] += 1
-                residue_count_by_face[("UNKNOWN", e % 9)] += 1
-            else:
-                for face in faces:
-                    boundary_count_by_face[(face, hblock, anchor)] += 1
-                    residue_count_by_face[(face, e % 9)] += 1
+def neg_interval(interval: Optional[tuple[int, int]]) -> Optional[tuple[int, int]]:
+    if interval is None:
+        return None
+    lo, hi = interval
+    return (-hi, -lo)
 
-            if len(missing_examples[key]) < 5:
-                missing_examples[key].append((atom, partner, faces))
+def sgn(n: int) -> int:
+    return (n > 0) - (n < 0)
 
-    mismatches = {
-        key: (key_weight[key], boundary_weight.get(key, 0))
-        for key in sorted(key_weight)
-        if key_weight[key] != boundary_weight.get(key, 0)
-    }
+def U_value(m: int, t: int, d: int) -> int:
+    num = t + d + 1
+    if num % 2:
+        raise ValueError('U is not integral')
+    return num // 2
 
-    nonzero_keys = {
-        key: wt
-        for key, wt in sorted(key_weight.items())
-        if wt != 0
-    }
+def V_value(m: int, t: int, d: int) -> int:
+    num = t - d + 1
+    if num % 2:
+        raise ValueError('V is not integral')
+    return num // 2
 
-    return {
-        "e": e,
-        "nonzero_keys": nonzero_keys,
-        "boundary_weight": dict(boundary_weight),
-        "boundary_count_by_key": dict(boundary_count_by_key),
-        "boundary_count_by_face": dict(boundary_count_by_face),
-        "residue_count_by_face_mod9": dict(residue_count_by_face),
-        "missing_examples": dict(missing_examples),
-        "identity_mismatches": mismatches,
-    }
+def strip_U_same_component_residual(m: int, t: int, d: int) -> int:
+    U = U_value(m, t, d)
+    U_tau = U_value(-m, -t, d)
+    return strip0(U, m - 1) - strip0(U_tau, -m - 1)
 
+def strip_V_same_component_residual(m: int, t: int, d: int) -> int:
+    V = V_value(m, t, d)
+    V_tau = V_value(-m, -t, d)
+    return strip0(V, m - 1) - strip0(V_tau, -m - 1)
 
-def first_hit_by_shell(
-    e_values: Iterable[int],
-    atoms_for_e: Callable[[int], Iterable[Atom]],
-    key_of: Callable[[Atom], Key],
-    sign_of: Callable[[Atom], int],
-    tau_color: Callable[[str], str],
-    failed_faces: Callable[[int, Atom], Tuple[Face, ...]],
-) -> Dict[int, Tuple[int, Key, int]]:
-    """
-    Return the first e at which each |hblock| shell has nonzero keyWeight.
-    The value is shell -> (e, key, keyWeight).
-    """
-    first: Dict[int, Tuple[int, Key, int]] = {}
+def strip_U_to_V_residual(m: int, t: int, d: int) -> int:
+    U = U_value(m, t, d)
+    V_tau = V_value(-m, -t, d)
+    return strip0(U, m - 1) - strip0(V_tau, -m - 1)
 
-    for e in sorted(e_values):
-        audit = boundary_audit_for_e(
-            e=e,
-            atoms_at_e=atoms_for_e(e),
-            key_of=key_of,
-            sign_of=sign_of,
-            tau_color=tau_color,
-            failed_faces=failed_faces,
-        )
-        nonzero_keys: Mapping[Key, int] = audit["nonzero_keys"]  # type: ignore[assignment]
+def strip_V_to_U_residual(m: int, t: int, d: int) -> int:
+    V = V_value(m, t, d)
+    U_tau = U_value(-m, -t, d)
+    return strip0(V, m - 1) - strip0(U_tau, -m - 1)
 
-        for key, weight in nonzero_keys.items():
-            hblock, _anchor = key
-            shell = abs(hblock)
-            if shell not in first:
-                first[shell] = (e, key, weight)
+def b_value_from_m(m: int) -> int:
+    return 2 * m - 1
 
-    return first
+def n_value_from_m(m: int) -> int:
+    # n = 54l + 45 = 54(m-1) + 45 = 54m - 9 = 9(6m-1).
+    return 54 * m - 9
 
+def missing_side_selector(m: int, j: int) -> int:
+    # Prompt convention: b>=0 uses partial_neg, b<0 uses partial_pos.
+    b = b_value_from_m(m)
+    if b >= 0:
+        return 1 if j < 0 else 0
+    return 1 if j >= 0 else 0
 
-def interval_defect(left: int, right: int, tau_center_sum: int = -2) -> int:
-    """
-    For a one-dimensional fiber parameter t with tau(t)=tau_center_sum-t,
-    return the endpoint defect. Zero means the integer interval endpoints are tau-symmetric.
-    """
-    return left + right - tau_center_sum
+def orbit_boundary_residual_signed(
+    a: Atom,
+    one_sided_signed_weight: Callable[[Atom], int],
+) -> int:
+    # Use this if one_sided_signed_weight already includes the atom sign.
+    return one_sided_signed_weight(a) + one_sided_signed_weight(tau_atom(a))
 
-
-def has_left_overhang(left: int, right: int, tau_center_sum: int = -2) -> bool:
-    """True when the support interval reaches too far to the left for tau-closure."""
-    return left + right < tau_center_sum
-
-
-def has_right_overhang(left: int, right: int, tau_center_sum: int = -2) -> bool:
-    """True when the support interval reaches too far to the right for tau-closure."""
-    return left + right > tau_center_sum
+def orbit_boundary_residual_body(
+    a: Atom,
+    atom_sign: Callable[[Atom], int],
+    one_sided_body_weight: Callable[[Atom], int],
+) -> int:
+    # Use this if body weights are printed before multiplying by atom sign.
+    return atom_sign(a) * (
+        one_sided_body_weight(a) - one_sided_body_weight(tau_atom(a))
+    )
 ```
 
-The most important assertion to check in real data is this:
+That code is deliberately only a classifier skeleton. The missing piece to plug in from the project is the actual `j`-quadratic root map and the actual color map. Once those are inserted, the classifier gives the exact tau-boundary without scanning irrelevant bilateral bulk.
+
+## 2. Why the mod-9 pattern is natural
+
+The j-coefficient quadratic has linear parameter
 
 ```text
-keyWeight_e(k) == boundaryWeight_e(k)
+n = 54l + 45 = 9(6l+5).
 ```
 
-for every noncentral key. If that equality holds, then the entire problem has been reduced from a mysterious q-series identity failure to an explicit boundary enumeration problem.
+In `m` coordinates this is
+
+```text
+n = 54m - 9 = 9(6m-1).
+```
+
+Under tau,
+
+```text
+n_tau = 54(-m) - 9 = -54m - 9 = -n - 18 = -9(6m+1).
+```
+
+So tau does not merely send `n` to `-n`; it sends it to `-n - 18`. This is the same one-unit displacement that appeared in
+
+```text
+b_tau = -b - 2.
+```
+
+The common factor `9` is not cosmetic. Suppose the j-coefficient equation has the standard quadratic shape
+
+```text
+A j^2 + n j + C = e
+```
+
+or, equivalently,
+
+```text
+A j^2 + n j + C - e = 0.
+```
+
+Then the discriminant is
+
+```text
+Delta = n^2 - 4A(C-e)
+      = 81(6m-1)^2 + 4A(e-C).
+```
+
+Modulo `9`, this reduces to
+
+```text
+Delta == 4A(e-C)  mod 9.
+```
+
+Integral roots require two things:
+
+```text
+1. Delta is a square.
+2. -n +/- sqrt(Delta) is divisible by 2A.
+```
+
+Since `n` is divisible by `9`, the numerator congruence often forces `sqrt(Delta)` to lie in a restricted congruence class modulo `3`, `9`, or `18`. On a boundary face where the remaining constant term satisfies
+
+```text
+C == 0  mod 9,
+```
+
+one gets the natural condition
+
+```text
+e == 0  mod 9
+```
+
+provided the allowed square root class is also `0 mod 3` or `0 mod 9`.
+
+This explains why the observed failures
+
+```text
+90    = 9 * 10,
+702   = 9 * 78,
+11763 = 9 * 1307
+```
+
+all being multiples of `9` is a serious clue. The factor `1307` is probably not the first thing to chase. The structural arithmetic is the common modulus `9`; the quotient is likely the value of a reduced boundary quadratic after dividing out the forced modulus.
+
+The exact modular theorem should be obtained face-by-face. For each missing-half or strip boundary face, compute the allowed residues
+
+```text
+(e mod 9, m mod M, t mod M, d mod M, j mod M)
+```
+
+satisfying the discriminant and numerator congruences. The output should be a finite residue table. The relevant question is not only whether all failures satisfy `e == 0 mod 9`, but whether every boundary face capable of nonzero key flux forces `e == 0 mod 9`.
+
+Here is the residue computation I would add next:
+
+```python
+from collections import defaultdict
+from dataclasses import dataclass
+from typing import Callable, Iterable
+
+@dataclass(frozen=True)
+class QuadraticModel:
+    A: int
+    # C_mod returns C modulo mod for a residue tuple.
+    C_mod: Callable[[int, int, int, int], int]
+    # Extra numerator condition for integral roots.
+    numerator_ok: Callable[[int, int, int], bool]
+
+
+def square_residues(mod: int) -> set[int]:
+    return {(r * r) % mod for r in range(mod)}
+
+
+def allowed_e_residues_mod9_for_face(
+    model: QuadraticModel,
+    m_modulus: int,
+    t_modulus: int,
+    d_modulus: int,
+    j_modulus: int,
+) -> dict[int, list[tuple[int, int, int, int]]]:
+    out: dict[int, list[tuple[int, int, int, int]]] = defaultdict(list)
+    sq9 = square_residues(9)
+    for m in range(m_modulus):
+        n = (54 * m - 9) % 9
+        for t in range(t_modulus):
+            for d in range(d_modulus):
+                C = model.C_mod(m, t, d, 9) % 9
+                for e in range(9):
+                    Delta = (n * n - 4 * model.A * (C - e)) % 9
+                    if Delta not in sq9:
+                        continue
+                    for j in range(j_modulus):
+                        if model.numerator_ok(n, Delta, j):
+                            out[e].append((m, t, d, j))
+                            break
+    return dict(out)
+```
+
+The expected result, if the mod-9 explanation is correct, is that the boundary faces that survive key aggregation have support only in the `e = 0 mod 9` bucket.
+
+If the table instead shows several allowed residue classes, then `e = 90,702,11763` being `0 mod 9` is a first-hit artifact, not a universal obstruction.
+
+## 3. Explicit strip boundary in `(m,t,d)`
+
+The cleanest formula is the Heaviside form above. I restate it here because it is the local boundary calculation I would put in the proof.
+
+Define
+
+```text
+S(N,m) = strip0(N,m-1) = H(m-1) - H(m-1-N).
+```
+
+For the U-strip,
+
+```text
+U       = (t+d+1)/2,
+U_tau   = (d-t+1)/2.
+```
+
+Then
+
+```text
+R_U(m,t,d)
+  = S(U,m) - S(U_tau,-m)
+  = H(m-1) - H(m-1-U)
+    - H(-m-1) + H(-m-1-U_tau).
+```
+
+For the V-strip,
+
+```text
+V       = (t-d+1)/2,
+V_tau   = (1-t-d)/2,
+```
+
+and
+
+```text
+R_V(m,t,d)
+  = H(m-1) - H(m-1-V)
+    - H(-m-1) + H(-m-1-V_tau).
+```
+
+If colors swap U and V, use
+
+```text
+R_{U->V}(m,t,d)
+  = H(m-1) - H(m-1-U)
+    - H(-m-1) + H(-m-1-V_tau),
+```
+
+and
+
+```text
+R_{V->U}(m,t,d)
+  = H(m-1) - H(m-1-V)
+    - H(-m-1) + H(-m-1-U_tau).
+```
+
+This makes the boundary faces visible. The jumps of `S(U,m)` occur at
+
+```text
+m = 1,
+m = U + 1.
+```
+
+The jumps of the tau-pulled strip occur at
+
+```text
+m = -1,
+m = -U_tau - 1.
+```
+
+Thus the U-strip boundary is controlled by the four affine faces
+
+```text
+m = 1,
+m = U + 1,
+m = -1,
+m = -U_tau - 1.
+```
+
+Substituting `U = (t+d+1)/2` and `U_tau = (d-t+1)/2`, these are
+
+```text
+m = 1,
+2m = t + d + 3,
+m = -1,
+2m = t - d - 3.
+```
+
+Similarly the V-strip faces are
+
+```text
+m = 1,
+2m = t - d + 3,
+m = -1,
+2m = -t - d - 3.
+```
+
+Those affine faces are the discrete Stokes boundary. The strip contribution is a finite interval in the bulk, but its failure under central reflection is governed by these faces. That is exactly why the next computation should be a boundary-face minimization rather than a full atom scan.
+
+A compact face enumerator looks like this:
+
+```python
+from dataclasses import dataclass
+from typing import Callable, Iterable
+
+@dataclass(frozen=True)
+class Face:
+    name: str
+    equation_value: Callable[[int, int, int], int]
+
+
+def U(m: int, t: int, d: int) -> int:
+    return (t + d + 1) // 2
+
+
+def V(m: int, t: int, d: int) -> int:
+    return (t - d + 1) // 2
+
+
+def U_tau(m: int, t: int, d: int) -> int:
+    return (d - t + 1) // 2
+
+
+def V_tau(m: int, t: int, d: int) -> int:
+    return (1 - t - d) // 2
+
+
+STRIP_FACES: tuple[Face, ...] = (
+    Face('U_left_m_eq_1',        lambda m, t, d: m - 1),
+    Face('U_right_m_eq_U_plus_1', lambda m, t, d: m - (U(m, t, d) + 1)),
+    Face('U_tau_left_m_eq_minus_1', lambda m, t, d: m + 1),
+    Face('U_tau_right_m_eq_minus_Utau_minus_1',
+         lambda m, t, d: m + U_tau(m, t, d) + 1),
+    Face('V_left_m_eq_1',        lambda m, t, d: m - 1),
+    Face('V_right_m_eq_V_plus_1', lambda m, t, d: m - (V(m, t, d) + 1)),
+    Face('V_tau_left_m_eq_minus_1', lambda m, t, d: m + 1),
+    Face('V_tau_right_m_eq_minus_Vtau_minus_1',
+         lambda m, t, d: m + V_tau(m, t, d) + 1),
+)
+
+
+def active_faces(m: int, t: int, d: int) -> list[str]:
+    return [face.name for face in STRIP_FACES if face.equation_value(m, t, d) == 0]
+```
+
+For threshold prediction, one should not require the atom to lie exactly on a jump face; the residual is supported on an oriented symmetric difference of intervals. But the first-hit values are attained when one of these affine boundary inequalities first admits a lattice point after imposing the root/discriminant and key constraints. That is the wavefront mechanism.
+
+## 4. Compensation term: yes, it should be partial theta
+
+The compensation should be a partial-theta or false-theta correction, probably a finite linear combination of such series indexed by boundary faces and residue classes.
+
+The exact corrected identity is
+
+```text
+keyWeight_e(k) - B_e(k) = 0,
+```
+
+where
+
+```text
+B_e(k)
+  = sum over tau-boundary orbits in key k of R_partial(a).
+```
+
+Equivalently, at the generating-series level,
+
+```text
+B_k(q)
+  = sum_e B_e(k) q^e.
+```
+
+Because the bulk is bilateral, it cancels by the central reflection. Because the boundary is cut out by half-line selectors such as
+
+```text
+j >= 0,
+j < 0,
+0 <= l < N,
+N <= l < 0,
+```
+
+its generating series is one-sided. Once a boundary face is parameterized, the exponent is still a quadratic form, but the summation range is a ray or a cone rather than all of `Z`. That is exactly a partial theta or false theta shape:
+
+```text
+sum_{r >= 0} eps(r) q^{A r^2 + B r + C}
+```
+
+or, before reducing a strip cone,
+
+```text
+sum_{N > 0} sum_{0 <= r < N} eps(N,r) q^{Q(N,r)}.
+```
+
+The strip double cone often telescopes. Using
+
+```text
+strip0(N,x) = H(x) - H(x-N),
+```
+
+one can express the strip correction as a difference of two half-space sums. After summing over the variable that controls `N`, these become boundary sums on the endpoint faces listed above. That is the discrete Stokes form: the divergence of a finite strip is supported at its endpoints.
+
+So the expected correction has the schematic form
+
+```text
+B(q)
+  = sum over missing-half faces F
+      c_F * sum_{r >= 0, r == rho_F mod M_F}
+              eps_F(r) q^{Q_F(r)}
+    + sum over strip faces G
+      c_G * sum_{r >= 0, r == rho_G mod M_G}
+              eps_G(r) q^{Q_G(r)}.
+```
+
+This is very close to the familiar Hickerson-Mortenson phenomenon: an indefinite/bilateral bulk cancellation leaves a theta correction on the boundary of the cone. In the root-pair involution language, the even-Delta fixed-point residual is not an error in the involution. It is the contribution of the boundary/fixed locus that remains after the involution cancels the free orbits. Here the role of the fixed locus is played by the half-theta and strip boundary.
+
+I would therefore not try first to invent a completely new involution on the original atoms. A fixed-point-free sign-reversing involution on the same key fiber would force the key weight to be zero. The observed key weight `+1` at `(-6,-17)` rules that out for the current atom set and current key. The principled rescue is instead:
+
+```text
+original identity = bilateral cancellation + explicit boundary correction.
+```
+
+If one insists on an involution, the natural one is on an enlarged set:
+
+```text
+A_e^sym = A_e union tau(A_e).
+```
+
+On `A_e^sym`, tau cancels perfectly. The difference between `A_e^sym` and `A_e` is exactly the boundary correction. This is often the cleanest proof architecture.
+
+## 5. Wavefront and threshold prediction
+
+The wavefront should be defined by boundary faces, not by the full support scan.
+
+For a key `k`, define
+
+```text
+F(k) = min { e : B_e(k) != 0 }.
+```
+
+For a shell depth `h`, define
+
+```text
+F_h = min { F(k) : |hblock(k)| = h }.
+```
+
+The reported data are consistent with
+
+```text
+F_1 = 90          at the outer shell,
+F_2 = 702         at the next shell,
+F_6 <= 11763      with key (-6,-17).
+```
+
+I would not fit these three points to a simple numerical formula. The correct formula is obtained by minimizing the coefficient exponent over the boundary faces:
+
+```text
+F_h
+  = min over boundary faces F
+      min Q_F(parameters)
+```
+
+subject to:
+
+```text
+1. the key equations giving hblock = +/-h,
+2. the anchor/color congruences,
+3. the discriminant square condition for the j-quadratic,
+4. the numerator divisibility condition for integral roots,
+5. the one-sided selector giving nonzero R_partial.
+```
+
+Since the boundary faces are affine and the exponent is quadratic, this is a finite collection of congruence-restricted quadratic minimization problems. In good coordinates it should produce a quasipolynomial or a small table of quadratic forms by residue class.
+
+That is the clean threshold formula I would seek:
+
+```text
+F_h = min_i min_{r in R_i(h)} Q_i(r),
+```
+
+where each `i` is a boundary face/residue class. The mod-9 observation says many or all of the relevant residue sets `R_i(h)` may force
+
+```text
+Q_i(r) == 0  mod 9.
+```
+
+## 6. What I would investigate first
+
+I would do these in order.
+
+### Step 1: print tau-orbit residuals, not just atom totals
+
+For every atom in a failing key, print
+
+```text
+atom,
+tau(atom),
+key(atom),
+key(tau(atom)),
+oddBilat(atom),
+oddBilat(tau(atom)),
+oneSided(atom),
+oneSided(tau(atom)),
+R_partial(atom).
+```
+
+The first assertion should be
+
+```text
+oddBilat(atom) + oddBilat(tau(atom)) = 0
+```
+
+in signed convention. The second assertion should be
+
+```text
+keyWeight = sum R_partial over tau-orbit representatives in the key.
+```
+
+This will immediately separate bulk cancellation from boundary flux.
+
+### Step 2: classify every residual by face
+
+For each nonzero residual, attach labels:
+
+```text
+missing_half_positive_cut,
+missing_half_negative_cut,
+U_strip_left,
+U_strip_right,
+U_tau_left,
+U_tau_right,
+V_strip_left,
+V_strip_right,
+V_tau_left,
+V_tau_right.
+```
+
+This tells whether `e = 11763` is a missing-half event, a strip event, or a mixed event. The body numbers suggest it is mixed but strip-dominated:
+
+```text
+oddMissingSigned = +1,
+stripUSigned     = +2,
+total boundary one-sided part = +3,
+oddBilat         = -2,
+net              = +1.
+```
+
+### Step 3: produce the mod-9 table by boundary face
+
+For the j-quadratic, write the exact discriminant and numerator condition. Then compute allowed `e mod 9` for each boundary face. The test is:
+
+```text
+Do all nonzero boundary residuals lie in e = 0 mod 9?
+```
+
+If yes, the divisibility by `9` is structural. If not, the first failures happen to land in the zero class, and the next task is to explain why the other classes cancel or have larger minima.
+
+### Step 4: minimize on faces
+
+Stop scanning all atoms. For each face, substitute the face equation into the exponent and key equations. Then minimize the resulting quadratic over the allowed residues. This should predict the first shell hits:
+
+```text
+h = 1  ->  e = 90,
+h = 2  ->  e = 702,
+h = 6  ->  e = 11763 or an earlier value if one exists.
+```
+
+If the computed first hit for `h = 6` is exactly `11763`, the mystery is solved: it is the first lattice point of a congruence-restricted boundary quadratic.
+
+### Step 5: derive the partial-theta correction
+
+Once the active faces are known, write
+
+```text
+B(q) = sum over active faces of one-sided quadratic sums.
+```
+
+Then try to simplify by pairing opposite faces. The expected end product is a finite linear combination of partial theta or Hickerson-Mortenson theta corrections.
 
 ## Bottom line
 
-The conjecture survives deep into the computation because `tau` is a valid involution on a large symmetric core of the root-packet support, and the asymmetric boundary collar reaches deeper `hblock` fibers only at sparse, arithmetically constrained `e` values. The inward progression is best viewed as a boundary wavefront in `(hblock, anchor)` space. A boundary compensation term is not only possible; it is the exact correction forced by the involution. A modified involution on the original atoms cannot pair everything at `e=11763`, because the key `(-6,-17)` has nonzero signed mass. The factor `9` is probably structural; the quotient `1307` should be decoded as a value of the reduced boundary quadratic form rather than treated as an isolated numerological factor.
+The conjecture survives deep into the range because the bilateral bulk is genuinely protected by the central reflection, and the asymmetric one-sided pieces have not yet produced an uncanceled lattice point in the deeper key fibers. The failures grow inward because the tau-boundary is a moving wavefront: as `e` increases, boundary faces intersect key fibers farther from the outer shell. The `9`-divisibility is naturally explained by the j-quadratic linear coefficient
+
+```text
+n = 9(6m-1)
+```
+
+and the associated discriminant/numerator congruences. The right rescue is not a new fixed-point-free involution on the same atoms. The right rescue is a discrete-Stokes correction: bilateral bulk cancels, and the missing-half plus strip boundary contributes a partial-theta correction.
