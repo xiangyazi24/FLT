@@ -1,823 +1,837 @@
-# Q3115 (dm1): R7 — non-multiplicativity of `B` and the order-6 character illusion
+# Q3124 (dm1): R8 audit of theorem statements and proof routes
 
 Date: 2026-07-02
 
-## Executive answer
+## Executive summary
 
-The right automorphic object is **not** a finite sum of Hecke eigenforms, and not a finite sum of Hecke characters.  The right object is a **real-quadratic Shintani / false-indefinite theta coefficient function**.
-
-More explicitly, with the standard Hickerson--Mortenson convention,
+The core algebraic spine is good:
 
 ```text
-B(X) = D(X) - A(X) = -f_{1,3,4}(X, -X^3, X),
+beta(k,r) = (r - 2k) + (4k + 3r + 1) phi
+-N(beta(k,r)) = 10 E(k,r) + 1
 ```
 
-and the coefficient `B_N` is a signed count of generators in a fixed ray/coset of `Z[phi]`, cut by a real-archimedean Shintani cone.  The ray/coset part is finite and character-like; the archimedean cone cut is a **step function on the real unit circle**.  That step function is the source of the non-multiplicativity.
+This really does give norm support for the coefficients of the cone series.  The main corrections before Lean formalization are:
 
-The prime phenomenon is then not mysterious.  At a split prime, there are only one or two relevant reduced generator orbits, so the coefficient is automatically tiny and lies in
+1. `L` is **not a sublattice**.  It is an affine coset of the index-10 sublattice `{a+b phi : b-3a == 0 mod 10}`.  This matters in Lean: do not make `L` an `AddSubgroup`.
+2. Theorems 1, 3, and 4 are correct as stated.
+3. Theorem 2 is correct after replacing “sublattice” by “affine coset”; the inverse formula is the proof, while the Jacobian determinant is only supporting evidence.
+4. Theorem 5 is correct if `B_N`, `A`/`D` cones, and finiteness are made explicit.  The norm corollary needs one extra sentence: since the identity gives `-N(beta)=10N+1`, positive norm representability follows by multiplying by `phi`, whose norm is `-1`.
+5. Theorem 6’s calculation is correct, but the corollary is ill-posed/too strong.  Since `epsilon*beta` is usually not in `L`, a function whose domain is only `L` cannot even be evaluated at `epsilon*beta`.  The correct conclusion is that the indicator of `L` is not `epsilon`-invariant; it is not that no congruence character can exist.
+6. Theorem 7 is essentially correct, but the proof should explicitly use ideals and CRT:
+   `O_K/(2 sqrt(5)) ~= O_K/(2) x O_K/(sqrt(5)) ~= F_4 x F_5`.
+   The order of `epsilon=phi^2` is indeed `lcm(3,2)=6`.  However, this does **not** by itself prove that the coefficient sequence is governed by an order-6 character.
+7. Conjecture A is not really conjectural once the Hickerson-Mortenson sign convention is fixed.  It is a direct term-by-term identity.
+8. The proof route for Conjecture B has a serious gap: “two prime ideals above `p`” does **not** imply “at most two atoms in `L`.”  Units give infinitely many generators, and `epsilon^6` preserves `L`.  The cone cut makes the coefficient finite, but the bound and noncancellation require a Shintani-sector theorem.
+9. Conjecture E should be reformulated.  “`B` is not multiplicative” only needs one counterexample.  A universal statement `B(pq) != B(p)B(q)` for all tested-style prime pairs is much stronger and may have accidental exceptions.  Also define multiplicativity on the norm variable `M=10N+1`, not on the coefficient index `N`.
+
+## Notation audit
+
+You wrote:
 
 ```text
-{-2, -1, 0, +1, +2}.
+L = {a+b phi in Z[phi] : b-3a = 1 mod 10} (sublattice of index 10)
 ```
 
-The observed absence of `0` at primes should be provable by a finite Shintani-sector table: in the prime case the possible selected representatives never occur in opposite-sign pairs.  The apparent order-6 character is a six-sector **archimedean window**, not a genuine order-6 Hecke character.  At composites, several prime-ideal choices interact; reducing their product back into the Shintani strip introduces unit-carry terms, and those carries destroy multiplicativity.
+This is the first thing to fix.  `L` is an affine coset, not a sublattice.  It is not closed under addition and does not contain `0`.
 
-So the clean slogan is:
+Correct formulation:
 
 ```text
-B is not multiplicative because it is a ray-class norm count with an archimedean cone window.
-The finite ray-class part is multiplicative; the Shintani window is not.
+L0 = {a+b phi in Z[phi] : b-3a == 0 mod 10}
+L  = {a+b phi in Z[phi] : b-3a == 1 mod 10}
 ```
 
-A correction to one premise: the classical Andrews--Dyson--Hickerson `sigma(q)` case is also real quadratic, attached to `Q(sqrt(6))` and norms `24n+1`.  Its unit group is infinite as well.  The finite-unit/order-6 picture belongs to imaginary quadratic `Q(sqrt(-3))` phenomena, not to the original ADH real-quadratic norm story.
+Then `L0` is an index-10 sublattice of `O_K`, and `L` is one affine coset of `L0`.
 
-## 1. Exact arithmetic model for `B_N`
-
-Write
+Lean implication:
 
 ```text
-E(k,r) = (4*k^2 + 2*k + r^2 + (6*k + 1)*r) / 2
-       = 2*k^2 + k + 3*k*r + r*(r+1)/2.
+Use Set O_K or a structure carrying a congruence predicate for L.
+Do not define L as an AddSubgroup/Submodule.
+```
+
+## Theorem 1: exponent parity
+
+### Statement
+
+Correct.
+
+For all integers `k,r`,
+
+```text
+Q(k,r) = 4k^2 + 2k + r^2 + (6k+1)r
+```
+
+is even.
+
+### Proof
+
+Correct and complete:
+
+```text
+Q(k,r) = 2(2k^2 + k + 3kr) + r(r+1).
+```
+
+The first term is even, and `r(r+1)` is even.
+
+### Lean note
+
+Define
+
+```text
+E(k,r) = Q(k,r) / 2
+```
+
+only after proving divisibility, or define directly as
+
+```text
+E(k,r) = 2*k^2 + k + 3*k*r + r*(r+1)/2.
+```
+
+The second definition is usually easier in Lean, because `r*(r+1)/2` still needs an integrality lemma but avoids quotienting the whole expression.
+
+## Theorem 2: bijection
+
+### Statement
+
+Correct after changing “sublattice” to “affine coset.”
+
+The map
+
+```text
+F : Z^2 -> L
+F(k,r) = beta(k,r) = (r-2k) + (4k+3r+1) phi
+```
+
+is a bijection from `Z^2` to the affine coset `L`.
+
+### Proof audit
+
+Let
+
+```text
+a = r - 2k,
+b = 4k + 3r + 1.
 ```
 
 Then
 
 ```text
-A(X) = sum_{k >= 0, r >= 0} (-1)^r X^E(k,r),
-D(X) = sum_{k < 0, r < 0} (-1)^r X^E(k,r),
-B(X) = D(X) - A(X).
+b - 3a = 4k + 3r + 1 - 3(r - 2k)
+        = 10k + 1,
 ```
 
-Let
+so `F(k,r) in L`.
+
+Conversely, if `a+b phi in L`, then
 
 ```text
-K = Q(sqrt(5)),
-phi = (1 + sqrt(5))/2,
-O_K = Z[phi],
-Norm(a + b*phi) = a^2 + a*b - b^2.
+k = (b - 3a - 1) / 10,
+r = a + 2k.
 ```
 
-For every atom `(k,r)`, define
+Since `b-3a == 1 mod 10`, `k` is an integer.  Then `r` is an integer.  Substitution gives
 
 ```text
-beta(k,r) = (r - 2*k) + (4*k + 3*r + 1)*phi.
+r - 2k = a,
+4k + 3r + 1 = b.
 ```
 
-Then the fundamental identity is
+So the inverse formula proves both injectivity and surjectivity.
+
+The Jacobian matrix of the affine map is
 
 ```text
--Norm(beta(k,r)) = 10*E(k,r) + 1.
+[[-2, 1],
+ [ 4, 3]],
 ```
 
-This is the strongest way to package the norm support.  It proves immediately:
+with determinant `-10`.  This agrees with the index, but it is not by itself a proof of surjectivity onto the correct affine coset.  Keep it as a check, not as the main proof.
+
+### Edge case
+
+No issue at `k=0` or `r=0`.  The affine shift `+1` in `b` is essential; omitting it changes the coset.
+
+## Theorem 3: norm identity
+
+### Statement
+
+Correct.
+
+For
 
 ```text
-B_N != 0  ==>  10*N + 1 is a norm from Z[phi].
+a = r - 2k,
+b = 4k + 3r + 1,
+N(a+b phi) = a^2 + ab - b^2,
 ```
 
-Since primes inert in `Q(sqrt(5))` are exactly the primes `p == 2,3 mod 5`, this gives the observed inert-prime parity test.
-
-Conversely, not every eligible norm has nonzero coefficient, because `B_N` is a signed cone count, not merely an existence count.
-
-## 2. Ray/coset formula
-
-Let
+one has
 
 ```text
-beta = a + b*phi.
+-N(beta(k,r)) = 10*E(k,r) + 1.
 ```
 
-The inverse map from `beta` back to `(k,r)` is
+### Proof audit
+
+Direct expansion gives
 
 ```text
-k = (b - 3*a - 1) / 10,
-r = (4*a + 2*b - 2) / 10.
+N(beta(k,r))
+  = (r-2k)^2
+    + (r-2k)(4k+3r+1)
+    - (4k+3r+1)^2
+
+  = -20k^2 - 10k - 30kr - 5r^2 - 5r - 1.
 ```
 
-Thus `beta` comes from an integral atom exactly when
+Meanwhile
 
 ```text
-b - 3*a == 1 mod 10.
+10 E(k,r) + 1
+  = 10 * (2k^2 + k + 3kr + r(r+1)/2) + 1
+  = 20k^2 + 10k + 30kr + 5r^2 + 5r + 1.
 ```
 
-The second integrality condition for `r` follows from this congruence.  Indeed, if `b = 3a + 1 mod 10`, then
+So the identity follows.
+
+### Hidden assumption
+
+The norm convention must be fixed exactly as
 
 ```text
-4a + 2b - 2 = 10a mod 20,
+N(a+b phi) = a^2 + ab - b^2.
 ```
 
-so it is divisible by `10`.
+This uses `phi^2=phi+1`, trace `Tr(phi)=1`, and norm `N(phi)=-1`.
 
-The cone conditions are the two linear inequalities
+## Theorem 4: sign simplification
+
+### Statement
+
+Correct.
+
+If `a = r - 2k`, then
 
 ```text
-A-cone:  b - 3*a - 1 >= 0   and   2*a + b - 1 >= 0,
-D-cone:  b - 3*a - 1 <  0   and   2*a + b - 1 <  0.
+(-1)^r = (-1)^a.
 ```
 
-The sign is
+### Proof
+
+Since
 
 ```text
-A contributes -(-1)^r,
-D contributes +(-1)^r,
-r = (4*a + 2*b - 2)/10.
+r = a + 2k,
 ```
 
-Therefore the exact coefficient formula is
+`r` and `a` have the same parity.
+
+### Corollary audit
+
+The corollary is correct if `B = D - A` and the cone signs are as stated:
 
 ```text
-B_N = sum over beta = a + b*phi in O_K of
-        W(beta)
+A-cone contribution: -(-1)^r = -(-1)^a
+D-cone contribution: +(-1)^r = +(-1)^a.
 ```
 
+Make the boundary convention explicit:
+
+```text
+A-cone: k >= 0 and r >= 0
+D-cone: k < 0 and r < 0
+```
+
+There is no overlap between these cones.
+
+## Theorem 5: exact formula
+
+### Statement
+
+Correct after adding explicit definitions and finiteness.
+
+Recommended statement:
+
+```text
+Let B(X) = D(X) - A(X) = sum_{N >= 0} B_N X^N,
 where
 
-```text
-Norm(beta) = -(10*N + 1),
-b - 3*a == 1 mod 10,
+A(X) = sum_{k>=0, r>=0} (-1)^r X^{E(k,r)},
+D(X) = sum_{k<0, r<0} (-1)^r X^{E(k,r)}.
+
+For N >= 0, let S(N) be the set of beta=a+b phi in L such that
+
+  -N_{K/Q}(beta) = 10N + 1
+
+and whose inverse atom (k,r) lies in the A-cone or D-cone.  Define
+
+  W(beta) = -(-1)^a  in the A-cone,
+  W(beta) = +(-1)^a  in the D-cone.
+
+Then
+
+  B_N = sum_{beta in S(N)} W(beta).
 ```
 
-and
+### Proof audit
+
+The proof is direct from Theorems 2-4, but two details should not be skipped.
+
+First, the cone conditions in `(a,b)` coordinates are:
 
 ```text
-W(beta) = -(-1)^r  if beta is in the A-cone,
-W(beta) = +(-1)^r  if beta is in the D-cone,
-W(beta) = 0        otherwise.
+k = (b - 3a - 1) / 10,
+r = (4a + 2b - 2) / 10 = (2a + b - 1) / 5.
 ```
-
-This formula is already the proof route for both norm support and non-multiplicativity.
-
-## 3. What is `B` automorphically?
-
-### 3.1 It is a false-indefinite theta coefficient function
-
-The pure quadratic part of the `f_{1,3,4}` exponent has matrix
-
-```text
-[[1, 3],
- [3, 4]],
-```
-
-up to the usual factor of `1/2`.  Its determinant is
-
-```text
-1*4 - 3^2 = -5,
-```
-
-so the lattice has signature `(1,1)`.  The completed object is therefore a signature `(1,1)` indefinite theta object of weight `1`, vector-valued for the relevant discriminant/ray module.
-
-The holomorphic q-series `B` is the false/mock holomorphic part obtained by cutting the lattice with a sign or cone kernel.  In the Hickerson--Mortenson description it is an Appell--Lerch expression plus a theta correction.  In the Zwegers description, the nonholomorphic completion replaces sharp signs by error functions attached to the two boundary lines.
 
 So:
 
 ```text
-B is a holomorphic false/mock part of an indefinite theta series.
-It is not itself a holomorphic modular form.
-It is not a Hecke eigenform.
-It is not expected to have multiplicative coefficients.
+A-cone: b - 3a - 1 >= 0 and 2a + b - 1 >= 0,
+D-cone: b - 3a - 1 <  0 and 2a + b - 1 <  0.
 ```
 
-### 3.2 It is not a finite sum of Hecke characters
+Second, the coefficient sum is finite.  This is not automatic from the norm equation alone, because the unit group is infinite.  It follows from the cone definitions.  On the A-cone,
 
-There is a finite ray-class condition, but the cone condition is archimedean.  This is the key point.
+```text
+E(k,r) = 2k^2 + k + 3kr + r(r+1)/2
+```
+
+grows positively for `k,r >= 0`.  On the D-cone, set `k=-u-1`, `r=-v-1` with `u,v >= 0`.  Then
+
+```text
+E(-u-1,-v-1)
+  = 2u^2 + 6u + 3uv + (v^2 + 7v)/2 + 4,
+```
+
+which also grows positively.  Hence only finitely many atoms contribute to a fixed `N`.
+
+### Norm-support corollary
+
+The corollary needs a sign clarification.
+
+Theorem 3 gives
+
+```text
+-N(beta) = 10N + 1.
+```
+
+This says `10N+1` is the negative of a norm.  Since `N(phi)=-1`, it is also a positive norm:
+
+```text
+N(phi * beta) = N(phi) N(beta) = -N(beta) = 10N + 1.
+```
+
+So the corrected corollary is:
+
+```text
+B_N != 0 implies 10N+1 is a norm from O_K.
+```
+
+The proof uses the existence of a contributing beta and multiplication by `phi`.
+
+## Theorem 6: instability of L under epsilon=phi^2
+
+### Statement
+
+The computation is correct, but the statement should be worded more carefully.
 
 Let
 
 ```text
-epsilon = phi^2
+epsilon = phi^2 = 1 + phi.
 ```
 
-be the totally positive fundamental unit.  For `alpha in K^*`, define the real-unit angle
+For `beta=a+b phi`,
 
 ```text
-theta(alpha)
-  = log(|alpha_1 / alpha_2|) / (2*log(epsilon))   mod 1,
+epsilon beta = (a+b) + (a+2b) phi.
 ```
 
-where `alpha_1, alpha_2` are the two real embeddings.  Multiplication by `epsilon` shifts the numerator by `2*log(epsilon)`, so `theta` is a coordinate on the compact real unit torus
+Thus, if
 
 ```text
-R / (2*log(epsilon)) Z.
+a' = a+b,
+b' = a+2b,
 ```
 
-The coefficient `B_N` has the shape
+then
 
 ```text
-B_N = sum_{Norm(alpha)=-(10N+1)} chi_fin(alpha) * H(theta(alpha)),
+b' - 3a' = (a+2b) - 3(a+b) = -2a - b.
 ```
 
-where:
+If `beta in L`, then `b == 3a+1 mod 10`, so
 
 ```text
-chi_fin       = finite congruence/sign data modulo 10,
-H             = step function recording A-cone versus D-cone versus outside,
-theta(alpha)  = archimedean unit coordinate.
+b' - 3a' == -5a - 1 mod 10.
 ```
 
-A finite Hecke character would replace `H(theta)` by an exponential
+This is never congruent to `1 mod 10`: if `a` is even it is `9 mod 10`, and if `a` is odd it is `4 mod 10`.  Therefore
 
 ```text
-exp(2*pi*i*m*theta).
+epsilon L cap L = empty.
 ```
 
-But `H` is a discontinuous step function.  Its Fourier expansion is infinite:
+That is the clean theorem.
+
+### Corollary problem
+
+The proposed corollary
 
 ```text
-H(theta) = sum_{m in Z} h_m exp(2*pi*i*m*theta),
+No congruence character chi on L with chi(epsilon*beta)=chi(beta) can exist.
 ```
 
-with infinitely many nonzero `h_m`, typically decaying like `1/m` because of the jumps.  Consequently the Dirichlet series attached to `B` is not a finite linear combination of Hecke L-functions.  It is an infinite Shintani/Lerch expansion:
+is not a good mathematical statement as written.
+
+Problem: if `chi` is only defined on `L`, then `chi(epsilon*beta)` is usually not defined, because `epsilon*beta notin L`.
+
+Also, if `chi` is instead a character on a larger residue group or on `O_K`, then such characters can certainly exist, for example any character with `chi(epsilon)=1` is invariant under multiplication by `epsilon` on its domain.
+
+Correct replacement:
 
 ```text
-sum_{N >= 0} B_N / (10N+1)^s
-  = sum_{finite ray characters rho} sum_{m in Z}
-      c(rho,m) * L(s, rho * |alpha_1/alpha_2|^(pi*i*m/log(epsilon))).
+The indicator function 1_L is not invariant under multiplication by epsilon.
+Equivalently, the affine congruence support L is not stable under the full positive unit group generated by epsilon.
 ```
 
-This is the precise automorphic decomposition I would use.  It is a spectral expansion along the real unit torus, not an Euler product.
-
-A rigorous non-finite proof route is:
-
-1. Write `B_N` in the ray/coset formula above.
-2. Reduce generators modulo totally positive units to a Shintani fundamental interval.
-3. Observe that the cone/sign function on that interval is a step function with at least one jump.
-4. A nonconstant step function on a circle is not a trigonometric polynomial.
-5. Therefore the Hecke-character expansion has infinitely many nonzero archimedean modes.
-6. Therefore `B` is not a finite sum of Hecke-character coefficient functions, and no Euler product or multiplicativity should survive.
-
-## 4. The order-6 character illusion at primes
-
-At a prime `p = 10N + 1`, the norm equation has only the two conjugate prime ideals above `p`, up to units.  After imposing the congruence
+A useful strengthening is:
 
 ```text
-b - 3*a == 1 mod 10,
+epsilon^3 L is the coset b-3a == -1 mod 10,
+epsilon^6 L = L.
 ```
 
-and reducing by powers of `epsilon`, there are only one or two contributing reduced representatives.  Hence the coefficient is forced into a tiny set:
+So the first totally positive unit power preserving `L` is expected to be `epsilon^6`, not `epsilon`.
+
+This is important for the Shintani proof route: reduce by the subgroup generated by `epsilon^6`, not by the full group generated by `epsilon`.
+
+## Theorem 7: order of epsilon modulo 2 sqrt(5)
+
+### Statement
+
+The statement is correct:
 
 ```text
-B_N in {-2, -1, 0, +1, +2}.
+epsilon = phi^2 has order 6 in (O_K / (2 sqrt(5)))^x.
 ```
 
-Your data says the zero case never occurs and that the absolute values occur in the ratio
+Here `(2 sqrt(5))` should be read as the principal ideal generated by `2 sqrt(5) = 2(2phi-1)`.
+
+### Proof audit
+
+The proof is basically right but needs the ideal details.
+
+1. The ideals `(2)` and `(sqrt(5))` are coprime, so CRT gives
 
 ```text
-|B_N| = 1 : |B_N| = 2 = 2 : 1.
+O_K / (2 sqrt(5)) ~= O_K/(2) x O_K/(sqrt(5)).
 ```
 
-The clean explanation to test is a six-sector Shintani table.
-
-### Candidate six-sector theorem
-
-There should be a unit-reduced coordinate `theta_p in R/Z` for the prime ideal above `p` and a phase shift `theta_0` such that
+2. Since the field discriminant is `5 == 5 mod 8`, the prime `2` is inert in `Q(sqrt(5))`.  Equivalently,
 
 ```text
-B_{(p-1)/10} = S(theta_p - theta_0),
+O_K/(2) ~= F_4.
 ```
 
-where `S` is a six-step function with values, up to a global sign and cyclic shift,
+In this quotient, `phi` satisfies
 
 ```text
-2, 1, -1, -2, -1, 1.
+phi^2 + phi + 1 = 0,
 ```
 
-These are exactly the numbers
+so `phi` has order `3` in `F_4^x`.  Hence `epsilon=phi^2` also has order `3` modulo `(2)`.
+
+3. The ideal `(sqrt(5))` is the unique ramified prime above `5`, and
 
 ```text
-2*cos(k*pi/3),   k = 0,1,2,3,4,5.
+O_K/(sqrt(5)) ~= F_5.
 ```
 
-But the mechanism is different from a character.  The function
+Modulo `(sqrt(5))`, we have `sqrt(5)=0`, so
 
 ```text
-theta -> 2*cos(2*pi*theta)
+phi = (1 + sqrt(5))/2 == 1/2 == 3 mod 5,
+epsilon = phi^2 == 9 == 4 == -1 mod 5.
 ```
 
-is a character-like exponential combination.  The actual object is expected to be a **piecewise constant sector function** that happens to take the same six values on six sectors.  At primes, only one angle is sampled, so it looks like an order-6 character.  At composites, products add angles and then require reduction back into the Shintani strip; the step function does not respect addition.
+Therefore `epsilon` has order `2` modulo `(sqrt(5))`.
 
-This is the precise reason for the illusion:
+4. In the CRT product, the order is
 
 ```text
-S(theta_1 + theta_2) is not S(theta_1) * S(theta_2).
+lcm(3,2) = 6.
 ```
 
-By contrast, a true order-6 Hecke character would be
+### What this theorem does not prove
+
+This theorem does **not** prove that `B` is controlled by a genuine order-6 Hecke character.  It only identifies the order of one unit in one finite quotient.
+
+To connect this to the coefficients, you still need separate lemmas showing:
 
 ```text
-chi(alpha) = exp(2*pi*i*theta(alpha)/6)
+1. how the affine coset L is encoded by a modulus,
+2. how the sign (-1)^a or (-1)^r is encoded by the same or a larger modulus,
+3. how the Shintani cone/window interacts with multiplication by epsilon^6.
 ```
 
-or a finite ray-class character, and would be multiplicative.
+The order-6 residue fact is useful, but it is not the same as the observed six-sector coefficient phenomenon.
 
-## 5. Why non-multiplicativity is expected
+## Conjecture A: HM identification
 
-Let `M_i = 10N_i + 1` and suppose `M_1, M_2` are coprime eligible norms.  A generator for the product norm is, up to units,
+### Verdict
+
+This should be promoted from conjecture to theorem once the HM convention is fixed.
+
+With the standard Hickerson-Mortenson convention
 
 ```text
-alpha = alpha_1 * alpha_2.
+f_{a,b,c}(x,y,q)
+  = sum_{sg(m)=sg(n)} sg(m) (-1)^{m+n} x^m y^n
+      q^{a*binom(m,2) + bmn + c*binom(n,2)},
 ```
 
-The finite ray-class data is multiplicative.  However, the Shintani angle satisfies
+where `sg(t)=+1` for `t>=0` and `sg(t)=-1` for `t<0`, one gets
 
 ```text
-theta(alpha) = theta(alpha_1) + theta(alpha_2)  mod 1,
+f_{1,3,4}(X, -X^3, X) = A(X) - D(X).
 ```
 
-and the coefficient uses the step function `H(theta)`, not an exponential.  Hence
+Indeed the summand is
 
 ```text
-H(theta_1 + theta_2) != H(theta_1) * H(theta_2)
+sg(m) (-1)^{m+n} X^m (-X^3)^n
+  X^{binom(m,2) + 3mn + 4binom(n,2)}.
 ```
 
-in general.
-
-Equivalently, when one multiplies two reduced generators, the product usually leaves the fundamental Shintani strip.  One must multiply by a power of the unit to return to the strip.  That exponent is a floor function in logarithms:
+The sign simplifies to `sg(m)(-1)^m`, and the exponent is
 
 ```text
-m(alpha_1 alpha_2)
-  = floor((log-position of alpha_1 + log-position of alpha_2 - boundary) / log(epsilon)).
+m + 3n + binom(m,2) + 3mn + 4binom(n,2)
+= m(m+1)/2 + 3mn + 2n^2 + n.
 ```
 
-Floor functions produce carries.  The carries change the cone side and the parity sign.  This is exactly the same obstruction that prevents reduced binary quadratic forms or continued-fraction digits from being multiplicative term-by-term.
-
-So the answer to Q2 is yes:
+Setting `m=r` and `n=k` gives exactly `E(k,r)`.  The same-sign nonnegative cone contributes `A`, and the same-sign negative cone contributes `-D`.  Therefore
 
 ```text
-non-multiplicativity is caused by the Shintani cone/window not being compatible with multiplication.
+B(X) = D(X) - A(X) = -f_{1,3,4}(X, -X^3, X).
 ```
 
-The proof route is to turn this sentence into the explicit ray/coset formula of Section 2 and then exhibit one pair of coprime eligible norms for which the Shintani carry changes the sign.  Your `1096/1188` failure rate is precisely what one expects from a non-character step function.
+If your local definition of `f` differs by a global sign or by the convention for `sg(0)`, this must be adjusted.  With HM's usual `sg(0)=+1`, the statement above is right.
 
-## 6. Prime nonvanishing route
+## Conjecture B: prime nonvanishing
 
-The observed statement
+### Statement
+
+The statement is plausible but needs sharper formulation.
+
+Recommended statement:
 
 ```text
-B_{(p-1)/10} != 0
+Let p be a rational prime with p == 1 mod 10, and set N=(p-1)/10.
+Then B_N is in {-2,-1,+1,+2}.
 ```
 
-for every prime `p = 10N+1` should be provable.
+This avoids ambiguity about “split prime,” since every prime `p == 1 mod 10` is split in `Q(sqrt(5))` and is represented in the `10N+1` family.
 
-I would prove it in this order.
+### Main gap in the proposed proof route
 
-### Step 1: finite ray-unit table
-
-Work with the unit action on coefficient pairs `(a,b)`:
+The proposed route says:
 
 ```text
-phi * (a + b*phi)     = b + (a+b)*phi,
-epsilon * (a + b*phi) = (a+b) + (a+2b)*phi.
+(1) two ideals above p,
+(2) <=2 atoms in L,
+(3) same cone,
+(4) same parity.
 ```
 
-Reduce this action modulo `10` and record the orbit of the congruence class
+Step (2) is not justified and is the central hard point.
+
+A split prime gives two prime ideals above `p`, but each ideal has infinitely many generators because the unit group is infinite.  Moreover `epsilon^6` preserves `L`, so even within the affine coset `L` there are infinite unit translates of a generator satisfying the same norm equation.  The cone restriction makes the coefficient finite, but it does not follow from “two ideals above p” that there are at most two contributing atoms.
+
+The real statement you need is a Shintani-sector theorem:
 
 ```text
-b - 3*a == 1 mod 10.
+For each of the two prime-ideal unit orbits of norm p, after imposing
+b-3a == 1 mod 10 and reducing modulo epsilon^6, the A/D cone window
+selects at most one representative; and across the two orbits the selected
+representatives have non-opposite weights.
 ```
 
-The parity sign `(-1)^r`, where
+That is much stronger than the current proof route.
+
+### What must be proved
+
+A sound proof route is:
+
+1. Work with the coefficient formula from Theorem 5.
+2. Replace the full unit group by the subgroup `Gamma=<epsilon^6>` that preserves `L`.
+3. Describe a fundamental Shintani strip for `Gamma` in the real embeddings.
+4. Make a finite residue table modulo a modulus large enough to encode:
 
 ```text
-r = (4*a + 2*b - 2)/10,
+b-3a == 1 mod 10,
+(-1)^a,
+A-cone versus D-cone boundary behavior.
 ```
 
-is also determined by a finite modulus, for example modulo `20` if needed.
+Modulo `20` is likely safer than modulo `10`, because parity signs are visible.
 
-### Step 2: Shintani sector table
+5. For a prime norm `p`, prove that the two prime-ideal orbits intersect the selected Shintani windows in either one or two representatives.
+6. Prove a finite “no opposite-sign pair” lemma for those representatives.
 
-For each admissible residue class, record which unit translates can land in the A-cone or D-cone inside one fundamental unit strip.  This produces a finite table of selected sectors and signs.
-
-### Step 3: prime ideal input
-
-For a split prime `p`, the principal ideals above `p` give only one conjugate pair of prime ideals.  Up to units, every generator is in one of these two orbits.  Therefore `B_{(p-1)/10}` is a sum of at most two entries from the finite sector table.
-
-### Step 4: no-opposite-pair lemma
-
-Check the finite table and prove:
+Only after these steps do you get
 
 ```text
-For prime-norm orbits satisfying b - 3*a == 1 mod 10,
-the selected sector entries are either a singleton or two entries with the same sign.
+B_N in {-2,-1,+1,+2}.
 ```
 
-This immediately implies
+### Boundary cases
+
+Check primes where the representative lands on a cone boundary:
 
 ```text
-B_{(p-1)/10} in {-2, -1, +1, +2},
+k=0, r>=0,
+r=0, k>=0
 ```
 
-and proves there are no prime cancellation zeros.
+These belong to `A`, not to `D`.  For prime `p`, the constant term boundary `N=0` is irrelevant, but other boundary atoms can occur and must be included in the finite table.
 
-### Step 5: density ratio
+## Conjecture C: cancellation zeros composite
 
-The same table should split the unit circle into six equal sectors, two of which give absolute value `2` and four of which give absolute value `1`.  Equidistribution of split prime ideal angles in the real-unit torus then predicts
+This is essentially a corollary of Conjecture B, not an independent conjecture.
+
+If Conjecture B is proved, then no coefficient with `10N+1` prime can vanish.  Therefore every zero among norm-eligible `N` with `B_N=0` must have composite `10N+1`.
+
+Recommended formulation:
 
 ```text
-|B(p)| = 1 with density 4/6 = 2/3,
-|B(p)| = 2 with density 2/6 = 1/3.
+Assuming Conjecture B, all cancellation zeros occur at composite norm values.
 ```
 
-This matches your data.  The density proof is a standard Hecke/prime-ideal equidistribution statement for real-quadratic ray classes with archimedean unit angle.
+Do not state it as a separate theorem unless you prove Conjecture B.
 
-## 7. Composite cancellation zeros
+## Conjecture D: equidistribution
 
-For composite eligible norms, the number of ideal-factor choices grows.  If
+### Statement
+
+Plausible, but it depends on the same finite Shintani-sector table as Conjecture B.
+
+You want something like:
 
 ```text
-M = 10N + 1 = product of split prime powers times inert prime even powers,
+Among primes p == 1 mod 10,
+|B_{(p-1)/10}| = 1 with density 2/3,
+|B_{(p-1)/10}| = 2 with density 1/3.
 ```
 
-then, after ignoring units, there are many choices of which prime above each split rational prime appears in the generator.  Each choice has a Shintani angle and sign.  The coefficient is a signed sum over these choices.
+### Hardest gap
 
-Thus the zeros are exactly:
+You must prove that the prime coefficient is determined by a six-sector step function whose sectors have equal measure and whose values have absolute value pattern
 
 ```text
-B_N = sum over ray-compatible divisor choices of sign(choice) * window(choice) = 0.
+1, 1, 2, 1, 1, 2
 ```
 
-This explains why all observed zeros are composite.  At primes there are too few choices to cancel, and the finite table prevents opposite pairs.  At composites there are enough choices for cancellation.
+up to cyclic order.
 
-The examples fit this perfectly:
+Then the density follows from equidistribution of prime ideal generators in the real-unit torus, with the finite ray class fixed.
+
+So the proof splits into two independent hard facts:
 
 ```text
-N = 45:   10N+1 = 451  = 11 * 41
-N = 84:   10N+1 = 841  = 29^2
-N = 112:  10N+1 = 1121 = 19 * 59
-N = 127:  10N+1 = 1271 = 31 * 41
-N = 133:  10N+1 = 1331 = 11^3
+finite table: coefficient value = six-sector step function,
+analytic number theory: split prime generators equidistribute among these sectors.
 ```
 
-All primes listed are split in `Q(sqrt(5))`; the vanishing is not a failure of norm representability, but cancellation among split-prime choices and unit reductions.
+The second is standard Hecke equidistribution for real quadratic fields, but the first is your real work.
 
-## 8. Explicit L-function decomposition
+## Conjecture E: non-multiplicativity
 
-A finite decomposition into Hecke L-functions is the wrong target.  The exact decomposition should be infinite, indexed by Fourier modes of the Shintani window.
+### Statement problem
 
-A precise template is:
+You should define the arithmetic function on norm values, not on coefficient indices.
+
+Define
 
 ```text
-D_B(s) = sum_{N >= 0} B_N / (10N+1)^s.
+a(M) = B_{(M-1)/10}
 ```
 
-Let `G` be the finite ray group modulo the modulus needed to encode
+for positive integers `M == 1 mod 10`, and `a(M)=0` otherwise if you want a function on all positive integers.
+
+Then multiplicativity means
 
 ```text
-b - 3*a == 1 mod 10
+a(M1*M2) = a(M1)*a(M2)
 ```
 
-and the parity sign.  For each finite character `rho` of `G`, and each integer `m`, define the Hecke character
+for coprime `M1,M2`.
+
+In terms of coefficient indices, if
 
 ```text
-Psi_{rho,m}(alpha)
-  = rho(alpha) * exp(2*pi*i*m*theta(alpha)).
+M1 = 10N1 + 1,
+M2 = 10N2 + 1,
 ```
 
-Then
+then the product corresponds to
 
 ```text
-D_B(s) = sum_{rho in G^} sum_{m in Z} c_{rho,m} L(s, Psi_{rho,m}),
+M1*M2 = 10N12 + 1,
+N12 = (M1*M2 - 1)/10,
 ```
 
-where `c_{rho,m}` are the Fourier coefficients of the finite-ray-class and archimedean cone-window function.
+not to `N1*N2`.
 
-This is the exact automorphic decomposition to pursue.  It gives a proof route for analytic continuation and asymptotics, but it does **not** give an Euler product for `D_B`, because an infinite linear combination of Euler products is not itself an Euler product.
+### Proof status
 
-A finite sum would imply the Shintani window is a trigonometric polynomial.  Since the window has jumps, that cannot be true.
+The statement “`B` is not multiplicative” only needs one explicit coprime counterexample.  That should be a theorem once you record a single checked pair.
 
-## 9. Growth prediction
-
-There is a simple rigorous bound from the representation formula:
+The stronger statement suggested by the data,
 
 ```text
-|B_N| <= C * number of ray-compatible generators with |Norm| = 10N+1
-      <= C' * d_K(10N+1),
+a(pq) != a(p)*a(q) for all tested prime pairs,
 ```
 
-where `d_K` is the ideal divisor function of `K`.  In particular,
+is probably too strong to state as a theorem without a conceptual reason.  It may have accidental exceptions at larger primes.  A safer conjecture is:
 
 ```text
-|B_N| <= C'' * tau(10N+1)^2
+The equality a(pq)=a(p)a(q) has density 0 among eligible split-prime pairs.
 ```
 
-is a very safe elementary bound, and with more care one should get a bound of the shape
+or simply:
 
 ```text
-|B_N| <= C * 2^{omega(10N+1)} * product_{p^e || 10N+1} (e+1),
+The function a is not multiplicative; the obstruction is the Shintani cone carry.
 ```
 
-restricted to split-prime choices.
+### Correct structural explanation
 
-Therefore the worst-case order should be subpolynomial, of divisor-function type:
+The finite congruence data is multiplicative.  The archimedean cone window is not.
+
+Multiplying two reduced generators usually leaves the chosen Shintani strip.  Reducing back into the strip requires multiplying by a power of `epsilon^6`; the exponent is a floor-function carry in logarithmic embedding coordinates.  That carry changes cone membership and sometimes parity signs.  This is the correct reason for non-multiplicativity.
+
+## Theorem 7 and CRT: more detailed ideal checklist
+
+Before Lean or paper formalization, state the following lemmas separately.
 
 ```text
-max_{N <= X} |B_N| <= exp(O(log X / log log X)).
+sqrt5 = 2phi - 1 in O_K.
 ```
-
-I would not conjecture a global `O(log N)` bound without more evidence.  The small observed maximum `7` up to `10^5` is consistent with strong cancellation and the fact that `10N+1` has few split prime factors in that range.  Along specially chosen products of many split primes whose Shintani angles align, the coefficient should grow.  The likely true maximal order is closer to a signed-divisor-function problem than to a bounded eigenvalue problem.
-
-For typical `N`, a random-sign model over split-prime choices predicts much smaller values, roughly square-root in the number of contributing choices, and often zero.  That matches the large number of cancellation zeros.
-
-## 10. Proof-route summary for Q1 and Q2
-
-Here is the proof route I would actually implement.
-
-### Theorem 1: exact ray/coset representation
-
-Prove the atom identity
 
 ```text
--Norm((r - 2*k) + (4*k + 3*r + 1)*phi) = 10*E(k,r) + 1.
+(sqrt5)^2 = 5, so (sqrt5) is the unique prime over 5 and
+O_K/(sqrt5) ~= F_5.
 ```
-
-Then prove the inverse congruence formula
 
 ```text
-k = (b - 3*a - 1)/10,
-r = (4*a + 2*b - 2)/10.
+The minimal polynomial of phi is T^2 - T - 1.
+Modulo 2 this becomes T^2 + T + 1, irreducible over F_2, so
+O_K/(2) ~= F_4.
 ```
-
-This gives the exact formula for `B_N` as a signed ray/coset Shintani count.
-
-### Theorem 2: automorphic nature
-
-Construct the Zwegers completion of the signature `(1,1)` theta series by replacing the cone signs with error functions.  This proves that `B` is the holomorphic false/mock part of a weight-1 indefinite theta object.
-
-### Theorem 3: non-multiplicativity mechanism
-
-Reduce generators modulo the positive unit group.  Show that the coefficient is a finite-ray character times a discontinuous archimedean step function `H(theta)`.  Since `H` is not a character, multiplication of ideals does not preserve the coefficient.  This proves the conceptual non-multiplicativity.
-
-### Theorem 4: infinite Hecke-character expansion
-
-Fourier-expand `H(theta)` on the real unit torus.  This expresses the Dirichlet series of `B` as an infinite sum of Hecke L-functions with archimedean characters.  Prove infinitely many Fourier coefficients are nonzero because `H` has jumps.  This rules out finite Hecke-character/eigenform explanations.
-
-### Theorem 5: prime finite-table theorem
-
-Enumerate the finite ray-unit table modulo `10` or `20`, plus the six Shintani sectors.  Prove that for prime norm `p=10N+1`, selected representatives are never opposite-sign pairs.  This proves
 
 ```text
-B_N in {-2,-1,+1,+2}
+The ideals (2) and (sqrt5) are coprime, hence
+O_K/(2sqrt5) ~= O_K/(2) x O_K/(sqrt5).
 ```
 
-and the absence of prime cancellation zeros.  Equidistribution of prime ideal angles gives the `2/3` versus `1/3` absolute-value density.
+```text
+epsilon=phi^2 has order 3 in F_4^x and order 2 in F_5^x.
+Therefore epsilon has order 6 in (O_K/(2sqrt5))^x.
+```
 
-## 11. Verification skeleton
+The theorem is fine if written this way.
 
-This code is intended as a proof-development oracle.  It isolates the finite congruence and cone data; it does not use numerical q-series expansion.
+## Minimal verification oracle
+
+This is not needed for the proof, but it is a useful way to check the formulas before Lean formalization.
 
 ```python
-from collections import defaultdict
 from dataclasses import dataclass
-from math import isqrt
-from typing import DefaultDict, Dict, Iterable, List, Optional, Tuple
+from typing import Optional, Tuple
 
 
 @dataclass(frozen=True)
 class PhiElt:
-    """Element a + b*phi in Z[phi], phi=(1+sqrt(5))/2."""
+    """Element a + b*phi in Z[phi], where phi^2 = phi + 1."""
     a: int
     b: int
 
 
 def norm_phi(x: PhiElt) -> int:
-    """Norm of a + b*phi, where phi^2=phi+1."""
+    """Norm N(a+b*phi) = a^2 + ab - b^2."""
     return x.a * x.a + x.a * x.b - x.b * x.b
 
 
-def mul_phi(x: PhiElt) -> PhiElt:
-    """Multiply by phi."""
-    return PhiElt(a=x.b, b=x.a + x.b)
+def beta(k: int, r: int) -> PhiElt:
+    return PhiElt(a=r - 2 * k, b=4 * k + 3 * r + 1)
 
 
-def mul_epsilon(x: PhiElt) -> PhiElt:
+def q_form(k: int, r: int) -> int:
+    return 4 * k * k + 2 * k + r * r + (6 * k + 1) * r
+
+
+def exponent_E(k: int, r: int) -> int:
+    q = q_form(k, r)
+    if q % 2 != 0:
+        raise ValueError((k, r, q))
+    return q // 2
+
+
+def in_L(x: PhiElt) -> bool:
+    return (x.b - 3 * x.a - 1) % 10 == 0
+
+
+def inverse_atom(x: PhiElt) -> Optional[Tuple[int, int]]:
+    num_k = x.b - 3 * x.a - 1
+    if num_k % 10 != 0:
+        return None
+    k = num_k // 10
+    r = x.a + 2 * k
+    return k, r
+
+
+def epsilon_mul(x: PhiElt) -> PhiElt:
     """Multiply by epsilon=phi^2=1+phi."""
     return PhiElt(a=x.a + x.b, b=x.a + 2 * x.b)
 
 
-def exponent_E(k: int, r: int) -> int:
-    """Exponent of X in B(X)."""
-    numerator = 4 * k * k + 2 * k + r * r + (6 * k + 1) * r
-    if numerator % 2 != 0:
-        raise ValueError((k, r, numerator))
-    return numerator // 2
-
-
-def beta_from_atom(k: int, r: int) -> PhiElt:
-    """beta(k,r) = (r-2k) + (4k+3r+1)*phi."""
-    return PhiElt(a=r - 2 * k, b=4 * k + 3 * r + 1)
-
-
-def atom_from_beta(x: PhiElt) -> Optional[Tuple[int, int]]:
-    """Recover (k,r) from beta=a+b*phi if beta is in the target coset."""
-    num_k = x.b - 3 * x.a - 1
-    num_r = 4 * x.a + 2 * x.b - 2
-    if num_k % 10 != 0 or num_r % 10 != 0:
-        return None
-    return num_k // 10, num_r // 10
-
-
-def in_target_coset(x: PhiElt) -> bool:
-    return (x.b - 3 * x.a - 1) % 10 == 0
-
-
-def cone_weight_for_B(k: int, r: int) -> int:
-    """Weight in B = D - A."""
-    parity = -1 if r % 2 else 1
-    if k >= 0 and r >= 0:
-        return -parity
-    if k < 0 and r < 0:
-        return parity
-    return 0
-
-
-def weight_from_beta(x: PhiElt) -> int:
-    kr = atom_from_beta(x)
-    if kr is None:
-        return 0
-    k, r = kr
-    return cone_weight_for_B(k, r)
-
-
-def check_norm_identity(k: int, r: int) -> bool:
-    x = beta_from_atom(k, r)
-    return -norm_phi(x) == 10 * exponent_E(k, r) + 1
-
-
-def coeffs_B_by_atoms(nmax: int) -> Dict[int, int]:
-    """Finite cone enumeration for B_N, used only as a test oracle."""
-    out: DefaultDict[int, int] = defaultdict(int)
-    bound = 4 * isqrt(2 * nmax + 1) + 50
-    for k in range(-bound, bound + 1):
-        for r in range(-bound, bound + 1):
-            w = cone_weight_for_B(k, r)
-            if w == 0:
-                continue
-            n = exponent_E(k, r)
-            if 0 <= n <= nmax:
-                assert check_norm_identity(k, r)
-                out[n] += w
-    return dict(out)
-
-
-def unit_orbit_mod(x: PhiElt, modulus: int, steps: int) -> List[PhiElt]:
-    """Orbit under epsilon=phi^2 modulo `modulus`."""
-    out: List[PhiElt] = []
-    y = PhiElt(x.a % modulus, x.b % modulus)
-    for _ in range(steps):
-        out.append(y)
-        y = mul_epsilon(y)
-        y = PhiElt(y.a % modulus, y.b % modulus)
-    return out
-
-
-def finite_admissible_residue_table(modulus: int = 20) -> List[Tuple[int, int, int]]:
-    """List residue classes that can contribute, with their local parity sign.
-
-    The modulus 20 is used so that r parity is visible.
-    """
-    rows: List[Tuple[int, int, int]] = []
-    for a in range(modulus):
-        for b in range(modulus):
-            x = PhiElt(a, b)
-            kr = atom_from_beta(x)
-            if kr is None:
-                continue
-            _k, r = kr
-            parity = -1 if r % 2 else 1
-            rows.append((a, b, parity))
-    return rows
+def check_core_identity(k: int, r: int) -> bool:
+    x = beta(k, r)
+    return in_L(x) and inverse_atom(x) == (k, r) and -norm_phi(x) == 10 * exponent_E(k, r) + 1
 ```
 
-A Sage version of the prime test should enumerate prime ideal generators, reduce by powers of `epsilon`, and compare the resulting sector table with the observed value of `B_{(p-1)/10}`.  The finite table is the piece that should turn the prime observations into a theorem.
-
-```python
-from typing import List, Optional, Tuple
-from sage.all import QuadraticField, ZZ, factor
-
-
-K = QuadraticField(5, 's')
-s = K.gen()
-phi = (1 + s) / 2
-OK = K.ring_of_integers()
-epsilon = phi ** 2
-
-
-def eligible_norm_integer(M: int) -> bool:
-    """Check the inert-prime norm criterion for Q(sqrt(5))."""
-    if M <= 0:
-        return False
-    for p, e in factor(ZZ(M)):
-        if int(p % 5) in (2, 3) and int(e) % 2:
-            return False
-    return True
-
-
-def phi_coefficients(alpha) -> Tuple[int, int]:
-    """Return a,b with alpha=a+b*phi, assuming alpha is integral.
-
-    In a final script this should use the integral basis chosen by Sage for OK.
-    This placeholder records the intended interface.
-    """
-    raise NotImplementedError("Extract coefficients in the basis 1, phi.")
-
-
-def atom_from_coefficients(a: int, b: int) -> Optional[Tuple[int, int]]:
-    num_k = b - 3 * a - 1
-    num_r = 4 * a + 2 * b - 2
-    if num_k % 10 or num_r % 10:
-        return None
-    return num_k // 10, num_r // 10
-
-
-def cone_weight(k: int, r: int) -> int:
-    parity = -1 if r % 2 else 1
-    if k >= 0 and r >= 0:
-        return -parity
-    if k < 0 and r < 0:
-        return parity
-    return 0
-
-
-def reduce_by_units_to_strip(alpha):
-    """Reduce alpha by powers of epsilon into a chosen Shintani strip.
-
-    The exact inequalities defining the strip should match the paper's cone
-    convention.  This placeholder is where the floor/log carry appears.
-    """
-    raise NotImplementedError("Choose and implement a Shintani fundamental strip.")
-```
-
-## 12. Answers to the numbered questions
-
-### Q1. What is `B` automorphically?
-
-`B` is the holomorphic false/mock part of a weight-1 signature `(1,1)` indefinite theta series attached to `Q(sqrt(5))` with a ray/coset condition modulo `10`.  It is not a single eigenform and not a finite sum of Hecke characters.  Its Dirichlet series is naturally an infinite Fourier expansion of Hecke L-functions indexed by archimedean unit modes.
-
-### Q2. Is non-multiplicativity caused by the Shintani cone?
-
-Yes.  The finite ray-class part is multiplicative, but the Shintani cone/window is a discontinuous function of the real unit coordinate.  Multiplying ideals adds unit angles and then requires a unit reduction; the resulting floor-function carry changes the window value.  That is the source of non-multiplicativity.
-
-### Q3. Can `B` be decomposed into L-function coefficients?
-
-Yes, but not finitely.  Fourier-expand the Shintani window on the real unit torus.  This gives an infinite sum of Hecke L-functions with finite ray character modulo `10` and archimedean characters
+## Final verdict table
 
 ```text
-alpha -> exp(2*pi*i*m*theta(alpha)).
+Theorem 1: correct.
+Theorem 2: correct after replacing “sublattice” by “affine coset”; inverse proof is essential.
+Theorem 3: correct.
+Theorem 4: correct.
+Theorem 5: correct after adding definitions, cone inequalities, and finiteness; norm corollary needs the phi sign fix.
+Theorem 6: computation correct; corollary ill-posed/too strong.  Replace with non-invariance of 1_L and use epsilon^6 as stabilizer.
+Theorem 7: correct, but write it with ideals and CRT; do not overinterpret it as an order-6 Hecke-character explanation.
+Conjecture A: should be a theorem under standard HM signs.
+Conjecture B: plausible, but current route has a major gap at “<=2 atoms.”  Needs a finite Shintani-sector table modulo epsilon^6.
+Conjecture C: follows from B; not independent.
+Conjecture D: plausible; depends on B plus equidistribution of prime generators among equal Shintani sectors.
+Conjecture E: reformulate on norm values.  Non-multiplicativity is easy once one counterexample is recorded; universal prime-pair inequality is much stronger and may be false.
 ```
 
-A finite combination would require the cone window to be a trigonometric polynomial, which it is not.
+## Most important fix before Lean
 
-### Q4. Growth rate?
-
-A rigorous divisor-type bound is expected:
+Define the arithmetic object as an affine-coset Shintani count:
 
 ```text
-|B_N| <= exp(O(log N / log log N)).
+B_N = sum_{beta in O_K,
+          b-3a == 1 mod 10,
+          -N(beta)=10N+1,
+          beta in A/D cone}
+        W(beta).
 ```
 
-Typical values can remain very small because the signed Shintani sum cancels.  I would not predict a global `O(log N)` bound without further evidence; along products of many split primes, growth should eventually exceed any fixed bound.
-
-### Q5. Why no prime cancellation zeros?
-
-For prime `10N+1`, there are only the two conjugate prime-ideal orbits.  The finite ray-unit/Shintani sector table should show that selected prime representatives are either singletons or same-sign pairs, never opposite-sign pairs.  That proves `B_N` is always one of
-
-```text
-{-2, -1, +1, +2}
-```
-
-at split primes.  Composite zeros occur because composite norms have multiple split-prime choices, and their signed sector contributions can cancel.
-
-## Bottom line
-
-The correct proof strategy is not to search for a hidden multiplicative eigenform.  The correct proof strategy is to formalize the exact ray-class Shintani coefficient formula.  Once that formula is in place, the observations become structurally natural:
-
-```text
-norm support      = ray-class norm equation,
-prime smallness   = one prime-ideal orbit plus finite sector table,
-2:1 ratio         = six-sector equidistribution,
-nonmultiplicative = Shintani window/floor-carry effect,
-composite zeros   = cancellation among split-prime choices.
-```
-
-This is the strongest route I see from the current data to a theorem.
-
-## References for orientation
-
-```text
-Hickerson--Mortenson, Hecke-type double sums, Appell-Lerch sums, and mock theta functions:
-https://arxiv.org/abs/1208.1421
-
-Mortenson, Ramanujan's 1psi1 summation, Hecke-type double sums, and Appell-Lerch sums:
-https://arxiv.org/abs/1208.1359
-
-Mortenson, On the dual nature of partial theta functions and Appell-Lerch sums:
-https://arxiv.org/abs/1208.6316
-
-Lovejoy--Osburn, Real quadratic double sums:
-https://arxiv.org/abs/1502.01109
-
-Zwegers, Mock Theta Functions:
-https://dspace.library.uu.nl/handle/1874/881
-
-Zwegers, Maass waveforms arising from sigma and related indefinite theta functions:
-https://arxiv.org/abs/1002.1175
-```
+Then prove the bijection with `(k,r)` atoms and the norm identity.  After that, handle units only through the subgroup preserving the affine coset, expected to be generated by `epsilon^6`.  This avoids the two main traps: treating `L` as a sublattice, and treating the order-6 residue phenomenon as a genuine multiplicative character before the Shintani window has been analyzed.
