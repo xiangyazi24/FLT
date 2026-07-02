@@ -1,837 +1,1140 @@
-# Q3124 (dm1): R8 audit of theorem statements and proof routes
+# Q3126 (dm1): R1 — Lean 4 framework design for Ch10 indefinite theta theorems
 
 Date: 2026-07-02
 
-## Executive summary
+## Executive recommendation
 
-The core algebraic spine is good:
-
-```text
-beta(k,r) = (r - 2k) + (4k + 3r + 1) phi
--N(beta(k,r)) = 10 E(k,r) + 1
-```
-
-This really does give norm support for the coefficients of the cone series.  The main corrections before Lean formalization are:
-
-1. `L` is **not a sublattice**.  It is an affine coset of the index-10 sublattice `{a+b phi : b-3a == 0 mod 10}`.  This matters in Lean: do not make `L` an `AddSubgroup`.
-2. Theorems 1, 3, and 4 are correct as stated.
-3. Theorem 2 is correct after replacing “sublattice” by “affine coset”; the inverse formula is the proof, while the Jacobian determinant is only supporting evidence.
-4. Theorem 5 is correct if `B_N`, `A`/`D` cones, and finiteness are made explicit.  The norm corollary needs one extra sentence: since the identity gives `-N(beta)=10N+1`, positive norm representability follows by multiplying by `phi`, whose norm is `-1`.
-5. Theorem 6’s calculation is correct, but the corollary is ill-posed/too strong.  Since `epsilon*beta` is usually not in `L`, a function whose domain is only `L` cannot even be evaluated at `epsilon*beta`.  The correct conclusion is that the indicator of `L` is not `epsilon`-invariant; it is not that no congruence character can exist.
-6. Theorem 7 is essentially correct, but the proof should explicitly use ideals and CRT:
-   `O_K/(2 sqrt(5)) ~= O_K/(2) x O_K/(sqrt(5)) ~= F_4 x F_5`.
-   The order of `epsilon=phi^2` is indeed `lcm(3,2)=6`.  However, this does **not** by itself prove that the coefficient sequence is governed by an order-6 character.
-7. Conjecture A is not really conjectural once the Hickerson-Mortenson sign convention is fixed.  It is a direct term-by-term identity.
-8. The proof route for Conjecture B has a serious gap: “two prime ideals above `p`” does **not** imply “at most two atoms in `L`.”  Units give infinitely many generators, and `epsilon^6` preserves `L`.  The cone cut makes the coefficient finite, but the bound and noncancellation require a Shintani-sector theorem.
-9. Conjecture E should be reformulated.  “`B` is not multiplicative” only needs one counterexample.  A universal statement `B(pq) != B(p)B(q)` for all tested-style prime pairs is much stronger and may have accidental exceptions.  Also define multiplicativity on the norm variable `M=10N+1`, not on the coefficient index `N`.
-
-## Notation audit
-
-You wrote:
+For the first Lean implementation, **do not use `Zsqrtd 5` and do not start with `NumberField.RingOfIntegers`**.  Roll a small custom model of
 
 ```text
-L = {a+b phi in Z[phi] : b-3a = 1 mod 10} (sublattice of index 10)
+Z[phi],  phi^2 = phi + 1,
 ```
 
-This is the first thing to fix.  `L` is an affine coset, not a sublattice.  It is not closed under addition and does not contain `0`.
+as pairs of integers.  This is the best fit for the nine theorems you listed because almost all proofs are elementary polynomial, congruence, and finite-search arguments in the coordinates `(a,b)` of `a+b*phi`.
 
-Correct formulation:
+The central design should be:
+
+```lean
+structure PhiInt where
+  a : Int
+  b : Int
+```
+
+with multiplication
 
 ```text
-L0 = {a+b phi in Z[phi] : b-3a == 0 mod 10}
-L  = {a+b phi in Z[phi] : b-3a == 1 mod 10}
+(a + b phi) * (c + d phi)
+  = (a*c + b*d) + (a*d + b*c + b*d) phi
 ```
 
-Then `L0` is an index-10 sublattice of `O_K`, and `L` is one affine coset of `L0`.
-
-Lean implication:
+and norm
 
 ```text
-Use Set O_K or a structure carrying a congruence predicate for L.
-Do not define L as an AddSubgroup/Submodule.
+N(a+b phi) = a^2 + a*b - b^2.
 ```
 
-## Theorem 1: exponent parity
-
-### Statement
-
-Correct.
-
-For all integers `k,r`,
+Model the coset
 
 ```text
-Q(k,r) = 4k^2 + 2k + r^2 + (6k+1)r
+L = {a+b phi : b - 3a == 1 mod 10}
 ```
 
-is even.
+as a **predicate** or `Set PhiInt`, not as a submodule.  It is an affine coset, not a sublattice.  This is one of the most important Lean design choices.
 
-### Proof
+The recommended staging is:
 
-Correct and complete:
+1. Formalize Tier 1 entirely in a custom coordinate file.  This should be robust and mostly `simp`, `omega`, `ring_nf`, and `nlinarith`.
+2. Formalize Tier 2a, the mod-10 unit/coset behavior, in the same coordinate model.
+3. Formalize Theorem 9 using explicit finite coefficient lemmas, not by evaluating an infinite q-series.
+4. Postpone the full ideal quotient theorem for Theorem 7 until after the algebraic core builds.  In the first pass, prove an explicit CRT-target version `F4 × ZMod 5` and later connect it to `O_K/(2*sqrt5)`.
+5. Treat Tier 3 as a coefficient-level bridge theorem before connecting to existing power-series infrastructure.
+
+## 1. Recommended definitions
+
+### 1.1 File header and imports
+
+For the Tier 1 coordinate file, start small:
+
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.Int.ModEq
+import Mathlib.Data.ZMod.Basic
+import QseriesFormalization.Basic
+
+namespace QseriesFormalization
+namespace Ch10
+```
+
+If `QseriesFormalization.Basic` is not needed for the pure algebra file, omit it there and import it only in the q-series bridge file.  Keeping the algebra file independent will make it faster and less fragile.
+
+### 1.2 `Z[phi]` as pairs
+
+Use a custom type.
+
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.Int.ModEq
+import Mathlib.Data.ZMod.Basic
+
+namespace QseriesFormalization
+namespace Ch10
+
+/-- Integer coordinates for `a + b * phi`, where `phi^2 = phi + 1`. -/
+structure PhiInt where
+  a : Int
+  b : Int
+  deriving DecidableEq, Repr
+
+namespace PhiInt
+
+instance : Zero PhiInt := ⟨⟨0, 0⟩⟩
+instance : One PhiInt := ⟨⟨1, 0⟩⟩
+instance : Add PhiInt := ⟨fun x y => ⟨x.a + y.a, x.b + y.b⟩⟩
+instance : Neg PhiInt := ⟨fun x => ⟨-x.a, -x.b⟩⟩
+instance : Sub PhiInt := ⟨fun x y => ⟨x.a - y.a, x.b - y.b⟩⟩
+
+/-- Multiplication in `Z[phi]`, using `phi^2 = phi + 1`. -/
+instance : Mul PhiInt :=
+  ⟨fun x y =>
+    ⟨x.a * y.a + x.b * y.b,
+     x.a * y.b + x.b * y.a + x.b * y.b⟩⟩
+
+@[simp] theorem zero_a : (0 : PhiInt).a = 0 := rfl
+@[simp] theorem zero_b : (0 : PhiInt).b = 0 := rfl
+@[simp] theorem one_a : (1 : PhiInt).a = 1 := rfl
+@[simp] theorem one_b : (1 : PhiInt).b = 0 := rfl
+@[simp] theorem add_a (x y : PhiInt) : (x + y).a = x.a + y.a := rfl
+@[simp] theorem add_b (x y : PhiInt) : (x + y).b = x.b + y.b := rfl
+@[simp] theorem neg_a (x : PhiInt) : (-x).a = -x.a := rfl
+@[simp] theorem neg_b (x : PhiInt) : (-x).b = -x.b := rfl
+@[simp] theorem sub_a (x y : PhiInt) : (x - y).a = x.a - y.a := rfl
+@[simp] theorem sub_b (x y : PhiInt) : (x - y).b = x.b - y.b := rfl
+@[simp] theorem mul_a (x y : PhiInt) : (x * y).a = x.a * y.a + x.b * y.b := rfl
+@[simp] theorem mul_b (x y : PhiInt) :
+    (x * y).b = x.a * y.b + x.b * y.a + x.b * y.b := rfl
+
+/-- `phi = 0 + 1*phi`. -/
+def phi : PhiInt := ⟨0, 1⟩
+
+/-- `sqrt 5 = 2*phi - 1`. -/
+def sqrt5 : PhiInt := ⟨-1, 2⟩
+
+/-- The totally positive unit `epsilon = phi^2 = 1 + phi`. -/
+def eps : PhiInt := ⟨1, 1⟩
+
+/-- Norm from `Z[phi]` to `Z`: `N(a+b phi)=a^2+ab-b^2`. -/
+def norm (x : PhiInt) : Int := x.a ^ 2 + x.a * x.b - x.b ^ 2
+
+@[simp] theorem norm_mk (a b : Int) : norm ⟨a, b⟩ = a ^ 2 + a * b - b ^ 2 := rfl
+
+end PhiInt
+end Ch10
+end QseriesFormalization
+```
+
+Do **not** spend time proving a full `CommRing PhiInt` instance in the first pass unless the code starts demanding it.  For Tier 1, the coordinate operations and theorems are enough.  A full ring instance is possible but creates extra proof obligations that do not help the first nine theorems.
+
+### 1.3 Exponent, beta map, coset, and cones
+
+Use integer-valued definitions.
+
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.Int.ModEq
+import Mathlib.Data.ZMod.Basic
+
+namespace QseriesFormalization
+namespace Ch10
+
+/-- Twice the exponent. -/
+def Q (k r : Int) : Int :=
+  4 * k ^ 2 + 2 * k + r ^ 2 + (6 * k + 1) * r
+
+/-- Integer triangular number on `Int`. -/
+def triZ (r : Int) : Int := r * (r + 1) / 2
+
+/-- The exponent `E = Q/2`, written without using `Q/2` directly. -/
+def E (k r : Int) : Int :=
+  2 * k ^ 2 + k + 3 * k * r + triZ r
+
+/-- The atom-to-golden-integer map. -/
+def beta (k r : Int) : PhiInt :=
+  ⟨r - 2 * k, 4 * k + 3 * r + 1⟩
+
+/-- The affine coset `L = {a+b phi : b - 3a == 1 mod 10}`. -/
+def InL (x : PhiInt) : Prop :=
+  Int.ModEq 10 (x.b - 3 * x.a) 1
+
+/-- Positive same-sign cone `A`. -/
+def InACone (k r : Int) : Prop := 0 <= k ∧ 0 <= r
+
+/-- Negative same-sign cone `D`. -/
+def InDCone (k r : Int) : Prop := k < 0 ∧ r < 0
+
+end Ch10
+end QseriesFormalization
+```
+
+Important note about signs: in Lean, `(-1 : Int) ^ r` is not available for negative integer exponents.  For signs, avoid integer exponents.  Define parity sign by a predicate instead:
+
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.Int.ModEq
+
+namespace QseriesFormalization
+namespace Ch10
+
+/-- The sign `(-1)^n`, defined by parity of an integer. -/
+def negOnePowInt (n : Int) : Int :=
+  if n % 2 = 0 then 1 else -1
+
+@[simp] theorem negOnePowInt_even {n : Int} (h : n % 2 = 0) : negOnePowInt n = 1 := by
+  simp [negOnePowInt, h]
+
+@[simp] theorem negOnePowInt_odd {n : Int} (h : n % 2 ≠ 0) : negOnePowInt n = -1 := by
+  simp [negOnePowInt, h]
+
+/-- Cone weight for `B = D - A`. -/
+def BWeight (k r : Int) : Int :=
+  if InACone k r then -negOnePowInt r
+  else if InDCone k r then negOnePowInt r
+  else 0
+
+end Ch10
+end QseriesFormalization
+```
+
+This avoids all negative-exponent headaches.
+
+## 2. Coset modeling
+
+Use `InL : PhiInt -> Prop` and optionally a subtype:
+
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.Int.ModEq
+
+namespace QseriesFormalization
+namespace Ch10
+
+abbrev L := {x : PhiInt // InL x}
+
+end Ch10
+end QseriesFormalization
+```
+
+Do not define `L` as an `AddSubgroup`, because it is not closed under addition.  If you want the underlying index-10 sublattice, define it separately:
+
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.Int.ModEq
+
+namespace QseriesFormalization
+namespace Ch10
+
+def InL0 (x : PhiInt) : Prop :=
+  Int.ModEq 10 (x.b - 3 * x.a) 0
+
+end Ch10
+end QseriesFormalization
+```
+
+For bijection proofs, a `Set.range` theorem is easier than an `Equiv` at first:
+
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.Int.ModEq
+
+namespace QseriesFormalization
+namespace Ch10
+
+/-- The image of `beta` is contained in the affine coset. -/
+theorem beta_mem_L (k r : Int) : InL (beta k r) := by
+  unfold InL beta
+  -- Goal: `10k+1 ≡ 1 [ZMOD 10]`.
+  omega
+
+end Ch10
+end QseriesFormalization
+```
+
+For surjectivity, avoid defining the inverse with `/ 10` if you can.  Use divisibility from `ModEq`.  If the exact `ModEq` lemma names become annoying, define the coset by divisibility from the start:
+
+```lean
+import Mathlib.Tactic
+
+namespace QseriesFormalization
+namespace Ch10
+
+def InL_dvd (x : PhiInt) : Prop :=
+  10 ∣ x.b - 3 * x.a - 1
+
+/-- The image of `beta` is contained in the divisibility-form affine coset. -/
+theorem beta_mem_L_dvd (k r : Int) : InL_dvd (beta k r) := by
+  unfold InL_dvd beta
+  use k
+  ring
+
+/-- Surjectivity of `beta` onto the divisibility-form affine coset. -/
+theorem exists_beta_of_mem_L_dvd (x : PhiInt) (hx : InL_dvd x) :
+    ∃ k r : Int, beta k r = x := by
+  rcases hx with ⟨k, hk⟩
+  refine ⟨k, x.a + 2 * k, ?_⟩
+  ext <;> unfold beta <;> omega
+
+end Ch10
+end QseriesFormalization
+```
+
+My practical recommendation:
 
 ```text
-Q(k,r) = 2(2k^2 + k + 3kr) + r(r+1).
+Use divisibility for proofs; expose `Int.ModEq` lemmas for human-facing theorem statements.
 ```
 
-The first term is even, and `r(r+1)` is even.
+## 3. File structure
 
-### Lean note
-
-Define
+Recommended split:
 
 ```text
-E(k,r) = Q(k,r) / 2
+QseriesFormalization/Ch10/PhiInt.lean
+QseriesFormalization/Ch10/ConeAlgebra.lean
+QseriesFormalization/Ch10/HMMatch.lean
+QseriesFormalization/Ch10/FiniteCounterexample.lean
+QseriesFormalization/Ch10/CRTOrder.lean
+QseriesFormalization/Ch10/CoefficientFormula.lean
 ```
 
-only after proving divisibility, or define directly as
+### `PhiInt.lean`
+
+Contains:
 
 ```text
-E(k,r) = 2*k^2 + k + 3*k*r + r*(r+1)/2.
+PhiInt structure
+addition/multiplication coordinate operations
+phi, sqrt5, eps
+norm
+basic simp lemmas
+optional norm_mul theorem
 ```
 
-The second definition is usually easier in Lean, because `r*(r+1)/2` still needs an integrality lemma but avoids quotienting the whole expression.
+### `ConeAlgebra.lean`
 
-## Theorem 2: bijection
-
-### Statement
-
-Correct after changing “sublattice” to “affine coset.”
-
-The map
+Contains:
 
 ```text
-F : Z^2 -> L
-F(k,r) = beta(k,r) = (r-2k) + (4k+3r+1) phi
+Q, triZ, E
+beta
+InL, InL0
+A/D cones
+parity sign
+Theorems 1--4
+Theorem 6 mod-10 instability and eps^6 stability
 ```
 
-is a bijection from `Z^2` to the affine coset `L`.
+### `HMMatch.lean`
 
-### Proof audit
-
-Let
+Contains:
 
 ```text
-a = r - 2k,
-b = 4k + 3r + 1.
+HM exponent expression
+HM sign simplification
+Theorem 8: f_{1,3,4}(X,-X^3,X) exponent matches E(k,r)
 ```
 
-Then
+This can remain pure algebra.  It does not need the actual HM q-series object yet.
+
+### `FiniteCounterexample.lean`
+
+Contains:
 
 ```text
-b - 3a = 4k + 3r + 1 - 3(r - 2k)
-        = 10k + 1,
+manual finite coefficient computations:
+B_1 = 1
+B_3 = -2
+B_34 = 3
+nonmultiplicativity on norm values 11 * 31 = 341
 ```
 
-so `F(k,r) in L`.
+Do this as a finite/manual theorem first.  Do not depend on full q-series expansion.
 
-Conversely, if `a+b phi in L`, then
+### `CRTOrder.lean`
+
+Contains:
 
 ```text
-k = (b - 3a - 1) / 10,
-r = a + 2k.
+explicit F4 × ZMod 5 model
+image of eps
+order 6 theorem in the CRT target
+later: isomorphism with O_K/(2*sqrt5)
 ```
 
-Since `b-3a == 1 mod 10`, `k` is an integer.  Then `r` is an integer.  Substitution gives
+This file is Tier 2 and can be postponed if it becomes heavy.
+
+### `CoefficientFormula.lean`
+
+Contains Tier 3:
 
 ```text
-r - 2k = a,
-4k + 3r + 1 = b.
+definition of coefficient-level A_N, D_N, B_N
+finite support boxes
+exact formula as sum over beta in S(N)
+bridge to existing q-series infrastructure
 ```
 
-So the inverse formula proves both injectivity and surjectivity.
+Keep it last.  It depends on the coefficient infrastructure and will likely be the least stable.
 
-The Jacobian matrix of the affine map is
+## 4. Proof strategies theorem by theorem
 
-```text
-[[-2, 1],
- [ 4, 3]],
+## Theorem 1: `Q(k,r)` is even
+
+Recommended statement:
+
+```lean
+import Mathlib.Tactic
+
+namespace QseriesFormalization
+namespace Ch10
+
+theorem Q_even (k r : Int) : 2 ∣ Q k r := by
+  unfold Q
+  -- Use the decomposition
+  -- Q = 2*(2*k^2+k+3*k*r) + r*(r+1)
+  -- and prove `2 ∣ r*(r+1)`.
+  sorry
+
+end Ch10
+end QseriesFormalization
 ```
 
-with determinant `-10`.  This agrees with the index, but it is not by itself a proof of surjectivity onto the correct affine coset.  Keep it as a check, not as the main proof.
+No `sorry` in final code, of course.  The proof pattern should be:
 
-### Edge case
+1. Prove or import the lemma:
 
-No issue at `k=0` or `r=0`.  The affine shift `+1` in `b` is essential; omitting it changes the coset.
+```lean
+lemma two_dvd_mul_succ (r : Int) : 2 ∣ r * (r + 1)
+```
+
+2. Then combine divisibility:
+
+```lean
+have h1 : 2 ∣ 2 * (2*k^2 + k + 3*k*r) := by exact dvd_mul_right 2 _
+have h2 : 2 ∣ r * (r + 1) := two_dvd_mul_succ r
+have hsum : 2 ∣ 2 * (2*k^2 + k + 3*k*r) + r*(r+1) := dvd_add h1 h2
+convert hsum using 1 <;> ring
+```
+
+If the imported evenness lemma is hard to find, prove it by parity cases on `r % 2`.  This is a one-time lemma worth having.
+
+## Theorem 2: beta bijection onto `L`
+
+Use two theorems first, not an `Equiv`:
+
+```lean
+import Mathlib.Tactic
+
+namespace QseriesFormalization
+namespace Ch10
+
+theorem beta_mem_L_dvd (k r : Int) : InL_dvd (beta k r) := by
+  unfold InL_dvd beta
+  use k
+  ring
+
+theorem exists_beta_of_mem_L_dvd (x : PhiInt) (hx : InL_dvd x) :
+    ∃ k r : Int, beta k r = x := by
+  rcases hx with ⟨k, hk⟩
+  refine ⟨k, x.a + 2*k, ?_⟩
+  ext <;> unfold beta <;> omega
+
+end Ch10
+end QseriesFormalization
+```
+
+This is much easier than making an `Equiv` on day one.  Once those build, define the actual equivalence only if another theorem needs it.
 
 ## Theorem 3: norm identity
 
-### Statement
+Best statement:
 
-Correct.
+```lean
+import Mathlib.Tactic
 
-For
+namespace QseriesFormalization
+namespace Ch10
 
-```text
-a = r - 2k,
-b = 4k + 3r + 1,
-N(a+b phi) = a^2 + ab - b^2,
+theorem norm_beta (k r : Int) :
+    -PhiInt.norm (beta k r) = 10 * E k r + 1 := by
+  unfold PhiInt.norm beta E triZ
+  -- Need lemma `2 * (r*(r+1)/2) = r*(r+1)`.
+  have htri : 2 * (r * (r + 1) / 2) = r * (r + 1) := by
+    -- follows from `2 ∣ r*(r+1)`
+    sorry
+  nlinarith [htri]
+
+end Ch10
+end QseriesFormalization
 ```
 
-one has
+The final code should replace the `sorry` with a lemma:
 
-```text
--N(beta(k,r)) = 10*E(k,r) + 1.
+```lean
+lemma two_mul_triZ (r : Int) : 2 * triZ r = r * (r + 1) := by
+  unfold triZ
+  have h : 2 ∣ r * (r + 1) := two_dvd_mul_succ r
+  exact Int.mul_ediv_cancel' h
 ```
 
-### Proof audit
-
-Direct expansion gives
-
-```text
-N(beta(k,r))
-  = (r-2k)^2
-    + (r-2k)(4k+3r+1)
-    - (4k+3r+1)^2
-
-  = -20k^2 - 10k - 30kr - 5r^2 - 5r - 1.
-```
-
-Meanwhile
-
-```text
-10 E(k,r) + 1
-  = 10 * (2k^2 + k + 3kr + r(r+1)/2) + 1
-  = 20k^2 + 10k + 30kr + 5r^2 + 5r + 1.
-```
-
-So the identity follows.
-
-### Hidden assumption
-
-The norm convention must be fixed exactly as
-
-```text
-N(a+b phi) = a^2 + ab - b^2.
-```
-
-This uses `phi^2=phi+1`, trace `Tr(phi)=1`, and norm `N(phi)=-1`.
+The exact theorem may be named `Int.mul_ediv_cancel'`; if it is not, search for the lemma proving `a * (b / a) = b` under `a ∣ b`.  This is a small local obstacle, not a conceptual risk.
 
 ## Theorem 4: sign simplification
 
-### Statement
+Do not use `(-1)^r` with negative integer exponents.  Prove parity equality instead.
 
-Correct.
+```lean
+import Mathlib.Tactic
 
-If `a = r - 2k`, then
+namespace QseriesFormalization
+namespace Ch10
 
-```text
-(-1)^r = (-1)^a.
+theorem negOnePowInt_beta_a (k r : Int) :
+    negOnePowInt r = negOnePowInt (r - 2*k) := by
+  unfold negOnePowInt
+  have h : r % 2 = (r - 2*k) % 2 := by omega
+  simp [h]
+
+end Ch10
+end QseriesFormalization
 ```
 
-### Proof
+If `omega` does not solve `%` goals over `Int`, use `Int.ModEq 2 r (r - 2*k)` and convert to equality of `negOnePowInt` by a helper lemma.
 
-Since
+## Theorem 8: HM exponent matching
 
-```text
-r = a + 2k,
-```
-
-`r` and `a` have the same parity.
-
-### Corollary audit
-
-The corollary is correct if `B = D - A` and the cone signs are as stated:
+The HM exponent after substituting
 
 ```text
-A-cone contribution: -(-1)^r = -(-1)^a
-D-cone contribution: +(-1)^r = +(-1)^a.
+x = X,
+y = -X^3,
+q = X,
+HM variables m=r, n=k
 ```
 
-Make the boundary convention explicit:
+is
 
 ```text
-A-cone: k >= 0 and r >= 0
-D-cone: k < 0 and r < 0
+r*(r+1)/2 + 3*r*k + 2*k^2 + k.
 ```
 
-There is no overlap between these cones.
+So the theorem is:
 
-## Theorem 5: exact formula
+```lean
+import Mathlib.Tactic
 
-### Statement
+namespace QseriesFormalization
+namespace Ch10
 
-Correct after adding explicit definitions and finiteness.
+def HMExp (k r : Int) : Int :=
+  triZ r + 3 * r * k + 2 * k ^ 2 + k
 
-Recommended statement:
+theorem HMExp_eq_E (k r : Int) : HMExp k r = E k r := by
+  unfold HMExp E
+  ring_nf
+
+end Ch10
+end QseriesFormalization
+```
+
+This should be easy because both sides use `triZ r` directly; no division arithmetic is needed beyond definitional equality.
+
+## Theorem 6: `eps*L ∩ L = empty`, `eps^6*L = L`
+
+With custom `PhiInt`, the unit action is explicit:
+
+```lean
+import Mathlib.Tactic
+
+namespace QseriesFormalization
+namespace Ch10
+
+def epsMul (x : PhiInt) : PhiInt :=
+  ⟨x.a + x.b, x.a + 2*x.b⟩
+
+@[simp] theorem epsMul_a (x : PhiInt) : (epsMul x).a = x.a + x.b := rfl
+@[simp] theorem epsMul_b (x : PhiInt) : (epsMul x).b = x.a + 2*x.b := rfl
+
+theorem epsMul_coset_expr (x : PhiInt) :
+    (epsMul x).b - 3*(epsMul x).a = -2*x.a - x.b := by
+  unfold epsMul
+  ring
+
+end Ch10
+end QseriesFormalization
+```
+
+For nonintersection, if `InL` is divisibility-based:
+
+```lean
+import Mathlib.Tactic
+
+namespace QseriesFormalization
+namespace Ch10
+
+theorem epsMul_not_mem_L_of_mem_L (x : PhiInt) (hx : InL_dvd x) :
+    ¬ InL_dvd (epsMul x) := by
+  intro hxe
+  rcases hx with ⟨m, hm⟩
+  rcases hxe with ⟨n, hn⟩
+  unfold epsMul at hn
+  -- hm: x.b - 3*x.a - 1 = 10*m
+  -- hn: (x.a+2*x.b) - 3*(x.a+x.b) - 1 = 10*n
+  -- combine to get impossible congruence `5*x.a = -2 mod 10`.
+  omega
+
+end Ch10
+end QseriesFormalization
+```
+
+For `eps^6`, avoid generic exponentiation at first.  Define the sixfold action explicitly.
+
+The matrix for `epsMul` is
 
 ```text
-Let B(X) = D(X) - A(X) = sum_{N >= 0} B_N X^N,
-where
-
-A(X) = sum_{k>=0, r>=0} (-1)^r X^{E(k,r)},
-D(X) = sum_{k<0, r<0} (-1)^r X^{E(k,r)}.
-
-For N >= 0, let S(N) be the set of beta=a+b phi in L such that
-
-  -N_{K/Q}(beta) = 10N + 1
-
-and whose inverse atom (k,r) lies in the A-cone or D-cone.  Define
-
-  W(beta) = -(-1)^a  in the A-cone,
-  W(beta) = +(-1)^a  in the D-cone.
-
-Then
-
-  B_N = sum_{beta in S(N)} W(beta).
+M = [[1,1],[1,2]].
 ```
 
-### Proof audit
-
-The proof is direct from Theorems 2-4, but two details should not be skipped.
-
-First, the cone conditions in `(a,b)` coordinates are:
+Its sixth power is
 
 ```text
-k = (b - 3a - 1) / 10,
-r = (4a + 2b - 2) / 10 = (2a + b - 1) / 5.
+M^6 = [[89,144],[144,233]].
 ```
 
-So:
+Thus define:
+
+```lean
+import Mathlib.Tactic
+
+namespace QseriesFormalization
+namespace Ch10
+
+def eps6Mul (x : PhiInt) : PhiInt :=
+  ⟨89*x.a + 144*x.b, 144*x.a + 233*x.b⟩
+
+theorem eps6Mul_preserves_L (x : PhiInt) (hx : InL_dvd x) : InL_dvd (eps6Mul x) := by
+  rcases hx with ⟨m, hm⟩
+  unfold InL_dvd eps6Mul
+  -- Key identity:
+  -- new_coset_minus_one = old_coset_minus_one + 10*(-12*a - 20*b).
+  use m - 12*x.a - 20*x.b
+  omega
+
+end Ch10
+end QseriesFormalization
+```
+
+## Theorem 7: order of `phi^2` in `(O_K/(2*sqrt5))^x`
+
+This is the highest-risk Tier 2 theorem if you try to use actual `RingOfIntegers`, ideals, and quotient rings immediately.
+
+### Recommended first formal target
+
+Prove an explicit CRT-target theorem first:
 
 ```text
-A-cone: b - 3a - 1 >= 0 and 2a + b - 1 >= 0,
-D-cone: b - 3a - 1 <  0 and 2a + b - 1 <  0.
+O_K/(2*sqrt5)  ≅  O_K/(2) × O_K/(sqrt5)  ≅  F4 × F5.
 ```
 
-Second, the coefficient sum is finite.  This is not automatic from the norm equation alone, because the unit group is infinite.  It follows from the cone definitions.  On the A-cone,
+But in Lean, begin with just the target:
 
 ```text
-E(k,r) = 2k^2 + k + 3kr + r(r+1)/2
+epsCRT has order 6 in F4^× × (ZMod 5)^×.
 ```
 
-grows positively for `k,r >= 0`.  On the D-cone, set `k=-u-1`, `r=-v-1` with `u,v >= 0`.  Then
+Then later prove that this is the image of `eps` under the quotient isomorphism.
+
+### F4 options
+
+Option A: use Mathlib finite fields if convenient.  Possible imports to try:
+
+```lean
+import Mathlib.FieldTheory.Finite.Basic
+import Mathlib.Data.ZMod.Basic
+import Mathlib.Tactic
+```
+
+Depending on Mathlib names, `GaloisField 2 2` may be available.  If names drift, this can become a time sink.
+
+Option B: define `F4` manually.  This is more work up front but very robust for order-6 only.
+
+Represent `F4 = F2[α]/(α^2+α+1)` as pairs over `ZMod 2`:
+
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.ZMod.Basic
+
+namespace QseriesFormalization
+namespace Ch10
+
+structure F4 where
+  c0 : ZMod 2
+  c1 : ZMod 2
+  deriving DecidableEq, Repr
+
+namespace F4
+
+instance : One F4 := ⟨⟨1, 0⟩⟩
+instance : Mul F4 :=
+  ⟨fun x y =>
+    -- alpha^2 = alpha + 1 in characteristic 2.
+    ⟨x.c0*y.c0 + x.c1*y.c1,
+     x.c0*y.c1 + x.c1*y.c0 + x.c1*y.c1⟩⟩
+
+def alpha : F4 := ⟨0, 1⟩
+def eps2 : F4 := alpha * alpha
+
+end F4
+end Ch10
+end QseriesFormalization
+```
+
+Then define the CRT target:
+
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.ZMod.Basic
+
+namespace QseriesFormalization
+namespace Ch10
+
+abbrev CRTTarget := F4 × ZMod 5
+
+def epsCRT : CRTTarget := (F4.eps2, (4 : ZMod 5))
+
+end Ch10
+end QseriesFormalization
+```
+
+Prove:
+
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.ZMod.Basic
+
+namespace QseriesFormalization
+namespace Ch10
+
+theorem epsCRT_pow_six : epsCRT ^ 6 = 1 := by
+  native_decide
+
+theorem epsCRT_pow_one_ne_one : epsCRT ^ 1 ≠ 1 := by
+  native_decide
+
+theorem epsCRT_pow_two_ne_one : epsCRT ^ 2 ≠ 1 := by
+  native_decide
+
+theorem epsCRT_pow_three_ne_one : epsCRT ^ 3 ≠ 1 := by
+  native_decide
+
+end Ch10
+end QseriesFormalization
+```
+
+You may need `BEq`, `DecidableEq`, and finite instances for the custom type if using `native_decide`.  Since this is only a four-element type, manual `rfl`/case proofs are also fine.
+
+### Full ideal quotient theorem later
+
+The full theorem should be broken into lemmas:
+
+```text
+sqrt5 = 2phi - 1.
+O_K/(2) is F4 because x^2-x-1 becomes x^2+x+1 irreducible mod 2.
+O_K/(sqrt5) is F5 because sqrt5=0 implies phi=1/2=3 mod 5.
+(2) and (sqrt5) are coprime.
+CRT gives quotient by product ideal.
+eps maps to (alpha^2, -1).
+order is lcm(3,2)=6.
+```
+
+This is mathematically clean but Lean-heavy.  Do not block Tier 1 on this.
+
+## Theorem 5: exact coefficient formula
+
+Tier 3 should be coefficient-level first, q-series-level second.
+
+Define coefficient functions by finite support, not by infinite sums:
+
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.Finset.Basic
+
+namespace QseriesFormalization
+namespace Ch10
+
+/-- A very safe finite bound for coefficient extraction. -/
+def coeffBound (N : Nat) : Int := (N : Int) + 10
+
+-- Later: Finset.Icc (-coeffBound N) (coeffBound N), filtered by cones and `E k r = N`.
+
+end Ch10
+end QseriesFormalization
+```
+
+But for general `N`, proving the bound is the real work.  The better staged approach is:
+
+1. Define `AcoeffInBox bound N`, `DcoeffInBox bound N`, `BcoeffInBox bound N`.
+2. Prove special values for Theorem 9 with a concrete bound, e.g. `bound=10`.
+3. Later prove a general support-bound theorem and remove the box parameter.
+
+The exact formula theorem should eventually say:
+
+```text
+B_N = sum over beta in L, -Norm(beta)=10N+1, beta in A or D cone of W(beta).
+```
+
+But in Lean this is easiest after you have:
+
+```text
+(k,r) <-> beta bijection
+norm identity
+sign simplification
+cone predicates transported through inverse formulas
+```
+
+So Tier 3 is not conceptually hard; it is infrastructure-heavy.
+
+## Theorem 9: explicit non-multiplicativity counterexample
+
+Use the norm values:
+
+```text
+11 * 31 = 341
+11 = 10*1 + 1
+31 = 10*3 + 1
+341 = 10*34 + 1
+```
+
+The coefficient values are:
+
+```text
+B_1  = 1
+B_3  = -2
+B_34 = 3
+```
+
+Thus
+
+```text
+B_34 != B_1 * B_3
+```
+
+because
+
+```text
+3 != -2.
+```
+
+### Manual coefficient proofs
+
+For `B_1`:
+
+```text
+E(k,r)=1
+A-cone solution: (k,r)=(0,1), weight +1
+D-cone solutions: none
+B_1=1
+```
+
+For `B_3`:
+
+```text
+E(k,r)=3
+A-cone solutions: (k,r)=(1,0), (0,2), each weight -1
+D-cone solutions: none
+B_3=-2
+```
+
+For `B_34`:
+
+```text
+A-cone solution: (k,r)=(2,3), weight +1
+D-cone solutions: (k,r)=(-1,-6), (-3,-2), each weight +1
+B_34=3
+```
+
+This gives a no-q-series proof of nonmultiplicativity.
+
+### Lean strategy
+
+In actual final code, avoid difficult set extensionality if unnecessary.  Use bounded finite enumeration or dedicated uniqueness/exhaustion lemmas using `interval_cases`:
+
+```lean
+have hk_bound : 0 <= k ∧ k <= 4 := by nlinarith [...]
+interval_cases k <;> interval_cases r <;> norm_num [E, triZ] at *
+```
+
+For D-cone, substitute
+
+```text
+k = -u - 1,
+r = -v - 1,
+u,v >= 0.
+```
+
+Then use the positive formula
 
 ```text
 E(-u-1,-v-1)
-  = 2u^2 + 6u + 3uv + (v^2 + 7v)/2 + 4,
+  = 2*u^2 + 6*u + 3*u*v + (v^2 + 7*v)/2 + 4.
 ```
 
-which also grows positively.  Hence only finitely many atoms contribute to a fixed `N`.
+This is much easier for bounding.
 
-### Norm-support corollary
+## 5. Biggest risks and hardest parts
 
-The corollary needs a sign clarification.
+### Risk 1: treating `L` as a sublattice
 
-Theorem 3 gives
+`L` is an affine coset.  This affects type choices, unit action, and quotient statements.  Use a predicate or subtype.
+
+### Risk 2: integer division in `E`
+
+`triZ r = r*(r+1)/2` creates proof obligations.  Isolate them in two lemmas:
 
 ```text
--N(beta) = 10N + 1.
+2 ∣ r*(r+1)
+2*triZ r = r*(r+1)
 ```
 
-This says `10N+1` is the negative of a norm.  Since `N(phi)=-1`, it is also a positive norm:
+After that, polynomial proofs become routine.
+
+### Risk 3: `(-1)^r` for negative `r`
+
+Do not use integer exponentiation.  Define a parity sign function `negOnePowInt`.
+
+### Risk 4: Theorem 7 if attempted too abstractly
+
+`RingOfIntegers`, ideal quotients, finite fields, and CRT are all available in principle but will consume time.  Prove the explicit CRT-target order first.  Bridge to quotient ideals later.
+
+### Risk 5: Theorem 5 finite support
+
+The q-series exact formula needs a finite-support theorem for coefficient extraction.  For each fixed coefficient, cone positivity gives finiteness; but Lean needs explicit bounds.  Do special coefficients first, then generalize.
+
+### Risk 6: `native_decide` over complicated structures
+
+`native_decide` is great for finite custom rings and finite tables.  It is not a substitute for proving infinite cone bounds or coefficient formulas.
+
+## 6. Alternative architectures
+
+### Alternative A: `Zsqrtd 5`
+
+Not recommended.  `Zsqrtd 5` models `Z[sqrt(5)]`, but the ring of integers is `Z[(1+sqrt(5))/2]`.  You would constantly fight factors of `2`.  The theorems are naturally in `(a,b)` coordinates for `a+b phi`, so this is the wrong abstraction for Tier 1.
+
+### Alternative B: `NumberField.RingOfIntegers`
+
+Mathematically canonical, but too heavy for the first implementation.  It is the right endpoint if you want the final theorem to literally mention `O_K`, ideals, quotient rings, and Hecke characters.  It is not the right starting point for polynomial identities, mod-10 cosets, and coefficient computations.
+
+Recommended use:
 
 ```text
-N(phi * beta) = N(phi) N(beta) = -N(beta) = 10N + 1.
+First prove everything in `PhiInt`.
+Later define a map from `PhiInt` to `𝓞 (Q(sqrt 5))` and prove it is a ring equivalence.
+Then transport high-level statements if needed.
 ```
 
-So the corrected corollary is:
+### Alternative C: coordinates only, no ring type
+
+This is viable and even simpler.  You can avoid `Mul PhiInt` entirely and just define:
 
 ```text
-B_N != 0 implies 10N+1 is a norm from O_K.
+norm(a,b)
+epsMul(a,b)
+beta(k,r)
 ```
 
-The proof uses the existence of a contributing beta and multiplication by `phi`.
+This is the most robust approach if the only goal is the nine theorems.  I still prefer `PhiInt` because the notation remains close to the mathematics and prepares for Theorem 7.
 
-## Theorem 6: instability of L under epsilon=phi^2
+## 7. Recommended implementation order
 
-### Statement
-
-The computation is correct, but the statement should be worded more carefully.
-
-Let
+### Phase 1: build pure algebra
 
 ```text
-epsilon = phi^2 = 1 + phi.
+PhiInt.lean
+ConeAlgebra.lean
 ```
 
-For `beta=a+b phi`,
+Targets:
 
 ```text
-epsilon beta = (a+b) + (a+2b) phi.
+Q_even
+Q_eq_two_mul_E
+beta_mem_L
+exists_beta_of_mem_L
+norm_beta
+negOnePowInt_beta_a
+HMExp_eq_E
+epsMul_not_mem_L_of_mem_L
+eps6Mul_preserves_L
 ```
 
-Thus, if
+### Phase 2: explicit nonmultiplicativity
 
 ```text
-a' = a+b,
-b' = a+2b,
+FiniteCounterexample.lean
 ```
 
-then
+Targets:
 
 ```text
-b' - 3a' = (a+2b) - 3(a+b) = -2a - b.
+Bcoeff_1 = 1
+Bcoeff_3 = -2
+Bcoeff_34 = 3
+B_not_multiplicative_on_11_31
 ```
 
-If `beta in L`, then `b == 3a+1 mod 10`, so
+Use manual finite enumeration or interval cases.
+
+### Phase 3: CRT order
 
 ```text
-b' - 3a' == -5a - 1 mod 10.
+CRTOrder.lean
 ```
 
-This is never congruent to `1 mod 10`: if `a` is even it is `9 mod 10`, and if `a` is odd it is `4 mod 10`.  Therefore
+Targets:
 
 ```text
-epsilon L cap L = empty.
+epsCRT^6 = 1
+no smaller positive power is 1
 ```
 
-That is the clean theorem.
-
-### Corollary problem
-
-The proposed corollary
+Then, optionally:
 
 ```text
-No congruence character chi on L with chi(epsilon*beta)=chi(beta) can exist.
+CRTTarget represents O_K/(2*sqrt5)
 ```
 
-is not a good mathematical statement as written.
-
-Problem: if `chi` is only defined on `L`, then `chi(epsilon*beta)` is usually not defined, because `epsilon*beta notin L`.
-
-Also, if `chi` is instead a character on a larger residue group or on `O_K`, then such characters can certainly exist, for example any character with `chi(epsilon)=1` is invariant under multiplication by `epsilon` on its domain.
-
-Correct replacement:
+### Phase 4: coefficient formula bridge
 
 ```text
-The indicator function 1_L is not invariant under multiplication by epsilon.
-Equivalently, the affine congruence support L is not stable under the full positive unit group generated by epsilon.
+CoefficientFormula.lean
 ```
 
-A useful strengthening is:
+Targets:
 
 ```text
-epsilon^3 L is the coset b-3a == -1 mod 10,
-epsilon^6 L = L.
+finite support lemmas for A/D cones
+coefficient-level exact formula
+bridge to existing q-series infrastructure
 ```
 
-So the first totally positive unit power preserving `L` is expected to be `epsilon^6`, not `epsilon`.
+## 8. Suggested theorem names
 
-This is important for the Shintani proof route: reduce by the subgroup generated by `epsilon^6`, not by the full group generated by `epsilon`.
-
-## Theorem 7: order of epsilon modulo 2 sqrt(5)
-
-### Statement
-
-The statement is correct:
+Use names that describe the coordinate theorem, not the paper theorem number:
 
 ```text
-epsilon = phi^2 has order 6 in (O_K / (2 sqrt(5)))^x.
+Q_even
+Q_eq_two_mul_E
+beta_mem_L
+exists_beta_of_mem_L
+beta_injective
+norm_beta
+parity_beta_a
+BWeight_eq_transported_weight
+HMExp_eq_E
+HMSign_eq_BSign
+epsMul_not_preserve_L
+eps6Mul_preserves_L
+epsCRT_order_six
+Bcoeff_one
+Bcoeff_three
+Bcoeff_thirty_four
+B_not_multiplicative
 ```
 
-Here `(2 sqrt(5))` should be read as the principal ideal generated by `2 sqrt(5) = 2(2phi-1)`.
+Paper theorem numbers can be comments or aliases later.
 
-### Proof audit
+## 9. A compact starter file
 
-The proof is basically right but needs the ideal details.
+This is the core skeleton I would actually start with.
 
-1. The ideals `(2)` and `(sqrt(5))` are coprime, so CRT gives
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.Int.ModEq
+import Mathlib.Data.ZMod.Basic
+
+namespace QseriesFormalization
+namespace Ch10
+
+structure PhiInt where
+  a : Int
+  b : Int
+  deriving DecidableEq, Repr
+
+namespace PhiInt
+
+instance : Zero PhiInt := ⟨⟨0, 0⟩⟩
+instance : One PhiInt := ⟨⟨1, 0⟩⟩
+instance : Add PhiInt := ⟨fun x y => ⟨x.a + y.a, x.b + y.b⟩⟩
+instance : Neg PhiInt := ⟨fun x => ⟨-x.a, -x.b⟩⟩
+instance : Sub PhiInt := ⟨fun x y => ⟨x.a - y.a, x.b - y.b⟩⟩
+instance : Mul PhiInt :=
+  ⟨fun x y =>
+    ⟨x.a * y.a + x.b * y.b,
+     x.a * y.b + x.b * y.a + x.b * y.b⟩⟩
+
+@[ext] theorem ext (x y : PhiInt) (ha : x.a = y.a) (hb : x.b = y.b) : x = y := by
+  cases x
+  cases y
+  simp at ha hb
+  simp [ha, hb]
+
+def norm (x : PhiInt) : Int := x.a ^ 2 + x.a * x.b - x.b ^ 2
+
+def phi : PhiInt := ⟨0, 1⟩
+def sqrt5 : PhiInt := ⟨-1, 2⟩
+def eps : PhiInt := ⟨1, 1⟩
+
+end PhiInt
+
+def Q (k r : Int) : Int :=
+  4 * k ^ 2 + 2 * k + r ^ 2 + (6 * k + 1) * r
+
+def triZ (r : Int) : Int := r * (r + 1) / 2
+
+def E (k r : Int) : Int :=
+  2 * k ^ 2 + k + 3 * k * r + triZ r
+
+def beta (k r : Int) : PhiInt :=
+  ⟨r - 2 * k, 4 * k + 3 * r + 1⟩
+
+def InL (x : PhiInt) : Prop :=
+  10 ∣ x.b - 3 * x.a - 1
+
+def InACone (k r : Int) : Prop := 0 <= k ∧ 0 <= r
+def InDCone (k r : Int) : Prop := k < 0 ∧ r < 0
+
+def negOnePowInt (n : Int) : Int :=
+  if n % 2 = 0 then 1 else -1
+
+def epsMul (x : PhiInt) : PhiInt :=
+  ⟨x.a + x.b, x.a + 2*x.b⟩
+
+def eps6Mul (x : PhiInt) : PhiInt :=
+  ⟨89*x.a + 144*x.b, 144*x.a + 233*x.b⟩
+
+end Ch10
+end QseriesFormalization
+```
+
+I would then add lemmas one at a time, building after each theorem.
+
+## 10. Bottom line
+
+The best architecture is a deliberately low-tech coordinate formalization.  It matches the mathematics, avoids algebraic-number-field overhead, and keeps the first six to eight theorems within reach of `simp`, `omega`, `ring_nf`, and `nlinarith`.
+
+The two hardest parts are:
 
 ```text
-O_K / (2 sqrt(5)) ~= O_K/(2) x O_K/(sqrt(5)).
+Theorem 7, if stated directly using quotient ideals of the ring of integers;
+Theorem 5, if stated directly as an equality of coefficients of infinite q-series.
 ```
 
-2. Since the field discriminant is `5 == 5 mod 8`, the prime `2` is inert in `Q(sqrt(5))`.  Equivalently,
-
-```text
-O_K/(2) ~= F_4.
-```
-
-In this quotient, `phi` satisfies
-
-```text
-phi^2 + phi + 1 = 0,
-```
-
-so `phi` has order `3` in `F_4^x`.  Hence `epsilon=phi^2` also has order `3` modulo `(2)`.
-
-3. The ideal `(sqrt(5))` is the unique ramified prime above `5`, and
-
-```text
-O_K/(sqrt(5)) ~= F_5.
-```
-
-Modulo `(sqrt(5))`, we have `sqrt(5)=0`, so
-
-```text
-phi = (1 + sqrt(5))/2 == 1/2 == 3 mod 5,
-epsilon = phi^2 == 9 == 4 == -1 mod 5.
-```
-
-Therefore `epsilon` has order `2` modulo `(sqrt(5))`.
-
-4. In the CRT product, the order is
-
-```text
-lcm(3,2) = 6.
-```
-
-### What this theorem does not prove
-
-This theorem does **not** prove that `B` is controlled by a genuine order-6 Hecke character.  It only identifies the order of one unit in one finite quotient.
-
-To connect this to the coefficients, you still need separate lemmas showing:
-
-```text
-1. how the affine coset L is encoded by a modulus,
-2. how the sign (-1)^a or (-1)^r is encoded by the same or a larger modulus,
-3. how the Shintani cone/window interacts with multiplication by epsilon^6.
-```
-
-The order-6 residue fact is useful, but it is not the same as the observed six-sector coefficient phenomenon.
-
-## Conjecture A: HM identification
-
-### Verdict
-
-This should be promoted from conjecture to theorem once the HM convention is fixed.
-
-With the standard Hickerson-Mortenson convention
-
-```text
-f_{a,b,c}(x,y,q)
-  = sum_{sg(m)=sg(n)} sg(m) (-1)^{m+n} x^m y^n
-      q^{a*binom(m,2) + bmn + c*binom(n,2)},
-```
-
-where `sg(t)=+1` for `t>=0` and `sg(t)=-1` for `t<0`, one gets
-
-```text
-f_{1,3,4}(X, -X^3, X) = A(X) - D(X).
-```
-
-Indeed the summand is
-
-```text
-sg(m) (-1)^{m+n} X^m (-X^3)^n
-  X^{binom(m,2) + 3mn + 4binom(n,2)}.
-```
-
-The sign simplifies to `sg(m)(-1)^m`, and the exponent is
-
-```text
-m + 3n + binom(m,2) + 3mn + 4binom(n,2)
-= m(m+1)/2 + 3mn + 2n^2 + n.
-```
-
-Setting `m=r` and `n=k` gives exactly `E(k,r)`.  The same-sign nonnegative cone contributes `A`, and the same-sign negative cone contributes `-D`.  Therefore
-
-```text
-B(X) = D(X) - A(X) = -f_{1,3,4}(X, -X^3, X).
-```
-
-If your local definition of `f` differs by a global sign or by the convention for `sg(0)`, this must be adjusted.  With HM's usual `sg(0)=+1`, the statement above is right.
-
-## Conjecture B: prime nonvanishing
-
-### Statement
-
-The statement is plausible but needs sharper formulation.
-
-Recommended statement:
-
-```text
-Let p be a rational prime with p == 1 mod 10, and set N=(p-1)/10.
-Then B_N is in {-2,-1,+1,+2}.
-```
-
-This avoids ambiguity about “split prime,” since every prime `p == 1 mod 10` is split in `Q(sqrt(5))` and is represented in the `10N+1` family.
-
-### Main gap in the proposed proof route
-
-The proposed route says:
-
-```text
-(1) two ideals above p,
-(2) <=2 atoms in L,
-(3) same cone,
-(4) same parity.
-```
-
-Step (2) is not justified and is the central hard point.
-
-A split prime gives two prime ideals above `p`, but each ideal has infinitely many generators because the unit group is infinite.  Moreover `epsilon^6` preserves `L`, so even within the affine coset `L` there are infinite unit translates of a generator satisfying the same norm equation.  The cone restriction makes the coefficient finite, but it does not follow from “two ideals above p” that there are at most two contributing atoms.
-
-The real statement you need is a Shintani-sector theorem:
-
-```text
-For each of the two prime-ideal unit orbits of norm p, after imposing
-b-3a == 1 mod 10 and reducing modulo epsilon^6, the A/D cone window
-selects at most one representative; and across the two orbits the selected
-representatives have non-opposite weights.
-```
-
-That is much stronger than the current proof route.
-
-### What must be proved
-
-A sound proof route is:
-
-1. Work with the coefficient formula from Theorem 5.
-2. Replace the full unit group by the subgroup `Gamma=<epsilon^6>` that preserves `L`.
-3. Describe a fundamental Shintani strip for `Gamma` in the real embeddings.
-4. Make a finite residue table modulo a modulus large enough to encode:
-
-```text
-b-3a == 1 mod 10,
-(-1)^a,
-A-cone versus D-cone boundary behavior.
-```
-
-Modulo `20` is likely safer than modulo `10`, because parity signs are visible.
-
-5. For a prime norm `p`, prove that the two prime-ideal orbits intersect the selected Shintani windows in either one or two representatives.
-6. Prove a finite “no opposite-sign pair” lemma for those representatives.
-
-Only after these steps do you get
-
-```text
-B_N in {-2,-1,+1,+2}.
-```
-
-### Boundary cases
-
-Check primes where the representative lands on a cone boundary:
-
-```text
-k=0, r>=0,
-r=0, k>=0
-```
-
-These belong to `A`, not to `D`.  For prime `p`, the constant term boundary `N=0` is irrelevant, but other boundary atoms can occur and must be included in the finite table.
-
-## Conjecture C: cancellation zeros composite
-
-This is essentially a corollary of Conjecture B, not an independent conjecture.
-
-If Conjecture B is proved, then no coefficient with `10N+1` prime can vanish.  Therefore every zero among norm-eligible `N` with `B_N=0` must have composite `10N+1`.
-
-Recommended formulation:
-
-```text
-Assuming Conjecture B, all cancellation zeros occur at composite norm values.
-```
-
-Do not state it as a separate theorem unless you prove Conjecture B.
-
-## Conjecture D: equidistribution
-
-### Statement
-
-Plausible, but it depends on the same finite Shintani-sector table as Conjecture B.
-
-You want something like:
-
-```text
-Among primes p == 1 mod 10,
-|B_{(p-1)/10}| = 1 with density 2/3,
-|B_{(p-1)/10}| = 2 with density 1/3.
-```
-
-### Hardest gap
-
-You must prove that the prime coefficient is determined by a six-sector step function whose sectors have equal measure and whose values have absolute value pattern
-
-```text
-1, 1, 2, 1, 1, 2
-```
-
-up to cyclic order.
-
-Then the density follows from equidistribution of prime ideal generators in the real-unit torus, with the finite ray class fixed.
-
-So the proof splits into two independent hard facts:
-
-```text
-finite table: coefficient value = six-sector step function,
-analytic number theory: split prime generators equidistribute among these sectors.
-```
-
-The second is standard Hecke equidistribution for real quadratic fields, but the first is your real work.
-
-## Conjecture E: non-multiplicativity
-
-### Statement problem
-
-You should define the arithmetic function on norm values, not on coefficient indices.
-
-Define
-
-```text
-a(M) = B_{(M-1)/10}
-```
-
-for positive integers `M == 1 mod 10`, and `a(M)=0` otherwise if you want a function on all positive integers.
-
-Then multiplicativity means
-
-```text
-a(M1*M2) = a(M1)*a(M2)
-```
-
-for coprime `M1,M2`.
-
-In terms of coefficient indices, if
-
-```text
-M1 = 10N1 + 1,
-M2 = 10N2 + 1,
-```
-
-then the product corresponds to
-
-```text
-M1*M2 = 10N12 + 1,
-N12 = (M1*M2 - 1)/10,
-```
-
-not to `N1*N2`.
-
-### Proof status
-
-The statement “`B` is not multiplicative” only needs one explicit coprime counterexample.  That should be a theorem once you record a single checked pair.
-
-The stronger statement suggested by the data,
-
-```text
-a(pq) != a(p)*a(q) for all tested prime pairs,
-```
-
-is probably too strong to state as a theorem without a conceptual reason.  It may have accidental exceptions at larger primes.  A safer conjecture is:
-
-```text
-The equality a(pq)=a(p)a(q) has density 0 among eligible split-prime pairs.
-```
-
-or simply:
-
-```text
-The function a is not multiplicative; the obstruction is the Shintani cone carry.
-```
-
-### Correct structural explanation
-
-The finite congruence data is multiplicative.  The archimedean cone window is not.
-
-Multiplying two reduced generators usually leaves the chosen Shintani strip.  Reducing back into the strip requires multiplying by a power of `epsilon^6`; the exponent is a floor-function carry in logarithmic embedding coordinates.  That carry changes cone membership and sometimes parity signs.  This is the correct reason for non-multiplicativity.
-
-## Theorem 7 and CRT: more detailed ideal checklist
-
-Before Lean or paper formalization, state the following lemmas separately.
-
-```text
-sqrt5 = 2phi - 1 in O_K.
-```
-
-```text
-(sqrt5)^2 = 5, so (sqrt5) is the unique prime over 5 and
-O_K/(sqrt5) ~= F_5.
-```
-
-```text
-The minimal polynomial of phi is T^2 - T - 1.
-Modulo 2 this becomes T^2 + T + 1, irreducible over F_2, so
-O_K/(2) ~= F_4.
-```
-
-```text
-The ideals (2) and (sqrt5) are coprime, hence
-O_K/(2sqrt5) ~= O_K/(2) x O_K/(sqrt5).
-```
-
-```text
-epsilon=phi^2 has order 3 in F_4^x and order 2 in F_5^x.
-Therefore epsilon has order 6 in (O_K/(2sqrt5))^x.
-```
-
-The theorem is fine if written this way.
-
-## Minimal verification oracle
-
-This is not needed for the proof, but it is a useful way to check the formulas before Lean formalization.
-
-```python
-from dataclasses import dataclass
-from typing import Optional, Tuple
-
-
-@dataclass(frozen=True)
-class PhiElt:
-    """Element a + b*phi in Z[phi], where phi^2 = phi + 1."""
-    a: int
-    b: int
-
-
-def norm_phi(x: PhiElt) -> int:
-    """Norm N(a+b*phi) = a^2 + ab - b^2."""
-    return x.a * x.a + x.a * x.b - x.b * x.b
-
-
-def beta(k: int, r: int) -> PhiElt:
-    return PhiElt(a=r - 2 * k, b=4 * k + 3 * r + 1)
-
-
-def q_form(k: int, r: int) -> int:
-    return 4 * k * k + 2 * k + r * r + (6 * k + 1) * r
-
-
-def exponent_E(k: int, r: int) -> int:
-    q = q_form(k, r)
-    if q % 2 != 0:
-        raise ValueError((k, r, q))
-    return q // 2
-
-
-def in_L(x: PhiElt) -> bool:
-    return (x.b - 3 * x.a - 1) % 10 == 0
-
-
-def inverse_atom(x: PhiElt) -> Optional[Tuple[int, int]]:
-    num_k = x.b - 3 * x.a - 1
-    if num_k % 10 != 0:
-        return None
-    k = num_k // 10
-    r = x.a + 2 * k
-    return k, r
-
-
-def epsilon_mul(x: PhiElt) -> PhiElt:
-    """Multiply by epsilon=phi^2=1+phi."""
-    return PhiElt(a=x.a + x.b, b=x.a + 2 * x.b)
-
-
-def check_core_identity(k: int, r: int) -> bool:
-    x = beta(k, r)
-    return in_L(x) and inverse_atom(x) == (k, r) and -norm_phi(x) == 10 * exponent_E(k, r) + 1
-```
-
-## Final verdict table
-
-```text
-Theorem 1: correct.
-Theorem 2: correct after replacing “sublattice” by “affine coset”; inverse proof is essential.
-Theorem 3: correct.
-Theorem 4: correct.
-Theorem 5: correct after adding definitions, cone inequalities, and finiteness; norm corollary needs the phi sign fix.
-Theorem 6: computation correct; corollary ill-posed/too strong.  Replace with non-invariance of 1_L and use epsilon^6 as stabilizer.
-Theorem 7: correct, but write it with ideals and CRT; do not overinterpret it as an order-6 Hecke-character explanation.
-Conjecture A: should be a theorem under standard HM signs.
-Conjecture B: plausible, but current route has a major gap at “<=2 atoms.”  Needs a finite Shintani-sector table modulo epsilon^6.
-Conjecture C: follows from B; not independent.
-Conjecture D: plausible; depends on B plus equidistribution of prime generators among equal Shintani sectors.
-Conjecture E: reformulate on norm values.  Non-multiplicativity is easy once one counterexample is recorded; universal prime-pair inequality is much stronger and may be false.
-```
-
-## Most important fix before Lean
-
-Define the arithmetic object as an affine-coset Shintani count:
-
-```text
-B_N = sum_{beta in O_K,
-          b-3a == 1 mod 10,
-          -N(beta)=10N+1,
-          beta in A/D cone}
-        W(beta).
-```
-
-Then prove the bijection with `(k,r)` atoms and the norm identity.  After that, handle units only through the subgroup preserving the affine coset, expected to be generated by `epsilon^6`.  This avoids the two main traps: treating `L` as a sublattice, and treating the order-6 residue phenomenon as a genuine multiplicative character before the Shintani window has been analyzed.
+Both should be staged through concrete coordinate/finite formulations first.  Once the coordinate theorems are stable, the high-level number-field and q-series bridges can be added without risking the algebraic core.
