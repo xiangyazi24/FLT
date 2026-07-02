@@ -1,884 +1,734 @@
-# Q3111 (dm1): Q(sqrt(5)) ADH-type identity from Chan's Theta_10
+# Q3115 (dm1): R7 — non-multiplicativity of `B` and the order-6 character illusion
 
 Date: 2026-07-02
 
 ## Executive answer
 
-This looks genuinely interesting.  I would formulate the discovery as follows.
+The right automorphic object is **not** a finite sum of Hecke eigenforms, and not a finite sum of Hecke characters.  The right object is a **real-quadratic Shintani / false-indefinite theta coefficient function**.
+
+More explicitly, with the standard Hickerson--Mortenson convention,
+
+```text
+B(X) = D(X) - A(X) = -f_{1,3,4}(X, -X^3, X),
+```
+
+and the coefficient `B_N` is a signed count of generators in a fixed ray/coset of `Z[phi]`, cut by a real-archimedean Shintani cone.  The ray/coset part is finite and character-like; the archimedean cone cut is a **step function on the real unit circle**.  That step function is the source of the non-multiplicativity.
+
+The prime phenomenon is then not mysterious.  At a split prime, there are only one or two relevant reduced generator orbits, so the coefficient is automatically tiny and lies in
+
+```text
+{-2, -1, 0, +1, +2}.
+```
+
+The observed absence of `0` at primes should be provable by a finite Shintani-sector table: in the prime case the possible selected representatives never occur in opposite-sign pairs.  The apparent order-6 character is a six-sector **archimedean window**, not a genuine order-6 Hecke character.  At composites, several prime-ideal choices interact; reducing their product back into the Shintani strip introduces unit-carry terms, and those carries destroy multiplicativity.
+
+So the clean slogan is:
+
+```text
+B is not multiplicative because it is a ray-class norm count with an archimedean cone window.
+The finite ray-class part is multiplicative; the Shintani window is not.
+```
+
+A correction to one premise: the classical Andrews--Dyson--Hickerson `sigma(q)` case is also real quadratic, attached to `Q(sqrt(6))` and norms `24n+1`.  Its unit group is infinite as well.  The finite-unit/order-6 picture belongs to imaginary quadratic `Q(sqrt(-3))` phenomena, not to the original ADH real-quadratic norm story.
+
+## 1. Exact arithmetic model for `B_N`
+
+Write
+
+```text
+E(k,r) = (4*k^2 + 2*k + r^2 + (6*k + 1)*r) / 2
+       = 2*k^2 + k + 3*k*r + r*(r+1)/2.
+```
+
+Then
+
+```text
+A(X) = sum_{k >= 0, r >= 0} (-1)^r X^E(k,r),
+D(X) = sum_{k < 0, r < 0} (-1)^r X^E(k,r),
+B(X) = D(X) - A(X).
+```
 
 Let
 
 ```text
 K = Q(sqrt(5)),
-phi = (1 + sqrt(5)) / 2,
-N(a + b*phi) = a^2 + a*b - b^2.
+phi = (1 + sqrt(5))/2,
+O_K = Z[phi],
+Norm(a + b*phi) = a^2 + a*b - b^2.
 ```
 
-For the cone exponent
-
-```text
-E(k,r) = (4*k^2 + 2*k + r^2 + (6*k + 1)*r) / 2
-       = 2*k^2 + k + 3*k*r + r*(r + 1)/2,
-```
-
-define
+For every atom `(k,r)`, define
 
 ```text
 beta(k,r) = (r - 2*k) + (4*k + 3*r + 1)*phi.
 ```
 
-Then the key identity is the exact norm identity
+Then the fundamental identity is
 
 ```text
--N_{K/Q}(beta(k,r)) = 10*E(k,r) + 1.
+-Norm(beta(k,r)) = 10*E(k,r) + 1.
 ```
 
-Therefore every nonzero coefficient of the cone series is supported on integers `10*n + 1` represented by the norm form of `Z[phi]`.  Since the rational primes inert in `Q(sqrt(5))` are exactly
-
-```text
-p == 2 or 3 mod 5,
-```
-
-the necessary norm criterion is exactly:
-
-```text
-every prime p == 2 or 3 mod 5 divides 10*n + 1 to even order.
-```
-
-Because `Q(sqrt(5))` has class number one and has a unit of norm `-1`, this inert-prime parity condition is also the usual global norm criterion for positive rational integers prime to 5.  The important point is that the coefficient can still vanish by signed cone cancellation even when the norm condition holds.
-
-I did not find an obvious web-indexed prior occurrence of this precise `10n + 1` / golden-field q-series.  The closest literature I found treats the ADH `Q(sqrt(6))` case and later real-quadratic q-hypergeometric families for `Q(sqrt(2))`, `Q(sqrt(3))`, and `Q(sqrt(6))`, but not this exact `Q(sqrt(5))` / `10n+1` cone series.  That is not a proof of novelty; MathSciNet/Zentralblatt and direct full-text checking of Andrews, Hickerson, Mortenson, Lovejoy, Osburn, Bringmann, Kane, Chern, Patkowski, and collaborators would still be needed.  But the first-pass signal is positive.
-
-My strongest recommendation is to treat this as a new **ADH-type false-indefinite theta component** attached to the golden field, with Chan's tenth-order theta identity providing the source identity.
-
-## 0. Sign convention warning
-
-There is one sign convention to lock down before writing the theorem.
-
-Hickerson-Mortenson use
-
-```text
-f_{a,b,c}(x,y,q)
-  = sum_{sg(r)=sg(s)} sg(r) * (-1)^(r+s) * x^r * y^s
-      * q^(a*binom(r,2) + b*r*s + c*binom(s,2)),
-```
-
-where `sg(t)=+1` for `t >= 0` and `sg(t)=-1` for `t < 0`.
-
-With that standard convention,
-
-```text
-F(X) := f_{1,3,4}(X, -X^3, X)
-```
-
-has term
-
-```text
-sg(r) * (-1)^r * X^(r*(r+1)/2 + 3*r*s + 2*s^2 + s).
-```
-
-After the identification `s = k`, this is the positive cone minus the negative cone:
-
-```text
-F(X) = A(X) - D(X).
-```
-
-Thus, if your `B` is defined as
-
-```text
-B(X) = D(X) - A(X),
-```
-
-then under the standard HM convention the precise statement is
-
-```text
-B(X) = -f_{1,3,4}(X, -X^3, X).
-```
-
-If your local convention for `f` has the opposite cone sign, then your displayed statement `B=f_{1,3,4}` is exactly correct.  The norm-support theorem is unaffected by this global sign.
-
-In what follows I write `B = D - A`, matching the missing-kernel factorization in the prompt:
-
-```text
-Missing_kernel = -q^(-1) * j(q;q^5)^2 * B(q^2).
-```
-
-## 1. Has the Q(sqrt(5)) ADH case been done before?
-
-I found no obvious prior exact match for this `10n+1` golden-field series.
-
-Searches that produced no relevant direct hit included variants of:
-
-```text
-"10n+1" norm "golden ratio" q-series
-"10n+1" "Q(sqrt(5))" "q-series"
-"10n+1" "mock theta" "norm" "sqrt(5)"
-"10n+1" "Andrews" "Hickerson" "Mortenson"
-"10n+1" "Z[phi]"
-"10n+1" "real quadratic" "q-hypergeometric"
-"f_{1,3,4}" "Hickerson" "Mortenson"
-```
-
-The nearest established literature I found is:
-
-```text
-Andrews--Dyson--Hickerson, Partitions and indefinite quadratic forms, Invent. Math. 91 (1988).
-```
-
-This is the original `sigma(q)` / `Q(sqrt(6))` source.
-
-```text
-Sander Zwegers, Maass waveforms arising from sigma and related indefinite theta functions.
-https://arxiv.org/abs/1002.1175
-```
-
-This places the ADH sigma story into the mock Maass / false-indefinite theta framework.
-
-```text
-Hickerson--Mortenson, Hecke-type double sums, Appell-Lerch sums, and mock theta functions (I).
-https://arxiv.org/abs/1208.1421
-```
-
-This gives the Appell-Lerch and theta-correction technology for Hecke-type double sums.
-
-```text
-Bringmann--Kane, Multiplicative q-hypergeometric series arising from real quadratic fields.
-https://arxiv.org/abs/0812.4397
-```
-
-This explicitly describes ADH-type q-series related to `Q(sqrt(2))` and `Q(sqrt(3))`, with partition interpretations.
-
-```text
-Lovejoy--Osburn, Real quadratic double sums.
-https://arxiv.org/abs/1502.01109
-```
-
-This gives a dozen double sums for ideals in real quadratic fields, specifically including `Q(sqrt(2))`, `Q(sqrt(3))`, and `Q(sqrt(6))` in the main theorems.  I did not see a `Q(sqrt(5))` theorem there.
-
-```text
-Folsom--Males--Rolen--Storzer, Oscillating asymptotics for a Nahm-type sum and conjectures of Andrews.
-https://arxiv.org/abs/2305.16654
-```
-
-This gives modern context for ADH-type phenomena, including the original relation of `sigma(q)` to `Q(sqrt(6))` and related partition-rank asymptotics.
-
-```text
-Bringmann--Craig--Nazaroglu, Precision Asymptotics for Partitions Featuring False-Indefinite Theta Functions.
-https://arxiv.org/abs/2409.17818
-```
-
-This is useful context for current interest in false-indefinite theta functions and partition asymptotics.
-
-My current assessment is:
-
-```text
-No direct prior Q(sqrt(5)), 10n+1, f_{1,3,4}(X,-X^3,X) ADH sibling was found in a first-pass search.
-```
-
-That should be phrased cautiously in a paper as:
-
-```text
-"We are not aware of this example in the literature."
-```
-
-not as an absolute novelty claim until a deeper bibliography search is complete.
-
-## 2. Publication value
-
-I think this is potentially publishable if the final write-up contains more than a numerical observation.
-
-A publishable package would have the following theorem stack.
-
-### Theorem A: Chan-kernel factorization
-
-Prove, from the Chan `Theta_10` formalism, that the even-row missing residual factors as
-
-```text
-Missing_kernel = -q^(-1) * j(q;q^5)^2 * B(q^2),
-```
-
-where `B` is the cone difference.
-
-### Theorem B: Hecke-Rogers / HM identification
-
-With standard HM signs,
-
-```text
-B(X) = -f_{1,3,4}(X, -X^3, X).
-```
-
-Equivalently, without relying on HM notation,
-
-```text
-B(X)
-  = - sum_{a,b >= 0} (-1)^b X^(2*a^2 + a + 3*a*b + b*(b+1)/2)
-    - sum_{a,b >= 0} (-1)^b X^(2*a^2 + 6*a + 3*a*b + (b^2 + 7*b)/2 + 4).
-```
-
-This is an exact two-variable false/partial theta expression.
-
-### Theorem C: golden-field norm support
-
-For `B(X)=sum B_N X^N`,
+This is the strongest way to package the norm support.  It proves immediately:
 
 ```text
 B_N != 0  ==>  10*N + 1 is a norm from Z[phi].
 ```
 
-Equivalently, every inert prime `p == 2,3 mod 5` occurs in `10*N+1` with even exponent.
+Since primes inert in `Q(sqrt(5))` are exactly the primes `p == 2,3 mod 5`, this gives the observed inert-prime parity test.
 
-The proof is the explicit identity
+Conversely, not every eligible norm has nonzero coefficient, because `B_N` is a signed cone count, not merely an existence count.
+
+## 2. Ray/coset formula
+
+Let
 
 ```text
--N((r - 2*k) + (4*k + 3*r + 1)*phi)
-  = 10*(2*k^2 + k + 3*k*r + r*(r+1)/2) + 1.
+beta = a + b*phi.
 ```
 
-### Theorem D: signed ray-class formula
-
-Strengthen Theorem C to a signed representation formula:
+The inverse map from `beta` back to `(k,r)` is
 
 ```text
-B_N = sum epsilon(alpha)
+k = (b - 3*a - 1) / 10,
+r = (4*a + 2*b - 2) / 10.
 ```
 
-over elements or principal ideals in a specified ray class of `Z[phi]` with norm `10*N+1`, reduced to a Shintani cone, with sign determined by the cone side and `(-1)^r`.
-
-This theorem would explain the 91 cancellation zeros.
-
-### Theorem E: HM/Appell-Lerch expression and completion
-
-Give the Appell-Lerch plus theta correction expression, and explain the modular completion as a signature `(1,1)` indefinite theta object.  This places the example in the modern ADH/Zwegers/Hickerson-Mortenson framework.
-
-### Publication target
-
-If the note is short and focused, good venues would include:
+Thus `beta` comes from an integral atom exactly when
 
 ```text
-The Ramanujan Journal
-Research in Number Theory
-Journal of Number Theory
-Hardy-Ramanujan Journal
-Integers
-Journal of Integer Sequences, if the coefficient/norm formula and sequence angle are emphasized
+b - 3*a == 1 mod 10.
 ```
 
-If the paper also includes a partition interpretation or a systematic search method, it becomes stronger and more suitable for `The Ramanujan Journal`, `Research in Number Theory`, or `Journal of Number Theory`.
-
-The new contribution should be framed as:
+The second integrality condition for `r` follows from this congruence.  Indeed, if `b = 3a + 1 mod 10`, then
 
 ```text
-A golden-field ADH-type component arising naturally from the tenth-order mock theta / Chan Theta_10 setting.
+4a + 2b - 2 = 10a mod 20,
 ```
 
-That is a better pitch than just “a new q-series sequence”.
+so it is divisible by `10`.
 
-## 3. Explicit identification of B
-
-### 3.1 Exact Hecke-type double-sum identification
-
-Let `X` be the variable of `B`.  With standard HM signs,
+The cone conditions are the two linear inequalities
 
 ```text
-B(X) = -f_{1,3,4}(X, -X^3, X).
-```
-
-Proof: HM's summand is
-
-```text
-sg(r) * (-1)^(r+s) * X^r * (-X^3)^s
-  * X^(binom(r,2) + 3*r*s + 4*binom(s,2)).
+A-cone:  b - 3*a - 1 >= 0   and   2*a + b - 1 >= 0,
+D-cone:  b - 3*a - 1 <  0   and   2*a + b - 1 <  0.
 ```
 
 The sign is
 
 ```text
-(-1)^(r+s) * (-1)^s = (-1)^r,
+A contributes -(-1)^r,
+D contributes +(-1)^r,
+r = (4*a + 2*b - 2)/10.
 ```
 
-and the exponent is
+Therefore the exact coefficient formula is
 
 ```text
-r + 3*s + binom(r,2) + 3*r*s + 4*binom(s,2)
-= r*(r+1)/2 + 3*r*s + 2*s^2 + s.
+B_N = sum over beta = a + b*phi in O_K of
+        W(beta)
 ```
 
-Putting `s=k`, this is
+where
 
 ```text
-2*k^2 + k + 3*k*r + r*(r+1)/2
-= Q(k,r)/2.
-```
-
-The positive same-sign cone contributes `A`; the negative same-sign cone contributes `-D` because of the factor `sg(r)`.  Therefore standard HM gives `f=A-D`, hence `B=D-A=-f`.
-
-### 3.2 Exact false-theta form
-
-The positive cone is already
-
-```text
-A(X) = sum_{a,b >= 0} (-1)^b
-       X^(2*a^2 + a + 3*a*b + b*(b+1)/2).
-```
-
-For the negative cone set
-
-```text
-k = -a - 1,
-r = -b - 1,
-```
-
-with `a,b >= 0`.  Then
-
-```text
-Q(-a-1,-b-1)/2
-  = 2*a^2 + 6*a + 3*a*b + (b^2 + 7*b)/2 + 4,
+Norm(beta) = -(10*N + 1),
+b - 3*a == 1 mod 10,
 ```
 
 and
 
 ```text
-(-1)^(-b-1) = -(-1)^b.
+W(beta) = -(-1)^r  if beta is in the A-cone,
+W(beta) = +(-1)^r  if beta is in the D-cone,
+W(beta) = 0        otherwise.
 ```
 
-Thus
+This formula is already the proof route for both norm support and non-multiplicativity.
+
+## 3. What is `B` automorphically?
+
+### 3.1 It is a false-indefinite theta coefficient function
+
+The pure quadratic part of the `f_{1,3,4}` exponent has matrix
 
 ```text
-B(X) = D(X) - A(X)
-     = - sum_{a,b >= 0} (-1)^b X^(2*a^2 + a + 3*a*b + b*(b+1)/2)
-       - sum_{a,b >= 0} (-1)^b X^(2*a^2 + 6*a + 3*a*b + (b^2 + 7*b)/2 + 4).
+[[1, 3],
+ [3, 4]],
 ```
 
-This is currently the cleanest closed form for direct verification.
-
-Define the one-variable partial theta
+up to the usual factor of `1/2`.  Its determinant is
 
 ```text
-P_M(X) = sum_{b >= 0} (-1)^b X^(b*(b+1)/2 + M*b).
+1*4 - 3^2 = -5,
 ```
 
-Then
+so the lattice has signature `(1,1)`.  The completed object is therefore a signature `(1,1)` indefinite theta object of weight `1`, vector-valued for the relevant discriminant/ray module.
+
+The holomorphic q-series `B` is the false/mock holomorphic part obtained by cutting the lattice with a sign or cone kernel.  In the Hickerson--Mortenson description it is an Appell--Lerch expression plus a theta correction.  In the Zwegers description, the nonholomorphic completion replaces sharp signs by error functions attached to the two boundary lines.
+
+So:
 
 ```text
-B(X)
-  = - sum_{a >= 0} X^(2*a^2 + a)       P_{3a}(X)
-    - sum_{a >= 0} X^(2*a^2 + 6*a + 4) P_{3a+3}(X),
+B is a holomorphic false/mock part of an indefinite theta series.
+It is not itself a holomorphic modular form.
+It is not a Hecke eigenform.
+It is not expected to have multiplicative coefficients.
 ```
 
-where the second formula uses
+### 3.2 It is not a finite sum of Hecke characters
 
-```text
-(b^2 + 7*b)/2 + 3ab = b*(b+1)/2 + (3a+3)b.
-```
-
-This is a very compact false-theta candidate.
-
-### 3.3 Appell-Lerch part from HM notation
+There is a finite ray-class condition, but the cone condition is archimedean.  This is the key point.
 
 Let
 
 ```text
-F(X) = f_{1,3,4}(X, -X^3, X).
+epsilon = phi^2
 ```
 
-For generic `x,y,q`, HM's Appell part `g_{a,b,c}` gives
+be the totally positive fundamental unit.  For `alpha in K^*`, define the real-unit angle
 
 ```text
-f_{a,b,c}(x,y,q) = g_{a,b,c}(x,y,q,z1,z0) + finite theta correction,
+theta(alpha)
+  = log(|alpha_1 / alpha_2|) / (2*log(epsilon))   mod 1,
 ```
 
-with the exact correction depending on the theorem/specialization used.  Specializing the generic Appell part to
+where `alpha_1, alpha_2` are the two real embeddings.  Multiplication by `epsilon` shifts the numerator by `2*log(epsilon)`, so `theta` is a coordinate on the compact real unit torus
 
 ```text
-a = 1,
-b = 3,
-c = 4,
-x = X,
-y = -X^3,
-q = X,
-z0 = z1 = -1,
+R / (2*log(epsilon)) Z.
 ```
 
-gives
+The coefficient `B_N` has the shape
 
 ```text
-G(X)
-  = j(X;X) * m(X^2, X^5, -1)
-    + sum_{t=0}^{3} (-X)^t * X^(t*(t-1)/2)
-        * j(-X^(3*t+3); X^4)
-        * m(-X^(9-5*t), X^20, -1).
-```
-
-Since
-
-```text
-j(X;X) = 0,
-```
-
-the first term vanishes at this specialization, so the Appell part simplifies to
-
-```text
-G(X)
-  = j(-X^3; X^4)  * m(-X^9,  X^20, -1)
-    - X*j(-X^6; X^4) * m(-X^4,  X^20, -1)
-    + X^3*j(-X^9; X^4) * m(-X^(-1), X^20, -1)
-    - X^6*j(-X^12;X^4) * m(-X^(-6), X^20, -1).
-```
-
-Thus, in a compact HM-style form,
-
-```text
-F(X) = G(X) + T_{1,3,4}(X),
-B(X) = -G(X) - T_{1,3,4}(X),
-```
-
-where `T_{1,3,4}` is the finite theta correction produced by HM after taking the non-generic specialization.  I would be careful here: the specialization `x=X`, `q=X` hits theta zeros, so the cleanest rigorous route is either:
-
-```text
-1. keep x,y generic, apply HM, simplify, and then take the specialization as a limit; or
-2. use the exact false-theta expression above as the primary closed form, and cite HM for the Appell-Lerch/completion interpretation.
-```
-
-For numerical verification, the false-theta expression is safer than the Appell-Lerch expression because it avoids regularization of special Appell-Lerch parameters.
-
-### 3.4 Alternative symmetric HM route
-
-There is also an equivalent route through the symmetric discriminant-5 family
-
-```text
-f_{2,3,2},
-```
-
-which lies directly in the HM family `f_{n,n+p,n}` with `n=2`, `p=1`.  In the original unsquared variable `q`, the cone factor from the previous normalization can be written as an even-projection:
-
-```text
-D(q) - A(q)
-  = -1/2 * ( f_{2,3,2}(-q^2, q^2, q)
-           + f_{2,3,2}( q^2, q^2, q) ).
-```
-
-This form is often better for invoking the published HM theorem directly.  The `f_{1,3,4}` form is better for the integral-power `X=q^2` variable and for the `10N+1` norm statement.
-
-## 4. Why the norm theorem is exactly the ADH-type statement
-
-The atom-level identity is very simple and should be highlighted in the paper.
-
-Let
-
-```text
-E(k,r) = 2*k^2 + k + 3*k*r + r*(r+1)/2.
-```
-
-Set
-
-```text
-beta(k,r) = (r - 2*k) + (4*k + 3*r + 1)*phi.
-```
-
-Since
-
-```text
-N(a + b*phi) = a^2 + a*b - b^2,
-```
-
-one computes
-
-```text
-N(beta(k,r))
-  = (r - 2*k)^2
-    + (r - 2*k)*(4*k + 3*r + 1)
-    - (4*k + 3*r + 1)^2
-  = -10*E(k,r) - 1.
-```
-
-Therefore
-
-```text
-10*E(k,r) + 1 = -N(beta(k,r)).
-```
-
-Because `phi` has norm `-1`, sign is immaterial for rational integer norm representability:
-
-```text
-10*E(k,r) + 1 = N(-phi * beta(k,r)).
-```
-
-So every represented cone exponent gives an actual norm from `Z[phi]`.
-
-The converse, however, is not coefficient nonvanishing.  It is only support eligibility.  The coefficient is a signed count of cone representatives in a ray class.  Eligible norms can cancel.
-
-## 5. The 91 cancellation zeros
-
-The cancellation zeros should be characterized as signed ray-class cancellations, not as failures of norm representability.
-
-Let
-
-```text
-M = 10*N + 1.
-```
-
-A representation by the cone gives an element
-
-```text
-beta = (r - 2*k) + (4*k + 3*r + 1)*phi
-```
-
-with
-
-```text
-N(beta) = -M.
-```
-
-The congruence and sign data are encoded by the inverse map
-
-```text
-b_phi = 4*k + 3*r + 1,
-a_phi = r - 2*k.
-```
-
-Solving for `k,r`,
-
-```text
-r = (4*a_phi + 2*b_phi - 2) / 10,
-k = (b_phi - 3*a_phi - 1) / 10.
-```
-
-Therefore the relevant ray/coset condition is
-
-```text
-4*a_phi + 2*b_phi - 2 == 0 mod 10,
-b_phi - 3*a_phi - 1 == 0 mod 10.
-```
-
-Equivalently,
-
-```text
-a_phi + 2*b_phi == 1 mod 5,
-b_phi - 3*a_phi == 1 mod 10.
-```
-
-Together with the cone condition
-
-```text
-k,r >= 0      for A,
-k,r < 0       for D,
-```
-
-and the sign
-
-```text
-(-1)^r,
-```
-
-this gives a ray-class signed representation formula for `B_N`.
-
-So the cancellation zeros are exactly those eligible norms `M=10N+1` for which the signed sum over representatives in this coset and Shintani cone is zero.
-
-For example, the first listed zeros are all norm-eligible:
-
-```text
-N = 45:  10N+1 = 451  = 11 * 41
-N = 84:  10N+1 = 841  = 29^2
-N = 112: 10N+1 = 1121 = 19 * 59
-N = 127: 10N+1 = 1271 = 31 * 41
-N = 133: 10N+1 = 1331 = 11^3
-```
-
-All these primes split in `Q(sqrt(5))`, since they are `1` or `4` modulo `5`.  Thus they pass the inert-prime test.  Their vanishing is caused by cancellation among split-prime choices and unit translates.
-
-A useful exact characterization should look like this:
-
-```text
-B_N = sum_{alpha in R(M)} chi_cone(alpha),
+B_N = sum_{Norm(alpha)=-(10N+1)} chi_fin(alpha) * H(theta(alpha)),
 ```
 
 where:
 
 ```text
-M = 10N+1,
-R(M) = a finite set of reduced generators alpha = a + b*phi
-       of principal ideals with |N(alpha)| = M,
-       satisfying the two congruences above,
-       chosen in a Shintani fundamental cone modulo a parity-preserving unit subgroup,
-chi_cone(alpha) = +(-1)^r or -(-1)^r according to whether alpha comes from D or A.
+chi_fin       = finite congruence/sign data modulo 10,
+H             = step function recording A-cone versus D-cone versus outside,
+theta(alpha)  = archimedean unit coordinate.
+```
+
+A finite Hecke character would replace `H(theta)` by an exponential
+
+```text
+exp(2*pi*i*m*theta).
+```
+
+But `H` is a discontinuous step function.  Its Fourier expansion is infinite:
+
+```text
+H(theta) = sum_{m in Z} h_m exp(2*pi*i*m*theta),
+```
+
+with infinitely many nonzero `h_m`, typically decaying like `1/m` because of the jumps.  Consequently the Dirichlet series attached to `B` is not a finite linear combination of Hecke L-functions.  It is an infinite Shintani/Lerch expansion:
+
+```text
+sum_{N >= 0} B_N / (10N+1)^s
+  = sum_{finite ray characters rho} sum_{m in Z}
+      c(rho,m) * L(s, rho * |alpha_1/alpha_2|^(pi*i*m/log(epsilon))).
+```
+
+This is the precise automorphic decomposition I would use.  It is a spectral expansion along the real unit torus, not an Euler product.
+
+A rigorous non-finite proof route is:
+
+1. Write `B_N` in the ray/coset formula above.
+2. Reduce generators modulo totally positive units to a Shintani fundamental interval.
+3. Observe that the cone/sign function on that interval is a step function with at least one jump.
+4. A nonconstant step function on a circle is not a trigonometric polynomial.
+5. Therefore the Hecke-character expansion has infinitely many nonzero archimedean modes.
+6. Therefore `B` is not a finite sum of Hecke-character coefficient functions, and no Euler product or multiplicativity should survive.
+
+## 4. The order-6 character illusion at primes
+
+At a prime `p = 10N + 1`, the norm equation has only the two conjugate prime ideals above `p`, up to units.  After imposing the congruence
+
+```text
+b - 3*a == 1 mod 10,
+```
+
+and reducing by powers of `epsilon`, there are only one or two contributing reduced representatives.  Hence the coefficient is forced into a tiny set:
+
+```text
+B_N in {-2, -1, 0, +1, +2}.
+```
+
+Your data says the zero case never occurs and that the absolute values occur in the ratio
+
+```text
+|B_N| = 1 : |B_N| = 2 = 2 : 1.
+```
+
+The clean explanation to test is a six-sector Shintani table.
+
+### Candidate six-sector theorem
+
+There should be a unit-reduced coordinate `theta_p in R/Z` for the prime ideal above `p` and a phase shift `theta_0` such that
+
+```text
+B_{(p-1)/10} = S(theta_p - theta_0),
+```
+
+where `S` is a six-step function with values, up to a global sign and cyclic shift,
+
+```text
+2, 1, -1, -2, -1, 1.
+```
+
+These are exactly the numbers
+
+```text
+2*cos(k*pi/3),   k = 0,1,2,3,4,5.
+```
+
+But the mechanism is different from a character.  The function
+
+```text
+theta -> 2*cos(2*pi*theta)
+```
+
+is a character-like exponential combination.  The actual object is expected to be a **piecewise constant sector function** that happens to take the same six values on six sectors.  At primes, only one angle is sampled, so it looks like an order-6 character.  At composites, products add angles and then require reduction back into the Shintani strip; the step function does not respect addition.
+
+This is the precise reason for the illusion:
+
+```text
+S(theta_1 + theta_2) is not S(theta_1) * S(theta_2).
+```
+
+By contrast, a true order-6 Hecke character would be
+
+```text
+chi(alpha) = exp(2*pi*i*theta(alpha)/6)
+```
+
+or a finite ray-class character, and would be multiplicative.
+
+## 5. Why non-multiplicativity is expected
+
+Let `M_i = 10N_i + 1` and suppose `M_1, M_2` are coprime eligible norms.  A generator for the product norm is, up to units,
+
+```text
+alpha = alpha_1 * alpha_2.
+```
+
+The finite ray-class data is multiplicative.  However, the Shintani angle satisfies
+
+```text
+theta(alpha) = theta(alpha_1) + theta(alpha_2)  mod 1,
+```
+
+and the coefficient uses the step function `H(theta)`, not an exponential.  Hence
+
+```text
+H(theta_1 + theta_2) != H(theta_1) * H(theta_2)
+```
+
+in general.
+
+Equivalently, when one multiplies two reduced generators, the product usually leaves the fundamental Shintani strip.  One must multiply by a power of the unit to return to the strip.  That exponent is a floor function in logarithms:
+
+```text
+m(alpha_1 alpha_2)
+  = floor((log-position of alpha_1 + log-position of alpha_2 - boundary) / log(epsilon)).
+```
+
+Floor functions produce carries.  The carries change the cone side and the parity sign.  This is exactly the same obstruction that prevents reduced binary quadratic forms or continued-fraction digits from being multiplicative term-by-term.
+
+So the answer to Q2 is yes:
+
+```text
+non-multiplicativity is caused by the Shintani cone/window not being compatible with multiplication.
+```
+
+The proof route is to turn this sentence into the explicit ray/coset formula of Section 2 and then exhibit one pair of coprime eligible norms for which the Shintani carry changes the sign.  Your `1096/1188` failure rate is precisely what one expects from a non-character step function.
+
+## 6. Prime nonvanishing route
+
+The observed statement
+
+```text
+B_{(p-1)/10} != 0
+```
+
+for every prime `p = 10N+1` should be provable.
+
+I would prove it in this order.
+
+### Step 1: finite ray-unit table
+
+Work with the unit action on coefficient pairs `(a,b)`:
+
+```text
+phi * (a + b*phi)     = b + (a+b)*phi,
+epsilon * (a + b*phi) = (a+b) + (a+2b)*phi.
+```
+
+Reduce this action modulo `10` and record the orbit of the congruence class
+
+```text
+b - 3*a == 1 mod 10.
+```
+
+The parity sign `(-1)^r`, where
+
+```text
+r = (4*a + 2*b - 2)/10,
+```
+
+is also determined by a finite modulus, for example modulo `20` if needed.
+
+### Step 2: Shintani sector table
+
+For each admissible residue class, record which unit translates can land in the A-cone or D-cone inside one fundamental unit strip.  This produces a finite table of selected sectors and signs.
+
+### Step 3: prime ideal input
+
+For a split prime `p`, the principal ideals above `p` give only one conjugate pair of prime ideals.  Up to units, every generator is in one of these two orbits.  Therefore `B_{(p-1)/10}` is a sum of at most two entries from the finite sector table.
+
+### Step 4: no-opposite-pair lemma
+
+Check the finite table and prove:
+
+```text
+For prime-norm orbits satisfying b - 3*a == 1 mod 10,
+the selected sector entries are either a singleton or two entries with the same sign.
+```
+
+This immediately implies
+
+```text
+B_{(p-1)/10} in {-2, -1, +1, +2},
+```
+
+and proves there are no prime cancellation zeros.
+
+### Step 5: density ratio
+
+The same table should split the unit circle into six equal sectors, two of which give absolute value `2` and four of which give absolute value `1`.  Equidistribution of split prime ideal angles in the real-unit torus then predicts
+
+```text
+|B(p)| = 1 with density 4/6 = 2/3,
+|B(p)| = 2 with density 2/6 = 1/3.
+```
+
+This matches your data.  The density proof is a standard Hecke/prime-ideal equidistribution statement for real-quadratic ray classes with archimedean unit angle.
+
+## 7. Composite cancellation zeros
+
+For composite eligible norms, the number of ideal-factor choices grows.  If
+
+```text
+M = 10N + 1 = product of split prime powers times inert prime even powers,
+```
+
+then, after ignoring units, there are many choices of which prime above each split rational prime appears in the generator.  Each choice has a Shintani angle and sign.  The coefficient is a signed sum over these choices.
+
+Thus the zeros are exactly:
+
+```text
+B_N = sum over ray-compatible divisor choices of sign(choice) * window(choice) = 0.
+```
+
+This explains why all observed zeros are composite.  At primes there are too few choices to cancel, and the finite table prevents opposite pairs.  At composites there are enough choices for cancellation.
+
+The examples fit this perfectly:
+
+```text
+N = 45:   10N+1 = 451  = 11 * 41
+N = 84:   10N+1 = 841  = 29^2
+N = 112:  10N+1 = 1121 = 19 * 59
+N = 127:  10N+1 = 1271 = 31 * 41
+N = 133:  10N+1 = 1331 = 11^3
+```
+
+All primes listed are split in `Q(sqrt(5))`; the vanishing is not a failure of norm representability, but cancellation among split-prime choices and unit reductions.
+
+## 8. Explicit L-function decomposition
+
+A finite decomposition into Hecke L-functions is the wrong target.  The exact decomposition should be infinite, indexed by Fourier modes of the Shintani window.
+
+A precise template is:
+
+```text
+D_B(s) = sum_{N >= 0} B_N / (10N+1)^s.
+```
+
+Let `G` be the finite ray group modulo the modulus needed to encode
+
+```text
+b - 3*a == 1 mod 10
+```
+
+and the parity sign.  For each finite character `rho` of `G`, and each integer `m`, define the Hecke character
+
+```text
+Psi_{rho,m}(alpha)
+  = rho(alpha) * exp(2*pi*i*m*theta(alpha)).
 ```
 
 Then
 
 ```text
-B_N = 0
+D_B(s) = sum_{rho in G^} sum_{m in Z} c_{rho,m} L(s, Psi_{rho,m}),
 ```
 
-if and only if this signed ray-class sum vanishes.
+where `c_{rho,m}` are the Fourier coefficients of the finite-ray-class and archimedean cone-window function.
 
-Because `Z[phi]` has class number one, `R(M)` can be described multiplicatively: each split prime factor of `M` gives a choice of one of two conjugate prime ideals, inert primes contribute only through even powers, and units move representatives between cones.  The remaining work is to compute the induced finite character on the ray classes modulo `10` plus the real-place cone condition.
+This is the exact automorphic decomposition to pursue.  It gives a proof route for analytic continuation and asymptotics, but it does **not** give an Euler product for `D_B`, because an infinite linear combination of Euler products is not itself an Euler product.
 
-This is the right way to turn the 91 cancellations into a theorem.
+A finite sum would imply the Shintani window is a trigonometric polynomial.  Since the window has jumps, that cannot be true.
 
-## 6. General systematic method
+## 9. Growth prediction
 
-Yes, this suggests a systematic ADH-component search method.
-
-### Step 1: Find Hecke-Rogers cone terms
-
-Decompose a q-series identity into pieces of the form
+There is a simple rigorous bound from the representation formula:
 
 ```text
-sum_{same-sign cone} epsilon(r,s) q^{quadratic(r,s) + linear(r,s)}.
+|B_N| <= C * number of ray-compatible generators with |Norm| = 10N+1
+      <= C' * d_K(10N+1),
 ```
 
-Use involutions to remove bilateral parts and isolate wall/cone residuals.
-
-### Step 2: Normalize to HM blocks
-
-Match each cone residual to
+where `d_K` is the ideal divisor function of `K`.  In particular,
 
 ```text
-f_{a,b,c}(x,y,q)
+|B_N| <= C'' * tau(10N+1)^2
 ```
 
-or to a projection of such an `f`.  Record
+is a very safe elementary bound, and with more care one should get a bound of the shape
 
 ```text
-Delta = b^2 - a*c.
+|B_N| <= C * 2^{omega(10N+1)} * product_{p^e || 10N+1} (e+1),
 ```
 
-The real quadratic field should be
+restricted to split-prime choices.
+
+Therefore the worst-case order should be subpolynomial, of divisor-function type:
 
 ```text
-Q(sqrt(Delta))
+max_{N <= X} |B_N| <= exp(O(log X / log log X)).
 ```
 
-up to square factors.
+I would not conjecture a global `O(log N)` bound without more evidence.  The small observed maximum `7` up to `10^5` is consistent with strong cancellation and the fact that `10N+1` has few split prime factors in that range.  Along specially chosen products of many split primes whose Shintani angles align, the coefficient should grow.  The likely true maximal order is closer to a signed-divisor-function problem than to a bounded eigenvalue problem.
 
-### Step 3: Complete the square over the real quadratic field
+For typical `N`, a random-sign model over split-prime choices predicts much smaller values, roughly square-root in the number of contributing choices, and often zero.  That matches the large number of cancellation zeros.
 
-For each inhomogeneous binary form, find a coset of the norm lattice.  In this example the atom-level identity is better than completing the square:
+## 10. Proof-route summary for Q1 and Q2
+
+Here is the proof route I would actually implement.
+
+### Theorem 1: exact ray/coset representation
+
+Prove the atom identity
 
 ```text
-10*E(k,r)+1 = -N((r-2k) + (4k+3r+1)*phi).
+-Norm((r - 2*k) + (4*k + 3*r + 1)*phi) = 10*E(k,r) + 1.
 ```
 
-In general, solve for constants `M,A,B` and a linear map `(r,s)->(u,v)` such that
+Then prove the inverse congruence formula
 
 ```text
-M*E(r,s) + A = ± N(u(r,s) + v(r,s)*omega).
+k = (b - 3*a - 1)/10,
+r = (4*a + 2*b - 2)/10.
 ```
 
-### Step 4: Derive the inert-prime support test
+This gives the exact formula for `B_N` as a signed ray/coset Shintani count.
 
-For `Q(sqrt(D))`, primes with Kronecker symbol
+### Theorem 2: automorphic nature
+
+Construct the Zwegers completion of the signature `(1,1)` theta series by replacing the cone signs with error functions.  This proves that `B` is the holomorphic false/mock part of a weight-1 indefinite theta object.
+
+### Theorem 3: non-multiplicativity mechanism
+
+Reduce generators modulo the positive unit group.  Show that the coefficient is a finite-ray character times a discontinuous archimedean step function `H(theta)`.  Since `H` is not a character, multiplication of ideals does not preserve the coefficient.  This proves the conceptual non-multiplicativity.
+
+### Theorem 4: infinite Hecke-character expansion
+
+Fourier-expand `H(theta)` on the real unit torus.  This expresses the Dirichlet series of `B` as an infinite sum of Hecke L-functions with archimedean characters.  Prove infinitely many Fourier coefficients are nonzero because `H` has jumps.  This rules out finite Hecke-character/eigenform explanations.
+
+### Theorem 5: prime finite-table theorem
+
+Enumerate the finite ray-unit table modulo `10` or `20`, plus the six Shintani sectors.  Prove that for prime norm `p=10N+1`, selected representatives are never opposite-sign pairs.  This proves
 
 ```text
-(D / p) = -1
+B_N in {-2,-1,+1,+2}
 ```
 
-must occur to even order in represented rational norms.  This gives a quick necessary support test.
+and the absence of prime cancellation zeros.  Equidistribution of prime ideal angles gives the `2/3` versus `1/3` absolute-value density.
 
-### Step 5: Upgrade support to coefficients
+## 11. Verification skeleton
 
-Support is not enough.  Coefficients require:
-
-```text
-ray congruence + Shintani cone + sign character.
-```
-
-This gives the signed finite formula and explains cancellation zeros.
-
-### Step 6: Search for Eulerian or partition forms
-
-Use Bailey pairs, Bailey-chain transformations, or constant-term methods to convert the Hecke-type form into a q-hypergeometric series.  Then interpret the q-hypergeometric denominator as partitions and the numerator/sign as a rank or parity statistic.
-
-This is exactly the ADH pattern.
-
-## 7. Partition combinatorics
-
-I would not yet claim a partition interpretation for `B` itself.  The safest statement is:
-
-```text
-B is a signed Hecke-Rogers / false-indefinite theta series.
-```
-
-However, the full residual
-
-```text
--q^(-1) * j(q;q^5)^2 * B(q^2)
-```
-
-has much better combinatorial prospects because
-
-```text
-j(q;q^5) = (q;q^5)_infty (q^4;q^5)_infty (q^5;q^5)_infty.
-```
-
-Thus `j(q;q^5)^2` is a signed generating function for two colored collections of distinct parts in residue classes `1,4,0 mod 5`, with signs coming from the number of selected parts.  Multiplying by `B(q^2)` imposes the discriminant-5 cone statistic.
-
-This suggests a partition-rank interpretation of the form:
-
-```text
-coefficient = # objects with even rank - # objects with odd rank,
-```
-
-where the objects are likely colored partitions with mod-5 restrictions and a cone/rank statistic inherited from `(k,r)`.
-
-The ADH sigma function is also a signed rank difference, not a positive partition-count function.  So a signed interpretation is exactly the right target.
-
-A concrete route is:
-
-1. Start from the exact cone expression for `B`.
-2. Multiply by `j(q;q^5)^2` and expand the two Jacobi triple products.
-3. Try to collapse one or two sums with Bailey's lemma or a constant-term identity.
-4. Extract a q-hypergeometric denominator.
-5. Interpret the denominator as partitions and the numerator as a rank/parity involution.
-
-Until that is done, the honest conclusion is:
-
-```text
-A partition interpretation is plausible and ADH-consistent, but not yet identified.
-```
-
-## 8. Code skeletons for verification
-
-### 8.1 Coefficient and norm verifier
+This code is intended as a proof-development oracle.  It isolates the finite congruence and cone data; it does not use numerical q-series expansion.
 
 ```python
 from collections import defaultdict
+from dataclasses import dataclass
 from math import isqrt
-from typing import DefaultDict, Dict, List, Tuple
+from typing import DefaultDict, Dict, Iterable, List, Optional, Tuple
+
+
+@dataclass(frozen=True)
+class PhiElt:
+    """Element a + b*phi in Z[phi], phi=(1+sqrt(5))/2."""
+    a: int
+    b: int
+
+
+def norm_phi(x: PhiElt) -> int:
+    """Norm of a + b*phi, where phi^2=phi+1."""
+    return x.a * x.a + x.a * x.b - x.b * x.b
+
+
+def mul_phi(x: PhiElt) -> PhiElt:
+    """Multiply by phi."""
+    return PhiElt(a=x.b, b=x.a + x.b)
+
+
+def mul_epsilon(x: PhiElt) -> PhiElt:
+    """Multiply by epsilon=phi^2=1+phi."""
+    return PhiElt(a=x.a + x.b, b=x.a + 2 * x.b)
 
 
 def exponent_E(k: int, r: int) -> int:
-    """Exponent E = Q(k,r)/2 in the B(X) variable."""
+    """Exponent of X in B(X)."""
     numerator = 4 * k * k + 2 * k + r * r + (6 * k + 1) * r
     if numerator % 2 != 0:
         raise ValueError((k, r, numerator))
     return numerator // 2
 
 
-def norm_phi(a: int, b: int) -> int:
-    """Norm of a + b*phi, phi=(1+sqrt(5))/2."""
-    return a * a + a * b - b * b
+def beta_from_atom(k: int, r: int) -> PhiElt:
+    """beta(k,r) = (r-2k) + (4k+3r+1)*phi."""
+    return PhiElt(a=r - 2 * k, b=4 * k + 3 * r + 1)
 
 
-def beta_coeffs(k: int, r: int) -> Tuple[int, int]:
-    """Return (a,b) such that beta = a + b*phi."""
-    return r - 2 * k, 4 * k + 3 * r + 1
+def atom_from_beta(x: PhiElt) -> Optional[Tuple[int, int]]:
+    """Recover (k,r) from beta=a+b*phi if beta is in the target coset."""
+    num_k = x.b - 3 * x.a - 1
+    num_r = 4 * x.a + 2 * x.b - 2
+    if num_k % 10 != 0 or num_r % 10 != 0:
+        return None
+    return num_k // 10, num_r // 10
+
+
+def in_target_coset(x: PhiElt) -> bool:
+    return (x.b - 3 * x.a - 1) % 10 == 0
+
+
+def cone_weight_for_B(k: int, r: int) -> int:
+    """Weight in B = D - A."""
+    parity = -1 if r % 2 else 1
+    if k >= 0 and r >= 0:
+        return -parity
+    if k < 0 and r < 0:
+        return parity
+    return 0
+
+
+def weight_from_beta(x: PhiElt) -> int:
+    kr = atom_from_beta(x)
+    if kr is None:
+        return 0
+    k, r = kr
+    return cone_weight_for_B(k, r)
 
 
 def check_norm_identity(k: int, r: int) -> bool:
-    e = exponent_E(k, r)
-    a, b = beta_coeffs(k, r)
-    return -norm_phi(a, b) == 10 * e + 1
+    x = beta_from_atom(k, r)
+    return -norm_phi(x) == 10 * exponent_E(k, r) + 1
 
 
-def cone_sign_for_B(k: int, r: int) -> int:
-    """Sign for B = D - A.
-
-    A: k>=0,r>=0 contributes -(-1)^r.
-    D: k<0,r<0 contributes +(-1)^r.
-    Mixed quadrants contribute 0.
-    """
-    parity = -1 if r % 2 else 1
-    if k >= 0 and r >= 0:
-        return -parity
-    if k < 0 and r < 0:
-        return parity
-    return 0
-
-
-def coefficients_B(nmax: int) -> Dict[int, int]:
-    """Finite search oracle for coefficients of B(X) through X^nmax."""
+def coeffs_B_by_atoms(nmax: int) -> Dict[int, int]:
+    """Finite cone enumeration for B_N, used only as a test oracle."""
     out: DefaultDict[int, int] = defaultdict(int)
-    bound = 4 * isqrt(2 * nmax + 1) + 20
+    bound = 4 * isqrt(2 * nmax + 1) + 50
     for k in range(-bound, bound + 1):
         for r in range(-bound, bound + 1):
-            sgn = cone_sign_for_B(k, r)
-            if sgn == 0:
+            w = cone_weight_for_B(k, r)
+            if w == 0:
                 continue
-            e = exponent_E(k, r)
-            if 0 <= e <= nmax:
-                out[e] += sgn
+            n = exponent_E(k, r)
+            if 0 <= n <= nmax:
                 assert check_norm_identity(k, r)
+                out[n] += w
     return dict(out)
 
 
-def inert_prime_condition(m: int) -> bool:
-    """Return True iff every p == 2,3 mod 5 occurs to even order.
+def unit_orbit_mod(x: PhiElt, modulus: int, steps: int) -> List[PhiElt]:
+    """Orbit under epsilon=phi^2 modulo `modulus`."""
+    out: List[PhiElt] = []
+    y = PhiElt(x.a % modulus, x.b % modulus)
+    for _ in range(steps):
+        out.append(y)
+        y = mul_epsilon(y)
+        y = PhiElt(y.a % modulus, y.b % modulus)
+    return out
 
-    This is a simple trial-division implementation for verification.
+
+def finite_admissible_residue_table(modulus: int = 20) -> List[Tuple[int, int, int]]:
+    """List residue classes that can contribute, with their local parity sign.
+
+    The modulus 20 is used so that r parity is visible.
     """
-    if m <= 0:
+    rows: List[Tuple[int, int, int]] = []
+    for a in range(modulus):
+        for b in range(modulus):
+            x = PhiElt(a, b)
+            kr = atom_from_beta(x)
+            if kr is None:
+                continue
+            _k, r = kr
+            parity = -1 if r % 2 else 1
+            rows.append((a, b, parity))
+    return rows
+```
+
+A Sage version of the prime test should enumerate prime ideal generators, reduce by powers of `epsilon`, and compare the resulting sector table with the observed value of `B_{(p-1)/10}`.  The finite table is the piece that should turn the prime observations into a theorem.
+
+```python
+from typing import List, Optional, Tuple
+from sage.all import QuadraticField, ZZ, factor
+
+
+K = QuadraticField(5, 's')
+s = K.gen()
+phi = (1 + s) / 2
+OK = K.ring_of_integers()
+epsilon = phi ** 2
+
+
+def eligible_norm_integer(M: int) -> bool:
+    """Check the inert-prime norm criterion for Q(sqrt(5))."""
+    if M <= 0:
         return False
-    n = m
-    p = 2
-    while p * p <= n:
-        if n % p == 0:
-            e = 0
-            while n % p == 0:
-                n //= p
-                e += 1
-            if p % 5 in (2, 3) and e % 2 != 0:
-                return False
-        p += 1 if p == 2 else 2
-    if n > 1 and n % 5 in (2, 3):
-        return False
+    for p, e in factor(ZZ(M)):
+        if int(p % 5) in (2, 3) and int(e) % 2:
+            return False
     return True
 
 
-def verify_support(nmax: int) -> List[Tuple[int, int]]:
-    """Return counterexamples to B_N != 0 => inert-prime norm condition."""
-    coeffs = coefficients_B(nmax)
-    bad: List[Tuple[int, int]] = []
-    for n, c in coeffs.items():
-        if c != 0 and not inert_prime_condition(10 * n + 1):
-            bad.append((n, c))
-    return bad
-```
+def phi_coefficients(alpha) -> Tuple[int, int]:
+    """Return a,b with alpha=a+b*phi, assuming alpha is integral.
 
-### 8.2 Ray-class reconstruction in Sage
-
-This is a computational outline, not polished production code.  The goal is to identify the finite ray classes and signs responsible for the cancellation zeros.
-
-```python
-from sage.all import QuadraticField
-from sage.all import ZZ
-from sage.all import factor
+    In a final script this should use the integral basis chosen by Sage for OK.
+    This placeholder records the intended interface.
+    """
+    raise NotImplementedError("Extract coefficients in the basis 1, phi.")
 
 
-def golden_field_data():
-    K = QuadraticField(5, 's')
-    s = K.gen()
-    phi = (1 + s) / 2
-    OK = K.ring_of_integers()
-    return K, OK, phi
-
-
-def beta_element(k: int, r: int):
-    K, OK, phi = golden_field_data()
-    return OK((r - 2 * k) + (4 * k + 3 * r + 1) * phi)
-
-
-def exponent_E(k: int, r: int) -> int:
-    return (4 * k * k + 2 * k + r * r + (6 * k + 1) * r) // 2
-
-
-def norm_identity_sage(k: int, r: int) -> bool:
-    beta = beta_element(k, r)
-    return -ZZ(beta.norm()) == 10 * exponent_E(k, r) + 1
-
-
-def inverse_kr_from_phi_coeffs(a: int, b: int):
-    """Given beta=a+b*phi, recover k,r if beta is in the target coset."""
-    num_r = 4 * a + 2 * b - 2
+def atom_from_coefficients(a: int, b: int) -> Optional[Tuple[int, int]]:
     num_k = b - 3 * a - 1
-    if num_r % 10 != 0 or num_k % 10 != 0:
+    num_r = 4 * a + 2 * b - 2
+    if num_k % 10 or num_r % 10:
         return None
-    r = num_r // 10
-    k = num_k // 10
-    return k, r
+    return num_k // 10, num_r // 10
 
 
-def cone_sign_for_B(k: int, r: int) -> int:
+def cone_weight(k: int, r: int) -> int:
     parity = -1 if r % 2 else 1
     if k >= 0 and r >= 0:
         return -parity
@@ -887,104 +737,87 @@ def cone_sign_for_B(k: int, r: int) -> int:
     return 0
 
 
-def eligible_by_factorization(N: int) -> bool:
-    """Norm eligibility for M=10*N+1."""
-    M = ZZ(10 * N + 1)
-    for p, e in factor(M):
-        if int(p % 5) in (2, 3) and e % 2:
-            return False
-    return True
+def reduce_by_units_to_strip(alpha):
+    """Reduce alpha by powers of epsilon into a chosen Shintani strip.
+
+    The exact inequalities defining the strip should match the paper's cone
+    convention.  This placeholder is where the floor/log carry appears.
+    """
+    raise NotImplementedError("Choose and implement a Shintani fundamental strip.")
 ```
 
-The next step is to enumerate generators of ideals of norm `10N+1`, reduce by a unit subgroup preserving the congruence class, and compare the signed sum from `inverse_kr_from_phi_coeffs` with the coefficient of `B`.
+## 12. Answers to the numbered questions
 
-## 9. Suggested theorem statement
+### Q1. What is `B` automorphically?
 
-Here is a concise theorem statement that I think is close to paper-ready.
+`B` is the holomorphic false/mock part of a weight-1 signature `(1,1)` indefinite theta series attached to `Q(sqrt(5))` with a ray/coset condition modulo `10`.  It is not a single eigenform and not a finite sum of Hecke characters.  Its Dirichlet series is naturally an infinite Fourier expansion of Hecke L-functions indexed by archimedean unit modes.
+
+### Q2. Is non-multiplicativity caused by the Shintani cone?
+
+Yes.  The finite ray-class part is multiplicative, but the Shintani cone/window is a discontinuous function of the real unit coordinate.  Multiplying ideals adds unit angles and then requires a unit reduction; the resulting floor-function carry changes the window value.  That is the source of non-multiplicativity.
+
+### Q3. Can `B` be decomposed into L-function coefficients?
+
+Yes, but not finitely.  Fourier-expand the Shintani window on the real unit torus.  This gives an infinite sum of Hecke L-functions with finite ray character modulo `10` and archimedean characters
 
 ```text
-Theorem.
-Let phi=(1+sqrt(5))/2 and define
-
-  B(X) = D(X)-A(X),
-
-where
-
-  A(X)=sum_{k,r>=0} (-1)^r X^((4k^2+2k+r^2+(6k+1)r)/2),
-  D(X)=sum_{k,r<0}  (-1)^r X^((4k^2+2k+r^2+(6k+1)r)/2).
-
-Then, with the standard Hickerson-Mortenson convention,
-
-  B(X) = -f_{1,3,4}(X,-X^3,X).
-
-Moreover, if B(X)=sum_{N>=0} B_N X^N and B_N != 0, then
-
-  10N+1 = N_{Q(sqrt(5))/Q}(alpha)
-
-for some alpha in Z[phi].  Equivalently, every rational prime p congruent to 2 or 3
-modulo 5 divides 10N+1 to even order.
+alpha -> exp(2*pi*i*m*theta(alpha)).
 ```
 
-The proof of the norm assertion is the explicit atom identity
+A finite combination would require the cone window to be a trigonometric polynomial, which it is not.
+
+### Q4. Growth rate?
+
+A rigorous divisor-type bound is expected:
 
 ```text
-10N+1 = -N((r-2k)+(4k+3r+1)phi)
+|B_N| <= exp(O(log N / log log N)).
 ```
 
-for every atom contributing to `X^N`.
+Typical values can remain very small because the signed Shintani sum cancels.  I would not predict a global `O(log N)` bound without further evidence; along products of many split primes, growth should eventually exceed any fixed bound.
 
-A stronger second theorem should identify `B_N` itself as the signed ray-class representation number described above.
+### Q5. Why no prime cancellation zeros?
 
-## 10. Answers to the six questions
-
-### Q1. Has the Q(sqrt(5)) ADH case been done before?
-
-I found no direct prior occurrence of this exact `10n+1` golden-field series in first-pass searches.  Existing ADH descendants prominently include `Q(sqrt(6))`, `Q(sqrt(2))`, and `Q(sqrt(3))`; I did not find this `Q(sqrt(5))` member.  Treat that as evidence of novelty, not proof.
-
-### Q2. Publication value?
-
-Yes, potentially.  A new golden-field ADH-type component arising naturally from Chan's tenth-order theta identity is a publishable observation if accompanied by proof, HM identification, norm-support theorem, and a ray-class coefficient formula.  The Ramanujan Journal, Research in Number Theory, Journal of Number Theory, Hardy-Ramanujan Journal, Integers, or Journal of Integer Sequences are plausible depending on depth.
-
-### Q3. Identify B explicitly / HM closed form?
-
-The exact identification is
+For prime `10N+1`, there are only the two conjugate prime-ideal orbits.  The finite ray-unit/Shintani sector table should show that selected prime representatives are either singletons or same-sign pairs, never opposite-sign pairs.  That proves `B_N` is always one of
 
 ```text
-B(X) = -f_{1,3,4}(X,-X^3,X)
+{-2, -1, +1, +2}
 ```
 
-under standard HM signs.  A direct false-theta closed form is
-
-```text
-B(X)
-  = - sum_{a,b >= 0} (-1)^b X^(2*a^2 + a + 3*a*b + b*(b+1)/2)
-    - sum_{a,b >= 0} (-1)^b X^(2*a^2 + 6*a + 3*a*b + (b^2 + 7*b)/2 + 4).
-```
-
-The HM Appell-Lerch part specializes to
-
-```text
-G(X)
-  = j(-X^3; X^4)  * m(-X^9,  X^20, -1)
-    - X*j(-X^6; X^4) * m(-X^4,  X^20, -1)
-    + X^3*j(-X^9; X^4) * m(-X^(-1), X^20, -1)
-    - X^6*j(-X^12;X^4) * m(-X^(-6), X^20, -1),
-```
-
-plus the finite HM theta correction, with a specialization/limit caveat.
-
-### Q4. Systematic method?
-
-Yes.  Search for Hecke-Rogers cone residuals, match them to `f_{a,b,c}`, compute `b^2-ac`, convert the inhomogeneous form into a real-quadratic norm coset, derive inert-prime support, then upgrade to a signed ray-class/Shintani cone coefficient formula.
-
-### Q5. Characterize the 91 cancellation zeros?
-
-They are norm-eligible values for which the signed ray-class representation sum vanishes.  Equivalently, `10N+1` is a norm, but the cone representatives in the relevant congruence class cancel under the sign `(-1)^r` and the `D-A` cone orientation.  A complete characterization should be a finite ray-class character formula modulo `10` and the real-place cone.
-
-### Q6. Partition combinatorics?
-
-A signed partition interpretation is plausible but not yet identified.  The full residual includes the product `j(q;q^5)^2`, which has a direct signed distinct-part interpretation in mod-5 residue classes.  The right target is likely a rank/parity difference on colored partitions with mod-5 restrictions, obtained by finding a Bailey-pair or q-hypergeometric form for the product times the cone series.
+at split primes.  Composite zeros occur because composite norms have multiple split-prime choices, and their signed sector contributions can cancel.
 
 ## Bottom line
 
-This is a strong lead.  The most valuable next step is to prove the signed ray-class formula for `B_N`.  Once that is in place, the result becomes a clean golden-field analogue of the ADH phenomenon rather than just a numerically verified support observation.
+The correct proof strategy is not to search for a hidden multiplicative eigenform.  The correct proof strategy is to formalize the exact ray-class Shintani coefficient formula.  Once that formula is in place, the observations become structurally natural:
+
+```text
+norm support      = ray-class norm equation,
+prime smallness   = one prime-ideal orbit plus finite sector table,
+2:1 ratio         = six-sector equidistribution,
+nonmultiplicative = Shintani window/floor-carry effect,
+composite zeros   = cancellation among split-prime choices.
+```
+
+This is the strongest route I see from the current data to a theorem.
+
+## References for orientation
+
+```text
+Hickerson--Mortenson, Hecke-type double sums, Appell-Lerch sums, and mock theta functions:
+https://arxiv.org/abs/1208.1421
+
+Mortenson, Ramanujan's 1psi1 summation, Hecke-type double sums, and Appell-Lerch sums:
+https://arxiv.org/abs/1208.1359
+
+Mortenson, On the dual nature of partial theta functions and Appell-Lerch sums:
+https://arxiv.org/abs/1208.6316
+
+Lovejoy--Osburn, Real quadratic double sums:
+https://arxiv.org/abs/1502.01109
+
+Zwegers, Mock Theta Functions:
+https://dspace.library.uu.nl/handle/1874/881
+
+Zwegers, Maass waveforms arising from sigma and related indefinite theta functions:
+https://arxiv.org/abs/1002.1175
+```
