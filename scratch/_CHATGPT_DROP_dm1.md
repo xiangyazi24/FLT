@@ -1,55 +1,271 @@
-# Q3129 (dm1): Ch10 Lean Framework — Round 2
+# Q3141 (dm1): Theorem 5 coefficient formula in Lean
 
-Date: 2026-07-02
+Date: 2026-07-03
 
 ## Executive answer
 
-The main tactical recommendation is:
+Use option **(a)**: define `B_N` as a computable `Finset.sum` over an explicit bounded rectangle, filtered by the equation `E k r = N` and by the active same-sign cones.  Do **not** start with `Finsupp`, and do **not** start with `PowerSeries` as the primary definition.
+
+The important correction is that the clean Lean statement should not literally sum over all pairs satisfying only
 
 ```text
-Use the isolated `triZ` lemmas, not a doubled-only API.
+E(k,r) = N.
 ```
 
-The doubled identity `Q_eq_two_mul_E` is useful and should be part of the API, but it does not eliminate the `triZ` division issue because `norm_beta` is an undoubled theorem.  You eventually need a robust lemma proving
+The quadratic form is indefinite off the same-sign cones, and the mixed-cone solutions are irrelevant because `BWeight = 0` there.  The finite coefficient theorem should sum over
+
+```text
+E(k,r) = N  and  (InACone(k,r) or InDCone(k,r)).
+```
+
+So the right Lean-level definition is:
 
 ```lean
-2 * triZ r = r * (r + 1)
+def Bcoeff (N : Nat) : Int :=
+  ((atomBox N).filter (activeAtom N)).sum
+    (fun p => BWeight p.1 p.2)
 ```
 
-anyway.
-
-The most important correction is in Q3: the proposed statement
+Then the theorem
 
 ```text
-eps^k * L ∩ L = empty for k = 1..5
+B_N = Σ BWeight(k,r)
 ```
 
-is **false**.  It is true for `k=1,3,5`, but false for `k=2,4`.  A counterexample for `k=2` is
+is either literally `rfl`, or a one-line simp theorem, depending on how you name it.  The genuinely useful theorem is not this definitional equality; it is the **support-bound theorem** saying your chosen box contains every active atom with exponent `N`.
+
+## Recommended formalization
+
+Use a deliberately coarse bound.  Do not try to use square roots.  Let
 
 ```text
-x = 1 + 4 phi.
+C(N) = 2N + 1.
 ```
 
-It lies in `L`, and `eps^2*x = 14 + 23 phi` also lies in `L`, because
+Then every active same-sign-cone atom contributing to coefficient `N` lies in
 
 ```text
-4 - 3*1 = 1,
-23 - 3*14 = -19 ≡ 1 mod 10.
+-C(N) <= k <= C(N),
+-C(N) <= r <= C(N).
 ```
 
-So do not build Lean around the five non-preservation theorem.  The correct unit-coset story is periodic/parity-dependent; `eps^6` preserves `L`, but smaller even powers can intersect `L` nontrivially.
+This bound is intentionally not sharp, but it is easy to prove and easy to use.
 
-## Q1. The `triZ` ediv landmine
+## Imports
 
-Use approach B as the main proof style:
+For the coefficient file, start with:
 
-1. Prove `two_dvd_mul_succ_int`.
-2. Prove `two_mul_triZ`.
-3. Use `nlinarith [two_mul_triZ r]` for polynomial identities involving `E`.
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.Finset.Interval
+import Mathlib.Algebra.BigOperators.Group.Finset
 
-Approach A, proving only `2 * E = Q`, is still worth adding as an API theorem, but it is not enough for `norm_beta` because the target is not doubled.
+import QseriesFormalization.Ch10.ConeAlgebra
 
-Here is a self-contained version of the proof.  It uses only `Mathlib.Tactic`; no `sorry`, no axiom, no number-field infrastructure.
+open scoped BigOperators
+
+namespace QseriesFormalization
+namespace Ch10
+```
+
+If your umbrella file already imports `Mathlib.Tactic` and `Finset.Icc` works, you may not need all of these.  The two imports that matter conceptually are the interval finset API and finite sums.
+
+## Core definitions
+
+This is the path of least resistance.
+
+```lean
+import Mathlib.Tactic
+import Mathlib.Data.Finset.Interval
+import Mathlib.Algebra.BigOperators.Group.Finset
+
+import QseriesFormalization.Ch10.ConeAlgebra
+
+open scoped BigOperators
+
+namespace QseriesFormalization
+namespace Ch10
+
+/-- A coarse coefficient bound.  It is deliberately larger than necessary. -/
+def coeffBound (N : Nat) : Int :=
+  2 * (N : Int) + 1
+
+/-- Integer range used for coefficient extraction. -/
+def coeffRange (N : Nat) : Finset Int :=
+  Finset.Icc (-(coeffBound N)) (coeffBound N)
+
+/-- Candidate pairs for coefficient extraction. -/
+def atomBox (N : Nat) : Finset (Int × Int) :=
+  (coeffRange N).product (coeffRange N)
+
+/-- Active atoms for the cone series coefficient. -/
+def activeAtom (N : Nat) (p : Int × Int) : Prop :=
+  E p.1 p.2 = (N : Int) ∧ (InACone p.1 p.2 ∨ InDCone p.1 p.2)
+
+/-- Finite set of active atoms contributing to coefficient `N`. -/
+def atomFinset (N : Nat) : Finset (Int × Int) :=
+  (atomBox N).filter (activeAtom N)
+
+/-- The coefficient of the cone-difference series `B(X)`. -/
+def Bcoeff (N : Nat) : Int :=
+  (atomFinset N).sum (fun p => BWeight p.1 p.2)
+
+/-- The coefficient formula is definitional once `Bcoeff` is the definition. -/
+theorem Bcoeff_eq_sum (N : Nat) :
+    Bcoeff N = (atomFinset N).sum (fun p => BWeight p.1 p.2) := rfl
+
+@[simp] theorem mem_atomFinset_iff (N : Nat) (p : Int × Int) :
+    p ∈ atomFinset N ↔
+      p ∈ atomBox N ∧ E p.1 p.2 = (N : Int) ∧
+        (InACone p.1 p.2 ∨ InDCone p.1 p.2) := by
+  simp [atomFinset, activeAtom]
+
+end Ch10
+end QseriesFormalization
+```
+
+This avoids `Finsupp` entirely.  It also avoids any need for a noncomputable definition.  Everything is a concrete finite sum.
+
+## Why filter by cone membership?
+
+Do not define the active finset as only
+
+```lean
+(E p.1 p.2 = (N : Int))
+```
+
+because off the same-sign cones the form is indefinite.  Even if `BWeight` is zero off the cones, Lean would still be asked to reason about a box that is not mathematically the full solution set of `E=N`.  The coefficient series itself is a same-sign-cone series, so make that explicit:
+
+```lean
+E p.1 p.2 = (N : Int) ∧ (InACone p.1 p.2 ∨ InDCone p.1 p.2)
+```
+
+This is both mathematically cleaner and much easier for Lean.
+
+## The real theorem: the box contains all active atoms
+
+The important theorem is the support theorem:
+
+```lean
+theorem activeAtom_mem_atomBox {N : Nat} {k r : Int}
+    (hE : E k r = (N : Int))
+    (hcone : InACone k r ∨ InDCone k r) :
+    (k, r) ∈ atomBox N := by
+  -- proof by cases on the cone
+  -- A-cone: use `Q = 2E` and nonnegativity to get `0 <= k,r` and upper bounds.
+  -- D-cone: write `u=-k-1`, `v=-r-1`; use the D-cone positive formula.
+  -- Finish with `simp [atomBox, coeffRange, coeffBound]` and `omega`.
+  sorry
+```
+
+The final project cannot contain `sorry`, of course.  The skeleton above is just the theorem to target.  The proof is straightforward but a little long.  I would prove it in smaller lemmas.
+
+### A-cone bound
+
+For the A-cone, use `Q_eq_two_mul_E` rather than unfolding `triZ`.
+
+If
+
+```text
+0 <= k, 0 <= r, E(k,r)=N,
+```
+
+then
+
+```text
+Q(k,r)=2N.
+```
+
+In the A-cone all terms in
+
+```text
+Q(k,r) = 4k^2 + 2k + r^2 + (6k+1)r
+```
+
+are nonnegative.  In particular,
+
+```text
+2k <= Q(k,r) = 2N,
+r  <= Q(k,r) = 2N.
+```
+
+So
+
+```text
+0 <= k <= N <= 2N+1,
+0 <= r <= 2N <= 2N+1.
+```
+
+A useful theorem shape is:
+
+```lean
+theorem A_atom_bounds {N : Nat} {k r : Int}
+    (hA : InACone k r) (hE : E k r = (N : Int)) :
+    -(coeffBound N) <= k ∧ k <= coeffBound N ∧
+    -(coeffBound N) <= r ∧ r <= coeffBound N := by
+  rcases hA with ⟨hk0, hr0⟩
+  have hQ : Q k r = 2 * (N : Int) := by
+    rw [Q_eq_two_mul_E, hE]
+  unfold Q at hQ
+  -- all terms are nonnegative; derive coarse upper bounds
+  have hkr0 : 0 <= k * r := mul_nonneg hk0 hr0
+  have h6kr0 : 0 <= 6 * k * r := by nlinarith
+  have hk_upper : k <= (N : Int) := by
+    nlinarith [sq_nonneg k, sq_nonneg r, h6kr0, hk0, hr0, hQ]
+  have hr_upper : r <= 2 * (N : Int) := by
+    nlinarith [sq_nonneg k, sq_nonneg r, h6kr0, hk0, hr0, hQ]
+  unfold coeffBound
+  omega
+```
+
+Depending on how `nlinarith` sees the term `(6*k+1)*r`, you may need the extra identity
+
+```lean
+have hterm : (6 * k + 1) * r = 6 * k * r + r := by ring
+```
+
+and rewrite `hQ` with it before the `nlinarith` calls.
+
+### D-cone bound
+
+For the D-cone, do not reason directly with negative variables.  Use
+
+```text
+k = -u - 1,
+r = -v - 1,
+u,v >= 0.
+```
+
+Then
+
+```text
+Q(-u-1,-v-1) = 4u^2 + 12u + 6uv + v^2 + 7v + 8.
+```
+
+Since `Q = 2N`, this gives
+
+```text
+12u <= 2N,
+7v <= 2N,
+```
+
+hence certainly
+
+```text
+u <= 2N,
+v <= 2N.
+```
+
+Therefore
+
+```text
+k = -u-1 >= -(2N+1),
+r = -v-1 >= -(2N+1),
+```
+
+and the upper bounds `k <= 2N+1`, `r <= 2N+1` are trivial because `k,r < 0`.
+
+Add this lemma:
 
 ```lean
 import Mathlib.Tactic
@@ -57,448 +273,206 @@ import Mathlib.Tactic
 namespace QseriesFormalization
 namespace Ch10
 
-structure PhiInt where
-  a : Int
-  b : Int
-  deriving DecidableEq, Repr
-
-namespace PhiInt
-
-/-- Norm in `Z[phi]`, where `phi^2 = phi + 1`. -/
-def norm (x : PhiInt) : Int := x.a ^ 2 + x.a * x.b - x.b ^ 2
-
-end PhiInt
-
-/-- Twice the exponent. -/
-def Q (k r : Int) : Int :=
-  4 * k ^ 2 + 2 * k + r ^ 2 + (6 * k + 1) * r
-
-/-- Integer triangular number. -/
-def triZ (r : Int) : Int := r * (r + 1) / 2
-
-/-- The exponent. -/
-def E (k r : Int) : Int :=
-  2 * k ^ 2 + k + 3 * k * r + triZ r
-
-/-- Atom-to-`Z[phi]` map. -/
-def beta (k r : Int) : PhiInt :=
-  ⟨r - 2 * k, 4 * k + 3 * r + 1⟩
-
-/-- Product of two consecutive integers is even. -/
-lemma two_dvd_mul_succ_int (r : Int) : 2 ∣ r * (r + 1) := by
-  have hmod : r % 2 = 0 ∨ r % 2 = 1 := by omega
-  rcases hmod with h | h
-  · refine ⟨(r / 2) * (r + 1), ?_⟩
-    have hr : r = 2 * (r / 2) := by omega
-    rw [hr]
-    ring
-  · refine ⟨r * ((r + 1) / 2), ?_⟩
-    have hr : r + 1 = 2 * ((r + 1) / 2) := by omega
-    rw [hr]
-    ring
-
-/-- The key `triZ` cancellation lemma. -/
-lemma two_mul_triZ (r : Int) : 2 * triZ r = r * (r + 1) := by
-  unfold triZ
-  rcases two_dvd_mul_succ_int r with ⟨t, ht⟩
-  have hquot : r * (r + 1) / 2 = t := by omega
-  rw [hquot, ht]
+/-- D-cone doubled exponent after `k=-u-1`, `r=-v-1`. -/
+theorem Q_neg_succ_neg_succ (u v : Int) :
+    Q (-u - 1) (-v - 1) =
+      4 * u ^ 2 + 12 * u + 6 * u * v + v ^ 2 + 7 * v + 8 := by
+  unfold Q
   ring
 
-/-- Useful doubled API theorem. -/
-theorem Q_eq_two_mul_E (k r : Int) : Q k r = 2 * E k r := by
-  have htri : 2 * triZ r = r * (r + 1) := two_mul_triZ r
-  unfold Q E triZ at *
-  nlinarith
-
-/-- The norm identity. -/
-theorem norm_beta (k r : Int) :
-    -PhiInt.norm (beta k r) = 10 * E k r + 1 := by
-  have htri : 2 * triZ r = r * (r + 1) := two_mul_triZ r
-  unfold PhiInt.norm beta E triZ at *
-  nlinarith
-
 end Ch10
 end QseriesFormalization
 ```
 
-Notes:
-
-- This avoids depending on brittle lemma names such as `Int.ediv_mul_cancel`.
-- The only moderately ambitious line is `have hmod : r % 2 = 0 ∨ r % 2 = 1 := by omega`.  In current Lean/Mathlib, `omega` is designed for this kind of Presburger/mod arithmetic.  If that line ever becomes brittle, replace it with Mathlib's explicit two-modulus lemma for integers, but keep the rest of the proof unchanged.
-- Once `two_mul_triZ` exists, most polynomial identities involving `E` become one-liners with `nlinarith`.
-
-## Q2. Theorem 9 box bounds and `B_1`
-
-First separate the coefficient computation into two layers:
-
-1. Prove solution-classification lemmas for `E(k,r)=N` in the A- and D-cones.
-2. Use those lemmas to simplify the finite coefficient definition of `B_N`.
-
-For `B_1`, the A-cone classification is:
-
-```text
-k >= 0, r >= 0, E(k,r)=1  iff  (k,r)=(0,1).
-```
-
-The D-cone is empty because after `k=-u-1`, `r=-v-1`, the D-cone exponent is at least `4`.
-
-Here is a Lean-style interval proof for the A-cone classification.  It uses `Q_eq_two_mul_E` to avoid unfolding `triZ` until the final finite cases.
+Then prove a D-bound lemma using `u = -k - 1`, `v = -r - 1`.
 
 ```lean
-import Mathlib.Tactic
-
-namespace QseriesFormalization
-namespace Ch10
-
-lemma A_E_one_solution (k r : Int)
-    (hk : 0 <= k) (hr : 0 <= r) (hE : E k r = 1) :
-    k = 0 ∧ r = 1 := by
-  have hQ : Q k r = 2 := by
-    have hQE : Q k r = 2 * E k r := Q_eq_two_mul_E k r
-    omega
-
-  -- Nonnegative product terms in the A-cone.
-  have hkr0 : 0 <= k * r := mul_nonneg hk hr
-  have h6kr0 : 0 <= 6 * k * r := by nlinarith
-
-  -- From Q=2 and nonnegativity, get small finite bounds.
-  have hk_le : k <= 1 := by
-    unfold Q at hQ
-    nlinarith [sq_nonneg k, sq_nonneg r, h6kr0, hk, hr]
-
-  have hr_le : r <= 2 := by
-    unfold Q at hQ
-    have hr_le_term : r <= (6 * k + 1) * r := by nlinarith [h6kr0]
-    nlinarith [sq_nonneg k, sq_nonneg r, hk, hr_le_term, hQ]
-
-  interval_cases k <;> interval_cases r <;> norm_num [E, triZ] at hE ⊢
-
-end Ch10
-end QseriesFormalization
-```
-
-After
-
-```lean
-interval_cases k <;> interval_cases r
-```
-
-the proof has six concrete branches:
-
-```text
-k = 0, r = 0
-k = 0, r = 1
-k = 0, r = 2
-k = 1, r = 0
-k = 1, r = 1
-k = 1, r = 2
-```
-
-The remaining goal in each branch is either:
-
-```lean
-⊢ 0 = 0 ∧ 1 = 1
-```
-
-for the true branch `(k,r)=(0,1)`, or a contradiction in `hE`, such as:
-
-```lean
-hE : 0 = 1
-⊢ False / or an impossible coordinate equality goal
-```
-
-The final line
-
-```lean
-norm_num [E, triZ] at hE ⊢
-```
-
-closes all branches.
-
-For the D-cone empty lemma, I would not try to reason directly with negative `k,r`.  Add a D-cone normalization lemma:
-
-```lean
-import Mathlib.Tactic
-
-namespace QseriesFormalization
-namespace Ch10
-
-/-- D-cone exponent after `k=-u-1`, `r=-v-1`. -/
-lemma E_neg_succ_neg_succ (u v : Int) :
-    E (-u - 1) (-v - 1)
-      = 2 * u ^ 2 + 6 * u + 3 * u * v + (v ^ 2 + 7 * v) / 2 + 4 := by
-  have htri : 2 * triZ (-v - 1) = (-v - 1) * (-v) := two_mul_triZ (-v - 1)
-  unfold E triZ at *
-  nlinarith
-
-end Ch10
-end QseriesFormalization
-```
-
-Then prove `D_E_one_empty` and `D_E_three_empty` by setting
-
-```text
-u = -k - 1,
-v = -r - 1,
-```
-
-with `u,v >= 0`, and using the displayed formula.  For `N=1,3`, the constant `+4` alone gives the contradiction.  For `N=34`, the bounds you listed are reasonable:
-
-```text
-A-cone: k in [0,3], r in [0,7]
-D-cone: u in [0,2], v in [0,5]
-```
-
-For the actual `B_1=1` theorem, once your finite coefficient function exists, the proof should be a rewrite from the two classification lemmas:
-
-```lean
--- Schematic, because the exact name/shape of your coefficient definition is not fixed here.
-theorem Bcoeff_one : Bcoeff 1 = 1 := by
-  -- rewrite finite sum using A_E_one_solution and D_E_one_empty
-  -- reduce the single surviving atom `(0,1)`
-  norm_num [BWeight, negOnePowInt, E, triZ]
-```
-
-The key point is that the hard part is not the final arithmetic; it is the solution classification.  Do the classification lemmas first.
-
-## Q3. Theorem 6 and powers of `eps`
-
-Do **not** try to prove
-
-```text
-eps^k * L ∩ L = empty for k=1..5.
-```
-
-That statement is false.
-
-### Counterexample for `k=2`
-
-Define the second iterate explicitly:
-
-```lean
-import Mathlib.Tactic
-
-namespace QseriesFormalization
-namespace Ch10
-
-structure PhiInt where
-  a : Int
-  b : Int
-  deriving DecidableEq, Repr
-
-def InL (x : PhiInt) : Prop :=
-  10 ∣ x.b - 3 * x.a - 1
-
-def epsMul (x : PhiInt) : PhiInt :=
-  ⟨x.a + x.b, x.a + 2 * x.b⟩
-
-def eps2Mul (x : PhiInt) : PhiInt :=
-  epsMul (epsMul x)
-
-example : eps2Mul ⟨1, 4⟩ = ⟨14, 23⟩ := by
-  norm_num [eps2Mul, epsMul]
-
-example : InL ⟨1, 4⟩ ∧ InL (eps2Mul ⟨1, 4⟩) := by
-  constructor <;> norm_num [InL, eps2Mul, epsMul]
-
-end Ch10
-end QseriesFormalization
-```
-
-Mathematically:
-
-```text
-1 + 4 phi ∈ L,
-eps^2(1+4phi) = 14 + 23phi ∈ L.
-```
-
-So `eps^2 L ∩ L` is nonempty.  Similarly, `eps^4 L ∩ L` is nonempty.  The empty cases are the odd powers `eps`, `eps^3`, and `eps^5`.
-
-### Concrete proof for `k=1`
-
-The `k=1` proof is clean with the divisibility-form `InL`.
-
-```lean
-import Mathlib.Tactic
-
-namespace QseriesFormalization
-namespace Ch10
-
-structure PhiInt where
-  a : Int
-  b : Int
-  deriving DecidableEq, Repr
-
-def InL (x : PhiInt) : Prop :=
-  10 ∣ x.b - 3 * x.a - 1
-
-def epsMul (x : PhiInt) : PhiInt :=
-  ⟨x.a + x.b, x.a + 2 * x.b⟩
-
-theorem epsMul_not_mem_L_of_mem_L (x : PhiInt) (hx : InL x) :
-    ¬ InL (epsMul x) := by
-  intro hxe
-  rcases hx with ⟨m, hm⟩
-  rcases hxe with ⟨n, hn⟩
-  unfold epsMul at hn
-  unfold InL at hm hn
+theorem D_atom_bounds {N : Nat} {k r : Int}
+    (hD : InDCone k r) (hE : E k r = (N : Int)) :
+    -(coeffBound N) <= k ∧ k <= coeffBound N ∧
+    -(coeffBound N) <= r ∧ r <= coeffBound N := by
+  rcases hD with ⟨hkneg, hrneg⟩
+  let u : Int := -k - 1
+  let v : Int := -r - 1
+  have hu0 : 0 <= u := by omega
+  have hv0 : 0 <= v := by omega
+  have hk_eq : k = -u - 1 := by omega
+  have hr_eq : r = -v - 1 := by omega
+  have hQ : Q k r = 2 * (N : Int) := by
+    rw [Q_eq_two_mul_E, hE]
+  have hQ_uv :
+      4 * u ^ 2 + 12 * u + 6 * u * v + v ^ 2 + 7 * v + 8 = 2 * (N : Int) := by
+    rw [← Q_neg_succ_neg_succ u v]
+    rw [← hk_eq, ← hr_eq]
+    exact hQ
+  have huv0 : 0 <= u * v := mul_nonneg hu0 hv0
+  have hu_upper : u <= 2 * (N : Int) := by
+    nlinarith [sq_nonneg u, sq_nonneg v, huv0, hu0, hv0, hQ_uv]
+  have hv_upper : v <= 2 * (N : Int) := by
+    nlinarith [sq_nonneg u, sq_nonneg v, huv0, hu0, hv0, hQ_uv]
+  unfold coeffBound
   omega
-
-end Ch10
-end QseriesFormalization
 ```
 
-This works because the two divisibility witnesses imply incompatible linear equations:
+If this exact proof needs small tuning, the structure is still the right one.  The point is that the D-cone bound should be proved in positive variables.
+
+### From bounds to box membership
+
+Once A/D bounds are proven, box membership is mechanical:
+
+```lean
+theorem activeAtom_mem_atomBox {N : Nat} {k r : Int}
+    (hE : E k r = (N : Int))
+    (hcone : InACone k r ∨ InDCone k r) :
+    (k, r) ∈ atomBox N := by
+  have hbounds := by
+    rcases hcone with hA | hD
+    · exact A_atom_bounds hA hE
+    · exact D_atom_bounds hD hE
+  rcases hbounds with ⟨hklo, hkhi, hrlo, hrhi⟩
+  simp [atomBox, coeffRange, coeffBound, hklo, hkhi, hrlo, hrhi]
+```
+
+This theorem is the mathematical justification for the finite-box definition.
+
+## Should Theorem 5 be a theorem or a definition?
+
+It depends on what you mean by `B`.
+
+### If `B` is introduced as this cone series
+
+Then Theorem 5 should be a **definition plus simp theorem**:
+
+```lean
+def Bcoeff (N : Nat) : Int := ...
+
+theorem Bcoeff_eq_sum (N : Nat) :
+    Bcoeff N = ... := rfl
+```
+
+This is enough.  Do not waste effort proving a theorem that just unfolds the definition.
+
+### If `B` already exists as a formal `PowerSeries`
+
+Then Theorem 5 is a real bridge theorem:
 
 ```text
-x.b - 3*x.a - 1 = 10*m,
-(x.a + 2*x.b) - 3*(x.a + x.b) - 1 = 10*n.
+coefficient of the formal series B at N = finite cone sum at N.
 ```
 
-`omega` sees the contradiction.
-
-### What to prove instead
-
-Use explicit iterates and prove the true periodic behavior.
+In that case, still define `Bcoeff` first, then define the series from coefficients:
 
 ```lean
-import Mathlib.Tactic
+-- schematic, depending on your existing q-series infrastructure
+noncomputable def BSeries : PowerSeries Int :=
+  PowerSeries.mk Bcoeff
 
-namespace QseriesFormalization
-namespace Ch10
-
-def eps2Mul (x : PhiInt) : PhiInt :=
-  ⟨2 * x.a + 3 * x.b, 3 * x.a + 5 * x.b⟩
-
-def eps3Mul (x : PhiInt) : PhiInt :=
-  ⟨5 * x.a + 8 * x.b, 8 * x.a + 13 * x.b⟩
-
-def eps4Mul (x : PhiInt) : PhiInt :=
-  ⟨13 * x.a + 21 * x.b, 21 * x.a + 34 * x.b⟩
-
-def eps5Mul (x : PhiInt) : PhiInt :=
-  ⟨34 * x.a + 55 * x.b, 55 * x.a + 89 * x.b⟩
-
-def eps6Mul (x : PhiInt) : PhiInt :=
-  ⟨89 * x.a + 144 * x.b, 144 * x.a + 233 * x.b⟩
-
-end Ch10
-end QseriesFormalization
+@[simp] theorem coeff_BSeries (N : Nat) :
+    PowerSeries.coeff Int N BSeries = Bcoeff N := rfl
 ```
 
-Then prove:
+If your existing infrastructure has its own series constructor, adapt this pattern.  The coefficient function should remain the primary object.
+
+## Why not `Finsupp` first?
+
+`Finsupp` is attractive only after you have already proved finite support.  Here, proving finite support is exactly the work.  If you start with `Finsupp`, Lean will ask for the same bounds plus extra support bookkeeping.
+
+The explicit `Finset.Icc` box is simpler:
 
 ```text
-eps^1 L ∩ L = empty,
-eps^3 L ∩ L = empty,
-eps^5 L ∩ L = empty,
-eps^2 L ∩ L is nonempty,
-eps^4 L ∩ L is nonempty,
-eps^6 L = L.
+finite by construction,
+computable,
+easy to inspect,
+works with `norm_num`, `decide`, and `native_decide`,
+works immediately for B_1, B_3, B_34.
 ```
 
-For `eps^6`, the proof from R1 remains right:
+You can always wrap it in a `Finsupp` later if some downstream theorem wants a finitely supported function.
+
+## Why not `PowerSeries` first?
+
+For this theorem, `PowerSeries` is not the hard part.  The hard part is coefficient extraction from an indefinite cone.  Define the coefficients first; then make the power series as a wrapper.
+
+Recommended order:
+
+```text
+1. Define `Bcoeff : Nat -> Int` by finite box.
+2. Prove support-bound theorem for mathematical correctness.
+3. Prove small coefficients and nonmultiplicativity from `Bcoeff`.
+4. Define `BSeries` from `Bcoeff` only when needed.
+5. Prove product/factorization identities later using coefficient extensionality.
+```
+
+## Recommended final API
+
+The coefficient file should expose these names:
 
 ```lean
-import Mathlib.Tactic
+def coeffBound (N : Nat) : Int
 
-namespace QseriesFormalization
-namespace Ch10
+def coeffRange (N : Nat) : Finset Int
 
-theorem eps6Mul_preserves_L (x : PhiInt) (hx : InL x) : InL (eps6Mul x) := by
-  rcases hx with ⟨m, hm⟩
-  unfold InL eps6Mul at *
-  use m - 12 * x.a - 20 * x.b
-  omega
+def atomBox (N : Nat) : Finset (Int × Int)
 
-end Ch10
-end QseriesFormalization
+def activeAtom (N : Nat) (p : Int × Int) : Prop
+
+def atomFinset (N : Nat) : Finset (Int × Int)
+
+def Bcoeff (N : Nat) : Int
+
+theorem mem_atomFinset_iff (N : Nat) (p : Int × Int) :
+  p ∈ atomFinset N ↔
+    p ∈ atomBox N ∧ E p.1 p.2 = (N : Int) ∧
+      (InACone p.1 p.2 ∨ InDCone p.1 p.2)
+
+theorem activeAtom_mem_atomBox {N : Nat} {k r : Int} :
+  E k r = (N : Int) ->
+  InACone k r ∨ InDCone k r ->
+  (k, r) ∈ atomBox N
+
+theorem Bcoeff_eq_sum (N : Nat) :
+  Bcoeff N = (atomFinset N).sum (fun p => BWeight p.1 p.2)
 ```
 
-I would use explicit `epskMul` definitions rather than repeated composition for these modular proofs.  Repeated composition with
+Then later, if you want the beta/norm form:
 
 ```lean
-simp [epsMul]
+def betaAtomFinset (N : Nat) : Finset PhiInt :=
+  (atomFinset N).image ⟨fun p => beta p.1 p.2, beta_injective_on_pairs⟩
 ```
 
-does reduce, but explicit iterates keep the goals small and make `omega` much happier.
+But do not start there.  Start with `(k,r)` atoms.
 
-The proposed `c = <-2,4>` divisibility trick is not the right first route, because the universal non-preservation statement it is meant to prove is false.  It may still be useful later for classifying which unit powers preserve which coset, but start with explicit matrices.
+## Is Theorem 5 worth formalizing?
 
-## Q4. The `@[ext]` theorem
+As a standalone theorem, only partly.
 
-Lean creates a structure extensionality theorem named something like `PhiInt.ext`, but I would still add an explicitly tagged theorem so the `ext` tactic is predictable in your namespace.
+If `Bcoeff` is defined as the finite sum, then
 
-Use this:
-
-```lean
-import Mathlib.Tactic
-
-namespace QseriesFormalization
-namespace Ch10
-
-structure PhiInt where
-  a : Int
-  b : Int
-  deriving DecidableEq, Repr
-
-namespace PhiInt
-
-@[ext] theorem ext_coords (x y : PhiInt)
-    (ha : x.a = y.a) (hb : x.b = y.b) : x = y := by
-  cases x with
-  | mk xa xb =>
-    cases y with
-    | mk ya yb =>
-      simp at ha hb
-      subst ya
-      subst yb
-      rfl
-
-end PhiInt
-
-end Ch10
-end QseriesFormalization
+```text
+Theorem 5 is mostly definitional.
 ```
 
-After this, if your goal is an equality of `PhiInt`s, use:
+The theorems that are actually worth formalizing are:
 
-```lean
-ext <;> simp [beta, epsMul, eps2Mul, eps6Mul] <;> omega
+1. `activeAtom_mem_atomBox`: the finite box is large enough.
+2. `Bcoeff_eq_sum`: a simp/rfl theorem giving the coefficient API.
+3. Small coefficient theorems, such as `Bcoeff 1 = 1`, `Bcoeff 3 = -2`, `Bcoeff 34 = 3`.
+4. The beta/norm reindexing theorem, if you want the norm-support theorem to refer directly to coefficients.
+5. A future bridge theorem from the existing q-series/PowerSeries object to `Bcoeff`.
+
+So I would include Theorem 5 in the paper-facing API, but internally I would make it a definition plus a support-bound theorem.
+
+## Bottom line
+
+The path of least resistance in Mathlib 4.30.0 is:
+
+```text
+Define `Bcoeff` by a finite `Finset.Icc` rectangle with bound `2N+1`,
+filter by `E=N` and active same-sign cone membership,
+sum `BWeight`,
+prove a separate support-bound theorem,
+postpone `Finsupp` and `PowerSeries` wrappers.
 ```
 
-`omega` cannot solve a `PhiInt.mk ... = PhiInt.mk ...` goal directly.  It needs the goal split into coordinate equalities first.  After `ext`, the goals are integer equalities, and `omega` is appropriate.
-
-Example:
-
-```lean
-import Mathlib.Tactic
-
-namespace QseriesFormalization
-namespace Ch10
-
-def epsMul (x : PhiInt) : PhiInt :=
-  ⟨x.a + x.b, x.a + 2 * x.b⟩
-
-def eps2Mul (x : PhiInt) : PhiInt :=
-  epsMul (epsMul x)
-
-theorem eps2Mul_formula (x : PhiInt) :
-    eps2Mul x = ⟨2 * x.a + 3 * x.b, 3 * x.a + 5 * x.b⟩ := by
-  ext <;> simp [eps2Mul, epsMul] <;> ring
-
-end Ch10
-end QseriesFormalization
-```
-
-You can use `ring` or `omega` after `ext`; for purely linear coordinate formulas, `omega` is usually enough.
-
-## Final recommendations
-
-1. Prove and use `two_mul_triZ`.  Keep `Q_eq_two_mul_E` too, but do not rely on doubled identities alone.
-2. For small coefficient proofs, classify solutions first, then let the coefficient theorem be a finite-sum simplification.
-3. Correct Theorem 6 before formalizing it: `eps^2 L ∩ L` and `eps^4 L ∩ L` are nonempty.  The safe theorem is `eps^1`, `eps^3`, `eps^5` are disjoint from `L`, and `eps^6` preserves `L`.
-4. Add an explicit `@[ext]` theorem for `PhiInt`.  Then `ext <;> simp [...] <;> omega` is the standard pattern for coordinate equalities.
-
-The biggest substantive fix is Q3.  If you formalize the false five-case theorem, Lean will correctly block you; the counterexample `⟨1,4⟩` should be added as a regression test.
+This gives you a computable coefficient function immediately, works with your existing small coefficient proofs, and keeps the genuinely difficult q-series identities out of the core algebra layer.
