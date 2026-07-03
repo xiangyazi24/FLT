@@ -1,919 +1,948 @@
-# Q3173 (dm1): Paper 2 Round 5 — Ramanujan Theta + Factorization + All Anchors Odd
+# Q3174 (dm1): Paper 2 Round 6 — From Statistics to Mechanism
 
 Date: 2026-07-03
 
 ## Executive answer
 
-The R5 results support a sharper paper thesis:
-
-> The bad-key/counterexample set is not just filtered by `hblock`; it is theta-filtered.  The shell-opening factor is a unary Ramanujan/Jacobi theta component, and if the shell-copy factorization conjecture holds, the full bad-key enumerator is a base-layer object multiplied by that theta component.
-
-The central identity is
+R6 changes the story in the right direction.  The old R1--R5 language was descriptive:
 
 ```text
-Θ(q) = Σ_{n∈Z} q^{18 n(17n+12)}
-     = Σ_{h∈Z} q^{18 h(17h-12)}
-     = f(q^522, q^90)
-     = j(-q^90; q^612)
-     = (-q^90;q^612)_∞ (-q^522;q^612)_∞ (q^612;q^612)_∞.
+shells, hblock, onset, theta opening, tentative factorization.
 ```
 
-The change from `n` to `h` is `h = -n`.  Thus the empirical shell onset
+The R5 experiments show that this descriptive layer is not the mechanism.  The correct mechanism is:
 
 ```text
-onset(h) = 18h(17h-12)
+The obstruction is the boundary defect of a mod-9 ghost symmetry.
 ```
 
-is exactly the two-sided exponent set of `f(q^522,q^90)`.
-
-The factorization conjecture should be written as a generating-function identity
+More precisely:
 
 ```text
-Bad(q) = N_0(q) Θ(q),
+τ = M^2
+τ ≡ -I mod 9
+τ ≠ -I over Z
 ```
 
-or coefficientwise
+so `τ` is a genuine integral change of variables which only looks like the required involution after reduction mod `9`.  It pairs the interior algebraically, but it does not preserve the integral summation domain.  Therefore the surviving coefficient is not a shell product.  It is the divergence of the domain indicator across the `τ` boundary.
+
+The key replacement for the failed factorization is:
 
 ```text
-Bad(E) = Σ_{n∈Z} N_0(E - 18n(17n+12)),
+Bad = not N_0 * Θ_shell,
+Bad = τ-boundary defect of the legal summation cone.
 ```
 
-with `N_0(t)=0` for negative `t`.  This is the cleanest formulation of “every shell is a translated copy of the base layer.”
+In generating-function form, the repair should be stated as
 
-The main caution: the number `612` is the Jacobi-product modulus / q-period.  It should not automatically be called the scalar modular level or conductor.  The natural object is a weight `1/2` unary theta component with a rational characteristic of denominator `17`, scaled by `72`; a safe ambient congruence level for the vector-valued theta description is `68*72 = 4896`, while the scalar stabilizer may be described more economically only after fixing the exact representation/stabilizer.
+```text
+Θ_10 = Main_τ + Corr_τ
+```
+
+with
+
+```text
+Corr_τ = Θ_u Θ_v (D - A)
+       = - Θ_u Θ_v f_{1,3,4}(X, -X^3, X).
+```
+
+Here `D-A` is the signed departure-minus-arrival boundary series for the failed `τ` pairing.  This is the publishable mechanism.  The hblock/onset/factorization statistics should now be demoted to diagnostics and historical evidence.
 
 ---
 
-## Q1. What modular form is `f(q^522,q^90)`?
+## 1. What replaces the failed factorization?
 
-Use Ramanujan's general theta function
-
-```text
-f(a,b) = Σ_{n∈Z} a^{n(n+1)/2} b^{n(n-1)/2}.
-```
-
-Then
+The failed conjecture was
 
 ```text
-f(q^522,q^90)
-  = Σ_{n∈Z} q^{522 n(n+1)/2 + 90 n(n-1)/2}
-  = Σ_{n∈Z} q^{306n^2 + 216n}
-  = Σ_{n∈Z} q^{18n(17n+12)}.
+Bad(q) ?= N_0(q) Θ_shell(q).
 ```
 
-Equivalently, with `Q=q^18`,
+The experiments rule this out decisively:
 
 ```text
-Θ(q) = f(Q^29,Q^5) = j(-Q^5; Q^34),
+aggregate mismatches:             430/450
+per-shell translated-copy rate:   about 5%
+formal quotient Bad/Θ:            many negative coefficients
+N_h(onset_h+x) != N_0(x):          generic
 ```
 
-where
+This means the bad set is not made by copying a base layer along a theta lattice.  The shell counts were measuring a shadow of a symmetry, not the symmetry itself.
+
+### Correct structural object
+
+Let `Λ` be the integral packet lattice.  Let `C ⊂ Λ` be the true legal summation cone/domain, and let `C_B` be the finite scan truncation.  Let
 
 ```text
-j(x;Q) = (x;Q)_∞(Q/x;Q)_∞(Q;Q)_∞.
+χ_C(x) = 1 if x is in the legal summation domain,
+       = 0 otherwise.
 ```
 
-So the product is
+Let `wt(x)` be the full signed monomial weight of a packet, including coefficient sign, exponent, and key variables:
 
 ```text
-j(-q^90;q^612)
- = (-q^90;q^612)_∞ (-q^522;q^612)_∞ (q^612;q^612)_∞.
+wt(x) = s(x) q^{E(x)} z^{K(x)}.
 ```
 
-### Theta-constant description
-
-Complete the square:
+The ghost map is
 
 ```text
-18n(17n+12)
-  = (18/17)((17n+6)^2 - 36).
+τ = M^2.
 ```
 
-Therefore
+It has the crucial property that the reduced algebra sees it as the missing involution:
 
 ```text
-q^(648/17) Θ(q)
-  = Σ_{m ≡ 6 mod 17} q^{18m^2/17}.
+τ ≡ -I mod 9,
 ```
 
-Using the standard unary theta components
+but the integral summation problem does not:
 
 ```text
-θ_{m,r}(τ) = Σ_{x ≡ r mod 2m} q^{x^2/(4m)},       q = e^{2πiτ},
+τ ≠ -I over Z.
 ```
 
-we get
+The expected cancellation is therefore valid only on the `τ`-paired interior.  The actual obstruction is the signed failure of the domain indicator to be invariant:
 
 ```text
-q^(648/17) Θ(τ)
-  = θ_{17,6}(72τ) + θ_{17,23}(72τ).
+δ_τ χ_C(x) = χ_C(x) - χ_C(τ^{-1}x).
 ```
 
-This is the most precise modular interpretation: `Θ` is a shifted unary theta component for the discriminant modulus `17`, pulled back by `τ ↦ 72τ`.
-
-### Level / conductor / character
-
-The product modulus is
+Then the corrected structural description is
 
 ```text
-612 = 36*17 = 18*34.
+BadSeries = boundary_τ(C; wt)
+          = (1/2) Σ_{x∈Λ} δ_τχ_C(x) wt(x),
 ```
 
-But this is not automatically the scalar modular level.  The base unary theta components `θ_{17,r}` live in the weight-`1/2` Weil representation attached to the finite quadratic module with modulus `17`; the usual ambient level for the vector-valued theta system is `4*17 = 68`.  Pulling back by `72τ` gives the safe ambient level
+with the factor `1/2` present when `D` and `A` are raw boundary strips.  If `D` and `A` are defined as already pair-compressed boundary series, then the same formula is written without the explicit `1/2`:
 
 ```text
-68*72 = 4896 = 2^5 * 3^2 * 17.
+BadSeries = D - A.
 ```
 
-The specific two-residue component `{6,23}` is not, by itself, a Dirichlet-character theta series unless it is projected into a character sum.  So I would not assign it a single primitive Dirichlet character or a single primitive L-function yet.  It is better described as:
+The evaluated form of this boundary series is the confirmed defect:
 
 ```text
-weight 1/2 unary theta component,
-rational characteristic denominator 17,
-scale 72,
-Jacobi product modulus 612,
-Weil-representation character rather than a single Dirichlet character.
+BadSeries = Θ_u Θ_v (D - A)
+          = - Θ_u Θ_v f_{1,3,4}(X, -X^3, X).
 ```
 
-### Eta quotient?
+This is the replacement for `N_0 * Θ_shell`.
 
-It is not a plain eta quotient in the usual sense.  An eta quotient selects residue classes by divisor structure.  This product selects exactly two classes in the `Q=q^18` variable:
+### Interpretation
+
+The counterexample set is a signed boundary, not a product set.
+
+The old theta shell appeared because the Pell/coset dynamics leaves strong quadratic traces.  But the set of surviving terms is selected by the mismatch
 
 ```text
-(-Q^5;Q^34)_∞ (-Q^29;Q^34)_∞ (Q^34;Q^34)_∞.
+C Δ τC,
 ```
 
-That is naturally a Jacobi theta product / Siegel-function type object.  It may be expressible using Siegel functions and eta factors, but the canonical identity for the paper is the `j(-q^90;q^612)` identity, not an eta quotient.
+not by free translation along an independent theta coordinate.  Therefore shell asymmetry, negative hblocks appearing early, and `B`-dependent onsets are not bugs in the data.  They are exactly what a chiral boundary defect should produce.
 
-### L-function?
+A compact slogan for the paper:
 
-The Mellin transform of the normalized theta component decomposes into unary theta L-series supported on the progression `m ≡ 6 mod 17`.  After decomposing the progression indicator into Dirichlet characters modulo `17` or `34`, it becomes a finite linear combination of elementary theta L-series.  It is not naturally a single newform L-function unless a later character projection produces one.
+```text
+The obstruction is not a theta factorization.  It is a τ-boundary cocycle.
+```
 
 ---
 
-## Q2. Why are all anchors odd?
+## 2. Precise theorem: key weight as boundary divergence
 
-This should be a structural lemma, not an empirical fact.
+The theorem should be stated at the level of the signed monomial series first, and then coefficientwise.
 
-The key point is that a `j`-block is built from triangular exponents.  For an integer block variable `n`,
+### Theorem A — ghost symmetry and interior cancellation
+
+Let `Λ` be the integral packet lattice and let `τ=M^2` be the Pell transformation attached to the coset `L`.  Assume:
 
 ```text
-T_n = n(n-1)/2 = ((2n-1)^2 - 1)/8.
+1. τ is an integral bijection of Λ.
+2. τ ≡ -I mod 9 on the reduced packet data.
+3. The signed monomial weight is τ-anti-invariant on the paired algebra:
+
+       wt(τx) = -wt(x).
 ```
 
-Thus the natural root variable of the triangular block is
+Then for every `τ`-invariant finite subset `S ⊂ Λ`,
 
 ```text
-A = 2n - 1,
+Σ_{x∈S} wt(x) = 0.
 ```
 
-which is always odd.
+This is the exact mathematical replacement for the informal statement “the main terms pair under `τ`.”
 
-For a general Jacobi block
+### Theorem B — boundary divergence formula
+
+For any finite truncation `C_B` of the legal summation domain,
 
 ```text
-j(-q^r;q^M) = Σ_{n∈Z} q^{M n(n-1)/2 + r n}
+Σ_{x∈C_B} wt(x)
+  = (1/2) Σ_{x∈Λ} (χ_B(x) - χ_B(τ^{-1}x)) wt(x),
 ```
 
-after absorbing the two signs, set `A=2n-1`.  Since `n=(A+1)/2`, the exponent is
+where `χ_B` is the indicator of `C_B`.
+
+Equivalently, if
 
 ```text
-E(n)
-  = M(A^2-1)/8 + r(A+1)/2
-  = (M A^2 + 4r A + 4r - M)/8.
-```
-
-The exponent is therefore naturally organized by an odd square-root variable `A`.  If the packet anchor is this root variable, or any signed/even translate of it,
-
-```text
-anchor = ±A + 2c,
+D_B = C_B \ τC_B,
+A_B = τC_B \ C_B,
 ```
 
 then
 
 ```text
-anchor ≡ A ≡ 1 mod 2.
+Σ_{x∈C_B} wt(x)
+  = (1/2) ( Σ_{x∈D_B} wt(x) - Σ_{x∈A_B} wt(x) ).
 ```
 
-That proves all anchors are odd.
+This is the exact boundary term.  The interior cancels; only the symmetric difference survives.
 
-This also explains why the observation is robust across the range `e=9..4050`: an even anchor would require `A` even, hence `n=(A+1)/2` half-integral, so it is not in the integer `j`-block lattice.
+### Coefficientwise version
 
-Important distinction: the completed-square variable of the scaled theta,
+Let `Π_{e,K}` denote coefficient extraction at exponent `e` and key `K`.  Define
 
 ```text
-17n + 6
+keyWeight_B(e,K) = [q^e z^K] Σ_{x∈C_B} wt(x).
 ```
 
-is not always odd.  Therefore the observed “all anchors odd” is not coming from the final `17n+6` theta square.  It is coming earlier, from the triangular-root variable `2n-1` inside the `j(a,b,n)` packet structure.
-
-### Parity theorem package
+Then
 
 ```text
-Theorem, Odd-anchor theorem.
-Every root-packet anchor attached to an integral j-block is odd.
-
-Proof.
-Write the j-block exponent in triangular form.  The block root variable is
-A=2n-1 or A=2n+1, depending on convention.  In either convention A is odd.
-All permitted packet translations preserve parity because they are even translations.
-Hence every emitted anchor is odd. ∎
+keyWeight_B(e,K)
+  = [q^e z^K] (1/2) Σ_{x∈Λ} (χ_B(x)-χ_B(τ^{-1}x)) wt(x).
 ```
 
-This converts the empirical result “zero even anchors through `4050`” into a one-line structural theorem once the paper records the exact anchor extraction map.
+Equivalently,
+
+```text
+keyWeight_B(e,K)
+  = [q^e z^K] boundary_τ(C_B; wt).
+```
+
+After evaluating the boundary strips and passing to the stable coefficient range, this becomes
+
+```text
+keyWeight(e,K)
+  = [q^e z^K] Θ_u Θ_v (D-A)
+  = -[q^e z^K] Θ_u Θ_v f_{1,3,4}(X,-X^3,X).
+```
+
+This is the theorem that should replace the old shell-copy theorem.
+
+### Why this proves the missing kernel coefficient
+
+If the original derivation implicitly assumed
+
+```text
+χ_C(x) = χ_C(τ^{-1}x),
+```
+
+then it silently threw away
+
+```text
+δ_τχ_C = χ_C - χ_C∘τ^{-1}.
+```
+
+The missing kernel coefficient is exactly the coefficient of this discarded boundary divergence.
 
 ---
 
-## Q3. Is the transition at `e=126` meaningful?
+## 3. The repair: corrected identity for `Θ_10`
 
-Yes, but it should be stated carefully.
+The repaired identity should be stated as an identity of generating series, not as an enumeration claim.
 
-The identity
+Let `Main_τ` denote the part of the original expression whose summation domain is genuinely paired by `τ`, or equivalently the expression obtained after cancelling the `τ`-paired interior terms.
+
+Then the corrected identity is
+
+```text
+Θ_10 = Main_τ + Corr_τ,
+```
+
+where
+
+```text
+Corr_τ = Θ_u Θ_v (D-A).
+```
+
+Using the confirmed boundary evaluation,
+
+```text
+D-A = -f_{1,3,4}(X,-X^3,X),
+```
+
+so the clean repaired formula is
+
+```text
+Θ_10 = Main_τ - Θ_u Θ_v f_{1,3,4}(X,-X^3,X).
+```
+
+Equivalently,
+
+```text
+Θ_10 + Θ_u Θ_v f_{1,3,4}(X,-X^3,X) = Main_τ.
+```
+
+This is likely the best published form because it says exactly what went wrong:
+
+```text
+The old identity was missing a boundary correction forced by the fact that
+τ is only a mod-9 symmetry, not an integral symmetry of the summation domain.
+```
+
+### Sign convention
+
+The sign should be fixed by the definition of `Defect`.
+
+If
+
+```text
+Defect = Actual Θ_10 - Claimed main expression,
+```
+
+then the R6 statement gives
+
+```text
+Defect = - Θ_u Θ_v f_{1,3,4}(X,-X^3,X).
+```
+
+If instead
+
+```text
+Defect = Claimed main expression - Actual Θ_10,
+```
+
+then all signs reverse.  The paper should choose one convention and display it once.
+
+Recommended convention:
+
+```text
+Corr_τ := Actual - Main_τ.
+```
+
+Then
+
+```text
+Corr_τ = Θ_u Θ_v(D-A)
+       = -Θ_u Θ_v f_{1,3,4}(X,-X^3,X).
+```
+
+---
+
+## 4. Meaning of shell asymmetry and chirality
+
+The shell asymmetry is no longer mysterious after the factorization failure.
+
+The old mental model was:
+
+```text
+hblock = shell coordinate,
+positive and negative shells are two sides of one theta,
+N_h should look like N_{-h} after translation.
+```
+
+R5 shows this is false:
+
+```text
+N_1 versus N_{-1}: 10.7% match
+N_2 versus N_{-2}: 29.0% match
+N_3 versus N_{-3}: 66.3% match
+negative hblocks appear before positive predicted onsets
+```
+
+The correct interpretation is:
+
+```text
+hblock is a chiral boundary coordinate, not a symmetric shell coordinate.
+```
+
+The map `τ` is congruent to `-I` mod `9`, so modulo `9` it looks like it should reverse the packet.  But integrally it has drift.  It sends the legal cone to a shifted cone:
+
+```text
+C  ----τ---->  τC,
+```
+
+and the obstruction lives in
+
+```text
+C Δ τC.
+```
+
+There is no reason for this signed boundary to be symmetric under `h ↦ -h`.  In fact, asymmetry is expected unless the cone itself has an independent reflection symmetry interchanging the two sides.  R5 shows it does not.
+
+### Why negative hblocks appear earlier
+
+Negative hblocks appearing before the positive onset prediction means the predicted onset was not intrinsic.  It was the minimum of a restricted/truncated scan path.  Once `B` is enlarged, the legal cone exposes boundary points that were invisible before.
+
+Geometrically:
+
+```text
+positive hblock side: boundary intersects the scan window later,
+negative hblock side: boundary intersects the scan window earlier.
+```
+
+This is chirality.  It comes from the orientation of the Pell map and the fact that `τ` is an integral drift, not an exact reflection.
+
+### Relation to theta branches
+
+There is still a theta-like branch phenomenon, but it should not be treated as a product factor.  Even the old Ramanujan theta
+
+```text
+f(q^522,q^90)
+```
+
+has asymmetric first branches:
+
+```text
+90 and 522.
+```
+
+The completed square is centered at a nonintegral characteristic:
+
+```text
+18h(17h-12) = (18/17)((17h-6)^2 - 36),
+```
+
+so the two directions are already biased by the shift `6/17`.  The new data says the actual boundary defect is even more chiral: the summation cone selects one side earlier than the other.  Thus the branch language is useful as local intuition, but the correct invariant is the `τ`-boundary, not the theta branch count.
+
+---
+
+## 5. All anchors odd and why `τ` acts freely
+
+This part is now solid and should remain in the paper.
+
+The anchor is the triangular root variable
+
+```text
+A = 2n - 1.
+```
+
+Therefore
+
+```text
+A ≡ 1 mod 2.
+```
+
+All anchors are odd for structural reasons; no finite verification is needed except as a sanity check.
+
+The putative fixed anchor of the `τ` action is the even residue/anchor value `6`.  Since anchors are always odd, that fixed point is never realized in the actual root-packet lattice.  Therefore `τ` acts freely on realized anchors.
+
+This matters because it prevents a second possible source of defect.  The obstruction is not caused by fixed points of `τ`.  It is caused by the boundary:
+
+```text
+fixed-point defect: absent,
+boundary defect: present.
+```
+
+This is a very clean causal statement.
+
+---
+
+## 6. The parity gap at `126`
+
+The R5 parity gap refines the old `126 = 90 + 36` observation.
+
+The confirmed mechanism is:
+
+```text
+first onset anchors at e=90,
+new anchors at e=126,
+126 = 90 + 2*18,
+step 1 is forbidden by odd parity.
+```
+
+Since anchors are odd, the next legal anchor displacement after an onset anchor is not a one-step displacement.  It is a two-step displacement.  In the exponent scale, one step of the anchor lattice corresponds to `18`, so the first allowed parity-preserving jump contributes
+
+```text
+2*18 = 36.
+```
+
+Thus
 
 ```text
 126 = 90 + 36
 ```
 
-is not random.  The `90` is the first nonzero shell-opening exponent, and the `36` is the square defect in the theta characteristic:
+has a better explanation than the old completed-square numerology:
 
 ```text
-18h(17h-12)
-  = (18/17)((17h-6)^2 - 36).
+36 is the first parity-allowed anchor displacement from the onset packet.
 ```
 
-So `36=6^2` is the characteristic defect attached to the residue shift `6/17`.
-
-However, because the `hblock=0` column sum is also nonzero starting at `e=126`, the transition should not be explained only as “the `90` shell translates a base coefficient at `36`.”  Under a charge-level factorization, the coefficient at `126` would schematically have the form
+This does not contradict the completed-square observation.  It strengthens it.  The same number `36=6^2=2*18` is seen from two sides:
 
 ```text
-[q^126] C(q)
-  = [q^126] C_0(q) + [q^36] C_0(q),
+theta characteristic defect: 36 = 6^2,
+anchor parity gap:           36 = 2*18.
 ```
 
-because below `126` the theta factor contributes only `1` and `q^90`.
-
-The confirmed fact that the `hblock=0` column is already nonzero at `126` means the first term `[q^126]C_0` is itself active.  The `90+36` relation is therefore best interpreted as a resonance between:
-
-```text
-first shell opening = 90,
-theta characteristic defect = 36,
-first global/base charge obstruction = 126.
-```
-
-The concrete test is:
-
-```text
-Compute the charge quotient C_0 if C(q)=C_0(q)Θ(q).
-Then inspect C_0(36) and C_0(126).
-```
-
-If `C_0(36)=0` and `C_0(126)≠0`, then the transition is intrinsic to the base layer and merely numerologically aligned with `90+36`.  If both are nonzero, the first global charge receives both the base obstruction and the first translated shell contribution.  Either way, the appearance of `36` is meaningful because it is the discriminant/characteristic defect of the theta factor.
+The paper should present the parity-gap explanation as the causal one, and the completed-square identity as supporting arithmetic structure.
 
 ---
 
-## Q4. What is `N_0`?
+## 7. Minimal theorem package for publishable Paper 2
 
-If factorization holds, `N_0` is not optional: it is uniquely determined by formal division by `Θ`, because `Θ(0)=1`.
+The publishable Paper 2 should no longer try to prove a factorization theorem.  It should prove a mechanism theorem and a repair theorem.
 
-```text
-N_0(q) = Bad(q) / Θ(q).
-```
-
-Coefficientwise this gives the recursion
+### Theorem 1 — Coset ghost theorem
 
 ```text
-N_0(E)
-  = Bad(E) - Σ_{t>0} Θ(t) N_0(E-t),
+For the coset L, the Pell transformation M has trace 18 and the map τ=M^2
+satisfies
+
+    τ ≡ -I mod 9,
+    τ ≠ -I over Z.
+
+Thus τ is a mod-9 ghost symmetry: it is the expected involution after reduction
+modulo 9, but not an integral symmetry of the summation domain.
 ```
 
-where `t` ranges over positive shell-opening exponents.
+Purpose: identifies the exact source of the false cancellation.
 
-Since the first positive theta exponents are
+### Theorem 2 — Odd-anchor/free-action theorem
 
 ```text
-90, 522, 792, 1656, 2106, 3402, 4032, ...,
+Every realized root-packet anchor has the form A=2n-1 and is therefore odd.
+The only possible fixed anchor for τ is even, hence τ acts freely on realized
+anchors.
 ```
 
-we have
+Purpose: proves that the defect is not a fixed-point defect.
+
+### Theorem 3 — Interior cancellation theorem
 
 ```text
-N_0(E) = Bad(E)          for E < 90.
+On every τ-invariant finite subdomain, the signed packet weights cancel in
+pairs.
 ```
 
-Thus the reported first values
+Purpose: salvages the original idea: the main terms really do pair, but only in the interior.
+
+### Theorem 4 — Boundary divergence theorem
 
 ```text
-E       9  18  27  36  45  54  63  72  81
-N_0     5   6   6   8   9  10  10  11  11
+For every finite scan domain C_B,
+
+    Σ_{x∈C_B} wt(x)
+      = (1/2) Σ_{x∈Λ} (χ_B(x)-χ_B(τ^{-1}x)) wt(x).
 ```
 
-are literally the base-layer bad counts before the first shell translation can interfere.
-
-### Is `N_0` a quadratic-form representation number?
-
-The early growth looks like a one-dimensional lattice count, not like a classical positive-definite binary quadratic representation number.
-
-A positive-definite binary quadratic representation number `r_Q(n)` usually has divisor-like arithmetic fluctuations and average size `n^{o(1)}` for individual coefficients.  The observed rough growth `O(sqrt(e/9))` is more suggestive of one of the following:
+Coefficientwise,
 
 ```text
-1. an interval count of admissible odd anchors;
-2. a degenerate / rank-one quadratic representation count;
-3. an indefinite-form count with a cutoff window;
-4. an Ehrhart/quasi-polynomial count from a packet polytope;
-5. a weighted count of odd root variables satisfying local congruences.
+keyWeight_B(e,K)
+  = [q^e z^K] boundary_τ(C_B; wt).
 ```
 
-Because Q2 says all anchors are odd, the most natural ansatz is
+Purpose: gives the precise causal formula.
+
+### Theorem 5 — Boundary evaluation theorem
 
 ```text
-N_0(9m) = Σ_{A odd} w(A,m) * 1_{local inequalities and congruences hold},
+The τ-boundary series factors along the free u and v directions and leaves a
+one-dimensional anchor defect:
+
+    boundary_τ(C; wt)
+      = Θ_u Θ_v (D-A)
+      = -Θ_u Θ_v f_{1,3,4}(X,-X^3,X).
 ```
 
-with `A` the triangular root variable from the `j`-block.  If the weights are eventually periodic in `A mod M`, then `N_0(9m)` may become a finite sum of floor functions.  That would explain the smooth step pattern better than a genuine binary quadratic representation number.
+Purpose: identifies the missing kernel coefficient explicitly.
 
-### Practical identification strategy
+### Theorem 6 — Corrected `Θ_10` identity
 
-1. Compute `N_0` by quotient recursion to a much larger bound.
-2. Split `N_0` by anchor residue classes modulo small moduli, especially modulo `2`, `3`, `9`, `17`, `34`, and `68`.
-3. Test whether `N_0(9m)` is a floor-sum / Ehrhart quasi-polynomial.
-4. If not, test whether it equals a representation count of an indefinite or degenerate quadratic form with an explicit cutoff.
-5. Only after that should one try to match it to a modular form database or a classical representation-number formula.
+```text
+Θ_10 = Main_τ - Θ_u Θ_v f_{1,3,4}(X,-X^3,X).
+```
 
-The first nine values are too few to identify the arithmetic function uniquely.  But they are enough to say that `N_0` is probably the base packet-count function, and the all-odd anchor theorem gives the right variable in which to express it.
+Equivalently,
+
+```text
+Θ_10 + Θ_u Θ_v f_{1,3,4}(X,-X^3,X) = Main_τ.
+```
+
+Purpose: states the repair.
+
+### Theorem 7 — Stability / B-independence theorem
+
+```text
+For each fixed coefficient e and key K, there is a bound B_0(e,K) such that
+for all B ≥ B_0(e,K),
+
+    keyWeight_B(e,K) = keyWeight(e,K).
+
+The stable value is the coefficient of the τ-boundary correction, not an hblock
+onset count.
+```
+
+Purpose: removes dependence on fragile scan onsets.
+
+### Appendix-only results
+
+The following should be moved to an appendix or computational diagnostics section:
+
+```text
+hblock counts,
+onset tables,
+failed factorization data,
+N_h versus N_{-h} mismatch tables,
+finite anchor parity verification.
+```
+
+They are useful evidence, but not the theorem architecture.
 
 ---
 
-## Q5. What is the second fiber?
+## 8. B-independent characterization
 
-For a fiber with parameters
-
-```text
-a = |l|,
-b = |v|,
-```
-
-the theta factor is
+The `B`-dependent onset failure is important.  It says:
 
 ```text
-Θ_{a,b}(q)
-  = f(q^{18(a+2b)}, q^{18a})
-  = Σ_{n∈Z} q^{18((a+b)n^2 + bn)}.
+onset_h(B) is not a number-theoretic invariant.
 ```
 
-The two positive branches are, for `j ≥ 1`,
+A scan cutoff can hide legal packets.  Enlarging `B` changes the first observed packet in a given hblock.  Therefore the paper should stop using hblock onset as a primary invariant.
+
+The B-independent characterization is:
 
 ```text
-lower_j = 18j((a+b)j - b),
-upper_j = 18j((a+b)j + b).
+Counterexample structure = support/coefficient mass of the stable τ-boundary
+of the legal summation cone.
 ```
 
-For the minimizing fiber
+Formally, define the infinite legal cone `C` first.  Then define
 
 ```text
-a = |l| = 5,
-b = |v| = 12,
-a+b = 17,
+∂_τ C = C Δ τC.
 ```
 
-this gives
+The signed boundary indicator is
 
 ```text
-Θ_{5,12}(q) = f(q^522,q^90).
+δ_τχ_C = χ_C - χ_C∘τ^{-1}.
 ```
 
-The first few nonzero exponents in this same fiber are
+The stable defect series is
 
 ```text
-j=1:   90,   522
-j=2:  792,  1656
-j=3: 2106,  3402
-j=4: 4032,  5760
+Defect(q,z)
+  = (1/2) Σ_{x∈Λ} δ_τχ_C(x) wt(x).
 ```
 
-So if “second fiber” means the second two-sided shell within the already identified fiber, the answer is
+Then for fixed `e,K`, define
 
 ```text
-j=2 branch: 792 and 1656.
+keyWeight(e,K) = [q^e z^K] Defect(q,z).
 ```
 
-### If “second fiber” means the next admissible cross-fiber
+This is independent of `B`.  A finite scan is only a method of approximating the coefficient, and it is valid only once `B` is large enough to contain all boundary points contributing to that coefficient.
 
-The relation
+The practical test is not “does the onset match a formula?”  The practical test is:
 
 ```text
-|u| = |l| + |v| - 9
+Does keyWeight_B(e,K) stabilize as B increases, and does the stable value equal
+[q^e z^K](-Θ_u Θ_v f_{1,3,4}(X,-X^3,X))?
 ```
 
-gives, in the present case,
-
-```text
-|l| = 5,
-|u| = 8,
-|v| = 12,
-|l|+|v| = 17,
-17 - |u| = 9.
-```
-
-If the admissible fibers are the `17`-split fibers generated by the `9`-defect, then the natural ordered candidates are:
-
-| fiber `(a,b)` | theta | first lower branch | first upper branch |
-|---:|---:|---:|---:|
-| `(5,12)` | `f(q^522,q^90)` | `90` | `522` |
-| `(8,9)` | `f(q^468,q^144)` | `144` | `468` |
-| `(9,8)` | `f(q^450,q^162)` | `162` | `450` |
-| `(12,5)` | `f(q^396,q^216)` | `216` | `396` |
-
-Under ordering by first onset, the second cross-fiber is therefore
-
-```text
-(a,b) = (8,9),
-Θ_{8,9}(q) = f(q^468,q^144).
-```
-
-Under ordering by the companion branch alone, `(12,5)` has the smallest companion `396`, but its first onset is later, at `216`.  For shell-opening purposes the first-onset order is the better ordering.
-
-Diagnostic: if the fiber system allowed the pair `(5,8)`, it would produce
-
-```text
-f(q^378,q^90),
-```
-
-which would compete with or precede the verified minimizing companion `q^522`.  Since the confirmed minimizing fiber is `f(q^522,q^90)`, the pair `(5,8)` must be inadmissible in the actual fiber index set, or “minimizing” must mean something stricter than first lower onset.
+That is the right verification target.
 
 ---
 
-## Q6. Minimal complete paper / theorem package
+## 9. What the counterexample set is, in one sentence
 
-The minimal paper should be built around the sentence:
+The counterexample set is the set of realized packets whose `τ` partner exists modulo `9` but lies outside the integral legal summation domain.
 
-```text
-The counterexample set is a theta-filtered modular object.
-```
-
-A good title would be:
+Equivalently:
 
 ```text
-A Ramanujan Theta Filtration of the hblock Counterexample Set
+Counterexamples = unpaired terms on C Δ τC.
 ```
 
-or, more cautiously,
+Weighted by the packet kernel, they generate
 
 ```text
-Unary Theta Structure in the hblock Obstruction Set
+-Θ_u Θ_v f_{1,3,4}(X,-X^3,X).
 ```
 
-### Proposed paper structure
-
-#### 1. Introduction
-
-State the empirical discovery and the corrected interpretation:
-
-```text
-Bad keys occur from e=9 onward, but global charge cancels until e=126.
-The missing kernel coefficient is not an isolated accident; it sits inside a
-unary theta shell filtration.
-```
-
-Main displayed identity:
-
-```text
-Θ(q)=f(q^522,q^90)=j(-q^90;q^612).
-```
-
-Main conditional identity:
-
-```text
-Bad(q)=N_0(q)Θ(q).
-```
-
-#### 2. Definitions
-
-Define:
-
-```text
-root packet
-anchor
-bad key
-charge
-hblock
-hblock shell
-base layer N_0
-Bad(q)
-Θ(q)
-```
-
-The `hblock` definition should be stated exactly:
-
-```text
-hblock = (|l+1| + 1 - |u+v-1| + carry)//3.
-```
-
-Then state that this is a translation coordinate, not just a label.
-
-#### 3. Shell theorem
-
-```text
-Theorem 1, hblock shell opening.
-For every h∈Z, the hblock shell opens at
-
-    E_h = 18h(17h-12).
-
-Moreover the shell-opening generating function is
-
-    Σ_{h∈Z} q^{E_h} = f(q^522,q^90).
-```
-
-Proof: change `h=-n` and use the Ramanujan theta exponent calculation.
-
-#### 4. Jacobi/Ramanujan product theorem
-
-```text
-Theorem 2, Jacobi product.
-The shell-opening series satisfies
-
-    Σ_{h∈Z} q^{18h(17h-12)}
-      = (-q^90;q^612)_∞(-q^522;q^612)_∞(q^612;q^612)_∞.
-```
-
-Proof: Jacobi triple product with `x=-q^90`, `Q=q^612`.
-
-Then add a modularity remark:
-
-```text
-After multiplying by q^(648/17), this is the unary theta component
-θ_{17,6}(72τ)+θ_{17,23}(72τ).
-```
-
-Do not overclaim scalar level `612`.
-
-#### 5. Fiber theorem
-
-```text
-Theorem 3, fiber theta.
-For a fiber with parameters a=|l| and b=|v|, the fiber-opening series is
-
-    Θ_{a,b}(q)=f(q^{18(a+2b)}, q^{18a}).
-
-The two branches are
-
-    E_j^- = 18j((a+b)j-b),
-    E_j^+ = 18j((a+b)j+b).
-```
-
-For `(a,b)=(5,12)`, this gives the verified minimizing fiber
-
-```text
-f(q^522,q^90).
-```
-
-#### 6. Odd-anchor theorem
-
-```text
-Theorem 4, all anchors odd.
-Every root-packet anchor emitted by an integral j-block is odd.
-```
-
-Proof: write the triangular exponent using `A=2n-1`.  This should replace the finite check through `4050` with a structural proof.
-
-#### 7. Charge theorem
-
-```text
-Theorem 5, first global charge obstruction.
-The global charge and the hblock=0 charge are zero below e=126 and nonzero at e=126.
-```
-
-This theorem should be stated as a computed/proved finite result first.  Then add the structural interpretation:
-
-```text
-126 = 90 + 36,
-36 = 6^2,
-18h(17h-12) = (18/17)((17h-6)^2 - 36).
-```
-
-The exact proof target is to express the charge functional through the same theta/base decomposition, or to show why the first nonzero base charge occurs at the theta defect threshold.
-
-#### 8. Factorization theorem / conjecture
-
-State this as conditional until the shell-copy bijection is proven.
-
-```text
-Conjecture 6, shell-copy factorization.
-There is a multiplicity-preserving translation from the hblock=0 layer to each
-hblock shell h, shifting e by 18h(17h-12).  Equivalently,
-
-    Bad(q)=N_0(q) f(q^522,q^90).
-```
-
-Then the coefficient statement is
-
-```text
-Bad(E)=Σ_{n∈Z}N_0(E-18n(17n+12)).
-```
-
-Proof route:
-
-```text
-1. Define the translation map T_h on packet keys.
-2. Prove T_h preserves badness and multiplicity.
-3. Prove every bad key has a unique decomposition into base key + h shell.
-4. Sum over h.
-```
-
-#### 9. Base layer theorem / problem
-
-```text
-Problem 7, identify N_0.
-Determine a closed formula for the base-layer enumerator N_0(q).
-```
-
-Initial data:
-
-```text
-N_0(9),...,N_0(81) = 5,6,6,8,9,10,10,11,11.
-```
-
-Expected shape:
-
-```text
-N_0(9m) is a weighted count of odd j-block anchors in a growing interval,
-possibly an Ehrhart/quasi-polynomial or a degenerate quadratic representation count.
-```
-
-#### 10. Verification section
-
-Include reproducible scripts for:
-
-```text
-1. shell-onset verification;
-2. theta-product coefficient comparison;
-3. factorization quotient N_0;
-4. odd-anchor verification by block ID;
-5. charge decomposition at e=126;
-6. second-fiber enumeration.
-```
+This is the causal explanation.
 
 ---
 
-## Reproducible code skeleton
+## 10. Recommended paper architecture
 
-The following code is only a harness.  It assumes the actual project code can supply `Bad(E)` and packet anchors.
+A minimal, mechanism-first paper could be:
+
+### Section 1. The failed cancellation
+
+State the original claimed pairing and show what it would require:
+
+```text
+an integral involution preserving the summation domain.
+```
+
+Then state the actual map:
+
+```text
+τ=M^2 ≡ -I mod 9 but τ≠-I over Z.
+```
+
+### Section 2. Root packets and odd anchors
+
+Prove:
+
+```text
+A=2n-1,
+all anchors odd,
+τ has no realized fixed points.
+```
+
+### Section 3. Interior pairing
+
+Prove the anti-invariance of the signed packet weight:
+
+```text
+wt(τx)=-wt(x).
+```
+
+Then prove cancellation on `τ`-invariant domains.
+
+### Section 4. Boundary divergence
+
+Prove the indicator identity:
+
+```text
+Σ_C wt = (1/2)Σ(χ_C-χ_C∘τ^{-1})wt.
+```
+
+This is the main conceptual theorem.
+
+### Section 5. Evaluation of the boundary
+
+Compute the boundary strips explicitly:
+
+```text
+D-A = -f_{1,3,4}(X,-X^3,X),
+Corr_τ = -Θ_uΘ_v f_{1,3,4}(X,-X^3,X).
+```
+
+### Section 6. Corrected identity
+
+State and prove:
+
+```text
+Θ_10 = Main_τ - Θ_uΘ_v f_{1,3,4}(X,-X^3,X).
+```
+
+### Section 7. Computational verification
+
+Verify:
+
+```text
+1. M^2 ≡ -I mod 9 and M^2≠-I over Z;
+2. all anchors are odd;
+3. no τ fixed anchors are realized;
+4. finite scans stabilize to the boundary correction;
+5. the coefficient at e=126 is exactly the missing kernel coefficient;
+6. shell factorization fails, as predicted by the boundary model.
+```
+
+The factorization failure becomes a confirmation of the mechanism, not a setback.
+
+---
+
+## 11. Verification harness
+
+This is a skeleton for the exact tests the repository should contain.  It deliberately tests the mechanism, not the obsolete factorization conjecture.
 
 ```python
 from __future__ import annotations
 
-from collections import defaultdict
-from typing import Dict, Iterable, List, Mapping, Sequence, Tuple
+from dataclasses import dataclass
+from typing import Callable, Dict, Iterable, Iterator, Mapping, MutableMapping, Sequence, Tuple
 
-CoeffDict = Dict[int, int]
-
-
-def fiber_exponent(n: int, a: int = 5, b: int = 12) -> int:
-    """Exponent of f(q^(18(a+2b)), q^(18a)) at summation index n."""
-    return 18 * ((a + b) * n * n + b * n)
+Vector = Tuple[int, ...]
+Key = Tuple[int, ...]
+CoeffKey = Tuple[int, Key]
+Series = Dict[CoeffKey, int]
 
 
-def theta_opening_coeffs(emax: int, a: int = 5, b: int = 12) -> CoeffDict:
-    """Return coefficients of Θ_{a,b} through emax.
+@dataclass(frozen=True)
+class PacketTerm:
+    """One signed packet term in the integral summation lattice."""
 
-    Θ_{a,b}(q) = Σ_{n∈Z} q^{18((a+b)n^2 + b n)}.
+    point: Vector
+    degree: int
+    key: Key
+    coeff: int
+
+    def monomial_key(self) -> CoeffKey:
+        return (self.degree, self.key)
+
+
+def add_to_series(series: MutableMapping[CoeffKey, int], term: PacketTerm, scale: int = 1) -> None:
+    """Accumulate a packet term into a sparse coefficient series."""
+    ck = term.monomial_key()
+    series[ck] = series.get(ck, 0) + scale * term.coeff
+    if series[ck] == 0:
+        del series[ck]
+
+
+def matrix_vector_mul(matrix: Sequence[Sequence[int]], vector: Vector) -> Vector:
+    """Multiply an integer matrix by an integer vector."""
+    return tuple(sum(row[j] * vector[j] for j in range(len(vector))) for row in matrix)
+
+
+def mod_vector(vector: Vector, modulus: int) -> Vector:
+    """Reduce a vector modulo modulus."""
+    return tuple(x % modulus for x in vector)
+
+
+def assert_tau_is_mod9_ghost(tau_matrix: Sequence[Sequence[int]]) -> None:
+    """Check τ ≡ -I mod 9 and τ != -I over Z."""
+    dim = len(tau_matrix)
+    minus_identity = tuple(
+        tuple(-1 if i == j else 0 for j in range(dim))
+        for i in range(dim)
+    )
+    tau_tuple = tuple(tuple(row) for row in tau_matrix)
+
+    if tau_tuple == minus_identity:
+        raise AssertionError("τ is literally -I over Z; not a ghost")
+
+    for i, row in enumerate(tau_matrix):
+        for j, value in enumerate(row):
+            expected = -1 if i == j else 0
+            if (value - expected) % 9 != 0:
+                raise AssertionError(
+                    f"τ is not -I mod 9 at entry {(i, j)}: {value} vs {expected}"
+                )
+
+
+def anchor_from_j_block(n: int) -> int:
+    """Triangular root variable; structurally odd."""
+    return 2 * n - 1
+
+
+def assert_anchor_is_odd(n: int) -> None:
+    """Check the structural parity lemma for a realized j-block index."""
+    anchor = anchor_from_j_block(n)
+    if anchor % 2 == 0:
+        raise AssertionError(f"even anchor realized: n={n}, anchor={anchor}")
+
+
+def boundary_divergence_series(
+    terms: Iterable[PacketTerm],
+    tau: Callable[[Vector], Vector],
+    inverse_tau: Callable[[Vector], Vector],
+    in_domain: Callable[[Vector], bool],
+    term_at: Callable[[Vector], PacketTerm],
+) -> Series:
+    """Compute the raw τ-boundary divergence.
+
+    This implements
+
+        (1/2) Σ_x (χ(x)-χ(τ^{-1}x)) wt(x).
+
+    To avoid fractions, the function returns the doubled boundary series:
+
+        Σ_x (χ(x)-χ(τ^{-1}x)) wt(x).
+
+    The caller can divide coefficients by 2 after verifying they are even, or
+    can compare against a boundary series D-A that has been defined with the
+    same raw normalization.
     """
-    coeffs: CoeffDict = defaultdict(int)
-    n = 0
-    while True:
-        progressed = False
-        for k in (n, -n) if n else (0,):
-            e = fiber_exponent(k, a=a, b=b)
-            if 0 <= e <= emax:
-                coeffs[e] += 1
-                progressed = True
-        if n > 0 and not progressed:
-            # Since the quadratic grows in both directions, this is safe after
-            # both +n and -n have exceeded the range.
-            e_pos = fiber_exponent(n, a=a, b=b)
-            e_neg = fiber_exponent(-n, a=a, b=b)
-            if e_pos > emax and e_neg > emax:
-                break
-        n += 1
-    return dict(coeffs)
+    doubled: Series = {}
+    seen_points = {term.point for term in terms}
+    closure_points = set(seen_points)
+    for point in tuple(seen_points):
+        closure_points.add(tau(point))
+        closure_points.add(inverse_tau(point))
 
-
-def convolve(a: Mapping[int, int], b: Mapping[int, int], emax: int) -> CoeffDict:
-    """Truncated Cauchy product."""
-    out: CoeffDict = defaultdict(int)
-    for ea, ca in a.items():
-        if ca == 0:
+    for point in closure_points:
+        delta = int(in_domain(point)) - int(in_domain(inverse_tau(point)))
+        if delta == 0:
             continue
-        for eb, cb in b.items():
-            e = ea + eb
-            if e <= emax:
-                out[e] += ca * cb
-    return dict(out)
+        add_to_series(doubled, term_at(point), scale=delta)
+
+    return doubled
 
 
-def recover_n0_from_bad(bad: Mapping[int, int], emax: int) -> CoeffDict:
-    """Recover N_0 from Bad = N_0 * Θ, using Θ(0)=1."""
-    theta = theta_opening_coeffs(emax)
-    positive_theta_terms = sorted((e, c) for e, c in theta.items() if e > 0)
-
-    n0: CoeffDict = {}
-    for e in range(emax + 1):
-        value = bad.get(e, 0)
-        for t, c in positive_theta_terms:
-            if t > e:
-                break
-            value -= c * n0.get(e - t, 0)
-        n0[e] = value
-    return n0
+def scan_series(terms: Iterable[PacketTerm], in_domain: Callable[[Vector], bool]) -> Series:
+    """Direct finite-domain packet sum."""
+    series: Series = {}
+    for term in terms:
+        if in_domain(term.point):
+            add_to_series(series, term)
+    return series
 
 
-def check_factorization(bad: Mapping[int, int], emax: int) -> List[Tuple[int, int, int]]:
-    """Return discrepancies (e, Bad(e), (N_0*Θ)(e))."""
-    n0 = recover_n0_from_bad(bad, emax)
-    theta = theta_opening_coeffs(emax)
-    rebuilt = convolve(n0, theta, emax)
-    discrepancies: List[Tuple[int, int, int]] = []
-    for e in range(emax + 1):
-        lhs = bad.get(e, 0)
-        rhs = rebuilt.get(e, 0)
-        if lhs != rhs:
-            discrepancies.append((e, lhs, rhs))
-    return discrepancies
+def compare_series(lhs: Mapping[CoeffKey, int], rhs: Mapping[CoeffKey, int]) -> Dict[CoeffKey, Tuple[int, int]]:
+    """Return coefficient mismatches between two sparse series."""
+    keys = set(lhs) | set(rhs)
+    return {key: (lhs.get(key, 0), rhs.get(key, 0)) for key in keys if lhs.get(key, 0) != rhs.get(key, 0)}
 
 
-def j_block_anchor(n: int, convention: str = "minus") -> int:
-    """The odd triangular root variable from a j-block.
+def first_missing_kernel_coefficient(series: Mapping[CoeffKey, int]) -> Tuple[CoeffKey, int] | None:
+    """Return the smallest nonzero coefficient in degree order."""
+    nonzero = [(key, value) for key, value in series.items() if value]
+    if not nonzero:
+        return None
+    return min(nonzero, key=lambda item: (item[0][0], item[0][1]))
+```
 
-    convention='minus' gives A=2n-1.
-    convention='plus' gives A=2n+1.
-    """
-    if convention == "minus":
-        return 2 * n - 1
-    if convention == "plus":
-        return 2 * n + 1
-    raise ValueError(f"unknown convention: {convention}")
+The repository-specific implementation should supply:
 
+```text
+1. the actual packet lattice points;
+2. the actual matrix M and τ=M^2;
+3. the legal-domain predicate χ_C or χ_B;
+4. the exact packet-term weight wt(x);
+5. the closed-form boundary series -Θ_uΘ_v f_{1,3,4}(X,-X^3,X).
+```
 
-def assert_all_anchors_odd(anchors: Iterable[int]) -> None:
-    """Raise if any anchor is even."""
-    even = [a for a in anchors if a % 2 == 0]
-    if even:
-        raise AssertionError(f"found even anchors: {even[:20]}")
+Then the central validation is:
 
+```text
+Direct finite scan = τ-boundary divergence = closed-form correction.
+```
 
-def branch_pair(j: int, a: int, b: int) -> Tuple[int, int]:
-    """Return the lower/upper j-branch exponents for Θ_{a,b}."""
-    lower = 18 * j * ((a + b) * j - b)
-    upper = 18 * j * ((a + b) * j + b)
-    return lower, upper
+not
 
-
-def candidate_fibers_from_split(total: int = 17) -> List[Tuple[int, int, int, int]]:
-    """Natural 17-split fibers relevant to |u|=|l|+|v|-9.
-
-    Returns tuples (a,b,first_lower,first_upper).
-    """
-    candidates = [(5, 12), (8, 9), (9, 8), (12, 5)]
-    out: List[Tuple[int, int, int, int]] = []
-    for a, b in candidates:
-        if a + b != total:
-            continue
-        lower, upper = branch_pair(1, a, b)
-        out.append((a, b, lower, upper))
-    return sorted(out, key=lambda row: (row[2], row[3]))
-
-
-if __name__ == "__main__":
-    # Confirmed first base-layer values supplied in R5.
-    n0_first = {
-        9: 5,
-        18: 6,
-        27: 6,
-        36: 8,
-        45: 9,
-        54: 10,
-        63: 10,
-        72: 11,
-        81: 11,
-    }
-
-    theta = theta_opening_coeffs(6000)
-    print("first theta exponents:", sorted(theta)[:10])
-    print("candidate split fibers:", candidate_fibers_from_split())
-    print("N0 first values:", [n0_first[9 * m] for m in range(1, 10)])
+```text
+Direct finite scan = N_0 * Θ_shell.
 ```
 
 ---
 
-## The compact theorem package to put in the paper
+## 12. Final synthesis
 
-Here is the minimal complete theorem package.
+Round 6 should be the pivot of Paper 2.
 
-### Theorem A — hblock is a shell coordinate
-
-```text
-The statistic
-
-    hblock = (|l+1|+1-|u+v-1|+carry)//3
-
-is a translation coordinate.  The h-shell opens at
-
-    E_h = 18h(17h-12).
-```
-
-Status: confirmed experimentally; needs formal proof from the packet inequalities.
-
-### Theorem B — shell opening is Ramanujan theta
+The old summary was:
 
 ```text
-Σ_{h∈Z} q^{18h(17h-12)} = f(q^522,q^90).
+The counterexample set appears to have theta shell statistics.
 ```
 
-Status: proven algebraically.
-
-### Theorem C — Jacobi triple product
+The corrected summary is:
 
 ```text
-f(q^522,q^90)
-  = (-q^90;q^612)_∞(-q^522;q^612)_∞(q^612;q^612)_∞.
+The original identity fails because the cancellation map is a mod-9 ghost:
+τ=M^2 behaves like -I modulo 9 but not over the integers.  It pairs the interior
+and acts freely on odd anchors, but the legal summation cone is not τ-invariant.
+The surviving obstruction is exactly the τ-boundary divergence, evaluated as
+
+    -Θ_u Θ_v f_{1,3,4}(X,-X^3,X).
+
+Adding this term repairs the Θ_10 identity.
 ```
 
-Status: proven by JTP.
-
-### Theorem D — modular interpretation
+That is a mechanism.  It explains the failed factorization, the shell asymmetry, the early negative hblocks, the `B`-dependent onsets, the parity gap at `126`, and the missing kernel coefficient with one cause:
 
 ```text
-q^(648/17) f(q^522,q^90)
-  = θ_{17,6}(72τ)+θ_{17,23}(72τ).
+integral boundary failure of a mod-9 ghost symmetry.
 ```
-
-Status: proven by completing the square.  Interpret as a weight-`1/2` unary theta component with denominator `17` and scale `72`.
-
-### Theorem E — fiber theta
-
-```text
-For a fiber with a=|l| and b=|v|,
-
-    Θ_{a,b}(q)=f(q^{18(a+2b)},q^{18a}).
-```
-
-Status: algebraic once the fiber onset formula is proven.
-
-### Theorem F — all anchors odd
-
-```text
-Every anchor is odd.
-```
-
-Status: should be structural.  Proof comes from the triangular root variable `A=2n-1` in every integral `j`-block.
-
-### Theorem G — charge transition
-
-```text
-The first nonzero global charge, and the first nonzero hblock=0 column charge,
-occur at e=126.
-```
-
-Status: confirmed computationally.  The structural explanation should use the theta characteristic defect `36=6^2` and the charge quotient/base-layer charge.
-
-### Conjecture H — shell-copy factorization
-
-```text
-Bad(q)=N_0(q) f(q^522,q^90).
-```
-
-Equivalent coefficient formula:
-
-```text
-Bad(E)=Σ_{n∈Z}N_0(E-18n(17n+12)).
-```
-
-Status: current R5 factorization conjecture.  The proof should be a bijection between each h-shell and the hblock=0 layer.
-
-### Problem I — identify `N_0`
-
-```text
-Find a closed arithmetic/combinatorial formula for N_0.
-```
-
-Expected answer: a weighted odd-anchor count, likely closer to an Ehrhart/floor-sum or rank-one/degenerate quadratic count than to a classical positive-definite binary representation number.
-
----
-
-## Final synthesis
-
-The paper should not merely report that bad keys exist at every `e=9n`.  The stronger and more publishable statement is:
-
-```text
-The bad-key set has a theta shell geometry.  The shell coordinate is hblock,
-the shell openings are exactly the Ramanujan theta f(q^522,q^90), every anchor
-is forced odd by the j-block triangular root, and the first uncancelled charge
-at e=126 is aligned with the 6^2 characteristic defect of the theta.
-```
-
-If the factorization conjecture is proven, the paper becomes very clean:
-
-```text
-Counterexample enumerator = base layer × unary theta.
-```
-
-Then the remaining arithmetic content is concentrated in `N_0`.  That is exactly the right architecture: prove the universal theta shell once, prove the odd-anchor theorem once, and reduce the complicated enumeration to the base layer.
