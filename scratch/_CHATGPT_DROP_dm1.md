@@ -1,478 +1,584 @@
-# Q3141 (dm1): Theorem 5 coefficient formula in Lean
+# Q3156 (dm1): Prime nonvanishing strategy for the `Q(sqrt(5))` cone series
 
 Date: 2026-07-03
 
+## Repo note
+
+I attempted to read `theorems.md` from the repository, but the GitHub connector did not find it at the repo root and repository search returned no match.  The analysis below is therefore based on the theorem list and context in the prompt, plus the established Q31xx setup.
+
+## First correction: the norm of `eps`
+
+With
+
+```text
+phi = (1 + sqrt(5)) / 2,
+eps = phi^2 = phi + 1,
+```
+
+one has
+
+```text
+N(phi) = -1,
+N(eps) = N(phi)^2 = +1.
+```
+
+So `eps = phi^2` is the totally positive norm-`+1` fundamental unit.  The norm-`-1` unit is `phi`.  This correction does not change the coset-stabilizer story, but it matters in the write-up.
+
 ## Executive answer
 
-Use option **(a)**: define `B_N` as a computable `Finset.sum` over an explicit bounded rectangle, filtered by the equation `E k r = N` and by the active same-sign cones.  Do **not** start with `Finsupp`, and do **not** start with `PowerSeries` as the primary definition.
-
-The important correction is that the clean Lean statement should not literally sum over all pairs satisfying only
+The real bottleneck is not any one of L1--L4 in isolation.  The right proof should replace them by one finite **ray-class/Shintani sector theorem**:
 
 ```text
-E(k,r) = N.
+For every prime p == 1 mod 10, the active set
+
+  A_p = { beta in L : -N(beta)=p and beta lies in the A- or D-cone }
+
+has cardinality 1 or 2, and all elements of A_p have the same weight.
 ```
 
-The quadratic form is indefinite off the same-sign cones, and the mixed-cone solutions are irrelevant because `BWeight = 0` there.  The finite coefficient theorem should sum over
+This single sector theorem implies:
 
 ```text
-E(k,r) = N  and  (InACone(k,r) or InDCone(k,r)).
-```
-
-So the right Lean-level definition is:
-
-```lean
-def Bcoeff (N : Nat) : Int :=
-  ((atomBox N).filter (activeAtom N)).sum
-    (fun p => BWeight p.1 p.2)
-```
-
-Then the theorem
-
-```text
-B_N = Σ BWeight(k,r)
-```
-
-is either literally `rfl`, or a one-line simp theorem, depending on how you name it.  The genuinely useful theorem is not this definitional equality; it is the **support-bound theorem** saying your chosen box contains every active atom with exponent `N`.
-
-## Recommended formalization
-
-Use a deliberately coarse bound.  Do not try to use square roots.  Let
-
-```text
-C(N) = 2N + 1.
-```
-
-Then every active same-sign-cone atom contributing to coefficient `N` lies in
-
-```text
--C(N) <= k <= C(N),
--C(N) <= r <= C(N).
-```
-
-This bound is intentionally not sharp, but it is easy to prove and easy to use.
-
-## Imports
-
-For the coefficient file, start with:
-
-```lean
-import Mathlib.Tactic
-import Mathlib.Data.Finset.Interval
-import Mathlib.Algebra.BigOperators.Group.Finset
-
-import QseriesFormalization.Ch10.ConeAlgebra
-
-open scoped BigOperators
-
-namespace QseriesFormalization
-namespace Ch10
-```
-
-If your umbrella file already imports `Mathlib.Tactic` and `Finset.Icc` works, you may not need all of these.  The two imports that matter conceptually are the interval finset API and finite sums.
-
-## Core definitions
-
-This is the path of least resistance.
-
-```lean
-import Mathlib.Tactic
-import Mathlib.Data.Finset.Interval
-import Mathlib.Algebra.BigOperators.Group.Finset
-
-import QseriesFormalization.Ch10.ConeAlgebra
-
-open scoped BigOperators
-
-namespace QseriesFormalization
-namespace Ch10
-
-/-- A coarse coefficient bound.  It is deliberately larger than necessary. -/
-def coeffBound (N : Nat) : Int :=
-  2 * (N : Int) + 1
-
-/-- Integer range used for coefficient extraction. -/
-def coeffRange (N : Nat) : Finset Int :=
-  Finset.Icc (-(coeffBound N)) (coeffBound N)
-
-/-- Candidate pairs for coefficient extraction. -/
-def atomBox (N : Nat) : Finset (Int × Int) :=
-  (coeffRange N).product (coeffRange N)
-
-/-- Active atoms for the cone series coefficient. -/
-def activeAtom (N : Nat) (p : Int × Int) : Prop :=
-  E p.1 p.2 = (N : Int) ∧ (InACone p.1 p.2 ∨ InDCone p.1 p.2)
-
-/-- Finite set of active atoms contributing to coefficient `N`. -/
-def atomFinset (N : Nat) : Finset (Int × Int) :=
-  (atomBox N).filter (activeAtom N)
-
-/-- The coefficient of the cone-difference series `B(X)`. -/
-def Bcoeff (N : Nat) : Int :=
-  (atomFinset N).sum (fun p => BWeight p.1 p.2)
-
-/-- The coefficient formula is definitional once `Bcoeff` is the definition. -/
-theorem Bcoeff_eq_sum (N : Nat) :
-    Bcoeff N = (atomFinset N).sum (fun p => BWeight p.1 p.2) := rfl
-
-@[simp] theorem mem_atomFinset_iff (N : Nat) (p : Int × Int) :
-    p ∈ atomFinset N ↔
-      p ∈ atomBox N ∧ E p.1 p.2 = (N : Int) ∧
-        (InACone p.1 p.2 ∨ InDCone p.1 p.2) := by
-  simp [atomFinset, activeAtom]
-
-end Ch10
-end QseriesFormalization
-```
-
-This avoids `Finsupp` entirely.  It also avoids any need for a noncomputable definition.  Everything is a concrete finite sum.
-
-## Why filter by cone membership?
-
-Do not define the active finset as only
-
-```lean
-(E p.1 p.2 = (N : Int))
-```
-
-because off the same-sign cones the form is indefinite.  Even if `BWeight` is zero off the cones, Lean would still be asked to reason about a box that is not mathematically the full solution set of `E=N`.  The coefficient series itself is a same-sign-cone series, so make that explicit:
-
-```lean
-E p.1 p.2 = (N : Int) ∧ (InACone p.1 p.2 ∨ InDCone p.1 p.2)
-```
-
-This is both mathematically cleaner and much easier for Lean.
-
-## The real theorem: the box contains all active atoms
-
-The important theorem is the support theorem:
-
-```lean
-theorem activeAtom_mem_atomBox {N : Nat} {k r : Int}
-    (hE : E k r = (N : Int))
-    (hcone : InACone k r ∨ InDCone k r) :
-    (k, r) ∈ atomBox N := by
-  -- proof by cases on the cone
-  -- A-cone: use `Q = 2E` and nonnegativity to get `0 <= k,r` and upper bounds.
-  -- D-cone: write `u=-k-1`, `v=-r-1`; use the D-cone positive formula.
-  -- Finish with `simp [atomBox, coeffRange, coeffBound]` and `omega`.
-  sorry
-```
-
-The final project cannot contain `sorry`, of course.  The skeleton above is just the theorem to target.  The proof is straightforward but a little long.  I would prove it in smaller lemmas.
-
-### A-cone bound
-
-For the A-cone, use `Q_eq_two_mul_E` rather than unfolding `triZ`.
-
-If
-
-```text
-0 <= k, 0 <= r, E(k,r)=N,
-```
-
-then
-
-```text
-Q(k,r)=2N.
-```
-
-In the A-cone all terms in
-
-```text
-Q(k,r) = 4k^2 + 2k + r^2 + (6k+1)r
-```
-
-are nonnegative.  In particular,
-
-```text
-2k <= Q(k,r) = 2N,
-r  <= Q(k,r) = 2N.
-```
-
-So
-
-```text
-0 <= k <= N <= 2N+1,
-0 <= r <= 2N <= 2N+1.
-```
-
-A useful theorem shape is:
-
-```lean
-theorem A_atom_bounds {N : Nat} {k r : Int}
-    (hA : InACone k r) (hE : E k r = (N : Int)) :
-    -(coeffBound N) <= k ∧ k <= coeffBound N ∧
-    -(coeffBound N) <= r ∧ r <= coeffBound N := by
-  rcases hA with ⟨hk0, hr0⟩
-  have hQ : Q k r = 2 * (N : Int) := by
-    rw [Q_eq_two_mul_E, hE]
-  unfold Q at hQ
-  -- all terms are nonnegative; derive coarse upper bounds
-  have hkr0 : 0 <= k * r := mul_nonneg hk0 hr0
-  have h6kr0 : 0 <= 6 * k * r := by nlinarith
-  have hk_upper : k <= (N : Int) := by
-    nlinarith [sq_nonneg k, sq_nonneg r, h6kr0, hk0, hr0, hQ]
-  have hr_upper : r <= 2 * (N : Int) := by
-    nlinarith [sq_nonneg k, sq_nonneg r, h6kr0, hk0, hr0, hQ]
-  unfold coeffBound
-  omega
-```
-
-Depending on how `nlinarith` sees the term `(6*k+1)*r`, you may need the extra identity
-
-```lean
-have hterm : (6 * k + 1) * r = 6 * k * r + r := by ring
-```
-
-and rewrite `hQ` with it before the `nlinarith` calls.
-
-### D-cone bound
-
-For the D-cone, do not reason directly with negative variables.  Use
-
-```text
-k = -u - 1,
-r = -v - 1,
-u,v >= 0.
+L1: existence, because |A_p| >= 1;
+L4: bounded multiplicity, because |A_p| <= 2;
+L2: cone separation, if the table shows the active atoms lie in one cone;
+L3: parity coherence, if the table shows the active atoms have the same a-parity.
 ```
 
 Then
 
 ```text
-Q(-u-1,-v-1) = 4u^2 + 12u + 6uv + v^2 + 7v + 8.
+B_{(p-1)/10} = sum_{beta in A_p} W(beta)
 ```
 
-Since `Q = 2N`, this gives
+is automatically one of
 
 ```text
-12u <= 2N,
-7v <= 2N,
+{-2, -1, +1, +2}.
 ```
 
-hence certainly
+The hardest part is the Shintani-sector table, especially the statement that each prime ideal orbit contributes at most one selected representative after reduction by `<eps^6>`, and that the two conjugate prime-ideal orbits do not give opposite signs.  The slogan is:
 
 ```text
-u <= 2N,
-v <= 2N.
+Prime nonvanishing is a finite sector-table theorem, not a Hecke-eigenform theorem.
 ```
 
-Therefore
+## 1. Which of L1--L4 is the bottleneck?
+
+The proposed lemmas are:
 
 ```text
-k = -u-1 >= -(2N+1),
-r = -v-1 >= -(2N+1),
+L1: Existence
+L2: Cone separation
+L3: Parity coherence
+L4: Bounded multiplicity
 ```
 
-and the upper bounds `k <= 2N+1`, `r <= 2N+1` are trivial because `k,r < 0`.
+### L4 is not trivial from “two prime ideals”
 
-Add this lemma:
+For a split rational prime `p`, there are two prime ideals above `p`, but each ideal has infinitely many generators because the unit group is infinite.  Since `eps^6 L = L`, each generator in `L` has infinitely many `eps^6`-associates still in `L` and with the same norm.
 
-```lean
-import Mathlib.Tactic
-
-namespace QseriesFormalization
-namespace Ch10
-
-/-- D-cone doubled exponent after `k=-u-1`, `r=-v-1`. -/
-theorem Q_neg_succ_neg_succ (u v : Int) :
-    Q (-u - 1) (-v - 1) =
-      4 * u ^ 2 + 12 * u + 6 * u * v + v ^ 2 + 7 * v + 8 := by
-  unfold Q
-  ring
-
-end Ch10
-end QseriesFormalization
-```
-
-Then prove a D-bound lemma using `u = -k - 1`, `v = -r - 1`.
-
-```lean
-theorem D_atom_bounds {N : Nat} {k r : Int}
-    (hD : InDCone k r) (hE : E k r = (N : Int)) :
-    -(coeffBound N) <= k ∧ k <= coeffBound N ∧
-    -(coeffBound N) <= r ∧ r <= coeffBound N := by
-  rcases hD with ⟨hkneg, hrneg⟩
-  let u : Int := -k - 1
-  let v : Int := -r - 1
-  have hu0 : 0 <= u := by omega
-  have hv0 : 0 <= v := by omega
-  have hk_eq : k = -u - 1 := by omega
-  have hr_eq : r = -v - 1 := by omega
-  have hQ : Q k r = 2 * (N : Int) := by
-    rw [Q_eq_two_mul_E, hE]
-  have hQ_uv :
-      4 * u ^ 2 + 12 * u + 6 * u * v + v ^ 2 + 7 * v + 8 = 2 * (N : Int) := by
-    rw [← Q_neg_succ_neg_succ u v]
-    rw [← hk_eq, ← hr_eq]
-    exact hQ
-  have huv0 : 0 <= u * v := mul_nonneg hu0 hv0
-  have hu_upper : u <= 2 * (N : Int) := by
-    nlinarith [sq_nonneg u, sq_nonneg v, huv0, hu0, hv0, hQ_uv]
-  have hv_upper : v <= 2 * (N : Int) := by
-    nlinarith [sq_nonneg u, sq_nonneg v, huv0, hu0, hv0, hQ_uv]
-  unfold coeffBound
-  omega
-```
-
-If this exact proof needs small tuning, the structure is still the right one.  The point is that the D-cone bound should be proved in positive variables.
-
-### From bounds to box membership
-
-Once A/D bounds are proven, box membership is mechanical:
-
-```lean
-theorem activeAtom_mem_atomBox {N : Nat} {k r : Int}
-    (hE : E k r = (N : Int))
-    (hcone : InACone k r ∨ InDCone k r) :
-    (k, r) ∈ atomBox N := by
-  have hbounds := by
-    rcases hcone with hA | hD
-    · exact A_atom_bounds hA hE
-    · exact D_atom_bounds hD hE
-  rcases hbounds with ⟨hklo, hkhi, hrlo, hrhi⟩
-  simp [atomBox, coeffRange, coeffBound, hklo, hkhi, hrlo, hrhi]
-```
-
-This theorem is the mathematical justification for the finite-box definition.
-
-## Should Theorem 5 be a theorem or a definition?
-
-It depends on what you mean by `B`.
-
-### If `B` is introduced as this cone series
-
-Then Theorem 5 should be a **definition plus simp theorem**:
-
-```lean
-def Bcoeff (N : Nat) : Int := ...
-
-theorem Bcoeff_eq_sum (N : Nat) :
-    Bcoeff N = ... := rfl
-```
-
-This is enough.  Do not waste effort proving a theorem that just unfolds the definition.
-
-### If `B` already exists as a formal `PowerSeries`
-
-Then Theorem 5 is a real bridge theorem:
+The coefficient is finite only because the A/D cone window selects finitely many of these associates.  Therefore L4 is really a Shintani-window statement:
 
 ```text
-coefficient of the formal series B at N = finite cone sum at N.
+A unit orbit of prime generators intersects the active A/D window at most once,
+or, after including conjugation, the total intersection has size at most two.
 ```
 
-In that case, still define `Bcoeff` first, then define the series from coefficients:
+This is not a consequence of ideal factorization alone.
 
-```lean
--- schematic, depending on your existing q-series infrastructure
-noncomputable def BSeries : PowerSeries Int :=
-  PowerSeries.mk Bcoeff
+### L1 is also a sector statement, but easier after the table
 
-@[simp] theorem coeff_BSeries (N : Nat) :
-    PowerSeries.coeff Int N BSeries = Bcoeff N := rfl
-```
-
-If your existing infrastructure has its own series constructor, adapt this pattern.  The coefficient function should remain the primary object.
-
-## Why not `Finsupp` first?
-
-`Finsupp` is attractive only after you have already proved finite support.  Here, proving finite support is exactly the work.  If you start with `Finsupp`, Lean will ask for the same bounds plus extra support bookkeeping.
-
-The explicit `Finset.Icc` box is simpler:
+Existence asks that at least one associate of a prime generator lands in
 
 ```text
-finite by construction,
-computable,
-easy to inspect,
-works with `norm_num`, `decide`, and `native_decide`,
-works immediately for B_1, B_3, B_34.
+L ∩ (A ∪ D).
 ```
 
-You can always wrap it in a `Finsupp` later if some downstream theorem wants a finitely supported function.
+This mixes finite congruence data with archimedean cone data.  Once the six-sector table is built, existence should be just a table read-off.  Before the table, it is not automatic.
 
-## Why not `PowerSeries` first?
+### L2 and L3 are consequences of the same finite table
 
-For this theorem, `PowerSeries` is not the hard part.  The hard part is coefficient extraction from an indefinite cone.  Define the coefficients first; then make the power series as a wrapper.
-
-Recommended order:
+Cone separation and parity coherence are best proved together.  A finite table should record, for each admissible sector/residue state:
 
 ```text
-1. Define `Bcoeff : Nat -> Int` by finite box.
-2. Prove support-bound theorem for mathematical correctness.
-3. Prove small coefficients and nonmultiplicativity from `Bcoeff`.
-4. Define `BSeries` from `Bcoeff` only when needed.
-5. Prove product/factorization identities later using coefficient extensionality.
+number of active atoms,
+A-cone or D-cone,
+a-parity,
+weight.
 ```
 
-## Recommended final API
+Then L2 and L3 are simply projections of that table.
 
-The coefficient file should expose these names:
+### Recommended replacement theorem
 
-```lean
-def coeffBound (N : Nat) : Int
-
-def coeffRange (N : Nat) : Finset Int
-
-def atomBox (N : Nat) : Finset (Int × Int)
-
-def activeAtom (N : Nat) (p : Int × Int) : Prop
-
-def atomFinset (N : Nat) : Finset (Int × Int)
-
-def Bcoeff (N : Nat) : Int
-
-theorem mem_atomFinset_iff (N : Nat) (p : Int × Int) :
-  p ∈ atomFinset N ↔
-    p ∈ atomBox N ∧ E p.1 p.2 = (N : Int) ∧
-      (InACone p.1 p.2 ∨ InDCone p.1 p.2)
-
-theorem activeAtom_mem_atomBox {N : Nat} {k r : Int} :
-  E k r = (N : Int) ->
-  InACone k r ∨ InDCone k r ->
-  (k, r) ∈ atomBox N
-
-theorem Bcoeff_eq_sum (N : Nat) :
-  Bcoeff N = (atomFinset N).sum (fun p => BWeight p.1 p.2)
-```
-
-Then later, if you want the beta/norm form:
-
-```lean
-def betaAtomFinset (N : Nat) : Finset PhiInt :=
-  (atomFinset N).image ⟨fun p => beta p.1 p.2, beta_injective_on_pairs⟩
-```
-
-But do not start there.  Start with `(k,r)` atoms.
-
-## Is Theorem 5 worth formalizing?
-
-As a standalone theorem, only partly.
-
-If `Bcoeff` is defined as the finite sum, then
+Instead of proving L1--L4 separately, prove:
 
 ```text
-Theorem 5 is mostly definitional.
+PrimeSectorTheorem.
+Let p be a rational prime with p == 1 mod 10, and let N=(p-1)/10.
+Then the active set
+
+  A_p = { beta in L : -N(beta)=p and beta is in A or D }
+
+has cardinality 1 or 2.  Moreover the weight W(beta) is constant on A_p.
 ```
 
-The theorems that are actually worth formalizing are:
+Then Conjecture B follows immediately.
 
-1. `activeAtom_mem_atomBox`: the finite box is large enough.
-2. `Bcoeff_eq_sum`: a simp/rfl theorem giving the coefficient API.
-3. Small coefficient theorems, such as `Bcoeff 1 = 1`, `Bcoeff 3 = -2`, `Bcoeff 34 = 3`.
-4. The beta/norm reindexing theorem, if you want the norm-support theorem to refer directly to coefficients.
-5. A future bridge theorem from the existing q-series/PowerSeries object to `Bcoeff`.
+## 2. How the six sectors should interact with the cosets `eps^j L`
 
-So I would include Theorem 5 in the paper-facing API, but internally I would make it a definition plus a support-bound theorem.
+The unit action on coordinates is
+
+```text
+eps * (a + b phi) = (a+b) + (a+2b) phi.
+```
+
+The first six powers have matrices
+
+```text
+eps^0: [[ 1,  0], [ 0,  1]]
+eps^1: [[ 1,  1], [ 1,  2]]
+eps^2: [[ 2,  3], [ 3,  5]]
+eps^3: [[ 5,  8], [ 8, 13]]
+eps^4: [[13, 21], [21, 34]]
+eps^5: [[34, 55], [55, 89]]
+eps^6: [[89,144], [144,233]].
+```
+
+The affine coset is
+
+```text
+L = { a+b phi : b - 3a == 1 mod 10 }.
+```
+
+Since `eps^6 L = L`, the subgroup
+
+```text
+Gamma = <eps^6>
+```
+
+is the relevant unit stabilizer.  A `Gamma`-Shintani fundamental domain is six times wider than an `eps`-fundamental domain.  Thus it is natural to subdivide a `Gamma`-domain into six `eps`-sectors:
+
+```text
+C_0, C_1 = eps*C_0, ..., C_5 = eps^5*C_0.
+```
+
+At the same time, the six cosets
+
+```text
+L_j = eps^j L,   j = 0,...,5,
+```
+
+cycle modulo `Gamma`.  This is the correct meaning of the “six-sector” phenomenon: a unit translate moves both the archimedean sector and the finite congruence coset.
+
+### Cone inequalities in `(a,b)` coordinates
+
+For
+
+```text
+beta = a + b phi,
+```
+
+the inverse atom is
+
+```text
+k = (b - 3a - 1) / 10,
+r = (4a + 2b - 2) / 10 = (2a + b - 1) / 5.
+```
+
+Therefore the active cones are:
+
+```text
+A-cone:  b - 3a - 1 >= 0  and  2a + b - 1 >= 0,
+D-cone:  b - 3a - 1 <  0  and  2a + b - 1 <  0.
+```
+
+At infinity, the two boundary slopes are approximately
+
+```text
+b = 3a,
+b = -2a.
+```
+
+The Shintani sector table should be built from these two real boundary lines plus the six finite coset translates `eps^j L`.
+
+### Clean proof shape
+
+The cleanest rigorous proof is:
+
+1. Work modulo the stabilizer `Gamma=<eps^6>`.
+2. Choose a `Gamma`-fundamental strip in the real embeddings.
+3. Decompose it into six `eps`-sectors.
+4. For each sector `j`, compute the finite residue class condition for membership in `L`.
+5. For each admissible sector/residue state, record whether it lies in the A-window, D-window, or outside.
+6. Prove a finite table theorem:
+
+```text
+For prime-norm orbits, the active window contains exactly one representative
+in four of the six sector states and exactly two representatives in two of
+the six sector states; all selected representatives have the same weight.
+```
+
+This table theorem simultaneously proves L1--L4.
+
+I would not expect a one-line conceptual argument for the “exactly one or two” count.  The right proof is finite and explicit: reduce the unit/coset/cone interaction to six residue-sector cases and check those cases.
+
+## 3. Can this be reduced to a Hecke character statement?
+
+Only partially.
+
+For the full coefficient function `B_N`, no: it is not a Hecke eigenform coefficient sequence and not a multiplicative ideal-counting function.  The obstruction is the archimedean Shintani window.  Multiplication of ideals is compatible with the finite ray-class data, but it is not compatible with the cone window because reducing a product back into a Shintani strip introduces a unit-carry/floor function.
+
+For primes, yes in a weaker sense: after the finite sector table is proved, the prime coefficient can be viewed as a finite class function on prime ideals in a ray-class/sector quotient.  Schematically, for a prime ideal `pfrak` above `p`,
+
+```text
+B_{(p-1)/10} = S(class(pfrak))
+```
+
+for a six-state sector function `S` with values in
+
+```text
+{-2,-1,+1,+2}.
+```
+
+But `S` is a sector/window function, not a multiplicative character.  It may be expressible as a finite Fourier combination of ray-class characters when restricted to primes, but it does not make the full coefficient sequence multiplicative.
+
+A useful wording is:
+
+```text
+Conjecture B should reduce to a finite ray-class sector table, not to a single Hecke character.
+```
+
+## 4. Relation with ADH sigma and known multi-sector techniques
+
+The original Andrews--Dyson--Hickerson `sigma(q)` phenomenon is also real quadratic, not imaginary quadratic.  Its simplicity comes from a unit-invariant or effectively one-sector situation: the relevant weight descends to ideals, so prime coefficients are forced to be nonzero once a split prime is represented.
+
+Here, `eps L` is disjoint from `L`, while `eps^6 L = L`.  Thus the natural coefficient does not descend to ideals under the full positive unit group.  It descends only after keeping track of six unit sectors.  This is the source of the multi-sector complication.
+
+The standard techniques to use are:
+
+```text
+Shintani cone decompositions for real quadratic fields;
+ray-class partial zeta functions with archimedean cone conditions;
+finite quotient/ray-class tables modulo a conductor encoding L and parity;
+Zwegers-style indefinite theta completions for the analytic object;
+Hickerson--Mortenson/Appell--Lerch formulas for the q-series identity.
+```
+
+For the prime nonvanishing theorem, the most relevant tool is not the analytic completion.  It is the arithmetic Shintani reduction:
+
+```text
+reduce unit orbits modulo <eps^6>, then check the finite sector table.
+```
+
+## 5. The 2:1 distribution and the `Z/3Z` factor
+
+The observed distribution
+
+```text
+|B(p)| = 2 with density 1/3,
+|B(p)| = 1 with density 2/3
+```
+
+strongly suggests that the absolute-value distinction is controlled by the order-3 part of the CRT quotient.
+
+You have
+
+```text
+(O_K / (2 sqrt(5)))^x ≅ F_4^x × F_5^x ≅ Z/3 × Z/4.
+```
+
+Here the `Z/3` factor comes from the inert prime `2`:
+
+```text
+O_K/(2) ≅ F_4,
+F_4^x has order 3.
+```
+
+The natural explanation is:
+
+```text
+one of the three F_4^x states gives two active sectors,
+the other two F_4^x states give one active sector.
+```
+
+Then Chebotarev/equidistribution of split prime ideals in the relevant ray class quotient predicts exactly
+
+```text
+1/3 and 2/3.
+```
+
+The `Z/4` factor coming from the ramified prime over `5` likely controls signs or a finer splitting, while the `Z/3` factor controls the absolute multiplicity.  This should be verified by the finite sector table; do not state it as a theorem until the table confirms which component controls which statistic.
+
+## 6. Proof strategy for Conjecture B
+
+Here is the route I would write into the paper or formalization plan.
+
+### Step 1: Define the active prime set
+
+For `p == 1 mod 10`, set `N=(p-1)/10` and define
+
+```text
+A_p = { beta = a+b phi in L : -N(beta)=p,
+        beta lies in the A-cone or D-cone }.
+```
+
+Then
+
+```text
+B_N = sum_{beta in A_p} W(beta).
+```
+
+### Step 2: Replace atoms by ray-class generators
+
+Use the inverse formulas
+
+```text
+k = (b - 3a - 1) / 10,
+r = (2a + b - 1) / 5.
+```
+
+This turns membership in `L` and the A/D cones into finite congruence plus linear inequalities.
+
+### Step 3: Reduce units modulo `<eps^6>`
+
+Since `eps^6 L = L`, reduce generators only by `Gamma=<eps^6>`.  In the real embeddings this gives one compact Shintani strip.
+
+### Step 4: Build the six-sector table
+
+Inside one `Gamma` strip, decompose into the six `eps`-sectors and record:
+
+```text
+sector label j in Z/6,
+residue class in (O_K/(2 sqrt5))^x,
+L-membership,
+A/D/outside,
+a-parity,
+weight.
+```
+
+This table is finite.  It is the central object.
+
+### Step 5: Prove the prime orbit intersection theorem
+
+For each split prime ideal orbit, prove:
+
+```text
+its Gamma-reduced representatives intersect the active table in exactly
+one or two entries;
+all active entries have the same weight.
+```
+
+This proves Conjecture B.
+
+### Step 6: Use Chebotarev/equidistribution for density
+
+Once the table is known, the 2:1 distribution follows from equidistribution of prime ideals among the relevant finite ray-class states.  If the table shows the absolute value depends only on the `F_4^x` component, this becomes a transparent `1 out of 3` versus `2 out of 3` result.
+
+## 7. A finite table oracle
+
+The following Python/Sage-style skeleton records the computation I would use before writing the proof.  It is not meant to replace the proof; it tells you exactly what finite table the proof must certify.
+
+```python
+from dataclasses import dataclass
+from typing import Callable, Dict, List, Optional, Tuple
+
+
+@dataclass(frozen=True)
+class PhiElt:
+    a: int
+    b: int
+
+
+def eps_mul(x: PhiElt) -> PhiElt:
+    return PhiElt(x.a + x.b, x.a + 2 * x.b)
+
+
+def eps_pow_mul(x: PhiElt, j: int) -> PhiElt:
+    y = x
+    for _ in range(j % 6):
+        y = eps_mul(y)
+    return y
+
+
+def in_L(x: PhiElt) -> bool:
+    return (x.b - 3 * x.a - 1) % 10 == 0
+
+
+def atom_from_beta(x: PhiElt) -> Optional[Tuple[int, int]]:
+    num_k = x.b - 3 * x.a - 1
+    num_r = 2 * x.a + x.b - 1
+    if num_k % 10 != 0 or num_r % 5 != 0:
+        return None
+    return num_k // 10, num_r // 5
+
+
+def cone_label(x: PhiElt) -> str:
+    atom = atom_from_beta(x)
+    if atom is None:
+        return "not_L"
+    k, r = atom
+    if k >= 0 and r >= 0:
+        return "A"
+    if k < 0 and r < 0:
+        return "D"
+    return "out"
+
+
+def parity_a(x: PhiElt) -> int:
+    return x.a % 2
+
+
+def weight(x: PhiElt) -> int:
+    atom = atom_from_beta(x)
+    if atom is None:
+        return 0
+    k, r = atom
+    sign = 1 if x.a % 2 == 0 else -1
+    if k >= 0 and r >= 0:
+        return -sign
+    if k < 0 and r < 0:
+        return sign
+    return 0
+
+
+def residue_state(x: PhiElt, modulus: int = 20) -> Tuple[int, int]:
+    return (x.a % modulus, x.b % modulus)
+
+
+def six_sector_table(representatives: List[PhiElt]) -> List[Dict[str, object]]:
+    rows: List[Dict[str, object]] = []
+    for x in representatives:
+        for j in range(6):
+            y = eps_pow_mul(x, j)
+            rows.append(
+                {
+                    "base": x,
+                    "sector": j,
+                    "residue20": residue_state(y, 20),
+                    "in_L": in_L(y),
+                    "cone": cone_label(y),
+                    "parity_a": parity_a(y),
+                    "weight": weight(y),
+                }
+            )
+    return rows
+```
+
+For a proof, replace the sampled `representatives` by symbolic residue classes in the finite quotient.  The final theorem should be a finite case check over those residue classes plus the ordered cone-boundary sectors.
+
+## 8. Additional literature to check
+
+The most relevant nearby sources are:
+
+```text
+Andrews--Dyson--Hickerson, Partitions and indefinite quadratic forms, Invent. Math. 91 (1988).
+```
+
+This is the original ADH real-quadratic norm-support source.
+
+```text
+Zwegers, Maass waveforms arising from sigma and related indefinite theta functions.
+https://arxiv.org/abs/1002.1175
+```
+
+This places ADH sigma-type functions into the indefinite theta / Maass waveform framework.
+
+```text
+Hickerson--Mortenson, Hecke-type double sums, Appell-Lerch sums, and mock theta functions.
+https://arxiv.org/abs/1208.1421
+```
+
+This is the relevant `f_{a,b,c}` / Appell--Lerch technology.
+
+```text
+Mortenson, Ramanujan's 1psi1 summation, Hecke-type double sums, and Appell-Lerch sums.
+https://arxiv.org/abs/1208.1359
+```
+
+Useful for alternative derivations of the HM formulas.
+
+```text
+Mortenson, A general formula for Hecke-type false theta functions.
+https://arxiv.org/abs/2212.13236
+```
+
+This is newer and directly relevant to Hecke-type false theta decompositions.
+
+```text
+Bringmann--Kane, Multiplicative q-hypergeometric series arising from real quadratic fields.
+https://arxiv.org/abs/0812.4397
+```
+
+This is important for the ADH generalization viewpoint and q-hypergeometric real-quadratic examples.
+
+```text
+Lovejoy--Osburn, Real quadratic double sums.
+https://arxiv.org/abs/1502.01109
+```
+
+This gives real-quadratic double sums and ideal-counting interpretations.
+
+```text
+Bringmann--Nazaroglu, Quantum Modular Forms from Real Quadratic Double Sums.
+https://arxiv.org/abs/2205.02643
+```
+
+This is useful for the modern modular/quantum modular context of real-quadratic double sums.
+
+For the arithmetic proof of the sector theorem, also check the Shintani literature:
+
+```text
+Shintani, On evaluation of zeta functions of totally real algebraic number fields at non-positive integers.
+Yamamoto, real quadratic class invariants / Shintani cone methods.
+Neukirch or Cox for ray class fields and prime ideal equidistribution.
+```
+
+The search target should be not only “ADH” but also:
+
+```text
+real quadratic Shintani cone ray class partial zeta
+indefinite theta real quadratic unit sector
+Hecke-type double sums real quadratic ideal norms
+```
+
+## 9. Answers to the six questions
+
+### Q1. Which of L1--L4 is the bottleneck?
+
+The bottleneck is the combined Shintani-sector table, especially the bounded-intersection and no-opposite-sign assertions.  L4 is not a corollary of “two prime ideals” because units give infinitely many generators.  L1--L4 should be replaced by one finite prime-sector theorem; the four lemmas are then projections of that theorem.
+
+### Q2. How does the six-sector structure interact with `eps^j L`?
+
+The six `eps`-sectors inside a `<eps^6>` fundamental domain are locked to the six cosets `eps^j L`.  The active A/D cones cut this six-sector cylinder by two linear boundary lines.  The proof should enumerate the six sector/coset states and show that a prime orbit hits the active window in one or two same-weight states.
+
+### Q3. Is there a simpler Hecke-character reformulation?
+
+For the full coefficient sequence, no.  The cone window prevents ideal descent and destroys multiplicativity.  For primes only, yes: after the finite sector table, `B_{(p-1)/10}` becomes a finite ray-class sector function of the prime ideal above `p`.  That is weaker than a Hecke character but strong enough for nonvanishing and density.
+
+### Q4. Known techniques for the multi-sector case?
+
+Use Shintani cone decompositions, ray-class partial zeta functions with archimedean conditions, and finite sector tables.  Analytic indefinite-theta machinery explains modularity/completion, but the prime nonvanishing theorem is primarily an arithmetic Shintani reduction problem.
+
+### Q5. Does the 2:1 distribution connect to `Z/3Z`?
+
+Very likely yes.  The `Z/3` factor is `F_4^x` from the inert prime `2`.  The most plausible table is: one of the three `F_4^x` states gives two active atoms, and the other two states give one.  Chebotarev/equidistribution then gives `1/3` and `2/3`.  The table must confirm this before it is stated as a theorem.
+
+### Q6. Additional literature?
+
+Check ADH, Zwegers on sigma, Hickerson--Mortenson, Mortenson's later false-theta work, Bringmann--Kane, Lovejoy--Osburn, Bringmann--Nazaroglu, and the Shintani/ray-class zeta literature.  For this proof, the most useful phrase is probably “Shintani cone decomposition with ray class congruence,” not just “mock theta” or “Hecke character.”
 
 ## Bottom line
 
-The path of least resistance in Mathlib 4.30.0 is:
+The prime nonvanishing conjecture should be attacked as a finite arithmetic-geometry table:
 
 ```text
-Define `Bcoeff` by a finite `Finset.Icc` rectangle with bound `2N+1`,
-filter by `E=N` and active same-sign cone membership,
-sum `BWeight`,
-prove a separate support-bound theorem,
-postpone `Finsupp` and `PowerSeries` wrappers.
+unit stabilizer:        <eps^6>
+finite congruence:      L modulo 10, plus parity
+archimedean geometry:   A/D cone window in one Shintani strip
+prime input:            two conjugate split prime ideal orbits
+output:                 one or two same-weight active representatives
 ```
 
-This gives you a computable coefficient function immediately, works with your existing small coefficient proofs, and keeps the genuinely difficult q-series identities out of the core algebra layer.
+Once this table is proved, Conjecture B and the 2:1 density statement become natural consequences.  Without this table, the four lemmas L1--L4 are too interdependent to prove cleanly one at a time.
