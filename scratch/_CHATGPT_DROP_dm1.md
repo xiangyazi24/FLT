@@ -1,584 +1,505 @@
-# Q3156 (dm1): Prime nonvanishing strategy for the `Q(sqrt(5))` cone series
+# Q3162 (dm1): Review of `paper/paper2_counterexample/paper2.tex`
 
 Date: 2026-07-03
 
-## Repo note
+Repository reviewed: `xiangyazi24/Q-series-and-Chan-s-work`
 
-I attempted to read `theorems.md` from the repository, but the GitHub connector did not find it at the repo root and repository search returned no match.  The analysis below is therefore based on the theorem list and context in the prompt, plus the established Q31xx setup.
+File reviewed: `paper/paper2_counterexample/paper2.tex` on `main`
 
-## First correction: the norm of `eps`
+## Overall verdict
 
-With
+The paper has a strong and interesting algebraic core, but in its current form I would treat it as **major revision before submission**.
 
-```text
-phi = (1 + sqrt(5)) / 2,
-eps = phi^2 = phi + 1,
-```
+The strongest parts are:
 
-one has
+1. the explicit `beta(k,r)` parametrization of the coset `L`;
+2. the norm identity `-N(beta(k,r)) = 10E(k,r)+1`;
+3. the identification with the Hickerson--Mortenson double sum, provided the sign convention is stated precisely;
+4. the concrete non-multiplicativity witness `a(11*31) != a(11)a(31)`.
 
-```text
-N(phi) = -1,
-N(eps) = N(phi)^2 = +1.
-```
+The weakest parts are:
 
-So `eps = phi^2` is the totally positive norm-`+1` fundamental unit.  The norm-`-1` unit is `phi`.  This correction does not change the coset-stabilizer story, but it matters in the write-up.
+1. the proof of the stabilizer/order theorem, which currently has a genuine arithmetic error modulo `sqrt(5)`;
+2. the prime nonvanishing proof, where the “bad class” theorem is asserted but not proved;
+3. the reflection/sector machinery, which is plausible but underdefined;
+4. the equidistribution proof, where “by Chebotarev” is not justified unless the `iota` invariant is first shown to factor through a finite ray class or an appropriate Hecke/Shintani equidistribution theorem is invoked.
 
-## Executive answer
+My current recommendation is: submit only after replacing the prime-value and equidistribution section with a fully explicit sector-table theorem.  The algebraic non-multiplicativity result alone may already be publishable as a shorter note, but the present headline claims about all split primes and density need more proof.
 
-The real bottleneck is not any one of L1--L4 in isolation.  The right proof should replace them by one finite **ray-class/Shintani sector theorem**:
+## A. Mathematical correctness audit
 
-```text
-For every prime p == 1 mod 10, the active set
+### 1. Definition of `E`: nonnegativity is false globally
 
-  A_p = { beta in L : -N(beta)=p and beta lies in the A- or D-cone }
-
-has cardinality 1 or 2, and all elements of A_p have the same weight.
-```
-
-This single sector theorem implies:
+The draft says that
 
 ```text
-L1: existence, because |A_p| >= 1;
-L4: bounded multiplicity, because |A_p| <= 2;
-L2: cone separation, if the table shows the active atoms lie in one cone;
-L3: parity coherence, if the table shows the active atoms have the same a-parity.
+E(k,r) = 1/2 Q(k,r)
 ```
 
-Then
+is “always a nonnegative integer.”  The integrality is correct, but global nonnegativity is false because the form is indefinite off the same-sign cones.
+
+Example:
 
 ```text
-B_{(p-1)/10} = sum_{beta in A_p} W(beta)
+E(1,-2) = 2*1^2 + 1 + 3*1*(-2) + (-2)(-1)/2
+        = 2 + 1 - 6 + 1
+        = -2.
 ```
 
-is automatically one of
+Fix:
 
 ```text
-{-2, -1, +1, +2}.
+E(k,r) is always an integer.  On the A- and D-cones used in the definition of B_N, it is nonnegative.
 ```
 
-The hardest part is the Shintani-sector table, especially the statement that each prime ideal orbit contributes at most one selected representative after reduction by `<eps^6>`, and that the two conjugate prime-ideal orbits do not give opposite signs.  The slogan is:
+This matters because a referee will object to the phrase “always nonnegative” immediately.
+
+### 2. Unit stabilizer theorem: the proof has a real modulo-`sqrt(5)` error
+
+The theorem statement
 
 ```text
-Prime nonvanishing is a finite sector-table theorem, not a Hecke-eigenform theorem.
+Stab_{<eps>}(L) = <eps^6>
 ```
 
-## 1. Which of L1--L4 is the bottleneck?
+is plausible and consistent with the prior computations, but the proof in the draft is wrong as written.
 
-The proposed lemmas are:
+The draft claims:
 
 ```text
-L1: Existence
-L2: Cone separation
-L3: Parity coherence
-L4: Bounded multiplicity
+eps = phi^2 has eps mod sqrt(5) = 1 + sqrt(5) ≡ 1.
 ```
 
-### L4 is not trivial from “two prime ideals”
-
-For a split rational prime `p`, there are two prime ideals above `p`, but each ideal has infinitely many generators because the unit group is infinite.  Since `eps^6 L = L`, each generator in `L` has infinitely many `eps^6`-associates still in `L` and with the same norm.
-
-The coefficient is finite only because the A/D cone window selects finitely many of these associates.  Therefore L4 is really a Shintani-window statement:
+This is incorrect.  Since
 
 ```text
-A unit orbit of prime generators intersects the active A/D window at most once,
-or, after including conjugation, the total intersection has size at most two.
+phi = (1 + sqrt(5))/2,
+eps = phi^2 = phi + 1 = (3 + sqrt(5))/2,
 ```
 
-This is not a consequence of ideal factorization alone.
-
-### L1 is also a sector statement, but easier after the table
-
-Existence asks that at least one associate of a prime generator lands in
+and modulo `(sqrt(5))` we have `phi ≡ 1/2 ≡ 3 mod 5`, so
 
 ```text
-L ∩ (A ∪ D).
+eps = phi^2 ≡ 3^2 ≡ 9 ≡ 4 ≡ -1 mod 5.
 ```
 
-This mixes finite congruence data with archimedean cone data.  Once the six-sector table is built, existence should be just a table read-off.  Before the table, it is not automatic.
+Thus `eps` has order `2` modulo `(sqrt(5))`, not order `1`.
 
-### L2 and L3 are consequences of the same finite table
-
-Cone separation and parity coherence are best proved together.  A finite table should record, for each admissible sector/residue state:
+There is also a second issue.  The draft factors the `L` condition modulo `sqrt(5)` as
 
 ```text
-number of active atoms,
-A-cone or D-cone,
-a-parity,
-weight.
+-2a ≡ 1 mod 5, i.e. a ≡ 2 mod 5.
 ```
 
-Then L2 and L3 are simply projections of that table.
-
-### Recommended replacement theorem
-
-Instead of proving L1--L4 separately, prove:
+That is not the clean way to express the coset.  The condition
 
 ```text
-PrimeSectorTheorem.
-Let p be a rational prime with p == 1 mod 10, and let N=(p-1)/10.
-Then the active set
-
-  A_p = { beta in L : -N(beta)=p and beta is in A or D }
-
-has cardinality 1 or 2.  Moreover the weight W(beta) is constant on A_p.
+b - 3a ≡ 1 mod 5
 ```
 
-Then Conjecture B follows immediately.
-
-## 2. How the six sectors should interact with the cosets `eps^j L`
-
-The unit action on coordinates is
+combined with `phi ≡ 3 mod sqrt(5)` gives
 
 ```text
-eps * (a + b phi) = (a+b) + (a+2b) phi.
+alpha = a + b phi ≡ a + 3b ≡ a + 3(3a+1) = 10a + 3 ≡ 3 mod 5.
 ```
 
-The first six powers have matrices
+So the `sqrt(5)` component of `L` is better written as
 
 ```text
-eps^0: [[ 1,  0], [ 0,  1]]
-eps^1: [[ 1,  1], [ 1,  2]]
-eps^2: [[ 2,  3], [ 3,  5]]
-eps^3: [[ 5,  8], [ 8, 13]]
-eps^4: [[13, 21], [21, 34]]
-eps^5: [[34, 55], [55, 89]]
-eps^6: [[89,144], [144,233]].
+alpha ≡ 3 mod sqrt(5).
 ```
 
-The affine coset is
+Multiplication by `eps ≡ -1` sends this to `-3 ≡ 2`, so it preserves the `sqrt(5)` condition only for even powers of `eps`.
+
+The corrected CRT proof should be:
 
 ```text
-L = { a+b phi : b - 3a == 1 mod 10 }.
+O_K/(2 sqrt(5)) ≅ O_K/(2) × O_K/(sqrt(5)) ≅ F_4 × F_5.
+
+L modulo 2: alpha mod 2 lies in {1, phi}, excluding eps = phi+1.
+L modulo sqrt(5): alpha ≡ 3 mod sqrt(5).
+
+eps mod 2 has order 3.
+eps mod sqrt(5) is -1 and has order 2.
+
+Therefore eps^j preserves L only if j ≡ 0 mod 3 and j ≡ 0 mod 2, i.e. 6 | j.
 ```
 
-Since `eps^6 L = L`, the subgroup
+This also fixes the apparent inconsistency in the current proof: the draft says the mod-`sqrt(5)` condition is preserved for all `j`, but still concludes `6 | j`.  If it were preserved for all `j`, the conclusion would only be `3 | j`.
+
+### 3. `eps*L ∩ L = empty` is correct, but do not overstate disjointness for all smaller powers
+
+The theorem
 
 ```text
-Gamma = <eps^6>
+eps L ∩ L = empty
 ```
 
-is the relevant unit stabilizer.  A `Gamma`-Shintani fundamental domain is six times wider than an `eps`-fundamental domain.  Thus it is natural to subdivide a `Gamma`-domain into six `eps`-sectors:
+is correct.
+
+However, be careful not to imply that all `eps^j L` for `1 <= j <= 5` are disjoint from `L`.  In earlier computations, `eps^2 L ∩ L` and `eps^4 L ∩ L` are nonempty.  For example,
 
 ```text
-C_0, C_1 = eps*C_0, ..., C_5 = eps^5*C_0.
+x = 1 + 4 phi ∈ L,
+eps^2 x = 14 + 23 phi ∈ L.
 ```
 
-At the same time, the six cosets
+So the precise statement should be about the stabilizer:
 
 ```text
-L_j = eps^j L,   j = 0,...,5,
+eps^j L = L iff 6 | j.
 ```
 
-cycle modulo `Gamma`.  This is the correct meaning of the “six-sector” phenomenon: a unit translate moves both the archimedean sector and the finite congruence coset.
+and not about pairwise disjointness of the six translates.
 
-### Cone inequalities in `(a,b)` coordinates
+### 4. The non-multiplicativity witness is solid, but the “character” corollary is too vague
 
-For
+The direct witness
 
 ```text
-beta = a + b phi,
+a(11)=B_1=1,
+a(31)=B_3=-2,
+a(341)=B_34=3
 ```
 
-the inverse atom is
+is a good theorem.  It proves non-multiplicativity cleanly.
+
+The corollary saying
 
 ```text
-k = (b - 3a - 1) / 10,
-r = (4a + 2b - 2) / 10 = (2a + b - 1) / 5.
+chi_fin(eps) != 1, in fact chi(eps) is a primitive 6th root
 ```
 
-Therefore the active cones are:
+needs a definition of `chi_fin` and a precise domain.  At present it reads as heuristic explanation, not a theorem.
+
+Suggested fix:
+
+- Keep the non-multiplicativity witness as the theorem.
+- Replace the character statement with a remark unless `chi_fin` is explicitly defined as a finite ray/coset character on a quotient and its value on `eps` is proved.
+
+A cautious wording:
 
 ```text
-A-cone:  b - 3a - 1 >= 0  and  2a + b - 1 >= 0,
-D-cone:  b - 3a - 1 <  0  and  2a + b - 1 <  0.
+The failure of eps to stabilize L prevents the coefficient sum from descending to an ideal-level sum invariant under the full positive unit group.  This is the structural source of non-multiplicativity.
 ```
 
-At infinity, the two boundary slopes are approximately
+### 5. HM identification is likely correct, but should be stated as a theorem with the convention
+
+The statement
 
 ```text
-b = 3a,
-b = -2a.
+B(X) = -f_{1,3,4}(X,-X^3,X)
 ```
 
-The Shintani sector table should be built from these two real boundary lines plus the six finite coset translates `eps^j L`.
-
-### Clean proof shape
-
-The cleanest rigorous proof is:
-
-1. Work modulo the stabilizer `Gamma=<eps^6>`.
-2. Choose a `Gamma`-fundamental strip in the real embeddings.
-3. Decompose it into six `eps`-sectors.
-4. For each sector `j`, compute the finite residue class condition for membership in `L`.
-5. For each admissible sector/residue state, record whether it lies in the A-window, D-window, or outside.
-6. Prove a finite table theorem:
+is likely correct under the standard Hickerson--Mortenson convention
 
 ```text
-For prime-norm orbits, the active window contains exactly one representative
-in four of the six sector states and exactly two representatives in two of
-the six sector states; all selected representatives have the same weight.
+f_{a,b,c}(x,y,q)
+= sum_{sg(r)=sg(s)} sg(r)(-1)^{r+s} x^r y^s
+  q^{a binom(r,2)+brs+c binom(s,2)}.
 ```
 
-This table theorem simultaneously proves L1--L4.
+But a referee will want the convention printed and the one-line exponent/sign check included.  The paper currently says it coincides with HM but does not prove it in the main text.
 
-I would not expect a one-line conceptual argument for the “exactly one or two” count.  The right proof is finite and explicit: reduce the unit/coset/cone interaction to six residue-sector cases and check those cases.
-
-## 3. Can this be reduced to a Hecke character statement?
-
-Only partially.
-
-For the full coefficient function `B_N`, no: it is not a Hecke eigenform coefficient sequence and not a multiplicative ideal-counting function.  The obstruction is the archimedean Shintani window.  Multiplication of ideals is compatible with the finite ray-class data, but it is not compatible with the cone window because reducing a product back into a Shintani strip introduces a unit-carry/floor function.
-
-For primes, yes in a weaker sense: after the finite sector table is proved, the prime coefficient can be viewed as a finite class function on prime ideals in a ray-class/sector quotient.  Schematically, for a prime ideal `pfrak` above `p`,
+Recommended insertion:
 
 ```text
-B_{(p-1)/10} = S(class(pfrak))
+With HM variables (r,s)=(r,k), substituting x=X, y=-X^3, q=X gives sign
+sg(r)(-1)^r and exponent
+r(r+1)/2 + 3rk + 2k^2 + k = E(k,r).
+Thus f_{1,3,4}(X,-X^3,X)=A(X)-D(X), hence B=D-A=-f.
 ```
 
-for a six-state sector function `S` with values in
+### 6. Shintani fundamental sector statement needs more precision
+
+The proposition that A is an exact fundamental domain for `<eps>` acting on
 
 ```text
-{-2,-1,+1,+2}.
+Q = {sigma_1(alpha)>0, sigma_2(alpha)<0}
 ```
 
-But `S` is a sector/window function, not a multiplicative character.  It may be expressible as a finite Fourier combination of ray-class characters when restricted to primes, but it does not make the full coefficient sequence multiplicative.
+is plausible, but it needs a fully specified embedding convention and boundary convention.
 
-A useful wording is:
+Questions a referee will ask:
+
+1. Are the boundary rays included on one side and excluded on the other?
+2. How is `delta` defined on a boundary?
+3. Are prime generators ever on a boundary?  If not, prove or state why.  Boundary norms may be exceptional and should be excluded explicitly.
+4. Does the D-cone use the same `delta` after negation, or is it a separate sector in `-Q`?
+
+The paper says “A-cone or D-cone is equivalent to delta=0.”  That needs a lemma.  For A it is direct; for D it is true only after clarifying whether `delta(alpha)` is sign-invariant or whether one applies `delta(-alpha)`.
+
+### 7. Reflection identity: plausible but currently underproved
+
+The reflection identity
 
 ```text
-Conjecture B should reduce to a finite ray-class sector table, not to a single Hecke character.
+iota(bar p) ≡ -iota(p) - 1 mod 3
 ```
 
-## 4. Relation with ADH sigma and known multi-sector techniques
-
-The original Andrews--Dyson--Hickerson `sigma(q)` phenomenon is also real quadratic, not imaginary quadratic.  Its simplicity comes from a unit-invariant or effectively one-sector situation: the relevant weight descends to ideals, so prime coefficients are forced to be nonzero once a split prime is represented.
-
-Here, `eps L` is disjoint from `L`, while `eps^6 L = L`.  Thus the natural coefficient does not descend to ideals under the full positive unit group.  It descends only after keeping track of six unit sectors.  This is the source of the multi-sector complication.
-
-The standard techniques to use are:
+has the right shape.  The finite-field part is correct if `lambda` is the discrete logarithm to base `eps mod 2`:
 
 ```text
-Shintani cone decompositions for real quadratic fields;
-ray-class partial zeta functions with archimedean cone conditions;
-finite quotient/ray-class tables modulo a conductor encoding L and parity;
-Zwegers-style indefinite theta completions for the analytic object;
-Hickerson--Mortenson/Appell--Lerch formulas for the q-series identity.
+conjugation in F_4 is Frobenius x -> x^2,
+lambda -> 2 lambda mod 3.
 ```
 
-For the prime nonvanishing theorem, the most relevant tool is not the analytic completion.  It is the arithmetic Shintani reduction:
+Indeed, in characteristic 2,
 
 ```text
-reduce unit orbits modulo <eps^6>, then check the finite sector table.
+bar(phi) = 1 - phi = 1 + phi = phi^2,
 ```
 
-## 5. The 2:1 distribution and the `Z/3Z` factor
+so the Frobenius statement is right.
 
-The observed distribution
+The archimedean part is the part that needs proof.  The draft asserts:
 
 ```text
-|B(p)| = 2 with density 1/3,
-|B(p)| = 1 with density 2/3
+delta(bar pi) = -delta(pi) - 1 mod 6.
 ```
 
-strongly suggests that the absolute-value distinction is controlled by the order-3 part of the CRT quotient.
-
-You have
+This is an off-by-one-sensitive floor-function statement.  It should be isolated as a lemma with exact interval conventions.  A safe version is:
 
 ```text
-(O_K / (2 sqrt(5)))^x ≅ F_4^x × F_5^x ≅ Z/3 × Z/4.
+If R lies in [eps^j, eps^{j+1}) in log-ratio coordinates, then 1/R lies in
+(eps^{-j-1}, eps^{-j}] and therefore has sector index -j-1, after the chosen
+half-open boundary convention.
 ```
 
-Here the `Z/3` factor comes from the inert prime `2`:
+Then state that boundary cases do not occur for primes `p ≡ 1 mod 10`, or handle them separately.
+
+Without this lemma, Theorem 4.7 is not referee-ready.
+
+### 8. The bad class theorem is currently unproved
+
+The paper states:
 
 ```text
-O_K/(2) ≅ F_4,
-F_4^x has order 3.
+An ideal p contributes an atom iff iota(p) != 2.
 ```
 
-The natural explanation is:
+but the following proof block is labelled as the proof of the prime nonvanishing theorem, not as a proof of the bad class theorem.  As written, the bad class theorem has no proof.
+
+More importantly, the bad class criterion suppresses several necessary lemmas:
+
+1. **Sign modulo `sqrt(5)` lemma.**  L-membership is not only the mod-2 condition `lambda in {0,2}`.  It also includes the condition `alpha ≡ 3 mod sqrt(5)`.  Since replacing a generator by `-alpha` flips `3` and `2` modulo `sqrt(5)` while preserving `lambda` and `delta`, one can probably choose the sign appropriately for prime norms, but this must be stated and proved.
+
+2. **Atom-sector lemma.**  For an element in `L`, being in the A- or D-cone must be shown equivalent to the correct sector condition, likely `delta=0` after a sign convention.
+
+3. **Unique representative lemma.**  For a contributing ideal at prime norm, there is exactly one active element in the relevant unit orbit modulo `<eps^6>`.  The draft later says “each contributing ideal contributes exactly one atom,” but does not prove it.
+
+4. **Parity coherence lemma.**  If both conjugate ideals contribute, their active atoms must have the same sign.  This is asserted, not proved.
+
+The bad class theorem is the center of the paper.  It needs a full proof or at least a clearly stated finite table with all cases.
+
+### 9. Prime nonvanishing logic: existence is not enough for the value set
+
+The reflection identity plus bad class logic can prove that at least one of the two conjugate prime ideals contributes.  But to conclude
 
 ```text
-one of the three F_4^x states gives two active sectors,
-the other two F_4^x states give one active sector.
+B_{(p-1)/10} in {-2,-1,+1,+2}
 ```
 
-Then Chebotarev/equidistribution of split prime ideals in the relevant ray class quotient predicts exactly
+you also need:
 
 ```text
-1/3 and 2/3.
+at most one atom per contributing ideal;
+no additional unit translates in the A/D cone;
+if both ideals contribute, the two atom weights do not cancel.
 ```
 
-The `Z/4` factor coming from the ramified prime over `5` likely controls signs or a finer splitting, while the `Z/3` factor controls the absolute multiplicity.  This should be verified by the finite sector table; do not state it as a theorem until the table confirms which component controls which statistic.
+These are currently summarized in one sentence as “bounded multiplicity from the cone-sector structure” and “coherent parity.”  A referee will not accept that as proof.
 
-## 6. Proof strategy for Conjecture B
+This is the single biggest mathematical gap in the paper.
 
-Here is the route I would write into the paper or formalization plan.
+### 10. Equidistribution proof is not justified by Chebotarev as written
 
-### Step 1: Define the active prime set
+The equidistribution proof says that `iota(p)` has density `1/3` by Chebotarev.
 
-For `p == 1 mod 10`, set `N=(p-1)/10` and define
+This needs much more justification.
+
+The invariant
 
 ```text
-A_p = { beta = a+b phi in L : -N(beta)=p,
-        beta lies in the A-cone or D-cone }.
+iota = delta - lambda
 ```
 
-Then
+contains `delta`, a Shintani sector/floor-function invariant defined using real embeddings.  Chebotarev directly applies to finite Galois/ray-class data, not to an archimedean sector index unless you first prove that `iota` factors through a finite ray class group.
+
+There are two possible routes:
+
+1. **Finite ray-class route.**  Prove that `iota` is actually a finite ray-class invariant modulo a stated modulus.  Then Chebotarev is appropriate.
+
+2. **Shintani/Hecke equidistribution route.**  Treat `delta` as an archimedean sector condition and invoke equidistribution of prime ideals in Shintani sectors.  This is not plain Chebotarev; it is a Hecke prime ideal equidistribution statement for real quadratic fields with a finite congruence condition.
+
+As written, the density theorem is not proved.
+
+## B. What a referee would flag
+
+A referee would likely flag the following points.
+
+### Major flags
+
+1. **False statement:** `E(k,r)` is not globally nonnegative.
+2. **Incorrect arithmetic in the stabilizer proof:** `eps mod sqrt(5)` is `-1`, not `1`.
+3. **Incorrect or unclear factorization of the coset condition modulo `sqrt(5)`.**  The clean condition is `alpha ≡ 3 mod sqrt(5)`, not `a ≡ 2 mod 5`.
+4. **Theorem “Bad class” has no proof.**
+5. **Prime nonvanishing proof relies on unproved bounded multiplicity and parity coherence.**
+6. **Equidistribution by Chebotarev is unsupported unless `iota` is finite ray-class data.**
+7. **Claims of novelty/firstness are too strong without a careful literature comparison.**
+8. **The Lean formalization claim needs exact scope.**  The abstract says “All algebraic results (Theorems 1--9) are formalized.”  If prime nonvanishing and equidistribution are not formalized, make sure theorem numbering does not imply they are.
+
+### Minor flags
+
+1. The bibliography entry labelled `Chan2005` gives a 2010 publication; check label and title against the actual source for Chan's `Theta_10` dissection.
+2. The phrase `chi(eps)=zeta_6` is not meaningful until `chi` is defined.
+3. The theorem environments are awkward: the prime theorem is stated in the introduction and then later a proof appears without a restated theorem.  It is better to restate the theorem in Section 4.
+4. Boundary conventions for Shintani sectors are missing.
+5. The numerical evidence says “split primes through N=10^5” and “p up to 10^6+1”; make the indexing consistent.
+
+## C. Does it distinguish itself from ADH/Cohen/Corson--Favero?
+
+Conceptually, yes, but the paper needs to be more precise.
+
+The promising distinction is:
 
 ```text
-B_N = sum_{beta in A_p} W(beta).
+ADH/Cohen/Corson--Favero examples produce norm-supported series whose coefficients descend to ideal-level sums with unit-invariant weights, leading to multiplicative or Hecke-theoretic coefficient structures.
+
+This example is norm-supported but does not descend to ideals because the defining coset is not stable under eps.  The coefficient sum remains element-level/Shintani-sector-level and is therefore non-multiplicative.
 ```
 
-### Step 2: Replace atoms by ray-class generators
+That is a strong story.
 
-Use the inverse formulas
+But I would soften claims like:
 
 ```text
-k = (b - 3a - 1) / 10,
-r = (2a + b - 1) / 5.
+first naturally occurring ...
+all previously known examples ...
 ```
 
-This turns membership in `L` and the A/D cones into finite congruence plus linear inequalities.
-
-### Step 3: Reduce units modulo `<eps^6>`
-
-Since `eps^6 L = L`, reduce generators only by `Gamma=<eps^6>`.  In the real embeddings this gives one compact Shintani strip.
-
-### Step 4: Build the six-sector table
-
-Inside one `Gamma` strip, decompose into the six `eps`-sectors and record:
+until the literature review is expanded.  A safer wording is:
 
 ```text
-sector label j in Z/6,
-residue class in (O_K/(2 sqrt5))^x,
-L-membership,
-A/D/outside,
-a-parity,
-weight.
+This appears to give a new type of ADH-style norm-supported kernel: it is naturally produced by a q-series dissection and has norm support, but the unit action prevents descent to a multiplicative ideal-sum.
 ```
 
-This table is finite.  It is the central object.
+Suggested additional comparison points:
 
-### Step 5: Prove the prime orbit intersection theorem
+1. ADH `sigma(q)` and Cohen's Maass waveform examples: emphasize multiplicative ideal-sum behavior.
+2. Corson--Favero--Liesinger--Zubairy: emphasize character/q-series in `Q(sqrt(2))` and unit-compatible characters.
+3. Bringmann--Kane and Lovejoy--Osburn real-quadratic double sums: check whether any examples are nonmultiplicative in the same coset/Shintani-window sense.
+4. Hickerson--Mortenson: position your `f_{1,3,4}` identification in the Hecke-type double-sum framework.
 
-For each split prime ideal orbit, prove:
+## D. Strongest and weakest parts
+
+### Strongest part
+
+The strongest part is the algebraic construction:
 
 ```text
-its Gamma-reduced representatives intersect the active table in exactly
-one or two entries;
-all active entries have the same weight.
+beta(k,r) maps Z^2 to L,
+-N(beta(k,r)) = 10E(k,r)+1,
+B is a cone-difference over A and D,
+B = -f_{1,3,4}(X,-X^3,X),
+B is not multiplicative by an explicit coefficient witness.
 ```
 
-This proves Conjecture B.
+This is concrete, checkable, and compelling.  It also has Lean support, which is valuable.
 
-### Step 6: Use Chebotarev/equidistribution for density
+### Weakest part
 
-Once the table is known, the 2:1 distribution follows from equidistribution of prime ideals among the relevant finite ray-class states.  If the table shows the absolute value depends only on the `F_4^x` component, this becomes a transparent `1 out of 3` versus `2 out of 3` result.
+The weakest part is the prime-value theorem and density theorem.  The paper currently gives the outline of a beautiful argument, but the finite sector table has not actually been written down or proved.
 
-## 7. A finite table oracle
-
-The following Python/Sage-style skeleton records the computation I would use before writing the proof.  It is not meant to replace the proof; it tells you exactly what finite table the proof must certify.
-
-```python
-from dataclasses import dataclass
-from typing import Callable, Dict, List, Optional, Tuple
-
-
-@dataclass(frozen=True)
-class PhiElt:
-    a: int
-    b: int
-
-
-def eps_mul(x: PhiElt) -> PhiElt:
-    return PhiElt(x.a + x.b, x.a + 2 * x.b)
-
-
-def eps_pow_mul(x: PhiElt, j: int) -> PhiElt:
-    y = x
-    for _ in range(j % 6):
-        y = eps_mul(y)
-    return y
-
-
-def in_L(x: PhiElt) -> bool:
-    return (x.b - 3 * x.a - 1) % 10 == 0
-
-
-def atom_from_beta(x: PhiElt) -> Optional[Tuple[int, int]]:
-    num_k = x.b - 3 * x.a - 1
-    num_r = 2 * x.a + x.b - 1
-    if num_k % 10 != 0 or num_r % 5 != 0:
-        return None
-    return num_k // 10, num_r // 5
-
-
-def cone_label(x: PhiElt) -> str:
-    atom = atom_from_beta(x)
-    if atom is None:
-        return "not_L"
-    k, r = atom
-    if k >= 0 and r >= 0:
-        return "A"
-    if k < 0 and r < 0:
-        return "D"
-    return "out"
-
-
-def parity_a(x: PhiElt) -> int:
-    return x.a % 2
-
-
-def weight(x: PhiElt) -> int:
-    atom = atom_from_beta(x)
-    if atom is None:
-        return 0
-    k, r = atom
-    sign = 1 if x.a % 2 == 0 else -1
-    if k >= 0 and r >= 0:
-        return -sign
-    if k < 0 and r < 0:
-        return sign
-    return 0
-
-
-def residue_state(x: PhiElt, modulus: int = 20) -> Tuple[int, int]:
-    return (x.a % modulus, x.b % modulus)
-
-
-def six_sector_table(representatives: List[PhiElt]) -> List[Dict[str, object]]:
-    rows: List[Dict[str, object]] = []
-    for x in representatives:
-        for j in range(6):
-            y = eps_pow_mul(x, j)
-            rows.append(
-                {
-                    "base": x,
-                    "sector": j,
-                    "residue20": residue_state(y, 20),
-                    "in_L": in_L(y),
-                    "cone": cone_label(y),
-                    "parity_a": parity_a(y),
-                    "weight": weight(y),
-                }
-            )
-    return rows
-```
-
-For a proof, replace the sampled `representatives` by symbolic residue classes in the finite quotient.  The final theorem should be a finite case check over those residue classes plus the ordered cone-boundary sectors.
-
-## 8. Additional literature to check
-
-The most relevant nearby sources are:
+The central missing theorem should look like this:
 
 ```text
-Andrews--Dyson--Hickerson, Partitions and indefinite quadratic forms, Invent. Math. 91 (1988).
+Finite sector theorem.
+For each split prime ideal orbit, after reducing by <eps^6>, the active set
+L ∩ (A ∪ D) has either zero or one representative; the zero/one condition is
+controlled by iota != 2; and for the two conjugate ideals, contributing
+representatives have coherent weights.
 ```
 
-This is the original ADH real-quadratic norm-support source.
+Once that theorem is proved, the prime nonvanishing and value set follow.
+
+Until then, the paper should not present prime nonvanishing and equidistribution as established theorems.
+
+## E. Venue suggestion
+
+### If the prime theorem and density are fully proved
+
+Good targets:
 
 ```text
-Zwegers, Maass waveforms arising from sigma and related indefinite theta functions.
-https://arxiv.org/abs/1002.1175
+The Ramanuan Journal
+Research in Number Theory
+Journal of Number Theory
 ```
 
-This places ADH sigma-type functions into the indefinite theta / Maass waveform framework.
+`The Ramanujan Journal` is probably the best thematic fit because the paper combines q-series, mock/false theta, and real quadratic arithmetic.
+
+`Research in Number Theory` is a good fit if the Lean formalization and arithmetic novelty are emphasized.
+
+`Journal of Number Theory` becomes realistic if the Shintani sector theorem and literature comparison are strengthened.
+
+### If the paper is shortened to the algebraic/nonmultiplicative construction only
+
+Good targets:
 
 ```text
-Hickerson--Mortenson, Hecke-type double sums, Appell-Lerch sums, and mock theta functions.
-https://arxiv.org/abs/1208.1421
+Integers
+Hardy-Ramanujan Journal
+Journal of Integer Sequences
 ```
 
-This is the relevant `f_{a,b,c}` / Appell--Lerch technology.
+`Integers` or `Hardy-Ramanujan Journal` would be reasonable for a concise paper presenting a new q-series kernel, norm support, HM identification, numerical data, and a nonmultiplicativity witness.
 
-```text
-Mortenson, Ramanujan's 1psi1 summation, Hecke-type double sums, and Appell-Lerch sums.
-https://arxiv.org/abs/1208.1359
-```
+## Suggested revision plan
 
-Useful for alternative derivations of the HM formulas.
+### Revision 1: fix arithmetic and wording
 
-```text
-Mortenson, A general formula for Hecke-type false theta functions.
-https://arxiv.org/abs/2212.13236
-```
+1. Change “`E` is always nonnegative” to “`E` is always integral, and is nonnegative on the A/D cones.”
+2. Correct the stabilizer proof:
+   ```text
+   L mod sqrt(5): alpha ≡ 3;
+   eps mod sqrt(5): -1;
+   eps mod 2: order 3;
+   hence eps^j L = L iff 6 | j.
+   ```
+3. Define `chi_fin` or remove the primitive-sixth-root statement.
+4. Add the HM convention and proof.
+5. Clarify which results are actually Lean formalized.
 
-This is newer and directly relevant to Hecke-type false theta decompositions.
+### Revision 2: replace the prime section with explicit lemmas
 
-```text
-Bringmann--Kane, Multiplicative q-hypergeometric series arising from real quadratic fields.
-https://arxiv.org/abs/0812.4397
-```
+Add lemmas:
 
-This is important for the ADH generalization viewpoint and q-hypergeometric real-quadratic examples.
+1. `delta` is well-defined with half-open sectors.
+2. Boundary cases do not occur for primes `p ≡ 1 mod 10`.
+3. `lambda(bar alpha)=2lambda(alpha)`.
+4. `delta(bar alpha)=-delta(alpha)-1`.
+5. L-membership includes both the mod-2 and mod-`sqrt(5)` conditions, and the sign choice handles the latter.
+6. Atom iff `iota != 2`, with a proof.
+7. Each contributing prime ideal gives exactly one active atom.
+8. The two conjugate contributing atoms, when both exist, have coherent parity/weight.
 
-```text
-Lovejoy--Osburn, Real quadratic double sums.
-https://arxiv.org/abs/1502.01109
-```
+### Revision 3: justify density
 
-This gives real-quadratic double sums and ideal-counting interpretations.
+Either prove that `iota` factors through a finite ray class group and use Chebotarev, or replace “Chebotarev” with the appropriate Hecke/Shintani prime-equidistribution theorem.
 
-```text
-Bringmann--Nazaroglu, Quantum Modular Forms from Real Quadratic Double Sums.
-https://arxiv.org/abs/2205.02643
-```
-
-This is useful for the modern modular/quantum modular context of real-quadratic double sums.
-
-For the arithmetic proof of the sector theorem, also check the Shintani literature:
-
-```text
-Shintani, On evaluation of zeta functions of totally real algebraic number fields at non-positive integers.
-Yamamoto, real quadratic class invariants / Shintani cone methods.
-Neukirch or Cox for ray class fields and prime ideal equidistribution.
-```
-
-The search target should be not only “ADH” but also:
-
-```text
-real quadratic Shintani cone ray class partial zeta
-indefinite theta real quadratic unit sector
-Hecke-type double sums real quadratic ideal norms
-```
-
-## 9. Answers to the six questions
-
-### Q1. Which of L1--L4 is the bottleneck?
-
-The bottleneck is the combined Shintani-sector table, especially the bounded-intersection and no-opposite-sign assertions.  L4 is not a corollary of “two prime ideals” because units give infinitely many generators.  L1--L4 should be replaced by one finite prime-sector theorem; the four lemmas are then projections of that theorem.
-
-### Q2. How does the six-sector structure interact with `eps^j L`?
-
-The six `eps`-sectors inside a `<eps^6>` fundamental domain are locked to the six cosets `eps^j L`.  The active A/D cones cut this six-sector cylinder by two linear boundary lines.  The proof should enumerate the six sector/coset states and show that a prime orbit hits the active window in one or two same-weight states.
-
-### Q3. Is there a simpler Hecke-character reformulation?
-
-For the full coefficient sequence, no.  The cone window prevents ideal descent and destroys multiplicativity.  For primes only, yes: after the finite sector table, `B_{(p-1)/10}` becomes a finite ray-class sector function of the prime ideal above `p`.  That is weaker than a Hecke character but strong enough for nonvanishing and density.
-
-### Q4. Known techniques for the multi-sector case?
-
-Use Shintani cone decompositions, ray-class partial zeta functions with archimedean conditions, and finite sector tables.  Analytic indefinite-theta machinery explains modularity/completion, but the prime nonvanishing theorem is primarily an arithmetic Shintani reduction problem.
-
-### Q5. Does the 2:1 distribution connect to `Z/3Z`?
-
-Very likely yes.  The `Z/3` factor is `F_4^x` from the inert prime `2`.  The most plausible table is: one of the three `F_4^x` states gives two active atoms, and the other two states give one.  Chebotarev/equidistribution then gives `1/3` and `2/3`.  The table must confirm this before it is stated as a theorem.
-
-### Q6. Additional literature?
-
-Check ADH, Zwegers on sigma, Hickerson--Mortenson, Mortenson's later false-theta work, Bringmann--Kane, Lovejoy--Osburn, Bringmann--Nazaroglu, and the Shintani/ray-class zeta literature.  For this proof, the most useful phrase is probably “Shintani cone decomposition with ray class congruence,” not just “mock theta” or “Hecke character.”
+The current one-line density proof is not enough.
 
 ## Bottom line
 
-The prime nonvanishing conjecture should be attacked as a finite arithmetic-geometry table:
+I would frame the current draft as follows:
 
 ```text
-unit stabilizer:        <eps^6>
-finite congruence:      L modulo 10, plus parity
-archimedean geometry:   A/D cone window in one Shintani strip
-prime input:            two conjugate split prime ideal orbits
-output:                 one or two same-weight active representatives
+The algebraic core and nonmultiplicativity result are strong and close to paper-ready.
+The prime nonvanishing/equidistribution section is promising but not yet rigorous.
+The stabilizer proof contains a concrete modulo-sqrt(5) error that must be fixed.
+The reflection identity is plausible; the finite-field half is correct, but the floor/sector half needs a precise lemma.
+The bad-class and prime-value claims need an explicit sector-table proof.
 ```
 
-Once this table is proved, Conjecture B and the 2:1 density statement become natural consequences.  Without this table, the four lemmas L1--L4 are too interdependent to prove cleanly one at a time.
+With those fixes, the paper could become a strong short note, especially if it presents the finite sector table cleanly and distinguishes “norm-supported but nonmultiplicative” from the classical ADH/Cohen/Corson--Favero paradigm.
