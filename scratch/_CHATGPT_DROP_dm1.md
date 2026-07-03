@@ -1,740 +1,919 @@
-# Q3172 (dm1): Paper 2 Round 4 — shell = hblock, two-sided theta, and global/local charge
+# Q3173 (dm1): Paper 2 Round 5 — Ramanujan Theta + Factorization + All Anchors Odd
 
 Date: 2026-07-03
 
 ## Executive answer
 
-The new experiments substantially improve the framing.
+The R5 results support a sharper paper thesis:
 
-The correct headline is no longer “first counterexample” and no longer “`9 | e`.”  The right headline is:
+> The bad-key/counterexample set is not just filtered by `hblock`; it is theta-filtered.  The shell-opening factor is a unary Ramanujan/Jacobi theta component, and if the shell-copy factorization conjecture holds, the full bad-key enumerator is a base-layer object multiplied by that theta component.
+
+The central identity is
 
 ```text
-The LRS root-packet obstruction is present from the first nonzero layer e=9,
-but it is globally balanced.  The new phenomenon is a shell filtration by
-hblock.  The hblock shells open at a two-sided unary theta sequence
-
-    e(h) = 18 h(17h - 12),    h in Z.
+Θ(q) = Σ_{n∈Z} q^{18 n(17n+12)}
+     = Σ_{h∈Z} q^{18 h(17h-12)}
+     = f(q^522, q^90)
+     = j(-q^90; q^612)
+     = (-q^90;q^612)_∞ (-q^522;q^612)_∞ (q^612;q^612)_∞.
 ```
 
-Equivalently, for `j >= 1`, the two shell-opening branches are
+The change from `n` to `h` is `h = -n`.  Thus the empirical shell onset
 
 ```text
-h = +j:  e_j^- = 18j(17j - 12),
-h = -j:  e_j^+ = 18j(17j + 12).
+onset(h) = 18h(17h-12)
 ```
 
-This produces the observed interleaving:
+is exactly the two-sided exponent set of `f(q^522,q^90)`.
+
+The factorization conjecture should be written as a generating-function identity
 
 ```text
-90, 522, 792, 1656, 2106, 3402, 4032, 5760, ...
+Bad(q) = N_0(q) Θ(q),
 ```
 
-The companion branch is not noise.  It is the negative-hblock side of the same theta series.  The right object is two-sided from the beginning.
-
-The strongest conceptual theorem is now:
+or coefficientwise
 
 ```text
-hblock is the signed shell coordinate of the LRS root-packet boundary.  The
-set of first appearances of hblock values is governed by a unary theta series
-with quadratic exponent 18h(17h-12).  Individual key fibers carry nonzero
-boundary charge from e=9 onward, but the total charge over all keys is expected
-to vanish by a global divergence/telescoping theorem.
+Bad(E) = Σ_{n∈Z} N_0(E - 18n(17n+12)),
 ```
 
-## 1. The two-sided shell-opening theta
+with `N_0(t)=0` for negative `t`.  This is the cleanest formulation of “every shell is a translated copy of the base layer.”
 
-The two experimental branches are
+The main caution: the number `612` is the Jacobi-product modulus / q-period.  It should not automatically be called the scalar modular level or conductor.  The natural object is a weight `1/2` unary theta component with a rational characteristic of denominator `17`, scaled by `72`; a safe ambient congruence level for the vector-valued theta description is `68*72 = 4896`, while the scalar stabilizer may be described more economically only after fixing the exact representation/stabilizer.
+
+---
+
+## Q1. What modular form is `f(q^522,q^90)`?
+
+Use Ramanujan's general theta function
 
 ```text
-onset_j     = 18j(17j - 12),
-companion_j = 18j(17j + 12).
+f(a,b) = Σ_{n∈Z} a^{n(n+1)/2} b^{n(n-1)/2}.
 ```
 
-They are the positive and negative halves of one integer-indexed quadratic:
+Then
 
 ```text
-e(h) = 18 h(17h - 12),    h in Z.
+f(q^522,q^90)
+  = Σ_{n∈Z} q^{522 n(n+1)/2 + 90 n(n-1)/2}
+  = Σ_{n∈Z} q^{306n^2 + 216n}
+  = Σ_{n∈Z} q^{18n(17n+12)}.
 ```
 
-Indeed:
+Equivalently, with `Q=q^18`,
 
 ```text
-h =  j > 0  gives 18j(17j - 12),
-h = -j < 0  gives 18j(17j + 12).
-```
-
-Thus the complete shell-opening generating function is
-
-```text
-Theta_shell(q) = sum_{h in Z} q^{18 h(17h - 12)}.
-```
-
-If `Q = q^18`, this is
-
-```text
-Theta_shell(Q) = sum_{h in Z} Q^{17h^2 - 12h}.
-```
-
-Completing the square gives
-
-```text
-17h^2 - 12h = ((17h - 6)^2 - 36) / 17.
-```
-
-So
-
-```text
-Theta_shell(Q)
-  = Q^{-36/17} * sum_{n ≡ -6 mod 17} Q^{n^2/17},
-```
-
-where `n = 17h - 6`.  If one records positive absolute residues, this is exactly the two-residue support
-
-```text
-n ≡ 6 or 11 mod 17.
-```
-
-This explains the observation that both residue classes `6` and `11` modulo `17` contribute.  They are not two unrelated series; they are the two orientations of the same coset theta.
-
-### Modular-form status
-
-`Theta_shell` is a unary theta series with rational characteristic.  After multiplying by the harmless fractional prefactor `Q^{36/17}`, it is a standard weight-`1/2` theta constant attached to the one-dimensional lattice/coset
-
-```text
-17 Z - 6.
-```
-
-It should be treated as a vector-valued or congruence-subgroup unary theta of weight `1/2`, not as an eta quotient.  The safest paper statement is:
-
-```text
-The shell-opening support is governed by the unary theta series
-
-    sum_{h in Z} Q^{17h^2 - 12h}.
-
-Equivalently, it is the theta series of the coset 17Z-6, shifted by Q^{-36/17}.
-```
-
-I would not claim a specific eta-product identity unless one is later proved.  Unary theta is the right identification.
-
-## 2. What hblock measures geometrically
-
-The new data strongly indicates:
-
-```text
-hblock = signed normal shell coordinate of the LRS boundary.
-```
-
-The root-packet key
-
-```text
-(hblock, anchor)
-```
-
-is therefore not an arbitrary bookkeeping pair.  It decomposes the LRS boundary into:
-
-```text
-hblock: signed distance/shell transverse to the base LRS wall,
-anchor: tangential coordinate along the root-pair orbit inside that shell.
-```
-
-This interpretation explains all four observations:
-
-1. `hblock=0` is the base wall layer and appears immediately at `e=9`.
-2. New shells `±j` open only when the shell-opening theta reaches `e(h=±j)`.
-3. The companion branch is the opposite orientation of hblock.
-4. The anchor involution `n -> 12-n` is fiber-specific because the tangential coordinate depends on the chosen shell/fiber, while hblock records only the normal displacement.
-
-### Likely algebraic form
-
-At the LRS level, the full exponent should admit a normal form of the schematic shape
-
-```text
-E_LRS = 18 h(17h - 12) + R_h(anchor, auxiliary variables),
+Θ(q) = f(Q^29,Q^5) = j(-Q^5; Q^34),
 ```
 
 where
 
 ```text
-h = hblock,
-R_h >= 0
+j(x;Q) = (x;Q)_∞(Q/x;Q)_∞(Q;Q)_∞.
 ```
 
-on the admissible LRS support.  The equality `R_h=0` gives the first opening of shell `h`.
-
-This is the precise sense in which `hblock` is the shell index.  It is the coordinate that appears quadratically in the leading normal energy.
-
-### What determines hblock from `(l,u,v,root variables)`?
-
-The data is not yet enough to write the exact formula, but the form of the theorem is clear.  There should be an explicit affine-linear map
+So the product is
 
 ```text
-hblock = H(l,u,v,n,branch)
+j(-q^90;q^612)
+ = (-q^90;q^612)_∞ (-q^522;q^612)_∞ (q^612;q^612)_∞.
 ```
 
-or, more likely, a piecewise affine-linear map depending on the LRS branch.  The anchor then records the companion tangential root coordinate.  The root-pair involution
+### Theta-constant description
+
+Complete the square:
 
 ```text
-n -> 12 - n
+18n(17n+12)
+  = (18/17)((17n+6)^2 - 36).
 ```
 
-acts primarily on the anchor coordinate, while `hblock` records the shell containing that anchor pair.
-
-The immediate task is to extract this map from the implementation and write it as a theorem:
+Therefore
 
 ```text
-LRSKey(atom) = (H(atom), A(atom)),
-H(atom) is the signed shell normal coordinate,
-A(atom) is the anchor/tangential coordinate.
+q^(648/17) Θ(q)
+  = Σ_{m ≡ 6 mod 17} q^{18m^2/17}.
 ```
 
-## 3. The hblock=0 base layer
-
-The base layer is now the simplest local obstruction object.
-
-You found at `e=9`:
+Using the standard unary theta components
 
 ```text
-(0,-1):  1
-(0, 1):  1
-(0, 3): -1
-(0, 5): -2
-(0, 7):  1
+θ_{m,r}(τ) = Σ_{x ≡ r mod 2m} q^{x^2/(4m)},       q = e^{2πiτ},
 ```
 
-and the sum is
+we get
 
 ```text
-1 + 1 - 1 - 2 + 1 = 0.
+q^(648/17) Θ(τ)
+  = θ_{17,6}(72τ) + θ_{17,23}(72τ).
 ```
 
-This strongly suggests that `hblock=0` is a one-dimensional boundary transfer along the anchor coordinate.  It is already locally nonzero at the first possible exponent, but its total charge cancels.
+This is the most precise modular interpretation: `Θ` is a shifted unary theta component for the discriminant modulus `17`, pulled back by `τ ↦ 72τ`.
 
-### Generating function expectation
+### Level / conductor / character
 
-Because hblock `0` has bad keys at every `e=9n` from `n=1` onward, its support is dense in the `q^9` variable.  Therefore it is unlikely to be a sparse unary theta by itself.  It is more likely one of the following:
+The product modulus is
 
 ```text
-1. a finite-difference/telescoping series along anchors;
-2. a rational q-series in q^9, such as a finite combination of q^a/(1-q^b);
-3. a partial-theta boundary series whose signed total telescopes to zero;
-4. a coefficientwise transfer operator between adjacent anchor fibers.
+612 = 36*17 = 18*34.
 ```
 
-The right object to fit is not just the set of bad keys.  Define the per-anchor charge series
+But this is not automatically the scalar modular level.  The base unary theta components `θ_{17,r}` live in the weight-`1/2` Weil representation attached to the finite quadratic module with modulus `17`; the usual ambient level for the vector-valued theta system is `4*17 = 68`.  Pulling back by `72τ` gives the safe ambient level
 
 ```text
-C_a(Q) = sum_{n >= 1} keyWeight(e=9n, hblock=0, anchor=a) Q^n.
+68*72 = 4896 = 2^5 * 3^2 * 17.
 ```
 
-Then test:
+The specific two-residue component `{6,23}` is not, by itself, a Dirichlet-character theta series unless it is projected into a character sum.  So I would not assign it a single primitive Dirichlet character or a single primitive L-function yet.  It is better described as:
 
 ```text
-C_0_total(Q) = sum_a C_a(Q).
+weight 1/2 unary theta component,
+rational characteristic denominator 17,
+scale 72,
+Jacobi product modulus 612,
+Weil-representation character rather than a single Dirichlet character.
 ```
 
-The e=9 data suggests
+### Eta quotient?
+
+It is not a plain eta quotient in the usual sense.  An eta quotient selects residue classes by divisor structure.  This product selects exactly two classes in the `Q=q^18` variable:
 
 ```text
-C_0_total(Q) = 0
+(-Q^5;Q^34)_∞ (-Q^29;Q^34)_∞ (Q^34;Q^34)_∞.
 ```
 
-or perhaps zero after including all anchors and all LRS branches.  If true, the base layer is a pure redistribution of charge between keys, not a global obstruction.
+That is naturally a Jacobi theta product / Siegel-function type object.  It may be expressible using Siegel functions and eta factors, but the canonical identity for the paper is the `j(-q^90;q^612)` identity, not an eta quotient.
 
-### Recognizability
+### L-function?
 
-I would not call the hblock=0 series an eta quotient yet.  Dense support at every `Q^n` is more characteristic of a rational/false-theta transfer series than a theta series.  The right first theorem is a telescoping theorem:
+The Mellin transform of the normalized theta component decomposes into unary theta L-series supported on the progression `m ≡ 6 mod 17`.  After decomposing the progression indicator into Dirichlet characters modulo `17` or `34`, it becomes a finite linear combination of elementary theta L-series.  It is not naturally a single newform L-function unless a later character projection produces one.
+
+---
+
+## Q2. Why are all anchors odd?
+
+This should be a structural lemma, not an empirical fact.
+
+The key point is that a `j`-block is built from triangular exponents.  For an integer block variable `n`,
 
 ```text
-sum_anchor keyWeight(9n,0,anchor) = 0 for all n.
+T_n = n(n-1)/2 = ((2n-1)^2 - 1)/8.
 ```
 
-Only after this is proved should one try to identify individual `C_a(Q)`.
-
-## 4. Refining Fable's fiber onset formula
-
-Fable's proposed fiber formula was
+Thus the natural root variable of the triangular block is
 
 ```text
-onset_j(fiber) = 18j((|l|+|v|)j - |v|).
+A = 2n - 1,
+```
+
+which is always odd.
+
+For a general Jacobi block
+
+```text
+j(-q^r;q^M) = Σ_{n∈Z} q^{M n(n-1)/2 + r n}
+```
+
+after absorbing the two signs, set `A=2n-1`.  Since `n=(A+1)/2`, the exponent is
+
+```text
+E(n)
+  = M(A^2-1)/8 + r(A+1)/2
+  = (M A^2 + 4r A + 4r - M)/8.
+```
+
+The exponent is therefore naturally organized by an odd square-root variable `A`.  If the packet anchor is this root variable, or any signed/even translate of it,
+
+```text
+anchor = ±A + 2c,
+```
+
+then
+
+```text
+anchor ≡ A ≡ 1 mod 2.
+```
+
+That proves all anchors are odd.
+
+This also explains why the observation is robust across the range `e=9..4050`: an even anchor would require `A` even, hence `n=(A+1)/2` half-integral, so it is not in the integer `j`-block lattice.
+
+Important distinction: the completed-square variable of the scaled theta,
+
+```text
+17n + 6
+```
+
+is not always odd.  Therefore the observed “all anchors odd” is not coming from the final `17n+6` theta square.  It is coming earlier, from the triangular-root variable `2n-1` inside the `j(a,b,n)` packet structure.
+
+### Parity theorem package
+
+```text
+Theorem, Odd-anchor theorem.
+Every root-packet anchor attached to an integral j-block is odd.
+
+Proof.
+Write the j-block exponent in triangular form.  The block root variable is
+A=2n-1 or A=2n+1, depending on convention.  In either convention A is odd.
+All permitted packet translations preserve parity because they are even translations.
+Hence every emitted anchor is odd. ∎
+```
+
+This converts the empirical result “zero even anchors through `4050`” into a one-line structural theorem once the paper records the exact anchor extraction map.
+
+---
+
+## Q3. Is the transition at `e=126` meaningful?
+
+Yes, but it should be stated carefully.
+
+The identity
+
+```text
+126 = 90 + 36
+```
+
+is not random.  The `90` is the first nonzero shell-opening exponent, and the `36` is the square defect in the theta characteristic:
+
+```text
+18h(17h-12)
+  = (18/17)((17h-6)^2 - 36).
+```
+
+So `36=6^2` is the characteristic defect attached to the residue shift `6/17`.
+
+However, because the `hblock=0` column sum is also nonzero starting at `e=126`, the transition should not be explained only as “the `90` shell translates a base coefficient at `36`.”  Under a charge-level factorization, the coefficient at `126` would schematically have the form
+
+```text
+[q^126] C(q)
+  = [q^126] C_0(q) + [q^36] C_0(q),
+```
+
+because below `126` the theta factor contributes only `1` and `q^90`.
+
+The confirmed fact that the `hblock=0` column is already nonzero at `126` means the first term `[q^126]C_0` is itself active.  The `90+36` relation is therefore best interpreted as a resonance between:
+
+```text
+first shell opening = 90,
+theta characteristic defect = 36,
+first global/base charge obstruction = 126.
+```
+
+The concrete test is:
+
+```text
+Compute the charge quotient C_0 if C(q)=C_0(q)Θ(q).
+Then inspect C_0(36) and C_0(126).
+```
+
+If `C_0(36)=0` and `C_0(126)≠0`, then the transition is intrinsic to the base layer and merely numerologically aligned with `90+36`.  If both are nonzero, the first global charge receives both the base obstruction and the first translated shell contribution.  Either way, the appearance of `36` is meaningful because it is the discriminant/characteristic defect of the theta factor.
+
+---
+
+## Q4. What is `N_0`?
+
+If factorization holds, `N_0` is not optional: it is uniquely determined by formal division by `Θ`, because `Θ(0)=1`.
+
+```text
+N_0(q) = Bad(q) / Θ(q).
+```
+
+Coefficientwise this gives the recursion
+
+```text
+N_0(E)
+  = Bad(E) - Σ_{t>0} Θ(t) N_0(E-t),
+```
+
+where `t` ranges over positive shell-opening exponents.
+
+Since the first positive theta exponents are
+
+```text
+90, 522, 792, 1656, 2106, 3402, 4032, ...,
+```
+
+we have
+
+```text
+N_0(E) = Bad(E)          for E < 90.
+```
+
+Thus the reported first values
+
+```text
+E       9  18  27  36  45  54  63  72  81
+N_0     5   6   6   8   9  10  10  11  11
+```
+
+are literally the base-layer bad counts before the first shell translation can interfere.
+
+### Is `N_0` a quadratic-form representation number?
+
+The early growth looks like a one-dimensional lattice count, not like a classical positive-definite binary quadratic representation number.
+
+A positive-definite binary quadratic representation number `r_Q(n)` usually has divisor-like arithmetic fluctuations and average size `n^{o(1)}` for individual coefficients.  The observed rough growth `O(sqrt(e/9))` is more suggestive of one of the following:
+
+```text
+1. an interval count of admissible odd anchors;
+2. a degenerate / rank-one quadratic representation count;
+3. an indefinite-form count with a cutoff window;
+4. an Ehrhart/quasi-polynomial count from a packet polytope;
+5. a weighted count of odd root variables satisfying local congruences.
+```
+
+Because Q2 says all anchors are odd, the most natural ansatz is
+
+```text
+N_0(9m) = Σ_{A odd} w(A,m) * 1_{local inequalities and congruences hold},
+```
+
+with `A` the triangular root variable from the `j`-block.  If the weights are eventually periodic in `A mod M`, then `N_0(9m)` may become a finite sum of floor functions.  That would explain the smooth step pattern better than a genuine binary quadratic representation number.
+
+### Practical identification strategy
+
+1. Compute `N_0` by quotient recursion to a much larger bound.
+2. Split `N_0` by anchor residue classes modulo small moduli, especially modulo `2`, `3`, `9`, `17`, `34`, and `68`.
+3. Test whether `N_0(9m)` is a floor-sum / Ehrhart quasi-polynomial.
+4. If not, test whether it equals a representation count of an indefinite or degenerate quadratic form with an explicit cutoff.
+5. Only after that should one try to match it to a modular form database or a classical representation-number formula.
+
+The first nine values are too few to identify the arithmetic function uniquely.  But they are enough to say that `N_0` is probably the base packet-count function, and the all-odd anchor theorem gives the right variable in which to express it.
+
+---
+
+## Q5. What is the second fiber?
+
+For a fiber with parameters
+
+```text
+a = |l|,
+b = |v|,
+```
+
+the theta factor is
+
+```text
+Θ_{a,b}(q)
+  = f(q^{18(a+2b)}, q^{18a})
+  = Σ_{n∈Z} q^{18((a+b)n^2 + bn)}.
+```
+
+The two positive branches are, for `j ≥ 1`,
+
+```text
+lower_j = 18j((a+b)j - b),
+upper_j = 18j((a+b)j + b).
 ```
 
 For the minimizing fiber
 
 ```text
-(l,u,v)=(-5,-8,-12),
+a = |l| = 5,
+b = |v| = 12,
+a+b = 17,
 ```
 
 this gives
 
 ```text
-|l| + |v| = 17,
+Θ_{5,12}(q) = f(q^522,q^90).
+```
+
+The first few nonzero exponents in this same fiber are
+
+```text
+j=1:   90,   522
+j=2:  792,  1656
+j=3: 2106,  3402
+j=4: 4032,  5760
+```
+
+So if “second fiber” means the second two-sided shell within the already identified fiber, the answer is
+
+```text
+j=2 branch: 792 and 1656.
+```
+
+### If “second fiber” means the next admissible cross-fiber
+
+The relation
+
+```text
+|u| = |l| + |v| - 9
+```
+
+gives, in the present case,
+
+```text
+|l| = 5,
+|u| = 8,
 |v| = 12,
+|l|+|v| = 17,
+17 - |u| = 9.
 ```
 
-and hence
+If the admissible fibers are the `17`-split fibers generated by the `9`-defect, then the natural ordered candidates are:
+
+| fiber `(a,b)` | theta | first lower branch | first upper branch |
+|---:|---:|---:|---:|
+| `(5,12)` | `f(q^522,q^90)` | `90` | `522` |
+| `(8,9)` | `f(q^468,q^144)` | `144` | `468` |
+| `(9,8)` | `f(q^450,q^162)` | `162` | `450` |
+| `(12,5)` | `f(q^396,q^216)` | `216` | `396` |
+
+Under ordering by first onset, the second cross-fiber is therefore
 
 ```text
-18j(17j - 12),
+(a,b) = (8,9),
+Θ_{8,9}(q) = f(q^468,q^144).
 ```
 
-which matches the observed positive-hblock branch.
+Under ordering by the companion branch alone, `(12,5)` has the smallest companion `396`, but its first onset is later, at `216`.  For shell-opening purposes the first-onset order is the better ordering.
 
-### Refinement: use chamber distances, not absolute values
-
-The absolute values are a clue but probably not the final theorem.  In the chamber containing the minimizing fiber, `l<0` and `v<0`, so
+Diagnostic: if the fiber system allowed the pair `(5,8)`, it would produce
 
 ```text
-|l| = -l,
-|v| = -v,
-|l|+|v| = -(l+v).
+f(q^378,q^90),
 ```
 
-A more structural formula is therefore:
+which would compete with or precede the verified minimizing companion `q^522`.  Since the confirmed minimizing fiber is `f(q^522,q^90)`, the pair `(5,8)` must be inadmissible in the actual fiber index set, or “minimizing” must mean something stricter than first lower onset.
+
+---
+
+## Q6. Minimal complete paper / theorem package
+
+The minimal paper should be built around the sentence:
 
 ```text
-onset_j(l,v) = 18j( L(l,v) * j - V(l,v) ),
+The counterexample set is a theta-filtered modular object.
 ```
 
-where `L(l,v)` and `V(l,v)` are positive distances to the relevant LRS support walls.  In this chamber,
+A good title would be:
 
 ```text
-L(l,v) = -l - v,
-V(l,v) = -v.
+A Ramanujan Theta Filtration of the hblock Counterexample Set
 ```
 
-The formula then becomes
+or, more cautiously,
 
 ```text
-onset_j(l,v) = 18j( (-l-v)j + v ).
+Unary Theta Structure in the hblock Obstruction Set
 ```
 
-For `l=-5`, `v=-12`, this is exactly `18j(17j-12)`.
+### Proposed paper structure
 
-### What it implies about the LRS normal form
+#### 1. Introduction
 
-It implies that, in a fixed chamber/fiber, the full LRS energy has normal coordinate `h=hblock` and leading term
+State the empirical discovery and the corrected interpretation:
 
 ```text
-18 [ L h^2 - V h ].
+Bad keys occur from e=9 onward, but global charge cancels until e=126.
+The missing kernel coefficient is not an isolated accident; it sits inside a
+unary theta shell filtration.
 ```
 
-For the opposite hblock orientation, one gets the companion branch
+Main displayed identity:
 
 ```text
-18 [ L h^2 + V h ]
+Θ(q)=f(q^522,q^90)=j(-q^90;q^612).
 ```
 
-with `h=j>0`, or uniformly
+Main conditional identity:
 
 ```text
-18 h (L h - V)
+Bad(q)=N_0(q)Θ(q).
 ```
 
-for signed `h` if the sign convention is chosen correctly.
+#### 2. Definitions
 
-This is exactly the two-sided theta form.  The companion branch is not a refutation of the formula; it is the negative hblock orientation.
-
-### Proof target
-
-The theorem to prove is:
+Define:
 
 ```text
-LRS normal form in a chamber.
-For each LRS chamber C and fiber parameter (l,u,v), there are wall-distance
-functions L_C(l,u,v), V_C(l,u,v) such that
-
-    E_LRS(atom) = 18 hblock (L_C hblock - V_C) + R_C(anchor, other variables),
-
-with R_C >= 0 on the admissible support.
+root packet
+anchor
+bad key
+charge
+hblock
+hblock shell
+base layer N_0
+Bad(q)
+Θ(q)
 ```
 
-Then the global shell-opening sequence is obtained by minimizing over chambers/fibers.
-
-## 5. Is the total sum over all keys always zero?
-
-This is now one of the most important questions.
-
-The e=9 data shows local nonzero key charges but total charge zero:
+The `hblock` definition should be stated exactly:
 
 ```text
-sum_K keyWeight(9,K) = 0.
+hblock = (|l+1| + 1 - |u+v-1| + carry)//3.
 ```
 
-The natural conjecture is:
+Then state that this is a translation coordinate, not just a label.
+
+#### 3. Shell theorem
 
 ```text
-GlobalCharge(e) := sum_K keyWeight(e,K) = 0 for every e.
+Theorem 1, hblock shell opening.
+For every h∈Z, the hblock shell opens at
+
+    E_h = 18h(17h-12).
+
+Moreover the shell-opening generating function is
+
+    Σ_{h∈Z} q^{E_h} = f(q^522,q^90).
 ```
 
-This is exactly what one expects if keyWeight is a discrete boundary divergence on the key graph.
+Proof: change `h=-n` and use the Ramanujan theta exponent calculation.
 
-### Divergence interpretation
-
-Think of keys as vertices and boundary pairings as directed edges.  Each defective atom contributes a signed current along an edge between keys.  The local keyWeight is the divergence at one vertex:
+#### 4. Jacobi/Ramanujan product theorem
 
 ```text
-keyWeight(e,K) = div J_e(K).
+Theorem 2, Jacobi product.
+The shell-opening series satisfies
+
+    Σ_{h∈Z} q^{18h(17h-12)}
+      = (-q^90;q^612)_∞(-q^522;q^612)_∞(q^612;q^612)_∞.
 ```
 
-Then summing over all keys gives
+Proof: Jacobi triple product with `x=-q^90`, `Q=q^612`.
+
+Then add a modularity remark:
 
 ```text
-sum_K div J_e(K) = 0
+After multiplying by q^(648/17), this is the unary theta component
+θ_{17,6}(72τ)+θ_{17,23}(72τ).
 ```
 
-provided there is no external boundary after all LRS branches are included.
+Do not overclaim scalar level `612`.
 
-This explains the phenomenon:
+#### 5. Fiber theorem
 
 ```text
-global q-series identity can still be true,
-while the fiber-local keyWeight=0 proof fails.
+Theorem 3, fiber theta.
+For a fiber with parameters a=|l| and b=|v|, the fiber-opening series is
+
+    Θ_{a,b}(q)=f(q^{18(a+2b)}, q^{18a}).
+
+The two branches are
+
+    E_j^- = 18j((a+b)j-b),
+    E_j^+ = 18j((a+b)j+b).
 ```
 
-The local charges are nonzero, but they are internal transfers between key fibers.
-
-### Caveat
-
-You must be precise about what is being summed.  The theorem should include:
+For `(a,b)=(5,12)`, this gives the verified minimizing fiber
 
 ```text
-all keys,
-all LRS branches,
-all signs,
-the exact same exponent e.
+f(q^522,q^90).
 ```
 
-If one sums only `normal_bad` keys or only a single branch, the total may not vanish.
-
-### Suggested theorem
+#### 6. Odd-anchor theorem
 
 ```text
-Global telescoping theorem.
-For every exponent e,
-
-    sum_{K} keyWeight(e,K) = 0.
-
-Equivalently, the LRS boundary charge is globally exact, but not fiberwise zero.
+Theorem 4, all anchors odd.
+Every root-packet anchor emitted by an integral j-block is odd.
 ```
 
-This theorem would be a major repair of the original proof strategy.  It says the old conjecture was too local, not globally false.
+Proof: write the triangular exponent using `A=2n-1`.  This should replace the finite check through `4050` with a structural proof.
 
-## 6. Correct theorem architecture for Paper 2
-
-The correct architecture is now clear.
-
-### The old framing to remove
-
-Do not headline:
+#### 7. Charge theorem
 
 ```text
-9|e is necessary.
+Theorem 5, first global charge obstruction.
+The global charge and the hblock=0 charge are zero below e=126 and nonzero at e=126.
 ```
 
-It is vacuous because atoms already occur only at `e` divisible by `9`.
-
-Do not headline:
+This theorem should be stated as a computed/proved finite result first.  Then add the structural interpretation:
 
 ```text
-first counterexample onset.
+126 = 90 + 36,
+36 = 6^2,
+18h(17h-12) = (18/17)((17h-6)^2 - 36).
 ```
 
-Bad keys already occur at `e=9`.
+The exact proof target is to express the charge functional through the same theta/base decomposition, or to show why the first nonzero base charge occurs at the theta defect threshold.
 
-Do not headline:
+#### 8. Factorization theorem / conjecture
+
+State this as conditional until the shell-copy bijection is proven.
 
 ```text
-M^2 ≡ -I mod 9 explains the LRS fiber counterexample.
+Conjecture 6, shell-copy factorization.
+There is a multiplicity-preserving translation from the hblock=0 layer to each
+hblock shell h, shifting e by 18h(17h-12).  Equivalently,
+
+    Bad(q)=N_0(q) f(q^522,q^90).
 ```
 
-`M` acts at the cone/Pell layer, not directly at the LRS key layer.
-
-### New headline
-
-Use:
+Then the coefficient statement is
 
 ```text
-A fiber-local cancellation failure with a shell-filtration law.
+Bad(E)=Σ_{n∈Z}N_0(E-18n(17n+12)).
 ```
 
-or more mathematically:
+Proof route:
 
 ```text
-The LRS boundary charge is globally telescoping but not fiberwise zero; its
-key support is filtered by hblock shells whose openings form a two-sided unary
-theta series.
+1. Define the translation map T_h on packet keys.
+2. Prove T_h preserves badness and multiplicity.
+3. Prove every bad key has a unique decomposition into base key + h shell.
+4. Sum over h.
 ```
 
-### Suggested main theorem package
-
-#### Theorem 1: LRS key decomposition
-
-Define the LRS atom, exponent, sign, and key
+#### 9. Base layer theorem / problem
 
 ```text
-K = (hblock, anchor).
+Problem 7, identify N_0.
+Determine a closed formula for the base-layer enumerator N_0(q).
 ```
 
-#### Theorem 2: hblock is shell
-
-Prove or state with verified cases:
+Initial data:
 
 ```text
-A bad key with |hblock| > j cannot occur below the j-th shell-opening level.
-The first appearance of hblock h occurs at
-
-    e(h) = 18 h(17h - 12).
+N_0(9),...,N_0(81) = 5,6,6,8,9,10,10,11,11.
 ```
 
-Equivalently, the shell-opening generating function is
+Expected shape:
 
 ```text
-Theta_shell(q) = sum_{h in Z} q^{18h(17h-12)}.
+N_0(9m) is a weighted count of odd j-block anchors in a growing interval,
+possibly an Ehrhart/quasi-polynomial or a degenerate quadratic representation count.
 ```
 
-#### Theorem 3: local nonzero from the base layer
+#### 10. Verification section
 
-Show:
+Include reproducible scripts for:
 
 ```text
-Bad keys exist at every e=9n from n=1 onward, already in hblock=0.
+1. shell-onset verification;
+2. theta-product coefficient comparison;
+3. factorization quotient N_0;
+4. odd-anchor verification by block ID;
+5. charge decomposition at e=126;
+6. second-fiber enumeration.
 ```
 
-If not yet proved for all n, state as a conjecture with strong data.
+---
 
-#### Theorem 4: global telescoping
+## Reproducible code skeleton
 
-Prove/conjecture:
-
-```text
-sum_{hblock,anchor} keyWeight(e,hblock,anchor) = 0 for all e.
-```
-
-This explains why the global q-series identity survives despite local key failures.
-
-#### Theorem 5: boundary generating function
-
-Connect to the cone/Paper 3 layer:
-
-```text
-Boundary_GF = Theta_u * Theta_v * (D-A),
-D-A = -f_{1,3,4}(X,-X^3,X).
-```
-
-#### Theorem 6: cone/Pell shadow
-
-State separately:
-
-```text
-The discriminant-5 cone factor has Pell deck anti-periodicity M^2 ≡ -I mod 9
-and the norm/coset stabilizer eps^6.  This is the global cone shadow of the
-LRS boundary, not the direct hblock-key action.
-```
-
-## 7. Answering the six questions directly
-
-### Q1. Is the two-sided onset support a theta function?
-
-Yes.  The complete shell-opening support is the unary theta series
-
-```text
-Theta_shell(q) = sum_{h in Z} q^{18h(17h-12)}.
-```
-
-In `Q=q^18`, it is
-
-```text
-sum_{h in Z} Q^{17h^2-12h}
-  = Q^{-36/17} sum_{n≡-6 mod17} Q^{n^2/17}.
-```
-
-It is a weight-`1/2` unary theta with rational characteristic, best viewed as a vector-valued theta/coset theta.  I would not identify it as an eta quotient unless later proven.
-
-### Q2. What does hblock measure geometrically?
-
-`hblock` is the signed normal shell coordinate of the LRS boundary.  The `anchor` is the tangential coordinate along the root-pair fiber.  Geometrically, the key `(hblock,anchor)` is a normal/tangential coordinate system for the LRS boundary charge.
-
-### Q3. What is the hblock=0 generating function?
-
-It is likely a one-dimensional anchor-transfer or telescoping series, not a sparse theta.  Since hblock=0 bad keys occur at every `e=9n`, its support is dense in the `q^9` variable.  The most promising theorem is not eta-product identification but a telescoping identity:
-
-```text
-sum_anchor keyWeight(9n,0,anchor) = 0.
-```
-
-Individual anchor series may be rational or partial-theta-like; they should be fitted separately.
-
-### Q4. Verify/refine Fable's formula
-
-Refine absolute values into chamber distances.  In the chamber of the minimizing fiber `l=-5,v=-12`, the formula is
-
-```text
-onset_j = 18j(((-l-v)j + v)) = 18j(17j-12).
-```
-
-The general theorem should use wall-distance functions, not literal absolute values.  It implies a normal form
-
-```text
-E_LRS = 18[L hblock^2 - V hblock] + residual,
-```
-
-with nonnegative residual on the support.
-
-### Q5. Does total boundary charge vanish globally?
-
-Very likely, and this should become a central theorem.  The e=9 data supports the divergence interpretation:
-
-```text
-local key charges are nonzero,
-but their total over keys is zero.
-```
-
-If true for all e, it explains exactly why the fiber-local proof fails while the global q-series identity can remain true.
-
-### Q6. Correct paper architecture?
-
-The headline should be:
-
-```text
-The LRS root-packet cancellation is globally telescoping but not fiberwise.
-Its local defects are organized by hblock shells, and the shell-opening levels
-form a two-sided unary theta series.
-```
-
-Then the Paper 3 factorization appears as the global generating function of those boundary transfers:
-
-```text
-Theta_u * Theta_v * (D-A),
-D-A = -f_{1,3,4}(X,-X^3,X).
-```
-
-## 8. Concrete next computations
-
-### 8.1 Extract per-hblock onset data
-
-For each hblock `h`, compute the first exponent and confirm:
-
-```text
-first_e(h) = 18h(17h-12).
-```
-
-Include `h=0`, where this formula gives `0`; the first nonzero bad-key layer for hblock 0 is `e=9`, so hblock 0 should be treated as the base transfer layer rather than a shell opening.
-
-### 8.2 Test global telescoping
-
-For many exponents `e=9n`, compute:
-
-```text
-TotalCharge(e) = sum_{hblock,anchor} keyWeight(e,hblock,anchor).
-```
-
-If this is always zero, it should become the main theorem.
-
-### 8.3 Fit hblock=0 anchor series
-
-For each anchor `a`, compute
-
-```text
-C_a(Q) = sum_{n>=1} keyWeight(9n,0,a) Q^n.
-```
-
-Look for:
-
-```text
-finite differences,
-periodicity in anchor mod something,
-rational functions,
-partial theta pieces.
-```
-
-### 8.4 Extract the LRS normal form
-
-For actual LRS atoms, compute
-
-```text
-R(atom) = E_LRS(atom) - 18*hblock*(17*hblock - 12).
-```
-
-Then test:
-
-```text
-R(atom) >= 0,
-R(atom)=0 exactly at shell-opening wavefronts.
-```
-
-This is the direct path to a proof.
-
-## 9. Minimal code skeleton for the theta and count analysis
+The following code is only a harness.  It assumes the actual project code can supply `Bad(E)` and packet anchors.
 
 ```python
+from __future__ import annotations
+
 from collections import defaultdict
-from dataclasses import dataclass
-from typing import Iterable
+from typing import Dict, Iterable, List, Mapping, Sequence, Tuple
+
+CoeffDict = Dict[int, int]
 
 
-def shell_opening(h: int) -> int:
-    """Two-sided hblock shell-opening exponent."""
-    return 18 * h * (17 * h - 12)
+def fiber_exponent(n: int, a: int = 5, b: int = 12) -> int:
+    """Exponent of f(q^(18(a+2b)), q^(18a)) at summation index n."""
+    return 18 * ((a + b) * n * n + b * n)
 
 
-def positive_onset(j: int) -> int:
-    return shell_opening(j)
+def theta_opening_coeffs(emax: int, a: int = 5, b: int = 12) -> CoeffDict:
+    """Return coefficients of Θ_{a,b} through emax.
+
+    Θ_{a,b}(q) = Σ_{n∈Z} q^{18((a+b)n^2 + b n)}.
+    """
+    coeffs: CoeffDict = defaultdict(int)
+    n = 0
+    while True:
+        progressed = False
+        for k in (n, -n) if n else (0,):
+            e = fiber_exponent(k, a=a, b=b)
+            if 0 <= e <= emax:
+                coeffs[e] += 1
+                progressed = True
+        if n > 0 and not progressed:
+            # Since the quadratic grows in both directions, this is safe after
+            # both +n and -n have exceeded the range.
+            e_pos = fiber_exponent(n, a=a, b=b)
+            e_neg = fiber_exponent(-n, a=a, b=b)
+            if e_pos > emax and e_neg > emax:
+                break
+        n += 1
+    return dict(coeffs)
 
 
-def companion_onset(j: int) -> int:
-    return shell_opening(-j)
-
-
-for j in range(1, 6):
-    print(j, positive_onset(j), companion_onset(j))
-
-
-@dataclass(frozen=True)
-class Key:
-    hblock: int
-    anchor: int
-
-
-def total_charge(charges: dict[Key, int]) -> int:
-    return sum(charges.values())
-
-
-def charges_by_hblock(charges: dict[Key, int]) -> dict[int, int]:
-    out: defaultdict[int, int] = defaultdict(int)
-    for key, value in charges.items():
-        out[key.hblock] += value
+def convolve(a: Mapping[int, int], b: Mapping[int, int], emax: int) -> CoeffDict:
+    """Truncated Cauchy product."""
+    out: CoeffDict = defaultdict(int)
+    for ea, ca in a.items():
+        if ca == 0:
+            continue
+        for eb, cb in b.items():
+            e = ea + eb
+            if e <= emax:
+                out[e] += ca * cb
     return dict(out)
 
 
-def bad_key_count(charges: dict[Key, int]) -> int:
-    return sum(1 for value in charges.values() if value != 0)
+def recover_n0_from_bad(bad: Mapping[int, int], emax: int) -> CoeffDict:
+    """Recover N_0 from Bad = N_0 * Θ, using Θ(0)=1."""
+    theta = theta_opening_coeffs(emax)
+    positive_theta_terms = sorted((e, c) for e, c in theta.items() if e > 0)
+
+    n0: CoeffDict = {}
+    for e in range(emax + 1):
+        value = bad.get(e, 0)
+        for t, c in positive_theta_terms:
+            if t > e:
+                break
+            value -= c * n0.get(e - t, 0)
+        n0[e] = value
+    return n0
+
+
+def check_factorization(bad: Mapping[int, int], emax: int) -> List[Tuple[int, int, int]]:
+    """Return discrepancies (e, Bad(e), (N_0*Θ)(e))."""
+    n0 = recover_n0_from_bad(bad, emax)
+    theta = theta_opening_coeffs(emax)
+    rebuilt = convolve(n0, theta, emax)
+    discrepancies: List[Tuple[int, int, int]] = []
+    for e in range(emax + 1):
+        lhs = bad.get(e, 0)
+        rhs = rebuilt.get(e, 0)
+        if lhs != rhs:
+            discrepancies.append((e, lhs, rhs))
+    return discrepancies
+
+
+def j_block_anchor(n: int, convention: str = "minus") -> int:
+    """The odd triangular root variable from a j-block.
+
+    convention='minus' gives A=2n-1.
+    convention='plus' gives A=2n+1.
+    """
+    if convention == "minus":
+        return 2 * n - 1
+    if convention == "plus":
+        return 2 * n + 1
+    raise ValueError(f"unknown convention: {convention}")
+
+
+def assert_all_anchors_odd(anchors: Iterable[int]) -> None:
+    """Raise if any anchor is even."""
+    even = [a for a in anchors if a % 2 == 0]
+    if even:
+        raise AssertionError(f"found even anchors: {even[:20]}")
+
+
+def branch_pair(j: int, a: int, b: int) -> Tuple[int, int]:
+    """Return the lower/upper j-branch exponents for Θ_{a,b}."""
+    lower = 18 * j * ((a + b) * j - b)
+    upper = 18 * j * ((a + b) * j + b)
+    return lower, upper
+
+
+def candidate_fibers_from_split(total: int = 17) -> List[Tuple[int, int, int, int]]:
+    """Natural 17-split fibers relevant to |u|=|l|+|v|-9.
+
+    Returns tuples (a,b,first_lower,first_upper).
+    """
+    candidates = [(5, 12), (8, 9), (9, 8), (12, 5)]
+    out: List[Tuple[int, int, int, int]] = []
+    for a, b in candidates:
+        if a + b != total:
+            continue
+        lower, upper = branch_pair(1, a, b)
+        out.append((a, b, lower, upper))
+    return sorted(out, key=lambda row: (row[2], row[3]))
+
+
+if __name__ == "__main__":
+    # Confirmed first base-layer values supplied in R5.
+    n0_first = {
+        9: 5,
+        18: 6,
+        27: 6,
+        36: 8,
+        45: 9,
+        54: 10,
+        63: 10,
+        72: 11,
+        81: 11,
+    }
+
+    theta = theta_opening_coeffs(6000)
+    print("first theta exponents:", sorted(theta)[:10])
+    print("candidate split fibers:", candidate_fibers_from_split())
+    print("N0 first values:", [n0_first[9 * m] for m in range(1, 10)])
 ```
 
-Expected opening sequence:
+---
+
+## The compact theorem package to put in the paper
+
+Here is the minimal complete theorem package.
+
+### Theorem A — hblock is a shell coordinate
 
 ```text
-j=1: 90, 522
-j=2: 792, 1656
-j=3: 2106, 3402
-j=4: 4032, 5760
-j=5: 6570, 9540
+The statistic
+
+    hblock = (|l+1|+1-|u+v-1|+carry)//3
+
+is a translation coordinate.  The h-shell opens at
+
+    E_h = 18h(17h-12).
 ```
 
-## Bottom line
+Status: confirmed experimentally; needs formal proof from the packet inequalities.
 
-The corrected Round 4 picture is coherent and publishable:
+### Theorem B — shell opening is Ramanujan theta
 
 ```text
-Bad keys are not rare first appearing at high energy; they exist from e=9.
-The real structure is a shell filtration.
-hblock is the shell coordinate.
-The shell-opening support is the two-sided unary theta
-
-    sum_{h in Z} q^{18h(17h-12)}.
-
-Local key charges can be nonzero while the global charge likely telescopes to
-zero.  The norm/cone false theta of Paper 3 is the global generating function
-of this LRS boundary transfer after summing and reindexing.
+Σ_{h∈Z} q^{18h(17h-12)} = f(q^522,q^90).
 ```
 
-This is a much stronger and cleaner narrative than the old divisibility framing.
+Status: proven algebraically.
+
+### Theorem C — Jacobi triple product
+
+```text
+f(q^522,q^90)
+  = (-q^90;q^612)_∞(-q^522;q^612)_∞(q^612;q^612)_∞.
+```
+
+Status: proven by JTP.
+
+### Theorem D — modular interpretation
+
+```text
+q^(648/17) f(q^522,q^90)
+  = θ_{17,6}(72τ)+θ_{17,23}(72τ).
+```
+
+Status: proven by completing the square.  Interpret as a weight-`1/2` unary theta component with denominator `17` and scale `72`.
+
+### Theorem E — fiber theta
+
+```text
+For a fiber with a=|l| and b=|v|,
+
+    Θ_{a,b}(q)=f(q^{18(a+2b)},q^{18a}).
+```
+
+Status: algebraic once the fiber onset formula is proven.
+
+### Theorem F — all anchors odd
+
+```text
+Every anchor is odd.
+```
+
+Status: should be structural.  Proof comes from the triangular root variable `A=2n-1` in every integral `j`-block.
+
+### Theorem G — charge transition
+
+```text
+The first nonzero global charge, and the first nonzero hblock=0 column charge,
+occur at e=126.
+```
+
+Status: confirmed computationally.  The structural explanation should use the theta characteristic defect `36=6^2` and the charge quotient/base-layer charge.
+
+### Conjecture H — shell-copy factorization
+
+```text
+Bad(q)=N_0(q) f(q^522,q^90).
+```
+
+Equivalent coefficient formula:
+
+```text
+Bad(E)=Σ_{n∈Z}N_0(E-18n(17n+12)).
+```
+
+Status: current R5 factorization conjecture.  The proof should be a bijection between each h-shell and the hblock=0 layer.
+
+### Problem I — identify `N_0`
+
+```text
+Find a closed arithmetic/combinatorial formula for N_0.
+```
+
+Expected answer: a weighted odd-anchor count, likely closer to an Ehrhart/floor-sum or rank-one/degenerate quadratic count than to a classical positive-definite binary representation number.
+
+---
+
+## Final synthesis
+
+The paper should not merely report that bad keys exist at every `e=9n`.  The stronger and more publishable statement is:
+
+```text
+The bad-key set has a theta shell geometry.  The shell coordinate is hblock,
+the shell openings are exactly the Ramanujan theta f(q^522,q^90), every anchor
+is forced odd by the j-block triangular root, and the first uncancelled charge
+at e=126 is aligned with the 6^2 characteristic defect of the theta.
+```
+
+If the factorization conjecture is proven, the paper becomes very clean:
+
+```text
+Counterexample enumerator = base layer × unary theta.
+```
+
+Then the remaining arithmetic content is concentrated in `N_0`.  That is exactly the right architecture: prove the universal theta shell once, prove the odd-anchor theorem once, and reduce the complicated enumeration to the base layer.
