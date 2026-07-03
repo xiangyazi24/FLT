@@ -1,686 +1,727 @@
-# Q3166 (dm1): Paper 2 counterexample research — keyWeight boundary mechanism
+# Q3170 (dm1): Paper 2 Round 2 — `M^2 ≡ -I mod 9` and the root-packet/fiber issue
 
 Date: 2026-07-03
 
 ## Executive answer
 
-The cleanest way to understand the counterexample is this:
+The confirmed congruence
 
 ```text
-The tau pairing cancels the bilateral/bulk kernel.
-The failure is entirely a boundary flux through one-sided cuts.
-Those boundary cuts are q^9-dilated because the root-pair row coefficient is
-
-    n(l) = 54l + 45 = 9(6l+5).
-
-Therefore nonzero keyWeight is impossible away from e ≡ 0 mod 9.
+M^2 ≡ -I mod 9
 ```
 
-But I would be careful with the phrase “fails iff 9|e.”  The data quoted says all failures occur at multiples of 9, but many multiples of 9 still have no failure.  The theorem you should aim to prove is:
+is important, but it should be interpreted carefully.  It is a **deck anti-periodicity on the Pell/cone coordinates**, not automatically an action on root-packet fibers.
+
+The correct separation of layers is:
 
 ```text
-Eligibility theorem:
-  if 9 ∤ e, every fiber is tau-closed and keyWeight(e,K)=0.
+Layer 1: root-packet/fiber layer
+  variables: (l,u,v) plus root variables n_i
+  key: (hblock, anchor)
+  tau: central reflection in (m,t,d)
 
-Boundary theorem:
-  if 9 | e, keyWeight(e,K) is a signed boundary representation number.
-  It may vanish by cancellation or by no boundary representative.
+Layer 2: even-k/cone layer
+  variables: (u,v,k,r) in even_k_exp
+  cone block: Q_kr(k,r)
+  sigma: (k,r) -> (k, -r-6k-1)
+
+Layer 3: Pell/norm layer
+  variables: X=4k+3r+1, Z=5r+1
+  Pell automorph: M = [[9,-4],[-20,9]]
+  confirmed: M^2 ≡ -I mod 9
 ```
 
-So `9|e` is a necessary support condition for the residual, not by itself a sufficient condition for each fiber.
+The critical point is that `(hblock, anchor)` is **not the same coordinate system** as `(k,r)`.  The anchor is a root-packet root variable, and in the displayed counterexample it is the root variable `n=-17` from the last `j(54k+18,18,r)` block.  It is not the Pell coordinate `r`, not the same as the cone coordinate `r`, and not obviously transformed by `M` unless the full root-packet key map is carried along.
 
-The sigma involution on the `(k,r)` cone is the right repair.  The corrected local statement should not be “tau closes every fiber,” but:
+So the best theorem framing is not simply “`M` acts on fibers.”  The right theorem is:
 
 ```text
-keyWeight(e,K) is the divergence of a tau/sigma boundary current.
-It vanishes exactly when the fiber has no sigma-straddling boundary atoms,
-or when their signed boundary count cancels.
+The cone/Pell deck group explains the q^9 boundary charge after projecting
+from root packets to the missing-kernel cone.  To make it act fiberwise, one
+must lift the deck action to decorated atoms carrying the root-packet key.
 ```
 
-This recovers a fiber-local proof after adding boundary edges or ghosts.  The quotient proof should pair atoms in the enlarged graph, not in the original support alone.
-
-## Repo context used
-
-I checked the current Q-series repo notes.  The active Chapter 10 route emphasizes the faithful bridge through `Fhm = Ghat 1`, specialization at `(18,18,1)`, and the importance of boundary clearing before specialization.  The run log also records the key specialization denominator shape `Wd(r)=90r-D_row`, with `|Wd| ≥ 9` at `(18,18)`.  That is consistent with the answer below: the residual is not a random failure of tau; it is a q^9/q^18 boundary phenomenon coming from the specialized row arithmetic.
-
-## 1. Why the `9 | e` condition appears
-
-### 1.1 The short mechanism
-
-The noncentral tau cancellation fails only when the atom lies on a one-sided boundary.  The boundary terms come from row equations in which the root-pair linear coefficient is
+The most publishable statement is a boundary-charge theorem:
 
 ```text
-n(l) = 54l + 45 = 9(6l+5).
+keyWeight is the Z/9-deck boundary charge of the tau pairing.
+Off e ≡ 0 mod 9 the deck charge is zero; on e ≡ 0 mod 9 it is the fiberwise
+shadow of the discriminant-5 false theta cone D-A.
 ```
 
-Equivalently, with `m=l+1`,
+I would avoid the slogan “keyWeight vanishes iff 9 ∤ e” unless it is phrased as a support theorem.  The data says nonmultiples of 9 have no failures, but not that every multiple of 9 fails.
+
+## Q1. Relation between `(k,r)` in `even_k_exp` and `(hblock, anchor)` in the root packet
+
+The root packet and the cone block are two different projections of the same expanded summand.
+
+You gave:
 
 ```text
-n = 54m - 9 = 9(6m-1).
+even_k_exp(u,v,k,r)
+  = j(-18,90,v)
+  + j(18,90,u)
+  + j(18,18,2k)
+  + j(54k+18,18,r).
 ```
 
-Under tau, `m -> -m`, so
+The root-packet fiber key uses root data from the four `j` blocks.  In the counterexample, the relevant root variables are
 
 ```text
-n_tau = -54m - 9 = -n - 18.
+n in {-3, 15, 29, -17},
 ```
 
-After dividing by 9, if
+and the key anchor `-17` is the root variable from the final block
 
 ```text
-a = n/9 = 6m - 1,
+j(54k+18,18,r).
 ```
 
-then tau sends
+Therefore:
 
 ```text
-a -> -a - 2.
+anchor = root variable of a j-block after the root-packet extraction,
+not the raw cone variable r in even_k_exp.
 ```
 
-So the tau root-pair symmetry is an affine reflection centered at `a=-1`, but only after the coefficient has been divided by 9.  This is the first structural reason the residual lives on a 9-dilated lattice.
+This distinction is essential.  The variable `r` in the cone block is an index in the Hecke-Rogers cone.  The anchor is a root-packet coordinate produced after applying the root-pair/fiber extraction to the `j(A,B,variable)` pieces.  In the final block, the anchor is controlled by both the displayed `r` and the row parameter `54k+18`, because the roots of the row depend on the coefficient as well as the index.
 
-### 1.2 Boundary energies are images of a 9-dilated quadratic
+### Is `hblock` a function of `k` only?
 
-The general pattern is:
+Almost certainly no.
+
+`hblock` is a fiber label in the root packet, so it must encode how the four root variables combine after the row decomposition.  Since the four root variables come from
 
 ```text
-bulk row contribution       = bilateral theta / complete root-pair orbit,
-boundary row contribution   = one-sided or strip-truncated root-pair orbit.
+v,
+u,
+2k,
+r with row coefficient 54k+18,
 ```
 
-For a typical root variable `j`, the row equation has schematic form
+any fiber label built from them can depend on `u`, `v`, `k`, and the row/strip choice.  Even if one component of `hblock` is largely controlled by `k`, the counterexample already shows that the key
 
 ```text
-e = A j^2 + n(l) j + C(other variables),
+(hblock, anchor)=(-6,-17)
 ```
 
-where the boundary part is obtained by restricting `j` to one side of a cut.  Since `n(l)=9(6l+5)`, completing the square or performing the root-pair involution shows that the boundary polynomial is naturally expressed as
+is not recoverable from `(k,r)` alone unless the root-packet map is explicitly known.
+
+### What to instrument
+
+Add a diagnostic map in the code/probe layer:
 
 ```text
-e = 9 * R(boundary variables),
+rootKey(u,v,k,r) = (hblock, anchor)
 ```
 
-possibly after the fixed row normalization used by the Chapter 10 dissection.
-
-This is exactly what the Paper 3 cone factor sees:
+and print it alongside the cone coordinates:
 
 ```text
-Missing_kernel = Theta_u * Theta_v * (D - A),
+(u,v,k,r)
+root variables from the four j-blocks
+(hblock, anchor)
+Pell coordinates (X,Z)
+sigma(k,r)
+M(k,r) or M^2(k,r) when integral
 ```
 
-where the cone factor is a discriminant-5 Hecke-type false/indefinite theta series.  In the even-row normalization, the cone exponent is usually written as `9E` or `18N`; in other parity/coset components the same mechanism can produce `9` rather than `18`.  This explains why `90`, `702`, and `11763` are all multiples of `9`, while not necessarily all multiples of `18`.
-
-### 1.3 What needs to be proved
-
-The right theorem is not simply “because `n` is divisible by 9.”  The proof should factor the boundary contribution.
-
-A precise target theorem is:
+The theorem you need before claiming `M` acts on fibers is:
 
 ```text
-BoundarySupportTheorem.
-For every fiber K and exponent e,
-
-  keyWeight(e,K) = BoundaryWeight(e,K),
-
-where BoundaryWeight(e,K) is a finite signed sum over boundary variables and
-is supported only when e = 9E_boundary for some integer E_boundary.
-
-Consequently, if 9 ∤ e, then keyWeight(e,K)=0.
+rootKey(T(u,v,k,r)) = transformKey(rootKey(u,v,k,r))
 ```
 
-This is stronger and cleaner than checking tau support directly.
+for the proposed deck transformation `T`.  Without this theorem, `M` is only acting on the cone/Pell projection.
 
-### 1.4 Why some multiples of 9 pass
+## Q2. Does `M` descend to fibers or permute `(hblock, anchor)` keys?
 
-The quoted data says:
+Not directly, at least not as the one-step matrix `M` on `(X,Z)`.
+
+You define
 
 ```text
-non-9-multiples: no failures;
-9-multiples: many failures, but not all.
+X = 4k + 3r + 1,
+Z = 5r + 1,
+M = [[9,-4],[-20,9]].
 ```
 
-That is exactly what a boundary representation theorem predicts.  Multiples of 9 are eligible, but a particular fiber may still have no boundary representative or may have signed cancellation.  In Paper 3 language, this is the same distinction as:
+The inverse relations are
 
 ```text
-norm-eligible does not imply nonzero coefficient.
+r = (Z-1)/5,
+k = (5X - 3Z - 2)/20.
 ```
 
-The correct statement should be:
+Now apply `M`:
 
 ```text
-keyWeight can fail only on the q^9 boundary subseries.
+X' = 9X - 4Z,
+Z' = -20X + 9Z.
 ```
 
-not:
+If `Z ≡ 1 mod 5`, then
 
 ```text
-every multiple of 9 fails.
+Z' ≡ -Z ≡ -1 mod 5,
 ```
 
-## 2. keyWeight as a boundary divergence
-
-Yes.  This is the right repair.
-
-Let `A_e` be the set of atoms at exponent `e`, let `χ_e(x)` be the support indicator, and let `τ` be the central reflection in `(m,t)`:
+so `M` does **not** preserve the original `(k,r)` lattice/coset.  It sends the cone lattice to the opposite congruence coset.  This is already enough to say:
 
 ```text
-τ(m,t,d) = (-m,-t,d).
+M alone cannot descend to the original root-packet fibers without an additional
+coset/sign/deck correction.
 ```
 
-Let `s(x)` be the outer sign, with
+By contrast, `M^2` does preserve the original congruence conditions.  Explicitly,
 
 ```text
-s(τx) = -s(x)
+M^2 = [[161,-72],[-360,161]].
 ```
 
-for noncentral atoms.  Then, for a fixed fiber `K`, the tau-paired keyWeight can be written as
+In `(k,r)` coordinates this gives the affine transformation
 
 ```text
-keyWeight(e,K)
-  = 1/2 * sum_{x in K-orbit domain}
-        s(x) * (χ_e(x) - χ_e(τx)) * localWeight(x).
+T = M^2:
+  k' = 377k + 72r + 52,
+  r' = -288k - 55r - 40.
 ```
 
-The bulk bilateral piece has
+Modulo `9`, this is
 
 ```text
-χ_e(x) = χ_e(τx)
+k' ≡ -k - 2 mod 9,
+r' ≡ -r + 5 mod 9.
 ```
 
-and cancels.  Thus only the support-boundary term survives:
+This is the affine version of the confirmed statement `M^2 ≡ -I mod 9` in Pell coordinates.  It is anti-periodic, not periodic.
+
+### Does this permute keys?
+
+It can only permute keys after lifting to the decorated state.  The map `T=M^2` changes `(k,r)` drastically and does not specify how `u` and `v` should change.  But the root-packet key depends on the four `j` blocks, so a fiber action must be a transformation of
 
 ```text
-boundaryFlux_e(x)
-  = s(x) * (χ_e(x) C_boundary(x) - χ_e(τx) C_boundary(τx)).
+(u,v,k,r; root variables; hblock; anchor),
 ```
 
-This is a discrete divergence.  More invariantly, make a graph whose vertices are atoms and whose edges connect `x` to `τx`.  Define a current on each edge by the signed contribution transported from one endpoint to the other.  Then keyWeight is the divergence of this current restricted to the cut support.
+not only `(k,r)`.
 
-### 2.1 Boundary edge family
-
-The concrete boundary edge families are:
+The most likely situation is:
 
 ```text
-1. missing-half theta edges;
-2. U-strip edges;
-3. V-strip edges;
-4. the k,r Hecke-Rogers cone wall D-A.
+M^2 preserves the boundary energy and q^9 residue class,
+but it sends a root-packet fiber to a different fiber unless accompanied by
+compensating shifts in u,v and/or the root-pair representatives.
 ```
 
-The sigma involution
+So the answer is:
+
+```text
+M^2 descends to the cone coefficient system.
+It does not yet descend to root-packet fibers until the key map is lifted.
+```
+
+## Q3. Dihedral group `<M, sigma>` and its action on fibers
+
+The group generated by the Pell translation `M` and the reflection
 
 ```text
 sigma(k,r) = (k, -r - 6k - 1)
 ```
 
-preserves the `(k,r)` quadratic energy and flips the sign `(-1)^r`.  Hence the full bilateral `(k,r)` sum cancels, and the residual is exactly a cone-wall difference.
+is the expected infinite dihedral group of the indefinite binary form.
 
-That gives the repaired theorem:
+Conceptually:
 
 ```text
-CorrectedFiberTheorem.
-For a fixed fiber K, keyWeight(e,K)=0 if the fiber is sigma-closed across the
-boundary edge family.  Otherwise keyWeight(e,K) equals the signed count of
-sigma-straddling boundary atoms in that fiber.
+M       = hyperbolic translation / unit action along the Pell orbit,
+sigma   = wall reflection preserving Q_kr and flipping (-1)^r,
+<M,sigma> = D_infinity orbit group of the discriminant-5 cone.
 ```
 
-This is the right replacement for the failed `keyWeight=0` conjecture.
+This group explains the **cone** cancellation pattern:
 
-### 2.2 How this rescues the proof
+1. The full bilateral cone is invariant under the group.
+2. `sigma` pairs the two sides of the wall and flips the sign.
+3. The A/D cone cut selects a non-invariant fundamental region.
+4. The residual is the signed crossing number through that cut.
 
-The original proof tried to pair atoms inside the original support.  The ghost partner at `(4,21,4)` shows that the original support is not tau-closed.  The repaired proof enlarges the object:
+But the root-packet fiber action is again subtler.  The group acts naturally on `(k,r)` and on Pell coordinates `(X,Z)`, while the fiber key lives in root-packet coordinates.  Therefore define a decorated action:
 
 ```text
-original support + ghost boundary edges + sigma reflection data.
+DecoratedAtom = (u,v,k,r, rootData, key)
 ```
 
-Then cancellation happens in the enlarged graph, and the obstruction is pushed to a boundary divergence term.  If the global q-series identity includes the corresponding boundary correction, the proof closes.
-
-## 3. Does the ghost partner re-enter support by a deck transformation?
-
-Probably yes, but not by tau alone and not by a simple translation in `(m,t,d)`.
-
-There are three relevant deck phenomena.
-
-### 3.1 Root-row affine deck
-
-In the normalized row coefficient
+and try to lift the generators:
 
 ```text
-a = n/9 = 6m - 1,
+sigma_hat : DecoratedAtom -> DecoratedAtom
+M_hat     : DecoratedAtom -> DecoratedAtom  or  M2_hat
 ```
 
-tau acts by
+with properties:
 
 ```text
-a -> -a - 2.
+energy(sigma_hat x) = energy(x),
+energy(M2_hat x) = energy(x) or same q^9 boundary class,
+key(sigma_hat x) = key(x) or controlled key transform,
+weight(sigma_hat x) = -weight(x),
 ```
 
-For the counterexample
+depending on the exact fiber notion.
+
+### What likely explains the keyWeight pattern
+
+The keyWeight pattern is not simply “orbits of `<M,sigma>` have zero sum.”  It is:
 
 ```text
-m = -4,
-a = 6(-4)-1 = -25,
-a_tau = 23 = -(-25)-2.
+keyWeight is the signed intersection number of a root-packet fiber with the
+A/D Shintani cone boundary after projecting to the `(k,r)` block.
 ```
 
-Thus the ghost is visible in the affine root-pair quotient whose reflection center is `a=-1`.  This suggests a deck action in the root-row variable with affine shift `2` after dividing by 9.
+If a fiber is closed under the lifted sigma/deck action, the signed intersection is zero.  If the fiber straddles the boundary and the tau ghost lies outside support, the intersection number is nonzero.
 
-### 3.2 Cone deck via sigma
-
-On the Hecke-Rogers cone side, the relevant deck/reflection is not tau but
+So the group explains the pattern only after you add:
 
 ```text
-sigma(k,r) = (k, -r - 6k - 1).
+projection from root packet to cone,
+finite key map,
+boundary window,
+lifted/decorated action.
 ```
 
-It preserves the quadratic energy and reverses the parity sign.  The ghost partner should therefore be interpreted as re-entering after applying the sigma wall reflection in the boundary cone.  In the quotient by the sigma pairing, the bilateral sum is zero.
+## Q4. Best theorem framing for the paper
 
-### 3.3 Ideal/coset deck via the unit stabilizer
-
-On the Paper 3 norm side, the natural deck group is
+The three proposed framings were:
 
 ```text
-Gamma = <eps^6>,
+(a) keyWeight vanishes iff 9 does not divide e; when 9|e, it is the Z/9-deck boundary charge
+(b) Missing kernel GF = Z/9-periodic false theta
+(c) tau is Z/9-approximate involution on support lattice
 ```
 
-because `eps^6 L = L`.  The period `6` is a multiplicative unit-sector period; it is not the same as the additive q-exponent period `9`, but both carry a mod-3 component.
+### Ranking
 
-### 3.4 What period to test
-
-I would test three candidate periods separately:
+The strongest publishable framing is a refined version of **(a)** plus the generating-function identification from **(b)**:
 
 ```text
-q-exponent period:      9,
-root-row affine period: a -> -a-2 in a=n/9,
-unit/coset period:      eps^6.
+Main theorem.
+The failure of the tau fiber pairing is a q^9-supported boundary divergence.
+Equivalently, the missing-kernel generating function is a q^9-dilated
+Hecke-Rogers false theta cone.  Off e ≠ 0 mod 9 the boundary charge vanishes.
 ```
 
-For the ghost atom, do not expect a literal `(m,t,d) -> (m+P,t+Q,d)` translation to fix the support.  The support is cut by half-open strips and cone walls, so the natural deck is an affine reflection plus unit-sector reduction, not a rectangular lattice period.
-
-A good diagnostic is:
+I would not use the wording “iff 9 does not divide e” unless you mean the support of the obstruction, not failure at every fiber.  The data says:
 
 ```text
-Given a ghost y=τx outside support, search for g in <sigma, eps^6> or in the
-root-row affine deck group such that g(y) lies in the same energy/fiber support.
+9 ∤ e  => no failure,
+9 | e  => failure possible, but not guaranteed.
 ```
 
-If this succeeds uniformly, the quotient proof should be formulated over that deck group.
-
-## 4. Shape of the support set in `(m,t,d)`
-
-Use
+So the clean theorem is:
 
 ```text
-m = l + 1,
-t = u + v - 1,
-d = u - v,
+keyWeight obstruction is supported on e ∈ 9Z.
+```
+
+### Why not (c)?
+
+“tau is a Z/9-approximate involution” is a useful slogan but less precise.  A referee will ask:
+
+```text
+Approximate in what category?
+What is the quotient?
+What is the actual deck group?
+```
+
+If you want to use it, put it in the introduction as intuition, not as the main theorem.
+
+### Suggested title-level theorem
+
+```text
+Theorem.
+For Chan's Theta_10 root-packet expansion, the tau-pairing defect is the
+boundary divergence of a Z/9-deck current.  Its generating function is the
+q^9-dilated discriminant-5 Hecke-Rogers false theta factor
+
+    D-A = -f_{1,3,4}(X,-X^3,X).
+
+In particular, all fiber obstructions vanish for e not divisible by 9.
+```
+
+This is both mathematically sharp and directly connected to Papers 2/3.
+
+## Q5. Shell depth onset formula
+
+The M-orbit geometry suggests the right **method** for shell onset, but a literal formula needs the root-key constraints.
+
+### Cone-only shell distance
+
+For the sigma wall, the straddling boundary is
+
+```text
+k >= 0: r <= -6k - 1,
+k < 0: r >= -6k.
+```
+
+For the `k >= 0` side, define shell distance
+
+```text
+s = -r - 6k - 1 >= 0,
 ```
 
 so
 
 ```text
-u = U = (t + d + 1)/2,
-v = V = (t - d + 1)/2,
-l = m - 1.
+r = -6k - 1 - s.
 ```
 
-The integrality/parity condition is:
+For the cone quadratic
 
 ```text
-t + d + 1 is even,
-t - d + 1 is even.
+Q_kr(k,r) = 4k^2 + 6kr + r^2 + 2k + r,
 ```
 
-Equivalently, `t+d` and `t-d` are odd, so `t` and `d` have opposite parity.
-
-### 4.1 Strip support intervals
-
-The uniform strip function is
+substitution gives
 
 ```text
-strip0(N,l) = H(l) - H(l-N),
+Q_kr(k, -6k-1-s) = 4k^2 + 6ks + 2k + s^2 + s.
 ```
 
-where `H(x)=1` for `x>=0` and `0` otherwise.  In `m`-coordinates:
+Thus, cone-only, the minimal wall energy at shell `s` is achieved at `k=0`:
 
 ```text
-strip0(N,m-1) = H(m-1) - H(m-1-N).
+Q_min_cone(s) = s^2 + s.
 ```
 
-Equivalently define the half-open interval
+This is the first term in any onset formula.
+
+### Why this does not yet give `90` and `792`
+
+The observed onsets
 
 ```text
-I(N) =
-  { m : 1 <= m <= N }       if N > 0,
-  { m : N+1 <= m <= 0 }     if N < 0,
-  empty                     if N = 0.
+shell 1: e = 90 = 9*10,
+shell 2: e = 792 = 9*88,
 ```
 
-Then
+are much larger than `9*(s^2+s)` alone.  Therefore shell onset is not only cone-wall distance.  It also includes:
 
 ```text
-U-strip support:  m in I(U),
-V-strip support:  m in I(V).
+u/v theta factors,
+root-packet key constraints,
+parity/coset restrictions,
+strip/missing-half support inequalities.
 ```
 
-Under tau,
+The correct formula is a constrained quadratic minimization:
 
 ```text
-m -> -m,
-t -> -t,
-d -> d,
-U -> 1 - V,
-V -> 1 - U.
+onset_s(K-class) = 9 * min {
+    E_boundary(u,v,k,r,...) :
+    shell(k,r)=s,
+    rootKey(u,v,k,r,...) belongs to the target fiber class,
+    parity/coset/support constraints hold
+}.
 ```
 
-So the tau-reflected U-strip condition is
+Globally:
 
 ```text
--m in I(1 - V),
+onset_s = min over all eligible key classes of onset_s(K-class).
 ```
 
-and the tau-reflected V-strip condition is
+### How `M` enters
+
+The Pell automorph `M` or `M^2` organizes all lattice points at a fixed norm into orbits.  Shell onset should be found by reducing the minimization to a finite set of residues in one Shintani domain:
 
 ```text
--m in I(1 - U).
+1. Fix shell distance s.
+2. Reduce by the deck subgroup that preserves the relevant coset/key data.
+3. Enumerate the finite residue classes modulo 9 and the support congruences.
+4. Minimize the positive representative of the quadratic energy in that domain.
+5. Propagate higher solutions by M-orbits.
 ```
 
-These are not equal to the original conditions in general.
+This is exactly the same shape as the prime-sector table in Paper 3, but now the finite quotient is the `mod 9` deck quotient coming from `M^2 ≡ -I`.
 
-### 4.2 Explicit strip defects
-
-The U-strip tau defect is
+### Concrete theorem target
 
 ```text
-∂τ S_U(m,t,d)
-  = strip0(U, m-1) - strip0(1-V, -m-1)
-  = H(m-1) - H(m-1-U) - H(-m-1) + H(V-m-2).
+ShellOnsetTheorem.
+For each shell distance s, the first possible keyWeight obstruction is
+
+  onset_s = 9 * min_{c in C_s} Q_s(c),
+
+where C_s is a finite set of residue/key/support classes modulo the Z/9 deck,
+and Q_s is the reduced boundary quadratic.
 ```
 
-The V-strip tau defect is
+Then the numerically observed values become checks:
 
 ```text
-∂τ S_V(m,t,d)
-  = strip0(V, m-1) - strip0(1-U, -m-1)
-  = H(m-1) - H(m-1-V) - H(-m-1) + H(U-m-2).
+onset_1 = 90,
+onset_2 = 792,
 ```
 
-Those two formulas are the explicit support-boundary equations in `(m,t,d)` for the strip pieces.
+and shell 3 can be predicted before brute-force scanning.
 
-### 4.3 Missing-half support
+## Q6. Paper 2 + Paper 3 fusion
 
-The missing-half piece should be expressed in the root variable whose row coefficient is
+Yes, there is likely a single theorem subsuming both, but it should be formulated at the level of **local unit/deck obstruction**, not as a claim that the two phenomena are literally the same congruence.
+
+### Common structure
+
+Both stories have the same skeleton:
 
 ```text
-n = 9(6m-1).
+1. A real-quadratic indefinite theta cone over Q(sqrt(5)).
+2. A finite coset/support condition.
+3. A natural involution/reflection that cancels the bilateral bulk.
+4. A unit/deck group that fails to act trivially on the finite coset.
+5. A residual boundary charge supported on a smaller congruence subseries.
 ```
 
-Its generic shape is a one-sided inequality such as
+Paper 2 / keyWeight side:
 
 ```text
-j >= 0
+local obstruction: prime 3 / mod 9 deck
+confirmed: M^2 ≡ -I mod 9
+consequence: tau pairing is exact off the q^9 boundary subseries
 ```
 
-paired with a root-pair transformation of the form
+Paper 3 / nonmultiplicative norm side:
 
 ```text
-j -> -j - A(m, other data),
+local obstruction: prime 2 and ramified prime 5 through O_K/(2sqrt5)
+eps has order 3 mod 2 and order 2 mod sqrt5
+consequence: eps^6 stabilizes L, eps does not; coefficients do not descend to ideals
 ```
 
-where the affine parameter is divisible by the normalized row coefficient.  The exact support set is therefore:
+The common `3` is structural:
 
 ```text
-S_e(K)
-  = energy equation at exponent e
-    ∩ parity/integrality conditions in (m,t,d)
-    ∩ root-packet inequalities
-    ∩ one-sided missing-half or strip conditions.
+Paper 2: q^9 = (q^3)^2 / mod-9 additive deck at inert prime 3.
+Paper 3: F_4^× has order 3 at inert prime 2.
 ```
 
-The important point is that `S` is not a single convex tau-invariant region.  It is a finite union of half-open polyhedral regions, and tau moves the anchors `m=0,1` and swaps `U,V` affinely.
+Both are cubic-sector obstructions inside the same discriminant-5 cone mechanism.
 
-### 4.4 The counterexample in these coordinates
+### Fable's “-1 not in `<eps^6>`” claim
 
-For the atom
+I would restate this more cautiously.
+
+A precise version is:
 
 ```text
-(m,t,d)=(-4,-21,4),
+Both anomalies measure anti-invariance of the natural deck/unit action on a
+finite local quotient.  In Paper 2 the anti-invariance is M^2 ≡ -I mod 9.
+In Paper 3 the nontrivial unit phase is eps mod (2sqrt5), whose stabilizer on
+L is eps^6 rather than eps.
 ```
 
-we get
+That is defensible.
+
+I would not yet state:
 
 ```text
-U = (-21 + 4 + 1)/2 = -8,
-V = (-21 - 4 + 1)/2 = -12.
+both anomalies are exactly -1 not in <eps^6>
 ```
 
-Tau sends it to
+unless you define a single group and a single quotient in which this sentence is literally true.
+
+### Unified paper theorem
+
+A unified paper could say:
 
 ```text
-(4,21,4),
-U_tau = 1 - V = 13,
-V_tau = 1 - U = 9.
+Theorem schema.
+Let C be the discriminant-5 Hecke-Rogers cone arising from Chan's Theta_10.
+The bilateral theta attached to C has a dihedral deck group generated by a Pell
+translation and a wall reflection.  Finite local coset conditions break this
+deck symmetry.  The broken symmetry has two shadows:
+
+  (i) an additive mod-9 boundary charge in root-packet fibers, causing exactly
+      the q^9-supported keyWeight obstruction;
+
+  (ii) a multiplicative mod-(2sqrt5) unit phase, causing norm support without
+       multiplicativity and prime coefficients governed by a sector invariant.
 ```
 
-The support mismatch is therefore not mysterious: the original and reflected points live relative to different half-open strip intervals anchored at `m=0,1`, and the missing-half/root condition lives in a row whose coefficient has been reflected from `9(6m-1)` to `9(-6m-1)`.
-
-## 5. Relationship between `9|e` and the order-6 stabilizer
-
-There is probably a common mod-3 source, but I would not claim a direct theorem yet.
-
-### 5.1 What is definitely true
-
-The `9|e` condition is additive/q-series data:
+This would fuse Paper 2 and Paper 3 into one conceptual story:
 
 ```text
-n(l)=54l+45=9(6l+5),
+Chan's Theta_10 dissection produces a discriminant-5 false theta boundary.
+The boundary is controlled by a dihedral/Pell deck group.
+The q^9 and eps^6 phenomena are the additive and multiplicative local
+manifestations of the same broken deck symmetry.
 ```
 
-and the boundary exponent is a q^9-dilated representation number.
+### Should they be one paper?
 
-The order-6 stabilizer is multiplicative/ray-class data:
+I would keep them separate unless the unified theorem is fully proved.
+
+Best strategy:
 
 ```text
-eps has order 3 mod 2, order 2 mod sqrt(5), so order 6 mod 2sqrt(5),
-eps^6 stabilizes L.
+Paper 2: keyWeight counterexample and q^9 boundary-charge theorem.
+Paper 3: norm-supported nonmultiplicative false theta and prime-sector theorem.
+Fusion note/paper: the common dihedral deck mechanism, after both sides are solid.
 ```
 
-These are different structures.
+The fusion is conceptually powerful, but it raises the proof burden.  For publication, the safest route is to prove the two shadows cleanly first.
 
-### 5.2 The common `3`
+## Recommended next experiments
 
-The common `3` is likely structural.  The Chapter 10 dissection uses cubic/root-of-unity filtering and q^3/q^9 substitutions.  On the `Q(sqrt(5))` side, the prime `2` is inert and
+### 1. Instrument the key map
+
+Dump the following table for every atom near the counterexample and for a few M/sigma images:
 
 ```text
-O_K / 2O_K ≅ F_4,
-F_4^× has order 3.
+(l,u,v,k,r)
+(m,t,d)
+four root variables n_i
+(hblock, anchor)
+(X,Z)
+M(X,Z), M^2(X,Z)
+sigma(k,r)
+rootKey after each defined transform
+support flag
+keyWeight contribution
 ```
 
-Thus both sides contain a natural order-3 sector:
+This will answer Q1/Q2 empirically and identify the correct decorated action.
+
+### 2. Verify M-coset behavior
+
+Use this small script as a sanity checker.
+
+```python
+from dataclasses import dataclass
+from typing import Tuple
+
+
+@dataclass(frozen=True)
+class KR:
+    k: int
+    r: int
+
+
+def pell_coords(x: KR) -> Tuple[int, int]:
+    X = 4 * x.k + 3 * x.r + 1
+    Z = 5 * x.r + 1
+    return X, Z
+
+
+def from_pell(X: int, Z: int) -> KR | None:
+    if (Z - 1) % 5 != 0:
+        return None
+    r = (Z - 1) // 5
+    num = 5 * X - 3 * Z - 2
+    if num % 20 != 0:
+        return None
+    k = num // 20
+    return KR(k, r)
+
+
+def M(X: int, Z: int) -> Tuple[int, int]:
+    return 9 * X - 4 * Z, -20 * X + 9 * Z
+
+
+def M2_on_kr(x: KR) -> KR:
+    X, Z = pell_coords(x)
+    X1, Z1 = M(*M(X, Z))
+    y = from_pell(X1, Z1)
+    if y is None:
+        raise ValueError((x, X1, Z1))
+    return y
+
+
+def sigma(x: KR) -> KR:
+    return KR(x.k, -x.r - 6 * x.k - 1)
+
+
+def qkr(x: KR) -> int:
+    k, r = x.k, x.r
+    return 4 * k * k + 6 * k * r + r * r + 2 * k + r
+
+
+for x in [KR(0, 0), KR(0, -2), KR(1, -8), KR(-1, 3)]:
+    y = M2_on_kr(x)
+    print(x, "M2=", y, "mod9=", (y.k % 9, y.r % 9), "Q", qkr(x), qkr(y))
+    z = sigma(x)
+    print("  sigma=", z, "Q", qkr(z))
+```
+
+Expected facts:
 
 ```text
-additive side:     q^9 = (q^3)^3, root-packet row coefficient divisible by 9;
-multiplicative side: F_4^× order 3, unit-sector invariant iota in Z/3Z.
+M does not preserve the original KR lattice/coset.
+M^2 does preserve it.
+M^2 is affine anti-periodic modulo 9 in KR coordinates.
+sigma preserves Q_kr and flips the wall side.
 ```
 
-This suggests that the same cubic dissection/filtering that creates the `q^9` boundary subseries also creates the order-3 finite-field sector in Paper 3.
+### 3. Define shell distance and minimize
 
-### 5.3 What not to claim
+```python
+from dataclasses import dataclass
+from typing import Optional
 
-Do not claim:
 
-```text
-9|e follows from eps^6 stabilizer.
+@dataclass(frozen=True)
+class KR:
+    k: int
+    r: int
+
+
+def shell_distance(x: KR) -> Optional[int]:
+    k, r = x.k, x.r
+    if k >= 0 and r <= -6 * k - 1:
+        return -r - 6 * k - 1
+    if k < 0 and r >= -6 * k:
+        return r + 6 * k
+    return None
+
+
+def qkr(x: KR) -> int:
+    k, r = x.k, x.r
+    return 4 * k * k + 6 * k * r + r * r + 2 * k + r
+
+
+def cone_onset(shell: int, k_bound: int = 100) -> tuple[int, KR]:
+    best: tuple[int, KR] | None = None
+    for k in range(0, k_bound + 1):
+        r = -6 * k - 1 - shell
+        x = KR(k, r)
+        val = qkr(x)
+        if best is None or val < best[0]:
+            best = (val, x)
+    if best is None:
+        raise ValueError(shell)
+    return best
+
+
+for s in range(1, 6):
+    print(s, cone_onset(s))
 ```
 
-That is too strong and likely false as a direct implication.  The safer statement is:
-
-```text
-Both phenomena are shadows of the same cubic/cyclotomic layer of the
-Theta_10 dissection: the additive boundary is q^9-dilated, while the
-multiplicative norm model has an F_4^× sector of order 3.
-```
-
-A possible future theorem would identify both as images of one underlying mod-3 root-of-unity filter.
-
-## 6. Proposed theorem package
-
-I would reorganize the research target into the following theorem package.
-
-### Theorem A: tau-pair decomposition
-
-```text
-For every exponent e and fiber K,
-keyWeight(e,K) = Bulk(e,K) + Boundary(e,K),
-Bulk(e,K)=0 by tau pairing.
-```
-
-### Theorem B: q^9 support of boundary
-
-```text
-Boundary(e,K)=0 unless 9 | e.
-```
-
-Proof route: express the boundary edge families as q^9-dilated quadratic/false-theta sums.
-
-### Theorem C: boundary divergence formula
-
-```text
-Boundary(e,K) = div(J_e)(K),
-```
-
-where `J_e` is the tau/sigma edge current across missing-half and strip boundaries.
-
-### Theorem D: sigma-straddling criterion
-
-```text
-Boundary(e,K) is the signed count of sigma-straddling atoms in the fiber.
-If the fiber is sigma-closed, keyWeight(e,K)=0.
-```
-
-### Theorem E: cone identification
-
-```text
-Global boundary generating function = Theta_u * Theta_v * (D-A),
-D-A = -f_{1,3,4}(X,-X^3,X).
-```
-
-This connects the local counterexample to Paper 3.
-
-### Theorem F: deck quotient cancellation
-
-```text
-After adjoining ghost boundary edges and quotienting by the sigma/deck action,
-the lifted keyWeight vanishes.  The original keyWeight is the boundary charge
-of the quotient projection.
-```
-
-This is the conceptual replacement for the false keyWeight=0 conjecture.
-
-## 7. Lean theorem shapes
-
-Here is the Lean-facing shape I would aim for.  This is only an interface sketch, not code claimed to compile against the existing files.
-
-```lean
-import Mathlib.Tactic
-
-namespace QseriesFormalization
-namespace Ch10
-
-/-- Abstract atom type for the fiber-level theorem. -/
-structure Atom where
-  m : Int
-  t : Int
-  d : Int
-  k : Int
-  r : Int
-  deriving DecidableEq, Repr
-
-/-- Tau reflection in `(m,t)` with fixed `d`; k,r behavior is supplied separately. -/
-def tauMTD (x : Atom) : Atom :=
-  { x with m := -x.m, t := -x.t }
-
-/-- Hecke-Rogers wall reflection on the `(k,r)` block. -/
-def sigmaKR (x : Atom) : Atom :=
-  { x with r := -x.r - 6*x.k - 1 }
-
-/-- Boundary eligibility: the q^9 support theorem. -/
-def BoundaryEligible (e : Int) : Prop :=
-  9 ∣ e
-
-/-- A schematic boundary flux functional. -/
-def BoundaryFlux
-    (support : Atom -> Prop)
-    (sgn : Atom -> Int)
-    (weight : Atom -> Int)
-    (x : Atom) : Int :=
-  if support x then sgn x * weight x else 0
-  -- In the real theorem this is paired with the tau/sigma reflected endpoint.
-
-/-- Target theorem shape: no boundary off the q^9 subseries. -/
-theorem keyWeight_zero_of_not_nine_dvd
-    (keyWeight : Int -> Int -> Int)
-    (e key : Int)
-    (h : ¬ 9 ∣ e) :
-    keyWeight e key = 0 := by
-  -- This should follow from the q^9 boundary support theorem, not from brute force.
-  admit
-
-end Ch10
-end QseriesFormalization
-```
-
-The `admit` above is deliberately included only to show theorem shape.  It should not be copied into the no-sorry development.
-
-## 8. Answers to the five questions
-
-### Q1. Why `9|e` precisely?
-
-Because the tau residual is not a bulk term.  It is a boundary term, and the boundary row coefficient is `n=54l+45=9(6l+5)`.  After root-pair reflection/completing-square normalization, the boundary energy is a q^9-dilated quadratic/false-theta representation.  Thus nonzero keyWeight is impossible unless `e` lies in `9Z`.  Multiples of 9 are only eligible; they can still pass by absence or cancellation of boundary representatives.
-
-### Q2. Can residual keyWeight be a boundary divergence?
-
-Yes.  This is the right repair.  Pair the tau orbit in the bulk, then write the uncancelled contribution as
-
-```text
-s(x) * (χ(x)C(x) - χ(τx)C(τx)).
-```
-
-This is a discrete divergence across the support cut.  The sigma involution identifies the Hecke-Rogers boundary wall, so the residual is a signed count of sigma-straddling atoms.
-
-### Q3. Does the ghost partner re-enter by a deck transformation?
-
-Likely yes in the enlarged quotient, but not by tau alone.  The relevant deck data are: additive q-period `9`, normalized row reflection `a -> -a-2` for `a=n/9`, sigma wall reflection on `(k,r)`, and multiplicative unit stabilizer `<eps^6>` on the norm side.  Do not expect a simple rectangular translation in `(m,t,d)`.
-
-### Q4. What is the support shape in `(m,t,d)`?
-
-It is a finite union of half-open polyhedral pieces.  The strip pieces are explicit:
-
-```text
-U = (t+d+1)/2,
-V = (t-d+1)/2,
-I(N) = [1,N] if N>0, [N+1,0] if N<0, empty if N=0.
-
-U-strip: m in I(U),
-V-strip: m in I(V).
-```
-
-Tau sends `U -> 1-V`, `V -> 1-U`, and `m -> -m`, so the strip support is not tau-invariant.  The exact strip defects are the Heaviside formulas above.  The missing-half piece should be written similarly in the root variable with row coefficient `9(6m-1)`.
-
-### Q5. Is there a relationship between `9` and order `6`?
-
-Probably, but only through a common mod-3 layer.  The `9` is additive q-series dilation from the root row; the `6` is multiplicative unit/coset stabilization, with order `3` mod `2` and order `2` mod `sqrt(5)`.  The common `3` is likely the cubic-dissection/F_4^× sector.  This is a structural analogy and a promising unification target, not yet a direct implication.
+This gives only the cone onset.  To match observed keyWeight onsets, add the root-key/support constraints to the minimization.
 
 ## Bottom line
 
-The counterexample does not mean the Chapter 10 proof idea is dead.  It means the naive support-local tau pairing was missing a boundary term.  The corrected statement should be:
+The confirmation `M^2 ≡ -I mod 9` is the missing algebraic bridge between the q^9 keyWeight phenomenon and the discriminant-5 cone geometry.  But the root-packet key layer is not the same as the cone `(k,r)` layer.  The immediate next theorem should therefore be a decorated-lift theorem, not a bare Pell-orbit theorem:
 
 ```text
-The tau bulk cancels.
-The entire obstruction is a q^9-supported boundary divergence.
-That divergence is the local fiber shadow of the global Hecke-Rogers cone
-D-A = -f_{1,3,4}(X,-X^3,X).
+Lift the dihedral cone deck action to decorated root atoms, or prove exactly
+which part of the root key it changes.
 ```
 
-This gives a coherent path forward: prove zero off `9Z`, express the `9Z` residual as sigma-straddling boundary flux, and then either add the required boundary correction or pass to the appropriate deck/ghost quotient where the lifted pairing is exact.
+Once that is done, the clean paper statement is:
+
+```text
+The keyWeight counterexample is a Z/9 boundary charge of the discriminant-5
+Pell/Shintani deck.  The same deck, viewed multiplicatively through the unit
+coset stabilizer eps^6, produces the nonmultiplicative norm theta series of
+Paper 3.
+```
