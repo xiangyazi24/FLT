@@ -1,596 +1,365 @@
-# Q3177 (dm1): Paper 2 Round 8 — Resolving Two Bottlenecks
+# Q3181 (dm1): Paper 2 Round 9 — Shadow Computation and Proof Sketches
 
 Date: 2026-07-03
 
 ## Executive answer
 
-R8 has two separate jobs.
+R9 is the point where the paper can become short and rigorous.
 
-The first job is analytic: resolve the Hickerson--Mortenson/Appell--Lerch description of
-
-```text
-f_{1,3,4}(X,-X^3,X)
-```
-
-at a torsion specialization.  The safe conclusion is:
-
-```text
-D-A = -f_{1,3,4}(X,-X^3,X)
-```
-
-is not an honest weight-1 theta series.  It is an indefinite-theta / mixed mock-Jacobi object.  The failure of multiplicativity and the large values such as `chi(17)=9` are exactly what one should expect after the R7/R8 computation.
-
-The second job is elementary and more important for Paper 2: prove the mechanism without invoking HM at all.  The sigma reflection
+The central elementary mechanism is now complete:
 
 ```text
 sigma_k(r) = -(6k+1)-r
 ```
 
-preserves the row quadratic exactly, flips the sign `(-1)^r`, has no integral fixed point, and cancels the interior of each row.  The only surviving atoms are the two slabs
+preserves the inner quadratic, flips the sign `(-1)^r`, has no integral fixed point, and cancels the sigma-stable interior.  The missing kernel is exactly the two-slab remainder
 
 ```text
 Slab+ = { k >= 0,  r <= -(6k+1) },
 Slab- = { k <= -1, r >= -6k }.
 ```
 
-Thus the missing kernel is already proved in elementary form as
+The analytic classification should now skip the full Hickerson--Mortenson expansion in the main body.  Use Zwegers directly on the two-slab indefinite theta.  HM can be reserved for an appendix or follow-up paper.
+
+The most important correction in R9 is this:
 
 ```text
-MissingKernel = Theta_u * Theta_v * F_slab,
+W(q) = 1/2 * sum_{r in Z} (-1)^r q^{9r(r+1)} = 0.
 ```
 
-where `F_slab` is the signed slab sum.  HM is only needed to name `F_slab` analytically as a mixed mock-Jacobi/Appell--Lerch object.
+It is not a nonzero unary theta correction.  The bilateral row cancels by the involution `r -> -r-1`.  Thus, with the sign-difference convention stated in the prompt, there is no actual extra modular wall term.  The k=0 issue is a normalization artifact of `sgn(0)=0`, and the bilateral correction cancels identically.
+
+The mockness is therefore entirely the Zwegers mockness of the sign-difference indefinite theta attached to the two negative vectors
+
+```text
+c1 = (-1, 3),      Q(c1) = -5,
+c2 = (-3, 14),     Q(c2) = -20.
+```
+
+A clean nonzero-shadow check is the first coefficient in the `c1` unary theta, at exponent `q^(9/4)` in the natural normalization; it is nonzero and cannot be cancelled by the `c2` contribution, whose first fractional exponent is different.
 
 ---
 
-## Bottleneck 1. HM torsion resolution
+## Q1. The k=0 wall correction
 
-### 1.1 Definitions and the five Appell--Lerch terms
+### Q1a. Identification of `W(q)`
 
-Use the standard notation
+The proposed correction is
 
 ```text
-j(x;q) = (x;q)_infty (q/x;q)_infty (q;q)_infty,
-
-m(x,q,z) = 1/j(z;q) * sum_{r in Z} (-1)^r q^{r(r-1)/2} z^r
-                              / (1 - q^{r-1}xz).
+W(q) = 1/2 * sum_{r in Z} (-1)^r q^{9r(r+1)}.
 ```
 
-For the Hecke-type double sum, use
+This bilateral series is identically zero.
+
+Indeed, pair `r` with
 
 ```text
-f_{a,b,c}(x,y,q)
-  = sum_{sg(r)=sg(s)} sg(r)(-1)^{r+s} x^r y^s
-      q^{a*r(r-1)/2 + b*r*s + c*s(s-1)/2}.
-```
-
-For `(a,b,c)=(1,3,4)`, the discriminant is
-
-```text
-b^2 - ac = 9 - 4 = 5.
-```
-
-The Appell--Lerch part obtained by substituting `(1,3,4)` into the HM `g_{a,b,c}` expression is
-
-```text
-G_{1,3,4}(x,y,q)
-  = j(x;q) m(-q^2 y/x^3, q^5, -1)
-    + sum_{t=0}^3 (-x)^t q^{t(t-1)/2} j(q^{3t}y; q^4)
-        m(q^{14-5t} x^4/y^3, q^20, -1).
-```
-
-Equivalently, the five Appell--Lerch terms are
-
-```text
-H0 =  j(x;q)                         m(-q^2 y/x^3,    q^5,  -1),
-H1 =  j(y;q^4)                       m( q^14 x^4/y^3, q^20, -1),
-H2 = -x j(q^3y;q^4)                  m( q^9  x^4/y^3, q^20, -1),
-H3 =  x^2 q j(q^6y;q^4)              m( q^4  x^4/y^3, q^20, -1),
-H4 = -x^3 q^3 j(q^9y;q^4)            m( q^-1 x^4/y^3, q^20, -1).
-```
-
-The full HM form is
-
-```text
-f_{1,3,4}(x,y,q) = G_{1,3,4}(x,y,q) + T_{1,3,4}(x,y,q),
-```
-
-where `T_{1,3,4}` is a finite theta quotient.  For Paper 2, the Appell--Lerch terms above are the computable mock part, and the finite quotient is the modular theta part.
-
-Important caveat: the published HM theorem should be quoted with its exact convention.  Some versions state a closed theorem first for `f_{n,n+p,n}` and special divisibility families, while the general `(a,b,c)` formula is implemented through the same `g_{a,b,c}` Appell--Lerch expression plus a finite theta correction.  So the paper should not invent a theta quotient from memory.  It should either quote the exact HM/Mortenson--Zwegers general theorem being used, or define
-
-```text
-T_{1,3,4} := f_{1,3,4} - G_{1,3,4}
-```
-
-and then evaluate that finite quotient by the residue algorithm.
-
-### 1.2 Specializing `x=X`, `y=-X^3`
-
-First keep the nome `q` separate from the monomial `X`.  Then
-
-```text
-G_{1,3,4}(X,-X^3,q)
-  = j(X;q) m(q^2, q^5, -1)
-    + j(-X^3;q^4) m(-q^14 X^-5, q^20, -1)
-    - X j(-q^3X^3;q^4) m(-q^9 X^-5, q^20, -1)
-    + X^2 q j(-q^6X^3;q^4) m(-q^4 X^-5, q^20, -1)
-    - X^3 q^3 j(-q^9X^3;q^4) m(-q^-1 X^-5, q^20, -1).
-```
-
-Now tie the monomial to the nome by setting `X=q`.  The Appell--Lerch part becomes
-
-```text
-G_{1,3,4}(q,-q^3,q)
-  = j(q;q) m(q^2, q^5, -1)
-    + j(-q^3;q^4) m(-q^9,  q^20, -1)
-    - q j(-q^6;q^4) m(-q^4,  q^20, -1)
-    + q^3 j(-q^9;q^4) m(-q^-1, q^20, -1)
-    - q^6 j(-q^12;q^4) m(-q^-6, q^20, -1).
-```
-
-Since
-
-```text
-j(q;q)=0,
-```
-
-the first displayed product must be treated by a limiting convention.  With the standard choice `z=-1`, the factor
-
-```text
-m(q^2,q^5,-1)
-```
-
-is finite as a formal Appell--Lerch value, so this first term contributes `0` directly.  If a different but equivalent HM representation moves a simple pole into the paired `m`-factor, then the finite part is computed by the derivative formula below.
-
-### 1.3 The Jacobi derivative and the `0 * infinity` finite part
-
-Let
-
-```text
-J_1 = (q;q)_infty.
-```
-
-The Jacobi triple product gives the first-order expansion
-
-```text
-j(q e^eps; q) = eps * J_1^3 + O(eps^2).
-```
-
-More generally, if
-
-```text
-M(eps) = m(alpha e^{lambda eps}, Q, z)
-```
-
-has a simple pole at `eps=0`, and the pole comes from the unique integer `r0` satisfying
-
-```text
-Q^{r0-1} alpha z = 1,
-```
-
-then the residue is
-
-```text
-M(eps)
-  = - 1/(lambda eps) * (-1)^{r0} Q^{r0(r0-1)/2} z^{r0} / j(z;Q)
-    + O(1).
-```
-
-Therefore
-
-```text
-lim_{eps -> 0} j(qe^eps;q) M(eps)
-  = - J_1^3/lambda * (-1)^{r0} Q^{r0(r0-1)/2} z^{r0} / j(z;Q).
-```
-
-This is the exact `eta^3` contribution: since `J_1 = q^{-1/24} eta(tau)`, the derivative term is an `eta^3`-type theta factor, up to the usual power of `q`.
-
-For a theta quotient with a denominator `j(qe^eps;q)`, use the reciprocal rule:
-
-```text
-FP_{eps=0} N(eps) / j(qe^eps;q)
-  = N'(0) / J_1^3
-```
-
-whenever `N(0)=0`.  If `N(0) != 0`, the quotient has an actual pole and the chosen HM representation is not the correct finite specialization until the pole is cancelled against another term.
-
-### 1.4 Closed computable form for `D-A`
-
-With the convention above, the clean closed form is
-
-```text
-D - A
-  = -f_{1,3,4}(q,-q^3,q)
-  = -R_0(q) - H_1(q) - H_2(q) - H_3(q) - H_4(q) - T^*(q),
-```
-
-where
-
-```text
-R_0(q)
-  = 0
-```
-
-for the standard `z=-1` specialization, and in any equivalent representation containing a genuine `0 * infinity` collision,
-
-```text
-R_0(q)
-  = - J_1^3/lambda * (-1)^{r0} Q^{r0(r0-1)/2} z^{r0}/j(z;Q).
-```
-
-The four nonzero Appell--Lerch terms are
-
-```text
-H_1(q) =  j(-q^3;q^4)    m(-q^9,  q^20, -1),
-H_2(q) = -q j(-q^6;q^4)  m(-q^4,  q^20, -1),
-H_3(q) =  q^3 j(-q^9;q^4) m(-q^-1, q^20, -1),
-H_4(q) = -q^6 j(-q^12;q^4)m(-q^-6, q^20, -1).
-```
-
-The finite theta quotient is
-
-```text
-T^*(q) = FP_{X=q} T_{1,3,4}(X,-X^3,q).
-```
-
-This is explicitly computable: expand every theta quotient in `T_{1,3,4}` along `X=q e^eps`, replace every vanishing `j(qe^eps;q)` by `eps J_1^3`, cancel poles, and retain the constant term in `eps`.
-
-Thus the repaired term is
-
-```text
-Corr_tau
-  = -Theta_u Theta_v f_{1,3,4}(q,-q^3,q)
-  = Theta_u Theta_v * (D-A)
-```
-
-with
-
-```text
-D-A = -R_0 - H_1 - H_2 - H_3 - H_4 - T^*.
-```
-
-Analytic classification:
-
-```text
-H_i terms        = Appell--Lerch / mock-Jacobi part,
-R_0 and T^*      = eta^3 and theta-quotient modular part,
-Corr_tau         = theta factors times mixed mock-Jacobi correction.
-```
-
-### 1.5 Even support and the natural nome
-
-The observed inner coefficients are supported only at even exponents:
-
-```text
-F(q) = sum_{n >= 0} a[n] q^{2n}.
-```
-
-The natural normalization is therefore
-
-```text
-Q = q^2,
-F(q) = F_even(Q).
-```
-
-This is a pullback `tau -> 2tau`, not evidence for honest weight-1 modularity.  No Dedekind eta factor is required merely to explain even support.  Eta factors enter only from Jacobi derivatives such as
-
-```text
-j(qe^eps;q)'|_{eps=0} = (q;q)_infty^3 = q^{-1/8} eta(tau)^3.
-```
-
-So the recommended paper normalization is:
-
-```text
-1. write the slab series in Q=q^2;
-2. record any derivative terms as eta(tau)^3 times a q-power;
-3. do not force a Dirichlet-character or multiplicative weight-1 interpretation.
-```
-
-The R8 multiplicativity failure is then not a negative result; it is a diagnostic confirming that the object is mixed mock-Jacobi rather than an honest theta series.
-
----
-
-## Bottleneck 2. Atom-to-key dictionary
-
-### 2.1 The correct triangular root variable
-
-The inner exponent is
-
-```text
-Q_inner(k,r) = 2k(2k+1) + r(r+6k+1).
-```
-
-Complete the `r`-quadratic by setting
-
-```text
-n = r + 3k + 1,
-A = 2n - 1 = 2r + 6k + 1.
+r' = -r - 1.
 ```
 
 Then
 
 ```text
-r(r+6k+1) = (A^2 - (6k+1)^2)/4,
+r'(r'+1) = (-r-1)(-r) = r(r+1),
 ```
 
-and
+but
 
 ```text
-Q_inner(k,r)
-  = 2k(2k+1) + (A^2 - (6k+1)^2)/4
-  = (A^2 - 20k^2 - 4k - 1)/4.
+(-1)^{r'} = (-1)^{-r-1} = -(-1)^r.
 ```
 
-Since
+So every pair cancels, and there is no fixed point because `r=-1/2` is not integral.  Therefore
 
 ```text
-A = 2r + 6k + 1 = 2(r+3k+1)-1,
+sum_{r in Z} (-1)^r q^{9r(r+1)} = 0,
+W(q)=0.
 ```
 
-`A` is always odd.  This is the structural proof of the all-anchors-odd observation in the sigma/slab variables.
-
-Thus the atom-to-key anchor dictionary should be
+This is the exact identification.  It can also be viewed as the vanishing of an odd theta characteristic.  If one writes
 
 ```text
-anchor A = 2r + 6k + 1,
-n        = r + 3k + 1.
-```
-
-If some older code reports the raw anchor as `2r-1`, then that is a different coordinate.  The triangular root coordinate of the row quadratic is the shifted root above.
-
-### 2.2 Action of sigma on the anchor
-
-The row reflection is
-
-```text
-sigma_k(r) = -(6k+1)-r.
-```
-
-It fixes `k`, hence sends
-
-```text
-n = r+3k+1
-```
-
-to
-
-```text
-n' = sigma_k(r)+3k+1
-   = -(6k+1)-r+3k+1
-   = -r-3k
-   = 1-n.
-```
-
-Therefore
-
-```text
-A' = 2n' - 1 = 2(1-n)-1 = -A.
-```
-
-So in the natural triangular-root anchor,
-
-```text
-sigma: A -> -A.
-```
-
-This is the cleanest possible affine involution: the constant is `C=0`.
-
-If instead one uses the unshifted coordinate
-
-```text
-A_raw = 2r - 1,
+r(r+1) = (r+1/2)^2 - 1/4,
 ```
 
 then
 
 ```text
-A_raw' = 2sigma_k(r)-1
-       = -2r - 12k - 3
-       = (-12k-4) - A_raw.
+sum_{r in Z} (-1)^r q^{9r(r+1)}
+  = q^(-9/4) sum_{r in Z} (-1)^r q^{9(r+1/2)^2},
 ```
 
-So in that raw coordinate the affine constant is
+and the theta function is odd under `r+1/2 -> -(r+1/2)`.
+
+Important: the half-row series
 
 ```text
-C(k) = -12k - 4.
+sum_{r <= -1} (-1)^r q^{9r(r+1)}
 ```
 
-This is why the shifted triangular root is the right key variable: it removes the row-dependent affine constant and makes sigma simply `A -> -A`.
+is not the correction.  It is a partial theta.  The actual difference between the slab indicator and the `sgn`-difference indicator includes both half-rows and cancels bilaterally.
 
-### 2.3 Boundary divergence per key
+### Q1b. Does the wall correction matter for modularity?
 
-The key is
+With the convention in the prompt,
 
 ```text
-K(x) = (hblock(x), anchor(x)),
+F_slab = F_Zwegers + W = F_Zwegers.
 ```
 
-with
+So yes, the wall issue is irrelevant to the modularity classification, but for a stronger reason than expected: the correction is zero.
+
+If a different convention is used, for example if one keeps only the `r <= -1` half-row, then that object is a partial theta and should not be inserted as a modular correction.  The paper should use the bilateral sign-difference normalization because it is the one compatible with Zwegers.
+
+### Q1c. Which boundary causes the correction?
+
+The only possible `sgn(0)` ambiguity is the wall
 
 ```text
-hblock = (|k| + 1 - |u+v-1| + carry)//3,
-
-carry = 1 if |k| = 0 and 1 <= (u-v) + |u+v-1|, else 0,
-
-anchor = 2r + 6k + 1.
+k = 0.
 ```
 
-Let
+The second sign is
 
 ```text
-E(u,v,k,r)
-  = 9*(5v^2 - 7v + 5u^2 - 3u
-       + 2k(2k+1) + r(r+6k+1)).
+sgn(6k+r+1/2).
 ```
 
-Let `sgn_atom(u,v,k,r)` be the full signed coefficient from the residual kernel.  If no additional code sign is present, the inner sign is `(-1)^r`.
-
-Then the per-key generating function is
+Its zero would occur at
 
 ```text
-G_K(q)
-  = sum_{(u,v,k,r) in Slab+ union Slab-}
-        sgn_atom(u,v,k,r) * 1_{K(u,v,k,r)=K} * q^{E(u,v,k,r)}.
+r = -6k - 1/2,
 ```
 
-Coefficientwise,
+which is never an integer.  Thus there is no lattice correction on that boundary.
+
+For `k=0`, the sign-difference indicator is
 
 ```text
-keyWeight(e,K) = [q^e] G_K(q).
+( sgn(0) - sgn(r+1/2) ) / 2.
 ```
 
-This is the precise key-level boundary divergence.  The total missing kernel is obtained by summing over all keys:
+It gives `+1/2` for `r <= -1` and `-1/2` for `r >= 0`, while the actual slab gives `1` for `r <= -1` and `0` for `r >= 0`.  The difference is `+1/2` on both half-rows, hence exactly `W(q)`, and `W(q)=0`.
+
+So the final statement should be:
 
 ```text
-MissingKernel(q) = sum_K G_K(q).
+There is a formal k=0 normalization discrepancy, but its bilateral theta series vanishes identically.  No nonzero wall correction remains.
 ```
-
-If `u` and `v` are not part of the key projection, their sums factor out as `Theta_u Theta_v`, leaving the inner slab series in `(k,r)`.
 
 ---
 
-## Q3. Disc-20 form and the Pell connection
+## Q2. Shadow computation
 
-### 3.1 Fundamental unit
+### Q2a. Covariant shadow formula
 
-The form
-
-```text
-4k^2 + 6kr + r^2
-```
-
-has discriminant
+Let the homogeneous inner form be
 
 ```text
-D = 6^2 - 4*4*1 = 20.
+Q0(k,r) = 4k^2 + 6kr + r^2.
 ```
 
-The corresponding quadratic order is
+Its symmetric bilinear form is
 
 ```text
-O_20 = Z[sqrt(5)],
+B((k,r),(k',r'))
+  = Q0((k,r)+(k',r')) - Q0(k,r) - Q0(k',r')
+  = 8kk' + 6kr' + 6rk' + 2rr'.
 ```
 
-which is the conductor-2 order inside the maximal order
+The two negative vectors are
 
 ```text
-O_5 = Z[(1+sqrt(5))/2].
+c1 = (-1, 3),      Q0(c1) = -5,
+c2 = (-3, 14),     Q0(c2) = -20.
 ```
 
-Let
+They encode the two signs because
 
 ```text
-epsilon = (1+sqrt(5))/2.
+B(c1,(k,r)) = 10k,
+B(c2,(k,r)) = 10(6k+r).
 ```
 
-Then
+The second wall in the slab is the shifted wall
 
 ```text
-epsilon^3 = 2 + sqrt(5)       has norm -1 and lies in O_20,
-epsilon^6 = 9 + 4sqrt(5)      has norm +1 and lies in O_20.
+6k+r+1/2 = 0,
 ```
 
-For the proper automorph group of an oriented indefinite form of discriminant `20`, the norm-`+1` generator is therefore
+so it is harmless to write it as an affine version of the `c2` wall.
+
+A standard Zwegers completion of the sign-difference series replaces
 
 ```text
-epsilon_20^+ = 9 + 4sqrt(5).
+sgn(B(c_i,x))
 ```
 
-The Pell matrix has eigenvalues
+by an error function
 
 ```text
-9 ± 4sqrt(5),
+E_i(x;y) = E( sqrt(18y) * B(c_i,x) / sqrt(-Q0(c_i)) ),
 ```
 
-so it is exactly multiplication by `epsilon^6` on the associated real quadratic line.
+with the obvious affine shift for `c2`.  Here `q=e^{2*pi*i*tau}` and `y=Im(tau)`.  The factor `18y` reflects the scale `9Q0` in the exponent; changing the normalization of `Q` changes this constant but not the unary theta factors.
 
-There is no division in `9+4sqrt(5)`.  The clean relation is
+In this normalization the antiholomorphic derivative is a sum of two unary theta kernels:
 
 ```text
-9 + 4sqrt(5) = ((1+sqrt(5))/2)^6 = (2+sqrt(5))^2.
+-∂Fhat/∂bar(tau)
+  = C * ( S_{c1}(tau) - S_{c2}(tau) ),
 ```
 
-### 3.2 Relation to the original discriminant-5 story
-
-The field has always been
+where `C` is an explicit nonzero normalization constant depending only on the chosen `E`-function convention, and
 
 ```text
-K = Q(sqrt(5)).
+S_c(tau)
+  = sum_{x in lattice/coset} chi(x)
+      B(c,x) / sqrt(-Q0(c))
+      exp( -18*pi*y * B(c,x)^2 / (-Q0(c)) )
+      q^{9Q_inner(x)}.
 ```
 
-The difference is the order:
+This is the direct shadow formula before Poisson summation.  After Poisson summation along the negative direction, each `S_c` becomes a holomorphic unary theta series on the positive line `c^perp`.
+
+### Q2b. Explicit unary theta form
+
+For the first wall,
 
 ```text
-discriminant 5:   maximal order Z[(1+sqrt(5))/2],
-discriminant 20:  conductor-2 order Z[sqrt(5)].
+c1^perp = Z*(0,1),
 ```
 
-The slab form is a conductor-2 incarnation of the same `Q(sqrt(5))` Pell dynamics.  The stabilizer `<epsilon^6>` appearing in the coset story is precisely the norm-`+1` unit of the conductor-2 order.
-
-So the disc-20 form is not a different field.  It is the same field with a stricter integrality condition.
-
-### 3.3 Correct integral norm representation
-
-The correct completion is
+because `B(c1,(0,1))=0`.  The wall coordinate is `r`, and on `k=0`
 
 ```text
-4k^2 + 6kr + r^2
-  = ((4k+3r)^2 - 5r^2)/4.
+Q_inner(0,r) = r(r+1) = (r+1/2)^2 - 1/4.
 ```
 
-Equivalently, define
+The corresponding nonzero unary shadow component is the odd-characteristic theta derivative
 
 ```text
-X = 4k + 3r,
-Y = r.
+Theta_1^sh(tau)
+  = sum_{r in Z} (-1)^r (2r+1) q^{9(r+1/2)^2}.
 ```
 
-Then
+Equivalently, in Jacobi notation,
 
 ```text
-4 * (4k^2 + 6kr + r^2) = X^2 - 5Y^2.
+Theta_1^sh(tau)
+  = (1/(pi*i)) * ∂/∂z theta_1(z | 18tau) evaluated at z=1/2,
 ```
 
-The integrality condition is
+up to the conventional power of `q` and the conventional theta normalization.  It is not the vanishing theta
 
 ```text
-X ≡ 3Y mod 4.
+sum (-1)^r q^{9(r+1/2)^2};
 ```
 
-Thus the form is the norm form
+the derivative factor `(2r+1)` is what makes the shadow nonzero.
+
+For the second wall, the positive line is generated by
 
 ```text
-N(X + Y sqrt(5)) = X^2 - 5Y^2
+p2 = (1,-6),       Q0(p2)=4,
 ```
 
-restricted to the congruence class `X ≡ 3Y mod 4`, then divided by `4`.
-
-This is the proper integral representation.  The expression with `2k + 3r/2` is useful for completing the square but is not the integral lattice model.
-
-For the full inner exponent, including linear terms, use the odd anchor `A=2r+6k+1`:
+since `B(c2,p2)=0`.  The affine wall is
 
 ```text
-Q_inner(k,r)
-  = 2k(2k+1) + r(r+6k+1)
-  = (A^2 - 20k^2 - 4k - 1)/4.
+6k+r+1/2=0,
 ```
 
-The homogeneous part is the discriminant-20 norm form; the linear terms select the shifted/odd coset.
+so the resulting unary theta is a characteristic theta on the coset of the `p2`-line shifted by the half-wall.  A convenient normalized form is
+
+```text
+Theta_2^sh(tau)
+  = sum_{n in Z} alpha(n) q^{36(n+alpha0)^2},
+```
+
+where the characteristic `alpha0` is determined by the affine shift `6k+r+1/2=0` and the linear term in `Q_inner`.  In the natural continuous boundary parametrization `r=-6k-1/2`, one obtains
+
+```text
+Q_inner(k,-6k-1/2) = 4k^2 - k - 1/4
+                   = 4(k-1/8)^2 - 5/16.
+```
+
+Thus a usable paper notation is
+
+```text
+Theta_2^sh(tau)
+  = sum_{k in Z} beta(k) q^{36(k-1/8)^2},
+```
+
+again up to the same global `q`-power and normalization convention.  The multiplier `beta(k)` records the parity character inherited from `(-1)^r` after the affine half-wall is converted to a characteristic.  Rather than forcing this into a simple `theta_2` or `theta_3`, it is cleaner to denote it by a unary theta with rational characteristic:
+
+```text
+vartheta_{36, -1/8}^{chi}(tau).
+```
+
+The final shadow should therefore be stated as
+
+```text
+Shadow(F_slab)
+  = C1 * sum_{r in Z} (-1)^r (2r+1) q^{9(r+1/2)^2}
+    - C2 * vartheta_{36,-1/8}^{chi}(tau),
+```
+
+where `C1,C2` are the explicit Zwegers normalization constants.  For the proof of mockness, the constants are irrelevant except that they are nonzero.
+
+Recommended paper definition:
+
+```text
+vartheta_{m,a,chi}^{(1)}(tau)
+  := sum_{n in Z+a} chi(n) n q^{m n^2}.
+```
+
+Then write
+
+```text
+Shadow(F_slab)
+  = C1 * vartheta_{9,1/2,(-1)^n}^{(1)}(tau)
+    - C2 * vartheta_{36,-1/8,chi_2}^{(1)}(tau).
+```
+
+This is explicit, avoids overclaiming an eta product, and is exactly the unary-theta shadow supplied by Zwegers.
+
+### Q2c. Simplest coefficient proving the shadow is nonzero
+
+Use the first `c1` coefficient.
+
+In
+
+```text
+Theta_1^sh(tau)
+  = sum_{r in Z} (-1)^r (2r+1) q^{9(r+1/2)^2},
+```
+
+the terms `r=0` and `r=-1` both contribute positively at exponent
+
+```text
+9*(1/2)^2 = 9/4.
+```
+
+Indeed,
+
+```text
+r=0:   (-1)^0*(1)  = 1,
+r=-1:  (-1)^(-1)*(-1) = 1.
+```
+
+So the coefficient of `q^(9/4)` in the `c1` shadow component is `2*C1`, nonzero.
+
+The `c2` component has a different first fractional exponent under the half-wall normalization, so it cannot cancel this `q^(9/4)` term.  Therefore the shadow is nonzero.  This proves genuine mockness.
 
 ---
 
-## Q4. What can be proved now, without HM?
+## Q3. Proof sketch for Theorem 1: sigma involution
 
-Theorems 1 and 2 are elementary.  They should be written into Paper 2 before any modular discussion.  HM is only needed later to identify the analytic type of the slab series.
+### Theorem 1. Sigma row cancellation
 
----
-
-## Theorem 1 proof sketch: sigma involution and interior cancellation
-
-### Theorem 1. Row reflection cancellation
-
-Fix an integer `k` and define
+For each integer `k`, define
 
 ```text
 sigma_k(r) = -(6k+1)-r.
@@ -599,44 +368,38 @@ sigma_k(r) = -(6k+1)-r.
 Let
 
 ```text
-Q_k(r) = 2k(2k+1) + r(r+6k+1).
+Q_inner(k,r) = 2k(2k+1) + r(r+6k+1).
 ```
 
-Then:
+Then `sigma_k` is a fixed-point-free involution of the `r`-row, preserves `Q_inner`, reverses the sign `(-1)^r`, and hence cancels every sigma-stable row interval in signed pairs.
+
+### Proof sketch
+
+Fix `k` and write
 
 ```text
-1. sigma_k is an involution;
-2. Q_k(sigma_k(r)) = Q_k(r);
-3. (-1)^{sigma_k(r)} = -(-1)^r;
-4. sigma_k has no integral fixed point;
-5. therefore every sigma-stable row interval cancels in signed pairs.
+C = 6k+1.
 ```
 
-### Proof
-
-First,
+Then
 
 ```text
-sigma_k(sigma_k(r))
-  = -(6k+1) - (-(6k+1)-r)
-  = r,
+sigma_k(r) = -C-r.
 ```
 
-so `sigma_k` is an involution.
-
-Next write `C=6k+1`.  Then
+First, `sigma_k` is an involution because
 
 ```text
-sigma_k(r) = -C-r,
+sigma_k(sigma_k(r)) = -C - (-C-r) = r.
 ```
 
-and
+Second, it preserves the exponent.  Since
 
 ```text
-sigma_k(r) + C = -r.
+sigma_k(r)+C = -r,
 ```
 
-Therefore
+we have
 
 ```text
 sigma_k(r)(sigma_k(r)+C)
@@ -644,117 +407,146 @@ sigma_k(r)(sigma_k(r)+C)
   = r(r+C).
 ```
 
-Since the term `2k(2k+1)` is fixed by sigma,
+The remaining term `2k(2k+1)` is independent of `r`, so
 
 ```text
-Q_k(sigma_k(r)) = Q_k(r).
+Q_inner(k,sigma_k(r)) = Q_inner(k,r).
 ```
 
-For the sign, compute
+Third, it flips the sign.  Since
 
 ```text
-sigma_k(r) - r = -(6k+1)-2r.
+sigma_k(r)-r = -(6k+1)-2r
 ```
 
-This is odd, because `6k+1` is odd and `2r` is even.  Hence
+is odd, we get
 
 ```text
 (-1)^{sigma_k(r)} = -(-1)^r.
 ```
 
-A fixed point would satisfy
+Fourth, it has no integral fixed point.  A fixed point would satisfy
 
 ```text
-r = -(6k+1)-r,
-2r = -(6k+1),
+r = -C-r,
+2r = -C = -(6k+1),
 ```
 
-which has no integral solution because `6k+1` is odd.  Thus the action is free on integral row atoms.
+which is impossible because `6k+1` is odd.
 
-Now let `I_k` be any finite interval of integers satisfying
+Equivalently, define the anchor
+
+```text
+A = 2r+6k+1.
+```
+
+Then `A` is always odd, and
+
+```text
+A(sigma_k(r)) = -A(r).
+```
+
+A fixed point would require `A=0`, impossible for odd `A`.
+
+Finally, let `I_k` be any finite row interval with
 
 ```text
 r in I_k  iff  sigma_k(r) in I_k.
 ```
 
-The signed row contribution over `I_k` is
+The signed row sum over `I_k` is
 
 ```text
-sum_{r in I_k} (-1)^r q^{Q_k(r)}.
+sum_{r in I_k} (-1)^r q^{9Q_inner(k,r)}.
 ```
 
-Pair each `r` with `sigma_k(r)`.  The exponents are equal and the signs are opposite, so every pair sums to zero.  Since there are no fixed points, the whole interval contributes zero.
+Pair each `r` with `sigma_k(r)`.  The exponents are equal and the signs are opposite.  Since there are no fixed points, every pair cancels, so the total is zero.
 
-This proves interior cancellation.
+This proves the interior cancellation theorem.
 
 ---
 
-## Theorem 2 proof sketch: slab decomposition and factored missing kernel
+## Q4. Proof sketch for Theorem 2: slab decomposition and factorization
 
-### Theorem 2. Two-slab missing kernel
+### Theorem 2. Two-slab decomposition and missing-kernel factorization
 
-For each row `k`, the legal `r`-domain is
+Define
 
 ```text
-k >= 0   : r <= -1,
-k <= -1  : r >= 0.
+Slab+ = { (k,r) in Z^2 : k >= 0,  r <= -(6k+1) },
+Slab- = { (k,r) in Z^2 : k <= -1, r >= -6k }.
 ```
 
-Under the row reflection `sigma_k(r)=-(6k+1)-r`, the sigma-stable interiors are
+Then the signed residual kernel after sigma cancellation is supported exactly on
 
 ```text
-k >= 0   : -6k <= r <= -1,
-k <= -1  : 0 <= r <= -6k-1.
+Slab+ union Slab-.
 ```
 
-These interiors cancel by Theorem 1.  The only surviving atoms are
+Moreover, since the exponent and sign split into an `(u,v)` part and a `(k,r)` part, the missing kernel factors as
 
 ```text
-Slab+ = { k >= 0,  r <= -6k-1 },
-Slab- = { k <= -1, r >= -6k }.
-```
-
-Consequently the missing kernel is
-
-```text
-MissingKernel = Theta_u * Theta_v * F_slab,
+MissingKernel(q) = Theta_u(q) * Theta_v(q) * F_slab(q),
 ```
 
 where
 
 ```text
 F_slab(q)
-  = sum_{k>=0, r<=-6k-1} c(k,r) q^{9Q_inner(k,r)}
-    + sum_{k<=-1, r>=-6k} c(k,r) q^{9Q_inner(k,r)}.
+  = sum_{k>=0, r<=-(6k+1)} (-1)^r q^{9Q_inner(k,r)}
+    - sum_{k<=-1, r>=-6k} (-1)^r q^{9Q_inner(k,r)}.
 ```
 
-Here `c(k,r)` is the signed inner coefficient, typically `(-1)^r` up to the fixed convention of the residual kernel.
-
-### Proof
-
-For `k>=0`, the legal condition is `r<=-1`.  The image of a legal `r` under sigma is legal exactly when
+The minus sign in the second sum is the orientation sign coming from the sign-difference indicator
 
 ```text
-sigma_k(r) <= -1
-<=> -(6k+1)-r <= -1
+( sgn(k) - sgn(6k+r+1/2) ) / 2.
+```
+
+If the code incorporates this orientation into the atom coefficient, write both slab sums with the code coefficient `c(k,r)` instead.
+
+### Proof sketch
+
+For `k>=0`, the legal half-row in the missing-kernel probe is
+
+```text
+r <= -1.
+```
+
+A legal point remains legal after sigma precisely when
+
+```text
+sigma_k(r) <= -1.
+```
+
+Using `sigma_k(r)=-(6k+1)-r`, this is
+
+```text
+-(6k+1)-r <= -1
 <=> r >= -6k.
 ```
 
-Thus the paired interior is
+Thus the sigma-stable interior for `k>=0` is
 
 ```text
 -6k <= r <= -1,
 ```
 
-and the unpaired legal part is
+and the unpaired remainder is
 
 ```text
-r <= -6k-1.
+r <= -6k-1 = -(6k+1).
 ```
 
 This is `Slab+`.
 
-For `k<=-1`, the legal condition is `r>=0`.  The image is legal exactly when
+For `k<=-1`, the legal half-row is
+
+```text
+r >= 0.
+```
+
+It remains legal after sigma precisely when
 
 ```text
 sigma_k(r) >= 0
@@ -762,13 +554,13 @@ sigma_k(r) >= 0
 <=> r <= -6k-1.
 ```
 
-Thus the paired interior is
+Thus the sigma-stable interior for `k<=-1` is
 
 ```text
 0 <= r <= -6k-1,
 ```
 
-and the unpaired legal part is
+and the unpaired remainder is
 
 ```text
 r >= -6k.
@@ -776,75 +568,344 @@ r >= -6k.
 
 This is `Slab-`.
 
-By Theorem 1, the paired interiors cancel exactly.  Therefore the signed row sum is supported on `Slab+ union Slab-`.
+By Theorem 1, the sigma-stable interiors cancel in signed pairs.  Hence only the two slabs survive.
 
-Finally, the full exponent separates:
+Now use the separated exponent
 
 ```text
 E(u,v,k,r)
-  = 9*Q_outer(u,v) + 9*Q_inner(k,r),
+  = 9*( Q_outer(u,v) + Q_inner(k,r) ),
 
 Q_outer(u,v) = 5v^2 - 7v + 5u^2 - 3u,
 Q_inner(k,r) = 2k(2k+1) + r(r+6k+1).
 ```
 
-The `u` and `v` sums are independent of the slab condition, so they factor as
+The sign also separates:
 
 ```text
-Theta_u * Theta_v.
+(-1)^{u+v+r} = (-1)^{u+v} * (-1)^r.
 ```
 
-The remaining `(k,r)` sum is exactly `F_slab`.  Therefore
+Therefore the `(u,v)` sums factor from the slab sum:
 
 ```text
-MissingKernel = Theta_u Theta_v F_slab.
+Theta_u(q) = sum_u (-1)^u q^{9(5u^2-3u)},
+Theta_v(q) = sum_v (-1)^v q^{9(5v^2-7v)},
 ```
 
-By the R6/R7 identification,
+with the exact ranges determined by the legal outer summation.  The remaining inner factor is precisely `F_slab(q)`.  This proves
 
 ```text
-F_slab = D-A = -f_{1,3,4}(X,-X^3,X),
+MissingKernel(q) = Theta_u(q) Theta_v(q) F_slab(q).
 ```
 
-so
+Finally, the R6/R7 identification gives
 
 ```text
-MissingKernel = -Theta_u Theta_v f_{1,3,4}(X,-X^3,X).
+F_slab(q) = D-A = -f_{1,3,4}(X,-X^3,X)
 ```
 
-This proves the repair term without using any modularity theorem.
+under the paper's variable convention, so the repaired identity is
+
+```text
+Theta_10 = Main_tau + Theta_u Theta_v F_slab
+         = Main_tau - Theta_u Theta_v f_{1,3,4}(X,-X^3,X).
+```
 
 ---
 
-## What needs HM and what does not
+## Q5. Proof sketch for Theorem 3: Pell structure
 
-### Proved now, elementary
+### Theorem 3. Discriminant-20 Pell structure and mock regime
 
-```text
-1. sigma preserves Q_inner;
-2. sigma flips the sign;
-3. sigma has no fixed integral row atom;
-4. interiors cancel;
-5. only Slab+ and Slab- survive;
-6. the full missing kernel factors as Theta_u Theta_v times the slab sum;
-7. the anchor is A=2r+6k+1 and sigma sends A to -A.
-```
-
-### Needs HM / Zwegers theory
+The homogeneous inner form
 
 ```text
-1. naming F_slab as a mixed mock-Jacobi object;
-2. writing F_slab as Appell--Lerch sums plus theta quotient;
-3. resolving torsion specializations with eta^3 derivative terms;
-4. determining the exact non-holomorphic completion and shadow.
+Q0(k,r) = 4k^2 + 6kr + r^2
 ```
 
-The paper can therefore be split cleanly:
+has discriminant `20` and is a conductor-2 norm form in `Q(sqrt(5))`.  Its automorph is generated by the matrix
 
 ```text
-Mechanism and repair: elementary.
-Analytic classification: HM/mock-Jacobi appendix or later section.
+M = [ [-3, -4],
+      [ 16, 21] ],
 ```
+
+which has trace `18`, determinant `1`, and eigenvalues
+
+```text
+9 ± 4sqrt(5) = epsilon^±6,
+```
+
+where
+
+```text
+epsilon = (1+sqrt(5))/2.
+```
+
+Since `M ≡ I mod 2`, the parity character `(-1)^r` is invariant under the Pell automorph.  The sign character is therefore even with respect to the Pell dynamics, putting the slab theta in the Zwegers/Rogers mock regime rather than in the honest weight-1 theta regime.
+
+### Proof sketch
+
+Introduce Pell coordinates
+
+```text
+x = r + 3k,
+y = k.
+```
+
+Then
+
+```text
+x^2 - 5y^2
+  = (r+3k)^2 - 5k^2
+  = r^2 + 6kr + 4k^2
+  = Q0(k,r).
+```
+
+The full inner exponent is a shifted norm:
+
+```text
+Q_inner(k,r)
+  = Q0(k,r) + 2k + r
+  = x^2 - 5y^2 + x - y.
+```
+
+The anchor is
+
+```text
+A = 2r+6k+1 = 2x+1.
+```
+
+The matrix
+
+```text
+M = [ [-3, -4],
+      [ 16, 21] ]
+```
+
+preserves `Q0`.  Direct multiplication gives
+
+```text
+M^T * [ [4,3], [3,1] ] * M = [ [4,3], [3,1] ],
+```
+
+where `[ [4,3], [3,1] ]` is the Gram matrix for `Q0(k,r)`.
+
+The matrix has
+
+```text
+det(M)=1,
+tr(M)=18,
+```
+
+so its eigenvalues are
+
+```text
+(18 ± sqrt(18^2-4))/2 = 9 ± 4sqrt(5).
+```
+
+In Pell coordinates `(x,y)`, the conjugate matrix is
+
+```text
+M_Pell = [ [ 9, -20],
+           [ -4,  9] ],
+```
+
+which is the standard multiplication matrix for the unit
+
+```text
+9 - 4sqrt(5)
+```
+
+or its inverse, depending on the chosen orientation.  Thus the automorph group is generated by
+
+```text
+epsilon_20 = 9 + 4sqrt(5) = ((1+sqrt(5))/2)^6 = (2+sqrt(5))^2.
+```
+
+Finally,
+
+```text
+M ≡ I mod 2.
+```
+
+Therefore `r mod 2` is preserved by the Pell automorph, and the character `(-1)^r` is Pell-even.  In the indefinite theta classification, the honest modular theta case comes from compatible odd cancellation under the automorph.  Here the parity does not remove the two-cusp sign defect; the sign-difference completion has nonzero unary shadow.  Hence the resulting slab series is a mixed mock-Jacobi object, not an honest weight-1 modular form.
+
+---
+
+## Q6. Overall paper strategy
+
+### Q6a. Introduction level for a combinatorics / number theory audience
+
+The introduction should be concrete and short.  Avoid starting with HM, Zwegers, or long computational tables.  Start with the failed identity and the repair.
+
+A good introduction outline:
+
+```text
+Paragraph 1. The object.
+Define Theta_10 at a high level as the theta/kernel series whose published or
+expected decomposition misses a residual term.  State that the paper identifies
+and repairs the missing term.
+
+Paragraph 2. The false cancellation.
+Explain that the original argument implicitly pairs summands by a symmetry.  The
+symmetry is real modulo 9 but not integral on the summation domain.  Hence the
+interior cancels but a boundary remains.
+
+Paragraph 3. The elementary mechanism.
+State sigma_k(r)=-(6k+1)-r.  It preserves the exponent, flips the sign, has no
+fixed point, and leaves exactly two slabs.  This is the heart of the paper.
+
+Paragraph 4. The repair.
+Display the corrected identity:
+
+    Theta_10 = Main_tau + Theta_u Theta_v F_slab
+             = Main_tau - Theta_u Theta_v f_{1,3,4}(X,-X^3,X).
+
+Paragraph 5. Analytic classification.
+State that F_slab is an indefinite theta series of discriminant 20.  Its
+Zwegers completion has nonzero unary shadow, so it is mock/mixed mock-Jacobi,
+not an honest modular theta series.
+
+Paragraph 6. Computation.
+Briefly mention that the earlier shell/onset statistics motivated the search
+but are not the theorem.  The numerical tables verify the boundary formula and
+show the failure of multiplicativity.
+```
+
+For JCTA or a DNA-style conference audience, the introduction should emphasize:
+
+```text
+1. exact cancellation mechanism,
+2. explicit repair term,
+3. small two-slab formula,
+4. nonzero shadow / mock classification,
+5. reproducible verification.
+```
+
+It should not foreground the failed shell product except as motivation.  The factorization failure is useful context, but the paper's contribution is the mechanism and the repair.
+
+### Q6b. Should the full HM expansion be included?
+
+Recommendation: do not include the full HM expansion in the main paper.
+
+Use Zwegers directly because:
+
+```text
+1. the slab is already an indefinite theta with two sign walls;
+2. the negative vectors c1,c2 are explicit;
+3. the nonzero shadow is easy to exhibit;
+4. the HM specialization has torsion and removable 0*infinity issues;
+5. including HM would distract from the elementary repair.
+```
+
+A compact appendix can say:
+
+```text
+By Hickerson--Mortenson, the same F_slab can be expanded as finitely many
+Appell--Lerch sums plus a theta quotient.  We do not need this expansion for the
+repair theorem; it gives an alternative analytic description.
+```
+
+Save the full HM torsion resolution for a follow-up paper unless a referee asks for it.
+
+---
+
+## Suggested main theorem package
+
+### Theorem A. Sigma cancellation
+
+```text
+sigma_k(r)=-(6k+1)-r
+```
+
+is a fixed-point-free sign-reversing exponent-preserving involution on each row.
+
+### Theorem B. Two-slab decomposition
+
+After sigma cancellation, the residual kernel is supported exactly on
+
+```text
+Slab+ union Slab-.
+```
+
+### Theorem C. Missing-kernel factorization
+
+```text
+MissingKernel = Theta_u Theta_v F_slab,
+```
+
+where
+
+```text
+F_slab(q)
+  = sum_{k>=0, r<=-(6k+1)} (-1)^r q^{9Q_inner(k,r)}
+    - sum_{k<=-1, r>=-6k} (-1)^r q^{9Q_inner(k,r)}.
+```
+
+### Theorem D. Corrected identity
+
+```text
+Theta_10 = Main_tau + Theta_u Theta_v F_slab
+         = Main_tau - Theta_u Theta_v f_{1,3,4}(X,-X^3,X).
+```
+
+### Theorem E. Pell/mock classification
+
+The homogeneous slab form has discriminant `20`, automorph generated by the unit
+
+```text
+9+4sqrt(5)=epsilon^6,
+```
+
+and Zwegers completion with negative vectors
+
+```text
+c1=(-1,3), c2=(-3,14).
+```
+
+The unary shadow is nonzero, so `F_slab` is genuinely mock/mixed mock-Jacobi and not an honest weight-1 modular theta series.
+
+---
+
+## Numerical evidence to include
+
+Keep the tables short.  Suggested tables:
+
+```text
+Table 1. Sigma verification:
+Q_inner(k,r)=Q_inner(k,sigma r), sign flip, no fixed point.
+
+Table 2. Interior cancellation:
+F_halfB - F_slab has zero mismatches through e=500.
+
+Table 3. First coefficients of F_slab:
+e/9 = 0: -1,
+      2:  1,
+      6: -2,
+      8: -1,
+     12:  1,
+     14:  1,
+     16:  1,
+     20: -2,
+     24: -2,
+     26: -1,
+     30:  1,
+     34:  1,
+     36:  1,
+     38:  2,
+     42: -2,
+     48: -1,
+     50: -2,
+     52: -1,
+     54: -1.
+
+Table 4. Nonmultiplicativity diagnostics:
+inner sum not multiplicative, e.g. 268/482 failures and chi(17)=9.
+```
+
+The nonmultiplicativity table should be used only to refute honest modular theta interpretations, not as a primary theorem.
 
 ---
 
@@ -854,34 +915,19 @@ Analytic classification: HM/mock-Jacobi appendix or later section.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Iterable, Iterator, List, Tuple
+from typing import Dict, Iterable, List, Tuple
 
 
 def sigma(k: int, r: int) -> int:
-    """Row reflection r -> -(6k+1)-r."""
     return -(6 * k + 1) - r
 
 
 def q_inner(k: int, r: int) -> int:
-    """Inner quadratic from the residual kernel."""
     return 2 * k * (2 * k + 1) + r * (r + 6 * k + 1)
 
 
 def anchor(k: int, r: int) -> int:
-    """Triangular root anchor A=2n-1 with n=r+3k+1."""
     return 2 * r + 6 * k + 1
-
-
-def n_from_atom(k: int, r: int) -> int:
-    """The triangular index giving anchor=2n-1."""
-    return r + 3 * k + 1
-
-
-def in_legal_r_domain(k: int, r: int) -> bool:
-    """Legal r-domain from even_missing_kernel_term."""
-    if k >= 0:
-        return r <= -1
-    return r >= 0
 
 
 def in_slab_plus(k: int, r: int) -> bool:
@@ -892,93 +938,115 @@ def in_slab_minus(k: int, r: int) -> bool:
     return k <= -1 and r >= -6 * k
 
 
-def in_slab(k: int, r: int) -> bool:
-    return in_slab_plus(k, r) or in_slab_minus(k, r)
+def slab_orientation(k: int, r: int) -> int:
+    if in_slab_plus(k, r):
+        return 1
+    if in_slab_minus(k, r):
+        return -1
+    return 0
 
 
-def assert_sigma_theorem(k_values: Iterable[int], r_values: Iterable[int]) -> None:
-    """Finite verification of the elementary sigma identities."""
+def wall_correction_term(max_abs_r: int) -> Dict[int, int]:
+    terms: Dict[int, int] = {}
+    for r in range(-max_abs_r, max_abs_r + 1):
+        e = 9 * r * (r + 1)
+        coeff = (-1) ** r
+        terms[e] = terms.get(e, 0) + coeff
+    return {e: c for e, c in terms.items() if c}
+
+
+def assert_wall_correction_cancels(max_abs_r: int) -> None:
+    # Symmetric truncations around the involution r -> -r-1 should cancel
+    # once the truncation is chosen in complete pairs.
+    for r in range(-max_abs_r, max_abs_r + 1):
+        rp = -r - 1
+        assert r * (r + 1) == rp * (rp + 1)
+        assert ((-1) ** r) == -((-1) ** rp)
+
+
+def assert_sigma_identities(k_values: Iterable[int], r_values: Iterable[int]) -> None:
     for k in k_values:
         for r in r_values:
             rp = sigma(k, r)
             assert sigma(k, rp) == r
             assert q_inner(k, rp) == q_inner(k, r)
-            assert (rp - r) % 2 == 1
+            assert ((rp - r) % 2) == 1
             assert anchor(k, rp) == -anchor(k, r)
             assert anchor(k, r) % 2 == 1
 
 
-def row_interior(k: int) -> range:
-    """Sigma-stable interior interval for a row."""
-    if k >= 0:
-        return range(-6 * k, 0)          # -6k <= r <= -1
-    return range(0, -6 * k)              # 0 <= r <= -6k-1
-
-
-def signed_row_interior_sum(k: int) -> int:
-    """Toy signed sum over the paired interior; should be zero coefficientwise by pairing."""
-    return sum((-1) ** r for r in row_interior(k))
+def f_slab_coeffs(k_bound: int, r_bound: int) -> Dict[int, int]:
+    coeffs: Dict[int, int] = {}
+    for k in range(-k_bound, k_bound + 1):
+        for r in range(-r_bound, r_bound + 1):
+            orient = slab_orientation(k, r)
+            if orient == 0:
+                continue
+            e = 9 * q_inner(k, r)
+            coeff = orient * ((-1) ** r)
+            coeffs[e] = coeffs.get(e, 0) + coeff
+    return {e: c for e, c in coeffs.items() if c}
 
 
 @dataclass(frozen=True)
-class AppellLerchTerm:
-    coeff: str
-    arg: str
-    base: str
-    z: str = "-1"
+class ShadowVector:
+    name: str
+    k: int
+    r: int
+    q_value: int
 
 
-def hm_terms_specialized() -> List[AppellLerchTerm]:
-    """The four nonzero standard z=-1 HM terms after X=q."""
-    return [
-        AppellLerchTerm("j(-q^3;q^4)", "-q^9", "q^20"),
-        AppellLerchTerm("-q*j(-q^6;q^4)", "-q^4", "q^20"),
-        AppellLerchTerm("q^3*j(-q^9;q^4)", "-q^-1", "q^20"),
-        AppellLerchTerm("-q^6*j(-q^12;q^4)", "-q^-6", "q^20"),
-    ]
+SHADOW_VECTORS: Tuple[ShadowVector, ...] = (
+    ShadowVector('c1', -1, 3, -5),
+    ShadowVector('c2', -3, 14, -20),
+)
+
+
+def q0(k: int, r: int) -> int:
+    return 4 * k * k + 6 * k * r + r * r
+
+
+def bilinear(a: Tuple[int, int], b: Tuple[int, int]) -> int:
+    k, r = a
+    kp, rp = b
+    return 8 * k * kp + 6 * k * rp + 6 * r * kp + 2 * r * rp
+
+
+def assert_shadow_vectors() -> None:
+    c1 = (-1, 3)
+    c2 = (-3, 14)
+    assert q0(*c1) == -5
+    assert q0(*c2) == -20
+    # B(c1,(k,r)) = 10k and B(c2,(k,r)) = 10(6k+r).
+    for k in range(-5, 6):
+        for r in range(-5, 6):
+            assert bilinear(c1, (k, r)) == 10 * k
+            assert bilinear(c2, (k, r)) == 10 * (6 * k + r)
 ```
 
 ---
 
 ## Final synthesis
 
-The two bottlenecks resolve as follows.
+The paper should now be organized around one elementary theorem and one analytic theorem.
 
-First, the HM side should be written as a finite Appell--Lerch expansion plus a finite theta quotient, with the torsion specialization handled by the Jacobi derivative
-
-```text
-j(qe^eps;q) = eps (q;q)_infty^3 + O(eps^2).
-```
-
-The standard `z=-1` five-term Appell--Lerch part leaves four visible `m(.,q^20,-1)` terms after `X=q`; any true `0*infinity` contribution is an explicit eta-cubed residue term.
-
-Second, the elementary mechanism is already complete:
+Elementary theorem:
 
 ```text
-sigma_k(r)=-(6k+1)-r
+The missing kernel is the two-slab residue of a sign-reversing row involution.
 ```
 
-preserves the quadratic, flips the sign, cancels the interior, and leaves exactly two slabs.  The atom-to-key anchor is
+Analytic theorem:
 
 ```text
-A = 2r + 6k + 1,
+The slab residue is a Zwegers indefinite theta with nonzero unary shadow.
 ```
 
-and sigma sends
+The corrected identity is
 
 ```text
-A -> -A.
+Theta_10 = Main_tau + Theta_u Theta_v F_slab
+         = Main_tau - Theta_u Theta_v f_{1,3,4}(X,-X^3,X).
 ```
 
-The disc-20 form is the conductor-2 norm form in the same field `Q(sqrt(5))`, with norm-`+1` unit
-
-```text
-9+4sqrt(5) = ((1+sqrt(5))/2)^6.
-```
-
-So Paper 2 can now be written with a clean division of labor:
-
-```text
-elementary sections: sigma, slabs, factorization Theta_u Theta_v F_slab, repair;
-analytic section: HM/Appell--Lerch expansion and mixed mock-Jacobi classification.
-```
+The k=0 wall does not add a nonzero modular correction; the proposed bilateral correction `W` vanishes identically.  The mockness is genuine and is witnessed by the nonzero `q^(9/4)` coefficient in the `c1` shadow component.
