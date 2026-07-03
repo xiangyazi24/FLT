@@ -1,574 +1,692 @@
-# Q3171 (dm1): Paper 2 Round 3 — corrected framing, LRS layer, and shell onset
+# Q3172 (dm1): Paper 2 Round 4 — shell = hblock, two-sided theta, and global/local charge
 
 Date: 2026-07-03
 
 ## Executive answer
 
-The Round 3 corrections change the story in an important way.
+The new experiments substantially improve the framing.
 
-The previous “`9 | e` explains the counterexample” framing should be retired.  It is now clear that `9 | e` is not a discriminating obstruction theorem: the atom-producing exponent systems are already `9`-dilated.  The correct phenomenon is not “divisible by 9 versus not divisible by 9,” but rather:
-
-```text
-The root-packet/LRS pairing fails on boundary shells of the LRS support.
-The first possible failure in shell j occurs at
-
-    onset_j = 18*j*(17*j - 12).
-
-The shell index, not divisibility by 9, is the meaningful obstruction parameter.
-```
-
-The second key correction is layer separation.  The counterexample at `e=11763` lives at the **LRS/root-packet level**, not at the even-k cone level.  Therefore the Pell automorphism `M` and the congruence `M^2 ≡ -I mod 9` are still structurally important, but they act on the cone/Pell projection, not directly on the `(hblock,anchor)` fiber where the counterexample is measured.
-
-The best current paper framing is:
+The correct headline is no longer “first counterexample” and no longer “`9 | e`.”  The right headline is:
 
 ```text
-Chan's Theta_10 root-packet proof fails because the tau pairing has a boundary-shell defect in the LRS decomposition.  The defect has a sharp shell onset law
+The LRS root-packet obstruction is present from the first nonzero layer e=9,
+but it is globally balanced.  The new phenomenon is a shell filtration by
+hblock.  The hblock shells open at a two-sided unary theta sequence
 
-    onset_j = 18*j*(17*j - 12),
-
-and the global generating function of these boundary defects factors as
-
-    Theta_u * Theta_v * (D - A),
-    D - A = -f_{1,3,4}(X,-X^3,X).
+    e(h) = 18 h(17h - 12),    h in Z.
 ```
 
-The Pell/norm story should be presented as the global cone shadow of the same boundary mechanism, not as the direct explanation of the `e=11763` LRS fiber.
-
-## 0. Layer correction: what survives and what does not
-
-The corrected layer diagram is:
+Equivalently, for `j >= 1`, the two shell-opening branches are
 
 ```text
-Layer 1: LRS/root-packet/fiber layer
-  coordinates: (l,u,v, root variable n), or equivalently decorated atoms
-  key: (hblock, anchor)
-  tau: root-packet central reflection
-  counterexample e=11763 lives here
-
-Layer 2: even-k/cone layer
-  coordinates: (u,v,k,r)
-  cone form: Q_kr = 4k^2 + 6kr + r^2 + 2k + r
-  sigma: (k,r) -> (k, -r - 6k - 1)
-  missing kernel factor D-A lives here after reindexing
-
-Layer 3: Pell/norm layer
-  coordinates: X = 4k + 3r + 1, Z = 5r + 1
-  automorph: M = [[9,-4],[-20,9]]
-  congruence: M^2 ≡ -I mod 9
+h = +j:  e_j^- = 18j(17j - 12),
+h = -j:  e_j^+ = 18j(17j + 12).
 ```
 
-The most important consequence is:
+This produces the observed interleaving:
 
 ```text
-Do not say that M acts on the root-packet key unless a decorated lift has been proved.
+90, 522, 792, 1656, 2106, 3402, 4032, 5760, ...
 ```
 
-It may act on the global boundary generating function and on the cone projection, but the LRS key `(hblock,anchor)` belongs to a different coordinate system.
+The companion branch is not noise.  It is the negative-hblock side of the same theta series.  The right object is two-sided from the beginning.
 
-## Q1. Why should `onset_j = 18j(17j-12)` work?
-
-The formula should be treated as a constrained-minimization law, not as a divisibility law.
-
-The target normal form should look like this.  For a shell-`j` LRS boundary atom, after the correct root-packet change of variables, the full LRS exponent should decompose as
+The strongest conceptual theorem is now:
 
 ```text
-E_LRS = 18*j*(17*j - 12) + R_j(tangential variables),
+hblock is the signed shell coordinate of the LRS root-packet boundary.  The
+set of first appearances of hblock values is governed by a unary theta series
+with quadratic exponent 18h(17h-12).  Individual key fibers carry nonzero
+boundary charge from e=9 onward, but the total charge over all keys is expected
+to vanish by a global divergence/telescoping theorem.
 ```
 
-where
+## 1. The two-sided shell-opening theta
+
+The two experimental branches are
 
 ```text
-R_j >= 0
+onset_j     = 18j(17j - 12),
+companion_j = 18j(17j + 12).
 ```
 
-on the admissible support, and equality is attained exactly at the shell-`j` wavefront.
-
-This is the first-principles explanation of the three verified values:
+They are the positive and negative halves of one integer-indexed quadratic:
 
 ```text
-j=1: 18*1*(17-12)     = 90
-j=2: 18*2*(34-12)     = 792
-j=3: 18*3*(51-12)     = 2106
-j=4: 18*4*(68-12)     = 4032
+e(h) = 18 h(17h - 12),    h in Z.
 ```
 
-The question is then: where do `17` and `12` come from?
-
-### 1.1 What determines the `12`
-
-The root-packet anchor-pair involution is
+Indeed:
 
 ```text
-n -> 12 - n.
+h =  j > 0  gives 18j(17j - 12),
+h = -j < 0  gives 18j(17j + 12).
 ```
 
-The observed root variables
+Thus the complete shell-opening generating function is
 
 ```text
-{-3, 15, 29, -17}
+Theta_shell(q) = sum_{h in Z} q^{18 h(17h - 12)}.
 ```
 
-pair as
+If `Q = q^18`, this is
 
 ```text
--3  <-> 15,
--17 <-> 29,
+Theta_shell(Q) = sum_{h in Z} Q^{17h^2 - 12h}.
 ```
 
-and both pairs have sum `12`.  Thus the affine center of the root-pair reflection is
+Completing the square gives
 
 ```text
-n = 6.
+17h^2 - 12h = ((17h - 6)^2 - 36) / 17.
 ```
 
-Any completed-square/root-pair energy written in the anchor coordinate will therefore contain a linear shift governed by this center.  The `-12j` term in
+So
 
 ```text
-17j^2 - 12j
+Theta_shell(Q)
+  = Q^{-36/17} * sum_{n ≡ -6 mod 17} Q^{n^2/17},
 ```
 
-is exactly the kind of linear term produced by a half-open shell distance measured from an affine reflection with pair-sum `12`.
-
-So the `12` is not accidental.  It is the root-pair anchor sum.
-
-### 1.2 What determines the `17`
-
-The coefficient `17` should be the normal curvature of the LRS boundary quadratic after all admissibility constraints have been imposed.  Equivalently, if `j` is the normal shell coordinate, then the LRS energy restricted to the minimizing affine line has a quadratic term
+where `n = 17h - 6`.  If one records positive absolute residues, this is exactly the two-residue support
 
 ```text
-18 * 17 * j^2.
+n ≡ 6 or 11 mod 17.
 ```
 
-This `17` is not visible in the cone-only wall distance.  It is produced by the full LRS energy, including:
+This explains the observation that both residue classes `6` and `11` modulo `17` contribute.  They are not two unrelated series; they are the two orientations of the same coset theta.
+
+### Modular-form status
+
+`Theta_shell` is a unary theta series with rational characteristic.  After multiplying by the harmless fractional prefactor `Q^{36/17}`, it is a standard weight-`1/2` theta constant attached to the one-dimensional lattice/coset
 
 ```text
-1. root-packet alignment terms,
-2. the oddBilat/oddMissing/strip upper alignment,
-3. parity/coset restrictions,
-4. the anchor-pair constraint n -> 12-n,
-5. the admissible support inequalities.
+17 Z - 6.
 ```
 
-This explains why the naive cone wall formula from the `(k,r)` block is too small.  The shell onset is not minimizing only `Q_kr`; it is minimizing the full LRS exponent over a constrained affine slice.
-
-### 1.3 The theorem to prove
-
-The first-principles theorem should be stated as a normal-form theorem:
+It should be treated as a vector-valued or congruence-subgroup unary theta of weight `1/2`, not as an eta quotient.  The safest paper statement is:
 
 ```text
-LRS shell normal form.
-For every LRS atom in shell j, there exist integer tangential variables y such that
+The shell-opening support is governed by the unary theta series
 
-    E_LRS(atom) = 18*j*(17*j - 12) + R_j(y),
+    sum_{h in Z} Q^{17h^2 - 12h}.
 
-where R_j(y) is a nonnegative integer-valued quadratic/linear expression on the
-admissible support.  Moreover R_j=0 is solvable for j=1,2,3, and conjecturally
-for all j>=1.
+Equivalently, it is the theta series of the coset 17Z-6, shifted by Q^{-36/17}.
 ```
 
-Then the onset formula follows immediately.
+I would not claim a specific eta-product identity unless one is later proved.  Unary theta is the right identification.
 
-This is much better than saying the formula was guessed from data.  The formula is telling you what the completed-square normal form must be.
+## 2. What hblock measures geometrically
 
-## Q2. What determines the bad-key count?
-
-The bad-key count is not determined by the shell onset alone.
-
-It is a representation number of the residual tangential form after the shell normal form is imposed.  In the notation above, for shell `j` and exponent `e`, define
+The new data strongly indicates:
 
 ```text
-R = e - onset_j.
+hblock = signed normal shell coordinate of the LRS boundary.
 ```
 
-Then the bad-key count has the shape
-
-```text
-BadKeys_j(e)
-  = # or signed count of root-packet fibers K for which
-      there exists an admissible LRS boundary atom with
-      shell = j,
-      R_j(y) = R,
-      key(atom) = K,
-      tau/sigma boundary partner missing or sign-uncancelled.
-```
-
-At the onset itself, `R=0`, so
-
-```text
-BadKeys_j(onset_j)
-```
-
-is the number of admissible minimizers of the tangential residual form modulo the key map.
-
-This explains why a high exponent can have few bad keys while a lower onset can have many:
-
-```text
-e=11763 is a shell-1 interior value with one isolated bad key.
-e=2106 is a shell-3 wavefront value where many keys become eligible simultaneously.
-```
-
-Wavefronts are caustics.  They can have high multiplicity even at smaller energy.
-
-### 2.1 Why 93 at shell 3 is plausible
-
-The number `93` should be interpreted as:
-
-```text
-93 = cardinality of the key image of the minimizer set {R_3=0}
-     after applying admissibility and noncancellation tests.
-```
-
-It is not evidence that the shell-3 space is generically denser at every exponent.  It says the shell-3 onset has many simultaneous minimizers.
-
-### 2.2 Formula for bad-key count
-
-The right formula is a finite representation-number formula, not a simple scalar polynomial unless the residual form is very special:
-
-```text
-BadKeys_j(e)
-  = sum_{K} 1[ BoundaryCharge_j(e,K) != 0 ],
-```
-
-where
-
-```text
-BoundaryCharge_j(e,K)
-  = sum_{y in Y_j(K), R_j(y)=e-onset_j} sign_j(y).
-```
-
-Here `Y_j(K)` is the set of tangential LRS variables in key fiber `K` and shell `j`.
-
-If the signs are ignored, the support count is the number of represented values of `R_j` in each key fiber.  With signs, cancellations are possible.
-
-### 2.3 What to compute next
-
-To get an actual closed formula, you need to extract:
-
-```text
-R_j(y),
-key_j(y) = (hblock, anchor),
-sign_j(y),
-admissibility inequalities.
-```
-
-Once those are known, the count is mechanically computable and may simplify to a divisor/interval formula.  But without that normal form, no reliable exact formula for `BadKeys_j(e)` can be inferred from the data points alone.
-
-## Q3. What is the LRS exponent algebraically?
-
-The LRS exponent is not `even_k_exp` or `odd_k_exp` alone.  It is the fully aligned exponent at the root-packet level after decomposing the summand into:
-
-```text
-oddBilat(l,u,v,root),
-oddMissingSigned(l,u,v,root),
-stripUSigned(l,u,v,root),
-possibly stripVSigned or companion strip terms depending on the branch.
-```
-
-The important distinction is:
-
-```text
-even_k_exp / odd_k_exp: row-level exponent formulas before the final root-packet
-                        key/fiber alignment.
-
-LRS exponent:           the exponent in the upper-aligned root-packet/fiber
-                        bookkeeping after bilateral, missing, and strip pieces
-                        have been combined.
-```
-
-So the counterexample exponent `e=11763` is a coefficient in the LRS bookkeeping, not one of the raw root values of the individual `odd_k_exp` rows.  That is exactly why plugging the root variables into `odd_k_exp(-5,-8,-12,m)` gives
-
-```text
-{12267, 9027, 10539, 18819}
-```
-
-rather than `11763`.
-
-### 3.1 What does the key mean at the LRS level?
-
-The key
+The root-packet key
 
 ```text
 (hblock, anchor)
 ```
 
-is a root-packet fiber label.  It is built after the row roots are grouped into anchor-pair orbits.  In the counterexample, the four root variables are
+is therefore not an arbitrary bookkeeping pair.  It decomposes the LRS boundary into:
 
 ```text
-{-3, 15, 29, -17}
+hblock: signed distance/shell transverse to the base LRS wall,
+anchor: tangential coordinate along the root-pair orbit inside that shell.
 ```
 
-and the involution
+This interpretation explains all four observations:
+
+1. `hblock=0` is the base wall layer and appears immediately at `e=9`.
+2. New shells `±j` open only when the shell-opening theta reaches `e(h=±j)`.
+3. The companion branch is the opposite orientation of hblock.
+4. The anchor involution `n -> 12-n` is fiber-specific because the tangential coordinate depends on the chosen shell/fiber, while hblock records only the normal displacement.
+
+### Likely algebraic form
+
+At the LRS level, the full exponent should admit a normal form of the schematic shape
+
+```text
+E_LRS = 18 h(17h - 12) + R_h(anchor, auxiliary variables),
+```
+
+where
+
+```text
+h = hblock,
+R_h >= 0
+```
+
+on the admissible LRS support.  The equality `R_h=0` gives the first opening of shell `h`.
+
+This is the precise sense in which `hblock` is the shell index.  It is the coordinate that appears quadratically in the leading normal energy.
+
+### What determines hblock from `(l,u,v,root variables)`?
+
+The data is not yet enough to write the exact formula, but the form of the theorem is clear.  There should be an explicit affine-linear map
+
+```text
+hblock = H(l,u,v,n,branch)
+```
+
+or, more likely, a piecewise affine-linear map depending on the LRS branch.  The anchor then records the companion tangential root coordinate.  The root-pair involution
 
 ```text
 n -> 12 - n
 ```
 
-pairs them as
+acts primarily on the anchor coordinate, while `hblock` records the shell containing that anchor pair.
+
+The immediate task is to extract this map from the implementation and write it as a theorem:
 
 ```text
-{-3,15} and {-17,29}.
+LRSKey(atom) = (H(atom), A(atom)),
+H(atom) is the signed shell normal coordinate,
+A(atom) is the anchor/tangential coordinate.
 ```
 
-The defective anchor is on the free pair
+## 3. The hblock=0 base layer
+
+The base layer is now the simplest local obstruction object.
+
+You found at `e=9`:
 
 ```text
-{-17,29} ≡ {1,2} mod 9,
+(0,-1):  1
+(0, 1):  1
+(0, 3): -1
+(0, 5): -2
+(0, 7):  1
 ```
 
-not the fixed residue pair
+and the sum is
 
 ```text
-{-3,15} ≡ {6,6} mod 9.
+1 + 1 - 1 - 2 + 1 = 0.
 ```
 
-Thus the LRS key is measuring root-packet anchor data, not cone data.
+This strongly suggests that `hblock=0` is a one-dimensional boundary transfer along the anchor coordinate.  It is already locally nonzero at the first possible exponent, but its total charge cancels.
 
-### 3.2 How this differs from the cone level
+### Generating function expectation
 
-At the cone level, the natural key is something like:
+Because hblock `0` has bad keys at every `e=9n` from `n=1` onward, its support is dense in the `q^9` variable.  Therefore it is unlikely to be a sparse unary theta by itself.  It is more likely one of the following:
 
 ```text
-(k,r) modulo sigma/deck/coset data.
+1. a finite-difference/telescoping series along anchors;
+2. a rational q-series in q^9, such as a finite combination of q^a/(1-q^b);
+3. a partial-theta boundary series whose signed total telescopes to zero;
+4. a coefficientwise transfer operator between adjacent anchor fibers.
 ```
 
-At the LRS level, the natural key is:
+The right object to fit is not just the set of bad keys.  Define the per-anchor charge series
 
 ```text
-root-pair block + anchor after upper alignment.
+C_a(Q) = sum_{n >= 1} keyWeight(e=9n, hblock=0, anchor=a) Q^n.
 ```
 
-The map from LRS to cone is therefore a projection/summation, not an equality of variables.  Many LRS atoms can project to the same cone atom, and one LRS key may split under cone reindexing.
-
-### 3.3 The missing definition to extract
-
-For a rigorous paper, define an explicit map:
+Then test:
 
 ```text
-LRSAtom(l,u,v,n,branch) -> (e, hblock, anchor, sign, supportFlag).
+C_0_total(Q) = sum_a C_a(Q).
 ```
 
-Then prove:
+The e=9 data suggests
 
 ```text
-1. tau acts on LRSAtom and maps anchor n to 12-n;
-2. keyWeight is the signed sum over fixed (e,hblock,anchor);
-3. the boundary defect is the part where tau exits support;
-4. after summing over keys and reindexing, this boundary defect becomes
-   Theta_u * Theta_v * (D-A).
+C_0_total(Q) = 0
 ```
 
-That will make the LRS exponent precise and separate it from `even_k_exp`.
+or perhaps zero after including all anchors and all LRS branches.  If true, the base layer is a pure redistribution of charge between keys, not a global obstruction.
 
-## Q4. What should the main theorem of Paper 2 be now?
+### Recognizability
 
-Do not make `9 | e` the headline.  It is now known to be vacuous at the atom-existence level.
-
-Do not make `M^2 ≡ -I mod 9` the headline for the counterexample either.  It is a beautiful cone/Pell theorem, but it acts one layer below the LRS key where the counterexample lives.
-
-The strongest and cleanest main theorem is the **boundary-shell theorem**.
-
-### Proposed main theorem
+I would not call the hblock=0 series an eta quotient yet.  Dense support at every `Q^n` is more characteristic of a rational/false-theta transfer series than a theta series.  The right first theorem is a telescoping theorem:
 
 ```text
-Theorem A: LRS boundary-shell obstruction.
-In the LRS/root-packet expansion of Chan's Theta_10, the failure of tau-pairing
-is a boundary-shell phenomenon.  For each shell j>=1, no normal bad key occurs
-below
-
-    onset_j = 18*j*(17*j - 12).
-
-The bound is sharp for j=1,2,3, with first onsets
-
-    90, 792, 2106.
+sum_anchor keyWeight(9n,0,anchor) = 0 for all n.
 ```
 
-If the formula is not yet proved for all `j`, make it a conjecture or theorem-with-verified-cases:
+Only after this is proved should one try to identify individual `C_a(Q)`.
+
+## 4. Refining Fable's fiber onset formula
+
+Fable's proposed fiber formula was
 
 ```text
-Theorem: verified for j=1,2,3 by exhaustive exact scan.
-Conjecture: holds for all j.
+onset_j(fiber) = 18j((|l|+|v|)j - |v|).
 ```
 
-### Secondary theorem
+For the minimizing fiber
 
 ```text
-Theorem B: Boundary generating function.
-The global generating function of the LRS boundary defect factors as
-
-    Missing_kernel = Theta_u * Theta_v * (D-A),
-    D-A = -f_{1,3,4}(X,-X^3,X).
+(l,u,v)=(-5,-8,-12),
 ```
 
-### Conceptual theorem
+this gives
 
 ```text
-Theorem C: Layer projection.
-The LRS boundary-shell defect projects to the discriminant-5 cone D-A under the
-root-packet-to-cone reindexing.  The Pell deck congruence M^2 ≡ -I mod 9
-explains the cone-level anti-periodicity but is not itself a fiber action on
-(hblock,anchor).
+|l| + |v| = 17,
+|v| = 12,
 ```
 
-This framing is honest, precise, and publishable.  It also protects the paper from the now-corrected false claims.
-
-## Q5. Shell-4 onset and bad-key count
-
-The onset prediction is clear:
+and hence
 
 ```text
-onset_4 = 18*4*(17*4 - 12)
-        = 18*4*56
-        = 4032.
+18j(17j - 12),
 ```
 
-I would be very cautious about predicting the bad-key count at shell 4.  The onset formula determines the first exponent where shell-4 defects can occur, but it does not determine the multiplicity of bad keys.
+which matches the observed positive-hblock branch.
 
-### 5.1 Why no reliable count follows from the onset formula alone
+### Refinement: use chamber distances, not absolute values
 
-The count depends on the residual minimizer set:
+The absolute values are a clue but probably not the final theorem.  In the chamber containing the minimizing fiber, `l<0` and `v<0`, so
 
 ```text
-BadKeys_4(4032)
-  = # {key fibers hit by admissible minimizers of R_4=0 with nonzero boundary charge}.
+|l| = -l,
+|v| = -v,
+|l|+|v| = -(l+v).
 ```
 
-The formula
+A more structural formula is therefore:
 
 ```text
-onset_j = 18j(17j-12)
+onset_j(l,v) = 18j( L(l,v) * j - V(l,v) ),
 ```
 
-only gives the minimum energy.  It does not give the number of minimizers.
-
-### 5.2 What I would predict qualitatively
-
-Given that shell 3 has `93` bad keys at onset, shell 4 may be large, probably larger than shell 3 if the residual minimizer dimension grows with `j`.  But exact monotonicity is not guaranteed.  It could be lower if parity/coset constraints become more restrictive at `j=4`.
-
-The honest prediction is:
+where `L(l,v)` and `V(l,v)` are positive distances to the relevant LRS support walls.  In this chamber,
 
 ```text
-shell-4 onset: e=4032;
-bad-key count: should be computed from the residual LRS minimizer form, not guessed.
+L(l,v) = -l - v,
+V(l,v) = -v.
 ```
 
-If you need a paper-safe statement:
+The formula then becomes
 
 ```text
-The onset formula predicts where shell 4 begins, not how many keys are bad at
-that first exponent.  The multiplicity is a separate representation number.
+onset_j(l,v) = 18j( (-l-v)j + v ).
 ```
 
-### 5.3 Formula template for bad-key count
+For `l=-5`, `v=-12`, this is exactly `18j(17j-12)`.
 
-Once the normal form is extracted, the count should be stated as:
+### What it implies about the LRS normal form
+
+It implies that, in a fixed chamber/fiber, the full LRS energy has normal coordinate `h=hblock` and leading term
 
 ```text
-bad_count(j,e)
-  = #{ K : sum_{y in Y_j(K), R_j(y)=e-onset_j} sign_j(y) != 0 }.
+18 [ L h^2 - V h ].
 ```
 
-At onset:
+For the opposite hblock orientation, one gets the companion branch
 
 ```text
-bad_count(j,onset_j)
-  = #{ K : sum_{y in Y_j(K), R_j(y)=0} sign_j(y) != 0 }.
+18 [ L h^2 + V h ]
 ```
 
-This is the formula.  To get a closed form in `j`, one needs the explicit residual zero set `R_j=0` and the key map.
-
-## Q6. How does `Theta_u * Theta_v * (D-A)` interact with the LRS decomposition?
-
-The factorization lives after summing/reindexing the LRS boundary terms.
-
-At the LRS level, the decomposition is:
+with `h=j>0`, or uniformly
 
 ```text
-oddBilat       = bilateral/root-pair bulk term,
-oddMissing     = one-sided missing-half boundary correction,
-stripU/stripV  = strip boundary corrections.
+18 h (L h - V)
 ```
 
-The tau pairing cancels the bilateral/bulk part when the support is closed.  The remaining terms are exactly the boundary divergence:
+for signed `h` if the sign convention is chosen correctly.
+
+This is exactly the two-sided theta form.  The companion branch is not a refutation of the formula; it is the negative hblock orientation.
+
+### Proof target
+
+The theorem to prove is:
 
 ```text
-Boundary_LRS = oddMissing + stripU + stripV contributions after tau mismatch.
+LRS normal form in a chamber.
+For each LRS chamber C and fiber parameter (l,u,v), there are wall-distance
+functions L_C(l,u,v), V_C(l,u,v) such that
+
+    E_LRS(atom) = 18 hblock (L_C hblock - V_C) + R_C(anchor, other variables),
+
+with R_C >= 0 on the admissible support.
 ```
 
-After summing over the root-packet fibers and changing variables, this boundary divergence factors as:
+Then the global shell-opening sequence is obtained by minimizing over chambers/fibers.
+
+## 5. Is the total sum over all keys always zero?
+
+This is now one of the most important questions.
+
+The e=9 data shows local nonzero key charges but total charge zero:
 
 ```text
-Boundary_LRS generating function
-  = Theta_u * Theta_v * (D-A).
+sum_K keyWeight(9,K) = 0.
 ```
 
-### 6.1 Where the factors come from
-
-The factors should be interpreted as follows:
+The natural conjecture is:
 
 ```text
-Theta_u:
-  the unary theta generated by the u/root-packet strip direction.
-
-Theta_v:
-  the unary theta generated by the v/root-packet strip direction.
-
-D-A:
-  the Hecke-Rogers cone wall generated by the missing/sigma-straddling boundary
-  in the remaining two variables after the LRS-to-cone reindexing.
+GlobalCharge(e) := sum_K keyWeight(e,K) = 0 for every e.
 ```
 
-Thus `D-A` is not visible as a single individual LRS atom.  It appears after:
+This is exactly what one expects if keyWeight is a discrete boundary divergence on the key graph.
+
+### Divergence interpretation
+
+Think of keys as vertices and boundary pairings as directed edges.  Each defective atom contributes a signed current along an edge between keys.  The local keyWeight is the divergence at one vertex:
 
 ```text
-1. summing boundary LRS atoms over root-packet fibers,
-2. collecting the u and v directions into unary theta factors,
-3. reindexing the remaining boundary variables to the discriminant-5 cone.
+keyWeight(e,K) = div J_e(K).
 ```
 
-### 6.2 What to prove
-
-The right theorem is a commuting diagram:
+Then summing over all keys gives
 
 ```text
-LRS boundary atoms
-    --sum over keys / boundary divergence-->
-Boundary generating function
-    --reindex variables-->
-Theta_u * Theta_v * (D-A)
-    --HM identification-->
-Theta_u * Theta_v * (-f_{1,3,4}(X,-X^3,X)).
+sum_K div J_e(K) = 0
 ```
 
-This theorem makes the relationship between LRS and Paper 3 precise.
+provided there is no external boundary after all LRS branches are included.
 
-### 6.3 Important consequence
-
-The LRS counterexample and the Paper 3 norm theta are not the same object at the same layer.  Instead:
+This explains the phenomenon:
 
 ```text
-The LRS counterexample is a fiber-level boundary charge.
-The norm theta D-A is the global generating function obtained after summing
-and reindexing those boundary charges.
+global q-series identity can still be true,
+while the fiber-local keyWeight=0 proof fails.
 ```
 
-This is the right fusion statement.
+The local charges are nonzero, but they are internal transfers between key fibers.
 
-## A concrete normal-form program
+### Caveat
 
-Here is a computational skeleton for the normal-form proof.  It records the theorem you want the code to discover, not a final verified formula.
+You must be precise about what is being summed.  The theorem should include:
+
+```text
+all keys,
+all LRS branches,
+all signs,
+the exact same exponent e.
+```
+
+If one sums only `normal_bad` keys or only a single branch, the total may not vanish.
+
+### Suggested theorem
+
+```text
+Global telescoping theorem.
+For every exponent e,
+
+    sum_{K} keyWeight(e,K) = 0.
+
+Equivalently, the LRS boundary charge is globally exact, but not fiberwise zero.
+```
+
+This theorem would be a major repair of the original proof strategy.  It says the old conjecture was too local, not globally false.
+
+## 6. Correct theorem architecture for Paper 2
+
+The correct architecture is now clear.
+
+### The old framing to remove
+
+Do not headline:
+
+```text
+9|e is necessary.
+```
+
+It is vacuous because atoms already occur only at `e` divisible by `9`.
+
+Do not headline:
+
+```text
+first counterexample onset.
+```
+
+Bad keys already occur at `e=9`.
+
+Do not headline:
+
+```text
+M^2 ≡ -I mod 9 explains the LRS fiber counterexample.
+```
+
+`M` acts at the cone/Pell layer, not directly at the LRS key layer.
+
+### New headline
+
+Use:
+
+```text
+A fiber-local cancellation failure with a shell-filtration law.
+```
+
+or more mathematically:
+
+```text
+The LRS boundary charge is globally telescoping but not fiberwise zero; its
+key support is filtered by hblock shells whose openings form a two-sided unary
+theta series.
+```
+
+### Suggested main theorem package
+
+#### Theorem 1: LRS key decomposition
+
+Define the LRS atom, exponent, sign, and key
+
+```text
+K = (hblock, anchor).
+```
+
+#### Theorem 2: hblock is shell
+
+Prove or state with verified cases:
+
+```text
+A bad key with |hblock| > j cannot occur below the j-th shell-opening level.
+The first appearance of hblock h occurs at
+
+    e(h) = 18 h(17h - 12).
+```
+
+Equivalently, the shell-opening generating function is
+
+```text
+Theta_shell(q) = sum_{h in Z} q^{18h(17h-12)}.
+```
+
+#### Theorem 3: local nonzero from the base layer
+
+Show:
+
+```text
+Bad keys exist at every e=9n from n=1 onward, already in hblock=0.
+```
+
+If not yet proved for all n, state as a conjecture with strong data.
+
+#### Theorem 4: global telescoping
+
+Prove/conjecture:
+
+```text
+sum_{hblock,anchor} keyWeight(e,hblock,anchor) = 0 for all e.
+```
+
+This explains why the global q-series identity survives despite local key failures.
+
+#### Theorem 5: boundary generating function
+
+Connect to the cone/Paper 3 layer:
+
+```text
+Boundary_GF = Theta_u * Theta_v * (D-A),
+D-A = -f_{1,3,4}(X,-X^3,X).
+```
+
+#### Theorem 6: cone/Pell shadow
+
+State separately:
+
+```text
+The discriminant-5 cone factor has Pell deck anti-periodicity M^2 ≡ -I mod 9
+and the norm/coset stabilizer eps^6.  This is the global cone shadow of the
+LRS boundary, not the direct hblock-key action.
+```
+
+## 7. Answering the six questions directly
+
+### Q1. Is the two-sided onset support a theta function?
+
+Yes.  The complete shell-opening support is the unary theta series
+
+```text
+Theta_shell(q) = sum_{h in Z} q^{18h(17h-12)}.
+```
+
+In `Q=q^18`, it is
+
+```text
+sum_{h in Z} Q^{17h^2-12h}
+  = Q^{-36/17} sum_{n≡-6 mod17} Q^{n^2/17}.
+```
+
+It is a weight-`1/2` unary theta with rational characteristic, best viewed as a vector-valued theta/coset theta.  I would not identify it as an eta quotient unless later proven.
+
+### Q2. What does hblock measure geometrically?
+
+`hblock` is the signed normal shell coordinate of the LRS boundary.  The `anchor` is the tangential coordinate along the root-pair fiber.  Geometrically, the key `(hblock,anchor)` is a normal/tangential coordinate system for the LRS boundary charge.
+
+### Q3. What is the hblock=0 generating function?
+
+It is likely a one-dimensional anchor-transfer or telescoping series, not a sparse theta.  Since hblock=0 bad keys occur at every `e=9n`, its support is dense in the `q^9` variable.  The most promising theorem is not eta-product identification but a telescoping identity:
+
+```text
+sum_anchor keyWeight(9n,0,anchor) = 0.
+```
+
+Individual anchor series may be rational or partial-theta-like; they should be fitted separately.
+
+### Q4. Verify/refine Fable's formula
+
+Refine absolute values into chamber distances.  In the chamber of the minimizing fiber `l=-5,v=-12`, the formula is
+
+```text
+onset_j = 18j(((-l-v)j + v)) = 18j(17j-12).
+```
+
+The general theorem should use wall-distance functions, not literal absolute values.  It implies a normal form
+
+```text
+E_LRS = 18[L hblock^2 - V hblock] + residual,
+```
+
+with nonnegative residual on the support.
+
+### Q5. Does total boundary charge vanish globally?
+
+Very likely, and this should become a central theorem.  The e=9 data supports the divergence interpretation:
+
+```text
+local key charges are nonzero,
+but their total over keys is zero.
+```
+
+If true for all e, it explains exactly why the fiber-local proof fails while the global q-series identity can remain true.
+
+### Q6. Correct paper architecture?
+
+The headline should be:
+
+```text
+The LRS root-packet cancellation is globally telescoping but not fiberwise.
+Its local defects are organized by hblock shells, and the shell-opening levels
+form a two-sided unary theta series.
+```
+
+Then the Paper 3 factorization appears as the global generating function of those boundary transfers:
+
+```text
+Theta_u * Theta_v * (D-A),
+D-A = -f_{1,3,4}(X,-X^3,X).
+```
+
+## 8. Concrete next computations
+
+### 8.1 Extract per-hblock onset data
+
+For each hblock `h`, compute the first exponent and confirm:
+
+```text
+first_e(h) = 18h(17h-12).
+```
+
+Include `h=0`, where this formula gives `0`; the first nonzero bad-key layer for hblock 0 is `e=9`, so hblock 0 should be treated as the base transfer layer rather than a shell opening.
+
+### 8.2 Test global telescoping
+
+For many exponents `e=9n`, compute:
+
+```text
+TotalCharge(e) = sum_{hblock,anchor} keyWeight(e,hblock,anchor).
+```
+
+If this is always zero, it should become the main theorem.
+
+### 8.3 Fit hblock=0 anchor series
+
+For each anchor `a`, compute
+
+```text
+C_a(Q) = sum_{n>=1} keyWeight(9n,0,a) Q^n.
+```
+
+Look for:
+
+```text
+finite differences,
+periodicity in anchor mod something,
+rational functions,
+partial theta pieces.
+```
+
+### 8.4 Extract the LRS normal form
+
+For actual LRS atoms, compute
+
+```text
+R(atom) = E_LRS(atom) - 18*hblock*(17*hblock - 12).
+```
+
+Then test:
+
+```text
+R(atom) >= 0,
+R(atom)=0 exactly at shell-opening wavefronts.
+```
+
+This is the direct path to a proof.
+
+## 9. Minimal code skeleton for the theta and count analysis
 
 ```python
+from collections import defaultdict
 from dataclasses import dataclass
-from typing import Callable, Iterable, Optional
+from typing import Iterable
 
 
-@dataclass(frozen=True)
-class LRSAtom:
-    l: int
-    u: int
-    v: int
-    anchor: int
-    branch: str
+def shell_opening(h: int) -> int:
+    """Two-sided hblock shell-opening exponent."""
+    return 18 * h * (17 * h - 12)
+
+
+def positive_onset(j: int) -> int:
+    return shell_opening(j)
+
+
+def companion_onset(j: int) -> int:
+    return shell_opening(-j)
+
+
+for j in range(1, 6):
+    print(j, positive_onset(j), companion_onset(j))
 
 
 @dataclass(frozen=True)
@@ -577,174 +695,46 @@ class Key:
     anchor: int
 
 
-def onset(shell: int) -> int:
-    """Predicted first exponent for shell `shell`."""
-    j = shell
-    return 18 * j * (17 * j - 12)
+def total_charge(charges: dict[Key, int]) -> int:
+    return sum(charges.values())
 
 
-def anchor_partner(n: int) -> int:
-    """Root-pair anchor involution observed in the LRS fiber."""
-    return 12 - n
+def charges_by_hblock(charges: dict[Key, int]) -> dict[int, int]:
+    out: defaultdict[int, int] = defaultdict(int)
+    for key, value in charges.items():
+        out[key.hblock] += value
+    return dict(out)
 
 
-def shell_normal_form_residual(atom: LRSAtom) -> Optional[int]:
-    """Placeholder for the residual R_j after extracting onset_j.
-
-    The goal theorem is:
-        E_LRS(atom) = onset(shell(atom)) + R_j(atom)
-    with R_j(atom) >= 0 on the admissible support.
-    """
-    raise NotImplementedError
-
-
-def key_of_atom(atom: LRSAtom) -> Key:
-    """The explicit LRS key map to extract from the implementation."""
-    raise NotImplementedError
-
-
-def lrs_exponent(atom: LRSAtom) -> int:
-    """Full upper-aligned LRS exponent, not even_k_exp or odd_k_exp."""
-    raise NotImplementedError
-
-
-def boundary_sign(atom: LRSAtom) -> int:
-    """Signed contribution of oddMissing/strip boundary terms."""
-    raise NotImplementedError
-
-
-def bad_key_count(shell: int, e: int, atoms: Iterable[LRSAtom]) -> int:
-    """Count keys with nonzero boundary charge at exponent e and shell."""
-    charges: dict[Key, int] = {}
-    for atom in atoms:
-        if lrs_exponent(atom) != e:
-            continue
-        # Replace by the real shell predicate.
-        residual = shell_normal_form_residual(atom)
-        if residual is None:
-            continue
-        if e != onset(shell) + residual:
-            continue
-        key = key_of_atom(atom)
-        charges[key] = charges.get(key, 0) + boundary_sign(atom)
+def bad_key_count(charges: dict[Key, int]) -> int:
     return sum(1 for value in charges.values() if value != 0)
-
-
-for j in range(1, 5):
-    print(j, onset(j))
 ```
 
-Expected output:
+Expected opening sequence:
 
 ```text
-1 90
-2 792
-3 2106
-4 4032
+j=1: 90, 522
+j=2: 792, 1656
+j=3: 2106, 3402
+j=4: 4032, 5760
+j=5: 6570, 9540
 ```
-
-## Suggested revised paper outline
-
-### Section 1: The failed tau-pairing conjecture
-
-State the original keyWeight=0 conjecture and the corrected layer distinction.
-
-### Section 2: LRS root-packet setup
-
-Define LRS atoms, full LRS exponent, `(hblock,anchor)`, tau, and boundary support.
-
-### Section 3: Boundary-shell normal form
-
-Prove or conjecture with verified cases:
-
-```text
-E_LRS = onset_j + R_j,
-R_j >= 0,
-onset_j = 18j(17j-12).
-```
-
-### Section 4: Counterexamples and shell wavefronts
-
-Give:
-
-```text
-shell 1 onset 90,
-shell 2 onset 792,
-shell 3 onset 2106 with 93 bad keys,
-e=11763 isolated shell-1 bad key.
-```
-
-### Section 5: Global generating function of the boundary
-
-Prove/restate:
-
-```text
-Boundary GF = Theta_u * Theta_v * (D-A),
-D-A = -f_{1,3,4}(X,-X^3,X).
-```
-
-### Section 6: Cone/Pell/norm shadow
-
-Discuss `M^2 ≡ -I mod 9` and `eps^6` as the cone/norm projection of the boundary deck, with a clear warning that this is not the root-packet key action unless decorated-lifted.
-
-## Answers to the six questions
-
-### Q1. Why does the onset formula work?
-
-Because shell onset is a constrained minimum of the full LRS exponent.  The expected normal form is
-
-```text
-E_LRS = 18j(17j-12) + R_j,
-R_j >= 0.
-```
-
-The `12` comes from the anchor-pair involution `n -> 12-n`.  The `17` is the normal curvature of the full LRS boundary quadratic after root-packet/coset/parity constraints, not the cone-only curvature.
-
-### Q2. What determines bad-key count?
-
-The count is a representation number of the residual tangential form `R_j` inside key fibers.  At onset it counts minimizers with `R_j=0` whose boundary charge is nonzero.  This can be large at a wavefront, explaining `93` bad keys at `e=2106`, while an interior shell-1 value such as `11763` may have only one bad key.
-
-### Q3. What is the LRS exponent?
-
-It is the full upper-aligned root-packet exponent after combining oddBilat, oddMissingSigned, and strip contributions.  It is not `even_k_exp` or `odd_k_exp` alone.  The key `(hblock,anchor)` is a root-packet fiber label, with the anchor living in the `n -> 12-n` root-pair system.
-
-### Q4. What should the main theorem be?
-
-The main theorem should be the boundary-shell onset theorem plus the boundary generating function factorization.  Do not headline `9|e`.  Do not claim `M` acts directly on LRS fibers.  State that the tau-pairing defect is a shell-indexed LRS boundary charge whose global generating function is the discriminant-5 false theta factor.
-
-### Q5. Shell-4 onset and count?
-
-The onset prediction is
-
-```text
-onset_4 = 4032.
-```
-
-The bad-key count at shell-4 onset is not determined by the onset formula.  It requires the residual minimizer count for `R_4=0` after applying the key map and signs.  A closed formula should be a representation-number formula for `R_j`, not a guess from the first three shells.
-
-### Q6. How does `Theta_u * Theta_v * (D-A)` interact with LRS?
-
-It is the global sum/reindexing of LRS boundary defects.  The LRS decomposition produces boundary terms from oddMissing and strips; after summing over fibers, the `u` and `v` directions become `Theta_u` and `Theta_v`, while the remaining wall variables become the cone difference `D-A = -f_{1,3,4}(X,-X^3,X)`.
 
 ## Bottom line
 
-The corrected story is stronger than the old `9|e` story.  It says:
+The corrected Round 4 picture is coherent and publishable:
 
 ```text
-The obstruction is not a divisibility accident.
-It is a boundary-shell wavefront phenomenon in the LRS root-packet geometry.
-The onset law is quadratic and sharp:
+Bad keys are not rare first appearing at high energy; they exist from e=9.
+The real structure is a shell filtration.
+hblock is the shell coordinate.
+The shell-opening support is the two-sided unary theta
 
-    onset_j = 18j(17j-12).
+    sum_{h in Z} q^{18h(17h-12)}.
 
-The global generating function of the boundary charges is the same
-discriminant-5 false theta cone that appears in the norm-theta paper.
+Local key charges can be nonzero while the global charge likely telescopes to
+zero.  The norm/cone false theta of Paper 3 is the global generating function
+of this LRS boundary transfer after summing and reindexing.
 ```
 
-That is the publishable core.  The next critical task is to extract the LRS normal form proving
-
-```text
-E_LRS - 18j(17j-12) = R_j >= 0
-```
-
-and then compute the residual representation formula for bad-key counts.
+This is a much stronger and cleaner narrative than the old divisibility framing.
