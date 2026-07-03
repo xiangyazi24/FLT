@@ -1,505 +1,686 @@
-# Q3162 (dm1): Review of `paper/paper2_counterexample/paper2.tex`
+# Q3166 (dm1): Paper 2 counterexample research — keyWeight boundary mechanism
 
 Date: 2026-07-03
 
-Repository reviewed: `xiangyazi24/Q-series-and-Chan-s-work`
+## Executive answer
 
-File reviewed: `paper/paper2_counterexample/paper2.tex` on `main`
-
-## Overall verdict
-
-The paper has a strong and interesting algebraic core, but in its current form I would treat it as **major revision before submission**.
-
-The strongest parts are:
-
-1. the explicit `beta(k,r)` parametrization of the coset `L`;
-2. the norm identity `-N(beta(k,r)) = 10E(k,r)+1`;
-3. the identification with the Hickerson--Mortenson double sum, provided the sign convention is stated precisely;
-4. the concrete non-multiplicativity witness `a(11*31) != a(11)a(31)`.
-
-The weakest parts are:
-
-1. the proof of the stabilizer/order theorem, which currently has a genuine arithmetic error modulo `sqrt(5)`;
-2. the prime nonvanishing proof, where the “bad class” theorem is asserted but not proved;
-3. the reflection/sector machinery, which is plausible but underdefined;
-4. the equidistribution proof, where “by Chebotarev” is not justified unless the `iota` invariant is first shown to factor through a finite ray class or an appropriate Hecke/Shintani equidistribution theorem is invoked.
-
-My current recommendation is: submit only after replacing the prime-value and equidistribution section with a fully explicit sector-table theorem.  The algebraic non-multiplicativity result alone may already be publishable as a shorter note, but the present headline claims about all split primes and density need more proof.
-
-## A. Mathematical correctness audit
-
-### 1. Definition of `E`: nonnegativity is false globally
-
-The draft says that
+The cleanest way to understand the counterexample is this:
 
 ```text
-E(k,r) = 1/2 Q(k,r)
+The tau pairing cancels the bilateral/bulk kernel.
+The failure is entirely a boundary flux through one-sided cuts.
+Those boundary cuts are q^9-dilated because the root-pair row coefficient is
+
+    n(l) = 54l + 45 = 9(6l+5).
+
+Therefore nonzero keyWeight is impossible away from e ≡ 0 mod 9.
 ```
 
-is “always a nonnegative integer.”  The integrality is correct, but global nonnegativity is false because the form is indefinite off the same-sign cones.
-
-Example:
+But I would be careful with the phrase “fails iff 9|e.”  The data quoted says all failures occur at multiples of 9, but many multiples of 9 still have no failure.  The theorem you should aim to prove is:
 
 ```text
-E(1,-2) = 2*1^2 + 1 + 3*1*(-2) + (-2)(-1)/2
-        = 2 + 1 - 6 + 1
-        = -2.
+Eligibility theorem:
+  if 9 ∤ e, every fiber is tau-closed and keyWeight(e,K)=0.
+
+Boundary theorem:
+  if 9 | e, keyWeight(e,K) is a signed boundary representation number.
+  It may vanish by cancellation or by no boundary representative.
 ```
 
-Fix:
+So `9|e` is a necessary support condition for the residual, not by itself a sufficient condition for each fiber.
+
+The sigma involution on the `(k,r)` cone is the right repair.  The corrected local statement should not be “tau closes every fiber,” but:
 
 ```text
-E(k,r) is always an integer.  On the A- and D-cones used in the definition of B_N, it is nonnegative.
+keyWeight(e,K) is the divergence of a tau/sigma boundary current.
+It vanishes exactly when the fiber has no sigma-straddling boundary atoms,
+or when their signed boundary count cancels.
 ```
 
-This matters because a referee will object to the phrase “always nonnegative” immediately.
+This recovers a fiber-local proof after adding boundary edges or ghosts.  The quotient proof should pair atoms in the enlarged graph, not in the original support alone.
 
-### 2. Unit stabilizer theorem: the proof has a real modulo-`sqrt(5)` error
+## Repo context used
 
-The theorem statement
+I checked the current Q-series repo notes.  The active Chapter 10 route emphasizes the faithful bridge through `Fhm = Ghat 1`, specialization at `(18,18,1)`, and the importance of boundary clearing before specialization.  The run log also records the key specialization denominator shape `Wd(r)=90r-D_row`, with `|Wd| ≥ 9` at `(18,18)`.  That is consistent with the answer below: the residual is not a random failure of tau; it is a q^9/q^18 boundary phenomenon coming from the specialized row arithmetic.
+
+## 1. Why the `9 | e` condition appears
+
+### 1.1 The short mechanism
+
+The noncentral tau cancellation fails only when the atom lies on a one-sided boundary.  The boundary terms come from row equations in which the root-pair linear coefficient is
 
 ```text
-Stab_{<eps>}(L) = <eps^6>
+n(l) = 54l + 45 = 9(6l+5).
 ```
 
-is plausible and consistent with the prior computations, but the proof in the draft is wrong as written.
-
-The draft claims:
+Equivalently, with `m=l+1`,
 
 ```text
-eps = phi^2 has eps mod sqrt(5) = 1 + sqrt(5) ≡ 1.
+n = 54m - 9 = 9(6m-1).
 ```
 
-This is incorrect.  Since
+Under tau, `m -> -m`, so
 
 ```text
-phi = (1 + sqrt(5))/2,
-eps = phi^2 = phi + 1 = (3 + sqrt(5))/2,
+n_tau = -54m - 9 = -n - 18.
 ```
 
-and modulo `(sqrt(5))` we have `phi ≡ 1/2 ≡ 3 mod 5`, so
+After dividing by 9, if
 
 ```text
-eps = phi^2 ≡ 3^2 ≡ 9 ≡ 4 ≡ -1 mod 5.
+a = n/9 = 6m - 1,
 ```
 
-Thus `eps` has order `2` modulo `(sqrt(5))`, not order `1`.
-
-There is also a second issue.  The draft factors the `L` condition modulo `sqrt(5)` as
+then tau sends
 
 ```text
--2a ≡ 1 mod 5, i.e. a ≡ 2 mod 5.
+a -> -a - 2.
 ```
 
-That is not the clean way to express the coset.  The condition
+So the tau root-pair symmetry is an affine reflection centered at `a=-1`, but only after the coefficient has been divided by 9.  This is the first structural reason the residual lives on a 9-dilated lattice.
+
+### 1.2 Boundary energies are images of a 9-dilated quadratic
+
+The general pattern is:
 
 ```text
-b - 3a ≡ 1 mod 5
+bulk row contribution       = bilateral theta / complete root-pair orbit,
+boundary row contribution   = one-sided or strip-truncated root-pair orbit.
 ```
 
-combined with `phi ≡ 3 mod sqrt(5)` gives
+For a typical root variable `j`, the row equation has schematic form
 
 ```text
-alpha = a + b phi ≡ a + 3b ≡ a + 3(3a+1) = 10a + 3 ≡ 3 mod 5.
+e = A j^2 + n(l) j + C(other variables),
 ```
 
-So the `sqrt(5)` component of `L` is better written as
+where the boundary part is obtained by restricting `j` to one side of a cut.  Since `n(l)=9(6l+5)`, completing the square or performing the root-pair involution shows that the boundary polynomial is naturally expressed as
 
 ```text
-alpha ≡ 3 mod sqrt(5).
+e = 9 * R(boundary variables),
 ```
 
-Multiplication by `eps ≡ -1` sends this to `-3 ≡ 2`, so it preserves the `sqrt(5)` condition only for even powers of `eps`.
+possibly after the fixed row normalization used by the Chapter 10 dissection.
 
-The corrected CRT proof should be:
+This is exactly what the Paper 3 cone factor sees:
 
 ```text
-O_K/(2 sqrt(5)) ≅ O_K/(2) × O_K/(sqrt(5)) ≅ F_4 × F_5.
-
-L modulo 2: alpha mod 2 lies in {1, phi}, excluding eps = phi+1.
-L modulo sqrt(5): alpha ≡ 3 mod sqrt(5).
-
-eps mod 2 has order 3.
-eps mod sqrt(5) is -1 and has order 2.
-
-Therefore eps^j preserves L only if j ≡ 0 mod 3 and j ≡ 0 mod 2, i.e. 6 | j.
+Missing_kernel = Theta_u * Theta_v * (D - A),
 ```
 
-This also fixes the apparent inconsistency in the current proof: the draft says the mod-`sqrt(5)` condition is preserved for all `j`, but still concludes `6 | j`.  If it were preserved for all `j`, the conclusion would only be `3 | j`.
+where the cone factor is a discriminant-5 Hecke-type false/indefinite theta series.  In the even-row normalization, the cone exponent is usually written as `9E` or `18N`; in other parity/coset components the same mechanism can produce `9` rather than `18`.  This explains why `90`, `702`, and `11763` are all multiples of `9`, while not necessarily all multiples of `18`.
 
-### 3. `eps*L ∩ L = empty` is correct, but do not overstate disjointness for all smaller powers
+### 1.3 What needs to be proved
 
-The theorem
+The right theorem is not simply “because `n` is divisible by 9.”  The proof should factor the boundary contribution.
+
+A precise target theorem is:
 
 ```text
-eps L ∩ L = empty
+BoundarySupportTheorem.
+For every fiber K and exponent e,
+
+  keyWeight(e,K) = BoundaryWeight(e,K),
+
+where BoundaryWeight(e,K) is a finite signed sum over boundary variables and
+is supported only when e = 9E_boundary for some integer E_boundary.
+
+Consequently, if 9 ∤ e, then keyWeight(e,K)=0.
 ```
 
-is correct.
+This is stronger and cleaner than checking tau support directly.
 
-However, be careful not to imply that all `eps^j L` for `1 <= j <= 5` are disjoint from `L`.  In earlier computations, `eps^2 L ∩ L` and `eps^4 L ∩ L` are nonempty.  For example,
+### 1.4 Why some multiples of 9 pass
+
+The quoted data says:
 
 ```text
-x = 1 + 4 phi ∈ L,
-eps^2 x = 14 + 23 phi ∈ L.
+non-9-multiples: no failures;
+9-multiples: many failures, but not all.
 ```
 
-So the precise statement should be about the stabilizer:
+That is exactly what a boundary representation theorem predicts.  Multiples of 9 are eligible, but a particular fiber may still have no boundary representative or may have signed cancellation.  In Paper 3 language, this is the same distinction as:
 
 ```text
-eps^j L = L iff 6 | j.
+norm-eligible does not imply nonzero coefficient.
 ```
 
-and not about pairwise disjointness of the six translates.
-
-### 4. The non-multiplicativity witness is solid, but the “character” corollary is too vague
-
-The direct witness
+The correct statement should be:
 
 ```text
-a(11)=B_1=1,
-a(31)=B_3=-2,
-a(341)=B_34=3
+keyWeight can fail only on the q^9 boundary subseries.
 ```
 
-is a good theorem.  It proves non-multiplicativity cleanly.
-
-The corollary saying
+not:
 
 ```text
-chi_fin(eps) != 1, in fact chi(eps) is a primitive 6th root
+every multiple of 9 fails.
 ```
 
-needs a definition of `chi_fin` and a precise domain.  At present it reads as heuristic explanation, not a theorem.
+## 2. keyWeight as a boundary divergence
 
-Suggested fix:
+Yes.  This is the right repair.
 
-- Keep the non-multiplicativity witness as the theorem.
-- Replace the character statement with a remark unless `chi_fin` is explicitly defined as a finite ray/coset character on a quotient and its value on `eps` is proved.
-
-A cautious wording:
+Let `A_e` be the set of atoms at exponent `e`, let `χ_e(x)` be the support indicator, and let `τ` be the central reflection in `(m,t)`:
 
 ```text
-The failure of eps to stabilize L prevents the coefficient sum from descending to an ideal-level sum invariant under the full positive unit group.  This is the structural source of non-multiplicativity.
+τ(m,t,d) = (-m,-t,d).
 ```
 
-### 5. HM identification is likely correct, but should be stated as a theorem with the convention
-
-The statement
+Let `s(x)` be the outer sign, with
 
 ```text
-B(X) = -f_{1,3,4}(X,-X^3,X)
+s(τx) = -s(x)
 ```
 
-is likely correct under the standard Hickerson--Mortenson convention
+for noncentral atoms.  Then, for a fixed fiber `K`, the tau-paired keyWeight can be written as
 
 ```text
-f_{a,b,c}(x,y,q)
-= sum_{sg(r)=sg(s)} sg(r)(-1)^{r+s} x^r y^s
-  q^{a binom(r,2)+brs+c binom(s,2)}.
+keyWeight(e,K)
+  = 1/2 * sum_{x in K-orbit domain}
+        s(x) * (χ_e(x) - χ_e(τx)) * localWeight(x).
 ```
 
-But a referee will want the convention printed and the one-line exponent/sign check included.  The paper currently says it coincides with HM but does not prove it in the main text.
-
-Recommended insertion:
+The bulk bilateral piece has
 
 ```text
-With HM variables (r,s)=(r,k), substituting x=X, y=-X^3, q=X gives sign
-sg(r)(-1)^r and exponent
-r(r+1)/2 + 3rk + 2k^2 + k = E(k,r).
-Thus f_{1,3,4}(X,-X^3,X)=A(X)-D(X), hence B=D-A=-f.
+χ_e(x) = χ_e(τx)
 ```
 
-### 6. Shintani fundamental sector statement needs more precision
-
-The proposition that A is an exact fundamental domain for `<eps>` acting on
+and cancels.  Thus only the support-boundary term survives:
 
 ```text
-Q = {sigma_1(alpha)>0, sigma_2(alpha)<0}
+boundaryFlux_e(x)
+  = s(x) * (χ_e(x) C_boundary(x) - χ_e(τx) C_boundary(τx)).
 ```
 
-is plausible, but it needs a fully specified embedding convention and boundary convention.
+This is a discrete divergence.  More invariantly, make a graph whose vertices are atoms and whose edges connect `x` to `τx`.  Define a current on each edge by the signed contribution transported from one endpoint to the other.  Then keyWeight is the divergence of this current restricted to the cut support.
 
-Questions a referee will ask:
+### 2.1 Boundary edge family
 
-1. Are the boundary rays included on one side and excluded on the other?
-2. How is `delta` defined on a boundary?
-3. Are prime generators ever on a boundary?  If not, prove or state why.  Boundary norms may be exceptional and should be excluded explicitly.
-4. Does the D-cone use the same `delta` after negation, or is it a separate sector in `-Q`?
-
-The paper says “A-cone or D-cone is equivalent to delta=0.”  That needs a lemma.  For A it is direct; for D it is true only after clarifying whether `delta(alpha)` is sign-invariant or whether one applies `delta(-alpha)`.
-
-### 7. Reflection identity: plausible but currently underproved
-
-The reflection identity
+The concrete boundary edge families are:
 
 ```text
-iota(bar p) ≡ -iota(p) - 1 mod 3
+1. missing-half theta edges;
+2. U-strip edges;
+3. V-strip edges;
+4. the k,r Hecke-Rogers cone wall D-A.
 ```
 
-has the right shape.  The finite-field part is correct if `lambda` is the discrete logarithm to base `eps mod 2`:
+The sigma involution
 
 ```text
-conjugation in F_4 is Frobenius x -> x^2,
-lambda -> 2 lambda mod 3.
+sigma(k,r) = (k, -r - 6k - 1)
 ```
 
-Indeed, in characteristic 2,
+preserves the `(k,r)` quadratic energy and flips the sign `(-1)^r`.  Hence the full bilateral `(k,r)` sum cancels, and the residual is exactly a cone-wall difference.
+
+That gives the repaired theorem:
 
 ```text
-bar(phi) = 1 - phi = 1 + phi = phi^2,
+CorrectedFiberTheorem.
+For a fixed fiber K, keyWeight(e,K)=0 if the fiber is sigma-closed across the
+boundary edge family.  Otherwise keyWeight(e,K) equals the signed count of
+sigma-straddling boundary atoms in that fiber.
 ```
 
-so the Frobenius statement is right.
+This is the right replacement for the failed `keyWeight=0` conjecture.
 
-The archimedean part is the part that needs proof.  The draft asserts:
+### 2.2 How this rescues the proof
+
+The original proof tried to pair atoms inside the original support.  The ghost partner at `(4,21,4)` shows that the original support is not tau-closed.  The repaired proof enlarges the object:
 
 ```text
-delta(bar pi) = -delta(pi) - 1 mod 6.
+original support + ghost boundary edges + sigma reflection data.
 ```
 
-This is an off-by-one-sensitive floor-function statement.  It should be isolated as a lemma with exact interval conventions.  A safe version is:
+Then cancellation happens in the enlarged graph, and the obstruction is pushed to a boundary divergence term.  If the global q-series identity includes the corresponding boundary correction, the proof closes.
+
+## 3. Does the ghost partner re-enter support by a deck transformation?
+
+Probably yes, but not by tau alone and not by a simple translation in `(m,t,d)`.
+
+There are three relevant deck phenomena.
+
+### 3.1 Root-row affine deck
+
+In the normalized row coefficient
 
 ```text
-If R lies in [eps^j, eps^{j+1}) in log-ratio coordinates, then 1/R lies in
-(eps^{-j-1}, eps^{-j}] and therefore has sector index -j-1, after the chosen
-half-open boundary convention.
+a = n/9 = 6m - 1,
 ```
 
-Then state that boundary cases do not occur for primes `p ≡ 1 mod 10`, or handle them separately.
-
-Without this lemma, Theorem 4.7 is not referee-ready.
-
-### 8. The bad class theorem is currently unproved
-
-The paper states:
+tau acts by
 
 ```text
-An ideal p contributes an atom iff iota(p) != 2.
+a -> -a - 2.
 ```
 
-but the following proof block is labelled as the proof of the prime nonvanishing theorem, not as a proof of the bad class theorem.  As written, the bad class theorem has no proof.
-
-More importantly, the bad class criterion suppresses several necessary lemmas:
-
-1. **Sign modulo `sqrt(5)` lemma.**  L-membership is not only the mod-2 condition `lambda in {0,2}`.  It also includes the condition `alpha ≡ 3 mod sqrt(5)`.  Since replacing a generator by `-alpha` flips `3` and `2` modulo `sqrt(5)` while preserving `lambda` and `delta`, one can probably choose the sign appropriately for prime norms, but this must be stated and proved.
-
-2. **Atom-sector lemma.**  For an element in `L`, being in the A- or D-cone must be shown equivalent to the correct sector condition, likely `delta=0` after a sign convention.
-
-3. **Unique representative lemma.**  For a contributing ideal at prime norm, there is exactly one active element in the relevant unit orbit modulo `<eps^6>`.  The draft later says “each contributing ideal contributes exactly one atom,” but does not prove it.
-
-4. **Parity coherence lemma.**  If both conjugate ideals contribute, their active atoms must have the same sign.  This is asserted, not proved.
-
-The bad class theorem is the center of the paper.  It needs a full proof or at least a clearly stated finite table with all cases.
-
-### 9. Prime nonvanishing logic: existence is not enough for the value set
-
-The reflection identity plus bad class logic can prove that at least one of the two conjugate prime ideals contributes.  But to conclude
+For the counterexample
 
 ```text
-B_{(p-1)/10} in {-2,-1,+1,+2}
+m = -4,
+a = 6(-4)-1 = -25,
+a_tau = 23 = -(-25)-2.
 ```
 
-you also need:
+Thus the ghost is visible in the affine root-pair quotient whose reflection center is `a=-1`.  This suggests a deck action in the root-row variable with affine shift `2` after dividing by 9.
+
+### 3.2 Cone deck via sigma
+
+On the Hecke-Rogers cone side, the relevant deck/reflection is not tau but
 
 ```text
-at most one atom per contributing ideal;
-no additional unit translates in the A/D cone;
-if both ideals contribute, the two atom weights do not cancel.
+sigma(k,r) = (k, -r - 6k - 1).
 ```
 
-These are currently summarized in one sentence as “bounded multiplicity from the cone-sector structure” and “coherent parity.”  A referee will not accept that as proof.
+It preserves the quadratic energy and reverses the parity sign.  The ghost partner should therefore be interpreted as re-entering after applying the sigma wall reflection in the boundary cone.  In the quotient by the sigma pairing, the bilateral sum is zero.
 
-This is the single biggest mathematical gap in the paper.
+### 3.3 Ideal/coset deck via the unit stabilizer
 
-### 10. Equidistribution proof is not justified by Chebotarev as written
-
-The equidistribution proof says that `iota(p)` has density `1/3` by Chebotarev.
-
-This needs much more justification.
-
-The invariant
+On the Paper 3 norm side, the natural deck group is
 
 ```text
-iota = delta - lambda
+Gamma = <eps^6>,
 ```
 
-contains `delta`, a Shintani sector/floor-function invariant defined using real embeddings.  Chebotarev directly applies to finite Galois/ray-class data, not to an archimedean sector index unless you first prove that `iota` factors through a finite ray class group.
+because `eps^6 L = L`.  The period `6` is a multiplicative unit-sector period; it is not the same as the additive q-exponent period `9`, but both carry a mod-3 component.
 
-There are two possible routes:
+### 3.4 What period to test
 
-1. **Finite ray-class route.**  Prove that `iota` is actually a finite ray-class invariant modulo a stated modulus.  Then Chebotarev is appropriate.
-
-2. **Shintani/Hecke equidistribution route.**  Treat `delta` as an archimedean sector condition and invoke equidistribution of prime ideals in Shintani sectors.  This is not plain Chebotarev; it is a Hecke prime ideal equidistribution statement for real quadratic fields with a finite congruence condition.
-
-As written, the density theorem is not proved.
-
-## B. What a referee would flag
-
-A referee would likely flag the following points.
-
-### Major flags
-
-1. **False statement:** `E(k,r)` is not globally nonnegative.
-2. **Incorrect arithmetic in the stabilizer proof:** `eps mod sqrt(5)` is `-1`, not `1`.
-3. **Incorrect or unclear factorization of the coset condition modulo `sqrt(5)`.**  The clean condition is `alpha ≡ 3 mod sqrt(5)`, not `a ≡ 2 mod 5`.
-4. **Theorem “Bad class” has no proof.**
-5. **Prime nonvanishing proof relies on unproved bounded multiplicity and parity coherence.**
-6. **Equidistribution by Chebotarev is unsupported unless `iota` is finite ray-class data.**
-7. **Claims of novelty/firstness are too strong without a careful literature comparison.**
-8. **The Lean formalization claim needs exact scope.**  The abstract says “All algebraic results (Theorems 1--9) are formalized.”  If prime nonvanishing and equidistribution are not formalized, make sure theorem numbering does not imply they are.
-
-### Minor flags
-
-1. The bibliography entry labelled `Chan2005` gives a 2010 publication; check label and title against the actual source for Chan's `Theta_10` dissection.
-2. The phrase `chi(eps)=zeta_6` is not meaningful until `chi` is defined.
-3. The theorem environments are awkward: the prime theorem is stated in the introduction and then later a proof appears without a restated theorem.  It is better to restate the theorem in Section 4.
-4. Boundary conventions for Shintani sectors are missing.
-5. The numerical evidence says “split primes through N=10^5” and “p up to 10^6+1”; make the indexing consistent.
-
-## C. Does it distinguish itself from ADH/Cohen/Corson--Favero?
-
-Conceptually, yes, but the paper needs to be more precise.
-
-The promising distinction is:
+I would test three candidate periods separately:
 
 ```text
-ADH/Cohen/Corson--Favero examples produce norm-supported series whose coefficients descend to ideal-level sums with unit-invariant weights, leading to multiplicative or Hecke-theoretic coefficient structures.
-
-This example is norm-supported but does not descend to ideals because the defining coset is not stable under eps.  The coefficient sum remains element-level/Shintani-sector-level and is therefore non-multiplicative.
+q-exponent period:      9,
+root-row affine period: a -> -a-2 in a=n/9,
+unit/coset period:      eps^6.
 ```
 
-That is a strong story.
+For the ghost atom, do not expect a literal `(m,t,d) -> (m+P,t+Q,d)` translation to fix the support.  The support is cut by half-open strips and cone walls, so the natural deck is an affine reflection plus unit-sector reduction, not a rectangular lattice period.
 
-But I would soften claims like:
+A good diagnostic is:
 
 ```text
-first naturally occurring ...
-all previously known examples ...
+Given a ghost y=τx outside support, search for g in <sigma, eps^6> or in the
+root-row affine deck group such that g(y) lies in the same energy/fiber support.
 ```
 
-until the literature review is expanded.  A safer wording is:
+If this succeeds uniformly, the quotient proof should be formulated over that deck group.
+
+## 4. Shape of the support set in `(m,t,d)`
+
+Use
 
 ```text
-This appears to give a new type of ADH-style norm-supported kernel: it is naturally produced by a q-series dissection and has norm support, but the unit action prevents descent to a multiplicative ideal-sum.
+m = l + 1,
+t = u + v - 1,
+d = u - v,
 ```
 
-Suggested additional comparison points:
-
-1. ADH `sigma(q)` and Cohen's Maass waveform examples: emphasize multiplicative ideal-sum behavior.
-2. Corson--Favero--Liesinger--Zubairy: emphasize character/q-series in `Q(sqrt(2))` and unit-compatible characters.
-3. Bringmann--Kane and Lovejoy--Osburn real-quadratic double sums: check whether any examples are nonmultiplicative in the same coset/Shintani-window sense.
-4. Hickerson--Mortenson: position your `f_{1,3,4}` identification in the Hecke-type double-sum framework.
-
-## D. Strongest and weakest parts
-
-### Strongest part
-
-The strongest part is the algebraic construction:
+so
 
 ```text
-beta(k,r) maps Z^2 to L,
--N(beta(k,r)) = 10E(k,r)+1,
-B is a cone-difference over A and D,
-B = -f_{1,3,4}(X,-X^3,X),
-B is not multiplicative by an explicit coefficient witness.
+u = U = (t + d + 1)/2,
+v = V = (t - d + 1)/2,
+l = m - 1.
 ```
 
-This is concrete, checkable, and compelling.  It also has Lean support, which is valuable.
-
-### Weakest part
-
-The weakest part is the prime-value theorem and density theorem.  The paper currently gives the outline of a beautiful argument, but the finite sector table has not actually been written down or proved.
-
-The central missing theorem should look like this:
+The integrality/parity condition is:
 
 ```text
-Finite sector theorem.
-For each split prime ideal orbit, after reducing by <eps^6>, the active set
-L ∩ (A ∪ D) has either zero or one representative; the zero/one condition is
-controlled by iota != 2; and for the two conjugate ideals, contributing
-representatives have coherent weights.
+t + d + 1 is even,
+t - d + 1 is even.
 ```
 
-Once that theorem is proved, the prime nonvanishing and value set follow.
+Equivalently, `t+d` and `t-d` are odd, so `t` and `d` have opposite parity.
 
-Until then, the paper should not present prime nonvanishing and equidistribution as established theorems.
+### 4.1 Strip support intervals
 
-## E. Venue suggestion
-
-### If the prime theorem and density are fully proved
-
-Good targets:
+The uniform strip function is
 
 ```text
-The Ramanuan Journal
-Research in Number Theory
-Journal of Number Theory
+strip0(N,l) = H(l) - H(l-N),
 ```
 
-`The Ramanujan Journal` is probably the best thematic fit because the paper combines q-series, mock/false theta, and real quadratic arithmetic.
-
-`Research in Number Theory` is a good fit if the Lean formalization and arithmetic novelty are emphasized.
-
-`Journal of Number Theory` becomes realistic if the Shintani sector theorem and literature comparison are strengthened.
-
-### If the paper is shortened to the algebraic/nonmultiplicative construction only
-
-Good targets:
+where `H(x)=1` for `x>=0` and `0` otherwise.  In `m`-coordinates:
 
 ```text
-Integers
-Hardy-Ramanujan Journal
-Journal of Integer Sequences
+strip0(N,m-1) = H(m-1) - H(m-1-N).
 ```
 
-`Integers` or `Hardy-Ramanujan Journal` would be reasonable for a concise paper presenting a new q-series kernel, norm support, HM identification, numerical data, and a nonmultiplicativity witness.
+Equivalently define the half-open interval
 
-## Suggested revision plan
+```text
+I(N) =
+  { m : 1 <= m <= N }       if N > 0,
+  { m : N+1 <= m <= 0 }     if N < 0,
+  empty                     if N = 0.
+```
 
-### Revision 1: fix arithmetic and wording
+Then
 
-1. Change “`E` is always nonnegative” to “`E` is always integral, and is nonnegative on the A/D cones.”
-2. Correct the stabilizer proof:
-   ```text
-   L mod sqrt(5): alpha ≡ 3;
-   eps mod sqrt(5): -1;
-   eps mod 2: order 3;
-   hence eps^j L = L iff 6 | j.
-   ```
-3. Define `chi_fin` or remove the primitive-sixth-root statement.
-4. Add the HM convention and proof.
-5. Clarify which results are actually Lean formalized.
+```text
+U-strip support:  m in I(U),
+V-strip support:  m in I(V).
+```
 
-### Revision 2: replace the prime section with explicit lemmas
+Under tau,
 
-Add lemmas:
+```text
+m -> -m,
+t -> -t,
+d -> d,
+U -> 1 - V,
+V -> 1 - U.
+```
 
-1. `delta` is well-defined with half-open sectors.
-2. Boundary cases do not occur for primes `p ≡ 1 mod 10`.
-3. `lambda(bar alpha)=2lambda(alpha)`.
-4. `delta(bar alpha)=-delta(alpha)-1`.
-5. L-membership includes both the mod-2 and mod-`sqrt(5)` conditions, and the sign choice handles the latter.
-6. Atom iff `iota != 2`, with a proof.
-7. Each contributing prime ideal gives exactly one active atom.
-8. The two conjugate contributing atoms, when both exist, have coherent parity/weight.
+So the tau-reflected U-strip condition is
 
-### Revision 3: justify density
+```text
+-m in I(1 - V),
+```
 
-Either prove that `iota` factors through a finite ray class group and use Chebotarev, or replace “Chebotarev” with the appropriate Hecke/Shintani prime-equidistribution theorem.
+and the tau-reflected V-strip condition is
 
-The current one-line density proof is not enough.
+```text
+-m in I(1 - U).
+```
+
+These are not equal to the original conditions in general.
+
+### 4.2 Explicit strip defects
+
+The U-strip tau defect is
+
+```text
+∂τ S_U(m,t,d)
+  = strip0(U, m-1) - strip0(1-V, -m-1)
+  = H(m-1) - H(m-1-U) - H(-m-1) + H(V-m-2).
+```
+
+The V-strip tau defect is
+
+```text
+∂τ S_V(m,t,d)
+  = strip0(V, m-1) - strip0(1-U, -m-1)
+  = H(m-1) - H(m-1-V) - H(-m-1) + H(U-m-2).
+```
+
+Those two formulas are the explicit support-boundary equations in `(m,t,d)` for the strip pieces.
+
+### 4.3 Missing-half support
+
+The missing-half piece should be expressed in the root variable whose row coefficient is
+
+```text
+n = 9(6m-1).
+```
+
+Its generic shape is a one-sided inequality such as
+
+```text
+j >= 0
+```
+
+paired with a root-pair transformation of the form
+
+```text
+j -> -j - A(m, other data),
+```
+
+where the affine parameter is divisible by the normalized row coefficient.  The exact support set is therefore:
+
+```text
+S_e(K)
+  = energy equation at exponent e
+    ∩ parity/integrality conditions in (m,t,d)
+    ∩ root-packet inequalities
+    ∩ one-sided missing-half or strip conditions.
+```
+
+The important point is that `S` is not a single convex tau-invariant region.  It is a finite union of half-open polyhedral regions, and tau moves the anchors `m=0,1` and swaps `U,V` affinely.
+
+### 4.4 The counterexample in these coordinates
+
+For the atom
+
+```text
+(m,t,d)=(-4,-21,4),
+```
+
+we get
+
+```text
+U = (-21 + 4 + 1)/2 = -8,
+V = (-21 - 4 + 1)/2 = -12.
+```
+
+Tau sends it to
+
+```text
+(4,21,4),
+U_tau = 1 - V = 13,
+V_tau = 1 - U = 9.
+```
+
+The support mismatch is therefore not mysterious: the original and reflected points live relative to different half-open strip intervals anchored at `m=0,1`, and the missing-half/root condition lives in a row whose coefficient has been reflected from `9(6m-1)` to `9(-6m-1)`.
+
+## 5. Relationship between `9|e` and the order-6 stabilizer
+
+There is probably a common mod-3 source, but I would not claim a direct theorem yet.
+
+### 5.1 What is definitely true
+
+The `9|e` condition is additive/q-series data:
+
+```text
+n(l)=54l+45=9(6l+5),
+```
+
+and the boundary exponent is a q^9-dilated representation number.
+
+The order-6 stabilizer is multiplicative/ray-class data:
+
+```text
+eps has order 3 mod 2, order 2 mod sqrt(5), so order 6 mod 2sqrt(5),
+eps^6 stabilizes L.
+```
+
+These are different structures.
+
+### 5.2 The common `3`
+
+The common `3` is likely structural.  The Chapter 10 dissection uses cubic/root-of-unity filtering and q^3/q^9 substitutions.  On the `Q(sqrt(5))` side, the prime `2` is inert and
+
+```text
+O_K / 2O_K ≅ F_4,
+F_4^× has order 3.
+```
+
+Thus both sides contain a natural order-3 sector:
+
+```text
+additive side:     q^9 = (q^3)^3, root-packet row coefficient divisible by 9;
+multiplicative side: F_4^× order 3, unit-sector invariant iota in Z/3Z.
+```
+
+This suggests that the same cubic dissection/filtering that creates the `q^9` boundary subseries also creates the order-3 finite-field sector in Paper 3.
+
+### 5.3 What not to claim
+
+Do not claim:
+
+```text
+9|e follows from eps^6 stabilizer.
+```
+
+That is too strong and likely false as a direct implication.  The safer statement is:
+
+```text
+Both phenomena are shadows of the same cubic/cyclotomic layer of the
+Theta_10 dissection: the additive boundary is q^9-dilated, while the
+multiplicative norm model has an F_4^× sector of order 3.
+```
+
+A possible future theorem would identify both as images of one underlying mod-3 root-of-unity filter.
+
+## 6. Proposed theorem package
+
+I would reorganize the research target into the following theorem package.
+
+### Theorem A: tau-pair decomposition
+
+```text
+For every exponent e and fiber K,
+keyWeight(e,K) = Bulk(e,K) + Boundary(e,K),
+Bulk(e,K)=0 by tau pairing.
+```
+
+### Theorem B: q^9 support of boundary
+
+```text
+Boundary(e,K)=0 unless 9 | e.
+```
+
+Proof route: express the boundary edge families as q^9-dilated quadratic/false-theta sums.
+
+### Theorem C: boundary divergence formula
+
+```text
+Boundary(e,K) = div(J_e)(K),
+```
+
+where `J_e` is the tau/sigma edge current across missing-half and strip boundaries.
+
+### Theorem D: sigma-straddling criterion
+
+```text
+Boundary(e,K) is the signed count of sigma-straddling atoms in the fiber.
+If the fiber is sigma-closed, keyWeight(e,K)=0.
+```
+
+### Theorem E: cone identification
+
+```text
+Global boundary generating function = Theta_u * Theta_v * (D-A),
+D-A = -f_{1,3,4}(X,-X^3,X).
+```
+
+This connects the local counterexample to Paper 3.
+
+### Theorem F: deck quotient cancellation
+
+```text
+After adjoining ghost boundary edges and quotienting by the sigma/deck action,
+the lifted keyWeight vanishes.  The original keyWeight is the boundary charge
+of the quotient projection.
+```
+
+This is the conceptual replacement for the false keyWeight=0 conjecture.
+
+## 7. Lean theorem shapes
+
+Here is the Lean-facing shape I would aim for.  This is only an interface sketch, not code claimed to compile against the existing files.
+
+```lean
+import Mathlib.Tactic
+
+namespace QseriesFormalization
+namespace Ch10
+
+/-- Abstract atom type for the fiber-level theorem. -/
+structure Atom where
+  m : Int
+  t : Int
+  d : Int
+  k : Int
+  r : Int
+  deriving DecidableEq, Repr
+
+/-- Tau reflection in `(m,t)` with fixed `d`; k,r behavior is supplied separately. -/
+def tauMTD (x : Atom) : Atom :=
+  { x with m := -x.m, t := -x.t }
+
+/-- Hecke-Rogers wall reflection on the `(k,r)` block. -/
+def sigmaKR (x : Atom) : Atom :=
+  { x with r := -x.r - 6*x.k - 1 }
+
+/-- Boundary eligibility: the q^9 support theorem. -/
+def BoundaryEligible (e : Int) : Prop :=
+  9 ∣ e
+
+/-- A schematic boundary flux functional. -/
+def BoundaryFlux
+    (support : Atom -> Prop)
+    (sgn : Atom -> Int)
+    (weight : Atom -> Int)
+    (x : Atom) : Int :=
+  if support x then sgn x * weight x else 0
+  -- In the real theorem this is paired with the tau/sigma reflected endpoint.
+
+/-- Target theorem shape: no boundary off the q^9 subseries. -/
+theorem keyWeight_zero_of_not_nine_dvd
+    (keyWeight : Int -> Int -> Int)
+    (e key : Int)
+    (h : ¬ 9 ∣ e) :
+    keyWeight e key = 0 := by
+  -- This should follow from the q^9 boundary support theorem, not from brute force.
+  admit
+
+end Ch10
+end QseriesFormalization
+```
+
+The `admit` above is deliberately included only to show theorem shape.  It should not be copied into the no-sorry development.
+
+## 8. Answers to the five questions
+
+### Q1. Why `9|e` precisely?
+
+Because the tau residual is not a bulk term.  It is a boundary term, and the boundary row coefficient is `n=54l+45=9(6l+5)`.  After root-pair reflection/completing-square normalization, the boundary energy is a q^9-dilated quadratic/false-theta representation.  Thus nonzero keyWeight is impossible unless `e` lies in `9Z`.  Multiples of 9 are only eligible; they can still pass by absence or cancellation of boundary representatives.
+
+### Q2. Can residual keyWeight be a boundary divergence?
+
+Yes.  This is the right repair.  Pair the tau orbit in the bulk, then write the uncancelled contribution as
+
+```text
+s(x) * (χ(x)C(x) - χ(τx)C(τx)).
+```
+
+This is a discrete divergence across the support cut.  The sigma involution identifies the Hecke-Rogers boundary wall, so the residual is a signed count of sigma-straddling atoms.
+
+### Q3. Does the ghost partner re-enter by a deck transformation?
+
+Likely yes in the enlarged quotient, but not by tau alone.  The relevant deck data are: additive q-period `9`, normalized row reflection `a -> -a-2` for `a=n/9`, sigma wall reflection on `(k,r)`, and multiplicative unit stabilizer `<eps^6>` on the norm side.  Do not expect a simple rectangular translation in `(m,t,d)`.
+
+### Q4. What is the support shape in `(m,t,d)`?
+
+It is a finite union of half-open polyhedral pieces.  The strip pieces are explicit:
+
+```text
+U = (t+d+1)/2,
+V = (t-d+1)/2,
+I(N) = [1,N] if N>0, [N+1,0] if N<0, empty if N=0.
+
+U-strip: m in I(U),
+V-strip: m in I(V).
+```
+
+Tau sends `U -> 1-V`, `V -> 1-U`, and `m -> -m`, so the strip support is not tau-invariant.  The exact strip defects are the Heaviside formulas above.  The missing-half piece should be written similarly in the root variable with row coefficient `9(6m-1)`.
+
+### Q5. Is there a relationship between `9` and order `6`?
+
+Probably, but only through a common mod-3 layer.  The `9` is additive q-series dilation from the root row; the `6` is multiplicative unit/coset stabilization, with order `3` mod `2` and order `2` mod `sqrt(5)`.  The common `3` is likely the cubic-dissection/F_4^× sector.  This is a structural analogy and a promising unification target, not yet a direct implication.
 
 ## Bottom line
 
-I would frame the current draft as follows:
+The counterexample does not mean the Chapter 10 proof idea is dead.  It means the naive support-local tau pairing was missing a boundary term.  The corrected statement should be:
 
 ```text
-The algebraic core and nonmultiplicativity result are strong and close to paper-ready.
-The prime nonvanishing/equidistribution section is promising but not yet rigorous.
-The stabilizer proof contains a concrete modulo-sqrt(5) error that must be fixed.
-The reflection identity is plausible; the finite-field half is correct, but the floor/sector half needs a precise lemma.
-The bad-class and prime-value claims need an explicit sector-table proof.
+The tau bulk cancels.
+The entire obstruction is a q^9-supported boundary divergence.
+That divergence is the local fiber shadow of the global Hecke-Rogers cone
+D-A = -f_{1,3,4}(X,-X^3,X).
 ```
 
-With those fixes, the paper could become a strong short note, especially if it presents the finite sector table cleanly and distinguishes “norm-supported but nonmultiplicative” from the classical ADH/Cohen/Corson--Favero paradigm.
+This gives a coherent path forward: prove zero off `9Z`, express the `9Z` residual as sigma-straddling boundary flux, and then either add the required boundary correction or pass to the appropriate deck/ghost quotient where the lifted pairing is exact.
