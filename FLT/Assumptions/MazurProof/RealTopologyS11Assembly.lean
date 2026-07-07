@@ -569,7 +569,7 @@ theorem thetaCandidateAdditive
   · subst P
     simp
   · subst P
-    exact thetaCandidate_root_left_add Q
+    exact thetaCandidate_root_left_add (hposRight := hposRight) Q
   · rcases hPU with ⟨x, hx, rfl⟩
     rcases s11_componentKer_branch_exhaustion (A := A) (B := B) (e := e)
         (hroot := hroot) (hderiv := hderiv) hposRight Q with
@@ -577,7 +577,7 @@ theorem thetaCandidateAdditive
     · subst Q
       simp
     · subst Q
-      exact thetaCandidate_root_right_add _
+      exact thetaCandidate_root_right_add hposRight _
     · rcases hQU with ⟨y, hy, rfl⟩
       exact thetaCandidate_upper_upper hposRight hx hy
     · rcases hQL with ⟨y, hy, rfl⟩
@@ -589,7 +589,7 @@ theorem thetaCandidateAdditive
     · subst Q
       simp
     · subst Q
-      exact thetaCandidate_root_right_add _
+      exact thetaCandidate_root_right_add hposRight _
     · rcases hQU with ⟨y, hy, rfl⟩
       exact thetaCandidate_mixed_additive hposRight hx hy
     · rcases hQL with ⟨y, hy, rfl⟩
