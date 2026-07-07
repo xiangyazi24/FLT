@@ -75,6 +75,97 @@ theorem no_order15_from_future_composite_exclusions
     ¬ HasRationalPointOfOrder E 15 :=
   hcomp E (n := 15) (by norm_num) needs_composite_exclusion_15
 
+namespace CyclicExclusion15
+
+/-! ## Tate normal form for the `3`-and-`5` obstruction -/
+
+/--
+The Tate normal form after imposing that `(0,0)` has order `5`:
+
+`y² + (1-b)xy - by = x³ - bx²`.
+
+For the usual two-parameter Tate normal form, the order-`5` condition is
+`c = b`.
+-/
+def tateOrder5Curve (b : ℚ) : WeierstrassCurve ℚ where
+  a₁ := 1 - b
+  a₂ := -b
+  a₃ := -b
+  a₄ := 0
+  a₆ := 0
+
+/-- The explicit `ψ₃` polynomial in the Tate order-`5` parameter. -/
+def tateOrder5Psi3 (b x : ℚ) : ℚ :=
+  3 * x ^ 4 + (b ^ 2 - 6 * b + 1) * x ^ 3 +
+    3 * (b ^ 2 - b) * x ^ 2 + 3 * b ^ 2 * x - b ^ 3
+
+/-- The nonsingularity condition for the Tate order-`5` normal form. -/
+def TateOrder5NonsingularParameter (b : ℚ) : Prop :=
+  b ^ 5 * (b ^ 2 - 11 * b - 1) ≠ 0
+
+/--
+The exact Diophantine obstruction needed for `X₁(15)`: a nonsingular Tate
+order-`5` normal form has no rational `x`-coordinate satisfying `ψ₃(x)=0`.
+-/
+def TateOrder5Psi3RootSolution (b x : ℚ) : Prop :=
+  TateOrder5NonsingularParameter b ∧ tateOrder5Psi3 b x = 0
+
+theorem tateOrder5Curve_discriminant (b : ℚ) :
+    (tateOrder5Curve b).Δ = b ^ 5 * (b ^ 2 - 11 * b - 1) := by
+  simp [tateOrder5Curve, WeierstrassCurve.Δ, WeierstrassCurve.b₂,
+    WeierstrassCurve.b₄, WeierstrassCurve.b₆, WeierstrassCurve.b₈]
+  ring
+
+theorem tateOrder5Curve_psi3_eval (b x : ℚ) :
+    ((tateOrder5Curve b).Ψ₃).eval x = tateOrder5Psi3 b x := by
+  simp [tateOrder5Curve, tateOrder5Psi3, WeierstrassCurve.Ψ₃,
+    WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆,
+    WeierstrassCurve.b₈]
+  ring
+
+/--
+Moduli and division-polynomial bridge for `X₁(15)`.
+
+From a curve over `ℚ` with rational points of exact orders `3` and `5`, put
+the order-`5` point in Tate normal form, use the order-`5` condition `c = b`,
+and evaluate the third division polynomial at the rational `x`-coordinate of
+the order-`3` point.
+-/
+def SimultaneousOrder3And5TateBridge : Prop :=
+  ∀ (E : WeierstrassCurve ℚ) [E.IsElliptic],
+    HasRationalPointOfOrder E 3 ∧ HasRationalPointOfOrder E 5 →
+      ∃ b x : ℚ, TateOrder5Psi3RootSolution b x
+
+/--
+Residual bridge from the current torsion predicate to the explicit Tate
+normal-form Diophantine problem.
+-/
+theorem simultaneous_order3_and5_tate_bridge :
+    SimultaneousOrder3And5TateBridge := by
+  intro E hEll htors
+  sorry
+
+/--
+Final Diophantine input.
+
+Explicitly, there are no `b x : ℚ` such that
+
+`b^5 * (b^2 - 11*b - 1) ≠ 0`
+
+and
+
+`3*x^4 + (b^2 - 6*b + 1)*x^3 + 3*(b^2-b)*x^2 + 3*b^2*x - b^3 = 0`.
+
+This is the rational-points computation on `X₁(15)` in Tate-normal-form
+coordinates; the rational points are cusps, and the nonsingularity condition
+excludes them.
+-/
+theorem no_tate_order5_psi3_root_solution :
+    ¬ ∃ b x : ℚ, TateOrder5Psi3RootSolution b x := by
+  sorry
+
+end CyclicExclusion15
+
 /-! ## The remaining `X₁(15)` arithmetic input -/
 
 /--
@@ -88,7 +179,10 @@ point of order `5`.
 theorem x1_15_no_simultaneous_rational_3_and_5_torsion
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ (HasRationalPointOfOrder E 3 ∧ HasRationalPointOfOrder E 5) := by
-  sorry
+  intro htors
+  obtain ⟨b, x, hbx⟩ :=
+    CyclicExclusion15.simultaneous_order3_and5_tate_bridge E htors
+  exact CyclicExclusion15.no_tate_order5_psi3_root_solution ⟨b, x, hbx⟩
 
 /-- No elliptic curve over `ℚ` has a rational point of exact order `15`. -/
 theorem no_rational_point_of_order_15
