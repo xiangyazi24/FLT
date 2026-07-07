@@ -1,5 +1,6 @@
 import Mathlib
 import FLT.Assumptions.MazurProof.RealTopologyS3
+import FLT.Assumptions.MazurProof.RealTopologyS11Assembly
 import FLT.Assumptions.MazurProof.TorsionDefs
 
 /-!
@@ -251,6 +252,210 @@ theorem shortW_nTorsionSet_ncard_le_of_componentKer_embeds_addCircle
   rcases hembed with ⟨T, theta, htheta⟩
   exact shortW_nTorsionSet_ncard_le_of_componentTheta hroot hderiv theta htheta n hn
 
+theorem shortW_nTorsionSet_ncard_le
+    {A B e : ℝ}
+    (hroot : RealTopology.shortCubic A B e = 0)
+    (hderiv : 0 < RealTopology.shortCubicDeriv A B e)
+    (hposRight : ∀ ⦃u : ℝ⦄, e < u → 0 < RealTopology.shortCubic A B u)
+    (n : ℕ) (hn : 0 < n) :
+    Set.Finite
+        {P : WeierstrassCurve.Affine.Point (RealTopology.shortW A B) |
+          (n : ℕ) • P = 0} ∧
+      Set.ncard
+        {P : WeierstrassCurve.Affine.Point (RealTopology.shortW A B) |
+          (n : ℕ) • P = 0} ≤ 2 * n := by
+  have hadd :=
+    RealTopology.thetaCandidateAdditive
+      (A := A) (B := B) (e := e) hroot hderiv hposRight
+  have hembed :=
+    RealTopology.exists_injective_thetaHom_of_thetaCandidate_additive
+      (A := A) (B := B) (e := e) hroot hderiv hposRight hadd
+  exact shortW_nTorsionSet_ncard_le_of_componentKer_embeds_addCircle
+    hroot hderiv hembed n hn
+
+/-!
+The remaining algebraic geometry bridge for the real-torsion bound.  It should
+use Mathlib's `toShortNF`, translate by a real root, identify the resulting
+equation with `shortW A B`, and transport points by an injective homomorphism.
+-/
+theorem exists_injective_shortW_model
+    (W : WeierstrassCurve ℝ) [W.IsElliptic] :
+    ∃ (A B : ℝ) (C : WeierstrassCurve.VariableChange ℝ),
+      C.u = 1 ∧
+        C • W = RealTopology.shortW A B ∧
+          (RealTopology.shortW A B).IsElliptic ∧
+            ∃ φ :
+              WeierstrassCurve.Affine.Point W →+
+                WeierstrassCurve.Affine.Point (RealTopology.shortW A B),
+              Function.Injective φ := by
+  sorry
+
+theorem shortW_discriminant (A B : ℝ) :
+    (RealTopology.shortW A B).Δ = 16 * B ^ 2 * (A ^ 2 - 4 * B) := by
+  simp [RealTopology.shortW, WeierstrassCurve.Δ, WeierstrassCurve.b₂,
+    WeierstrassCurve.b₄, WeierstrassCurve.b₆, WeierstrassCurve.b₈]
+  ring
+
+theorem shortW_B_ne_zero_of_isElliptic
+    {A B : ℝ} [(RealTopology.shortW A B).IsElliptic] :
+    B ≠ 0 := by
+  have hΔunit : IsUnit (RealTopology.shortW A B).Δ :=
+    WeierstrassCurve.IsElliptic.isUnit
+  have hΔ : (RealTopology.shortW A B).Δ ≠ 0 := hΔunit.ne_zero
+  intro hB
+  apply hΔ
+  rw [shortW_discriminant, hB]
+  ring
+
+theorem shortW_quadratic_discriminant_ne_zero_of_isElliptic
+    {A B : ℝ} [(RealTopology.shortW A B).IsElliptic] :
+    A ^ 2 - 4 * B ≠ 0 := by
+  have hΔunit : IsUnit (RealTopology.shortW A B).Δ :=
+    WeierstrassCurve.IsElliptic.isUnit
+  have hΔ : (RealTopology.shortW A B).Δ ≠ 0 := hΔunit.ne_zero
+  intro hdisc
+  apply hΔ
+  rw [shortW_discriminant, hdisc]
+  ring
+
+private theorem shortCubic_quadratic_factor_pos
+    {A B u : ℝ} (hDpos : 0 < A ^ 2 - 4 * B) :
+    RealTopology.shortCubic A B u =
+      u * (u - (-A - Real.sqrt (A ^ 2 - 4 * B)) / 2) *
+        (u - (-A + Real.sqrt (A ^ 2 - 4 * B)) / 2) := by
+  have hDpos' : 0 < A ^ 2 - B * 4 := by nlinarith
+  have hsq : (Real.sqrt (A ^ 2 - B * 4)) ^ 2 = A ^ 2 - B * 4 :=
+    Real.sq_sqrt hDpos'.le
+  rw [RealTopology.shortCubic]
+  ring_nf
+  rw [hsq]
+  ring
+
+private theorem shortCubicDeriv_upperRoot_eq
+    {A B : ℝ} (hDpos : 0 < A ^ 2 - 4 * B) :
+    RealTopology.shortCubicDeriv A B ((-A + Real.sqrt (A ^ 2 - 4 * B)) / 2) =
+      ((-A + Real.sqrt (A ^ 2 - 4 * B)) / 2) *
+        (((-A + Real.sqrt (A ^ 2 - 4 * B)) / 2) -
+          ((-A - Real.sqrt (A ^ 2 - 4 * B)) / 2)) := by
+  have hDpos' : 0 < A ^ 2 - B * 4 := by nlinarith
+  have hsq : (Real.sqrt (A ^ 2 - B * 4)) ^ 2 = A ^ 2 - B * 4 :=
+    Real.sq_sqrt hDpos'.le
+  rw [RealTopology.shortCubicDeriv]
+  ring_nf
+  rw [hsq]
+  ring
+
+private theorem shortCubic_B_eq_roots_product
+    {A B : ℝ} (hDpos : 0 < A ^ 2 - 4 * B) :
+    B =
+      ((-A - Real.sqrt (A ^ 2 - 4 * B)) / 2) *
+        ((-A + Real.sqrt (A ^ 2 - 4 * B)) / 2) := by
+  have hDpos' : 0 < A ^ 2 - B * 4 := by nlinarith
+  have hsq : (Real.sqrt (A ^ 2 - B * 4)) ^ 2 = A ^ 2 - B * 4 :=
+    Real.sq_sqrt hDpos'.le
+  ring_nf
+  rw [hsq]
+  ring
+
+private theorem exists_shortCubic_right_root_of_negative_discriminant
+    {A B : ℝ} (hDneg : A ^ 2 - 4 * B < 0) :
+    ∃ e : ℝ,
+      RealTopology.shortCubic A B e = 0 ∧
+        0 < RealTopology.shortCubicDeriv A B e ∧
+        (∀ ⦃u : ℝ⦄, e < u → 0 < RealTopology.shortCubic A B u) := by
+  refine ⟨0, ?_, ?_, ?_⟩
+  · simp [RealTopology.shortCubic]
+  · have hBpos : 0 < B := by
+      have hsq : 0 ≤ A ^ 2 := sq_nonneg A
+      nlinarith
+    simpa [RealTopology.shortCubicDeriv] using hBpos
+  · intro u hu
+    have hq : 0 < u ^ 2 + A * u + B := by
+      have hDpos : 0 < 4 * B - A ^ 2 := by nlinarith
+      have hs : 0 ≤ (2 * u + A) ^ 2 := sq_nonneg (2 * u + A)
+      have hsum : 0 < (2 * u + A) ^ 2 + (4 * B - A ^ 2) :=
+        add_pos_of_nonneg_of_pos hs hDpos
+      nlinarith
+    have hmul : 0 < u * (u ^ 2 + A * u + B) := mul_pos hu hq
+    rw [RealTopology.shortCubic]
+    nlinarith
+
+private theorem exists_shortCubic_right_root_of_positive_discriminant
+    {A B : ℝ} (hB : B ≠ 0) (hDpos : 0 < A ^ 2 - 4 * B) :
+    ∃ e : ℝ,
+      RealTopology.shortCubic A B e = 0 ∧
+        0 < RealTopology.shortCubicDeriv A B e ∧
+        (∀ ⦃u : ℝ⦄, e < u → 0 < RealTopology.shortCubic A B u) := by
+  let r₁ := (-A - Real.sqrt (A ^ 2 - 4 * B)) / 2
+  let r₂ := (-A + Real.sqrt (A ^ 2 - 4 * B)) / 2
+  have hspos : 0 < Real.sqrt (A ^ 2 - 4 * B) := Real.sqrt_pos.2 hDpos
+  have hr12 : r₁ < r₂ := by
+    dsimp [r₁, r₂]
+    linarith
+  by_cases hr2pos : 0 < r₂
+  · refine ⟨r₂, ?_, ?_, ?_⟩
+    · rw [shortCubic_quadratic_factor_pos (A := A) (B := B) (u := r₂) hDpos]
+      ring
+    · rw [show r₂ = (-A + Real.sqrt (A ^ 2 - 4 * B)) / 2 by rfl]
+      rw [shortCubicDeriv_upperRoot_eq (A := A) (B := B) hDpos]
+      dsimp [r₁, r₂] at hr12 hr2pos ⊢
+      exact mul_pos hr2pos (sub_pos.mpr hr12)
+    · intro u hu
+      rw [shortCubic_quadratic_factor_pos (A := A) (B := B) (u := u) hDpos]
+      have hu0 : 0 < u := lt_trans hr2pos hu
+      have hur1 : 0 < u - r₁ := by linarith
+      have hur2 : 0 < u - r₂ := sub_pos.mpr hu
+      dsimp [r₁, r₂] at hur1 hur2
+      positivity
+  · have hr2le : r₂ ≤ 0 := not_lt.mp hr2pos
+    have hr2ne : r₂ ≠ 0 := by
+      intro hr2zero
+      apply hB
+      have hsq : (Real.sqrt (A ^ 2 - 4 * B)) ^ 2 = A ^ 2 - 4 * B :=
+        Real.sq_sqrt hDpos.le
+      dsimp [r₂] at hr2zero
+      nlinarith
+    have hr2neg : r₂ < 0 := lt_of_le_of_ne hr2le hr2ne
+    have hr1neg : r₁ < 0 := lt_trans hr12 hr2neg
+    have hBpos : 0 < B := by
+      rw [shortCubic_B_eq_roots_product (A := A) (B := B) hDpos]
+      dsimp [r₁, r₂] at hr1neg hr2neg
+      exact mul_pos_of_neg_of_neg hr1neg hr2neg
+    refine ⟨0, ?_, ?_, ?_⟩
+    · simp [RealTopology.shortCubic]
+    · simpa [RealTopology.shortCubicDeriv] using hBpos
+    · intro u hu
+      rw [shortCubic_quadratic_factor_pos (A := A) (B := B) (u := u) hDpos]
+      have hur1 : 0 < u - r₁ := by linarith
+      have hur2 : 0 < u - r₂ := by linarith
+      dsimp [r₁, r₂] at hur1 hur2
+      positivity
+
+/-!
+The remaining real-root bridge for `shortW`.  The intended proof chooses the
+largest real root of `x^3 + A*x^2 + B*x`; ellipticity excludes multiple roots,
+so the derivative is positive there and the cubic is positive to the right.
+-/
+theorem exists_shortCubic_right_root_of_simple
+    {A B : ℝ} (hB : B ≠ 0) (hdisc : A ^ 2 - 4 * B ≠ 0) :
+    ∃ e : ℝ,
+      RealTopology.shortCubic A B e = 0 ∧
+        0 < RealTopology.shortCubicDeriv A B e ∧
+        (∀ ⦃u : ℝ⦄, e < u → 0 < RealTopology.shortCubic A B u) := by
+  rcases lt_or_gt_of_ne hdisc with hDneg | hDpos
+  · exact exists_shortCubic_right_root_of_negative_discriminant hDneg
+  · exact exists_shortCubic_right_root_of_positive_discriminant hB hDpos
+
+theorem exists_shortCubic_right_root
+    {A B : ℝ} [(RealTopology.shortW A B).IsElliptic] :
+    ∃ e : ℝ,
+      RealTopology.shortCubic A B e = 0 ∧
+        0 < RealTopology.shortCubicDeriv A B e ∧
+        (∀ ⦃u : ℝ⦄, e < u → 0 < RealTopology.shortCubic A B u) := by
+  exact exists_shortCubic_right_root_of_simple
+    (shortW_B_ne_zero_of_isElliptic (A := A) (B := B))
+    (shortW_quadratic_discriminant_ne_zero_of_isElliptic (A := A) (B := B))
+
 private theorem sq_le_two_mul_of_pos {m : ℕ} (hm : 0 < m) (h : m * m ≤ 2 * m) :
     m ≤ 2 := by
   nlinarith
@@ -266,7 +471,18 @@ theorem card_E_R_torsion_le
     (n : ℕ) (hn : 0 < n) :
     Set.Finite {P : (E⁄ℝ).Point | (n : ℕ) • P = 0} ∧
       Set.ncard {P : (E⁄ℝ).Point | (n : ℕ) • P = 0} ≤ 2 * n := by
-  sorry
+  haveI : (E⁄ℝ).IsElliptic := by
+    change (E.map (algebraMap ℚ ℝ)).IsElliptic
+    infer_instance
+  obtain ⟨A, B, C, hCu, hmodel, hshort, φ, hφ⟩ :=
+    exists_injective_shortW_model (E⁄ℝ)
+  haveI : (RealTopology.shortW A B).IsElliptic := hshort
+  obtain ⟨e, hroot, hderiv, hposRight⟩ :=
+    exists_shortCubic_right_root (A := A) (B := B)
+  obtain ⟨hshort_finite, hshort_card⟩ :=
+    shortW_nTorsionSet_ncard_le hroot hderiv hposRight n hn
+  exact nTorsionSet_ncard_le_of_injective_addMonoidHom
+    φ hφ n (2 * n) hshort_finite hshort_card
 
 /-! ## Assembly -/
 
