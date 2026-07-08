@@ -103,12 +103,21 @@ def tateOrder5Psi3 (b x : ℚ) : ℚ :=
 def TateOrder5NonsingularParameter (b : ℚ) : Prop :=
   b ^ 5 * (b ^ 2 - 11 * b - 1) ≠ 0
 
+/-- The Tate curve equation with `c = b` (order-5 specialization). -/
+def TateOrder5CurveEq (b x y : ℚ) : Prop :=
+  y ^ 2 + (1 - b) * x * y - b * y = x ^ 3 - b * x ^ 2
+
 /--
 The exact Diophantine obstruction needed for `X₁(15)`: a nonsingular Tate
-order-`5` normal form has no rational `x`-coordinate satisfying `ψ₃(x)=0`.
+order-`5` normal form has no rational point `(x,y)` on the curve with
+`ψ₃(x) = 0`.
+
+Note: ψ₃ CAN have rational roots (e.g. `b = -2, x = -1`) without producing
+a rational 3-torsion point, because the curve equation may have no rational `y`.
 -/
-def TateOrder5Psi3RootSolution (b x : ℚ) : Prop :=
-  TateOrder5NonsingularParameter b ∧ tateOrder5Psi3 b x = 0
+def TateOrder5Psi3RootSolution (b x y : ℚ) : Prop :=
+  TateOrder5NonsingularParameter b ∧ TateOrder5CurveEq b x y ∧
+    tateOrder5Psi3 b x = 0
 
 theorem tateOrder5Curve_discriminant (b : ℚ) :
     (tateOrder5Curve b).Δ = b ^ 5 * (b ^ 2 - 11 * b - 1) := by
@@ -134,7 +143,7 @@ the order-`3` point.
 def SimultaneousOrder3And5TateBridge : Prop :=
   ∀ (E : WeierstrassCurve ℚ) [E.IsElliptic],
     HasRationalPointOfOrder E 3 ∧ HasRationalPointOfOrder E 5 →
-      ∃ b x : ℚ, TateOrder5Psi3RootSolution b x
+      ∃ b x y : ℚ, TateOrder5Psi3RootSolution b x y
 
 /--
 Residual bridge from the current torsion predicate to the explicit Tate
@@ -148,20 +157,18 @@ theorem simultaneous_order3_and5_tate_bridge :
 /--
 Final Diophantine input.
 
-Explicitly, there are no `b x : ℚ` such that
-
-`b^5 * (b^2 - 11*b - 1) ≠ 0`
-
-and
-
-`3*x^4 + (b^2 - 6*b + 1)*x^3 + 3*(b^2-b)*x^2 + 3*b^2*x - b^3 = 0`.
+There are no rational `(b,x,y)` with `b^5(b^2-11b-1) ≠ 0`,
+`y² + (1-b)xy - by = x³ - bx²`, and `ψ₃(b,x) = 0`.
 
 This is the rational-points computation on `X₁(15)` in Tate-normal-form
 coordinates; the rational points are cusps, and the nonsingularity condition
 excludes them.
+
+Note: ψ₃ alone CAN have rational roots without the curve equation constraint
+(e.g. `b = -2, x = -1` gives ψ₃ = 0 but the curve has no rational `y`).
 -/
 theorem no_tate_order5_psi3_root_solution :
-    ¬ ∃ b x : ℚ, TateOrder5Psi3RootSolution b x := by
+    ¬ ∃ b x y : ℚ, TateOrder5Psi3RootSolution b x y := by
   sorry
 
 end CyclicExclusion15
@@ -180,9 +187,9 @@ theorem x1_15_no_simultaneous_rational_3_and_5_torsion
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ (HasRationalPointOfOrder E 3 ∧ HasRationalPointOfOrder E 5) := by
   intro htors
-  obtain ⟨b, x, hbx⟩ :=
+  obtain ⟨b, x, y, hbxy⟩ :=
     CyclicExclusion15.simultaneous_order3_and5_tate_bridge E htors
-  exact CyclicExclusion15.no_tate_order5_psi3_root_solution ⟨b, x, hbx⟩
+  exact CyclicExclusion15.no_tate_order5_psi3_root_solution ⟨b, x, y, hbxy⟩
 
 /-- No elliptic curve over `ℚ` has a rational point of exact order `15`. -/
 theorem no_rational_point_of_order_15
