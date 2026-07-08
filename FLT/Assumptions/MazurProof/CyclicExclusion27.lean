@@ -1,3 +1,4 @@
+import Mathlib
 import FLT.Assumptions.MazurProof.TorsionDefs
 
 /-!
@@ -31,9 +32,22 @@ axiom order27_to_fermat_cubic
 
 /-- The only rational points on x³ + y³ = 1 are (1,0) and (0,1).
     This follows from Fermat's Last Theorem for exponent 3. -/
+private lemma rat_cube_eq_one (z : ℚ) (hz : z ^ 3 = 1) : z = 1 := by
+  have : z ^ 3 = (1 : ℚ) ^ 3 := by simpa using hz
+  exact ((show Odd 3 by decide).pow_inj).mp this
+
 theorem fermat_cubic_rational_points_are_cusps :
     ∀ x y : ℚ, FermatCubicEquation x y → FermatCubicCusp x y := by
-  sorry
+  intro x y h
+  unfold FermatCubicEquation at h
+  unfold FermatCubicCusp
+  have hFLTQ : FermatLastTheoremWith ℚ 3 :=
+    (fermatLastTheoremFor_iff_rat (n := 3)).mp fermatLastTheoremThree
+  by_cases hx : x = 0
+  · right; exact ⟨hx, rat_cube_eq_one y (by simpa [hx] using h)⟩
+  · by_cases hy : y = 0
+    · left; exact ⟨rat_cube_eq_one x (by simpa [hy] using h), hy⟩
+    · exfalso; exact hFLTQ x y 1 hx hy (by norm_num) (by simpa using h)
 
 theorem no_rational_point_of_order_27
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
