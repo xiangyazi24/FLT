@@ -3,6 +3,11 @@
 - doctrine version: Mazur axiom elimination (rewritten)
 - approval: /automode command
 - starting avenue: (a) arithmetic foundation + Phase 0 decomposition
+- status update 2026-07-08 00:30:
+  Phase 0 DONE (3 files, 0 sorry): TateNFDivision + CyclicOrderArithmetic + CyclicOrderAssembly.
+  Monolithic axiom decomposed into 13 named sub-axioms.
+  Scaffolding committed: CyclicExclusion{18,20,21,27} (4 new files, ~14 sorry total).
+  ChatGPT channels active: flt1 = N14 scaffold, flt2 = N27 scaffold (may be stuck).
 - end: <pending>
 - final result: <pending>
 
