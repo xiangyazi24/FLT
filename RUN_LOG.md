@@ -8,8 +8,10 @@
   Monolithic axiom decomposed into 13 named sub-axioms.
   Scaffolding committed: CyclicExclusion{18,20,21,27} (4 new files, ~14 sorry total).
   ChatGPT channels active: flt1 = N14 scaffold, flt2 = N27 scaffold (may be stuck).
-- end: <pending>
-- final result: <pending>
+- end: 2026-07-08 01:30
+- final result: Phase 0 DONE + all scaffolding + CyclicExclusion27 sorry CLOSED.
+  9 commits, 12 new files. 1 monolithic axiom → 13 named sub-axioms.
+  ChatGPT flt2 git-drop unstable (3+ consecutive failures).
 
 ## Run 2026-06-19 01:30
 - doctrine version: DOCTRINE.md written this session
