@@ -1,152 +1,129 @@
-# Session Handoff — 2026-06-24 FINAL (Mazur FLT Formalization)
+# Session Handoff — 2026-07-07 (Mazur FLT Formalization)
 
-## Session achievements: Torsion.lean 8 → 3 sorries
+## Achievement: Single-Axiom Trust Base
 
-### Closed (verified green, 8601 jobs)
-- h4 (4≠0): CharZero threading (f929c76)
-- hc3 (Ψ₃≠0): Mathlib Ψ₃_ne_zero (f929c76)
-- hψ_ne (ψ_m≠0): coordinate-ring degree argument (ee3af21)
-- sub-D root realization: IsSepClosed→IsAlgClosed→bridge-1→assembly (be32fe3)
-- SEAM1 bridge-1 coprimality: CLOSED + wired (4e49710)
+`mazur_torsion_bound : |E(ℚ)_tors| ≤ 16` now depends on exactly:
 
-### Remaining 3 sorries (all NOT OURS)
-- L52 n_torsion_finite (David Angdinata)
-- L1072 Module.Finite (depends on above)
-- L1133 galoisRep (data sorry)
+```
+#print axioms MazurProof.mazur_torsion_bound =
+  [propext, Classical.choice, mazur_cyclic_order_bound, Quot.sound]
+```
 
-## SEAM1 bridge-2: the ONE remaining mathematical sorry
+One mathematical axiom. Everything else is proved.
 
-`dual_root_implies_tangent_zero` in SeamE1_Core = general-n preΨ'_n separability.
+## The Axiom
 
-### Architecture (6-round ChatGPT brainstorm, settled)
-Path: ω_n projective formula + local parameter + d[n]|_O = n identification.
+```lean
+-- FLT/Assumptions/MazurProof/Axioms.lean:288
+axiom mazur_cyclic_order_bound
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ}
+    (hord : HasRationalPointOfOrder E n) :
+    n ∈ ({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12} : Finset ℕ)
+```
 
-### What's built (all 0-sorry)
-- OmegaDivPoly: ψTwoMulQuot (complEDS₂) + ωProto + normalization
-- ProjectiveFormula: addZ + dblZ (Z-components)
-- ProjectiveFormulaXY: m=1,2 X-component
-- Bridge1Even: EDS closed forms (odd+even, all 6 ring identities)
-- SeamE1_FormalNsmul: formalNsmul_coeff_one ([n]'(0)=n)
-- SeamE1_DualUnit: ψ₂-unit at non-2-torsion
-- SeamE1_FormalBridge: decomposition + n=3 case
+This IS Mazur 1977 Inventiones Theorem 1.
 
-### The critical next step (for next session)
-**The direct addX proof needs 5 inputs, not 4.** CAS verified (dm1 Q288):
-1. hω: `W.two_mul_ψ_mul_ωProto m` (PROVED, OmegaDivPoly)
-2. heven: `W.ψ_even m` (MATHLIB)
-3. hφ: `WeierstrassCurve.φ` definition (MATHLIB)
-4. hFW: `AdjoinRoot.mk_self` (MATHLIB)
-5. **Hmiss**: Ward invariant relation = `mk_invariant_descended` (PsiInvariant.lean, IN REPO)
+### Decomposition (CyclicOrderReduction.lean)
 
-With all 5, `2·(addX - ψ_{m-1}²·φ_{m+1})` reduces to 0 mod F_W. Implementation: `rw [AdjoinRoot.mk_eq_zero]; exact ⟨cofactor_expressed_via_5_inputs, by ring⟩` or `linear_combination`.
+```
+mazur_cyclic_order_bound
+  = mazur_prime_torsion_bound         [axiom: prime order ∈ {2,3,5,7}]
+  + FutureCompositeExclusions         [parameter: n>12, small prime factors]
+  + large prime exclusion             [proved from prime axiom]
+```
 
-After addX general-m closes → addY (similar) → ATOM 5 (ω≠0) → ATOM 6 (local param) → ATOM 7 (coeffε) → assembly → bridge-2 CLOSED → SEAM1 fully 0-sorry.
+## What Was Proved This Session (~15K new lines)
 
-## Shortcut analysis (all ruled out)
-- Per-n Bezout: tractable n≤5, intractable n≥11 ✗
-- Torsion counting (rank-2): circular ✗
-- Resultant recurrence: no EDS recurrence for resultants ✗
-- Function-field route: needs same projective formula ✗
-- Direct 4-input proof: needs 5th input (Ward invariant) — FOUND ✓
+### Route 2: Real Topology (complete, 0 sorry, remote build verified)
+| File | Lines | Content |
+|------|-------|---------|
+| RealTopologyS1-S3 | 765 | shortW, componentBit, componentBitHom |
+| RealTopologyS4 | 813 | σ integral, halfPeriod, derivatives, limits |
+| RealTopologyS5 | 563 | θ candidate + injectivity |
+| RealTopologyS6 | 583 | defect framework, AddMonoidHom packaging |
+| RealTopologyS7 | 478 | chord calculus, derivative identities |
+| RealTopologyS8 | 1300 | local constancy (HasDerivAt=0) |
+| RealTopologyS9 | 212 | global glue (IsLocallyConstant + atTop → 0) |
+| RealTopologyS10Audit | 100 | API prerequisites |
+| RealTopologyS10T2 | 658 | θ(P+T₂) = θ(P)+T (T₂-translation trick) |
+| RealTopologyS10Mixed | 1676 | θ(L+U) = θ(L)+θ(U) (mixed additivity) |
+| RealTopologyS11Assembly | 600 | ThetaCandidateAdditive (4×4 case bash) |
+| RealTorsionBound | 764 | card_E_R_torsion_le + shortW model + harvest |
 
-## Build state on uisai2
-- Branch: ai-scratch, latest: 4a264fc
-- Torsion.lean: 3 actual sorries, 8601 jobs green
-- scratch.SeamE1: 1 sorry (bridge-2), 3012 jobs green
-## Update 2026-06-25 (continued session)
+### Elementary Exclusions (0 sorry)
+| File | Lines | Content |
+|------|-------|---------|
+| NoFull3Torsion | 220 | (ℤ/3)² ⊄ E(ℚ) via ψ₃ Vieta trick |
+| NoFull4Torsion | 490 | (ℤ/4)² ⊄ E(ℚ) via halving criterion |
+| FullTorsionBound | 158 | m ≤ 2 wiring |
+| TorsionFiniteFromOrderBound | 53 | torsion finite via bounded exponent |
 
-### New findings
-- ATOM 5 (ω≠0): PROVED (32804ef, 0-sorry)
-- addX general-m: ω-elimination proved, ωfree_dvd 1 sorry (sub-agent grinding)
-- c₅=0 breakthrough: addX with Ψ₂Sq-Hmiss is an EXACT polynomial identity (no AdjoinRoot needed)
-- addY structural obstruction: ω_m² term needs 1/ψ_m → MUST use coordinate ring (polynomial LC impossible)
-- Discriminant route: NOT viable for general n (same formal-group content, normalization traps)
-- Finite morphism injectivity: NOT a shortcut (finite+nonconstant ≠ unramified)
-- Torsion counting: circular
-- Function-field: needs same projective formula
+### Axioms Eliminated
+| Eliminated | Method |
+|------------|--------|
+| mordell_weil_fg | bounded exponent (N=2520) via Route 2 |
+| weil_interface_bridge | trivial: m ≤ 2 → ζ ∈ {±1} |
+| kubert_C10_square | TateZ2xZ10Reduction (1540 lines) |
+| kubert_C12_square | TateZ2xZ12Reduction (1745 lines) |
+| Z2xZ16_gives_non_degenerate | KubertBridgeN16 |
 
-### The irreducible gap: tangent bridge
-After exhaustive exploration (40+ ChatGPT rounds, 5 alternative routes ruled out):
-The tangent bridge = connecting projective local-parameter coefficient to abstract d[n]|_O = n.
-This is the CORE CONTENT of the Weierstrass formal group and cannot be bypassed.
+## Next Session Plan
 
-### Two legs remaining for bridge-2
-1. Projective formula addX/addY (leg 1): ωfree_dvd sub-agent grinding
-2. Tangent bridge (leg 2): needs W.formalGroup or equivalent first-order construction
+### Oracle-planned attack on mazur_prime_torsion_bound
 
-### Verified state on uisai2
-- Torsion.lean: 3 actual sorries (all not-ours), 8601 jobs green
-- scratch.SeamE1: 1 sorry (bridge-2), 3012 jobs green  
-- scratch.Bridge1Even: 0 sorry
-- scratch.OmegaDivPoly: 0 sorry
-- scratch.ProjectiveFormula: 0 sorry (Z-components)
-- scratch.Atom5OmegaNonzero: 0 sorry
-- scratch.AddXGeneral: 1 sorry (ωfree_dvd, sub-agent in flight)
+**Start with /fable-ora 3 rounds**: plan rational ℓ-isogeny descent module.
 
-## Update 2026-06-25 (late)
+**Weeks-class (p=11):**
+- X₁(11) = 11a3, rank 0, 5-isogeny descent (Billing-Mahler 1940)
+- Build reusable "descent via rational ℓ-isogeny" module
+- Same module closes n=14, n=15 Diophantine sorry's
+- Shrinks axiom to p ≥ 13
 
-### Mathlib FormalGroup discovery
-Mathlib has FormalGroup at RingTheory/FormalGroup/Basic.lean (Wenrong Zou).
-Same structure as our SeamE1_FormalNsmul.lean. Has additiveFormalGroup.
-Our formalNsmul_coeff_one (d[n]=n) is NOT in Mathlib — our contribution.
-W.formalGroup instance is NOT in Mathlib — the tangent bridge gap.
+**Months-class (p=17,19):**
+- X₀(p) elliptic rank 0, 2-isogeny descent
+- Shrinks axiom to p ≥ 23
 
-### Proven this sub-session
-- addX general-m: 0-sorry (fcc5aa4)
-- ATOM 5 (ω≠0): 0-sorry (32804ef)
-- addY: 6/7 helpers 0-sorry, assembly 1 sorry (sub-agent grinding)
+**Years-class (keep as axiom):**
+- p = 13: X₁(13) genus 2 (Mazur-Tate 1973)
+- p ≥ 23: Eisenstein ideal (Mazur 1977)
 
-### ChatGPT bridge reliability
-Last 2 rounds (~8 questions) ALL returned PENDING (bridge capture failure on Pro long-thinks).
-Answers in tabs but git-write not triggering. Need manual paste or bridge fix.
+## Key Technical Insights
 
-### Remaining for bridge-2
-1. addY assembly (1 sorry, sub-agent in flight)
-2. Tangent bridge (irreducible, needs W.formalGroup or equivalent)
+1. **T₂-translation trick** (Fable oracle): θ(P+T₂)=θ(P)+T has empty bad
+   set; mixed additivity has built-in anchor. Eliminates atTop + doubling seam.
 
-## FINAL UPDATE 2026-06-25
+2. **Bounded exponent kills Mordell-Weil**: order ∈ {1,...,12} →
+   addOrderOf | 2520 → E(Q)_tors ⊆ E(Q)[2520] → finite via Route 2.
 
-### PROJECTIVE FORMULA COMPLETE
-All 3 components proved for general m (0-sorry, standard-3 axioms):
-- Z: addZ (exact) + dblZ (exact) — ProjectiveFormula.lean
-- X: mk_addX_divPoly_general — AddXGeneral.lean  
-- Y: mk_addY_divPoly_general — AddYGeneral.lean
+3. **Convention**: shortCubic A B x = x³+Ax²+Bx. shortW A B has a₂=A, a₄=B.
 
-### SOLE REMAINING GAP: Tangent Bridge
-Connect projective local-parameter coefficient to d[n]|_O = n.
-Requires W.formalGroup instance or equivalent.
-Mathlib has FormalGroup structure (RingTheory/FormalGroup/Basic.lean).
-Our formalNsmul_coeff_one proved d[n]=n abstractly.
-Missing: W.formalGroup : FormalGroup K for the Weierstrass curve.
+4. **Tate NF reduction template**: TateZ2xZ10Reduction (1540 lines) and
+   TateZ2xZ12Reduction (1745 lines) are reusable patterns.
 
-### All alternatives ruled out (exhaustively)
-- Per-n Bezout: n≥11 intractable
-- Discriminant recurrence: same formal-group content
-- Torsion counting: circular  
-- Function-field: needs same projective formula
-- Finite morphism: finite≠unramified
-- Additive FormalGroup shortcut: ALL FGLs agree to 1st order, but the CONNECTION to the curve is the content
+5. **Remote build**: uisai2 at /home/xhuan5/repos/flt-ai.
+   Push to `xiang`, `git reset --hard xiang/ai-scratch`.
 
-## W.formalGroup Design Round 1 (in progress)
-- dm2 blind review (86bb631a8): projective coords, w(t) iteration, ~650-1300 lines
-- Jacobian dblXYZ/addXYZ DEGENERATE at Z=0 (confirmed): w(t) construction necessary
-- dm1 atom decomposition + dm4 CAS dblXYZ: still processing
-- Design approach: w(t) → [t:-1:w(t)] → projective addition → F = -X/Y
+## Active Import Chain
 
-## W.formalGroup Design R2 findings
-- u(t) = 1 + a₁t + (a₁²+a₂)t² + ... (CAS verified, u(0)=1, unit power series)
-- Correct equation: u = 1 + a₁tu + a₂t²u + a₃t³u² + a₄t⁴u² + a₆t⁶u³
-- addXYZ(P(t₁),P(t₂)) at Z~t degenerates: addZ factors as u₁u₂(t₂-t₁)(t₂+t₁+O(t²))
-- The (t₂-t₁) factor cancels when computing F = -XZ/Y (the t₁+t₂ survives)
-- PowerSeries.subst API available for substitution
+```
+TorsionBound.lean
+├── TorsionFiniteFromOrderBound.lean
+│   ├── Axioms.lean (mazur_cyclic_order_bound — THE axiom)
+│   └── RealTorsionBound.lean → RealTopologyS1-S11 (all 0 sorry)
+├── Axioms.lean
+│   ├── NoncyclicN10 → DescentBridge → KubertBridgeN10 → TateZ2xZ10Reduction
+│   │                → DescentBridgeN12 → KubertBridgeN12 → TateZ2xZ12Reduction
+│   ├── RealTorsionBridge, TwoInvariantFactors, GroupTheory
+│   └── (no mordell_weil_fg anywhere)
+└── RealTorsionBound.lean
+```
 
-## W.formalGroup ATOM 3 status (2026-06-25 late)
-- 8 sorries remain in FormalGroupW.lean (was 7, decomposed into clearer structure)
-- Core 3 divisibility lemmas: (X₀-X₁)³ ∣ addX/Y/Z
-- addZ: delta factored, (X₀-X₁)|delta proved, gap = prime cancellation of w₀w₁
-- addX/Y: may hold as pure polynomial identities (CAS check in flight)
-- Diagonal-difference base lemma: sub-agent grinding (sub_dvd_pow_sub_pow + dvd_sum)
-- Design: UFD/coprime route REJECTED (Mathlib lacks API), diagonal-difference route ADOPTED
-- CAS: (t₁-t₂)³ divisibility verified for all 3 coords (Q476, remainder=0)
-- dm3 Q478: order-3 from chord variables U,V structure
-- dm2 Q477: diagonal-difference strategy recommended
+## Files NOT on Active Path (future work)
+
+- CyclicExclusion{11,14,15,16}.lean — sorry scaffolding for composite orders
+- CyclicOrderReduction.lean — prime axiom decomposition
+- KubertBridgeN16.lean — N=16 infrastructure (2 sorry)
+- DescentBridgeN14.lean — 2 axioms (non-critical)
+- OrderReduction.lean — duplicate axiom (cleanup)
+- TorsionFinite.lean — dead code (mordell_weil_fg)
+- WeilPairingInterface.lean — closed (0 sorry, historical)
