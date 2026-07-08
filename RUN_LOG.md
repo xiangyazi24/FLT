@@ -1,4 +1,39 @@
 
+## Run 2026-07-08 (ChatGPT harvest mode)
+- doctrine version: Close CyclicExclusion sorry's via ChatGPT harvest
+- approval: /automode command
+- starting avenue: (a) CyclicExclusion20 group-theory sorry's
+- status update 07:40:
+  CyclicExclusion20: 7→2 sorry (5 group-theory lemmas CLOSED). commit 0796e235.
+  CyclicExclusion15: fixed false no_tate_order5_psi3_root_solution (was missing curve eq). commit 3b0e38e6.
+  Total: 125→120 sorry, 27 axiom.
+  ChatGPT: Q3905 (group theory) ✓ harvested; Q3907 (Kubert bridge) ✓ research harvested;
+  Q3906 (Diophantine N18/N21) still processing; Q3915 (Z2×Z10 embedding) still processing.
+- status update 08:00:
+  CyclicExclusion15: fixed false `no_tate_order5_psi3_root_solution` (commit 3b0e38e6).
+  ChatGPT Q3915 + Q3918 (Z2×Z10 embedding): structure correct (coprod + fin_cases),
+  `eq_five_nsmul_of_order_two_mem_zmultiples` + `coprod_zmod_two_ten_injective` received,
+  tactic details need debugging (ZMod↔ℤ conversion, simp lemmas).
+  Q3906 (Diophantine) still running at ~29min extended thinking.
+  Found CyclicExclusion15 no_tate_order5_psi3_root_solution FALSE (b=-2 x=-1 counterexample), fixed.
+- status update 08:10:
+  eq_five_nsmul_of_order_two_in_zmultiples: COMPILES (commit 6734e097).
+  Key independence lemma for Z2×Z10 embedding.
+  Q3906 (Diophantine) git-drop failed after 40min, re-dispatched.
+  Total: 120 sorry, 27 axiom.
+- status update 08:15:
+  Q3921 (Diophantine N18) answered: X₁(18) is genus 2, proof needs Chabauty.
+  F9=0 parametrizes as c=t²(t-1), b=t²(t-1)(t²-t+1), reducing to single
+  curve G(t,X)=0 which is an affine model of X₁(18).
+  no_obstruction18 and no_obstruction21 should remain as axioms (genus-2 Chabauty
+  is beyond current Lean infra).
+- end: 2026-07-08 08:15
+- final result: 5 sorry CLOSED (CyclicExclusion20 group theory), 1 false statement
+  FIXED (CyclicExclusion15), eq_five_nsmul independence lemma PROVED.
+  Mathematical research harvested: Kubert bridge (N14/N16), X₁(18) genus-2 analysis.
+  ChatGPT: 5 questions dispatched, 4 answers harvested (1 git-drop fail → re-dispatched).
+  Total: 125→120 sorry, 27 axiom.
+
 ## Run 2026-07-07 22:30
 - doctrine version: Mazur axiom elimination (rewritten)
 - approval: /automode command
