@@ -1,5 +1,4 @@
 import Mathlib
-import FLT.EllipticCurve.Torsion
 import scratch.TateZ2xZ10Reduction
 
 /-!
@@ -673,6 +672,315 @@ theorem exists_tate_parameters_of_order12_and_independent_2torsion
       (b := b) (c := c) (x₁ := xT) (y₁ := yT)
       (x₂ := tateX6 b c) (y₂ := tateY6 b c)
       (h₁ := hT) (h₂ := h6) hT2' h6P2' hne
+
+/-! ## The cyclic-12 Kubert quadratic root -/
+
+def alpha12OfTate (b c : ℚ) : ℚ :=
+  1 + (b - c) ^ 2 / (c * (b - c ^ 2 - c))
+
+def c12Kubert (a : ℚ) : ℚ :=
+  ((3 * a ^ 2 - 3 * a + 1) * (a - 2 * a ^ 2)) / (a - 1) ^ 3
+
+def b12Kubert (a : ℚ) : ℚ :=
+  c12Kubert a * (2 * a - 2 * a ^ 2 - 1) / (a - 1)
+
+def x6Kubert (a : ℚ) : ℚ :=
+  a * (3 * a ^ 2 - 3 * a + 1) / (a - 1)
+
+def Q12A (a : ℚ) : ℚ :=
+  4 * (a - 1) ^ 7
+
+def Q12B (a : ℚ) : ℚ :=
+  (a - 1) * (2 * a - 1) * (2 * a ^ 2 - 2 * a + 1) *
+    (12 * a ^ 4 - 20 * a ^ 3 + 10 * a ^ 2 - 1)
+
+def Q12C (a : ℚ) : ℚ :=
+  -a * (2 * a - 1) ^ 2 * (2 * a ^ 2 - 2 * a + 1) ^ 2 *
+    (3 * a ^ 2 - 3 * a + 1)
+
+def Q12 (a X : ℚ) : ℚ :=
+  Q12A a * X ^ 2 + Q12B a * X + Q12C a
+
+def H12 (a : ℚ) : ℚ :=
+  2 * a ^ 2 - 2 * a + 1
+
+def G12 (a : ℚ) : ℚ :=
+  6 * a ^ 2 - 6 * a + 1
+
+def S12 (a X : ℚ) : ℚ :=
+  2 * Q12A a * X + Q12B a
+
+def eta12 (a X : ℚ) : ℚ :=
+  S12 a X / ((a - 1) * (2 * a - 1) ^ 3 * H12 a)
+
+def kubertA12 (t : ℚ) : ℚ :=
+  6 * t ^ 8 + 48 * t ^ 6 + 12 * t ^ 4 - 2
+
+def kubertB12 (t : ℚ) : ℚ :=
+  (t ^ 2 - 1) ^ 6 * (1 + 3 * t ^ 2) ^ 2
+
+def kubertDelta12 (t : ℚ) : ℚ :=
+  256 * (t ^ 2 - 1) ^ 12 * (1 + 3 * t ^ 2) ^ 4 * t ^ 6 *
+    (t ^ 2 + 1) ^ 3 * (3 * t ^ 2 - 1)
+
+lemma c_eq_c12_alpha
+    (b c : ℚ) (hc : c ≠ 0) (hbc : b - c ≠ 0)
+    (hD : b - c ^ 2 - c ≠ 0) (hPhi : Phi12 b c = 0) :
+    c = c12Kubert (alpha12OfTate b c) := by
+  unfold c12Kubert alpha12OfTate
+  field_simp [hc, hbc, hD]
+  unfold Phi12 at hPhi
+  ring_nf at hPhi ⊢
+  linear_combination
+    (2 * b ^ 4 + b ^ 3 * c ^ 2 - 5 * b ^ 3 * c - 6 * b ^ 2 * c ^ 3 +
+      4 * b ^ 2 * c ^ 2 + 7 * b * c ^ 4 - b * c ^ 3 + c ^ 6 - 2 * c ^ 5) *
+      hPhi
+
+lemma b_eq_b12_alpha
+    (b c : ℚ) (hc : c ≠ 0) (hbc : b - c ≠ 0)
+    (hD : b - c ^ 2 - c ≠ 0) (hPhi : Phi12 b c = 0) :
+    b = b12Kubert (alpha12OfTate b c) := by
+  unfold b12Kubert c12Kubert alpha12OfTate
+  field_simp [hc, hbc, hD]
+  unfold Phi12 at hPhi
+  ring_nf at hPhi ⊢
+  linear_combination
+    (-4 * b ^ 8 - b ^ 7 * c ^ 2 + 22 * b ^ 7 * c - b ^ 6 * c ^ 4 +
+      15 * b ^ 6 * c ^ 3 - 52 * b ^ 6 * c ^ 2 + 8 * b ^ 5 * c ^ 5 -
+      50 * b ^ 5 * c ^ 4 + 69 * b ^ 5 * c ^ 3 - 33 * b ^ 4 * c ^ 6 +
+      75 * b ^ 4 * c ^ 5 - 56 * b ^ 4 * c ^ 4 - b ^ 3 * c ^ 8 +
+      57 * b ^ 3 * c ^ 7 - 61 * b ^ 3 * c ^ 6 + 28 * b ^ 3 * c ^ 5 +
+      8 * b ^ 2 * c ^ 9 - 44 * b ^ 2 * c ^ 8 + 29 * b ^ 2 * c ^ 7 -
+      8 * b ^ 2 * c ^ 6 - 9 * b * c ^ 10 + 15 * b * c ^ 9 -
+      8 * b * c ^ 8 + b * c ^ 7 - c ^ 12 + 2 * c ^ 11 -
+      2 * c ^ 10 + c ^ 9) * hPhi
+
+lemma tateX6_b12_c12_eq_x6
+    (a : ℚ) (ha1 : a - 1 ≠ 0)
+    (hD : b12Kubert a - c12Kubert a ^ 2 - c12Kubert a ≠ 0) :
+    tateX6 (b12Kubert a) (c12Kubert a) = x6Kubert a := by
+  unfold tateX6 x6Kubert
+  field_simp [hD]
+  unfold b12Kubert c12Kubert
+  field_simp [ha1]
+  ring
+
+lemma tateTwoTorsionCubic_b12_c12_factor
+    (a X : ℚ) (ha1 : a - 1 ≠ 0) :
+    (a - 1) ^ 7 * tateTwoTorsionCubic (b12Kubert a) (c12Kubert a) X =
+      (X - x6Kubert a) * Q12 a X := by
+  unfold tateTwoTorsionCubic b12Kubert c12Kubert x6Kubert Q12 Q12A Q12B Q12C
+  field_simp [ha1]
+  ring
+
+lemma Q12_eq_zero_of_tate_root
+    (a X : ℚ) (ha1 : a - 1 ≠ 0)
+    (hroot : tateTwoTorsionCubic (b12Kubert a) (c12Kubert a) X = 0)
+    (hne : X ≠ x6Kubert a) :
+    Q12 a X = 0 := by
+  have hfactor := tateTwoTorsionCubic_b12_c12_factor a X ha1
+  have hprod : (X - x6Kubert a) * Q12 a X = 0 := by
+    simpa [hroot] using hfactor.symm
+  exact (mul_eq_zero.mp hprod).resolve_left (sub_ne_zero.mpr hne)
+
+lemma eta12_sq_sub
+    (a X : ℚ) (ha1 : a - 1 ≠ 0) (h2a1 : 2 * a - 1 ≠ 0)
+    (_hH : H12 a ≠ 0) :
+    eta12 a X ^ 2 - H12 a * G12 a =
+      (16 * (a - 1) ^ 5 / ((2 * a - 1) ^ 6 * (H12 a) ^ 2)) * Q12 a X := by
+  unfold eta12 S12 Q12 Q12A Q12B Q12C H12 G12
+  field_simp [ha1, h2a1, _hH]
+  ring
+
+lemma eta12_sq_of_Q12_eq_zero
+    (a X : ℚ) (ha1 : a - 1 ≠ 0) (h2a1 : 2 * a - 1 ≠ 0)
+    (hH : H12 a ≠ 0) (hQ : Q12 a X = 0) :
+    eta12 a X ^ 2 = H12 a * G12 a := by
+  have h := eta12_sq_sub a X ha1 h2a1 hH
+  rw [hQ, mul_zero] at h
+  linarith
+
+lemma rat_sq_ne_three_kubert (r : ℚ) : r ^ 2 ≠ 3 := by
+  intro h
+  have hs : IsSquare (3 : ℚ) := ⟨r, by simpa [sq] using h.symm⟩
+  have hs_nat : IsSquare (3 : ℕ) :=
+    Rat.isSquare_natCast_iff.mp (by simpa using hs)
+  norm_num [IsSquare] at hs_nat
+
+lemma kubertDelta12_ne_zero_of_alpha
+    (a : ℚ) (ha0 : a ≠ 0) (ha1 : a - 1 ≠ 0) (h2a1 : 2 * a - 1 ≠ 0) :
+    kubertDelta12 (2 * a - 1) ≠ 0 := by
+  let t : ℚ := 2 * a - 1
+  have ht : t ≠ 0 := by
+    dsimp [t]
+    exact h2a1
+  have ht_sq_sub_one : t ^ 2 - 1 ≠ 0 := by
+    intro h
+    have hprod : a * (a - 1) = 0 := by
+      dsimp [t] at h
+      nlinarith
+    rcases mul_eq_zero.mp hprod with hzero | hone
+    · exact ha0 hzero
+    · exact ha1 hone
+  have ht_sq_add_one : t ^ 2 + 1 ≠ 0 := by
+    nlinarith [sq_nonneg t]
+  have hthree : 3 * t ^ 2 - 1 ≠ 0 := by
+    intro h
+    exact rat_sq_ne_three_kubert (3 * t) (by nlinarith)
+  have hone_add_three : 1 + 3 * t ^ 2 ≠ 0 := by
+    nlinarith [sq_nonneg t]
+  dsimp [t]
+  unfold kubertDelta12
+  repeat' apply mul_ne_zero
+  · norm_num
+  · exact pow_ne_zero 12 ht_sq_sub_one
+  · exact pow_ne_zero 4 hone_add_three
+  · exact pow_ne_zero 6 ht
+  · exact pow_ne_zero 3 ht_sq_add_one
+  · exact hthree
+
+lemma kubert_quad_disc_identity_12 (t : ℚ) :
+    kubertA12 t ^ 2 - 4 * kubertB12 t =
+      256 * t ^ 6 * (t ^ 2 + 1) ^ 3 * (3 * t ^ 2 - 1) := by
+  unfold kubertA12 kubertB12
+  ring
+
+lemma kubert_quadratic_root_of_eta_sq
+    (a eta : ℚ) (ha0 : a ≠ 0) (ha1 : a - 1 ≠ 0) (h2a1 : 2 * a - 1 ≠ 0)
+    (heta : eta ^ 2 = H12 a * G12 a) :
+    ∃ t x : ℚ,
+      kubertDelta12 t ≠ 0 ∧
+        x ^ 2 + kubertA12 t * x + kubertB12 t = 0 := by
+  let t : ℚ := 2 * a - 1
+  let s : ℚ := 32 * t ^ 3 * (t ^ 2 + 1) * eta
+  have hs : s ^ 2 = kubertA12 t ^ 2 - 4 * kubertB12 t := by
+    rw [kubert_quad_disc_identity_12 t]
+    calc
+      s ^ 2 = 1024 * t ^ 6 * (t ^ 2 + 1) ^ 2 * eta ^ 2 := by
+        dsimp [s]
+        ring
+      _ = 256 * t ^ 6 * (t ^ 2 + 1) ^ 3 * (3 * t ^ 2 - 1) := by
+        rw [heta]
+        dsimp [t]
+        unfold H12 G12
+        ring
+  refine ⟨t, (-kubertA12 t + s) / 2, kubertDelta12_ne_zero_of_alpha a ha0 ha1 h2a1, ?_⟩
+  field_simp
+  ring_nf
+  nlinarith
+
+theorem kubert_quadratic_root_of_tate_data
+    (b c x : ℚ)
+    (_hb : b ≠ 0) (hc : c ≠ 0) (hbc : b - c ≠ 0)
+    (hD : b - c ^ 2 - c ≠ 0)
+    (hPhi : Phi12 b c = 0)
+    (hroot : tateTwoTorsionCubic b c x = 0)
+    (hxne : x ≠ tateX6 b c) :
+    ∃ t x₀ : ℚ,
+      kubertDelta12 t ≠ 0 ∧
+        x₀ ^ 2 + kubertA12 t * x₀ + kubertB12 t = 0 := by
+  let a : ℚ := alpha12OfTate b c
+  have hc_eq : c = c12Kubert a := by
+    dsimp [a]
+    exact c_eq_c12_alpha b c hc hbc hD hPhi
+  have hb_eq : b = b12Kubert a := by
+    dsimp [a]
+    exact b_eq_b12_alpha b c hc hbc hD hPhi
+  have ha1 : a - 1 ≠ 0 := by
+    have hfrac : (b - c) ^ 2 / (c * (b - c ^ 2 - c)) ≠ 0 :=
+      div_ne_zero (pow_ne_zero 2 hbc) (mul_ne_zero hc hD)
+    simpa [a, alpha12OfTate] using hfrac
+  have ha0 : a ≠ 0 := by
+    intro ha
+    apply hc
+    rw [hc_eq, ha]
+    norm_num [c12Kubert]
+  have h2a1 : 2 * a - 1 ≠ 0 := by
+    intro h2
+    have ha : a = 1 / 2 := by linarith
+    apply hc
+    rw [hc_eq, ha]
+    norm_num [c12Kubert]
+  have hH : H12 a ≠ 0 := by
+    unfold H12
+    nlinarith [sq_nonneg (2 * a - 1)]
+  have hD_a : b12Kubert a - c12Kubert a ^ 2 - c12Kubert a ≠ 0 := by
+    rwa [← hb_eq, ← hc_eq]
+  have hx6_eq : tateX6 (b12Kubert a) (c12Kubert a) = x6Kubert a :=
+    tateX6_b12_c12_eq_x6 a ha1 hD_a
+  have hroot_a : tateTwoTorsionCubic (b12Kubert a) (c12Kubert a) x = 0 := by
+    rwa [← hb_eq, ← hc_eq]
+  have hxne_a : x ≠ x6Kubert a := by
+    intro hx
+    apply hxne
+    rw [hb_eq, hc_eq, hx6_eq]
+    exact hx
+  have hQ : Q12 a x = 0 :=
+    Q12_eq_zero_of_tate_root a x ha1 hroot_a hxne_a
+  have heta : eta12 a x ^ 2 = H12 a * G12 a :=
+    eta12_sq_of_Q12_eq_zero a x ha1 h2a1 hH hQ
+  exact kubert_quadratic_root_of_eta_sq a (eta12 a x) ha0 ha1 h2a1 heta
+
+theorem kubert_quadratic_root_of_order12_and_full_two
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (h12 : ∃ P : (E⁄ℚ).Point, orderOf (Multiplicative.ofAdd P) = 12)
+    (h2 : ∃ g : (ZMod 2 × ZMod 2) →+ (E⁄ℚ).Point, Function.Injective g) :
+    ∃ t x : ℚ,
+      kubertDelta12 t ≠ 0 ∧
+        x ^ 2 + kubertA12 t * x + kubertB12 t = 0 := by
+  classical
+  obtain ⟨P, hPmult⟩ := h12
+  have hP : addOrderOf P = 12 := by
+    simpa using hPmult
+  have hPsmall : ∀ m < 12, 0 < m → (m : ℕ) • P ≠ 0 :=
+    ((addOrderOf_eq_iff (x := P) (by norm_num : 0 < 12)).mp hP).2
+  have h6Pne0 : (6 : ℕ) • P ≠ 0 :=
+    hPsmall 6 (by norm_num) (by norm_num)
+  have h12Pzero : (12 : ℕ) • P = 0 :=
+    ((addOrderOf_eq_iff (x := P) (by norm_num : 0 < 12)).mp hP).1
+  have h6P2 : (2 : ℕ) • ((6 : ℕ) • P) = 0 := by
+    rw [← mul_nsmul]
+    simpa using h12Pzero
+  obtain ⟨g, hg⟩ := h2
+  let S : (E⁄ℚ).Point := (6 : ℕ) • P
+  let e₁ : ZMod 2 × ZMod 2 := ((1 : ZMod 2), (0 : ZMod 2))
+  let e₂ : ZMod 2 × ZMod 2 := ((0 : ZMod 2), (1 : ZMod 2))
+  have he₁_two : (2 : ℕ) • e₁ = 0 := by decide
+  have he₂_two : (2 : ℕ) • e₂ = 0 := by decide
+  have he₁_ne_zero : e₁ ≠ 0 := by decide
+  have he₂_ne_zero : e₂ ≠ 0 := by decide
+  have he₁_ne_e₂ : e₁ ≠ e₂ := by decide
+  by_cases h₁S : g e₁ = S
+  · let T : (E⁄ℚ).Point := g e₂
+    have hT2 : (2 : ℕ) • T = 0 := by
+      dsimp [T]
+      rw [← g.map_nsmul, he₂_two, map_zero]
+    have hTne0 : T ≠ 0 := by
+      intro hT0
+      exact he₂_ne_zero (hg (by simpa [T] using hT0))
+    have hTne6P : T ≠ (6 : ℕ) • P := by
+      intro hTS
+      have hgeq : g e₁ = g e₂ := by
+        rw [h₁S]
+        simpa [T, S] using hTS.symm
+      exact he₁_ne_e₂ (hg hgeq)
+    rcases exists_tate_parameters_of_order12_and_independent_2torsion
+        E P T hP hT2 hTne0 h6Pne0 h6P2 hTne6P with
+      ⟨b, c, xT, hb, hc, hbc, hD, hPhi, hroot, hxne⟩
+    exact kubert_quadratic_root_of_tate_data b c xT hb hc hbc hD hPhi hroot hxne
+  · let T : (E⁄ℚ).Point := g e₁
+    have hT2 : (2 : ℕ) • T = 0 := by
+      dsimp [T]
+      rw [← g.map_nsmul, he₁_two, map_zero]
+    have hTne0 : T ≠ 0 := by
+      intro hT0
+      exact he₁_ne_zero (hg (by simpa [T] using hT0))
+    have hTne6P : T ≠ (6 : ℕ) • P := by
+      simpa [T, S] using h₁S
+    rcases exists_tate_parameters_of_order12_and_independent_2torsion
+        E P T hP hT2 hTne0 h6Pne0 h6P2 hTne6P with
+      ⟨b, c, xT, hb, hc, hbc, hD, hPhi, hroot, hxne⟩
+    exact kubert_quadratic_root_of_tate_data b c xT hb hc hbc hD hPhi hroot hxne
 
 /-! ## The explicit map to the `N = 12` obstruction curve -/
 

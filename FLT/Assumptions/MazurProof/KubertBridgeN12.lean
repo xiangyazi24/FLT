@@ -1,6 +1,7 @@
 import Mathlib
 import FLT.Assumptions.MazurProof.DescentBridgeN12Defs
 import FLT.Assumptions.MazurProof.RationalPointsN12
+import scratch.TateZ2xZ12Reduction
 
 /-!
 # Kubert bridge: Z/2Z × Z/12Z torsion → point on w² = u³ - u² - 4u + 4
@@ -258,7 +259,10 @@ theorem kubert_C12_tate_quadratic_root_of_order12_and_full_two
     (h12 : ∃ P : (E⁄ℚ).Point, orderOf (Multiplicative.ofAdd P) = 12)
     (h2 : ∃ g : (ZMod 2 × ZMod 2) →+ (E⁄ℚ).Point, Function.Injective g) :
     ∃ t x : ℚ, Delta12 t ≠ 0 ∧ x ^ 2 + A12 t * x + B12 t = 0 := by
-  sorry
+  simpa [A12, B12, Delta12, Scratch.TateZ2xZ12Reduction.kubertA12,
+    Scratch.TateZ2xZ12Reduction.kubertB12,
+    Scratch.TateZ2xZ12Reduction.kubertDelta12] using
+    Scratch.TateZ2xZ12Reduction.kubert_quadratic_root_of_order12_and_full_two E h12 h2
 
 /-- Checked reduction from a `ZMod 2 × ZMod 12` injection to the Tate/Kubert
 normal-form root seam. -/
