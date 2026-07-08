@@ -1,66 +1,67 @@
-# Mazur |T|≤16 — Checklist
+# MazurProof Sorry Analysis — 2026-07-08
 
-**Status: 0 sorry, 12 axioms | Infrastructure building phase**
+**Status: 12 sorry, 14 axiom (in CyclicOrderAssembly + other files)**
 
-## Axiom 1: obstruction_curve_20a4_points_degenerate (3/6 done)
-- [x] Integer descent: u ∈ Z → u ∈ {-1,0,1} (Descent20a4.lean)
-- [x] Selmer φ-direction: 6/6 obstructions (SelmerD2, Selmer20a4, SelmerNeg, SelmerD10, SelmerNeg10Phi)
-- [x] Selmer φ̂-direction: 6/6 obstructions (SelmerDual, SelmerDualD2, SelmerDualD10)
-- [ ] Quartic d-by-d: d=2✅ d=3✅ d=4✅ d=5✅ d=6✅ d=7✅ d=8⬜ d=9✅
-  - ⚠️ Each d is a theorem but doesn't cover all d uniformly
-- [ ] Assembly: Selmer → rank 0 → integrality → integer descent → axiom
-  - ⚠️ Blocked: descent exact sequence framework not in Mathlib
-- [ ] 2-torsion bound: |E(Q)[2]| ≤ 4 (TwoTorsionBound.lean by Codex, needs verification)
+## Sorry Classification
 
-## Axiom 2: obstruction_curve_N12_points_degenerate (2/5 done)
-- [x] Bug fix: degenerate set {-2,1,2} → {-2,0,1,2,4}
-- [x] N=12 descent structure: 3∤(u-1) case proved (DescentN12.lean)
-- [ ] N=12 quartic subcase: b²=3a⁴+2a²-1
-  - ⚠️ Blocked: same as quartic general d
-- [ ] Integrality for Q
-- [ ] Assembly
+### Category A: Tate NF Bridge (4 sorry)
+These bridge from `HasRationalPointOfOrder E N` to Tate NF parameters.
+BLOCKED ON: general Tate NF reduction theorem (not in Mathlib).
 
-## Axiom 3: obstruction_curve_N14_points_degenerate (1/4 done)
-- [x] Integer descent: odd case + even case (DescentN14.lean, 0 sorry)
-- [ ] Integrality for Q
-- [ ] Assembly
+| File | Sorry | Statement |
+|------|-------|-----------|
+| CyclicExclusion11:173 | `tate_polynomial_system_solution_of_order11` | order 11 → Tate system |
+| CyclicExclusion15:155 | `simultaneous_order3_and5_tate_bridge` | orders 3+5 → Tate |
+| CyclicExclusion18:29 | `order18_to_tate_obstruction` | order 18 → Tate |
+| CyclicExclusion21:34 | `order21_to_tate_obstruction` | order 21 → Tate |
 
-## Axiom 4: obstruction_curve_N16_points_degenerate (1/4 done)
-- [x] Integer descent (DescentN16.lean, 0 sorry)
-- [ ] Integrality for Q
-- [ ] Assembly
+### Category B: Diophantine / Rational Points (4 sorry)
+Prove that specific polynomial systems have no rational solutions.
+BLOCKED ON: descent/Chabauty/rank computations.
 
-## Axiom 5-8: Z2xZ{10,12,14,16}_gives_non_degenerate_*_point (0/4 done)
-- [ ] Tate normal form infrastructure
-- [ ] Kubert parametrization table
-- [ ] Per-N polynomial computation
-  - ⚠️ Blocked: requires Tate normal form + Kubert table formalization
+| File | Sorry | Curve | Genus | Method |
+|------|-------|-------|-------|--------|
+| CyclicExclusion11:185 | `no_tate_order11_polynomial_solution` | X₁(11) = 11a3 | 1 | rank 0 descent |
+| CyclicExclusion15:172 | `no_tate_order5_psi3_root_solution` | X₁(15) | 1 | rank 0 descent |
+| CyclicExclusion18:32 | `no_obstruction18` | X₁(18) | 2 | Chabauty |
+| CyclicExclusion21:37 | `no_obstruction21` | X₁(21) | ? | Chabauty/descent |
 
-## Axiom 9: mordell_weil_fg (0/1 done)
-- [ ] Mordell-Weil theorem
-  - ⚠️ Blocked: deep theorem, active FLT project work
+### Category C: Kubert Bridge / Modular Parametrization (4 sorry)
+Explicit polynomial maps between Tate NF and obstruction curves.
+BLOCKED ON: modular curve parametrization computation.
 
-## Axiom 10: rational_torsion_two_invariant_factors (0/1 done)
-- [ ] Derive from mordell_weil_fg + weil_pairing + Mathlib structure theorem
-- [x] InvariantFactorLemmas.lean: 4 supporting lemmas (0 sorry)
-- [x] TwoTorsionBound.lean: |E[2]| ≤ 4 (Codex, 0 sorry, needs verification)
-  - ⚠️ Needs: connect to rational_torsion_two_invariant_factors
+| File | Sorry | Content |
+|------|-------|---------|
+| CyclicExclusion14:77 | `cyclic_order_14_kubert_bridge` | order 14 → 96A1 |
+| CyclicExclusion16:112 | `cyclic_order_16_kubert_bridge` | order 16 → N16 curve |
+| KubertBridgeN16:288 | `kubert_C16_discriminant_data` | Z/2×Z/16 → Tate disc |
+| KubertBridgeN16:307 | `EN16_point_of_Phi16_and_disc` | Tate disc → N16 curve |
 
-## Axiom 11: weil_pairing_primitive_root (0/1 done)
-- [ ] Weil pairing theory
-  - ⚠️ Blocked: not in Mathlib
+## Tractability Assessment
 
-## Axiom 12: no_rational_point_of_order_ge_17 (0/1 done)
-- [ ] Mazur cyclic bound (the hardest axiom)
-  - ⚠️ Blocked: requires modular curve theory
+**Most tractable (Category B, genus 1):**
+- X₁(11) = 11a3: rank 0 over Q, denominator descent feasible (~1000 lines)
+- X₁(15): rank 0 over Q, similar approach
 
----
-**Infrastructure files (all 0 sorry):**
-Descent20a4, DescentN14, DescentN16, Isogeny20a4, E20GoodReduction,
-Selmer20a4, SelmerD2, SelmerNeg, SelmerD10, SelmerNeg10Phi,
-SelmerDual, SelmerDualD2, SelmerDualD10, DescentN12, QuarticObstruction,
-QuarticD2, QuarticD3, QuarticD4, QuarticD5, QuarticD6, QuarticD7, QuarticD9,
-GroupTheory, RootsOfUnity, InvariantFactorLemmas, TwoTorsionBound,
-X1_13_PointCount, X1_17_PointCount, E20_TorsionOrder, OddTorsion
+**Moderate (Category C):**
+- Kubert bridges: concrete polynomial computation, could be done with
+  polyrith/ring/field_simp once the map is known
 
-Last verified: 2026-06-18
+**Hard (Category A):**
+- General Tate NF reduction: requires Weierstrass coordinate change theory
+
+**Hardest (Category B, genus 2):**
+- X₁(18), X₁(21): need genus-2 Jacobian rank computation (Chabauty)
+
+## Session Progress
+
+| Commit | Content | Sorry closed |
+|--------|---------|-------------|
+| 0796e235 | CyclicExclusion20: 5 group-theory sorry | 5 |
+| 3b0e38e6 | CyclicExclusion15: false statement fixed | 0 |
+| 6734e097 | eq_five_nsmul independence lemma | 0 |
+| cef30929 | N14 axiom→theorem wiring (remote build) | 1+1axiom |
+| fa82cf3b | Z2×Z10 injective embedding | 0 |
+| 20ff9cfa | CyclicExclusion20: ALL 7 sorry CLOSED | 2 |
+
+**Total this session: 7 sorry closed, 1 axiom discharged, 1 false statement fixed.**

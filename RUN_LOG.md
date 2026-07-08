@@ -32,6 +32,13 @@
   RationalPointsN14 + DescentBridgeN14 wired (commit cef30929, needs remote build).
   ChatGPT Q3935: cyclic-14 Kubert bridge uses different curve (j-invariants differ).
   Prepared code closes 3 sorry + 1 axiom if remote build passes.
+
+## Run 2026-07-08 14:00 (automode: clear remaining sorry)
+- doctrine version: Clear remaining 12 MazurProof sorry's
+- approval: /automode command
+- starting avenue: (a) CyclicExclusion14/16 Kubert bridges
+- end: <pending>
+- final result: <pending>
 - end: <pending>
 - final result: 5 sorry CLOSED locally (CyclicExclusion20 group theory), 1 false statement
   FIXED (CyclicExclusion15), eq_five_nsmul independence lemma PROVED.

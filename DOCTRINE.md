@@ -1,55 +1,64 @@
-# Automode Doctrine: Close CyclicExclusion sorry's via ChatGPT harvest
+# Automode Doctrine: Clear remaining 12 MazurProof sorry's
 
 ## Goal
 
-Close as many sorry's as possible in the CyclicExclusion files by
-dispatching proof questions to ChatGPT Pro and harvesting/wiring results.
-Opus orchestrates, ChatGPT produces proofs.
+Close all remaining sorry in FLT/Assumptions/MazurProof/.
 
-## Current state (125 sorry, 27 axiom in FLT/)
+## Current state (12 sorry in MazurProof/)
 
-| File | sorry | axiom | Type |
-|------|-------|-------|------|
-| CyclicExclusion20 | 7 | 1 | Group theory (addOrderOf) |
-| CyclicExclusion18 | 2 | 0 | Tate NF + Diophantine |
-| CyclicExclusion21 | 2 | 0 | Tate NF + Diophantine |
-| CyclicExclusion14 | 1 | 0 | Kubert bridge |
-| CyclicExclusion15 | 2 | 0 | Tate NF / X₁(15) |
-| CyclicExclusion16 | 1 | 0 | Kubert bridge |
-| CyclicExclusion11 | 3 | 0 | 5-isogeny descent |
-| RationalPointsN14 | 1 | 0 | 2-isogeny descent (scratch proof exists!) |
+| File | sorry | Type |
+|------|-------|------|
+| CyclicExclusion11 | 2 | Tate bridge + X₁(11) rational points |
+| CyclicExclusion14 | 1 | Kubert bridge (cyclic order 14) |
+| CyclicExclusion15 | 2 | Tate bridge + X₁(15) rational points |
+| CyclicExclusion16 | 1 | Kubert bridge (cyclic order 16) |
+| CyclicExclusion18 | 2 | Tate bridge + X₁(18) genus-2 |
+| CyclicExclusion21 | 2 | Tate bridge + X₁(21) |
+| KubertBridgeN16 | 2 | Kubert discriminant + birational map |
 
-## Avenues
+## Avenues (ranked)
 
-### (a) CyclicExclusion20 group-theory sorry's (7 sorry)
+### (a) Kubert bridges: CyclicExclusion14 + CyclicExclusion16 (2 sorry)
 
-Pure addOrderOf lemmas + kernel analysis. ChatGPT should know Mathlib API well.
-Questions: image order under quotient by kernel, independence via lift.
+Both are `cyclic_order_N_kubert_bridge`: from HasRationalPointOfOrder E N,
+produce a point on the obstruction curve. These are concrete polynomial
+computations in the Tate normal form.
 
-Terminal: all 7 sorry → 0 sorry. Or: identify which need axiom.
+Attack: write the Tate NF parametrization explicitly, compute the
+obstruction curve coordinates, verify with ring/norm_num.
 
-### (b) CyclicExclusion18/21 Tate NF sorry's (4 sorry)
+Terminal: both sorry's closed, or concrete Lean error identified.
 
-Parametric computation: Tate normal form with marked N-torsion point.
-Concrete polynomial identities.
+### (b) KubertBridgeN16 (2 sorry)
 
-Terminal: sorry's closed or identified as needing external computation.
+`kubert_C16_discriminant_data` + `EN16_point_of_Phi16_and_disc`.
+These are explicit polynomial computations: from Tate parameters,
+extract discriminant data and birational map to obstruction curve.
 
-### (c) CyclicExclusion14/15/16 Kubert bridge sorry's (4 sorry)
+Terminal: both sorry's closed.
 
-Similar to (b) — modular curve parametrization.
+### (c) CyclicExclusion18/21 Diophantine parts (2 sorry)
 
-Terminal: sorry's closed.
+`no_obstruction18` and `no_obstruction21`: genus-2 Chabauty needed.
+ChatGPT confirmed X₁(18) is genus 2. These are the hardest.
 
-### (d) Wire scratch/ObstructionN14 into RationalPointsN14 (1 sorry)
+Attack: try to formalize the genus-2 argument, or find an elementary
+mod-p obstruction, or parametrize and reduce to a simpler curve.
 
-The 1924-line proof exists in scratch/ with 0 sorry. Need to either:
-- Add scratch to the lake build graph, or
-- Extract the key theorem and import it.
+Terminal: sorry closed, or proved infeasible with current Mathlib.
 
-Terminal: rank_zero_96a1 sorry closed.
+### (d) Tate bridge sorry's (4 sorry across 11/15/18/21)
 
-## Method
+`order*_to_tate_obstruction`: from HasRationalPointOfOrder, extract
+Tate normal form parameters. These need the Tate NF infrastructure
+that already exists in the project.
 
-Dispatch to ChatGPT Pro, harvest, wire into files, verify with `lake env lean`.
-Opus does minimal code — just enough to wire ChatGPT's output.
+Attack: use existing TateNFDivision.lean infrastructure to build
+the bridge.
+
+Terminal: sorry's closed or blocked on missing Tate NF API.
+
+## Fallback
+
+Any sorry closed is permanent progress. Focus on polynomial
+computations (avenues a/b) first since they're most concrete.
