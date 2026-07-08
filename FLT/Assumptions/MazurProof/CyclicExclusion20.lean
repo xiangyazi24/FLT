@@ -57,16 +57,17 @@ private theorem eta_ne_half_image_20
   intro h
   have hker : D.phi (T - 5 • P) = 0 := by
     rw [map_sub, map_nsmul, hT_phi, h, sub_self]
-  rcases (D.ker_eq (T - 5 • P)).mp hker with hzero | hQ
-  · have : T = 5 • P := by rwa [sub_eq_zero] at hzero
-    sorry
-  · sorry
+  sorry
 
 private theorem eta_ne_half_image_24
     {G H : Type*} [AddCommGroup G] [AddCommGroup H]
     {P : G} (hP : addOrderOf P = 24)
     (D : RationalTwoIsogenyData (G := G) (H := H) (12 • P)) :
     D.eta ≠ 6 • D.phi P := by
+  obtain ⟨T, hT_ord, hT_ne0, hT_neQ, hT_phi⟩ := D.eta_lift
+  intro h
+  have hker : D.phi (T - 6 • P) = 0 := by
+    rw [map_sub, map_nsmul, hT_phi, h, sub_self]
   sorry
 
 /-! ## Geometric input: existence of 2-isogeny quotient -/
