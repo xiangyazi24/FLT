@@ -1,64 +1,73 @@
-# Session Handoff — 2026-07-08 (ChatGPT Harvest Mode)
+# Session Handoff — 2026-07-08 (automode: sorry elimination)
 
-## Achievements
+## Achievements This Session
 
-### CyclicExclusion20: 7→2 sorry (commit 0796e235)
-Closed all 4 group-theory lemmas:
-- `image_order_10_of_order_20` via `addOrderOf_eq_of_nsmul_and_div_prime_nsmul`
-- `image_order_12_of_order_24` (same pattern)
-- `eta_ne_half_image_20` via 2•T = 0 → 10•P = 0 contradiction
-- `eta_ne_half_image_24` (same pattern)
+### CyclicExclusion20: ALL 7 sorry CLOSED (commit 20ff9cfa)
+- 5 group-theory lemmas (addOrderOf under 2-isogeny kernel)
+- 2 final wiring: Z/2×Z/10 and Z/2×Z/12 injective embedding
+  → contradiction with no_Z2_cross_Z{10,12}_from_descent
+- Key infrastructure: eq_five/six_nsmul, intSmulHom', coprod injection
+- 1 axiom remains: exists_rational_two_isogeny_quotient
 
-2 helpers (`image_five_nsmul_ne_zero_of_order_20`, `image_two_nsmul_ne_zero_of_order_20`, etc.)
+### RationalPointsN14 + DescentBridgeN14: wired (commit cef30929)
+- import scratch.ObstructionN14 → axiom → theorem
+- Needs remote build (local mini has no scratch oleans)
+- Would close 1 sorry + 1 axiom
 
-Remaining 2 sorry: `no_rational_point_of_order_{20,24}` — needs Z/2×Z/10 embedding.
+### CyclicExclusion15: false statement FIXED (commit 3b0e38e6)
+- no_tate_order5_psi3_root_solution was FALSE (b=-2, x=-1 counterexample)
+- Added TateOrder5CurveEq constraint
 
-### CyclicExclusion15: Bug fix (commit 3b0e38e6)
-`no_tate_order5_psi3_root_solution` was FALSE — b=-2, x=-1 is a counterexample
-(ψ₃ has a rational root but the curve has no rational y with discriminant -11).
-Fixed by adding `TateOrder5CurveEq` constraint.
+### Total: 7 sorry closed, 1 axiom discharged (pending remote build), 1 fix
 
-### Total: 125→120 sorry, 27 axiom
+## Remaining: 12 sorry in MazurProof/
+
+### Category A: Tate NF Bridge (4 sorry) — BLOCKED
+All need general Tate NF reduction (not in Mathlib):
+- CyclicExclusion11: order 11 → Tate system
+- CyclicExclusion15: orders 3+5 → Tate
+- CyclicExclusion18: order 18 → Tate
+- CyclicExclusion21: order 21 → Tate
+
+### Category B: Diophantine (4 sorry) — TRACTABLE via descent
+- F₁₁=0 (X₁(11)=11a3, genus 1, rank 0): mod-2 obstruction verified
+  (b odd → F₁₁≡1 mod 2). Full rational case needs clearing denominators.
+- X₁(15) (genus 1, rank 0): similar approach
+- X₁(18) (genus 2): needs Chabauty (ChatGPT confirmed)
+- X₁(21): similar
+
+### Category C: Kubert Bridge (4 sorry) — NEEDS modular curve computation
+- CyclicExclusion14: j-invariants differ between X₁(14) and 96A1
+- CyclicExclusion16: similar
+- KubertBridgeN16 (2 sorry): explicit birational map from Tate disc model
 
 ## ChatGPT Research Harvested
 
-### Q3905 (group theory) → USED ✓
-All 4 group-theory lemma proofs. Key API: `addOrderOf_eq_of_nsmul_and_div_prime_nsmul`.
+1. **X₁(18) is genus 2** — F9=0 parametrizes as c=t²(t-1),
+   b=t²(t-1)(t²-t+1). Curve G(t,X)=0 is affine model of X₁(18).
+   No mod-p obstruction mod 2,3,5,7. Needs Chabauty.
 
-### Q3907 (Kubert bridge math) → RESEARCH ✓
-- N=14 standard: w²+uw+w = u³-u (NOT the project's w²=u³+u²-2u directly)
-- Need birational map from standard to project curve
-- N=16: nested square condition, parametrize via α=(m²-1)/(m²+1)
-- Cusps: u ∈ {-1,0,1} for N=14
+2. **Kubert bridge N14**: standard curve is w²+uw+w=u³-u (14a1),
+   j=-15625/28 ≠ 21952/9 = j(96A1). NOT birationally equivalent.
+   Bridge must go through modular parametrization.
 
-### Q3915 (Z2×Z10 embedding) → PARTIAL
-Code structure correct: coprod + ZMod.lift + independence lemma.
-`eq_five_nsmul_of_order_two_mem_zmultiples` COMPILES.
-Injectivity proof has tactic errors (ZMod↔ℤ conversion).
-Follow-up question dispatched.
+3. **T2 discriminant for N14**: after F7 parametrization,
+   disc(T2) = (d-1)⁷(d+1)⁷(d³-13d²-9d+13)/8192.
+   Rational root condition gives genus-2 hyperelliptic curve.
 
-### Q3906 (Diophantine N18/N21) → PENDING (24+ min of extended thinking)
+4. **F₁₁ mod 2**: F₁₁(b,c) ≡ b⁵+b⁴c+b³c²+b²c⁵+b²c⁴+b²c³+bc⁷+bc⁶+c⁶.
+   At b=1: ≡1 mod 2 for all c. No odd-b solutions.
 
-## Scratch Files Created
-- `scratch/TestExcl20.lean` — test file for group-theory proofs (compiles clean)
-- `scratch/TestZ2Z10.lean` — Z2×Z10 embedding WIP (partially compiles)
+## Pending ChatGPT Questions
+- Q3946 (Kubert bridge discriminant → 96A1 connection)
+- Q3947 (X₁(11) rational points proof strategy)
+- Q3948 (F₁₁ mod-2 clearing denominators)
 
-## Next Steps (priority order)
-
-1. **Close `no_rational_point_of_order_{20,24}`**: needs the Z2×Z10 injective hom.
-   `eq_five_nsmul_of_order_two_mem_zmultiples` is proved.
-   Need working `torsionProductHom_injective` tactic proof.
-
-2. **Harvest Q3906** (Diophantine): when it lands, wire into CyclicExclusion18/21.
-
-3. **Wire scratch/ObstructionN14**: The 1924-line 0-sorry proof exists in scratch/.
-   Can discharge `rank_zero_96a1` in RationalPointsN14 and
-   `obstruction_curve_N14_points_degenerate` axiom in DescentBridgeN14.
-   Needs: add scratch to lake build graph or copy into FLT/.
-
-4. **CyclicExclusion14/15/16 Kubert bridges**: substantial modular-curve infra.
+## Next Actions
+1. Harvest ChatGPT answers when they land
+2. Dispatch Codex for Lean proof grinding (per role-division feedback)
+3. Remote build on uisai2 for scratch import wiring
 
 ## Remote Build
-
 uisai2 at /home/xhuan5/repos/flt-ai. Push to `xiang` remote.
 Local `lake build` forbidden (24GB mini). Use `lake env lean` for single-file checks.
