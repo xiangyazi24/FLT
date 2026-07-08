@@ -27,8 +27,13 @@
   curve G(t,X)=0 which is an affine model of X₁(18).
   no_obstruction18 and no_obstruction21 should remain as axioms (genus-2 Chabauty
   is beyond current Lean infra).
-- end: 2026-07-08 08:15
-- final result: 5 sorry CLOSED (CyclicExclusion20 group theory), 1 false statement
+- status update 09:15:
+  Z2×Z10 injective embedding COMPILES (commit fa82cf3b).
+  RationalPointsN14 + DescentBridgeN14 wired (commit cef30929, needs remote build).
+  ChatGPT Q3935: cyclic-14 Kubert bridge uses different curve (j-invariants differ).
+  Prepared code closes 3 sorry + 1 axiom if remote build passes.
+- end: <pending>
+- final result: 5 sorry CLOSED locally (CyclicExclusion20 group theory), 1 false statement
   FIXED (CyclicExclusion15), eq_five_nsmul independence lemma PROVED.
   Mathematical research harvested: Kubert bridge (N14/N16), X₁(18) genus-2 analysis.
   ChatGPT: 5 questions dispatched, 4 answers harvested (1 git-drop fail → re-dispatched).
