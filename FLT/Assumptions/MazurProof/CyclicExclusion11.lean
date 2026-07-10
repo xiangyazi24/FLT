@@ -2,6 +2,7 @@ import FLT.Assumptions.MazurProof.TorsionDefs
 import FLT.Assumptions.MazurProof.TateOrder11
 import FLT.Assumptions.MazurProof.RationalPointsN11
 import FLT.Assumptions.MazurProof.RationalPointsN11Descent
+import FLT.Assumptions.MazurProof.BillingMahlerField
 
 /-!
 # Cyclic order 11 exclusion
@@ -242,15 +243,33 @@ theorem tate_polynomial_system_solution_of_order11
     simpa [T] using hb
 
 /--
-The remaining global input in the Billing--Mahler proof.
+The remaining global input in the Billing--Mahler proof, after denominator
+normalization and all explicit cubic-field algebra.
 
-For a rational point on the integral cubic, either that point satisfies the
-Lutz--Nagell exceptional-point conditions, or the nontrivial unit squareclass
-in the cubic descent produces the displayed parity-obstructed equation.  The
-finite exceptional-point enumeration and the mod-4 obstruction are proved in
-`RationalPointsN11Descent`; this dichotomy is the exact unformalized
-cubic-field descent boundary.
+For a primitive integral model, either the original rational point is an
+integral Lutz--Nagell exceptional point, or the principal-ideal descent puts
+the cubic factor in the `epsilon` squareclass.  The class-number-one theorem,
+the integral basis, the four unit squareclasses, and the coefficient expansion
+are proved in `BillingMahlerField`.
 -/
+theorem billing_mahler_global_descent
+    {ξ η : ℚ} (hcurve : RationalPointsN11Descent.MordellEquation ξ η)
+    (x z y : ℤ) (hz : 0 < z) (hcop : Int.gcd x z = 1)
+    (hξ : ξ = (x : ℚ) / (z : ℚ) ^ 2)
+    (hmodel : y ^ 2 = x ^ 3 - 432 * x * z ^ 4 + 8208 * z ^ 6) :
+    (∃ x y : ℤ,
+      ξ = (x : ℚ) ∧ η = (y : ℚ) ∧
+        (y ^ 2 = 0 ∨ y ^ 2 ∣
+          (RationalPointsN11Descent.mordellDiscriminantAbs : ℤ))) ∨
+      ∃ I : Ideal (NumberField.RingOfIntegers BillingMahlerField.K),
+        y ≠ 0 ∧
+          Ideal.span ({BillingMahlerField.descentInteger x z} :
+              Set (NumberField.RingOfIntegers BillingMahlerField.K)) = I ^ 2 ∧
+          ¬ IsSquare (BillingMahlerField.descentElement x z) := by
+  sorry
+
+/-- The global seam above implies the exact arithmetic dichotomy consumed by
+the already-checked exceptional enumeration and parity contradiction. -/
 theorem billing_mahler_rational_point_dichotomy
     {ξ η : ℚ} (hcurve : RationalPointsN11Descent.MordellEquation ξ η) :
     (∃ x y : ℤ,
@@ -262,7 +281,38 @@ theorem billing_mahler_rational_point_dichotomy
           -x + 24 * z ^ 2 = a ^ 2 + 4 * b * c ∧
           18 * z ^ 2 = c ^ 2 + 2 * a * b + 4 * b * c ∧
           x = 2 * (b ^ 2 + c ^ 2 + a * c + 3 * z ^ 2) := by
-  sorry
+  obtain ⟨x, z, y, hz, hcop, hξ, hmodel⟩ :=
+    RationalPointsN11Descent.mordell_integral_model_of_rational_point ξ η hcurve
+  rcases billing_mahler_global_descent hcurve x z y hz hcop hξ hmodel with
+    hexceptional | ⟨I, hy, hideal, hnonsquare⟩
+  · exact Or.inl hexceptional
+  · have hnorm : 0 < Algebra.norm ℚ (BillingMahlerField.descentElement x z) := by
+      rw [BillingMahlerField.norm_descentElement, ← hmodel]
+      exact_mod_cast sq_pos_of_ne_zero hy
+    obtain ⟨w, hw⟩ :=
+      BillingMahlerField.descentElement_eq_epsilon_mul_integral_sq_of_ideal_square
+        x z I hideal hnonsquare hnorm
+    obtain ⟨a, b, c, habc⟩ :=
+      BillingMahlerField.ringOfIntegers_exists_thetaBasis_coords
+        (BillingMahlerField.epsilonInteger * w)
+    have hsquare :
+        BillingMahlerField.epsilon * BillingMahlerField.descentElement x z =
+          BillingMahlerField.thetaBasisElement a b c ^ 2 := by
+      calc
+        BillingMahlerField.epsilon * BillingMahlerField.descentElement x z =
+            BillingMahlerField.epsilon *
+              (BillingMahlerField.epsilon * (w : BillingMahlerField.K) ^ 2) := by
+                rw [hw]
+        _ = (((BillingMahlerField.epsilonInteger * w :
+              NumberField.RingOfIntegers BillingMahlerField.K) :
+                BillingMahlerField.K)) ^ 2 := by
+              simp
+              ring
+        _ = BillingMahlerField.thetaBasisElement a b c ^ 2 := by rw [habc]
+    have hcoeff :=
+      BillingMahlerField.coefficient_system_of_epsilon_mul_descentElement_eq_sq
+        x z a b c hsquare
+    exact Or.inr ⟨x, z, a, b, c, hcop, hcoeff.1, hcoeff.2.1, hcoeff.2.2⟩
 
 /-- Every rational affine point on `11a3` is one of its four affine cusps. -/
 theorem E11_rational_points_boundary
