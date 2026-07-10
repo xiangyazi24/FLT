@@ -5,7 +5,8 @@ automode: yes
 ## Branch synchronization
 
 - Local `/Users/huangx/repos/flt`, GitHub `xiang/ai-scratch`, and UISAI2
-  `/home/xhuan5/repos/flt-ai` are synchronized through `39b90f1d`.
+  `/home/xhuan5/repos/flt-ai` synchronized and built the code state at
+  `39b90f1d`; subsequent commits only update this handoff record.
 - UISAI2 had three untracked files colliding with the fast-forward.  They are
   preserved in `stash@{0}` with message
   `pre-sync collision backup 2026-07-10`.
