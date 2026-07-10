@@ -160,3 +160,21 @@ MW group = ℤ/6ℤ (rank 0), rational points u ∈ {-1, 1, 3} are all cusps.
   unconstrained → FALSE for (ℤ/2)³. Added `h_two_rank` parameter and new
   axiom `no_triple_two_torsion` for the EC application. Net axiom count
   unchanged but mathematical correctness restored.
+
+## Progress Log (2026-07-10 order-11 exclusion)
+
+- Proved the general Tate-normal-form bridge for a marked point of order
+  greater than three.
+- Proved the explicit division-polynomial identity
+  `ψ₁₁(0,0)=b⁴⁰F₁₁(b,c)` and the exact-order equivalence at the Tate origin.
+- Proved the rational algebra map from `F₁₁=0` to the noncuspidal locus on
+  `Y²=X³+8X²+16X+16`.
+- For the Billing--Mahler model `η²=ξ³-432ξ+8208`, proved denominator
+  normalization, the finite exceptional-point enumeration, and the complete
+  parity tail from the three descent coefficient equations.
+- `CyclicExclusion11.lean` now has one exact residual theorem,
+  `billing_mahler_rational_point_dichotomy`; its Tate/moduli `sorry` is closed.
+- The earlier claim that Q4012/Q4013 supplied a complete finite 2-descent was
+  false: the local table and scalar/norm compatibility were not proved.
+- UISAI2 target build passed.  See the repository-root `HANDOFF.md` for the
+  exact residual signature and server synchronization state.
