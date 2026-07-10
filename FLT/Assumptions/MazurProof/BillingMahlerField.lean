@@ -62,7 +62,7 @@ theorem cubicPoly_irreducible : Irreducible cubicPoly := by
   exact (cubicPolyInt_monic.isPrimitive.irreducible_iff_irreducible_map_fraction_map).mp
     cubicPolyInt_irreducible
 
-local instance cubicPolyIrreducibleFact : Fact (Irreducible cubicPoly) :=
+instance cubicPolyIrreducibleFact : Fact (Irreducible cubicPoly) :=
   ⟨cubicPoly_irreducible⟩
 
 theorem cubicPoly_monic : cubicPoly.Monic := by

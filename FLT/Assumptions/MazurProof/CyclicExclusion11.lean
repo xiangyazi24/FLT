@@ -247,10 +247,10 @@ The remaining global input in the Billing--Mahler proof, after denominator
 normalization and all explicit cubic-field algebra.
 
 For a primitive integral model, either the original rational point is an
-integral Lutz--Nagell exceptional point, or the principal-ideal descent puts
-the cubic factor in the `epsilon` squareclass.  The class-number-one theorem,
-the integral basis, the four unit squareclasses, and the coefficient expansion
-are proved in `BillingMahlerField`.
+integral Lutz--Nagell exceptional point, or the global descent supplies an
+ideal square and a nonsquare cubic factor.  The class-number-one theorem, the
+integral basis, the four unit squareclasses, selection of the `epsilon` class,
+and the coefficient expansion are proved in `BillingMahlerField`.
 -/
 theorem billing_mahler_global_descent
     {ξ η : ℚ} (hcurve : RationalPointsN11Descent.MordellEquation ξ η)
