@@ -14,10 +14,11 @@ Here we prove directly that its only affine rational points are `(0,0)` and
 coprime factors `y` and `y+1` into cubes, and invokes the proved exponent-three
 case of Fermat's last theorem.
 
-The final section records the exact remaining modular input: an exact
-order-27 Tate origin must map to a noncuspidal point of this cubic.  All
-division-polynomial data entering that seam are produced by the generic Tate
-origin theorem rather than assumed.
+The final section records the algebraic data supplied by an exact order-27
+Tate origin.  Constructing the actual quotient coordinates on this cubic is a
+separate task; this file deliberately does not package that missing map as a
+hypothesis, since such a hypothesis would be equivalent to the desired
+order-27 exclusion.
 -/
 
 namespace MazurProof.RationalPointsN27CM
@@ -257,8 +258,9 @@ theorem level27_rational_point_set :
   simp only [Set.mem_univ, Set.mem_insert_iff, Set.mem_singleton_iff, true_iff]
   exact level27_point_classification P
 
-/-! The displayed LMFDB `j`-map has this denominator in the affine chart
-`z=1`.  Only its vanishing locus is needed downstream. -/
+/-! The following explicit polynomial is the denominator displayed by the
+LMFDB model in the affine chart `z=1`.  The theorem below is purely algebraic:
+this file does not formalize the modular interpretation of that display. -/
 def Level27JDenominator (y : ℚ) : ℚ :=
   y ^ 9 * (y + 1) ^ 9 * (y ^ 2 + y + 1) ^ 3 *
     (y ^ 3 - 3 * y ^ 2 - 6 * y - 1) *
@@ -270,7 +272,7 @@ theorem level27_jDenominator_eq_zero {x y : ℚ}
   · simp [Level27JDenominator]
   · simp [Level27JDenominator]
 
-theorem level27_no_finite_j_point :
+theorem level27_no_point_with_nonzero_displayed_denominator :
     ¬ ∃ x y : ℚ, Level27Equation x y ∧ Level27JDenominator y ≠ 0 := by
   rintro ⟨x, y, hcurve, hden⟩
   exact hden (level27_jDenominator_eq_zero hcurve)
@@ -280,7 +282,7 @@ theorem level27_no_noncuspidal_point :
   rintro ⟨x, y, hcurve, hnoncusp⟩
   exact hnoncusp (level27_rational_points_are_cusps hcurve)
 
-/-! ## Correct order-27 downstream seam -/
+/-! ## Exact order-27 Tate data -/
 
 /-- Exact order 27 supplies all algebraic inputs required by the corrected
 level-27 map. -/
@@ -301,26 +303,6 @@ theorem exact_order_twenty_seven_tate_data
       (by norm_num : 0 < 27) (by norm_num : 0 < 9)
       (by norm_num : 9 < 27) (by decide : ¬ Even 9) hord
   exact ⟨b, c, inferInstance, hord, hb, h27eval, h9eval⟩
-
-/-- Once the explicit degree-three quotient map is supplied, the order-27
-exclusion is immediate from the fully proved rational-point classification. -/
-theorem no_rational_point_of_order_27_of_tate_level_map
-    (hmap :
-      ∀ b c : ℚ,
-        ∀ _hEll : WeierstrassCurve.IsElliptic (W b c),
-          addOrderOf (tateOrigin b c) = 27 → b ≠ 0 →
-          ((W b c).preΨ' 27).eval 0 = 0 →
-          ((W b c).preΨ' 9).eval 0 ≠ 0 →
-          ∃ x y : ℚ,
-            Level27Equation x y ∧ Level27JDenominator y ≠ 0)
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    ¬ HasRationalPointOfOrder E 27 := by
-  intro h27
-  obtain ⟨b, c, hEll, hord, hb, h27eval, h9eval⟩ :=
-    exact_order_twenty_seven_tate_data E h27
-  obtain ⟨x, y, hcurve, hden⟩ :=
-    hmap b c hEll hord hb h27eval h9eval
-  exact hden (level27_jDenominator_eq_zero hcurve)
 
 end
 
