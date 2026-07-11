@@ -148,9 +148,7 @@ theorem all_mem_of_reduction_card
             rfl
   have hopt : Fintype.card (Option H) ≤ Fintype.card G :=
     Fintype.card_le_of_injective f hf
-  have hbad : Fintype.card H + 1 ≤ Fintype.card H := by
-    simpa [hEq] using hopt
-  omega
+  simp [hEq] at hopt
 
 /-- Equivalent subgroup formulation of `all_mem_of_reduction_card`. -/
 theorem subgroup_eq_top_of_reduction_card
@@ -231,7 +229,7 @@ end CompleteAssembly
 
 section ExplicitFinset
 
-variable {G A : Type*} [AddCommGroup G] [AddCommGroup A] [DecidableEq G]
+variable {G A : Type*} [AddCommGroup G] [AddCommGroup A]
 
 /-- Final wrapper after a curve file identifies membership in `H` with the
 explicit eight-point finset `S`. -/
