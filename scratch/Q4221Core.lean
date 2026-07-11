@@ -120,6 +120,7 @@ theorem iterated_decomposition (H : AddSubgroup G)
       simp only [AddSubgroup.coe_add, AddSubgroup.coe_nsmul, nsmul_add, pow_succ,
         ← mul_nsmul]
       rw [Nat.mul_comm (2 ^ n) 2]
+      abel
 
 /-- Multiplying by four removes all subgroup representatives.  Hence every
     `4x` is infinitely two-divisible. -/
