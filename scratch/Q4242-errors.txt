@@ -1,2 +1,37 @@
+scratch/Q4242Reduction.lean:29:43: error: failed to synthesize
+  Decidable (Affine.Equation (E0 (ZMod 2)) 0 0)
 
-EXIT_STATUS=0
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+scratch/Q4242Reduction.lean:30:43: error: failed to synthesize
+  Decidable (Affine.Equation (E0 (ZMod 2)) 0 1)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+scratch/Q4242Reduction.lean:31:43: error: failed to synthesize
+  Decidable (Affine.Equation (E0 (ZMod 2)) 1 1)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+scratch/Q4242Reduction.lean:34:26: error: failed to synthesize
+  Decidable (Affine.Equation (E0 (ZMod 2)) 0 0)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+scratch/Q4242Reduction.lean:36:26: error: failed to synthesize
+  Decidable (Affine.Equation (E0 (ZMod 2)) 0 1)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+scratch/Q4242Reduction.lean:38:26: error: failed to synthesize
+  Decidable (Affine.Equation (E0 (ZMod 2)) 1 1)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+scratch/Q4242Reduction.lean:55:8: error: Tactic `native_decide` evaluated that the proposition
+  False
+is false
+scratch/Q4242Reduction.lean:43:15: error: unsolved goals
+case some.«1».«1»
+h : Affine.Nonsingular (E0 (ZMod 2)) ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩)
+⊢ Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0 ∨
+    Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = R00 ∨
+      Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = R01 ∨
+        Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = R11
+scratch/Q4242Reduction.lean:55:22: error: unexpected token 'at'; expected command
+
+EXIT_STATUS=1
