@@ -5,14 +5,18 @@ set_option autoImplicit false
 namespace MazurProof.CyclicExclusion16
 
 structure CoprimeFourthDifference where
-  X Y Z : ℤ
+  X : ℤ
+  Y : ℤ
+  Z : ℤ
   hXY : IsCoprime X Y
   hX : X ≠ 0
   hY : Y ≠ 0
   hEq : Z ^ 2 = X ^ 4 - Y ^ 4
 
 structure TwiceSquareFourthDifference where
-  a b c : ℤ
+  a : ℤ
+  b : ℤ
+  c : ℤ
   hab : IsCoprime a b
   ha : Odd a
   hb : Odd b
