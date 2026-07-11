@@ -21,10 +21,11 @@ lemma E0_discriminant (R : Type*) [CommRing R] :
 instance : (E0 (ZMod 2)).IsElliptic := by
   refine ⟨?_⟩
   rw [E0_discriminant]
+  convert isUnit_one using 1
   norm_num
 
 /-- Direct finite computation: the group of points of the good reduction has exponent four. -/
-theorem E0_F2_exponent_four (P : (E0 (ZMod 2)).Affine.Point) :
+theorem E0_F2_exponent_four (P : (E0 (ZMod 2)).Point) :
     4 • P = 0 := by
   cases P with
   | zero => simp
