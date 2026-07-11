@@ -1,8 +1,8 @@
-name: Q4221 inspect
+name: Q4221 final check
 
 on:
   push:
-    branches: [q4221-check]
+    branches: [q4221-finalcheck]
     paths-ignore:
       - scratch/Q4221-output.txt
   workflow_dispatch:
@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: q4221-check
+          ref: q4221-finalcheck
       - uses: leanprover/lean-action@v1
         with:
           auto-config: false
@@ -46,6 +46,6 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add scratch/Q4221-output.txt
-          git commit -m 'Record current Q4221 layer diagnostics [skip ci]' || true
-          git push origin HEAD:q4221-check
+          git commit -m 'Record isolated Q4221 diagnostics [skip ci]' || true
+          git push origin HEAD:q4221-finalcheck
           exit "$status"
