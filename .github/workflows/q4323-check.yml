@@ -10,6 +10,16 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - name: Exact ECNF records
+        run: |
+          curl -sSL https://raw.githubusercontent.com/JohnCremona/ecnf-data/master/IQF/mwdata.2.0.8.1 -o /tmp/mw
+          curl -sSL https://raw.githubusercontent.com/JohnCremona/ecnf-data/master/IQF/local_data.2.0.8.1 -o /tmp/local
+          echo Q4323_MW_BEGIN
+          grep -E '^2\.0\.8\.1 (324\.5|324\.1|1296\.5|1296\.1|2916\.5|2916\.3|11664\.5|11664\.3|20736\.5|20736\.1) ' /tmp/mw || true
+          echo Q4323_MW_END
+          echo Q4323_LOCAL_BEGIN
+          grep -E '^2\.0\.8\.1 (324\.5|324\.1) ' /tmp/local || true
+          echo Q4323_LOCAL_END
       - name: Install PARI
         run: sudo apt-get update -qq >/dev/null && sudo apt-get install -y pari-gp >/dev/null
       - name: Q4323 PARI results
