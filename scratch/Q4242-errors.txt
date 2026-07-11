@@ -1,3 +1,48 @@
-error: unknown target `scratch.Q4242Core`
+scratch/Q4242Core.lean:28:4: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+scratch/Q4242Core.lean:65:18: error(lean.unknownIdentifier): Unknown identifier `nsmul_nsmul`
+scratch/Q4242Core.lean:64:45: error: unsolved goals
+G : Type u_1
+inst✝ : AddCommGroup G
+n : ℕ
+x : G
+⊢ (2 * 2 ^ n) • x = 2 • 2 ^ n • x
+scratch/Q4242Core.lean:142:22: error(lean.unknownIdentifier): Unknown identifier `nsmul_nsmul`
+scratch/Q4242Core.lean:142:6: error: Type mismatch: After simplification, term
+  hQ
+ has type
+  (2 ^ n * 4) • Q = P
+but is expected to have type
+  2 ^ n • 4 • Q = P
+scratch/Q4242Core.lean:177:38: error(lean.unknownIdentifier): Unknown identifier `nsmul_nsmul`
+Try this:
+  [apply] abel_nf
+scratch/Q4242Core.lean:172:14: error: unsolved goals
+case succ
+G : Type u_1
+inst✝ : AddCommGroup G
+H : AddSubgroup G
+hstep : ∀ (x : G), ∃ t ∈ H, ∃ y, x = t + 2 • y
+x : G
+n : ℕ
+s : G
+hs : s ∈ H
+y : G
+hy : x = s + 2 ^ n • y
+t : G
+ht : t ∈ H
+z : G
+hz : y = t + 2 • z
+⊢ s + (2 ^ n • t + 2 ^ n • 2 • z) = s + (2 ^ n • t + (2 ^ n * 2) • z)
+scratch/Q4242Core.lean:191:12: error(lean.unknownIdentifier): Unknown identifier `nsmul_nsmul`
+scratch/Q4242Core.lean:191:6: error: `simp` made no progress
+scratch/Q4242Core.lean:193:12: warning: This simp argument is unused:
+  nsmul_add
+
+Hint: Omit it from the simp argument list.
+  simp [n̵s̵m̵u̵l̵_̵a̵d̵d̵,̵ ̵hexp t ht]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
 
 EXIT_STATUS=1
