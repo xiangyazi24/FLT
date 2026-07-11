@@ -26,7 +26,7 @@ jobs:
         run: lake exe cache get
       - name: Build Mathlib umbrella
         run: lake build Mathlib
-      - name: Compile Q4221 layers and persist output
+      - name: Compile corrected Q4221 layers and persist output
         shell: bash
         run: |
           set +e
@@ -35,8 +35,8 @@ jobs:
             lake env lean scratch/Q4221Core.lean
             s1=$?
             echo "CORE_STATUS=$s1"
-            echo '=== VALUATION ==='
-            lake env lean scratch/Q4221Valuation.lean
+            echo '=== CORRECTED VALUATION ==='
+            lake env lean scratch/Q4221ValuationSimple.lean
             s2=$?
             echo "VALUATION_STATUS=$s2"
             if [ "$s1" -ne 0 ] || [ "$s2" -ne 0 ]; then status=1; else status=0; fi
@@ -46,6 +46,6 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add scratch/Q4221-output.txt
-          git commit -m 'Record isolated Q4221 diagnostics [skip ci]' || true
+          git commit -m 'Record corrected Q4221 diagnostics [skip ci]' || true
           git push origin HEAD:q4221-finalcheck
           exit "$status"
