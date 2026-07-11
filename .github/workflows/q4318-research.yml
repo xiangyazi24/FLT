@@ -22,12 +22,25 @@ jobs:
         with:
           ref: q4318-research
       - name: Run Sage introspection
+        continue-on-error: true
         shell: bash
         run: |
           set -o pipefail
           sage scratch/Q4318Sage.sage 2>&1 | tee scratch/Q4318Sage.out
       - name: Post output to temporary PR
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
-        run: gh pr comment 9 --body-file scratch/Q4318Sage.out
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          body = open('scratch/Q4318Sage.out').read()
+          req = urllib.request.Request(
+              'https://api.github.com/repos/xiangyazi24/FLT/issues/9/comments',
+              data=json.dumps({'body': body}).encode(), method='POST',
+              headers={'Authorization': 'Bearer '+os.environ['GH_TOKEN'],
+                       'Accept':'application/vnd.github+json',
+                       'Content-Type':'application/json'})
+          print(urllib.request.urlopen(req).read().decode())
+          PY
