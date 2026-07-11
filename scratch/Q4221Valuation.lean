@@ -187,19 +187,18 @@ theorem n15_v2_formal_double_explicit {t w : ℚ}
   have hw3a : VAtLeast (3 * a) w := Or.inr hw
   have hw1 : VAtLeast 1 w := hw3a.mono (by omega)
   have hw2 : VAtLeast (6 * a) (w ^ 2) := by
-    simpa only [mul_assoc] using hw3a.pow_two
+    convert hw3a.pow_two using 1 <;> ring
   have hw2one : VAtLeast 1 (w ^ 2) := hw2.mono (by omega)
   have htw : VAtLeast (4 * a) (t * w) := by
-    have h := htA.mul hw3a
-    simpa only [add_eq_add_iff_left] using h
+    convert htA.mul hw3a using 1 <;> ring
   have htw1 : VAtLeast 1 (t * w) := htw.mono (by omega)
 
-  have h2w1 : VAtLeast 1 (2 * w) :=
-    VAtLeast.mul_natCast_left 2 hw1
+  have h2w1 : VAtLeast 1 (2 * w) := by
+    convert VAtLeast.mul_natCast_left 2 hw1 using 1 <;> norm_num <;> ring
   have h10tw1 : VAtLeast 1 (10 * t * w) := by
-    simpa only [mul_assoc] using VAtLeast.mul_natCast_left 10 htw1
-  have h6w2one : VAtLeast 1 (6 * w ^ 2) :=
-    VAtLeast.mul_natCast_left 6 hw2one
+    convert VAtLeast.mul_natCast_left 10 htw1 using 1 <;> norm_num <;> ring
+  have h6w2one : VAtLeast 1 (6 * w ^ 2) := by
+    convert VAtLeast.mul_natCast_left 6 hw2one using 1 <;> norm_num <;> ring
   have htailD : VAtLeast 1
       (-(t + t ^ 2 + 2 * w - 10 * t * w + 6 * w ^ 2)) := by
     apply VAtLeast.neg
@@ -211,14 +210,17 @@ theorem n15_v2_formal_double_explicit {t w : ℚ}
         ring]
     exact v2_one_add_eq_zero htailD
 
-  have h3t2 : VAtLeast (2 * a) (3 * t ^ 2) :=
-    VAtLeast.mul_natCast_left 3 ht2a
+  have h3t2 : VAtLeast (2 * a) (3 * t ^ 2) := by
+    convert VAtLeast.mul_natCast_left 3 ht2a using 1 <;> norm_num <;> ring
   have hw2a : VAtLeast (2 * a) w := hw3a.mono (by omega)
   have h2tw2a : VAtLeast (2 * a) (2 * t * w) := by
-    have h := VAtLeast.mul_natCast_left 2 htw
-    simpa only [mul_assoc] using h.mono (by omega)
-  have h5w2_2a : VAtLeast (2 * a) (5 * w ^ 2) :=
-    (VAtLeast.mul_natCast_left 5 hw2).mono (by omega)
+    have hraw := VAtLeast.mul_natCast_left 2 htw
+    have hmono : VAtLeast (2 * a) ((2 : ℚ) * (t * w)) := hraw.mono (by omega)
+    convert hmono using 1 <;> norm_num <;> ring
+  have h5w2_2a : VAtLeast (2 * a) (5 * w ^ 2) := by
+    have hraw := VAtLeast.mul_natCast_left 5 hw2
+    have hmono : VAtLeast (2 * a) ((5 : ℚ) * w ^ 2) := hraw.mono (by omega)
+    convert hmono using 1 <;> norm_num <;> ring
   have hA : VAtLeast (2 * a) (tangentA t w) := by
     unfold tangentA
     exact ((h3t2.add hw2a).add h2tw2a).sub h5w2_2a
@@ -227,20 +229,22 @@ theorem n15_v2_formal_double_explicit {t w : ℚ}
     exact hA.div_unit hDunit.1 hDunit.2
   have hlam1 : VAtLeast 1 (tangentLambda t w) := hlam.mono (by omega)
   have hlam2 : VAtLeast (4 * a) (tangentLambda t w ^ 2) := by
-    simpa only [mul_assoc] using hlam.pow_two
+    convert hlam.pow_two using 1 <;> ring
   have hlam3 : VAtLeast (6 * a) (tangentLambda t w ^ 3) := by
-    have h := hlam2.mul hlam
-    simpa only [add_eq_add_iff_left, pow_succ] using h
+    convert hlam2.mul hlam using 1 <;> ring
   have hnu : VAtLeast (3 * a) (tangentNu t w) := by
     unfold tangentNu
     apply VAtLeast.sub hw3a
-    have h := hlam.mul htA
-    simpa only [add_eq_add_iff_left] using h
+    convert hlam.mul htA using 1 <;> ring
 
-  have h5lam2one : VAtLeast 1 (5 * tangentLambda t w ^ 2) :=
-    (VAtLeast.mul_natCast_left 5 hlam2).mono (by omega)
-  have h2lam3one : VAtLeast 1 (2 * tangentLambda t w ^ 3) :=
-    (VAtLeast.mul_natCast_left 2 hlam3).mono (by omega)
+  have h5lam2one : VAtLeast 1 (5 * tangentLambda t w ^ 2) := by
+    have hraw := VAtLeast.mul_natCast_left 5 hlam2
+    have hmono : VAtLeast 1 ((5 : ℚ) * tangentLambda t w ^ 2) := hraw.mono (by omega)
+    convert hmono using 1 <;> norm_num <;> ring
+  have h2lam3one : VAtLeast 1 (2 * tangentLambda t w ^ 3) := by
+    have hraw := VAtLeast.mul_natCast_left 2 hlam3
+    have hmono : VAtLeast 1 ((2 : ℚ) * tangentLambda t w ^ 3) := hraw.mono (by omega)
+    convert hmono using 1 <;> norm_num <;> ring
   have hthirdTail : VAtLeast 1
       (tangentLambda t w - 5 * tangentLambda t w ^ 2
         + 2 * tangentLambda t w ^ 3) :=
@@ -258,12 +262,16 @@ theorem n15_v2_formal_double_explicit {t w : ℚ}
   have hnu2a : VAtLeast (2 * a) (tangentNu t w) := hnu.mono (by omega)
   have h10lamnu : VAtLeast (2 * a)
       (10 * tangentLambda t w * tangentNu t w) := by
-    have h := VAtLeast.mul_natCast_left 10 (hlam.mul hnu)
-    simpa only [mul_assoc] using h.mono (by omega)
+    have hraw := VAtLeast.mul_natCast_left 10 (hlam.mul hnu)
+    have hmono : VAtLeast (2 * a)
+        ((10 : ℚ) * (tangentLambda t w * tangentNu t w)) := hraw.mono (by omega)
+    convert hmono using 1 <;> norm_num <;> ring
   have h6lam2nu : VAtLeast (2 * a)
       (6 * tangentLambda t w ^ 2 * tangentNu t w) := by
-    have h := VAtLeast.mul_natCast_left 6 (hlam2.mul hnu)
-    simpa only [mul_assoc] using h.mono (by omega)
+    have hraw := VAtLeast.mul_natCast_left 6 (hlam2.mul hnu)
+    have hmono : VAtLeast (2 * a)
+        ((6 : ℚ) * (tangentLambda t w ^ 2 * tangentNu t w)) := hraw.mono (by omega)
+    convert hmono using 1 <;> norm_num <;> ring
   have hcorrNum : VAtLeast (2 * a) (thirdCorrNum t w) := by
     unfold thirdCorrNum
     exact ((hlam.add hlam2_2a).add hnu2a).sub h10lamnu |>.add h6lam2nu
