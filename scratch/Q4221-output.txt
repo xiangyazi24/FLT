@@ -1,62 +1,113 @@
 === CORE ===
 CORE_STATUS=0
 === VALUATION ===
-scratch/Q4221Valuation.lean:190:4: error: Type mismatch: After simplification, term
-  VAtLeast.pow_two hw3a
- has type
-  VAtLeast (2 * (3 * a)) (w ^ 2)
-but is expected to have type
-  VAtLeast (6 * a) (w ^ 2)
-scratch/Q4221Valuation.lean:194:16: error(lean.unknownIdentifier): Unknown identifier `add_eq_add_iff_left`
-scratch/Q4221Valuation.lean:194:4: error: Type mismatch: After simplification, term
-  h
- has type
-  VAtLeast (a + 3 * a) (t * w)
-but is expected to have type
-  VAtLeast (4 * a) (t * w)
-scratch/Q4221Valuation.lean:200:4: error: Type mismatch: After simplification, term
-  VAtLeast.mul_natCast_left 10 htw1
- has type
-  VAtLeast 1 (↑10 * (t * w))
-but is expected to have type
-  VAtLeast 1 (10 * (t * w))
-scratch/Q4221Valuation.lean:219:4: error: Type mismatch: After simplification, term
-  VAtLeast.mono (Decidable.byContradiction fun a => n15_v2_formal_double_explicit._proof_1_6 ht a) h
- has type
-  VAtLeast (2 * a) (↑2 * (t * w))
-but is expected to have type
-  VAtLeast (2 * a) (2 * (t * w))
-scratch/Q4221Valuation.lean:230:4: error: Type mismatch: After simplification, term
-  VAtLeast.pow_two hlam
- has type
-  VAtLeast (2 * (2 * a)) (tangentLambda t w ^ 2)
-but is expected to have type
-  VAtLeast (4 * a) (tangentLambda t w ^ 2)
-scratch/Q4221Valuation.lean:233:16: error(lean.unknownIdentifier): Unknown identifier `add_eq_add_iff_left`
-scratch/Q4221Valuation.lean:233:4: error: Type mismatch: After simplification, term
-  h
- has type
-  VAtLeast (4 * a + 2 * a) (tangentLambda t w ^ 0 * tangentLambda t w * tangentLambda t w * tangentLambda t w)
-but is expected to have type
-  VAtLeast (6 * a) (tangentLambda t w ^ 0 * tangentLambda t w * tangentLambda t w * tangentLambda t w)
-scratch/Q4221Valuation.lean:238:16: error(lean.unknownIdentifier): Unknown identifier `add_eq_add_iff_left`
-scratch/Q4221Valuation.lean:238:4: error: Type mismatch: After simplification, term
-  h
- has type
-  VAtLeast (2 * a + a) (tangentLambda t w * t)
-but is expected to have type
-  VAtLeast (3 * a) (tangentLambda t w * t)
-scratch/Q4221Valuation.lean:262:4: error: Type mismatch: After simplification, term
-  VAtLeast.mono (Decidable.byContradiction fun a => n15_v2_formal_double_explicit._proof_1_8 ht a) h
- has type
-  VAtLeast (2 * a) (↑10 * (tangentLambda t w * tangentNu t w))
-but is expected to have type
-  VAtLeast (2 * a) (10 * (tangentLambda t w * tangentNu t w))
-scratch/Q4221Valuation.lean:266:4: error: Type mismatch: After simplification, term
-  VAtLeast.mono (Decidable.byContradiction fun a => n15_v2_formal_double_explicit._proof_1_9 ht a) h
- has type
-  VAtLeast (2 * a) (↑6 * (tangentLambda t w ^ 2 * tangentNu t w))
-but is expected to have type
-  VAtLeast (2 * a) (6 * (tangentLambda t w ^ 2 * tangentNu t w))
-VALUATION_STATUS=1
-EXIT_STATUS=1
+scratch/Q4221Valuation.lean:197:69: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+scratch/Q4221Valuation.lean:201:72: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+scratch/Q4221Valuation.lean:214:70: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+scratch/Q4221Valuation.lean:223:30: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+scratch/Q4221Valuation.lean:223:43: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+scratch/Q4221Valuation.lean:243:30: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+scratch/Q4221Valuation.lean:243:43: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+scratch/Q4221Valuation.lean:247:30: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+scratch/Q4221Valuation.lean:247:43: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+scratch/Q4221Valuation.lean:190:33: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:193:33: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:197:52: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:199:54: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:199:67: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:201:55: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:214:53: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:219:26: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:219:39: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:232:33: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:238:33: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:268:26: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:268:39: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:274:26: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:274:39: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+scratch/Q4221Valuation.lean:197:69: warning: 'ring' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+scratch/Q4221Valuation.lean:201:72: warning: 'ring' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+scratch/Q4221Valuation.lean:214:70: warning: 'ring' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+scratch/Q4221Valuation.lean:219:30: warning: 'norm_num' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+scratch/Q4221Valuation.lean:223:30: warning: 'norm_num' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+scratch/Q4221Valuation.lean:223:43: warning: 'ring' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+scratch/Q4221Valuation.lean:243:30: warning: 'norm_num' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+scratch/Q4221Valuation.lean:243:43: warning: 'ring' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+scratch/Q4221Valuation.lean:247:30: warning: 'norm_num' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+scratch/Q4221Valuation.lean:247:43: warning: 'ring' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+scratch/Q4221Valuation.lean:268:30: warning: 'norm_num' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+scratch/Q4221Valuation.lean:274:30: warning: 'norm_num' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+VALUATION_STATUS=0
+EXIT_STATUS=0
