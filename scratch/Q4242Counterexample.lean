@@ -38,7 +38,7 @@ lemma T_negY : (-7 / 8 : ℚ) =
     WeierstrassCurve.Affine.negY E0 (3 / 4 : ℚ) (-7 / 8 : ℚ) := by
   norm_num [WeierstrassCurve.Affine.negY, E0]
 
-/-- This is the image of `(15,0)` under the stated integral change of variables. -/
+/-- This is the image of `(15,0)` under the stated change of variables. -/
 lemma two_nsmul_T : 2 • T = 0 := by
   rw [two_nsmul]
   exact WeierstrassCurve.Affine.Point.add_self_of_Y_eq T_negY
@@ -54,20 +54,28 @@ def formalW (P : Pt) : ℚ :=
   | .some _ y _ => -1 / y
 
 lemma formalParameter_T : formalParameter T = 6 / 7 := by
-  norm_num [formalParameter, T]
+  change -(3 / 4 : ℚ) / (-7 / 8) = 6 / 7
+  norm_num
 
 lemma formalW_T : formalW T = 8 / 7 := by
-  norm_num [formalW, T]
+  change -(1 : ℚ) / (-7 / 8) = 8 / 7
+  norm_num
+
+lemma v2_six_sevenths : padicValRat 2 (6 / 7 : ℚ) = 1 := by
+  native_decide
+
+lemma v2_eight_sevenths : padicValRat 2 (8 / 7 : ℚ) = 3 := by
+  native_decide
 
 lemma v2_formalParameter_T :
     padicValRat 2 (formalParameter T) = 1 := by
   rw [formalParameter_T]
-  norm_num [padicValRat, padicValInt, padicValNat]
+  exact v2_six_sevenths
 
 lemma v2_formalW_T :
     padicValRat 2 (formalW T) = 3 := by
   rw [formalW_T]
-  norm_num [padicValRat, padicValInt, padicValNat]
+  exact v2_eight_sevenths
 
 lemma formalParameter_two_T : formalParameter (2 • T) = 0 := by
   rw [two_nsmul_T]
