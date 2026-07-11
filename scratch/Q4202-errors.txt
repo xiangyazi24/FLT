@@ -1,41 +1,147 @@
-✖ [8564/8565] Building scratch.FermatFourthDifferenceN16 (3.8s)
-trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/bin/lean /home/runner/work/FLT/FLT/scratch/FermatFourthDifferenceN16.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/FermatFourthDifferenceN16.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/FermatFourthDifferenceN16.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/scratch/FermatFourthDifferenceN16.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/scratch/FermatFourthDifferenceN16.setup.json --json
-error: scratch/FermatFourthDifferenceN16.lean:9:20: Unknown identifier `Y`
+✔ [8564/8565] Built scratch.FermatFourthDifferenceN16 (4.5s)
+✖ [8565/8565] Building scratch.Q4202Check (6.0s)
+trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/bin/lean /home/runner/work/FLT/FLT/scratch/Q4202Check.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q4202Check.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q4202Check.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q4202Check.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q4202Check.setup.json --json
+error: scratch/Q4202Check.lean:113:25: `simp` made no progress
+error: scratch/Q4202Check.lean:110:29: unsolved goals
+case e'_4
+M N : ℤ
+hMN : IsCoprime M N
+h0 : IsCoprime M (-N ^ 2)
+h1 : IsCoprime M (-N ^ 2 + M * (M + 2 * N))
+⊢ M ^ 2 + 2 * M * N - N ^ 2 = -N ^ 2 + M * (M + 2 * N)
+error: scratch/Q4202Check.lean:119:25: `simp` made no progress
+error: scratch/Q4202Check.lean:116:29: unsolved goals
+case e'_4
+M N : ℤ
+hMN : IsCoprime M N
+h0 : IsCoprime N (M ^ 2)
+h1 : IsCoprime N (M ^ 2 + N * (2 * M - N))
+⊢ M ^ 2 + 2 * M * N - N ^ 2 = M ^ 2 + N * (2 * M - N)
+error: scratch/Q4202Check.lean:123:49: `ring_nf` made no progress on the goal
+error: scratch/Q4202Check.lean:140:6: Type mismatch: After simplification, term
+  Even.add_odd hMe (Odd.pow hNo)
+ has type
+  Odd (M + N ^ ?m.51)
+but is expected to have type
+  Odd (M ^ 2 + N ^ 2)
+error: scratch/Q4202Check.lean:141:6: Type mismatch: After simplification, term
+  Even.add_odd hNe (Odd.pow hMo)
+ has type
+  Odd (N + M ^ ?m.65)
+but is expected to have type
+  Odd (M ^ 2 + N ^ 2)
+error: scratch/Q4202Check.lean:152:27: `simp` made no progress
+error: scratch/Q4202Check.lean:161:27: `simp` made no progress
+error: scratch/Q4202Check.lean:181:65: Application type mismatch: The argument
+  Eq.symm ha
+has type
+  0 = M
+but is expected to have type
+  M = 0
+in the application
+  hM0 (Eq.symm ha)
+error: scratch/Q4202Check.lean:181:65: Application type mismatch: The argument
+  Eq.symm ha
+has type
+  0 = M
+but is expected to have type
+  M = 0
+in the application
+  hM0 (Eq.symm ha)
+error: scratch/Q4202Check.lean:238:27: `simp` made no progress
+error: scratch/Q4202Check.lean:244:27: `simp` made no progress
+warning: scratch/Q4202Check.lean:238:41: This simp argument is unused:
+  hQ
 
-Note: It is not possible to treat `Y` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-error: scratch/FermatFourthDifferenceN16.lean:11:7: Unknown identifier `Y`
+Hint: Omit it from the simp argument list.
+  simp [hM, hN, h̵Q̵,̵ ̵Q16]
 
-Note: It is not possible to treat `Y` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-error: scratch/FermatFourthDifferenceN16.lean:12:8: Unknown identifier `Z`
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/Q4202Check.lean:238:45: This simp argument is unused:
+  Q16
 
-Note: It is not possible to treat `Z` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-error: scratch/FermatFourthDifferenceN16.lean:12:24: Unknown identifier `Y`
+Hint: Omit it from the simp argument list.
+  simp [hM, hN, hQ,̵ ̵Q̵1̵6̵]
 
-Note: It is not possible to treat `Y` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-error: scratch/FermatFourthDifferenceN16.lean:16:20: Unknown identifier `b`
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/Q4202Check.lean:244:33: This simp argument is unused:
+  hQ
 
-Note: It is not possible to treat `b` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-error: scratch/FermatFourthDifferenceN16.lean:18:11: Unknown identifier `b`
+Hint: Omit it from the simp argument list.
+  simp [hQ̵,̵ ̵h̵R, Q16, R16]
 
-Note: It is not possible to treat `b` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-error: scratch/FermatFourthDifferenceN16.lean:19:16: Unknown identifier `b`
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/Q4202Check.lean:244:37: This simp argument is unused:
+  hR
 
-Note: It is not possible to treat `b` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-error: scratch/FermatFourthDifferenceN16.lean:19:28: Unknown identifier `c`
+Hint: Omit it from the simp argument list.
+  simp [hQ, h̵R̵,̵ ̵Q16, R16]
 
-Note: It is not possible to treat `c` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-error: scratch/FermatFourthDifferenceN16.lean:20:16: Unknown identifier `b`
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/Q4202Check.lean:244:41: This simp argument is unused:
+  Q16
 
-Note: It is not possible to treat `b` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-error: scratch/FermatFourthDifferenceN16.lean:22:40: Unknown identifier `CoprimeFourthDifference`
+Hint: Omit it from the simp argument list.
+  simp [hQ, hR, Q̵1̵6̵,̵ ̵R16]
 
-Note: It is not possible to treat `CoprimeFourthDifference` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-error: scratch/FermatFourthDifferenceN16.lean:23:45: Unknown identifier `TwiceSquareFourthDifference`
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/Q4202Check.lean:244:46: This simp argument is unused:
+  R16
 
-Note: It is not possible to treat `TwiceSquareFourthDifference` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+Hint: Omit it from the simp argument list.
+  simp [hQ, hR, Q16,̵ ̵R̵1̵6̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/Q4202Check.lean:248:5: Variable name `hM` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: scratch/Q4202Check.lean:248:26: Variable name `hN` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+error: scratch/Q4202Check.lean:347:29: Unknown constant `Nat.mul_eq_one.mp`
+error: scratch/Q4202Check.lean:371:8: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  v ^ 2
+in the target expression
+  (↑N ^ 3 * v) ^ 2 = ↑(M * N * Q16 M N * R16 M N)
+
+u v : ℚ
+h : v ^ 2 = u * (u ^ 2 + 1) * (u ^ 2 + 2 * u - 1)
+M : ℤ := u.num
+N : ℤ := ↑u.den
+hN : 0 < N
+hN0 : N ≠ 0
+hMN : IsCoprime M N
+hu : u = ↑M / ↑N
+wq : ℚ := ↑N ^ 3 * v
+⊢ (↑N ^ 3 * v) ^ 2 = ↑(M * N * Q16 M N * R16 M N)
+error: scratch/Q4202Check.lean:388:2: unsolved goals
+case inr.inr
+u v : ℚ
+h : v ^ 2 = u * (u ^ 2 + 1) * (u ^ 2 + 2 * u - 1)
+M : ℤ := u.num
+N : ℤ := ↑u.den
+hN : 0 < N
+hN0 : N ≠ 0
+hMN : IsCoprime M N
+hu : u = ↑M / ↑N
+wq : ℚ := ↑N ^ 3 * v
+hwq : wq ^ 2 = ↑(M * N * Q16 M N * R16 M N)
+W : ℤ
+hWrat : wq = ↑W
+hWint : W ^ 2 = M * N * Q16 M N * R16 M N
+hMneg : M = -N
+⊢ ↑(-N) = -↑N
+warning: scratch/Q4202Check.lean:443:4: `simp at hi` is a flexible tactic modifying `hi`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: scratch/Q4202Check.lean:444:4: `exact sub_eq_zero.mp hi` uses `hi`!
 error: Lean exited with code 1
 Some required targets logged failures:
-- scratch.FermatFourthDifferenceN16
+- scratch.Q4202Check
 error: build failed
 
 EXIT_STATUS=1
