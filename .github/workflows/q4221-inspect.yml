@@ -31,6 +31,10 @@ jobs:
         run: |
           set +e
           {
+            echo '=== PROBE ==='
+            lake env lean scratch/Q4221Probe2.lean
+            sp=$?
+            echo "PROBE_STATUS=$sp"
             echo '=== CORE ==='
             lake env lean scratch/Q4221Core.lean
             s1=$?
@@ -39,7 +43,7 @@ jobs:
             lake env lean scratch/Q4221Valuation.lean
             s2=$?
             echo "VALUATION_STATUS=$s2"
-            if [ "$s1" -ne 0 ] || [ "$s2" -ne 0 ]; then status=1; else status=0; fi
+            if [ "$sp" -ne 0 ] || [ "$s1" -ne 0 ] || [ "$s2" -ne 0 ]; then status=1; else status=0; fi
             echo "EXIT_STATUS=$status"
           } > scratch/Q4221-output.txt 2>&1
           status=$(tail -n 1 scratch/Q4221-output.txt | cut -d= -f2)
