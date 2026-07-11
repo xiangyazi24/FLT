@@ -1,107 +1,23 @@
 scratch/Q4242Core.lean:28:4: warning: try 'simp' instead of 'simpa'
 
 Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
-scratch/Q4242Reduction.lean:32:9: error: unsolved goals
-case zero
-⊢ 4 • Affine.Point.zero = 0
-scratch/Q4242Reduction.lean:34:38: error: failed to synthesize
-  Decidable
-    (∀ (h : Affine.Nonsingular (E0 (ZMod 2)) ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩)),
-      4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0)
-
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-scratch/Q4242Reduction.lean:34:38: error: failed to synthesize
-  Decidable
-    (∀ (h : Affine.Nonsingular (E0 (ZMod 2)) ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩)),
-      4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0)
-
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-scratch/Q4242Reduction.lean:34:38: error: failed to synthesize
-  Decidable
-    (∀ (h : Affine.Nonsingular (E0 (ZMod 2)) ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩)),
-      4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0)
-
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-scratch/Q4242Reduction.lean:34:38: error: failed to synthesize
-  Decidable
-    (∀ (h : Affine.Nonsingular (E0 (ZMod 2)) ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩)),
-      4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0)
-
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-scratch/Q4242PointClass.lean:49:21: error: unexpected token ';'; expected ')'
-scratch/Q4242PointClass.lean:124:8: error(lean.invalidField): Invalid field `addX`: The environment does not contain `WeierstrassCurve.addX`, so it is not possible to project the field `addX` from an expression
-  E15
-of type `WeierstrassCurve ℚ`
-scratch/Q4242PointClass.lean:125:20: error(lean.invalidField): Invalid field `negY`: The environment does not contain `WeierstrassCurve.negY`, so it is not possible to project the field `negY` from an expression
-  E15
-of type `WeierstrassCurve ℚ`
-scratch/Q4242PointClass.lean:128:4: error: linarith failed to find a contradiction
-X Y : ℚ
-hE : Y ^ 2 = X * (X - 15) * (X - 16)
-hY : Y ≠ 0
-heq : Y = sorry ()
-⊢ False
-failed
-scratch/Q4242PointClass.lean:127:10: warning: This simp argument is unused:
-  E15
-
-Hint: Omit it from the simp argument list.
-  simp [E̵1̵5̵,̵ ̵WeierstrassCurve.Affine.negY] at heq
-
-Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-scratch/Q4242PointClass.lean:127:15: warning: This simp argument is unused:
-  WeierstrassCurve.Affine.negY
-
-Hint: Omit it from the simp argument list.
-  simp [E15,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵A̵f̵f̵i̵n̵e̵.̵n̵e̵g̵Y̵] at heq
-
-Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-scratch/Q4242PointClass.lean:152:20: error(lean.invalidField): Invalid field `negY`: The environment does not contain `WeierstrassCurve.negY`, so it is not possible to project the field `negY` from an expression
-  E15
-of type `WeierstrassCurve ℚ`
-scratch/Q4242PointClass.lean:155:4: error: linarith failed to find a contradiction
-X Y : ℚ
-hP : Affine.Nonsingular E15 X Y
-h4 : 4 • Affine.Point.some X Y hP = 0
-hE : Y ^ 2 = X * (X - 15) * (X - 16)
-hY0 : ¬Y = 0
-heq : Y = sorry ()
-⊢ False
-failed
-scratch/Q4242PointClass.lean:159:16: error(lean.invalidField): Invalid field `addX`: The environment does not contain `WeierstrassCurve.addX`, so it is not possible to project the field `addX` from an expression
-  E15
-of type `WeierstrassCurve ℚ`
-scratch/Q4242PointClass.lean:160:10: error(lean.invalidField): Invalid field `addY`: The environment does not contain `WeierstrassCurve.addY`, so it is not possible to project the field `addY` from an expression
-  E15
-of type `WeierstrassCurve ℚ`
-scratch/Q4242PointClass.lean:172:12: error: No goals to be solved
-scratch/Q4242PointClass.lean:180:86: error: Application type mismatch: The argument
-  hne
-has type
-  ¬Y₂ = 0
-but is expected to have type
-  Y₂ ≠ Affine.negY E15 X₂ Y₂
-in the application
-  Affine.Point.add_self_of_Y_ne hne
-scratch/Q4242PointClass.lean:191:21: error(lean.invalidField): Invalid field `addX`: The environment does not contain `WeierstrassCurve.addX`, so it is not possible to project the field `addX` from an expression
-  E15
-of type `WeierstrassCurve ℚ`
-scratch/Q4242PointClass.lean:192:17: error(lean.invalidField): Invalid field `addY`: The environment does not contain `WeierstrassCurve.addY`, so it is not possible to project the field `addY` from an expression
-  E15
-of type `WeierstrassCurve ℚ`
-scratch/Q4242PointClass.lean:154:10: warning: This simp argument is unused:
-  E15
-
-Hint: Omit it from the simp argument list.
-  simp [E̵1̵5̵,̵ ̵WeierstrassCurve.Affine.negY] at heq
-
-Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-scratch/Q4242PointClass.lean:154:15: warning: This simp argument is unused:
-  WeierstrassCurve.Affine.negY
-
-Hint: Omit it from the simp argument list.
-  simp [E15,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵A̵f̵f̵i̵n̵e̵.̵n̵e̵g̵Y̵] at heq
-
-Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+scratch/Q4242Counterexample.lean:56:55: error: unsolved goals
+⊢ (match Affine.Point.mk ⋯ with
+    | Affine.Point.zero => 0
+    | Affine.Point.some x y h => -x / y) =
+    6 / 7
+scratch/Q4242Counterexample.lean:59:39: error: unsolved goals
+⊢ (match Affine.Point.mk ⋯ with
+    | Affine.Point.zero => 0
+    | Affine.Point.some x y h => -1 / y) =
+    8 / 7
+scratch/Q4242Counterexample.lean:65:2: error: Tactic `simp` failed with a nested error:
+maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+scratch/Q4242Counterexample.lean:70:2: error: Tactic `simp` failed with a nested error:
+maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
 
 EXIT_STATUS=1
