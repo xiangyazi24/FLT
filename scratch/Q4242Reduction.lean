@@ -26,16 +26,29 @@ instance : (E0 (ZMod 2)).IsElliptic := by
 
 abbrev Pt2 := WeierstrassCurve.Affine.Point (E0 (ZMod 2))
 
-def R00 : Pt2 := .mk (x := 0) (y := 0) (by native_decide)
-def R01 : Pt2 := .mk (x := 0) (y := 1) (by native_decide)
-def R11 : Pt2 := .mk (x := 1) (y := 1) (by native_decide)
+lemma eq00 : WeierstrassCurve.Affine.Equation (E0 (ZMod 2)) 0 0 := by
+  rw [WeierstrassCurve.Affine.equation_iff]
+  native_decide
 
-lemma R00_coords : R00 = WeierstrassCurve.Affine.Point.mk (W' := E0 (ZMod 2))
-    (x := 0) (y := 0) (by native_decide) := by rfl
-lemma R01_coords : R01 = WeierstrassCurve.Affine.Point.mk (W' := E0 (ZMod 2))
-    (x := 0) (y := 1) (by native_decide) := by rfl
-lemma R11_coords : R11 = WeierstrassCurve.Affine.Point.mk (W' := E0 (ZMod 2))
-    (x := 1) (y := 1) (by native_decide) := by rfl
+lemma eq01 : WeierstrassCurve.Affine.Equation (E0 (ZMod 2)) 0 1 := by
+  rw [WeierstrassCurve.Affine.equation_iff]
+  native_decide
+
+lemma eq11 : WeierstrassCurve.Affine.Equation (E0 (ZMod 2)) 1 1 := by
+  rw [WeierstrassCurve.Affine.equation_iff]
+  native_decide
+
+lemma not_eq10 : ¬WeierstrassCurve.Affine.Equation (E0 (ZMod 2)) 1 0 := by
+  rw [WeierstrassCurve.Affine.equation_iff]
+  native_decide
+
+def R00 : Pt2 := .mk eq00
+def R01 : Pt2 := .mk eq01
+def R11 : Pt2 := .mk eq11
+
+lemma R00_coords : R00 = WeierstrassCurve.Affine.Point.mk (W' := E0 (ZMod 2)) eq00 := by rfl
+lemma R01_coords : R01 = WeierstrassCurve.Affine.Point.mk (W' := E0 (ZMod 2)) eq01 := by rfl
+lemma R11_coords : R11 = WeierstrassCurve.Affine.Point.mk (W' := E0 (ZMod 2)) eq11 := by rfl
 
 lemma Pt2_exhaust (P : Pt2) : P = 0 ∨ P = R00 ∨ P = R01 ∨ P = R11 := by
   cases P with
@@ -50,9 +63,7 @@ lemma Pt2_exhaust (P : Pt2) : P = 0 ∨ P = R00 ∨ P = R01 ∨ P = R11 := by
         rw [R01_coords]
         apply WeierstrassCurve.Affine.Point.some.inj
         exact ⟨rfl, rfl⟩
-      · exfalso
-        have heq := h.1
-        native_decide at heq
+      · exact (not_eq10 h.1).elim
       · right; right; right
         rw [R11_coords]
         apply WeierstrassCurve.Affine.Point.some.inj
