@@ -1,0 +1,37 @@
+name: Q4318 quotient coordinate fit
+
+on:
+  push:
+    branches: [q4318-research]
+    paths:
+      - scratch/Q4318UVFit.py
+      - .github/workflows/q4318-uvfit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q4318-research
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install sympy
+      - name: Fit quotient coordinates
+        shell: bash
+        run: |
+          set -o pipefail
+          python scratch/Q4318UVFit.py 2>&1 | tee scratch/Q4318UVFit.out
+      - name: Post output
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          { echo 'Q4318_UVFIT_FINAL'; cat scratch/Q4318UVFit.out; } > scratch/Q4318UVFit.comment
+          gh pr comment 9 --body-file scratch/Q4318UVFit.comment
