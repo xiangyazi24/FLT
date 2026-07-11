@@ -28,16 +28,22 @@ jobs:
         run: lake exe cache get
       - name: Build Mathlib umbrella
         run: lake build Mathlib
+      - name: Generate corrected explicit descent
+        shell: bash
+        run: |
+          cp scratch/Q4202QuarticExplicit2.lean scratch/Q4202QuarticExplicit3.lean
+          perl -0pi -e 's/structure CoprimeRectangle \(r s m n : ℤ\) where\n  α : ℤ\n  β : ℤ\n  γ : ℤ\n  δ : ℤ\n  hr : r = α \* β\n  hs : s = γ \* δ\n  hm : m = α \* γ\n  hn : n = β \* δ\n  hαδ : IsCoprime α δ\n  hβγ : IsCoprime β γ/def CoprimeRectangle (r s m n : ℤ) : Prop :=\n  ∃ α β γ δ : ℤ,\n    r = α * β ∧ s = γ * δ ∧ m = α * γ ∧ n = β * δ ∧\n      IsCoprime α δ ∧ IsCoprime β γ/' scratch/Q4202QuarticExplicit3.lean
+          perl -0pi -e 's/  exact\n    \{ α := α\n      β := β\n      γ := γ\n      δ := δ\n      hr := hr\x27\n      hs := hs\x27\n      hm := hm\x27\n      hn := hn\x27\n      hαδ := hαδ\n      hβγ := Int\.isCoprime_iff_gcd_eq_one\.mpr hβγgcd \}/  exact ⟨α, β, γ, δ, hr\x27, hs\x27, hm\x27, hn\x27, hαδ,\n    Int.isCoprime_iff_gcd_eq_one.mpr hβγgcd⟩/' scratch/Q4202QuarticExplicit3.lean
       - name: Check Q4202 layers and persist diagnostics
         shell: bash
         run: |
           set +e
-          lake build scratch.Q4202Check2 scratch.Q4202QuarticExplicit2 > scratch/Q4202-errors.txt 2>&1
+          lake build scratch.Q4202Check2 scratch.Q4202QuarticExplicit3 scratch.Q4202EndpointAdapter > scratch/Q4202-errors.txt 2>&1
           status=$?
           printf '\nEXIT_STATUS=%s\n' "$status" >> scratch/Q4202-errors.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add scratch/Q4202-errors.txt
-          git commit -m 'Record Q4202 layer diagnostics [skip ci]' || true
+          git add scratch/Q4202QuarticExplicit3.lean scratch/Q4202-errors.txt
+          git commit -m 'Record Q4202 third-draft diagnostics [skip ci]' || true
           git push origin HEAD:q4202-check
           exit "$status"
