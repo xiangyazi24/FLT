@@ -6,6 +6,8 @@ on:
     paths:
       - scratch/Q4318UVFinal.py
       - .github/workflows/q4318-uv-final.yml
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 permissions:
