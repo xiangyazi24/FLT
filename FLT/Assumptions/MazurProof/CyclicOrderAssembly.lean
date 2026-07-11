@@ -31,9 +31,11 @@ Endpoint wired to a real theorem:
   stated geometric seam `exists_rational_two_isogeny_quotient`, whose dual map
   composes with the quotient map as multiplication by `2`.
 * `25` — `CyclicExclusion25.no_rational_point_of_order_25`; its geometric
-  front end is now proved through the generic odd-order Tate bridge.  The sole
-  remaining input is the explicit raw division system
-  `no_raw_order25_tate_obstruction`.
+  front end is proved through the generic odd-order Tate bridge, and the
+  order-25 division polynomial is factored as the proper order-five factor
+  times an explicit primitive degree-40 polynomial.  The sole remaining input
+  is `no_explicit_order25_obstruction`, the rational-point exclusion for that
+  explicit affine model of `X₁(25)`.
 * `49` — likewise reduced by the generic odd-order Tate bridge to
   `preΨ'₄₉(0)=0` with the proper factor `preΨ'₇(0)≠0`; its remaining input is
   `no_raw_order49_tate_obstruction`.
