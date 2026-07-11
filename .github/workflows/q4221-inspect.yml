@@ -1,20 +1,12 @@
-name: Q4221 final check
+name: Q4263 check
 
 on:
   push:
     branches: [q4221-finalcheck]
-    paths-ignore:
-      - scratch/Q4221-output.txt
-      - scratch/Q4221Combined.lean
-  pull_request:
-    branches: [scratch]
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  inspect:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,20 +21,5 @@ jobs:
         run: lake exe cache get
       - name: Build Mathlib umbrella
         run: lake build Mathlib
-      - name: Generate one-file corrected layer
-        shell: bash
-        run: |
-          cat scratch/Q4221Core.lean > scratch/Q4221Combined.lean
-          tail -n +5 scratch/Q4221Valuation.lean >> scratch/Q4221Combined.lean
-          tail -n +5 scratch/Q4221F2.lean >> scratch/Q4221Combined.lean
-          tail -n +5 scratch/Q4221Finite.lean >> scratch/Q4221Combined.lean
-          tail -n +6 scratch/Q4221Assembly.lean >> scratch/Q4221Combined.lean
-      - name: Compile corrected Q4221 layers
-        shell: bash
-        run: |
-          lake env lean scratch/Q4221Core.lean
-          lake env lean scratch/Q4221Valuation.lean
-          lake env lean scratch/Q4221ValuationSimple.lean
-          lake env lean scratch/Q4221F2.lean
-          lake env lean scratch/Q4221Finite.lean
-          lake env lean scratch/Q4221Combined.lean
+      - name: Compile Q4263 proof
+        run: lake env lean scratch/Q4263.lean
