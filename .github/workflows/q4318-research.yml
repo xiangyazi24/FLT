@@ -1,0 +1,36 @@
+name: Q4318 symbolic research
+
+on:
+  push:
+    branches: [q4318-research]
+    paths-ignore:
+      - scratch/Q4318Research.out
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q4318-research
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install sympy
+      - name: Run symbolic computation
+        shell: bash
+        run: |
+          set -o pipefail
+          python scratch/Q4318Research.py > scratch/Q4318Research.out 2>&1
+      - name: Commit output
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scratch/Q4318Research.out
+          git commit -m 'Record Q4318 symbolic output [skip ci]' || true
+          git push origin HEAD:q4318-research
