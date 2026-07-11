@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -29,6 +29,16 @@ jobs:
         run: |
           set -o pipefail
           python scratch/Q4318UVFit.py 2>&1 | tee scratch/Q4318UVFit.out
+      - name: Persist output through contents API
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          enc=$(base64 -w0 scratch/Q4318UVFit.out)
+          gh api --method PUT repos/${{ github.repository }}/contents/scratch/Q4318UVFit.out \
+            -f message='Record Q4318 quotient fit output [skip ci]' \
+            -f content="$enc" \
+            -f branch=q4318-research
       - name: Post output
         env:
           GH_TOKEN: ${{ github.token }}
