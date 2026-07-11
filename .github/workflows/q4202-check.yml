@@ -3,18 +3,34 @@ name: Q4202 Lean check
 on:
   push:
     branches: [q4202-check]
-  pull_request:
-    branches: [scratch]
+    paths-ignore:
+      - scratch/Q4202-errors.txt
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: q4202-check
       - uses: leanprover/lean-action@v1
         with:
           auto-config: false
           use-mathlib-cache: true
-      - name: Check Q4202
-        run: lake env lean scratch/Q4202Check.lean
+      - name: Check Q4202 and persist diagnostics
+        shell: bash
+        run: |
+          set +e
+          lake env lean scratch/Q4202Check.lean > scratch/Q4202-errors.txt 2>&1
+          status=$?
+          printf '\nEXIT_STATUS=%s\n' "$status" >> scratch/Q4202-errors.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scratch/Q4202-errors.txt
+          git commit -m 'Record Q4202 compiler diagnostics [skip ci]' || true
+          git push origin HEAD:q4202-check
+          exit "$status"
