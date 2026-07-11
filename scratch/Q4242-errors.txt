@@ -28,5 +28,80 @@ scratch/Q4242Reduction.lean:34:38: error: failed to synthesize
       4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0)
 
 Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+scratch/Q4242PointClass.lean:49:21: error: unexpected token ';'; expected ')'
+scratch/Q4242PointClass.lean:124:8: error(lean.invalidField): Invalid field `addX`: The environment does not contain `WeierstrassCurve.addX`, so it is not possible to project the field `addX` from an expression
+  E15
+of type `WeierstrassCurve ℚ`
+scratch/Q4242PointClass.lean:125:20: error(lean.invalidField): Invalid field `negY`: The environment does not contain `WeierstrassCurve.negY`, so it is not possible to project the field `negY` from an expression
+  E15
+of type `WeierstrassCurve ℚ`
+scratch/Q4242PointClass.lean:128:4: error: linarith failed to find a contradiction
+X Y : ℚ
+hE : Y ^ 2 = X * (X - 15) * (X - 16)
+hY : Y ≠ 0
+heq : Y = sorry ()
+⊢ False
+failed
+scratch/Q4242PointClass.lean:127:10: warning: This simp argument is unused:
+  E15
+
+Hint: Omit it from the simp argument list.
+  simp [E̵1̵5̵,̵ ̵WeierstrassCurve.Affine.negY] at heq
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+scratch/Q4242PointClass.lean:127:15: warning: This simp argument is unused:
+  WeierstrassCurve.Affine.negY
+
+Hint: Omit it from the simp argument list.
+  simp [E15,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵A̵f̵f̵i̵n̵e̵.̵n̵e̵g̵Y̵] at heq
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+scratch/Q4242PointClass.lean:152:20: error(lean.invalidField): Invalid field `negY`: The environment does not contain `WeierstrassCurve.negY`, so it is not possible to project the field `negY` from an expression
+  E15
+of type `WeierstrassCurve ℚ`
+scratch/Q4242PointClass.lean:155:4: error: linarith failed to find a contradiction
+X Y : ℚ
+hP : Affine.Nonsingular E15 X Y
+h4 : 4 • Affine.Point.some X Y hP = 0
+hE : Y ^ 2 = X * (X - 15) * (X - 16)
+hY0 : ¬Y = 0
+heq : Y = sorry ()
+⊢ False
+failed
+scratch/Q4242PointClass.lean:159:16: error(lean.invalidField): Invalid field `addX`: The environment does not contain `WeierstrassCurve.addX`, so it is not possible to project the field `addX` from an expression
+  E15
+of type `WeierstrassCurve ℚ`
+scratch/Q4242PointClass.lean:160:10: error(lean.invalidField): Invalid field `addY`: The environment does not contain `WeierstrassCurve.addY`, so it is not possible to project the field `addY` from an expression
+  E15
+of type `WeierstrassCurve ℚ`
+scratch/Q4242PointClass.lean:172:12: error: No goals to be solved
+scratch/Q4242PointClass.lean:180:86: error: Application type mismatch: The argument
+  hne
+has type
+  ¬Y₂ = 0
+but is expected to have type
+  Y₂ ≠ Affine.negY E15 X₂ Y₂
+in the application
+  Affine.Point.add_self_of_Y_ne hne
+scratch/Q4242PointClass.lean:191:21: error(lean.invalidField): Invalid field `addX`: The environment does not contain `WeierstrassCurve.addX`, so it is not possible to project the field `addX` from an expression
+  E15
+of type `WeierstrassCurve ℚ`
+scratch/Q4242PointClass.lean:192:17: error(lean.invalidField): Invalid field `addY`: The environment does not contain `WeierstrassCurve.addY`, so it is not possible to project the field `addY` from an expression
+  E15
+of type `WeierstrassCurve ℚ`
+scratch/Q4242PointClass.lean:154:10: warning: This simp argument is unused:
+  E15
+
+Hint: Omit it from the simp argument list.
+  simp [E̵1̵5̵,̵ ̵WeierstrassCurve.Affine.negY] at heq
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+scratch/Q4242PointClass.lean:154:15: warning: This simp argument is unused:
+  WeierstrassCurve.Affine.negY
+
+Hint: Omit it from the simp argument list.
+  simp [E15,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵A̵f̵f̵i̵n̵e̵.̵n̵e̵g̵Y̵] at heq
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
 
 EXIT_STATUS=1
