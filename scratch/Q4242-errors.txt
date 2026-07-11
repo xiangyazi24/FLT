@@ -33,5 +33,35 @@ X : ℚ
 hE : OnE X 0
 h16 : dupX X 0 = 16
 ⊢ False
+scratch/Q4242Points.lean:24:13: error: Invalid field notation: Function `Affine` does not have a usable parameter of type `WeierstrassCurve ...` for which to substitute `E15`
+
+Note: Such a parameter must be explicit, or implicit with a unique name, to be used by field notation
+scratch/Q4242Points.lean:27:4: error: Invalid field notation: Function `Affine` does not have a usable parameter of type `WeierstrassCurve ...` for which to substitute `E15`
+
+Note: Such a parameter must be explicit, or implicit with a unique name, to be used by field notation
+scratch/Q4242Points.lean:32:10: error(lean.unknownIdentifier): Unknown identifier `Pt`
+
+Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+scratch/Q4242Points.lean:33:11: error(lean.unknownIdentifier): Unknown identifier `Pt`
+
+Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+scratch/Q4242Points.lean:34:11: error(lean.unknownIdentifier): Unknown identifier `Pt`
+
+Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+scratch/Q4242Points.lean:35:11: error(lean.unknownIdentifier): Unknown identifier `Pt`
+
+Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+scratch/Q4242Points.lean:36:11: error(lean.unknownIdentifier): Unknown identifier `Pt`
+
+Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+scratch/Q4242Points.lean:37:11: error(lean.unknownIdentifier): Unknown identifier `Pt`
+
+Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+scratch/Q4242Points.lean:38:11: error(lean.unknownIdentifier): Unknown identifier `Pt`
+
+Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+scratch/Q4242Points.lean:41:16: error(lean.unknownIdentifier): Unknown identifier `Pt`
+
+Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
 
 EXIT_STATUS=1
