@@ -21,10 +21,11 @@ instance : E15.IsElliptic := by
   rw [E15_discriminant]
   norm_num
 
-abbrev Pt := E15.Point
+abbrev Pt := WeierstrassCurve.Affine.Point E15
 
 lemma equation_iff_onE (X Y : ℚ) :
-    E15.Equation X Y ↔ Y ^ 2 = X * (X - 15) * (X - 16) := by
+    WeierstrassCurve.Affine.Equation E15 X Y ↔
+      Y ^ 2 = X * (X - 15) * (X - 16) := by
   rw [WeierstrassCurve.Affine.equation_iff]
   simp [E15]
   ring_nf
