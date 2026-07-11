@@ -62,7 +62,8 @@ def InfinitelyTwoDivisible {G : Type*} [AddCommGroup G] (x : G) : Prop :=
 
 lemma twoPow_smul_succ {G : Type*} [AddCommGroup G] (n : ℕ) (x : G) :
     (2 ^ (n + 1)) • x = 2 • ((2 ^ n) • x) := by
-  simp [pow_succ, nsmul_nsmul, Nat.mul_comm]
+  rw [pow_succ]
+  exact mul_nsmul x (2 ^ n) 2
 
 /-- The exact abstract interface supplied by a curve-specific formal-kernel construction. -/
 structure LocalLayer (G : Type*) [AddCommGroup G] where
@@ -139,7 +140,11 @@ theorem n15_no_infinitely_two_divisible
       exact L.four_mem Q
     have hPR : (2 ^ n) • R = P := by
       dsimp [R]
-      simpa [pow_add, nsmul_nsmul] using hQ
+      calc
+        (2 ^ n) • (4 • Q) = (2 ^ n * 4) • Q :=
+          (mul_nsmul' Q (2 ^ n) 4).symm
+        _ = (2 ^ (n + 2)) • Q := by norm_num [pow_add]
+        _ = P := hQ
     have hR0 : R ≠ 0 := by
       intro hR
       apply hP0
@@ -174,7 +179,7 @@ lemma iterated_decomposition
       rcases hstep y with ⟨t, ht, z, hz⟩
       refine ⟨s + (2 ^ n) • t, H.add_mem hs (H.nsmul_mem ht _), z, ?_⟩
       rw [hy, hz]
-      simp only [nsmul_add, pow_succ, nsmul_nsmul]
+      simp only [nsmul_add, pow_succ, ← mul_nsmul']
       abel
 
 lemma four_nsmul_infinitelyTwoDivisible
@@ -187,10 +192,12 @@ lemma four_nsmul_infinitelyTwoDivisible
   rcases iterated_decomposition H hstep x n with ⟨t, ht, y, hy⟩
   refine ⟨4 • y, ?_⟩
   calc
-    (2 ^ n) • (4 • y) = 4 • ((2 ^ n) • y) := by
-      simp [nsmul_nsmul, Nat.mul_comm]
+    (2 ^ n) • (4 • y) = (2 ^ n * 4) • y :=
+      (mul_nsmul' y (2 ^ n) 4).symm
+    _ = (4 * 2 ^ n) • y := by rw [Nat.mul_comm]
+    _ = 4 • ((2 ^ n) • y) := mul_nsmul' y 4 (2 ^ n)
     _ = 4 • (t + (2 ^ n) • y) := by
-      simp [nsmul_add, hexp t ht]
+      simp [hexp t ht]
     _ = 4 • x := by rw [hy]
 
 /-- Final weak-descent assembly once the curve-specific local layer is built. -/
