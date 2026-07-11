@@ -30,7 +30,7 @@ def add(X,Y):return [X[i]+Y[i] for i in range(N+1)]
 def scale(X,c):return [c*z for z in X]
 def compose(poly,X,var):
  Z=[0]*(N+1)
- for c in reversed(sp.Poly(poly,var).all_coeffs()):Z=add(mul(Z,X),[c]+[0]*N)
+ for c in sp.Poly(poly,var).all_coeffs():Z=add(mul(Z,X),[c]+[0]*N)
  return Z
 E1,E5,E7,E35=eta(1),eta(5),eta(7),eta(35)
 a=shift(scale(mul(power(E7,4),power(E1,-4)),49),1)
@@ -47,10 +47,7 @@ ap[0]=[1]+[0]*N;hp[0]=[1]+[0]*N
 for i in range(maxd):ap[i+1]=mul(ap[i],a);hp[i+1]=mul(hp[i],h)
 
 def mons(d):
- out=[]
- for i in range(d+1):
-  for j in range(d+1-i):out.append((i,j,mul(ap[i],hp[j])))
- return out
+ return [(i,j,mul(ap[i],hp[j])) for i in range(d+1) for j in range(d+1-i)]
 
 def fit(T,maxdeg=10):
  for dr in range(maxdeg+1):
