@@ -19,20 +19,22 @@ jobs:
           PGPASSWORD: lmfdb
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
           DB='postgresql://lmfdb@devmirror.lmfdb.xyz:5432/lmfdb'
           echo Q4342_MF
-          psql "$DB" -X -A -F '|' -t -c "SELECT label,dim,nf_label,field_poly,field_disc,char_order,char_conductor,is_cm,is_rm,is_self_twist,self_twist_type,inner_twist_count,inner_twists,has_non_self_twist,analytic_rank,analytic_rank_proved,relative_dim,sato_tate_group FROM mf_newforms WHERE label='18.2.c.a';"
+          psql "$DB" -X -A -F '|' -t -c "SELECT label,dim,nf_label,field_poly,field_disc,char_order,char_conductor,is_cm,is_rm,is_self_twist,self_twist_type,inner_twist_count,inner_twists,has_non_self_twist,analytic_rank,analytic_rank_proved,relative_dim,sato_tate_group FROM mf_newforms WHERE label='18.2.c.a';" || true
           echo Q4342_ENDO_BASE
-          psql "$DB" -X -A -F '|' -t -c "SELECT factorsRR_base,factorsQQ_base,is_simple_base,ring_base,st_group_base FROM g2c_endomorphisms WHERE label='324.a.648.1';"
+          psql "$DB" -X -A -F '|' -t -c 'SELECT "factorsRR_base","factorsQQ_base",is_simple_base,ring_base,st_group_base FROM g2c_endomorphisms WHERE label='"'"'324.a.648.1'"'"';' || true
           echo Q4342_ENDO_GEOM
-          psql "$DB" -X -A -F '|' -t -c "SELECT factorsRR_geom,factorsQQ_geom,is_simple_geom,ring_geom,st_group_geom FROM g2c_endomorphisms WHERE label='324.a.648.1';"
+          psql "$DB" -X -A -F '|' -t -c 'SELECT "factorsRR_geom","factorsQQ_geom",is_simple_geom,ring_geom,st_group_geom FROM g2c_endomorphisms WHERE label='"'"'324.a.648.1'"'"';' || true
           echo Q4342_FIELDS
-          psql "$DB" -X -A -F '|' -t -c "SELECT fod_label,fod_coeffs,spl_fod_label,spl_fod_coeffs,spl_fod_gen,spl_facs_labels,spl_facs_coeffs,spl_facs_condnorms,lattice FROM g2c_endomorphisms WHERE label='324.a.648.1';"
-          echo Q4342_G2_COLUMNS
-          psql "$DB" -X -A -t -c "SELECT column_name FROM information_schema.columns WHERE table_name='g2c_curves' AND (column_name LIKE '%rank%' OR column_name LIKE '%tors%' OR column_name LIKE '%selmer%' OR column_name LIKE '%sha%' OR column_name LIKE '%st_%' OR column_name LIKE '%end%' OR column_name='eqn' OR column_name='label') ORDER BY ordinal_position;"
-          echo Q4342_G2_SHORT
-          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT label,eqn,analytic_rank,torsion,two_selmer_rank,analytic_sha,st_group FROM g2c_curves WHERE label='324.a.648.1') t;" || true
+          psql "$DB" -X -A -F '|' -t -c "SELECT fod_label,fod_coeffs,spl_fod_label,spl_fod_coeffs,spl_fod_gen,spl_facs_labels,spl_facs_coeffs,spl_facs_condnorms,lattice FROM g2c_endomorphisms WHERE label='324.a.648.1';" || true
+          echo Q4342_NF
+          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT label,coeffs,disc_abs,disc_sign,signature,class_number,class_group FROM nf_fields WHERE label='3.3.81.1') t;" || true
+          echo Q4342_EC_COLUMNS
+          psql "$DB" -X -A -t -c "SELECT column_name FROM information_schema.columns WHERE table_name='ec_nfcurves' AND (column_name IN ('label','ainvs','jinv','equation','rank','rank_bounds','torsion_order','torsion_structure','base_change','conductor_norm','conductor_label','field_label')) ORDER BY ordinal_position;" || true
+          echo Q4342_EC
+          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT label,field_label,conductor_label,conductor_norm,ainvs,jinv,equation,rank,rank_bounds,torsion_order,torsion_structure,base_change FROM ec_nfcurves WHERE label='3.3.81.1-8.1-a1') t;" || true
       - name: Frobenius polynomials and split tests
         shell: bash
         run: |
