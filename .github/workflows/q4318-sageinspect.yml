@@ -26,8 +26,11 @@ jobs:
       - name: Inspect Sage APIs
         shell: bash
         run: |
-          set -o pipefail
-          sage scratch/Q4318SageInspect.sage 2>&1 | tee scratch/Q4318SageInspect.out
+          set +e
+          sage scratch/Q4318SageInspect.sage > scratch/Q4318SageInspect.out 2>&1
+          echo EXIT_STATUS=$? >> scratch/Q4318SageInspect.out
+          cat scratch/Q4318SageInspect.out
+          exit 0
       - name: Persist output
         shell: bash
         run: |
