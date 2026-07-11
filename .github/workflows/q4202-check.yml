@@ -32,7 +32,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          lake build scratch.Q4202Check2 scratch.Q4202QuarticExplicit > scratch/Q4202-errors.txt 2>&1
+          lake build scratch.Q4202Check2 scratch.Q4202QuarticExplicit2 > scratch/Q4202-errors.txt 2>&1
           status=$?
           printf '\nEXIT_STATUS=%s\n' "$status" >> scratch/Q4202-errors.txt
           git config user.name github-actions[bot]
