@@ -1,0 +1,347 @@
+=== FILES ===
+./.git/FETCH_HEAD
+./.git/HEAD
+./.git/config
+./.git/config.worktree
+./.git/description
+./.git/hooks/applypatch-msg.sample
+./.git/hooks/commit-msg.sample
+./.git/hooks/fsmonitor-watchman.sample
+./.git/hooks/post-update.sample
+./.git/hooks/pre-applypatch.sample
+./.git/hooks/pre-commit.sample
+./.git/hooks/pre-merge-commit.sample
+./.git/hooks/pre-push.sample
+./.git/hooks/pre-rebase.sample
+./.git/hooks/pre-receive.sample
+./.git/hooks/prepare-commit-msg.sample
+./.git/hooks/push-to-checkout.sample
+./.git/hooks/sendemail-validate.sample
+./.git/hooks/update.sample
+./.git/index
+./.git/info/exclude
+./.git/logs/HEAD
+./.git/objects/pack/pack-de8d4ab29aaeafdd51eb1d81cbf57fbd98b7914c.idx
+./.git/objects/pack/pack-de8d4ab29aaeafdd51eb1d81cbf57fbd98b7914c.pack
+./.git/objects/pack/pack-de8d4ab29aaeafdd51eb1d81cbf57fbd98b7914c.rev
+./.git/refs/heads/q4221-check
+./.git/shallow
+./.github/dependabot.yml
+./.github/workflows/01-claim-issue.yml
+./.github/workflows/02-disclaim-issue.yml
+./.github/workflows/03-propose-pr.yml
+./.github/workflows/04-withdraw-pr.yml
+./.github/workflows/05-pr-comment.yml
+./.github/workflows/blueprint.yml
+./.github/workflows/create-release.yml
+./.github/workflows/q4221-inspect.yml
+./.github/workflows/update.yml
+./.gitignore
+./.gitpod.yml
+./.vscode/copyright.code-snippets
+./.vscode/module-docstring.code-snippets
+./.vscode/settings.json
+./2026_EPSRC_TCC_course/20260122.pdf
+./2026_EPSRC_TCC_course/20260205.pdf
+./2026_EPSRC_TCC_course/20260212.pdf
+./2026_EPSRC_TCC_course/20260219.pdf
+./2026_EPSRC_TCC_course/20260226.pdf
+./2026_EPSRC_TCC_course/20260312.pdf
+./2026_EPSRC_TCC_course/20260319.pdf
+./2026_EPSRC_TCC_course/20260326.pdf
+./2026_EPSRC_TCC_course/20260430.pdf
+./2026_EPSRC_TCC_course/20260507.pdf
+./2026_EPSRC_TCC_course/20260514.pdf
+./CITATION.bib
+./CODE_OF_CONDUCT.md
+./CONTRIBUTING.md
+./FLT.lean
+./FLT/Assumptions/KnownIn1980s.lean
+./FLT/Assumptions/Mazur.lean
+./FLT/Assumptions/Odlyzko.lean
+./FLT/Assumptions/README.md
+./FLT/AutomorphicForm/QuaternionAlgebra/Defs.lean
+./FLT/AutomorphicForm/QuaternionAlgebra/FiniteDimensional.lean
+./FLT/Data/Hurwitz.lean
+./FLT/Data/HurwitzRatHat.lean
+./FLT/Data/QHat.lean
+./FLT/DedekindDomain/AdicValuation.lean
+./FLT/DedekindDomain/Completion/BaseChange.lean
+./FLT/DedekindDomain/FiniteAdeleRing/BaseChange.lean
+./FLT/DedekindDomain/FiniteAdeleRing/IsDirectLimitRestricted.lean
+./FLT/DedekindDomain/FiniteAdeleRing/LocalUnits.lean
+./FLT/DedekindDomain/FiniteAdeleRing/TensorPi.lean
+./FLT/DedekindDomain/FiniteAdeleRing/TensorProduct.lean
+./FLT/DedekindDomain/FiniteAdeleRing/TensorRestrictedProduct.lean
+./FLT/DedekindDomain/IntegralClosure.lean
+./FLT/Deformations/Categories.lean
+./FLT/Deformations/ContinuousRepresentation/IsTopologicalModule.lean
+./FLT/Deformations/IsProartinian.lean
+./FLT/Deformations/IsResidueAlgebra.lean
+./FLT/Deformations/Lemmas.lean
+./FLT/Deformations/LiftFunctor.lean
+./FLT/Deformations/Representable.lean
+./FLT/Deformations/RepresentationTheory/AbsoluteGaloisGroup.lean
+./FLT/Deformations/RepresentationTheory/ContinuousSMulDiscrete.lean
+./FLT/Deformations/RepresentationTheory/Etale.lean
+./FLT/Deformations/RepresentationTheory/Frobenius.lean
+./FLT/Deformations/RepresentationTheory/GaloisRep.lean
+./FLT/Deformations/RepresentationTheory/GaloisRepFamily.lean
+./FLT/Deformations/RepresentationTheory/IntegralClosure.lean
+./FLT/Deformations/RepresentationTheory/Irreducible.lean
+./FLT/Deformations/Subfunctor.lean
+./FLT/DivisionAlgebra/Finiteness.lean
+./FLT/EllipticCurve/Torsion.lean
+./FLT/FreyCurve/Contradiction.lean
+./FLT/FreyCurve/FreyPackage.lean
+./FLT/GaloisRepresentation/Automorphic.lean
+./FLT/GaloisRepresentation/Cyclotomic.lean
+./FLT/GaloisRepresentation/HardlyRamified/Defs.lean
+./FLT/GaloisRepresentation/HardlyRamified/Family.lean
+./FLT/GaloisRepresentation/HardlyRamified/Frey.lean
+./FLT/GaloisRepresentation/HardlyRamified/Lift.lean
+./FLT/GaloisRepresentation/HardlyRamified/ModThree.lean
+./FLT/GaloisRepresentation/HardlyRamified/Threeadic.lean
+./FLT/GlobalLanglandsConjectures/GLnDefs.lean
+./FLT/GlobalLanglandsConjectures/GLzero.lean
+./FLT/GroupScheme/FiniteFlat.lean
+./FLT/HaarMeasure/HaarChar/AddEquiv.lean
+./FLT/HaarMeasure/HaarChar/AdeleRing.lean
+./FLT/HaarMeasure/HaarChar/FiniteAdeleRing.lean
+./FLT/HaarMeasure/HaarChar/FiniteDimensional.lean
+./FLT/HaarMeasure/HaarChar/Padic.lean
+./FLT/HaarMeasure/HaarChar/RealComplex.lean
+./FLT/HaarMeasure/HaarChar/Ring.lean
+./FLT/HaarMeasure/MeasurableSpacePadics.lean
+./FLT/Hacks/RightActionInstances.lean
+./FLT/Mathlib/Algebra/IsDirectLimit.lean
+./FLT/Mathlib/Algebra/IsQuaternionAlgebra.lean
+./FLT/Mathlib/GroupTheory/DoubleCoset.lean
+./FLT/Mathlib/GroupTheory/Index.lean
+./FLT/Mathlib/LinearAlgebra/Countable.lean
+./FLT/Mathlib/LinearAlgebra/Determinant.lean
+./FLT/Mathlib/LinearAlgebra/Pi.lean
+./FLT/Mathlib/RepresentationTheory/Basic.lean
+./FLT/Mathlib/Topology/Bases.lean
+./FLT/Mathlib/Topology/Constructions.lean
+./FLT/Mathlib/Topology/HomToDiscrete.lean
+./FLT/Mathlib/Topology/Polish.lean
+./FLT/NumberField/AdeleRing.lean
+./FLT/NumberField/Completion/Finite.lean
+./FLT/NumberField/Completion/Infinite.lean
+./FLT/NumberField/DiscriminantBounds.lean
+./FLT/NumberField/HeightOneSpectrum.lean
+./FLT/NumberField/InfiniteAdeleRing.lean
+./FLT/NumberField/InfinitePlace/Extension.lean
+./FLT/NumberField/Padics/RestrictedProduct.lean
+./FLT/Patching/Algebra.lean
+./FLT/Patching/Module.lean
+./FLT/Patching/Over.lean
+./FLT/Patching/REqualsT.lean
+./FLT/Patching/System.lean
+./FLT/Patching/Ultraproduct.lean
+./FLT/Patching/Utils/AdicTopology.lean
+./FLT/Patching/Utils/CompactHausdorffRings.lean
+./FLT/Patching/Utils/Depth.lean
+./FLT/Patching/Utils/InverseLimit.lean
+./FLT/Patching/Utils/Lemmas.lean
+./FLT/Patching/Utils/StructureFiniteness.lean
+./FLT/Patching/Utils/TopologicallyFG.lean
+./FLT/Patching/VanishingFilter.lean
+./FLT/QuaternionAlgebra/NumberField.lean
+./FLT/TateCurve/TateCurve.lean
+./FLTTest.lean
+./FLTTest/FLTTest.lean
+./FLTTest/MathlibCompatibility.lean
+./FermatsLastTheorem.lean
+./GENERAL.md
+./LICENSE
+./README.md
+./blog.md
+./blueprint-verso/.gitignore
+./blueprint-verso/BLUEPRINT_VERSO_HINTS.md
+./blueprint-verso/FLTBlueprint.lean
+./blueprint-verso/FLTBlueprint/Blueprint.lean
+./blueprint-verso/FLTBlueprint/Chapters/Definitions.lean
+./blueprint-verso/FLTBlueprintMain.lean
+./blueprint-verso/README.md
+./blueprint-verso/VERSO_TODO.md
+./blueprint-verso/doc/GETTING_STARTED.md
+./blueprint-verso/doc/MANUAL.md
+./blueprint-verso/doc/README.md
+./blueprint-verso/lake-manifest.json
+./blueprint-verso/lakefile.toml
+./blueprint-verso/lean-toolchain
+./blueprint-verso/scripts/ci-pages.sh
+./blueprint/notes_on_how_blueprint_works.txt
+./blueprint/requirements.txt
+./blueprint/src/FLT.bib
+./blueprint/src/TODO
+./blueprint/src/blueprint.sty
+./blueprint/src/chapter/AdeleMiniproject.tex
+./blueprint/src/chapter/FrobeniusProject.tex
+./blueprint/src/chapter/FujisakiProject.tex
+./blueprint/src/chapter/HaarCharacterProject.tex
+./blueprint/src/chapter/HeckeOperatorProject.tex
+./blueprint/src/chapter/QuaternionAlgebraProject.tex
+./blueprint/src/chapter/biblio.tex
+./blueprint/src/chapter/ch01introduction.tex
+./blueprint/src/chapter/ch02reductions.tex
+./blueprint/src/chapter/ch03freyold.tex
+./blueprint/src/chapter/ch03freyreduction.tex
+./blueprint/src/chapter/ch04overview.tex
+./blueprint/src/chapter/ch05automorphicformexample.tex
+./blueprint/src/chapter/ch06automorphicrepresentations.tex
+./blueprint/src/chapter/ch07exampleGLn.tex
+./blueprint/src/chapter/chtopbestiary.tex
+./blueprint/src/chapter/global_langlands.tex
+./blueprint/src/content.tex
+./blueprint/src/extra_styles.css
+./blueprint/src/latexmkrc
+./blueprint/src/macro/common.tex
+./blueprint/src/macro/print.tex
+./blueprint/src/macro/web.tex
+./blueprint/src/plastex.cfg
+./blueprint/src/print.tex
+./blueprint/src/stylecours.css
+./blueprint/src/util.sty
+./blueprint/src/web.tex
+./blueprint/tasks.py
+./docs/.bundle/config
+./docs/.gitignore
+./docs/404.html
+./docs/Gemfile
+./docs/Gemfile.lock
+./docs/_config.yml
+./docs/_includes/mathjax.html
+./docs/_layouts/default.html
+./docs/assets/css/style.scss
+./docs/index.md
+./docs/upstreaming.md
+./drops/Q3541-6dc3505a.md
+./drops/Q3546-9378d088.md
+./drops/Q3554-e2f8efde.md
+./drops/Q3557-1e62c935.md
+./drops/Q3561-f63ee1d6.md
+./drops/Q3563-596f869b.md
+./drops/Q3567-baadebf5.md
+./drops/Q3568-fea8cb12.md
+./drops/Q3572-bfb816d7.md
+./drops/Q3574-8fcc6af8.md
+./drops/Q3579-fbe5089c.md
+./drops/Q3586-96cdd9d7.md
+./drops/Q3740-bb268294.md
+./drops/Q3741-4ad3ee59.md
+./drops/Q3817-43b34961.md
+./drops/Q3819-ac98cc26.md
+./drops/Q3820-0b2a2434.md
+./drops/Q3838-fe221827.md
+./drops/Q3854-8e5e85a9.md
+./drops/Q3856-65600813.md
+./drops/Q3861-1668a9db.md
+./drops/Q3862-d87fdfaf.md
+./drops/Q3863-ab0c4e3d.md
+./drops/Q3865-953bc4c9.md
+./drops/Q3867-5bf434fa.md
+./drops/Q3869-41193c12.md
+./drops/Q3871-7e7ccf6c.md
+./drops/Q3885-05c44dd0.md
+./drops/Q3887-c89da824.md
+./drops/Q3889-8dec0a8b.md
+./drops/Q3905-b51da7c7.md
+./drops/Q3907-dbe3eaf8.md
+./drops/Q3915-d27f6613.md
+./drops/Q3918-cb928e5a.md
+./drops/Q3921-4493aa97.md
+./drops/Q3932-3d255f2e.md
+./drops/Q3933-f81f91fd.md
+./drops/Q3935-6a8ffee1.md
+./drops/Q3946-f999aaa8.md
+./drops/Q3947-f3685935.md
+./drops/Q3950-47c1d7fd.md
+./drops/Q4012-a5cb6867.md
+./drops/Q4013-1d4cd5ba.md
+./drops/Q4184-14cadac3.md
+./drops/Q4185-07ebde0b.md
+./drops/Q4186-eac71d42.md
+./drops/Q4191-9067d36b.md
+./drops/Q4196-721b140f.md
+./drops/Q4197-f90fb35c.md
+./lake-manifest.json
+./lakefile.toml
+./lean-toolchain
+./scratch/Atom6LocalParam.lean
+./scratch/Isogeny20a4.lean
+./scratch/Q4221-inventory.txt
+./scratch/_CHATGPT_DROP_dm-codex1.md
+./scratch/_CHATGPT_DROP_dm-codex2.md
+./scratch/_CHATGPT_DROP_dm-codex3.md
+./scratch/_CHATGPT_DROP_dm.md
+./scratch/_CHATGPT_DROP_dm1.md
+./scratch/_CHATGPT_DROP_dm2.md
+./scratch/_CHATGPT_DROP_dm3.md
+./scratch/_CHATGPT_DROP_dm4.md
+./scripts/build_docs.sh
+./scripts/dag_traversal.py
+./scripts/install_pre-push.sh
+./scripts/nolints.json
+./scripts/noshake.json
+./scripts/pre-push.sh
+./scripts/rm_set_option.py
+./scripts/run_before_push.sh
+./scripts/set_option_utils.py
+./tasks.py
+
+=== N15 / curve / formal-kernel matches ===
+./drops/Q4197-f90fb35c.md:671:One still has to rule out a nonzero infinitely 2-divisible subgroup. This can be done locally and does not require finite generation.
+./drops/Q4185-07ebde0b.md:26:   Y^2=X(X-15)(X-16);
+./drops/Q4185-07ebde0b.md:298:Y^2=X(X-15)(X-16).
+./drops/Q4185-07ebde0b.md:305:E:\qquad Y^2=X(X-15)(X-16)
+./drops/Q4185-07ebde0b.md:306:      =X^3-31X^2+240X.
+./drops/Q4185-07ebde0b.md:427:### Apply the lemma to \(E:Y^2=X^3-31X^2+240X\)
+./drops/Q4185-07ebde0b.md:432:a=-31,\qquad B=240,\qquad a^2-4B=961-960=1.
+./drops/Q4185-07ebde0b.md:455:R^2=dM^4-31M^2N^2+\frac{240}{d}N^4.
+./drops/Q4185-07ebde0b.md:463:* If \(M,N\) are both odd, then modulo \(8\), using \(-31\equiv1\pmod8\) and \(8\mid240/d\), the right side is
+./.github/workflows/q4221-inspect.yml:28:            echo '=== N15 / curve / formal-kernel matches ==='
+./.github/workflows/q4221-inspect.yml:29:            grep -RInE 'n15|N15|iterated_decomposition|formalKernel|formal kernel|31[^0-9].*240|X\(X-15\)\(X-16\)|x\^3\+x\^2-5\*?x\+2|no_infinitely|infinitely.*divisible' --exclude-dir=.git --exclude='Q4221-inventory.txt' . || true
+
+=== Elliptic / projective helper matches ===
+./FLT/FreyCurve/Contradiction.lean:47:open WeierstrassCurve
+./FLT/FreyCurve/FreyPackage.lean:233:def freyCurveInt (P : FreyPackage) : WeierstrassCurve ℤ where
+./FLT/FreyCurve/FreyPackage.lean:246:def freyCurve (P : FreyPackage) : WeierstrassCurve ℚ where
+./FLT/FreyCurve/FreyPackage.lean:294:    simp [← P.hFLT, WeierstrassCurve.Δ, freyCurve, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+./FLT/FreyCurve/FreyPackage.lean:295:      WeierstrassCurve.b₆, WeierstrassCurve.b₈]
+./FLT/FreyCurve/FreyPackage.lean:299:instance (P : FreyPackage) : WeierstrassCurve.IsElliptic (freyCurve P) where
+./FLT/FreyCurve/FreyPackage.lean:309:  simp [freyCurve, WeierstrassCurve.b₂]
+./FLT/FreyCurve/FreyPackage.lean:314:  simp [freyCurve, WeierstrassCurve.b₄]
+./FLT/FreyCurve/FreyPackage.lean:319:  simp [FreyCurve.b₂, FreyCurve.b₄, WeierstrassCurve.c₄]
+./FLT/FreyCurve/FreyPackage.lean:334:  rw [mul_div_right_comm, WeierstrassCurve.j, FreyCurve.Δ'inv, FreyCurve.c₄']
+./FLT/FreyCurve/FreyPackage.lean:346:    (P.p : ℤ) ∣ padicValRat q P.freyCurve.j := by
+./FLT/FreyCurve/FreyPackage.lean:353:  rw [FreyCurve.j, padicValRat.div (mul_ne_zero (by norm_num) h₀) (pow_ne_zero _ (mod_cast h₁)),
+./FLT/FreyCurve/FreyPackage.lean:354:    padicValRat.mul (by norm_num) h₀, padicValRat.pow two_ne_zero, ← Nat.cast_two,
+./FLT/FreyCurve/FreyPackage.lean:355:    ← padicValRat_of_nat, padicValNat_primes hqodd.ne', Nat.cast_zero, mul_zero, zero_add]
+./FLT/FreyCurve/FreyPackage.lean:377:  rw [padicValRat.of_int, padicValInt.eq_zero_of_not_dvd this, Nat.cast_zero, zero_sub,
+./FLT/FreyCurve/FreyPackage.lean:378:    Int.cast_pow, padicValRat.pow (mod_cast h₁), dvd_neg, Nat.cast_mul]
+./FLT/Assumptions/Mazur.lean:9:public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+./FLT/Assumptions/Mazur.lean:94:open scoped WeierstrassCurve.Affine -- E⟮ℚ⟯ notation
+./FLT/Assumptions/Mazur.lean:105:axiom Mazur_statement (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+./FLT/EllipticCurve/Torsion.lean:8:public import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
+./FLT/EllipticCurve/Torsion.lean:27:variable {k : Type u} [Field k] (E : WeierstrassCurve k) [E.IsElliptic] [DecidableEq k]
+./FLT/EllipticCurve/Torsion.lean:29:open WeierstrassCurve WeierstrassCurve.Affine
+./FLT/EllipticCurve/Torsion.lean:33:abbrev WeierstrassCurve.nTorsion (n : ℕ) : Type u := Submodule.torsionBy ℤ (E⁄k).Point n
+./FLT/EllipticCurve/Torsion.lean:46:theorem WeierstrassCurve.n_torsion_finite {n : ℕ} (hn : 0 < n) : Finite (E.nTorsion n) := sorry
+./FLT/EllipticCurve/Torsion.lean:50:theorem WeierstrassCurve.n_torsion_card [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
+./FLT/EllipticCurve/Torsion.lean:60:theorem WeierstrassCurve.n_torsion_dimension [IsSepClosed k] {n : ℕ} (hn : (n : k) ≠ 0) :
+./FLT/EllipticCurve/Torsion.lean:77:noncomputable def WeierstrassCurve.Points.map {K L : Type u} [Field K] [Field L] [Algebra k K]
+./FLT/EllipticCurve/Torsion.lean:79:    (f : K →ₐ[k] L) : (E⁄K).Point →+ (E⁄L).Point := WeierstrassCurve.Affine.Point.map f
+./FLT/EllipticCurve/Torsion.lean:82:lemma WeierstrassCurve.Points.map_id (K : Type u) [Field K] [DecidableEq K] [Algebra k K] :
+./FLT/EllipticCurve/Torsion.lean:83:    WeierstrassCurve.Points.map E (AlgHom.id k K) = AddMonoidHom.id _ := by
+./FLT/EllipticCurve/Torsion.lean:85:      exact WeierstrassCurve.Affine.Point.map_id _
+./FLT/EllipticCurve/Torsion.lean:88:lemma WeierstrassCurve.Points.map_comp (K L M : Type u) [Field K] [Field L] [Field M]
+./FLT/EllipticCurve/Torsion.lean:91:    (WeierstrassCurve.Affine.Point.map g).comp (WeierstrassCurve.Affine.Point.map f) =
+./FLT/EllipticCurve/Torsion.lean:92:    WeierstrassCurve.Affine.Point.map (W' := E) (g.comp f) := by
+./FLT/EllipticCurve/Torsion.lean:94:  exact WeierstrassCurve.Affine.Point.map_map _ _ _
+./FLT/EllipticCurve/Torsion.lean:97:noncomputable instance WeierstrassCurve.galoisRepresentationSmul
+./FLT/EllipticCurve/Torsion.lean:100:  fun g P ↦ WeierstrassCurve.Affine.Point.map (g : K →ₐ[k] K) P⟩
+./FLT/EllipticCurve/Torsion.lean:103:noncomputable instance WeierstrassCurve.galoisRepresentation
+./FLT/EllipticCurve/Torsion.lean:115:def WeierstrassCurve.galoisRep {K : Type u} [Field K] (E : WeierstrassCurve K) [E.IsElliptic]
