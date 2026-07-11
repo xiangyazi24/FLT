@@ -112,135 +112,180 @@ Note: This linter can be disabled with `set_option linter.unusedTactic false`
 EXPLICIT_VALUATION_STATUS=0
 === CORRECTED SEPARATEDNESS ===
 SEPARATEDNESS_STATUS=0
-=== ASSEMBLY ===
-scratch/Q4221Assembly.lean:1:0: error: unknown module prefix 'scratch'
-
-No directory 'scratch' or file 'scratch.olean' in the search path entries:
-/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/build/lib/lean
-/home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/lib/lean
-/home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/lib/lean
-ASSEMBLY_STATUS=1
+=== FINITE DUPLICATION ===
+scratch/Q4221Finite.lean:38:31: error: omega could not prove the goal:
+a possible counterexample may satisfy the constraints
+  a ≥ 0
+where
+ a := ↑(Rat.den 240)
+scratch/Q4221Finite.lean:45:12: error(lean.unknownIdentifier): Unknown constant `Int.pow_emod`
+scratch/Q4221Finite.lean:32:45: error: unsolved goals
+x : ℚ
+hnum : (x ^ 2).num = Rat.num 240
+hden : (x ^ 2).den = Rat.den 240
+hden1 : x.den * x.den = 1
+hxden : x.den = 1
+hx : x = ↑x.num
+h : x.num ^ 2 = 240
+hmod3 : 3 ∣ x.num ^ 2
+⊢ False
+scratch/Q4221Finite.lean:107:41: error: Application type mismatch: The argument
+  hcurve
+has type
+  y ^ 2 = 144
+but is expected to have type
+  ?m.432 ^ 2 = ?m.433 ^ 2
+in the application
+  sq_eq_sq_iff_eq_or_eq_neg.mp hcurve
+scratch/Q4221Finite.lean:115:41: error: Application type mismatch: The argument
+  hcurve
+has type
+  y ^ 2 = 400
+but is expected to have type
+  ?m.482 ^ 2 = ?m.483 ^ 2
+in the application
+  sq_eq_sq_iff_eq_or_eq_neg.mp hcurve
+FINITE_STATUS=1
 === COMBINED ONE FILE ===
-scratch/Q4221Combined.lean:348:69: warning: this tactic is never executed
+scratch/Q4221Combined.lean:349:69: warning: this tactic is never executed
 
 Note: This linter can be disabled with `set_option linter.unreachableTactic false`
-scratch/Q4221Combined.lean:352:72: warning: this tactic is never executed
+scratch/Q4221Combined.lean:353:72: warning: this tactic is never executed
 
 Note: This linter can be disabled with `set_option linter.unreachableTactic false`
-scratch/Q4221Combined.lean:365:70: warning: this tactic is never executed
+scratch/Q4221Combined.lean:366:70: warning: this tactic is never executed
 
 Note: This linter can be disabled with `set_option linter.unreachableTactic false`
-scratch/Q4221Combined.lean:374:30: warning: this tactic is never executed
+scratch/Q4221Combined.lean:375:30: warning: this tactic is never executed
 
 Note: This linter can be disabled with `set_option linter.unreachableTactic false`
-scratch/Q4221Combined.lean:374:43: warning: this tactic is never executed
+scratch/Q4221Combined.lean:375:43: warning: this tactic is never executed
 
 Note: This linter can be disabled with `set_option linter.unreachableTactic false`
-scratch/Q4221Combined.lean:394:30: warning: this tactic is never executed
+scratch/Q4221Combined.lean:395:30: warning: this tactic is never executed
 
 Note: This linter can be disabled with `set_option linter.unreachableTactic false`
-scratch/Q4221Combined.lean:394:43: warning: this tactic is never executed
+scratch/Q4221Combined.lean:395:43: warning: this tactic is never executed
 
 Note: This linter can be disabled with `set_option linter.unreachableTactic false`
-scratch/Q4221Combined.lean:398:30: warning: this tactic is never executed
+scratch/Q4221Combined.lean:399:30: warning: this tactic is never executed
 
 Note: This linter can be disabled with `set_option linter.unreachableTactic false`
-scratch/Q4221Combined.lean:398:43: warning: this tactic is never executed
+scratch/Q4221Combined.lean:399:43: warning: this tactic is never executed
 
 Note: This linter can be disabled with `set_option linter.unreachableTactic false`
-scratch/Q4221Combined.lean:341:33: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:342:33: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:344:33: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:345:33: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:348:52: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:349:52: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:350:54: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:351:54: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:350:67: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:351:67: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:352:55: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:353:55: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:365:53: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:366:53: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:370:26: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:371:26: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:370:39: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:371:39: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:383:33: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:384:33: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:389:33: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:390:33: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:419:26: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:420:26: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:419:39: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:420:39: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:425:26: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:426:26: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:425:39: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+scratch/Q4221Combined.lean:426:39: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
 
 Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
-scratch/Q4221Combined.lean:348:69: warning: 'ring' tactic does nothing
+scratch/Q4221Combined.lean:349:69: warning: 'ring' tactic does nothing
 
 Note: This linter can be disabled with `set_option linter.unusedTactic false`
-scratch/Q4221Combined.lean:352:72: warning: 'ring' tactic does nothing
+scratch/Q4221Combined.lean:353:72: warning: 'ring' tactic does nothing
 
 Note: This linter can be disabled with `set_option linter.unusedTactic false`
-scratch/Q4221Combined.lean:365:70: warning: 'ring' tactic does nothing
+scratch/Q4221Combined.lean:366:70: warning: 'ring' tactic does nothing
 
 Note: This linter can be disabled with `set_option linter.unusedTactic false`
-scratch/Q4221Combined.lean:370:30: warning: 'norm_num' tactic does nothing
+scratch/Q4221Combined.lean:371:30: warning: 'norm_num' tactic does nothing
 
 Note: This linter can be disabled with `set_option linter.unusedTactic false`
-scratch/Q4221Combined.lean:374:30: warning: 'norm_num' tactic does nothing
+scratch/Q4221Combined.lean:375:30: warning: 'norm_num' tactic does nothing
 
 Note: This linter can be disabled with `set_option linter.unusedTactic false`
-scratch/Q4221Combined.lean:374:43: warning: 'ring' tactic does nothing
+scratch/Q4221Combined.lean:375:43: warning: 'ring' tactic does nothing
 
 Note: This linter can be disabled with `set_option linter.unusedTactic false`
-scratch/Q4221Combined.lean:394:30: warning: 'norm_num' tactic does nothing
+scratch/Q4221Combined.lean:395:30: warning: 'norm_num' tactic does nothing
 
 Note: This linter can be disabled with `set_option linter.unusedTactic false`
-scratch/Q4221Combined.lean:394:43: warning: 'ring' tactic does nothing
+scratch/Q4221Combined.lean:395:43: warning: 'ring' tactic does nothing
 
 Note: This linter can be disabled with `set_option linter.unusedTactic false`
-scratch/Q4221Combined.lean:398:30: warning: 'norm_num' tactic does nothing
+scratch/Q4221Combined.lean:399:30: warning: 'norm_num' tactic does nothing
 
 Note: This linter can be disabled with `set_option linter.unusedTactic false`
-scratch/Q4221Combined.lean:398:43: warning: 'ring' tactic does nothing
+scratch/Q4221Combined.lean:399:43: warning: 'ring' tactic does nothing
 
 Note: This linter can be disabled with `set_option linter.unusedTactic false`
-scratch/Q4221Combined.lean:419:30: warning: 'norm_num' tactic does nothing
+scratch/Q4221Combined.lean:420:30: warning: 'norm_num' tactic does nothing
 
 Note: This linter can be disabled with `set_option linter.unusedTactic false`
-scratch/Q4221Combined.lean:425:30: warning: 'norm_num' tactic does nothing
+scratch/Q4221Combined.lean:426:30: warning: 'norm_num' tactic does nothing
 
 Note: This linter can be disabled with `set_option linter.unusedTactic false`
-scratch/Q4221Combined.lean:454:0: error: Invalid `end`: There is no current scope to end
-
-Note: Scopes are introduced using `namespace` and `section`
+scratch/Q4221Combined.lean:489:31: error: omega could not prove the goal:
+a possible counterexample may satisfy the constraints
+  a ≥ 0
+where
+ a := ↑(Rat.den 240)
+scratch/Q4221Combined.lean:496:12: error(lean.unknownIdentifier): Unknown constant `Int.pow_emod`
+scratch/Q4221Combined.lean:483:45: error: unsolved goals
+x : ℚ
+hnum : (x ^ 2).num = Rat.num 240
+hden : (x ^ 2).den = Rat.den 240
+hden1 : x.den * x.den = 1
+hxden : x.den = 1
+hx : x = ↑x.num
+h : x.num ^ 2 = 240
+hmod3 : 3 ∣ x.num ^ 2
+⊢ False
+scratch/Q4221Combined.lean:558:41: error: Application type mismatch: The argument
+  hcurve
+has type
+  y ^ 2 = 144
+but is expected to have type
+  ?m.432 ^ 2 = ?m.433 ^ 2
+in the application
+  sq_eq_sq_iff_eq_or_eq_neg.mp hcurve
+scratch/Q4221Combined.lean:566:41: error: Application type mismatch: The argument
+  hcurve
+has type
+  y ^ 2 = 400
+but is expected to have type
+  ?m.482 ^ 2 = ?m.483 ^ 2
+in the application
+  sq_eq_sq_iff_eq_or_eq_neg.mp hcurve
 COMBINED_STATUS=1
 EXIT_STATUS=1
