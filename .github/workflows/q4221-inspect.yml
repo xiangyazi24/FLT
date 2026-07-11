@@ -26,16 +26,16 @@ jobs:
         run: lake exe cache get
       - name: Build Mathlib umbrella
         run: lake build Mathlib
-      - name: Compile probe and persist output
+      - name: Compile Q4221 core and persist output
         shell: bash
         run: |
           set +e
-          lake env lean scratch/Q4221Api.lean > scratch/Q4221-output.txt 2>&1
+          lake env lean scratch/Q4221Core.lean > scratch/Q4221-output.txt 2>&1
           status=$?
           printf '\nEXIT_STATUS=%s\n' "$status" >> scratch/Q4221-output.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add scratch/Q4221-output.txt
-          git commit -m 'Record Q4221 API probe [skip ci]' || true
+          git commit -m 'Record Q4221 core diagnostics [skip ci]' || true
           git push origin HEAD:q4221-check
           exit "$status"
