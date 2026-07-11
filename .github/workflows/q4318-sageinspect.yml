@@ -6,8 +6,6 @@ on:
     paths:
       - scratch/Q4318SageInspect.sage
       - .github/workflows/q4318-sageinspect.yml
-  pull_request:
-    branches: [scratch]
   workflow_dispatch:
 
 permissions:
@@ -31,12 +29,13 @@ jobs:
           echo EXIT_STATUS=$? >> scratch/Q4318SageInspect.out
           cat scratch/Q4318SageInspect.out
           exit 0
-      - name: Persist output
+      - name: Persist output through contents API
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add scratch/Q4318SageInspect.out
-          git commit -m 'Record Q4318 Sage inspection [skip ci]' || true
-          git push origin HEAD:q4318-uv-final
+          enc=$(base64 -w0 scratch/Q4318SageInspect.out)
+          gh api --method PUT repos/${{ github.repository }}/contents/scratch/Q4318SageInspect.out \
+            -f message='Record Q4318 Sage inspection [skip ci]' \
+            -f content="$enc" \
+            -f branch=q4318-uv-final
