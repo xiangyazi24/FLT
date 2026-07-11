@@ -33,25 +33,25 @@ lemma no_int_sq_240 (z : ℤ) : z ^ 2 ≠ 240 := by
   intro h
   have hz : z ≤ -16 ∨ (-15 ≤ z ∧ z ≤ 15) ∨ 16 ≤ z := by omega
   rcases hz with hz | hz | hz
-  · have hp : 0 ≤ (-z - 16) * (-z + 16) := by positivity
+  · have hp : 0 ≤ (-z - 16) * (-z + 16) :=
+      mul_nonneg (by omega) (by omega)
     nlinarith
-  · have hp : 0 ≤ (z + 15) * (15 - z) := by positivity
+  · have hp : 0 ≤ (z + 15) * (15 - z) :=
+      mul_nonneg (by omega) (by omega)
     nlinarith
-  · have hp : 0 ≤ (z - 16) * (z + 16) := by positivity
+  · have hp : 0 ≤ (z - 16) * (z + 16) :=
+      mul_nonneg (by omega) (by omega)
     nlinarith
 
 lemma no_rat_sq_240 (x : ℚ) : x ^ 2 ≠ 240 := by
   intro h
-  have hden := congrArg Rat.den h
-  have hden1 : x.den * x.den = 1 := by
-    simpa [pow_two, Rat.mul_self_den] using hden
-  have hxden : x.den = 1 := by omega
-  have hx : x = (x.num : ℚ) := by
-    rw [← Rat.num_divInt_den x, hxden]
-    simp
-  rw [hx] at h
-  norm_cast at h
-  exact no_int_sq_240 x.num h
+  have hsQ : IsSquare (240 : ℚ) := by
+    refine ⟨x, ?_⟩
+    nlinarith
+  have hsZ : IsSquare (240 : ℤ) := Rat.isSquare_intCast_iff.mp hsQ
+  rcases hsZ with ⟨z, hz⟩
+  apply no_int_sq_240 z
+  nlinarith
 
 lemma duplicate_to_x0_impossible {x y : ℚ}
     (hy : y ≠ 0)
