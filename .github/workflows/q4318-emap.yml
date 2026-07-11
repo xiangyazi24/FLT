@@ -6,6 +6,11 @@ on:
     paths:
       - scratch/Q4318EMapFit.py
       - .github/workflows/q4318-emap.yml
+  pull_request:
+    branches: [scratch]
+    paths:
+      - scratch/Q4318EMapFit.py
+      - .github/workflows/q4318-emap.yml
   workflow_dispatch:
 
 permissions:
