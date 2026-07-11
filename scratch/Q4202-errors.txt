@@ -1,24 +1,9 @@
-✔ [8564/8566] Built scratch.FermatFourthDifferenceN16 (3.8s)
-⚠ [8565/8566] Built scratch.Q4202Check2 (8.7s)
-warning: scratch/Q4202Check2.lean:191:31: `simp [haZero] at ha` is a flexible tactic modifying `ha`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+✔ [8564/8566] Built scratch.FermatFourthDifferenceN16 (3.9s)
+✖ [8565/8566] Building scratch.Q4202QuarticExplicit2 (8.8s)
+trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/bin/lean /home/runner/work/FLT/FLT/scratch/Q4202QuarticExplicit2.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q4202QuarticExplicit2.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q4202QuarticExplicit2.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q4202QuarticExplicit2.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q4202QuarticExplicit2.setup.json --json
+error: scratch/Q4202QuarticExplicit2.lean:32:9: Tactic `cases` failed with a nested error:
+Tactic `induction` failed: recursor `Exists.casesOn` can only eliminate into `Prop`
 
-Note: This linter can be disabled with `set_option linter.flexible false`
-info: scratch/Q4202Check2.lean:191:55: `exact hM0 ha` uses `ha`!
-warning: scratch/Q4202Check2.lean:191:31: `simp [haZero] at ha` is a flexible tactic modifying `ha`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
-
-Note: This linter can be disabled with `set_option linter.flexible false`
-info: scratch/Q4202Check2.lean:191:55: `exact hM0 ha` uses `ha`!
-✖ [8566/8566] Building scratch.Q4202QuarticExplicit (8.8s)
-trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/bin/lean /home/runner/work/FLT/FLT/scratch/Q4202QuarticExplicit.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q4202QuarticExplicit.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q4202QuarticExplicit.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q4202QuarticExplicit.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q4202QuarticExplicit.setup.json --json
-error: scratch/Q4202QuarticExplicit.lean:9:2: failed to generate projection `MazurProof.CyclicExclusion16.CoprimeRectangle.α` for the 'Prop'-valued type `CoprimeRectangle`, field must be a proof, but it has type
-  ℤ
-info: scratch/Q4202QuarticExplicit.lean:52:4: Try this:
-  [apply] ring_nf
-  
-  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
-    
-  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
-error: scratch/Q4202QuarticExplicit.lean:49:26: unsolved goals
 r s m n : ℤ
 hrs : IsCoprime r s
 hr0 : r ≠ 0
@@ -26,139 +11,23 @@ hm0 : m ≠ 0
 hprod : r * s = m * n
 hg0 : r.gcd m ≠ 0
 hgpos : 0 < r.gcd m
-β γ : ℤ
-hβγgcd : β.gcd γ = 1
-hr : r = β * ↑(r.gcd m)
-hm : m = γ * ↑(r.gcd m)
-α : ℤ := ↑(r.gcd m)
-hα0 : α ≠ 0
-⊢ β * ↑(r.gcd m) = β * ↑((β * ↑(r.gcd m)).gcd m)
-info: scratch/Q4202QuarticExplicit.lean:56:4: Try this:
-  [apply] ring_nf
-  
-  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
-    
-  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
-error: scratch/Q4202QuarticExplicit.lean:53:26: unsolved goals
-r s m n : ℤ
-hrs : IsCoprime r s
-hr0 : r ≠ 0
-hm0 : m ≠ 0
-hprod : r * s = m * n
-hg0 : r.gcd m ≠ 0
-hgpos : 0 < r.gcd m
-β γ : ℤ
-hβγgcd : β.gcd γ = 1
-hr : r = β * ↑(r.gcd m)
-hm : m = γ * ↑(r.gcd m)
-α : ℤ := ↑(r.gcd m)
-hα0 : α ≠ 0
-hr' : r = α * β
-⊢ γ * ↑(r.gcd m) = γ * ↑(r.gcd (γ * ↑(r.gcd m)))
-error: scratch/Q4202QuarticExplicit.lean:70:6: invalid 'calc' step, left-hand side is
-  α * (β * s) : ℤ
-but is expected to be
-  β * s * α : ℤ
-error: scratch/Q4202QuarticExplicit.lean:72:6: invalid 'calc' step, right-hand side is
-  α * (γ * n) : ℤ
-but is expected to be
-  γ * n * α : ℤ
-error: scratch/Q4202QuarticExplicit.lean:90:6: invalid 'calc' step, left-hand side is
-  β * γ * ε : ℤ
-but is expected to be
-  ε * (β * γ) : ℤ
-error: scratch/Q4202QuarticExplicit.lean:92:6: invalid 'calc' step, right-hand side is
-  β * γ * δ : ℤ
-but is expected to be
-  δ * (β * γ) : ℤ
-error: scratch/Q4202QuarticExplicit.lean:99:4: invalid {...} notation, structure type expected
-  CoprimeRectangle r s m n
-error: scratch/Q4202QuarticExplicit.lean:197:6: invalid 'calc' step, left-hand side is
-  α ^ 2 * δ ^ 2 * h₁ : ℤ
-but is expected to be
-  h₁ * (α ^ 2 * δ ^ 2) : ℤ
-error: scratch/Q4202QuarticExplicit.lean:199:6: invalid 'calc' step, right-hand side is
-  α ^ 2 * δ ^ 2 * h₂ : ℤ
-but is expected to be
-  h₂ * (α ^ 2 * δ ^ 2) : ℤ
-error: scratch/Q4202QuarticExplicit.lean:202:8: Tactic `rewrite` failed: Did not find an occurrence of the pattern
-  γ ^ 2 - β ^ 2
-in the target expression
-  (α * δ * h₁) ^ 2 = γ ^ 4 - β ^ 4
-
-r s m n : ℤ
-hrs : IsCoprime r s
-hr0 : r ≠ 0
-hs0 : s ≠ 0
-hm0 : m ≠ 0
-hprod : r * s = m * n
-hsum : r ^ 2 + s ^ 2 = m ^ 2 - n ^ 2
-α β γ δ : ℤ
-hr : r = α * β
-hs : s = γ * δ
-hm : m = α * γ
-hn : n = β * δ
-hαδ : IsCoprime α δ
-hβγ : IsCoprime β γ
-hα0 : α ≠ 0
-hδ0 : δ ≠ 0
-hβ0 : β ≠ 0
-hγ0 : γ ≠ 0
-hkey : α ^ 2 * (γ ^ 2 - β ^ 2) = δ ^ 2 * (γ ^ 2 + β ^ 2)
-hpowcp : IsCoprime (α ^ 2) (δ ^ 2)
-h₁ : ℤ
-hminus : γ ^ 2 - β ^ 2 = δ ^ 2 * h₁
-hplus : γ ^ 2 + β ^ 2 = α ^ 2 * h₁
-⊢ (α * δ * h₁) ^ 2 = γ ^ 4 - β ^ 4
-error: scratch/Q4202QuarticExplicit.lean:235:22: unsolved goals
-a b c : ℤ
-hab : IsCoprime a b
-h : a ^ 4 + b ^ 4 = 2 * c ^ 2
-p : ℤ
-hp : a = 2 * p + 1
-q : ℤ
-hq : b = 2 * q + 1
-r : ℤ := p + q + 1
-s : ℤ := p - q
-ha_rs : a = r + s
-hb_rs : b = r - s
-habsq : ¬a ^ 2 = b ^ 2
-hr0 : r ≠ 0
-hs : s = 0
-⊢ (r + 0) ^ 2 = (r - 0) ^ 2
-error: scratch/Q4202QuarticExplicit.lean:270:6: linarith failed to find a contradiction
-case inr
-a b c : ℤ
-hab : IsCoprime a b
-h : a ^ 4 + b ^ 4 = 2 * c ^ 2
-p : ℤ
-hp : a = 2 * p + 1
-q : ℤ
-hq : b = 2 * q + 1
-r : ℤ := p + q + 1
-s : ℤ := p - q
-ha_rs : a = r + s
-hb_rs : b = r - s
-habsq : ¬a ^ 2 = b ^ 2
-hr0 : r ≠ 0
-hs0 : s ≠ 0
-hrs : IsCoprime r s
-X : ℤ := r ^ 2 + s ^ 2
-Y : ℤ := 2 * r * s
-htrip : PythagoreanTriple X Y c
-hXYcp : IsCoprime X Y
-m n : ℤ
-_hc : c = m ^ 2 + n ^ 2 ∨ c = -(m ^ 2 + n ^ 2)
-hmngcd : m.gcd n = 1
-_hmnparity : m % 2 = 0 ∧ n % 2 = 1 ∨ m % 2 = 1 ∧ n % 2 = 0
-hsecond : X = 2 * m * n ∧ Y = m ^ 2 - n ^ 2
-k : ℤ
-hk : 2 * m * n = 2 * k + 1
-⊢ False
-failed
+x✝ : ∃ m' n', m'.gcd n' = 1 ∧ r = m' * ↑(r.gcd m) ∧ m = n' * ↑(r.gcd m)
+⊢ CoprimeRectangle r s m n
+error: scratch/Q4202QuarticExplicit2.lean:20:0: type of theorem `MazurProof.CyclicExclusion16.coprime_rectangle` is not a proposition
+  {r s m n : ℤ} → IsCoprime r s → r ≠ 0 → m ≠ 0 → r * s = m * n → CoprimeRectangle r s m n
+error: scratch/Q4202QuarticExplicit2.lean:132:6: (kernel) unknown constant 'MazurProof.CyclicExclusion16.coprime_rectangle'
 error: Lean exited with code 1
+⚠ [8566/8566] Built scratch.Q4202Check2 (9.2s)
+warning: scratch/Q4202Check2.lean:191:31: `simp [haZero] at ha` is a flexible tactic modifying `ha`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: scratch/Q4202Check2.lean:191:55: `exact hM0 ha` uses `ha`!
+warning: scratch/Q4202Check2.lean:191:31: `simp [haZero] at ha` is a flexible tactic modifying `ha`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: scratch/Q4202Check2.lean:191:55: `exact hM0 ha` uses `ha`!
 Some required targets logged failures:
-- scratch.Q4202QuarticExplicit
+- scratch.Q4202QuarticExplicit2
 error: build failed
 
 EXIT_STATUS=1
