@@ -3,6 +3,7 @@ import FLT.Assumptions.MazurProof.CyclicOrderArithmetic
 import FLT.Assumptions.MazurProof.CyclicExclusion20
 import FLT.Assumptions.MazurProof.CyclicExclusion25
 import FLT.Assumptions.MazurProof.CyclicExclusion27
+import FLT.Assumptions.MazurProof.CyclicExclusion49
 
 /-!
 # Assembly: cyclic order bound from named sub-axioms
@@ -30,6 +31,9 @@ Endpoint wired to a real theorem:
   front end is now proved through the generic odd-order Tate bridge.  The sole
   remaining input is the explicit raw division system
   `no_raw_order25_tate_obstruction`.
+* `49` — likewise reduced by the generic odd-order Tate bridge to
+  `preΨ'₄₉(0)=0` with the proper factor `preΨ'₇(0)≠0`; its remaining input is
+  `no_raw_order49_tate_obstruction`.
 * `27` — `CyclicExclusion27.no_rational_point_of_order_27`, via
   `X₀(27) ≅ {x³ + y³ = 1}` and Mathlib's `fermatLastTheoremThree`.  Its only
   remaining seam is the named geometric input `order27_to_fermat_cubic`, which
@@ -40,7 +44,7 @@ Endpoints kept as named sub-axioms, because no sound real theorem exists to
 wire:
 
 * `14, 15, 16, 18, 21` — the `CyclicExclusion` proofs still contain `sorry`.
-* `35, 49` — their final arithmetic input is not yet formalized.
+* `35` — its final arithmetic input is not yet formalized.
 
 Together with the prime-order input `mazur_prime_torsion_bound_sub`, these are
 exactly the named inputs reported by
@@ -66,7 +70,6 @@ axiom no_order_16 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPoin
 axiom no_order_18 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 18
 axiom no_order_21 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 21
 axiom no_order_35 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 35
-axiom no_order_49 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 49
 
 /-! ## Concrete exclusion wired to a real theorem -/
 
@@ -85,6 +88,10 @@ theorem no_order_25 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
 theorem no_order_27 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ HasRationalPointOfOrder E 27 :=
   CyclicExclusion27.no_rational_point_of_order_27 E
+
+theorem no_order_49 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ HasRationalPointOfOrder E 49 :=
+  CyclicExclusion49.no_rational_point_of_order_49 E
 
 /-! ## Composite dispatch -/
 
