@@ -20,7 +20,7 @@ lemma E0_discriminant (R : Type*) [CommRing R] :
 
 instance : (E0 (ZMod 2)).IsElliptic := by
   refine ⟨?_⟩
-  have h225 : (225 : ZMod 2) = 1 := by norm_num
+  have h225 : (225 : ZMod 2) = 1 := by native_decide
   rw [E0_discriminant, h225]
   exact isUnit_one
 
@@ -29,8 +29,8 @@ theorem E0_F2_exponent_four
     (P : WeierstrassCurve.Affine.Point (E0 (ZMod 2))) :
     4 • P = 0 := by
   cases P with
-  | zero => simp
+  | zero => norm_num
   | some x y h =>
-      fin_cases x <;> fin_cases y <;> native_decide
+      fin_cases x <;> fin_cases y <;> native_decide +revert
 
 end N15Reduction
