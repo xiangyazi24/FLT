@@ -35,6 +35,7 @@ jobs:
           perl -0pi -e 's/have hQrest : IsCoprime \(Q16 M N\) \(2 \* N \* \(M - N\)\) := by\n    have ht := \(hQ2\.mul_right hQN\)\.mul_right hQD\n    convert ht using 1\n    ring/have hQrest : IsCoprime (Q16 M N) (2 * N * (M - N)) :=\n    (hQ2.mul_right hQN).mul_right hQD/' scratch/Q4202Check2.lean
           perl -0pi -e 's/have hdone : r\.den = 1 := by omega/have hdone : r.den = 1 := by\n    nlinarith [r.den_pos]/' scratch/Q4202Check2.lean
           perl -0pi -e 's/  · left\n    rw \[hu, hMneg\]\n    norm_num\n\ndef A16/  · left\n    rw [hu, hMneg]\n    field_simp [show (N : ℚ) ≠ 0 by exact_mod_cast hN0]\n\ndef A16/' scratch/Q4202Check2.lean
+          perl -0pi -e 's/  · left\n    rw \[hu, hMneg\]\n    field_simp \[show \(N : ℚ\) ≠ 0 by exact_mod_cast hN0\]\n\ndef A16/  · left\n    rw [hu, hMneg]\n    have hNq : (N : ℚ) ≠ 0 := by exact_mod_cast hN0\n    simp [hNq]\n\ndef A16/' scratch/Q4202Check2.lean
       - name: Check Q4202 and persist diagnostics
         shell: bash
         run: |
