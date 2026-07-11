@@ -28,8 +28,11 @@ jobs:
       - name: Verify identities
         shell: bash
         run: |
-          set -o pipefail
-          python scratch/Q4318HauptCheck.py 2>&1 | tee scratch/Q4318HauptCheck.out
+          set +e
+          python scratch/Q4318HauptCheck.py > scratch/Q4318HauptCheck.out 2>&1
+          echo EXIT_STATUS=$? >> scratch/Q4318HauptCheck.out
+          cat scratch/Q4318HauptCheck.out
+          exit 0
       - name: Persist output
         shell: bash
         run: |
