@@ -1,0 +1,3 @@
+scratch/Q4202Check.lean:1:0: error: object file '/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean/Mathlib.olean' of module Mathlib does not exist
+
+EXIT_STATUS=1
