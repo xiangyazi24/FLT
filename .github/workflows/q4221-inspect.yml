@@ -26,7 +26,7 @@ jobs:
         run: lake exe cache get
       - name: Build Mathlib umbrella
         run: lake build Mathlib
-      - name: Compile Q4221 layers and persist output
+      - name: Compile latest Q4221 layers and persist output
         shell: bash
         run: |
           set +e
@@ -50,6 +50,6 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add scratch/Q4221-output.txt
-          git commit -m 'Record Q4221 layer diagnostics [skip ci]' || true
+          git commit -m 'Record latest Q4221 layer diagnostics [skip ci]' || true
           git push origin HEAD:q4221-check
           exit "$status"
