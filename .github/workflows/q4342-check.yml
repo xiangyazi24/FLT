@@ -1,0 +1,63 @@
+name: Q4342 structural check
+on:
+  push:
+    branches: [q4342-check]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install PARI and PostgreSQL client
+        run: |
+          sudo apt-get update -qq >/dev/null
+          sudo apt-get install -y pari-gp postgresql-client >/dev/null
+      - name: Query exact LMFDB records
+        env:
+          PGPASSWORD: lmfdb
+        shell: bash
+        run: |
+          set -euo pipefail
+          DB='postgresql://lmfdb@devmirror.lmfdb.xyz:5432/lmfdb'
+          echo Q4342_MF_BEGIN
+          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT * FROM mf_newforms WHERE label='18.2.c.a') t;" || true
+          echo Q4342_MF_END
+          echo Q4342_G2_BEGIN
+          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT * FROM g2c_curves WHERE label='324.a.648.1') t;" || true
+          echo Q4342_G2_END
+          echo Q4342_ENDO_BEGIN
+          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT * FROM g2c_endomorphisms WHERE label='324.a.648.1') t;" || true
+          echo Q4342_ENDO_END
+          echo Q4342_RATPTS_BEGIN
+          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT * FROM g2c_ratpts WHERE label='324.a.648.1') t;" || true
+          echo Q4342_RATPTS_END
+      - name: Frobenius polynomials and split tests
+        shell: bash
+        run: |
+          cat >/tmp/q4342.gp <<'GP'
+          f=x^6+4*x^5+10*x^4+10*x^3+5*x^2+2*x+1;
+          print("Q4342_PARI_BEGIN");
+          forprime(p=5,43,
+            if(p!=2 && p!=3,
+              P=hyperellcharpoly(Mod(1,p)*f);
+              print("P=",p," CHARPOLY=",lift(P)," FACTOR=",factor(lift(P))," JORDER=",subst(lift(P),x,1));
+            )
+          );
+          print("Q4342_PARI_END");
+          quit;
+          GP
+          gp -q /tmp/q4342.gp
+      - name: LMFDB API probes
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo Q4342_API_BEGIN
+          for u in \
+            'https://www.lmfdb.org/api/mf_newforms/?label=18.2.c.a&_format=json' \
+            'https://www.lmfdb.org/api/g2c_curves/?label=324.a.648.1&_format=json' \
+            'https://www.lmfdb.org/api/g2c_endomorphisms/?label=324.a.648.1&_format=json'; do
+            echo URL=$u
+            curl -sSL --max-time 30 "$u" | head -c 20000 || true
+            echo
+          done
+          echo Q4342_API_END
