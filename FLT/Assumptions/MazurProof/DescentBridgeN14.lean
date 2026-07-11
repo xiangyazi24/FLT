@@ -18,7 +18,7 @@ theorem obstruction_curve_N14_points_degenerate :
   intro u w h
   simp only [E_N14_AffineEquation] at h
   simp only [E_N14_DegenerateParameter]
-  exact ObstructionN14.obstruction_N14 u w h
+  exact _root_.obstruction_N14 u w h
 
 axiom Z2xZ14_gives_non_degenerate_N14_point
     (E : WeierstrassCurve ℚ) [E.IsElliptic]

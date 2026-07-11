@@ -1,4 +1,4 @@
-import FLT.Assumptions.MazurProof.TorsionDefs
+import FLT.Assumptions.MazurProof.TateOrder18
 
 /-!
 # Cyclic order 18 exclusion
@@ -26,7 +26,8 @@ theorem order18_to_tate_obstruction
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     (h18 : HasRationalPointOfOrder E 18) :
     ∃ b c X : ℚ, Obstruction18 b c X := by
-  sorry
+  simpa [Obstruction18, F9, T2, TateNFDivision.F9, TateNFDivision.T2] using
+    TateOrder18.order18_to_tate_obstruction E h18
 
 theorem no_obstruction18 : ¬ ∃ b c X : ℚ, Obstruction18 b c X := by
   sorry

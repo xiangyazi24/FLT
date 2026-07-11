@@ -19,7 +19,7 @@ theorem rank_zero_96a1 :
     ∀ u w : ℚ, w ^ 2 = u ^ 3 + u ^ 2 - 2 * u →
       (u = -2 ∧ w = 0) ∨ (u = 0 ∧ w = 0) ∨ (u = 1 ∧ w = 0) := by
   intro u w h
-  rcases ObstructionN14.obstruction_N14 u w h with hu | hu | hu
+  rcases obstruction_N14 u w h with hu | hu | hu
   · left; exact ⟨hu, by nlinarith [sq_nonneg w, hu]⟩
   · right; left; exact ⟨hu, by nlinarith [sq_nonneg w, hu]⟩
   · right; right; exact ⟨hu, by nlinarith [sq_nonneg w, hu]⟩

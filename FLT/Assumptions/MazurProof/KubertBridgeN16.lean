@@ -163,6 +163,60 @@ theorem eta16bc_sq_eq_disc_of_Q16bc_root
   rw [hQ, mul_zero] at h
   nlinarith
 
+/-! ## Discriminant factorization: integralizing the residual square condition
+
+`discQ16bc b c` is a rational function whose numerator, after clearing the
+square denominator `(c ^ 2 * tateM16 b c ^ 2) ^ 2`, factors as the negative of
+`descentG1 b c * descentG2 b c` (identity checked by `ring`).  Consequently the
+residual 2-torsion square condition
+`eta ^ 2 = discQ16bc b c` is equivalent to the *polynomial* square condition
+
+  `(eta * (c ^ 2 * tateM16 b c ^ 2)) ^ 2 = -(descentG1 b c * descentG2 b c)`,
+
+an integral entry point for the remaining descent on the order-16 modular
+locus.  Any coprimality or factor-splitting property needed later must be proved
+separately. -/
+
+def descentG1 (b c : ℚ) : ℚ :=
+  6 * b ^ 3 - 4 * b ^ 2 * c ^ 2 - 12 * b ^ 2 * c + b * c ^ 4 + 2 * b * c ^ 3
+    + 7 * b * c ^ 2 + c ^ 4 - c ^ 3
+
+def descentG2 (b c : ℚ) : ℚ :=
+  8 * b ^ 9 - 16 * b ^ 8 * c ^ 2 - 48 * b ^ 8 * c - 28 * b ^ 7 * c ^ 4 + 72 * b ^ 7 * c ^ 3
+    + 124 * b ^ 7 * c ^ 2 + 80 * b ^ 6 * c ^ 6 + 144 * b ^ 6 * c ^ 5 - 172 * b ^ 6 * c ^ 4
+    - 180 * b ^ 6 * c ^ 3 - 50 * b ^ 5 * c ^ 8 - 264 * b ^ 5 * c ^ 7 - 276 * b ^ 5 * c ^ 6
+    + 296 * b ^ 5 * c ^ 5 + 158 * b ^ 5 * c ^ 4 + 12 * b ^ 4 * c ^ 10 + 84 * b ^ 4 * c ^ 9
+    + 372 * b ^ 4 * c ^ 8 + 292 * b ^ 4 * c ^ 7 - 360 * b ^ 4 * c ^ 6 - 80 * b ^ 4 * c ^ 5
+    - b ^ 3 * c ^ 12 - 6 * b ^ 3 * c ^ 11 - 73 * b ^ 3 * c ^ 10 - 316 * b ^ 3 * c ^ 9
+    - 201 * b ^ 3 * c ^ 8 + 286 * b ^ 3 * c ^ 7 + 15 * b ^ 3 * c ^ 6 + 13 * b ^ 2 * c ^ 12
+    + 39 * b ^ 2 * c ^ 11 + 130 * b ^ 2 * c ^ 10 + 78 * b ^ 2 * c ^ 9 - 139 * b ^ 2 * c ^ 8
+    + 7 * b ^ 2 * c ^ 7 + 13 * b * c ^ 12 - 12 * b * c ^ 10 + 36 * b * c ^ 9 - 5 * b * c ^ 8
+    - c ^ 12 + 3 * c ^ 11 - 3 * c ^ 10 + c ^ 9
+
+/-- The exact discriminant factorization (checked by `ring`): clearing the square
+denominator `(c ^ 2 * tateM16 b c ^ 2) ^ 2` turns `discQ16bc` into the negated
+product `-(descentG1 * descentG2)`. -/
+theorem discQ16bc_mul_sq_den (b c : ℚ) (hc : c ≠ 0) (hM : tateM16 b c ≠ 0) :
+    discQ16bc b c * (c ^ 2 * (tateM16 b c) ^ 2) ^ 2
+      = -(descentG1 b c * descentG2 b c) := by
+  unfold discQ16bc tateX8 tateN16 tateL16 descentG1 descentG2
+  field_simp [hc, hM]
+  unfold tateM16
+  ring
+
+/-- Integralized form of the residual 2-torsion square condition.  From
+`eta ^ 2 = discQ16bc b c` (with `c ≠ 0`, `tateM16 b c ≠ 0`) one obtains a genuine
+*polynomial* square identity, eliminating all denominators. -/
+theorem descent_square_of_disc
+    (b c eta : ℚ) (hc : c ≠ 0) (hM : tateM16 b c ≠ 0)
+    (hDisc : eta ^ 2 = discQ16bc b c) :
+    (eta * (c ^ 2 * (tateM16 b c) ^ 2)) ^ 2
+      = -(descentG1 b c * descentG2 b c) := by
+  have h := discQ16bc_mul_sq_den b c hc hM
+  have hrw : (eta * (c ^ 2 * (tateM16 b c) ^ 2)) ^ 2
+      = eta ^ 2 * (c ^ 2 * (tateM16 b c) ^ 2) ^ 2 := by ring
+  rw [hrw, hDisc, h]
+
 /-! ## Checked group-theoretic extraction from `ZMod 2 x ZMod 16` -/
 
 private def zmod16ToZmod2xZmod16 : ZMod 16 →+ (ZMod 2 × ZMod 16) where
