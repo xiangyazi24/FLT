@@ -1,49 +1,15 @@
 === CORE ===
-scratch/Q4221Core.lean:58:2: error: Tactic `simp` failed with a nested error:
-maximum recursion depth has been reached
-use `set_option maxRecDepth <num>` to increase limit
-use `set_option diagnostics true` to get diagnostic information
-Try this:
-  [apply] abel_nf
-scratch/Q4221Core.lean:116:14: error: unsolved goals
-case succ
-G : Type u_1
-inst✝ : AddCommGroup G
-H : AddSubgroup G
-hdecomp : ∀ (x : G), ∃ h y, x = ↑h + 2 • y
-x : G
-n : ℕ
-h : ↥H
-y : G
-hxy : x = ↑h + 2 ^ n • y
-h' : ↥H
-z : G
-hyz : y = ↑h' + 2 • z
-⊢ ↑h + (2 ^ n • ↑h' + 2 ^ n • 2 • z) = ↑h + (2 ^ n • ↑h' + 2 • 2 ^ n • z)
-scratch/Q4221Core.lean:138:31: error: unsolved goals
-G : Type u_1
-inst✝ : AddCommGroup G
-H : AddSubgroup G
-hdecomp : ∀ (x : G), ∃ h y, x = ↑h + 2 • y
-hexp : ∀ (h : ↥H), 4 • ↑h = 0
-x : G
-n : ℕ
-h : ↥H
-y : G
-hxy : x = ↑h + 2 ^ n • y
-⊢ 4 • 2 ^ n • y = 2 ^ n • 4 • y
-scratch/Q4221Core.lean:140:39: error: unsolved goals
-G : Type u_1
-inst✝ : AddCommGroup G
-H : AddSubgroup G
-hdecomp : ∀ (x : G), ∃ h y, x = ↑h + 2 • y
-hexp : ∀ (h : ↥H), 4 • ↑h = 0
-x : G
-n : ℕ
-h : ↥H
-y : G
-hxy : x = ↑h + 2 ^ n • y
-⊢ 4 • 2 ^ n • y = 2 ^ n • 4 • y
+scratch/Q4221Core.lean:122:18: error(lean.unknownIdentifier): Unknown identifier `nsmul_nsmul`
+scratch/Q4221Core.lean:122:6: error: Type mismatch: After simplification, term
+  have this :=
+    Eq.mpr (id (congrArg (fun _a => _a • z = (2 * 2 ^ n) • z) (Nat.mul_comm (2 ^ n) 2))) (Eq.refl ((2 * 2 ^ n) • z));
+  this
+ has type
+  (2 ^ n * 2) • z = (2 * 2 ^ n) • z
+but is expected to have type
+  ↑h = ↑h + 2 ^ n • ↑h'
+scratch/Q4221Core.lean:139:17: error(lean.unknownIdentifier): Unknown identifier `nsmul_nsmul`
+scratch/Q4221Core.lean:139:6: error: `simp` made no progress
 CORE_STATUS=1
 === VALUATION ===
 scratch/Q4221Valuation.lean:64:2: error: omega could not prove the goal:
