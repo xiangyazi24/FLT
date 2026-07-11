@@ -1,37 +1,21 @@
-WeierstrassCurve.{u} (R : Type u) : Type u
-WeierstrassCurve.Affine.Point.{r} {R : Type r} [CommRing R] (W' : WeierstrassCurve.Affine R) : Type r
-WeierstrassCurve.Affine.Point.mk.{r} {R : Type r} [CommRing R] {W' : WeierstrassCurve.Affine R} [Nontrivial R]
-  [WeierstrassCurve.IsElliptic W'] {x y : R} (h : W'.Equation x y) : W'.Point
-scratch/Q4221Api.lean:6:7: error(lean.unknownIdentifier): Unknown constant `WeierstrassCurve.Affine.Point.pointEquiv`
-WeierstrassCurve.Affine.Point.add_self_of_Y_ne.{u} {F : Type u} [Field F] {W : WeierstrassCurve.Affine F}
-  [DecidableEq F] {x₁ y₁ : F} {h₁ : W.Nonsingular x₁ y₁} (hy : y₁ ≠ W.negY x₁ y₁) :
-  WeierstrassCurve.Affine.Point.some x₁ y₁ h₁ + WeierstrassCurve.Affine.Point.some x₁ y₁ h₁ =
-    WeierstrassCurve.Affine.Point.some (W.addX x₁ x₁ (W.slope x₁ x₁ y₁ y₁)) (W.addY x₁ x₁ y₁ (W.slope x₁ x₁ y₁ y₁)) ⋯
-WeierstrassCurve.Affine.slope_of_Y_ne.{u} {F : Type u} [Field F] {W : WeierstrassCurve.Affine F} [DecidableEq F]
-  {x₁ x₂ y₁ y₂ : F} (hx : x₁ = x₂) (hy : y₁ ≠ W.negY x₂ y₂) :
-  W.slope x₁ x₂ y₁ y₂ = (3 * x₁ ^ 2 + 2 * W.a₂ * x₁ + W.a₄ - W.a₁ * y₁) / (y₁ - W.negY x₁ y₁)
-WeierstrassCurve.Affine.addX.{r} {R : Type r} [CommRing R] (W' : WeierstrassCurve.Affine R) (x₁ x₂ ℓ : R) : R
-WeierstrassCurve.Affine.addY.{r} {R : Type r} [CommRing R] (W' : WeierstrassCurve.Affine R) (x₁ x₂ y₁ ℓ : R) : R
-padicValRat (p : ℕ) (q : ℚ) : ℤ
-padicValRat.mul {p : ℕ} [hp : Fact (Nat.Prime p)] {q r : ℚ} (hq : q ≠ 0) (hr : r ≠ 0) :
-  padicValRat p (q * r) = padicValRat p q + padicValRat p r
-padicValRat.pow {p : ℕ} [hp : Fact (Nat.Prime p)] {q : ℚ} (hq : q ≠ 0) {k : ℕ} :
-  padicValRat p (q ^ k) = ↑k * padicValRat p q
-padicValRat.add_eq_of_lt {p : ℕ} [hp : Fact (Nat.Prime p)] {q r : ℚ} (hqr : q + r ≠ 0) (hq : q ≠ 0) (hr : r ≠ 0)
-  (hval : padicValRat p q < padicValRat p r) : padicValRat p (q + r) = padicValRat p q
-padicValRat.min_le_padicValRat_add {p : ℕ} [hp : Fact (Nat.Prime p)] {q r : ℚ} (hqr : q + r ≠ 0) :
-  min (padicValRat p q) (padicValRat p r) ≤ padicValRat p (q + r)
-Rat.num_divInt_den (a : ℚ) : Rat.divInt a.num ↑a.den = a
-WeierstrassCurve.map.{u, v} {R : Type u} [CommRing R] (W : WeierstrassCurve R) {A : Type v} [CommRing A] (f : R →+* A) :
-  WeierstrassCurve A
-WeierstrassCurve.Affine.Point.map.{r, s, u, v} {R : Type r} {S : Type s} {F : Type u} {K : Type v} [CommRing R]
-  [CommRing S] [Field F] [Field K] {W' : WeierstrassCurve.Affine R} [DecidableEq F] [DecidableEq K] [Algebra R S]
-  [Algebra R F] [Algebra S F] [IsScalarTower R S F] [Algebra R K] [Algebra S K] [IsScalarTower R S K] (f : F →ₐ[S] K) :
-  (W'.baseChange F).Point →+ (W'.baseChange K).Point
-WeierstrassCurve.VariableChange.{u} (R : Type u) [CommRing R] : Type u
-scratch/Q4221Api.lean:20:7: error(lean.unknownIdentifier): Unknown constant `WeierstrassCurve.variableChange`
-scratch/Q4221Api.lean:21:7: error(lean.unknownIdentifier): Unknown constant `WeierstrassCurve.changeVariables`
-scratch/Q4221Api.lean:22:7: error(lean.unknownIdentifier): Unknown constant `WeierstrassCurve.linearMap`
-Ideal.span.{u} {α : Type u} [Semiring α] (s : Set α) : Ideal α
+scratch/Q4221Core.lean:50:41: error: unsolved goals
+⊢ (match Point.mk ⋯ with
+    | zero => 0
+    | Point.some x y h => -x / y) =
+    6 / 7
+scratch/Q4221Core.lean:53:56: error: unsolved goals
+⊢ ↑(padicValInt 2 6) - ↑(padicValNat 2 7) = 1
+scratch/Q4221Core.lean:120:6: error: 'change' tactic failed, pattern
+  ↑h + 2 ^ n • (↑h' + 2 • z) = ↑h + 2 ^ n • ↑h' + 2 ^ n.succ • z
+is not definitionally equal to target
+  ↑h + (2 ^ n • ↑h' + 2 ^ n • 2 • z) = ↑h + 2 ^ n • ↑h' + 2 ^ (n + 1) • z
+scratch/Q4221Core.lean:119:28: warning: This simp argument is unused:
+  nsmul_eq_mul
+
+Hint: Omit it from the simp argument list.
+  simp only [nsmul_add,̵ ̵n̵s̵m̵u̵l̵_̵e̵q̵_̵m̵u̵l̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+scratch/Q4221Core.lean:137:2: error: `simp` made no progress
 
 EXIT_STATUS=1
