@@ -1,23 +1,49 @@
 === CORE ===
-scratch/Q4221Core.lean:50:41: error: unsolved goals
-⊢ (match Point.mk ⋯ with
-    | zero => 0
-    | Point.some x y h => -x / y) =
-    6 / 7
-scratch/Q4221Core.lean:53:56: error: unsolved goals
-⊢ ↑(padicValInt 2 6) - ↑(padicValNat 2 7) = 1
-scratch/Q4221Core.lean:120:6: error: 'change' tactic failed, pattern
-  ↑h + 2 ^ n • (↑h' + 2 • z) = ↑h + 2 ^ n • ↑h' + 2 ^ n.succ • z
-is not definitionally equal to target
-  ↑h + (2 ^ n • ↑h' + 2 ^ n • 2 • z) = ↑h + 2 ^ n • ↑h' + 2 ^ (n + 1) • z
-scratch/Q4221Core.lean:119:28: warning: This simp argument is unused:
-  nsmul_eq_mul
-
-Hint: Omit it from the simp argument list.
-  simp only [nsmul_add,̵ ̵n̵s̵m̵u̵l̵_̵e̵q̵_̵m̵u̵l̵]
-
-Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-scratch/Q4221Core.lean:137:2: error: `simp` made no progress
+scratch/Q4221Core.lean:58:2: error: Tactic `simp` failed with a nested error:
+maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+Try this:
+  [apply] abel_nf
+scratch/Q4221Core.lean:116:14: error: unsolved goals
+case succ
+G : Type u_1
+inst✝ : AddCommGroup G
+H : AddSubgroup G
+hdecomp : ∀ (x : G), ∃ h y, x = ↑h + 2 • y
+x : G
+n : ℕ
+h : ↥H
+y : G
+hxy : x = ↑h + 2 ^ n • y
+h' : ↥H
+z : G
+hyz : y = ↑h' + 2 • z
+⊢ ↑h + (2 ^ n • ↑h' + 2 ^ n • 2 • z) = ↑h + (2 ^ n • ↑h' + 2 • 2 ^ n • z)
+scratch/Q4221Core.lean:138:31: error: unsolved goals
+G : Type u_1
+inst✝ : AddCommGroup G
+H : AddSubgroup G
+hdecomp : ∀ (x : G), ∃ h y, x = ↑h + 2 • y
+hexp : ∀ (h : ↥H), 4 • ↑h = 0
+x : G
+n : ℕ
+h : ↥H
+y : G
+hxy : x = ↑h + 2 ^ n • y
+⊢ 4 • 2 ^ n • y = 2 ^ n • 4 • y
+scratch/Q4221Core.lean:140:39: error: unsolved goals
+G : Type u_1
+inst✝ : AddCommGroup G
+H : AddSubgroup G
+hdecomp : ∀ (x : G), ∃ h y, x = ↑h + 2 • y
+hexp : ∀ (h : ↥H), 4 • ↑h = 0
+x : G
+n : ℕ
+h : ↥H
+y : G
+hxy : x = ↑h + 2 ^ n • y
+⊢ 4 • 2 ^ n • y = 2 ^ n • 4 • y
 CORE_STATUS=1
 === VALUATION ===
 scratch/Q4221Valuation.lean:17:38: warning: Variable name `hq0` is not explicitly referenced.
