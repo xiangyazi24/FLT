@@ -3,6 +3,8 @@ name: Q4263 check
 on:
   push:
     branches: [q4221-finalcheck]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
