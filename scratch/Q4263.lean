@@ -102,6 +102,20 @@ lemma two_mul {k : ℤ} {q : ℚ} (hq : VAtLeast k q) :
   have h := htwo.mul hq
   simpa only [add_comm] using h
 
+lemma natCast (n : ℕ) : VAtLeast 0 (n : ℚ) := by
+  by_cases hn : n = 0
+  · simp [hn, VAtLeast]
+  right
+  exact zero_le_padicValRat_of_nat n
+
+lemma intCast (z : ℤ) : VAtLeast 0 (z : ℚ) := by
+  by_cases hz : (z : ℚ) = 0
+  · exact Or.inl hz
+  right
+  change 0 ≤ padicValRat 2 (z : ℚ)
+  rw [padicValRat.of_int]
+  exact Int.natCast_nonneg _
+
 lemma sum {ι : Type*} {s : Finset ι} {f : ι → ℚ} {k : ℤ}
     (h : ∀ i ∈ s, VAtLeast k (f i)) :
     VAtLeast k (∑ i ∈ s, f i) := by
@@ -259,6 +273,15 @@ section ReductionKernel
 
 variable {G A : Type*} [AddCommGroup G] [AddCommGroup A]
 
+/-- A finite additive group of cardinality four has exponent dividing four. -/
+theorem four_smul_eq_zero_of_card_four [Fintype A]
+    (hcard : Fintype.card A = 4) (Q : A) : (4 : ℕ) • Q = 0 := by
+  have hdvd : AddMonoid.exponent A ∣ 4 := by
+    rw [← hcard]
+    exact AddGroup.exponent_dvd_card
+  obtain ⟨k, hk⟩ := hdvd
+  rw [hk, mul_nsmul, AddMonoid.exponent_nsmul_eq_zero, nsmul_zero]
+
 /-- If the reduced group has exponent four, then `4P` lies in the kernel of
 reduction. -/
 theorem four_smul_mem_reduction_ker
@@ -267,6 +290,13 @@ theorem four_smul_mem_reduction_ker
     (P : G) : (4 : ℕ) • P ∈ red.ker := by
   change red ((4 : ℕ) • P) = 0
   rw [map_nsmul, hexp]
+
+/-- Cardinality-four version of the preceding lemma. -/
+theorem four_smul_mem_reduction_ker_of_card_four [Fintype A]
+    (red : G →+ A) (hcard : Fintype.card A = 4) (P : G) :
+    (4 : ℕ) • P ∈ red.ker := by
+  apply four_smul_mem_reduction_ker red
+  exact four_smul_eq_zero_of_card_four hcard
 
 /-- Predicate form, for a separately defined formal kernel. -/
 theorem four_smul_mem_formal_kernel
@@ -277,30 +307,17 @@ theorem four_smul_mem_formal_kernel
     (P : G) : FormalKernel ((4 : ℕ) • P) := by
   rw [hkernel, map_nsmul, hexp]
 
+/-- Cardinality-four predicate form. -/
+theorem four_smul_mem_formal_kernel_of_card_four [Fintype A]
+    (red : G →+ A)
+    (FormalKernel : G → Prop)
+    (hcard : Fintype.card A = 4)
+    (hkernel : ∀ Q : G, FormalKernel Q ↔ red Q = 0)
+    (P : G) : FormalKernel ((4 : ℕ) • P) := by
+  apply four_smul_mem_formal_kernel red FormalKernel
+  · exact four_smul_eq_zero_of_card_four hcard
+  · exact hkernel
+
 end ReductionKernel
-
-open WeierstrassCurve
-
-/-- A concrete good-reduction-at-two model used to verify the finite exponent
-step by direct enumeration of `x,y : ZMod 2`. -/
-def E02 : WeierstrassCurve.Affine (ZMod 2) where
-  a₁ := 1
-  a₂ := 1
-  a₃ := 1
-  a₄ := -5
-  a₆ := 2
-
-instance : E02.IsElliptic where
-  isUnit := by
-    rw [isUnit_iff_ne_zero]
-    native_decide
-
-theorem E02_exponent_four (Q : E02.Point) : (4 : ℕ) • Q = 0 := by
-  cases Q with
-  | zero =>
-      change (4 : ℕ) • (0 : E02.Point) = 0
-      simp
-  | some x y h =>
-      fin_cases x <;> fin_cases y <;> native_decide +revert
 
 end Q4263
