@@ -80,7 +80,7 @@ def fit(T,name,maxdeg=8):
  raise RuntimeError('no fit '+name)
 pk,rk=fit(k,'K',7)
 pm,rm=fit(m,'M',7)
-# certificate against E35 after X=1-7k, Y=-(1+7m)/2
 KE=pk/rk;ME=pm/rm
 cert=sp.factor((-(1+7*ME)/2)**2+(-(1+7*ME)/2)-(1-7*KE)**3-(1-7*KE)**2-9*(1-7*KE)-1)
 print('E_CERT_FACTOR=',cert)
+# trigger 2
