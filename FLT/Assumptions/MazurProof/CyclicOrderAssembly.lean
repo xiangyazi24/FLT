@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.TorsionDefs
 import FLT.Assumptions.MazurProof.CyclicOrderArithmetic
+import FLT.Assumptions.MazurProof.CyclicExclusion20
 import FLT.Assumptions.MazurProof.CyclicExclusion27
 
 /-!
@@ -20,6 +21,10 @@ private copies (`minimalBadComposites'`, `IsSmooth'`) and their two placeholder
 
 Endpoint wired to a real theorem:
 
+* `20, 24` — `CyclicExclusion20.no_rational_point_of_order_20` and
+  `CyclicExclusion20.no_rational_point_of_order_24`.  They share the correctly
+  stated geometric seam `exists_rational_two_isogeny_quotient`, whose dual map
+  composes with the quotient map as multiplication by `2`.
 * `27` — `CyclicExclusion27.no_rational_point_of_order_27`, via
   `X₀(27) ≅ {x³ + y³ = 1}` and Mathlib's `fermatLastTheoremThree`.  Its only
   remaining seam is the named geometric input `order27_to_fermat_cubic`, which
@@ -30,11 +35,7 @@ Endpoints kept as named sub-axioms, because no sound real theorem exists to
 wire:
 
 * `14, 15, 16, 18, 21` — the `CyclicExclusion` proofs still contain `sorry`.
-* `25, 35, 49` — only a bare `orderN_contradiction` seam axiom exists.
-* `20, 24` — the `CyclicExclusion20` two-isogeny route is deliberately **not**
-  wired: it rests on `exists_rational_two_isogeny_quotient`, whose `eta_lift`
-  clause (a second rational `2`-torsion point `T ≠ 0, Q` with `φ T = η`) is not
-  valid in general, so the honest Mazur placeholder is retained instead.
+* `25, 35, 49` — their final arithmetic input is not yet formalized.
 
 Together with the prime-order input `mazur_prime_torsion_bound_sub`, these are
 exactly the named inputs reported by
@@ -58,14 +59,20 @@ axiom no_order_14 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPoin
 axiom no_order_15 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 15
 axiom no_order_16 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 16
 axiom no_order_18 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 18
-axiom no_order_20 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 20
 axiom no_order_21 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 21
-axiom no_order_24 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 24
 axiom no_order_25 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 25
 axiom no_order_35 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 35
 axiom no_order_49 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 49
 
 /-! ## Concrete exclusion wired to a real theorem -/
+
+theorem no_order_20 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ HasRationalPointOfOrder E 20 :=
+  no_rational_point_of_order_20 E
+
+theorem no_order_24 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ HasRationalPointOfOrder E 24 :=
+  no_rational_point_of_order_24 E
 
 theorem no_order_27 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ HasRationalPointOfOrder E 27 :=
