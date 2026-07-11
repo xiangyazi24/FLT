@@ -1,6 +1,3 @@
-scratch/Q4242Core.lean:28:4: warning: try 'simp' instead of 'simpa'
-
-Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
 scratch/Q4242Counterexample.lean:56:55: error: unsolved goals
 ⊢ (match Affine.Point.mk ⋯ with
     | Affine.Point.zero => 0
