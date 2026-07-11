@@ -28,14 +28,16 @@ lemma p2_on_E0 : E0.Equation (3 / 4 : ℚ) (-7 / 8 : ℚ) := by
 
 /-- The image on `E0` of the rational two-torsion point `(15,0)` on
 `Y² = X(X-15)(X-16)`. -/
-def P2 : E0.Point := Point.mk p2_on_E0
+def P2 : E0.Point :=
+  .some (3 / 4 : ℚ) (-7 / 8 : ℚ)
+    (WeierstrassCurve.Affine.equation_iff_nonsingular.mp p2_on_E0)
 
 lemma P2_ne_zero : P2 ≠ 0 := by
   exact Point.some_ne_zero _
 
 lemma P2_add_self : P2 + P2 = 0 := by
   apply Point.add_self_of_Y_eq
-  norm_num [P2, Point.mk, E0, WeierstrassCurve.Affine.negY]
+  norm_num [P2, E0, WeierstrassCurve.Affine.negY]
 
 lemma two_smul_P2 : (2 : ℕ) • P2 = 0 := by
   simpa [two_nsmul] using P2_add_self
@@ -48,14 +50,11 @@ def formalT : E0.Point → ℚ
 @[simp] lemma formalT_zero : formalT (0 : E0.Point) = 0 := rfl
 
 lemma formalT_P2 : formalT P2 = 6 / 7 := by
-  norm_num [formalT, P2, Point.mk]
+  norm_num [formalT, P2]
 
 lemma v2_formalT_P2 : padicValRat 2 (formalT P2) = 1 := by
   rw [formalT_P2]
-  have h6 : (6 : ℚ) ≠ 0 := by norm_num
-  have h7 : (7 : ℚ) ≠ 0 := by norm_num
-  rw [padicValRat.div h6 h7]
-  norm_num [padicValRat, padicValInt, padicValNat]
+  native_decide
 
 /-- A deliberately minimal description of the first formal filtration.  The
 zero point belongs to every filtration level. -/
@@ -118,9 +117,10 @@ theorem iterated_decomposition (H : AddSubgroup G)
       obtain ⟨h', z, hyz⟩ := hdecomp y
       refine ⟨h + (2 ^ n : ℕ) • h', z, ?_⟩
       rw [hxy, hyz]
-      simp only [AddSubgroup.coe_add, AddSubgroup.coe_nsmul, nsmul_add]
-      rw [pow_succ, mul_nsmul]
-      abel
+      simp only [AddSubgroup.coe_add, AddSubgroup.coe_nsmul, nsmul_add, pow_succ]
+      congr 2
+      simpa only [nsmul_nsmul] using
+        (show (2 ^ n * 2 : ℕ) • z = (2 * 2 ^ n : ℕ) • z by rw [Nat.mul_comm])
 
 /-- Multiplying by four removes all subgroup representatives.  Hence every
     `4x` is infinitely two-divisible. -/
@@ -135,9 +135,9 @@ theorem four_mul_infinitelyTwoDivisible (H : AddSubgroup G)
     (4 : ℕ) • x = (4 : ℕ) • ((h : G) + (2 ^ n : ℕ) • y) := by rw [hxy]
     _ = (4 : ℕ) • (h : G) + (4 : ℕ) • ((2 ^ n : ℕ) • y) := by rw [nsmul_add]
     _ = (4 : ℕ) • ((2 ^ n : ℕ) • y) := by rw [hexp, zero_add]
-    _ = (4 * 2 ^ n : ℕ) • y := by rw [mul_nsmul]
-    _ = (2 ^ n * 4 : ℕ) • y := by rw [Nat.mul_comm]
-    _ = (2 ^ n : ℕ) • ((4 : ℕ) • y) := by rw [mul_nsmul]
+    _ = (2 ^ n : ℕ) • ((4 : ℕ) • y) := by
+      simp only [nsmul_nsmul]
+      rw [Nat.mul_comm]
 
 /-- The exact group-theoretic final assembly used by the N15 argument. -/
 theorem weak_descent_final (H : AddSubgroup G)
