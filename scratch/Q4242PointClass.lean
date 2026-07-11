@@ -46,7 +46,7 @@ def dupX (X Y : ℚ) : ℚ :=
   (X ^ 2 - 240) ^ 2 / (4 * Y ^ 2)
 
 lemma zero_ordinate_candidates {X : ℚ}
-    (h : Y := (0 : ℚ); Y ^ 2 = X * (X - 15) * (X - 16)) :
+    (h : (0 : ℚ) ^ 2 = X * (X - 15) * (X - 16)) :
     X = 0 ∨ X = 15 ∨ X = 16 := by
   have hp : X * (X - 15) * (X - 16) = 0 := by simpa using h.symm
   rcases mul_eq_zero.mp hp with hleft | h16
@@ -111,24 +111,36 @@ lemma dupX_eq_sixteen_candidates {X Y : ℚ}
   · left
     have hX : X = 12 := sub_eq_zero.mp h12
     refine ⟨hX, ?_⟩
-    have hYsq : Y ^ 2 = (12 : ℚ) ^ 2 := by rw [hX] at hE; norm_num at hE ⊢; exact hE
+    have hYsq : Y ^ 2 = (12 : ℚ) ^ 2 := by
+      rw [hX] at hE
+      norm_num at hE ⊢
+      exact hE
     exact eq_or_eq_neg_of_sq_eq_sq Y 12 hYsq
   · right
     have hX : X = 20 := sub_eq_zero.mp h20
     refine ⟨hX, ?_⟩
-    have hYsq : Y ^ 2 = (20 : ℚ) ^ 2 := by rw [hX] at hE; norm_num at hE ⊢; exact hE
+    have hYsq : Y ^ 2 = (20 : ℚ) ^ 2 := by
+      rw [hX] at hE
+      norm_num at hE ⊢
+      exact hE
     exact eq_or_eq_neg_of_sq_eq_sq Y 20 hYsq
+
+lemma negY_E15 (X Y : ℚ) :
+    WeierstrassCurve.Affine.negY E15 X Y = -Y := by
+  simp [WeierstrassCurve.Affine.negY, E15]
 
 lemma addX_self_eq_dupX {X Y : ℚ}
     (hE : Y ^ 2 = X * (X - 15) * (X - 16)) (hY : Y ≠ 0) :
-    E15.addX X X (E15.slope X X Y Y) = dupX X Y := by
-  have hy : Y ≠ E15.negY X Y := by
+    WeierstrassCurve.Affine.addX E15 X X
+      (WeierstrassCurve.Affine.slope E15 X X Y Y) = dupX X Y := by
+  have hy : Y ≠ WeierstrassCurve.Affine.negY E15 X Y := by
+    rw [negY_E15]
     intro heq
-    simp [E15, WeierstrassCurve.Affine.negY] at heq
+    apply hY
     linarith
   rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl hy]
   simp only [WeierstrassCurve.Affine.addX]
-  simp [E15, WeierstrassCurve.Affine.negY]
+  simp [E15]
   field_simp [hY]
   rw [hE]
   ring
@@ -149,22 +161,26 @@ theorem listed_of_four_nsmul_eq_zero (P : Pt) (h4 : 4 • P = 0) : Listed P := b
       exact Or.inr (Or.inr (Or.inl rfl))
     · subst X
       exact Or.inr (Or.inr (Or.inr (Or.inl rfl)))
-  have hy : Y ≠ E15.negY X Y := by
+  have hy : Y ≠ WeierstrassCurve.Affine.negY E15 X Y := by
+    rw [negY_E15]
     intro heq
-    simp [E15, WeierstrassCurve.Affine.negY] at heq
+    apply hY0
     linarith
-  let Q : Pt := .some X Y hP + .some X Y hP
-  have hdouble := WeierstrassCurve.Affine.Point.add_self_of_Y_ne (W := E15) (h₁ := hP) hy
-  have hQaff : ∃ X₂ Y₂ h₂, Q = WeierstrassCurve.Affine.Point.some X₂ Y₂ h₂ := by
-    refine ⟨E15.addX X X (E15.slope X X Y Y),
-      E15.addY X X Y (E15.slope X X Y Y), _, ?_⟩
-    exact hdouble
-  rcases hQaff with ⟨X₂, Y₂, h₂, hQ⟩
-  have hQtwo : Q = 2 • (WeierstrassCurve.Affine.Point.some X Y hP : Pt) := by
-    dsimp [Q]
+  let X₂ : ℚ := WeierstrassCurve.Affine.addX E15 X X
+    (WeierstrassCurve.Affine.slope E15 X X Y Y)
+  let Y₂ : ℚ := WeierstrassCurve.Affine.addY E15 X X Y
+    (WeierstrassCurve.Affine.slope E15 X X Y Y)
+  have hdouble := WeierstrassCurve.Affine.Point.add_self_of_Y_ne
+    (W := E15) (h₁ := hP) hy
+  have h₂ : WeierstrassCurve.Affine.Nonsingular E15 X₂ Y₂ := by
+    exact WeierstrassCurve.Affine.nonsingular_add E15 hP hP
+  let Q : Pt := WeierstrassCurve.Affine.Point.some X₂ Y₂ h₂
+  have hQeq : Q = 2 • (WeierstrassCurve.Affine.Point.some X Y hP : Pt) := by
+    dsimp [Q, X₂, Y₂]
     rw [two_nsmul]
+    exact hdouble.symm
   have h2Q : 2 • Q = 0 := by
-    rw [hQtwo]
+    rw [hQeq]
     calc
       2 • (2 • (WeierstrassCurve.Affine.Point.some X Y hP : Pt)) =
           4 • (WeierstrassCurve.Affine.Point.some X Y hP : Pt) := by
@@ -172,27 +188,27 @@ theorem listed_of_four_nsmul_eq_zero (P : Pt) (h4 : 4 • P = 0) : Listed P := b
             norm_num
       _ = 0 := h4
   have hY₂zero : Y₂ = 0 := by
-    have hselfzero :
-        (WeierstrassCurve.Affine.Point.some X₂ Y₂ h₂ : Pt) +
-          .some X₂ Y₂ h₂ = 0 := by
-      rw [← two_nsmul, ← hQ, h2Q]
-    by_contra hne
-    have hadd := WeierstrassCurve.Affine.Point.add_self_of_Y_ne (W := E15) (h₁ := h₂) hne
+    by_contra hY₂0
+    have hY₂neNeg : Y₂ ≠ WeierstrassCurve.Affine.negY E15 X₂ Y₂ := by
+      rw [negY_E15]
+      intro heq
+      apply hY₂0
+      linarith
+    have hadd := WeierstrassCurve.Affine.Point.add_self_of_Y_ne
+      (W := E15) (h₁ := h₂) hY₂neNeg
+    have hselfzero : Q + Q = 0 := by
+      rw [← two_nsmul, h2Q]
+    dsimp [Q] at hselfzero
     rw [hselfzero] at hadd
-    exact (WeierstrassCurve.Affine.Point.some_ne_zero _ hadd.symm)
+    exact WeierstrassCurve.Affine.Point.some_ne_zero _ hadd.symm
   have hX₂root : X₂ = 0 ∨ X₂ = 15 ∨ X₂ = 16 := by
     apply zero_ordinate_candidates
     have heq := h₂.1
     rw [hY₂zero] at heq
     exact (equation_iff_onE X₂ 0).mp heq
   have hX₂dup : X₂ = dupX X Y := by
-    have heq :
-        (WeierstrassCurve.Affine.Point.some X₂ Y₂ h₂ : Pt) =
-          .some (E15.addX X X (E15.slope X X Y Y))
-            (E15.addY X X Y (E15.slope X X Y Y)) _ := by
-      rw [← hQ, hdouble]
-    have hx := (WeierstrassCurve.Affine.Point.some.inj heq).1
-    rw [hx, addX_self_eq_dupX hE hY0]
+    dsimp [X₂]
+    exact addX_self_eq_dupX hE hY0
   rcases hX₂root with h0 | h15 | h16
   · exfalso
     apply dupX_ne_zero hY0
