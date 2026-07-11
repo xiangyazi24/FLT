@@ -123,8 +123,9 @@ lemma v2_two : v2 (2 : ℚ) = 1 := by
 
 lemma v2_two_pow (n : ℕ) : v2 ((2 : ℚ) ^ n) = (n : ℤ) := by
   change padicValRat 2 ((2 : ℚ) ^ n) = (n : ℤ)
-  rw [padicValRat.pow (by norm_num), padicValRat.self (by norm_num)]
-  simp
+  rw [padicValRat.pow (by norm_num)]
+  have htwo : padicValRat 2 (2 : ℚ) = 1 := by native_decide
+  rw [htwo, mul_one]
 
 /-- Exact wrapper around Mathlib's distinct-valuation sum lemma. -/
 lemma v2_add_eq_min_of_ne {a b : ℚ}
@@ -147,7 +148,9 @@ lemma higher_monomial {c z : ℚ} {n : ℕ}
     VAtLeast (v2 z + 1) (c * z ^ n) := by
   have hzA : VAtLeast (v2 z) z := Or.inr le_rfl
   have h := hc.mul (hzA.pow n)
-  exact VAtLeast.mono (by omega) h
+  have hnZ : (2 : ℤ) ≤ (n : ℤ) := by exact_mod_cast hn
+  apply VAtLeast.mono (hq := h)
+  nlinarith
 
 /-- Finite version of “all terms of the tail have degree at least two and
 2-integral coefficients”. -/
@@ -293,8 +296,11 @@ instance : E02.IsElliptic where
     native_decide
 
 theorem E02_exponent_four (Q : E02.Point) : (4 : ℕ) • Q = 0 := by
-  rcases Q with (_ | ⟨x, y, h⟩)
-  · simp
-  fin_cases x <;> fin_cases y <;> native_decide
+  cases Q with
+  | zero =>
+      change (4 : ℕ) • (0 : E02.Point) = 0
+      simp
+  | some x y h =>
+      fin_cases x <;> fin_cases y <;> native_decide +revert
 
 end Q4263
