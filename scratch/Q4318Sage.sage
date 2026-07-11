@@ -4,7 +4,7 @@ print('factor=', factor(F))
 P2.<A,H,Z> = ProjectiveSpace(QQ,2)
 Fp = H*(A^2+13*A*Z+49*Z^2)*(A^2+5*A*Z+Z^2)^3 - A*Z^2*(H^2+10*H*Z+5*Z^2)^3
 print('homogeneous=',Fp.is_homogeneous(), 'degree=',Fp.degree())
-C = Curve(P2,Fp)
+C = Curve(Fp)
 print('curve=',C)
 print('curve methods=', [m for m in dir(C) if any(k in m.lower() for k in ['normal','function','canonical','hyperell','genus','riemann','model'])])
 try:
