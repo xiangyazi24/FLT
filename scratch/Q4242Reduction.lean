@@ -26,9 +26,9 @@ instance : (E0 (ZMod 2)).IsElliptic := by
 
 abbrev Pt2 := WeierstrassCurve.Affine.Point (E0 (ZMod 2))
 
-def R00 : Pt2 := .mk (by native_decide)
-def R01 : Pt2 := .mk (by native_decide)
-def R11 : Pt2 := .mk (by native_decide)
+def R00 : Pt2 := .mk (x := 0) (y := 0) (by native_decide)
+def R01 : Pt2 := .mk (x := 0) (y := 1) (by native_decide)
+def R11 : Pt2 := .mk (x := 1) (y := 1) (by native_decide)
 
 lemma R00_coords : R00 = WeierstrassCurve.Affine.Point.mk (W' := E0 (ZMod 2))
     (x := 0) (y := 0) (by native_decide) := by rfl
