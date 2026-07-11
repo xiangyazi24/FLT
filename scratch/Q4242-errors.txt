@@ -1,24 +1,32 @@
 scratch/Q4242Core.lean:28:4: warning: try 'simp' instead of 'simpa'
 
 Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
-scratch/Q4242Reduction.lean:23:36: error: unsolved goals
-⊢ 225 = 1
-scratch/Q4242Reduction.lean:32:12: error: `simp` made no progress
-scratch/Q4242Reduction.lean:34:38: error: Expected type must not contain free variables
-  4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0
+scratch/Q4242Reduction.lean:32:9: error: unsolved goals
+case zero
+⊢ 4 • Affine.Point.zero = 0
+scratch/Q4242Reduction.lean:34:38: error: failed to synthesize
+  Decidable
+    (∀ (h : Affine.Nonsingular (E0 (ZMod 2)) ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩)),
+      4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0)
 
-Hint: Use the `+revert` option to automatically clean up and revert free variables
-scratch/Q4242Reduction.lean:34:38: error: Expected type must not contain free variables
-  4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+scratch/Q4242Reduction.lean:34:38: error: failed to synthesize
+  Decidable
+    (∀ (h : Affine.Nonsingular (E0 (ZMod 2)) ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩)),
+      4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0)
 
-Hint: Use the `+revert` option to automatically clean up and revert free variables
-scratch/Q4242Reduction.lean:34:38: error: Expected type must not contain free variables
-  4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+scratch/Q4242Reduction.lean:34:38: error: failed to synthesize
+  Decidable
+    (∀ (h : Affine.Nonsingular (E0 (ZMod 2)) ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩)),
+      4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0)
 
-Hint: Use the `+revert` option to automatically clean up and revert free variables
-scratch/Q4242Reduction.lean:34:38: error: Expected type must not contain free variables
-  4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+scratch/Q4242Reduction.lean:34:38: error: failed to synthesize
+  Decidable
+    (∀ (h : Affine.Nonsingular (E0 (ZMod 2)) ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩)),
+      4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0)
 
-Hint: Use the `+revert` option to automatically clean up and revert free variables
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
 
 EXIT_STATUS=1
