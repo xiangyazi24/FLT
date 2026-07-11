@@ -1,9 +1,12 @@
 import Mathlib
-import FLT.EllipticCurve.Torsion
 import FLT.Assumptions.MazurProof.DescentBridge
 import FLT.Assumptions.MazurProof.DescentBridgeN12
 
-/-! # N=10 and N=12 noncyclic exclusions — both proved from descent bridges -/
+/-! # N=10 and N=12 noncyclic exclusions
+
+The N=10 case uses the C20 rational-points bridge plus the Kubert square input.
+The N=12 case still delegates to its direct descent bridge.
+-/
 
 open scoped WeierstrassCurve.Affine
 

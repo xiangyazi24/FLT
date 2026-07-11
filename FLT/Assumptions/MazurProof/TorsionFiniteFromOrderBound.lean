@@ -30,7 +30,7 @@ private theorem torsionSet_subset_2520_torsion
   have hord_pos :
       0 < addOrderOf P ∧ HasRationalPointOfOrder E (addOrderOf P) :=
     ⟨((AddCommGroup.mem_torsion P).mp hP).addOrderOf_pos, ⟨P, rfl⟩⟩
-  have hmem := mazur_cyclic_order_bound E hord_pos.2
+  have hmem := mazur_cyclic_order_bound E hord_pos.1 hord_pos.2
   have hdvd : addOrderOf P ∣ 2520 := dvd_2520_of_mem_mazur_list hmem
   exact (addOrderOf_dvd_iff_nsmul_eq_zero (x := P)).mp hdvd
 

@@ -21,7 +21,7 @@ private theorem n_in_mazur_list_of_structure
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     (d : TorsionStructureData E) :
     d.n ∈ ({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12} : Finset ℕ) :=
-  mazur_cyclic_order_bound E d.has_point_order_n
+  mazur_cyclic_order_bound E d.n_pos d.has_point_order_n
 
 private theorem even_forbidden_of_two_dvd {n : ℕ} (hdvd : 2 ∣ n) (hgt : 8 < n)
     (hmem : n ∈ ({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12} : Finset ℕ)) :
