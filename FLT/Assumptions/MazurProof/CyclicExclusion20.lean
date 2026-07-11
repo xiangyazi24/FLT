@@ -11,9 +11,9 @@ This contradicts the already-proved noncyclic exclusions.
 
 The argument: φ(P) has order 10 (resp. 12) on E', and the dual-kernel
 generator η ∈ E'[2] is independent from the unique order-2 element
-5·φ(P) (resp. 6·φ(P)) in ⟨φ(P)⟩. Independence follows from the fact
-that any lift T of η to E[2] would have order 2, but 5P and 15P
-(resp. 6P and 18P) have order 4.
+5·φ(P) (resp. 6·φ(P)) in ⟨φ(P)⟩.  If they were equal, applying the dual
+isogeny would give 10P = 0 (resp. 12P = 0), contradicting the exact order
+of P.
 
 The sole geometric input is the existence of rational 2-isogeny quotients,
 formalized as `RationalTwoIsogenyData`.
@@ -29,10 +29,12 @@ structure RationalTwoIsogenyData
     {G H : Type*} [AddCommGroup G] [AddCommGroup H]
     (Q : G) where
   phi : G →+ H
+  dual : H →+ G
   eta : H
   eta_order : addOrderOf eta = 2
   ker_eq : ∀ R : G, phi R = 0 ↔ R = 0 ∨ R = Q
-  eta_lift : ∃ T : G, addOrderOf T = 2 ∧ T ≠ 0 ∧ T ≠ Q ∧ phi T = eta
+  dual_phi : ∀ R : G, dual (phi R) = 2 • R
+  dual_eta : dual eta = 0
 
 /-! ## Group-theory lemmas -/
 
@@ -145,52 +147,30 @@ private theorem eta_ne_half_image_20
     {P : G} (hP : addOrderOf P = 20)
     (D : RationalTwoIsogenyData (G := G) (H := H) (10 • P)) :
     D.eta ≠ 5 • D.phi P := by
-  obtain ⟨T, hT_ord, _, _, hT_phi⟩ := D.eta_lift
   intro h
-  have h2T : 2 • T = 0 := by
-    have := addOrderOf_nsmul_eq_zero T; simpa [hT_ord] using this
-  have hker : D.phi (T - 5 • P) = 0 := by
-    rw [map_sub, map_nsmul, hT_phi, h, sub_self]
-  rcases (D.ker_eq (T - 5 • P)).mp hker with h0 | hQ
-  · have hT : T = 5 • P := sub_eq_zero.mp h0
-    have h10P : 10 • P = 0 := by
-      have : 2 • (5 • P) = 0 := hT ▸ h2T
-      rwa [← mul_nsmul, show 2 * 5 = 10 from by norm_num] at this
-    have : 20 ∣ 10 := by simpa [hP] using addOrderOf_dvd_of_nsmul_eq_zero h10P
-    norm_num at this
-  · have hT : T = 15 • P := by
-      have := sub_eq_iff_eq_add.mp hQ; rw [this]; abel
-    have h30P : 30 • P = 0 := by
-      have : 2 • (15 • P) = 0 := hT ▸ h2T
-      rwa [← mul_nsmul, show 2 * 15 = 30 from by norm_num] at this
-    have : 20 ∣ 30 := by simpa [hP] using addOrderOf_dvd_of_nsmul_eq_zero h30P
-    norm_num at this
+  have h10P : (10 : ℕ) • P = 0 := by
+    calc
+      (10 : ℕ) • P = 5 • (2 • P) := by rw [← mul_nsmul]
+      _ = D.dual (5 • D.phi P) := by rw [map_nsmul, D.dual_phi]
+      _ = D.dual D.eta := by rw [h]
+      _ = 0 := D.dual_eta
+  have : 20 ∣ 10 := by simpa [hP] using addOrderOf_dvd_of_nsmul_eq_zero h10P
+  norm_num at this
 
 private theorem eta_ne_half_image_24
     {G H : Type*} [AddCommGroup G] [AddCommGroup H]
     {P : G} (hP : addOrderOf P = 24)
     (D : RationalTwoIsogenyData (G := G) (H := H) (12 • P)) :
     D.eta ≠ 6 • D.phi P := by
-  obtain ⟨T, hT_ord, _, _, hT_phi⟩ := D.eta_lift
   intro h
-  have h2T : 2 • T = 0 := by
-    have := addOrderOf_nsmul_eq_zero T; simpa [hT_ord] using this
-  have hker : D.phi (T - 6 • P) = 0 := by
-    rw [map_sub, map_nsmul, hT_phi, h, sub_self]
-  rcases (D.ker_eq (T - 6 • P)).mp hker with h0 | hQ
-  · have hT : T = 6 • P := sub_eq_zero.mp h0
-    have h12P : 12 • P = 0 := by
-      have : 2 • (6 • P) = 0 := hT ▸ h2T
-      rwa [← mul_nsmul, show 2 * 6 = 12 from by norm_num] at this
-    have : 24 ∣ 12 := by simpa [hP] using addOrderOf_dvd_of_nsmul_eq_zero h12P
-    norm_num at this
-  · have hT : T = 18 • P := by
-      have := sub_eq_iff_eq_add.mp hQ; rw [this]; abel
-    have h36P : 36 • P = 0 := by
-      have : 2 • (18 • P) = 0 := hT ▸ h2T
-      rwa [← mul_nsmul, show 2 * 18 = 36 from by norm_num] at this
-    have : 24 ∣ 36 := by simpa [hP] using addOrderOf_dvd_of_nsmul_eq_zero h36P
-    norm_num at this
+  have h12P : (12 : ℕ) • P = 0 := by
+    calc
+      (12 : ℕ) • P = 6 • (2 • P) := by rw [← mul_nsmul]
+      _ = D.dual (6 • D.phi P) := by rw [map_nsmul, D.dual_phi]
+      _ = D.dual D.eta := by rw [h]
+      _ = 0 := D.dual_eta
+  have : 24 ∣ 12 := by simpa [hP] using addOrderOf_dvd_of_nsmul_eq_zero h12P
+  norm_num at this
 
 /-! ## Geometric input: existence of 2-isogeny quotient -/
 
@@ -199,10 +179,11 @@ axiom exists_rational_two_isogeny_quotient
     {Q : (E⁄ℚ).Point} (hQ : addOrderOf Q = 2) :
     ∃ (E' : WeierstrassCurve ℚ) (hE' : E'.IsElliptic)
       (phi : (E⁄ℚ).Point →+ (E'⁄ℚ).Point)
+      (dual : (E'⁄ℚ).Point →+ (E⁄ℚ).Point)
       (eta : (E'⁄ℚ).Point),
       addOrderOf eta = 2 ∧
       (∀ R, phi R = 0 ↔ R = 0 ∨ R = Q) ∧
-      (∃ T : (E⁄ℚ).Point, addOrderOf T = 2 ∧ T ≠ 0 ∧ T ≠ Q ∧ phi T = eta)
+      (∀ R, dual (phi R) = 2 • R) ∧ dual eta = 0
 
 /-! ## Z/2 × Z/n injective embedding machinery -/
 
@@ -307,11 +288,11 @@ private theorem no_rational_point_of_order_20_aux
   rintro ⟨P, hP⟩
   have h10P : addOrderOf ((10 : ℕ) • P) = 2 := by
     rw [addOrderOf_nsmul' P (by norm_num), hP]; norm_num
-  obtain ⟨E', hE', phi, eta, hη, hker, hdual⟩ :=
+  obtain ⟨E', hE', phi, dual, eta, hη, hker, hdualPhi, hdualEta⟩ :=
     exists_rational_two_isogeny_quotient E h10P
   letI : E'.IsElliptic := hE'
   let D : RationalTwoIsogenyData ((10 : ℕ) • P) :=
-    ⟨phi, eta, hη, hker, hdual⟩
+    ⟨phi, dual, eta, hη, hker, hdualPhi, hdualEta⟩
   have himg := image_order_10_of_order_20 hP D
   have hindep := eta_ne_half_image_20 hP D
   have ⟨f, hf⟩ := exists_injective_Z2xZn hη himg hindep
@@ -418,11 +399,11 @@ private theorem no_rational_point_of_order_24_aux
   rintro ⟨P, hP⟩
   have h12P : addOrderOf ((12 : ℕ) • P) = 2 := by
     rw [addOrderOf_nsmul' P (by norm_num), hP]; norm_num
-  obtain ⟨E', hE', phi, eta, hη, hker, hdual⟩ :=
+  obtain ⟨E', hE', phi, dual, eta, hη, hker, hdualPhi, hdualEta⟩ :=
     exists_rational_two_isogeny_quotient E h12P
   letI : E'.IsElliptic := hE'
   let D : RationalTwoIsogenyData ((12 : ℕ) • P) :=
-    ⟨phi, eta, hη, hker, hdual⟩
+    ⟨phi, dual, eta, hη, hker, hdualPhi, hdualEta⟩
   have himg := image_order_12_of_order_24 hP D
   have hindep := eta_ne_half_image_24 hP D
   have ⟨f, hf⟩ := exists_injective_Z2xZ12 hη himg hindep
