@@ -1,37 +1,59 @@
-scratch/Q4242Reduction.lean:29:43: error: failed to synthesize
-  Decidable (Affine.Equation (E0 (ZMod 2)) 0 0)
+scratch/Q4242Reduction.lean:60:8: error: Tactic `apply` failed: could not unify the conclusion of `@Affine.Point.some.inj`
+  ?x✝ = ?x ∧ ?y✝ = ?y
+with the goal
+  Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = Affine.Point.mk eq00
 
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-scratch/Q4242Reduction.lean:30:43: error: failed to synthesize
-  Decidable (Affine.Equation (E0 (ZMod 2)) 0 1)
+Note: The full type of `@Affine.Point.some.inj` is
+  ∀ {R : Type ?u.12} {inst : CommRing R} {W' : Affine R} {x y : R} {h : W'.Nonsingular x y} {x_1 y_1 : R}
+    {h_1 : W'.Nonsingular x_1 y_1}, Affine.Point.some x y h = Affine.Point.some x_1 y_1 h_1 → x = x_1 ∧ y = y_1
 
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-scratch/Q4242Reduction.lean:31:43: error: failed to synthesize
-  Decidable (Affine.Equation (E0 (ZMod 2)) 1 1)
+case some.«0».«0»
+h : Affine.Nonsingular (E0 (ZMod 2)) ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩)
+⊢ Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = Affine.Point.mk eq00
+scratch/Q4242Reduction.lean:64:8: error: Tactic `apply` failed: could not unify the conclusion of `@Affine.Point.some.inj`
+  ?x✝ = ?x ∧ ?y✝ = ?y
+with the goal
+  Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = Affine.Point.mk eq01
 
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-scratch/Q4242Reduction.lean:34:26: error: failed to synthesize
-  Decidable (Affine.Equation (E0 (ZMod 2)) 0 0)
+Note: The full type of `@Affine.Point.some.inj` is
+  ∀ {R : Type ?u.13} {inst : CommRing R} {W' : Affine R} {x y : R} {h : W'.Nonsingular x y} {x_1 y_1 : R}
+    {h_1 : W'.Nonsingular x_1 y_1}, Affine.Point.some x y h = Affine.Point.some x_1 y_1 h_1 → x = x_1 ∧ y = y_1
 
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-scratch/Q4242Reduction.lean:36:26: error: failed to synthesize
-  Decidable (Affine.Equation (E0 (ZMod 2)) 0 1)
+case some.«0».«1»
+h : Affine.Nonsingular (E0 (ZMod 2)) ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩)
+⊢ Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = Affine.Point.mk eq01
+scratch/Q4242Reduction.lean:69:8: error: Tactic `apply` failed: could not unify the conclusion of `@Affine.Point.some.inj`
+  ?x✝ = ?x ∧ ?y✝ = ?y
+with the goal
+  Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = Affine.Point.mk eq11
 
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-scratch/Q4242Reduction.lean:38:26: error: failed to synthesize
-  Decidable (Affine.Equation (E0 (ZMod 2)) 1 1)
+Note: The full type of `@Affine.Point.some.inj` is
+  ∀ {R : Type ?u.15} {inst : CommRing R} {W' : Affine R} {x y : R} {h : W'.Nonsingular x y} {x_1 y_1 : R}
+    {h_1 : W'.Nonsingular x_1 y_1}, Affine.Point.some x y h = Affine.Point.some x_1 y_1 h_1 → x = x_1 ∧ y = y_1
 
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-scratch/Q4242Reduction.lean:55:8: error: Tactic `native_decide` evaluated that the proposition
-  False
-is false
-scratch/Q4242Reduction.lean:43:15: error: unsolved goals
 case some.«1».«1»
 h : Affine.Nonsingular (E0 (ZMod 2)) ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩)
-⊢ Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0 ∨
-    Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = R00 ∨
-      Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = R01 ∨
-        Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = R11
-scratch/Q4242Reduction.lean:55:22: error: unexpected token 'at'; expected command
+⊢ Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = Affine.Point.mk eq11
+Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+scratch/Q4242PointClass.lean:135:64: error: unsolved goals
+X Y : ℚ
+hE : Y ^ 2 = X * (X - 15) * (X - 16)
+hY : Y ≠ 0
+hy : Y ≠ Affine.negY E15 X Y
+⊢ 57600 - X ^ 2 * 480 + X ^ 4 = X * dupX X Y * 960 - X ^ 2 * dupX X Y * 124 + X ^ 3 * dupX X Y * 4
+scratch/Q4242PointClass.lean:176:50: error: Application type mismatch: The argument
+  E15
+has type
+  WeierstrassCurve ℚ
+of sort `Type` but is expected to have type
+  Affine.Nonsingular E15 X Y
+of sort `Prop` in the application
+  Affine.nonsingular_add E15
+scratch/Q4242PointClass.lean:188:12: error: No goals to be solved
 
 EXIT_STATUS=1
