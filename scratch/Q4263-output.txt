@@ -1,35 +1,26 @@
-scratch/Q4263.lean:126:37: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
-  padicValRat ?m.25 ↑?m.25
-in the target expression
-  ↑n * padicValRat 2 2 = ↑n
+scratch/Q4263.lean:304:38: error: failed to synthesize
+  Decidable
+    (∀ (h : E02.Nonsingular ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩)),
+      4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0)
 
-n : ℕ
-⊢ ↑n * padicValRat 2 2 = ↑n
-scratch/Q4263.lean:150:26: error: omega could not prove the goal:
-a possible counterexample may satisfy the constraints
-  b ≥ 2
-  a ≥ 1
-  a - d ≥ 0
-where
- a := v2 z
- b := ↑n
- d := ↑n * v2 z
-scratch/Q4263.lean:297:4: error: `simp` made no progress
-scratch/Q4263.lean:298:34: error: Expected type must not contain free variables
-  4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+scratch/Q4263.lean:304:38: error: failed to synthesize
+  Decidable
+    (∀ (h : E02.Nonsingular ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩)),
+      4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0)
 
-Hint: Use the `+revert` option to automatically clean up and revert free variables
-scratch/Q4263.lean:298:34: error: Expected type must not contain free variables
-  4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+scratch/Q4263.lean:304:38: error: failed to synthesize
+  Decidable
+    (∀ (h : E02.Nonsingular ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩)),
+      4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0)
 
-Hint: Use the `+revert` option to automatically clean up and revert free variables
-scratch/Q4263.lean:298:34: error: Expected type must not contain free variables
-  4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+scratch/Q4263.lean:304:38: error: failed to synthesize
+  Decidable
+    (∀ (h : E02.Nonsingular ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩)),
+      4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0)
 
-Hint: Use the `+revert` option to automatically clean up and revert free variables
-scratch/Q4263.lean:298:34: error: Expected type must not contain free variables
-  4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0
-
-Hint: Use the `+revert` option to automatically clean up and revert free variables
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
 
 EXIT_STATUS=1
