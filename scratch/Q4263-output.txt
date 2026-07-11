@@ -1,0 +1,27 @@
+scratch/Q4263.lean:125:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  padicValRat ?m.9 (?m.11 ^ ?m.13)
+in the target expression
+  v2 (2 ^ n) = ↑n
+
+n : ℕ
+⊢ v2 (2 ^ n) = ↑n
+scratch/Q4263.lean:150:2: error: omega could not prove the goal:
+a possible counterexample may satisfy the constraints
+  b ≥ 2
+  a ≥ 1
+  a - d ≥ 0
+where
+ a := v2 z
+ b := ↑n
+ d := ↑n * v2 z
+scratch/Q4263.lean:295:19: error(lean.synthInstanceFailed): failed to synthesize instance of type class
+  Fintype E02.Point
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+scratch/Q4263.lean:296:2: error: Tactic `native_decide` failed: Could not evaluate decidable instance. Error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors
+scratch/Q4263.lean:299:2: error: failed to synthesize
+  Decidable (∀ (Q : E02.Point), 4 • Q = 0)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+
+EXIT_STATUS=1
