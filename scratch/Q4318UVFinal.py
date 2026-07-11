@@ -1,6 +1,6 @@
 import sympy as sp
 A,H=sp.symbols('a h')
-N=130
+N=75
 
 def mul(X,Y):
  Z=[sp.Integer(0)]*(N+1)
@@ -52,21 +52,22 @@ one=[1]+[0]*N
 den=add(add(mul(x,x),x),scale(one,-1))
 k=mul(x,inv(den))
 m=mul(y,power(den,-2))
-print('k_first=',k[:20]);print('m_first=',m[:20])
+print('k_first=',k[:16]);print('m_first=',m[:16],flush=True)
 
-maxd=8
+maxd=5
 ap=[None]*(maxd+1);hp=[None]*(maxd+1);ap[0]=one;hp[0]=one
 for i in range(maxd):ap[i+1]=mul(ap[i],a);hp[i+1]=mul(hp[i],h)
 def mons(d):return [(i,j,mul(ap[i],hp[j])) for i in range(d+1) for j in range(d+1-i)]
-def fit(T,name,maxdeg=7):
- for bound in range(maxdeg+1):
-  for dr in range(bound+1):
-   dp=bound-dr
+def fit(T,name,maxdeg=4):
+ for dr in range(maxdeg+1):
+  for dp in range(maxdeg+1):
    MR=mons(dr); MP=mons(dp)
    cols=[mul(T,z) for _,_,z in MR]+[scale(z,-1) for _,_,z in MP]
-   rows=min(N+1,len(cols)+40)
+   rows=min(N+1,len(cols)+20)
    M=sp.Matrix([[cols[j][n] for j in range(len(cols))] for n in range(rows)])
-   for vv in M.nullspace():
+   ns=M.nullspace()
+   print(name,'try',dr,dp,'nullity',len(ns),flush=True)
+   for vv in ns:
     if not any(vv[i] for i in range(len(MR))):continue
     test=[0]*(N+1)
     for c,z in zip(vv,cols):test=add(test,scale(z,c))
@@ -75,9 +76,10 @@ def fit(T,name,maxdeg=7):
      P=sum(vv[len(MR)+n]*A**i*H**j for n,(i,j,_) in enumerate(MP))
      g=sp.gcd(sp.Poly(R,A,H),sp.Poly(P,A,H)).as_expr()
      R=sp.factor(R/g);P=sp.factor(P/g)
-     print(name+'_DEGREES=',dr,dp);print(name+'_R=',R);print(name+'_P=',P)
+     print(name+'_DEGREES=',dr,dp);print(name+'_R=',R);print(name+'_P=',P,flush=True)
      return P,R
- raise RuntimeError('no fit '+name)
-pk,rk=fit(k,'K',7)
-pm,rm=fit(m,'M',7)
-print('DONE')
+ print(name+'_NO_FIT',flush=True)
+ return None,None
+pk,rk=fit(k,'K',4)
+pm,rm=fit(m,'M',4)
+print('DONE',flush=True)
