@@ -1,0 +1,39 @@
+name: Q4318 Sage inspect
+
+on:
+  push:
+    branches: [q4318-uv-final]
+    paths:
+      - scratch/Q4318SageInspect.sage
+      - .github/workflows/q4318-sageinspect.yml
+  pull_request:
+    branches: [scratch]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container:
+      image: sagemath/sagemath:latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q4318-uv-final
+      - name: Inspect Sage APIs
+        shell: bash
+        run: |
+          set -o pipefail
+          sage scratch/Q4318SageInspect.sage 2>&1 | tee scratch/Q4318SageInspect.out
+      - name: Persist output
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scratch/Q4318SageInspect.out
+          git commit -m 'Record Q4318 Sage inspection [skip ci]' || true
+          git push origin HEAD:q4318-uv-final
