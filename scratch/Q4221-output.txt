@@ -1,15 +1,77 @@
-nsmul_eq_mul.{u} {α : Type u} [NonAssocSemiring α] (n : ℕ) (a : α) : n • a = ↑n * a
-scratch/Q4221Probe2.lean:4:7: error(lean.unknownIdentifier): Unknown identifier `nsmul_nsmul`
-smul_smul.{u_1, u_5} {M : Type u_1} {α : Type u_5} [Monoid M] [MulAction M α] (a₁ a₂ : M) (b : α) :
-  a₁ • a₂ • b = (a₁ * a₂) • b
-scratch/Q4221Probe2.lean:6:7: error(lean.unknownIdentifier): Unknown identifier `nsmul_comm`
-add_nsmul.{u_2} {M : Type u_2} [AddMonoid M] (a : M) (m n : ℕ) : (m + n) • a = m • a + n • a
-nsmul_add.{u_4} {M : Type u_4} [AddCommMonoid M] (a b : M) (n : ℕ) : n • (a + b) = n • a + n • b
-mul_nsmul.{u_2} {M : Type u_2} [AddMonoid M] (a : M) (m n : ℕ) : (m * n) • a = n • m • a
-Nat.smul_one_eq_cast.{u_5} {R : Type u_5} [NonAssocSemiring R] (m : ℕ) : m • 1 = ↑m
-Nat.cast_smul_eq_nsmul.{u_1, u_3} (R : Type u_1) {M : Type u_3} [Semiring R] [AddCommMonoid M] [Module R M] (n : ℕ)
-  (b : M) : ↑n • b = n • b
-scratch/Q4221Probe2.lean:12:7: error(lean.unknownIdentifier): Unknown constant `Nat.smul_comm`
-scratch/Q4221Probe2.lean:13:7: error(lean.unknownIdentifier): Unknown constant `Nat.smul_def`
-
+=== CORE ===
+scratch/Q4221Core.lean:115:14: error: unsolved goals
+case succ
+G : Type u_1
+inst✝ : AddCommGroup G
+H : AddSubgroup G
+hdecomp : ∀ (x : G), ∃ h y, x = ↑h + 2 • y
+x : G
+n : ℕ
+h : ↥H
+y : G
+hxy : x = ↑h + 2 ^ n • y
+h' : ↥H
+z : G
+hyz : y = ↑h' + 2 • z
+⊢ ↑h + (2 ^ n • ↑h' + (2 * 2 ^ n) • z) = ↑h + 2 ^ n • ↑h' + (2 * 2 ^ n) • z
+CORE_STATUS=1
+=== VALUATION ===
+scratch/Q4221Valuation.lean:190:4: error: Type mismatch: After simplification, term
+  VAtLeast.pow_two hw3a
+ has type
+  VAtLeast (2 * (3 * a)) (w ^ 2)
+but is expected to have type
+  VAtLeast (6 * a) (w ^ 2)
+scratch/Q4221Valuation.lean:194:16: error(lean.unknownIdentifier): Unknown identifier `add_eq_add_iff_left`
+scratch/Q4221Valuation.lean:194:4: error: Type mismatch: After simplification, term
+  h
+ has type
+  VAtLeast (a + 3 * a) (t * w)
+but is expected to have type
+  VAtLeast (4 * a) (t * w)
+scratch/Q4221Valuation.lean:200:4: error: Type mismatch: After simplification, term
+  VAtLeast.mul_natCast_left 10 htw1
+ has type
+  VAtLeast 1 (↑10 * (t * w))
+but is expected to have type
+  VAtLeast 1 (10 * (t * w))
+scratch/Q4221Valuation.lean:219:4: error: Type mismatch: After simplification, term
+  VAtLeast.mono (Decidable.byContradiction fun a => n15_v2_formal_double_explicit._proof_1_6 ht a) h
+ has type
+  VAtLeast (2 * a) (↑2 * (t * w))
+but is expected to have type
+  VAtLeast (2 * a) (2 * (t * w))
+scratch/Q4221Valuation.lean:230:4: error: Type mismatch: After simplification, term
+  VAtLeast.pow_two hlam
+ has type
+  VAtLeast (2 * (2 * a)) (tangentLambda t w ^ 2)
+but is expected to have type
+  VAtLeast (4 * a) (tangentLambda t w ^ 2)
+scratch/Q4221Valuation.lean:233:16: error(lean.unknownIdentifier): Unknown identifier `add_eq_add_iff_left`
+scratch/Q4221Valuation.lean:233:4: error: Type mismatch: After simplification, term
+  h
+ has type
+  VAtLeast (4 * a + 2 * a) (tangentLambda t w ^ 0 * tangentLambda t w * tangentLambda t w * tangentLambda t w)
+but is expected to have type
+  VAtLeast (6 * a) (tangentLambda t w ^ 0 * tangentLambda t w * tangentLambda t w * tangentLambda t w)
+scratch/Q4221Valuation.lean:238:16: error(lean.unknownIdentifier): Unknown identifier `add_eq_add_iff_left`
+scratch/Q4221Valuation.lean:238:4: error: Type mismatch: After simplification, term
+  h
+ has type
+  VAtLeast (2 * a + a) (tangentLambda t w * t)
+but is expected to have type
+  VAtLeast (3 * a) (tangentLambda t w * t)
+scratch/Q4221Valuation.lean:262:4: error: Type mismatch: After simplification, term
+  VAtLeast.mono (Decidable.byContradiction fun a => n15_v2_formal_double_explicit._proof_1_8 ht a) h
+ has type
+  VAtLeast (2 * a) (↑10 * (tangentLambda t w * tangentNu t w))
+but is expected to have type
+  VAtLeast (2 * a) (10 * (tangentLambda t w * tangentNu t w))
+scratch/Q4221Valuation.lean:266:4: error: Type mismatch: After simplification, term
+  VAtLeast.mono (Decidable.byContradiction fun a => n15_v2_formal_double_explicit._proof_1_9 ht a) h
+ has type
+  VAtLeast (2 * a) (↑6 * (tangentLambda t w ^ 2 * tangentNu t w))
+but is expected to have type
+  VAtLeast (2 * a) (6 * (tangentLambda t w ^ 2 * tangentNu t w))
+VALUATION_STATUS=1
 EXIT_STATUS=1
