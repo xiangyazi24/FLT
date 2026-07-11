@@ -14,22 +14,32 @@ jobs:
         run: |
           sudo apt-get update -qq >/dev/null
           sudo apt-get install -y pari-gp >/dev/null
-      - name: Frobenius and involution calculations
+      - name: Explicit involution quotient
         shell: bash
         run: |
           cat >/tmp/q4342.gp <<'GP'
           f=x^6+4*x^5+10*x^4+10*x^3+5*x^2+2*x+1;
-          print("Q4342_PARI_BEGIN");
-          forprime(p=5,43,{if(p!=2 && p!=3, H=[Mod(1,p)*f,Mod(0,p)]; P=lift(hyperellcharpoly(H)); print("P=",p," CHARPOLY=",P," FACTOR=",factor(P)," JORDER=",subst(P,x,1))) });
           aa=Mod(t,t^3-3*t-1);
-          den=x+aa+1;
-          sx=(-(aa+1)*x-aa)/den;
+          A=-aa-1;
           q=aa^2-1;
-          R=den^6*subst(f,x,sx)-q^6*f;
-          print("INVOLUTION_POLY_IDENTITY=",lift(R));
-          s2=subst(sx,x,sx);
-          print("INVOLUTION_X_SQUARE=",lift(s2-x));
-          print("Q4342_PARI_END");
+          rp=A+q;
+          rm=A-q;
+          den=x-A;
+          sx=(A*x-aa)/den;
+          print("Q4342_QUOTIENT_BEGIN");
+          print("A=",lift(A)," Q=",lift(q)," RPLUS=",lift(rp)," RMINUS=",lift(rm));
+          print("INVOLUTION_ID=",lift(den^6*subst(f,x,sx)-q^6*f));
+          zfun=(x-rp)/(x-rm);
+          print("Z_ANTI_INVARIANT=",lift(subst(zfun,x,sx)+zfun));
+          xz=(z*rm-rp)/(z-1);
+          Fz=(z-1)^6*subst(f,x,xz);
+          print("EVEN_SEXTIC=",lift(Fz));
+          print("C0=",lift(polcoef(Fz,0)));
+          print("C2=",lift(polcoef(Fz,2)));
+          print("C4=",lift(polcoef(Fz,4)));
+          print("C6=",lift(polcoef(Fz,6)));
+          print("ODD1=",lift(polcoef(Fz,1))," ODD3=",lift(polcoef(Fz,3))," ODD5=",lift(polcoef(Fz,5)));
+          print("Q4342_QUOTIENT_END");
           quit;
           GP
           gp -q /tmp/q4342.gp
