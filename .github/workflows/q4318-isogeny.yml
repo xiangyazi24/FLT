@@ -6,6 +6,11 @@ on:
     paths:
       - scratch/Q4318Isogeny.py
       - .github/workflows/q4318-isogeny.yml
+  pull_request:
+    branches: [scratch]
+    paths:
+      - scratch/Q4318Isogeny.py
+      - .github/workflows/q4318-isogeny.yml
   workflow_dispatch:
 
 permissions:
