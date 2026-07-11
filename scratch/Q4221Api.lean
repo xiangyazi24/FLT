@@ -1,0 +1,23 @@
+import Mathlib
+
+#check WeierstrassCurve
+#check WeierstrassCurve.Affine.Point
+#check WeierstrassCurve.Affine.Point.mk
+#check WeierstrassCurve.Affine.Point.pointEquiv
+#check WeierstrassCurve.Affine.Point.add_self_of_Y_ne
+#check WeierstrassCurve.Affine.slope_of_Y_ne
+#check WeierstrassCurve.Affine.addX
+#check WeierstrassCurve.Affine.addY
+#check padicValRat
+#check padicValRat.mul
+#check padicValRat.pow
+#check padicValRat.add_eq_of_lt
+#check padicValRat.min_le_padicValRat_add
+#check Rat.num_divInt_den
+#check WeierstrassCurve.map
+#check WeierstrassCurve.Affine.Point.map
+#check WeierstrassCurve.VariableChange
+#check WeierstrassCurve.variableChange
+#check WeierstrassCurve.changeVariables
+#check WeierstrassCurve.linearMap
+#check Ideal.span
