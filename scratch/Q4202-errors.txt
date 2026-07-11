@@ -1,6 +1,5 @@
-✔ [8564/8565] Built scratch.FermatFourthDifferenceN16 (3.9s)
-✖ [8565/8565] Building scratch.Q4202Check2 (7.2s)
-trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/bin/lean /home/runner/work/FLT/FLT/scratch/Q4202Check2.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q4202Check2.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q4202Check2.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q4202Check2.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q4202Check2.setup.json --json
+✔ [8564/8565] Built scratch.FermatFourthDifferenceN16 (4.5s)
+⚠ [8565/8565] Built scratch.Q4202Check2 (7.9s)
 warning: scratch/Q4202Check2.lean:191:31: `simp [haZero] at ha` is a flexible tactic modifying `ha`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
 
 Note: This linter can be disabled with `set_option linter.flexible false`
@@ -9,26 +8,6 @@ warning: scratch/Q4202Check2.lean:191:31: `simp [haZero] at ha` is a flexible ta
 
 Note: This linter can be disabled with `set_option linter.flexible false`
 info: scratch/Q4202Check2.lean:191:55: `exact hM0 ha` uses `ha`!
-error: scratch/Q4202Check2.lean:414:2: unsolved goals
-case inr.inr
-u v : ℚ
-h : v ^ 2 = u * (u ^ 2 + 1) * (u ^ 2 + 2 * u - 1)
-M : ℤ := u.num
-N : ℤ := ↑u.den
-hN : 0 < N
-hN0 : N ≠ 0
-hMN : IsCoprime M N
-hu : u = ↑M / ↑N
-wq : ℚ := ↑N ^ 3 * v
-hwq : wq ^ 2 = ↑(M * N * Q16 M N * R16 M N)
-W : ℤ
-hWrat : wq = ↑W
-hWint : W ^ 2 = M * N * Q16 M N * R16 M N
-hMneg : M = -N
-⊢ ↑(-N) = -↑N
-error: Lean exited with code 1
-Some required targets logged failures:
-- scratch.Q4202Check2
-error: build failed
+Build completed successfully (8565 jobs).
 
-EXIT_STATUS=1
+EXIT_STATUS=0

@@ -413,7 +413,8 @@ theorem C16_rational_u {u v : ℚ}
     field_simp [show (N : ℚ) ≠ 0 by exact_mod_cast hN0]
   · left
     rw [hu, hMneg]
-    field_simp [show (N : ℚ) ≠ 0 by exact_mod_cast hN0]
+    have hNq : (N : ℚ) ≠ 0 := by exact_mod_cast hN0
+    simp [hNq]
 
 def A16 (x : ℚ) : ℚ := x ^ 3 + x ^ 2 - x + 1
 
