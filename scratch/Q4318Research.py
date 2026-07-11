@@ -22,53 +22,56 @@ F4 = sp.expand(
     + (b2*b8 - b4*b6)*X + (b4*b8 - b6**2)
 )
 psi5 = sp.expand(F4*psi2sq**2 - psi3**3)
-psi5p = sp.Poly(psi5, X)
-print('psi5_degree_X =', psi5p.degree())
-print('psi5_terms =', len(psi5p.terms()))
+print('psi5_degree_X =', sp.Poly(psi5, X).degree())
 print('b2 =', b2)
 print('b4 =', b4)
 print('b6 =', b6)
 print('b8 =', b8)
 
+# Check the diamond-action weight.
+tp = (t-1)/t
+Xp = (X - t**2*(t-1))/t**4
+ratio_check = sp.factor(sp.together(t**48 * psi5.subs({t: tp, X: Xp}, simultaneous=True) - psi5))
+print('diamond_weight_certificate_zero =', ratio_check == 0)
+
 # Invariant r = (q X - t^2(t-1))/(t^2(t-1)^2).
 Xsol = t**2*(t-1)*(r*(t-1)+1)/q
-N = sp.cancel(q**12 * psi5.subs(X, Xsol))
-Nnum, Nden = sp.fraction(N)
-assert sp.expand(Nden) == 1
-Nnum = sp.Poly(sp.expand(Nnum), t, r)
-fac = t**24 * (t-1)**24
-Qpoly, Rem = sp.div(Nnum, sp.Poly(fac, t, r))
-print('division_remainder_zero =', Rem.is_zero)
-H = sp.expand(Qpoly.as_expr())
-print('H_degree_t =', sp.Poly(H, t).degree())
-print('H_degree_r =', sp.Poly(H, r).degree())
+I = sp.cancel(q**12 * psi5.subs(X, Xsol) / (t**24 * (t-1)**24))
+Inum, Iden = map(sp.expand, sp.fraction(I))
+print('I_num_degree_t =', sp.Poly(Inum, t).degree())
+print('I_den_factor =', sp.factor(Iden))
 
-# Reduce H modulo t^3 - s t^2 + (s-3)t + 1.
+# Reduce the rational function I modulo the cubic relation for t over s.
 K = sp.QQ.frac_field(s, r)
-Ht = sp.Poly(H, t, domain=K)
 cubic = sp.Poly(t**3 - s*t**2 + (s-3)*t + 1, t, domain=K)
-Remainder = Ht.rem(cubic).as_expr()
-Remainder = sp.factor(Remainder)
-print('remainder =', Remainder)
-RP = sp.Poly(sp.expand(Remainder), t, domain=K)
-print('remainder_degree_t =', RP.degree())
-R35 = sp.cancel(RP.coeff_monomial(1)) if RP.degree() == 0 else None
-print('R35 =', sp.factor(R35) if R35 is not None else 'NONCONSTANT')
-if R35 is not None:
-    R35 = sp.factor(R35)
-    num, den = sp.fraction(R35)
-    print('R35_den =', sp.factor(den))
-    R35num = sp.Poly(sp.expand(num), s, r)
-    print('R35_degree_s =', R35num.degree(s))
-    print('R35_degree_r =', R35num.degree(r))
-    print('R35_terms =', len(R35num.terms()))
-    print('R35_expanded =', R35num.as_expr())
-    if R35num.degree(s) == 2:
-        A = sp.Poly(R35num.as_expr(), s).coeff_monomial(s**2)
-        B = sp.Poly(R35num.as_expr(), s).coeff_monomial(s)
-        C = sp.Poly(R35num.as_expr(), s).coeff_monomial(1)
-        disc = sp.factor(B**2 - 4*A*C)
-        print('quad_A =', sp.factor(A))
-        print('quad_B =', sp.factor(B))
-        print('quad_C =', sp.factor(C))
-        print('disc_factor =', disc)
+numrem = sp.Poly(Inum, t, domain=K).rem(cubic)
+denrem = sp.Poly(Iden, t, domain=K).rem(cubic)
+deni = sp.invert(denrem, cubic)
+Rrem = (numrem * deni).rem(cubic)
+print('invariant_remainder_degree_t =', Rrem.degree())
+print('invariant_remainder =', sp.factor(Rrem.as_expr()))
+if Rrem.degree() == 0:
+    R35 = sp.cancel(Rrem.coeff_monomial(1))
+    R35num, R35den = sp.fraction(R35)
+    R35num = sp.factor(R35num)
+    R35den = sp.factor(R35den)
+    print('R35_den =', R35den)
+    P35 = sp.Poly(sp.expand(R35num), s, r)
+    print('R35_degree_s =', P35.degree(s))
+    print('R35_degree_r =', P35.degree(r))
+    print('R35_terms =', len(P35.terms()))
+    print('R35_num =', P35.as_expr())
+
+# Duplication involution on x(Q), then on invariant r.
+phi2 = sp.expand(X**4 - b4*X**2 - 2*b6*X - b8)
+X2 = sp.cancel(phi2 / psi2sq)
+r2 = sp.cancel((q*X2 - t**2*(t-1))/(t**2*(t-1)**2))
+r2_sub = sp.cancel(r2.subs(X, Xsol))
+print('r2_raw =', sp.factor(r2_sub))
+# Reduce r2 rationally modulo the cubic relation.
+r2n, r2d = map(sp.expand, sp.fraction(r2_sub))
+r2nr = sp.Poly(r2n, t, domain=K).rem(cubic)
+r2dr = sp.Poly(r2d, t, domain=K).rem(cubic)
+r2red = (r2nr * sp.invert(r2dr, cubic)).rem(cubic)
+print('r2_remainder_degree_t =', r2red.degree())
+print('r2_reduced =', sp.factor(r2red.as_expr()))
