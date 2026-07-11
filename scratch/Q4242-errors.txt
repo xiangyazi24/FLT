@@ -1,20 +1,2 @@
-scratch/Q4242Counterexample.lean:56:55: error: unsolved goals
-⊢ (match Affine.Point.mk ⋯ with
-    | Affine.Point.zero => 0
-    | Affine.Point.some x y h => -x / y) =
-    6 / 7
-scratch/Q4242Counterexample.lean:59:39: error: unsolved goals
-⊢ (match Affine.Point.mk ⋯ with
-    | Affine.Point.zero => 0
-    | Affine.Point.some x y h => -1 / y) =
-    8 / 7
-scratch/Q4242Counterexample.lean:65:2: error: Tactic `simp` failed with a nested error:
-maximum recursion depth has been reached
-use `set_option maxRecDepth <num>` to increase limit
-use `set_option diagnostics true` to get diagnostic information
-scratch/Q4242Counterexample.lean:70:2: error: Tactic `simp` failed with a nested error:
-maximum recursion depth has been reached
-use `set_option maxRecDepth <num>` to increase limit
-use `set_option diagnostics true` to get diagnostic information
 
-EXIT_STATUS=1
+EXIT_STATUS=0
