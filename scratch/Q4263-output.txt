@@ -1,26 +1,2 @@
-scratch/Q4263.lean:304:38: error: failed to synthesize
-  Decidable
-    (∀ (h : E02.Nonsingular ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩)),
-      4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0)
 
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-scratch/Q4263.lean:304:38: error: failed to synthesize
-  Decidable
-    (∀ (h : E02.Nonsingular ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩)),
-      4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0)
-
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-scratch/Q4263.lean:304:38: error: failed to synthesize
-  Decidable
-    (∀ (h : E02.Nonsingular ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩)),
-      4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0)
-
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-scratch/Q4263.lean:304:38: error: failed to synthesize
-  Decidable
-    (∀ (h : E02.Nonsingular ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩)),
-      4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0)
-
-Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
-
-EXIT_STATUS=1
+EXIT_STATUS=0
