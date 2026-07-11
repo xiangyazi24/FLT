@@ -1,0 +1,38 @@
+name: Q4221 inspect
+
+on:
+  push:
+    branches: [q4221-check]
+    paths-ignore:
+      - scratch/Q4221-inventory.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q4221-check
+      - name: Inventory relevant sources
+        shell: bash
+        run: |
+          set +e
+          {
+            echo '=== FILES ==='
+            find . -maxdepth 4 -type f | sort
+            echo
+            echo '=== N15 / curve / formal-kernel matches ==='
+            grep -RInE 'n15|N15|iterated_decomposition|formalKernel|formal kernel|31[^0-9].*240|X\(X-15\)\(X-16\)|x\^3\+x\^2-5\*?x\+2|no_infinitely|infinitely.*divisible' --exclude-dir=.git --exclude='Q4221-inventory.txt' . || true
+            echo
+            echo '=== Elliptic / projective helper matches ==='
+            grep -RInE 'WeierstrassCurve|Jacobian\.Point|Affine\.Point|padicValRat|v2|reduction.*mod.*2' --include='*.lean' --exclude-dir=.git . | head -n 5000 || true
+          } > scratch/Q4221-inventory.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scratch/Q4221-inventory.txt
+          git commit -m 'Record Q4221 repository inventory [skip ci]' || true
+          git push origin HEAD:q4221-check
