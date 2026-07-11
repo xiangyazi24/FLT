@@ -1,18 +1,41 @@
-scratch/Q4202Check.lean:1:0: error: unknown module prefix 'scratch'
+✖ [8564/8565] Building scratch.FermatFourthDifferenceN16 (3.8s)
+trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/bin/lean /home/runner/work/FLT/FLT/scratch/FermatFourthDifferenceN16.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/FermatFourthDifferenceN16.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/FermatFourthDifferenceN16.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/scratch/FermatFourthDifferenceN16.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/scratch/FermatFourthDifferenceN16.setup.json --json
+error: scratch/FermatFourthDifferenceN16.lean:9:20: Unknown identifier `Y`
 
-No directory 'scratch' or file 'scratch.olean' in the search path entries:
-/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/build/lib/lean
-/home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/lib/lean
-/home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/lib/lean
+Note: It is not possible to treat `Y` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+error: scratch/FermatFourthDifferenceN16.lean:11:7: Unknown identifier `Y`
+
+Note: It is not possible to treat `Y` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+error: scratch/FermatFourthDifferenceN16.lean:12:8: Unknown identifier `Z`
+
+Note: It is not possible to treat `Z` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+error: scratch/FermatFourthDifferenceN16.lean:12:24: Unknown identifier `Y`
+
+Note: It is not possible to treat `Y` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+error: scratch/FermatFourthDifferenceN16.lean:16:20: Unknown identifier `b`
+
+Note: It is not possible to treat `b` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+error: scratch/FermatFourthDifferenceN16.lean:18:11: Unknown identifier `b`
+
+Note: It is not possible to treat `b` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+error: scratch/FermatFourthDifferenceN16.lean:19:16: Unknown identifier `b`
+
+Note: It is not possible to treat `b` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+error: scratch/FermatFourthDifferenceN16.lean:19:28: Unknown identifier `c`
+
+Note: It is not possible to treat `c` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+error: scratch/FermatFourthDifferenceN16.lean:20:16: Unknown identifier `b`
+
+Note: It is not possible to treat `b` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+error: scratch/FermatFourthDifferenceN16.lean:22:40: Unknown identifier `CoprimeFourthDifference`
+
+Note: It is not possible to treat `CoprimeFourthDifference` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+error: scratch/FermatFourthDifferenceN16.lean:23:45: Unknown identifier `TwiceSquareFourthDifference`
+
+Note: It is not possible to treat `TwiceSquareFourthDifference` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+error: Lean exited with code 1
+Some required targets logged failures:
+- scratch.FermatFourthDifferenceN16
+error: build failed
 
 EXIT_STATUS=1
