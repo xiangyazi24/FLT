@@ -3,6 +3,8 @@ name: Q4202 Lean check
 on:
   push:
     branches: [q4202-check]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
