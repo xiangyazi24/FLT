@@ -20,12 +20,7 @@ jobs:
           cat >/tmp/q4342.gp <<'GP'
           f=x^6+4*x^5+10*x^4+10*x^3+5*x^2+2*x+1;
           print("Q4342_PARI_BEGIN");
-          forprime(p=5,43,
-            if(p!=2 && p!=3,
-              P=lift(hyperellcharpoly(Mod(1,p)*f));
-              print("P=",p," CHARPOLY=",P," FACTOR=",factor(P)," JORDER=",subst(P,x,1));
-            )
-          );
+          forprime(p=5,43,{if(p!=2 && p!=3, H=[Mod(1,p)*f,Mod(0,p)]; P=lift(hyperellcharpoly(H)); print("P=",p," CHARPOLY=",P," FACTOR=",factor(P)," JORDER=",subst(P,x,1))) });
           aa=Mod(t,t^3-3*t-1);
           den=x+aa+1;
           sx=(-(aa+1)*x-aa)/den;
