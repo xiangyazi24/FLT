@@ -1,41 +1,24 @@
 scratch/Q4242Core.lean:28:4: warning: try 'simp' instead of 'simpa'
 
 Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
-scratch/Q4242Reduction.lean:21:39: error: unsolved goals
-case e'_3
+scratch/Q4242Reduction.lean:23:36: error: unsolved goals
 ⊢ 225 = 1
-scratch/Q4242Reduction.lean:28:47: error(lean.invalidField): Invalid field `Point`: The environment does not contain `WeierstrassCurve.Point`, so it is not possible to project the field `Point` from an expression
-  E0 (ZMod 2)
-of type `WeierstrassCurve (ZMod 2)`
-scratch/Q4242Points.lean:24:17: error(lean.invalidField): Invalid field `Point`: The environment does not contain `WeierstrassCurve.Point`, so it is not possible to project the field `Point` from an expression
-  E15
-of type `WeierstrassCurve ℚ`
-scratch/Q4242Points.lean:27:8: error(lean.invalidField): Invalid field `Equation`: The environment does not contain `WeierstrassCurve.Equation`, so it is not possible to project the field `Equation` from an expression
-  E15
-of type `WeierstrassCurve ℚ`
-scratch/Q4242Points.lean:32:10: error(lean.unknownIdentifier): Unknown identifier `Pt`
+scratch/Q4242Reduction.lean:32:12: error: `simp` made no progress
+scratch/Q4242Reduction.lean:34:38: error: Expected type must not contain free variables
+  4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0
 
-Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-scratch/Q4242Points.lean:33:11: error(lean.unknownIdentifier): Unknown identifier `Pt`
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+scratch/Q4242Reduction.lean:34:38: error: Expected type must not contain free variables
+  4 • Affine.Point.some ((fun i => i) ⟨0, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0
 
-Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-scratch/Q4242Points.lean:34:11: error(lean.unknownIdentifier): Unknown identifier `Pt`
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+scratch/Q4242Reduction.lean:34:38: error: Expected type must not contain free variables
+  4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨0, ⋯⟩) h = 0
 
-Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-scratch/Q4242Points.lean:35:11: error(lean.unknownIdentifier): Unknown identifier `Pt`
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+scratch/Q4242Reduction.lean:34:38: error: Expected type must not contain free variables
+  4 • Affine.Point.some ((fun i => i) ⟨1, ⋯⟩) ((fun i => i) ⟨1, ⋯⟩) h = 0
 
-Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-scratch/Q4242Points.lean:36:11: error(lean.unknownIdentifier): Unknown identifier `Pt`
-
-Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-scratch/Q4242Points.lean:37:11: error(lean.unknownIdentifier): Unknown identifier `Pt`
-
-Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-scratch/Q4242Points.lean:38:11: error(lean.unknownIdentifier): Unknown identifier `Pt`
-
-Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-scratch/Q4242Points.lean:41:16: error(lean.unknownIdentifier): Unknown identifier `Pt`
-
-Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
+Hint: Use the `+revert` option to automatically clean up and revert free variables
 
 EXIT_STATUS=1
