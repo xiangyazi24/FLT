@@ -117,10 +117,9 @@ theorem iterated_decomposition (H : AddSubgroup G)
       obtain ⟨h', z, hyz⟩ := hdecomp y
       refine ⟨h + (2 ^ n : ℕ) • h', z, ?_⟩
       rw [hxy, hyz]
-      simp only [AddSubgroup.coe_add, AddSubgroup.coe_nsmul, nsmul_add, pow_succ]
-      congr 2
-      simpa only [nsmul_nsmul] using
-        (show (2 ^ n * 2 : ℕ) • z = (2 * 2 ^ n : ℕ) • z by rw [Nat.mul_comm])
+      simp only [AddSubgroup.coe_add, AddSubgroup.coe_nsmul, nsmul_add, pow_succ,
+        ← mul_nsmul]
+      rw [Nat.mul_comm (2 ^ n) 2]
 
 /-- Multiplying by four removes all subgroup representatives.  Hence every
     `4x` is infinitely two-divisible. -/
@@ -136,7 +135,7 @@ theorem four_mul_infinitelyTwoDivisible (H : AddSubgroup G)
     _ = (4 : ℕ) • (h : G) + (4 : ℕ) • ((2 ^ n : ℕ) • y) := by rw [nsmul_add]
     _ = (4 : ℕ) • ((2 ^ n : ℕ) • y) := by rw [hexp, zero_add]
     _ = (2 ^ n : ℕ) • ((4 : ℕ) • y) := by
-      simp only [nsmul_nsmul]
+      simp only [← mul_nsmul]
       rw [Nat.mul_comm]
 
 /-- The exact group-theoretic final assembly used by the N15 argument. -/
