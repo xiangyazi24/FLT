@@ -5,6 +5,8 @@ on:
     branches: [q4202-check]
     paths-ignore:
       - scratch/Q4202-errors.txt
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 permissions:
@@ -20,6 +22,7 @@ jobs:
       - uses: leanprover/lean-action@v1
         with:
           auto-config: false
+          use-github-cache: true
           use-mathlib-cache: false
       - name: Fetch Mathlib cache
         run: lake exe cache get
