@@ -43,7 +43,9 @@ jobs:
           status4=$?
           lake env lean scratch/Q4242Counterexample.lean >> scratch/Q4242-errors.txt 2>&1
           status5=$?
-          status=$((status1 || status2 || status3 || status4 || status5))
+          lake env lean scratch/Q4242PointClass.lean >> scratch/Q4242-errors.txt 2>&1
+          status6=$?
+          status=$((status1 || status2 || status3 || status4 || status5 || status6))
           printf '\nEXIT_STATUS=%s\n' "$status" >> scratch/Q4242-errors.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
