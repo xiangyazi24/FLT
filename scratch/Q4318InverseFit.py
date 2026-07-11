@@ -35,7 +35,7 @@ def compose(poly,X,var):
 E1,E5,E7,E35=eta(1),eta(5),eta(7),eta(35)
 a=shift(scale(mul(power(E7,4),power(E1,-4)),49),1)
 h=shift(scale(mul(power(E5,6),power(E1,-6)),125),1)
-x=shift(mul(mul(E1,E35),mul(inv(E5),inv(E7))),1)
+x=scale(shift(mul(mul(E1,E35),mul(inv(E5),inv(E7))),1),-1)
 xx=sp.symbols('x');f=xx**8-4*xx**7-6*xx**6-4*xx**5-9*xx**4+4*xx**3-6*xx**2+4*xx+1
 fx=compose(f,x,xx)
 y=[0]*(N+1);y[0]=1
@@ -46,8 +46,7 @@ ap=[None]*(maxd+1);hp=[None]*(maxd+1)
 ap[0]=[1]+[0]*N;hp[0]=[1]+[0]*N
 for i in range(maxd):ap[i+1]=mul(ap[i],a);hp[i+1]=mul(hp[i],h)
 
-def mons(d):
- return [(i,j,mul(ap[i],hp[j])) for i in range(d+1) for j in range(d+1-i)]
+def mons(d):return [(i,j,mul(ap[i],hp[j])) for i in range(d+1) for j in range(d+1-i)]
 
 def fit(T,maxdeg=10):
  for dr in range(maxdeg+1):
