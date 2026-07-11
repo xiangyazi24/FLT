@@ -10,50 +10,8 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Locate exact ECNF records
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl -sSL --retry 3 https://raw.githubusercontent.com/JohnCremona/ecnf-data/master/IQF/curves.2.0.8.1 -o /tmp/curves
-          echo 'Q4323_ECNF_BEGIN'
-          grep -F -- '-256,-512' /tmp/curves || true
-          echo 'Q4323_ECNF_END'
-      - name: PARI arithmetic probes
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -qq >/dev/null
-          sudo apt-get install -y pari-gp >/dev/null
-          cat >/tmp/q4323.gp <<'GP'
-          default(parisizemax, 4000000000);
-          K=bnfinit(y^2+2);
-          a=Mod(y,y^2+2);
-          lam=1-a;
-          E=ellinit([0,-lam,0,0,-1],K);
-          print("Q4323_PARI_BEGIN");
-          print("BASE_AINVS=",[E.a1,E.a2,E.a3,E.a4,E.a6]);
-          print("BASE_J=",E.j);
-          print("BASE_DISC=",E.disc);
-          iferr(print("BASE_GLOBALRED=",ellglobalred(E)),e,print("BASE_GLOBALRED_ERROR=",errname(e)));
-          P2=idealprimedec(K,2)[1];
-          P3=idealprimedec(K,3);
-          iferr(print("BASE_LOCAL2=",elllocalred(E,P2)),e,print("BASE_LOCAL2_ERROR=",errname(e)));
-          iferr(print("BASE_LOCAL3_1=",elllocalred(E,P3[1])),e,print("BASE_LOCAL3_1_ERROR=",errname(e)));
-          iferr(print("BASE_LOCAL3_2=",elllocalred(E,P3[2])),e,print("BASE_LOCAL3_2_ERROR=",errname(e)));
-          iferr(print("BASE_TORS=",elltors(E)),e,print("BASE_TORS_ERROR=",errname(e)));
-          iferr(print("BASE_RANK=",ellrank(E)),e,print("BASE_RANK_ERROR=",errname(e)));
-          iferr(print("BASE_ROOTNO=",ellrootno(E)),e,print("BASE_ROOTNO_ERROR=",errname(e)));
-          D=[1,-1,3,-3];
-          for(i=1,#D,
-            d=D[i];
-            Ed=if(d==1,E,elltwist(E,d));
-            print("TWIST_D=",d," AINVS=",[Ed.a1,Ed.a2,Ed.a3,Ed.a4,Ed.a6]);
-            iferr(print("TWIST_GLOBALRED_D=",d," ",ellglobalred(Ed)),e,print("TWIST_GLOBALRED_ERROR_D=",d," ",errname(e)));
-            iferr(print("TWIST_TORS_D=",d," ",elltors(Ed)),e,print("TWIST_TORS_ERROR_D=",d," ",errname(e)));
-            iferr(print("TWIST_RANK_D=",d," ",ellrank(Ed)),e,print("TWIST_RANK_ERROR_D=",d," ",errname(e)));
-            iferr(print("TWIST_ROOTNO_D=",d," ",ellrootno(Ed)),e,print("TWIST_ROOTNO_ERROR_D=",d," ",errname(e)));
-          );
-          print("Q4323_PARI_END");
-          quit;
-          GP
-          gp -q /tmp/q4323.gp
+      - uses: actions/checkout@v4
+      - name: Install PARI
+        run: sudo apt-get update -qq >/dev/null && sudo apt-get install -y pari-gp >/dev/null
+      - name: Q4323 PARI results
+        run: gp -q .github/q4323.gp
