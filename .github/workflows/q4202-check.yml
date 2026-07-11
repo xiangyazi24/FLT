@@ -20,7 +20,9 @@ jobs:
       - uses: leanprover/lean-action@v1
         with:
           auto-config: false
-          use-mathlib-cache: true
+          use-mathlib-cache: false
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
       - name: Check Q4202 and persist diagnostics
         shell: bash
         run: |
