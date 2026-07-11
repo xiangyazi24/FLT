@@ -122,7 +122,8 @@ lemma v2_two : v2 (2 : ℚ) = 1 := by
   exact padicValRat.self (by norm_num)
 
 lemma v2_two_pow (n : ℕ) : v2 ((2 : ℚ) ^ n) = (n : ℤ) := by
-  rw [padicValRat.pow (by norm_num), v2_two]
+  change padicValRat 2 ((2 : ℚ) ^ n) = (n : ℤ)
+  rw [padicValRat.pow (by norm_num), padicValRat.self (by norm_num)]
   simp
 
 /-- Exact wrapper around Mathlib's distinct-valuation sum lemma. -/
@@ -146,8 +147,7 @@ lemma higher_monomial {c z : ℚ} {n : ℕ}
     VAtLeast (v2 z + 1) (c * z ^ n) := by
   have hzA : VAtLeast (v2 z) z := Or.inr le_rfl
   have h := hc.mul (hzA.pow n)
-  apply h.mono
-  omega
+  exact VAtLeast.mono (by omega) h
 
 /-- Finite version of “all terms of the tail have degree at least two and
 2-integral coefficients”. -/
@@ -279,7 +279,7 @@ end ReductionKernel
 open WeierstrassCurve
 
 /-- A concrete good-reduction-at-two model used to verify the finite exponent
-step by computation. -/
+step by direct enumeration of `x,y : ZMod 2`. -/
 def E02 : WeierstrassCurve.Affine (ZMod 2) where
   a₁ := 1
   a₂ := 1
@@ -292,10 +292,9 @@ instance : E02.IsElliptic where
     rw [isUnit_iff_ne_zero]
     native_decide
 
-theorem E02_card : Fintype.card E02.Point = 4 := by
-  native_decide
-
-theorem E02_exponent_four : ∀ Q : E02.Point, (4 : ℕ) • Q = 0 := by
-  native_decide
+theorem E02_exponent_four (Q : E02.Point) : (4 : ℕ) • Q = 0 := by
+  rcases Q with (_ | ⟨x, y, h⟩)
+  · simp
+  fin_cases x <;> fin_cases y <;> native_decide
 
 end Q4263
