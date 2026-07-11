@@ -2,6 +2,8 @@ name: Q4358 lambda Selmer check
 on:
   push:
     branches: [q4358-check]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
@@ -14,25 +16,22 @@ jobs:
           sudo apt-get update -qq >/dev/null
           sudo apt-get install -y pari-gp >/dev/null
           cat >/tmp/model.gp <<'GP'
-          z=Mod(z,z^2+z+1);
-          s=1+2*z;
-          g1=(3+2*s)/7; g2=s; g3=(3-2*s)/7; g4=-s;
+          zz=Mod(z,z^2+z+1);
+          ss=1+2*zz;
+          g1=(3+2*ss)/7; g2=ss; g3=(3-2*ss)/7; g4=-ss;
           C=(g2-g4)/(g2-g3);
-          u=3*C*(m-g3)/(m-g4);
-          mofu=solve(x=0,0); /* placeholder */
-          t=(-m^2-6*m+3)/(m^2-1);
-          R=(t-3*z)*(t-3*z^2)^2;
+          uu=3*C*(m-g3)/(m-g4);
+          tt=(-m^2-6*m+3)/(m^2-1);
+          RR=(tt-3*zz)*(tt-3*zz^2)^2;
           print("GAMMAS=",g1," ; ",g2," ; ",g3," ; ",g4);
-          print("CROSS_U=",u);
-          /* solve u relation by hand as linear fractional */
-          numu=numerator(u); denu=denominator(u);
-          /* u*denu=numu, solve linearly for m */
-          mm=-(polcoef(numu-u*denu,0,m))/polcoef(numu-u*denu,1,m);
+          print("CROSS_U=",lift(uu));
+          numu=numerator(uu); denu=denominator(uu);
+          /* solve U*denu=numu linearly for m, using q as a formal variable */
+          eq=subst(numu-u*denu,m,m);
+          mm=-polcoef(eq,0,m)/polcoef(eq,1,m);
           print("M_OF_U=",lift(mm));
-          Ru=subst(R,m,mm);
-          /* multiply by cube of denominator of mm and m^2-1 as needed; cube-free simplify */
+          Ru=subst(RR,m,mm);
           print("R_U_RAW=",lift(Ru));
-          print("SAGE_POLICY_PLACEHOLDER");
           quit;
           GP
           gp -q /tmp/model.gp
