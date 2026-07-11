@@ -1,0 +1,40 @@
+name: Q4318 Hauptmodul check
+
+on:
+  push:
+    branches: [q4318-uv-final]
+    paths:
+      - scratch/Q4318HauptCheck.py
+      - .github/workflows/q4318-hauptcheck.yml
+  pull_request:
+    branches: [scratch]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q4318-uv-final
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install sympy
+      - name: Verify identities
+        shell: bash
+        run: |
+          set -o pipefail
+          python scratch/Q4318HauptCheck.py 2>&1 | tee scratch/Q4318HauptCheck.out
+      - name: Persist output
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scratch/Q4318HauptCheck.out
+          git commit -m 'Record Q4318 Hauptmodul output [skip ci]' || true
+          git push origin HEAD:q4318-uv-final
