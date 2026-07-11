@@ -1,4 +1,4 @@
-name: Q4318 symbolic research
+name: Q4318 Sage research
 
 on:
   push:
@@ -15,20 +15,19 @@ jobs:
   compute:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    container:
+      image: sagemath/sagemath:latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: q4318-research
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: pip install sympy
-      - name: Run quotient computation
+      - name: Run Sage introspection
         shell: bash
         run: |
           set -o pipefail
-          python scratch/Q4318Quotient.py 2>&1 | tee scratch/Q4318Quotient.out
+          sage scratch/Q4318Sage.sage 2>&1 | tee scratch/Q4318Sage.out
       - name: Post output to temporary PR
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh pr comment 9 --body-file scratch/Q4318Quotient.out
+        shell: bash
+        run: gh pr comment 9 --body-file scratch/Q4318Sage.out
