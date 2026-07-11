@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.TorsionDefs
 import FLT.Assumptions.MazurProof.CyclicOrderArithmetic
+import FLT.Assumptions.MazurProof.CyclicExclusion14
 import FLT.Assumptions.MazurProof.CyclicExclusion20
 import FLT.Assumptions.MazurProof.CyclicExclusion25
 import FLT.Assumptions.MazurProof.CyclicExclusion27
@@ -23,6 +24,8 @@ private copies (`minimalBadComposites'`, `IsSmooth'`) and their two placeholder
 
 Endpoint wired to a real theorem:
 
+* `14` — `no_rational_point_of_order_14`, via the Tate/Kubert map to
+  `X₁(14)` and the complete quartic descent in `scratch.ObstructionQ14`.
 * `20, 24` — `CyclicExclusion20.no_rational_point_of_order_20` and
   `CyclicExclusion20.no_rational_point_of_order_24`.  They share the correctly
   stated geometric seam `exists_rational_two_isogeny_quotient`, whose dual map
@@ -34,16 +37,16 @@ Endpoint wired to a real theorem:
 * `49` — likewise reduced by the generic odd-order Tate bridge to
   `preΨ'₄₉(0)=0` with the proper factor `preΨ'₇(0)≠0`; its remaining input is
   `no_raw_order49_tate_obstruction`.
-* `27` — `CyclicExclusion27.no_rational_point_of_order_27`, via
-  `X₀(27) ≅ {x³ + y³ = 1}` and Mathlib's `fermatLastTheoremThree`.  Its only
-  remaining seam is the named geometric input `order27_to_fermat_cubic`, which
-  `#print axioms mazur_cyclic_order_bound_assembled` reports explicitly — the
-  wiring does not claim a closed proof of the order-`27` exclusion.
+* `27` — `CyclicExclusion27.no_rational_point_of_order_27`, via the
+  degree-three genus-one quotient `X₁(27) → 27C1`, whose Fermat-cubic model
+  is handled by Mathlib's `fermatLastTheoremThree`.  Its only remaining seam is
+  the named geometric input `order27_to_fermat_cubic`; this is a map to
+  `27C1`, not to `X₀(27)` (which has a rational noncuspidal CM point).
 
 Endpoints kept as named sub-axioms, because no sound real theorem exists to
 wire:
 
-* `14, 15, 16, 18, 21` — the `CyclicExclusion` proofs still contain `sorry`.
+* `15, 16, 18, 21` — the `CyclicExclusion` proofs still contain `sorry`.
 * `35` — its final arithmetic input is not yet formalized.
 
 Together with the prime-order input `mazur_prime_torsion_bound_sub`, these are
@@ -64,7 +67,6 @@ axiom mazur_prime_torsion_bound_sub
 
 /-! ## Composite-order sub-axioms (no sound real theorem to wire yet) -/
 
-axiom no_order_14 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 14
 axiom no_order_15 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 15
 axiom no_order_16 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 16
 axiom no_order_18 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 18
@@ -72,6 +74,10 @@ axiom no_order_21 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPoin
 axiom no_order_35 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 35
 
 /-! ## Concrete exclusion wired to a real theorem -/
+
+theorem no_order_14 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ HasRationalPointOfOrder E 14 :=
+  no_rational_point_of_order_14 E
 
 theorem no_order_20 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ HasRationalPointOfOrder E 20 :=

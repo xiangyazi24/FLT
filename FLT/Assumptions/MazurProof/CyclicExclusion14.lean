@@ -16,9 +16,9 @@ bridge to the same `N = 14` obstruction curve
 
 `w² = u³ + u² - 2u`.
 
-The remaining external computation is isolated as
-`cyclic_order_14_kubert_bridge`: a rational point of order `14` gives a
-nondegenerate rational point on the `N = 14` obstruction curve.
+The Tate/Kubert bridge and the birational map to the standard `X₁(14)`
+model are both proved below.  The rational-point calculation is supplied by
+`Scratch.DischargeN14.X14_rational_points_degenerate`.
 -/
 
 open Polynomial
@@ -510,45 +510,17 @@ theorem order14_gives_order2
   exists_point_of_prime_order_of_dvd (E := E) (n := 14) (p := 2)
     (by norm_num) (by norm_num) (by norm_num) h
 
-/-! ## Cyclic `N = 14` modular-curve bridge -/
-
-/--
-The cyclic `N = 14` Tate/Kubert computation.
-
-Mathematically, one starts from the Tate normal form with a marked point of
-order `7`, imposes that the marked lift has order `14`, and obtains a rational
-point on `w² = u³ + u² - 2u`.  Nondegeneracy excludes the cuspidal parameters.
--/
-def CyclicOrder14KubertBridge : Prop :=
-  ∀ (E : WeierstrassCurve ℚ) [E.IsElliptic],
-    HasRationalPointOfOrder E 14 →
-      ∃ u w : ℚ, E_N14_AffineEquation u w ∧ ¬ E_N14_DegenerateParameter u
-
-/--
-Residual cyclic `N = 14` bridge.
-
-This is the only cyclic-order-specific modular-curve computation in this file;
-the contradiction after this point is formal.
--/
-theorem cyclic_order_14_kubert_bridge : CyclicOrder14KubertBridge := by
-  intro E hEll horder
-  sorry
-
 /-! ## Exclusion theorem -/
-
-theorem no_rational_point_of_order_14_of_kubert_bridge
-    (hbridge : CyclicOrder14KubertBridge)
-    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    ¬ HasRationalPointOfOrder E 14 := by
-  intro horder
-  rcases hbridge E horder with ⟨u, w, hcurve, hnondeg⟩
-  exact hnondeg (obstruction_curve_N14_points_degenerate u w hcurve)
 
 /-- No elliptic curve over `ℚ` has a rational point of order `14`. -/
 theorem no_rational_point_of_order_14
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    ¬ HasRationalPointOfOrder E 14 :=
-  no_rational_point_of_order_14_of_kubert_bridge cyclic_order_14_kubert_bridge E
+    ¬ HasRationalPointOfOrder E 14 := by
+  intro horder
+  obtain ⟨u, s, hcurve, hnondeg⟩ :=
+    CyclicExclusion14.raw_obstruction_to_X14
+      (CyclicExclusion14.order14_to_raw_X1_14 E horder)
+  exact hnondeg (Scratch.DischargeN14.X14_rational_points_degenerate hcurve)
 
 theorem no_rational_point_of_order_eq_14
     (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ} (hn : n = 14) :
