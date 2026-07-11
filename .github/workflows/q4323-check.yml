@@ -1,0 +1,45 @@
+name: Q4323 arithmetic check
+on:
+  push:
+    branches: [q4323-check]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Locate curve in ECNF data
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -L --retry 3 https://raw.githubusercontent.com/JohnCremona/ecnf-data/master/IQF/curves.2.0.8.1 -o /tmp/curves.2.0.8.1
+          echo '=== j invariant matches ==='
+          grep -F -- '-256,-512' /tmp/curves.2.0.8.1 || true
+          grep -F -- '-256,512' /tmp/curves.2.0.8.1 || true
+          echo '=== original and Tate model coefficient matches ==='
+          grep -F -- '0,0;2,-2;0,0;-1,-2;-1,0' /tmp/curves.2.0.8.1 || true
+          grep -F -- '-2,2;0,0;2,0;0,0;0,0' /tmp/curves.2.0.8.1 || true
+      - name: PARI global reduction and rank probes
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y pari-gp
+          cat >/tmp/q4323.gp <<'GP'
+          default(parisizemax, 4000000000);
+          K=bnfinit(y^2+2);
+          a=Mod(y,y^2+2);
+          E=ellinit([0,2-2*a,0,-1-2*a,-1],K);
+          print("AINVS=",E.a1,",",E.a2,",",E.a3,",",E.a4,",",E.a6);
+          print("J=",E.j);
+          print("DISC=",E.disc);
+          iferr(print("GLOBALRED=",ellglobalred(E)),e,print("GLOBALRED_ERROR=",errname(e)," ",e));
+          iferr(print("LOCAL2=",elllocalred(E,idealprimedec(K,2)[1])),e,print("LOCAL2_ERROR=",errname(e)," ",e));
+          iferr(print("LOCAL3A=",elllocalred(E,idealprimedec(K,3)[1])),e,print("LOCAL3A_ERROR=",errname(e)," ",e));
+          iferr(print("LOCAL3B=",elllocalred(E,idealprimedec(K,3)[2])),e,print("LOCAL3B_ERROR=",errname(e)," ",e));
+          iferr(print("TORS=",elltors(E)),e,print("TORS_ERROR=",errname(e)," ",e));
+          iferr(print("RANK=",ellrank(E)),e,print("RANK_ERROR=",errname(e)," ",e));
+          iferr(print("ROOTNO=",ellrootno(E)),e,print("ROOTNO_ERROR=",errname(e)," ",e));
+          quit;
+          GP
+          gp -q /tmp/q4323.gp
