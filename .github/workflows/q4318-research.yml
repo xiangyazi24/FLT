@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          python scratch/Q4318Research.py > scratch/Q4318Research.out 2>&1
+          python scratch/Q4318Research.py 2>&1 | tee scratch/Q4318Research.out
       - name: Commit output
         shell: bash
         run: |
@@ -35,4 +35,5 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add scratch/Q4318Research.out
           git commit -m 'Record Q4318 symbolic output [skip ci]' || true
+          git pull --rebase origin q4318-research || true
           git push origin HEAD:q4318-research
