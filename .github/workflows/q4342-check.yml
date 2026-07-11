@@ -14,25 +14,25 @@ jobs:
         run: |
           sudo apt-get update -qq >/dev/null
           sudo apt-get install -y pari-gp postgresql-client >/dev/null
-      - name: Query exact LMFDB records
+      - name: Exact modular and endomorphism data
         env:
           PGPASSWORD: lmfdb
         shell: bash
         run: |
           set -euo pipefail
           DB='postgresql://lmfdb@devmirror.lmfdb.xyz:5432/lmfdb'
-          echo Q4342_MF_COLUMNS
-          psql "$DB" -X -A -t -c "SELECT column_name FROM information_schema.columns WHERE table_name='mf_newforms' AND (column_name LIKE '%twist%' OR column_name LIKE '%cm%' OR column_name LIKE '%rank%' OR column_name LIKE '%field%' OR column_name LIKE '%char%' OR column_name LIKE '%sato%') ORDER BY ordinal_position;"
-          echo Q4342_MF_ROW
-          psql "$DB" -X -A -F '|' -t -c "SELECT label,dim,nf_label,field_poly,field_disc,char_order,char_conductor,char_orbit_label,is_cm,is_rm,is_self_twist,self_twist_type,inner_twist_count,analytic_rank,analytic_rank_proved,relative_dim,sato_tate_group,related_objects FROM mf_newforms WHERE label='18.2.c.a';"
-          echo Q4342_ENDO_COLUMNS
-          psql "$DB" -X -A -t -c "SELECT column_name FROM information_schema.columns WHERE table_name='g2c_endomorphisms' ORDER BY ordinal_position;"
-          echo Q4342_ENDO_ROW
-          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT * FROM g2c_endomorphisms WHERE label='324.a.648.1') t;"
-          echo Q4342_G2_ROW
-          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT label,eqn,cond,disc_key,st_group,real_geom_end_alg,analytic_rank,torsion,two_selmer_rank,has_square_sha,is_gl2_type FROM g2c_curves WHERE label='324.a.648.1') t;" || true
-          echo Q4342_LFUNC_INSTANCES
-          psql "$DB" -X -A -t -c "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name LIKE 'lfunc%instance%';"
+          echo Q4342_MF
+          psql "$DB" -X -A -F '|' -t -c "SELECT label,dim,nf_label,field_poly,field_disc,char_order,char_conductor,is_cm,is_rm,is_self_twist,self_twist_type,inner_twist_count,inner_twists,has_non_self_twist,analytic_rank,analytic_rank_proved,relative_dim,sato_tate_group FROM mf_newforms WHERE label='18.2.c.a';"
+          echo Q4342_ENDO_BASE
+          psql "$DB" -X -A -F '|' -t -c "SELECT factorsRR_base,factorsQQ_base,is_simple_base,ring_base,st_group_base FROM g2c_endomorphisms WHERE label='324.a.648.1';"
+          echo Q4342_ENDO_GEOM
+          psql "$DB" -X -A -F '|' -t -c "SELECT factorsRR_geom,factorsQQ_geom,is_simple_geom,ring_geom,st_group_geom FROM g2c_endomorphisms WHERE label='324.a.648.1';"
+          echo Q4342_FIELDS
+          psql "$DB" -X -A -F '|' -t -c "SELECT fod_label,fod_coeffs,spl_fod_label,spl_fod_coeffs,spl_fod_gen,spl_facs_labels,spl_facs_coeffs,spl_facs_condnorms,lattice FROM g2c_endomorphisms WHERE label='324.a.648.1';"
+          echo Q4342_G2_COLUMNS
+          psql "$DB" -X -A -t -c "SELECT column_name FROM information_schema.columns WHERE table_name='g2c_curves' AND (column_name LIKE '%rank%' OR column_name LIKE '%tors%' OR column_name LIKE '%selmer%' OR column_name LIKE '%sha%' OR column_name LIKE '%st_%' OR column_name LIKE '%end%' OR column_name='eqn' OR column_name='label') ORDER BY ordinal_position;"
+          echo Q4342_G2_SHORT
+          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT label,eqn,analytic_rank,torsion,two_selmer_rank,analytic_sha,st_group FROM g2c_curves WHERE label='324.a.648.1') t;" || true
       - name: Frobenius polynomials and split tests
         shell: bash
         run: |
