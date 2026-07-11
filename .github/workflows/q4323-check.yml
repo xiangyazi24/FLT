@@ -10,8 +10,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - name: Install PARI
         run: sudo apt-get update -qq >/dev/null && sudo apt-get install -y pari-gp >/dev/null
       - name: Q4323 PARI results
-        run: gp -q .github/q4323.gp
+        run: curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4323-check/.github/q4323.gp | gp -q
