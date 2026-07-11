@@ -1,7 +1,7 @@
 import sympy as sp
 x=sp.symbols('x')
 f=x**8-4*x**7-6*x**6-4*x**5-9*x**4+4*x**3-6*x**2+4*x+1
-N=90
+N=110
 
 def mul(A,B):
  C=[sp.Integer(0)]*(N+1)
@@ -47,10 +47,9 @@ xx=scale(shift(mul(mul(E1,E35),mul(inv(E5),inv(E7))),1),-1)
 fx=compose_poly(f,xx)
 y=[sp.Integer(0)]*(N+1);y[0]=1
 for n in range(1,N+1): y[n]=(fx[n]-sum(y[k]*y[n-k] for k in range(1,n)))/2
-print('x first',xx[:12]);print('y first',y[:12])
-xp=series_powers(xx,18)
+xp=series_powers(xx,20)
 
-def fit(T,maxd=11):
+def fit(T,maxd=12):
  for dR in range(maxd+1):
   for dP in range(maxd+1):
    for dQ in range(maxd+1):
@@ -58,7 +57,7 @@ def fit(T,maxd=11):
     for i in range(dR+1): cols.append(mul(T,xp[i]));names.append(('R',i))
     for i in range(dP+1): cols.append(scale(xp[i],-1));names.append(('P',i))
     for i in range(dQ+1): cols.append(scale(mul(y,xp[i]),-1));names.append(('Q',i))
-    rows=min(N+1,len(cols)+18)
+    rows=min(N+1,len(cols)+25)
     ns=sp.Matrix([[cols[j][i] for j in range(len(cols))] for i in range(rows)]).nullspace()
     for v in ns:
      if not any(v[i]!=0 for i,nm in enumerate(names) if nm[0]=='R'): continue
@@ -69,15 +68,22 @@ def fit(T,maxd=11):
       for vv,(k,i) in zip(v,names):polys[k]+=vv*x**i
       g=sp.gcd(sp.gcd(sp.Poly(polys['R'],x),sp.Poly(polys['P'],x)),sp.Poly(polys['Q'],x)).as_expr()
       for k in polys:polys[k]=sp.factor(polys[k]/g)
-      print('degrees',dR,dP,dQ)
-      print('R=',polys['R']);print('P=',polys['P']);print('Q=',polys['Q'])
-      return polys
+      return dR,dP,dQ,polys
  raise RuntimeError('no fit')
-print('A_FORMULA'); pa=fit(a)
-print('H_FORMULA'); ph=fit(h)
+
+da,pa1,qa,pa=fit(a)
+dh,ph1,qh,ph=fit(h)
+print('A_DEGREES',da,pa1,qa)
+print('A_R',pa['R']);print('A_P',pa['P']);print('A_Q',pa['Q'])
+print('H_DEGREES',dh,ph1,qh)
+print('H_R',ph['R']);print('H_P',ph['P']);print('H_Q',ph['Q'])
 yv=sp.symbols('y')
 AA=(pa['P']+yv*pa['Q'])/pa['R']; HH=(ph['P']+yv*ph['Q'])/ph['R']
 F=HH*(AA**2+13*AA+49)*(AA**2+5*AA+1)**3-AA*(HH**2+10*HH+5)**3
 num=sp.together(F).as_numer_denom()[0]
 red=sp.Poly(num,yv).rem(sp.Poly(yv**2-f,yv)).as_expr()
-print('fiber_product_certificate_remainder=',sp.factor(red))
+print('CERT_ZERO',sp.expand(red)==0)
+if red!=0:
+ p=sp.Poly(red,x,yv)
+ print('CERT_DEGREES',p.degree(x),p.degree(yv),'TERMS',len(p.terms()))
+ print('CERT_FACTOR_SMALL',sp.factor(red).as_ordered_factors()[:5])
