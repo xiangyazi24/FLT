@@ -122,7 +122,7 @@ lemma coprime_N_R16 {M N : ℤ} (hMN : IsCoprime M N) :
 
 lemma coprime_sub_right {M N : ℤ} (hMN : IsCoprime M N) :
     IsCoprime (M - N) N := by
-  rw [show M - N = M + (-1) * N by ring]
+  rw [show M - N = M + N * (-1) by ring]
   exact hMN.add_mul_left_left (-1)
 
 lemma not_both_even_of_isCoprime {M N : ℤ} (hMN : IsCoprime M N) :
@@ -162,10 +162,8 @@ lemma pairwiseCoprime4_of_oppositeParity {M N : ℤ}
   have hQ2 : IsCoprime (Q16 M N) 2 := Int.isCoprime_two_right.mpr hQodd
   have hQN : IsCoprime (Q16 M N) N := (coprime_N_Q16 hMN).symm
   have hQD : IsCoprime (Q16 M N) (M - N) := hDQ.symm
-  have hQrest : IsCoprime (Q16 M N) (2 * N * (M - N)) := by
-    have ht := (hQ2.mul_right hQN).mul_right hQD
-    convert ht using 1
-    ring
+  have hQrest : IsCoprime (Q16 M N) (2 * N * (M - N)) :=
+    (hQ2.mul_right hQN).mul_right hQD
   have hQR : IsCoprime (Q16 M N) (R16 M N) := by
     rw [show R16 M N = 2 * N * (M - N) + Q16 M N * 1 by
       unfold Q16 R16
@@ -363,7 +361,8 @@ theorem rat_isInt_of_sq_isInt (r : ℚ) (k : ℤ)
   have hden : r.den * r.den = 1 := by
     have hd := congrArg Rat.den h
     simpa [pow_two, Rat.mul_self_den] using hd
-  have hdone : r.den = 1 := by omega
+  have hdone : r.den = 1 := by
+    nlinarith [r.den_pos]
   refine ⟨r.num, ?_⟩
   rw [← Rat.num_divInt_den r, hdone]
   simp
@@ -414,7 +413,7 @@ theorem C16_rational_u {u v : ℚ}
     field_simp [show (N : ℚ) ≠ 0 by exact_mod_cast hN0]
   · left
     rw [hu, hMneg]
-    norm_num
+    field_simp [show (N : ℚ) ≠ 0 by exact_mod_cast hN0]
 
 def A16 (x : ℚ) : ℚ := x ^ 3 + x ^ 2 - x + 1
 
