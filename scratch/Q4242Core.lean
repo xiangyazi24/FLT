@@ -25,7 +25,7 @@ lemma one_le_v2_two_add_mul
     1 ≤ padicValRat 2 (2 + t * u) := by
   by_cases hu0 : u = 0
   · subst u
-    simpa [v2_two]
+    simp [v2_two]
   have hvtu : 1 ≤ padicValRat 2 (t * u) := by
     rw [padicValRat.mul ht hu0]
     rcases hu with hu | hu
@@ -40,7 +40,8 @@ lemma one_le_v2_two_add_mul
 
 /-- If an explicitly computed formal doubling parameter has the shape
 `t(2P) = t(P) * (2 + t(P) * u) / d`, with `u` 2-integral and `d` a 2-adic
-unit, then doubling raises the 2-adic valuation by at least one. -/
+unit, then doubling raises the 2-adic valuation by at least one, provided the
+double is not the identity. -/
 lemma v2_formal_double_of_shape
     {t t₂ u d : ℚ}
     (hshape : t₂ = t * (2 + t * u) / d)
@@ -65,14 +66,16 @@ lemma twoPow_smul_succ {G : Type*} [AddCommGroup G] (n : ℕ) (x : G) :
   rw [pow_succ]
   exact mul_nsmul x (2 ^ n) 2
 
-/-- The exact abstract interface supplied by a curve-specific formal-kernel construction. -/
+/-- The exact abstract interface supplied by a curve-specific formal-kernel construction.
+The doubling estimate assumes `2 • P ≠ 0`, not merely `P ≠ 0`; this is
+necessary at `p = 2`, where the formal kernel can contain nonzero 2-torsion. -/
 structure LocalLayer (G : Type*) [AddCommGroup G] where
   formalKernel : AddSubgroup G
   parameter : G → ℚ
   four_mem : ∀ P : G, 4 • P ∈ formalKernel
   parameter_positive : ∀ P : G, P ∈ formalKernel → P ≠ 0 →
     1 ≤ padicValRat 2 (parameter P)
-  double_valuation : ∀ P : G, P ∈ formalKernel → P ≠ 0 →
+  double_valuation : ∀ P : G, P ∈ formalKernel → 2 • P ≠ 0 →
     padicValRat 2 (parameter P) + 1 ≤
       padicValRat 2 (parameter (2 • P))
 
@@ -84,13 +87,13 @@ theorem n15_four_mul_mem_formalKernel
     4 • P ∈ L.formalKernel :=
   L.four_mem P
 
-/-- Curve-independent wrapper for the second requested lemma. -/
+/-- Corrected curve-independent wrapper for formal doubling. -/
 theorem n15_v2_formal_double
     (L : LocalLayer G) (P : G)
-    (hPker : P ∈ L.formalKernel) (hP0 : P ≠ 0) :
+    (hPker : P ∈ L.formalKernel) (h2P0 : 2 • P ≠ 0) :
     padicValRat 2 (L.parameter P) + 1 ≤
       padicValRat 2 (L.parameter (2 • P)) :=
-  L.double_valuation P hPker hP0
+  L.double_valuation P hPker h2P0
 
 lemma v2_twoPow_smul
     (L : LocalLayer G) {P : G}
@@ -110,9 +113,11 @@ lemma v2_twoPow_smul
         apply hfinal
         rw [twoPow_smul_succ, hzero]
         simp
+      have hdouble0 : 2 • ((2 ^ n) • P) ≠ 0 := by
+        rwa [← twoPow_smul_succ]
       have hprevKer : (2 ^ n) • P ∈ L.formalKernel :=
         L.formalKernel.nsmul_mem hPker (2 ^ n)
-      have hstep := L.double_valuation ((2 ^ n) • P) hprevKer hprev0
+      have hstep := L.double_valuation ((2 ^ n) • P) hprevKer hdouble0
       have hind := ih hprev0
       rw [twoPow_smul_succ]
       omega
@@ -200,7 +205,7 @@ lemma four_nsmul_infinitelyTwoDivisible
       simp [hexp t ht]
     _ = 4 • x := by rw [hy]
 
-/-- Final weak-descent assembly once the curve-specific local layer is built. -/
+/-- Final weak-descent assembly once the corrected curve-specific local layer is built. -/
 theorem four_nsmul_eq_zero_of_weakDescent
     (L : LocalLayer G)
     (H : AddSubgroup G)
