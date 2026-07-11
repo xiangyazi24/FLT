@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   compute:
@@ -28,7 +29,7 @@ jobs:
         run: |
           set -o pipefail
           python scratch/Q4318Research.py 2>&1 | tee scratch/Q4318Research.out
-      - uses: actions/upload-artifact@v4
-        with:
-          name: q4318-symbolic-output
-          path: scratch/Q4318Research.out
+      - name: Post output to temporary PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment 9 --body-file scratch/Q4318Research.out
