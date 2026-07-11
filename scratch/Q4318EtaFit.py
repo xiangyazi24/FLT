@@ -43,7 +43,7 @@ def series_powers(A,maxd):
 E1=prod_eta(1);E5=prod_eta(5);E7=prod_eta(7);E35=prod_eta(35)
 a=shift([49*z for z in mul(power(E7,4),power(E1,-4))],1)
 h=shift([125*z for z in mul(power(E5,6),power(E1,-6))],1)
-xx=shift(mul(mul(E1,E35),mul(inv(E5),inv(E7))),1)
+xx=scale(shift(mul(mul(E1,E35),mul(inv(E5),inv(E7))),1),-1)
 fx=compose_poly(f,xx)
 y=[sp.Integer(0)]*(N+1);y[0]=1
 for n in range(1,N+1): y[n]=(fx[n]-sum(y[k]*y[n-k] for k in range(1,n)))/2
