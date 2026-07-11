@@ -14,12 +14,12 @@ def dupX (X Y : ℚ) : ℚ :=
 
 lemma zero_ordinate_candidates {X : ℚ}
     (h : OnE X 0) : X = 0 ∨ X = 15 ∨ X = 16 := by
-  unfold OnE at h
-  norm_num at h
-  rcases mul_eq_zero.mp h.symm with hX | hrest
-  · exact Or.inl hX
-  rcases mul_eq_zero.mp hrest with h15 | h16
-  · exact Or.inr (Or.inl (sub_eq_zero.mp h15))
+  have hp : X * (X - 15) * (X - 16) = 0 := by
+    simpa [OnE] using h.symm
+  rcases mul_eq_zero.mp hp with hleft | h16
+  · rcases mul_eq_zero.mp hleft with hX | h15
+    · exact Or.inl hX
+    · exact Or.inr (Or.inl (sub_eq_zero.mp h15))
   · exact Or.inr (Or.inr (sub_eq_zero.mp h16))
 
 lemma no_rational_sq_240 {X : ℚ} : X ^ 2 ≠ 240 := by
@@ -103,15 +103,18 @@ theorem affine_candidates_of_double_two_torsion {X Y : ℚ}
       (X = 16 ∧ Y = 0) ∨
       (X = 12 ∧ (Y = 12 ∨ Y = -12)) ∨
       (X = 20 ∧ (Y = 20 ∨ Y = -20)) := by
-  rcases hdup with hY0 | h0 | h15 | h16
+  by_cases hY0 : Y = 0
   · subst Y
     rcases zero_ordinate_candidates hE with hX | hX | hX
     · exact Or.inl ⟨hX, rfl⟩
     · exact Or.inr (Or.inl ⟨hX, rfl⟩)
     · exact Or.inr (Or.inr (Or.inl ⟨hX, rfl⟩))
-  · exact (dupX_ne_zero (by aesop) h0).elim
-  · exact (dupX_eq_fifteen_impossible hE (by aesop) h15).elim
-  · rcases dupX_eq_sixteen_candidates hE (by aesop) h16 with h12 | h20
+  have hdup' : dupX X Y = 0 ∨ dupX X Y = 15 ∨ dupX X Y = 16 :=
+    hdup.resolve_left hY0
+  rcases hdup' with h0 | h15 | h16
+  · exact (dupX_ne_zero hY0 h0).elim
+  · exact (dupX_eq_fifteen_impossible hE hY0 h15).elim
+  · rcases dupX_eq_sixteen_candidates hE hY0 h16 with h12 | h20
     · exact Or.inr (Or.inr (Or.inr (Or.inl h12)))
     · exact Or.inr (Or.inr (Or.inr (Or.inr h20)))
 
