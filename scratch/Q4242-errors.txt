@@ -7,5 +7,31 @@ scratch/Q4242Reduction.lean:27:33: error: Invalid field notation: Function `Affi
   (ZMod 2)`
 
 Note: Such a parameter must be explicit, or implicit with a unique name, to be used by field notation
+scratch/Q4242Finite.lean:19:24: error: Application type mismatch: The argument
+  Or.symm h
+has type
+  X - 16 = 0 ∨ X = 0 ∨ X - 15 = 0
+but is expected to have type
+  ?m.21 * ?m.22 = 0
+in the application
+  mul_eq_zero.mp (Or.symm h)
+scratch/Q4242Finite.lean:112:28: warning: aesop: failed to prove the goal after exhaustive search.
+scratch/Q4242Finite.lean:112:25: error: unsolved goals
+X : ℚ
+hE : OnE X 0
+h0 : dupX X 0 = 0
+⊢ False
+scratch/Q4242Finite.lean:113:45: warning: aesop: failed to prove the goal after exhaustive search.
+scratch/Q4242Finite.lean:113:42: error: unsolved goals
+X : ℚ
+hE : OnE X 0
+h15 : dupX X 0 = 15
+⊢ False
+scratch/Q4242Finite.lean:114:45: warning: aesop: failed to prove the goal after exhaustive search.
+scratch/Q4242Finite.lean:114:42: error: unsolved goals
+X : ℚ
+hE : OnE X 0
+h16 : dupX X 0 = 16
+⊢ False
 
 EXIT_STATUS=1
