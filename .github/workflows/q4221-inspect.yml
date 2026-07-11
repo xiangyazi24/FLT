@@ -3,9 +3,12 @@ name: Q4263 check
 on:
   push:
     branches: [q4221-finalcheck]
-  pull_request:
-    branches: [scratch]
+    paths-ignore:
+      - scratch/Q4263-output.txt
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   check:
@@ -23,5 +26,16 @@ jobs:
         run: lake exe cache get
       - name: Build Mathlib umbrella
         run: lake build Mathlib
-      - name: Compile Q4263 proof
-        run: lake env lean scratch/Q4263.lean
+      - name: Compile Q4263 proof and persist diagnostics
+        shell: bash
+        run: |
+          set +e
+          lake env lean scratch/Q4263.lean > scratch/Q4263-output.txt 2>&1
+          status=$?
+          printf '\nEXIT_STATUS=%s\n' "$status" >> scratch/Q4263-output.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scratch/Q4263-output.txt
+          git commit -m 'Record Q4263 compile diagnostics [skip ci]' || true
+          git push origin HEAD:q4221-finalcheck
+          exit "$status"
