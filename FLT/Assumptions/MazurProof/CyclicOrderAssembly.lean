@@ -37,11 +37,10 @@ Endpoint wired to a real theorem:
 * `49` — likewise reduced by the generic odd-order Tate bridge to
   `preΨ'₄₉(0)=0` with the proper factor `preΨ'₇(0)≠0`; its remaining input is
   `no_raw_order49_tate_obstruction`.
-* `27` — `CyclicExclusion27.no_rational_point_of_order_27`, via the
-  degree-three genus-one quotient `X₁(27) → 27C1`, whose Fermat-cubic model
-  is handled by Mathlib's `fermatLastTheoremThree`.  Its only remaining seam is
-  the named geometric input `order27_to_fermat_cubic`; this is a map to
-  `27C1`, not to `X₀(27)` (which has a rational noncuspidal CM point).
+* `27` — `CyclicExclusion27.no_rational_point_of_order_27`, via simultaneous
+  Tate normalization of `P` and `3P`, a special three-descent on the Kubert
+  order-nine family, and the proved rational-point classification of the
+  level-27 curve `y²+y=x³`.
 
 Endpoints kept as named sub-axioms, because no sound real theorem exists to
 wire:
