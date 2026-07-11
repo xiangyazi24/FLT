@@ -2,6 +2,8 @@ name: Q4323 arithmetic check
 on:
   push:
     branches: [q4323-check]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
