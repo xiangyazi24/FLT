@@ -3,8 +3,6 @@ name: Q4318 symbolic research
 on:
   push:
     branches: [q4318-research]
-    paths-ignore:
-      - scratch/Q4318Research.out
   pull_request:
     branches: [scratch]
   workflow_dispatch:
@@ -16,6 +14,7 @@ permissions:
 jobs:
   compute:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,12 +23,12 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install sympy
-      - name: Run symbolic computation
+      - name: Run quotient computation
         shell: bash
         run: |
           set -o pipefail
-          python scratch/Q4318Research.py 2>&1 | tee scratch/Q4318Research.out
+          python scratch/Q4318Quotient.py 2>&1 | tee scratch/Q4318Quotient.out
       - name: Post output to temporary PR
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh pr comment 9 --body-file scratch/Q4318Research.out
+        run: gh pr comment 9 --body-file scratch/Q4318Quotient.out
