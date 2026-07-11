@@ -21,18 +21,18 @@ jobs:
         run: |
           set -euo pipefail
           DB='postgresql://lmfdb@devmirror.lmfdb.xyz:5432/lmfdb'
-          echo Q4342_MF_BEGIN
-          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT * FROM mf_newforms WHERE label='18.2.c.a') t;" || true
-          echo Q4342_MF_END
-          echo Q4342_G2_BEGIN
-          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT * FROM g2c_curves WHERE label='324.a.648.1') t;" || true
-          echo Q4342_G2_END
-          echo Q4342_ENDO_BEGIN
-          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT * FROM g2c_endomorphisms WHERE label='324.a.648.1') t;" || true
-          echo Q4342_ENDO_END
-          echo Q4342_RATPTS_BEGIN
-          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT * FROM g2c_ratpts WHERE label='324.a.648.1') t;" || true
-          echo Q4342_RATPTS_END
+          echo Q4342_MF_COLUMNS
+          psql "$DB" -X -A -t -c "SELECT column_name FROM information_schema.columns WHERE table_name='mf_newforms' AND (column_name LIKE '%twist%' OR column_name LIKE '%cm%' OR column_name LIKE '%rank%' OR column_name LIKE '%field%' OR column_name LIKE '%char%' OR column_name LIKE '%sato%') ORDER BY ordinal_position;"
+          echo Q4342_MF_ROW
+          psql "$DB" -X -A -F '|' -t -c "SELECT label,dim,nf_label,field_poly,field_disc,char_order,char_conductor,char_orbit_label,is_cm,is_rm,is_self_twist,self_twist_type,inner_twist_count,analytic_rank,analytic_rank_proved,relative_dim,sato_tate_group,related_objects FROM mf_newforms WHERE label='18.2.c.a';"
+          echo Q4342_ENDO_COLUMNS
+          psql "$DB" -X -A -t -c "SELECT column_name FROM information_schema.columns WHERE table_name='g2c_endomorphisms' ORDER BY ordinal_position;"
+          echo Q4342_ENDO_ROW
+          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT * FROM g2c_endomorphisms WHERE label='324.a.648.1') t;"
+          echo Q4342_G2_ROW
+          psql "$DB" -X -A -t -c "SELECT row_to_json(t) FROM (SELECT label,eqn,cond,disc_key,st_group,real_geom_end_alg,analytic_rank,torsion,two_selmer_rank,has_square_sha,is_gl2_type FROM g2c_curves WHERE label='324.a.648.1') t;" || true
+          echo Q4342_LFUNC_INSTANCES
+          psql "$DB" -X -A -t -c "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name LIKE 'lfunc%instance%';"
       - name: Frobenius polynomials and split tests
         shell: bash
         run: |
@@ -41,25 +41,11 @@ jobs:
           print("Q4342_PARI_BEGIN");
           forprime(p=5,43,
             if(p!=2 && p!=3,
-              P=hyperellcharpoly(Mod(1,p)*f);
-              print("P=",p," CHARPOLY=",lift(P)," FACTOR=",factor(lift(P))," JORDER=",subst(lift(P),x,1));
+              P=lift(hyperellcharpoly(Mod(1,p)*f));
+              print("P=",p," CHARPOLY=",P," FACTOR=",factor(P)," JORDER=",subst(P,x,1));
             )
           );
           print("Q4342_PARI_END");
           quit;
           GP
           gp -q /tmp/q4342.gp
-      - name: LMFDB API probes
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo Q4342_API_BEGIN
-          for u in \
-            'https://www.lmfdb.org/api/mf_newforms/?label=18.2.c.a&_format=json' \
-            'https://www.lmfdb.org/api/g2c_curves/?label=324.a.648.1&_format=json' \
-            'https://www.lmfdb.org/api/g2c_endomorphisms/?label=324.a.648.1&_format=json'; do
-            echo URL=$u
-            curl -sSL --max-time 30 "$u" | head -c 20000 || true
-            echo
-          done
-          echo Q4342_API_END
