@@ -5,6 +5,8 @@ on:
     branches: [q4281-check]
     paths-ignore:
       - scratch/Q4281-output.txt
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 permissions:
