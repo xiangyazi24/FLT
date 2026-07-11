@@ -2,43 +2,17 @@ scratch/Q4242Core.lean:28:4: warning: try 'simp' instead of 'simpa'
 
 Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
 scratch/Q4242Reduction.lean:21:39: error: unsolved goals
+case e'_3
 ⊢ 225 = 1
-scratch/Q4242Reduction.lean:27:33: error: Invalid field notation: Function `Affine` does not have a usable parameter of type `WeierstrassCurve ...` for which to substitute `E0
-  (ZMod 2)`
-
-Note: Such a parameter must be explicit, or implicit with a unique name, to be used by field notation
-scratch/Q4242Finite.lean:19:24: error: Application type mismatch: The argument
-  Or.symm h
-has type
-  X - 16 = 0 ∨ X = 0 ∨ X - 15 = 0
-but is expected to have type
-  ?m.21 * ?m.22 = 0
-in the application
-  mul_eq_zero.mp (Or.symm h)
-scratch/Q4242Finite.lean:112:28: warning: aesop: failed to prove the goal after exhaustive search.
-scratch/Q4242Finite.lean:112:25: error: unsolved goals
-X : ℚ
-hE : OnE X 0
-h0 : dupX X 0 = 0
-⊢ False
-scratch/Q4242Finite.lean:113:45: warning: aesop: failed to prove the goal after exhaustive search.
-scratch/Q4242Finite.lean:113:42: error: unsolved goals
-X : ℚ
-hE : OnE X 0
-h15 : dupX X 0 = 15
-⊢ False
-scratch/Q4242Finite.lean:114:45: warning: aesop: failed to prove the goal after exhaustive search.
-scratch/Q4242Finite.lean:114:42: error: unsolved goals
-X : ℚ
-hE : OnE X 0
-h16 : dupX X 0 = 16
-⊢ False
-scratch/Q4242Points.lean:24:13: error: Invalid field notation: Function `Affine` does not have a usable parameter of type `WeierstrassCurve ...` for which to substitute `E15`
-
-Note: Such a parameter must be explicit, or implicit with a unique name, to be used by field notation
-scratch/Q4242Points.lean:27:4: error: Invalid field notation: Function `Affine` does not have a usable parameter of type `WeierstrassCurve ...` for which to substitute `E15`
-
-Note: Such a parameter must be explicit, or implicit with a unique name, to be used by field notation
+scratch/Q4242Reduction.lean:28:47: error(lean.invalidField): Invalid field `Point`: The environment does not contain `WeierstrassCurve.Point`, so it is not possible to project the field `Point` from an expression
+  E0 (ZMod 2)
+of type `WeierstrassCurve (ZMod 2)`
+scratch/Q4242Points.lean:24:17: error(lean.invalidField): Invalid field `Point`: The environment does not contain `WeierstrassCurve.Point`, so it is not possible to project the field `Point` from an expression
+  E15
+of type `WeierstrassCurve ℚ`
+scratch/Q4242Points.lean:27:8: error(lean.invalidField): Invalid field `Equation`: The environment does not contain `WeierstrassCurve.Equation`, so it is not possible to project the field `Equation` from an expression
+  E15
+of type `WeierstrassCurve ℚ`
 scratch/Q4242Points.lean:32:10: error(lean.unknownIdentifier): Unknown identifier `Pt`
 
 Note: It is not possible to treat `Pt` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
