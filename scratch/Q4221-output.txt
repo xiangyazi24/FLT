@@ -1,20 +1,5 @@
 === CORE ===
-scratch/Q4221Core.lean:115:14: error: unsolved goals
-case succ
-G : Type u_1
-inst✝ : AddCommGroup G
-H : AddSubgroup G
-hdecomp : ∀ (x : G), ∃ h y, x = ↑h + 2 • y
-x : G
-n : ℕ
-h : ↥H
-y : G
-hxy : x = ↑h + 2 ^ n • y
-h' : ↥H
-z : G
-hyz : y = ↑h' + 2 • z
-⊢ ↑h + (2 ^ n • ↑h' + (2 * 2 ^ n) • z) = ↑h + 2 ^ n • ↑h' + (2 * 2 ^ n) • z
-CORE_STATUS=1
+CORE_STATUS=0
 === VALUATION ===
 scratch/Q4221Valuation.lean:190:4: error: Type mismatch: After simplification, term
   VAtLeast.pow_two hw3a
