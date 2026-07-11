@@ -20,12 +20,13 @@ lemma E0_discriminant (R : Type*) [CommRing R] :
 
 instance : (E0 (ZMod 2)).IsElliptic := by
   refine ⟨?_⟩
-  rw [E0_discriminant]
-  convert isUnit_one using 1
-  norm_num
+  have h225 : (225 : ZMod 2) = 1 := by norm_num
+  rw [E0_discriminant, h225]
+  exact isUnit_one
 
 /-- Direct finite computation: the group of points of the good reduction has exponent four. -/
-theorem E0_F2_exponent_four (P : (E0 (ZMod 2)).Point) :
+theorem E0_F2_exponent_four
+    (P : WeierstrassCurve.Affine.Point (E0 (ZMod 2))) :
     4 • P = 0 := by
   cases P with
   | zero => simp
