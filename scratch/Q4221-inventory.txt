@@ -21,9 +21,9 @@
 ./.git/index
 ./.git/info/exclude
 ./.git/logs/HEAD
-./.git/objects/pack/pack-de8d4ab29aaeafdd51eb1d81cbf57fbd98b7914c.idx
-./.git/objects/pack/pack-de8d4ab29aaeafdd51eb1d81cbf57fbd98b7914c.pack
-./.git/objects/pack/pack-de8d4ab29aaeafdd51eb1d81cbf57fbd98b7914c.rev
+./.git/objects/pack/pack-58f57eeb753974ec20e5f9eb85834e845c89d905.idx
+./.git/objects/pack/pack-58f57eeb753974ec20e5f9eb85834e845c89d905.pack
+./.git/objects/pack/pack-58f57eeb753974ec20e5f9eb85834e845c89d905.rev
 ./.git/refs/heads/q4221-check
 ./.git/shallow
 ./.github/dependabot.yml
@@ -273,6 +273,7 @@
 ./scratch/Atom6LocalParam.lean
 ./scratch/Isogeny20a4.lean
 ./scratch/Q4221-inventory.txt
+./scratch/Q4221Api.lean
 ./scratch/_CHATGPT_DROP_dm-codex1.md
 ./scratch/_CHATGPT_DROP_dm-codex2.md
 ./scratch/_CHATGPT_DROP_dm-codex3.md
@@ -306,6 +307,25 @@
 ./.github/workflows/q4221-inspect.yml:29:            grep -RInE 'n15|N15|iterated_decomposition|formalKernel|formal kernel|31[^0-9].*240|X\(X-15\)\(X-16\)|x\^3\+x\^2-5\*?x\+2|no_infinitely|infinitely.*divisible' --exclude-dir=.git --exclude='Q4221-inventory.txt' . || true
 
 === Elliptic / projective helper matches ===
+./scratch/Q4221Api.lean:3:#check WeierstrassCurve
+./scratch/Q4221Api.lean:4:#check WeierstrassCurve.Affine.Point
+./scratch/Q4221Api.lean:5:#check WeierstrassCurve.Affine.Point.mk
+./scratch/Q4221Api.lean:6:#check WeierstrassCurve.Affine.Point.pointEquiv
+./scratch/Q4221Api.lean:7:#check WeierstrassCurve.Affine.Point.add_self_of_Y_ne
+./scratch/Q4221Api.lean:8:#check WeierstrassCurve.Affine.slope_of_Y_ne
+./scratch/Q4221Api.lean:9:#check WeierstrassCurve.Affine.addX
+./scratch/Q4221Api.lean:10:#check WeierstrassCurve.Affine.addY
+./scratch/Q4221Api.lean:11:#check padicValRat
+./scratch/Q4221Api.lean:12:#check padicValRat.mul
+./scratch/Q4221Api.lean:13:#check padicValRat.pow
+./scratch/Q4221Api.lean:14:#check padicValRat.add_eq_of_lt
+./scratch/Q4221Api.lean:15:#check padicValRat.min_le_padicValRat_add
+./scratch/Q4221Api.lean:17:#check WeierstrassCurve.map
+./scratch/Q4221Api.lean:18:#check WeierstrassCurve.Affine.Point.map
+./scratch/Q4221Api.lean:19:#check WeierstrassCurve.VariableChange
+./scratch/Q4221Api.lean:20:#check WeierstrassCurve.variableChange
+./scratch/Q4221Api.lean:21:#check WeierstrassCurve.changeVariables
+./scratch/Q4221Api.lean:22:#check WeierstrassCurve.linearMap
 ./FLT/FreyCurve/Contradiction.lean:47:open WeierstrassCurve
 ./FLT/FreyCurve/FreyPackage.lean:233:def freyCurveInt (P : FreyPackage) : WeierstrassCurve ℤ where
 ./FLT/FreyCurve/FreyPackage.lean:246:def freyCurve (P : FreyPackage) : WeierstrassCurve ℚ where
