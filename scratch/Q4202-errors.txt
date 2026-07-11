@@ -1,23 +1,25 @@
-✔ [8564/8566] Built scratch.FermatFourthDifferenceN16 (3.9s)
-✖ [8565/8566] Building scratch.Q4202QuarticExplicit2 (8.8s)
-trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/bin/lean /home/runner/work/FLT/FLT/scratch/Q4202QuarticExplicit2.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q4202QuarticExplicit2.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q4202QuarticExplicit2.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q4202QuarticExplicit2.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q4202QuarticExplicit2.setup.json --json
-error: scratch/Q4202QuarticExplicit2.lean:32:9: Tactic `cases` failed with a nested error:
-Tactic `induction` failed: recursor `Exists.casesOn` can only eliminate into `Prop`
-
-r s m n : ℤ
-hrs : IsCoprime r s
-hr0 : r ≠ 0
-hm0 : m ≠ 0
-hprod : r * s = m * n
-hg0 : r.gcd m ≠ 0
-hgpos : 0 < r.gcd m
-x✝ : ∃ m' n', m'.gcd n' = 1 ∧ r = m' * ↑(r.gcd m) ∧ m = n' * ↑(r.gcd m)
-⊢ CoprimeRectangle r s m n
-error: scratch/Q4202QuarticExplicit2.lean:20:0: type of theorem `MazurProof.CyclicExclusion16.coprime_rectangle` is not a proposition
-  {r s m n : ℤ} → IsCoprime r s → r ≠ 0 → m ≠ 0 → r * s = m * n → CoprimeRectangle r s m n
-error: scratch/Q4202QuarticExplicit2.lean:132:6: (kernel) unknown constant 'MazurProof.CyclicExclusion16.coprime_rectangle'
+✔ [8564/8567] Built scratch.FermatFourthDifferenceN16 (3.8s)
+✖ [8565/8567] Building scratch.Q4202EndpointAdapter (7.2s)
+trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/bin/lean /home/runner/work/FLT/FLT/scratch/Q4202EndpointAdapter.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q4202EndpointAdapter.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q4202EndpointAdapter.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q4202EndpointAdapter.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q4202EndpointAdapter.setup.json --json
+warning: scratch/Q4202EndpointAdapter.lean:13:2: aesop: failed to prove the goal after exhaustive search.
+error: scratch/Q4202EndpointAdapter.lean:11:45: unsolved goals
+X Y Z : ℤ
+hXY : IsCoprime X Y
+hX : ¬X = 0
+hY : ¬Y = 0
+hEq : Z ^ 2 = X ^ 4 - Y ^ 4
+⊢ CoprimeFourthDifference
+warning: scratch/Q4202EndpointAdapter.lean:21:2: aesop: failed to prove the goal after exhaustive search.
+error: scratch/Q4202EndpointAdapter.lean:19:37: unsolved goals
+a b c : ℤ
+hab : IsCoprime a b
+ha : Odd a
+hb : Odd b
+hEq : a ^ 4 + b ^ 4 = 2 * c ^ 2
+hne : ¬a ^ 2 = b ^ 2
+⊢ TwiceSquareFourthDifference
 error: Lean exited with code 1
-⚠ [8566/8566] Built scratch.Q4202Check2 (9.2s)
+⚠ [8566/8567] Built scratch.Q4202Check2 (9.9s)
 warning: scratch/Q4202Check2.lean:191:31: `simp [haZero] at ha` is a flexible tactic modifying `ha`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
 
 Note: This linter can be disabled with `set_option linter.flexible false`
@@ -26,8 +28,9 @@ warning: scratch/Q4202Check2.lean:191:31: `simp [haZero] at ha` is a flexible ta
 
 Note: This linter can be disabled with `set_option linter.flexible false`
 info: scratch/Q4202Check2.lean:191:55: `exact hM0 ha` uses `ha`!
+✔ [8567/8567] Built scratch.Q4202QuarticExplicit3 (10s)
 Some required targets logged failures:
-- scratch.Q4202QuarticExplicit2
+- scratch.Q4202EndpointAdapter
 error: build failed
 
 EXIT_STATUS=1
