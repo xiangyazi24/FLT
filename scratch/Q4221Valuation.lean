@@ -14,7 +14,7 @@ def VAtLeast (k : ℤ) (q : ℚ) : Prop := q = 0 ∨ k ≤ v2 q
 
 lemma VAtLeast.zero (k : ℤ) : VAtLeast k 0 := Or.inl rfl
 
-lemma VAtLeast.of_ne {k : ℤ} {q : ℚ} (hq0 : q ≠ 0) (hq : k ≤ v2 q) :
+lemma VAtLeast.of_ne {k : ℤ} {q : ℚ} (_hq0 : q ≠ 0) (hq : k ≤ v2 q) :
     VAtLeast k q := Or.inr hq
 
 lemma VAtLeast.mono {j k : ℤ} {q : ℚ} (hjk : j ≤ k) (hq : VAtLeast k q) :
@@ -59,6 +59,7 @@ lemma VAtLeast.mul {j k : ℤ} {q r : ℚ}
   by_cases hr0 : r = 0
   · simp [hr0, VAtLeast]
   right
+  change j + k ≤ padicValRat 2 (q * r)
   rw [padicValRat.mul hq0 hr0]
   omega
 
@@ -69,6 +70,7 @@ lemma VAtLeast.pow_two {k : ℤ} {q : ℚ} (hq : VAtLeast k q) :
   by_cases hq0 : q = 0
   · simp [hq0, VAtLeast]
   right
+  change 2 * k ≤ padicValRat 2 (q ^ 2)
   rw [padicValRat.pow hq0]
   omega
 
@@ -79,9 +81,12 @@ lemma VAtLeast.natCast (n : ℕ) : VAtLeast 0 (n : ℚ) := by
   exact zero_le_padicValRat_of_nat n
 
 lemma VAtLeast.intCast (z : ℤ) : VAtLeast 0 (z : ℚ) := by
-  obtain ⟨n, rfl⟩ | ⟨n, rfl⟩ := z.eq_nat_or_neg
-  · exact VAtLeast.natCast n
-  · simpa using (VAtLeast.natCast n).neg
+  by_cases hz : (z : ℚ) = 0
+  · exact Or.inl hz
+  right
+  change 0 ≤ padicValRat 2 (z : ℚ)
+  rw [padicValRat.of_int]
+  exact Int.ofNat_zero_le _
 
 lemma v2_two : v2 (2 : ℚ) = 1 := by
   exact padicValRat.self (by norm_num)
@@ -106,7 +111,11 @@ lemma v2_one_add_eq_zero {r : ℚ} (hr : VAtLeast 1 r) :
     rw [hre] at hr
     norm_num [v2] at hr
   refine ⟨hsum, ?_⟩
-  exact padicValRat.add_eq_of_lt hsum one_ne_zero hr0 (by simpa [v2] using hr)
+  have hlt : padicValRat 2 (1 : ℚ) < padicValRat 2 r := by
+    simp only [padicValRat.one]
+    change 0 < v2 r
+    omega
+  simpa [v2] using padicValRat.add_eq_of_lt hsum one_ne_zero hr0 hlt
 
 lemma v2_one_sub_eq_zero {r : ℚ} (hr : VAtLeast 1 r) :
     1 - r ≠ 0 ∧ v2 (1 - r) = 0 := by
@@ -119,7 +128,10 @@ lemma VAtLeast.div_unit {k : ℤ} {q u : ℚ} (hq : VAtLeast k q)
   by_cases hq0 : q = 0
   · simp [hq0, VAtLeast]
   right
-  rw [padicValRat.div hq0 hu0, hu, sub_zero]
+  change k ≤ padicValRat 2 (q / u)
+  rw [padicValRat.div hq0 hu0]
+  change k ≤ v2 q - v2 u
+  rw [hu, sub_zero]
   exact hq
 
 /-- The exact finite rational expressions occurring in the tangent construction
@@ -152,7 +164,7 @@ def formalDoubleT (t w : ℚ) : ℚ :=
 /-- The local valuation calculation behind formal-group separatedness.  It is
     entirely finite: no power-series API or completeness theorem is used. -/
 theorem n15_v2_formal_double_explicit {t w : ℚ}
-    (ht0 : t ≠ 0) (hw0 : w ≠ 0)
+    (_ht0 : t ≠ 0) (_hw0 : w ≠ 0)
     (ht : 1 ≤ v2 t)
     (hw : 3 * v2 t ≤ v2 w) :
     VAtLeast (v2 t + 1) (formalDoubleT t w) := by
@@ -171,29 +183,39 @@ theorem n15_v2_formal_double_explicit {t w : ℚ}
     convert htA.mul hw3a using 1 <;> ring
   have htw1 : VAtLeast 1 (t * w) := htw.mono (by omega)
 
+  have h2w1 : VAtLeast 1 (2 * w) := by
+    have h := (VAtLeast.natCast 2).mul hw1
+    convert h.mono (by omega) using 1 <;> ring
+  have h10tw1 : VAtLeast 1 (10 * t * w) := by
+    have h := (VAtLeast.natCast 10).mul htw1
+    convert h.mono (by omega) using 1 <;> ring
+  have h6w2one : VAtLeast 1 (6 * w ^ 2) := by
+    have h := (VAtLeast.natCast 6).mul hw2one
+    convert h.mono (by omega) using 1 <;> ring
   have htailD : VAtLeast 1
       (-(t + t ^ 2 + 2 * w - 10 * t * w + 6 * w ^ 2)) := by
     apply VAtLeast.neg
-    apply VAtLeast.add
-    · apply VAtLeast.sub
-      · apply VAtLeast.add
-        · exact ht1.add ht2one
-        · exact (VAtLeast.natCast 2).mul hw1 |>.mono (by omega)
-      · exact (VAtLeast.natCast 10).mul htw1 |>.mono (by omega)
-    · exact (VAtLeast.natCast 6).mul hw2one |>.mono (by omega)
+    exact ((ht1.add ht2one).add h2w1).sub h10tw1 |>.add h6w2one
   have hDunit : tangentD t w ≠ 0 ∧ v2 (tangentD t w) = 0 := by
-    unfold tangentD
-    simpa [sub_eq_add_neg] using v2_one_add_eq_zero htailD
+    rw [show tangentD t w =
+      1 + (-(t + t ^ 2 + 2 * w - 10 * t * w + 6 * w ^ 2)) by
+        unfold tangentD
+        ring]
+    exact v2_one_add_eq_zero htailD
 
+  have h3t2 : VAtLeast (2 * a) (3 * t ^ 2) := by
+    have h := (VAtLeast.natCast 3).mul ht2a
+    convert h.mono (by omega) using 1 <;> ring
+  have hw2a : VAtLeast (2 * a) w := hw3a.mono (by omega)
+  have h2tw2a : VAtLeast (2 * a) (2 * t * w) := by
+    have h := (VAtLeast.natCast 2).mul htw
+    convert h.mono (by omega) using 1 <;> ring
+  have h5w2_2a : VAtLeast (2 * a) (5 * w ^ 2) := by
+    have h := (VAtLeast.natCast 5).mul hw2
+    convert h.mono (by omega) using 1 <;> ring
   have hA : VAtLeast (2 * a) (tangentA t w) := by
     unfold tangentA
-    apply VAtLeast.sub
-    · apply VAtLeast.add
-      · apply VAtLeast.add
-        · exact (VAtLeast.natCast 3).mul ht2a |>.mono (by omega)
-        · exact hw3a.mono (by omega)
-      · exact ((VAtLeast.natCast 2).mul htw).mono (by omega)
-    · exact ((VAtLeast.natCast 5).mul hw2).mono (by omega)
+    exact ((h3t2.add hw2a).add h2tw2a).sub h5w2_2a
   have hlam : VAtLeast (2 * a) (tangentLambda t w) := by
     unfold tangentLambda
     exact hA.div_unit hDunit.1 hDunit.2
@@ -209,30 +231,47 @@ theorem n15_v2_formal_double_explicit {t w : ℚ}
     have h := hlam.mul htA
     convert h using 1 <;> ring
 
+  have h5lam2one : VAtLeast 1 (5 * tangentLambda t w ^ 2) := by
+    have h := (VAtLeast.natCast 5).mul hlam2
+    convert h.mono (by omega) using 1 <;> ring
+  have h2lam3one : VAtLeast 1 (2 * tangentLambda t w ^ 3) := by
+    have h := (VAtLeast.natCast 2).mul hlam3
+    convert h.mono (by omega) using 1 <;> ring
   have hthirdTail : VAtLeast 1
       (tangentLambda t w - 5 * tangentLambda t w ^ 2
-        + 2 * tangentLambda t w ^ 3) := by
-    apply VAtLeast.add
-    · exact hlam1.sub (((VAtLeast.natCast 5).mul hlam2).mono (by omega))
-    · exact ((VAtLeast.natCast 2).mul hlam3).mono (by omega)
+        + 2 * tangentLambda t w ^ 3) :=
+    (hlam1.sub h5lam2one).add h2lam3one
   have hthirdDen : thirdDen t w ≠ 0 ∧ v2 (thirdDen t w) = 0 := by
-    unfold thirdDen
-    simpa [add_assoc] using v2_one_add_eq_zero hthirdTail
+    rw [show thirdDen t w = 1 +
+        (tangentLambda t w - 5 * tangentLambda t w ^ 2 +
+          2 * tangentLambda t w ^ 3) by
+      unfold thirdDen
+      ring]
+    exact v2_one_add_eq_zero hthirdTail
 
+  have hlam2_2a : VAtLeast (2 * a) (tangentLambda t w ^ 2) :=
+    hlam2.mono (by omega)
+  have hnu2a : VAtLeast (2 * a) (tangentNu t w) := hnu.mono (by omega)
+  have h10lamnu : VAtLeast (2 * a)
+      (10 * tangentLambda t w * tangentNu t w) := by
+    have h := (VAtLeast.natCast 10).mul (hlam.mul hnu)
+    convert h.mono (by omega) using 1 <;> ring
+  have h6lam2nu : VAtLeast (2 * a)
+      (6 * tangentLambda t w ^ 2 * tangentNu t w) := by
+    have h := (VAtLeast.natCast 6).mul (hlam2.mul hnu)
+    convert h.mono (by omega) using 1 <;> ring
   have hcorrNum : VAtLeast (2 * a) (thirdCorrNum t w) := by
     unfold thirdCorrNum
-    apply VAtLeast.add
-    · apply VAtLeast.sub
-      · exact hlam.add hlam2.mono (by omega) |>.add (hnu.mono (by omega))
-      · exact ((VAtLeast.natCast 10).mul (hlam.mul hnu)).mono (by omega)
-    · exact ((VAtLeast.natCast 6).mul (hlam2.mul hnu)).mono (by omega)
+    exact ((hlam.add hlam2_2a).add hnu2a).sub h10lamnu |>.add h6lam2nu
   have hcorr : VAtLeast (2 * a) (thirdCorrNum t w / thirdDen t w) :=
     hcorrNum.div_unit hthirdDen.1 hthirdDen.2
   have h2t : VAtLeast (a + 1) (2 * t) := by
     convert htA.two_mul using 1 <;> ring
+  have hneg2t : VAtLeast (a + 1) (-2 * t) := by
+    convert h2t.neg using 1 <;> ring
   have hthirdT : VAtLeast (a + 1) (thirdT t w) := by
     unfold thirdT
-    exact h2t.neg.sub (hcorr.mono (by omega))
+    exact hneg2t.sub (hcorr.mono (by omega))
   have hthirdT1 : VAtLeast 1 (thirdT t w) := hthirdT.mono (by omega)
   have hthirdW : VAtLeast 1 (thirdW t w) := by
     unfold thirdW
