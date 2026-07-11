@@ -35,13 +35,15 @@ jobs:
           : > scratch/Q4242-errors.txt
           lake env lean scratch/Q4242Core.lean >> scratch/Q4242-errors.txt 2>&1
           status1=$?
-          lake env lean scratch/Q4242Finite.lean >> scratch/Q4242-errors.txt 2>&1
+          lake env lean scratch/Q4242Reduction.lean >> scratch/Q4242-errors.txt 2>&1
           status2=$?
-          lake env lean scratch/Q4242Points.lean >> scratch/Q4242-errors.txt 2>&1
+          lake env lean scratch/Q4242Finite.lean >> scratch/Q4242-errors.txt 2>&1
           status3=$?
-          lake env lean scratch/Q4242Counterexample.lean >> scratch/Q4242-errors.txt 2>&1
+          lake env lean scratch/Q4242Points.lean >> scratch/Q4242-errors.txt 2>&1
           status4=$?
-          status=$((status1 || status2 || status3 || status4))
+          lake env lean scratch/Q4242Counterexample.lean >> scratch/Q4242-errors.txt 2>&1
+          status5=$?
+          status=$((status1 || status2 || status3 || status4 || status5))
           printf '\nEXIT_STATUS=%s\n' "$status" >> scratch/Q4242-errors.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
