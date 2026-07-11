@@ -5,6 +5,8 @@ on:
     branches: [q4318-research]
     paths-ignore:
       - scratch/Q4318Research.out
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 permissions:
