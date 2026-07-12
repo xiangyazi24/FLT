@@ -11,6 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      - name: Inspect Sutherland TeX source
+        shell: bash
+        run: |
+          mkdir -p /tmp/suth && cd /tmp/suth
+          curl -sSL https://export.arxiv.org/e-print/0811.0296 -o src.tar
+          tar -xf src.tar
+          echo 'SOURCE_FILES'
+          find . -maxdepth 2 -type f -print
+          echo 'MATCHES_X1_18'
+          grep -RniE 'X_.?1.?\(18\)|N.?=.?18|18[[:space:]]*&' . --exclude=src.tar | head -100 || true
+          echo 'MATCHES_TABLE_MAPS'
+          grep -RniE 'Tate|b_N|c_N|birational|Table' . --exclude=src.tar | head -150 || true
       - name: Run Sage Tate computation
         shell: bash
         run: |
