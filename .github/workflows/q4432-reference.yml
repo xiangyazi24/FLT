@@ -1,0 +1,24 @@
+name: Q4432 reference compile
+on:
+  push:
+    branches: [q4432-check]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compile reference draft
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone -q --depth 1 --branch q4432-check https://github.com/xiangyazi24/FLT.git repo
+          cd repo
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y >/dev/null
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake exe cache get >/dev/null 2>&1
+          set +e
+          lake env lean FLTTest/Q4432Reference.lean >/tmp/q4432.log 2>&1
+          rc=$?
+          cat /tmp/q4432.log
+          exit $rc
