@@ -15,16 +15,18 @@ print('UNIT_BASIS',e1,e2)
 print('S_UNIT_BASIS',e1,e2,L(2),pi)
 
 found=False
-for N in range(2,13):
+for N in range(2,8):
     PN=P^N
     A=OL.quotient(PN.gens(),'q')
-    cube_set={x^3 for x in A}
+    reps=[A(sum(ds[n]*pi^n for n in range(N))) for ds in product(range(3),repeat=N)]
+    assert len(set(reps))==3^N
+    cube_set={x^3 for x in reps}
     survivors=[]
     for i,j,k in product(range(3),repeat=3):
         u=A(e1^i*e2^j*L(2)^k)
         if u in cube_set:
             survivors.append((i,j,k))
-    print('FINITE_N',N,'CARD',A.cardinality(),'UNIT_CUBE_SURVIVORS',survivors)
+    print('FINITE_N',N,'CARD',A.cardinality(),'CUBE_SET_CARD',len(cube_set),'UNIT_CUBE_SURVIVORS',survivors)
     if survivors==[(0,0,0)]:
         print('FINITE_CERTIFICATE_LEVEL',N)
         found=True
