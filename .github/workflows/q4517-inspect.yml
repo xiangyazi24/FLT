@@ -2,6 +2,8 @@ name: Q4517 N18 Block4 inspection
 on:
   push:
     branches: [q4517-check]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
@@ -57,14 +59,9 @@ jobs:
                   print(' DUAL_RATMAPS',dh.rational_maps())
                   print(' DUAL_KERNEL_POLY',dh.kernel_polynomial())
               except Exception as ex: print(' DUAL_ERR',repr(ex))
-          # Fixed rational EVelu model from previous derivation.
           Ep = EllipticCurve(K,[-3,0,2,30,26])
           print('EVELU_AINVS', Ep.a_invariants(), 'DISC',Ep.discriminant(),'J',Ep.j_invariant())
           print('E_ISOM_EVELU', E.is_isogenous(Ep))
-          try:
-              print('ISOS_TO_EVELU', E.isogenies_prime_degree(3))
-          except Exception as ex: print('ISOS_TO_ERR',repr(ex))
-          # Pinned model.
           Epin = EllipticCurve(K,[1,a^2+a-3,a^2+a-1,4-a^2,-a-2])
           print('EPIN_AINVS', Epin.a_invariants())
           print('EVELU_ISOM_EPIN', Ep.is_isomorphic(Epin))
@@ -73,7 +70,6 @@ jobs:
               print('EVELU_TO_EPIN', iso)
               print('EVELU_TO_EPIN_URST', iso.tuple())
               print('EVELU_TO_EPIN_RATMAPS', iso.rational_maps())
-          # S-unit group, if available.
           S = [p[0] for p in K.ideal(2).factor()] + [p[0] for p in K.ideal(3).factor()]
           print('S_PRIMES', S)
           for method in ['S_unit_group','selmer_group']:
