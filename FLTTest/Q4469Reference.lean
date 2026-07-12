@@ -56,13 +56,13 @@ theorem no_tate49_witness (bridge : X049Bridge) (mw : X049MWCertificate) :
 
 /-! ## Finite local certificates for the 2-isogeny descent -/
 
-def even16 (x : ZMod 16) : Bool :=
-  (Finset.univ : Finset (ZMod 16)).any fun y => x == 2 * y
+/-- In the canonical representative `0 ≤ x.val < 16`, parity is ordinary parity. -/
+def even16 (x : ZMod 16) : Bool := x.val % 2 == 0
 
 def primitive16 (u v : ZMod 16) : Bool := !(even16 u && even16 v)
 
-def sevenDiv49 (x : ZMod 49) : Bool :=
-  (Finset.univ : Finset (ZMod 49)).any fun y => x == 7 * y
+/-- In the canonical representative `0 ≤ x.val < 49`, divisibility by seven is literal. -/
+def sevenDiv49 (x : ZMod 49) : Bool := x.val % 7 == 0
 
 def primitive49 (u v : ZMod 49) : Bool := !(sevenDiv49 u && sevenDiv49 v)
 
