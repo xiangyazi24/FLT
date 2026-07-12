@@ -1,0 +1,10 @@
+A_DEGREES 5 6 2
+A_R -2*x**5
+A_P -x**6 + 5*x**5 - 5*x**3 + 5*x + 1
+A_Q x**2 - 3*x - 1
+H_DEGREES 7 8 4
+H_R 2*x**7
+H_P (x**2 + 1)*(x**6 - 7*x**5 + 6*x**4 + 21*x**3 - 6*x**2 - 7*x - 1)
+H_Q (x**2 - 4*x - 1)*(x**2 - x - 1)
+CERT_ZERO True
+EXIT_STATUS=0
