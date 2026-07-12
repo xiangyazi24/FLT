@@ -10,10 +10,10 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Compute intermediate quotient and Jacobian data
+      - name: Compute intermediate quotient and canonical model data
         shell: bash
         run: |
           set -euo pipefail
           git clone -q --depth 1 --branch q4483-check https://github.com/xiangyazi24/FLT.git repo
           docker pull -q sagemath/sagemath:latest >/dev/null
-          docker run --rm -v "$PWD/repo/.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest bash -lc 'sage q4483.sage; sage q4483_jac.sage'
+          docker run --rm -v "$PWD/repo/.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest bash -lc 'sage q4483.sage; sage q4483_jac.sage; sage q4483_model.sage'
