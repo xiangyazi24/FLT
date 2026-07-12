@@ -2,6 +2,8 @@ name: Q4483 X1(25) quotient inspection
 on:
   push:
     branches: [q4483-check]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
