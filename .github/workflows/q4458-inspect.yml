@@ -2,6 +2,8 @@ name: Q4458 helper inspection
 on:
   push:
     branches: [q4458-check]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
