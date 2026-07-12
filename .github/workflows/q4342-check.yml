@@ -9,14 +9,13 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - name: Install PARI
-        run: |
-          sudo apt-get update -qq >/dev/null
-          sudo apt-get install -y pari-gp >/dev/null
       - name: Explicit involution quotient
         shell: bash
         run: |
+          sudo apt-get update -qq >/dev/null
+          sudo apt-get install -y pari-gp >/dev/null
           cat >/tmp/q4342.gp <<'GP'
           f=x^6+4*x^5+10*x^4+10*x^3+5*x^2+2*x+1;
           aa=Mod(t,t^3-3*t-1);
@@ -34,12 +33,13 @@ jobs:
           xz=(z*rm-rp)/(z-1);
           Fz=(z-1)^6*subst(f,x,xz);
           print("EVEN_SEXTIC=",lift(Fz));
-          print("C0=",lift(polcoef(Fz,0)));
-          print("C2=",lift(polcoef(Fz,2)));
-          print("C4=",lift(polcoef(Fz,4)));
-          print("C6=",lift(polcoef(Fz,6)));
-          print("ODD1=",lift(polcoef(Fz,1))," ODD3=",lift(polcoef(Fz,3))," ODD5=",lift(polcoef(Fz,5)));
           print("Q4342_QUOTIENT_END");
           quit;
           GP
           gp -q /tmp/q4342.gp
+      - name: Exact quotient normalizations
+        shell: bash
+        run: |
+          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4342-check/.github/q4389_quotients.sage -o /tmp/q4389_quotients.sage
+          docker pull -q sagemath/sagemath:latest >/dev/null
+          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4389_quotients.sage
