@@ -13,11 +13,11 @@ universe u
 variable (K : Type u) [Field K] [DecidableEq K] [CharZero K]
 
 /-- The fixed sextic defining `X_1(18)`. -/
-def n18F : K[X] :=
+noncomputable def n18F : K[X] :=
   X ^ 6 + 4 * X ^ 5 + 10 * X ^ 4 + 10 * X ^ 3 + 5 * X ^ 2 + 2 * X + 1
 
 /-- The outer polynomial variable is the hyperelliptic `y`-coordinate. -/
-def n18Rel : K[X][X] := X ^ 2 - C (n18F K)
+noncomputable def n18Rel : K[X][X] := X ^ 2 - C (n18F K)
 
 /-- Affine coordinate ring `K[x,y]/(y^2-f(x))`. -/
 abbrev N18AffineRing := AdjoinRoot (n18Rel K)
@@ -57,7 +57,7 @@ structure N18Mumford where
 namespace N18Mumford
 
 /-- The distinguished identity representative. -/
-def identity : N18Mumford K where
+noncomputable def identity : N18Mumford K where
   u := 1
   v := 0
   k := 0
@@ -82,8 +82,11 @@ noncomputable def complementary (D : N18Mumford K) : K[X] :=
 
 lemma complementary_spec (D : N18Mumford K) :
     n18F K - D.v ^ 2 = D.u * D.complementary := by
-  rw [complementary, ← quotient_spec]
-  ring
+  rw [complementary]
+  calc
+    n18F K - D.v ^ 2 = -(D.v ^ 2 - n18F K) := by ring
+    _ = -(D.u * D.quotient) := by rw [quotient_spec]
+    _ = D.u * -D.quotient := by ring
 
 /-- The Bézout certificate needed for the reverse ideal inclusion.
 It follows from squarefreeness of `n18F` and `2 != 0`: a common factor of
@@ -111,15 +114,14 @@ lemma span_pair_mul_conj_eq_span
   · rw [Ideal.span_le]
     intro z hz
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
+    have hU : U ∈ Ideal.span ({U} : Set R) :=
+      Ideal.subset_span (Set.mem_singleton U)
     rcases hz with rfl | rfl | rfl | rfl
-    · rw [Ideal.mem_span_singleton]
-      exact ⟨U, by ring⟩
-    · rw [Ideal.mem_span_singleton]
-      exact ⟨Y + V, by ring⟩
-    · rw [Ideal.mem_span_singleton]
-      exact ⟨Y - V, by ring⟩
-    · rw [hrel, Ideal.mem_span_singleton]
-      exact ⟨W, rfl⟩
+    · exact (Ideal.span {U}).mul_mem_left U hU
+    · exact (Ideal.span {U}).mul_mem_right (Y + V) hU
+    · exact (Ideal.span {U}).mul_mem_left (Y - V) hU
+    · rw [hrel]
+      exact (Ideal.span {U}).mul_mem_right W hU
   · rw [Ideal.span_singleton_le_iff_mem]
     let J : Ideal R :=
       Ideal.span {U * U, U * (Y + V), (Y - V) * U, (Y - V) * (Y + V)}
