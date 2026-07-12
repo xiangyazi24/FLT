@@ -1,0 +1,31 @@
+name: Q4458 helper inspection
+on:
+  push:
+    branches: [q4458-check]
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect helper axioms and nearby infrastructure
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone -q --depth 1 --branch q4458-check https://github.com/xiangyazi24/FLT.git repo
+          cd repo
+          echo '=== EXACT MATCHES ==='
+          grep -R -n -E 'exists_rational_two_isogeny_quotient|no_explicit_order25_obstruction|no_raw_order49_tate_obstruction|Z2xZ14_gives_non_degenerate_N14_point' \
+            --include='*.lean' . || true
+          echo '=== CONTEXT ==='
+          while IFS=: read -r file line rest; do
+            [ -n "$file" ] || continue
+            lo=$((line > 70 ? line - 70 : 1)); hi=$((line + 100))
+            echo "----- $file:$line -----"
+            sed -n "${lo},${hi}p" "$file"
+          done < <(grep -R -n -E 'exists_rational_two_isogeny_quotient|no_explicit_order25_obstruction|no_raw_order49_tate_obstruction|Z2xZ14_gives_non_degenerate_N14_point' --include='*.lean' . || true)
+          echo '=== RELATED INFRASTRUCTURE FILES ==='
+          find . -name '*.lean' | grep -Ei 'Tate|Division|Psi|Separated|N14|N15|N20|N21|N25|N49|Isogeny|Velu' | sort | head -400
+          echo '=== RELATED SYMBOLS ==='
+          grep -R -n -E 'prePsi|preΨ|separated|two_isogeny|2-isogeny|V[eé]lu|Tate normal|tateM|N14|N20|N25|N49|order25|order49' \
+            --include='*.lean' FLT FermatsLastTheorem FLTTest 2>/dev/null | head -1600 || true
