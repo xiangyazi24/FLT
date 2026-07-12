@@ -2,6 +2,8 @@ name: Q4568 arithmetic verification
 on:
   push:
     branches: [q4568-check]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
@@ -29,12 +31,9 @@ jobs:
               for P,e in K.ideal(p).factor():
                   print('PRIME_DATA', p, P, 'e', e, 'f', P.residue_class_degree(), 'norm', P.norm())
           A,B = var('A B')
-          # multiplication matrix of A+B*a in basis 1,a,a^2
           M = matrix(QQ[A,B], 3, 3)
-          # columns are products by 1,a,a^2 reduced with a^3=4a^2-4a+2
           M[:,0] = vector([A,B,0])
           M[:,1] = vector([0,A,B])
-          # (A+B a)a^2 = A a^2 + B a^3
           M[:,2] = vector([2*B,-4*B,A+4*B])
           print('NORM_AB', M.det().factor())
           x,s = var('x s')
