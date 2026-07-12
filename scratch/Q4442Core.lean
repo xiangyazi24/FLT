@@ -39,8 +39,7 @@ noncomputable def baseChangeMumford : MQ →+ ML :=
 @[simp] theorem baseChangeMumford_apply (M : MQ) :
     d.baseChangeMumford M = d.mapCoeffs M := by
   apply d.classL.injective
-  change d.orientedClassBaseChange (d.classQ M) = d.classL (d.mapCoeffs M)
-  exact (d.class_mapCoeffs M).symm
+  simpa [baseChangeMumford] using (d.class_mapCoeffs M).symm
 
 /-- The induced map on `Pic^0`; this is exactly the oriented quotient map. -/
 noncomputable abbrev baseChangePic : JQ →+ JL :=
@@ -65,26 +64,35 @@ theorem baseChangePic_injective : Function.Injective d.baseChangePic := by
   have hM : d.baseChangeMumford (d.classQ.symm x) =
       d.baseChangeMumford (d.classQ.symm y) := by
     apply d.classL.injective
-    change d.baseChangePic (d.classQ (d.classQ.symm x)) =
-      d.baseChangePic (d.classQ (d.classQ.symm y))
-    simpa using hxy
+    calc
+      d.classL (d.baseChangeMumford (d.classQ.symm x)) =
+          d.baseChangePic (d.classQ (d.classQ.symm x)) :=
+        d.class_baseChangeMumford (d.classQ.symm x)
+      _ = d.baseChangePic x := by rw [d.classQ.apply_symm_apply]
+      _ = d.baseChangePic y := hxy
+      _ = d.baseChangePic (d.classQ (d.classQ.symm y)) := by
+        rw [d.classQ.apply_symm_apply]
+      _ = d.classL (d.baseChangeMumford (d.classQ.symm y)) :=
+        (d.class_baseChangeMumford (d.classQ.symm y)).symm
   exact d.classQ.symm.injective (d.baseChangeMumford_injective hM)
 
 /-- A uniform annihilator over the extension field descends to the ground field. -/
-theorem annihilator_descends (n : ℕ)
+theorem annihilator_descends
+    (d : Data MQ ML JQ JL) (n : ℕ)
     (hL : ∀ y : JL, n • y = 0) (x : JQ) :
     n • x = 0 := by
-  apply baseChangePic_injective d
+  apply d.baseChangePic_injective
   rw [map_nsmul, hL, map_zero]
 
 /-- Finiteness descends along an injective base-change map. -/
-@[reducible] noncomputable def finite_source_of_finite_target [Finite JL] : Finite JQ :=
-  Finite.of_injective d.baseChangePic (baseChangePic_injective d)
+@[reducible] noncomputable def finite_source_of_finite_target
+    (d : Data MQ ML JQ JL) [Finite JL] : Finite JQ :=
+  Finite.of_injective d.baseChangePic d.baseChangePic_injective
 
 /-- If Abel--Jacobi is injective and the extension-field Picard group is finite,
 then the set of ground-field curve points is finite. -/
 @[reducible] noncomputable def finite_curvePoints_of_finite_pic
-    {CPoint : Type*} [Finite JL]
+    (d : Data MQ ML JQ JL) {CPoint : Type*} [Finite JL]
     (abelJacobi : CPoint → JQ)
     (hAJ : Function.Injective abelJacobi) : Finite CPoint := by
   letI : Finite JQ := d.finite_source_of_finite_target
