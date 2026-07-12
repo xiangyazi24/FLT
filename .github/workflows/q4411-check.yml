@@ -18,4 +18,10 @@ jobs:
       - name: Fetch Mathlib cache
         run: lake exe cache get
       - name: Compile Q4411 scratch
-        run: lake env lean FLTTest/Q4411Scratch.lean
+        shell: bash
+        run: |
+          set +e
+          lake env lean FLTTest/Q4411Scratch.lean >/tmp/q4411.log 2>&1
+          rc=$?
+          tail -200 /tmp/q4411.log
+          exit $rc
