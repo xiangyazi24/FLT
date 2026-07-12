@@ -1,5 +1,29 @@
 from sage.all import *
 from itertools import product
+
+# Exact global field and the unique prime over 3.
+S.<T>=PolynomialRing(QQ)
+L.<a0>=NumberField(T^3-3*T-1)
+OL=L.ring_of_integers()
+pi0=a0-1
+e10=-a0^2+a0+2
+e20=-a0
+P=OL.ideal(pi0)
+print('EXACT_P_NORM',P.norm(),'P3_EQUALS_3',P^3==OL.ideal(3))
+for N in range(2,11):
+    A=OL.quotient(P^N,'q')
+    cube_set={x^3 for x in A}
+    survivors=[]
+    for i,j,k in product(range(3),repeat=3):
+        u=A(e10^i*e20^j*L(2)^k)
+        if u in cube_set:
+            survivors.append((i,j,k))
+    print('FINITE_N',N,'CARD',A.cardinality(),'UNIT_CUBE_SURVIVORS',survivors)
+    if survivors==[(0,0,0)]:
+        print('FINITE_CERTIFICATE_LEVEL',N)
+        break
+
+# Independent q-adic cross-check and explicit local class fingerprints.
 Q=Qp(3,prec=120,type='capped-rel')
 R.<X>=PolynomialRing(Q)
 K.<pi>=Q.extension(X^3+3*X^2-3)
@@ -29,11 +53,10 @@ print('CUBE_COMBINATIONS',[(e,str(r.add_bigoh(10))) for e,r in cubes])
 print('BASIS_INDEPENDENT',len(cubes)==1 and cubes[0][0]==(0,0,0,0))
 for i,b in enumerate(B):
     print('B',i,'VAL',b.valuation(),'APPROX',b.add_bigoh(10))
-# Special Kummer class alpha(T)=1/16.
 sp=K(1)/16
-print('SPECIAL_CLASS_EXPECT_2SQ',cube_root(sp/(K(2)^2)) is not None)
+print('SPECIAL_CLASS_EXPECT_2SQ',cube_root(sp/(K(2)^2) is not None))
 print('TWO_NONCUBE',cube_root(K(2)) is None)
-# Fingerprint all 81 combinations by whether quotient by one of basis products is a cube.
+
 def cls(q):
     for ex in product(range(3),repeat=4):
         b=prod(B[i]^ex[i] for i in range(4))
@@ -45,11 +68,4 @@ print('CLASS_E1',cls(e1))
 print('CLASS_E2',cls(e2))
 print('CLASS_2',cls(K(2)))
 print('CLASS_SPECIAL',cls(sp))
-# The local alpha-image has order 3 from the local isogeny ratio; T supplies class 2^2.
-# Thus it is exactly the span of class(2). Print all global exponent vectors satisfying this.
-surv=[]
-for ex in product(range(3),repeat=4):
-    # order is pi,e1,e2,2
-    if ex[0]==0 and ex[1]==0 and ex[2]==0:
-        surv.append(ex)
-print('LOCAL_IMAGE_SPAN2_GLOBAL_SURVIVORS',surv)
+print('LOCAL_IMAGE_SPAN2_GLOBAL_SURVIVORS',[(0,0,0,k) for k in range(3)])
