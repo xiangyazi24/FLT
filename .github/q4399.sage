@@ -1,99 +1,65 @@
 from sage.all import *
 
-print('Q4399_BEGIN')
+print('Q4399_CONCISE_BEGIN')
 R0.<Avar> = PolynomialRing(QQ)
 L.<a> = NumberField(Avar^3 - 3*Avar - 1)
-R.<z> = PolynomialRing(L)
+Rz.<z> = PolynomialRing(L)
 A0 = -a - 1
 q0 = a^2 - 1
-rp = A0 + q0
-rm = A0 - q0
-x_of_z = (z*rm - rp)/(z - 1)
-
-def fpoly(x):
-    return x^6 + 4*x^5 + 10*x^4 + 10*x^3 + 5*x^2 + 2*x + 1
-
-Fz = R((z-1)^6 * fpoly(x_of_z))
-print('A0=',A0)
-print('q0=',q0)
-print('rplus=',rp)
-print('rminus=',rm)
-print('Fz=',Fz)
-print('Fz_coeffs=',[Fz[i] for i in range(7)])
-assert all(Fz[i] == 0 for i in [1,3,5])
-
-c0 = Fz[0]; c1 = Fz[2]; c2 = Fz[4]; c3 = Fz[6]
-print('C0=',c0)
-print('C1=',c1)
-print('C2=',c2)
-print('C3=',c3)
-
-# E+ from v^2 = c3*u^3 + c2*u^2 + c1*u + c0,
-# via X=c3*u, Y=c3*v.
-Eplus = EllipticCurve(L,[0,c2,0,c1*c3,c0*c3^2])
-# E- from V^2=u*(c3*u^3+c2*u^2+c1*u+c0),
-# via U=1/u,W=V/u^2 then X=c0*U,Y=c0*W.
-Eminus = EllipticCurve(L,[0,c1,0,c2*c0,c3*c0^2])
+rp = a^2 - a - 2
+rm = -a^2 - a
+x_of_z = (z*rm-rp)/(z-1)
+def fpoly(x): return x^6+4*x^5+10*x^4+10*x^3+5*x^2+2*x+1
+Fz = Rz((z-1)^6*fpoly(x_of_z))
+c0,c2,c3 = Fz[0],Fz[4],Fz[6]
+Eplus = EllipticCurve(L,[0,c2,0,0,c0*c3^2])
+Eminus = EllipticCurve(L,[0,0,0,c2*c0,c3*c0^2])
 E0Q = EllipticCurve(QQ,[1,-1,1,-5,5])
-E0 = E0Q.change_ring(L)
-print('EPLUS_AINVS=',Eplus.a_invariants())
-print('EMINUS_AINVS=',Eminus.a_invariants())
-print('E0_AINVS=',E0.a_invariants())
-print('EPLUS_DISC=',Eplus.discriminant())
-print('EMINUS_DISC=',Eminus.discriminant())
-print('E0_DISC=',E0.discriminant())
-print('EPLUS_J=',Eplus.j_invariant())
-print('EMINUS_J=',Eminus.j_invariant())
-print('E0_J=',E0.j_invariant())
-print('PLUS_ISO_E0=',Eplus.is_isomorphic(E0))
-print('MINUS_ISO_E0=',Eminus.is_isomorphic(E0))
+EhatQ = E0Q.isogenies_prime_degree(3)[0].codomain()
+E0=E0Q.change_ring(L); Ehat=EhatQ.change_ring(L)
+isoP=Eplus.isomorphism_to(E0); isoM=Eminus.isomorphism_to(Ehat)
+print('BASIC=',A0,q0,rp,rm)
+print('C=',c0,c2,c3)
+print('EPLUS=',Eplus.a_invariants())
+print('EMINUS=',Eminus.a_invariants())
+print('E0=',E0.a_invariants(),'LABEL',E0Q.label())
+print('EHAT=',Ehat.a_invariants(),'LABEL',EhatQ.label())
+print('PLUS_TUPLE=',isoP.tuple())
+print('PLUS_MAP=',isoP.rational_maps())
+print('PLUS_INV=',(~isoP).rational_maps())
+print('MINUS_TUPLE=',isoM.tuple())
+print('MINUS_MAP=',isoM.rational_maps())
+print('MINUS_INV=',(~isoM).rational_maps())
+print('ISOGENY_E0_TO_EHAT=',E0Q.isogenies_prime_degree(3)[0].rational_maps())
 
-# rational 3-isogenies of E0/Q
-phis = E0Q.isogenies_prime_degree(3)
-print('NUM_3ISOG=',len(phis))
-for i,phiQ in enumerate(phis):
-    EhatQ = phiQ.codomain()
-    Ehat = EhatQ.change_ring(L)
-    print('PHI',i,'EHATQ_AINVS=',EhatQ.a_invariants(),'EHATQ_LABEL=',getattr(EhatQ,'label',lambda:None)())
-    print('PHI',i,'EHATQ_J=',EhatQ.j_invariant())
-    print('PLUS_ISO_EHAT=',Eplus.is_isomorphic(Ehat))
-    print('MINUS_ISO_EHAT=',Eminus.is_isomorphic(Ehat))
-    try:
-        print('PHI_MAP=',phiQ.rational_maps())
-    except Exception as e:
-        print('PHI_MAP_ERR=',repr(e))
+# Coefficients in the direct maps from (u,v) raw quotient coordinates.
+Pmap=isoP.rational_maps(); Mmap=isoM.rational_maps()
+# substitute X=c3*u,Y=c3*v and X=c0/u,Y=c0*w/u^2 respectively
+Ruv.<u,v> = PolynomialRing(L,2)
+Xp=c3*u; Yp=c3*v
+xm = c0/u; ym = c0*v/u^2
+print('PLUS_DIRECT_UV_X=',Pmap[0](Xp,Yp))
+print('PLUS_DIRECT_UV_Y=',Pmap[1](Xp,Yp))
+print('MINUS_DIRECT_UW_X=',Mmap[0](xm,ym))
+print('MINUS_DIRECT_UW_Y=',Mmap[1](xm,ym))
 
-# Find target isomorphisms and print exact maps.
-def dump_iso(name, Efrom, Eto):
-    print(name,'TRY')
-    try:
-        iso = Efrom.isomorphism_to(Eto)
-        print(name,'OBJ=',iso)
-        try: print(name,'TUPLE=',iso.tuple())
-        except Exception as e: print(name,'TUPLE_ERR=',repr(e))
-        try: print(name,'MAPS=',iso.rational_maps())
-        except Exception as e: print(name,'MAPS_ERR=',repr(e))
-        try:
-            inv=~iso
-            print(name,'INV_OBJ=',inv)
-            print(name,'INV_MAPS=',inv.rational_maps())
-        except Exception as e: print(name,'INV_ERR=',repr(e))
-        return iso
-    except Exception as e:
-        print(name,'FAIL=',repr(e))
-        return None
+# Direct formulas from C coordinates, kept factored through z.
+Rxy.<x,y> = PolynomialRing(L,2)
+zxy=(x-rp)/(x-rm)
+up=zxy^2
+vp=(zxy-1)^3*y
+wm=zxy*vp
+Xplus=c3*up; Yplus=c3*vp
+Xminus=c0/up; Yminus=c0*wm/up^2
+print('QPLUS_X_E0=',factor(Pmap[0](Xplus,Yplus)))
+print('QPLUS_Y_E0=',factor(Pmap[1](Xplus,Yplus)))
+print('QMINUS_X_EHAT=',factor(Mmap[0](Xminus,Yminus)))
+print('QMINUS_Y_EHAT=',factor(Mmap[1](Xminus,Yminus)))
 
-iso_plus_E0 = dump_iso('ISO_PLUS_E0',Eplus,E0)
-iso_minus_E0 = dump_iso('ISO_MINUS_E0',Eminus,E0)
-for i,phiQ in enumerate(phis):
-    Ehat=phiQ.codomain().change_ring(L)
-    dump_iso('ISO_PLUS_EHAT_%s'%i,Eplus,Ehat)
-    dump_iso('ISO_MINUS_EHAT_%s'%i,Eminus,Ehat)
-
-# Verify sigma action in z,Y coordinates.
-sx = (A0*x_of_z - a)/(x_of_z - A0)
-print('SIGMA_Z_CHECK=',R((sx-rp)/(sx-rm) + z))
-# y multiplier expressed in z
-mu = q0^3/(x_of_z-A0)^3
-print('SIGMA_Y_MULT=',mu)
-print('Q4399_END')
+# Basic identity checks.
+sx=(A0*x_of_z-a)/(x_of_z-A0)
+print('SIGMA_Z=',Rz((sx-rp)/(sx-rm)))
+print('SIGMA_MU=',q0^3/(x_of_z-A0)^3)
+print('Q0_CUBE=',q0^3)
+print('REL_FIXED=',q0^2-(A0^2-a))
+print('Q4399_CONCISE_END')
