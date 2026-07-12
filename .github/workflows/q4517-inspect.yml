@@ -16,72 +16,8 @@ jobs:
           set -euo pipefail
           git clone -q --depth 1 --branch q4517-check https://github.com/xiangyazi24/FLT.git repo
           cd repo
-          echo '=== REPO MATCHES ==='
-          grep -R -n -E 'structure IsogenyData|structure KummerData|n18Isogeny|n18Kummer|dualSelmerCode|phiSelmerCode|weak_three_descent|EVelu|E0PrimePinned' --include='*.lean' . | head -2000 || true
-          echo '=== RELEVANT FILES ==='
-          find . -type f -name '*.lean' | grep -Ei 'N18|ThreeDescent|Block4|Kummer|Isogeny' | sort | head -500 || true
-          cat > /tmp/q4517.sage <<'SAGE'
-          Qx.<z> = PolynomialRing(QQ)
-          K.<a> = NumberField(z^3-3*z-1)
-          OK = K.ring_of_integers()
-          print('FIELD_POLY', K.defining_polynomial())
-          print('DISC', K.discriminant())
-          print('OK_BASIS', OK.basis())
-          print('CLASS_GROUP', K.class_group())
-          print('UNIT_GROUP', K.unit_group())
-          try:
-              print('UNIT_GENS_VALUES', [K(u) for u in K.unit_group().gens_values()])
-          except Exception as ex:
-              print('UNIT_GENS_VALUES_ERR', repr(ex))
-          print('FACTOR_2', K.ideal(2).factor())
-          print('FACTOR_3', K.ideal(3).factor())
-          pi = a-1
-          print('PI_NORM', K.norm(pi), 'PI_MINPOLY', pi.minpoly())
-          print('PI_IDEAL_FACTOR', K.ideal(pi).factor())
-          E = EllipticCurve(K,[1,-1,1,-5,5])
-          P = E(1,0)
-          print('E_AINVS', E.a_invariants())
-          print('E_DISC', E.discriminant(), 'E_J', E.j_invariant())
-          print('P', P, 'P_ORDER', P.order(), 'MINUS_P', -P)
-          print('ISOGENY_METHODS', [s for s in dir(E) if 'isogen' in s.lower()][:100])
-          isos = E.isogenies_prime_degree(3)
-          print('ISOS_LEN',len(isos))
-          for i,phi in enumerate(isos):
-              print('ISO',i)
-              print(' DEG',phi.degree())
-              print(' KERNEL_POLY',phi.kernel_polynomial())
-              print(' COD_AINVS',phi.codomain().a_invariants())
-              try: print(' RATMAPS',phi.rational_maps())
-              except Exception as ex: print(' RATMAPS_ERR',repr(ex))
-              try:
-                  dh=phi.dual()
-                  print(' DUAL_COD',dh.codomain().a_invariants())
-                  print(' DUAL_RATMAPS',dh.rational_maps())
-                  print(' DUAL_KERNEL_POLY',dh.kernel_polynomial())
-              except Exception as ex: print(' DUAL_ERR',repr(ex))
-          Ep = EllipticCurve(K,[-3,0,2,30,26])
-          print('EVELU_AINVS', Ep.a_invariants(), 'DISC',Ep.discriminant(),'J',Ep.j_invariant())
-          print('E_ISOM_EVELU', E.is_isogenous(Ep))
-          Epin = EllipticCurve(K,[1,a^2+a-3,a^2+a-1,4-a^2,-a-2])
-          print('EPIN_AINVS', Epin.a_invariants())
-          print('EVELU_ISOM_EPIN', Ep.is_isomorphic(Epin))
-          if Ep.is_isomorphic(Epin):
-              iso = Ep.isomorphism_to(Epin)
-              print('EVELU_TO_EPIN', iso)
-              print('EVELU_TO_EPIN_URST', iso.tuple())
-              print('EVELU_TO_EPIN_RATMAPS', iso.rational_maps())
-          S = [p[0] for p in K.ideal(2).factor()] + [p[0] for p in K.ideal(3).factor()]
-          print('S_PRIMES', S)
-          for method in ['S_unit_group','selmer_group']:
-              if hasattr(K,method):
-                  try:
-                      if method=='S_unit_group':
-                          G=K.S_unit_group(S=S)
-                          print('SUNIT_GROUP',G)
-                          print('SUNIT_GENS_VALUES',[K(u) for u in G.gens_values()])
-                      else:
-                          print('SELMER_3',K.selmer_group(S,3))
-                  except Exception as ex: print(method,'ERR',repr(ex))
-          SAGE
+          echo REPO_MATCHES_BEGIN
+          grep -R -n -E 'structure IsogenyData|structure KummerData|n18Isogeny|n18Kummer|dualSelmerCode|phiSelmerCode|weak_three_descent|EVelu|E0PrimePinned' --include='*.lean' . | head -500 || true
+          echo REPO_MATCHES_END
           docker pull -q sagemath/sagemath:latest >/dev/null
-          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4517.sage
+          docker run --rm -v "$PWD/.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest sage q4517.sage
