@@ -1,0 +1,17 @@
+name: Q4399 quotient check
+on:
+  push:
+    branches: [q4399-check]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Run Sage quotient derivation
+        shell: bash
+        run: |
+          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4399-check/.github/q4399.sage -o /tmp/q4399.sage
+          docker pull -q sagemath/sagemath:latest >/dev/null
+          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4399.sage
