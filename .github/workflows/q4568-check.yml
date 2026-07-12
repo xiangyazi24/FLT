@@ -33,7 +33,8 @@ jobs:
           S.<A,B,x,s> = PolynomialRing(QQ)
           normAB = A^3 + 4*A^2*B + 4*A*B^2 + 2*B^3
           print('NORM_AB', normAB)
-          print('NORM_DELTA', normAB(A=x-24*s,B=18*s).expand().factor())
-          print('MOD11_EXPAND', ((T-8)^2*(T-10)).change_ring(GF(11)).expand())
+          print('NORM_DELTA', normAB(A=x-24*s,B=18*s))
+          F11.<U> = PolynomialRing(GF(11))
+          print('MOD11_EXPAND', (U-8)^2*(U-10))
           SAGE
           docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4568.sage
