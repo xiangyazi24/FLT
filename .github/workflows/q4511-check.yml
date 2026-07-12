@@ -1,0 +1,25 @@
+name: Q4511 filtration reference check
+on:
+  push:
+    branches: [q4511-check]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q4511-check
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+      - name: Build Mathlib umbrella
+        run: lake build Mathlib
+      - name: Compile reference
+        run: lake env lean scratch/Q4511Core.lean
