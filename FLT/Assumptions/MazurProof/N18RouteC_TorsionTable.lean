@@ -143,21 +143,54 @@ theorem x_ne_generator (i : Fin 18) :
   rw [x_diff_mul_inv] at hzero
   exact one_ne_zero hzero
 
+/-- Slopes of the secants from `2P, ..., 19P` to `P`. -/
+def secantSlope : Fin 18 → L := ![
+  2 * a ^ 2 - a - 6,
+  2 * a ^ 2 + a - 5,
+  -5,
+  3 * a ^ 2 - 2 * a - 6,
+  a ^ 2 - 5,
+  2 * a ^ 2 - 5,
+  a ^ 2 - a - 5,
+  a ^ 2 + a - 4,
+  2 * a ^ 2 - 2 * a - 5,
+  a ^ 2 + a - 4,
+  a ^ 2 - a - 5,
+  2 * a ^ 2 - 5,
+  a ^ 2 - 5,
+  3 * a ^ 2 - 2 * a - 6,
+  -5,
+  2 * a ^ 2 + a - 5,
+  2 * a ^ 2 - a - 6,
+  2 * a ^ 2 - 7]
+
+theorem slope_consecutive (i : Fin 18) :
+    WeierstrassCurve.Affine.slope E0
+        (torsionX ⟨i + 1, by omega⟩) (torsionX 0)
+        (torsionY ⟨i + 1, by omega⟩) (torsionY 0) = secantSlope i := by
+  rw [WeierstrassCurve.Affine.slope_of_X_ne (x_ne_generator i)]
+  have hinv :
+      (torsionX ⟨i + 1, by omega⟩ - torsionX 0)⁻¹ = xDiffInv i :=
+    inv_eq_of_mul_eq_one_right (x_diff_mul_inv i)
+  rw [div_eq_mul_inv, hinv]
+  fin_cases i <;>
+    simp [torsionX, torsionY, secantSlope, xDiffInv] <;>
+    n18t_ring
+
 set_option maxHeartbeats 0 in
 theorem add_generator_consecutive (i : Fin 18) :
     torsionAffine ⟨i + 1, by omega⟩ + generator21 =
       torsionAffine ⟨i + 2, by omega⟩ := by
-  unfold torsionAffine generator21
+  unfold generator21
+  unfold torsionAffine
   rw [WeierstrassCurve.Affine.Point.add_of_X_ne (x_ne_generator i)]
   rw [WeierstrassCurve.Affine.Point.some.injEq]
-  fin_cases i <;>
-    simp [torsionX, torsionY] <;>
-    constructor <;>
-    rw [WeierstrassCurve.Affine.slope_of_X_ne] <;>
-    simp [E0, WeierstrassCurve.Affine.addX,
-      WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negAddY,
-      WeierstrassCurve.Affine.negY] <;>
-    field_simp <;>
+  rw [slope_consecutive]
+  constructor <;>
+    fin_cases i <;>
+    simp [torsionX, torsionY, secantSlope, E0,
+      WeierstrassCurve.Affine.addX, WeierstrassCurve.Affine.addY,
+      WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.negY] <;>
     n18t_ring
 
 theorem tangent_difference_unit :
@@ -169,30 +202,46 @@ theorem tangent_difference_unit :
 theorem tangent_y_ne_negY :
     torsionY 0 ≠ WeierstrassCurve.Affine.negY E0 (torsionX 0) (torsionY 0) := by
   intro h
+  have hsub :
+      torsionY 0 - WeierstrassCurve.Affine.negY E0 (torsionX 0) (torsionY 0) = 0 :=
+    sub_eq_zero.mpr h
   have hzero :
       (torsionY 0 - WeierstrassCurve.Affine.negY E0 (torsionX 0) (torsionY 0)) *
           ((1 / 2 : L) * a + 1 / 6) = 0 := by
-    rw [h, sub_self, zero_mul]
+    rw [hsub, zero_mul]
   rw [tangent_difference_unit] at hzero
   exact one_ne_zero hzero
+
+theorem tangentSlope :
+    WeierstrassCurve.Affine.slope E0 (torsionX 0) (torsionX 0)
+      (torsionY 0) (torsionY 0) = 2 * a ^ 2 - 7 := by
+  rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl tangent_y_ne_negY]
+  have hinv :
+      (torsionY 0 - WeierstrassCurve.Affine.negY E0 (torsionX 0) (torsionY 0))⁻¹ =
+        (1 / 2 : L) * a + 1 / 6 :=
+    inv_eq_of_mul_eq_one_right tangent_difference_unit
+  rw [div_eq_mul_inv, hinv]
+  simp [torsionX, torsionY, E0, WeierstrassCurve.Affine.negY]
+  n18t_ring
 
 set_option maxHeartbeats 0 in
 theorem two_nsmul_generator :
     (2 : ℕ) • generator21 = torsionAffine 1 := by
   rw [two_nsmul]
-  unfold generator21 torsionAffine
+  unfold generator21
+  unfold torsionAffine
   rw [WeierstrassCurve.Affine.Point.add_self_of_Y_ne tangent_y_ne_negY]
   rw [WeierstrassCurve.Affine.Point.some.injEq]
+  rw [tangentSlope]
   constructor <;>
-    rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl tangent_y_ne_negY] <;>
     simp [torsionX, torsionY, E0, WeierstrassCurve.Affine.addX,
       WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negAddY,
       WeierstrassCurve.Affine.negY] <;>
-    field_simp <;>
     n18t_ring
 
 theorem last_add_generator : torsionAffine 19 + generator21 = 0 := by
-  unfold torsionAffine generator21
+  unfold generator21
+  unfold torsionAffine
   apply WeierstrassCurve.Affine.Point.add_of_Y_eq
   · simp [torsionX]
   · simp [torsionX, torsionY, E0, WeierstrassCurve.Affine.negY]
@@ -202,38 +251,66 @@ theorem add_generator_table (i : Fin 20) :
     torsionPoint i.castSucc + generator21 = torsionPoint i.succ := by
   fin_cases i
   · rfl
-  · simpa [torsionPoint] using two_nsmul_generator
-  · simpa [torsionPoint] using add_generator_consecutive 0
-  · simpa [torsionPoint] using add_generator_consecutive 1
-  · simpa [torsionPoint] using add_generator_consecutive 2
-  · simpa [torsionPoint] using add_generator_consecutive 3
-  · simpa [torsionPoint] using add_generator_consecutive 4
-  · simpa [torsionPoint] using add_generator_consecutive 5
-  · simpa [torsionPoint] using add_generator_consecutive 6
-  · simpa [torsionPoint] using add_generator_consecutive 7
-  · simpa [torsionPoint] using add_generator_consecutive 8
-  · simpa [torsionPoint] using add_generator_consecutive 9
-  · simpa [torsionPoint] using add_generator_consecutive 10
-  · simpa [torsionPoint] using add_generator_consecutive 11
-  · simpa [torsionPoint] using add_generator_consecutive 12
-  · simpa [torsionPoint] using add_generator_consecutive 13
-  · simpa [torsionPoint] using add_generator_consecutive 14
-  · simpa [torsionPoint] using add_generator_consecutive 15
-  · simpa [torsionPoint] using add_generator_consecutive 16
-  · simpa [torsionPoint] using add_generator_consecutive 17
+  · change generator21 + generator21 = torsionAffine 1
+    simpa only [two_nsmul] using two_nsmul_generator
+  · change torsionAffine 1 + generator21 = torsionAffine 2
+    exact add_generator_consecutive 0
+  · change torsionAffine 2 + generator21 = torsionAffine 3
+    exact add_generator_consecutive 1
+  · change torsionAffine 3 + generator21 = torsionAffine 4
+    exact add_generator_consecutive 2
+  · change torsionAffine 4 + generator21 = torsionAffine 5
+    exact add_generator_consecutive 3
+  · change torsionAffine 5 + generator21 = torsionAffine 6
+    exact add_generator_consecutive 4
+  · change torsionAffine 6 + generator21 = torsionAffine 7
+    exact add_generator_consecutive 5
+  · change torsionAffine 7 + generator21 = torsionAffine 8
+    exact add_generator_consecutive 6
+  · change torsionAffine 8 + generator21 = torsionAffine 9
+    exact add_generator_consecutive 7
+  · change torsionAffine 9 + generator21 = torsionAffine 10
+    exact add_generator_consecutive 8
+  · change torsionAffine 10 + generator21 = torsionAffine 11
+    exact add_generator_consecutive 9
+  · change torsionAffine 11 + generator21 = torsionAffine 12
+    exact add_generator_consecutive 10
+  · change torsionAffine 12 + generator21 = torsionAffine 13
+    exact add_generator_consecutive 11
+  · change torsionAffine 13 + generator21 = torsionAffine 14
+    exact add_generator_consecutive 12
+  · change torsionAffine 14 + generator21 = torsionAffine 15
+    exact add_generator_consecutive 13
+  · change torsionAffine 15 + generator21 = torsionAffine 16
+    exact add_generator_consecutive 14
+  · change torsionAffine 16 + generator21 = torsionAffine 17
+    exact add_generator_consecutive 15
+  · change torsionAffine 17 + generator21 = torsionAffine 18
+    exact add_generator_consecutive 16
+  · change torsionAffine 18 + generator21 = torsionAffine 19
+    exact add_generator_consecutive 17
 
 theorem nsmul_generator (i : Fin 21) :
     (i : ℕ) • generator21 = torsionPoint i := by
   induction i using Fin.induction with
   | zero => simp
   | succ i ih =>
-      rw [Nat.succ_eq_add_one, add_nsmul, one_nsmul, ih]
-      exact add_generator_table i
+      calc
+        (i.succ : ℕ) • generator21 =
+            (i.castSucc : ℕ) • generator21 + generator21 := by
+              simp only [Fin.val_succ, Fin.val_castSucc, add_nsmul, one_nsmul]
+        _ = torsionPoint i.castSucc + generator21 := by rw [ih]
+        _ = torsionPoint i.succ := add_generator_table i
 
 theorem twenty_one_nsmul_generator : (21 : ℕ) • generator21 = 0 := by
-  rw [show (21 : ℕ) = 20 + 1 by norm_num, add_nsmul, one_nsmul,
-    nsmul_generator (20 : Fin 21)]
-  exact last_add_generator
+  calc
+    (21 : ℕ) • generator21 = (20 : ℕ) • generator21 + generator21 := by
+      rw [show (21 : ℕ) = 20 + 1 by norm_num, add_nsmul, one_nsmul]
+    _ = torsionPoint (20 : Fin 21) + generator21 := by
+      exact congrArg (fun Q : E0Point ↦ Q + generator21)
+        (by simpa using nsmul_generator (20 : Fin 21))
+    _ = torsionAffine 19 + generator21 := rfl
+    _ = 0 := last_add_generator
 
 private theorem divisor_twenty_one {d : ℕ} (hd : d ∣ 21) :
     d = 1 ∨ d = 3 ∨ d = 7 ∨ d = 21 := by
@@ -247,15 +324,22 @@ theorem addOrderOf_generator21 : addOrderOf generator21 = 21 := by
     addOrderOf_dvd_of_nsmul_eq_zero twenty_one_nsmul_generator
   rcases divisor_twenty_one hd with h1 | h3 | h7 | h21
   · rw [AddMonoid.addOrderOf_eq_one_iff] at h1
+    exfalso
     exact (WeierstrassCurve.Affine.Point.some_ne_zero _) h1
   · have hz : (3 : ℕ) • generator21 = 0 :=
       addOrderOf_dvd_iff_nsmul_eq_zero.mp (h3 ▸ dvd_rfl)
-    rw [nsmul_generator (3 : Fin 21)] at hz
-    exact (WeierstrassCurve.Affine.Point.some_ne_zero _) hz
+    have hz' : torsionPoint (3 : Fin 21) = 0 := by
+      rw [← nsmul_generator (3 : Fin 21)]
+      exact hz
+    exfalso
+    exact (WeierstrassCurve.Affine.Point.some_ne_zero _) hz'
   · have hz : (7 : ℕ) • generator21 = 0 :=
       addOrderOf_dvd_iff_nsmul_eq_zero.mp (h7 ▸ dvd_rfl)
-    rw [nsmul_generator (7 : Fin 21)] at hz
-    exact (WeierstrassCurve.Affine.Point.some_ne_zero _) hz
+    have hz' : torsionPoint (7 : Fin 21) = 0 := by
+      rw [← nsmul_generator (7 : Fin 21)]
+      exact hz
+    exfalso
+    exact (WeierstrassCurve.Affine.Point.some_ne_zero _) hz'
   · exact h21
 
 end

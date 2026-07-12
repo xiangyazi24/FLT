@@ -1,6 +1,7 @@
 import FLT.Assumptions.MazurProof.N18RouteC_FieldBasis
 import FLT.Assumptions.MazurProof.N18RouteC_Finiteness
 import FLT.Assumptions.MazurProof.N18RouteC_TorsionTable
+import FLT.Assumptions.MazurProof.N18RouteC_Curve
 
 /-!
 # The rational part of the N18 plus-quotient fiber table
@@ -51,6 +52,8 @@ def qPlusAffine {x y : L}
     apply WeierstrassCurve.Affine.equation_iff_nonsingular.mp
     rw [WeierstrassCurve.Affine.equation_iff]
     apply sub_eq_zero.mp
+    change wcResidual E0
+      (plusIsoX (plusRawX x)) (plusIsoY (plusRawX x) (plusRawY x y)) = 0
     rw [plus_change_residual, plusRaw_on_curve hC hx, mul_zero]
 
 def fiberCoeff0 (i : Fin 20) (t : ℚ) : ℚ := ![
@@ -145,10 +148,11 @@ theorem quotient_x_eq_target_coefficients
           ((3 / 2 : L) - torsionX i) * ((t : L) - rm) ^ 2 = 0 := by
     unfold plusIsoX plusRawX at hx
     field_simp [hd] at hx
-    linear_combination hx
+    linear_combination (1 / 2 : L) * hx
   rw [quotient_x_numerator_coefficients] at hnum
   exact FieldBasis.quadratic_eq_zero hnum
 
+set_option maxHeartbeats 0 in
 theorem coefficients_force_cusp_x
     (i : Fin 20) (t : ℚ)
     (h0 : fiberCoeff0 i t = 0)
@@ -156,40 +160,61 @@ theorem coefficients_force_cusp_x
     (h2 : fiberCoeff2 i t = 0) :
     t = 0 ∨ t = -1 := by
   fin_cases i <;>
-    simp [fiberCoeff0, fiberCoeff1, fiberCoeff2] at h0 h1 h2 <;>
-    nlinarith
+    simp [fiberCoeff0, fiberCoeff1, fiberCoeff2] at h0 h1 h2 ⊢
+  all_goals try rcases h0 with h0 | h0
+  all_goals try rcases h1 with h1 | h1
+  all_goals try rcases h2 with h2 | h2
+  all_goals first | (left; linarith) | (right; linarith) | (exfalso; nlinarith)
+
+theorem rational_on_curve_L
+    (x y : ℚ) (hC : y ^ 2 = curvePolynomial x) :
+    (y : L) ^ 2 = curveF (x : L) := by
+  calc
+    (y : L) ^ 2 = algebraMap ℚ L (curvePolynomial x) := by
+      simpa only [map_pow, eq_ratCast] using congrArg (algebraMap ℚ L) hC
+    _ = curvePolynomial (x : L) := by
+      simpa only [eq_ratCast] using
+        CurvePoint.curvePolynomial_map (algebraMap ℚ L) x
+    _ = curveF (x : L) := curvePolynomial_L_eq_curveF (x : L)
 
 theorem rational_affine_target_forces_cusp_x
     (x y : ℚ) (hC : y ^ 2 = curvePolynomial x)
     (n : Fin 21)
     (h : qPlusAffine
-        (by simpa using congrArg (algebraMap ℚ L) hC)
+        (rational_on_curve_L x y hC)
         (rational_ne_rm x) = torsionPoint n) :
     x = 0 ∨ x = -1 := by
+  revert h
   refine Fin.cases ?_ (fun i ↦ ?_) n
-  · intro hzero
-    simpa [qPlusAffine] using hzero
-  · intro hi
+  · intro h
+    have hzero : False := by
+      simpa [qPlusAffine, torsionPoint] using h
+    exact hzero.elim
+  · intro h
     have hc := quotient_x_eq_target_coefficients i x (y : L)
-      (by simpa using congrArg (algebraMap ℚ L) hC) (by simpa [torsionPoint] using hi)
+      (rational_on_curve_L x y hC)
+      (by simpa [torsionPoint] using h)
     exact coefficients_force_cusp_x i x hc.1 hc.2.1 hc.2.2
 
 theorem rational_affine_target_is_cusp
     (x y : ℚ) (hC : y ^ 2 = curvePolynomial x)
     (n : Fin 21)
     (h : qPlusAffine
-        (by simpa using congrArg (algebraMap ℚ L) hC)
+        (rational_on_curve_L x y hC)
         (rational_ne_rm x) = torsionPoint n) :
     CurvePoint.IsCusp (.affine x y hC) := by
   have hx := rational_affine_target_forces_cusp_x x y hC n h
-  have hy : y = 1 ∨ y = -1 := by
-    rcases hx with rfl | rfl
-    · apply sq_eq_one_iff.mp
-      simpa [curvePolynomial] using hC
-    · apply sq_eq_one_iff.mp
-      simpa [curvePolynomial] using hC
-  exact hx.elim (fun h0 ↦ Or.inl ⟨h0, hy⟩)
-    (fun h1 ↦ Or.inr ⟨h1, hy⟩)
+  rcases hx with hx | hx
+  · left
+    refine ⟨hx, ?_⟩
+    subst x
+    apply sq_eq_one_iff.mp
+    exact hC.trans (by norm_num [curvePolynomial])
+  · right
+    refine ⟨hx, ?_⟩
+    subst x
+    apply sq_eq_one_iff.mp
+    exact hC.trans (by norm_num [curvePolynomial])
 
 /-- Once the elliptic quotient has been exhausted by the verified order-21
 table, the finite coefficient check proves that every rational curve point
@@ -203,7 +228,7 @@ theorem all_rational_points_are_cusps
   | infinityMinus => trivial
   | affine x y hC =>
       let Q : E0Point := qPlusAffine
-        (by simpa using congrArg (algebraMap ℚ L) hC)
+        (rational_on_curve_L x y hC)
         (rational_ne_rm x)
       obtain ⟨n, hn⟩ := hexhaust Q
       exact rational_affine_target_is_cusp x y hC n hn
@@ -223,8 +248,8 @@ theorem torsionPoint_injective : Function.Injective torsionPoint := by
         _ = i.val • generator21 := hsmul.symm
         _ = i.val • generator21 + 0 := (add_zero _).symm
     have hd : 21 ∣ j.val - i.val := by
-      rw [← addOrderOf_generator21]
-      exact addOrderOf_dvd_of_nsmul_eq_zero hzero
+      have hd' := addOrderOf_dvd_of_nsmul_eq_zero hzero
+      simpa only [addOrderOf_generator21] using hd'
     have hle : 21 ≤ j.val - i.val := Nat.le_of_dvd (by omega) hd
     omega
   · exact hijeq
@@ -237,8 +262,8 @@ theorem torsionPoint_injective : Function.Injective torsionPoint := by
         _ = j.val • generator21 := hsmul
         _ = j.val • generator21 + 0 := (add_zero _).symm
     have hd : 21 ∣ i.val - j.val := by
-      rw [← addOrderOf_generator21]
-      exact addOrderOf_dvd_of_nsmul_eq_zero hzero
+      have hd' := addOrderOf_dvd_of_nsmul_eq_zero hzero
+      simpa only [addOrderOf_generator21] using hd'
     have hle : 21 ≤ i.val - j.val := Nat.le_of_dvd (by omega) hd
     omega
 
@@ -253,10 +278,11 @@ theorem torsionPoint_exhaustive
     have hlower : Nat.card (Fin 21) ≤ Nat.card E0Point :=
       Finiteness.natCard_le_of_injective torsionPoint torsionPoint_injective
     rw [Nat.card_fin] at hlower
-    simpa only [Nat.card_eq_fintype_card] using
+    have heq : Nat.card E0Point = 21 :=
       le_antisymm hcard (by simpa using hlower)
+    simpa only [Fintype.card_fin, Nat.card_eq_fintype_card] using heq.symm
   have hsurj : Function.Surjective torsionPoint :=
-    (Fintype.bijective_iff_injective_and_card.mpr
+    ((Fintype.bijective_iff_injective_and_card torsionPoint).mpr
       ⟨torsionPoint_injective, hcardEq⟩).2
   intro Q
   obtain ⟨n, hn⟩ := hsurj Q

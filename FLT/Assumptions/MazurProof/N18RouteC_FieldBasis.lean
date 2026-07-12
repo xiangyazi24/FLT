@@ -15,17 +15,18 @@ noncomputable section
 open Polynomial
 
 private def quadraticInPi (c0 c1 c2 : ℚ) : ℚ[X] :=
-  C c0 + C c1 * (X + 1) + C c2 * (X + 1) ^ 2
+  C (c0 + c1 + c2) + C (c1 + 2 * c2) * X + C c2 * X ^ 2
 
 private theorem quadraticInPi_natDegree_lt (c0 c1 c2 : ℚ) :
     (quadraticInPi c0 c1 c2).natDegree < 3 := by
   unfold quadraticInPi
-  compute_degree
+  compute_degree <;> norm_num
 
 private theorem mk_quadraticInPi (c0 c1 c2 : ℚ) :
     AdjoinRoot.mk cubicPoly (quadraticInPi c0 c1 c2) =
       (c0 : L) + c1 * a + c2 * a ^ 2 := by
   simp [quadraticInPi, a, pi]
+  ring
 
 /-- The coefficients of a quadratic expression in `a` are unique. -/
 theorem quadratic_eq_zero_iff (c0 c1 c2 : ℚ) :
@@ -60,7 +61,7 @@ theorem quadratic_ne_zero {c0 c1 c2 : ℚ}
     (c0 : L) + c1 * a + c2 * a ^ 2 ≠ 0 := by
   intro hz
   obtain ⟨h0, h1, h2⟩ := quadratic_eq_zero hz
-  exact h (by simp [h0, h1, h2])
+  simp [h0, h1, h2] at h
 
 end
 

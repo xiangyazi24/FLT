@@ -28,14 +28,12 @@ theorem torsionRepresentativesToModThree_surjective
     (hweak : ∀ P : G, ∃ h : H, ∃ Q : G, P = (h : G) + 3 • Q) :
     Function.Surjective (torsionRepresentativesToModThree H) := by
   intro z
-  obtain ⟨P, rfl⟩ := QuotientAddGroup.mk'_surjective z
+  obtain ⟨P, rfl⟩ := QuotientAddGroup.mk'_surjective (ThreeRange G) z
   obtain ⟨h, Q, hP⟩ := hweak P
   refine ⟨h, ?_⟩
-  apply (QuotientAddGroup.mk'_eq_mk').2
-  refine ⟨-(3 • Q), ?_, ?_⟩
-  · exact ⟨-Q, by simp⟩
-  · rw [hP]
-    simp
+  apply (QuotientAddGroup.mk'_eq_mk' (ThreeRange G)).2
+  refine ⟨3 • Q, ⟨Q, rfl⟩, ?_⟩
+  exact hP.symm
 
 theorem finite_modThree_of_weak
     (H : AddSubgroup G) [Finite H]
