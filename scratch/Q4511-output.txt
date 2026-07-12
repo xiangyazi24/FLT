@@ -1,0 +1,59 @@
+scratch/Q4511Core.lean:25:6: error: Type mismatch: After simplification, term
+  le_refl (F.level y)
+ has type
+  True
+but is expected to have type
+  F.level y ≤ F.level x
+scratch/Q4511Core.lean:32:35: error: unsolved goals
+G : Type u_1
+inst✝ : AddCommGroup G
+H : AddSubgroup G
+m : ℕ
+F : StrictNSmulFiltration H m
+y : ↥H
+n : ℕ
+ih : ∀ {x : ↥H}, x ≠ 0 → x = m ^ n • y → F.level y + n ≤ F.level x
+x : ↥H
+hx : x ≠ 0
+hxy : x = m ^ (n + 1) • y
+z : ↥H := m ^ n • y
+⊢ m ^ n • m • y = m • m ^ n • y
+scratch/Q4511Core.lean:71:52: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  3 • ↑t
+in the target expression
+  3 • 7 • ↑t = 0
+
+G : Type u_1
+inst✝ : AddCommGroup G
+T : AddSubgroup G
+hT : ∀ (t : ↥T), 3 • ↑t = 0
+t : ↥T
+⊢ 3 • 7 • ↑t = 0
+scratch/Q4511Core.lean:91:8: error: No goals to be solved
+scratch/Q4511Core.lean:96:46: error: unsolved goals
+G : Type u_1
+inst✝ : AddCommGroup G
+T : AddSubgroup G
+hweak : WeakDescent 3 T
+hT : ∀ (t : ↥T), 3 • ↑t = 0
+x : G
+n : ℕ
+y : G
+hy : 21 • x = 3 ^ n • 21 • y
+t : ↥T
+z : G
+hz : y = ↑t + 3 • z
+h21t : 21 • ↑t = 0
+hinner : 21 • (↑t + 3 • z) = 3 • 21 • z
+⊢ (3 * 3 ^ n) • 21 • z = (3 ^ n * 3) • 21 • z
+scratch/Q4511Core.lean:104:54: error: unsolved goals
+G : Type u_1
+Q : Type u_2
+inst✝¹ : AddCommGroup G
+inst✝ : AddCommGroup Q
+red : G →+ Q
+hred : ∀ (q : Q), 7 • q = 0
+x : G
+⊢ 7 • 3 • red x = 3 • 7 • red x
+
+EXIT_STATUS=1
