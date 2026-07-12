@@ -44,8 +44,15 @@ def full_span(B):
 def setup_local(p, prec=80):
     Q=Qp(p, prec=prec, type='capped-rel')
     R=PolynomialRing(Q,'X'); X=R.gen()
-    K=Q.extension(X**2+X+1, names='z')
-    z=K.gen()
+    if p == 2:
+        K=Q.extension(X**2+X+1, names='z')
+        z=K.gen()
+        uniformizer=K(2)
+    else:
+        # pi = 1-zeta satisfies pi^2 - 3*pi + 3 = 0, Eisenstein at 3.
+        K=Q.extension(X**2-3*X+3, names='pi')
+        uniformizer=K.gen()
+        z=1-uniformizer
     s=1+2*z
     g1=(3+2*s)/7; g2=s; g3=(3-2*s)/7; g4=-s
     A=1+3*z; Bb=1+3*z**2
@@ -55,9 +62,7 @@ def setup_local(p, prec=80):
     h10=(m0-g1)/(m0-g4); h20=(m0-g2)/(m0-g4)
     if p==2:
         cbasis=[K(2),z]
-        uniformizer=K(2)
     else:
-        uniformizer=1-z
         cbasis=[uniformizer,z,1+uniformizer**2,1+uniformizer**3]
     return K,z,s,(g1,g2,g3,g4),c,rhs,m0,h10,h20,uniformizer,cbasis
 
