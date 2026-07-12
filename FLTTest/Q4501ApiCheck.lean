@@ -1,4 +1,4 @@
-import FLT.EllipticCurve.Torsion
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.AlgebraicGeometry.EllipticCurve.Reduction
 import Mathlib.GroupTheory.Torsion
 
