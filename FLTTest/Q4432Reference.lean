@@ -126,10 +126,10 @@ lemma span_pair_mul_conj_eq_span
     let J : Ideal R :=
       Ideal.span {U * U, U * (Y + V), (Y - V) * U, (Y - V) * (Y + V)}
     change U ∈ J
-    have hUU : U * U ∈ J := Ideal.subset_span (by simp [J])
-    have hUp : U * (Y + V) ∈ J := Ideal.subset_span (by simp [J])
-    have hUm : (Y - V) * U ∈ J := Ideal.subset_span (by simp [J])
-    have hLast : (Y - V) * (Y + V) ∈ J := Ideal.subset_span (by simp [J])
+    have hUU : U * U ∈ J := Ideal.subset_span (by simp)
+    have hUp : U * (Y + V) ∈ J := Ideal.subset_span (by simp)
+    have hUm : (Y - V) * U ∈ J := Ideal.subset_span (by simp)
+    have hLast : (Y - V) * (Y + V) ∈ J := Ideal.subset_span (by simp)
     have hU2V : U * (2 * V) ∈ J := by
       have h := J.sub_mem hUp hUm
       convert h using 1 <;> ring
@@ -140,11 +140,13 @@ lemma span_pair_mul_conj_eq_span
         a * (U * U) + b * (U * (2 * V)) + c * (U * W) ∈ J :=
       J.add_mem (J.add_mem (J.mul_mem_left a hUU) (J.mul_mem_left b hU2V))
         (J.mul_mem_left c hUW)
-    convert hsum using 1
-    calc
-      a * (U * U) + b * (U * (2 * V)) + c * (U * W) =
-          U * (a * U + b * (2 * V) + c * W) := by ring
-      _ = U := by rw [hbez, mul_one]
+    have heq : a * (U * U) + b * (U * (2 * V)) + c * (U * W) = U := by
+      calc
+        a * (U * U) + b * (U * (2 * V)) + c * (U * W) =
+            U * (a * U + b * (2 * V) + c * W) := by ring
+        _ = U := by rw [hbez, mul_one]
+    rw [← heq]
+    exact hsum
 
 /-- Integral Mumford ideal `<u, y-v>`. -/
 noncomputable def mumfordIdeal (D : N18Mumford K) : Ideal (N18AffineRing K) :=
@@ -176,7 +178,7 @@ lemma exists_mapped_bezout (D : N18Mumford K) :
   rcases D.exists_bezout with ⟨a, b, c, h⟩
   refine ⟨coeff K a, coeff K b, coeff K c, ?_⟩
   have hm := congrArg (fun p : K[X] => coeff K p) h
-  simpa using hm
+  simpa only [map_add, map_mul, map_ofNat, map_one] using hm
 
 /-- Exact integral-ideal identity `I(u,v) * I(u,-v) = (u)`. -/
 theorem mumfordIdeal_mul_conjugateIdeal (D : N18Mumford K) :
@@ -324,32 +326,33 @@ theorem mumfordAdd_assoc (ordInf : N18InfinityOrder K) (D E F : N18Mumford K) :
     mumfordAdd K ordInf (mumfordAdd K ordInf D E) F =
       mumfordAdd K ordInf D (mumfordAdd K ordInf E F) := by
   apply classOf_injective K ordInf
-  simp [add_assoc]
+  rw [classOf_mumfordAdd, classOf_mumfordAdd, classOf_mumfordAdd, classOf_mumfordAdd]
+  exact add_assoc _ _ _
 
 /-- Commutativity is inherited in the same way. -/
 theorem mumfordAdd_comm (ordInf : N18InfinityOrder K) (D E : N18Mumford K) :
     mumfordAdd K ordInf D E = mumfordAdd K ordInf E D := by
   apply classOf_injective K ordInf
-  simp [add_comm]
+  rw [classOf_mumfordAdd, classOf_mumfordAdd]
+  exact add_comm _ _
 
 /-- Left identity, with the concrete representative `(1,0,0)`. -/
 theorem mumford_identity_add (ordInf : N18InfinityOrder K) (D : N18Mumford K) :
     mumfordAdd K ordInf (N18Mumford.identity K) D = D := by
   apply classOf_injective K ordInf
-  simp
+  rw [classOf_mumfordAdd, classOf_identity, zero_add]
 
 /-- Additive inverse law. -/
 theorem mumford_neg_add (ordInf : N18InfinityOrder K) (D : N18Mumford K) :
     mumfordAdd K ordInf (mumfordNeg K ordInf D) D = N18Mumford.identity K := by
   apply classOf_injective K ordInf
-  simp
+  rw [classOf_mumfordAdd, classOf_mumfordNeg, neg_add_cancel, classOf_identity]
 
 /-- A concrete Cantor implementation may replace this definition.  Its only
 public proof obligation is the class-level specification below. -/
 noncomputable def cantor (ordInf : N18InfinityOrder K)
-    (D E : N18Mumford K) : N18Mumford K := by
-  -- `normalize (composeSemi D E)` in the executable module.
-  exact mumfordAdd K ordInf D E
+    (D E : N18Mumford K) : N18Mumford K :=
+  mumfordAdd K ordInf D E
 
 @[simp]
 theorem classOf_cantor (ordInf : N18InfinityOrder K) (D E : N18Mumford K) :
@@ -360,8 +363,7 @@ theorem classOf_cantor (ordInf : N18InfinityOrder K) (D E : N18Mumford K) :
 /-- Any executable Cantor routine satisfying `classOf_cantor` equals the
 transported operation by injectivity. -/
 theorem cantor_eq_mumfordAdd (ordInf : N18InfinityOrder K) (D E : N18Mumford K) :
-    cantor K ordInf D E = mumfordAdd K ordInf D E := by
-  apply classOf_injective K ordInf
-  simp
+    cantor K ordInf D E = mumfordAdd K ordInf D E :=
+  rfl
 
 end N18RouteCReference
