@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.N18RouteC_FieldBasis
+import FLT.Assumptions.MazurProof.N18RouteC_Finiteness
 import FLT.Assumptions.MazurProof.N18RouteC_TorsionTable
 
 /-!
@@ -206,6 +207,65 @@ theorem all_rational_points_are_cusps
         (rational_ne_rm x)
       obtain ⟨n, hn⟩ := hexhaust Q
       exact rational_affine_target_is_cusp x y hC n hn
+
+theorem torsionPoint_injective : Function.Injective torsionPoint := by
+  intro i j hij
+  have hsmul : (i : ℕ) • generator21 = (j : ℕ) • generator21 := by
+    simpa only [nsmul_generator] using hij
+  apply Fin.ext
+  rcases lt_trichotomy i.val j.val with hijlt | hijeq | hjilt
+  · have hzero : (j.val - i.val) • generator21 = 0 := by
+      apply add_left_cancel (a := i.val • generator21)
+      calc
+        i.val • generator21 + (j.val - i.val) • generator21 =
+            j.val • generator21 := by
+              rw [← add_nsmul, Nat.add_sub_of_le hijlt.le]
+        _ = i.val • generator21 := hsmul.symm
+        _ = i.val • generator21 + 0 := (add_zero _).symm
+    have hd : 21 ∣ j.val - i.val := by
+      rw [← addOrderOf_generator21]
+      exact addOrderOf_dvd_of_nsmul_eq_zero hzero
+    have hle : 21 ≤ j.val - i.val := Nat.le_of_dvd (by omega) hd
+    omega
+  · exact hijeq
+  · have hzero : (i.val - j.val) • generator21 = 0 := by
+      apply add_left_cancel (a := j.val • generator21)
+      calc
+        j.val • generator21 + (i.val - j.val) • generator21 =
+            i.val • generator21 := by
+              rw [← add_nsmul, Nat.add_sub_of_le hjilt.le]
+        _ = j.val • generator21 := hsmul
+        _ = j.val • generator21 + 0 := (add_zero _).symm
+    have hd : 21 ∣ i.val - j.val := by
+      rw [← addOrderOf_generator21]
+      exact addOrderOf_dvd_of_nsmul_eq_zero hzero
+    have hle : 21 ≤ i.val - j.val := Nat.le_of_dvd (by omega) hd
+    omega
+
+/-- A cardinality upper bound of `21` turns the verified table into an
+exhaustive enumeration; no structure theorem for finitely generated groups
+is used. -/
+theorem torsionPoint_exhaustive
+    [Finite E0Point] (hcard : Nat.card E0Point ≤ 21) :
+    ∀ Q : E0Point, ∃ n : Fin 21, Q = torsionPoint n := by
+  letI : Fintype E0Point := Fintype.ofFinite E0Point
+  have hcardEq : Fintype.card (Fin 21) = Fintype.card E0Point := by
+    have hlower : Nat.card (Fin 21) ≤ Nat.card E0Point :=
+      Finiteness.natCard_le_of_injective torsionPoint torsionPoint_injective
+    rw [Nat.card_fin] at hlower
+    simpa only [Nat.card_eq_fintype_card] using
+      le_antisymm hcard (by simpa using hlower)
+  have hsurj : Function.Surjective torsionPoint :=
+    (Fintype.bijective_iff_injective_and_card.mpr
+      ⟨torsionPoint_injective, hcardEq⟩).2
+  intro Q
+  obtain ⟨n, hn⟩ := hsurj Q
+  exact ⟨n, hn.symm⟩
+
+theorem all_rational_points_are_cusps_of_card_le
+    [Finite E0Point] (hcard : Nat.card E0Point ≤ 21) :
+    ∀ P : CurvePointQ, CurvePoint.IsCusp P :=
+  all_rational_points_are_cusps (torsionPoint_exhaustive hcard)
 
 end
 
