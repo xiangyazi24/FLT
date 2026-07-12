@@ -6,12 +6,12 @@ print('X0_AINVS',X0.ainvs())
 print('X0_DISC',X0.discriminant(),'J',X0.j_invariant(),'RANK',X0.rank())
 print('X0_TORSION',X0.torsion_subgroup())
 print('X0_TORSION_POINTS',X0.torsion_points())
-try:
-    for sign in [0,1,-1]:
+for sign in [1,-1]:
+    try:
         ms=X0.modular_symbol(sign=sign)
-        print('MODSYM',sign,'AT0',ms(0),'ATINF',ms(Infinity))
-except Exception as ex:
-    print('MODSYM_ERR',repr(ex))
+        print('MODSYM',sign,'AT0',ms(0))
+    except Exception as ex:
+        print('MODSYM_ERR',sign,repr(ex))
 try:
     L=X0.period_lattice()
     print('PERIOD_BASIS',L.basis())
