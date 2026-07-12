@@ -2,18 +2,20 @@ name: Q4403 Tate normal form check
 on:
   push:
     branches: [q4403-check]
-  pull_request:
-    branches: [scratch]
   workflow_dispatch:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - name: Derive inverse coordinate map
+      - name: Print Sutherland optimized model and map rows
         shell: bash
         run: |
-          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/160be817de6793fc6586e57175fdae682d3456f5/.github/q4403_inverse.sage -o /tmp/q4403_inverse.sage
-          docker pull -q sagemath/sagemath:latest >/dev/null
-          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4403_inverse.sage
+          mkdir -p /tmp/suth && cd /tmp/suth
+          curl -sSL https://export.arxiv.org/e-print/0811.0296 -o src.tar
+          tar -xf src.tar
+          echo 'OPTIMIZED_MODELS'
+          sed -n '680,735p' torsion.tex
+          echo 'BIRATIONAL_MAPS'
+          sed -n '750,825p' torsion.tex
