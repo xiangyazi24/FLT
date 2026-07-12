@@ -4,6 +4,8 @@ import FLT.Assumptions.MazurProof.N18RouteC_ThreeAdic
 import FLT.Assumptions.MazurProof.N18RouteC_Reduction
 import FLT.Assumptions.MazurProof.N18RouteC_Block4
 import FLT.Assumptions.MazurProof.N18RouteC_Composition
+import FLT.Assumptions.MazurProof.N18RouteC_Separated
+import FLT.Assumptions.MazurProof.N18ReductionHom
 import FLT.Assumptions.MazurProof.CyclicExclusion18
 
 /-!
@@ -399,39 +401,113 @@ theorem hC (x : E0Point) (hx : ∃ k : ℕ, ((3 : ℤ) ^ k) • x = 0) :
   have := congrArg (Subtype.val) h3z
   rwa [AddSubgroupClass.coe_zsmul, ZeroMemClass.coe_zero] at this
 
-/-- **Lemma A + reduction wiring (`hQ7`).**  The prime-to-`3` part of `E₀(L)`
-injects into the seven-point reduction (`Reduction.seven_nsmul`), so it is killed
-by `[7]`.  The reduction-homomorphism chaining is left as a labelled `sorry`. -/
-theorem hQ (x : E0Point) (hx : ∃ j : ℤ, ¬ (3 ∣ j) ∧ j • x = 0) :
-    (7 : ℤ) • x = 0 := by
-  -- WIRING (hQ7 red-chaining): Lemma A (`no_prime_to_3_torsion`) rules out
-  -- prime-to-3 torsion inside the formal kernel; the residual injects into
-  -- `Reduction.RedPoint` (card 7) via the reduction map, whence `[7]`.
-  sorry
+/-- **Kernel identification.**  The carried characterization `hker`
+(`P ∈ red.ker ↔ P ∈ kernelSubgroup`) upgrades to an additive isomorphism between
+`ker red` and the formal kernel `formalKernel18.M = kernelSubgroup`. -/
+def kerEquiv
+    (red : E0Point →+ Reduction.RedPoint)
+    (hker : ∀ P, P ∈ red.ker ↔ P ∈ D.kernelSubgroup) :
+    red.ker ≃+ D.kernelSubgroup where
+  toFun x := ⟨(x : E0Point), (hker (x : E0Point)).mp x.2⟩
+  invFun x := ⟨(x : E0Point), (hker (x : E0Point)).mpr x.2⟩
+  left_inv x := by cases x; rfl
+  right_inv x := by cases x; rfl
+  map_add' x y := rfl
+
+/-- **The strict valuation filtration on `ker red`** (the KEY new lemma): the
+`π`-adic valuation `v(zP)` gives a level function on the formal kernel that
+strictly increases under `[3]`, because `v([3]P) ≥ min(3+v, 2v) ≥ v+1` for
+`v ≥ 1` (the `val_three_smul_ge`/`one_le_val` laws of `formalKernel18`). -/
+def formalFiltration
+    (red : E0Point →+ Reduction.RedPoint)
+    (hker : ∀ P, P ∈ red.ker ↔ P ∈ D.kernelSubgroup) :
+    Separated.StrictNSmulFiltration red.ker 3 where
+  level x := (D.formalKernel18.val (D.kerEquiv red hker x)).toNat
+  step := by
+    intro x hx0 h3x0
+    have hfx3 : D.kerEquiv red hker ((3 : ℕ) • x)
+        = (3 : ℕ) • D.kerEquiv red hker x := map_nsmul _ _ _
+    show (D.formalKernel18.val (D.kerEquiv red hker x)).toNat + 1
+        ≤ (D.formalKernel18.val (D.kerEquiv red hker ((3 : ℕ) • x))).toNat
+    rw [hfx3]
+    set w := D.kerEquiv red hker x with hw
+    have hwne : w ≠ 0 := by
+      rw [hw]; intro h
+      exact hx0 ((D.kerEquiv red hker).injective (by rw [h, map_zero]))
+    have hw3ne : (3 : ℕ) • w ≠ 0 := by
+      intro h
+      apply h3x0
+      apply (D.kerEquiv red hker).injective
+      rw [map_zero, map_nsmul, ← hw]; exact h
+    have ha1 : (1 : ℕ∞) ≤ D.formalKernel18.val w := D.formalKernel18.one_le_val w hwne
+    have hge : min (3 + D.formalKernel18.val w) (2 * D.formalKernel18.val w)
+        ≤ D.formalKernel18.val ((3 : ℕ) • w) := D.formalKernel18.val_three_smul_ge w
+    have hstep : D.formalKernel18.val w + 1 ≤ D.formalKernel18.val ((3 : ℕ) • w) := by
+      refine le_trans ?_ hge
+      apply le_min
+      · calc D.formalKernel18.val w + 1
+            ≤ D.formalKernel18.val w + 3 := add_le_add le_rfl (by norm_num)
+          _ = 3 + D.formalKernel18.val w := add_comm _ _
+      · calc D.formalKernel18.val w + 1
+            ≤ D.formalKernel18.val w + D.formalKernel18.val w := add_le_add le_rfl ha1
+          _ = 2 * D.formalKernel18.val w := (two_mul _).symm
+    have hwtop : D.formalKernel18.val w ≠ ⊤ := (D.formalKernel18.val_eq_top w).not.mpr hwne
+    have hw3top : D.formalKernel18.val ((3 : ℕ) • w) ≠ ⊤ :=
+      (D.formalKernel18.val_eq_top _).not.mpr hw3ne
+    calc (D.formalKernel18.val w).toNat + 1
+        = (D.formalKernel18.val w + 1).toNat := by
+          rw [ENat.toNat_add hwtop ENat.one_ne_top, ENat.toNat_one]
+      _ ≤ (D.formalKernel18.val ((3 : ℕ) • w)).toNat := ENat.toNat_le_toNat hstep hw3top
+
+/-- **Lemma A + reduction wiring (`hQ7`).**  Given the carried reduction hom
+`red` and the kernel characterization `hker`, prime-to-`3` torsion of `E₀(L)` is
+killed by `[7]`: `[7]P` reduces to `0` (lands in `ker red ≃ formalKernel18.M`),
+and Lemma A (`no_prime_to_3_torsion`) then forces `[7]P = 0`.  Discharged by
+`N18ReductionHom.prime_to_3_torsion_killed_by_seven`. -/
+theorem hQ
+    (red : E0Point →+ Reduction.RedPoint)
+    (hker : ∀ P, P ∈ red.ker ↔ P ∈ D.kernelSubgroup)
+    (x : E0Point) (hx : ∃ j : ℤ, ¬ (3 ∣ j) ∧ j • x = 0) :
+    (7 : ℤ) • x = 0 :=
+  N18ReductionHom.prime_to_3_torsion_killed_by_seven red D.formalKernel18
+    (D.kerEquiv red hker) x hx
 
 /-- `[21]` annihilates every torsion point of `E₀(L)`, via the proven abstract
 `annihilated_by_21` fed with `hC` and `hQ`. -/
-theorem torsion_annihilated_by_21 (x : E0Point)
+theorem torsion_annihilated_by_21
+    (red : E0Point →+ Reduction.RedPoint)
+    (hker : ∀ P, P ∈ red.ker ↔ P ∈ D.kernelSubgroup)
+    (x : E0Point)
     (htor : ∃ n : ℕ, 0 < n ∧ n • x = 0) : (21 : ℤ) • x = 0 :=
-  FormalKernel18.annihilated_by_21 (G := E0Point) D.hC D.hQ x htor
+  FormalKernel18.annihilated_by_21 (G := E0Point) D.hC (D.hQ red hker) x htor
 
-/-- **Rank-0 wiring (`torsion_eq_Z21`).**  Combined with `Block4.weak_three_descent`
-(every point is a kernel representative mod `3`) and the upstream rank-0 input,
-every `L`-point is torsion and hence killed by `[21]`.  Left as a labelled
-`sorry`. -/
-theorem all_points_annihilated_by_21 : ∀ P : E0Point, (21 : ℤ) • P = 0 := by
-  -- Every `P` is torsion (rank 0); then `torsion_annihilated_by_21`.
-  -- `Block4.weak_three_descent P : ∃ h, 3•h = 0 ∧ ∃ Q, P = h + 3•Q`.
-  sorry
+/-- **Uniform `[21]` annihilation (`torsion_eq_Z21`).**  Discharged by the
+committed `Separated.e0_killed_by_21`, fed with `loc = id`, the carried reduction
+hom `red`, the weak three-descent `Block4.weak_three_descent`, the seven-torsion
+reduction `Reduction.seven_nsmul`, and the strict formal-kernel filtration
+`formalFiltration`. -/
+theorem all_points_annihilated_by_21
+    (red : E0Point →+ Reduction.RedPoint)
+    (hker : ∀ P, P ∈ red.ker ↔ P ∈ D.kernelSubgroup) :
+    ∀ P : E0Point, (21 : ℤ) • P = 0 := by
+  have h21 : ∀ P : E0Point, (21 : ℕ) • P = 0 :=
+    Separated.e0_killed_by_21 (AddMonoidHom.id E0Point)
+      (by rw [AddMonoidHom.coe_id]; exact Function.injective_id) red
+      Block4.weak_three_descent Reduction.seven_nsmul (D.formalFiltration red hker)
+  intro P
+  rw [show (21 : ℤ) = ((21 : ℕ) : ℤ) by norm_cast, natCast_zsmul]
+  exact h21 P
 
 /-- **Closing `no_obstruction18`, conditional on the carried `front_end`.**
 `front_end` is the committed geometric bridge `E₀(L)=ℤ/21 ⇒ ¬Obstruction18`
 (`X₁(18)` split / Jacobian / five-descent). -/
 theorem no_obstruction18
+    (red : E0Point →+ Reduction.RedPoint)
+    (hker : ∀ P, P ∈ red.ker ↔ P ∈ D.kernelSubgroup)
     (front_end : (∀ P : E0Point, (21 : ℤ) • P = 0) →
       ¬ ∃ b c X : ℚ, MazurProof.CyclicExclusion18.Obstruction18 b c X) :
     ¬ ∃ b c X : ℚ, MazurProof.CyclicExclusion18.Obstruction18 b c X :=
-  front_end D.all_points_annihilated_by_21
+  front_end (D.all_points_annihilated_by_21 red hker)
 
 end FormalKernelData
 
