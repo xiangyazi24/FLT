@@ -10,7 +10,7 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Search direct coordinate descent templates
+      - name: Search direct coordinate descent templates and solve preimage formulas
         shell: bash
         run: |
           set -euo pipefail
@@ -21,4 +21,7 @@ jobs:
           find . -type f -name '*.lean' | sort | grep -Ei 'descent|isogen|kummer|torsion|n15|n21|n18|cubic|cube' | head -1000 || true
           echo '=== MATCHES ==='
           grep -R -n -E 'preimage|cube|Cube|three[_ -]?descent|dual.*composition|composition.*three|phihat|Kummer|kummer|Isogeny|isogeny|kernel.*image|image.*kernel' --include='*.lean' . | head -5000 || true
+          echo '=== FORMULAS ==='
+          docker pull -q sagemath/sagemath:latest >/dev/null
+          docker run --rm -v "$PWD/../.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest sage q4552_formula.sage
           echo Q4552_END
