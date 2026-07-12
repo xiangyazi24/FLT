@@ -1,32 +1,30 @@
 from sage.all import *
-
 print('Q4403_INVERSE_BEGIN')
 
-# Sutherland's optimized N=18 model and map to the raw (r,s)-model.
-A.<rr,ss> = PolynomialRing(QQ)
-F = A.fraction_field()
-S.<yy,xx> = PolynomialRing(F, order='lex')
+# Raw X_1(18) function field: QQ(r)[s]/(F18).
+Fr.<r0> = FunctionField(QQ)
+Ps.<S> = PolynomialRing(Fr)
+F18 = (
+    r0^4*S^3 - 6*r0^4*S^2 + 9*r0^4*S - r0^4
+  + r0^3*S^5 - 7*r0^3*S^4 + 20*r0^3*S^3 - 19*r0^3*S^2 - 8*r0^3*S + r0^3
+  + r0^2*S^4 - 11*r0^2*S^3 + 28*r0^2*S^2
+  + r0*S^4 - 5*r0*S^3 - 8*r0*S^2
+  + S^4 + S^3 + S^2)
+print('F18_FACTOR',F18.factor())
+K.<s> = Fr.extension(F18)
+r=K(r0)
 
-h = xx^3 - 2*xx^2 + 3*xx + 1
-C = yy^2 + h*yy + 2*xx
-nr = xx^2 - xx*yy - 3*xx + 1
-dr = (xx-1)^2 * (xx*yy + 1)
-ns = xx^2 - 2*xx - yy
-ds = xx^2 - xx*yy - 3*xx - yy^2 - 2*yy
-
-J = S.ideal([C, F(rr)*dr - nr, F(ss)*ds - ns])
-GG = J.groebner_basis()
-print('FF_GB_LEN', len(GG))
-for i,g in enumerate(GG):
-    print('FF_GB', i, g)
-
-# Print numerator/denominator separately for any linear solution formulas.
-for i,g in enumerate(GG):
-    py = g.polynomial(yy)
-    if py.degree() == 1:
-        print('LINEAR_Y', i, 'LC', py[1], 'CONST', py[0])
-    px = g.polynomial(xx)
-    if px.degree() == 1:
-        print('LINEAR_X', i, 'LC', px[1], 'CONST', px[0])
-
+# Solve the published optimized->raw formulas over K.
+R.<y,x> = PolynomialRing(K, order='lex')
+h=x^3-2*x^2+3*x+1
+C=y^2+h*y+2*x
+nr=x^2-x*y-3*x+1
+dr=(x-1)^2*(x*y+1)
+ns=x^2-2*x-y
+ds=x^2-x*y-3*x-y^2-2*y
+I=R.ideal([C, r*dr-nr, s*ds-ns])
+G=I.groebner_basis()
+print('GB_LEN',len(G))
+for i,g in enumerate(G):
+    print('GB',i,g)
 print('Q4403_INVERSE_END')
