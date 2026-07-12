@@ -10,10 +10,10 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Inspect the simple dimension-4 factor
+      - name: Compute the genus-4 canonical model
         shell: bash
         run: |
           set -euo pipefail
           git clone -q --depth 1 --branch q4483-check https://github.com/xiangyazi24/FLT.git repo
           docker pull -q sagemath/sagemath:latest >/dev/null
-          docker run --rm -v "$PWD/repo/.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest sage q4483_a4.sage
+          docker run --rm -v "$PWD/repo/.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest sage q4483_model.sage
