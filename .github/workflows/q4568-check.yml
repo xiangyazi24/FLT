@@ -1,0 +1,45 @@
+name: Q4568 arithmetic verification
+on:
+  push:
+    branches: [q4568-check]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify cubic field arithmetic
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull -q sagemath/sagemath:latest >/dev/null
+          cat > /tmp/q4568.sage <<'SAGE'
+          R.<T> = PolynomialRing(QQ)
+          f = T^3 - 4*T^2 + 4*T - 2
+          K.<a> = NumberField(f)
+          OK = K.ring_of_integers()
+          print('POLY', f)
+          print('IRRED', f.is_irreducible())
+          print('DISC_POLY', f.discriminant())
+          print('DISC_FIELD', K.discriminant())
+          print('OK_BASIS', OK.basis())
+          for p in [2,3,11]:
+              print('MOD_FACTOR', p, f.change_ring(GF(p)).factor())
+              print('IDEAL_FACTOR', p, K.ideal(p).factor())
+              for P,e in K.ideal(p).factor():
+                  print('PRIME_DATA', p, P, 'e', e, 'f', P.residue_class_degree(), 'norm', P.norm())
+          A,B = var('A B')
+          # multiplication matrix of A+B*a in basis 1,a,a^2
+          M = matrix(QQ[A,B], 3, 3)
+          # columns are products by 1,a,a^2 reduced with a^3=4a^2-4a+2
+          M[:,0] = vector([A,B,0])
+          M[:,1] = vector([0,A,B])
+          # (A+B a)a^2 = A a^2 + B a^3
+          M[:,2] = vector([2*B,-4*B,A+4*B])
+          print('NORM_AB', M.det().factor())
+          x,s = var('x s')
+          expr = M.det().subs({A:x-24*s,B:18*s}).expand().factor()
+          print('NORM_DELTA', expr)
+          print('MOD11_EXPAND', ((T-8)^2*(T-10)).change_ring(GF(11)).expand())
+          SAGE
+          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4568.sage
