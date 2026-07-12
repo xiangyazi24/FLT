@@ -1,0 +1,78 @@
+name: Q4483 X1(25) quotient inspection
+on:
+  push:
+    branches: [q4483-check]
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compute intermediate quotient genera and modular-symbol data
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone -q --depth 1 --branch q4483-check https://github.com/xiangyazi24/FLT.git repo
+          cd repo
+          cat > /tmp/q4483.sage <<'SAGE'
+          N = 25
+          units = [a for a in range(N) if gcd(a,N)==1]
+          Hs = [
+            ('H2_pm1', [1,24]),
+            ('H4_ord2quot', [1,7,18,24]),
+            ('H10_ord5quot', sorted(set([power_mod(4,i,25) for i in range(10)]))),
+            ('H20_all', units),
+          ]
+          print('UNITS', units)
+          for name,H in Hs:
+              print('\n===',name,'H=',H,'===')
+              G = GammaH(N,H)
+              attrs = {}
+              for meth in ['genus','index','ncusps','nu2','nu3','level']:
+                  try: attrs[meth]=getattr(G,meth)()
+                  except Exception as e: attrs[meth]='ERR:'+repr(e)
+              print('GROUP_DATA',attrs)
+              try:
+                  print('CUSP_REPS',G.cusps())
+              except Exception as e: print('CUSP_REPS_ERR',repr(e))
+              try:
+                  M = ModularSymbols(G,2,sign=0)
+                  C = M.cuspidal_subspace()
+                  print('MODSYM_DIMS',M.dimension(),C.dimension())
+                  try:
+                      decomp=C.decomposition()
+                      print('DECOMP_LEN',len(decomp))
+                      for i,A in enumerate(decomp):
+                          print('FACTOR',i,'dim',A.dimension(),'rank?',getattr(A,'rank',lambda:'NA')())
+                          print('FACTOR_METHODS',[s for s in dir(A) if 'elliptic' in s.lower() or 'abelian' in s.lower() or 'newform' in s.lower()][:50])
+                          for p in [2,3,7,11]:
+                              if gcd(p,N)==1:
+                                  try: print('HECKE',p,A.hecke_polynomial(p))
+                                  except Exception as e: print('HECKE_ERR',p,repr(e))
+                  except Exception as e: print('DECOMP_ERR',repr(e))
+              except Exception as e: print('MODSYM_ERR',repr(e))
+              try:
+                  S=CuspForms(G,2)
+                  print('CUSPFORM_DIM',S.dimension())
+                  print('CUSPFORM_METHODS',[s for s in dir(S) if 'newform' in s.lower() or 'decomp' in s.lower()][:50])
+                  try:
+                      print('NEWFORMS',S.newforms(names='a'))
+                  except Exception as e: print('NEWFORMS_ERR',repr(e))
+              except Exception as e: print('CUSPFORM_ERR',repr(e))
+
+          print('\n=== DIRICHLET CHARACTERS TRIVIAL ON H ===')
+          DG=DirichletGroup(25,CyclotomicField(20))
+          for name,H in Hs:
+              chars=[]
+              for chi in DG:
+                  if all(chi(h)==1 for h in H):
+                      chars.append(chi)
+              print(name,'COUNT',len(chars))
+              for chi in chars:
+                  try:
+                      S=Newforms(chi,2,names='a')
+                      print(' CHAR',chi,'order',chi.order(),'newforms',[(f.level(),f.base_ring(),f.coefficient(2),f.coefficient(3)) for f in S])
+                  except Exception as e: print(' CHAR_ERR',chi,repr(e))
+          SAGE
+          docker pull -q sagemath/sagemath:latest >/dev/null
+          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4483.sage
