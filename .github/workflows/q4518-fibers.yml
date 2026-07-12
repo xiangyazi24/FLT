@@ -8,16 +8,11 @@ on:
 jobs:
   compute:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
-      - name: Classify L-rational fiber points as cusps
+      - name: Classify cusps and norm nonsquares
         shell: bash
         run: |
-          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4518-check/.github/q4518_cusps.sage -o /tmp/q4518_cusps.sage
+          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/5131d6b84aaaa6e97ded0acf58ffdaf016a69c99/.github/q4518_cusps.sage -o /tmp/q4518_cusps.sage
           docker pull -q sagemath/sagemath:latest >/dev/null
           docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4518_cusps.sage
-      - name: Run exact Sage fiber computation
-        shell: bash
-        run: |
-          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4518-check/.github/q4518_fibers.sage -o /tmp/q4518_fibers.sage
-          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4518_fibers.sage
