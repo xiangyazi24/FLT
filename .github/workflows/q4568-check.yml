@@ -30,15 +30,10 @@ jobs:
               print('IDEAL_FACTOR', p, K.ideal(p).factor())
               for P,e in K.ideal(p).factor():
                   print('PRIME_DATA', p, P, 'e', e, 'f', P.residue_class_degree(), 'norm', P.norm())
-          A,B = var('A B')
-          M = matrix(QQ[A,B], 3, 3)
-          M[:,0] = vector([A,B,0])
-          M[:,1] = vector([0,A,B])
-          M[:,2] = vector([2*B,-4*B,A+4*B])
-          print('NORM_AB', M.det().factor())
-          x,s = var('x s')
-          expr = M.det().subs({A:x-24*s,B:18*s}).expand().factor()
-          print('NORM_DELTA', expr)
+          S.<A,B,x,s> = PolynomialRing(QQ)
+          normAB = A^3 + 4*A^2*B + 4*A*B^2 + 2*B^3
+          print('NORM_AB', normAB)
+          print('NORM_DELTA', normAB(A=x-24*s,B=18*s).expand().factor())
           print('MOD11_EXPAND', ((T-8)^2*(T-10)).change_ring(GF(11)).expand())
           SAGE
           docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4568.sage
