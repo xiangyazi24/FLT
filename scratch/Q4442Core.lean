@@ -11,46 +11,64 @@ variable [AddCommGroup MQ] [AddCommGroup ML]
 variable [AddCommGroup JQ] [AddCommGroup JL]
 
 /--
-The interface exported by the concrete oriented-Mumford implementation.
-`classQ` and `classL` are the canonical reduced-Mumford equivalences.
-`baseChangeMumford` is coefficient extension on reduced triples.
+Minimal interface exported by the concrete oriented-Mumford implementation.
+The coefficient map need not be proved additive directly: additivity is obtained
+by transport through the oriented class groups.
 -/
 structure Data (MQ ML JQ JL : Type*)
     [AddCommGroup MQ] [AddCommGroup ML]
     [AddCommGroup JQ] [AddCommGroup JL] where
   classQ : MQ ≃+ JQ
   classL : ML ≃+ JL
-  baseChangeMumford : MQ →+ ML
-  baseChangeMumford_injective : Function.Injective baseChangeMumford
+  mapCoeffs : MQ → ML
+  mapCoeffs_injective : Function.Injective mapCoeffs
+  orientedClassBaseChange : JQ →+ JL
+  class_mapCoeffs : ∀ M : MQ,
+    classL (mapCoeffs M) = orientedClassBaseChange (classQ M)
 
 namespace Data
 
 variable (d : Data MQ ML JQ JL)
 
-/-- The induced base-change map on `Pic^0`, transported through reduced Mumford forms. -/
-noncomputable def baseChangePic : JQ →+ JL :=
-  d.classL.toAddMonoidHom.comp
-    (d.baseChangeMumford.comp d.classQ.symm.toAddMonoidHom)
+/-- Additive base change on reduced Mumford forms, transported from the
+oriented-class base-change homomorphism. -/
+noncomputable def baseChangeMumford : MQ →+ ML :=
+  d.classL.symm.toAddMonoidHom.comp
+    (d.orientedClassBaseChange.comp d.classQ.toAddMonoidHom)
 
-@[simp] theorem baseChangePic_apply (D : JQ) :
-    d.baseChangePic D =
-      d.classL (d.baseChangeMumford (d.classQ.symm D)) := rfl
+@[simp] theorem baseChangeMumford_apply (M : MQ) :
+    d.baseChangeMumford M = d.mapCoeffs M := by
+  apply d.classL.injective
+  change d.orientedClassBaseChange (d.classQ M) = d.classL (d.mapCoeffs M)
+  exact (d.class_mapCoeffs M).symm
+
+/-- The induced map on `Pic^0`; this is exactly the oriented quotient map. -/
+noncomputable abbrev baseChangePic : JQ →+ JL :=
+  d.orientedClassBaseChange
 
 /-- Compatibility with the class of a Mumford representative. -/
 @[simp] theorem class_baseChangeMumford (M : MQ) :
     d.classL (d.baseChangeMumford M) =
       d.baseChangePic (d.classQ M) := by
-  simp [baseChangePic]
+  simpa only [baseChangeMumford_apply] using d.class_mapCoeffs M
 
-/-- Injectivity follows from uniqueness of reduced Mumford forms and injectivity
-of coefficient extension.  This is the lightweight replacement for a direct
-Hilbert-90 proof on the oriented ideal quotient. -/
+/-- Coefficient extension on reduced Mumford forms is injective. -/
+theorem baseChangeMumford_injective :
+    Function.Injective d.baseChangeMumford := by
+  intro x y hxy
+  apply d.mapCoeffs_injective
+  simpa only [baseChangeMumford_apply] using hxy
+
+/-- Injectivity of base change on `Pic^0`, derived from unique reduced Mumford forms. -/
 theorem baseChangePic_injective : Function.Injective d.baseChangePic := by
   intro x y hxy
-  change d.classL (d.baseChangeMumford (d.classQ.symm x)) =
-    d.classL (d.baseChangeMumford (d.classQ.symm y)) at hxy
-  exact d.classQ.symm.injective
-    (d.baseChangeMumford_injective (d.classL.injective hxy))
+  have hM : d.baseChangeMumford (d.classQ.symm x) =
+      d.baseChangeMumford (d.classQ.symm y) := by
+    apply d.classL.injective
+    change d.baseChangePic (d.classQ (d.classQ.symm x)) =
+      d.baseChangePic (d.classQ (d.classQ.symm y))
+    simpa using hxy
+  exact d.classQ.symm.injective (d.baseChangeMumford_injective hM)
 
 /-- A uniform annihilator over the extension field descends to the ground field. -/
 theorem annihilator_descends (n : ℕ)
