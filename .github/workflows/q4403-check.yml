@@ -17,12 +17,14 @@ jobs:
           mkdir -p /tmp/suth && cd /tmp/suth
           curl -sSL https://export.arxiv.org/e-print/0811.0296 -o src.tar
           tar -xf src.tar
-          echo 'SOURCE_FILES'
-          find . -maxdepth 2 -type f -print
-          echo 'MATCHES_X1_18'
-          grep -RniE 'X_.?1.?\(18\)|N.?=.?18|18[[:space:]]*&' . --exclude=src.tar | head -100 || true
-          echo 'MATCHES_TABLE_MAPS'
-          grep -RniE 'Tate|b_N|c_N|birational|Table' . --exclude=src.tar | head -150 || true
+          echo 'RAW_X1_ROWS'
+          sed -n '570,615p' torsion.tex
+          echo 'FINAL_X1_ROWS'
+          sed -n '690,725p' torsion.tex
+          echo 'FINAL_MAP_ROWS'
+          sed -n '770,805p' torsion.tex
+          echo 'BC_FORMULAS'
+          sed -n '120,190p' torsion.tex
       - name: Run Sage Tate computation
         shell: bash
         run: |
