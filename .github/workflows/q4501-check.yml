@@ -2,6 +2,8 @@ name: Q4501 reference compile
 on:
   push:
     branches: [q4501-check]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
