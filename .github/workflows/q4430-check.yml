@@ -1,0 +1,23 @@
+name: Q4430 push-pull reference check
+on:
+  push:
+    branches: [q4430-check]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q4430-check
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+      - name: Compile Q4430 algebra core
+        run: lake env lean scratch/Q4430Core.lean
