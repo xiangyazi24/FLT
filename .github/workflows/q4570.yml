@@ -2,6 +2,8 @@ name: Q4570 arithmetic investigation
 on:
   push:
     branches: [q4570-check]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
@@ -42,20 +44,18 @@ jobs:
               print('RED',p,'CARD',Ep.cardinality(),'STRUCT',Ep.abelian_group())
               print('RED_POINTS',p,Ep.points())
           Ps=[]
-          for x in [-12,24]:
-            for y in [-108,108]:
+          for x0 in [-12,24]:
+            for y0 in [-108,108]:
               try:
-                P=E(x,y); Ps.append(P)
+                P=E(x0,y0); Ps.append(P)
                 print('POINT',P,'ORDER',P.order(),'MIN_IMAGE',iso(P))
               except Exception as ex: pass
           for P in Ps:
             print('HALVES_OF',P)
             for Q in E.torsion_points():
               if 2*Q==P: print(' HALF',Q)
-          # General coefficient formulas for w=A+D*alpha+B*alpha^2, D=c-2b.
           S.<aa,b,c,z,x,y> = PolynomialRing(QQ)
           D = c-2*b
-          # multiplication / square coefficients by manual reduction alpha^3=4a2-4a+2, alpha^4=12a2-14a+8
           const = aa^2 + 4*D*b + 8*b^2
           lin = 2*aa*D - 8*D*b - 14*b^2
           quad = D^2 + 2*aa*b + 8*D*b + 12*b^2
@@ -64,29 +64,22 @@ jobs:
           print('W2_QUAD',quad.factor())
           tr = 3*aa + 4*D + 8*b
           print('TRACE_W',tr.factor())
-          # trace(w^2)=3*x after imposing delta, so s2=(tr^2-3x)/2
           s2 = (tr^2-3*x)/2
           print('S2_RAW',s2)
-          # Reduce using x = aa^2+4*b*c+24z^2 and 9z^2=aa*c-2aa*b-4bc+b^2 and quad=0
           rel1 = x-(aa^2+4*b*c+24*z^2)
           rel2 = 9*z^2-(aa*c-2*aa*b-4*b*c+b^2)
           rel3 = c^2+4*b*c+2*aa*b
-          # Groebner reduce expressions
           I=S.ideal([rel1,rel2,rel3])
           print('S2_REDUCED',I.reduce(s2))
           xhalfnum = I.reduce(x+s2)
           print('XHALF_NUM',xhalfnum.factor())
-          # norm of w via characteristic relation / direct multiplication matrix.
-          # Use separate symbolic alpha algebra and determinant.
           U.<A,Dd,Bb> = PolynomialRing(QQ)
           M=matrix(U,3,3)
           M[:,0]=vector([A,Dd,Bb])
           M[:,1]=vector([2*Bb,A-4*Bb,Dd+4*Bb])
-          # w*alpha^2 = A alpha^2 + D alpha^3 + B alpha^4
           M[:,2]=vector([2*Dd+8*Bb,-4*Dd-14*Bb,A+4*Dd+12*Bb])
           normW=M.det()
           print('NORM_W_ADB',normW.factor())
-          # substitute D=c-2b in a fresh polynomial ring
           print('Q4570_END')
           SAGE
           docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4570.sage
