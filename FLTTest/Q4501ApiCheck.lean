@@ -1,0 +1,19 @@
+import FLT.EllipticCurve.Torsion
+import Mathlib.AlgebraicGeometry.EllipticCurve.Reduction
+import Mathlib.GroupTheory.Torsion
+
+#check Nat.Coprime.pow
+#check Nat.Coprime.pow_left
+#check Nat.Coprime.pow_right
+#check addOrderOf_dvd_iff_nsmul_eq_zero
+#check AddMonoid.addOrderOf_eq_one_iff
+#check Finite.of_injective
+#check AddMonoidHom.prod
+#check AddMonoidHom.prod_apply
+#check AddSubgroup.subtype
+#check AddCommGroup.primaryComponent
+#check AddCommMonoid.primaryComponent.disjoint
+#check WeierstrassCurve.reduction
+#check WeierstrassCurve.HasGoodReduction
+#check WeierstrassCurve.Affine.Point.map
+#check WeierstrassCurve.Affine.Point.map_injective
