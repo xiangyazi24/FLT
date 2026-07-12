@@ -14,6 +14,6 @@ jobs:
       - name: Derive inverse coordinate map
         shell: bash
         run: |
-          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4403-check/.github/q4403_inverse.sage -o /tmp/q4403_inverse.sage
+          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/160be817de6793fc6586e57175fdae682d3456f5/.github/q4403_inverse.sage -o /tmp/q4403_inverse.sage
           docker pull -q sagemath/sagemath:latest >/dev/null
           docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4403_inverse.sage
