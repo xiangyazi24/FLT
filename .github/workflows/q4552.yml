@@ -1,0 +1,22 @@
+name: Q4552 direct descent template inspection
+on:
+  push:
+    branches: [q4517-check]
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Search direct coordinate descent templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone -q --depth 1 --branch scratch https://github.com/xiangyazi24/FLT.git repo
+          cd repo
+          echo Q4552_BEGIN
+          echo '=== FILES ==='
+          find . -type f -name '*.lean' | sort | grep -Ei 'descent|isogen|kummer|torsion|n15|n21|n18|cubic|cube' | head -1000 || true
+          echo '=== MATCHES ==='
+          grep -R -n -E 'preimage|cube|Cube|three[_ -]?descent|dual.*composition|composition.*three|phihat|Kummer|kummer|Isogeny|isogeny|kernel.*image|image.*kernel' --include='*.lean' . | head -5000 || true
+          echo Q4552_END
