@@ -9,13 +9,11 @@ on:
 jobs:
   check:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
-      - name: Print every N=18 source row
+      - name: Derive saturated inverse map
         shell: bash
         run: |
-          mkdir -p /tmp/suth && cd /tmp/suth
-          curl -sSL https://export.arxiv.org/e-print/0811.0296 -o src.tar
-          tar -xf src.tar
-          grep -n '^18&' torsion.tex
-          grep -n '18.*frac' torsion.tex || true
+          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4403-check/.github/q4403_inverse.sage -o /tmp/q4403_inverse.sage
+          docker pull -q sagemath/sagemath:latest >/dev/null
+          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4403_inverse.sage
