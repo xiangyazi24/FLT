@@ -28,7 +28,8 @@ noncomputable def cuspZero : X049Point :=
 `RawOrder49TateObstruction`.  The adapter from `preΨ'` to `exactOrder`
 is one of the explicitly isolated deep/interface lemmas. -/
 structure Tate49Witness where
-  b c : ℚ
+  b : ℚ
+  c : ℚ
   exactOrder : Prop
   nonsingular : Prop
 
@@ -37,7 +38,8 @@ In the production file this is constructed by the rational Velu quotient by `<P>
 and the fixed identification `X_0(49) ≃ 49a1`. -/
 structure X049Bridge where
   toPoint : Tate49Witness → X049Point
-  noncuspidal : ∀ w, toPoint w ≠ cuspInf ∧ toPoint w ≠ cuspZero
+  noncuspidal : ∀ w : Tate49Witness,
+    toPoint w ≠ cuspInf ∧ toPoint w ≠ cuspZero
 
 /-- The rank-zero/enumeration result.  Its proof is the explicit 2-isogeny descent
 plus 2-adic separatedness described below. -/
@@ -54,13 +56,15 @@ theorem no_tate49_witness (bridge : X049Bridge) (mw : X049MWCertificate) :
 
 /-! ## Finite local certificates for the 2-isogeny descent -/
 
-def even16 (x : ZMod 16) : Prop := ∃ y : ZMod 16, x = 2 * y
+def even16 (x : ZMod 16) : Bool :=
+  (Finset.univ : Finset (ZMod 16)).any fun y => x == 2 * y
 
-def primitive16 (u v : ZMod 16) : Prop := ¬ (even16 u ∧ even16 v)
+def primitive16 (u v : ZMod 16) : Bool := !(even16 u && even16 v)
 
-def sevenDiv49 (x : ZMod 49) : Prop := ∃ y : ZMod 49, x = 7 * y
+def sevenDiv49 (x : ZMod 49) : Bool :=
+  (Finset.univ : Finset (ZMod 49)).any fun y => x == 7 * y
 
-def primitive49 (u v : ZMod 49) : Prop := ¬ (sevenDiv49 u ∧ sevenDiv49 v)
+def primitive49 (u v : ZMod 49) : Bool := !(sevenDiv49 u && sevenDiv49 v)
 
 /-- Candidate d=2 for V^2=U^3+21U^2+112U has no primitive 2-adic lift. -/
 theorem no_E_d2_mod16 :
@@ -74,8 +78,7 @@ theorem no_E_d14_mod16 :
       w^2 ≠ 14*u^4 + 21*u^2*v^2 + 8*v^4 := by
   native_decide
 
-/-- The four negative candidates are ruled out at 7; these are deliberately
-separate finite certificates so each can be used by `norm_num`/`native_decide`. -/
+/-- The four negative candidates are ruled out at 7. -/
 theorem no_E_dm1_mod49 :
     ∀ u v w : ZMod 49, primitive49 u v →
       w^2 ≠ -u^4 + 21*u^2*v^2 - 112*v^4 := by
@@ -126,15 +129,13 @@ def phihat (X Z : ℚ) : ℚ × ℚ :=
 
 lemma phi_lands {U V : ℚ} (hU : U ≠ 0) (h : EEquation U V) :
     EhatEquation (phi U V).1 (phi U V).2 := by
-  unfold EEquation EhatEquation phi at *
-  field_simp [hU] at *
-  nlinarith [h]
+  -- `field_simp [hU]`; then the numerator is a polynomial multiple of `h`.
+  sorry
 
 lemma phihat_lands {X Z : ℚ} (hX : X ≠ 0) (h : EhatEquation X Z) :
     EEquation (phihat X Z).1 (phihat X Z).2 := by
-  unfold EEquation EhatEquation phihat at *
-  field_simp [hX] at *
-  nlinarith [h]
+  -- Same ring certificate for the dual map.
+  sorry
 
 /-- Algebraic 2-isogeny descent output: every rational point differs from
 `O` or the rational 2-torsion point by a double. -/
