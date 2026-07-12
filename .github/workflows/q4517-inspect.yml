@@ -10,14 +10,11 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Inspect repository and compute explicit 3-isogeny data
+      - name: Compute local and composition data
         shell: bash
         run: |
           set -euo pipefail
           git clone -q --depth 1 --branch q4517-check https://github.com/xiangyazi24/FLT.git repo
           cd repo
-          echo REPO_MATCHES_BEGIN
-          grep -R -n -E 'structure IsogenyData|structure KummerData|n18Isogeny|n18Kummer|dualSelmerCode|phiSelmerCode|weak_three_descent|EVelu|E0PrimePinned' --include='*.lean' . | head -500 || true
-          echo REPO_MATCHES_END
           docker pull -q sagemath/sagemath:latest >/dev/null
-          docker run --rm -v "$PWD/.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest bash -lc 'sage q4517.sage; sage q4517_local.sage; sage q4517_maps.sage'
+          docker run --rm -v "$PWD/.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest bash -lc 'sage q4517_local.sage; sage q4517_maps.sage'
