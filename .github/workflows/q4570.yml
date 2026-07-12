@@ -10,76 +10,10 @@ jobs:
   investigate:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Compute minimal model, torsion, and halving identities
         shell: bash
         run: |
           set -euo pipefail
           docker pull -q sagemath/sagemath:latest >/dev/null
-          cat > /tmp/q4570.sage <<'SAGE'
-          R.<T> = PolynomialRing(QQ)
-          E = EllipticCurve(QQ,[0,0,0,-432,8208])
-          print('E_AINVS',E.a_invariants())
-          print('E_DISC',E.discriminant(),'E_J',E.j_invariant(),'COND',E.conductor())
-          try: print('LABEL',E.cremona_label())
-          except Exception as ex: print('LABEL_ERR',repr(ex))
-          Emin = E.global_minimal_model()
-          print('EMIN_AINVS',Emin.a_invariants(),'DISC',Emin.discriminant(),'COND',Emin.conductor())
-          iso = E.isomorphism_to(Emin)
-          print('ISO_TO_MIN',iso)
-          try: print('ISO_URST',iso.tuple())
-          except Exception as ex: print('ISO_URST_ERR',repr(ex))
-          try: print('ISO_MAPS',iso.rational_maps())
-          except Exception as ex: print('ISO_MAPS_ERR',repr(ex))
-          inv = iso.inverse()
-          try: print('ISO_INV_URST',inv.tuple())
-          except Exception as ex: print('ISO_INV_URST_ERR',repr(ex))
-          try: print('ISO_INV_MAPS',inv.rational_maps())
-          except Exception as ex: print('ISO_INV_MAPS_ERR',repr(ex))
-          print('TORSION_SUBGROUP',Emin.torsion_subgroup())
-          print('TORSION_POINTS',Emin.torsion_points())
-          print('E_TORSION_POINTS',E.torsion_points())
-          for p in [2,3,5,7,11,13]:
-            if p != 11:
-              Ep = Emin.change_ring(GF(p))
-              print('RED',p,'CARD',Ep.cardinality(),'STRUCT',Ep.abelian_group())
-              print('RED_POINTS',p,Ep.points())
-          Ps=[]
-          for x0 in [-12,24]:
-            for y0 in [-108,108]:
-              try:
-                P=E(x0,y0); Ps.append(P)
-                print('POINT',P,'ORDER',P.order(),'MIN_IMAGE',iso(P))
-              except Exception as ex: pass
-          for P in Ps:
-            print('HALVES_OF',P)
-            for Q in E.torsion_points():
-              if 2*Q==P: print(' HALF',Q)
-          S.<aa,b,c,z,x,y> = PolynomialRing(QQ)
-          D = c-2*b
-          const = aa^2 + 4*D*b + 8*b^2
-          lin = 2*aa*D - 8*D*b - 14*b^2
-          quad = D^2 + 2*aa*b + 8*D*b + 12*b^2
-          print('W2_CONST',const.factor())
-          print('W2_LIN',lin.factor())
-          print('W2_QUAD',quad.factor())
-          tr = 3*aa + 4*D + 8*b
-          print('TRACE_W',tr.factor())
-          s2 = (tr^2-3*x)/2
-          print('S2_RAW',s2)
-          rel1 = x-(aa^2+4*b*c+24*z^2)
-          rel2 = 9*z^2-(aa*c-2*aa*b-4*b*c+b^2)
-          rel3 = c^2+4*b*c+2*aa*b
-          I=S.ideal([rel1,rel2,rel3])
-          print('S2_REDUCED',I.reduce(s2))
-          xhalfnum = I.reduce(x+s2)
-          print('XHALF_NUM',xhalfnum.factor())
-          U.<A,Dd,Bb> = PolynomialRing(QQ)
-          M=matrix(U,3,3)
-          M[:,0]=vector([A,Dd,Bb])
-          M[:,1]=vector([2*Bb,A-4*Bb,Dd+4*Bb])
-          M[:,2]=vector([2*Dd+8*Bb,-4*Dd-14*Bb,A+4*Dd+12*Bb])
-          normW=M.det()
-          print('NORM_W_ADB',normW.factor())
-          print('Q4570_END')
-          SAGE
-          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4570.sage
+          docker run --rm -v "$PWD/.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest sage q4570.sage
