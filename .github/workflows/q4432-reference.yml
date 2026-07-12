@@ -2,6 +2,8 @@ name: Q4432 reference compile
 on:
   push:
     branches: [q4432-check]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
