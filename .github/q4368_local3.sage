@@ -54,7 +54,7 @@ print('BASIS_INDEPENDENT',len(cubes)==1 and cubes[0][0]==(0,0,0,0))
 for i,b in enumerate(B):
     print('B',i,'VAL',b.valuation(),'APPROX',b.add_bigoh(10))
 sp=K(1)/16
-print('SPECIAL_CLASS_EXPECT_2SQ',cube_root(sp/(K(2)^2) is not None))
+print('SPECIAL_CLASS_EXPECT_2SQ',cube_root(sp/(K(2)^2)) is not None)
 print('TWO_NONCUBE',cube_root(K(2)) is None)
 
 def cls(q):
