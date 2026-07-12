@@ -11,13 +11,11 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - name: Print Sutherland optimized model and map rows
+      - name: Print every N=18 source row
         shell: bash
         run: |
           mkdir -p /tmp/suth && cd /tmp/suth
           curl -sSL https://export.arxiv.org/e-print/0811.0296 -o src.tar
           tar -xf src.tar
-          echo 'OPTIMIZED_MODELS'
-          sed -n '680,735p' torsion.tex
-          echo 'BIRATIONAL_MAPS'
-          sed -n '750,825p' torsion.tex
+          grep -n '^18&' torsion.tex
+          grep -n '18.*frac' torsion.tex || true
