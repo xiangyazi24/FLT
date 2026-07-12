@@ -28,8 +28,9 @@ lemma level_add_le_of_eq_pow_nsmul
       have hxz : x = m • z := by
         calc
           x = (m ^ (n + 1)) • y := hxy
-          _ = m • ((m ^ n) • y) := by
-            simp [smul_smul, Nat.mul_comm]
+          _ = (m ^ n * m) • y := by rw [pow_succ]
+          _ = (m * m ^ n) • y := by rw [Nat.mul_comm]
+          _ = m • ((m ^ n) • y) := by rw [smul_smul]
           _ = m • z := rfl
       have hz : z ≠ 0 := by
         intro hz0
@@ -94,8 +95,8 @@ lemma twentyOne_smul_three_pow_divisible
         (21 : ℕ) • x = (3 ^ n) • ((21 : ℕ) • y) := hy
         _ = (3 ^ n) • ((21 : ℕ) • ((t : G) + (3 : ℕ) • z)) := by rw [hz]
         _ = (3 ^ n) • ((3 : ℕ) • ((21 : ℕ) • z)) := by rw [hinner]
-        _ = (3 ^ (n + 1)) • ((21 : ℕ) • z) := by
-          simp [pow_succ, smul_smul, Nat.mul_comm]
+        _ = (3 ^ n * 3) • ((21 : ℕ) • z) := by rw [smul_smul]
+        _ = (3 ^ (n + 1)) • ((21 : ℕ) • z) := by rw [pow_succ]
 
 lemma twentyOne_smul_mem_ker
     (red : G →+ Q) (hred : ∀ q : Q, (7 : ℕ) • q = 0) (x : G) :
