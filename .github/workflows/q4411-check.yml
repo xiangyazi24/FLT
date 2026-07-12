@@ -13,15 +13,19 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Lean
         run: |
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y >/dev/null
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Fetch Mathlib cache
-        run: lake exe cache get
+        run: lake exe cache get >/dev/null
       - name: Compile Q4411 scratch
         shell: bash
         run: |
           set +e
           lake env lean FLTTest/Q4411Scratch.lean >/tmp/q4411.log 2>&1
           rc=$?
-          tail -200 /tmp/q4411.log
+          if [ "$rc" -ne 0 ]; then
+            grep -n -E 'error:|unsolved goals|type mismatch|application type mismatch|unknown identifier|unexpected token' -A8 -B2 /tmp/q4411.log || cat /tmp/q4411.log
+          else
+            echo Q4411_COMPILE_PASS
+          fi
           exit $rc
