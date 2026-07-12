@@ -10,10 +10,10 @@ jobs:
   investigate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - name: Compute minimal model, torsion, and halving identities
         shell: bash
         run: |
           set -euo pipefail
+          git clone -q --depth 1 --branch q4570-check https://github.com/xiangyazi24/FLT.git repo
           docker pull -q sagemath/sagemath:latest >/dev/null
-          docker run --rm -v "$PWD/.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest sage q4570.sage
+          docker run --rm -v "$PWD/repo/.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest sage q4570.sage
