@@ -1,0 +1,18 @@
+name: Q4504 p19 fixed-case diagnostics
+on:
+  push:
+    branches: [q4504-check]
+  pull_request:
+    branches: [scratch]
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Run Sage diagnostics
+        shell: bash
+        run: |
+          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4504-check/.github/q4504.sage -o /tmp/q4504.sage
+          docker pull -q sagemath/sagemath:latest >/dev/null
+          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4504.sage
