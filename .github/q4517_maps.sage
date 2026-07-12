@@ -2,16 +2,15 @@ print('MAPS_BEGIN')
 R.<u,Y> = PolynomialRing(QQ)
 F=R.fraction_field()
 u=F(u); Y=F(Y)
-C=u^3-6*u+4
 A=u^3+6*u-8
 P=u^3+3*u^2-6*u+4
 X=P/u^2
 U=lambda x: x^3-9*x^2+81*x-243
 V=lambda x: x^3-81*x+486
-ucomp=(U(X)/(9*X^2)).factor()
-Ycomp=(V(X)*(A*Y/u^3)/(27*X^3)).factor()
-print('COMP_U',ucomp)
-print('COMP_Y',Ycomp)
+ucomp=U(X)/(9*X^2)
+Ycomp=V(X)*(A*Y/u^3)/(27*X^3)
+print('COMP_U_FACT',ucomp.factor())
+print('COMP_Y_FACT',Ycomp.factor())
 print('COMP_U_NUM',ucomp.numerator().factor())
 print('COMP_U_DEN',ucomp.denominator().factor())
 print('COMP_Y_NUM',Ycomp.numerator().factor())
