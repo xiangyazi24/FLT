@@ -22,14 +22,14 @@ lemma level_add_le_of_eq_pow_nsmul
     F.level y + n ≤ F.level x := by
   induction n generalizing x with
   | zero =>
-      simpa using (le_refl (F.level y))
+      simpa [hxy]
   | succ n ih =>
       let z : H := (m ^ n) • y
       have hxz : x = m • z := by
         calc
           x = (m ^ (n + 1)) • y := hxy
-          _ = (m * m ^ n) • y := by rw [pow_succ, Nat.mul_comm]
-          _ = m • ((m ^ n) • y) := by rw [mul_nsmul]
+          _ = m • ((m ^ n) • y) := by
+            simp [smul_smul, Nat.mul_comm]
           _ = m • z := rfl
       have hz : z ≠ 0 := by
         intro hz0
@@ -68,7 +68,10 @@ variable {T : AddSubgroup G}
 lemma twentyOne_smul_torsion_zero
     (hT : ∀ t : T, (3 : ℕ) • (t : G) = 0) (t : T) :
     (21 : ℕ) • (t : G) = 0 := by
-  rw [show (21 : ℕ) = 7 * 3 by norm_num, mul_nsmul, hT t, nsmul_zero]
+  calc
+    (21 : ℕ) • (t : G) = (7 : ℕ) • ((3 : ℕ) • (t : G)) := by
+      norm_num [smul_smul]
+    _ = 0 := by rw [hT t, nsmul_zero]
 
 lemma twentyOne_smul_three_pow_divisible
     (hweak : WeakDescent 3 T)
@@ -86,15 +89,13 @@ lemma twentyOne_smul_three_pow_divisible
       have hinner : (21 : ℕ) • ((t : G) + (3 : ℕ) • z) =
           (3 : ℕ) • ((21 : ℕ) • z) := by
         rw [nsmul_add, h21t, zero_add]
-        simp only [smul_smul]
-        congr 1
-        norm_num
+        simp [smul_smul, Nat.mul_comm]
       calc
         (21 : ℕ) • x = (3 ^ n) • ((21 : ℕ) • y) := hy
         _ = (3 ^ n) • ((21 : ℕ) • ((t : G) + (3 : ℕ) • z)) := by rw [hz]
         _ = (3 ^ n) • ((3 : ℕ) • ((21 : ℕ) • z)) := by rw [hinner]
         _ = (3 ^ (n + 1)) • ((21 : ℕ) • z) := by
-          rw [← mul_nsmul, pow_succ]
+          simp [pow_succ, smul_smul, Nat.mul_comm]
 
 lemma twentyOne_smul_mem_ker
     (red : G →+ Q) (hred : ∀ q : Q, (7 : ℕ) • q = 0) (x : G) :
@@ -102,7 +103,7 @@ lemma twentyOne_smul_mem_ker
   rw [map_nsmul]
   calc
     (21 : ℕ) • red x = (3 : ℕ) • ((7 : ℕ) • red x) := by
-      rw [show (21 : ℕ) = 3 * 7 by norm_num, mul_nsmul]
+      norm_num [smul_smul]
     _ = 0 := by rw [hred (red x), nsmul_zero]
 
 /-- Weak `3`-descent modulo `3`-torsion, exponent `7` on the reduction,
