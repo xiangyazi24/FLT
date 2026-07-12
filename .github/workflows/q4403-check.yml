@@ -1,0 +1,19 @@
+name: Q4403 Tate normal form check
+on:
+  push:
+    branches: [q4403-check]
+  pull_request:
+    branches: [scratch]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Run Sage Tate computation
+        shell: bash
+        run: |
+          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4403-check/.github/q4403_tate.sage -o /tmp/q4403_tate.sage
+          docker pull -q sagemath/sagemath:latest >/dev/null
+          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4403_tate.sage
