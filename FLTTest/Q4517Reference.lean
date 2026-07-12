@@ -1,4 +1,7 @@
-import Mathlib
+import Mathlib.Data.ZMod.Basic
+import Mathlib.Data.Fin.VecNotation
+import Mathlib.Data.Finset.Card
+import Mathlib.Tactic
 
 set_option autoImplicit false
 set_option maxHeartbeats 0
@@ -7,15 +10,12 @@ namespace Q4517Reference
 
 open scoped BigOperators
 
-/-! Pure ring certificates for the 3-isogeny in Tate coordinates. -/
-
 def C {R : Type*} [Ring R] (u : R) : R := u ^ 3 - 6 * u + 4
 
 def A {R : Type*} [Ring R] (u : R) : R := u ^ 3 + 6 * u - 8
 
 def B {R : Type*} [Ring R] (u : R) : R := -18 * u ^ 2 + 24 * u - 8
 
-/-- The denominator-cleared Vélu landing identity. -/
 theorem velu_certificate {R : Type*} [CommRing R] (u w : R) :
     (A u * w + B u) ^ 2
       - 3 * u * C u * (A u * w + B u)
@@ -35,7 +35,6 @@ def RE {R : Type*} [Ring R] (u Y : R) : R :=
 def REprime {R : Type*} [Ring R] (X Z : R) : R :=
   4 * Z ^ 2 - 4 * X ^ 3 + 27 * X ^ 2 - 162 * X + 243
 
-/-- The denominator-cleared dual-isogeny landing identity. -/
 theorem dual_certificate {K : Type*} [Field K] [CharZero K]
     (X Z : K) (hX : X ≠ 0) :
     729 * X ^ 6 * RE (U X / (9 * X ^ 2)) (V X * Z / (27 * X ^ 3))
@@ -43,8 +42,6 @@ theorem dual_certificate {K : Type*} [Field K] [CharZero K]
   field_simp [RE, REprime, U, V, hX]
   ring
 
-/-- Norm identity for the `phi` Kummer function
-`g = eta + 1 + 3*zeta*xi`. -/
 theorem phi_kummer_norm {K : Type*} [CommRing K]
     (xi eta zeta : K)
     (hsum : zeta + zeta ^ 2 = -1)
@@ -63,7 +60,6 @@ theorem phi_kummer_norm {K : Type*} [CommRing K]
       rw [show eta ^ 2 - 3 * xi * eta + 2 * eta = xi ^ 3 + 30 * xi + 26 from hE]
       ring
 
-/-- Two elementary unit identities in `Q(a)`, assuming `a^3=3a+1`. -/
 theorem a_mul_inverse {K : Type*} [CommRing K] (a : K)
     (ha : a ^ 3 = 3 * a + 1) : a * (a ^ 2 - 3) = 1 := by
   calc
@@ -77,8 +73,6 @@ theorem aplus_mul_inverse {K : Type*} [CommRing K] (a : K)
     (a + 1) * (-a ^ 2 + a + 2) = -a ^ 3 + 3 * a + 2 := by ring
     _ = 1 := by rw [ha]; ring
 
-/-! The finite 84-candidate certificate. -/
-
 abbrev F3 := ZMod 3
 abbrev DualClass := Fin 4 → F3
 abbrev PhiClass := F3
@@ -88,25 +82,19 @@ def mkDual (i j k l : F3) : DualClass := ![i, j, k, l]
 
 def dualTClass : DualClass := mkDual 0 0 2 0
 
-/-- At the inert prime over 2, only the valuation class `[2]` remains and
-it is entirely in the dual local image. -/
 def locDual2 (c : DualClass) : F3 := c 2
 
 def inDualImage2 (_ : F3) : Prop := True
 
-/-- At the prime over 3 the dual local image is exactly `<[2]>`. -/
 def locDual3 (c : DualClass) : DualClass := c
 
 def inDualImage3 (c : DualClass) : Prop :=
   c 0 = 0 ∧ c 1 = 0 ∧ c 3 = 0
 
-/-- The global phi-side class is the exponent of `[zeta_9]`. -/
 def locPhi2 (r : PhiClass) : F3 := r
 
 def inPhiImage2 (r : F3) : Prop := r = 0
 
-/-- Coordinates at 3 are chosen dual to `[a],[a+1],[2],[pi]`, with the
-first coordinate pairing nontrivially with the dual line `<[2]>`. -/
 def locPhi3 (r : PhiClass) : PhiLocal3 := ![r, 0, 0, 0]
 
 def inPhiImage3 (v : PhiLocal3) : Prop := v 0 = 0
