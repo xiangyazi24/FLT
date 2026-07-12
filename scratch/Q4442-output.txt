@@ -1,10 +1,39 @@
-scratch/Q4442Core.lean:53:2: error: Tactic `simp` failed with a nested error:
-maximum recursion depth has been reached
-use `set_option maxRecDepth <num>` to increase limit
-use `set_option diagnostics true` to get diagnostic information
-scratch/Q4442Core.lean:59:8: error(lean.unknownIdentifier): Unknown identifier `d.baseChangePic_injective`
-scratch/Q4442Core.lean:60:2: error: No goals to be solved
-scratch/Q4442Core.lean:62:0: warning: Definition `FLT.CyclicExclusion.N18.BaseChangeReference.Data.finite_source_of_finite_target` of class type must be marked with `@[reducible]` or `@[implicit_reducible]`
-scratch/Q4442Core.lean:66:0: warning: Definition `FLT.CyclicExclusion.N18.BaseChangeReference.Data.finite_curvePoints_of_finite_pic` of class type must be marked with `@[reducible]` or `@[implicit_reducible]`
+scratch/Q4442Core.lean:59:32: error(lean.unknownIdentifier): Unknown identifier `d`
+scratch/Q4442Core.lean:58:17: error: unsolved goals
+JQ : Type u_3
+JL : Type u_4
+inst✝¹ : AddCommGroup JQ
+inst✝ : AddCommGroup JL
+n : ℕ
+hL : ∀ (y : JL), n • y = 0
+x : JQ
+⊢ Type ?u.39
+
+JQ : Type u_3
+JL : Type u_4
+inst✝¹ : AddCommGroup JQ
+inst✝ : AddCommGroup JL
+n : ℕ
+hL : ∀ (y : JL), n • y = 0
+x : JQ
+⊢ Type ?u.38
+
+JQ : Type u_3
+JL : Type u_4
+inst✝¹ : AddCommGroup JQ
+inst✝ : AddCommGroup JL
+n : ℕ
+hL : ∀ (y : JL), n • y = 0
+x : JQ
+⊢ AddCommGroup ?m.20
+
+JQ : Type u_3
+JL : Type u_4
+inst✝¹ : AddCommGroup JQ
+inst✝ : AddCommGroup JL
+n : ℕ
+hL : ∀ (y : JL), n • y = 0
+x : JQ
+⊢ AddCommGroup ?m.21
 
 EXIT_STATUS=1
