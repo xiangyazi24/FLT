@@ -11,6 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      - name: Run Q4368 explicit isogeny diagnostics
+        shell: bash
+        run: |
+          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4358-check/.github/q4368_compute.sage -o /tmp/q4368_compute.sage
+          docker pull -q sagemath/sagemath:latest >/dev/null
+          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4368_compute.sage
       - name: Run Sage finite local witnesses
         shell: bash
         run: |
