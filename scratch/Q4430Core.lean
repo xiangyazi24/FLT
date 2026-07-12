@@ -4,6 +4,35 @@ set_option autoImplicit false
 
 namespace FLT.CyclicExclusion.N18.PushPullReference
 
+section Transport
+
+variable {M A : Type*} [AddCommGroup M] [AddCommGroup A]
+
+/-- Conjugate an endomorphism of the reduced-Mumford model through the
+additive equivalence with the oriented class group. -/
+noncomputable def transportEnd (e : M ≃+ A) (alpha : M →+ M) : A →+ A :=
+  e.toAddMonoidHom.comp (alpha.comp e.symm.toAddMonoidHom)
+
+@[simp] theorem transportEnd_apply (e : M ≃+ A) (alpha : M →+ M) (x : A) :
+    transportEnd e alpha x = e (alpha (e.symm x)) := rfl
+
+/-- Transport respects composition; this discharges `tau_* = h_* ∘ sigma_*`
+once `tauMumford` is defined as `hMumford.comp sigmaMumford`. -/
+theorem transportEnd_comp (e : M ≃+ A) (alpha beta : M →+ M) :
+    transportEnd e (alpha.comp beta) =
+      (transportEnd e alpha).comp (transportEnd e beta) := by
+  ext x
+  simp [transportEnd]
+
+/-- If the Mumford action is pointwise negation, so is its transported action. -/
+theorem transportEnd_eq_neg_id (e : M ≃+ A) (alpha : M →+ M)
+    (halpha : ∀ x : M, alpha x = -x) :
+    transportEnd e alpha = -(AddMonoidHom.id A) := by
+  ext x
+  simp [transportEnd, halpha]
+
+end Transport
+
 section GenericAlgebra
 
 variable {J EPlus EMinus : Type*}
