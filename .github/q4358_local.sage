@@ -85,12 +85,6 @@ def enum_p2(depth=6):
     print("P2_CLASS_2",cube_class(K(2),data[-1]))
     print("P2_CLASS_ZETA",cube_class(z,data[-1]))
     print("P2_CLASS_S",cube_class(data[2],data[-1]))
-    # A simple near-branch test intended to give the residue generator.
-    g1,g2,g3,g4=data[3]
-    msimple=g2+16*z**2
-    print("P2_SIMPLE_M",msimple)
-    print("P2_SIMPLE_RHS_CUBE",data[5](msimple).is_nth_power(3))
-    print("P2_SIMPLE_VECTOR",point_vector(msimple,data))
     return data,B
 
 def enum_p3(depth=7):
