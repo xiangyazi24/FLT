@@ -104,7 +104,7 @@ structure RationalTwoGoodPrimes
 Existence follows by choosing two primes away from the discriminant and
 constructing the two local reduction maps. No Mordell--Weil finite-generation
 theorem is involved. -/
-noncomputable theorem exists_rational_two_good_primes
+theorem exists_rational_two_good_primes
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     Nonempty (RationalTwoGoodPrimes E) := by
   sorry
@@ -112,7 +112,7 @@ noncomputable theorem exists_rational_two_good_primes
 /-- Rational elliptic-curve torsion is finite, using only reduction at two good
 primes. This is the theorem intended to replace the finiteness `sorry` needed
 by the Mazur `ncard` statement. -/
-noncomputable theorem rational_torsion_finite_via_two_good_primes
+theorem rational_torsion_finite_via_two_good_primes
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     Finite (AddCommGroup.torsion (E⁄ℚ).Point) := by
   obtain ⟨D⟩ := exists_rational_two_good_primes E
