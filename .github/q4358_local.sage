@@ -22,37 +22,26 @@ def cube_class(a, basis):
     raise RuntimeError("cube class not found for %s" % a)
 
 def span_basis(vectors, ncols):
-    B=[]
-    r=0
+    B=[]; r=0
     for v in vectors:
         nr=matrix(F3, B+[list(v)], ncols=ncols).rank()
         if nr>r:
             B.append(tuple(F3(x) for x in v)); r=nr
     return B
 
-def full_span(B):
-    if not B:
-        return [tuple()]
-    n=len(B[0]); out=set()
-    for cc in product(range(3), repeat=len(B)):
-        v=[F3(0)]*n
-        for c,b in zip(cc,B):
-            for j in range(n): v[j]+=F3(c)*b[j]
-        out.add(tuple(ZZ(x) for x in v))
-    return sorted(out)
+def rref_rows(B):
+    M=matrix(F3,[list(b) for b in B]).echelon_form()
+    return [tuple(ZZ(x) for x in row) for row in M.rows() if any(row)]
 
 def setup_local(p, prec=80):
     Q=Qp(p, prec=prec, type='capped-rel')
     R=PolynomialRing(Q,'X'); X=R.gen()
     if p == 2:
         K=Q.extension(X**2+X+1, names='z')
-        z=K.gen()
-        uniformizer=K(2)
+        z=K.gen(); pi=K(2)
     else:
-        # pi = 1-zeta satisfies pi^2 - 3*pi + 3 = 0, Eisenstein at 3.
         K=Q.extension(X**2-3*X+3, names='pi')
-        uniformizer=K.gen()
-        z=1-uniformizer
+        pi=K.gen(); z=1-pi
     s=1+2*z
     g1=(3+2*s)/7; g2=s; g3=(3-2*s)/7; g4=-s
     A=1+3*z; Bb=1+3*z**2
@@ -60,17 +49,13 @@ def setup_local(p, prec=80):
     def rhs(m): return c*(m-g1)*(m-g2)*(m-g3)**2*(m-g4)**2
     m0=K(1)
     h10=(m0-g1)/(m0-g4); h20=(m0-g2)/(m0-g4)
-    if p==2:
-        cbasis=[K(2),z]
-    else:
-        cbasis=[uniformizer,z,1+uniformizer**2,1+uniformizer**3]
-    return K,z,s,(g1,g2,g3,g4),c,rhs,m0,h10,h20,uniformizer,cbasis
+    cbasis=[K(2),z] if p==2 else [pi,z,1+pi**2,1+pi**3]
+    return K,z,s,(g1,g2,g3,g4),c,rhs,m0,h10,h20,pi,cbasis
 
 def point_vector(m, data):
     K,z,s,gg,c,rhs,m0,h10,h20,pi,cbasis=data
     g1,g2,g3,g4=gg
-    if m==g4 or m==g1 or m==g2 or m==g3:
-        return None
+    if m in gg: return None
     rr=rhs(m)
     if rr==0: return None
     try:
@@ -82,22 +67,30 @@ def point_vector(m, data):
     bb=((m-g2)/(m-g4))/h20
     return cube_class(aa,cbasis)+cube_class(bb,cbasis)
 
-def enum_p2(depth=5):
+def enum_p2(depth=6):
     data=setup_local(2)
-    K,z,*rest=data
+    K,z,*_=data
     digits=[K(0),K(1),z,1+z]
     vecs=[]; witnesses={}
     for ds in product(digits, repeat=depth):
-        r=sum(ds[i]*K(2)**i for i in range(depth))
-        m=1+2*r
+        m=1+2*sum(ds[i]*K(2)**i for i in range(depth))
         v=point_vector(m,data)
         if v is not None:
             vecs.append(v); witnesses.setdefault(v,m)
     B=span_basis(vecs,4)
     print("P2_POINT_CLASS_COUNT",len(set(vecs)))
-    print("P2_BASIS",[tuple(ZZ(x) for x in b) for b in B])
-    print("P2_FULL_TABLE",full_span(B))
-    for b in B: print("P2_WITNESS",tuple(ZZ(x) for x in b),witnesses.get(tuple(ZZ(x) for x in b),witnesses.get(b)))
+    print("P2_RAW_BASIS",[tuple(ZZ(x) for x in b) for b in B])
+    print("P2_RREF",rref_rows(B))
+    for b in B: print("P2_WITNESS",tuple(ZZ(x) for x in b),witnesses[b])
+    print("P2_CLASS_2",cube_class(K(2),data[-1]))
+    print("P2_CLASS_ZETA",cube_class(z,data[-1]))
+    print("P2_CLASS_S",cube_class(data[2],data[-1]))
+    # A simple near-branch test intended to give the residue generator.
+    g1,g2,g3,g4=data[3]
+    msimple=g2+16*z**2
+    print("P2_SIMPLE_M",msimple)
+    print("P2_SIMPLE_RHS_CUBE",data[5](msimple).is_nth_power(3))
+    print("P2_SIMPLE_VECTOR",point_vector(msimple,data))
     return data,B
 
 def enum_p3(depth=7):
@@ -105,26 +98,27 @@ def enum_p3(depth=7):
     K,z,s,gg,c,rhs,m0,h10,h20,pi,cbasis=data
     digits=[K(0),K(1),K(2)]
     vecs=[]; witnesses={}
-    # integral m modulo pi^depth
     for ds in product(digits, repeat=depth):
         m=sum(ds[i]*pi**i for i in range(depth))
         v=point_vector(m,data)
         if v is not None:
             vecs.append(v); witnesses.setdefault(v,m)
-    # a small search at negative valuations
     for k in [1,2,3]:
       for ds in product(digits, repeat=4):
         if ds[0]==0: continue
-        u=sum(ds[i]*pi**i for i in range(4))
-        m=u/pi**k
+        m=sum(ds[i]*pi**i for i in range(4))/pi**k
         v=point_vector(m,data)
         if v is not None:
             vecs.append(v); witnesses.setdefault(v,m)
     B=span_basis(vecs,8)
     print("P3_POINT_CLASS_COUNT",len(set(vecs)))
-    print("P3_BASIS",[tuple(ZZ(x) for x in b) for b in B])
-    print("P3_FULL_TABLE",full_span(B))
-    for b in B: print("P3_WITNESS",tuple(ZZ(x) for x in b),witnesses.get(tuple(ZZ(x) for x in b),witnesses.get(b)))
+    print("P3_RAW_BASIS",[tuple(ZZ(x) for x in b) for b in B])
+    print("P3_RREF",rref_rows(B))
+    for b in B: print("P3_WITNESS",tuple(ZZ(x) for x in b),witnesses[b])
+    print("P3_CLASS_2",cube_class(K(2),cbasis))
+    print("P3_CLASS_ZETA",cube_class(z,cbasis))
+    print("P3_CLASS_S",cube_class(s,cbasis))
+    print("P3_CLASS_PI",cube_class(pi,cbasis))
     return data,B
 
 def in_span(v,B):
@@ -135,7 +129,6 @@ def in_span(v,B):
 def invariant_candidates(data2,B2,data3,B3):
     out2=[]; out3=[]; both=[]
     for a,b,c in product(range(3),repeat=3):
-        # alpha = 2^b * s^c, beta = z^a
         v2=cube_class(data2[0](2)**b*data2[2]**c,data2[-1])+cube_class(data2[1]**a,data2[-1])
         v3=cube_class(data3[0](2)**b*data3[2]**c,data3[-1])+cube_class(data3[1]**a,data3[-1])
         ok2=in_span(v2,B2); ok3=in_span(v3,B3)
@@ -147,7 +140,7 @@ def invariant_candidates(data2,B2,data3,B3):
     print("GLOBAL_QINV_BOTH",both)
 
 print("Q4358_SAGE_BEGIN")
-d2,B2=enum_p2(6)
-d3,B3=enum_p3(7)
+d2,B2=enum_p2()
+d3,B3=enum_p3()
 invariant_candidates(d2,B2,d3,B3)
 print("Q4358_SAGE_END")
