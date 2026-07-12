@@ -1,0 +1,16 @@
+name: Q4368 local cube certificate
+on:
+  push:
+    branches: [q4358-check]
+  workflow_dispatch:
+jobs:
+  local3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Run exact and p-adic cube checks
+        shell: bash
+        run: |
+          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4358-check/.github/q4368_local3.sage -o /tmp/q4368_local3.sage
+          docker pull -q sagemath/sagemath:latest >/dev/null
+          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4368_local3.sage
