@@ -1,6 +1,7 @@
 from sage.all import *
 from itertools import product
 
+# Exact finite certificate for the unique prime above 3.
 S.<T>=PolynomialRing(QQ)
 L.<a>=NumberField(T^3-3*T-1)
 OL=L.ring_of_integers()
