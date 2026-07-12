@@ -1,0 +1,41 @@
+name: Q4469 N49 inspection
+on:
+  push:
+    branches: [q4469-check]
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect repository and compute 49a1 data
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone -q --depth 1 --branch q4469-check https://github.com/xiangyazi24/FLT.git repo
+          cd repo
+          echo '=== REPOSITORY MATCHES ==='
+          grep -R -n -E "RawOrder49TateObstruction|no_raw_order49_tate_obstruction|preΨ'|prePsi|preΨ|TateNormal|tateM" --include='*.lean' . | head -1600 || true
+          echo '=== RELEVANT FILES ==='
+          find . -name '*.lean' | grep -Ei 'Tate|Division|Psi|49|Separated|Isogeny' | sort | head -500 || true
+          cat > /tmp/q4469.sage <<'SAGE'
+          E = EllipticCurve('49a1')
+          print('LABEL', E.cremona_label())
+          print('A_INVS', E.a_invariants())
+          print('DISC', E.discriminant())
+          print('J', E.j_invariant())
+          print('RANK', E.rank())
+          print('TORSION', E.torsion_subgroup())
+          print('TORSION_POINTS', E.torsion_points())
+          print('ISOGENY_CLASS', [(C.cremona_label(), C.a_invariants()) for C in E.isogeny_class()])
+          print('CM', E.has_cm(), E.cm_discriminant() if E.has_cm() else None)
+          Em = EllipticCurve([0,21,0,112,0])
+          print('SHIFTED', Em.cremona_label(), Em.a_invariants(), Em.rank(), Em.torsion_subgroup(), Em.torsion_points())
+          Eh = EllipticCurve([0,-42,0,-7,0])
+          print('TWO_ISOG', Eh.cremona_label(), Eh.a_invariants(), Eh.rank(), Eh.torsion_subgroup(), Eh.torsion_points())
+          print('E_2DESC', E.gens(proof=True))
+          print('GENUS_X1_49', Gamma1(49).genus())
+          print('GENUS_X0_49', Gamma0(49).genus())
+          SAGE
+          docker pull -q sagemath/sagemath:latest >/dev/null
+          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4469.sage
