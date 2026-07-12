@@ -13,7 +13,7 @@ except Exception as ex: print('UNIT_GENS_VALUES_ERR',repr(ex))
 print('FACTOR_2', K.ideal(2).factor())
 print('FACTOR_3', K.ideal(3).factor())
 pi=a-1
-print('PI_NORM', K.norm(pi), 'PI_MINPOLY', pi.minpoly())
+print('PI_NORM', pi.norm(), 'PI_MINPOLY', pi.minpoly())
 print('PI_IDEAL_FACTOR', K.ideal(pi).factor())
 E=EllipticCurve(K,[1,-1,1,-5,5])
 P=E(1,0)
