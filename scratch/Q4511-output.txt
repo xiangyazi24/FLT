@@ -1,42 +1,5 @@
 scratch/Q4511Core.lean:25:6: warning: try 'simp' instead of 'simpa'
 
 Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
-scratch/Q4511Core.lean:31:35: error: unsolved goals
-G : Type u_1
-inst✝ : AddCommGroup G
-H : AddSubgroup G
-m : ℕ
-F : StrictNSmulFiltration H m
-y : ↥H
-n : ℕ
-ih : ∀ {x : ↥H}, x ≠ 0 → x = m ^ n • y → F.level y + n ≤ F.level x
-x : ↥H
-hx : x ≠ 0
-hxy : x = m ^ (n + 1) • y
-z : ↥H := m ^ n • y
-⊢ m ^ (n + 1) • y = (m * m ^ n) • y
-scratch/Q4511Core.lean:32:29: warning: This simp argument is unused:
-  Nat.mul_comm
 
-Hint: Omit it from the simp argument list.
-  simp [smul_smul,̵ ̵N̵a̵t̵.̵m̵u̵l̵_̵c̵o̵m̵m̵]
-
-Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-scratch/Q4511Core.lean:97:46: error: unsolved goals
-G : Type u_1
-inst✝ : AddCommGroup G
-T : AddSubgroup G
-hweak : WeakDescent 3 T
-hT : ∀ (t : ↥T), 3 • ↑t = 0
-x : G
-n : ℕ
-y : G
-hy : 21 • x = 3 ^ n • 21 • y
-t : ↥T
-z : G
-hz : y = ↑t + 3 • z
-h21t : 21 • ↑t = 0
-hinner : 21 • (↑t + 3 • z) = 3 • 21 • z
-⊢ (3 ^ n * 63) • z = (3 * 3 ^ n * 21) • z
-
-EXIT_STATUS=1
+EXIT_STATUS=0
