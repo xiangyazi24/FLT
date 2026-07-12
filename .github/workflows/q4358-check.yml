@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
       - name: Run Sage local Kummer enumeration
         shell: bash
         run: |
+          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4358-check/.github/q4358_local.sage -o /tmp/q4358_local.sage
           docker pull -q sagemath/sagemath:latest >/dev/null
           set +e
-          docker run --rm -v "$PWD:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest sage .github/q4358_local.sage > /tmp/q4358.out 2>&1
+          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4358_local.sage > /tmp/q4358.out 2>&1
           rc=$?
           cat /tmp/q4358.out
           exit $rc
