@@ -12,18 +12,18 @@ F18 = (
 K.<s> = Fr.extension(F18)
 r=K(r0)
 
-R.<y,x> = PolynomialRing(K, order='lex')
+# Add z with z*dr*ds=1; lex eliminates z and removes denominator components.
+R.<z,y,x> = PolynomialRing(K, order='lex')
 h=x^3-2*x^2+3*x+1
 C=y^2+h*y+2*x
 nr=x^2-x*y-3*x+1
 dr=(x-1)^2*(x*y+1)
 ns=x^2-2*x-y
 ds=x^2-x*y-3*x-y^2-2*y
-I=R.ideal([C, r*dr-nr, s*ds-ns])
-J,expo=I.saturation(R.ideal(dr*ds))
-print('SAT_EXP',expo)
-G=J.groebner_basis()
+I=R.ideal([C, r*dr-nr, s*ds-ns, z*dr*ds-1])
+G=I.groebner_basis()
 print('GB_LEN',len(G))
 for i,g in enumerate(G):
-    print('GB',i,g)
+    if g.degree(z)==0:
+        print('ELIM',i,g)
 print('Q4403_INVERSE_END')
