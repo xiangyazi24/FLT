@@ -2,6 +2,8 @@ name: Q4399 quotient check
 on:
   push:
     branches: [q4399-check]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
