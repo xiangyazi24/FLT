@@ -15,7 +15,8 @@ print('S_UNIT_BASIS',e1,e2,L(2),pi)
 
 found=False
 for N in range(2,13):
-    A=OL.quotient(P^N,'q')
+    PN=P^N
+    A=OL.quotient(PN.gens(),'q')
     cube_set={x^3 for x in A}
     survivors=[]
     for i,j,k in product(range(3),repeat=3):
