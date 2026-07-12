@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - name: Derive saturated inverse map
+      - name: Factor direct order-18 Tate condition
         shell: bash
         run: |
-          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4403-check/.github/q4403_inverse.sage -o /tmp/q4403_inverse.sage
+          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4403-check/.github/q4403_tate.sage -o /tmp/q4403_tate.sage
           docker pull -q sagemath/sagemath:latest >/dev/null
-          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4403_inverse.sage
+          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4403_tate.sage
