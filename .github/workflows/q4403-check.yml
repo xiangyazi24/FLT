@@ -9,17 +9,11 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
-      - name: Print exact source rows
+      - name: Derive inverse coordinate map
         shell: bash
         run: |
-          mkdir -p /tmp/suth && cd /tmp/suth
-          curl -sSL https://export.arxiv.org/e-print/0811.0296 -o src.tar
-          tar -xf src.tar
-          echo 'OPT_MODEL'
-          sed -n '704,716p' torsion.tex
-          echo 'MAP_ROW'
-          sed -n '780,794p' torsion.tex
-          echo 'TATE_VARIABLES'
-          sed -n '128,185p' torsion.tex
+          curl -sSL https://raw.githubusercontent.com/xiangyazi24/FLT/q4403-check/.github/q4403_inverse.sage -o /tmp/q4403_inverse.sage
+          docker pull -q sagemath/sagemath:latest >/dev/null
+          docker run --rm -v /tmp:/home/sage/work -w /home/sage/work sagemath/sagemath:latest sage q4403_inverse.sage
