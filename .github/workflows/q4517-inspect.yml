@@ -7,25 +7,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  local:
+  quotient:
     runs-on: ubuntu-latest
     steps:
-      - name: Compute local arithmetic
+      - name: Inspect local quotient rings
         shell: bash
         run: |
           set -euo pipefail
           git clone -q --depth 1 --branch q4517-check https://github.com/xiangyazi24/FLT.git repo
           cd repo
           docker pull -q sagemath/sagemath:latest >/dev/null
-          docker run --rm -v "$PWD/.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest sage q4517_local.sage
-  maps:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Compute composition maps
-        shell: bash
-        run: |
-          set -euo pipefail
-          git clone -q --depth 1 --branch q4517-check https://github.com/xiangyazi24/FLT.git repo
-          cd repo
-          docker pull -q sagemath/sagemath:latest >/dev/null
-          docker run --rm -v "$PWD/.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest sage q4517_maps.sage
+          docker run --rm -v "$PWD/.github:/home/sage/work" -w /home/sage/work sagemath/sagemath:latest sage q4517_quot.sage
