@@ -2,6 +2,8 @@ name: Q4403 inverse map final
 on:
   push:
     branches: [q4403-inverse-final]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
