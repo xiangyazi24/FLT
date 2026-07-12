@@ -26,6 +26,8 @@ jobs:
           use-mathlib-cache: false
       - name: Fetch Mathlib cache
         run: lake exe cache get
+      - name: Build Mathlib umbrella
+        run: lake build Mathlib
       - name: Compile and persist diagnostics
         shell: bash
         run: |
