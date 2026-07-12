@@ -2,6 +2,8 @@ name: Q4430 push-pull reference check
 on:
   push:
     branches: [q4430-check]
+  pull_request:
+    branches: [scratch]
   workflow_dispatch:
 
 jobs:
