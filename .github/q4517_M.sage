@@ -1,0 +1,21 @@
+M.<z9> = CyclotomicField(9)
+a = -(z9^5 + z9^4)
+print('M_BEGIN')
+print('M_POLY',M.defining_polynomial(),'DISC',M.discriminant(),'CLASS',M.class_group())
+print('A_CHECK',a,a^3-3*a-1)
+UG=M.unit_group()
+print('M_UNIT_GROUP',UG)
+try: print('M_UNIT_GENS',UG.gens_values())
+except Exception as ex: print('M_UNIT_GENS_ERR',repr(ex))
+print('M_FACTOR_2',M.ideal(2).factor())
+print('M_FACTOR_3',M.ideal(3).factor())
+print('Z9_CONJ',z9^-1,'Z9_CUBE',z9^3)
+for xname,x in [('a',a),('a+1',a+1),('2',M(2)),('pi',a-1),('z9',z9)]:
+  print('CONJ',xname,x.galois_conjugate(5) if hasattr(x,'galois_conjugate') else 'NA')
+S=[fac[0] for fac in M.ideal(2).factor()]+[fac[0] for fac in M.ideal(3).factor()]
+try:
+  SG=M.S_unit_group(S=S)
+  print('M_SUNIT_GROUP',SG)
+  print('M_SUNIT_GENS',SG.gens_values())
+except Exception as ex: print('M_SUNIT_ERR',repr(ex))
+print('M_END')
