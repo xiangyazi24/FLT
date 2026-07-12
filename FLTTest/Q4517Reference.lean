@@ -8,8 +8,6 @@ set_option maxHeartbeats 0
 
 namespace Q4517Reference
 
-open scoped BigOperators
-
 def C {R : Type*} [Ring R] (u : R) : R := u ^ 3 - 6 * u + 4
 
 def A {R : Type*} [Ring R] (u : R) : R := u ^ 3 + 6 * u - 8
@@ -39,7 +37,8 @@ theorem dual_certificate {K : Type*} [Field K] [CharZero K]
     (X Z : K) (hX : X ≠ 0) :
     729 * X ^ 6 * RE (U X / (9 * X ^ 2)) (V X * Z / (27 * X ^ 3))
       = V X ^ 2 * REprime X Z := by
-  field_simp [RE, REprime, U, V, hX]
+  unfold RE REprime U V
+  field_simp [hX]
   ring
 
 theorem phi_kummer_norm {K : Type*} [CommRing K]
@@ -57,8 +56,7 @@ theorem phi_kummer_norm {K : Type*} [CommRing K]
       rw [hsum, hprod]
       ring
     _ = (xi + 3) ^ 3 := by
-      rw [show eta ^ 2 - 3 * xi * eta + 2 * eta = xi ^ 3 + 30 * xi + 26 from hE]
-      ring
+      linear_combination hE
 
 theorem a_mul_inverse {K : Type*} [CommRing K] (a : K)
     (ha : a ^ 3 = 3 * a + 1) : a * (a ^ 2 - 3) = 1 := by
@@ -84,39 +82,39 @@ def dualTClass : DualClass := mkDual 0 0 2 0
 
 def locDual2 (c : DualClass) : F3 := c 2
 
-def inDualImage2 (_ : F3) : Prop := True
+def inDualImage2 (_ : F3) : Bool := true
 
 def locDual3 (c : DualClass) : DualClass := c
 
-def inDualImage3 (c : DualClass) : Prop :=
-  c 0 = 0 ∧ c 1 = 0 ∧ c 3 = 0
+def inDualImage3 (c : DualClass) : Bool :=
+  c 0 == 0 && c 1 == 0 && c 3 == 0
 
 def locPhi2 (r : PhiClass) : F3 := r
 
-def inPhiImage2 (r : F3) : Prop := r = 0
+def inPhiImage2 (r : F3) : Bool := r == 0
 
 def locPhi3 (r : PhiClass) : PhiLocal3 := ![r, 0, 0, 0]
 
-def inPhiImage3 (v : PhiLocal3) : Prop := v 0 = 0
+def inPhiImage3 (v : PhiLocal3) : Bool := v 0 == 0
 
-def passDual (c : DualClass) : Prop :=
-  inDualImage2 (locDual2 c) ∧ inDualImage3 (locDual3 c)
+def passDual (c : DualClass) : Bool :=
+  inDualImage2 (locDual2 c) && inDualImage3 (locDual3 c)
 
-def passPhi (r : PhiClass) : Prop :=
-  inPhiImage2 (locPhi2 r) ∧ inPhiImage3 (locPhi3 r)
+def passPhi (r : PhiClass) : Bool :=
+  inPhiImage2 (locPhi2 r) && inPhiImage3 (locPhi3 r)
 
-def dualSelmerCode : Finset DualClass := Finset.univ.filter passDual
+def dualSelmerCode : Finset DualClass := Finset.univ.filter fun c => passDual c
 
-def phiSelmerCode : Finset PhiClass := Finset.univ.filter passPhi
+def phiSelmerCode : Finset PhiClass := Finset.univ.filter fun r => passPhi r
 
 theorem candidate_count : Fintype.card DualClass + Fintype.card PhiClass = 84 := by
   native_decide
 
 theorem local_image_cardinalities :
-    (Finset.univ.filter inDualImage2).card = 3 ∧
-    (Finset.univ.filter inDualImage3).card = 3 ∧
-    (Finset.univ.filter inPhiImage2).card = 1 ∧
-    (Finset.univ.filter inPhiImage3).card = 27 := by
+    (Finset.univ.filter fun x => inDualImage2 x).card = 3 ∧
+    (Finset.univ.filter fun x => inDualImage3 x).card = 3 ∧
+    (Finset.univ.filter fun x => inPhiImage2 x).card = 1 ∧
+    (Finset.univ.filter fun x => inPhiImage3 x).card = 27 := by
   native_decide
 
 theorem phiSelmerCode_eq :
@@ -129,10 +127,10 @@ theorem dualSelmerCode_eq :
   native_decide
 
 theorem passDual_iff :
-    ∀ c : DualClass, passDual c ↔ ∃ k : F3, c = mkDual 0 0 k 0 := by
+    ∀ c : DualClass, passDual c = true ↔ ∃ k : F3, c = mkDual 0 0 k 0 := by
   native_decide
 
-theorem passPhi_iff : ∀ r : PhiClass, passPhi r ↔ r = 0 := by
+theorem passPhi_iff : ∀ r : PhiClass, passPhi r = true ↔ r = 0 := by
   native_decide
 
 theorem dualLine_represented :
