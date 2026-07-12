@@ -1,0 +1,22 @@
+name: Q4469 Lean reference
+on:
+  push:
+    branches: [q4469-check]
+  pull_request:
+    branches: [scratch]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compile draft
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone -q --depth 1 --branch q4469-check https://github.com/xiangyazi24/FLT.git repo
+          cd repo
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y >/dev/null
+          export PATH="$HOME/.elan/bin:$PATH"
+          lake exe cache get >/dev/null 2>&1
+          lake env lean FLTTest/Q4469Reference.lean
