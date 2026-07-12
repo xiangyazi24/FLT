@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -33,6 +33,19 @@ jobs:
         run: |
           set -o pipefail
           python scratch/Q4318Isogeny.py 2>&1 | tee scratch/Q4318Isogeny.out
+      - name: Persist output through contents API
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          enc=$(base64 -w0 scratch/Q4318Isogeny.out)
+          if sha=$(gh api repos/${{ github.repository }}/contents/scratch/Q4318Isogeny.out?ref=q4318-research --jq .sha 2>/dev/null); then
+            gh api --method PUT repos/${{ github.repository }}/contents/scratch/Q4318Isogeny.out \
+              -f message='Record Q4318 isogeny output [skip ci]' -f content="$enc" -f branch=q4318-research -f sha="$sha"
+          else
+            gh api --method PUT repos/${{ github.repository }}/contents/scratch/Q4318Isogeny.out \
+              -f message='Record Q4318 isogeny output [skip ci]' -f content="$enc" -f branch=q4318-research
+          fi
       - name: Expose output in fixed comment
         env:
           GH_TOKEN: ${{ github.token }}
