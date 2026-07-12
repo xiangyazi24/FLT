@@ -47,25 +47,25 @@ of coefficient extension.  This is the lightweight replacement for a direct
 Hilbert-90 proof on the oriented ideal quotient. -/
 theorem baseChangePic_injective : Function.Injective d.baseChangePic := by
   intro x y hxy
-  apply d.classQ.symm.injective
-  apply d.baseChangeMumford_injective
-  apply d.classL.injective
-  simpa [baseChangePic] using hxy
+  change d.classL (d.baseChangeMumford (d.classQ.symm x)) =
+    d.classL (d.baseChangeMumford (d.classQ.symm y)) at hxy
+  exact d.classQ.symm.injective
+    (d.baseChangeMumford_injective (d.classL.injective hxy))
 
 /-- A uniform annihilator over the extension field descends to the ground field. -/
 theorem annihilator_descends (n : ℕ)
     (hL : ∀ y : JL, n • y = 0) (x : JQ) :
     n • x = 0 := by
-  apply d.baseChangePic_injective
-  simpa using hL (d.baseChangePic x)
+  apply baseChangePic_injective d
+  rw [map_nsmul, hL, map_zero]
 
 /-- Finiteness descends along an injective base-change map. -/
-noncomputable def finite_source_of_finite_target [Finite JL] : Finite JQ :=
-  Finite.of_injective d.baseChangePic d.baseChangePic_injective
+@[reducible] noncomputable def finite_source_of_finite_target [Finite JL] : Finite JQ :=
+  Finite.of_injective d.baseChangePic (baseChangePic_injective d)
 
 /-- If Abel--Jacobi is injective and the extension-field Picard group is finite,
 then the set of ground-field curve points is finite. -/
-noncomputable def finite_curvePoints_of_finite_pic
+@[reducible] noncomputable def finite_curvePoints_of_finite_pic
     {CPoint : Type*} [Finite JL]
     (abelJacobi : CPoint → JQ)
     (hAJ : Function.Injective abelJacobi) : Finite CPoint := by
