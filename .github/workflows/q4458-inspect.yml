@@ -16,18 +16,18 @@ jobs:
           set -euo pipefail
           git clone -q --depth 1 --branch q4458-check https://github.com/xiangyazi24/FLT.git repo
           cd repo
-          echo '=== EXACT MATCHES ==='
-          grep -R -n -E 'exists_rational_two_isogeny_quotient|no_explicit_order25_obstruction|no_raw_order49_tate_obstruction|Z2xZ14_gives_non_degenerate_N14_point' \
-            --include='*.lean' . || true
-          echo '=== CONTEXT ==='
-          while IFS=: read -r file line rest; do
-            [ -n "$file" ] || continue
-            lo=$((line > 70 ? line - 70 : 1)); hi=$((line + 100))
-            echo "----- $file:$line -----"
-            sed -n "${lo},${hi}p" "$file"
-          done < <(grep -R -n -E 'exists_rational_two_isogeny_quotient|no_explicit_order25_obstruction|no_raw_order49_tate_obstruction|Z2xZ14_gives_non_degenerate_N14_point' --include='*.lean' . || true)
-          echo '=== RELATED INFRASTRUCTURE FILES ==='
-          find . -name '*.lean' | grep -Ei 'Tate|Division|Psi|Separated|N14|N15|N20|N21|N25|N49|Isogeny|Velu' | sort | head -400
-          echo '=== RELATED SYMBOLS ==='
-          grep -R -n -E 'prePsi|preΨ|separated|two_isogeny|2-isogeny|V[eé]lu|Tate normal|tateM|N14|N20|N25|N49|order25|order49' \
-            --include='*.lean' FLT FermatsLastTheorem FLTTest 2>/dev/null | head -1600 || true
+          echo '=== SCRATCH LEAN FILES ==='
+          find scratch -type f -name '*.lean' | sort
+          echo '=== EXACT AND FUZZY MATCHES ==='
+          grep -R -n -Ei \
+            'exists_rational_two_isogeny_quotient|no_explicit_order25_obstruction|no_raw_order49_tate_obstruction|Z2xZ14_gives_non_degenerate_N14_point|order.?25|order.?49|N14|N20|N25|N49|two.?isogeny|Velu|Vélu|prePsi|preΨ|separatedness|separated' \
+            --include='*.lean' scratch FLT FermatsLastTheorem FLTTest 2>/dev/null | head -2400 || true
+          echo '=== AXIOM/SORRY IN RELEVANT SCRATCH FILES ==='
+          for file in $(grep -R -l -Ei '25|49|N14|N20|two.?isogeny|Tate|torsion|obstruction' --include='*.lean' scratch 2>/dev/null | sort); do
+            echo "----- $file -----"
+            grep -n -C 35 -Ei 'axiom|sorry|theorem|lemma|def |structure|25|49|N14|N20|two.?isogeny|Tate|torsion|obstruction' "$file" | head -700 || true
+          done
+          echo '=== RELEVANT IMPORT GRAPH/SYMBOLS REPO-WIDE ==='
+          grep -R -n -Ei \
+            'prePsi|preΨ|divisionPolynomial|separatedness|separated|TateNormal|tateM|torsion.*14|torsion.*20|torsion.*25|torsion.*49|order.?14|order.?20|order.?25|order.?49' \
+            --include='*.lean' . 2>/dev/null | head -3000 || true
