@@ -1,10 +1,7 @@
-scratch/Q4511Core.lean:25:6: error: Type mismatch: After simplification, term
-  le_refl (F.level y)
- has type
-  True
-but is expected to have type
-  F.level y ≤ F.level x
-scratch/Q4511Core.lean:32:35: error: unsolved goals
+scratch/Q4511Core.lean:25:6: warning: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+scratch/Q4511Core.lean:31:35: error: unsolved goals
 G : Type u_1
 inst✝ : AddCommGroup G
 H : AddSubgroup G
@@ -17,20 +14,15 @@ x : ↥H
 hx : x ≠ 0
 hxy : x = m ^ (n + 1) • y
 z : ↥H := m ^ n • y
-⊢ m ^ n • m • y = m • m ^ n • y
-scratch/Q4511Core.lean:71:52: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
-  3 • ↑t
-in the target expression
-  3 • 7 • ↑t = 0
+⊢ m ^ (n + 1) • y = (m * m ^ n) • y
+scratch/Q4511Core.lean:32:29: warning: This simp argument is unused:
+  Nat.mul_comm
 
-G : Type u_1
-inst✝ : AddCommGroup G
-T : AddSubgroup G
-hT : ∀ (t : ↥T), 3 • ↑t = 0
-t : ↥T
-⊢ 3 • 7 • ↑t = 0
-scratch/Q4511Core.lean:91:8: error: No goals to be solved
-scratch/Q4511Core.lean:96:46: error: unsolved goals
+Hint: Omit it from the simp argument list.
+  simp [smul_smul,̵ ̵N̵a̵t̵.̵m̵u̵l̵_̵c̵o̵m̵m̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+scratch/Q4511Core.lean:97:46: error: unsolved goals
 G : Type u_1
 inst✝ : AddCommGroup G
 T : AddSubgroup G
@@ -45,15 +37,6 @@ z : G
 hz : y = ↑t + 3 • z
 h21t : 21 • ↑t = 0
 hinner : 21 • (↑t + 3 • z) = 3 • 21 • z
-⊢ (3 * 3 ^ n) • 21 • z = (3 ^ n * 3) • 21 • z
-scratch/Q4511Core.lean:104:54: error: unsolved goals
-G : Type u_1
-Q : Type u_2
-inst✝¹ : AddCommGroup G
-inst✝ : AddCommGroup Q
-red : G →+ Q
-hred : ∀ (q : Q), 7 • q = 0
-x : G
-⊢ 7 • 3 • red x = 3 • 7 • red x
+⊢ (3 ^ n * 63) • z = (3 * 3 ^ n * 21) • z
 
 EXIT_STATUS=1
