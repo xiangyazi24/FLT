@@ -84,17 +84,18 @@ Mathlib currently supplies the first two curve-level notions, but not the last
 two point-level theorems. -/
 structure RationalGoodReductionData
     (E : WeierstrassCurve ℚ) [E.IsElliptic] (p : ℕ) where
-  prime : p.Prime
+  prime : Nat.Prime p
   mapData : PrimePowerKernelMap (RationalTorsion E) p
 
 /-- Two distinct good primes, packaged in exactly the form needed by the
 finite group-theoretic argument. -/
 structure RationalTwoGoodPrimes
     (E : WeierstrassCurve ℚ) [E.IsElliptic] where
-  p q : ℕ
-  hp : p.Prime
-  hq : q.Prime
-  coprime : p.Coprime q
+  p : ℕ
+  q : ℕ
+  hp : Nat.Prime p
+  hq : Nat.Prime q
+  coprime : Nat.Coprime p q
   atP : PrimePowerKernelMap (RationalTorsion E) p
   atQ : PrimePowerKernelMap (RationalTorsion E) q
 
