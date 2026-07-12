@@ -1,20 +1,24 @@
 import FLT.Assumptions.MazurProof.CyclicOrderReduction
-import FLT.Assumptions.MazurProof.RationalPointsN16
+import FLT.Assumptions.MazurProof.RationalPointsX116
 
 /-!
-# Cyclic order 16 exclusion
+# Cyclic order 16 exclusion through `X₁(16)`
 
 This file records the cyclic `N = 16` composite exclusion needed by
 `CyclicOrderReduction`.
 
-The noncyclic statement `ZMod 2 × ZMod 16` is handled in `DescentBridgeN16`.
-That does not imply the cyclic case.  Here the cyclic case is separated into:
+The noncyclic statement `ZMod 2 × ZMod 16` remains handled by
+`DescentBridgeN16` and `RationalPointsN16`; it does not imply the cyclic case.
+Here the cyclic case is separated into:
 
 * elementary order extraction from a point of exact order `16`;
 * the bookkeeping fact that `16` is one of the composite residual orders;
-* a cyclic `X₁(16)`/Tate-normal-form bridge to the existing N=16 obstruction
-  curve `w² = u³ - u² - u`;
-* the already-proved rational-points computation in `RationalPointsN16`.
+* the genuine Tate-normal-form bridge to a nondegenerate affine point on
+  `X₁(16)`;
+* the split genus-two descent in `RationalPointsX116`.
+
+There is no map here to the conductor-`20` curve `w² = u³ - u² - u`: that
+previous seam was mis-modeled and has been removed.
 -/
 
 open scoped WeierstrassCurve.Affine
@@ -84,48 +88,27 @@ theorem no_order16_from_future_composite_exclusions
     ¬ HasRationalPointOfOrder E 16 :=
   hcomp E (n := 16) (by norm_num) needs_composite_exclusion_16
 
-/-! ## Cyclic `N = 16` modular-curve bridge -/
+/-! ## The correctly stated `X₁(16)` seam -/
 
-/--
-The cyclic `N = 16` Tate/Kubert computation.
-
-Mathematically, a rational point of exact order `16` gives a noncuspidal
-rational point on `X₁(16)`.  The explicit Tate normal form and the standard
-descent to the N=16 obstruction coordinates produce a rational point on
-`w² = u³ - u² - u`; the cuspidal parameters are exactly
-`E_N16_DegenerateParameter`.
--/
-def CyclicOrder16KubertBridge : Prop :=
-  ∀ (E : WeierstrassCurve ℚ) [E.IsElliptic],
-    HasRationalPointOfOrder E 16 →
-      ∃ u w : ℚ, E_N16_AffineEquation u w ∧ ¬ E_N16_DegenerateParameter u
-
-/--
-Residual cyclic `N = 16` bridge.
-
-This is the cyclic-order-specific modular-curve computation.  After this
-bridge, the contradiction is supplied by the elementary rational-points proof
-in `RationalPointsN16`.
--/
-theorem cyclic_order_16_kubert_bridge : CyclicOrder16KubertBridge := by
-  intro E hEll horder
-  sorry
+/-- The nondegenerate affine Tate model of `X₁(16)` has no rational point. -/
+theorem no_X116Datum :
+    ¬ ∃ b c : ℚ, TateOrder16Cyclic.X116Datum b c :=
+  RationalPointsX116.no_X116Datum
 
 /-! ## Exclusion theorem -/
 
-theorem no_rational_point_of_order_16_of_kubert_bridge
-    (hbridge : CyclicOrder16KubertBridge)
+theorem no_rational_point_of_order_16_of_no_X116Datum
+    (hX116 : ¬ ∃ b c : ℚ, TateOrder16Cyclic.X116Datum b c)
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ HasRationalPointOfOrder E 16 := by
   intro horder
-  rcases hbridge E horder with ⟨u, w, hcurve, hnondeg⟩
-  exact hnondeg (RationalPointsN16.obstruction_curve_N16_from_elementary u w hcurve)
+  exact hX116 (TateOrder16Cyclic.order16_gives_X1_16_modular_point E horder)
 
 /-- No elliptic curve over `ℚ` has a rational point of exact order `16`. -/
 theorem no_rational_point_of_order_16
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ HasRationalPointOfOrder E 16 :=
-  no_rational_point_of_order_16_of_kubert_bridge cyclic_order_16_kubert_bridge E
+  no_rational_point_of_order_16_of_no_X116Datum no_X116Datum E
 
 theorem no_rational_point_of_order_eq_16
     (E : WeierstrassCurve ℚ) [E.IsElliptic] {n : ℕ} (hn : n = 16) :

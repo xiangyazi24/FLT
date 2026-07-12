@@ -92,13 +92,14 @@ Any rational point of additive order `n > 3` can be moved to the marked
 origin of a nonsingular Tate normal form.  The output parameter `b` is
 nonzero; this is the only nondegeneracy factor needed for prime order 11.
 -/
-theorem exists_tate_normalized_of_addOrder_gt_three
+theorem exists_tate_normalized_of_addOrder_gt_three_with_j
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     (P : (E⁄ℚ).Point) (n : ℕ) (hn : 3 < n)
     (hP : addOrderOf P = n) :
     ∃ b c : ℚ,
       ∃ _hEll : WeierstrassCurve.IsElliptic (tateNormalFormCurve b c),
-        addOrderOf (tateOrigin b c) = n ∧ b ≠ 0 := by
+        addOrderOf (tateOrigin b c) = n ∧ b ≠ 0 ∧
+          (tateNormalFormCurve b c).j = E.j := by
   cases P with
   | zero =>
       have hzero :
@@ -243,7 +244,22 @@ theorem exists_tate_normalized_of_addOrder_gt_three
         have hdiv : W1.a₂ ^ 3 / W1.a₃ ^ 2 ≠ 0 :=
           div_ne_zero (pow_ne_zero 3 hW1a₂_ne) (pow_ne_zero 2 hW1a₃_ne)
         simpa [b, tateBFromCoefficients] using (neg_ne_zero.mpr hdiv)
-      exact ⟨b, c, inferInstance, hOriginOrder, hb⟩
+      have hj : (tateNormalFormCurve b c).j = E.j := by
+        have hjraw : (C1 • W1).j = E.j := by simp [W1]
+        simpa only [hW2eq] using hjraw
+      exact ⟨b, c, inferInstance, hOriginOrder, hb, hj⟩
+
+/-- The Tate-normal-form bridge with only the order and nonvanishing data. -/
+theorem exists_tate_normalized_of_addOrder_gt_three
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P : (E⁄ℚ).Point) (n : ℕ) (hn : 3 < n)
+    (hP : addOrderOf P = n) :
+    ∃ b c : ℚ,
+      ∃ _hEll : WeierstrassCurve.IsElliptic (tateNormalFormCurve b c),
+        addOrderOf (tateOrigin b c) = n ∧ b ≠ 0 := by
+  obtain ⟨b, c, hEll, hord, hb, _hj⟩ :=
+    exists_tate_normalized_of_addOrder_gt_three_with_j E P n hn hP
+  exact ⟨b, c, hEll, hord, hb⟩
 
 end
 

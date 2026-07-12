@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.TateOrder18
+import FLT.Assumptions.MazurProof.RationalPointsX121
 
 /-!
 # Cyclic order 21 exclusion
@@ -469,7 +470,40 @@ theorem order21_to_tate_obstruction
     exact hpsi
 
 theorem no_obstruction21 : ¬ ∃ b c X Y : ℚ, Obstruction21 b c X Y := by
-  sorry
+  rintro ⟨b, c, X, Y, hb, hF7, _hTate, hPsi⟩
+  have hc : c ≠ 0 := by
+    intro hc0
+    subst c
+    simp only [F7] at hF7
+    apply hb
+    nlinarith [sq_nonneg b]
+  let t : ℚ := b / c
+  have ht0 : t ≠ 0 := div_ne_zero hb hc
+  have ht1 : t ≠ 1 := by
+    intro ht
+    have hbc : b = c := (div_eq_one_iff_eq hc).mp ht
+    rw [hbc] at hF7
+    simp only [F7] at hF7
+    ring_nf at hF7
+    exact (pow_ne_zero 3 hc) hF7
+  have hcparam : c = t * (t - 1) := by
+    dsimp only [t]
+    simp only [F7] at hF7
+    field_simp [hc]
+    nlinarith [hF7]
+  have hbparam : b = t ^ 2 * (t - 1) := by
+    calc
+      b = t * c := by
+        dsimp only [t]
+        exact (div_mul_cancel₀ b hc).symm
+      _ = t * (t * (t - 1)) := by rw [hcparam]
+      _ = t ^ 2 * (t - 1) := by ring
+  have hG : RationalPointsX121.G21 t X = 0 := by
+    rw [← hPsi]
+    rw [hbparam, hcparam]
+    unfold Psi3X RationalPointsX121.G21
+    ring
+  exact RationalPointsX121.G21_ne_zero_of_t_ne_zero_one t X ht0 ht1 hG
 
 theorem no_rational_point_of_order_21
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :

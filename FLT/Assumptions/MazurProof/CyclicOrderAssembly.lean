@@ -1,10 +1,15 @@
 import FLT.Assumptions.MazurProof.TorsionDefs
 import FLT.Assumptions.MazurProof.CyclicOrderArithmetic
 import FLT.Assumptions.MazurProof.CyclicExclusion14
+import FLT.Assumptions.MazurProof.CyclicExclusion16
 import FLT.Assumptions.MazurProof.CyclicExclusion20
 import FLT.Assumptions.MazurProof.CyclicExclusion25
 import FLT.Assumptions.MazurProof.CyclicExclusion27
 import FLT.Assumptions.MazurProof.CyclicExclusion49
+import FLT.Assumptions.MazurProof.CyclicExclusion35
+import FLT.Assumptions.MazurProof.CyclicExclusion15
+import FLT.Assumptions.MazurProof.CyclicExclusion21
+import FLT.Assumptions.MazurProof.CyclicExclusion11
 
 /-!
 # Assembly: cyclic order bound from named sub-axioms
@@ -26,6 +31,8 @@ Endpoint wired to a real theorem:
 
 * `14` — `no_rational_point_of_order_14`, via the Tate/Kubert map to
   `X₁(14)` and the complete quartic descent in `scratch.ObstructionQ14`.
+* `16` — `no_rational_point_of_order_16`, via the genuine Tate map to
+  `X₁(16)` and the split genus-two factor descent in `RationalPointsX116`.
 * `20, 24` — `CyclicExclusion20.no_rational_point_of_order_20` and
   `CyclicExclusion20.no_rational_point_of_order_24`.  They share the correctly
   stated geometric seam `exists_rational_two_isogeny_quotient`, whose dual map
@@ -47,8 +54,7 @@ Endpoint wired to a real theorem:
 Endpoints kept as named sub-axioms, because no sound real theorem exists to
 wire:
 
-* `15, 16, 18, 21` — the `CyclicExclusion` proofs still contain `sorry`.
-* `35` — its final arithmetic input is not yet formalized.
+* `15, 18, 21` — the `CyclicExclusion` proofs still contain `sorry`.
 
 Together with the prime-order input `mazur_prime_torsion_bound_sub`, these are
 exactly the named inputs reported by
@@ -68,17 +74,27 @@ axiom mazur_prime_torsion_bound_sub
 
 /-! ## Composite-order sub-axioms (no sound real theorem to wire yet) -/
 
-axiom no_order_15 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 15
-axiom no_order_16 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 16
+theorem no_order_15 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ HasRationalPointOfOrder E 15 :=
+  no_rational_point_of_order_15 E
 axiom no_order_18 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 18
-axiom no_order_21 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 21
-axiom no_order_35 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 35
+theorem no_order_21 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ HasRationalPointOfOrder E 21 :=
+  CyclicExclusion21.no_rational_point_of_order_21 E
+
+theorem no_order_35 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ HasRationalPointOfOrder E 35 :=
+  no_rational_point_of_order_35 E
 
 /-! ## Concrete exclusion wired to a real theorem -/
 
 theorem no_order_14 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ HasRationalPointOfOrder E 14 :=
   no_rational_point_of_order_14 E
+
+theorem no_order_16 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ HasRationalPointOfOrder E 16 :=
+  no_rational_point_of_order_16 E
 
 theorem no_order_20 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ HasRationalPointOfOrder E 20 :=
@@ -133,8 +149,7 @@ theorem mazur_cyclic_order_bound_assembled
   -- n ∉ {1,…,10,12} and n > 0. So n = 11 or n ≥ 13.
   by_cases h11 : n = 11
   · subst n
-    have hprime := mazur_prime_torsion_bound_sub E (by norm_num : Nat.Prime 11) hord
-    norm_num at hprime
+    exact no_rational_point_of_order_11 E hord
   · -- n ≥ 13 (since n ∉ {1,…,10,12}, n ≠ 11, n > 0)
     have hn12 : 12 < n := by omega
     -- All prime factors of n are in {2,3,5,7}.
