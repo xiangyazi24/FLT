@@ -15,25 +15,30 @@ This file instantiates the *verified* abstract Block-5 scaffold
 (`FormalKernel18`, providing the proven `no_prime_to_3_torsion`,
 `three_power_torsion_exponent_three`, `annihilated_by_21`) for the real
 `E₀ = 162.c3` over `L = ℚ(ζ₉)⁺` at the prime `π ∣ 3`, and closes
-`CyclicExclusion18.no_obstruction18` **conditional on exactly three carried
-packages** (Package I `add_congr`, Package II `msq_torsionFree`,
-Package III `three_pow_torsion_mem_kernel`) plus the elementary `zParam`
-laws and a carried `front_end` bridge.
+`CyclicExclusion18.no_obstruction18` **conditional on carried packages** plus a
+carried `front_end` bridge and a carried reduction hom `red`/`hker`.
 
-Everything else — the `FormalKernel18` instance, the reduction of `[21]`
-annihilation to the three abstract lemmas, and the assembly — is **proved**
-here.  The two pure valuation inductions `val_unit_smul` and `val_three_smul_ge`
-are now **discharged** from Package I (`add_congr`) via `zParam_nsmul_congr`
-plus the elementary `vpi_three`/`vpi_unit` laws.  Two labelled `sorry`s remain,
-both blocked on infrastructure absent from the committed RouteC files:
-* `hQ` (the `hQ7` prime-to-3 reduction chaining) needs a concrete reduction
-  homomorphism `red : E0Point →+ Reduction.RedPoint` with
-  `red.ker = kernelSubgroup` — RouteC only takes such a `red` as a hypothesis
-  (`Block7`/`Separated`), it never constructs it;
-* `all_points_annihilated_by_21` (rank-0 `torsion_eq_Z21` bookkeeping) needs an
-  unconditional "every `E₀(L)`-point is torsion" (rank-0 / finiteness) input,
-  which is likewise not present unconditionally in the committed infra.
-See `N18_BLOCK5_INSTANTIATION_DESIGN.md`.
+**Soundness fix (Fable adversarial check).**  The formal kernel is now the
+CORRECT near-`O` set `kernelSubgroup = {O} ∪ {P | v(x P) < 0}`, NOT the earlier
+`{P | v(zP) ≥ 1}`.  The old `z`-condition was UNSOUND: a point reducing to
+`(0, ȳ)` on `Ẽ₀` has `v(x) ≥ 1, v(y) = 0`, so `v(z) = v(x) ≥ 1` yet is not near
+`O`; with it, the carried Package I `add_congr` was unsatisfiable and the whole
+conditional was vacuous.  Accordingly the carried packages are now stated on the
+correct kernel and are all satisfiable for the real `E₀`:
+* Package I `add_congr` — guarded by the near-`O` (`v(x) < 0`) condition;
+* `vpi_pos_bridge` — the forward `val_coords` direction `v(x) < 0 ⇒ v(z) > 0`
+  (PROVED concretely in `N18AddCongr.val_coords`), tying the `x`-adic kernel to
+  the `z`-parameter machinery;
+* `kernel_add_closed` — near-`O` add-closure (the reduction-hom fact `ker red`
+  is a subgroup); NOT derivable from the `z`-only `add_congr`, so carried as an
+  explicit satisfiable package at the same boundary as `red`;
+* Package II `msq_torsionFree`, Package III `three_pow_torsion_mem_kernel`
+  (now typed against the correct kernel).
+
+Everything else — the `FormalKernel18` instance, the `[21]`-annihilation, the
+assembly, and both valuation inductions `val_unit_smul`/`val_three_smul_ge`
+(discharged from Package I via `zParam_nsmul_congr`) — is **proved** here with no
+`sorry`.  See `N18_BLOCK5_INSTANTIATION_DESIGN.md`.
 -/
 
 open scoped Classical
@@ -42,8 +47,27 @@ namespace MazurProof.N18Block5Instantiation
 
 open MazurProof.N18RouteC
 open MazurProof.N18RouteC.Isogeny
+open MazurProof.N18RouteC.ThreeAdic
 
 noncomputable section
+
+/-! ## The affine `x`-coordinate and the correct near-`O` (formal-kernel) condition
+
+Fable's adversarial check found the previous kernel `{P | v(zP) ≥ 1}` UNSOUND: a
+point reducing to `(0, ȳ)` on `Ẽ₀` has `v(x) ≥ 1, v(y) = 0`, so
+`v(z) = v(x) ≥ 1`, yet it is **not** near `O`.  The correct formal-kernel
+condition is `v(x) < 0` (finite points near `O`) together with `O` itself. -/
+
+/-- The affine `x`-coordinate of a point of `E₀(L)` (junk value `0` at `O`). -/
+def xCoord : E0Point → L
+  | .zero => 0
+  | .some x _ _ => x
+
+/-- Negation keeps the `x`-coordinate (`negY` only changes `Y`). -/
+theorem xCoord_neg (P : E0Point) : xCoord (-P) = xCoord P := by
+  cases P with
+  | zero => rfl
+  | some x y h => rfl
 
 /-! ## `WithTop ℤ → ℕ∞` coercion (negatives, absent on the kernel, clamp to `0`). -/
 
@@ -140,18 +164,32 @@ structure FormalKernelData where
   zParam_neg : ∀ P, zParam (-P) = - zParam P
   /-- `z = 0` only at the origin (faithfulness of `z = -x/y` on the kernel). -/
   zParam_eq_zero : ∀ P, zParam P = 0 → P = 0
-  /-- **Package I** — integral formal group law leading term (pointwise):
-  `v(z(P⊕Q) − zP − zQ) ≥ v(zP)+v(zQ)` for kernel points `P, Q`. -/
-  add_congr : ∀ P Q, 0 < vpi (zParam P) → 0 < vpi (zParam Q) →
+  /-- **Package I** — integral formal group law leading term (pointwise), stated
+  on the **correct** near-`O` kernel (`v(x) < 0`, plus `O`), so it is satisfiable
+  for the real `E₀`: `v(z(P⊕Q) − zP − zQ) ≥ v(zP)+v(zQ)` for near-`O` points. -/
+  add_congr : ∀ P Q, (P = 0 ∨ ordPi (xCoord P) < 0) → (Q = 0 ∨ ordPi (xCoord Q) < 0) →
     vpi (zParam P) + vpi (zParam Q) ≤ vpi (zParam (P + Q) - zParam P - zParam Q)
+  /-- **Bridge (STEP 1 / `val_coords`, forward direction)** — a near-`O` finite
+  point (`v(x) < 0`) has positive parameter valuation: `v(x) = −2·v(z)` forces
+  `v(z) > 0`.  This ties the correct `x`-adic kernel to the `z`-parameter
+  machinery below.  Satisfiable for the real `E₀` (proved in `N18AddCongr`). -/
+  vpi_pos_bridge : ∀ P, ordPi (xCoord P) < 0 → 0 < vpi (zParam P)
+  /-- **Near-`O` add-closure** — the formal kernel `{O} ∪ {v(x) < 0}` is closed
+  under addition (it is `ker` of the reduction map `E₀(L) → Ẽ₀(k)`).  This is the
+  reduction-hom fact; it is NOT derivable from the `z`-parameter `add_congr`
+  alone (which only bounds `v(z)`, not `v(x)`).  Carried as a package here, in
+  the same honest boundary as the reduction hom `red` the downstream takes. -/
+  kernel_add_closed : ∀ P Q, (P = 0 ∨ ordPi (xCoord P) < 0) →
+    (Q = 0 ∨ ordPi (xCoord Q) < 0) →
+    (P + Q = 0 ∨ ordPi (xCoord (P + Q)) < 0)
   /-- **Package II** — `Ê₀(𝔪²)` torsion-free: a nonzero kernel torsion point has
   valuation exactly `1`. -/
   msq_torsionFree : ∀ P, 0 < vpi (zParam P) → zParam P ≠ 0 →
     (∃ n : ℕ, 0 < n ∧ n • P = 0) → vpi (zParam P) = 1
   /-- **Package III** — supersingular `⇒` `3`-power torsion lands in the formal
-  kernel. -/
+  kernel (now typed against the CORRECT `x`-adic kernel). -/
   three_pow_torsion_mem_kernel : ∀ P, (∃ k : ℕ, ((3 : ℤ) ^ k) • P = 0) →
-    0 < vpi (zParam P)
+    (P = 0 ∨ ordPi (xCoord P) < 0)
 
 namespace FormalKernelData
 
@@ -159,40 +197,34 @@ variable (D : FormalKernelData)
 
 /-! ## The formal kernel as an additive subgroup of `E₀(L)` -/
 
-/-- The formal kernel `Ê₀(𝔪) = {P | v(zP) > 0}`, an additive subgroup by
-Package I (`add_congr`) and `zParam_neg`. -/
+/-- The formal kernel `Ê₀(𝔪) = {O} ∪ {P | v(x P) < 0}` (the CORRECT near-`O`
+condition; see Fable's check above), an additive subgroup: `zero_mem'` is
+immediate, `add_mem'` is the carried near-`O` closure (`kernel_add_closed`), and
+`neg_mem'` uses `xCoord (−P) = xCoord P`. -/
 def kernelSubgroup : AddSubgroup E0Point where
-  carrier := {P | 0 < D.vpi (D.zParam P)}
-  zero_mem' := by
-    show 0 < D.vpi (D.zParam 0)
-    rw [D.zParam_zero, AddValuation.map_zero]
-    simpa using WithTop.coe_lt_top (0 : ℤ)
+  carrier := {P | P = 0 ∨ ordPi (xCoord P) < 0}
+  zero_mem' := Or.inl rfl
   add_mem' := by
     intro a b ha hb
-    simp only [Set.mem_setOf_eq] at ha hb ⊢
-    have hr :
-        D.vpi (D.zParam a) + D.vpi (D.zParam b) ≤
-          D.vpi (D.zParam (a + b) - D.zParam a - D.zParam b) :=
-      D.add_congr a b ha hb
-    have hpos_sum : 0 < D.vpi (D.zParam a) + D.vpi (D.zParam b) :=
-      lt_of_lt_of_le ha (le_add_of_nonneg_right (le_of_lt hb))
-    have hrpos : 0 < D.vpi (D.zParam (a + b) - D.zParam a - D.zParam b) :=
-      lt_of_lt_of_le hpos_sum hr
-    have hsum : 0 < D.vpi (D.zParam a + D.zParam b) := D.vpi.map_lt_add ha hb
-    have hdecomp :
-        D.zParam (a + b) =
-          (D.zParam (a + b) - D.zParam a - D.zParam b) +
-            (D.zParam a + D.zParam b) := by ring
-    rw [hdecomp]
-    exact D.vpi.map_lt_add hrpos hsum
+    exact D.kernel_add_closed a b ha hb
   neg_mem' := by
     intro a ha
-    simp only [Set.mem_setOf_eq] at ha ⊢
-    rw [D.zParam_neg, AddValuation.map_neg]
-    exact ha
+    rcases ha with h0 | hlt
+    · exact Or.inl (by rw [h0, neg_zero])
+    · exact Or.inr (by rw [xCoord_neg]; exact hlt)
 
 theorem mem_kernelSubgroup {P : E0Point} :
-    P ∈ D.kernelSubgroup ↔ 0 < D.vpi (D.zParam P) := Iff.rfl
+    P ∈ D.kernelSubgroup ↔ (P = 0 ∨ ordPi (xCoord P) < 0) := Iff.rfl
+
+/-- Every kernel member has positive parameter valuation: at `O` it is `⊤`, and
+for `v(x) < 0` it follows from the forward bridge (`val_coords`).  This recovers
+the `z`-positivity the parameter machinery below is stated in terms of. -/
+theorem vpi_pos_of_mem {P : E0Point} (hP : P ∈ D.kernelSubgroup) :
+    0 < D.vpi (D.zParam P) := by
+  rcases hP with h0 | hlt
+  · rw [h0, D.zParam_zero, AddValuation.map_zero]
+    simpa using WithTop.coe_lt_top (0 : ℤ)
+  · exact D.vpi_pos_bridge P hlt
 
 /-! ## Valuation inductions for `zParam` (Package I `add_congr` closure) -/
 
@@ -207,10 +239,11 @@ theorem zero_le_vpi_natCast (k : ℕ) : (0 : WithTop ℤ) ≤ D.vpi ((k : L)) :=
 /-- **Formal-group `nsmul` congruence** (from Package I `add_congr`): for a kernel
 point `P` (`0 < v(zP)`), the parameter of `[n]P` agrees with `n·zP` up to a term
 of valuation `≥ 2·v(zP)`, and `[n]P` stays in the kernel. -/
-theorem zParam_nsmul_congr (P : E0Point) (hpos : 0 < D.vpi (D.zParam P)) :
+theorem zParam_nsmul_congr (P : E0Point) (hmem : P ∈ D.kernelSubgroup) :
     ∀ n : ℕ, 1 ≤ n →
       2 • D.vpi (D.zParam P) ≤ D.vpi (D.zParam (n • P) - n • D.zParam P)
       ∧ D.vpi (D.zParam P) ≤ D.vpi (D.zParam (n • P)) := by
+  have hpos : 0 < D.vpi (D.zParam P) := D.vpi_pos_of_mem hmem
   intro n
   induction n with
   | zero => intro h; exact absurd h (by norm_num)
@@ -221,13 +254,14 @@ theorem zParam_nsmul_congr (P : E0Point) (hpos : 0 < D.vpi (D.zParam P)) :
         · rw [zero_add, one_nsmul, one_nsmul, sub_self, D.vpi.map_zero]; exact le_top
         · rw [zero_add, one_nsmul]
       · obtain ⟨ih1, ih2⟩ := ih hk
-        have hkP : 0 < D.vpi (D.zParam (k • P)) := lt_of_lt_of_le hpos ih2
         have hB1 : 2 • D.vpi (D.zParam P)
             ≤ D.vpi (D.zParam (k • P + P) - D.zParam (k • P) - D.zParam P) := by
           have h2 : 2 • D.vpi (D.zParam P)
               ≤ D.vpi (D.zParam (k • P)) + D.vpi (D.zParam P) := by
             rw [two_nsmul]; exact add_le_add ih2 le_rfl
-          exact le_trans h2 (D.add_congr (k • P) P hkP hpos)
+          exact le_trans h2 (D.add_congr (k • P) P
+            ((D.mem_kernelSubgroup).mp (nsmul_mem hmem k))
+            ((D.mem_kernelSubgroup).mp hmem))
         have key : D.zParam ((k + 1) • P) - (k + 1) • D.zParam P
             = (D.zParam (k • P + P) - D.zParam (k • P) - D.zParam P)
               + (D.zParam (k • P) - k • D.zParam P) := by
@@ -248,9 +282,10 @@ theorem zParam_nsmul_congr (P : E0Point) (hpos : 0 < D.vpi (D.zParam P)) :
         exact D.vpi.map_le_add (le_trans ha_le hclaim1) hval_smul
 
 /-- **`[m]` preserves the parameter valuation for `3 ∤ m`** (ℕ version). -/
-theorem vpi_zParam_nsmul (P : E0Point) (hpos : 0 < D.vpi (D.zParam P))
+theorem vpi_zParam_nsmul (P : E0Point) (hmem : P ∈ D.kernelSubgroup)
     (n : ℕ) (hn : ¬ (3 ∣ (n : ℤ))) :
     D.vpi (D.zParam (n • P)) = D.vpi (D.zParam P) := by
+  have hpos : 0 < D.vpi (D.zParam P) := D.vpi_pos_of_mem hmem
   rcases eq_or_ne (D.zParam P) 0 with h0 | hfP
   · have hP0 : P = 0 := D.zParam_eq_zero P h0
     rw [hP0, smul_zero]
@@ -259,7 +294,7 @@ theorem vpi_zParam_nsmul (P : E0Point) (hpos : 0 < D.vpi (D.zParam P))
       rcases Nat.eq_zero_or_pos n with rfl | h
       · exact absurd (by norm_num) hn
       · exact h
-    obtain ⟨c1, _c2⟩ := D.zParam_nsmul_congr P hpos n hn1
+    obtain ⟨c1, _c2⟩ := D.zParam_nsmul_congr P hmem n hn1
     have hunit : D.vpi ((n : L)) = 0 := by
       simpa using D.vpi_unit (n : ℤ) hn
     have hnfP : D.vpi (n • D.zParam P) = D.vpi (D.zParam P) := by
@@ -273,19 +308,19 @@ theorem vpi_zParam_nsmul (P : E0Point) (hpos : 0 < D.vpi (D.zParam P))
     rw [hdecomp, D.vpi.map_add_eq_of_lt_left hlt, hnfP]
 
 /-- **`[m]` preserves the parameter valuation for `3 ∤ m`** (ℤ version). -/
-theorem vpi_zParam_zsmul (P : E0Point) (hpos : 0 < D.vpi (D.zParam P))
+theorem vpi_zParam_zsmul (P : E0Point) (hmem : P ∈ D.kernelSubgroup)
     (m : ℤ) (hm : ¬ (3 ∣ m)) :
     D.vpi (D.zParam (m • P)) = D.vpi (D.zParam P) := by
   rcases le_total 0 m with hmnn | hmp
   · lift m to ℕ using hmnn with n
     rw [natCast_zsmul]
-    exact D.vpi_zParam_nsmul P hpos n hm
+    exact D.vpi_zParam_nsmul P hmem n hm
   · have hnn : (0 : ℤ) ≤ -m := by omega
     have e2 : ((-m).toNat) • P = (-m) • P := by
       rw [← natCast_zsmul, Int.toNat_of_nonneg hnn]
     have hmP : m • P = -(((-m).toNat) • P) := by rw [e2, neg_zsmul, neg_neg]
     rw [hmP, D.zParam_neg, D.vpi.map_neg]
-    apply D.vpi_zParam_nsmul P hpos
+    apply D.vpi_zParam_nsmul P hmem
     rw [Int.toNat_of_nonneg hnn, Int.dvd_neg]
     exact hm
 
@@ -309,7 +344,7 @@ def formalKernel18 : FormalKernel18 where
       rw [this, D.zParam_zero]
   one_le_val := by
     intro z _
-    exact one_le_toENat_of_pos z.property
+    exact one_le_toENat_of_pos (D.vpi_pos_of_mem z.property)
   val_unit_smul := by
     -- `[m]` for `3 ∤ m` preserves `v(z)`: `z([m]P) = m·zP + (higher order)` and
     -- `v(m) = 0` (`vpi_unit`).  Strict domination via `zParam_nsmul_congr`.
@@ -324,14 +359,14 @@ def formalKernel18 : FormalKernel18 where
     -- `z([3]P) = 3·zP + r`, `v(r) ≥ 2·v(zP)` (`zParam_nsmul_congr`), `v(3·zP) = 3 + v(zP)`
     -- (`vpi_three`), then `v([3]z) ≥ min(3+v, 2v)` via `map_add`, pushed through `toENat`.
     intro z
-    have hpos : 0 < D.vpi (D.zParam (z : E0Point)) := z.property
+    have hpos : 0 < D.vpi (D.zParam (z : E0Point)) := D.vpi_pos_of_mem z.property
     have hcoe : (((3 : ℤ) • z : D.kernelSubgroup) : E0Point) = (3 : ℕ) • (z : E0Point) := by
       rw [AddSubgroupClass.coe_zsmul, show (3 : ℤ) = ((3 : ℕ) : ℤ) by norm_cast, natCast_zsmul]
     show min (3 + toENat (D.vpi (D.zParam (z : E0Point))))
           (2 * toENat (D.vpi (D.zParam (z : E0Point))))
        ≤ toENat (D.vpi (D.zParam (((3 : ℤ) • z : D.kernelSubgroup) : E0Point)))
     rw [hcoe]
-    obtain ⟨c1, _c2⟩ := D.zParam_nsmul_congr (z : E0Point) hpos 3 (by norm_num)
+    obtain ⟨c1, _c2⟩ := D.zParam_nsmul_congr (z : E0Point) z.property 3 (by norm_num)
     have hv3 : D.vpi ((3 : ℕ) • D.zParam (z : E0Point))
         = 3 + D.vpi (D.zParam (z : E0Point)) := by
       rw [nsmul_eq_mul, D.vpi.map_mul]
@@ -359,7 +394,7 @@ def formalKernel18 : FormalKernel18 where
   torsion_val_eq_one := by
     intro z hz htor
     show toENat (D.vpi (D.zParam (z : E0Point))) = 1
-    have hpos : 0 < D.vpi (D.zParam (z : E0Point)) := z.property
+    have hpos : 0 < D.vpi (D.zParam (z : E0Point)) := D.vpi_pos_of_mem z.property
     have hzne : D.zParam (z : E0Point) ≠ 0 := by
       intro h
       exact hz (Subtype.ext (by
