@@ -35,7 +35,7 @@ theorem pi5_pow_eq_zero_of_five_le {n : ℕ} (hn : 5 ≤ n) :
     pi5 ^ n = 0 := by
   obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hn
   rw [pow_add]
-  have hpi5 : pi5 ^ 5 = 0 := by decide
+  have hpi5 : pi5 ^ 5 = 0 := pi5_pow_five
   rw [hpi5, zero_mul]
 
 theorem three_mul_pi5_pow_eq_zero_of_two_le {n : ℕ} (hn : 2 ≤ n) :

@@ -172,10 +172,8 @@ theorem IntCoords.red_neg (x : IntCoords) :
     LocalThree.neg (reduceInt x.c0 x.c1 x.c2)
   ext <;> simp [reduceInt, LocalThree.neg]
 
--- Kernel `decide` over the 243-element ring.
-set_option maxHeartbeats 0 in
-private theorem local_one_mul (r : R5) : LocalThree.mul LocalThree.one r = r := by
-  decide +revert
+private theorem local_one_mul (r : R5) : LocalThree.mul LocalThree.one r = r :=
+  one_mul r
 
 private theorem unitRep_zero :
     unitRep (0 : F3) (0 : F3) (0 : F3) = LocalThree.one := by
@@ -230,19 +228,17 @@ theorem red_unitCoords (i j k : F3) :
     (unitCoords i j k).red = unitRep i j k := by
   simp [unitCoords, IntCoords.red_mul, IntCoords.red_pow, unitRep]
 
--- Kernel `decide` over the 243-element ring.
-set_option maxHeartbeats 0 in
 private theorem local_pow_three (r : R5) :
     LocalThree.pow r 3 = LocalThree.mul (LocalThree.mul r r) r := by
-  decide +revert
+  show r ^ 3 = r * r * r; ring
 
 private theorem local_isUnit_of_mul_eq_one (r s : R5)
     (h : LocalThree.mul r s = LocalThree.one) : IsUnit5 r := by
   rw [isUnit5_iff]
   intro hr0
-  have h2 : red3 LocalThree.one = red3 r * red3 s := by
-    rw [← h]; exact red3_mul r s
-  rw [red3_one, hr0, zero_mul] at h2
+  have h' : r * s = 1 := h
+  have h2 : red3 (r * s) = red3 r * red3 s := red3_mul r s
+  rw [h', red3_one, hr0, zero_mul] at h2
   exact one_ne_zero h2
 
 theorem IntCoords.eval_injective : Function.Injective IntCoords.eval := by
