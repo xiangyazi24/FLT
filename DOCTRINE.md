@@ -71,7 +71,7 @@ TIER 2 (good-model FormalKernelData, serial core):
 - 2a: zParamGood definition [LOW]
 - 2b: vpi/vpi_three/vpi_unit reuse [LOW]
 - 2c: val_coords for E0Good (Newton polygon, ℤ[a] coefficients) [MED]
-- **2d: add_congr for E0Good** [HIGH — BC_factor fails (a₁≠1,a₃≠1), needs new identity (8). Oracle design required]
+- **2d: ELIMINATED** — Fable: weaken add_congr to `2*min(v(zP),v(zQ)) ≤ v(error)` (generic, no BC_factor). Transport fails (depth shift + kernel mismatch). Weak bound suffices for nsmul_congr. Prove generic add_congr_weak on E0Good by term-by-term ultrametric (no identity 8).
 - 2e: vpi_pos_bridge [LOW]
 - 2f: kernel_add_closed [MED]
 - 2g: Package III (3-power torsion in kernel) [MED]

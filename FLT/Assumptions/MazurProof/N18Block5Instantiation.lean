@@ -164,11 +164,13 @@ structure FormalKernelData where
   vpi_zParam_neg : ∀ P, vpi (zParam (-P)) = vpi (zParam P)
   /-- `z = 0` only at the origin (faithfulness of `z = -x/y` on the kernel). -/
   zParam_eq_zero : ∀ P, zParam P = 0 → P = 0
-  /-- **Package I** — integral formal group law leading term (pointwise), stated
-  on the **correct** near-`O` kernel (`v(x) < 0`, plus `O`), so it is satisfiable
-  for the real `E₀`: `v(z(P⊕Q) − zP − zQ) ≥ v(zP)+v(zQ)` for near-`O` points. -/
+  /-- **Package I** — integral formal group law leading term (pointwise, weak form).
+  The weak bound `2·min ≤ v(error)` suffices for the downstream `nsmul_congr` induction
+  and is provable generically for any Weierstrass curve with `v(aᵢ) ≥ 0`, avoiding the
+  E0-specific BC_factor identity. The strong bound `v(zP)+v(zQ) ≤ v(error)` is proved
+  for E0 in N18AddCongrWired.lean and implies this a fortiori. -/
   add_congr : ∀ P Q, (P = 0 ∨ ordPi (xCoord P) < 0) → (Q = 0 ∨ ordPi (xCoord Q) < 0) →
-    vpi (zParam P) + vpi (zParam Q) ≤ vpi (zParam (P + Q) - zParam P - zParam Q)
+    2 * min (vpi (zParam P)) (vpi (zParam Q)) ≤ vpi (zParam (P + Q) - zParam P - zParam Q)
   /-- **Bridge (STEP 1 / `val_coords`, forward direction)** — a near-`O` finite
   point (`v(x) < 0`) has positive parameter valuation: `v(x) = −2·v(z)` forces
   `v(z) > 0`.  This ties the correct `x`-adic kernel to the `z`-parameter
@@ -256,12 +258,15 @@ theorem zParam_nsmul_congr (P : E0Point) (hmem : P ∈ D.kernelSubgroup) :
       · obtain ⟨ih1, ih2⟩ := ih hk
         have hB1 : 2 • D.vpi (D.zParam P)
             ≤ D.vpi (D.zParam (k • P + P) - D.zParam (k • P) - D.zParam P) := by
-          have h2 : 2 • D.vpi (D.zParam P)
-              ≤ D.vpi (D.zParam (k • P)) + D.vpi (D.zParam P) := by
-            rw [two_nsmul]; exact add_le_add ih2 le_rfl
-          exact le_trans h2 (D.add_congr (k • P) P
-            ((D.mem_kernelSubgroup).mp (nsmul_mem hmem k))
-            ((D.mem_kernelSubgroup).mp hmem))
+          have hmin : min (D.vpi (D.zParam (k • P))) (D.vpi (D.zParam P))
+              = D.vpi (D.zParam P) := min_eq_right ih2
+          calc 2 • D.vpi (D.zParam P)
+              = 2 * min (D.vpi (D.zParam (k • P))) (D.vpi (D.zParam P)) := by
+                rw [hmin, two_nsmul, two_mul]
+            _ ≤ D.vpi (D.zParam (k • P + P) - D.zParam (k • P) - D.zParam P) :=
+                D.add_congr (k • P) P
+                  ((D.mem_kernelSubgroup).mp (nsmul_mem hmem k))
+                  ((D.mem_kernelSubgroup).mp hmem)
         have key : D.zParam ((k + 1) • P) - (k + 1) • D.zParam P
             = (D.zParam (k • P + P) - D.zParam (k • P) - D.zParam P)
               + (D.zParam (k • P) - k • D.zParam P) := by
