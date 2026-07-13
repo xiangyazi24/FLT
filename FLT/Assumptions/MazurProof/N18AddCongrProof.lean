@@ -76,12 +76,62 @@ theorem add_congr_inverse_branch {x y : L}
     zParam (P + (-P)) - zParam P - zParam (-P) = 0 ∨
     v (zParam P) + v (zParam (-P)) ≤
       v (zParam (P + (-P)) - zParam P - zParam (-P)) := by
-  -- P + (-P) = 0, so zParam(P+(-P)) = 0.
-  -- error = -zP - z(-P) = x(x+1)/(y(y+x+1)) by field_simp; ring
-  -- val_coords gives v(x) = -2r, v(y) = -3r where r = v(zP) ≥ 1.
-  -- Ultrametric: v(x+1)=-2r, v(y+x+1)=-3r.
-  -- v(error) = -4r+6r = 2r = v(zP)+v(z(-P)). Right disjunct holds.
-  sorry
+  let P : E0Point := WeierstrassCurve.Affine.Point.some x y hns
+  let r : ℤ := ordPi (-x / y)
+  have hPneg : P + (-P) = 0 := add_neg_cancel P
+  have heq :
+      y ^ 2 + E0.a₁ * x * y + E0.a₃ * y =
+        x ^ 3 + E0.a₂ * x ^ 2 + E0.a₄ * x + E0.a₆ :=
+    (WeierstrassCurve.Affine.equation_iff x y).mp hns.1
+  have hcoords := val_coords hx0 hy0 heq hxneg
+  have hxv : ordPi x = -2 * r := hcoords.1
+  have hyv : ordPi y = -3 * r := hcoords.2
+  have hx1v : ordPi (x + 1) = -2 * r := by
+    rw [ordPi_add_eq_of_lt hx0 one_ne_zero]
+    · exact hxv
+    · rw [hxv, ordPi_one]
+      omega
+  have hx1ne : x + 1 ≠ 0 := by
+    intro h
+    rw [h, ordPi_zero] at hx1v
+    omega
+  have hdenv : ordPi (y + x + 1) = -3 * r := by
+    rw [show y + x + 1 = y + (x + 1) by ring,
+      ordPi_add_eq_of_lt hy0 hx1ne]
+    · exact hyv
+    · rw [hyv, hx1v]
+      omega
+  have hden : y + x + 1 ≠ 0 := by
+    intro h
+    rw [h, ordPi_zero] at hdenv
+    omega
+  have hzneg : zParam (-P) = x / (y + x + 1) := by
+    change -x / WeierstrassCurve.Affine.negY E0 x y = x / (y + x + 1)
+    rw [show WeierstrassCurve.Affine.negY E0 x y = -(y + x + 1) by
+      simp only [WeierstrassCurve.Affine.negY, E0]
+      ring]
+    field_simp [hden]
+  have herr :
+      (0 : L) - (-x / y) - x / (y + x + 1) =
+        x * (x + 1) / (y * (y + x + 1)) := by
+    field_simp [hy0, hden]
+    ring
+  have herrv :
+      ordPi (x * (x + 1) / (y * (y + x + 1))) = 2 * r := by
+    rw [ordPi_div (mul_ne_zero hx0 hx1ne) (mul_ne_zero hy0 hden),
+      ordPi_mul hx0 hx1ne, ordPi_mul hy0 hden, hxv, hx1v, hyv, hdenv]
+    omega
+  dsimp only
+  right
+  rw [show WeierstrassCurve.Affine.Point.some x y hns +
+        -WeierstrassCurve.Affine.Point.some x y hns = 0 from hPneg,
+    zParam_zero, hzneg]
+  change ordPi (-x / y) + ordPi (x / (y + x + 1)) ≤
+    ordPi ((0 : L) - (-x / y) - x / (y + x + 1))
+  rw [herr, herrv]
+  change r + ordPi (x / (y + x + 1)) ≤ 2 * r
+  rw [ordPi_div hx0 hden, hxv, hdenv]
+  omega
 
 /-! ## Exact valuation lemmas for the counterexample -/
 
