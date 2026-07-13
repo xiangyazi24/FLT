@@ -61,6 +61,28 @@ theorem identity8 (m b t₁ t₂ u t₃ d : L)
   linear_combination
     A m * ht₃ + (b - 1) * hsum + (1 + m) * hpair + hBC
 
+/-! ## Inverse branch of add_congr (P+Q=O, Q=-P)
+
+For P=(x,y) finite with v(zP)=r≥1 and Q=-P:
+  error = 0 - zP - z(-P) = x(x+1)/(y(y+x+1))
+  v(error) = v(x)+v(x+1)-v(y)-v(y+x+1) = (-2r)+(-2r)-(-3r)-(-3r) = 2r = r+r.
+So the right disjunct holds with equality. -/
+
+theorem add_congr_inverse_branch {x y : L}
+    (hx0 : x ≠ 0) (hy0 : y ≠ 0)
+    (hns : WeierstrassCurve.Affine.Nonsingular E0 x y)
+    (hxneg : ordPi x < 0) :
+    let P := WeierstrassCurve.Affine.Point.some x y hns
+    zParam (P + (-P)) - zParam P - zParam (-P) = 0 ∨
+    v (zParam P) + v (zParam (-P)) ≤
+      v (zParam (P + (-P)) - zParam P - zParam (-P)) := by
+  -- P + (-P) = 0, so zParam(P+(-P)) = 0.
+  -- error = -zP - z(-P) = x(x+1)/(y(y+x+1)) by field_simp; ring
+  -- val_coords gives v(x) = -2r, v(y) = -3r where r = v(zP) ≥ 1.
+  -- Ultrametric: v(x+1)=-2r, v(y+x+1)=-3r.
+  -- v(error) = -4r+6r = 2r = v(zP)+v(z(-P)). Right disjunct holds.
+  sorry
+
 /-! ## Exact valuation lemmas for the counterexample -/
 
 private theorem add_ne_zero_of_ordPi_ne {x y : L}

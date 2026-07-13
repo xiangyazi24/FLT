@@ -282,17 +282,17 @@ torsionAffine 5 gives error with ordPi = 0 while the sum = 2).  The disjunctive
 restatement is mathematically correct and compatible with the downstream
 `FormalKernelData.add_congr` (which uses `vpi : WithTop ℤ` where `vpi 0 = ⊤`). -/
 theorem add_congr (P Q : E0Point)
-    (hP : 1 ≤ v (zParam P)) (hQ : 1 ≤ v (zParam Q)) :
+    (hP : P = 0 ∨ ordPi (xCoord P) < 0)
+    (hQ : Q = 0 ∨ ordPi (xCoord Q) < 0) :
     zParam (P + Q) - zParam P - zParam Q = 0 ∨
     v (zParam P) + v (zParam Q) ≤ v (zParam (P + Q) - zParam P - zParam Q) := by
-  -- The origin cases are vacuous: `v (zParam 0) = 0` contradicts `hP`/`hQ`.
-  rcases P with _ | ⟨x₁, y₁, h₁⟩
-  · change 1 ≤ ordPi (0 : L) at hP
-    rw [ordPi_zero] at hP; exact absurd hP (by norm_num)
-  rcases Q with _ | ⟨x₂, y₂, h₂⟩
-  · change 1 ≤ ordPi (0 : L) at hQ
-    rw [ordPi_zero] at hQ; exact absurd hQ (by norm_num)
-  -- Remaining: both finite in the formal kernel.  Three branches of Point.add:
+  -- The origin cases: P=0 gives zParam P = 0, error = z(Q) - z(Q) = 0.
+  rcases hP with rfl | hPx
+  · simp [zParam_zero]; left; ring
+  rcases hQ with rfl | hQx
+  · simp [zParam_zero]; left; ring
+  -- Remaining: both P = (x₁,y₁) and Q = (x₂,y₂) finite with v(x) < 0 (near O).
+  -- Three branches of Point.add:
   -- (a) inverse (P+Q=O), (b) distinct-x, (c) doubling.
   -- Chart algebra (G_line, BC_factor, identity8) is proved in N18AddCongrProof.lean.
   sorry
