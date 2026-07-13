@@ -74,7 +74,27 @@ theorem add_congr_wired (P Q : E0Point)
   -- Case split on Point.add branches and dispatch to the three sorry-free proofs.
   -- The type-matching is fiddly (dependent types in Point.neg, 2*z vs z+z);
   -- each branch is independently sorry-free in N18AddCongrProof.lean.
-  sorry
+  by_cases hx : x₁ = x₂
+  · subst x₂
+    by_cases hy : y₁ = WeierstrassCurve.Affine.negY E0 x₁ y₂
+    · have hy₂ : y₂ = WeierstrassCurve.Affine.negY E0 x₁ y₁ := by
+        rw [hy, WeierstrassCurve.Affine.negY_negY]
+      have hQnegP :
+          WeierstrassCurve.Affine.Point.some x₁ y₂ hns₂ =
+            -WeierstrassCurve.Affine.Point.some x₁ y₁ hns₁ := by
+        rw [WeierstrassCurve.Affine.Point.neg_some,
+          WeierstrassCurve.Affine.Point.some.injEq]
+        exact ⟨rfl, hy₂⟩
+      rw [hQnegP]
+      exact add_congr_inverse_branch hx₁0 hy₁0 hns₁ hPx
+    · have hyEq : y₁ = y₂ :=
+        WeierstrassCurve.Affine.Y_eq_of_Y_ne hns₁.1 hns₂.1 rfl hy
+      subst y₂
+      cases Subsingleton.elim hns₂ hns₁
+      simpa only [two_mul, sub_sub] using
+        add_congr_tangent_branch hx₁0 hy₁0 hns₁ hPx (fun h => hy h.symm)
+  · exact add_congr_distinct_x_branch
+      hx₁0 hy₁0 hx₂0 hy₂0 hns₁ hns₂ hx hPx hQx
 
 end
 
