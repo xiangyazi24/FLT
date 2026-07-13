@@ -207,9 +207,46 @@ theorem vpi_pos_bridge_good (P : GoodPoint)
 /-- Negation has the same formal-parameter order on the good chart.  It is the
 valuation-level form of the formal inverse expansion `i(T) = -T + O(T²)`. -/
 theorem vpi_zParamGood_neg (P : GoodPoint) :
+    InFormalKernel P →
     vpiGood (MazurProof.N18PackageII.zParamGood (-P)) =
       vpiGood (MazurProof.N18PackageII.zParamGood P) := by
-  sorry
+  intro hP
+  rcases hP with hzero | hx
+  · subst P
+    simp
+  · cases P with
+    | zero =>
+        simp [xCoordGood, ordPi_zero] at hx
+    | some x y h =>
+        simp only [xCoordGood] at hx
+        have hx0 : x ≠ 0 := by
+          intro hzero
+          rw [hzero, ordPi_zero] at hx
+          omega
+        have hy0 : y ≠ 0 := yCoordGood_ne_zero_of_ordPi_x_neg h hx
+        have hneg : WeierstrassCurve.Affine.Nonsingular E0Good x
+            (WeierstrassCurve.Affine.negY E0Good x y) :=
+          (WeierstrassCurve.Affine.nonsingular_neg x y).mpr h
+        have hyneg0 : WeierstrassCurve.Affine.negY E0Good x y ≠ 0 :=
+          yCoordGood_ne_zero_of_ordPi_x_neg hneg hx
+        have heq := (WeierstrassCurve.Affine.equation_iff x y).mp h.1
+        have heqneg := (WeierstrassCurve.Affine.equation_iff x
+          (WeierstrassCurve.Affine.negY E0Good x y)).mp hneg.1
+        have hcoords := MazurProof.N18RouteC.GoodModel.val_coords
+          hx0 hy0 (by simpa using heq) hx
+        have hcoordsNeg := MazurProof.N18RouteC.GoodModel.val_coords
+          hx0 hyneg0 (by simpa using heqneg) hx
+        have hz0 : -x / y ≠ 0 := div_ne_zero (neg_ne_zero.mpr hx0) hy0
+        have hzneg0 :
+            -x / WeierstrassCurve.Affine.negY E0Good x y ≠ 0 :=
+          div_ne_zero (neg_ne_zero.mpr hx0) hyneg0
+        rw [WeierstrassCurve.Affine.Point.neg_some,
+          MazurProof.N18PackageII.zParamGood_some,
+          MazurProof.N18PackageII.zParamGood_some,
+          vpiGood_apply_of_ne hzneg0, vpiGood_apply_of_ne hz0]
+        exact_mod_cast (show
+          ordPi (-x / WeierstrassCurve.Affine.negY E0Good x y) =
+            ordPi (-x / y) by omega)
 
 /-- Package I on the good model, in the weak form used by the induction.
 The intended proof expands the integral chart law and applies the
@@ -231,7 +268,27 @@ kernel of good reduction.  This is the remaining Package III reduction fact. -/
 theorem three_pow_torsion_mem_kernel_good (P : GoodPoint)
     (hP : ∃ k : ℕ, ((3 : ℤ) ^ k) • P = 0) :
     InFormalKernel P := by
-  sorry
+  obtain ⟨k, hk⟩ := hP
+  have hpow : ((3 : ℤ) ^ k) • redGood P = 0 := by
+    rw [← map_zsmul, hk, map_zero]
+  have hseven : (7 : ℤ) • redGood P = 0 :=
+    MazurProof.N18ReductionHom.seven_zsmul_redPoint (redGood P)
+  have hcop : IsCoprime ((3 : ℤ) ^ k) 7 :=
+    (show IsCoprime (3 : ℤ) 7 by norm_num).pow_left
+  obtain ⟨u, v, huv⟩ := hcop
+  have hred : redGood P = 0 := by
+    calc
+      redGood P = (1 : ℤ) • redGood P := by simp
+      _ = (u * (3 : ℤ) ^ k + v * 7) • redGood P := by rw [huv]
+      _ = u • (((3 : ℤ) ^ k) • redGood P) +
+          v • ((7 : ℤ) • redGood P) := by
+            rw [add_zsmul, mul_zsmul, mul_zsmul]
+      _ = 0 := by
+        rw [hpow, hseven]
+        change u • (0 : MazurProof.N18RouteC.Reduction.RedPoint) +
+          v • (0 : MazurProof.N18RouteC.Reduction.RedPoint) = 0
+        rw [zsmul_zero, zsmul_zero, zero_add]
+  exact (redGood_ker P).mp (AddMonoidHom.mem_ker.mpr hred)
 
 theorem inFormalKernel_iff_packageII (P : GoodPoint) :
     InFormalKernel P ↔ MazurProof.N18PackageII.InFormalKernel P := by
@@ -275,8 +332,9 @@ structure FormalKernelData where
   vpi_three : vpi (3 : L) = (3 : WithTop ℤ)
   vpi_unit : ∀ m : ℤ, ¬ (3 ∣ m) → vpi (m : L) = 0
   zParam_zero : zParam 0 = 0
-  vpi_zParam_neg : ∀ P, vpi (zParam (-P)) = vpi (zParam P)
-  zParam_eq_zero : ∀ P, zParam P = 0 → P = 0
+  vpi_zParam_neg : ∀ P, InFormalKernel P →
+    vpi (zParam (-P)) = vpi (zParam P)
+  zParam_eq_zero : ∀ P, InFormalKernel P → zParam P = 0 → P = 0
   add_congr : ∀ P Q, InFormalKernel P → InFormalKernel Q →
     2 * min (vpi (zParam P)) (vpi (zParam Q)) ≤
       vpi (zParam (P + Q) - zParam P - zParam Q)
@@ -288,11 +346,24 @@ structure FormalKernelData where
   three_pow_torsion_mem_kernel : ∀ P,
     (∃ k : ℕ, ((3 : ℤ) ^ k) • P = 0) → InFormalKernel P
 
-/-- Faithfulness of `z = -x/y` on the good model.  Equivalently, the two
-quadratic points above `x = 0` are not `L`-rational. -/
+/-- Faithfulness of `z = -x/y` on the good formal kernel. -/
 theorem zParamGood_eq_zero_good (P : GoodPoint)
+    (hP : InFormalKernel P)
     (hz : MazurProof.N18PackageII.zParamGood P = 0) : P = 0 := by
-  sorry
+  rcases hP with hzero | hx
+  · exact hzero
+  · cases P with
+    | zero => rfl
+    | some x y h =>
+        simp only [xCoordGood] at hx
+        have hx0 : x ≠ 0 := by
+          intro hzero
+          rw [hzero, ordPi_zero] at hx
+          omega
+        have hy0 : y ≠ 0 := yCoordGood_ne_zero_of_ordPi_x_neg h hx
+        exfalso
+        exact (div_ne_zero (neg_ne_zero.mpr hx0) hy0)
+          (by simpa using hz)
 
 /-- Package I + Package II + the explicit good-model coordinate bridges. -/
 noncomputable def goodFormalKernelData : FormalKernelData where
@@ -409,7 +480,8 @@ theorem vpi_zParam_nsmul (P : GoodPoint) (hmem : P ∈ D.kernelSubgroup)
     D.vpi (D.zParam (n • P)) = D.vpi (D.zParam P) := by
   have hpos : 0 < D.vpi (D.zParam P) := D.vpi_pos_of_mem hmem
   rcases eq_or_ne (D.zParam P) 0 with hzero | hz
-  · have hP0 : P = 0 := D.zParam_eq_zero P hzero
+  · have hP0 : P = 0 := D.zParam_eq_zero P
+      ((D.mem_kernelSubgroup).mp hmem) hzero
     subst P
     rw [nsmul_zero_good]
   · have hfinite : D.vpi (D.zParam P) ≠ ⊤ := by
@@ -443,7 +515,8 @@ theorem vpi_zParam_zsmul (P : GoodPoint) (hmem : P ∈ D.kernelSubgroup)
     exact D.vpi_zParam_nsmul P hmem n hm
   | negSucc n =>
     change D.vpi (D.zParam (-((n + 1) • P))) = D.vpi (D.zParam P)
-    rw [D.vpi_zParam_neg]
+    rw [D.vpi_zParam_neg _
+      ((D.mem_kernelSubgroup).mp (nsmul_mem hmem (n + 1)))]
     apply D.vpi_zParam_nsmul P hmem
     intro hd
     apply hm
@@ -463,7 +536,7 @@ def formalKernel18 : _root_.FormalKernel18 where
     · intro h
       apply Subtype.ext
       rw [ZeroMemClass.coe_zero]
-      exact D.zParam_eq_zero _ h
+      exact D.zParam_eq_zero _ z.property h
     · intro h
       have hz : (z : GoodPoint) = 0 := by rw [h, ZeroMemClass.coe_zero]
       rw [hz, D.zParam_zero]
@@ -539,7 +612,7 @@ def formalKernel18 : _root_.FormalKernel18 where
       apply hz
       apply Subtype.ext
       rw [ZeroMemClass.coe_zero]
-      exact D.zParam_eq_zero _ h
+      exact D.zParam_eq_zero _ z.property h
     have htor' : ∃ n : ℕ, 0 < n ∧ n • (z : GoodPoint) = 0 := by
       obtain ⟨n, hn, hnz⟩ := htor
       refine ⟨n, hn, ?_⟩
