@@ -1,6 +1,5 @@
 import FLT.Assumptions.MazurProof.TateOrder25Factor
 import FLT.Assumptions.MazurProof.RationalPointsX049
-import FLT.Assumptions.MazurProof.RationalPointsX049
 
 /-!
 # The compact order-49 Tate polynomial
