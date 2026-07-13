@@ -16,10 +16,15 @@
 - final result: 5 commits, axiom surface decomposed from 1 monolithic to 8 targeted,
   kernelPoly19_no_rational_root sorry-free, N18 bridge (C) sorry-free
 - next session priorities:
-  (1) harvest ChatGPT flt3/4 answers (Vélu 2-isogeny formulas, N25/N49 strategy)
-  (2) get p=17 kernel polynomial (Sage session on uisai2 or LMFDB)
-  (3) close kernelPoly17_no_rational_root (same pattern as p=19)
-  (4) work on KubertBridgeN16 sorry #2 (birational map formulas)
+  (1) p=17 kernel poly: need Sage on uisai2 to compute isogeny kernel for
+      the 17-isogeny corresponding to the noncuspidal X_0(17) points.
+      The LMFDB shows curves with 17-isogenies exist (conductor 14450).
+      Command: `E.isogenies_prime_degree(17)[0].kernel_polynomial()` in Sage.
+  (2) close kernelPoly17_no_rational_root (same pattern as p=19 — monic+mod p)
+  (3) KubertBridgeN16 sorry #2: birational map (b,c,eta) → (u,w) on w²=u³-u²-u
+  (4) Vélu 2-isogeny for exists_rational_two_isogeny_quotient
+  (5) p=13 genus-2 descent (biggest piece, needs Q4478 design)
+  Note: ChatGPT flt tabs may still have answers in browser — check manually.
 
 ## Run 2026-07-08 (ChatGPT harvest mode)
 - doctrine version: Close CyclicExclusion sorry's via ChatGPT harvest
