@@ -161,7 +161,7 @@ structure FormalKernelData where
   `ThreeAdic.ordPi m = 0` for `3 ∤ m`; carried here because `vpi` is abstract. -/
   vpi_unit : ∀ m : ℤ, ¬ (3 ∣ m) → vpi ((m : L)) = 0
   zParam_zero : zParam 0 = 0
-  zParam_neg : ∀ P, zParam (-P) = - zParam P
+  vpi_zParam_neg : ∀ P, vpi (zParam (-P)) = vpi (zParam P)
   /-- `z = 0` only at the origin (faithfulness of `z = -x/y` on the kernel). -/
   zParam_eq_zero : ∀ P, zParam P = 0 → P = 0
   /-- **Package I** — integral formal group law leading term (pointwise), stated
@@ -319,7 +319,7 @@ theorem vpi_zParam_zsmul (P : E0Point) (hmem : P ∈ D.kernelSubgroup)
     have e2 : ((-m).toNat) • P = (-m) • P := by
       rw [← natCast_zsmul, Int.toNat_of_nonneg hnn]
     have hmP : m • P = -(((-m).toNat) • P) := by rw [e2, neg_zsmul, neg_neg]
-    rw [hmP, D.zParam_neg, D.vpi.map_neg]
+    rw [hmP, D.vpi_zParam_neg]
     apply D.vpi_zParam_nsmul P hmem
     rw [Int.toNat_of_nonneg hnn, Int.dvd_neg]
     exact hm

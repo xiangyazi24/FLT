@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.N18AddCongrProof
+import FLT.Assumptions.MazurProof.N18Block5Instantiation
 
 /-!
 # Wired add_congr: assembles the three branch proofs
@@ -31,13 +32,7 @@ private theorem xCoord_ne_zero_of_ordPi_neg {x y : L}
 private theorem yCoord_ne_zero_of_ordPi_xneg {x y : L}
     (hns : WeierstrassCurve.Affine.Nonsingular E0 x y)
     (hx : ordPi x < 0) : y ≠ 0 := by
-  intro hy
-  have heq := (WeierstrassCurve.Affine.equation_iff x y).mp hns.1
-  rw [hy] at heq
-  simp only [zero_pow, mul_zero, add_zero, zero_mul] at heq
-  have : ordPi (x ^ 3 + E0.a₂ * x ^ 2 + E0.a₄ * x + E0.a₆) = ordPi (E0.a₆) := by
-    sorry -- strict domination: v(x³) = 3·v(x) < 2·v(x) < v(x) < 0 = v(a₆)
-  sorry -- contradiction from heq and the ordPi computation
+  sorry
 
 /-- **Package I `add_congr`, wired from the three branch proofs.** -/
 theorem add_congr_wired (P Q : E0Point)
@@ -50,11 +45,10 @@ theorem add_congr_wired (P Q : E0Point)
   rcases hQ with rfl | hQx
   · left; rw [add_zero P, zParam_zero]; ring
   rcases P with _ | ⟨x₁, y₁, hns₁⟩
-  · exact absurd rfl (by simp [xCoord] at hPx)
+  · simp [xCoord] at hPx
   rcases Q with _ | ⟨x₂, y₂, hns₂⟩
-  · exact absurd rfl (by simp [xCoord] at hQx)
-  change ordPi x₁ < 0 at hPx
-  change ordPi x₂ < 0 at hQx
+  · simp [xCoord] at hQx
+  simp only [xCoord] at hPx hQx
   have hx₁0 := xCoord_ne_zero_of_ordPi_neg hns₁ hPx
   have hy₁0 := yCoord_ne_zero_of_ordPi_xneg hns₁ hPx
   have hx₂0 := xCoord_ne_zero_of_ordPi_neg hns₂ hQx
