@@ -53,12 +53,43 @@ Fixed-curve Jacobian descent. Lean draft Q4478.
 **Terminal:** sorry-free `no_prime_order_ge_17`, or axiomatized as `PrimeTailPackage` (Q4499).
 Research-scale. May axiomatize interface and fill later.
 
-### (e) N18 E₀ route (Layer 1 residual)
+### (e) N18 E₀ route — Fable campaign plan (2026-07-13 05:00)
 **Terminal:** `no_five_descent_solution` sorry-free → `no_order_18` becomes a theorem.
-Three sub-pieces per N18_HANDOFF.md:
-  (A) Good-model port (crux)
-  (B) Front-end via reduction-mod-5
-  (C) Bridge: integer soln → rational point (independent, small)
+
+**Completed:**
+- (C) Bridge: `five_descent_to_noncuspidal` sorry-free
+- Package I `add_congr` for E0: all 3 branches sorry-free (1278 lines)
+  (inverse + distinct-x + tangent in N18AddCongrProof.lean)
+
+**Remaining chain (Fable plan, 4 tiers):**
+
+TIER 1 (interface fixes, do first):
+- 1a: Fix `zParam_neg` → `vpi_zParam_neg` in FormalKernelData [LOW, Codex]
+- 1b: N18GoodModelAssembly.lean skeleton [LOW, Codex]
+
+TIER 2 (good-model FormalKernelData, serial core):
+- 2a: zParamGood definition [LOW]
+- 2b: vpi/vpi_three/vpi_unit reuse [LOW]
+- 2c: val_coords for E0Good (Newton polygon, ℤ[a] coefficients) [MED]
+- **2d: add_congr for E0Good** [HIGH — BC_factor fails (a₁≠1,a₃≠1), needs new identity (8). Oracle design required]
+- 2e: vpi_pos_bridge [LOW]
+- 2f: kernel_add_closed [MED]
+- 2g: Package III (3-power torsion in kernel) [MED]
+- **2h: Package II msq_torsionFree** [HIGH — needs [3]-series or Ψ₃. Oracle design required]
+
+TIER 3 (transport and assembly):
+- 3a: redGood : E0GoodPoint →+ RedPoint [MED-HIGH — no Mathlib API]
+- 3b: hkerGood (kernel = formal kernel) [MED]
+- 3c: Transport h21 via e0GoodEquiv [LOW]
+- 3d: Build red_E0 and hker7_E0 [LOW]
+
+TIER 4 (front-end wiring):
+- 4a: Coordinate bridge (ring lemma) [LOW]
+- 4b: no_five_descent_solution final assembly [LOW]
+
+**Critical path:** 2d ‖ 2h (parallel, each HIGH) → 3a+3b → assembly
+**Biggest risks:** 2d (new identity for E0Good) and 2h (Package II torsion-free)
+**Front-end (B):** NOT needed per Fable — existing FiberTable does direct exhaustion
 
 ### (f) KubertBridgeN16 (Z/2×Z/16)
 **Terminal:** 2 sorry closed. Polynomial computations in Tate NF.
