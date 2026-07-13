@@ -6,6 +6,8 @@ import FLT.Assumptions.MazurProof.N18RouteC_GoodModel
 import FLT.Assumptions.MazurProof.N18Block5Instantiation
 import FLT.Assumptions.MazurProof.CyclicExclusion18
 import FLT.Assumptions.MazurProof.N18RouteC_Block7
+import FLT.Assumptions.MazurProof.N18RouteC_LocalThreeSound
+import FLT.Assumptions.MazurProof.N18RouteC_TorsionTable
 
 /-!
 # N18 good-model final assembly
@@ -38,6 +40,8 @@ open MazurProof.N18RouteC.ThreeAdic
 open MazurProof.N18Block5Instantiation.AddCongr
 
 noncomputable section
+
+set_option maxHeartbeats 0
 
 abbrev GoodPoint := MazurProof.N18RouteC.GoodModel.E0GoodPoint
 
@@ -75,32 +79,6 @@ private theorem nsmul_zero_good (n : ℕ) : n • (0 : GoodPoint) = 0 := by
   induction n with
   | zero => rfl
   | succ n ih => rw [succ_nsmul, ih]; rfl
-
-/-- The good integral equation has its usual reduction homomorphism, and the
-kernel is exactly the near-origin locus.  Closing this theorem requires the
-ring-of-integers reduction map and its compatibility with the affine group
-law; it is independent of every later Block-5 and Block-7 argument. -/
-theorem exists_good_reduction :
-    ∃ red : GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint,
-      ∀ P : GoodPoint, P ∈ red.ker ↔ InFormalKernel P := by
-  sorry
-
-/-- The reduction homomorphism selected from `exists_good_reduction`. -/
-noncomputable def redGood :
-    GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint :=
-  Classical.choose exists_good_reduction
-
-theorem redGood_ker (P : GoodPoint) :
-    P ∈ redGood.ker ↔ InFormalKernel P :=
-  Classical.choose_spec exists_good_reduction P
-
-/-- Near-origin points are closed under addition, as a consequence of the
-kernel description of reduction. -/
-theorem kernel_add_closed_good (P Q : GoodPoint)
-    (hP : InFormalKernel P) (hQ : InFormalKernel Q) :
-    InFormalKernel (P + Q) := by
-  apply (redGood_ker (P + Q)).mp
-  exact add_mem ((redGood_ker P).mpr hP) ((redGood_ker Q).mpr hQ)
 
 /-- A finite good-model point with negative `x`-order cannot have `y = 0`.
 This is the monic-cubic Newton-polygon lemma used immediately before
@@ -367,13 +345,88 @@ private theorem good_coeff_orders :
     GoodModel.zero_le_ordPi_ringOfIntegers _,
     GoodModel.zero_le_ordPi_ringOfIntegers _⟩
 
+private theorem ordPi_mul_nonneg_good {u w : L}
+    (hu : 0 ≤ ordPi u) (hw : 0 ≤ ordPi w) :
+    0 ≤ ordPi (u * w) := by
+  by_cases hu0 : u = 0
+  · simp [hu0, ordPi_zero]
+  by_cases hw0 : w = 0
+  · simp [hw0, ordPi_zero]
+  rw [ordPi_mul hu0 hw0]
+  omega
+
+private theorem ordPi_le_mul_right_good {u w : L}
+    (hu : 0 ≤ ordPi u) (hw : ordPi w ≤ 0) :
+    ordPi w ≤ ordPi (u * w) := by
+  by_cases hu0 : u = 0
+  · simp [hu0, ordPi_zero, hw]
+  by_cases hw0 : w = 0
+  · simp [hw0, ordPi_zero]
+  rw [ordPi_mul hu0 hw0]
+  omega
+
+/-- Integrality of `x` forces integrality of `y` on the good equation. -/
+private theorem y_nonneg_of_x_nonneg_good {x y : L}
+    (h : WeierstrassCurve.Affine.Nonsingular E0Good x y)
+    (hx : 0 ≤ ordPi x) : 0 ≤ ordPi y := by
+  by_cases hy0 : y = 0
+  · simp [hy0, ordPi_zero]
+  by_contra hy
+  have hyneg : ordPi y < 0 := lt_of_not_ge hy
+  rcases good_coeff_orders with ⟨ha1, ha2, ha3, ha4, ha6⟩
+  have hx2 : 0 ≤ ordPi (x ^ 2) := by
+    rw [pow_two]
+    exact ordPi_mul_nonneg_good hx hx
+  have hx3 : 0 ≤ ordPi (x ^ 3) := by
+    rw [show x ^ 3 = x ^ 2 * x by ring]
+    exact ordPi_mul_nonneg_good hx2 hx
+  have hrhs : 0 ≤ ordPi
+      (x ^ 3 + E0Good.a₂ * x ^ 2 + E0Good.a₄ * x + E0Good.a₆) := by
+    have h2 := ordPi_mul_nonneg_good ha2 hx2
+    have h4 := ordPi_mul_nonneg_good ha4 hx
+    exact le_ordPi_add
+      (le_ordPi_add (le_ordPi_add hx3 h2 le_rfl) h4 le_rfl) ha6 le_rfl
+  let tail := E0Good.a₁ * x * y + E0Good.a₃ * y
+  have htail : ordPi y ≤ ordPi tail := by
+    have hax : 0 ≤ ordPi (E0Good.a₁ * x) :=
+      ordPi_mul_nonneg_good ha1 hx
+    have h1 : ordPi y ≤ ordPi (E0Good.a₁ * x * y) :=
+      ordPi_le_mul_right_good hax hyneg.le
+    have h3 : ordPi y ≤ ordPi (E0Good.a₃ * y) :=
+      ordPi_le_mul_right_good ha3 hyneg.le
+    exact le_ordPi_add h1 h3 hyneg.le
+  have hy2 : ordPi (y ^ 2) = 2 * ordPi y := by
+    rw [pow_two, ordPi_mul hy0 hy0]
+    ring
+  have hlhs : ordPi (y ^ 2 + tail) = 2 * ordPi y := by
+    by_cases ht0 : tail = 0
+    · simp [ht0, hy2]
+    · rw [ordPi_add_eq_of_lt (pow_ne_zero 2 hy0) ht0 (by
+          rw [hy2]
+          omega), hy2]
+  have hcurve := (WeierstrassCurve.Affine.equation_iff x y).mp h.1
+  have hcurve' : y ^ 2 + tail =
+      x ^ 3 + E0Good.a₂ * x ^ 2 + E0Good.a₄ * x + E0Good.a₆ := by
+    simpa only [tail, add_assoc] using hcurve
+  have hrhs0 :
+      x ^ 3 + E0Good.a₂ * x ^ 2 + E0Good.a₄ * x + E0Good.a₆ ≠ 0 := by
+    intro hz
+    have hlhs0 : y ^ 2 + tail = 0 := hcurve'.trans hz
+    have hord := congrArg ordPi hlhs0
+    rw [hlhs, ordPi_zero] at hord
+    omega
+  have hord := congrArg ordPi hcurve'
+  rw [hlhs] at hord
+  omega
+
 private theorem good_a1_unit : E0Good.a₁ ≠ 0 ∧ ordPi E0Good.a₁ = 0 := by
-  let c : MazurProof.N18PackageII.OL := aInteger ^ 2 - aInteger - 1
+  let c : MazurProof.N18PackageII.OL :=
+    FieldArithmetic.aInteger ^ 2 - FieldArithmetic.aInteger - 1
   have hc : 0 ≤ ordPi ((c : MazurProof.N18PackageII.OL) : L) :=
     GoodModel.zero_le_ordPi_ringOfIntegers c
   have hmul : E0Good.a₁ * (c : L) = 1 := by
-    dsimp [c]
-    simp only [E0Good, aInteger]
+    change E0Good.a₁ * (a ^ 2 - a - 1) = 1
+    simp only [E0Good]
     ring_nf
     simp only [a_pow_four, a_cubic]
     ring
@@ -501,6 +554,9 @@ private theorem vieta_x_sum_good (m b t₁ t₂ u : L)
     intro h; apply hq0; simp [q, h]
   have hu0 : m * u + b ≠ 0 := by
     intro h; apply hq0; simp [q, h]
+  have h₁0' : t₁ * m + b ≠ 0 := by simpa only [mul_comm] using h₁0
+  have h₂0' : t₂ * m + b ≠ 0 := by simpa only [mul_comm] using h₂0
+  have hu0' : u * m + b ≠ 0 := by simpa only [mul_comm] using hu0
   have hcleared :
       b ^ 2 * n =
         (m ^ 2 + E0Good.a₁ * m * b - E0Good.a₂ * b ^ 2) * q := by
@@ -510,7 +566,7 @@ private theorem vieta_x_sum_good (m b t₁ t₂ u : L)
   refine ⟨hq0, ?_⟩
   have hleft :
       t₁ / (m * t₁ + b) + t₂ / (m * t₂ + b) + u / (m * u + b) = n / q := by
-    field_simp [hq0, h₁0, h₂0, hu0]
+    field_simp [hq0, h₁0, h₂0, hu0, h₁0', h₂0', hu0']
     simp only [n, q]
     ring
   rw [hleft]
@@ -523,13 +579,14 @@ private theorem add_congr_inverse_good {x y : L}
     (hxneg : ordPi x < 0) :
     let P : GoodPoint := .some x y hns
     let r := ordPi (-x / y)
-    MazurProof.N18PackageII.zParamGood (P + (-P)) -
-        MazurProof.N18PackageII.zParamGood P -
-        MazurProof.N18PackageII.zParamGood (-P) = 0 ∨
-      2 * r ≤ ordPi
-        (MazurProof.N18PackageII.zParamGood (P + (-P)) -
+    InFormalKernel (P + (-P)) ∧
+      (MazurProof.N18PackageII.zParamGood (P + (-P)) -
           MazurProof.N18PackageII.zParamGood P -
-          MazurProof.N18PackageII.zParamGood (-P)) := by
+          MazurProof.N18PackageII.zParamGood (-P) = 0 ∨
+        2 * r ≤ ordPi
+          (MazurProof.N18PackageII.zParamGood (P + (-P)) -
+            MazurProof.N18PackageII.zParamGood P -
+            MazurProof.N18PackageII.zParamGood (-P))) := by
   let P : GoodPoint := .some x y hns
   let r : ℤ := ordPi (-x / y)
   have heq := (WeierstrassCurve.Affine.equation_iff x y).mp hns.1
@@ -556,7 +613,7 @@ private theorem add_congr_inverse_good {x y : L}
     dsimp [s]
     by_cases ha30 : E0Good.a₃ = 0
     · rw [ha30, add_zero, haxv]
-    · exact ordPi_add_eq_of_lt hax0 ha30 (by rw [haxv]; omega)
+    · exact (ordPi_add_eq_of_lt hax0 ha30 (by rw [haxv]; omega)).trans haxv
   let d : L := y + s
   have hd0 : d ≠ 0 := by
     intro hd
@@ -568,7 +625,7 @@ private theorem add_congr_inverse_good {x y : L}
     omega
   have hdv : ordPi d = -3 * r := by
     dsimp [d]
-    exact ordPi_add_eq_of_lt hy0 hs0 (by rw [hyv, hsv]; omega)
+    exact (ordPi_add_eq_of_lt hy0 hs0 (by rw [hyv, hsv]; omega)).trans hyv
   have hzneg : MazurProof.N18PackageII.zParamGood (-P) = x / d := by
     change -x / WeierstrassCurve.Affine.negY E0Good x y = x / d
     rw [show WeierstrassCurve.Affine.negY E0Good x y = -d by
@@ -578,9 +635,13 @@ private theorem add_congr_inverse_good {x y : L}
     field_simp [hd0]
   have herr :
       (0 : L) - (-x / y) - x / d = x * s / (y * d) := by
-    dsimp [d, s]
-    field_simp [hy0, hd0]
-    ring
+    calc
+      (0 : L) - (-x / y) - x / d = x / y - x / d := by ring
+      _ = (x * d - y * x) / (y * d) := div_sub_div x x hy0 hd0
+      _ = x * s / (y * d) := by
+        congr 1
+        dsimp only [d]
+        ring
   have herr0 : x * s / (y * d) ≠ 0 :=
     div_ne_zero (mul_ne_zero hx0 hs0) (mul_ne_zero hy0 hd0)
   have herrv : ordPi (x * s / (y * d)) = 2 * r := by
@@ -588,9 +649,12 @@ private theorem add_congr_inverse_good {x y : L}
       ordPi_mul hx0 hs0, ordPi_mul hy0 hd0, hxv, hsv, hyv, hdv]
     omega
   dsimp only
+  refine ⟨Or.inl (add_neg_cancel P), ?_⟩
   right
   rw [show P + -P = 0 by exact add_neg_cancel P,
-    MazurProof.N18PackageII.zParamGood_zero, hzneg, herr, herrv]
+    MazurProof.N18PackageII.zParamGood_zero, hzneg]
+  change 2 * ordPi (-x / y) ≤ ordPi ((0 : L) - (-x / y) - x / d)
+  rw [herr, herrv]
 
 private theorem line_valuation_good (r : ℤ) (t₁ t₂ m b : L)
     (hr : 1 ≤ r) (ht₁ : OrdGoodG r t₁) (ht₂ : OrdGoodG r t₂)
@@ -636,11 +700,20 @@ private theorem line_valuation_good (r : ℤ) (t₁ t₂ m b : L)
     (hmSq.mul hb).mono (by omega)
   have hB : OrdGoodG (2 * r) (BGood m b) := by
     simp only [BGood]
-    have h1 := (c1.mul hm).mono (by omega)
-    have h2 := (c2.mul hb2).mono (by omega)
-    have h3 := (c3.mul hmSq).mono (by omega)
-    have h4 := ((c4.mul hmb).mono (by omega)).nat_mul 2
-    have h6 := ((c6.mul hmSqb).mono (by omega)).nat_mul 3
+    have h1 : OrdGoodG (2 * r) (E0Good.a₁ * m) :=
+      (c1.mul hm).mono (by omega)
+    have h2 : OrdGoodG (2 * r) (E0Good.a₂ * b) :=
+      (c2.mul hb2).mono (by omega)
+    have h3 : OrdGoodG (2 * r) (E0Good.a₃ * m ^ 2) :=
+      (c3.mul hmSq).mono (by omega)
+    have h4base : OrdGoodG (2 * r) (E0Good.a₄ * (m * b)) := by
+      simpa only [zero_add] using c4.mul hmb
+    have h4 : OrdGoodG (2 * r) (2 * E0Good.a₄ * m * b) := by
+      simpa only [Nat.cast_ofNat, mul_assoc] using h4base.nat_mul 2
+    have h6base : OrdGoodG (2 * r) (E0Good.a₆ * (m ^ 2 * b)) := by
+      simpa only [zero_add] using c6.mul hmSqb
+    have h6 : OrdGoodG (2 * r) (3 * E0Good.a₆ * m ^ 2 * b) := by
+      simpa only [Nat.cast_ofNat, mul_assoc] using h6base.nat_mul 3
     exact (((h1.add h2).add h3).add h4).add h6
   have hu : OrdGoodG r u := by
     dsimp [u]
@@ -671,9 +744,22 @@ private theorem line_valuation_good (r : ℤ) (t₁ t₂ m b : L)
     (hu.mul hk' |>.mono (by omega)).div_unit hdunit.1 hdunit.2
   let err := t₃ - t₁ - t₂
   have herrEq : err = BGood m b / AGood m - u * k / d := by
-    dsimp [err, t₃, k, d, u]
-    field_simp [hAunit.1, hdunit.1]
-    ring
+    have huEq : t₁ + t₂ = -BGood m b / AGood m - u := by
+      dsimp only [u]
+      ring
+    have hdEq' : d = 1 - k := by
+      dsimp only [d, k]
+      ring
+    have hdk : 1 - k ≠ 0 := by
+      rw [← hdEq']
+      exact hdunit.1
+    calc
+      err = -u / d - (t₁ + t₂) := by dsimp only [err, t₃]; ring
+      _ = -u / d - (-BGood m b / AGood m - u) := by rw [huEq]
+      _ = BGood m b / AGood m - u * k / d := by
+        rw [hdEq']
+        field_simp [hAunit.1, hdk]
+        ring
   have herrGood : OrdGoodG (2 * r) err := by
     rw [herrEq]
     exact hfirst.sub hsecond
@@ -689,13 +775,14 @@ private theorem add_congr_distinct_good {x₁ y₁ x₂ y₂ : L}
     let P : GoodPoint := .some x₁ y₁ hns₁
     let Q : GoodPoint := .some x₂ y₂ hns₂
     let r := min (ordPi (-x₁ / y₁)) (ordPi (-x₂ / y₂))
-    MazurProof.N18PackageII.zParamGood (P + Q) -
-        MazurProof.N18PackageII.zParamGood P -
-        MazurProof.N18PackageII.zParamGood Q = 0 ∨
-      2 * r ≤ ordPi
-        (MazurProof.N18PackageII.zParamGood (P + Q) -
+    InFormalKernel (P + Q) ∧
+      (MazurProof.N18PackageII.zParamGood (P + Q) -
           MazurProof.N18PackageII.zParamGood P -
-          MazurProof.N18PackageII.zParamGood Q) := by
+          MazurProof.N18PackageII.zParamGood Q = 0 ∨
+        2 * r ≤ ordPi
+          (MazurProof.N18PackageII.zParamGood (P + Q) -
+            MazurProof.N18PackageII.zParamGood P -
+            MazurProof.N18PackageII.zParamGood Q)) := by
   let P : GoodPoint := .some x₁ y₁ hns₁
   let Q : GoodPoint := .some x₂ y₂ hns₂
   let t₁ : L := -x₁ / y₁
@@ -770,12 +857,29 @@ private theorem add_congr_distinct_good {x₁ y₁ x₂ y₂ : L}
     E0Good.a₆ * (w₁ ^ 2 + w₁ * w₂ + w₂ ^ 2)
   have hqSU : OrdGoodG 1 qSU := by
     dsimp [qSU]
-    have h1 := ((c1.mul ht₂1).mono (by omega)).neg
-    have h2 := ((c2.mul ht₂sq1).mono (by omega)).neg
-    have h3 := ((c3.mul hwsum1).mono (by omega)).neg
-    have h4 := ((c4.mul (ht₂1.mul hwsum1)).mono (by omega)).neg
-    have h6 := ((c6.mul hww1).mono (by omega)).neg
-    exact (((h1.add h2).add h3).add h4).add h6
+    have h1 : OrdGoodG 1 (-E0Good.a₁ * t₂) := by
+      simpa only [neg_mul] using
+        (show OrdGoodG 1 (-(E0Good.a₁ * t₂)) from
+          (by simpa only [zero_add] using c1.mul ht₂1 :
+            OrdGoodG 1 (E0Good.a₁ * t₂)).neg)
+    have h2 : OrdGoodG 1 (-E0Good.a₂ * t₂ ^ 2) := by
+      simpa only [neg_mul] using
+        (show OrdGoodG 1 (-(E0Good.a₂ * t₂ ^ 2)) from
+          (by simpa only [zero_add] using c2.mul ht₂sq1 :
+            OrdGoodG 1 (E0Good.a₂ * t₂ ^ 2)).neg)
+    have h3 : OrdGoodG 1 (-E0Good.a₃ * (w₁ + w₂)) := by
+      simpa only [neg_mul] using
+        (show OrdGoodG 1 (-(E0Good.a₃ * (w₁ + w₂))) from
+          (by simpa only [zero_add] using c3.mul hwsum1 :
+            OrdGoodG 1 (E0Good.a₃ * (w₁ + w₂))).neg)
+    have h4base : OrdGoodG (1 + 1) (E0Good.a₄ * (t₂ * (w₁ + w₂))) := by
+      simpa only [zero_add] using c4.mul (ht₂1.mul hwsum1)
+    have h4 : OrdGoodG 1 (-E0Good.a₄ * t₂ * (w₁ + w₂)) := by
+      simpa only [neg_mul, mul_assoc] using (h4base.mono (by norm_num)).neg
+    have h6 : OrdGoodG 1
+        (-E0Good.a₆ * (w₁ ^ 2 + w₁ * w₂ + w₂ ^ 2)) := by
+      simpa only [neg_mul, zero_add] using (c6.mul hww1).neg
+    simpa only [sub_eq_add_neg, neg_mul] using (((h1.add h2).add h3).add h4).add h6
   have hSUeq : SU = 1 + qSU := by simp only [SU, qSU]; ring
   have hSUunit : SU ≠ 0 ∧ ordPi SU = 0 := by
     rw [hSUeq]
@@ -894,8 +998,19 @@ private theorem add_congr_distinct_good {x₁ y₁ x₂ y₂ : L}
     have hxdiff :
         t₁ / (m * t₁ + b) - t₂ / (m * t₂ + b) ≠ 0 := by
       simpa only [← hx₁chart, ← hx₂chart] using sub_ne_zero.mpr hxne
-    field_simp [hmt₁0, hmt₂0, hxdiff, hb0, sub_ne_zero.mpr htne]
-    ring
+    have hbdiff : -(b * t₂) + b * t₁ ≠ 0 := by
+      rw [show -(b * t₂) + b * t₁ = b * (t₁ - t₂) by ring]
+      exact mul_ne_zero hb0 (sub_ne_zero.mpr htne)
+    field_simp [hmt₁0, hmt₂0, hxdiff, hb0, hbdiff]
+    calc
+      b * (-(m * t₂ + b) - -(m * t₁ + b)) /
+          (t₁ * (m * t₂ + b) - (m * t₁ + b) * t₂) =
+          m * (-(b * t₂) + b * t₁) / (-(b * t₂) + b * t₁) := by
+            congr 1 <;> ring
+      _ = m := by
+        have htdiff : -t₂ + t₁ ≠ 0 := by
+          simpa only [neg_add_eq_sub, sub_ne_zero] using htne
+        field_simp [htdiff]
   let x₃ := WeierstrassCurve.Affine.addX E0Good x₁ x₂ ell
   have hx₃ : x₃ = u / (m * u + b) := by
     change ell ^ 2 + E0Good.a₁ * ell - E0Good.a₂ - x₁ - x₂ =
@@ -924,7 +1039,33 @@ private theorem add_congr_distinct_good {x₁ y₁ x₂ y₂ : L}
     dsimp [t₃]
     have hmu0' : u * m + b ≠ 0 := by simpa only [mul_comm] using hmu0
     field_simp [hmu0, hmu0', hdunit.1]
+  have hmuGood : OrdGoodG (3 * r) (m * u) :=
+    (hmGood.mul huGood).mono (by omega)
+  have hmubGood : OrdGoodG (3 * r) (m * u + b) :=
+    hmuGood.add hbGood
+  have hmubOrd : 3 * r ≤ ordPi (m * u + b) := by
+    rcases hmubGood with hmubZero | hmubOrd
+    · exact (hmu0 hmubZero).elim
+    · exact hmubOrd
+  have hns₃ : WeierstrassCurve.Affine.Nonsingular E0Good x₃ y₃ := by
+    exact WeierstrassCurve.Affine.nonsingular_add hns₁ hns₂
+      (fun hxy ↦ hxne hxy.1)
+  have hy₃v : ordPi y₃ = -ordPi (m * u + b) := by
+    rw [hy₃, ordPi_div hdunit.1 hmu0, hdunit.2]
+    ring
+  have hy₃neg : ordPi y₃ < 0 := by
+    rw [hy₃v]
+    omega
+  have hx₃neg : ordPi x₃ < 0 := by
+    by_contra hx₃
+    have hy₃nonneg := y_nonneg_of_x_nonneg_good hns₃ (le_of_not_gt hx₃)
+    omega
+  have hformal : InFormalKernel (P + Q) := by
+    dsimp only [P, Q]
+    rw [WeierstrassCurve.Affine.Point.add_of_X_ne hxne]
+    exact Or.inr hx₃neg
   dsimp only
+  refine ⟨hformal, ?_⟩
   rw [hbridge]
   exact herr
 
@@ -935,11 +1076,12 @@ private theorem add_congr_tangent_good {x y : L}
     (hyne : WeierstrassCurve.Affine.negY E0Good x y ≠ y) :
     let P : GoodPoint := .some x y hns
     let r := ordPi (-x / y)
-    MazurProof.N18PackageII.zParamGood (P + P) -
-        2 * MazurProof.N18PackageII.zParamGood P = 0 ∨
-      2 * r ≤ ordPi
-        (MazurProof.N18PackageII.zParamGood (P + P) -
-          2 * MazurProof.N18PackageII.zParamGood P) := by
+    InFormalKernel (P + P) ∧
+      (MazurProof.N18PackageII.zParamGood (P + P) -
+          2 * MazurProof.N18PackageII.zParamGood P = 0 ∨
+        2 * r ≤ ordPi
+          (MazurProof.N18PackageII.zParamGood (P + P) -
+            2 * MazurProof.N18PackageII.zParamGood P)) := by
   let P : GoodPoint := .some x y hns
   let t : L := -x / y
   let w : L := -1 / y
@@ -980,12 +1122,32 @@ private theorem add_congr_tangent_good {x y : L}
     3 * E0Good.a₆ * w ^ 2
   have hqTU : OrdGoodG 1 qTU := by
     dsimp [qTU]
-    have h1 := ((c1.mul ht1).mono (by omega)).neg
-    have h2 := ((c2.mul htSq1).mono (by omega)).neg
-    have h3 := (((c3.mul hw1).mono (by omega)).nat_mul 2).neg
-    have h4 := (((c4.mul (ht1.mul hw1)).mono (by omega)).nat_mul 2).neg
-    have h6 := (((c6.mul hwSq1).mono (by omega)).nat_mul 3).neg
-    exact (((h1.add h2).add h3).add h4).add h6
+    have h1 : OrdGoodG 1 (-E0Good.a₁ * t) := by
+      simpa only [neg_mul] using
+        (show OrdGoodG 1 (-(E0Good.a₁ * t)) from
+          (by simpa only [zero_add] using c1.mul ht1 :
+            OrdGoodG 1 (E0Good.a₁ * t)).neg)
+    have h2 : OrdGoodG 1 (-E0Good.a₂ * t ^ 2) := by
+      simpa only [neg_mul] using
+        (show OrdGoodG 1 (-(E0Good.a₂ * t ^ 2)) from
+          (by simpa only [zero_add] using c2.mul htSq1 :
+            OrdGoodG 1 (E0Good.a₂ * t ^ 2)).neg)
+    have h3base : OrdGoodG 1 (E0Good.a₃ * w) := by
+      simpa only [zero_add] using c3.mul hw1
+    have h3 : OrdGoodG 1 (-2 * E0Good.a₃ * w) := by
+      simpa only [Nat.cast_ofNat, neg_mul, mul_assoc] using
+        (h3base.nat_mul 2).neg
+    have h4base : OrdGoodG (1 + 1) (E0Good.a₄ * (t * w)) := by
+      simpa only [zero_add] using c4.mul (ht1.mul hw1)
+    have h4 : OrdGoodG 1 (-2 * E0Good.a₄ * t * w) := by
+      simpa only [Nat.cast_ofNat, neg_mul, mul_assoc] using
+        ((h4base.mono (by norm_num)).nat_mul 2).neg
+    have h6base : OrdGoodG 1 (E0Good.a₆ * w ^ 2) := by
+      simpa only [zero_add] using c6.mul hwSq1
+    have h6 : OrdGoodG 1 (-3 * E0Good.a₆ * w ^ 2) := by
+      simpa only [Nat.cast_ofNat, neg_mul, mul_assoc] using
+        (h6base.nat_mul 3).neg
+    simpa only [sub_eq_add_neg, neg_mul] using (((h1.add h2).add h3).add h4).add h6
   have hTUeq : TU = 1 + qTU := by simp only [TU, qTU]; ring
   have hTUunit : TU ≠ 0 ∧ ordPi TU = 0 := by
     rw [hTUeq]
@@ -995,8 +1157,12 @@ private theorem add_congr_tangent_good {x y : L}
   have hw2 : OrdGoodG (2 * r) w := hwGood.mono (by omega)
   have hTN : OrdGoodG (2 * r) TN := by
     have h0 := htSq.nat_mul 3
-    have h1 := (c1.mul hw2).mono (by omega)
-    have h2 := ((c2.mul (htGood.mul hwGood)).mono (by omega)).nat_mul 2
+    have h1 : OrdGoodG (2 * r) (E0Good.a₁ * w) :=
+      (c1.mul hw2).mono (by omega)
+    have h2base : OrdGoodG (2 * r) (E0Good.a₂ * (t * w)) :=
+      (c2.mul (htGood.mul hwGood)).mono (by omega)
+    have h2 : OrdGoodG (2 * r) (2 * E0Good.a₂ * t * w) := by
+      simpa only [Nat.cast_ofNat, mul_assoc] using h2base.nat_mul 2
     have h4 : OrdGoodG (2 * r) (E0Good.a₄ * w ^ 2) := by
       rw [pow_two]
       exact (c4.mul (hwGood.mul hwGood)).mono (by omega)
@@ -1133,8 +1299,35 @@ private theorem add_congr_tangent_good {x y : L}
     dsimp [t₃]
     have hmu0' : u * m + b ≠ 0 := by simpa only [mul_comm] using hmu0
     field_simp [hmu0, hmu0', hdunit.1]
+  have hmuGood : OrdGoodG (3 * r) (m * u) :=
+    (hmGood.mul huGood).mono (by omega)
+  have hmubGood : OrdGoodG (3 * r) (m * u + b) :=
+    hmuGood.add hbGood
+  have hmubOrd : 3 * r ≤ ordPi (m * u + b) := by
+    rcases hmubGood with hmubZero | hmubOrd
+    · exact (hmu0 hmubZero).elim
+    · exact hmubOrd
+  have hns₃ : WeierstrassCurve.Affine.Nonsingular E0Good x₃ y₃ := by
+    exact WeierstrassCurve.Affine.nonsingular_add hns hns
+      (fun hxy ↦ hyne' hxy.2)
+  have hy₃v : ordPi y₃ = -ordPi (m * u + b) := by
+    rw [hy₃, ordPi_div hdunit.1 hmu0, hdunit.2]
+    ring
+  have hy₃neg : ordPi y₃ < 0 := by
+    rw [hy₃v]
+    omega
+  have hx₃neg : ordPi x₃ < 0 := by
+    by_contra hx₃
+    have hy₃nonneg := y_nonneg_of_x_nonneg_good hns₃ (le_of_not_gt hx₃)
+    omega
+  have hformal : InFormalKernel (P + P) := by
+    dsimp only [P]
+    rw [WeierstrassCurve.Affine.Point.add_self_of_Y_ne hyne']
+    exact Or.inr hx₃neg
   dsimp only
+  refine ⟨hformal, ?_⟩
   rw [hbridge]
+  change t₃ - 2 * t = 0 ∨ 2 * r ≤ ordPi (t₃ - 2 * t)
   rw [show t₃ - 2 * t = t₃ - t - t by ring]
   exact herr
 
@@ -1153,10 +1346,22 @@ theorem add_congr_good_weak (P Q : GoodPoint)
           MazurProof.N18PackageII.zParamGood Q) := by
   rcases hP with hP0 | hPx
   · subst P
-    simp [MazurProof.N18PackageII.zParamGood_zero]
+    have herr : MazurProof.N18PackageII.zParamGood ((0 : GoodPoint) + Q) -
+        MazurProof.N18PackageII.zParamGood 0 -
+        MazurProof.N18PackageII.zParamGood Q = 0 := by
+      rw [zero_add Q, MazurProof.N18PackageII.zParamGood_zero]
+      ring
+    rw [herr, vpiGood_zero]
+    exact le_top
   rcases hQ with hQ0 | hQx
   · subst Q
-    simp [MazurProof.N18PackageII.zParamGood_zero]
+    have herr : MazurProof.N18PackageII.zParamGood (P + (0 : GoodPoint)) -
+        MazurProof.N18PackageII.zParamGood P -
+        MazurProof.N18PackageII.zParamGood 0 = 0 := by
+      rw [add_zero P, MazurProof.N18PackageII.zParamGood_zero]
+      ring
+    rw [herr, vpiGood_zero]
+    exact le_top
   rcases P with _ | ⟨x₁, y₁, hns₁⟩
   · simp [xCoordGood, ordPi_zero] at hPx
   rcases Q with _ | ⟨x₂, y₂, hns₂⟩
@@ -1174,28 +1379,44 @@ theorem add_congr_good_weak (P Q : GoodPoint)
     exact div_ne_zero (neg_ne_zero.mpr hx₁0) hy₁0
   have hzQ : MazurProof.N18PackageII.zParamGood Q₂ ≠ 0 := by
     exact div_ne_zero (neg_ne_zero.mpr hx₂0) hy₂0
+  have hzPpos : 1 ≤ ordPi (MazurProof.N18PackageII.zParamGood P₁) := by
+    have hc := GoodModel.val_coords hx₁0 hy₁0
+      (by simpa using (WeierstrassCurve.Affine.equation_iff x₁ y₁).mp hns₁.1) hPx
+    dsimp [P₁, MazurProof.N18PackageII.zParamGood]
+    omega
+  have hzQpos : 1 ≤ ordPi (MazurProof.N18PackageII.zParamGood Q₂) := by
+    have hc := GoodModel.val_coords hx₂0 hy₂0
+      (by simpa using (WeierstrassCurve.Affine.equation_iff x₂ y₂).mp hns₂.1) hQx
+    dsimp [Q₂, MazurProof.N18PackageII.zParamGood]
+    omega
+  change 2 * min
+      (vpiGood (MazurProof.N18PackageII.zParamGood P₁))
+      (vpiGood (MazurProof.N18PackageII.zParamGood Q₂)) ≤
+    vpiGood (MazurProof.N18PackageII.zParamGood (P₁ + Q₂) -
+      MazurProof.N18PackageII.zParamGood P₁ -
+      MazurProof.N18PackageII.zParamGood Q₂)
   by_cases hx : x₁ = x₂
   · subst x₂
     by_cases hy : y₁ = WeierstrassCurve.Affine.negY E0Good x₁ y₂
     · have hy₂ : y₂ = WeierstrassCurve.Affine.negY E0Good x₁ y₁ := by
         rw [hy, WeierstrassCurve.Affine.negY_negY]
       have hQnegP : Q₂ = -P₁ := by
-        dsimp [P₁, Q₂]
-        rw [WeierstrassCurve.Affine.Point.neg_some,
-          WeierstrassCurve.Affine.Point.some.injEq]
-        exact ⟨rfl, hy₂⟩
-      rw [show WeierstrassCurve.Affine.Point.some x₁ y₁ hns₁ = P₁ by rfl,
-        show WeierstrassCurve.Affine.Point.some x₁ y₂ hns₂ = Q₂ by rfl,
-        hQnegP]
-      have hb := add_congr_inverse_good hx₁0 hy₁0 hns₁ hPx
-      dsimp only at hb
+        subst y₂
+        dsimp only [P₁, Q₂]
+        rfl
+      rw [hQnegP]
+      have hb := (add_congr_inverse_good hx₁0 hy₁0 hns₁ hPx).2
       let err := MazurProof.N18PackageII.zParamGood (P₁ + -P₁) -
         MazurProof.N18PackageII.zParamGood P₁ -
         MazurProof.N18PackageII.zParamGood (-P₁)
       change err = 0 ∨
         2 * ordPi (MazurProof.N18PackageII.zParamGood P₁) ≤ ordPi err at hb
       rcases hb with herr | herr
-      · rw [herr, vpiGood_zero]
+      · change 2 * min
+            (vpiGood (MazurProof.N18PackageII.zParamGood P₁))
+            (vpiGood (MazurProof.N18PackageII.zParamGood (-P₁))) ≤
+          vpiGood err
+        rw [herr, vpiGood_zero]
         exact le_top
       · have herr0 : err ≠ 0 := by
           intro h
@@ -1204,24 +1425,29 @@ theorem add_congr_good_weak (P Q : GoodPoint)
         have hvneg := vpi_zParamGood_neg P₁ (Or.inr hPx)
         rw [hvneg, min_self, vpiGood_apply_of_ne hzP,
           vpiGood_apply_of_ne herr0]
-        exact_mod_cast herr
+        change ((2 * ordPi (MazurProof.N18PackageII.zParamGood P₁) : ℤ) :
+          WithTop ℤ) ≤ (ordPi err : WithTop ℤ)
+        exact WithTop.coe_le_coe.mpr herr
     · have hyEq : y₁ = y₂ :=
         WeierstrassCurve.Affine.Y_eq_of_Y_ne hns₁.1 hns₂.1 rfl hy
       subst y₂
       cases Subsingleton.elim hns₂ hns₁
-      rw [show WeierstrassCurve.Affine.Point.some x₁ y₁ hns₁ = P₁ by rfl,
-        show WeierstrassCurve.Affine.Point.some x₁ y₁ hns₁ = Q₂ by rfl]
-      have hb := add_congr_tangent_good hx₁0 hy₁0 hns₁ hPx (fun h => hy h.symm)
-      dsimp only at hb
+      have hQP : Q₂ = P₁ := rfl
+      rw [hQP]
+      have hb :=
+        (add_congr_tangent_good hx₁0 hy₁0 hns₁ hPx (fun h => hy h.symm)).2
       let err := MazurProof.N18PackageII.zParamGood (P₁ + P₁) -
         2 * MazurProof.N18PackageII.zParamGood P₁
       change err = 0 ∨
         2 * ordPi (MazurProof.N18PackageII.zParamGood P₁) ≤ ordPi err at hb
       rcases hb with herr | herr
-      · rw [show MazurProof.N18PackageII.zParamGood (P₁ + P₁) -
-            MazurProof.N18PackageII.zParamGood P₁ -
-            MazurProof.N18PackageII.zParamGood P₁ = err by dsimp [err]; ring,
-          herr, vpiGood_zero]
+      · have herrShape :
+            MazurProof.N18PackageII.zParamGood (P₁ + P₁) -
+                MazurProof.N18PackageII.zParamGood P₁ -
+                MazurProof.N18PackageII.zParamGood P₁ = err := by
+          dsimp [err]
+          ring
+        rw [herrShape, herr, vpiGood_zero]
         exact le_top
       · have herr0 : err ≠ 0 := by
           intro h; rw [h, ordPi_zero] at herr; omega
@@ -1231,12 +1457,11 @@ theorem add_congr_good_weak (P Q : GoodPoint)
               MazurProof.N18PackageII.zParamGood P₁ = err by
             dsimp [err]; ring,
           vpiGood_apply_of_ne herr0]
-        exact_mod_cast herr
-  · rw [show WeierstrassCurve.Affine.Point.some x₁ y₁ hns₁ = P₁ by rfl,
-      show WeierstrassCurve.Affine.Point.some x₂ y₂ hns₂ = Q₂ by rfl]
-    have hb := add_congr_distinct_good
-      hx₁0 hy₁0 hx₂0 hy₂0 hns₁ hns₂ hx hPx hQx
-    dsimp only at hb
+        change ((2 * ordPi (MazurProof.N18PackageII.zParamGood P₁) : ℤ) :
+          WithTop ℤ) ≤ (ordPi err : WithTop ℤ)
+        exact WithTop.coe_le_coe.mpr herr
+  · have hb := (add_congr_distinct_good
+      hx₁0 hy₁0 hx₂0 hy₂0 hns₁ hns₂ hx hPx hQx).2
     let err := MazurProof.N18PackageII.zParamGood (P₁ + Q₂) -
       MazurProof.N18PackageII.zParamGood P₁ -
       MazurProof.N18PackageII.zParamGood Q₂
@@ -1244,13 +1469,388 @@ theorem add_congr_good_weak (P Q : GoodPoint)
       2 * min (ordPi (MazurProof.N18PackageII.zParamGood P₁))
         (ordPi (MazurProof.N18PackageII.zParamGood Q₂)) ≤ ordPi err at hb
     rcases hb with herr | herr
-    · rw [herr, vpiGood_zero]
+    · change 2 * min
+          (vpiGood (MazurProof.N18PackageII.zParamGood P₁))
+          (vpiGood (MazurProof.N18PackageII.zParamGood Q₂)) ≤
+        vpiGood err
+      rw [herr, vpiGood_zero]
       exact le_top
     · have herr0 : err ≠ 0 := by
         intro h; rw [h, ordPi_zero] at herr; omega
       rw [vpiGood_apply_of_ne hzP, vpiGood_apply_of_ne hzQ,
         vpiGood_apply_of_ne herr0]
-      exact_mod_cast herr
+      change ((2 * min
+          (ordPi (MazurProof.N18PackageII.zParamGood P₁))
+          (ordPi (MazurProof.N18PackageII.zParamGood Q₂)) : ℤ) :
+        WithTop ℤ) ≤ (ordPi err : WithTop ℤ)
+      exact WithTop.coe_le_coe.mpr herr
+
+/-- The near-origin locus is closed under addition. -/
+theorem kernel_add_closed_good (P Q : GoodPoint)
+    (hP : InFormalKernel P) (hQ : InFormalKernel Q) :
+    InFormalKernel (P + Q) := by
+  rcases hP with hP0 | hPx
+  · subst P
+    rw [zero_add]
+    exact hQ
+  rcases hQ with hQ0 | hQx
+  · subst Q
+    rw [add_zero]
+    exact Or.inr hPx
+  rcases P with _ | ⟨x₁, y₁, hns₁⟩
+  · simp [xCoordGood, ordPi_zero] at hPx
+  rcases Q with _ | ⟨x₂, y₂, hns₂⟩
+  · simp [xCoordGood, ordPi_zero] at hQx
+  simp only [xCoordGood] at hPx hQx
+  have hx₁0 : x₁ ≠ 0 := by
+    intro h
+    rw [h, ordPi_zero] at hPx
+    omega
+  have hx₂0 : x₂ ≠ 0 := by
+    intro h
+    rw [h, ordPi_zero] at hQx
+    omega
+  have hy₁0 := yCoordGood_ne_zero_of_ordPi_x_neg hns₁ hPx
+  have hy₂0 := yCoordGood_ne_zero_of_ordPi_x_neg hns₂ hQx
+  let P₁ : GoodPoint := .some x₁ y₁ hns₁
+  let Q₂ : GoodPoint := .some x₂ y₂ hns₂
+  change InFormalKernel (P₁ + Q₂)
+  by_cases hx : x₁ = x₂
+  · subst x₂
+    by_cases hy : y₁ = WeierstrassCurve.Affine.negY E0Good x₁ y₂
+    · have hy₂ : y₂ = WeierstrassCurve.Affine.negY E0Good x₁ y₁ := by
+        rw [hy, WeierstrassCurve.Affine.negY_negY]
+      have hQnegP : Q₂ = -P₁ := by
+        subst y₂
+        rfl
+      rw [hQnegP]
+      exact (add_congr_inverse_good hx₁0 hy₁0 hns₁ hPx).1
+    · have hyEq : y₁ = y₂ :=
+        WeierstrassCurve.Affine.Y_eq_of_Y_ne hns₁.1 hns₂.1 rfl hy
+      subst y₂
+      cases Subsingleton.elim hns₂ hns₁
+      have hQP : Q₂ = P₁ := rfl
+      rw [hQP]
+      exact (add_congr_tangent_good hx₁0 hy₁0 hns₁ hPx
+        (fun h ↦ hy h.symm)).1
+  · exact (add_congr_distinct_good
+      hx₁0 hy₁0 hx₂0 hy₂0 hns₁ hns₂ hx hPx hQx).1
+
+/-! ## Residue codes for the quotient by the formal kernel -/
+
+abbrev GoodOL := NumberField.RingOfIntegers L
+
+/-- Reduction modulo `pi` in the integral basis `1, pi, pi²`. -/
+private def reducePiOL : GoodOL →+* ZMod 3 where
+  toFun u := ((MazurProof.N18RouteC.LocalThreeSound.coordsOf u).c0 : ZMod 3)
+  map_zero' := by
+    simp [MazurProof.N18RouteC.LocalThreeSound.coordsOf_zero]
+  map_one' := by
+    simp [MazurProof.N18RouteC.LocalThreeSound.coordsOf_one,
+      MazurProof.N18RouteC.LocalThreeSound.IntCoords.one]
+  map_add' x y := by
+    simp [MazurProof.N18RouteC.LocalThreeSound.coordsOf_add,
+      MazurProof.N18RouteC.LocalThreeSound.IntCoords.add]
+  map_mul' x y := by
+    rw [MazurProof.N18RouteC.LocalThreeSound.coordsOf_mul]
+    simp only [MazurProof.N18RouteC.LocalThreeSound.IntCoords.mul,
+      MazurProof.N18RouteC.LocalThreeSound.prodC0]
+    push_cast
+    rw [show (3 : ZMod 3) = 0 by decide,
+      show (9 : ZMod 3) = 0 by decide]
+    ring
+
+private theorem reducePiOL_den_ne_zero (d : p3.asIdeal.primeCompl) :
+    reducePiOL d ≠ 0 := by
+  apply isUnit_iff_ne_zero.mp
+  have hd := MazurProof.N18RouteC.LocalThreeSound.reduceOL_isUnit_of_not_mem d.prop
+  rw [MazurProof.N18RouteC.LocalThree.isUnit5_iff] at hd
+  exact isUnit_iff_ne_zero.mpr (by
+    simpa [reducePiOL, MazurProof.N18RouteC.LocalThreeSound.reduceOL,
+      MazurProof.N18RouteC.LocalThreeSound.IntCoords.red,
+      MazurProof.N18RouteC.LocalThreeSound.reduceInt,
+      MazurProof.N18RouteC.LocalThree.red3] using hd)
+
+private def IntegralAtPi (x : L) : Prop := p3.valuation L x ≤ 1
+
+private def ReducesPi (x : L) (r : ZMod 3) : Prop :=
+  ∃ n : GoodOL, ∃ d : p3.asIdeal.primeCompl,
+    x * algebraMap GoodOL L d = algebraMap GoodOL L n ∧
+      r * reducePiOL d = reducePiOL n
+
+private theorem reducesPi_exists {x : L} (hx : IntegralAtPi x) :
+    ∃ r : ZMod 3, ReducesPi x r := by
+  obtain ⟨n, d, hnd⟩ := p3.exists_primeCompl_mul_eq_of_integer x hx
+  refine ⟨reducePiOL n / reducePiOL d, n, d, hnd, ?_⟩
+  exact div_mul_cancel₀ _ (reducePiOL_den_ne_zero d)
+
+private theorem reducesPi_unique {x : L} {r s : ZMod 3}
+    (hr : ReducesPi x r) (hs : ReducesPi x s) : r = s := by
+  obtain ⟨n, d, hxd, hrd⟩ := hr
+  obtain ⟨n', d', hxd', hsd'⟩ := hs
+  have hcrossL :
+      algebraMap GoodOL L (n * d') = algebraMap GoodOL L (n' * d) := by
+    simp only [map_mul]
+    calc
+      algebraMap GoodOL L n * algebraMap GoodOL L (d' : GoodOL) =
+          (x * algebraMap GoodOL L (d : GoodOL)) *
+            algebraMap GoodOL L (d' : GoodOL) := by rw [hxd]
+      _ = (x * algebraMap GoodOL L (d' : GoodOL)) *
+            algebraMap GoodOL L (d : GoodOL) := by ring
+      _ = algebraMap GoodOL L n' * algebraMap GoodOL L (d : GoodOL) := by
+        rw [hxd']
+  have hcross : n * (d' : GoodOL) = n' * (d : GoodOL) :=
+    (FaithfulSMul.algebraMap_injective GoodOL L) hcrossL
+  apply mul_right_cancel₀
+    (mul_ne_zero (reducePiOL_den_ne_zero d) (reducePiOL_den_ne_zero d'))
+  calc
+    r * (reducePiOL d * reducePiOL d') =
+        (r * reducePiOL d) * reducePiOL d' := by ring
+    _ = reducePiOL n * reducePiOL d' := by rw [hrd]
+    _ = reducePiOL (n * (d' : GoodOL)) := by rw [map_mul]
+    _ = reducePiOL (n' * (d : GoodOL)) := by rw [hcross]
+    _ = reducePiOL n' * reducePiOL d := by rw [map_mul]
+    _ = (s * reducePiOL d') * reducePiOL d := by rw [hsd']
+    _ = s * (reducePiOL d * reducePiOL d') := by ring
+
+private theorem integralAtPi_zero : IntegralAtPi (0 : L) := by
+  simp [IntegralAtPi]
+
+private theorem IntegralAtPi.add {x y : L}
+    (hx : IntegralAtPi x) (hy : IntegralAtPi y) : IntegralAtPi (x + y) := by
+  exact (p3.valuation L).map_add x y |>.trans (max_le hx hy)
+
+private theorem IntegralAtPi.neg {x : L} (hx : IntegralAtPi x) :
+    IntegralAtPi (-x) := by
+  simpa [IntegralAtPi] using hx
+
+private theorem IntegralAtPi.sub {x y : L}
+    (hx : IntegralAtPi x) (hy : IntegralAtPi y) : IntegralAtPi (x - y) := by
+  simpa [sub_eq_add_neg] using hx.add hy.neg
+
+private theorem ReducesPi.zero : ReducesPi (0 : L) 0 := by
+  refine ⟨0, 1, ?_, ?_⟩ <;> simp [reducePiOL]
+
+private theorem ReducesPi.add {x y : L} {r s : ZMod 3}
+    (hr : ReducesPi x r) (hs : ReducesPi y s) :
+    ReducesPi (x + y) (r + s) := by
+  obtain ⟨n, d, hxd, hrd⟩ := hr
+  obtain ⟨n', d', hxd', hsd'⟩ := hs
+  refine ⟨n * (d' : GoodOL) + n' * (d : GoodOL), d * d', ?_, ?_⟩
+  · simp only [map_add, map_mul, Submonoid.coe_mul]
+    calc
+      (x + y) * (algebraMap GoodOL L d * algebraMap GoodOL L d') =
+          (x * algebraMap GoodOL L d) * algebraMap GoodOL L d' +
+            (y * algebraMap GoodOL L d') * algebraMap GoodOL L d := by ring
+      _ = algebraMap GoodOL L n * algebraMap GoodOL L d' +
+            algebraMap GoodOL L n' * algebraMap GoodOL L d := by rw [hxd, hxd']
+  · simp only [map_add, map_mul, Submonoid.coe_mul]
+    calc
+      (r + s) * (reducePiOL d * reducePiOL d') =
+          (r * reducePiOL d) * reducePiOL d' +
+            (s * reducePiOL d') * reducePiOL d := by ring
+      _ = reducePiOL n * reducePiOL d' +
+            reducePiOL n' * reducePiOL d := by rw [hrd, hsd']
+
+private theorem ReducesPi.neg {x : L} {r : ZMod 3}
+    (hr : ReducesPi x r) : ReducesPi (-x) (-r) := by
+  obtain ⟨n, d, hxd, hrd⟩ := hr
+  refine ⟨-n, d, ?_, ?_⟩
+  · simp only [map_neg]
+    linear_combination -hxd
+  · simp only [map_neg]
+    linear_combination -hrd
+
+private theorem ReducesPi.sub {x y : L} {r s : ZMod 3}
+    (hr : ReducesPi x r) (hs : ReducesPi y s) :
+    ReducesPi (x - y) (r - s) := by
+  simpa [sub_eq_add_neg] using hr.add hs.neg
+
+private theorem reducesPi_existsUnique {x : L} (hx : IntegralAtPi x) :
+    ∃! r : ZMod 3, ReducesPi x r := by
+  obtain ⟨r, hr⟩ := reducesPi_exists hx
+  exact ⟨r, hr, fun s hs ↦ (reducesPi_unique hr hs).symm⟩
+
+private noncomputable def reducePi (x : L) (hx : IntegralAtPi x) : ZMod 3 :=
+  Classical.choose (reducesPi_existsUnique hx)
+
+private theorem reducePi_spec (x : L) (hx : IntegralAtPi x) :
+    ReducesPi x (reducePi x hx) :=
+  (Classical.choose_spec (reducesPi_existsUnique hx)).1
+
+private theorem reducePi_eq_of_reduces {x : L} (hx : IntegralAtPi x)
+    {r : ZMod 3} (hr : ReducesPi x r) : reducePi x hx = r :=
+  reducesPi_unique (reducePi_spec x hx) hr
+
+@[simp] private theorem reducePi_zero :
+    reducePi 0 integralAtPi_zero = 0 :=
+  reducePi_eq_of_reduces integralAtPi_zero ReducesPi.zero
+
+private theorem reducePi_add {x y : L}
+    (hx : IntegralAtPi x) (hy : IntegralAtPi y) :
+    reducePi (x + y) (hx.add hy) = reducePi x hx + reducePi y hy :=
+  reducePi_eq_of_reduces (hx.add hy) ((reducePi_spec x hx).add (reducePi_spec y hy))
+
+private theorem reducePi_neg {x : L} (hx : IntegralAtPi x) :
+    reducePi (-x) hx.neg = -reducePi x hx :=
+  reducePi_eq_of_reduces hx.neg (reducePi_spec x hx).neg
+
+private theorem reducePi_sub {x y : L}
+    (hx : IntegralAtPi x) (hy : IntegralAtPi y) :
+    reducePi (x - y) (hx.sub hy) = reducePi x hx - reducePi y hy := by
+  rw [show x - y = x + -y by ring]
+  simpa only [sub_eq_add_neg] using reducePi_add hx hy.neg |>.trans
+    (congrArg (reducePi x hx + ·) (reducePi_neg hy))
+
+private theorem valuation_eq_exp_neg_ordPi {x : L} (hx : x ≠ 0) :
+    p3.valuation L x = WithZero.exp (-ordPi x) := by
+  have hv : p3.valuation L x ≠ 0 :=
+    (Valuation.ne_zero_iff (p3.valuation L)).2 hx
+  calc
+    p3.valuation L x = WithZero.exp (WithZero.log (p3.valuation L x)) :=
+      (WithZero.exp_log hv).symm
+    _ = WithZero.exp (-ordPi x) := by
+      congr 1
+      simp [ordPi, v3]
+
+private theorem integralAtPi_of_ordPi_nonneg {x : L} (hx : x ≠ 0)
+    (hord : 0 ≤ ordPi x) : IntegralAtPi x := by
+  unfold IntegralAtPi
+  rw [valuation_eq_exp_neg_ordPi hx, ← WithZero.exp_zero,
+    WithZero.exp_le_exp]
+  omega
+
+private theorem reducePi_eq_zero_of_ordPi_pos {x : L} (hx : x ≠ 0)
+    (hord : 0 < ordPi x) :
+    reducePi x (integralAtPi_of_ordPi_nonneg hx hord.le) = 0 := by
+  let hxInt := integralAtPi_of_ordPi_nonneg hx hord.le
+  obtain ⟨n, d, hxd, hred⟩ := reducePi_spec x hxInt
+  have hdL : algebraMap GoodOL L (d : GoodOL) ≠ 0 :=
+    (map_eq_zero_iff _ (FaithfulSMul.algebraMap_injective GoodOL L)).not.mpr
+      (fun hd ↦ d.property (hd ▸ Submodule.zero_mem _))
+  have hdord : ordPi (algebraMap GoodOL L (d : GoodOL)) = 0 := by
+    have hv : p3.valuation L (algebraMap GoodOL L (d : GoodOL)) = 1 :=
+      (p3.valuation_eq_one_iff_notMem (K := L)).2 d.property
+    simp [ordPi, v3, hv]
+  have hnL : algebraMap GoodOL L n ≠ 0 := by
+    rw [← hxd]
+    exact mul_ne_zero hx hdL
+  have hnord : ordPi (algebraMap GoodOL L n) = ordPi x := by
+    rw [← hxd, ordPi_mul hx hdL, hdord, add_zero]
+  have hnmem : n ∈ p3.asIdeal := by
+    by_contra hnmem
+    have hv : p3.valuation L (algebraMap GoodOL L n) = 1 :=
+      (p3.valuation_eq_one_iff_notMem (K := L)).2 hnmem
+    have hz : ordPi (algebraMap GoodOL L n) = 0 := by
+      simp [ordPi, v3, hv]
+    rw [hnord] at hz
+    omega
+  have hnbar : reducePiOL n = 0 := by
+    have hpi : MazurProof.N18RouteC.LocalThreeSound.reduceOL n =
+        MazurProof.N18RouteC.LocalThree.pi5 *
+          MazurProof.N18RouteC.LocalThreeSound.reduceOL
+            (Classical.choose (Ideal.mem_span_singleton.mp (by
+              simpa [p3, primeAboveThree_eq_span_pi] using hnmem))) := by
+      obtain ⟨c, hc⟩ := Ideal.mem_span_singleton.mp (by
+        simpa [p3, primeAboveThree_eq_span_pi] using hnmem)
+      rw [hc, MazurProof.N18RouteC.LocalThreeSound.reduceOL_mul,
+        MazurProof.N18RouteC.LocalThreeSound.reduceOL_piInteger]
+    have hred := congrArg MazurProof.N18RouteC.LocalThree.red3 hpi
+    simpa [reducePiOL, MazurProof.N18RouteC.LocalThreeSound.reduceOL,
+      MazurProof.N18RouteC.LocalThreeSound.IntCoords.red,
+      MazurProof.N18RouteC.LocalThreeSound.reduceInt,
+      MazurProof.N18RouteC.LocalThree.red3] using hred
+  rw [hnbar] at hred
+  exact (mul_eq_zero.mp hred).resolve_right (reducePiOL_den_ne_zero d)
+
+private theorem reducePi_ne_zero_of_ordPi_eq_zero {x : L} (hx : x ≠ 0)
+    (hord : ordPi x = 0) :
+    reducePi x (integralAtPi_of_ordPi_nonneg hx hord.ge) ≠ 0 := by
+  let hxInt := integralAtPi_of_ordPi_nonneg hx hord.ge
+  have hvx : p3.valuation L x = 1 := by
+    rw [valuation_eq_exp_neg_ordPi hx, hord]
+    simp
+  have hxInvInt : IntegralAtPi x⁻¹ := by
+    unfold IntegralAtPi
+    rw [map_inv₀, hvx, inv_one]
+  let r := reducePi x hxInt
+  let s := reducePi x⁻¹ hxInvInt
+  have hrs : ReducesPi (1 : L) (r * s) := by
+    obtain ⟨n, d, hxd, hrd⟩ := reducePi_spec x hxInt
+    obtain ⟨n', d', hxd', hrd'⟩ := reducePi_spec x⁻¹ hxInvInt
+    refine ⟨n * n', d * d', ?_, ?_⟩
+    · simp only [map_mul, Submonoid.coe_mul]
+      rw [← hxd, ← hxd']
+      field_simp [hx]
+      ring
+    · simp only [map_mul, Submonoid.coe_mul]
+      rw [← hrd, ← hrd']
+      ring
+  have hone : ReducesPi (1 : L) 1 := by
+    refine ⟨1, 1, ?_, ?_⟩ <;> simp [reducePiOL]
+  have hrsOne : r * s = 1 := reducesPi_unique hrs hone
+  intro hr0
+  change r = 0 at hr0
+  rw [hr0, zero_mul] at hrsOne
+  exact zero_ne_one hrsOne
+
+private theorem reducePoint_eq_zero_iff_formal_good (P : GoodPoint) :
+    MazurProof.N18ReductionGood.reducePoint P = 0 ↔ InFormalKernel P := by
+  rw [MazurProof.N18ReductionGood.reducePoint_eq_zero_iff]
+  cases P with
+  | zero => simp [InFormalKernel]
+  | some x y h => simp [InFormalKernel, xCoordGood]
+
+/-- The denominator-unit calculation for addition outside the formal
+neighborhood.  This is the only remaining affine group-law case. -/
+private theorem reducePoint_add_of_not_formal_left (P Q : GoodPoint)
+    (hP : ¬ InFormalKernel P) :
+    MazurProof.N18ReductionGood.reducePoint (P + Q) =
+      MazurProof.N18ReductionGood.reducePoint P +
+        MazurProof.N18ReductionGood.reducePoint Q := by
+  sorry
+
+theorem reducePoint_add_good (P Q : GoodPoint) :
+    MazurProof.N18ReductionGood.reducePoint (P + Q) =
+      MazurProof.N18ReductionGood.reducePoint P +
+        MazurProof.N18ReductionGood.reducePoint Q := by
+  by_cases hP : InFormalKernel P
+  · by_cases hQ : InFormalKernel Q
+    · have hPQ := kernel_add_closed_good P Q hP hQ
+      rw [(reducePoint_eq_zero_iff_formal_good P).2 hP,
+        (reducePoint_eq_zero_iff_formal_good Q).2 hQ,
+        (reducePoint_eq_zero_iff_formal_good (P + Q)).2 hPQ,
+        zero_add]
+    · rw [add_comm P Q,
+        add_comm (MazurProof.N18ReductionGood.reducePoint P)]
+      exact reducePoint_add_of_not_formal_left Q P hQ
+  · exact reducePoint_add_of_not_formal_left P Q hP
+
+/-- Good reduction at `pi` as an additive homomorphism. -/
+noncomputable def reductionHomGood :
+    GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint where
+  toFun := MazurProof.N18ReductionGood.reducePoint
+  map_zero' := MazurProof.N18ReductionGood.reducePoint_zero
+  map_add' := reducePoint_add_good
+
+/-- The good integral equation has its usual reduction homomorphism, whose
+kernel is exactly the near-origin locus. -/
+theorem exists_good_reduction :
+    ∃ red : GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint,
+      ∀ P : GoodPoint, P ∈ red.ker ↔ InFormalKernel P := by
+  refine ⟨reductionHomGood, ?_⟩
+  intro P
+  rw [AddMonoidHom.mem_ker]
+  exact reducePoint_eq_zero_iff_formal_good P
+
+/-- The reduction homomorphism selected from `exists_good_reduction`. -/
+noncomputable def redGood :
+    GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint :=
+  Classical.choose exists_good_reduction
+
+theorem redGood_ker (P : GoodPoint) :
+    P ∈ redGood.ker ↔ InFormalKernel P :=
+  Classical.choose_spec exists_good_reduction P
 
 /-- Supersingular connectedness puts every three-primary torsion point in the
 kernel of good reduction.  This is the remaining Package III reduction fact. -/
