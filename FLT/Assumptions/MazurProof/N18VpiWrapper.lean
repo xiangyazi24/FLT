@@ -27,9 +27,9 @@ def vpiGood : AddValuation L (WithTop ℤ) :=
       by_cases hxy : x + y = 0
       · simp [hxy]
       by_cases hx : x = 0
-      · simp [hx, hxy]
+      · simp [hx]
       by_cases hy : y = 0
-      · simp [hy, hxy]
+      · simp [hy]
       simpa [hx, hy, hxy] using ordPi_add_ge hx hy hxy)
     (by
       intro x y
@@ -54,12 +54,34 @@ theorem vpiGood_one : vpiGood (1 : L) = 0 := by
 
 @[simp]
 theorem vpiGood_three : vpiGood (3 : L) = (3 : WithTop ℤ) := by
-  sorry
+  rw [vpiGood_apply_of_ne (by norm_num), ordPi_three]
+  norm_num
 
 @[simp]
 theorem vpiGood_unit (m : ℤ) (hm : ¬ (3 ∣ m)) :
     vpiGood (m : L) = 0 := by
-  sorry
+  have hm0 : m ≠ 0 := by
+    intro h
+    subst m
+    exact hm (dvd_zero 3)
+  have hm0L : (m : L) ≠ 0 := by
+    exact_mod_cast hm0
+  have hm_not_mem : (m : OL) ∉ primeAboveThree := by
+    letI : primeAboveThree.LiesOver
+        (Ideal.span ({(3 : ℤ)} : Set ℤ)) := primeAboveThree_mem.2
+    intro hmem
+    apply hm
+    have hmem' : m ∈ Ideal.span ({(3 : ℤ)} : Set ℤ) :=
+      (Ideal.mem_of_liesOver primeAboveThree
+        (Ideal.span ({(3 : ℤ)} : Set ℤ)) m).mpr (by simpa using hmem)
+    rwa [Ideal.mem_span_singleton] at hmem'
+  have hv3m : v3 (m : L) = 1 := by
+    rw [v3, ← show (((m : OL) : L)) = (m : L) by norm_num,
+      IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap,
+      IsDedekindDomain.HeightOneSpectrum.intValuation_eq_one_iff]
+    exact hm_not_mem
+  rw [vpiGood_apply_of_ne hm0L]
+  simp [ordPi, hv3m]
 
 end
 
