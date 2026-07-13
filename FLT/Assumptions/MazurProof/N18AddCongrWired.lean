@@ -28,9 +28,36 @@ private theorem xCoord_ne_zero_of_ordPi_neg {x y : L}
 private theorem yCoord_ne_zero_of_ordPi_xneg {x y : L}
     (hns : WeierstrassCurve.Affine.Nonsingular E0 x y)
     (hx : ordPi x < 0) : y ≠ 0 := by
-  -- If y = 0, the curve equation becomes 0 = x³-x²-5x+5.
-  -- v(x) < 0 means x³ strictly dominates ⟹ RHS ≠ 0. Contradiction.
-  sorry
+  have hx0 : x ≠ 0 := by intro h; rw [h, ordPi_zero] at hx; omega
+  intro hy; subst hy
+  have heq := (WeierstrassCurve.Affine.equation_iff x 0).mp hns.1
+  simp only [E0, zero_pow, mul_zero, add_zero, zero_mul, zero_add] at heq
+  -- heq : 0 = x³ - x² - 5x + 5
+  -- Factor: x³ - x² - 5x + 5 = (x-1)(x²-5)
+  have hfact : x ^ 3 + (-1 : L) * x ^ 2 + (-5 : L) * x + (5 : L) = (x - 1) * (x ^ 2 - 5) := by
+    ring
+  -- v(x-1) = v(x) < 0 (strict domination: v(x) < 0 = v(1))
+  have hx1 : x - 1 ≠ 0 := by
+    intro h; have : x = 1 := by linarith
+    rw [this, ordPi_one] at hx; omega
+  have hvx1 : ordPi (x - 1) = ordPi x := by
+    rw [show x - 1 = x + (-1 : L) from by ring]
+    exact ordPi_add_eq_of_lt hx0 (by norm_num)
+      (by rw [ordPi_neg, ordPi_one]; linarith)
+  -- v(x²-5) = 2v(x) < 0 (strict domination: v(x²) = 2v(x) < 0 ≤ v(5))
+  have hx2_5 : x ^ 2 - 5 ≠ 0 := by
+    intro h
+    have hvx2 : ordPi (x ^ 2) = 2 * ordPi x := by
+      rw [show x ^ 2 = x * x from by ring, ordPi_mul hx0 hx0]; ring
+    have : ordPi (x ^ 2 - (5 : L)) = ordPi (x ^ 2) := by
+      rw [show x ^ 2 - (5 : L) = x ^ 2 + (-(5 : L)) from by ring]
+      exact ordPi_add_eq_of_lt (pow_ne_zero 2 hx0) (by norm_num)
+        (by rw [hvx2, ordPi_neg]; have := zero_le_ordPi_intCast 5; omega)
+    rw [h, ordPi_zero, hvx2] at this; omega
+  -- Product is nonzero
+  have hprod : (x - 1) * (x ^ 2 - 5) ≠ 0 := mul_ne_zero hx1 hx2_5
+  -- But heq says the product = 0
+  exact hprod (hfact ▸ by linarith [heq])
 
 /-- **Package I `add_congr`, wired from the three branch proofs.** -/
 theorem add_congr_wired (P Q : E0Point)
