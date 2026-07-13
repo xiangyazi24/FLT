@@ -5,20 +5,25 @@
 Discharge all axioms/sorry so `mazur_cyclic_order_bound_assembled` has
 `#print axioms` = `{propext, Classical.choice, Quot.sound}` only.
 
-## Current state (code-verified 2026-07-12)
+## Current state (post-commit 077eebc6, 2026-07-12)
 
-### Axioms in CyclicOrderAssembly.lean
-1. `mazur_prime_torsion_bound_sub` (line 70) — **Layer 2**: ∀ prime p ≥ 11, no rational p-torsion
-2. `no_order_18` (line 80) — **Layer 1 residual**: ¬ HasRationalPointOfOrder E 18
+### Full axiom inventory (`#print axioms mazur_cyclic_order_bound_assembled`)
+1. `no_order_13_prime` — NEW sub-axiom for p=13
+2. `no_prime_order_ge_17` — NEW sub-axiom for p≥17
+3. `no_order_18` — N18 (Layer 1 residual)
+4. `no_explicit_order25_obstruction` — N25
+5. `no_raw_order49_tate_obstruction` — N49
+6. `exists_rational_two_isogeny_quotient` — N20/N24
 
 ### Sorry in source files
-3. `CyclicExclusion18.lean:76` — `no_five_descent_solution` (the N18 content)
-4. `N18AddCongr.lean:294` — `add_congr` (Package I formal kernel, feeds N18)
-5. `KubertBridgeN16.lean:342` — `kubert_C16_discriminant_data` (Z/2×Z/16)
-6. `KubertBridgeN16.lean:361` — `EN16_point_of_Phi16_and_disc` (Z/2×Z/16)
+7. `CyclicExclusion18.lean:76` — `no_five_descent_solution` (feeds #3)
+8. `N18AddCongr.lean:294` — `add_congr` (Package I, feeds #7)
+9. `KubertBridgeN16.lean:342` — `kubert_C16_discriminant_data`
+10. `KubertBridgeN16.lean:361` — `EN16_point_of_Phi16_and_disc`
 
-### Already closed (since prior doctrine)
-CyclicExclusion 11, 14, 15, 16, 20, 21, 25, 27, 35, 49 — all sorry-free.
+### Closed this session (commit 077eebc6)
+- `mazur_prime_torsion_bound_sub` axiom → THEOREM (11+13+ge17 dispatcher)
+- N18 bridge (C): `five_descent_to_noncuspidal` + `C_sq_eq_F18Positive` sorry-free
 
 ## Layer 2 ChatGPT pre-designs (scratch/layer2/)
 - Q4463: Layer 2 scope (2A=p11, 2B=p13, 2C=tail p≥17, 2D=dispatcher)

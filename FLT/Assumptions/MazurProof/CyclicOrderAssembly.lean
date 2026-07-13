@@ -71,17 +71,41 @@ The monolithic axiom `mazur_prime_torsion_bound_sub` is now a THEOREM
 assembled from:
 * `no_rational_point_of_order_11` — sorry-free (Billing–Mahler cubic descent)
 * `no_order_13_prime` — sub-axiom (genus-2 Jacobian descent on X₁(13))
-* `no_prime_order_ge_17` — sub-axiom (formal immersion on X₀(p))
+* `no_order_17_prime` — sub-axiom (X₀(17) + fiber irreducibility)
+* `no_order_19_prime` — sub-axiom (X₀(19) + fiber irreducibility)
+* `no_prime_order_ge_23` — sub-axiom (formal immersion on X₀(p), uniform tail)
 -/
 
 axiom no_order_13_prime
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ HasRationalPointOfOrder E 13
 
-axiom no_prime_order_ge_17
+axiom no_order_17_prime
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ HasRationalPointOfOrder E 17
+
+axiom no_order_19_prime
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ HasRationalPointOfOrder E 19
+
+axiom no_prime_order_ge_23
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {p : ℕ} (hp : Nat.Prime p) (hp23 : 23 ≤ p) :
+    ¬ HasRationalPointOfOrder E p
+
+theorem no_prime_order_ge_17
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     {p : ℕ} (hp : Nat.Prime p) (hp17 : 17 ≤ p) :
-    ¬ HasRationalPointOfOrder E p
+    ¬ HasRationalPointOfOrder E p := by
+  by_cases hp23 : 23 ≤ p
+  · exact no_prime_order_ge_23 E hp hp23
+  · have hp22 : p ≤ 22 := by omega
+    have : p = 17 ∨ p = 19 := by
+      interval_cases p <;> first | left; rfl | right; rfl |
+        (exfalso; revert hp; decide)
+    rcases this with rfl | rfl
+    · exact no_order_17_prime E
+    · exact no_order_19_prime E
 
 theorem mazur_prime_torsion_bound_sub
     (E : WeierstrassCurve ℚ) [E.IsElliptic] {p : ℕ} (hp : Nat.Prime p)
