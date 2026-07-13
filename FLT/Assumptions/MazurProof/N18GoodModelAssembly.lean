@@ -3,6 +3,7 @@ import FLT.Assumptions.MazurProof.N18PackageII
 import FLT.Assumptions.MazurProof.N18GoodModelValCoords
 import FLT.Assumptions.MazurProof.N18VpiWrapper
 import FLT.Assumptions.MazurProof.N18RouteC_GoodModel
+import FLT.Assumptions.MazurProof.N18ReductionGood
 import FLT.Assumptions.MazurProof.N18Block5Instantiation
 import FLT.Assumptions.MazurProof.CyclicExclusion18
 import FLT.Assumptions.MazurProof.N18RouteC_Block7
@@ -1572,6 +1573,22 @@ private def reducePiOL : GoodOL →+* ZMod 3 where
 @[simp] private theorem reducePiOL_natCast (n : ℕ) :
     reducePiOL (n : GoodOL) = (n : ZMod 3) :=
   map_natCast reducePiOL n
+
+@[simp] private theorem reducePiOL_two :
+    reducePiOL (2 : GoodOL) = (2 : ZMod 3) := by
+  exact map_ofNat reducePiOL 2
+
+@[simp] private theorem reducePiOL_three :
+    reducePiOL (3 : GoodOL) = (3 : ZMod 3) := by
+  exact map_ofNat reducePiOL 3
+
+@[simp] private theorem reducePiOL_four :
+    reducePiOL (4 : GoodOL) = (4 : ZMod 3) := by
+  exact map_ofNat reducePiOL 4
+
+@[simp] private theorem reducePiOL_seven :
+    reducePiOL (7 : GoodOL) = (7 : ZMod 3) := by
+  exact map_ofNat reducePiOL 7
 
 private theorem reducePiOL_den_ne_zero (d : p3.asIdeal.primeCompl) :
     reducePiOL d ≠ 0 := by
