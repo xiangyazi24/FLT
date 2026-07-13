@@ -1,4 +1,6 @@
 import FLT.Assumptions.MazurProof.TateOrder25Factor
+import FLT.Assumptions.MazurProof.RationalPointsX049
+import FLT.Assumptions.MazurProof.RationalPointsX049
 
 /-!
 # The compact order-49 Tate polynomial
@@ -493,7 +495,7 @@ exactly `2*y+x=0`.
 theorem X049_affine_is_two_torsion
     {x y : ℚ} (hcurve : X049Equation x y) :
     2 * y + x = 0 := by
-  sorry
+  exact RationalPointsX049.affine_is_two_torsion hcurve
 
 /-- The only affine rational point on `X₀(49)` is its non-infinite cusp. -/
 theorem X049_affine_rational_point
