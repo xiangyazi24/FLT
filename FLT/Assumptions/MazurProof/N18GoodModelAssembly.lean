@@ -1491,11 +1491,11 @@ theorem kernel_add_closed_good (P Q : GoodPoint)
     InFormalKernel (P + Q) := by
   rcases hP with hP0 | hPx
   · subst P
-    rw [zero_add]
+    rw [zero_add Q]
     exact hQ
   rcases hQ with hQ0 | hQx
   · subst Q
-    rw [add_zero]
+    rw [add_zero P]
     exact Or.inr hPx
   rcases P with _ | ⟨x₁, y₁, hns₁⟩
   · simp [xCoordGood, ordPi_zero] at hPx
@@ -1559,6 +1559,19 @@ private def reducePiOL : GoodOL →+* ZMod 3 where
     rw [show (3 : ZMod 3) = 0 by decide,
       show (9 : ZMod 3) = 0 by decide]
     ring
+
+@[simp] private theorem reducePiOL_piInteger :
+    reducePiOL FieldArithmetic.piInteger = 0 := by
+  simp [reducePiOL, MazurProof.N18RouteC.LocalThreeSound.coordsOf_piInteger]
+
+@[simp] private theorem reducePiOL_aInteger :
+    reducePiOL FieldArithmetic.aInteger = 1 := by
+  simp [reducePiOL, MazurProof.N18RouteC.LocalThreeSound.coordsOf_aInteger,
+    MazurProof.N18RouteC.LocalThreeSound.aCoords]
+
+@[simp] private theorem reducePiOL_natCast (n : ℕ) :
+    reducePiOL (n : GoodOL) = (n : ZMod 3) :=
+  map_natCast reducePiOL n
 
 private theorem reducePiOL_den_ne_zero (d : p3.asIdeal.primeCompl) :
     reducePiOL d ≠ 0 := by
@@ -1628,8 +1641,23 @@ private theorem IntegralAtPi.sub {x y : L}
     (hx : IntegralAtPi x) (hy : IntegralAtPi y) : IntegralAtPi (x - y) := by
   simpa [sub_eq_add_neg] using hx.add hy.neg
 
+private theorem IntegralAtPi.mul {x y : L}
+    (hx : IntegralAtPi x) (hy : IntegralAtPi y) : IntegralAtPi (x * y) := by
+  unfold IntegralAtPi at hx hy ⊢
+  rw [map_mul]
+  exact (mul_le_mul' hx hy).trans_eq (mul_one 1)
+
+private theorem IntegralAtPi.pow {x : L} (hx : IntegralAtPi x) (n : ℕ) :
+    IntegralAtPi (x ^ n) := by
+  induction n with
+  | zero => simp [IntegralAtPi]
+  | succ n ih => simpa [pow_succ] using ih.mul hx
+
 private theorem ReducesPi.zero : ReducesPi (0 : L) 0 := by
-  refine ⟨0, 1, ?_, ?_⟩ <;> simp [reducePiOL]
+  refine ⟨0, 1, ?_, ?_⟩
+  · simp
+  · rw [map_zero]
+    simp
 
 private theorem ReducesPi.add {x y : L} {r s : ZMod 3}
     (hr : ReducesPi x r) (hs : ReducesPi y s) :
@@ -1666,6 +1694,26 @@ private theorem ReducesPi.sub {x y : L} {r s : ZMod 3}
     ReducesPi (x - y) (r - s) := by
   simpa [sub_eq_add_neg] using hr.add hs.neg
 
+private theorem ReducesPi.mul {x y : L} {r s : ZMod 3}
+    (hr : ReducesPi x r) (hs : ReducesPi y s) :
+    ReducesPi (x * y) (r * s) := by
+  obtain ⟨n, d, hxd, hrd⟩ := hr
+  obtain ⟨n', d', hxd', hsd'⟩ := hs
+  refine ⟨n * n', d * d', ?_, ?_⟩
+  · simp only [map_mul, Submonoid.coe_mul]
+    rw [← hxd, ← hxd']
+    ring
+  · simp only [map_mul, Submonoid.coe_mul]
+    rw [← hrd, ← hsd']
+    ring
+
+private theorem ReducesPi.pow {x : L} {r : ZMod 3}
+    (hr : ReducesPi x r) (n : ℕ) : ReducesPi (x ^ n) (r ^ n) := by
+  induction n with
+  | zero =>
+      refine ⟨1, 1, ?_, ?_⟩ <;> simp [reducePiOL]
+  | succ n ih => simpa [pow_succ] using ih.mul hr
+
 private theorem reducesPi_existsUnique {x : L} (hx : IntegralAtPi x) :
     ∃! r : ZMod 3, ReducesPi x r := by
   obtain ⟨r, hr⟩ := reducesPi_exists hx
@@ -1697,10 +1745,25 @@ private theorem reducePi_neg {x : L} (hx : IntegralAtPi x) :
 
 private theorem reducePi_sub {x y : L}
     (hx : IntegralAtPi x) (hy : IntegralAtPi y) :
-    reducePi (x - y) (hx.sub hy) = reducePi x hx - reducePi y hy := by
-  rw [show x - y = x + -y by ring]
-  simpa only [sub_eq_add_neg] using reducePi_add hx hy.neg |>.trans
-    (congrArg (reducePi x hx + ·) (reducePi_neg hy))
+    reducePi (x - y) (hx.sub hy) = reducePi x hx - reducePi y hy :=
+  reducePi_eq_of_reduces (hx.sub hy)
+    ((reducePi_spec x hx).sub (reducePi_spec y hy))
+
+private theorem reducePi_mul {x y : L}
+    (hx : IntegralAtPi x) (hy : IntegralAtPi y) :
+    reducePi (x * y) (hx.mul hy) = reducePi x hx * reducePi y hy :=
+  reducePi_eq_of_reduces (hx.mul hy)
+    ((reducePi_spec x hx).mul (reducePi_spec y hy))
+
+private theorem reducePi_pow {x : L} (hx : IntegralAtPi x) (n : ℕ) :
+    reducePi (x ^ n) (hx.pow n) = reducePi x hx ^ n :=
+  reducePi_eq_of_reduces (hx.pow n) ((reducePi_spec x hx).pow n)
+
+private theorem reducePi_of_integer (n : GoodOL) :
+    reducePi (algebraMap GoodOL L n) (by
+      simpa [IntegralAtPi] using p3.valuation_le_one (K := L) n) = reducePiOL n := by
+  apply reducePi_eq_of_reduces
+  refine ⟨n, 1, ?_, ?_⟩ <;> simp
 
 private theorem valuation_eq_exp_neg_ordPi {x : L} (hx : x ≠ 0) :
     p3.valuation L x = WithZero.exp (-ordPi x) := by
@@ -1746,20 +1809,9 @@ private theorem reducePi_eq_zero_of_ordPi_pos {x : L} (hx : x ≠ 0)
     rw [hnord] at hz
     omega
   have hnbar : reducePiOL n = 0 := by
-    have hpi : MazurProof.N18RouteC.LocalThreeSound.reduceOL n =
-        MazurProof.N18RouteC.LocalThree.pi5 *
-          MazurProof.N18RouteC.LocalThreeSound.reduceOL
-            (Classical.choose (Ideal.mem_span_singleton.mp (by
-              simpa [p3, primeAboveThree_eq_span_pi] using hnmem))) := by
-      obtain ⟨c, hc⟩ := Ideal.mem_span_singleton.mp (by
-        simpa [p3, primeAboveThree_eq_span_pi] using hnmem)
-      rw [hc, MazurProof.N18RouteC.LocalThreeSound.reduceOL_mul,
-        MazurProof.N18RouteC.LocalThreeSound.reduceOL_piInteger]
-    have hred := congrArg MazurProof.N18RouteC.LocalThree.red3 hpi
-    simpa [reducePiOL, MazurProof.N18RouteC.LocalThreeSound.reduceOL,
-      MazurProof.N18RouteC.LocalThreeSound.IntCoords.red,
-      MazurProof.N18RouteC.LocalThreeSound.reduceInt,
-      MazurProof.N18RouteC.LocalThree.red3] using hred
+    obtain ⟨c, hc⟩ := Ideal.mem_span_singleton.mp (by
+      simpa [p3, primeAboveThree_eq_span_pi] using hnmem)
+    rw [hc, map_mul, reducePiOL_piInteger, zero_mul]
   rw [hnbar] at hred
   exact (mul_eq_zero.mp hred).resolve_right (reducePiOL_den_ne_zero d)
 
@@ -1782,7 +1834,6 @@ private theorem reducePi_ne_zero_of_ordPi_eq_zero {x : L} (hx : x ≠ 0)
     · simp only [map_mul, Submonoid.coe_mul]
       rw [← hxd, ← hxd']
       field_simp [hx]
-      ring
     · simp only [map_mul, Submonoid.coe_mul]
       rw [← hrd, ← hrd']
       ring
@@ -1794,54 +1845,457 @@ private theorem reducePi_ne_zero_of_ordPi_eq_zero {x : L} (hx : x ≠ 0)
   rw [hr0, zero_mul] at hrsOne
   exact zero_ne_one hrsOne
 
-private theorem reducePoint_eq_zero_iff_formal_good (P : GoodPoint) :
-    MazurProof.N18ReductionGood.reducePoint P = 0 ↔ InFormalKernel P := by
-  rw [MazurProof.N18ReductionGood.reducePoint_eq_zero_iff]
+private theorem integralAtPi_of_ordPi_nonneg_total {x : L}
+    (hx : 0 ≤ ordPi x) : IntegralAtPi x := by
+  by_cases hx0 : x = 0
+  · subst x
+    exact integralAtPi_zero
+  · exact integralAtPi_of_ordPi_nonneg hx0 hx
+
+private noncomputable def reduceNonneg (x : L) (hx : 0 ≤ ordPi x) : ZMod 3 :=
+  reducePi x (integralAtPi_of_ordPi_nonneg_total hx)
+
+private theorem reduceNonneg_sub {x y : L}
+    (hx : 0 ≤ ordPi x) (hy : 0 ≤ ordPi y)
+    (hxy : 0 ≤ ordPi (x - y)) :
+    reduceNonneg (x - y) hxy = reduceNonneg x hx - reduceNonneg y hy := by
+  unfold reduceNonneg
+  simpa only using reducePi_sub
+    (integralAtPi_of_ordPi_nonneg_total hx)
+    (integralAtPi_of_ordPi_nonneg_total hy)
+
+private theorem reduceNonneg_add {x y : L}
+    (hx : 0 ≤ ordPi x) (hy : 0 ≤ ordPi y)
+    (hxy : 0 ≤ ordPi (x + y)) :
+    reduceNonneg (x + y) hxy = reduceNonneg x hx + reduceNonneg y hy := by
+  unfold reduceNonneg
+  simpa only using reducePi_add
+    (integralAtPi_of_ordPi_nonneg_total hx)
+    (integralAtPi_of_ordPi_nonneg_total hy)
+
+private theorem reduceNonneg_neg {x : L}
+    (hx : 0 ≤ ordPi x) (hnx : 0 ≤ ordPi (-x)) :
+    reduceNonneg (-x) hnx = -reduceNonneg x hx := by
+  unfold reduceNonneg
+  simpa only using reducePi_neg (integralAtPi_of_ordPi_nonneg_total hx)
+
+private theorem reduceNonneg_mul {x y : L}
+    (hx : 0 ≤ ordPi x) (hy : 0 ≤ ordPi y)
+    (hxy : 0 ≤ ordPi (x * y)) :
+    reduceNonneg (x * y) hxy = reduceNonneg x hx * reduceNonneg y hy := by
+  unfold reduceNonneg
+  simpa only using reducePi_mul
+    (integralAtPi_of_ordPi_nonneg_total hx)
+    (integralAtPi_of_ordPi_nonneg_total hy)
+
+private theorem reduceNonneg_pow {x : L}
+    (hx : 0 ≤ ordPi x) (n : ℕ) (hxn : 0 ≤ ordPi (x ^ n)) :
+    reduceNonneg (x ^ n) hxn = reduceNonneg x hx ^ n := by
+  unfold reduceNonneg
+  simpa only using reducePi_pow (integralAtPi_of_ordPi_nonneg_total hx) n
+
+private theorem reduceNonneg_eq_zero_of_pos {x : L} (hx : x ≠ 0)
+    (hord : 0 < ordPi x) :
+    reduceNonneg x hord.le = 0 := by
+  unfold reduceNonneg
+  simpa only using reducePi_eq_zero_of_ordPi_pos hx hord
+
+private theorem reduceNonneg_ne_zero_of_ord_eq_zero {x : L} (hx : x ≠ 0)
+    (hord : ordPi x = 0) :
+    reduceNonneg x hord.ge ≠ 0 := by
+  unfold reduceNonneg
+  simpa only using reducePi_ne_zero_of_ordPi_eq_zero hx hord
+
+private theorem reduceNonneg_eq_of_eq {x y : L}
+    (hx : 0 ≤ ordPi x) (hy : 0 ≤ ordPi y) (hxy : x = y) :
+    reduceNonneg x hx = reduceNonneg y hy := by
+  subst y
+  rfl
+
+private theorem reduceNonneg_good_a₁ :
+    reduceNonneg E0Good.a₁ good_coeff_orders.1 = 2 := by
+  have hm := congrArg (fun W : WeierstrassCurve L ↦ W.a₁)
+    MazurProof.N18PackageII.E0GoodInt_map
+  simp only [WeierstrassCurve.map_a₁] at hm
+  let hi := GoodModel.zero_le_ordPi_ringOfIntegers
+    MazurProof.N18PackageII.E0GoodInt.a₁
+  calc
+    reduceNonneg E0Good.a₁ good_coeff_orders.1 =
+        reduceNonneg (algebraMap GoodOL L MazurProof.N18PackageII.E0GoodInt.a₁) hi :=
+      reduceNonneg_eq_of_eq _ _ hm.symm
+    _ = reducePiOL MazurProof.N18PackageII.E0GoodInt.a₁ := by
+      unfold reduceNonneg
+      exact reducePi_of_integer _
+    _ = 2 := by norm_num [MazurProof.N18PackageII.E0GoodInt]
+
+private theorem reduceNonneg_good_a₂ :
+    reduceNonneg E0Good.a₂ good_coeff_orders.2.1 = 2 := by
+  have hm := congrArg (fun W : WeierstrassCurve L ↦ W.a₂)
+    MazurProof.N18PackageII.E0GoodInt_map
+  simp only [WeierstrassCurve.map_a₂] at hm
+  let hi := GoodModel.zero_le_ordPi_ringOfIntegers
+    MazurProof.N18PackageII.E0GoodInt.a₂
+  calc
+    reduceNonneg E0Good.a₂ good_coeff_orders.2.1 =
+        reduceNonneg (algebraMap GoodOL L MazurProof.N18PackageII.E0GoodInt.a₂) hi :=
+      reduceNonneg_eq_of_eq _ _ hm.symm
+    _ = reducePiOL MazurProof.N18PackageII.E0GoodInt.a₂ := by
+      unfold reduceNonneg
+      exact reducePi_of_integer _
+    _ = 2 := by norm_num [MazurProof.N18PackageII.E0GoodInt]
+
+private theorem reduceNonneg_good_a₃ :
+    reduceNonneg E0Good.a₃ good_coeff_orders.2.2.1 = 2 := by
+  have hm := congrArg (fun W : WeierstrassCurve L ↦ W.a₃)
+    MazurProof.N18PackageII.E0GoodInt_map
+  simp only [WeierstrassCurve.map_a₃] at hm
+  let hi := GoodModel.zero_le_ordPi_ringOfIntegers
+    MazurProof.N18PackageII.E0GoodInt.a₃
+  calc
+    reduceNonneg E0Good.a₃ good_coeff_orders.2.2.1 =
+        reduceNonneg (algebraMap GoodOL L MazurProof.N18PackageII.E0GoodInt.a₃) hi :=
+      reduceNonneg_eq_of_eq _ _ hm.symm
+    _ = reducePiOL MazurProof.N18PackageII.E0GoodInt.a₃ := by
+      unfold reduceNonneg
+      exact reducePi_of_integer _
+    _ = 2 := by norm_num [MazurProof.N18PackageII.E0GoodInt]
+
+private theorem reduceNonneg_good_a₄ :
+    reduceNonneg E0Good.a₄ good_coeff_orders.2.2.2.1 = 0 := by
+  have hm := congrArg (fun W : WeierstrassCurve L ↦ W.a₄)
+    MazurProof.N18PackageII.E0GoodInt_map
+  simp only [WeierstrassCurve.map_a₄] at hm
+  let hi := GoodModel.zero_le_ordPi_ringOfIntegers
+    MazurProof.N18PackageII.E0GoodInt.a₄
+  calc
+    reduceNonneg E0Good.a₄ good_coeff_orders.2.2.2.1 =
+        reduceNonneg (algebraMap GoodOL L MazurProof.N18PackageII.E0GoodInt.a₄) hi :=
+      reduceNonneg_eq_of_eq _ _ hm.symm
+    _ = reducePiOL MazurProof.N18PackageII.E0GoodInt.a₄ := by
+      unfold reduceNonneg
+      exact reducePi_of_integer _
+    _ = 0 := by norm_num [MazurProof.N18PackageII.E0GoodInt]
+
+private theorem reduceNonneg_good_a₆ :
+    reduceNonneg E0Good.a₆ good_coeff_orders.2.2.2.2 = 0 := by
+  have hm := congrArg (fun W : WeierstrassCurve L ↦ W.a₆)
+    MazurProof.N18PackageII.E0GoodInt_map
+  simp only [WeierstrassCurve.map_a₆] at hm
+  let hi := GoodModel.zero_le_ordPi_ringOfIntegers
+    MazurProof.N18PackageII.E0GoodInt.a₆
+  calc
+    reduceNonneg E0Good.a₆ good_coeff_orders.2.2.2.2 =
+        reduceNonneg (algebraMap GoodOL L MazurProof.N18PackageII.E0GoodInt.a₆) hi :=
+      reduceNonneg_eq_of_eq _ _ hm.symm
+    _ = reducePiOL MazurProof.N18PackageII.E0GoodInt.a₆ := by
+      unfold reduceNonneg
+      exact reducePi_of_integer _
+    _ = 0 := by norm_num [MazurProof.N18PackageII.E0GoodInt]
+
+private theorem reducesPi_nonneg {x : L} (hx : 0 ≤ ordPi x) :
+    ReducesPi x (reduceNonneg x hx) := by
+  unfold reduceNonneg
+  exact reducePi_spec _ _
+
+private theorem residue_equation_good {x y : L}
+    (h : WeierstrassCurve.Affine.Nonsingular E0Good x y)
+    (hx : 0 ≤ ordPi x) (hy : 0 ≤ ordPi y) :
+    WeierstrassCurve.Affine.Equation reducedGoodCurve
+      (reduceNonneg x hx) (reduceNonneg y hy) := by
+  let rx := reduceNonneg x hx
+  let ry := reduceNonneg y hy
+  have hxRed : ReducesPi x rx := reducesPi_nonneg hx
+  have hyRed : ReducesPi y ry := reducesPi_nonneg hy
+  have ha₁Red : ReducesPi E0Good.a₁ 2 := by
+    have hred := reducesPi_nonneg good_coeff_orders.1
+    rwa [reduceNonneg_good_a₁] at hred
+  have ha₂Red : ReducesPi E0Good.a₂ 2 := by
+    have hred := reducesPi_nonneg good_coeff_orders.2.1
+    rwa [reduceNonneg_good_a₂] at hred
+  have ha₃Red : ReducesPi E0Good.a₃ 2 := by
+    have hred := reducesPi_nonneg good_coeff_orders.2.2.1
+    rwa [reduceNonneg_good_a₃] at hred
+  have ha₄Red : ReducesPi E0Good.a₄ 0 := by
+    have hred := reducesPi_nonneg good_coeff_orders.2.2.2.1
+    rwa [reduceNonneg_good_a₄] at hred
+  have ha₆Red : ReducesPi E0Good.a₆ 0 := by
+    have hred := reducesPi_nonneg good_coeff_orders.2.2.2.2
+    rwa [reduceNonneg_good_a₆] at hred
+  have hlhs : ReducesPi
+      (y ^ 2 + E0Good.a₁ * x * y + E0Good.a₃ * y)
+      (ry ^ 2 + 2 * rx * ry + 2 * ry) := by
+    exact ((hyRed.pow 2).add ((ha₁Red.mul hxRed).mul hyRed)).add
+      (ha₃Red.mul hyRed)
+  have hrhs : ReducesPi
+      (x ^ 3 + E0Good.a₂ * x ^ 2 + E0Good.a₄ * x + E0Good.a₆)
+      (rx ^ 3 + 2 * rx ^ 2 + 0 * rx + 0) := by
+    exact ((hxRed.pow 3).add (ha₂Red.mul (hxRed.pow 2))).add
+      (ha₄Red.mul hxRed) |>.add ha₆Red
+  have heq := (WeierstrassCurve.Affine.equation_iff x y).mp h.1
+  rw [heq] at hlhs
+  have hred := reducesPi_unique hlhs hrhs
+  simpa [rx, ry, reducedGoodCurve,
+    WeierstrassCurve.Affine.equation_iff] using hred
+
+private theorem redPoint_ne_neg_of_ne_zero
+    (R : MazurProof.N18RouteC.Reduction.RedPoint) (hR : R ≠ 0) :
+    R ≠ -R := by
+  intro hself
+  have htwo : (2 : ℕ) • R = 0 := by
+    rw [two_nsmul]
+    calc
+      R + R = R + -R := congrArg (R + ·) hself
+      _ = 0 := add_neg_cancel R
+  have hordTwo : addOrderOf R ∣ 2 :=
+    addOrderOf_dvd_of_nsmul_eq_zero htwo
+  have hordSeven : addOrderOf R ∣ 7 :=
+    addOrderOf_dvd_of_nsmul_eq_zero
+      (MazurProof.N18RouteC.Reduction.seven_nsmul R)
+  have hordOne : addOrderOf R = 1 := by
+    apply Nat.dvd_one.mp
+    simpa using Nat.dvd_gcd hordTwo hordSeven
+  rw [AddMonoid.addOrderOf_eq_one_iff] at hordOne
+  exact hR hordOne
+
+private theorem reduced_pair_not_self_neg {x y : ZMod 3}
+    (h : WeierstrassCurve.Affine.Equation reducedGoodCurve x y) :
+    y ≠ WeierstrassCurve.Affine.negY reducedGoodCurve x y := by
+  let R : MazurProof.N18RouteC.Reduction.RedPoint :=
+    WeierstrassCurve.Affine.Point.mk h
+  have hR0 : R ≠ 0 := by
+    exact WeierstrassCurve.Affine.Point.some_ne_zero _
+  have hRneg := redPoint_ne_neg_of_ne_zero R hR0
+  intro hy
+  apply hRneg
+  change WeierstrassCurve.Affine.Point.some x y _ =
+    WeierstrassCurve.Affine.Point.some x
+      (WeierstrassCurve.Affine.negY reducedGoodCurve x y) _
+  rw [WeierstrassCurve.Affine.Point.some.injEq]
+  exact ⟨rfl, hy⟩
+
+private theorem reduce_negY_good {x y : L}
+    (h : WeierstrassCurve.Affine.Nonsingular E0Good x y)
+    (hx : 0 ≤ ordPi x) (hy : 0 ≤ ordPi y) :
+    ∃ hny : 0 ≤ ordPi (WeierstrassCurve.Affine.negY E0Good x y),
+      reduceNonneg (WeierstrassCurve.Affine.negY E0Good x y) hny =
+        WeierstrassCurve.Affine.negY reducedGoodCurve
+          (reduceNonneg x hx) (reduceNonneg y hy) := by
+  let ny := WeierstrassCurve.Affine.negY E0Good x y
+  have hnonsing : WeierstrassCurve.Affine.Nonsingular E0Good x ny :=
+    (WeierstrassCurve.Affine.nonsingular_neg x y).mpr h
+  have hny : 0 ≤ ordPi ny := y_nonneg_of_x_nonneg_good hnonsing hx
+  refine ⟨hny, ?_⟩
+  have hxRed := reducesPi_nonneg hx
+  have hyRed := reducesPi_nonneg hy
+  have ha₁Red : ReducesPi E0Good.a₁ 2 := by
+    have hred := reducesPi_nonneg good_coeff_orders.1
+    rwa [reduceNonneg_good_a₁] at hred
+  have ha₃Red : ReducesPi E0Good.a₃ 2 := by
+    have hred := reducesPi_nonneg good_coeff_orders.2.2.1
+    rwa [reduceNonneg_good_a₃] at hred
+  have hformula : ReducesPi ny
+      (-reduceNonneg y hy - 2 * reduceNonneg x hx - 2) := by
+    simpa only [ny, WeierstrassCurve.Affine.negY] using
+      (hyRed.neg.sub (ha₁Red.mul hxRed)).sub ha₃Red
+  have hunique := reducesPi_unique (reducesPi_nonneg hny) hformula
+  simpa only [ny, WeierstrassCurve.Affine.negY, reducedGoodCurve] using hunique
+
+private noncomputable def residueCode :
+    GoodPoint → Option (ZMod 3 × ZMod 3)
+  | .zero => none
+  | .some x y h =>
+      if hx : ordPi x < 0 then none
+      else
+        let hx' := le_of_not_gt hx
+        let hy' := y_nonneg_of_x_nonneg_good h hx'
+        some (reduceNonneg x hx', reduceNonneg y hy')
+
+private theorem formal_neg_good (P : GoodPoint)
+    (hP : InFormalKernel P) : InFormalKernel (-P) := by
+  rcases hP with rfl | hP
+  · exact Or.inl rfl
+  · exact Or.inr (by rwa [xCoordGood_neg])
+
+private theorem residueCode_eq_none_iff (P : GoodPoint) :
+    residueCode P = none ↔ InFormalKernel P := by
   cases P with
-  | zero => simp [InFormalKernel]
-  | some x y h => simp [InFormalKernel, xCoordGood]
+  | zero => exact iff_of_true rfl (Or.inl rfl)
+  | some x y h =>
+      simp [residueCode, InFormalKernel, xCoordGood]
 
-/-- The denominator-unit calculation for addition outside the formal
-neighborhood.  This is the only remaining affine group-law case. -/
-private theorem reducePoint_add_of_not_formal_left (P Q : GoodPoint)
-    (hP : ¬ InFormalKernel P) :
-    MazurProof.N18ReductionGood.reducePoint (P + Q) =
-      MazurProof.N18ReductionGood.reducePoint P +
-        MazurProof.N18ReductionGood.reducePoint Q := by
-  sorry
+private theorem formal_sub_of_residueCode_eq (P Q : GoodPoint)
+    (hcode : residueCode P = residueCode Q) :
+    InFormalKernel (P - Q) := by
+  cases P with
+  | zero =>
+      have hQ : InFormalKernel Q := by
+        apply (residueCode_eq_none_iff Q).mp
+        simpa [residueCode] using hcode.symm
+      rw [show WeierstrassCurve.Affine.Point.zero - Q = -Q by rfl]
+      exact formal_neg_good Q hQ
+  | some x₁ y₁ h₁ =>
+      by_cases hx₁neg : ordPi x₁ < 0
+      · have hP : InFormalKernel
+            (WeierstrassCurve.Affine.Point.some x₁ y₁ h₁) := Or.inr hx₁neg
+        have hQ : InFormalKernel Q := by
+          apply (residueCode_eq_none_iff Q).mp
+          rw [← hcode]
+          simp [residueCode, hx₁neg]
+        simpa only [sub_eq_add_neg] using
+          kernel_add_closed_good _ _ hP (formal_neg_good Q hQ)
+      · have hx₁ : 0 ≤ ordPi x₁ := le_of_not_gt hx₁neg
+        have hy₁ : 0 ≤ ordPi y₁ := y_nonneg_of_x_nonneg_good h₁ hx₁
+        cases Q with
+        | zero =>
+            have : False := by
+              have hc : residueCode
+                  (WeierstrassCurve.Affine.Point.some x₁ y₁ h₁) ≠ none := by
+                simp [residueCode, hx₁neg]
+              exact hc (by simpa [residueCode] using hcode)
+            exact this.elim
+        | some x₂ y₂ h₂ =>
+            by_cases hx₂neg : ordPi x₂ < 0
+            · have : False := by
+                have hc : residueCode
+                    (WeierstrassCurve.Affine.Point.some x₁ y₁ h₁) ≠ none := by
+                  simp [residueCode, hx₁neg]
+                apply hc
+                rw [hcode]
+                simp [residueCode, hx₂neg]
+              exact this.elim
+            · have hx₂ : 0 ≤ ordPi x₂ := le_of_not_gt hx₂neg
+              have hy₂ : 0 ≤ ordPi y₂ := y_nonneg_of_x_nonneg_good h₂ hx₂
+              have hcode' :
+                  some (reduceNonneg x₁ hx₁, reduceNonneg y₁ hy₁) =
+                    some (reduceNonneg x₂ hx₂, reduceNonneg y₂ hy₂) := by
+                simpa only [residueCode, dif_neg hx₁neg, dif_neg hx₂neg] using hcode
+              have hpair := Option.some.inj hcode'
+              have hxred : reduceNonneg x₁ hx₁ = reduceNonneg x₂ hx₂ :=
+                congrArg Prod.fst hpair
+              have hyred : reduceNonneg y₁ hy₁ = reduceNonneg y₂ hy₂ :=
+                congrArg Prod.snd hpair
+              by_cases hxEq : x₁ = x₂
+              · by_cases hyEq : y₁ = y₂
+                · subst x₂
+                  subst y₂
+                  cases Subsingleton.elim h₂ h₁
+                  exact Or.inl (sub_self _)
+                · have hyNeg : y₁ = WeierstrassCurve.Affine.negY E0Good x₂ y₂ :=
+                    (WeierstrassCurve.Affine.Y_eq_of_X_eq h₁.1 h₂.1 hxEq).resolve_left hyEq
+                  obtain ⟨hny₂, hnyred⟩ := reduce_negY_good h₂ hx₂ hy₂
+                  have hredEq : reduceNonneg y₁ hy₁ =
+                      WeierstrassCurve.Affine.negY reducedGoodCurve
+                        (reduceNonneg x₁ hx₁) (reduceNonneg y₁ hy₁) := by
+                    calc
+                      reduceNonneg y₁ hy₁ = reduceNonneg
+                          (WeierstrassCurve.Affine.negY E0Good x₂ y₂) hny₂ :=
+                        reduceNonneg_eq_of_eq _ _ hyNeg
+                      _ = WeierstrassCurve.Affine.negY reducedGoodCurve
+                          (reduceNonneg x₂ hx₂) (reduceNonneg y₂ hy₂) := hnyred
+                      _ = WeierstrassCurve.Affine.negY reducedGoodCurve
+                          (reduceNonneg x₁ hx₁) (reduceNonneg y₁ hy₁) := by
+                        rw [hxred, hyred]
+                  exact (reduced_pair_not_self_neg
+                    (residue_equation_good h₁ hx₁ hy₁) hredEq).elim
+              · let ny₂ := WeierstrassCurve.Affine.negY E0Good x₂ y₂
+                obtain ⟨hny₂, hnyred⟩ := reduce_negY_good h₂ hx₂ hy₂
+                let num := y₁ - ny₂
+                let den := x₁ - x₂
+                have hden0 : den ≠ 0 := sub_ne_zero.mpr hxEq
+                have hden : 0 ≤ ordPi den := by
+                  dsimp only [den]
+                  have hnx₂ : 0 ≤ ordPi (-x₂) := by rwa [ordPi_neg]
+                  simpa only [sub_eq_add_neg] using le_ordPi_add hx₁ hnx₂ le_rfl
+                have hdenRed : reduceNonneg den hden = 0 := by
+                  rw [reduceNonneg_sub hx₁ hx₂ hden, hxred, sub_self]
+                have hdenPos : 0 < ordPi den := by
+                  by_contra hpos
+                  have hzero : ordPi den = 0 := by omega
+                  exact (reduceNonneg_ne_zero_of_ord_eq_zero hden0 hzero)
+                    (by simpa only [hzero] using hdenRed)
+                have hnum : 0 ≤ ordPi num := by
+                  dsimp only [num]
+                  have hnny₂ : 0 ≤ ordPi (-ny₂) := by rwa [ordPi_neg]
+                  simpa only [sub_eq_add_neg] using le_ordPi_add hy₁ hnny₂ le_rfl
+                have hnumRed : reduceNonneg num hnum =
+                    reduceNonneg y₁ hy₁ -
+                      WeierstrassCurve.Affine.negY reducedGoodCurve
+                        (reduceNonneg x₂ hx₂) (reduceNonneg y₂ hy₂) := by
+                  rw [reduceNonneg_sub hy₁ hny₂ hnum, hnyred]
+                have hnumRed0 : reduceNonneg num hnum ≠ 0 := by
+                  rw [hnumRed]
+                  intro hz
+                  have hself : reduceNonneg y₁ hy₁ =
+                      WeierstrassCurve.Affine.negY reducedGoodCurve
+                        (reduceNonneg x₁ hx₁) (reduceNonneg y₁ hy₁) := by
+                    have := sub_eq_zero.mp hz
+                    simpa only [hxred, hyred] using this
+                  exact reduced_pair_not_self_neg
+                    (residue_equation_good h₁ hx₁ hy₁) hself
+                have hnum0 : num ≠ 0 := by
+                  intro hz
+                  have hzeroOrd : 0 ≤ ordPi (0 : L) := by simp [ordPi_zero]
+                  have hredEq := reduceNonneg_eq_of_eq hnum hzeroOrd hz
+                  apply hnumRed0
+                  rw [hredEq]
+                  unfold reduceNonneg
+                  simpa only using reducePi_zero
+                have hnumOrd : ordPi num = 0 := by
+                  by_contra hne
+                  have hpos : 0 < ordPi num := by omega
+                  exact hnumRed0 (by
+                    simpa only using reduceNonneg_eq_zero_of_pos hnum0 hpos)
+                let ell := WeierstrassCurve.Affine.slope E0Good x₁ x₂ y₁ ny₂
+                have hell : ell = num / den := by
+                  dsimp only [ell, num, den]
+                  rw [WeierstrassCurve.Affine.slope_of_X_ne hxEq]
+                have hell0 : ell ≠ 0 := by
+                  rw [hell]
+                  exact div_ne_zero hnum0 hden0
+                have hellOrd : ordPi ell = -ordPi den := by
+                  rw [hell, ordPi_div hnum0 hden0, hnumOrd]
+                  omega
+                have hellNeg : ordPi ell < 0 := by rw [hellOrd]; omega
+                let tail := E0Good.a₁ * ell - E0Good.a₂ - x₁ - x₂
+                have htail : ordPi ell ≤ ordPi tail := by
+                  have h1 : ordPi ell ≤ ordPi (E0Good.a₁ * ell) :=
+                    ordPi_le_mul_right_good good_coeff_orders.1 hellNeg.le
+                  have h2 : ordPi ell ≤ ordPi (-E0Good.a₂) := by
+                    have ha₂ := good_coeff_orders.2.1
+                    rw [ordPi_neg]
+                    omega
+                  have h3 : ordPi ell ≤ ordPi (-x₁) := by
+                    rw [ordPi_neg]
+                    omega
+                  have h4 : ordPi ell ≤ ordPi (-x₂) := by
+                    rw [ordPi_neg]
+                    omega
+                  dsimp only [tail]
+                  simpa only [sub_eq_add_neg] using
+                    le_ordPi_add (le_ordPi_add (le_ordPi_add h1 h2 hellNeg.le)
+                      h3 hellNeg.le) h4 hellNeg.le
+                let x₃ := WeierstrassCurve.Affine.addX E0Good x₁ x₂ ell
+                have hx₃Eq : x₃ = ell ^ 2 + tail := by
+                  simp only [x₃, tail, WeierstrassCurve.Affine.addX]
+                  ring
+                have hellSq0 : ell ^ 2 ≠ 0 := pow_ne_zero 2 hell0
+                have hellSqOrd : ordPi (ell ^ 2) = 2 * ordPi ell := by
+                  rw [pow_two, ordPi_mul hell0 hell0]
+                  ring
+                have hx₃Ord : ordPi x₃ = 2 * ordPi ell := by
+                  rw [hx₃Eq]
+                  by_cases ht0 : tail = 0
+                  · simp [ht0, hellSqOrd]
+                  · exact (ordPi_add_eq_of_lt hellSq0 ht0 (by
+                      rw [hellSqOrd]
+                      omega)).trans hellSqOrd
+                have hx₃Neg : ordPi x₃ < 0 := by rw [hx₃Ord]; omega
+                rw [sub_eq_add_neg,
+                  WeierstrassCurve.Affine.Point.neg_some,
+                  WeierstrassCurve.Affine.Point.add_of_X_ne hxEq]
+                exact Or.inr hx₃Neg
 
-theorem reducePoint_add_good (P Q : GoodPoint) :
-    MazurProof.N18ReductionGood.reducePoint (P + Q) =
-      MazurProof.N18ReductionGood.reducePoint P +
-        MazurProof.N18ReductionGood.reducePoint Q := by
-  by_cases hP : InFormalKernel P
-  · by_cases hQ : InFormalKernel Q
-    · have hPQ := kernel_add_closed_good P Q hP hQ
-      rw [(reducePoint_eq_zero_iff_formal_good P).2 hP,
-        (reducePoint_eq_zero_iff_formal_good Q).2 hQ,
-        (reducePoint_eq_zero_iff_formal_good (P + Q)).2 hPQ,
-        zero_add]
-    · rw [add_comm P Q,
-        add_comm (MazurProof.N18ReductionGood.reducePoint P)]
-      exact reducePoint_add_of_not_formal_left Q P hQ
-  · exact reducePoint_add_of_not_formal_left P Q hP
-
-/-- Good reduction at `pi` as an additive homomorphism. -/
-noncomputable def reductionHomGood :
-    GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint where
-  toFun := MazurProof.N18ReductionGood.reducePoint
-  map_zero' := MazurProof.N18ReductionGood.reducePoint_zero
-  map_add' := reducePoint_add_good
-
-/-- The good integral equation has its usual reduction homomorphism, whose
-kernel is exactly the near-origin locus. -/
-theorem exists_good_reduction :
-    ∃ red : GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint,
-      ∀ P : GoodPoint, P ∈ red.ker ↔ InFormalKernel P := by
-  refine ⟨reductionHomGood, ?_⟩
-  intro P
-  rw [AddMonoidHom.mem_ker]
-  exact reducePoint_eq_zero_iff_formal_good P
+-- The quotient construction of the reduction homomorphism is below.
 
 /-- The reduction homomorphism selected from `exists_good_reduction`. -/
 noncomputable def redGood :
