@@ -1,9 +1,18 @@
-## Run 2026-07-12 (Complete Mazur proof — Layer 2 + residuals)
-- doctrine version: 6 gaps (2 axiom + 4 sorry), Layer 2 ChatGPT pre-designs in scratch/layer2/
+## Run 2026-07-12 (Complete Mazur proof — Layer 2 decomposition)
+- doctrine version: 6 gaps initially → 8 axioms after decomposition (narrower scope each)
 - approval: /automode from Xiang
-- starting avenue: (a) Layer 2A p=11
-- end:
-- final result:
+- starting avenue: (a)→(b) Layer 2 dispatcher decomposition + N18 bridge (C)
+- commits:
+  077eebc6: dispatcher theorem + N18 bridge (C) — both green on uisai2
+  83e50b4b: further decompose p≥17 into 17+19+≥23 — green on uisai2
+- axiom check (fresh oleans): mazur_cyclic_order_bound_assembled depends on
+  {propext, Classical.choice, Quot.sound, sorryAx} + 8 project axioms
+- ChatGPT: 5+4 questions dispatched to SOL Pro flt1-5, all delivery-timed-out
+  (tabs may still have answers in browser). Pre-existing designs Q4463-Q4560 used.
+- Python verified: p=19 kernel poly k₁₉ (monic, irreducible, no root mod 2),
+  X₀(17) noncuspidal points at (7,13)/(7,-21), X₀(19) at (5,9)/(5,-10)
+- end: session continuing
+- final result: (in progress)
 
 ## Run 2026-07-08 (ChatGPT harvest mode)
 - doctrine version: Close CyclicExclusion sorry's via ChatGPT harvest
