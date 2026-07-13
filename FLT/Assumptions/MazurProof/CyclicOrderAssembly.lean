@@ -55,14 +55,16 @@ Endpoint wired to a real theorem:
   order-nine family, and the proved rational-point classification of the
   level-27 curve `y²+y=x³`.
 
-Endpoints kept as named sub-axioms, because no sound real theorem exists to
-wire:
+Endpoint wired to theorems (formerly axioms):
 
-* `15, 18, 21` — the `CyclicExclusion` proofs still contain `sorry`.
+* `15` — `CyclicExclusion15.no_rational_point_of_order_15`, sorry-free.
+* `18` — `N18GoodModelAssembly.no_rational_point_of_order_18`, sorry-free
+  five-descent via 2898-line good-model assembly.
+* `21` — `CyclicExclusion21.no_rational_point_of_order_21`, sorry-free.
 
-Together with the prime-order input `mazur_prime_torsion_bound_sub`, these are
-exactly the named inputs reported by
-`#print axioms mazur_cyclic_order_bound_assembled`.
+The sole remaining axiom is `no_prime_order_ge_23` (formal immersion tail
+for primes p ≥ 23).  All other prime-order exclusions are theorems via
+bridge axioms in PrimeExclusion{13,17,19}.lean.
 -/
 
 open scoped WeierstrassCurve.Affine
@@ -74,10 +76,10 @@ namespace MazurProof
 The monolithic axiom `mazur_prime_torsion_bound_sub` is now a THEOREM
 assembled from:
 * `no_rational_point_of_order_11` — sorry-free (Billing–Mahler cubic descent)
-* `no_order_13_prime` — sub-axiom (genus-2 Jacobian descent on X₁(13))
-* `no_order_17_prime` — sub-axiom (X₀(17) + fiber irreducibility)
-* `no_order_19_prime` — sub-axiom (X₀(19) + fiber irreducibility)
-* `no_prime_order_ge_23` — sub-axiom (formal immersion on X₀(p), uniform tail)
+* `no_order_13_prime` — theorem (via PrimeExclusion13 bridge)
+* `no_order_17_prime` — theorem (via PrimeExclusion17 kernel poly bridge)
+* `no_order_19_prime` — theorem (via PrimeExclusion19 kernel poly bridge)
+* `no_prime_order_ge_23` — axiom (formal immersion on X₀(p), uniform tail)
 -/
 
 theorem no_order_13_prime
