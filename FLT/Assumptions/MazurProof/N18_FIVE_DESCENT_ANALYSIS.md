@@ -49,9 +49,46 @@ for coprime `A,D` (Z[√-2] descent), or (ii) uses the 5-adic conditions for a c
 route. Prefer the route that formalizes with a SMALL decidable congruence + coprimality, not a
 large `decide`.
 
-## Route-2 backup (parked)
+## VERDICT (Fable audit + ChatGPT flt1/Q4610, both independently verified) — 2026-07-12
 
-The E₀ rank-0 route (`FormalKernel18`/`N18Block5Instantiation`, add_congr, front_end) is
-architecturally complete but carries the flagged Mathlib gap (Package II formal-log iso,
-`Ê₀(𝔪²)` torsion-free). Scouting dispatched to flt4 (formal-log Mathlib) + flt5 (add_congr).
-Only revive if Route-1 descent proves intractable.
+**`no_five_descent_solution` is NOT elementarily provable. Congruence/`decide` is DEAD, not hard.**
+
+- **Universal local witness** `(A,D,e,f) = (5m, 1, 1, 5m)`, `C = 50m²+1` (Fable verified sympy +
+  numeric to m≤2000): for EVERY modulus `m` it satisfies all positivity/gcd/5-conditions exactly
+  over ℤ, and `e·f ≡ AD(A+D)` and `normReal ≡ e²−2f²` mod `m`. lcm kills any CRT combination.
+  ⇒ **no counter-modulus exists.** Any mod-m "proof" exploits the ZMod-unit bug
+  (`(5 : ZMod m) ∣ x` is vacuously true when `gcd(m,5)=1`) or an unsound gcd/positivity encoding.
+- **The obstruction is GLOBAL:** `F/A⁶` with `x=D/A` is the genus-2 model of X₁(18)
+  (`x⁶+4x⁵+10x⁴+10x³+5x²+2x+1`); an integer solution = a rational point with `x=D/A>0`. The
+  contradiction IS the theorem `X₁(18)(ℚ) = {6 cusps}` (finite x-coords 0, −1).
+- **No elliptic-quotient shortcut:** Fable's independent L-poly computation gives
+  `#J(𝔽_p) = 21,63,84,189,441,441,399` for p=5..23 (gcd 21 ⇒ `J(ℚ)_tors=ℤ/21`, rank 0); the
+  L-polys are ℚ-irreducible and split over ℚ(ζ₃) ⇒ **J₁(18) is ℚ-simple GL₂-type — provably no
+  elliptic quotient over ℚ.** The N16 miracle (sextic factors → Fermat quartic) is structurally
+  absent, not merely undiscovered.
+
+**Pivot verdict: real value, but relocated (not removed) the mountain.** The elementary chain
+(`RationalPointsN18Descent`, sorry-free) is a PROVED chunk of what Route-2's `front_end` only
+CARRIES as a hypothesis; the pivot cleaned the axiom trace and crystallized the interface. But
+the `sorry` contains 100% of the global content — `no_five_descent_solution` is NOT independent
+of the E₀ route, it FOLLOWS from it. Route 1 proved the front half of `front_end`; Route 2
+supplies the group-theoretic half. **They are two halves of one proof and must be reunited.**
+
+## PATH FORWARD (Fable option (a) — reunite Route 1 + Route 2). Rank 0 ⇒ NO Chabauty.
+
+1. **Easy bridge (Codex-sized):** prove `∃ integer solution → ∃ x y : ℚ, 0<x ∧ y²=sextic(x)`
+   via `(x,y)=(D/A, C/A³)` (needs `C²=F` from the form identity `(e²−2f²)²+8e²f²=(e²+2f²)²`
+   + `ef=AD(A+D)`, then field_simp/ring). Restate the global target as weak `no_positive_point`
+   (only `x>0` needed); make `no_five_descent_solution` its corollary. This is exactly the shape
+   Route 2 feeds.
+2. **THE single hard core = Package II** `Ê₀(𝔪²)` torsion-free — NOT a Mathlib mountain, a ~2-page
+   self-contained formal-group argument on the existing `vpi`/`zParam` infra: from
+   `[3](T)=3f(T)+g(T³)` and `v(3)=3`, for `v(z)=k`: `v(3f(z))=3+k` vs `v(g(z³))≥3k`; `k=1`
+   allows the order-3 point, `k≥2` gives `v([3]z)=3+k` finite ⇒ `[3]z≠0`. **Dispatched as sharp
+   lemma Q4615.**
+3. **Geometric middle (front_end's other half):** explicit `L=ℚ(ζ₉)⁺` maps `C→E₀`
+   (ring-checkable via `a³=3a+1`, Q4366 design) + finite fiber computation over `E₀(L)` torsion.
+   `C(ℚ)⊂C(L)→E₀(L)=` finite explicit set; fibers by field algebra. No Chabauty (rank 0).
+4. **Rejected:** genus-2 Chabauty (rank-0 makes it unnecessary; Mathlib lacks it) and any
+   "missed elementary route" (would be Eisenstein–Thue, strictly heavier than Route C). The
+   ROADMAP's Route-C choice is confirmed correct by this audit.
