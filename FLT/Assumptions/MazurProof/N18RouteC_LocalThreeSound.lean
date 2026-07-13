@@ -14,6 +14,8 @@ namespace MazurProof.N18RouteC.LocalThreeSound
 
 open FieldArithmetic LocalThree
 
+set_option maxRecDepth 4000
+
 noncomputable section
 
 abbrev OL := NumberField.RingOfIntegers L
@@ -170,12 +172,14 @@ theorem IntCoords.red_neg (x : IntCoords) :
     LocalThree.neg (reduceInt x.c0 x.c1 x.c2)
   ext <;> simp [reduceInt, LocalThree.neg]
 
+-- Kernel `decide` over the 243-element ring.
+set_option maxHeartbeats 0 in
 private theorem local_one_mul (r : R5) : LocalThree.mul LocalThree.one r = r := by
-  native_decide +revert
+  decide +revert
 
 private theorem unitRep_zero :
     unitRep (0 : F3) (0 : F3) (0 : F3) = LocalThree.one := by
-  native_decide
+  decide
 
 theorem IntCoords.eval_pow (x : IntCoords) (n : ℕ) :
     (x.pow n).eval = x.eval ^ n := by
@@ -226,13 +230,20 @@ theorem red_unitCoords (i j k : F3) :
     (unitCoords i j k).red = unitRep i j k := by
   simp [unitCoords, IntCoords.red_mul, IntCoords.red_pow, unitRep]
 
+-- Kernel `decide` over the 243-element ring.
+set_option maxHeartbeats 0 in
 private theorem local_pow_three (r : R5) :
     LocalThree.pow r 3 = LocalThree.mul (LocalThree.mul r r) r := by
-  native_decide +revert
+  decide +revert
 
 private theorem local_isUnit_of_mul_eq_one (r s : R5)
     (h : LocalThree.mul r s = LocalThree.one) : IsUnit5 r := by
-  native_decide +revert
+  rw [isUnit5_iff]
+  intro hr0
+  have h2 : red3 LocalThree.one = red3 r * red3 s := by
+    rw [← h]; exact red3_mul r s
+  rw [red3_one, hr0, zero_mul] at h2
+  exact one_ne_zero h2
 
 theorem IntCoords.eval_injective : Function.Injective IntCoords.eval := by
   intro x y h

@@ -140,11 +140,11 @@ def sub3 (x y : F3) : F3 :=
 private theorem sub3_cast (x y : F3) :
     ((sub3 x y).val : ZMod 3) =
       (x.val : ZMod 3) - (y.val : ZMod 3) := by
-  native_decide +revert
+  decide +revert
 
 private theorem sub3_eq_zero_iff (x y : F3) :
     sub3 x y = 0 ↔ x = y := by
-  native_decide +revert
+  decide +revert
 
 theorem generatorResidue_injective : Function.Injective generatorResidue := by
   rintro ⟨p1, p2⟩ ⟨q1, q2⟩ hpq

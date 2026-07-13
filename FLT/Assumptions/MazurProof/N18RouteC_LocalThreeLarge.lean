@@ -35,14 +35,14 @@ theorem pi5_pow_eq_zero_of_five_le {n : ℕ} (hn : 5 ≤ n) :
     pi5 ^ n = 0 := by
   obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hn
   rw [pow_add]
-  have hpi5 : pi5 ^ 5 = 0 := by native_decide
+  have hpi5 : pi5 ^ 5 = 0 := by decide
   rw [hpi5, zero_mul]
 
 theorem three_mul_pi5_pow_eq_zero_of_two_le {n : ℕ} (hn : 2 ≤ n) :
     (3 : R5) * pi5 ^ n = 0 := by
   obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hn
   rw [pow_add]
-  have hbase : (3 : R5) * pi5 ^ 2 = 0 := by native_decide
+  have hbase : (3 : R5) * pi5 ^ 2 = 0 := by decide
   rw [← mul_assoc, hbase, zero_mul]
 
 end MazurProof.N18RouteC.LocalThree

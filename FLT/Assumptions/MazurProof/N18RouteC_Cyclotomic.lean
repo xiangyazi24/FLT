@@ -143,19 +143,19 @@ theorem complexConj_embedL (x : L) :
 
 theorem finrank_M_over_Q : Module.finrank ℚ M = 6 := by
   rw [IsCyclotomicExtension.Rat.finrank 9 M]
-  native_decide
+  decide
 
 theorem discr_M : NumberField.discr M = -19683 := by
   letI : IsCyclotomicExtension {3 ^ 2} ℚ M := by
     norm_num
     exact cycloM
-  have htot : Nat.totient 9 = 6 := by native_decide
+  have htot : Nat.totient 9 = 6 := by decide
   simpa [htot] using IsCyclotomicExtension.Rat.discr_prime_pow 3 2 M
 
 theorem nrComplexPlaces_M :
     NumberField.InfinitePlace.nrComplexPlaces M = 3 := by
   rw [IsCyclotomicExtension.Rat.nrComplexPlaces_eq_totient_div_two 9 M]
-  native_decide
+  decide
 
 theorem minkowski_lt_five :
     (4 / Real.pi) ^ NumberField.InfinitePlace.nrComplexPlaces M *

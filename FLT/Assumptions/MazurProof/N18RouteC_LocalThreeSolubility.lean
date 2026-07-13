@@ -12,7 +12,7 @@ namespace MazurProof.N18RouteC.LocalThree
 
 private theorem unitRep_zero_zero (k : F3) :
     unitRep 0 0 k = pow two5 k.val := by
-  native_decide +revert
+  decide +revert
 
 theorem isUnit5_pow {x : R5}
     (hx : IsUnit5 x) (n : ℕ) : IsUnit5 (x ^ n) := by
