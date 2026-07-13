@@ -92,3 +92,40 @@ supplies the group-theoretic half. **They are two halves of one proof and must b
 4. **Rejected:** genus-2 Chabauty (rank-0 makes it unnecessary; Mathlib lacks it) and any
    "missed elementary route" (would be Eisenstein–Thue, strictly heavier than Route C). The
    ROADMAP's Route-C choice is confirmed correct by this audit.
+
+## CORRECTED PLAN after 3-round design debate (Opus critic + Fable deep-dive + verification) — 2026-07-12
+
+The Fable-1 plan above was WRONG on its headline. Two independently-verified corrections:
+
+**(A) Package II is OFF the critical path and DROPPABLE.** Live `no_obstruction18` =
+`front_end ∘ all_points_annihilated_by_21` ⟸ `Separated.e0_killed_by_21` = `Block4.weak_three_descent`
+(**PROVEN, sorry-free**) + `Reduction.seven_nsmul` (**PROVEN**) + `formalFiltration` ⟸ `val_three_smul_ge`
+⟸ `zParam_nsmul_congr` ⟸ **Package I `add_congr`**. `msq_torsionFree` (Pkg II) feeds only
+`torsion_annihilated_by_21`, which is referenced nowhere (dead). Exponent-21 suffices.
+
+**(B) VACUITY BUG — the current formal-kernel infra is built on the WRONG model.** E₀=(1,−1,1,−5,5)
+has ADDITIVE reduction at 3 (conductor 162=2·3⁴). `kernelSubgroup={P=0 ∨ ordPi(xCoord P)<0}`, but the
+order-3 point T=(1,0) has `ordPi(xCoord T)=ordPi(1)=0` ⟹ T ∉ kernelSubgroup. With `hker: ker red =
+kernelSubgroup`, red T ≠ 0 has order 3 in RedPoint (card **7**, proven) → 3∤7 Lagrange contradiction ⟹
+the carried `(red, hker)` of `N18Block5Instantiation.no_obstruction18` are JOINTLY UNSATISFIABLE ⟹ the
+conditional is VACUOUS as it stands. T lives in the formal kernel only on the GOOD model (over L, good
+supersingular reduction, v(z)=1). Same bug class as the earlier v(z)≥1→v(x)<0 fix. Verified:
+`addOrderOf T=3`, kernelSubgroup def, `redPoint_card=7`, xCoord T=1. [3]-series on ℤ-model has every
+coeff divisible by 3 (Ĝₐ, additive) — no supersingular structure; the good model has Newton polygon
+(1,3)-(3,1)-(9,0).
+
+**THE REAL WORK (nailed):**
+1. **Port kernel / `val_coords` / `add_congr` to the GOOD model** (`N18RouteC_GoodModel.lean` +
+   `VariableChangePoints`, both sorry-free). Good-model coeffs are no longer π-units; every unit
+   certificate becomes an `a³=3a+1` ring computation. **This is the real multi-week cost.** The
+   `add_congr` method (chart-normalized line, identity (8), the slope-bug fix) is in
+   `N18_ADD_CONGR_DESIGN.md` (Q4613) — transfers, but recompute coefficients on the good model.
+2. good-model Package I → `formalFiltration` → **exponent-21 via the already-proven `Block4`** →
+   `front_end` (from the Q4366 `J_L ~ E₀×E₀` splitting, confirmed) → `no_obstruction18` →
+   `no_five_descent_solution` (the current live sorry) → done.
+3. **Package II DROPPED** (or, if kept for the good-model kernel field, ~2-3 pages via Ψ₃
+   `coeff_Ψ₃=3` on the good model — NOT the formal-log `3f(T)+g(T³)` route; Mathlib has no elliptic
+   formal group / [n]-series).
+
+Independently settled (Python + code): congruence dead; J₁(18) ℚ-simple GL₂-type, no ℚ elliptic
+quotient, torsion ℤ/21, rank 0; front_end map exists (J_L~E₀², #J(𝔽₁₇)=#J(𝔽₁₉)=21²=#E₀²).
