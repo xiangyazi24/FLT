@@ -233,10 +233,9 @@ private theorem ordPi_seven_generator_z : ordPi (zParam (torsionAffine 6)) = 0 :
   omega
 
 private theorem generator_add_six_generator :
-    generator21 + torsionAffine 5 = torsionAffine 6 := by
-  have := add_generator_consecutive (4 : Fin 18)
-  rw [add_comm] at this
-  convert this using 2 <;> rfl
+    generator21 + torsionAffine 5 = torsionAffine 6 :=
+  (add_comm generator21 (torsionAffine 5)).trans
+    (add_generator_consecutive (4 : Fin 18))
 
 private theorem ordPi_counterexample_error :
     ordPi (zParam (generator21 + torsionAffine 5) -
