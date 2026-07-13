@@ -1,4 +1,5 @@
 import Mathlib
+import FLT.Assumptions.MazurProof.TorsionDefs
 
 /-!
 # Prime order 17 exclusion — kernel polynomial infrastructure
@@ -105,5 +106,36 @@ theorem fiber2_no_rational_root (x : ℚ) :
   exact fiber2_no_root_mod3 _ hmod
 
 end
+
+/-! ## Bridge: X₀(17)(ℚ) classification → kernel root
+
+X₀(17) has genus 1 with exactly 4 rational points: 2 cusps + 2 noncuspidal.
+The noncuspidal points correspond to two oriented rational 17-isogenies:
+  ξ₁ ↔ source 14450.o2, kernel polynomial k₁ = fiberQ1 · fiberQ2
+  ξ₂ ↔ source 14450.o1, kernel polynomial k₂ = fiber2
+
+A rational point of order 17 on any E/ℚ gives a rational Y₁(17) point,
+whose image in Y₀(17) = X₀(17) \ {cusps} is one of ξ₁ or ξ₂.  The
+Y₁ → Y₀ fiber over ξᵢ is the root scheme of κᵢ, so a rational lift
+forces κᵢ to have a rational root.
+
+This axiom encapsulates the X₀(17)(ℚ) classification + fiber analysis.
+-/
+
+open scoped WeierstrassCurve.Affine in
+axiom order17_implies_kernel_root
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (h : MazurProof.HasRationalPointOfOrder E 17) :
+    (∃ x : ℚ, Polynomial.aeval x (fiberQ1 * fiberQ2) = 0) ∨
+    (∃ x : ℚ, Polynomial.aeval x fiber2 = 0)
+
+open scoped WeierstrassCurve.Affine in
+theorem no_order_17_prime
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ MazurProof.HasRationalPointOfOrder E 17 := by
+  intro h
+  rcases order17_implies_kernel_root E h with ⟨x, hx⟩ | ⟨x, hx⟩
+  · exact fiber1_no_rational_root x hx
+  · exact fiber2_no_rational_root x hx
 
 end MazurProof.PrimeExclusion17

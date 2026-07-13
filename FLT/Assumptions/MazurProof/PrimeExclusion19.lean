@@ -1,4 +1,5 @@
 import Mathlib
+import FLT.Assumptions.MazurProof.TorsionDefs
 
 /-!
 # Prime order 19 exclusion — kernel polynomial infrastructure
@@ -39,5 +40,32 @@ theorem kernelPoly19_no_rational_root (x : ℚ) :
   exact kernelPoly19_no_root_mod2 _ hmod
 
 end
+
+/-! ## Bridge: X₀(19)(ℚ) classification → kernel root
+
+X₀(19) has genus 1 with exactly 3 rational points: 2 cusps + 1 noncuspidal
+CM point ξ_CM (j = -884736 = -96³).  The unique rational 19-isogeny has
+kernel polynomial kernelPoly19 (degree 9 = (19-1)/2).
+
+A rational point of order 19 gives a rational Y₁(19) point, whose image
+in Y₀(19) is ξ_CM.  The Y₁ → Y₀ fiber is the root scheme of kernelPoly19,
+so a rational lift forces a rational root.
+
+This axiom encapsulates the X₀(19)(ℚ) classification + fiber analysis.
+-/
+
+open scoped WeierstrassCurve.Affine in
+axiom order19_implies_kernel_root
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (h : MazurProof.HasRationalPointOfOrder E 19) :
+    ∃ x : ℚ, Polynomial.aeval x kernelPoly19 = 0
+
+open scoped WeierstrassCurve.Affine in
+theorem no_order_19_prime
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ MazurProof.HasRationalPointOfOrder E 19 := by
+  intro h
+  obtain ⟨x, hx⟩ := order19_implies_kernel_root E h
+  exact kernelPoly19_no_rational_root x hx
 
 end MazurProof.PrimeExclusion19
