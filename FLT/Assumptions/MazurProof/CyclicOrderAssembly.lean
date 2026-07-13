@@ -10,6 +10,7 @@ import FLT.Assumptions.MazurProof.CyclicExclusion35
 import FLT.Assumptions.MazurProof.CyclicExclusion15
 import FLT.Assumptions.MazurProof.CyclicExclusion21
 import FLT.Assumptions.MazurProof.CyclicExclusion11
+import FLT.Assumptions.MazurProof.N18GoodModelAssembly
 
 /-!
 # Assembly: cyclic order bound from named sub-axioms
@@ -125,7 +126,8 @@ theorem mazur_prime_torsion_bound_sub
 theorem no_order_15 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ HasRationalPointOfOrder E 15 :=
   no_rational_point_of_order_15 E
-axiom no_order_18 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 18
+theorem no_order_18 (E : WeierstrassCurve ℚ) [E.IsElliptic] : ¬ HasRationalPointOfOrder E 18 :=
+  N18GoodModelAssembly.no_rational_point_of_order_18 E
 theorem no_order_21 (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ HasRationalPointOfOrder E 21 :=
   CyclicExclusion21.no_rational_point_of_order_21 E

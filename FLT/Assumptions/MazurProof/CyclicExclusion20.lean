@@ -1,6 +1,7 @@
 import FLT.Assumptions.MazurProof.TorsionDefs
 import FLT.Assumptions.MazurProof.DescentBridge
 import FLT.Assumptions.MazurProof.DescentBridgeN12
+import FLT.Assumptions.MazurProof.Velu2Isogeny
 
 /-!
 # Cyclic order 20 and 24 exclusion via 2-isogeny quotient
@@ -171,19 +172,6 @@ private theorem eta_ne_half_image_24
       _ = 0 := D.dual_eta
   have : 24 ∣ 12 := by simpa [hP] using addOrderOf_dvd_of_nsmul_eq_zero h12P
   norm_num at this
-
-/-! ## Geometric input: existence of 2-isogeny quotient -/
-
-axiom exists_rational_two_isogeny_quotient
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    {Q : (E⁄ℚ).Point} (hQ : addOrderOf Q = 2) :
-    ∃ (E' : WeierstrassCurve ℚ) (hE' : E'.IsElliptic)
-      (phi : (E⁄ℚ).Point →+ (E'⁄ℚ).Point)
-      (dual : (E'⁄ℚ).Point →+ (E⁄ℚ).Point)
-      (eta : (E'⁄ℚ).Point),
-      addOrderOf eta = 2 ∧
-      (∀ R, phi R = 0 ↔ R = 0 ∨ R = Q) ∧
-      (∀ R, dual (phi R) = 2 • R) ∧ dual eta = 0
 
 /-! ## Z/2 × Z/n injective embedding machinery -/
 

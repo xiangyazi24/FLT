@@ -3105,4 +3105,20 @@ theorem no_five_descent_solution :
 
 end
 
+open scoped WeierstrassCurve.Affine in
+theorem no_rational_point_of_order_18
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ HasRationalPointOfOrder E 18 := by
+  intro h18
+  obtain ⟨b, c, X, hb, hF9, hT2⟩ :=
+    CyclicExclusion18.order18_to_tate_obstruction E h18
+  have hF9' : TateNFDivision.F9 b c = 0 := by
+    simpa [TateNFDivision.F9, CyclicExclusion18.F9] using hF9
+  have hT2' : TateNFDivision.T2 b c X = 0 := by
+    simpa [TateNFDivision.T2, CyclicExclusion18.T2] using hT2
+  obtain ⟨U, Y, hU0, hU1, hY⟩ :=
+    RationalPointsN18.obstruction_to_hyperelliptic hb hF9' hT2'
+  exact no_five_descent_solution
+    (RationalPointsN18Descent.noncuspidal_point_to_five_descent hU0 hU1 hY)
+
 end MazurProof.N18GoodModelAssembly
