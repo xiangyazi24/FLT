@@ -431,11 +431,17 @@ theorem raw_order49_obstruction_iff_pure :
   raw_order49_obstruction_iff_compact.trans compact_order49_obstruction_iff_pure
 
 /-!
-## Remaining arithmetic theorem
+## Remaining arithmetic theorems
 
 `G49` is explicit: unfolding `G49`, `G23`, ..., `G10` and the imported
 `F5`, ..., `F15`, `G11`, ..., `G14` produces an integer polynomial in `b,c`.
-The only missing result is the following exact Diophantine assertion.
+The remaining Diophantine argument is split at the standard modular-curve
+boundary.  This makes the two certificates that still have to be generated
+and checked explicit:
+
+1. the diamond quotient from the open order-`49` Tate locus to the
+   noncuspidal affine locus of `X₀(49)`;
+2. the rank-zero calculation for the minimal model of `X₀(49)`.
 
 A direct completion must supply a checkable certificate proving that every
 rational zero of `G49` lies on at least one of these excluded loci:
@@ -444,19 +450,74 @@ rational zero of `G49` lies on at least one of these excluded loci:
 * `tateDiscriminant49 b c = 0`;
 * `F7 b c = 0`.
 
-Equivalently, a generated diamond-quotient certificate may map this open
-piece to a noncuspidal rational point of
-`y² + xy = x³ - x² - 2x - 1`, followed by a proof that the latter curve's
-rational points are only `O` and `(2,-1)`.  Merely assuming either the quotient
-map or the rational-point classification would move, rather than close, the
-axiom.
+The elementary final step from the rank-zero statement to the affine-point
+classification is proved below.
 -/
 
-/-- `SORRY[N49-POLY]`: the explicit order-49 polynomial has no rational zero
-off the singular and proper-order-seven loci. -/
+/-- The affine minimal model of `X₀(49)` (Cremona `49a1`). -/
+def X049Equation (x y : ℚ) : Prop :=
+  y ^ 2 + x * y = x ^ 3 - x ^ 2 - 2 * x - 1
+
+/-- `SORRY[N49-QUOTIENT]`: a generated certificate for the diamond quotient
+`X₁(49) → X₀(49)` on the Tate chart.
+
+The certificate must give explicit rational functions `x(b,c), y(b,c)`, prove
+their denominators nonzero from `hb`, `hdisc`, and `hF7`, verify
+`X049Equation x y` from `hG49`, and prove that the image is not the affine cusp
+`(2,-1)`.  The point at infinity is already excluded by producing affine
+coordinates. -/
+theorem pure_order49_to_noncuspidal_X049
+    {b c : ℚ}
+    (hb : b ≠ 0)
+    (hdisc : tateDiscriminant49 b c ≠ 0)
+    (hF7 : F7 b c ≠ 0)
+    (hG49 : G49 b c = 0) :
+    ∃ x y : ℚ, X049Equation x y ∧ ¬ (x = 2 ∧ y = -1) := by
+  sorry
+
+/-- `SORRY[N49-RANK-ZERO]`: the Mordell--Weil calculation for `49a1`.
+
+For a concrete `2`-isogeny descent, set `X = 4*(x-2)` and
+`Y = 8*y+4*x`.  The resulting model and its `2`-isogenous curve are
+
+* `Y² = X³ + 21*X² + 112*X`;
+* `Y² = X³ - 42*X² - 7*X`.
+
+The two square-class images are respectively `{1, 7}` and `{1, -7}`.
+Their other candidate classes are excluded by real-sign, parity, and
+`7`-adic arguments.  This proves rank zero; good reduction at `2` and `3`
+then bounds the torsion order by `gcd(2,4)=2`.  In the original affine
+coordinates the conclusion that every rational point is two-torsion is
+exactly `2*y+x=0`.
+-/
+theorem X049_affine_is_two_torsion
+    {x y : ℚ} (hcurve : X049Equation x y) :
+    2 * y + x = 0 := by
+  sorry
+
+/-- The only affine rational point on `X₀(49)` is its non-infinite cusp. -/
+theorem X049_affine_rational_point
+    {x y : ℚ} (hcurve : X049Equation x y) :
+    x = 2 ∧ y = -1 := by
+  have htwo := X049_affine_is_two_torsion hcurve
+  have hy : y = -x / 2 := by linarith
+  rw [hy] at hcurve
+  have hfactor : (x - 2) * (4 * x ^ 2 + 5 * x + 2) = 0 := by
+    dsimp [X049Equation] at hcurve
+    nlinarith
+  rcases mul_eq_zero.mp hfactor with hx | hquad
+  · constructor <;> nlinarith
+  · have hsquare : (8 * x + 5) ^ 2 + 7 = 0 := by nlinarith
+    nlinarith [sq_nonneg (8 * x + 5)]
+
+/-- The explicit order-49 polynomial has no rational zero off the singular and
+proper-order-seven loci, modulo the two isolated certificates above. -/
 theorem no_pure_order49_polynomial_solution :
     ¬ PureOrder49PolynomialObstruction := by
-  sorry
+  rintro ⟨b, c, hb, hdisc, hF7, hG49⟩
+  obtain ⟨x, y, hcurve, hnoncusp⟩ :=
+    pure_order49_to_noncuspidal_X049 hb hdisc hF7 hG49
+  exact hnoncusp (X049_affine_rational_point hcurve)
 
 /-- Polynomial-form replacement for the raw Tate obstruction axiom. -/
 theorem no_raw_order49_tate_obstruction :
