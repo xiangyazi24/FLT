@@ -276,10 +276,14 @@ and `P = −Q` cases are elementary), split on the doubling/distinct branch of
 and `z₃ = −x₃/y₃`, and STEP 4 for the cross-term valuation bound using the
 ultrametric `ordPi_add_ge` + `ordPi_mul`.
 
-**Not yet fully wired** — currently a `sorry`; see the report for the exact
-remaining reduction (STEP 2–4 on top of STEP 1). -/
+**Corrected statement (Codex counterexample, 2026-07-13):** the `ordPi`-valued
+version with `ordPi 0 = 0` is FALSE on concrete kernel points (generator21 +
+torsionAffine 5 gives error with ordPi = 0 while the sum = 2).  The disjunctive
+restatement is mathematically correct and compatible with the downstream
+`FormalKernelData.add_congr` (which uses `vpi : WithTop ℤ` where `vpi 0 = ⊤`). -/
 theorem add_congr (P Q : E0Point)
     (hP : 1 ≤ v (zParam P)) (hQ : 1 ≤ v (zParam Q)) :
+    zParam (P + Q) - zParam P - zParam Q = 0 ∨
     v (zParam P) + v (zParam Q) ≤ v (zParam (P + Q) - zParam P - zParam Q) := by
   -- The origin cases are vacuous: `v (zParam 0) = 0` contradicts `hP`/`hQ`.
   rcases P with _ | ⟨x₁, y₁, h₁⟩
@@ -288,9 +292,9 @@ theorem add_congr (P Q : E0Point)
   rcases Q with _ | ⟨x₂, y₂, h₂⟩
   · change 1 ≤ ordPi (0 : L) at hQ
     rw [ordPi_zero] at hQ; exact absurd hQ (by norm_num)
-  -- Remaining: both `P = (x₁,y₁)` and `Q = (x₂,y₂)` finite.  STEP 2–4 on top of
-  -- STEP 1 (`val_coords`), splitting on the doubling/distinct branch of
-  -- `Point.add`.  **Remaining reduction — see report.**
+  -- Remaining: both finite in the formal kernel.  Three branches of Point.add:
+  -- (a) inverse (P+Q=O), (b) distinct-x, (c) doubling.
+  -- Chart algebra (G_line, BC_factor, identity8) is proved in N18AddCongrProof.lean.
   sorry
 
 end
