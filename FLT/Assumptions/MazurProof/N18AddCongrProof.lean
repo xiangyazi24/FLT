@@ -58,7 +58,6 @@ theorem identity8 (m b t₁ t₂ u t₃ d : L)
       b * H m b - A m * (t₁ * t₂) * (1 + m) - A m * b * u := by
   have hBC := BC_factor m b
   rw [hd] at ht₃ ⊢
-  simp only [A, B, C, H] at hsum hpair hBC ⊢
   linear_combination
     A m * ht₃ + (b - 1) * hsum + (1 + m) * hpair + hBC
 
@@ -70,6 +69,12 @@ private theorem add_ne_zero_of_ordPi_ne {x y : L}
   have hy : y = -x := by linear_combination h
   apply hxy
   rw [hy, ordPi_neg]
+
+private theorem pi_ne_zero : pi ≠ 0 := by
+  intro h
+  have hv := ordPi_pi
+  rw [h, ordPi_zero] at hv
+  omega
 
 private theorem ordPi_two : ordPi (2 : L) = 0 := by
   have hnegone : ordPi (-1 : L) = 0 := by rw [ordPi_neg, ordPi_one]
@@ -102,7 +107,8 @@ private theorem ordPi_fifty : ordPi (50 : L) = 0 := by
   have h48 : 3 ≤ ordPi (48 : L) := by
     rw [show (48 : L) = 3 * 16 by norm_num, ordPi_mul (by norm_num) (by norm_num),
       ordPi_three]
-    have := zero_le_ordPi_intCast 16
+    have : 0 ≤ ordPi (16 : L) := by
+      simpa only [Int.cast_ofNat] using zero_le_ordPi_intCast 16
     omega
   calc
     ordPi (50 : L) = ordPi ((2 : L) + 48) := by norm_num
@@ -114,7 +120,8 @@ private theorem ordPi_sixty_eight : ordPi (68 : L) = 0 := by
   have h66 : 3 ≤ ordPi (66 : L) := by
     rw [show (66 : L) = 3 * 22 by norm_num, ordPi_mul (by norm_num) (by norm_num),
       ordPi_three]
-    have := zero_le_ordPi_intCast 22
+    have : 0 ≤ ordPi (22 : L) := by
+      simpa only [Int.cast_ofNat] using zero_le_ordPi_intCast 22
     omega
   calc
     ordPi (68 : L) = ordPi ((2 : L) + 66) := by norm_num
@@ -128,6 +135,7 @@ private theorem ordPi_generator21_z : ordPi (zParam generator21) = 1 := by
   let qy : L := 50 + 30 * pi
   have h5pi : ordPi (5 * pi) = 1 := by
     rw [ordPi_mul (by norm_num) pi_ne_zero, ordPi_five, ordPi_pi]
+    norm_num
   have hqx : ordPi qx = 1 := by
     change ordPi (9 + 5 * pi) = 1
     rw [add_comm, ordPi_add_eq_of_lt (mul_ne_zero (by norm_num) pi_ne_zero) (by norm_num)]
@@ -140,6 +148,7 @@ private theorem ordPi_generator21_z : ordPi (zParam generator21) = 1 := by
     omega
   have hpqx : ordPi (pi * qx) = 2 := by
     rw [ordPi_mul pi_ne_zero hqx0, ordPi_pi, hqx]
+    norm_num
   have hux : ordPi ux = 0 := by
     change ordPi ((-10 : L) + pi * qx) = 0
     rw [ordPi_add_eq_of_lt (by norm_num) (mul_ne_zero pi_ne_zero hqx0)]
@@ -153,15 +162,18 @@ private theorem ordPi_generator21_z : ordPi (zParam generator21) = 1 := by
   have hxform : torsionX 0 = pi * ux := by
     change -6 * a ^ 2 + 2 * a + 19 = pi * (-10 + pi * (9 + 5 * pi))
     unfold a
-    linear_combination 5 * pi_relation
+    linear_combination -5 * pi_relation
   have hx0 : torsionX 0 ≠ 0 := by rw [hxform]; exact mul_ne_zero pi_ne_zero hux0
   have hxv : ordPi (torsionX 0) = 1 := by
     rw [hxform, ordPi_mul pi_ne_zero hux0, ordPi_pi, hux]
+    norm_num
   have h30 : ordPi (30 : L) = 3 := by
     rw [show (30 : L) = 3 * 10 by norm_num, ordPi_mul (by norm_num) (by norm_num),
       ordPi_three, ordPi_ten]
+    norm_num
   have h30pi : ordPi (30 * pi) = 4 := by
     rw [ordPi_mul (by norm_num) pi_ne_zero, h30, ordPi_pi]
+    norm_num
   have hqy : ordPi qy = 0 := by
     change ordPi ((50 : L) + 30 * pi) = 0
     rw [ordPi_add_eq_of_lt (by norm_num) (mul_ne_zero (by norm_num) pi_ne_zero)]
@@ -174,6 +186,7 @@ private theorem ordPi_generator21_z : ordPi (zParam generator21) = 1 := by
     omega
   have hpy : ordPi (pi * qy) = 1 := by
     rw [ordPi_mul pi_ne_zero hqy0, ordPi_pi, hqy]
+    norm_num
   have hyform : torsionY 0 = -68 + pi * qy := by
     change 30 * a ^ 2 - 10 * a - 88 = -68 + pi * (50 + 30 * pi)
     unfold a
@@ -195,6 +208,7 @@ private theorem ordPi_generator21_z : ordPi (zParam generator21) = 1 := by
 private theorem ordPi_six_generator_z : ordPi (zParam (torsionAffine 5)) = 1 := by
   have h2pi : ordPi (2 * pi) = 1 := by
     rw [ordPi_mul (by norm_num) pi_ne_zero, ordPi_two, ordPi_pi]
+    norm_num
   have hy0 : (1 : L) + 2 * pi ≠ 0 := by
     apply add_ne_zero_of_ordPi_ne
     rw [ordPi_one, h2pi]
@@ -211,7 +225,8 @@ private theorem ordPi_six_generator_z : ordPi (zParam (torsionAffine 5)) = 1 := 
   omega
 
 private theorem seven_generator_z : zParam (torsionAffine 6) = (1 / 2 : L) := by
-  rfl
+  change -((1 : L)) / (-2) = 1 / 2
+  norm_num
 
 private theorem ordPi_seven_generator_z : ordPi (zParam (torsionAffine 6)) = 0 := by
   rw [seven_generator_z, ordPi_div (by norm_num) (by norm_num), ordPi_one, ordPi_two]
@@ -231,11 +246,13 @@ private theorem ordPi_counterexample_error :
     norm_num
   have hz1 : zParam generator21 ≠ 0 := by
     intro h
-    rw [h, ordPi_zero] at ordPi_generator21_z
+    have hv := ordPi_generator21_z
+    rw [h, ordPi_zero] at hv
     omega
   have hz6 : zParam (torsionAffine 5) ≠ 0 := by
     intro h
-    rw [h, ordPi_zero] at ordPi_six_generator_z
+    have hv := ordPi_six_generator_z
+    rw [h, ordPi_zero] at hv
     omega
   have hfirst0 :
       ordPi (zParam (torsionAffine 6) + -zParam generator21) = 0 := by
@@ -247,10 +264,12 @@ private theorem ordPi_counterexample_error :
     apply add_ne_zero_of_ordPi_ne
     rw [ordPi_seven_generator_z, ordPi_neg, ordPi_generator21_z]
     omega
-  simpa [sub_eq_add_neg] using
-    (ordPi_add_eq_of_lt hfirstne (neg_ne_zero.mpr hz6) (by
-      rw [hfirst0, ordPi_neg, ordPi_six_generator_z]
-      omega))
+  rw [show zParam (torsionAffine 6) - zParam generator21 - zParam (torsionAffine 5) =
+      (zParam (torsionAffine 6) + -zParam generator21) + -zParam (torsionAffine 5) by
+        ring]
+  rw [ordPi_add_eq_of_lt hfirstne (neg_ne_zero.mpr hz6) (by
+    rw [hfirst0, ordPi_neg, ordPi_six_generator_z]
+    omega), hfirst0]
 
 /-- The requested signature is false on two entries of the existing explicit
 order-21 point table. -/
@@ -261,7 +280,11 @@ theorem not_add_congr_signature :
           v (zParam (P + Q) - zParam P - zParam Q) := by
   intro h
   have hbad := h generator21 (torsionAffine 5)
-    (by rw [ordPi_generator21_z]) (by rw [ordPi_six_generator_z])
+    (by change 1 ≤ ordPi (zParam generator21); rw [ordPi_generator21_z])
+    (by change 1 ≤ ordPi (zParam (torsionAffine 5)); rw [ordPi_six_generator_z])
+  change ordPi (zParam generator21) + ordPi (zParam (torsionAffine 5)) ≤
+    ordPi (zParam (generator21 + torsionAffine 5) -
+      zParam generator21 - zParam (torsionAffine 5)) at hbad
   rw [ordPi_generator21_z, ordPi_six_generator_z, ordPi_counterexample_error] at hbad
   omega
 
