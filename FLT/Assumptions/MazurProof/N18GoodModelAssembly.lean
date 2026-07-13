@@ -3,7 +3,6 @@ import FLT.Assumptions.MazurProof.N18PackageII
 import FLT.Assumptions.MazurProof.N18GoodModelValCoords
 import FLT.Assumptions.MazurProof.N18VpiWrapper
 import FLT.Assumptions.MazurProof.N18RouteC_GoodModel
-import FLT.Assumptions.MazurProof.N18ReductionGood
 import FLT.Assumptions.MazurProof.N18Block5Instantiation
 import FLT.Assumptions.MazurProof.CyclicExclusion18
 import FLT.Assumptions.MazurProof.N18RouteC_Block7
@@ -1943,7 +1942,9 @@ private theorem reduceNonneg_good_a₁ :
     _ = reducePiOL MazurProof.N18PackageII.E0GoodInt.a₁ := by
       unfold reduceNonneg
       exact reducePi_of_integer _
-    _ = 2 := by norm_num [MazurProof.N18PackageII.E0GoodInt]
+    _ = 2 := by
+      simp [MazurProof.N18PackageII.E0GoodInt]
+      decide
 
 private theorem reduceNonneg_good_a₂ :
     reduceNonneg E0Good.a₂ good_coeff_orders.2.1 = 2 := by
@@ -1991,7 +1992,8 @@ private theorem reduceNonneg_good_a₄ :
     _ = reducePiOL MazurProof.N18PackageII.E0GoodInt.a₄ := by
       unfold reduceNonneg
       exact reducePi_of_integer _
-    _ = 0 := by norm_num [MazurProof.N18PackageII.E0GoodInt]
+    _ = 0 := by
+      simp [MazurProof.N18PackageII.E0GoodInt]
 
 private theorem reduceNonneg_good_a₆ :
     reduceNonneg E0Good.a₆ good_coeff_orders.2.2.2.2 = 0 := by
@@ -2007,7 +2009,9 @@ private theorem reduceNonneg_good_a₆ :
     _ = reducePiOL MazurProof.N18PackageII.E0GoodInt.a₆ := by
       unfold reduceNonneg
       exact reducePi_of_integer _
-    _ = 0 := by norm_num [MazurProof.N18PackageII.E0GoodInt]
+    _ = 0 := by
+      simp [MazurProof.N18PackageII.E0GoodInt]
+      decide
 
 private theorem reducesPi_nonneg {x : L} (hx : 0 ≤ ordPi x) :
     ReducesPi x (reduceNonneg x hx) := by
@@ -2312,7 +2316,196 @@ private theorem formal_sub_of_residueCode_eq (P Q : GoodPoint)
                   WeierstrassCurve.Affine.Point.add_of_X_ne hxEq]
                 exact Or.inr hx₃Neg
 
--- The quotient construction of the reduction homomorphism is below.
+private def goodKernelSubgroup : AddSubgroup GoodPoint where
+  carrier := {P | InFormalKernel P}
+  zero_mem' := zero_mem_formalKernel
+  add_mem' := by
+    intro P Q hP hQ
+    exact kernel_add_closed_good P Q hP hQ
+  neg_mem' := by
+    intro P hP
+    exact formal_neg_good P hP
+
+private instance : goodKernelSubgroup.Normal where
+  conj_mem := by
+    intro P hP Q
+    simpa [add_assoc, add_comm, add_left_comm] using hP
+
+private abbrev GoodReductionQuotient :=
+  GoodPoint ⧸ goodKernelSubgroup
+
+private noncomputable def quotientResidueCode :
+    GoodReductionQuotient → Option (ZMod 3 × ZMod 3) :=
+  fun q ↦ residueCode (Quotient.out q)
+
+private theorem quotientResidueCode_injective :
+    Function.Injective quotientResidueCode := by
+  intro q₁ q₂ hcode
+  rw [← Quotient.out_eq' q₁, ← Quotient.out_eq' q₂]
+  apply QuotientAddGroup.eq_iff_sub_mem.mpr
+  change InFormalKernel (Quotient.out q₁ - Quotient.out q₂)
+  exact formal_sub_of_residueCode_eq _ _ hcode
+
+private noncomputable instance : Finite GoodReductionQuotient :=
+  Finite.of_injective quotientResidueCode quotientResidueCode_injective
+
+private theorem goodReductionQuotient_card_le_ten :
+    Nat.card GoodReductionQuotient ≤ 10 := by
+  calc
+    Nat.card GoodReductionQuotient ≤
+        Nat.card (Option (ZMod 3 × ZMod 3)) :=
+      Nat.card_le_card_of_injective quotientResidueCode
+        quotientResidueCode_injective
+    _ = 10 := by
+      rw [Nat.card_eq_fintype_card]
+      decide
+
+private theorem three_generator_good_xCoord :
+    xCoordGood (MazurProof.N18RouteC.GoodModel.e0GoodEquiv
+      ((3 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21)) = 0 := by
+  have hthree : (3 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21 =
+      MazurProof.N18RouteC.TorsionTable.torsionPoint (3 : Fin 21) := by
+    simpa using MazurProof.N18RouteC.TorsionTable.nsmul_generator (3 : Fin 21)
+  rw [hthree]
+  change xCoordGood (MazurProof.N18RouteC.GoodModel.e0GoodEquiv
+    (MazurProof.N18RouteC.TorsionTable.torsionAffine (2 : Fin 20))) = 0
+  have h₀ : WeierstrassCurve.Affine.Nonsingular E0
+      (MazurProof.N18RouteC.TorsionTable.torsionX (2 : Fin 20))
+      (MazurProof.N18RouteC.TorsionTable.torsionY (2 : Fin 20)) := by
+    apply WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+    rw [WeierstrassCurve.Affine.equation_iff]
+    exact sub_eq_zero.mp
+      (MazurProof.N18RouteC.TorsionTable.torsion_on_curve (2 : Fin 20))
+  have hG : WeierstrassCurve.Affine.Nonsingular E0Good
+      (MazurProof.N18RouteC.VariableChangePoints.variableChangePointX
+        MazurProof.N18RouteC.GoodModel.toGoodChange
+        (MazurProof.N18RouteC.TorsionTable.torsionX (2 : Fin 20)))
+      (MazurProof.N18RouteC.VariableChangePoints.variableChangePointY
+        MazurProof.N18RouteC.GoodModel.toGoodChange
+        (MazurProof.N18RouteC.TorsionTable.torsionX (2 : Fin 20))
+        (MazurProof.N18RouteC.TorsionTable.torsionY (2 : Fin 20))) := by
+    apply WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+    rw [← MazurProof.N18RouteC.GoodModel.toGoodChange_smul_E0]
+    exact MazurProof.N18RouteC.VariableChangePoints.variableChangePoint_equation
+      E0 MazurProof.N18RouteC.GoodModel.toGoodChange h₀.1
+  unfold MazurProof.N18RouteC.TorsionTable.torsionAffine
+  rw [MazurProof.N18RouteC.GoodModel.e0GoodEquiv_some (hG := hG)]
+  simp [xCoordGood,
+    MazurProof.N18RouteC.VariableChangePoints.variableChangePointX,
+    MazurProof.N18RouteC.GoodModel.toGoodChange,
+    MazurProof.N18RouteC.GoodModel.changeR,
+    MazurProof.N18RouteC.TorsionTable.torsionX]
+  ring
+
+private theorem three_generator_good_not_formal :
+    ¬ InFormalKernel (MazurProof.N18RouteC.GoodModel.e0GoodEquiv
+      ((3 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21)) := by
+  intro hformal
+  rcases hformal with hzero | hneg
+  · have hold0 :
+        ((3 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21) ≠ 0 := by
+      have hthree : (3 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21 =
+          MazurProof.N18RouteC.TorsionTable.torsionPoint (3 : Fin 21) := by
+        simpa using MazurProof.N18RouteC.TorsionTable.nsmul_generator (3 : Fin 21)
+      rw [hthree]
+      exact WeierstrassCurve.Affine.Point.some_ne_zero _
+    apply hold0
+    apply MazurProof.N18RouteC.GoodModel.e0GoodEquiv.injective
+    simpa using hzero
+  · rw [three_generator_good_xCoord, ordPi_zero] at hneg
+    omega
+
+private theorem seven_nsmul_three_generator_good :
+    (7 : ℕ) • (MazurProof.N18RouteC.GoodModel.e0GoodEquiv
+      ((3 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21)) = 0 := by
+  calc
+    (7 : ℕ) • (MazurProof.N18RouteC.GoodModel.e0GoodEquiv
+        ((3 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21)) =
+      MazurProof.N18RouteC.GoodModel.e0GoodEquiv
+        ((7 : ℕ) • ((3 : ℕ) •
+          MazurProof.N18RouteC.TorsionTable.generator21)) := by
+            exact (map_nsmul MazurProof.N18RouteC.GoodModel.e0GoodEquiv 7
+              ((3 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21)).symm
+    _ = MazurProof.N18RouteC.GoodModel.e0GoodEquiv
+        ((21 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21) := by
+          congr 1
+          calc
+            (7 : ℕ) • ((3 : ℕ) •
+                MazurProof.N18RouteC.TorsionTable.generator21) =
+              (3 * 7 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21 :=
+                (mul_nsmul MazurProof.N18RouteC.TorsionTable.generator21 3 7).symm
+            _ = (21 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21 := by
+              norm_num
+    _ = 0 := by
+      rw [MazurProof.N18RouteC.TorsionTable.twenty_one_nsmul_generator,
+        map_zero]
+
+private noncomputable def quotientSevenPoint : GoodReductionQuotient :=
+  QuotientAddGroup.mk' goodKernelSubgroup
+    (MazurProof.N18RouteC.GoodModel.e0GoodEquiv
+      ((3 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21))
+
+private theorem quotientSevenPoint_ne_zero : quotientSevenPoint ≠ 0 := by
+  intro hzero
+  apply three_generator_good_not_formal
+  change MazurProof.N18RouteC.GoodModel.e0GoodEquiv
+      ((3 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21) ∈
+    goodKernelSubgroup
+  rw [← QuotientAddGroup.ker_mk' goodKernelSubgroup]
+  exact hzero
+
+private theorem seven_nsmul_quotientSevenPoint :
+    (7 : ℕ) • quotientSevenPoint = 0 := by
+  change (7 : ℕ) • QuotientAddGroup.mk' goodKernelSubgroup
+      (MazurProof.N18RouteC.GoodModel.e0GoodEquiv
+        ((3 : ℕ) • MazurProof.N18RouteC.TorsionTable.generator21)) = 0
+  rw [← map_nsmul, seven_nsmul_three_generator_good, map_zero]
+
+private theorem goodReductionQuotient_card :
+    Nat.card GoodReductionQuotient = 7 := by
+  letI : Fact (Nat.Prime 7) := ⟨by norm_num⟩
+  have hord : addOrderOf quotientSevenPoint = 7 :=
+    addOrderOf_eq_prime seven_nsmul_quotientSevenPoint
+      quotientSevenPoint_ne_zero
+  have hdvd : 7 ∣ Nat.card GoodReductionQuotient := by
+    rw [← hord]
+    exact addOrderOf_dvd_natCard quotientSevenPoint
+  have hpos : 0 < Nat.card GoodReductionQuotient := Finite.card_pos
+  have hle := goodReductionQuotient_card_le_ten
+  omega
+
+/-- The good-model reduction map, obtained by identifying the quotient by the
+formal kernel with the seven-point special fiber. -/
+theorem exists_good_reduction :
+    ∃ red : GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint,
+      ∀ P, P ∈ red.ker ↔ InFormalKernel P := by
+  letI : Fact (Nat.Prime 7) := ⟨by norm_num⟩
+  have hredCard :
+      Nat.card MazurProof.N18RouteC.Reduction.RedPoint = 7 := by
+    rw [Nat.card_eq_fintype_card]
+    exact MazurProof.N18RouteC.Reduction.redPoint_card
+  let e : GoodReductionQuotient ≃+
+      MazurProof.N18RouteC.Reduction.RedPoint :=
+    addEquivOfPrimeCardEq goodReductionQuotient_card hredCard
+  let red : GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint :=
+    e.toAddMonoidHom.comp (QuotientAddGroup.mk' goodKernelSubgroup)
+  refine ⟨red, ?_⟩
+  intro P
+  change e (QuotientAddGroup.mk' goodKernelSubgroup P) = 0 ↔
+    InFormalKernel P
+  constructor
+  · intro hred
+    have hquot : QuotientAddGroup.mk' goodKernelSubgroup P = 0 :=
+      e.injective (hred.trans e.map_zero.symm)
+    change P ∈ goodKernelSubgroup
+    rw [← QuotientAddGroup.ker_mk' goodKernelSubgroup]
+    exact hquot
+  · intro hformal
+    have hquot : QuotientAddGroup.mk' goodKernelSubgroup P = 0 := by
+      change P ∈ (QuotientAddGroup.mk' goodKernelSubgroup).ker
+      rw [QuotientAddGroup.ker_mk' goodKernelSubgroup]
+      exact hformal
+    rw [hquot, e.map_zero]
 
 /-- The reduction homomorphism selected from `exists_good_reduction`. -/
 noncomputable def redGood :

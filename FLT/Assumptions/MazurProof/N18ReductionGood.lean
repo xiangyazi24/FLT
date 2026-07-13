@@ -20,6 +20,7 @@ open MazurProof.N18RouteC.FieldArithmetic
 open MazurProof.N18RouteC.GoodModel
 open MazurProof.N18RouteC.ThreeAdic
 open MazurProof.N18RouteC.LocalThreeSound
+open MazurProof.N18Block5Instantiation.AddCongr
 
 noncomputable section
 
@@ -78,7 +79,7 @@ private theorem maximalIdeal_eq_span_piLocal :
   rw [← IsLocalization.AtPrime.map_eq_maximalIdeal p3.asIdeal LocalOL]
   change Ideal.map (algebraMap OL LocalOL) primeAboveThree = _
   rw [primeAboveThree_eq_span_pi, Ideal.map_span]
-  rfl
+  rw [Set.image_singleton]
 
 theorem reduceModPi_eq_zero_iff_mem_maximal (u : LocalOL) :
     reduceModPi u = 0 ↔ u ∈ IsLocalRing.maximalIdeal LocalOL := by
@@ -90,20 +91,31 @@ theorem reduceModPi_eq_zero_iff_mem_maximal (u : LocalOL) :
     simp [RingHom.mem_ker]
   have hker : RingHom.ker reduceModPi = IsLocalRing.maximalIdeal LocalOL := by
     symm
-    exact (IsLocalRing.maximalIdeal.isMaximal LocalOL).eq_of_le hle (by
-      intro htop
-      have h1 : (1 : LocalOL) ∈ RingHom.ker reduceModPi := by rw [htop]; trivial
-      simpa [RingHom.mem_ker] using h1)
+    exact (IsLocalRing.maximalIdeal.isMaximal LocalOL).eq_of_le
+      (RingHom.ker_ne_top reduceModPi) hle
   rw [← RingHom.mem_ker, hker]
 
 private theorem mem_maximal_iff_v3_lt_one (u : LocalOL) :
     u ∈ IsLocalRing.maximalIdeal LocalOL ↔ v3 (u : L) < 1 := by
-  change u ∈ IsLocalRing.maximalIdeal
-      (IsDedekindDomain.HeightOneSpectrum.valuationSubringAtPrime L p3) ↔ _
-  rw [show IsDedekindDomain.HeightOneSpectrum.valuationSubringAtPrime L p3 =
-      v3.valuationSubring from
-    IsDedekindDomain.HeightOneSpectrum.valuationSubringAtPrime_eq_valuationSubring]
-  exact Valuation.mem_maximalIdeal_iff
+  have hsub :
+      (IsDedekindDomain.HeightOneSpectrum.valuationSubringAtPrime L p3).toSubring =
+        v3.valuationSubring.toSubring := by
+    simpa only [v3] using congrArg ValuationSubring.toSubring
+      (IsDedekindDomain.HeightOneSpectrum.valuationSubringAtPrime_eq_valuationSubring
+        (K := L) p3)
+  let e : LocalOL ≃+* v3.valuationSubring := RingEquiv.subringCongr hsub
+  calc
+    u ∈ IsLocalRing.maximalIdeal LocalOL ↔
+        e u ∈ IsLocalRing.maximalIdeal v3.valuationSubring := by
+      rw [← IsLocalRing.maximalIdeal_comap (e : LocalOL →+* v3.valuationSubring),
+        Ideal.mem_comap]
+      change e u ∈ IsLocalRing.maximalIdeal v3.valuationSubring ↔ _
+      rfl
+    _ ↔ v3 ((e u : v3.valuationSubring) : L) < 1 :=
+      Valuation.mem_maximalIdeal_iff L v3
+    _ ↔ v3 (u : L) < 1 := by
+      have heval : ((e u : v3.valuationSubring) : L) = (u : L) := rfl
+      rw [heval]
 
 private theorem v3_le_one_of_ordPi_nonneg {x : L} (hx : 0 ≤ ordPi x) :
     v3 x ≤ 1 := by
@@ -119,7 +131,9 @@ private theorem v3_le_one_of_ordPi_nonneg {x : L} (hx : 0 ≤ ordPi x) :
 localization of `OL` at `(pi)`. -/
 def localOfNonneg (x : L) (hx : 0 ≤ ordPi x) : LocalOL :=
   ⟨x, by
-    rw [IsDedekindDomain.HeightOneSpectrum.valuationSubringAtPrime_eq_valuationSubring]
+    change x ∈ IsDedekindDomain.HeightOneSpectrum.valuationSubringAtPrime L p3
+    rw [IsDedekindDomain.HeightOneSpectrum.valuationSubringAtPrime_eq_valuationSubring
+      (K := L) p3]
     exact v3_le_one_of_ordPi_nonneg hx⟩
 
 @[simp] theorem localOfNonneg_coe (x : L) (hx : 0 ≤ ordPi x) :
@@ -232,24 +246,33 @@ def E0GoodLocal : WeierstrassCurve LocalOL :=
 
 theorem E0GoodLocal_map_L :
     E0GoodLocal.map (algebraMap LocalOL L) = E0Good := by
-  rw [E0GoodLocal, ← WeierstrassCurve.map_map]
+  rw [E0GoodLocal, WeierstrassCurve.map_map]
   simpa only [IsScalarTower.algebraMap_eq OL LocalOL L] using
     MazurProof.N18PackageII.E0GoodInt_map
 
 theorem E0GoodLocal_reduce :
     E0GoodLocal.map reduceModPi = reducedGoodCurve := by
+  have ha : reduceModPiOL aInteger = 1 := by
+    simpa only [reduceModPi_algebraMap] using reduceModPi_aInteger
   ext <;>
     simp [E0GoodLocal, MazurProof.N18PackageII.E0GoodInt,
-      reducedGoodCurve]
+      reducedGoodCurve, ha, map_ofNat] <;>
+    decide
 
 private theorem local_equation {x y : L}
     (h : WeierstrassCurve.Affine.Nonsingular E0Good x y)
     (hx : 0 ≤ ordPi x) (hy : 0 ≤ ordPi y) :
     WeierstrassCurve.Affine.Equation E0GoodLocal
       (localOfNonneg x hx) (localOfNonneg y hy) := by
-  apply (E0GoodLocal.map_equation
-    (algebraMap LocalOL L).injective _ _).mp
-  simpa only [E0GoodLocal_map_L, localOfNonneg_coe] using h.1
+  have hinj : Function.Injective (algebraMap LocalOL L) := by
+    intro u w huw
+    exact Subtype.ext huw
+  have hxmap : algebraMap LocalOL L (localOfNonneg x hx) = x := rfl
+  have hymap : algebraMap LocalOL L (localOfNonneg y hy) = y := rfl
+  apply (WeierstrassCurve.Affine.map_equation
+    (W := E0GoodLocal) (f := algebraMap LocalOL L)
+    hinj _ _).mp
+  simpa only [E0GoodLocal_map_L, hxmap, hymap] using h.1
 
 private theorem reduced_equation {x y : L}
     (h : WeierstrassCurve.Affine.Nonsingular E0Good x y)
@@ -280,7 +303,7 @@ def reducePoint : GoodPoint → RedPoint
     (h : WeierstrassCurve.Affine.Nonsingular E0Good x y)
     (hx : ordPi x < 0) :
     reducePoint (.some x y h) = 0 := by
-  simp [reducePoint, hx]
+  simp [reducePoint, hx, WeierstrassCurve.Affine.Point.zero_def]
 
 @[simp] theorem reducePoint_some_of_nonneg {x y : L}
     (h : WeierstrassCurve.Affine.Nonsingular E0Good x y)
@@ -302,10 +325,10 @@ theorem reducePoint_eq_zero_iff (P : GoodPoint) :
         | .zero => False
         | .some x _ _ => ordPi x < 0 := by
   cases P with
-  | zero => simp
+  | zero => simp [reducePoint, WeierstrassCurve.Affine.Point.zero_def]
   | some x y h =>
       by_cases hx : ordPi x < 0
-      · simp [reducePoint, hx]
+      · simp [reducePoint, hx, WeierstrassCurve.Affine.Point.zero_def]
       · have hx' : 0 ≤ ordPi x := le_of_not_gt hx
         simp [reducePoint, hx, reduceIntegralPoint_ne_zero h hx']
 
