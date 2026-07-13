@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.TateOriginDivision
+import FLT.Assumptions.MazurProof.CyclicExclusion49Polynomial
 
 /-!
 # Cyclic order 49 exclusion
@@ -39,8 +40,10 @@ theorem order49_to_raw_tate_obstruction
       (by decide) hord
   exact ⟨b, c, inferInstance, hb, h49eval, h7eval⟩
 
-/-- Remaining arithmetic boundary for order 49. -/
-axiom no_raw_order49_tate_obstruction : ¬ RawOrder49TateObstruction
+/-- Remaining arithmetic boundary for order 49.
+Proved via the compact polynomial reduction in CyclicExclusion49Polynomial. -/
+theorem no_raw_order49_tate_obstruction : ¬ RawOrder49TateObstruction :=
+  CyclicExclusion49Polynomial.no_raw_order49_tate_obstruction
 
 theorem no_rational_point_of_order_49
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
