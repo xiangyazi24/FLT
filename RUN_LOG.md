@@ -11,8 +11,15 @@
   (tabs may still have answers in browser). Pre-existing designs Q4463-Q4560 used.
 - Python verified: p=19 kernel poly k₁₉ (monic, irreducible, no root mod 2),
   X₀(17) noncuspidal points at (7,13)/(7,-21), X₀(19) at (5,9)/(5,-10)
-- end: session continuing
-- final result: (in progress)
+- ChatGPT round 2: flt1,2,5 timed out (f=2); flt3,4 still running
+- end: session continuing (wakeup scheduled for flt3/4 completion)
+- final result: 5 commits, axiom surface decomposed from 1 monolithic to 8 targeted,
+  kernelPoly19_no_rational_root sorry-free, N18 bridge (C) sorry-free
+- next session priorities:
+  (1) harvest ChatGPT flt3/4 answers (Vélu 2-isogeny formulas, N25/N49 strategy)
+  (2) get p=17 kernel polynomial (Sage session on uisai2 or LMFDB)
+  (3) close kernelPoly17_no_rational_root (same pattern as p=19)
+  (4) work on KubertBridgeN16 sorry #2 (birational map formulas)
 
 ## Run 2026-07-08 (ChatGPT harvest mode)
 - doctrine version: Close CyclicExclusion sorry's via ChatGPT harvest
