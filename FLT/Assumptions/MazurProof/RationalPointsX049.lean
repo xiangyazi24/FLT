@@ -586,7 +586,7 @@ private theorem squarefree_dvd_112 {d : ℕ}
   all_goals simp
 
 private theorem squarefree_dvd_7 {d : ℕ}
-    (hd : Squarefree d) (hdiv : d ∣ 7) : d = 1 ∨ d = 7 := by
+    (_hd : Squarefree d) (hdiv : d ∣ 7) : d = 1 ∨ d = 7 := by
   exact (Nat.dvd_prime (by norm_num)).mp hdiv
 
 private theorem rat_squareclass_of_integral
@@ -609,7 +609,11 @@ private theorem zmod16_sq_cases (a : ZMod 16) :
 
 private theorem reduce16to2_eq_zero_of_sq_even {a : ZMod 16}
     (h : a ^ 2 = 0 ∨ a ^ 2 = 4) : reduce16to2 a = 0 := by
-  fin_cases a <;> decide
+  have hs : (reduce16to2 a) ^ 2 = 0 := by
+    rcases h with h | h
+    · simpa using congrArg reduce16to2 h
+    · simpa [reduce16to2, ZMod.castHom_apply] using congrArg reduce16to2 h
+  exact sq_eq_zero_iff.mp hs
 
 private theorem primitive_sq_residues
     {r B : ℤ} (hcop : Int.gcd r B = 1) :
@@ -629,77 +633,141 @@ private theorem primitive_sq_residues
   rw [hcop] at hdg
   norm_num at hdg
 
+private theorem no_ESplit_two_residues
+    (R S T : ZMod 16)
+    (hR : R = 0 ∨ R = 1 ∨ R = 4 ∨ R = 9)
+    (hS : S = 0 ∨ S = 1 ∨ S = 4 ∨ S = 9)
+    (hT : T = 0 ∨ T = 1 ∨ T = 4 ∨ T = 9)
+    (hp : ¬ ((R = 0 ∨ R = 4) ∧ (S = 0 ∨ S = 4)))
+    (h : T = 2 * R ^ 2 + 21 * R * S + 56 * S ^ 2) : False := by
+  rcases hR with rfl | rfl | rfl | rfl <;>
+    rcases hS with rfl | rfl | rfl | rfl <;>
+      rcases hT with rfl | rfl | rfl | rfl
+  all_goals first | exact hp ⟨by decide, by decide⟩ | (revert h; decide)
+
+private theorem no_ESplit_fourteen_residues
+    (R S T : ZMod 16)
+    (hR : R = 0 ∨ R = 1 ∨ R = 4 ∨ R = 9)
+    (hS : S = 0 ∨ S = 1 ∨ S = 4 ∨ S = 9)
+    (hT : T = 0 ∨ T = 1 ∨ T = 4 ∨ T = 9)
+    (hp : ¬ ((R = 0 ∨ R = 4) ∧ (S = 0 ∨ S = 4)))
+    (h : T = 14 * R ^ 2 + 21 * R * S + 8 * S ^ 2) : False := by
+  rcases hR with rfl | rfl | rfl | rfl <;>
+    rcases hS with rfl | rfl | rfl | rfl <;>
+      rcases hT with rfl | rfl | rfl | rfl
+  all_goals first | exact hp ⟨by decide, by decide⟩ | (revert h; decide)
+
+private theorem no_EHat_neg_one_residues
+    (R S T : ZMod 16)
+    (hR : R = 0 ∨ R = 1 ∨ R = 4 ∨ R = 9)
+    (hS : S = 0 ∨ S = 1 ∨ S = 4 ∨ S = 9)
+    (hT : T = 0 ∨ T = 1 ∨ T = 4 ∨ T = 9)
+    (hp : ¬ ((R = 0 ∨ R = 4) ∧ (S = 0 ∨ S = 4)))
+    (h : T = -(R ^ 2) - 42 * R * S + 7 * S ^ 2) : False := by
+  rcases hR with rfl | rfl | rfl | rfl <;>
+    rcases hS with rfl | rfl | rfl | rfl <;>
+      rcases hT with rfl | rfl | rfl | rfl
+  all_goals first | exact hp ⟨by decide, by decide⟩ | (revert h; decide)
+
+private theorem no_EHat_seven_residues
+    (R S T : ZMod 16)
+    (hR : R = 0 ∨ R = 1 ∨ R = 4 ∨ R = 9)
+    (hS : S = 0 ∨ S = 1 ∨ S = 4 ∨ S = 9)
+    (hT : T = 0 ∨ T = 1 ∨ T = 4 ∨ T = 9)
+    (hp : ¬ ((R = 0 ∨ R = 4) ∧ (S = 0 ∨ S = 4)))
+    (h : T = 7 * R ^ 2 - 42 * R * S - S ^ 2) : False := by
+  rcases hR with rfl | rfl | rfl | rfl <;>
+    rcases hS with rfl | rfl | rfl | rfl <;>
+      rcases hT with rfl | rfl | rfl | rfl
+  all_goals first | exact hp ⟨by decide, by decide⟩ | (revert h; decide)
+
 private theorem no_primitive_ESplit_two_cover (r B z : ℤ)
     (hcop : Int.gcd r B = 1)
     (h : z ^ 2 = 2 * r ^ 4 + 21 * r ^ 2 * B ^ 2 + 56 * B ^ 4) : False := by
   have hm := congrArg (fun n : ℤ => (n : ZMod 16)) h
   push_cast at hm
-  have hr := zmod16_sq_cases (r : ZMod 16)
-  have hB := zmod16_sq_cases (B : ZMod 16)
-  have hz := zmod16_sq_cases (z : ZMod 16)
-  have hp := primitive_sq_residues hcop
-  have hr4 : (r : ZMod 16) ^ 4 = ((r : ZMod 16) ^ 2) ^ 2 := by ring
-  have hB4 : (B : ZMod 16) ^ 4 = ((B : ZMod 16) ^ 2) ^ 2 := by ring
-  rcases hr with hr | hr | hr | hr <;>
-    rcases hB with hB | hB | hB | hB <;>
-      rcases hz with hz | hz | hz | hz <;>
-        first
-        | exact hp ⟨by simp_all, by simp_all⟩
-        | norm_num [hr4, hB4, hr, hB, hz] at hm
+  let R : ZMod 16 := (r : ZMod 16) ^ 2
+  let S : ZMod 16 := (B : ZMod 16) ^ 2
+  let T : ZMod 16 := (z : ZMod 16) ^ 2
+  apply no_ESplit_two_residues R S T
+  · simpa [R] using zmod16_sq_cases (r : ZMod 16)
+  · simpa [S] using zmod16_sq_cases (B : ZMod 16)
+  · simpa [T] using zmod16_sq_cases (z : ZMod 16)
+  · simpa [R, S] using primitive_sq_residues hcop
+  · dsimp [R, S, T]
+    calc
+      (z : ZMod 16) ^ 2 = 2 * (r : ZMod 16) ^ 4 +
+          21 * (r : ZMod 16) ^ 2 * (B : ZMod 16) ^ 2 +
+          56 * (B : ZMod 16) ^ 4 := hm
+      _ = 2 * ((r : ZMod 16) ^ 2) ^ 2 +
+          21 * (r : ZMod 16) ^ 2 * (B : ZMod 16) ^ 2 +
+          56 * ((B : ZMod 16) ^ 2) ^ 2 := by ring
 
 private theorem no_primitive_ESplit_fourteen_cover (r B z : ℤ)
     (hcop : Int.gcd r B = 1)
     (h : z ^ 2 = 14 * r ^ 4 + 21 * r ^ 2 * B ^ 2 + 8 * B ^ 4) : False := by
   have hm := congrArg (fun n : ℤ => (n : ZMod 16)) h
   push_cast at hm
-  have hr := zmod16_sq_cases (r : ZMod 16)
-  have hB := zmod16_sq_cases (B : ZMod 16)
-  have hz := zmod16_sq_cases (z : ZMod 16)
-  have hp := primitive_sq_residues hcop
-  have hr4 : (r : ZMod 16) ^ 4 = ((r : ZMod 16) ^ 2) ^ 2 := by ring
-  have hB4 : (B : ZMod 16) ^ 4 = ((B : ZMod 16) ^ 2) ^ 2 := by ring
-  rcases hr with hr | hr | hr | hr <;>
-    rcases hB with hB | hB | hB | hB <;>
-      rcases hz with hz | hz | hz | hz <;>
-        first
-        | exact hp ⟨by simp_all, by simp_all⟩
-        | norm_num [hr4, hB4, hr, hB, hz] at hm
+  let R : ZMod 16 := (r : ZMod 16) ^ 2
+  let S : ZMod 16 := (B : ZMod 16) ^ 2
+  let T : ZMod 16 := (z : ZMod 16) ^ 2
+  apply no_ESplit_fourteen_residues R S T
+  · simpa [R] using zmod16_sq_cases (r : ZMod 16)
+  · simpa [S] using zmod16_sq_cases (B : ZMod 16)
+  · simpa [T] using zmod16_sq_cases (z : ZMod 16)
+  · simpa [R, S] using primitive_sq_residues hcop
+  · dsimp [R, S, T]
+    calc
+      (z : ZMod 16) ^ 2 = 14 * (r : ZMod 16) ^ 4 +
+          21 * (r : ZMod 16) ^ 2 * (B : ZMod 16) ^ 2 +
+          8 * (B : ZMod 16) ^ 4 := hm
+      _ = 14 * ((r : ZMod 16) ^ 2) ^ 2 +
+          21 * (r : ZMod 16) ^ 2 * (B : ZMod 16) ^ 2 +
+          8 * ((B : ZMod 16) ^ 2) ^ 2 := by ring
 
 private theorem no_primitive_EHat_neg_one_cover (r B z : ℤ)
     (hcop : Int.gcd r B = 1)
     (h : z ^ 2 = -(r ^ 4) - 42 * r ^ 2 * B ^ 2 + 7 * B ^ 4) : False := by
   have hm := congrArg (fun n : ℤ => (n : ZMod 16)) h
   push_cast at hm
-  have hr := zmod16_sq_cases (r : ZMod 16)
-  have hB := zmod16_sq_cases (B : ZMod 16)
-  have hz := zmod16_sq_cases (z : ZMod 16)
-  have hp := primitive_sq_residues hcop
-  have hr4 : (r : ZMod 16) ^ 4 = ((r : ZMod 16) ^ 2) ^ 2 := by ring
-  have hB4 : (B : ZMod 16) ^ 4 = ((B : ZMod 16) ^ 2) ^ 2 := by ring
-  rcases hr with hr | hr | hr | hr <;>
-    rcases hB with hB | hB | hB | hB <;>
-      rcases hz with hz | hz | hz | hz <;>
-        first
-        | exact hp ⟨by simp_all, by simp_all⟩
-        | norm_num [hr4, hB4, hr, hB, hz] at hm
+  let R : ZMod 16 := (r : ZMod 16) ^ 2
+  let S : ZMod 16 := (B : ZMod 16) ^ 2
+  let T : ZMod 16 := (z : ZMod 16) ^ 2
+  apply no_EHat_neg_one_residues R S T
+  · simpa [R] using zmod16_sq_cases (r : ZMod 16)
+  · simpa [S] using zmod16_sq_cases (B : ZMod 16)
+  · simpa [T] using zmod16_sq_cases (z : ZMod 16)
+  · simpa [R, S] using primitive_sq_residues hcop
+  · dsimp [R, S, T]
+    calc
+      (z : ZMod 16) ^ 2 = -(r : ZMod 16) ^ 4 -
+          42 * (r : ZMod 16) ^ 2 * (B : ZMod 16) ^ 2 +
+          7 * (B : ZMod 16) ^ 4 := hm
+      _ = -(((r : ZMod 16) ^ 2) ^ 2) -
+          42 * (r : ZMod 16) ^ 2 * (B : ZMod 16) ^ 2 +
+          7 * ((B : ZMod 16) ^ 2) ^ 2 := by ring
 
 private theorem no_primitive_EHat_seven_cover (r B z : ℤ)
     (hcop : Int.gcd r B = 1)
     (h : z ^ 2 = 7 * r ^ 4 - 42 * r ^ 2 * B ^ 2 - B ^ 4) : False := by
   have hm := congrArg (fun n : ℤ => (n : ZMod 16)) h
   push_cast at hm
-  have hr := zmod16_sq_cases (r : ZMod 16)
-  have hB := zmod16_sq_cases (B : ZMod 16)
-  have hz := zmod16_sq_cases (z : ZMod 16)
-  have hp := primitive_sq_residues hcop
-  have hr4 : (r : ZMod 16) ^ 4 = ((r : ZMod 16) ^ 2) ^ 2 := by ring
-  have hB4 : (B : ZMod 16) ^ 4 = ((B : ZMod 16) ^ 2) ^ 2 := by ring
-  rcases hr with hr | hr | hr | hr <;>
-    rcases hB with hB | hB | hB | hB <;>
-      rcases hz with hz | hz | hz | hz <;>
-        first
-        | exact hp ⟨by simp_all, by simp_all⟩
-        | norm_num [hr4, hB4, hr, hB, hz] at hm
+  let R : ZMod 16 := (r : ZMod 16) ^ 2
+  let S : ZMod 16 := (B : ZMod 16) ^ 2
+  let T : ZMod 16 := (z : ZMod 16) ^ 2
+  apply no_EHat_seven_residues R S T
+  · simpa [R] using zmod16_sq_cases (r : ZMod 16)
+  · simpa [S] using zmod16_sq_cases (B : ZMod 16)
+  · simpa [T] using zmod16_sq_cases (z : ZMod 16)
+  · simpa [R, S] using primitive_sq_residues hcop
+  · dsimp [R, S, T]
+    calc
+      (z : ZMod 16) ^ 2 = 7 * (r : ZMod 16) ^ 4 -
+          42 * (r : ZMod 16) ^ 2 * (B : ZMod 16) ^ 2 -
+          (B : ZMod 16) ^ 4 := hm
+      _ = 7 * ((r : ZMod 16) ^ 2) ^ 2 -
+          42 * (r : ZMod 16) ^ 2 * (B : ZMod 16) ^ 2 -
+          ((B : ZMod 16) ^ 2) ^ 2 := by ring
 
 private theorem ESplit_x_nonnegative {U V : ℚ} (h : OnESplit U V) : 0 ≤ U := by
   by_contra hU
