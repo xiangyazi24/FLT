@@ -62,6 +62,21 @@ private theorem pi_ne_zero : pi ≠ 0 := by
   rw [h, ordPi_zero] at hp
   omega
 
+private theorem ordPi_nonneg_of_ringOfIntegers (u : OL) :
+    0 ≤ ordPi (u : L) := by
+  rcases eq_or_ne (u : L) 0 with h0 | hne
+  · rw [h0, ordPi_zero]
+  · have hle : v3 (u : L) ≤ 1 := by
+      show p3.valuation L (u : L) ≤ 1
+      simpa using
+        (IsDedekindDomain.HeightOneSpectrum.valuation_le_one
+          (K := L) p3 u)
+    have hlog : WithZero.log (v3 (u : L)) ≤ 0 := by
+      have h := (WithZero.log_le_log (v3_ne_zero hne) one_ne_zero).mpr hle
+      rwa [WithZero.log_one] at h
+    unfold ordPi
+    linarith
+
 theorem c₂_eq : c₂ = -3 * (a ^ 2 - 2) := by
   simp [c₂, E0Good]
 
@@ -97,16 +112,18 @@ private theorem ordPi_a₁_good : ordPi E0Good.a₁ = 0 := by
   have haInt : IsIntegral ℤ a := (pi_isIntegral.add isIntegral_one)
   let a₁Int : OL := aInteger ^ 2 - 2
   have ha₁map : (a₁Int : L) = E0Good.a₁ := by
-    change a ^ 2 - algebraMap OL L (2 : OL) = a ^ 2 - (2 : L)
-    rw [map_natCast]
+    simp [a₁Int, aInteger, E0Good]
+    exact map_natCast (algebraMap OL L) 2
   have hinvInt : IsIntegral ℤ (a ^ 2 - a - 1) :=
     ((haInt.pow 2).sub haInt).sub (isIntegral_intCast 1)
   have hv := congrArg ordPi hmul
   rw [ordPi_mul ha₁ hinv, ordPi_one] at hv
   have hnonneg₁ : 0 ≤ ordPi E0Good.a₁ := by
     rw [← ha₁map]
-    exact zero_le_ordPi_ringOfIntegers a₁Int
-  have hnonnegInv := zero_le_ordPi_of_isIntegral hinvInt
+    exact ordPi_nonneg_of_ringOfIntegers a₁Int
+  have hnonnegInv : 0 ≤ ordPi (a ^ 2 - a - 1) := by
+    simpa using ordPi_nonneg_of_ringOfIntegers
+      (⟨a ^ 2 - a - 1, hinvInt⟩ : OL)
   omega
 
 /-- The quadratic coefficient has exact `pi`-order three. -/
@@ -142,10 +159,10 @@ theorem ordPi_c₃ : ordPi c₃ = 1 := by
   let qInt : OL :=
     7 - 4 * piInteger * (piInteger ^ 2 + 3 * piInteger + 1)
   have hqMap : (qInt : L) = q := by
-    change algebraMap OL L (7 : OL) - algebraMap OL L (4 : OL) * pi *
-      (pi ^ 2 + algebraMap OL L (3 : OL) * pi + 1) =
-        7 - 4 * pi * (pi ^ 2 + 3 * pi + 1)
-    rw [map_natCast, map_natCast, map_natCast]
+    simp [qInt, q, piInteger]
+    rw [map_ofNat (algebraMap OL L) 7,
+      map_ofNat (algebraMap OL L) 4,
+      map_ofNat (algebraMap OL L) 3]
   rw [c₃_pi_expansion, htail]
   by_cases hq : q = 0
   · simp [hq, ordPi_pi]
@@ -155,7 +172,7 @@ theorem ordPi_c₃ : ordPi c₃ = 1 := by
         ordPi_pow pi_ne_zero, ordPi_pi]
       have hqNonneg : 0 ≤ ordPi q := by
         rw [← hqMap]
-        exact zero_le_ordPi_ringOfIntegers qInt
+        exact ordPi_nonneg_of_ringOfIntegers qInt
       omega
     rw [ordPi_add_eq_of_lt (neg_ne_zero.mpr pi_ne_zero) htail0]
     · simp [ordPi_pi]
@@ -174,11 +191,20 @@ def E0GoodInt : WeierstrassCurve OL where
 
 theorem E0GoodInt_map :
     E0GoodInt.map (algebraMap OL L) = E0Good := by
-  ext <;> simp only [E0GoodInt, E0Good, WeierstrassCurve.map_a₁,
-    WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₃,
-    WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆, map_add, map_sub,
-    map_neg, map_mul, map_pow, map_one, aInteger]
-  all_goals rw [map_natCast]
+  have hmapNat (n : ℕ) : algebraMap OL L (n : OL) = (n : L) :=
+    map_natCast (algebraMap OL L) n
+  ext
+  · simp [E0GoodInt, E0Good, aInteger]
+    exact hmapNat 2
+  · simp [E0GoodInt, E0Good, aInteger]
+    left
+    exact hmapNat 2
+  · simp [E0GoodInt, E0Good, aInteger]
+  · simp [E0GoodInt, E0Good, aInteger]
+  · simp [E0GoodInt, E0Good, aInteger]
+    rw [map_ofNat (algebraMap OL L) 4,
+      map_ofNat (algebraMap OL L) 7,
+      map_ofNat (algebraMap OL L) 3]
 
 private theorem ordPi_finset_sum_gt_or_zero {q : L} {s : Finset ι} {f : ι → L}
     (hgt : ∀ i ∈ s, f i ≠ 0 → ordPi q < ordPi (f i)) :
@@ -193,16 +219,16 @@ private theorem ordPi_finset_sum_gt_or_zero {q : L} {s : Finset ι} {f : ι → 
       rcases ih hs with hsum | hsum
       · by_cases hfi : f i = 0
         · left
-          simp [hfi, hsum]
+          simp [Finset.sum_insert hi, hfi, hsum]
         · right
-          simpa [hfi, hsum] using hgt i (by simp) hfi
+          simpa [Finset.sum_insert hi, hsum] using hgt i (by simp) hfi
       · by_cases hfi : f i = 0
         · right
-          simpa [hfi] using hsum
-      · by_cases htail : ∑ j ∈ s, f j = 0
+          simpa [Finset.sum_insert hi, hfi] using hsum
+        · by_cases htail : ∑ j ∈ s, f j = 0
           · right
-            simpa [htail] using hgt i (by simp) hfi
-        · by_cases hall : f i + ∑ j ∈ s, f j = 0
+            simpa [Finset.sum_insert hi, htail] using hgt i (by simp) hfi
+          · by_cases hall : f i + ∑ j ∈ s, f j = 0
             · left
               simpa [Finset.sum_insert hi] using hall
             · right
@@ -226,8 +252,9 @@ private theorem ordPi_eval₂_eq_natDegree_mul
   let lead : L := (p.leadingCoeff : L) * x ^ d
   let tail : L := ∑ i ∈ Finset.range d, (p.coeff i : L) * x ^ i
   have hlc0 : (p.leadingCoeff : L) ≠ 0 := by
+    have hlcOL : p.leadingCoeff ≠ 0 := p.leadingCoeff_ne_zero.mpr hp
     intro h
-    apply p.leadingCoeff_ne_zero
+    apply hlcOL
     exact_mod_cast h
   have hlead0 : lead ≠ 0 := mul_ne_zero hlc0 (pow_ne_zero d hx0)
   have hleadOrd : ordPi lead = (d : ℤ) * ordPi x := by
@@ -248,14 +275,14 @@ private theorem ordPi_eval₂_eq_natDegree_mul
     have hpow : x ^ i ≠ 0 := pow_ne_zero i hx0
     rw [ordPi_mul hci hpow, ordPi_pow hx0, hleadOrd]
     have hcoeff : 0 ≤ ordPi ((p.coeff i : OL) : L) :=
-      zero_le_ordPi_ringOfIntegers (p.coeff i)
+      ordPi_nonneg_of_ringOfIntegers (p.coeff i)
     have hidz : (i : ℤ) < d := by exact_mod_cast hid
     nlinarith
   rw [hshape]
   rcases htail with htail | htail
-  · simp [htail, hleadOrd]
+  · simp only [htail, zero_add, hleadOrd, d]
   · by_cases htail0 : tail = 0
-    · simp [htail0, hleadOrd]
+    · simp only [htail0, zero_add, hleadOrd, d]
     · rw [add_comm, ordPi_add_eq_of_lt hlead0 htail0 htail, hleadOrd]
 
 private theorem psi_ne_zero_charZero (W : WeierstrassCurve L) [W.IsElliptic] :
@@ -333,11 +360,11 @@ private theorem ordPi_phi_eval {n : ℕ} {x : L} (hx : ordPi x < 0) :
   have hp : p ≠ 0 := E0GoodInt.Φ_ne_zero (n : ℤ)
   have hlc : ordPi ((p.leadingCoeff : OL) : L) = 0 := by
     rw [show p.leadingCoeff = 1 by
-      simpa [p] using WeierstrassCurve.leadingCoeff_Φ E0GoodInt (n : ℤ)]
-    simpa using ordPi_one
+      simp [p, WeierstrassCurve.leadingCoeff_Φ]]
+    exact ordPi_one
   have hval := ordPi_eval₂_eq_natDegree_mul p hp hx hlc
   have hdeg : p.natDegree = n ^ 2 := by
-    simpa [p] using WeierstrassCurve.natDegree_Φ E0GoodInt (n : ℤ)
+    simp [p, WeierstrassCurve.natDegree_Φ]
   rw [hdeg] at hval
   have hmap : p.eval₂ (algebraMap OL L) x = (E0Good.Φ (n : ℤ)).eval x := by
     rw [← Polynomial.eval_map]
@@ -365,8 +392,13 @@ private theorem ordPi_psiSq_eval_of_unit {n : ℕ}
     ordPi_int_of_not_three_dvd (n : ℤ) hn
   have hlc : ordPi ((p.leadingCoeff : OL) : L) = 0 := by
     rw [hlcEq]
-    simp only [map_pow, map_intCast]
-    rw [ordPi_pow (by exact_mod_cast hn0), hnval]
+    change ordPi (algebraMap OL L (((n : ℤ) : OL) ^ 2)) = 0
+    have hncast : algebraMap OL L ((n : ℤ) : OL) = (n : L) :=
+      map_intCast (algebraMap OL L) (n : ℤ)
+    have hnbase0 : algebraMap OL L ((n : ℤ) : OL) ≠ 0 := by
+      rw [hncast]
+      exact_mod_cast hn0
+    rw [map_pow, ordPi_pow hnbase0, hncast, hnval]
     simp
   have hval := ordPi_eval₂_eq_natDegree_mul p hp hx hlc
   have hdeg : p.natDegree = n ^ 2 - 1 := by
@@ -398,22 +430,22 @@ private theorem E0GoodInt_b₈_map : (E0GoodInt.b₈ : L) = E0Good.b₈ := by
 
 private theorem ordPi_b₄_nonneg : 0 ≤ ordPi E0Good.b₄ := by
   rw [← E0GoodInt_b₄_map]
-  exact zero_le_ordPi_ringOfIntegers E0GoodInt.b₄
+  exact ordPi_nonneg_of_ringOfIntegers E0GoodInt.b₄
 
 private theorem ordPi_b₆_nonneg : 0 ≤ ordPi E0Good.b₆ := by
   rw [← E0GoodInt_b₆_map]
-  exact zero_le_ordPi_ringOfIntegers E0GoodInt.b₆
+  exact ordPi_nonneg_of_ringOfIntegers E0GoodInt.b₆
 
 private theorem ordPi_b₈_nonneg : 0 ≤ ordPi E0Good.b₈ := by
   rw [← E0GoodInt_b₈_map]
-  exact zero_le_ordPi_ringOfIntegers E0GoodInt.b₈
+  exact ordPi_nonneg_of_ringOfIntegers E0GoodInt.b₈
 
 private theorem ordPi_a₂_nonneg : 0 ≤ ordPi E0Good.a₂ := by
   have ha₂map : (E0GoodInt.a₂ : L) = E0Good.a₂ := by
     have h := congrArg (fun W : WeierstrassCurve L ↦ W.a₂) E0GoodInt_map
     simpa using h
   rw [← ha₂map]
-  exact zero_le_ordPi_ringOfIntegers E0GoodInt.a₂
+  exact ordPi_nonneg_of_ringOfIntegers E0GoodInt.a₂
 
 /-- The `b₂` coefficient has order one.  This is the same cubic-order
 certificate as `c₃`: `b₂ = c₃ + 12a₂`, and the correction has order at
@@ -576,8 +608,9 @@ private theorem xPair_same_nsmul {n : ℕ} {x y : L}
   have hs₂ := KeystoneLadder.xPair_same_xLadderRep_seam E0Good n x
     (by norm_num) (psi_ne_zero_charZero E0Good)
     (WeierstrassCurve.Ψ₃_ne_zero E0Good (by norm_num))
+  rw [hh] at hs₁
   exact KeystoneLadder.SameP1Vec.trans
-    (by simpa [WeierstrassCurve.baseChange, hh] using hs₁)
+    hs₁
     (by simpa [WeierstrassCurve.baseChange] using hs₂)
 
 private theorem nsmul_affine_x_eq_div {n : ℕ} {x y : L}
@@ -594,9 +627,10 @@ private theorem nsmul_affine_x_eq_div {n : ℕ} {x y : L}
       (WeierstrassCurve.Affine.Point.some x y h : E0GoodPoint) = Q at hs
   cases Q with
   | zero =>
+      change KeystoneLadder.SameP1Vec ![1, 0]
+        (KeystoneLadder.xPair E0Good (n : ℤ) x) at hs
       have hzero := KeystoneLadder.SameP1Vec.second_eq_zero_of_same_infty
-        (v := KeystoneLadder.xPair E0Good (n : ℤ) x) (by
-          simpa only [WeierstrassCurve.Affine.Point.xRep_zero] using hs)
+        (v := KeystoneLadder.xPair E0Good (n : ℤ) x) hs
       exact absurd (by simpa [KeystoneLadder.xPair] using hzero) hden
   | some xn yn hn =>
       refine ⟨xn, yn, hn, rfl, ?_⟩
@@ -655,8 +689,7 @@ private theorem affine_val_coords {x y : L}
         simpa only [WeierstrassCurve.map_a₆] using hm
       dsimp [p]
       simp only [Polynomial.eval₂_add, Polynomial.eval₂_pow,
-        Polynomial.eval₂_X, Polynomial.eval₂_mul, Polynomial.eval₂_C,
-        map_pow, map_add, map_neg, map_mul, map_one, map_ofNat]
+        Polynomial.eval₂_X, Polynomial.eval₂_mul, Polynomial.eval₂_C]
       rw [ha₂map, ha₄map, ha₆map]
       change x ^ 3 + E0Good.a₂ * x ^ 2 + E0Good.a₄ * x + E0Good.a₆ = 0
       norm_num at heq
@@ -674,7 +707,12 @@ private theorem unit_nsmul_data (n : ℕ) (hn : ¬(3 ∣ (n : ℤ)))
       ordPi (zParamGood (n • P)) = ordPi (zParamGood P) := by
   cases P with
   | zero =>
-      simpa [InFormalKernel]
+      change InFormalKernel (n • (0 : E0GoodPoint)) ∧
+        ordPi (zParamGood (n • (0 : E0GoodPoint))) =
+          ordPi (zParamGood (0 : E0GoodPoint))
+      have hnzero : n • (0 : E0GoodPoint) = 0 := nsmul_zero n
+      rw [hnzero]
+      exact ⟨trivial, rfl⟩
   | some x y h =>
       simp only [InFormalKernel] at hP
       have hx0 : x ≠ 0 := by
@@ -748,20 +786,23 @@ private theorem three_nsmul_data {P : E0GoodPoint}
       have hxr : ordPi x = -2 * r := by simpa [r] using hin.1
       have hr : 2 ≤ r := by simpa [zParamGood_some, r] using hlevel
       have hnumOrd := ordPi_phi_eval (n := 3) hP
-      norm_num at hnumOrd
       have hdenOrd := ordPi_psiSq_three hxr hr
       have hden0 : (E0Good.ΨSq (3 : ℤ)).eval x ≠ 0 := by
         intro hzero
         rw [hzero, ordPi_zero] at hdenOrd
         omega
       obtain ⟨xn, yn, hQ, hpoint, hxn⟩ := nsmul_affine_x_eq_div h hden0
-      norm_num at hxn
-      have hnum0 : (E0Good.Φ (3 : ℤ)).eval x ≠ 0 := by
+      have hdenOrdNat :
+          ordPi ((E0Good.ΨSq ((3 : ℕ) : ℤ)).eval x) = 6 - 16 * r := by
+        simpa only [Nat.cast_ofNat] using hdenOrd
+      have hden0Nat : (E0Good.ΨSq ((3 : ℕ) : ℤ)).eval x ≠ 0 := by
+        simpa only [Nat.cast_ofNat] using hden0
+      have hnum0 : (E0Good.Φ ((3 : ℕ) : ℤ)).eval x ≠ 0 := by
         intro hzero
         rw [hzero, ordPi_zero, hxr] at hnumOrd
         omega
       have hxnOrd : ordPi xn = -2 * (r + 3) := by
-        rw [hxn, ordPi_div hnum0 hden0, hnumOrd, hdenOrd, hxr]
+        rw [hxn, ordPi_div hnum0 hden0Nat, hnumOrd, hdenOrdNat, hxr]
         ring
       have hxnNeg : ordPi xn < 0 := by omega
       have hout := affine_val_coords hQ hxnNeg
@@ -782,10 +823,13 @@ private theorem three_nsmul_data {P : E0GoodPoint}
 /-- If `P` is in the good formal kernel and `ordPi z(P) ≥ 2`, then
 tripling raises its parameter order by exactly three. -/
 theorem ordPi_three_smul_eq {P : E0GoodPoint}
-    (hP : InFormalKernel P) (hz : zParamGood P ≠ 0)
-    (hlevel : 2 ≤ ordPi (zParamGood P)) :
-    ordPi (zParamGood (3 • P)) = 3 + ordPi (zParamGood P) :=
-  (three_nsmul_data hP hz hlevel).2.2
+    (hP : InFormalKernel P) (hlevel : 2 ≤ ordPi (zParamGood P)) :
+    ordPi (zParamGood (3 • P)) = 3 + ordPi (zParamGood P) := by
+  have hz : zParamGood P ≠ 0 := by
+    intro hzero
+    rw [hzero, ordPi_zero] at hlevel
+    omega
+  exact (three_nsmul_data hP hz hlevel).2.2
 
 private theorem three_pow_nsmul_data {P : E0GoodPoint}
     (hP : InFormalKernel P) (hz : zParamGood P ≠ 0)
@@ -813,9 +857,12 @@ private theorem three_pow_nsmul_data {P : E0GoodPoint}
 
 /-- The second formal-kernel step contains no point of positive finite order. -/
 theorem msq_torsionFree {P : E0GoodPoint}
-    (hP : InFormalKernel P) (hz : zParamGood P ≠ 0)
-    (hlevel : 2 ≤ ordPi (zParamGood P)) :
+    (hP : InFormalKernel P) (hlevel : 2 ≤ ordPi (zParamGood P)) :
     ¬∃ n : ℕ, 0 < n ∧ n • P = 0 := by
+  have hz : zParamGood P ≠ 0 := by
+    intro hzero
+    rw [hzero, ordPi_zero] at hlevel
+    omega
   rintro ⟨n, hnpos, hnP⟩
   obtain ⟨j, m, hm3, hnm⟩ :=
     Nat.exists_eq_pow_mul_and_not_dvd hnpos.ne' 3 (by norm_num)
@@ -842,13 +889,20 @@ theorem msq_torsionFree {P : E0GoodPoint}
 /-- A nonzero torsion point in the good formal kernel has parameter order
 exactly one.  Equivalently, no torsion survives in `m²`. -/
 theorem torsion_val_eq_one (P : E0GoodPoint)
-    (hP : InFormalKernel P) (hpos : 0 < ordPi (zParamGood P))
-    (hz : zParamGood P ≠ 0)
+    (hP : InFormalKernel P) (hz : zParamGood P ≠ 0)
     (htor : ∃ n : ℕ, 0 < n ∧ n • P = 0) :
     ordPi (zParamGood P) = 1 := by
+  have hpos : 0 < ordPi (zParamGood P) := by
+    cases P with
+    | zero => exact absurd rfl hz
+    | some x y h =>
+        simp only [InFormalKernel] at hP
+        have hv := affine_val_coords h hP
+        simp only [zParamGood_some]
+        omega
   by_contra hne
   have hlevel : 2 ≤ ordPi (zParamGood P) := by omega
-  exact msq_torsionFree hP hz hlevel htor
+  exact msq_torsionFree hP hlevel htor
 
 end
 
