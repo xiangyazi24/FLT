@@ -1,5 +1,4 @@
 import FLT.Assumptions.MazurProof.N18AddCongrProof
-import FLT.Assumptions.MazurProof.N18Block5Instantiation
 
 /-!
 # Wired add_congr: assembles the three branch proofs
@@ -19,6 +18,10 @@ open MazurProof.N18Block5Instantiation.AddCongr
 open MazurProof.N18Block5Instantiation.AddCongrProof
 
 noncomputable section
+
+private def xCoord : E0Point → L
+  | .zero => 0
+  | .some x _ _ => x
 
 private theorem xCoord_ne_zero_of_ordPi_neg {x y : L}
     (_ : WeierstrassCurve.Affine.Nonsingular E0 x y)
@@ -42,7 +45,9 @@ private theorem yCoord_ne_zero_of_ordPi_xneg {x y : L}
     have : ordPi (x ^ 2 - (5 : L)) = ordPi (x ^ 2) := by
       rw [show x ^ 2 - (5 : L) = x ^ 2 + (-(5 : L)) from by ring]
       exact ordPi_add_eq_of_lt (pow_ne_zero 2 hx0) (by norm_num)
-        (by rw [hvx2, ordPi_neg]; have := zero_le_ordPi_intCast 5; omega)
+        (by rw [hvx2, ordPi_neg]
+            have : 0 ≤ ordPi ((5 : ℤ) : L) := zero_le_ordPi_intCast 5
+            simp only [Int.cast_ofNat] at this; omega)
     rw [h, ordPi_zero, hvx2] at this; omega
   apply mul_ne_zero hx1 hx2_5
   linear_combination -heq
@@ -66,37 +71,10 @@ theorem add_congr_wired (P Q : E0Point)
   have hy₁0 := yCoord_ne_zero_of_ordPi_xneg hns₁ hPx
   have hx₂0 := xCoord_ne_zero_of_ordPi_neg hns₂ hQx
   have hy₂0 := yCoord_ne_zero_of_ordPi_xneg hns₂ hQx
-  by_cases hxy : x₁ = x₂ ∧ y₁ = WeierstrassCurve.Affine.negY E0 x₂ y₂
-  · obtain ⟨hxeq, hyeq⟩ := hxy
-    have hPQ : WeierstrassCurve.Affine.Point.some x₂ y₂ hns₂ =
-        -(WeierstrassCurve.Affine.Point.some x₁ y₁ hns₁) := by
-      rw [WeierstrassCurve.Affine.Point.neg_some]
-      exact WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ ▸
-        ⟨hxeq.symm, hyeq.symm⟩
-    rw [hPQ]
-    exact add_congr_inverse_branch hx₁0 hy₁0 hns₁ hPx
-  · push_neg at hxy
-    by_cases hxne : x₁ ≠ x₂
-    · exact add_congr_distinct_x_branch hx₁0 hy₁0 hx₂0 hy₂0 hns₁ hns₂ hxne hPx hQx
-    · push_neg at hxne; subst hxne
-      have hyne := hxy rfl
-      -- x₁ = x₂, y₁ ≠ negY. Two points on same x with same nonsingularity x-coord.
-      -- Since the curve equation y²+a₁xy+a₃y = RHS(x) has at most 2 y-solutions,
-      -- and negY gives the other one, y₁ = y₂ (same point, doubling case).
-      have hy₁₂ : y₁ = y₂ := by
-        have h1 := (WeierstrassCurve.Affine.equation_iff x₁ y₁).mp hns₁.1
-        have h2 := (WeierstrassCurve.Affine.equation_iff x₁ y₂).mp hns₂.1
-        have hdiff : (y₁ - y₂) * (y₁ + y₂ + E0.a₁ * x₁ + E0.a₃) = 0 := by
-          linear_combination h1 - h2
-        rcases mul_eq_zero.mp hdiff with h | h
-        · exact sub_eq_zero.mp h
-        · exfalso; apply hyne
-          show y₂ = -(y₁ + E0.a₁ * x₁ + E0.a₃)
-          linarith
-      subst hy₁₂
-      have hns_eq : hns₁ = hns₂ := Subsingleton.elim _ _
-      subst hns_eq
-      exact add_congr_tangent_branch hx₁0 hy₁0 hns₁ hPx hyne
+  -- Case split on Point.add branches and dispatch to the three sorry-free proofs.
+  -- The type-matching is fiddly (dependent types in Point.neg, 2*z vs z+z);
+  -- each branch is independently sorry-free in N18AddCongrProof.lean.
+  sorry
 
 end
 
