@@ -11,6 +11,7 @@ import FLT.Assumptions.MazurProof.CyclicExclusion15
 import FLT.Assumptions.MazurProof.CyclicExclusion21
 import FLT.Assumptions.MazurProof.CyclicExclusion11
 import FLT.Assumptions.MazurProof.N18GoodModelAssembly
+import FLT.Assumptions.MazurProof.PrimeExclusion13
 import FLT.Assumptions.MazurProof.PrimeExclusion17
 import FLT.Assumptions.MazurProof.PrimeExclusion19
 
@@ -79,9 +80,10 @@ assembled from:
 * `no_prime_order_ge_23` — sub-axiom (formal immersion on X₀(p), uniform tail)
 -/
 
-axiom no_order_13_prime
+theorem no_order_13_prime
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    ¬ HasRationalPointOfOrder E 13
+    ¬ HasRationalPointOfOrder E 13 :=
+  PrimeExclusion13.no_order_13_prime E
 
 theorem no_order_17_prime
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
