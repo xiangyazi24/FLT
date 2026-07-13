@@ -1,3 +1,9 @@
+## Run 2026-07-12 (Complete Mazur proof — Layer 2 + residuals)
+- doctrine version: 6 gaps (2 axiom + 4 sorry), Layer 2 ChatGPT pre-designs in scratch/layer2/
+- approval: /automode from Xiang
+- starting avenue: (a) Layer 2A p=11
+- end:
+- final result:
 
 ## Run 2026-07-08 (ChatGPT harvest mode)
 - doctrine version: Close CyclicExclusion sorry's via ChatGPT harvest

@@ -65,12 +65,36 @@ open scoped WeierstrassCurve.Affine
 
 namespace MazurProof
 
-/-! ## Prime-order input -/
+/-! ## Prime-order input — decomposed into three sub-pieces
 
-axiom mazur_prime_torsion_bound_sub
+The monolithic axiom `mazur_prime_torsion_bound_sub` is now a THEOREM
+assembled from:
+* `no_rational_point_of_order_11` — sorry-free (Billing–Mahler cubic descent)
+* `no_order_13_prime` — sub-axiom (genus-2 Jacobian descent on X₁(13))
+* `no_prime_order_ge_17` — sub-axiom (formal immersion on X₀(p))
+-/
+
+axiom no_order_13_prime
+    (E : WeierstrassCurve ℚ) [E.IsElliptic] :
+    ¬ HasRationalPointOfOrder E 13
+
+axiom no_prime_order_ge_17
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {p : ℕ} (hp : Nat.Prime p) (hp17 : 17 ≤ p) :
+    ¬ HasRationalPointOfOrder E p
+
+theorem mazur_prime_torsion_bound_sub
     (E : WeierstrassCurve ℚ) [E.IsElliptic] {p : ℕ} (hp : Nat.Prime p)
     (hord : HasRationalPointOfOrder E p) :
-    p ∈ ({2, 3, 5, 7} : Finset ℕ)
+    p ∈ ({2, 3, 5, 7} : Finset ℕ) := by
+  by_contra hnot
+  by_cases hp17 : 17 ≤ p
+  · exact no_prime_order_ge_17 E hp hp17 hord
+  · have hp16 : p ≤ 16 := by omega
+    interval_cases p <;> simp_all (config := { decide := true }) [Finset.mem_insert,
+      Finset.mem_singleton] <;> first
+      | exact no_rational_point_of_order_11 E hord
+      | exact no_order_13_prime E hord
 
 /-! ## Composite-order sub-axioms (no sound real theorem to wire yet) -/
 
