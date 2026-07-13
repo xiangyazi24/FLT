@@ -718,6 +718,334 @@ theorem add_congr_distinct_x_branch {x₁ y₁ x₂ y₂ : L}
   change err = 0 ∨ r₁ + r₂ ≤ ordPi err
   exact herr
 
+theorem add_congr_tangent_branch {x y : L}
+    (hx0 : x ≠ 0) (hy0 : y ≠ 0)
+    (hns : WeierstrassCurve.Affine.Nonsingular E0 x y)
+    (hxneg : ordPi x < 0)
+    (hyne : WeierstrassCurve.Affine.negY E0 x y ≠ y) :
+    let P := WeierstrassCurve.Affine.Point.some x y hns
+    zParam (P + P) - 2 * zParam P = 0 ∨
+    2 * v (zParam P) ≤ v (zParam (P + P) - 2 * zParam P) := by
+  let P : E0Point := WeierstrassCurve.Affine.Point.some x y hns
+  change zParam (P + P) - 2 * zParam P = 0 ∨
+    2 * ordPi (zParam P) ≤ ordPi (zParam (P + P) - 2 * zParam P)
+  let t : L := -x / y
+  let w : L := -1 / y
+  let r : ℤ := ordPi t
+  have heq := (WeierstrassCurve.Affine.equation_iff x y).mp hns.1
+  have hcoords := val_coords hx0 hy0 heq hxneg
+  have hxv : ordPi x = -2 * r := hcoords.1
+  have hyv : ordPi y = -3 * r := hcoords.2
+  have hr : 1 ≤ r := by omega
+  have ht0 : t ≠ 0 := div_ne_zero (neg_ne_zero.mpr hx0) hy0
+  have hw0 : w ≠ 0 := div_ne_zero (by norm_num) hy0
+  have htv : ordPi t = r := rfl
+  have hwv : ordPi w = 3 * r := by
+    dsimp [w]
+    rw [ordPi_div (by norm_num) hy0, ordPi_neg, ordPi_one, hyv]
+    omega
+  have htGood : OrdGood r t := Or.inr (by rw [htv])
+  have hwGood : OrdGood (3 * r) w := Or.inr (by rw [hwv])
+  have hG : G t w = 0 := chartG_eq_zero hy0 heq
+  let TU : L := 1 - t + t ^ 2 - 2 * w + 10 * t * w - 15 * w ^ 2
+  let TN : L := 3 * t ^ 2 + w - 2 * t * w - 5 * w ^ 2
+  have ht1 : OrdGood 1 t := htGood.mono (by omega)
+  have hw1 : OrdGood 1 w := hwGood.mono (by omega)
+  have htSq1 : OrdGood 1 (t ^ 2) := by
+    rw [pow_two]
+    exact (ht1.mul ht1).mono (by omega)
+  have h2w1 : OrdGood 1 (2 * w) := by
+    simpa only [Int.cast_ofNat] using hw1.int_mul 2
+  have h10tw1 : OrdGood 1 (10 * t * w) := by
+    simpa only [Int.cast_ofNat, mul_assoc] using
+      ((ht1.mul hw1).int_mul 10).mono (by omega)
+  have hwSq1 : OrdGood 1 (w ^ 2) := by
+    rw [pow_two]
+    exact (hw1.mul hw1).mono (by omega)
+  have h15wSq1 : OrdGood 1 (15 * w ^ 2) := by
+    simpa only [Int.cast_ofNat] using hwSq1.int_mul 15
+  let qTU : L := -t + t ^ 2 - 2 * w + 10 * t * w - 15 * w ^ 2
+  have hqTU : OrdGood 1 qTU := by
+    dsimp [qTU]
+    exact (((ht1.neg.add htSq1).sub h2w1).add h10tw1).sub h15wSq1
+  have hTUeq : TU = 1 + qTU := by simp only [TU, qTU]; ring
+  have hTUunit : TU ≠ 0 ∧ ordPi TU = 0 := by
+    rw [hTUeq]
+    exact hqTU.unit_one_add
+  have htSq2r : OrdGood (2 * r) (t ^ 2) := by
+    rw [pow_two]
+    simpa only [two_mul] using htGood.mul htGood
+  have h3tSq : OrdGood (2 * r) (3 * t ^ 2) := by
+    simpa only [Int.cast_ofNat] using htSq2r.int_mul 3
+  have hw2r : OrdGood (2 * r) w := hwGood.mono (by omega)
+  have h2tw : OrdGood (2 * r) (2 * t * w) := by
+    simpa only [Int.cast_ofNat, mul_assoc] using
+      ((htGood.mul hwGood).int_mul 2).mono (by omega)
+  have hwSq2r : OrdGood (2 * r) (w ^ 2) := by
+    rw [pow_two]
+    exact (hwGood.mul hwGood).mono (by omega)
+  have h5wSq : OrdGood (2 * r) (5 * w ^ 2) := by
+    simpa only [Int.cast_ofNat] using hwSq2r.int_mul 5
+  have hTNGood : OrdGood (2 * r) TN := by
+    dsimp [TN]
+    exact ((h3tSq.add hw2r).sub h2tw).sub h5wSq
+  let m : L := TN / TU
+  have hmGood : OrdGood (2 * r) m :=
+    hTNGood.div_unit hTUunit.1 hTUunit.2
+  have hTUm : TU * m = TN := by
+    dsimp [m]
+    field_simp [hTUunit.1]
+  let b : L := w - m * t
+  have hline : w = m * t + b := by dsimp [b]; ring
+  have hbGood : OrdGood (3 * r) b := by
+    have hmt : OrdGood (3 * r) (m * t) := by
+      exact (hmGood.mul htGood).mono (by omega)
+    dsimp [b]
+    exact hwGood.sub hmt
+  have hbIdentity : TU * b = w * (t + w - 2) := by
+    have hTUm' := hTUm
+    dsimp [TU, TN] at hTUm' ⊢
+    dsimp [b]
+    simp only [G] at hG
+    linear_combination 3 * hG - t * hTUm'
+  have hordPiTwo : ordPi (2 : L) = 0 := by
+    have hnegone : ordPi (-1 : L) = 0 := by rw [ordPi_neg, ordPi_one]
+    calc
+      ordPi (2 : L) = ordPi ((-1 : L) + 3) := by norm_num
+      _ = ordPi (-1 : L) :=
+        ordPi_add_eq_of_lt (by norm_num) (by norm_num)
+          (by rw [hnegone, ordPi_three]; omega)
+      _ = 0 := hnegone
+  have htw1 : OrdGood 1 (t + w) := ht1.add hw1
+  let qtw : L := -(t + w) / 2
+  have hqtw : OrdGood 1 qtw := by
+    dsimp [qtw]
+    exact htw1.neg.div_unit (by norm_num) hordPiTwo
+  have htwUnit : 1 + qtw ≠ 0 ∧ ordPi (1 + qtw) = 0 := hqtw.unit_one_add
+  let et : L := t + w - 2
+  have hetEq : et = -2 * (1 + qtw) := by
+    dsimp [et, qtw]
+    field_simp
+    ring
+  have hetUnit : et ≠ 0 ∧ ordPi et = 0 := by
+    constructor
+    · rw [hetEq]
+      exact mul_ne_zero (by norm_num) htwUnit.1
+    · rw [hetEq, ordPi_mul (by norm_num) htwUnit.1, ordPi_neg,
+        hordPiTwo, htwUnit.2]
+      omega
+  have hb0 : b ≠ 0 := by
+    intro hb
+    rw [hb, mul_zero] at hbIdentity
+    exact (mul_ne_zero hw0 hetUnit.1) hbIdentity.symm
+  have hbv : ordPi b = 3 * r := by
+    have hv := congrArg ordPi hbIdentity
+    rw [ordPi_mul hTUunit.1 hb0, ordPi_mul hw0 hetUnit.1,
+      hTUunit.2, hwv, hetUnit.2] at hv
+    omega
+  have hm1 : OrdGood 1 m := hmGood.mono (by omega)
+  have hmSq1 : OrdGood 1 (m ^ 2) := by
+    rw [pow_two]
+    exact (hm1.mul hm1).mono (by omega)
+  have hmCube1 : OrdGood 1 (m ^ 3) := by
+    rw [show m ^ 3 = m ^ 2 * m by ring]
+    exact (hmSq1.mul hm1).mono (by omega)
+  let qA : L := -m - 5 * m ^ 2 + 5 * m ^ 3
+  have hqA : OrdGood 1 qA := by
+    dsimp [qA]
+    exact (hm1.neg.sub (hmSq1.int_mul 5)).add (hmCube1.int_mul 5)
+  have hAeq : A m = 1 + qA := by simp only [A, qA]; ring
+  have hAunit : A m ≠ 0 ∧ ordPi (A m) = 0 := by
+    rw [hAeq]
+    exact hqA.unit_one_add
+  have hOneMunit : 1 + m ≠ 0 ∧ ordPi (1 + m) = 0 := hm1.unit_one_add
+  have hb1 : OrdGood 1 b := hbGood.mono (by omega)
+  have hbSq1 : OrdGood 1 (b ^ 2) := by
+    rw [pow_two]
+    exact (hb1.mul hb1).mono (by omega)
+  let e : L := 1 - b - 5 * b ^ 2
+  let qe : L := -b - 5 * b ^ 2
+  have hqe : OrdGood 1 qe := by
+    dsimp [qe]
+    exact hb1.neg.sub (hbSq1.int_mul 5)
+  have heeq : e = 1 + qe := by simp only [e, qe]; ring
+  have heunit : e ≠ 0 ∧ ordPi e = 0 := by
+    rw [heeq]
+    exact hqe.unit_one_add
+  have hlineG : G t (m * t + b) = 0 := by rw [← hline]; exact hG
+  have htangent : -3 * A m * t ^ 2 - 2 * B m b * t + C m b = 0 := by
+    have hTUm' := hTUm
+    dsimp [TU, TN] at hTUm'
+    simp only [A, B, C]
+    dsimp [b]
+    linear_combination hTUm'
+  let u : L := -B m b / A m - 2 * t
+  have hsum : A m * (t + t + u) + B m b = 0 := by
+    dsimp [u]
+    field_simp [hAunit.1]
+    ring
+  have hpair : A m * (t * t + (t + t) * u) + C m b = 0 := by
+    linear_combination htangent + 2 * t * hsum
+  have hp := hlineG
+  rw [G_line] at hp
+  have hprod : A m * t * t * u = D b := by
+    linear_combination -hp - t ^ 2 * hsum + t * hpair
+  have hprod' : A m * t * t * u = b * e := by
+    rw [hprod]
+    simp only [D, e]
+    ring
+  have hu0 : u ≠ 0 := by
+    intro hu
+    rw [hu, mul_zero] at hprod'
+    exact (mul_ne_zero hb0 heunit.1) hprod'.symm
+  have huv : ordPi u = r := by
+    have hv := congrArg ordPi hprod'
+    rw [ordPi_mul (mul_ne_zero (mul_ne_zero hAunit.1 ht0) ht0) hu0,
+      ordPi_mul (mul_ne_zero hAunit.1 ht0) ht0,
+      ordPi_mul hAunit.1 ht0, hAunit.2, htv,
+      ordPi_mul hb0 heunit.1, hbv, heunit.2] at hv
+    omega
+  let qd : L := -(1 + m) * u - b
+  have hqd : OrdGood 1 qd := by
+    have hOneM : OrdGood 0 (1 + m) := Or.inr (by rw [hOneMunit.2])
+    have hterm : OrdGood r ((1 + m) * u) := by
+      simpa only [zero_add] using hOneM.mul (Or.inr (by rw [huv]))
+    dsimp [qd]
+    simpa only [neg_mul] using (hterm.neg.mono (by omega)).sub hb1
+  let d : L := 1 - (1 + m) * u - b
+  have hdeq : d = 1 + qd := by simp only [d, qd]; ring
+  have hdunit : d ≠ 0 ∧ ordPi d = 0 := by
+    rw [hdeq]
+    exact hqd.unit_one_add
+  let t₃ : L := -u / d
+  have hdt₃ : d * t₃ = -u := by
+    dsimp [t₃]
+    field_simp [hdunit.1]
+  have hxsumData := vieta_x_sum_aux m b t t u hAunit.1 hb0 hsum hpair hprod
+  dsimp only at hxsumData
+  rcases hxsumData with ⟨hqprod, hxsum⟩
+  have hmu0 : m * u + b ≠ 0 := by
+    intro h
+    apply hqprod
+    simp [h]
+  have hmt0 : m * t + b ≠ 0 := by simpa only [← hline] using hw0
+  have hxchart0 : x = t / w := by
+    dsimp [t, w]
+    field_simp [hy0]
+  have hychart0 : y = -1 / w := by
+    dsimp [w]
+    field_simp [hy0]
+  have hxchart : x = t / (m * t + b) := by rw [← hline]; exact hxchart0
+  have hychart : y = -1 / (m * t + b) := by rw [← hline]; exact hychart0
+  let ell : L := WeierstrassCurve.Affine.slope E0 x x y y
+  have hyne' : y ≠ WeierstrassCurve.Affine.negY E0 x y := Ne.symm hyne
+  have hellFormula : ell = TN / (w * et) := by
+    dsimp only [ell]
+    rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl hyne']
+    rw [hxchart0, hychart0]
+    simp only [WeierstrassCurve.Affine.negY, E0]
+    dsimp [TN, et]
+    field_simp [hw0, hetUnit.1]
+    ring
+  have hell : ell = m / b := by
+    rw [hellFormula]
+    apply (div_eq_div_iff (mul_ne_zero hw0 hetUnit.1) hb0).2
+    linear_combination -b * hTUm + m * hbIdentity
+  let x₃ : L := WeierstrassCurve.Affine.addX E0 x x ell
+  have hx₃ : x₃ = u / (m * u + b) := by
+    change ell ^ 2 + E0.a₁ * ell - E0.a₂ - x - x = u / (m * u + b)
+    rw [hell, hxchart]
+    have ha1 : E0.a₁ = (1 : L) := by norm_num [E0]
+    have ha2 : E0.a₂ = (-1 : L) := by norm_num [E0]
+    rw [ha1, ha2, one_mul, sub_neg_eq_add]
+    rw [← hxsum]
+    abel
+  let ybar : L := WeierstrassCurve.Affine.negAddY E0 x x y ell
+  have hybar : ybar = -1 / (m * u + b) := by
+    change ell * (x₃ - x) + y = -1 / (m * u + b)
+    rw [hx₃, hell, hxchart, hychart]
+    field_simp [hb0, hmt0, hmu0]
+    ring
+  let y₃ : L := WeierstrassCurve.Affine.addY E0 x x y ell
+  have hy₃ : y₃ = d / (m * u + b) := by
+    change WeierstrassCurve.Affine.negY E0 x₃ ybar = d / (m * u + b)
+    rw [hybar, hx₃]
+    simp only [WeierstrassCurve.Affine.negY, E0]
+    dsimp [d]
+    field_simp [hmu0]
+    ring
+  have hbridge : zParam (P + P) = t₃ := by
+    dsimp [P]
+    rw [WeierstrassCurve.Affine.Point.add_self_of_Y_ne hyne']
+    change -WeierstrassCurve.Affine.addX E0 x x
+        (WeierstrassCurve.Affine.slope E0 x x y y) /
+      WeierstrassCurve.Affine.addY E0 x x y
+        (WeierstrassCurve.Affine.slope E0 x x y y) = t₃
+    change -x₃ / y₃ = t₃
+    rw [hx₃, hy₃]
+    dsimp [t₃]
+    have hmu0' : u * m + b ≠ 0 := by
+      rw [mul_comm u m]
+      exact hmu0
+    field_simp [hmu0, hmu0', hdunit.1]
+  have hmSq2r : OrdGood (2 * r) (m ^ 2) := by
+    rw [pow_two]
+    exact (hmGood.mul hmGood).mono (by omega)
+  have hb2r : OrdGood (2 * r) b := hbGood.mono (by omega)
+  have hmb2r : OrdGood (2 * r) (m * b) :=
+    (hmGood.mul hbGood).mono (by omega)
+  have hHGood : OrdGood (2 * r) (H m b) := by
+    have h₁' := hmGood.int_mul (-8)
+    have h₁ : OrdGood (2 * r) (-8 * m) := by
+      convert h₁' using 1
+      norm_num
+    have h₂ : OrdGood (2 * r) (16 * m ^ 2) := hmSq2r.int_mul 16
+    have h₃' := hb2r.int_mul (-4)
+    have h₃ : OrdGood (2 * r) (-(4 * b)) := by
+      convert h₃' using 1
+      norm_num
+    have h₄ : OrdGood (2 * r) (20 * m * b) := by
+      simpa only [Int.cast_ofNat, mul_assoc] using hmb2r.int_mul 20
+    simp only [H]
+    simpa only [sub_eq_add_neg] using ((h₁.add h₂).add h₃).add h₄
+  have hBH : OrdGood (2 * r) (b * H m b) :=
+    (hbGood.mul hHGood).mono (by omega)
+  have hA0 : OrdGood 0 (A m) := Or.inr (by rw [hAunit.2])
+  have hOneM0 : OrdGood 0 (1 + m) := Or.inr (by rw [hOneMunit.2])
+  have htExact : OrdGood r t := Or.inr (by rw [htv])
+  have hAtSq : OrdGood (2 * r) (A m * (t * t) * (1 + m)) := by
+    have h := hA0.mul (htExact.mul htExact) |>.mul hOneM0
+    simpa only [zero_add, add_zero, add_assoc, two_mul] using h
+  have hAbu : OrdGood (2 * r) (A m * b * u) := by
+    have h := hA0.mul hbGood |>.mul (Or.inr (by rw [huv]))
+    exact h.mono (by omega)
+  let err : L := t₃ - t - t
+  have hid := identity8 m b t t u t₃ d hsum hpair rfl hdt₃
+  change A m * d * err =
+    b * H m b - A m * (t * t) * (1 + m) - A m * b * u at hid
+  have hRHS : OrdGood (2 * r)
+      (b * H m b - A m * (t * t) * (1 + m) - A m * b * u) :=
+    (hBH.sub hAtSq).sub hAbu
+  have herr : err = 0 ∨ 2 * r ≤ ordPi err := by
+    by_cases herr0 : err = 0
+    · exact Or.inl herr0
+    right
+    have hlhs0 : A m * d * err ≠ 0 :=
+      mul_ne_zero (mul_ne_zero hAunit.1 hdunit.1) herr0
+    have hrhs0 : b * H m b - A m * (t * t) * (1 + m) - A m * b * u ≠ 0 := by
+      intro h
+      rw [h] at hid
+      exact hlhs0 hid
+    have hrhs := hRHS.resolve_left hrhs0
+    have hv := congrArg ordPi hid
+    rw [ordPi_mul (mul_ne_zero hAunit.1 hdunit.1) herr0,
+      ordPi_mul hAunit.1 hdunit.1, hAunit.2, hdunit.2] at hv
+    omega
+  rw [hbridge]
+  change t₃ - 2 * t = 0 ∨ 2 * r ≤ ordPi (t₃ - 2 * t)
+  rw [show t₃ - 2 * t = err by dsimp [err]; ring]
+  exact herr
+
 /-! ## Exact valuation lemmas for the counterexample -/
 
 private theorem add_ne_zero_of_ordPi_ne {x y : L}
