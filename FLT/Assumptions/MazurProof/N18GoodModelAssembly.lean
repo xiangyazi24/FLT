@@ -27,6 +27,10 @@ open scoped Classical NumberField WeierstrassCurve.Affine
 
 namespace MazurProof.N18GoodModelAssembly
 
+-- Prevent the abstract structure projection from competing with the concrete
+-- elliptic-curve point group during elaboration.
+attribute [-instance] _root_.FormalKernel18.addCommGroup
+
 open MazurProof.N18RouteC
 open MazurProof.N18RouteC.Isogeny
 open MazurProof.N18RouteC.IsogenyPoints
@@ -56,6 +60,21 @@ theorem xCoordGood_neg (P : GoodPoint) : xCoordGood (-P) = xCoordGood P := by
   cases P with
   | zero => rfl
   | some x y h => rfl
+
+private theorem two_nsmul_eq_two_mul (a : WithTop ℤ) : 2 • a = 2 * a := by
+  cases a with
+  | top => simp [two_nsmul]
+  | coe m =>
+      rw [two_nsmul, ← WithTop.coe_add,
+        show (2 : WithTop ℤ) = ((2 : ℤ) : WithTop ℤ) by norm_cast,
+        ← WithTop.coe_mul]
+      congr
+      ring
+
+private theorem nsmul_zero_good (n : ℕ) : n • (0 : GoodPoint) = 0 := by
+  induction n with
+  | zero => rfl
+  | succ n ih => rw [succ_nsmul, ih]; rfl
 
 /-- The good integral equation has its usual reduction homomorphism, and the
 kernel is exactly the near-origin locus.  Closing this theorem requires the
@@ -90,7 +109,78 @@ theorem yCoordGood_ne_zero_of_ordPi_x_neg {x y : L}
     (h : WeierstrassCurve.Affine.Nonsingular
       MazurProof.N18RouteC.E0Good x y)
     (hx : ordPi x < 0) : y ≠ 0 := by
-  sorry
+  have hx0 : x ≠ 0 := by
+    intro hzero
+    rw [hzero, ordPi_zero] at hx
+    omega
+  intro hy
+  subst y
+  have heq := (WeierstrassCurve.Affine.equation_iff x 0).mp h.1
+  have ha₂map :
+      algebraMap MazurProof.N18PackageII.OL L
+          MazurProof.N18PackageII.E0GoodInt.a₂ = E0Good.a₂ := by
+    have hm := congrArg (fun W : WeierstrassCurve L ↦ W.a₂)
+      MazurProof.N18PackageII.E0GoodInt_map
+    simpa only [WeierstrassCurve.map_a₂] using hm
+  have ha₄map :
+      algebraMap MazurProof.N18PackageII.OL L
+          MazurProof.N18PackageII.E0GoodInt.a₄ = E0Good.a₄ := by
+    have hm := congrArg (fun W : WeierstrassCurve L ↦ W.a₄)
+      MazurProof.N18PackageII.E0GoodInt_map
+    simpa only [WeierstrassCurve.map_a₄] using hm
+  have ha₆map :
+      algebraMap MazurProof.N18PackageII.OL L
+          MazurProof.N18PackageII.E0GoodInt.a₆ = E0Good.a₆ := by
+    have hm := congrArg (fun W : WeierstrassCurve L ↦ W.a₆)
+      MazurProof.N18PackageII.E0GoodInt_map
+    simpa only [WeierstrassCurve.map_a₆] using hm
+  have ha₂ : 0 ≤ ordPi E0Good.a₂ := by
+    rw [← ha₂map]
+    exact MazurProof.N18RouteC.GoodModel.zero_le_ordPi_ringOfIntegers _
+  have ha₄ : 0 ≤ ordPi E0Good.a₄ := by
+    rw [← ha₄map]
+    exact MazurProof.N18RouteC.GoodModel.zero_le_ordPi_ringOfIntegers _
+  have ha₆ : 0 ≤ ordPi E0Good.a₆ := by
+    rw [← ha₆map]
+    exact MazurProof.N18RouteC.GoodModel.zero_le_ordPi_ringOfIntegers _
+  have hx2 : ordPi (x ^ 2) = 2 * ordPi x := by
+    rw [show x ^ 2 = x * x by ring, ordPi_mul hx0 hx0]
+    ring
+  have hx3 : ordPi (x ^ 3) = 3 * ordPi x := by
+    rw [show x ^ 3 = x * x * x by ring,
+      ordPi_mul (mul_ne_zero hx0 hx0) hx0, ordPi_mul hx0 hx0]
+    ring
+  have ha₂x :
+      2 * ordPi x ≤ ordPi (E0Good.a₂ * x ^ 2) := by
+    by_cases hzero : E0Good.a₂ = 0
+    · rw [hzero, zero_mul, ordPi_zero]
+      omega
+    · rw [ordPi_mul hzero (pow_ne_zero 2 hx0), hx2]
+      omega
+  have ha₄x :
+      2 * ordPi x ≤ ordPi (E0Good.a₄ * x) := by
+    by_cases hzero : E0Good.a₄ = 0
+    · rw [hzero, zero_mul, ordPi_zero]
+      omega
+    · rw [ordPi_mul hzero hx0]
+      omega
+  have htail :
+      2 * ordPi x ≤
+        ordPi (E0Good.a₂ * x ^ 2 + E0Good.a₄ * x + E0Good.a₆) := by
+    apply le_ordPi_add
+    · exact le_ordPi_add ha₂x ha₄x (by omega)
+    · omega
+    · omega
+  have hcurve :
+      x ^ 3 + E0Good.a₂ * x ^ 2 + E0Good.a₄ * x + E0Good.a₆ = 0 := by
+    norm_num at heq
+    exact heq.symm
+  have hfactor :
+      x ^ 3 = -(E0Good.a₂ * x ^ 2 + E0Good.a₄ * x + E0Good.a₆) := by
+    linear_combination hcurve
+  have hord := congrArg ordPi hfactor
+  rw [hx3, ordPi_neg] at hord
+  omega
 
 /-- The forward coordinate-valuation bridge on the good model. -/
 theorem vpi_pos_bridge_good (P : GoodPoint)
@@ -233,7 +323,8 @@ def kernelSubgroup : AddSubgroup GoodPoint where
   neg_mem' := by
     intro P hP
     rcases hP with hzero | hx
-    · exact Or.inl (by rw [hzero, neg_zero])
+    · subst P
+      exact Or.inl rfl
     · exact Or.inr (by rw [xCoordGood_neg]; exact hx)
 
 theorem mem_kernelSubgroup {P : GoodPoint} :
@@ -281,8 +372,8 @@ theorem zParam_nsmul_congr (P : GoodPoint) (hmem : P ∈ D.kernelSubgroup) :
             2 • D.vpi (D.zParam P) =
                 2 * min (D.vpi (D.zParam (k • P)))
                   (D.vpi (D.zParam P)) := by
-                    rw [hmin, two_nsmul]
-                    exact (two_mul _).symm
+                    rw [hmin]
+                    exact two_nsmul_eq_two_mul _
             _ ≤ D.vpi
                 (D.zParam (k • P + P) - D.zParam (k • P) - D.zParam P) :=
               D.add_congr (k • P) P
@@ -319,7 +410,8 @@ theorem vpi_zParam_nsmul (P : GoodPoint) (hmem : P ∈ D.kernelSubgroup)
   have hpos : 0 < D.vpi (D.zParam P) := D.vpi_pos_of_mem hmem
   rcases eq_or_ne (D.zParam P) 0 with hzero | hz
   · have hP0 : P = 0 := D.zParam_eq_zero P hzero
-    simp [hP0]
+    subst P
+    rw [nsmul_zero_good]
   · have hfinite : D.vpi (D.zParam P) ≠ ⊤ := by
       rw [D.vpi.ne_top_iff]
       exact hz
@@ -345,21 +437,18 @@ theorem vpi_zParam_nsmul (P : GoodPoint) (hmem : P ∈ D.kernelSubgroup)
 theorem vpi_zParam_zsmul (P : GoodPoint) (hmem : P ∈ D.kernelSubgroup)
     (m : ℤ) (hm : ¬ (3 ∣ m)) :
     D.vpi (D.zParam (m • P)) = D.vpi (D.zParam P) := by
-  rcases le_total 0 m with hmnn | hmneg
-  · lift m to ℕ using hmnn with n
-    rw [natCast_zsmul]
+  cases m with
+  | ofNat n =>
+    change D.vpi (D.zParam (n • P)) = D.vpi (D.zParam P)
     exact D.vpi_zParam_nsmul P hmem n hm
-  · have hnn : (0 : ℤ) ≤ -m := by omega
-    have heq : ((-m).toNat) • P = (-m) • P := by
-      rw [← natCast_zsmul, Int.toNat_of_nonneg hnn]
-    have hmP : m • P = -(((-m).toNat) • P) := by
-      calc
-        m • P = -((-m) • P) := by rw [neg_zsmul, neg_neg]
-        _ = -(((-m).toNat) • P) := congrArg Neg.neg heq.symm
-    rw [hmP, D.vpi_zParam_neg]
+  | negSucc n =>
+    change D.vpi (D.zParam (-((n + 1) • P))) = D.vpi (D.zParam P)
+    rw [D.vpi_zParam_neg]
     apply D.vpi_zParam_nsmul P hmem
-    rw [Int.toNat_of_nonneg hnn, Int.dvd_neg]
-    exact hm
+    intro hd
+    apply hm
+    rw [show Int.negSucc n = -((n + 1 : ℕ) : ℤ) by omega]
+    exact dvd_neg.mpr hd
 
 /-- The abstract Block-5 formal-kernel object on the good model. -/
 def formalKernel18 : _root_.FormalKernel18 where
@@ -459,6 +548,8 @@ def formalKernel18 : _root_.FormalKernel18 where
     have hv := D.msq_torsionFree (z : GoodPoint) z.property hzne htor'
     rw [hv, MazurProof.N18Block5Instantiation.toENat_one]
 
+include D
+
 /-- Package III plus the abstract Block-5 Lemma C. -/
 theorem three_power_torsion_exponent_three
     (P : GoodPoint) (hP : ∃ k : ℕ, ((3 : ℤ) ^ k) • P = 0) :
@@ -478,13 +569,15 @@ theorem three_power_torsion_exponent_three
     exact hknat
   have h3z := D.formalKernel18.three_power_torsion_exponent_three z k hkz
   have := congrArg Subtype.val h3z
-  rwa [AddSubgroupClass.coe_zsmul, ZeroMemClass.coe_zero] at this
+  change (3 : ℤ) • P = 0 at this
+  exact this
 
 /-- Identify the reduction kernel with the formal-kernel subgroup. -/
 def kerEquiv
     (red : GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint)
-    (hker : ∀ P, P ∈ red.ker ↔ P ∈ D.kernelSubgroup) :
-    red.ker ≃+ D.kernelSubgroup where
+    (hker : ∀ P, P ∈ (red.ker : AddSubgroup GoodPoint) ↔
+      P ∈ D.kernelSubgroup) :
+    (red.ker : AddSubgroup GoodPoint) ≃+ D.kernelSubgroup where
   toFun P := ⟨(P : GoodPoint), (hker P).mp P.property⟩
   invFun P := ⟨(P : GoodPoint), (hker P).mpr P.property⟩
   left_inv P := by cases P; rfl
@@ -494,8 +587,10 @@ def kerEquiv
 /-- Strict growth of the good formal parameter under multiplication by three. -/
 def formalFiltration
     (red : GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint)
-    (hker : ∀ P, P ∈ red.ker ↔ P ∈ D.kernelSubgroup) :
-    MazurProof.N18RouteC.Separated.StrictNSmulFiltration red.ker 3 where
+    (hker : ∀ P, P ∈ (red.ker : AddSubgroup GoodPoint) ↔
+      P ∈ D.kernelSubgroup) :
+    MazurProof.N18RouteC.Separated.StrictNSmulFiltration
+      (red.ker : AddSubgroup GoodPoint) 3 where
   level P := (D.formalKernel18.val (D.kerEquiv red hker P)).toNat
   step := by
     intro P hP0 h3P0
@@ -506,7 +601,9 @@ def formalFiltration
     have hz0 : z ≠ 0 := by
       intro hz
       apply hP0
-      exact (D.kerEquiv red hker).injective (by rw [hz, map_zero])
+      apply (D.kerEquiv red hker).injective
+      have hz' : D.kerEquiv red hker P = 0 := by simpa [z] using hz
+      simpa using hz'
     have h3z0 : (3 : ℕ) • z ≠ 0 := by
       intro h3z
       apply h3P0
@@ -564,6 +661,8 @@ theorem weak_three_descent_good (P : GoodPoint) :
 /-- The complete Block-5 output on the good model. -/
 theorem h21_good : ∀ P : GoodPoint, (21 : ℕ) • P = 0 := by
   exact MazurProof.N18RouteC.Separated.e0_killed_by_21
+    (E0Point := GoodPoint) (LocalPoint := GoodPoint)
+    (RedPoint := MazurProof.N18RouteC.Reduction.RedPoint)
     (AddMonoidHom.id GoodPoint)
     Function.injective_id
     redGood weak_three_descent_good
