@@ -20,7 +20,7 @@ def kernelPoly19 : Polynomial ℤ :=
     - C 7942 * X ^ 5 + C 82308 * X ^ 4 - C 274360 * X ^ 3
     + C 390963 * X ^ 2 - C 130321 * X - C 130321
 
-set_option maxHeartbeats 400000 in
+set_option maxHeartbeats 800000 in
 theorem kernelPoly19_monic : kernelPoly19.Monic := by
   unfold kernelPoly19; decide
 
