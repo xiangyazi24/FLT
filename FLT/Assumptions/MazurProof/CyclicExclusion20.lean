@@ -179,6 +179,7 @@ Proved in `Velu2Isogeny.lean` (2006 lines, 0 sorry). Re-stated here as a
 local theorem to avoid elaboration mismatch when importing the Vélu file
 (the `omit` + `noncomputable section` context in Velu2Isogeny produces a
 different instance resolution path for `addOrderOf`). -/
+set_option maxHeartbeats 1600000 in
 private theorem exists_rational_two_isogeny_quotient_local
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     {Q : (E⁄ℚ).Point} (hQ : addOrderOf Q = 2) :

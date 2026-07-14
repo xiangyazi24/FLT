@@ -838,7 +838,7 @@ private theorem three_pow_nsmul_data {P : E0GoodPoint}
       ordPi (zParamGood ((3 ^ j) • P)) =
         3 * (j : ℤ) + ordPi (zParamGood P) := by
   induction j with
-  | zero => simp; exact ⟨hP, hz, rfl⟩
+  | zero => exact ⟨by simpa, by simpa, by simp⟩
   | succ j ih =>
       rcases ih with ⟨hjP, hjz, hjord⟩
       have hjlevel : 2 ≤ ordPi (zParamGood ((3 ^ j) • P)) := by
