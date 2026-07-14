@@ -277,7 +277,7 @@ private theorem no_rational_point_of_order_20_aux
   have h10P : addOrderOf ((10 : ℕ) • P) = 2 := by
     rw [addOrderOf_nsmul' P (by norm_num), hP]; norm_num
   obtain ⟨E', hE', phi, dual, eta, hη, hker, hdualPhi, hdualEta⟩ :=
-    exists_rational_two_isogeny_quotient E h10P
+    Velu2Isogeny.exists_rational_two_isogeny_quotient E h10P
   letI : E'.IsElliptic := hE'
   let D : RationalTwoIsogenyData ((10 : ℕ) • P) :=
     ⟨phi, dual, eta, hη, hker, hdualPhi, hdualEta⟩
@@ -388,7 +388,7 @@ private theorem no_rational_point_of_order_24_aux
   have h12P : addOrderOf ((12 : ℕ) • P) = 2 := by
     rw [addOrderOf_nsmul' P (by norm_num), hP]; norm_num
   obtain ⟨E', hE', phi, dual, eta, hη, hker, hdualPhi, hdualEta⟩ :=
-    exists_rational_two_isogeny_quotient E h12P
+    Velu2Isogeny.exists_rational_two_isogeny_quotient E h12P
   letI : E'.IsElliptic := hE'
   let D : RationalTwoIsogenyData ((12 : ℕ) • P) :=
     ⟨phi, dual, eta, hη, hker, hdualPhi, hdualEta⟩
