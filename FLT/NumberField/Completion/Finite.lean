@@ -7,6 +7,7 @@ module
 
 public import Mathlib.RingTheory.DedekindDomain.AdicValuation
 import FLT.DedekindDomain.AdicValuation
+public import FLT.Mathlib.RingTheory.DedekindDomain.AdicValuation
 import FLT.Mathlib.Topology.Algebra.Valued.WithZeroMulInt
 import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 import Mathlib.NumberTheory.Padics.HeightOneSpectrum
@@ -48,7 +49,7 @@ instance NumberField.instCompactSpaceAdicCompletionIntegers :
   Valued.WithZeroMulInt.integer_compactSpace (v.adicCompletion K) inferInstance
     (v.valuedAdicCompletion_surjective K)
 
-lemma NumberField.isCompactAdicCompletionIntegers :
+lemma NumberField.isCompact_adicCompletionIntegers :
     IsCompact (v.adicCompletionIntegers K : Set (v.adicCompletion K)) := by
   rw [isCompact_iff_compactSpace]
   exact instCompactSpaceAdicCompletionIntegers K v

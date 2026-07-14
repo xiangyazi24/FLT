@@ -422,12 +422,6 @@ variable [FiniteDimensional K D]
 instance (vi : InfinitePlace K) : SecondCountableTopology (D ⊗[K] vi.Completion) :=
   Module.Finite.secondCountabletopology vi.Completion _
 
--- shortcut
-instance (vi : InfinitePlace K) : Module K vi.Completion := inferInstance
-
-set_option synthInstance.maxHeartbeats 40000 in
--- https://github.com/ImperialCollegeLondon/FLT/issues/891
-set_option maxHeartbeats 400000 in
 variable
   [(vi : InfinitePlace K) → MeasurableSpace (D ⊗[K] vi.Completion)]
   [(vi : InfinitePlace K) → BorelSpace (D ⊗[K] vi.Completion)] in
@@ -835,8 +829,9 @@ open scoped Pointwise in
 def Y : Set D_𝔸 := X K D * X K D
 
 lemma X_compact : IsCompact (X K D) := by
-  simpa only [Set.image_prod, Set.image2_sub] using! (IsCompact.image_of_continuousOn
-    ((E_compact K D).prod (E_compact K D)) ((continuous_fst.sub continuous_snd).continuousOn))
+  have this : IsCompact ((Prod.fst - Prod.snd) '' E K D ×ˢ E K D) :=
+    IsCompact.image_of_continuousOn ((E_compact K D).prod (E_compact K D)) (by fun_prop)
+  simpa [X]
 
 lemma Y_compact : IsCompact (Y K D) := by
   simpa only [Pi.mul_def, Set.image_prod, Set.image2_mul, Y] using (IsCompact.image_of_continuousOn
