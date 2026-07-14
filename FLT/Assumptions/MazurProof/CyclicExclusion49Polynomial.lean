@@ -248,6 +248,34 @@ private lemma prePsi_15_eval (b c : ℚ) :
   simp only [F6, F15]
   ring
 
+/-- Compact factor with `preΨ'₁₆(0) = b⁸⁴ · G16 b c`. -/
+def G16 (b c : ℚ) : ℚ :=
+  c * F8 b c * (F7 b c ^ 2 * G10 b c + b * F6 b c * F9 b c ^ 2)
+
+/-- Compact factor with `preΨ'₁₇(0) = b⁹⁶ · G17 b c`. -/
+def G17 (b c : ℚ) : ℚ :=
+  c ^ 3 * G10 b c * F8 b c ^ 3 - b * F7 b c * F9 b c ^ 3
+
+/-- Compact factor with `preΨ'₁₈(0) = b¹⁰⁷ · G18 b c`. -/
+def G18 (b c : ℚ) : ℚ :=
+  F9 b c * (c ^ 2 * F8 b c ^ 2 * G11 b c - F7 b c * G10 b c ^ 2)
+
+/-- Compact factor with `preΨ'₁₉(0) = b¹²⁰ · G19 b c`. -/
+def G19 (b c : ℚ) : ℚ :=
+  b * G11 b c * F9 b c ^ 3 - c * F8 b c * G10 b c ^ 3
+
+/-- Compact factor with `preΨ'₂₀(0) = -(b¹³² · G20 b c)`. -/
+def G20 (b c : ℚ) : ℚ :=
+  G10 b c * (b * F9 b c ^ 2 * G12 b c + c * F8 b c * G11 b c ^ 2)
+
+/-- Compact factor with `preΨ'₂₁(0) = -(b¹⁴⁷ · G21 b c)`. -/
+def G21 (b c : ℚ) : ℚ :=
+  G12 b c * G10 b c ^ 3 + F9 b c * G11 b c ^ 3
+
+/-- Compact factor with `preΨ'₂₂(0) = -(b¹⁶⁰ · G22 b c)`. -/
+def G22 (b c : ℚ) : ℚ :=
+  G11 b c * (G10 b c ^ 2 * G13 b c + b * F9 b c * G12 b c ^ 2)
+
 /-- Compact factor with `preΨ'₂₃(0) = b¹⁷⁶ · G23 b c`. -/
 def G23 (b c : ℚ) : ℚ :=
   b * G10 b c * G12 b c ^ 3 - G13 b c * G11 b c ^ 3
@@ -266,6 +294,66 @@ def G25 (b c : ℚ) : ℚ :=
 /-- Compact factor with `preΨ'₂₆(0) = b²²⁴ · G26 b c`. -/
 def G26 (b c : ℚ) : ℚ :=
   G13 b c * (G11 b c * G14 b c ^ 2 - b * G12 b c ^ 2 * F15 b c)
+
+private lemma eval_prePsi_sixteen (b c : ℚ) :
+    ((W49 b c).preΨ' 16).eval 0 =
+      ((W49 b c).preΨ' 7).eval 0 ^ 2 * ((W49 b c).preΨ' 8).eval 0 *
+          ((W49 b c).preΨ' 10).eval 0 -
+        ((W49 b c).preΨ' 6).eval 0 * ((W49 b c).preΨ' 8).eval 0 *
+          ((W49 b c).preΨ' 9).eval 0 ^ 2 := by
+  have h := congrArg (fun p : ℚ[X] ↦ p.eval 0) ((W49 b c).preΨ'_even 5)
+  simpa using h
+
+private lemma eval_prePsi_seventeen (b c : ℚ) :
+    ((W49 b c).preΨ' 17).eval 0 =
+      ((W49 b c).preΨ' 10).eval 0 * (((W49 b c).preΨ' 8).eval 0) ^ 3 *
+          ((W49 b c).Ψ₂Sq.eval 0) ^ 2 -
+        ((W49 b c).preΨ' 7).eval 0 * (((W49 b c).preΨ' 9).eval 0) ^ 3 := by
+  have h := congrArg (fun p : ℚ[X] ↦ p.eval 0) ((W49 b c).preΨ'_odd 6)
+  simpa [show Even (6 : ℕ) by decide] using h
+
+private lemma eval_prePsi_eighteen (b c : ℚ) :
+    ((W49 b c).preΨ' 18).eval 0 =
+      ((W49 b c).preΨ' 8).eval 0 ^ 2 * ((W49 b c).preΨ' 9).eval 0 *
+          ((W49 b c).preΨ' 11).eval 0 -
+        ((W49 b c).preΨ' 7).eval 0 * ((W49 b c).preΨ' 9).eval 0 *
+          ((W49 b c).preΨ' 10).eval 0 ^ 2 := by
+  have h := congrArg (fun p : ℚ[X] ↦ p.eval 0) ((W49 b c).preΨ'_even 6)
+  simpa using h
+
+private lemma eval_prePsi_nineteen (b c : ℚ) :
+    ((W49 b c).preΨ' 19).eval 0 =
+      ((W49 b c).preΨ' 11).eval 0 * (((W49 b c).preΨ' 9).eval 0) ^ 3 -
+        ((W49 b c).preΨ' 8).eval 0 * (((W49 b c).preΨ' 10).eval 0) ^ 3 *
+          ((W49 b c).Ψ₂Sq.eval 0) ^ 2 := by
+  have h := congrArg (fun p : ℚ[X] ↦ p.eval 0) ((W49 b c).preΨ'_odd 7)
+  simpa [show ¬ Even (7 : ℕ) by decide] using h
+
+private lemma eval_prePsi_twenty (b c : ℚ) :
+    ((W49 b c).preΨ' 20).eval 0 =
+      ((W49 b c).preΨ' 9).eval 0 ^ 2 * ((W49 b c).preΨ' 10).eval 0 *
+          ((W49 b c).preΨ' 12).eval 0 -
+        ((W49 b c).preΨ' 8).eval 0 * ((W49 b c).preΨ' 10).eval 0 *
+          ((W49 b c).preΨ' 11).eval 0 ^ 2 := by
+  have h := congrArg (fun p : ℚ[X] ↦ p.eval 0) ((W49 b c).preΨ'_even 7)
+  simpa using h
+
+private lemma eval_prePsi_twentyone (b c : ℚ) :
+    ((W49 b c).preΨ' 21).eval 0 =
+      ((W49 b c).preΨ' 12).eval 0 * (((W49 b c).preΨ' 10).eval 0) ^ 3 *
+          ((W49 b c).Ψ₂Sq.eval 0) ^ 2 -
+        ((W49 b c).preΨ' 9).eval 0 * (((W49 b c).preΨ' 11).eval 0) ^ 3 := by
+  have h := congrArg (fun p : ℚ[X] ↦ p.eval 0) ((W49 b c).preΨ'_odd 8)
+  simpa [show Even (8 : ℕ) by decide] using h
+
+private lemma eval_prePsi_twentytwo (b c : ℚ) :
+    ((W49 b c).preΨ' 22).eval 0 =
+      ((W49 b c).preΨ' 10).eval 0 ^ 2 * ((W49 b c).preΨ' 11).eval 0 *
+          ((W49 b c).preΨ' 13).eval 0 -
+        ((W49 b c).preΨ' 9).eval 0 * ((W49 b c).preΨ' 11).eval 0 *
+          ((W49 b c).preΨ' 12).eval 0 ^ 2 := by
+  have h := congrArg (fun p : ℚ[X] ↦ p.eval 0) ((W49 b c).preΨ'_even 8)
+  simpa using h
 
 private lemma eval_prePsi_twentythree (b c : ℚ) :
     ((W49 b c).preΨ' 23).eval 0 =
@@ -300,6 +388,55 @@ private lemma eval_prePsi_twentysix (b c : ℚ) :
           ((W49 b c).preΨ' 14).eval 0 ^ 2 := by
   have h := congrArg (fun p : ℚ[X] ↦ p.eval 0) ((W49 b c).preΨ'_even 10)
   simpa using h
+
+private lemma prePsi_16_eval (b c : ℚ) :
+    ((W49 b c).preΨ' 16).eval 0 = b ^ 84 * G16 b c := by
+  rw [eval_prePsi_sixteen, prePsi_seven_eval_tate_origin, prePsi_8_eval,
+    prePsi_10_eval, prePsi_6_eval, prePsi_9_eval]
+  simp only [G16]
+  ring
+
+private lemma prePsi_17_eval (b c : ℚ) :
+    ((W49 b c).preΨ' 17).eval 0 = b ^ 96 * G17 b c := by
+  rw [eval_prePsi_seventeen, prePsi_10_eval, prePsi_8_eval, Psi2Sq_eval,
+    prePsi_seven_eval_tate_origin, prePsi_9_eval]
+  simp only [G17]
+  ring
+
+private lemma prePsi_18_eval (b c : ℚ) :
+    ((W49 b c).preΨ' 18).eval 0 = b ^ 107 * G18 b c := by
+  rw [eval_prePsi_eighteen, prePsi_8_eval, prePsi_9_eval, prePsi_11_eval,
+    prePsi_seven_eval_tate_origin, prePsi_10_eval]
+  simp only [G18]
+  ring
+
+private lemma prePsi_19_eval (b c : ℚ) :
+    ((W49 b c).preΨ' 19).eval 0 = b ^ 120 * G19 b c := by
+  rw [eval_prePsi_nineteen, prePsi_11_eval, prePsi_9_eval, prePsi_8_eval,
+    prePsi_10_eval, Psi2Sq_eval]
+  simp only [G19]
+  ring
+
+private lemma prePsi_20_eval (b c : ℚ) :
+    ((W49 b c).preΨ' 20).eval 0 = -(b ^ 132 * G20 b c) := by
+  rw [eval_prePsi_twenty, prePsi_9_eval, prePsi_10_eval, prePsi_12_eval,
+    prePsi_8_eval, prePsi_11_eval]
+  simp only [G20]
+  ring
+
+private lemma prePsi_21_eval (b c : ℚ) :
+    ((W49 b c).preΨ' 21).eval 0 = -(b ^ 147 * G21 b c) := by
+  rw [eval_prePsi_twentyone, prePsi_12_eval, prePsi_10_eval, Psi2Sq_eval,
+    prePsi_9_eval, prePsi_11_eval]
+  simp only [G21]
+  ring
+
+private lemma prePsi_22_eval (b c : ℚ) :
+    ((W49 b c).preΨ' 22).eval 0 = -(b ^ 160 * G22 b c) := by
+  rw [eval_prePsi_twentytwo, prePsi_10_eval, prePsi_11_eval, prePsi_13_eval,
+    prePsi_9_eval, prePsi_12_eval]
+  simp only [G22]
+  ring
 
 private lemma prePsi_23_eval (b c : ℚ) :
     ((W49 b c).preΨ' 23).eval 0 = b ^ 176 * G23 b c := by
