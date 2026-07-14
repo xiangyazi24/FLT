@@ -212,8 +212,9 @@ def kernelSubgroup : AddSubgroup E0Point where
   neg_mem' := by
     intro a ha
     rcases ha with h0 | hlt
-    · exact Or.inl (by rw [h0, neg_zero])
-    · exact Or.inr (by rw [xCoord_neg]; exact hlt)
+    · subst a
+      exact Or.inl rfl
+    · exact Or.inr (by simp only [xCoord_neg]; exact hlt)
 
 theorem mem_kernelSubgroup {P : E0Point} :
     P ∈ D.kernelSubgroup ↔ (P = 0 ∨ ordPi (xCoord P) < 0) := Iff.rfl
@@ -260,9 +261,19 @@ theorem zParam_nsmul_congr (P : E0Point) (hmem : P ∈ D.kernelSubgroup) :
             ≤ D.vpi (D.zParam (k • P + P) - D.zParam (k • P) - D.zParam P) := by
           have hmin : min (D.vpi (D.zParam (k • P))) (D.vpi (D.zParam P))
               = D.vpi (D.zParam P) := min_eq_right ih2
+          have htwo (a : WithTop ℤ) : 2 • a = 2 * a := by
+            cases a with
+            | top => simp [two_nsmul]
+            | coe m =>
+                rw [two_nsmul, ← WithTop.coe_add,
+                  show (2 : WithTop ℤ) = ((2 : ℤ) : WithTop ℤ) by norm_cast,
+                  ← WithTop.coe_mul]
+                congr
+                ring
           calc 2 • D.vpi (D.zParam P)
               = 2 * min (D.vpi (D.zParam (k • P))) (D.vpi (D.zParam P)) := by
-                rw [hmin, two_nsmul, two_mul]
+                rw [hmin]
+                exact htwo _
             _ ≤ D.vpi (D.zParam (k • P + P) - D.zParam (k • P) - D.zParam P) :=
                 D.add_congr (k • P) P
                   ((D.mem_kernelSubgroup).mp (nsmul_mem hmem k))
@@ -293,7 +304,12 @@ theorem vpi_zParam_nsmul (P : E0Point) (hmem : P ∈ D.kernelSubgroup)
   have hpos : 0 < D.vpi (D.zParam P) := D.vpi_pos_of_mem hmem
   rcases eq_or_ne (D.zParam P) 0 with h0 | hfP
   · have hP0 : P = 0 := D.zParam_eq_zero P h0
-    rw [hP0, smul_zero]
+    have hnzero : ∀ k : ℕ, k • (0 : E0Point) = 0 := by
+      intro k
+      induction k with
+      | zero => rfl
+      | succ k ih => rw [succ_nsmul, ih]; rfl
+    rw [hP0, hnzero n]
   · have hane : D.vpi (D.zParam P) ≠ ⊤ := by rw [D.vpi.ne_top_iff]; exact hfP
     have hn1 : 1 ≤ n := by
       rcases Nat.eq_zero_or_pos n with rfl | h
@@ -316,18 +332,18 @@ theorem vpi_zParam_nsmul (P : E0Point) (hmem : P ∈ D.kernelSubgroup)
 theorem vpi_zParam_zsmul (P : E0Point) (hmem : P ∈ D.kernelSubgroup)
     (m : ℤ) (hm : ¬ (3 ∣ m)) :
     D.vpi (D.zParam (m • P)) = D.vpi (D.zParam P) := by
-  rcases le_total 0 m with hmnn | hmp
-  · lift m to ℕ using hmnn with n
-    rw [natCast_zsmul]
+  cases m with
+  | ofNat n =>
+    change D.vpi (D.zParam (n • P)) = D.vpi (D.zParam P)
     exact D.vpi_zParam_nsmul P hmem n hm
-  · have hnn : (0 : ℤ) ≤ -m := by omega
-    have e2 : ((-m).toNat) • P = (-m) • P := by
-      rw [← natCast_zsmul, Int.toNat_of_nonneg hnn]
-    have hmP : m • P = -(((-m).toNat) • P) := by rw [e2, neg_zsmul, neg_neg]
-    rw [hmP, D.vpi_zParam_neg]
+  | negSucc n =>
+    change D.vpi (D.zParam (-((n + 1) • P))) = D.vpi (D.zParam P)
+    rw [D.vpi_zParam_neg]
     apply D.vpi_zParam_nsmul P hmem
-    rw [Int.toNat_of_nonneg hnn, Int.dvd_neg]
-    exact hm
+    intro hd
+    apply hm
+    rw [show Int.negSucc n = -((n + 1 : ℕ) : ℤ) by omega]
+    exact dvd_neg.mpr hd
 
 /-! ## The `FormalKernel18` instance -/
 
@@ -447,7 +463,7 @@ theorem hC (x : E0Point) (hx : ∃ k : ℕ, ((3 : ℤ) ^ k) • x = 0) :
 def kerEquiv
     (red : E0Point →+ Reduction.RedPoint)
     (hker : ∀ P, P ∈ red.ker ↔ P ∈ D.kernelSubgroup) :
-    red.ker ≃+ D.kernelSubgroup where
+    (red.ker : AddSubgroup E0Point) ≃+ D.kernelSubgroup where
   toFun x := ⟨(x : E0Point), (hker (x : E0Point)).mp x.2⟩
   invFun x := ⟨(x : E0Point), (hker (x : E0Point)).mpr x.2⟩
   left_inv x := by cases x; rfl
@@ -461,7 +477,7 @@ strictly increases under `[3]`, because `v([3]P) ≥ min(3+v, 2v) ≥ v+1` for
 def formalFiltration
     (red : E0Point →+ Reduction.RedPoint)
     (hker : ∀ P, P ∈ red.ker ↔ P ∈ D.kernelSubgroup) :
-    Separated.StrictNSmulFiltration red.ker 3 where
+    Separated.StrictNSmulFiltration (red.ker : AddSubgroup E0Point) 3 where
   level x := (D.formalKernel18.val (D.kerEquiv red hker x)).toNat
   step := by
     intro x hx0 h3x0
@@ -530,9 +546,11 @@ theorem all_points_annihilated_by_21
     (red : E0Point →+ Reduction.RedPoint)
     (hker : ∀ P, P ∈ red.ker ↔ P ∈ D.kernelSubgroup) :
     ∀ P : E0Point, (21 : ℤ) • P = 0 := by
-  have h21 : ∀ P : E0Point, (21 : ℕ) • P = 0 :=
-    Separated.e0_killed_by_21 (AddMonoidHom.id E0Point)
-      (by rw [AddMonoidHom.coe_id]; exact Function.injective_id) red
+  have h21 : ∀ P : E0Point, (21 : ℕ) • P = 0 := by
+    exact Separated.e0_killed_by_21
+      (E0Point := E0Point) (LocalPoint := E0Point)
+      (RedPoint := Reduction.RedPoint)
+      (AddMonoidHom.id E0Point) Function.injective_id red
       Block4.weak_three_descent Reduction.seven_nsmul (D.formalFiltration red hker)
   intro P
   rw [show (21 : ℤ) = ((21 : ℕ) : ℤ) by norm_cast, natCast_zsmul]
