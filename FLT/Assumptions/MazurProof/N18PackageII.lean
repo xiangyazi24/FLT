@@ -206,7 +206,7 @@ theorem E0GoodInt_map :
       map_ofNat (algebraMap OL L) 7,
       map_ofNat (algebraMap OL L) 3]
 
-private theorem ordPi_finset_sum_gt_or_zero {q : L} {s : Finset ι} {f : ι → L}
+private theorem ordPi_finset_sum_gt_or_zero {ι : Type*} {q : L} {s : Finset ι} {f : ι → L}
     (hgt : ∀ i ∈ s, f i ≠ 0 → ordPi q < ordPi (f i)) :
     (∑ i ∈ s, f i) = 0 ∨ ordPi q < ordPi (∑ i ∈ s, f i) := by
   classical

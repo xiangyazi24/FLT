@@ -268,7 +268,7 @@ private theorem exists_injective_Z2xZn
 
 /-! ## Final exclusion theorems -/
 
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 1600000 in
 private theorem no_rational_point_of_order_20_aux
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     (hno : ∀ (E' : WeierstrassCurve ℚ) [E'.IsElliptic],
@@ -380,7 +380,7 @@ private theorem exists_injective_Z2xZ12
       exact ⟨-b, by simpa [neg_zsmul] using (eq_neg_of_add_eq_zero_left hrel).symm⟩
     exact hindep (eq_six_nsmul_of_order_two_in_zmultiples' hη hQ hmem)
 
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 1600000 in
 private theorem no_rational_point_of_order_24_aux
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     (hno : ∀ (E' : WeierstrassCurve ℚ) [E'.IsElliptic],
