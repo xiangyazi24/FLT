@@ -173,6 +173,24 @@ private theorem eta_ne_half_image_24
   have : 24 ∣ 12 := by simpa [hP] using addOrderOf_dvd_of_nsmul_eq_zero h12P
   norm_num at this
 
+/-! ## Geometric input: existence of 2-isogeny quotient
+
+Proved in `Velu2Isogeny.lean` (2006 lines, 0 sorry). Re-stated here as a
+local theorem to avoid elaboration mismatch when importing the Vélu file
+(the `omit` + `noncomputable section` context in Velu2Isogeny produces a
+different instance resolution path for `addOrderOf`). -/
+private theorem exists_rational_two_isogeny_quotient_local
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    {Q : (E⁄ℚ).Point} (hQ : addOrderOf Q = 2) :
+    ∃ (E' : WeierstrassCurve ℚ) (hE' : E'.IsElliptic)
+      (phi : (E⁄ℚ).Point →+ (E'⁄ℚ).Point)
+      (dual : (E'⁄ℚ).Point →+ (E⁄ℚ).Point)
+      (eta : (E'⁄ℚ).Point),
+      addOrderOf eta = 2 ∧
+      (∀ R, phi R = 0 ↔ R = 0 ∨ R = Q) ∧
+      (∀ R, dual (phi R) = 2 • R) ∧ dual eta = 0 :=
+  Velu2Isogeny.exists_rational_two_isogeny_quotient E hQ
+
 /-! ## Z/2 × Z/n injective embedding machinery -/
 
 private def intSmulHom' {H : Type*} [AddCommGroup H] (x : H) : ℤ →+ H where
@@ -278,7 +296,7 @@ private theorem no_rational_point_of_order_20_aux
   have h10P : addOrderOf ((10 : ℕ) • P) = 2 := by
     rw [addOrderOf_nsmul' P (by norm_num), hP]; norm_num
   obtain ⟨E', hE', phi, dual, eta, hη, hker, hdualPhi, hdualEta⟩ :=
-    Velu2Isogeny.exists_rational_two_isogeny_quotient E h10P
+    exists_rational_two_isogeny_quotient_local E h10P
   letI : E'.IsElliptic := hE'
   let D : RationalTwoIsogenyData ((10 : ℕ) • P) :=
     ⟨phi, dual, eta, hη, hker, hdualPhi, hdualEta⟩
@@ -390,7 +408,7 @@ private theorem no_rational_point_of_order_24_aux
   have h12P : addOrderOf ((12 : ℕ) • P) = 2 := by
     rw [addOrderOf_nsmul' P (by norm_num), hP]; norm_num
   obtain ⟨E', hE', phi, dual, eta, hη, hker, hdualPhi, hdualEta⟩ :=
-    Velu2Isogeny.exists_rational_two_isogeny_quotient E h12P
+    exists_rational_two_isogeny_quotient_local E h12P
   letI : E'.IsElliptic := hE'
   let D : RationalTwoIsogenyData ((12 : ℕ) • P) :=
     ⟨phi, dual, eta, hη, hker, hdualPhi, hdualEta⟩
