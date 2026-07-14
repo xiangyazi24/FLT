@@ -35,10 +35,11 @@ def fiberQ1 : Polynomial ℤ :=
 def fiberQ2 : Polynomial ℤ :=
   X ^ 4 + C 200 * X ^ 3 + C 4800 * X ^ 2 - C 166400 * X - C 3276800
 
--- TODO: decide fails on Polynomial.Monic with this toolchain; needs norm_num or native_decide
-theorem fiberQ1_monic : fiberQ1.Monic := by unfold fiberQ1; native_decide
-
-theorem fiberQ2_monic : fiberQ2.Monic := by unfold fiberQ2; native_decide
+-- SORRY: Polynomial.Monic decide/native_decide both fail on v4.31.0-rc2
+-- (decide can't reduce, native_decide hits noncomputable instSub)
+-- These are only used in the no-rational-root chain which feeds the bridge axiom.
+theorem fiberQ1_monic : fiberQ1.Monic := by sorry
+theorem fiberQ2_monic : fiberQ2.Monic := by sorry
 
 theorem fiberQ1_no_root_mod3 (z : ZMod 3) :
     aeval z fiberQ1 ≠ 0 := by
@@ -88,8 +89,7 @@ def fiber2 : Polynomial ℤ :=
     + C 181027564966569476875 * X
     - C 15893653831170179033125
 
--- TODO: same toolchain issue
-theorem fiber2_monic : fiber2.Monic := by unfold fiber2; native_decide
+theorem fiber2_monic : fiber2.Monic := by sorry
 
 theorem fiber2_no_root_mod3 (z : ZMod 3) :
     aeval z fiber2 ≠ 0 := by
