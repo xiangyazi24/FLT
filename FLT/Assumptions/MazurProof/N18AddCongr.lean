@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.N18RouteC_Isogeny
 import FLT.Assumptions.MazurProof.N18RouteC_ThreeAdic
+import FLT.Assumptions.MazurProof.N18Block5Instantiation
 
 /-!
 # Package I — the formal-group **addition congruence** for `E₀`, pointwise
@@ -264,38 +265,13 @@ theorem val_coords {x y : L} (hx0 : x ≠ 0) (hy0 : y ≠ 0)
       exact hLHS
   -- assemble the two filtration equalities
   have hc : ordPi (-x / y) = ordPi x - ordPi y := by
-    rw [neg_div, ordPi_neg, ordPi_div hx0 hy0]
+    rw [ordPi_div (neg_ne_zero.mpr hx0) hy0, ordPi_neg]
   exact ⟨by rw [hc]; omega, by rw [hc]; omega⟩
 
-/-- **Package I** — integral formal group law leading term (pointwise).
-
-Route: reduce to finite `P = (x₁,y₁)`, `Q = (x₂,y₂)` with `P+Q ≠ O` (the zero
-and `P = −Q` cases are elementary), split on the doubling/distinct branch of
-`Point.add`, use STEP 1 (`val_coords`) for the coordinate valuations, STEP 2 for
-`v ℓ ≥ −min(v z₁, v z₂)` via `slope`, STEP 3 for `x₃ = ℓ² + a₁ℓ − a₂ − x₁ − x₂`
-and `z₃ = −x₃/y₃`, and STEP 4 for the cross-term valuation bound using the
-ultrametric `ordPi_add_ge` + `ordPi_mul`.
-
-**Corrected statement (Codex counterexample, 2026-07-13):** the `ordPi`-valued
-version with `ordPi 0 = 0` is FALSE on concrete kernel points (generator21 +
-torsionAffine 5 gives error with ordPi = 0 while the sum = 2).  The disjunctive
-restatement is mathematically correct and compatible with the downstream
-`FormalKernelData.add_congr` (which uses `vpi : WithTop ℤ` where `vpi 0 = ⊤`). -/
-theorem add_congr (P Q : E0Point)
-    (hP : P = 0 ∨ ordPi (xCoord P) < 0)
-    (hQ : Q = 0 ∨ ordPi (xCoord Q) < 0) :
-    zParam (P + Q) - zParam P - zParam Q = 0 ∨
-    v (zParam P) + v (zParam Q) ≤ v (zParam (P + Q) - zParam P - zParam Q) := by
-  -- The origin cases: P=0 gives zParam P = 0, error = z(Q) - z(Q) = 0.
-  rcases hP with rfl | hPx
-  · simp [zParam_zero]; left; ring
-  rcases hQ with rfl | hQx
-  · simp [zParam_zero]; left; ring
-  -- Remaining: both P = (x₁,y₁) and Q = (x₂,y₂) finite with v(x) < 0 (near O).
-  -- Three branches of Point.add:
-  -- (a) inverse (P+Q=O), (b) distinct-x, (c) doubling.
-  -- Chart algebra (G_line, BC_factor, identity8) is proved in N18AddCongrProof.lean.
-  sorry
+-- **Package I `add_congr`** SUPERSEDED: the sorry-free proof lives in
+-- `N18AddCongrWired.add_congr_wired`, assembled from the three branch proofs
+-- in `N18AddCongrProof`. The downstream instantiation uses
+-- `N18GoodModelAssembly.add_congr_good_weak` (also sorry-free).
 
 end
 
