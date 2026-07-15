@@ -20,8 +20,8 @@ def kernelPoly19 : Polynomial ℤ :=
     - C 7942 * X ^ 5 + C 82308 * X ^ 4 - C 274360 * X ^ 3
     + C 390963 * X ^ 2 - C 130321 * X - C 130321
 
--- SORRY: same Polynomial.Monic toolchain issue as PrimeExclusion17
-theorem kernelPoly19_monic : kernelPoly19.Monic := by sorry
+theorem kernelPoly19_monic : kernelPoly19.Monic := by
+  unfold kernelPoly19; monicity!
 
 private theorem kernelPoly19_no_root_mod2 (z : ZMod 2) :
     aeval z kernelPoly19 ≠ 0 := by
