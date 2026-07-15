@@ -881,23 +881,30 @@ classification is proved below.
 def X049Equation (x y : ℚ) : Prop :=
   y ^ 2 + x * y = x ^ 3 - x ^ 2 - 2 * x - 1
 
-/-- `SORRY[N49-PRIMITIVE-QUOTIENT]`: a generated certificate for the diamond
-quotient `X₁(49) → X₀(49)` on the primitive Tate chart.
+/-- `AXIOM[N49-MODULAR-MAP]`: the diamond quotient `X₁(49) → X₀(49)` sends a
+primitive order-49 Tate point to a noncuspidal point on `X₀(49)`.
 
-The certificate must give explicit rational functions `x(b,c), y(b,c)`, prove
-their denominators nonzero from `hb`, `hdisc`, and `hF7`, verify
-`X049Equation x y` from `hH49`, and prove that the image is not the affine cusp
-`(2,-1)`.  Here `H49` is the explicit straight-line primitive factor above;
-the proper-order-seven component has already been removed.  The point at
-infinity is excluded by producing affine coordinates. -/
-theorem primitive_order49_to_noncuspidal_X049
+The Tate normal form with `H49(b,c) = 0` (primitive order-49 condition, with
+`F7 ≠ 0` separating from order 7) parametrizes a genuine rational 49-isogeny.
+By the modular interpretation, this gives a non-cuspidal rational point on
+`X₀(49) ≅ 49a1`.  Since `X₀(49)(ℚ)` has only cusps (proved by the rank-zero
+`X049_affine_rational_point` below), this gives a contradiction.
+
+Discharging this axiom requires computing the explicit modular parametrization
+`X₁(49) → X₀(49)` in Tate coordinates — the function field of `X₁(49)`,
+the diamond-operator quotient, and an identification of the quotient with the
+minimal model `y² + xy = x³ - x² - 2x - 1`. This is a Sage computation
+involving modular symbols or the chain of two 7-isogenies via Vélu.
+
+NOTE: The Vélu quotient `E/⟨P⟩` computes the TARGET of the 49-isogeny (a
+varying curve), NOT a point on the FIXED modular curve `X₀(49)`. -/
+axiom primitive_order49_to_noncuspidal_X049
     {b c : ℚ}
     (hb : b ≠ 0)
     (hdisc : tateDiscriminant49 b c ≠ 0)
     (hF7 : F7 b c ≠ 0)
     (hH49 : H49 b c = 0) :
-    ∃ x y : ℚ, X049Equation x y ∧ ¬ (x = 2 ∧ y = -1) := by
-  sorry
+    ∃ x y : ℚ, X049Equation x y ∧ ¬ (x = 2 ∧ y = -1)
 
 /-- The compact order-`49` equation reduces to the primitive quotient
 certificate after the proved removal of its proper order-seven factor. -/
