@@ -11,9 +11,7 @@ namespace MazurProof.N18RouteC.VariableChangePoints
 
 noncomputable section
 
-variable {F : Type*} [Field F]
-
-local instance : DecidableEq F := Classical.decEq F
+variable {F : Type*} [Field F] [DecidableEq F]
 
 /-- The transformed `X`-coordinate under a Weierstrass variable change.  This is
 the inverse coordinate map from old coordinates on `W` to new coordinates on

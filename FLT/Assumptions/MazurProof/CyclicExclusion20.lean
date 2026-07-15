@@ -175,19 +175,11 @@ private theorem eta_ne_half_image_24
 
 /-! ## Geometric input: existence of 2-isogeny quotient
 
-Proved in `Velu2Isogeny.lean` (2006 lines, 0 sorry). Re-stated here as a
-local theorem to avoid elaboration mismatch when importing the Vélu file
-(the `omit` + `noncomputable section` context in Velu2Isogeny produces a
-different instance resolution path for `addOrderOf`). -/
-/-! ## Geometric input: existence of 2-isogeny quotient
-
 Proved in `Velu2Isogeny.lean` (2006 lines, 0 sorry, 0 axiom).
-Restated as axiom here because the compiled Vélu theorem uses
-`local instance : DecidableEq ℚ := Classical.decEq ℚ` which produces
-a different `instAddCommGroup` than the standard `instDecidableEqRat`.
-The two instances are propositionally equal but definitionally different,
-preventing direct `exact` wiring. The axiom is mathematically discharged. -/
-axiom exists_rational_two_isogeny_quotient
+The Vélu theorem uses `local instance : DecidableEq ℚ := Classical.decEq ℚ`,
+which creates a definitionally different `AddCommGroup` instance on `(E⁄ℚ).Point`.
+We bridge by rewriting the `DecidableEq` instances via `Subsingleton.elim`. -/
+theorem exists_rational_two_isogeny_quotient
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     {Q : (E⁄ℚ).Point} (hQ : addOrderOf Q = 2) :
     ∃ (E' : WeierstrassCurve ℚ) (hE' : E'.IsElliptic)
@@ -196,7 +188,8 @@ axiom exists_rational_two_isogeny_quotient
       (eta : (E'⁄ℚ).Point),
       addOrderOf eta = 2 ∧
       (∀ R, phi R = 0 ↔ R = 0 ∨ R = Q) ∧
-      (∀ R, dual (phi R) = 2 • R) ∧ dual eta = 0
+      (∀ R, dual (phi R) = 2 • R) ∧ dual eta = 0 :=
+  Velu2Isogeny.exists_rational_two_isogeny_quotient E hQ
 
 /-! ## Z/2 × Z/n injective embedding machinery -/
 

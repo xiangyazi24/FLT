@@ -21,8 +21,6 @@ open MazurProof.N18RouteC.VariableChangePoints
 
 noncomputable section
 
-local instance : DecidableEq ℚ := Classical.decEq ℚ
-
 def disc (A B : ℚ) : ℚ := A ^ 2 - 4 * B
 
 def sourceEquationModel (A B x y : ℚ) : Prop :=
