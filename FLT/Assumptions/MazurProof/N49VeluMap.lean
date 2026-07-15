@@ -23,6 +23,11 @@ noncomputable section
 def x1 (b c : ℚ) : ℚ :=
   b * c * F6 b c * F8 b c / F7 b c ^ 2
 
+/-- The SLP expression for `y([7]P)`.
+Sage: `y7_num = b² · F6² · (-F9)`, `y7_den = F7³`. -/
+def y1 (b c : ℚ) : ℚ :=
+  -(b ^ 2 * F6 b c ^ 2 * F9 b c) / F7 b c ^ 3
+
 /-- The SLP expression for `x([14]P)`. -/
 def x2 (b c : ℚ) : ℚ :=
   b * G13 b c * F15 b c / G14 b c ^ 2
@@ -127,6 +132,50 @@ It is the square of `2*yR + (1-c)*xR - b` once the ordinate is introduced. -/
 def HxR (b c : ℚ) : ℚ :=
   4 * xR b c ^ 3 + b2 b c * xR b c ^ 2 +
     2 * (b4 b c + 2 * a4' b c) * xR b c + b6 b c + 4 * a6' b c
+
+/-! ## T₇ invariant V = T₇(d([7]P))
+
+The d-invariant of [7]P on the Tate curve uses `x1`, `y1` and the curve
+coefficients `a₁ = 1-c, a₂ = -b, a₃ = -b, a₄ = 0`.  Since `y1` factors
+through `F6²·F9`, the intermediate expressions stay in the SLP ring. -/
+
+/-- λ = (3x₁² + 2a₂x₁ + a₄ - a₁y₁) / (2y₁ + a₁x₁ + a₃), numerator. -/
+def lam_num (b c : ℚ) : ℚ :=
+  3 * x1 b c ^ 2 + 2 * (-b) * x1 b c - (1 - c) * y1 b c
+
+/-- λ denominator: 2y₁ + a₁x₁ + a₃ = 2y₁ + (1-c)x₁ - b. -/
+def lam_den (b c : ℚ) : ℚ :=
+  2 * y1 b c + (1 - c) * x1 b c - b
+
+/-- A₂' = a₂ - λa₁ - λ² + 3x₁, times lam_den². -/
+def A2_num (b c : ℚ) : ℚ :=
+  (-b) * lam_den b c ^ 2 - lam_num b c * (1 - c) * lam_den b c -
+    lam_num b c ^ 2 + 3 * x1 b c * lam_den b c ^ 2
+
+/-- A₃' = a₃ + a₁x₁ + 2y₁ = lam_den. -/
+def A3_val (b c : ℚ) : ℚ :=
+  lam_den b c
+
+/-- A₁' = a₁ + 2λ, times lam_den. -/
+def A1_num (b c : ℚ) : ℚ :=
+  (1 - c) * lam_den b c + 2 * lam_num b c
+
+/-- d([7]P) = -A₂³/(A₃(A₃ - A₁A₂)), all multiplied by lam_den⁶ to clear.
+Numerator of d: -A2_num³. Denominator: A3_val·lam_den²·(A3_val·lam_den² - A1_num·A2_num). -/
+def d7_num (b c : ℚ) : ℚ :=
+  -(A2_num b c) ^ 3
+
+def d7_den (b c : ℚ) : ℚ :=
+  A3_val b c * lam_den b c ^ 2 *
+    (A3_val b c * lam_den b c ^ 2 - A1_num b c * A2_num b c)
+
+/-- V = T₇(d) = (d³-8d²+5d+1)/(d(d-1)), numerator times d7_den³. -/
+def V_num (b c : ℚ) : ℚ :=
+  d7_num b c ^ 3 - 8 * d7_num b c ^ 2 * d7_den b c +
+    5 * d7_num b c * d7_den b c ^ 2 + d7_den b c ^ 3
+
+def V_den (b c : ℚ) : ℚ :=
+  d7_num b c * (d7_num b c - d7_den b c)
 
 end
 
