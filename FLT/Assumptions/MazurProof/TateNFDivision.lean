@@ -80,6 +80,11 @@ def F13 (b c : K) : K :=
 def F15 (b c : K) : K :=
   F9 b c * F7 b c ^ 3 + (b - c - c ^ 2) * c ^ 3 * F8 b c ^ 3
 
+/-- `preΨ'₁₇(0) / b⁹⁶`.  Compact order-17 factor at the Tate origin. -/
+def F17 (b c : K) : K :=
+  c ^ 3 * F5 b c * (c ^ 2 * F7 b c + b * F6 b c ^ 2) * F8 b c ^ 3 -
+    b * F7 b c * F9 b c ^ 3
+
 /-! ## Expanded forms (useful for ring-level reasoning) -/
 
 @[simp] theorem F5_eq (b c : K) : F5 b c = b - c := rfl
@@ -157,6 +162,10 @@ def ExactOrder11 (b c : K) : Prop :=
 /-- Exact order 13: `F13(b,c) = 0` (with `b ≠ 0`). -/
 def ExactOrder13 (b c : K) : Prop :=
   b ≠ 0 ∧ F13 b c = 0
+
+/-- Exact order 17: `F17(b,c) = 0` (with `b ≠ 0`). -/
+def ExactOrder17 (b c : K) : Prop :=
+  b ≠ 0 ∧ F17 b c = 0
 
 /-! ## Composite order systems via coprime decomposition -/
 
