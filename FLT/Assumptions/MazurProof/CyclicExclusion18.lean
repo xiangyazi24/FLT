@@ -54,12 +54,29 @@ theorem order18_to_five_descent
     RationalPointsN18.obstruction_to_hyperelliptic hb hF9 hT2
   exact RationalPointsN18Descent.noncuspidal_point_to_five_descent hU0 hU1 hY
 
+/-- `AXIOM[X1-18-RATIONAL-POINTS]`: the genus-2 rational-point classification.
+
+The hyperelliptic model of `X₁(18)` is `Y² = U⁶-4U⁵+10U⁴-10U³+5U²-2U+1`.
+Its only rational `U`-coordinates are `U = 0` and `U = 1` (both cusps).
+This is a Chabauty–Coleman / Mordell–Weil sieve computation on the
+Jacobian of the genus-2 curve.
+
+The system `no_five_descent_solution` is NOT provable by congruence arguments:
+it is locally soluble at every prime (explicit `ℤ₅`-solution at `(A,D)=(1,4)`).
+The obstruction is global. -/
+axiom x1_18_rational_point_classification
+    (U Y : ℚ) (hY : Y ^ 2 = RationalPointsN18.hyperellipticF18 U) :
+    U = 0 ∨ U = 1
+
 /-- **The final integer five-descent.**  The rational obstruction to order 18
 lands, via the `X₁(18)` hyperelliptic model and the primitive-norm
 parametrization, in this explicit integer system on the five-descent data
 `(A, D, C, e, f)`.  Order 18 is not a Mazur torsion order, so the system is
-unsatisfiable; this is the sole remaining elementary number-theoretic content
-of the order-18 exclusion (all of `RationalPointsN18Descent` is `sorry`-free). -/
+unsatisfiable.
+
+Proved by reducing to the genus-2 rational-point classification: any solution
+produces a noncuspidal point on `X₁(18)`, but the only rational points are
+the two cusps `U = 0` and `U = 1`. -/
 theorem no_five_descent_solution :
     ¬ ∃ A D C e f : ℤ,
       0 < A ∧ 0 < D ∧ 0 < e ∧ 0 < f ∧
@@ -73,7 +90,13 @@ theorem no_five_descent_solution :
       (((5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ D ∧ ¬(5 : ℤ) ∣ A + D) ∨
        ((5 : ℤ) ∣ D ∧ ¬(5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ A + D) ∨
        ((5 : ℤ) ∣ A + D ∧ ¬(5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ D)) := by
-  sorry
+  rintro ⟨A, D, C, e, f, hA, hD, he, hf, hcop, hcopAS, hcopDS,
+    hcopEF, hmul, hforms, _, _⟩
+  obtain ⟨U, Y, hU0, hU1, hY⟩ :=
+    RationalPointsN18Descent.five_descent_to_noncuspidal hA hD hmul hforms
+  rcases x1_18_rational_point_classification U Y hY with rfl | rfl
+  · exact hU0 rfl
+  · exact hU1 rfl
 
 theorem no_obstruction18 : ¬ ∃ b c X : ℚ, Obstruction18 b c X := by
   rintro ⟨b, c, X, hb, hF9, hT2⟩
