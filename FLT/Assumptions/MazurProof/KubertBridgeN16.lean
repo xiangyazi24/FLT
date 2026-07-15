@@ -333,13 +333,14 @@ order `16`, one moves to Tate normal form.  The order-16 condition gives
 `Phi16 b c = 0`; the extra rational 2-torsion point makes the remaining
 quadratic factor have square discriminant.
 -/
-theorem kubert_C16_discriminant_data
+-- `AXIOM[N16-TATE-KUBERT]`: Kubert normal-form input for `ℤ/2ℤ × ℤ/16ℤ`.
+-- Discharging requires the Tate normal form theorem + residual discriminant formula.
+axiom kubert_C16_discriminant_data
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
     (hE : ∃ f : (ZMod 2 × ZMod 16) →+ (E⁄ℚ).Point, Function.Injective f) :
     ∃ b c eta : ℚ,
       b ≠ 0 ∧ c ≠ 0 ∧ tateM16 b c ≠ 0 ∧
-        Phi16 b c = 0 ∧ eta ^ 2 = discQ16bc b c := by
-  sorry
+        Phi16 b c = 0 ∧ eta ^ 2 = discQ16bc b c
 
 /--
 The birational map from the Tate/discriminant model
@@ -350,15 +351,16 @@ The birational map from the Tate/discriminant model
 to the chosen elliptic obstruction model `w^2 = u^3 - u^2 - u`, with the
 cuspidal/degenerate `u`-values excluded.
 -/
-theorem EN16_point_of_Phi16_and_disc
+-- `AXIOM[N16-BIRATIONAL-MAP]`: birational map from Tate/discriminant model
+-- to `w² = u³ - u² - u`. A concrete rational-function computation.
+axiom EN16_point_of_Phi16_and_disc
     (b c eta : ℚ)
     (hPhi : Phi16 b c = 0)
     (hDisc : eta ^ 2 = discQ16bc b c)
     (hb : b ≠ 0)
     (hc : c ≠ 0)
     (hM : tateM16 b c ≠ 0) :
-    ∃ u w : ℚ, E_N16_AffineEquation u w ∧ ¬ E_N16_DegenerateParameter u := by
-  sorry
+    ∃ u w : ℚ, E_N16_AffineEquation u w ∧ ¬ E_N16_DegenerateParameter u
 
 /-- Discharge `Z2xZ16_gives_non_degenerate_N16_point` from the N=16 Kubert inputs. -/
 theorem bridge_N16 (E : WeierstrassCurve ℚ) [E.IsElliptic]
