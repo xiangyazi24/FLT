@@ -1,0 +1,52 @@
+name: Temporary X1(19) diamond trace probe
+
+on:
+  push:
+    branches: [q-x1-19-trace]
+    paths:
+      - scratch/x1_19_trace_probe.sage
+      - scratch/x1_19_kernel_coeffs.sage
+      - .github/workflows/x1-19-trace-probe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    container:
+      image: sagemath/sagemath:latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q-x1-19-trace
+      - name: Compute original traces
+        shell: bash
+        run: |
+          set +e
+          sage scratch/x1_19_trace_probe.sage > scratch/x1_19_trace_probe.out 2>&1
+          status=$?
+          echo EXIT_STATUS=$status >> scratch/x1_19_trace_probe.out
+          tail -100 scratch/x1_19_trace_probe.out
+      - name: Compute kernel coefficients and certificates
+        shell: bash
+        run: |
+          set +e
+          sage scratch/x1_19_kernel_coeffs.sage > scratch/x1_19_kernel_coeffs.out 2>&1
+          status=$?
+          echo EXIT_STATUS=$status >> scratch/x1_19_kernel_coeffs.out
+          tail -200 scratch/x1_19_kernel_coeffs.out
+          exit 0
+      - name: Persist output
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scratch/x1_19_*.out scratch/x1_19_*.txt || true
+          git commit -m 'Record X1(19) exact trace outputs [skip ci]' || true
+          git push origin HEAD:q-x1-19-trace
