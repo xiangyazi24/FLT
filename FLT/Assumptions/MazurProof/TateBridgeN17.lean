@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.TateBridgeN17Data
+import FLT.Assumptions.MazurProof.RationalPointsX017
 
 /-!
 # Tate bridge for p=17: explicit map to X₀(17)
@@ -51,6 +52,17 @@ theorem on_X017_of_F17 (b c : ℚ) (hc : c ≠ 0) (hF : F17 b c = 0) :
   unfold mapX17 mapY17
   field_simp [hc]
   nlinarith
+
+theorem mapX17_mapY17_classified (b c : ℚ) (hb : b ≠ 0) (hF : F17 b c = 0) :
+    (mapX17 b c = 7 ∧ mapY17 b c = 13) ∨
+    (mapX17 b c = 11 / 4 ∧ mapY17 b c = -15 / 8) ∨
+    (mapX17 b c = 7 ∧ mapY17 b c = -21) := by
+  have hc := c_ne_zero_of_F17 b c hb hF
+  have hcurve := on_X017_of_F17 b c hc hF
+  have hOnE : RationalPointsX017.OnE17 (mapX17 b c) (mapY17 b c) := by
+    unfold RationalPointsX017.OnE17
+    linarith
+  exact RationalPointsX017.affine_rational_points hOnE
 
 end
 
