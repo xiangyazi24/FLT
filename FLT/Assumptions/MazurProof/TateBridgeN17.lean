@@ -26,28 +26,28 @@ def mapX17 (b c : ℚ) : ℚ := Xnum17 b c / c ^ 28
 
 def mapY17 (b c : ℚ) : ℚ := Ynum17 b c / c ^ 29
 
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 32000000 in
+set_option maxRecDepth 4096 in
 theorem curve_identity_17 (b c : ℚ) :
     c ^ 26 * (Ynum17 b c) ^ 2 + c ^ 27 * (Xnum17 b c) * (Ynum17 b c)
     + c ^ 55 * (Ynum17 b c) - (Xnum17 b c) ^ 3
     + c ^ 28 * (Xnum17 b c) ^ 2 + c ^ 56 * (Xnum17 b c) + 14 * c ^ 84
     = F17 b c * C17 b c := by
-  unfold Xnum17 Ynum17 A17 B17 F17 C17 F5 F6 F7 F8 F9
+  simp only [Xnum17, Ynum17, A17, B17, F17, C17, C17_lo, C17_hi, F5, F6, F7, F8, F9]
   ring
 
 theorem c_ne_zero_of_F17 (b c : ℚ) (hb : b ≠ 0) (hF : F17 b c = 0) :
     c ≠ 0 := by
   intro hc; subst hc
-  have : F17 b 0 = -b ^ 12 := by unfold F17 F5 F6 F7 F8 F9; ring
-  rw [this] at hF
-  have : b ^ 12 = 0 := by linarith
+  simp only [F17, F5, F6, F7, F8, F9] at hF
+  have : b ^ 12 = 0 := by nlinarith
   exact hb (pow_eq_zero_iff (n := 12) (by norm_num) |>.mp this)
 
 theorem on_X017_of_F17 (b c : ℚ) (hc : c ≠ 0) (hF : F17 b c = 0) :
     (mapY17 b c) ^ 2 + (mapX17 b c) * (mapY17 b c) + (mapY17 b c)
     = (mapX17 b c) ^ 3 - (mapX17 b c) ^ 2 - (mapX17 b c) - 14 := by
   have h := curve_identity_17 b c
-  rw [hF, mul_zero] at h
+  rw [hF, zero_mul] at h
   unfold mapX17 mapY17
   field_simp [hc]
   nlinarith
