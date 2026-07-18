@@ -1,0 +1,41 @@
+name: Q4318 Sage inspect
+
+on:
+  push:
+    branches: [q4318-uv-final]
+    paths:
+      - scratch/Q4318SageInspect.sage
+      - .github/workflows/q4318-sageinspect.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container:
+      image: sagemath/sagemath:latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q4318-uv-final
+      - name: Inspect Sage APIs
+        shell: bash
+        run: |
+          set +e
+          sage scratch/Q4318SageInspect.sage > scratch/Q4318SageInspect.out 2>&1
+          echo EXIT_STATUS=$? >> scratch/Q4318SageInspect.out
+          cat scratch/Q4318SageInspect.out
+          exit 0
+      - name: Persist output through contents API
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          enc=$(base64 -w0 scratch/Q4318SageInspect.out)
+          gh api --method PUT repos/${{ github.repository }}/contents/scratch/Q4318SageInspect.out \
+            -f message='Record Q4318 Sage inspection [skip ci]' \
+            -f content="$enc" \
+            -f branch=q4318-uv-final

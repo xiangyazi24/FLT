@@ -1,0 +1,55 @@
+k_first= [0, -1, 0, 1, 4, 5, -2, -17, -38, -20, 60, 209, 262, -75, -960, -1925]
+m_first= [1, 4, 0, 10, -72, 162, -930, 4436, -20904, 107348, -551014, 2878404, -15266494, 81777170, -442242216, 2410847950]
+K try 0 0 nullity 0
+K try 0 1 nullity 0
+K try 0 2 nullity 0
+K try 0 3 nullity 0
+K try 0 4 nullity 0
+K try 1 0 nullity 0
+K try 1 1 nullity 0
+K try 1 2 nullity 0
+K try 1 3 nullity 0
+K try 1 4 nullity 0
+K try 2 0 nullity 0
+K try 2 1 nullity 0
+K try 2 2 nullity 0
+K try 2 3 nullity 0
+K try 2 4 nullity 0
+K try 3 0 nullity 0
+K try 3 1 nullity 0
+K try 3 2 nullity 0
+K try 3 3 nullity 0
+K try 3 4 nullity 0
+K try 4 0 nullity 0
+K try 4 1 nullity 0
+K try 4 2 nullity 0
+K try 4 3 nullity 0
+K try 4 4 nullity 0
+K_NO_FIT
+M try 0 0 nullity 0
+M try 0 1 nullity 0
+M try 0 2 nullity 0
+M try 0 3 nullity 0
+M try 0 4 nullity 0
+M try 1 0 nullity 0
+M try 1 1 nullity 0
+M try 1 2 nullity 0
+M try 1 3 nullity 0
+M try 1 4 nullity 0
+M try 2 0 nullity 0
+M try 2 1 nullity 0
+M try 2 2 nullity 0
+M try 2 3 nullity 0
+M try 2 4 nullity 0
+M try 3 0 nullity 0
+M try 3 1 nullity 0
+M try 3 2 nullity 0
+M try 3 3 nullity 0
+M try 3 4 nullity 0
+M try 4 0 nullity 0
+M try 4 1 nullity 0
+M try 4 2 nullity 0
+M try 4 3 nullity 0
+M try 4 4 nullity 0
+M_NO_FIT
+DONE

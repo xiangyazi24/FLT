@@ -1,0 +1,43 @@
+name: Q4318 eta fit
+
+on:
+  push:
+    branches: [q4318-uv-final]
+    paths:
+      - scratch/Q4318EtaFit.py
+      - .github/workflows/q4318-etafit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q4318-uv-final
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install sympy
+      - name: Compute exact fit
+        shell: bash
+        run: |
+          set +e
+          python scratch/Q4318EtaFit.py > scratch/Q4318EtaFit.out 2>&1
+          echo EXIT_STATUS=$? >> scratch/Q4318EtaFit.out
+          cat scratch/Q4318EtaFit.out
+          exit 0
+      - name: Persist output
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          enc=$(base64 -w0 scratch/Q4318EtaFit.out)
+          gh api --method PUT repos/${{ github.repository }}/contents/scratch/Q4318EtaFit.out \
+            -f message='Record Q4318 eta fit output [skip ci]' \
+            -f content="$enc" \
+            -f branch=q4318-uv-final
