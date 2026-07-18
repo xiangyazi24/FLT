@@ -1,0 +1,51 @@
+name: Q4221 inspect
+
+on:
+  push:
+    branches: [q4221-check]
+    paths-ignore:
+      - scratch/Q4221-output.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q4221-check
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+      - name: Build Mathlib umbrella
+        run: lake build Mathlib
+      - name: Compile Q4221 layers and persist output
+        shell: bash
+        run: |
+          set +e
+          {
+            echo '=== CORE ==='
+            lake env lean scratch/Q4221Core.lean
+            s1=$?
+            echo "CORE_STATUS=$s1"
+            echo '=== VALUATION ==='
+            lake env lean scratch/Q4221Valuation.lean
+            s2=$?
+            echo "VALUATION_STATUS=$s2"
+            if [ "$s1" -ne 0 ] || [ "$s2" -ne 0 ]; then status=1; else status=0; fi
+            echo "EXIT_STATUS=$status"
+          } > scratch/Q4221-output.txt 2>&1
+          status=$(tail -n 1 scratch/Q4221-output.txt | cut -d= -f2)
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scratch/Q4221-output.txt
+          git commit -m 'Record current Q4221 layer diagnostics [skip ci]' || true
+          git push origin HEAD:q4221-check
+          exit "$status"
