@@ -1,0 +1,91 @@
+name: Q4202 Lean check
+
+on:
+  push:
+    branches: [q4202-check]
+    paths-ignore:
+      - scratch/Q4202-errors.txt
+  pull_request:
+    branches: [scratch]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q4202-check
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+      - name: Build Mathlib umbrella
+        run: lake build Mathlib
+      - name: Assemble final Q4202 source
+        shell: bash
+        run: |
+          {
+            printf '%s\n' \
+              'import Mathlib' \
+              'import scratch.FermatFourthDifferenceN16' \
+              '' \
+              'set_option autoImplicit false' \
+              '' \
+              'namespace MazurProof.CyclicExclusion16' \
+              ''
+
+            awk '
+              /namespace MazurProof.CyclicExclusion16/ { inside=1; next }
+              /\/-- The imported endpoint is the completed fourth-difference descent/ { exit }
+              inside { print }
+            ' scratch/Q4202Check2.lean
+
+            awk '
+              /namespace MazurProof.CyclicExclusion16/ { inside=1; next }
+              /^end MazurProof.CyclicExclusion16/ { exit }
+              inside { print }
+            ' scratch/Q4202QuarticExplicit3.lean |
+              sed 's/theorem quarticMean_explicit/theorem quarticMean_trivial/'
+
+            cat <<'LEAN'
+
+/-- Direct corollary through the already-formalized twice-square endpoint.
+    This is a regression check that the second imported endpoint has exactly
+    the intended interface. -/
+theorem quarticMean_trivial_via_existing_endpoint {a b c : ℤ}
+    (hab : IsCoprime a b) (ha : Odd a) (hb : Odd b)
+    (h : a ^ 4 + b ^ 4 = 2 * c ^ 2) : a ^ 2 = b ^ 2 := by
+  by_contra hne
+  exact no_twice_square_fourth_difference
+    ⟨a, b, c, hab, ha, hb, h, hne⟩
+
+LEAN
+
+            awk '
+              /^def Q16 / { inside=1 }
+              /^end MazurProof.CyclicExclusion16/ { exit }
+              inside { print }
+            ' scratch/Q4202Check2.lean
+
+            printf '\nend MazurProof.CyclicExclusion16\n'
+          } > scratch/Q4202Final.lean
+      - name: Check final Q4202 source and persist diagnostics
+        shell: bash
+        run: |
+          set +e
+          lake build scratch.Q4202Final > scratch/Q4202-errors.txt 2>&1
+          status=$?
+          printf '\nEXIT_STATUS=%s\n' "$status" >> scratch/Q4202-errors.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scratch/Q4202Final.lean scratch/Q4202-errors.txt
+          git commit -m 'Assemble final Q4202 Lean source [skip ci]' || true
+          git push origin HEAD:q4202-check
+          exit "$status"
