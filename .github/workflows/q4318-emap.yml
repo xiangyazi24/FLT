@@ -1,0 +1,56 @@
+name: Q4318 E35 map fitting
+
+on:
+  push:
+    branches: [q4318-research]
+    paths:
+      - scratch/Q4318EMapFit.py
+      - .github/workflows/q4318-emap.yml
+  pull_request:
+    branches: [scratch]
+    paths:
+      - scratch/Q4318EMapFit.py
+      - .github/workflows/q4318-emap.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q4318-research
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install sympy
+      - name: Run E35 map fitting
+        shell: bash
+        run: |
+          set -o pipefail
+          python scratch/Q4318EMapFit.py 2>&1 | tee scratch/Q4318EMapFit.out
+      - name: Persist output through contents API
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          enc=$(base64 -w0 scratch/Q4318EMapFit.out)
+          if sha=$(gh api repos/${{ github.repository }}/contents/scratch/Q4318EMapFit.out?ref=q4318-research --jq .sha 2>/dev/null); then
+            gh api --method PUT repos/${{ github.repository }}/contents/scratch/Q4318EMapFit.out \
+              -f message='Record Q4318 E35 map output [skip ci]' -f content="$enc" -f branch=q4318-research -f sha="$sha"
+          else
+            gh api --method PUT repos/${{ github.repository }}/contents/scratch/Q4318EMapFit.out \
+              -f message='Record Q4318 E35 map output [skip ci]' -f content="$enc" -f branch=q4318-research
+          fi
+      - name: Expose output in fixed comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          jq -Rs '{body:.}' scratch/Q4318EMapFit.out |
+            gh api --method PATCH repos/xiangyazi24/FLT/issues/comments/4949020893 --input -

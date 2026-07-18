@@ -1,0 +1,36 @@
+name: Q4318 eta fitting
+
+on:
+  push:
+    branches: [q4318-research]
+  pull_request:
+    branches: [scratch]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q4318-research
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install sympy
+      - name: Run eta fitting
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          python scratch/Q4318EtaFit.py 2>&1 | tee scratch/Q4318EtaFit.out
+      - name: Post output to temporary PR
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment 9 --body-file scratch/Q4318EtaFit.out
