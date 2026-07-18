@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.TateOrder18
 import FLT.Assumptions.MazurProof.RationalPointsN18Descent
+import FLT.Assumptions.MazurProof.N18GoodModelAssembly
 
 /-!
 # Cyclic order 18 exclusion
@@ -54,8 +55,38 @@ theorem order18_to_five_descent
     RationalPointsN18.obstruction_to_hyperelliptic hb hF9 hT2
   exact RationalPointsN18Descent.noncuspidal_point_to_five_descent hU0 hU1 hY
 
+/-- **The final integer five-descent.**  The rational obstruction to order 18
+lands, via the `X₁(18)` hyperelliptic model and the primitive-norm
+parametrization, in this explicit integer system on the five-descent data
+`(A, D, C, e, f)`.  Order 18 is not a Mazur torsion order, so the system is
+unsatisfiable; this is the sole remaining elementary number-theoretic content
+of the order-18 exclusion.  Now discharged via the good-model assembly
+(Block 7 + formal-kernel machine on E0Good). -/
+theorem no_five_descent_solution :
+    ¬ ∃ A D C e f : ℤ,
+      0 < A ∧ 0 < D ∧ 0 < e ∧ 0 < f ∧
+      Int.gcd A D = 1 ∧ Int.gcd A (A + D) = 1 ∧ Int.gcd D (A + D) = 1 ∧
+      Int.gcd e f = 1 ∧ e * f = A * D * (A + D) ∧
+      ((RationalPointsN18Descent.normReal A D = e ^ 2 - 2 * f ^ 2 ∧
+          |C| = e ^ 2 + 2 * f ^ 2) ∨
+       (RationalPointsN18Descent.normReal A D = 2 * e ^ 2 - f ^ 2 ∧
+          |C| = 2 * e ^ 2 + f ^ 2)) ∧
+      (((5 : ℤ) ∣ e ∧ ¬(5 : ℤ) ∣ f) ∨ ((5 : ℤ) ∣ f ∧ ¬(5 : ℤ) ∣ e)) ∧
+      (((5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ D ∧ ¬(5 : ℤ) ∣ A + D) ∨
+       ((5 : ℤ) ∣ D ∧ ¬(5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ A + D) ∨
+       ((5 : ℤ) ∣ A + D ∧ ¬(5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ D)) :=
+  MazurProof.N18GoodModelAssembly.no_five_descent_solution
+
 theorem no_obstruction18 : ¬ ∃ b c X : ℚ, Obstruction18 b c X := by
-  sorry
+  rintro ⟨b, c, X, hb, hF9, hT2⟩
+  have hF9' : TateNFDivision.F9 b c = 0 := by
+    simpa [TateNFDivision.F9, F9] using hF9
+  have hT2' : TateNFDivision.T2 b c X = 0 := by
+    simpa [TateNFDivision.T2, T2] using hT2
+  obtain ⟨U, Y, hU0, hU1, hY⟩ :=
+    RationalPointsN18.obstruction_to_hyperelliptic hb hF9' hT2'
+  exact no_five_descent_solution
+    (RationalPointsN18Descent.noncuspidal_point_to_five_descent hU0 hU1 hY)
 
 theorem no_rational_point_of_order_18
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :

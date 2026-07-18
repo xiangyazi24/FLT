@@ -1,64 +1,82 @@
-# Automode Doctrine: Clear remaining 12 MazurProof sorry's
+# Automode Doctrine: Complete Mazur |E(ℚ)_tors| ≤ 16
 
 ## Goal
 
-Close all remaining sorry in FLT/Assumptions/MazurProof/.
+Discharge all axioms/sorry so `mazur_cyclic_order_bound_assembled` has
+`#print axioms` = `{propext, Classical.choice, Quot.sound}` only.
 
-## Current state (12 sorry in MazurProof/)
+## Current state (post-session 2026-07-17)
 
-| File | sorry | Type |
-|------|-------|------|
-| CyclicExclusion11 | 2 | Tate bridge + X₁(11) rational points |
-| CyclicExclusion14 | 1 | Kubert bridge (cyclic order 14) |
-| CyclicExclusion15 | 2 | Tate bridge + X₁(15) rational points |
-| CyclicExclusion16 | 1 | Kubert bridge (cyclic order 16) |
-| CyclicExclusion18 | 2 | Tate bridge + X₁(18) genus-2 |
-| CyclicExclusion21 | 2 | Tate bridge + X₁(21) |
-| KubertBridgeN16 | 2 | Kubert discriminant + birational map |
+### Sorry inventory (code-level, after Fable R1 audit)
 
-## Avenues (ranked)
+**LIVE sorry (4):**
+1. `N18GoodModelAssembly.lean:86` — `exists_good_reduction` (reduction hom)
+2. `N18GoodModelAssembly.lean:262` — `add_congr_good_weak` (ultrametric on E0Good)
+3. `KubertBridgeN16.lean:342` — `kubert_C16_discriminant_data`
+4. `KubertBridgeN16.lean:361` — `EN16_point_of_Phi16_and_disc`
 
-### (a) Kubert bridges: CyclicExclusion14 + CyclicExclusion16 (2 sorry)
+**DEAD CODE sorry (4, no longer on critical path):**
+- `N18GoodModelZParam.lean:42,44` — FALSE theorem (counterexample: (0, a-a²))
+  File is orphan (nothing imports it). Superseded by `zParamGood_eq_zero_good`
+  at Assembly:346 (proved, with InFormalKernel guard).
+- `N18AddCongr.lean:303` — old `add_congr` (original E0 model). Superseded by
+  `add_congr_wired` at N18AddCongrWired:56 (sorry-free). No consumers; the
+  good-model route uses `add_congr_good_weak` instead.
+- CyclicExclusion18.lean:76 — `no_five_descent_solution` WAS sorry; now wired
+  to Assembly's proof via `exact Assembly.no_five_descent_solution`.
 
-Both are `cyclic_order_N_kubert_bridge`: from HasRationalPointOfOrder E N,
-produce a point on the obstruction curve. These are concrete polynomial
-computations in the Tate normal form.
+### Axiom inventory (`#print axioms mazur_cyclic_order_bound_assembled`)
+1. `no_order_13_prime` — NEW sub-axiom for p=13
+2. `no_prime_order_ge_17` — NEW sub-axiom for p≥17
+3. `no_order_18` — feeds through CyclicExclusion18 → Assembly → sorry #1,#2
+4. `no_explicit_order25_obstruction` — N25
+5. `no_raw_order49_tate_obstruction` — N49
+6. `exists_rational_two_isogeny_quotient` — N20/N24
 
-Attack: write the Tate NF parametrization explicitly, compute the
-obstruction curve coordinates, verify with ring/norm_num.
+### Key structural discovery (2026-07-17 Fable R1)
 
-Terminal: both sorry's closed, or concrete Lean error identified.
+The CyclicExclusion18 import cycle was broken:
+- Assembly imported CyclicExclusion18 only for transitive RationalPointsN18Descent access.
+- Replaced with direct import. Now CyclicExclusion18 imports Assembly and uses its
+  `no_five_descent_solution` (proved via Block 7 + formal kernel machine).
+- The N18 sorry cluster reduces to **2 live sorry** (Assembly:86, :262).
 
-### (b) KubertBridgeN16 (2 sorry)
+## Avenues (ranked by actionability, updated 2026-07-17)
 
-`kubert_C16_discriminant_data` + `EN16_point_of_Phi16_and_disc`.
-These are explicit polynomial computations: from Tate parameters,
-extract discriminant data and birational map to obstruction curve.
+### (e) N18 Assembly — close the 2 remaining sorry [ACTIVE]
 
-Terminal: both sorry's closed.
+**2 sorry → 0 sorry closes axiom #3 (`no_order_18`).**
 
-### (c) CyclicExclusion18/21 Diophantine parts (2 sorry)
+**Sorry #1: `exists_good_reduction` (Assembly:86)**
+Terminal boss. Block 7 consumes the hom itself.
+Fable design:
+- OL = Z[a] (maximal, disc=81). Residue map at π=a-1 is a↦1 onto F₃.
+- Define red by valuation trichotomy: 0/near-O → 0; integral → residues.
+- Kernel characterization is definitional. Pain concentrates in `map_add`.
+- `map_add` four cases: (i) 0 input; (ii) integral+near-O; (iii) both near-O;
+  (iv) both integral (hardest: divided-difference identity + finite ZMod 3 checks).
 
-`no_obstruction18` and `no_obstruction21`: genus-2 Chabauty needed.
-ChatGPT confirmed X₁(18) is genus 2. These are the hardest.
+**Sorry #2: `add_congr_good_weak` (Assembly:262)**
+Regenerate the three E0 branch proofs for E0Good with general a₁, a₃.
+Ultrametric estimates only used v(aᵢ) ≥ 0 (holds for E0Good integral model).
+The a₁=a₃=1 specialization in BC_factor is the only breakage — fix with
+generalized identity (still closes by `ring`). Use N18AddCongrProof.lean
+(1278 lines) as template.
 
-Attack: try to formalize the genus-2 argument, or find an elementary
-mod-p obstruction, or parametrize and reduce to a simpler curve.
+**Critical path:** #1 ‖ #2 (parallel). Then `no_order_18` closes.
 
-Terminal: sorry closed, or proved infeasible with current Mathlib.
+### (f) KubertBridgeN16 — 2 sorry
+**Terminal:** polynomial computations in Tate NF.
+- `kubert_C16_discriminant_data` — Tate → discriminant data
+- `EN16_point_of_Phi16_and_disc` — birational map
 
-### (d) Tate bridge sorry's (4 sorry across 11/15/18/21)
-
-`order*_to_tate_obstruction`: from HasRationalPointOfOrder, extract
-Tate normal form parameters. These need the Tate NF infrastructure
-that already exists in the project.
-
-Attack: use existing TateNFDivision.lean infrastructure to build
-the bridge.
-
-Terminal: sorry's closed or blocked on missing Tate NF API.
+### (a)-(d) Layer 2 prime exclusions
+After N18 lands. See earlier doctrine entries.
 
 ## Fallback
+Axiomatize remaining hard theorems with precisely-scoped interfaces. Last resort.
 
-Any sorry closed is permanent progress. Focus on polynomial
-computations (avenues a/b) first since they're most concrete.
+## Execution order (updated 2026-07-17 post-Fable)
+1. (e) N18 Assembly sorry #1 ‖ #2 — parallel, both HIGH
+2. (f) KubertBridgeN16 — parallelizable with (e)
+3. (a)/(b)/(c) — prime exclusions
