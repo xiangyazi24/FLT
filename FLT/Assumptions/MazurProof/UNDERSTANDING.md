@@ -190,3 +190,22 @@ MW group = ℤ/6ℤ (rank 0), rational points u ∈ {-1, 1, 3} are all cusps.
   false: the local table and scalar/norm compatibility were not proved.
 - UISAI2 target build passed.  See the repository-root `HANDOFF.md` for the
   exact residual signature and server synchronization state.
+
+## Progress Log (2026-07-18 order-49 exclusion)
+
+- **Structural approach (DONE, 0 sorry, 0 axiom, builds in 41s):**
+  1. `TateOrder49Factor.lean` (345 lines): proves `preΨ'₄₉(0) = b⁸⁰⁰ * bracket₄₉`
+     by unrolling the `preΨ'_odd` recurrence through intermediate G-polynomials
+     (G23, G24, G25, G26). Each step is a bounded rewrite + ring (degree ≤ 40).
+     No brute-force computation.
+  2. `TateOrder49Bridge.lean` (62 lines): proves the equivalence
+     `RawOrder49TateObstruction ↔ ExplicitOrder49Obstruction` where the explicit
+     form is `bracket₄₉(b,c) = 0` with `b ≠ 0`, `F₇ ≠ 0`, `W` elliptic.
+- The remaining axiom in `CyclicExclusion49.lean` (`no_raw_order49_tate_obstruction`)
+  now reduces to proving: no rational (b,c) satisfies
+  `bracket₄₉(b,c) = 0 ∧ F₇(b,c) ≠ 0 ∧ b ≠ 0 ∧ W(b,c) elliptic`.
+- Key insight: the bridge works directly with the unfactored bracket₄₉ (degree 160).
+  The factorization `bracket₄₉ = F₇ * F₄₉` (where F₄₉ is the genus-69 modular curve)
+  is NOT needed for the bridge — only for the eventual rational-point analysis.
+- Previous brute-force approaches (staged ring1, F₄₉ as explicit 3526-monomial
+  polynomial) were abandoned: they required 9.5-17 GB elaboration and 2+ hours.
