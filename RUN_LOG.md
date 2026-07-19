@@ -1,3 +1,30 @@
+## Run 2026-07-12 (Complete Mazur proof — Layer 2 decomposition)
+- doctrine version: 6 gaps initially → 8 axioms after decomposition (narrower scope each)
+- approval: /automode from Xiang
+- starting avenue: (a)→(b) Layer 2 dispatcher decomposition + N18 bridge (C)
+- commits:
+  077eebc6: dispatcher theorem + N18 bridge (C) — both green on uisai2
+  83e50b4b: further decompose p≥17 into 17+19+≥23 — green on uisai2
+- axiom check (fresh oleans): mazur_cyclic_order_bound_assembled depends on
+  {propext, Classical.choice, Quot.sound, sorryAx} + 8 project axioms
+- ChatGPT: 5+4 questions dispatched to SOL Pro flt1-5, all delivery-timed-out
+  (tabs may still have answers in browser). Pre-existing designs Q4463-Q4560 used.
+- Python verified: p=19 kernel poly k₁₉ (monic, irreducible, no root mod 2),
+  X₀(17) noncuspidal points at (7,13)/(7,-21), X₀(19) at (5,9)/(5,-10)
+- ChatGPT round 2: flt1,2,5 timed out (f=2); flt3,4 still running
+- end: 2026-07-13 01:20 (clean pause — all independent work exhausted)
+- final result: 5 commits, axiom surface decomposed from 1 monolithic to 8 targeted,
+  kernelPoly19_no_rational_root sorry-free, N18 bridge (C) sorry-free
+- next session priorities:
+  (1) p=17 kernel poly: need Sage on uisai2 to compute isogeny kernel for
+      the 17-isogeny corresponding to the noncuspidal X_0(17) points.
+      The LMFDB shows curves with 17-isogenies exist (conductor 14450).
+      Command: `E.isogenies_prime_degree(17)[0].kernel_polynomial()` in Sage.
+  (2) close kernelPoly17_no_rational_root (same pattern as p=19 — monic+mod p)
+  (3) KubertBridgeN16 sorry #2: birational map (b,c,eta) → (u,w) on w²=u³-u²-u
+  (4) Vélu 2-isogeny for exists_rational_two_isogeny_quotient
+  (5) p=13 genus-2 descent (biggest piece, needs Q4478 design)
+  Note: ChatGPT flt tabs may still have answers in browser — check manually.
 
 ## Run 2026-07-08 (ChatGPT harvest mode)
 - doctrine version: Close CyclicExclusion sorry's via ChatGPT harvest
@@ -138,3 +165,15 @@
 - TALLY: 7 axioms discharged (13→6). TWO complete cases: N=10 + N=12.
 - Remaining 6: Z2xZ14/16 forward (genus 4/5 obstruction, our curves to restructure to the elliptic quotient), rational_torsion + weil_pairing (KEYSTONE: n-torsion + Weil pairing via FLT/EllipticCurve/Torsion.lean 10 sorries + Route C), mordell_weil_fg (Mordell-Weil thm), no_rational_point_of_order_ge_17 (Mazur core).
 - NEXT: keystone (Torsion.lean).
+
+## Run 2026-07-18 01:30 (automode: N25/N49 axiom attack)
+- doctrine version: DOCTRINE.md (7 axioms, N18 ported, build in progress)
+- approval: /automode 我睡觉你自主做
+- starting avenue: (a) build verification + commit, then (b) N25/N49 per Fable oracle
+- Fable oracle strategy (R1):
+  * N49: X₀(49) = 49a1 elliptic curve, rank 0, MW = ℤ/2. 2-isogeny descent.
+  * N25: Cyclic quintic cover, z⁵ = h(t) over ℚ(ζ₅), ℤ[ζ₅] PID arithmetic.
+  * Step 0 CRITICAL: verify axioms are literally true FIRST (cusp check).
+- ChatGPT: Q45-48 all connector-timed-out, waiting for git-drop
+- end: <pending>
+- final result: <pending>

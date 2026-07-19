@@ -1,6 +1,5 @@
 import FLT.Assumptions.MazurProof.TateOrder18
 import FLT.Assumptions.MazurProof.RationalPointsN18Descent
-import FLT.Assumptions.MazurProof.N18GoodModelAssembly
 
 /-!
 # Cyclic order 18 exclusion
@@ -60,8 +59,7 @@ lands, via the `X₁(18)` hyperelliptic model and the primitive-norm
 parametrization, in this explicit integer system on the five-descent data
 `(A, D, C, e, f)`.  Order 18 is not a Mazur torsion order, so the system is
 unsatisfiable; this is the sole remaining elementary number-theoretic content
-of the order-18 exclusion.  Now discharged via the good-model assembly
-(Block 7 + formal-kernel machine on E0Good). -/
+of the order-18 exclusion (all of `RationalPointsN18Descent` is `sorry`-free). -/
 theorem no_five_descent_solution :
     ¬ ∃ A D C e f : ℤ,
       0 < A ∧ 0 < D ∧ 0 < e ∧ 0 < f ∧
@@ -74,8 +72,8 @@ theorem no_five_descent_solution :
       (((5 : ℤ) ∣ e ∧ ¬(5 : ℤ) ∣ f) ∨ ((5 : ℤ) ∣ f ∧ ¬(5 : ℤ) ∣ e)) ∧
       (((5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ D ∧ ¬(5 : ℤ) ∣ A + D) ∨
        ((5 : ℤ) ∣ D ∧ ¬(5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ A + D) ∨
-       ((5 : ℤ) ∣ A + D ∧ ¬(5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ D)) :=
-  MazurProof.N18GoodModelAssembly.no_five_descent_solution
+       ((5 : ℤ) ∣ A + D ∧ ¬(5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ D)) := by
+  sorry
 
 theorem no_obstruction18 : ¬ ∃ b c X : ℚ, Obstruction18 b c X := by
   rintro ⟨b, c, X, hb, hF9, hT2⟩

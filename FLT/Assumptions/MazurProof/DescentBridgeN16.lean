@@ -1,25 +1,22 @@
 import Mathlib
-import FLT.Assumptions.MazurProof.DescentBridgeN16Defs
 import FLT.Assumptions.MazurProof.KubertBridgeN16
-import FLT.Assumptions.MazurProof.RationalPointsN16
+import FLT.Assumptions.MazurProof.CyclicExclusion16
 
-/-! # N=16 descent bridge -/
+/-! # N=16 descent bridge
+
+The noncyclic Z/2Z × Z/16Z case is discharged ex falso: the injection
+implies a rational point of order 16 (via `point_addOrder16_of_zmod2_zmod16_injection`),
+contradicting `no_rational_point_of_order_16` (proved via `X₁(16)` split descent). -/
 
 open scoped WeierstrassCurve.Affine
 
 namespace MazurProof
 
-theorem Z2xZ16_gives_non_degenerate_N16_point
-    (E : WeierstrassCurve ℚ) [E.IsElliptic]
-    (hE : ∃ f : ZMod 2 × ZMod 16 →+ (E⁄ℚ).Point, Function.Injective f) :
-    ∃ u w : ℚ, E_N16_AffineEquation u w ∧ ¬ E_N16_DegenerateParameter u :=
-  KubertBridgeN16.bridge_N16 E hE
-
 theorem no_Z2_cross_Z16_from_descent
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ ∃ f : ZMod 2 × ZMod 16 →+ (E⁄ℚ).Point, Function.Injective f := by
-  intro hE
-  rcases Z2xZ16_gives_non_degenerate_N16_point E hE with ⟨u, w, hcurve, hnondeg⟩
-  exact hnondeg (RationalPointsN16.obstruction_curve_N16_from_elementary u w hcurve)
+  rintro ⟨f, hf⟩
+  obtain ⟨P, hP⟩ := KubertBridgeN16.point_addOrder16_of_zmod2_zmod16_injection E f hf
+  exact no_rational_point_of_order_16 E ⟨P, hP⟩
 
 end MazurProof

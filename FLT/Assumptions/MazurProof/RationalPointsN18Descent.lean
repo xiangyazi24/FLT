@@ -740,4 +740,55 @@ theorem noncuspidal_point_to_five_descent {U Y : ℚ}
 
 end
 
+/-! ## Reverse bridge: five-descent data → noncuspidal rational point -/
+
+section ReverseBridge
+
+open RationalPointsN18
+
+/-- Both descent forms give `C² = F18Positive A D`: the form identity
+`(e²±2f²)² = (e²∓2f²)² + 8(ef)²` combined with `normImag = 2·ef`. -/
+theorem C_sq_eq_F18Positive {A D C e f : ℤ}
+    (hef : e * f = A * D * (A + D))
+    (hforms : (normReal A D = e ^ 2 - 2 * f ^ 2 ∧ |C| = e ^ 2 + 2 * f ^ 2) ∨
+              (normReal A D = 2 * e ^ 2 - f ^ 2 ∧ |C| = 2 * e ^ 2 + f ^ 2)) :
+    C ^ 2 = F18Positive A D := by
+  have hsq : C ^ 2 = |C| ^ 2 := (sq_abs C).symm
+  rw [hsq, F18Positive_norm]
+  have himag : normImag A D = 2 * (e * f) := by
+    simp only [normImag]
+    nlinarith [hef]
+  rw [himag]
+  rcases hforms with ⟨hN, hC⟩ | ⟨hN, hC⟩ <;> rw [hC, hN] <;> ring
+
+/-- Five-descent data produces a noncuspidal rational point on `X₁(18)`. -/
+theorem five_descent_to_noncuspidal {A D C e f : ℤ}
+    (hA : 0 < A) (hD : 0 < D)
+    (hef : e * f = A * D * (A + D))
+    (hforms : (normReal A D = e ^ 2 - 2 * f ^ 2 ∧ |C| = e ^ 2 + 2 * f ^ 2) ∨
+              (normReal A D = 2 * e ^ 2 - f ^ 2 ∧ |C| = 2 * e ^ 2 + f ^ 2)) :
+    ∃ U Y : ℚ, U ≠ 0 ∧ U ≠ 1 ∧ Y ^ 2 = hyperellipticF18 U := by
+  set B := A + D with hB_def
+  have hBpos : (0 : ℤ) < B := by omega
+  have hBne : (B : ℤ) ≠ 0 := ne_of_gt hBpos
+  have hBneQ : ((B : ℤ) : ℚ) ≠ 0 := Int.cast_ne_zero.mpr hBne
+  have hCsq := C_sq_eq_F18Positive hef hforms
+  refine ⟨(A : ℚ) / (B : ℚ), (C : ℚ) / (B : ℚ) ^ 3, ?_, ?_, ?_⟩
+  · exact div_ne_zero (Int.cast_ne_zero.mpr (ne_of_gt hA)) hBneQ
+  · intro h
+    have hAeqB : (A : ℚ) = (B : ℚ) := by
+      rwa [div_eq_iff hBneQ, one_mul] at h
+    have : A = B := by exact_mod_cast hAeqB
+    omega
+  · have h6ne : (B : ℚ) ^ 6 ≠ 0 := pow_ne_zero 6 hBneQ
+    rw [div_pow, show ((B : ℚ) ^ 3) ^ 2 = (B : ℚ) ^ 6 from by ring,
+      div_eq_iff h6ne, mul_comm]
+    have hclear := F18Hom_clear_denominators A B hBne
+    rw [hclear]
+    have hFsub : C ^ 2 = F18Hom A B := by
+      rw [hB_def, F18Hom_substitution]; exact hCsq
+    exact_mod_cast hFsub
+
+end ReverseBridge
+
 end MazurProof.RationalPointsN18Descent

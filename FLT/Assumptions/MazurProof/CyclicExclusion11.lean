@@ -3,6 +3,7 @@ import FLT.Assumptions.MazurProof.TateOrder11
 import FLT.Assumptions.MazurProof.RationalPointsN11
 import FLT.Assumptions.MazurProof.RationalPointsN11Descent
 import FLT.Assumptions.MazurProof.BillingMahlerField
+import FLT.Assumptions.MazurProof.RationalPointsN11IdealSquare
 
 /-!
 # Cyclic order 11 exclusion
@@ -252,6 +253,139 @@ ideal square and a nonsquare cubic factor.  The class-number-one theorem, the
 integral basis, the four unit squareclasses, selection of the `epsilon` class,
 and the coefficient expansion are proved in `BillingMahlerField`.
 -/
+private theorem descentElement_isSquare_of_primitive_model
+    (x z y : ℤ) (hcop : Int.gcd x z = 1) (hy : y ≠ 0)
+    (hmodel : y ^ 2 = x ^ 3 - 432 * x * z ^ 4 + 8208 * z ^ 6) :
+    IsSquare (BillingMahlerField.descentElement x z) := by
+  obtain ⟨I, hideal⟩ :=
+    RationalPointsN11IdealSquare.descentInteger_span_eq_sq
+      x z y hcop hy hmodel
+  obtain ⟨w, hw | hw | hw | hw⟩ :=
+    BillingMahlerField.descentInteger_four_squareclasses_of_ideal_square
+      x z I hideal
+  · refine ⟨(w : BillingMahlerField.K), ?_⟩
+    simpa [pow_two] using congrArg
+      (fun q : NumberField.RingOfIntegers BillingMahlerField.K ↦
+        (q : BillingMahlerField.K)) hw
+  · have hwK : BillingMahlerField.descentElement x z =
+        -((w : BillingMahlerField.K) ^ 2) := by
+      simpa using congrArg
+        (fun q : NumberField.RingOfIntegers BillingMahlerField.K ↦
+          (q : BillingMahlerField.K)) hw
+    have hnormPos : 0 <
+        Algebra.norm ℚ (BillingMahlerField.descentElement x z) := by
+      rw [BillingMahlerField.norm_descentElement, ← hmodel]
+      exact_mod_cast sq_pos_of_ne_zero hy
+    have hnormNonpos :
+        Algebra.norm ℚ (-((w : BillingMahlerField.K) ^ 2)) ≤ 0 := by
+      rw [show -((w : BillingMahlerField.K) ^ 2) =
+          algebraMap ℚ BillingMahlerField.K (-1) * (w : BillingMahlerField.K) ^ 2 by
+            simp,
+        map_mul, Algebra.norm_algebraMap, map_pow, BillingMahlerField.finrank_K]
+      norm_num
+      positivity
+    rw [← hwK] at hnormNonpos
+    linarith
+  · have hwK : BillingMahlerField.descentElement x z =
+        BillingMahlerField.epsilon * (w : BillingMahlerField.K) ^ 2 := by
+      simpa using congrArg
+        (fun q : NumberField.RingOfIntegers BillingMahlerField.K ↦
+          (q : BillingMahlerField.K)) hw
+    obtain ⟨a, b, c, habc⟩ :=
+      BillingMahlerField.ringOfIntegers_exists_thetaBasis_coords
+        (BillingMahlerField.epsilonInteger * w)
+    have hsquare :
+        BillingMahlerField.epsilon * BillingMahlerField.descentElement x z =
+          BillingMahlerField.thetaBasisElement a b c ^ 2 := by
+      calc
+        BillingMahlerField.epsilon * BillingMahlerField.descentElement x z =
+            BillingMahlerField.epsilon *
+              (BillingMahlerField.epsilon * (w : BillingMahlerField.K) ^ 2) := by
+                rw [hwK]
+        _ = (((BillingMahlerField.epsilonInteger * w :
+              NumberField.RingOfIntegers BillingMahlerField.K) :
+                BillingMahlerField.K)) ^ 2 := by
+              simp
+              ring
+        _ = BillingMahlerField.thetaBasisElement a b c ^ 2 := by rw [habc]
+    have hcoeff :=
+      BillingMahlerField.coefficient_system_of_epsilon_mul_descentElement_eq_sq
+        x z a b c hsquare
+    exact (RationalPointsN11Descent.no_billing_mahler_coefficient_system
+      x z a b c hcop hcoeff.1 hcoeff.2.1 hcoeff.2.2).elim
+  · have hwK : BillingMahlerField.descentElement x z =
+        -BillingMahlerField.epsilon * (w : BillingMahlerField.K) ^ 2 := by
+      simpa using congrArg
+        (fun q : NumberField.RingOfIntegers BillingMahlerField.K ↦
+          (q : BillingMahlerField.K)) hw
+    have hnormPos : 0 <
+        Algebra.norm ℚ (BillingMahlerField.descentElement x z) := by
+      rw [BillingMahlerField.norm_descentElement, ← hmodel]
+      exact_mod_cast sq_pos_of_ne_zero hy
+    have hnormNonpos : Algebra.norm ℚ
+        (-BillingMahlerField.epsilon * (w : BillingMahlerField.K) ^ 2) ≤ 0 := by
+      rw [show -BillingMahlerField.epsilon =
+          algebraMap ℚ BillingMahlerField.K (-1) *
+            BillingMahlerField.epsilon by simp,
+        mul_assoc, map_mul, map_mul, Algebra.norm_algebraMap,
+        BillingMahlerField.norm_epsilon, map_pow, BillingMahlerField.finrank_K]
+      norm_num
+      positivity
+    rw [← hwK] at hnormNonpos
+    linarith
+
+private theorem primitive_model_y_ne_zero
+    (x z y : ℤ) (hz : 0 < z)
+    (hmodel : y ^ 2 = x ^ 3 - 432 * x * z ^ 4 + 8208 * z ^ 6) :
+    y ≠ 0 := by
+  intro hy
+  have hnorm :
+      Algebra.norm ℚ (BillingMahlerField.descentElement x z) = 0 := by
+    rw [BillingMahlerField.norm_descentElement, ← hmodel, hy]
+    norm_num
+  have hzero : BillingMahlerField.descentElement x z = 0 :=
+    (Algebra.norm_eq_zero_iff (R := ℚ)).1 hnorm
+  have hone := congrArg
+    (fun q : BillingMahlerField.K ↦
+      BillingMahlerField.basis.repr q (1 : Fin 3)) hzero
+  simp only [BillingMahlerField.descentElement,
+    BillingMahlerField.basis_repr_ofCoords_one, map_zero] at hone
+  push_cast at hone
+  have hzsq : (z : ℚ) ^ 2 = 0 :=
+    (mul_eq_zero.mp hone).resolve_left (by norm_num)
+  have hzq : (z : ℚ) = 0 := sq_eq_zero_iff.mp hzsq
+  exact (Int.cast_ne_zero.mpr (ne_of_gt hz)) hzq
+
+private theorem factor_square_of_descentElement_square
+    {xi : ℚ} (x z : ℤ) (hz : 0 < z)
+    (hxi : xi = (x : ℚ) / (z : ℚ) ^ 2)
+    (hsquare : IsSquare (BillingMahlerField.descentElement x z)) :
+    IsSquare (BillingMahlerField.ofCoords (xi - 24) 18 0) := by
+  have hzq : (z : ℚ) ≠ 0 := Int.cast_ne_zero.mpr (ne_of_gt hz)
+  have hzK : algebraMap ℚ BillingMahlerField.K (z : ℚ) ≠ 0 :=
+    (map_ne_zero (algebraMap ℚ BillingMahlerField.K)).2 hzq
+  have hscale :
+      BillingMahlerField.descentElement x z =
+        (algebraMap ℚ BillingMahlerField.K (z : ℚ)) ^ 2 *
+          BillingMahlerField.ofCoords (xi - 24) 18 0 := by
+    unfold BillingMahlerField.descentElement BillingMahlerField.ofCoords
+    rw [hxi]
+    push_cast
+    field_simp [hzq, hzK]
+    ring
+  rcases hsquare with ⟨w, hw⟩
+  refine ⟨w / algebraMap ℚ BillingMahlerField.K (z : ℚ), ?_⟩
+  apply mul_left_cancel₀ (pow_ne_zero 2 hzK)
+  calc
+    (algebraMap ℚ BillingMahlerField.K (z : ℚ)) ^ 2 *
+          BillingMahlerField.ofCoords (xi - 24) 18 0 =
+        BillingMahlerField.descentElement x z := hscale.symm
+    _ = w * w := hw
+    _ = (algebraMap ℚ BillingMahlerField.K (z : ℚ)) ^ 2 *
+        ((w / algebraMap ℚ BillingMahlerField.K (z : ℚ)) *
+          (w / algebraMap ℚ BillingMahlerField.K (z : ℚ))) := by
+      field_simp [hzK]
+
 theorem billing_mahler_global_descent
     {ξ η : ℚ} (hcurve : RationalPointsN11Descent.MordellEquation ξ η)
     (x z y : ℤ) (hz : 0 < z) (hcop : Int.gcd x z = 1)
@@ -266,7 +400,55 @@ theorem billing_mahler_global_descent
           Ideal.span ({BillingMahlerField.descentInteger x z} :
               Set (NumberField.RingOfIntegers BillingMahlerField.K)) = I ^ 2 ∧
           ¬ IsSquare (BillingMahlerField.descentElement x z) := by
-  sorry
+  have hall : ∀ {xi' eta' : ℚ},
+      eta' ^ 2 = xi' ^ 3 - 432 * xi' + 8208 →
+        IsSquare (BillingMahlerField.ofCoords (xi' - 24) 18 0) := by
+    intro xi' eta' hcurve'
+    by_cases hsame : xi' = ξ
+    · subst xi'
+      have hy : y ≠ 0 := primitive_model_y_ne_zero x z y hz hmodel
+      have hsquare : IsSquare (BillingMahlerField.descentElement x z) :=
+        descentElement_isSquare_of_primitive_model x z y hcop hy hmodel
+      exact factor_square_of_descentElement_square x z hz hξ hsquare
+    · obtain ⟨x', z', y', hz', hcop', hxi', hmodel'⟩ :=
+        RationalPointsN11Descent.mordell_integral_model_of_rational_point
+          xi' eta' hcurve'
+      have hy' : y' ≠ 0 := primitive_model_y_ne_zero x' z' y' hz' hmodel'
+      have hsquare : IsSquare (BillingMahlerField.descentElement x' z') :=
+        descentElement_isSquare_of_primitive_model
+          x' z' y' hcop' hy' hmodel'
+      exact factor_square_of_descentElement_square x' z' hz' hxi' hsquare
+  have hboundary : ξ = -12 ∨ ξ = 24 :=
+    RationalPointsN11IdealSquare.mordell_x_boundary_of_all_factor_square
+      hall hcurve
+  left
+  rcases hboundary with hxi | hxi
+  · have hetaSq : η ^ 2 = (108 : ℚ) ^ 2 := by
+      calc
+        η ^ 2 = ξ ^ 3 - 432 * ξ + 8208 := hcurve
+        _ = (108 : ℚ) ^ 2 := by rw [hxi]; norm_num
+    rcases sq_eq_sq_iff_eq_or_eq_neg.mp hetaSq with heta | heta
+    · refine ⟨-12, 108, ?_, ?_, Or.inr ?_⟩
+      · simpa using hxi
+      · simpa using heta
+      · norm_num [RationalPointsN11Descent.mordellDiscriminantAbs]
+    · refine ⟨-12, -108, ?_, ?_, Or.inr ?_⟩
+      · simpa using hxi
+      · simpa using heta
+      · norm_num [RationalPointsN11Descent.mordellDiscriminantAbs]
+  · have hetaSq : η ^ 2 = (108 : ℚ) ^ 2 := by
+      calc
+        η ^ 2 = ξ ^ 3 - 432 * ξ + 8208 := hcurve
+        _ = (108 : ℚ) ^ 2 := by rw [hxi]; norm_num
+    rcases sq_eq_sq_iff_eq_or_eq_neg.mp hetaSq with heta | heta
+    · refine ⟨24, 108, ?_, ?_, Or.inr ?_⟩
+      · simpa using hxi
+      · simpa using heta
+      · norm_num [RationalPointsN11Descent.mordellDiscriminantAbs]
+    · refine ⟨24, -108, ?_, ?_, Or.inr ?_⟩
+      · simpa using hxi
+      · simpa using heta
+      · norm_num [RationalPointsN11Descent.mordellDiscriminantAbs]
 
 /-- The global seam above implies the exact arithmetic dichotomy consumed by
 the already-checked exceptional enumeration and parity contradiction. -/
