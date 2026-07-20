@@ -12,6 +12,8 @@ import FLT.Assumptions.MazurProof.CyclicExclusion21
 import FLT.Assumptions.MazurProof.CyclicExclusion11
 import FLT.Assumptions.MazurProof.CyclicExclusion18
 import FLT.Assumptions.MazurProof.N18GoodModelAssembly
+import FLT.Assumptions.MazurProof.PrimeExclusion17Bridge
+import FLT.Assumptions.MazurProof.PrimeExclusion19Bridge
 
 /-!
 # Assembly: cyclic order bound from named sub-axioms
@@ -75,8 +77,8 @@ The monolithic axiom `mazur_prime_torsion_bound_sub` is now a THEOREM
 assembled from:
 * `no_rational_point_of_order_11` — sorry-free (Billing–Mahler cubic descent)
 * `no_order_13_prime` — sub-axiom (genus-2 Jacobian descent on X₁(13))
-* `no_order_17_prime` — sub-axiom (X₀(17) + fiber irreducibility)
-* `no_order_19_prime` — sub-axiom (X₀(19) + fiber irreducibility)
+* `no_order_17_prime` — THEOREM via kernel polynomial bridge (PrimeExclusion17Bridge)
+* `no_order_19_prime` — THEOREM via kernel polynomial bridge (PrimeExclusion19Bridge)
 * `no_prime_order_ge_23` — sub-axiom (formal immersion on X₀(p), uniform tail)
 -/
 
@@ -84,13 +86,15 @@ axiom no_order_13_prime
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
     ¬ HasRationalPointOfOrder E 13
 
-axiom no_order_17_prime
+theorem no_order_17_prime
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    ¬ HasRationalPointOfOrder E 17
+    ¬ HasRationalPointOfOrder E 17 :=
+  PrimeExclusion17Bridge.no_order_17_prime E
 
-axiom no_order_19_prime
+theorem no_order_19_prime
     (E : WeierstrassCurve ℚ) [E.IsElliptic] :
-    ¬ HasRationalPointOfOrder E 19
+    ¬ HasRationalPointOfOrder E 19 :=
+  PrimeExclusion19Bridge.no_order_19_prime E
 
 axiom no_prime_order_ge_23
     (E : WeierstrassCurve ℚ) [E.IsElliptic]

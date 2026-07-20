@@ -251,7 +251,13 @@ MW group = ℤ/6ℤ (rank 0), rational points u ∈ {-1, 1, 3} are all cusps.
 | `no_explicit_order25_obstruction` | axiom | Quotient curve + F₂/F₄ points (partial) |
 | `no_raw_order49_tate_obstruction` | axiom | X₀(49) descent (in progress) |
 | `exists_rational_two_isogeny_quotient` | axiom | N20/N24 2-isogeny (deferred) |
-| `no_order_13_prime` | axiom | X₁(13) Jacobian descent |
-| `no_order_17_prime` | axiom | X₀(17) + formal immersion |
-| `no_order_19_prime` | axiom | X₀(19) + formal immersion |
+| `no_order_13_prime` | axiom | X₁(13) genus-2 Jacobian descent |
+| `no_order_17_prime` | ✅ THEOREM | PrimeExclusion17Bridge: kernel poly no-root + bridge axiom |
+| `no_order_19_prime` | ✅ THEOREM | PrimeExclusion19Bridge: kernel poly no-root + bridge axiom |
 | `no_prime_order_ge_23` | axiom | Formal immersion (uniform) |
+
+#### Bridge axioms (sub-axioms replacing raw prime exclusions)
+| Bridge axiom | File | Content |
+|-------------|------|---------|
+| `order17_to_kernel_root` | PrimeExclusion17Bridge | X₀(17)(ℚ) = 2 cusps + 2 noncuspidal; kernel poly at each noncuspidal has no ℚ-root (PROVED in PrimeExclusion17) |
+| `order19_to_kernel_root` | PrimeExclusion19Bridge | X₀(19)(ℚ) = 2 cusps + 1 noncuspidal; kernel poly at noncuspidal has no ℚ-root (PROVED in PrimeExclusion19) |
