@@ -176,6 +176,26 @@ lemma veluMapPoint_eq_zero_iff {A B r : ℚ} {htors : r ^ 3 + A * r + B = 0}
 
 /-! ## Homomorphism -/
 
+private lemma veluMapPoint_neg {A B r : ℚ} {htors : r ^ 3 + A * r + B = 0}
+    [hE : (shortWS A B).IsElliptic]
+    [hE' : (veluQuotCurve A B r).IsElliptic]
+    (P : Point (shortWS A B)) :
+    veluMapPoint htors (-P) = -(veluMapPoint htors P) := by
+  match P with
+  | .zero =>
+    show veluMapPoint htors (-(0 : Point (shortWS A B))) = -(veluMapPoint htors 0)
+    simp
+  | .some x y h =>
+    simp only [Point.neg_some, veluMapPoint]
+    simp only [negY, shortWS]
+    by_cases hx : x = r
+    · simp only [hx, dite_true]; exact (neg_zero).symm
+    · simp only [hx, dite_false]
+      rw [Point.neg_some]
+      congr 1
+      simp [negY, veluQuotCurve]
+      ring
+
 lemma veluMapPoint_add {A B r : ℚ} {htors : r ^ 3 + A * r + B = 0}
     [hE : (shortWS A B).IsElliptic]
     [hE' : (veluQuotCurve A B r).IsElliptic]
