@@ -209,3 +209,49 @@ MW group = ℤ/6ℤ (rank 0), rational points u ∈ {-1, 1, 3} are all cusps.
   is NOT needed for the bridge — only for the eventual rational-point analysis.
 - Previous brute-force approaches (staged ring1, F₄₉ as explicit 3526-monomial
   polynomial) were abandoned: they required 9.5-17 GB elaboration and 2+ hours.
+
+## Progress Log (2026-07-19 N18 fix + N49 descent)
+
+### N18 build fixes
+- **N18VpiWrapper.lean**: Fixed two Mathlib API breakages:
+  - Line 57: `vpiGood_three` — added `; norm_cast` for WithTop ℤ coercion
+  - Lines 72-76: `Ideal.mem_of_liesOver` — rewrote from `.mpr` term-mode to tactic-mode
+- **N18PackageII.lean**: Fixed two Mathlib API breakages:
+  - Line 209: `ordPi_finset_sum_gt_or_zero` — added missing `{ι : Type*}` parameter
+  - Line 841: `three_pow_nsmul_data` zero case — replaced broken `simpa using ⟨...⟩`
+    with `refine ⟨?_, ?_, ?_⟩` + individual `simpa [pow_zero]` subgoals
+- Full chain N18VpiWrapper → N18PackageII → N18GoodModelAssembly → CyclicOrderAssembly
+  now builds. The `no_order_18` theorem is proved (`sorry`-free on N18 route).
+
+### N49 discharge strategy (from ChatGPT co-design Q140)
+- **Key insight**: X₀(49) ≅ E₄₉ (Cremona 49a1, LMFDB 49.a4), genus 1, rank 0.
+  Equation: y² + xy = x³ - x² - 2x - 1, Δ = -7³, j = -3375.
+- **E₄₉(ℚ) = {O, (2,-1)} ≅ ℤ/2ℤ** — both points are cusps of X₀(49).
+- **Proof via 2-isogeny descent**:
+  - Split model: V² = U³ + 21U² + 112U (U² + 21U + 112 irreducible, disc = -7)
+  - 2-isogenous: Z² = X³ - 42X² - 7X
+  - φ-Selmer = {1, 7}: d<0 killed at real place (positive definite form);
+    d=2,14 killed at p=2 (mod 32)
+  - φ̂-Selmer = {1, -7}: all non-survivors killed at p=2 (mod 16)
+  - Both Selmer groups size 2 = |kernel| → rank = 0
+- **File `X049DescentObstruction.lean`**: Contains all 12 local obstruction theorems
+  (6 for φ, 6 for φ̂). Archimedean obstruction for d<0 proved via completing the
+  square; 2-adic obstructions via `native_decide` on ZMod 32/16.
+- **Remaining for N49 discharge**:
+  1. Wire the descent obstructions to prove E₄₉(ℚ) = {O, (2,-1)}
+  2. Build explicit Tate(b,c) → X₀(49) coordinate map (the bottleneck —
+     needs Vélu quotient + Hauptmodul computation, dispatched to ChatGPT)
+  3. Show the map's image avoids both cusps when b≠0, F₇≠0
+  4. Wire to `no_raw_order49_tate_obstruction`
+
+### Current axiom inventory (CyclicOrderAssembly)
+| Axiom | Status | Strategy |
+|-------|--------|----------|
+| `no_order_18` | ✅ PROVED | N18GoodModelAssembly (sorry-free) |
+| `no_explicit_order25_obstruction` | axiom | Quotient curve + F₂/F₄ points (partial) |
+| `no_raw_order49_tate_obstruction` | axiom | X₀(49) descent (in progress) |
+| `exists_rational_two_isogeny_quotient` | axiom | N20/N24 2-isogeny (deferred) |
+| `no_order_13_prime` | axiom | X₁(13) Jacobian descent |
+| `no_order_17_prime` | axiom | X₀(17) + formal immersion |
+| `no_order_19_prime` | axiom | X₀(19) + formal immersion |
+| `no_prime_order_ge_23` | axiom | Formal immersion (uniform) |

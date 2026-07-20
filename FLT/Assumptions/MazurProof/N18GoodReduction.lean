@@ -3,49 +3,36 @@ import FLT.Assumptions.MazurProof.N18PackageII
 import FLT.Assumptions.MazurProof.N18GoodModelValCoords
 import FLT.Assumptions.MazurProof.N18VpiWrapper
 import FLT.Assumptions.MazurProof.N18RouteC_GoodModel
+import FLT.Assumptions.MazurProof.N18RouteC_Reduction
+import FLT.Assumptions.MazurProof.N18RouteC_ThreeAdic
 import FLT.Assumptions.MazurProof.N18Block5Instantiation
 import FLT.Assumptions.MazurProof.N18RouteC_Block7
 import FLT.Assumptions.MazurProof.N18RouteC_LocalThreeSound
 import FLT.Assumptions.MazurProof.N18RouteC_TorsionTable
-import FLT.Assumptions.MazurProof.N18GoodReduction
 
 /-!
-# N18 good-model final assembly
+# Reduction data for the N18 good model
 
-This file records the complete dependency path from the two formal-kernel
-packages on the integral good model `E0Good` to the elementary five-descent
-contradiction.  The old `N18Block5Instantiation.FormalKernelData` is tied to
-the original additive-at-three equation.  Consequently this file gives the
-same interface on `E0GoodPoint`, where reduction at `pi` is good, and feeds it
-to the already verified abstract `FormalKernel18` and separatedness machines.
-
-Every remaining infrastructure gap is isolated as a named theorem: the good
-reduction homomorphism and its kernel, one coordinate nonvanishing lemma, the
-weak chart congruence, negation at the valuation level, and the fact that
-three-power torsion reduces into the formal kernel.
+This file starts from the concrete integral basis `1, pi, pi^2` for `OL`.
+Modulo the prime `(pi)`, the residue of an algebraic integer is its constant
+coefficient modulo `3`.
 -/
 
 open scoped Classical NumberField WeierstrassCurve.Affine
 
-namespace MazurProof.N18GoodModelAssembly
-
--- Prevent the abstract structure projection from competing with the concrete
--- elliptic-curve point group during elaboration.
-attribute [-instance] _root_.FormalKernel18.addCommGroup
+namespace MazurProof.N18GoodReduction
 
 open MazurProof.N18RouteC
 open MazurProof.N18RouteC.Isogeny
 open MazurProof.N18RouteC.IsogenyPoints
 open MazurProof.N18RouteC.ThreeAdic
+open MazurProof.N18RouteC.FieldArithmetic
 open MazurProof.N18Block5Instantiation.AddCongr
 
 noncomputable section
 
-set_option maxHeartbeats 0
-
 abbrev GoodPoint := MazurProof.N18RouteC.GoodModel.E0GoodPoint
-
-/-! ## The good formal kernel and its concrete package inputs -/
+abbrev RedPoint := MazurProof.N18RouteC.Reduction.RedPoint
 
 /-- The affine `x`-coordinate on the good equation, totalized by `0` at `O`. -/
 def xCoordGood : GoodPoint → L
@@ -55,6 +42,891 @@ def xCoordGood : GoodPoint → L
 /-- The near-origin locus on the good equation. -/
 def InFormalKernel : GoodPoint → Prop :=
   fun P ↦ P = 0 ∨ ordPi (xCoordGood P) < 0
+
+/-- Constant coefficient in the integral basis `1, pi, pi^2`. -/
+def coeff0 (u : OL) : ℤ := integralPowerBasis.repr u (0 : Fin 3)
+
+/-- `pi`-coefficient in the integral basis `1, pi, pi^2`. -/
+def coeff1 (u : OL) : ℤ := integralPowerBasis.repr u (1 : Fin 3)
+
+/-- `pi^2`-coefficient in the integral basis `1, pi, pi^2`. -/
+def coeff2 (u : OL) : ℤ := integralPowerBasis.repr u (2 : Fin 3)
+
+theorem coeffs_eq (u : OL) :
+    u = algebraMap ℤ OL (coeff0 u) +
+        algebraMap ℤ OL (coeff1 u) * piInteger +
+          algebraMap ℤ OL (coeff2 u) * piInteger ^ 2 := by
+  apply Subtype.ext
+  have hsum := integralPowerBasis.sum_repr u
+  rw [Fin.sum_univ_three] at hsum
+  have hsumL := congrArg (fun v : OL ↦ (v : L)) hsum
+  change (u : L) = (coeff0 u : L) + (coeff1 u : L) * pi +
+    (coeff2 u : L) * pi ^ 2
+  simpa [coeff0, coeff1, coeff2, Algebra.smul_def,
+    integralPowerBasis_coe_L, basis_apply] using hsumL.symm
+
+theorem coeffs_coe_eq (u : OL) :
+    (u : L) = ofCoords (coeff0 u) (coeff1 u) (coeff2 u) := by
+  have hsum := integralPowerBasis.sum_repr u
+  rw [Fin.sum_univ_three] at hsum
+  have hsumL := congrArg (fun v : OL ↦ (v : L)) hsum
+  simpa [coeff0, coeff1, coeff2, ofCoords, Algebra.smul_def,
+    integralPowerBasis_coe_L, basis_apply] using hsumL.symm
+
+theorem basis_repr_coe_zero (u : OL) :
+    basis.repr (u : L) (0 : Fin 3) = coeff0 u := by
+  rw [coeffs_coe_eq u]
+  exact basis_repr_ofCoords_zero (coeff0 u : ℚ) (coeff1 u : ℚ) (coeff2 u : ℚ)
+
+@[simp] theorem coeff0_zero : coeff0 0 = 0 := by
+  simp [coeff0]
+
+@[simp] theorem coeff0_one : coeff0 1 = 1 := by
+  apply Int.cast_injective (α := ℚ)
+  rw [← basis_repr_coe_zero]
+  simpa [ofCoords] using basis_repr_ofCoords_zero (1 : ℚ) 0 0
+
+@[simp] theorem coeff0_intCast (n : ℤ) :
+    coeff0 (algebraMap ℤ OL n) = n := by
+  apply Int.cast_injective (α := ℚ)
+  rw [← basis_repr_coe_zero]
+  simpa [ofCoords] using basis_repr_ofCoords_zero (n : ℚ) 0 0
+
+@[simp] theorem coeff0_add (x y : OL) :
+    coeff0 (x + y) = coeff0 x + coeff0 y := by
+  simp [coeff0]
+
+@[simp] theorem coeff0_neg (x : OL) :
+    coeff0 (-x) = -coeff0 x := by
+  simp [coeff0]
+
+@[simp] theorem coeff0_sub (x y : OL) :
+    coeff0 (x - y) = coeff0 x - coeff0 y := by
+  simp [sub_eq_add_neg]
+
+/-- Algebraic integers reduce by taking the constant coefficient modulo `3`. -/
+def residueOL (u : OL) : ZMod 3 :=
+  coeff0 u
+
+@[simp] theorem residueOL_zero : residueOL 0 = 0 := by
+  simp [residueOL]
+
+@[simp] theorem residueOL_one : residueOL 1 = 1 := by
+  simp [residueOL]
+
+@[simp] theorem residueOL_add (x y : OL) :
+    residueOL (x + y) = residueOL x + residueOL y := by
+  simp [residueOL]
+
+@[simp] theorem residueOL_neg (x : OL) :
+    residueOL (-x) = -residueOL x := by
+  simp [residueOL]
+
+@[simp] theorem residueOL_sub (x y : OL) :
+    residueOL (x - y) = residueOL x - residueOL y := by
+  simp [sub_eq_add_neg]
+
+@[simp] theorem residueOL_intCast (n : ℤ) :
+    residueOL (algebraMap ℤ OL n) = n := by
+  change ((coeff0 (algebraMap ℤ OL n) : ℤ) : ZMod 3) = n
+  rw [coeff0_intCast]
+
+@[simp] theorem residueOL_natCast (n : ℕ) :
+    residueOL (n : OL) = n := by
+  simpa using residueOL_intCast (n : ℤ)
+
+@[simp] theorem algebraMap_OL_L_intCast (n : ℤ) :
+    algebraMap OL L (algebraMap ℤ OL n) = (n : L) :=
+  map_intCast (algebraMap OL L) n
+
+@[simp] theorem algebraMap_OL_L_natCast (n : ℕ) :
+    algebraMap OL L (n : OL) = (n : L) :=
+  map_natCast (algebraMap OL L) n
+
+@[simp] theorem residueOL_two : residueOL (2 : OL) = (2 : ZMod 3) :=
+  residueOL_natCast 2
+
+@[simp] theorem residueOL_three : residueOL (3 : OL) = (3 : ZMod 3) :=
+  residueOL_natCast 3
+
+@[simp] theorem residueOL_four : residueOL (4 : OL) = (4 : ZMod 3) :=
+  residueOL_natCast 4
+
+@[simp] theorem residueOL_seven : residueOL (7 : OL) = (7 : ZMod 3) :=
+  residueOL_natCast 7
+
+@[simp] theorem algebraMap_OL_L_two :
+    algebraMap OL L (2 : OL) = (2 : L) :=
+  algebraMap_OL_L_natCast 2
+
+@[simp] theorem algebraMap_OL_L_three :
+    algebraMap OL L (3 : OL) = (3 : L) :=
+  algebraMap_OL_L_natCast 3
+
+@[simp] theorem algebraMap_OL_L_four :
+    algebraMap OL L (4 : OL) = (4 : L) :=
+  algebraMap_OL_L_natCast 4
+
+@[simp] theorem algebraMap_OL_L_seven :
+    algebraMap OL L (7 : OL) = (7 : L) :=
+  algebraMap_OL_L_natCast 7
+
+theorem mem_primeAboveThree_iff_dvd_coeff0 (u : OL) :
+    u ∈ primeAboveThree ↔ (3 : ℤ) ∣ coeff0 u := by
+  constructor
+  · rw [primeAboveThree_eq_span_pi, Ideal.mem_span_singleton]
+    rintro ⟨b, hb⟩
+    have hbL := congrArg (fun z : OL ↦ (z : L)) hb
+    have hbpi :
+        ((piInteger * b : OL) : L) =
+          ofCoords (3 * coeff2 b) (coeff0 b) (-3 * coeff2 b + coeff1 b) := by
+      calc
+        ((piInteger * b : OL) : L) = pi * (b : L) := rfl
+        _ = pi * ofCoords (coeff0 b) (coeff1 b) (coeff2 b) := by
+          rw [coeffs_coe_eq b]
+        _ = ofCoords (3 * coeff2 b) (coeff0 b)
+              (-3 * coeff2 b + coeff1 b) := by
+          unfold ofCoords
+          ring_nf
+          rw [pi_cubed]
+          simp only [map_add, map_neg, map_mul, map_ofNat]
+          ring
+    have h0 : (coeff0 u : ℚ) = (3 * coeff2 b : ℚ) := by
+      calc
+        (coeff0 u : ℚ) = basis.repr (u : L) (0 : Fin 3) := by
+          exact (basis_repr_coe_zero u).symm
+        _ = basis.repr
+              (ofCoords (3 * coeff2 b) (coeff0 b)
+                (-3 * coeff2 b + coeff1 b)) (0 : Fin 3) := by
+          rw [hbL, hbpi]
+        _ = (3 * coeff2 b : ℚ) := by
+          exact basis_repr_ofCoords_zero (3 * coeff2 b : ℚ)
+            (coeff0 b : ℚ) (-3 * coeff2 b + coeff1 b : ℚ)
+    refine ⟨coeff2 b, ?_⟩
+    exact_mod_cast h0
+  · rintro ⟨q, hq⟩
+    rw [primeAboveThree_eq_span_pi, coeffs_eq u]
+    apply Ideal.add_mem
+    · apply Ideal.add_mem
+      · rw [show coeff0 u = 3 * q by simpa using hq, map_mul]
+        exact Ideal.mul_mem_right _ (Ideal.span ({piInteger} : Set OL))
+          three_mem_span_pi
+      · exact (Ideal.span ({piInteger} : Set OL)).mul_mem_left _
+          (Ideal.subset_span (Set.mem_singleton piInteger))
+    · apply (Ideal.span ({piInteger} : Set OL)).mul_mem_left
+      exact (Ideal.span ({piInteger} : Set OL)).pow_mem_of_mem
+        (Ideal.subset_span (Set.mem_singleton piInteger)) 2 (by norm_num)
+
+theorem sub_const_mem_primeAboveThree (u : OL) :
+    u - algebraMap ℤ OL (coeff0 u) ∈ primeAboveThree := by
+  rw [mem_primeAboveThree_iff_dvd_coeff0]
+  refine ⟨0, ?_⟩
+  rw [coeff0_sub, coeff0_intCast]
+  ring
+
+@[simp] theorem residueOL_mul (x y : OL) :
+    residueOL (x * y) = residueOL x * residueOL y := by
+  have hx := sub_const_mem_primeAboveThree x
+  have hy := sub_const_mem_primeAboveThree y
+  have hmem :
+      x * y - algebraMap ℤ OL (coeff0 x * coeff0 y) ∈ primeAboveThree := by
+    have hxmul :
+        (x - algebraMap ℤ OL (coeff0 x)) * y ∈ primeAboveThree :=
+      Ideal.mul_mem_right _ primeAboveThree hx
+    have hymul :
+        algebraMap ℤ OL (coeff0 x) *
+            (y - algebraMap ℤ OL (coeff0 y)) ∈ primeAboveThree :=
+      Ideal.mul_mem_left primeAboveThree _ hy
+    convert Ideal.add_mem primeAboveThree hxmul hymul using 1
+    simp [map_mul]
+    ring
+  have hdvd := (mem_primeAboveThree_iff_dvd_coeff0
+    (x * y - algebraMap ℤ OL (coeff0 x * coeff0 y))).mp hmem
+  change ((coeff0 (x * y) : ℤ) : ZMod 3) =
+    ((coeff0 x : ℤ) : ZMod 3) * ((coeff0 y : ℤ) : ZMod 3)
+  rw [← Int.cast_mul]
+  symm
+  apply (ZMod.intCast_eq_intCast_iff_dvd_sub
+    (coeff0 x * coeff0 y) (coeff0 (x * y)) 3).2
+  have hdvd' :
+      (3 : ℤ) ∣ coeff0 (x * y) -
+        coeff0 (algebraMap ℤ OL (coeff0 x * coeff0 y)) := by
+    simpa [coeff0_sub] using hdvd
+  have hconst :
+      coeff0 (algebraMap ℤ OL (coeff0 x * coeff0 y)) =
+        coeff0 x * coeff0 y :=
+    coeff0_intCast _
+  rw [hconst] at hdvd'
+  exact hdvd'
+
+@[simp] theorem residueOL_pow (x : OL) (n : ℕ) :
+    residueOL (x ^ n) = residueOL x ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [pow_succ, residueOL_mul, ih, pow_succ]
+
+/-- Ring-hom form of the residue map on algebraic integers. -/
+def residueOLHom : OL →+* ZMod 3 where
+  toFun := residueOL
+  map_zero' := residueOL_zero
+  map_one' := residueOL_one
+  map_add' := residueOL_add
+  map_mul' := residueOL_mul
+
+@[simp] theorem residueOLHom_apply (u : OL) :
+    residueOLHom u = residueOL u := rfl
+
+theorem residueOL_piInteger : residueOL piInteger = 0 := by
+  change ((coeff0 piInteger : ℤ) : ZMod 3) = 0
+  have h0 : coeff0 piInteger = 0 := by
+    apply Int.cast_injective (α := ℚ)
+    rw [← basis_repr_coe_zero]
+    simpa [ofCoords] using basis_repr_ofCoords_zero (0 : ℚ) 1 0
+  simp [h0]
+
+theorem residueOL_aInteger : residueOL aInteger = 1 := by
+  change ((coeff0 aInteger : ℤ) : ZMod 3) = 1
+  have h0 : coeff0 aInteger = 1 := by
+    apply Int.cast_injective (α := ℚ)
+    rw [← basis_repr_coe_zero]
+    change basis.repr (pi + 1) (0 : Fin 3) = (1 : ℚ)
+    rw [show pi + 1 = ofCoords (1 : ℚ) 1 0 by
+      simp [ofCoords, add_comm]]
+    exact basis_repr_ofCoords_zero (1 : ℚ) 1 0
+  simp [h0]
+
+/-! ## The integral good model and its special fibre -/
+
+/-- The good equation with coefficients in the ring of integers. -/
+def E0GoodInt : WeierstrassCurve OL where
+  a₁ := aInteger ^ 2 - 2
+  a₂ := -aInteger ^ 2 + 2 * aInteger + 1
+  a₃ := aInteger + 1
+  a₄ := -aInteger ^ 2 + 1
+  a₆ := 4 * aInteger ^ 2 - 7 * aInteger - 3
+
+theorem E0GoodInt_map_L : E0GoodInt.map (algebraMap OL L) = E0Good := by
+  ext <;> simp [E0GoodInt, E0Good, aInteger]
+
+theorem E0GoodInt_map_residue :
+    E0GoodInt.map residueOLHom = reducedGoodCurve := by
+  ext <;>
+    simp [E0GoodInt, reducedGoodCurve, residueOLHom_apply,
+      residueOL_aInteger] <;> decide
+
+theorem E0GoodInt_a₁_map :
+    algebraMap OL L E0GoodInt.a₁ = E0Good.a₁ := by
+  have h := congrArg (fun W : WeierstrassCurve L ↦ W.a₁) E0GoodInt_map_L
+  simpa only [WeierstrassCurve.map_a₁] using h
+
+theorem E0GoodInt_a₂_map :
+    algebraMap OL L E0GoodInt.a₂ = E0Good.a₂ := by
+  have h := congrArg (fun W : WeierstrassCurve L ↦ W.a₂) E0GoodInt_map_L
+  simpa only [WeierstrassCurve.map_a₂] using h
+
+theorem E0GoodInt_a₃_map :
+    algebraMap OL L E0GoodInt.a₃ = E0Good.a₃ := by
+  have h := congrArg (fun W : WeierstrassCurve L ↦ W.a₃) E0GoodInt_map_L
+  simpa only [WeierstrassCurve.map_a₃] using h
+
+theorem E0GoodInt_a₄_map :
+    algebraMap OL L E0GoodInt.a₄ = E0Good.a₄ := by
+  have h := congrArg (fun W : WeierstrassCurve L ↦ W.a₄) E0GoodInt_map_L
+  simpa only [WeierstrassCurve.map_a₄] using h
+
+theorem E0GoodInt_a₆_map :
+    algebraMap OL L E0GoodInt.a₆ = E0Good.a₆ := by
+  have h := congrArg (fun W : WeierstrassCurve L ↦ W.a₆) E0GoodInt_map_L
+  simpa only [WeierstrassCurve.map_a₆] using h
+
+theorem E0GoodInt_a₁_residue :
+    residueOL E0GoodInt.a₁ = reducedGoodCurve.a₁ := by
+  have h := congrArg (fun W : WeierstrassCurve (ZMod 3) ↦ W.a₁)
+    E0GoodInt_map_residue
+  simpa only [WeierstrassCurve.map_a₁, residueOLHom_apply] using h
+
+theorem E0GoodInt_a₂_residue :
+    residueOL E0GoodInt.a₂ = reducedGoodCurve.a₂ := by
+  have h := congrArg (fun W : WeierstrassCurve (ZMod 3) ↦ W.a₂)
+    E0GoodInt_map_residue
+  simpa only [WeierstrassCurve.map_a₂, residueOLHom_apply] using h
+
+theorem E0GoodInt_a₃_residue :
+    residueOL E0GoodInt.a₃ = reducedGoodCurve.a₃ := by
+  have h := congrArg (fun W : WeierstrassCurve (ZMod 3) ↦ W.a₃)
+    E0GoodInt_map_residue
+  simpa only [WeierstrassCurve.map_a₃, residueOLHom_apply] using h
+
+theorem E0GoodInt_a₄_residue :
+    residueOL E0GoodInt.a₄ = reducedGoodCurve.a₄ := by
+  have h := congrArg (fun W : WeierstrassCurve (ZMod 3) ↦ W.a₄)
+    E0GoodInt_map_residue
+  simpa only [WeierstrassCurve.map_a₄, residueOLHom_apply] using h
+
+theorem E0GoodInt_a₆_residue :
+    residueOL E0GoodInt.a₆ = reducedGoodCurve.a₆ := by
+  have h := congrArg (fun W : WeierstrassCurve (ZMod 3) ↦ W.a₆)
+    E0GoodInt_map_residue
+  simpa only [WeierstrassCurve.map_a₆, residueOLHom_apply] using h
+
+theorem residueOL_den_ne_zero (d : p3.asIdeal.primeCompl) :
+    residueOL d ≠ 0 := by
+  intro hzero
+  apply d.property
+  change (d : OL) ∈ primeAboveThree
+  rw [mem_primeAboveThree_iff_dvd_coeff0]
+  change ((coeff0 (d : OL) : ℤ) : ZMod 3) = 0 at hzero
+  exact (ZMod.intCast_zmod_eq_zero_iff_dvd (coeff0 (d : OL)) 3).mp hzero
+
+/-- `x` is integral at the prime above `3`. -/
+def IntegralAtPi (x : L) : Prop :=
+  p3.valuation L x ≤ 1
+
+theorem v3_ne_zero {x : L} (hx : x ≠ 0) : v3 x ≠ 0 :=
+  v3.ne_zero_iff.mpr hx
+
+theorem ordPi_mul {x y : L} (hx : x ≠ 0) (hy : y ≠ 0) :
+    ordPi (x * y) = ordPi x + ordPi y := by
+  unfold ordPi
+  rw [map_mul, WithZero.log_mul (v3_ne_zero hx) (v3_ne_zero hy)]
+  ring
+
+theorem ordPi_div {x y : L} (hx : x ≠ 0) (hy : y ≠ 0) :
+    ordPi (x / y) = ordPi x - ordPi y := by
+  unfold ordPi
+  rw [map_div₀, WithZero.log_div (v3_ne_zero hx) (v3_ne_zero hy)]
+  ring
+
+@[simp] theorem ordPi_neg (x : L) : ordPi (-x) = ordPi x := by
+  unfold ordPi
+  rw [Valuation.map_neg]
+
+@[simp] theorem ordPi_zero : ordPi (0 : L) = 0 := by
+  unfold ordPi
+  rw [map_zero, WithZero.log_zero, neg_zero]
+
+theorem ordPi_one : ordPi (1 : L) = 0 := by
+  unfold ordPi
+  rw [map_one, WithZero.log_one, neg_zero]
+
+theorem ordPi_add_ge {x y : L}
+    (hx : x ≠ 0) (hy : y ≠ 0) (hxy : x + y ≠ 0) :
+    min (ordPi x) (ordPi y) ≤ ordPi (x + y) := by
+  have hmax : v3 (x + y) ≤ max (v3 x) (v3 y) := v3.map_add x y
+  have hlog : WithZero.log (v3 (x + y)) ≤
+      max (WithZero.log (v3 x)) (WithZero.log (v3 y)) := by
+    rcases le_total (v3 x) (v3 y) with hle | hle
+    · have hle' : v3 (x + y) ≤ v3 y :=
+        le_trans hmax (by rw [max_eq_right hle])
+      exact le_trans
+        ((WithZero.log_le_log (v3_ne_zero hxy) (v3_ne_zero hy)).mpr hle')
+        (le_max_right _ _)
+    · have hle' : v3 (x + y) ≤ v3 x :=
+        le_trans hmax (by rw [max_eq_left hle])
+      exact le_trans
+        ((WithZero.log_le_log (v3_ne_zero hxy) (v3_ne_zero hx)).mpr hle')
+        (le_max_left _ _)
+  unfold ordPi
+  omega
+
+theorem le_ordPi_add {N : ℤ} {x y : L}
+    (hx : N ≤ ordPi x) (hy : N ≤ ordPi y) (hN : N ≤ 0) :
+    N ≤ ordPi (x + y) := by
+  by_cases hxy : x + y = 0
+  · rw [hxy, ordPi_zero]
+    exact hN
+  by_cases hx0 : x = 0
+  · rw [hx0, zero_add]
+    exact hy
+  by_cases hy0 : y = 0
+  · rw [hy0, add_zero]
+    exact hx
+  exact le_trans (le_min hx hy) (ordPi_add_ge hx0 hy0 hxy)
+
+theorem ordPi_add_eq_of_lt {x y : L}
+    (hx : x ≠ 0) (hy : y ≠ 0) (hxy : ordPi x < ordPi y) :
+    ordPi (x + y) = ordPi x := by
+  have hsum : x + y ≠ 0 := by
+    intro h
+    have : y = -x := by linear_combination h
+    rw [this, ordPi_neg] at hxy
+    exact lt_irrefl _ hxy
+  refine le_antisymm ?_ ?_
+  · by_contra hlt
+    push Not at hlt
+    have h := ordPi_add_ge hsum (neg_ne_zero.mpr hy)
+      (by rw [add_neg_cancel_right]; exact hx)
+    rw [add_neg_cancel_right, ordPi_neg] at h
+    exact absurd h (not_le.mpr (lt_min hlt hxy))
+  · have h := ordPi_add_ge hx hy hsum
+    rwa [min_eq_left hxy.le] at h
+
+theorem nonneg_ordPi_add {x y : L}
+    (hx : 0 ≤ ordPi x) (hy : 0 ≤ ordPi y) :
+    0 ≤ ordPi (x + y) :=
+  le_ordPi_add hx hy le_rfl
+
+theorem nonneg_ordPi_mul {x y : L}
+    (hx : 0 ≤ ordPi x) (hy : 0 ≤ ordPi y) :
+    0 ≤ ordPi (x * y) := by
+  by_cases hx0 : x = 0
+  · simp [hx0, ordPi_zero]
+  by_cases hy0 : y = 0
+  · simp [hy0, ordPi_zero]
+  rw [ordPi_mul hx0 hy0]
+  omega
+
+theorem nonneg_ordPi_pow {x : L}
+    (hx : 0 ≤ ordPi x) (n : ℕ) : 0 ≤ ordPi (x ^ n) := by
+  induction n with
+  | zero =>
+      rw [pow_zero, ordPi_one]
+  | succ n ih =>
+      rw [pow_succ]
+      exact nonneg_ordPi_mul ih hx
+
+theorem integralAtPi_iff_nonneg_ordPi (x : L) :
+    IntegralAtPi x ↔ 0 ≤ ordPi x := by
+  by_cases hx : x = 0
+  · subst x
+    simp [IntegralAtPi, ordPi_zero]
+  constructor
+  · intro h
+    have hlog : WithZero.log (v3 x) ≤ 0 := by
+      have h' := (WithZero.log_le_log (v3_ne_zero hx) one_ne_zero).mpr h
+      rwa [WithZero.log_one] at h'
+    unfold ordPi
+    omega
+  · intro h
+    have hlog : WithZero.log (v3 x) ≤
+        WithZero.log (1 : WithZero (Multiplicative ℤ)) := by
+      rw [WithZero.log_one]
+      unfold ordPi at h
+      omega
+    exact (WithZero.log_le_log (v3_ne_zero hx) one_ne_zero).mp hlog
+
+theorem integralAtPi_of_nonneg_ordPi {x : L} (hx : 0 ≤ ordPi x) :
+    IntegralAtPi x :=
+  (integralAtPi_iff_nonneg_ordPi x).2 hx
+
+theorem nonneg_ordPi_of_integralAtPi {x : L} (hx : IntegralAtPi x) :
+    0 ≤ ordPi x :=
+  (integralAtPi_iff_nonneg_ordPi x).1 hx
+
+theorem integralAtPi_of_OL (u : OL) :
+    IntegralAtPi (u : L) := by
+  show p3.valuation L (algebraMap OL L u) ≤ 1
+  exact IsDedekindDomain.HeightOneSpectrum.valuation_le_one (K := L) p3 u
+
+theorem integralAtPi_E0Good_a₁ : IntegralAtPi E0Good.a₁ := by
+  rw [← E0GoodInt_a₁_map]
+  exact integralAtPi_of_OL E0GoodInt.a₁
+
+theorem integralAtPi_E0Good_a₂ : IntegralAtPi E0Good.a₂ := by
+  rw [← E0GoodInt_a₂_map]
+  exact integralAtPi_of_OL E0GoodInt.a₂
+
+theorem integralAtPi_E0Good_a₃ : IntegralAtPi E0Good.a₃ := by
+  rw [← E0GoodInt_a₃_map]
+  exact integralAtPi_of_OL E0GoodInt.a₃
+
+theorem integralAtPi_E0Good_a₄ : IntegralAtPi E0Good.a₄ := by
+  rw [← E0GoodInt_a₄_map]
+  exact integralAtPi_of_OL E0GoodInt.a₄
+
+theorem integralAtPi_E0Good_a₆ : IntegralAtPi E0Good.a₆ := by
+  rw [← E0GoodInt_a₆_map]
+  exact integralAtPi_of_OL E0GoodInt.a₆
+
+theorem nonneg_ordPi_E0Good_a₁ : 0 ≤ ordPi E0Good.a₁ :=
+  nonneg_ordPi_of_integralAtPi integralAtPi_E0Good_a₁
+
+theorem nonneg_ordPi_E0Good_a₂ : 0 ≤ ordPi E0Good.a₂ :=
+  nonneg_ordPi_of_integralAtPi integralAtPi_E0Good_a₂
+
+theorem nonneg_ordPi_E0Good_a₃ : 0 ≤ ordPi E0Good.a₃ :=
+  nonneg_ordPi_of_integralAtPi integralAtPi_E0Good_a₃
+
+theorem nonneg_ordPi_E0Good_a₄ : 0 ≤ ordPi E0Good.a₄ :=
+  nonneg_ordPi_of_integralAtPi integralAtPi_E0Good_a₄
+
+theorem nonneg_ordPi_E0Good_a₆ : 0 ≤ ordPi E0Good.a₆ :=
+  nonneg_ordPi_of_integralAtPi integralAtPi_E0Good_a₆
+
+theorem y_integral_of_x_integral {x y : L}
+    (h : WeierstrassCurve.Affine.Nonsingular E0Good x y)
+    (hx : IntegralAtPi x) : IntegralAtPi y := by
+  apply integralAtPi_of_nonneg_ordPi
+  by_contra hyNon
+  have hyneg : ordPi y < 0 := by omega
+  have hy0 : y ≠ 0 := by
+    intro hzero
+    rw [hzero, ordPi_zero] at hyneg
+    omega
+  have hxord : 0 ≤ ordPi x := nonneg_ordPi_of_integralAtPi hx
+  let A : L := E0Good.a₁ * x + E0Good.a₃
+  have hAnonneg : 0 ≤ ordPi A := by
+    dsimp [A]
+    exact nonneg_ordPi_add
+      (nonneg_ordPi_mul nonneg_ordPi_E0Good_a₁ hxord)
+      nonneg_ordPi_E0Good_a₃
+  have hyAord : ordPi (y + A) = ordPi y := by
+    by_cases hA0 : A = 0
+    · simp [hA0]
+    · exact ordPi_add_eq_of_lt hy0 hA0 (by omega)
+  have hyA0 : y + A ≠ 0 := by
+    intro hzero
+    rw [hzero, ordPi_zero] at hyAord
+    omega
+  have hleftOrd :
+      ordPi (y ^ 2 + E0Good.a₁ * x * y + E0Good.a₃ * y) =
+        2 * ordPi y := by
+    rw [show y ^ 2 + E0Good.a₁ * x * y + E0Good.a₃ * y =
+        y * (y + A) by dsimp [A]; ring]
+    rw [ordPi_mul hy0 hyA0, hyAord]
+    ring
+  have hx3 : 0 ≤ ordPi (x ^ 3) := nonneg_ordPi_pow hxord 3
+  have ha₂x2 : 0 ≤ ordPi (E0Good.a₂ * x ^ 2) :=
+    nonneg_ordPi_mul nonneg_ordPi_E0Good_a₂
+      (nonneg_ordPi_pow hxord 2)
+  have ha₄x : 0 ≤ ordPi (E0Good.a₄ * x) :=
+    nonneg_ordPi_mul nonneg_ordPi_E0Good_a₄ hxord
+  have hrightOrd :
+      0 ≤ ordPi (x ^ 3 + E0Good.a₂ * x ^ 2 + E0Good.a₄ * x + E0Good.a₆) := by
+    have h₁ : 0 ≤ ordPi (x ^ 3 + E0Good.a₂ * x ^ 2) :=
+      nonneg_ordPi_add hx3 ha₂x2
+    have h₂ : 0 ≤ ordPi (x ^ 3 + E0Good.a₂ * x ^ 2 + E0Good.a₄ * x) := by
+      simpa [add_assoc] using nonneg_ordPi_add h₁ ha₄x
+    simpa [add_assoc] using nonneg_ordPi_add h₂ nonneg_ordPi_E0Good_a₆
+  have hxy := (WeierstrassCurve.Affine.equation_iff x y).mp h.1
+  have hord := congrArg ordPi hxy
+  rw [hleftOrd] at hord
+  have hnonneg : 0 ≤ 2 * ordPi y := by
+    rw [hord]
+    exact hrightOrd
+  omega
+
+/-- A field element reduces to `r` when, after multiplying by a denominator
+outside `p3`, numerator and denominator have the expected algebraic-integer
+residues. -/
+def Reduces (x : L) (r : ZMod 3) : Prop :=
+  ∃ n : OL, ∃ d : p3.asIdeal.primeCompl,
+    x * algebraMap OL L d = algebraMap OL L n ∧
+      r * residueOL d = residueOL n
+
+theorem reduces_of_OL (u : OL) : Reduces (u : L) (residueOL u) := by
+  refine ⟨u, 1, ?_, ?_⟩ <;> simp [residueOL_one]
+
+theorem reduces_E0Good_a₁ :
+    Reduces E0Good.a₁ reducedGoodCurve.a₁ := by
+  simpa [E0GoodInt_a₁_map, E0GoodInt_a₁_residue]
+    using reduces_of_OL E0GoodInt.a₁
+
+theorem reduces_E0Good_a₂ :
+    Reduces E0Good.a₂ reducedGoodCurve.a₂ := by
+  simpa [E0GoodInt_a₂_map, E0GoodInt_a₂_residue]
+    using reduces_of_OL E0GoodInt.a₂
+
+theorem reduces_E0Good_a₃ :
+    Reduces E0Good.a₃ reducedGoodCurve.a₃ := by
+  simpa [E0GoodInt_a₃_map, E0GoodInt_a₃_residue]
+    using reduces_of_OL E0GoodInt.a₃
+
+theorem reduces_E0Good_a₄ :
+    Reduces E0Good.a₄ reducedGoodCurve.a₄ := by
+  simpa [E0GoodInt_a₄_map, E0GoodInt_a₄_residue]
+    using reduces_of_OL E0GoodInt.a₄
+
+theorem reduces_E0Good_a₆ :
+    Reduces E0Good.a₆ reducedGoodCurve.a₆ := by
+  simpa [E0GoodInt_a₆_map, E0GoodInt_a₆_residue]
+    using reduces_of_OL E0GoodInt.a₆
+
+theorem reduces_exists {x : L} (hx : IntegralAtPi x) :
+    ∃ r : ZMod 3, Reduces x r := by
+  obtain ⟨n, d, hnd⟩ := p3.exists_primeCompl_mul_eq_of_integer x hx
+  refine ⟨residueOL n / residueOL d, n, d, hnd, ?_⟩
+  exact div_mul_cancel₀ _ (residueOL_den_ne_zero d)
+
+theorem reduces_unique {x : L} {r s : ZMod 3}
+    (hr : Reduces x r) (hs : Reduces x s) : r = s := by
+  obtain ⟨n, d, hxd, hrd⟩ := hr
+  obtain ⟨n', d', hxd', hsd'⟩ := hs
+  have hcrossL :
+      algebraMap OL L (n * d') = algebraMap OL L (n' * d) := by
+    simp only [map_mul]
+    calc
+      algebraMap OL L n * algebraMap OL L (d' : OL) =
+          (x * algebraMap OL L (d : OL)) * algebraMap OL L (d' : OL) := by
+            rw [hxd]
+      _ = (x * algebraMap OL L (d' : OL)) * algebraMap OL L (d : OL) := by ring
+      _ = algebraMap OL L n' * algebraMap OL L (d : OL) := by rw [hxd']
+  have hcross : n * (d' : OL) = n' * (d : OL) :=
+    (FaithfulSMul.algebraMap_injective OL L) hcrossL
+  apply mul_right_cancel₀
+    (mul_ne_zero (residueOL_den_ne_zero d) (residueOL_den_ne_zero d'))
+  calc
+    r * (residueOL d * residueOL d') =
+        (r * residueOL d) * residueOL d' := by ring
+    _ = residueOL n * residueOL d' := by rw [hrd]
+    _ = residueOL (n * (d' : OL)) := by rw [residueOL_mul]
+    _ = residueOL (n' * (d : OL)) := by rw [hcross]
+    _ = residueOL n' * residueOL d := by rw [residueOL_mul]
+    _ = (s * residueOL d') * residueOL d := by rw [hsd']
+    _ = s * (residueOL d * residueOL d') := by ring
+
+theorem reduces_existsUnique {x : L} (hx : IntegralAtPi x) :
+    ∃! r : ZMod 3, Reduces x r := by
+  obtain ⟨r, hr⟩ := reduces_exists hx
+  exact ⟨r, hr, fun s hs ↦
+    (reduces_unique (x := x) (r := r) (s := s) hr hs).symm⟩
+
+/-- Residue of a field element integral at `pi`. -/
+def reduce (x : L) (hx : IntegralAtPi x) : ZMod 3 :=
+  Classical.choose (reduces_existsUnique hx)
+
+theorem reduce_spec (x : L) (hx : IntegralAtPi x) :
+    Reduces x (reduce x hx) :=
+  (Classical.choose_spec (reduces_existsUnique hx)).1
+
+theorem reduce_eq_of_reduces {x : L} (hx : IntegralAtPi x) {r : ZMod 3}
+    (hr : Reduces x r) : reduce x hx = r :=
+  reduces_unique (reduce_spec x hx) hr
+
+theorem reduce_of_OL (u : OL) :
+    reduce (u : L) (integralAtPi_of_OL u) = residueOL u :=
+  reduce_eq_of_reduces (integralAtPi_of_OL u) (reduces_of_OL u)
+
+theorem integralAtPi_zero : IntegralAtPi (0 : L) := by
+  simp [IntegralAtPi]
+
+theorem integralAtPi_one : IntegralAtPi (1 : L) := by
+  simp [IntegralAtPi]
+
+theorem IntegralAtPi.add {x y : L}
+    (hx : IntegralAtPi x) (hy : IntegralAtPi y) : IntegralAtPi (x + y) := by
+  exact (p3.valuation L).map_add x y |>.trans (max_le hx hy)
+
+theorem IntegralAtPi.neg {x : L} (hx : IntegralAtPi x) :
+    IntegralAtPi (-x) := by
+  simpa [IntegralAtPi] using hx
+
+theorem IntegralAtPi.sub {x y : L}
+    (hx : IntegralAtPi x) (hy : IntegralAtPi y) : IntegralAtPi (x - y) := by
+  simpa [sub_eq_add_neg] using hx.add hy.neg
+
+theorem IntegralAtPi.mul {x y : L}
+    (hx : IntegralAtPi x) (hy : IntegralAtPi y) : IntegralAtPi (x * y) := by
+  unfold IntegralAtPi at hx hy ⊢
+  rw [map_mul]
+  exact (mul_le_mul' hx hy).trans_eq (mul_one 1)
+
+theorem IntegralAtPi.pow {x : L} (hx : IntegralAtPi x) (n : ℕ) :
+    IntegralAtPi (x ^ n) := by
+  induction n with
+  | zero => simpa using integralAtPi_one
+  | succ n ih => simpa [pow_succ] using ih.mul hx
+
+theorem reduces_zero : Reduces (0 : L) 0 := by
+  refine ⟨0, 1, ?_, ?_⟩ <;> simp [residueOL_one]
+
+theorem reduces_one : Reduces (1 : L) 1 := by
+  refine ⟨1, 1, ?_, ?_⟩ <;> simp [residueOL_one]
+
+theorem Reduces.add {x y : L} {r s : ZMod 3}
+    (hr : Reduces x r) (hs : Reduces y s) : Reduces (x + y) (r + s) := by
+  obtain ⟨n, d, hxd, hrd⟩ := hr
+  obtain ⟨n', d', hxd', hsd'⟩ := hs
+  refine ⟨n * (d' : OL) + n' * (d : OL), d * d', ?_, ?_⟩
+  · simp only [map_add, map_mul, Submonoid.coe_mul]
+    calc
+      (x + y) * (algebraMap OL L d * algebraMap OL L d') =
+          (x * algebraMap OL L d) * algebraMap OL L d' +
+            (y * algebraMap OL L d') * algebraMap OL L d := by ring
+      _ = algebraMap OL L n * algebraMap OL L d' +
+            algebraMap OL L n' * algebraMap OL L d := by rw [hxd, hxd']
+  · simp only [residueOL_add, residueOL_mul, Submonoid.coe_mul]
+    calc
+      (r + s) * (residueOL d * residueOL d') =
+          (r * residueOL d) * residueOL d' +
+            (s * residueOL d') * residueOL d := by ring
+      _ = residueOL n * residueOL d' +
+            residueOL n' * residueOL d := by rw [hrd, hsd']
+
+theorem Reduces.neg {x : L} {r : ZMod 3} (hr : Reduces x r) :
+    Reduces (-x) (-r) := by
+  obtain ⟨n, d, hxd, hrd⟩ := hr
+  refine ⟨-n, d, ?_, ?_⟩
+  · simp only [map_neg]
+    linear_combination -1 * hxd
+  · simp only [residueOL_neg]
+    linear_combination -1 * hrd
+
+theorem Reduces.mul {x y : L} {r s : ZMod 3}
+    (hr : Reduces x r) (hs : Reduces y s) : Reduces (x * y) (r * s) := by
+  obtain ⟨n, d, hxd, hrd⟩ := hr
+  obtain ⟨n', d', hxd', hsd'⟩ := hs
+  refine ⟨n * n', d * d', ?_, ?_⟩
+  · simp only [map_mul, Submonoid.coe_mul]
+    rw [← hxd, ← hxd']
+    ring
+  · simp only [residueOL_mul, Submonoid.coe_mul]
+    rw [← hrd, ← hsd']
+    ring
+
+theorem Reduces.pow {x : L} {r : ZMod 3} (hr : Reduces x r) (n : ℕ) :
+    Reduces (x ^ n) (r ^ n) := by
+  induction n with
+  | zero => simpa using reduces_one
+  | succ n ih => simpa [pow_succ] using ih.mul hr
+
+@[simp] theorem reduce_zero : reduce 0 integralAtPi_zero = 0 :=
+  reduce_eq_of_reduces integralAtPi_zero reduces_zero
+
+@[simp] theorem reduce_one : reduce 1 integralAtPi_one = 1 :=
+  reduce_eq_of_reduces integralAtPi_one reduces_one
+
+theorem reduce_add {x y : L} (hx : IntegralAtPi x) (hy : IntegralAtPi y) :
+    reduce (x + y) (hx.add hy) = reduce x hx + reduce y hy :=
+  reduce_eq_of_reduces (hx.add hy) ((reduce_spec x hx).add (reduce_spec y hy))
+
+theorem reduce_neg {x : L} (hx : IntegralAtPi x) :
+    reduce (-x) hx.neg = -reduce x hx :=
+  reduce_eq_of_reduces hx.neg (reduce_spec x hx).neg
+
+theorem reduce_sub {x y : L} (hx : IntegralAtPi x) (hy : IntegralAtPi y) :
+    reduce (x - y) (hx.sub hy) = reduce x hx - reduce y hy := by
+  have hred : Reduces (x - y) (reduce x hx - reduce y hy) := by
+    simpa [sub_eq_add_neg] using
+      ((reduce_spec x hx).add (reduce_spec y hy).neg)
+  exact reduce_eq_of_reduces (hx.sub hy) hred
+
+theorem reduce_mul {x y : L} (hx : IntegralAtPi x) (hy : IntegralAtPi y) :
+    reduce (x * y) (hx.mul hy) = reduce x hx * reduce y hy :=
+  reduce_eq_of_reduces (hx.mul hy) ((reduce_spec x hx).mul (reduce_spec y hy))
+
+theorem reduce_pow {x : L} (hx : IntegralAtPi x) (n : ℕ) :
+    reduce (x ^ n) (hx.pow n) = reduce x hx ^ n :=
+  reduce_eq_of_reduces (hx.pow n) ((reduce_spec x hx).pow n)
+
+theorem reduced_equation_of_integral {x y : L}
+    (hx : IntegralAtPi x) (hy : IntegralAtPi y)
+    (hxy : WeierstrassCurve.Affine.Equation E0Good x y) :
+    WeierstrassCurve.Affine.Equation reducedGoodCurve
+      (reduce x hx) (reduce y hy) := by
+  rw [WeierstrassCurve.Affine.equation_iff] at hxy ⊢
+  have hxred := reduce_spec x hx
+  have hyred := reduce_spec y hy
+  have hA₁xy :
+      Reduces (E0Good.a₁ * x * y)
+        (reducedGoodCurve.a₁ * reduce x hx * reduce y hy) := by
+    simpa [mul_assoc] using
+      ((reduces_E0Good_a₁.mul hxred).mul hyred)
+  have hA₃y :
+      Reduces (E0Good.a₃ * y)
+        (reducedGoodCurve.a₃ * reduce y hy) := by
+    simpa [mul_assoc] using
+      (reduces_E0Good_a₃.mul hyred)
+  have hleft :
+      Reduces (y ^ 2 + E0Good.a₁ * x * y + E0Good.a₃ * y)
+        (reduce y hy ^ 2 +
+          reducedGoodCurve.a₁ * reduce x hx * reduce y hy +
+            reducedGoodCurve.a₃ * reduce y hy) := by
+    simpa [add_assoc] using ((hyred.pow 2).add hA₁xy).add hA₃y
+  have hA₂x₂ :
+      Reduces (E0Good.a₂ * x ^ 2)
+        (reducedGoodCurve.a₂ * reduce x hx ^ 2) := by
+    simpa [mul_assoc] using
+      (reduces_E0Good_a₂.mul (hxred.pow 2))
+  have hA₄x :
+      Reduces (E0Good.a₄ * x)
+        (reducedGoodCurve.a₄ * reduce x hx) := by
+    simpa [mul_assoc] using
+      (reduces_E0Good_a₄.mul hxred)
+  have hright :
+      Reduces (x ^ 3 + E0Good.a₂ * x ^ 2 + E0Good.a₄ * x + E0Good.a₆)
+        (reduce x hx ^ 3 +
+          reducedGoodCurve.a₂ * reduce x hx ^ 2 +
+            reducedGoodCurve.a₄ * reduce x hx +
+              reducedGoodCurve.a₆) := by
+    simpa [add_assoc] using
+      ((((hxred.pow 3).add hA₂x₂).add hA₄x).add reduces_E0Good_a₆)
+  have hright' :
+      Reduces (y ^ 2 + E0Good.a₁ * x * y + E0Good.a₃ * y)
+        (reduce x hx ^ 3 +
+          reducedGoodCurve.a₂ * reduce x hx ^ 2 +
+            reducedGoodCurve.a₄ * reduce x hx +
+              reducedGoodCurve.a₆) := by
+    rw [hxy]
+    exact hright
+  have hred := reduces_unique hleft hright'
+  simpa [add_assoc, mul_assoc] using hred
+
+/-- Reduction of a finite point whose affine coordinates are integral at `pi`. -/
+noncomputable def reduceIntegralPoint (x y : L)
+    (hx : IntegralAtPi x) (hy : IntegralAtPi y)
+    (h : WeierstrassCurve.Affine.Nonsingular E0Good x y) : RedPoint :=
+  WeierstrassCurve.Affine.Point.mk
+    (reduced_equation_of_integral hx hy h.1)
+
+theorem reduceIntegralPoint_ne_zero (x y : L)
+    (hx : IntegralAtPi x) (hy : IntegralAtPi y)
+    (h : WeierstrassCurve.Affine.Nonsingular E0Good x y) :
+    reduceIntegralPoint x y hx hy h ≠ 0 := by
+  unfold reduceIntegralPoint
+  exact WeierstrassCurve.Affine.Point.some_ne_zero _
+
+/-- The usual pointwise reduction map before proving additivity. -/
+noncomputable def reductionMapToFun : GoodPoint → RedPoint
+  | .zero => 0
+  | .some x y h =>
+      if hx : IntegralAtPi x then
+        reduceIntegralPoint x y hx (y_integral_of_x_integral h hx) h
+      else 0
+
+@[simp] theorem reductionMapToFun_zero :
+    reductionMapToFun (0 : GoodPoint) = 0 := rfl
+
+theorem reductionMapToFun_eq_zero_iff (P : GoodPoint) :
+    reductionMapToFun P = 0 ↔ InFormalKernel P := by
+  cases P with
+  | zero =>
+      constructor
+      · intro _
+        exact Or.inl rfl
+      · intro _
+        rfl
+  | some x y h =>
+      by_cases hx : IntegralAtPi x
+      · have hxnonneg : 0 ≤ ordPi x := nonneg_ordPi_of_integralAtPi hx
+        constructor
+        · intro hzero
+          simp [reductionMapToFun, hx] at hzero
+          exact False.elim
+            (reduceIntegralPoint_ne_zero x y hx
+              (y_integral_of_x_integral h hx) h hzero)
+        · intro hformal
+          rcases hformal with hzero | hxneg
+          · exact False.elim (WeierstrassCurve.Affine.Point.some_ne_zero h hzero)
+          · exact False.elim ((not_lt_of_ge hxnonneg) hxneg)
+      · have hxneg : ordPi x < 0 := by
+          by_contra hnot
+          have hxnonneg : 0 ≤ ordPi x := by omega
+          exact hx (integralAtPi_of_nonneg_ordPi hxnonneg)
+        constructor
+        · intro _
+          exact Or.inr hxneg
+        · intro _
+          simp [reductionMapToFun, hx]
+
+end
+
+/-! ## Existence proof exported for assembly wiring -/
+
+set_option maxHeartbeats 0
+
+namespace QuotientProof
 
 @[simp] theorem zero_mem_formalKernel : InFormalKernel (0 : GoodPoint) :=
   Or.inl rfl
@@ -444,23 +1316,23 @@ private theorem good_a1_unit : E0Good.a₁ ≠ 0 ∧ ordPi E0Good.a₁ = 0 := by
   have ha := good_coeff_orders.1
   omega
 
-private def GGood (t w : L) : L :=
+private noncomputable def GGood (t w : L) : L :=
   w - E0Good.a₁ * t * w - E0Good.a₂ * t ^ 2 * w -
     E0Good.a₃ * w ^ 2 - E0Good.a₄ * t * w ^ 2 -
     E0Good.a₆ * w ^ 3 - t ^ 3
 
-private def AGood (m : L) : L :=
+private noncomputable def AGood (m : L) : L :=
   1 + E0Good.a₂ * m + E0Good.a₄ * m ^ 2 + E0Good.a₆ * m ^ 3
 
-private def BGood (m b : L) : L :=
+private noncomputable def BGood (m b : L) : L :=
   E0Good.a₁ * m + E0Good.a₂ * b + E0Good.a₃ * m ^ 2 +
     2 * E0Good.a₄ * m * b + 3 * E0Good.a₆ * m ^ 2 * b
 
-private def CGood (m b : L) : L :=
+private noncomputable def CGood (m b : L) : L :=
   m - E0Good.a₁ * b - 2 * E0Good.a₃ * m * b -
     E0Good.a₄ * b ^ 2 - 3 * E0Good.a₆ * m * b ^ 2
 
-private def DGood (b : L) : L :=
+private noncomputable def DGood (b : L) : L :=
   b - E0Good.a₃ * b ^ 2 - E0Good.a₆ * b ^ 3
 
 private theorem GGood_line (t m b : L) :
@@ -1541,7 +2413,7 @@ theorem kernel_add_closed_good (P Q : GoodPoint)
 abbrev GoodOL := NumberField.RingOfIntegers L
 
 /-- Reduction modulo `pi` in the integral basis `1, pi, pi²`. -/
-private def reducePiOL : GoodOL →+* ZMod 3 where
+private noncomputable def reducePiOL : GoodOL →+* ZMod 3 where
   toFun u := ((MazurProof.N18RouteC.LocalThreeSound.coordsOf u).c0 : ZMod 3)
   map_zero' := by
     simp [MazurProof.N18RouteC.LocalThreeSound.coordsOf_zero]
@@ -2479,604 +3351,40 @@ formal kernel with the seven-point special fiber. -/
 theorem exists_good_reduction :
     ∃ red : GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint,
       ∀ P, P ∈ red.ker ↔ InFormalKernel P := by
-  exact MazurProof.N18GoodReduction.exists_good_reduction_proof
-
-/-- The reduction homomorphism selected from `exists_good_reduction`. -/
-noncomputable def redGood :
-    GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint :=
-  Classical.choose exists_good_reduction
-
-theorem redGood_ker (P : GoodPoint) :
-    P ∈ redGood.ker ↔ InFormalKernel P :=
-  Classical.choose_spec exists_good_reduction P
-
-/-- Supersingular connectedness puts every three-primary torsion point in the
-kernel of good reduction.  This is the remaining Package III reduction fact. -/
-theorem three_pow_torsion_mem_kernel_good (P : GoodPoint)
-    (hP : ∃ k : ℕ, ((3 : ℤ) ^ k) • P = 0) :
-    InFormalKernel P := by
-  obtain ⟨k, hk⟩ := hP
-  have hpow : ((3 : ℤ) ^ k) • redGood P = 0 := by
-    rw [← map_zsmul, hk, map_zero]
-  have hseven : (7 : ℤ) • redGood P = 0 :=
-    MazurProof.N18ReductionHom.seven_zsmul_redPoint (redGood P)
-  have hcop : IsCoprime ((3 : ℤ) ^ k) 7 :=
-    (show IsCoprime (3 : ℤ) 7 by norm_num).pow_left
-  obtain ⟨u, v, huv⟩ := hcop
-  have hred : redGood P = 0 := by
-    calc
-      redGood P = (1 : ℤ) • redGood P := by simp
-      _ = (u * (3 : ℤ) ^ k + v * 7) • redGood P := by rw [huv]
-      _ = u • (((3 : ℤ) ^ k) • redGood P) +
-          v • ((7 : ℤ) • redGood P) := by
-            rw [add_zsmul, mul_zsmul, mul_zsmul]
-      _ = 0 := by
-        rw [hpow, hseven]
-        change u • (0 : MazurProof.N18RouteC.Reduction.RedPoint) +
-          v • (0 : MazurProof.N18RouteC.Reduction.RedPoint) = 0
-        rw [zsmul_zero, zsmul_zero, zero_add]
-  exact (redGood_ker P).mp (AddMonoidHom.mem_ker.mpr hred)
-
-theorem inFormalKernel_iff_packageII (P : GoodPoint) :
-    InFormalKernel P ↔ MazurProof.N18PackageII.InFormalKernel P := by
-  cases P with
-  | zero => exact iff_of_true (Or.inl rfl) trivial
-  | some x y h =>
-      simp [InFormalKernel, xCoordGood, MazurProof.N18PackageII.InFormalKernel]
-
-/-- Package II, restated in the exact form consumed by `FormalKernel18`:
-a nonzero torsion point in the first formal-kernel step has order exactly one.
-The contradiction at order at least two is exactly
-`N18PackageII.msq_torsionFree`. -/
-theorem torsion_val_eq_one_good (P : GoodPoint)
-    (hP : InFormalKernel P)
-    (hz : MazurProof.N18PackageII.zParamGood P ≠ 0)
-    (htor : ∃ n : ℕ, 0 < n ∧ n • P = 0) :
-    vpiGood (MazurProof.N18PackageII.zParamGood P) = 1 := by
-  have hPkg : MazurProof.N18PackageII.InFormalKernel P :=
-    (inFormalKernel_iff_packageII P).mp hP
-  have hpos : 0 < ordPi (MazurProof.N18PackageII.zParamGood P) := by
-    rcases hP with hzero | hx
-    · subst P
-      exact (hz rfl).elim
-    · have hv := vpi_pos_bridge_good P hx
-      rw [vpiGood_apply_of_ne hz] at hv
-      exact_mod_cast hv
-  have hord : ordPi (MazurProof.N18PackageII.zParamGood P) = 1 := by
-    by_contra hne
-    have hlevel : 2 ≤ ordPi (MazurProof.N18PackageII.zParamGood P) := by
-      omega
-    exact MazurProof.N18PackageII.msq_torsionFree hPkg hlevel htor
-  rw [vpiGood_apply_of_ne hz, hord]
-  norm_num
-
-/-! ## Good-model `FormalKernelData` and the abstract Block-5 instance -/
-
-/-- The concrete interface carried by the good model. -/
-structure FormalKernelData where
-  zParam : GoodPoint → L
-  vpi : AddValuation L (WithTop ℤ)
-  vpi_three : vpi (3 : L) = (3 : WithTop ℤ)
-  vpi_unit : ∀ m : ℤ, ¬ (3 ∣ m) → vpi (m : L) = 0
-  zParam_zero : zParam 0 = 0
-  vpi_zParam_neg : ∀ P, InFormalKernel P →
-    vpi (zParam (-P)) = vpi (zParam P)
-  zParam_eq_zero : ∀ P, InFormalKernel P → zParam P = 0 → P = 0
-  add_congr : ∀ P Q, InFormalKernel P → InFormalKernel Q →
-    2 * min (vpi (zParam P)) (vpi (zParam Q)) ≤
-      vpi (zParam (P + Q) - zParam P - zParam Q)
-  vpi_pos_bridge : ∀ P, ordPi (xCoordGood P) < 0 → 0 < vpi (zParam P)
-  kernel_add_closed : ∀ P Q, InFormalKernel P → InFormalKernel Q →
-    InFormalKernel (P + Q)
-  msq_torsionFree : ∀ P, InFormalKernel P → zParam P ≠ 0 →
-    (∃ n : ℕ, 0 < n ∧ n • P = 0) → vpi (zParam P) = 1
-  three_pow_torsion_mem_kernel : ∀ P,
-    (∃ k : ℕ, ((3 : ℤ) ^ k) • P = 0) → InFormalKernel P
-
-/-- Faithfulness of `z = -x/y` on the good formal kernel. -/
-theorem zParamGood_eq_zero_good (P : GoodPoint)
-    (hP : InFormalKernel P)
-    (hz : MazurProof.N18PackageII.zParamGood P = 0) : P = 0 := by
-  rcases hP with hzero | hx
-  · exact hzero
-  · cases P with
-    | zero => rfl
-    | some x y h =>
-        simp only [xCoordGood] at hx
-        have hx0 : x ≠ 0 := by
-          intro hzero
-          rw [hzero, ordPi_zero] at hx
-          omega
-        have hy0 : y ≠ 0 := yCoordGood_ne_zero_of_ordPi_x_neg h hx
-        exfalso
-        exact (div_ne_zero (neg_ne_zero.mpr hx0) hy0)
-          (by simpa using hz)
-
-/-- Package I + Package II + the explicit good-model coordinate bridges. -/
-noncomputable def goodFormalKernelData : FormalKernelData where
-  zParam := MazurProof.N18PackageII.zParamGood
-  vpi := vpiGood
-  vpi_three := vpiGood_three
-  vpi_unit := vpiGood_unit
-  zParam_zero := MazurProof.N18PackageII.zParamGood_zero
-  vpi_zParam_neg := vpi_zParamGood_neg
-  zParam_eq_zero := zParamGood_eq_zero_good
-  add_congr := add_congr_good_weak
-  vpi_pos_bridge := vpi_pos_bridge_good
-  kernel_add_closed := kernel_add_closed_good
-  msq_torsionFree := torsion_val_eq_one_good
-  three_pow_torsion_mem_kernel := three_pow_torsion_mem_kernel_good
-
-namespace FormalKernelData
-
-variable (D : FormalKernelData)
-
-/-- The formal kernel as an additive subgroup of `E0Good(L)`. -/
-def kernelSubgroup : AddSubgroup GoodPoint where
-  carrier := {P | InFormalKernel P}
-  zero_mem' := zero_mem_formalKernel
-  add_mem' := by
-    intro P Q hP hQ
-    exact D.kernel_add_closed P Q hP hQ
-  neg_mem' := by
-    intro P hP
-    rcases hP with hzero | hx
-    · subst P
-      exact Or.inl rfl
-    · exact Or.inr (by rw [xCoordGood_neg]; exact hx)
-
-theorem mem_kernelSubgroup {P : GoodPoint} :
-    P ∈ D.kernelSubgroup ↔ InFormalKernel P := Iff.rfl
-
-theorem vpi_pos_of_mem {P : GoodPoint} (hP : P ∈ D.kernelSubgroup) :
-    0 < D.vpi (D.zParam P) := by
-  rcases hP with hzero | hx
-  · rw [hzero, D.zParam_zero, AddValuation.map_zero]
-    simpa using WithTop.coe_lt_top (0 : ℤ)
-  · exact D.vpi_pos_bridge P hx
-
-theorem zero_le_vpi_natCast (k : ℕ) :
-    (0 : WithTop ℤ) ≤ D.vpi (k : L) := by
-  induction k with
-  | zero => rw [Nat.cast_zero, D.vpi.map_zero]; exact le_top
-  | succ n ih =>
-      rw [Nat.cast_succ]
-      exact D.vpi.map_le_add ih (le_of_eq D.vpi.map_one.symm)
-
-/-- Package I gives the uniform weak scalar congruence. -/
-theorem zParam_nsmul_congr (P : GoodPoint) (hmem : P ∈ D.kernelSubgroup) :
-    ∀ n : ℕ, 1 ≤ n →
-      2 • D.vpi (D.zParam P) ≤
-          D.vpi (D.zParam (n • P) - n • D.zParam P) ∧
-      D.vpi (D.zParam P) ≤ D.vpi (D.zParam (n • P)) := by
-  have hpos : 0 < D.vpi (D.zParam P) := D.vpi_pos_of_mem hmem
-  intro n
-  induction n with
-  | zero => intro h; exact absurd h (by norm_num)
-  | succ k ih =>
-      intro _
-      rcases Nat.eq_zero_or_pos k with rfl | hk
-      · refine ⟨?_, ?_⟩
-        · rw [zero_add, one_nsmul, one_nsmul, sub_self, D.vpi.map_zero]
-          exact le_top
-        · rw [zero_add, one_nsmul]
-      · obtain ⟨ih1, ih2⟩ := ih hk
-        have hB1 : 2 • D.vpi (D.zParam P) ≤
-            D.vpi (D.zParam (k • P + P) - D.zParam (k • P) - D.zParam P) := by
-          have hmin :
-              min (D.vpi (D.zParam (k • P))) (D.vpi (D.zParam P)) =
-                D.vpi (D.zParam P) := min_eq_right ih2
-          calc
-            2 • D.vpi (D.zParam P) =
-                2 * min (D.vpi (D.zParam (k • P)))
-                  (D.vpi (D.zParam P)) := by
-                    rw [hmin]
-                    exact two_nsmul_eq_two_mul _
-            _ ≤ D.vpi
-                (D.zParam (k • P + P) - D.zParam (k • P) - D.zParam P) :=
-              D.add_congr (k • P) P
-                ((D.mem_kernelSubgroup).mp (nsmul_mem hmem k))
-                ((D.mem_kernelSubgroup).mp hmem)
-        have key :
-            D.zParam ((k + 1) • P) - (k + 1) • D.zParam P =
-              (D.zParam (k • P + P) - D.zParam (k • P) - D.zParam P) +
-                (D.zParam (k • P) - k • D.zParam P) := by
-          rw [succ_nsmul P k, succ_nsmul (D.zParam P) k]
-          abel
-        have hclaim1 : 2 • D.vpi (D.zParam P) ≤
-            D.vpi (D.zParam ((k + 1) • P) - (k + 1) • D.zParam P) := by
-          rw [key]
-          exact D.vpi.map_le_add hB1 ih1
-        refine ⟨hclaim1, ?_⟩
-        have hval_smul : D.vpi (D.zParam P) ≤
-            D.vpi ((k + 1) • D.zParam P) := by
-          rw [nsmul_eq_mul, D.vpi.map_mul]
-          exact le_add_of_nonneg_left (D.zero_le_vpi_natCast (k + 1))
-        have ha_le : D.vpi (D.zParam P) ≤ 2 • D.vpi (D.zParam P) := by
-          rw [two_nsmul]
-          exact le_add_of_nonneg_left (le_of_lt hpos)
-        have hdecomp : D.zParam ((k + 1) • P) =
-            (D.zParam ((k + 1) • P) - (k + 1) • D.zParam P) +
-              (k + 1) • D.zParam P := by
-          abel
-        rw [hdecomp]
-        exact D.vpi.map_le_add (le_trans ha_le hclaim1) hval_smul
-
-theorem vpi_zParam_nsmul (P : GoodPoint) (hmem : P ∈ D.kernelSubgroup)
-    (n : ℕ) (hn : ¬ (3 ∣ (n : ℤ))) :
-    D.vpi (D.zParam (n • P)) = D.vpi (D.zParam P) := by
-  have hpos : 0 < D.vpi (D.zParam P) := D.vpi_pos_of_mem hmem
-  rcases eq_or_ne (D.zParam P) 0 with hzero | hz
-  · have hP0 : P = 0 := D.zParam_eq_zero P
-      ((D.mem_kernelSubgroup).mp hmem) hzero
-    subst P
-    rw [nsmul_zero_good]
-  · have hfinite : D.vpi (D.zParam P) ≠ ⊤ := by
-      rw [D.vpi.ne_top_iff]
-      exact hz
-    have hn1 : 1 ≤ n := by
-      rcases Nat.eq_zero_or_pos n with rfl | hnpos
-      · exact absurd (by norm_num) hn
-      · exact hnpos
-    obtain ⟨hcongr, _⟩ := D.zParam_nsmul_congr P hmem n hn1
-    have hunit : D.vpi (n : L) = 0 := by
-      simpa using D.vpi_unit (n : ℤ) hn
-    have hlinear : D.vpi (n • D.zParam P) = D.vpi (D.zParam P) := by
-      rw [nsmul_eq_mul, D.vpi.map_mul, hunit, zero_add]
-    have hlt : D.vpi (n • D.zParam P) <
-        D.vpi (D.zParam (n • P) - n • D.zParam P) := by
-      rw [hlinear]
-      exact lt_of_lt_of_le
-        (MazurProof.N18Block5Instantiation.lt_two_nsmul hpos hfinite) hcongr
-    have hdecomp : D.zParam (n • P) =
-        n • D.zParam P + (D.zParam (n • P) - n • D.zParam P) := by
-      abel
-    rw [hdecomp, D.vpi.map_add_eq_of_lt_left hlt, hlinear]
-
-theorem vpi_zParam_zsmul (P : GoodPoint) (hmem : P ∈ D.kernelSubgroup)
-    (m : ℤ) (hm : ¬ (3 ∣ m)) :
-    D.vpi (D.zParam (m • P)) = D.vpi (D.zParam P) := by
-  cases m with
-  | ofNat n =>
-    change D.vpi (D.zParam (n • P)) = D.vpi (D.zParam P)
-    exact D.vpi_zParam_nsmul P hmem n hm
-  | negSucc n =>
-    change D.vpi (D.zParam (-((n + 1) • P))) = D.vpi (D.zParam P)
-    rw [D.vpi_zParam_neg _
-      ((D.mem_kernelSubgroup).mp (nsmul_mem hmem (n + 1)))]
-    apply D.vpi_zParam_nsmul P hmem
-    intro hd
-    apply hm
-    rw [show Int.negSucc n = -((n + 1 : ℕ) : ℤ) by omega]
-    exact dvd_neg.mpr hd
-
-/-- The abstract Block-5 formal-kernel object on the good model. -/
-def formalKernel18 : _root_.FormalKernel18 where
-  M := D.kernelSubgroup
-  addCommGroup := inferInstance
-  val := fun z ↦ MazurProof.N18Block5Instantiation.toENat
-    (D.vpi (D.zParam (z : GoodPoint)))
-  val_eq_top := by
-    intro z
-    rw [MazurProof.N18Block5Instantiation.toENat_eq_top, D.vpi.top_iff]
-    constructor
-    · intro h
-      apply Subtype.ext
-      rw [ZeroMemClass.coe_zero]
-      exact D.zParam_eq_zero _ z.property h
-    · intro h
-      have hz : (z : GoodPoint) = 0 := by rw [h, ZeroMemClass.coe_zero]
-      rw [hz, D.zParam_zero]
-  one_le_val := by
-    intro z _
-    exact MazurProof.N18Block5Instantiation.one_le_toENat_of_pos
-      (D.vpi_pos_of_mem z.property)
-  val_unit_smul := by
-    intro m hm z
-    have hcoe : ((m • z : D.kernelSubgroup) : GoodPoint) =
-        m • (z : GoodPoint) := by
-      rw [AddSubgroupClass.coe_zsmul]
-    rw [hcoe]
-    exact congrArg MazurProof.N18Block5Instantiation.toENat
-      (D.vpi_zParam_zsmul _ z.property m hm)
-  val_three_smul_ge := by
-    intro z
-    have hpos : 0 < D.vpi (D.zParam (z : GoodPoint)) :=
-      D.vpi_pos_of_mem z.property
-    have hcoe : (((3 : ℤ) • z : D.kernelSubgroup) : GoodPoint) =
-        (3 : ℕ) • (z : GoodPoint) := by
-      rw [AddSubgroupClass.coe_zsmul,
-        show (3 : ℤ) = ((3 : ℕ) : ℤ) by norm_cast, natCast_zsmul]
-    rw [hcoe]
-    obtain ⟨hcongr, _⟩ := D.zParam_nsmul_congr
-      (z : GoodPoint) z.property 3 (by norm_num)
-    have hthree : D.vpi ((3 : ℕ) • D.zParam (z : GoodPoint)) =
-        3 + D.vpi (D.zParam (z : GoodPoint)) := by
-      rw [nsmul_eq_mul, D.vpi.map_mul]
-      congr 1
-      rw [show ((3 : ℕ) : L) = (3 : L) by norm_cast]
-      exact D.vpi_three
-    have hdecomp : D.zParam ((3 : ℕ) • (z : GoodPoint)) =
-        (3 : ℕ) • D.zParam (z : GoodPoint) +
-          (D.zParam ((3 : ℕ) • (z : GoodPoint)) -
-            (3 : ℕ) • D.zParam (z : GoodPoint)) := by
-      abel
-    have hbound :
-        min (3 + D.vpi (D.zParam (z : GoodPoint)))
-            (2 • D.vpi (D.zParam (z : GoodPoint))) ≤
-          D.vpi (D.zParam ((3 : ℕ) • (z : GoodPoint))) := by
-      rw [hdecomp]
-      exact le_trans (min_le_min (le_of_eq hthree.symm) hcongr)
-        (D.vpi.map_add _ _)
-    have hbridge :
-        MazurProof.N18Block5Instantiation.toENat
-            (min (3 + D.vpi (D.zParam (z : GoodPoint)))
-              (2 • D.vpi (D.zParam (z : GoodPoint)))) =
-          min
-            (3 + MazurProof.N18Block5Instantiation.toENat
-              (D.vpi (D.zParam (z : GoodPoint))))
-            (2 * MazurProof.N18Block5Instantiation.toENat
-              (D.vpi (D.zParam (z : GoodPoint)))) := by
-      rw [MazurProof.N18Block5Instantiation.toENat_min,
-        MazurProof.N18Block5Instantiation.toENat_three_add (le_of_lt hpos),
-        MazurProof.N18Block5Instantiation.toENat_two_nsmul (le_of_lt hpos)]
-    calc
-      min
-          (3 + MazurProof.N18Block5Instantiation.toENat
-            (D.vpi (D.zParam (z : GoodPoint))))
-          (2 * MazurProof.N18Block5Instantiation.toENat
-            (D.vpi (D.zParam (z : GoodPoint)))) =
-        MazurProof.N18Block5Instantiation.toENat
-          (min (3 + D.vpi (D.zParam (z : GoodPoint)))
-            (2 • D.vpi (D.zParam (z : GoodPoint)))) := hbridge.symm
-      _ ≤ MazurProof.N18Block5Instantiation.toENat
-          (D.vpi (D.zParam ((3 : ℕ) • (z : GoodPoint)))) :=
-        MazurProof.N18Block5Instantiation.toENat_mono hbound
-  torsion_val_eq_one := by
-    intro z hz htor
-    have hzne : D.zParam (z : GoodPoint) ≠ 0 := by
-      intro h
-      apply hz
-      apply Subtype.ext
-      rw [ZeroMemClass.coe_zero]
-      exact D.zParam_eq_zero _ z.property h
-    have htor' : ∃ n : ℕ, 0 < n ∧ n • (z : GoodPoint) = 0 := by
-      obtain ⟨n, hn, hnz⟩ := htor
-      refine ⟨n, hn, ?_⟩
-      have := congrArg Subtype.val hnz
-      rwa [AddSubmonoidClass.coe_nsmul, ZeroMemClass.coe_zero] at this
-    have hv := D.msq_torsionFree (z : GoodPoint) z.property hzne htor'
-    rw [hv, MazurProof.N18Block5Instantiation.toENat_one]
-
-include D
-
-/-- Package III plus the abstract Block-5 Lemma C. -/
-theorem three_power_torsion_exponent_three
-    (P : GoodPoint) (hP : ∃ k : ℕ, ((3 : ℤ) ^ k) • P = 0) :
-    (3 : ℤ) • P = 0 := by
-  have hmem : P ∈ D.kernelSubgroup :=
-    D.three_pow_torsion_mem_kernel P hP
-  let z : D.kernelSubgroup := ⟨P, hmem⟩
-  obtain ⟨k, hk⟩ := hP
-  have hknat : ((3 : ℕ) ^ k) • P = 0 := by
-    have hcast : ((3 : ℤ) ^ k) • P =
-        (((3 : ℕ) ^ k : ℕ) : ℤ) • P := by norm_cast
-    rw [hcast, natCast_zsmul] at hk
-    exact hk
-  have hkz : ((3 : ℕ) ^ k) • z = 0 := by
-    apply Subtype.ext
-    rw [AddSubmonoidClass.coe_nsmul, ZeroMemClass.coe_zero]
-    exact hknat
-  have h3z := D.formalKernel18.three_power_torsion_exponent_three z k hkz
-  have := congrArg Subtype.val h3z
-  change (3 : ℤ) • P = 0 at this
-  exact this
-
-/-- Identify the reduction kernel with the formal-kernel subgroup. -/
-def kerEquiv
-    (red : GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint)
-    (hker : ∀ P, P ∈ (red.ker : AddSubgroup GoodPoint) ↔
-      P ∈ D.kernelSubgroup) :
-    (red.ker : AddSubgroup GoodPoint) ≃+ D.kernelSubgroup where
-  toFun P := ⟨(P : GoodPoint), (hker P).mp P.property⟩
-  invFun P := ⟨(P : GoodPoint), (hker P).mpr P.property⟩
-  left_inv P := by cases P; rfl
-  right_inv P := by cases P; rfl
-  map_add' _ _ := rfl
-
-/-- Strict growth of the good formal parameter under multiplication by three. -/
-def formalFiltration
-    (red : GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint)
-    (hker : ∀ P, P ∈ (red.ker : AddSubgroup GoodPoint) ↔
-      P ∈ D.kernelSubgroup) :
-    MazurProof.N18RouteC.Separated.StrictNSmulFiltration
-      (red.ker : AddSubgroup GoodPoint) 3 where
-  level P := (D.formalKernel18.val (D.kerEquiv red hker P)).toNat
-  step := by
-    intro P hP0 h3P0
-    have hmap : D.kerEquiv red hker ((3 : ℕ) • P) =
-        (3 : ℕ) • D.kerEquiv red hker P := map_nsmul _ _ _
-    rw [hmap]
-    let z := D.kerEquiv red hker P
-    have hz0 : z ≠ 0 := by
-      intro hz
-      apply hP0
-      apply (D.kerEquiv red hker).injective
-      have hz' : D.kerEquiv red hker P = 0 := by simpa [z] using hz
-      simpa using hz'
-    have h3z0 : (3 : ℕ) • z ≠ 0 := by
-      intro h3z
-      apply h3P0
-      apply (D.kerEquiv red hker).injective
-      rw [map_zero, map_nsmul]
-      exact h3z
-    have hone : (1 : ℕ∞) ≤ D.formalKernel18.val z :=
-      D.formalKernel18.one_le_val z hz0
-    have hge := D.formalKernel18.val_three_smul_ge z
-    have hstep : D.formalKernel18.val z + 1 ≤
-        D.formalKernel18.val ((3 : ℕ) • z) := by
-      refine le_trans ?_ hge
-      apply le_min
-      · calc
-          D.formalKernel18.val z + 1 ≤
-              D.formalKernel18.val z + 3 := add_le_add le_rfl (by norm_num)
-          _ = 3 + D.formalKernel18.val z := add_comm _ _
-      · calc
-          D.formalKernel18.val z + 1 ≤
-              D.formalKernel18.val z + D.formalKernel18.val z :=
-            add_le_add le_rfl hone
-          _ = 2 * D.formalKernel18.val z := (two_mul _).symm
-    have hzTop : D.formalKernel18.val z ≠ ⊤ :=
-      (D.formalKernel18.val_eq_top z).not.mpr hz0
-    have h3zTop : D.formalKernel18.val ((3 : ℕ) • z) ≠ ⊤ :=
-      (D.formalKernel18.val_eq_top _).not.mpr h3z0
-    calc
-      (D.formalKernel18.val z).toNat + 1 =
-          (D.formalKernel18.val z + 1).toNat := by
-        rw [ENat.toNat_add hzTop ENat.one_ne_top, ENat.toNat_one]
-      _ ≤ (D.formalKernel18.val ((3 : ℕ) • z)).toNat :=
-        ENat.toNat_le_toNat hstep h3zTop
-
-end FormalKernelData
-
-/-! ## Uniform annihilation, transport, and Block 7 -/
-
-theorem redGood_ker_formalKernel (P : GoodPoint) :
-    P ∈ redGood.ker ↔ P ∈ goodFormalKernelData.kernelSubgroup := by
-  rw [redGood_ker]
-  rfl
-
-/-- Transport the committed weak three-descent to the integral good equation. -/
-theorem weak_three_descent_good (P : GoodPoint) :
-    ∃ h : GoodPoint, 3 • h = 0 ∧
-      ∃ Q : GoodPoint, P = h + 3 • Q := by
-  obtain ⟨h, hh, Q, hPQ⟩ :=
-    MazurProof.N18RouteC.Block4.weak_three_descent
-      (MazurProof.N18RouteC.GoodModel.e0GoodEquiv.symm P)
-  refine ⟨MazurProof.N18RouteC.GoodModel.e0GoodEquiv h, ?_,
-    MazurProof.N18RouteC.GoodModel.e0GoodEquiv Q, ?_⟩
-  · simpa using congrArg MazurProof.N18RouteC.GoodModel.e0GoodEquiv hh
-  · simpa using congrArg MazurProof.N18RouteC.GoodModel.e0GoodEquiv hPQ
-
-/-- The complete Block-5 output on the good model. -/
-theorem h21_good : ∀ P : GoodPoint, (21 : ℕ) • P = 0 := by
-  exact MazurProof.N18RouteC.Separated.e0_killed_by_21
-    (E0Point := GoodPoint) (LocalPoint := GoodPoint)
-    (RedPoint := MazurProof.N18RouteC.Reduction.RedPoint)
-    (AddMonoidHom.id GoodPoint)
-    Function.injective_id
-    redGood weak_three_descent_good
-    MazurProof.N18RouteC.Reduction.seven_nsmul
-    (goodFormalKernelData.formalFiltration redGood redGood_ker_formalKernel)
-
-/-- Transport `[21]`-annihilation back to the original quotient equation. -/
-theorem h21_E0 : ∀ P : E0Point, (21 : ℕ) • P = 0 := by
+  letI : Fact (Nat.Prime 7) := ⟨by norm_num⟩
+  have hredCard :
+      Nat.card MazurProof.N18RouteC.Reduction.RedPoint = 7 := by
+    rw [Nat.card_eq_fintype_card]
+    exact MazurProof.N18RouteC.Reduction.redPoint_card
+  let e : GoodReductionQuotient ≃+
+      MazurProof.N18RouteC.Reduction.RedPoint :=
+    addEquivOfPrimeCardEq goodReductionQuotient_card hredCard
+  let red : GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint :=
+    e.toAddMonoidHom.comp (QuotientAddGroup.mk' goodKernelSubgroup)
+  refine ⟨red, ?_⟩
   intro P
-  apply MazurProof.N18RouteC.GoodModel.e0GoodEquiv.injective
-  simpa only [map_nsmul, map_zero] using
-    h21_good (MazurProof.N18RouteC.GoodModel.e0GoodEquiv P)
+  change e (QuotientAddGroup.mk' goodKernelSubgroup P) = 0 ↔
+    InFormalKernel P
+  constructor
+  · intro hred
+    have hquot : QuotientAddGroup.mk' goodKernelSubgroup P = 0 :=
+      e.injective (hred.trans e.map_zero.symm)
+    change P ∈ goodKernelSubgroup
+    rw [← QuotientAddGroup.ker_mk' goodKernelSubgroup]
+    exact hquot
+  · intro hformal
+    have hquot : QuotientAddGroup.mk' goodKernelSubgroup P = 0 := by
+      change P ∈ (QuotientAddGroup.mk' goodKernelSubgroup).ker
+      rw [QuotientAddGroup.ker_mk' goodKernelSubgroup]
+      exact hformal
+    rw [hquot, e.map_zero]
 
-/-- Reduction on the original equation, defined by transport through the good
-model. -/
-noncomputable def red_E0 :
-    E0Point →+ MazurProof.N18RouteC.Reduction.RedPoint :=
-  redGood.comp MazurProof.N18RouteC.GoodModel.e0GoodEquiv.toAddMonoidHom
+end QuotientProof
 
-/-- Reduction is injective on seven-torsion.  The proof is the abstract
-prime-to-three formal-kernel lemma applied after transport to `E0Good`. -/
-theorem hker7 (P : E0Point)
-    (h7 : (7 : ℕ) • P = 0) (hred : red_E0 P = 0) : P = 0 := by
-  let PG : GoodPoint := MazurProof.N18RouteC.GoodModel.e0GoodEquiv P
-  have hredG : redGood PG = 0 := by
-    simpa [red_E0, PG] using hred
-  have hmemRed : PG ∈ redGood.ker := AddMonoidHom.mem_ker.mpr hredG
-  have hmem : PG ∈ goodFormalKernelData.kernelSubgroup :=
-    (redGood_ker_formalKernel PG).mp hmemRed
-  let z : goodFormalKernelData.kernelSubgroup := ⟨PG, hmem⟩
-  have h7PG : (7 : ℕ) • PG = 0 := by
-    simpa [PG] using
-      congrArg MazurProof.N18RouteC.GoodModel.e0GoodEquiv h7
-  have h7z : (7 : ℤ) • z = 0 := by
-    apply Subtype.ext
-    rw [AddSubgroupClass.coe_zsmul, ZeroMemClass.coe_zero,
-      show (7 : ℤ) = ((7 : ℕ) : ℤ) by norm_cast, natCast_zsmul]
-    exact h7PG
-  have hz0 : z = 0 :=
-    goodFormalKernelData.formalKernel18.no_prime_to_3_torsion
-      7 (by norm_num) z h7z
-  have hPG0 : PG = 0 := by
-    simpa [z] using congrArg Subtype.val hz0
-  apply MazurProof.N18RouteC.GoodModel.e0GoodEquiv.injective
-  simpa [PG] using hPG0
+/-- Exported proof requested by `N18GoodModelAssembly`. -/
+theorem exists_good_reduction_proof :
+    ∃ red : GoodPoint →+ MazurProof.N18RouteC.Reduction.RedPoint,
+      ∀ P : GoodPoint, P ∈ red.ker ↔ InFormalKernel P := by
+  exact QuotientProof.exists_good_reduction
 
-/-- The weak descent with its representative retained in the explicit
-three-element subgroup `H3`, as required by Block 7. -/
-theorem weak_three_descent_H3 (P : E0Point) :
-    ∃ h : H3, ∃ Q : E0Point, P = (h : E0Point) + 3 • Q := by
-  obtain ⟨n, c, hc⟩ :=
-    MazurProof.N18RouteC.DualSurvivor.kappa_cube_after_sub_torsion P
-  obtain ⟨R, hR⟩ :=
-    MazurProof.N18RouteC.DualPreimage.exists_phihat_preimage_of_kappa_cube
-      (P - n.val • T) ⟨c, hc⟩
-  obtain ⟨Q, hQ⟩ :=
-    MazurProof.N18RouteC.PhiPreimage.phiPoint_surjective R
-  let h : H3 := ⟨n.val • T, nsmul_mem (AddSubgroup.mem_zmultiples T) n.val⟩
-  refine ⟨h, Q, ?_⟩
-  calc
-    P = n.val • T + (P - n.val • T) := by abel
-    _ = n.val • T + phihatPoint R := by rw [hR]
-    _ = n.val • T + phihatPoint (phiPoint Q) := by rw [hQ]
-    _ = (h : E0Point) + 3 • Q := by
-      rw [MazurProof.N18RouteC.Composition.phihat_phi_point]
-
-/-- Block 7 and the verified twenty-one-point fiber table. -/
-theorem all_rational_points_are_cusps :
-    ∀ P : CurvePointQ, CurvePoint.IsCusp P :=
-  MazurProof.N18RouteC.Block7.all_rational_points_are_cusps
-    h21_E0 weak_three_descent_H3 red_E0 hker7
-
-/-! ## Closing the elementary five-descent endpoint -/
-
-theorem curvePolynomial_neg_eq_hyperellipticF18 (U : ℚ) :
-    curvePolynomial (-U) = MazurProof.RationalPointsN18.hyperellipticF18 U := by
-  unfold curvePolynomial MazurProof.RationalPointsN18.hyperellipticF18
-  ring
-
-/-- The final five-descent contradiction.  The reverse bridge constructs a
-noncuspidal rational point, whereas Block 7 says that every rational point is
-a cusp. -/
-theorem no_five_descent_solution :
-    ¬ ∃ A D C e f : ℤ,
-      0 < A ∧ 0 < D ∧ 0 < e ∧ 0 < f ∧
-      Int.gcd A D = 1 ∧ Int.gcd A (A + D) = 1 ∧
-      Int.gcd D (A + D) = 1 ∧ Int.gcd e f = 1 ∧
-      e * f = A * D * (A + D) ∧
-      ((MazurProof.RationalPointsN18Descent.normReal A D = e ^ 2 - 2 * f ^ 2 ∧
-          |C| = e ^ 2 + 2 * f ^ 2) ∨
-       (MazurProof.RationalPointsN18Descent.normReal A D = 2 * e ^ 2 - f ^ 2 ∧
-          |C| = 2 * e ^ 2 + f ^ 2)) ∧
-      (((5 : ℤ) ∣ e ∧ ¬ (5 : ℤ) ∣ f) ∨
-        ((5 : ℤ) ∣ f ∧ ¬ (5 : ℤ) ∣ e)) ∧
-      (((5 : ℤ) ∣ A ∧ ¬ (5 : ℤ) ∣ D ∧ ¬ (5 : ℤ) ∣ A + D) ∨
-       ((5 : ℤ) ∣ D ∧ ¬ (5 : ℤ) ∣ A ∧ ¬ (5 : ℤ) ∣ A + D) ∨
-       ((5 : ℤ) ∣ A + D ∧ ¬ (5 : ℤ) ∣ A ∧ ¬ (5 : ℤ) ∣ D)) := by
-  rintro ⟨A, D, C, e, f, hA, hD, _he, _hf,
-    _hAD, _hAAS, _hDAS, _hefCop, hef, hforms, _hfiveEF, _hfiveAD⟩
-  obtain ⟨U, Y, hU0, hU1, hY⟩ :=
-    MazurProof.RationalPointsN18Descent.five_descent_to_noncuspidal
-      hA hD hef hforms
-  have hcurve : Y ^ 2 = curvePolynomial (-U) := by
-    rw [curvePolynomial_neg_eq_hyperellipticF18]
-    exact hY
-  let P : CurvePointQ := .affine (-U) Y hcurve
-  have hnot : ¬ CurvePoint.IsCusp P := by
-    apply CurvePoint.affine_not_cusp_of_x_ne
-    · exact neg_ne_zero.mpr hU0
-    · intro hneg
-      apply hU1
-      linarith
-  exact hnot (all_rational_points_are_cusps P)
-
-end
-
-end MazurProof.N18GoodModelAssembly
+end MazurProof.N18GoodReduction
