@@ -1,5 +1,7 @@
 import FLT.Assumptions.MazurProof.TateOrder18
 import FLT.Assumptions.MazurProof.RationalPointsN18Descent
+import FLT.Assumptions.MazurProof.N18ObstructionDefs
+import FLT.Assumptions.MazurProof.N18GoodModelAssembly
 
 /-!
 # Cyclic order 18 exclusion
@@ -14,14 +16,6 @@ open scoped WeierstrassCurve.Affine
 namespace MazurProof.CyclicExclusion18
 
 noncomputable section
-
-def F9 (b c : ℚ) : ℚ := (b - c) ^ 3 + c ^ 3 * (b - c - c ^ 2)
-
-def T2 (b c X : ℚ) : ℚ :=
-  4 * X ^ 3 + ((1 - c) ^ 2 - 4 * b) * X ^ 2 + 2 * b * (c - 1) * X + b ^ 2
-
-def Obstruction18 (b c X : ℚ) : Prop :=
-  b ≠ 0 ∧ F9 b c = 0 ∧ T2 b c X = 0
 
 theorem order18_to_tate_obstruction
     (E : WeierstrassCurve ℚ) [E.IsElliptic]
@@ -72,8 +66,8 @@ theorem no_five_descent_solution :
       (((5 : ℤ) ∣ e ∧ ¬(5 : ℤ) ∣ f) ∨ ((5 : ℤ) ∣ f ∧ ¬(5 : ℤ) ∣ e)) ∧
       (((5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ D ∧ ¬(5 : ℤ) ∣ A + D) ∨
        ((5 : ℤ) ∣ D ∧ ¬(5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ A + D) ∨
-       ((5 : ℤ) ∣ A + D ∧ ¬(5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ D)) := by
-  sorry
+       ((5 : ℤ) ∣ A + D ∧ ¬(5 : ℤ) ∣ A ∧ ¬(5 : ℤ) ∣ D)) :=
+  N18GoodModelAssembly.no_five_descent_solution
 
 theorem no_obstruction18 : ¬ ∃ b c X : ℚ, Obstruction18 b c X := by
   rintro ⟨b, c, X, hb, hF9, hT2⟩

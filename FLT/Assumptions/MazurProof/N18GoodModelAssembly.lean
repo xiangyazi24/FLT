@@ -4,6 +4,7 @@ import FLT.Assumptions.MazurProof.N18GoodModelValCoords
 import FLT.Assumptions.MazurProof.N18VpiWrapper
 import FLT.Assumptions.MazurProof.N18RouteC_GoodModel
 import FLT.Assumptions.MazurProof.N18Block5Instantiation
+import FLT.Assumptions.MazurProof.RationalPointsN18Descent
 import FLT.Assumptions.MazurProof.N18RouteC_Block7
 import FLT.Assumptions.MazurProof.N18RouteC_LocalThreeSound
 import FLT.Assumptions.MazurProof.N18RouteC_TorsionTable
