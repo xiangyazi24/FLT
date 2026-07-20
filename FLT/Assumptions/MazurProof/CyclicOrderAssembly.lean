@@ -55,12 +55,11 @@ Endpoint wired to a real theorem:
   order-nine family, and the proved rational-point classification of the
   level-27 curve `y²+y=x³`.
 
-Endpoints kept as named sub-axioms, because no sound real theorem exists to
-wire:
-
-* `15, 21` — the `CyclicExclusion` proofs still contain `sorry`.
-* `18` — proved via `N18GoodModelAssembly.no_five_descent_solution` composed
-  with `CyclicExclusion18.order18_to_five_descent` (both `sorry`-free).
+All composite exclusions `14, 15, 16, 18, 20, 21, 24, 25, 27, 35, 49`
+are wired to `sorry`-free theorems.  `15, 21, 35` are fully proved
+(0 sorry, 0 axiom).  `18` is proved via
+`N18GoodModelAssembly.no_five_descent_solution` composed with
+`CyclicExclusion18.order18_to_five_descent` (both `sorry`-free).
 
 Together with the prime-order input `mazur_prime_torsion_bound_sub`, these are
 exactly the named inputs reported by
