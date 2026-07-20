@@ -244,20 +244,38 @@ MW group = ℤ/6ℤ (rank 0), rational points u ∈ {-1, 1, 3} are all cusps.
   3. Show the map's image avoids both cusps when b≠0, F₇≠0
   4. Wire to `no_raw_order49_tate_obstruction`
 
-### Current axiom inventory (CyclicOrderAssembly)
-| Axiom | Status | Strategy |
-|-------|--------|----------|
-| `no_order_18` | ✅ PROVED | N18GoodModelAssembly (sorry-free) |
-| `no_explicit_order25_obstruction` | axiom | Quotient curve + F₂/F₄ points (partial) |
-| `no_raw_order49_tate_obstruction` | axiom | X₀(49) descent (in progress) |
-| `exists_rational_two_isogeny_quotient` | axiom | N20/N24 2-isogeny (deferred) |
-| `no_order_13_prime` | axiom | X₁(13) genus-2 Jacobian descent |
-| `no_order_17_prime` | ✅ THEOREM | PrimeExclusion17Bridge: kernel poly no-root + bridge axiom |
-| `no_order_19_prime` | ✅ THEOREM | PrimeExclusion19Bridge: kernel poly no-root + bridge axiom |
-| `no_prime_order_ge_23` | axiom | Formal immersion (uniform) |
+### Definitive axiom inventory (`#print axioms mazur_cyclic_order_bound_assembled`)
 
-#### Bridge axioms (sub-axioms replacing raw prime exclusions)
-| Bridge axiom | File | Content |
-|-------------|------|---------|
-| `order17_to_kernel_root` | PrimeExclusion17Bridge | X₀(17)(ℚ) = 2 cusps + 2 noncuspidal; kernel poly at each noncuspidal has no ℚ-root (PROVED in PrimeExclusion17) |
-| `order19_to_kernel_root` | PrimeExclusion19Bridge | X₀(19)(ℚ) = 2 cusps + 1 noncuspidal; kernel poly at noncuspidal has no ℚ-root (PROVED in PrimeExclusion19) |
+**7 custom axioms** (plus 3 Lean built-ins: propext, Classical.choice, Quot.sound):
+
+| # | Axiom | File | Status | Strategy |
+|---|-------|------|--------|----------|
+| 1 | `no_order_13_prime` | CyclicOrderAssembly | axiom | X₁(13) genus-2; F₁₃ has no ℚ-zero mod 2,3,5 with b≠0, but bivariate → needs Chabauty |
+| 2 | `no_prime_order_ge_23` | CyclicOrderAssembly | axiom | Formal immersion on X₀(p) (uniform for all p≥23) |
+| 3 | `no_explicit_order25_obstruction` | CyclicExclusion25 | axiom | X₁(25) genus-12; quotient F₂/F₄ done, Chabauty gap |
+| 4 | `no_raw_order49_tate_obstruction` | CyclicExclusion49 | axiom | X₀(49)≅E₄₉ rank-0 descent done; Tate→X₀ map gap |
+| 5 | `exists_rational_two_isogeny_quotient` | CyclicExclusion20 | axiom | Vélu 2-isogeny (N20/N24 seam) |
+| 6 | `order17_to_kernel_root` | PrimeExclusion17Bridge | bridge axiom | X₀(17) classification; kernel poly no-root PROVED |
+| 7 | `order19_to_kernel_root` | PrimeExclusion19Bridge | bridge axiom | X₀(19) classification; kernel poly no-root PROVED |
+
+**NOT in axiom list** (fully discharged):
+- `no_order_17_prime` → THEOREM via bridge 6
+- `no_order_19_prime` → THEOREM via bridge 7
+- `no_order_18` → THEOREM via N18GoodModelAssembly
+- `no_order_11` → THEOREM via Billing–Mahler cubic descent
+- All composite exclusions (14,15,16,20,21,24,25,27,35,49) → THEOREMs
+- `mordell_weil_fg` → NOT needed by assembly (only by TorsionFinite)
+- `Z2xZ14_gives_non_degenerate_N14_point` → NOT needed by assembly
+
+#### Bridge axiom detail
+| Bridge axiom | Content |
+|-------------|---------|
+| `order17_to_kernel_root` | X₀(17)(ℚ) = 2 cusps + 2 noncuspidal; each noncuspidal fiber's kernel poly has no ℚ-root (PROVED in PrimeExclusion17) |
+| `order19_to_kernel_root` | X₀(19)(ℚ) = 2 cusps + 1 noncuspidal; kernel poly at noncuspidal has no ℚ-root (PROVED in PrimeExclusion19) |
+
+#### N13 analysis note
+F₁₃(b,c) is bivariate (degree 10 in c, monic leading coeff -1; degree 7 in b;
+20 terms, total degree 11). The degree-7 homogeneous part is -b(b-c)⁶. Over
+𝔽₂, 𝔽₃, 𝔽₅: the only solution with b≠0 is the empty set. This rules out
+integer solutions via infinite descent, but rational solutions require the full
+genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
