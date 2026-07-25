@@ -4,8 +4,80 @@
 - exact certificate check: `failure`
 
 ```text
-scripts/Q996FieldSimpCheck.lean:37:2: error: Tactic `simp` failed with a nested error:
-maximum recursion depth has been reached
-use `set_option maxRecDepth <num>` to increase limit
-use `set_option diagnostics true` to get diagnostic information
+scripts/Q996FieldSimpCheck.lean:38:2: error: ring failed, ring expressions not equal
+x y A B r : ℚ
+hy : y ≠ 0
+hd : x - r ≠ 0
+he : (x - r) ^ 2 - (3 * r ^ 2 + A) ≠ 0
+hx3 : ((3 * x ^ 2 + A) / (2 * y)) ^ 2 - 2 * x - r ≠ 0
+hcurve : y ^ 2 = x ^ 3 + A * x + B
+htors : r ^ 3 + A * r + B = 0
+t : ℚ := ⋯
+d : ℚ := ⋯
+e : ℚ := ⋯
+u : ℚ := ⋯
+m : ℚ := ⋯
+p : ℚ := ⋯
+h : ℚ := ⋯
+q : ℚ := ⋯
+f0 : ℚ := ⋯
+C : ℚ := ⋯
+⊢ ⋯ - ⋯ + ⋯ * 2304 + x ^ 6 * r ^ 3 * 144 - x ^ 7 * A * 24 + x ^ 7 * A * y ^ 2 * r ^ 4 * 13824 +
+                                                                                              x ^ 7 * A * y ^ 4 * r *
+                                                                                                2304 +
+                                                                                            x ^ 7 * A ^ 2 * y ^ 2 *
+                                                                                                r ^ 2 *
+                                                                                              6336 +
+                                                                                          x ^ 7 * A ^ 3 * y ^ 2 * 960 +
+                                                                                        x ^ 7 * y ^ 2 * r ^ 6 * 10368 +
+                                                                                      x ^ 7 * y ^ 4 * r ^ 3 * 6912 -
+                                                                                    x ^ 7 * r ^ 2 * 72 -
+                                                                                  x ^ 8 * A * y ^ 2 * r ^ 3 * 10368 -
+                                                                                x ^ 8 * A * y ^ 4 * 1056 -
+                                                                              x ^ 8 * A ^ 2 * y ^ 2 * r * 3744 +
+                                                                            x ^ 8 * y ^ 2 * r ^ 5 * 2592 -
+                                                                          x ^ 8 * y ^ 4 * r ^ 2 * 3168 +
+                                                                        x ^ 9 * A * y ^ 2 * r ^ 2 * 4320 +
+                                                                      x ^ 9 * A ^ 2 * y ^ 2 * 1440 -
+                                                                    x ^ 10 * A * y ^ 2 * r * 1728 -
+                                                                  x ^ 10 * y ^ 2 * r ^ 3 * 5184 +
+                                                                x ^ 11 * A * y ^ 2 * 864 +
+                                                              x ^ 11 * y ^ 2 * r ^ 2 * 2592 +
+                                                            A * y ^ 2 * r ^ 4 * 128 -
+                                                          A * y ^ 4 * r ^ 5 *
+                                                              (-(x * y ^ 2 * 8) + x ^ 2 * A * 6 + x ^ 4 * 9 + A ^ 2 -
+                                                                  y ^ 2 * r * 4)⁻¹ *
+                                                            256 +
+                                                        A * y ^ 4 * r ^ 8 * 5376 +
+                                                      A * y ^ 6 * r ^ 5 * 3072 +
+                                                    A * r ^ 7 * 336 +
+                                                  A ^ 2 * y ^ 2 * r ^ 2 * 56 -
+                                                A ^ 2 * y ^ 2 * r ^ 9 * 576 -
+                                              A ^ 2 * y ^ 4 * r ^ 3 *
+                                                  (-(x * y ^ 2 * 8) + x ^ 2 * A * 6 + x ^ 4 * 9 + A ^ 2 -
+                                                      y ^ 2 * r * 4)⁻¹ *
+                                                112 +
+                                            A ^ 2 * y ^ 4 * r ^ 6 * 3840 +
+                                          A ^ 2 * y ^ 6 * r ^ 3 * 1344 +
+                                        A ^ 2 * r ^ 5 * 264 +
+                                      A ^ 3 * y ^ 2 * 8 -
+                                    A ^ 3 * y ^ 2 * r ^ 7 * 1344 -
+                                  A ^ 3 * y ^ 4 * r *
+                                      (-(x * y ^ 2 * 8) + x ^ 2 * A * 6 + x ^ 4 * 9 + A ^ 2 - y ^ 2 * r * 4)⁻¹ *
+                                    16 +
+                                A ^ 3 * y ^ 4 * r ^ 4 * 768 +
+                              A ^ 3 * y ^ 6 * r * 192 +
+                            A ^ 3 * r ^ 3 * 80 -
+                          A ^ 4 * y ^ 2 * r ^ 5 * 1056 -
+                        A ^ 4 * y ^ 4 * r ^ 2 * 96 +
+                      A ^ 4 * r * 8 -
+                    A ^ 5 * y ^ 2 * r ^ 3 * 320 -
+                  A ^ 5 * y ^ 4 * 32 -
+                A ^ 6 * y ^ 2 * r * 32 +
+              y ^ 2 * r ^ 6 * 96 -
+            y ^ 4 * r ^ 7 * (-(x * y ^ 2 * 8) + x ^ 2 * A * 6 + x ^ 4 * 9 + A ^ 2 - y ^ 2 * r * 4)⁻¹ * 192 +
+          y ^ 4 * r ^ 10 * 2304 +
+        y ^ 6 * r ^ 7 * 2304 +
+      r ^ 9 * 144 =
+    0
 ```
