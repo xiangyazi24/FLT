@@ -42,3 +42,5 @@ jobs:
           fi
           git commit -m "Record exact Q990 SymPy certificate"
           git push origin HEAD:q990-calc-1c48b827
+
+# Triggered after registration on the default branch.
