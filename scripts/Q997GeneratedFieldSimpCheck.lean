@@ -610,7 +610,27 @@ example
           - (x₂ + (3 * r ^ 2 + A) / (x₂ - r)) ≠ 0 := by
     rw [hXeq]
     exact div_ne_zero (mul_ne_zero hd hnh) (mul_ne_zero ha₁ ha₂)
+  have hx3eq :
+      (((y₁ - y₂) / (x₁ - x₂)) ^ 2 - x₁ - x₂) - r =
+        ((y₁ - y₂) ^ 2 - (x₁ - x₂) ^ 2 * (x₁ + x₂ + r)) /
+          (x₁ - x₂) ^ 2 := by
+    field_simp [hd]
+    ring
+  have hD3 :
+      (y₁ - y₂) ^ 2 - (x₁ - x₂) ^ 2 * (x₁ + x₂ + r) ≠ 0 := by
+    intro hzero
+    apply hx₃r
+    rw [hx3eq, hzero]
+    simp
+  have hden :
+      (-(y₁ * y₂ * 2) + y₁ ^ 2 + y₂ ^ 2 + x₁ * x₂ * r * 2 +
+            x₁ * x₂ ^ 2 + x₁ ^ 2 * x₂ - x₁ ^ 2 * r - x₁ ^ 3 -
+            x₂ ^ 2 * r - x₂ ^ 3) =
+        (y₁ - y₂) ^ 2 - (x₁ - x₂) ^ 2 * (x₁ + x₂ + r) := by
+    ring
   field_simp [ha₁, ha₂, hd, hX, hx₃r]
+  rw [hden]
+  field_simp [hD3]
   linear_combination
       (-((x₁ - x₂) ^ 3) * q997_c1 x₁ x₂ y₁ y₂ A r) * hcurve₁
     + (-((x₁ - x₂) ^ 3) * q997_c2 x₁ x₂ y₁ y₂ A r) * hcurve₂
