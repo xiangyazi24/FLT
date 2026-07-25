@@ -1,15 +1,16 @@
-name: Q990 SymPy certificate
+name: Q990 SymPy certificate PR check
 
 on:
-  push:
+  pull_request:
     branches:
-      - q990-calc-1c48b827
+      - main
     paths:
       - scripts/q990_compute_doubling_y.py
       - .github/workflows/q990-sympy.yml
 
 permissions:
   contents: write
+  pull-requests: read
 
 jobs:
   compute:
@@ -31,7 +32,7 @@ jobs:
       - name: Compute and verify Q990 certificate
         run: python scripts/q990_compute_doubling_y.py > Q990_GENERATED.md
 
-      - name: Commit exact generated report
+      - name: Commit exact generated report to the calculation branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
