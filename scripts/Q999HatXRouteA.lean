@@ -134,8 +134,9 @@ example
   rw [hden]
   field_simp [hz']
 
-  -- Step 6: the combined two-pass LCD is the literal side-product LCD, so the
-  -- coefficients are exactly s²*cE and s²*cM.
+  -- Step 6: Lean normalizes an equality as RHS-LHS here, whereas N₀ below is
+  -- target-minus-source.  Therefore the exact field_simp coefficients carry
+  -- one overall minus sign, in addition to the side-product s² multiplier.
   linear_combination
-      ((x₁ - x₂) ^ 2 * cE) * hE
-    + ((x₁ - x₂) ^ 2 * cM) * hm
+      (-((x₁ - x₂) ^ 2 * cE)) * hE
+    + (-((x₁ - x₂) ^ 2 * cM)) * hm
