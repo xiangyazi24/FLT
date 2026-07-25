@@ -2,6 +2,7 @@ import Mathlib
 
 set_option autoImplicit false
 set_option maxHeartbeats 0
+set_option maxRecDepth 100000
 
 /-- The exact full rational hat-X identity, proved by Route A:
 derive the selected branch and shifted curve equations, clear fractions on
