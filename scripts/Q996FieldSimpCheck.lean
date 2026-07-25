@@ -5,7 +5,9 @@ set_option maxHeartbeats 0
 set_option maxRecDepth 100000
 
 /-- Direct check of the polynomial produced by `field_simp` after normalizing
-`x3 - r` to the exact polynomial denominator `D3 / (4 * y^2)`. -/
+`x3 - r` to the exact polynomial denominator `D3 / (4 * y^2)`.
+The expected common-denominator certificate is `4 * C`, whereas the literal
+product-of-side-denominators certificate is `16 * y^2 * C`. -/
 example
     (x y A B r : Rat)
     (hy : Ne y 0)
