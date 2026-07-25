@@ -4,7 +4,7 @@
 - exact certificate check: `failure`
 
 ```text
-scripts/Q996FieldSimpCheck.lean:61:2: error: ring failed, ring expressions not equal
+scripts/Q996FieldSimpCheck.lean:62:2: error: ring failed, ring expressions not equal
 x y A B r : ℚ
 hy : y ≠ 0
 hd : x - r ≠ 0
