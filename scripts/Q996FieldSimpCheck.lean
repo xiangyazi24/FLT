@@ -47,4 +47,4 @@ example
     simp
   rw [hx3_eq]
   field_simp [hy, hd, he, hD3]
-  linear_combination (16 * y ^ 2 * C) * hcurve + (16 * y ^ 2 * C) * htors
+  linear_combination (4 * C) * hcurve + (4 * C) * htors
