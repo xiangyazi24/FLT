@@ -53,11 +53,15 @@ example
   have hB : B = -(r ^ 3 + A * r) := by
     linear_combination htors
 
-  -- The two-generator Route A certificate assumes the hat equation has also
-  -- been used as a substitution, so eliminate A before field_simp.
-  have hA :
-      A = (x₁ - r) * (x₂ - r) - 3 * r ^ 2 := by
-    linear_combination -hat
+  -- Targeted hat rewrites.  These avoid rewriting bare A recursively through
+  -- the very large rational expression.
+  have ht :
+      3 * r ^ 2 + A = (x₁ - r) * (x₂ - r) := hat.symm
+  have hAp :
+      A - 5 * (3 * r ^ 2 + A) =
+        ((x₁ - r) * (x₂ - r) - 3 * r ^ 2)
+          - 5 * ((x₁ - r) * (x₂ - r)) := by
+    linear_combination 4 * hat
 
   have he :
       (x₁ - r) ^ 2 - (x₁ - r) * (x₂ - r) ≠ 0 := by
@@ -104,8 +108,8 @@ example
   -- standalone simplified X-formula itself has no remaining B occurrence.
   simp only [hB] at hcurve₁ hcurve₂ htors ⊢
 
-  -- The necessary hat substitution.  `rw` avoids a deep recursive simp walk.
-  rw [hA]
+  -- Put the rational goal on the hat locus without a generic A rewrite.
+  rw [hAp, ht]
 
   -- Steps 5-6.  Literal field_simp cross-multiplies the two sides, so its
   -- polynomial is (x₁-x₂)^2 times the primitive u^2*N₀ certificate.
