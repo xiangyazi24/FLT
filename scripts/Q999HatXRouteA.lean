@@ -85,6 +85,11 @@ example
             - (x₁ - x₂) ^ 2 * (x₁ + x₂ + r) := by ring
       _ = 0 := hz0
 
+  -- `field_simp` ring-normalizes the x₃-r numerator before looking up its
+  -- nonzero proof, so retain a hypothesis in exactly that normal form.
+  have hz_nf := hz
+  ring_nf at hz_nf
+
   -- Compact B-free coefficient names.
   let u : Rat := x₁ - r
   let v : Rat := x₂ - r
@@ -102,17 +107,6 @@ example
   let cM : Rat :=
     K * (4 * z * y₁ ^ 2 - u ^ 2 * s ^ 4)
 
-  have hz' : z ≠ 0 := by
-    dsimp [z, d, s, T]
-    exact hz
-
-  have hx₃r_eq :
-      ((y₁ - y₂) / (x₁ - x₂)) ^ 2 - x₁ - x₂ - r =
-        z / (x₁ - x₂) ^ 2 := by
-    dsimp [z, d, s, T]
-    field_simp [hd]
-    <;> ring
-
   -- Step 7 is represented by this cancellation combinator.  Its remaining
   -- subgoal is exactly u^2 times the original rational equality.
   refine mul_left_cancel₀ (pow_ne_zero 2 ha₁) ?_
@@ -121,12 +115,12 @@ example
   -- standalone simplified X-formula itself has no remaining B occurrence.
   simp only [hB] at hcurve₁ hcurve₂ htors ⊢
 
-  -- Put the rational goal on the hat locus and expose the named z denominator.
-  rw [hAp, ht, hx₃r_eq]
+  -- Put the rational goal on the hat locus without reducing its denominator.
+  rw [hAp, ht]
 
   -- Steps 5-6.  Literal field_simp cross-multiplies the two sides, so its
   -- polynomial is (x₁-x₂)^2 times the primitive u^2*N₀ certificate.
-  field_simp [hy₁, ha₁, hd, he, hz']
+  field_simp [hy₁, ha₁, hd, he, hz, hz_nf]
   linear_combination
       ((x₁ - x₂) ^ 2 * cE) * hE
     + ((x₁ - x₂) ^ 2 * cM) * hm
