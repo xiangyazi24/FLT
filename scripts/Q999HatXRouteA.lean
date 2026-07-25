@@ -100,8 +100,11 @@ example
   -- subgoal is exactly u^2 times the original rational equality.
   refine mul_left_cancel₀ (pow_ne_zero 2 ha₁) ?_
 
-  -- Steps 4 and the necessary hat substitution.
-  simp only [hB]
+  -- Step 4.  Mentioning the hypotheses makes this robust even when the
+  -- standalone simplified X-formula itself has no remaining B occurrence.
+  simp only [hB] at hcurve₁ hcurve₂ htors ⊢
+
+  -- The necessary hat substitution.
   simp only [hA]
 
   -- Steps 5-6.  Literal field_simp cross-multiplies the two sides, so its
