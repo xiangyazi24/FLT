@@ -6,6 +6,7 @@ on:
       - q974-calc-b4f28945
     paths:
       - scripts/q974_compute_nonhat_x.py
+      - scripts/q974_factor_probe.py
       - .github/workflows/q974-sympy.yml
 
 permissions:
@@ -31,14 +32,17 @@ jobs:
       - name: Compute and verify Q974 certificate
         run: python scripts/q974_compute_nonhat_x.py > Q974_GENERATED.md
 
-      - name: Commit exact generated report
+      - name: Audit cancellation and factorization
+        run: python scripts/q974_factor_probe.py > Q974_FACTOR_PROBE.txt
+
+      - name: Commit exact generated reports
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Q974_GENERATED.md
+          git add Q974_GENERATED.md Q974_FACTOR_PROBE.txt
           if git diff --cached --quiet; then
-            echo "Generated report is unchanged."
+            echo "Generated reports are unchanged."
             exit 0
           fi
-          git commit -m "Compute Q974 exact SymPy certificate"
+          git commit -m "Audit Q974 certificate cancellation and factors"
           git push origin HEAD:q974-calc-b4f28945
