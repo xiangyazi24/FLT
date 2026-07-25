@@ -1,4 +1,4 @@
-scripts/Q999HatXRouteA.lean:118:2: error: ring failed, ring expressions not equal
+scripts/Q999HatXRouteA.lean:132:2: error: ring failed, ring expressions not equal
 x₁ x₂ y₁ y₂ A B r : ℚ
 hat : (x₁ - r) * (x₂ - r) = 3 * r ^ 2 + A
 ha₁ : x₁ - r ≠ 0
@@ -13,6 +13,7 @@ hB : B = -(r ^ 3 + A * r)
 ht : 3 * r ^ 2 + A = (x₁ - r) * (x₂ - r)
 hAp : A - 5 * (3 * r ^ 2 + A) = (x₁ - r) * (x₂ - r) - 3 * r ^ 2 - 5 * ((x₁ - r) * (x₂ - r))
 he : (x₁ - r) ^ 2 - (x₁ - r) * (x₂ - r) ≠ 0
+hz : (y₁ - y₂) ^ 2 - (x₁ - x₂) ^ 2 * (x₁ + x₂ + r) ≠ 0
 hx₃r : ((y₁ - y₂) / (x₁ - x₂)) ^ 2 - x₁ - x₂ - r ≠ 0
 u : ℚ := ⋯
 v : ℚ := ⋯
