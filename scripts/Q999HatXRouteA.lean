@@ -85,37 +85,6 @@ example
             - (x₁ - x₂) ^ 2 * (x₁ + x₂ + r) := by ring
       _ = 0 := hz0
 
-  -- Exact syntactic normal form exposed during `field_simp` for the x₃-r
-  -- numerator.  Having it in context before the tactic runs lets the tactic
-  -- clear that inverse in the same pass.
-  have hz_fs :
-      x₁ * r * x₂ * 2
-          + x₁ * x₂ ^ 2
-          - x₁ ^ 2 * r
-          + x₁ ^ 2 * x₂
-          - x₁ ^ 3
-          - r * x₂ ^ 2
-          - x₂ ^ 3
-          - y₁ * y₂ * 2
-          + y₁ ^ 2
-          + y₂ ^ 2 ≠ 0 := by
-    intro hz0
-    apply hz
-    calc
-      (y₁ - y₂) ^ 2
-            - (x₁ - x₂) ^ 2 * (x₁ + x₂ + r) =
-          x₁ * r * x₂ * 2
-            + x₁ * x₂ ^ 2
-            - x₁ ^ 2 * r
-            + x₁ ^ 2 * x₂
-            - x₁ ^ 3
-            - r * x₂ ^ 2
-            - x₂ ^ 3
-            - y₁ * y₂ * 2
-            + y₁ ^ 2
-            + y₂ ^ 2 := by ring
-      _ = 0 := hz0
-
   -- Compact B-free coefficient names.
   let u : Rat := x₁ - r
   let v : Rat := x₂ - r
@@ -133,6 +102,27 @@ example
   let cM : Rat :=
     K * (4 * z * y₁ ^ 2 - u ^ 2 * s ^ 4)
 
+  have hz' : z ≠ 0 := by
+    dsimp [z, d, s, T]
+    exact hz
+
+  -- `field_simp` creates this expanded denominator only after its first pass.
+  -- Rewriting it afterward, rather than rewriting x₃-r beforehand, preserves
+  -- the full side-product LCD and hence the extra s² scaling.
+  have hden :
+      x₁ * r * x₂ * 2
+          + x₁ * x₂ ^ 2
+          - x₁ ^ 2 * r
+          + x₁ ^ 2 * x₂
+          - x₁ ^ 3
+          - r * x₂ ^ 2
+          - x₂ ^ 3
+          - y₁ * y₂ * 2
+          + y₁ ^ 2
+          + y₂ ^ 2 = z := by
+    dsimp [z, d, s, T]
+    ring
+
   -- Step 7 is represented by this cancellation combinator.  Its remaining
   -- subgoal is exactly u^2 times the original rational equality.
   refine mul_left_cancel₀ (pow_ne_zero 2 ha₁) ?_
@@ -144,9 +134,16 @@ example
   -- Put the rational goal on the hat locus without reducing its denominator.
   rw [hAp, ht]
 
-  -- Steps 5-6.  This clears the literal side-product LCD, so the resulting
-  -- polynomial is (x₁-x₂)^2 times primitive u^2*N₀.
+  -- Step 5, first pass: clear all denominators visible before normalization.
   field_simp [hy₁, ha₁, hd, he]
+
+  -- The first pass has now exposed the normalized x₃-r numerator.  Rename it
+  -- to z and clear precisely this remaining inverse.
+  rw [hden]
+  field_simp [hz']
+
+  -- Step 6: the combined two-pass LCD is the literal side-product LCD, so the
+  -- coefficients are exactly s²*cE and s²*cM.
   linear_combination
       ((x₁ - x₂) ^ 2 * cE) * hE
     + ((x₁ - x₂) ^ 2 * cM) * hm
