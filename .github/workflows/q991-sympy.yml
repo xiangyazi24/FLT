@@ -8,6 +8,7 @@ on:
       - scripts/q991_compute_hat_y.py
       - scripts/q991_compact_certificate.py
       - scripts/q991_hat_y_final.py
+      - scripts/q991_unspecialized_certificate.py
       - .github/workflows/q991-sympy.yml
 
 permissions:
@@ -31,7 +32,7 @@ jobs:
         run: python -m pip install --disable-pip-version-check sympy==1.14.0
 
       - name: Compute and verify Q991 certificate
-        run: python scripts/q991_hat_y_final.py > Q991_GENERATED.md
+        run: python scripts/q991_unspecialized_certificate.py > Q991_GENERATED.md
 
       - name: Commit exact generated report
         run: |
