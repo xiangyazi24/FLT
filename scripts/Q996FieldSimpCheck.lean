@@ -4,8 +4,8 @@ set_option autoImplicit false
 set_option maxHeartbeats 0
 set_option maxRecDepth 100000
 
-/-- Direct check of the polynomial produced by `field_simp` on the fully
-unfolded doubling X-coordinate identity. -/
+/-- Direct check of the polynomial produced by `field_simp` after normalizing
+`x3 - r` to the exact polynomial denominator `D3 / (4 * y^2)`. -/
 example
     (x y A B r : Rat)
     (hy : Ne y 0)
@@ -45,18 +45,6 @@ example
     apply hx3
     rw [hx3_eq, hzero]
     simp
-  have hD3nf :
-      Ne
-        (-(x * y ^ 2 * 8) + x ^ 2 * A * 6 + x ^ 4 * 9 + A ^ 2 - y ^ 2 * r * 4)
-        0 := by
-    intro hzero
-    apply hD3
-    dsimp [D3, u, h]
-    calc
-      (3 * x ^ 2 + A) ^ 2 - 4 * (2 * x + r) * y ^ 2 =
-          -(x * y ^ 2 * 8) + x ^ 2 * A * 6 + x ^ 4 * 9 + A ^ 2 - y ^ 2 * r * 4 := by
-        ring
-      _ = 0 := hzero
-  field_simp [hy, hd, he, hD3nf]
-  field_simp [hD3nf]
+  rw [hx3_eq]
+  field_simp [hy, hd, he, hD3]
   linear_combination (16 * y ^ 2 * C) * hcurve + (16 * y ^ 2 * C) * htors
