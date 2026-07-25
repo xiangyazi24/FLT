@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """Q974: exact SymPy certificate for the non-hat Vélu X-coordinate identity.
 
-The rational identity itself is formed after eliminating
+Two denominator-clearing conventions are reported:
+
+1. reduced: numerator(cancel(together(lhs - rhs)));
+2. raw:     numerator(together(lhs - rhs)).
+
+The raw numerator is checked to be an exact polynomial multiple of the reduced
+one.  The rational identity itself is formed after eliminating
     B = -(r^3 + A*r).
 For the final Lean certificate we retain an independent symbol B and use
     g_i = hcurve_i + htors.
@@ -38,10 +44,22 @@ X3p = ellp**2 - X1p - X2p
 
 lhs = x3 + t / (x3 - r)
 rhs = X3p
-diff = sp.together(lhs - rhs)
-num_raw, den_raw = sp.fraction(diff)
-num = sp.expand(num_raw)
-den = sp.factor(den_raw)
+
+# Keep both exact conventions.  The reduced one is the primary certificate.
+together_diff = sp.together(lhs - rhs)
+raw_num_expr, raw_den_expr = sp.fraction(together_diff)
+raw_num = sp.expand(raw_num_expr)
+raw_den = sp.factor(raw_den_expr)
+
+reduced_diff = sp.cancel(together_diff)
+num_expr, den_expr = sp.fraction(reduced_diff)
+num = sp.expand(num_expr)
+den = sp.factor(den_expr)
+
+raw_multiplier = sp.factor(sp.cancel(raw_num / num))
+assert sp.denom(sp.together(raw_multiplier)) == 1
+assert sp.expand(raw_num - raw_multiplier*num) == 0
+assert sp.expand(raw_num*den - num*raw_den) == 0
 
 
 # ---------------------------------------------------------------------------
@@ -70,6 +88,12 @@ assert sp.expand(g2 - (hcurve2 + htors)) == 0
 assert rem2 == 0
 assert sp.expand(num - c1*g1 - c2*g2) == 0
 assert sp.expand(num - c1*hcurve1 - c2*hcurve2 - c3*htors) == 0
+assert sp.expand(
+    raw_num
+    - raw_multiplier*c1*hcurve1
+    - raw_multiplier*c2*hcurve2
+    - raw_multiplier*c3*htors
+) == 0
 assert all(B not in c.free_symbols for c in (c1, c2, c3))
 assert all(sp.denom(sp.together(c)) == 1 for c in (c1, c2, c3))
 
@@ -89,6 +113,14 @@ LEAN_NAMES = {
 
 def lean_monomial(expr: sp.Expr) -> str:
     """Print one expanded monomial in syntax accepted by Lean 4."""
+    text = sp.sstr(expr, order="lex").replace("**", "^")
+    for old, new in LEAN_NAMES.items():
+        text = re.sub(rf"\b{re.escape(old)}\b", new, text)
+    return text
+
+
+def lean_expr(expr: sp.Expr) -> str:
+    """Print any small SymPy expression in Lean syntax."""
     text = sp.sstr(expr, order="lex").replace("**", "^")
     for old, new in LEAN_NAMES.items():
         text = re.sub(rf"\b{re.escape(old)}\b", new, text)
@@ -119,6 +151,22 @@ def emit_coefficient(expr: sp.Expr, outer_indent: str = "  ") -> list[str]:
     return [outer_indent + "(", inner_indent + body[0], *body[1:], outer_indent + ")"]
 
 
+def emit_scaled_coefficient(
+    multiplier: sp.Expr, coeff: sp.Expr, outer_indent: str = "  "
+) -> list[str]:
+    inner_indent = outer_indent + "  "
+    coeff_indent = inner_indent + "  "
+    body = lean_sum_lines(coeff, coeff_indent)
+    return [
+        outer_indent + "(",
+        inner_indent + lean_expr(multiplier) + " * (",
+        coeff_indent + body[0],
+        *body[1:],
+        inner_indent + ")",
+        outer_indent + ")",
+    ]
+
+
 def term_count(expr: sp.Expr) -> int:
     expr = sp.expand(expr)
     return 0 if expr == 0 else len(expr.as_ordered_terms())
@@ -135,25 +183,35 @@ def digest(expr: sp.Expr) -> str:
 print("## Exact result")
 print()
 print(f"- SymPy version: `{sp.__version__}`")
-print(f"- numerator terms: `{term_count(num)}`")
-print(f"- degree in `y1`: `{sp.degree(num, y1)}`")
-print(f"- degree in `y2`: `{sp.degree(num, y2)}`")
-print(f"- `c1` terms: `{term_count(c1)}`")
-print(f"- `c2` terms: `{term_count(c2)}`")
-print(f"- `c3` terms after expansion: `{term_count(c3)}`")
+print(f"- raw together numerator terms: `{term_count(raw_num)}`")
+print(f"- reduced cancelled numerator terms: `{term_count(num)}`")
+print(f"- exact raw/reduced multiplier: `{sp.sstr(raw_multiplier, order='lex')}`")
+print(f"- reduced numerator degree in `y1`: `{sp.degree(num, y1)}`")
+print(f"- reduced numerator degree in `y2`: `{sp.degree(num, y2)}`")
+print(f"- reduced `c1` terms: `{term_count(c1)}`")
+print(f"- reduced `c2` terms: `{term_count(c2)}`")
+print(f"- reduced `c3` terms after expansion: `{term_count(c3)}`")
 print(f"- final division remainder: `{rem2}`")
 print("- exact reduced-curve verification: `0`")
 print("- exact original-hypothesis verification: `0`")
-print("- all three coefficients are B-free: `True`")
-print(f"- numerator SHA-256: `{digest(num)}`")
-print(f"- c1 SHA-256: `{digest(c1)}`")
-print(f"- c2 SHA-256: `{digest(c2)}`")
-print(f"- c3 SHA-256: `{digest(c3)}`")
+print("- exact raw-numerator verification using the multiplier: `0`")
+print("- all three reduced coefficients are B-free: `True`")
+print(f"- raw numerator SHA-256: `{digest(raw_num)}`")
+print(f"- reduced numerator SHA-256: `{digest(num)}`")
+print(f"- reduced c1 SHA-256: `{digest(c1)}`")
+print(f"- reduced c2 SHA-256: `{digest(c2)}`")
+print(f"- reduced c3 SHA-256: `{digest(c3)}`")
 print()
-print("The denominator returned by `fraction(together(lhs - rhs))` factors as:")
+print("The reduced denominator returned by `fraction(cancel(together(lhs - rhs)))` factors as:")
 print()
 print("```text")
 print(sp.sstr(den, order="lex"))
+print("```")
+print()
+print("The uncancelled denominator returned by `fraction(together(lhs - rhs))` factors as:")
+print()
+print("```text")
+print(sp.sstr(raw_den, order="lex"))
 print("```")
 print()
 print("The first remainder (after division in `y1`) has")
@@ -169,7 +227,9 @@ print(Path(__file__).read_text(encoding="utf-8").rstrip())
 print("```")
 print()
 
-print("## Exact Lean 4 command")
+print("## Exact Lean 4 command for the reduced numerator")
+print()
+print("This is the numerator of `cancel(together(lhs - rhs))`.")
 print()
 print("```lean")
 print("linear_combination")
@@ -180,6 +240,25 @@ for line in emit_coefficient(c2):
     print(line)
 print("  * hcurve₂ +")
 for line in emit_coefficient(c3):
+    print(line)
+print("  * htors")
+print("```")
+print()
+
+print("## Exact Lean 4 command for the raw `together` numerator")
+print()
+print("The raw numerator is the reduced numerator multiplied by")
+print(f"`{lean_expr(raw_multiplier)}`.  Therefore use:")
+print()
+print("```lean")
+print("linear_combination")
+for line in emit_scaled_coefficient(raw_multiplier, c1):
+    print(line)
+print("  * hcurve₁ +")
+for line in emit_scaled_coefficient(raw_multiplier, c2):
+    print(line)
+print("  * hcurve₂ +")
+for line in emit_scaled_coefficient(raw_multiplier, c3):
     print(line)
 print("  * htors")
 print("```")
