@@ -1,0 +1,75 @@
+name: Q999 hat X Route A PR check
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - scripts/q999_compute_hat_x_route_a.py
+      - scripts/Q999HatXRouteA.lean
+      - .github/workflows/q999-route-a.yml
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q999-calc-781a78b3
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install exact SymPy version
+        run: python -m pip install --disable-pip-version-check sympy==1.14.0
+
+      - name: Run exact SymPy audit and retain its log
+        shell: bash
+        run: |
+          set +e
+          python scripts/q999_compute_hat_x_route_a.py > Q999_GENERATED.md 2> Q999_SYMPY_LOG.txt
+          status=$?
+          printf '%s\n' "$status" > Q999_SYMPY_STATUS.txt
+          exit 0
+
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+
+      - name: Elaborate exact Lean Route A proof
+        shell: bash
+        run: |
+          set +e
+          lake env lean scripts/Q999HatXRouteA.lean > Q999_LEAN_LOG.txt 2>&1
+          status=$?
+          printf '%s\n' "$status" > Q999_LEAN_STATUS.txt
+          exit 0
+
+      - name: Commit exact reports and logs to the calculation branch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Q999_GENERATED.md Q999_SYMPY_LOG.txt Q999_SYMPY_STATUS.txt \
+                  Q999_LEAN_LOG.txt Q999_LEAN_STATUS.txt
+          if git diff --cached --quiet; then
+            echo 'Reports unchanged.'
+          else
+            git commit -m 'Record Q999 exact Route A audit'
+            git push origin HEAD:q999-calc-781a78b3
+          fi
+
+      - name: Fail if either verifier failed
+        shell: bash
+        run: |
+          test "$(cat Q999_SYMPY_STATUS.txt)" = 0
+          test "$(cat Q999_LEAN_STATUS.txt)" = 0
