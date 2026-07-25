@@ -71,6 +71,20 @@ example
         (x₁ - r) * (x₁ - x₂) by ring]
     exact mul_ne_zero ha₁ hd
 
+  have hz :
+      (y₁ - y₂) ^ 2
+          - (x₁ - x₂) ^ 2 * (x₁ + x₂ + r) ≠ 0 := by
+    intro hz0
+    apply hx₃r_poly
+    calc
+      (y₁ - y₂) ^ 2
+            - x₁ * (x₁ - x₂) ^ 2
+            - x₂ * (x₁ - x₂) ^ 2
+            - (x₁ - x₂) ^ 2 * r =
+          (y₁ - y₂) ^ 2
+            - (x₁ - x₂) ^ 2 * (x₁ + x₂ + r) := by ring
+      _ = 0 := hz0
+
   have hx₃r :
       ((y₁ - y₂) / (x₁ - x₂)) ^ 2 - x₁ - x₂ - r ≠ 0 := by
     rw [show
@@ -114,7 +128,7 @@ example
 
   -- Steps 5-6.  Literal field_simp cross-multiplies the two sides, so its
   -- polynomial is (x₁-x₂)^2 times the primitive u^2*N₀ certificate.
-  field_simp [hy₁, ha₁, hd, he, hx₃r]
+  field_simp [hy₁, ha₁, hd, he, hz, hx₃r]
   linear_combination
       ((x₁ - x₂) ^ 2 * cE) * hE
     + ((x₁ - x₂) ^ 2 * cM) * hm
