@@ -2,6 +2,7 @@ import Mathlib
 
 set_option autoImplicit false
 set_option maxHeartbeats 0
+set_option maxRecDepth 100000
 
 /-- Direct check of the polynomial produced by `field_simp` on the fully
 unfolded doubling X-coordinate identity. -/
