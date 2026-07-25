@@ -45,5 +45,17 @@ example
     apply hx3
     rw [hx3_eq, hzero]
     simp
-  field_simp [hy, hd, he, hD3]
+  have hD3nf :
+      Ne
+        (-(x * y ^ 2 * 8) + x ^ 2 * A * 6 + x ^ 4 * 9 + A ^ 2 - y ^ 2 * r * 4)
+        0 := by
+    intro hzero
+    apply hD3
+    dsimp [D3, u, h]
+    calc
+      (3 * x ^ 2 + A) ^ 2 - 4 * (2 * x + r) * y ^ 2 =
+          -(x * y ^ 2 * 8) + x ^ 2 * A * 6 + x ^ 4 * 9 + A ^ 2 - y ^ 2 * r * 4 := by
+        ring
+      _ = 0 := hzero
+  field_simp [hy, hd, he, hD3nf]
   linear_combination (16 * y ^ 2 * C) * hcurve + (16 * y ^ 2 * C) * htors
