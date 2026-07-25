@@ -31,8 +31,19 @@ example
   let h : Rat := 2 * x + r
   let q : Rat := 2 * t - d * h
   let f0 : Rat := x ^ 3 + A * x - r ^ 3 - A * r
+  let D3 : Rat := u ^ 2 - 4 * h * y ^ 2
   let C : Rat :=
     d * h * p ^ 2
       + e ^ 2 * (u ^ 2 * q - 12 * t * (x + r) * (y ^ 2 + f0))
-  field_simp [hy, hd, he, hx3]
+  have hx3_eq :
+      ((3 * x ^ 2 + A) / (2 * y)) ^ 2 - 2 * x - r = D3 / (4 * y ^ 2) := by
+    dsimp [D3, u, h]
+    field_simp [hy]
+    ring
+  have hD3 : Ne D3 0 := by
+    intro hzero
+    apply hx3
+    rw [hx3_eq, hzero]
+    simp
+  field_simp [hy, hd, he, hD3]
   linear_combination (16 * y ^ 2 * C) * hcurve + (16 * y ^ 2 * C) * htors
