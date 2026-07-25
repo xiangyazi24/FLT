@@ -6,6 +6,7 @@ on:
       - q996-calc-e02dbee8
     paths:
       - scripts/q996_compute_doubling_x_scaling.py
+      - scripts/q996_final_field_simp_vs_product.py
       - .github/workflows/q996-sympy.yml
 
 permissions:
@@ -28,17 +29,20 @@ jobs:
       - name: Install exact SymPy version
         run: python -m pip install --disable-pip-version-check sympy==1.14.0
 
-      - name: Compute and verify Q996 scaling certificate
+      - name: Compute and verify the original Q996 scaling certificate
         run: python scripts/q996_compute_doubling_x_scaling.py > Q996_GENERATED.md
 
-      - name: Commit exact generated report
+      - name: Verify field_simp versus literal denominator product
+        run: python scripts/q996_final_field_simp_vs_product.py > Q996_FINAL.md
+
+      - name: Commit exact generated reports
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Q996_GENERATED.md
+          git add Q996_GENERATED.md Q996_FINAL.md
           if git diff --cached --quiet; then
-            echo "Generated report is unchanged."
+            echo "Generated reports are unchanged."
             exit 0
           fi
-          git commit -m "Record exact Q996 scaling certificate"
+          git commit -m "Record final Q996 field-simp audit"
           git push origin HEAD:q996-calc-e02dbee8
