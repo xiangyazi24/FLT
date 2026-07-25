@@ -1,0 +1,27 @@
+name: Q996 direct Lean field_simp check
+
+on:
+  push:
+    branches:
+      - q996-calc-e02dbee8
+    paths:
+      - scripts/Q996FieldSimpCheck.lean
+      - .github/workflows/q996-lean.yml
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q996-calc-e02dbee8
+
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+
+      - name: Elaborate the exact field_simp certificate
+        run: lake env lean scripts/Q996FieldSimpCheck.lean
