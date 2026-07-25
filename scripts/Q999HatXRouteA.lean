@@ -85,10 +85,34 @@ example
             - (x₁ - x₂) ^ 2 * (x₁ + x₂ + r) := by ring
       _ = 0 := hz0
 
-  -- `field_simp` ring-normalizes the x₃-r numerator before looking up its
-  -- nonzero proof, so retain a hypothesis in exactly that normal form.
-  have hz_nf := hz
-  ring_nf at hz_nf
+  -- Exact syntactic normal form used by `field_simp` for the x₃-r numerator.
+  have hz_fs :
+      x₁ * r * x₂ * 2
+          + x₁ * x₂ ^ 2
+          - x₁ ^ 2 * r
+          + x₁ ^ 2 * x₂
+          - x₁ ^ 3
+          - r * x₂ ^ 2
+          - x₂ ^ 3
+          - y₁ * y₂ * 2
+          + y₁ ^ 2
+          + y₂ ^ 2 ≠ 0 := by
+    intro hz0
+    apply hz
+    calc
+      (y₁ - y₂) ^ 2
+            - (x₁ - x₂) ^ 2 * (x₁ + x₂ + r) =
+          x₁ * r * x₂ * 2
+            + x₁ * x₂ ^ 2
+            - x₁ ^ 2 * r
+            + x₁ ^ 2 * x₂
+            - x₁ ^ 3
+            - r * x₂ ^ 2
+            - x₂ ^ 3
+            - y₁ * y₂ * 2
+            + y₁ ^ 2
+            + y₂ ^ 2 := by ring
+      _ = 0 := hz0
 
   -- Compact B-free coefficient names.
   let u : Rat := x₁ - r
@@ -120,7 +144,7 @@ example
 
   -- Steps 5-6.  Literal field_simp cross-multiplies the two sides, so its
   -- polynomial is (x₁-x₂)^2 times the primitive u^2*N₀ certificate.
-  field_simp [hy₁, ha₁, hd, he, hz, hz_nf]
+  field_simp [hy₁, ha₁, hd, he, hz, hz_fs]
   linear_combination
       ((x₁ - x₂) ^ 2 * cE) * hE
     + ((x₁ - x₂) ^ 2 * cM) * hm
