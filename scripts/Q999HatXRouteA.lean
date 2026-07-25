@@ -3,7 +3,7 @@ import Mathlib
 set_option autoImplicit false
 set_option maxHeartbeats 0
 
-/-- Preliminary exact checks for the four algebraic reductions used by Q999. -/
+/-- Preliminary exact checks for the algebraic reductions used by Q999. -/
 example
     (x₁ x₂ y₁ y₂ A B r : Rat)
     (hcurve₁ : y₁ ^ 2 = x₁ ^ 3 + A * x₁ + B)
@@ -41,3 +41,13 @@ example
     (htors : r ^ 3 + A * r + B = 0) :
     B = -(r ^ 3 + A * r) := by
   linear_combination htors
+
+example
+    (x₁ x₂ r : Rat)
+    (ha₁ : x₁ - r ≠ 0)
+    (hd : x₁ - x₂ ≠ 0) :
+    (x₁ - r) ^ 2 - (x₁ - r) * (x₂ - r) ≠ 0 := by
+  rw [show
+    (x₁ - r) ^ 2 - (x₁ - r) * (x₂ - r) =
+      (x₁ - r) * (x₁ - x₂) by ring]
+  exact mul_ne_zero ha₁ hd
