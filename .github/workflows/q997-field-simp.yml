@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - scripts/q997_compute_nonhat_x_fieldsimp.py
+      - scripts/q997_patch_generated_second_pass.py
       - scripts/Q997GeneratedFieldSimpCheck.lean
       - .github/workflows/q997-field-simp.yml
 
@@ -40,6 +41,9 @@ jobs:
           status=$?
           printf '%s\n' "$status" > Q997_SYMPY_STATUS.txt
           exit 0
+
+      - name: Insert the second D3 field_simp pass
+        run: python scripts/q997_patch_generated_second_pass.py
 
       - uses: leanprover/lean-action@v1
         with:
