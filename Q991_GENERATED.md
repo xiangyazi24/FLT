@@ -98,3 +98,53 @@ Thus, for the standard `LHS-RHS` reduced numerator, use
 `red_coeff_original` on `hcurve1`, the same coefficient on `htors`,
 and `-(x1-r)*red_coeff_original` on `hat`.  Negate all three for
 Mathlib `negAddY` or for the opposite defect orientation.
+
+## Compact structured certificate
+
+Use
+
+```text
+u = x1-r
+v = x2-r
+s = u-v
+U = u+v
+T = 3*r+U
+p = y1
+E = p^2-u^2*T
+g = s^2+2*U*T
+z = p^2*U^2-u^2*s^2*T
+```
+
+The standard-addY full defect is exactly
+
+```text
+qYfull * E / (8*p^3*u^3*s^3*z^2)
+```
+
+where
+
+```text
+qYline =
+  (z-u^3*s^2)
+  * (z-u^2*v*s^2)
+  * (u^2*g*s^2-2*p^2*U^3)
+
+qX =
+  u^4*s^6
+  - 4*z*(p^2*U^2 + u^2*U*(s^2+U*T))
+
+qYfull = 4*p^2*qYline + u^2*z*g*qX
+```
+
+The decomposition verified is
+
+```text
+full_Y_defect = line_defect + mu * X_defect
+mu = u*g/(2*p*s)
+
+line_defect = qYline*E/(2*p*u^3*s^3*z^2)
+X_defect    = qX*E/(4*p^2*u^2*s^2*z)
+```
+
+For Mathlib negAddY, or if the equality is normalized in the opposite
+orientation, negate qYline/qYfull as appropriate.
