@@ -29,17 +29,25 @@ jobs:
       - name: Install exact SymPy version
         run: python -m pip install --disable-pip-version-check sympy==1.14.0
 
-      - name: Compute and verify Q990 certificate
-        run: python scripts/q990_compute_doubling_y.py > Q990_GENERATED.md
+      - name: Compute and capture Q990 certificate diagnostics
+        run: |
+          set +e
+          python scripts/q990_compute_doubling_y.py > Q990_GENERATED.md 2> Q990_ERROR.txt
+          status=$?
+          printf '%s\n' "$status" > Q990_EXIT_STATUS.txt
+          exit 0
 
-      - name: Commit exact generated report to the calculation branch
+      - name: Commit generated report and diagnostics to the calculation branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Q990_GENERATED.md
+          git add Q990_GENERATED.md Q990_ERROR.txt Q990_EXIT_STATUS.txt
           if git diff --cached --quiet; then
-            echo "Generated report is unchanged."
-            exit 0
+            echo "Generated diagnostics are unchanged."
+          else
+            git commit -m "Record Q990 SymPy certificate diagnostics"
+            git push origin HEAD:q990-calc-1c48b827
           fi
-          git commit -m "Record exact Q990 SymPy certificate"
-          git push origin HEAD:q990-calc-1c48b827
+
+      - name: Propagate checker result
+        run: test "$(cat Q990_EXIT_STATUS.txt)" = "0"
