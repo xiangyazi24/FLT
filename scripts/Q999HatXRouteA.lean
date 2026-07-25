@@ -85,7 +85,8 @@ example
             - (x₁ - x₂) ^ 2 * (x₁ + x₂ + r) := by ring
       _ = 0 := hz0
 
-  -- Exact syntactic normal form used by `field_simp` for the x₃-r numerator.
+  -- Exact syntactic normal form exposed by the first `field_simp` pass for
+  -- the x₃-r numerator.
   have hz_fs :
       x₁ * r * x₂ * 2
           + x₁ * x₂ ^ 2
@@ -142,9 +143,12 @@ example
   -- Put the rational goal on the hat locus without reducing its denominator.
   rw [hAp, ht]
 
-  -- Steps 5-6.  Literal field_simp cross-multiplies the two sides, so its
-  -- polynomial is (x₁-x₂)^2 times the primitive u^2*N₀ certificate.
-  field_simp [hy₁, ha₁, hd, he, hz, hz_fs]
+  -- Steps 5-6.  The first pass clears the visible rational denominators and
+  -- exposes the expanded z⁻¹ term.  The second pass clears that exact term.
+  -- Their combined multiplier is the literal side-product LCD, hence the
+  -- resulting polynomial is (x₁-x₂)^2 times primitive u^2*N₀.
+  field_simp [hy₁, ha₁, hd, he]
+  field_simp [hz_fs]
   linear_combination
       ((x₁ - x₂) ^ 2 * cE) * hE
     + ((x₁ - x₂) ^ 2 * cM) * hm
