@@ -58,4 +58,5 @@ example
         ring
       _ = 0 := hzero
   field_simp [hy, hd, he, hD3nf]
+  field_simp [hD3nf]
   linear_combination (16 * y ^ 2 * C) * hcurve + (16 * y ^ 2 * C) * htors
