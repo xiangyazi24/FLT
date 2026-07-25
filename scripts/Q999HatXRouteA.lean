@@ -106,20 +106,12 @@ example
     dsimp [z, d, s, T]
     exact hz
 
-  -- `field_simp` creates this expanded denominator only after its first pass.
-  -- Rewriting it afterward, rather than rewriting x₃-r beforehand, preserves
-  -- the full side-product LCD and hence the extra s² scaling.
+  -- This is the exact denominator left by the first field_simp pass.
   have hden :
-      x₁ * r * x₂ * 2
-          + x₁ * x₂ ^ 2
-          - x₁ ^ 2 * r
-          + x₁ ^ 2 * x₂
-          - x₁ ^ 3
-          - r * x₂ ^ 2
-          - x₂ ^ 3
-          - y₁ * y₂ * 2
-          + y₁ ^ 2
-          + y₂ ^ 2 = z := by
+      (y₁ - y₂) ^ 2
+          - x₁ * (x₁ - x₂) ^ 2
+          - x₂ * (x₁ - x₂) ^ 2
+          - r * (x₁ - x₂) ^ 2 = z := by
     dsimp [z, d, s, T]
     ring
 
@@ -137,8 +129,8 @@ example
   -- Step 5, first pass: clear all denominators visible before normalization.
   field_simp [hy₁, ha₁, hd, he]
 
-  -- The first pass has now exposed the normalized x₃-r numerator.  Rename it
-  -- to z and clear precisely this remaining inverse.
+  -- The first pass leaves exactly one division by the polynomial above.
+  -- Rename that polynomial z and clear this last denominator.
   rw [hden]
   field_simp [hz']
 
