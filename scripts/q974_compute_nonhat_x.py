@@ -7,7 +7,7 @@ Two denominator-clearing conventions are reported:
 2. raw:     numerator(together(lhs - rhs)).
 
 The raw numerator is checked to be an exact polynomial multiple of the reduced
-one.  The rational identity itself is formed after eliminating
+one. The rational identity itself is formed after eliminating
     B = -(r^3 + A*r).
 For the final Lean certificate we retain an independent symbol B and use
     g_i = hcurve_i + htors.
@@ -45,7 +45,7 @@ X3p = ellp**2 - X1p - X2p
 lhs = x3 + t / (x3 - r)
 rhs = X3p
 
-# Keep both exact conventions.  The reduced one is the primary certificate.
+# Keep both exact conventions. The reduced one is the primary certificate.
 together_diff = sp.together(lhs - rhs)
 raw_num_expr, raw_den_expr = sp.fraction(together_diff)
 raw_num = sp.expand(raw_num_expr)
@@ -97,6 +97,14 @@ assert sp.expand(
 assert all(B not in c.free_symbols for c in (c1, c2, c3))
 assert all(sp.denom(sp.together(c)) == 1 for c in (c1, c2, c3))
 
+# Exact factorizations used for the readable Lean output.
+f1 = sp.factor(c1)
+f2 = sp.factor(c2)
+f3 = sp.factor(c3)
+assert sp.expand(f1 - c1) == 0
+assert sp.expand(f2 - c2) == 0
+assert sp.expand(f3 - c3) == 0
+
 
 # ---------------------------------------------------------------------------
 # 3. Lean 4 printer
@@ -111,16 +119,8 @@ LEAN_NAMES = {
 }
 
 
-def lean_monomial(expr: sp.Expr) -> str:
-    """Print one expanded monomial in syntax accepted by Lean 4."""
-    text = sp.sstr(expr, order="lex").replace("**", "^")
-    for old, new in LEAN_NAMES.items():
-        text = re.sub(rf"\b{re.escape(old)}\b", new, text)
-    return text
-
-
 def lean_expr(expr: sp.Expr) -> str:
-    """Print any small SymPy expression in Lean syntax."""
+    """Print a small SymPy expression in Lean 4 syntax."""
     text = sp.sstr(expr, order="lex").replace("**", "^")
     for old, new in LEAN_NAMES.items():
         text = re.sub(rf"\b{re.escape(old)}\b", new, text)
@@ -137,34 +137,12 @@ def lean_sum_lines(expr: sp.Expr, continuation_indent: str) -> list[str]:
     lines: list[str] = []
     for i, term in enumerate(terms):
         negative = term.could_extract_minus_sign()
-        body = lean_monomial(-term if negative else term)
+        body = lean_expr(-term if negative else term)
         if i == 0:
             lines.append(("- " if negative else "") + body)
         else:
             lines.append(continuation_indent + ("- " if negative else "+ ") + body)
     return lines
-
-
-def emit_coefficient(expr: sp.Expr, outer_indent: str = "  ") -> list[str]:
-    inner_indent = outer_indent + "  "
-    body = lean_sum_lines(expr, inner_indent)
-    return [outer_indent + "(", inner_indent + body[0], *body[1:], outer_indent + ")"]
-
-
-def emit_scaled_coefficient(
-    multiplier: sp.Expr, coeff: sp.Expr, outer_indent: str = "  "
-) -> list[str]:
-    inner_indent = outer_indent + "  "
-    coeff_indent = inner_indent + "  "
-    body = lean_sum_lines(coeff, coeff_indent)
-    return [
-        outer_indent + "(",
-        inner_indent + lean_expr(multiplier) + " * (",
-        coeff_indent + body[0],
-        *body[1:],
-        inner_indent + ")",
-        outer_indent + ")",
-    ]
 
 
 def term_count(expr: sp.Expr) -> int:
@@ -175,6 +153,51 @@ def term_count(expr: sp.Expr) -> int:
 def digest(expr: sp.Expr) -> str:
     payload = sp.sstr(sp.expand(expr), order="lex").encode("utf-8")
     return hashlib.sha256(payload).hexdigest()
+
+
+def factor_summary(expr: sp.Expr) -> str:
+    content, factors = sp.factor_list(expr)
+    pieces = []
+    if content != 1:
+        pieces.append(lean_expr(content))
+    for factor, exponent in factors:
+        pieces.append(f"({lean_expr(factor)})^{exponent}[{term_count(factor)} terms]")
+    return " * ".join(pieces)
+
+
+def emit_factorized_definition(name: str, expr: sp.Expr) -> list[str]:
+    """Emit `let name : ℚ := ...` with any large factor printed multiline."""
+    content, factors = sp.factor_list(expr)
+    components: list[tuple[str, sp.Expr | str, int]] = []
+
+    if content != 1:
+        components.append(("inline", lean_expr(content), 1))
+    for factor, exponent in factors:
+        if term_count(factor) <= 4:
+            token = f"({lean_expr(factor)})"
+            if exponent != 1:
+                token += f"^{exponent}"
+            components.append(("inline", token, 1))
+        else:
+            components.append(("poly", factor, exponent))
+
+    lines = [f"let {name} : ℚ :="]
+    for i, (kind, value, exponent) in enumerate(components):
+        suffix = " *" if i + 1 < len(components) else ""
+        if kind == "inline":
+            lines.append("  " + str(value) + suffix)
+            continue
+
+        poly = sp.sympify(value)
+        lines.append("  (")
+        body = lean_sum_lines(poly, "    ")
+        lines.append("    " + body[0])
+        lines.extend(body[1:])
+        close = "  )"
+        if exponent != 1:
+            close += f"^{exponent}"
+        lines.append(close + suffix)
+    return lines
 
 
 # ---------------------------------------------------------------------------
@@ -188,9 +211,12 @@ print(f"- reduced cancelled numerator terms: `{term_count(num)}`")
 print(f"- exact raw/reduced multiplier: `{sp.sstr(raw_multiplier, order='lex')}`")
 print(f"- reduced numerator degree in `y1`: `{sp.degree(num, y1)}`")
 print(f"- reduced numerator degree in `y2`: `{sp.degree(num, y2)}`")
-print(f"- reduced `c1` terms: `{term_count(c1)}`")
-print(f"- reduced `c2` terms: `{term_count(c2)}`")
-print(f"- reduced `c3` terms after expansion: `{term_count(c3)}`")
+print(f"- reduced `c1` expanded terms: `{term_count(c1)}`")
+print(f"- reduced `c2` expanded terms: `{term_count(c2)}`")
+print(f"- reduced `c3` expanded terms: `{term_count(c3)}`")
+print(f"- reduced `c1` factorization: `{factor_summary(c1)}`")
+print(f"- reduced `c2` factorization: `{factor_summary(c2)}`")
+print(f"- reduced `c3` factorization: `{factor_summary(c3)}`")
 print(f"- final division remainder: `{rem2}`")
 print("- exact reduced-curve verification: `0`")
 print("- exact original-hypothesis verification: `0`")
@@ -227,38 +253,40 @@ print(Path(__file__).read_text(encoding="utf-8").rstrip())
 print("```")
 print()
 
-print("## Exact Lean 4 command for the reduced numerator")
-print()
-print("This is the numerator of `cancel(together(lhs - rhs))`.")
+print("## Exact factorized Lean 4 coefficients")
 print()
 print("```lean")
-print("linear_combination")
-for line in emit_coefficient(c1):
-    print(line)
-print("  * hcurve₁ +")
-for line in emit_coefficient(c2):
-    print(line)
-print("  * hcurve₂ +")
-for line in emit_coefficient(c3):
-    print(line)
-print("  * htors")
+for definition in (
+    emit_factorized_definition("q974_c1", c1),
+    emit_factorized_definition("q974_c2", c2),
+    emit_factorized_definition("q974_c3", c3),
+):
+    for line in definition:
+        print(line)
+    print()
 print("```")
 print()
 
-print("## Exact Lean 4 command for the raw `together` numerator")
+print("## Lean command for the reduced numerator")
 print()
-print("The raw numerator is the reduced numerator multiplied by")
-print(f"`{lean_expr(raw_multiplier)}`.  Therefore use:")
+print("Use this when the target is the numerator of `cancel(together(lhs - rhs))`:")
 print()
 print("```lean")
 print("linear_combination")
-for line in emit_scaled_coefficient(raw_multiplier, c1):
-    print(line)
-print("  * hcurve₁ +")
-for line in emit_scaled_coefficient(raw_multiplier, c2):
-    print(line)
-print("  * hcurve₂ +")
-for line in emit_scaled_coefficient(raw_multiplier, c3):
-    print(line)
-print("  * htors")
+print("  q974_c1 * hcurve₁ +")
+print("  q974_c2 * hcurve₂ +")
+print("  q974_c3 * htors")
+print("```")
+print()
+
+print("## Lean command for the raw `together` numerator")
+print()
+print("The raw numerator is the reduced numerator multiplied by")
+print(f"`{lean_expr(raw_multiplier)}`. With the same definitions above, use:")
+print()
+print("```lean")
+print("linear_combination")
+print(f"  ({lean_expr(raw_multiplier)} * q974_c1) * hcurve₁ +")
+print(f"  ({lean_expr(raw_multiplier)} * q974_c2) * hcurve₂ +")
+print(f"  ({lean_expr(raw_multiplier)} * q974_c3) * htors")
 print("```")
