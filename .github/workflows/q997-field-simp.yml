@@ -1,0 +1,79 @@
+name: Q997 non-hat X field_simp audit
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - scripts/q997_compute_nonhat_x_fieldsimp.py
+      - scripts/Q997GeneratedFieldSimpCheck.lean
+      - .github/workflows/q997-field-simp.yml
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q997-calc-59ff0e15
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install exact SymPy version
+        run: python -m pip install --disable-pip-version-check sympy==1.14.0
+
+      - name: Compute exact coefficients and generate Lean checker
+        shell: bash
+        run: |
+          set +e
+          python scripts/q997_compute_nonhat_x_fieldsimp.py \
+            --lean-output scripts/Q997GeneratedFieldSimpCheck.lean \
+            > Q997_GENERATED.md 2> Q997_SYMPY_LOG.txt
+          status=$?
+          printf '%s\n' "$status" > Q997_SYMPY_STATUS.txt
+          exit 0
+
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+
+      - name: Elaborate direct and compact field_simp certificates
+        shell: bash
+        run: |
+          set +e
+          lake env lean scripts/Q997GeneratedFieldSimpCheck.lean \
+            > Q997_LEAN_LOG.txt 2>&1
+          status=$?
+          printf '%s\n' "$status" > Q997_LEAN_STATUS.txt
+          exit 0
+
+      - name: Commit exact reports and generated checker
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Q997_GENERATED.md Q997_SYMPY_LOG.txt Q997_SYMPY_STATUS.txt \
+                  Q997_LEAN_LOG.txt Q997_LEAN_STATUS.txt \
+                  scripts/Q997GeneratedFieldSimpCheck.lean
+          if git diff --cached --quiet; then
+            echo 'Reports unchanged.'
+          else
+            git commit -m 'Record Q997 exact field_simp audit'
+            git push origin HEAD:q997-calc-59ff0e15
+          fi
+
+      - name: Fail if either verifier failed
+        shell: bash
+        run: |
+          test "$(cat Q997_SYMPY_STATUS.txt)" = 0
+          test "$(cat Q997_LEAN_STATUS.txt)" = 0
