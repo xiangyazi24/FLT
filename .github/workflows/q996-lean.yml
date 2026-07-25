@@ -30,7 +30,7 @@ jobs:
           test: false
 
       - id: lean_check
-        name: Elaborate the exact field_simp certificate
+        name: Elaborate the final common-denominator certificate
         if: steps.lean_setup.outcome == 'success'
         continue-on-error: true
         run: lake env lean scripts/Q996FieldSimpCheck.lean > Q996_LEAN_LOG.txt 2>&1
