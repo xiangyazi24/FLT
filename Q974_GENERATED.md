@@ -6,9 +6,12 @@
 - exact raw/reduced multiplier: `-(x1 - x2)**3`
 - reduced numerator degree in `y1`: `4`
 - reduced numerator degree in `y2`: `4`
-- reduced `c1` terms: `196`
-- reduced `c2` terms: `167`
-- reduced `c3` terms after expansion: `200`
+- reduced `c1` expanded terms: `196`
+- reduced `c2` expanded terms: `167`
+- reduced `c3` expanded terms: `200`
+- reduced `c1` factorization: `-1 * (A + 3*r^2)^1[2 terms] * (2*A^2*r^4 - 5*A^2*r^3*x₁ - 3*A^2*r^3*x₂ + 4*A^2*r^2*x₁^2 + 7*A^2*r^2*x₁*x₂ + A^2*r^2*x₂^2 - A^2*r*x₁^3 - 5*A^2*r*x₁^2*x₂ - 2*A^2*r*x₁*x₂^2 + A^2*x₁^3*x₂ + A^2*x₁^2*x₂^2 + 6*A*r^6 - 12*A*r^5*x₁ - 6*A*r^5*x₂ + 7*A*r^4*x₁^2 + A*r^4*x₁*x₂ + 4*A*r^4*x₂^2 + 3*A*r^3*x₁^3 + 5*A*r^3*x₁^2*x₂ + 11*A*r^3*x₁*x₂^2 - 7*A*r^3*x₂^3 - 2*A*r^3*y₁^2 + 4*A*r^3*y₁*y₂ - 2*A*r^2*x₁^4 - 13*A*r^2*x₁^3*x₂ - 9*A*r^2*x₁^2*x₂^2 + 5*A*r^2*x₁*x₂^3 + A*r^2*x₁*y₁^2 - 2*A*r^2*x₁*y₁*y₂ - 4*A*r^2*x₁*y₂^2 + A*r^2*x₂^4 + 5*A*r^2*x₂*y₁^2 - 10*A*r^2*x₂*y₁*y₂ + 4*A*r^2*x₂*y₂^2 + 4*A*r*x₁^4*x₂ + 11*A*r*x₁^3*x₂^2 - 7*A*r*x₁^2*x₂^3 + 4*A*r*x₁^2*y₂^2 - 5*A*r*x₁*x₂^4 - 2*A*r*x₁*x₂*y₁^2 + 4*A*r*x₁*x₂*y₁*y₂ + 3*A*r*x₂^5 - 4*A*r*x₂^2*y₁^2 + 8*A*r*x₂^2*y₁*y₂ - 4*A*r*x₂^2*y₂^2 - 2*A*x₁^4*x₂^2 - A*x₁^3*x₂^3 - A*x₁^3*y₂^2 + 4*A*x₁^2*x₂^4 - A*x₁^2*x₂*y₂^2 + A*x₁*x₂^2*y₁^2 - 2*A*x₁*x₂^2*y₁*y₂ + A*x₁*x₂^2*y₂^2 - A*x₂^6 + A*x₂^3*y₁^2 - 2*A*x₂^3*y₁*y₂ + A*x₂^3*y₂^2 + 4*r^8 - 7*r^7*x₁ - r^7*x₂ + 6*r^6*x₁^2 - 14*r^6*x₁*x₂ + 6*r^6*x₂^2 + 7*r^5*x₁^3 - 3*r^5*x₁^2*x₂ + 18*r^5*x₁*x₂^2 - 12*r^5*x₂^3 - 4*r^5*y₁^2 + 8*r^5*y₁*y₂ - 3*r^4*x₁^4 - 17*r^4*x₁^3*x₂ + 18*r^4*x₁^2*x₂^2 + 2*r^4*x₁*x₂^3 - r^4*x₁*y₁^2 - 6*r^4*x₁*y₂^2 - 2*r^4*x₂^4 + 9*r^4*x₂*y₁^2 - 16*r^4*x₂*y₁*y₂ + 6*r^4*x₂*y₂^2 - r^3*x₁^5 + 5*r^3*x₁^4*x₂ + 9*r^3*x₁^3*x₂^2 - 17*r^3*x₁^2*x₂^3 + 2*r^3*x₁^2*y₁^2 + 2*r^3*x₁*x₂^4 + 6*r^3*x₁*x₂*y₁^2 - 12*r^3*x₁*x₂*y₁*y₂ + 6*r^3*x₂^5 - 6*r^3*x₂^2*y₁^2 + 8*r^3*x₂^2*y₁*y₂ + 3*r^2*x₁^5*x₂ - 3*r^2*x₁^4*x₂^2 - 7*r^2*x₁^3*x₂^3 - 2*r^2*x₁^3*y₁*y₂ + 3*r^2*x₁^3*y₂^2 - 9*r^2*x₁^2*x₂^4 - 6*r^2*x₁^2*x₂*y₁^2 + 6*r^2*x₁^2*x₂*y₁*y₂ + 15*r^2*x₁^2*x₂*y₂^2 + 3*r^2*x₁*x₂^5 - 9*r^2*x₁*x₂^2*y₁^2 + 24*r^2*x₁*x₂^2*y₁*y₂ - 15*r^2*x₁*x₂^2*y₂^2 - r^2*x₂^6 + r^2*x₂^3*y₁^2 - 3*r^2*x₂^3*y₂^2 - 3*r*x₁^5*x₂^2 + 3*r*x₁^4*x₂^3 + 11*r*x₁^3*x₂^4 + 4*r*x₁^3*x₂*y₁*y₂ - 12*r*x₁^3*x₂*y₂^2 + 3*r*x₁^2*x₂^5 + 6*r*x₁^2*x₂^2*y₁^2 - 12*r*x₁^2*x₂^2*y₁*y₂ - 4*r*x₁*x₂^6 + 4*r*x₁*x₂^3*y₁^2 - 12*r*x₁*x₂^3*y₁*y₂ + 12*r*x₁*x₂^3*y₂^2 + x₁^5*x₂^3 - 2*x₁^4*x₂^4 - 3*x₁^3*x₂^5 - 2*x₁^3*x₂^2*y₁*y₂ + 6*x₁^3*x₂^2*y₂^2 + 2*x₁^2*x₂^6 - 2*x₁^2*x₂^3*y₁^2 + 6*x₁^2*x₂^3*y₁*y₂ - 6*x₁^2*x₂^3*y₂^2)^1[127 terms]`
+- reduced `c2` factorization: `-1 * (A + 3*r^2)^1[2 terms] * (-r + x₁)^2[2 terms] * (-2*A^2*r^2 + 3*A^2*r*x₁ + A^2*r*x₂ - A^2*x₁^2 - A^2*x₁*x₂ - 6*A*r^4 + 4*A*r^3*x₁ + 2*A*r^3*x₂ + 9*A*r^2*x₁*x₂ - 3*A*r^2*x₂^2 + A*r*x₁^3 - 9*A*r*x₁^2*x₂ + 3*A*r*x₁*x₂^2 - A*r*x₂^3 - 4*A*r*y₁*y₂ + 2*A*r*y₂^2 - A*x₁^3*x₂ + 3*A*x₁^2*x₂^2 - 4*A*x₁*x₂^3 + 2*A*x₁*y₁*y₂ - A*x₁*y₂^2 + 2*A*x₂^4 + 2*A*x₂*y₁*y₂ - A*x₂*y₂^2 - 4*r^6 - r^5*x₁ + r^5*x₂ - 4*r^4*x₁^2 + 16*r^4*x₁*x₂ - 6*r^4*x₂^2 + 2*r^3*x₁^3 - 2*r^3*x₁^2*x₂ + 6*r^3*x₁*x₂^2 - 4*r^3*x₂^3 - 8*r^3*y₁*y₂ + 4*r^3*y₂^2 + 4*r^2*x₁^4 - 4*r^2*x₁^3*x₂ - 3*r^2*x₁*x₂^3 - r^2*x₁*y₂^2 + 3*r^2*x₂^4 + r^2*x₂*y₂^2 - 8*r*x₁^4*x₂ + 5*r*x₁^3*x₂^2 - 5*r*x₁^2*x₂^3 + r*x₁*x₂^4 + 12*r*x₁*x₂*y₁*y₂ - 4*r*x₁*x₂*y₂^2 + r*x₂^5 - 2*r*x₂^2*y₂^2 + 4*x₁^4*x₂^2 - 3*x₁^3*x₂^3 + 2*x₁^2*x₂^4 - x₁*x₂^5 - 6*x₁*x₂^2*y₁*y₂ + 2*x₁*x₂^2*y₂^2 + 2*x₂^3*y₁*y₂)^1[57 terms]`
+- reduced `c3` factorization: `-1 * (A + 3*r^2)^1[2 terms] * (2*A^2*r^3*x₁ - 2*A^2*r^3*x₂ - 5*A^2*r^2*x₁^2 + 4*A^2*r^2*x₁*x₂ + A^2*r^2*x₂^2 + 4*A^2*r*x₁^3 - 2*A^2*r*x₁^2*x₂ - 2*A^2*r*x₁*x₂^2 - A^2*x₁^4 + A^2*x₁^2*x₂^2 + 4*A*r^5*x₁ - 4*A*r^5*x₂ - 7*A*r^4*x₁^2 + 6*A*r^4*x₁*x₂ + A*r^4*x₂^2 + 8*A*r^3*x₁^3 - 20*A*r^3*x₁^2*x₂ + 20*A*r^3*x₁*x₂^2 - 8*A*r^3*x₂^3 - 2*A*r^3*y₁^2 + 2*A*r^3*y₂^2 - 4*A*r^2*x₁^4 + 13*A*r^2*x₁^3*x₂ - 15*A*r^2*x₁^2*x₂^2 + 3*A*r^2*x₁*x₂^3 + A*r^2*x₁*y₁^2 + 8*A*r^2*x₁*y₁*y₂ - 9*A*r^2*x₁*y₂^2 + 3*A*r^2*x₂^4 + 5*A*r^2*x₂*y₁^2 - 8*A*r^2*x₂*y₁*y₂ + 3*A*r^2*x₂*y₂^2 + A*r*x₁^5 - 3*A*r*x₁^4*x₂ + 8*A*r*x₁^3*x₂^2 - 8*A*r*x₁^2*y₁*y₂ + 8*A*r*x₁^2*y₂^2 - 9*A*r*x₁*x₂^4 - 2*A*r*x₁*x₂*y₁^2 + 2*A*r*x₁*x₂*y₂^2 + 3*A*r*x₂^5 - 4*A*r*x₂^2*y₁^2 + 8*A*r*x₂^2*y₁*y₂ - 4*A*r*x₂^2*y₂^2 - A*x₁^5*x₂ + A*x₁^4*x₂^2 - 5*A*x₁^3*x₂^3 + 2*A*x₁^3*y₁*y₂ - 2*A*x₁^3*y₂^2 + 6*A*x₁^2*x₂^4 + 2*A*x₁^2*x₂*y₁*y₂ - 2*A*x₁^2*x₂*y₂^2 + A*x₁*x₂^2*y₁^2 - 2*A*x₁*x₂^2*y₁*y₂ + A*x₁*x₂^2*y₂^2 - A*x₂^6 + A*x₂^3*y₁^2 - 2*A*x₂^3*y₁*y₂ + A*x₂^3*y₂^2 + 16*r^5*x₁^3 - 36*r^5*x₁^2*x₂ + 36*r^5*x₁*x₂^2 - 16*r^5*x₂^3 - 4*r^5*y₁^2 + 4*r^5*y₂^2 - 7*r^4*x₁^4 - r^4*x₁^3*x₂ + 7*r^4*x₁*x₂^3 - r^4*x₁*y₁^2 + 16*r^4*x₁*y₁*y₂ - 15*r^4*x₁*y₂^2 + r^4*x₂^4 + 9*r^4*x₂*y₁^2 - 16*r^4*x₂*y₁*y₂ + 7*r^4*x₂*y₂^2 - 7*r^3*x₁^5 + 3*r^3*x₁^4*x₂ + 20*r^3*x₁^3*x₂^2 - 20*r^3*x₁^2*x₂^3 + 2*r^3*x₁^2*y₁^2 - 8*r^3*x₁^2*y₁*y₂ + 6*r^3*x₁^2*y₂^2 - 3*r^3*x₁*x₂^4 + 6*r^3*x₁*x₂*y₁^2 - 6*r^3*x₁*x₂*y₂^2 + 7*r^3*x₂^5 - 6*r^3*x₂^2*y₁^2 + 8*r^3*x₂^2*y₁*y₂ - 2*r^3*x₂^2*y₂^2 + 4*r^2*x₁^6 + 15*r^2*x₁^5*x₂ - 9*r^2*x₁^4*x₂^2 - 3*r^2*x₁^3*x₂^3 - 2*r^2*x₁^3*y₁*y₂ + 2*r^2*x₁^3*y₂^2 - 6*r^2*x₁^2*x₂^4 - 6*r^2*x₁^2*x₂*y₁^2 - 18*r^2*x₁^2*x₂*y₁*y₂ + 24*r^2*x₁^2*x₂*y₂^2 - 9*r^2*x₁*x₂^2*y₁^2 + 18*r^2*x₁*x₂^2*y₁*y₂ - 9*r^2*x₁*x₂^2*y₂^2 - r^2*x₂^6 + r^2*x₂^3*y₁^2 + 2*r^2*x₂^3*y₁*y₂ - 3*r^2*x₂^3*y₂^2 - 8*r*x₁^6*x₂ - 6*r*x₁^5*x₂^2 + 4*r*x₁^4*x₂^3 + 8*r*x₁^3*x₂^4 + 16*r*x₁^3*x₂*y₁*y₂ - 16*r*x₁^3*x₂*y₂^2 + 6*r*x₁^2*x₂^5 + 6*r*x₁^2*x₂^2*y₁^2 - 6*r*x₁^2*x₂^2*y₂^2 - 4*r*x₁*x₂^6 + 4*r*x₁*x₂^3*y₁^2 - 16*r*x₁*x₂^3*y₁*y₂ + 12*r*x₁*x₂^3*y₂^2 + 4*x₁^6*x₂^2 - 2*x₁^5*x₂^3 - 4*x₁^3*x₂^5 - 8*x₁^3*x₂^2*y₁*y₂ + 8*x₁^3*x₂^2*y₂^2 + 2*x₁^2*x₂^6 - 2*x₁^2*x₂^3*y₁^2 + 8*x₁^2*x₂^3*y₁*y₂ - 6*x₁^2*x₂^3*y₂^2)^1[128 terms]`
 - final division remainder: `0`
 - exact reduced-curve verification: `0`
 - exact original-hypothesis verification: `0`
@@ -49,7 +52,7 @@ Two denominator-clearing conventions are reported:
 2. raw:     numerator(together(lhs - rhs)).
 
 The raw numerator is checked to be an exact polynomial multiple of the reduced
-one.  The rational identity itself is formed after eliminating
+one. The rational identity itself is formed after eliminating
     B = -(r^3 + A*r).
 For the final Lean certificate we retain an independent symbol B and use
     g_i = hcurve_i + htors.
@@ -87,7 +90,7 @@ X3p = ellp**2 - X1p - X2p
 lhs = x3 + t / (x3 - r)
 rhs = X3p
 
-# Keep both exact conventions.  The reduced one is the primary certificate.
+# Keep both exact conventions. The reduced one is the primary certificate.
 together_diff = sp.together(lhs - rhs)
 raw_num_expr, raw_den_expr = sp.fraction(together_diff)
 raw_num = sp.expand(raw_num_expr)
@@ -139,6 +142,14 @@ assert sp.expand(
 assert all(B not in c.free_symbols for c in (c1, c2, c3))
 assert all(sp.denom(sp.together(c)) == 1 for c in (c1, c2, c3))
 
+# Exact factorizations used for the readable Lean output.
+f1 = sp.factor(c1)
+f2 = sp.factor(c2)
+f3 = sp.factor(c3)
+assert sp.expand(f1 - c1) == 0
+assert sp.expand(f2 - c2) == 0
+assert sp.expand(f3 - c3) == 0
+
 
 # ---------------------------------------------------------------------------
 # 3. Lean 4 printer
@@ -153,16 +164,8 @@ LEAN_NAMES = {
 }
 
 
-def lean_monomial(expr: sp.Expr) -> str:
-    """Print one expanded monomial in syntax accepted by Lean 4."""
-    text = sp.sstr(expr, order="lex").replace("**", "^")
-    for old, new in LEAN_NAMES.items():
-        text = re.sub(rf"\b{re.escape(old)}\b", new, text)
-    return text
-
-
 def lean_expr(expr: sp.Expr) -> str:
-    """Print any small SymPy expression in Lean syntax."""
+    """Print a small SymPy expression in Lean 4 syntax."""
     text = sp.sstr(expr, order="lex").replace("**", "^")
     for old, new in LEAN_NAMES.items():
         text = re.sub(rf"\b{re.escape(old)}\b", new, text)
@@ -179,34 +182,12 @@ def lean_sum_lines(expr: sp.Expr, continuation_indent: str) -> list[str]:
     lines: list[str] = []
     for i, term in enumerate(terms):
         negative = term.could_extract_minus_sign()
-        body = lean_monomial(-term if negative else term)
+        body = lean_expr(-term if negative else term)
         if i == 0:
             lines.append(("- " if negative else "") + body)
         else:
             lines.append(continuation_indent + ("- " if negative else "+ ") + body)
     return lines
-
-
-def emit_coefficient(expr: sp.Expr, outer_indent: str = "  ") -> list[str]:
-    inner_indent = outer_indent + "  "
-    body = lean_sum_lines(expr, inner_indent)
-    return [outer_indent + "(", inner_indent + body[0], *body[1:], outer_indent + ")"]
-
-
-def emit_scaled_coefficient(
-    multiplier: sp.Expr, coeff: sp.Expr, outer_indent: str = "  "
-) -> list[str]:
-    inner_indent = outer_indent + "  "
-    coeff_indent = inner_indent + "  "
-    body = lean_sum_lines(coeff, coeff_indent)
-    return [
-        outer_indent + "(",
-        inner_indent + lean_expr(multiplier) + " * (",
-        coeff_indent + body[0],
-        *body[1:],
-        inner_indent + ")",
-        outer_indent + ")",
-    ]
 
 
 def term_count(expr: sp.Expr) -> int:
@@ -217,6 +198,51 @@ def term_count(expr: sp.Expr) -> int:
 def digest(expr: sp.Expr) -> str:
     payload = sp.sstr(sp.expand(expr), order="lex").encode("utf-8")
     return hashlib.sha256(payload).hexdigest()
+
+
+def factor_summary(expr: sp.Expr) -> str:
+    content, factors = sp.factor_list(expr)
+    pieces = []
+    if content != 1:
+        pieces.append(lean_expr(content))
+    for factor, exponent in factors:
+        pieces.append(f"({lean_expr(factor)})^{exponent}[{term_count(factor)} terms]")
+    return " * ".join(pieces)
+
+
+def emit_factorized_definition(name: str, expr: sp.Expr) -> list[str]:
+    """Emit `let name : ℚ := ...` with any large factor printed multiline."""
+    content, factors = sp.factor_list(expr)
+    components: list[tuple[str, sp.Expr | str, int]] = []
+
+    if content != 1:
+        components.append(("inline", lean_expr(content), 1))
+    for factor, exponent in factors:
+        if term_count(factor) <= 4:
+            token = f"({lean_expr(factor)})"
+            if exponent != 1:
+                token += f"^{exponent}"
+            components.append(("inline", token, 1))
+        else:
+            components.append(("poly", factor, exponent))
+
+    lines = [f"let {name} : ℚ :="]
+    for i, (kind, value, exponent) in enumerate(components):
+        suffix = " *" if i + 1 < len(components) else ""
+        if kind == "inline":
+            lines.append("  " + str(value) + suffix)
+            continue
+
+        poly = sp.sympify(value)
+        lines.append("  (")
+        body = lean_sum_lines(poly, "    ")
+        lines.append("    " + body[0])
+        lines.extend(body[1:])
+        close = "  )"
+        if exponent != 1:
+            close += f"^{exponent}"
+        lines.append(close + suffix)
+    return lines
 
 
 # ---------------------------------------------------------------------------
@@ -230,9 +256,12 @@ print(f"- reduced cancelled numerator terms: `{term_count(num)}`")
 print(f"- exact raw/reduced multiplier: `{sp.sstr(raw_multiplier, order='lex')}`")
 print(f"- reduced numerator degree in `y1`: `{sp.degree(num, y1)}`")
 print(f"- reduced numerator degree in `y2`: `{sp.degree(num, y2)}`")
-print(f"- reduced `c1` terms: `{term_count(c1)}`")
-print(f"- reduced `c2` terms: `{term_count(c2)}`")
-print(f"- reduced `c3` terms after expansion: `{term_count(c3)}`")
+print(f"- reduced `c1` expanded terms: `{term_count(c1)}`")
+print(f"- reduced `c2` expanded terms: `{term_count(c2)}`")
+print(f"- reduced `c3` expanded terms: `{term_count(c3)}`")
+print(f"- reduced `c1` factorization: `{factor_summary(c1)}`")
+print(f"- reduced `c2` factorization: `{factor_summary(c2)}`")
+print(f"- reduced `c3` factorization: `{factor_summary(c3)}`")
 print(f"- final division remainder: `{rem2}`")
 print("- exact reduced-curve verification: `0`")
 print("- exact original-hypothesis verification: `0`")
@@ -269,1206 +298,400 @@ print(Path(__file__).read_text(encoding="utf-8").rstrip())
 print("```")
 print()
 
-print("## Exact Lean 4 command for the reduced numerator")
-print()
-print("This is the numerator of `cancel(together(lhs - rhs))`.")
+print("## Exact factorized Lean 4 coefficients")
 print()
 print("```lean")
-print("linear_combination")
-for line in emit_coefficient(c1):
-    print(line)
-print("  * hcurve₁ +")
-for line in emit_coefficient(c2):
-    print(line)
-print("  * hcurve₂ +")
-for line in emit_coefficient(c3):
-    print(line)
-print("  * htors")
+for definition in (
+    emit_factorized_definition("q974_c1", c1),
+    emit_factorized_definition("q974_c2", c2),
+    emit_factorized_definition("q974_c3", c3),
+):
+    for line in definition:
+        print(line)
+    print()
 print("```")
 print()
 
-print("## Exact Lean 4 command for the raw `together` numerator")
+print("## Lean command for the reduced numerator")
+print()
+print("Use this when the target is the numerator of `cancel(together(lhs - rhs))`:")
+print()
+print("```lean")
+print("linear_combination")
+print("  q974_c1 * hcurve₁ +")
+print("  q974_c2 * hcurve₂ +")
+print("  q974_c3 * htors")
+print("```")
+print()
+
+print("## Lean command for the raw `together` numerator")
 print()
 print("The raw numerator is the reduced numerator multiplied by")
-print(f"`{lean_expr(raw_multiplier)}`.  Therefore use:")
+print(f"`{lean_expr(raw_multiplier)}`. With the same definitions above, use:")
 print()
 print("```lean")
 print("linear_combination")
-for line in emit_scaled_coefficient(raw_multiplier, c1):
-    print(line)
-print("  * hcurve₁ +")
-for line in emit_scaled_coefficient(raw_multiplier, c2):
-    print(line)
-print("  * hcurve₂ +")
-for line in emit_scaled_coefficient(raw_multiplier, c3):
-    print(line)
-print("  * htors")
+print(f"  ({lean_expr(raw_multiplier)} * q974_c1) * hcurve₁ +")
+print(f"  ({lean_expr(raw_multiplier)} * q974_c2) * hcurve₂ +")
+print(f"  ({lean_expr(raw_multiplier)} * q974_c3) * htors")
 print("```")
 ```
 
-## Exact Lean 4 command for the reduced numerator
-
-This is the numerator of `cancel(together(lhs - rhs))`.
+## Exact factorized Lean 4 coefficients
 
 ```lean
-linear_combination
+let q974_c1 : ℚ :=
+  -1 *
+  (A + 3*r^2) *
   (
-    - 2*A^3*r^4
-    + 5*A^3*r^3*x₁
-    + 3*A^3*r^3*x₂
-    - 4*A^3*r^2*x₁^2
-    - 7*A^3*r^2*x₁*x₂
-    - A^3*r^2*x₂^2
-    + A^3*r*x₁^3
-    + 5*A^3*r*x₁^2*x₂
-    + 2*A^3*r*x₁*x₂^2
-    - A^3*x₁^3*x₂
-    - A^3*x₁^2*x₂^2
-    - 12*A^2*r^6
-    + 27*A^2*r^5*x₁
-    + 15*A^2*r^5*x₂
-    - 19*A^2*r^4*x₁^2
-    - 22*A^2*r^4*x₁*x₂
-    - 7*A^2*r^4*x₂^2
-    + 10*A^2*r^3*x₁^2*x₂
-    - 5*A^2*r^3*x₁*x₂^2
-    + 7*A^2*r^3*x₂^3
-    + 2*A^2*r^3*y₁^2
-    - 4*A^2*r^3*y₁*y₂
-    + 2*A^2*r^2*x₁^4
-    + 10*A^2*r^2*x₁^3*x₂
-    + 6*A^2*r^2*x₁^2*x₂^2
-    - 5*A^2*r^2*x₁*x₂^3
-    - A^2*r^2*x₁*y₁^2
-    + 2*A^2*r^2*x₁*y₁*y₂
-    + 4*A^2*r^2*x₁*y₂^2
-    - A^2*r^2*x₂^4
-    - 5*A^2*r^2*x₂*y₁^2
-    + 10*A^2*r^2*x₂*y₁*y₂
-    - 4*A^2*r^2*x₂*y₂^2
-    - 4*A^2*r*x₁^4*x₂
-    - 11*A^2*r*x₁^3*x₂^2
-    + 7*A^2*r*x₁^2*x₂^3
-    - 4*A^2*r*x₁^2*y₂^2
-    + 5*A^2*r*x₁*x₂^4
-    + 2*A^2*r*x₁*x₂*y₁^2
-    - 4*A^2*r*x₁*x₂*y₁*y₂
-    - 3*A^2*r*x₂^5
-    + 4*A^2*r*x₂^2*y₁^2
-    - 8*A^2*r*x₂^2*y₁*y₂
-    + 4*A^2*r*x₂^2*y₂^2
-    + 2*A^2*x₁^4*x₂^2
-    + A^2*x₁^3*x₂^3
-    + A^2*x₁^3*y₂^2
-    - 4*A^2*x₁^2*x₂^4
-    + A^2*x₁^2*x₂*y₂^2
-    - A^2*x₁*x₂^2*y₁^2
-    + 2*A^2*x₁*x₂^2*y₁*y₂
-    - A^2*x₁*x₂^2*y₂^2
-    + A^2*x₂^6
-    - A^2*x₂^3*y₁^2
-    + 2*A^2*x₂^3*y₁*y₂
-    - A^2*x₂^3*y₂^2
-    - 22*A*r^8
-    + 43*A*r^7*x₁
-    + 19*A*r^7*x₂
-    - 27*A*r^6*x₁^2
-    + 11*A*r^6*x₁*x₂
-    - 18*A*r^6*x₂^2
-    - 16*A*r^5*x₁^3
-    - 12*A*r^5*x₁^2*x₂
-    - 51*A*r^5*x₁*x₂^2
-    + 33*A*r^5*x₂^3
-    + 10*A*r^5*y₁^2
-    - 20*A*r^5*y₁*y₂
-    + 9*A*r^4*x₁^4
-    + 56*A*r^4*x₁^3*x₂
-    + 9*A*r^4*x₁^2*x₂^2
-    - 17*A*r^4*x₁*x₂^3
-    - 2*A*r^4*x₁*y₁^2
-    + 6*A*r^4*x₁*y₁*y₂
-    + 18*A*r^4*x₁*y₂^2
-    - A*r^4*x₂^4
-    - 24*A*r^4*x₂*y₁^2
-    + 46*A*r^4*x₂*y₁*y₂
-    - 18*A*r^4*x₂*y₂^2
-    + A*r^3*x₁^5
-    - 17*A*r^3*x₁^4*x₂
-    - 42*A*r^3*x₁^3*x₂^2
-    + 38*A*r^3*x₁^2*x₂^3
-    - 2*A*r^3*x₁^2*y₁^2
-    - 12*A*r^3*x₁^2*y₂^2
-    + 13*A*r^3*x₁*x₂^4
-    - 15*A*r^3*x₂^5
-    + 18*A*r^3*x₂^2*y₁^2
-    - 32*A*r^3*x₂^2*y₁*y₂
-    + 12*A*r^3*x₂^2*y₂^2
-    - 3*A*r^2*x₁^5*x₂
-    + 9*A*r^2*x₁^4*x₂^2
-    + 10*A*r^2*x₁^3*x₂^3
-    + 2*A*r^2*x₁^3*y₁*y₂
-    - 3*A*r^2*x₁^2*x₂^4
-    + 6*A*r^2*x₁^2*x₂*y₁^2
-    - 6*A*r^2*x₁^2*x₂*y₁*y₂
-    - 12*A*r^2*x₁^2*x₂*y₂^2
-    - 3*A*r^2*x₁*x₂^5
-    + 6*A*r^2*x₁*x₂^2*y₁^2
-    - 18*A*r^2*x₁*x₂^2*y₁*y₂
-    + 12*A*r^2*x₁*x₂^2*y₂^2
-    + 4*A*r^2*x₂^6
-    - 4*A*r^2*x₂^3*y₁^2
-    + 6*A*r^2*x₂^3*y₁*y₂
-    + 3*A*r*x₁^5*x₂^2
-    - 3*A*r*x₁^4*x₂^3
-    - 11*A*r*x₁^3*x₂^4
-    - 4*A*r*x₁^3*x₂*y₁*y₂
-    + 12*A*r*x₁^3*x₂*y₂^2
-    - 3*A*r*x₁^2*x₂^5
-    - 6*A*r*x₁^2*x₂^2*y₁^2
-    + 12*A*r*x₁^2*x₂^2*y₁*y₂
-    + 4*A*r*x₁*x₂^6
-    - 4*A*r*x₁*x₂^3*y₁^2
-    + 12*A*r*x₁*x₂^3*y₁*y₂
-    - 12*A*r*x₁*x₂^3*y₂^2
-    - A*x₁^5*x₂^3
-    + 2*A*x₁^4*x₂^4
-    + 3*A*x₁^3*x₂^5
-    + 2*A*x₁^3*x₂^2*y₁*y₂
-    - 6*A*x₁^3*x₂^2*y₂^2
-    - 2*A*x₁^2*x₂^6
-    + 2*A*x₁^2*x₂^3*y₁^2
-    - 6*A*x₁^2*x₂^3*y₁*y₂
-    + 6*A*x₁^2*x₂^3*y₂^2
-    - 12*r^10
-    + 21*r^9*x₁
-    + 3*r^9*x₂
-    - 18*r^8*x₁^2
-    + 42*r^8*x₁*x₂
-    - 18*r^8*x₂^2
-    - 21*r^7*x₁^3
-    + 9*r^7*x₁^2*x₂
-    - 54*r^7*x₁*x₂^2
-    + 36*r^7*x₂^3
-    + 12*r^7*y₁^2
-    - 24*r^7*y₁*y₂
-    + 9*r^6*x₁^4
-    + 51*r^6*x₁^3*x₂
-    - 54*r^6*x₁^2*x₂^2
-    - 6*r^6*x₁*x₂^3
-    + 3*r^6*x₁*y₁^2
-    + 18*r^6*x₁*y₂^2
-    + 6*r^6*x₂^4
-    - 27*r^6*x₂*y₁^2
-    + 48*r^6*x₂*y₁*y₂
-    - 18*r^6*x₂*y₂^2
-    + 3*r^5*x₁^5
-    - 15*r^5*x₁^4*x₂
-    - 27*r^5*x₁^3*x₂^2
-    + 51*r^5*x₁^2*x₂^3
-    - 6*r^5*x₁^2*y₁^2
-    - 6*r^5*x₁*x₂^4
-    - 18*r^5*x₁*x₂*y₁^2
-    + 36*r^5*x₁*x₂*y₁*y₂
-    - 18*r^5*x₂^5
-    + 18*r^5*x₂^2*y₁^2
-    - 24*r^5*x₂^2*y₁*y₂
-    - 9*r^4*x₁^5*x₂
-    + 9*r^4*x₁^4*x₂^2
-    + 21*r^4*x₁^3*x₂^3
-    + 6*r^4*x₁^3*y₁*y₂
-    - 9*r^4*x₁^3*y₂^2
-    + 27*r^4*x₁^2*x₂^4
-    + 18*r^4*x₁^2*x₂*y₁^2
-    - 18*r^4*x₁^2*x₂*y₁*y₂
-    - 45*r^4*x₁^2*x₂*y₂^2
-    - 9*r^4*x₁*x₂^5
-    + 27*r^4*x₁*x₂^2*y₁^2
-    - 72*r^4*x₁*x₂^2*y₁*y₂
-    + 45*r^4*x₁*x₂^2*y₂^2
-    + 3*r^4*x₂^6
-    - 3*r^4*x₂^3*y₁^2
-    + 9*r^4*x₂^3*y₂^2
-    + 9*r^3*x₁^5*x₂^2
-    - 9*r^3*x₁^4*x₂^3
-    - 33*r^3*x₁^3*x₂^4
-    - 12*r^3*x₁^3*x₂*y₁*y₂
-    + 36*r^3*x₁^3*x₂*y₂^2
-    - 9*r^3*x₁^2*x₂^5
-    - 18*r^3*x₁^2*x₂^2*y₁^2
-    + 36*r^3*x₁^2*x₂^2*y₁*y₂
-    + 12*r^3*x₁*x₂^6
-    - 12*r^3*x₁*x₂^3*y₁^2
-    + 36*r^3*x₁*x₂^3*y₁*y₂
-    - 36*r^3*x₁*x₂^3*y₂^2
-    - 3*r^2*x₁^5*x₂^3
-    + 6*r^2*x₁^4*x₂^4
-    + 9*r^2*x₁^3*x₂^5
-    + 6*r^2*x₁^3*x₂^2*y₁*y₂
-    - 18*r^2*x₁^3*x₂^2*y₂^2
-    - 6*r^2*x₁^2*x₂^6
-    + 6*r^2*x₁^2*x₂^3*y₁^2
-    - 18*r^2*x₁^2*x₂^3*y₁*y₂
-    + 18*r^2*x₁^2*x₂^3*y₂^2
+    2*A^2*r^4
+    - 5*A^2*r^3*x₁
+    - 3*A^2*r^3*x₂
+    + 4*A^2*r^2*x₁^2
+    + 7*A^2*r^2*x₁*x₂
+    + A^2*r^2*x₂^2
+    - A^2*r*x₁^3
+    - 5*A^2*r*x₁^2*x₂
+    - 2*A^2*r*x₁*x₂^2
+    + A^2*x₁^3*x₂
+    + A^2*x₁^2*x₂^2
+    + 6*A*r^6
+    - 12*A*r^5*x₁
+    - 6*A*r^5*x₂
+    + 7*A*r^4*x₁^2
+    + A*r^4*x₁*x₂
+    + 4*A*r^4*x₂^2
+    + 3*A*r^3*x₁^3
+    + 5*A*r^3*x₁^2*x₂
+    + 11*A*r^3*x₁*x₂^2
+    - 7*A*r^3*x₂^3
+    - 2*A*r^3*y₁^2
+    + 4*A*r^3*y₁*y₂
+    - 2*A*r^2*x₁^4
+    - 13*A*r^2*x₁^3*x₂
+    - 9*A*r^2*x₁^2*x₂^2
+    + 5*A*r^2*x₁*x₂^3
+    + A*r^2*x₁*y₁^2
+    - 2*A*r^2*x₁*y₁*y₂
+    - 4*A*r^2*x₁*y₂^2
+    + A*r^2*x₂^4
+    + 5*A*r^2*x₂*y₁^2
+    - 10*A*r^2*x₂*y₁*y₂
+    + 4*A*r^2*x₂*y₂^2
+    + 4*A*r*x₁^4*x₂
+    + 11*A*r*x₁^3*x₂^2
+    - 7*A*r*x₁^2*x₂^3
+    + 4*A*r*x₁^2*y₂^2
+    - 5*A*r*x₁*x₂^4
+    - 2*A*r*x₁*x₂*y₁^2
+    + 4*A*r*x₁*x₂*y₁*y₂
+    + 3*A*r*x₂^5
+    - 4*A*r*x₂^2*y₁^2
+    + 8*A*r*x₂^2*y₁*y₂
+    - 4*A*r*x₂^2*y₂^2
+    - 2*A*x₁^4*x₂^2
+    - A*x₁^3*x₂^3
+    - A*x₁^3*y₂^2
+    + 4*A*x₁^2*x₂^4
+    - A*x₁^2*x₂*y₂^2
+    + A*x₁*x₂^2*y₁^2
+    - 2*A*x₁*x₂^2*y₁*y₂
+    + A*x₁*x₂^2*y₂^2
+    - A*x₂^6
+    + A*x₂^3*y₁^2
+    - 2*A*x₂^3*y₁*y₂
+    + A*x₂^3*y₂^2
+    + 4*r^8
+    - 7*r^7*x₁
+    - r^7*x₂
+    + 6*r^6*x₁^2
+    - 14*r^6*x₁*x₂
+    + 6*r^6*x₂^2
+    + 7*r^5*x₁^3
+    - 3*r^5*x₁^2*x₂
+    + 18*r^5*x₁*x₂^2
+    - 12*r^5*x₂^3
+    - 4*r^5*y₁^2
+    + 8*r^5*y₁*y₂
+    - 3*r^4*x₁^4
+    - 17*r^4*x₁^3*x₂
+    + 18*r^4*x₁^2*x₂^2
+    + 2*r^4*x₁*x₂^3
+    - r^4*x₁*y₁^2
+    - 6*r^4*x₁*y₂^2
+    - 2*r^4*x₂^4
+    + 9*r^4*x₂*y₁^2
+    - 16*r^4*x₂*y₁*y₂
+    + 6*r^4*x₂*y₂^2
+    - r^3*x₁^5
+    + 5*r^3*x₁^4*x₂
+    + 9*r^3*x₁^3*x₂^2
+    - 17*r^3*x₁^2*x₂^3
+    + 2*r^3*x₁^2*y₁^2
+    + 2*r^3*x₁*x₂^4
+    + 6*r^3*x₁*x₂*y₁^2
+    - 12*r^3*x₁*x₂*y₁*y₂
+    + 6*r^3*x₂^5
+    - 6*r^3*x₂^2*y₁^2
+    + 8*r^3*x₂^2*y₁*y₂
+    + 3*r^2*x₁^5*x₂
+    - 3*r^2*x₁^4*x₂^2
+    - 7*r^2*x₁^3*x₂^3
+    - 2*r^2*x₁^3*y₁*y₂
+    + 3*r^2*x₁^3*y₂^2
+    - 9*r^2*x₁^2*x₂^4
+    - 6*r^2*x₁^2*x₂*y₁^2
+    + 6*r^2*x₁^2*x₂*y₁*y₂
+    + 15*r^2*x₁^2*x₂*y₂^2
+    + 3*r^2*x₁*x₂^5
+    - 9*r^2*x₁*x₂^2*y₁^2
+    + 24*r^2*x₁*x₂^2*y₁*y₂
+    - 15*r^2*x₁*x₂^2*y₂^2
+    - r^2*x₂^6
+    + r^2*x₂^3*y₁^2
+    - 3*r^2*x₂^3*y₂^2
+    - 3*r*x₁^5*x₂^2
+    + 3*r*x₁^4*x₂^3
+    + 11*r*x₁^3*x₂^4
+    + 4*r*x₁^3*x₂*y₁*y₂
+    - 12*r*x₁^3*x₂*y₂^2
+    + 3*r*x₁^2*x₂^5
+    + 6*r*x₁^2*x₂^2*y₁^2
+    - 12*r*x₁^2*x₂^2*y₁*y₂
+    - 4*r*x₁*x₂^6
+    + 4*r*x₁*x₂^3*y₁^2
+    - 12*r*x₁*x₂^3*y₁*y₂
+    + 12*r*x₁*x₂^3*y₂^2
+    + x₁^5*x₂^3
+    - 2*x₁^4*x₂^4
+    - 3*x₁^3*x₂^5
+    - 2*x₁^3*x₂^2*y₁*y₂
+    + 6*x₁^3*x₂^2*y₂^2
+    + 2*x₁^2*x₂^6
+    - 2*x₁^2*x₂^3*y₁^2
+    + 6*x₁^2*x₂^3*y₁*y₂
+    - 6*x₁^2*x₂^3*y₂^2
   )
-  * hcurve₁ +
+
+let q974_c2 : ℚ :=
+  -1 *
+  (A + 3*r^2) *
+  (-r + x₁)^2 *
   (
-    2*A^3*r^4
-    - 7*A^3*r^3*x₁
-    - A^3*r^3*x₂
-    + 9*A^3*r^2*x₁^2
-    + 3*A^3*r^2*x₁*x₂
-    - 5*A^3*r*x₁^3
-    - 3*A^3*r*x₁^2*x₂
-    + A^3*x₁^4
-    + A^3*x₁^3*x₂
-    + 12*A^2*r^6
-    - 37*A^2*r^5*x₁
-    - 5*A^2*r^5*x₂
-    + 41*A^2*r^4*x₁^2
-    + 4*A^2*r^4*x₁*x₂
-    + 3*A^2*r^4*x₂^2
-    - 20*A^2*r^3*x₁^3
-    + 16*A^2*r^3*x₁^2*x₂
-    - 9*A^2*r^3*x₁*x₂^2
-    + A^2*r^3*x₂^3
-    + 4*A^2*r^3*y₁*y₂
-    - 2*A^2*r^3*y₂^2
-    + 5*A^2*r^2*x₁^4
-    - 23*A^2*r^2*x₁^3*x₂
-    + 6*A^2*r^2*x₁^2*x₂^2
-    + 2*A^2*r^2*x₁*x₂^3
-    - 10*A^2*r^2*x₁*y₁*y₂
-    + 5*A^2*r^2*x₁*y₂^2
-    - 2*A^2*r^2*x₂^4
-    - 2*A^2*r^2*x₂*y₁*y₂
-    + A^2*r^2*x₂*y₂^2
-    - A^2*r*x₁^5
-    + 7*A^2*r*x₁^4*x₂
-    + 3*A^2*r*x₁^3*x₂^2
-    - 7*A^2*r*x₁^2*x₂^3
-    + 8*A^2*r*x₁^2*y₁*y₂
-    - 4*A^2*r*x₁^2*y₂^2
-    + 4*A^2*r*x₁*x₂^4
-    + 4*A^2*r*x₁*x₂*y₁*y₂
-    - 2*A^2*r*x₁*x₂*y₂^2
-    + A^2*x₁^5*x₂
-    - 3*A^2*x₁^4*x₂^2
-    + 4*A^2*x₁^3*x₂^3
-    - 2*A^2*x₁^3*y₁*y₂
-    + A^2*x₁^3*y₂^2
-    - 2*A^2*x₁^2*x₂^4
-    - 2*A^2*x₁^2*x₂*y₁*y₂
-    + A^2*x₁^2*x₂*y₂^2
-    + 22*A*r^8
-    - 55*A*r^7*x₁
-    - 7*A*r^7*x₂
-    + 48*A*r^6*x₁^2
-    - 29*A*r^6*x₁*x₂
-    + 15*A*r^6*x₂^2
-    - 24*A*r^5*x₁^3
-    + 108*A*r^5*x₁^2*x₂
-    - 45*A*r^5*x₁*x₂^2
-    + 7*A*r^5*x₂^3
-    + 20*A*r^5*y₁*y₂
-    - 10*A*r^5*y₂^2
-    + 10*A*r^4*x₁^4
-    - 94*A*r^4*x₁^3*x₂
-    + 36*A*r^4*x₁^2*x₂^2
-    + A*r^4*x₁*x₂^3
-    - 46*A*r^4*x₁*y₁*y₂
-    + 24*A*r^4*x₁*y₂^2
-    - 9*A*r^4*x₂^4
-    - 6*A*r^4*x₂*y₁*y₂
-    + 2*A*r^4*x₂*y₂^2
-    + 3*A*r^3*x₁^5
-    + 23*A*r^3*x₁^4*x₂
-    - 2*A*r^3*x₁^3*x₂^2
-    - 18*A*r^3*x₁^2*x₂^3
-    + 32*A*r^3*x₁^2*y₁*y₂
-    - 18*A*r^3*x₁^2*y₂^2
-    + 17*A*r^3*x₁*x₂^4
-    - A*r^3*x₂^5
-    + 2*A*r^3*x₂^2*y₂^2
-    - 4*A*r^2*x₁^6
-    - 9*A*r^2*x₁^5*x₂
-    - 3*A*r^2*x₁^4*x₂^2
-    + 8*A*r^2*x₁^3*x₂^3
-    - 6*A*r^2*x₁^3*y₁*y₂
-    + 4*A*r^2*x₁^3*y₂^2
-    - 9*A*r^2*x₁^2*x₂^4
-    + 18*A*r^2*x₁^2*x₂*y₁*y₂
-    - 6*A*r^2*x₁^2*x₂*y₂^2
-    + 3*A*r^2*x₁*x₂^5
-    + 6*A*r^2*x₁*x₂^2*y₁*y₂
-    - 6*A*r^2*x₁*x₂^2*y₂^2
-    - 2*A*r^2*x₂^3*y₁*y₂
-    + 8*A*r*x₁^6*x₂
-    + 3*A*r*x₁^5*x₂^2
-    - A*r*x₁^4*x₂^3
-    + 3*A*r*x₁^3*x₂^4
-    - 12*A*r*x₁^3*x₂*y₁*y₂
-    + 4*A*r*x₁^3*x₂*y₂^2
-    - 3*A*r*x₁^2*x₂^5
-    - 12*A*r*x₁^2*x₂^2*y₁*y₂
-    + 6*A*r*x₁^2*x₂^2*y₂^2
-    + 4*A*r*x₁*x₂^3*y₁*y₂
-    - 4*A*x₁^6*x₂^2
-    + 3*A*x₁^5*x₂^3
-    - 2*A*x₁^4*x₂^4
-    + A*x₁^3*x₂^5
-    + 6*A*x₁^3*x₂^2*y₁*y₂
-    - 2*A*x₁^3*x₂^2*y₂^2
-    - 2*A*x₁^2*x₂^3*y₁*y₂
-    + 12*r^10
-    - 21*r^9*x₁
-    - 3*r^9*x₂
-    + 18*r^8*x₁^2
-    - 42*r^8*x₁*x₂
-    + 18*r^8*x₂^2
-    - 27*r^7*x₁^3
-    + 99*r^7*x₁^2*x₂
-    - 54*r^7*x₁*x₂^2
-    + 12*r^7*x₂^3
-    + 24*r^7*y₁*y₂
-    - 12*r^7*y₂^2
-    + 12*r^6*x₁^4
-    - 48*r^6*x₁^3*x₂
-    + 54*r^6*x₁^2*x₂^2
-    - 15*r^6*x₁*x₂^3
-    - 48*r^6*x₁*y₁*y₂
-    + 27*r^6*x₁*y₂^2
-    - 9*r^6*x₂^4
-    - 3*r^6*x₂*y₂^2
-    + 18*r^5*x₁^5
-    + 6*r^5*x₁^4*x₂
-    - 33*r^5*x₁^3*x₂^2
-    + 9*r^5*x₁^2*x₂^3
-    + 24*r^5*x₁^2*y₁*y₂
-    - 18*r^5*x₁^2*y₂^2
-    + 15*r^5*x₁*x₂^4
-    - 36*r^5*x₁*x₂*y₁*y₂
-    + 18*r^5*x₁*x₂*y₂^2
-    - 3*r^5*x₂^5
-    + 6*r^5*x₂^2*y₂^2
-    - 12*r^4*x₁^6
-    - 36*r^4*x₁^5*x₂
-    + 18*r^4*x₁^4*x₂^2
-    - 12*r^4*x₁^3*x₂^3
-    + 3*r^4*x₁^3*y₂^2
-    - 9*r^4*x₁^2*x₂^4
-    + 72*r^4*x₁^2*x₂*y₁*y₂
-    - 27*r^4*x₁^2*x₂*y₂^2
-    + 9*r^4*x₁*x₂^5
-    + 18*r^4*x₁*x₂^2*y₁*y₂
-    - 18*r^4*x₁*x₂^2*y₂^2
-    - 6*r^4*x₂^3*y₁*y₂
-    + 24*r^3*x₁^6*x₂
-    + 9*r^3*x₁^5*x₂^2
-    - 3*r^3*x₁^4*x₂^3
-    + 9*r^3*x₁^3*x₂^4
-    - 36*r^3*x₁^3*x₂*y₁*y₂
-    + 12*r^3*x₁^3*x₂*y₂^2
-    - 9*r^3*x₁^2*x₂^5
-    - 36*r^3*x₁^2*x₂^2*y₁*y₂
-    + 18*r^3*x₁^2*x₂^2*y₂^2
-    + 12*r^3*x₁*x₂^3*y₁*y₂
-    - 12*r^2*x₁^6*x₂^2
-    + 9*r^2*x₁^5*x₂^3
-    - 6*r^2*x₁^4*x₂^4
-    + 3*r^2*x₁^3*x₂^5
-    + 18*r^2*x₁^3*x₂^2*y₁*y₂
-    - 6*r^2*x₁^3*x₂^2*y₂^2
-    - 6*r^2*x₁^2*x₂^3*y₁*y₂
+    - 2*A^2*r^2
+    + 3*A^2*r*x₁
+    + A^2*r*x₂
+    - A^2*x₁^2
+    - A^2*x₁*x₂
+    - 6*A*r^4
+    + 4*A*r^3*x₁
+    + 2*A*r^3*x₂
+    + 9*A*r^2*x₁*x₂
+    - 3*A*r^2*x₂^2
+    + A*r*x₁^3
+    - 9*A*r*x₁^2*x₂
+    + 3*A*r*x₁*x₂^2
+    - A*r*x₂^3
+    - 4*A*r*y₁*y₂
+    + 2*A*r*y₂^2
+    - A*x₁^3*x₂
+    + 3*A*x₁^2*x₂^2
+    - 4*A*x₁*x₂^3
+    + 2*A*x₁*y₁*y₂
+    - A*x₁*y₂^2
+    + 2*A*x₂^4
+    + 2*A*x₂*y₁*y₂
+    - A*x₂*y₂^2
+    - 4*r^6
+    - r^5*x₁
+    + r^5*x₂
+    - 4*r^4*x₁^2
+    + 16*r^4*x₁*x₂
+    - 6*r^4*x₂^2
+    + 2*r^3*x₁^3
+    - 2*r^3*x₁^2*x₂
+    + 6*r^3*x₁*x₂^2
+    - 4*r^3*x₂^3
+    - 8*r^3*y₁*y₂
+    + 4*r^3*y₂^2
+    + 4*r^2*x₁^4
+    - 4*r^2*x₁^3*x₂
+    - 3*r^2*x₁*x₂^3
+    - r^2*x₁*y₂^2
+    + 3*r^2*x₂^4
+    + r^2*x₂*y₂^2
+    - 8*r*x₁^4*x₂
+    + 5*r*x₁^3*x₂^2
+    - 5*r*x₁^2*x₂^3
+    + r*x₁*x₂^4
+    + 12*r*x₁*x₂*y₁*y₂
+    - 4*r*x₁*x₂*y₂^2
+    + r*x₂^5
+    - 2*r*x₂^2*y₂^2
+    + 4*x₁^4*x₂^2
+    - 3*x₁^3*x₂^3
+    + 2*x₁^2*x₂^4
+    - x₁*x₂^5
+    - 6*x₁*x₂^2*y₁*y₂
+    + 2*x₁*x₂^2*y₂^2
+    + 2*x₂^3*y₁*y₂
   )
-  * hcurve₂ +
+
+let q974_c3 : ℚ :=
+  -1 *
+  (A + 3*r^2) *
   (
-    - 2*A^3*r^3*x₁
-    + 2*A^3*r^3*x₂
-    + 5*A^3*r^2*x₁^2
-    - 4*A^3*r^2*x₁*x₂
-    - A^3*r^2*x₂^2
-    - 4*A^3*r*x₁^3
-    + 2*A^3*r*x₁^2*x₂
-    + 2*A^3*r*x₁*x₂^2
-    + A^3*x₁^4
-    - A^3*x₁^2*x₂^2
-    - 10*A^2*r^5*x₁
-    + 10*A^2*r^5*x₂
-    + 22*A^2*r^4*x₁^2
-    - 18*A^2*r^4*x₁*x₂
-    - 4*A^2*r^4*x₂^2
-    - 20*A^2*r^3*x₁^3
-    + 26*A^2*r^3*x₁^2*x₂
-    - 14*A^2*r^3*x₁*x₂^2
-    + 8*A^2*r^3*x₂^3
-    + 2*A^2*r^3*y₁^2
-    - 2*A^2*r^3*y₂^2
-    + 7*A^2*r^2*x₁^4
-    - 13*A^2*r^2*x₁^3*x₂
-    + 12*A^2*r^2*x₁^2*x₂^2
-    - 3*A^2*r^2*x₁*x₂^3
-    - A^2*r^2*x₁*y₁^2
-    - 8*A^2*r^2*x₁*y₁*y₂
-    + 9*A^2*r^2*x₁*y₂^2
-    - 3*A^2*r^2*x₂^4
-    - 5*A^2*r^2*x₂*y₁^2
-    + 8*A^2*r^2*x₂*y₁*y₂
-    - 3*A^2*r^2*x₂*y₂^2
-    - A^2*r*x₁^5
-    + 3*A^2*r*x₁^4*x₂
-    - 8*A^2*r*x₁^3*x₂^2
-    + 8*A^2*r*x₁^2*y₁*y₂
-    - 8*A^2*r*x₁^2*y₂^2
-    + 9*A^2*r*x₁*x₂^4
-    + 2*A^2*r*x₁*x₂*y₁^2
-    - 2*A^2*r*x₁*x₂*y₂^2
-    - 3*A^2*r*x₂^5
-    + 4*A^2*r*x₂^2*y₁^2
-    - 8*A^2*r*x₂^2*y₁*y₂
-    + 4*A^2*r*x₂^2*y₂^2
-    + A^2*x₁^5*x₂
-    - A^2*x₁^4*x₂^2
-    + 5*A^2*x₁^3*x₂^3
-    - 2*A^2*x₁^3*y₁*y₂
-    + 2*A^2*x₁^3*y₂^2
-    - 6*A^2*x₁^2*x₂^4
-    - 2*A^2*x₁^2*x₂*y₁*y₂
-    + 2*A^2*x₁^2*x₂*y₂^2
-    - A^2*x₁*x₂^2*y₁^2
-    + 2*A^2*x₁*x₂^2*y₁*y₂
-    - A^2*x₁*x₂^2*y₂^2
-    + A^2*x₂^6
-    - A^2*x₂^3*y₁^2
-    + 2*A^2*x₂^3*y₁*y₂
-    - A^2*x₂^3*y₂^2
-    - 12*A*r^7*x₁
-    + 12*A*r^7*x₂
-    + 21*A*r^6*x₁^2
-    - 18*A*r^6*x₁*x₂
-    - 3*A*r^6*x₂^2
-    - 40*A*r^5*x₁^3
-    + 96*A*r^5*x₁^2*x₂
-    - 96*A*r^5*x₁*x₂^2
-    + 40*A*r^5*x₂^3
-    + 10*A*r^5*y₁^2
-    - 10*A*r^5*y₂^2
-    + 19*A*r^4*x₁^4
-    - 38*A*r^4*x₁^3*x₂
-    + 45*A*r^4*x₁^2*x₂^2
-    - 16*A*r^4*x₁*x₂^3
-    - 2*A*r^4*x₁*y₁^2
-    - 40*A*r^4*x₁*y₁*y₂
-    + 42*A*r^4*x₁*y₂^2
-    - 10*A*r^4*x₂^4
-    - 24*A*r^4*x₂*y₁^2
-    + 40*A*r^4*x₂*y₁*y₂
-    - 16*A*r^4*x₂*y₂^2
-    + 4*A*r^3*x₁^5
-    + 6*A*r^3*x₁^4*x₂
-    - 44*A*r^3*x₁^3*x₂^2
-    + 20*A*r^3*x₁^2*x₂^3
-    - 2*A*r^3*x₁^2*y₁^2
-    + 32*A*r^3*x₁^2*y₁*y₂
-    - 30*A*r^3*x₁^2*y₂^2
-    + 30*A*r^3*x₁*x₂^4
-    - 16*A*r^3*x₂^5
-    + 18*A*r^3*x₂^2*y₁^2
-    - 32*A*r^3*x₂^2*y₁*y₂
-    + 14*A*r^3*x₂^2*y₂^2
-    - 4*A*r^2*x₁^6
-    - 12*A*r^2*x₁^5*x₂
-    + 6*A*r^2*x₁^4*x₂^2
-    + 18*A*r^2*x₁^3*x₂^3
-    - 4*A*r^2*x₁^3*y₁*y₂
-    + 4*A*r^2*x₁^3*y₂^2
-    - 12*A*r^2*x₁^2*x₂^4
-    + 6*A*r^2*x₁^2*x₂*y₁^2
-    + 12*A*r^2*x₁^2*x₂*y₁*y₂
-    - 18*A*r^2*x₁^2*x₂*y₂^2
-    + 6*A*r^2*x₁*x₂^2*y₁^2
-    - 12*A*r^2*x₁*x₂^2*y₁*y₂
-    + 6*A*r^2*x₁*x₂^2*y₂^2
-    + 4*A*r^2*x₂^6
-    - 4*A*r^2*x₂^3*y₁^2
-    + 4*A*r^2*x₂^3*y₁*y₂
-    + 8*A*r*x₁^6*x₂
-    + 6*A*r*x₁^5*x₂^2
-    - 4*A*r*x₁^4*x₂^3
-    - 8*A*r*x₁^3*x₂^4
-    - 16*A*r*x₁^3*x₂*y₁*y₂
-    + 16*A*r*x₁^3*x₂*y₂^2
-    - 6*A*r*x₁^2*x₂^5
-    - 6*A*r*x₁^2*x₂^2*y₁^2
-    + 6*A*r*x₁^2*x₂^2*y₂^2
-    + 4*A*r*x₁*x₂^6
-    - 4*A*r*x₁*x₂^3*y₁^2
-    + 16*A*r*x₁*x₂^3*y₁*y₂
-    - 12*A*r*x₁*x₂^3*y₂^2
-    - 4*A*x₁^6*x₂^2
-    + 2*A*x₁^5*x₂^3
-    + 4*A*x₁^3*x₂^5
-    + 8*A*x₁^3*x₂^2*y₁*y₂
-    - 8*A*x₁^3*x₂^2*y₂^2
-    - 2*A*x₁^2*x₂^6
-    + 2*A*x₁^2*x₂^3*y₁^2
-    - 8*A*x₁^2*x₂^3*y₁*y₂
-    + 6*A*x₁^2*x₂^3*y₂^2
-    - 48*r^7*x₁^3
-    + 108*r^7*x₁^2*x₂
-    - 108*r^7*x₁*x₂^2
-    + 48*r^7*x₂^3
-    + 12*r^7*y₁^2
-    - 12*r^7*y₂^2
-    + 21*r^6*x₁^4
-    + 3*r^6*x₁^3*x₂
-    - 21*r^6*x₁*x₂^3
-    + 3*r^6*x₁*y₁^2
-    - 48*r^6*x₁*y₁*y₂
-    + 45*r^6*x₁*y₂^2
-    - 3*r^6*x₂^4
-    - 27*r^6*x₂*y₁^2
-    + 48*r^6*x₂*y₁*y₂
-    - 21*r^6*x₂*y₂^2
-    + 21*r^5*x₁^5
-    - 9*r^5*x₁^4*x₂
-    - 60*r^5*x₁^3*x₂^2
-    + 60*r^5*x₁^2*x₂^3
-    - 6*r^5*x₁^2*y₁^2
-    + 24*r^5*x₁^2*y₁*y₂
-    - 18*r^5*x₁^2*y₂^2
-    + 9*r^5*x₁*x₂^4
-    - 18*r^5*x₁*x₂*y₁^2
-    + 18*r^5*x₁*x₂*y₂^2
-    - 21*r^5*x₂^5
-    + 18*r^5*x₂^2*y₁^2
-    - 24*r^5*x₂^2*y₁*y₂
-    + 6*r^5*x₂^2*y₂^2
-    - 12*r^4*x₁^6
-    - 45*r^4*x₁^5*x₂
-    + 27*r^4*x₁^4*x₂^2
-    + 9*r^4*x₁^3*x₂^3
-    + 6*r^4*x₁^3*y₁*y₂
-    - 6*r^4*x₁^3*y₂^2
-    + 18*r^4*x₁^2*x₂^4
-    + 18*r^4*x₁^2*x₂*y₁^2
-    + 54*r^4*x₁^2*x₂*y₁*y₂
-    - 72*r^4*x₁^2*x₂*y₂^2
-    + 27*r^4*x₁*x₂^2*y₁^2
-    - 54*r^4*x₁*x₂^2*y₁*y₂
-    + 27*r^4*x₁*x₂^2*y₂^2
-    + 3*r^4*x₂^6
-    - 3*r^4*x₂^3*y₁^2
-    - 6*r^4*x₂^3*y₁*y₂
-    + 9*r^4*x₂^3*y₂^2
-    + 24*r^3*x₁^6*x₂
-    + 18*r^3*x₁^5*x₂^2
-    - 12*r^3*x₁^4*x₂^3
-    - 24*r^3*x₁^3*x₂^4
-    - 48*r^3*x₁^3*x₂*y₁*y₂
-    + 48*r^3*x₁^3*x₂*y₂^2
-    - 18*r^3*x₁^2*x₂^5
-    - 18*r^3*x₁^2*x₂^2*y₁^2
-    + 18*r^3*x₁^2*x₂^2*y₂^2
-    + 12*r^3*x₁*x₂^6
-    - 12*r^3*x₁*x₂^3*y₁^2
-    + 48*r^3*x₁*x₂^3*y₁*y₂
-    - 36*r^3*x₁*x₂^3*y₂^2
-    - 12*r^2*x₁^6*x₂^2
-    + 6*r^2*x₁^5*x₂^3
-    + 12*r^2*x₁^3*x₂^5
-    + 24*r^2*x₁^3*x₂^2*y₁*y₂
-    - 24*r^2*x₁^3*x₂^2*y₂^2
-    - 6*r^2*x₁^2*x₂^6
-    + 6*r^2*x₁^2*x₂^3*y₁^2
-    - 24*r^2*x₁^2*x₂^3*y₁*y₂
-    + 18*r^2*x₁^2*x₂^3*y₂^2
+    2*A^2*r^3*x₁
+    - 2*A^2*r^3*x₂
+    - 5*A^2*r^2*x₁^2
+    + 4*A^2*r^2*x₁*x₂
+    + A^2*r^2*x₂^2
+    + 4*A^2*r*x₁^3
+    - 2*A^2*r*x₁^2*x₂
+    - 2*A^2*r*x₁*x₂^2
+    - A^2*x₁^4
+    + A^2*x₁^2*x₂^2
+    + 4*A*r^5*x₁
+    - 4*A*r^5*x₂
+    - 7*A*r^4*x₁^2
+    + 6*A*r^4*x₁*x₂
+    + A*r^4*x₂^2
+    + 8*A*r^3*x₁^3
+    - 20*A*r^3*x₁^2*x₂
+    + 20*A*r^3*x₁*x₂^2
+    - 8*A*r^3*x₂^3
+    - 2*A*r^3*y₁^2
+    + 2*A*r^3*y₂^2
+    - 4*A*r^2*x₁^4
+    + 13*A*r^2*x₁^3*x₂
+    - 15*A*r^2*x₁^2*x₂^2
+    + 3*A*r^2*x₁*x₂^3
+    + A*r^2*x₁*y₁^2
+    + 8*A*r^2*x₁*y₁*y₂
+    - 9*A*r^2*x₁*y₂^2
+    + 3*A*r^2*x₂^4
+    + 5*A*r^2*x₂*y₁^2
+    - 8*A*r^2*x₂*y₁*y₂
+    + 3*A*r^2*x₂*y₂^2
+    + A*r*x₁^5
+    - 3*A*r*x₁^4*x₂
+    + 8*A*r*x₁^3*x₂^2
+    - 8*A*r*x₁^2*y₁*y₂
+    + 8*A*r*x₁^2*y₂^2
+    - 9*A*r*x₁*x₂^4
+    - 2*A*r*x₁*x₂*y₁^2
+    + 2*A*r*x₁*x₂*y₂^2
+    + 3*A*r*x₂^5
+    - 4*A*r*x₂^2*y₁^2
+    + 8*A*r*x₂^2*y₁*y₂
+    - 4*A*r*x₂^2*y₂^2
+    - A*x₁^5*x₂
+    + A*x₁^4*x₂^2
+    - 5*A*x₁^3*x₂^3
+    + 2*A*x₁^3*y₁*y₂
+    - 2*A*x₁^3*y₂^2
+    + 6*A*x₁^2*x₂^4
+    + 2*A*x₁^2*x₂*y₁*y₂
+    - 2*A*x₁^2*x₂*y₂^2
+    + A*x₁*x₂^2*y₁^2
+    - 2*A*x₁*x₂^2*y₁*y₂
+    + A*x₁*x₂^2*y₂^2
+    - A*x₂^6
+    + A*x₂^3*y₁^2
+    - 2*A*x₂^3*y₁*y₂
+    + A*x₂^3*y₂^2
+    + 16*r^5*x₁^3
+    - 36*r^5*x₁^2*x₂
+    + 36*r^5*x₁*x₂^2
+    - 16*r^5*x₂^3
+    - 4*r^5*y₁^2
+    + 4*r^5*y₂^2
+    - 7*r^4*x₁^4
+    - r^4*x₁^3*x₂
+    + 7*r^4*x₁*x₂^3
+    - r^4*x₁*y₁^2
+    + 16*r^4*x₁*y₁*y₂
+    - 15*r^4*x₁*y₂^2
+    + r^4*x₂^4
+    + 9*r^4*x₂*y₁^2
+    - 16*r^4*x₂*y₁*y₂
+    + 7*r^4*x₂*y₂^2
+    - 7*r^3*x₁^5
+    + 3*r^3*x₁^4*x₂
+    + 20*r^3*x₁^3*x₂^2
+    - 20*r^3*x₁^2*x₂^3
+    + 2*r^3*x₁^2*y₁^2
+    - 8*r^3*x₁^2*y₁*y₂
+    + 6*r^3*x₁^2*y₂^2
+    - 3*r^3*x₁*x₂^4
+    + 6*r^3*x₁*x₂*y₁^2
+    - 6*r^3*x₁*x₂*y₂^2
+    + 7*r^3*x₂^5
+    - 6*r^3*x₂^2*y₁^2
+    + 8*r^3*x₂^2*y₁*y₂
+    - 2*r^3*x₂^2*y₂^2
+    + 4*r^2*x₁^6
+    + 15*r^2*x₁^5*x₂
+    - 9*r^2*x₁^4*x₂^2
+    - 3*r^2*x₁^3*x₂^3
+    - 2*r^2*x₁^3*y₁*y₂
+    + 2*r^2*x₁^3*y₂^2
+    - 6*r^2*x₁^2*x₂^4
+    - 6*r^2*x₁^2*x₂*y₁^2
+    - 18*r^2*x₁^2*x₂*y₁*y₂
+    + 24*r^2*x₁^2*x₂*y₂^2
+    - 9*r^2*x₁*x₂^2*y₁^2
+    + 18*r^2*x₁*x₂^2*y₁*y₂
+    - 9*r^2*x₁*x₂^2*y₂^2
+    - r^2*x₂^6
+    + r^2*x₂^3*y₁^2
+    + 2*r^2*x₂^3*y₁*y₂
+    - 3*r^2*x₂^3*y₂^2
+    - 8*r*x₁^6*x₂
+    - 6*r*x₁^5*x₂^2
+    + 4*r*x₁^4*x₂^3
+    + 8*r*x₁^3*x₂^4
+    + 16*r*x₁^3*x₂*y₁*y₂
+    - 16*r*x₁^3*x₂*y₂^2
+    + 6*r*x₁^2*x₂^5
+    + 6*r*x₁^2*x₂^2*y₁^2
+    - 6*r*x₁^2*x₂^2*y₂^2
+    - 4*r*x₁*x₂^6
+    + 4*r*x₁*x₂^3*y₁^2
+    - 16*r*x₁*x₂^3*y₁*y₂
+    + 12*r*x₁*x₂^3*y₂^2
+    + 4*x₁^6*x₂^2
+    - 2*x₁^5*x₂^3
+    - 4*x₁^3*x₂^5
+    - 8*x₁^3*x₂^2*y₁*y₂
+    + 8*x₁^3*x₂^2*y₂^2
+    + 2*x₁^2*x₂^6
+    - 2*x₁^2*x₂^3*y₁^2
+    + 8*x₁^2*x₂^3*y₁*y₂
+    - 6*x₁^2*x₂^3*y₂^2
   )
-  * htors
+
 ```
 
-## Exact Lean 4 command for the raw `together` numerator
+## Lean command for the reduced numerator
 
-The raw numerator is the reduced numerator multiplied by
-`-(x₁ - x₂)^3`.  Therefore use:
+Use this when the target is the numerator of `cancel(together(lhs - rhs))`:
 
 ```lean
 linear_combination
-  (
-    -(x₁ - x₂)^3 * (
-      - 2*A^3*r^4
-      + 5*A^3*r^3*x₁
-      + 3*A^3*r^3*x₂
-      - 4*A^3*r^2*x₁^2
-      - 7*A^3*r^2*x₁*x₂
-      - A^3*r^2*x₂^2
-      + A^3*r*x₁^3
-      + 5*A^3*r*x₁^2*x₂
-      + 2*A^3*r*x₁*x₂^2
-      - A^3*x₁^3*x₂
-      - A^3*x₁^2*x₂^2
-      - 12*A^2*r^6
-      + 27*A^2*r^5*x₁
-      + 15*A^2*r^5*x₂
-      - 19*A^2*r^4*x₁^2
-      - 22*A^2*r^4*x₁*x₂
-      - 7*A^2*r^4*x₂^2
-      + 10*A^2*r^3*x₁^2*x₂
-      - 5*A^2*r^3*x₁*x₂^2
-      + 7*A^2*r^3*x₂^3
-      + 2*A^2*r^3*y₁^2
-      - 4*A^2*r^3*y₁*y₂
-      + 2*A^2*r^2*x₁^4
-      + 10*A^2*r^2*x₁^3*x₂
-      + 6*A^2*r^2*x₁^2*x₂^2
-      - 5*A^2*r^2*x₁*x₂^3
-      - A^2*r^2*x₁*y₁^2
-      + 2*A^2*r^2*x₁*y₁*y₂
-      + 4*A^2*r^2*x₁*y₂^2
-      - A^2*r^2*x₂^4
-      - 5*A^2*r^2*x₂*y₁^2
-      + 10*A^2*r^2*x₂*y₁*y₂
-      - 4*A^2*r^2*x₂*y₂^2
-      - 4*A^2*r*x₁^4*x₂
-      - 11*A^2*r*x₁^3*x₂^2
-      + 7*A^2*r*x₁^2*x₂^3
-      - 4*A^2*r*x₁^2*y₂^2
-      + 5*A^2*r*x₁*x₂^4
-      + 2*A^2*r*x₁*x₂*y₁^2
-      - 4*A^2*r*x₁*x₂*y₁*y₂
-      - 3*A^2*r*x₂^5
-      + 4*A^2*r*x₂^2*y₁^2
-      - 8*A^2*r*x₂^2*y₁*y₂
-      + 4*A^2*r*x₂^2*y₂^2
-      + 2*A^2*x₁^4*x₂^2
-      + A^2*x₁^3*x₂^3
-      + A^2*x₁^3*y₂^2
-      - 4*A^2*x₁^2*x₂^4
-      + A^2*x₁^2*x₂*y₂^2
-      - A^2*x₁*x₂^2*y₁^2
-      + 2*A^2*x₁*x₂^2*y₁*y₂
-      - A^2*x₁*x₂^2*y₂^2
-      + A^2*x₂^6
-      - A^2*x₂^3*y₁^2
-      + 2*A^2*x₂^3*y₁*y₂
-      - A^2*x₂^3*y₂^2
-      - 22*A*r^8
-      + 43*A*r^7*x₁
-      + 19*A*r^7*x₂
-      - 27*A*r^6*x₁^2
-      + 11*A*r^6*x₁*x₂
-      - 18*A*r^6*x₂^2
-      - 16*A*r^5*x₁^3
-      - 12*A*r^5*x₁^2*x₂
-      - 51*A*r^5*x₁*x₂^2
-      + 33*A*r^5*x₂^3
-      + 10*A*r^5*y₁^2
-      - 20*A*r^5*y₁*y₂
-      + 9*A*r^4*x₁^4
-      + 56*A*r^4*x₁^3*x₂
-      + 9*A*r^4*x₁^2*x₂^2
-      - 17*A*r^4*x₁*x₂^3
-      - 2*A*r^4*x₁*y₁^2
-      + 6*A*r^4*x₁*y₁*y₂
-      + 18*A*r^4*x₁*y₂^2
-      - A*r^4*x₂^4
-      - 24*A*r^4*x₂*y₁^2
-      + 46*A*r^4*x₂*y₁*y₂
-      - 18*A*r^4*x₂*y₂^2
-      + A*r^3*x₁^5
-      - 17*A*r^3*x₁^4*x₂
-      - 42*A*r^3*x₁^3*x₂^2
-      + 38*A*r^3*x₁^2*x₂^3
-      - 2*A*r^3*x₁^2*y₁^2
-      - 12*A*r^3*x₁^2*y₂^2
-      + 13*A*r^3*x₁*x₂^4
-      - 15*A*r^3*x₂^5
-      + 18*A*r^3*x₂^2*y₁^2
-      - 32*A*r^3*x₂^2*y₁*y₂
-      + 12*A*r^3*x₂^2*y₂^2
-      - 3*A*r^2*x₁^5*x₂
-      + 9*A*r^2*x₁^4*x₂^2
-      + 10*A*r^2*x₁^3*x₂^3
-      + 2*A*r^2*x₁^3*y₁*y₂
-      - 3*A*r^2*x₁^2*x₂^4
-      + 6*A*r^2*x₁^2*x₂*y₁^2
-      - 6*A*r^2*x₁^2*x₂*y₁*y₂
-      - 12*A*r^2*x₁^2*x₂*y₂^2
-      - 3*A*r^2*x₁*x₂^5
-      + 6*A*r^2*x₁*x₂^2*y₁^2
-      - 18*A*r^2*x₁*x₂^2*y₁*y₂
-      + 12*A*r^2*x₁*x₂^2*y₂^2
-      + 4*A*r^2*x₂^6
-      - 4*A*r^2*x₂^3*y₁^2
-      + 6*A*r^2*x₂^3*y₁*y₂
-      + 3*A*r*x₁^5*x₂^2
-      - 3*A*r*x₁^4*x₂^3
-      - 11*A*r*x₁^3*x₂^4
-      - 4*A*r*x₁^3*x₂*y₁*y₂
-      + 12*A*r*x₁^3*x₂*y₂^2
-      - 3*A*r*x₁^2*x₂^5
-      - 6*A*r*x₁^2*x₂^2*y₁^2
-      + 12*A*r*x₁^2*x₂^2*y₁*y₂
-      + 4*A*r*x₁*x₂^6
-      - 4*A*r*x₁*x₂^3*y₁^2
-      + 12*A*r*x₁*x₂^3*y₁*y₂
-      - 12*A*r*x₁*x₂^3*y₂^2
-      - A*x₁^5*x₂^3
-      + 2*A*x₁^4*x₂^4
-      + 3*A*x₁^3*x₂^5
-      + 2*A*x₁^3*x₂^2*y₁*y₂
-      - 6*A*x₁^3*x₂^2*y₂^2
-      - 2*A*x₁^2*x₂^6
-      + 2*A*x₁^2*x₂^3*y₁^2
-      - 6*A*x₁^2*x₂^3*y₁*y₂
-      + 6*A*x₁^2*x₂^3*y₂^2
-      - 12*r^10
-      + 21*r^9*x₁
-      + 3*r^9*x₂
-      - 18*r^8*x₁^2
-      + 42*r^8*x₁*x₂
-      - 18*r^8*x₂^2
-      - 21*r^7*x₁^3
-      + 9*r^7*x₁^2*x₂
-      - 54*r^7*x₁*x₂^2
-      + 36*r^7*x₂^3
-      + 12*r^7*y₁^2
-      - 24*r^7*y₁*y₂
-      + 9*r^6*x₁^4
-      + 51*r^6*x₁^3*x₂
-      - 54*r^6*x₁^2*x₂^2
-      - 6*r^6*x₁*x₂^3
-      + 3*r^6*x₁*y₁^2
-      + 18*r^6*x₁*y₂^2
-      + 6*r^6*x₂^4
-      - 27*r^6*x₂*y₁^2
-      + 48*r^6*x₂*y₁*y₂
-      - 18*r^6*x₂*y₂^2
-      + 3*r^5*x₁^5
-      - 15*r^5*x₁^4*x₂
-      - 27*r^5*x₁^3*x₂^2
-      + 51*r^5*x₁^2*x₂^3
-      - 6*r^5*x₁^2*y₁^2
-      - 6*r^5*x₁*x₂^4
-      - 18*r^5*x₁*x₂*y₁^2
-      + 36*r^5*x₁*x₂*y₁*y₂
-      - 18*r^5*x₂^5
-      + 18*r^5*x₂^2*y₁^2
-      - 24*r^5*x₂^2*y₁*y₂
-      - 9*r^4*x₁^5*x₂
-      + 9*r^4*x₁^4*x₂^2
-      + 21*r^4*x₁^3*x₂^3
-      + 6*r^4*x₁^3*y₁*y₂
-      - 9*r^4*x₁^3*y₂^2
-      + 27*r^4*x₁^2*x₂^4
-      + 18*r^4*x₁^2*x₂*y₁^2
-      - 18*r^4*x₁^2*x₂*y₁*y₂
-      - 45*r^4*x₁^2*x₂*y₂^2
-      - 9*r^4*x₁*x₂^5
-      + 27*r^4*x₁*x₂^2*y₁^2
-      - 72*r^4*x₁*x₂^2*y₁*y₂
-      + 45*r^4*x₁*x₂^2*y₂^2
-      + 3*r^4*x₂^6
-      - 3*r^4*x₂^3*y₁^2
-      + 9*r^4*x₂^3*y₂^2
-      + 9*r^3*x₁^5*x₂^2
-      - 9*r^3*x₁^4*x₂^3
-      - 33*r^3*x₁^3*x₂^4
-      - 12*r^3*x₁^3*x₂*y₁*y₂
-      + 36*r^3*x₁^3*x₂*y₂^2
-      - 9*r^3*x₁^2*x₂^5
-      - 18*r^3*x₁^2*x₂^2*y₁^2
-      + 36*r^3*x₁^2*x₂^2*y₁*y₂
-      + 12*r^3*x₁*x₂^6
-      - 12*r^3*x₁*x₂^3*y₁^2
-      + 36*r^3*x₁*x₂^3*y₁*y₂
-      - 36*r^3*x₁*x₂^3*y₂^2
-      - 3*r^2*x₁^5*x₂^3
-      + 6*r^2*x₁^4*x₂^4
-      + 9*r^2*x₁^3*x₂^5
-      + 6*r^2*x₁^3*x₂^2*y₁*y₂
-      - 18*r^2*x₁^3*x₂^2*y₂^2
-      - 6*r^2*x₁^2*x₂^6
-      + 6*r^2*x₁^2*x₂^3*y₁^2
-      - 18*r^2*x₁^2*x₂^3*y₁*y₂
-      + 18*r^2*x₁^2*x₂^3*y₂^2
-    )
-  )
-  * hcurve₁ +
-  (
-    -(x₁ - x₂)^3 * (
-      2*A^3*r^4
-      - 7*A^3*r^3*x₁
-      - A^3*r^3*x₂
-      + 9*A^3*r^2*x₁^2
-      + 3*A^3*r^2*x₁*x₂
-      - 5*A^3*r*x₁^3
-      - 3*A^3*r*x₁^2*x₂
-      + A^3*x₁^4
-      + A^3*x₁^3*x₂
-      + 12*A^2*r^6
-      - 37*A^2*r^5*x₁
-      - 5*A^2*r^5*x₂
-      + 41*A^2*r^4*x₁^2
-      + 4*A^2*r^4*x₁*x₂
-      + 3*A^2*r^4*x₂^2
-      - 20*A^2*r^3*x₁^3
-      + 16*A^2*r^3*x₁^2*x₂
-      - 9*A^2*r^3*x₁*x₂^2
-      + A^2*r^3*x₂^3
-      + 4*A^2*r^3*y₁*y₂
-      - 2*A^2*r^3*y₂^2
-      + 5*A^2*r^2*x₁^4
-      - 23*A^2*r^2*x₁^3*x₂
-      + 6*A^2*r^2*x₁^2*x₂^2
-      + 2*A^2*r^2*x₁*x₂^3
-      - 10*A^2*r^2*x₁*y₁*y₂
-      + 5*A^2*r^2*x₁*y₂^2
-      - 2*A^2*r^2*x₂^4
-      - 2*A^2*r^2*x₂*y₁*y₂
-      + A^2*r^2*x₂*y₂^2
-      - A^2*r*x₁^5
-      + 7*A^2*r*x₁^4*x₂
-      + 3*A^2*r*x₁^3*x₂^2
-      - 7*A^2*r*x₁^2*x₂^3
-      + 8*A^2*r*x₁^2*y₁*y₂
-      - 4*A^2*r*x₁^2*y₂^2
-      + 4*A^2*r*x₁*x₂^4
-      + 4*A^2*r*x₁*x₂*y₁*y₂
-      - 2*A^2*r*x₁*x₂*y₂^2
-      + A^2*x₁^5*x₂
-      - 3*A^2*x₁^4*x₂^2
-      + 4*A^2*x₁^3*x₂^3
-      - 2*A^2*x₁^3*y₁*y₂
-      + A^2*x₁^3*y₂^2
-      - 2*A^2*x₁^2*x₂^4
-      - 2*A^2*x₁^2*x₂*y₁*y₂
-      + A^2*x₁^2*x₂*y₂^2
-      + 22*A*r^8
-      - 55*A*r^7*x₁
-      - 7*A*r^7*x₂
-      + 48*A*r^6*x₁^2
-      - 29*A*r^6*x₁*x₂
-      + 15*A*r^6*x₂^2
-      - 24*A*r^5*x₁^3
-      + 108*A*r^5*x₁^2*x₂
-      - 45*A*r^5*x₁*x₂^2
-      + 7*A*r^5*x₂^3
-      + 20*A*r^5*y₁*y₂
-      - 10*A*r^5*y₂^2
-      + 10*A*r^4*x₁^4
-      - 94*A*r^4*x₁^3*x₂
-      + 36*A*r^4*x₁^2*x₂^2
-      + A*r^4*x₁*x₂^3
-      - 46*A*r^4*x₁*y₁*y₂
-      + 24*A*r^4*x₁*y₂^2
-      - 9*A*r^4*x₂^4
-      - 6*A*r^4*x₂*y₁*y₂
-      + 2*A*r^4*x₂*y₂^2
-      + 3*A*r^3*x₁^5
-      + 23*A*r^3*x₁^4*x₂
-      - 2*A*r^3*x₁^3*x₂^2
-      - 18*A*r^3*x₁^2*x₂^3
-      + 32*A*r^3*x₁^2*y₁*y₂
-      - 18*A*r^3*x₁^2*y₂^2
-      + 17*A*r^3*x₁*x₂^4
-      - A*r^3*x₂^5
-      + 2*A*r^3*x₂^2*y₂^2
-      - 4*A*r^2*x₁^6
-      - 9*A*r^2*x₁^5*x₂
-      - 3*A*r^2*x₁^4*x₂^2
-      + 8*A*r^2*x₁^3*x₂^3
-      - 6*A*r^2*x₁^3*y₁*y₂
-      + 4*A*r^2*x₁^3*y₂^2
-      - 9*A*r^2*x₁^2*x₂^4
-      + 18*A*r^2*x₁^2*x₂*y₁*y₂
-      - 6*A*r^2*x₁^2*x₂*y₂^2
-      + 3*A*r^2*x₁*x₂^5
-      + 6*A*r^2*x₁*x₂^2*y₁*y₂
-      - 6*A*r^2*x₁*x₂^2*y₂^2
-      - 2*A*r^2*x₂^3*y₁*y₂
-      + 8*A*r*x₁^6*x₂
-      + 3*A*r*x₁^5*x₂^2
-      - A*r*x₁^4*x₂^3
-      + 3*A*r*x₁^3*x₂^4
-      - 12*A*r*x₁^3*x₂*y₁*y₂
-      + 4*A*r*x₁^3*x₂*y₂^2
-      - 3*A*r*x₁^2*x₂^5
-      - 12*A*r*x₁^2*x₂^2*y₁*y₂
-      + 6*A*r*x₁^2*x₂^2*y₂^2
-      + 4*A*r*x₁*x₂^3*y₁*y₂
-      - 4*A*x₁^6*x₂^2
-      + 3*A*x₁^5*x₂^3
-      - 2*A*x₁^4*x₂^4
-      + A*x₁^3*x₂^5
-      + 6*A*x₁^3*x₂^2*y₁*y₂
-      - 2*A*x₁^3*x₂^2*y₂^2
-      - 2*A*x₁^2*x₂^3*y₁*y₂
-      + 12*r^10
-      - 21*r^9*x₁
-      - 3*r^9*x₂
-      + 18*r^8*x₁^2
-      - 42*r^8*x₁*x₂
-      + 18*r^8*x₂^2
-      - 27*r^7*x₁^3
-      + 99*r^7*x₁^2*x₂
-      - 54*r^7*x₁*x₂^2
-      + 12*r^7*x₂^3
-      + 24*r^7*y₁*y₂
-      - 12*r^7*y₂^2
-      + 12*r^6*x₁^4
-      - 48*r^6*x₁^3*x₂
-      + 54*r^6*x₁^2*x₂^2
-      - 15*r^6*x₁*x₂^3
-      - 48*r^6*x₁*y₁*y₂
-      + 27*r^6*x₁*y₂^2
-      - 9*r^6*x₂^4
-      - 3*r^6*x₂*y₂^2
-      + 18*r^5*x₁^5
-      + 6*r^5*x₁^4*x₂
-      - 33*r^5*x₁^3*x₂^2
-      + 9*r^5*x₁^2*x₂^3
-      + 24*r^5*x₁^2*y₁*y₂
-      - 18*r^5*x₁^2*y₂^2
-      + 15*r^5*x₁*x₂^4
-      - 36*r^5*x₁*x₂*y₁*y₂
-      + 18*r^5*x₁*x₂*y₂^2
-      - 3*r^5*x₂^5
-      + 6*r^5*x₂^2*y₂^2
-      - 12*r^4*x₁^6
-      - 36*r^4*x₁^5*x₂
-      + 18*r^4*x₁^4*x₂^2
-      - 12*r^4*x₁^3*x₂^3
-      + 3*r^4*x₁^3*y₂^2
-      - 9*r^4*x₁^2*x₂^4
-      + 72*r^4*x₁^2*x₂*y₁*y₂
-      - 27*r^4*x₁^2*x₂*y₂^2
-      + 9*r^4*x₁*x₂^5
-      + 18*r^4*x₁*x₂^2*y₁*y₂
-      - 18*r^4*x₁*x₂^2*y₂^2
-      - 6*r^4*x₂^3*y₁*y₂
-      + 24*r^3*x₁^6*x₂
-      + 9*r^3*x₁^5*x₂^2
-      - 3*r^3*x₁^4*x₂^3
-      + 9*r^3*x₁^3*x₂^4
-      - 36*r^3*x₁^3*x₂*y₁*y₂
-      + 12*r^3*x₁^3*x₂*y₂^2
-      - 9*r^3*x₁^2*x₂^5
-      - 36*r^3*x₁^2*x₂^2*y₁*y₂
-      + 18*r^3*x₁^2*x₂^2*y₂^2
-      + 12*r^3*x₁*x₂^3*y₁*y₂
-      - 12*r^2*x₁^6*x₂^2
-      + 9*r^2*x₁^5*x₂^3
-      - 6*r^2*x₁^4*x₂^4
-      + 3*r^2*x₁^3*x₂^5
-      + 18*r^2*x₁^3*x₂^2*y₁*y₂
-      - 6*r^2*x₁^3*x₂^2*y₂^2
-      - 6*r^2*x₁^2*x₂^3*y₁*y₂
-    )
-  )
-  * hcurve₂ +
-  (
-    -(x₁ - x₂)^3 * (
-      - 2*A^3*r^3*x₁
-      + 2*A^3*r^3*x₂
-      + 5*A^3*r^2*x₁^2
-      - 4*A^3*r^2*x₁*x₂
-      - A^3*r^2*x₂^2
-      - 4*A^3*r*x₁^3
-      + 2*A^3*r*x₁^2*x₂
-      + 2*A^3*r*x₁*x₂^2
-      + A^3*x₁^4
-      - A^3*x₁^2*x₂^2
-      - 10*A^2*r^5*x₁
-      + 10*A^2*r^5*x₂
-      + 22*A^2*r^4*x₁^2
-      - 18*A^2*r^4*x₁*x₂
-      - 4*A^2*r^4*x₂^2
-      - 20*A^2*r^3*x₁^3
-      + 26*A^2*r^3*x₁^2*x₂
-      - 14*A^2*r^3*x₁*x₂^2
-      + 8*A^2*r^3*x₂^3
-      + 2*A^2*r^3*y₁^2
-      - 2*A^2*r^3*y₂^2
-      + 7*A^2*r^2*x₁^4
-      - 13*A^2*r^2*x₁^3*x₂
-      + 12*A^2*r^2*x₁^2*x₂^2
-      - 3*A^2*r^2*x₁*x₂^3
-      - A^2*r^2*x₁*y₁^2
-      - 8*A^2*r^2*x₁*y₁*y₂
-      + 9*A^2*r^2*x₁*y₂^2
-      - 3*A^2*r^2*x₂^4
-      - 5*A^2*r^2*x₂*y₁^2
-      + 8*A^2*r^2*x₂*y₁*y₂
-      - 3*A^2*r^2*x₂*y₂^2
-      - A^2*r*x₁^5
-      + 3*A^2*r*x₁^4*x₂
-      - 8*A^2*r*x₁^3*x₂^2
-      + 8*A^2*r*x₁^2*y₁*y₂
-      - 8*A^2*r*x₁^2*y₂^2
-      + 9*A^2*r*x₁*x₂^4
-      + 2*A^2*r*x₁*x₂*y₁^2
-      - 2*A^2*r*x₁*x₂*y₂^2
-      - 3*A^2*r*x₂^5
-      + 4*A^2*r*x₂^2*y₁^2
-      - 8*A^2*r*x₂^2*y₁*y₂
-      + 4*A^2*r*x₂^2*y₂^2
-      + A^2*x₁^5*x₂
-      - A^2*x₁^4*x₂^2
-      + 5*A^2*x₁^3*x₂^3
-      - 2*A^2*x₁^3*y₁*y₂
-      + 2*A^2*x₁^3*y₂^2
-      - 6*A^2*x₁^2*x₂^4
-      - 2*A^2*x₁^2*x₂*y₁*y₂
-      + 2*A^2*x₁^2*x₂*y₂^2
-      - A^2*x₁*x₂^2*y₁^2
-      + 2*A^2*x₁*x₂^2*y₁*y₂
-      - A^2*x₁*x₂^2*y₂^2
-      + A^2*x₂^6
-      - A^2*x₂^3*y₁^2
-      + 2*A^2*x₂^3*y₁*y₂
-      - A^2*x₂^3*y₂^2
-      - 12*A*r^7*x₁
-      + 12*A*r^7*x₂
-      + 21*A*r^6*x₁^2
-      - 18*A*r^6*x₁*x₂
-      - 3*A*r^6*x₂^2
-      - 40*A*r^5*x₁^3
-      + 96*A*r^5*x₁^2*x₂
-      - 96*A*r^5*x₁*x₂^2
-      + 40*A*r^5*x₂^3
-      + 10*A*r^5*y₁^2
-      - 10*A*r^5*y₂^2
-      + 19*A*r^4*x₁^4
-      - 38*A*r^4*x₁^3*x₂
-      + 45*A*r^4*x₁^2*x₂^2
-      - 16*A*r^4*x₁*x₂^3
-      - 2*A*r^4*x₁*y₁^2
-      - 40*A*r^4*x₁*y₁*y₂
-      + 42*A*r^4*x₁*y₂^2
-      - 10*A*r^4*x₂^4
-      - 24*A*r^4*x₂*y₁^2
-      + 40*A*r^4*x₂*y₁*y₂
-      - 16*A*r^4*x₂*y₂^2
-      + 4*A*r^3*x₁^5
-      + 6*A*r^3*x₁^4*x₂
-      - 44*A*r^3*x₁^3*x₂^2
-      + 20*A*r^3*x₁^2*x₂^3
-      - 2*A*r^3*x₁^2*y₁^2
-      + 32*A*r^3*x₁^2*y₁*y₂
-      - 30*A*r^3*x₁^2*y₂^2
-      + 30*A*r^3*x₁*x₂^4
-      - 16*A*r^3*x₂^5
-      + 18*A*r^3*x₂^2*y₁^2
-      - 32*A*r^3*x₂^2*y₁*y₂
-      + 14*A*r^3*x₂^2*y₂^2
-      - 4*A*r^2*x₁^6
-      - 12*A*r^2*x₁^5*x₂
-      + 6*A*r^2*x₁^4*x₂^2
-      + 18*A*r^2*x₁^3*x₂^3
-      - 4*A*r^2*x₁^3*y₁*y₂
-      + 4*A*r^2*x₁^3*y₂^2
-      - 12*A*r^2*x₁^2*x₂^4
-      + 6*A*r^2*x₁^2*x₂*y₁^2
-      + 12*A*r^2*x₁^2*x₂*y₁*y₂
-      - 18*A*r^2*x₁^2*x₂*y₂^2
-      + 6*A*r^2*x₁*x₂^2*y₁^2
-      - 12*A*r^2*x₁*x₂^2*y₁*y₂
-      + 6*A*r^2*x₁*x₂^2*y₂^2
-      + 4*A*r^2*x₂^6
-      - 4*A*r^2*x₂^3*y₁^2
-      + 4*A*r^2*x₂^3*y₁*y₂
-      + 8*A*r*x₁^6*x₂
-      + 6*A*r*x₁^5*x₂^2
-      - 4*A*r*x₁^4*x₂^3
-      - 8*A*r*x₁^3*x₂^4
-      - 16*A*r*x₁^3*x₂*y₁*y₂
-      + 16*A*r*x₁^3*x₂*y₂^2
-      - 6*A*r*x₁^2*x₂^5
-      - 6*A*r*x₁^2*x₂^2*y₁^2
-      + 6*A*r*x₁^2*x₂^2*y₂^2
-      + 4*A*r*x₁*x₂^6
-      - 4*A*r*x₁*x₂^3*y₁^2
-      + 16*A*r*x₁*x₂^3*y₁*y₂
-      - 12*A*r*x₁*x₂^3*y₂^2
-      - 4*A*x₁^6*x₂^2
-      + 2*A*x₁^5*x₂^3
-      + 4*A*x₁^3*x₂^5
-      + 8*A*x₁^3*x₂^2*y₁*y₂
-      - 8*A*x₁^3*x₂^2*y₂^2
-      - 2*A*x₁^2*x₂^6
-      + 2*A*x₁^2*x₂^3*y₁^2
-      - 8*A*x₁^2*x₂^3*y₁*y₂
-      + 6*A*x₁^2*x₂^3*y₂^2
-      - 48*r^7*x₁^3
-      + 108*r^7*x₁^2*x₂
-      - 108*r^7*x₁*x₂^2
-      + 48*r^7*x₂^3
-      + 12*r^7*y₁^2
-      - 12*r^7*y₂^2
-      + 21*r^6*x₁^4
-      + 3*r^6*x₁^3*x₂
-      - 21*r^6*x₁*x₂^3
-      + 3*r^6*x₁*y₁^2
-      - 48*r^6*x₁*y₁*y₂
-      + 45*r^6*x₁*y₂^2
-      - 3*r^6*x₂^4
-      - 27*r^6*x₂*y₁^2
-      + 48*r^6*x₂*y₁*y₂
-      - 21*r^6*x₂*y₂^2
-      + 21*r^5*x₁^5
-      - 9*r^5*x₁^4*x₂
-      - 60*r^5*x₁^3*x₂^2
-      + 60*r^5*x₁^2*x₂^3
-      - 6*r^5*x₁^2*y₁^2
-      + 24*r^5*x₁^2*y₁*y₂
-      - 18*r^5*x₁^2*y₂^2
-      + 9*r^5*x₁*x₂^4
-      - 18*r^5*x₁*x₂*y₁^2
-      + 18*r^5*x₁*x₂*y₂^2
-      - 21*r^5*x₂^5
-      + 18*r^5*x₂^2*y₁^2
-      - 24*r^5*x₂^2*y₁*y₂
-      + 6*r^5*x₂^2*y₂^2
-      - 12*r^4*x₁^6
-      - 45*r^4*x₁^5*x₂
-      + 27*r^4*x₁^4*x₂^2
-      + 9*r^4*x₁^3*x₂^3
-      + 6*r^4*x₁^3*y₁*y₂
-      - 6*r^4*x₁^3*y₂^2
-      + 18*r^4*x₁^2*x₂^4
-      + 18*r^4*x₁^2*x₂*y₁^2
-      + 54*r^4*x₁^2*x₂*y₁*y₂
-      - 72*r^4*x₁^2*x₂*y₂^2
-      + 27*r^4*x₁*x₂^2*y₁^2
-      - 54*r^4*x₁*x₂^2*y₁*y₂
-      + 27*r^4*x₁*x₂^2*y₂^2
-      + 3*r^4*x₂^6
-      - 3*r^4*x₂^3*y₁^2
-      - 6*r^4*x₂^3*y₁*y₂
-      + 9*r^4*x₂^3*y₂^2
-      + 24*r^3*x₁^6*x₂
-      + 18*r^3*x₁^5*x₂^2
-      - 12*r^3*x₁^4*x₂^3
-      - 24*r^3*x₁^3*x₂^4
-      - 48*r^3*x₁^3*x₂*y₁*y₂
-      + 48*r^3*x₁^3*x₂*y₂^2
-      - 18*r^3*x₁^2*x₂^5
-      - 18*r^3*x₁^2*x₂^2*y₁^2
-      + 18*r^3*x₁^2*x₂^2*y₂^2
-      + 12*r^3*x₁*x₂^6
-      - 12*r^3*x₁*x₂^3*y₁^2
-      + 48*r^3*x₁*x₂^3*y₁*y₂
-      - 36*r^3*x₁*x₂^3*y₂^2
-      - 12*r^2*x₁^6*x₂^2
-      + 6*r^2*x₁^5*x₂^3
-      + 12*r^2*x₁^3*x₂^5
-      + 24*r^2*x₁^3*x₂^2*y₁*y₂
-      - 24*r^2*x₁^3*x₂^2*y₂^2
-      - 6*r^2*x₁^2*x₂^6
-      + 6*r^2*x₁^2*x₂^3*y₁^2
-      - 24*r^2*x₁^2*x₂^3*y₁*y₂
-      + 18*r^2*x₁^2*x₂^3*y₂^2
-    )
-  )
-  * htors
+  q974_c1 * hcurve₁ +
+  q974_c2 * hcurve₂ +
+  q974_c3 * htors
+```
+
+## Lean command for the raw `together` numerator
+
+The raw numerator is the reduced numerator multiplied by
+`-(x₁ - x₂)^3`. With the same definitions above, use:
+
+```lean
+linear_combination
+  (-(x₁ - x₂)^3 * q974_c1) * hcurve₁ +
+  (-(x₁ - x₂)^3 * q974_c2) * hcurve₂ +
+  (-(x₁ - x₂)^3 * q974_c3) * htors
 ```
