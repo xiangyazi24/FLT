@@ -6,6 +6,7 @@ on:
       - q996-calc-e02dbee8
     paths:
       - scripts/q996_compute_doubling_x_scaling.py
+      - scripts/Q996FieldSimpCheck.lean
       - .github/workflows/q996-sympy.yml
 
 permissions:
@@ -30,6 +31,11 @@ jobs:
 
       - name: Compute and verify Q996 scaling certificate
         run: python scripts/q996_compute_doubling_x_scaling.py > Q996_GENERATED.md
+
+      - name: Verify the exact coefficient against Lean field_simp
+        run: |
+          lake env lean scripts/Q996FieldSimpCheck.lean
+          printf '\n- direct Lean field_simp check with coefficient 16*y^2*C: `PASS`\n' >> Q996_GENERATED.md
 
       - name: Commit exact generated report
         run: |
