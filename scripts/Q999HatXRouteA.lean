@@ -104,8 +104,8 @@ example
   -- standalone simplified X-formula itself has no remaining B occurrence.
   simp only [hB] at hcurve₁ hcurve₂ htors ⊢
 
-  -- The necessary hat substitution.
-  simp only [hA]
+  -- The necessary hat substitution.  `rw` avoids a deep recursive simp walk.
+  rw [hA]
 
   -- Steps 5-6.  Literal field_simp cross-multiplies the two sides, so its
   -- polynomial is (x₁-x₂)^2 times the primitive u^2*N₀ certificate.
