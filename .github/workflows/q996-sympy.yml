@@ -1,0 +1,44 @@
+name: Q996 SymPy scaling audit
+
+on:
+  push:
+    branches:
+      - q996-calc-e02dbee8
+    paths:
+      - scripts/q996_compute_doubling_x_scaling.py
+      - .github/workflows/q996-sympy.yml
+
+permissions:
+  contents: write
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q996-calc-e02dbee8
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install exact SymPy version
+        run: python -m pip install --disable-pip-version-check sympy==1.14.0
+
+      - name: Compute and verify Q996 scaling certificate
+        run: python scripts/q996_compute_doubling_x_scaling.py > Q996_GENERATED.md
+
+      - name: Commit exact generated report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Q996_GENERATED.md
+          if git diff --cached --quiet; then
+            echo "Generated report is unchanged."
+            exit 0
+          fi
+          git commit -m "Record exact Q996 scaling certificate"
+          git push origin HEAD:q996-calc-e02dbee8
