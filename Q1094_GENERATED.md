@@ -10,13 +10,9 @@ tors = [4, [4], [[7, 13]]]
 rank = [0, 0, 0, []]
 #ell2cover = 1
 ell2cover raw = [[x^4 + 10*x^3 - 3*x^2 - 4*x - 8, [7/y^2*x^4 + 2/y^2*x^3 + 13/y^2*x^2 + 40/y^2*x - 5/y^2, 17/y^3*x^6 - 17/y^3*x^5 + ((-7*y - 170)/(2*y^3))*x^4 + ((-y - 255)/y^3)*x^3 + ((-13*y + 85)/(2*y^3))*x^2 + ((-40*y - 119)/(2*y^3))*x + ((-y^3 + 5*y - 170)/(2*y^3))]]]
-[0;31m[0;31m  ***   syntax error, unexpected end of file, expecting )-> or ',' or ')': 
-[0;31m  ***   [0;35mif(#C17[0;35m,
-[0;31m[0;31m  ***          ^-[0m
 cover 1 quartic = x^4 + 10*x^3 - 3*x^2 - 4*x - 8
 cover 1 point over quartic algebra = [7/y^2*x^4 + 2/y^2*x^3 + 13/y^2*x^2 + 40/y^2*x - 5/y^2, 17/y^3*x^6 - 17/y^3*x^5 + ((-7*y - 170)/(2*y^3))*x^4 + ((-y - 255)/y^3)*x^3 + ((-13*y + 85)/(2*y^3))*x^2 + ((-40*y - 119)/(2*y^3))*x + ((-y^3 + 5*y - 170)/(2*y^3))]
-[0;31m[0;31m  ***   syntax error, unexpected ')', expecting end of file:[0;35m );
-[0;31m[0;31m  ***                                                        ^--[0m
+cover 1 rational points searched = [[3/2, 17/4], [3/2, -17/4]]
 17 phi q[1] points = [[0, 17], [0, -17]]
 17 phi q[17] points = [[-1, 8], [-1, -8], [1, 8], [1, -8]]
 17 phi q[-1] points = []
@@ -25,6 +21,23 @@ cover 1 point over quartic algebra = [7/y^2*x^4 + 2/y^2*x^3 + 13/y^2*x^2 + 40/y^
 17 dual q[-1] points = [[-2, 0], [0, 16], [0, -16], [2, 0]]
 17 dual q[2] points = []
 17 dual q[-2] points = []
+[0;31m[0;31m  ***   syntax error, unexpected end of file, expecting )-> or ',' or ')': 
+[0;31m  ***   [0;35mfor(U=0,511[0;35m,
+[0;31m[0;31m  ***              ^-[0m
+[0;31m[0;31m  ***   syntax error, unexpected end of file, expecting )-> or ',' or ')': 
+[0;31m  ***   [0;35mfor(V=0,511[0;35m,
+[0;31m[0;31m  ***              ^-[0m
+[0;31m[0;31m  ***   syntax error, unexpected end of file, expecting )-> or ',' or ')': 
+[0;31m  ***   [0;35mif((U%2)||(V%2)[0;35m,
+[0;31m[0;31m  ***                  ^-[0m
+[0;31m[0;31m  ***   syntax error, unexpected ')', expecting end of file:[0;35m );
+[0;31m[0;31m  ***                                                        ^--[0m
+[0;31m[0;31m  ***   syntax error, unexpected ')', expecting end of file:[0;35m );
+[0;31m[0;31m  ***                                                        ^--[0m
+[0;31m[0;31m  ***   syntax error, unexpected ')', expecting end of file:[0;35m );
+[0;31m[0;31m  ***                                                        ^--[0m
+primitive residue pairs mod 512 for dual d=2 = 0
+primitive residue pairs mod 512 for dual d=-2 = 0
 analytic rank = [0, 0.38676993838778004330239475124323592948]
 L1 = 0.38676993838778004330239475124323592948
 bsd = 0.38676993838778004330239475124323592948
@@ -38,6 +51,9 @@ tors = [3, [3], [[5, 9]]]
 rank = [0, 0, 0, []]
 #ell2cover = 0
 ell2cover raw = []
+19 quartic A factorization = [x - 2, 1; x^3 + 3*x^2 + x - 3, 1]
+19 quartic B factorization = [3*x - 2, 1; x^3 + 2*x^2 - 4, 1]
+19 quartic C factorization = [x - 1, 1; 3*x^3 - 2*x^2 - 12*x - 8, 1]
 19 quartic A points = [[1, 2], [1, -2], [2, 0]]
 19 quartic B points = [[1, 1], [1, -1], [2/3, 0]]
 19 quartic C points = [[1, 0], [2, 4], [2, -4]]
