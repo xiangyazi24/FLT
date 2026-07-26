@@ -1,0 +1,69 @@
+name: Q1094 exact 2-descent audit
+
+on:
+  push:
+    branches:
+      - q1094-calc-de16f30f
+    paths:
+      - scripts/q1094_descent.gp
+      - .github/workflows/q1094-descent.yml
+
+permissions:
+  contents: write
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q1094-calc-de16f30f
+          fetch-depth: 0
+
+      - name: Install PARI/GP and eclib mwrank
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pari-gp eclib-tools
+          gp --version
+          mwrank -h | head -80
+
+      - name: Run exact PARI computations
+        run: gp -q < scripts/q1094_descent.gp > Q1094_PARI.txt 2>&1
+
+      - name: Run verbose mwrank 2-descent for 17a1
+        run: |
+          printf '%s\n' '[1,-1,1,-1,-14]' | mwrank -v 5 -s -l -b 20 -x 12 > Q1094_MWRANK_17.txt 2>&1
+
+      - name: Run verbose mwrank 2-descent for 19a1
+        run: |
+          printf '%s\n' '[0,1,1,-9,-15]' | mwrank -v 5 -s -l -b 20 -x 12 > Q1094_MWRANK_19.txt 2>&1
+
+      - name: Record outputs
+        run: |
+          {
+            echo '# Q1094 exact descent computation'
+            echo
+            echo '## PARI/GP'
+            echo '```text'
+            cat Q1094_PARI.txt
+            echo '```'
+            echo
+            echo '## mwrank 17a1, verbosity 5, Selmer-only'
+            echo '```text'
+            cat Q1094_MWRANK_17.txt
+            echo '```'
+            echo
+            echo '## mwrank 19a1, verbosity 5, Selmer-only'
+            echo '```text'
+            cat Q1094_MWRANK_19.txt
+            echo '```'
+          } > Q1094_GENERATED.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Q1094_GENERATED.md
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'Record Q1094 exact 2-descent output'
+          git push origin HEAD:q1094-calc-de16f30f
