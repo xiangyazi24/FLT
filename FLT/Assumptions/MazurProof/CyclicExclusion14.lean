@@ -1,5 +1,4 @@
 import FLT.Assumptions.MazurProof.CyclicOrderReduction
-import FLT.Assumptions.MazurProof.DescentBridgeN14
 import FLT.Assumptions.MazurProof.TateOrder18
 import scratch.DischargeN14
 
