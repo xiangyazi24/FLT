@@ -7,6 +7,12 @@ on:
     paths:
       - scripts/q1094_descent.gp
       - .github/workflows/q1094-descent.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - scripts/q1094_descent.gp
+      - .github/workflows/q1094-descent.yml
 
 permissions:
   contents: write
