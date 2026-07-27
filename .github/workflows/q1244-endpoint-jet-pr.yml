@@ -24,6 +24,8 @@ jobs:
         run: |
           g++ -O3 -std=c++20 -Wall -Wextra -pedantic scripts/q1244_endpoint_jet_search.cpp -o /tmp/q1244_search
           /tmp/q1244_search > Q1244_ENDPOINT_JET_RESULT.txt
+      - name: Install Boost multiprecision headers
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libboost-dev
       - name: Compile and run exact integer gcd search
         run: |
           set +e
