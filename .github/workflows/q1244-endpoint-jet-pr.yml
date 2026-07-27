@@ -20,19 +20,26 @@ jobs:
         with:
           ref: q1244-endpoint-jet-search
           fetch-depth: 0
-      - name: Compile exact modular search
-        run: g++ -O3 -std=c++20 -Wall -Wextra -pedantic scripts/q1244_endpoint_jet_search.cpp -o /tmp/q1244_search
-      - name: Run exact modular search
-        run: /tmp/q1244_search > Q1244_ENDPOINT_JET_RESULT.txt
-      - name: Compile exact integer gcd search
-        run: g++ -O3 -std=c++20 -Wall -Wextra -pedantic scripts/q1244_integer_jet_gcd.cpp -o /tmp/q1244_gcd
-      - name: Run exact integer gcd search
-        run: /tmp/q1244_gcd > Q1244_INTEGER_GCD_RESULT.txt
+      - name: Compile and run exact modular search
+        run: |
+          g++ -O3 -std=c++20 -Wall -Wextra -pedantic scripts/q1244_endpoint_jet_search.cpp -o /tmp/q1244_search
+          /tmp/q1244_search > Q1244_ENDPOINT_JET_RESULT.txt
+      - name: Compile and run exact integer gcd search
+        run: |
+          set +e
+          g++ -O3 -std=c++20 -Wall -Wextra -pedantic scripts/q1244_integer_jet_gcd.cpp -o /tmp/q1244_gcd 2> Q1244_GCD_COMPILE.txt
+          status=$?
+          if [ $status -eq 0 ]; then
+            /tmp/q1244_gcd > Q1244_INTEGER_GCD_RESULT.txt
+          else
+            echo "compile_status=$status" > Q1244_INTEGER_GCD_RESULT.txt
+          fi
+          exit 0
       - name: Commit results to calculation branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Q1244_ENDPOINT_JET_RESULT.txt Q1244_INTEGER_GCD_RESULT.txt
+          git add Q1244_ENDPOINT_JET_RESULT.txt Q1244_INTEGER_GCD_RESULT.txt Q1244_GCD_COMPILE.txt
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Record Q1244 endpoint-jet exact searches"
           git push origin HEAD:q1244-endpoint-jet-search
