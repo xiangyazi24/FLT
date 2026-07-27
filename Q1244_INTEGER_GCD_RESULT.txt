@@ -1,1 +1,1 @@
-compile_status=1
+NONINTEGER at n=4
