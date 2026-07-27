@@ -177,675 +177,1309 @@ private lemma point_some_congr {W : WeierstrassCurve ℚ} {a b c d : ℚ}
     (Point.some a b h₁ : Point W) = Point.some c d h₂ := by
   subst hx; subst hy; rfl
 
-/-! ## Homomorphism -/
+/-! ## Homomorphism via the standard two-isogeny
 
-private lemma veluMapPoint_neg {A B r : ℚ} {htors : r ^ 3 + A * r + B = 0}
-    [hE : (shortWS A B).IsElliptic]
-    [hE' : (veluQuotCurve A B r).IsElliptic]
-    (P : Point (shortWS A B)) :
-    veluMapPoint htors (-P) = -(veluMapPoint htors P) := by
-  match P with
-  | .zero =>
-    show veluMapPoint htors (-(0 : Point (shortWS A B))) = -(veluMapPoint htors 0)
-    simp
-  | .some x y h =>
-    simp only [Point.neg_some, veluMapPoint]
-    simp only [negY, shortWS]
-    by_cases hx : x = r
-    · simp only [hx, dite_true]; exact (neg_zero).symm
-    · simp only [hx, dite_false]
-      rw [Point.neg_some]
-      congr 1
-      simp [negY, veluQuotCurve]
-      ring
-
-private lemma veluT_ne_zero {A B r : ℚ}
-    (htors : r ^ 3 + A * r + B = 0) [hE : (shortWS A B).IsElliptic] :
-    veluT A r ≠ 0 := by
-  intro h
-  have hΔ := hE.isUnit
-  rw [shortWS_Δ_factor htors] at hΔ
-  have h1 : A + 3 * r ^ 2 = 0 := by unfold veluT at h; linarith
-  exact absurd (show -16 * (A + 3 * r ^ 2) ^ 2 * (4 * A + 3 * r ^ 2) = 0 by rw [h1]; ring)
-    (isUnit_iff_ne_zero.mp hΔ)
+Translate the rational 2-torsion point to `(0, 0)`.  The Vélu map then becomes
+the standard degree-two map on `y² = x(x² + ax + b)`.  Its additivity is proved
+from the dual-composition doubling identity and the description of its fibres as
+cosets of the kernel; the final bridge is an additive change of variables.
+-/
 
 private lemma torsion_y_zero {A B r x y : ℚ}
     (htors : r ^ 3 + A * r + B = 0)
     (hcurve : Equation (shortWS A B) x y) (hx : x = r) : y = 0 := by
   have := shortWS_equation.mp hcurve
-  rw [hx] at this; nlinarith [sq_nonneg y]
+  rw [hx] at this
+  nlinarith [sq_nonneg y]
 
-private lemma coset_x_identity {A B r x₂ y₂ : ℚ}
+namespace StandardTwoIsogeny
+
+open WeierstrassCurve.Affine
+
+/-! ### The standard model and its two maps -/
+
+@[reducible] def curve (a b : ℚ) : WeierstrassCurve ℚ where
+  a₁ := 0
+  a₂ := a
+  a₃ := 0
+  a₄ := b
+  a₆ := 0
+
+lemma curve_equation {a b x y : ℚ} :
+    Equation (curve a b) x y ↔ y ^ 2 = x * (x ^ 2 + a * x + b) := by
+  rw [equation_iff]
+  simp only [curve]
+  constructor <;> intro h <;> nlinarith
+
+def fx (x y : ℚ) : ℚ := y ^ 2 / x ^ 2
+def fy (b x y : ℚ) : ℚ := y * (b - x ^ 2) / x ^ 2
+def dx (x y : ℚ) : ℚ := y ^ 2 / x ^ 2 / 4
+def dy (a b x y : ℚ) : ℚ := y * ((a ^ 2 - 4 * b) - x ^ 2) / x ^ 2 / 8
+
+lemma forward_equation {a b x y : ℚ}
+    (h : Equation (curve a b) x y) (hx : x ≠ 0) :
+    Equation (curve (-2 * a) (a ^ 2 - 4 * b))
+      (fx x y) (fy b x y) := by
+  rw [curve_equation]
+  have heq := curve_equation.mp h
+  unfold fx fy
+  field_simp [hx]
+  rw [heq]
+  ring
+
+lemma dual_equation {a b x y : ℚ}
+    (h : Equation (curve (-2 * a) (a ^ 2 - 4 * b)) x y) (hx : x ≠ 0) :
+    Equation (curve a b) (dx x y) (dy a b x y) := by
+  rw [curve_equation]
+  have heq := curve_equation.mp h
+  unfold dx dy
+  field_simp [hx]
+  rw [heq]
+  ring
+
+def tangent (a b x y : ℚ) : ℚ := (3 * x ^ 2 + 2 * a * x + b) / (2 * y)
+def tx (a x m : ℚ) : ℚ := m ^ 2 - a - 2 * x
+def ty (a x y m : ℚ) : ℚ := -(m * (tx a x m - x) + y)
+
+lemma dual_forward_x {a b x y : ℚ} (hx : x ≠ 0) (hy : y ≠ 0)
+    (h : y ^ 2 = x * (x ^ 2 + a * x + b)) :
+    dx (fx x y) (fy b x y) = tx a x (tangent a b x y) := by
+  unfold dx fx fy tx tangent
+  field_simp [hx, hy]
+  rw [h]
+  ring
+
+lemma dual_forward_y {a b x y : ℚ} (hx : x ≠ 0) (hy : y ≠ 0)
+    (h : y ^ 2 = x * (x ^ 2 + a * x + b)) :
+    dy a b (fx x y) (fy b x y) = ty a x y (tangent a b x y) := by
+  unfold dy fx fy ty tx tangent
+  field_simp [hx, hy]
+  have hy4 : y ^ 4 = (x * (x ^ 2 + a * x + b)) ^ 2 := by
+    calc
+      y ^ 4 = (y ^ 2) ^ 2 := by ring
+      _ = _ := by rw [h]
+  rw [hy4, h]
+  ring
+
+lemma forward_dual_x {a b x y : ℚ} (hx : x ≠ 0) (hy : y ≠ 0)
+    (h : y ^ 2 = x * (x ^ 2 + (-2 * a) * x + (a ^ 2 - 4 * b))) :
+    fx (dx x y) (dy a b x y) =
+      tx (-2 * a) x (tangent (-2 * a) (a ^ 2 - 4 * b) x y) := by
+  unfold fx dx dy tx tangent
+  field_simp [hx, hy]
+  rw [h]
+  ring
+
+lemma forward_dual_y {a b x y : ℚ} (hx : x ≠ 0) (hy : y ≠ 0)
+    (h : y ^ 2 = x * (x ^ 2 + (-2 * a) * x + (a ^ 2 - 4 * b))) :
+    fy b (dx x y) (dy a b x y) =
+      ty (-2 * a) x y (tangent (-2 * a) (a ^ 2 - 4 * b) x y) := by
+  unfold fy dx dy ty tx tangent
+  field_simp [hx, hy]
+  have hy4 :
+      y ^ 4 = (x * (x ^ 2 + (-2 * a) * x + (a ^ 2 - 4 * b))) ^ 2 := by
+    calc
+      y ^ 4 = (y ^ 2) ^ 2 := by ring
+      _ = _ := by rw [h]
+  rw [hy4, h]
+  ring
+
+noncomputable def pointMap {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic] :
+    Point (curve a b) → Point (curve (-2 * a) (a ^ 2 - 4 * b))
+  | .zero => .zero
+  | .some x y h =>
+      if hx : x = 0 then .zero
+      else .some (fx x y) (fy b x y)
+        (equation_iff_nonsingular.mp (forward_equation h.left hx))
+
+noncomputable def dualPoint {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic] :
+    Point (curve (-2 * a) (a ^ 2 - 4 * b)) → Point (curve a b)
+  | .zero => .zero
+  | .some x y h =>
+      if hx : x = 0 then .zero
+      else .some (dx x y) (dy a b x y)
+        (equation_iff_nonsingular.mp (dual_equation h.left hx))
+
+@[simp] lemma pointMap_zero {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic] :
+    pointMap (a := a) (b := b) 0 = 0 := rfl
+
+@[simp] lemma dualPoint_zero {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic] :
+    dualPoint (a := a) (b := b) 0 = 0 := rfl
+
+lemma pointMap_some {a b x y : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (h : Nonsingular (curve a b) x y) (hx : x ≠ 0) :
+    pointMap (a := a) (b := b) (.some x y h) =
+      .some (fx x y) (fy b x y)
+        (equation_iff_nonsingular.mp (forward_equation h.left hx)) := by
+  simp [pointMap, hx]
+
+lemma dualPoint_some {a b x y : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (h : Nonsingular (curve (-2 * a) (a ^ 2 - 4 * b)) x y) (hx : x ≠ 0) :
+    dualPoint (a := a) (b := b) (.some x y h) =
+      .some (dx x y) (dy a b x y)
+        (equation_iff_nonsingular.mp (dual_equation h.left hx)) := by
+  simp [dualPoint, hx]
+
+@[simp] lemma curve_negY (a b x y : ℚ) :
+    negY (curve a b) x y = -y := by
+  simp [negY, curve]
+
+lemma y_zero_of_x_zero {a b x y : ℚ}
+    (h : Nonsingular (curve a b) x y) (hx : x = 0) : y = 0 := by
+  have heq := curve_equation.mp h.left
+  rw [hx] at heq
+  nlinarith
+
+lemma double_eq_zero_of_y_zero {a b x y : ℚ}
+    [hE : (curve a b).IsElliptic]
+    (h : Nonsingular (curve a b) x y) (hy : y = 0) :
+    2 • (Point.some x y h : Point (curve a b)) = 0 := by
+  rw [two_nsmul]
+  exact Point.add_self_of_Y_eq (by simp [hy, curve_negY])
+
+lemma y_ne_negY {a b x y : ℚ} (hy : y ≠ 0) :
+    y ≠ negY (curve a b) x y := by
+  rw [curve_negY]
+  intro h
+  exact hy (by linarith)
+
+lemma slope_self {a b x y : ℚ} (hy : y ≠ 0) :
+    slope (curve a b) x x y y = tangent a b x y := by
+  rw [slope_of_Y_ne rfl (y_ne_negY hy)]
+  simp [curve, tangent, negY]
+  ring
+
+lemma addX_self (a b x y : ℚ) :
+    addX (curve a b) x x (tangent a b x y) =
+      tx a x (tangent a b x y) := by
+  simp [curve, addX, tx]
+  ring
+
+lemma addY_self (a b x y : ℚ) :
+    addY (curve a b) x x y (tangent a b x y) =
+      ty a x y (tangent a b x y) := by
+  simp only [curve, addY, WeierstrassCurve.Affine.negAddY, negY, addX, ty, tx,
+    zero_mul, add_zero, sub_zero]
+  ring
+
+/-! ### Dual composition and doubling -/
+
+lemma dual_comp_pointMap {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P : Point (curve a b)) :
+    dualPoint (a := a) (b := b) (pointMap P) = 2 • P := by
+  cases P with
+  | zero => rfl
+  | some x y h =>
+      by_cases hx : x = 0
+      · have hy := y_zero_of_x_zero h hx
+        have hmap : pointMap (a := a) (b := b) (Point.some x y h) = 0 := by
+          show pointMap (a := a) (b := b) (Point.some x y h) = Point.zero
+          unfold pointMap
+          exact dif_pos hx
+        rw [hmap, dualPoint_zero]
+        exact (double_eq_zero_of_y_zero h hy).symm
+      · rw [pointMap_some h hx]
+        by_cases hy : y = 0
+        · have hfx : fx x y = 0 := by simp [fx, hy]
+          simp only [dualPoint, hfx, dite_true]
+          exact (double_eq_zero_of_y_zero h hy).symm
+        · have hfx : fx x y ≠ 0 :=
+            div_ne_zero (pow_ne_zero 2 hy) (pow_ne_zero 2 hx)
+          rw [dualPoint_some _ hfx, two_nsmul,
+            Point.add_self_of_Y_ne (y_ne_negY hy)]
+          rw [Point.some.injEq]
+          have heq := curve_equation.mp h.left
+          exact ⟨by
+            rw [dual_forward_x hx hy heq, slope_self hy, addX_self],
+            by rw [dual_forward_y hx hy heq, slope_self hy, addY_self]⟩
+
+lemma pointMap_comp_dual {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P : Point (curve (-2 * a) (a ^ 2 - 4 * b))) :
+    pointMap (a := a) (b := b) (dualPoint P) = 2 • P := by
+  cases P with
+  | zero => rfl
+  | some x y h =>
+      by_cases hx : x = 0
+      · have hy := y_zero_of_x_zero h hx
+        have hmap : dualPoint (a := a) (b := b) (Point.some x y h) = 0 := by
+          show dualPoint (a := a) (b := b) (Point.some x y h) = Point.zero
+          unfold dualPoint
+          exact dif_pos hx
+        rw [hmap, pointMap_zero]
+        exact (double_eq_zero_of_y_zero h hy).symm
+      · rw [dualPoint_some h hx]
+        by_cases hy : y = 0
+        · have hdx : dx x y = 0 := by simp [dx, hy]
+          simp only [pointMap, hdx, dite_true]
+          exact (double_eq_zero_of_y_zero h hy).symm
+        · have hdx : dx x y ≠ 0 :=
+            div_ne_zero
+              (div_ne_zero (pow_ne_zero 2 hy) (pow_ne_zero 2 hx))
+              (by norm_num)
+          rw [pointMap_some _ hdx, two_nsmul,
+            Point.add_self_of_Y_ne (y_ne_negY hy)]
+          rw [Point.some.injEq]
+          have heq := curve_equation.mp h.left
+          exact ⟨by
+            rw [forward_dual_x hx hy heq, slope_self hy, addX_self],
+            by rw [forward_dual_y hx hy heq, slope_self hy, addY_self]⟩
+
+lemma pointMap_add_self {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P : Point (curve a b)) :
+    pointMap (P + P) = pointMap P + pointMap P := by
+  rw [← two_nsmul]
+  calc
+    pointMap (2 • P) = pointMap (dualPoint (pointMap P)) := by
+      rw [dual_comp_pointMap]
+    _ = 2 • pointMap P := pointMap_comp_dual _
+
+/-! ### Kernel translations and fibres -/
+
+def kernelPoint (a b : ℚ) [hE : (curve a b).IsElliptic] :
+    Point (curve a b) :=
+  .some 0 0 (equation_iff_nonsingular.mp (curve_equation.mpr (by ring)))
+
+lemma b_ne_zero (a b : ℚ) [hE : (curve a b).IsElliptic] : b ≠ 0 := by
+  have hns : Nonsingular (curve a b) 0 0 :=
+    equation_iff_nonsingular.mp (curve_equation.mpr (by ring))
+  have h := (nonsingular_zero (W := curve a b)).mp hns
+  simpa [curve] using h.2
+
+@[simp] lemma pointMap_kernel {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic] :
+    pointMap (kernelPoint a b) = 0 := by
+  show pointMap (a := a) (b := b) (kernelPoint a b) = Point.zero
+  unfold pointMap kernelPoint
+  exact dif_pos rfl
+
+lemma kernel_add_self {a b : ℚ} [hE : (curve a b).IsElliptic] :
+    kernelPoint a b + kernelPoint a b = 0 := by
+  exact Point.add_self_of_Y_eq (by simp [kernelPoint, curve_negY])
+
+lemma pointMap_neg {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P : Point (curve a b)) :
+    pointMap (-P) = -pointMap P := by
+  cases P with
+  | zero => rfl
+  | some x y h =>
+      simp only [Point.neg_some, pointMap]
+      by_cases hx : x = 0
+      · simp only [hx, dite_true]
+        rfl
+      · simp only [hx, dite_false]
+        rw [Point.neg_some]
+        congr 1
+        · simp [curve_negY, fx]
+        · simp only [curve_negY, fy]
+          ring
+
+lemma slope_kernel {a b x y : ℚ} (hx : x ≠ 0) :
+    slope (curve a b) x 0 y 0 = y / x := by
+  rw [slope_of_X_ne hx]
+  ring
+
+lemma add_kernel_x {a b x y : ℚ}
+    (h : Nonsingular (curve a b) x y) (hx : x ≠ 0) :
+    addX (curve a b) x 0 (slope (curve a b) x 0 y 0) = b / x := by
+  rw [slope_kernel hx]
+  have heq := curve_equation.mp h.left
+  simp only [addX, curve, zero_mul, add_zero, sub_zero]
+  field_simp [hx]
+  linear_combination heq
+
+lemma add_kernel_y {a b x y : ℚ}
+    (h : Nonsingular (curve a b) x y) (hx : x ≠ 0) :
+    addY (curve a b) x 0 y (slope (curve a b) x 0 y 0) =
+      -(b * y / x ^ 2) := by
+  rw [slope_kernel hx]
+  have hX : addX (curve a b) x 0 (y / x) = b / x := by
+    rw [← slope_kernel hx]
+    exact add_kernel_x h hx
+  simp only [addY, WeierstrassCurve.Affine.negAddY, curve_negY]
+  rw [hX]
+  field_simp [hx]
+  ring
+
+lemma translation_coordinates {b x y : ℚ}
+    (hx : x ≠ 0) (hb : b ≠ 0) :
+    fx (b / x) (-(b * y / x ^ 2)) = fx x y ∧
+      fy b (b / x) (-(b * y / x ^ 2)) = fy b x y := by
+  constructor
+  · unfold fx
+    field_simp [hx, hb]
+  · unfold fy
+    field_simp [hx, hb]
+    ring
+
+lemma pointMap_add_kernel {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P : Point (curve a b)) :
+    pointMap (P + kernelPoint a b) = pointMap P := by
+  cases P with
+  | zero =>
+      change pointMap (kernelPoint a b) = pointMap 0
+      rw [pointMap_kernel, pointMap_zero]
+  | some x y h =>
+      by_cases hx : x = 0
+      · have hy := y_zero_of_x_zero h hx
+        have hP : (Point.some x y h : Point (curve a b)) = kernelPoint a b := by
+          unfold kernelPoint
+          rw [Point.some.injEq]
+          exact ⟨hx, hy⟩
+        rw [hP, kernel_add_self, pointMap_zero, pointMap_kernel]
+      · rw [show kernelPoint a b =
+            Point.some 0 0 (equation_iff_nonsingular.mp
+              (curve_equation.mpr (by ring))) by rfl]
+        rw [Point.add_of_X_ne hx]
+        have hb := b_ne_zero a b
+        have hax : addX (curve a b) x 0 (slope (curve a b) x 0 y 0) ≠ 0 := by
+          rw [add_kernel_x h hx]
+          exact div_ne_zero hb hx
+        rw [pointMap_some _ hax, pointMap_some h hx, Point.some.injEq]
+        rw [add_kernel_x h hx, add_kernel_y h hx]
+        exact translation_coordinates hx hb
+
+lemma pointMap_kernel_add {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P : Point (curve a b)) :
+    pointMap (kernelPoint a b + P) = pointMap P := by
+  rw [add_comm, pointMap_add_kernel]
+
+lemma pointMap_eq_zero_iff {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P : Point (curve a b)) :
+    pointMap P = 0 ↔ P = 0 ∨ P = kernelPoint a b := by
+  constructor
+  · intro hmap
+    cases P with
+    | zero => exact Or.inl rfl
+    | some x y h =>
+        by_cases hx : x = 0
+        · right
+          unfold kernelPoint
+          rw [Point.some.injEq]
+          exact ⟨hx, y_zero_of_x_zero h hx⟩
+        · rw [pointMap_some h hx] at hmap
+          exact (Point.some_ne_zero _ hmap).elim
+  · rintro (rfl | rfl)
+    · exact pointMap_zero
+    · exact pointMap_kernel
+
+lemma fx_secant_form {a b x y : ℚ}
+    (h : y ^ 2 = x * (x ^ 2 + a * x + b)) (hx : x ≠ 0) :
+    fx x y = x + a + b / x := by
+  unfold fx
+  rw [h]
+  field_simp [hx]
+
+lemma x_fibre_factor {a b x₁ y₁ x₂ y₂ : ℚ}
+    (h₁ : y₁ ^ 2 = x₁ * (x₁ ^ 2 + a * x₁ + b))
+    (h₂ : y₂ ^ 2 = x₂ * (x₂ ^ 2 + a * x₂ + b))
+    (hx₁ : x₁ ≠ 0) (hx₂ : x₂ ≠ 0)
+    (hfx : fx x₁ y₁ = fx x₂ y₂) :
+    x₁ = x₂ ∨ x₁ * x₂ = b := by
+  rw [fx_secant_form h₁ hx₁, fx_secant_form h₂ hx₂] at hfx
+  have hprod : (x₁ - x₂) * (x₁ * x₂ - b) = 0 := by
+    field_simp [hx₁, hx₂] at hfx
+    linear_combination hfx
+  rcases mul_eq_zero.mp hprod with h | h
+  · left
+    linarith
+  · right
+    linarith
+
+lemma affine_fibre {a b x₁ y₁ x₂ y₂ : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (h₁ : Nonsingular (curve a b) x₁ y₁)
+    (h₂ : Nonsingular (curve a b) x₂ y₂)
+    (hx₁ : x₁ ≠ 0) (hx₂ : x₂ ≠ 0)
+    (hmap : pointMap (a := a) (b := b) (Point.some x₁ y₁ h₁) =
+      pointMap (a := a) (b := b) (Point.some x₂ y₂ h₂)) :
+    (Point.some x₂ y₂ h₂ : Point (curve a b)) = Point.some x₁ y₁ h₁ ∨
+      (Point.some x₂ y₂ h₂ : Point (curve a b)) =
+        Point.some x₁ y₁ h₁ + kernelPoint a b := by
+  rw [pointMap_some h₁ hx₁, pointMap_some h₂ hx₂] at hmap
+  have hcoords := Point.some.inj hmap
+  have heq₁ := curve_equation.mp h₁.left
+  have heq₂ := curve_equation.mp h₂.left
+  have hxf := x_fibre_factor heq₁ heq₂ hx₁ hx₂ hcoords.1
+  have sameX (hxeq : x₁ = x₂) :
+      (Point.some x₂ y₂ h₂ : Point (curve a b)) = Point.some x₁ y₁ h₁ ∨
+        (Point.some x₂ y₂ h₂ : Point (curve a b)) =
+          Point.some x₁ y₁ h₁ + kernelPoint a b := by
+    rcases Y_eq_of_X_eq h₁.left h₂.left hxeq with hyeq | hyneg
+    · left
+      rw [Point.some.injEq]
+      exact ⟨hxeq.symm, hyeq.symm⟩
+    · have hy₂ : y₂ = -y₁ := by
+        rw [curve_negY] at hyneg
+        linarith
+      by_cases hy₁ : y₁ = 0
+      · left
+        rw [Point.some.injEq]
+        exact ⟨hxeq.symm, by linarith⟩
+      · have hY := hcoords.2
+        rw [← hxeq] at hY
+        unfold fy at hY
+        field_simp [hx₁] at hY
+        rw [hy₂] at hY
+        have hprod : y₁ * (b - x₁ ^ 2) = 0 := by
+          linear_combination (1 / 2 : ℚ) * hY
+        have hsquare : x₁ ^ 2 = b := by
+          have := (mul_eq_zero.mp hprod).resolve_left hy₁
+          linarith
+        right
+        change Point.some x₂ y₂ h₂ =
+          (Point.some x₁ y₁ h₁ : Point (curve a b)) +
+            Point.some 0 0 _
+        rw [Point.add_of_X_ne hx₁, Point.some.injEq]
+        constructor
+        · rw [add_kernel_x h₁ hx₁, ← hxeq]
+          field_simp [hx₁]
+          nlinarith
+        · rw [add_kernel_y h₁ hx₁, hy₂]
+          field_simp [hx₁]
+          nlinarith
+  rcases hxf with hxeq | hprod
+  · exact sameX hxeq
+  · by_cases hxeq : x₁ = x₂
+    · exact sameX hxeq
+    · have hx₂val : x₂ = b / x₁ := by
+        field_simp [hx₁]
+        nlinarith
+      have hsquare : x₁ ^ 2 ≠ b := by
+        intro hs
+        apply hxeq
+        rw [hx₂val]
+        field_simp [hx₁]
+        nlinarith
+      have hY := hcoords.2
+      rw [hx₂val] at hY
+      have hb := b_ne_zero a b
+      unfold fy at hY
+      field_simp [hx₁, hb] at hY
+      have hfac : (x₁ ^ 2 - b) * (x₁ ^ 2 * y₂ + b * y₁) = 0 := by
+        calc
+          (x₁ ^ 2 - b) * (x₁ ^ 2 * y₂ + b * y₁) =
+              -(y₁ * b * (b - x₁ ^ 2) -
+                x₁ ^ 2 * y₂ * (x₁ ^ 2 - b)) := by ring
+          _ = 0 := by rw [hY]; ring
+      have hyrel : x₁ ^ 2 * y₂ + b * y₁ = 0 :=
+        (mul_eq_zero.mp hfac).resolve_left (sub_ne_zero.mpr hsquare)
+      right
+      change Point.some x₂ y₂ h₂ =
+        (Point.some x₁ y₁ h₁ : Point (curve a b)) +
+          Point.some 0 0 _
+      rw [Point.add_of_X_ne hx₁, Point.some.injEq]
+      constructor
+      · rw [add_kernel_x h₁ hx₁, hx₂val]
+      · rw [add_kernel_y h₁ hx₁]
+        field_simp [hx₁]
+        nlinarith
+
+lemma pointMap_eq_iff {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P Q : Point (curve a b)) :
+    pointMap P = pointMap Q ↔ Q = P ∨ Q = P + kernelPoint a b := by
+  constructor
+  · intro hPQ
+    by_cases hPzero : pointMap P = 0
+    · have hQzero : pointMap Q = 0 := by rw [← hPQ]; exact hPzero
+      rcases (pointMap_eq_zero_iff P).mp hPzero with hP | hP <;>
+        rcases (pointMap_eq_zero_iff Q).mp hQzero with hQ | hQ
+      · left
+        rw [hP, hQ]
+      · right
+        rw [hP, hQ, zero_add]
+      · right
+        rw [hP, hQ, kernel_add_self]
+      · left
+        rw [hP, hQ]
+    · have hQzero : pointMap Q ≠ 0 := by
+        intro hQ
+        apply hPzero
+        rw [hPQ, hQ]
+      cases P with
+      | zero => exact (hPzero pointMap_zero).elim
+      | some x₁ y₁ h₁ =>
+          cases Q with
+          | zero => exact (hQzero pointMap_zero).elim
+          | some x₂ y₂ h₂ =>
+              have hx₁ : x₁ ≠ 0 := by
+                intro hx
+                apply hPzero
+                show pointMap (a := a) (b := b) (Point.some x₁ y₁ h₁) = Point.zero
+                unfold pointMap
+                exact dif_pos hx
+              have hx₂ : x₂ ≠ 0 := by
+                intro hx
+                apply hQzero
+                show pointMap (a := a) (b := b) (Point.some x₂ y₂ h₂) = Point.zero
+                unfold pointMap
+                exact dif_pos hx
+              exact affine_fibre h₁ h₂ hx₁ hx₂ hPQ
+  · rintro (rfl | rfl)
+    · rfl
+    · exact (pointMap_add_kernel P).symm
+
+/-! ### The generic secant calculation
+
+The two `secant_*_identity` lemmas package the only coordinate calculation.
+They are low-degree consequences of the two curve equations and the equation of
+the secant line; all exceptional configurations have already been classified as
+kernel cosets.
+-/
+
+lemma secant_relations
+    {a b x₁ y₁ x₂ y₂ ℓ r : ℚ}
+    (h₁ : y₁ ^ 2 = x₁ * (x₁ ^ 2 + a * x₁ + b))
+    (h₂ : y₂ ^ 2 = x₂ * (x₂ ^ 2 + a * x₂ + b))
+    (hx₁x₂ : x₁ ≠ x₂)
+    (hℓ : ℓ = (y₁ - y₂) / (x₁ - x₂))
+    (hrdef : r = ℓ ^ 2 - a - x₁ - x₂) :
+    x₁ * x₂ + x₁ * r + x₂ * r -
+          (b - 2 * ℓ * y₁ + 2 * ℓ ^ 2 * x₁) = 0 ∧
+      x₁ * x₂ * r - (y₁ - ℓ * x₁) ^ 2 = 0 := by
+  have hline : y₂ = y₁ - ℓ * (x₁ - x₂) := by
+    rw [hℓ]
+    field_simp [sub_ne_zero.mpr hx₁x₂]
+    ring
+  have h₂' := h₂
+  rw [hline] at h₂'
+  have hBmul :
+      (x₁ - x₂) *
+        (x₁ * x₂ + x₁ * r + x₂ * r -
+          (b - 2 * ℓ * y₁ + 2 * ℓ ^ 2 * x₁)) = 0 := by
+    rw [hrdef]
+    linear_combination h₁ - h₂'
+  have hB :
+      x₁ * x₂ + x₁ * r + x₂ * r -
+          (b - 2 * ℓ * y₁ + 2 * ℓ ^ 2 * x₁) = 0 :=
+    (mul_eq_zero.mp hBmul).resolve_left (sub_ne_zero.mpr hx₁x₂)
+  refine ⟨hB, ?_⟩
+  linear_combination x₁ * hB - h₁ - x₁ ^ 2 * hrdef
+
+lemma secant_x_identity
+    {a b x₁ y₁ x₂ y₂ ℓ r : ℚ}
+    (h₁ : y₁ ^ 2 = x₁ * (x₁ ^ 2 + a * x₁ + b))
+    (h₂ : y₂ ^ 2 = x₂ * (x₂ ^ 2 + a * x₂ + b))
+    (hx₁ : x₁ ≠ 0) (hx₂ : x₂ ≠ 0) (hx₁x₂ : x₁ ≠ x₂)
+    (hℓ : ℓ = (y₁ - y₂) / (x₁ - x₂))
+    (hrdef : r = ℓ ^ 2 - a - x₁ - x₂)
+    (hr : r ≠ 0) (hb : x₁ * x₂ - b ≠ 0) :
+    r + a + b / r =
+      ((y₁ * (b - x₁ ^ 2) / x₁ ^ 2 -
+          y₂ * (b - x₂ ^ 2) / x₂ ^ 2) /
+        ((x₁ + a + b / x₁) - (x₂ + a + b / x₂))) ^ 2 +
+        2 * a - (x₁ + a + b / x₁) - (x₂ + a + b / x₂) := by
+  have hline : y₂ = y₁ - ℓ * (x₁ - x₂) := by
+    rw [hℓ]
+    field_simp [sub_ne_zero.mpr hx₁x₂]
+    ring
+  obtain ⟨hB, hC⟩ := secant_relations h₁ h₂ hx₁x₂ hℓ hrdef
+  have hCeq : r * x₁ * x₂ = (ℓ * x₁ - y₁) ^ 2 := by
+    linear_combination hC
+  have hu : ℓ * x₁ - y₁ ≠ 0 := by
+    intro hu0
+    have hprod : r * x₁ * x₂ ≠ 0 := mul_ne_zero (mul_ne_zero hr hx₁) hx₂
+    apply hprod
+    rw [hCeq, hu0]
+    norm_num
+  have hu' : -y₁ + x₁ * ℓ ≠ 0 := by
+    intro hu0
+    apply hu
+    linear_combination hu0
+  have hu'' : x₁ * ℓ - y₁ ≠ 0 := by
+    intro hu0
+    apply hu
+    linear_combination hu0
+  have hT :
+      x₁ * x₂ + r * (x₁ + x₂) = b + 2 * ℓ * (ℓ * x₁ - y₁) := by
+    linear_combination hB
+  have hA : r + x₁ + x₂ + a = ℓ ^ 2 := by
+    linear_combination hrdef
+  have hFD_eq :
+      (x₁ + a + b / x₁) - (x₂ + a + b / x₂) =
+        (x₁ - x₂) * (x₁ * x₂ - b) / (x₁ * x₂) := by
+    field_simp [hx₁, hx₂]
+    ring
+  have hm₀ :
+      (y₁ * (b - x₁ ^ 2) / x₁ ^ 2 -
+          y₂ * (b - x₂ ^ 2) / x₂ ^ 2) /
+        ((x₁ + a + b / x₁) - (x₂ + a + b / x₂)) =
+      (-b * y₁ * (x₁ + x₂) + ℓ * x₁ ^ 2 * (b - x₂ ^ 2)) /
+        (x₁ * x₂ * (x₁ * x₂ - b)) := by
+    rw [hline, hFD_eq]
+    field_simp [hx₁, hx₂, sub_ne_zero.mpr hx₁x₂, hb]
+    ring
+  have hcross :
+      (-b * y₁ * (x₁ + x₂) + ℓ * x₁ ^ 2 * (b - x₂ ^ 2)) *
+          (ℓ * x₁ - y₁) +
+        (ℓ * (ℓ * x₁ - y₁) + b) * (x₁ * x₂ * (x₁ * x₂ - b)) = 0 := by
+    linear_combination (b * x₁ * x₂) * hB - (b * (x₁ + x₂)) * hC
+  have hden : x₁ * x₂ * (x₁ * x₂ - b) ≠ 0 :=
+    mul_ne_zero (mul_ne_zero hx₁ hx₂) hb
+  have hm₁ :
+      (-b * y₁ * (x₁ + x₂) + ℓ * x₁ ^ 2 * (b - x₂ ^ 2)) /
+          (x₁ * x₂ * (x₁ * x₂ - b)) =
+        -(ℓ * (ℓ * x₁ - y₁) + b) / (ℓ * x₁ - y₁) := by
+    apply (div_eq_iff hden).2
+    field_simp [hu, hu', hu'']
+    linear_combination hcross
+  have hsum :
+      (r + a + b / r) + (x₁ + a + b / x₁) +
+          (x₂ + a + b / x₂) - 2 * a =
+        ((ℓ * (ℓ * x₁ - y₁) + b) / (ℓ * x₁ - y₁)) ^ 2 := by
+    calc
+      (r + a + b / r) + (x₁ + a + b / x₁) +
+            (x₂ + a + b / x₂) - 2 * a =
+          r + x₁ + x₂ + a +
+            b * (x₁ * x₂ + r * (x₁ + x₂)) / (r * x₁ * x₂) := by
+        field_simp [hr, hx₁, hx₂]
+        ring
+      _ = ℓ ^ 2 +
+            b * (x₁ * x₂ + r * (x₁ + x₂)) / (r * x₁ * x₂) := by rw [hA]
+      _ = ℓ ^ 2 +
+            b * (b + 2 * ℓ * (ℓ * x₁ - y₁)) /
+              ((ℓ * x₁ - y₁) ^ 2) := by rw [hT, hCeq]
+      _ = ((ℓ * (ℓ * x₁ - y₁) + b) / (ℓ * x₁ - y₁)) ^ 2 := by
+        field_simp [hu]
+        ring
+  rw [hm₀, hm₁]
+  linear_combination hsum
+
+lemma secant_y_identity
+    {a b x₁ y₁ x₂ y₂ ℓ r : ℚ}
+    (h₁ : y₁ ^ 2 = x₁ * (x₁ ^ 2 + a * x₁ + b))
+    (h₂ : y₂ ^ 2 = x₂ * (x₂ ^ 2 + a * x₂ + b))
+    (hx₁ : x₁ ≠ 0) (hx₂ : x₂ ≠ 0) (hx₁x₂ : x₁ ≠ x₂)
+    (hℓ : ℓ = (y₁ - y₂) / (x₁ - x₂))
+    (hrdef : r = ℓ ^ 2 - a - x₁ - x₂)
+    (hr : r ≠ 0) (hb : x₁ * x₂ - b ≠ 0) :
+    (ℓ * (x₁ - r) - y₁) * (b - r ^ 2) / r ^ 2 =
+      ((y₁ * (b - x₁ ^ 2) / x₁ ^ 2 -
+          y₂ * (b - x₂ ^ 2) / x₂ ^ 2) /
+        ((x₁ + a + b / x₁) - (x₂ + a + b / x₂))) *
+          ((x₁ + a + b / x₁) - (r + a + b / r)) -
+        y₁ * (b - x₁ ^ 2) / x₁ ^ 2 := by
+  have hline : y₂ = y₁ - ℓ * (x₁ - x₂) := by
+    rw [hℓ]
+    field_simp [sub_ne_zero.mpr hx₁x₂]
+    ring
+  obtain ⟨hB, hC⟩ := secant_relations h₁ h₂ hx₁x₂ hℓ hrdef
+  have hH :
+      ℓ * r * x₁ ^ 2 - ℓ * r * x₁ * x₂ + ℓ * x₁ ^ 2 * x₂ -
+          b * ℓ * x₁ - r * x₁ * y₁ - r * x₂ * y₁ - x₁ * x₂ * y₁ +
+          b * y₁ = 0 := by
+    linear_combination (ℓ * x₁ - y₁) * hB - 2 * ℓ * hC
+  have hFD_eq :
+      (x₁ + a + b / x₁) - (x₂ + a + b / x₂) =
+        (x₁ - x₂) * (x₁ * x₂ - b) / (x₁ * x₂) := by
+    field_simp [hx₁, hx₂]
+    ring
+  have hm :
+      (y₁ * (b - x₁ ^ 2) / x₁ ^ 2 -
+          y₂ * (b - x₂ ^ 2) / x₂ ^ 2) /
+        ((x₁ + a + b / x₁) - (x₂ + a + b / x₂)) =
+      (-b * y₁ * (x₁ + x₂) + ℓ * x₁ ^ 2 * (b - x₂ ^ 2)) /
+        (x₁ * x₂ * (x₁ * x₂ - b)) := by
+    rw [hline, hFD_eq]
+    field_simp [hx₁, hx₂, sub_ne_zero.mpr hx₁x₂, hb]
+    ring
+  rw [hm]
+  apply sub_eq_zero.mp
+  calc
+    (ℓ * (x₁ - r) - y₁) * (b - r ^ 2) / r ^ 2 -
+          ((-b * y₁ * (x₁ + x₂) + ℓ * x₁ ^ 2 * (b - x₂ ^ 2)) /
+              (x₁ * x₂ * (x₁ * x₂ - b)) *
+            ((x₁ + a + b / x₁) - (r + a + b / r)) -
+          y₁ * (b - x₁ ^ 2) / x₁ ^ 2) =
+        b * (x₁ - r) * (x₂ - r) *
+            (ℓ * r * x₁ ^ 2 - ℓ * r * x₁ * x₂ + ℓ * x₁ ^ 2 * x₂ -
+              b * ℓ * x₁ - r * x₁ * y₁ - r * x₂ * y₁ - x₁ * x₂ * y₁ +
+              b * y₁) /
+          (r ^ 2 * x₁ * x₂ * (x₁ * x₂ - b)) := by
+      field_simp [hx₁, hx₂, hr, hb]
+      ring
+    _ = 0 := by rw [hH]; ring
+
+/-! ### Additivity on the standard model -/
+
+lemma pointMap_add_x_generic {a b x₁ y₁ x₂ y₂ : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (h₁ : Nonsingular (curve a b) x₁ y₁)
+    (h₂ : Nonsingular (curve a b) x₂ y₂)
+    (hx₁ : x₁ ≠ 0) (hx₂ : x₂ ≠ 0) (hx₁x₂ : x₁ ≠ x₂)
+    (hr : addX (curve a b) x₁ x₂ (slope (curve a b) x₁ x₂ y₁ y₂) ≠ 0)
+    (hF : fx x₁ y₁ ≠ fx x₂ y₂) :
+    fx
+        (addX (curve a b) x₁ x₂ (slope (curve a b) x₁ x₂ y₁ y₂))
+        (addY (curve a b) x₁ x₂ y₁ (slope (curve a b) x₁ x₂ y₁ y₂)) =
+      addX (curve (-2 * a) (a ^ 2 - 4 * b))
+        (fx x₁ y₁) (fx x₂ y₂)
+        (slope (curve (-2 * a) (a ^ 2 - 4 * b))
+          (fx x₁ y₁) (fx x₂ y₂) (fy b x₁ y₁) (fy b x₂ y₂)) := by
+  have heq₁ := curve_equation.mp h₁.left
+  have heq₂ := curve_equation.mp h₂.left
+  have hsum := nonsingular_add h₁ h₂ (fun hxy => hx₁x₂ hxy.1)
+  have hsumEq := curve_equation.mp hsum.left
+  have hr' :
+      ((y₁ - y₂) / (x₁ - x₂)) ^ 2 - a - x₁ - x₂ ≠ 0 := by
+    simpa [slope_of_X_ne hx₁x₂, addX, curve] using hr
+  have hF' : x₁ + a + b / x₁ ≠ x₂ + a + b / x₂ := by
+    simpa [fx_secant_form heq₁ hx₁, fx_secant_form heq₂ hx₂] using hF
+  have hb : x₁ * x₂ - b ≠ 0 := by
+    intro hzero
+    apply hF'
+    apply sub_eq_zero.mp
+    calc
+      (x₁ + a + b / x₁) - (x₂ + a + b / x₂) =
+          (x₁ - x₂) * (x₁ * x₂ - b) / (x₁ * x₂) := by
+        field_simp [hx₁, hx₂]
+        ring
+      _ = 0 := by rw [hzero]; simp
+  have hid := secant_x_identity heq₁ heq₂ hx₁ hx₂ hx₁x₂
+    (ℓ := (y₁ - y₂) / (x₁ - x₂))
+    (r := ((y₁ - y₂) / (x₁ - x₂)) ^ 2 - a - x₁ - x₂)
+    rfl rfl hr' hb
+  rw [fx_secant_form hsumEq hr]
+  rw [slope_of_X_ne hx₁x₂, slope_of_X_ne hF]
+  rw [fx_secant_form heq₁ hx₁, fx_secant_form heq₂ hx₂]
+  simp only [addX, curve, zero_mul, add_zero, fy]
+  convert hid using 1 <;> ring
+
+lemma pointMap_add_y_generic {a b x₁ y₁ x₂ y₂ : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (h₁ : Nonsingular (curve a b) x₁ y₁)
+    (h₂ : Nonsingular (curve a b) x₂ y₂)
+    (hx₁ : x₁ ≠ 0) (hx₂ : x₂ ≠ 0) (hx₁x₂ : x₁ ≠ x₂)
+    (hr : addX (curve a b) x₁ x₂ (slope (curve a b) x₁ x₂ y₁ y₂) ≠ 0)
+    (hF : fx x₁ y₁ ≠ fx x₂ y₂) :
+    fy b
+        (addX (curve a b) x₁ x₂ (slope (curve a b) x₁ x₂ y₁ y₂))
+        (addY (curve a b) x₁ x₂ y₁ (slope (curve a b) x₁ x₂ y₁ y₂)) =
+      addY (curve (-2 * a) (a ^ 2 - 4 * b))
+        (fx x₁ y₁) (fx x₂ y₂) (fy b x₁ y₁)
+        (slope (curve (-2 * a) (a ^ 2 - 4 * b))
+          (fx x₁ y₁) (fx x₂ y₂) (fy b x₁ y₁) (fy b x₂ y₂)) := by
+  have heq₁ := curve_equation.mp h₁.left
+  have heq₂ := curve_equation.mp h₂.left
+  have hsum := nonsingular_add h₁ h₂ (fun hxy => hx₁x₂ hxy.1)
+  have hsumEq := curve_equation.mp hsum.left
+  have hr' :
+      ((y₁ - y₂) / (x₁ - x₂)) ^ 2 - a - x₁ - x₂ ≠ 0 := by
+    simpa [slope_of_X_ne hx₁x₂, addX, curve] using hr
+  have hF' : x₁ + a + b / x₁ ≠ x₂ + a + b / x₂ := by
+    simpa [fx_secant_form heq₁ hx₁, fx_secant_form heq₂ hx₂] using hF
+  have hb : x₁ * x₂ - b ≠ 0 := by
+    intro hzero
+    apply hF'
+    apply sub_eq_zero.mp
+    calc
+      (x₁ + a + b / x₁) - (x₂ + a + b / x₂) =
+          (x₁ - x₂) * (x₁ * x₂ - b) / (x₁ * x₂) := by
+        field_simp [hx₁, hx₂]
+        ring
+      _ = 0 := by rw [hzero]; simp
+  have hid := secant_y_identity heq₁ heq₂ hx₁ hx₂ hx₁x₂
+    (ℓ := (y₁ - y₂) / (x₁ - x₂))
+    (r := ((y₁ - y₂) / (x₁ - x₂)) ^ 2 - a - x₁ - x₂)
+    rfl rfl hr' hb
+  have hX := pointMap_add_x_generic h₁ h₂ hx₁ hx₂ hx₁x₂ hr hF
+  unfold addY WeierstrassCurve.Affine.negAddY
+  rw [curve_negY, curve_negY]
+  rw [← hX]
+  rw [fx_secant_form hsumEq hr]
+  rw [slope_of_X_ne hx₁x₂, slope_of_X_ne hF]
+  rw [fx_secant_form heq₁ hx₁, fx_secant_form heq₂ hx₂]
+  simp only [fy, addX, curve, zero_mul, add_zero]
+  convert hid using 1 <;> ring
+
+lemma pointMap_add_generic {a b x₁ y₁ x₂ y₂ : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (h₁ : Nonsingular (curve a b) x₁ y₁)
+    (h₂ : Nonsingular (curve a b) x₂ y₂)
+    (hx₁ : x₁ ≠ 0) (hx₂ : x₂ ≠ 0) (hx₁x₂ : x₁ ≠ x₂)
+    (hr : addX (curve a b) x₁ x₂ (slope (curve a b) x₁ x₂ y₁ y₂) ≠ 0)
+    (hF : fx x₁ y₁ ≠ fx x₂ y₂) :
+    pointMap
+        ((Point.some x₁ y₁ h₁ : Point (curve a b)) + Point.some x₂ y₂ h₂) =
+      pointMap (Point.some x₁ y₁ h₁) + pointMap (Point.some x₂ y₂ h₂) := by
+  rw [Point.add_of_X_ne hx₁x₂]
+  have hsum := nonsingular_add h₁ h₂ (fun hxy => hx₁x₂ hxy.1)
+  rw [pointMap_some hsum hr, pointMap_some h₁ hx₁, pointMap_some h₂ hx₂]
+  rw [Point.add_of_X_ne hF, Point.some.injEq]
+  exact ⟨pointMap_add_x_generic h₁ h₂ hx₁ hx₂ hx₁x₂ hr hF,
+    pointMap_add_y_generic h₁ h₂ hx₁ hx₂ hx₁x₂ hr hF⟩
+
+lemma pointMap_add_zero {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P : Point (curve a b)) :
+    pointMap (P + 0) = pointMap P + pointMap 0 := by
+  rw [add_zero, pointMap_zero, add_zero]
+
+lemma pointMap_zero_add {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P : Point (curve a b)) :
+    pointMap (0 + P) = pointMap 0 + pointMap P := by
+  rw [zero_add, pointMap_zero, zero_add]
+
+lemma pointMap_add_neg {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P : Point (curve a b)) :
+    pointMap (P + -P) = pointMap P + pointMap (-P) := by
+  rw [add_neg_cancel, pointMap_zero, pointMap_neg, add_neg_cancel]
+
+lemma pointMap_add_kernelTranslate {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P : Point (curve a b)) :
+    pointMap (P + (P + kernelPoint a b)) =
+      pointMap P + pointMap (P + kernelPoint a b) := by
+  rw [← add_assoc, pointMap_add_kernel, pointMap_add_kernel, pointMap_add_self]
+
+lemma pointMap_add_neg_kernelTranslate {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P : Point (curve a b)) :
+    pointMap (P + (-P + kernelPoint a b)) =
+      pointMap P + pointMap (-P + kernelPoint a b) := by
+  rw [← add_assoc, add_neg_cancel, zero_add, pointMap_kernel,
+    pointMap_add_kernel, pointMap_neg, add_neg_cancel]
+
+lemma pointMap_add_of_basic_or_kernel_relation {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P Q : Point (curve a b))
+    (hQ : Q = 0 ∨ Q = kernelPoint a b ∨ Q = P ∨ Q = -P ∨
+      Q = P + kernelPoint a b ∨ Q = -P + kernelPoint a b) :
+    pointMap (P + Q) = pointMap P + pointMap Q := by
+  rcases hQ with hQ | hQ | hQ | hQ | hQ | hQ
+  · rw [hQ]
+    exact pointMap_add_zero P
+  · rw [hQ, pointMap_add_kernel, pointMap_kernel, add_zero]
+  · rw [hQ]
+    exact pointMap_add_self P
+  · rw [hQ]
+    exact pointMap_add_neg P
+  · rw [hQ]
+    exact pointMap_add_kernelTranslate P
+  · rw [hQ]
+    exact pointMap_add_neg_kernelTranslate P
+
+lemma kernel_neg {a b : ℚ} [hE : (curve a b).IsElliptic] :
+    -(kernelPoint a b) = kernelPoint a b := by
+  rw [neg_eq_iff_add_eq_zero]
+  exact kernel_add_self
+
+lemma pointMap_add_of_fx_eq {a b x₁ y₁ x₂ y₂ : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (h₁ : Nonsingular (curve a b) x₁ y₁)
+    (h₂ : Nonsingular (curve a b) x₂ y₂)
+    (hx₁ : x₁ ≠ 0) (hx₂ : x₂ ≠ 0)
+    (hF : fx x₁ y₁ = fx x₂ y₂) :
+    pointMap
+        ((Point.some x₁ y₁ h₁ : Point (curve a b)) + Point.some x₂ y₂ h₂) =
+      pointMap (Point.some x₁ y₁ h₁) + pointMap (Point.some x₂ y₂ h₂) := by
+  have hf₁ : Nonsingular (curve (-2 * a) (a ^ 2 - 4 * b))
+      (fx x₁ y₁) (fy b x₁ y₁) :=
+    equation_iff_nonsingular.mp (forward_equation h₁.left hx₁)
+  have hf₂ : Nonsingular (curve (-2 * a) (a ^ 2 - 4 * b))
+      (fx x₂ y₂) (fy b x₂ y₂) :=
+    equation_iff_nonsingular.mp (forward_equation h₂.left hx₂)
+  rcases (Point.X_eq_iff (h₁ := hf₁) (h₂ := hf₂)).mp hF with hsame | hneg
+  · have hmap :
+        pointMap (a := a) (b := b) (Point.some x₁ y₁ h₁) =
+          pointMap (a := a) (b := b) (Point.some x₂ y₂ h₂) := by
+      rw [pointMap_some h₁ hx₁, pointMap_some h₂ hx₂]
+      exact hsame
+    rcases (pointMap_eq_iff
+      (Point.some x₁ y₁ h₁) (Point.some x₂ y₂ h₂)).mp hmap with hQ | hQ
+    · exact pointMap_add_of_basic_or_kernel_relation _ _
+        (Or.inr (Or.inr (Or.inl hQ)))
+    · exact pointMap_add_of_basic_or_kernel_relation _ _
+        (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl hQ)))))
+  · have hmapneg :
+        pointMap (a := a) (b := b) (Point.some x₁ y₁ h₁) =
+          -pointMap (a := a) (b := b) (Point.some x₂ y₂ h₂) := by
+      rw [pointMap_some h₁ hx₁, pointMap_some h₂ hx₂]
+      exact hneg
+    have hmap :
+        pointMap (a := a) (b := b) (Point.some x₁ y₁ h₁) =
+          pointMap (a := a) (b := b) (-(Point.some x₂ y₂ h₂)) := by
+      rw [pointMap_neg]
+      exact hmapneg
+    rcases (pointMap_eq_iff
+      (Point.some x₁ y₁ h₁) (-(Point.some x₂ y₂ h₂))).mp hmap with hQ | hQ
+    · have hQ' :
+          (Point.some x₂ y₂ h₂ : Point (curve a b)) =
+            -(Point.some x₁ y₁ h₁) := by
+        calc
+          (Point.some x₂ y₂ h₂ : Point (curve a b)) =
+              -(-(Point.some x₂ y₂ h₂)) := (neg_neg _).symm
+          _ = -(Point.some x₁ y₁ h₁) := congrArg Neg.neg hQ
+      exact pointMap_add_of_basic_or_kernel_relation _ _
+        (Or.inr (Or.inr (Or.inr (Or.inl hQ'))))
+    · have hQ' :
+          (Point.some x₂ y₂ h₂ : Point (curve a b)) =
+            -(Point.some x₁ y₁ h₁) + kernelPoint a b := by
+        calc
+          (Point.some x₂ y₂ h₂ : Point (curve a b)) =
+              -(-(Point.some x₂ y₂ h₂)) := (neg_neg _).symm
+          _ = -((Point.some x₁ y₁ h₁ : Point (curve a b)) +
+                kernelPoint a b) := by rw [hQ]
+          _ = -(Point.some x₁ y₁ h₁) + kernelPoint a b := by
+            rw [neg_add_rev, kernel_neg, add_comm]
+      exact pointMap_add_of_basic_or_kernel_relation _ _
+        (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr hQ')))))
+
+theorem pointMap_add {a b : ℚ}
+    [hE : (curve a b).IsElliptic]
+    [hE' : (curve (-2 * a) (a ^ 2 - 4 * b)).IsElliptic]
+    (P Q : Point (curve a b)) :
+    pointMap (P + Q) = pointMap P + pointMap Q := by
+  cases P with
+  | zero => exact pointMap_zero_add Q
+  | some x₁ y₁ h₁ =>
+      cases Q with
+      | zero => exact pointMap_add_zero _
+      | some x₂ y₂ h₂ =>
+          by_cases hx₁ : x₁ = 0
+          · have hy₁ := y_zero_of_x_zero h₁ hx₁
+            have hP :
+                (Point.some x₁ y₁ h₁ : Point (curve a b)) = kernelPoint a b := by
+              unfold kernelPoint
+              rw [Point.some.injEq]
+              exact ⟨hx₁, hy₁⟩
+            rw [hP, pointMap_kernel_add, pointMap_kernel, zero_add]
+          · by_cases hx₂ : x₂ = 0
+            · have hy₂ := y_zero_of_x_zero h₂ hx₂
+              have hQ :
+                  (Point.some x₂ y₂ h₂ : Point (curve a b)) = kernelPoint a b := by
+                unfold kernelPoint
+                rw [Point.some.injEq]
+                exact ⟨hx₂, hy₂⟩
+              rw [hQ, pointMap_add_kernel, pointMap_kernel, add_zero]
+            · by_cases hx₁x₂ : x₁ = x₂
+              · rcases (Point.X_eq_iff (h₁ := h₁) (h₂ := h₂)).mp hx₁x₂ with hsame | hneg
+                · rw [← hsame]
+                  exact pointMap_add_self _
+                · have hQ :
+                      (Point.some x₂ y₂ h₂ : Point (curve a b)) =
+                        -(Point.some x₁ y₁ h₁) := by
+                    calc
+                      (Point.some x₂ y₂ h₂ : Point (curve a b)) =
+                          -(-(Point.some x₂ y₂ h₂)) := (neg_neg _).symm
+                      _ = -(Point.some x₁ y₁ h₁) := (congrArg Neg.neg hneg).symm
+                  rw [hQ]
+                  exact pointMap_add_neg _
+              · by_cases hr :
+                    addX (curve a b) x₁ x₂ (slope (curve a b) x₁ x₂ y₁ y₂) = 0
+                · have hsum := nonsingular_add h₁ h₂ (fun hxy => hx₁x₂ hxy.1)
+                  have hsumY := y_zero_of_x_zero hsum hr
+                  have hsumK :
+                      (Point.some x₁ y₁ h₁ : Point (curve a b)) +
+                          Point.some x₂ y₂ h₂ = kernelPoint a b := by
+                    change
+                      (Point.some x₁ y₁ h₁ : Point (curve a b)) +
+                          Point.some x₂ y₂ h₂ = Point.some 0 0 _
+                    rw [Point.add_of_X_ne hx₁x₂, Point.some.injEq]
+                    exact ⟨hr, hsumY⟩
+                  have hQ :
+                      (Point.some x₂ y₂ h₂ : Point (curve a b)) =
+                        -(Point.some x₁ y₁ h₁) + kernelPoint a b := by
+                    calc
+                      (Point.some x₂ y₂ h₂ : Point (curve a b)) =
+                          -(Point.some x₁ y₁ h₁) +
+                            ((Point.some x₁ y₁ h₁ : Point (curve a b)) +
+                              Point.some x₂ y₂ h₂) := by
+                        symm
+                        rw [← add_assoc, neg_add_cancel, zero_add]
+                      _ = -(Point.some x₁ y₁ h₁) + kernelPoint a b := by
+                        rw [hsumK]
+                  exact pointMap_add_of_basic_or_kernel_relation _ _
+                    (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr hQ)))))
+                · by_cases hF : fx x₁ y₁ = fx x₂ y₂
+                  · exact pointMap_add_of_fx_eq h₁ h₂ hx₁ hx₂ hF
+                  · exact pointMap_add_generic h₁ h₂ hx₁ hx₂ hx₁x₂ hr hF
+
+/-! ### Conjugating the Vélu formula to the standard model -/
+
+open MazurProof.N18RouteC.VariableChangePoints
+
+def sourceChange (r : ℚ) : WeierstrassCurve.VariableChange ℚ where
+  u := 1
+  r := r
+  s := 0
+  t := 0
+
+def targetChange (r : ℚ) : WeierstrassCurve.VariableChange ℚ where
+  u := -1
+  r := -2 * r
+  s := 0
+  t := 0
+
+lemma sourceChange_eq {A B r : ℚ} (htors : r ^ 3 + A * r + B = 0) :
+    sourceChange r • shortWS A B = curve (3 * r) (veluT A r) := by
+  rw [WeierstrassCurve.variableChange_def]
+  ext <;> simp [sourceChange, shortWS, curve, veluT] <;> nlinarith
+
+lemma targetChange_eq {A B r : ℚ} (htors : r ^ 3 + A * r + B = 0) :
+    targetChange r • veluQuotCurve A B r =
+      curve (-2 * (3 * r)) ((3 * r) ^ 2 - 4 * veluT A r) := by
+  rw [WeierstrassCurve.variableChange_def]
+  ext <;> simp [targetChange, veluQuotCurve, curve, veluT] <;> nlinarith
+
+noncomputable def curveCastAddEquiv {W₁ W₂ : WeierstrassCurve ℚ}
+    [W₁.IsElliptic] [W₂.IsElliptic] (h : W₁ = W₂) :
+    Point W₁ ≃+ Point W₂ :=
+  AddEquiv.mk
+    { toFun := fun P => h ▸ P
+      invFun := fun P => h.symm ▸ P
+      left_inv := by subst h; intro P; rfl
+      right_inv := by subst h; intro P; rfl }
+    (by subst h; intro P Q; rfl)
+
+@[reducible] def sourceStdIsElliptic {A B r : ℚ}
     (htors : r ^ 3 + A * r + B = 0)
-    (hcurve : y₂ ^ 2 = x₂ ^ 3 + A * x₂ + B)
-    (hx : x₂ ≠ r) :
-    let s := (0 - y₂) / (r - x₂)
-    let x₃ := s ^ 2 - r - x₂
-    (x₃ - r) * (x₂ - r) = veluT A r := by
-  simp only
-  unfold veluT
-  have hd : r - x₂ ≠ 0 := sub_ne_zero.mpr (Ne.symm hx)
-  field_simp
-  linear_combination (x₂ - r) * hcurve + (x₂ - r) * htors
+    [hE : (shortWS A B).IsElliptic] :
+    (curve (3 * r) (veluT A r)).IsElliptic :=
+  sourceChange_eq htors ▸
+    (inferInstance : (sourceChange r • shortWS A B).IsElliptic)
 
-private lemma coset_y_identity {A B r x₂ y₂ : ℚ}
+@[reducible] def targetStdIsElliptic {A B r : ℚ}
     (htors : r ^ 3 + A * r + B = 0)
-    (hcurve : y₂ ^ 2 = x₂ ^ 3 + A * x₂ + B)
-    (hx : x₂ ≠ r) :
-    let s := (0 - y₂) / (r - x₂)
-    let x₃ := s ^ 2 - r - x₂
-    s * (r - x₃) = -y₂ * veluT A r / (x₂ - r) ^ 2 := by
-  simp only
-  unfold veluT
-  have hd : r - x₂ ≠ 0 := sub_ne_zero.mpr (Ne.symm hx)
-  field_simp
-  linear_combination y₂ * (r - x₂) ^ 2 * hcurve + y₂ * (r - x₂) ^ 2 * htors
+    [hE' : (veluQuotCurve A B r).IsElliptic] :
+    (curve (-2 * (3 * r)) ((3 * r) ^ 2 - 4 * veluT A r)).IsElliptic :=
+  targetChange_eq htors ▸
+    (inferInstance : (targetChange r • veluQuotCurve A B r).IsElliptic)
 
-set_option maxHeartbeats 0 in
-set_option maxRecDepth 8192 in
+noncomputable def sourceEquiv {A B r : ℚ}
+    (htors : r ^ 3 + A * r + B = 0)
+    [hE : (shortWS A B).IsElliptic] :
+    Point (shortWS A B) ≃+ Point (curve (3 * r) (veluT A r)) :=
+  haveI hstd : (curve (3 * r) (veluT A r)).IsElliptic :=
+    sourceStdIsElliptic htors
+  (variableChangePointAddEquiv (shortWS A B) (sourceChange r)).trans
+    (curveCastAddEquiv (sourceChange_eq htors))
+
+noncomputable def targetEquiv {A B r : ℚ}
+    (htors : r ^ 3 + A * r + B = 0)
+    [hE' : (veluQuotCurve A B r).IsElliptic] :
+    Point (veluQuotCurve A B r) ≃+
+      Point (curve (-2 * (3 * r)) ((3 * r) ^ 2 - 4 * veluT A r)) :=
+  haveI hstd :
+      (curve (-2 * (3 * r)) ((3 * r) ^ 2 - 4 * veluT A r)).IsElliptic :=
+    targetStdIsElliptic htors
+  (variableChangePointAddEquiv (veluQuotCurve A B r) (targetChange r)).trans
+    (curveCastAddEquiv (targetChange_eq htors))
+
+lemma standard_x_eq {A B r x y : ℚ}
+    (htors : r ^ 3 + A * r + B = 0)
+    (hcurve : y ^ 2 = x ^ 3 + A * x + B)
+    (hxr : x ≠ r) :
+    fx (x - r) y = x + veluT A r / (x - r) + 2 * r := by
+  have hB : B = -(r ^ 3 + A * r) := by
+    linarith [htors]
+  have hfactor :
+      y ^ 2 = (x - r) * (x ^ 2 + x * r + r ^ 2 + A) := by
+    rw [hcurve, hB]
+    ring
+  unfold fx veluT
+  field_simp [sub_ne_zero.mpr hxr]
+  rw [hfactor]
+  ring
+
+@[simp] lemma sourceChange_x (r x : ℚ) :
+    variableChangePointX (sourceChange r) x = x - r := by
+  simp [variableChangePointX, sourceChange]
+
+@[simp] lemma sourceChange_y (r x y : ℚ) :
+    variableChangePointY (sourceChange r) x y = y := by
+  simp [variableChangePointY, sourceChange]
+
+@[simp] lemma targetChange_x (r x : ℚ) :
+    variableChangePointX (targetChange r) x = x + 2 * r := by
+  simp [variableChangePointX, targetChange]
+
+@[simp] lemma targetChange_y (r x y : ℚ) :
+    variableChangePointY (targetChange r) x y = -y := by
+  simp [variableChangePointY, targetChange]
+  ring
+
+lemma variableChangeEquiv_some
+    (W : WeierstrassCurve ℚ) [W.IsElliptic]
+    (C : WeierstrassCurve.VariableChange ℚ)
+    {x y : ℚ} (hns : Nonsingular W x y) :
+    (variableChangePointAddEquiv W C) (Point.some x y hns) =
+      Point.some (variableChangePointX C x) (variableChangePointY C x y)
+        (equation_iff_nonsingular.mp
+          (variableChangePoint_equation W C hns.left)) := by
+  show variableChangePointMap W C (Point.some x y hns) = _
+  unfold variableChangePointMap
+  rfl
+
+lemma curveCastAddEquiv_some {W₁ W₂ : WeierstrassCurve ℚ}
+    [W₁.IsElliptic] [W₂.IsElliptic] (h : W₁ = W₂)
+    {x y : ℚ} (hns : Nonsingular W₁ x y) :
+    curveCastAddEquiv h (Point.some x y hns) =
+      Point.some x y (h ▸ hns) := by
+  subst h
+  rfl
+
+@[simp] lemma sourceEquiv_zero {A B r : ℚ}
+    (htors : r ^ 3 + A * r + B = 0)
+    [hE : (shortWS A B).IsElliptic] :
+    sourceEquiv htors 0 = 0 :=
+  map_zero _
+
+@[simp] lemma targetEquiv_zero {A B r : ℚ}
+    (htors : r ^ 3 + A * r + B = 0)
+    [hE' : (veluQuotCurve A B r).IsElliptic] :
+    targetEquiv htors 0 = 0 :=
+  map_zero _
+
+lemma sourceEquiv_some {A B r x y : ℚ}
+    (htors : r ^ 3 + A * r + B = 0)
+    [hE : (shortWS A B).IsElliptic]
+    [hstd : (curve (3 * r) (veluT A r)).IsElliptic]
+    (hns : Nonsingular (shortWS A B) x y) :
+    sourceEquiv htors (Point.some x y hns) =
+      Point.some (variableChangePointX (sourceChange r) x)
+        (variableChangePointY (sourceChange r) x y)
+        ((sourceChange_eq htors) ▸
+          equation_iff_nonsingular.mp
+            (variableChangePoint_equation (shortWS A B) (sourceChange r) hns.left)) := by
+  unfold sourceEquiv
+  rw [AddEquiv.trans_apply, variableChangeEquiv_some, curveCastAddEquiv_some]
+
+lemma targetEquiv_some {A B r x y : ℚ}
+    (htors : r ^ 3 + A * r + B = 0)
+    [hE' : (veluQuotCurve A B r).IsElliptic]
+    [hstd :
+      (curve (-2 * (3 * r)) ((3 * r) ^ 2 - 4 * veluT A r)).IsElliptic]
+    (hns : Nonsingular (veluQuotCurve A B r) x y) :
+    targetEquiv htors (Point.some x y hns) =
+      Point.some (variableChangePointX (targetChange r) x)
+        (variableChangePointY (targetChange r) x y)
+        ((targetChange_eq htors) ▸
+          equation_iff_nonsingular.mp
+            (variableChangePoint_equation (veluQuotCurve A B r) (targetChange r) hns.left)) := by
+  unfold targetEquiv
+  rw [AddEquiv.trans_apply, variableChangeEquiv_some, curveCastAddEquiv_some]
+
+lemma map_conjugacy {A B r : ℚ}
+    (htors : r ^ 3 + A * r + B = 0)
+    [hE : (shortWS A B).IsElliptic]
+    [hE' : (veluQuotCurve A B r).IsElliptic]
+    [hsourceStd : (curve (3 * r) (veluT A r)).IsElliptic]
+    [htargetStd :
+      (curve (-2 * (3 * r)) ((3 * r) ^ 2 - 4 * veluT A r)).IsElliptic]
+    (P : Point (shortWS A B)) :
+    targetEquiv htors (veluMapPoint htors P) =
+      pointMap (sourceEquiv htors P) := by
+  cases P with
+  | zero =>
+      change targetEquiv htors 0 = pointMap (sourceEquiv htors 0)
+      rw [targetEquiv_zero, sourceEquiv_zero, pointMap_zero]
+  | some x y h =>
+      by_cases hxr : x = r
+      · have hmap : veluMapPoint htors (Point.some x y h) = 0 := by
+          show veluMapPoint htors (Point.some x y h) = Point.zero
+          unfold veluMapPoint
+          exact dif_pos hxr
+        rw [hmap, targetEquiv_zero, sourceEquiv_some]
+        have hx0 : variableChangePointX (sourceChange r) x = 0 := by
+          simp [hxr]
+        simp only [pointMap, hx0, dite_true]
+        rfl
+      · have hvns := equation_iff_nonsingular.mp (velu_equation h.left htors hxr)
+        have hmap :
+            veluMapPoint htors (Point.some x y h) =
+              Point.some (x + veluT A r / (x - r))
+                (y * ((x - r) ^ 2 - veluT A r) / (x - r) ^ 2) hvns := by
+          unfold veluMapPoint
+          exact dif_neg hxr
+        rw [hmap, targetEquiv_some, sourceEquiv_some]
+        rw [pointMap_some]
+        · rw [Point.some.injEq]
+          constructor
+          · simp only [targetChange_x, sourceChange_x, sourceChange_y]
+            exact (standard_x_eq htors (shortWS_equation.mp h.left) hxr).symm
+          · simp only [targetChange_x, targetChange_y, sourceChange_x,
+              sourceChange_y, fy]
+            ring
+        · simpa only [sourceChange_x] using sub_ne_zero.mpr hxr
+
+theorem conjugated_veluMapPoint_add {A B r : ℚ}
+    (htors : r ^ 3 + A * r + B = 0)
+    [hE : (shortWS A B).IsElliptic]
+    [hE' : (veluQuotCurve A B r).IsElliptic]
+    (P Q : Point (shortWS A B)) :
+    veluMapPoint htors (P + Q) = veluMapPoint htors P + veluMapPoint htors Q := by
+  letI hsourceStd : (curve (3 * r) (veluT A r)).IsElliptic :=
+    sourceStdIsElliptic htors
+  letI htargetStd :
+      (curve (-2 * (3 * r)) ((3 * r) ^ 2 - 4 * veluT A r)).IsElliptic :=
+    targetStdIsElliptic htors
+  apply (targetEquiv htors).injective
+  calc
+    targetEquiv htors (veluMapPoint htors (P + Q)) =
+        pointMap (sourceEquiv htors (P + Q)) :=
+      map_conjugacy htors (P + Q)
+    _ = pointMap (sourceEquiv htors P + sourceEquiv htors Q) := by
+      rw [map_add]
+    _ = pointMap (sourceEquiv htors P) + pointMap (sourceEquiv htors Q) :=
+      pointMap_add _ _
+    _ = targetEquiv htors (veluMapPoint htors P) +
+        targetEquiv htors (veluMapPoint htors Q) := by
+      rw [map_conjugacy, map_conjugacy]
+    _ = targetEquiv htors (veluMapPoint htors P + veluMapPoint htors Q) := by
+      rw [map_add]
+
+
+end StandardTwoIsogeny
+
 lemma veluMapPoint_add {A B r : ℚ} {htors : r ^ 3 + A * r + B = 0}
     [hE : (shortWS A B).IsElliptic]
     [hE' : (veluQuotCurve A B r).IsElliptic]
     (P Q : Point (shortWS A B)) :
     veluMapPoint htors (P + Q) =
-      veluMapPoint htors P + veluMapPoint htors Q := by
-  match P, Q with
-  | .zero, _ =>
-    show veluMapPoint htors (0 + _) = veluMapPoint htors 0 + veluMapPoint htors _
-    rw [zero_add, veluMapPoint_zero, zero_add]
-  | _, .zero =>
-    show veluMapPoint htors (_ + 0) = veluMapPoint htors _ + veluMapPoint htors 0
-    rw [add_zero, veluMapPoint_zero, add_zero]
-  | .some x₁ y₁ h₁, .some x₂ y₂ h₂ =>
-    by_cases hxy : x₁ = x₂ ∧ y₁ = negY (shortWS A B) x₂ y₂
-    · -- P = -Q: sum is 0
-      obtain ⟨hx_eq, hy_eq⟩ := hxy
-      rw [Point.add_of_Y_eq hx_eq hy_eq, veluMapPoint_zero]
-      have hP_neg : (Point.some x₁ y₁ h₁ : Point (shortWS A B)) =
-          -(Point.some x₂ y₂ h₂) := by
-        rw [Point.neg_some]; subst hx_eq; subst hy_eq; rfl
-      rw [hP_neg, veluMapPoint_neg, neg_add_cancel]
-    · -- P + Q ≠ 0
-      rw [Point.add_some hxy]
-      by_cases hx₁r : x₁ = r
-      · -- x₁ = r: P₁ is the torsion point (r, 0)
-        have hy₁ : y₁ = 0 := torsion_y_zero htors h₁.left hx₁r
-        have hx₂r : x₂ ≠ r := by
-          intro heq; apply hxy
-          exact ⟨hx₁r ▸ heq ▸ rfl,
-            by simp [negY, shortWS, hy₁, torsion_y_zero htors h₂.left heq]⟩
-        have hφ₁ : veluMapPoint htors (Point.some x₁ y₁ h₁) =
-            (0 : Point (veluQuotCurve A B r)) := by
-          unfold veluMapPoint; exact dif_pos hx₁r
-        rw [hφ₁, zero_add]
-        simp only [hx₁r, hy₁]
-        set ℓ := slope (shortWS A B) r x₂ 0 y₂
-        set x₃ := addX (shortWS A B) r x₂ ℓ with x₃_def
-        have hℓ : ℓ = (0 - y₂) / (r - x₂) :=
-          WeierstrassCurve.Affine.slope_of_X_ne (Ne.symm hx₂r)
-        have hx₃_eq : x₃ = ℓ ^ 2 - r - x₂ := by
-          simp [x₃_def, addX, shortWS]
-        have hcoset : (x₃ - r) * (x₂ - r) = veluT A r := by
-          rw [hx₃_eq, hℓ]
-          exact coset_x_identity htors (shortWS_equation.mp h₂.left) hx₂r
-        have hx₃r : x₃ ≠ r := by
-          intro heq
-          exact veluT_ne_zero htors (by rw [← hcoset, heq, sub_self, zero_mul])
-        unfold veluMapPoint
-        dsimp only []
-        rw [dif_neg hx₃r, dif_neg hx₂r]
-        apply point_some_congr
-        · -- X: x₃ + t/(x₃-r) = x₂ + t/(x₂-r)
-          have h1 : veluT A r / (x₃ - r) = x₂ - r := by
-            rw [div_eq_iff (sub_ne_zero.mpr hx₃r)]
-            linarith [mul_comm (x₃ - r) (x₂ - r), hcoset]
-          have h2 : veluT A r / (x₂ - r) = x₃ - r := by
-            rw [div_eq_iff (sub_ne_zero.mpr hx₂r)]
-            linarith [hcoset]
-          linarith [h1, h2]
-        · -- Y-coordinate
-          rw [div_eq_div_iff (pow_ne_zero 2 (sub_ne_zero.mpr hx₃r))
-            (pow_ne_zero 2 (sub_ne_zero.mpr hx₂r))]
-          have haddY : addY (shortWS A B) r x₂ 0 ℓ = -(ℓ * (x₃ - r)) := by
-            simp only [addY, negY, shortWS,
-              WeierstrassCurve.Affine.negAddY, addX]
-            linear_combination ℓ * hx₃_eq
-          rw [haddY]
-          have hℓ_mul : ℓ * (r - x₂) = -y₂ := by
-            rw [hℓ, div_mul_cancel₀ _ (sub_ne_zero.mpr (Ne.symm hx₂r))]
-            ring
-          linear_combination
-            -(ℓ * (x₃ - r) * (x₂ - r) ^ 2 + y₂ * (x₃ - r) ^ 2) * hcoset
-            - (x₃ - r) ^ 2 * (x₂ - r) * (x₂ - x₃) * hℓ_mul
-      · by_cases hx₂r : x₂ = r
-        · -- x₂ = r: symmetric torsion case (direct proof)
-          have hy₂ : y₂ = 0 := torsion_y_zero htors h₂.left hx₂r
-          have hφ₂ : veluMapPoint htors (Point.some x₂ y₂ h₂) =
-              (0 : Point (veluQuotCurve A B r)) := by
-            unfold veluMapPoint; exact dif_pos hx₂r
-          rw [hφ₂, add_zero]
-          simp only [hx₂r, hy₂]
-          set ℓ := slope (shortWS A B) x₁ r y₁ 0
-          set x₃ := addX (shortWS A B) x₁ r ℓ with x₃_def
-          have hℓ : ℓ = (y₁ - 0) / (x₁ - r) :=
-            WeierstrassCurve.Affine.slope_of_X_ne hx₁r
-          have hx₃_eq : x₃ = ℓ ^ 2 - x₁ - r := by
-            simp [x₃_def, addX, shortWS]
-          have hcoset : (x₃ - r) * (x₁ - r) = veluT A r := by
-            have h := coset_x_identity htors (shortWS_equation.mp h₁.left) hx₁r
-            simp only at h
-            rw [hx₃_eq]
-            have hsq : ((0 - y₁) / (r - x₁)) ^ 2 = ℓ ^ 2 := by
-              rw [hℓ, sub_zero, zero_sub, div_pow, div_pow, neg_sq,
-                show (r - x₁ : ℚ) ^ 2 = (x₁ - r) ^ 2 from by ring]
-            rw [hsq, show ℓ ^ 2 - r - x₁ = ℓ ^ 2 - x₁ - r from by ring] at h
-            exact h
-          have hx₃r : x₃ ≠ r := by
-            intro heq
-            exact veluT_ne_zero htors (by rw [← hcoset, heq, sub_self, zero_mul])
-          unfold veluMapPoint
-          dsimp only []
-          rw [dif_neg hx₃r, dif_neg hx₁r]
-          apply point_some_congr
-          · have h1 : veluT A r / (x₃ - r) = x₁ - r := by
-              rw [div_eq_iff (sub_ne_zero.mpr hx₃r)]
-              linarith [mul_comm (x₃ - r) (x₁ - r), hcoset]
-            have h2 : veluT A r / (x₁ - r) = x₃ - r := by
-              rw [div_eq_iff (sub_ne_zero.mpr hx₁r)]
-              linarith [hcoset]
-            linarith [h1, h2]
-          · rw [div_eq_div_iff (pow_ne_zero 2 (sub_ne_zero.mpr hx₃r))
-              (pow_ne_zero 2 (sub_ne_zero.mpr hx₁r))]
-            have haddY : addY (shortWS A B) x₁ r y₁ ℓ = -(ℓ * (x₃ - x₁) + y₁) := by
-              simp only [addY, negY, shortWS,
-                WeierstrassCurve.Affine.negAddY, addX]
-              linear_combination ℓ * hx₃_eq
-            rw [haddY]
-            have hℓ_mul : ℓ * (x₁ - r) = y₁ := by
-              rw [hℓ, sub_zero, div_mul_cancel₀ _ (sub_ne_zero.mpr hx₁r)]
-            linear_combination
-              -ℓ * (x₃ - r) * (x₁ - r) * ((x₃ - r) + (x₁ - r)) * hcoset
-              + (2 * (x₃ - r) ^ 2 * (x₁ - r) ^ 2
-                 - veluT A r * ((x₃ - r) ^ 2 + (x₁ - r) ^ 2)) * hℓ_mul
-        · -- Generic: x₁ ≠ r, x₂ ≠ r
-          have hcurve₁ := shortWS_equation.mp h₁.left
-          have hcurve₂ := shortWS_equation.mp h₂.left
-          have ha₁ : x₁ - r ≠ 0 := sub_ne_zero.mpr hx₁r
-          have ha₂ : x₂ - r ≠ 0 := sub_ne_zero.mpr hx₂r
-          by_cases hx₁x₂ : x₁ = x₂
-          · -- Doubling case: x₁ = x₂
-            have h_y_sq : y₁ ^ 2 = y₂ ^ 2 := by
-              have h := hcurve₂; rw [← hx₁x₂] at h; linarith
-            have h_y_eq : y₁ = y₂ := by
-              have h_factor : (y₁ - y₂) * (y₁ + y₂) = 0 := by nlinarith
-              rcases mul_eq_zero.mp h_factor with h_diff | h_sum
-              · linarith
-              · exfalso; apply hxy
-                exact ⟨hx₁x₂, by
-                  simp only [negY, shortWS, mul_zero, zero_mul, sub_zero]; linarith⟩
-            have h_y_ne : y₁ ≠ 0 := by
-              intro h; apply hxy
-              exact ⟨hx₁x₂, by
-                simp only [negY, shortWS, mul_zero, zero_mul, sub_zero]
-                linarith [h_y_eq]⟩
-            have hy_ne_neg : y₁ ≠ negY (shortWS A B) x₁ y₁ := by
-              simp only [negY, shortWS, mul_zero, zero_mul, sub_zero]
-              intro h; exact h_y_ne (by linarith)
-            unfold veluMapPoint; dsimp only []
-            rw [dif_neg hx₁r, dif_neg hx₂r]
-            simp only [show x₂ = x₁ from hx₁x₂.symm, show y₂ = y₁ from h_y_eq.symm]
-            set ℓ := slope (shortWS A B) x₁ x₁ y₁ y₁
-            have hℓ : ℓ = (3 * x₁ ^ 2 + A) / (2 * y₁) := by
-              show WeierstrassCurve.Affine.slope (shortWS A B) x₁ x₁ y₁ y₁ =
-                (3 * x₁ ^ 2 + A) / (2 * y₁)
-              rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl hy_ne_neg]
-              simp only [shortWS, negY, mul_zero, zero_mul, sub_zero, add_zero]
-              ring
-            have hx₃_eq : addX (shortWS A B) x₁ x₁ ℓ = ℓ ^ 2 - 2 * x₁ := by
-              simp only [addX, shortWS]; ring
-            by_cases hx₃r : addX (shortWS A B) x₁ x₁ ℓ = r
-            · -- [2]P₁ in kernel: both sides are 0
-              rw [dif_pos hx₃r]
-              have hℓsq : ℓ ^ 2 = 2 * x₁ + r := by linarith [hx₃_eq, hx₃r]
-              have hat : (x₁ - r) ^ 2 = veluT A r := by
-                unfold veluT
-                have h_ring : (3 * x₁ ^ 2 + A) ^ 2 - (8 * x₁ + 4 * r) *
-                    (x₁ ^ 3 + A * x₁ + B) =
-                    ((x₁ - r) ^ 2 - (3 * r ^ 2 + A)) ^ 2 +
-                    (-4 * r - 8 * x₁) * (r ^ 3 + A * r + B) := by ring
-                rw [htors, mul_zero, add_zero] at h_ring
-                have h_sq : (3 * x₁ ^ 2 + A) ^ 2 = 4 * y₁ ^ 2 * ℓ ^ 2 := by
-                  rw [hℓ]; field_simp; ring
-                have h_sq_zero : ((x₁ - r) ^ 2 - (3 * r ^ 2 + A)) ^ 2 = 0 := by
-                  nlinarith [hcurve₁, hℓsq]
-                linarith [sq_eq_zero_iff.mp h_sq_zero]
-              have hY₁_zero : y₁ * ((x₁ - r) ^ 2 - veluT A r) / (x₁ - r) ^ 2 = 0 := by
-                rw [hat, sub_self, mul_zero, zero_div]
-              have hY_eq : y₁ * ((x₁ - r) ^ 2 - veluT A r) / (x₁ - r) ^ 2 =
-                  negY (veluQuotCurve A B r) (x₁ + veluT A r / (x₁ - r))
-                    (y₁ * ((x₁ - r) ^ 2 - veluT A r) / (x₁ - r) ^ 2) := by
-                simp only [negY, veluQuotCurve, mul_zero, zero_mul, sub_zero]
-                rw [hY₁_zero]; ring
-              exact (Point.add_of_Y_eq rfl hY_eq).symm
-            · -- [2]P₁ not in kernel: apply certs
-              rw [dif_neg hx₃r]
-              have hat_ne : (x₁ - r) ^ 2 ≠ veluT A r := by
-                intro hat; apply hx₃r; rw [hx₃_eq]
-                unfold veluT at hat
-                have h_ring : (3 * x₁ ^ 2 + A) ^ 2 - (8 * x₁ + 4 * r) *
-                    (x₁ ^ 3 + A * x₁ + B) =
-                    ((x₁ - r) ^ 2 - (3 * r ^ 2 + A)) ^ 2 +
-                    (-4 * r - 8 * x₁) * (r ^ 3 + A * r + B) := by ring
-                rw [htors, mul_zero, add_zero, hat, sub_self, zero_pow two_ne_zero] at h_ring
-                have h_sq : (3 * x₁ ^ 2 + A) ^ 2 = 4 * y₁ ^ 2 * ℓ ^ 2 := by
-                  rw [hℓ]; field_simp; ring
-                have h_prod : y₁ ^ 2 * (4 * ℓ ^ 2 - (8 * x₁ + 4 * r)) = 0 := by
-                  linear_combination -h_sq + h_ring - (8 * x₁ + 4 * r) * hcurve₁
-                rcases mul_eq_zero.mp h_prod with h | h
-                · exact absurd (sq_eq_zero_iff.mp h) h_y_ne
-                · linarith
-              have hY₁_ne : y₁ * ((x₁ - r) ^ 2 - veluT A r) / (x₁ - r) ^ 2 ≠ 0 :=
-                div_ne_zero (mul_ne_zero h_y_ne (sub_ne_zero.mpr hat_ne))
-                  (pow_ne_zero 2 (sub_ne_zero.mpr hx₁r))
-              have hy'_ne_neg : y₁ * ((x₁ - r) ^ 2 - veluT A r) / (x₁ - r) ^ 2 ≠
-                  negY (veluQuotCurve A B r) (x₁ + veluT A r / (x₁ - r))
-                    (y₁ * ((x₁ - r) ^ 2 - veluT A r) / (x₁ - r) ^ 2) := by
-                simp only [negY, veluQuotCurve, mul_zero, zero_mul, sub_zero]
-                intro h; exact hY₁_ne (by linarith)
-              have hxy' : ¬(x₁ + veluT A r / (x₁ - r) = x₁ + veluT A r / (x₁ - r) ∧
-                  y₁ * ((x₁ - r) ^ 2 - veluT A r) / (x₁ - r) ^ 2 =
-                    negY (veluQuotCurve A B r) (x₁ + veluT A r / (x₁ - r))
-                      (y₁ * ((x₁ - r) ^ 2 - veluT A r) / (x₁ - r) ^ 2)) :=
-                fun ⟨_, h⟩ => hy'_ne_neg h
-              rw [Point.add_some hxy']
-              apply point_some_congr
-              · -- X-coordinate identity
-                rw [hx₃_eq, WeierstrassCurve.Affine.slope_of_Y_ne rfl hy'_ne_neg]
-                simp only [hℓ, addX, negY, shortWS, veluQuotCurve,
-                  mul_zero, zero_mul, sub_zero, add_zero, zero_add]
-                unfold veluT at hat_ne ⊢
-                have ha₃ : ((3 * x₁ ^ 2 + A) / (2 * y₁)) ^ 2 - 2 * x₁ - r ≠ 0 := by
-                  have : ℓ ^ 2 - 2 * x₁ - r ≠ 0 := by
-                    rw [← hx₃_eq]; exact sub_ne_zero.mpr hx₃r
-                  rwa [hℓ] at this
-                have hcurve₁' : y₁ ^ 2 - x₁ ^ 3 - A * x₁ + r ^ 3 + A * r = 0 := by
-                  linarith [hcurve₁, htors]
-                sorry
-              · -- Y-coordinate identity
-                rw [hx₃_eq, WeierstrassCurve.Affine.slope_of_Y_ne rfl hy'_ne_neg]
-                simp only [hℓ, addY, WeierstrassCurve.Affine.negAddY,
-                  negY, addX, shortWS, veluQuotCurve,
-                  mul_zero, zero_mul, sub_zero, add_zero, zero_add]
-                unfold veluT at hat_ne ⊢
-                have ha₃ : ((3 * x₁ ^ 2 + A) / (2 * y₁)) ^ 2 - 2 * x₁ - r ≠ 0 := by
-                  have : ℓ ^ 2 - 2 * x₁ - r ≠ 0 := by
-                    rw [← hx₃_eq]; exact sub_ne_zero.mpr hx₃r
-                  rwa [hℓ] at this
-                have hcurve₁' : y₁ ^ 2 - x₁ ^ 3 - A * x₁ + r ^ 3 + A * r = 0 := by
-                  linarith [hcurve₁, htors]
-                sorry
-          · -- Addition case: x₁ ≠ x₂
-            have hd : x₁ - x₂ ≠ 0 := sub_ne_zero.mpr hx₁x₂
-            unfold veluMapPoint
-            dsimp only []
-            rw [dif_neg hx₁r, dif_neg hx₂r]
-            set ℓ := slope (shortWS A B) x₁ x₂ y₁ y₂
-            have hℓ : ℓ = (y₁ - y₂) / (x₁ - x₂) :=
-              WeierstrassCurve.Affine.slope_of_X_ne hx₁x₂
-            have hx₃_eq : addX (shortWS A B) x₁ x₂ ℓ = ℓ ^ 2 - x₁ - x₂ := by
-              simp [addX, shortWS]
-            by_cases hx₃r : addX (shortWS A B) x₁ x₂ ℓ = r
-            · -- P₁+P₂ in kernel: φ(P₁+P₂) = 0, need φ(P₁)+φ(P₂) = 0
-              rw [dif_pos hx₃r]
-              -- ℓ² = x₁ + x₂ + r
-              have hℓsq : ℓ ^ 2 = x₁ + x₂ + r := by linarith [hx₃_eq, hx₃r]
-              -- Sum point P₁+P₂ is on the curve with x = r, so y = 0
-              have h_sum_eq := shortWS_equation.mp
-                (WeierstrassCurve.Affine.equation_add h₁.left h₂.left hxy)
-              rw [hx₃r] at h_sum_eq
-              have haddY_zero : addY (shortWS A B) x₁ x₂ y₁ ℓ = 0 := by
-                have : (addY (shortWS A B) x₁ x₂ y₁ ℓ) ^ 2 = 0 := by linarith [h_sum_eq, htors]
-                exact sq_eq_zero_iff.mp this
-              -- addY = -(y₁ + ℓ(r - x₁)), so y₁ = ℓ(x₁ - r)
-              have h_y1 : y₁ = ℓ * (x₁ - r) := by
-                have : addY (shortWS A B) x₁ x₂ y₁ ℓ = -(y₁ + ℓ * (r - x₁)) := by
-                  simp only [addY, negY, shortWS,
-                    WeierstrassCurve.Affine.negAddY, addX]
-                  linear_combination -ℓ * hℓsq
-                linarith [this, haddY_zero]
-              have hℓd : ℓ * (x₁ - x₂) = y₁ - y₂ := by rw [hℓ]; field_simp
-              have h_y2 : y₂ = ℓ * (x₂ - r) := by linear_combination h_y1 + hℓd
-              -- (x₁ - r)(x₂ - r) = veluT A r
-              have hat : (x₁ - r) * (x₂ - r) = veluT A r := by
-                unfold veluT
-                have h_y1_sq : y₁ ^ 2 = ℓ ^ 2 * (x₁ - r) ^ 2 := by rw [h_y1]; ring
-                have h_key : (x₁ + x₂ + r) * (x₁ - r) ^ 2 = x₁ ^ 3 + A * x₁ + B := by
-                  rw [hℓsq.symm, ← h_y1_sq]; exact hcurve₁
-                have h_poly : (x₁ - r) * ((x₁ - r) * (x₂ - r) - (3 * r ^ 2 + A)) = 0 := by
-                  linear_combination h_key + htors
-                rcases mul_eq_zero.mp h_poly with h | h
-                · exact absurd h ha₁
-                · linarith
-              -- X₁' = X₂'
-              have hX_eq : x₁ + veluT A r / (x₁ - r) =
-                  x₂ + veluT A r / (x₂ - r) := by
-                have h1 : veluT A r / (x₁ - r) = x₂ - r := by
-                  rw [div_eq_iff ha₁]; linarith [hat]
-                have h2 : veluT A r / (x₂ - r) = x₁ - r := by
-                  rw [div_eq_iff ha₂]; linarith [mul_comm (x₁ - r) (x₂ - r), hat]
-                linarith [h1, h2]
-              -- Y₁' = negY(E', X₂', Y₂')
-              have hY_negY : y₁ * ((x₁ - r) ^ 2 - veluT A r) / (x₁ - r) ^ 2 =
-                  negY (veluQuotCurve A B r) (x₂ + veluT A r / (x₂ - r))
-                    (y₂ * ((x₂ - r) ^ 2 - veluT A r) / (x₂ - r) ^ 2) := by
-                simp only [negY, veluQuotCurve, mul_zero, sub_zero, zero_mul]
-                rw [h_y1, h_y2]
-                have hf1 : (x₁ - r) ^ 2 - veluT A r = (x₁ - r) * (x₁ - x₂) := by
-                  linear_combination hat
-                have hf2 : (x₂ - r) ^ 2 - veluT A r = (x₂ - r) * (x₂ - x₁) := by
-                  linear_combination hat
-                rw [hf1, hf2]
-                field_simp
-                ring
-              exact (Point.add_of_Y_eq hX_eq hY_negY).symm
-            · -- P₁+P₂ not in kernel
-              rw [dif_neg hx₃r]
-              -- Split on the coset condition a₁a₂ = t
-              by_cases hat : (x₁ - r) * (x₂ - r) = veluT A r
-              · -- a₁a₂ = t: X₁' = X₂', E' addition is doubling (x₃ ≠ r here)
-                -- X₁' = X₂' (from hat, same as kernel case)
-                have hX_eq : x₁ + veluT A r / (x₁ - r) =
-                    x₂ + veluT A r / (x₂ - r) := by
-                  have h1 : veluT A r / (x₁ - r) = x₂ - r := by
-                    rw [div_eq_iff ha₁]; linarith [hat]
-                  have h2 : veluT A r / (x₂ - r) = x₁ - r := by
-                    rw [div_eq_iff ha₂]
-                    linarith [mul_comm (x₁ - r) (x₂ - r), hat]
-                  linarith [h1, h2]
-                -- Y₁' ≠ negY(Y₂'): if equal, forces x₃ = r, contradicting hx₃r
-                have hy'_ne_neg : y₁ * ((x₁ - r) ^ 2 - veluT A r) / (x₁ - r) ^ 2 ≠
-                    negY (veluQuotCurve A B r) (x₂ + veluT A r / (x₂ - r))
-                      (y₂ * ((x₂ - r) ^ 2 - veluT A r) / (x₂ - r) ^ 2) := by
-                  simp only [negY, veluQuotCurve, mul_zero, sub_zero, zero_mul]
-                  intro h_eq
-                  apply hx₃r; rw [hx₃_eq, hℓ]
-                  have hf1 : (x₁ - r) ^ 2 - veluT A r = (x₁ - r) * (x₁ - x₂) := by
-                    linear_combination hat
-                  have hf2 : (x₂ - r) ^ 2 - veluT A r = (x₂ - r) * (x₂ - x₁) := by
-                    linear_combination hat
-                  have h1_ne : (x₁ - r : ℚ) ^ 2 ≠ 0 := pow_ne_zero 2 ha₁
-                  have h2_ne : (x₂ - r : ℚ) ^ 2 ≠ 0 := pow_ne_zero 2 ha₂
-                  have h_eq_add : y₁ * ((x₁ - r) ^ 2 - veluT A r) / (x₁ - r) ^ 2 +
-                      y₂ * ((x₂ - r) ^ 2 - veluT A r) / (x₂ - r) ^ 2 = 0 := by
-                    linarith
-                  rw [hf1, hf2, div_add_div _ _ h1_ne h2_ne] at h_eq_add
-                  replace h_eq_add :=
-                    (div_eq_zero_iff.mp h_eq_add).resolve_right (mul_ne_zero h1_ne h2_ne)
-                  have h_factor : (x₁ - r) * (x₂ - r) * (x₁ - x₂) *
-                      (y₁ * (x₂ - r) - y₂ * (x₁ - r)) = 0 := by
-                    linear_combination h_eq_add
-                  rcases mul_eq_zero.mp h_factor with h | h
-                  · rcases mul_eq_zero.mp h with h' | h'
-                    · rcases mul_eq_zero.mp h' with h'' | h''
-                      · exact absurd h'' ha₁
-                      · exact absurd h'' ha₂
-                    · exact absurd h' hd
-                  · have hslope : (y₁ - y₂) * (x₂ - r) = y₂ * (x₁ - x₂) := by
-                      linarith
-                    have hslope_sq : (y₁ - y₂) ^ 2 * (x₂ - r) ^ 2 =
-                        y₂ ^ 2 * (x₁ - x₂) ^ 2 := by
-                      linear_combination
-                        ((y₁ - y₂) * (x₂ - r) + y₂ * (x₁ - x₂)) * hslope
-                    have hat' := hat; unfold veluT at hat'
-                    have hnum : (x₁ + x₂ + r) * (x₂ - r) ^ 2 =
-                        x₂ ^ 3 + A * x₂ + B := by
-                      linear_combination (x₂ - r) * hat' - htors
-                    have hgoal : (y₁ - y₂) ^ 2 =
-                        (x₁ + x₂ + r) * (x₁ - x₂) ^ 2 := by
-                      have h_key : ((y₁ - y₂) ^ 2 -
-                          (x₁ + x₂ + r) * (x₁ - x₂) ^ 2) *
-                          (x₂ - r) ^ 2 = 0 := by
-                        linear_combination hslope_sq -
-                          (x₁ - x₂) ^ 2 * hnum +
-                          (x₁ - x₂) ^ 2 * hcurve₂
-                      rcases mul_eq_zero.mp h_key with hk | hk
-                      · linarith
-                      · exact absurd hk h2_ne
-                    rw [div_pow, hgoal,
-                      mul_div_cancel_right₀ _ (pow_ne_zero 2 hd)]
-                    ring
-                have hxy' : ¬(x₁ + veluT A r / (x₁ - r) =
-                      x₂ + veluT A r / (x₂ - r) ∧
-                    y₁ * ((x₁ - r) ^ 2 - veluT A r) / (x₁ - r) ^ 2 =
-                      negY (veluQuotCurve A B r) (x₂ + veluT A r / (x₂ - r))
-                        (y₂ * ((x₂ - r) ^ 2 - veluT A r) / (x₂ - r) ^ 2)) :=
-                  fun ⟨_, h⟩ => hy'_ne_neg h
-                rw [Point.add_some hxy']
-                apply point_some_congr
-                · -- X-coordinate identity (E-side addition ↔ E'-side doubling)
-                  -- h_ya ≠ 0 from hy'_ne_neg via hat
-                  have h_ya_ne : y₁ * (x₂ - r) - y₂ * (x₁ - r) ≠ 0 := by
-                    intro h
-                    apply hy'_ne_neg
-                    simp only [negY, veluQuotCurve, mul_zero, sub_zero, zero_mul]
-                    have hf1 : (x₁ - r) ^ 2 - veluT A r = (x₁ - r) * (x₁ - x₂) := by
-                      linear_combination hat
-                    have hf2 : (x₂ - r) ^ 2 - veluT A r = (x₂ - r) * (x₂ - x₁) := by
-                      linear_combination hat
-                    rw [hf1, hf2]
-                    field_simp
-                    linear_combination (x₁ - x₂) * h
-                  have hy₁ : y₁ ≠ 0 := by
-                    intro hy₁_eq
-                    apply h_ya_ne
-                    have h_c1_zero : x₁ ^ 3 + A * x₁ + B = 0 := by
-                      nlinarith [hcurve₁, hy₁_eq]
-                    have h_prod : (x₁ - r) * (x₁ ^ 2 + x₁ * r + r ^ 2 + A) = 0 := by
-                      linear_combination h_c1_zero - htors
-                    have h_quad : x₁ ^ 2 + x₁ * r + r ^ 2 + A = 0 :=
-                      (mul_eq_zero.mp h_prod).resolve_left ha₁
-                    have hat' := hat; unfold veluT at hat'
-                    have hx₂_prod : (x₁ - r) * (x₂ + x₁ + r) = 0 := by
-                      linear_combination hat' + h_quad
-                    have hx₂ : x₂ + x₁ + r = 0 :=
-                      (mul_eq_zero.mp hx₂_prod).resolve_left ha₁
-                    have hy₂sq : y₂ ^ 2 = 0 := by
-                      linear_combination hcurve₂ +
-                        (A + r ^ 2 + 2 * r * x₁ - r * x₂ + x₁ ^ 2 -
-                          x₁ * x₂ + x₂ ^ 2) * hx₂ +
-                        (-2 * r - x₁) * h_quad + htors
-                    have hy₂ : y₂ = 0 := sq_eq_zero_iff.mp hy₂sq
-                    rw [hy₁_eq, hy₂]; ring
-                  refine mul_left_cancel₀ h_ya_ne ?_
-                  rw [hx₃_eq]
-                  rw [WeierstrassCurve.Affine.slope_of_Y_ne hX_eq hy'_ne_neg]
-                  simp only [hℓ, addX, negY, shortWS, veluQuotCurve,
-                    mul_zero, zero_mul, sub_zero, add_zero, zero_add]
-                  unfold veluT
-                  unfold veluT at hat
-                  have hx₃r_poly : (y₁ - y₂) ^ 2 - x₁ * (x₁ - x₂) ^ 2 -
-                      x₂ * (x₁ - x₂) ^ 2 - (x₁ - x₂) ^ 2 * r ≠ 0 := by
-                    intro h; apply hx₃r; rw [hx₃_eq]
-                    have : ℓ ^ 2 = x₁ + x₂ + r := by
-                      rw [hℓ, div_pow]; field_simp; nlinarith
-                    linarith
-                  have hy₁_fac_ne : y₁ * ((x₁ - r) ^ 2 - (3 * r ^ 2 + A)) ≠ 0 := by
-                    have hf : (x₁ - r) ^ 2 - (3 * r ^ 2 + A) =
-                        (x₁ - r) * (x₁ - x₂) := by
-                      linear_combination hat
-                    rw [hf]; exact mul_ne_zero hy₁ (mul_ne_zero ha₁ hd)
-                  have h_ya_neg : y₁ * (x₂ - r) + y₂ * (x₁ - r) = 0 := by
-                    have h_prod : (y₁ * (x₂ - r) - y₂ * (x₁ - r)) *
-                        (y₁ * (x₂ - r) + y₂ * (x₁ - r)) = 0 := by
-                      linear_combination
-                          (x₂ - r) ^ 2 * hcurve₁ -
-                          (x₁ - r) ^ 2 * hcurve₂ +
-                          (x₁ - r) * (x₂ - r) * (x₁ - x₂) * hat -
-                          (x₁ - x₂) * (x₁ + x₂ - 2 * r) * htors
-                    exact (mul_eq_zero.mp h_prod).resolve_left h_ya_ne
-                  have hy₂_eq : y₂ = -(y₁ * (x₂ - r) / (x₁ - r)) := by
-                    have h := h_ya_neg; field_simp at h ⊢; linarith
-                  have hE : y₁ ^ 2 - (x₁ - r) ^ 2 * (x₁ + x₂ + r) = 0 := by
-                    linear_combination hcurve₁ + (r - x₁) * hat + htors
-                  have h_sub_ne : (x₁ - r) ^ 2 - (3 * r ^ 2 + A) ≠ 0 := by
-                    have hf : (x₁ - r) ^ 2 - (3 * r ^ 2 + A) =
-                        (x₁ - r) * (x₁ - x₂) := by linear_combination hat
-                    rw [hf]; exact mul_ne_zero ha₁ hd
-                  rw [hy₂_eq] at hx₃r_poly
-                  field_simp at hx₃r_poly
-                  rw [hy₂_eq]
-                  sorry
-                · -- Y-coordinate identity
-                  have h_ya_ne : y₁ * (x₂ - r) - y₂ * (x₁ - r) ≠ 0 := by
-                    intro h
-                    apply hy'_ne_neg
-                    simp only [negY, veluQuotCurve, mul_zero, sub_zero, zero_mul]
-                    have hf1 : (x₁ - r) ^ 2 - veluT A r = (x₁ - r) * (x₁ - x₂) := by
-                      linear_combination hat
-                    have hf2 : (x₂ - r) ^ 2 - veluT A r = (x₂ - r) * (x₂ - x₁) := by
-                      linear_combination hat
-                    rw [hf1, hf2]
-                    field_simp
-                    linear_combination (x₁ - x₂) * h
-                  have hy₁ : y₁ ≠ 0 := by
-                    intro hy₁_eq
-                    apply h_ya_ne
-                    have h_c1_zero : x₁ ^ 3 + A * x₁ + B = 0 := by
-                      nlinarith [hcurve₁, hy₁_eq]
-                    have h_prod : (x₁ - r) * (x₁ ^ 2 + x₁ * r + r ^ 2 + A) = 0 := by
-                      linear_combination h_c1_zero - htors
-                    have h_quad : x₁ ^ 2 + x₁ * r + r ^ 2 + A = 0 :=
-                      (mul_eq_zero.mp h_prod).resolve_left ha₁
-                    have hat' := hat; unfold veluT at hat'
-                    have hx₂_prod : (x₁ - r) * (x₂ + x₁ + r) = 0 := by
-                      linear_combination hat' + h_quad
-                    have hx₂ : x₂ + x₁ + r = 0 :=
-                      (mul_eq_zero.mp hx₂_prod).resolve_left ha₁
-                    have hy₂sq : y₂ ^ 2 = 0 := by
-                      linear_combination hcurve₂ +
-                        (A + r ^ 2 + 2 * r * x₁ - r * x₂ + x₁ ^ 2 -
-                          x₁ * x₂ + x₂ ^ 2) * hx₂ +
-                        (-2 * r - x₁) * h_quad + htors
-                    have hy₂ : y₂ = 0 := sq_eq_zero_iff.mp hy₂sq
-                    rw [hy₁_eq, hy₂]; ring
-                  refine mul_left_cancel₀ h_ya_ne ?_
-                  rw [hx₃_eq]
-                  rw [WeierstrassCurve.Affine.slope_of_Y_ne hX_eq hy'_ne_neg]
-                  simp only [hℓ, addY, WeierstrassCurve.Affine.negAddY, negY, addX,
-                    shortWS, veluQuotCurve,
-                    mul_zero, zero_mul, sub_zero, add_zero, zero_add]
-                  unfold veluT
-                  unfold veluT at hat
-                  have hx₃r_poly : (y₁ - y₂) ^ 2 - x₁ * (x₁ - x₂) ^ 2 -
-                      x₂ * (x₁ - x₂) ^ 2 - (x₁ - x₂) ^ 2 * r ≠ 0 := by
-                    intro h; apply hx₃r; rw [hx₃_eq]
-                    have : ℓ ^ 2 = x₁ + x₂ + r := by
-                      rw [hℓ, div_pow]; field_simp; nlinarith
-                    linarith
-                  have hy₁_fac_ne : y₁ * ((x₁ - r) ^ 2 - (3 * r ^ 2 + A)) ≠ 0 := by
-                    have hf : (x₁ - r) ^ 2 - (3 * r ^ 2 + A) =
-                        (x₁ - r) * (x₁ - x₂) := by
-                      linear_combination hat
-                    rw [hf]; exact mul_ne_zero hy₁ (mul_ne_zero ha₁ hd)
-                  have h_ya_neg : y₁ * (x₂ - r) + y₂ * (x₁ - r) = 0 := by
-                    have h_prod : (y₁ * (x₂ - r) - y₂ * (x₁ - r)) *
-                        (y₁ * (x₂ - r) + y₂ * (x₁ - r)) = 0 := by
-                      linear_combination
-                          (x₂ - r) ^ 2 * hcurve₁ -
-                          (x₁ - r) ^ 2 * hcurve₂ +
-                          (x₁ - r) * (x₂ - r) * (x₁ - x₂) * hat -
-                          (x₁ - x₂) * (x₁ + x₂ - 2 * r) * htors
-                    exact (mul_eq_zero.mp h_prod).resolve_left h_ya_ne
-                  have hy₂_eq : y₂ = -(y₁ * (x₂ - r) / (x₁ - r)) := by
-                    have h := h_ya_neg; field_simp at h ⊢; linarith
-                  have h_sub_ne : (x₁ - r) ^ 2 - (r ^ 2 * 3 + A) ≠ 0 := by
-                    have hf : (x₁ - r) ^ 2 - (r ^ 2 * 3 + A) =
-                        (x₁ - r) * (x₁ - x₂) := by linear_combination hat
-                    rw [hf]; exact mul_ne_zero ha₁ hd
-                  rw [hy₂_eq] at hx₃r_poly
-                  field_simp at hx₃r_poly
-                  rw [hy₂_eq, WeierstrassCurve.Affine.slope_of_X_ne hx₁x₂]
-                  field_simp [hx₃r_poly, h_sub_ne]
-                  sorry
-              · -- a₁a₂ ≠ t: X₁' ≠ X₂', fully generic addition on E'
-                have hX_ne : x₁ + veluT A r / (x₁ - r) ≠
-                    x₂ + veluT A r / (x₂ - r) := by
-                  intro heq; apply hat
-                  have h1 : (x₁ - x₂) * ((x₁ - r) * (x₂ - r) - veluT A r) = 0 := by
-                    have := heq; unfold veluT at this ⊢
-                    field_simp at this ⊢; linarith
-                  rcases mul_eq_zero.mp h1 with h | h
-                  · exact absurd (sub_eq_zero.mp h) hx₁x₂
-                  · linarith
-                have hxy' : ¬(x₁ + veluT A r / (x₁ - r) =
-                      x₂ + veluT A r / (x₂ - r) ∧
-                    y₁ * ((x₁ - r) ^ 2 - veluT A r) / (x₁ - r) ^ 2 =
-                      negY (veluQuotCurve A B r) (x₂ + veluT A r / (x₂ - r))
-                        (y₂ * ((x₂ - r) ^ 2 - veluT A r) / (x₂ - r) ^ 2)) :=
-                  fun ⟨h, _⟩ => hX_ne h
-                rw [Point.add_some hxy']
-                apply point_some_congr
-                · -- X-coordinate identity
-                  simp only [hx₃_eq, addX, shortWS, veluQuotCurve,
-                    WeierstrassCurve.Affine.slope_of_X_ne hX_ne,
-                    mul_zero, zero_mul, sub_zero, add_zero, zero_add]
-                  rw [WeierstrassCurve.Affine.slope_of_X_ne hx₁x₂]
-                  unfold veluT
-                  -- field_simp needs nonzero proofs matching the exact denominator form
-                  have hx₃r_poly : (y₁ - y₂) ^ 2 - x₁ * (x₁ - x₂) ^ 2 -
-                      x₂ * (x₁ - x₂) ^ 2 - (x₁ - x₂) ^ 2 * r ≠ 0 := by
-                    intro h; apply hx₃r; rw [hx₃_eq]
-                    have : ℓ ^ 2 = x₁ + x₂ + r := by
-                      rw [hℓ, div_pow]; field_simp; nlinarith
-                    linarith
-                  have hX_den :
-                      (x₂ - r) * (x₁ * (x₁ - r) + (3 * r ^ 2 + A)) -
-                      (x₁ - r) * (x₂ * (x₂ - r) + (3 * r ^ 2 + A)) ≠ 0 := by
-                    intro h
-                    have : (x₁ - x₂) * ((x₁ - r) * (x₂ - r) -
-                        (3 * r ^ 2 + A)) = 0 := by
-                      linear_combination h
-                    rcases mul_eq_zero.mp this with h1 | h1
-                    · exact absurd h1 hd
-                    · exact absurd (by linarith :
-                        (x₁ - r) * (x₂ - r) = 3 * r ^ 2 + A) hat
-                  have hcurve₁' : y₁ ^ 2 - x₁ ^ 3 - A * x₁ + r ^ 3 + A * r = 0 := by
-                    linarith [hcurve₁, htors]
-                  have hcurve₂' : y₂ ^ 2 - x₂ ^ 3 - A * x₂ + r ^ 3 + A * r = 0 := by
-                    linarith [hcurve₂, htors]
-                  field_simp [ha₁, ha₂, hd, hx₃r_poly, hX_den]
-                  set_option maxHeartbeats 0 in
-                  linear_combination
-                      (2*A ^ 3*r ^ 4*x₁ ^ 3 - 6*A ^ 3*r ^ 4*x₁ ^ 2*x₂ + 6*A ^ 3*r ^ 4*x₁*x₂ ^ 2 - 2*A ^ 3*r ^ 4*x₂ ^ 3 - 5*A ^ 3*r ^ 3*x₁ ^ 4 + 12*A ^ 3*r ^ 3*x₁ ^ 3*x₂ - 6*A ^ 3*r ^ 3*x₁ ^ 2*x₂ ^ 2 - 4*A ^ 3*r ^ 3*x₁*x₂ ^ 3 + 3*A ^ 3*r ^ 3*x₂ ^ 4 + 4*A ^ 3*r ^ 2*x₁ ^ 5 - 5*A ^ 3*r ^ 2*x₁ ^ 4*x₂ - 8*A ^ 3*r ^ 2*x₁ ^ 3*x₂ ^ 2 + 14*A ^ 3*r ^ 2*x₁ ^ 2*x₂ ^ 3 - 4*A ^ 3*r ^ 2*x₁*x₂ ^ 4 - A ^ 3*r ^ 2*x₂ ^ 5 - A ^ 3*r*x₁ ^ 6 - 2*A ^ 3*r*x₁ ^ 5*x₂ + 10*A ^ 3*r*x₁ ^ 4*x₂ ^ 2 - 8*A ^ 3*r*x₁ ^ 3*x₂ ^ 3 - A ^ 3*r*x₁ ^ 2*x₂ ^ 4 + 2*A ^ 3*r*x₁*x₂ ^ 5 + A ^ 3*x₁ ^ 6*x₂ - 2*A ^ 3*x₁ ^ 5*x₂ ^ 2 + 2*A ^ 3*x₁ ^ 3*x₂ ^ 4 - A ^ 3*x₁ ^ 2*x₂ ^ 5 + 12*A ^ 2*r ^ 6*x₁ ^ 3 - 36*A ^ 2*r ^ 6*x₁ ^ 2*x₂ + 36*A ^ 2*r ^ 6*x₁*x₂ ^ 2 - 12*A ^ 2*r ^ 6*x₂ ^ 3 - 27*A ^ 2*r ^ 5*x₁ ^ 4 + 66*A ^ 2*r ^ 5*x₁ ^ 3*x₂ - 36*A ^ 2*r ^ 5*x₁ ^ 2*x₂ ^ 2 - 18*A ^ 2*r ^ 5*x₁*x₂ ^ 3 + 15*A ^ 2*r ^ 5*x₂ ^ 4 + 19*A ^ 2*r ^ 4*x₁ ^ 5 - 35*A ^ 2*r ^ 4*x₁ ^ 4*x₂ - 2*A ^ 2*r ^ 4*x₁ ^ 3*x₂ ^ 2 + 26*A ^ 2*r ^ 4*x₁ ^ 2*x₂ ^ 3 - A ^ 2*r ^ 4*x₁*x₂ ^ 4 - 7*A ^ 2*r ^ 4*x₂ ^ 5 - 10*A ^ 2*r ^ 3*x₁ ^ 5*x₂ + 35*A ^ 2*r ^ 3*x₁ ^ 4*x₂ ^ 2 - 52*A ^ 2*r ^ 3*x₁ ^ 3*x₂ ^ 3 - 2*A ^ 2*r ^ 3*x₁ ^ 3*y₁ ^ 2 + 4*A ^ 2*r ^ 3*x₁ ^ 3*y₁*y₂ + 46*A ^ 2*r ^ 3*x₁ ^ 2*x₂ ^ 4 + 6*A ^ 2*r ^ 3*x₁ ^ 2*x₂*y₁ ^ 2 - 12*A ^ 2*r ^ 3*x₁ ^ 2*x₂*y₁*y₂ - 26*A ^ 2*r ^ 3*x₁*x₂ ^ 5 - 6*A ^ 2*r ^ 3*x₁*x₂ ^ 2*y₁ ^ 2 + 12*A ^ 2*r ^ 3*x₁*x₂ ^ 2*y₁*y₂ + 7*A ^ 2*r ^ 3*x₂ ^ 6 + 2*A ^ 2*r ^ 3*x₂ ^ 3*y₁ ^ 2 - 4*A ^ 2*r ^ 3*x₂ ^ 3*y₁*y₂ - 2*A ^ 2*r ^ 2*x₁ ^ 7 - 4*A ^ 2*r ^ 2*x₁ ^ 6*x₂ + 18*A ^ 2*r ^ 2*x₁ ^ 5*x₂ ^ 2 - 5*A ^ 2*r ^ 2*x₁ ^ 4*x₂ ^ 3 + A ^ 2*r ^ 2*x₁ ^ 4*y₁ ^ 2 - 2*A ^ 2*r ^ 2*x₁ ^ 4*y₁*y₂ - 4*A ^ 2*r ^ 2*x₁ ^ 4*y₂ ^ 2 - 22*A ^ 2*r ^ 2*x₁ ^ 3*x₂ ^ 4 + 2*A ^ 2*r ^ 2*x₁ ^ 3*x₂*y₁ ^ 2 - 4*A ^ 2*r ^ 2*x₁ ^ 3*x₂*y₁*y₂ + 16*A ^ 2*r ^ 2*x₁ ^ 3*x₂*y₂ ^ 2 + 18*A ^ 2*r ^ 2*x₁ ^ 2*x₂ ^ 5 - 12*A ^ 2*r ^ 2*x₁ ^ 2*x₂ ^ 2*y₁ ^ 2 + 24*A ^ 2*r ^ 2*x₁ ^ 2*x₂ ^ 2*y₁*y₂ - 24*A ^ 2*r ^ 2*x₁ ^ 2*x₂ ^ 2*y₂ ^ 2 - 2*A ^ 2*r ^ 2*x₁*x₂ ^ 6 + 14*A ^ 2*r ^ 2*x₁*x₂ ^ 3*y₁ ^ 2 - 28*A ^ 2*r ^ 2*x₁*x₂ ^ 3*y₁*y₂ + 16*A ^ 2*r ^ 2*x₁*x₂ ^ 3*y₂ ^ 2 - A ^ 2*r ^ 2*x₂ ^ 7 - 5*A ^ 2*r ^ 2*x₂ ^ 4*y₁ ^ 2 + 10*A ^ 2*r ^ 2*x₂ ^ 4*y₁*y₂ - 4*A ^ 2*r ^ 2*x₂ ^ 4*y₂ ^ 2 + 4*A ^ 2*r*x₁ ^ 7*x₂ - A ^ 2*r*x₁ ^ 6*x₂ ^ 2 - 28*A ^ 2*r*x₁ ^ 5*x₂ ^ 3 + 4*A ^ 2*r*x₁ ^ 5*y₂ ^ 2 + 45*A ^ 2*r*x₁ ^ 4*x₂ ^ 4 - 2*A ^ 2*r*x₁ ^ 4*x₂*y₁ ^ 2 + 4*A ^ 2*r*x₁ ^ 4*x₂*y₁*y₂ - 12*A ^ 2*r*x₁ ^ 4*x₂*y₂ ^ 2 - 14*A ^ 2*r*x₁ ^ 3*x₂ ^ 5 + 2*A ^ 2*r*x₁ ^ 3*x₂ ^ 2*y₁ ^ 2 - 4*A ^ 2*r*x₁ ^ 3*x₂ ^ 2*y₁*y₂ + 8*A ^ 2*r*x₁ ^ 3*x₂ ^ 2*y₂ ^ 2 - 17*A ^ 2*r*x₁ ^ 2*x₂ ^ 6 + 6*A ^ 2*r*x₁ ^ 2*x₂ ^ 3*y₁ ^ 2 - 12*A ^ 2*r*x₁ ^ 2*x₂ ^ 3*y₁*y₂ + 8*A ^ 2*r*x₁ ^ 2*x₂ ^ 3*y₂ ^ 2 + 14*A ^ 2*r*x₁*x₂ ^ 7 - 10*A ^ 2*r*x₁*x₂ ^ 4*y₁ ^ 2 + 20*A ^ 2*r*x₁*x₂ ^ 4*y₁*y₂ - 12*A ^ 2*r*x₁*x₂ ^ 4*y₂ ^ 2 - 3*A ^ 2*r*x₂ ^ 8 + 4*A ^ 2*r*x₂ ^ 5*y₁ ^ 2 - 8*A ^ 2*r*x₂ ^ 5*y₁*y₂ + 4*A ^ 2*r*x₂ ^ 5*y₂ ^ 2 - 2*A ^ 2*x₁ ^ 7*x₂ ^ 2 + 5*A ^ 2*x₁ ^ 6*x₂ ^ 3 - A ^ 2*x₁ ^ 6*y₂ ^ 2 + A ^ 2*x₁ ^ 5*x₂ ^ 4 + 2*A ^ 2*x₁ ^ 5*x₂*y₂ ^ 2 - 13*A ^ 2*x₁ ^ 4*x₂ ^ 5 + A ^ 2*x₁ ^ 4*x₂ ^ 2*y₁ ^ 2 - 2*A ^ 2*x₁ ^ 4*x₂ ^ 2*y₁*y₂ + A ^ 2*x₁ ^ 4*x₂ ^ 2*y₂ ^ 2 + 12*A ^ 2*x₁ ^ 3*x₂ ^ 6 - 2*A ^ 2*x₁ ^ 3*x₂ ^ 3*y₁ ^ 2 + 4*A ^ 2*x₁ ^ 3*x₂ ^ 3*y₁*y₂ - 4*A ^ 2*x₁ ^ 3*x₂ ^ 3*y₂ ^ 2 - A ^ 2*x₁ ^ 2*x₂ ^ 7 + A ^ 2*x₁ ^ 2*x₂ ^ 4*y₂ ^ 2 - 3*A ^ 2*x₁*x₂ ^ 8 + 2*A ^ 2*x₁*x₂ ^ 5*y₁ ^ 2 - 4*A ^ 2*x₁*x₂ ^ 5*y₁*y₂ + 2*A ^ 2*x₁*x₂ ^ 5*y₂ ^ 2 + A ^ 2*x₂ ^ 9 - A ^ 2*x₂ ^ 6*y₁ ^ 2 + 2*A ^ 2*x₂ ^ 6*y₁*y₂ - A ^ 2*x₂ ^ 6*y₂ ^ 2 + 22*A*r ^ 8*x₁ ^ 3 - 66*A*r ^ 8*x₁ ^ 2*x₂ + 66*A*r ^ 8*x₁*x₂ ^ 2 - 22*A*r ^ 8*x₂ ^ 3 - 43*A*r ^ 7*x₁ ^ 4 + 110*A*r ^ 7*x₁ ^ 3*x₂ - 72*A*r ^ 7*x₁ ^ 2*x₂ ^ 2 - 14*A*r ^ 7*x₁*x₂ ^ 3 + 19*A*r ^ 7*x₂ ^ 4 + 27*A*r ^ 6*x₁ ^ 5 - 92*A*r ^ 6*x₁ ^ 4*x₂ + 132*A*r ^ 6*x₁ ^ 3*x₂ ^ 2 - 114*A*r ^ 6*x₁ ^ 2*x₂ ^ 3 + 65*A*r ^ 6*x₁*x₂ ^ 4 - 18*A*r ^ 6*x₂ ^ 5 + 16*A*r ^ 5*x₁ ^ 6 - 36*A*r ^ 5*x₁ ^ 5*x₂ + 63*A*r ^ 5*x₁ ^ 4*x₂ ^ 2 - 166*A*r ^ 5*x₁ ^ 3*x₂ ^ 3 - 10*A*r ^ 5*x₁ ^ 3*y₁ ^ 2 + 20*A*r ^ 5*x₁ ^ 3*y₁*y₂ + 240*A*r ^ 5*x₁ ^ 2*x₂ ^ 4 + 30*A*r ^ 5*x₁ ^ 2*x₂*y₁ ^ 2 - 60*A*r ^ 5*x₁ ^ 2*x₂*y₁*y₂ - 150*A*r ^ 5*x₁*x₂ ^ 5 - 30*A*r ^ 5*x₁*x₂ ^ 2*y₁ ^ 2 + 60*A*r ^ 5*x₁*x₂ ^ 2*y₁*y₂ + 33*A*r ^ 5*x₂ ^ 6 + 10*A*r ^ 5*x₂ ^ 3*y₁ ^ 2 - 20*A*r ^ 5*x₂ ^ 3*y₁*y₂ - 9*A*r ^ 4*x₁ ^ 7 - 29*A*r ^ 4*x₁ ^ 6*x₂ + 132*A*r ^ 4*x₁ ^ 5*x₂ ^ 2 - 115*A*r ^ 4*x₁ ^ 4*x₂ ^ 3 + 2*A*r ^ 4*x₁ ^ 4*y₁ ^ 2 - 6*A*r ^ 4*x₁ ^ 4*y₁*y₂ - 18*A*r ^ 4*x₁ ^ 4*y₂ ^ 2 - 21*A*r ^ 4*x₁ ^ 3*x₂ ^ 4 + 18*A*r ^ 4*x₁ ^ 3*x₂*y₁ ^ 2 - 28*A*r ^ 4*x₁ ^ 3*x₂*y₁*y₂ + 72*A*r ^ 4*x₁ ^ 3*x₂*y₂ ^ 2 + 57*A*r ^ 4*x₁ ^ 2*x₂ ^ 5 - 66*A*r ^ 4*x₁ ^ 2*x₂ ^ 2*y₁ ^ 2 + 120*A*r ^ 4*x₁ ^ 2*x₂ ^ 2*y₁*y₂ - 108*A*r ^ 4*x₁ ^ 2*x₂ ^ 2*y₂ ^ 2 - 14*A*r ^ 4*x₁*x₂ ^ 6 + 70*A*r ^ 4*x₁*x₂ ^ 3*y₁ ^ 2 - 132*A*r ^ 4*x₁*x₂ ^ 3*y₁*y₂ + 72*A*r ^ 4*x₁*x₂ ^ 3*y₂ ^ 2 - A*r ^ 4*x₂ ^ 7 - 24*A*r ^ 4*x₂ ^ 4*y₁ ^ 2 + 46*A*r ^ 4*x₂ ^ 4*y₁*y₂ - 18*A*r ^ 4*x₂ ^ 4*y₂ ^ 2 - A*r ^ 3*x₁ ^ 8 + 20*A*r ^ 3*x₁ ^ 7*x₂ - 12*A*r ^ 3*x₁ ^ 6*x₂ ^ 2 - 112*A*r ^ 3*x₁ ^ 5*x₂ ^ 3 + 2*A*r ^ 3*x₁ ^ 5*y₁ ^ 2 + 12*A*r ^ 3*x₁ ^ 5*y₂ ^ 2 + 210*A*r ^ 3*x₁ ^ 4*x₂ ^ 4 - 6*A*r ^ 3*x₁ ^ 4*x₂*y₁ ^ 2 - 36*A*r ^ 3*x₁ ^ 4*x₂*y₂ ^ 2 - 102*A*r ^ 3*x₁ ^ 3*x₂ ^ 5 - 12*A*r ^ 3*x₁ ^ 3*x₂ ^ 2*y₁ ^ 2 + 32*A*r ^ 3*x₁ ^ 3*x₂ ^ 2*y₁*y₂ + 24*A*r ^ 3*x₁ ^ 3*x₂ ^ 2*y₂ ^ 2 - 46*A*r ^ 3*x₁ ^ 2*x₂ ^ 6 + 52*A*r ^ 3*x₁ ^ 2*x₂ ^ 3*y₁ ^ 2 - 96*A*r ^ 3*x₁ ^ 2*x₂ ^ 3*y₁*y₂ + 24*A*r ^ 3*x₁ ^ 2*x₂ ^ 3*y₂ ^ 2 + 58*A*r ^ 3*x₁*x₂ ^ 7 - 54*A*r ^ 3*x₁*x₂ ^ 4*y₁ ^ 2 + 96*A*r ^ 3*x₁*x₂ ^ 4*y₁*y₂ - 36*A*r ^ 3*x₁*x₂ ^ 4*y₂ ^ 2 - 15*A*r ^ 3*x₂ ^ 8 + 18*A*r ^ 3*x₂ ^ 5*y₁ ^ 2 - 32*A*r ^ 3*x₂ ^ 5*y₁*y₂ + 12*A*r ^ 3*x₂ ^ 5*y₂ ^ 2 + 3*A*r ^ 2*x₁ ^ 8*x₂ - 18*A*r ^ 2*x₁ ^ 7*x₂ ^ 2 + 26*A*r ^ 2*x₁ ^ 6*x₂ ^ 3 - 2*A*r ^ 2*x₁ ^ 6*y₁*y₂ + 3*A*r ^ 2*x₁ ^ 5*x₂ ^ 4 - 6*A*r ^ 2*x₁ ^ 5*x₂*y₁ ^ 2 + 12*A*r ^ 2*x₁ ^ 5*x₂*y₁*y₂ + 12*A*r ^ 2*x₁ ^ 5*x₂*y₂ ^ 2 - 27*A*r ^ 2*x₁ ^ 4*x₂ ^ 5 + 12*A*r ^ 2*x₁ ^ 4*x₂ ^ 2*y₁ ^ 2 - 6*A*r ^ 2*x₁ ^ 4*x₂ ^ 2*y₁*y₂ - 48*A*r ^ 2*x₁ ^ 4*x₂ ^ 2*y₂ ^ 2 + 6*A*r ^ 2*x₁ ^ 3*x₂ ^ 6 + 4*A*r ^ 2*x₁ ^ 3*x₂ ^ 3*y₁ ^ 2 - 40*A*r ^ 2*x₁ ^ 3*x₂ ^ 3*y₁*y₂ + 72*A*r ^ 2*x₁ ^ 3*x₂ ^ 3*y₂ ^ 2 + 18*A*r ^ 2*x₁ ^ 2*x₂ ^ 7 - 24*A*r ^ 2*x₁ ^ 2*x₂ ^ 4*y₁ ^ 2 + 66*A*r ^ 2*x₁ ^ 2*x₂ ^ 4*y₁*y₂ - 48*A*r ^ 2*x₁ ^ 2*x₂ ^ 4*y₂ ^ 2 - 15*A*r ^ 2*x₁*x₂ ^ 8 + 18*A*r ^ 2*x₁*x₂ ^ 5*y₁ ^ 2 - 36*A*r ^ 2*x₁*x₂ ^ 5*y₁*y₂ + 12*A*r ^ 2*x₁*x₂ ^ 5*y₂ ^ 2 + 4*A*r ^ 2*x₂ ^ 9 - 4*A*r ^ 2*x₂ ^ 6*y₁ ^ 2 + 6*A*r ^ 2*x₂ ^ 6*y₁*y₂ - 3*A*r*x₁ ^ 8*x₂ ^ 2 + 12*A*r*x₁ ^ 7*x₂ ^ 3 - 7*A*r*x₁ ^ 6*x₂ ^ 4 + 4*A*r*x₁ ^ 6*x₂*y₁*y₂ - 12*A*r*x₁ ^ 6*x₂*y₂ ^ 2 - 18*A*r*x₁ ^ 5*x₂ ^ 5 + 6*A*r*x₁ ^ 5*x₂ ^ 2*y₁ ^ 2 - 24*A*r*x₁ ^ 5*x₂ ^ 2*y₁*y₂ + 36*A*r*x₁ ^ 5*x₂ ^ 2*y₂ ^ 2 + 17*A*r*x₁ ^ 4*x₂ ^ 6 - 14*A*r*x₁ ^ 4*x₂ ^ 3*y₁ ^ 2 + 36*A*r*x₁ ^ 4*x₂ ^ 3*y₁*y₂ - 24*A*r*x₁ ^ 4*x₂ ^ 3*y₂ ^ 2 + 10*A*r*x₁ ^ 3*x₂ ^ 7 + 6*A*r*x₁ ^ 3*x₂ ^ 4*y₁ ^ 2 - 4*A*r*x₁ ^ 3*x₂ ^ 4*y₁*y₂ - 24*A*r*x₁ ^ 3*x₂ ^ 4*y₂ ^ 2 - 15*A*r*x₁ ^ 2*x₂ ^ 8 + 6*A*r*x₁ ^ 2*x₂ ^ 5*y₁ ^ 2 - 24*A*r*x₁ ^ 2*x₂ ^ 5*y₁*y₂ + 36*A*r*x₁ ^ 2*x₂ ^ 5*y₂ ^ 2 + 4*A*r*x₁*x₂ ^ 9 - 4*A*r*x₁*x₂ ^ 6*y₁ ^ 2 + 12*A*r*x₁*x₂ ^ 6*y₁*y₂ - 12*A*r*x₁*x₂ ^ 6*y₂ ^ 2 + A*x₁ ^ 8*x₂ ^ 3 - 5*A*x₁ ^ 7*x₂ ^ 4 + 6*A*x₁ ^ 6*x₂ ^ 5 - 2*A*x₁ ^ 6*x₂ ^ 2*y₁*y₂ + 6*A*x₁ ^ 6*x₂ ^ 2*y₂ ^ 2 + 4*A*x₁ ^ 5*x₂ ^ 6 - 2*A*x₁ ^ 5*x₂ ^ 3*y₁ ^ 2 + 12*A*x₁ ^ 5*x₂ ^ 3*y₁*y₂ - 24*A*x₁ ^ 5*x₂ ^ 3*y₂ ^ 2 - 13*A*x₁ ^ 4*x₂ ^ 7 + 6*A*x₁ ^ 4*x₂ ^ 4*y₁ ^ 2 - 24*A*x₁ ^ 4*x₂ ^ 4*y₁*y₂ + 36*A*x₁ ^ 4*x₂ ^ 4*y₂ ^ 2 + 9*A*x₁ ^ 3*x₂ ^ 8 - 6*A*x₁ ^ 3*x₂ ^ 5*y₁ ^ 2 + 20*A*x₁ ^ 3*x₂ ^ 5*y₁*y₂ - 24*A*x₁ ^ 3*x₂ ^ 5*y₂ ^ 2 - 2*A*x₁ ^ 2*x₂ ^ 9 + 2*A*x₁ ^ 2*x₂ ^ 6*y₁ ^ 2 - 6*A*x₁ ^ 2*x₂ ^ 6*y₁*y₂ + 6*A*x₁ ^ 2*x₂ ^ 6*y₂ ^ 2 + 12*r ^ 10*x₁ ^ 3 - 36*r ^ 10*x₁ ^ 2*x₂ + 36*r ^ 10*x₁*x₂ ^ 2 - 12*r ^ 10*x₂ ^ 3 - 21*r ^ 9*x₁ ^ 4 + 60*r ^ 9*x₁ ^ 3*x₂ - 54*r ^ 9*x₁ ^ 2*x₂ ^ 2 + 12*r ^ 9*x₁*x₂ ^ 3 + 3*r ^ 9*x₂ ^ 4 + 18*r ^ 8*x₁ ^ 5 - 96*r ^ 8*x₁ ^ 4*x₂ + 198*r ^ 8*x₁ ^ 3*x₂ ^ 2 - 198*r ^ 8*x₁ ^ 2*x₂ ^ 3 + 96*r ^ 8*x₁*x₂ ^ 4 - 18*r ^ 8*x₂ ^ 5 + 21*r ^ 7*x₁ ^ 6 - 72*r ^ 7*x₁ ^ 5*x₂ + 144*r ^ 7*x₁ ^ 4*x₂ ^ 2 - 246*r ^ 7*x₁ ^ 3*x₂ ^ 3 - 12*r ^ 7*x₁ ^ 3*y₁ ^ 2 + 24*r ^ 7*x₁ ^ 3*y₁*y₂ + 279*r ^ 7*x₁ ^ 2*x₂ ^ 4 + 36*r ^ 7*x₁ ^ 2*x₂*y₁ ^ 2 - 72*r ^ 7*x₁ ^ 2*x₂*y₁*y₂ - 162*r ^ 7*x₁*x₂ ^ 5 - 36*r ^ 7*x₁*x₂ ^ 2*y₁ ^ 2 + 72*r ^ 7*x₁*x₂ ^ 2*y₁*y₂ + 36*r ^ 7*x₂ ^ 6 + 12*r ^ 7*x₂ ^ 3*y₁ ^ 2 - 24*r ^ 7*x₂ ^ 3*y₁*y₂ - 9*r ^ 6*x₁ ^ 7 - 24*r ^ 6*x₁ ^ 6*x₂ + 180*r ^ 6*x₁ ^ 5*x₂ ^ 2 - 300*r ^ 6*x₁ ^ 4*x₂ ^ 3 - 3*r ^ 6*x₁ ^ 4*y₁ ^ 2 - 18*r ^ 6*x₁ ^ 4*y₂ ^ 2 + 189*r ^ 6*x₁ ^ 3*x₂ ^ 4 + 36*r ^ 6*x₁ ^ 3*x₂*y₁ ^ 2 - 48*r ^ 6*x₁ ^ 3*x₂*y₁*y₂ + 72*r ^ 6*x₁ ^ 3*x₂*y₂ ^ 2 - 18*r ^ 6*x₁ ^ 2*x₂ ^ 5 - 90*r ^ 6*x₁ ^ 2*x₂ ^ 2*y₁ ^ 2 + 144*r ^ 6*x₁ ^ 2*x₂ ^ 2*y₁*y₂ - 108*r ^ 6*x₁ ^ 2*x₂ ^ 2*y₂ ^ 2 - 24*r ^ 6*x₁*x₂ ^ 6 + 84*r ^ 6*x₁*x₂ ^ 3*y₁ ^ 2 - 144*r ^ 6*x₁*x₂ ^ 3*y₁*y₂ + 72*r ^ 6*x₁*x₂ ^ 3*y₂ ^ 2 + 6*r ^ 6*x₂ ^ 7 - 27*r ^ 6*x₂ ^ 4*y₁ ^ 2 + 48*r ^ 6*x₂ ^ 4*y₁*y₂ - 18*r ^ 6*x₂ ^ 4*y₂ ^ 2 - 3*r ^ 5*x₁ ^ 8 + 24*r ^ 5*x₁ ^ 7*x₂ - 27*r ^ 5*x₁ ^ 6*x₂ ^ 2 - 84*r ^ 5*x₁ ^ 5*x₂ ^ 3 + 6*r ^ 5*x₁ ^ 5*y₁ ^ 2 + 225*r ^ 5*x₁ ^ 4*x₂ ^ 4 - 36*r ^ 5*x₁ ^ 4*x₂*y₁*y₂ - 180*r ^ 5*x₁ ^ 3*x₂ ^ 5 - 54*r ^ 5*x₁ ^ 3*x₂ ^ 2*y₁ ^ 2 + 132*r ^ 5*x₁ ^ 3*x₂ ^ 2*y₁*y₂ + 15*r ^ 5*x₁ ^ 2*x₂ ^ 6 + 102*r ^ 5*x₁ ^ 2*x₂ ^ 3*y₁ ^ 2 - 180*r ^ 5*x₁ ^ 2*x₂ ^ 3*y₁*y₂ + 48*r ^ 5*x₁*x₂ ^ 7 - 72*r ^ 5*x₁*x₂ ^ 4*y₁ ^ 2 + 108*r ^ 5*x₁*x₂ ^ 4*y₁*y₂ - 18*r ^ 5*x₂ ^ 8 + 18*r ^ 5*x₂ ^ 5*y₁ ^ 2 - 24*r ^ 5*x₂ ^ 5*y₁*y₂ + 9*r ^ 4*x₁ ^ 8*x₂ - 36*r ^ 4*x₁ ^ 7*x₂ ^ 2 + 33*r ^ 4*x₁ ^ 6*x₂ ^ 3 - 6*r ^ 4*x₁ ^ 6*y₁*y₂ + 9*r ^ 4*x₁ ^ 6*y₂ ^ 2 - 18*r ^ 4*x₁ ^ 5*x₂*y₁ ^ 2 + 36*r ^ 4*x₁ ^ 5*x₂*y₁*y₂ + 18*r ^ 4*x₁ ^ 5*x₂*y₂ ^ 2 + 36*r ^ 4*x₁ ^ 4*x₂ ^ 5 + 27*r ^ 4*x₁ ^ 4*x₂ ^ 2*y₁ ^ 2 - 153*r ^ 4*x₁ ^ 4*x₂ ^ 2*y₂ ^ 2 - 90*r ^ 4*x₁ ^ 3*x₂ ^ 6 + 30*r ^ 4*x₁ ^ 3*x₂ ^ 3*y₁ ^ 2 - 156*r ^ 4*x₁ ^ 3*x₂ ^ 3*y₁*y₂ + 252*r ^ 4*x₁ ^ 3*x₂ ^ 3*y₂ ^ 2 + 63*r ^ 4*x₁ ^ 2*x₂ ^ 7 - 72*r ^ 4*x₁ ^ 2*x₂ ^ 4*y₁ ^ 2 + 198*r ^ 4*x₁ ^ 2*x₂ ^ 4*y₁*y₂ - 153*r ^ 4*x₁ ^ 2*x₂ ^ 4*y₂ ^ 2 - 18*r ^ 4*x₁*x₂ ^ 8 + 36*r ^ 4*x₁*x₂ ^ 5*y₁ ^ 2 - 72*r ^ 4*x₁*x₂ ^ 5*y₁*y₂ + 18*r ^ 4*x₁*x₂ ^ 5*y₂ ^ 2 + 3*r ^ 4*x₂ ^ 9 - 3*r ^ 4*x₂ ^ 6*y₁ ^ 2 + 9*r ^ 4*x₂ ^ 6*y₂ ^ 2 - 9*r ^ 3*x₁ ^ 8*x₂ ^ 2 + 36*r ^ 3*x₁ ^ 7*x₂ ^ 3 - 21*r ^ 3*x₁ ^ 6*x₂ ^ 4 + 12*r ^ 3*x₁ ^ 6*x₂*y₁*y₂ - 36*r ^ 3*x₁ ^ 6*x₂*y₂ ^ 2 - 54*r ^ 3*x₁ ^ 5*x₂ ^ 5 + 18*r ^ 3*x₁ ^ 5*x₂ ^ 2*y₁ ^ 2 - 72*r ^ 3*x₁ ^ 5*x₂ ^ 2*y₁*y₂ + 108*r ^ 3*x₁ ^ 5*x₂ ^ 2*y₂ ^ 2 + 51*r ^ 3*x₁ ^ 4*x₂ ^ 6 - 42*r ^ 3*x₁ ^ 4*x₂ ^ 3*y₁ ^ 2 + 108*r ^ 3*x₁ ^ 4*x₂ ^ 3*y₁*y₂ - 72*r ^ 3*x₁ ^ 4*x₂ ^ 3*y₂ ^ 2 + 30*r ^ 3*x₁ ^ 3*x₂ ^ 7 + 18*r ^ 3*x₁ ^ 3*x₂ ^ 4*y₁ ^ 2 - 12*r ^ 3*x₁ ^ 3*x₂ ^ 4*y₁*y₂ - 72*r ^ 3*x₁ ^ 3*x₂ ^ 4*y₂ ^ 2 - 45*r ^ 3*x₁ ^ 2*x₂ ^ 8 + 18*r ^ 3*x₁ ^ 2*x₂ ^ 5*y₁ ^ 2 - 72*r ^ 3*x₁ ^ 2*x₂ ^ 5*y₁*y₂ + 108*r ^ 3*x₁ ^ 2*x₂ ^ 5*y₂ ^ 2 + 12*r ^ 3*x₁*x₂ ^ 9 - 12*r ^ 3*x₁*x₂ ^ 6*y₁ ^ 2 + 36*r ^ 3*x₁*x₂ ^ 6*y₁*y₂ - 36*r ^ 3*x₁*x₂ ^ 6*y₂ ^ 2 + 3*r ^ 2*x₁ ^ 8*x₂ ^ 3 - 15*r ^ 2*x₁ ^ 7*x₂ ^ 4 + 18*r ^ 2*x₁ ^ 6*x₂ ^ 5 - 6*r ^ 2*x₁ ^ 6*x₂ ^ 2*y₁*y₂ + 18*r ^ 2*x₁ ^ 6*x₂ ^ 2*y₂ ^ 2 + 12*r ^ 2*x₁ ^ 5*x₂ ^ 6 - 6*r ^ 2*x₁ ^ 5*x₂ ^ 3*y₁ ^ 2 + 36*r ^ 2*x₁ ^ 5*x₂ ^ 3*y₁*y₂ - 72*r ^ 2*x₁ ^ 5*x₂ ^ 3*y₂ ^ 2 - 39*r ^ 2*x₁ ^ 4*x₂ ^ 7 + 18*r ^ 2*x₁ ^ 4*x₂ ^ 4*y₁ ^ 2 - 72*r ^ 2*x₁ ^ 4*x₂ ^ 4*y₁*y₂ + 108*r ^ 2*x₁ ^ 4*x₂ ^ 4*y₂ ^ 2 + 27*r ^ 2*x₁ ^ 3*x₂ ^ 8 - 18*r ^ 2*x₁ ^ 3*x₂ ^ 5*y₁ ^ 2 + 60*r ^ 2*x₁ ^ 3*x₂ ^ 5*y₁*y₂ - 72*r ^ 2*x₁ ^ 3*x₂ ^ 5*y₂ ^ 2 - 6*r ^ 2*x₁ ^ 2*x₂ ^ 9 + 6*r ^ 2*x₁ ^ 2*x₂ ^ 6*y₁ ^ 2 - 18*r ^ 2*x₁ ^ 2*x₂ ^ 6*y₁*y₂ + 18*r ^ 2*x₁ ^ 2*x₂ ^ 6*y₂ ^ 2)
-                      * hcurve₁' +
-                      (-2*A ^ 3*r ^ 4*x₁ ^ 3 + 6*A ^ 3*r ^ 4*x₁ ^ 2*x₂ - 6*A ^ 3*r ^ 4*x₁*x₂ ^ 2 + 2*A ^ 3*r ^ 4*x₂ ^ 3 + 7*A ^ 3*r ^ 3*x₁ ^ 4 - 20*A ^ 3*r ^ 3*x₁ ^ 3*x₂ + 18*A ^ 3*r ^ 3*x₁ ^ 2*x₂ ^ 2 - 4*A ^ 3*r ^ 3*x₁*x₂ ^ 3 - A ^ 3*r ^ 3*x₂ ^ 4 - 9*A ^ 3*r ^ 2*x₁ ^ 5 + 24*A ^ 3*r ^ 2*x₁ ^ 4*x₂ - 18*A ^ 3*r ^ 2*x₁ ^ 3*x₂ ^ 2 + 3*A ^ 3*r ^ 2*x₁*x₂ ^ 4 + 5*A ^ 3*r*x₁ ^ 6 - 12*A ^ 3*r*x₁ ^ 5*x₂ + 6*A ^ 3*r*x₁ ^ 4*x₂ ^ 2 + 4*A ^ 3*r*x₁ ^ 3*x₂ ^ 3 - 3*A ^ 3*r*x₁ ^ 2*x₂ ^ 4 - A ^ 3*x₁ ^ 7 + 2*A ^ 3*x₁ ^ 6*x₂ - 2*A ^ 3*x₁ ^ 4*x₂ ^ 3 + A ^ 3*x₁ ^ 3*x₂ ^ 4 - 12*A ^ 2*r ^ 6*x₁ ^ 3 + 36*A ^ 2*r ^ 6*x₁ ^ 2*x₂ - 36*A ^ 2*r ^ 6*x₁*x₂ ^ 2 + 12*A ^ 2*r ^ 6*x₂ ^ 3 + 37*A ^ 2*r ^ 5*x₁ ^ 4 - 106*A ^ 2*r ^ 5*x₁ ^ 3*x₂ + 96*A ^ 2*r ^ 5*x₁ ^ 2*x₂ ^ 2 - 22*A ^ 2*r ^ 5*x₁*x₂ ^ 3 - 5*A ^ 2*r ^ 5*x₂ ^ 4 - 41*A ^ 2*r ^ 4*x₁ ^ 5 + 119*A ^ 2*r ^ 4*x₁ ^ 4*x₂ - 114*A ^ 2*r ^ 4*x₁ ^ 3*x₂ ^ 2 + 38*A ^ 2*r ^ 4*x₁ ^ 2*x₂ ^ 3 - 5*A ^ 2*r ^ 4*x₁*x₂ ^ 4 + 3*A ^ 2*r ^ 4*x₂ ^ 5 + 20*A ^ 2*r ^ 3*x₁ ^ 6 - 76*A ^ 2*r ^ 3*x₁ ^ 5*x₂ + 117*A ^ 2*r ^ 3*x₁ ^ 4*x₂ ^ 2 - 96*A ^ 2*r ^ 3*x₁ ^ 3*x₂ ^ 3 - 4*A ^ 2*r ^ 3*x₁ ^ 3*y₁*y₂ + 2*A ^ 2*r ^ 3*x₁ ^ 3*y₂ ^ 2 + 46*A ^ 2*r ^ 3*x₁ ^ 2*x₂ ^ 4 + 12*A ^ 2*r ^ 3*x₁ ^ 2*x₂*y₁*y₂ - 6*A ^ 2*r ^ 3*x₁ ^ 2*x₂*y₂ ^ 2 - 12*A ^ 2*r ^ 3*x₁*x₂ ^ 5 - 12*A ^ 2*r ^ 3*x₁*x₂ ^ 2*y₁*y₂ + 6*A ^ 2*r ^ 3*x₁*x₂ ^ 2*y₂ ^ 2 + A ^ 2*r ^ 3*x₂ ^ 6 + 4*A ^ 2*r ^ 3*x₂ ^ 3*y₁*y₂ - 2*A ^ 2*r ^ 3*x₂ ^ 3*y₂ ^ 2 - 5*A ^ 2*r ^ 2*x₁ ^ 7 + 38*A ^ 2*r ^ 2*x₁ ^ 6*x₂ - 90*A ^ 2*r ^ 2*x₁ ^ 5*x₂ ^ 2 + 90*A ^ 2*r ^ 2*x₁ ^ 4*x₂ ^ 3 + 10*A ^ 2*r ^ 2*x₁ ^ 4*y₁*y₂ - 5*A ^ 2*r ^ 2*x₁ ^ 4*y₂ ^ 2 - 33*A ^ 2*r ^ 2*x₁ ^ 3*x₂ ^ 4 - 28*A ^ 2*r ^ 2*x₁ ^ 3*x₂*y₁*y₂ + 14*A ^ 2*r ^ 2*x₁ ^ 3*x₂*y₂ ^ 2 - 6*A ^ 2*r ^ 2*x₁ ^ 2*x₂ ^ 5 + 24*A ^ 2*r ^ 2*x₁ ^ 2*x₂ ^ 2*y₁*y₂ - 12*A ^ 2*r ^ 2*x₁ ^ 2*x₂ ^ 2*y₂ ^ 2 + 8*A ^ 2*r ^ 2*x₁*x₂ ^ 6 - 4*A ^ 2*r ^ 2*x₁*x₂ ^ 3*y₁*y₂ + 2*A ^ 2*r ^ 2*x₁*x₂ ^ 3*y₂ ^ 2 - 2*A ^ 2*r ^ 2*x₂ ^ 7 - 2*A ^ 2*r ^ 2*x₂ ^ 4*y₁*y₂ + A ^ 2*r ^ 2*x₂ ^ 4*y₂ ^ 2 + A ^ 2*r*x₁ ^ 8 - 10*A ^ 2*r*x₁ ^ 7*x₂ + 21*A ^ 2*r*x₁ ^ 6*x₂ ^ 2 - 6*A ^ 2*r*x₁ ^ 5*x₂ ^ 3 - 8*A ^ 2*r*x₁ ^ 5*y₁*y₂ + 4*A ^ 2*r*x₁ ^ 5*y₂ ^ 2 - 27*A ^ 2*r*x₁ ^ 4*x₂ ^ 4 + 20*A ^ 2*r*x₁ ^ 4*x₂*y₁*y₂ - 10*A ^ 2*r*x₁ ^ 4*x₂*y₂ ^ 2 + 36*A ^ 2*r*x₁ ^ 3*x₂ ^ 5 - 12*A ^ 2*r*x₁ ^ 3*x₂ ^ 2*y₁*y₂ + 6*A ^ 2*r*x₁ ^ 3*x₂ ^ 2*y₂ ^ 2 - 19*A ^ 2*r*x₁ ^ 2*x₂ ^ 6 - 4*A ^ 2*r*x₁ ^ 2*x₂ ^ 3*y₁*y₂ + 2*A ^ 2*r*x₁ ^ 2*x₂ ^ 3*y₂ ^ 2 + 4*A ^ 2*r*x₁*x₂ ^ 7 + 4*A ^ 2*r*x₁*x₂ ^ 4*y₁*y₂ - 2*A ^ 2*r*x₁*x₂ ^ 4*y₂ ^ 2 - A ^ 2*x₁ ^ 8*x₂ + 6*A ^ 2*x₁ ^ 7*x₂ ^ 2 - 16*A ^ 2*x₁ ^ 6*x₂ ^ 3 + 2*A ^ 2*x₁ ^ 6*y₁*y₂ - A ^ 2*x₁ ^ 6*y₂ ^ 2 + 24*A ^ 2*x₁ ^ 5*x₂ ^ 4 - 4*A ^ 2*x₁ ^ 5*x₂*y₁*y₂ + 2*A ^ 2*x₁ ^ 5*x₂*y₂ ^ 2 - 21*A ^ 2*x₁ ^ 4*x₂ ^ 5 + 10*A ^ 2*x₁ ^ 3*x₂ ^ 6 + 4*A ^ 2*x₁ ^ 3*x₂ ^ 3*y₁*y₂ - 2*A ^ 2*x₁ ^ 3*x₂ ^ 3*y₂ ^ 2 - 2*A ^ 2*x₁ ^ 2*x₂ ^ 7 - 2*A ^ 2*x₁ ^ 2*x₂ ^ 4*y₁*y₂ + A ^ 2*x₁ ^ 2*x₂ ^ 4*y₂ ^ 2 - 22*A*r ^ 8*x₁ ^ 3 + 66*A*r ^ 8*x₁ ^ 2*x₂ - 66*A*r ^ 8*x₁*x₂ ^ 2 + 22*A*r ^ 8*x₂ ^ 3 + 55*A*r ^ 7*x₁ ^ 4 - 158*A*r ^ 7*x₁ ^ 3*x₂ + 144*A*r ^ 7*x₁ ^ 2*x₂ ^ 2 - 34*A*r ^ 7*x₁*x₂ ^ 3 - 7*A*r ^ 7*x₂ ^ 4 - 48*A*r ^ 6*x₁ ^ 5 + 173*A*r ^ 6*x₁ ^ 4*x₂ - 246*A*r ^ 6*x₁ ^ 3*x₂ ^ 2 + 180*A*r ^ 6*x₁ ^ 2*x₂ ^ 3 - 74*A*r ^ 6*x₁*x₂ ^ 4 + 15*A*r ^ 6*x₂ ^ 5 + 24*A*r ^ 5*x₁ ^ 6 - 180*A*r ^ 5*x₁ ^ 5*x₂ + 441*A*r ^ 5*x₁ ^ 4*x₂ ^ 2 - 490*A*r ^ 5*x₁ ^ 3*x₂ ^ 3 - 20*A*r ^ 5*x₁ ^ 3*y₁*y₂ + 10*A*r ^ 5*x₁ ^ 3*y₂ ^ 2 + 264*A*r ^ 5*x₁ ^ 2*x₂ ^ 4 + 60*A*r ^ 5*x₁ ^ 2*x₂*y₁*y₂ - 30*A*r ^ 5*x₁ ^ 2*x₂*y₂ ^ 2 - 66*A*r ^ 5*x₁*x₂ ^ 5 - 60*A*r ^ 5*x₁*x₂ ^ 2*y₁*y₂ + 30*A*r ^ 5*x₁*x₂ ^ 2*y₂ ^ 2 + 7*A*r ^ 5*x₂ ^ 6 + 20*A*r ^ 5*x₂ ^ 3*y₁*y₂ - 10*A*r ^ 5*x₂ ^ 3*y₂ ^ 2 - 10*A*r ^ 4*x₁ ^ 7 + 124*A*r ^ 4*x₁ ^ 6*x₂ - 348*A*r ^ 4*x₁ ^ 5*x₂ ^ 2 + 399*A*r ^ 4*x₁ ^ 4*x₂ ^ 3 + 46*A*r ^ 4*x₁ ^ 4*y₁*y₂ - 24*A*r ^ 4*x₁ ^ 4*y₂ ^ 2 - 190*A*r ^ 4*x₁ ^ 3*x₂ ^ 4 - 132*A*r ^ 4*x₁ ^ 3*x₂*y₁*y₂ + 70*A*r ^ 4*x₁ ^ 3*x₂*y₂ ^ 2 + 6*A*r ^ 4*x₁ ^ 2*x₂ ^ 5 + 120*A*r ^ 4*x₁ ^ 2*x₂ ^ 2*y₁*y₂ - 66*A*r ^ 4*x₁ ^ 2*x₂ ^ 2*y₂ ^ 2 + 28*A*r ^ 4*x₁*x₂ ^ 6 - 28*A*r ^ 4*x₁*x₂ ^ 3*y₁*y₂ + 18*A*r ^ 4*x₁*x₂ ^ 3*y₂ ^ 2 - 9*A*r ^ 4*x₂ ^ 7 - 6*A*r ^ 4*x₂ ^ 4*y₁*y₂ + 2*A*r ^ 4*x₂ ^ 4*y₂ ^ 2 - 3*A*r ^ 3*x₁ ^ 8 - 14*A*r ^ 3*x₁ ^ 7*x₂ + 62*A*r ^ 3*x₁ ^ 6*x₂ ^ 2 - 54*A*r ^ 3*x₁ ^ 5*x₂ ^ 3 - 32*A*r ^ 3*x₁ ^ 5*y₁*y₂ + 18*A*r ^ 3*x₁ ^ 5*y₂ ^ 2 - 42*A*r ^ 3*x₁ ^ 4*x₂ ^ 4 + 96*A*r ^ 3*x₁ ^ 4*x₂*y₁*y₂ - 54*A*r ^ 3*x₁ ^ 4*x₂*y₂ ^ 2 + 104*A*r ^ 3*x₁ ^ 3*x₂ ^ 5 - 96*A*r ^ 3*x₁ ^ 3*x₂ ^ 2*y₁*y₂ + 52*A*r ^ 3*x₁ ^ 3*x₂ ^ 2*y₂ ^ 2 - 72*A*r ^ 3*x₁ ^ 2*x₂ ^ 6 + 32*A*r ^ 3*x₁ ^ 2*x₂ ^ 3*y₁*y₂ - 12*A*r ^ 3*x₁ ^ 2*x₂ ^ 3*y₂ ^ 2 + 20*A*r ^ 3*x₁*x₂ ^ 7 - 6*A*r ^ 3*x₁*x₂ ^ 4*y₂ ^ 2 - A*r ^ 3*x₂ ^ 8 + 2*A*r ^ 3*x₂ ^ 5*y₂ ^ 2 + 4*A*r ^ 2*x₁ ^ 9 - 3*A*r ^ 2*x₁ ^ 8*x₂ - 12*A*r ^ 2*x₁ ^ 7*x₂ ^ 2 + 6*A*r ^ 2*x₁ ^ 6*x₂ ^ 3 + 6*A*r ^ 2*x₁ ^ 6*y₁*y₂ - 4*A*r ^ 2*x₁ ^ 6*y₂ ^ 2 + 33*A*r ^ 2*x₁ ^ 5*x₂ ^ 4 - 36*A*r ^ 2*x₁ ^ 5*x₂*y₁*y₂ + 18*A*r ^ 2*x₁ ^ 5*x₂*y₂ ^ 2 - 57*A*r ^ 2*x₁ ^ 4*x₂ ^ 5 + 66*A*r ^ 2*x₁ ^ 4*x₂ ^ 2*y₁*y₂ - 24*A*r ^ 2*x₁ ^ 4*x₂ ^ 2*y₂ ^ 2 + 44*A*r ^ 2*x₁ ^ 3*x₂ ^ 6 - 40*A*r ^ 2*x₁ ^ 3*x₂ ^ 3*y₁*y₂ + 4*A*r ^ 2*x₁ ^ 3*x₂ ^ 3*y₂ ^ 2 - 18*A*r ^ 2*x₁ ^ 2*x₂ ^ 7 - 6*A*r ^ 2*x₁ ^ 2*x₂ ^ 4*y₁*y₂ + 12*A*r ^ 2*x₁ ^ 2*x₂ ^ 4*y₂ ^ 2 + 3*A*r ^ 2*x₁*x₂ ^ 8 + 12*A*r ^ 2*x₁*x₂ ^ 5*y₁*y₂ - 6*A*r ^ 2*x₁*x₂ ^ 5*y₂ ^ 2 - 2*A*r ^ 2*x₂ ^ 6*y₁*y₂ - 8*A*r*x₁ ^ 9*x₂ + 21*A*r*x₁ ^ 8*x₂ ^ 2 - 14*A*r*x₁ ^ 7*x₂ ^ 3 - 7*A*r*x₁ ^ 6*x₂ ^ 4 + 12*A*r*x₁ ^ 6*x₂*y₁*y₂ - 4*A*r*x₁ ^ 6*x₂*y₂ ^ 2 + 18*A*r*x₁ ^ 5*x₂ ^ 5 - 24*A*r*x₁ ^ 5*x₂ ^ 2*y₁*y₂ + 6*A*r*x₁ ^ 5*x₂ ^ 2*y₂ ^ 2 - 19*A*r*x₁ ^ 4*x₂ ^ 6 - 4*A*r*x₁ ^ 4*x₂ ^ 3*y₁*y₂ + 6*A*r*x₁ ^ 4*x₂ ^ 3*y₂ ^ 2 + 12*A*r*x₁ ^ 3*x₂ ^ 7 + 36*A*r*x₁ ^ 3*x₂ ^ 4*y₁*y₂ - 14*A*r*x₁ ^ 3*x₂ ^ 4*y₂ ^ 2 - 3*A*r*x₁ ^ 2*x₂ ^ 8 - 24*A*r*x₁ ^ 2*x₂ ^ 5*y₁*y₂ + 6*A*r*x₁ ^ 2*x₂ ^ 5*y₂ ^ 2 + 4*A*r*x₁*x₂ ^ 6*y₁*y₂ + 4*A*x₁ ^ 9*x₂ ^ 2 - 15*A*x₁ ^ 8*x₂ ^ 3 + 23*A*x₁ ^ 7*x₂ ^ 4 - 20*A*x₁ ^ 6*x₂ ^ 5 - 6*A*x₁ ^ 6*x₂ ^ 2*y₁*y₂ + 2*A*x₁ ^ 6*x₂ ^ 2*y₂ ^ 2 + 12*A*x₁ ^ 5*x₂ ^ 6 + 20*A*x₁ ^ 5*x₂ ^ 3*y₁*y₂ - 6*A*x₁ ^ 5*x₂ ^ 3*y₂ ^ 2 - 5*A*x₁ ^ 4*x₂ ^ 7 - 24*A*x₁ ^ 4*x₂ ^ 4*y₁*y₂ + 6*A*x₁ ^ 4*x₂ ^ 4*y₂ ^ 2 + A*x₁ ^ 3*x₂ ^ 8 + 12*A*x₁ ^ 3*x₂ ^ 5*y₁*y₂ - 2*A*x₁ ^ 3*x₂ ^ 5*y₂ ^ 2 - 2*A*x₁ ^ 2*x₂ ^ 6*y₁*y₂ - 12*r ^ 10*x₁ ^ 3 + 36*r ^ 10*x₁ ^ 2*x₂ - 36*r ^ 10*x₁*x₂ ^ 2 + 12*r ^ 10*x₂ ^ 3 + 21*r ^ 9*x₁ ^ 4 - 60*r ^ 9*x₁ ^ 3*x₂ + 54*r ^ 9*x₁ ^ 2*x₂ ^ 2 - 12*r ^ 9*x₁*x₂ ^ 3 - 3*r ^ 9*x₂ ^ 4 - 18*r ^ 8*x₁ ^ 5 + 96*r ^ 8*x₁ ^ 4*x₂ - 198*r ^ 8*x₁ ^ 3*x₂ ^ 2 + 198*r ^ 8*x₁ ^ 2*x₂ ^ 3 - 96*r ^ 8*x₁*x₂ ^ 4 + 18*r ^ 8*x₂ ^ 5 + 27*r ^ 7*x₁ ^ 6 - 180*r ^ 7*x₁ ^ 5*x₂ + 432*r ^ 7*x₁ ^ 4*x₂ ^ 2 - 498*r ^ 7*x₁ ^ 3*x₂ ^ 3 - 24*r ^ 7*x₁ ^ 3*y₁*y₂ + 12*r ^ 7*x₁ ^ 3*y₂ ^ 2 + 297*r ^ 7*x₁ ^ 2*x₂ ^ 4 + 72*r ^ 7*x₁ ^ 2*x₂*y₁*y₂ - 36*r ^ 7*x₁ ^ 2*x₂*y₂ ^ 2 - 90*r ^ 7*x₁*x₂ ^ 5 - 72*r ^ 7*x₁*x₂ ^ 2*y₁*y₂ + 36*r ^ 7*x₁*x₂ ^ 2*y₂ ^ 2 + 12*r ^ 7*x₂ ^ 6 + 24*r ^ 7*x₂ ^ 3*y₁*y₂ - 12*r ^ 7*x₂ ^ 3*y₂ ^ 2 - 12*r ^ 6*x₁ ^ 7 + 84*r ^ 6*x₁ ^ 6*x₂ - 234*r ^ 6*x₁ ^ 5*x₂ ^ 2 + 333*r ^ 6*x₁ ^ 4*x₂ ^ 3 + 48*r ^ 6*x₁ ^ 4*y₁*y₂ - 27*r ^ 6*x₁ ^ 4*y₂ ^ 2 - 246*r ^ 6*x₁ ^ 3*x₂ ^ 4 - 144*r ^ 6*x₁ ^ 3*x₂*y₁*y₂ + 84*r ^ 6*x₁ ^ 3*x₂*y₂ ^ 2 + 72*r ^ 6*x₁ ^ 2*x₂ ^ 5 + 144*r ^ 6*x₁ ^ 2*x₂ ^ 2*y₁*y₂ - 90*r ^ 6*x₁ ^ 2*x₂ ^ 2*y₂ ^ 2 + 12*r ^ 6*x₁*x₂ ^ 6 - 48*r ^ 6*x₁*x₂ ^ 3*y₁*y₂ + 36*r ^ 6*x₁*x₂ ^ 3*y₂ ^ 2 - 9*r ^ 6*x₂ ^ 7 - 3*r ^ 6*x₂ ^ 4*y₂ ^ 2 - 18*r ^ 5*x₁ ^ 8 + 48*r ^ 5*x₁ ^ 7*x₂ - 3*r ^ 5*x₁ ^ 6*x₂ ^ 2 - 108*r ^ 5*x₁ ^ 5*x₂ ^ 3 - 24*r ^ 5*x₁ ^ 5*y₁*y₂ + 18*r ^ 5*x₁ ^ 5*y₂ ^ 2 + 117*r ^ 5*x₁ ^ 4*x₂ ^ 4 + 108*r ^ 5*x₁ ^ 4*x₂*y₁*y₂ - 72*r ^ 5*x₁ ^ 4*x₂*y₂ ^ 2 - 12*r ^ 5*x₁ ^ 3*x₂ ^ 5 - 180*r ^ 5*x₁ ^ 3*x₂ ^ 2*y₁*y₂ + 102*r ^ 5*x₁ ^ 3*x₂ ^ 2*y₂ ^ 2 - 45*r ^ 5*x₁ ^ 2*x₂ ^ 6 + 132*r ^ 5*x₁ ^ 2*x₂ ^ 3*y₁*y₂ - 54*r ^ 5*x₁ ^ 2*x₂ ^ 3*y₂ ^ 2 + 24*r ^ 5*x₁*x₂ ^ 7 - 36*r ^ 5*x₁*x₂ ^ 4*y₁*y₂ - 3*r ^ 5*x₂ ^ 8 + 6*r ^ 5*x₂ ^ 5*y₂ ^ 2 + 12*r ^ 4*x₁ ^ 9 - 90*r ^ 4*x₁ ^ 7*x₂ ^ 2 + 162*r ^ 4*x₁ ^ 6*x₂ ^ 3 - 3*r ^ 4*x₁ ^ 6*y₂ ^ 2 - 117*r ^ 4*x₁ ^ 5*x₂ ^ 4 - 72*r ^ 4*x₁ ^ 5*x₂*y₁*y₂ + 36*r ^ 4*x₁ ^ 5*x₂*y₂ ^ 2 + 18*r ^ 4*x₁ ^ 4*x₂ ^ 5 + 198*r ^ 4*x₁ ^ 4*x₂ ^ 2*y₁*y₂ - 72*r ^ 4*x₁ ^ 4*x₂ ^ 2*y₂ ^ 2 + 42*r ^ 4*x₁ ^ 3*x₂ ^ 6 - 156*r ^ 4*x₁ ^ 3*x₂ ^ 3*y₁*y₂ + 30*r ^ 4*x₁ ^ 3*x₂ ^ 3*y₂ ^ 2 - 36*r ^ 4*x₁ ^ 2*x₂ ^ 7 + 27*r ^ 4*x₁ ^ 2*x₂ ^ 4*y₂ ^ 2 + 9*r ^ 4*x₁*x₂ ^ 8 + 36*r ^ 4*x₁*x₂ ^ 5*y₁*y₂ - 18*r ^ 4*x₁*x₂ ^ 5*y₂ ^ 2 - 6*r ^ 4*x₂ ^ 6*y₁*y₂ - 24*r ^ 3*x₁ ^ 9*x₂ + 63*r ^ 3*x₁ ^ 8*x₂ ^ 2 - 42*r ^ 3*x₁ ^ 7*x₂ ^ 3 - 21*r ^ 3*x₁ ^ 6*x₂ ^ 4 + 36*r ^ 3*x₁ ^ 6*x₂*y₁*y₂ - 12*r ^ 3*x₁ ^ 6*x₂*y₂ ^ 2 + 54*r ^ 3*x₁ ^ 5*x₂ ^ 5 - 72*r ^ 3*x₁ ^ 5*x₂ ^ 2*y₁*y₂ + 18*r ^ 3*x₁ ^ 5*x₂ ^ 2*y₂ ^ 2 - 57*r ^ 3*x₁ ^ 4*x₂ ^ 6 - 12*r ^ 3*x₁ ^ 4*x₂ ^ 3*y₁*y₂ + 18*r ^ 3*x₁ ^ 4*x₂ ^ 3*y₂ ^ 2 + 36*r ^ 3*x₁ ^ 3*x₂ ^ 7 + 108*r ^ 3*x₁ ^ 3*x₂ ^ 4*y₁*y₂ - 42*r ^ 3*x₁ ^ 3*x₂ ^ 4*y₂ ^ 2 - 9*r ^ 3*x₁ ^ 2*x₂ ^ 8 - 72*r ^ 3*x₁ ^ 2*x₂ ^ 5*y₁*y₂ + 18*r ^ 3*x₁ ^ 2*x₂ ^ 5*y₂ ^ 2 + 12*r ^ 3*x₁*x₂ ^ 6*y₁*y₂ + 12*r ^ 2*x₁ ^ 9*x₂ ^ 2 - 45*r ^ 2*x₁ ^ 8*x₂ ^ 3 + 69*r ^ 2*x₁ ^ 7*x₂ ^ 4 - 60*r ^ 2*x₁ ^ 6*x₂ ^ 5 - 18*r ^ 2*x₁ ^ 6*x₂ ^ 2*y₁*y₂ + 6*r ^ 2*x₁ ^ 6*x₂ ^ 2*y₂ ^ 2 + 36*r ^ 2*x₁ ^ 5*x₂ ^ 6 + 60*r ^ 2*x₁ ^ 5*x₂ ^ 3*y₁*y₂ - 18*r ^ 2*x₁ ^ 5*x₂ ^ 3*y₂ ^ 2 - 15*r ^ 2*x₁ ^ 4*x₂ ^ 7 - 72*r ^ 2*x₁ ^ 4*x₂ ^ 4*y₁*y₂ + 18*r ^ 2*x₁ ^ 4*x₂ ^ 4*y₂ ^ 2 + 3*r ^ 2*x₁ ^ 3*x₂ ^ 8 + 36*r ^ 2*x₁ ^ 3*x₂ ^ 5*y₁*y₂ - 6*r ^ 2*x₁ ^ 3*x₂ ^ 5*y₂ ^ 2 - 6*r ^ 2*x₁ ^ 2*x₂ ^ 6*y₁*y₂)
-                      * hcurve₂'
-                · -- Y-coordinate identity
-                  simp only [hx₃_eq, addY, WeierstrassCurve.Affine.negAddY, negY, addX, shortWS,
-                    veluQuotCurve, WeierstrassCurve.Affine.slope_of_X_ne hX_ne,
-                    mul_zero, zero_mul, sub_zero, add_zero, zero_add]
-                  rw [WeierstrassCurve.Affine.slope_of_X_ne hx₁x₂]
-                  unfold veluT
-                  have hx₃r_poly : (y₁ - y₂) ^ 2 - x₁ * (x₁ - x₂) ^ 2 -
-                      x₂ * (x₁ - x₂) ^ 2 - (x₁ - x₂) ^ 2 * r ≠ 0 := by
-                    intro h; apply hx₃r; rw [hx₃_eq]
-                    have : ℓ ^ 2 = x₁ + x₂ + r := by
-                      rw [hℓ, div_pow]; field_simp; nlinarith
-                    linarith
-                  have hX_den : (x₂ - r) * (x₁ * (x₁ - r) + (3 * r ^ 2 + A)) -
-                      (x₁ - r) * (x₂ * (x₂ - r) + (3 * r ^ 2 + A)) ≠ 0 := by
-                    intro h
-                    have : (x₁ - x₂) * ((x₁ - r) * (x₂ - r) -
-                        (3 * r ^ 2 + A)) = 0 := by linear_combination h
-                    rcases mul_eq_zero.mp this with h1 | h1
-                    · exact absurd h1 hd
-                    · exact absurd (by linarith :
-                        (x₁ - r) * (x₂ - r) = 3 * r ^ 2 + A) hat
-                  have hcurve₁' : y₁ ^ 2 - x₁ ^ 3 - A * x₁ + r ^ 3 + A * r = 0 := by
-                    linarith [hcurve₁, htors]
-                  have hcurve₂' : y₂ ^ 2 - x₂ ^ 3 - A * x₂ + r ^ 3 + A * r = 0 := by
-                    linarith [hcurve₂, htors]
-                  sorry
+      veluMapPoint htors P + veluMapPoint htors Q :=
+  StandardTwoIsogeny.conjugated_veluMapPoint_add htors P Q
 
 def veluMapHom {A B r : ℚ} (htors : r ^ 3 + A * r + B = 0)
     [hE : (shortWS A B).IsElliptic]
