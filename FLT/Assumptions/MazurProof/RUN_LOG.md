@@ -72,6 +72,26 @@
 - end: <fill on close>
 - final result: <fill on close>
 
+## Run 2026-07-27 (automode — structural N13 route)
+- Replaced the old order-13 high-degree-polynomial boundary with a proved
+  chain:
+  `F13(b,c)=0` → Kubert raw `X₁(13)` chart → optimized genus-two model →
+  standard monic sextic.  All exceptional denominators are excluded from
+  `b≠0` and the equation itself; no finite search is used.
+- Added the exact optimized/sextic equivalence
+  `X=-x-1`, `Y=2y+x³+x²+1`, exposing the four affine cusps over `X=0,-1`
+  and the two points at infinity.
+- `CyclicExclusion13.no_F13_rational_solution` is now a theorem.  The sole
+  N13 arithmetic boundary is
+  `C13Sextic_affine_x_is_cuspidal`.
+- Added a curve-independent smooth monic-sextic Mumford core and instantiated
+  it for N13.  Smoothness uses a degree-5/4 Bézout identity equal to 104.
+  Coordinate-ring domain, rank-two basis, hyperelliptic conjugation,
+  balanced point representatives, and coefficient base change are being
+  extracted generically from the N18 implementation.
+- Verified targeted builds and `#print axioms`: all new bridge/model/Mumford
+  theorems use only `propext`, `Classical.choice`, and `Quot.sound`.
+
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
   * Part 1 `span{δ}=I²`: PROVABLE (Dedekind ideal-square from N(δ)=y², bad primes {2,3,11},

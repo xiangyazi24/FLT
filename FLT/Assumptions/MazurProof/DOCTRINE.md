@@ -9,7 +9,7 @@ Current status: 6 custom axioms + 3 standard (propext, Classical.choice, Quot.so
 
 | # | Axiom | Location | Nature |
 |---|-------|----------|--------|
-| 1 | `no_F13_rational_solution` | CyclicExclusion13:34 | F₁₃(b,c)=0 has no ℚ-solution with b≠0 |
+| 1 | `C13Sextic_affine_x_is_cuspidal` | CyclicExclusion13 | The standard `X₁(13)` sextic has affine x-coordinate 0 or -1 |
 | 2 | `no_F17_rational_solution` | CyclicExclusion17:21 | F₁₇(b,c)=0 has no ℚ-solution with b≠0 |
 | 3 | `no_F19_rational_solution` | CyclicExclusion19:21 | F₁₉(b,c)=0 has no ℚ-solution with b≠0 |
 | 4 | `no_prime_order_ge_23` | CyclicOrderAssembly:100 | Formal immersion on X₀(p) for p≥23 |
@@ -19,6 +19,9 @@ Current status: 6 custom axioms + 3 standard (propext, Classical.choice, Quot.so
 ### Cleared (complete)
 
 - `exists_rational_two_isogeny_quotient` — DISCHARGED via VeluTwoIsogeny (5d11f7e944)
+- The old N13 `no_F13_rational_solution` axiom — REPLACED by a theorem:
+  Tate parameters → Kubert raw model → optimized genus-two model → standard sextic
+  (`N13TateBridge`, `N13CurveModel`, commit b42fbe9294)
 - Old bridge axioms `order17_to_kernel_root` / `order19_to_kernel_root` — REPLACED
   by direct `no_F17/F19_rational_solution` (bridge files deleted)
 - N18 import cycle fixed, sorry closed
@@ -146,6 +149,20 @@ Terminal: axiom replaced by theorem.
 X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
 2-adic/3-adic obstructions do NOT exist (verified computationally).
 
+**Structural reductions completed Jul 27:**
+- Kubert substitution `b=rs(r-1), c=s(r-1)` factors the Tate condition into
+  the low-degree raw equation.
+- The birational map to `y²+(x³+x²+1)y=x²+x` is proved on the full
+  nondegenerate Tate chart, including all denominator exclusions.
+- Completing the square with `X=-x-1`, `Y=2y+x³+x²+1` gives
+  `Y²=X⁶+4X⁵+6X⁴+2X³+X²+2X+1`; the four affine cusps lie over `X=0,-1`.
+- A generic smooth monic-sextic Mumford layer is in progress.  The N13 sextic
+  is monic, degree six, and separable by a short Bézout identity with its
+  derivative.  This is the intended base for the fixed Jacobian 2-descent.
+
+The only remaining N13 axiom is now the fixed sextic rational-point theorem,
+not the high-degree Tate polynomial.
+
 Possible approaches:
 (i) Chabauty-Coleman: need J(X₁(13))(ℚ) rank ≤ 1 (known to be true).
 (ii) Adapt N=11 Billing-Mahler cubic descent.
@@ -173,11 +190,11 @@ Terminal: axiom replaced by theorem (long-term campaign).
 
 ## Execution Order
 
-1. **NOW:** Build chain: VeluTwoIsogeny → CyclicExclusion20 → CyclicOrderAssembly
-2. **NEXT:** (a) N25 — exploit monic structure
-3. **THEN:** (c) N13 — study N=11 proof, adapt descent
-4. **PARALLEL:** (b) N49 via birational reduction
-5. **LATER:** (d) N17/N19 via Chabauty or modular theory
+1. **NOW:** (c) N13 — generic sextic/Mumford infrastructure, then fixed weak
+   2-descent on `J₁(13)(ℚ)`
+2. **NEXT:** N13 separatedness and the six-cusp conclusion
+3. **THEN:** (b) N49 after an explicit Tate-to-`X₀(49)` coordinate bridge exists
+4. **LATER:** (a) N25 (needs a deep rank-zero input), (d) N17/N19, then the prime tail
 6. **LAST:** (e) formal immersion
 
 ## Build Status
