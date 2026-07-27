@@ -159,14 +159,37 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
 - A generic smooth monic-sextic Mumford layer is in progress.  The N13 sextic
   is monic, degree six, and separable by a short Bézout identity with its
   derivative.  This is the intended base for the fixed Jacobian 2-descent.
+- The two Laurent embeddings at infinity are now explicit.  For every
+  `p(X)+q(X)Y`, the product of the two branches is the quadratic norm
+  `p²-q²f`, and the minimum branch order is
+  `-max(deg p,deg q+3)`.  Thus cancellation at one infinity is detected at
+  the other; no leading-coefficient table is needed.
+- The rational diamond action is the visible `C₆` action
+  `x ↦ -1/(x+1)`.  Its order-three quotient is the rational conic
+  `z²=u²+4u+8`, with cubic fibers.  This proves structurally that the quotient
+  is genus zero, but also that it cannot by itself classify the rational
+  points.  There is no non-hyperelliptic involution over `ℚ`, hence no
+  rational elliptic quotient shortcut.
+- Over `ℚ(i)`, the sextic is the norm of the cubic
+  `A+iB`, where `A=X³+2X²-X-1` and `B=2X(X+1)`.  The associated sextic field
+  has class number one, unit rank two, and a 16-class global square-class
+  envelope after the primes above `2` and `13` are imposed.  These PARI data
+  are recorded only as a reproducible guide; the remaining proof obligation
+  is the actual local-image theorem for those classes.
+- Modulo three the four affine points are proved from
+  `f(x)=1-x(x+1)` and Frobenius, not enumeration.  Together with the two
+  infinity points, these are exactly the six cusp reductions.
 
 The only remaining N13 axiom is now the fixed sextic rational-point theorem,
 not the high-degree Tate polynomial.
 
 Possible approaches:
-(i) Chabauty-Coleman: need J(X₁(13))(ℚ) rank ≤ 1 (known to be true).
-(ii) Adapt N=11 Billing-Mahler cubic descent.
-(iii) Cover descent via quotient elliptic curves.
+(i) Complete the fixed genus-two weak 2-descent from the 16 global classes.
+(ii) Formalize the Mazur--Tate 19-isogeny/fppf descent (more structural but
+substantially larger).
+
+The rational elliptic-quotient route has been ruled out by the proved
+automorphism structure.
 
 Terminal: axiom replaced by theorem.
 
@@ -190,9 +213,8 @@ Terminal: axiom replaced by theorem (long-term campaign).
 
 ## Execution Order
 
-1. **NOW:** (c) N13 — generic sextic/Mumford infrastructure, then fixed weak
-   2-descent on `J₁(13)(ℚ)`
-2. **NEXT:** N13 separatedness and the six-cusp conclusion
+1. **NOW:** (c) N13 — fixed weak 2-descent local-image theorem
+2. **NEXT:** N13 Jacobian finite reduction and the six-cusp conclusion
 3. **THEN:** (b) N49 after an explicit Tate-to-`X₀(49)` coordinate bridge exists
 4. **LATER:** (a) N25 (needs a deep rank-zero input), (d) N17/N19, then the prime tail
 6. **LAST:** (e) formal immersion

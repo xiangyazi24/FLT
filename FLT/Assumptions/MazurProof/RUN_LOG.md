@@ -91,6 +91,28 @@
   extracted generically from the N18 implementation.
 - Verified targeted builds and `#print axioms`: all new bridge/model/Mumford
   theorems use only `propext`, `Classical.choice`, and `Quot.sound`.
+- Completed both infinity branches and their evaluation API.  Polynomial
+  order at `X=s⁻¹` is proved by reversing the polynomial; the leading
+  coefficient becomes the constant coefficient, so the order is exactly
+  `-deg`.
+- Proved the two-branch norm and leading-order formulas for
+  `p(X)+q(X)Y`.  In particular, a function with at most a simple pole at both
+  infinities has `q=0` and degree at most one.  This is the structural
+  Riemann--Roch input needed for direct Abel--Jacobi rigidity.
+- Formalized the rational `C₆` diamond symmetry, its order-three genus-zero
+  quotient, complete conic parametrization, and the residual cubic fiber.
+  This rules out the proposed rational elliptic-quotient shortcut.
+- Formalized the Gaussian norm factorization
+  `f=A²+B²` and the exact `F₃` affine-point classification without
+  enumeration.
+- Cleared the first generic normal-form step: every invertible fractional
+  ideal can be scaled to an integral ideal.  The next generic gap is the
+  rank-two Hermite/Cantor reduction, for which Mathlib has no ready high-level
+  theorem.
+- Reproducibly computed the sextic field's integral basis, discriminant,
+  class number one, units, bad-prime factorization, and the resulting
+  16-class global weak-2-descent envelope.  These computations identify, but
+  do not replace, the remaining local-image proof.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
