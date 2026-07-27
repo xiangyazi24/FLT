@@ -6,7 +6,6 @@ using boost::multiprecision::cpp_int;
 
 static cpp_int absz(cpp_int x){return x<0?-x:x;}
 static cpp_int gcdz(cpp_int a, cpp_int b){a=absz(a);b=absz(b);while(b!=0){cpp_int r=a%b;a=b;b=r;}return a;}
-static long long mod_small(const cpp_int &x, long long p){cpp_int r=x%p;long long v=r.convert_to<long long>();if(v<0)v+=p;return v;}
 static std::vector<int> primes_up_to(int N){std::vector<bool>a(N+1,true);a[0]=a[1]=false;for(int i=2;1LL*i*i<=N;++i)if(a[i])for(int j=i*i;j<=N;j+=i)a[j]=false;std::vector<int>p;for(int i=2;i<=N;++i)if(a[i])p.push_back(i);return p;}
 
 int main(){
