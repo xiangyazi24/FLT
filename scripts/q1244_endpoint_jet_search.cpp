@@ -1,36 +1,99 @@
-#include <array>
 #include <cstdint>
 #include <iostream>
 #include <vector>
 
 using i64 = long long;
-using Poly = std::array<int, 9>;
 
-static int mod_pow(i64 a, i64 e, int p) {
-    i64 r = 1; a %= p;
-    while (e) { if (e & 1) r = r*a % p; a = a*a % p; e >>= 1; }
-    return (int)r;
-}
 static std::vector<int> primes_up_to(int N) {
-    std::vector<bool> a(N+1,true); a[0]=a[1]=false;
-    for(int i=2;1LL*i*i<=N;++i) if(a[i]) for(int j=i*i;j<=N;j+=i) a[j]=false;
-    std::vector<int> p; for(int i=2;i<=N;++i) if(a[i]) p.push_back(i); return p;
+    std::vector<bool> a(N + 1, true);
+    a[0] = a[1] = false;
+    for (int i = 2; 1LL * i * i <= N; ++i)
+        if (a[i]) for (int j = i * i; j <= N; j += i) a[j] = false;
+    std::vector<int> ps;
+    for (int i = 2; i <= N; ++i) if (a[i]) ps.push_back(i);
+    return ps;
 }
-static Poly mul(const Poly&a,const Poly&b,int p){Poly c{};for(int i=0;i<=8;++i)for(int j=0;i+j<=8;++j)c[i+j]=(c[i+j]+1LL*a[i]*b[j])%p;return c;}
-static Poly sub(const Poly&a,const Poly&b,int p){Poly c{};for(int i=0;i<=8;++i){int x=a[i]-b[i];x%=p;if(x<0)x+=p;c[i]=x;}return c;}
-static Poly linpow(int n,int e,int p){Poly r{};r[0]=1;Poly y{};y[0]=n%p;y[1]=1;for(int k=0;k<e;++k)r=mul(r,y,p);return r;}
-static Poly Aser(int n,int p){Poly y=linpow(n,1,p),y2=mul(y,y,p),y3=mul(y2,y,p),a{};for(int k=0;k<=8;++k){i64 v=34LL*y3[k]+51LL*y2[k]+27LL*y[k]+(k==0?5:0);a[k]=v%p;}return a;}
-static Poly invcube(int c,int p){Poly r{};int u=mod_pow(c,p-2,p);i64 pw=1LL*u*u%p*u%p;for(int k=0;k<=8;++k){i64 v=(1LL*(k+1)*(k+2)/2)%p*pw%p;if(k&1)v=(p-v)%p;r[k]=v;pw=pw*u%p;}return r;}
-int main(){
-    const int LIMIT=100000;
-    int maxm=0, doubles=0, nondouble=0, triples=0;
-    for(int p:primes_up_to(LIMIT)){if(p<5)continue;Poly um1{},u{};u[0]=1;
-        for(int n=0;n<=p-3;++n){Poly un=mul(sub(mul(Aser(n,p),u,p),mul(linpow(n,6,p),um1,p),p),invcube(n+1,p),p);int m=n+1,k=0;while(k<=8&&un[k]==0)++k;
-            if(k>maxm){maxm=k;std::cout<<"NEW_MAX p="<<p<<" j="<<m+1<<" m="<<m<<" mult="<<k<<" coeffs=";for(int z=0;z<=8;++z)std::cout<<un[z]<<(z==8?'\n':',');}
-            if(k>=2){++doubles;bool central=(2*m+1==p);if(!central){++nondouble;if(nondouble<=20)std::cout<<"NONCENTRAL_DOUBLE p="<<p<<" j="<<m+1<<" m="<<m<<" mult="<<k<<"\n";}}
-            if(k>=3){++triples;std::cout<<"TRIPLE p="<<p<<" j="<<m+1<<" m="<<m<<" mult="<<k<<" coeffs=";for(int z=0;z<=8;++z)std::cout<<un[z]<<(z==8?'\n':',');if(triples>=20)return 0;}
-            um1=u;u=un;
+
+static inline int norm(i64 x, int p) {
+    x %= p;
+    if (x < 0) x += p;
+    return static_cast<int>(x);
+}
+
+int main() {
+    constexpr int LIMIT = 100000;
+    int max_mult = 0;
+    long long double_count = 0, noncentral_double_count = 0, triple_count = 0;
+
+    for (int p : primes_up_to(LIMIT)) {
+        if (p < 5) continue;
+        std::vector<int> inv(p);
+        inv[1] = 1;
+        for (int i = 2; i < p; ++i)
+            inv[i] = norm(p - 1LL * (p / i) * inv[p % i], p);
+
+        // U_0, U_1 and their first two parameter derivatives at s=0.
+        int bm1 = 1, b = 5 % p;
+        int cm1 = 0, c = 12 % p;
+        int em1 = 0, e = 0;
+
+        auto inspect = [&](int m, int bv, int cv, int ev) {
+            int mult = (bv != 0 ? 0 : (cv != 0 ? 1 : (ev != 0 ? 2 : 3)));
+            if (mult > max_mult) {
+                max_mult = mult;
+                std::cout << "NEW_MAX p=" << p << " j=" << (m + 1)
+                          << " m=" << m << " mult_at_least=" << mult
+                          << " b,c,e=" << bv << ',' << cv << ',' << ev << '\n';
+            }
+            if (mult >= 2) {
+                ++double_count;
+                const bool central = (2 * m + 1 == p);
+                if (!central) {
+                    ++noncentral_double_count;
+                    if (noncentral_double_count <= 30)
+                        std::cout << "NONCENTRAL_DOUBLE p=" << p << " j=" << (m + 1)
+                                  << " m=" << m << " b,c,e=" << bv << ',' << cv << ',' << ev << '\n';
+                }
+            }
+            if (mult >= 3) {
+                ++triple_count;
+                std::cout << "TRIPLE p=" << p << " j=" << (m + 1)
+                          << " m=" << m << " b,c,e=" << bv << ',' << cv << ',' << ev << '\n';
+            }
+        };
+
+        inspect(1, b, c, e);
+        for (int n = 1; n <= p - 3; ++n) {
+            const i64 n2 = 1LL * n * n % p;
+            const i64 n3 = n2 * n % p;
+            const int np1 = n + 1;
+            const i64 u2 = 1LL * np1 * np1 % p;
+            const i64 u3 = u2 * np1 % p;
+            const i64 inv3 = 1LL * inv[np1] * inv[np1] % p * inv[np1] % p;
+
+            const int An = norm(34 * n3 + 51 * n2 + 27LL * n + 5, p);
+            const int A1 = norm(102 * n2 + 102LL * n + 27, p);
+            const int A2 = norm(204LL * n + 102, p);
+
+            const int bn = norm((1LL * An * b - n3 * bm1) * inv3, p);
+            const int cn = norm((1LL * An * c - n3 * cm1 + 1LL * A1 * b
+                               - 3LL * u2 * bn - 3LL * n2 * bm1) * inv3, p);
+            const int en = norm((1LL * An * e - n3 * em1 + 2LL * A1 * c + 1LL * A2 * b
+                               - 6LL * u2 * cn - 6LL * np1 * bn
+                               - 6LL * n2 * cm1 - 6LL * n * bm1) * inv3, p);
+
+            bm1 = b; b = bn;
+            cm1 = c; c = cn;
+            em1 = e; e = en;
+            inspect(n + 1, b, c, e);
+            if (triple_count >= 30) break;
         }
+        if (triple_count >= 30) break;
     }
-    std::cout<<"SUMMARY limit="<<LIMIT<<" max_mult="<<maxm<<" doubles="<<doubles<<" noncentral_doubles="<<nondouble<<" triples="<<triples<<"\n";
+
+    std::cout << "SUMMARY limit=" << LIMIT
+              << " max_mult_at_least=" << max_mult
+              << " doubles=" << double_count
+              << " noncentral_doubles=" << noncentral_double_count
+              << " triples=" << triple_count << '\n';
 }
