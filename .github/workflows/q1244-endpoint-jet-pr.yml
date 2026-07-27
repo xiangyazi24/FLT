@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - scripts/q1244_endpoint_jet_search.cpp
+      - scripts/q1244_integer_jet_gcd.cpp
 
 permissions:
   contents: write
@@ -19,15 +20,19 @@ jobs:
         with:
           ref: q1244-endpoint-jet-search
           fetch-depth: 0
-      - name: Compile exact C++ recurrence search
+      - name: Compile exact modular search
         run: g++ -O3 -std=c++20 -Wall -Wextra -pedantic scripts/q1244_endpoint_jet_search.cpp -o /tmp/q1244_search
-      - name: Run search
+      - name: Run exact modular search
         run: /tmp/q1244_search > Q1244_ENDPOINT_JET_RESULT.txt
-      - name: Commit result to calculation branch
+      - name: Compile exact integer gcd search
+        run: g++ -O3 -std=c++20 -Wall -Wextra -pedantic scripts/q1244_integer_jet_gcd.cpp -o /tmp/q1244_gcd
+      - name: Run exact integer gcd search
+        run: /tmp/q1244_gcd > Q1244_INTEGER_GCD_RESULT.txt
+      - name: Commit results to calculation branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Q1244_ENDPOINT_JET_RESULT.txt
+          git add Q1244_ENDPOINT_JET_RESULT.txt Q1244_INTEGER_GCD_RESULT.txt
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Record Q1244 endpoint-jet search result"
+          git commit -m "Record Q1244 endpoint-jet exact searches"
           git push origin HEAD:q1244-endpoint-jet-search
