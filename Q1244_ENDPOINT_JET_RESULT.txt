@@ -1,0 +1,3 @@
+NEW_MAX p=5 j=2 m=1 mult_at_least=1 b,c,e=0,2,0
+NEW_MAX p=11 j=6 m=5 mult_at_least=2 b,c,e=0,0,10
+SUMMARY limit=100000 max_mult_at_least=2 doubles=2 noncentral_doubles=0 triples=0
