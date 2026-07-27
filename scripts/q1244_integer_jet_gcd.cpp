@@ -9,7 +9,7 @@ static cpp_int gcdz(cpp_int a, cpp_int b){a=absz(a);b=absz(b);while(b!=0){cpp_in
 static std::vector<int> primes_up_to(int N){std::vector<bool>a(N+1,true);a[0]=a[1]=false;for(int i=2;1LL*i*i<=N;++i)if(a[i])for(int j=i*i;j<=N;j+=i)a[j]=false;std::vector<int>p;for(int i=2;i<=N;++i)if(a[i])p.push_back(i);return p;}
 
 int main(){
-  const int M=300;
+  const int M=300; // Exact integer recurrence; finite scan is diagnostic only.
   std::vector<cpp_int>b(M+1),c(M+1),e(M+1);
   b[0]=1;b[1]=5;c[0]=0;c[1]=12;e[0]=0;e[1]=0;
   auto ps=primes_up_to(2000000);
