@@ -195,6 +195,16 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   19-element special-fibre Jacobian.  A 3-adic kernel cannot kill an
   infinitely 2-divisible class because multiplication by two is a 3-adic
   unit.
+- The good model
+  `y²+(x³+x+1)y=x⁵+x⁴` and its weighted completion are now formalized.
+  The two standard charts agree by an exact homogeneous transition identity.
+  The affine chart is geometrically smooth in characteristic two, and the
+  two infinity points are smooth in the complementary chart.
+- Frobenius and the Artin--Schreier map give exactly six points over both
+  `F₂` and `F₄`, without pair enumeration.  Newton's identities therefore
+  force `P₂(T)=1+3T+5T²+6T³+4T⁴` and `P₂(1)=19`.  Mathlib has no existing
+  genus-two zeta/Jacobian theorem connecting this last evaluation to
+  `#J(F₂)`; that bridge is an explicit remaining geometry seam.
 - Modulo three the four affine points are proved from
   `f(x)=1-x(x+1)` and Frobenius, not enumeration.  Together with the two
   infinity points, these are exactly the six cusp reductions.
@@ -232,11 +242,11 @@ Terminal: axiom replaced by theorem (long-term campaign).
 
 ## Execution Order
 
-1. **NOW:** (c) N13 — formalize the good characteristic-two generalized
-   model, its six points over `F₂` and `F₄`, and the resulting Weil numerator
-2. **NEXT:** prove the actual fake Kummer kernel/local-image theorem and the
-   strict 2-adic reduction filtration; combine them directly into exponent
-   19, without Mordell--Weil finite generation
+1. **NOW:** (c) N13 — prove the actual fake Kummer kernel/local-image theorem
+2. **NEXT:** construct the Jacobian reduction map and strict 2-adic formal
+   filtration; connect the proved Weil numerator to `#J(F₂)=19`, then combine
+   the packages directly into exponent 19 without Mordell--Weil finite
+   generation
 3. **THEN:** (b) N49 after an explicit Tate-to-`X₀(49)` coordinate bridge exists
 4. **LATER:** (a) N25 (needs a deep rank-zero input), (d) N17/N19, then the prime tail
 6. **LAST:** (e) formal immersion

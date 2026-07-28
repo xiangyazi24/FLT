@@ -138,6 +138,23 @@
   `y²+(x³+x+1)y=x⁵+x⁴`; its two affine/infinity charts stay smooth modulo
   two.  The completed-square sextic is singular modulo two and is not the
   reduction model.
+- Formalized the good generalized model and its weighted-homogeneous
+  completion.  The `Z=1` and `X=1` equations agree on their overlap by a
+  homogeneous residual identity, and completing the square over `ℚ` gives
+  exactly the existing N13 sextic.
+- Proved geometric affine smoothness in every characteristic-two field by
+  excluding simultaneous vanishing of the two partial derivatives.  The
+  infinity fibre has two points and second partial derivative one; the
+  complementary chart covers every nonzero point at infinity.
+- Proved structurally that the completed curve has six points over both
+  `F₂` and `F₄`.  The `F₄` proof uses Frobenius-fixed elements and the
+  Artin--Schreier obstruction; it does not enumerate the 16 affine pairs.
+- Formalized the Newton-identity layer.  The two counts uniquely give
+  `s₁=-3`, `s₂=5`,
+  `P₂(T)=1+3T+5T²+6T³+4T⁴`, and `P₂(1)=19`.
+- Audited Mathlib and the repository: no genus-two point-count/zeta/Jacobian
+  cardinality bridge exists.  This is now isolated from the completed
+  finite-field arithmetic rather than hidden inside it.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
