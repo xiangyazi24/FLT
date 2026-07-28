@@ -200,6 +200,15 @@
   The audit also exposed the separate nonsplit-orbit issue between
   `Sym2(C(F₂))` and `Sym²(C)(F₂)`; the absence of new `F₄` points is the
   structural input that will close it.
+- Closed that nonsplit-orbit issue at the Frobenius point-set level.
+  Base change from the six `F₂` points to the six `F₄` points is a
+  bijection; the explicit Frobenius map fixes every affine and infinity
+  point.  Hence the Frobenius-fixed unordered pairs over `F₄` are
+  equivalent to `Sym2(C(F₂))` and have cardinality 21.
+- `lake build FLT.Assumptions.MazurProof.N13SymmetricSquareFrobenius`
+  passes.  Axiom audits for point base change, Frobenius fixedness, the
+  divisor equivalence, and its cardinality report only `propext`,
+  `Classical.choice`, and `Quot.sound`.
 - Formalized the two-adic group-theoretic closure without finite generation.
   A trivial fake descent is represented exactly by surjectivity of doubling;
   together with the separated doubling filtration and special-fibre

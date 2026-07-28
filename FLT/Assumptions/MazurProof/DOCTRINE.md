@@ -290,11 +290,13 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   genus-two equality criterion saying that two effective degree-two
   divisors are linearly equivalent exactly when they are equal or both
   canonical.
-- There is a small but real source-type seam: `Sym2(C(F₂))` need not equal
-  the `F₂`-points of the geometric symmetric square.  In this instance the
-  already proved fact that every `F₄` point is Frobenius-fixed rules out a
-  nonsplit degree-two orbit; this identification still needs to be wired
-  into the fixed Picard construction.
+- The nonsplit source-type seam is now closed at the Frobenius point-set
+  level.  Base change `C(F₂)→C(F₄)` is proved bijective, geometric
+  Frobenius fixes every `F₄` curve point, and its fixed unordered
+  degree-two divisors are therefore equivalent to `Sym2(C(F₂))`; there
+  are exactly 21.  Connecting this fixed-point description to an actual
+  scheme-theoretic symmetric square remains part of the fixed Picard
+  construction, not a hidden extra orbit count.
 - The group-theoretic two-adic endgame is now formalized without
   Mordell--Weil finite generation.  Surjectivity of doubling, the
   19-element special fibre, and a separated doubling filtration imply that
