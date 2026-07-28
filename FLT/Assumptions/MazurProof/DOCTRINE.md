@@ -184,6 +184,13 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   denominator clearing.  Instantiating the power basis, and then proving the
   absolute discriminant, class-number, unit, and bad-prime statements, remain
   separate structural steps.
+- The missing power-basis discriminant interface is also now structural.
+  For any separable power-basis extension, the norm of `q(θ)` is the
+  resultant of `minpoly(θ)` and `q`: the proof reindexes the canonical
+  product over embeddings by the canonical root multiset.  This gives the
+  basis-discriminant/minimal-polynomial-discriminant identity and its
+  integral coefficient-map form without expanding a multiplication or
+  Sylvester matrix.
 - The direct Abel--Jacobi map is now proved injective without a global
   `NormalFormData` assumption.  The proof clears both numerator directions
   of a principal relation, applies the two-infinity norm-degree rigidity,

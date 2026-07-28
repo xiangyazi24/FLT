@@ -453,6 +453,14 @@
   The trace discriminant puts a prime-power multiple of every integral
   element in the monogenic order, and Mathlib's Eisenstein denominator
   removal divides out that power.  Targeted checks for both new files pass.
+- Closed the generic norm/resultant and power-basis discriminant seams.
+  The norm proof canonically reindexes the product over embeddings by the
+  minimal polynomial's root multiset; no roots are selected or listed.
+  The resulting theorem identifies a power-basis discriminant with the
+  polynomial discriminant and transports it from an integrally closed base
+  to its fraction field.  The rational `AdjoinRoot` specialization is
+  exported for the N13 sextic.  Single-file checks and all four endpoint
+  audits pass with only `propext`, `Classical.choice`, and `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
