@@ -308,11 +308,18 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   positive-infinity order.  This proves strict affine-degree descent above
   three and the degree-three leading-term cancellation.  Composing this
   step by well-founded recursion proves that every oriented class has a
-  semi-Mumford representative with `deg u≤2`.  Low affine degree alone is
-  not yet balanced: a second well-founded phase must move the infinity
-  coordinate between its two walls using the cubic polynomial parts of
-  `Y` at infinity.  That phase remains useful for a balanced normal form,
-  but it is no longer on the fake-Kummer dependency path.
+  semi-Mumford representative with `deg u≤2`.
+- The second, infinity-orientation phase is now also complete for the true
+  N13 sextic.  The exact identity
+  `f-(X³+2X²+X-1)²=4X(X+1)` supplies positive- and negative-branch
+  adapted cubic lifts.  Their cofactor degrees stay at most two, while the
+  branch norm determines the exact updates
+  `n↦n+deg(u)-3` and `n↦n+3-deg(w)`.  A two-wall defect decreases
+  well-foundedly, so every oriented class has a genuinely balanced Mumford
+  representative.  The balanced Kummer homomorphism is therefore
+  unconditional and is proved equal to the earlier low-degree
+  construction; Phase II remains optional for fake-Kummer evaluation but
+  is no longer an unproved normal-form theorem.
 - The raw Mumford Kummer value is now defined in the actual sextic field.
   The branch specialization `X↦θ, Y↦0` sends the hyperelliptic norm of
   every affine function to a square.  For a low-degree representative,

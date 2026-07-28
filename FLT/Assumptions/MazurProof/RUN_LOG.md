@@ -430,6 +430,19 @@
 - Target builds for `N13MumfordKummerKernelForward` and
   `N13FakeDescentAssembly` pass.  All five new forward/integration theorem
   audits report only `propext`, `Classical.choice`, and `Quot.sound`.
+- Closed N13 infinity balancing structurally.  The true cubic branch part
+  `s=X³+2X²+X-1` satisfies `f-s²=4X(X+1)`.  Positive- and negative-adapted
+  Cantor lifts have cofactor degree at most two; their opposite-branch
+  leading coefficients are exactly `-2` and `2`, so the branch-norm
+  identity gives the exact two orientation updates.  Recursion on the sum
+  of the lower- and upper-wall defects proves
+  `N13MumfordInfinityBalance.classOf_surjective`.
+- The resulting unconditional balanced-representative Kummer homomorphism
+  is proved extensionally equal to
+  `N13LowDegreeKummerHom.mumfordKummer`.  Single-file checks pass, no
+  `sorry`, `admit`, axiom, `native_decide`, enumeration, or Riemann--Roch
+  input occurs, and the two endpoint audits report only `propext`,
+  `Classical.choice`, and `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
