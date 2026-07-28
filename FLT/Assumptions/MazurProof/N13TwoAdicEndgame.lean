@@ -5,14 +5,13 @@ import FLT.Assumptions.MazurProof.N18RouteC_Separated
 # The N13 two-adic endgame without Mordell--Weil finite generation
 
 A trivial fake two-descent says that multiplication by two on `J(ℚ)` is
-surjective.  Combining this with a separated two-adic reduction kernel and
-the exponent-nineteen special fibre forces all of `J(ℚ)` to have exponent
-nineteen.  If multiplication by nineteen is injective on the formal kernel
-(because nineteen is a two-adic unit), reduction is injective.
+surjective.  For the actual finite image quotient of reduction, doubling is
+then bijective.  Compatible halves of a kernel element stay in the kernel, so
+a separated two-adic filtration already forces reduction to be injective.
 
-This file formalizes that group-theoretic chain.  It does not replace the
-remaining arithmetic tasks by axioms: fake-descent soundness, the reduction
-map, and the formal filtration remain explicit hypotheses.
+The older exponent-nineteen route is retained below as a stronger optional
+conclusion.  All arithmetic inputs remain explicit hypotheses: fake-descent
+soundness, the reduction map, and the formal filtration.
 -/
 
 namespace MazurProof.N13TwoAdicEndgame
@@ -79,6 +78,95 @@ theorem weakDescentWitness_of_twoSurjective
   intro P
   obtain ⟨Q, hQ⟩ := htwo P
   exact ⟨0, Q, by simp, by simpa using hQ⟩
+
+/-- Surjectivity of doubling iterates to every power of two. -/
+theorem twoPow_surjective
+    {G : Type*} [AddCommGroup G]
+    (htwo : TwoSurjective G) :
+    ∀ k : ℕ, Function.Surjective (fun P : G => (2 ^ k) • P) := by
+  intro k
+  induction k with
+  | zero =>
+      intro P
+      exact ⟨P, by simp⟩
+  | succ k ih =>
+      intro P
+      obtain ⟨R, hR⟩ := ih P
+      obtain ⟨Q, hQ⟩ := htwo R
+      refine ⟨Q, ?_⟩
+      calc
+        (2 ^ (k + 1)) • Q = 2 • ((2 ^ k) • Q) := by
+          rw [pow_succ, mul_nsmul]
+        _ = (2 ^ k) • (2 • Q) :=
+          N18RouteC.Separated.nsmul_nsmul_comm 2 (2 ^ k) Q
+        _ = (2 ^ k) • R := by rw [← hQ]
+        _ = P := hR
+
+/-- If doubling is injective, so is multiplication by every power of two. -/
+theorem twoPow_injective_of_two_injective
+    {G : Type*} [AddCommGroup G]
+    (htwo : Function.Injective (fun P : G => 2 • P)) :
+    ∀ k : ℕ, Function.Injective (fun P : G => (2 ^ k) • P) := by
+  intro k
+  induction k with
+  | zero =>
+      intro P Q hPQ
+      simpa using hPQ
+  | succ k ih =>
+      intro P Q hPQ
+      apply ih
+      apply htwo
+      simpa [pow_succ, mul_nsmul] using hPQ
+
+/-- A finite quotient target makes the old exponent-nineteen detour
+unnecessary.  If reduction is surjective, two-divisibility of the source
+makes doubling bijective on the finite target.  Compatible halves of every
+kernel element therefore remain in the kernel, so separatedness alone makes
+reduction injective. -/
+theorem reduction_injective_of_finite_target
+    {G J₂ : Type*}
+    [AddCommGroup G] [AddCommGroup J₂] [Finite J₂]
+    (red : G →+ J₂)
+    (red_surjective : Function.Surjective red)
+    (twoSurjective : TwoSurjective G)
+    (separated : NSeparated red.ker 2) :
+    Function.Injective red := by
+  have twoSurjectiveTarget :
+      Function.Surjective (fun z : J₂ => 2 • z) := by
+    intro z
+    obtain ⟨P, rfl⟩ := red_surjective z
+    obtain ⟨Q, hQ⟩ := twoSurjective P
+    refine ⟨red Q, ?_⟩
+    simpa only [map_nsmul] using congrArg red hQ.symm
+  have twoInjectiveTarget :
+      Function.Injective (fun z : J₂ => 2 • z) :=
+    Finite.injective_iff_surjective.mpr twoSurjectiveTarget
+  have twoPowInjectiveTarget :=
+    twoPow_injective_of_two_injective twoInjectiveTarget
+  intro P Q hPQ
+  let z : red.ker :=
+    ⟨P - Q, by
+      change red (P - Q) = 0
+      rw [map_sub, hPQ, sub_self]⟩
+  have zInfinitelyDivisible : InfinitelyNSmulDivisible 2 z := by
+    intro k
+    obtain ⟨R, hR⟩ := twoPow_surjective twoSurjective k (P - Q)
+    change (2 ^ k) • R = P - Q at hR
+    have hredR : red R = 0 := by
+      apply twoPowInjectiveTarget k
+      calc
+        (2 ^ k) • red R = red ((2 ^ k) • R) := by
+          rw [map_nsmul]
+        _ = red (P - Q) := by rw [hR]
+        _ = 0 := z.2
+        _ = (2 ^ k) • (0 : J₂) := by simp
+    let r : red.ker := ⟨R, hredR⟩
+    refine ⟨r, ?_⟩
+    apply Subtype.ext
+    exact hR
+  have hz : z = 0 :=
+    separated z zInfinitelyDivisible
+  exact sub_eq_zero.mp (congrArg Subtype.val hz)
 
 /-- The structural N13 exponent argument. -/
 theorem exponent_nineteen

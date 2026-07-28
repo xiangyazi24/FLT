@@ -25,6 +25,19 @@ theorem twoSurjective :
     (N13MumfordFullKummerIdentityFiber.kernel_eq_doubles P).mp
       (N13GaussianGlobalZeroCarrierDlog.actualKummer_trivial P)
 
+/-- For the actual image quotient, no special-fibre group law or
+exponent-nineteen argument is needed.  Finiteness of the quotient and a
+separated reduction kernel already force injectivity. -/
+theorem reduction_injective_of_finite_image
+    {J₂ : Type*} [AddCommGroup J₂] [Finite J₂]
+    (red : G →+ J₂)
+    (red_surjective : Function.Surjective red)
+    (separated :
+      N18RouteC.Separated.NSeparated red.ker 2) :
+    Function.Injective red :=
+  N13TwoAdicEndgame.reduction_injective_of_finite_target
+    red red_surjective twoSurjective separated
+
 /-- Assemble the remaining geometric reduction data with the now-proved
 doubling surjectivity. -/
 def endgameData
