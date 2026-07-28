@@ -184,9 +184,17 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   2-, 13-, and real conditions, the two representatives are `1` and
   `e2*a*q`, but the unit identity
   `(e2*a*q)*(ζ*e1*a)^2=13` makes the latter a rational scalar.  They are
-  already equal in `L*/(L*² ℚ*)`, the natural fake-descent target.  The next
-  formal step is therefore the quotient target and this identity, not a
-  search for a further local obstruction.
+  already equal in `L*/(L*² ℚ*)`, the natural fake-descent target.  This
+  quotient and the exact identity are now formalized over the sextic algebra.
+  The equality to the scalar unit `13` proves internally that both displayed
+  factors are units, so no irreducibility or number-field construction is
+  needed.
+- Trivial fake 2-descent gives `J(ℚ)/2J(ℚ)=0`, not finiteness by itself.
+  The structural closure must use the same prime: a good generalized model
+  at two, a strict 2-adic formal-kernel filtration, and reduction to the
+  19-element special-fibre Jacobian.  A 3-adic kernel cannot kill an
+  infinitely 2-divisible class because multiplication by two is a 3-adic
+  unit.
 - Modulo three the four affine points are proved from
   `f(x)=1-x(x+1)` and Frobenius, not enumeration.  Together with the two
   infinity points, these are exactly the six cusp reductions.
@@ -224,10 +232,11 @@ Terminal: axiom replaced by theorem (long-term campaign).
 
 ## Execution Order
 
-1. **NOW:** (c) N13 — formalize the fake square-class quotient and collapse
-   the two local survivors by the rational-scalar identity
-2. **NEXT:** connect the resulting weak descent to Jacobian finiteness and
-   the six-cusp reduction conclusion
+1. **NOW:** (c) N13 — formalize the good characteristic-two generalized
+   model, its six points over `F₂` and `F₄`, and the resulting Weil numerator
+2. **NEXT:** prove the actual fake Kummer kernel/local-image theorem and the
+   strict 2-adic reduction filtration; combine them directly into exponent
+   19, without Mordell--Weil finite generation
 3. **THEN:** (b) N49 after an explicit Tate-to-`X₀(49)` coordinate bridge exists
 4. **LATER:** (a) N25 (needs a deep rank-zero input), (d) N17/N19, then the prime tail
 6. **LAST:** (e) formal immersion

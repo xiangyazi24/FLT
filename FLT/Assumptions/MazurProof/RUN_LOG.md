@@ -124,6 +124,20 @@
   `(e2*a*q)*(ζ*e1*a)^2=13`.  Thus the two survivors coincide in the standard
   fake-Jacobian target modulo `ℚ*`; searching for another local prime to kill
   the second representative was the wrong problem.
+- Formalized the generic fake square-class target
+  `Lˣ / (Lˣ² · image(Kˣ))` for commutative rings and the ring-level bridge
+  from `z*s²=e(q)` to a trivial quotient class.  The bridge extracts the
+  required units from the equality itself.
+- Formalized the N13 identity in the quotient algebra using three compressed
+  low-degree polynomial reductions.  No degree-33 expansion, irreducibility
+  proof, local-prime search, or representative enumeration is used.
+- Targeted builds pass.  `#print axioms` for the scalar identity and quotient
+  collapse reports only `propext`, `Classical.choice`, and `Quot.sound`.
+- Corrected the endgame: fake-2 triviality supplies 2-divisibility, so the
+  separated kernel must be 2-adic.  The good model is
+  `y²+(x³+x+1)y=x⁵+x⁴`; its two affine/infinity charts stay smooth modulo
+  two.  The completed-square sextic is singular modulo two and is not the
+  reduction model.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
