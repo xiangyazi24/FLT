@@ -443,6 +443,16 @@
   `sorry`, `admit`, axiom, `native_decide`, enumeration, or Riemann--Roch
   input occurs, and the two endpoint audits report only `propext`,
   `Classical.choice`, and `Quot.sound`.
+- Formalized the exact Gaussian cubic arithmetic behind the N13 global
+  descent.  The cubic times its conjugate is the guarded N13 sextic, its
+  discriminant is `(3-2i)²`, and translation by `9` gives an Eisenstein
+  polynomial at `3-2i`.  The Gaussian prime proof uses norm `13`; the
+  constant-coefficient test reduces to `13 ∤ 62197`, with no ideal
+  factorization table.
+- Added a reusable discriminant--Eisenstein integral-closure criterion.
+  The trace discriminant puts a prime-power multiple of every integral
+  element in the monogenic order, and Mathlib's Eisenstein denominator
+  removal divides out that power.  Targeted checks for both new files pass.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:

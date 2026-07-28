@@ -176,6 +176,14 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   envelope after the primes above `2` and `13` are imposed.  These PARI data
   are recorded only as a reproducible guide; the remaining proof obligation
   is the actual local-image theorem for those classes.
+- The first global-arithmetic layer behind that guide is now formal.
+  Over `ℤ[i]`, the exact cubic factor has discriminant `(3-2i)²`; its translate
+  by `9` is Eisenstein at the Gaussian prime `3-2i`, whose primality follows
+  from norm `13`.  A generic discriminant--Eisenstein criterion now proves
+  that an integral power-basis order is the full integral closure by trace
+  denominator clearing.  Instantiating the power basis, and then proving the
+  absolute discriminant, class-number, unit, and bad-prime statements, remain
+  separate structural steps.
 - The direct Abel--Jacobi map is now proved injective without a global
   `NormalFormData` assumption.  The proof clears both numerator directions
   of a principal relation, applies the two-infinity norm-degree rigidity,
