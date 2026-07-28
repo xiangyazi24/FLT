@@ -4,7 +4,7 @@ import FLT.Assumptions.MazurProof.N13Mumford
 /-!
 # Completing the square on the N13 coordinate rings
 
-Over `ℚ`, the good generalized equation
+Over any field of characteristic zero, the good generalized equation
 
 `y² + (X³+X+1)y = X⁵+X⁴`
 
@@ -25,75 +25,85 @@ namespace MazurProof.N13GoodSexticCoordinateEquiv
 
 noncomputable section
 
-abbrev M : SexticMumford.Model ℚ :=
-  N13Mumford.model ℚ
+universe u
 
-abbrev GoodRing : Type :=
-  N13GeneralizedMumfordIntegral.CoordinateRing (R := ℚ)
+variable {K : Type u} [Field K] [CharZero K]
 
-abbrev SexticRing : Type :=
-  N13Mumford.CoordinateRing ℚ
+abbrev M : SexticMumford.Model K :=
+  N13Mumford.model K
 
-def goodXHom : ℚ[X] →+* GoodRing :=
+abbrev GoodRing : Type u :=
+  N13GeneralizedMumfordIntegral.CoordinateRing (R := K)
+
+abbrev SexticRing : Type u :=
+  N13Mumford.CoordinateRing K
+
+def goodXHom : K[X] →+* GoodRing (K := K) :=
   N13GeneralizedMumfordIntegral.xClassHom
 
-def sexticXHom : ℚ[X] →+* SexticRing :=
-  AdjoinRoot.of (SexticMumford.curvePoly M)
+def sexticXHom : K[X] →+* SexticRing (K := K) :=
+  AdjoinRoot.of (SexticMumford.curvePoly (M (K := K)))
 
-@[simp] theorem goodXHom_apply (p : ℚ[X]) :
-    goodXHom p =
+@[simp] theorem goodXHom_apply (p : K[X]) :
+    goodXHom (K := K) p =
       N13GeneralizedMumfordIntegral.xClass p := rfl
 
-@[simp] theorem sexticXHom_apply (p : ℚ[X]) :
-    sexticXHom p = SexticMumford.xClass M p := rfl
+@[simp] theorem sexticXHom_apply (p : K[X]) :
+    sexticXHom (K := K) p =
+      SexticMumford.xClass (M (K := K)) p := rfl
 
-abbrev hPoly : ℚ[X] :=
+abbrev hPoly : K[X] :=
   N13GeneralizedMumfordIntegral.hPoly
 
-abbrev rhsPoly : ℚ[X] :=
+abbrev rhsPoly : K[X] :=
   N13GeneralizedMumfordIntegral.rhsPoly
 
 /-- The polynomial identity behind completion of the square. -/
 theorem sextic_eq_h_sq_add_four_rhs :
-    N13Mumford.f ℚ = hPoly ^ 2 + 4 * rhsPoly := by
+    N13Mumford.f K = hPoly ^ 2 + 4 * rhsPoly := by
   simp only [N13Mumford.f, hPoly, rhsPoly,
     N13GeneralizedMumfordIntegral.hPoly,
     N13GeneralizedMumfordIntegral.rhsPoly]
   ring
 
 /-- The good `y` coordinate inside the sextic coordinate ring. -/
-def goodYInSextic : SexticRing :=
-  (1 / 2 : ℚ) •
-    (SexticMumford.yClass M - sexticXHom hPoly)
+def goodYInSextic : SexticRing (K := K) :=
+  (1 / 2 : K) •
+    (SexticMumford.yClass (M (K := K)) -
+      sexticXHom (K := K) hPoly)
 
 /-- The sextic `Y` coordinate inside the good coordinate ring. -/
-def sexticYInGood : GoodRing :=
+def sexticYInGood : GoodRing (K := K) :=
   2 * N13GeneralizedMumfordIntegral.yClass +
-    goodXHom hPoly
+    goodXHom (K := K) hPoly
 
 private theorem goodYInSextic_root :
-    N13GeneralizedMumfordIntegral.curvePoly.eval₂
-      sexticXHom goodYInSextic = 0 := by
+    (N13GeneralizedMumfordIntegral.curvePoly (R := K)).eval₂
+      (sexticXHom (K := K)) (goodYInSextic (K := K)) = 0 := by
   simp only [N13GeneralizedMumfordIntegral.curvePoly,
     eval₂_sub, eval₂_add, eval₂_pow, eval₂_X, eval₂_C,
     eval₂_mul]
-  have hy := SexticMumford.yClass_sq M
+  have hy := SexticMumford.yClass_sq (M (K := K))
   change
-    SexticMumford.yClass M ^ 2 =
-      sexticXHom (N13Mumford.f ℚ) at hy
-  rw [sextic_eq_h_sq_add_four_rhs] at hy
+    SexticMumford.yClass (M (K := K)) ^ 2 =
+      sexticXHom (K := K) (N13Mumford.f K) at hy
+  rw [sextic_eq_h_sq_add_four_rhs (K := K)] at hy
   simp only [map_add, map_mul, map_pow, map_ofNat] at hy
-  let a : SexticRing :=
-    (algebraMap ℚ SexticRing) (1 / 2)
-  let Y : SexticRing := SexticMumford.yClass M
-  let H : SexticRing := sexticXHom hPoly
-  let R : SexticRing := sexticXHom rhsPoly
+  let a : SexticRing (K := K) :=
+    (algebraMap K (SexticRing (K := K))) (1 / 2)
+  let Y : SexticRing (K := K) :=
+    SexticMumford.yClass (M (K := K))
+  let H : SexticRing (K := K) :=
+    sexticXHom (K := K) (hPoly (K := K))
+  let R : SexticRing (K := K) :=
+    sexticXHom (K := K) (rhsPoly (K := K))
   simp only [goodYInSextic, Algebra.smul_def]
   change (a * (Y - H)) ^ 2 + H * (a * (Y - H)) - R = 0
   have hy' : Y ^ 2 = H ^ 2 + 4 * R := hy
   have ha : 2 * a = 1 := by
     dsimp only [a]
-    rw [← map_ofNat (algebraMap ℚ SexticRing) 2,
+    rw [← map_ofNat
+      (algebraMap K (SexticRing (K := K))) 2,
       ← map_mul]
     norm_num
   linear_combination
@@ -102,9 +112,9 @@ private theorem goodYInSextic_root :
 
 private theorem good_root_relation :
     N13GeneralizedMumfordIntegral.yClass ^ 2 +
-        goodXHom hPoly *
+        goodXHom (K := K) (hPoly (K := K)) *
           N13GeneralizedMumfordIntegral.yClass -
-      goodXHom rhsPoly = 0 := by
+      goodXHom (K := K) (rhsPoly (K := K)) = 0 := by
   apply sub_eq_zero.mpr
   apply AdjoinRoot.mk_eq_mk.mpr
   refine ⟨1, ?_⟩
@@ -112,131 +122,169 @@ private theorem good_root_relation :
   ring
 
 private theorem sexticYInGood_root :
-    (SexticMumford.curvePoly M).eval₂
-      goodXHom sexticYInGood = 0 := by
+    (SexticMumford.curvePoly (M (K := K))).eval₂
+      (goodXHom (K := K)) (sexticYInGood (K := K)) = 0 := by
   simp only [SexticMumford.curvePoly,
     eval₂_sub, eval₂_pow, eval₂_X, eval₂_C]
   change
-    sexticYInGood ^ 2 -
-      goodXHom (N13Mumford.f ℚ) = 0
-  rw [sextic_eq_h_sq_add_four_rhs]
+    sexticYInGood (K := K) ^ 2 -
+      goodXHom (K := K) (N13Mumford.f K) = 0
+  rw [sextic_eq_h_sq_add_four_rhs (K := K)]
   simp only [map_add, map_mul, map_pow, map_ofNat]
   unfold sexticYInGood
-  linear_combination 4 * good_root_relation
+  linear_combination 4 * good_root_relation (K := K)
 
 /-- Completion of the square as a ring homomorphism from the good model to
 the sextic model. -/
-def toSextic : GoodRing →+* SexticRing :=
-  AdjoinRoot.lift sexticXHom goodYInSextic
-    goodYInSextic_root
+def toSextic :
+    GoodRing (K := K) →+* SexticRing (K := K) :=
+  AdjoinRoot.lift (sexticXHom (K := K))
+    (goodYInSextic (K := K))
+    (goodYInSextic_root (K := K))
 
 /-- The inverse change of variables. -/
-def toGood : SexticRing →+* GoodRing :=
-  AdjoinRoot.lift goodXHom sexticYInGood
-    sexticYInGood_root
+def toGood :
+    SexticRing (K := K) →+* GoodRing (K := K) :=
+  AdjoinRoot.lift (goodXHom (K := K))
+    (sexticYInGood (K := K))
+    (sexticYInGood_root (K := K))
 
-@[simp] theorem toSextic_xClass (p : ℚ[X]) :
-    toSextic
+@[simp] theorem toSextic_xClass (p : K[X]) :
+    toSextic (K := K)
         (N13GeneralizedMumfordIntegral.xClass p) =
-      SexticMumford.xClass M p := by
+      SexticMumford.xClass (M (K := K)) p := by
   change
-    toSextic
+    toSextic (K := K)
         (AdjoinRoot.of
-          (N13GeneralizedMumfordIntegral.curvePoly (R := ℚ)) p) =
-      sexticXHom p
-  exact AdjoinRoot.lift_of goodYInSextic_root
+          (N13GeneralizedMumfordIntegral.curvePoly (R := K)) p) =
+      sexticXHom (K := K) p
+  exact AdjoinRoot.lift_of (goodYInSextic_root (K := K))
+
+@[simp] theorem toSextic_algebraMap (z : K) :
+    toSextic (K := K)
+        (algebraMap K (GoodRing (K := K)) z) =
+      algebraMap K (SexticRing (K := K)) z := by
+  change
+    toSextic (K := K)
+        (N13GeneralizedMumfordIntegral.xClass (C z)) =
+      SexticMumford.xClass (M (K := K)) (C z)
+  exact toSextic_xClass (K := K) (C z)
 
 @[simp] theorem toSextic_yClass :
-    toSextic
+    toSextic (K := K)
         N13GeneralizedMumfordIntegral.yClass =
-      goodYInSextic :=
-  AdjoinRoot.lift_root goodYInSextic_root
+      goodYInSextic (K := K) :=
+  AdjoinRoot.lift_root (goodYInSextic_root (K := K))
 
-@[simp] theorem toGood_xClass (p : ℚ[X]) :
-    toGood (SexticMumford.xClass M p) =
+@[simp] theorem toGood_xClass (p : K[X]) :
+    toGood (K := K) (SexticMumford.xClass (M (K := K)) p) =
       N13GeneralizedMumfordIntegral.xClass p := by
   change
-    toGood
+    toGood (K := K)
         (AdjoinRoot.of
-          (SexticMumford.curvePoly M) p) =
-      goodXHom p
-  exact AdjoinRoot.lift_of sexticYInGood_root
+          (SexticMumford.curvePoly (M (K := K))) p) =
+      goodXHom (K := K) p
+  exact AdjoinRoot.lift_of (sexticYInGood_root (K := K))
+
+@[simp] theorem toGood_algebraMap (z : K) :
+    toGood (K := K)
+        (algebraMap K (SexticRing (K := K)) z) =
+      algebraMap K (GoodRing (K := K)) z := by
+  change
+    toGood (K := K)
+        (SexticMumford.xClass (M (K := K)) (C z)) =
+      N13GeneralizedMumfordIntegral.xClass (C z)
+  exact toGood_xClass (K := K) (C z)
 
 @[simp] theorem toGood_yClass :
-    toGood (SexticMumford.yClass M) =
-      sexticYInGood :=
-  AdjoinRoot.lift_root sexticYInGood_root
+    toGood (K := K) (SexticMumford.yClass (M (K := K))) =
+      sexticYInGood (K := K) :=
+  AdjoinRoot.lift_root (sexticYInGood_root (K := K))
 
 private theorem invTwo_mul_two_good :
-    (algebraMap ℚ GoodRing) (2 : ℚ)⁻¹ *
-        (2 : GoodRing) = 1 := by
-  rw [← map_ofNat (algebraMap ℚ GoodRing) 2,
+    (algebraMap K (GoodRing (K := K))) (2 : K)⁻¹ *
+        (2 : GoodRing (K := K)) = 1 := by
+  rw [← map_ofNat
+      (algebraMap K (GoodRing (K := K))) 2,
     ← map_mul]
   norm_num
 
 private theorem two_mul_invTwo_sextic :
-    (2 : SexticRing) *
-        (algebraMap ℚ SexticRing) (2 : ℚ)⁻¹ = 1 := by
-  rw [← map_ofNat (algebraMap ℚ SexticRing) 2,
+    (2 : SexticRing (K := K)) *
+        (algebraMap K (SexticRing (K := K))) (2 : K)⁻¹ = 1 := by
+  rw [← map_ofNat
+      (algebraMap K (SexticRing (K := K))) 2,
     ← map_mul]
   norm_num
 
 private theorem toGood_comp_toSextic :
-    toGood.comp toSextic = RingHom.id GoodRing := by
+    (toGood (K := K)).comp (toSextic (K := K)) =
+      RingHom.id (GoodRing (K := K)) := by
   apply AdjoinRoot.ringHom_ext
   · apply RingHom.ext_iff.mpr
     intro p
     change
-      toGood (toSextic (goodXHom p)) = goodXHom p
+      toGood (K := K)
+          (toSextic (K := K) (goodXHom (K := K) p)) =
+        goodXHom (K := K) p
     rw [goodXHom_apply, toSextic_xClass, toGood_xClass]
   · change
-      toGood (toSextic
+      toGood (K := K) (toSextic (K := K)
         N13GeneralizedMumfordIntegral.yClass) =
           N13GeneralizedMumfordIntegral.yClass
-    rw [toSextic_yClass]
+    rw [toSextic_yClass (K := K)]
     simp [goodYInSextic, sexticYInGood, Algebra.smul_def]
-    rw [← mul_assoc, invTwo_mul_two_good, one_mul]
+    rw [← mul_assoc, invTwo_mul_two_good (K := K), one_mul]
 
 private theorem toSextic_comp_toGood :
-    toSextic.comp toGood = RingHom.id SexticRing := by
+    (toSextic (K := K)).comp (toGood (K := K)) =
+      RingHom.id (SexticRing (K := K)) := by
   apply AdjoinRoot.ringHom_ext
   · apply RingHom.ext_iff.mpr
     intro p
     change
-      toSextic (toGood (sexticXHom p)) = sexticXHom p
+      toSextic (K := K)
+          (toGood (K := K) (sexticXHom (K := K) p)) =
+        sexticXHom (K := K) p
     rw [sexticXHom_apply, toGood_xClass, toSextic_xClass]
   · change
-      toSextic (toGood (SexticMumford.yClass M)) =
-        SexticMumford.yClass M
-    rw [toGood_yClass]
+      toSextic (K := K)
+          (toGood (K := K)
+            (SexticMumford.yClass (M (K := K)))) =
+        SexticMumford.yClass (M (K := K))
+    rw [toGood_yClass (K := K)]
     simp [goodYInSextic, sexticYInGood, Algebra.smul_def]
-    rw [map_ofNat, ← mul_assoc, two_mul_invTwo_sextic]
+    rw [map_ofNat, ← mul_assoc,
+      two_mul_invTwo_sextic (K := K)]
     ring
 
 /-- The coordinate-ring isomorphism induced by completion of the square. -/
-def coordinateRingEquiv : GoodRing ≃+* SexticRing where
-  toFun := toSextic
-  invFun := toGood
+def coordinateRingEquiv :
+    GoodRing (K := K) ≃+* SexticRing (K := K) where
+  toFun := toSextic (K := K)
+  invFun := toGood (K := K)
   left_inv z := by
-    have h := DFunLike.congr_fun toGood_comp_toSextic z
+    have h :=
+      DFunLike.congr_fun (toGood_comp_toSextic (K := K)) z
     simpa using h
   right_inv z := by
-    have h := DFunLike.congr_fun toSextic_comp_toGood z
+    have h :=
+      DFunLike.congr_fun (toSextic_comp_toGood (K := K)) z
     simpa using h
-  map_mul' := map_mul toSextic
-  map_add' := map_add toSextic
+  map_mul' := map_mul (toSextic (K := K))
+  map_add' := map_add (toSextic (K := K))
 
-@[simp] theorem coordinateRingEquiv_xClass (p : ℚ[X]) :
-    coordinateRingEquiv
+@[simp] theorem coordinateRingEquiv_xClass (p : K[X]) :
+    coordinateRingEquiv (K := K)
         (N13GeneralizedMumfordIntegral.xClass p) =
-      SexticMumford.xClass M p :=
-  toSextic_xClass p
+      SexticMumford.xClass (M (K := K)) p :=
+  toSextic_xClass (K := K) p
 
 @[simp] theorem coordinateRingEquiv_yClass :
-    coordinateRingEquiv
+    coordinateRingEquiv (K := K)
         N13GeneralizedMumfordIntegral.yClass =
-      goodYInSextic :=
-  toSextic_yClass
+      goodYInSextic (K := K) :=
+  toSextic_yClass (K := K)
 
 end
 
