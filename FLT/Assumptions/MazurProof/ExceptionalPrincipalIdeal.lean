@@ -341,5 +341,167 @@ theorem exists_unit_two_carriers_mul_sq_of_even_away
   refine ⟨r, q, ε, y, ?_⟩
   simpa only [hrval, hqval, mul_assoc] using hxy
 
-end MazurProof.ExceptionalPrincipalIdeal
 
+theorem principalCount_unit
+    (ε : Oˣ) (R : HeightOneSpectrum O) :
+    principalCount (L := L) R (ε : O) = 0 := by
+  rw [principalCount_eq_factorization_span
+    (ε : O) ε.ne_zero R]
+  rw [Ideal.span_singleton_eq_top.mpr
+    (Units.isUnit ε)]
+  rw [← Ideal.one_eq_top, factorization_one]
+  norm_num
+
+/-- If the two exceptional counts have the same parity, their two carrier
+bits collapse to the single product carrier. -/
+theorem exists_unit_common_carrier_mul_sq_of_even_away
+    [IsPrincipalIdealRing O]
+    (P Q : HeightOneSpectrum O)
+    (hPQ : P ≠ Q)
+    (A Qelt x : O)
+    (hPgen :
+      P.asIdeal = Ideal.span ({A} : Set O))
+    (hQgen :
+      Q.asIdeal = Ideal.span ({Qelt} : Set O))
+    (hx : x ≠ 0)
+    (hAway :
+      ∀ R : HeightOneSpectrum O,
+        R ≠ P → R ≠ Q →
+          Even (principalCount (L := L) R x))
+    (hpair :
+      Even
+        (principalCount (L := L) P x -
+          principalCount (L := L) Q x)) :
+    ∃ d : ZMod 2, ∃ ε : Oˣ, ∃ y : O,
+      x =
+        (ε : O) * (A * Qelt) ^ d.val *
+          y ^ 2 := by
+  obtain ⟨r, q, ε, y, hxy⟩ :=
+    exists_unit_two_carriers_mul_sq_of_even_away
+      (L := L) P Q hPQ A Qelt x
+      hPgen hQgen hx hAway
+  have hA0 : A ≠ 0 := by
+    intro hzero
+    apply P.ne_bot
+    rw [hPgen, hzero]
+    simp
+  have hQ0 : Qelt ≠ 0 := by
+    intro hzero
+    apply Q.ne_bot
+    rw [hQgen, hzero]
+    simp
+  have hy0 : y ≠ 0 := by
+    intro hzero
+    apply hx
+    simpa [hzero] using hxy
+  have hε0 : (ε : O) ≠ 0 := ε.ne_zero
+  have hAr0 : A ^ r.val ≠ 0 :=
+    pow_ne_zero _ hA0
+  have hQq0 : Qelt ^ q.val ≠ 0 :=
+    pow_ne_zero _ hQ0
+  have hy20 : y ^ 2 ≠ 0 :=
+    pow_ne_zero _ hy0
+  have hcountP :
+      principalCount (L := L) P x =
+        (r.val : ℤ) +
+          2 * principalCount (L := L) P y := by
+    calc
+      principalCount (L := L) P x =
+          principalCount (L := L) P
+            ((ε : O) * A ^ r.val *
+              Qelt ^ q.val * y ^ 2) :=
+        congrArg (principalCount (L := L) P) hxy
+      _ =
+          principalCount (L := L) P
+                ((ε : O) * A ^ r.val *
+                  Qelt ^ q.val) +
+            principalCount (L := L) P (y ^ 2) := by
+        rw [principalCount_mul
+          (mul_ne_zero
+            (mul_ne_zero hε0 hAr0) hQq0)
+          hy20]
+      _ =
+          (principalCount (L := L) P
+                ((ε : O) * A ^ r.val) +
+              principalCount (L := L) P
+                (Qelt ^ q.val)) +
+            principalCount (L := L) P (y ^ 2) := by
+        rw [principalCount_mul
+          (mul_ne_zero hε0 hAr0) hQq0]
+      _ =
+          ((principalCount (L := L) P (ε : O) +
+                principalCount (L := L) P
+                  (A ^ r.val)) +
+              principalCount (L := L) P
+                (Qelt ^ q.val)) +
+            principalCount (L := L) P (y ^ 2) := by
+        rw [principalCount_mul hε0 hAr0]
+      _ = (r.val : ℤ) +
+            2 * principalCount (L := L) P y := by
+        rw [principalCount_unit,
+          principalCount_pow,
+          principalCount_generator_self
+            P hPgen hA0,
+          principalCount_pow,
+          principalCount_generator_of_ne
+            Q P hQgen hQ0 hPQ,
+          principalCount_pow]
+        ring
+  have hcountQ :
+      principalCount (L := L) Q x =
+        (q.val : ℤ) +
+          2 * principalCount (L := L) Q y := by
+    calc
+      principalCount (L := L) Q x =
+          principalCount (L := L) Q
+            ((ε : O) * A ^ r.val *
+              Qelt ^ q.val * y ^ 2) :=
+        congrArg (principalCount (L := L) Q) hxy
+      _ =
+          principalCount (L := L) Q
+                ((ε : O) * A ^ r.val *
+                  Qelt ^ q.val) +
+            principalCount (L := L) Q (y ^ 2) := by
+        rw [principalCount_mul
+          (mul_ne_zero
+            (mul_ne_zero hε0 hAr0) hQq0)
+          hy20]
+      _ =
+          (principalCount (L := L) Q
+                ((ε : O) * A ^ r.val) +
+              principalCount (L := L) Q
+                (Qelt ^ q.val)) +
+            principalCount (L := L) Q (y ^ 2) := by
+        rw [principalCount_mul
+          (mul_ne_zero hε0 hAr0) hQq0]
+      _ =
+          ((principalCount (L := L) Q (ε : O) +
+                principalCount (L := L) Q
+                  (A ^ r.val)) +
+              principalCount (L := L) Q
+                (Qelt ^ q.val)) +
+            principalCount (L := L) Q (y ^ 2) := by
+        rw [principalCount_mul hε0 hAr0]
+      _ = (q.val : ℤ) +
+            2 * principalCount (L := L) Q y := by
+        rw [principalCount_unit,
+          principalCount_pow,
+          principalCount_generator_of_ne
+            P Q hPgen hA0 (Ne.symm hPQ),
+          principalCount_pow,
+          principalCount_generator_self
+            Q hQgen hQ0,
+          principalCount_pow]
+        ring
+  obtain ⟨k, hk⟩ := hpair
+  rw [hcountP, hcountQ] at hk
+  have hrlt : r.val < 2 := ZMod.val_lt r
+  have hqlt : q.val < 2 := ZMod.val_lt q
+  have hrq : r.val = q.val := by
+    omega
+  refine ⟨r, ε, y, ?_⟩
+  rw [← hrq] at hxy
+  simpa only [mul_pow, mul_assoc] using hxy
+
+
+end MazurProof.ExceptionalPrincipalIdeal
