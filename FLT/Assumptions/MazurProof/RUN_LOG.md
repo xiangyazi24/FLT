@@ -341,6 +341,19 @@
   FLT.Assumptions.MazurProof.N13MumfordKummerKernelForward` passes.  Axiom
   audits for all four forward-kernel theorems report only `propext`,
   `Classical.choice`, and `Quot.sound`.
+- Constructed the fixed Gaussian cubic order over `ℤ₂` and its exact
+  first ramified quotient.  The map `i ↦ 1+ε`, `θ ↦ α` is surjective onto
+  `F₈[ε]/(ε²)`; two nested monic power bases prove that its kernel is
+  `(1-i)²=(2)`.  Thus the order modulo the ramified-prime square is
+  equivalent to the dual-number ring without a ray-class table or
+  cardinality enumeration.
+- `lake env lean
+  FLT/Assumptions/MazurProof/N13GaussianOrderTwo.lean` passes.  Axiom
+  audits for power-basis recomposition, reduction surjectivity, kernel
+  equality, and the quotient equivalence report only `propext`,
+  `Classical.choice`, and `Quot.sound`.  Identifying this explicit order
+  with the completed maximal order and transporting the genuine Kummer
+  value remain separate arithmetic-semantic bridges.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:

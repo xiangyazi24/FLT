@@ -228,6 +228,13 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   local semantic seam is the fixed equivalence
   `O_{L,P}/P² ≃ F₈[ε]/(ε²)` and identification of the actual Mumford
   Kummer value with these coordinate jets.
+- The fixed quotient algebra is now proved directly for the Gaussian
+  cubic `ℤ₂`-order.  Reduction by `i↦1+ε`, `θ↦α` is surjective, its kernel
+  is exactly `(1-i)²=(2)`, and hence the order modulo that square is
+  `F₈[ε]/(ε²)`.  Kernel exactness comes from the `1,i` and
+  `1,θ,θ²` power bases, not from a finite quotient table.  What remains
+  local is only the arithmetic identification with the completed maximal
+  order and the genuine Mumford-value compatibility.
 - The even-sextic infinity correction is now explicit rather than an
   abstract kernel ambiguity.  For
   `u=X(X+1)` and `v=-(2X+1)`, the Mumford ideal satisfies
