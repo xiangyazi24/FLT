@@ -22,6 +22,14 @@
   - proved that completion of the square sends those two graph ideals to the
     same sextic fractional ideal, hence the recovered pair carries exactly
     the original oriented and centred two-adic Picard class (`7954d95b0d`)
+  - separated the genuine Abel differential from the graph-equation
+    linearization: evaluation at `(0,0)` and `(-1,0)` has matrix
+    `[[1,0],[-1,1]]`, determinant one, and an explicit integral linear
+    inverse (`b1b350245d`)
+  - formalized the module-theoretic Čech--Nakayama step: special-fibre
+    surjectivity of a finite-target coboundary lifts integrally, and a
+    cochain closed modulo the maximal ideal can be corrected to an actual
+    cocycle without changing its reduction (`b1b350245d`)
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -36,9 +44,10 @@
      logarithm argument)
   Affine ideal saturation alone is insufficient: it does not prevent a
   degree-two divisor from escaping to infinity.  The honest next route is a
-  proper two-chart/Čech construction of the relative degree-two divisor (or
-  an equivalent valuation-theoretic properness proof), followed by the
-  already proved chart uniqueness.
+  proper two-chart/Čech construction of the relative degree-two divisor:
+  identify finite bounded-pole cochain modules and prove the special-fibre
+  coboundary is surjective, then apply the now-formalized Nakayama correction.
+  An equivalent valuation-theoretic properness proof would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
