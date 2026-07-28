@@ -244,6 +244,14 @@
   audits for the ideal square, branch order, oriented raw relation, and
   final doubling theorem report only `propext`, `Classical.choice`, and
   `Quot.sound`.
+- Assembled the even-sextic kernel correction abstractly.  If a genuine
+  Kummer homomorphism has kernel “a double or a double plus
+  `[∞₋-∞₊]`”, the explicit half-class turns this into exactly the doubles.
+  Triviality of that map then yields the `TwoSurjective` package used by
+  the two-adic endgame.
+- `lake build FLT.Assumptions.MazurProof.N13KummerKernelAssembly` passes;
+  both assembly theorems audit with only `propext`, `Classical.choice`,
+  and `Quot.sound`.
 - Proved generically in characteristic zero that every coordinate-ring
   unit fixed by hyperelliptic conjugation comes from a nonzero scalar of
   the ground field.  The proof uses only the canonical rank-two basis and
