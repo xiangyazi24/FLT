@@ -212,6 +212,15 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   What remains is semantic: completeness of the global four-generator
   envelope and containment of the actual `ℚ₂` Kummer image in the
   first-jet kernel.
+- Both `ℚ₂` coordinate regimes now have structural first-jet adapters.
+  An integral coordinate reduces to the constant unit `x̄-α`, whose
+  logarithm is zero.  For a nonintegral coordinate, removing the rational
+  scalar `x` leaves `1-x⁻¹θ`; positive valuation of `x⁻¹` forces its
+  residue to vanish, so this normalized jet is exactly one.  The maps
+  `i↦1+ε` and `θ↦α` satisfy the Gaussian cubic relation.  The remaining
+  local semantic seam is the fixed equivalence
+  `O_{L,P}/P² ≃ F₈[ε]/(ε²)` and identification of the actual Mumford
+  Kummer value with these coordinate jets.
 - The even-sextic infinity correction is now explicit rather than an
   abstract kernel ambiguity.  For
   `u=X(X+1)` and `v=-(2X+1)`, the Mumford ideal satisfies

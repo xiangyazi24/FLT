@@ -212,6 +212,19 @@
   `#print axioms` for
   `candidateClass_eq_one_of_dlog_eq_zero` reports only `propext`,
   `Classical.choice`, and `Quot.sound`.
+- Formalized both valuation regimes for a `ℚ₂` affine coordinate.  In the
+  integral regime the first jet is constant.  In the nonintegral regime,
+  the exact factorization
+  `x-θ=x(1-x⁻¹θ)` removes a rational scalar, and valuation theory proves
+  that the residue of `x⁻¹` is zero.  Both ramified logarithms vanish.
+- Verified that the dual-number images of `i` and `θ` satisfy the Gaussian
+  cubic presentation.  The module deliberately stops short of calling
+  these the actual Jacobian local images: the length-two local-order
+  quotient and Mumford-value compatibility are still required.
+- `lake build FLT.Assumptions.MazurProof.N13LocalDlogRegimes` passes.
+  Axiom audits for both regimes, the residue theorem, and the scalar
+  factorization report only `propext`, `Classical.choice`, and
+  `Quot.sound`.
 - Constructed an explicit half of the even-sextic infinity-difference
   class.  The proof uses the Gaussian factorization to show
   `(X(X+1),Y+2X+1)²=(Y-A)`, computes the branch order of `Y-A`, and keeps
