@@ -242,6 +242,14 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   half-class.  If the map is trivial, the theorem directly supplies the
   doubling-surjectivity input expected by the two-adic endgame.  The
   generic half-divisor kernel theorem itself remains a genuine input.
+- The finite candidate calculation is also connected to this group-level
+  assembly without hiding its semantics.  The exact remaining
+  `CandidateLocalization` input says that every genuine global Kummer value
+  lies in the four-generator envelope and that its genuine first local
+  logarithm is zero.  From those two statements, candidate collapse makes
+  the Kummer map trivial and the infinity-half theorem makes doubling
+  surjective.  Neither the global S-unit envelope nor the actual local-image
+  comparison is asserted merely from the finite jet calculation.
 - The unit ambiguity in principal Mumford-ideal relations is also
   structural.  In the rank-two affine basis `p(X)+q(X)Y`, hyperelliptic
   conjugation negates `q`; a conjugation-fixed unit therefore has `q=0`.

@@ -290,6 +290,15 @@
   audits for the zero value, the exponent-two equality criterion, and the
   product-square-scalar bridge report only `propext`, `Classical.choice`,
   and `Quot.sound`.
+- Assembled the candidate calculation with the even-sextic kernel theorem.
+  A `CandidateLocalization` now records exactly the two genuine arithmetic
+  inputs: every global Kummer value enters the four-generator envelope, and
+  its actual first two-adic logarithm vanishes.  These inputs imply that the
+  Kummer map is trivial; the explicit infinity half then implies
+  surjectivity of doubling.
+- `lake build FLT.Assumptions.MazurProof.N13FakeDescentAssembly` passes.
+  Axiom audits for candidate collapse, Kummer triviality, and doubling
+  surjectivity report only `propext`, `Classical.choice`, and `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
