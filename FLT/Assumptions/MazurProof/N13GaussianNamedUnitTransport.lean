@@ -38,6 +38,58 @@ def orderToGaussian : O →+* Lg :=
       (integralClosure N13GaussianGlobalArithmetic.GI Lg)).toRingHom.comp
     N13GaussianGlobalReductionTwo.relativeToRingOfIntegers.symm.toRingHom
 
+/-- The explicit maximal-order map has the same underlying field value as
+the canonical ring-of-integers coercion. -/
+@[simp] theorem orderToGaussian_apply (x : O) :
+    orderToGaussian x = (x : Lg) := by
+  letI intAlgebraLg : Algebra ℤ Lg :=
+    Ring.toIntAlgebra Lg
+  letI hO : IsIntegralClosure O ℤ Lg :=
+    NumberField.RingOfIntegers.instIsIntegralClosureInt
+  change
+    ((N13GaussianGlobalReductionTwo.relativeToRingOfIntegers.symm x :
+        N13GaussianGlobalReductionTwo.RelativeO) : Lg) =
+      (x : Lg)
+  simp [N13GaussianGlobalReductionTwo.relativeToRingOfIntegers,
+    N13GaussianNumberField.integralClosureToRingOfIntegersRingEquiv,
+    N13GaussianNumberField.relativeToAbsoluteAlgEquiv]
+  let e :
+      (integralClosure ℤ Lg) ≃ₐ[ℤ] O :=
+    IsIntegralClosure.equiv
+      ℤ (integralClosure ℤ Lg) Lg O
+  have he :=
+    IsIntegralClosure.algebraMap_equiv
+      ℤ (integralClosure ℤ Lg) Lg O (e.symm x)
+  calc
+    algebraMap (integralClosure ℤ Lg) Lg (e.symm x) =
+        algebraMap O Lg (e (e.symm x)) :=
+      he.symm
+    _ = algebraMap O Lg x := by
+      rw [e.apply_symm_apply]
+
+/-- The explicit maximal-order embedding is injective. -/
+theorem orderToGaussian_injective :
+    Function.Injective orderToGaussian := by
+  intro x y hxy
+  apply NumberField.RingOfIntegers.ext
+  simpa only [orderToGaussian_apply] using hxy
+
+/-- The carrier-preserving ring map from the maximal order directly to the
+sextic presentation.  No additional algebra instance is introduced. -/
+def orderToSextic : O →+* Ls :=
+  N13GaussianFieldEquiv.sexticEquivGaussian.symm.toRingEquiv.toRingHom.comp
+    orderToGaussian
+
+@[simp] theorem orderToSextic_apply (x : O) :
+    orderToSextic x =
+      N13GaussianFieldEquiv.sexticEquivGaussian.symm (x : Lg) := by
+  simp [orderToSextic]
+
+theorem orderToSextic_injective :
+    Function.Injective orderToSextic :=
+  N13GaussianFieldEquiv.sexticEquivGaussian.symm.injective.comp
+    orderToGaussian_injective
+
 def orderUnitsToGaussian : Oˣ →* Lgˣ :=
   Units.map orderToGaussian.toMonoidHom
 
@@ -47,6 +99,14 @@ def orderUnitsToSextic : Oˣ →* Lsˣ :=
   (Units.map
       N13GaussianFieldEquiv.sexticEquivGaussian.symm.toMonoidHom).comp
     orderUnitsToGaussian
+
+/-- The previously defined unit transport is exactly the unit map induced by
+the direct carrier-preserving ring homomorphism. -/
+theorem unitsMap_orderToSextic_eq :
+    Units.map orderToSextic.toMonoidHom =
+      orderUnitsToSextic := by
+  ext u
+  rfl
 
 theorem map_relativeTheta :
     algebraMap N13GaussianGlobalReductionTwo.RelativeO Lg
