@@ -86,6 +86,12 @@
     linearly with `ℤ₂²`.  In particular the genuine untwisted Čech cokernel
     is finite, exactly the finiteness input used by the module-valued
     Nakayama theorem (`2d7b71c0ee`)
+  - lifted the simple formal-infinity branch `v = 0` by X-adic Hensel,
+    constructed its quadratic conjugate, and proved that the two roots
+    differ by a unit.  The complete-chart polynomial now has a verified
+    linear factorization over `ℤ₂[[X]]`; two-point evaluation/interpolation
+    is therefore the remaining step to an explicit product decomposition
+    of the infinity chart
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -115,11 +121,13 @@
   The genuine quadratic overlap algebra, both actual chart rings, their
   exact linear Čech complex and finite rank-two cokernel, the integral
   connecting matrix, its special reduction, and finite-cokernel Nakayama
-  correction are now formalized.  What remains before the divisor
-  construction is to instantiate this module-valued complex for the actual
-  oriented fractional ideal and prove finite cokernel plus zero residue
-  cokernel.  An equivalent valuation-theoretic properness proof would also
-  suffice.
+  correction are now formalized.  The formal-infinity polynomial also has
+  two Hensel roots with unit difference and an explicit factorization; its
+  evaluation equivalence with the product of the two branch rings remains
+  to be packaged.  What remains before the divisor construction is to
+  instantiate the module-valued complex for the actual oriented fractional
+  ideal and prove finite cokernel plus zero residue cokernel.  An equivalent
+  valuation-theoretic properness proof would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
