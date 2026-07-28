@@ -377,3 +377,131 @@ by a sixteen-row certificate.
 7. Connect the global/local candidate envelope to
    `N13CandidateCollapse`, yielding
    `N13TwoAdicEndgame.TwoSurjective G`.
+
+## 2026-07-27 update: complete target and the exact remaining seam
+
+The earlier implementation order is now mostly historical.  Production
+already contains the low-degree representative, the unconditional fake
+Kummer homomorphism, the global Gaussian/local-dlog collapse, the explicit
+half of the infinity difference, and the genuine complete norm-pair target.
+In particular:
+
+```text
+N13MumfordOrientedFullKummer.orientedFullKummer
+  : G → N13FullNormPair.FullTarget
+```
+
+is a homomorphism, the N13 Gaussian order-four unit identifies the two
+possible sign fibres, and the fake class is trivial for every rational
+Picard class.  The only hard implication still missing is
+
+```text
+orientedFullKummer P = 1  ->  exists Q, P = 2 • Q.
+```
+
+The complete target is the standard coupled norm-pair quotient
+
+```text
+Gamma = { (alpha,s) in L^* x Q^* | Norm(alpha)=s^2 }
+(alpha,s) ~ (beta^2 q alpha, Norm(beta) q^3 s).
+```
+
+The precise published source for its honest Kummer interpretation is
+Stoll--van Luijk, *Explicit Selmer groups for cyclic covers of P1*,
+Theorem 1.1 and Proposition 3.1.  Poonen--Schaefer Theorem 11.3 is the
+corresponding fake-map theorem.  For N13 its quadratic-conjugate cubic
+factorization is exactly their even-genus condition; equivalently, the
+six branch points have a Galois-stable partition into two conjugate triples.
+
+### Constructive Cantor interface
+
+For an inverse-doubling witness it is enough to produce polynomials
+`a,L` and a nonzero scalar `k` such that
+
+```text
+f - L^2 = k a^2 u,             u | (L - v) or u | (L + v).
+```
+
+The finite ideal identity is structural.  First prove
+
+```text
+I(a,L)^2 = I(a^2,L).
+```
+
+The nontrivial inclusion follows by multiplying a Bezout identity for
+`a, 2L, (f-L^2)/a` by `Y-L`.  Then the existing Cantor product theorem
+gives
+
+```text
+I(a,L)^2 * I(k u,L) = (Y-L),
+```
+
+and scalar normalization plus the congruence modulo `u` identifies the
+second factor with the target Mumford ideal or its conjugate.  The remaining
+integer-at-infinity equality supplies the oriented square root.  This is
+being formalized in
+`N13MumfordFullKummerIdentityFiber.lean`.
+
+### Padé construction and its audited limitation
+
+Given a full-gauge witness
+
+```text
+u(theta) = q beta^2,
+```
+
+write `B` for the degree-less-than-six polynomial representative of `beta`.
+Linear algebra produces nonzero `a`, of degree at most two, for which
+
+```text
+l = (a B) mod f
+```
+
+has degree at most three.  Consequently
+
+```text
+q l^2 - a^2 u = c f
+```
+
+for a rational scalar `c`.  This is a useful structural compression, but
+one must not silently assume that `q/c` is a rational square.  Such a square
+would immediately give `L = sqrt(q/c) l` and the Cantor witness above; its
+existence is essentially the kernel theorem being proved.  Resultants and
+the full orientation coordinate determine the relevant sign, but in the
+degree-two branch they do not by themselves prove the rational squareclass.
+
+Modulo `u`, the Mumford relation does show that `q/c` is a square in the
+quadratic algebra `Q[X]/u` (when the displayed quantities are nonzero):
+
+```text
+q l^2 = c f = c v^2 mod u.
+```
+
+Turning this quadratic-algebra square root into a simultaneous square root
+of `f` modulo `a^2 u` is the current constructive subproblem.  Any proof must
+also handle `c=0` and degree drops; these are where the even-sextic infinity
+branch can appear.
+
+### Available cohomological infrastructure
+
+The pinned Mathlib already contains:
+
+```text
+Mathlib.RepresentationTheory.Homological.GroupCohomology.LowDegree
+Mathlib.RepresentationTheory.Homological.GroupCohomology.Hilbert90
+groupCohomology.isMulCoboundary₁_of_isMulCocycle₁_of_aut_to_units
+```
+
+Thus a fallback formalization of Stoll--van Luijk need not reprove Hilbert
+90 or a general low-degree cohomology library.  The irreducible missing
+bridge would instead be:
+
+1. construct the six-root sign module over a finite splitting field;
+2. identify its norm kernel modulo the diagonal sign with the concrete
+   Picard two-torsion;
+3. prove that complete Mumford evaluation represents the ordinary
+   half-point Kummer cocycle.
+
+This route is conceptually clean but larger than a successful direct
+inverse-Cantor construction.  It should be used only if the Padé/CRT bridge
+cannot be completed.
