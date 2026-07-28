@@ -69,6 +69,13 @@
     into polynomials in `x=t⁻¹`; for the `v` coefficient it first shifts by
     `t³`.  Thus both submodules in the formal Čech quotient are now exactly
     the images of the two genuine chart rings (`f636af395b`)
+  - formed the genuine additive Čech coboundary from the actual affine and
+    complete formal-infinity rings.  Its image is exactly the kernel of the
+    two principal-part coefficients, and its additive cokernel is
+    canonically equivalent to the rank-two obstruction group.  The
+    Laurent-series calculation is therefore now an exact statement about
+    the actual chart complex, not only its coefficient submodules
+    (`f2e7c66f84`)
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -97,13 +104,13 @@
   Affine ideal saturation alone is insufficient: it does not prevent a
   degree-two divisor from escaping to infinity.  The honest next route is a
   proper two-chart/Čech construction of the relative degree-two divisor.
-  The genuine quadratic overlap algebra, both actual chart rings, the exact
-  equalities between their restriction images and the two Čech submodules,
-  the integral connecting matrix, its special reduction, and the Nakayama
-  correction are now formalized.  What remains before the divisor
-  construction is the module-level gluing/principality theorem for the
-  actual oriented fractional ideal.  An equivalent valuation-theoretic
-  properness proof would also suffice.
+  The genuine quadratic overlap algebra, both actual chart rings, their
+  exact additive Čech complex and rank-two cokernel, the integral connecting
+  matrix, its special reduction, and the Nakayama correction are now
+  formalized.  What remains before the divisor construction is the
+  module-level gluing/principality theorem for the actual oriented
+  fractional ideal.  An equivalent valuation-theoretic properness proof
+  would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
