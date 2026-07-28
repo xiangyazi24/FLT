@@ -332,6 +332,15 @@
   passes.  Axiom audits for Smith form, contraction, primitive graph form,
   integral representatives, and the final conditional surjectivity theorem
   report only `propext`, `Classical.choice`, and `Quot.sound`.
+- Proved the easy direction of the actual N13 Kummer-kernel theorem.  The
+  descended homomorphism kills every double because its target has exponent
+  two; it also kills the infinity-difference class because that class has
+  the explicit Mumford representative `u=1`.  Hence both standard
+  even-sextic branches lie in the kernel.
+- `lake build
+  FLT.Assumptions.MazurProof.N13MumfordKummerKernelForward` passes.  Axiom
+  audits for all four forward-kernel theorems report only `propext`,
+  `Classical.choice`, and `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:

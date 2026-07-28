@@ -242,6 +242,12 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   half-class.  If the map is trivial, the theorem directly supplies the
   doubling-surjectivity input expected by the two-adic endgame.  The
   generic half-divisor kernel theorem itself remains a genuine input.
+- For the actual descended Kummer homomorphism, the forward half of that
+  kernel description is no longer an input: all doubles vanish by
+  exponent two, and the infinity-difference class vanishes because its
+  explicit balanced representative has `u=1`.  Only the converse
+  principal-genus statement—from trivial fake class back to a double or
+  infinity-shifted double—remains genuinely hard.
 - The finite candidate calculation is also connected to this group-level
   assembly without hiding its semantics.  The exact remaining
   `CandidateLocalization` input says that every genuine global Kummer value
