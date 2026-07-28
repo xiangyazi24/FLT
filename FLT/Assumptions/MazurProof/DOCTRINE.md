@@ -189,6 +189,21 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   The equality to the scalar unit `13` proves internally that both displayed
   factors are units, so no irreducibility or number-field construction is
   needed.
+- The six-dimensional power basis has now been replaced, for the local
+  calculation, by its intrinsic Gaussian cubic presentation.  The torsion
+  unit satisfies `ζ²=-1`, the sextic root satisfies a cubic equation over
+  `ℚ(ζ)`, and `e1`, `e2`, `a`, and `q` have exact expressions of degree at
+  most two in `ζ` and the root.  All polynomial quotients in these changes
+  of presentation are constant or linear.
+- The useful two-adic ray characters are now packaged as one first
+  ramified logarithm on
+  `F₈[ε]/(ε²)`: `(r+εc) ↦ c/r`.  Lean proves that it is multiplicative-to-
+  additive, kills squares and scalar units, and therefore descends to the
+  fake square-class quotient.  The four candidate generators have exact
+  logarithms, and `κ=0` is equivalent to
+  `i=0`, `j=0`, `k=s`; this is the structural `16→2` reduction.  The
+  remaining local task is the `ℚ₂` adapter proving that both valuation
+  regimes land in this first-jet kernel, not a table of sixteen classes.
 - Trivial fake 2-descent gives `J(ℚ)/2J(ℚ)=0`, not finiteness by itself.
   The structural closure must use the same prime: a good generalized model
   at two, a strict 2-adic formal-kernel filtration, and reduction to the

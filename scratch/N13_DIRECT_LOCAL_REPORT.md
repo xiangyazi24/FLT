@@ -77,7 +77,11 @@ to the `2`-adic square test, and also `u/2^m` for odd `u mod 32` and
   \chi_1=\chi_2=\chi_3=\chi_4=0.
 \]
 
-For the global candidates these four *uniform* equations solve to
+The first three equations are the three coordinates of one intrinsic
+`F_8`-valued first ramified logarithm.  The fourth row is independent on the
+full local unit quotient but duplicates the third row on these four global
+generators.  Consequently the single first-jet equation, rather than four
+independent conditions or a representative table, solves to
 
 \[
   i=j=0,\qquad k=s,

@@ -133,6 +133,23 @@
   proof, local-prime search, or representative enumeration is used.
 - Targeted builds pass.  `#print axioms` for the scalar identity and quotient
   collapse reports only `propext`, `Classical.choice`, and `Quot.sound`.
+- Formalized the Gaussian cubic change of presentation.  The intrinsic
+  order-four unit squares to `-1`; the sextic root obeys a cubic over that
+  quadratic subalgebra; and the four long S-unit/prime generators reduce to
+  exact degree-two formulas.  The relevant polynomial quotients are only
+  constant or linear.
+- Replaced the first useful two-adic ray-character rows by one intrinsic
+  first ramified logarithm on the dual numbers over `F₈`.  The generic
+  logarithm kills squares and scalar units and factors through the fake
+  square-class target.
+- Calculated the four N13 generator jets and proved by minimal-polynomial
+  linear independence that the first-jet kernel is exactly
+  `i=0`, `j=0`, `k=s`.  This reduces the sixteen global candidates to two
+  in one `F₈` equation; no candidate enumeration is present.
+- Targeted builds and axiom audits for the Gaussian cubic, ramified
+  logarithm, and N13 first-jet kernel pass with only `propext`,
+  `Classical.choice`, and `Quot.sound`.  The actual `ℚ₂` valuation adapter
+  and completeness of the global S-unit envelope remain explicit.
 - Corrected the endgame: fake-2 triviality supplies 2-divisibility, so the
   separated kernel must be 2-adic.  The good model is
   `y²+(x³+x+1)y=x⁵+x⁴`; its two affine/infinity charts stay smooth modulo
