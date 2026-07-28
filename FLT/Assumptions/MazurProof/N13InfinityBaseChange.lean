@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.N13BranchNorm
+import FLT.Assumptions.MazurProof.N13SmallMumfordRigidity
 import FLT.Assumptions.MazurProof.SexticMumfordOrientedBaseChange
 import Mathlib.NumberTheory.Padics.PadicIntegers
 
@@ -292,6 +293,96 @@ def picMapRatToQ₂ :
     (N13Infinity.positiveInfinityOrder ℚ)
     (N13Infinity.positiveInfinityOrder Q₂)
     (infinityCompatible ratToQ₂ ratToQ₂_injective) D
+
+/-- Canonical balanced representatives commute with rational-to-two-adic
+base change. -/
+@[simp] theorem normalize_picMapRatToQ₂
+    (c :
+      SexticMumford.ConcretePic
+        (N13Mumford.model ℚ)
+        (N13Infinity.positiveInfinityOrder ℚ)) :
+    SexticMumford.normalize
+        (N13Mumford.model Q₂)
+        (N13Infinity.positiveInfinityOrder Q₂)
+        (picMapRatToQ₂ c) =
+      (SexticMumford.normalize
+          (N13Mumford.model ℚ)
+          (N13Infinity.positiveInfinityOrder ℚ) c).mapCoeffs
+        ratToQ₂ ratToQ₂_injective
+        (map_n13_f ratToQ₂) := by
+  apply SexticMumford.normalize_eq_of_class
+  calc
+    SexticMumford.classOf
+          (N13Mumford.model Q₂)
+          (N13Infinity.positiveInfinityOrder Q₂)
+          ((SexticMumford.normalize
+              (N13Mumford.model ℚ)
+              (N13Infinity.positiveInfinityOrder ℚ) c).mapCoeffs
+            ratToQ₂ ratToQ₂_injective
+            (map_n13_f ratToQ₂)) =
+        picMapRatToQ₂
+          (SexticMumford.classOf
+            (N13Mumford.model ℚ)
+            (N13Infinity.positiveInfinityOrder ℚ)
+            (SexticMumford.normalize
+              (N13Mumford.model ℚ)
+              (N13Infinity.positiveInfinityOrder ℚ) c)) := by
+      rw [picMapRatToQ₂_classOf]
+    _ = picMapRatToQ₂ c := by
+      rw [SexticMumford.classOf_normalize]
+
+/-- Rational oriented Picard classes remain distinct after extension to
+`ℚ₂`.  The proof uses unique balanced normal forms, not a Picard-scheme
+separatedness theorem. -/
+theorem picMapRatToQ₂_injective :
+    Function.Injective picMapRatToQ₂ := by
+  intro c d hcd
+  have hnormal :
+      ((SexticMumford.normalize
+          (N13Mumford.model ℚ)
+          (N13Infinity.positiveInfinityOrder ℚ) c).mapCoeffs
+            ratToQ₂ ratToQ₂_injective
+            (map_n13_f ratToQ₂) :
+          N13Mumford.Mumford Q₂) =
+        ((SexticMumford.normalize
+          (N13Mumford.model ℚ)
+          (N13Infinity.positiveInfinityOrder ℚ) d).mapCoeffs
+            ratToQ₂ ratToQ₂_injective
+            (map_n13_f ratToQ₂) :
+          N13Mumford.Mumford Q₂) := by
+    rw [← normalize_picMapRatToQ₂,
+      ← normalize_picMapRatToQ₂, hcd]
+  have hsource :
+      SexticMumford.normalize
+          (N13Mumford.model ℚ)
+          (N13Infinity.positiveInfinityOrder ℚ) c =
+        SexticMumford.normalize
+          (N13Mumford.model ℚ)
+          (N13Infinity.positiveInfinityOrder ℚ) d :=
+    SexticMumford.Mumford.mapCoeffs_injective
+      ratToQ₂ ratToQ₂_injective
+      (map_n13_f ratToQ₂) hnormal
+  calc
+    c = SexticMumford.classOf
+          (N13Mumford.model ℚ)
+          (N13Infinity.positiveInfinityOrder ℚ)
+          (SexticMumford.normalize
+            (N13Mumford.model ℚ)
+            (N13Infinity.positiveInfinityOrder ℚ) c) :=
+      (SexticMumford.classOf_normalize
+        (N13Mumford.model ℚ)
+        (N13Infinity.positiveInfinityOrder ℚ) c).symm
+    _ = SexticMumford.classOf
+          (N13Mumford.model ℚ)
+          (N13Infinity.positiveInfinityOrder ℚ)
+          (SexticMumford.normalize
+            (N13Mumford.model ℚ)
+            (N13Infinity.positiveInfinityOrder ℚ) d) := by
+      rw [hsource]
+    _ = d :=
+      SexticMumford.classOf_normalize
+        (N13Mumford.model ℚ)
+        (N13Infinity.positiveInfinityOrder ℚ) d
 
 end
 
