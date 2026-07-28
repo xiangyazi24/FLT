@@ -13,7 +13,7 @@ Gaussian order with the full relative integral closure.
 This file contains no class-group computation and no integral-basis search.
 -/
 
-open Algebra Polynomial
+open Algebra Module Polynomial
 
 namespace MazurProof.N13GaussianCubicField
 
@@ -61,11 +61,6 @@ local instance : Fact (Irreducible hK) :=
 
 local instance fieldL : Field L :=
   AdjoinRoot.instField
-
-/-- The compatible `ℤ[i]`-algebra structure obtained through its fraction
-field. -/
-local instance algebraGIL : Algebra GI L :=
-  Algebra.ofModule smul_mul_assoc mul_smul_comm
 
 /-- The shifted cubic generator. -/
 def alpha : L :=
@@ -138,6 +133,78 @@ theorem integralClosure_eq_adjoin :
   · simpa [powerBasis_gen] using alpha_integral
   · exact powerBasis_discr
   · simpa [powerBasis_gen, minpoly_alpha] using h_eisenstein
+
+/-! ## The relative integral basis -/
+
+local instance faithfulGIL : FaithfulSMul GI L := by
+  rw [faithfulSMul_iff_algebraMap_injective]
+  intro x y hxy
+  apply IsFractionRing.injective GI K
+  apply (algebraMap K L).injective
+  have hmap :
+      algebraMap GI L =
+        (algebraMap K L).comp (algebraMap GI K) :=
+    IsScalarTower.algebraMap_eq GI K L
+  rw [hmap] at hxy
+  exact hxy
+
+/-- The power basis on the generated Gaussian order, transported to the
+proved relative integral closure. -/
+def relativeIntegralPowerBasis :
+    PowerBasis GI (integralClosure GI L) :=
+  (Algebra.adjoin.powerBasis' (R := GI) alpha_integral).map
+    (Subalgebra.equivOfEq _ _
+      integralClosure_eq_adjoin.symm)
+
+@[simp] theorem relativeIntegralPowerBasis_dim :
+    relativeIntegralPowerBasis.dim = 3 := by
+  simp [relativeIntegralPowerBasis, minpoly_alpha,
+    h_natDegree]
+
+@[simp] theorem coe_relativeIntegralPowerBasis_gen :
+    ((relativeIntegralPowerBasis.gen :
+        integralClosure GI L) : L) = alpha := by
+  simp [relativeIntegralPowerBasis]
+
+/-- The literal relative integral basis `(1, α, α²)`. -/
+def relativeIntegralBasis :
+    Basis (Fin 3) GI (integralClosure GI L) :=
+  relativeIntegralPowerBasis.basis.reindex
+    (finCongr relativeIntegralPowerBasis_dim)
+
+@[simp] theorem coe_relativeIntegralBasis_apply
+    (j : Fin 3) :
+    ((relativeIntegralBasis j :
+        integralClosure GI L) : L) =
+      alpha ^ (j : ℕ) := by
+  rw [relativeIntegralBasis, Basis.reindex_apply,
+    relativeIntegralPowerBasis.basis_eq_pow]
+  have hindex :
+      (((finCongr relativeIntegralPowerBasis_dim).symm j) :
+        ℕ) = (j : ℕ) := rfl
+  change
+    ((relativeIntegralPowerBasis.gen :
+      integralClosure GI L) : L) ^
+        (((finCongr relativeIntegralPowerBasis_dim).symm j) :
+          ℕ) =
+      alpha ^ (j : ℕ)
+  rw [coe_relativeIntegralPowerBasis_gen]
+  rw [hindex]
+
+@[simp] theorem coe_relativeIntegralBasis_zero :
+    ((relativeIntegralBasis 0 :
+        integralClosure GI L) : L) = 1 := by
+  simp
+
+@[simp] theorem coe_relativeIntegralBasis_one :
+    ((relativeIntegralBasis 1 :
+        integralClosure GI L) : L) = alpha := by
+  simp
+
+@[simp] theorem coe_relativeIntegralBasis_two :
+    ((relativeIntegralBasis 2 :
+        integralClosure GI L) : L) = alpha ^ 2 := by
+  simp
 
 end
 
