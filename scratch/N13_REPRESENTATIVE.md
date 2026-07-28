@@ -153,3 +153,26 @@ The two adapted cubic lifts should give updates
 `n ↦ n+d-3` and `n ↦ n+3-e`; these formulas must be derived from the
 existing `ordPlus`/`ordMinus` definitions before implementing the second
 well-founded recursion.  No stale polynomial from Q1649 is admissible.
+
+## Fake-Kummer bypass
+
+Phase II is no longer required for the N13 fake-Kummer map.  The new
+`N13LowDegreeKummerHom` uses the surjectivity of
+`exists_lowDegreeSemiRepresentative` directly.  For a low-degree
+semirepresentative `D`, it constructs an auxiliary Mumford datum with the
+same `u` and `v` and with `nInf=0`; `deg u≤2` makes this a valid balanced
+datum.  This auxiliary object is used only by the already-proved
+`u(θ)` evaluator.
+
+Crucially, equality and addition are not tested using the auxiliary
+balanced class.  They are tested in
+
+```text
+semiMumfordClass M O D.toSemi,
+```
+
+with the original integer `nInf`.  The quotient equality supplies the
+finite principal-ideal relation, and that relation alone is passed to the
+existing Kummer invariance theorem.  Hence the resulting homomorphism is
+unconditional and preserves the full oriented semantics; infinity
+balancing remains only a normal-form theorem.

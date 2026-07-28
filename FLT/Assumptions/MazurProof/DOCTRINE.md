@@ -291,8 +291,8 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   numerator/conumerator factors specialize at `θ` to the square.  The same
   argument for a product of two Mumford ideals gives the three-term identity
   needed for addition in the Picard quotient.  Consequently, surjectivity of
-  balanced representatives alone defines a canonical Picard-to-fake-class
-  homomorphism; uniqueness of normal forms is not needed.
+  low-degree semirepresentatives defines a canonical Picard-to-fake-class
+  homomorphism; uniqueness and infinity balancing are not needed.
 - Balanced-representative existence now has a complete structural affine
   phase.  The ideal of all `Y`-coefficients is principal; stability under
   multiplication by `Y` puts the constant coefficients in the same ideal.
@@ -311,17 +311,25 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   semi-Mumford representative with `deg u≤2`.  Low affine degree alone is
   not yet balanced: a second well-founded phase must move the infinity
   coordinate between its two walls using the cubic polynomial parts of
-  `Y` at infinity.
+  `Y` at infinity.  That phase remains useful for a balanced normal form,
+  but it is no longer on the fake-Kummer dependency path.
 - The raw Mumford Kummer value is now defined in the actual sextic field.
   The branch specialization `X↦θ, Y↦0` sends the hyperelliptic norm of
-  every affine function to a square.  For a balanced representative,
+  every affine function to a square.  For a low-degree representative,
   `deg u≤2<6` makes `u(θ)` nonzero, hence a field unit, and its class in
   `Lˣ/(Lˣ²ℚˣ)` is defined, and the zero representative maps to zero.  Lean
   proves generically that this target has exponent two and that a
   product-square-scalar relation identifies two raw values.  Independence
-  from the chosen Mumford representative and additivity on Picard classes
-  are now proved; existence of a balanced representative for every class is
-  the remaining normal-form input for the global homomorphism.
+  from the chosen affine Mumford ideal and additivity on Picard classes are
+  now proved.
+- Infinity balancing is not needed to construct the global fake-Kummer
+  homomorphism.  Every oriented class already has a semi-Mumford
+  representative with `deg u≤2`.  Replacing only its stored infinity
+  integer by zero gives an auxiliary balanced datum with the same `(u,v)`
+  for evaluating `u(θ)`; principal relations and addition are still
+  extracted from the original oriented classes.  Thus the unconditional
+  homomorphism is defined after affine Phase I, without changing an
+  oriented class or assuming surjectivity of balanced representatives.
 - Trivial fake 2-descent gives `J(ℚ)/2J(ℚ)=0`, not finiteness by itself.
   The structural closure must use the same prime: a good generalized model
   at two, a strict 2-adic formal-kernel filtration, and reduction to the

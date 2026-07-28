@@ -407,6 +407,20 @@
   the strict step, and the final existence theorem report only `propext`,
   `Classical.choice`, and `Quot.sound`.  Infinity balancing remains a
   separate Phase II.
+- Removed infinity Phase II from the fake-Kummer dependency chain.  A
+  low-degree semirepresentative is converted only for evaluation to a
+  balanced datum with the same `(u,v)` and `nInf=0`; its original integer
+  infinity coordinate remains in `semiMumfordClass`.  Equality and
+  additivity first extract the finite principal-ideal relation from those
+  original oriented classes, then reuse the existing `u(θ)` relation
+  theorem.
+- This gives an unconditional homomorphism
+  `N13LowDegreeKummerHom.mumfordKummer`; no
+  `Function.Surjective (classOf M O)` parameter remains.  `lake build
+  FLT.Assumptions.MazurProof.N13LowDegreeKummerHom` passes.  Axiom audits
+  for affine-ideal preservation, relation invariance, additivity,
+  low-degree surjectivity, and the final homomorphism report only
+  `propext`, `Classical.choice`, and `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
