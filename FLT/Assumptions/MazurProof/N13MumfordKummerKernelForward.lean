@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.N13MumfordKummerHom
+import FLT.Assumptions.MazurProof.N13LowDegreeKummerHom
 import FLT.Assumptions.MazurProof.N13KummerKernelAssembly
 
 /-!
@@ -86,6 +87,64 @@ theorem mumfordKummer_two_nsmul_add_infinityClass
         (2 • Q + infinityClass) = 0 := by
   rw [map_add, mumfordKummer_two_nsmul,
     mumfordKummer_infinityClass, zero_add]
+
+/-! ## Unconditional low-degree Kummer homomorphism -/
+
+abbrev structuralKummer : G →+ Target :=
+  N13LowDegreeKummerHom.mumfordKummer
+
+def infinityMinusLow :
+    N13LowDegreeKummerHom.LowRep where
+  toSemi := (infinityMinusMumford M).toSemi
+  degree_le_two := (infinityMinusMumford M).deg_u
+
+@[simp] theorem lowClass_infinityMinusLow :
+    N13LowDegreeKummerHom.lowClass infinityMinusLow =
+      infinityClass := by
+  rfl
+
+@[simp] theorem lowFakeClass_infinityMinusLow :
+    N13LowDegreeKummerHom.lowFakeClass infinityMinusLow = 0 := by
+  have hu :
+      N13MumfordKummerValue.uThetaUnit
+          (N13LowDegreeKummerHom.asMumford infinityMinusLow) = 1 := by
+    apply Units.ext
+    simp [N13MumfordKummerValue.uThetaUnit,
+      N13MumfordKummerValue.uTheta,
+      N13LowDegreeKummerHom.asMumford, infinityMinusLow,
+      infinityMinusMumford]
+  change
+    Additive.ofMul
+        (((N13MumfordKummerValue.uThetaUnit
+          (N13LowDegreeKummerHom.asMumford infinityMinusLow) :
+          N13MumfordKummerValue.Lˣ)) :
+          FakeSquareClass.Target
+            (algebraMap ℚ N13MumfordKummerValue.L)) =
+      Additive.ofMul 1
+  simp only [hu, QuotientGroup.mk_one]
+
+/-- The unconditional structural Kummer homomorphism kills the difference
+of the two infinity points. -/
+theorem structuralKummer_infinityClass :
+    structuralKummer infinityClass = 0 := by
+  rw [← lowClass_infinityMinusLow,
+    N13LowDegreeKummerHom.mumfordKummer_lowClass,
+    lowFakeClass_infinityMinusLow]
+
+/-- The unconditional structural Kummer homomorphism kills every double. -/
+theorem structuralKummer_two_nsmul (Q : G) :
+    structuralKummer (2 • Q) = 0 := by
+  rw [map_nsmul, N13LowDegreeKummerHom.mumfordKummer_apply]
+  exact
+    N13MumfordKummerValue.two_nsmul_mumfordFakeClass
+      (N13LowDegreeKummerHom.asMumford
+        (N13LowDegreeKummerHom.representative Q))
+
+/-- It also kills a double translated by the infinity class. -/
+theorem structuralKummer_two_nsmul_add_infinityClass (Q : G) :
+    structuralKummer (2 • Q + infinityClass) = 0 := by
+  rw [map_add, structuralKummer_two_nsmul,
+    structuralKummer_infinityClass, zero_add]
 
 end
 

@@ -421,6 +421,15 @@
   for affine-ideal preservation, relation invariance, additivity,
   low-degree surjectivity, and the final homomorphism report only
   `propext`, `Classical.choice`, and `Quot.sound`.
+- Replaced the abstract/conditional map in the forward-kernel endpoint by
+  the unconditional low-degree map.  It kills doubles, the
+  infinity-difference class, and their sums.  The fake-descent assembly now
+  exposes `actualKummer` and a final
+  `twoSurjective_of_actualCandidateLocalization` theorem whose only inputs
+  are the converse even-sextic kernel statement and CandidateLocalization.
+- Target builds for `N13MumfordKummerKernelForward` and
+  `N13FakeDescentAssembly` pass.  All five new forward/integration theorem
+  audits report only `propext`, `Classical.choice`, and `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:

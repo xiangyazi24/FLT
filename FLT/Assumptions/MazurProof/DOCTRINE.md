@@ -330,6 +330,12 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   extracted from the original oriented classes.  Thus the unconditional
   homomorphism is defined after affine Phase I, without changing an
   oriented class or assuming surjectivity of balanced representatives.
+- The unconditional map is now wired through the forward kernel and weak
+  descent layers.  It kills every double and the infinity-difference class,
+  and `CandidateLocalization` makes this specific map trivial.  The final
+  doubling-surjectivity theorem therefore has exactly two remaining
+  arithmetic inputs: CandidateLocalization and the converse
+  double-or-infinity kernel theorem.
 - Trivial fake 2-descent gives `J(ℚ)/2J(ℚ)=0`, not finiteness by itself.
   The structural closure must use the same prime: a good generalized model
   at two, a strict 2-adic formal-kernel filtration, and reduction to the

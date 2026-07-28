@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.N13CandidateCollapse
 import FLT.Assumptions.MazurProof.N13KummerKernelAssembly
+import FLT.Assumptions.MazurProof.N13LowDegreeKummerHom
 import FLT.Assumptions.MazurProof.N13MumfordKummerValue
 
 /-!
@@ -83,6 +84,31 @@ theorem twoSurjective_of_candidateLocalization
   exact N13KummerKernelAssembly.twoSurjective_of_kummer_trivial
     kummer kernel_double_or_infinity
     (kummer_trivial_of_candidateLocalization kummer H)
+
+/-! ## The unconditional structural Kummer map -/
+
+abbrev actualKummer : G →+ Target :=
+  N13LowDegreeKummerHom.mumfordKummer
+
+/-- Candidate localization makes the now-unconditional N13 Kummer map
+trivial. -/
+theorem actualKummer_trivial_of_candidateLocalization
+    (H : CandidateLocalization actualKummer) :
+    ∀ P : G, actualKummer P = 0 :=
+  kummer_trivial_of_candidateLocalization actualKummer H
+
+/-- For the actual structural Kummer map, only the converse kernel theorem
+and CandidateLocalization remain as weak-descent inputs. -/
+theorem twoSurjective_of_actualCandidateLocalization
+    (kernel_double_or_infinity :
+      ∀ P : G, actualKummer P = 0 ↔
+        (∃ Q : G, P = 2 • Q) ∨
+        (∃ Q : G,
+          P = 2 • Q + N13KummerKernelAssembly.infinityClass))
+    (H : CandidateLocalization actualKummer) :
+    N13TwoAdicEndgame.TwoSurjective G :=
+  twoSurjective_of_candidateLocalization
+    actualKummer kernel_double_or_infinity H
 
 end
 
