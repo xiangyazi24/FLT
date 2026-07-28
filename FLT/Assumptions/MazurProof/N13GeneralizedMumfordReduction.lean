@@ -132,6 +132,75 @@ theorem map_mumfordIdeal (u v : R₂[X]) :
     N13GoodCoordinateRingTwo.mumfordIdeal, Ideal.map_span,
     Set.image_pair, reduce_xClass, reduce_ySubClass]
 
+/-- Integral generalized Mumford data carrying the smoothness Bézout
+identity.  This is precisely the extra condition needed for the reduced
+graph ideal to be invertible. -/
+structure SmoothMumford₂ : Type
+    extends
+      N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂ where
+  bezout :
+    ∃ a b c : R₂[X],
+      a * u + b * (2 * v +
+        N13GeneralizedMumfordIntegral.hPoly (R := R₂)) +
+          c * w = 1
+
+/-- Smooth integral Mumford data reduce to the already constructed smooth
+special-fibre data. -/
+def reduceSmoothMumford
+    (D : SmoothMumford₂) :
+    N13GoodCoordinateRingTwo.SemiMumford where
+  u := reducePoly D.u
+  v := reducePoly D.v
+  w := reducePoly D.w
+  u_monic := D.u_monic.map reduceBase
+  curve_eq := by
+    have h := congrArg reducePoly D.curve_eq
+    simpa only [map_add, map_sub, map_mul, map_pow,
+      reduce_hPoly, reduce_rhsPoly] using h
+  bezout := by
+    obtain ⟨a, b, c, habc⟩ := D.bezout
+    refine ⟨reducePoly a, reducePoly b, reducePoly c, ?_⟩
+    have h := congrArg reducePoly habc
+    simpa only [map_add, map_mul, map_ofNat, map_one,
+      reduce_hPoly] using h
+
+@[simp] theorem reduceSmoothMumford_u
+    (D : SmoothMumford₂) :
+    (reduceSmoothMumford D).u = reducePoly D.u := rfl
+
+@[simp] theorem reduceSmoothMumford_v
+    (D : SmoothMumford₂) :
+    (reduceSmoothMumford D).v = reducePoly D.v := rfl
+
+/-- The exact ideal reduction theorem, now stated for smooth integral data. -/
+theorem map_smoothMumfordIdeal
+    (D : SmoothMumford₂) :
+    Ideal.map reduceCoordinate
+        (N13GeneralizedMumfordIntegral.mumfordIdeal
+          (R := R₂) D.u D.v) =
+      N13GoodCoordinateRingTwo.mumfordIdeal
+        (reduceSmoothMumford D).u
+        (reduceSmoothMumford D).v := by
+  simpa using map_mumfordIdeal D.u D.v
+
+/-- Consequently the reduced graph ideal is represented by the canonical
+unit fractional ideal on the special fibre. -/
+def reducedIdealUnit
+    (D : SmoothMumford₂) :
+    N13GoodCoordinateRingTwo.InvFrac :=
+  N13GoodCoordinateRingTwo.mumfordIdealUnit
+    (reduceSmoothMumford D)
+
+@[simp] theorem coe_reducedIdealUnit
+    (D : SmoothMumford₂) :
+    (reducedIdealUnit D :
+      FractionalIdeal (nonZeroDivisors SpecialRing)
+        N13GoodCoordinateRingTwo.FunctionField) =
+      N13GoodCoordinateRingTwo.mumfordIdeal
+        (reducePoly D.u) (reducePoly D.v) := by
+  exact N13GoodCoordinateRingTwo.coe_mumfordIdealUnit
+    (reduceSmoothMumford D)
+
 end
 
 end MazurProof.N13GeneralizedMumfordReduction
