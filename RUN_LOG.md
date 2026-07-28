@@ -97,6 +97,11 @@
     surjective by explicit two-point interpolation.  Hence the actual
     complete formal-infinity chart is ring-equivalent to
     `ℤ₂[[X]] × ℤ₂[[X]]`, with a proved formula for the inverse
+  - split the actual punctured formal overlap by the same method:
+    its quadratic algebra is ring-equivalent to the product of its two
+    Laurent-series branch rings.  The equivalence has an explicit
+    interpolation inverse, and simultaneous branch evaluation commutes
+    with restriction from the complete formal-infinity chart
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -126,12 +131,14 @@
   The genuine quadratic overlap algebra, both actual chart rings, their
   exact linear Čech complex and finite rank-two cokernel, the integral
   connecting matrix, its special reduction, and finite-cokernel Nakayama
-  correction are now formalized.  The complete formal-infinity chart is
-  now explicitly split as the product of its two Hensel branch rings.
-  What remains before the divisor construction is to instantiate the
-  module-valued complex for the actual oriented fractional ideal and prove
-  finite cokernel plus zero residue cokernel.  An equivalent
-  valuation-theoretic properness proof would also suffice.
+  correction are now formalized.  Both the complete formal-infinity chart
+  and its punctured overlap are explicitly split into their two Hensel
+  branches, compatibly with restriction.  What remains before the divisor
+  construction is to extend the affine restriction to the rational
+  fractional ideal, choose its branchwise integral infinity lattice, and
+  instantiate the module-valued complex; its cokernel must be finite with
+  zero residue cokernel.  An equivalent valuation-theoretic properness
+  proof would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
