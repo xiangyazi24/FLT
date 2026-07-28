@@ -461,6 +461,15 @@
   to its fraction field.  The rational `AdjoinRoot` specialization is
   exported for the N13 sextic.  Single-file checks and all four endpoint
   audits pass with only `propext`, `Classical.choice`, and `Quot.sound`.
+- Constructed the global relative cubic field over
+  `Frac(ℤ[i])`.  Eisenstein plus Gauss proves the translated cubic
+  irreducible; its root is integral over `ℤ[i]`, with the displayed cubic as
+  its exact integral minimal polynomial.  The relative power-basis
+  discriminant is `(3-2i)²`, so the generic denominator-removal theorem
+  identifies the full relative integral closure with `ℤ[i][α]`.
+  The targeted check and audits of irreducibility, minpoly, discriminant,
+  and maximal-order endpoints pass with only `propext`, `Classical.choice`,
+  and `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:

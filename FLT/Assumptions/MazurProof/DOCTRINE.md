@@ -191,6 +191,13 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   basis-discriminant/minimal-polynomial-discriminant identity and its
   integral coefficient-map form without expanding a multiplication or
   Sylvester matrix.
+- The relative Gaussian maximal-order step is now instantiated.  The
+  translated cubic is irreducible over `ℤ[i]` by Eisenstein and over its
+  fraction field by Gauss.  Its root has integral minimal polynomial exactly
+  the translated cubic, its relative power-basis discriminant is
+  `(3-2i)²`, and the discriminant--Eisenstein criterion proves
+  `integralClosure ℤ[i] L = ℤ[i][α]`.  Thus no integral-basis search remains
+  in the relative cubic extension.
 - The direct Abel--Jacobi map is now proved injective without a global
   `NormalFormData` assumption.  The proof clears both numerator directions
   of a principal relation, applies the two-infinity norm-degree rigidity,
