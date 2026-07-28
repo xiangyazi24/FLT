@@ -293,6 +293,36 @@ theorem norm_mk_eq_resultant
   rw [← hpad]
   exact norm_mk_eq_resultant_fixed_one u p hu hu2 hp
 
+/-- A polynomial coprime to the modulus represents a unit in the
+polynomial quotient. -/
+theorem isUnit_mk_of_isCoprime
+    (u p : K[X]) (hcop : IsCoprime u p) :
+    IsUnit (AdjoinRoot.mk u p) := by
+  obtain ⟨a, b, hab⟩ := hcop
+  apply IsUnit.of_mul_eq_one (AdjoinRoot.mk u b)
+  calc
+    AdjoinRoot.mk u p * AdjoinRoot.mk u b =
+        AdjoinRoot.mk u (p * b) := by
+      rw [map_mul]
+    _ = AdjoinRoot.mk u (a * u + b * p) := by
+      rw [map_add, map_mul, map_mul,
+        AdjoinRoot.mk_self]
+      simp [mul_comm]
+    _ = AdjoinRoot.mk u 1 := by
+      rw [hab]
+    _ = 1 := map_one (AdjoinRoot.mk u)
+
+/-- A nonzero resultant is enough to produce the quotient unit. -/
+theorem isUnit_mk_of_resultant_ne_zero
+    (u p : K[X]) (hu : u ≠ 0)
+    (hres : Polynomial.resultant u p ≠ 0) :
+    IsUnit (AdjoinRoot.mk u p) := by
+  apply isUnit_mk_of_isCoprime
+  by_contra hcop
+  apply hres
+  exact Polynomial.resultant_eq_zero_iff.mpr
+    ⟨Or.inl hu, hcop⟩
+
 end
 
 end MazurProof.QuadraticAdjoinRootNorm
