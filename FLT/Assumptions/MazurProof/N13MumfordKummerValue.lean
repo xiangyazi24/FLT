@@ -118,6 +118,44 @@ def mumfordFakeClass (D : N13Mumford.Mumford ℚ) : FakeTarget :=
     (((uThetaUnit D : Lˣ)) :
       FakeSquareClass.Target (algebraMap ℚ L))
 
+@[simp] theorem uTheta_zero :
+    uTheta (SexticMumford.zero M) = 1 := by
+  simp [uTheta]
+
+@[simp] theorem uThetaUnit_zero :
+    uThetaUnit (SexticMumford.zero M) = 1 := by
+  apply Units.ext
+  exact uTheta_zero
+
+@[simp] theorem mumfordFakeClass_zero :
+    mumfordFakeClass (SexticMumford.zero M) = 0 := by
+  change
+    Additive.ofMul
+        (((uThetaUnit (SexticMumford.zero M) : Lˣ)) :
+          FakeSquareClass.Target (algebraMap ℚ L)) =
+      0
+  rw [uThetaUnit_zero]
+  rfl
+
+/-- A product that differs from a rational scalar by a square gives equal
+raw fake-Kummer values.  Principal-ideal geometry will provide precisely
+this equality for two representatives of the same class. -/
+theorem mumfordFakeClass_eq_of_product_mul_square_eq_scalar
+    (D E : N13Mumford.Mumford ℚ)
+    (s : Lˣ) (q : ℚˣ)
+    (h :
+      (uThetaUnit D * uThetaUnit E) * s ^ 2 =
+        FakeSquareClass.scalarUnitsMap (algebraMap ℚ L) q) :
+    mumfordFakeClass D = mumfordFakeClass E := by
+  change
+    (((uThetaUnit D : Lˣ)) :
+        FakeSquareClass.Target (algebraMap ℚ L)) =
+      (((uThetaUnit E : Lˣ)) :
+        FakeSquareClass.Target (algebraMap ℚ L))
+  rw [FakeSquareClass.target_eq_iff_mul_eq_one]
+  exact FakeSquareClass.eq_one_of_mul_sq_eq_scalar
+    (algebraMap ℚ L) (uThetaUnit D * uThetaUnit E) s q h
+
 /-- The fake target has exponent two, so every raw value kills doubles. -/
 theorem two_nsmul_mumfordFakeClass
     (D : N13Mumford.Mumford ℚ) :

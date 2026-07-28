@@ -253,10 +253,12 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   The branch specialization `X↦θ, Y↦0` sends the hyperelliptic norm of
   every affine function to a square.  For a balanced representative,
   `deg u≤2<6` makes `u(θ)` nonzero, hence a field unit, and its class in
-  `Lˣ/(Lˣ²ℚˣ)` is defined.  Lean also proves generically that this target
-  has exponent two.  Independence from the chosen Mumford representative
-  still requires the principal-ideal square/scalar relation; it is not
-  hidden in this definition.
+  `Lˣ/(Lˣ²ℚˣ)` is defined, and the zero representative maps to zero.  Lean
+  proves generically that this target has exponent two and that a
+  product-square-scalar relation identifies two raw values.  Independence
+  from the chosen Mumford representative is therefore reduced exactly to
+  the structural principal-ideal square/scalar relation; it is not hidden
+  in the definition.
 - Trivial fake 2-descent gives `J(ℚ)/2J(ℚ)=0`, not finiteness by itself.
   The structural closure must use the same prime: a good generalized model
   at two, a strict 2-adic formal-kernel filtration, and reduction to the

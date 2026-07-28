@@ -50,6 +50,22 @@ theorem square_eq_one (e : K →+* L) (s : Lˣ) :
   intro s
   exact square_eq_one e s
 
+/-- In an exponent-two square-class target, equality is detected by the
+product rather than by a quotient. -/
+theorem target_eq_iff_mul_eq_one (e : K →+* L) (x y : Target e) :
+    x = y ↔ x * y = 1 := by
+  constructor
+  · intro hxy
+    rw [hxy]
+    rw [← pow_two]
+    exact target_sq_eq_one e y
+  · intro hxy
+    calc
+      x = x * 1 := (mul_one x).symm
+      _ = x * (y * y) := by rw [← pow_two, target_sq_eq_one]
+      _ = (x * y) * y := by ac_rfl
+      _ = y := by rw [hxy, one_mul]
+
 /-- If `z` differs from a scalar by a square, its fake class is trivial. -/
 theorem eq_one_of_mul_sq_eq_scalar
     (e : K →+* L) (z s : Lˣ) (q : Kˣ)

@@ -280,6 +280,16 @@
   Axiom audits for branch-norm squareness, nonvanishing, and the
   exponent-two consequence report only `propext`, `Classical.choice`, and
   `Quot.sound`.
+- The raw N13 fake-Kummer value now sends the zero Mumford representative
+  to zero.  A generic square-class bridge proves that a
+  product-square-scalar identity for two values is exactly enough to
+  identify their fake classes; this is the terminal algebraic step needed
+  by the principal-ideal relation argument.
+- `lake env lean
+  FLT/Assumptions/MazurProof/N13MumfordKummerValue.lean` passes.  Axiom
+  audits for the zero value, the exponent-two equality criterion, and the
+  product-square-scalar bridge report only `propext`, `Classical.choice`,
+  and `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
