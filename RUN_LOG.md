@@ -102,16 +102,23 @@
     Laurent-series branch rings.  The equivalence has an explicit
     interpolation inverse, and simultaneous branch evaluation commutes
     with restriction from the complete formal-infinity chart
+  - combined the two rational Laurent expansions into a faithful algebra
+    map from the N13 function field to the product of its infinity branches.
+    Every affine fractional ideal, including an invertible nonprincipal
+    one, now restricts canonically and injectively to that product; the
+    construction is a ring homomorphism on fractional ideals and therefore
+    also restricts their units, without choosing a global generator
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
 - exact remaining N13 seam:
-  1. for each rational Picard specialization-kernel class, construct the
-     actual oriented invertible fractional ideal/module on the affine chart,
-     its formal-infinity lattice, and the two restriction maps into the
-     overlap module for the twist by the fixed base divisor.  Prove that
-     this genuine module-valued Čech cokernel is finite and that its residue
-     cokernel is zero.  The new finite-cokernel Nakayama theorem then gives
+  1. for each rational Picard specialization-kernel class, take its actual
+     oriented invertible fractional ideal/module on the affine chart.  Its
+     faithful restriction to the two rational Laurent branches is now
+     canonical.  Choose the two complete integral branch lattices for the
+     twist by the fixed base divisor, form the genuine module-valued Čech
+     restriction difference, and prove that its cokernel is finite with
+     zero residue cokernel.  The finite-cokernel Nakayama theorem then gives
      the required integral section lift without any affine generator.
      A separate principality theorem is no longer required
   2. apply `exists_twisted_kernel_lift` to lift the canonical section,
@@ -133,12 +140,13 @@
   connecting matrix, its special reduction, and finite-cokernel Nakayama
   correction are now formalized.  Both the complete formal-infinity chart
   and its punctured overlap are explicitly split into their two Hensel
-  branches, compatibly with restriction.  What remains before the divisor
-  construction is to extend the affine restriction to the rational
-  fractional ideal, choose its branchwise integral infinity lattice, and
-  instantiate the module-valued complex; its cokernel must be finite with
-  zero residue cokernel.  An equivalent valuation-theoretic properness
-  proof would also suffice.
+  branches, compatibly with restriction.  The rational affine fractional
+  ideal now restricts faithfully to their product without a chosen
+  generator.  What remains before the divisor construction is to choose
+  its branchwise integral infinity lattices and instantiate the
+  module-valued complex; its cokernel must be finite with zero residue
+  cokernel.  An equivalent valuation-theoretic properness proof would also
+  suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
