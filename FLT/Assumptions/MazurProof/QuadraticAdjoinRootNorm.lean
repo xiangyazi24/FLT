@@ -323,6 +323,59 @@ theorem isUnit_mk_of_resultant_ne_zero
   exact Polynomial.resultant_eq_zero_iff.mpr
     ⟨Or.inl hu, hcop⟩
 
+/-- The norm of the quotient of a cubic numerator by a reduced denominator
+is the corresponding ratio of resultants.  The denominator is packaged as
+an actual unit, so this remains valid when the quadratic quotient is not a
+domain. -/
+theorem exists_mk_unit_norm_mul_inv
+    (u l v : K[X]) (hu : u.Monic)
+    (hu2 : u.natDegree = 2)
+    (hl : l.natDegree ≤ 3)
+    (hv : v.natDegree ≤ 1)
+    (hres : Polynomial.resultant u v ≠ 0) :
+    ∃ V : (AdjoinRoot u)ˣ,
+      (V : AdjoinRoot u) = AdjoinRoot.mk u v ∧
+      Algebra.norm K
+          (AdjoinRoot.mk u l *
+            ((V⁻¹ : (AdjoinRoot u)ˣ) : AdjoinRoot u)) =
+        Polynomial.resultant u l 2 3 /
+          Polynomial.resultant u v := by
+  have hvUnit :
+      IsUnit (AdjoinRoot.mk u v) :=
+    isUnit_mk_of_resultant_ne_zero
+      u v hu.ne_zero hres
+  let V : (AdjoinRoot u)ˣ := hvUnit.unit
+  have hV :
+      (V : AdjoinRoot u) = AdjoinRoot.mk u v :=
+    hvUnit.unit_spec
+  refine ⟨V, hV, ?_⟩
+  have hnormL :
+      Algebra.norm K (AdjoinRoot.mk u l) =
+        Polynomial.resultant u l 2 3 :=
+    norm_mk_eq_resultant_fixed_three
+      u l hu hu2 hl
+  have hnormV :
+      Algebra.norm K (V : AdjoinRoot u) =
+        Polynomial.resultant u v := by
+    rw [hV]
+    exact norm_mk_eq_resultant u v hu hu2 hv
+  have hnormInv :
+      Algebra.norm K
+          ((V⁻¹ : (AdjoinRoot u)ˣ) : AdjoinRoot u) =
+        (Polynomial.resultant u v)⁻¹ := by
+    calc
+      Algebra.norm K
+            ((V⁻¹ : (AdjoinRoot u)ˣ) : AdjoinRoot u) =
+          (((Units.map (Algebra.norm K) V)⁻¹ : Kˣ) : K) := by
+            exact
+              (Units.coe_map_inv
+                (Algebra.norm K) V).symm
+      _ = (Algebra.norm K (V : AdjoinRoot u))⁻¹ := by
+        rw [Units.val_inv_eq_inv_val, Units.coe_map]
+      _ = (Polynomial.resultant u v)⁻¹ := by
+        rw [hnormV]
+  rw [map_mul, hnormL, hnormInv, div_eq_mul_inv]
+
 end
 
 end MazurProof.QuadraticAdjoinRootNorm
