@@ -52,14 +52,22 @@
     For every invertible transition function reducing to `1`, the twisted
     principal connecting map reduces to the special N13 matrix, hence is
     surjective and admits the required kernel lift (`cefa49c23b`)
+  - identified that pair algebra with the genuine quadratic
+    `ℤ₂((t))`-algebra and constructed the actual restriction homomorphism
+    from the integral affine coordinate ring by `x ↦ t⁻¹`,
+    `y ↦ t⁻³v`.  Its normal-form coordinates respect multiplication, every
+    actual affine function lands in the previously defined affine-section
+    submodule, and a genuine overlap unit reducing to one canonically gives
+    a `NearIdentityTransition` (`7713f611c7`)
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
 - exact remaining N13 seam:
   1. for each rational Picard specialization-kernel class, construct affine
-     and formal-infinity trivializations of its oriented fractional ideal;
-     their overlap must be a
-     `N13FormalLineBundleCech.NearIdentityTransition`
+     and formal-infinity generators of its oriented fractional ideal.  The
+     affine restriction map is now explicit; the quotient of the two
+     generators must be a genuine formal-overlap unit reducing to one, hence
+     a `N13FormalLineBundleCech.NearIdentityTransition`
   2. apply `exists_twisted_kernel_lift` to lift the canonical section,
      produce its relative effective degree-two divisor, prove that it does
      not escape to infinity, and obtain a smooth integral Mumford graph
@@ -74,12 +82,13 @@
   Affine ideal saturation alone is insufficient: it does not prevent a
   degree-two divisor from escaping to infinity.  The honest next route is a
   proper two-chart/Čech construction of the relative degree-two divisor.
-  The genuine Laurent-series overlap, its power-series tails, the quadratic
-  formal curve multiplication, the integral connecting matrix, its special
-  reduction, and the Nakayama correction are now formalized.  What remains
-  before the divisor construction is the geometric local-trivialization
-  theorem for an actual oriented fractional ideal.  An equivalent
-  valuation-theoretic properness proof would also suffice.
+  The genuine quadratic overlap algebra, the actual affine restriction map,
+  its affine-section bound, the power-series tails, the integral connecting
+  matrix, its special reduction, and the Nakayama correction are now
+  formalized.  What remains before the divisor construction is the
+  geometric generator theorem for an actual oriented fractional ideal on
+  the two charts.  An equivalent valuation-theoretic properness proof would
+  also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
