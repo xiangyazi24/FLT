@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.N13TwoAdicAbelChartData
+import FLT.Assumptions.MazurProof.N13TwoAdicAbelChartPic
 import Mathlib.RingTheory.Henselian
 
 /-!
@@ -18,6 +19,7 @@ properness shortcut is used.
 -/
 
 open Polynomial
+open scoped nonZeroDivisors
 
 namespace MazurProof.N13TwoAdicAbelChartRecover
 
@@ -31,6 +33,12 @@ abbrev R₂ : Type :=
 
 abbrev K : Type :=
   N13GoodCoordinateRingTwo.K
+
+abbrev Q₂ : Type :=
+  ℚ_[2]
+
+abbrev Pic : Type :=
+  N13TwoAdicAbelChartPic.Pic
 
 abbrev maximal : Ideal R₂ :=
   IsLocalRing.maximalIdeal R₂
@@ -365,6 +373,112 @@ theorem mumfordIdeal_diskPair :
   exact mumfordIdeal_eq_of_dvd_sub
     D.u D.v D.diskPair.v D.u_dvd_v_sub_diskPair_v
 
+/-- Completion of the square carries the original graph and the recovered
+disk graph to the same standard sextic Mumford ideal. -/
+theorem sextic_mumfordIdeal_diskPair :
+    SexticMumford.mumfordIdeal
+        (N13Mumford.model Q₂)
+        (N13TwoAdicMumfordTransport.sexticSemi
+          D.toSmoothMumford₂ 0).u
+        (N13TwoAdicMumfordTransport.sexticSemi
+          D.toSmoothMumford₂ 0).v =
+      SexticMumford.mumfordIdeal
+        (N13Mumford.model Q₂)
+        (N13TwoAdicMumfordTransport.sexticSemi
+          D.diskPair.smoothMumford 0).u
+        (N13TwoAdicMumfordTransport.sexticSemi
+          D.diskPair.smoothMumford 0).v := by
+  rw [
+    ← N13TwoAdicCoordinateBaseChange.map_mumfordIdeal_sexticSemi
+      D.toSmoothMumford₂ 0,
+    ← N13TwoAdicCoordinateBaseChange.map_mumfordIdeal_sexticSemi
+      D.diskPair.smoothMumford 0]
+  exact congrArg
+    (Ideal.map N13TwoAdicCoordinateBaseChange.integralToSextic)
+    D.mumfordIdeal_diskPair
+
+theorem sextic_mumfordIdealUnit_diskPair :
+    SexticMumford.mumfordIdealUnit
+        (N13Mumford.model Q₂)
+        (N13TwoAdicMumfordTransport.sexticSemi
+          D.toSmoothMumford₂ 0) =
+      SexticMumford.mumfordIdealUnit
+        (N13Mumford.model Q₂)
+        (N13TwoAdicMumfordTransport.sexticSemi
+          D.diskPair.smoothMumford 0) := by
+  apply Units.ext
+  change
+    (SexticMumford.mumfordIdeal
+        (N13Mumford.model Q₂)
+        (N13TwoAdicMumfordTransport.sexticSemi
+          D.toSmoothMumford₂ 0).u
+        (N13TwoAdicMumfordTransport.sexticSemi
+          D.toSmoothMumford₂ 0).v :
+      FractionalIdeal
+        (N13Mumford.CoordinateRing Q₂)⁰
+        (N13Mumford.FunctionField Q₂)) =
+      SexticMumford.mumfordIdeal
+        (N13Mumford.model Q₂)
+        (N13TwoAdicMumfordTransport.sexticSemi
+          D.diskPair.smoothMumford 0).u
+        (N13TwoAdicMumfordTransport.sexticSemi
+          D.diskPair.smoothMumford 0).v
+  rw [D.sextic_mumfordIdeal_diskPair]
+
+/-- The oriented two-adic Picard class carried by a near-base integral
+graph. -/
+def pic : Pic :=
+  SexticMumford.semiMumfordClass
+    (N13Mumford.model Q₂)
+    (N13Infinity.positiveInfinityOrder Q₂)
+    (N13TwoAdicMumfordTransport.sexticSemi
+      D.toSmoothMumford₂ 0)
+
+/-- Recovery is compatible with the actual oriented Picard class. -/
+theorem pic_eq_diskPair_pic :
+    D.pic =
+      N13TwoAdicAbelChartPic.DiskPair.pic D.diskPair := by
+  change
+    SexticMumford.semiMumfordClass
+        (N13Mumford.model Q₂)
+        (N13Infinity.positiveInfinityOrder Q₂)
+        (N13TwoAdicMumfordTransport.sexticSemi
+          D.toSmoothMumford₂ 0) =
+      SexticMumford.classOf
+        (N13Mumford.model Q₂)
+        (N13Infinity.positiveInfinityOrder Q₂)
+        (N13TwoAdicAbelChartPic.DiskPair.mumford D.diskPair)
+  rw [← SexticMumford.semiMumfordClass_toSemi]
+  change
+    SexticMumford.semiMumfordClass
+        (N13Mumford.model Q₂)
+        (N13Infinity.positiveInfinityOrder Q₂)
+        (N13TwoAdicMumfordTransport.sexticSemi
+          D.toSmoothMumford₂ 0) =
+      SexticMumford.semiMumfordClass
+        (N13Mumford.model Q₂)
+        (N13Infinity.positiveInfinityOrder Q₂)
+        (N13TwoAdicMumfordTransport.sexticSemi
+          D.diskPair.smoothMumford 0)
+  unfold SexticMumford.semiMumfordClass
+  congr 2
+  apply Prod.ext
+  · exact D.sextic_mumfordIdealUnit_diskPair
+  · rfl
+
+/-- Centre the integral graph class at the selected base divisor. -/
+def centeredPic : Pic :=
+  D.pic -
+    N13TwoAdicAbelChartPic.DiskPair.pic
+      N13TwoAdicAbelChartData.basePair
+
+theorem centeredPic_eq_diskPair_centeredPic :
+    D.centeredPic =
+      N13TwoAdicAbelChartPic.DiskPair.centeredPic D.diskPair := by
+  rw [centeredPic,
+    N13TwoAdicAbelChartPic.DiskPair.centeredPic,
+    D.pic_eq_diskPair_pic]
+
 /-- The disk pair associated with a near-base graph is unique. -/
 theorem existsUnique_diskPair :
     ∃! P : N13TwoAdicAbelChartData.DiskPair,
@@ -382,6 +496,19 @@ theorem existsUnique_diskPair :
   apply N13TwoAdicAbelChartData.DiskPair.u_injective
   rw [(ofDiskPair P).diskPair_u]
   rfl
+
+@[simp] theorem pic_ofDiskPair
+    (P : N13TwoAdicAbelChartData.DiskPair) :
+    (ofDiskPair P).pic =
+      N13TwoAdicAbelChartPic.DiskPair.pic P := by
+  rw [(ofDiskPair P).pic_eq_diskPair_pic, diskPair_ofDiskPair]
+
+@[simp] theorem centeredPic_ofDiskPair
+    (P : N13TwoAdicAbelChartData.DiskPair) :
+    (ofDiskPair P).centeredPic =
+      N13TwoAdicAbelChartPic.DiskPair.centeredPic P := by
+  rw [(ofDiskPair P).centeredPic_eq_diskPair_centeredPic,
+    diskPair_ofDiskPair]
 
 end NearBaseMumford
 
