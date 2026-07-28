@@ -176,6 +176,17 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   envelope after the primes above `2` and `13` are imposed.  These PARI data
   are recorded only as a reproducible guide; the remaining proof obligation
   is the actual local-image theorem for those classes.
+- The direct Abel--Jacobi map is now proved injective without a global
+  `NormalFormData` assumption.  The proof clears both numerator directions
+  of a principal relation, applies the two-infinity norm-degree rigidity,
+  and recovers the monic Mumford `u` by contraction of scaled ideals.
+- The local square-class calculation has a structural correction: after the
+  2-, 13-, and real conditions, the two representatives are `1` and
+  `e2*a*q`, but the unit identity
+  `(e2*a*q)*(ζ*e1*a)^2=13` makes the latter a rational scalar.  They are
+  already equal in `L*/(L*² ℚ*)`, the natural fake-descent target.  The next
+  formal step is therefore the quotient target and this identity, not a
+  search for a further local obstruction.
 - Modulo three the four affine points are proved from
   `f(x)=1-x(x+1)` and Frobenius, not enumeration.  Together with the two
   infinity points, these are exactly the six cusp reductions.
@@ -213,8 +224,10 @@ Terminal: axiom replaced by theorem (long-term campaign).
 
 ## Execution Order
 
-1. **NOW:** (c) N13 — fixed weak 2-descent local-image theorem
-2. **NEXT:** N13 Jacobian finite reduction and the six-cusp conclusion
+1. **NOW:** (c) N13 — formalize the fake square-class quotient and collapse
+   the two local survivors by the rational-scalar identity
+2. **NEXT:** connect the resulting weak descent to Jacobian finiteness and
+   the six-cusp reduction conclusion
 3. **THEN:** (b) N49 after an explicit Tate-to-`X₀(49)` coordinate bridge exists
 4. **LATER:** (a) N25 (needs a deep rank-zero input), (d) N17/N19, then the prime tail
 6. **LAST:** (e) formal immersion

@@ -1,5 +1,4 @@
-import FLT.Assumptions.MazurProof.SexticMumfordGroup
-import FLT.Assumptions.MazurProof.N13Infinity
+import FLT.Assumptions.MazurProof.N13SmallMumfordRigidity
 
 /-!
 # The N13 Abel--Jacobi embedding in oriented Mumford coordinates
@@ -27,14 +26,8 @@ def abelJacobi :
     (SexticMumford.pointMumford (N13Mumford.model K) P)
 
 theorem abelJacobi_injective
-    [SexticMumford.NormalFormData (N13Mumford.model K)
-      (N13Infinity.positiveInfinityOrder K)] :
-    Function.Injective (abelJacobi K) := by
-  intro P Q hPQ
-  apply SexticMumford.pointMumford_injective (N13Mumford.model K)
-  apply SexticMumford.classOf_injective (N13Mumford.model K)
-    (N13Infinity.positiveInfinityOrder K)
-  exact hPQ
+    : Function.Injective (abelJacobi K) := by
+  exact N13SmallMumfordRigidity.point_class_injective K
 
 abbrev Cusp13 := N13Mumford.Cusp13
 
@@ -46,14 +39,10 @@ def cuspAbelJacobi : Cusp13 → ConcretePic ℚ :=
   (abelJacobi ℚ).comp cuspPoint
 
 theorem cuspAbelJacobi_injective
-    [SexticMumford.NormalFormData (N13Mumford.model ℚ)
-      (N13Infinity.positiveInfinityOrder ℚ)] :
-    Function.Injective cuspAbelJacobi := by
+    : Function.Injective cuspAbelJacobi := by
   exact (abelJacobi_injective ℚ).comp N13Mumford.cuspPoint_injective
 
 theorem cuspAbelJacobi_ne
-    [SexticMumford.NormalFormData (N13Mumford.model ℚ)
-      (N13Infinity.positiveInfinityOrder ℚ)]
     {c d : Cusp13} (hcd : c ≠ d) :
     cuspAbelJacobi c ≠ cuspAbelJacobi d := by
   exact fun h => hcd (cuspAbelJacobi_injective h)

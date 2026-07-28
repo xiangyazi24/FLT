@@ -113,6 +113,17 @@
   class number one, units, bad-prime factorization, and the resulting
   16-class global weak-2-descent envelope.  These computations identify, but
   do not replace, the remaining local-image proof.
+- Replaced the conditional N13 Abel--Jacobi injection with a direct proof for
+  point-sized Mumford representatives.  Clearing a principal relation gives
+  two integral factors; the two-branch norm forces both into `K[X]`, and
+  ideal contraction plus monicity forces their `u`-polynomials to agree.
+  Targeted builds pass, and `#print axioms` reports only `propext`,
+  `Classical.choice`, and `Quot.sound`.
+- Corrected the weak-2-descent interpretation.  The apparent second survivor
+  `e2*a*q` is the rational scalar class `[13]`, since
+  `(e2*a*q)*(ζ*e1*a)^2=13`.  Thus the two survivors coincide in the standard
+  fake-Jacobian target modulo `ℚ*`; searching for another local prime to kill
+  the second representative was the wrong problem.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
