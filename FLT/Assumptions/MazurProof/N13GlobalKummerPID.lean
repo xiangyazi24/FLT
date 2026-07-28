@@ -83,6 +83,17 @@ def integralClosureEquivClassNumberOrder :
   map_add' _ _ := rfl
   map_mul' _ _ := rfl
 
+/-- The normalization order and the class-number order have literally the
+same underlying element of the ambient number field.  Exporting this small
+carrier theorem prevents downstream proofs from unfolding the full ring
+equivalence. -/
+@[simp] theorem coe_integralClosureEquivClassNumberOrder
+    (x : O) :
+    ((integralClosureEquivClassNumberOrder x :
+        N13GaussianClassNumberOne.O) : L) =
+      (x : L) :=
+  rfl
+
 /-- The unconditional class-number-one specialization of the good-locus
 square factorization. -/
 theorem normalizedKummerInteger_associated_square
