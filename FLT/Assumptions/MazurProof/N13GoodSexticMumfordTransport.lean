@@ -120,6 +120,123 @@ theorem map_mumfordIdeal (u v : ℚ[X]) :
     toSextic_ySubClass]
   exact span_pair_mul_right_unit _ _ _ invTwo_isUnit
 
+/-- Congruent graph polynomials define the same sextic graph ideal. -/
+theorem sextic_mumfordIdeal_eq_of_dvd_sub
+    (u v w : ℚ[X]) (hvw : u ∣ v - w) :
+    SexticMumford.mumfordIdeal M u v =
+      SexticMumford.mumfordIdeal M u w := by
+  obtain ⟨q, hq⟩ := hvw
+  have hxsub :
+      SexticMumford.xClass M (v - w) =
+        SexticMumford.xClass M v -
+          SexticMumford.xClass M w := by
+    change sexticXHom (v - w) =
+      sexticXHom v - sexticXHom w
+    exact map_sub sexticXHom v w
+  have hxmul :
+      SexticMumford.xClass M (u * q) =
+        SexticMumford.xClass M u *
+          SexticMumford.xClass M q := by
+    change sexticXHom (u * q) =
+      sexticXHom u * sexticXHom q
+    exact map_mul sexticXHom u q
+  have hyw :
+      SexticMumford.ySubClass M w =
+        SexticMumford.ySubClass M v +
+          SexticMumford.xClass M u *
+            SexticMumford.xClass M q := by
+    unfold SexticMumford.ySubClass
+    rw [← hxmul, ← hq, hxsub]
+    ring
+  have hyv :
+      SexticMumford.ySubClass M v =
+        SexticMumford.ySubClass M w -
+          SexticMumford.xClass M u *
+            SexticMumford.xClass M q := by
+    rw [hyw]
+    ring
+  have hxv :
+      SexticMumford.xClass M u ∈
+        SexticMumford.mumfordIdeal M u v :=
+    SexticMumford.xClass_mem_mumfordIdeal M u v
+  have hxw :
+      SexticMumford.xClass M u ∈
+        SexticMumford.mumfordIdeal M u w :=
+    SexticMumford.xClass_mem_mumfordIdeal M u w
+  have hyvmem :
+      SexticMumford.ySubClass M v ∈
+        SexticMumford.mumfordIdeal M u v := by
+    unfold SexticMumford.mumfordIdeal
+    exact Ideal.subset_span (by simp)
+  have hywmem :
+      SexticMumford.ySubClass M w ∈
+        SexticMumford.mumfordIdeal M u w := by
+    unfold SexticMumford.mumfordIdeal
+    exact Ideal.subset_span (by simp)
+  have hmulv :
+      SexticMumford.xClass M u *
+          SexticMumford.xClass M q ∈
+        SexticMumford.mumfordIdeal M u v := by
+    simpa only [mul_comm] using
+      Ideal.mul_mem_left
+        (SexticMumford.mumfordIdeal M u v)
+        (SexticMumford.xClass M q) hxv
+  have hmulw :
+      SexticMumford.xClass M u *
+          SexticMumford.xClass M q ∈
+        SexticMumford.mumfordIdeal M u w := by
+    simpa only [mul_comm] using
+      Ideal.mul_mem_left
+        (SexticMumford.mumfordIdeal M u w)
+        (SexticMumford.xClass M q) hxw
+  apply le_antisymm
+  · apply Ideal.span_le.2
+    intro z hz
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
+    rcases hz with hz | hz
+    · rw [hz]
+      exact hxw
+    · rw [hz, hyv]
+      exact Ideal.sub_mem
+        (SexticMumford.mumfordIdeal M u w)
+        hywmem
+        hmulw
+  · apply Ideal.span_le.2
+    intro z hz
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
+    rcases hz with hz | hz
+    · rw [hz]
+      exact hxv
+    · rw [hz, hyw]
+      exact Ideal.add_mem
+        (SexticMumford.mumfordIdeal M u v)
+        hyvmem
+        hmulv
+
+/-- The reduced sextic graph polynomial attached to generalized data. -/
+def reducedCompletedGraph (u v : ℚ[X]) : ℚ[X] :=
+  completedGraph v % u
+
+private theorem dvd_sub_mod (p u : ℚ[X]) :
+    u ∣ p - p % u := by
+  refine ⟨p / u, ?_⟩
+  have h := EuclideanDomain.mod_add_div p u
+  calc
+    p - p % u = (p % u + u * (p / u)) - p % u := by
+      rw [h]
+    _ = u * (p / u) := by ring
+
+/-- The exact transport theorem with the sextic graph polynomial reduced
+modulo `u`, as required by the standard Mumford representation. -/
+theorem map_mumfordIdeal_reduced (u v : ℚ[X]) :
+    Ideal.map toSextic
+        (N13GeneralizedMumfordIntegral.mumfordIdeal u v) =
+      SexticMumford.mumfordIdeal M u
+        (reducedCompletedGraph u v) := by
+  rw [map_mumfordIdeal]
+  exact sextic_mumfordIdeal_eq_of_dvd_sub _ _ _
+    (dvd_sub_mod (completedGraph v) u)
+
 end
 
 end MazurProof.N13GoodSexticMumfordTransport
