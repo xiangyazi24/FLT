@@ -235,6 +235,128 @@ theorem factor_pair_rigidity
     omega
   exact ⟨hqz, hqw, hdegz, hdegw⟩
 
+private theorem minus_order_le_neg_three_of_coeffY_ne_zero
+    (p q : K[X])
+    (hz : N13BranchNorm.linearFunction K p q ≠ 0)
+    (hq : q ≠ 0)
+    (hplus : (-2 : ℤ) ≤
+      (N13Infinity.coordinateToLaurent K
+        (N13BranchNorm.linearFunction K p q)).order) :
+    (N13InfinityMinus.coordinateToLaurentMinus K
+      (N13BranchNorm.linearFunction K p q)).order ≤ -3 := by
+  have hmin :=
+    N13BranchLeading.branch_min_order K p q hz
+  have hpole :
+      3 ≤ N13BranchLeading.poleDegree K p q := by
+    simp only [N13BranchLeading.poleDegree, hq, if_false]
+    omega
+  omega
+
+/-- If two affine functions with at most double poles at the positive
+infinity multiply to a polynomial of degree at most four, neither function
+has a `Y`-part.  If both had a `Y`-part, both negative-branch pole orders
+would be at most `-3`, whereas their product has pole order at least `-4`.
+Once one `Y`-part vanishes, the rank-two coefficient decomposition forces
+the other to vanish as well. -/
+theorem factor_pair_coeffY_eq_zero
+    (z w : N13Mumford.CoordinateRing K) (P : K[X])
+    (hP : P ≠ 0) (hdeg : P.natDegree ≤ 4)
+    (hprod :
+      z * w = SexticMumford.xClass (N13Mumford.model K) P)
+    (hzplus : (-2 : ℤ) ≤
+      (N13Infinity.coordinateToLaurent K z).order)
+    (hwplus : (-2 : ℤ) ≤
+      (N13Infinity.coordinateToLaurent K w).order) :
+    SexticMumford.coeffY (N13Mumford.model K) z = 0 ∧
+      SexticMumford.coeffY (N13Mumford.model K) w = 0 := by
+  let M := N13Mumford.model K
+  let pz := SexticMumford.coeff0 M z
+  let qz := SexticMumford.coeffY M z
+  let pw := SexticMumford.coeff0 M w
+  let qw := SexticMumford.coeffY M w
+  have hzlin : N13BranchNorm.linearFunction K pz qz = z :=
+    SexticMumford.recompose M z
+  have hwlin : N13BranchNorm.linearFunction K pw qw = w :=
+    SexticMumford.recompose M w
+  have hxP :
+      SexticMumford.xClass M P ≠ 0 :=
+    SexticMumford.xClass_ne_zero M hP
+  have hzw : z * w ≠ 0 := by
+    rw [hprod]
+    exact hxP
+  have hz : z ≠ 0 := left_ne_zero_of_mul hzw
+  have hw : w ≠ 0 := right_ne_zero_of_mul hzw
+  have hzMinus :
+      N13InfinityMinus.coordinateToLaurentMinus K z ≠ 0 :=
+    by simpa using
+      (N13InfinityMinus.coordinateToLaurentMinus_injective K).ne hz
+  have hwMinus :
+      N13InfinityMinus.coordinateToLaurentMinus K w ≠ 0 :=
+    by simpa using
+      (N13InfinityMinus.coordinateToLaurentMinus_injective K).ne hw
+  have hminusSum :
+      (N13InfinityMinus.coordinateToLaurentMinus K z).order +
+          (N13InfinityMinus.coordinateToLaurentMinus K w).order =
+        -(P.natDegree : ℤ) := by
+    have hmapped :=
+      congrArg
+        (N13InfinityMinus.coordinateToLaurentMinus K) hprod
+    rw [map_mul,
+      N13InfinityMinus.coordinateToLaurentMinus_xClass] at hmapped
+    calc
+      (N13InfinityMinus.coordinateToLaurentMinus K z).order +
+            (N13InfinityMinus.coordinateToLaurentMinus K w).order =
+          (N13InfinityMinus.coordinateToLaurentMinus K z *
+            N13InfinityMinus.coordinateToLaurentMinus K w).order :=
+        (HahnSeries.order_mul hzMinus hwMinus).symm
+      _ = (N13BranchNorm.evalPoly K P).order := by
+        rw [hmapped]
+        rfl
+      _ = -(P.natDegree : ℤ) :=
+        N13BranchNorm.evalPoly_order K P hP
+  have hone : qz = 0 ∨ qw = 0 := by
+    by_contra hboth
+    push Not at hboth
+    have hzBound :=
+      minus_order_le_neg_three_of_coeffY_ne_zero
+        K pz qz (hzlin.trans_ne hz) hboth.1
+          (by simpa only [hzlin] using hzplus)
+    have hwBound :=
+      minus_order_le_neg_three_of_coeffY_ne_zero
+        K pw qw (hwlin.trans_ne hw) hboth.2
+          (by simpa only [hwlin] using hwplus)
+    rw [hzlin] at hzBound
+    rw [hwlin] at hwBound
+    have hdegZ : (P.natDegree : ℤ) ≤ 4 := by
+      exact_mod_cast hdeg
+    omega
+  rcases hone with hqz | hqw
+  · have hzpoly : z = SexticMumford.xClass M pz := by
+      simpa [M, N13BranchNorm.linearFunction, hqz] using hzlin.symm
+    have hpz : pz ≠ 0 := by
+      intro hpz
+      apply hz
+      rw [hzpoly, hpz, SexticMumford.xClass_zero]
+    have hcoeff : pz * qw = 0 := by
+      have hcoeff' := congrArg (SexticMumford.coeffY M) hprod
+      rw [hzpoly, SexticMumford.coeffY_xClass_mul] at hcoeff'
+      simpa [M, qw] using hcoeff'
+    exact ⟨hqz, (mul_eq_zero.mp hcoeff).resolve_left hpz⟩
+  · have hwpoly : w = SexticMumford.xClass M pw := by
+      simpa [M, N13BranchNorm.linearFunction, hqw] using hwlin.symm
+    have hpw : pw ≠ 0 := by
+      intro hpw
+      apply hw
+      rw [hwpoly, hpw, SexticMumford.xClass_zero]
+    have hprod' :
+        w * z = SexticMumford.xClass (N13Mumford.model K) P := by
+      simpa [mul_comm] using hprod
+    have hcoeff : pw * qz = 0 := by
+      have hcoeff' := congrArg (SexticMumford.coeffY M) hprod'
+      rw [hwpoly, SexticMumford.coeffY_xClass_mul] at hcoeff'
+      simpa [M, qz] using hcoeff'
+    exact ⟨(mul_eq_zero.mp hcoeff).resolve_left hpw, hqw⟩
+
 end
 
 end MazurProof.N13FactorRigidity

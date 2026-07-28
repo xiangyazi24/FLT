@@ -2,18 +2,20 @@ import FLT.Assumptions.MazurProof.N13FactorRigidity
 import FLT.Assumptions.MazurProof.SexticMumfordPrincipalScale
 import FLT.Assumptions.MazurProof.N13MumfordRigidity
 import FLT.Assumptions.MazurProof.SexticMumfordGroup
+import FLT.Assumptions.MazurProof.N13MumfordInfinityBalance
 
 /-!
-# Rigidity of point-sized Mumford representatives on `X₁(13)`
+# Rigidity of balanced Mumford representatives on `X₁(13)`
 
-For representatives with `deg(u) + nInf ≤ 1`, a principal relation clears
-to two affine factors whose product has degree at most two.  The two-infinity
-norm argument forces both factors into the polynomial subring.  Ideal
+For balanced representatives, a principal relation clears to two affine
+factors whose product has degree at most four.  The two-infinity pole-order
+argument forces both factors into the polynomial subring.  Ideal
 contraction then identifies the monic `u`-polynomials, so the principal
 function is constant and the balanced representatives agree.
 
-This yields the Abel--Jacobi embedding of the curve directly, without a
-global Mumford normal-form hypothesis and without coefficient enumeration.
+Together with structural infinity balancing, this gives the full unique
+Mumford normal form and hence the Abel--Jacobi embedding of the curve,
+without coefficient enumeration.
 -/
 
 open Polynomial
@@ -119,11 +121,9 @@ private theorem orientation_order
   have h := Multiplicative.ofAdd.injective hInf
   omega
 
-private theorem principal_is_constant_of_small
+private theorem principal_is_constant
     (D₁ D₂ : Mumford (N13Mumford.model K))
     (α : (N13Mumford.FunctionField K)ˣ)
-    (hsmall₁ : D₁.u.natDegree + D₁.nInf ≤ 1)
-    (hsmall₂ : D₂.u.natDegree + D₂.nInf ≤ 1)
     (hIdeal :
       mumfordIdealUnit (N13Mumford.model K) D₁.toSemi *
           toPrincipalIdeal (N13Mumford.CoordinateRing K)
@@ -160,19 +160,23 @@ private theorem principal_is_constant_of_small
   have hworder := numerator_order K α⁻¹ D₂.u w hu₂ hweq
   have hαinv := inverse_order K α
   have hzplus :
-      (-1 : ℤ) ≤ (N13Infinity.coordinateToLaurent K z).order := by
+      (-2 : ℤ) ≤ (N13Infinity.coordinateToLaurent K z).order := by
     rw [hzorder, hαorder]
+    have hbound := D₁.infinity_bound
     omega
   have hwplus :
-      (-1 : ℤ) ≤ (N13Infinity.coordinateToLaurent K w).order := by
+      (-2 : ℤ) ≤ (N13Infinity.coordinateToLaurent K w).order := by
     rw [hworder, hαinv, hαorder]
+    have hbound := D₂.infinity_bound
     omega
   have hP : D₁.u * D₂.u ≠ 0 := mul_ne_zero hu₁ hu₂
-  have hPdeg : (D₁.u * D₂.u).natDegree ≤ 2 := by
+  have hPdeg : (D₁.u * D₂.u).natDegree ≤ 4 := by
     rw [Polynomial.natDegree_mul hu₁ hu₂]
+    have hdeg₁ := D₁.deg_u
+    have hdeg₂ := D₂.deg_u
     omega
-  obtain ⟨hzY, hwY, -, -⟩ :=
-    N13FactorRigidity.factor_pair_rigidity K z w
+  obtain ⟨hzY, hwY⟩ :=
+    N13FactorRigidity.factor_pair_coeffY_eq_zero K z w
       (D₁.u * D₂.u) hP hPdeg hprod hzplus hwplus
   let pz := coeff0 M z
   let pw := coeff0 M w
@@ -305,10 +309,8 @@ private theorem principal_is_constant_of_small
   rw [hαfield, ← hCr]
   rfl
 
-theorem eq_of_class_eq_of_small
+theorem eq_of_class_eq
     (D₁ D₂ : Mumford (N13Mumford.model K))
-    (hsmall₁ : D₁.u.natDegree + D₁.nInf ≤ 1)
-    (hsmall₂ : D₂.u.natDegree + D₂.nInf ≤ 1)
     (hclass :
       classOf (N13Mumford.model K)
           (N13Infinity.positiveInfinityOrder K) D₁ =
@@ -319,10 +321,45 @@ theorem eq_of_class_eq_of_small
     (classOf_eq_iff (N13Mumford.model K)
       (N13Infinity.positiveInfinityOrder K) D₁ D₂).mp hclass
   obtain ⟨c, hα⟩ :=
-    principal_is_constant_of_small K D₁ D₂ α
-      hsmall₁ hsmall₂ hIdeal hInf
+    principal_is_constant K D₁ D₂ α hIdeal hInf
   exact N13Mumford.principal_between_balanced_of_constant
     K c hα hIdeal hInf
+
+theorem eq_of_class_eq_of_small
+    (D₁ D₂ : Mumford (N13Mumford.model K))
+    (_hsmall₁ : D₁.u.natDegree + D₁.nInf ≤ 1)
+    (_hsmall₂ : D₂.u.natDegree + D₂.nInf ≤ 1)
+    (hclass :
+      classOf (N13Mumford.model K)
+          (N13Infinity.positiveInfinityOrder K) D₁ =
+        classOf (N13Mumford.model K)
+          (N13Infinity.positiveInfinityOrder K) D₂) :
+    D₁ = D₂ :=
+  eq_of_class_eq K D₁ D₂ hclass
+
+theorem classOf_injective :
+    Function.Injective
+      (classOf (N13Mumford.model K)
+        (N13Infinity.positiveInfinityOrder K)) := by
+  intro D₁ D₂
+  exact eq_of_class_eq K D₁ D₂
+
+theorem existsUnique_classOf
+    (c : ConcretePic (N13Mumford.model K)
+      (N13Infinity.positiveInfinityOrder K)) :
+    ∃! D : Mumford (N13Mumford.model K),
+      classOf (N13Mumford.model K)
+        (N13Infinity.positiveInfinityOrder K) D = c := by
+  obtain ⟨D, hD⟩ :=
+    N13MumfordInfinityBalance.classOf_surjective c
+  refine ⟨D, hD, ?_⟩
+  intro E hE
+  exact classOf_injective K (hE.trans hD.symm)
+
+instance instNormalFormData :
+    NormalFormData (N13Mumford.model K)
+      (N13Infinity.positiveInfinityOrder K) where
+  existsUnique := existsUnique_classOf K
 
 theorem pointMumford_small
     (P : CurvePoint (N13Mumford.model K)) :
