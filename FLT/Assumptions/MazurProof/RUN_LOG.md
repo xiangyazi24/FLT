@@ -163,6 +163,17 @@
   `#J(F₂)=21-3+1=19`, hence exponent 19 for the finite additive Jacobian.
   This is structural and leaves only the standard fixed-curve Abel-fibre
   geometry, not a table of 19 group elements.
+- Constructed the fixed finite Abel set model.  The six points decompose as
+  three hyperelliptic pairs; collapsing exactly their three canonical
+  degree-two divisors gives a quotient of cardinality 19.  The production
+  module explicitly distinguishes this set quotient from the geometric
+  Picard group.
+- Isolated the exact semantic bridge as `GeometricAbelCriterion`: Abel
+  surjectivity plus the degree-two linear-equivalence criterion
+  automatically supplies the previously defined fibre-counting package.
+  The audit also exposed the separate nonsplit-orbit issue between
+  `Sym2(C(F₂))` and `Sym²(C)(F₂)`; the absence of new `F₄` points is the
+  structural input that will close it.
 - Formalized the two-adic group-theoretic closure without finite generation.
   A trivial fake descent is represented exactly by surjectivity of doubling;
   together with the separated doubling filtration and special-fibre

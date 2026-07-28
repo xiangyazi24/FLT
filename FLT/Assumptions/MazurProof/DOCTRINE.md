@@ -213,6 +213,20 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   into `#J(F₂)=21-3+1=19` and exponent 19.  The remaining input is therefore
   the fixed Abel-fibre geometry, not a zeta-function library or a 19-row
   Mumford table.
+- The finite Abel-fibre model is now explicit: the six special-fibre points
+  are three hyperelliptic pairs, and the set quotient of their 21 unordered
+  degree-two divisors collapses exactly the three canonical divisors.  Lean
+  proves that this quotient has 19 elements.  It is deliberately not called
+  the geometric Picard group.  A `GeometricAbelCriterion` isolates the
+  genuine bridge to two statements: Abel-map surjectivity and the
+  genus-two equality criterion saying that two effective degree-two
+  divisors are linearly equivalent exactly when they are equal or both
+  canonical.
+- There is a small but real source-type seam: `Sym2(C(F₂))` need not equal
+  the `F₂`-points of the geometric symmetric square.  In this instance the
+  already proved fact that every `F₄` point is Frobenius-fixed rules out a
+  nonsplit degree-two orbit; this identification still needs to be wired
+  into the fixed Picard construction.
 - The group-theoretic two-adic endgame is now formalized without
   Mordell--Weil finite generation.  Surjectivity of doubling, the
   19-element special fibre, and a separated doubling filtration imply that
