@@ -1,6 +1,8 @@
 import FLT.Assumptions.MazurProof.N13GaussianCubicField
 import FLT.Assumptions.MazurProof.N13GaussianFractionField
+import FLT.Assumptions.MazurProof.TowerDiscriminant
 import Mathlib.LinearAlgebra.Dimension.Free
+import Mathlib.NumberTheory.NumberField.Discriminant.Defs
 
 /-!
 # The absolute N13 number field
@@ -27,8 +29,30 @@ abbrev K := FractionRing GI
 
 abbrev L := AdjoinRoot N13GaussianCubicField.hK
 
-local instance fieldL : Field L :=
-  N13GaussianCubicField.cubicField
+local instance hKIrreducibleFact :
+    Fact (Irreducible N13GaussianCubicField.hK) :=
+  N13GaussianCubicField.hKIrreducibleFact
+
+@[reducible] local instance fieldL : Field L :=
+  AdjoinRoot.instField
+
+local instance intAlgebraL : Algebra ℤ L :=
+  Ring.toIntAlgebra L
+
+/- The subtype algebras otherwise prefer transitive `Subalgebra.algebra`
+instances.  For a tower starting at `ℤ`, use the unique canonical integer
+algebra structures so their modules are definitionally the usual `zsmul`
+modules carried by the explicit bases. -/
+local instance intAlgebraGI : Algebra ℤ GI :=
+  Ring.toIntAlgebra GI
+
+local instance intAlgebraRelativeIntegers :
+    Algebra ℤ (integralClosure GI L) :=
+  Ring.toIntAlgebra (integralClosure GI L)
+
+local instance intAlgebraAbsoluteIntegers :
+    Algebra ℤ (integralClosure ℤ L) :=
+  Ring.toIntAlgebra (integralClosure ℤ L)
 
 /-- The relative `K`-basis `(1, α, α²)`, with a fixed index type. -/
 def relativeBasis : Basis (Fin 3) K L :=
@@ -112,19 +136,23 @@ theorem absoluteIntegralClosure_toSubring_eq :
   integralClosure_toSubring_eq_of_isIntegral
     (R := ℤ) (S := GI) (A := L)
 
-/-- Change only the proof that an element of `L` is integral. -/
-def relativeToAbsoluteAddEquiv :
-    integralClosure GI L ≃+ integralClosure ℤ L where
+/-- Change only the proof that an element of `L` is integral.  Since the
+underlying carrier map is the identity, this is an algebra equivalence. -/
+def relativeToAbsoluteAlgEquiv :
+    integralClosure GI L ≃ₐ[ℤ] integralClosure ℤ L where
   toFun x := ⟨x.1, isIntegral_trans x.1 x.2⟩
   invFun x := ⟨x.1, x.2.tower_top⟩
   left_inv _ := Subtype.ext rfl
   right_inv _ := Subtype.ext rfl
   map_add' _ _ := rfl
+  map_mul' _ _ := rfl
+  commutes' _ := rfl
 
-/-- The same carrier change as an integer-linear equivalence. -/
+/-- The linear equivalence underlying the carrier-preserving algebra
+equivalence. -/
 def relativeToAbsoluteLinearEquiv :
     integralClosure GI L ≃ₗ[ℤ] integralClosure ℤ L :=
-  relativeToAbsoluteAddEquiv.toIntLinearEquiv
+  relativeToAbsoluteAlgEquiv.toAddEquiv.toIntLinearEquiv
 
 /-- The absolute integral basis obtained by composing the Gaussian integral
 basis with the relative cubic integral basis. -/
@@ -142,7 +170,110 @@ def absoluteIntegralBasis :
           (N13GaussianFractionField.gaussianIntBasis ij.1) *
         N13GaussianCubicField.alpha ^ (ij.2 : ℕ) := by
   simp [absoluteIntegralBasis, relativeToAbsoluteLinearEquiv,
-    relativeToAbsoluteAddEquiv, Algebra.smul_def]
+    relativeToAbsoluteAlgEquiv, Algebra.smul_def]
+
+/- Mathlib packages the ring of integers as a separate definition rather
+than exposing the integral-closure subtype directly.  This carrier-preserving
+equivalence is the explicit bridge between the two presentations. -/
+def integralClosureToRingOfIntegersRingEquiv :
+    integralClosure ℤ L ≃+*
+      NumberField.RingOfIntegers L :=
+  (NumberField.RingOfIntegers.equiv
+    (integralClosure ℤ L)).symm
+
+/-- The carrier-preserving bridge respects the canonical integer algebra
+structures. -/
+def integralClosureToRingOfIntegersAlgEquiv :
+    integralClosure ℤ L ≃ₐ[ℤ]
+      NumberField.RingOfIntegers L :=
+  AlgEquiv.ofRingEquiv
+    (f := integralClosureToRingOfIntegersRingEquiv)
+    (fun z => by simp)
+
+/-- The explicit integral basis, transported to Mathlib's performance-oriented
+`RingOfIntegers` wrapper. -/
+def absoluteRingOfIntegersBasis :
+    Basis (Fin 2 × Fin 3) ℤ
+      (NumberField.RingOfIntegers L) :=
+  absoluteIntegralBasis.map
+    integralClosureToRingOfIntegersAlgEquiv.toAddEquiv.toIntLinearEquiv
+
+/-! ## Absolute discriminant -/
+
+/-- The tower basis before changing the integral-closure subtype has the
+absolute discriminant `-10816`. -/
+theorem relativeTowerBasis_discr :
+    Algebra.discr ℤ
+      (N13GaussianFractionField.gaussianIntBasis.smulTower
+        N13GaussianCubicField.relativeIntegralBasis) =
+      -10816 := by
+  rw [TowerDiscriminant.discr_smulTower,
+    N13GaussianFractionField.discr_gaussianIntBasis,
+    N13GaussianCubicField.relativeIntegralBasis_discr]
+  simp only [Fintype.card_fin,
+    N13GaussianFractionField.algebraNorm_pi_sq]
+  norm_num
+
+/-- Discriminant of the explicit absolute integral basis. -/
+@[simp] theorem absoluteIntegralBasis_discr :
+    Algebra.discr ℤ absoluteIntegralBasis = -10816 := by
+  calc
+    Algebra.discr ℤ absoluteIntegralBasis =
+        Algebra.discr ℤ
+          (N13GaussianFractionField.gaussianIntBasis.smulTower
+            N13GaussianCubicField.relativeIntegralBasis) := by
+      symm
+      have hfun :
+          (relativeToAbsoluteAlgEquiv ∘
+              (N13GaussianFractionField.gaussianIntBasis.smulTower
+                N13GaussianCubicField.relativeIntegralBasis :
+                Fin 2 × Fin 3 →
+                  integralClosure GI L)) =
+            (absoluteIntegralBasis :
+              Fin 2 × Fin 3 → integralClosure ℤ L) := by
+        funext ij
+        rfl
+      have hdisc :=
+        Algebra.discr_eq_discr_of_algEquiv
+          (N13GaussianFractionField.gaussianIntBasis.smulTower
+            N13GaussianCubicField.relativeIntegralBasis)
+          relativeToAbsoluteAlgEquiv
+      rw [hfun] at hdisc
+      exact hdisc
+    _ = -10816 := relativeTowerBasis_discr
+
+/-- Discriminant of the same basis in Mathlib's `RingOfIntegers` wrapper. -/
+@[simp] theorem absoluteRingOfIntegersBasis_discr :
+    Algebra.discr ℤ absoluteRingOfIntegersBasis = -10816 := by
+  calc
+    Algebra.discr ℤ absoluteRingOfIntegersBasis =
+        Algebra.discr ℤ absoluteIntegralBasis := by
+      symm
+      have hfun :
+          (integralClosureToRingOfIntegersAlgEquiv ∘
+              (absoluteIntegralBasis :
+                Fin 2 × Fin 3 → integralClosure ℤ L)) =
+            (absoluteRingOfIntegersBasis :
+              Fin 2 × Fin 3 →
+                NumberField.RingOfIntegers L) := by
+        funext ij
+        rfl
+      have hdisc :=
+        Algebra.discr_eq_discr_of_algEquiv
+          absoluteIntegralBasis
+          integralClosureToRingOfIntegersAlgEquiv
+      rw [hfun] at hdisc
+      exact hdisc
+    _ = -10816 := absoluteIntegralBasis_discr
+
+/-- The absolute number-field discriminant. -/
+@[simp] theorem numberField_discr :
+    NumberField.discr L = -10816 := by
+  have hcanonical :=
+    NumberField.discr_eq_discr L
+      absoluteRingOfIntegersBasis
+  rw [← hcanonical]
+  exact absoluteRingOfIntegersBasis_discr
 
 end
 

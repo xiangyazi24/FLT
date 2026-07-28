@@ -1,6 +1,7 @@
 import FLT.Assumptions.MazurProof.N13GaussianGlobalArithmetic
 import Mathlib.NumberTheory.NumberField.Basic
 import Mathlib.RingTheory.Localization.Module
+import Mathlib.RingTheory.Localization.NormTrace
 import Mathlib.RingTheory.Discriminant
 
 /-!
@@ -75,6 +76,12 @@ def gaussianIntLinearEquiv : GI ≃ₗ[ℤ] (Fin 2 → ℤ) :=
 /-- The structural integral basis `(1,i)` of the Gaussian integers. -/
 def gaussianIntBasis : Basis (Fin 2) ℤ GI :=
   Basis.ofEquivFun gaussianIntLinearEquiv
+
+instance gaussianIntFree : Module.Free ℤ GI :=
+  Module.Free.of_basis gaussianIntBasis
+
+instance gaussianIntFinite : Module.Finite ℤ GI :=
+  Module.Finite.of_basis gaussianIntBasis
 
 @[simp] theorem gaussianIntBasis_repr_apply
     (z : GI) (j : Fin 2) :
@@ -294,6 +301,56 @@ theorem discr_gaussianBasis :
     gaussianBasis_one, one_mul, mul_one, iK_mul_self,
     trace_one_gaussian, trace_iK, trace_neg_one_gaussian]
   norm_num
+
+/-- The integral Gaussian basis has the same discriminant `-4`.
+This follows by localizing the basis, not by recomputing its trace matrix. -/
+theorem discr_gaussianIntBasis :
+    Algebra.discr ℤ gaussianIntBasis = -4 := by
+  apply RingHom.injective_int (algebraMap ℤ ℚ)
+  rw [← Algebra.discr_localizationLocalization
+    ℤ (nonZeroDivisors ℤ) K gaussianIntBasis]
+  exact discr_gaussianBasis
+
+/-- The algebra norm in the integral basis `(1,i)` is the usual Gaussian
+norm.  The proof is the symbolic determinant of multiplication by
+`a + bi`, not a computation on Gaussian elements. -/
+theorem algebraNorm_eq_gaussianNorm (z : GI) :
+    Algebra.norm ℤ z = Zsqrtd.norm z := by
+  rw [Algebra.norm_eq_matrix_det gaussianIntBasis,
+    Matrix.det_fin_two]
+  simp [Algebra.leftMulMatrix_eq_repr_mul,
+    gaussianIntBasis_zero, gaussianIntBasis_one,
+    gaussianIntBasis_repr_apply, i]
+  change z.re * z.re + z.im * z.im = Zsqrtd.norm z
+  simp [Zsqrtd.norm]
+
+@[simp] theorem algebraNorm_pi :
+    Algebra.norm ℤ pi = 13 := by
+  rw [algebraNorm_eq_gaussianNorm, pi_norm]
+
+@[simp] theorem algebraNorm_pi_sq :
+    Algebra.norm ℤ (pi ^ 2) = 13 ^ 2 := by
+  rw [map_pow, algebraNorm_pi]
+
+/-- Localization identifies the field norm on `K/ℚ` with the same Gaussian
+norm. -/
+theorem fieldNorm_algebraMap (z : GI) :
+    Algebra.norm ℚ (algebraMap GI K z) =
+      algebraMap ℤ ℚ (Zsqrtd.norm z) := by
+  rw [Algebra.norm_localization
+    ℤ (nonZeroDivisors ℤ) z,
+    algebraNorm_eq_gaussianNorm]
+
+@[simp] theorem fieldNorm_pi :
+    Algebra.norm ℚ (algebraMap GI K pi) = 13 := by
+  rw [fieldNorm_algebraMap, pi_norm]
+  norm_num
+
+@[simp] theorem fieldNorm_pi_sq :
+    Algebra.norm ℚ (algebraMap GI K (pi ^ 2)) =
+      13 ^ 2 := by
+  rw [map_pow (algebraMap GI K),
+    map_pow (Algebra.norm ℚ), fieldNorm_pi]
 
 end
 

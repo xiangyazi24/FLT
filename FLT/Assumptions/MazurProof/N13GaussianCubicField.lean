@@ -1,6 +1,7 @@
 import FLT.Assumptions.MazurProof.IntegralClosureOfEisensteinDiscr
 import FLT.Assumptions.MazurProof.N13GaussianGlobalArithmetic
 import FLT.Assumptions.MazurProof.PowerBasisDiscriminant
+import Mathlib.RingTheory.Localization.NormTrace
 
 /-!
 # The global N13 Gaussian cubic field
@@ -14,6 +15,7 @@ This file contains no class-group computation and no integral-basis search.
 -/
 
 open Algebra Module Polynomial
+open scoped nonZeroDivisors
 
 namespace MazurProof.N13GaussianCubicField
 
@@ -85,6 +87,19 @@ theorem powerBasis_dim :
   rw [powerBasis, AdjoinRoot.powerBasis_dim]
   rw [hK, h_monic.natDegree_map]
   exact h_natDegree
+
+/-- The relative field basis `(1, α, α²)` with fixed index `Fin 3`. -/
+def relativeFieldBasis : Basis (Fin 3) K L :=
+  powerBasis.basis.reindex (finCongr powerBasis_dim)
+
+@[simp] theorem relativeFieldBasis_apply (j : Fin 3) :
+    relativeFieldBasis j = alpha ^ (j : ℕ) := by
+  rw [relativeFieldBasis, Basis.reindex_apply,
+    powerBasis.basis_eq_pow]
+  have hindex :
+      (((finCongr powerBasis_dim).symm j) : ℕ) =
+        (j : ℕ) := rfl
+  rw [hindex, powerBasis_gen]
 
 /-- The shifted generator is integral over the Gaussian integers. -/
 theorem alpha_integral : IsIntegral GI alpha := by
@@ -205,6 +220,70 @@ def relativeIntegralBasis :
     ((relativeIntegralBasis 2 :
         integralClosure GI L) : L) = alpha ^ 2 := by
   simp
+
+/-! ## Discriminant of the relative integral basis -/
+
+local instance integralClosureLocalization :
+    IsLocalization
+      (Algebra.algebraMapSubmonoid
+        (integralClosure GI L) (nonZeroDivisors GI)) L :=
+  IsIntegralClosure.isLocalization
+    GI K L (integralClosure GI L)
+
+/-- Localizing the relative integral basis gives the literal relative field
+basis. -/
+def localizedRelativeIntegralBasis :
+    Basis (Fin 3) K L :=
+  Basis.localizationLocalization
+    K (nonZeroDivisors GI) L relativeIntegralBasis
+
+theorem localizedRelativeIntegralBasis_eq :
+    localizedRelativeIntegralBasis = relativeFieldBasis := by
+  ext j
+  simp [localizedRelativeIntegralBasis]
+
+theorem relativeFieldBasis_discr :
+    Algebra.discr K relativeFieldBasis =
+      algebraMap GI K (pi ^ 2) := by
+  calc
+    Algebra.discr K relativeFieldBasis =
+        Algebra.discr K powerBasis.basis := by
+      simpa [relativeFieldBasis] using
+        (Algebra.discr_reindex K powerBasis.basis
+          (finCongr powerBasis_dim))
+    _ = algebraMap GI K (pi ^ 2) :=
+      powerBasis_discr
+
+/-- The relative integral basis has discriminant `π²`. -/
+theorem relativeIntegralBasis_discr :
+    Algebra.discr GI relativeIntegralBasis = pi ^ 2 := by
+  apply IsFractionRing.injective GI K
+  calc
+    algebraMap GI K
+        (Algebra.discr GI relativeIntegralBasis) =
+        Algebra.discr K localizedRelativeIntegralBasis :=
+      (Algebra.discr_localizationLocalization
+        GI (nonZeroDivisors GI) L
+        relativeIntegralBasis).symm
+    _ = Algebra.discr K relativeFieldBasis := by
+      rw [localizedRelativeIntegralBasis_eq]
+    _ = algebraMap GI K (pi ^ 2) :=
+      relativeFieldBasis_discr
+
+/-- Equivalent discriminant statement for the unreindexed integral power
+basis. -/
+theorem relativeIntegralPowerBasis_discr :
+    Algebra.discr GI relativeIntegralPowerBasis.basis =
+      pi ^ 2 := by
+  calc
+    Algebra.discr GI relativeIntegralPowerBasis.basis =
+        Algebra.discr GI relativeIntegralBasis := by
+      symm
+      simpa [relativeIntegralBasis] using
+        (Algebra.discr_reindex GI
+          relativeIntegralPowerBasis.basis
+          (finCongr relativeIntegralPowerBasis_dim))
+    _ = pi ^ 2 := relativeIntegralBasis_discr
 
 end
 
