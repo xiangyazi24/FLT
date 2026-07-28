@@ -235,6 +235,14 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   `1,θ,θ²` power bases, not from a finite quotient table.  What remains
   local is only the arithmetic identification with the completed maximal
   order and the genuine Mumford-value compatibility.
+- The even-sextic target has now been corrected from a fake first
+  coordinate to the full norm pair `(α,s)`, with `N(α)=s²`, modulo the
+  square/norm and scalar/cubic gauges.  Forgetting `s` recovers the fake
+  quotient.  Pure quotient algebra proves that its kernel consists of
+  sign pairs `(1,ε)` with `ε²=1`; for N13 over `ℚ`, this leaves only the
+  identity and `(1,-1)`.  This isolates the genuine remaining theorem:
+  exactness of the Picard full-Kummer map, rather than an unjustified
+  converse for the fake target.
 - The even-sextic infinity correction is now explicit rather than an
   abstract kernel ambiguity.  For
   `u=X(X+1)` and `v=-(2X+1)`, the Mumford ideal satisfies

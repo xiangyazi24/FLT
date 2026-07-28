@@ -354,6 +354,19 @@
   `Classical.choice`, and `Quot.sound`.  Identifying this explicit order
   with the completed maximal order and transporting the genuine Kummer
   value remain separate arithmetic-semantic bridges.
+- Defined the full degree-six norm-pair target before forgetting the norm
+  root.  The abstract target remembers `(α,s)` with `N(α)=s²` and quotients
+  by `(β²,Nβ)` and `(q,q³)`.  Projection to the first coordinate descends
+  to the fake target, every full class has exponent two, and its forgetting
+  kernel is represented by pairs `(1,ε)` with `ε²=1`.
+- Specialized this construction to the N13 sextic field.  The power basis
+  gives rank six and the scalar norm formula; over `ℚˣ`, the only possible
+  signs are `1` and `-1`.  Hence the concrete forgetting kernel consists
+  of at most the identity and `(1,-1)`, without asserting that they are
+  distinct.  `lake build FLT.Assumptions.MazurProof.N13FullNormPair`
+  passes, and all target/kernel axiom audits report only `propext`,
+  `Classical.choice`, and `Quot.sound`.  The Picard full-Kummer exactness
+  theorem remains separate.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
