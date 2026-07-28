@@ -40,6 +40,11 @@ def mapPoly : R₂[X] →+* Q₂[X] :=
 @[simp] theorem mapPoly_apply (p : R₂[X]) :
     mapPoly p = p.map coeffMap := rfl
 
+/-- Coefficient extension from `ℤ₂[X]` to `ℚ₂[X]` is faithful. -/
+theorem mapPoly_injective : Function.Injective mapPoly :=
+  Polynomial.map_injective coeffMap
+    (IsFractionRing.injective R₂ Q₂)
+
 @[simp] theorem mapPoly_hPoly :
     mapPoly
         (N13GeneralizedMumfordIntegral.hPoly (R := R₂)) =
@@ -110,6 +115,40 @@ def extendCoordinate : IntegralRing →+* GoodRing :=
       N13GeneralizedMumfordIntegral.ySubClass
         (R := Q₂) (mapPoly v) := by
   simp [N13GeneralizedMumfordIntegral.ySubClass]
+
+/-- Coefficient extension preserves the `1`-coordinate in the rank-two
+presentation of the generalized coordinate ring. -/
+@[simp] theorem coeff0_extendCoordinate (z : IntegralRing) :
+    N13GeneralizedMumfordIntegral.coeff0
+        (extendCoordinate z) =
+      mapPoly (N13GeneralizedMumfordIntegral.coeff0 z) := by
+  rw [← N13GeneralizedMumfordIntegral.recompose z]
+  simp
+
+/-- Coefficient extension preserves the `Y`-coordinate in the rank-two
+presentation of the generalized coordinate ring. -/
+@[simp] theorem coeffY_extendCoordinate (z : IntegralRing) :
+    N13GeneralizedMumfordIntegral.coeffY
+        (extendCoordinate z) =
+      mapPoly (N13GeneralizedMumfordIntegral.coeffY z) := by
+  rw [← N13GeneralizedMumfordIntegral.recompose z]
+  simp
+
+/-- Base change from the integral good model to its generic fibre loses no
+functions.  This is the rank-two basis argument, not a localization
+calculation in coordinates. -/
+theorem extendCoordinate_injective :
+    Function.Injective extendCoordinate := by
+  intro z w h
+  apply
+    (N13GeneralizedMumfordIntegral.eq_iff_coeff z w).2
+  constructor
+  · apply mapPoly_injective
+    simpa only [coeff0_extendCoordinate] using congrArg
+      N13GeneralizedMumfordIntegral.coeff0 h
+  · apply mapPoly_injective
+    simpa only [coeffY_extendCoordinate] using congrArg
+      N13GeneralizedMumfordIntegral.coeffY h
 
 /-- Coefficient extension maps an integral graph ideal onto the
 coefficient-extended graph ideal. -/

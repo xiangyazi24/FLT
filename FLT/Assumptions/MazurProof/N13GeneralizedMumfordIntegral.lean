@@ -145,6 +145,61 @@ theorem recompose [Nontrivial R]
         _ = mk g :=
           AdjoinRoot.mk_leftInverse curvePoly_monic (mk g)
 
+@[simp] theorem coeff0_xClass [Nontrivial R] (p : R[X]) :
+    coeff0 (xClass p) = p := by
+  change (C p %ₘ curvePoly).coeff 0 = p
+  rw [(modByMonic_eq_self_iff curvePoly_monic).mpr]
+  · simp
+  · exact degree_C_le.trans_lt (by rw [curvePoly_degree]; norm_num)
+
+@[simp] theorem coeffY_xClass [Nontrivial R] (p : R[X]) :
+    coeffY (xClass p) = 0 := by
+  change (C p %ₘ curvePoly).coeff 1 = 0
+  rw [(modByMonic_eq_self_iff curvePoly_monic).mpr]
+  · simp
+  · exact degree_C_le.trans_lt (by rw [curvePoly_degree]; norm_num)
+
+@[simp] theorem coeff0_yClass [Nontrivial R] :
+    coeff0 (yClass (R := R)) = 0 := by
+  change (X %ₘ curvePoly).coeff 0 = 0
+  rw [(modByMonic_eq_self_iff curvePoly_monic).mpr]
+  · simp
+  · rw [degree_X, curvePoly_degree]
+    norm_num
+
+@[simp] theorem coeffY_yClass [Nontrivial R] :
+    coeffY (yClass (R := R)) = 1 := by
+  change (X %ₘ curvePoly).coeff 1 = 1
+  rw [(modByMonic_eq_self_iff curvePoly_monic).mpr]
+  · simp
+  · rw [degree_X, curvePoly_degree]
+    norm_num
+
+@[simp] theorem coeff0_xClass_mul_yClass [Nontrivial R] (p : R[X]) :
+    coeff0 (xClass p * yClass) = 0 := by
+  change coeff0
+    ((algebraMap R[X] (CoordinateRing (R := R)) p) * yClass) = 0
+  rw [← Algebra.smul_def]
+  simp
+
+@[simp] theorem coeffY_xClass_mul_yClass [Nontrivial R] (p : R[X]) :
+    coeffY (xClass p * yClass) = p := by
+  change coeffY
+    ((algebraMap R[X] (CoordinateRing (R := R)) p) * yClass) = p
+  rw [← Algebra.smul_def]
+  simp
+
+/-- Equality in the generalized affine coordinate ring is coefficientwise
+with respect to the basis `1, Y` over `R[X]`. -/
+theorem eq_iff_coeff [Nontrivial R]
+    (z w : CoordinateRing (R := R)) :
+    z = w ↔ coeff0 z = coeff0 w ∧ coeffY z = coeffY w := by
+  constructor
+  · rintro rfl
+    exact ⟨rfl, rfl⟩
+  · rintro ⟨h0, hY⟩
+    rw [← recompose z, ← recompose w, h0, hY]
+
 /-- The generalized graph relation; no smoothness assumption is needed for
 the evaluation-kernel and saturation theorems. -/
 structure SemiMumford where
