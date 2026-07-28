@@ -254,6 +254,63 @@ def xClassHom : K[X] →+* CoordinateRing :=
     xClass (p ^ n) = xClass p ^ n :=
   map_pow xClassHom p n
 
+/-- The canonical degree-less-than-two polynomial representative. -/
+def normalPoly : CoordinateRing →ₗ[K[X]] K[X][X] :=
+  AdjoinRoot.modByMonicHom curvePoly_monic
+
+/-- Constant coefficient in the `1,Y` basis. -/
+def coeff0 : CoordinateRing →ₗ[K[X]] K[X] :=
+  (Polynomial.lcoeff K[X] 0).comp normalPoly
+
+/-- `Y` coefficient in the `1,Y` basis. -/
+def coeffY : CoordinateRing →ₗ[K[X]] K[X] :=
+  (Polynomial.lcoeff K[X] 1).comp normalPoly
+
+@[simp] theorem normalPoly_mk (g : K[X][X]) :
+    normalPoly (mk g) = g %ₘ curvePoly := rfl
+
+@[simp] theorem coeff0_mk (g : K[X][X]) :
+    coeff0 (mk g) = (g %ₘ curvePoly).coeff 0 := rfl
+
+@[simp] theorem coeffY_mk (g : K[X][X]) :
+    coeffY (mk g) = (g %ₘ curvePoly).coeff 1 := rfl
+
+private theorem curvePoly_degree : curvePoly.degree = 2 := by
+  rw [degree_eq_natDegree curvePoly_monic.ne_zero,
+    curvePoly_natDegree]
+  norm_num
+
+theorem normalPoly_eq_C_add_C_mul_X (z : CoordinateRing) :
+    normalPoly z = C (coeff0 z) + C (coeffY z) * X := by
+  induction z using AdjoinRoot.induction_on with
+  | ih g =>
+      change g %ₘ curvePoly =
+        C ((g %ₘ curvePoly).coeff 0) +
+          C ((g %ₘ curvePoly).coeff 1) * X
+      have hsum := Polynomial.sum_modByMonic_coeff
+        (p := g) (q := curvePoly) curvePoly_monic
+        (n := 2) (by rw [curvePoly_degree]; norm_num)
+      rw [Fin.sum_univ_two] at hsum
+      simpa [← Polynomial.C_mul_X_pow_eq_monomial] using hsum.symm
+
+/-- Every coordinate-ring element has a unique rank-two expression. -/
+theorem recompose (z : CoordinateRing) :
+    xClass (coeff0 z) + xClass (coeffY z) * yClass = z := by
+  induction z using AdjoinRoot.induction_on with
+  | ih g =>
+      calc
+        xClass (coeff0 (mk g)) +
+              xClass (coeffY (mk g)) * yClass =
+            mk
+              (C (coeff0 (mk g)) +
+                C (coeffY (mk g)) * X) := by
+                  simp only [xClass, yClass, mk, map_add, map_mul,
+                    AdjoinRoot.mk_C, AdjoinRoot.mk_X]
+        _ = mk (normalPoly (mk g)) := by
+              rw [normalPoly_eq_C_add_C_mul_X]
+        _ = mk g :=
+          AdjoinRoot.mk_leftInverse curvePoly_monic (mk g)
+
 @[simp] theorem yClass_relation :
     yClass ^ 2 + xClass hPoly * yClass = xClass rhsPoly := by
   apply AdjoinRoot.mk_eq_mk.mpr
@@ -299,6 +356,119 @@ theorem xClass_mem_mumfordIdeal (u v : K[X]) :
 theorem ySubClass_mem_mumfordIdeal (u v : K[X]) :
     ySubClass v ∈ mumfordIdeal u v :=
   Ideal.subset_span (by simp)
+
+/-! ## Evaluation at a generalized Mumford graph -/
+
+abbrev MumfordResidue (D : SemiMumford) : Type :=
+  K[X] ⧸ Ideal.span ({D.u} : Set K[X])
+
+private theorem mumford_root_relation (D : SemiMumford) :
+    curvePoly.eval₂
+      (Ideal.Quotient.mk (Ideal.span ({D.u} : Set K[X])))
+      (Ideal.Quotient.mk (Ideal.span ({D.u} : Set K[X])) D.v) = 0 := by
+  change (X ^ 2 + C hPoly * X - C rhsPoly).eval₂
+      (Ideal.Quotient.mk (Ideal.span ({D.u} : Set K[X])))
+      (Ideal.Quotient.mk (Ideal.span ({D.u} : Set K[X])) D.v) = 0
+  simp only [eval₂_sub, eval₂_add, eval₂_pow, eval₂_X, eval₂_C,
+    eval₂_mul]
+  change Ideal.Quotient.mk (Ideal.span ({D.u} : Set K[X]))
+    (D.v ^ 2 + hPoly * D.v - rhsPoly) = 0
+  rw [Ideal.Quotient.eq_zero_iff_mem, Ideal.mem_span_singleton]
+  exact ⟨D.w, D.curve_eq⟩
+
+/-- Evaluation `X ↦ X mod u`, `Y ↦ v mod u`. -/
+def mumfordEval (D : SemiMumford) :
+    CoordinateRing →+* MumfordResidue D :=
+  AdjoinRoot.lift
+    (Ideal.Quotient.mk (Ideal.span ({D.u} : Set K[X])))
+    (Ideal.Quotient.mk (Ideal.span ({D.u} : Set K[X])) D.v)
+    (mumford_root_relation D)
+
+@[simp] theorem mumfordEval_xClass
+    (D : SemiMumford) (p : K[X]) :
+    mumfordEval D (xClass p) =
+      Ideal.Quotient.mk (Ideal.span ({D.u} : Set K[X])) p := by
+  change mumfordEval D (AdjoinRoot.of curvePoly p) = _
+  exact AdjoinRoot.lift_of (mumford_root_relation D)
+
+@[simp] theorem mumfordEval_yClass (D : SemiMumford) :
+    mumfordEval D yClass =
+      Ideal.Quotient.mk (Ideal.span ({D.u} : Set K[X])) D.v :=
+  AdjoinRoot.lift_root (mumford_root_relation D)
+
+@[simp] theorem mumfordEval_ySubClass (D : SemiMumford) :
+    mumfordEval D (ySubClass D.v) = 0 := by
+  simp [ySubClass]
+
+theorem mumfordIdeal_le_ker (D : SemiMumford) :
+    mumfordIdeal D.u D.v ≤ RingHom.ker (mumfordEval D) := by
+  apply Ideal.span_le.2
+  intro z hz
+  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
+  rcases hz with rfl | rfl
+  · change mumfordEval D (xClass D.u) = 0
+    rw [mumfordEval_xClass,
+      Ideal.Quotient.eq_zero_iff_mem, Ideal.mem_span_singleton]
+  · exact mumfordEval_ySubClass D
+
+/-- The generalized Mumford graph ideal is exactly the evaluation kernel. -/
+theorem ker_mumfordEval (D : SemiMumford) :
+    RingHom.ker (mumfordEval D) = mumfordIdeal D.u D.v := by
+  apply le_antisymm
+  · intro z hz
+    rw [RingHom.mem_ker] at hz
+    let p : K[X] := coeff0 z
+    let q : K[X] := coeffY z
+    have hz' : mumfordEval D
+        (xClass p + xClass q * yClass) = 0 := by
+      rw [recompose]
+      exact hz
+    have hquot : Ideal.Quotient.mk
+        (Ideal.span ({D.u} : Set K[X]))
+        (p + q * D.v) = 0 := by
+      simpa only [map_add, map_mul, mumfordEval_xClass,
+        mumfordEval_yClass] using hz'
+    have hdvd : D.u ∣ p + q * D.v :=
+      Ideal.mem_span_singleton.mp
+        (Ideal.Quotient.eq_zero_iff_mem.mp hquot)
+    obtain ⟨s, hs⟩ := hdvd
+    have hu : xClass D.u ∈ mumfordIdeal D.u D.v :=
+      xClass_mem_mumfordIdeal D.u D.v
+    have hyv : ySubClass D.v ∈ mumfordIdeal D.u D.v :=
+      ySubClass_mem_mumfordIdeal D.u D.v
+    have hbase : xClass (p + q * D.v) ∈
+        mumfordIdeal D.u D.v := by
+      rw [hs, xClass_mul, mul_comm]
+      exact Ideal.mul_mem_left
+        (mumfordIdeal D.u D.v) (xClass s) hu
+    have hgraph : xClass q * ySubClass D.v ∈
+        mumfordIdeal D.u D.v :=
+      Ideal.mul_mem_left
+        (mumfordIdeal D.u D.v) (xClass q) hyv
+    rw [← recompose z]
+    have hdecomp :
+        xClass p + xClass q * yClass =
+          xClass (p + q * D.v) +
+            xClass q * ySubClass D.v := by
+      simp only [xClass_add, xClass_mul, ySubClass]
+      ring
+    rw [hdecomp]
+    exact Ideal.add_mem _ hbase hgraph
+  · exact mumfordIdeal_le_ker D
+
+theorem mumfordEval_surjective (D : SemiMumford) :
+    Function.Surjective (mumfordEval D) := by
+  intro z
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective z
+  exact ⟨xClass p, mumfordEval_xClass D p⟩
+
+/-- The graph quotient is canonically the monic polynomial quotient. -/
+noncomputable def mumfordQuotientEquiv (D : SemiMumford) :
+    CoordinateRing ⧸ mumfordIdeal D.u D.v ≃+*
+      MumfordResidue D := by
+  rw [← ker_mumfordEval D]
+  exact RingHom.quotientKerEquivOfSurjective
+    (mumfordEval_surjective D)
 
 /-- The two graph generators multiply to the negative Cantor quotient. -/
 theorem ySubClass_mul_conjugate (D : SemiMumford) :
