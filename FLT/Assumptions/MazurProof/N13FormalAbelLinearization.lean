@@ -137,6 +137,52 @@ theorem remainderLinearization_isUnit :
     remainderLinearization_mul_self,
     remainderLinearization_mul_self⟩, rfl⟩
 
+/-! ## The Abel differential -/
+
+/-- The differential of the degree-two Abel map at
+`(0,0)+(-1,0)`, in the differential basis
+`dx/(2y+h), x dx/(2y+h)`.
+
+The two rows are evaluation at `(0,0)` and `(-1,0)`.  The vertical
+derivatives there are `1` and `-1`, so the matrix is triangular with unit
+diagonal.  This is the actual nonspecial Abel-map Jacobian; it is logically
+separate from `remainderLinearization`, which only solves the curve
+equations for the graph coefficients. -/
+def abelDifferentialMatrix : Matrix (Fin 2) (Fin 2) R :=
+  !![1, 0; -1, 1]
+
+@[simp] theorem abelDifferentialMatrix_det :
+    (abelDifferentialMatrix : Matrix (Fin 2) (Fin 2) R).det = 1 := by
+  rw [Matrix.det_fin_two]
+  simp [abelDifferentialMatrix]
+
+theorem abelDifferentialMatrix_det_isUnit :
+    IsUnit
+      (abelDifferentialMatrix :
+        Matrix (Fin 2) (Fin 2) R).det := by
+  rw [abelDifferentialMatrix_det]
+  exact isUnit_one
+
+/-- Evaluation at the two base points is an integral linear equivalence.
+This is the tangent-space form of nonspeciality used by the local Abel
+chart. -/
+def abelDifferentialEquiv :
+    (Fin 2 → R) ≃ₗ[R] (Fin 2 → R) where
+  toFun z := ![z 0, -z 0 + z 1]
+  invFun z := ![z 0, z 0 + z 1]
+  left_inv z := by
+    funext i
+    fin_cases i <;> simp
+  right_inv z := by
+    funext i
+    fin_cases i <;> simp
+  map_add' z w := by
+    funext i
+    fin_cases i <;> simp [add_assoc, add_left_comm, add_comm]
+  map_smul' a z := by
+    funext i
+    fin_cases i <;> simp [mul_add, mul_neg]
+
 end
 
 end MazurProof.N13FormalAbelLinearization
