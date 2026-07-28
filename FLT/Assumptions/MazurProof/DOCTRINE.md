@@ -257,6 +257,13 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   unit, hence a nonzero ground-field scalar.  This is the key
   well-definedness input for quotienting Mumford Kummer values by squares
   and rational scalars.
+- Principal-relation invariance and additivity are now proved.  Multiplying
+  a relation by its conjugate produces the fixed scalar unit, while integral
+  numerator/conumerator factors specialize at `θ` to the square.  The same
+  argument for a product of two Mumford ideals gives the three-term identity
+  needed for addition in the Picard quotient.  Consequently, surjectivity of
+  balanced representatives alone defines a canonical Picard-to-fake-class
+  homomorphism; uniqueness of normal forms is not needed.
 - The raw Mumford Kummer value is now defined in the actual sextic field.
   The branch specialization `X↦θ, Y↦0` sends the hyperelliptic norm of
   every affine function to a square.  For a balanced representative,
@@ -264,9 +271,9 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   `Lˣ/(Lˣ²ℚˣ)` is defined, and the zero representative maps to zero.  Lean
   proves generically that this target has exponent two and that a
   product-square-scalar relation identifies two raw values.  Independence
-  from the chosen Mumford representative is therefore reduced exactly to
-  the structural principal-ideal square/scalar relation; it is not hidden
-  in the definition.
+  from the chosen Mumford representative and additivity on Picard classes
+  are now proved; existence of a balanced representative for every class is
+  the remaining normal-form input for the global homomorphism.
 - Trivial fake 2-descent gives `J(ℚ)/2J(ℚ)=0`, not finiteness by itself.
   The structural closure must use the same prime: a good generalized model
   at two, a strict 2-adic formal-kernel filtration, and reduction to the

@@ -299,6 +299,23 @@
 - `lake build FLT.Assumptions.MazurProof.N13FakeDescentAssembly` passes.
   Axiom audits for candidate collapse, Kummer triviality, and doubling
   surjectivity report only `propext`, `Classical.choice`, and `Quot.sound`.
+- Proved the principal-relation theorem for the N13 Mumford value.  After
+  multiplying an ideal relation by its conjugate, the remaining coordinate
+  unit is conjugation-fixed and hence rational; integral numerator and
+  conumerator witnesses then give the required scalar-square identity.
+  The three-ideal version proves additivity, and both results descend
+  directly through equality and addition in the oriented Picard quotient.
+- Constructed the actual fake-Kummer homomorphism from any proof that
+  balanced Mumford representatives are surjective.  A noncomputable section
+  is sufficient: principal-relation invariance makes the value independent
+  of the chosen section, and the three-ideal theorem proves `map_add`.
+  Uniqueness of normal forms and a transported group law on Mumford data are
+  not required.
+- `lake build FLT.Assumptions.MazurProof.N13MumfordKummerRelation` and
+  `lake build FLT.Assumptions.MazurProof.N13MumfordKummerHom` pass.  Axiom
+  audits for the six relation theorems and the descended homomorphism report
+  only `propext`, `Classical.choice`, and `Quot.sound`; neither file contains
+  a proof escape.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
