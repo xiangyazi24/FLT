@@ -367,6 +367,20 @@
   passes, and all target/kernel axiom audits report only `propext`,
   `Classical.choice`, and `Quot.sound`.  The Picard full-Kummer exactness
   theorem remains separate.
+- Proved the structural one-step Cantor complement for every smooth monic
+  sextic in characteristic zero.  Congruent graph polynomials define the
+  same ideal; a transported Bézout relation proves
+  `I(u,V)I(w,V)=(Y-V)`; squarefreeness makes `w` nonzero; normalization and
+  conjugation use the essential next graph `(-V) mod normalize(w)`.
+- The oriented correction is carried by the explicit function
+  `(Y-V)/normalize(w)` and its positive-infinity order, so the resulting
+  semireduced datum represents the same concrete Picard class.  For
+  `deg u>3` the affine degree strictly falls; at `deg u=3`, taking
+  `V=v+u` cancels the two monic degree-six leading terms and lands in
+  degree at most two.  The target build and all nine key axiom audits are
+  standard-only.  This is intentionally the affine-degree phase: the
+  separate infinity-orientation balancing recursion is still required
+  before claiming a balanced representative.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:

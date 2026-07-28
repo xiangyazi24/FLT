@@ -295,6 +295,16 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   require a general Riemann--Roch theorem: replacing `v` by `v+u` cancels
   the monic degree-six leading term in `f-(v+u)²`, producing a complement
   of degree at most two.
+- The affine Cantor step is now formalized.  Its product identity comes
+  from a three-term Bézout relation, graph changes transport that relation
+  algebraically, and the next graph is `(-V) mod normalize(w)` so
+  conjugation preserves rather than inverts the class.  The principal
+  correction updates the stored orientation through its actual
+  positive-infinity order.  This proves strict affine-degree descent above
+  three and the degree-three leading-term cancellation.  Low affine degree
+  alone is not yet balanced: a second well-founded phase must move the
+  infinity coordinate between its two walls using the cubic polynomial
+  parts of `Y` at infinity.
 - The raw Mumford Kummer value is now defined in the actual sextic field.
   The branch specialization `X↦θ, Y↦0` sends the hyperelliptic norm of
   every affine function to a square.  For a balanced representative,
