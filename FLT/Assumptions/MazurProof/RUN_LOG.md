@@ -155,6 +155,14 @@
 - Audited Mathlib and the repository: no genus-two point-count/zeta/Jacobian
   cardinality bridge exists.  This is now isolated from the completed
   finite-field arithmetic rather than hidden inside it.
+- Replaced the missing general zeta API by the fixed genus-two
+  symmetric-square route.  Mathlib's `Sym2` cardinal theorem gives 21
+  effective degree-two divisors from the six curve points.
+- Formalized the exact Abel-fibre counting interface: one three-element
+  canonical fibre and singleton fibres elsewhere imply
+  `#J(F₂)=21-3+1=19`, hence exponent 19 for the finite additive Jacobian.
+  This is structural and leaves only the standard fixed-curve Abel-fibre
+  geometry, not a table of 19 group elements.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:

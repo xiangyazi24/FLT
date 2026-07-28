@@ -205,6 +205,14 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   force `P₂(T)=1+3T+5T²+6T³+4T⁴` and `P₂(1)=19`.  Mathlib has no existing
   genus-two zeta/Jacobian theorem connecting this last evaluation to
   `#J(F₂)`; that bridge is an explicit remaining geometry seam.
+- A shorter replacement for the missing general zeta API is now formalized.
+  The six `F₂` points have 21 unordered effective divisors of degree two.
+  For the genus-two Abel map `Sym²(C)→J`, the sole exceptional fibre is the
+  canonical `P¹`, which has three `F₂` points; all other fibres are
+  singletons.  A generic fibre-counting theorem turns exactly this package
+  into `#J(F₂)=21-3+1=19` and exponent 19.  The remaining input is therefore
+  the fixed Abel-fibre geometry, not a zeta-function library or a 19-row
+  Mumford table.
 - Modulo three the four affine points are proved from
   `f(x)=1-x(x+1)` and Frobenius, not enumeration.  Together with the two
   infinity points, these are exactly the six cusp reductions.
@@ -243,8 +251,8 @@ Terminal: axiom replaced by theorem (long-term campaign).
 ## Execution Order
 
 1. **NOW:** (c) N13 — prove the actual fake Kummer kernel/local-image theorem
-2. **NEXT:** construct the Jacobian reduction map and strict 2-adic formal
-   filtration; connect the proved Weil numerator to `#J(F₂)=19`, then combine
+2. **NEXT:** construct the fixed special-fibre Abel map/fibre theorem, the
+   Jacobian reduction map, and the strict 2-adic formal filtration; combine
    the packages directly into exponent 19 without Mordell--Weil finite
    generation
 3. **THEN:** (b) N49 after an explicit Tate-to-`X₀(49)` coordinate bridge exists
