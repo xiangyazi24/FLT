@@ -235,6 +235,14 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   `1,θ,θ²` power bases, not from a finite quotient table.  What remains
   local is only the arithmetic identification with the completed maximal
   order and the genuine Mumford-value compatibility.
+- Every primitive integral polynomial of degree at most two now has zero
+  first ramified logarithm at `θ`.  Its reduction is a constant dual
+  number obtained by evaluation at `α`; nonvanishing follows uniformly
+  because the minimal polynomial of `α` has degree three.  This includes
+  irreducible quadratic support without splitting or enumerating factors.
+  The remaining bridge is to normalize the genuine rational Mumford
+  polynomial primitively at two and transport its value through the
+  completed maximal order.
 - The even-sextic target has now been corrected from a fake first
   coordinate to the full norm pair `(α,s)`, with `N(α)=s²`, modulo the
   square/norm and scalar/cubic gauges.  Forgetting `s` recovers the fake

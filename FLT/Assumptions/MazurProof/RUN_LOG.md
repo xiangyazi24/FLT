@@ -354,6 +354,16 @@
   `Classical.choice`, and `Quot.sound`.  Identifying this explicit order
   with the completed maximal order and transporting the genuine Kummer
   value remain separate arithmetic-semantic bridges.
+- Proved a single low-degree local lemma covering every primitive
+  `ℤ₂`-polynomial of degree at most two.  Evaluation at `θ` reduces to the
+  constant jet obtained by evaluating its residue polynomial at `α`, and
+  this value is nonzero because no nonzero polynomial below the cubic
+  minimal degree can vanish at `α`.  Thus its first ramified logarithm is
+  zero, including the nonsplit quadratic case without a factor table.
+- `lake build FLT.Assumptions.MazurProof.N13GaussianLowDegree` passes.
+  Axiom audits for reduction/evaluation compatibility, low-degree
+  nonvanishing, and logarithm vanishing report only `propext`,
+  `Classical.choice`, and `Quot.sound`.
 - Defined the full degree-six norm-pair target before forgetting the norm
   root.  The abstract target remembers `(α,s)` with `N(α)=s²` and quotients
   by `(β²,Nβ)` and `(q,q³)`.  Projection to the first coordinate descends
