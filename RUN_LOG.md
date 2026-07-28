@@ -76,20 +76,28 @@
     Laurent-series calculation is therefore now an exact statement about
     the actual chart complex, not only its coefficient submodules
     (`f2e7c66f84`)
+  - generalized the Čech--Nakayama correction from a finite overlap target
+    to an arbitrary overlap with finite actual cokernel.  Vanishing of the
+    residue cokernel now implies integral surjectivity and a kernel lift
+    preserving reduction.  The source can therefore retain a nonprincipal
+    affine invertible module (`891e1592c8`)
+  - proved both genuine chart restrictions are `ℤ₂`-linear, upgraded the
+    actual coboundary and cokernel to modules, and identified that cokernel
+    linearly with `ℤ₂²`.  In particular the genuine untwisted Čech cokernel
+    is finite, exactly the finiteness input used by the module-valued
+    Nakayama theorem (`2d7b71c0ee`)
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
 - exact remaining N13 seam:
   1. for each rational Picard specialization-kernel class, construct the
-     actual oriented invertible fractional ideal/module together with its
-     formal-infinity trivialization and overlap comparison.  An arbitrary
-     line bundle need not be globally principal on the affine chart, so do
-     not simply choose an affine generator.  Either formulate the twisted
-     Čech argument while retaining the affine invertible module, or prove a
-     genuine principality theorem for these particular kernel classes.
-     Only after an actual pair of trivializations is available may their
-     quotient be used as a formal-overlap unit reducing to one and hence as
-     a `N13FormalLineBundleCech.NearIdentityTransition`
+     actual oriented invertible fractional ideal/module on the affine chart,
+     its formal-infinity lattice, and the two restriction maps into the
+     overlap module for the twist by the fixed base divisor.  Prove that
+     this genuine module-valued Čech cokernel is finite and that its residue
+     cokernel is zero.  The new finite-cokernel Nakayama theorem then gives
+     the required integral section lift without any affine generator.
+     A separate principality theorem is no longer required
   2. apply `exists_twisted_kernel_lift` to lift the canonical section,
      produce its relative effective degree-two divisor, prove that it does
      not escape to infinity, and obtain a smooth integral Mumford graph
@@ -105,12 +113,13 @@
   degree-two divisor from escaping to infinity.  The honest next route is a
   proper two-chart/Čech construction of the relative degree-two divisor.
   The genuine quadratic overlap algebra, both actual chart rings, their
-  exact additive Čech complex and rank-two cokernel, the integral connecting
-  matrix, its special reduction, and the Nakayama correction are now
-  formalized.  What remains before the divisor construction is the
-  module-level gluing/principality theorem for the actual oriented
-  fractional ideal.  An equivalent valuation-theoretic properness proof
-  would also suffice.
+  exact linear Čech complex and finite rank-two cokernel, the integral
+  connecting matrix, its special reduction, and finite-cokernel Nakayama
+  correction are now formalized.  What remains before the divisor
+  construction is to instantiate this module-valued complex for the actual
+  oriented fractional ideal and prove finite cokernel plus zero residue
+  cokernel.  An equivalent valuation-theoretic properness proof would also
+  suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
