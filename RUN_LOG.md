@@ -30,6 +30,11 @@
     surjectivity of a finite-target coboundary lifts integrally, and a
     cochain closed modulo the maximal ideal can be corrected to an actual
     cocycle without changing its reduction (`b1b350245d`)
+  - computed the actual special-fibre two-chart Laurent Čech quotient:
+    the affine and infinity images miss exactly `v t⁻²` and `v t⁻¹`;
+    the two base-point principal parts have obstruction vectors `(1,0)`
+    and `(1,1)`, so the connecting matrix is invertible and the twisted
+    Čech `H¹` vanishes (`f24ae0b1dc`)
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -45,9 +50,10 @@
   Affine ideal saturation alone is insufficient: it does not prevent a
   degree-two divisor from escaping to infinity.  The honest next route is a
   proper two-chart/Čech construction of the relative degree-two divisor:
-  identify finite bounded-pole cochain modules and prove the special-fibre
-  coboundary is surjective, then apply the now-formalized Nakayama correction.
-  An equivalent valuation-theoretic properness proof would also suffice.
+  lift the now-explicit two-dimensional special obstruction complex to
+  finite bounded-pole `ℤ₂` modules, identify the reduction of the
+  coboundary, then apply the now-formalized Nakayama correction.  An
+  equivalent valuation-theoretic properness proof would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
