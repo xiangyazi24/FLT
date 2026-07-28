@@ -15,13 +15,22 @@
     faithfulness; for a rational reduction kernel the remaining chart inputs
     are now only representative existence and regularity of transported
     addition (`91fdc242e5`)
+  - recovered a unique `DiskPair` from every smooth integral Mumford graph
+    reducing to `(X² + X, 0)`: Hensel lifting supplies the two roots and the
+    curve equation identifies the two graph values; the original and
+    recovered graph ideals coincide (`201ae724b1`)
+  - proved that completion of the square sends those two graph ideals to the
+    same sextic fractional ideal, hence the recovered pair carries exactly
+    the original oriented and centred two-adic Picard class (`7954d95b0d`)
 - verification:
-  - all four touched endpoints compile by `lake env lean <file>`
+  - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
 - exact remaining N13 seam:
   1. construct the genuine finite reduction classifier and prove its fibres
      are the cosets of its kernel
-  2. prove each kernel class lies in the centred two-disk Abel-chart image
+  2. prove each kernel class has a smooth integral Mumford graph reducing to
+     `(X² + X, 0)`; recovery, uniqueness, and Picard compatibility then put
+     it in the centred two-disk Abel-chart image automatically
   3. prove the transported local group law has the required two-adic
      quadratic error (or replace it by an equally strong structural
      logarithm argument)
