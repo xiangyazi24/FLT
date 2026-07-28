@@ -92,6 +92,11 @@
     linear factorization over `ℤ₂[[X]]`; two-point evaluation/interpolation
     is therefore the remaining step to an explicit product decomposition
     of the infinity chart
+  - completed that product decomposition: simultaneous evaluation on the
+    two Hensel roots is injective by the unique normal form `a+bv` and
+    surjective by explicit two-point interpolation.  Hence the actual
+    complete formal-infinity chart is ring-equivalent to
+    `ℤ₂[[X]] × ℤ₂[[X]]`, with a proved formula for the inverse
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -121,12 +126,11 @@
   The genuine quadratic overlap algebra, both actual chart rings, their
   exact linear Čech complex and finite rank-two cokernel, the integral
   connecting matrix, its special reduction, and finite-cokernel Nakayama
-  correction are now formalized.  The formal-infinity polynomial also has
-  two Hensel roots with unit difference and an explicit factorization; its
-  evaluation equivalence with the product of the two branch rings remains
-  to be packaged.  What remains before the divisor construction is to
-  instantiate the module-valued complex for the actual oriented fractional
-  ideal and prove finite cokernel plus zero residue cokernel.  An equivalent
+  correction are now formalized.  The complete formal-infinity chart is
+  now explicitly split as the product of its two Hensel branch rings.
+  What remains before the divisor construction is to instantiate the
+  module-valued complex for the actual oriented fractional ideal and prove
+  finite cokernel plus zero residue cokernel.  An equivalent
   valuation-theoretic properness proof would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
