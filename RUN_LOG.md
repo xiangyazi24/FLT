@@ -42,19 +42,30 @@
     every finite integral coboundary with that residue is surjective, and
     every cochain closed modulo two has a kernel lift with unchanged
     reduction (`94e0fb8037`)
+  - replaced the finite Laurent-polynomial proxy by the genuine formal
+    overlap of Laurent series, including arbitrary power-series tails at
+    infinity.  Its quotient still has exactly the two obstruction classes;
+    the actual integral principal functions satisfy the cleared-denominator
+    identities, induce the computed integral matrix, and make the formal
+    twisted additive `H¹` vanish (`1dce55b62f`)
+  - formalized multiplication in the actual quadratic formal curve algebra.
+    For every invertible transition function reducing to `1`, the twisted
+    principal connecting map reduces to the special N13 matrix, hence is
+    surjective and admits the required kernel lift (`cefa49c23b`)
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
 - exact remaining N13 seam:
-  1. identify the genuine proper bounded-pole line-bundle coboundary with
-     the finite integral complex in `N13IntegralCechObstruction`; its
-     special reduction is now the only hypothesis needed by the proved
-     Čech--Nakayama correction
-  2. apply that correction to kernel classes to produce a relative
-     degree-two divisor, prove that it does not escape to infinity, and
-     obtain a smooth integral Mumford graph reducing to `(X² + X, 0)`;
-     recovery, uniqueness, and Picard compatibility then put it in the
-     centred two-disk Abel-chart image automatically
+  1. for each rational Picard specialization-kernel class, construct affine
+     and formal-infinity trivializations of its oriented fractional ideal;
+     their overlap must be a
+     `N13FormalLineBundleCech.NearIdentityTransition`
+  2. apply `exists_twisted_kernel_lift` to lift the canonical section,
+     produce its relative effective degree-two divisor, prove that it does
+     not escape to infinity, and obtain a smooth integral Mumford graph
+     reducing to `(X² + X, 0)`; recovery, uniqueness, and Picard
+     compatibility then put it in the centred two-disk Abel-chart image
+     automatically
   3. construct the genuine finite reduction classifier and prove its fibres
      are the cosets of its kernel
   4. prove the transported local group law has the required two-adic
@@ -63,10 +74,11 @@
   Affine ideal saturation alone is insufficient: it does not prevent a
   degree-two divisor from escaping to infinity.  The honest next route is a
   proper two-chart/Čech construction of the relative degree-two divisor.
-  The abstract Laurent quotient, its finite `ℤ₂` obstruction module, the
-  integral connecting matrix, its special reduction, and the Nakayama
-  correction are now formalized; what remains is the geometric
-  identification with the actual bounded-pole sheaves.  An equivalent
+  The genuine Laurent-series overlap, its power-series tails, the quadratic
+  formal curve multiplication, the integral connecting matrix, its special
+  reduction, and the Nakayama correction are now formalized.  What remains
+  before the divisor construction is the geometric local-trivialization
+  theorem for an actual oriented fractional ideal.  An equivalent
   valuation-theoretic properness proof would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
