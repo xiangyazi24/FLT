@@ -1,3 +1,38 @@
+## Run 2026-07-28 (N13 structural two-adic Abel chart)
+- approval: `/automode`; stop requested at the next clean node
+- proof policy: structural only; no finite tables, `native_decide`, giant
+  certificates, replacement axioms, or `sorry`
+- completed:
+  - proved compatibility of the two infinity orders under field extension,
+    including `ℚ → ℚ₂`, by preservation of Laurent order and uniqueness of
+    the positive square root (`9b70a580cd`)
+  - proved canonical Mumford normalization commutes with `ℚ → ℚ₂` and that
+    rational oriented Picard base change is injective (`0e2befa7a2`)
+  - constructed the balanced degree-two Mumford class of every pair in the
+    two distinguished residue disks and proved the centred Abel chart
+    `DiskPair → J(ℚ₂)` injective (`014e31f9a7`)
+  - derived `pair_zero` and `pair_injective` automatically from Picard
+    faithfulness; for a rational reduction kernel the remaining chart inputs
+    are now only representative existence and regularity of transported
+    addition (`91fdc242e5`)
+- verification:
+  - all four touched endpoints compile by `lake env lean <file>`
+  - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
+- exact remaining N13 seam:
+  1. construct the genuine finite reduction classifier and prove its fibres
+     are the cosets of its kernel
+  2. prove each kernel class lies in the centred two-disk Abel-chart image
+  3. prove the transported local group law has the required two-adic
+     quadratic error (or replace it by an equally strong structural
+     logarithm argument)
+  Affine ideal saturation alone is insufficient: it does not prevent a
+  degree-two divisor from escaping to infinity.  The honest next route is a
+  proper two-chart/Čech construction of the relative degree-two divisor (or
+  an equivalent valuation-theoretic properness proof), followed by the
+  already proved chart uniqueness.
+- pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
+  deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
+
 ## Run 2026-07-12 (Complete Mazur proof — Layer 2 decomposition)
 - doctrine version: 6 gaps initially → 8 axioms after decomposition (narrower scope each)
 - approval: /automode from Xiang
