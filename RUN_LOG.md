@@ -59,14 +59,29 @@
     actual affine function lands in the previously defined affine-section
     submodule, and a genuine overlap unit reducing to one canonically gives
     a `NearIdentityTransition` (`7713f611c7`)
+  - constructed the genuine complete formal-infinity chart
+    `ℤ₂[[t]][v]/(v²+(1+t²+t³)v-(t+t²))` and proved that its restriction
+    image is exactly the full power-series `infinitySections` submodule
+    (`98237bf9cf`)
+  - proved the converse on the actual affine chart: every Laurent pair in
+    `affineSections` is the restriction of an integral affine function.
+    The proof reverses the finitely many nonpositive Laurent coefficients
+    into polynomials in `x=t⁻¹`; for the `v` coefficient it first shifts by
+    `t³`.  Thus both submodules in the formal Čech quotient are now exactly
+    the images of the two genuine chart rings (`f636af395b`)
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
 - exact remaining N13 seam:
-  1. for each rational Picard specialization-kernel class, construct affine
-     and formal-infinity generators of its oriented fractional ideal.  The
-     affine restriction map is now explicit; the quotient of the two
-     generators must be a genuine formal-overlap unit reducing to one, hence
+  1. for each rational Picard specialization-kernel class, construct the
+     actual oriented invertible fractional ideal/module together with its
+     formal-infinity trivialization and overlap comparison.  An arbitrary
+     line bundle need not be globally principal on the affine chart, so do
+     not simply choose an affine generator.  Either formulate the twisted
+     Čech argument while retaining the affine invertible module, or prove a
+     genuine principality theorem for these particular kernel classes.
+     Only after an actual pair of trivializations is available may their
+     quotient be used as a formal-overlap unit reducing to one and hence as
      a `N13FormalLineBundleCech.NearIdentityTransition`
   2. apply `exists_twisted_kernel_lift` to lift the canonical section,
      produce its relative effective degree-two divisor, prove that it does
@@ -82,13 +97,13 @@
   Affine ideal saturation alone is insufficient: it does not prevent a
   degree-two divisor from escaping to infinity.  The honest next route is a
   proper two-chart/Čech construction of the relative degree-two divisor.
-  The genuine quadratic overlap algebra, the actual affine restriction map,
-  its affine-section bound, the power-series tails, the integral connecting
-  matrix, its special reduction, and the Nakayama correction are now
-  formalized.  What remains before the divisor construction is the
-  geometric generator theorem for an actual oriented fractional ideal on
-  the two charts.  An equivalent valuation-theoretic properness proof would
-  also suffice.
+  The genuine quadratic overlap algebra, both actual chart rings, the exact
+  equalities between their restriction images and the two Čech submodules,
+  the integral connecting matrix, its special reduction, and the Nakayama
+  correction are now formalized.  What remains before the divisor
+  construction is the module-level gluing/principality theorem for the
+  actual oriented fractional ideal.  An equivalent valuation-theoretic
+  properness proof would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
