@@ -202,6 +202,16 @@
 - Targeted build and axiom audit pass for this endgame.  The exported
   exponent and reduction-injectivity theorems use only `propext`,
   `Classical.choice`, and `Quot.sound`.
+- Joined the first-jet kernel theorem to the rational-scalar identity.
+  Every candidate with vanishing local logarithm now has trivial fake
+  square class: the kernel theorem leaves only `(0,0,s,s)`, and the
+  `s=1` representative is a scalar times a square.  This replaces the
+  entire sixteen-candidate table by one linear-independence argument and
+  one exact algebra identity.
+- `lake build FLT.Assumptions.MazurProof.N13CandidateCollapse` passes.
+  `#print axioms` for
+  `candidateClass_eq_one_of_dlog_eq_zero` reports only `propext`,
+  `Classical.choice`, and `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:

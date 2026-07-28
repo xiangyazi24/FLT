@@ -204,6 +204,14 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   `i=0`, `j=0`, `k=s`; this is the structural `16→2` reduction.  The
   remaining local task is the `ℚ₂` adapter proving that both valuation
   regimes land in this first-jet kernel, not a table of sixteen classes.
+- The finite candidate layer now closes without a sixteen-row certificate.
+  Vanishing of the first ramified logarithm first forces
+  `(i,j,k,s)=(0,0,s,s)`.  The nonzero survivor is `e2*a*q`, and the exact
+  identity `(e2*a*q)*(ζ*e1*a)^2=13` makes its fake square class trivial.
+  Lean derives all five required unit hypotheses from this same identity.
+  What remains is semantic: completeness of the global four-generator
+  envelope and containment of the actual `ℚ₂` Kummer image in the
+  first-jet kernel.
 - Trivial fake 2-descent gives `J(ℚ)/2J(ℚ)=0`, not finiteness by itself.
   The structural closure must use the same prime: a good generalized model
   at two, a strict 2-adic formal-kernel filtration, and reduction to the
