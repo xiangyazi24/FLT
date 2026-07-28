@@ -35,25 +35,39 @@
     the two base-point principal parts have obstruction vectors `(1,0)`
     and `(1,1)`, so the connecting matrix is invertible and the twisted
     Čech `H¹` vanishes (`f24ae0b1dc`)
+  - extracted the Laurent calculation over an arbitrary commutative ring
+    and lifted the finite obstruction complex to `ℤ₂`; the integral
+    principal-part columns are `(1,0)` and `(1,-1)`, with determinant
+    `-1`, and reduce to the computed special-fibre matrix.  Consequently
+    every finite integral coboundary with that residue is surjective, and
+    every cochain closed modulo two has a kernel lift with unchanged
+    reduction (`94e0fb8037`)
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
 - exact remaining N13 seam:
-  1. construct the genuine finite reduction classifier and prove its fibres
+  1. identify the genuine proper bounded-pole line-bundle coboundary with
+     the finite integral complex in `N13IntegralCechObstruction`; its
+     special reduction is now the only hypothesis needed by the proved
+     Čech--Nakayama correction
+  2. apply that correction to kernel classes to produce a relative
+     degree-two divisor, prove that it does not escape to infinity, and
+     obtain a smooth integral Mumford graph reducing to `(X² + X, 0)`;
+     recovery, uniqueness, and Picard compatibility then put it in the
+     centred two-disk Abel-chart image automatically
+  3. construct the genuine finite reduction classifier and prove its fibres
      are the cosets of its kernel
-  2. prove each kernel class has a smooth integral Mumford graph reducing to
-     `(X² + X, 0)`; recovery, uniqueness, and Picard compatibility then put
-     it in the centred two-disk Abel-chart image automatically
-  3. prove the transported local group law has the required two-adic
+  4. prove the transported local group law has the required two-adic
      quadratic error (or replace it by an equally strong structural
      logarithm argument)
   Affine ideal saturation alone is insufficient: it does not prevent a
   degree-two divisor from escaping to infinity.  The honest next route is a
-  proper two-chart/Čech construction of the relative degree-two divisor:
-  lift the now-explicit two-dimensional special obstruction complex to
-  finite bounded-pole `ℤ₂` modules, identify the reduction of the
-  coboundary, then apply the now-formalized Nakayama correction.  An
-  equivalent valuation-theoretic properness proof would also suffice.
+  proper two-chart/Čech construction of the relative degree-two divisor.
+  The abstract Laurent quotient, its finite `ℤ₂` obstruction module, the
+  integral connecting matrix, its special reduction, and the Nakayama
+  correction are now formalized; what remains is the geometric
+  identification with the actual bounded-pole sheaves.  An equivalent
+  valuation-theoretic properness proof would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
