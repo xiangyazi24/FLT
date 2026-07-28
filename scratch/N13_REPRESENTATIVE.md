@@ -112,56 +112,44 @@ class-group theorem; it neither carries the chosen infinity orientation
 nor supplies an effective divisor of degree at most two.  The present
 proof therefore works directly in `ConcretePic`.
 
-## Minimal remaining seam
+## Phase I closed; remaining infinity phase
 
-The next algebraic lemma is primitive principal scaling:
-
-```lean
-forall R : IntegralOrientedRep M,
-  exists R' : IntegralOrientedRep M,
-    R'.picClass M O = R.picClass M O
-    and IdealIsPrimitive M R'.ideal
-```
-
-The intended proof is Hermite/content reduction, not enumeration.  Take
-the ideal of all `Y`-coefficients of elements of `R.ideal`.  Ideal
-stability under multiplication by `Y` shows that the same content divides
-the constant coefficients.  Divide by its principal generator.  The new
-ideal is integral and contains an element with `Y`-coefficient one; the
-principal oriented factor records the corresponding infinity shift.
-
-After this lemma, `exists_semiMumford_of_primitive` supplies graph-form
-data for every class.  The next step should be a pure Cantor descent; a
-general Riemann--Roch library is not required.
+`SexticMumfordPrimitivePart` now constructs the coefficient-content ideal,
+divides it by a colon ideal, and proves the exact factorization
 
 ```text
-semi-Mumford graph form
-  -> principal-equivalent balanced Mumford form
-  with natDegree(u) + nInf <= 2.
+(content) * primitivePart = J.
 ```
 
-For `D=(u,v,n)` and `d=natDegree(u)`:
+The quotient is primitive and fractionally invertible.  Its oriented
+representative subtracts the actual `ordPlus(content)` and is equal to the
+original class.  Thus every oriented class enters semi-Mumford graph form.
 
-- if `d>3`, put `V=v` and `w=(f-V^2)/u`; reducedness of `v` gives
-  `degree(w) <= max(6-d,d-2) < d`;
-- if `d=3`, put `V=v+u`.  Both `f` and `V^2` are monic of degree six, so
-  their leading terms cancel and `degree((f-V^2)/u) <= 2`;
-- `V` is congruent to `v` modulo `u`, so `(u,Y-V)=(u,Y-v)`;
-- prove the structural ideal identity
+`SexticMumfordStructuralReduction` then iterates the verified Cantor
+complement by well-founded recursion on `natDegree u`.  Above degree three
+the cofactor has smaller degree; at degree three the lift `v+u` cancels
+the monic degree-six terms.  The result is:
 
-  ```text
-  I(u,V) * I(w,V) = (Y-V)
-  ```
+```lean
+theorem exists_lowDegreeSemiRepresentative
+    (c : ConcretePic M O) :
+    ∃ D : LowDegreeSemi M,
+      semiMumfordClass M O D.toSemi = c
+```
 
-  using the existing Mumford Bezout identity
+where `D.toSemi.u.natDegree ≤ 2`.  The full oriented class is preserved,
+not only its affine ideal class.
 
-  ```text
-  2V(Y-V) = (f-V^2) - (Y-V)^2.
-  ```
+The only remaining representative seam is Phase II: move `nInf` between
+the two balanced walls while retaining `deg u≤2`.  For the actual N13
+polynomial, the relevant cubic is
 
-Normalize `w`, reduce `V` modulo the new monic polynomial, and recurse on
-its strictly smaller degree.  The principal factor `Y-V` and
-`ordPlus(Y-V)` must update the oriented infinity coordinate at every step.
-The final low-degree step must also choose the natural `nInf` satisfying
-the balancing inequality.  These orientation equations, rather than a
-class enumeration, are the remaining Cantor seam.
+```text
+s = X^3 + 2X^2 + X - 1,
+f - s^2 = 4X(X+1).
+```
+
+The two adapted cubic lifts should give updates
+`n ↦ n+d-3` and `n ↦ n+3-e`; these formulas must be derived from the
+existing `ordPlus`/`ordMinus` definitions before implementing the second
+well-founded recursion.  No stale polynomial from Q1649 is admissible.

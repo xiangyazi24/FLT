@@ -391,6 +391,22 @@
   standard-only.  This is intentionally the affine-degree phase: the
   separate infinity-orientation balancing recursion is still required
   before claiming a balanced representative.
+- Closed the primitive-scaling seam structurally.  The ideal of
+  `Y`-coefficients of an integral ideal also contains all constant
+  coefficients, so division by its canonical polynomial generator is an
+  exact colon-ideal factorization.  The quotient ideal is primitive and
+  remains fractionally invertible.  Multiplication by the corresponding
+  principal function, with its actual `ordPlus`, proves equality in the
+  oriented Picard quotient.
+- Every oriented class therefore has a semi-Mumford representative.
+  Iterating the verified Cantor step by recursion on `natDegree u` now
+  produces one with `natDegree u≤2`, preserving the full oriented class at
+  every step.  `lake build
+  FLT.Assumptions.MazurProof.SexticMumfordStructuralReduction` passes;
+  audits of content factorization, primitive scaling, graph extraction,
+  the strict step, and the final existence theorem report only `propext`,
+  `Classical.choice`, and `Quot.sound`.  Infinity balancing remains a
+  separate Phase II.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:

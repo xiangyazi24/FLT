@@ -262,7 +262,8 @@ theorem exists_semiMumford_of_primitive
     (hprimitive : IdealIsPrimitive M J) (n : ℤ) :
     ∃ D : SemiMumford M,
       mumfordIdeal M D.u D.v = J ∧
-      D.u = contractionGenerator M J := by
+      D.u = contractionGenerator M J ∧
+      D.nInf = n := by
   obtain ⟨z, hzJ, hzY⟩ := hprimitive
   let u : K[X] := contractionGenerator M J
   let v0 : K[X] := -(coeff0 M z)
@@ -329,7 +330,7 @@ theorem exists_semiMumford_of_primitive
         rw [Polynomial.mod_eq_self_iff hu]
         exact EuclideanDomain.mod_lt _ hu
       curve_dvd := hcurve }
-  refine ⟨D, ?_, rfl⟩
+  refine ⟨D, ?_, rfl, rfl⟩
   exact mumfordIdeal_eq_of_contraction_eq_span_of_ySub_mem
     M J u v hcontraction hgraph
 

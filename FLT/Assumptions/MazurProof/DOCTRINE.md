@@ -293,26 +293,25 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   needed for addition in the Picard quotient.  Consequently, surjectivity of
   balanced representatives alone defines a canonical Picard-to-fake-class
   homomorphism; uniqueness of normal forms is not needed.
-- Balanced-representative existence has reached the structural Hermite
-  layer.  Every Picard class has an integral invertible-ideal
-  representative; every nonzero integral ideal has a canonical monic
-  contraction generator `u`; and every primitive ideal is proved exactly
-  equal to `(u,Y-v)` with the semireduced Mumford relations.  The two
-  remaining steps are principal content scaling to make the ideal primitive
-  and a well-founded Cantor descent.  The degree-three obstruction does not
-  require a general Riemann--Roch theorem: replacing `v` by `v+u` cancels
-  the monic degree-six leading term in `f-(v+u)²`, producing a complement
-  of degree at most two.
+- Balanced-representative existence now has a complete structural affine
+  phase.  The ideal of all `Y`-coefficients is principal; stability under
+  multiplication by `Y` puts the constant coefficients in the same ideal.
+  Dividing by its generator through a colon ideal gives an integral
+  primitive ideal, and the actual principal function and `ordPlus` update
+  preserve the oriented Picard class.  Primitive graph extraction then
+  gives a semi-Mumford representative for every class.
 - The affine Cantor step is now formalized.  Its product identity comes
   from a three-term Bézout relation, graph changes transport that relation
   algebraically, and the next graph is `(-V) mod normalize(w)` so
   conjugation preserves rather than inverts the class.  The principal
   correction updates the stored orientation through its actual
   positive-infinity order.  This proves strict affine-degree descent above
-  three and the degree-three leading-term cancellation.  Low affine degree
-  alone is not yet balanced: a second well-founded phase must move the
-  infinity coordinate between its two walls using the cubic polynomial
-  parts of `Y` at infinity.
+  three and the degree-three leading-term cancellation.  Composing this
+  step by well-founded recursion proves that every oriented class has a
+  semi-Mumford representative with `deg u≤2`.  Low affine degree alone is
+  not yet balanced: a second well-founded phase must move the infinity
+  coordinate between its two walls using the cubic polynomial parts of
+  `Y` at infinity.
 - The raw Mumford Kummer value is now defined in the actual sextic field.
   The branch specialization `X↦θ, Y↦0` sends the hyperelliptic norm of
   every affine function to a square.  For a balanced representative,
