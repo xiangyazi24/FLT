@@ -109,6 +109,21 @@ theorem eq_algebraMap_of_sq_eq_norm
       rw [div_eq_mul_inv]
       ring
 
+/-- The scalar supplied by quadratic rigidity is itself a square root of
+the common square and norm. -/
+theorem exists_scalar_square_root
+    (b : Module.Basis (Fin 2) K E) (t : E) (s : K)
+    (hs : s ≠ 0)
+    (hsq : t ^ 2 = algebraMap K E s)
+    (hnorm : Algebra.norm K t = s) :
+    ∃ r : K,
+      t = algebraMap K E r ∧ r ^ 2 = s := by
+  obtain ⟨r, hr⟩ :=
+    eq_algebraMap_of_sq_eq_norm b t s hs hsq hnorm
+  refine ⟨r, hr, ?_⟩
+  apply FaithfulSMul.algebraMap_injective K E
+  rw [map_pow, ← hr, hsq]
+
 end
 
 end MazurProof.QuadraticNormRigidity
