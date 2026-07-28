@@ -163,6 +163,17 @@
   `#J(F₂)=21-3+1=19`, hence exponent 19 for the finite additive Jacobian.
   This is structural and leaves only the standard fixed-curve Abel-fibre
   geometry, not a table of 19 group elements.
+- Formalized the two-adic group-theoretic closure without finite generation.
+  A trivial fake descent is represented exactly by surjectivity of doubling;
+  together with the separated doubling filtration and special-fibre
+  exponent 19, the existing separated-descent theorem kills the rational
+  Jacobian by 19.  A formal valuation invariant under odd multiplication
+  makes `[19]` injective on the reduction kernel, so reduction is injective.
+  Fake-Kummer soundness, the fixed reduction map, Abel-fibre geometry, and
+  the formal-kernel filtration remain explicit instance-level inputs.
+- Targeted build and axiom audit pass for this endgame.  The exported
+  exponent and reduction-injectivity theorems use only `propext`,
+  `Classical.choice`, and `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:

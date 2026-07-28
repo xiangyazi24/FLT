@@ -213,6 +213,15 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   into `#J(F₂)=21-3+1=19` and exponent 19.  The remaining input is therefore
   the fixed Abel-fibre geometry, not a zeta-function library or a 19-row
   Mumford table.
+- The group-theoretic two-adic endgame is now formalized without
+  Mordell--Weil finite generation.  Surjectivity of doubling, the
+  19-element special fibre, and a separated doubling filtration imply that
+  every rational Jacobian class is killed by 19.  A formal-kernel valuation
+  preserved by odd multiplication then makes multiplication by 19
+  injective on the kernel, hence reduction itself injective.  The actual
+  fake-Kummer theorem, reduction map, fixed Abel-fibre geometry, and formal
+  filtration remain explicit mathematical inputs rather than hidden
+  assumptions.
 - Modulo three the four affine points are proved from
   `f(x)=1-x(x+1)` and Frobenius, not enumeration.  Together with the two
   infinity points, these are exactly the six cusp reductions.
