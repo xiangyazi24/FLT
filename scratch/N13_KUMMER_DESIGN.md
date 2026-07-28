@@ -438,11 +438,11 @@ I(a,L)^2 * I(k u,L) = (Y-L),
 
 and scalar normalization plus the congruence modulo `u` identifies the
 second factor with the target Mumford ideal or its conjugate.  The remaining
-integer-at-infinity equality supplies the oriented square root.  This is
-being formalized in
+integer-at-infinity discrepancy is a pure infinity class and is absorbed by
+the compiled explicit half of that class.  This is being formalized in
 `N13MumfordFullKummerIdentityFiber.lean`.
 
-### Padé construction and its audited limitation
+### Padé construction and the quadratic norm closure
 
 Given a full-gauge witness
 
@@ -463,24 +463,58 @@ has degree at most three.  Consequently
 q l^2 - a^2 u = c f
 ```
 
-for a rational scalar `c`.  This is a useful structural compression, but
-one must not silently assume that `q/c` is a rational square.  Such a square
-would immediately give `L = sqrt(q/c) l` and the Cantor witness above; its
-existence is essentially the kernel theorem being proved.  Resultants and
-the full orientation coordinate determine the relevant sign, but in the
-degree-two branch they do not by themselves prove the rational squareclass.
-
-Modulo `u`, the Mumford relation does show that `q/c` is a square in the
-quadratic algebra `Q[X]/u` (when the displayed quantities are nonzero):
+for a rational scalar `c`.  An arbitrary full-gauge witness can indeed have
+nonsquare `q/c`; the missing step is to normalize the *witness*, not merely
+the representative.  If the stored orientation sign is `+1`, replace
 
 ```text
-q l^2 = c f = c v^2 mod u.
+(beta,q) by (i beta,-q).
 ```
 
-Turning this quadratic-algebra square root into a simultaneous square root
-of `f` modulo `a^2 u` is the current constructive subproblem.  Any proof must
-also handle `c=0` and degree drops; these are where the even-sextic infinity
-branch can appear.
+The compiled Gaussian identity `chi(i) iota(-1) = signPair` shows that this
+leaves the first coordinate unchanged and flips the norm-root coordinate.
+After this normalization the scalar equation always has sign `-1`.
+
+Assume first that `c != 0` and `deg u = 2`.  In the quadratic algebra
+
+```text
+E = Q[X]/u
+```
+
+put `t = l/v` and `s = c/q`.  The Mumford and Padé congruences give
+`t^2 = s`.  The padded resultant formulas, including the degree-drop
+leading coefficients, and the normalized full orientation equation give
+
+```text
+Norm_E/Q(t) = s.
+```
+
+The generic rank-two Cayley--Hamilton identity
+
+```text
+t^2 - Trace(t)t + Norm(t) = 0
+```
+
+then forces `t` to be scalar: since `t^2 = Norm(t) = s != 0`, one has
+`Trace(t)t = 2s`.  This uniformly excludes the mixed-sign element in a
+split quadratic algebra and also covers a repeated quadratic.  Therefore
+`c/q` is a rational square.  Taking `lambda^2 = q/c` and `L = lambda l`
+yields
+
+```text
+f - L^2 = -(1/c) a^2 u,       u | L-v,
+```
+
+which is exactly the Cantor square input above.  For `deg u = 1`, the
+quotient algebra is already `Q`; for `deg u = 0`, the class is purely at
+infinity.  The branch `c = 0` makes `u` a polynomial square and is handled
+by the same structural ideal-square lemma with its linear square root.
+
+The finite ideal identity need not compute the exact order of `Y-L` at
+infinity.  After lifting its finite component to an oriented fractional
+ideal, the discrepancy is a pure integer-orientation class.  That class is
+an integer multiple of the infinity difference, and the compiled explicit
+half of the infinity difference makes it a double.
 
 ### Available cohomological infrastructure
 
