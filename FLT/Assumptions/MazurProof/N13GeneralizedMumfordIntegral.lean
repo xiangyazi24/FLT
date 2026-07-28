@@ -1,0 +1,361 @@
+import FLT.Assumptions.MazurProof.N13GoodModelTwo
+import Mathlib.LinearAlgebra.FreeModule.Basic
+import Mathlib.NumberTheory.Padics.PadicIntegers
+import Mathlib.RingTheory.Ideal.Quotient.Operations
+
+/-!
+# Integral generalized Mumford graph quotients for N13
+
+For the good equation
+
+`Y² + (X³ + X + 1)Y = X⁵ + X⁴`,
+
+evaluation on a graph `Y=v mod u` identifies the graph quotient with
+`R[X]/(u)` over any nontrivial commutative base ring.  If the base is a
+domain and `u` is monic, this quotient is free and hence torsion-free.
+Consequently every graph ideal is saturated with respect to each nonzero
+base scalar.
+
+This is the elementary integral algebra needed before reduction modulo two;
+it uses neither normality of the affine ring nor a Picard scheme.
+-/
+
+open Polynomial
+
+namespace MazurProof.N13GeneralizedMumfordIntegral
+
+noncomputable section
+
+universe u
+
+variable {R : Type u} [CommRing R]
+
+def hPoly : R[X] :=
+  X ^ 3 + X + 1
+
+def rhsPoly : R[X] :=
+  X ^ 5 + X ^ 4
+
+def curvePoly : R[X][X] :=
+  X ^ 2 + C hPoly * X - C rhsPoly
+
+theorem curvePoly_monic : (curvePoly : R[X][X]).Monic := by
+  unfold curvePoly
+  monicity <;> norm_num
+
+theorem curvePoly_natDegree [Nontrivial R] :
+    (curvePoly : R[X][X]).natDegree = 2 := by
+  unfold curvePoly
+  compute_degree <;> norm_num
+
+abbrev CoordinateRing : Type u :=
+  AdjoinRoot (curvePoly : R[X][X])
+
+noncomputable instance : Algebra R (CoordinateRing (R := R)) :=
+  inferInstance
+
+noncomputable instance : Algebra R[X] (CoordinateRing (R := R)) :=
+  inferInstance
+
+def mk : R[X][X] →+* CoordinateRing (R := R) :=
+  AdjoinRoot.mk (curvePoly (R := R))
+
+def xClass (p : R[X]) : CoordinateRing (R := R) :=
+  mk (R := R) (C p)
+
+def yClass : CoordinateRing (R := R) :=
+  mk (R := R) X
+
+def xClassHom : R[X] →+* CoordinateRing (R := R) :=
+  AdjoinRoot.of (curvePoly (R := R))
+
+@[simp] theorem xClassHom_apply (p : R[X]) :
+    xClassHom p = xClass p := rfl
+
+@[simp] theorem xClass_zero : xClass (0 : R[X]) = 0 :=
+  map_zero xClassHom
+
+@[simp] theorem xClass_one : xClass (1 : R[X]) = 1 :=
+  map_one xClassHom
+
+@[simp] theorem xClass_add (p q : R[X]) :
+    xClass (p + q) = xClass p + xClass q :=
+  map_add xClassHom p q
+
+@[simp] theorem xClass_sub (p q : R[X]) :
+    xClass (p - q) = xClass p - xClass q :=
+  map_sub xClassHom p q
+
+@[simp] theorem xClass_neg (p : R[X]) :
+    xClass (-p) = -xClass p :=
+  map_neg xClassHom p
+
+@[simp] theorem xClass_mul (p q : R[X]) :
+    xClass (p * q) = xClass p * xClass q :=
+  map_mul xClassHom p q
+
+def normalPoly :
+    CoordinateRing (R := R) →ₗ[R[X]] R[X][X] :=
+  AdjoinRoot.modByMonicHom (curvePoly_monic (R := R))
+
+def coeff0 :
+    CoordinateRing (R := R) →ₗ[R[X]] R[X] :=
+  (Polynomial.lcoeff R[X] 0).comp (normalPoly (R := R))
+
+def coeffY :
+    CoordinateRing (R := R) →ₗ[R[X]] R[X] :=
+  (Polynomial.lcoeff R[X] 1).comp (normalPoly (R := R))
+
+private theorem curvePoly_degree [Nontrivial R] :
+    (curvePoly : R[X][X]).degree = 2 := by
+  rw [degree_eq_natDegree curvePoly_monic.ne_zero,
+    curvePoly_natDegree]
+  norm_num
+
+theorem normalPoly_eq_C_add_C_mul_X
+    [Nontrivial R]
+    (z : CoordinateRing (R := R)) :
+    normalPoly z = C (coeff0 z) + C (coeffY z) * X := by
+  induction z using AdjoinRoot.induction_on with
+  | ih g =>
+      change g %ₘ curvePoly =
+        C ((g %ₘ curvePoly).coeff 0) +
+          C ((g %ₘ curvePoly).coeff 1) * X
+      have hsum := Polynomial.sum_modByMonic_coeff
+        (p := g) (q := curvePoly) curvePoly_monic
+        (n := 2) (by rw [curvePoly_degree]; norm_num)
+      rw [Fin.sum_univ_two] at hsum
+      simpa [← Polynomial.C_mul_X_pow_eq_monomial] using hsum.symm
+
+theorem recompose [Nontrivial R]
+    (z : CoordinateRing (R := R)) :
+    xClass (coeff0 z) + xClass (coeffY z) * yClass = z := by
+  induction z using AdjoinRoot.induction_on with
+  | ih g =>
+      calc
+        xClass (coeff0 (mk g)) +
+              xClass (coeffY (mk g)) * yClass =
+            mk
+              (C (coeff0 (mk g)) +
+                C (coeffY (mk g)) * X) := by
+                  simp only [xClass, yClass, mk, map_add, map_mul,
+                    AdjoinRoot.mk_C, AdjoinRoot.mk_X]
+        _ = mk (normalPoly (mk g)) := by
+              rw [normalPoly_eq_C_add_C_mul_X]
+        _ = mk g :=
+          AdjoinRoot.mk_leftInverse curvePoly_monic (mk g)
+
+/-- The generalized graph relation; no smoothness assumption is needed for
+the evaluation-kernel and saturation theorems. -/
+structure SemiMumford where
+  u : R[X]
+  v : R[X]
+  w : R[X]
+  u_monic : u.Monic
+  curve_eq : v ^ 2 + hPoly * v - rhsPoly = u * w
+
+def ySubClass (v : R[X]) : CoordinateRing (R := R) :=
+  yClass - xClass v
+
+def mumfordIdeal (u v : R[X]) :
+    Ideal (CoordinateRing (R := R)) :=
+  Ideal.span {xClass u, ySubClass v}
+
+theorem xClass_mem_mumfordIdeal (u v : R[X]) :
+    xClass u ∈ mumfordIdeal u v :=
+  Ideal.subset_span (by simp)
+
+theorem ySubClass_mem_mumfordIdeal (u v : R[X]) :
+    ySubClass v ∈ mumfordIdeal u v :=
+  Ideal.subset_span (by simp)
+
+abbrev MumfordResidue
+    (D : SemiMumford (R := R)) : Type u :=
+  R[X] ⧸ Ideal.span ({D.u} : Set R[X])
+
+private theorem mumford_root_relation
+    (D : SemiMumford (R := R)) :
+    curvePoly.eval₂
+      (Ideal.Quotient.mk (Ideal.span ({D.u} : Set R[X])))
+      (Ideal.Quotient.mk (Ideal.span ({D.u} : Set R[X])) D.v) = 0 := by
+  change (X ^ 2 + C hPoly * X - C rhsPoly).eval₂
+      (Ideal.Quotient.mk (Ideal.span ({D.u} : Set R[X])))
+      (Ideal.Quotient.mk (Ideal.span ({D.u} : Set R[X])) D.v) = 0
+  simp only [eval₂_sub, eval₂_add, eval₂_pow, eval₂_X, eval₂_C,
+    eval₂_mul]
+  change Ideal.Quotient.mk (Ideal.span ({D.u} : Set R[X]))
+    (D.v ^ 2 + hPoly * D.v - rhsPoly) = 0
+  rw [Ideal.Quotient.eq_zero_iff_mem, Ideal.mem_span_singleton]
+  exact ⟨D.w, D.curve_eq⟩
+
+def mumfordEval (D : SemiMumford (R := R)) :
+    CoordinateRing (R := R) →+* MumfordResidue D :=
+  AdjoinRoot.lift
+    (Ideal.Quotient.mk (Ideal.span ({D.u} : Set R[X])))
+    (Ideal.Quotient.mk (Ideal.span ({D.u} : Set R[X])) D.v)
+    (mumford_root_relation D)
+
+@[simp] theorem mumfordEval_xClass
+    (D : SemiMumford (R := R)) (p : R[X]) :
+    mumfordEval D (xClass p) =
+      Ideal.Quotient.mk (Ideal.span ({D.u} : Set R[X])) p := by
+  change mumfordEval D (AdjoinRoot.of curvePoly p) = _
+  exact AdjoinRoot.lift_of (mumford_root_relation D)
+
+@[simp] theorem mumfordEval_yClass
+    (D : SemiMumford (R := R)) :
+    mumfordEval D yClass =
+      Ideal.Quotient.mk (Ideal.span ({D.u} : Set R[X])) D.v :=
+  AdjoinRoot.lift_root (mumford_root_relation D)
+
+@[simp] theorem mumfordEval_ySubClass
+    (D : SemiMumford (R := R)) :
+    mumfordEval D (ySubClass D.v) = 0 := by
+  simp [ySubClass]
+
+theorem mumfordIdeal_le_ker
+    (D : SemiMumford (R := R)) :
+    mumfordIdeal D.u D.v ≤ RingHom.ker (mumfordEval D) := by
+  apply Ideal.span_le.2
+  intro z hz
+  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
+  rcases hz with rfl | rfl
+  · change mumfordEval D (xClass D.u) = 0
+    rw [mumfordEval_xClass,
+      Ideal.Quotient.eq_zero_iff_mem, Ideal.mem_span_singleton]
+  · exact mumfordEval_ySubClass D
+
+theorem ker_mumfordEval
+    [Nontrivial R]
+    (D : SemiMumford (R := R)) :
+    RingHom.ker (mumfordEval D) = mumfordIdeal D.u D.v := by
+  apply le_antisymm
+  · intro z hz
+    rw [RingHom.mem_ker] at hz
+    let p : R[X] := coeff0 z
+    let q : R[X] := coeffY z
+    have hz' : mumfordEval D
+        (xClass p + xClass q * yClass) = 0 := by
+      rw [recompose]
+      exact hz
+    have hquot : Ideal.Quotient.mk
+        (Ideal.span ({D.u} : Set R[X]))
+        (p + q * D.v) = 0 := by
+      simpa only [map_add, map_mul, mumfordEval_xClass,
+        mumfordEval_yClass] using hz'
+    have hdvd : D.u ∣ p + q * D.v :=
+      Ideal.mem_span_singleton.mp
+        (Ideal.Quotient.eq_zero_iff_mem.mp hquot)
+    obtain ⟨s, hs⟩ := hdvd
+    have hu : xClass D.u ∈ mumfordIdeal D.u D.v :=
+      xClass_mem_mumfordIdeal D.u D.v
+    have hyv : ySubClass D.v ∈ mumfordIdeal D.u D.v :=
+      ySubClass_mem_mumfordIdeal D.u D.v
+    have hbase : xClass (p + q * D.v) ∈
+        mumfordIdeal D.u D.v := by
+      rw [hs, xClass_mul, mul_comm]
+      exact Ideal.mul_mem_left
+        (mumfordIdeal D.u D.v) (xClass s) hu
+    have hgraph : xClass q * ySubClass D.v ∈
+        mumfordIdeal D.u D.v :=
+      Ideal.mul_mem_left
+        (mumfordIdeal D.u D.v) (xClass q) hyv
+    rw [← recompose z]
+    have hdecomp :
+        xClass p + xClass q * yClass =
+          xClass (p + q * D.v) +
+            xClass q * ySubClass D.v := by
+      simp only [xClass_add, xClass_mul, ySubClass]
+      ring
+    rw [hdecomp]
+    exact Ideal.add_mem _ hbase hgraph
+  · exact mumfordIdeal_le_ker D
+
+theorem mumfordEval_surjective
+    (D : SemiMumford (R := R)) :
+    Function.Surjective (mumfordEval D) := by
+  intro z
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective z
+  exact ⟨xClass p, mumfordEval_xClass D p⟩
+
+noncomputable def mumfordQuotientEquiv
+    [Nontrivial R]
+    (D : SemiMumford (R := R)) :
+    CoordinateRing ⧸ mumfordIdeal D.u D.v ≃+*
+      MumfordResidue D := by
+  rw [← ker_mumfordEval D]
+  exact RingHom.quotientKerEquivOfSurjective
+    (mumfordEval_surjective D)
+
+/-- A monic graph quotient is free over the base. -/
+noncomputable instance mumfordResidueFree
+    (D : SemiMumford (R := R)) :
+    Module.Free R (MumfordResidue D) :=
+  D.u_monic.free_quotient
+
+/-- A generalized Mumford graph ideal is saturated with respect to every
+nonzero scalar from a domain base. -/
+theorem scalar_saturated
+    [IsDomain R]
+    (D : SemiMumford (R := R))
+    (r : R) (hr : r ≠ 0)
+    (z : CoordinateRing (R := R))
+    (hz : xClass (C r) * z ∈ mumfordIdeal D.u D.v) :
+    z ∈ mumfordIdeal D.u D.v := by
+  have hker :
+      xClass (C r) * z ∈ RingHom.ker (mumfordEval D) := by
+    rw [ker_mumfordEval]
+    exact hz
+  have hmap :
+      mumfordEval D (xClass (C r) * z) = 0 :=
+    hker
+  have hscalar :
+      r • mumfordEval D z =
+        Ideal.Quotient.mk
+          (Ideal.span ({D.u} : Set R[X])) (C r) *
+            mumfordEval D z := by
+    obtain ⟨p, hp⟩ :=
+      Ideal.Quotient.mk_surjective (mumfordEval D z)
+    rw [← hp]
+    change
+      Ideal.Quotient.mk (Ideal.span ({D.u} : Set R[X])) (r • p) =
+        Ideal.Quotient.mk (Ideal.span ({D.u} : Set R[X])) (C r) *
+          Ideal.Quotient.mk (Ideal.span ({D.u} : Set R[X])) p
+    rw [Polynomial.smul_eq_C_mul]
+    exact
+      (Ideal.Quotient.mk
+        (Ideal.span ({D.u} : Set R[X]))).map_mul (C r) p
+  have hsmul : r • mumfordEval D z = 0 := by
+    rw [hscalar]
+    simpa only [map_mul, mumfordEval_xClass] using hmap
+  have heval : mumfordEval D z = 0 :=
+    (smul_eq_zero.mp hsmul).resolve_left hr
+  rw [← ker_mumfordEval D, RingHom.mem_ker]
+  exact heval
+
+namespace TwoAdic
+
+abbrev R₂ : Type := ℤ_[2]
+
+abbrev CoordinateRing₂ : Type :=
+  CoordinateRing (R := R₂)
+
+abbrev SemiMumford₂ : Type :=
+  SemiMumford (R := R₂)
+
+/-- In particular, integral graph ideals over `ℤ₂` are vertically
+two-saturated. -/
+theorem two_saturated
+    (D : SemiMumford₂)
+    (z : CoordinateRing₂)
+    (hz :
+      xClass (R := R₂) (C (2 : R₂)) * z ∈
+        mumfordIdeal D.u D.v) :
+    z ∈ mumfordIdeal D.u D.v :=
+  scalar_saturated D 2 (by norm_num) z hz
+
+end TwoAdic
+
+end
+
+end MazurProof.N13GeneralizedMumfordIntegral
