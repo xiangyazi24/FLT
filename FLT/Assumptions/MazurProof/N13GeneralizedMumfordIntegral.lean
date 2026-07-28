@@ -326,6 +326,25 @@ theorem ker_mumfordEval
     exact Ideal.add_mem _ hbase hgraph
   · exact mumfordIdeal_le_ker D
 
+/-- Membership in a generalized Mumford graph ideal is the single monic
+divisibility condition obtained by substituting `Y = v`. -/
+theorem mem_mumfordIdeal_iff
+    [Nontrivial R]
+    (D : SemiMumford (R := R))
+    (z : CoordinateRing (R := R)) :
+    z ∈ mumfordIdeal D.u D.v ↔
+      D.u ∣ coeff0 z + coeffY z * D.v := by
+  rw [← ker_mumfordEval D, RingHom.mem_ker]
+  conv_lhs =>
+    rw [← recompose z]
+  simp only [map_add, map_mul, mumfordEval_xClass,
+    mumfordEval_yClass]
+  change
+    Ideal.Quotient.mk (Ideal.span ({D.u} : Set R[X]))
+        (coeff0 z + coeffY z * D.v) = 0 ↔ _
+  rw [Ideal.Quotient.eq_zero_iff_mem,
+    Ideal.mem_span_singleton]
+
 theorem mumfordEval_surjective
     (D : SemiMumford (R := R)) :
     Function.Surjective (mumfordEval D) := by
