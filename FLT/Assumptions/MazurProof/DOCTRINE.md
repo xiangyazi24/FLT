@@ -264,6 +264,16 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   needed for addition in the Picard quotient.  Consequently, surjectivity of
   balanced representatives alone defines a canonical Picard-to-fake-class
   homomorphism; uniqueness of normal forms is not needed.
+- Balanced-representative existence has reached the structural Hermite
+  layer.  Every Picard class has an integral invertible-ideal
+  representative; every nonzero integral ideal has a canonical monic
+  contraction generator `u`; and every primitive ideal is proved exactly
+  equal to `(u,Y-v)` with the semireduced Mumford relations.  The two
+  remaining steps are principal content scaling to make the ideal primitive
+  and a well-founded Cantor descent.  The degree-three obstruction does not
+  require a general Riemann--Roch theorem: replacing `v` by `v+u` cancels
+  the monic degree-six leading term in `f-(v+u)²`, producing a complement
+  of degree at most two.
 - The raw Mumford Kummer value is now defined in the actual sextic field.
   The branch specialization `X↦θ, Y↦0` sends the hyperelliptic norm of
   every affine function to a square.  For a balanced representative,

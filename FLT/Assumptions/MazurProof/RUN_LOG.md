@@ -316,6 +316,22 @@
   audits for the six relation theorems and the descended homomorphism report
   only `propext`, `Classical.choice`, and `Quot.sound`; neither file contains
   a proof escape.
+- Advanced balanced-representative existence through the quadratic
+  Hermite layer.  A nonzero integral ideal has nonzero contraction to
+  `K[X]`, hence a canonical monic generator `u`.  If the ideal is primitive
+  (it contains an element with `Y`-coefficient one), coefficient
+  decomposition constructs `v` and proves the exact graph presentation
+  `J=(u,Y-v)`, with `u ∣ f-v²` and `v` reduced modulo `u`.
+- Every oriented Picard class now has an integral invertible-ideal
+  representative and every such ideal has a rank-two Smith presentation.
+  The remaining representative work is precisely principal scaling to a
+  primitive ideal followed by well-founded Cantor reduction.  The latter
+  has a purely algebraic route: use `(f-v²)/u` above degree three, and at
+  degree three replace `v` by `v+u` so the monic degree-six terms cancel.
+- `lake build FLT.Assumptions.MazurProof.SexticMumfordRepresentative`
+  passes.  Axiom audits for Smith form, contraction, primitive graph form,
+  integral representatives, and the final conditional surjectivity theorem
+  report only `propext`, `Classical.choice`, and `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
