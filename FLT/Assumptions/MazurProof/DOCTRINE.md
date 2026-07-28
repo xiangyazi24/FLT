@@ -195,6 +195,13 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   `ℚ(ζ)`, and `e1`, `e2`, `a`, and `q` have exact expressions of degree at
   most two in `ζ` and the root.  All polynomial quotients in these changes
   of presentation are constant or linear.
+- The sextic is now proved irreducible over `ℚ` without factor
+  enumeration.  Modulo three, the Rabin criterion is discharged by the
+  finite-field Frobenius theorem and three Bézout coprimality identities
+  for possible factor degrees one through three; Gauss's lemma lifts the
+  result to `ℚ`.  The resulting sextic field structure is exported as an
+  opt-in instance, so files that only need the quotient algebra do not
+  acquire a global field instance.
 - The useful two-adic ray characters are now packaged as one first
   ramified logarithm on
   `F₈[ε]/(ε²)`: `(r+εc) ↦ c/r`.  Lean proves that it is multiplicative-to-

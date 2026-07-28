@@ -150,6 +150,15 @@
   logarithm, and N13 first-jet kernel pass with only `propext`,
   `Classical.choice`, and `Quot.sound`.  The actual `ℚ₂` valuation adapter
   and completeness of the global S-unit envelope remain explicit.
+- Proved the N13 sextic irreducible by reduction modulo three.  The
+  finite-field proof uses Frobenius divisibility for an arbitrary
+  irreducible factor and Bézout coprimality for degrees one, two, and
+  three; it does not enumerate finite-field factors.  Gauss's lemma then
+  gives irreducibility over `ℚ`.
+- Exported opt-in `Fact` and field structures for the fake-descent sextic
+  algebra, avoiding a global instance.  The targeted build passes, and
+  axiom audits for both the finite-field and rational irreducibility
+  theorems report only `propext`, `Classical.choice`, and `Quot.sound`.
 - Corrected the endgame: fake-2 triviality supplies 2-divisibility, so the
   separated kernel must be 2-adic.  The good model is
   `y²+(x³+x+1)y=x⁵+x⁴`; its two affine/infinity charts stay smooth modulo
