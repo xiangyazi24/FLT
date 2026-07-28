@@ -222,6 +222,14 @@
   audits for the ideal square, branch order, oriented raw relation, and
   final doubling theorem report only `propext`, `Classical.choice`, and
   `Quot.sound`.
+- Proved generically in characteristic zero that every coordinate-ring
+  unit fixed by hyperelliptic conjugation comes from a nonzero scalar of
+  the ground field.  The proof uses only the canonical rank-two basis and
+  the inverse-unit equation; it does not invoke divisor reduction or
+  finite Mumford cases.
+- `lake build FLT.Assumptions.MazurProof.SexticMumfordFixedUnit` passes.
+  The key theorem's axiom audit reports only `propext`,
+  `Classical.choice`, and `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:

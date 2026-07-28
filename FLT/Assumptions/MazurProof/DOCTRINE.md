@@ -220,6 +220,13 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   `2[H]=[∞₋-∞₊]` in the concrete Picard group.  Once the generic
   fake-Kummer kernel is proved to be “a double or a double plus the
   infinity class”, this relation collapses both alternatives to doubles.
+- The unit ambiguity in principal Mumford-ideal relations is also
+  structural.  In the rank-two affine basis `p(X)+q(X)Y`, hyperelliptic
+  conjugation negates `q`; a conjugation-fixed unit therefore has `q=0`.
+  Expanding its inverse in the same basis proves that `p` is a polynomial
+  unit, hence a nonzero ground-field scalar.  This is the key
+  well-definedness input for quotienting Mumford Kummer values by squares
+  and rational scalars.
 - Trivial fake 2-descent gives `J(ℚ)/2J(ℚ)=0`, not finiteness by itself.
   The structural closure must use the same prime: a good generalized model
   at two, a strict 2-adic formal-kernel filtration, and reduction to the
