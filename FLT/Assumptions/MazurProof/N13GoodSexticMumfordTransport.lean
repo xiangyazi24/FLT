@@ -254,6 +254,91 @@ theorem map_mumfordIdeal_reduced (u v : K[X]) :
   exact sextic_mumfordIdeal_eq_of_dvd_sub _ _ _
     (dvd_sub_mod (completedGraph v) u)
 
+/-- Completing the square carries the generalized Mumford equation to the
+standard sextic equation. -/
+theorem completedGraph_curve_eq
+    (D :
+      N13GeneralizedMumfordIntegral.SemiMumford (R := K)) :
+    N13Mumford.f K - completedGraph D.v ^ 2 =
+      D.u * (-4 * D.w) := by
+  rw [N13GoodSexticCoordinateEquiv.sextic_eq_h_sq_add_four_rhs
+    (K := K)]
+  unfold completedGraph
+  linear_combination -4 * D.curve_eq
+
+/-- Reducing the completed graph polynomial modulo `u` preserves the
+sextic divisibility relation. -/
+theorem reducedCompletedGraph_curve_dvd
+    (D :
+      N13GeneralizedMumfordIntegral.SemiMumford (R := K)) :
+    D.u ∣ N13Mumford.f K -
+      reducedCompletedGraph D.u D.v ^ 2 := by
+  let V : K[X] := completedGraph D.v
+  let Vred : K[X] := reducedCompletedGraph D.u D.v
+  obtain ⟨q, hq⟩ := dvd_sub_mod V D.u
+  change V - Vred = D.u * q at hq
+  refine ⟨-4 * D.w + q * (V + Vred), ?_⟩
+  calc
+    N13Mumford.f K - Vred ^ 2 =
+        (N13Mumford.f K - V ^ 2) +
+          (V - Vred) * (V + Vred) := by ring
+    _ =
+        D.u * (-4 * D.w) +
+          (D.u * q) * (V + Vred) := by
+      rw [completedGraph_curve_eq D, hq]
+    _ = D.u * (-4 * D.w + q * (V + Vred)) := by ring
+
+/-- A generalized Mumford representative over a characteristic-zero field,
+written as a standard reduced sextic semirepresentative. -/
+def toSexticSemi
+    (D :
+      N13GeneralizedMumfordIntegral.SemiMumford (R := K))
+    (nInf : ℤ) :
+    SexticMumford.SemiMumford ModelK where
+  u := D.u
+  v := reducedCompletedGraph D.u D.v
+  nInf := nInf
+  u_monic := D.u_monic
+  v_reduced := by
+    apply (Polynomial.mod_eq_self_iff D.u_monic.ne_zero).2
+    exact Polynomial.degree_mod_lt _ D.u_monic.ne_zero
+  curve_dvd := by
+    simpa only [N13Mumford.model_f] using
+      reducedCompletedGraph_curve_dvd D
+
+@[simp] theorem toSexticSemi_u
+    (D :
+      N13GeneralizedMumfordIntegral.SemiMumford (R := K))
+    (nInf : ℤ) :
+    (toSexticSemi D nInf).u = D.u := rfl
+
+@[simp] theorem toSexticSemi_v
+    (D :
+      N13GeneralizedMumfordIntegral.SemiMumford (R := K))
+    (nInf : ℤ) :
+    (toSexticSemi D nInf).v =
+      reducedCompletedGraph D.u D.v := rfl
+
+@[simp] theorem toSexticSemi_nInf
+    (D :
+      N13GeneralizedMumfordIntegral.SemiMumford (R := K))
+    (nInf : ℤ) :
+    (toSexticSemi D nInf).nInf = nInf := rfl
+
+/-- The reduced standard semirepresentative has exactly the transported
+generalized graph ideal. -/
+theorem map_mumfordIdeal_toSexticSemi
+    (D :
+      N13GeneralizedMumfordIntegral.SemiMumford (R := K))
+    (nInf : ℤ) :
+    Ideal.map toSexticK
+        (N13GeneralizedMumfordIntegral.mumfordIdeal D.u D.v) =
+      SexticMumford.mumfordIdeal ModelK
+        (toSexticSemi D nInf).u
+        (toSexticSemi D nInf).v := by
+  simpa only [toSexticSemi_u, toSexticSemi_v] using
+    map_mumfordIdeal_reduced D.u D.v
+
 end
 
 end MazurProof.N13GoodSexticMumfordTransport
