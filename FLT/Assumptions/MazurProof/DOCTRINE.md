@@ -212,6 +212,14 @@ X₁(13) is genus 2. F₁₃ is irreducible over ℚ, 20 terms, total degree 10.
   What remains is semantic: completeness of the global four-generator
   envelope and containment of the actual `ℚ₂` Kummer image in the
   first-jet kernel.
+- The even-sextic infinity correction is now explicit rather than an
+  abstract kernel ambiguity.  For
+  `u=X(X+1)` and `v=-(2X+1)`, the Mumford ideal satisfies
+  `(u,Y-v)²=(Y-A)`, and the positive-infinity order of `Y-A` is `-1`.
+  Keeping the orientation therefore proves
+  `2[H]=[∞₋-∞₊]` in the concrete Picard group.  Once the generic
+  fake-Kummer kernel is proved to be “a double or a double plus the
+  infinity class”, this relation collapses both alternatives to doubles.
 - Trivial fake 2-descent gives `J(ℚ)/2J(ℚ)=0`, not finiteness by itself.
   The structural closure must use the same prime: a good generalized model
   at two, a strict 2-adic formal-kernel filtration, and reduction to the

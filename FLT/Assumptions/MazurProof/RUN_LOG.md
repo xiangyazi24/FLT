@@ -212,6 +212,16 @@
   `#print axioms` for
   `candidateClass_eq_one_of_dlog_eq_zero` reports only `propext`,
   `Classical.choice`, and `Quot.sound`.
+- Constructed an explicit half of the even-sextic infinity-difference
+  class.  The proof uses the Gaussian factorization to show
+  `(X(X+1),Y+2X+1)²=(Y-A)`, computes the branch order of `Y-A`, and keeps
+  the oriented fractional-ideal component throughout.  It yields
+  `2[H]=[∞₋-∞₊]`, which removes the extra infinity alternative from the
+  future exact fake-Kummer kernel.
+- `lake build FLT.Assumptions.MazurProof.N13InfinityHalf` passes.  Axiom
+  audits for the ideal square, branch order, oriented raw relation, and
+  final doubling theorem report only `propext`, `Classical.choice`, and
+  `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
