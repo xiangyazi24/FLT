@@ -43,6 +43,13 @@ theorem square_eq_one (e : K →+* L) (s : Lˣ) :
   apply Subgroup.mem_sup_left
   exact Subgroup.mem_square.mpr ⟨s, by simp [pow_two]⟩
 
+/-- Every element of the fake square-class target has exponent two. -/
+@[simp] theorem target_sq_eq_one (e : K →+* L) (z : Target e) :
+    z ^ 2 = 1 := by
+  refine QuotientGroup.induction_on z ?_
+  intro s
+  exact square_eq_one e s
+
 /-- If `z` differs from a scalar by a square, its fake class is trivial. -/
 theorem eq_one_of_mul_sq_eq_scalar
     (e : K →+* L) (z s : Lˣ) (q : Kˣ)

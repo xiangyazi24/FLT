@@ -252,6 +252,17 @@
 - `lake build FLT.Assumptions.MazurProof.SexticMumfordFixedUnit` passes.
   The key theorem's axiom audit reports only `propext`,
   `Classical.choice`, and `Quot.sound`.
+- Constructed the sextic branch specialization
+  `ℚ[X,Y]/(Y²-f) → ℚ(θ)` with `X↦θ`, `Y↦0`, and proved that it sends
+  every hyperelliptic norm to a square.
+- Defined `u(θ)` for every balanced N13 Mumford representative and proved
+  it is nonzero from `deg u≤2<6`; irreducibility then packages it as a
+  sextic-field unit and hence as a raw fake square class.  Added the
+  generic theorem that every fake square-class target has exponent two.
+- `lake build FLT.Assumptions.MazurProof.N13MumfordKummerValue` passes.
+  Axiom audits for branch-norm squareness, nonvanishing, and the
+  exponent-two consequence report only `propext`, `Classical.choice`, and
+  `Quot.sound`.
 
 ### p11 avenue — CONFIRMED finding + verdict (2026-07-12)
 - billing_mahler_global_descent sorry is NOT provable as stated. It conflates:
