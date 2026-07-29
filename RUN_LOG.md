@@ -177,6 +177,16 @@
     ideal whose generic fibre represents the class.  Invertibility of that
     contraction on the two-dimensional integral surface is deliberately not
     asserted
+  - proved that the N13 function field is also the fraction field of the
+    integral good-model ring and that vertical extension commutes with
+    inverse fractional ideals.  The reverse inclusion uses Noetherian finite
+    generation and one common vertical denominator for all generators.
+    Therefore extension also commutes with the divisorial double inverse,
+    and the divisorial hull of the contraction of every invertible generic
+    ideal has exactly the original generic fibre.  This removes the
+    reflexive-hull/localization compatibility gap without choosing an affine
+    generator; local freeness of the hull on the integral surface remains a
+    separate geometric step
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -185,11 +195,12 @@
      smooth integral Mumford representative reducing to `(X² + X, 0)`.
      Vertical localization and contraction are now closed: every generic
      ideal has a nonzero vertically saturated integral-model contraction
-     with the correct generic fibre.  The proper two-chart route still has
-     to promote that contraction, for example via a reflexive hull, to the
-     actual integral invertible rank-one module without changing its generic
-     fibre; identify its completed restriction with the branch-local
-     lattice and the verified module-valued Čech map; lift the canonical
+     with the correct generic fibre.  Its divisorial double inverse is now
+     constructed and proved to retain exactly that generic fibre for every
+     invertible generic ideal.  The proper two-chart route still has to prove
+     that this rank-one reflexive hull is locally free/invertible on the
+     integral surface; identify its completed restriction with the
+     branch-local lattice and the verified module-valued Čech map; lift the canonical
      section; and prove that its relative effective degree-two divisor does
      not escape to infinity.
      An equivalent valuative properness theorem would also close this seam.
@@ -229,13 +240,15 @@
   Mumford graph, the monic-polynomial ratio now supplies that transition
   directly and reduces to one.  The generic affine coordinate ring is now
   proved to be the vertical localization of the integral model, so generic
-  ideals contract canonically and without losing their generic fibre.  What
-  remains upstream is to make the contracted rank-one object invertible on
-  the integral surface and then execute the actual
+  ideals contract canonically and without losing their generic fibre.  The
+  divisorial hull of every contracted invertible ideal now preserves that
+  generic fibre as well.  What remains upstream is to prove this hull is
+  locally free/invertible on the integral surface and then execute the actual
   module-to-divisor/properness argument; a generic rational Laurent unit
   cannot simply be cleared coefficientwise to an integral unit.
-- pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
-  deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
+- pending ChatGPT bridge answers: Q2598--Q2601 and Q2626--Q2630; do not
+  duplicate stale failed deliveries Q2313/Q2314 unless the corresponding tabs
+  are confirmed dead
 
 ## Run 2026-07-12 (Complete Mazur proof — Layer 2 decomposition)
 - doctrine version: 6 gaps initially → 8 axioms after decomposition (narrower scope each)
