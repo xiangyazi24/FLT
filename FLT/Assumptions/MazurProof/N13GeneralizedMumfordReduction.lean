@@ -291,6 +291,31 @@ structure SmoothMumford₂ : Type
         N13GeneralizedMumfordIntegral.hPoly (R := R₂)) +
           c * w = 1
 
+/-- The integral graph ideal of smooth two-adic Mumford data has the
+expected explicit inverse numerator: its product with the conjugate graph
+ideal is the principal ideal `(u)`. -/
+theorem integral_mumfordIdeal_mul_conj
+    (D : SmoothMumford₂) :
+    N13GeneralizedMumfordIntegral.mumfordIdeal D.u D.v *
+        N13GeneralizedMumfordIntegral.mumfordIdeal D.u
+          (N13GeneralizedMumfordIntegral.conjugateV D.v) =
+      Ideal.span
+        ({N13GeneralizedMumfordIntegral.xClass D.u} :
+          Set IntegralRing) :=
+  N13GeneralizedMumfordIntegral.mumfordIdeal_mul_conj_integral
+    D.toSemiMumford D.bezout
+
+/-- Hyperelliptic conjugation commutes with coefficient reduction. -/
+theorem reduce_conjugateV
+    (v : R₂[X]) :
+    reducePoly
+        (N13GeneralizedMumfordIntegral.conjugateV v) =
+      N13GoodCoordinateRingTwo.conjugateV
+        (reducePoly v) := by
+  unfold N13GeneralizedMumfordIntegral.conjugateV
+    N13GoodCoordinateRingTwo.conjugateV
+  rw [map_sub, map_neg, reduce_hPoly]
+
 /-- Smooth integral Mumford data reduce to the already constructed smooth
 special-fibre data. -/
 def reduceSmoothMumford

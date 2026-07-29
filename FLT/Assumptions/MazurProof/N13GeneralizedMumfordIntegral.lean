@@ -78,6 +78,11 @@ def xClassHom : R[X] →+* CoordinateRing (R := R) :=
 @[simp] theorem xClass_one : xClass (1 : R[X]) = 1 :=
   map_one xClassHom
 
+@[simp] theorem xClass_natCast (n : ℕ) :
+    xClass (n : R[X]) =
+      (n : CoordinateRing (R := R)) :=
+  map_natCast xClassHom n
+
 @[simp] theorem xClass_add (p q : R[X]) :
     xClass (p + q) = xClass p + xClass q :=
   map_add xClassHom p q
@@ -93,6 +98,10 @@ def xClassHom : R[X] →+* CoordinateRing (R := R) :=
 @[simp] theorem xClass_mul (p q : R[X]) :
     xClass (p * q) = xClass p * xClass q :=
   map_mul xClassHom p q
+
+@[simp] theorem xClass_pow (p : R[X]) (n : ℕ) :
+    xClass (p ^ n) = xClass p ^ n :=
+  map_pow xClassHom p n
 
 def normalPoly :
     CoordinateRing (R := R) →ₗ[R[X]] R[X][X] :=
@@ -209,6 +218,10 @@ structure SemiMumford where
   u_monic : u.Monic
   curve_eq : v ^ 2 + hPoly * v - rhsPoly = u * w
 
+/-- Hyperelliptic conjugation sends a graph value `v` to `-h-v`. -/
+def conjugateV (v : R[X]) : R[X] :=
+  -hPoly - v
+
 def ySubClass (v : R[X]) : CoordinateRing (R := R) :=
   yClass - xClass v
 
@@ -223,6 +236,126 @@ theorem xClass_mem_mumfordIdeal (u v : R[X]) :
 theorem ySubClass_mem_mumfordIdeal (u v : R[X]) :
     ySubClass v ∈ mumfordIdeal u v :=
   Ideal.subset_span (by simp)
+
+@[simp] theorem yClass_relation :
+    yClass (R := R) ^ 2 +
+        xClass (R := R) (hPoly (R := R)) *
+          yClass (R := R) =
+      xClass (R := R) (rhsPoly (R := R)) := by
+  apply AdjoinRoot.mk_eq_mk.mpr
+  refine ⟨1, ?_⟩
+  simp only [curvePoly]
+  ring
+
+/-- The two conjugate graph functions multiply to the negative Cantor
+quotient.  This identity is valid integrally, before reduction modulo two. -/
+theorem ySubClass_mul_conjugate
+    (D : SemiMumford (R := R)) :
+    ySubClass D.v * ySubClass (conjugateV D.v) =
+      -(xClass D.u * xClass D.w) := by
+  calc
+    ySubClass D.v * ySubClass (conjugateV D.v) =
+        yClass ^ 2 + xClass hPoly * yClass -
+          (xClass D.v ^ 2 + xClass hPoly * xClass D.v) := by
+      simp only [ySubClass, conjugateV, xClass_neg, xClass_sub]
+      ring
+    _ = xClass rhsPoly -
+          xClass (D.v ^ 2 + hPoly * D.v) := by
+      rw [yClass_relation, xClass_add, xClass_mul, xClass_pow]
+    _ = -xClass (D.v ^ 2 + hPoly * D.v - rhsPoly) := by
+      rw [xClass_sub]
+      ring
+    _ = -xClass (D.u * D.w) := by rw [D.curve_eq]
+    _ = -(xClass D.u * xClass D.w) := by rw [xClass_mul]
+
+/-- A smooth generalized Mumford graph and its hyperelliptic conjugate
+multiply to the principal ideal `(u)`.  The only smoothness input is the
+displayed Bézout identity, so the theorem works over an arbitrary
+commutative base ring. -/
+theorem mumfordIdeal_mul_conj_integral
+    (D : SemiMumford (R := R))
+    (hbez :
+      ∃ a b c : R[X],
+        a * D.u + b * (2 * D.v + hPoly) + c * D.w = 1) :
+    mumfordIdeal D.u D.v *
+        mumfordIdeal D.u (conjugateV D.v) =
+      Ideal.span
+        ({xClass D.u} :
+          Set (CoordinateRing (R := R))) := by
+  let I := mumfordIdeal D.u D.v
+  let J := mumfordIdeal D.u (conjugateV D.v)
+  apply le_antisymm
+  · apply Ideal.mul_le.mpr
+    intro p hp q hq
+    rw [Ideal.mem_span_singleton]
+    obtain ⟨p₀, pY, hpEq⟩ := Ideal.mem_span_pair.mp hp
+    obtain ⟨q₀, qY, hqEq⟩ := Ideal.mem_span_pair.mp hq
+    refine ⟨p₀ * q₀ * xClass D.u +
+        p₀ * qY * ySubClass (conjugateV D.v) +
+        pY * q₀ * ySubClass D.v -
+        pY * qY * xClass D.w, ?_⟩
+    rw [← hpEq, ← hqEq]
+    linear_combination pY * qY * ySubClass_mul_conjugate D
+  · rw [Ideal.span_singleton_le_iff_mem]
+    obtain ⟨a, b, c, habc⟩ := hbez
+    have huI : xClass D.u ∈ I :=
+      xClass_mem_mumfordIdeal D.u D.v
+    have huJ : xClass D.u ∈ J :=
+      xClass_mem_mumfordIdeal D.u (conjugateV D.v)
+    have hvI : ySubClass D.v ∈ I :=
+      ySubClass_mem_mumfordIdeal D.u D.v
+    have hvJ : ySubClass (conjugateV D.v) ∈ J :=
+      ySubClass_mem_mumfordIdeal D.u (conjugateV D.v)
+    have hu2 : xClass D.u * xClass D.u ∈ I * J :=
+      Ideal.mul_mem_mul huI huJ
+    have huv :
+        xClass D.u * xClass (2 * D.v + hPoly) ∈ I * J := by
+      have hp :
+          xClass D.u * ySubClass (conjugateV D.v) ∈ I * J :=
+        Ideal.mul_mem_mul huI hvJ
+      have hm :
+          ySubClass D.v * xClass D.u ∈ I * J :=
+        Ideal.mul_mem_mul hvI huJ
+      have hd := Ideal.sub_mem (I * J) hp hm
+      convert hd using 1
+      simp only [two_mul, ySubClass, conjugateV, xClass_neg, xClass_sub,
+        xClass_add]
+      ring
+    have huw : xClass D.u * xClass D.w ∈ I * J := by
+      have hg :
+          ySubClass D.v * ySubClass (conjugateV D.v) ∈ I * J :=
+        Ideal.mul_mem_mul hvI hvJ
+      have hneg := (I * J).neg_mem hg
+      rw [ySubClass_mul_conjugate] at hneg
+      simpa using hneg
+    have ha :
+        xClass a * (xClass D.u * xClass D.u) ∈ I * J :=
+      Ideal.mul_mem_left (I * J) (xClass a) hu2
+    have hb :
+        xClass b *
+          (xClass D.u * xClass (2 * D.v + hPoly)) ∈ I * J :=
+      Ideal.mul_mem_left (I * J) (xClass b) huv
+    have hc :
+        xClass c * (xClass D.u * xClass D.w) ∈ I * J :=
+      Ideal.mul_mem_left (I * J) (xClass c) huw
+    have hsum :=
+      Ideal.add_mem (I * J) (Ideal.add_mem (I * J) ha hb) hc
+    have heq :
+        xClass a * (xClass D.u * xClass D.u) +
+            xClass b *
+              (xClass D.u * xClass (2 * D.v + hPoly)) +
+            xClass c * (xClass D.u * xClass D.w) =
+          xClass D.u := by
+      calc
+        _ = xClass D.u *
+            xClass
+              (a * D.u + b * (2 * D.v + hPoly) + c * D.w) := by
+          simp only [two_mul, xClass_add, xClass_mul]
+          ring
+        _ = xClass D.u * 1 := by rw [habc, xClass_one]
+        _ = xClass D.u := mul_one _
+    rw [heq] at hsum
+    exact hsum
 
 abbrev MumfordResidue
     (D : SemiMumford (R := R)) : Type u :=

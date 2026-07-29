@@ -202,6 +202,12 @@
     Generic invertibility plus this single witness is now a complete
     capstone for integral invertibility, with no regular-local or UFD
     infrastructure
+  - proved the generalized Mumford inverse formula integrally over an
+    arbitrary commutative base: the graph ideal `(u,Y-v)` times its
+    hyperelliptic-conjugate graph ideal `(u,Y+h+v)` is the principal ideal
+    `(u)`.  The proof uses only the curve equation and the smoothness Bézout
+    identity, retains the `2v+h` term, and commutes with reduction; it does
+    not use a characteristic-two shortcut
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
