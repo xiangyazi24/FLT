@@ -147,6 +147,15 @@
     generated.  After restriction to the two faithful Laurent branches,
     its scalar extension is the full branch pair: a nonzero lattice section
     is nonzero in both branch fields and hence is a unit in their product
+  - packaged the corresponding branch-local trivialization without
+    principalizing the affine ideal.  A nonzero affine-lattice section gives
+    a unit only in the product of the two rational branch fields; multiplying
+    the standard complete branch lattice by that unit produces its local
+    lattice model.  This model is linearly equivalent to the standard
+    lattice, independent of the local-basis choice up to linear equivalence,
+    has full rational scalar span, contains the restricted chosen section,
+    and is exactly the unit multiple of the image of the actual complete
+    formal-infinity chart
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -162,11 +171,13 @@
      near-identity transition.  The fractional ideal now has a finite
      integral affine lattice whose rational extension is exact and whose
      branchwise scalar span is full.  Compare its completed/saturated
-     branch restriction with the standard complete lattice; prove that a
-     specialization-kernel class supplies a transition reducing to one and
-     that its module-valued restriction map identifies with the verified
-     extended Čech map.  No global affine generator or separate
-     principality theorem is required
+     branch restriction with the standard complete lattice.  The candidate
+     local model and its rational transition are now explicit; prove that
+     the actual completed affine module equals this model, that the
+     transition lies in the integral formal overlap, and that specialization
+     makes its reduction equal to one.  Then identify its module-valued
+     restriction map with the verified extended Čech map.  No global affine
+     generator or separate principality theorem is required
   2. apply `exists_baseTwisted_kernel_lift` to lift the canonical section,
      produce its relative effective degree-two divisor, prove that it does
      not escape to infinity, and obtain a smooth integral Mumford graph
@@ -196,13 +207,15 @@
   pair.  Such an ideal now also carries a finite integral affine lattice
   that lies inside it, recovers it after rational scalar extension, and
   still spans the whole rational branch pair after restriction.  The actual
-  complete chart realizes the standard integral branch lattice, and the
-  fixed-divisor principal parts make the extended actual Čech map
-  surjective for every supplied near-identity transition.  What remains is
-  the integral completion/saturation comparison and the semantic bridge
-  from specialization to a near-identity local transition, followed by
-  construction of the relative divisor.  An equivalent valuation-theoretic
-  properness proof would also suffice.
+  complete chart realizes the standard integral branch lattice.  A local
+  basis now turns it into an explicit unit-multiple lattice, parameterized
+  exactly by the actual complete infinity chart.  The fixed-divisor
+  principal parts make the extended actual Čech map surjective for every
+  supplied near-identity transition.  What remains is to identify the
+  actual completed affine module with that candidate model and prove that
+  specialization makes its rational unit an integral formal transition
+  reducing to one, followed by construction of the relative divisor.  An
+  equivalent valuation-theoretic properness proof would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
