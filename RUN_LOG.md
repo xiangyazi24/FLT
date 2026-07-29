@@ -156,37 +156,35 @@
     has full rational scalar span, contains the restricted chosen section,
     and is exactly the unit multiple of the image of the actual complete
     formal-infinity chart
+  - constructed the formal transition attached to an already-integral
+    near-base Mumford graph.  For every monic `u`, its restriction at
+    `x=t⁻¹` factors as the Laurent pole monomial times the power-series
+    reversal of `u`; the latter has constant coefficient one and is a unit.
+    Coefficientwise reduction commutes with this restriction.  Hence for
+    `u mod 2 = u₀ mod 2`, the ratio `u/u₀` is a genuine unit of the actual
+    quadratic formal overlap whose reduction is one, and canonically gives
+    `NearIdentityTransition`.  No Laurent-coefficient enumeration or
+    denominator clearing is used
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
 - exact remaining N13 seam:
-  1. for each rational Picard specialization-kernel class, take its actual
-     oriented invertible fractional ideal/module on the affine chart.  Its
-     faithful restriction to the two rational Laurent branches is now
-     canonical, and those branches are now identified with the
-     coefficient-extended integral Hensel branches; the full affine
-     restriction square now commutes.  The complete integral branch lattice
-     is the exact image of the actual infinity chart, and the fixed
-     base-divisor extension is already surjective for every supplied
-     near-identity transition.  The fractional ideal now has a finite
-     integral affine lattice whose rational extension is exact and whose
-     branchwise scalar span is full.  Compare its completed/saturated
-     branch restriction with the standard complete lattice.  The candidate
-     local model and its rational transition are now explicit; prove that
-     the actual completed affine module equals this model, that the
-     transition lies in the integral formal overlap, and that specialization
-     makes its reduction equal to one.  Then identify its module-valued
-     restriction map with the verified extended Čech map.  No global affine
-     generator or separate principality theorem is required
-  2. apply `exists_baseTwisted_kernel_lift` to lift the canonical section,
-     produce its relative effective degree-two divisor, prove that it does
-     not escape to infinity, and obtain a smooth integral Mumford graph
-     reducing to `(X² + X, 0)`; recovery, uniqueness, and Picard
-     compatibility then put it in the centred two-disk Abel-chart image
-     automatically
-  3. construct the genuine finite reduction classifier and prove its fibres
+  1. prove that every rational Picard specialization-kernel class has a
+     smooth integral Mumford representative reducing to `(X² + X, 0)`.
+     The proper two-chart route still has to identify the actual
+     completed/saturated affine module with its branch-local lattice,
+     identify the resulting module-valued restriction with the verified
+     extended Čech map, lift the canonical section, and prove that its
+     relative effective degree-two divisor does not escape to infinity.
+     An equivalent valuative properness theorem would also close this seam.
+     Once such a `NearBaseMumford` representative exists, its integral
+     near-identity transition, Hensel recovery, chart uniqueness, and Picard
+     compatibility are all automatic.  The new `u/u₀` transition theorem is
+     downstream of representative existence and must not be used
+     circularly
+  2. construct the genuine finite reduction classifier and prove its fibres
      are the cosets of its kernel
-  4. prove the transported local group law has the required two-adic
+  3. prove the transported local group law has the required two-adic
      quadratic error (or replace it by an equally strong structural
      logarithm argument)
   Affine ideal saturation alone is insufficient: it does not prevent a
@@ -211,11 +209,12 @@
   basis now turns it into an explicit unit-multiple lattice, parameterized
   exactly by the actual complete infinity chart.  The fixed-divisor
   principal parts make the extended actual Čech map surjective for every
-  supplied near-identity transition.  What remains is to identify the
-  actual completed affine module with that candidate model and prove that
-  specialization makes its rational unit an integral formal transition
-  reducing to one, followed by construction of the relative divisor.  An
-  equivalent valuation-theoretic properness proof would also suffice.
+  supplied near-identity transition.  For an already-integral near-base
+  Mumford graph, the monic-polynomial ratio now supplies that transition
+  directly and reduces to one.  What remains upstream is the actual
+  module-to-divisor/properness argument producing such a graph for every
+  specialization-kernel class; a generic rational Laurent unit cannot
+  simply be cleared coefficientwise to an integral unit.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
