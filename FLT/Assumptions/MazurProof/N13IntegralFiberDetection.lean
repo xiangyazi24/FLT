@@ -3,7 +3,7 @@ import FLT.Assumptions.MazurProof.N13GeneralizedMumfordReduction
 import Mathlib.Algebra.Ring.GeomSum
 
 open Polynomial
-open scoped nonZeroDivisors
+open scoped BigOperators nonZeroDivisors
 
 namespace MazurProof.N13IntegralFiberDetection
 
@@ -24,18 +24,35 @@ abbrev RationalRing : Type :=
 abbrev SpecialRing : Type :=
   N13GeneralizedMumfordReduction.SpecialRing
 
+abbrev FunctionField : Type :=
+  N13IntegralFractionalHull.FunctionField
+
+abbrev IntegralFractionalIdeal : Type :=
+  N13IntegralFractionalHull.IntegralFractionalIdeal
+
+abbrev RationalFractionalIdeal : Type :=
+  N13IntegralFractionalHull.RationalFractionalIdeal
+
 def integralToRational : IntegralRing →+* RationalRing :=
   N13IntegralFractionalHull.integralToRational
 
 local instance integralRationalAlgebra :
     Algebra IntegralRing RationalRing :=
-  integralToRational.toAlgebra
+  N13IntegralFractionalHull.integralToRational.toAlgebra
+
+local instance integralRingDomain : IsDomain IntegralRing :=
+  N13IntegralFractionalHull.integralToRational_injective.isDomain
+    N13IntegralFractionalHull.integralToRational
 
 local instance rationalRingLocalization :
     IsLocalization
       N13IntegralModelContraction.verticalScalars
       RationalRing :=
   N13IntegralModelContraction.rationalRing_isLocalization
+
+local instance integralFunctionFieldFractionRing :
+    IsFractionRing IntegralRing FunctionField :=
+  N13IntegralFractionalHull.functionField_isFractionRing
 
 def reduceCoordinate : IntegralRing →+* SpecialRing :=
   N13GeneralizedMumfordReduction.reduceCoordinate
@@ -191,6 +208,150 @@ theorem map_defectIdeal_eq_top_iff_exists
     rw [← hred]
     exact Ideal.mem_map_of_mem reduceCoordinate hz
 
+/-- A finite dual frame for a fractional ideal, with integral evaluation
+trace reducing to one.  The primal vectors lie in `H`, the dual vectors lie
+in the multiplier inverse `H⁻¹`, and their evaluation sum is represented by
+one integral affine function.  This is the exact algebraic output expected
+from the module-valued Čech construction. -/
+structure DefectDualFrame
+    (H : IntegralFractionalIdeal) where
+  rank : ℕ
+  primal : Fin rank → FunctionField
+  dual : Fin rank → FunctionField
+  primal_mem : ∀ i, primal i ∈ H
+  dual_mem : ∀ i, dual i ∈ H⁻¹
+  trace : IntegralRing
+  algebraMap_trace :
+    algebraMap IntegralRing FunctionField trace =
+      ∑ i, primal i * dual i
+  reduce_trace :
+    reduceCoordinate trace = 1
+
+namespace DefectDualFrame
+
+variable {H : IntegralFractionalIdeal}
+
+/-- The evaluation trace of a finite dual frame belongs to the integral
+defect ideal. -/
+theorem trace_mem_defect
+    (F : DefectDualFrame H) :
+    F.trace ∈ N13IntegralFractionalHull.defectIdeal H := by
+  have hsum :
+      (∑ i, F.primal i * F.dual i) ∈ H * H⁻¹ := by
+    apply Submodule.sum_mem
+    intro i _
+    exact
+      FractionalIdeal.mul_mem_mul
+        (F.primal_mem i) (F.dual_mem i)
+  have htrace :
+      algebraMap IntegralRing FunctionField F.trace ∈
+        (N13IntegralFractionalHull.defectIdeal H :
+          IntegralFractionalIdeal) := by
+    rw [N13IntegralFractionalHull.coe_defectIdeal,
+      F.algebraMap_trace]
+    exact hsum
+  obtain ⟨z, hz, hzTrace⟩ :=
+    (FractionalIdeal.mem_coeIdeal
+      (nonZeroDivisors IntegralRing)).mp htrace
+  have hzt : z = F.trace :=
+    (IsFractionRing.injective IntegralRing FunctionField)
+      hzTrace
+  simpa [hzt] using hz
+
+/-- A finite dual frame supplies exactly the concrete special trace witness
+required by the generic--special fibre criterion. -/
+theorem exists_defect_reduces_one
+    (F : DefectDualFrame H) :
+    ∃ z : IntegralRing,
+      z ∈ N13IntegralFractionalHull.defectIdeal H ∧
+        reduceCoordinate z = 1 :=
+  ⟨F.trace, F.trace_mem_defect, F.reduce_trace⟩
+
+end DefectDualFrame
+
+/-- A finite dual frame stated before reflexive hull: primal vectors lie in
+the contracted generic ideal and dual vectors lie in its multiplier inverse.
+Triple-inverse stability transports this frame verbatim to the divisorial
+hull and its inverse. -/
+structure ContractedDualFrame
+    (J : Ideal RationalRing) where
+  rank : ℕ
+  primal : Fin rank → FunctionField
+  dual : Fin rank → FunctionField
+  primal_mem :
+    ∀ i, primal i ∈
+      N13IntegralFractionalHull.contractedFractional J
+  dual_mem :
+    ∀ i, dual i ∈
+      (N13IntegralFractionalHull.contractedFractional J)⁻¹
+  trace : IntegralRing
+  algebraMap_trace :
+    algebraMap IntegralRing FunctionField trace =
+      ∑ i, primal i * dual i
+  reduce_trace :
+    reduceCoordinate trace = 1
+
+namespace ContractedDualFrame
+
+variable {J : Ideal RationalRing}
+
+/-- Build the contracted dual frame from finitely many affine primal and
+multiplier-inverse lifts together with integral representatives of their
+products.  The factors need not extend individually as global sections of
+the proper curve. -/
+noncomputable def ofProductLifts
+    {n : ℕ}
+    (primal dual : Fin n → FunctionField)
+    (primal_mem :
+      ∀ i, primal i ∈
+        N13IntegralFractionalHull.contractedFractional J)
+    (dual_mem :
+      ∀ i, dual i ∈
+        (N13IntegralFractionalHull.contractedFractional J)⁻¹)
+    (product : Fin n → IntegralRing)
+    (algebraMap_product :
+      ∀ i,
+        algebraMap IntegralRing FunctionField (product i) =
+          primal i * dual i)
+    (reduce_sum :
+      (∑ i, reduceCoordinate (product i)) = 1) :
+    ContractedDualFrame J where
+  rank := n
+  primal := primal
+  dual := dual
+  primal_mem := primal_mem
+  dual_mem := dual_mem
+  trace := ∑ i, product i
+  algebraMap_trace := by
+    rw [map_sum]
+    exact Finset.sum_congr rfl
+      (fun i _ ↦ algebraMap_product i)
+  reduce_trace := by
+    rw [map_sum]
+    exact reduce_sum
+
+/-- A contracted dual frame is already a defect dual frame for the
+divisorial hull; no local-freeness theorem is used. -/
+def toDefectDualFrame
+    (F : ContractedDualFrame J)
+    (hJ : J ≠ ⊥) :
+    DefectDualFrame
+      (N13IntegralFractionalHull.divisorialHull J) where
+  rank := F.rank
+  primal := F.primal
+  dual := F.dual
+  primal_mem i :=
+    N13IntegralFractionalHull.contractedFractional_le_divisorialHull
+      hJ (F.primal_mem i)
+  dual_mem i := by
+    rw [N13IntegralFractionalHull.divisorialHull_inv hJ]
+    exact F.dual_mem i
+  trace := F.trace
+  algebraMap_trace := F.algebraMap_trace
+  reduce_trace := F.reduce_trace
+
+end ContractedDualFrame
+
 /-- Concrete capstone for the affine invertibility problem.  It avoids all
 local-factoriality infrastructure: generic invertibility plus one integral
 evaluation element reducing to one already make `H` a unit fractional
@@ -209,6 +370,52 @@ theorem isUnit_of_exists_defect_reduces_one
   isUnit_of_map_defectIdeal_eq_top
     hH hGeneric
     ((map_defectIdeal_eq_top_iff_exists H).2 hSpecial)
+
+/-- Structural capstone in the form used by Čech duality: a generically
+invertible fractional ideal with one finite dual frame reducing to the
+identity is already an integral unit fractional ideal. -/
+theorem isUnit_of_defectDualFrame
+    {H : IntegralFractionalIdeal}
+    (hH : H ≠ 0)
+    (hGeneric :
+      IsUnit
+        (N13IntegralFractionalHull.extendFractional H))
+    (F : DefectDualFrame H) :
+    IsUnit H :=
+  isUnit_of_exists_defect_reduces_one
+    hH hGeneric F.exists_defect_reduces_one
+
+/-- Final affine-hull criterion in the form needed upstream: an invertible
+generic ideal and one contracted dual frame with trace `1 mod 2` make its
+divisorial hull an invertible integral fractional ideal. -/
+theorem isUnit_divisorialHull_of_contractedDualFrame
+    {J : Ideal RationalRing}
+    (hJ : J ≠ ⊥)
+    (hGeneric :
+      IsUnit (J : RationalFractionalIdeal))
+    (F : ContractedDualFrame J) :
+    IsUnit
+      (N13IntegralFractionalHull.divisorialHull J) := by
+  have hHull :
+      N13IntegralFractionalHull.divisorialHull J ≠ 0 := by
+    intro hzero
+    have hle :=
+      N13IntegralFractionalHull.contractedFractional_le_divisorialHull
+        hJ
+    rw [hzero] at hle
+    exact
+      N13IntegralFractionalHull.contractedFractional_ne_zero hJ
+        (bot_unique hle)
+  have hExtended :
+      IsUnit
+        (N13IntegralFractionalHull.extendFractional
+          (N13IntegralFractionalHull.divisorialHull J)) := by
+    rw [N13IntegralFractionalHull.extendFractional_divisorialHull_eq
+      hJ hGeneric]
+    exact hGeneric
+  exact
+    isUnit_of_defectDualFrame
+      hHull hExtended (F.toDefectDualFrame hJ)
 
 end
 

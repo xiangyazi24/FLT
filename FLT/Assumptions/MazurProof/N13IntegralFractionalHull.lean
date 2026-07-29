@@ -414,11 +414,36 @@ theorem le_inv_inv
   exact
     (FractionalIdeal.mem_inv_iff hI).mp hy x hx
 
+/-- Multiplier inverse is unchanged by taking the divisorial double inverse.
+Equivalently, triple inverse equals single inverse for every nonzero
+fractional ideal. -/
+theorem inv_inv_inv
+    {I : IntegralFractionalIdeal} (hI : I ≠ 0) :
+    I⁻¹⁻¹⁻¹ = I⁻¹ := by
+  have hInv : I⁻¹ ≠ 0 :=
+    fractional_inv_ne_zero hI
+  have hInvInv : I⁻¹⁻¹ ≠ 0 :=
+    fractional_inv_ne_zero hInv
+  apply le_antisymm
+  · exact
+      FractionalIdeal.inv_anti_mono
+        hI hInvInv (le_inv_inv hI)
+  · exact le_inv_inv hInv
+
 /-- Divisorial/reflexive hull of the contracted ideal. -/
 def divisorialHull
     (J : Ideal RationalRing) :
     IntegralFractionalIdeal :=
   (contractedFractional J)⁻¹⁻¹
+
+/-- The multiplier inverse of the divisorial hull is already the multiplier
+inverse of the original contracted ideal. -/
+theorem divisorialHull_inv
+    {J : Ideal RationalRing} (hJ : J ≠ ⊥) :
+    (divisorialHull J)⁻¹ =
+      (contractedFractional J)⁻¹ := by
+  rw [divisorialHull,
+    inv_inv_inv (contractedFractional_ne_zero hJ)]
 
 theorem extendFractional_divisorialHull
     {J : Ideal RationalRing} (hJ : J ≠ ⊥) :

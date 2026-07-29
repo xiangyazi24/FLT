@@ -208,6 +208,30 @@
     `(u)`.  The proof uses only the curve equation and the smoothness Bézout
     identity, retains the `2v+h` term, and commutes with reduction; it does
     not use a characteristic-two shortcut
+  - proved triple-inverse stability for nonzero fractional ideals and hence
+    identified the inverse of the divisorial hull with the inverse of the
+    original contracted ideal.  A finite dual frame for the contraction
+    therefore transports directly to the hull, avoiding any
+    reflexive-rank-one-to-locally-free theorem
+  - formalized the finite dual-frame endpoint: finitely many primal and
+    multiplier-inverse affine lifts, together with integral representatives
+    of their products whose reductions sum to one, give the defect witness
+    and make the divisorial hull invertible
+  - proved the explicit special-fibre affine dual frame symbolically:
+    `[u,cu,y]` lies in `(u,y)`,
+    `[x³,(y+h)/u,c]` lies in its multiplier inverse, and the three
+    evaluations sum to one.  Membership of `(y+h)/u` uses only
+    `y(y+h)=u x³`; there is no finite computation
+  - isolated generic two-chart trace-lifting lemmas, including a raw-lift
+    variant which corrects one supplied cochain by a divisible coboundary
+    and does not assert global reduction-surjectivity for a constrained
+    complete chart
+  - ruled out an overstrong route: the six displayed special affine factors
+    cannot individually be compatible global proper-curve sections.  For
+    example `u x³=x⁵+x⁴` has a pole at infinity.  The remaining theorem must
+    lift these factors only in the affine lattice and multiplier inverse;
+    proper Čech data supplies the integral specialization model, not six
+    global sections
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -221,9 +245,12 @@
      invertible generic ideal.  Its generic invertibility is enough: the
      generic--special defect criterion now reduces integral invertibility to
      constructing one element of `H * H⁻¹` whose special reduction is `1`.
-     The proper two-chart route must construct this trace/evaluation witness
-     non-circularly from the affine lattice, its dual, and the completed
-     branch lattice; then lift the canonical section and prove that its
+     The special affine trace/evaluation certificate is now closed.  The
+     proper two-chart route must supply a non-circular integral
+     specialization model whose affine lattice and multiplier inverse lift
+     those six selected special elements; then the finite product endpoint
+     constructs the witness automatically.  It must then lift the canonical
+     section and prove that its
      relative effective degree-two divisor does not escape to infinity.
      An equivalent valuative properness theorem would also close this seam.
      Once such a `NearBaseMumford` representative exists, its integral
