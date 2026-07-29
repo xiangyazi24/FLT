@@ -532,3 +532,30 @@
   flat of rank two, and recover the Mumford graph from the lifted basis
   `{1,x}` via the characteristic polynomial.  This avoids affine
   principality and general Cartier-divisor infrastructure.
+
+### N13 generic--special defect detection (2026-07-29)
+
+- Attached to every integral fractional ideal `H` its integral defect ideal
+  whose fractional extension is exactly `H * H⁻¹`.  Generic invertibility of
+  `H` now proves automatically that this defect ideal becomes the unit ideal
+  after vertical localization.
+- Proved that an integral ideal is the unit ideal whenever both its generic
+  vertical localization and its special reduction are unit ideals.  The
+  proof extracts a nonzero two-adic scalar from localization, replaces it by
+  a power of two using `PadicInt.ideal_eq_span_pow_p`, lifts a special unit
+  using surjectivity and `ker reduceCoordinate = (2)`, and closes with a
+  finite geometric series.
+- Consequently `isUnit_of_map_defectIdeal_eq_top` reduces invertibility of
+  the divisorial hull to the single honest special-fibre condition
+  `Ideal.map reduceCoordinate (defectIdeal H) = ⊤`.  No regular-local UFD,
+  reflexive-to-projective theorem, completion, affine generator, or
+  Noetherian induction is used.
+- Targeted checks of `N13IntegralFractionalHull.lean` and
+  `N13IntegralFiberDetection.lean` pass.  All four new endpoint audits report
+  only `propext`, `Classical.choice`, and `Quot.sound`.
+- ChatGPT Q2726--Q2730 independently agree that the regularity/UFD route is
+  mathematically valid but much heavier in the pinned Mathlib.  Q2730
+  identifies the same special trace witness as the shortest continuation.
+  Q2733--Q2735 now ask for the exact module-valued Čech evaluation lift,
+  the integral generalized-Mumford inverse formula, and the dual-pairing
+  adapter.

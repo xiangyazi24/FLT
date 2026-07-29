@@ -489,6 +489,75 @@ theorem genericIdeal_le_extended_divisorialHull
     extended_mono
       (contractedFractional_le_divisorialHull hJ)
 
+/-- The integral defect ideal attached to a fractional ideal.  Its
+fractional extension is the evaluation product `H * H⁻¹`, which lies in the
+unit fractional ideal by definition of inverse. -/
+def defectIdeal
+    (H : IntegralFractionalIdeal) :
+    Ideal IntegralRing :=
+  Classical.choose
+    (FractionalIdeal.le_one_iff_exists_coeIdeal.mp
+      (by
+        simpa only [FractionalIdeal.inv_eq] using
+          (FractionalIdeal.mul_one_div_le_one
+            (I := H))))
+
+theorem coe_defectIdeal
+    (H : IntegralFractionalIdeal) :
+    (defectIdeal H : IntegralFractionalIdeal) =
+      H * H⁻¹ :=
+  Classical.choose_spec
+    (FractionalIdeal.le_one_iff_exists_coeIdeal.mp
+      (by
+        simpa only [FractionalIdeal.inv_eq] using
+          (FractionalIdeal.mul_one_div_le_one
+            (I := H))))
+
+/-- Generic-fibre invertibility forces the defect ideal to be generically
+the unit ideal. -/
+theorem map_defectIdeal_eq_top
+    {H : IntegralFractionalIdeal}
+    (hH : H ≠ 0)
+    (hGeneric :
+      IsUnit (extendFractional H)) :
+    Ideal.map integralToRational (defectIdeal H) = ⊤ := by
+  rw [← Ideal.one_eq_top]
+  apply
+    (FractionalIdeal.coeIdeal_eq_one
+      (K := FunctionField)).mp
+  change
+    ((Ideal.map integralToRational (defectIdeal H) :
+      Ideal RationalRing) : RationalFractionalIdeal) = 1
+  calc
+    ((Ideal.map integralToRational (defectIdeal H) :
+        Ideal RationalRing) : RationalFractionalIdeal) =
+        extendFractional
+          (defectIdeal H : IntegralFractionalIdeal) := by
+      rw [extendFractional,
+        FractionalIdeal.extendedHom'_apply,
+        FractionalIdeal.extended_coeIdeal_eq_map]
+    _ = 1 := by
+      rw [coe_defectIdeal, map_mul,
+        extendFractional_inv hH]
+      exact
+        (FractionalIdeal.mul_inv_cancel_iff_isUnit
+          FunctionField).mpr hGeneric
+
+/-- Equality of the defect ideal with the unit ideal is exactly the desired
+invertibility conclusion. -/
+theorem isUnit_of_defectIdeal_eq_top
+    {H : IntegralFractionalIdeal}
+    (hDefect : defectIdeal H = ⊤) :
+    IsUnit H := by
+  apply
+    (FractionalIdeal.mul_inv_cancel_iff_isUnit
+      FunctionField).mp
+  rw [← coe_defectIdeal H, hDefect]
+  show
+    ((⊤ : Ideal IntegralRing) :
+      IntegralFractionalIdeal) = 1
+  exact FractionalIdeal.coeIdeal_top IntegralRing⁰
+
 end
 
 end MazurProof.N13IntegralFractionalHull
