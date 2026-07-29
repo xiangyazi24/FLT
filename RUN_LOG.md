@@ -108,6 +108,12 @@
     one, now restricts canonically and injectively to that product; the
     construction is a ring homomorphism on fractional ideals and therefore
     also restricts their units, without choosing a global generator
+  - identified the integral and rational infinity branches under
+    `ℤ₂ → ℚ₂`.  Coefficient extension sends the X-adic Hensel root reducing
+    to zero to the positive sextic Laurent root after the good-model
+    coordinate change, and sends its conjugate to the negative root.  The
+    proof uses the quadratic relation and constant-term uniqueness rather
+    than coefficient expansion
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -115,12 +121,15 @@
   1. for each rational Picard specialization-kernel class, take its actual
      oriented invertible fractional ideal/module on the affine chart.  Its
      faithful restriction to the two rational Laurent branches is now
-     canonical.  Choose the two complete integral branch lattices for the
-     twist by the fixed base divisor, form the genuine module-valued Čech
-     restriction difference, and prove that its cokernel is finite with
-     zero residue cokernel.  The finite-cokernel Nakayama theorem then gives
-     the required integral section lift without any affine generator.
-     A separate principality theorem is no longer required
+     canonical, and those branches are now identified with the
+     coefficient-extended integral Hensel branches.  Prove the full affine
+     restriction square commutes, choose the two complete integral branch
+     lattices for the twist by the fixed base divisor, form the genuine
+     module-valued Čech restriction difference, and prove that its cokernel
+     is finite with zero residue cokernel.  The finite-cokernel Nakayama
+     theorem then gives the required integral section lift without any
+     affine generator.  A separate principality theorem is no longer
+     required
   2. apply `exists_twisted_kernel_lift` to lift the canonical section,
      produce its relative effective degree-two divisor, prove that it does
      not escape to infinity, and obtain a smooth integral Mumford graph
@@ -142,11 +151,12 @@
   and its punctured overlap are explicitly split into their two Hensel
   branches, compatibly with restriction.  The rational affine fractional
   ideal now restricts faithfully to their product without a chosen
-  generator.  What remains before the divisor construction is to choose
-  its branchwise integral infinity lattices and instantiate the
-  module-valued complex; its cokernel must be finite with zero residue
-  cokernel.  An equivalent valuation-theoretic properness proof would also
-  suffice.
+  generator, and the integral and rational branch roots agree under
+  coefficient extension.  What remains before choosing its branchwise
+  integral infinity lattices is the full affine restriction compatibility
+  square.  Then instantiate the module-valued complex and prove its
+  cokernel finite with zero residue cokernel.  An equivalent
+  valuation-theoretic properness proof would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
