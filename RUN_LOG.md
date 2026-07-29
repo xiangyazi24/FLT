@@ -129,6 +129,17 @@
     lattice.  This embedding is proved equal to restriction
     `Power → Laurent` followed by coefficient extension, so the lattice is
     compatible with the formal/rational branch square
+  - proved that the actual complete formal-infinity chart realizes exactly
+    this integral branch lattice.  Restriction through the punctured formal
+    overlap, Hensel branch splitting, and coefficient extension gives the
+    same rational branch pair
+  - placed the fixed base-divisor twist on the correct chart.  Since
+    `(0,0)+(-1,0)` is supported on the affine chart, the infinity lattice is
+    unchanged and the affine source is enlarged by its two genuine
+    principal parts.  Combining these with the actual two-chart
+    coboundary gives a surjective extended Čech map for every invertible
+    overlap transition reducing to one; every near-closed cochain has an
+    actual kernel lift with unchanged residue
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -138,16 +149,16 @@
      faithful restriction to the two rational Laurent branches is now
      canonical, and those branches are now identified with the
      coefficient-extended integral Hensel branches; the full affine
-     restriction square now commutes.  The untwisted complete integral
-     branch lattice is now embedded canonically in the full scalar
-     extension of every invertible affine ideal.  Transport this lattice
-     through the branchwise twist by the fixed base divisor, form the
-     genuine module-valued Čech restriction difference, and prove that its
-     cokernel is finite with zero residue cokernel.  The finite-cokernel
-     Nakayama theorem then gives the required integral section lift without
-     any affine generator.  A separate principality theorem is no longer
-     required
-  2. apply `exists_twisted_kernel_lift` to lift the canonical section,
+     restriction square now commutes.  The complete integral branch lattice
+     is the exact image of the actual infinity chart, and the fixed
+     base-divisor extension is already surjective for every supplied
+     near-identity transition.  Construct the integral affine lattice of
+     the actual fractional ideal and its branchwise local trivialization;
+     prove that a specialization-kernel class supplies such a transition
+     reducing to one and that its module-valued restriction map identifies
+     with the verified extended Čech map.  No global affine generator or
+     separate principality theorem is required
+  2. apply `exists_baseTwisted_kernel_lift` to lift the canonical section,
      produce its relative effective degree-two divisor, prove that it does
      not escape to infinity, and obtain a smooth integral Mumford graph
      reducing to `(X² + X, 0)`; recovery, uniqueness, and Picard
@@ -173,10 +184,14 @@
   also commutes.  The standard complete integral branch lattice is now a
   faithful submodule of that common rational branch pair, and the scalar
   extension of every nonzero affine fractional ideal is the whole branch
-  pair.  What remains is to incorporate the fixed-divisor twist into the
-  branchwise lattice, instantiate the module-valued complex, and prove its
-  cokernel finite with zero residue cokernel.  An equivalent
-  valuation-theoretic properness proof would also suffice.
+  pair.  The actual complete chart now realizes the standard integral
+  branch lattice, and the fixed-divisor principal parts make the extended
+  actual Čech map surjective for every supplied near-identity transition.
+  What remains is the semantic bridge from a rational
+  specialization-kernel fractional ideal to its integral affine lattice
+  and near-identity local transition, followed by construction of the
+  relative divisor.  An equivalent valuation-theoretic properness proof
+  would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
