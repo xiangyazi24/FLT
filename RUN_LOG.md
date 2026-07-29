@@ -119,6 +119,16 @@
     `y`, it is exactly the two branch identities above.  The unique
     rank-two normal form `p(x)+q(x)y` then extends the comparison to every
     integral affine function
+  - proved that every nonzero affine fractional ideal becomes the full
+    rank-one module after scalar extension to the product of the two
+    Laurent branch fields.  A nonzero ideal section is nonzero in both
+    branches by faithfulness, hence is a unit in their product; this proves
+    local triviality without selecting a global affine generator
+  - embedded `ℤ₂[[t]] × ℤ₂[[t]]` faithfully into the rational branch pair
+    as an `ℤ₂`-algebra and defined its image as the complete integral branch
+    lattice.  This embedding is proved equal to restriction
+    `Power → Laurent` followed by coefficient extension, so the lattice is
+    compatible with the formal/rational branch square
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -128,8 +138,10 @@
      faithful restriction to the two rational Laurent branches is now
      canonical, and those branches are now identified with the
      coefficient-extended integral Hensel branches; the full affine
-     restriction square now commutes.  Choose the two complete integral
-     branch lattices for the twist by the fixed base divisor, form the
+     restriction square now commutes.  The untwisted complete integral
+     branch lattice is now embedded canonically in the full scalar
+     extension of every invertible affine ideal.  Transport this lattice
+     through the branchwise twist by the fixed base divisor, form the
      genuine module-valued Čech restriction difference, and prove that its
      cokernel is finite with zero residue cokernel.  The finite-cokernel
      Nakayama theorem then gives the required integral section lift without
@@ -158,8 +170,11 @@
   ideal now restricts faithfully to their product without a chosen
   generator, and the integral and rational branch roots agree under
   coefficient extension.  The full affine restriction compatibility square
-  also commutes.  What remains is to choose its branchwise integral
-  infinity lattices, instantiate the module-valued complex, and prove its
+  also commutes.  The standard complete integral branch lattice is now a
+  faithful submodule of that common rational branch pair, and the scalar
+  extension of every nonzero affine fractional ideal is the whole branch
+  pair.  What remains is to incorporate the fixed-divisor twist into the
+  branchwise lattice, instantiate the module-valued complex, and prove its
   cokernel finite with zero residue cokernel.  An equivalent
   valuation-theoretic properness proof would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
