@@ -114,6 +114,11 @@
     coordinate change, and sends its conjugate to the negative root.  The
     proof uses the quadratic relation and constant-term uniqueness rather
     than coefficient expansion
+  - proved the full affine restriction/base-change square commutes.  On
+    `x`, this is naturality of polynomial evaluation at `t⁻¹`; on the good
+    `y`, it is exactly the two branch identities above.  The unique
+    rank-two normal form `p(x)+q(x)y` then extends the comparison to every
+    integral affine function
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -122,13 +127,13 @@
      oriented invertible fractional ideal/module on the affine chart.  Its
      faithful restriction to the two rational Laurent branches is now
      canonical, and those branches are now identified with the
-     coefficient-extended integral Hensel branches.  Prove the full affine
-     restriction square commutes, choose the two complete integral branch
-     lattices for the twist by the fixed base divisor, form the genuine
-     module-valued Čech restriction difference, and prove that its cokernel
-     is finite with zero residue cokernel.  The finite-cokernel Nakayama
-     theorem then gives the required integral section lift without any
-     affine generator.  A separate principality theorem is no longer
+     coefficient-extended integral Hensel branches; the full affine
+     restriction square now commutes.  Choose the two complete integral
+     branch lattices for the twist by the fixed base divisor, form the
+     genuine module-valued Čech restriction difference, and prove that its
+     cokernel is finite with zero residue cokernel.  The finite-cokernel
+     Nakayama theorem then gives the required integral section lift without
+     any affine generator.  A separate principality theorem is no longer
      required
   2. apply `exists_twisted_kernel_lift` to lift the canonical section,
      produce its relative effective degree-two divisor, prove that it does
@@ -152,9 +157,9 @@
   branches, compatibly with restriction.  The rational affine fractional
   ideal now restricts faithfully to their product without a chosen
   generator, and the integral and rational branch roots agree under
-  coefficient extension.  What remains before choosing its branchwise
-  integral infinity lattices is the full affine restriction compatibility
-  square.  Then instantiate the module-valued complex and prove its
+  coefficient extension.  The full affine restriction compatibility square
+  also commutes.  What remains is to choose its branchwise integral
+  infinity lattices, instantiate the module-valued complex, and prove its
   cokernel finite with zero residue cokernel.  An equivalent
   valuation-theoretic properness proof would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
