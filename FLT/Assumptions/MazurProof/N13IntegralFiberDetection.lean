@@ -165,6 +165,51 @@ theorem isUnit_of_map_defectIdeal_eq_top
     N13IntegralFractionalHull.isUnit_of_defectIdeal_eq_top
       hDefect
 
+/-- The special-fibre condition is equivalent to one concrete integral
+trace witness: an element of the defect ideal reducing to one. -/
+theorem map_defectIdeal_eq_top_iff_exists
+    (H : N13IntegralFractionalHull.IntegralFractionalIdeal) :
+    Ideal.map reduceCoordinate
+          (N13IntegralFractionalHull.defectIdeal H) = ⊤ ↔
+      ∃ z : IntegralRing,
+        z ∈ N13IntegralFractionalHull.defectIdeal H ∧
+          reduceCoordinate z = 1 := by
+  constructor
+  · intro htop
+    have hone :
+        (1 : SpecialRing) ∈
+          Ideal.map reduceCoordinate
+            (N13IntegralFractionalHull.defectIdeal H) := by
+      rw [htop]
+      simp
+    rw [Ideal.mem_map_iff_of_surjective
+      reduceCoordinate
+      N13GeneralizedMumfordReduction.reduceCoordinate_surjective] at hone
+    exact hone
+  · rintro ⟨z, hz, hred⟩
+    rw [Ideal.eq_top_iff_one]
+    rw [← hred]
+    exact Ideal.mem_map_of_mem reduceCoordinate hz
+
+/-- Concrete capstone for the affine invertibility problem.  It avoids all
+local-factoriality infrastructure: generic invertibility plus one integral
+evaluation element reducing to one already make `H` a unit fractional
+ideal. -/
+theorem isUnit_of_exists_defect_reduces_one
+    {H : N13IntegralFractionalHull.IntegralFractionalIdeal}
+    (hH : H ≠ 0)
+    (hGeneric :
+      IsUnit
+        (N13IntegralFractionalHull.extendFractional H))
+    (hSpecial :
+      ∃ z : IntegralRing,
+        z ∈ N13IntegralFractionalHull.defectIdeal H ∧
+          reduceCoordinate z = 1) :
+    IsUnit H :=
+  isUnit_of_map_defectIdeal_eq_top
+    hH hGeneric
+    ((map_defectIdeal_eq_top_iff_exists H).2 hSpecial)
+
 end
 
 end MazurProof.N13IntegralFiberDetection
