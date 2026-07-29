@@ -165,17 +165,33 @@
     quadratic formal overlap whose reduction is one, and canonically gives
     `NearIdentityTransition`.  No Laurent-coefficient enumeration or
     denominator clearing is used
+  - proved that the affine generic fibre is exactly the vertical
+    localization of the integral good-model coordinate ring: after inverting
+    nonzero `ℤ₂` scalars, the rank-two normal form clears the two polynomial
+    denominators simultaneously.  Completion of the square transports this
+    localization to the standard sextic coordinate ring.  Hence every
+    generic-fibre ideal has a canonical contraction whose extension is
+    exactly the original ideal; the contraction is nonzero when the original
+    ideal is nonzero and is saturated by every nonzero vertical scalar.
+    Every local oriented Picard class now has such a nonzero integral-model
+    ideal whose generic fibre represents the class.  Invertibility of that
+    contraction on the two-dimensional integral surface is deliberately not
+    asserted
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
 - exact remaining N13 seam:
   1. prove that every rational Picard specialization-kernel class has a
      smooth integral Mumford representative reducing to `(X² + X, 0)`.
-     The proper two-chart route still has to identify the actual
-     completed/saturated affine module with its branch-local lattice,
-     identify the resulting module-valued restriction with the verified
-     extended Čech map, lift the canonical section, and prove that its
-     relative effective degree-two divisor does not escape to infinity.
+     Vertical localization and contraction are now closed: every generic
+     ideal has a nonzero vertically saturated integral-model contraction
+     with the correct generic fibre.  The proper two-chart route still has
+     to promote that contraction, for example via a reflexive hull, to the
+     actual integral invertible rank-one module without changing its generic
+     fibre; identify its completed restriction with the branch-local
+     lattice and the verified module-valued Čech map; lift the canonical
+     section; and prove that its relative effective degree-two divisor does
+     not escape to infinity.
      An equivalent valuative properness theorem would also close this seam.
      Once such a `NearBaseMumford` representative exists, its integral
      near-identity transition, Hensel recovery, chart uniqueness, and Picard
@@ -211,10 +227,13 @@
   principal parts make the extended actual Čech map surjective for every
   supplied near-identity transition.  For an already-integral near-base
   Mumford graph, the monic-polynomial ratio now supplies that transition
-  directly and reduces to one.  What remains upstream is the actual
-  module-to-divisor/properness argument producing such a graph for every
-  specialization-kernel class; a generic rational Laurent unit cannot
-  simply be cleared coefficientwise to an integral unit.
+  directly and reduces to one.  The generic affine coordinate ring is now
+  proved to be the vertical localization of the integral model, so generic
+  ideals contract canonically and without losing their generic fibre.  What
+  remains upstream is to make the contracted rank-one object invertible on
+  the integral surface and then execute the actual
+  module-to-divisor/properness argument; a generic rational Laurent unit
+  cannot simply be cleared coefficientwise to an integral unit.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
