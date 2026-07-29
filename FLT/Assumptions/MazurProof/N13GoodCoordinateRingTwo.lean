@@ -311,6 +311,66 @@ theorem recompose (z : CoordinateRing) :
         _ = mk g :=
           AdjoinRoot.mk_leftInverse curvePoly_monic (mk g)
 
+@[simp] theorem coeff0_xClass (p : K[X]) :
+    coeff0 (xClass p) = p := by
+  change (C p %ₘ curvePoly).coeff 0 = p
+  rw [(modByMonic_eq_self_iff curvePoly_monic).mpr]
+  · simp
+  · exact degree_C_le.trans_lt (by
+      rw [degree_eq_natDegree curvePoly_monic.ne_zero,
+        curvePoly_natDegree]
+      norm_num)
+
+@[simp] theorem coeffY_xClass (p : K[X]) :
+    coeffY (xClass p) = 0 := by
+  change (C p %ₘ curvePoly).coeff 1 = 0
+  rw [(modByMonic_eq_self_iff curvePoly_monic).mpr]
+  · simp
+  · exact degree_C_le.trans_lt (by
+      rw [degree_eq_natDegree curvePoly_monic.ne_zero,
+        curvePoly_natDegree]
+      norm_num)
+
+@[simp] theorem coeff0_yClass :
+    coeff0 yClass = 0 := by
+  change (X %ₘ curvePoly).coeff 0 = 0
+  rw [(modByMonic_eq_self_iff curvePoly_monic).mpr]
+  · simp
+  · rw [degree_X, degree_eq_natDegree curvePoly_monic.ne_zero,
+      curvePoly_natDegree]
+    norm_num
+
+@[simp] theorem coeffY_yClass :
+    coeffY yClass = 1 := by
+  change (X %ₘ curvePoly).coeff 1 = 1
+  rw [(modByMonic_eq_self_iff curvePoly_monic).mpr]
+  · simp
+  · rw [degree_X, degree_eq_natDegree curvePoly_monic.ne_zero,
+      curvePoly_natDegree]
+    norm_num
+
+@[simp] theorem coeff0_xClass_mul_yClass (p : K[X]) :
+    coeff0 (xClass p * yClass) = 0 := by
+  change coeff0 ((algebraMap K[X] CoordinateRing p) * yClass) = 0
+  rw [← Algebra.smul_def]
+  simp
+
+@[simp] theorem coeffY_xClass_mul_yClass (p : K[X]) :
+    coeffY (xClass p * yClass) = p := by
+  change coeffY ((algebraMap K[X] CoordinateRing p) * yClass) = p
+  rw [← Algebra.smul_def]
+  simp
+
+/-- Equality in the special-fibre coordinate ring is coefficientwise in
+the rank-two basis `1,Y`. -/
+theorem eq_iff_coeff (z w : CoordinateRing) :
+    z = w ↔ coeff0 z = coeff0 w ∧ coeffY z = coeffY w := by
+  constructor
+  · rintro rfl
+    exact ⟨rfl, rfl⟩
+  · rintro ⟨h0, hY⟩
+    rw [← recompose z, ← recompose w, h0, hY]
+
 @[simp] theorem yClass_relation :
     yClass ^ 2 + xClass hPoly * yClass = xClass rhsPoly := by
   apply AdjoinRoot.mk_eq_mk.mpr

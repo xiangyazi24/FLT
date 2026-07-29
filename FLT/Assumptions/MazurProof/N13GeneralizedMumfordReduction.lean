@@ -2,6 +2,7 @@ import FLT.Assumptions.MazurProof.N13GeneralizedMumfordIntegral
 import FLT.Assumptions.MazurProof.N13GoodCoordinateRingTwo
 import Mathlib.Data.Set.Image
 import Mathlib.NumberTheory.Padics.RingHoms
+import Mathlib.RingTheory.Polynomial.Basic
 
 /-!
 # Reduction of integral N13 Mumford graphs at two
@@ -45,6 +46,12 @@ def reducePoly : R₂[X] →+* K[X] :=
 
 @[simp] theorem reducePoly_apply (p : R₂[X]) :
     reducePoly p = p.map reduceBase := rfl
+
+@[simp] theorem reduceBase_two :
+    reduceBase (2 : R₂) = 0 := by
+  rw [← RingHom.mem_ker, reduceBase, PadicInt.ker_toZMod,
+    PadicInt.maximalIdeal_eq_span_p]
+  exact Ideal.subset_span (by simp)
 
 @[simp] theorem reduce_hPoly :
     reducePoly
@@ -119,6 +126,146 @@ def reduceCoordinate : IntegralRing →+* SpecialRing :=
       N13GoodCoordinateRingTwo.ySubClass (reducePoly v) := by
   simp [N13GeneralizedMumfordIntegral.ySubClass,
     N13GoodCoordinateRingTwo.ySubClass]
+
+/-- Coefficientwise reduction of polynomials is onto. -/
+theorem reducePoly_surjective :
+    Function.Surjective reducePoly :=
+  Polynomial.map_surjective
+    reduceBase
+    (ZMod.ringHom_surjective PadicInt.toZMod)
+
+/-- The integral good-model coordinate ring reduces onto its special fibre.
+This follows from the common rank-two normal form, not from a presentation
+calculation in the quotient. -/
+theorem reduceCoordinate_surjective :
+    Function.Surjective reduceCoordinate := by
+  intro z
+  obtain ⟨p, hp⟩ :=
+    reducePoly_surjective
+      (N13GoodCoordinateRingTwo.coeff0 z)
+  obtain ⟨q, hq⟩ :=
+    reducePoly_surjective
+      (N13GoodCoordinateRingTwo.coeffY z)
+  refine ⟨
+    N13GeneralizedMumfordIntegral.xClass p +
+      N13GeneralizedMumfordIntegral.xClass q *
+        N13GeneralizedMumfordIntegral.yClass,
+    ?_⟩
+  simp only [map_add, map_mul, reduce_xClass, reduce_yClass,
+    hp, hq]
+  exact N13GoodCoordinateRingTwo.recompose z
+
+@[simp] theorem reduce_coeff0 (z : IntegralRing) :
+    N13GoodCoordinateRingTwo.coeff0 (reduceCoordinate z) =
+      reducePoly
+        (N13GeneralizedMumfordIntegral.coeff0 z) := by
+  calc
+    N13GoodCoordinateRingTwo.coeff0 (reduceCoordinate z) =
+        N13GoodCoordinateRingTwo.coeff0
+          (reduceCoordinate
+            (N13GeneralizedMumfordIntegral.xClass
+                (N13GeneralizedMumfordIntegral.coeff0 z) +
+              N13GeneralizedMumfordIntegral.xClass
+                  (N13GeneralizedMumfordIntegral.coeffY z) *
+                N13GeneralizedMumfordIntegral.yClass)) := by
+          rw [N13GeneralizedMumfordIntegral.recompose]
+    _ = reducePoly
+          (N13GeneralizedMumfordIntegral.coeff0 z) := by
+      simp only [map_add, map_mul, reduce_xClass, reduce_yClass,
+        N13GoodCoordinateRingTwo.coeff0_xClass,
+        N13GoodCoordinateRingTwo.coeff0_xClass_mul_yClass,
+        add_zero]
+
+@[simp] theorem reduce_coeffY (z : IntegralRing) :
+    N13GoodCoordinateRingTwo.coeffY (reduceCoordinate z) =
+      reducePoly
+        (N13GeneralizedMumfordIntegral.coeffY z) := by
+  calc
+    N13GoodCoordinateRingTwo.coeffY (reduceCoordinate z) =
+        N13GoodCoordinateRingTwo.coeffY
+          (reduceCoordinate
+            (N13GeneralizedMumfordIntegral.xClass
+                (N13GeneralizedMumfordIntegral.coeff0 z) +
+              N13GeneralizedMumfordIntegral.xClass
+                  (N13GeneralizedMumfordIntegral.coeffY z) *
+                N13GeneralizedMumfordIntegral.yClass)) := by
+          rw [N13GeneralizedMumfordIntegral.recompose]
+    _ = reducePoly
+          (N13GeneralizedMumfordIntegral.coeffY z) := by
+      simp only [map_add, map_mul, reduce_xClass, reduce_yClass,
+        N13GoodCoordinateRingTwo.coeffY_xClass,
+        N13GoodCoordinateRingTwo.coeffY_xClass_mul_yClass,
+        zero_add]
+
+private theorem exists_eq_C_two_mul_of_reducePoly_eq_zero
+    (p : R₂[X]) (hp : reducePoly p = 0) :
+    ∃ q : R₂[X], p = C (2 : R₂) * q := by
+  have hmem :
+      p ∈ RingHom.ker reducePoly :=
+    RingHom.mem_ker.mpr hp
+  rw [reducePoly, Polynomial.ker_mapRingHom, reduceBase,
+    PadicInt.ker_toZMod, PadicInt.maximalIdeal_eq_span_p,
+    Ideal.map_span, Set.image_singleton,
+    Ideal.mem_span_singleton] at hmem
+  exact hmem
+
+/-- Reduction has exactly the vertical principal ideal `(2)` as kernel.
+The proof combines the rank-two normal form with the polynomial-map kernel
+theorem and the standard description of the maximal ideal of `ℤ₂`. -/
+theorem ker_reduceCoordinate :
+    RingHom.ker reduceCoordinate =
+      Ideal.span
+        ({algebraMap R₂ IntegralRing (2 : R₂)} :
+          Set IntegralRing) := by
+  apply le_antisymm
+  · intro z hz
+    have hz0 : reduceCoordinate z = 0 :=
+      RingHom.mem_ker.mp hz
+    have h0 :
+        reducePoly
+          (N13GeneralizedMumfordIntegral.coeff0 z) = 0 := by
+      rw [← reduce_coeff0 z, hz0]
+      simp
+    have hY :
+        reducePoly
+          (N13GeneralizedMumfordIntegral.coeffY z) = 0 := by
+      rw [← reduce_coeffY z, hz0]
+      simp
+    obtain ⟨p, hp⟩ :=
+      exists_eq_C_two_mul_of_reducePoly_eq_zero _ h0
+    obtain ⟨q, hq⟩ :=
+      exists_eq_C_two_mul_of_reducePoly_eq_zero _ hY
+    rw [Ideal.mem_span_singleton]
+    refine ⟨
+      N13GeneralizedMumfordIntegral.xClass p +
+        N13GeneralizedMumfordIntegral.xClass q *
+          N13GeneralizedMumfordIntegral.yClass,
+      ?_⟩
+    rw [← N13GeneralizedMumfordIntegral.recompose z, hp, hq]
+    calc
+      N13GeneralizedMumfordIntegral.xClass (C 2 * p) +
+          N13GeneralizedMumfordIntegral.xClass (C 2 * q) *
+            N13GeneralizedMumfordIntegral.yClass =
+        N13GeneralizedMumfordIntegral.xClass (C 2) *
+          (N13GeneralizedMumfordIntegral.xClass p +
+            N13GeneralizedMumfordIntegral.xClass q *
+              N13GeneralizedMumfordIntegral.yClass) := by
+          simp only [mul_add,
+            N13GeneralizedMumfordIntegral.xClass_mul]
+          ring
+      _ = algebraMap R₂ IntegralRing (2 : R₂) *
+          (N13GeneralizedMumfordIntegral.xClass p +
+            N13GeneralizedMumfordIntegral.xClass q *
+              N13GeneralizedMumfordIntegral.yClass) := rfl
+  · rw [Ideal.span_le, Set.singleton_subset_iff]
+    change
+      algebraMap R₂ IntegralRing (2 : R₂) ∈
+        RingHom.ker reduceCoordinate
+    rw [RingHom.mem_ker]
+    change reduceCoordinate
+      (N13GeneralizedMumfordIntegral.xClass (C (2 : R₂))) = 0
+    rw [reduce_xClass]
+    simp [reducePoly]
 
 /-- Reduction carries the integral graph ideal onto, rather than merely
 into, the graph ideal with reduced coefficients. -/

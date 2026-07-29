@@ -509,3 +509,26 @@
 - Banked this session (tail-package branch): PrimeTailPackage (84c8cdf7), TorsionFinitePackage
   (wire-ready). Removed: DedekindSquareIdeal. Net main-theorem sorry/axiom change by Opus hand: 0
   (the value is the p11 audit + two wire-ready axiom-sharpening interfaces + drift-catch).
+
+### N13 integral special-fibre reduction (2026-07-29)
+
+- Completed the rank-two normal-form API for the N13 special coordinate
+  ring: both coefficient projections on `xClass`, `yClass`, and their
+  products are now available, together with coefficientwise extensionality.
+- Proved coefficientwise reduction of polynomials and the induced reduction
+  of the good-model coordinate ring are surjective.
+- Proved the exact kernel formula
+  `ker reduceCoordinate = (2)`.  The proof uses the rank-two normal form,
+  `Polynomial.ker_mapRingHom`, and
+  `PadicInt.ker_toZMod`; it does not enumerate residue classes or use a
+  certificate.
+- Targeted checks of `N13GoodCoordinateRingTwo.lean` and
+  `N13GeneralizedMumfordReduction.lean` pass.  Axiom audits of special-ring
+  extensionality, reduction surjectivity, and the kernel theorem report only
+  `propext`, `Classical.choice`, and `Quot.sound`.
+- ChatGPT Q2729 confirmed the proper two-chart continuation: lift a
+  normalized section in the module-valued Čech kernel, use a unit on every
+  completed infinity branch for non-escape, prove the zero quotient finite
+  flat of rank two, and recover the Mumford graph from the lifted basis
+  `{1,x}` via the characteristic polynomial.  This avoids affine
+  principality and general Cartier-divisor infrastructure.
