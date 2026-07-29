@@ -140,6 +140,13 @@
     coboundary gives a surjective extended Čech map for every invertible
     overlap transition reducing to one; every near-closed cochain has an
     actual kernel lift with unchanged residue
+  - extracted a finite integral affine lattice from every invertible
+    rational affine fractional ideal without choosing a global generator.
+    Its generators lie in the original ideal, rational scalar extension
+    recovers that ideal exactly, and the lattice is nonzero and finitely
+    generated.  After restriction to the two faithful Laurent branches,
+    its scalar extension is the full branch pair: a nonzero lattice section
+    is nonzero in both branch fields and hence is a unit in their product
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -152,12 +159,14 @@
      restriction square now commutes.  The complete integral branch lattice
      is the exact image of the actual infinity chart, and the fixed
      base-divisor extension is already surjective for every supplied
-     near-identity transition.  Construct the integral affine lattice of
-     the actual fractional ideal and its branchwise local trivialization;
-     prove that a specialization-kernel class supplies such a transition
-     reducing to one and that its module-valued restriction map identifies
-     with the verified extended Čech map.  No global affine generator or
-     separate principality theorem is required
+     near-identity transition.  The fractional ideal now has a finite
+     integral affine lattice whose rational extension is exact and whose
+     branchwise scalar span is full.  Compare its completed/saturated
+     branch restriction with the standard complete lattice; prove that a
+     specialization-kernel class supplies a transition reducing to one and
+     that its module-valued restriction map identifies with the verified
+     extended Čech map.  No global affine generator or separate
+     principality theorem is required
   2. apply `exists_baseTwisted_kernel_lift` to lift the canonical section,
      produce its relative effective degree-two divisor, prove that it does
      not escape to infinity, and obtain a smooth integral Mumford graph
@@ -184,14 +193,16 @@
   also commutes.  The standard complete integral branch lattice is now a
   faithful submodule of that common rational branch pair, and the scalar
   extension of every nonzero affine fractional ideal is the whole branch
-  pair.  The actual complete chart now realizes the standard integral
-  branch lattice, and the fixed-divisor principal parts make the extended
-  actual Čech map surjective for every supplied near-identity transition.
-  What remains is the semantic bridge from a rational
-  specialization-kernel fractional ideal to its integral affine lattice
-  and near-identity local transition, followed by construction of the
-  relative divisor.  An equivalent valuation-theoretic properness proof
-  would also suffice.
+  pair.  Such an ideal now also carries a finite integral affine lattice
+  that lies inside it, recovers it after rational scalar extension, and
+  still spans the whole rational branch pair after restriction.  The actual
+  complete chart realizes the standard integral branch lattice, and the
+  fixed-divisor principal parts make the extended actual Čech map
+  surjective for every supplied near-identity transition.  What remains is
+  the integral completion/saturation comparison and the semantic bridge
+  from specialization to a near-identity local transition, followed by
+  construction of the relative divisor.  An equivalent valuation-theoretic
+  properness proof would also suffice.
 - pending ChatGPT bridge answers: Q2598--Q2601; do not duplicate stale failed
   deliveries Q2313/Q2314 unless the corresponding tabs are confirmed dead
 
