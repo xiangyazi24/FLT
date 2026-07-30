@@ -199,6 +199,145 @@ theorem separated :
 
 end Chart
 
+/-! ## The unary doubling interface
+
+Separatedness only iterates multiplication by two.  The binary addition
+estimate above is therefore stronger than necessary: it is enough to know
+the same quadratic error estimate on the diagonal. -/
+
+/-- A two-coordinate chart with only the diagonal doubling estimate needed
+for two-adic separatedness. -/
+structure DoublingChart (K : Type u) [AddCommGroup K] where
+  coord : K → Fin 2 → R₂
+  coord_zero : coord 0 = 0
+  coord_injective : Function.Injective coord
+  coord_mem_two :
+    ∀ z i, coord z i ∈ powTwoIdeal 1
+  double_error_mem :
+    ∀ z i,
+      coord (2 • z) i - (coord z i + coord z i) ∈
+        coordIdeal coord z * coordIdeal coord z
+
+namespace DoublingChart
+
+variable (C : DoublingChart K)
+
+/-- All unary-chart coordinates have depth at least `n`. -/
+def CoordDepth (n : ℕ) (z : K) : Prop :=
+  ∀ i, C.coord z i ∈ powTwoIdeal n
+
+theorem coordIdeal_le_powTwoIdeal
+    {n : ℕ} {z : K}
+    (hz : C.CoordDepth n z) :
+    coordIdeal C.coord z ≤ powTwoIdeal n := by
+  rw [coordIdeal, Ideal.span_le]
+  intro a ha
+  obtain ⟨i, rfl⟩ := ha
+  exact hz i
+
+private theorem two_mul_mem_next
+    {n : ℕ} {a : R₂}
+    (ha : a ∈ powTwoIdeal n) :
+    a + a ∈ powTwoIdeal (n + 1) := by
+  rw [powTwoIdeal, Ideal.mem_span_singleton] at ha ⊢
+  obtain ⟨b, hb⟩ := ha
+  refine ⟨b, ?_⟩
+  rw [hb, pow_succ]
+  ring
+
+/-- The diagonal quadratic estimate raises coordinate depth under
+doubling. -/
+theorem two_nsmul_depth
+    {n : ℕ} (hn : 1 ≤ n) {z : K}
+    (hz : C.CoordDepth n z) :
+    C.CoordDepth (n + 1) (2 • z) := by
+  intro i
+  have herr :
+      C.coord (2 • z) i -
+          (C.coord z i + C.coord z i) ∈
+        powTwoIdeal (n + n) := by
+    rw [← powTwoIdeal_mul]
+    exact
+      (Ideal.mul_mono
+        (C.coordIdeal_le_powTwoIdeal hz)
+        (C.coordIdeal_le_powTwoIdeal hz))
+        (C.double_error_mem z i)
+  have herr' :
+      C.coord (2 • z) i -
+          (C.coord z i + C.coord z i) ∈
+        powTwoIdeal (n + 1) :=
+    powTwoIdeal_antitone (by omega) herr
+  have hlinear :
+      C.coord z i + C.coord z i ∈
+        powTwoIdeal (n + 1) :=
+    two_mul_mem_next (hz i)
+  have hsum :=
+    Ideal.add_mem (powTwoIdeal (n + 1)) herr' hlinear
+  simpa using hsum
+
+/-- Iterated doubling gains one level of depth at every step. -/
+theorem twoPow_depth
+    (z : K) :
+    ∀ k : ℕ,
+      C.CoordDepth (k + 1) ((2 ^ k) • z) := by
+  intro k
+  induction k with
+  | zero =>
+      intro i
+      simpa only [pow_zero, one_nsmul, zero_add] using
+        C.coord_mem_two z i
+  | succ k ih =>
+      have hstep :
+          C.CoordDepth (k + 1 + 1)
+            (2 • ((2 ^ k) • z)) :=
+        C.two_nsmul_depth (n := k + 1) (by omega) ih
+      simpa [pow_succ, mul_nsmul] using hstep
+
+theorem coord_eq_zero_of_all_depth
+    {z : K}
+    (hz : ∀ n : ℕ, C.CoordDepth n z) :
+    C.coord z = 0 := by
+  funext i
+  by_contra hi
+  have hmem :
+      C.coord z i ∈
+        Ideal.span
+          ({(2 : R₂) ^
+            (C.coord z i).valuation.succ} : Set R₂) := by
+    simpa only [powTwoIdeal] using
+      hz (C.coord z i).valuation.succ i
+  have hle :
+      (C.coord z i).valuation.succ ≤
+        (C.coord z i).valuation :=
+    (PadicInt.mem_span_pow_iff_le_valuation
+      (C.coord z i) hi
+      (C.coord z i).valuation.succ).mp hmem
+  omega
+
+include C
+
+/-- The unary doubling chart is already sufficient for two-adic
+separatedness. -/
+theorem separated :
+    NSeparated K 2 := by
+  intro z hdiv
+  have hall : ∀ n : ℕ, C.CoordDepth n z := by
+    intro n
+    cases n with
+    | zero =>
+        intro i
+        simp [powTwoIdeal]
+    | succ k =>
+        obtain ⟨y, hy⟩ := hdiv k
+        have hdepth := C.twoPow_depth y k
+        rw [hy] at hdepth
+        simpa [Nat.succ_eq_add_one] using hdepth
+  apply C.coord_injective
+  rw [C.coord_zero]
+  exact C.coord_eq_zero_of_all_depth hall
+
+end DoublingChart
+
 end
 
 end MazurProof.N13TwoAdicKernelChart

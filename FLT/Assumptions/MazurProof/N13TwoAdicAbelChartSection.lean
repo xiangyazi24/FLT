@@ -34,6 +34,54 @@ abbrev Pic₂ : Type :=
 
 variable {K : Type u} [AddCommGroup K]
 
+/-- A faithful Picard realization with the minimal unary doubling law.
+The representative at zero and its injectivity both follow from
+`realize`. -/
+structure DoublingData (K : Type u) [AddCommGroup K] where
+  toPic : K →+ Pic₂
+  toPic_injective : Function.Injective toPic
+  pair : K → DiskPair
+  realize :
+    ∀ z,
+      N13TwoAdicAbelChartPic.DiskPair.centeredPic (pair z) =
+        toPic z
+  law :
+    N13TwoAdicAbelChartLaw.DoublingLaw
+      (fun z =>
+        N13TwoAdicAbelChartData.DiskPair.coord (pair z))
+
+namespace DoublingData
+
+variable (D : DoublingData K)
+
+theorem pair_zero :
+    D.pair 0 = N13TwoAdicAbelChartData.basePair := by
+  apply N13TwoAdicAbelChartPic.DiskPair.centeredPic_injective
+  rw [D.realize, map_zero,
+    N13TwoAdicAbelChartPic.DiskPair.centeredPic_basePair]
+
+theorem pair_injective :
+    Function.Injective D.pair := by
+  intro z w hzw
+  apply D.toPic_injective
+  rw [← D.realize z, ← D.realize w, hzw]
+
+/-- Picard realization supplies the minimal unary geometric package. -/
+def toGeometricData :
+    N13TwoAdicAbelChartLaw.DoublingGeometricData K where
+  pair := D.pair
+  pair_zero := D.pair_zero
+  pair_injective := D.pair_injective
+  law := D.law
+
+include D
+
+theorem separated :
+    N18RouteC.Separated.NSeparated K 2 :=
+  D.toGeometricData.separated
+
+end DoublingData
+
 /-- A faithful Picard realization whose elements are represented by the
 two-disk Abel chart.  The representative is not assumed injective and its
 value at zero is not specified: both follow from `realize`. -/
@@ -75,6 +123,15 @@ def toGeometricData :
   pair_injective := D.pair_injective
   law := D.law
 
+/-- Forget the unused off-diagonal part of the polynomial group law. -/
+def toDoublingData :
+    DoublingData K where
+  toPic := D.toPic
+  toPic_injective := D.toPic_injective
+  pair := D.pair
+  realize := D.realize
+  law := D.law.toDoublingLaw
+
 include D
 
 theorem separated :
@@ -99,6 +156,38 @@ theorem subgroupToPic_injective
     Function.Injective (subgroupToPic H) :=
   N13InfinityBaseChange.picMapRatToQ₂_injective.comp
     H.subtype_injective
+
+/-- The minimal unary data required for an actual rational reduction
+kernel.  The binary polynomial law is deliberately absent. -/
+structure RationalKernelDoublingData
+    (H : AddSubgroup RationalPic) where
+  pair : H → DiskPair
+  realize :
+    ∀ z,
+      N13TwoAdicAbelChartPic.DiskPair.centeredPic (pair z) =
+        subgroupToPic H z
+  law :
+    N13TwoAdicAbelChartLaw.DoublingLaw
+      (fun z =>
+        N13TwoAdicAbelChartData.DiskPair.coord (pair z))
+
+namespace RationalKernelDoublingData
+
+variable {H : AddSubgroup RationalPic}
+
+def toData (D : RationalKernelDoublingData H) :
+    DoublingData H where
+  toPic := subgroupToPic H
+  toPic_injective := subgroupToPic_injective H
+  pair := D.pair
+  realize := D.realize
+  law := D.law
+
+theorem separated (D : RationalKernelDoublingData H) :
+    N18RouteC.Separated.NSeparated H 2 :=
+  D.toData.separated
+
+end RationalKernelDoublingData
 
 /-- The reduced data required for an actual rational reduction kernel.
 Faithfulness is inherited from rational Picard base change. -/
@@ -125,6 +214,14 @@ def toData (D : RationalKernelData H) :
   pair := D.pair
   realize := D.realize
   law := D.law
+
+/-- Restrict the full polynomial law to the unary input used by
+separatedness. -/
+def toDoublingData (D : RationalKernelData H) :
+    RationalKernelDoublingData H where
+  pair := D.pair
+  realize := D.realize
+  law := D.law.toDoublingLaw
 
 theorem separated (D : RationalKernelData H) :
     N18RouteC.Separated.NSeparated H 2 :=

@@ -137,6 +137,38 @@ structure PolynomialLaw
           (polynomial i) =
         N13CrossQuadraticPolynomial.leftVar R₂ i
 
+/-- The diagonal part of a regular group law.  This is the exact unary
+input used by the separatedness argument. -/
+structure DoublingLaw
+    (coord : K → Fin 2 → R₂) where
+  double_error_mem :
+    ∀ z i,
+      coord (2 • z) i - (coord z i + coord z i) ∈
+        N13TwoAdicKernelChart.coordIdeal coord z *
+          N13TwoAdicKernelChart.coordIdeal coord z
+
+namespace DoublingLaw
+
+variable {coord : K → Fin 2 → R₂}
+
+/-- A unary doubling law upgrades suitable coordinates to the minimal
+two-adic kernel chart. -/
+def toChart
+    (L : DoublingLaw coord)
+    (coord_zero : coord 0 = 0)
+    (coord_injective : Function.Injective coord)
+    (coord_mem_two :
+      ∀ z i,
+        coord z i ∈ N13TwoAdicKernelChart.powTwoIdeal 1) :
+    N13TwoAdicKernelChart.DoublingChart K where
+  coord := coord
+  coord_zero := coord_zero
+  coord_injective := coord_injective
+  coord_mem_two := coord_mem_two
+  double_error_mem := L.double_error_mem
+
+end DoublingLaw
+
 namespace PolynomialLaw
 
 variable {coord : K → Fin 2 → R₂}
@@ -166,6 +198,13 @@ theorem add_error_mem
   rw [hrealize] at heval
   exact heval
 
+/-- Restrict a binary polynomial group law to the diagonal. -/
+def toDoublingLaw
+    (L : PolynomialLaw coord) :
+    DoublingLaw coord where
+  double_error_mem z i := by
+    simpa only [two_nsmul] using L.add_error_mem z z i
+
 /-- A regular polynomial law upgrades suitable coordinates to the abstract
 two-adic kernel chart. -/
 def toChart
@@ -183,6 +222,57 @@ def toChart
   add_error_mem := L.add_error_mem
 
 end PolynomialLaw
+
+/-- The minimal geometric input required for the separatedness argument:
+faithful disk representatives and their unary doubling estimate. -/
+structure DoublingGeometricData
+    (K : Type u) [AddCommGroup K] where
+  pair : K → N13TwoAdicAbelChartData.DiskPair
+  pair_zero :
+    pair 0 = N13TwoAdicAbelChartData.basePair
+  pair_injective : Function.Injective pair
+  law :
+    DoublingLaw
+      (fun z =>
+        N13TwoAdicAbelChartData.DiskPair.coord (pair z))
+
+namespace DoublingGeometricData
+
+variable (D : DoublingGeometricData K)
+
+def coord : K → Fin 2 → R₂ :=
+  fun z => N13TwoAdicAbelChartData.DiskPair.coord (D.pair z)
+
+@[simp] theorem coord_zero :
+    D.coord 0 = 0 := by
+  rw [coord, D.pair_zero]
+  exact N13TwoAdicAbelChartData.DiskPair.coord_basePair
+
+theorem coord_injective :
+    Function.Injective D.coord :=
+  N13TwoAdicAbelChartData.DiskPair.coord_injective.comp
+    D.pair_injective
+
+theorem coord_mem_two
+    (z : K) (i : Fin 2) :
+    D.coord z i ∈
+      N13TwoAdicKernelChart.powTwoIdeal 1 :=
+  N13TwoAdicAbelChartData.DiskPair.coord_mem_two
+    (D.pair z) i
+
+/-- The minimal unary chart attached to disk representatives. -/
+def chart :
+    N13TwoAdicKernelChart.DoublingChart K :=
+  D.law.toChart D.coord_zero D.coord_injective
+    D.coord_mem_two
+
+include D
+
+theorem separated :
+    N18RouteC.Separated.NSeparated K 2 :=
+  N13TwoAdicKernelChart.DoublingChart.separated (chart D)
+
+end DoublingGeometricData
 
 /-- The precise geometric input still required to identify a reduction
 kernel with the two-disk Abel chart. -/
@@ -226,6 +316,14 @@ def chart :
     N13TwoAdicKernelChart.Chart K :=
   D.law.toChart D.coord_zero D.coord_injective
     D.coord_mem_two
+
+/-- Forget the unused off-diagonal part of the polynomial law. -/
+def toDoublingGeometricData :
+    DoublingGeometricData K where
+  pair := D.pair
+  pair_zero := D.pair_zero
+  pair_injective := D.pair_injective
+  law := D.law.toDoublingLaw
 
 include D
 
