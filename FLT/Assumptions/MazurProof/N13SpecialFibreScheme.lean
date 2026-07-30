@@ -13,6 +13,7 @@ three-distinct-index compatibility condition is vacuous.  Promotion to
 -/
 
 open CategoryTheory
+open Set Topology
 
 namespace MazurProof.N13SpecialFibreScheme
 
@@ -149,6 +150,191 @@ def glueData' : CategoryTheory.GlueData' Scheme where
     intro i j k hij hik hjk
     cases i <;> cases j <;> cases k
     all_goals contradiction
+
+private theorem glueData'_f_open
+    (i j : glueData'.J) (h : i ≠ j) :
+    IsOpenImmersion (glueData'.f i j h) := by
+  change Bool at i j
+  change IsOpenImmersion (overlapInclusion i j h)
+  exact overlapInclusion_open i j h
+
+private theorem glueData_f'_open
+    (i j : glueData'.J) :
+    IsOpenImmersion (glueData'.f' i j) := by
+  classical
+  unfold CategoryTheory.GlueData'.f'
+  split
+  · infer_instance
+  · rename_i h
+    haveI := glueData'_f_open i j h
+    infer_instance
+
+/-- The full scheme gluing datum obtained from the two off-diagonal
+principal opens. -/
+def glueData : Scheme.GlueData where
+  toGlueData :=
+    CategoryTheory.GlueData.ofGlueData' glueData'
+  f_open := glueData_f'_open
+
+/-- The glued characteristic-two special fibre. -/
+abbrev SpecialFibre : Scheme :=
+  glueData.glued
+
+/-- The canonical affine/infinity open cover. -/
+abbrev chartCover : SpecialFibre.OpenCover :=
+  glueData.openCover
+
+private instance chart_isIntegral (i : Bool) :
+    IsIntegral (chart i) := by
+  cases i <;> dsimp [chart] <;> infer_instance
+
+/-- Two irreducible open subsets with nonempty intersection and union the
+whole space make the ambient space irreducible. -/
+private theorem irreducibleSpace_of_two_open_cover
+    {X : Type*} [TopologicalSpace X]
+    (A B : Set X)
+    (hAopen : IsOpen A)
+    (_hBopen : IsOpen B)
+    (hcover : A ∪ B = Set.univ)
+    (hAirr : IsIrreducible A)
+    (hBirr : IsIrreducible B)
+    (hAB : (A ∩ B).Nonempty) :
+    IrreducibleSpace X := by
+  rw [irreducibleSpace_def]
+  have hAdense : Dense A := by
+    rw [dense_iff_inter_open]
+    intro W hW hWne
+    by_cases hWA : (W ∩ A).Nonempty
+    · exact hWA
+    · have hBW : (B ∩ W).Nonempty := by
+        obtain ⟨x, hxW⟩ := hWne
+        have hxCover : x ∈ A ∪ B := by
+          rw [hcover]
+          trivial
+        rcases hxCover with hxA | hxB
+        · exact (hWA ⟨x, hxW, hxA⟩).elim
+        · exact ⟨x, hxB, hxW⟩
+      have hBA : (B ∩ A).Nonempty := by
+        simpa [inter_comm] using hAB
+      rcases
+          hBirr.isPreirreducible
+            W A hW hAopen hBW hBA with
+        ⟨x, hxB, hxW, hxA⟩
+      exact ⟨x, hxW, hxA⟩
+  have hclosure : IsIrreducible (closure A) :=
+    hAirr.closure
+  rw [hAdense.closure_eq] at hclosure
+  simpa using hclosure
+
+private def affineRange : Set SpecialFibre :=
+  Set.range (glueData.ι false).base
+
+private def infinityRange : Set SpecialFibre :=
+  Set.range (glueData.ι true).base
+
+private theorem affineRange_open :
+    IsOpen affineRange :=
+  (glueData.ι false).isOpenEmbedding.isOpen_range
+
+private theorem infinityRange_open :
+    IsOpen infinityRange :=
+  (glueData.ι true).isOpenEmbedding.isOpen_range
+
+private theorem affineRange_irreducible :
+    IsIrreducible affineRange := by
+  rw [affineRange, ← Set.image_univ]
+  exact
+    (IrreducibleSpace.isIrreducible_univ
+      (chart false).carrier).image
+      (glueData.ι false).base
+      (glueData.ι false).base.hom.continuous.continuousOn
+
+private theorem infinityRange_irreducible :
+    IsIrreducible infinityRange := by
+  rw [infinityRange, ← Set.image_univ]
+  exact
+    (IrreducibleSpace.isIrreducible_univ
+      (chart true).carrier).image
+      (glueData.ι true).base
+      (glueData.ι true).base.hom.continuous.continuousOn
+
+private theorem ranges_cover :
+    affineRange ∪ infinityRange = Set.univ := by
+  rw [Set.eq_univ_iff_forall]
+  intro x
+  obtain ⟨i, y, hy⟩ := glueData.ι_jointly_surjective x
+  subst x
+  cases i
+  · exact Or.inl ⟨y, rfl⟩
+  · exact Or.inr ⟨y, rfl⟩
+
+private theorem affine_xClass_ne_zero :
+    N13SpecialCurveOverlap.xClass ≠ 0 := by
+  apply N13GoodCoordinateRingTwo.xClass_ne_zero
+  exact Polynomial.X_ne_zero
+
+private instance affineOverlap_isDomain :
+    IsDomain AffineOverlap :=
+  IsLocalization.isDomain_localization
+    (powers_le_nonZeroDivisors_of_noZeroDivisors
+      affine_xClass_ne_zero)
+
+private noncomputable def overlapPoint :
+    (glueData.V (false, true)).carrier := by
+  let p : (Spec (.of AffineOverlap)).carrier :=
+    Classical.choice
+      (inferInstance :
+        Nonempty (Spec (.of AffineOverlap)).carrier)
+  simpa [glueData, CategoryTheory.GlueData.ofGlueData',
+    glueData', overlap] using p
+
+private theorem ranges_inter_nonempty :
+    (affineRange ∩ infinityRange).Nonempty := by
+  let z := overlapPoint
+  refine
+    ⟨glueData.ι false (glueData.f false true z), ?_, ?_⟩
+  · exact ⟨_, rfl⟩
+  · refine
+      ⟨glueData.f true false
+          (glueData.t false true z), ?_⟩
+    have h :=
+      congrArg (fun q => q z)
+        (glueData.glue_condition false true)
+    change
+      (glueData.ι true)
+          (glueData.f true false
+            (glueData.t false true z)) =
+        (glueData.ι false)
+          (glueData.f false true z) at h
+    exact h
+
+instance specialFibre_isReduced :
+    IsReduced SpecialFibre := by
+  letI :
+      ∀ i : Bool,
+        IsReduced ((glueData.openCover).X i) :=
+    fun i => by
+      change IsReduced (chart i)
+      infer_instance
+  exact IsReduced.of_openCover
+    SpecialFibre glueData.openCover
+
+instance specialFibre_irreducibleSpace :
+    IrreducibleSpace SpecialFibre :=
+  irreducibleSpace_of_two_open_cover
+    affineRange
+    infinityRange
+    affineRange_open
+    infinityRange_open
+    ranges_cover
+    affineRange_irreducible
+    infinityRange_irreducible
+    ranges_inter_nonempty
+
+instance specialFibre_isIntegral :
+    IsIntegral SpecialFibre :=
+  isIntegral_of_irreducibleSpace_of_isReduced
+    SpecialFibre
 
 end
 
