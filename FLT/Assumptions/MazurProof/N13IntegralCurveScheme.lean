@@ -174,6 +174,40 @@ def glueData : Scheme.GlueData where
     CategoryTheory.GlueData.ofGlueData' glueData'
   f_open := glueData_f'_open
 
+/-- The explicit affine overlap, identified with the corresponding
+off-diagonal object of the full glue data. -/
+def affineOverlapToGlueDataIso :
+    Spec (.of AffineOverlap) ≅ glueData.V (false, true) :=
+  eqToIso (by
+    simp [glueData, CategoryTheory.GlueData.ofGlueData',
+      glueData', overlap])
+
+/-- The explicit infinity overlap, identified with the corresponding
+off-diagonal object of the full glue data. -/
+def infinityOverlapToGlueDataIso :
+    Spec (.of InfinityOverlap) ≅ glueData.V (true, false) :=
+  eqToIso (by
+    simp [glueData, CategoryTheory.GlueData.ofGlueData',
+      glueData', overlap])
+
+@[simp, reassoc]
+theorem affineOverlapToGlueDataIso_hom_f :
+    affineOverlapToGlueDataIso.hom ≫ glueData.f false true =
+      overlapInclusion false true (by decide) := by
+  simp [affineOverlapToGlueDataIso, glueData,
+    CategoryTheory.GlueData.ofGlueData',
+    CategoryTheory.GlueData'.f', glueData',
+    overlap, overlapInclusion]
+
+@[simp, reassoc]
+theorem infinityOverlapToGlueDataIso_hom_f :
+    infinityOverlapToGlueDataIso.hom ≫ glueData.f true false =
+      overlapInclusion true false (by decide) := by
+  simp [infinityOverlapToGlueDataIso, glueData,
+    CategoryTheory.GlueData.ofGlueData',
+    CategoryTheory.GlueData'.f', glueData',
+    overlap, overlapInclusion]
+
 /-- The integral two-chart N13 model. -/
 abbrev IntegralCurve : Scheme :=
   glueData.glued
