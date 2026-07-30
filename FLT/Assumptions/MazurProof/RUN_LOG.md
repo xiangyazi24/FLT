@@ -583,3 +583,27 @@
   `N13IntegralFiberDetection.lean`, and
   `N13SpecialProductLift.lean` pass.  Axiom audits of the four new endpoints
   report only `propext`, `Classical.choice`, and `Quot.sound`.
+
+### N13 exact integral-graph contraction (2026-07-29)
+
+- Proved that extension of a smooth integral generalized Mumford graph to
+  the standard sextic generic fibre, followed by canonical contraction,
+  recovers the original graph ideal exactly.  The proof reuses the existing
+  coefficient-extension `comap_map_mumfordIdeal` theorem and cancels
+  completion of the square as a coordinate-ring equivalence.
+- Specialized this to the literal sextic ideal attached by
+  `sexticSemi D nInf`, and recorded the corresponding equality of contracted
+  fractional ideals in the common function field.  These are
+  representative-level equalities, not Picard-class comparisons.
+- This is deliberately a downstream adapter: it applies after a smooth
+  integral graph has been constructed and does not prove such a graph exists
+  for an arbitrary specialization-kernel class.
+- The targeted check of `N13IntegralGraphContraction.lean` passes.  Axiom
+  audits of all three public endpoints report only `propext`,
+  `Classical.choice`, and `Quot.sound`.
+- ChatGPT Q2757 isolates the post-invertibility geometry sharply.  An
+  embedded special-fibre framing gives flatness of the affine quotient, but
+  finiteness still needs one genuine no-escape input at the proper infinity
+  chart.  After finiteness, the basis `{1,x}`, characteristic polynomial,
+  and polynomial division recover the integral Mumford graph by pure
+  algebra.
