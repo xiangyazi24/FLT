@@ -246,6 +246,19 @@
     base ring.  The proof is a surjection from two copies of the finite
     monic algebra `AdjoinRoot m`; it does not enumerate coefficients or
     choose a finite spanning bound
+  - closed the fixed-curve algebra in the explicit no-escape route.  The
+    hyperelliptic conjugate of `P(x)+Q(x)y` has norm
+    `P²-hPQ-rQ²`, and this norm stays in the same affine ideal.  Polynomial
+    reflection computes its coefficient of degree `2N` as the product of
+    the two normalized infinity-branch constants, without expanding a
+    coefficient convolution.  If both constants are units, scaling the norm
+    gives a monic polynomial in the ideal, so the affine quotient is finite
+  - isolated the generic branch-unit argument.  A power series reducing to
+    one under a local coefficient homomorphism is a unit; multiplication by
+    an invertible transition transfers this to the normalized affine
+    branch restriction.  The remaining project-specific input is now only
+    the genuine compatible Čech section, its componentwise reduction, and
+    the normalized branch/glue identities
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
