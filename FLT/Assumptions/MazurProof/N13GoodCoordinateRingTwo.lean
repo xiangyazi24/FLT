@@ -525,10 +525,34 @@ theorem mumfordEval_surjective (D : SemiMumford) :
 /-- The graph quotient is canonically the monic polynomial quotient. -/
 noncomputable def mumfordQuotientEquiv (D : SemiMumford) :
     CoordinateRing ⧸ mumfordIdeal D.u D.v ≃+*
-      MumfordResidue D := by
-  rw [← ker_mumfordEval D]
-  exact RingHom.quotientKerEquivOfSurjective
-    (mumfordEval_surjective D)
+      MumfordResidue D :=
+  (Ideal.quotEquivOfEq (ker_mumfordEval D).symm).trans
+    (RingHom.quotientKerEquivOfSurjective
+      (mumfordEval_surjective D))
+
+@[simp] theorem mumfordQuotientEquiv_apply_mk
+    (D : SemiMumford) (z : CoordinateRing) :
+    mumfordQuotientEquiv D
+        (Ideal.Quotient.mk (mumfordIdeal D.u D.v) z) =
+      mumfordEval D z := by
+  simp [mumfordQuotientEquiv]
+
+/-- The graph quotient equivalence respects the coefficient field. -/
+noncomputable def mumfordQuotientAlgEquiv (D : SemiMumford) :
+    (CoordinateRing ⧸ mumfordIdeal D.u D.v) ≃ₐ[K]
+      MumfordResidue D :=
+  AlgEquiv.ofRingEquiv
+    (f := mumfordQuotientEquiv D)
+    (by
+      intro r
+      change
+        mumfordQuotientEquiv D
+            (Ideal.Quotient.mk
+              (mumfordIdeal D.u D.v) (xClass (C r))) =
+          Ideal.Quotient.mk
+            (Ideal.span ({D.u} : Set K[X])) (C r)
+      rw [mumfordQuotientEquiv_apply_mk,
+        mumfordEval_xClass])
 
 /-- The two graph generators multiply to the negative Cantor quotient. -/
 theorem ySubClass_mul_conjugate (D : SemiMumford) :

@@ -116,6 +116,44 @@ theorem ker_mumfordEval (D : SemiMumford M) :
     exact Ideal.add_mem _ hbase hgraph
   · exact mumfordIdeal_le_ker M D
 
+theorem mumfordEval_surjective (D : SemiMumford M) :
+    Function.Surjective (mumfordEval M D) := by
+  intro z
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective z
+  exact ⟨xClass M p, mumfordEval_xClass M D p⟩
+
+/-- The graph quotient is canonically the monic polynomial quotient. -/
+noncomputable def mumfordQuotientEquiv (D : SemiMumford M) :
+    CoordinateRing M ⧸ mumfordIdeal M D.u D.v ≃+*
+      MumfordResidue M D :=
+  (Ideal.quotEquivOfEq (ker_mumfordEval M D).symm).trans
+    (RingHom.quotientKerEquivOfSurjective
+      (mumfordEval_surjective M D))
+
+@[simp] theorem mumfordQuotientEquiv_apply_mk
+    (D : SemiMumford M) (z : CoordinateRing M) :
+    mumfordQuotientEquiv M D
+        (Ideal.Quotient.mk (mumfordIdeal M D.u D.v) z) =
+      mumfordEval M D z := by
+  simp [mumfordQuotientEquiv]
+
+/-- The graph quotient equivalence respects the coefficient field. -/
+noncomputable def mumfordQuotientAlgEquiv (D : SemiMumford M) :
+    (CoordinateRing M ⧸ mumfordIdeal M D.u D.v) ≃ₐ[K]
+      MumfordResidue M D :=
+  AlgEquiv.ofRingEquiv
+    (f := mumfordQuotientEquiv M D)
+    (by
+      intro r
+      change
+        mumfordQuotientEquiv M D
+            (Ideal.Quotient.mk
+              (mumfordIdeal M D.u D.v) (xClass M (C r))) =
+          Ideal.Quotient.mk
+            (Ideal.span ({D.u} : Set K[X])) (C r)
+      rw [mumfordQuotientEquiv_apply_mk,
+        mumfordEval_xClass])
+
 theorem mumfordIdeal_comap_base (D : SemiMumford M) :
     (mumfordIdeal M D.u D.v).comap (xClassHom M) =
       Ideal.span ({D.u} : Set K[X]) := by

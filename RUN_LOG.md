@@ -280,6 +280,22 @@
     integral basis.  This proof assumes neither module finiteness nor
     properness, Čech branch units, a valuation table, or a finite
     certificate
+  - constructed the generic and fixed-special graph-quotient equivalences
+    and transported the monic quadratic power bases to literal quotient
+    bases `{1,x}`.  These are genuine algebra equivalences, not dimension
+    counts or chosen quotient representatives
+  - proved that the quotient of a canonical vertical contraction injects
+    into its generic Mumford quotient and carries the integral classes of
+    `1` and `x` to the two literal generic basis vectors
+  - instantiated the abstract equal-two-fibre theorem for the canonical
+    contraction.  Assuming only the remaining literal special-ideal
+    equality, the integral quotient itself has basis `{1,x}` without any
+    prior module-finiteness hypothesis
+  - used multiplication by `x`, its characteristic polynomial, expression
+    of `y` in the integral basis, and ideal correspondence to recover the
+    canonical contraction exactly as a monic degree-two generalized
+    Mumford graph.  Thus every algebraic step after the special-ideal
+    equality is now compiled
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
@@ -300,10 +316,12 @@
      kernel class and prove that the mapped contraction ideal on the special
      affine fibre is literally the fixed graph ideal `(X²+X,Y)` (or supply
      the equivalent quotient map carrying `{1,x}` to its fixed special
-     basis).  The generic quotient already has the literal degree-two basis;
-     after that ideal-level specialization statement, vertical saturation,
-     denominator clearing, finiteness, flatness, the integral basis, and
-     characteristic-polynomial graph recovery are all formalized.
+     basis).  The generic and fixed special quotients now have their literal
+     degree-two bases, and a single application of
+     `N13ConcreteGraphRecovery.exists_integral_graph` performs vertical
+     no-escape, constructs the integral basis, and recovers the monic
+     quadratic graph.  Hence this representative-level special-ideal
+     equality is the sole remaining semantic theorem before graph recovery.
      Once such a `NearBaseMumford` representative exists, its integral
      near-identity transition, Hensel recovery, chart uniqueness, and Picard
      compatibility are all automatic.  The new `u/u₀` transition theorem is
@@ -320,9 +338,14 @@
   replaced by an unchecked claim that Picard specialization equality already
   gives literal equality of affine ideals; that ideal-level bridge is the
   next theorem.
-- pending ChatGPT bridge answers: Q2732--Q2735; Q2726--Q2730 have been
-  harvested.  Do not duplicate stale failed deliveries Q2313/Q2314 unless
-  the corresponding tabs are confirmed dead
+- latest ChatGPT bridge audits Q2789, Q2790, Q2802, Q2820, Q2821, Q2837,
+  and Q2840 have been harvested.  They confirm that the remaining statement
+  is the literal special-ideal equality; restricted reduction exactness is
+  only an equivalent reformulation.  The honest structural route is to
+  construct the special effective degree-two divisor represented by the
+  mapped contraction and use Abel rigidity to identify it with the fixed
+  divisor.  Do not duplicate stale failed deliveries Q2313/Q2314 unless the
+  corresponding tabs are confirmed dead
 
 ## Run 2026-07-12 (Complete Mazur proof — Layer 2 decomposition)
 - doctrine version: 6 gaps initially → 8 axioms after decomposition (narrower scope each)
