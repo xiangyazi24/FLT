@@ -181,6 +181,83 @@ theorem range_weightedChartGauge_not_le_ker_firstJet :
   have hcoord := congrFun hzero 0
   norm_num [z] at hcoord
 
+/-- The largest additive chart-gauge submodule invisible to the weighted
+first jet.  Any geometric rigidification capable of comparing the fixed
+Mumford frames must land in this kernel. -/
+def normalizedChartGauge : Submodule R₂ ChartCochains :=
+  LinearMap.ker weightedGaugeJet
+
+theorem mem_normalizedChartGauge_iff
+    (γ : ChartCochains) :
+    γ ∈ normalizedChartGauge ↔
+      weightedGaugeJet γ 0 = 0 ∧
+        weightedGaugeJet γ 1 = 0 := by
+  change weightedGaugeJet γ = 0 ↔ _
+  constructor
+  · intro h
+    exact ⟨congrFun h 0, congrFun h 1⟩
+  · rintro ⟨h₀, h₁⟩
+    funext i
+    fin_cases i
+    · exact h₀
+    · exact h₁
+
+/-- In Laurent coordinates the normalization consists of exactly the
+vanishing of the coefficients of degrees `0` and `-1`. -/
+theorem mem_normalizedChartGauge_iff_coeff
+    (γ : ChartCochains) :
+    γ ∈ normalizedChartGauge ↔
+      (weightedChartGauge γ).1.coeff 0 = 0 ∧
+        (weightedChartGauge γ).1.coeff (-1) = 0 := by
+  rw [mem_normalizedChartGauge_iff]
+  change
+    -(weightedChartGauge γ).1.coeff 0 = 0 ∧
+          (-(weightedChartGauge γ).1.coeff (-1) +
+            (weightedChartGauge γ).1.coeff 0) = 0 ↔
+      _
+  constructor
+  · rintro ⟨h₀, h₁⟩
+    have hc₀ :
+        (weightedChartGauge γ).1.coeff 0 = 0 := by
+      simpa using congrArg Neg.neg h₀
+    refine ⟨hc₀, ?_⟩
+    rw [hc₀, add_zero] at h₁
+    simpa using congrArg Neg.neg h₁
+  · rintro ⟨hc₀, hc₁⟩
+    simp [hc₀, hc₁]
+
+/-- Remove the unique pure-infinity two-jet supplied by `gaugeSeed`. -/
+def normalizeGauge (γ : ChartCochains) : ChartCochains :=
+  γ - gaugeSeed (weightedGaugeJet γ)
+
+theorem normalizeGauge_mem
+    (γ : ChartCochains) :
+    normalizeGauge γ ∈ normalizedChartGauge := by
+  change weightedGaugeJet (normalizeGauge γ) = 0
+  rw [normalizeGauge, map_sub, weightedGaugeJet_gaugeSeed, sub_self]
+
+/-- Every additive gauge is its normalized part plus its explicit
+pure-infinity two-jet. -/
+theorem normalizeGauge_add_gaugeSeed
+    (γ : ChartCochains) :
+    normalizeGauge γ + gaugeSeed (weightedGaugeJet γ) = γ :=
+  sub_add_cancel _ _
+
+/-- The preceding normalized-plus-jet decomposition is unique. -/
+theorem normalized_decomposition_unique
+    (γ n : ChartCochains) (z : Fin 2 → R₂)
+    (hn : n ∈ normalizedChartGauge)
+    (hγ : γ = n + gaugeSeed z) :
+    n = normalizeGauge γ ∧ z = weightedGaugeJet γ := by
+  have hnzero : weightedGaugeJet n = 0 :=
+    LinearMap.mem_ker.mp hn
+  have hz : weightedGaugeJet γ = z := by
+    rw [hγ, map_add, hnzero, zero_add,
+      weightedGaugeJet_gaugeSeed]
+  refine ⟨?_, hz.symm⟩
+  rw [normalizeGauge, hz]
+  exact eq_sub_of_add_eq hγ.symm
+
 end
 
 end MazurProof.N13MumfordFormalTransitionJetGauge

@@ -2367,6 +2367,45 @@ theorem isDouble_of_finiteIdealSquareRoot
   simp only [two_nsmul, zsmul_add]
   abel
 
+/-- Constructive generic output retained from one finite fractional-ideal
+square root.  It records the exact root and principal correction together
+with the half selected by the existing quotient proof.  No two-adic
+integrality assertion is included. -/
+structure FiniteIdealHalfData (D : LowRep) where
+  idealRoot : InvFrac M
+  principalCorrection : (FunctionField M)ˣ
+  square_eq :
+    mumfordIdealUnit M D.toSemi *
+        toPrincipalIdeal
+          (CoordinateRing M) (FunctionField M)
+          principalCorrection =
+      idealRoot ^ 2
+  half : G
+  half_spec :
+    N13LowDegreeKummerHom.lowClass D = 2 • half
+
+/-- Retain the input square root when selecting the half furnished by
+`isDouble_of_finiteIdealSquareRoot`. -/
+def finiteIdealHalfData
+    (D : LowRep)
+    (I : InvFrac M)
+    (α : (FunctionField M)ˣ)
+    (hIdeal :
+      mumfordIdealUnit M D.toSemi *
+          toPrincipalIdeal
+            (CoordinateRing M) (FunctionField M) α =
+        I ^ 2) :
+    FiniteIdealHalfData D := by
+  let hhalf :=
+    isDouble_of_finiteIdealSquareRoot D
+      ⟨I, α, hIdeal⟩
+  exact
+    { idealRoot := I
+      principalCorrection := α
+      square_eq := hIdeal
+      half := Classical.choose hhalf
+      half_spec := Classical.choose_spec hhalf }
+
 /-! ## The structural full-gauge bridge -/
 
 /-- A negatively normalized full-gauge witness always yields a finite
