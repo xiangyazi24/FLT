@@ -534,7 +534,6 @@ selected special graph is represented by an actual pair in the two
 distinguished residue disks. -/
 theorem exists_diskPair_class_eq
     (D : SexticMumford.Mumford Model)
-    (hdeg : D.u.natDegree = 2)
     (hmap :
       Ideal.map
           N13GeneralizedMumfordReduction.reduceCoordinate
@@ -545,6 +544,9 @@ theorem exists_diskPair_class_eq
       SexticMumford.classOf
           Model (N13Infinity.positiveInfinityOrder Q₂) D =
         N13TwoAdicAbelChartPic.DiskPair.pic P := by
+  have hdeg : D.u.natDegree = 2 :=
+    N13TwoFiberConcreteBasis.degree_eq_two_of_map_contractIdeal_eq_special
+      D.toSemi (by simpa using D.deg_u) hmap
   have hnInfNat : D.nInf = 0 := by
     have hbound := D.infinity_bound
     omega
