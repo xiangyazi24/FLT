@@ -242,6 +242,48 @@ def chartToBase : ∀ i : Bool, chart i ⟶ Spec (.of R₂)
         (CommRingCat.ofHom
           infinityBaseMap)
 
+theorem affineOverlapInclusion_chartToBase :
+    Spec.map
+          (CommRingCat.ofHom
+            (algebraMap Affine AffineOverlap)) ≫
+        chartToBase false =
+      Spec.map
+        (CommRingCat.ofHom
+          (algebraMap R₂ AffineOverlap)) := by
+  change
+    Spec.map
+          (CommRingCat.ofHom
+            (algebraMap Affine AffineOverlap)) ≫
+        Spec.map
+          (CommRingCat.ofHom affineBaseMap) =
+      Spec.map
+        (CommRingCat.ofHom
+          (algebraMap R₂ AffineOverlap))
+  rw [show affineBaseMap = algebraMap R₂ Affine by rfl]
+  rw [← Spec.map_comp]
+  congr 1
+
+theorem infinityOverlapInclusion_chartToBase :
+    Spec.map
+          (CommRingCat.ofHom
+            (algebraMap Infinity InfinityOverlap)) ≫
+        chartToBase true =
+      Spec.map
+        (CommRingCat.ofHom
+          (algebraMap R₂ InfinityOverlap)) := by
+  change
+    Spec.map
+          (CommRingCat.ofHom
+            (algebraMap Infinity InfinityOverlap)) ≫
+        Spec.map
+          (CommRingCat.ofHom infinityBaseMap) =
+      Spec.map
+        (CommRingCat.ofHom
+          (algebraMap R₂ InfinityOverlap))
+  rw [show infinityBaseMap = algebraMap R₂ Infinity by rfl]
+  rw [← Spec.map_comp]
+  congr 1
+
 private theorem overlapEquiv_symm_base (r : R₂) :
     N13OrdinaryCurveOverlap.overlapEquiv.symm
         (N13OrdinaryCurveOverlap.coefficientToInfinityOverlap r) =
@@ -383,6 +425,28 @@ def toBase : IntegralCurve ⟶ Spec (.of R₂) := by
 theorem ι_toBase (i : Bool) :
     glueData.ι i ≫ toBase = chartToBase i :=
   Multicoequalizer.π_desc _ _ _ _ _
+
+theorem affineOverlapToGlueDataIso_hom_toBase :
+    affineOverlapToGlueDataIso.hom ≫
+        (glueData.f false true ≫ glueData.ι false ≫ toBase) =
+      Spec.map
+        (CommRingCat.ofHom
+          (algebraMap R₂ AffineOverlap)) := by
+  simp only [affineOverlapToGlueDataIso_hom_f_assoc, ι_toBase,
+    overlapInclusion, chartToBase]
+  exact
+    affineOverlapInclusion_chartToBase
+
+theorem infinityOverlapToGlueDataIso_hom_toBase :
+    infinityOverlapToGlueDataIso.hom ≫
+        (glueData.f true false ≫ glueData.ι true ≫ toBase) =
+      Spec.map
+        (CommRingCat.ofHom
+          (algebraMap R₂ InfinityOverlap)) := by
+  simp only [infinityOverlapToGlueDataIso_hom_f_assoc, ι_toBase,
+    overlapInclusion, chartToBase]
+  exact
+    infinityOverlapInclusion_chartToBase
 
 end
 
