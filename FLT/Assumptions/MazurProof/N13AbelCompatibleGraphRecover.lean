@@ -192,6 +192,21 @@ def normalizedNearBase
         (D.u_monic.map
           N13GeneralizedMumfordReduction.reduceBase)).2 hdvd
 
+/-- The representative-level mapped-ideal equality is an equivalent and
+often more convenient input than the set-valued Abel equality. -/
+def normalizedNearBaseOfMappedSpecial
+    (D : SmoothMumford₂)
+    (hdeg : D.u.natDegree = 2)
+    (hmap :
+      Ideal.map N13GeneralizedMumfordReduction.reduceCoordinate
+          (N13GeneralizedMumfordIntegral.mumfordIdeal
+            (R := R₂) D.u D.v) =
+        N13SpecialQuotientBasis.specialIdeal) :
+    N13TwoAdicAbelChartRecover.NearBaseMumford :=
+  normalizedNearBase D hdeg
+    ((N13SpecialGraphReduction.setAbel_eq_iff_map_mumfordIdeal_eq_special
+      D hdeg).2 hmap)
+
 /-- The disk pair recovered by Hensel lifting from an Abel-compatible
 integral graph. -/
 def recoveredDiskPair
@@ -207,6 +222,18 @@ def recoveredDiskPair
           N13AbelChartBase.specialBaseDivisor) :
     N13TwoAdicAbelChartData.DiskPair :=
   (normalizedNearBase D hdeg habel).diskPair
+
+/-- Hensel recovery directly from the literal mapped special ideal. -/
+def recoveredDiskPairOfMappedSpecial
+    (D : SmoothMumford₂)
+    (hdeg : D.u.natDegree = 2)
+    (hmap :
+      Ideal.map N13GeneralizedMumfordReduction.reduceCoordinate
+          (N13GeneralizedMumfordIntegral.mumfordIdeal
+            (R := R₂) D.u D.v) =
+        N13SpecialQuotientBasis.specialIdeal) :
+    N13TwoAdicAbelChartData.DiskPair :=
+  (normalizedNearBaseOfMappedSpecial D hdeg hmap).diskPair
 
 /-- Recovery is exact at the level of integral graph ideals. -/
 theorem mumfordIdeal_eq_recoveredDiskPair
@@ -227,6 +254,27 @@ theorem mumfordIdeal_eq_recoveredDiskPair
   unfold recoveredDiskPair
   rw [←
     (normalizedNearBase D hdeg habel).mumfordIdeal_diskPair]
+  exact (normalizeSmoothMumford_mumfordIdeal D).symm
+
+/-- Literal special reduction is therefore exactly enough to recover a
+two-disk graph with the same integral ideal. -/
+theorem mumfordIdeal_eq_recoveredDiskPairOfMappedSpecial
+    (D : SmoothMumford₂)
+    (hdeg : D.u.natDegree = 2)
+    (hmap :
+      Ideal.map N13GeneralizedMumfordReduction.reduceCoordinate
+          (N13GeneralizedMumfordIntegral.mumfordIdeal
+            (R := R₂) D.u D.v) =
+        N13SpecialQuotientBasis.specialIdeal) :
+    N13GeneralizedMumfordIntegral.mumfordIdeal D.u D.v =
+      N13GeneralizedMumfordIntegral.mumfordIdeal
+        (recoveredDiskPairOfMappedSpecial D hdeg hmap).u
+        (recoveredDiskPairOfMappedSpecial D hdeg hmap).v := by
+  unfold recoveredDiskPairOfMappedSpecial
+  have hpair :=
+    N13TwoAdicAbelChartRecover.NearBaseMumford.mumfordIdeal_diskPair
+      (normalizedNearBaseOfMappedSpecial D hdeg hmap)
+  rw [← hpair]
   exact (normalizeSmoothMumford_mumfordIdeal D).symm
 
 end

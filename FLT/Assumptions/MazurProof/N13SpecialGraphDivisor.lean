@@ -303,6 +303,121 @@ theorem u_eq_base_and_dvd_v_of_graphDivisor_eq
   · rw [← hu]
     exact hprod_v
 
+/-- Literal equality with the selected special graph ideal already recovers
+the monic quadratic and the graph value modulo it.  This is the converse
+representative statement to `mumfordIdeal_eq_special_of_graphDivisor_eq`. -/
+theorem u_eq_base_and_dvd_v_of_mumfordIdeal_eq
+    (D : SemiMumford) (hdeg : D.u.natDegree = 2)
+    (hideal :
+      mumfordIdeal D.u D.v =
+        N13SpecialQuotientBasis.specialIdeal) :
+    D.u = (X ^ 2 + X : K[X]) ∧ D.u ∣ D.v := by
+  have hxmem :
+      xClass N13SpecialQuotientBasis.specialData.u ∈
+        mumfordIdeal D.u D.v := by
+    rw [hideal]
+    exact
+      xClass_mem_mumfordIdeal
+        N13SpecialQuotientBasis.specialData.u
+        N13SpecialQuotientBasis.specialData.v
+  have hxker :
+      xClass N13SpecialQuotientBasis.specialData.u ∈
+        RingHom.ker (mumfordEval D) := by
+    rw [ker_mumfordEval D]
+    exact hxmem
+  have hxzero :=
+    RingHom.mem_ker.mp hxker
+  rw [mumfordEval_xClass,
+    Ideal.Quotient.eq_zero_iff_mem,
+    Ideal.mem_span_singleton] at hxzero
+  have hueq :
+      D.u = (X ^ 2 + X : K[X]) := by
+    have hspecial :
+        N13SpecialQuotientBasis.specialData.u = D.u :=
+      Polynomial.eq_of_monic_of_dvd_of_natDegree_le
+        D.u_monic
+        N13SpecialQuotientBasis.specialData.u_monic
+        hxzero
+        (by
+          rw [hdeg,
+            N13SpecialQuotientBasis.specialData_u_natDegree])
+    simpa only [N13SpecialQuotientBasis.specialData_u] using hspecial.symm
+  have hymem :
+      yClass ∈ mumfordIdeal D.u D.v := by
+    rw [hideal]
+    change
+      yClass ∈
+        mumfordIdeal
+          N13SpecialQuotientBasis.specialData.u
+          N13SpecialQuotientBasis.specialData.v
+    simpa only [N13SpecialQuotientBasis.specialData_v,
+      ySubClass, xClass_zero, sub_zero] using
+      ySubClass_mem_mumfordIdeal
+        N13SpecialQuotientBasis.specialData.u
+        N13SpecialQuotientBasis.specialData.v
+  have hyker :
+      yClass ∈ RingHom.ker (mumfordEval D) := by
+    rw [ker_mumfordEval D]
+    exact hymem
+  have hyzero :=
+    RingHom.mem_ker.mp hyker
+  rw [mumfordEval_yClass,
+    Ideal.Quotient.eq_zero_iff_mem,
+    Ideal.mem_span_singleton] at hyzero
+  exact ⟨hueq, hyzero⟩
+
+/-- The literal special graph ideal determines the selected effective
+divisor.  The proof recovers the two roots and evaluates the graph there;
+it does not enumerate the special curve. -/
+theorem graphDivisor_eq_special_of_mumfordIdeal_eq
+    (D : SemiMumford) (hdeg : D.u.natDegree = 2)
+    (hideal :
+      mumfordIdeal D.u D.v =
+        N13SpecialQuotientBasis.specialIdeal) :
+    graphDivisor D hdeg =
+      N13AbelChartBase.specialBaseDivisor := by
+  obtain ⟨hu, hv⟩ :=
+    u_eq_base_and_dvd_v_of_mumfordIdeal_eq D hdeg hideal
+  have hr0 : D.u.IsRoot 0 := by
+    simp [hu]
+  have hr1 : D.u.IsRoot 1 := by
+    change D.u.eval 1 = 0
+    rw [hu]
+    norm_num
+    exact CharP.cast_eq_zero K 2
+  have hmem0 :
+      (0 : K) ∈ rootPair D hdeg :=
+    (mem_rootPair_iff_isRoot D hdeg 0).2 hr0
+  have hmem1 :
+      (1 : K) ∈ rootPair D hdeg :=
+    (mem_rootPair_iff_isRoot D hdeg 1).2 hr1
+  obtain ⟨q, hq⟩ := hv
+  have hv0 : D.v.eval 0 = 0 := by
+    rw [hq, eval_mul, hr0, zero_mul]
+  have hv1 : D.v.eval 1 = 0 := by
+    rw [hq, eval_mul, hr1, zero_mul]
+  have hp00 :
+      N13AbelChartBase.p00 ∈ graphDivisor D hdeg := by
+    rw [graphDivisor, Sym2.mem_pmap_iff]
+    refine ⟨0, hmem0, ?_⟩
+    simp [rootPoint, N13AbelChartBase.p00,
+      N13AbelFiberTwoModel.curvePointEquiv, hv0]
+  have hp10 :
+      N13AbelChartBase.p10 ∈ graphDivisor D hdeg := by
+    rw [graphDivisor, Sym2.mem_pmap_iff]
+    refine ⟨1, hmem1, ?_⟩
+    simp [rootPoint, N13AbelChartBase.p10,
+      N13AbelFiberTwoModel.curvePointEquiv, hv1]
+  have hpne :
+      N13AbelChartBase.p00 ≠ N13AbelChartBase.p10 := by
+    intro h
+    have h' :=
+      congrArg N13AbelFiberTwoModel.curvePointEquiv h
+    simp [N13AbelChartBase.p00,
+      N13AbelChartBase.p10] at h'
+  simpa [N13AbelChartBase.specialBaseDivisor] using
+    (Sym2.mem_and_mem_iff hpne).mp ⟨hp00, hp10⟩
+
 theorem mumfordIdeal_eq_zero_of_dvd
     (u v : K[X]) (h : u ∣ v) :
     mumfordIdeal u v = mumfordIdeal u 0 := by
@@ -385,6 +500,23 @@ theorem mumfordIdeal_eq_special_of_setAbel_eq
       N13SpecialQuotientBasis.specialIdeal :=
   mumfordIdeal_eq_special_of_abel_eq
     N13AbelFiberTwoModel.picTwoSetModelCriterion D hdeg habel
+
+/-- For quadratic special graphs, the intrinsic Abel class and the literal
+graph ideal carry exactly the same information at the selected regular
+class. -/
+theorem setAbel_eq_iff_mumfordIdeal_eq_special
+    (D : SemiMumford) (hdeg : D.u.natDegree = 2) :
+    N13AbelFiberTwoModel.abel (graphDivisor D hdeg) =
+        N13AbelFiberTwoModel.abel
+          N13AbelChartBase.specialBaseDivisor ↔
+      mumfordIdeal D.u D.v =
+        N13SpecialQuotientBasis.specialIdeal := by
+  constructor
+  · exact mumfordIdeal_eq_special_of_setAbel_eq D hdeg
+  · intro hideal
+    exact congrArg N13AbelFiberTwoModel.abel
+      (graphDivisor_eq_special_of_mumfordIdeal_eq
+        D hdeg hideal)
 
 end
 

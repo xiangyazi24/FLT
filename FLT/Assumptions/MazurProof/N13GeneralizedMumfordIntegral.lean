@@ -247,6 +247,25 @@ theorem ySubClass_mem_mumfordIdeal (u v : R[X]) :
   simp only [curvePoly]
   ring
 
+/-- The product of the two raw graph functions is the negative substituted
+curve equation.  No divisibility or smoothness hypothesis is needed. -/
+theorem ySubClass_mul_conjugateV_raw
+    (v : R[X]) :
+    ySubClass v * ySubClass (conjugateV v) =
+      -xClass (v ^ 2 + hPoly * v - rhsPoly) := by
+  calc
+    ySubClass v * ySubClass (conjugateV v) =
+        yClass ^ 2 + xClass hPoly * yClass -
+          (xClass v ^ 2 + xClass hPoly * xClass v) := by
+      simp only [ySubClass, conjugateV, xClass_neg, xClass_sub]
+      ring
+    _ = xClass rhsPoly -
+          xClass (v ^ 2 + hPoly * v) := by
+      rw [yClass_relation, xClass_add, xClass_mul, xClass_pow]
+    _ = -xClass (v ^ 2 + hPoly * v - rhsPoly) := by
+      rw [xClass_sub]
+      ring
+
 /-- The two conjugate graph functions multiply to the negative Cantor
 quotient.  This identity is valid integrally, before reduction modulo two. -/
 theorem ySubClass_mul_conjugate
@@ -255,16 +274,8 @@ theorem ySubClass_mul_conjugate
       -(xClass D.u * xClass D.w) := by
   calc
     ySubClass D.v * ySubClass (conjugateV D.v) =
-        yClass ^ 2 + xClass hPoly * yClass -
-          (xClass D.v ^ 2 + xClass hPoly * xClass D.v) := by
-      simp only [ySubClass, conjugateV, xClass_neg, xClass_sub]
-      ring
-    _ = xClass rhsPoly -
-          xClass (D.v ^ 2 + hPoly * D.v) := by
-      rw [yClass_relation, xClass_add, xClass_mul, xClass_pow]
-    _ = -xClass (D.v ^ 2 + hPoly * D.v - rhsPoly) := by
-      rw [xClass_sub]
-      ring
+        -xClass (D.v ^ 2 + hPoly * D.v - rhsPoly) :=
+      ySubClass_mul_conjugateV_raw D.v
     _ = -xClass (D.u * D.w) := by rw [D.curve_eq]
     _ = -(xClass D.u * xClass D.w) := by rw [xClass_mul]
 

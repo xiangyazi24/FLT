@@ -66,6 +66,27 @@ theorem map_mumfordIdeal_eq_special_of_setAbel_eq
       (N13GeneralizedMumfordReduction.reduceSmoothMumford D)
       (reduceSmoothMumford_u_natDegree D hdeg) habel
 
+/-- For an integral quadratic graph, mapped-ideal equality is equivalent to
+the intrinsic special-fibre Abel equality. -/
+theorem setAbel_eq_iff_map_mumfordIdeal_eq_special
+    (D : SmoothMumford₂)
+    (hdeg : D.u.natDegree = 2) :
+    N13AbelFiberTwoModel.abel
+          (N13SpecialGraphDivisor.graphDivisor
+            (N13GeneralizedMumfordReduction.reduceSmoothMumford D)
+            (reduceSmoothMumford_u_natDegree D hdeg)) =
+        N13AbelFiberTwoModel.abel
+          N13AbelChartBase.specialBaseDivisor ↔
+      Ideal.map N13GeneralizedMumfordReduction.reduceCoordinate
+          (N13GeneralizedMumfordIntegral.mumfordIdeal
+            (R := N13GeneralizedMumfordReduction.R₂) D.u D.v) =
+        N13SpecialQuotientBasis.specialIdeal := by
+  rw [N13GeneralizedMumfordReduction.map_smoothMumfordIdeal]
+  exact
+    N13SpecialGraphDivisor.setAbel_eq_iff_mumfordIdeal_eq_special
+      (N13GeneralizedMumfordReduction.reduceSmoothMumford D)
+      (reduceSmoothMumford_u_natDegree D hdeg)
+
 /-- Exact contraction turns the preceding Abel statement into precisely the
 special-ideal equality consumed by the concrete two-fibre recovery layer. -/
 theorem map_contractIdeal_sexticIdeal_eq_special_of_setAbel_eq
