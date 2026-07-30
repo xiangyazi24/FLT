@@ -1923,6 +1923,9 @@ structure FiniteIdealGraphRootData (D : LowRep) where
   graphU : ℚ[X]
   graphV : ℚ[X]
   graphU_ne_zero : graphU ≠ 0
+  graphU_degree_le_two : graphU.natDegree ≤ 2
+  graph_curve_dvd :
+    graphU ∣ N13Mumford.f ℚ - graphV ^ 2
   inverseOrientation : Bool
   graph_eq :
     (((if inverseOrientation then idealRoot⁻¹ else idealRoot) :
@@ -1938,7 +1941,8 @@ which presents the chosen root. -/
 def toFiniteIdealGraphRootData
     {D : LowRep} {a : ℚ[X]}
     (R : FinitePadeGraphRootData D a)
-    (ha : a ≠ 0) :
+    (ha : a ≠ 0)
+    (hdegree : a.natDegree ≤ 2) :
     FiniteIdealGraphRootData D where
   idealRoot := R.rootData.root
   principalCorrection :=
@@ -1947,11 +1951,195 @@ def toFiniteIdealGraphRootData
   graphU := a
   graphV := R.L₀
   graphU_ne_zero := ha
+  graphU_degree_le_two := hdegree
+  graph_curve_dvd := by
+    refine
+      ⟨a *
+        (Polynomial.C (R.κ : ℚ) * D.toSemi.u), ?_⟩
+    rw [R.curve_eq]
+    ring
   inverseOrientation := true
   graph_eq := by
     simpa using R.rootData.inverseRoot_coe
 
 end FinitePadeGraphRootData
+
+namespace FiniteIdealGraphRootData
+
+private theorem normalize_dvd_sub_mod
+    (p q : ℚ[X]) :
+    normalize q ∣ p - p % normalize q := by
+  refine ⟨p / normalize q, ?_⟩
+  have hdiv :=
+    EuclideanDomain.mod_add_div p (normalize q)
+  calc
+    p - p % normalize q =
+        (p % normalize q +
+            normalize q * (p / normalize q)) -
+          p % normalize q := by
+      rw [hdiv]
+    _ = normalize q * (p / normalize q) := by
+      ring
+
+/-- Canonical monic/remainder Mumford data presenting the retained graph.
+This is a generic-fibre normalization only; it makes no two-adic
+integrality assertion. -/
+def normalizedGraphMumford
+    {D : LowRep} (R : FiniteIdealGraphRootData D) :
+    SexticMumford.Mumford M where
+  u := normalize R.graphU
+  v := R.graphV % normalize R.graphU
+  nInf := 0
+  u_monic := monic_normalize R.graphU_ne_zero
+  deg_u := by
+    have hdegree :
+        (normalize R.graphU).natDegree =
+          R.graphU.natDegree :=
+      Polynomial.natDegree_eq_of_degree_eq
+        (Polynomial.degree_eq_degree_of_associated
+          (associated_normalize R.graphU).symm)
+    rw [hdegree]
+    exact R.graphU_degree_le_two
+  v_reduced := by
+    apply
+      (mod_eq_self_iff
+        (monic_normalize R.graphU_ne_zero).ne_zero).mpr
+    exact
+      degree_mod_lt _
+        (monic_normalize R.graphU_ne_zero).ne_zero
+  curve_dvd := by
+    have hnBase :
+        normalize R.graphU ∣
+          M.f - R.graphV ^ 2 :=
+      (associated_normalize R.graphU).symm.dvd.trans
+        R.graph_curve_dvd
+    have hnGraph :
+        normalize R.graphU ∣
+          R.graphV -
+            R.graphV % normalize R.graphU :=
+      normalize_dvd_sub_mod R.graphV R.graphU
+    obtain ⟨a, ha⟩ := hnBase
+    obtain ⟨b, hb⟩ := hnGraph
+    refine
+      ⟨a + b *
+        (R.graphV +
+          R.graphV % normalize R.graphU), ?_⟩
+    calc
+      M.f -
+            (R.graphV % normalize R.graphU) ^ 2 =
+          (M.f - R.graphV ^ 2) +
+            (R.graphV -
+                R.graphV % normalize R.graphU) *
+              (R.graphV +
+                R.graphV % normalize R.graphU) := by
+            ring
+      _ =
+          normalize R.graphU * a +
+            (normalize R.graphU * b) *
+              (R.graphV +
+                R.graphV % normalize R.graphU) := by
+            rw [ha, hb]
+      _ =
+          normalize R.graphU *
+            (a + b *
+              (R.graphV +
+                R.graphV % normalize R.graphU)) := by
+            ring
+  infinity_bound := by
+    have hdegree :
+        (normalize R.graphU).natDegree =
+          R.graphU.natDegree :=
+      Polynomial.natDegree_eq_of_degree_eq
+        (Polynomial.degree_eq_degree_of_associated
+          (associated_normalize R.graphU).symm)
+    rw [hdegree]
+    exact R.graphU_degree_le_two
+
+/-- The canonical normalized Mumford pair gives exactly the same graph
+ideal as the retained Padé presentation. -/
+theorem mumfordIdeal_normalizedGraphMumford
+    {D : LowRep} (R : FiniteIdealGraphRootData D) :
+    mumfordIdeal M
+        (normalizedGraphMumford R).u
+        (normalizedGraphMumford R).v =
+      mumfordIdeal M R.graphU R.graphV := by
+  calc
+    mumfordIdeal M
+          (normalize R.graphU)
+          (R.graphV % normalize R.graphU) =
+        mumfordIdeal M
+          (normalize R.graphU) R.graphV := by
+      apply mumfordIdeal_eq_of_dvd_sub
+      obtain ⟨q, hq⟩ :=
+        normalize_dvd_sub_mod R.graphV R.graphU
+      refine ⟨-q, ?_⟩
+      calc
+        R.graphV % normalize R.graphU - R.graphV =
+            -(R.graphV -
+              R.graphV % normalize R.graphU) := by
+                ring
+        _ = -(normalize R.graphU * q) := by
+              rw [hq]
+        _ = normalize R.graphU * (-q) := by
+              ring
+    _ = mumfordIdeal M R.graphU R.graphV := by
+      exact
+        mumfordIdeal_eq_of_dvd_dvd
+          M (normalize R.graphU) R.graphU R.graphV
+            (associated_normalize R.graphU).symm.dvd
+            (associated_normalize R.graphU).dvd
+
+/-- A retained graph of degree zero is the unit ideal.  Consequently the
+selected fractional root is itself trivial, independently of which
+orientation presents the graph. -/
+theorem idealRoot_eq_one_of_graphU_natDegree_eq_zero
+    {D : LowRep} (R : FiniteIdealGraphRootData D)
+    (hdeg : R.graphU.natDegree = 0) :
+    R.idealRoot = 1 := by
+  have hconstant :
+      R.graphU =
+        Polynomial.C (R.graphU.coeff 0) :=
+    Polynomial.eq_C_of_natDegree_eq_zero hdeg
+  have hcoeff :
+      R.graphU.coeff 0 ≠ 0 := by
+    intro hzero
+    apply R.graphU_ne_zero
+    rw [hconstant, hzero, Polynomial.C_0]
+  let κ : ℚˣ :=
+    Units.mk0 (R.graphU.coeff 0) hcoeff
+  have hscaled :
+      R.graphU =
+        Polynomial.C (κ : ℚ) * 1 := by
+    rw [hconstant, mul_one]
+    rfl
+  have hgraphTop :
+      mumfordIdeal M R.graphU R.graphV = ⊤ := by
+    calc
+      mumfordIdeal M R.graphU R.graphV =
+          mumfordIdeal M
+            (Polynomial.C (κ : ℚ) * 1) R.graphV := by
+        rw [hscaled]
+      _ = mumfordIdeal M 1 R.graphV :=
+        mumfordIdeal_C_mul M κ 1 R.graphV
+      _ = ⊤ := by
+        rw [mumfordIdeal, Ideal.eq_top_iff_one]
+        exact Ideal.subset_span (by simp [xClass_one])
+  by_cases hOrientation : R.inverseOrientation = true
+  · have h := R.graph_eq
+    simp only [hOrientation, if_pos] at h
+    rw [hgraphTop] at h
+    have hinv : R.idealRoot⁻¹ = 1 :=
+      Units.ext h
+    simpa using congrArg Inv.inv hinv
+  · have hFalse :
+        R.inverseOrientation = false :=
+      Bool.eq_false_of_not_eq_true hOrientation
+    have h := R.graph_eq
+    simp only [hFalse, Bool.false_eq_true, if_false] at h
+    rw [hgraphTop] at h
+    exact Units.ext h
+
+end FiniteIdealGraphRootData
 
 /-- Construct the exact nondegenerate Padé graph together with the
 fractional-ideal root whose inverse is that graph ideal. -/
@@ -2058,6 +2246,8 @@ def finiteIdealGraphRootData_of_zero_pade_scalar
   have hbSpec := Classical.choose_spec hbExists
   have hbMonic := hbSpec.1
   have hub := hbSpec.2.2
+  have hbDegree : b.natDegree ≤ 2 :=
+    hbSpec.2.1.trans (by norm_num)
   let hwExists := D.toSemi.curve_dvd
   let w := Classical.choose hwExists
   have hw := Classical.choose_spec hwExists
@@ -2116,6 +2306,8 @@ def finiteIdealGraphRootData_of_zero_pade_scalar
       graphU := b
       graphV := D.toSemi.v
       graphU_ne_zero := hbMonic.ne_zero
+      graphU_degree_le_two := hbDegree
+      graph_curve_dvd := ⟨b * w, hcurve⟩
       inverseOrientation := false
       graph_eq := by
         change
@@ -2181,6 +2373,8 @@ def finiteIdealGraphRootData_of_natDegree_zero
       graphU := 1
       graphV := 0
       graphU_ne_zero := one_ne_zero
+      graphU_degree_le_two := by simp
+      graph_curve_dvd := one_dvd _
       inverseOrientation := false
       graph_eq := by
         change
@@ -2672,7 +2866,7 @@ def finiteIdealGraphRootData_of_negative_norm_gauge
           (finitePadeGraphRootData
               D q (a : ℚ[X]) l c b
                 hrelation hb hbSq hgraph hc haPoly).toFiniteIdealGraphRootData
-            haPoly
+            haPoly (padeNumerator_natDegree_le_two a ha0)
       · have hu2 : D.toSemi.u.natDegree = 2 := by
           have hle := D.degree_le_two
           omega
@@ -2689,7 +2883,7 @@ def finiteIdealGraphRootData_of_negative_norm_gauge
           (finitePadeGraphRootData
               D q (a : ℚ[X]) l c b
                 hrelation hb hbSq hgraph hc haPoly).toFiniteIdealGraphRootData
-            haPoly
+            haPoly (padeNumerator_natDegree_le_two a ha0)
 
 /-- Compatibility wrapper which forgets the retained graph presentation. -/
 theorem exists_finiteIdealSquareRoot_of_negative_norm_gauge

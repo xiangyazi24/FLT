@@ -95,6 +95,49 @@ def twoAdicGraphIdeal (P : G) : Ideal RationalRing :=
     ((graphU P).map N13InfinityBaseChange.ratToQ₂)
     ((graphV P).map N13InfinityBaseChange.ratToQ₂)
 
+/-- The canonical monic/remainder rational Mumford representative of the
+retained Padé graph. -/
+def normalizedGraphMumford (P : G) :
+    SexticMumford.Mumford Mℚ :=
+  N13MumfordFullKummerIdentityFiber.FiniteIdealGraphRootData.normalizedGraphMumford
+      (N13MumfordFullKummerTwoSurjective.constructedHalfData
+        P).finite.toFiniteIdealGraphRootData
+
+/-- Coefficient extension of the canonical retained graph to `ℚ₂`. -/
+def twoAdicNormalizedGraphMumford (P : G) :
+    SexticMumford.Mumford M₂ :=
+  (normalizedGraphMumford P).mapCoeffs
+    N13InfinityBaseChange.ratToQ₂
+    N13InfinityBaseChange.ratToQ₂_injective
+    (N13InfinityBaseChange.map_n13_f
+      N13InfinityBaseChange.ratToQ₂)
+
+/-- The coefficient-extended normalized Mumford pair presents exactly the
+same ordinary graph ideal as the original retained Padé polynomials. -/
+theorem mumfordIdeal_twoAdicNormalizedGraph_eq
+    (P : G) :
+    SexticMumford.mumfordIdeal M₂
+        (twoAdicNormalizedGraphMumford P).u
+        (twoAdicNormalizedGraphMumford P).v =
+      twoAdicGraphIdeal P := by
+  have h :=
+    congrArg
+      (Ideal.map
+        (SexticMumford.OrientedBaseChange.coordinateMap
+          (M := Mℚ) (M' := M₂)
+          N13InfinityBaseChange.ratToQ₂
+          (N13InfinityBaseChange.map_n13_f
+            N13InfinityBaseChange.ratToQ₂)))
+      (N13MumfordFullKummerIdentityFiber.FiniteIdealGraphRootData.mumfordIdeal_normalizedGraphMumford
+          (N13MumfordFullKummerTwoSurjective.constructedHalfData
+            P).finite.toFiniteIdealGraphRootData)
+  simpa only [normalizedGraphMumford,
+    twoAdicNormalizedGraphMumford,
+    SexticMumford.mapCoeffs_u,
+    SexticMumford.mapCoeffs_v,
+    graphU, graphV, twoAdicGraphIdeal,
+    SexticMumford.OrientedBaseChange.map_mumfordIdeal] using h
+
 /-- The selected root still satisfies its exact square identity after
 two-adic coefficient extension. -/
 theorem twoAdicIdealRoot_square (P : G) :
@@ -153,6 +196,58 @@ theorem twoAdicIdealRoot_graph_eq (P : G) :
       SexticMumford.OrientedBaseChange.coe_invFracMap,
       SexticMumford.OrientedBaseChange.fractionalMap_coe_mumfordIdeal]
       using h
+
+/-- The retained root or inverse is the graph ideal of an actual balanced
+Mumford representative over `ℚ₂`, canonically normalized from the Padé
+polynomials. -/
+theorem twoAdicIdealRoot_normalizedGraph_eq (P : G) :
+    (((if inverseOrientation P
+        then (twoAdicIdealRoot P)⁻¹
+        else twoAdicIdealRoot P) :
+      SexticMumford.InvFrac M₂) :
+        RationalFractionalIdeal) =
+      (SexticMumford.mumfordIdeal M₂
+          (twoAdicNormalizedGraphMumford P).u
+          (twoAdicNormalizedGraphMumford P).v :
+        RationalFractionalIdeal) := by
+  rw [twoAdicIdealRoot_graph_eq,
+    mumfordIdeal_twoAdicNormalizedGraph_eq]
+
+/-- A degree-zero retained graph gives the trivial selected root after
+two-adic coefficient extension. -/
+theorem twoAdicIdealRoot_eq_one_of_graphU_natDegree_eq_zero
+    (P : G) (hdeg : (graphU P).natDegree = 0) :
+    twoAdicIdealRoot P = 1 := by
+  have hroot :=
+    N13MumfordFullKummerIdentityFiber.FiniteIdealGraphRootData.idealRoot_eq_one_of_graphU_natDegree_eq_zero
+        (N13MumfordFullKummerTwoSurjective.constructedHalfData
+          P).finite.toFiniteIdealGraphRootData hdeg
+  rw [twoAdicIdealRoot, hroot, map_one]
+
+/-- The degree-zero branch has the unit integral spread; it does not need
+the general divisorial-hull or special-product-lift construction. -/
+def degreeZeroIntegralRootHull :
+    N13IntegralFractionalHull.IntegralFractionalIdeal :=
+  1
+
+theorem extend_degreeZeroIntegralRootHull
+    (P : G) (hdeg : (graphU P).natDegree = 0) :
+    N13IntegralFractionalHull.extendFractional
+        degreeZeroIntegralRootHull =
+      (twoAdicIdealRoot P :
+        RationalFractionalIdeal) := by
+  rw [twoAdicIdealRoot_eq_one_of_graphU_natDegree_eq_zero
+    P hdeg]
+  change
+    N13IntegralFractionalHull.extendFractional
+        (1 :
+          N13IntegralFractionalHull.IntegralFractionalIdeal) =
+      (1 : RationalFractionalIdeal)
+  exact map_one N13IntegralFractionalHull.extendFractional
+
+theorem degreeZeroIntegralRootHull_isUnit :
+    IsUnit degreeZeroIntegralRootHull :=
+  isUnit_one
 
 /-- The underlying two-adic generic fractional ideal. -/
 def rootFractional (P : G) :
