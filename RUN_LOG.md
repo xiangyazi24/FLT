@@ -240,6 +240,12 @@
     two, annihilates `x`, and every quotient element is linear in `x`.
     This step uses no domain, UFD, divisor, or N13-specific hypothesis and
     does not assume the missing no-escape theorem
+  - formalized the algebraic finiteness endpoint in the explicit no-escape
+    route.  If an affine algebra has normal form `P(x)+Q(x)y` and an ideal
+    contains one monic relation in `x`, its quotient is finite over the
+    base ring.  The proof is a surjection from two copies of the finite
+    monic algebra `AdjoinRoot m`; it does not enumerate coefficients or
+    choose a finite spanning bound
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
