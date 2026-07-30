@@ -100,4 +100,37 @@ def overlapBaseChangeIso (i j : D.J) :
       (D.ι j)
       (pullback.fst (D.ι i ≫ p) g ≫ D.ι i)
 
+/-- The base change of the overlap inclusion into its source chart. -/
+def overlapToChartBaseChange (i j : D.J) :
+    pullback (overlapToBase D p i j) g ⟶
+      pullback (D.ι i ≫ p) g :=
+  pullback.map
+    (overlapToBase D p i j)
+    g
+    (D.ι i ≫ p)
+    g
+    (D.f i j)
+    (𝟙 _)
+    (𝟙 _)
+    (by simp [overlapToBase])
+    (by simp)
+
+@[simp, reassoc]
+theorem overlapBaseChangeIso_hom_fst (i j : D.J) :
+    (overlapBaseChangeIso D p g i j).hom ≫
+        pullback.fst
+          (pullback.fst (D.ι i ≫ p) g ≫ D.ι i)
+          (D.ι j) =
+      overlapToChartBaseChange D p g i j := by
+  apply pullback.hom_ext
+  · simp [overlapBaseChangeIso, transportOverlapBaseChange,
+      overlapToChartBaseChange, Category.assoc]
+    dsimp only [pullback.map]
+    rw [pullback.lift_fst_assoc, pullback.lift_fst]
+    simp [Category.assoc]
+  · simp [overlapBaseChangeIso, transportOverlapBaseChange,
+      overlapToChartBaseChange, Category.assoc]
+    dsimp only [pullback.map]
+    rw [pullback.lift_snd, pullback.lift_snd]
+
 end MazurProof.GlueDataClosedBaseChange

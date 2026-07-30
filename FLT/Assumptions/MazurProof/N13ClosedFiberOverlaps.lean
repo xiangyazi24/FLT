@@ -329,6 +329,22 @@ def affineOverlapClosedFiberIso :
     reduceAffineOverlap_surjective
     ker_reduceAffineOverlap
 
+@[reassoc]
+theorem affineOverlapClosedFiberIso_hom_reduceAffineOverlap :
+    affineOverlapClosedFiberIso.hom ≫
+        Spec.map
+          (CommRingCat.ofHom
+            N13OverlapReductionCompatibility.reduceAffineOverlap) =
+      pullback.fst
+        affineOverlapToBase
+        N13ClosedFiberCharts.closedBaseMap := by
+  exact
+    ClosedFiberAffineCore.specPullbackIsoOfReduction_hom_specMap
+      N13ClosedFiberCharts.verticalIdeal
+      N13OverlapReductionCompatibility.reduceAffineOverlap
+      reduceAffineOverlap_surjective
+      ker_reduceAffineOverlap
+
 /-- The special infinity overlap is the closed fibre of the ordinary
 infinity overlap. -/
 def infinityOverlapClosedFiberIso :
@@ -341,5 +357,21 @@ def infinityOverlapClosedFiberIso :
     N13OverlapReductionCompatibility.reduceInfinityOverlap
     reduceInfinityOverlap_surjective
     ker_reduceInfinityOverlap
+
+@[reassoc]
+theorem infinityOverlapClosedFiberIso_hom_reduceInfinityOverlap :
+    infinityOverlapClosedFiberIso.hom ≫
+        Spec.map
+          (CommRingCat.ofHom
+            N13OverlapReductionCompatibility.reduceInfinityOverlap) =
+      pullback.fst
+        infinityOverlapToBase
+        N13ClosedFiberCharts.closedBaseMap := by
+  exact
+    ClosedFiberAffineCore.specPullbackIsoOfReduction_hom_specMap
+      N13ClosedFiberCharts.verticalIdeal
+      N13OverlapReductionCompatibility.reduceInfinityOverlap
+      reduceInfinityOverlap_surjective
+      ker_reduceInfinityOverlap
 
 end MazurProof.N13ClosedFiberOverlaps

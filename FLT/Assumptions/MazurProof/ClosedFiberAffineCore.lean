@@ -115,4 +115,48 @@ noncomputable def specPullbackIsoOfReduction
       (tensorQuotientEquivOfReduction
         I ρ hρ hker).symm.toCommRingCatIso.op
 
+@[reassoc]
+theorem specPullbackIsoOfReduction_hom_specMap
+    {R A A₀ : Type u}
+    [CommRing R] [CommRing A] [CommRing A₀]
+    [Algebra R A]
+    (I : Ideal R)
+    (ρ : A →+* A₀)
+    (hρ : Function.Surjective ρ)
+    (hker :
+      RingHom.ker ρ =
+        I.map (algebraMap R A)) :
+    (specPullbackIsoOfReduction I ρ hρ hker).hom ≫
+        Spec.map (CommRingCat.ofHom ρ) =
+      pullback.fst
+        (Spec.map
+          (CommRingCat.ofHom
+            (algebraMap R A)))
+        (Spec.map
+          (CommRingCat.ofHom
+            (algebraMap R (R ⧸ I)))) := by
+  rw [specPullbackIsoOfReduction, Iso.trans_hom, Category.assoc,
+    ← pullbackSpecIso_hom_fst R A (R ⧸ I)]
+  congr 1
+  change
+    Spec.map
+          (CommRingCat.ofHom
+            (tensorQuotientEquivOfReduction
+              I ρ hρ hker).symm.toRingHom) ≫
+        Spec.map (CommRingCat.ofHom ρ) =
+      Spec.map
+        (CommRingCat.ofHom
+          (algebraMap A (A ⊗[R] (R ⧸ I))))
+  rw [← Spec.map_comp]
+  congr 1
+  ext a
+  change
+    (tensorQuotientEquivOfReduction I ρ hρ hker).symm
+        (ρ a) =
+      a ⊗ₜ[R] (1 : R ⧸ I)
+  apply
+    (tensorQuotientEquivOfReduction I ρ hρ hker).injective
+  rw [RingEquiv.apply_symm_apply,
+    tensorQuotientEquivOfReduction_tmul_one]
+
 end MazurProof.ClosedFiberAffineCore

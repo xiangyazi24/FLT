@@ -98,6 +98,22 @@ def reduceAffineOverlap :
       N13OrdinaryCurveOverlap.xClass
       affine_x_mapsToUnit z
 
+/-- Restriction to the affine principal open commutes with reduction. -/
+theorem reduceAffineOverlap_comp_algebraMap :
+    reduceAffineOverlap.comp
+        (algebraMap OrdinaryAffine OrdinaryAffineOverlap) =
+      (algebraMap SpecialAffine SpecialAffineOverlap).comp
+        N13GeneralizedMumfordReduction.reduceCoordinate := by
+  apply RingHom.ext
+  intro z
+  change
+    reduceAffineOverlap
+        (algebraMap OrdinaryAffine OrdinaryAffineOverlap z) =
+      algebraMap SpecialAffine SpecialAffineOverlap
+        (N13GeneralizedMumfordReduction.reduceCoordinate z)
+  rw [reduceAffineOverlap_algebraMap]
+  rfl
+
 @[simp] theorem reduceAffineOverlap_x :
     reduceAffineOverlap
         N13OrdinaryCurveOverlap.xAffineOverlap =
@@ -210,6 +226,22 @@ def reduceInfinityOverlap :
     IsLocalization.Away.lift_eq
       N13IntegralInfinityChart.tClass
       infinity_t_mapsToUnit z
+
+/-- Restriction to the infinity principal open commutes with reduction. -/
+theorem reduceInfinityOverlap_comp_algebraMap :
+    reduceInfinityOverlap.comp
+        (algebraMap OrdinaryInfinity OrdinaryInfinityOverlap) =
+      (algebraMap SpecialInfinity SpecialInfinityOverlap).comp
+        N13IntegralInfinityReduction.reduceCoordinate := by
+  apply RingHom.ext
+  intro z
+  change
+    reduceInfinityOverlap
+        (algebraMap OrdinaryInfinity OrdinaryInfinityOverlap z) =
+      algebraMap SpecialInfinity SpecialInfinityOverlap
+        (N13IntegralInfinityReduction.reduceCoordinate z)
+  rw [reduceInfinityOverlap_algebraMap]
+  rfl
 
 @[simp] theorem reduceInfinityOverlap_t :
     reduceInfinityOverlap

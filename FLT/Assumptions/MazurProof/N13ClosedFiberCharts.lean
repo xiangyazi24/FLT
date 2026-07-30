@@ -103,6 +103,41 @@ def affineClosedFiberIso :
       N13GeneralizedMumfordReduction.reduceCoordinate_surjective
       affine_kernel_extended
 
+@[reassoc]
+theorem affineClosedFiberIso_hom_reduceCoordinate :
+    affineClosedFiberIso.hom ≫
+        Spec.map
+          (CommRingCat.ofHom
+            N13GeneralizedMumfordReduction.reduceCoordinate) =
+      pullback.fst
+        (N13IntegralCurveScheme.chartToBase false)
+        closedBaseMap := by
+  exact
+    ClosedFiberAffineCore.specPullbackIsoOfReduction_hom_specMap
+      verticalIdeal
+      N13GeneralizedMumfordReduction.reduceCoordinate
+      N13GeneralizedMumfordReduction.reduceCoordinate_surjective
+      affine_kernel_extended
+
+theorem comp_affineClosedFiberIso_hom_reduceCoordinate
+    {X : Scheme}
+    (f :
+      X ⟶
+        pullback
+          (N13IntegralCurveScheme.chartToBase false)
+          closedBaseMap) :
+    (f ≫ affineClosedFiberIso.hom) ≫
+        Spec.map
+          (CommRingCat.ofHom
+            N13GeneralizedMumfordReduction.reduceCoordinate) =
+      f ≫
+        pullback.fst
+          (N13IntegralCurveScheme.chartToBase false)
+          closedBaseMap := by
+  rw [Category.assoc,
+    affineClosedFiberIso_hom_reduceCoordinate]
+  rfl
+
 /-- The special infinity chart is the closed fibre of the integral
 infinity chart at `2`. -/
 def infinityClosedFiberIso :
@@ -129,5 +164,40 @@ def infinityClosedFiberIso :
       N13IntegralInfinityReduction.reduceCoordinate
       N13IntegralInfinityReduction.reduceCoordinate_surjective
       infinity_kernel_extended
+
+@[reassoc]
+theorem infinityClosedFiberIso_hom_reduceCoordinate :
+    infinityClosedFiberIso.hom ≫
+        Spec.map
+          (CommRingCat.ofHom
+            N13IntegralInfinityReduction.reduceCoordinate) =
+      pullback.fst
+        (N13IntegralCurveScheme.chartToBase true)
+        closedBaseMap := by
+  exact
+    ClosedFiberAffineCore.specPullbackIsoOfReduction_hom_specMap
+      verticalIdeal
+      N13IntegralInfinityReduction.reduceCoordinate
+      N13IntegralInfinityReduction.reduceCoordinate_surjective
+      infinity_kernel_extended
+
+theorem comp_infinityClosedFiberIso_hom_reduceCoordinate
+    {X : Scheme}
+    (f :
+      X ⟶
+        pullback
+          (N13IntegralCurveScheme.chartToBase true)
+          closedBaseMap) :
+    (f ≫ infinityClosedFiberIso.hom) ≫
+        Spec.map
+          (CommRingCat.ofHom
+            N13IntegralInfinityReduction.reduceCoordinate) =
+      f ≫
+        pullback.fst
+          (N13IntegralCurveScheme.chartToBase true)
+          closedBaseMap := by
+  rw [Category.assoc,
+    infinityClosedFiberIso_hom_reduceCoordinate]
+  rfl
 
 end MazurProof.N13ClosedFiberCharts
