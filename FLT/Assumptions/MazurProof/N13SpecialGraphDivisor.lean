@@ -161,6 +161,40 @@ noncomputable def graphDivisor
   Sym2.pmap (rootPoint D hdeg) (rootPair D hdeg)
     (fun _ ha => ha)
 
+/-- Abel equality with the selected nonspecial divisor already forces
+literal equality of effective divisors.  The only other degree-two Abel
+fibre is the canonical pencil, and the selected base divisor is not in it. -/
+theorem graphDivisor_eq_special_of_abel_eq
+    {J : Type*}
+    (G : N13AbelFiberTwoModel.GeometricAbelCriterion J)
+    (D : SemiMumford) (hdeg : D.u.natDegree = 2)
+    (habel :
+      G.abel (graphDivisor D hdeg) =
+        G.abel N13AbelChartBase.specialBaseDivisor) :
+    graphDivisor D hdeg =
+      N13AbelChartBase.specialBaseDivisor := by
+  rcases
+      (G.eq_iff
+        (graphDivisor D hdeg)
+        N13AbelChartBase.specialBaseDivisor).mp habel with
+    h | ⟨_, hbase⟩
+  · exact h
+  · exact
+      (N13AbelChartBase.specialBaseDivisor_not_canonical hbase).elim
+
+/-- The same rigidity statement in the canonical nineteen-element
+set-valued Abel quotient. -/
+theorem graphDivisor_eq_special_of_setAbel_eq
+    (D : SemiMumford) (hdeg : D.u.natDegree = 2)
+    (habel :
+      N13AbelFiberTwoModel.abel (graphDivisor D hdeg) =
+        N13AbelFiberTwoModel.abel
+          N13AbelChartBase.specialBaseDivisor) :
+    graphDivisor D hdeg =
+      N13AbelChartBase.specialBaseDivisor :=
+  graphDivisor_eq_special_of_abel_eq
+    N13AbelFiberTwoModel.picTwoSetModelCriterion D hdeg habel
+
 theorem zero_one_roots_and_values_of_graphDivisor_eq
     (D : SemiMumford) (hdeg : D.u.natDegree = 2)
     (hgraph :
@@ -324,6 +358,33 @@ theorem mumfordIdeal_eq_special_of_graphDivisor_eq
       simp [N13SpecialQuotientBasis.specialIdeal,
         N13SpecialQuotientBasis.specialData_u,
         N13SpecialQuotientBasis.specialData_v, hu]
+
+/-- The complete special-fibre bridge: an Abel-compatible quadratic
+Mumford graph has the fixed literal graph ideal. -/
+theorem mumfordIdeal_eq_special_of_abel_eq
+    {J : Type*}
+    (G : N13AbelFiberTwoModel.GeometricAbelCriterion J)
+    (D : SemiMumford) (hdeg : D.u.natDegree = 2)
+    (habel :
+      G.abel (graphDivisor D hdeg) =
+        G.abel N13AbelChartBase.specialBaseDivisor) :
+    mumfordIdeal D.u D.v =
+      N13SpecialQuotientBasis.specialIdeal :=
+  mumfordIdeal_eq_special_of_graphDivisor_eq D hdeg
+    (graphDivisor_eq_special_of_abel_eq G D hdeg habel)
+
+/-- Set-valued Abel compatibility is already enough to identify the fixed
+special graph ideal. -/
+theorem mumfordIdeal_eq_special_of_setAbel_eq
+    (D : SemiMumford) (hdeg : D.u.natDegree = 2)
+    (habel :
+      N13AbelFiberTwoModel.abel (graphDivisor D hdeg) =
+        N13AbelFiberTwoModel.abel
+          N13AbelChartBase.specialBaseDivisor) :
+    mumfordIdeal D.u D.v =
+      N13SpecialQuotientBasis.specialIdeal :=
+  mumfordIdeal_eq_special_of_abel_eq
+    N13AbelFiberTwoModel.picTwoSetModelCriterion D hdeg habel
 
 end
 

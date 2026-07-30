@@ -197,6 +197,25 @@ structure GeometricAbelCriterion (J : Type*) where
     ∀ D E : EffectiveDivisorTwo,
       abel D = abel E ↔ AbelRel D E
 
+/-- The intrinsic nineteen-element quotient itself satisfies the geometric
+Abel-fibre interface.  This lets later arguments use Abel rigidity without
+postulating a separate special Picard-group implementation. -/
+def picTwoSetModelCriterion :
+    GeometricAbelCriterion PicTwoSetModel where
+  abel := abel
+  canonicalClass := canonicalClass
+  canonical_eq := by
+    intro b
+    change
+      abel (canonicalDivisor b) =
+        abel (canonicalDivisor baseAtInfinity)
+    rw [abel_eq_iff]
+    exact Or.inr
+      ⟨canonicalDivisor_isCanonical b,
+        canonicalDivisor_isCanonical baseAtInfinity⟩
+  surjective := Quotient.mk_surjective
+  eq_iff := abel_eq_iff
+
 namespace GeometricAbelCriterion
 
 variable {J : Type*} (G : GeometricAbelCriterion J)
