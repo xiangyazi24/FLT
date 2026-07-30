@@ -1,0 +1,97 @@
+import FLT.Assumptions.MazurProof.N13IntegralModelContraction
+import Mathlib.RingTheory.Flat.TorsionFree
+import Mathlib.RingTheory.Ideal.Quotient.Operations
+
+/-!
+# Vertical saturation gives flat N13 quotients
+
+The canonical contraction of a generic ideal is saturated with respect to
+every nonzero two-adic scalar.  Consequently its affine quotient has no
+two-adic torsion.  Since the two-adic integers form a Dedekind domain, the
+quotient is flat even before finiteness has been established.
+
+This separates the easy vertical part of the two-fibre argument from the
+genuine no-escape/finiteness step.
+-/
+
+namespace MazurProof.N13QuotientVerticalFlatness
+
+noncomputable section
+
+universe uR uA
+
+variable {R : Type uR} {A : Type uA}
+variable [CommRing R] [IsDomain R]
+variable [CommRing A] [Algebra R A]
+
+/--
+An ideal saturated with respect to every nonzero base scalar has a
+torsion-free quotient over the base.
+-/
+theorem quotient_isTorsionFree_of_scalar_saturated
+    (I : Ideal A)
+    (hsaturated :
+      ∀ (r : R), r ≠ 0 →
+        ∀ a : A, algebraMap R A r * a ∈ I → a ∈ I) :
+    Module.IsTorsionFree R (A ⧸ I) := by
+  apply Module.IsTorsionFree.of_smul_eq_zero
+  intro r z hrz
+  by_cases hr : r = 0
+  · exact Or.inl hr
+  · right
+    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective z
+    apply Ideal.Quotient.eq_zero_iff_mem.mpr
+    apply hsaturated r hr a
+    apply Ideal.Quotient.eq_zero_iff_mem.mp
+    rw [map_mul]
+    change
+      algebraMap R (A ⧸ I) r *
+          Ideal.Quotient.mk I a = 0
+    simpa only [Algebra.smul_def] using hrz
+
+local instance : Fact (Nat.Prime 2) :=
+  ⟨Nat.prime_two⟩
+
+abbrev R₂ : Type :=
+  N13IntegralModelContraction.R₂
+
+abbrev IntegralRing : Type :=
+  N13IntegralModelContraction.IntegralRing
+
+abbrev RationalRing : Type :=
+  N13IntegralModelContraction.RationalRing
+
+local instance integralRationalAlgebra :
+    Algebra IntegralRing RationalRing :=
+  N13TwoAdicCoordinateBaseChange.integralToSextic.toAlgebra
+
+/-- The quotient by a canonical vertical contraction is two-adically
+torsion-free. -/
+theorem contractQuotient_isTorsionFree
+    (J : Ideal RationalRing) :
+    Module.IsTorsionFree R₂
+      (IntegralRing ⧸
+        N13IntegralModelContraction.contractIdeal J) := by
+  apply quotient_isTorsionFree_of_scalar_saturated
+  intro r hr a ha
+  exact
+    N13IntegralModelContraction.contractIdeal_vertical_saturated
+      J r hr ha
+
+/-- Over the two-adic DVR the same quotient is flat, with no finiteness
+assumption. -/
+theorem contractQuotient_flat
+    (J : Ideal RationalRing) :
+    Module.Flat R₂
+      (IntegralRing ⧸
+        N13IntegralModelContraction.contractIdeal J) := by
+  letI :
+      Module.IsTorsionFree R₂
+        (IntegralRing ⧸
+          N13IntegralModelContraction.contractIdeal J) :=
+    contractQuotient_isTorsionFree J
+  infer_instance
+
+end
+
+end MazurProof.N13QuotientVerticalFlatness
