@@ -47,16 +47,12 @@ def constructedHalfData (P : G) :
   let hq := Classical.choose_spec hcoordinates
   let q := Classical.choose hq
   have hcoordinates_spec := Classical.choose_spec hq
-  let hfinite :=
-    N13MumfordFullKummerIdentityFiber.exists_finiteIdealSquareRoot_of_full_gauge
+  let root :=
+    N13MumfordFullKummerIdentityFiber.finiteIdealGraphRootData_of_full_gauge
       D β q hcoordinates_spec.1 hcoordinates_spec.2
-  let I := Classical.choose hfinite
-  let hα := Classical.choose_spec hfinite
-  let α := Classical.choose hα
-  have hIdeal := Classical.choose_spec hα
   let finite :=
     N13MumfordFullKummerIdentityFiber.finiteIdealHalfData
-      D I α hIdeal
+      D root
   refine
     { representative := D
       representative_spec :=

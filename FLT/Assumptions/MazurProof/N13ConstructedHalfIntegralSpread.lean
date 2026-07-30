@@ -21,6 +21,7 @@ open scoped nonZeroDivisors
 namespace MazurProof.N13ConstructedHalfIntegralSpread
 
 noncomputable section
+open Polynomial
 open SexticMumford
 
 local instance : Fact (Nat.Prime 2) :=
@@ -65,6 +66,35 @@ def twoAdicIdealRoot (P : G) :
     (N13MumfordFullKummerTwoSurjective.constructedHalfData
       P).finite.idealRoot
 
+/-- The literal polynomial generator retained by the selected Padé
+branch. -/
+def graphU (P : G) : ℚ[X] :=
+  (N13MumfordFullKummerTwoSurjective.constructedHalfData
+    P).finite.graphU
+
+/-- The literal graph polynomial retained by the selected Padé branch. -/
+def graphV (P : G) : ℚ[X] :=
+  (N13MumfordFullKummerTwoSurjective.constructedHalfData
+    P).finite.graphV
+
+theorem graphU_ne_zero (P : G) :
+    graphU P ≠ 0 :=
+  (N13MumfordFullKummerTwoSurjective.constructedHalfData
+    P).finite.graphU_ne_zero
+
+/-- Whether the selected fractional root or its inverse is the retained
+graph ideal. -/
+def inverseOrientation (P : G) : Bool :=
+  (N13MumfordFullKummerTwoSurjective.constructedHalfData
+    P).finite.inverseOrientation
+
+/-- The coefficient-extended literal graph ideal selected by the Padé
+construction. -/
+def twoAdicGraphIdeal (P : G) : Ideal RationalRing :=
+  SexticMumford.mumfordIdeal M₂
+    ((graphU P).map N13InfinityBaseChange.ratToQ₂)
+    ((graphV P).map N13InfinityBaseChange.ratToQ₂)
+
 /-- The selected root still satisfies its exact square identity after
 two-adic coefficient extension. -/
 theorem twoAdicIdealRoot_square (P : G) :
@@ -81,6 +111,48 @@ theorem twoAdicIdealRoot_square (P : G) :
   rw [(N13MumfordFullKummerTwoSurjective.constructedHalfData
     P).finite.square_eq, map_pow]
   rfl
+
+/-- Base change preserves the exact graph presentation: according to the
+retained orientation bit, the selected two-adic root itself or its inverse
+is literally the coefficient-extended Padé graph ideal. -/
+theorem twoAdicIdealRoot_graph_eq (P : G) :
+    (((if inverseOrientation P
+        then (twoAdicIdealRoot P)⁻¹
+        else twoAdicIdealRoot P) :
+      SexticMumford.InvFrac M₂) :
+        RationalFractionalIdeal) =
+      (twoAdicGraphIdeal P : RationalFractionalIdeal) := by
+  have h :=
+    congrArg
+      (SexticMumford.OrientedBaseChange.fractionalMap
+        (M := Mℚ) (M' := M₂)
+        N13InfinityBaseChange.ratToQ₂
+        N13InfinityBaseChange.ratToQ₂_injective
+        (N13InfinityBaseChange.map_n13_f
+          N13InfinityBaseChange.ratToQ₂))
+      (N13MumfordFullKummerTwoSurjective.constructedHalfData
+        P).finite.graph_eq
+  by_cases hOrientation :
+      (N13MumfordFullKummerTwoSurjective.constructedHalfData
+        P).finite.inverseOrientation = true
+  · simp only [inverseOrientation, hOrientation, if_pos] at h ⊢
+    rw [twoAdicIdealRoot, ← map_inv, invFracBaseChange,
+      SexticMumford.OrientedBaseChange.coe_invFracMap]
+    simpa only [graphU, graphV, twoAdicGraphIdeal,
+      SexticMumford.OrientedBaseChange.fractionalMap_coe_mumfordIdeal]
+      using h
+  · have hFalse :
+        (N13MumfordFullKummerTwoSurjective.constructedHalfData
+          P).finite.inverseOrientation = false :=
+      Bool.eq_false_of_not_eq_true hOrientation
+    simp only [inverseOrientation, hFalse, Bool.false_eq_true,
+      if_false] at h ⊢
+    simpa only [twoAdicIdealRoot, invFracBaseChange,
+      graphU, graphV, twoAdicGraphIdeal,
+      Units.coe_map,
+      SexticMumford.OrientedBaseChange.coe_invFracMap,
+      SexticMumford.OrientedBaseChange.fractionalMap_coe_mumfordIdeal]
+      using h
 
 /-- The underlying two-adic generic fractional ideal. -/
 def rootFractional (P : G) :

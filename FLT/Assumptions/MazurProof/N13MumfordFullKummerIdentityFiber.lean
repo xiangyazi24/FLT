@@ -1705,11 +1705,36 @@ theorem mumfordIdeal_pade_half
         (a ^ 2) (Polynomial.C (κ : K) * u₀) L₀
         hcurve hbezoutCantor
 
+/-- The exact graph geometry retained by the Padé square root.  The inverse
+of `root` is literally the auxiliary graph ideal `(a,Y-L₀)`, while
+`square_eq` is the finite ideal identity used by the quotient proof. -/
+structure PadeIdealRootData
+    (C : SexticMumford.Model K)
+    (D : SexticMumford.SemiMumford C)
+    (a L₀ : K[X]) where
+  root : SexticMumford.InvFrac C
+  inverseRoot_coe :
+    ((root⁻¹ : SexticMumford.InvFrac C) :
+        FractionalIdeal
+          (SexticMumford.CoordinateRing C)⁰
+          (SexticMumford.FunctionField C)) =
+      (mumfordIdeal C a L₀ :
+        FractionalIdeal
+          (SexticMumford.CoordinateRing C)⁰
+          (SexticMumford.FunctionField C))
+  square_eq :
+    mumfordIdealUnit C D *
+        toPrincipalIdeal
+          (SexticMumford.CoordinateRing C)
+          (SexticMumford.FunctionField C)
+          (ySubFunctionUnit C L₀)⁻¹ =
+      root ^ 2
+
 /-- The integral Padé identity already makes the auxiliary graph ideal
 invertible: an explicit inverse is `J · I_D · (Y-L)⁻¹`.  Hence the target
 Mumford fractional ideal is the square of `J⁻¹` after multiplying by the
-inverse graph function. -/
-theorem exists_invFrac_square_of_pade_identity
+inverse graph function.  This version retains the literal graph ideal. -/
+def padeIdealRootData
     (C : SexticMumford.Model K)
     (D : SexticMumford.SemiMumford C)
     (a L₀ : K[X])
@@ -1719,13 +1744,7 @@ theorem exists_invFrac_square_of_pade_identity
         Ideal.span
           ({ySubClass C L₀} :
             Set (SexticMumford.CoordinateRing C))) :
-    ∃ R : SexticMumford.InvFrac C,
-      mumfordIdealUnit C D *
-          toPrincipalIdeal
-            (SexticMumford.CoordinateRing C)
-            (SexticMumford.FunctionField C)
-            (ySubFunctionUnit C L₀)⁻¹ =
-        R ^ 2 := by
+    PadeIdealRootData C D a L₀ := by
   let J₀ :
       FractionalIdeal
         (SexticMumford.CoordinateRing C)⁰
@@ -1831,14 +1850,151 @@ theorem exists_invFrac_square_of_pade_identity
             (SexticMumford.CoordinateRing C)⁰
             (SexticMumford.FunctionField C))
     simpa only [pow_two] using hfrac
-  refine ⟨Jᵤ⁻¹, ?_⟩
-  rw [map_inv]
-  change Dᵤ * Pᵤ⁻¹ = Jᵤ⁻¹ ^ 2
-  rw [← hunit]
-  simp only [mul_inv_rev, pow_two]
-  rw [← mul_assoc, mul_inv_cancel, one_mul]
+  refine
+    { root := Jᵤ⁻¹
+      inverseRoot_coe := ?_
+      square_eq := ?_ }
+  · change
+      (((Jᵤ⁻¹)⁻¹ : SexticMumford.InvFrac C) :
+          FractionalIdeal
+            (SexticMumford.CoordinateRing C)⁰
+            (SexticMumford.FunctionField C)) =
+        J₀
+    rw [inv_inv]
+    rfl
+  · rw [map_inv]
+    change Dᵤ * Pᵤ⁻¹ = Jᵤ⁻¹ ^ 2
+    rw [← hunit]
+    simp only [mul_inv_rev, pow_two]
+    rw [← mul_assoc, mul_inv_cancel, one_mul]
+
+/-- Existential compatibility wrapper for the original finite-square
+interface. -/
+theorem exists_invFrac_square_of_pade_identity
+    (C : SexticMumford.Model K)
+    (D : SexticMumford.SemiMumford C)
+    (a L₀ : K[X])
+    (hideal :
+      mumfordIdeal C a L₀ ^ 2 *
+          mumfordIdeal C D.u D.v =
+        Ideal.span
+          ({ySubClass C L₀} :
+            Set (SexticMumford.CoordinateRing C))) :
+    ∃ R : SexticMumford.InvFrac C,
+      mumfordIdealUnit C D *
+          toPrincipalIdeal
+            (SexticMumford.CoordinateRing C)
+            (SexticMumford.FunctionField C)
+            (ySubFunctionUnit C L₀)⁻¹ =
+        R ^ 2 :=
+  let R := padeIdealRootData C D a L₀ hideal
+  ⟨R.root, R.square_eq⟩
 
 /-! ## Closing the finite ideal square -/
+
+/-- The full nondegenerate Padé graph retained before passage to the
+fractional-ideal quotient.  Besides the exact square root, this records the
+scaled graph polynomial and its literal compatibility with the original
+Mumford representative. -/
+structure FinitePadeGraphRootData
+    (D : LowRep) (a : ℚ[X]) where
+  L₀ : ℚ[X]
+  κ : ℚˣ
+  curve_eq :
+    N13Mumford.f ℚ - L₀ ^ 2 =
+      a ^ 2 * (Polynomial.C (κ : ℚ) * D.toSemi.u)
+  graph_eq :
+    D.toSemi.u ∣ L₀ - D.toSemi.v
+  rootData :
+    PadeIdealRootData M D.toSemi a L₀
+
+/-- A uniform finite square root together with a literal graph-ideal
+presentation.  `inverseOrientation = false` means that `idealRoot` itself is
+the graph ideal; `true` means that its inverse is the graph ideal. -/
+structure FiniteIdealGraphRootData (D : LowRep) where
+  idealRoot : InvFrac M
+  principalCorrection : (FunctionField M)ˣ
+  square_eq :
+    mumfordIdealUnit M D.toSemi *
+        toPrincipalIdeal
+          (CoordinateRing M) (FunctionField M)
+          principalCorrection =
+      idealRoot ^ 2
+  graphU : ℚ[X]
+  graphV : ℚ[X]
+  graphU_ne_zero : graphU ≠ 0
+  inverseOrientation : Bool
+  graph_eq :
+    (((if inverseOrientation then idealRoot⁻¹ else idealRoot) :
+        InvFrac M) :
+      FractionalIdeal (CoordinateRing M)⁰ (FunctionField M)) =
+        (mumfordIdeal M graphU graphV :
+          FractionalIdeal (CoordinateRing M)⁰ (FunctionField M))
+
+namespace FinitePadeGraphRootData
+
+/-- Forget the extra Padé equations while retaining the exact graph ideal
+which presents the chosen root. -/
+def toFiniteIdealGraphRootData
+    {D : LowRep} {a : ℚ[X]}
+    (R : FinitePadeGraphRootData D a)
+    (ha : a ≠ 0) :
+    FiniteIdealGraphRootData D where
+  idealRoot := R.rootData.root
+  principalCorrection :=
+    (ySubFunctionUnit M R.L₀)⁻¹
+  square_eq := R.rootData.square_eq
+  graphU := a
+  graphV := R.L₀
+  graphU_ne_zero := ha
+  inverseOrientation := true
+  graph_eq := by
+    simpa using R.rootData.inverseRoot_coe
+
+end FinitePadeGraphRootData
+
+/-- Construct the exact nondegenerate Padé graph together with the
+fractional-ideal root whose inverse is that graph ideal. -/
+def finitePadeGraphRootData
+    (D : LowRep) (q : ℚˣ) (a l : ℚ[X])
+    (c b : ℚ)
+    (hrelation :
+      Polynomial.C (q : ℚ) * l ^ 2 -
+          a ^ 2 * D.toSemi.u =
+        Polynomial.C c * N13Mumford.f ℚ)
+    (hb : b ≠ 0)
+    (hbSq : b ^ 2 = c / (q : ℚ))
+    (hgraph :
+      D.toSemi.u ∣
+        l - Polynomial.C b * D.toSemi.v)
+    (hc : c ≠ 0)
+    (ha : a ≠ 0) :
+    FinitePadeGraphRootData D a := by
+  let hscaled :=
+    exists_scaled_pade_graph
+      D q a l c b hrelation hb hbSq hgraph hc
+  let L₀ := Classical.choose hscaled
+  let hκ := Classical.choose_spec hscaled
+  let κ := Classical.choose hκ
+  have hscaled_spec := Classical.choose_spec hκ
+  have hcurve := hscaled_spec.1
+  have hgraphScaled := hscaled_spec.2
+  have hideal :
+      mumfordIdeal M a L₀ ^ 2 *
+          mumfordIdeal M D.toSemi.u D.toSemi.v =
+        Ideal.span
+          ({ySubClass M L₀} :
+            Set (CoordinateRing M)) :=
+    mumfordIdeal_pade_half
+      M a D.toSemi.u D.toSemi.v L₀ κ
+        hcurve hgraphScaled ha
+  exact
+    { L₀ := L₀
+      κ := κ
+      curve_eq := hcurve
+      graph_eq := hgraphScaled
+      rootData :=
+        padeIdealRootData M D.toSemi a L₀ hideal }
 
 /-- Once the quotient argument supplies a rational graph scalar, the
 uniform scaling lemma and Cantor identity produce the required finite
@@ -1862,38 +2018,26 @@ theorem exists_finiteIdealSquareRoot_of_pade_graph
         mumfordIdealUnit M D.toSemi *
             toPrincipalIdeal
               (CoordinateRing M) (FunctionField M) α =
-          I ^ 2 := by
-  obtain ⟨L₀, κ, hcurve, hgraphScaled⟩ :=
-    exists_scaled_pade_graph
-      D q a l c b hrelation hb hbSq hgraph hc
-  have hideal :
-      mumfordIdeal M a L₀ ^ 2 *
-          mumfordIdeal M D.toSemi.u D.toSemi.v =
-        Ideal.span
-          ({ySubClass M L₀} :
-            Set (CoordinateRing M)) :=
-    mumfordIdeal_pade_half
-      M a D.toSemi.u D.toSemi.v L₀ κ
-        hcurve hgraphScaled ha
-  obtain ⟨R, hR⟩ :=
-    exists_invFrac_square_of_pade_identity
-      M D.toSemi a L₀ hideal
-  exact
-    ⟨R, (ySubFunctionUnit M L₀)⁻¹, hR⟩
+          I ^ 2 :=
+  let R :=
+    finitePadeGraphRootData
+      D q a l c b hrelation hb hbSq hgraph hc ha
+  ⟨R.rootData.root,
+    (ySubFunctionUnit M R.L₀)⁻¹,
+    R.rootData.square_eq⟩
 
 /-! The branch `c = 0` is not a degenerate coefficient search.  The UFD
 identity `q l² = a²u` says directly that the monic polynomial `u` is a
 square; the corresponding repeated graph ideal is then the finite square
 root. -/
-theorem exists_finiteIdealSquareRoot_of_zero_pade_scalar
+def finiteIdealGraphRootData_of_zero_pade_scalar
     (D : LowRep) (q : ℚˣ)
     (a l : ℚ[X])
     (ha : a ≠ 0)
     (hrelation :
       Polynomial.C (q : ℚ) * l ^ 2 =
         a ^ 2 * D.toSemi.u) :
-    ∃ I : InvFrac M,
-      mumfordIdealUnit M D.toSemi = I ^ 2 := by
+    FiniteIdealGraphRootData D := by
   have hl : l ≠ 0 := by
     intro hl
     have hzero :
@@ -1907,10 +2051,16 @@ theorem exists_finiteIdealSquareRoot_of_zero_pade_scalar
       IsUnit (Polynomial.C (q : ℚ)) :=
     Polynomial.isUnit_C.mpr
       (isUnit_iff_ne_zero.mpr (Units.ne_zero q))
-  obtain ⟨b, hbMonic, _, hub⟩ :=
+  let hbExists :=
     PadeZeroConstantSquare.exists_monic_square_root_of_relation
       hq hl D.toSemi.u_monic D.degree_le_two hrelation
-  obtain ⟨w, hw⟩ := D.toSemi.curve_dvd
+  let b := Classical.choose hbExists
+  have hbSpec := Classical.choose_spec hbExists
+  have hbMonic := hbSpec.1
+  have hub := hbSpec.2.2
+  let hwExists := D.toSemi.curve_dvd
+  let w := Classical.choose hwExists
+  have hw := Classical.choose_spec hwExists
   have hcurve :
       M.f - D.toSemi.v ^ 2 =
         b * (b * w) := by
@@ -1953,22 +2103,55 @@ theorem exists_finiteIdealSquareRoot_of_zero_pade_scalar
     simp only [coe_mumfordIdealUnit]
     rw [pow_two, ← FractionalIdeal.coeIdeal_mul,
       ← pow_two, hideal]
-  obtain ⟨J, hJ⟩ :=
-    SquareRootUnitLift.exists_unit_sq_eq
+  let hroot :=
+    SquareRootUnitLift.exists_unit_val_eq_and_sq_eq
       J₀ (mumfordIdealUnit M D.toSemi) hfrac
-  exact ⟨J, hJ.symm⟩
+  let J := Classical.choose hroot
+  have hJ := Classical.choose_spec hroot
+  exact
+    { idealRoot := J
+      principalCorrection := 1
+      square_eq := by
+        simpa only [map_one, mul_one] using hJ.2.symm
+      graphU := b
+      graphV := D.toSemi.v
+      graphU_ne_zero := hbMonic.ne_zero
+      inverseOrientation := false
+      graph_eq := by
+        change
+          (J :
+            FractionalIdeal
+              (CoordinateRing M)⁰ (FunctionField M)) =
+            J₀
+        exact hJ.1 }
+
+/-- Compatibility wrapper which forgets the retained direct graph
+presentation in the zero-`c` branch. -/
+theorem exists_finiteIdealSquareRoot_of_zero_pade_scalar
+    (D : LowRep) (q : ℚˣ)
+    (a l : ℚ[X])
+    (ha : a ≠ 0)
+    (hrelation :
+      Polynomial.C (q : ℚ) * l ^ 2 =
+        a ^ 2 * D.toSemi.u) :
+    ∃ I : InvFrac M,
+      mumfordIdealUnit M D.toSemi = I ^ 2 := by
+  let R :=
+    finiteIdealGraphRootData_of_zero_pade_scalar
+      D q a l ha hrelation
+  refine ⟨R.idealRoot, ?_⟩
+  have hR := R.square_eq
+  have hcorrection : R.principalCorrection = 1 := by
+    rfl
+  rw [hcorrection] at hR
+  simpa only [map_one, mul_one] using hR
 
 /-- A constant monic Mumford polynomial is `1`, so its finite ideal is
 already trivial. -/
-theorem exists_finiteIdealSquareRoot_of_natDegree_zero
+def finiteIdealGraphRootData_of_natDegree_zero
     (D : LowRep)
     (hu0 : D.toSemi.u.natDegree = 0) :
-    ∃ I : InvFrac M,
-      ∃ α : (FunctionField M)ˣ,
-        mumfordIdealUnit M D.toSemi *
-            toPrincipalIdeal
-              (CoordinateRing M) (FunctionField M) α =
-          I ^ 2 := by
+    FiniteIdealGraphRootData D := by
   have huOne : D.toSemi.u = 1 :=
     D.toSemi.u_monic.natDegree_eq_zero.mp hu0
   have hvZero : D.toSemi.v = 0 := by
@@ -1989,9 +2172,44 @@ theorem exists_finiteIdealSquareRoot_of_natDegree_zero
       show mumfordIdeal M 1 0 = ⊤ from
         zero_mumfordIdeal M]
     rfl
-  refine ⟨1, 1, ?_⟩
-  rw [hunit]
-  simp
+  exact
+    { idealRoot := 1
+      principalCorrection := 1
+      square_eq := by
+        rw [hunit]
+        simp
+      graphU := 1
+      graphV := 0
+      graphU_ne_zero := one_ne_zero
+      inverseOrientation := false
+      graph_eq := by
+        change
+          ((⊤ : Ideal (CoordinateRing M)) :
+            FractionalIdeal
+              (CoordinateRing M)⁰ (FunctionField M)) =
+            (mumfordIdeal M 1 0 :
+              FractionalIdeal
+                (CoordinateRing M)⁰ (FunctionField M))
+        exact congrArg
+          (fun I : Ideal (CoordinateRing M) ↦
+            (I :
+              FractionalIdeal
+                (CoordinateRing M)⁰ (FunctionField M)))
+          (zero_mumfordIdeal M).symm }
+
+/-- Compatibility wrapper for the trivial graph-root branch. -/
+theorem exists_finiteIdealSquareRoot_of_natDegree_zero
+    (D : LowRep)
+    (hu0 : D.toSemi.u.natDegree = 0) :
+    ∃ I : InvFrac M,
+      ∃ α : (FunctionField M)ˣ,
+        mumfordIdealUnit M D.toSemi *
+            toPrincipalIdeal
+              (CoordinateRing M) (FunctionField M) α =
+          I ^ 2 :=
+  let R :=
+    finiteIdealGraphRootData_of_natDegree_zero D hu0
+  ⟨R.idealRoot, R.principalCorrection, R.square_eq⟩
 
 /-- The zero-`c` UFD square is a finite ideal square with trivial
 principal correction. -/
@@ -2369,40 +2587,25 @@ theorem isDouble_of_finiteIdealSquareRoot
 
 /-- Constructive generic output retained from one finite fractional-ideal
 square root.  It records the exact root and principal correction together
-with the half selected by the existing quotient proof.  No two-adic
-integrality assertion is included. -/
-structure FiniteIdealHalfData (D : LowRep) where
-  idealRoot : InvFrac M
-  principalCorrection : (FunctionField M)ˣ
-  square_eq :
-    mumfordIdealUnit M D.toSemi *
-        toPrincipalIdeal
-          (CoordinateRing M) (FunctionField M)
-          principalCorrection =
-      idealRoot ^ 2
+with its literal graph presentation and the half selected by the existing
+quotient proof.  No two-adic integrality assertion is included. -/
+structure FiniteIdealHalfData (D : LowRep)
+    extends FiniteIdealGraphRootData D where
   half : G
   half_spec :
     N13LowDegreeKummerHom.lowClass D = 2 • half
 
-/-- Retain the input square root when selecting the half furnished by
+/-- Retain the graph-presented square root when selecting the half furnished by
 `isDouble_of_finiteIdealSquareRoot`. -/
 def finiteIdealHalfData
     (D : LowRep)
-    (I : InvFrac M)
-    (α : (FunctionField M)ˣ)
-    (hIdeal :
-      mumfordIdealUnit M D.toSemi *
-          toPrincipalIdeal
-            (CoordinateRing M) (FunctionField M) α =
-        I ^ 2) :
+    (R : FiniteIdealGraphRootData D) :
     FiniteIdealHalfData D := by
   let hhalf :=
     isDouble_of_finiteIdealSquareRoot D
-      ⟨I, α, hIdeal⟩
+      ⟨R.idealRoot, R.principalCorrection, R.square_eq⟩
   exact
-    { idealRoot := I
-      principalCorrection := α
-      square_eq := hIdeal
+    { toFiniteIdealGraphRootData := R
       half := Classical.choose hhalf
       half_spec := Classical.choose_spec hhalf }
 
@@ -2411,7 +2614,84 @@ def finiteIdealHalfData
 /-- A negatively normalized full-gauge witness always yields a finite
 ideal square.  The proof chooses a Padé numerator by dimension, separates
 the genuine UFD branch `c = 0`, and otherwise treats the quotient algebra
-according to its rank `0`, `1`, or `2`. -/
+according to its rank `0`, `1`, or `2`.  The chosen square root retains a
+literal graph-ideal presentation in every branch. -/
+def finiteIdealGraphRootData_of_negative_norm_gauge
+    (D : LowRep) (β : Lˣ) (q : ℚˣ)
+    (hfst :
+      N13MumfordKummerValue.uThetaUnit
+            (N13LowDegreeKummerHom.asMumford D) =
+        β ^ 2 * N13FullNormPair.scalarUnits q)
+    (hsnd :
+      (-1 : ℚˣ) *
+            N13MumfordKummerNorm.normRootUnit D =
+        N13FullNormPair.normUnits β * q ^ 3) :
+    FiniteIdealGraphRootData D := by
+  let haExists :=
+    exists_pade_numerator
+      (branchSquarePolynomial β)
+  let a := Classical.choose haExists
+  have haSpec := Classical.choose_spec haExists
+  have ha0 := haSpec.1
+  have haKer := haSpec.2
+  let hcExists :=
+    exists_pade_sextic_scalar
+      D β q hfst a ha0 haKer
+  let c := Classical.choose hcExists
+  have hrelation := Classical.choose_spec hcExists
+  let l : ℚ[X] :=
+    padeRemainderMap (branchSquarePolynomial β) a
+  have haPoly : (a : ℚ[X]) ≠ 0 := by
+    exact fun h => ha0 (Subtype.ext h)
+  by_cases hc : c = 0
+  · have hzeroRelation :
+        Polynomial.C (q : ℚ) * l ^ 2 =
+          (a : ℚ[X]) ^ 2 * D.toSemi.u := by
+      have h := hrelation
+      change Classical.choose hcExists = 0 at hc
+      rw [hc] at h
+      simp only [Polynomial.C_0, zero_mul] at h
+      exact sub_eq_zero.mp h
+    exact
+      finiteIdealGraphRootData_of_zero_pade_scalar
+        D q (a : ℚ[X]) l haPoly hzeroRelation
+  · by_cases hu0 : D.toSemi.u.natDegree = 0
+    · exact
+        finiteIdealGraphRootData_of_natDegree_zero
+          D hu0
+    · by_cases hu1 : D.toSemi.u.natDegree = 1
+      · let hbExists :=
+          exists_pade_graph_scalar_of_c_ne_zero_degree_one
+            D q (a : ℚ[X]) l c hrelation hu1 hc
+        let b := Classical.choose hbExists
+        have hbSpec := Classical.choose_spec hbExists
+        have hb := hbSpec.1
+        have hbSq := hbSpec.2.1
+        have hgraph := hbSpec.2.2
+        exact
+          (finitePadeGraphRootData
+              D q (a : ℚ[X]) l c b
+                hrelation hb hbSq hgraph hc haPoly).toFiniteIdealGraphRootData
+            haPoly
+      · have hu2 : D.toSemi.u.natDegree = 2 := by
+          have hle := D.degree_le_two
+          omega
+        let hbExists :=
+          exists_pade_graph_scalar_of_c_ne_zero
+            D β q a ha0 haKer c
+              hrelation hsnd hu2 hc
+        let b := Classical.choose hbExists
+        have hbSpec := Classical.choose_spec hbExists
+        have hb := hbSpec.1
+        have hbSq := hbSpec.2.1
+        have hgraph := hbSpec.2.2
+        exact
+          (finitePadeGraphRootData
+              D q (a : ℚ[X]) l c b
+                hrelation hb hbSq hgraph hc haPoly).toFiniteIdealGraphRootData
+            haPoly
+
+/-- Compatibility wrapper which forgets the retained graph presentation. -/
 theorem exists_finiteIdealSquareRoot_of_negative_norm_gauge
     (D : LowRep) (β : Lˣ) (q : ℚˣ)
     (hfst :
@@ -2427,54 +2707,38 @@ theorem exists_finiteIdealSquareRoot_of_negative_norm_gauge
         mumfordIdealUnit M D.toSemi *
             toPrincipalIdeal
               (CoordinateRing M) (FunctionField M) α =
-          I ^ 2 := by
-  obtain ⟨a, ha0, haKer⟩ :=
-    exists_pade_numerator
-      (branchSquarePolynomial β)
-  obtain ⟨c, hrelation⟩ :=
-    exists_pade_sextic_scalar
-      D β q hfst a ha0 haKer
-  let l : ℚ[X] :=
-    padeRemainderMap (branchSquarePolynomial β) a
-  have haPoly : (a : ℚ[X]) ≠ 0 := by
-    exact fun h => ha0 (Subtype.ext h)
-  by_cases hc : c = 0
-  · have hzeroRelation :
-        Polynomial.C (q : ℚ) * l ^ 2 =
-          (a : ℚ[X]) ^ 2 * D.toSemi.u := by
-      have h := hrelation
-      rw [hc] at h
-      simp only [Polynomial.C_0, zero_mul] at h
-      exact sub_eq_zero.mp h
-    exact
-      exists_finiteIdealSquareRoot_of_zero_pade_scalar'
-        D q (a : ℚ[X]) l haPoly hzeroRelation
-  · by_cases hu0 : D.toSemi.u.natDegree = 0
-    · exact
-        exists_finiteIdealSquareRoot_of_natDegree_zero
-          D hu0
-    · by_cases hu1 : D.toSemi.u.natDegree = 1
-      · obtain ⟨b, hb, hbSq, hgraph⟩ :=
-          exists_pade_graph_scalar_of_c_ne_zero_degree_one
-            D q (a : ℚ[X]) l c hrelation hu1 hc
-        exact
-          exists_finiteIdealSquareRoot_of_pade_graph
-            D q (a : ℚ[X]) l c b
-              hrelation hb hbSq hgraph hc haPoly
-      · have hu2 : D.toSemi.u.natDegree = 2 := by
-          have hle := D.degree_le_two
-          omega
-        obtain ⟨b, hb, hbSq, hgraph⟩ :=
-          exists_pade_graph_scalar_of_c_ne_zero
-            D β q a ha0 haKer c
-              hrelation hsnd hu2 hc
-        exact
-          exists_finiteIdealSquareRoot_of_pade_graph
-            D q (a : ℚ[X]) l c b
-              hrelation hb hbSq hgraph hc haPoly
+          I ^ 2 :=
+  let R :=
+    finiteIdealGraphRootData_of_negative_norm_gauge
+      D β q hfst hsnd
+  ⟨R.idealRoot, R.principalCorrection, R.square_eq⟩
 
 /-- The original orientation sign can first be normalized by the Gaussian
 unit `i`; the preceding theorem then supplies the finite ideal square. -/
+def finiteIdealGraphRootData_of_full_gauge
+    (D : LowRep) (β : Lˣ) (q : ℚˣ)
+    (hfst :
+      N13MumfordKummerValue.uThetaUnit
+            (N13LowDegreeKummerHom.asMumford D) =
+        β ^ 2 * N13FullNormPair.scalarUnits q)
+    (hsnd :
+      N13MumfordOrientedFullKummer.orientationSignUnit D *
+            N13MumfordKummerNorm.normRootUnit D =
+        N13FullNormPair.normUnits β * q ^ 3) :
+    FiniteIdealGraphRootData D := by
+  let hcoordinates :=
+    exists_negative_norm_gauge_coordinates
+      D β q hfst hsnd
+  let β' := Classical.choose hcoordinates
+  let hq := Classical.choose_spec hcoordinates
+  let q' := Classical.choose hq
+  have hcoordinates_spec := Classical.choose_spec hq
+  exact
+    finiteIdealGraphRootData_of_negative_norm_gauge
+      D β' q' hcoordinates_spec.1 hcoordinates_spec.2
+
+/-- Compatibility wrapper which forgets the graph presentation after
+normalizing the orientation sign. -/
 theorem exists_finiteIdealSquareRoot_of_full_gauge
     (D : LowRep) (β : Lˣ) (q : ℚˣ)
     (hfst :
@@ -2490,13 +2754,11 @@ theorem exists_finiteIdealSquareRoot_of_full_gauge
         mumfordIdealUnit M D.toSemi *
             toPrincipalIdeal
               (CoordinateRing M) (FunctionField M) α =
-          I ^ 2 := by
-  obtain ⟨β', q', hfst', hsnd'⟩ :=
-    exists_negative_norm_gauge_coordinates
+          I ^ 2 :=
+  let R :=
+    finiteIdealGraphRootData_of_full_gauge
       D β q hfst hsnd
-  exact
-    exists_finiteIdealSquareRoot_of_negative_norm_gauge
-      D β' q' hfst' hsnd'
+  ⟨R.idealRoot, R.principalCorrection, R.square_eq⟩
 
 /-- The full-gauge coordinate equations therefore imply divisibility by
 two in the concrete oriented Picard group. -/

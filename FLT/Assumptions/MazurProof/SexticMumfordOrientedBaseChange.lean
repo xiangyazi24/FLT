@@ -167,6 +167,19 @@ def invFracMap
     InvFrac M →* InvFrac M' :=
   Units.map (fractionalMap ι hι hM).toMonoidHom
 
+@[simp] theorem coe_invFracMap
+    (ι : K →+* K') (hι : Function.Injective ι)
+    (hM : M.f.map ι = M'.f)
+    (I : InvFrac M) :
+    ((invFracMap ι hι hM I : InvFrac M') :
+        FractionalIdeal
+          (CoordinateRing M')⁰ (FunctionField M')) =
+      fractionalMap ι hι hM
+        (I :
+          FractionalIdeal
+            (CoordinateRing M)⁰ (FunctionField M)) :=
+  rfl
+
 /-- Extension of nonzero rational functions. -/
 def functionUnitMap
     (ι : K →+* K') (hι : Function.Injective ι)
@@ -276,6 +289,33 @@ theorem map_mumfordIdeal
       mumfordIdeal M' (u.map ι) (v.map ι) := by
   rw [mumfordIdeal, mumfordIdeal, Ideal.map_span, Set.image_pair,
     coordinateMap_xClass, coordinateMap_ySubClass]
+
+/-- Fractional-ideal extension carries a literal Mumford graph ideal to
+the coefficient-extended graph ideal. -/
+theorem fractionalMap_coe_mumfordIdeal
+    (ι : K →+* K') (hι : Function.Injective ι)
+    (hM : M.f.map ι = M'.f)
+    (u v : K[X]) :
+    fractionalMap ι hι hM
+        (mumfordIdeal M u v :
+          FractionalIdeal (CoordinateRing M)⁰ (FunctionField M)) =
+      (mumfordIdeal M' (u.map ι) (v.map ι) :
+        FractionalIdeal
+          (CoordinateRing M')⁰ (FunctionField M')) := by
+  calc
+    fractionalMap ι hι hM
+          (mumfordIdeal M u v :
+            FractionalIdeal
+              (CoordinateRing M)⁰ (FunctionField M)) =
+        (Ideal.map (coordinateMap ι hM)
+            (mumfordIdeal M u v) :
+          FractionalIdeal
+            (CoordinateRing M')⁰ (FunctionField M')) :=
+      FractionalIdeal.extended_coeIdeal_eq_map
+        (FunctionField M')
+        (nonZeroDivisors_le_comap ι hι hM)
+        (mumfordIdeal M u v)
+    _ = _ := by rw [map_mumfordIdeal]
 
 theorem invFracMap_mumfordIdealUnit
     (ι : K →+* K') (hι : Function.Injective ι)
