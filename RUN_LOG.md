@@ -259,6 +259,14 @@
     branch restriction.  The remaining project-specific input is now only
     the genuine compatible Čech section, its componentwise reduction, and
     the normalized branch/glue identities
+  - closed the finite-flat graph-recovery tail.  Over a local base, flatness
+    and a residue-field basis literally given by `{1,x}` lift that same
+    family to an integral basis and hence to a power basis.  If evaluation
+    at the quotient class of `x` has principal kernel `(u)` and the quotient
+    class of `y` is `v(x)`, polynomial normal form and ideal correspondence
+    recover the original ambient ideal exactly as `(u(x), y-v(x))`.  This
+    is a structural basis-lifting and kernel argument, not coefficient
+    elimination
 - verification:
   - all touched endpoints compile by `lake env lean <file>`
   - axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`
