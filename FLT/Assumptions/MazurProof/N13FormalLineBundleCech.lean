@@ -148,6 +148,23 @@ def leftMul
       simp only [← HahnSeries.single_zero_mul_eq_smul]
       ring
 
+theorem mulOverlap_add_right
+    {R : Type*} [CommRing R]
+    (x y z : N13CechLaurentSeriesCore.Overlap (R := R)) :
+    mulOverlap x (y + z) =
+      mulOverlap x y + mulOverlap x z :=
+  (leftMul x).map_add y z
+
+theorem mulOverlap_add_left
+    {R : Type*} [CommRing R]
+    (x y z : N13CechLaurentSeriesCore.Overlap (R := R)) :
+    mulOverlap (x + y) z =
+      mulOverlap x z + mulOverlap y z := by
+  rw [mulOverlap_comm (x + y) z,
+    mulOverlap_add_right,
+    mulOverlap_comm z x,
+    mulOverlap_comm z y]
+
 /-- Coefficientwise reduction of a two-adic Laurent series. -/
 def reduceBase : R₂ →+* K :=
   PadicInt.toZMod
@@ -254,6 +271,81 @@ def identity : NearIdentityTransition where
   mul_inverse := oneOverlap_mul _
   inverse_mul := oneOverlap_mul _
   reduce_transition := reduceOverlap_one
+
+/-- Tensor square of a near-trivial formal line bundle, written on its
+overlap transition. -/
+def square : NearIdentityTransition where
+  transition := mulOverlap g.transition g.transition
+  inverse := mulOverlap g.inverse g.inverse
+  mul_inverse := by
+    calc
+      mulOverlap
+          (mulOverlap g.transition g.transition)
+          (mulOverlap g.inverse g.inverse) =
+        mulOverlap g.transition
+          (mulOverlap g.transition
+            (mulOverlap g.inverse g.inverse)) :=
+        mulOverlap_assoc _ _ _
+      _ =
+        mulOverlap g.transition
+          (mulOverlap
+            (mulOverlap g.transition g.inverse)
+            g.inverse) := by
+          rw [mulOverlap_assoc]
+      _ =
+        mulOverlap g.transition
+          (mulOverlap oneOverlap g.inverse) := by
+          rw [g.mul_inverse]
+      _ = mulOverlap g.transition g.inverse := by
+          rw [oneOverlap_mul]
+      _ = oneOverlap := g.mul_inverse
+  inverse_mul := by
+    calc
+      mulOverlap
+          (mulOverlap g.inverse g.inverse)
+          (mulOverlap g.transition g.transition) =
+        mulOverlap g.inverse
+          (mulOverlap g.inverse
+            (mulOverlap g.transition g.transition)) :=
+        mulOverlap_assoc _ _ _
+      _ =
+        mulOverlap g.inverse
+          (mulOverlap
+            (mulOverlap g.inverse g.transition)
+            g.transition) := by
+          rw [mulOverlap_assoc]
+      _ =
+        mulOverlap g.inverse
+          (mulOverlap oneOverlap g.transition) := by
+          rw [g.inverse_mul]
+      _ = mulOverlap g.inverse g.transition := by
+          rw [oneOverlap_mul]
+      _ = oneOverlap := g.inverse_mul
+  reduce_transition := by
+    rw [reduceOverlap_mul, g.reduce_transition, oneOverlap_mul]
+
+@[simp] theorem square_transition :
+    g.square.transition =
+      mulOverlap g.transition g.transition :=
+  rfl
+
+/-- The transition displacement from the identity. -/
+def deviation : Overlap₂ :=
+  g.transition - oneOverlap
+
+/-- Squaring a transition is linear to first order.  The exact error is the
+product of the transition displacement with itself. -/
+theorem square_deviation :
+    g.square.transition - oneOverlap -
+          (g.deviation + g.deviation) =
+      mulOverlap g.deviation g.deviation := by
+  have htransition :
+      g.transition = g.deviation + oneOverlap := by
+    rw [deviation, sub_add_cancel]
+  rw [square_transition, htransition]
+  simp only [mulOverlap_add_left, mulOverlap_add_right,
+    oneOverlap_mul, mul_oneOverlap]
+  abel
 
 /-- Twisting the actual principal parts by the line-bundle transition and
 then passing to the two formal Čech obstruction coefficients. -/
