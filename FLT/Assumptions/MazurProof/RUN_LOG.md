@@ -559,3 +559,27 @@
   Q2733--Q2735 now ask for the exact module-valued Čech evaluation lift,
   the integral generalized-Mumford inverse formula, and the dual-pairing
   adapter.
+
+### N13 product-level trace criterion (2026-07-29)
+
+- Named the three special affine evaluations in the coordinate ring and
+  proved that their images are the products in the explicit dual frame.
+  Their sum is already one before passage to the special function field.
+- Replaced factorwise integral lifting by a strictly smaller interface:
+  each special evaluation only needs an integral representative whose image
+  lies in `L * L⁻¹`.  Finite-sum closure transports these aggregate products
+  to the defect ideal of the divisorial hull and gives the required element
+  reducing to one.
+- Added `N13SpecialProductLift.Data`, which states exactly the remaining
+  three product-level witnesses and feeds them into the generic--special
+  criterion.  This avoids any reduction map on `L⁻¹` and any false claim
+  that the six affine factors extend as proper global sections.
+- The product witnesses are still the full special trace-unit certificate;
+  they do not follow from vertical contraction and generic invertibility
+  alone.  The next semantic input must identify the canonical contraction's
+  special fibre with the fixed base line, or construct the equivalent trace
+  witness geometrically.
+- Targeted checks of `N13SpecialDualFrame.lean`,
+  `N13IntegralFiberDetection.lean`, and
+  `N13SpecialProductLift.lean` pass.  Axiom audits of the four new endpoints
+  report only `propext`, `Classical.choice`, and `Quot.sound`.

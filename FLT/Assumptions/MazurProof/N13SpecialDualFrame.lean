@@ -332,6 +332,20 @@ theorem trace_relation :
       simp [uF, x3F, cF, yF, hF]
     _ = 1 := by rw [coordinate_identity, map_one]
 
+/-- The three evaluations already lie in the special affine coordinate
+ring, despite the denominator in the middle dual factor. -/
+def product : Fin 3 → A :=
+  ![
+    N13GoodCoordinateRingTwo.xClass u *
+      N13GoodCoordinateRingTwo.xClass (X ^ 3),
+    N13GoodCoordinateRingTwo.xClass c *
+      (N13GoodCoordinateRingTwo.yClass +
+        N13GoodCoordinateRingTwo.xClass
+          N13GoodCoordinateRingTwo.hPoly),
+    N13GoodCoordinateRingTwo.yClass *
+      N13GoodCoordinateRingTwo.xClass c
+  ]
+
 /-- The three primal factors in the special graph ideal. -/
 def primal : Fin 3 → F :=
   ![uF, cF * uF, yF]
@@ -353,6 +367,52 @@ theorem dual_mem (i : Fin 3) :
   · exact x3F_mem_inv
   · exact quotientDual_mem_inv
   · exact cF_mem_inv
+
+/-- Each special product is the evaluation of the corresponding primal and
+multiplier-dual factors. -/
+theorem algebraMap_product (i : Fin 3) :
+    algebraMap A F (product i) =
+      primal i * dual i := by
+  fin_cases i
+  · change
+      algebraMap A F
+          (N13GoodCoordinateRingTwo.xClass u *
+            N13GoodCoordinateRingTwo.xClass (X ^ 3)) =
+        uF * x3F
+    rw [map_mul]
+    rfl
+  · change
+      algebraMap A F
+          (N13GoodCoordinateRingTwo.xClass c *
+            (N13GoodCoordinateRingTwo.yClass +
+              N13GoodCoordinateRingTwo.xClass
+                N13GoodCoordinateRingTwo.hPoly)) =
+        (cF * uF) * quotientDual
+    rw [map_mul, map_add]
+    change
+      cF * (yF + hF) =
+        (cF * uF) * quotientDual
+    rw [quotientDual, div_eq_mul_inv]
+    calc
+      cF * (yF + hF) =
+          cF * (yF + hF) * (uF * uF⁻¹) := by
+        rw [mul_inv_cancel₀ u_ne_zero, mul_one]
+      _ = (cF * uF) * ((yF + hF) * uF⁻¹) := by
+        ring
+  · change
+      algebraMap A F
+          (N13GoodCoordinateRingTwo.yClass *
+            N13GoodCoordinateRingTwo.xClass c) =
+        yF * cF
+    rw [map_mul]
+    rfl
+
+/-- The three affine product representatives sum to one before passage to
+the special function field. -/
+theorem sum_product :
+    ∑ i, product i = 1 := by
+  rw [Fin.sum_univ_three]
+  exact coordinate_identity
 
 /-- The explicit finite multiplier evaluation is the identity. -/
 theorem sum_primal_mul_dual :

@@ -330,6 +330,91 @@ noncomputable def ofProductLifts
     rw [map_sum]
     exact reduce_sum
 
+end ContractedDualFrame
+
+/-- Product-level special-fibre detection.  It is enough to lift finitely
+many special evaluations into `L * L⁻¹`; no choice of primal and dual
+factors is needed on the integral model.  When the generic fibre is
+invertible and the reductions sum to one, these witnesses constitute the
+entire missing trace-ideal unit certificate; they do not follow from
+vertical contraction alone. -/
+theorem isUnit_divisorialHull_of_productWitnesses
+    {J : Ideal RationalRing}
+    (hJ : J ≠ ⊥)
+    (hGeneric : IsUnit (J : RationalFractionalIdeal))
+    {n : ℕ}
+    (product : Fin n → IntegralRing)
+    (product_mem :
+      ∀ i,
+        algebraMap IntegralRing FunctionField (product i) ∈
+          N13IntegralFractionalHull.contractedFractional J *
+            (N13IntegralFractionalHull.contractedFractional J)⁻¹)
+    (reduce_sum :
+      (∑ i, reduceCoordinate (product i)) = 1) :
+    IsUnit
+      (N13IntegralFractionalHull.divisorialHull J) := by
+  let H :=
+    N13IntegralFractionalHull.divisorialHull J
+  have hH : H ≠ 0 := by
+    intro hzero
+    have hle :=
+      N13IntegralFractionalHull.contractedFractional_le_divisorialHull
+        hJ
+    change
+      N13IntegralFractionalHull.contractedFractional J ≤ H at hle
+    rw [hzero] at hle
+    exact
+      N13IntegralFractionalHull.contractedFractional_ne_zero hJ
+        (bot_unique hle)
+  have hGenericH :
+      IsUnit
+        (N13IntegralFractionalHull.extendFractional H) := by
+    change
+      IsUnit
+        (N13IntegralFractionalHull.extendFractional
+          (N13IntegralFractionalHull.divisorialHull J))
+    rw [N13IntegralFractionalHull.extendFractional_divisorialHull_eq
+      hJ hGeneric]
+    exact hGeneric
+  apply isUnit_of_map_defectIdeal_eq_top hH hGenericH
+  apply (map_defectIdeal_eq_top_iff_exists H).2
+  refine ⟨∑ i, product i, ?_, ?_⟩
+  · have hmul_le :
+        N13IntegralFractionalHull.contractedFractional J *
+              (N13IntegralFractionalHull.contractedFractional J)⁻¹ ≤
+            H * H⁻¹ := by
+      change
+        N13IntegralFractionalHull.contractedFractional J *
+              (N13IntegralFractionalHull.contractedFractional J)⁻¹ ≤
+            N13IntegralFractionalHull.divisorialHull J *
+              (N13IntegralFractionalHull.divisorialHull J)⁻¹
+      rw [N13IntegralFractionalHull.divisorialHull_inv hJ]
+      exact mul_le_mul'
+        (N13IntegralFractionalHull.contractedFractional_le_divisorialHull
+          hJ)
+        le_rfl
+    have htrace :
+        algebraMap IntegralRing FunctionField (∑ i, product i) ∈
+          (N13IntegralFractionalHull.defectIdeal H :
+            IntegralFractionalIdeal) := by
+      rw [N13IntegralFractionalHull.coe_defectIdeal, map_sum]
+      apply Submodule.sum_mem
+      intro i _
+      exact hmul_le (product_mem i)
+    obtain ⟨z, hz, hzTrace⟩ :=
+      (FractionalIdeal.mem_coeIdeal
+        (nonZeroDivisors IntegralRing)).mp htrace
+    have hzt : z = ∑ i, product i :=
+      (IsFractionRing.injective IntegralRing FunctionField)
+        hzTrace
+    simpa [hzt] using hz
+  · rw [map_sum]
+    exact reduce_sum
+
+namespace ContractedDualFrame
+
+variable {J : Ideal RationalRing}
+
 /-- A contracted dual frame is already a defect dual frame for the
 divisorial hull; no local-freeness theorem is used. -/
 def toDefectDualFrame
