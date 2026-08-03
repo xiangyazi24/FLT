@@ -57,6 +57,123 @@ theorem ySubClass_mem_graphIdeal
     ySubClass xClass yClass v ∈ graphIdeal xClass yClass u v :=
   Ideal.subset_span (by simp)
 
+/-- Replacing the graph ordinate by a congruent polynomial modulo the
+horizontal equation does not change the graph ideal. -/
+theorem graphIdeal_eq_of_dvd_sub
+    (xClass : R[X] →+* A) (yClass : A)
+    (u v V : R[X]) (h : u ∣ V - v) :
+    graphIdeal xClass yClass u V =
+      graphIdeal xClass yClass u v := by
+  obtain ⟨t, ht⟩ := h
+  apply le_antisymm
+  · apply Ideal.span_le.mpr
+    intro z hz
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
+    rcases hz with rfl | rfl
+    · exact xClass_mem_graphIdeal xClass yClass u v
+    · have hmultiple :
+          xClass (V - v) ∈ graphIdeal xClass yClass u v := by
+        rw [ht, map_mul, mul_comm]
+        exact Ideal.mul_mem_left _
+          (xClass t) (xClass_mem_graphIdeal xClass yClass u v)
+      have heq :
+          ySubClass xClass yClass V =
+            ySubClass xClass yClass v - xClass (V - v) := by
+        simp [ySubClass, map_sub]
+      rw [heq]
+      exact Ideal.sub_mem _
+        (ySubClass_mem_graphIdeal xClass yClass u v) hmultiple
+  · apply Ideal.span_le.mpr
+    intro z hz
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
+    rcases hz with rfl | rfl
+    · exact xClass_mem_graphIdeal xClass yClass u V
+    · have hmultiple :
+          xClass (V - v) ∈ graphIdeal xClass yClass u V := by
+        rw [ht, map_mul, mul_comm]
+        exact Ideal.mul_mem_left _
+          (xClass t) (xClass_mem_graphIdeal xClass yClass u V)
+      have heq :
+          ySubClass xClass yClass v =
+            ySubClass xClass yClass V + xClass (V - v) := by
+        simp [ySubClass, map_sub]
+      rw [heq]
+      exact Ideal.add_mem _
+        (ySubClass_mem_graphIdeal xClass yClass u V) hmultiple
+
+/-- Two graph ideals with coprime horizontal equations multiply to the
+graph ideal of the product.  The common ordinate is only required modulo
+the two factors, so this is the ideal-theoretic Chinese remainder theorem
+for a split divisor. -/
+theorem graphIdeal_mul_of_coprime
+    (xClass : R[X] →+* A) (yClass : A)
+    (u₁ u₂ v₁ v₂ V : R[X])
+    (h₁ : u₁ ∣ V - v₁)
+    (h₂ : u₂ ∣ V - v₂)
+    (hcoprime :
+      ∃ a b : R[X], a * u₁ + b * u₂ = 1) :
+    graphIdeal xClass yClass u₁ v₁ *
+        graphIdeal xClass yClass u₂ v₂ =
+      graphIdeal xClass yClass (u₁ * u₂) V := by
+  rw [← graphIdeal_eq_of_dvd_sub xClass yClass u₁ v₁ V h₁,
+    ← graphIdeal_eq_of_dvd_sub xClass yClass u₂ v₂ V h₂]
+  let I₁ := graphIdeal xClass yClass u₁ V
+  let I₂ := graphIdeal xClass yClass u₂ V
+  let I := graphIdeal xClass yClass (u₁ * u₂) V
+  let g := ySubClass xClass yClass V
+  apply le_antisymm
+  · rw [graphIdeal, graphIdeal, graphIdeal,
+      Ideal.span_pair_mul_span_pair]
+    apply Ideal.span_le.mpr
+    intro z hz
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
+    rcases hz with rfl | rfl | rfl | rfl
+    · exact Ideal.subset_span (by simp [map_mul])
+    · exact Ideal.mul_mem_left I (xClass u₁)
+        (ySubClass_mem_graphIdeal xClass yClass (u₁ * u₂) V)
+    · exact Ideal.mul_mem_right (xClass u₂) _
+        (Ideal.subset_span
+          (Set.mem_insert_iff.mpr
+            (Or.inr (Set.mem_singleton _))))
+    · exact Ideal.mul_mem_left I g
+        (ySubClass_mem_graphIdeal xClass yClass (u₁ * u₂) V)
+  · apply Ideal.span_le.mpr
+    intro z hz
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
+    rcases hz with rfl | rfl
+    · rw [map_mul]
+      exact Ideal.mul_mem_mul
+        (xClass_mem_graphIdeal xClass yClass u₁ V)
+        (xClass_mem_graphIdeal xClass yClass u₂ V)
+    · obtain ⟨a, b, hab⟩ := hcoprime
+      have h₁g :
+          xClass u₁ * g ∈ I₁ * I₂ :=
+        Ideal.mul_mem_mul
+          (xClass_mem_graphIdeal xClass yClass u₁ V)
+          (ySubClass_mem_graphIdeal xClass yClass u₂ V)
+      have hg₂ :
+          g * xClass u₂ ∈ I₁ * I₂ :=
+        Ideal.mul_mem_mul
+          (ySubClass_mem_graphIdeal xClass yClass u₁ V)
+          (xClass_mem_graphIdeal xClass yClass u₂ V)
+      have ha :
+          xClass a * (xClass u₁ * g) ∈ I₁ * I₂ :=
+        Ideal.mul_mem_left _ (xClass a) h₁g
+      have hb :
+          xClass b * (g * xClass u₂) ∈ I₁ * I₂ :=
+        Ideal.mul_mem_left _ (xClass b) hg₂
+      have hsum := Ideal.add_mem (I₁ * I₂) ha hb
+      have heq :
+          xClass a * (xClass u₁ * g) +
+              xClass b * (g * xClass u₂) = g := by
+        calc
+          _ = xClass (a * u₁ + b * u₂) * g := by
+            simp only [map_add, map_mul]
+            ring
+          _ = g := by rw [hab, map_one, one_mul]
+      rw [heq] at hsum
+      exact hsum
+
 /-- The product of the two raw graph functions is the negative substituted
 curve equation. -/
 theorem ySubClass_mul_conjugateV_raw

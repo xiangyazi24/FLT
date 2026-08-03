@@ -746,3 +746,20 @@
   `N13IntegralInfinityPointSpread.lean` pass; the follow-up check of
   `N13EscapingDegreeOneSpread.lean` also passes.  No point enumeration,
   normality, local factoriality, or finite certificate is used.
+
+### N13 split degree-two point lines (2026-07-30)
+
+- Proved the ideal-theoretic Chinese remainder formula for graph ideals.
+  If two horizontal equations are coprime and one polynomial interpolates
+  their two graph ordinates, the product of the two graph ideals is
+  literally the graph ideal of the product equation.
+- Added chartwise tensor products to the explicit N13 `TwoChartLine`.
+  Invertibility is preserved on both charts, and overlap compatibility is
+  a formal consequence of multiplicativity of ideal extension.
+- Tensoring two escaping point lines now gives an honest proper
+  two-chart spread.  For distinct horizontal coordinates, its generic
+  affine ideal is exactly the quadratic Mumford graph of the secant
+  interpolant, rather than an unspecified product in the Picard group.
+- Targeted checks of `GeneralizedGraphIdealCore.lean` and
+  `N13TwoChartLineTensor.lean` pass.  No point enumeration, special-fibre
+  table, local factoriality, custom axiom, or finite certificate is used.
