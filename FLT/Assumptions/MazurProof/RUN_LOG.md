@@ -760,6 +760,15 @@
   two-chart spread.  For distinct horizontal coordinates, its generic
   affine ideal is exactly the quadratic Mumford graph of the secant
   interpolant, rather than an unspecified product in the Picard group.
+- A reduced ordinate of degree below two is uniquely its secant
+  interpolant at two distinct roots.  Hence every split balanced
+  quadratic Mumford graph is literally the product of its two point
+  ideals, and the two roots automatically satisfy the sextic equation.
+- Applied this to the selected Padé representative.  If its quadratic
+  horizontal polynomial has two distinct rational roots and both have
+  negative two-adic valuation, tensoring the two explicit infinity point
+  lines gives a proper spread whose generic ideal is exactly the selected
+  graph.
 - Targeted checks of `GeneralizedGraphIdealCore.lean` and
   `N13TwoChartLineTensor.lean` pass.  No point enumeration, special-fibre
   table, local factoriality, custom axiom, or finite certificate is used.

@@ -153,6 +153,93 @@ theorem pointIdeal_mul_eq_secantGraph
         (secantV x₁ z₁ x₂ z₂)
         h₁ h₂ (linearFactors_coprime x₁ x₂ hneq))
 
+/-- A reduced ordinate on a split monic quadratic is its secant
+interpolant. -/
+theorem mumford_v_eq_secant
+    (D : SexticMumford.Mumford
+      N13EscapingDegreeOneSpread.Model)
+    (hdeg : D.u.natDegree = 2)
+    (x₁ x₂ : N13EscapingDegreeOneSpread.Q₂)
+    (hneq : x₁ ≠ x₂) :
+    D.v =
+      secantV x₁ (D.v.eval x₁) x₂ (D.v.eval x₂) := by
+  have huDegree :
+      D.u.degree = (2 : WithBot ℕ) := by
+    rw [degree_eq_natDegree D.u_monic.ne_zero, hdeg]
+    norm_num
+  have hvDegree :
+      D.v.degree < D.u.degree :=
+    (mod_eq_self_iff D.u_monic.ne_zero).mp D.v_reduced
+  have hvlt : D.v.natDegree < 2 := by
+    by_cases hv0 : D.v = 0
+    · simp [hv0]
+    · rw [natDegree_lt_iff_degree_lt hv0]
+      simpa [huDegree] using hvDegree
+  have hsle :
+      (secantV x₁ (D.v.eval x₁) x₂ (D.v.eval x₂)).natDegree ≤ 1 := by
+    unfold secantV
+    compute_degree
+  let f : Fin 2 → N13EscapingDegreeOneSpread.Q₂ :=
+    fun i => if i = 0 then x₁ else x₂
+  have hf : Function.Injective f := by
+    intro i j
+    fin_cases i <;> fin_cases j <;> simp [f, hneq, hneq.symm]
+  apply Polynomial.eq_of_natDegree_lt_card_of_eval_eq
+    D.v
+    (secantV x₁ (D.v.eval x₁) x₂ (D.v.eval x₂))
+    hf
+  · intro i
+    fin_cases i
+    · simp [f]
+    · simp [f, secantV_eval_right _ _ _ _ hneq]
+  · simp only [Fintype.card_fin]
+    omega
+
+/-- The two factors of a split Mumford horizontal polynomial are actual
+curve points. -/
+theorem mumford_eval_onCurve_of_split
+    (D : SexticMumford.Mumford
+      N13EscapingDegreeOneSpread.Model)
+    (x₁ x₂ : N13EscapingDegreeOneSpread.Q₂)
+    (hfactor :
+      D.u = (X - C x₁) * (X - C x₂)) :
+    (D.v.eval x₁) ^ 2 =
+        N13EscapingDegreeOneSpread.Model.f.eval x₁ ∧
+      (D.v.eval x₂) ^ 2 =
+        N13EscapingDegreeOneSpread.Model.f.eval x₂ := by
+  obtain ⟨w, hw⟩ := D.curve_dvd
+  constructor
+  · have hzero :=
+      congrArg (Polynomial.eval x₁) hw
+    simp [hfactor] at hzero
+    exact (sub_eq_zero.mp hzero).symm
+  · have hzero :=
+      congrArg (Polynomial.eval x₂) hw
+    simp [hfactor] at hzero
+    exact (sub_eq_zero.mp hzero).symm
+
+/-- A split balanced quadratic Mumford graph is literally the product of
+the two point ideals, not only equal to it in the Picard quotient. -/
+theorem mumfordIdeal_eq_pointIdeal_mul_of_split
+    (D : SexticMumford.Mumford
+      N13EscapingDegreeOneSpread.Model)
+    (hdeg : D.u.natDegree = 2)
+    (x₁ x₂ : N13EscapingDegreeOneSpread.Q₂)
+    (hfactor :
+      D.u = (X - C x₁) * (X - C x₂))
+    (hneq : x₁ ≠ x₂) :
+    SexticMumford.mumfordIdeal
+          N13EscapingDegreeOneSpread.Model
+          (X - C x₁) (C (D.v.eval x₁)) *
+        SexticMumford.mumfordIdeal
+          N13EscapingDegreeOneSpread.Model
+          (X - C x₂) (C (D.v.eval x₂)) =
+      SexticMumford.mumfordIdeal
+        N13EscapingDegreeOneSpread.Model D.u D.v := by
+  rw [pointIdeal_mul_eq_secantGraph _ _ _ _ hneq,
+    ← hfactor, ← mumford_v_eq_secant
+      D hdeg x₁ x₂ hneq]
+
 /-- Tensor the proper lines of two escaping affine points. -/
 def nonintegralPointPairLine
     (x₁ y₁ x₂ y₂ : N13EscapingDegreeOneSpread.Q₂)
@@ -225,6 +312,141 @@ theorem map_nonintegralPointPairLine_eq_secantGraph
           x₂ (N13EscapingDegreeOneSpread.pointY x₂ y₂)) := by
   rw [map_nonintegralPointPairLine_affineIdeal,
     pointIdeal_mul_eq_secantGraph _ _ _ _ hneq]
+
+/-- Inverse completed-square ordinate over `ℚ₂`. -/
+def goodY
+    (x Y : N13EscapingDegreeOneSpread.Q₂) :
+    N13EscapingDegreeOneSpread.Q₂ :=
+  (Y - N13GoodModelTwo.h x) / 2
+
+@[simp] theorem pointY_goodY
+    (x Y : N13EscapingDegreeOneSpread.Q₂) :
+    N13EscapingDegreeOneSpread.pointY x (goodY x Y) = Y := by
+  simp only [N13EscapingDegreeOneSpread.pointY, goodY]
+  ring
+
+/-- Completing the square is an equivalence between the sextic and good
+affine equations over `ℚ₂`. -/
+theorem goodY_onCurve
+    (x Y : N13EscapingDegreeOneSpread.Q₂)
+    (hcurve :
+      Y ^ 2 =
+        N13EscapingDegreeOneSpread.Model.f.eval x) :
+    N13GoodModelTwo.AffineEquation x (goodY x Y) := by
+  have hf :
+      N13GoodModelTwo.completedSextic x =
+        N13EscapingDegreeOneSpread.Model.f.eval x := by
+    simp [N13EscapingDegreeOneSpread.Model,
+      N13Mumford.f, N13GoodModelTwo.completedSextic]
+  have hs :=
+    N13GoodModelTwo.completed_square_identity x (goodY x Y)
+  have hround :
+      2 * goodY x Y + N13GoodModelTwo.h x = Y := by
+    exact pointY_goodY x Y
+  rw [hround] at hs
+  have hfour :
+      (4 : N13EscapingDegreeOneSpread.Q₂) *
+          ((goodY x Y) ^ 2 +
+            N13GoodModelTwo.h x * goodY x Y -
+            N13GoodModelTwo.rhs x) = 0 := by
+    rw [hf, ← hcurve] at hs
+    calc
+      _ =
+          (Y ^ 2 +
+            4 * ((goodY x Y) ^ 2 +
+              N13GoodModelTwo.h x * goodY x Y -
+              N13GoodModelTwo.rhs x)) -
+            Y ^ 2 := by ring
+      _ = 0 := by rw [← hs, sub_self]
+  have hres :
+      (goodY x Y) ^ 2 +
+          N13GoodModelTwo.h x * goodY x Y -
+        N13GoodModelTwo.rhs x = 0 :=
+    (mul_eq_zero.mp hfour).resolve_left (by norm_num)
+  exact sub_eq_zero.mp hres
+
+abbrev G : Type :=
+  N13ConstructedHalfIntegralSpread.G
+
+/-- If the selected quadratic Padé graph splits over `ℚ` into two
+distinct points and both points escape the affine integral chart, their
+tensor point line is an explicit proper spread of the exact selected
+two-adic graph. -/
+theorem selectedGraph_has_pairLine_of_split_escape
+    (P : G)
+    (hdeg :
+      (N13ConstructedHalfIntegralSpread.graphU P).natDegree = 2)
+    (x₁ x₂ : ℚ)
+    (hfactor :
+      (N13ConstructedHalfIntegralSpread.normalizedGraphMumford P).u =
+        (X - C x₁) * (X - C x₂))
+    (hneq : x₁ ≠ x₂)
+    (hx₁ :
+      (N13ProperCurveReduction.ratToQ₂ x₁).valuation < 0)
+    (hx₂ :
+      (N13ProperCurveReduction.ratToQ₂ x₂).valuation < 0) :
+    ∃ L : TwoChartLine,
+      Ideal.map
+          N13TwoAdicCoordinateBaseChange.integralToSextic
+          L.affineIdeal =
+        SexticMumford.mumfordIdeal
+          N13EscapingDegreeOneSpread.Model
+          (N13ConstructedHalfIntegralSpread.twoAdicNormalizedGraphMumford
+            P).u
+          (N13ConstructedHalfIntegralSpread.twoAdicNormalizedGraphMumford
+            P).v := by
+  let D :=
+    N13ConstructedHalfIntegralSpread.twoAdicNormalizedGraphMumford P
+  let x₁₂ : N13EscapingDegreeOneSpread.Q₂ :=
+    N13ProperCurveReduction.ratToQ₂ x₁
+  let x₂₂ : N13EscapingDegreeOneSpread.Q₂ :=
+    N13ProperCurveReduction.ratToQ₂ x₂
+  have hneq₂ : x₁₂ ≠ x₂₂ := by
+    exact N13InfinityBaseChange.ratToQ₂_injective.ne hneq
+  have hfactor₂ :
+      D.u = (X - C x₁₂) * (X - C x₂₂) := by
+    have hmap :=
+      congrArg
+        (Polynomial.map N13InfinityBaseChange.ratToQ₂)
+        hfactor
+    simpa [D, x₁₂, x₂₂,
+      N13ConstructedHalfIntegralSpread.twoAdicNormalizedGraphMumford]
+      using hmap
+  have hDdeg : D.u.natDegree = 2 := by
+    change
+      ((N13ConstructedHalfIntegralSpread.normalizedGraphMumford
+        P).u.map N13InfinityBaseChange.ratToQ₂).natDegree = 2
+    rw [
+      (N13ConstructedHalfIntegralSpread.normalizedGraphMumford
+        P).u_monic.natDegree_map]
+    exact
+      (N13DegreeOneGraphPoint.normalizedGraphMumford_u_natDegree P).trans
+        hdeg
+  obtain ⟨hcurve₁, hcurve₂⟩ :=
+    mumford_eval_onCurve_of_split D x₁₂ x₂₂ hfactor₂
+  let y₁ := goodY x₁₂ (D.v.eval x₁₂)
+  let y₂ := goodY x₂₂ (D.v.eval x₂₂)
+  have hgood₁ :
+      N13GoodModelTwo.AffineEquation x₁₂ y₁ :=
+    goodY_onCurve x₁₂ (D.v.eval x₁₂) hcurve₁
+  have hgood₂ :
+      N13GoodModelTwo.AffineEquation x₂₂ y₂ :=
+    goodY_onCurve x₂₂ (D.v.eval x₂₂) hcurve₂
+  let L :=
+    nonintegralPointPairLine
+      x₁₂ y₁ x₂₂ y₂ hx₁ hgood₁ hx₂ hgood₂
+  refine ⟨L, ?_⟩
+  change
+    Ideal.map
+        N13TwoAdicCoordinateBaseChange.integralToSextic
+        (nonintegralPointPairLine
+          x₁₂ y₁ x₂₂ y₂ hx₁ hgood₁ hx₂ hgood₂).affineIdeal =
+      _
+  rw [map_nonintegralPointPairLine_eq_secantGraph
+      x₁₂ y₁ x₂₂ y₂ hx₁ hgood₁ hx₂ hgood₂ hneq₂,
+    pointY_goodY, pointY_goodY,
+    ← mumford_v_eq_secant D hDdeg x₁₂ x₂₂ hneq₂,
+    ← hfactor₂]
 
 end
 
