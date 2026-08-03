@@ -46,8 +46,16 @@ local instance integralFunctionFieldFractionRing :
 abbrev SmoothMumford₂ : Type :=
   N13GeneralizedMumfordReduction.SmoothMumford₂
 
+abbrev SemiMumford₂ : Type :=
+  N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂
+
 /-- The integral graph ideal attached to generalized Mumford data. -/
 def graphIdeal (D : SmoothMumford₂) : Ideal IntegralRing :=
+  N13GeneralizedMumfordIntegral.mumfordIdeal D.u D.v
+
+/-- The integral graph ideal attached to arbitrary generalized Mumford
+data. -/
+def semiGraphIdeal (D : SemiMumford₂) : Ideal IntegralRing :=
   N13GeneralizedMumfordIntegral.mumfordIdeal D.u D.v
 
 /-- A bijective second coordinate change cancels from extension followed by
@@ -99,6 +107,38 @@ theorem contractIdeal_map_graphIdeal
       simpa [graphIdeal] using
         N13TwoAdicCoordinateBaseChange.comap_map_mumfordIdeal D)
 
+/-- Exact contraction already holds for an arbitrary integral semigraph.
+Only monicity is used in the coefficient-descent argument. -/
+theorem contractIdeal_map_semiGraphIdeal
+    (D : SemiMumford₂) :
+    N13IntegralModelContraction.contractIdeal
+        (Ideal.map
+          N13TwoAdicCoordinateBaseChange.integralToSextic
+          (semiGraphIdeal D)) =
+      semiGraphIdeal D := by
+  change
+    (Ideal.map
+      (N13GoodSexticCoordinateEquiv.toSextic.comp
+        N13TwoAdicCoordinateBaseChange.extendCoordinate)
+      (semiGraphIdeal D)).comap
+        (N13GoodSexticCoordinateEquiv.toSextic.comp
+          N13TwoAdicCoordinateBaseChange.extendCoordinate) =
+      semiGraphIdeal D
+  exact comap_map_comp_of_bijective
+    N13TwoAdicCoordinateBaseChange.extendCoordinate
+    N13GoodSexticCoordinateEquiv.toSextic
+    (by
+      change Function.Bijective
+        (N13GoodSexticCoordinateEquiv.coordinateRingEquiv
+          (K := N13IntegralModelContraction.Q₂))
+      exact
+        (N13GoodSexticCoordinateEquiv.coordinateRingEquiv
+          (K := N13IntegralModelContraction.Q₂)).bijective)
+    (semiGraphIdeal D)
+    (by
+      simpa [semiGraphIdeal] using
+        N13TwoAdicCoordinateBaseChange.comap_map_mumfordIdeal_semi D)
+
 /-- The standard sextic graph ideal of smooth integral data. -/
 def sexticIdeal
     (D : SmoothMumford₂) (nInf : ℤ) :
@@ -108,6 +148,17 @@ def sexticIdeal
       (K := N13IntegralModelContraction.Q₂))
     (N13TwoAdicMumfordTransport.sexticSemi D nInf).u
     (N13TwoAdicMumfordTransport.sexticSemi D nInf).v
+
+/-- The standard sextic generic graph attached to arbitrary integral
+generalized Mumford data. -/
+def sexticSemiIdeal
+    (D : SemiMumford₂) (nInf : ℤ) :
+    Ideal RationalRing :=
+  SexticMumford.mumfordIdeal
+    (N13GoodSexticCoordinateEquiv.M
+      (K := N13IntegralModelContraction.Q₂))
+    (N13TwoAdicMumfordTransport.sexticSemiOfSemi D nInf).u
+    (N13TwoAdicMumfordTransport.sexticSemiOfSemi D nInf).v
 
 /-- The canonical contraction of the actual sextic graph is the original
 integral graph ideal, not merely an ideal in the same Picard class. -/
@@ -122,6 +173,20 @@ theorem contractIdeal_sexticIdeal
       D nInf]
   simpa [graphIdeal] using contractIdeal_map_graphIdeal D
 
+/-- Canonical contraction of an arbitrary transported integral semigraph
+recovers the original integral graph ideal exactly. -/
+theorem contractIdeal_sexticSemiIdeal
+    (D : SemiMumford₂) (nInf : ℤ) :
+    N13IntegralModelContraction.contractIdeal
+        (sexticSemiIdeal D nInf) =
+      semiGraphIdeal D := by
+  unfold sexticSemiIdeal
+  rw [←
+    N13TwoAdicCoordinateBaseChange.map_mumfordIdeal_sexticSemiOfSemi
+      D nInf]
+  simpa [semiGraphIdeal] using
+    contractIdeal_map_semiGraphIdeal D
+
 /-- Fractional-ideal form of exact contraction. -/
 theorem contractedFractional_sexticIdeal
     (D : SmoothMumford₂) (nInf : ℤ) :
@@ -133,6 +198,18 @@ theorem contractedFractional_sexticIdeal
     (fun I : Ideal IntegralRing ↦
       (I : FractionalIdeal IntegralRing⁰ FunctionField))
     (contractIdeal_sexticIdeal D nInf)
+
+/-- Fractional-ideal form of exact semigraph contraction. -/
+theorem contractedFractional_sexticSemiIdeal
+    (D : SemiMumford₂) (nInf : ℤ) :
+    N13IntegralFractionalHull.contractedFractional
+        (sexticSemiIdeal D nInf) =
+      (semiGraphIdeal D :
+        FractionalIdeal IntegralRing⁰ FunctionField) := by
+  exact congrArg
+    (fun I : Ideal IntegralRing ↦
+      (I : FractionalIdeal IntegralRing⁰ FunctionField))
+    (contractIdeal_sexticSemiIdeal D nInf)
 
 end
 

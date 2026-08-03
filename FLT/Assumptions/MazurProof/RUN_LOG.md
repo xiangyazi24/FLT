@@ -667,3 +667,26 @@
   `N13TwoFiberGraphBasis.lean`, `N13RankTwoSemiGraphRecovery.lean`, and
   `N13ArbitrarySpecialGraphSpread.lean` pass.  Audits of all four endpoints
   report only `propext`, `Classical.choice`, and `Quot.sound`.
+
+### N13 semigraph contraction and the degree-one branch (2026-07-30)
+
+- Removed the unnecessary `SmoothMumford₂.bezout` requirement from exact
+  coefficient extension and contraction.  Monicity alone makes polynomial
+  divisibility descend from `ℚ₂` to `ℤ₂`, so every integral generalized
+  semigraph contracts exactly to its original graph ideal.
+- Combined that exact semigraph contraction with the global integral
+  Jacobian frame.  Every integral semigraph now directly supplies an
+  invertible divisorial spread; a separate vertical smoothness certificate
+  is no longer part of this interface.
+- Identified the selected Padé root's degree-one branch intrinsically.
+  A balanced monic linear graph with zero infinity coordinate is exactly
+  the graph of one affine rational curve point: monicity determines `u`,
+  reducedness makes `v` constant, and the Mumford divisibility relation
+  evaluates to the curve equation.  Thus this branch is routed to the
+  existing proper affine/infinity two-chart point reduction rather than to
+  the quadratic quotient-basis argument.
+- Targeted checks of `N13TwoAdicMumfordTransport.lean`,
+  `N13TwoAdicCoordinateBaseChange.lean`,
+  `N13IntegralGraphContraction.lean`, `N13IntegralGraphSpread.lean`, and
+  `N13DegreeOneGraphPoint.lean` pass.  Audits of the five new endpoints
+  report only `propext`, `Classical.choice`, and `Quot.sound`.

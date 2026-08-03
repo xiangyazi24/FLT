@@ -163,6 +163,45 @@ theorem map_mumfordIdeal (u v : R₂[X]) :
     Ideal.map_span, Set.image_pair, extend_xClass,
     extend_ySubClass]
 
+/-- Extension followed by contraction fixes every integral generalized
+Mumford graph.  The proof only uses monicity and coefficientwise
+divisibility descent; no special-fibre smoothness witness is involved. -/
+theorem comap_map_mumfordIdeal_semi
+    (D :
+      N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂) :
+    (Ideal.map extendCoordinate
+        (N13GeneralizedMumfordIntegral.mumfordIdeal
+          (R := R₂) D.u D.v)).comap extendCoordinate =
+      N13GeneralizedMumfordIntegral.mumfordIdeal
+        (R := R₂) D.u D.v := by
+  ext z
+  rw [Ideal.mem_comap, map_mumfordIdeal]
+  change
+    extendCoordinate z ∈
+        N13GeneralizedMumfordIntegral.mumfordIdeal
+          (N13TwoAdicMumfordTransport.baseChangeSemi D).u
+          (N13TwoAdicMumfordTransport.baseChangeSemi D).v ↔
+      z ∈
+        N13GeneralizedMumfordIntegral.mumfordIdeal D.u D.v
+  rw [
+    N13GeneralizedMumfordIntegral.mem_mumfordIdeal_iff
+      (N13TwoAdicMumfordTransport.baseChangeSemi D),
+    N13GeneralizedMumfordIntegral.mem_mumfordIdeal_iff D]
+  simp only [N13TwoAdicMumfordTransport.baseChangeSemi_u,
+    N13TwoAdicMumfordTransport.baseChangeSemi_v,
+    coeff0_extendCoordinate, coeffY_extendCoordinate]
+  change
+    D.u.map coeffMap ∣
+          (N13GeneralizedMumfordIntegral.coeff0 z).map coeffMap +
+            (N13GeneralizedMumfordIntegral.coeffY z).map coeffMap *
+              D.v.map coeffMap ↔
+      D.u ∣
+        N13GeneralizedMumfordIntegral.coeff0 z +
+          N13GeneralizedMumfordIntegral.coeffY z * D.v
+  rw [← Polynomial.map_mul, ← Polynomial.map_add]
+  exact Polynomial.map_dvd_map coeffMap
+    (IsFractionRing.injective R₂ Q₂) D.u_monic
+
 /-- Extending a smooth integral graph to the generic fibre and contracting
 it back recovers the original graph.  The reason is exactly that divisibility
 by a monic polynomial descends along an injective coefficient map. -/
@@ -244,6 +283,25 @@ theorem map_mumfordIdeal_sexticSemi
     map_mumfordIdeal]
   exact
     N13TwoAdicMumfordTransport.map_mumfordIdeal_sexticSemi
+      D nInf
+
+/-- The same coordinate transport theorem for arbitrary integral
+semigraphs. -/
+theorem map_mumfordIdeal_sexticSemiOfSemi
+    (D :
+      N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂)
+    (nInf : ℤ) :
+    Ideal.map integralToSextic
+        (N13GeneralizedMumfordIntegral.mumfordIdeal
+          (R := R₂) D.u D.v) =
+      SexticMumford.mumfordIdeal
+        (N13GoodSexticCoordinateEquiv.M (K := Q₂))
+        (N13TwoAdicMumfordTransport.sexticSemiOfSemi D nInf).u
+        (N13TwoAdicMumfordTransport.sexticSemiOfSemi D nInf).v := by
+  rw [integralToSextic, ← Ideal.map_map,
+    map_mumfordIdeal]
+  exact
+    N13TwoAdicMumfordTransport.map_mumfordIdeal_sexticSemiOfSemi
       D nInf
 
 end

@@ -167,6 +167,29 @@ theorem divisorialHull_sexticIdeal_isUnit
     N13IntegralGraphJacobian.mumfordIdeal_isUnit
       D.toSemiMumford
 
+/-- The divisorial hull of a transported integral semigraph is literally
+its original integral graph fractional ideal. -/
+theorem divisorialHull_sexticSemiIdeal_eq_semiGraphIdeal
+    (D : SemiMumford₂) (nInf : ℤ) :
+    N13IntegralFractionalHull.divisorialHull
+        (N13IntegralGraphContraction.sexticSemiIdeal D nInf) =
+      (N13IntegralGraphContraction.semiGraphIdeal D :
+        IntegralFractionalIdeal) := by
+  rw [N13IntegralFractionalHull.divisorialHull,
+    N13IntegralGraphContraction.contractedFractional_sexticSemiIdeal]
+  exact inv_inv_eq_of_isUnit
+    (N13IntegralGraphJacobian.mumfordIdeal_isUnit D)
+
+/-- Thus every integral generalized Mumford semigraph, without an extra
+vertical smoothness field, supplies an invertible integral spread. -/
+theorem divisorialHull_sexticSemiIdeal_isUnit
+    (D : SemiMumford₂) (nInf : ℤ) :
+    IsUnit
+      (N13IntegralFractionalHull.divisorialHull
+        (N13IntegralGraphContraction.sexticSemiIdeal D nInf)) := by
+  rw [divisorialHull_sexticSemiIdeal_eq_semiGraphIdeal]
+  exact N13IntegralGraphJacobian.mumfordIdeal_isUnit D
+
 end
 
 end MazurProof.N13IntegralGraphSpread

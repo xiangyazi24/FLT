@@ -49,6 +49,36 @@ def mapPoly : R₂[X] →+* Q₂[X] :=
   simp [mapPoly, coeffMap,
     N13GeneralizedMumfordIntegral.rhsPoly]
 
+/-- Coefficient extension does not require the additional special-fibre
+smoothness witness. -/
+def baseChangeSemi
+    (D :
+      N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂) :
+    N13GeneralizedMumfordIntegral.SemiMumford (R := Q₂) where
+  u := mapPoly D.u
+  v := mapPoly D.v
+  w := mapPoly D.w
+  u_monic := D.u_monic.map coeffMap
+  curve_eq := by
+    have h := congrArg mapPoly D.curve_eq
+    simpa only [map_add, map_sub, map_mul, map_pow,
+      mapPoly_hPoly, mapPoly_rhsPoly] using h
+
+@[simp] theorem baseChangeSemi_u
+    (D :
+      N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂) :
+    (baseChangeSemi D).u = mapPoly D.u := rfl
+
+@[simp] theorem baseChangeSemi_v
+    (D :
+      N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂) :
+    (baseChangeSemi D).v = mapPoly D.v := rfl
+
+@[simp] theorem baseChangeSemi_w
+    (D :
+      N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂) :
+    (baseChangeSemi D).w = mapPoly D.w := rfl
+
 /-- Coefficient extension of an integral generalized Mumford datum. -/
 def baseChange
     (D : N13GeneralizedMumfordReduction.SmoothMumford₂) :
@@ -87,6 +117,54 @@ theorem baseChange_bezout
   have h := congrArg mapPoly habc
   simpa only [baseChange_u, baseChange_v, baseChange_w,
     map_add, map_mul, map_ofNat, map_one, mapPoly_hPoly] using h
+
+/-- The standard reduced sextic semirepresentative attached to arbitrary
+integral generalized Mumford data. -/
+def sexticSemiOfSemi
+    (D :
+      N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂)
+    (nInf : ℤ) :
+    SexticMumford.SemiMumford
+      (N13GoodSexticCoordinateEquiv.M (K := Q₂)) :=
+  N13GoodSexticMumfordTransport.toSexticSemi
+    (baseChangeSemi D) nInf
+
+@[simp] theorem sexticSemiOfSemi_u
+    (D :
+      N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂)
+    (nInf : ℤ) :
+    (sexticSemiOfSemi D nInf).u = mapPoly D.u := rfl
+
+@[simp] theorem sexticSemiOfSemi_v
+    (D :
+      N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂)
+    (nInf : ℤ) :
+    (sexticSemiOfSemi D nInf).v =
+      N13GoodSexticMumfordTransport.reducedCompletedGraph
+        (mapPoly D.u) (mapPoly D.v) := rfl
+
+@[simp] theorem sexticSemiOfSemi_nInf
+    (D :
+      N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂)
+    (nInf : ℤ) :
+    (sexticSemiOfSemi D nInf).nInf = nInf := rfl
+
+/-- Completion of the square transports every integral generalized graph
+ideal, independently of a vertical Bézout witness. -/
+theorem map_mumfordIdeal_sexticSemiOfSemi
+    (D :
+      N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂)
+    (nInf : ℤ) :
+    Ideal.map
+        (N13GoodSexticCoordinateEquiv.toSextic (K := Q₂))
+        (N13GeneralizedMumfordIntegral.mumfordIdeal
+          (baseChangeSemi D).u (baseChangeSemi D).v) =
+      SexticMumford.mumfordIdeal
+        (N13GoodSexticCoordinateEquiv.M (K := Q₂))
+        (sexticSemiOfSemi D nInf).u
+        (sexticSemiOfSemi D nInf).v :=
+  N13GoodSexticMumfordTransport.map_mumfordIdeal_toSexticSemi
+    (baseChangeSemi D) nInf
 
 /-- The standard reduced sextic semirepresentative over `ℚ₂`. -/
 def sexticSemi
