@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.GraphJacobianDualFrame
+import FLT.Assumptions.MazurProof.GeneralizedGraphIdealCore
 import FLT.Assumptions.MazurProof.N13IntegralFractionalHull
 import FLT.Assumptions.MazurProof.N13GeneralizedMumfordIntegral
 
@@ -225,6 +226,118 @@ theorem exists_jacobian_bezout :
           (u : IntegralRing) := by
       rw [thirteen_isUnit.unit_spec]
     _ = 1 := by simp
+
+/-! ## Graphs without a monicity hypothesis
+
+Monicity is needed by the quotient-basis and contraction arguments, but not
+by the Jacobian dual frame.  The following version isolates the exact
+regularity input here: the horizontal graph equation is merely nonzero.
+-/
+
+abbrev GraphData : Type :=
+  GeneralizedGraphIdealCore.SemiGraph
+    (hPoly (R := R₂)) (rhsPoly (R := R₂))
+
+private theorem derivative_graphData_curve_eq
+    (D : GraphData) :
+    (C (2 : R₂) * D.v + hPoly) *
+          derivative D.v +
+          derivative hPoly * D.v -
+        derivative rhsPoly =
+      derivative D.u * D.w +
+        D.u * derivative D.w := by
+  have h := congrArg derivative D.curve_eq
+  simp only [derivative_sub, derivative_add,
+    derivative_mul, derivative_pow] at h
+  norm_num only [Nat.reduceSub, pow_one] at h
+  linear_combination h
+
+private theorem jacobianY_eq_graphData
+    (D : GraphData) :
+    jacobianY =
+      GeneralizedGraphIdealCore.ySubClass
+          xClassHom yClass D.v +
+        GeneralizedGraphIdealCore.ySubClass
+          xClassHom yClass
+            (GeneralizedGraphIdealCore.conjugateV hPoly D.v) := by
+  simp only [jacobianY, GeneralizedGraphIdealCore.ySubClass,
+    GeneralizedGraphIdealCore.conjugateV,
+    xClassHom_apply, xClass_neg, xClass_sub]
+  ring
+
+private theorem jacobianX_eq_graphData
+    (D : GraphData) :
+    jacobianX =
+      xClass (derivative D.u) * xClass D.w +
+        xClass D.u * xClass (derivative D.w) -
+        xClass (derivative D.v) *
+          GeneralizedGraphIdealCore.ySubClass
+            xClassHom yClass
+              (GeneralizedGraphIdealCore.conjugateV hPoly D.v) +
+        (xClass (derivative hPoly) +
+            xClass (derivative D.v)) *
+          GeneralizedGraphIdealCore.ySubClass
+            xClassHom yClass D.v := by
+  have h :=
+    congrArg
+      (xClass (R := R₂))
+      (derivative_graphData_curve_eq D)
+  have htwo :
+      xClass (R := R₂) (C (2 : R₂)) =
+        (2 : IntegralRing) := by
+    rw [show C (2 : R₂) = (2 : R₂[X]) by
+      exact map_natCast C 2]
+    exact xClass_natCast 2
+  simp only [jacobianX,
+    GeneralizedGraphIdealCore.ySubClass,
+    GeneralizedGraphIdealCore.conjugateV,
+    xClassHom_apply, xClass_add, xClass_sub, xClass_neg,
+    xClass_mul] at h ⊢
+  rw [htwo] at h
+  linear_combination h
+
+/-- Every nondegenerate integral polynomial graph on the affine good model
+is invertible.  Its horizontal equation need not be monic. -/
+theorem graphIdeal_isUnit
+    (D : GraphData)
+    (hu : D.u ≠ 0) :
+    IsUnit
+      ((GeneralizedGraphIdealCore.graphIdeal
+          xClassHom yClass D.u D.v :
+          Ideal IntegralRing) :
+        IntegralFractionalIdeal) := by
+  obtain ⟨a, b, hBez⟩ := exists_jacobian_bezout
+  apply
+    GraphJacobianDualFrame.graphJacobian_isUnit
+      (K := FunctionField)
+      (U := xClass D.u)
+      (G :=
+        GeneralizedGraphIdealCore.ySubClass
+          xClassHom yClass D.v)
+      (Gbar :=
+        GeneralizedGraphIdealCore.ySubClass
+          xClassHom yClass
+            (GeneralizedGraphIdealCore.conjugateV hPoly D.v))
+      (W := xClass D.w)
+      (Fy := jacobianY)
+      (Fx := jacobianX)
+      (Ux := xClass (derivative D.u))
+      (Wx := xClass (derivative D.w))
+      (Vx := xClass (derivative D.v))
+      (hx := xClass (derivative hPoly))
+      (a := a) (b := b)
+  · intro hzero
+    apply hu
+    have hcoeff :=
+      congrArg (coeff0 (R := R₂)) hzero
+    simpa only [coeff0_xClass, map_zero] using hcoeff
+  · exact
+      GeneralizedGraphIdealCore.ySubClass_mul_conjugate
+        xClassHom yClass hPoly rhsPoly D
+        (yClass_relation (R := R₂))
+  · exact jacobianY_eq_graphData D
+  · exact jacobianX_eq_graphData D
+  · exact hBez
 
 /-- A global relative-Jacobian Bézout pair makes every integral smooth
 Mumford graph invertible by the explicit graph dual frame. -/

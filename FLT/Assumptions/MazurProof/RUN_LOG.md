@@ -708,3 +708,32 @@
 - The targeted check of `N13IntegralAffinePointSpread.lean` passes.  Audits
   of its three main endpoints report only `propext`, `Classical.choice`,
   and `Quot.sound`.
+
+### N13 integral infinity point spreads (2026-07-30)
+
+- Factored the generalized graph-ideal product calculation into a
+  coefficient-independent ring-theoretic core.  A graph ideal times its
+  hyperelliptic conjugate is the principal horizontal ideal whenever
+  `u`, `2v+h`, and the residual quotient satisfy the displayed Bézout
+  identity.
+- For every integral point of the ordinary infinity chart above `t=0`,
+  proved that the ordinate Jacobian reduces to one.  Its point ideal
+  `(t-t₀,v-v₀)` therefore has an explicit conjugate inverse and is
+  invertible as a fractional ideal.
+- Generalized the affine global-Jacobian dual frame from monic semigraphs
+  to every nondegenerate polynomial graph.  This applies to the weighted
+  affine closure `(1-t₀x, y-v₀x³)` of an infinity point, whose exact graph
+  factorization follows from the weighted chart equation.
+- Proved that the affine and infinity point ideals agree after restriction
+  to the ordinary overlap: their generators differ by the units `x` and
+  `x³`.  Packaged the two invertible ideals and this equality as an honest
+  two-chart line, and instantiated it for every negative-valuation affine
+  point supplied by `nonintegralInfinityLift`.
+- Proved that the generic fibre of the affine half is exactly the
+  coefficient-extended, completed-square sextic graph.  This leaves only
+  its identification with the standard degree-one point graph before the
+  escaping selected Padé branch is fully connected to the proper line.
+- Targeted checks of `GeneralizedGraphIdealCore.lean`,
+  `N13IntegralGraphJacobian.lean`, `N13OrdinaryCurveOverlap.lean`, and
+  `N13IntegralInfinityPointSpread.lean` pass.  No point enumeration,
+  normality, local factoriality, or finite certificate is used.

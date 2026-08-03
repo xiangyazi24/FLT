@@ -114,6 +114,14 @@ def coefficientToInfinityOverlap : R₂ →+* InfinityOverlap :=
 def affineCoeffMap : R₂[X] →+* InfinityOverlap :=
   Polynomial.eval₂RingHom coefficientToInfinityOverlap xOverlap
 
+@[simp] theorem affineCoeffMap_C (r : R₂) :
+    affineCoeffMap (C r) = coefficientToInfinityOverlap r := by
+  simp [affineCoeffMap]
+
+@[simp] theorem affineCoeffMap_X :
+    affineCoeffMap X = xOverlap := by
+  simp [affineCoeffMap]
+
 def affineYImage : InfinityOverlap :=
   xOverlap ^ 3 * vOverlap
 
@@ -157,6 +165,12 @@ def affineToInfinityOverlap :
       affineCoeffMap p := by
   exact AdjoinRoot.lift_of affineCurve_relation
 
+@[simp] theorem affineToInfinityOverlap_xClassHom (p : R₂[X]) :
+    affineToInfinityOverlap
+        (N13GeneralizedMumfordIntegral.xClassHom p) =
+      affineCoeffMap p :=
+  affineToInfinityOverlap_of p
+
 @[simp] theorem affineToInfinityOverlap_xClass :
     affineToInfinityOverlap xClass = xOverlap := by
   simp [affineToInfinityOverlap, xClass,
@@ -166,6 +180,12 @@ def affineToInfinityOverlap :
 @[simp] theorem affineToInfinityOverlap_yClass :
     affineToInfinityOverlap yClass = affineYImage := by
   exact AdjoinRoot.lift_root affineCurve_relation
+
+@[simp] theorem affineToInfinityOverlap_generalized_yClass :
+    affineToInfinityOverlap
+        (N13GeneralizedMumfordIntegral.yClass (R := R₂)) =
+      affineYImage :=
+  affineToInfinityOverlap_yClass
 
 theorem affine_xClass_mapsToUnit :
     IsUnit (affineToInfinityOverlap xClass) := by
