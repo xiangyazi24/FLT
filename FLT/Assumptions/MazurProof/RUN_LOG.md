@@ -877,3 +877,20 @@
   only on `propext`, `Classical.choice`, and `Quot.sound`; no preferred
   integral basis, point enumeration, custom axiom, or finite certificate
   is used.
+
+### N13 finite-contraction coordinate basis (2026-07-30)
+
+- For the reduction of an arbitrary canonical contraction, identified
+  the quotient of the special affine coordinate ring with the tensor
+  special fibre of the contracted integral quotient.
+- Kept the concrete field `F₂` and the local-ring residue-field type
+  distinct.  The scalar map between them is surjective, so a concrete
+  `F₂` basis transports rigorously to the residue-field basis used by
+  finite-flat lifting.
+- Combined rank two, coordinate generation, and finite-flat lifting:
+  every finite quadratic contraction has either the literal integral
+  basis `{1,x}` or the literal integral basis `{1,y}`.
+- The targeted check of `N13ContractQuotientXYBasis.lean` passes.  Its
+  main endpoint depends only on `propext`, `Classical.choice`, and
+  `Quot.sound`; no special-point classification or residue enumeration
+  is used.
