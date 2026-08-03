@@ -847,3 +847,15 @@
 - Packaged the dichotomy for arbitrary balanced quadratic N13 Mumford
   graphs.  No splitting field, classification of quadratic extensions, or
   point enumeration enters the proof.
+
+### N13 irreducible affine quotient finiteness (2026-07-30)
+
+- Proved that any monic integral horizontal equation whose coefficient
+  extension is the generic Mumford equation belongs to the canonical
+  contraction.
+- On the affine side of the proper-chart dichotomy, the existing
+  rank-two coordinate normal form therefore makes the contracted quotient
+  finite over `ℤ₂`; vertical saturation independently makes it flat.
+- The only non-affine alternative is now stated literally as integrality
+  of the reciprocal monic quadratic on the infinity chart.  No claim of
+  affine finiteness is made in that escaping branch.
