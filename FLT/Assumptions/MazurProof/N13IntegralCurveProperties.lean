@@ -40,11 +40,11 @@ private abbrev AffineOverlap :=
 private abbrev InfinityOverlap :=
   N13OrdinaryCurveOverlap.InfinityOverlap
 
-private instance affineCurve_isDomain : IsDomain AffineCurve :=
+instance affineCurve_isDomain : IsDomain AffineCurve :=
   N13IntegralFractionalHull.integralToRational_injective.isDomain
     N13IntegralFractionalHull.integralToRational
 
-private theorem affine_xClass_ne_zero :
+theorem affine_xClass_ne_zero :
     N13OrdinaryCurveOverlap.xClass ≠ 0 := by
   intro h
   have h0 := congrArg
@@ -52,19 +52,19 @@ private theorem affine_xClass_ne_zero :
       (R := N13OrdinaryCurveOverlap.R₂)) h
   simp [N13OrdinaryCurveOverlap.xClass] at h0
 
-private instance affineOverlap_isDomain : IsDomain AffineOverlap :=
+instance affineOverlap_isDomain : IsDomain AffineOverlap :=
   IsLocalization.isDomain_localization
     (powers_le_nonZeroDivisors_of_noZeroDivisors
       affine_xClass_ne_zero)
 
-private instance infinityOverlap_isDomain : IsDomain InfinityOverlap :=
+instance infinityOverlap_isDomain : IsDomain InfinityOverlap :=
   N13OrdinaryCurveOverlap.overlapEquiv.symm.toMulEquiv.isDomain
     AffineOverlap
 
 /-- The infinity parameter is a non-zero-divisor.  This is the free-module
 argument: multiplication by `t` is scalar multiplication by the nonzero
 polynomial `X` on a free `ℤ₂[t]`-module. -/
-private theorem infinity_tClass_mem_nonZeroDivisors :
+theorem infinity_tClass_mem_nonZeroDivisors :
     N13IntegralInfinityChart.tClass ∈
       nonZeroDivisors InfinityCurve := by
   apply IsRegular.mem_nonZeroDivisors
@@ -79,19 +79,19 @@ private theorem infinity_tClass_mem_nonZeroDivisors :
   simpa [N13IntegralInfinityChart.tClass,
     Algebra.smul_def] using h
 
-private theorem infinity_powers_le_nonZeroDivisors :
+theorem infinity_powers_le_nonZeroDivisors :
     Submonoid.powers N13IntegralInfinityChart.tClass ≤
       nonZeroDivisors InfinityCurve :=
   Submonoid.powers_le.mpr
     infinity_tClass_mem_nonZeroDivisors
 
-private theorem infinity_to_overlap_injective :
+theorem infinity_to_overlap_injective :
     Function.Injective
       (algebraMap InfinityCurve InfinityOverlap) :=
   IsLocalization.injective InfinityOverlap
     infinity_powers_le_nonZeroDivisors
 
-private instance infinityCurve_isDomain : IsDomain InfinityCurve :=
+instance infinityCurve_isDomain : IsDomain InfinityCurve :=
   infinity_to_overlap_injective.isDomain
     (algebraMap InfinityCurve InfinityOverlap)
 
