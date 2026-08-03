@@ -690,3 +690,21 @@
   `N13IntegralGraphContraction.lean`, `N13IntegralGraphSpread.lean`, and
   `N13DegreeOneGraphPoint.lean` pass.  Audits of the five new endpoints
   report only `propext`, `Classical.choice`, and `Quot.sound`.
+
+### N13 integral affine point spreads (2026-07-30)
+
+- Constructed the monic linear integral semigraph attached to every
+  integral point of the good two-adic affine chart.  Its curve equation is
+  the factor theorem applied to the point residual.
+- Proved that completion of the square carries this semigraph to the
+  standard sextic Mumford graph of the corresponding curve point.  Exact
+  semigraph contraction and the global Jacobian frame therefore make its
+  canonical divisorial hull invertible.
+- Applied the construction to the selected degree-one Padé graph.  If its
+  rational affine `x`-coordinate is two-adically integral, the exact
+  selected graph now has an invertible spread.  Otherwise its `x`-coordinate
+  has negative valuation and the point is routed, with no ambiguity, to
+  the existing infinity-chart lift.
+- The targeted check of `N13IntegralAffinePointSpread.lean` passes.  Audits
+  of its three main endpoints report only `propext`, `Classical.choice`,
+  and `Quot.sound`.

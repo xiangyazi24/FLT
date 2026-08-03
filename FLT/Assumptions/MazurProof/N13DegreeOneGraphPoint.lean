@@ -105,13 +105,13 @@ theorem normalizedGraphMumford_u_natDegree
 
 /-- In the degree-one branch, the selected normalized Padé graph is
 literally the balanced graph of a rational affine curve point. -/
-theorem exists_rationalCurvePoint_of_graphU_natDegree_eq_one
+theorem exists_rationalAffinePoint_of_graphU_natDegree_eq_one
     (P : G)
     (hdeg :
       (N13ConstructedHalfIntegralSpread.graphU P).natDegree = 1) :
-    ∃ Q : SexticMumford.CurvePoint ModelQ,
+    ∃ x y : ℚ, ∃ hcurve : y ^ 2 = ModelQ.f.eval x,
       N13ConstructedHalfIntegralSpread.normalizedGraphMumford P =
-        SexticMumford.pointMumford ModelQ Q := by
+        SexticMumford.affinePointMumford ModelQ x y hcurve := by
   have hnormalized :
       (N13ConstructedHalfIntegralSpread.normalizedGraphMumford P).u.natDegree =
         1 := by
@@ -121,6 +121,18 @@ theorem exists_rationalCurvePoint_of_graphU_natDegree_eq_one
       ModelQ
       (N13ConstructedHalfIntegralSpread.normalizedGraphMumford P)
       hnormalized rfl
+  exact ⟨x, y, hcurve, hpoint⟩
+
+/-- Curve-point form of the same degree-one identification. -/
+theorem exists_rationalCurvePoint_of_graphU_natDegree_eq_one
+    (P : G)
+    (hdeg :
+      (N13ConstructedHalfIntegralSpread.graphU P).natDegree = 1) :
+    ∃ Q : SexticMumford.CurvePoint ModelQ,
+      N13ConstructedHalfIntegralSpread.normalizedGraphMumford P =
+        SexticMumford.pointMumford ModelQ Q := by
+  obtain ⟨x, y, hcurve, hpoint⟩ :=
+    exists_rationalAffinePoint_of_graphU_natDegree_eq_one P hdeg
   exact ⟨.affine x y hcurve, hpoint⟩
 
 end
