@@ -143,8 +143,8 @@ theorem pointIdeal_sq_eq_mumfordIdeal_of_square
     rw [hs, SexticMumford.xClass_mul]
     convert
       Ideal.mul_mem_left (I ^ 2)
-        (SexticMumford.xClass M s) hpgI using 1 <;>
-      ring
+        (SexticMumford.xClass M s) hpgI using 1
+    all_goals ring
   have htwo :
       2 * SexticMumford.xClass M (C z) =
         SexticMumford.xClass M (C (2 * z)) := by
@@ -262,6 +262,51 @@ abbrev IntegralFractionalIdeal : Type :=
 abbrev G : Type :=
   N13ConstructedHalfIntegralSpread.G
 
+/-- Every balanced quadratic graph with one repeated two-adic root has an
+invertible integral affine spread.  It is the tensor square of the
+valuation-independent point spread at the corresponding tangent point. -/
+theorem mumfordGraph_has_affineSpread_of_repeated_root
+    (D : SexticMumford.Mumford Model)
+    (x : Q₂)
+    (hfactor : D.u = (X - C x) ^ 2) :
+    ∃ J : Ideal IntegralRing,
+      IsUnit (J : IntegralFractionalIdeal) ∧
+        Ideal.map
+            N13TwoAdicCoordinateBaseChange.integralToSextic J =
+          SexticMumford.mumfordIdeal Model D.u D.v := by
+  have hfactorMul :
+      D.u = (X - C x) * (X - C x) := by
+    simpa only [pow_two] using hfactor
+  obtain ⟨hsextic, _⟩ :=
+    N13TwoChartLineTensor.mumford_eval_onCurve_of_split
+      D x x hfactorMul
+  let y :=
+    N13TwoChartLineTensor.goodY x (D.v.eval x)
+  have hcurve :
+      N13GoodModelTwo.AffineEquation x y :=
+    N13TwoChartLineTensor.goodY_onCurve
+      x (D.v.eval x) hsextic
+  let J :=
+    N13AllPointAffineSpread.pairIdeal
+      x y x y hcurve hcurve
+  refine
+    ⟨J,
+      N13AllPointAffineSpread.pairIdeal_isUnit
+        x y x y hcurve hcurve,
+      ?_⟩
+  change
+    Ideal.map
+        N13TwoAdicCoordinateBaseChange.integralToSextic
+        (N13AllPointAffineSpread.pairIdeal
+          x y x y hcurve hcurve) =
+      SexticMumford.mumfordIdeal Model D.u D.v
+  rw [N13AllPointAffineSpread.pairIdeal, Ideal.map_mul,
+    (N13AllPointAffineSpread.pointSpread x y hcurve).map_ideal,
+    N13TwoChartLineTensor.pointY_goodY,
+    ← pow_two,
+    pointIdeal_sq_eq_mumfordIdeal_of_square
+      Model D x hfactor]
+
 /-- Every selected quadratic graph with one repeated rational root has an
 invertible integral affine spread.  It is the tensor square of the
 valuation-independent point spread at the corresponding tangent point. -/
@@ -293,38 +338,9 @@ theorem selectedGraph_has_affineSpread_of_repeated_root
     simpa [D, x₂,
       N13ConstructedHalfIntegralSpread.twoAdicNormalizedGraphMumford]
       using hmap
-  have hfactorMul :
-      D.u = (X - C x₂) * (X - C x₂) := by
-    simpa only [pow_two] using hfactor₂
-  obtain ⟨hsextic, _⟩ :=
-    N13TwoChartLineTensor.mumford_eval_onCurve_of_split
-      D x₂ x₂ hfactorMul
-  let y :=
-    N13TwoChartLineTensor.goodY x₂ (D.v.eval x₂)
-  have hcurve :
-      N13GoodModelTwo.AffineEquation x₂ y :=
-    N13TwoChartLineTensor.goodY_onCurve
-      x₂ (D.v.eval x₂) hsextic
-  let J :=
-    N13AllPointAffineSpread.pairIdeal
-      x₂ y x₂ y hcurve hcurve
-  refine
-    ⟨J,
-      N13AllPointAffineSpread.pairIdeal_isUnit
-        x₂ y x₂ y hcurve hcurve,
-      ?_⟩
-  change
-    Ideal.map
-        N13TwoAdicCoordinateBaseChange.integralToSextic
-        (N13AllPointAffineSpread.pairIdeal
-          x₂ y x₂ y hcurve hcurve) =
-      SexticMumford.mumfordIdeal Model D.u D.v
-  rw [N13AllPointAffineSpread.pairIdeal, Ideal.map_mul,
-    (N13AllPointAffineSpread.pointSpread x₂ y hcurve).map_ideal,
-    N13TwoChartLineTensor.pointY_goodY,
-    ← pow_two,
-    pointIdeal_sq_eq_mumfordIdeal_of_square
-      Model D x₂ hfactor₂]
+  simpa [D] using
+    (mumfordGraph_has_affineSpread_of_repeated_root
+      D x₂ hfactor₂)
 
 end
 

@@ -819,3 +819,31 @@
   generic tangent theorems and the selected-spread theorem depend only on
   `propext`, `Classical.choice`, and `Quot.sound`; no custom axiom,
   `sorry`, `native_decide`, or finite certificate is used.
+
+### N13 quadratic spread dichotomy (2026-07-30)
+
+- Generalized the repeated-root spread from rational roots to arbitrary
+  roots in `ℚ₂`; the tangent construction uses only the two-adic point
+  spread and therefore needs no descent to `ℚ`.
+- Proved the exact structural dichotomy for every monic quadratic Mumford
+  graph over `ℚ₂`.  Nonirreducibility supplies a coefficient factorization
+  into two linear factors.  Distinct factors use the secant tensor spread;
+  equal factors use the tangent-square spread.
+- Applied the dichotomy to the normalized Padé-selected graph.  Thus the
+  only remaining degree-two case is a genuinely irreducible horizontal
+  polynomial over `ℚ₂`, rather than an unclassified failure of a splitting
+  argument.
+
+### N13 irreducible quadratic proper chart (2026-07-30)
+
+- Proved a root-free Newton/Hensel lemma: if the linear coefficient of a
+  monic quadratic is nonintegral while its constant term is smaller than
+  the square of that coefficient, Hensel's lemma produces a root over
+  `ℚ₂`, contradicting irreducibility.
+- Consequently every irreducible monic quadratic over `ℚ₂` lies wholly in
+  one ordinary proper chart.  Either its two affine coefficients are
+  integral, or the two coefficients of its reciprocal monic quadratic are
+  integral.
+- Packaged the dichotomy for arbitrary balanced quadratic N13 Mumford
+  graphs.  No splitting field, classification of quadratic extensions, or
+  point enumeration enters the proof.
