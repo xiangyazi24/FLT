@@ -791,6 +791,10 @@
   spread, without any condition on the two root valuations.  The remaining
   degree-two cases are now the repeated-root and irreducible-quadratic
   regimes.
+- Generalized the tensor argument from rational roots to arbitrary distinct
+  roots in `ℚ₂`.  Thus a rational quadratic which is irreducible over `ℚ`
+  but splits over `ℚ₂` is also covered; the only unsplit regime is now
+  genuine two-adic irreducibility.
 - Targeted checks of `N13IntegralInfinityPointSpread.lean`,
   `N13IntegralAffinePointSpread.lean`, `N13EscapingDegreeOneSpread.lean`,
   `N13TwoChartLineTensor.lean`, and `N13AllPointAffineSpread.lean` pass.

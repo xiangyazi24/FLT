@@ -152,6 +152,56 @@ theorem map_pairIdeal_eq_secantGraph
     N13TwoChartLineTensor.pointIdeal_mul_eq_secantGraph
       _ _ _ _ hneq]
 
+/-- Every balanced quadratic graph that splits over `ℚ₂` with distinct
+roots has an invertible integral affine spread.  Rationality of the roots
+is irrelevant; only the two-adic factorization is used. -/
+theorem mumfordGraph_has_affineSpread_of_distinct_split
+    (D : SexticMumford.Mumford Model)
+    (x₁ x₂ : Q₂)
+    (hfactor :
+      D.u = (X - C x₁) * (X - C x₂))
+    (hneq : x₁ ≠ x₂) :
+    ∃ J : Ideal IntegralRing,
+      IsUnit (J : IntegralFractionalIdeal) ∧
+        Ideal.map
+            N13TwoAdicCoordinateBaseChange.integralToSextic J =
+          SexticMumford.mumfordIdeal Model D.u D.v := by
+  have hDdeg : D.u.natDegree = 2 := by
+    rw [hfactor]
+    compute_degree
+    norm_num
+  obtain ⟨hsextic₁, hsextic₂⟩ :=
+    N13TwoChartLineTensor.mumford_eval_onCurve_of_split
+      D x₁ x₂ hfactor
+  let y₁ := N13TwoChartLineTensor.goodY x₁ (D.v.eval x₁)
+  let y₂ := N13TwoChartLineTensor.goodY x₂ (D.v.eval x₂)
+  have hcurve₁ :
+      N13GoodModelTwo.AffineEquation x₁ y₁ :=
+    N13TwoChartLineTensor.goodY_onCurve
+      x₁ (D.v.eval x₁) hsextic₁
+  have hcurve₂ :
+      N13GoodModelTwo.AffineEquation x₂ y₂ :=
+    N13TwoChartLineTensor.goodY_onCurve
+      x₂ (D.v.eval x₂) hsextic₂
+  let J := pairIdeal x₁ y₁ x₂ y₂ hcurve₁ hcurve₂
+  refine
+    ⟨J,
+      pairIdeal_isUnit
+        x₁ y₁ x₂ y₂ hcurve₁ hcurve₂,
+      ?_⟩
+  change
+    Ideal.map
+        N13TwoAdicCoordinateBaseChange.integralToSextic
+        (pairIdeal x₁ y₁ x₂ y₂ hcurve₁ hcurve₂) =
+      SexticMumford.mumfordIdeal Model D.u D.v
+  rw [map_pairIdeal_eq_secantGraph
+      x₁ y₁ x₂ y₂ hcurve₁ hcurve₂ hneq,
+    N13TwoChartLineTensor.pointY_goodY,
+    N13TwoChartLineTensor.pointY_goodY,
+    ← N13TwoChartLineTensor.mumford_v_eq_secant
+      D hDdeg x₁ x₂ hneq,
+    ← hfactor]
+
 abbrev G : Type :=
   N13ConstructedHalfIntegralSpread.G
 
@@ -160,7 +210,7 @@ an invertible integral affine spread, with no valuation restriction on
 the roots. -/
 theorem selectedGraph_has_affineSpread_of_distinct_split
     (P : G)
-    (hdeg :
+    (_hdeg :
       (N13ConstructedHalfIntegralSpread.graphU P).natDegree = 2)
     (x₁ x₂ : ℚ)
     (hfactor :
@@ -193,44 +243,9 @@ theorem selectedGraph_has_affineSpread_of_distinct_split
     simpa [D, x₁₂, x₂₂,
       N13ConstructedHalfIntegralSpread.twoAdicNormalizedGraphMumford]
       using hmap
-  have hDdeg : D.u.natDegree = 2 := by
-    change
-      ((N13ConstructedHalfIntegralSpread.normalizedGraphMumford
-        P).u.map N13InfinityBaseChange.ratToQ₂).natDegree = 2
-    rw [
-      (N13ConstructedHalfIntegralSpread.normalizedGraphMumford
-        P).u_monic.natDegree_map]
-    exact
-      (N13DegreeOneGraphPoint.normalizedGraphMumford_u_natDegree P).trans
-        hdeg
-  obtain ⟨hsextic₁, hsextic₂⟩ :=
-    N13TwoChartLineTensor.mumford_eval_onCurve_of_split
-      D x₁₂ x₂₂ hfactor₂
-  let y₁ := N13TwoChartLineTensor.goodY x₁₂ (D.v.eval x₁₂)
-  let y₂ := N13TwoChartLineTensor.goodY x₂₂ (D.v.eval x₂₂)
-  have hcurve₁ :
-      N13GoodModelTwo.AffineEquation x₁₂ y₁ :=
-    N13TwoChartLineTensor.goodY_onCurve
-      x₁₂ (D.v.eval x₁₂) hsextic₁
-  have hcurve₂ :
-      N13GoodModelTwo.AffineEquation x₂₂ y₂ :=
-    N13TwoChartLineTensor.goodY_onCurve
-      x₂₂ (D.v.eval x₂₂) hsextic₂
-  let J := pairIdeal x₁₂ y₁ x₂₂ y₂ hcurve₁ hcurve₂
-  refine ⟨J, pairIdeal_isUnit
-    x₁₂ y₁ x₂₂ y₂ hcurve₁ hcurve₂, ?_⟩
-  change
-    Ideal.map
-        N13TwoAdicCoordinateBaseChange.integralToSextic
-        (pairIdeal x₁₂ y₁ x₂₂ y₂ hcurve₁ hcurve₂) =
-      _
-  rw [map_pairIdeal_eq_secantGraph
-      x₁₂ y₁ x₂₂ y₂ hcurve₁ hcurve₂ hneq₂,
-    N13TwoChartLineTensor.pointY_goodY,
-    N13TwoChartLineTensor.pointY_goodY,
-    ← N13TwoChartLineTensor.mumford_v_eq_secant
-      D hDdeg x₁₂ x₂₂ hneq₂,
-    ← hfactor₂]
+  simpa [D] using
+    (mumfordGraph_has_affineSpread_of_distinct_split
+      D x₁₂ x₂₂ hfactor₂ hneq₂)
 
 end
 
