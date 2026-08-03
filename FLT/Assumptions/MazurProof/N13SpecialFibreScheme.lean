@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.N13SpecialCurveOverlap
+import FLT.Assumptions.MazurProof.GlueDataOffDiagonal
 import Mathlib.AlgebraicGeometry.Gluing
 import Mathlib.AlgebraicGeometry.OpenImmersion
 
@@ -176,39 +177,43 @@ def glueData : Scheme.GlueData where
     CategoryTheory.GlueData.ofGlueData' glueData'
   f_open := glueData_f'_open
 
+open scoped Classical in
 /-- The explicit affine overlap, identified with the corresponding
 off-diagonal object of the full glue data. -/
 def affineOverlapToGlueDataIso :
     Spec (.of AffineOverlap) ≅ glueData.V (false, true) :=
-  eqToIso (by
-    simp [glueData, CategoryTheory.GlueData.ofGlueData',
-      glueData', overlap])
+  CategoryTheory.GlueData'.offDiagonalIso glueData'
+    (i := false) (j := true) (by simp)
 
+open scoped Classical in
 /-- The explicit infinity overlap, identified with the corresponding
 off-diagonal object of the full glue data. -/
 def infinityOverlapToGlueDataIso :
     Spec (.of InfinityOverlap) ≅ glueData.V (true, false) :=
-  eqToIso (by
-    simp [glueData, CategoryTheory.GlueData.ofGlueData',
-      glueData', overlap])
+  CategoryTheory.GlueData'.offDiagonalIso glueData'
+    (i := true) (j := false) (by simp)
+
+@[reassoc]
+theorem affineOverlapToGlueDataIso_hom_t :
+    affineOverlapToGlueDataIso.hom ≫ glueData.t false true =
+      transition false true (by simp) ≫
+        infinityOverlapToGlueDataIso.hom := by
+  exact CategoryTheory.GlueData'.offDiagonalIso_hom_t glueData'
+    (i := false) (j := true) (by simp)
 
 @[simp, reassoc]
 theorem affineOverlapToGlueDataIso_hom_f :
     affineOverlapToGlueDataIso.hom ≫ glueData.f false true =
       overlapInclusion false true (by decide) := by
-  simp [affineOverlapToGlueDataIso, glueData,
-    CategoryTheory.GlueData.ofGlueData',
-    CategoryTheory.GlueData'.f', glueData',
-    overlap, overlapInclusion]
+  exact CategoryTheory.GlueData'.offDiagonalIso_hom_f glueData'
+    (i := false) (j := true) (by simp)
 
 @[simp, reassoc]
 theorem infinityOverlapToGlueDataIso_hom_f :
     infinityOverlapToGlueDataIso.hom ≫ glueData.f true false =
       overlapInclusion true false (by decide) := by
-  simp [infinityOverlapToGlueDataIso, glueData,
-    CategoryTheory.GlueData.ofGlueData',
-    CategoryTheory.GlueData'.f', glueData',
-    overlap, overlapInclusion]
+  exact CategoryTheory.GlueData'.offDiagonalIso_hom_f glueData'
+    (i := true) (j := false) (by simp)
 
 /-- The glued characteristic-two special fibre. -/
 abbrev SpecialFibre : Scheme :=
