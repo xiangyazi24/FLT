@@ -630,3 +630,19 @@
   `N13VerticalFibreTopology.lean`, `N13VerticalCartierCharts.lean`, and
   `N13VerticalCartierGlue.lean` pass.  The three gluing endpoint audits
   report only `propext`, `Classical.choice`, and `Quot.sound`.
+
+### N13 recovered integral graph spreads (2026-07-30)
+
+- Combined exact graph contraction with the global relative-Jacobian
+  Bézout frame.  For every smooth integral generalized Mumford graph, the
+  canonical contraction is already an invertible integral fractional
+  ideal, so its divisorial double inverse is literally the original graph
+  ideal.
+- More generally, any generic ideal whose canonical contraction is
+  recovered as a smooth integral graph has an invertible divisorial hull.
+  Applying the existing two-fibre basis and graph-recovery theorem shows
+  that a balanced quadratic graph with the fixed mapped special ideal
+  needs no further contracted-factor lift or local-factoriality argument.
+- Targeted checks of `N13IntegralGraphSpread.lean` and
+  `N13RecoveredGraphSpread.lean` pass.  Both endpoint audits report only
+  `propext`, `Classical.choice`, and `Quot.sound`.
