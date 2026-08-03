@@ -894,3 +894,21 @@
   main endpoint depends only on `propext`, `Classical.choice`, and
   `Quot.sound`; no special-point classification or residue enumeration
   is used.
+
+### N13 vertical graph recovery and Jacobian frame (2026-07-30)
+
+- Proved a generic graph-Jacobian dual-frame theorem.  A complementary
+  factorization and decompositions of the two Jacobian rows, combined with
+  a global Bezout identity, make a two-generated graph ideal invertible.
+- From a literal integral basis `{1,y}`, recovered a monic quadratic
+  relation `m(y)`, a linear vertical equation `x=a+cy`, and the exact
+  contracted ideal `(m(y),x-a-cy)`.
+- Divided the integral curve equation by `x-a-cy` and differentiated the
+  substituted vertical curve relation.  These identities place both
+  Jacobian rows in the generic dual frame, proving the recovered vertical
+  graph ideal is invertible without point enumeration or a certificate.
+- Targeted checks of `GraphJacobianDecompositionFrame.lean`,
+  `N13RankTwoVerticalIdealRecovery.lean`,
+  `N13RankTwoVerticalGraphRecovery.lean`, and
+  `N13VerticalGraphJacobian.lean` pass.  Their audited endpoints depend
+  only on `propext`, `Classical.choice`, and `Quot.sound`.
