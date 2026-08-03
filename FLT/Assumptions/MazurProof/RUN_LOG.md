@@ -794,3 +794,24 @@
 - Targeted checks of `N13IntegralInfinityPointSpread.lean`,
   `N13IntegralAffinePointSpread.lean`, `N13EscapingDegreeOneSpread.lean`,
   `N13TwoChartLineTensor.lean`, and `N13AllPointAffineSpread.lean` pass.
+
+### N13 repeated-root tangent spreads (2026-07-30)
+
+- Closed the repeated-root quadratic regime by a tangent-ideal argument,
+  without enumerating roots or residue classes.
+- Proved structurally that the ordinate at a repeated horizontal root is
+  nonzero.  If it vanished, the repeated linear factor would divide both
+  the ordinate and the curve residual, so its square would divide the
+  separable sextic, contradicting squarefreeness.
+- Proved that the repeated-root Mumford graph ideal is exactly the square
+  of the corresponding point graph ideal.  Modulo the point ideal the
+  conjugate graph factor `Y + v` is the nonzero scalar `2v(a)`, which
+  places the tangent graph generator in the ideal square.
+- Tensor-squared the valuation-independent point spread to obtain an
+  invertible integral affine spread for every selected quadratic graph
+  with a repeated rational root.
+- `lake env lean
+  FLT/Assumptions/MazurProof/N13RepeatedRootSpread.lean` passes.  The two
+  generic tangent theorems and the selected-spread theorem depend only on
+  `propext`, `Classical.choice`, and `Quot.sound`; no custom axiom,
+  `sorry`, `native_decide`, or finite certificate is used.
