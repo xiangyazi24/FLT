@@ -37,6 +37,9 @@ abbrev RationalRing : Type :=
 abbrev SmoothMumford₂ : Type :=
   N13IntegralGraphContraction.SmoothMumford₂
 
+abbrev SemiMumford₂ : Type :=
+  N13GeneralizedMumfordIntegral.TwoAdic.SemiMumford₂
+
 local instance integralRingDomain : IsDomain IntegralRing :=
   N13IntegralFractionalHull.integralToRational_injective.isDomain
     N13IntegralFractionalHull.integralToRational
@@ -73,6 +76,38 @@ private theorem inv_inv_eq_of_isUnit
     (FractionalIdeal.right_inverse_eq
       FunctionField I⁻¹ I
         (by simpa [mul_comm] using hmul)).symm
+
+/-- Exact recovery as any integral generalized Mumford semigraph already
+identifies the divisorial hull with that graph ideal.  The stronger
+vertical Bézout field of `SmoothMumford₂` is not needed here because the
+global curve Jacobian supplies the dual frame. -/
+theorem divisorialHull_eq_semiGraphIdeal_of_contractIdeal_eq
+    (J : Ideal RationalRing)
+    (D : SemiMumford₂)
+    (hcontract :
+      N13IntegralModelContraction.contractIdeal J =
+        N13GeneralizedMumfordIntegral.mumfordIdeal D.u D.v) :
+    N13IntegralFractionalHull.divisorialHull J =
+      (N13GeneralizedMumfordIntegral.mumfordIdeal D.u D.v :
+        IntegralFractionalIdeal) := by
+  rw [N13IntegralFractionalHull.divisorialHull,
+    N13IntegralFractionalHull.contractedFractional,
+    hcontract]
+  exact inv_inv_eq_of_isUnit
+    (N13IntegralGraphJacobian.mumfordIdeal_isUnit D)
+
+/-- Hence a recovered integral semigraph makes the canonical divisorial
+spread invertible without any special-fibre frame. -/
+theorem divisorialHull_isUnit_of_contractIdeal_eq_semiGraph
+    (J : Ideal RationalRing)
+    (D : SemiMumford₂)
+    (hcontract :
+      N13IntegralModelContraction.contractIdeal J =
+        N13GeneralizedMumfordIntegral.mumfordIdeal D.u D.v) :
+    IsUnit (N13IntegralFractionalHull.divisorialHull J) := by
+  rw [divisorialHull_eq_semiGraphIdeal_of_contractIdeal_eq
+    J D hcontract]
+  exact N13IntegralGraphJacobian.mumfordIdeal_isUnit D
 
 /-- Any generic ideal whose canonical contraction is an integral graph has
 that graph itself as its divisorial hull. -/

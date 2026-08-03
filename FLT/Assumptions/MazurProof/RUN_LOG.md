@@ -646,3 +646,24 @@
 - Targeted checks of `N13IntegralGraphSpread.lean` and
   `N13RecoveredGraphSpread.lean` pass.  Both endpoint audits report only
   `propext`, `Classical.choice`, and `Quot.sound`.
+
+### N13 arbitrary-special-graph spreads (2026-07-30)
+
+- Removed the hardcoded special graph from the two-fibre no-escape layer.
+  Every monic quadratic special Mumford graph quotient has the literal
+  basis `{1,x}` by graph evaluation and the canonical polynomial power
+  basis.
+- Factored graph recovery before its fixed-special smoothness calculation:
+  an integral quotient basis `{1,x}` already reconstructs a monic
+  quadratic integral semigraph and identifies its graph ideal exactly with
+  the canonical contraction.
+- The global integral Jacobian frame applies to every such semigraph, so a
+  quadratic generic graph has an invertible divisorial spread as soon as
+  its mapped contraction is the graph ideal of any quadratic special
+  Mumford datum.  The remaining condition is packaged as
+  `N13ArbitrarySpecialGraphSpread.SpecialGraphModel`; it no longer names a
+  fixed Picard class or asks for three contracted factor lifts.
+- Targeted checks of `N13SpecialGraphQuotientBasis.lean`,
+  `N13TwoFiberGraphBasis.lean`, `N13RankTwoSemiGraphRecovery.lean`, and
+  `N13ArbitrarySpecialGraphSpread.lean` pass.  Audits of all four endpoints
+  report only `propext`, `Classical.choice`, and `Quot.sound`.
