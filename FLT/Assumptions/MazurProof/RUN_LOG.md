@@ -731,9 +731,18 @@
   point supplied by `nonintegralInfinityLift`.
 - Proved that the generic fibre of the affine half is exactly the
   coefficient-extended, completed-square sextic graph.  This leaves only
-  its identification with the standard degree-one point graph before the
-  escaping selected Padé branch is fully connected to the proper line.
+  a representative comparison with the standard degree-one point graph.
+- Completed that comparison for every negative-valuation point:
+  `1-t₀X` is a nonzero scalar multiple of `X-x`, while the completed graph
+  ordinate evaluates to `2y+h(x)` and hence differs from its constant
+  point ordinate by a multiple of `X-x`.  The generic fibre of the
+  two-chart line is therefore literally the standard point Mumford ideal.
+- Applied the equality to the selected degree-one Padé graph.  Its escape
+  alternative now supplies an explicit invertible two-chart line whose
+  generic ideal is exactly the selected two-adic graph.  Thus degree one
+  has no remaining unrepresented nonintegral branch.
 - Targeted checks of `GeneralizedGraphIdealCore.lean`,
   `N13IntegralGraphJacobian.lean`, `N13OrdinaryCurveOverlap.lean`, and
-  `N13IntegralInfinityPointSpread.lean` pass.  No point enumeration,
+  `N13IntegralInfinityPointSpread.lean` pass; the follow-up check of
+  `N13EscapingDegreeOneSpread.lean` also passes.  No point enumeration,
   normality, local factoriality, or finite certificate is used.
