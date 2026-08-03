@@ -113,8 +113,7 @@ def pointJacobianValue (P : IntegralInfinityPoint) : R₂ :=
     (1 + P.1.1 ^ 2 + P.1.1 ^ 3)
 
 theorem pointJacobianValue_toZMod
-    (P : IntegralInfinityPoint)
-    (ht : PadicInt.toZMod P.1.1 = 0) :
+    (P : IntegralInfinityPoint) :
     PadicInt.toZMod (pointJacobianValue P) = 1 := by
   have htwo :
       PadicInt.toZMod (2 : R₂) = 0 := by
@@ -124,18 +123,26 @@ theorem pointJacobianValue_toZMod
       _ = 0 := ZMod.natCast_self 2
   calc
     PadicInt.toZMod (pointJacobianValue P) =
-        PadicInt.toZMod (2 : R₂) * PadicInt.toZMod P.1.2 +
+      PadicInt.toZMod (2 : R₂) * PadicInt.toZMod P.1.2 +
           (1 + PadicInt.toZMod P.1.1 ^ 2 +
             PadicInt.toZMod P.1.1 ^ 3) := by
       simp only [pointJacobianValue, map_add, map_mul, map_one, map_pow]
-    _ = 0 * PadicInt.toZMod P.1.2 + (1 + 0 ^ 2 + 0 ^ 3) := by
-      rw [ht, htwo]
-    _ = 1 := by norm_num
+    _ = 1 := by
+      let t : ZMod 2 := PadicInt.toZMod P.1.1
+      have ht2 : t ^ 2 = t :=
+        ZMod.pow_card t
+      have ht3 : t ^ 3 = t := by
+        rw [show t ^ 3 = t ^ 2 * t by ring,
+          ht2, ← pow_two, ht2]
+      rw [htwo, zero_mul, zero_add]
+      change 1 + t ^ 2 + t ^ 3 = 1
+      rw [ht2, ht3]
+      linear_combination (ZMod.natCast_self 2) * t
 
-/-- At a point above `t=0`, the ordinate Jacobian is a unit. -/
+/-- At every integral infinity-chart point, the ordinate Jacobian is a
+unit.  On the special fibre `t²=t`, so `1+t²+t³=1`. -/
 theorem pointJacobianValue_isUnit
-    (P : IntegralInfinityPoint)
-    (ht : PadicInt.toZMod P.1.1 = 0) :
+    (P : IntegralInfinityPoint) :
     IsUnit (pointJacobianValue P) := by
   rw [← IsLocalRing.residue_ne_zero_iff_isUnit]
   intro hzero
@@ -146,7 +153,7 @@ theorem pointJacobianValue_isUnit
   have hto :
       PadicInt.toZMod (pointJacobianValue P) = 0 := by
     simpa [PadicInt.toZMod_eq_residueField_comp_residue] using hmap
-  rw [pointJacobianValue_toZMod P ht] at hto
+  rw [pointJacobianValue_toZMod P] at hto
   exact one_ne_zero hto
 
 def pointJacobian (P : IntegralInfinityPoint) : Base :=
@@ -176,20 +183,19 @@ theorem pointJacobian_sub_value_eq
 
 /-- The unit ordinate derivative supplies the exact graph Bézout identity. -/
 theorem point_bezout
-    (P : IntegralInfinityPoint)
-    (ht : PadicInt.toZMod P.1.1 = 0) :
+    (P : IntegralInfinityPoint) :
     ∃ a b c : Base,
       a * pointU P +
           b *
             (2 * pointV P +
               N13IntegralInfinityChart.hBase) +
           c * pointW P = 1 := by
-  let e : R₂ˣ := (pointJacobianValue_isUnit P ht).unit
+  let e : R₂ˣ := (pointJacobianValue_isUnit P).unit
   let b : Base := C ((e⁻¹ : R₂ˣ) : R₂)
   refine
     ⟨-(b * pointJacobianQuotient P), b, 0, ?_⟩
   have he : (e : R₂) = pointJacobianValue P :=
-    (pointJacobianValue_isUnit P ht).unit_spec
+    (pointJacobianValue_isUnit P).unit_spec
   have hj := pointJacobian_sub_value_eq P
   change
     -(b * pointJacobianQuotient P) * pointU P +
@@ -219,8 +225,7 @@ def conjugatePointIdeal
 
 /-- The point ideal times its hyperelliptic conjugate is `(t-t₀)`. -/
 theorem pointIdeal_mul_conjugate
-    (P : IntegralInfinityPoint)
-    (ht : PadicInt.toZMod P.1.1 = 0) :
+    (P : IntegralInfinityPoint) :
     pointIdeal P * conjugatePointIdeal P =
       Ideal.span ({xClassHom (pointU P)} : Set InfinityCurve) := by
   exact
@@ -230,7 +235,7 @@ theorem pointIdeal_mul_conjugate
       N13IntegralInfinityChart.rhsBase
       (pointSemiGraph P)
       yClass_relation
-      (point_bezout P ht)
+      (point_bezout P)
 
 theorem infinityCurvePoly_degree :
     N13IntegralInfinityChart.infinityCurvePoly.degree = 2 := by
@@ -253,8 +258,7 @@ theorem xClassHom_pointU_ne_zero (P : IntegralInfinityPoint) :
 
 /-- The integral infinity-chart point ideal is invertible. -/
 theorem pointIdeal_isUnit
-    (P : IntegralInfinityPoint)
-    (ht : PadicInt.toZMod P.1.1 = 0) :
+    (P : IntegralInfinityPoint) :
     IsUnit (pointIdeal P : InfinityFractionalIdeal) := by
   refine
     ⟨Units.mkOfMulEqOne
@@ -265,7 +269,7 @@ theorem pointIdeal_isUnit
             InfinityFractionalIdeal)⁻¹)
       ?_, rfl⟩
   rw [← mul_assoc, ← FractionalIdeal.coeIdeal_mul,
-    pointIdeal_mul_conjugate P ht]
+    pointIdeal_mul_conjugate P]
   exact
     FractionalIdeal.coe_ideal_span_singleton_mul_inv
       FunctionField (xClassHom_pointU_ne_zero P)
@@ -507,13 +511,12 @@ structure TwoChartLine where
 /-- The horizontal section through an infinity-chart integral point is an
 honest invertible two-chart line. -/
 def pointLine
-    (P : IntegralInfinityPoint)
-    (ht : PadicInt.toZMod P.1.1 = 0) :
+    (P : IntegralInfinityPoint) :
     TwoChartLine where
   affineIdeal := affinePointIdeal P
   infinityIdeal := pointIdeal P
   affine_isUnit := affinePointIdeal_isUnit P
-  infinity_isUnit := pointIdeal_isUnit P ht
+  infinity_isUnit := pointIdeal_isUnit P
   overlap_eq := pointIdeals_agree_on_overlap P
 
 theorem nonintegralLift_t_residue_eq_zero
@@ -539,7 +542,6 @@ def nonintegralPointLine
   pointLine
     (N13ProperCurveReduction.nonintegralInfinityLift
       x y hx hxy)
-    (nonintegralLift_t_residue_eq_zero x y hx hxy)
 
 abbrev Model : SexticMumford.Model N13ProperCurveReduction.Q₂ :=
   N13GoodSexticCoordinateEquiv.M

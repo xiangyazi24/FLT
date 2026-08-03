@@ -772,3 +772,25 @@
 - Targeted checks of `GeneralizedGraphIdealCore.lean` and
   `N13TwoChartLineTensor.lean` pass.  No point enumeration, special-fibre
   table, local factoriality, custom axiom, or finite certificate is used.
+
+### N13 all-point affine spreads (2026-07-30)
+
+- Removed the unnecessary `t ≡ 0 (mod 2)` restriction from integral
+  infinity-chart point lines.  For every residue `t ∈ F₂`, Frobenius gives
+  `t²=t` and hence the ordinate Jacobian reduces structurally to
+  `1+t²+t³=1`.  Thus every integral infinity-chart point ideal is
+  invertible.
+- Exposed the literal monic affine point ideal, its integral fractional
+  invertibility, and its exact standard sextic generic fibre for every
+  integral affine point.
+- Combined the two presentations into one valuation-independent affine
+  spread theorem: integral `x` uses the monic affine graph; negative
+  valuation uses the affine half of the proper infinity point line.
+- Tensoring these point spreads proves that every selected quadratic Padé
+  graph with two distinct rational roots has an invertible integral affine
+  spread, without any condition on the two root valuations.  The remaining
+  degree-two cases are now the repeated-root and irreducible-quadratic
+  regimes.
+- Targeted checks of `N13IntegralInfinityPointSpread.lean`,
+  `N13IntegralAffinePointSpread.lean`, `N13EscapingDegreeOneSpread.lean`,
+  `N13TwoChartLineTensor.lean`, and `N13AllPointAffineSpread.lean` pass.

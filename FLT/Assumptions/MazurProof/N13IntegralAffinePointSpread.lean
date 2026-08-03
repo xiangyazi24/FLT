@@ -155,6 +155,35 @@ theorem sexticSemiIdeal_eq_pointIdeal (P : IntegralPoint) :
   rw [sexticSemi_u, sexticSemi_v]
   rfl
 
+/-- The literal integral affine graph ideal of an integral point. -/
+def pointIdeal (P : IntegralPoint) :
+    Ideal N13IntegralGraphJacobian.IntegralRing :=
+  N13GeneralizedMumfordIntegral.mumfordIdeal
+    (integralSemiGraph P).u (integralSemiGraph P).v
+
+/-- The affine point graph is already an invertible integral fractional
+ideal; no divisorial hull is needed for tensor products of point spreads. -/
+theorem pointIdeal_isUnit (P : IntegralPoint) :
+    IsUnit
+      (pointIdeal P :
+        N13IntegralGraphJacobian.IntegralFractionalIdeal) := by
+  exact
+    N13IntegralGraphJacobian.mumfordIdeal_isUnit
+      (integralSemiGraph P)
+
+/-- The generic fibre of the literal integral affine point ideal is the
+standard sextic point graph. -/
+theorem map_pointIdeal (P : IntegralPoint) :
+    Ideal.map
+        N13TwoAdicCoordinateBaseChange.integralToSextic
+        (pointIdeal P) =
+      SexticMumford.mumfordIdeal Model
+        (SexticMumford.pointMumford Model (curvePoint P)).u
+        (SexticMumford.pointMumford Model (curvePoint P)).v := by
+  rw [pointIdeal,
+    N13TwoAdicCoordinateBaseChange.map_mumfordIdeal_sexticSemiOfSemi]
+  exact sexticSemiIdeal_eq_pointIdeal P
+
 /-- Every affine integral point supplies an invertible canonical
 divisorial spread of its generic sextic graph. -/
 theorem divisorialHull_pointIdeal_isUnit (P : IntegralPoint) :
