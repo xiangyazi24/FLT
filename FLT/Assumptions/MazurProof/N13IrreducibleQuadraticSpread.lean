@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.N13FiniteContractIdealInvertible
 import FLT.Assumptions.MazurProof.N13IrreducibleQuadraticFinite
+import FLT.Assumptions.MazurProof.N13ReciprocalQuadraticReflection
 
 /-!
 # The affine spread branch for irreducible N13 quadratics
@@ -48,6 +49,41 @@ theorem divisorialHull_isUnit_or_integral_reciprocal
       (N13FiniteContractIdealInvertible.divisorialHull_graphIdeal_isUnit_of_finite_quadratic
         D.toSemi hdeg hfinite)
   · exact Or.inr hreciprocal
+
+/-- In the escaping branch, the integral reciprocal equation already has
+the correct affine weighted horizontal closure: after coefficient
+extension it is the original Mumford equation multiplied by the inverse
+constant term. -/
+theorem divisorialHull_isUnit_or_reciprocal_closure
+    (D : SexticMumford.Mumford Model)
+    (hdeg : D.u.natDegree = 2)
+    (hirr : Irreducible D.u) :
+    IsUnit
+        (N13IntegralFractionalHull.divisorialHull
+          (N13CanonicalContractionQuotient.graphIdeal D.toSemi)) ∨
+      ∃ a b : R₂,
+        let m :=
+          N13ReciprocalQuadraticReflection.integralReciprocal a b
+        m.Monic ∧
+          m.natDegree = 2 ∧
+          N13TwoAdicCoordinateBaseChange.mapPoly (m.reflect 2) =
+            C ((D.u.coeff 0)⁻¹) * D.u := by
+  rcases
+      divisorialHull_isUnit_or_integral_reciprocal
+        D hdeg hirr with hunit | hreciprocal
+  · exact Or.inl hunit
+  · right
+    obtain ⟨h0, a, b, hm⟩ := hreciprocal
+    refine ⟨a, b, ?_, ?_, ?_⟩
+    · exact
+        N13ReciprocalQuadraticReflection.integralReciprocal_monic
+          a b
+    · exact
+        N13ReciprocalQuadraticReflection.integralReciprocal_natDegree
+          a b
+    · exact
+        N13ReciprocalQuadraticReflection.mapPoly_reflect_integralReciprocal
+          D hdeg h0 a b hm
 
 end
 

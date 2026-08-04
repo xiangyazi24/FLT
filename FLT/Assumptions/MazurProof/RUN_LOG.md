@@ -984,3 +984,7 @@
   endpoints depend only on `propext`, `Classical.choice`, and
   `Quot.sound`; no root splitting or ordinate-integrality assumption is
   used.
+- Strengthened the irreducible spread dichotomy: its escaping branch now
+  returns the integral reciprocal polynomial together with monicity,
+  degree two, and the exact reflected generic equality.  The strengthened
+  endpoint has the same three standard axioms only.
