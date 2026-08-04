@@ -952,3 +952,22 @@
 - The targeted check of `N13IntegralInfinityGraphJacobian.lean` passes.
   No point enumeration, root splitting, custom axiom, or finite
   certificate is used.
+
+### N13 integral infinity graph two-chart closure (2026-08-04)
+
+- Defined the affine weighted closures of an integral infinity semigraph
+  by reflecting its three polynomials at weights `2`, `3`, and `4`.
+- Reflected the infinity semigraph equation at total weight `6`.  The
+  multiplicativity of bounded polynomial reflection gives the exact
+  affine semigraph equation without choosing roots.
+- Proved that the affine and infinity graph ideals agree on the Laurent
+  overlap: their horizontal and ordinate generators differ by the units
+  `x²` and `x³`.
+- Combined both global Jacobian frames to construct an invertible
+  `TwoChartLine` for every bounded nonzero integral infinity graph.
+- Targeted compilation generated the object files for both
+  `N13IntegralInfinityGraphJacobian.lean` and
+  `N13IntegralInfinityGraphTwoChart.lean`.  Neither file contains
+  `sorry`, a custom axiom, root splitting, or point enumeration.
+- The audited Jacobian and two-chart endpoints depend only on `propext`,
+  `Classical.choice`, and `Quot.sound`.
