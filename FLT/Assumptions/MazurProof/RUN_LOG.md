@@ -927,3 +927,14 @@
 - The targeted check of `N13FiniteContractIdealInvertible.lean` passes.
   Both new endpoints depend only on `propext`, `Classical.choice`, and
   `Quot.sound`.  The reciprocal integral infinity-chart branch remains.
+
+### N13 irreducible affine spread branch (2026-08-04)
+
+- Combined the irreducible proper-chart dichotomy with finite-contraction
+  invertibility.  Every irreducible quadratic Mumford graph now either
+  has an invertible affine divisorial hull or has a literal integral monic
+  reciprocal equation on the infinity chart.
+- This is an affine-only capstone: it records the exact remaining branch
+  without hiding it behind a semantic properness structure.
+- The targeted check of `N13IrreducibleQuadraticSpread.lean` passes.
+  The theorem contains no `sorry`, custom axiom, or finite certificate.
