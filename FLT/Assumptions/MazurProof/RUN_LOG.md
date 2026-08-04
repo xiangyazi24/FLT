@@ -912,3 +912,18 @@
   `N13RankTwoVerticalGraphRecovery.lean`, and
   `N13VerticalGraphJacobian.lean` pass.  Their audited endpoints depend
   only on `propext`, `Classical.choice`, and `Quot.sound`.
+
+### N13 finite quadratic contractions are invertible (2026-08-04)
+
+- Combined the coordinate-basis dichotomy with both graph-recovery
+  constructions.  A finite quadratic canonical contraction with basis
+  `{1,x}` is an integral horizontal semigraph; with basis `{1,y}` it is
+  an integral vertical graph.
+- The corresponding global Jacobian frames prove that the contracted
+  fractional ideal is invertible in either case.
+- Proved that its divisorial double-inverse hull is therefore invertible
+  as well.  This closes the affine-integral branch of the irreducible
+  quadratic proper-chart dichotomy.
+- The targeted check of `N13FiniteContractIdealInvertible.lean` passes.
+  Both new endpoints depend only on `propext`, `Classical.choice`, and
+  `Quot.sound`.  The reciprocal integral infinity-chart branch remains.
