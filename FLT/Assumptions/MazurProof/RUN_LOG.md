@@ -938,3 +938,17 @@
   without hiding it behind a semantic properness structure.
 - The targeted check of `N13IrreducibleQuadraticSpread.lean` passes.
   The theorem contains no `sorry`, custom axiom, or finite certificate.
+
+### N13 integral infinity graph Jacobian (2026-08-04)
+
+- Constructed the two relative Jacobian rows on the ordinary infinity
+  chart `v² + (1+t²+t³)v = t+t²`.
+- Proved an explicit integral Bézout identity with right-hand side `117`.
+  Since `117` is a two-adic unit, the two Jacobian rows generate one over
+  the entire chart.
+- Instantiated the general graph-Jacobian dual frame.  Every nonzero
+  integral polynomial semigraph on the infinity chart now defines an
+  invertible fractional ideal.
+- The targeted check of `N13IntegralInfinityGraphJacobian.lean` passes.
+  No point enumeration, root splitting, custom axiom, or finite
+  certificate is used.
