@@ -971,3 +971,16 @@
   `sorry`, a custom axiom, root splitting, or point enumeration.
 - The audited Jacobian and two-chart endpoints depend only on `propext`,
   `Classical.choice`, and `Quot.sound`.
+
+### N13 reciprocal quadratic reflection (2026-08-04)
+
+- Proved that reflecting the monic reciprocal quadratic at weight two
+  gives the original monic quadratic multiplied by the inverse of its
+  nonzero constant term.
+- For a literal integral reciprocal equation, proved that coefficient
+  extension of its affine weighted closure is therefore a nonzero scalar
+  multiple of the original generic Mumford horizontal equation.
+- The targeted object-file compilation and axiom audit pass.  Both
+  endpoints depend only on `propext`, `Classical.choice`, and
+  `Quot.sound`; no root splitting or ordinate-integrality assumption is
+  used.
