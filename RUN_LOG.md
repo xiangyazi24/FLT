@@ -1,3 +1,40 @@
+## Run 2026-08-05 (source-rebuilt Mazur audit and N17 classification layer)
+
+- approval: automode continuation; ChatGPT tabs kept saturated through the
+  shared `flt` bridge
+- source-rebuilt correction:
+  - endpoint has exactly six custom axioms and no reachable `sorryAx`
+  - removed the stale seventh item `exists_rational_two_isogeny_quotient`;
+    the Vélu quotient used by orders 20 and 24 is proved
+  - confirmed the two tracked `KubertBridgeN16` `sorry`s are outside the
+    endpoint import closure
+- N13 audit:
+  - Q3802 confirms that the finite 19-element special Abel set, quotient
+    basis, graph/disk-pair recovery, relation-first classifier, separatedness
+    adapter, and rational-point cusp tail are already proved
+  - Q3805 isolates the weakest endpoint seam as pointwise reflection of
+    rational Abel classes from equality of anchored special classes
+  - the next low-degree construction is irreducible-quadratic special
+    restriction on both charts; no new special Jacobian count is needed
+- N17 verified milestones:
+  - `42adc64469`: preserve `j` in exact-order-17 Tate normalization
+  - `aefa1fdb8c`: explicit `X₀(17)` model, standard two-isogeny, and exact
+    order-four point
+  - `034571e123`: classify rational two-torsion and prove its cardinality is
+    two
+  - current working node: sharpen the abstract two-isogeny exact sequence;
+    a zero left arrow embeds `G/2G` into the right quotient, and
+    `|G/2G| ≤ |G[2]|` forces free rank zero
+- verification:
+  - scoped compilations pass
+  - the N17 two-torsion theorem and all three new exact-sequence/rank
+    declarations have clean-3 axiom audits
+- next N17 producers:
+  - concrete two-coset exhaustions for the standard isogeny and its dual
+  - finite generation/rank-zero classification of `X₀(17)(ℚ)`
+  - later, the level quotient and twist/kernel transport needed to consume
+    the classification in the active Tate locus
+
 ## Run 2026-07-28 (N13 structural two-adic Abel chart)
 - approval: `/automode`; stop requested at the next clean node
 - proof policy: structural only; no finite tables, `native_decide`, giant

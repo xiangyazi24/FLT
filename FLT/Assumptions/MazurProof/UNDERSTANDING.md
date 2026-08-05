@@ -342,6 +342,15 @@ the standard model are infinity and `(0,0)`, constructs an explicit
 equivalence with `Bool`, and obtains two-torsion cardinality exactly two.
 This is the sharp torsion input for the eventual `E(ℚ)/2E(ℚ)` rank-zero
 criterion.
+`X017ExactSequence.lean` now proves the sharpened abstract descent layer.
+If the left isogeny quotient has representatives zero and one element killed
+by the dual map, the first exact-sequence arrow vanishes, so `G/2G` injects
+into the right endpoint quotient.  It also generalizes the N15 rank criterion:
+for a finitely generated abelian group, the inequality
+`|G/2G| ≤ |G[2]|` forces free rank zero.  The N17-specific producers still
+missing from this layer are the two concrete isogeny-coset exhaustions and
+finite generation of the rational point group; neither is carried as a
+hypothesis by an endpoint theorem.
 
 #### N13 analysis note
 F₁₃(b,c) is bivariate (degree 10 in c, monic leading coeff -1; degree 7 in b;
@@ -551,3 +560,25 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
 - Earlier axiom inventories in this file describe historical snapshots and
   must not be treated as current.  Use a fresh `#print axioms` audit of the
   assembled theorem before reporting the remaining global Mazur boundary.
+- The source audit recovered as Q3802 confirms that the broad N13 tail is
+  already present: the 19-element special Abel set, selected quotient basis,
+  integral graph/disk-pair recovery, relation-first classifier, reduction
+  injectivity from `NSeparated`, transition-square estimate, and final
+  rational-point-to-cusp implication are all proved.  The next missing
+  low-degree theorem is specifically the special restriction of an
+  irreducible quadratic proper line, with exact equalities on both charts.
+  After that, the genuine remaining producers are one concrete
+  relation-first `SpreadData`, `abel_reduces`, literal mapped-special equality
+  for canonical translated kernel representatives, and the first-jet
+  comparison for doubling.  No additional finite Jacobian group law or
+  cardinality computation belongs on the critical path.
+- Q3805 independently confirms an even weaker endpoint formulation: it is
+  sufficient to prove, only for rational curve points, that equality of
+  their anchored special Abel classes reflects equality of their rational
+  Abel--Jacobi classes.  Cusp surjectivity and rational Abel--Jacobi
+  injectivity then give affine cuspidality directly.  This pointwise
+  reflection theorem is weaker than constructing a group law on the
+  19-element special set or proving global rational Picard finiteness.  The
+  full `SpreadData` route remains useful because it also supplies the
+  separated-kernel endgame, but it must not be mistaken for the weakest
+  theorem needed by `CyclicExclusion13`.

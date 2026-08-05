@@ -1,67 +1,69 @@
-# MazurProof Sorry Analysis — 2026-07-08
+# Mazur Endpoint Checklist
 
-**Status: 12 sorry, 14 axiom (in CyclicOrderAssembly + other files)**
+Last source-rebuilt audit: 2026-08-05.
 
-## Sorry Classification
+The authoritative endpoint is `MazurProof.mazur_torsion_bound`.  A box may be
+checked only after the replacement theorem is reachable from that endpoint,
+scoped builds pass, and `#print axioms` contains only `propext`,
+`Classical.choice`, and `Quot.sound`.
 
-### Category A: Tate NF Bridge (4 sorry)
-These bridge from `HasRationalPointOfOrder E N` to Tate NF parameters.
-BLOCKED ON: general Tate NF reduction theorem (not in Mathlib).
+## Primitive endpoint axioms
 
-| File | Sorry | Statement |
-|------|-------|-----------|
-| CyclicExclusion11:173 | `tate_polynomial_system_solution_of_order11` | order 11 → Tate system |
-| CyclicExclusion15:155 | `simultaneous_order3_and5_tate_bridge` | orders 3+5 → Tate |
-| CyclicExclusion18:29 | `order18_to_tate_obstruction` | order 18 → Tate |
-| CyclicExclusion21:34 | `order21_to_tate_obstruction` | order 21 → Tate |
+- [ ] N13 — `CyclicExclusion13.C13Sextic_affine_x_is_cuspidal`
+  - Closed infrastructure: low-degree proper spreads; complete degree-one and
+    split/repeated-root two-fibre Picard data; 19-element special Abel set;
+    selected quotient basis; graph/disk-pair recovery; abstract classifier;
+    final rational-point-to-cusp implication.
+  - Immediate open atom: irreducible-quadratic special restriction on both
+    charts.
+  - Remaining semantic atoms: either pointwise specialization reflection on
+    rational Abel classes, or the stronger concrete `SpreadData` plus
+    `abel_reduces`, canonical mapped-special equality, and first-jet doubling
+    compatibility.
 
-### Category B: Diophantine / Rational Points (4 sorry)
-Prove that specific polynomial systems have no rational solutions.
-BLOCKED ON: descent/Chabauty/rank computations.
+- [ ] N17 — `CyclicExclusion17.no_F17_rational_solution`
+  - Closed infrastructure: exact-order Tate normalization with preserved
+    `j`; explicit `X₀(17)` model and standard two-isogeny; visible point of
+    exact order four; rational two-torsion has cardinality two; sharpened
+    exact-sequence and general rank-zero criterion.
+  - Open arithmetic atoms: two explicit isogeny-coset exhaustions, finite
+    generation, and the rational-point classification.
+  - Open geometric atoms: the Tate `X₁(17) → X₀(17)` quotient with cusp and
+    `j` control, then twist/model/kernel transport for the two noncuspidal
+    fibres.
 
-| File | Sorry | Curve | Genus | Method |
-|------|-------|-------|-------|--------|
-| CyclicExclusion11:185 | `no_tate_order11_polynomial_solution` | X₁(11) = 11a3 | 1 | rank 0 descent |
-| CyclicExclusion15:172 | `no_tate_order5_psi3_root_solution` | X₁(15) | 1 | rank 0 descent |
-| CyclicExclusion18:32 | `no_obstruction18` | X₁(18) | 2 | Chabauty |
-| CyclicExclusion21:37 | `no_obstruction21` | X₁(21) | ? | Chabauty/descent |
+- [ ] N19 — `CyclicExclusion19.no_F19_rational_solution`
+  - Closed infrastructure: Tate exact-order normalization and fixed
+    `kernelPoly19` no-root tail.
+  - Open atom: emptiness of the nonsingular rational Tate `F19 = 0` locus.
+    A universal map is required before the fixed-fibre polynomial can be
+    consumed.
 
-### Category C: Kubert Bridge / Modular Parametrization (4 sorry)
-Explicit polynomial maps between Tate NF and obstruction curves.
-BLOCKED ON: modular curve parametrization computation.
+- [ ] N25 — `CyclicExclusion25.no_explicit_order25_obstruction`
+  - Closed infrastructure: explicit primitive order-25 obstruction.
+  - Open atom: rational-point exclusion for that explicit locus.
 
-| File | Sorry | Content |
-|------|-------|---------|
-| CyclicExclusion14:77 | `cyclic_order_14_kubert_bridge` | order 14 → 96A1 |
-| CyclicExclusion16:112 | `cyclic_order_16_kubert_bridge` | order 16 → N16 curve |
-| KubertBridgeN16:288 | `kubert_C16_discriminant_data` | Z/2×Z/16 → Tate disc |
-| KubertBridgeN16:307 | `EN16_point_of_Phi16_and_disc` | Tate disc → N16 curve |
+- [ ] N49 — `CyclicExclusion49.no_raw_order49_tate_obstruction`
+  - Closed infrastructure: structural `ψ₄₉` factorization bridge to the
+    explicit obstruction.
+  - Open atoms: rational-point classification of `X₀(49)` and the universal
+    Tate-to-modular map with cusp exclusion.
 
-## Tractability Assessment
+- [ ] Large primes — `no_prime_order_ge_23`
+  - Open atom family: formal-immersion/Eisenstein-ideal exclusion uniformly
+    for primes at least 23.
 
-**Most tractable (Category B, genus 1):**
-- X₁(11) = 11a3: rank 0 over Q, denominator descent feasible (~1000 lines)
-- X₁(15): rank 0 over Q, similar approach
+## Cross-cutting checks
 
-**Moderate (Category C):**
-- Kubert bridges: concrete polynomial computation, could be done with
-  polyrith/ring/field_simp once the map is known
+- [x] Endpoint has no reachable `sorryAx`.
+- [x] Orders 11, 14, 15, 16, 18, 20, 21, 24, 27, and 35 are discharged from
+  the endpoint.
+- [x] The order-20/order-24 Vélu two-isogeny quotient is a theorem, not an
+  axiom.
+- [x] The two tracked `KubertBridgeN16` `sorry`s are outside the endpoint
+  import closure.
+- [ ] Rebuild the final endpoint and obtain a clean-3 axiom audit after all
+  six primitive boxes are checked.
 
-**Hard (Category A):**
-- General Tate NF reduction: requires Weierstrass coordinate change theory
-
-**Hardest (Category B, genus 2):**
-- X₁(18), X₁(21): need genus-2 Jacobian rank computation (Chabauty)
-
-## Session Progress
-
-| Commit | Content | Sorry closed |
-|--------|---------|-------------|
-| 0796e235 | CyclicExclusion20: 5 group-theory sorry | 5 |
-| 3b0e38e6 | CyclicExclusion15: false statement fixed | 0 |
-| 6734e097 | eq_five_nsmul independence lemma | 0 |
-| cef30929 | N14 axiom→theorem wiring (remote build) | 1+1axiom |
-| fa82cf3b | Z2×Z10 injective embedding | 0 |
-| 20ff9cfa | CyclicExclusion20: ALL 7 sorry CLOSED | 2 |
-
-**Total this session: 7 sorry closed, 1 axiom discharged, 1 false statement fixed.**
+Scoreboard: **0 / 6 primitive endpoint axioms discharged** in the current
+source-rebuilt snapshot.
