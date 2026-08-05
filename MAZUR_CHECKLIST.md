@@ -50,13 +50,18 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     algebraic quotient sends every normalized Tate solution to the classified
     four-point `X₀(17)` model and eliminates every possible fibre.
 
-- [ ] N19 — `CyclicExclusion19.no_F19_rational_solution`
-  - Closed infrastructure: Tate exact-order normalization; an explicit
+- [x] N19 — `CyclicExclusion19.no_F19_rational_solution`
+  - Discharged infrastructure: Tate exact-order normalization; the
     raw-to-optimized chart; the degree-three quotient to
-    `v²+v=u³+u²+u`; every Tate-chart exceptional case; the first rational-flex
-    cube descent; and explicit surjectivity of the dual three-isogeny.
-  - Open atom: the complementary three-isogeny descent proving every rational
-    affine point on the quotient has first coordinate zero.
+    `v²+v=u³+u²+u`; every exceptional Tate-chart case; both rational-flex
+    three-isogeny descents; explicit dual-forward composition; weak
+    three-descent; three-adic formal entry and separatedness; and transport
+    from the good model through the short and minimal quotient models.
+  - Final classification:
+    `XDelta19GoodRationalPoints.affine_x_eq_zero` proves that every affine
+    good-model rational point has first coordinate zero, and
+    `XDelta19RationalPoints.no_F19_rational_solution` transports this fact to
+    the Tate residual.
 
 - [ ] N25 — `CyclicExclusion25.no_explicit_order25_obstruction`
   - Closed infrastructure: explicit primitive order-25 obstruction.
@@ -84,5 +89,5 @@ scoped builds pass, and `#print axioms` contains only `propext`,
 - [ ] Rebuild the final endpoint and obtain a clean-3 axiom audit after all
   six primitive boxes are checked.
 
-Scoreboard: **1 / 6 primitive endpoint axioms discharged** in the current
+Scoreboard: **2 / 6 primitive endpoint axioms discharged** in the current
 source-rebuilt snapshot.

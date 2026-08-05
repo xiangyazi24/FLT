@@ -77,8 +77,10 @@ The monolithic axiom `mazur_prime_torsion_bound_sub` is now a THEOREM
 assembled from:
 * `no_rational_point_of_order_11` — sorry-free (Billing–Mahler cubic descent)
 * `no_order_13_prime` — THEOREM via TateOrder13 + Diophantine axiom (CyclicExclusion13)
-* `no_order_17_prime` — THEOREM via TateOrder17 + Diophantine axiom (CyclicExclusion17)
-* `no_order_19_prime` — THEOREM via TateOrder19 + Diophantine axiom (CyclicExclusion19)
+* `no_order_17_prime` — proved by the explicit `X₀(17)` quotient and
+  rational-point classification.
+* `no_order_19_prime` — proved by the explicit order-three diamond quotient,
+  three-isogeny descent, and three-adic formal reduction.
 * `no_prime_order_ge_23` — sub-axiom (formal immersion on X₀(p), uniform tail)
 -/
 

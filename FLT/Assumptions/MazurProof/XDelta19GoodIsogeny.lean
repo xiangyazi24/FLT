@@ -242,7 +242,7 @@ private theorem goodCubic_ne_zero (x : ℚ) :
 
 /-- An affine rational point on the good model never has zero vertical
 coordinate. -/
-private theorem good_y_ne_zero {x y : ℚ} (h : OnGood x y) :
+theorem good_y_ne_zero {x y : ℚ} (h : OnGood x y) :
     y ≠ 0 := by
   intro hy
   apply goodCubic_ne_zero x

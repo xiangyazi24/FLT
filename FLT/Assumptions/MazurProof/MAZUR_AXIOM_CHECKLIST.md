@@ -14,23 +14,21 @@ The main numerical theorem and its cyclic-order input compile from source:
 - `MazurProof.mazur_torsion_bound`
 - `MazurProof.mazur_torsion_bound_ncard`
 
-Their reachable custom-axiom ledger has exactly five entries:
+Their reachable custom-axiom ledger has exactly four entries:
 
 1. `MazurProof.CyclicExclusion13.C13Sextic_affine_x_is_cuspidal`
    in `CyclicExclusion13.lean`;
-2. `MazurProof.CyclicExclusion19.no_F19_rational_solution`
-   in `CyclicExclusion19.lean`;
-3. `MazurProof.CyclicExclusion25.no_explicit_order25_obstruction`
+2. `MazurProof.CyclicExclusion25.no_explicit_order25_obstruction`
    in `CyclicExclusion25.lean`;
-4. `MazurProof.CyclicExclusion49.no_raw_order49_tate_obstruction`
+3. `MazurProof.CyclicExclusion49.no_raw_order49_tate_obstruction`
    in `CyclicExclusion49.lean`;
-5. `MazurProof.no_prime_order_ge_23`
+4. `MazurProof.no_prime_order_ge_23`
    in `CyclicOrderAssembly.lean`.
 
-Apart from these five declarations, the audit reports only `propext`,
+Apart from these four declarations, the audit reports only `propext`,
 `Classical.choice`, and `Quot.sound`.  It reports no reachable `sorryAx`.
 
-## Newly discharged: order seventeen
+## Newly discharged: orders seventeen and nineteen
 
 `CyclicExclusion17.no_F17_rational_solution` is now a theorem, not an axiom.
 The source proof in `TateOrder17Quotient.lean`:
@@ -49,6 +47,22 @@ The theorem
 `MazurProof.TateOrder17Quotient.no_F17_rational_solution` depends only on the
 three standard logical axioms above.
 
+`CyclicExclusion19.no_F19_rational_solution` is also now a theorem.  The
+source proof:
+
+1. completes both rational-flex degree-three isogeny descents on the
+   good-reduction model;
+2. combines weak three-descent with three-adic formal entry and separatedness
+   to prove that every good-model rational point is killed by three;
+3. classifies every affine good-model point by its first coordinate;
+4. transports the classification through the scaled dual, short, and minimal
+   quotient models; and
+5. applies the checked algebraic Tate-to-diamond quotient identities to
+   exclude every nondegenerate zero of `F₁₉`.
+
+`MazurProof.XDelta19RationalPoints.no_F19_rational_solution` and the public
+cyclic exclusion depend only on the three standard logical axioms above.
+
 ## Declarations present in the tree but not reachable from the endpoint
 
 These custom axioms remain in older or alternative routes, but the rebuilt
@@ -60,18 +74,17 @@ main theorem does not depend on them:
 
 The two tracked proof placeholders in `KubertBridgeN16.lean` are likewise not
 reachable from the current endpoint.  They must not be counted as completed
-work, but they are not part of the five-entry endpoint ledger.
+work, but they are not part of the four-entry endpoint ledger.
 
 ## Next discharge order
 
-The five remaining assumptions are independent named arithmetic inputs.
+The four remaining assumptions are independent named arithmetic inputs.
 The finite cases should be attacked before the uniform tail:
 
 1. finish the rational-point classification on the order-thirteen sextic;
-2. prove the order-nineteen Tate residual has no nondegenerate rational zero;
-3. close the explicit order-twenty-five obstruction;
-4. close the raw order-forty-nine Tate obstruction;
-5. formalize the uniform prime-order exclusion for `p ≥ 23`.
+2. close the explicit order-twenty-five obstruction;
+3. close the raw order-forty-nine Tate obstruction;
+4. formalize the uniform prime-order exclusion for `p ≥ 23`.
 
 Any future count must come from a fresh source rebuild of every changed
 downstream module followed by `#print axioms`; stale `.olean` files can retain

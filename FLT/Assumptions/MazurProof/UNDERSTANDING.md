@@ -249,16 +249,15 @@ MW group = ℤ/6ℤ (rank 0), rational points u ∈ {-1, 1, 3} are all cusps.
 The authoritative command is
 `#print axioms MazurProof.mazur_torsion_bound` after rebuilding every changed
 dependency from source in order.  The endpoint currently depends on exactly
-**5 custom axioms**, plus the Lean built-ins `propext`, `Classical.choice`,
+**4 custom axioms**, plus the Lean built-ins `propext`, `Classical.choice`,
 and `Quot.sound`.  It does **not** depend on `sorryAx`.
 
 | # | Primitive axiom | File | Mathematical content |
 |---|-----------------|------|----------------------|
 | 1 | `C13Sextic_affine_x_is_cuspidal` | `CyclicExclusion13` | Every rational point on the optimized genus-two `X₁(13)` model is cuspidal |
-| 2 | `no_F19_rational_solution` | `CyclicExclusion19` | The nondegenerate Tate equation for order 19 has no rational solution |
-| 3 | `no_explicit_order25_obstruction` | `CyclicExclusion25` | The explicit primitive order-25 obstruction has no rational point |
-| 4 | `no_raw_order49_tate_obstruction` | `CyclicExclusion49` | The primitive order-49 Tate obstruction has no rational point |
-| 5 | `no_prime_order_ge_23` | `CyclicOrderAssembly` | Uniform formal-immersion exclusion for prime orders at least 23 |
+| 2 | `no_explicit_order25_obstruction` | `CyclicExclusion25` | The explicit primitive order-25 obstruction has no rational point |
+| 3 | `no_raw_order49_tate_obstruction` | `CyclicExclusion49` | The primitive order-49 Tate obstruction has no rational point |
+| 4 | `no_prime_order_ge_23` | `CyclicOrderAssembly` | Uniform formal-immersion exclusion for prime orders at least 23 |
 
 The previous inventories were stale in four ways:
 
@@ -266,7 +265,7 @@ The previous inventories were stale in four ways:
   `VeluTwoIsogeny`, so orders 20 and 24 are clean.
 - The endpoint previously used direct Tate Diophantine seams for orders 17
   and 19, not the older `order17_to_kernel_root` and
-  `order19_to_kernel_root` bridge names; only the order-19 seam remains.
+  `order19_to_kernel_root` bridge names; both direct seams are now discharged.
 - The primitive N13 seam is `C13Sextic_affine_x_is_cuspidal`;
   `no_F13_rational_solution` is a derived theorem.
 - `TateOrder17Quotient.no_F17_rational_solution` is now a theorem, so the
@@ -281,8 +280,8 @@ primitive N13 axiom.  Endpoint audits must therefore compare source and
 
 **Fully discharged from the endpoint dependency graph:**
 
-- Orders 11, 17, and 18 are theorems via the Billing--Mahler, explicit
-  order-17 quotient, and N18 descent routes.
+- Orders 11, 17, 18, and 19 are theorems via the Billing--Mahler, explicit
+  order-17 quotient, N18 descent, and degree-three quotient/descent routes.
 - All composite exclusions 14, 15, 16, 20, 21, 24, 27, and 35 are clean;
   theorems for 25 and 49 depend only on the named rational-point axioms above.
 - The Vélu two-isogeny quotient used for orders 20 and 24 is clean.
@@ -292,7 +291,7 @@ primitive N13 axiom.  Endpoint audits must therefore compare source and
   `mazur_torsion_bound`; the endpoint uses the clean cyclic `X₁(16)` route
   and different noncyclic exclusions.
 
-#### Exact strength of the remaining N19 seam
+#### Discharged N19 endpoint
 
 The N17 seam is fully discharged.  `TateOrder17Quotient.lean` normalizes the
 Tate equation, constructs an explicit rational map through two genus-one
@@ -301,18 +300,16 @@ models to the proved `X₀(17)` equation, classifies the image using
 algebraic implication from `F17 b c = 0`; it does not rely on an unformalized
 modular interpretation or twist/kernel transport.
 
-The active N19 axiom is stronger than the endpoint needs.  The proved
-Tate-normal-form bridge produces `b`, `c`, `b ≠ 0`, the residual equation
-`F19 b c = 0`, and an elliptic Tate curve.  Thus the smallest honest missing
-theorem is emptiness of the nonsingular rational Tate locus, rather than
-nonvanishing of `F19` on every pair with `b ≠ 0`.  As at N17, a sufficiently
-strong direct algebraic proof of the global statement is also acceptable.
+The former N19 endpoint axiom has been replaced by a source theorem.
+The Tate-normal-form bridge produces `b`, `c`, `b ≠ 0`, the residual equation
+`F19 b c = 0`, and an elliptic Tate curve.  The completed proof establishes
+the stronger global nonvanishing statement for every rational pair with
+`b ≠ 0`.
 
 `PrimeExclusion19.lean` proves that a fixed degree-nine CM kernel polynomial
-has no rational root, but the active endpoint does not import it.  No source
-theorem currently maps every rational noncuspidal point of the order-19 Tate
-locus to a root of that polynomial.  This arithmetic tail cannot replace the
-live axiom until a genuine universal quotient/fibre map is proved.
+has no rational root, but the completed endpoint does not use that alternative
+route.  Instead it uses the universal algebraic quotient and direct
+rational-point classification described below.
 
 The universal algebraic quotient is now explicit.
 `N19SutherlandModels.lean` identifies the repository `F19` with Sutherland's
@@ -342,7 +339,7 @@ previous scaled quotient under `s=9X+228`, `t=27Y`; its discriminant is
 `XDelta19GoodIsogeny.lean` constructs its quotient
 `t²=s³-3(24s+12)²`, bundles both degree-three maps, and proves that their
 dual-forward composition is multiplication by three.  The small constant
-`12` is the decisive normalization for the remaining Eisenstein descent:
+`12` is the decisive normalization for the complementary Eisenstein descent:
 unlike the earlier scaled equation, its quotient factorization has no
 split prime above nineteen.  `XDelta19GoodDescent.lean` now completes the
 primitive two-adic normalization on this model.  Its two flex factors have
@@ -358,11 +355,20 @@ translation by `(0,76)` or `(0,-76)` converts the `19` and `19²` classes to
 cubes, so every good-model rational point is a threefold multiple up to one
 of those two visible three-torsion points.
 
-The remaining N19 arithmetic is now the three-adic separatedness endgame
-and final transport back to the minimal quotient.  The quotient geometry,
-Tate-chart exceptional cases, both isogeny pairs, both composition
-identities, both Selmer computations, and weak three-descent are no longer
-missing.
+`XDelta19GoodFormalCore.lean` and
+`XDelta19GoodFormalReduction.lean` finish the three-adic endgame.  Explicit
+doubling formulas and finite residue certificates force `6P` into every
+formal level, and separatedness gives `6P=0`.
+`XDelta19GoodRationalPoints.lean` combines this result with weak
+three-descent and the absence of nonzero rational two-torsion to prove
+`3P=0`; the dual-forward composition then forces every affine good-model
+point to have first coordinate zero.
+`XDelta19RationalPoints.lean` transports that classification through the
+scaled dual and short models to `v²+v=u³+u²+u`, and
+`TateOrder19Quotient.no_F19_rational_solution_of_diamond_x_eq_zero` finishes
+the Tate residual.  `CyclicExclusion19.no_F19_rational_solution` is therefore
+a theorem whose axiom audit reports only `propext`, `Classical.choice`, and
+`Quot.sound`.
 
 `TateOrder17.exists_tate_parameters_of_order_seventeen_with_j` now preserves
 the original curve's `j`-invariant together with ellipticity, exact order,
