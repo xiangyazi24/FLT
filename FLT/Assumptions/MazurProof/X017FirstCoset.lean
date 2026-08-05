@@ -1,4 +1,6 @@
 import FLT.Assumptions.MazurProof.X017Descent
+import FLT.Assumptions.MazurProof.X017ExactSequence
+import FLT.Assumptions.MazurProof.StandardTwoIsogenyPreimages
 
 /-!
 # The target squareclasses in the `X₀(17)` two-isogeny descent
@@ -25,8 +27,10 @@ namespace MazurProof.X017FirstCoset
 open WeierstrassCurve
 open WeierstrassCurve.Affine
 open MazurProof.RationalPointsN15Descent
+open MazurProof.StandardTwoIsogenyPreimages
 open MazurProof.VeluTwoIsogeny
 open MazurProof.X017Model
+open MazurProof.X017IsogenySequence
 
 /-! ## Small parity certificates -/
 
@@ -311,5 +315,122 @@ theorem standardDual_x_squareclass {x y : ℚ}
     rw [hx, hr]
     push_cast
     ring
+
+/-! ## The first concrete isogeny quotient -/
+
+/-- A nonzero square first coordinate on the standard dual has a preimage
+under the transported forward isogeny. -/
+theorem exists_forwardHom_preimage_of_x_eq_sq
+    {x y r : ℚ} (h : Nonsingular standardDual x y)
+    (hx : x ≠ 0) (hr : x = r ^ 2) :
+    ∃ P : Point standard,
+      forwardHom P = Point.some x y h := by
+  obtain ⟨P, hP⟩ :=
+    exists_pointMap_preimage_of_x_eq_sq
+      (a := a17) (b := b17) h hx hr
+  exact ⟨P, by rw [forwardHom_apply, hP]⟩
+
+/-- The transported target-kernel representative has additive order two in
+the form needed for coset arithmetic. -/
+private theorem eta_add_self : eta + eta = 0 := by
+  rw [eta_eq_standardDualKernel]
+  exact StandardTwoIsogeny.kernel_add_self
+
+/-- The target of the standard N17 two-isogeny is covered by the two cosets
+represented by zero and the dual-kernel point `(0,0)`. -/
+theorem standardDual_twoCosetExhaustion :
+    MazurProof.X017ExactSequence.TwoCosetExhaustion forwardHom eta := by
+  intro Q
+  cases Q with
+  | zero =>
+      exact ⟨0, Or.inl (map_zero forwardHom).symm⟩
+  | some x y h =>
+      by_cases hx : x = 0
+      · have hy : y = 0 :=
+          StandardTwoIsogeny.y_zero_of_x_zero h hx
+        have hQeta :
+            (Point.some x y h : Point standardDual) = eta := by
+          rw [eta_eq_standardDualKernel]
+          unfold StandardTwoIsogeny.kernelPoint
+          rw [Point.some.injEq]
+          exact ⟨hx, hy⟩
+        refine ⟨0, Or.inr ?_⟩
+        rw [hQeta, map_zero, add_zero]
+      · obtain ⟨q, hq | hq⟩ :=
+          standardDual_x_squareclass h.left hx
+        · obtain ⟨P, hP⟩ :=
+            exists_forwardHom_preimage_of_x_eq_sq h hx hq
+          exact ⟨P, Or.inl hP.symm⟩
+        · have hq0 : q ≠ 0 := by
+            intro hqz
+            apply hx
+            rw [hq, hqz]
+            norm_num
+          generalize hR :
+              (Point.some x y h : Point standardDual) + eta = R
+          cases R with
+          | zero =>
+              have hR' := hR
+              rw [eta_eq_standardDualKernel] at hR'
+              unfold StandardTwoIsogeny.kernelPoint at hR'
+              rw [Point.add_of_X_ne hx] at hR'
+              exact ((Point.some_ne_zero _) hR').elim
+          | some x' y' h' =>
+              have hx' :
+                  x' = (a17 ^ 2 - 4 * b17) / x := by
+                have hR' := hR
+                rw [eta_eq_standardDualKernel] at hR'
+                unfold StandardTwoIsogeny.kernelPoint at hR'
+                rw [Point.add_of_X_ne hx] at hR'
+                rw [Point.some.injEq] at hR'
+                calc
+                  x' =
+                      addX standardDual x 0
+                        (slope standardDual x 0 y 0) :=
+                    hR'.1.symm
+                  _ = (a17 ^ 2 - 4 * b17) / x :=
+                    StandardTwoIsogeny.add_kernel_x h hx
+              have hxSquare : x' = (16 / q) ^ 2 := by
+                rw [hx', hq]
+                norm_num [a17, b17, veluT]
+                field_simp [hq0]
+                norm_num
+              have hx'0 : x' ≠ 0 := by
+                rw [hxSquare]
+                exact pow_ne_zero 2 (div_ne_zero (by norm_num) hq0)
+              obtain ⟨P, hP⟩ :=
+                exists_forwardHom_preimage_of_x_eq_sq h' hx'0 hxSquare
+              have hrange :
+                  (Point.some x y h : Point standardDual) + eta =
+                    forwardHom P :=
+                hR.trans hP.symm
+              refine ⟨P, Or.inr ?_⟩
+              calc
+                (Point.some x y h : Point standardDual) =
+                    Point.some x y h + 0 := (add_zero _).symm
+                _ = Point.some x y h + (eta + eta) := by
+                  rw [eta_add_self]
+                _ = eta + (Point.some x y h + eta) := by
+                  ac_rfl
+                _ = eta + forwardHom P := by
+                  rw [hrange]
+
+/-- The completed target coset calculation makes the left arrow in the
+concrete N17 two-isogeny exact sequence identically zero. -/
+theorem standard_leftMap_eq_zero :
+    MazurProof.RationalPointsN15ExactSequence.leftMap
+      forwardHom dualHom dual_comp_forward = 0 :=
+  MazurProof.X017ExactSequence.leftMap_eq_zero_of_twoCosetExhaustion
+    forwardHom dualHom dual_comp_forward eta dualHom_eta
+      standardDual_twoCosetExhaustion
+
+/-- Exactness and the target coset calculation embed the source modulo
+doubling into the still-independent right isogeny quotient. -/
+theorem standard_rightMap_injective :
+    Function.Injective
+      (MazurProof.RationalPointsN15ExactSequence.rightMap
+        forwardHom dualHom dual_comp_forward) :=
+  MazurProof.X017ExactSequence.rightMap_injective_of_leftMap_eq_zero
+    forwardHom dualHom dual_comp_forward standard_leftMap_eq_zero
 
 end MazurProof.X017FirstCoset

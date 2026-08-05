@@ -34,10 +34,12 @@ doubling, and the target point killed by the dual is the visible `(0,0)`,
 not `(64,0)`.  The nonzero source first-coordinate squareclass is now proved
 to be `1` or `17`, and the nonzero target squareclass is proved to be `1` or
 `-1`.  Converting those coordinate classes into the chosen `T` and `(0,0)`
-cosets remains an explicit translation/preimage task.  Next producers are the
-two concrete two-isogeny coset exhaustions and finite generation/rank zero.
-The later modular quotient and twist/kernel transport remain separate
-geometric packages.
+cosets was the next explicit task; the target cover by the forward image and
+its `(0,0)` translate is now proved, so the left exact-sequence arrow is zero
+and the right arrow is injective.  The remaining independent quotient is the
+source cover by the dual image and its `T` translate.  It is followed by
+finite generation/rank zero.  The later modular quotient and twist/kernel
+transport remain separate geometric packages.
 
 ### (b) N13 concrete specialization and separatedness
 

@@ -378,6 +378,17 @@ concludes that every nonzero target first coordinate is a square or a
 negative square.  The remaining target endpoint work is now precisely the
 generic square-coordinate preimage theorem and the translation by the target
 kernel `(0,0)`, not any further squareclass enumeration.
+`StandardTwoIsogenyPreimages.lean` now proves that generic preimage theorem.
+For a target point with `x=r²≠0`, it constructs the source point with
+coordinates
+`p=(r²-a-y/r)/2` and `q=rp`, and verifies the standard Vélu formula
+coefficient-independently.  `X017FirstCoset.lean` combines it with the target
+squareclass theorem and the identity
+`x(Q+(0,0))=-256/x(Q)`.  A negative square therefore becomes a square after
+translation by the target kernel.  This proves the first full concrete
+two-coset exhaustion, makes the left exact-sequence arrow zero, and makes the
+right arrow injective.  The source quotient modulo the dual image remains a
+separate arithmetic input; the completed target cover does not imply it.
 `X017HeightDescent.lean` specializes Mathlib's general descent theorem to a
 two-element representative set `{0,T}` modulo doubling.  It proves finite
 generation from Northcott, nonnegativity, the doubling lower bound, and only

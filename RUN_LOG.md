@@ -51,13 +51,21 @@
     both provisional `±2` classes by three-stage two-adic parity descent, and
     proves that every nonzero rational target coordinate has squareclass
     `1` or `-1`
+  - `StandardTwoIsogenyPreimages.lean` promotes the order-15 square-coordinate
+    reconstruction to arbitrary standard two-isogeny coefficients
+  - the target squareclass calculation and explicit preimages now prove the
+    concrete cover `target = forwardHom(source) ∪
+    (eta + forwardHom(source))`; consequently the concrete left
+    exact-sequence arrow is zero and the right arrow is injective
 - verification:
   - scoped compilations pass
   - the N17 two-torsion theorem, exact-sequence/rank declarations, and
-    transported N17 isogeny identities, and both source and target
-    squareclass classifications have clean-3 axiom audits
+    transported N17 isogeny identities, both source and target squareclass
+    classifications, the generic square-coordinate preimage theorem, and the
+    first concrete coset exhaustion have clean-3 axiom audits
 - next N17 producers:
-  - concrete two-coset exhaustions for the standard isogeny and its dual
+  - the independent source quotient cover for the dual isogeny, represented
+    by zero and `T`
   - finite generation/rank-zero classification of `X₀(17)(ℚ)`
   - later, the level quotient and twist/kernel transport needed to consume
     the classification in the active Tate locus
