@@ -348,6 +348,14 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   affine branch uses the general infinity-closure theorem, while the
   escaping branch uses reciprocal horizontal-or-vertical recovery.  No
   finite-versus-reciprocal properness dichotomy remains.
+- `N13QuadraticTwoChartSpread.lean` closes the reducible branch as well.
+  Every two-adic affine point now has a valuation-independent proper point
+  line, and tensoring two such lines realizes split secant and repeated-root
+  tangent graphs.  The split-or-irreducible dichotomy therefore gives every
+  balanced quadratic Mumford graph, and every selected degree-two graph, a
+  proper `TwoChartLine` with its exact generic affine graph ideal.  Together
+  with the degree-one result, the low-degree proper-spread algebraic layer is
+  closed.
 - The chart-level `nInf` factor is now explicit.  The two integral points
   `(t,v)=(0,0)` and `(0,-1)` give the positive- and negative-infinity
   `TwoChartLine`s.  Natural tensor powers of the positive line are trivial
@@ -371,10 +379,19 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
 - The general finite-support closure now supplies the missing
   infinity-chart extension whenever the chosen affine ideal has finite
   quotient.  This has been instantiated for integral point graphs and the
-  finite irreducible quadratic branch.  Consolidating the reducible
-  quadratic constructors behind one proper-line interface remains, as does
-  identifying the positive-infinity tensor factor with the representative's
-  oriented `nInf` coordinate.
+  finite irreducible quadratic branch.  The reducible quadratic constructors
+  are now consolidated behind the same proper-line interface.  What remains
+  is identifying the positive-infinity tensor factor with the
+  representative's oriented `nInf` coordinate and identifying chartwise
+  special reduction with a literal divisor on the completed special curve.
+- Mathlib at the pinned revision has no exported descent constructor turning
+  two affine module sheaves and an overlap isomorphism into a module sheaf on
+  `Scheme.GlueData.glued`.  The shortest rigorous specialization bridge is
+  therefore ring-theoretic: reduce both ideals of a `TwoChartLine`, retain
+  their proved special-overlap equality, identify that chart pair with the
+  canonical chart ideals of an `EffectiveDivisorTwo`, and separately retain
+  the explicit infinity orientation.  A general relative Picard functor or
+  Cartier-divisor formalization is not presently a prerequisite.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
