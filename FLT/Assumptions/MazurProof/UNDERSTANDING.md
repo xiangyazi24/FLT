@@ -363,6 +363,13 @@ production module, and the fixed-`T` translation bound remains to be proved.
 The same file now converts the concrete `TwoCosetExhaustion` witness directly
 to the sumset cover consumed by Mathlib, so the geometric coset theorem will
 feed both the exact-sequence and height layers without a second interface.
+`X017Reduction.lean` proves by kernel-checked finite computation that the
+integral `X₀(17)` equation has three affine points over each of `𝔽₂` and
+`𝔽₃`; with the point at infinity, both good fibres have four points.  It also
+checks the discriminant factor is nonzero at both primes.  This supplies the
+finite target counts, but the pinned library still lacks the point-level
+good-reduction homomorphism and prime-to-prime torsion injection needed to
+turn those counts into a rational torsion bound.
 
 #### N13 analysis note
 F₁₃(b,c) is bivariate (degree 10 in c, monic leading coeff -1; degree 7 in b;

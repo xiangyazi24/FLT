@@ -26,9 +26,11 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     `j`; explicit `X₀(17)` model and standard two-isogeny; visible point of
     exact order four; rational two-torsion has cardinality two; sharpened
     exact-sequence and general rank-zero criterion; two-coset height-descent
-    wrapper reducing finite generation to one fixed translation estimate.
+    wrapper reducing finite generation to one fixed translation estimate;
+    good-fibre point counts `#X₀(17)(𝔽₂)=#X₀(17)(𝔽₃)=4`.
   - Open arithmetic atoms: two explicit isogeny-coset exhaustions, finite
-    generation, and the rational-point classification.
+    generation, good-reduction torsion injection, and the rational-point
+    classification.
   - Open geometric atoms: the Tate `X₁(17) → X₀(17)` quotient with cusp and
     `j` control, then twist/model/kernel transport for the two noncuspidal
     fibres.
