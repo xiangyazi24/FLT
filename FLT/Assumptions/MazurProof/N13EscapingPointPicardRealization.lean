@@ -154,26 +154,6 @@ theorem map_anchoredPointLine_affineIdeal
     N13EscapingDegreeOneSpread.genericIdeal_eq_pointMumford
       x y hx hxy
 
-/-- Coercing `genericIdealUnit` to a fractional ideal gives the literal
-extension of the line's affine ideal. -/
-@[simp] theorem coe_genericIdealUnit
-    (L : Line) :
-    (N13TwoChartPicardRealization.genericIdealUnit L :
-        N13IntegralFractionalHull.RationalFractionalIdeal) =
-      (Ideal.map
-        N13IntegralFractionalHull.integralToRational
-        L.affineIdeal :
-        N13IntegralFractionalHull.RationalFractionalIdeal) := by
-  change
-    N13IntegralFractionalHull.extendFractional
-        (L.affine_isUnit.unit :
-          N13IntegralFractionalHull.IntegralFractionalIdeal) =
-      _
-  rw [L.affine_isUnit.unit_spec,
-    N13IntegralFractionalHull.extendFractional,
-    FractionalIdeal.extendedHom'_apply,
-    FractionalIdeal.extended_coeIdeal_eq_map]
-
 /-- The generic fractional-ideal unit of the anchored proper line is exactly
 the unit packaged by the degree-one Mumford representative. -/
 theorem genericIdealUnit_anchoredPointLine_eq_pointMumford
@@ -186,7 +166,7 @@ theorem genericIdealUnit_anchoredPointLine_eq_pointMumford
       SexticMumford.mumfordIdealUnit Model
         (degreeOneMumford x y hxy).toSemi := by
   apply Units.ext
-  rw [coe_genericIdealUnit,
+  rw [N13TwoChartPicardRealization.coe_genericIdealUnit,
     SexticMumford.coe_mumfordIdealUnit]
   exact
     congrArg

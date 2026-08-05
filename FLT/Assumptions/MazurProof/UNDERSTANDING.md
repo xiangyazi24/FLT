@@ -454,8 +454,7 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   the two canonical point-chart cases.  After tensoring once with positive
   infinity, both reduced chart ideals equal those of
   `s(reducedPoint, specialAnchor)`.  Thus the special-fibre realization of
-  every degree-one point line is complete.  The integral branch still needs
-  the oriented generic comparison packaged below the chart level.
+  every degree-one point line is complete.
 - `N13SplitQuadraticSpecialRestriction.lean` packages proper reduction of an
   arbitrary two-adic affine point behind the same valuation case split as
   `pointLine`.  Its two chart ideals reduce to the canonical point pair.
@@ -469,9 +468,13 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   associated affine `pointMumford` has `nInf = 0`, so the oriented exponent is
   definitionally `-1`; the resulting `genericRaw` is literally
   `mumfordRaw`, and the generic Picard class is exactly `classOf`.  No
-  geometric orientation theorem remains in this branch.  The integral
-  degree-one analogue and oriented quadratic comparisons remain to be
-  packaged.
+  geometric orientation theorem remains in this branch.
+- `N13IntegralPointPicardRealization.lean` proves the identical oriented
+  comparison for an integral affine point.  Its anchored finite closure has
+  the standard generic point ideal, the same exponent `-1`, and the canonical
+  divisor `s(reducedPoint, specialAnchor)` on both special charts.  Hence the
+  complete degree-one two-fibre `Data` layer is now closed for both valuation
+  regimes.  Oriented quadratic comparisons remain to be packaged.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.

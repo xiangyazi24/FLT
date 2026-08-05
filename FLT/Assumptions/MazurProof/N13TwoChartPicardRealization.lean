@@ -52,6 +52,20 @@ abbrev SpecialPic : Type :=
 abbrev EffectiveDivisorTwo : Type :=
   N13SymmetricSquareTwo.EffectiveDivisorTwo
 
+/-- Algebra structure used to extend an integral fractional ideal to the
+generic sextic coordinate ring. -/
+local instance integralRationalAlgebra :
+    Algebra N13IntegralFractionalHull.IntegralRing
+      N13IntegralFractionalHull.RationalRing :=
+  N13IntegralFractionalHull.integralToRational.toAlgebra
+
+/-- The common function field is the fraction field of the integral affine
+coordinate ring. -/
+local instance integralFunctionFieldFractionRing :
+    IsFractionRing N13IntegralFractionalHull.IntegralRing
+      N13IntegralFractionalHull.FunctionField :=
+  N13IntegralFractionalHull.functionField_isFractionRing
+
 /-- Extension of the invertible affine ideal of a proper line to the generic
 sextic coordinate ring. -/
 def genericIdealUnit (L : Line) :
@@ -59,6 +73,29 @@ def genericIdealUnit (L : Line) :
   Units.map
     N13IntegralFractionalHull.extendFractional.toMonoidHom
     L.affine_isUnit.unit
+
+/-- Coercing the generic ideal unit to a fractional ideal recovers the
+literal extension of the line's affine ideal.
+
+This bridge is independent of the geometric origin of the proper line and is
+therefore shared by point and quadratic Picard realizations. -/
+@[simp] theorem coe_genericIdealUnit
+    (L : Line) :
+    (genericIdealUnit L :
+        N13IntegralFractionalHull.RationalFractionalIdeal) =
+      (Ideal.map
+        N13IntegralFractionalHull.integralToRational
+        L.affineIdeal :
+        N13IntegralFractionalHull.RationalFractionalIdeal) := by
+  change
+    N13IntegralFractionalHull.extendFractional
+        (L.affine_isUnit.unit :
+          N13IntegralFractionalHull.IntegralFractionalIdeal) =
+      _
+  rw [L.affine_isUnit.unit_spec,
+    N13IntegralFractionalHull.extendFractional,
+    FractionalIdeal.extendedHom'_apply,
+    FractionalIdeal.extended_coeIdeal_eq_map]
 
 /-- Oriented generic fractional-ideal datum of a proper line.
 
