@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.N13MumfordFormalTransitionJet
+import FLT.Assumptions.MazurProof.N13ConcreteGraphRecovery
 import FLT.Assumptions.MazurProof.N13SpreadRationalPointReduction
 import FLT.Assumptions.MazurProof.N13TwoAdicAbelChartSection
 
@@ -43,6 +44,19 @@ abbrev NearBaseMumford : Type :=
 /-- The two-adic integer coefficient ring of the Abel chart. -/
 abbrev R₂ : Type :=
   ℤ_[2]
+
+/-- The oriented Picard group of the N13 curve over the two-adic field. -/
+abbrev Pic₂ : Type :=
+  N13TwoAdicAbelChartPic.Pic
+
+/-- The balanced N13 Mumford model over the two-adic field. -/
+abbrev Model₂ : SexticMumford.Model ℚ_[2] :=
+  N13ConcreteGraphRecovery.Model
+
+/-- The Picard class of the distinguished nonspecial base disk pair. -/
+def basePic : Pic₂ :=
+  N13TwoAdicAbelChartPic.DiskPair.pic
+    N13TwoAdicAbelChartData.basePair
 
 /-! ## Recovering canonical disk pairs from kernel representatives -/
 
@@ -98,6 +112,85 @@ theorem realize
         ((F.graph z).centeredPic_eq_diskPair_centeredPic).symm
     _ = N13TwoAdicAbelChartSection.subgroupToPic H z :=
       F.realize_graph z
+
+end NearBaseFamily
+
+/-- A balanced quadratic representative of a centered two-adic Picard
+class whose canonical contraction has the literal selected special graph.
+
+The represented uncentered class is translated by `basePic`.  This
+translation is forced because disk-pair coordinates are centered at the
+distinguished base divisor. -/
+structure MappedSpecialRepresentative
+    (c : Pic₂) where
+  mumford : SexticMumford.Mumford Model₂
+  class_eq :
+    SexticMumford.classOf
+        Model₂ (N13Infinity.positiveInfinityOrder ℚ_[2])
+        mumford =
+      c + basePic
+  map_contract_eq_special :
+    Ideal.map
+        N13GeneralizedMumfordReduction.reduceCoordinate
+        (N13IntegralModelContraction.contractIdeal
+          (N13CanonicalContractionQuotient.graphIdeal
+            mumford.toSemi)) =
+      N13SpecialQuotientBasis.specialIdeal
+
+namespace MappedSpecialRepresentative
+
+variable {c : Pic₂}
+
+/-- Literal special-ideal reduction recovers a disk pair whose centered
+Picard class is the prescribed class `c`.  All normalization and Hensel
+lifting are supplied by the existing concrete graph-recovery theorem. -/
+theorem exists_nearBase
+    (R : MappedSpecialRepresentative c) :
+    ∃ E : NearBaseMumford, E.centeredPic = c := by
+  obtain ⟨P, hP⟩ :=
+    N13ConcreteGraphRecovery.exists_diskPair_class_eq
+      R.mumford R.map_contract_eq_special
+  refine
+    ⟨N13TwoAdicAbelChartRecover.NearBaseMumford.ofDiskPair P, ?_⟩
+  rw [
+    N13TwoAdicAbelChartRecover.NearBaseMumford.centeredPic_ofDiskPair,
+    N13TwoAdicAbelChartPic.DiskPair.centeredPic]
+  have hPic :
+      N13TwoAdicAbelChartPic.DiskPair.pic P =
+        c + basePic :=
+    hP.symm.trans R.class_eq
+  rw [hPic, basePic]
+  abel
+
+end MappedSpecialRepresentative
+
+/-- A literal mapped-special representative for every class in a rational
+kernel.  This is the concrete representative producer from which the
+abstract near-base family can now be derived. -/
+structure MappedSpecialFamily
+    (H : AddSubgroup RationalPic) where
+  representative :
+    ∀ z : H,
+      MappedSpecialRepresentative
+        (N13TwoAdicAbelChartSection.subgroupToPic H z)
+
+namespace MappedSpecialFamily
+
+variable {H : AddSubgroup RationalPic}
+
+/-- Concrete graph recovery discharges the entire pointwise near-base
+realization field from literal mapped-special representatives. -/
+def toNearBaseFamily
+    (R : MappedSpecialFamily H) :
+    NearBaseFamily H :=
+  NearBaseFamily.ofExists
+    (fun z => (R.representative z).exists_nearBase)
+
+end MappedSpecialFamily
+
+namespace NearBaseFamily
+
+variable {H : AddSubgroup RationalPic}
 
 /-- The two integral Abel-chart coordinates of the recovered disk pair. -/
 def coord

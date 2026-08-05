@@ -322,6 +322,11 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   with the squared transition modulo the moving coordinate ideal squared.
   Those two inputs now assemble directly into
   `RationalKernelDoublingData` and hence `NSeparated`.
+- The near-base producer is itself reduced further in the same adapter.
+  It suffices to give each kernel class a balanced representative of the
+  translated class `z + basePic` whose canonical contraction maps literally
+  to the selected special ideal.  `exists_diskPair_class_eq` then supplies
+  the centered disk pair and the exact Picard realization automatically.
 - Earlier axiom inventories in this file describe historical snapshots and
   must not be treated as current.  Use a fresh `#print axioms` audit of the
   assembled theorem before reporting the remaining global Mazur boundary.
