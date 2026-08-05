@@ -398,6 +398,15 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   already proved overlap-reduction square.  The output is a concrete
   `ChartPair`; the remaining special-fibre task is to identify selected such
   pairs with canonical chart ideals of explicit effective divisors.
+- `N13SpecialDivisorCharts.lean` constructs those canonical chart pairs.
+  A finite special point with `x=0` is supported only on the affine chart, a
+  finite point with `x=1` is written compatibly on both charts under
+  `x=t⁻¹` and `y=x³v`, and an infinity point is supported only on the
+  infinity chart.  Multiplying two point pairs descends through `Sym2`, so
+  every `EffectiveDivisorTwo` now has literal compatible affine and infinity
+  ideals.  The remaining task is to equate the chartwise reduction of each
+  selected integral proper line with the pair of its intended special
+  divisor.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
