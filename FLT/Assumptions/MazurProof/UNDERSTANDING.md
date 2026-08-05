@@ -707,6 +707,15 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   special divisor and the exact original generic Mumford class.  The
   irreducible quadratic branch is the remaining degree-two Picard
   realization.
+- `N13SpecialGraphDivisorCharts.lean` identifies the affine chart ideal of
+  every quadratic special-fibre Mumford graph with the canonical chart ideal
+  of its literal root divisor.  The distinct-root case is the graph-ideal
+  Chinese remainder theorem.  The repeated-root case is now proved directly
+  in characteristic two from `h(a) = 1`, so multiplicity is retained without
+  a finite divisor table.  This closes the horizontal affine half of the
+  irreducible specialization seam.  It does not yet identify the infinity
+  ideal of a horizontal closure or handle the vertical `{1,y}` recovery
+  branch.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
