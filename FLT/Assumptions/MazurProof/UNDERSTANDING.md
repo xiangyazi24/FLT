@@ -327,6 +327,10 @@ explicit squareclass/coset exhaustions, one fixed-translation height
 inequality, and prime-to-prime good-reduction torsion injection.  The latter
 point-reduction API is not present in the pinned Mathlib.  The modular
 quotient and twist/kernel transport remain the genuinely geometric N17 core.
+`TateOrder17.exists_tate_parameters_of_order_seventeen_with_j` now preserves
+the original curve's `j`-invariant together with ellipticity, exact order,
+`b ≠ 0`, and `F17 b c = 0`, so the future quotient/fibre layer no longer has
+to reconstruct that certificate.
 
 #### N13 analysis note
 F₁₃(b,c) is bivariate (degree 10 in c, monic leading coeff -1; degree 7 in b;

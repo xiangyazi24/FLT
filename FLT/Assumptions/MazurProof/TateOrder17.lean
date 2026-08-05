@@ -239,6 +239,30 @@ theorem exists_tate_parameters_of_order_seventeen
   exact ⟨b, c, inferInstance, horigin, hb,
     F17_eq_zero_of_tateOrigin_order_seventeen b c hb horigin⟩
 
+/-- Exact order seventeen yields Tate parameters satisfying the residual
+division equation while retaining the original curve's `j`-invariant.
+
+The `j` certificate is needed by the later `X₀(17)` fibre and twist
+identification, so keeping it here avoids reconstructing the isomorphism
+class after the Tate normalization data have been unpacked. -/
+theorem exists_tate_parameters_of_order_seventeen_with_j
+    (E : WeierstrassCurve ℚ) [E.IsElliptic]
+    (P : (E⁄ℚ).Point) (hP : addOrderOf P = 17) :
+    ∃ b c : ℚ,
+      ∃ _hEll : WeierstrassCurve.IsElliptic (W b c),
+        addOrderOf (tateOrigin b c) = 17 ∧
+          b ≠ 0 ∧ TateNFDivision.F17 b c = 0 ∧
+            (W b c).j = E.j := by
+  obtain ⟨b, c, hEll, hord, hb, hj⟩ :=
+    TateNormalFormBridge.exists_tate_normalized_of_addOrder_gt_three_with_j
+      E P 17 (by norm_num) hP
+  letI : WeierstrassCurve.IsElliptic (W b c) := hEll
+  have horigin : addOrderOf (tateOrigin b c) = 17 := by
+    rw [tateOrigin_eq_normalized_origin]
+    exact hord
+  exact ⟨b, c, inferInstance, horigin, hb,
+    F17_eq_zero_of_tateOrigin_order_seventeen b c hb horigin, hj⟩
+
 end
 
 end MazurProof.TateOrder17
