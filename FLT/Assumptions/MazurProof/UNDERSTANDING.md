@@ -321,6 +321,15 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
 - Combining that closure with the existing escaping point line proves that
   every selected degree-one graph has a proper `TwoChartLine` whose affine
   generic fibre is exactly the selected Mumford graph.
+- `N13IntegralAffinePointSpecialClass.lean` computes the other fibre of the
+  integral point family at the affine-ideal level.  Coefficientwise reduction
+  sends the literal integral point ideal exactly to the linear Mumford graph
+  of the reduced special point.  The corresponding point-indexed special
+  class is explicitly normalized as that point plus the positive-infinity
+  anchor.  What is still missing is a general geometric specialization map
+  from a raw `TwoChartLine` (or its Cartier divisor) proving that its special
+  divisor equals this anchored divisor; the target and its affine support are
+  no longer ambiguous.
 - `N13LowDegreeFractionalSpread.lean` now exhausts the Padé bound
   `natDegree ≤ 2` and gives every selected graph one invertible integral
   fractional spread with the exact normalized generic Mumford ideal.
