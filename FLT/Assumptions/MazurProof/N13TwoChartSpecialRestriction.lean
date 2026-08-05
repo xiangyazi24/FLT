@@ -129,6 +129,52 @@ def restrict (L : Line) : ChartPair where
   infinityIdeal := infinityIdeal L
   overlap_eq := overlap_eq L
 
+/-- Chartwise restriction carries tensor products of proper lines to products
+of their reduced affine ideals. -/
+@[simp] theorem restrict_tensor_affineIdeal
+    (L M : Line) :
+    (restrict (N13TwoChartLineTensor.tensor L M)).affineIdeal =
+      (restrict L).affineIdeal * (restrict M).affineIdeal := by
+  exact Ideal.map_mul _ _ _
+
+/-- Chartwise restriction carries tensor products of proper lines to products
+of their reduced infinity ideals. -/
+@[simp] theorem restrict_tensor_infinityIdeal
+    (L M : Line) :
+    (restrict (N13TwoChartLineTensor.tensor L M)).infinityIdeal =
+      (restrict L).infinityIdeal * (restrict M).infinityIdeal := by
+  exact Ideal.map_mul _ _ _
+
+/-- Restriction of a natural tensor power is the corresponding power of the
+reduced affine ideal. -/
+@[simp] theorem restrict_tensorPow_affineIdeal
+    (L : Line) (n : ℕ) :
+    (restrict (N13TwoChartLineTensor.tensorPow L n)).affineIdeal =
+      (restrict L).affineIdeal ^ n := by
+  change
+    Ideal.map
+        N13GeneralizedMumfordReduction.reduceCoordinate
+        (N13TwoChartLineTensor.tensorPow L n).affineIdeal =
+      (Ideal.map
+        N13GeneralizedMumfordReduction.reduceCoordinate
+        L.affineIdeal) ^ n
+  rw [N13TwoChartLineTensor.tensorPow_affineIdeal, Ideal.map_pow]
+
+/-- Restriction of a natural tensor power is the corresponding power of the
+reduced infinity ideal. -/
+@[simp] theorem restrict_tensorPow_infinityIdeal
+    (L : Line) (n : ℕ) :
+    (restrict (N13TwoChartLineTensor.tensorPow L n)).infinityIdeal =
+      (restrict L).infinityIdeal ^ n := by
+  change
+    Ideal.map
+        N13IntegralInfinityReduction.reduceCoordinate
+        (N13TwoChartLineTensor.tensorPow L n).infinityIdeal =
+      (Ideal.map
+        N13IntegralInfinityReduction.reduceCoordinate
+        L.infinityIdeal) ^ n
+  rw [N13TwoChartLineTensor.tensorPow_infinityIdeal, Ideal.map_pow]
+
 end
 
 end MazurProof.N13TwoChartSpecialRestriction

@@ -414,6 +414,13 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   The oriented generic class and special Abel class are then definitions.
   Constructing `Data` for the selected corrected low-degree lines is now the
   precise specialization producer boundary.
+- `N13InfinityLineSpecialRestriction.lean` proves the first concrete
+  producer cases.  The positive and negative integral infinity point ideals
+  reduce exactly to `(t,v)=(0,0)` and `(0,1)`, respectively; the two sheets
+  remain distinct.  The positive point is proved equal to the fixed special
+  anchor, and chartwise restriction is proved compatible with tensor
+  products and natural powers.  Consequently the special chart ideals of
+  every positive `nInf` correction are now formal powers of the anchor ideal.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
