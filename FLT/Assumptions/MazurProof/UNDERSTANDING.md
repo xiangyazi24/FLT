@@ -293,7 +293,10 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   interface.  An integral point uses the canonical divisorial hull, while an
   escaping point uses the affine ideal of its explicit invertible two-chart
   line.
-- The three new public spread theorems pass scoped compilation, bypass
+- `N13LowDegreeFractionalSpread.lean` now exhausts the Padé bound
+  `natDegree ≤ 2` and gives every selected graph one invertible integral
+  fractional spread with the exact normalized generic Mumford ideal.
+- The four new public spread theorems pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
 - The remaining N13 mathematical providers are a concrete
