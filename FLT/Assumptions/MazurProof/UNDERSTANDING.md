@@ -310,13 +310,20 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   unconditional dichotomy: either its canonical finite affine divisorial
   hull is invertible, or it has a proper two-chart line whose generic ideal
   is literally the graph ideal.  The remaining properness issue is confined
-  to converting the finite affine branch, and then the oriented `nInf`
-  correction, into a complete proper line.
-- The last statement is intentionally only about the finite affine graph.
-  A low-degree semirepresentative retains an integer infinity coordinate;
-  realizing that coordinate by a proper infinity-chart line is still needed
-  before this affine spread can serve as `SpreadData.exists_spread` for the
-  full oriented rational class.
+  to converting the finite affine branch and proving the oriented meaning
+  of the explicit `nInf` correction.
+- The chart-level `nInf` factor is now explicit.  The two integral points
+  `(t,v)=(0,0)` and `(0,-1)` give the positive- and negative-infinity
+  `TwoChartLine`s.  Natural tensor powers of the positive line are trivial
+  on the affine chart, so tensoring them onto any proper spread preserves
+  its exact affine generic ideal.  What remains is the semantic theorem
+  identifying these local lines with the corresponding oriented Picard
+  classes; affine ideals alone cannot distinguish the two infinity points.
+- The low-degree fractional-spread theorem is intentionally only about the
+  finite affine graph.  Before it can serve as `SpreadData.exists_spread`,
+  its finite ideal still needs a proper infinity-chart extension and the
+  positive-infinity tensor factor must be identified with the representative's
+  oriented `nInf` coordinate.
 - All six public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.

@@ -39,6 +39,19 @@ local instance integralFunctionFieldFractionRing :
       N13IntegralFractionalHull.FunctionField :=
   N13IntegralFractionalHull.functionField_isFractionRing
 
+/-- The trivial line in the explicit two-chart presentation. -/
+def one : TwoChartLine where
+  affineIdeal := ⊤
+  infinityIdeal := ⊤
+  affine_isUnit := by
+    rw [FractionalIdeal.coeIdeal_top]
+    exact isUnit_one
+  infinity_isUnit := by
+    rw [FractionalIdeal.coeIdeal_top]
+    exact isUnit_one
+  overlap_eq := by
+    rw [Ideal.map_top, Ideal.map_top]
+
 /-- Tensor product in the explicit two-chart presentation. -/
 def tensor (L M : TwoChartLine) : TwoChartLine where
   affineIdeal := L.affineIdeal * M.affineIdeal
@@ -61,6 +74,153 @@ def tensor (L M : TwoChartLine) : TwoChartLine where
     (tensor L M).infinityIdeal =
       L.infinityIdeal * M.infinityIdeal :=
   rfl
+
+/-- Natural tensor powers of an explicit two-chart line.  Natural powers
+are sufficient for balanced low-degree Mumford representatives because
+their infinity multiplicity is nonnegative. -/
+def tensorPow
+    (L : TwoChartLine) :
+    ℕ → TwoChartLine
+  | 0 => one
+  | n + 1 => tensor L (tensorPow L n)
+
+@[simp] theorem tensorPow_zero
+    (L : TwoChartLine) :
+    tensorPow L 0 = one :=
+  rfl
+
+@[simp] theorem tensorPow_succ
+    (L : TwoChartLine) (n : ℕ) :
+    tensorPow L (n + 1) =
+      tensor L (tensorPow L n) :=
+  rfl
+
+@[simp] theorem tensorPow_affineIdeal
+    (L : TwoChartLine) (n : ℕ) :
+    (tensorPow L n).affineIdeal =
+      L.affineIdeal ^ n := by
+  induction n with
+  | zero =>
+      simp [tensorPow, one]
+  | succ n ih =>
+      simp [tensorPow, ih, pow_succ']
+
+@[simp] theorem tensorPow_infinityIdeal
+    (L : TwoChartLine) (n : ℕ) :
+    (tensorPow L n).infinityIdeal =
+      L.infinityIdeal ^ n := by
+  induction n with
+  | zero =>
+      simp [tensorPow, one]
+  | succ n ih =>
+      simp [tensorPow, ih, pow_succ']
+
+/-! ## The two rational points at infinity -/
+
+abbrev IntegralInfinityPoint : Type :=
+  N13IntegralInfinityPointSpread.IntegralInfinityPoint
+
+/-- The positive point at infinity in the good chart, with coordinates
+`t = 0` and `v = 0`. -/
+def infinityPlusPoint : IntegralInfinityPoint :=
+  ⟨(0, 0), by
+    norm_num [N13GoodModelTwo.InfinityChartEquation]⟩
+
+/-- The negative point at infinity in the good chart, with coordinates
+`t = 0` and `v = -1`. -/
+def infinityMinusPoint : IntegralInfinityPoint :=
+  ⟨(0, -1), by
+    norm_num [N13GoodModelTwo.InfinityChartEquation]⟩
+
+/-- The proper two-chart point line supported at positive infinity. -/
+def infinityPlusLine : TwoChartLine :=
+  N13IntegralInfinityPointSpread.pointLine infinityPlusPoint
+
+/-- The proper two-chart point line supported at negative infinity. -/
+def infinityMinusLine : TwoChartLine :=
+  N13IntegralInfinityPointSpread.pointLine infinityMinusPoint
+
+/-- Both infinity point lines are trivial on the affine chart.  The branch
+distinction is retained entirely by their infinity-chart point ideals. -/
+@[simp] theorem infinityPlusLine_affineIdeal :
+    infinityPlusLine.affineIdeal = ⊤ := by
+  simp [infinityPlusLine,
+    N13IntegralInfinityPointSpread.pointLine,
+    N13IntegralInfinityPointSpread.affinePointIdeal,
+    GeneralizedGraphIdealCore.graphIdeal,
+    N13IntegralInfinityPointSpread.affineU,
+    infinityPlusPoint]
+  rw [Ideal.eq_top_iff_one]
+  exact Ideal.subset_span (by simp)
+
+/-- The negative infinity point line is likewise trivial on the affine
+chart, although its infinity-chart ideal differs from the positive line. -/
+@[simp] theorem infinityMinusLine_affineIdeal :
+    infinityMinusLine.affineIdeal = ⊤ := by
+  simp [infinityMinusLine,
+    N13IntegralInfinityPointSpread.pointLine,
+    N13IntegralInfinityPointSpread.affinePointIdeal,
+    GeneralizedGraphIdealCore.graphIdeal,
+    N13IntegralInfinityPointSpread.affineU,
+    infinityMinusPoint]
+  rw [Ideal.eq_top_iff_one]
+  exact Ideal.subset_span (by simp)
+
+/-- The natural tensor power of the positive-infinity point line.  Balanced
+low-degree Mumford data use only nonnegative infinity multiplicities. -/
+def positiveInfinityPowerLine
+    (n : ℕ) :
+    TwoChartLine :=
+  tensorPow infinityPlusLine n
+
+@[simp] theorem positiveInfinityPowerLine_affineIdeal
+    (n : ℕ) :
+    (positiveInfinityPowerLine n).affineIdeal = ⊤ := by
+  simp [positiveInfinityPowerLine]
+
+@[simp] theorem positiveInfinityPowerLine_infinityIdeal
+    (n : ℕ) :
+    (positiveInfinityPowerLine n).infinityIdeal =
+      (N13IntegralInfinityPointSpread.pointIdeal
+        infinityPlusPoint) ^ n := by
+  simp [positiveInfinityPowerLine, infinityPlusLine,
+    N13IntegralInfinityPointSpread.pointLine]
+
+/-- Tensoring by a positive-infinity power changes only the infinity chart.
+In particular it preserves the exact affine generic ideal of any previously
+constructed proper spread. -/
+@[simp] theorem tensor_positiveInfinityPowerLine_affineIdeal
+    (L : TwoChartLine) (n : ℕ) :
+    (tensor L (positiveInfinityPowerLine n)).affineIdeal =
+      L.affineIdeal := by
+  simp
+
+/-- Add a nonnegative positive-infinity multiplicity to a proper line.
+This supplies the chart-level factor needed for the `nInf` field of a
+balanced low-degree Mumford representative; identifying the resulting line
+with the oriented Picard class is a separate semantic comparison. -/
+def withPositiveInfinityMultiplicity
+    (L : TwoChartLine) (n : ℕ) :
+    TwoChartLine :=
+  tensor L (positiveInfinityPowerLine n)
+
+@[simp] theorem withPositiveInfinityMultiplicity_affineIdeal
+    (L : TwoChartLine) (n : ℕ) :
+    (withPositiveInfinityMultiplicity L n).affineIdeal =
+      L.affineIdeal :=
+  tensor_positiveInfinityPowerLine_affineIdeal L n
+
+/-- Adding the positive-infinity correction preserves the exact Mumford
+ideal seen on the generic affine chart. -/
+theorem map_withPositiveInfinityMultiplicity_affineIdeal
+    (L : TwoChartLine) (n : ℕ) :
+    Ideal.map
+        N13TwoAdicCoordinateBaseChange.integralToSextic
+        (withPositiveInfinityMultiplicity L n).affineIdeal =
+      Ideal.map
+        N13TwoAdicCoordinateBaseChange.integralToSextic
+        L.affineIdeal := by
+  rw [withPositiveInfinityMultiplicity_affineIdeal]
 
 theorem map_tensor_affineIdeal
     (L M : TwoChartLine) :
