@@ -315,6 +315,13 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `RationalKernelDoublingData`, including its compatible disk-pair
   realization and integral first-jet doubling law.  Once these providers
   exist, the final affine-cuspidality wiring is thin.
+- `N13RationalKernelDoublingAdapter.lean` sharpens the separatedness
+  boundary.  The transition-square quadratic estimate is already proved.
+  It remains to produce a centered near-base integral Mumford graph for
+  each kernel class and to compare the chosen representative of `2 • z`
+  with the squared transition modulo the moving coordinate ideal squared.
+  Those two inputs now assemble directly into
+  `RationalKernelDoublingData` and hence `NSeparated`.
 - Earlier axiom inventories in this file describe historical snapshots and
   must not be treated as current.  Use a fresh `#print axioms` audit of the
   assembled theorem before reporting the remaining global Mazur boundary.
