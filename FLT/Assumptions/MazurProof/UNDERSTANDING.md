@@ -249,27 +249,28 @@ MW group = ℤ/6ℤ (rank 0), rational points u ∈ {-1, 1, 3} are all cusps.
 The authoritative command is
 `#print axioms MazurProof.mazur_torsion_bound` after rebuilding every changed
 dependency from source in order.  The endpoint currently depends on exactly
-**6 custom axioms**, plus the Lean built-ins `propext`, `Classical.choice`,
+**5 custom axioms**, plus the Lean built-ins `propext`, `Classical.choice`,
 and `Quot.sound`.  It does **not** depend on `sorryAx`.
 
 | # | Primitive axiom | File | Mathematical content |
 |---|-----------------|------|----------------------|
 | 1 | `C13Sextic_affine_x_is_cuspidal` | `CyclicExclusion13` | Every rational point on the optimized genus-two `X₁(13)` model is cuspidal |
-| 2 | `no_F17_rational_solution` | `CyclicExclusion17` | The nondegenerate Tate equation for order 17 has no rational solution |
-| 3 | `no_F19_rational_solution` | `CyclicExclusion19` | The nondegenerate Tate equation for order 19 has no rational solution |
-| 4 | `no_explicit_order25_obstruction` | `CyclicExclusion25` | The explicit primitive order-25 obstruction has no rational point |
-| 5 | `no_raw_order49_tate_obstruction` | `CyclicExclusion49` | The primitive order-49 Tate obstruction has no rational point |
-| 6 | `no_prime_order_ge_23` | `CyclicOrderAssembly` | Uniform formal-immersion exclusion for prime orders at least 23 |
+| 2 | `no_F19_rational_solution` | `CyclicExclusion19` | The nondegenerate Tate equation for order 19 has no rational solution |
+| 3 | `no_explicit_order25_obstruction` | `CyclicExclusion25` | The explicit primitive order-25 obstruction has no rational point |
+| 4 | `no_raw_order49_tate_obstruction` | `CyclicExclusion49` | The primitive order-49 Tate obstruction has no rational point |
+| 5 | `no_prime_order_ge_23` | `CyclicOrderAssembly` | Uniform formal-immersion exclusion for prime orders at least 23 |
 
-The previous seven-item table was stale in three ways:
+The previous inventories were stale in four ways:
 
 - `exists_rational_two_isogeny_quotient` is now a theorem from
   `VeluTwoIsogeny`, so orders 20 and 24 are clean.
-- The endpoint uses the direct Tate Diophantine axioms for orders 17 and 19,
-  not the older `order17_to_kernel_root` and `order19_to_kernel_root` bridge
-  names.
+- The endpoint previously used direct Tate Diophantine seams for orders 17
+  and 19, not the older `order17_to_kernel_root` and
+  `order19_to_kernel_root` bridge names; only the order-19 seam remains.
 - The primitive N13 seam is `C13Sextic_affine_x_is_cuspidal`;
   `no_F13_rational_solution` is a derived theorem.
+- `TateOrder17Quotient.no_F17_rational_solution` is now a theorem, so the
+  order-17 Tate seam is no longer an endpoint axiom.
 
 The audit initially reported `sorryAx` because several `.olean` files were
 older than their proved sources.  Rebuilding
@@ -280,8 +281,8 @@ primitive N13 axiom.  Endpoint audits must therefore compare source and
 
 **Fully discharged from the endpoint dependency graph:**
 
-- Orders 11 and 18 are theorems via the Billing--Mahler and N18 descent
-  routes.
+- Orders 11, 17, and 18 are theorems via the Billing--Mahler, explicit
+  order-17 quotient, and N18 descent routes.
 - All composite exclusions 14, 15, 16, 20, 21, 24, 27, and 35 are clean;
   theorems for 25 and 49 depend only on the named rational-point axioms above.
 - The Vélu two-isogeny quotient used for orders 20 and 24 is clean.
@@ -291,45 +292,53 @@ primitive N13 axiom.  Endpoint audits must therefore compare source and
   `mazur_torsion_bound`; the endpoint uses the clean cyclic `X₁(16)` route
   and different noncyclic exclusions.
 
-#### Exact strength of the N17 and N19 seams
+#### Exact strength of the remaining N19 seam
 
-The active N17 and N19 axioms are stronger than the endpoint needs.  The
-proved Tate-normal-form bridges produce `b`, `c`, `b ≠ 0`, the residual
-equation `F17 b c = 0` or `F19 b c = 0`, and an elliptic Tate curve.
-Therefore the smallest honest missing theorem in each case is emptiness of
-the **nonsingular** rational Tate locus, not nonvanishing of `F17` or `F19`
-on every pair with `b ≠ 0`.  `TateOrder17` and `TateOrder19` already prove
-both directions between the residual equation and the exact order of the
-marked Tate origin under those hypotheses.
+The N17 seam is fully discharged.  `TateOrder17Quotient.lean` normalizes the
+Tate equation, constructs an explicit rational map through two genus-one
+models to the proved `X₀(17)` equation, classifies the image using
+`X017RationalPoints`, and eliminates every possible fibre.  This is a direct
+algebraic implication from `F17 b c = 0`; it does not rely on an unformalized
+modular interpretation or twist/kernel transport.
 
-`PrimeExclusion17.lean` and `PrimeExclusion19.lean` contain proved fixed
-kernel-polynomial root exclusions, but the active endpoint does not import
-them.  No source theorem maps every rational noncuspidal point of either Tate
-locus to a root of the corresponding fixed polynomial.  Those algebraic
-tails cannot replace the live axioms until a genuine universal modular-curve
-or fibre map is proved.
+The active N19 axiom is stronger than the endpoint needs.  The proved
+Tate-normal-form bridge produces `b`, `c`, `b ≠ 0`, the residual equation
+`F19 b c = 0`, and an elliptic Tate curve.  Thus the smallest honest missing
+theorem is emptiness of the nonsingular rational Tate locus, rather than
+nonvanishing of `F19` on every pair with `b ≠ 0`.  As at N17, a sufficiently
+strong direct algebraic proof of the global statement is also acceptable.
 
-For N17 specifically, the fixed-fibre arithmetic is not the dominant
-remaining task.  `PrimeExclusion17` already proves the two required
-fixed-polynomial root exclusions.  A valid replacement of the live axiom
-still needs three independent producers:
+`PrimeExclusion19.lean` proves that a fixed degree-nine CM kernel polynomial
+has no rational root, but the active endpoint does not import it.  No source
+theorem currently maps every rational noncuspidal point of the order-19 Tate
+locus to a root of that polynomial.  This arithmetic tail cannot replace the
+live axiom until a genuine universal quotient/fibre map is proved.
 
-1. classify the four rational points of the explicit genus-one `X₀(17)`
-   model;
-2. construct the level-specific Tate `X₁(17) → X₀(17)` quotient, including
-   cusp exclusion and the two noncuspidal `j`-values;
-3. prove rational twist/model transport from each noncuspidal fibre to the
-   corresponding fixed kernel polynomial.
+The universal algebraic quotient is now explicit.
+`N19SutherlandModels.lean` identifies the repository `F19` with Sutherland's
+raw equation, proves that every nonboundary raw point lies in the optimized
+chart, and verifies a degree-three quotient to
+`v²+v=u³+u²+u`.  A compact Bézout identity shows that the zero horizontal
+fibre would have optimized coordinate `x=-1`, while the raw equation proves
+that this is a boundary point.  `TateOrder19Quotient.lean` assembles these
+identities and reduces the broad `F19` nonvanishing theorem to the single
+arithmetic statement that every affine rational point on the quotient has
+first coordinate zero.
 
-The first package is now closed without relying on a missing point-reduction
-API.  It uses the existing Vélu two-isogeny, exact-sequence, Northcott, and
-doubling infrastructure together with an explicit two-adic formal-kernel
-argument.  The modular quotient and twist/kernel transport remain the
-genuinely geometric N17 core.
+`XDelta19Model.lean` records the quotient curve, its integral short model
+`Y²=X³+(2X+4)²`, and the explicit three-isogeny pair.
+`XDelta19Descent.lean` completes the first rational-flex descent: a primitive
+integral normalization proves that `Y-(2X+4)` is always a rational cube, and
+the resulting explicit formulas prove that the dual three-isogeny is
+surjective on rational points.  The remaining N19 core is the complementary
+three-isogeny descent/rank-zero argument for this conductor-19 isogeny class;
+the quotient geometry and all Tate-chart exceptional cases are no longer
+missing.
+
 `TateOrder17.exists_tate_parameters_of_order_seventeen_with_j` now preserves
 the original curve's `j`-invariant together with ellipticity, exact order,
-`b ≠ 0`, and `F17 b c = 0`, so the future quotient/fibre layer no longer has
-to reconstruct that certificate.
+`b ≠ 0`, and `F17 b c = 0`; the final direct algebraic quotient proof does
+not need to reconstruct that certificate.
 `X017Model.lean` now verifies the concrete genus-one equation
 `y²+xy+y=x³-x²-x-14`, its discriminant `-17⁴`, the rational variable changes
 to `Y²=X(X²+30X+289)` and its standard two-isogeny dual, and an explicit
@@ -346,9 +355,9 @@ by the dual map, the first exact-sequence arrow vanishes, so `G/2G` injects
 into the right endpoint quotient.  It also generalizes the N15 rank criterion:
 for a finitely generated abelian group, the inequality
 `|G/2G| ≤ |G[2]|` forces free rank zero.  The N17-specific producers still
-missing from this layer are the two concrete isogeny-coset exhaustions and
-finite generation of the rational point group; neither is carried as a
-hypothesis by an endpoint theorem.
+missing at the time this layer was introduced were the two concrete
+isogeny-coset exhaustions and finite generation of the rational point group.
+The later files listed below supply all three producers.
 `X017IsogenySequence.lean` now supplies the concrete additive homomorphisms
 required by that abstract layer.  It conjugates the already bundled general
 Vélu map and dual map through the explicit N17 source and target
@@ -364,18 +373,18 @@ neither may be inferred from the other.
 classification.  For every nonzero affine source point, denominator clearing
 and squarefree-core extraction restrict the first coordinate to squareclass
 `1` or `17`; positivity of `x²+30x+289=(x+15)²+64` removes both negative
-classes.  This does not yet prove the quotient cover with representatives
-`0,T`: the `17` class still has to be converted into the chosen `T`-coset by
-an explicit translation identity and a dual-isogeny preimage theorem.
+classes.  At this intermediate stage the `17` class still had to be
+converted into the chosen `T`-coset; `X017SecondCoset.lean` performs that
+translation and closes the quotient cover.
 `X017FirstCoset.lean` proves the corresponding target squareclass
 classification.  A squarefree core first leaves `±1` and `±2`; the latter
 two classes lead to explicit homogeneous quartics and are eliminated by a
 three-stage two-adic parity descent.  The implementation uses only small
 kernel-checked `ZMod 8` certificates between honest integer divisions, and
 concludes that every nonzero target first coordinate is a square or a
-negative square.  The remaining target endpoint work is now precisely the
-generic square-coordinate preimage theorem and the translation by the target
-kernel `(0,0)`, not any further squareclass enumeration.
+negative square.  `StandardTwoIsogenyPreimages.lean` and the remainder of
+`X017FirstCoset.lean` supply the generic square-coordinate preimage and the
+translation by the target kernel `(0,0)`.
 `StandardTwoIsogenyPreimages.lean` now proves that generic preimage theorem.
 For a target point with `x=r²≠0`, it constructs the source point with
 coordinates
@@ -443,13 +452,17 @@ so `4P=0`; the four-torsion classification then gives exactly
 `0,K,T,-T`.  It further proves that the full point group is generated by the
 order-four point `T` and has natural-number cardinality four.  All of these
 declarations audit to Lean's standard quotient/classical axioms only.
+`TateOrder17Quotient.lean` turns that rational-point classification into the
+final order-17 exclusion.  It proves the needed normalized factor
+nonvanishing, maps every hypothetical `F17=0` solution to the concrete
+genus-one model, and eliminates all classified fibres by exact polynomial
+identities and small modular or square-class contradictions.
 `X017Reduction.lean` proves by kernel-checked finite computation that the
 integral `X₀(17)` equation has three affine points over each of `𝔽₂` and
 `𝔽₃`; with the point at infinity, both good fibres have four points.  It also
-checks the discriminant factor is nonzero at both primes.  This supplies the
-finite target counts, but the pinned library still lacks the point-level
-good-reduction homomorphism and prime-to-prime torsion injection needed to
-turn those counts into a rational torsion bound.
+checks the discriminant factor is nonzero at both primes.  This reduction
+route was not needed in the final proof, which instead uses the exact
+two-coset descent and formal-kernel argument above.
 
 #### N13 analysis note
 F₁₃(b,c) is bivariate (degree 10 in c, monic leading coeff -1; degree 7 in b;
