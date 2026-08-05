@@ -362,6 +362,13 @@ the point `(0,0)` of exact order two.  The other visible target point
 kernel point.  Q3806 also confirmed that the left two-representative cover
 and the right quotient bound are logically independent arithmetic inputs;
 neither may be inferred from the other.
+`X017Descent.lean` now proves the first arithmetic half of the right-endpoint
+classification.  For every nonzero affine source point, denominator clearing
+and squarefree-core extraction restrict the first coordinate to squareclass
+`1` or `17`; positivity of `x²+30x+289=(x+15)²+64` removes both negative
+classes.  This does not yet prove the quotient cover with representatives
+`0,T`: the `17` class still has to be converted into the chosen `T`-coset by
+an explicit translation identity and a dual-isogeny preimage theorem.
 `X017HeightDescent.lean` specializes Mathlib's general descent theorem to a
 two-element representative set `{0,T}` modulo doubling.  It proves finite
 generation from Northcott, nonnegativity, the doubling lower bound, and only

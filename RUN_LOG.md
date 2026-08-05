@@ -41,10 +41,14 @@
     two-representative cover and the right quotient bound are separate
     arithmetic producers, and finite generation remains an independent
     height input
+  - `X017Descent.lean` clears square denominators on the standard source and
+    proves that every nonzero rational first coordinate has squareclass `1`
+    or `17`; the positive quadratic factor removes negative classes
 - verification:
   - scoped compilations pass
   - the N17 two-torsion theorem, exact-sequence/rank declarations, and
-    transported N17 isogeny identities have clean-3 axiom audits
+    transported N17 isogeny identities, and source squareclass classification
+    have clean-3 axiom audits
 - next N17 producers:
   - concrete two-coset exhaustions for the standard isogeny and its dual
   - finite generation/rank-zero classification of `X₀(17)(ℚ)`
