@@ -360,6 +360,9 @@ the explicit `X₀(17)` height satisfies it.  The project already has a clean
 scratch proof of the general projective `x`-height Northcott and doubling
 lower bound, but that code has not yet been promoted into a dependency-clean
 production module, and the fixed-`T` translation bound remains to be proved.
+The same file now converts the concrete `TwoCosetExhaustion` witness directly
+to the sumset cover consumed by Mathlib, so the geometric coset theorem will
+feed both the exact-sequence and height layers without a second interface.
 
 #### N13 analysis note
 F₁₃(b,c) is bivariate (degree 10 in c, monic leading coeff -1; degree 7 in b;

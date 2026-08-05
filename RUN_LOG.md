@@ -28,6 +28,8 @@
   - specialized Mathlib's height descent to representatives `{0,T}` modulo
     doubling; finite generation now needs only Northcott, the doubling lower
     bound, and one fixed-`T` translation estimate
+  - connected `TwoCosetExhaustion` directly to the sumset cover required by
+    that descent theorem; both bridge declarations compile and audit clean-3
 - verification:
   - scoped compilations pass
   - the N17 two-torsion theorem and all three new exact-sequence/rank
