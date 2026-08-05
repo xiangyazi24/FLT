@@ -331,6 +331,12 @@ quotient and twist/kernel transport remain the genuinely geometric N17 core.
 the original curve's `j`-invariant together with ellipticity, exact order,
 `b ≠ 0`, and `F17 b c = 0`, so the future quotient/fibre layer no longer has
 to reconstruct that certificate.
+`X017Model.lean` now verifies the concrete genus-one equation
+`y²+xy+y=x³-x²-x-14`, its discriminant `-17⁴`, the rational variable changes
+to `Y²=X(X²+30X+289)` and its standard two-isogeny dual, and an explicit
+point of exact order four.  This closes the model/visible-torsion algebra but
+does not assert the still-missing modular interpretation or rational-point
+classification.
 
 #### N13 analysis note
 F₁₃(b,c) is bivariate (degree 10 in c, monic leading coeff -1; degree 7 in b;
