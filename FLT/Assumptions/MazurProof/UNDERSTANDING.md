@@ -351,6 +351,15 @@ for a finitely generated abelian group, the inequality
 missing from this layer are the two concrete isogeny-coset exhaustions and
 finite generation of the rational point group; neither is carried as a
 hypothesis by an endpoint theorem.
+`X017HeightDescent.lean` specializes Mathlib's general descent theorem to a
+two-element representative set `{0,T}` modulo doubling.  It proves finite
+generation from Northcott, nonnegativity, the doubling lower bound, and only
+one nontrivial translation estimate, namely translation by the fixed point
+`T`.  This is a genuine reduction of the height interface, not a proof that
+the explicit `X₀(17)` height satisfies it.  The project already has a clean
+scratch proof of the general projective `x`-height Northcott and doubling
+lower bound, but that code has not yet been promoted into a dependency-clean
+production module, and the fixed-`T` translation bound remains to be proved.
 
 #### N13 analysis note
 F₁₃(b,c) is bivariate (degree 10 in c, monic leading coeff -1; degree 7 in b;

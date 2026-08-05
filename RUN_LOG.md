@@ -25,6 +25,9 @@
   - current working node: sharpen the abstract two-isogeny exact sequence;
     a zero left arrow embeds `G/2G` into the right quotient, and
     `|G/2G| ≤ |G[2]|` forces free rank zero
+  - specialized Mathlib's height descent to representatives `{0,T}` modulo
+    doubling; finite generation now needs only Northcott, the doubling lower
+    bound, and one fixed-`T` translation estimate
 - verification:
   - scoped compilations pass
   - the N17 two-torsion theorem and all three new exact-sequence/rank

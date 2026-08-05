@@ -25,7 +25,8 @@ scoped builds pass, and `#print axioms` contains only `propext`,
   - Closed infrastructure: exact-order Tate normalization with preserved
     `j`; explicit `X₀(17)` model and standard two-isogeny; visible point of
     exact order four; rational two-torsion has cardinality two; sharpened
-    exact-sequence and general rank-zero criterion.
+    exact-sequence and general rank-zero criterion; two-coset height-descent
+    wrapper reducing finite generation to one fixed translation estimate.
   - Open arithmetic atoms: two explicit isogeny-coset exhaustions, finite
     generation, and the rational-point classification.
   - Open geometric atoms: the Tate `X₁(17) → X₀(17)` quotient with cusp and
