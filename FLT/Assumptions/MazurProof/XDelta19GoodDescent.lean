@@ -18,6 +18,7 @@ namespace MazurProof.XDelta19GoodDescent
 
 open MazurProof.RationalPointsX135
 open MazurProof.XDelta19GoodModel
+open MazurProof.XDelta19GoodIsogeny
 
 noncomputable section
 
@@ -366,6 +367,108 @@ theorem good_alpha_cubeclass {x y : ℚ} (h : OnGood x y) :
     push_cast
     field_simp [Int.cast_ne_zero.mpr (ne_of_gt hDpos)]
     ring
+
+/-! ## Cubes and translation by the visible flexes -/
+
+/-- A nonzero cube value of the flex function constructs an explicit
+preimage under the dual degree-three isogeny. -/
+theorem exists_dualThreeIsogeny_preimage_of_alpha_cube
+    {x y r : ℚ}
+    (h : WeierstrassCurve.Affine.Nonsingular goodCurve x y)
+    (hr : r ^ 3 = y - (8 * x + 76)) (hr0 : r ≠ 0) :
+    ∃ Q : QuotientPoint,
+      dualThreeIsogenyPoint Q =
+        WeierstrassCurve.Affine.Point.some x y h := by
+  have hcurve : OnGood x y := (goodCurve_equation_iff x y).mp h.1
+  have hy : y = r ^ 3 + 8 * x + 76 := by
+    linarith
+  have hrel : x ^ 3 = r ^ 3 * (r ^ 3 + 16 * x + 152) := by
+    unfold OnGood at hcurve
+    rw [hy] at hcurve
+    linear_combination -hcurve
+  let d : ℚ := 3 * x - 3 * r ^ 2 - 16 * r
+  have hd : d ≠ 0 := by
+    intro hd
+    have hx : x = r ^ 2 + 16 * r / 3 := by
+      dsimp [d] at hd
+      linarith
+    rw [hx] at hrel
+    ring_nf at hrel
+    apply hr0
+    have : r ^ 3 = 0 := by
+      linarith
+    exact (pow_eq_zero_iff (by norm_num : (3 : ℕ) ≠ 0)).mp this
+  let s : ℚ := 24 * r / d
+  let t : ℚ := 9 * s * r + 24 * s + 36
+  have hs : s ≠ 0 :=
+    div_ne_zero (mul_ne_zero (by norm_num) hr0) hd
+  have hquotient : OnQuotient s t := by
+    unfold OnQuotient
+    dsimp only [t, s]
+    field_simp [hd]
+    dsimp only [d]
+    linear_combination 46656 * hrel
+  have hxmap : dualThreeIsogenyX s = x := by
+    unfold dualThreeIsogenyX
+    dsimp only [s]
+    field_simp [hd, hr0]
+    dsimp only [d]
+    linear_combination -46656 * hrel
+  have hymap : dualThreeIsogenyY s t = y := by
+    rw [hy]
+    unfold dualThreeIsogenyY
+    dsimp only [t, s]
+    field_simp [hd, hr0]
+    dsimp only [d]
+    linear_combination
+      10077696 * (-2 * r ^ 2 - 8 * r + x) * hrel
+  have hquotientns :
+      WeierstrassCurve.Affine.Nonsingular quotientCurve s t :=
+    WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+      ((quotientCurve_equation_iff s t).mpr hquotient)
+  let Q : QuotientPoint :=
+    WeierstrassCurve.Affine.Point.some s t hquotientns
+  refine ⟨Q, ?_⟩
+  rw [dualThreeIsogenyPoint_some_of_x_ne_zero hquotientns hs]
+  change WeierstrassCurve.Affine.Point.some
+      (dualThreeIsogenyX s) (dualThreeIsogenyY s t) _ =
+    WeierstrassCurve.Affine.Point.some x y h
+  rw [WeierstrassCurve.Affine.Point.some.injEq]
+  exact ⟨hxmap, hymap⟩
+
+/-- Translation by the positive visible flex multiplies the flex
+function by the stated rational cube factor. -/
+theorem add_goodT_alpha_identity {x y : ℚ} (hx : x ≠ 0)
+    (hcurve : OnGood x y) :
+    let L := WeierstrassCurve.Affine.slope goodCurve x 0 y 76
+    let X := WeierstrassCurve.Affine.addX goodCurve x 0 L
+    let Y := WeierstrassCurve.Affine.addY goodCurve x 0 y L
+    Y - (8 * X + 76) =
+      -23104 * (y - (8 * x + 76)) / x ^ 3 := by
+  dsimp
+  rw [WeierstrassCurve.Affine.slope_of_X_ne hx]
+  unfold WeierstrassCurve.Affine.addY WeierstrassCurve.Affine.negAddY
+    WeierstrassCurve.Affine.negY WeierstrassCurve.Affine.addX goodCurve
+  field_simp [hx]
+  unfold OnGood at hcurve
+  linear_combination -(x ^ 3) * (8 * x + y - 228) * hcurve
+
+/-- Translation by the negative visible flex transforms the conjugate
+factor by the stated rational cube factor. -/
+theorem add_goodTNeg_alpha_identity {x y : ℚ} (hx : x ≠ 0)
+    (hcurve : OnGood x y) :
+    let L := WeierstrassCurve.Affine.slope goodCurve x 0 y (-76)
+    let X := WeierstrassCurve.Affine.addX goodCurve x 0 L
+    let Y := WeierstrassCurve.Affine.addY goodCurve x 0 y L
+    Y - (8 * X + 76) =
+      -152 * (y + (8 * x + 76)) ^ 2 / x ^ 3 := by
+  dsimp
+  rw [WeierstrassCurve.Affine.slope_of_X_ne hx]
+  unfold WeierstrassCurve.Affine.addY WeierstrassCurve.Affine.negAddY
+    WeierstrassCurve.Affine.negY WeierstrassCurve.Affine.addX goodCurve
+  field_simp [hx]
+  unfold OnGood at hcurve
+  linear_combination -(x ^ 3) * (8 * x + y + 76) * hcurve
 
 end
 

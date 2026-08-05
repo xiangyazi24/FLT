@@ -347,13 +347,22 @@ unlike the earlier scaled equation, its quotient factorization has no
 split prime above nineteen.  `XDelta19GoodDescent.lean` now completes the
 primitive two-adic normalization on this model.  Its two flex factors have
 cube product, can share only the prime nineteen, and therefore give exactly
-the three candidate rational cubeclasses `1`, `19`, and `19²`.  What remains
-is to convert those three classes into the weak three-descent by the two
-visible flex translations, prove surjectivity on the small quotient, and
-close the three-adic separatedness and final transport back to the minimal
-quotient.  The quotient geometry, Tate-chart exceptional cases, both
-isogeny pairs, both composition identities, and the first Selmer
-cubeclass computation are no longer missing.
+the three candidate rational cubeclasses `1`, `19`, and `19²`.
+`XDelta19GoodDualDescent.lean` completes the complementary Eisenstein
+calculation.  It separates conjugate prime factors using the constant `12`,
+excludes the `ζ` and `ζ²` unit classes by exact modulo-27 certificates,
+expands the remaining cube into an explicit rational preimage, and proves
+the forward three-isogeny surjective on rational points of the small
+quotient.  Finally, `XDelta19GoodWeakDescent.lean` combines both descents:
+translation by `(0,76)` or `(0,-76)` converts the `19` and `19²` classes to
+cubes, so every good-model rational point is a threefold multiple up to one
+of those two visible three-torsion points.
+
+The remaining N19 arithmetic is now the three-adic separatedness endgame
+and final transport back to the minimal quotient.  The quotient geometry,
+Tate-chart exceptional cases, both isogeny pairs, both composition
+identities, both Selmer computations, and weak three-descent are no longer
+missing.
 
 `TateOrder17.exists_tate_parameters_of_order_seventeen_with_j` now preserves
 the original curve's `j`-invariant together with ellipticity, exact order,
