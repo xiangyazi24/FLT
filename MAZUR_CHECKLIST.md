@@ -64,8 +64,16 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     the Tate residual.
 
 - [ ] N25 — `CyclicExclusion25.no_explicit_order25_obstruction`
-  - Closed infrastructure: explicit primitive order-25 obstruction.
-  - Open atom: rational-point exclusion for that explicit locus.
+  - Closed infrastructure: explicit primitive order-25 obstruction; the
+    canonical quadric-cubic model of the genus-four quotient
+    `25.150.4.f.1`; its five rational cusp vectors; elimination to a plane
+    sextic on the dense chart; an explicit order-five automorphism and basic
+    invariants; exhaustive classifications over `𝔽₂` and `𝔽₄`, with no new
+    projective class over the quadratic extension.
+  - Open atoms: an exact map from the nondegenerate `F₂₅` Tate locus to a
+    noncuspidal point of the canonical model, and the global
+    rational-point/formal-immersion argument showing that every rational
+    canonical point is one of the five cusps.
 
 - [ ] N49 — `CyclicExclusion49.no_raw_order49_tate_obstruction`
   - Closed infrastructure: structural `ψ₄₉` factorization bridge to the

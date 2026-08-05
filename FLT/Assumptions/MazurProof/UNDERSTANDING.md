@@ -374,6 +374,37 @@ a theorem whose axiom audit reports only `propext`, `Classical.choice`, and
 the original curve's `j`-invariant together with ellipticity, exact order,
 `b ≠ 0`, and `F17 b c = 0`; the final direct algebraic quotient proof does
 not need to reconstruct that certificate.
+
+#### Current N25 foundation
+
+The active endpoint seam remains
+`CyclicExclusion25.no_explicit_order25_obstruction`, but the local
+rational-point infrastructure is no longer empty.
+`RationalPointsN25CanonicalPoints.lean` records the canonical
+quadric-cubic model of the genus-four quotient `25.150.4.f.1`, proves that
+every canonical point with a zero homogeneous coordinate is one of the five
+rational cusps, and gives the exact dense-chart elimination to a plane
+sextic with a recovered fourth coordinate.
+`RationalPointsN25QuotientAction.lean` verifies an explicit linear
+automorphism of order five, its action on the five cusps, the cyclic
+augmentation coordinates, and homogeneous invariants of weights two, three,
+and five.
+`RationalPointsN25QuotientF2.lean` gives kernel-checked exhaustive
+classifications over `𝔽₂` and its quadratic extension: the five special
+projective points are exactly the cusp classes, and no new class appears
+over `𝔽₄`.
+
+All three files pass scoped compilation.  Axiom audits of their terminal
+theorems report only `propext`, `Classical.choice`, and `Quot.sound`.
+They are not yet imported by `CyclicExclusion25`: the genuine remaining
+work is an exact map from the nondegenerate `F25` Tate locus to a
+noncuspidal canonical point, followed by a global rational-point or
+formal-immersion argument proving that every rational canonical point is a
+cusp.  The older `N25LecacheuxIntegrality.lean` and
+`N25LecacheuxSieve.lean` scratch experiments do not currently compile and
+do not contain the advertised final Newton-polygon theorem; they must not be
+counted as proved N25 infrastructure.
+
 `X017Model.lean` now verifies the concrete genus-one equation
 `y²+xy+y=x³-x²-x-14`, its discriminant `-17⁴`, the rational variable changes
 to `Y²=X(X²+30X+289)` and its standard two-isogeny dual, and an explicit
