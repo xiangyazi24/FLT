@@ -500,10 +500,40 @@ noncomputable def mumfordQuotientEquiv
     [Nontrivial R]
     (D : SemiMumford (R := R)) :
     CoordinateRing ⧸ mumfordIdeal D.u D.v ≃+*
-      MumfordResidue D := by
-  rw [← ker_mumfordEval D]
-  exact RingHom.quotientKerEquivOfSurjective
-    (mumfordEval_surjective D)
+      MumfordResidue D :=
+  (Ideal.quotEquivOfEq (ker_mumfordEval D).symm).trans
+    (RingHom.quotientKerEquivOfSurjective
+      (mumfordEval_surjective D))
+
+/-- The graph quotient equivalence sends a quotient class to its graph
+evaluation. -/
+@[simp] theorem mumfordQuotientEquiv_apply_mk
+    [Nontrivial R]
+    (D : SemiMumford (R := R))
+    (z : CoordinateRing (R := R)) :
+    mumfordQuotientEquiv D
+        (Ideal.Quotient.mk (mumfordIdeal D.u D.v) z) =
+      mumfordEval D z := by
+  simp [mumfordQuotientEquiv]
+
+/-- The graph quotient equivalence respects the coefficient algebra. -/
+noncomputable def mumfordQuotientAlgEquiv
+    [Nontrivial R]
+    (D : SemiMumford (R := R)) :
+    (CoordinateRing ⧸ mumfordIdeal D.u D.v) ≃ₐ[R]
+      MumfordResidue D :=
+  AlgEquiv.ofRingEquiv
+    (f := mumfordQuotientEquiv D)
+    (by
+      intro r
+      change
+        mumfordQuotientEquiv D
+            (Ideal.Quotient.mk
+              (mumfordIdeal D.u D.v) (xClass (C r))) =
+          Ideal.Quotient.mk
+            (Ideal.span ({D.u} : Set R[X])) (C r)
+      rw [mumfordQuotientEquiv_apply_mk,
+        mumfordEval_xClass])
 
 /-- A monic graph quotient is free over the base. -/
 noncomputable instance mumfordResidueFree

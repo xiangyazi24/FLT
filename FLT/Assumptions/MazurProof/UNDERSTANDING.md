@@ -293,6 +293,16 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   interface.  An integral point uses the canonical divisorial hull, while an
   escaping point uses the affine ideal of its explicit invertible two-chart
   line.
+- `N13FiniteAffineTwoChart.lean` removes the properness asymmetry in that
+  statement.  An invertible affine ideal with finite quotient has an
+  invertible infinity-chart closure: a monic equation for the affine
+  coordinate reflects to an equation with constant coefficient one, so the
+  infinity uniformizer is a unit modulo the closure and localization
+  patching applies.  In particular, every integral affine point graph has an
+  honest proper two-chart line with its literal affine ideal.
+- Combining that closure with the existing escaping point line proves that
+  every selected degree-one graph has a proper `TwoChartLine` whose affine
+  generic fibre is exactly the selected Mumford graph.
 - `N13LowDegreeFractionalSpread.lean` now exhausts the Padé bound
   `natDegree ≤ 2` and gives every selected graph one invertible integral
   fractional spread with the exact normalized generic Mumford ideal.
@@ -306,12 +316,11 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   contraction identifies its generic affine ideal with the original
   Mumford graph.  Together with the existing horizontal recovery, every
   integral reciprocal quadratic has an exact proper two-chart spread.
-- Consequently an arbitrary irreducible quadratic graph has an
-  unconditional dichotomy: either its canonical finite affine divisorial
-  hull is invertible, or it has a proper two-chart line whose generic ideal
-  is literally the graph ideal.  The remaining properness issue is confined
-  to converting the finite affine branch and proving the oriented meaning
-  of the explicit `nInf` correction.
+- Consequently every irreducible quadratic graph now has a proper two-chart
+  line whose generic affine ideal is literally the graph ideal.  The finite
+  affine branch uses the general infinity-closure theorem, while the
+  escaping branch uses reciprocal horizontal-or-vertical recovery.  No
+  finite-versus-reciprocal properness dichotomy remains.
 - The chart-level `nInf` factor is now explicit.  The two integral points
   `(t,v)=(0,0)` and `(0,-1)` give the positive- and negative-infinity
   `TwoChartLine`s.  Natural tensor powers of the positive line are trivial
@@ -332,12 +341,14 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   classification: it is the geometric special-fibre theorem identifying
   the reduction of the explicit proper point line with the anchored class
   of the point reduced from the same infinity-chart lift.
-- The low-degree fractional-spread theorem is intentionally only about the
-  finite affine graph.  Before it can serve as `SpreadData.exists_spread`,
-  its finite ideal still needs a proper infinity-chart extension and the
-  positive-infinity tensor factor must be identified with the representative's
+- The general finite-support closure now supplies the missing
+  infinity-chart extension whenever the chosen affine ideal has finite
+  quotient.  This has been instantiated for integral point graphs and the
+  finite irreducible quadratic branch.  Consolidating the reducible
+  quadratic constructors behind one proper-line interface remains, as does
+  identifying the positive-infinity tensor factor with the representative's
   oriented `nInf` coordinate.
-- All six public spread theorems named above pass scoped compilation, bypass
+- All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
 - The remaining N13 mathematical providers are a concrete

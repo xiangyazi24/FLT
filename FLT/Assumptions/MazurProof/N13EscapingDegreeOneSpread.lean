@@ -1,4 +1,4 @@
-import FLT.Assumptions.MazurProof.N13IntegralAffinePointSpread
+import FLT.Assumptions.MazurProof.N13FiniteAffineTwoChart
 import FLT.Assumptions.MazurProof.N13IntegralInfinityPointSpread
 
 /-!
@@ -14,6 +14,11 @@ After passing to the generic fibre, its first generator is a unit multiple
 of `X-x`, and its completed-square ordinate agrees modulo `X-x` with the
 standard sextic ordinate `2y+h(x)`.  Hence the generic fibre is exactly the
 usual degree-one Mumford point ideal.
+
+For an integral affine point, the finite-support closure theorem instead
+contracts the overlap ideal onto the infinity chart.  Together the two
+constructions give a proper two-chart line for every selected degree-one
+graph.
 -/
 
 open Polynomial
@@ -311,6 +316,83 @@ theorem genericIdeal_eq_pointMumford
 abbrev G : Type :=
   N13ConstructedHalfIntegralSpread.G
 
+/-- The integral alternative produced by the selected degree-one graph is
+realized by closing its literal monic point ideal on the infinity chart. -/
+theorem selectedGraph_has_pointLine_of_integral_x
+    (P : G)
+    (x y : ℚ)
+    (hcurve :
+      y ^ 2 = (N13Mumford.model ℚ).f.eval x)
+    (hgraph :
+      N13ConstructedHalfIntegralSpread.normalizedGraphMumford P =
+        SexticMumford.affinePointMumford
+          (N13Mumford.model ℚ) x y hcurve)
+    (hx :
+      ‖N13ProperCurveReduction.ratToQ₂ x‖ ≤ 1) :
+    ∃ L : N13IntegralInfinityPointSpread.TwoChartLine,
+      Ideal.map
+          N13TwoAdicCoordinateBaseChange.integralToSextic
+          L.affineIdeal =
+        SexticMumford.mumfordIdeal Model
+          (N13ConstructedHalfIntegralSpread.twoAdicNormalizedGraphMumford
+            P).u
+          (N13ConstructedHalfIntegralSpread.twoAdicNormalizedGraphMumford
+            P).v := by
+  have hcurve' :
+      N13CurveModel.C13SexticEq x y := by
+    rw [N13CurveModel.C13SexticEq,
+      ← N13Mumford.f_eval_eq_sexticF13]
+    exact hcurve
+  let x₂ : Q₂ :=
+    N13ProperCurveReduction.ratToQ₂ x
+  let y₂ : Q₂ :=
+    N13ProperCurveReduction.ratToQ₂
+      (N13GoodModelTwo.sexticToGoodY x y)
+  have hgood :
+      N13GoodModelTwo.AffineEquation x₂ y₂ :=
+    N13ProperCurveReduction.map_good_equation hcurve'
+  let P₂ : N13IntegralAffinePointSpread.IntegralPoint :=
+    N13ProperCurveReduction.integralAffineLift x₂ y₂ hx hgood
+  have hsexticY :
+      N13IntegralAffinePointSpread.sexticY P₂ =
+        N13ProperCurveReduction.ratToQ₂ y := by
+    have hround :=
+      congrArg N13ProperCurveReduction.ratToQ₂
+        (N13GoodModelTwo.sextic_good_y_roundtrip x y)
+    simpa [P₂, N13ProperCurveReduction.integralAffineLift,
+      x₂, y₂, N13IntegralAffinePointSpread.sexticY,
+      N13ProperCurveReduction.ratToQ₂,
+      N13GoodModelTwo.h] using hround
+  have hu :
+      (N13ConstructedHalfIntegralSpread.twoAdicNormalizedGraphMumford
+        P).u =
+        (SexticMumford.pointMumford Model
+          (N13IntegralAffinePointSpread.curvePoint P₂)).u := by
+    change
+      (N13ConstructedHalfIntegralSpread.normalizedGraphMumford P).u.map
+          N13InfinityBaseChange.ratToQ₂ =
+        X - C (P₂.1.1 : Q₂)
+    rw [hgraph]
+    simp [SexticMumford.affinePointMumford, P₂,
+      N13ProperCurveReduction.integralAffineLift, x₂]
+  have hv :
+      (N13ConstructedHalfIntegralSpread.twoAdicNormalizedGraphMumford
+        P).v =
+        (SexticMumford.pointMumford Model
+          (N13IntegralAffinePointSpread.curvePoint P₂)).v := by
+    change
+      (N13ConstructedHalfIntegralSpread.normalizedGraphMumford P).v.map
+          N13InfinityBaseChange.ratToQ₂ =
+        C (N13IntegralAffinePointSpread.sexticY P₂)
+    rw [hgraph]
+    simp [SexticMumford.affinePointMumford, hsexticY,
+      N13ProperCurveReduction.ratToQ₂]
+  let L :=
+    N13FiniteAffineTwoChart.integralPointTwoChartLine P₂
+  refine ⟨L, ?_⟩
+  rw [N13FiniteAffineTwoChart.map_integralPointTwoChartLine_affineIdeal,
+    ← hu, ← hv]
+
 /-- The escaping alternative produced by the selected degree-one graph is
 realized by an honest two-chart point line with exactly that generic graph
 ideal. -/
@@ -366,8 +448,7 @@ theorem selectedGraph_has_pointLine_of_escape
           N13InfinityBaseChange.ratToQ₂ =
         X - C x₂
     rw [hgraph]
-    simp [SexticMumford.affinePointMumford, x₂,
-      N13ProperCurveReduction.ratToQ₂]
+    simp [SexticMumford.affinePointMumford, x₂]
   have hv :
       (N13ConstructedHalfIntegralSpread.twoAdicNormalizedGraphMumford
         P).v =
@@ -423,6 +504,38 @@ theorem selectedGraph_isUnit_or_has_pointLine
   · exact Or.inr
       (selectedGraph_has_pointLine_of_escape
         P x y hcurve hgraph hx)
+
+/-- Every selected degree-one graph has an honest proper two-chart line
+whose affine generic fibre is exactly the selected Mumford graph. -/
+theorem selectedGraph_has_pointLine
+    (P : G)
+    (hdeg :
+      (N13ConstructedHalfIntegralSpread.graphU P).natDegree = 1) :
+    ∃ L : N13IntegralInfinityPointSpread.TwoChartLine,
+      Ideal.map
+          N13TwoAdicCoordinateBaseChange.integralToSextic
+          L.affineIdeal =
+        SexticMumford.mumfordIdeal Model
+          (N13ConstructedHalfIntegralSpread.twoAdicNormalizedGraphMumford
+            P).u
+          (N13ConstructedHalfIntegralSpread.twoAdicNormalizedGraphMumford
+            P).v := by
+  obtain ⟨x, y, hcurve, hgraph⟩ :=
+    N13DegreeOneGraphPoint.exists_rationalAffinePoint_of_graphU_natDegree_eq_one
+      P hdeg
+  by_cases hx :
+      ‖N13ProperCurveReduction.ratToQ₂ x‖ ≤ 1
+  · exact
+      selectedGraph_has_pointLine_of_integral_x
+        P x y hcurve hgraph hx
+  · have hval :
+      (N13ProperCurveReduction.ratToQ₂ x).valuation < 0 :=
+      lt_of_not_ge
+        ((Padic.norm_le_one_iff_val_nonneg
+          (N13ProperCurveReduction.ratToQ₂ x)).not.mp hx)
+    exact
+      selectedGraph_has_pointLine_of_escape
+        P x y hcurve hgraph hval
 
 end
 

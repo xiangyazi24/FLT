@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.N13FiniteContractIdealInvertible
+import FLT.Assumptions.MazurProof.N13FiniteAffineTwoChart
 import FLT.Assumptions.MazurProof.N13IrreducibleQuadraticFinite
 import FLT.Assumptions.MazurProof.N13IntegralInfinityGraphSaturation
 import FLT.Assumptions.MazurProof.N13IntegralInfinityVerticalGraphContraction
@@ -6,12 +7,14 @@ import FLT.Assumptions.MazurProof.N13ReciprocalInfinityContraction
 import FLT.Assumptions.MazurProof.N13ReciprocalQuadraticReflection
 
 /-!
-# The affine spread branch for irreducible N13 quadratics
+# Proper spreads for irreducible N13 quadratics
 
 An irreducible quadratic Mumford graph lies in one of the two ordinary
-proper charts.  On the affine chart its canonical contraction is finite,
-and hence its divisorial hull is invertible.  The only branch left by this
-file is the literal integral reciprocal equation on the infinity chart.
+proper charts.  In the finite branch, a monic equation in the finite
+quotient patches the canonical affine contraction across the infinity
+uniformizer.  In the escaping branch, the literal integral reciprocal
+equation gives a horizontal or vertical infinity graph.  Both cases now
+produce an invertible two-chart line with the exact generic graph ideal.
 -/
 
 open Polynomial
@@ -266,6 +269,32 @@ theorem divisorialHull_isUnit_or_exists_twoChartLine
   · exact Or.inl hfinite
   · exact Or.inr
       (exists_reciprocal_twoChartLine D hdeg h0 a b hm)
+
+/-- Every irreducible quadratic Mumford graph has a proper integral
+two-chart spread.  Finite affine support is closed by contraction through
+the ordinary overlap; escaping support is closed by the reciprocal
+horizontal-or-vertical recovery. -/
+theorem exists_twoChartLine
+    (D : SexticMumford.Mumford Model)
+    (hdeg : D.u.natDegree = 2)
+    (hirr : Irreducible D.u) :
+    ∃ L : TwoChartLine,
+      Ideal.map
+          N13TwoAdicCoordinateBaseChange.integralToSextic
+          L.affineIdeal =
+        SexticMumford.mumfordIdeal Model D.u D.v := by
+  rcases
+      N13IrreducibleQuadraticFinite.contractQuotient_finite_or_integral_reciprocal
+        D hdeg hirr with
+    hfinite | ⟨h0, a, b, hm⟩
+  · let L :=
+      N13FiniteAffineTwoChart.finiteQuadraticTwoChartLine
+        D.toSemi hdeg hfinite
+    refine ⟨L, ?_⟩
+    exact
+      N13FiniteAffineTwoChart.map_finiteQuadraticTwoChartLine_affineIdeal
+        D.toSemi hdeg hfinite
+  · exact exists_reciprocal_twoChartLine D hdeg h0 a b hm
 
 /-- A recovered reciprocal semigraph is not merely an arbitrary
 two-chart lattice: its reflected affine ideal is vertically saturated,
