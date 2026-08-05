@@ -458,6 +458,29 @@ theorem affineIdeal_isUnit
   rw [FractionalIdeal.canonicalEquiv_coeIdeal] at hmap
   exact hmap
 
+/-- Package a recovered vertical infinity graph and its weighted affine
+closure as an honest invertible line on the two ordinary integral charts.
+The reciprocal equation `u` is redundant on the overlap, but it is what
+removes affine support at `x = 0` and hence makes the affine closure
+invertible on the whole chart. -/
+def twoChartLine
+    (u : R₂[X])
+    (E : VerticalGraph)
+    (hu : u.Monic)
+    (huDegree : u.natDegree = 2)
+    (hmDegree : E.m.natDegree = 2)
+    (huMem :
+      N13IntegralInfinityReduction.integralBaseClass u ∈ E.ideal) :
+    N13IntegralInfinityPointSpread.TwoChartLine where
+  affineIdeal := affineIdeal u E
+  infinityIdeal := E.ideal
+  affine_isUnit :=
+    affineIdeal_isUnit u E hu huDegree hmDegree huMem
+  infinity_isUnit :=
+    N13IntegralInfinityVerticalGraphJacobian.verticalIdeal_isUnit E
+  overlap_eq :=
+    ideals_agree_on_overlap u E huDegree.le hmDegree huMem
+
 end
 
 end MazurProof.N13IntegralInfinityVerticalGraphTwoChart

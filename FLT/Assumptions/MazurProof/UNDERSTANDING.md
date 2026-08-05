@@ -300,6 +300,18 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   every balanced two-adic Mumford graph, and in particular the finite graph
   of the chosen low-degree representative of every rational Picard class,
   has such an exact invertible affine spread.
+- The reciprocal infinity-chart recovery is now proper in both rank-two
+  basis branches.  A recovered vertical graph packages its invertible
+  affine closure and infinity ideal into a `TwoChartLine`, and exact
+  contraction identifies its generic affine ideal with the original
+  Mumford graph.  Together with the existing horizontal recovery, every
+  integral reciprocal quadratic has an exact proper two-chart spread.
+- Consequently an arbitrary irreducible quadratic graph has an
+  unconditional dichotomy: either its canonical finite affine divisorial
+  hull is invertible, or it has a proper two-chart line whose generic ideal
+  is literally the graph ideal.  The remaining properness issue is confined
+  to converting the finite affine branch, and then the oriented `nInf`
+  correction, into a complete proper line.
 - The last statement is intentionally only about the finite affine graph.
   A low-degree semirepresentative retains an integer infinity coordinate;
   realizing that coordinate by a proper infinity-chart line is still needed

@@ -200,6 +200,73 @@ theorem ReciprocalGraphClosure.exists_twoChartLine
         D hdeg h0 a b hm
   · exact E.generic_ordinate
 
+/-- The direct reciprocal-kernel construction always supplies a proper
+two-chart spread of the original quadratic Mumford graph.  The recovered
+rank-two quotient may use either the horizontal basis `{1,t}` or the
+vertical basis `{1,v}`; the two recovery theorems now package both cases
+with the same exact generic-ideal conclusion. -/
+theorem exists_reciprocal_twoChartLine
+    (D : SexticMumford.Mumford Model)
+    (hdeg : D.u.natDegree = 2)
+    (h0 : D.u.coeff 0 ≠ 0)
+    (a b : R₂)
+    (hm :
+      (X ^ 2 + C (a : Q₂) * X + C (b : Q₂) : Q₂[X]) =
+        X ^ 2 +
+          C (D.u.coeff 1 / D.u.coeff 0) * X +
+          C ((D.u.coeff 0)⁻¹)) :
+    ∃ L : TwoChartLine,
+      Ideal.map
+          N13TwoAdicCoordinateBaseChange.integralToSextic
+          L.affineIdeal =
+        SexticMumford.mumfordIdeal Model D.u D.v := by
+  rcases
+      exists_reciprocalGraphClosure_or_verticalGraph
+        D hdeg h0 a b hm with
+    hhorizontal | ⟨E, hmDegree, hI⟩
+  · obtain ⟨E⟩ := hhorizontal
+    exact E.exists_twoChartLine hdeg h0 hm
+  · let u :=
+      N13ReciprocalQuadraticReflection.integralReciprocal a b
+    have hu : u.Monic :=
+      N13ReciprocalQuadraticReflection.integralReciprocal_monic a b
+    have huDegree : u.natDegree = 2 :=
+      N13ReciprocalQuadraticReflection.integralReciprocal_natDegree a b
+    have huMem :
+        N13IntegralInfinityReduction.integralBaseClass u ∈ E.ideal := by
+      rw [← hI]
+      exact
+        N13ReciprocalInfinityContraction.reciprocal_mem_integralInfinityIdeal
+          D hdeg h0 a b hm
+    obtain ⟨L, _hInfinity, hGeneric⟩ :=
+      N13IntegralInfinityVerticalGraphContraction.exists_twoChartLine
+        D hdeg h0 u E hu huDegree hmDegree huMem hI
+    exact ⟨L, hGeneric⟩
+
+/-- Every irreducible quadratic graph is now covered by one of the two
+explicit integral models needed downstream: a finite affine divisorial
+spread, or a proper two-chart line with the exact generic graph ideal.
+No reciprocal-chart recovery hypothesis remains in this dichotomy. -/
+theorem divisorialHull_isUnit_or_exists_twoChartLine
+    (D : SexticMumford.Mumford Model)
+    (hdeg : D.u.natDegree = 2)
+    (hirr : Irreducible D.u) :
+    IsUnit
+        (N13IntegralFractionalHull.divisorialHull
+          (N13CanonicalContractionQuotient.graphIdeal D.toSemi)) ∨
+      ∃ L : TwoChartLine,
+        Ideal.map
+            N13TwoAdicCoordinateBaseChange.integralToSextic
+            L.affineIdeal =
+          SexticMumford.mumfordIdeal Model D.u D.v := by
+  rcases
+      divisorialHull_isUnit_or_integral_reciprocal
+        D hdeg hirr with
+    hfinite | ⟨h0, a, b, hm⟩
+  · exact Or.inl hfinite
+  · exact Or.inr
+      (exists_reciprocal_twoChartLine D hdeg h0 a b hm)
+
 /-- A recovered reciprocal semigraph is not merely an arbitrary
 two-chart lattice: its reflected affine ideal is vertically saturated,
 so it is the canonical contraction of the original generic graph. -/

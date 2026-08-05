@@ -382,6 +382,50 @@ theorem contractIdeal_eq_affineIdeal
           (N13IntegralInfinityVerticalGraphTwoChart.affineIdeal_xUnitMod
             u E hu huDegree)
 
+/-- A recovered vertical reciprocal branch is a proper two-chart spread of
+the original generic Mumford ideal.  The infinity component is the direct
+kernel itself, while exact contraction and vertical localization identify
+the affine generic fibre with the original graph rather than only with an
+isomorphic Picard class. -/
+theorem exists_twoChartLine
+    (D : SexticMumford.Mumford Model)
+    (hdeg : D.u.natDegree = 2)
+    (h0 : D.u.coeff 0 ≠ 0)
+    (u : R₂[X])
+    (E : VerticalGraph)
+    (hu : u.Monic)
+    (huDegree : u.natDegree = 2)
+    (hmDegree : E.m.natDegree = 2)
+    (huMem :
+      N13IntegralInfinityReduction.integralBaseClass u ∈ E.ideal)
+    (hI :
+      N13ReciprocalInfinityContraction.integralInfinityIdeal
+          D hdeg h0 =
+        E.ideal) :
+    ∃ L : N13IntegralInfinityPointSpread.TwoChartLine,
+      L.infinityIdeal =
+          N13ReciprocalInfinityContraction.integralInfinityIdeal
+            D hdeg h0 ∧
+        Ideal.map
+            N13TwoAdicCoordinateBaseChange.integralToSextic
+            L.affineIdeal =
+          N13ReciprocalInfinityContraction.genericIdeal D := by
+  let L :=
+    N13IntegralInfinityVerticalGraphTwoChart.twoChartLine
+      u E hu huDegree hmDegree huMem
+  refine ⟨L, ?_, ?_⟩
+  · change E.ideal =
+      N13ReciprocalInfinityContraction.integralInfinityIdeal D hdeg h0
+    exact hI.symm
+  · change
+      Ideal.map
+          N13TwoAdicCoordinateBaseChange.integralToSextic
+          (N13IntegralInfinityVerticalGraphTwoChart.affineIdeal u E) =
+        N13ReciprocalInfinityContraction.genericIdeal D
+    rw [← contractIdeal_eq_affineIdeal
+        D hdeg h0 u E hu huDegree hmDegree huMem hI,
+      N13IntegralModelContraction.map_contractIdeal]
+
 /-- The recovered vertical branch has an invertible canonical divisorial
 hull on the affine integral model. -/
 theorem divisorialHull_isUnit
