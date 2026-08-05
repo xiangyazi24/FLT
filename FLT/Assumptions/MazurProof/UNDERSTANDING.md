@@ -244,34 +244,52 @@ MW group = ℤ/6ℤ (rank 0), rational points u ∈ {-1, 1, 3} are all cusps.
   3. Show the map's image avoids both cusps when b≠0, F₇≠0
   4. Wire to `no_raw_order49_tate_obstruction`
 
-### Definitive axiom inventory (`#print axioms mazur_cyclic_order_bound_assembled`)
+### Definitive endpoint inventory (source-rebuilt audit, 2026-08-05)
 
-**7 custom axioms** (plus 3 Lean built-ins: propext, Classical.choice, Quot.sound):
+The authoritative command is
+`#print axioms MazurProof.mazur_torsion_bound` after rebuilding every changed
+dependency from source in order.  The endpoint currently depends on exactly
+**6 custom axioms**, plus the Lean built-ins `propext`, `Classical.choice`,
+and `Quot.sound`.  It does **not** depend on `sorryAx`.
 
-| # | Axiom | File | Status | Strategy |
-|---|-------|------|--------|----------|
-| 1 | `no_order_13_prime` | CyclicOrderAssembly | axiom | X₁(13) genus-2; F₁₃ has no ℚ-zero mod 2,3,5 with b≠0, but bivariate → needs Chabauty |
-| 2 | `no_prime_order_ge_23` | CyclicOrderAssembly | axiom | Formal immersion on X₀(p) (uniform for all p≥23) |
-| 3 | `no_explicit_order25_obstruction` | CyclicExclusion25 | axiom | X₁(25) genus-12; quotient F₂/F₄ done, Chabauty gap |
-| 4 | `no_raw_order49_tate_obstruction` | CyclicExclusion49 | axiom | X₀(49)≅E₄₉ rank-0 descent done; Tate→X₀ map gap |
-| 5 | `exists_rational_two_isogeny_quotient` | CyclicExclusion20 | axiom | Vélu 2-isogeny (N20/N24 seam) |
-| 6 | `order17_to_kernel_root` | PrimeExclusion17Bridge | bridge axiom | X₀(17) classification; kernel poly no-root PROVED |
-| 7 | `order19_to_kernel_root` | PrimeExclusion19Bridge | bridge axiom | X₀(19) classification; kernel poly no-root PROVED |
+| # | Primitive axiom | File | Mathematical content |
+|---|-----------------|------|----------------------|
+| 1 | `C13Sextic_affine_x_is_cuspidal` | `CyclicExclusion13` | Every rational point on the optimized genus-two `X₁(13)` model is cuspidal |
+| 2 | `no_F17_rational_solution` | `CyclicExclusion17` | The nondegenerate Tate equation for order 17 has no rational solution |
+| 3 | `no_F19_rational_solution` | `CyclicExclusion19` | The nondegenerate Tate equation for order 19 has no rational solution |
+| 4 | `no_explicit_order25_obstruction` | `CyclicExclusion25` | The explicit primitive order-25 obstruction has no rational point |
+| 5 | `no_raw_order49_tate_obstruction` | `CyclicExclusion49` | The primitive order-49 Tate obstruction has no rational point |
+| 6 | `no_prime_order_ge_23` | `CyclicOrderAssembly` | Uniform formal-immersion exclusion for prime orders at least 23 |
 
-**NOT in axiom list** (fully discharged):
-- `no_order_17_prime` → THEOREM via bridge 6
-- `no_order_19_prime` → THEOREM via bridge 7
-- `no_order_18` → THEOREM via N18GoodModelAssembly
-- `no_order_11` → THEOREM via Billing–Mahler cubic descent
-- All composite exclusions (14,15,16,20,21,24,25,27,35,49) → THEOREMs
-- `mordell_weil_fg` → NOT needed by assembly (only by TorsionFinite)
-- `Z2xZ14_gives_non_degenerate_N14_point` → NOT needed by assembly
+The previous seven-item table was stale in three ways:
 
-#### Bridge axiom detail
-| Bridge axiom | Content |
-|-------------|---------|
-| `order17_to_kernel_root` | X₀(17)(ℚ) = 2 cusps + 2 noncuspidal; each noncuspidal fiber's kernel poly has no ℚ-root (PROVED in PrimeExclusion17) |
-| `order19_to_kernel_root` | X₀(19)(ℚ) = 2 cusps + 1 noncuspidal; kernel poly at noncuspidal has no ℚ-root (PROVED in PrimeExclusion19) |
+- `exists_rational_two_isogeny_quotient` is now a theorem from
+  `VeluTwoIsogeny`, so orders 20 and 24 are clean.
+- The endpoint uses the direct Tate Diophantine axioms for orders 17 and 19,
+  not the older `order17_to_kernel_root` and `order19_to_kernel_root` bridge
+  names.
+- The primitive N13 seam is `C13Sextic_affine_x_is_cuspidal`;
+  `no_F13_rational_solution` is a derived theorem.
+
+The audit initially reported `sorryAx` because several `.olean` files were
+older than their proved sources.  Rebuilding
+`VeluTwoIsogeny → CyclicExclusion20 → CyclicOrderAssembly` removed that
+artifact.  Rebuilding `CyclicExclusion13` likewise exposed the correct
+primitive N13 axiom.  Endpoint audits must therefore compare source and
+`.olean` timestamps and rebuild stale dependencies before recording results.
+
+**Fully discharged from the endpoint dependency graph:**
+
+- Orders 11 and 18 are theorems via the Billing--Mahler and N18 descent
+  routes.
+- All composite exclusions 14, 15, 16, 20, 21, 24, 27, and 35 are clean;
+  theorems for 25 and 49 depend only on the named rational-point axioms above.
+- The Vélu two-isogeny quotient used for orders 20 and 24 is clean.
+- `mordell_weil_fg` is not used; torsion finiteness follows from the cyclic
+  order bound and the proved real torsion bound.
+- The two tracked `sorry`s in `KubertBridgeN16.lean` are not reachable from
+  `mazur_torsion_bound`; the endpoint uses the clean cyclic `X₁(16)` route
+  and different noncyclic exclusions.
 
 #### N13 analysis note
 F₁₃(b,c) is bivariate (degree 10 in c, monic leading coeff -1; degree 7 in b;
