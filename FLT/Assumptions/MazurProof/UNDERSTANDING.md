@@ -309,6 +309,25 @@ locus to a root of the corresponding fixed polynomial.  Those algebraic
 tails cannot replace the live axioms until a genuine universal modular-curve
 or fibre map is proved.
 
+For N17 specifically, the fixed-fibre arithmetic is not the dominant
+remaining task.  `PrimeExclusion17` already proves the two required
+fixed-polynomial root exclusions.  A valid replacement of the live axiom
+still needs three independent producers:
+
+1. classify the four rational points of the explicit genus-one `X₀(17)`
+   model;
+2. construct the level-specific Tate `X₁(17) → X₀(17)` quotient, including
+   cusp exclusion and the two noncuspidal `j`-values;
+3. prove rational twist/model transport from each noncuspidal fibre to the
+   corresponding fixed kernel polynomial.
+
+The first package can reuse the existing Vélu two-isogeny, exact-sequence,
+Northcott, and doubling infrastructure.  Its missing arithmetic is two
+explicit squareclass/coset exhaustions, one fixed-translation height
+inequality, and prime-to-prime good-reduction torsion injection.  The latter
+point-reduction API is not present in the pinned Mathlib.  The modular
+quotient and twist/kernel transport remain the genuinely geometric N17 core.
+
 #### N13 analysis note
 F₁₃(b,c) is bivariate (degree 10 in c, monic leading coeff -1; degree 7 in b;
 20 terms, total degree 11). The degree-7 homogeneous part is -b(b-c)⁶. Over
@@ -474,7 +493,18 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   the standard generic point ideal, the same exponent `-1`, and the canonical
   divisor `s(reducedPoint, specialAnchor)` on both special charts.  Hence the
   complete degree-one two-fibre `Data` layer is now closed for both valuation
-  regimes.  Oriented quadratic comparisons remain to be packaged.
+  regimes.
+- `N13TwoChartPicardRealization.lean` now contains the generic bridge shared
+  by every proper line: exact equality of the mapped affine ideal with a
+  Mumford ideal gives equality of fractional-ideal units, literal
+  `genericRaw = mumfordRaw` at exponent `nInf - 1`, and equality of oriented
+  Picard classes.
+- `N13SplitQuadraticPicardRealization.lean` applies that bridge to the
+  split-specialization constructors.  Every distinct-root secant and every
+  repeated-root tangent now yields complete two-fibre `Data`, with a literal
+  special divisor and the exact original generic Mumford class.  The
+  irreducible quadratic branch is the remaining degree-two Picard
+  realization.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.

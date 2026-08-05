@@ -105,6 +105,52 @@ def genericRaw (L : Line) (infinityOrder : ℤ) :
     SexticMumford.OrientedFrac Model :=
   (genericIdealUnit L, Multiplicative.ofAdd infinityOrder)
 
+/-- Equality of mapped generic affine ideals determines equality of their
+packaged fractional-ideal units.
+
+The statement retains the exact Mumford representative rather than passing
+prematurely to the oriented Picard quotient. -/
+theorem genericIdealUnit_eq_mumfordIdealUnit_of_map_affineIdeal_eq
+    (L : Line)
+    (D : SexticMumford.Mumford Model)
+    (hmap :
+      Ideal.map
+          N13IntegralFractionalHull.integralToRational
+          L.affineIdeal =
+        SexticMumford.mumfordIdeal Model D.u D.v) :
+    genericIdealUnit L =
+      SexticMumford.mumfordIdealUnit Model D.toSemi := by
+  apply Units.ext
+  rw [coe_genericIdealUnit,
+    SexticMumford.coe_mumfordIdealUnit]
+  exact
+    congrArg
+      (fun I : Ideal N13IntegralFractionalHull.RationalRing =>
+        (I : N13IntegralFractionalHull.RationalFractionalIdeal))
+      hmap
+
+/-- A proper line with the exact Mumford affine ideal realizes the literal
+oriented Mumford datum when marked by the representative's exponent
+`nInf - 1`.
+
+This is the generic-fibre bridge used uniformly by point and quadratic
+two-chart realizations. -/
+theorem genericRaw_eq_mumfordRaw_of_map_affineIdeal_eq
+    (L : Line)
+    (D : SexticMumford.Mumford Model)
+    (hmap :
+      Ideal.map
+          N13IntegralFractionalHull.integralToRational
+          L.affineIdeal =
+        SexticMumford.mumfordIdeal Model D.u D.v) :
+    genericRaw L ((D.nInf : ℤ) - 1) =
+      SexticMumford.mumfordRaw Model D := by
+  apply Prod.ext
+  · exact
+      genericIdealUnit_eq_mumfordIdealUnit_of_map_affineIdeal_eq
+        L D hmap
+  · rfl
+
 /-- Oriented generic Picard class carried by a marked proper line. -/
 def genericClass (L : Line) (infinityOrder : ℤ) :
     GenericPic :=
@@ -114,6 +160,24 @@ def genericClass (L : Line) (infinityOrder : ℤ) :
         Model
         (N13Infinity.positiveInfinityOrder Q₂)).range
       (genericRaw L infinityOrder)
+
+/-- Exact mapped-ideal equality also identifies the induced generic Picard
+class with the standard oriented class of the Mumford representative. -/
+theorem genericClass_eq_classOf_of_map_affineIdeal_eq
+    (L : Line)
+    (D : SexticMumford.Mumford Model)
+    (hmap :
+      Ideal.map
+          N13IntegralFractionalHull.integralToRational
+          L.affineIdeal =
+        SexticMumford.mumfordIdeal Model D.u D.v) :
+    genericClass L ((D.nInf : ℤ) - 1) =
+      SexticMumford.classOf
+        Model
+        (N13Infinity.positiveInfinityOrder Q₂)
+        D := by
+  unfold genericClass SexticMumford.classOf
+  rw [genericRaw_eq_mumfordRaw_of_map_affineIdeal_eq L D hmap]
 
 /-- One proper line together with exact interpretations on both fibres.
 
