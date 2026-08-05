@@ -712,10 +712,27 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   of its literal root divisor.  The distinct-root case is the graph-ideal
   Chinese remainder theorem.  The repeated-root case is now proved directly
   in characteristic two from `h(a) = 1`, so multiplicity is retained without
-  a finite divisor table.  This closes the horizontal affine half of the
-  irreducible specialization seam.  It does not yet identify the infinity
-  ideal of a horizontal closure or handle the vertical `{1,y}` recovery
-  branch.
+  a finite divisor table.  The same file computes the canonical infinity
+  ideal as the product of the two root-point contributions.  Thus both
+  target chart ideals of a horizontal special graph are explicit.  It does
+  not by itself treat a reciprocal graph whose affine degree drops after
+  reduction or handle the general vertical `{1,y}` relation.
+- `N13SpecialInfinityGraphDivisor.lean` handles precisely the reciprocal
+  degree-drop case on the special infinity chart.  A monic quadratic
+  semigraph there still splits over `F₂`; roots at `t=0` are completed as
+  points at infinity, while the nonzero root `t=1` is transported to the
+  affine overlap.  `N13SpecialInfinityGraphDivisorCharts.lean` proves that
+  this root divisor has the original quadratic infinity graph ideal,
+  including the repeated-root tangent case, and computes its affine ideal
+  as the product of the surviving `x=1` point contributions.
+- `N13IntegralInfinityGraphSpecialRestriction.lean` closes the horizontal
+  reciprocal specialization seam.  For every integral infinity semigraph
+  with monic quadratic `u`, `deg v ≤ 3`, and `deg w ≤ 4`, coefficient
+  reduction of its weighted two-chart line is literally the canonical chart
+  pair of the completed special root divisor.  The affine proof classifies
+  the four root patterns `(0,0)`, `(0,1)`, `(1,0)`, `(1,1)` and preserves
+  the doubled point in the last case.  No finite divisor table or additional
+  geometric provider is used.
 - `N13SpecialVerticalDivisorCharts.lean` supplies the complementary literal
   chart calculation for the canonical `{1,y}` special fibres.  The two
   affine sheet ideals above `x=a` multiply to `(X-a)`.  Their infinity ideal

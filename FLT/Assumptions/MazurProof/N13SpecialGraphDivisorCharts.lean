@@ -326,6 +326,109 @@ theorem ofDivisor_graphDivisor_affineIdeal
       hz
       (rootPolynomial_rootPair D hdeg).symm
 
+/-- The infinity chart contribution of one graph root is unit at `x = 0`
+and is the literal point ideal at `t = 1` when `x = 1`. -/
+theorem graphRootPoint_infinityIdeal
+    (D : SemiMumford)
+    (a : K) (ha : D.u.IsRoot a) :
+    (N13SpecialDivisorCharts.point
+        (graphRootPoint D a ha)).infinityIdeal =
+      if a = 0 then ⊤ else
+        N13SpecialDivisorCharts.infinityPointIdeal
+          1 (D.v.eval a) := by
+  rw [N13SpecialDivisorCharts.point.eq_def]
+  dsimp [graphRootPoint]
+  split <;> rfl
+
+/-- The infinity ideal contributed by an unordered pair of graph roots. -/
+def rootInfinityIdeal
+    (D : SemiMumford) :
+    Sym2 K → Ideal N13SpecialDivisorCharts.SpecialInfinity :=
+  Sym2.lift
+    ⟨fun a b =>
+        (if a = 0 then ⊤ else
+          N13SpecialDivisorCharts.infinityPointIdeal
+            1 (D.v.eval a)) *
+        (if b = 0 then ⊤ else
+          N13SpecialDivisorCharts.infinityPointIdeal
+            1 (D.v.eval b)),
+      fun a b => by
+        dsimp
+        rw [mul_comm]⟩
+
+@[simp] theorem rootInfinityIdeal_mk
+    (D : SemiMumford) (a b : K) :
+    rootInfinityIdeal D s(a, b) =
+      (if a = 0 then ⊤ else
+        N13SpecialDivisorCharts.infinityPointIdeal
+          1 (D.v.eval a)) *
+      (if b = 0 then ⊤ else
+        N13SpecialDivisorCharts.infinityPointIdeal
+          1 (D.v.eval b)) :=
+  rfl
+
+/-- The infinity chart ideal of a split root divisor is the product of the
+point contributions selected by its two roots. -/
+theorem ofDivisor_graphRoots_infinityIdeal
+    (D : SemiMumford)
+    (z : Sym2 K)
+    (hz : ∀ a ∈ z, D.u.IsRoot a) :
+    (N13SpecialDivisorCharts.ofDivisor
+        (Sym2.pmap (graphRootPoint D) z hz)).infinityIdeal =
+      rootInfinityIdeal D z := by
+  induction z using Sym2.ind with
+  | _ a b =>
+      rw [Sym2.pmap_pair,
+        N13SpecialDivisorCharts.ofDivisor_mk]
+      change
+        (N13SpecialDivisorCharts.point
+            (graphRootPoint D a
+              (hz a (Sym2.mem_mk_left a b)))).infinityIdeal *
+          (N13SpecialDivisorCharts.point
+            (graphRootPoint D b
+              (hz b (Sym2.mem_mk_right a b)))).infinityIdeal =
+        rootInfinityIdeal D s(a, b)
+      rw [graphRootPoint_infinityIdeal,
+        graphRootPoint_infinityIdeal, rootInfinityIdeal_mk]
+
+/-- The canonical infinity chart ideal of a quadratic special graph is the
+explicit product attached to its chosen unordered root pair. -/
+theorem ofDivisor_graphDivisor_infinityIdeal
+    (D : SemiMumford)
+    (hdeg : D.u.natDegree = 2) :
+    (N13SpecialDivisorCharts.ofDivisor
+        (N13SpecialGraphDivisor.graphDivisor D hdeg)).infinityIdeal =
+      rootInfinityIdeal D
+        (N13SpecialGraphDivisor.rootPair D hdeg) := by
+  unfold N13SpecialGraphDivisor.graphDivisor
+  let hz :
+      ∀ a ∈ N13SpecialGraphDivisor.rootPair D hdeg,
+        D.u.IsRoot a :=
+    fun a ha =>
+      (N13SpecialGraphDivisor.mem_rootPair_iff_isRoot
+        D hdeg a).mp ha
+  have hpmap :
+      Sym2.pmap
+          (N13SpecialGraphDivisor.rootPoint D hdeg)
+          (N13SpecialGraphDivisor.rootPair D hdeg)
+          (fun _ ha => ha) =
+        Sym2.pmap
+          (graphRootPoint D)
+          (N13SpecialGraphDivisor.rootPair D hdeg)
+          hz := by
+    apply Sym2.ext
+    intro P
+    rw [Sym2.mem_pmap_iff, Sym2.mem_pmap_iff]
+    constructor
+    · rintro ⟨a, ha, rfl⟩
+      exact ⟨a, ha, rfl⟩
+    · rintro ⟨a, ha, rfl⟩
+      exact ⟨a, ha, rfl⟩
+  rw [hpmap]
+  exact
+    ofDivisor_graphRoots_infinityIdeal D
+      (N13SpecialGraphDivisor.rootPair D hdeg) hz
+
 end
 
 end MazurProof.N13SpecialGraphDivisorCharts
