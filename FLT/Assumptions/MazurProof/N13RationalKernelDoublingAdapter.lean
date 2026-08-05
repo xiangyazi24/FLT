@@ -188,6 +188,97 @@ def toNearBaseFamily
 
 end MappedSpecialFamily
 
+/-! ## Canonical mapped-special representatives -/
+
+/-- The canonical balanced Mumford representative of the translated
+two-adic class `c + basePic`.  Fixing this normal form removes both the
+pointwise representative choice and the separate proof of its Picard
+class from the remaining kernel-recovery input. -/
+def canonicalMappedSpecialMumford
+    (c : Pic₂) :
+    SexticMumford.Mumford Model₂ :=
+  SexticMumford.normalize
+    Model₂
+    (N13Infinity.positiveInfinityOrder ℚ_[2])
+    (c + basePic)
+
+/-- Normal-form theory identifies the canonical representative with the
+translated Picard class used by centered disk coordinates. -/
+@[simp] theorem classOf_canonicalMappedSpecialMumford
+    (c : Pic₂) :
+    SexticMumford.classOf
+        Model₂
+        (N13Infinity.positiveInfinityOrder ℚ_[2])
+        (canonicalMappedSpecialMumford c) =
+      c + basePic := by
+  simpa only [canonicalMappedSpecialMumford] using
+    (SexticMumford.classOf_normalize
+      Model₂
+      (N13Infinity.positiveInfinityOrder ℚ_[2])
+      (c + basePic))
+
+/-- Minimal literal special-fibre input for a rational subgroup.
+
+For each subgroup element, the only stored fact is that the canonical
+balanced representative of its translated two-adic class has canonical
+contraction equal to the fixed special graph after reduction. -/
+structure CanonicalMappedSpecialFamily
+    (H : AddSubgroup RationalPic) where
+  map_contract_eq_special :
+    ∀ z : H,
+      Ideal.map
+          N13GeneralizedMumfordReduction.reduceCoordinate
+          (N13IntegralModelContraction.contractIdeal
+            (N13CanonicalContractionQuotient.graphIdeal
+              (canonicalMappedSpecialMumford
+                (N13TwoAdicAbelChartSection.subgroupToPic H z)).toSemi)) =
+        N13SpecialQuotientBasis.specialIdeal
+
+namespace CanonicalMappedSpecialFamily
+
+variable {H : AddSubgroup RationalPic}
+
+/-- Package the canonical normal form into the arbitrary representative
+interface.  Its translated class equality is supplied by normalization. -/
+def toMappedSpecialFamily
+    (R : CanonicalMappedSpecialFamily H) :
+    MappedSpecialFamily H where
+  representative z :=
+    { mumford :=
+        canonicalMappedSpecialMumford
+          (N13TwoAdicAbelChartSection.subgroupToPic H z)
+      class_eq :=
+        classOf_canonicalMappedSpecialMumford
+          (N13TwoAdicAbelChartSection.subgroupToPic H z)
+      map_contract_eq_special :=
+        R.map_contract_eq_special z }
+
+/-- Literal special-ideal equality for the canonical normal forms recovers
+a centered near-base Mumford graph for every subgroup element. -/
+def toNearBaseFamily
+    (R : CanonicalMappedSpecialFamily H) :
+    NearBaseFamily H :=
+  R.toMappedSpecialFamily.toNearBaseFamily
+
+/-- The ordered Hensel pair recovered from each canonical representative. -/
+def recoveredPair
+    (R : CanonicalMappedSpecialFamily H) :
+    H → DiskPair :=
+  R.toNearBaseFamily.pair
+
+/-- Each recovered Hensel pair realizes the original rational subgroup
+element after base change to the two-adic Picard group. -/
+theorem realize_recoveredPair
+    (R : CanonicalMappedSpecialFamily H)
+    (z : H) :
+    N13TwoAdicAbelChartPic.DiskPair.centeredPic
+        (R.recoveredPair z) =
+      N13TwoAdicAbelChartSection.subgroupToPic H z := by
+  simpa only [recoveredPair] using
+    NearBaseFamily.realize R.toNearBaseFamily z
+
+end CanonicalMappedSpecialFamily
+
 namespace NearBaseFamily
 
 variable {H : AddSubgroup RationalPic}
@@ -299,6 +390,60 @@ def toRationalKernelDoublingData
   NearBaseFamily.ofDoublingLaw F C.toDoublingLaw
 
 end FirstJetDoublingCompatibility
+
+/-! ## One-call assembly from mapped-special representatives -/
+
+namespace MappedSpecialFamily
+
+variable {H : AddSubgroup RationalPic}
+
+/-- A mapped-special representative family reaches the rational-kernel
+doubling structure once the selected doubles agree with transition squares
+to first order. -/
+def toRationalKernelDoublingData
+    (R : MappedSpecialFamily H)
+    (C :
+      FirstJetDoublingCompatibility R.toNearBaseFamily) :
+    N13TwoAdicAbelChartSection.RationalKernelDoublingData H :=
+  C.toRationalKernelDoublingData
+
+/-- The recovered representatives and their first-jet doubling comparison
+imply two-adic separatedness of the rational subgroup. -/
+theorem separated
+    (R : MappedSpecialFamily H)
+    (C :
+      FirstJetDoublingCompatibility R.toNearBaseFamily) :
+    N18RouteC.Separated.NSeparated H 2 :=
+  N13TwoAdicAbelChartSection.RationalKernelDoublingData.separated
+    (R.toRationalKernelDoublingData C)
+
+end MappedSpecialFamily
+
+namespace CanonicalMappedSpecialFamily
+
+variable {H : AddSubgroup RationalPic}
+
+/-- For canonical normal forms, literal mapped-special equality and the
+single first-jet comparison are the complete inputs to the rational-kernel
+doubling structure. -/
+def toRationalKernelDoublingData
+    (R : CanonicalMappedSpecialFamily H)
+    (C :
+      FirstJetDoublingCompatibility R.toNearBaseFamily) :
+    N13TwoAdicAbelChartSection.RationalKernelDoublingData H :=
+  C.toRationalKernelDoublingData
+
+/-- Canonical mapped-special representatives reduce separatedness to the
+one remaining first-jet compatibility theorem. -/
+theorem separated
+    (R : CanonicalMappedSpecialFamily H)
+    (C :
+      FirstJetDoublingCompatibility R.toNearBaseFamily) :
+    N18RouteC.Separated.NSeparated H 2 :=
+  N13TwoAdicAbelChartSection.RationalKernelDoublingData.separated
+    (R.toRationalKernelDoublingData C)
+
+end CanonicalMappedSpecialFamily
 
 /-! ## Specialization to the eventual spread classifier -/
 

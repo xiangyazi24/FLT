@@ -339,6 +339,12 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   translated class `z + basePic` whose canonical contraction maps literally
   to the selected special ideal.  `exists_diskPair_class_eq` then supplies
   the centered disk pair and the exact Picard realization automatically.
+- The representative choice can now be removed entirely: use the canonical
+  balanced normal form `normalize (z + basePic)`.  A
+  `CanonicalMappedSpecialFamily` stores only the literal mapped-special
+  equality for those normal forms.  It recovers the centered disk pairs and
+  reaches separatedness once the single family-level
+  `FirstJetDoublingCompatibility` statement is supplied.
 - Earlier axiom inventories in this file describe historical snapshots and
   must not be treated as current.  Use a fresh `#print axioms` audit of the
   assembled theorem before reporting the remaining global Mazur boundary.
