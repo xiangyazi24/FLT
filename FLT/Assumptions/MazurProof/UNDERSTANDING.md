@@ -429,6 +429,17 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `s(reducedPoint, specialAnchor)`.  This completes the special-fibre
   realization of the escaping degree-one branch; only its oriented generic
   comparison remains before constructing full Picard `Data`.
+- `N13FiniteAffinePointInfinityClosure.lean` closes the finite degree-one
+  special branch.  It identifies the abstract contracted infinity closure
+  with the explicit weighted ideal `(1-at, v-bt³)`.  The proof shows that
+  this ideal is already `t`-saturated because `a` is the inverse of `t`
+  modulo the ideal; no primality or principality assumption is used.
+  Reduction then gives `⊤` when `ā=0` and `(t-1,v-b̄)` when `ā=1`, exactly
+  the two canonical point-chart cases.  After tensoring once with positive
+  infinity, both reduced chart ideals equal those of
+  `s(reducedPoint, specialAnchor)`.  Thus the special-fibre realization of
+  every degree-one point line is complete; its oriented generic comparison
+  is the remaining degree-one `Data` field.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
