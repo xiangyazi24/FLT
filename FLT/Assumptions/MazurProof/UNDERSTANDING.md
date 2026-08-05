@@ -351,6 +351,17 @@ for a finitely generated abelian group, the inequality
 missing from this layer are the two concrete isogeny-coset exhaustions and
 finite generation of the rational point group; neither is carried as a
 hypothesis by an endpoint theorem.
+`X017IsogenySequence.lean` now supplies the concrete additive homomorphisms
+required by that abstract layer.  It conjugates the already bundled general
+Vélu map and dual map through the explicit N17 source and target
+equivalences, proves that their composition is multiplication by two, and
+bridges the forward homomorphism back to the standard-coordinate `pointMap`.
+The distinguished target representative killed by the dual is proved to be
+the point `(0,0)` of exact order two.  The other visible target point
+`U=(64,0)` is not in the dual kernel: its dual image is the nonzero source
+kernel point.  Q3806 also confirmed that the left two-representative cover
+and the right quotient bound are logically independent arithmetic inputs;
+neither may be inferred from the other.
 `X017HeightDescent.lean` specializes Mathlib's general descent theorem to a
 two-element representative set `{0,T}` modulo doubling.  It proves finite
 generation from Northcott, nonnegativity, the doubling lower bound, and only

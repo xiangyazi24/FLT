@@ -33,10 +33,18 @@
   - proved the integral model has three affine points over both `𝔽₂` and
     `𝔽₃`, hence four projective points in each good fibre; the remaining
     torsion step is the absent rational-point reduction/injection API
+  - `X017IsogenySequence.lean` transports the existing bundled Vélu maps to
+    the two standard N17 models, proves dual-forward composition is doubling,
+    and identifies the dual-kernel representative with the target point
+    `(0,0)`; `(64,0)` instead maps back to the nonzero source kernel
+  - Q3806 independently audited the exact-sequence layer: the left
+    two-representative cover and the right quotient bound are separate
+    arithmetic producers, and finite generation remains an independent
+    height input
 - verification:
   - scoped compilations pass
-  - the N17 two-torsion theorem and all three new exact-sequence/rank
-    declarations have clean-3 axiom audits
+  - the N17 two-torsion theorem, exact-sequence/rank declarations, and
+    transported N17 isogeny identities have clean-3 axiom audits
 - next N17 producers:
   - concrete two-coset exhaustions for the standard isogeny and its dual
   - finite generation/rank-zero classification of `X₀(17)(ℚ)`

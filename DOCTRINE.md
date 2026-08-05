@@ -28,8 +28,10 @@ in `KubertBridgeN16.lean` are outside the endpoint import closure.
 
 Current active route.  The explicit model, discriminant, standard
 two-isogeny, a rational point of exact order four, rational two-torsion
-classification, and the sharpened abstract exact-sequence/rank criterion are
-proved.  Next producers are concrete two-isogeny coset exhaustions and
+classification, the sharpened abstract exact-sequence/rank criterion, and the
+concrete forward/dual additive homomorphisms are proved.  Their composition is
+doubling, and the target point killed by the dual is the visible `(0,0)`,
+not `(64,0)`.  Next producers are concrete two-isogeny coset exhaustions and
 finite generation/rank zero.  The later modular quotient and twist/kernel
 transport remain separate geometric packages.
 

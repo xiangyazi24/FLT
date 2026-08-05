@@ -25,9 +25,11 @@ scoped builds pass, and `#print axioms` contains only `propext`,
   - Closed infrastructure: exact-order Tate normalization with preserved
     `j`; explicit `X₀(17)` model and standard two-isogeny; visible point of
     exact order four; rational two-torsion has cardinality two; sharpened
-    exact-sequence and general rank-zero criterion; two-coset height-descent
-    wrapper reducing finite generation to one fixed translation estimate;
-    good-fibre point counts `#X₀(17)(𝔽₂)=#X₀(17)(𝔽₃)=4`.
+    exact-sequence and general rank-zero criterion; concrete forward and dual
+    additive homomorphisms with dual-forward composition equal to doubling;
+    two-coset height-descent wrapper reducing finite generation to one fixed
+    translation estimate; good-fibre point counts
+    `#X₀(17)(𝔽₂)=#X₀(17)(𝔽₃)=4`.
   - Open arithmetic atoms: two explicit isogeny-coset exhaustions, finite
     generation, good-reduction torsion injection, and the rational-point
     classification.
