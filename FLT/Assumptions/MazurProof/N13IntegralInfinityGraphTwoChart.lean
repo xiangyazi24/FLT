@@ -167,6 +167,90 @@ def affineIdeal
     N13GeneralizedMumfordIntegral.yClass
     (affineU D) (affineV D)
 
+abbrev GenericModel : SexticMumford.Model
+    N13TwoAdicCoordinateBaseChange.Q₂ :=
+  N13GoodSexticCoordinateEquiv.M
+    (K := N13TwoAdicCoordinateBaseChange.Q₂)
+
+/-- The generic fibre of the affine half of an infinity graph is its
+coefficient-extended, completed-square sextic graph. -/
+theorem map_affineIdeal
+    (D : GraphData) :
+    Ideal.map
+        N13TwoAdicCoordinateBaseChange.integralToSextic
+        (affineIdeal D) =
+      SexticMumford.mumfordIdeal GenericModel
+        (N13TwoAdicCoordinateBaseChange.mapPoly (affineU D))
+        (N13GoodSexticMumfordTransport.completedGraph
+          (N13TwoAdicCoordinateBaseChange.mapPoly (affineV D))) := by
+  rw [N13TwoAdicCoordinateBaseChange.integralToSextic,
+    ← Ideal.map_map]
+  change
+    Ideal.map N13GoodSexticCoordinateEquiv.toSextic
+        (Ideal.map N13TwoAdicCoordinateBaseChange.extendCoordinate
+          (N13GeneralizedMumfordIntegral.mumfordIdeal
+            (affineU D) (affineV D))) = _
+  rw [N13TwoAdicCoordinateBaseChange.map_mumfordIdeal,
+    N13GoodSexticMumfordTransport.map_mumfordIdeal]
+
+/-- If weighted reflection recovers a nonzero scalar multiple of a Mumford
+horizontal equation and the reflected ordinate recovers its graph modulo
+that equation, then the affine half has exactly the prescribed generic
+graph ideal. -/
+theorem map_affineIdeal_eq_mumfordIdeal
+    (E : GraphData)
+    (D : SexticMumford.SemiMumford GenericModel)
+    (c : N13TwoAdicCoordinateBaseChange.Q₂)
+    (hc : c ≠ 0)
+    (hu :
+      N13TwoAdicCoordinateBaseChange.mapPoly (affineU E) =
+        C c * D.u)
+    (hv :
+      D.u ∣
+        N13GoodSexticMumfordTransport.completedGraph
+            (N13TwoAdicCoordinateBaseChange.mapPoly (affineV E)) -
+          D.v) :
+    Ideal.map
+        N13TwoAdicCoordinateBaseChange.integralToSextic
+        (affineIdeal E) =
+      SexticMumford.mumfordIdeal GenericModel D.u D.v := by
+  rw [map_affineIdeal, hu]
+  have hunit :
+      IsUnit
+        (SexticMumford.xClass GenericModel (C c)) := by
+    change
+      IsUnit
+        (algebraMap N13TwoAdicCoordinateBaseChange.Q₂
+          (SexticMumford.CoordinateRing GenericModel) c)
+    exact
+      (isUnit_iff_ne_zero.mpr hc).map
+        (algebraMap N13TwoAdicCoordinateBaseChange.Q₂
+          (SexticMumford.CoordinateRing GenericModel))
+  change
+    GeneralizedGraphIdealCore.graphIdeal
+        (SexticMumford.xClassHom GenericModel)
+        (SexticMumford.yClass GenericModel)
+        (C c * D.u)
+        (N13GoodSexticMumfordTransport.completedGraph
+          (N13TwoAdicCoordinateBaseChange.mapPoly (affineV E))) =
+      GeneralizedGraphIdealCore.graphIdeal
+        (SexticMumford.xClassHom GenericModel)
+        (SexticMumford.yClass GenericModel) D.u D.v
+  rw [GeneralizedGraphIdealCore.graphIdeal_mul_left_eq_of_isUnit
+      (SexticMumford.xClassHom GenericModel)
+      (SexticMumford.yClass GenericModel)
+      (C c) D.u
+      (N13GoodSexticMumfordTransport.completedGraph
+        (N13TwoAdicCoordinateBaseChange.mapPoly (affineV E)))
+      hunit,
+    GeneralizedGraphIdealCore.graphIdeal_eq_of_dvd_sub
+      (SexticMumford.xClassHom GenericModel)
+      (SexticMumford.yClass GenericModel)
+      D.u D.v
+      (N13GoodSexticMumfordTransport.completedGraph
+        (N13TwoAdicCoordinateBaseChange.mapPoly (affineV E)))
+      hv]
+
 theorem infinityIdeal_isUnit
     (D : GraphData)
     (hu : D.u ≠ 0) :

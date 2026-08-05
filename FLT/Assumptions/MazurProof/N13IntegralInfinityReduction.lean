@@ -249,6 +249,70 @@ theorem special_recompose (z : SpecialRing) :
             N13SpecialInfinityChart.curvePoly_monic
             (AdjoinRoot.mk _ g)
 
+@[simp] theorem integralCoeff0_baseClass (p : IntegralBase) :
+    integralCoeff0 (integralBaseClass p) = p := by
+  change
+    (C p %ₘ N13IntegralInfinityChart.infinityCurvePoly).coeff 0 = p
+  rw [(modByMonic_eq_self_iff
+      N13IntegralInfinityChart.infinityCurvePoly_monic).mpr]
+  · simp
+  · exact degree_C_le.trans_lt (by
+      rw [integral_curve_degree]
+      norm_num)
+
+@[simp] theorem integralCoeffV_baseClass (p : IntegralBase) :
+    integralCoeffV (integralBaseClass p) = 0 := by
+  change
+    (C p %ₘ N13IntegralInfinityChart.infinityCurvePoly).coeff 1 = 0
+  rw [(modByMonic_eq_self_iff
+      N13IntegralInfinityChart.infinityCurvePoly_monic).mpr]
+  · simp
+  · exact degree_C_le.trans_lt (by
+      rw [integral_curve_degree]
+      norm_num)
+
+@[simp] theorem integralCoeff0_vClass :
+    integralCoeff0 N13IntegralInfinityChart.vClass = 0 := by
+  change
+    (X %ₘ N13IntegralInfinityChart.infinityCurvePoly).coeff 0 = 0
+  rw [(modByMonic_eq_self_iff
+      N13IntegralInfinityChart.infinityCurvePoly_monic).mpr]
+  · simp
+  · rw [degree_X, integral_curve_degree]
+    norm_num
+
+@[simp] theorem integralCoeffV_vClass :
+    integralCoeffV N13IntegralInfinityChart.vClass = 1 := by
+  change
+    (X %ₘ N13IntegralInfinityChart.infinityCurvePoly).coeff 1 = 1
+  rw [(modByMonic_eq_self_iff
+      N13IntegralInfinityChart.infinityCurvePoly_monic).mpr]
+  · simp
+  · rw [degree_X, integral_curve_degree]
+    norm_num
+
+@[simp] theorem integralCoeff0_baseClass_mul_vClass
+    (p : IntegralBase) :
+    integralCoeff0
+        (integralBaseClass p *
+          N13IntegralInfinityChart.vClass) = 0 := by
+  change integralCoeff0
+    ((algebraMap IntegralBase IntegralRing p) *
+      N13IntegralInfinityChart.vClass) = 0
+  rw [← Algebra.smul_def]
+  simp
+
+@[simp] theorem integralCoeffV_baseClass_mul_vClass
+    (p : IntegralBase) :
+    integralCoeffV
+        (integralBaseClass p *
+          N13IntegralInfinityChart.vClass) = p := by
+  change integralCoeffV
+    ((algebraMap IntegralBase IntegralRing p) *
+      N13IntegralInfinityChart.vClass) = p
+  rw [← Algebra.smul_def]
+  simp
+
 @[simp] theorem specialCoeff0_baseClass (p : SpecialBase) :
     specialCoeff0 (specialBaseClass p) = p := by
   change

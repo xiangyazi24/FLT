@@ -57,6 +57,40 @@ theorem ySubClass_mem_graphIdeal
     ySubClass xClass yClass v ∈ graphIdeal xClass yClass u v :=
   Ideal.subset_span (by simp)
 
+/-- Multiplying the horizontal equation by a factor whose image is a unit
+does not change the graph ideal. -/
+theorem graphIdeal_mul_left_eq_of_isUnit
+    (xClass : R[X] →+* A) (yClass : A)
+    (c u v : R[X]) (hc : IsUnit (xClass c)) :
+    graphIdeal xClass yClass (c * u) v =
+      graphIdeal xClass yClass u v := by
+  apply le_antisymm
+  · apply Ideal.span_le.mpr
+    intro z hz
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
+    rcases hz with rfl | rfl
+    · rw [map_mul]
+      exact Ideal.mul_mem_left _
+        (xClass c) (xClass_mem_graphIdeal xClass yClass u v)
+    · exact ySubClass_mem_graphIdeal xClass yClass u v
+  · apply Ideal.span_le.mpr
+    intro z hz
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
+    rcases hz with rfl | rfl
+    · obtain ⟨d, hdc⟩ := isUnit_iff_exists_inv.mp hc
+      have hdc' : d * xClass c = 1 := by
+        simpa [mul_comm] using hdc
+      have hcu :
+          xClass (c * u) ∈
+            graphIdeal xClass yClass (c * u) v :=
+        xClass_mem_graphIdeal xClass yClass (c * u) v
+      have hdcu :=
+        Ideal.mul_mem_left
+          (graphIdeal xClass yClass (c * u) v) d hcu
+      rw [map_mul] at hdcu
+      simpa [← mul_assoc, hdc'] using hdcu
+    · exact ySubClass_mem_graphIdeal xClass yClass (c * u) v
+
 /-- Replacing the graph ordinate by a congruent polynomial modulo the
 horizontal equation does not change the graph ideal. -/
 theorem graphIdeal_eq_of_dvd_sub

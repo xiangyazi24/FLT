@@ -77,6 +77,20 @@ private theorem inv_inv_eq_of_isUnit
       FunctionField I⁻¹ I
         (by simpa [mul_comm] using hmul)).symm
 
+/-- Any canonical contraction that is already an invertible ordinary
+integral ideal has invertible divisorial hull. -/
+theorem divisorialHull_isUnit_of_contractIdeal_eq_isUnit
+    (J : Ideal RationalRing)
+    (I : Ideal IntegralRing)
+    (hcontract :
+      N13IntegralModelContraction.contractIdeal J = I)
+    (hunit : IsUnit (I : IntegralFractionalIdeal)) :
+    IsUnit (N13IntegralFractionalHull.divisorialHull J) := by
+  rw [N13IntegralFractionalHull.divisorialHull,
+    N13IntegralFractionalHull.contractedFractional, hcontract,
+    inv_inv_eq_of_isUnit hunit]
+  exact hunit
+
 /-- Exact recovery as any integral generalized Mumford semigraph already
 identifies the divisorial hull with that graph ideal.  The stronger
 vertical Bézout field of `SmoothMumford₂` is not needed here because the
