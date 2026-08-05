@@ -279,7 +279,9 @@ private theorem tOverlap_isUnit :
     ⟨N13OrdinaryCurveOverlap.xOverlap,
       N13OrdinaryCurveOverlap.tOverlap_mul_xOverlap⟩
 
-private theorem xClassHom_on_overlap
+/-- The infinity horizontal coordinate map evaluates polynomials at the
+Laurent-overlap coordinate `t`. -/
+theorem xClassHom_on_overlap
     (p : Base) :
     (algebraMap InfinityCurve
       N13OrdinaryCurveOverlap.InfinityOverlap)
@@ -305,7 +307,9 @@ private theorem xClassHom_on_overlap
         N13IntegralInfinityChart.tClass]
   exact congrArg (fun φ : Base →+* _ => φ p) hfg
 
-private theorem reflect_on_overlap
+/-- Evaluating a bounded weighted reflection on the affine overlap equals
+the original polynomial evaluated at `t=x⁻¹`, multiplied by `xⁿ`. -/
+theorem reflect_on_overlap
     (n : ℕ)
     (p : Base)
     (hp : p.natDegree ≤ n) :

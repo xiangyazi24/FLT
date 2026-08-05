@@ -1,6 +1,7 @@
 import FLT.Assumptions.MazurProof.N13FiniteContractIdealInvertible
 import FLT.Assumptions.MazurProof.N13IrreducibleQuadraticFinite
 import FLT.Assumptions.MazurProof.N13IntegralInfinityGraphSaturation
+import FLT.Assumptions.MazurProof.N13IntegralInfinityVerticalGraphContraction
 import FLT.Assumptions.MazurProof.N13ReciprocalInfinityContraction
 import FLT.Assumptions.MazurProof.N13ReciprocalQuadraticReflection
 
@@ -329,6 +330,24 @@ theorem divisorialHull_isUnit_or_verticalGraph
     · obtain ⟨E⟩ := hclosure
       exact Or.inl (E.divisorialHull_isUnit hdeg h0 hm)
     · exact Or.inr ⟨a, b, h0, hm, hvertical⟩
+
+/-- Every irreducible quadratic Mumford graph has an invertible canonical
+divisorial spread; the direct-kernel vertical alternative is closed by its
+three-generated affine contraction. -/
+theorem divisorialHull_isUnit
+    (D : SexticMumford.Mumford Model)
+    (hdeg : D.u.natDegree = 2)
+    (hirr : Irreducible D.u) :
+    IsUnit
+      (N13IntegralFractionalHull.divisorialHull
+        (N13CanonicalContractionQuotient.graphIdeal D.toSemi)) := by
+  rcases
+      divisorialHull_isUnit_or_verticalGraph D hdeg hirr with
+    hunit | ⟨a, b, h0, hm, E, hmDegree, hI⟩
+  · exact hunit
+  · exact
+      N13IntegralInfinityVerticalGraphContraction.divisorialHull_isUnit
+        D hdeg h0 a b hm E hmDegree hI
 
 end
 

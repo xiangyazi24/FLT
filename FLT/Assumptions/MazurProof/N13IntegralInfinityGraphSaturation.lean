@@ -337,7 +337,9 @@ def XUnitMod (I : Ideal AffineCurve) : Prop :=
   ∃ q : AffineCurve,
     1 - q * N13OrdinaryCurveOverlap.xClass ∈ I
 
-private theorem monic_quadratic_eq
+/-- A monic polynomial of degree two is determined by its two lower
+coefficients. -/
+theorem monic_quadratic_eq
     (u : R₂[X])
     (hu : u.Monic)
     (hdeg : u.natDegree = 2) :
@@ -360,7 +362,9 @@ private theorem monic_quadratic_eq
       rw [hc₂, C_1]
       ring
 
-private theorem reflect_two_eq_one_add_X_mul
+/-- A monic quadratic reflects to a polynomial with constant coefficient
+one and an explicit remaining multiple of `X`. -/
+theorem reflect_two_eq_one_add_X_mul
     (u : R₂[X])
     (hu : u.Monic)
     (hdeg : u.natDegree = 2) :
@@ -547,6 +551,19 @@ theorem affineOverlapContracted_of_xUnitMod
         (algebraMap R₂ InfinityCurve r) =
       algebraMap R₂ InfinityOverlap r := by
   exact IsScalarTower.algebraMap_apply R₂ InfinityCurve InfinityOverlap r
+
+/-- The named coefficient map is the ordinary scalar map into the
+infinity overlap. -/
+@[simp] theorem coefficientToInfinityOverlap_eq_algebraMap_R₂
+    (r : R₂) :
+    N13OrdinaryCurveOverlap.coefficientToInfinityOverlap r =
+      algebraMap R₂ InfinityOverlap r := by
+  unfold N13OrdinaryCurveOverlap.coefficientToInfinityOverlap
+  change
+    (algebraMap InfinityCurve InfinityOverlap)
+        (algebraMap R₂ InfinityCurve r) =
+      algebraMap R₂ InfinityOverlap r
+  exact infinityOverlap_algebraMap_R₂ r
 
 /-- A monic quadratic infinity graph with a bounded ordinate has a
 vertically saturated reflected affine closure. -/
