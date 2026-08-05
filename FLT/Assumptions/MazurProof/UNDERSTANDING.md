@@ -369,6 +369,15 @@ and squarefree-core extraction restrict the first coordinate to squareclass
 classes.  This does not yet prove the quotient cover with representatives
 `0,T`: the `17` class still has to be converted into the chosen `T`-coset by
 an explicit translation identity and a dual-isogeny preimage theorem.
+`X017FirstCoset.lean` proves the corresponding target squareclass
+classification.  A squarefree core first leaves `±1` and `±2`; the latter
+two classes lead to explicit homogeneous quartics and are eliminated by a
+three-stage two-adic parity descent.  The implementation uses only small
+kernel-checked `ZMod 8` certificates between honest integer divisions, and
+concludes that every nonzero target first coordinate is a square or a
+negative square.  The remaining target endpoint work is now precisely the
+generic square-coordinate preimage theorem and the translation by the target
+kernel `(0,0)`, not any further squareclass enumeration.
 `X017HeightDescent.lean` specializes Mathlib's general descent theorem to a
 two-element representative set `{0,T}` modulo doubling.  It proves finite
 generation from Northcott, nonnegativity, the doubling lower bound, and only

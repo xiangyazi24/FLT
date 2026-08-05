@@ -44,11 +44,18 @@
   - `X017Descent.lean` clears square denominators on the standard source and
     proves that every nonzero rational first coordinate has squareclass `1`
     or `17`; the positive quadratic factor removes negative classes
+  - Q3809 identifies the target quotient as the first independent endpoint:
+    its expected squareclass image is `{1,-1}`, with `(0,0)` as the
+    nontrivial representative
+  - `X017FirstCoset.lean` clears denominators on the standard target, excludes
+    both provisional `±2` classes by three-stage two-adic parity descent, and
+    proves that every nonzero rational target coordinate has squareclass
+    `1` or `-1`
 - verification:
   - scoped compilations pass
   - the N17 two-torsion theorem, exact-sequence/rank declarations, and
-    transported N17 isogeny identities, and source squareclass classification
-    have clean-3 axiom audits
+    transported N17 isogeny identities, and both source and target
+    squareclass classifications have clean-3 axiom audits
 - next N17 producers:
   - concrete two-coset exhaustions for the standard isogeny and its dual
   - finite generation/rank-zero classification of `X₀(17)(ℚ)`

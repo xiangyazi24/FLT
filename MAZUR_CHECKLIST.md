@@ -28,6 +28,7 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     exact-sequence and general rank-zero criterion; concrete forward and dual
     additive homomorphisms with dual-forward composition equal to doubling;
     nonzero source first-coordinate squareclasses restricted to `1` and `17`;
+    nonzero target first-coordinate squareclasses restricted to `1` and `-1`;
     two-coset height-descent wrapper reducing finite generation to one fixed
     translation estimate; good-fibre point counts
     `#X₀(17)(𝔽₂)=#X₀(17)(𝔽₃)=4`.

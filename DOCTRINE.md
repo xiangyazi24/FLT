@@ -32,11 +32,12 @@ classification, the sharpened abstract exact-sequence/rank criterion, and the
 concrete forward/dual additive homomorphisms are proved.  Their composition is
 doubling, and the target point killed by the dual is the visible `(0,0)`,
 not `(64,0)`.  The nonzero source first-coordinate squareclass is now proved
-to be `1` or `17`; converting the `17` class to the chosen `T`-coset remains
-an explicit translation/preimage task.  Next producers are the two concrete
-two-isogeny coset exhaustions and finite generation/rank zero.  The later
-modular quotient and twist/kernel transport remain separate geometric
-packages.
+to be `1` or `17`, and the nonzero target squareclass is proved to be `1` or
+`-1`.  Converting those coordinate classes into the chosen `T` and `(0,0)`
+cosets remains an explicit translation/preimage task.  Next producers are the
+two concrete two-isogeny coset exhaustions and finite generation/rank zero.
+The later modular quotient and twist/kernel transport remain separate
+geometric packages.
 
 ### (b) N13 concrete specialization and separatedness
 
