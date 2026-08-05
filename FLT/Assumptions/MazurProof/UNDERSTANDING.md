@@ -392,6 +392,12 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   canonical chart ideals of an `EffectiveDivisorTwo`, and separately retain
   the explicit infinity orientation.  A general relative Picard functor or
   Cartier-divisor formalization is not presently a prerequisite.
+- `N13TwoChartSpecialRestriction.lean` implements the first step of that
+  bridge.  It maps both chart ideals through the literal reduction maps and
+  proves that their extensions remain equal on the special overlap by the
+  already proved overlap-reduction square.  The output is a concrete
+  `ChartPair`; the remaining special-fibre task is to identify selected such
+  pairs with canonical chart ideals of explicit effective divisors.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
