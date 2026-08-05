@@ -421,6 +421,14 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   anchor, and chartwise restriction is proved compatible with tensor
   products and natural powers.  Consequently the special chart ideals of
   every positive `nInf` correction are now formal powers of the anchor ideal.
+- `N13EscapingPointSpecialRestriction.lean` closes both special-chart fields
+  for every nonintegral affine point.  The cleared affine generator
+  `1-t₀x` reduces to `1`, while the infinity graph reduces to the point
+  selected by proper reduction.  Tensoring once with the positive-infinity
+  line therefore gives exactly the canonical chart pair of
+  `s(reducedPoint, specialAnchor)`.  This completes the special-fibre
+  realization of the escaping degree-one branch; only its oriented generic
+  comparison remains before constructing full Picard `Data`.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
