@@ -1,0 +1,190 @@
+import FLT.Assumptions.MazurProof.N13ProperCurveReduction
+
+/-!
+# Anchored Abel classes at the two N13 infinity points
+
+The set-valued special Abel class adjoins the positive infinity point as a
+fixed anchor.  Therefore the negative infinity point gives the canonical
+hyperelliptic fibre, while two copies of the positive point do not.  These
+calculations retain the sheet coordinate that a bare affine ideal loses.
+-/
+
+namespace MazurProof.N13InfinitySpecialPointClass
+
+noncomputable section
+
+open scoped Sym2
+
+/-- The residue field `F₂`, used for the two sheets of the special curve. -/
+abbrev K : Type :=
+  N13AbelFiberTwoModel.K
+
+/-- The two-adic field in which the proper affine/infinity chart split is made. -/
+abbrev Q₂ : Type :=
+  N13ProperCurveReduction.Q₂
+
+/-- The fixed anchor is the sheet-zero point over the infinity base point. -/
+@[simp] theorem curvePointEquiv_specialAnchor :
+    N13AbelFiberTwoModel.curvePointEquiv
+        N13RationalPointEndgame.specialAnchor =
+      (N13AbelFiberTwoModel.baseAtInfinity, (0 : K)) := by
+  simp [N13RationalPointEndgame.specialAnchor,
+    N13AbelFiberTwoModel.baseAtInfinity,
+    N13SpecialCuspReduction.cuspCoordinate]
+
+/-- The negative infinity cusp is the sheet-one point over the same base. -/
+@[simp] theorem curvePointEquiv_specialInfinityMinus :
+    N13AbelFiberTwoModel.curvePointEquiv
+        (N13SpecialCuspReduction.specialCuspEquiv
+          N13Mumford.Cusp13.infinityMinus) =
+      (N13AbelFiberTwoModel.baseAtInfinity, (1 : K)) := by
+  simp [N13AbelFiberTwoModel.baseAtInfinity,
+    N13SpecialCuspReduction.cuspCoordinate]
+
+/-- The negative infinity point together with the positive anchor is the
+canonical degree-two divisor over the infinity base point. -/
+theorem infinityPair_isCanonical :
+    N13AbelFiberTwoModel.IsCanonical
+      s(N13SpecialCuspReduction.specialCuspEquiv
+          N13Mumford.Cusp13.infinityMinus,
+        N13RationalPointEndgame.specialAnchor) := by
+  refine
+    ⟨N13AbelFiberTwoModel.baseAtInfinity, ?_⟩
+  change
+    s(N13AbelFiberTwoModel.curvePointEquiv.symm
+        (N13AbelFiberTwoModel.baseAtInfinity, 0),
+      N13AbelFiberTwoModel.curvePointEquiv.symm
+        (N13AbelFiberTwoModel.baseAtInfinity, 1)) =
+      s(N13SpecialCuspReduction.specialCuspEquiv
+          N13Mumford.Cusp13.infinityMinus,
+        N13RationalPointEndgame.specialAnchor)
+  rw [Sym2.eq_iff]
+  refine Or.inr ⟨?_, ?_⟩
+  · apply N13AbelFiberTwoModel.curvePointEquiv.injective
+    simp
+  · apply N13AbelFiberTwoModel.curvePointEquiv.injective
+    simp [N13AbelFiberTwoModel.baseAtInfinity,
+      N13SpecialCuspReduction.cuspCoordinate]
+
+/-- The anchored special class of negative infinity is the canonical class. -/
+@[simp] theorem specialPointClass_infinityMinus_eq_canonicalClass :
+    N13RationalPointEndgame.specialPointClass
+        (N13SpecialCuspReduction.specialCuspEquiv
+          N13Mumford.Cusp13.infinityMinus) =
+      N13AbelFiberTwoModel.canonicalClass := by
+  exact
+    (N13AbelFiberTwoModel.abel_eq_canonicalClass_iff _).2
+      infinityPair_isCanonical
+
+/-- Two copies of the positive infinity point cannot be a hyperelliptic
+fibre because a canonical fibre contains one point on each sheet. -/
+theorem anchorPair_not_canonical :
+    ¬ N13AbelFiberTwoModel.IsCanonical
+      s(N13RationalPointEndgame.specialAnchor,
+        N13RationalPointEndgame.specialAnchor) := by
+  rintro ⟨b, hb⟩
+  change
+    s(N13AbelFiberTwoModel.curvePointEquiv.symm (b, 0),
+      N13AbelFiberTwoModel.curvePointEquiv.symm (b, 1)) =
+      s(N13RationalPointEndgame.specialAnchor,
+        N13RationalPointEndgame.specialAnchor) at hb
+  rw [Sym2.eq_iff] at hb
+  rcases hb with hb | hb
+  · have hsheet :=
+      congrArg
+        (fun P => (N13AbelFiberTwoModel.curvePointEquiv P).2)
+        hb.2
+    simp at hsheet
+  · have hsheet :=
+      congrArg
+        (fun P => (N13AbelFiberTwoModel.curvePointEquiv P).2)
+        hb.2
+    simp at hsheet
+
+/-- Hence the anchored class of positive infinity is a regular class, not
+the canonical class obtained from the opposite sheet. -/
+theorem specialPointClass_specialAnchor_ne_canonicalClass :
+    N13RationalPointEndgame.specialPointClass
+        N13RationalPointEndgame.specialAnchor ≠
+      N13AbelFiberTwoModel.canonicalClass := by
+  intro h
+  exact
+    anchorPair_not_canonical
+      ((N13AbelFiberTwoModel.abel_eq_canonicalClass_iff _).1 h)
+
+/-! ## Proper reduction of an escaping affine point -/
+
+/-- Proper reduction of a nonintegral affine point records the residue of
+the ordinate of its integral infinity-chart lift, over the infinity base
+point.  This is the same lift used by the explicit proper point line. -/
+@[simp] theorem curvePointEquiv_reduceNonintegralAffine
+    (x y : Q₂)
+    (hx : x.valuation < 0)
+    (hxy : N13GoodModelTwo.AffineEquation x y) :
+    N13AbelFiberTwoModel.curvePointEquiv
+        (N13ProperCurveReduction.reduceNonintegralAffine
+          x y hx hxy) =
+      (N13AbelFiberTwoModel.baseAtInfinity,
+        PadicInt.toZMod
+          (N13ProperCurveReduction.nonintegralInfinityLift
+            x y hx hxy).1.2) := by
+  rfl
+
+/-- An escaping affine point reduces to exactly one of the two infinity
+sheets: the fixed positive anchor or the named negative infinity cusp. -/
+theorem reduceNonintegralAffine_eq_specialAnchor_or_infinityMinus
+    (x y : Q₂)
+    (hx : x.valuation < 0)
+    (hxy : N13GoodModelTwo.AffineEquation x y) :
+    N13ProperCurveReduction.reduceNonintegralAffine x y hx hxy =
+        N13RationalPointEndgame.specialAnchor ∨
+      N13ProperCurveReduction.reduceNonintegralAffine x y hx hxy =
+        N13SpecialCuspReduction.specialCuspEquiv
+          N13Mumford.Cusp13.infinityMinus := by
+  let s : K :=
+    PadicInt.toZMod
+      (N13ProperCurveReduction.nonintegralInfinityLift
+        x y hx hxy).1.2
+  have hs : s = 0 ∨ s = 1 :=
+    N13GoodModelTwo.fixedTwo_eq_zero_or_one
+      s (ZMod.pow_card s)
+  rcases hs with hs | hs
+  · left
+    apply N13AbelFiberTwoModel.curvePointEquiv.injective
+    rw [curvePointEquiv_reduceNonintegralAffine,
+      curvePointEquiv_specialAnchor]
+    simp [s, hs]
+  · right
+    apply N13AbelFiberTwoModel.curvePointEquiv.injective
+    rw [curvePointEquiv_reduceNonintegralAffine,
+      curvePointEquiv_specialInfinityMinus]
+    simp [s, hs]
+
+/-- Consequently the anchored special target of an escaping point is
+completely determined: it is either the anchor-double class or the
+canonical class. -/
+theorem specialPointClass_reduceNonintegralAffine_dichotomy
+    (x y : Q₂)
+    (hx : x.valuation < 0)
+    (hxy : N13GoodModelTwo.AffineEquation x y) :
+    N13RationalPointEndgame.specialPointClass
+          (N13ProperCurveReduction.reduceNonintegralAffine
+            x y hx hxy) =
+        N13RationalPointEndgame.specialPointClass
+          N13RationalPointEndgame.specialAnchor ∨
+      N13RationalPointEndgame.specialPointClass
+          (N13ProperCurveReduction.reduceNonintegralAffine
+            x y hx hxy) =
+        N13AbelFiberTwoModel.canonicalClass := by
+  rcases
+      reduceNonintegralAffine_eq_specialAnchor_or_infinityMinus
+        x y hx hxy with hplus | hminus
+  · exact Or.inl (congrArg
+      N13RationalPointEndgame.specialPointClass hplus)
+  · exact Or.inr (by
+      rw [hminus,
+        specialPointClass_infinityMinus_eq_canonicalClass])
+
+end
+
+end MazurProof.N13InfinitySpecialPointClass

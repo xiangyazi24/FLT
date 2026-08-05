@@ -319,6 +319,19 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   its exact affine generic ideal.  What remains is the semantic theorem
   identifying these local lines with the corresponding oriented Picard
   classes; affine ideals alone cannot distinguish the two infinity points.
+- `N13InfinitySpecialPointClass.lean` now computes the same two infinity
+  sheets in the special Abel model.  The negative-infinity point together
+  with the fixed positive anchor is the canonical hyperelliptic fibre,
+  whereas two positive anchors are noncanonical.  Thus their anchored
+  special classes are provably distinct without forgetting the sheet
+  coordinate.
+- Proper reduction of every escaping affine point is now proved to land on
+  exactly one of those two infinity sheets.  Consequently its anchored
+  special class is either the regular anchor-double class or the canonical
+  class.  The remaining `abel_reduces` input is not this point
+  classification: it is the geometric special-fibre theorem identifying
+  the reduction of the explicit proper point line with the anchored class
+  of the point reduced from the same infinity-chart lift.
 - The low-degree fractional-spread theorem is intentionally only about the
   finite affine graph.  Before it can serve as `SpreadData.exists_spread`,
   its finite ideal still needs a proper infinity-chart extension and the
