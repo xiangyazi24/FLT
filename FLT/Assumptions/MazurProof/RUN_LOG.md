@@ -988,3 +988,23 @@
   returns the integral reciprocal polynomial together with monicity,
   degree two, and the exact reflected generic equality.  The strengthened
   endpoint has the same three standard axioms only.
+
+### N17 explicit quotient and axiom discharge (2026-08-05)
+
+- Normalized the exact Tate residual by `b=c(d+1)` and proved compact
+  polynomial certificates excluding every denominator of the quotient.
+- Constructed an explicit algebraic map through the curves
+  `[1,-1,1,-1,0]` and `[1,-1,1,-6,-4]` to the integral `X₀(17)` model
+  `[1,-1,1,-1,-14]`.  Each landing statement is a denominator-cleared
+  polynomial identity; no modular interpretation is used by the proof.
+- Applied the completed four-point classification on the standard model.
+  The two possible affine horizontal fibres reduce to a monic quartic with
+  no root modulo three and to quadratic equations of discriminant seventeen.
+- Replaced `CyclicExclusion17.no_F17_rational_solution` by the theorem in
+  `TateOrder17Quotient.lean`.  Source checks pass for the new file,
+  `CyclicExclusion17.lean`, `CyclicOrderAssembly.lean`, `Axioms.lean`,
+  `TorsionFiniteFromOrderBound.lean`, and `TorsionBound.lean`.
+- After rebuilding the full downstream object chain, the main torsion-bound
+  endpoint has exactly five custom axioms: the N13, N19, N25, and N49
+  rational-point inputs and the uniform prime tail `p ≥ 23`.  There is no
+  reachable `sorryAx`.

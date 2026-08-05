@@ -1,71 +1,78 @@
-# Mazur |T|≤16 — Axiom Discharge Board (老规矩: 列清单挨个磨, 挨个钩)
+# Mazur torsion bound: exact discharge ledger
 
-Goal: discharge all 6 remaining custom axioms → only [propext, Classical.choice, Quot.sound].
-Status: ✅ done sorry-free + #print axioms clean · 🟡 partial/in-work (what's open) · ⬜ open.
-Last verified: 2026-06-21.
+Goal: prove `MazurProof.mazur_torsion_bound_ncard` with no custom axioms and
+no reachable `sorryAx`.
 
-## TOP-LEVEL AXIOMS — scoreboard 4/6 discharged (2 custom axioms remain; A1+A2+A4+A5 ✅ fresh-rebuild verified). Remaining = the 2 deep pillars.
-- ✅ **A1 `rational_torsion_two_invariant_factors`** — DISCHARGED (axiom→theorem, 6→5; residual=keystone seam sorryAx). — needs: keystone rank-2 (K) + finiteness (C2 ✓avail) + invariant-factor algebra (C1 ✅). Closest to dischargeable.
-- ✅ **A2 `weil_pairing_primitive_root`** — DISCHARGED (axiom→theorem, 5→4; residual=rationalWeilPairingPackage Miller seam). — needs: keystone rank-2 (K) + WeilPairingPackage Stage-1 + Miller Stage-3 (SEAM 3).
-- ⬜ **A3 `no_rational_point_of_order_ge_17`** — Mazur core, deepest. Separate later campaign.
-- ✅ **A4 `Z2xZ14_gives_non_degenerate_N14_point`** — DISCHARGED ex-falso (4→3; residual=order14_point_obstructed_by_X14_rank_zero seam, the 14a4 rank-0 work). — genus-4 forward restructure.
-- ✅ **A5 `Z2xZ16_gives_non_degenerate_N16_point`** — RESTRUCTURED ex-falso (3→2; residual=2 named genus-2 X1(16) seams, DEEP gap). — genus-5 forward restructure.
-- 🟡 **A6 `mordell_weil_fg`** — full Mordell-Weil. Currently USED (legit strong axiom) to supply
-  finiteness; the THOROUGH finish is to prove it (cornerstone, max reuse). Mountain, not permanent.
+Last source rebuild and `#print axioms` audit: 2026-08-05.
 
-## KEYSTONE sub-board (shared foundation for A1 + A2) — scoreboard 0/3
-- 🟡 **K1 `n_torsion_card = n²`** (scratch/NTorsionCard.lean) — compiles, #print axioms =
-  [propext, sorryAx, Classical.choice, Quot.sound] (NO custom axiom). Modulo 4 code sorries:
-  - ⬜ **SEAM 1 `preΨ'_separable_of_natCast_ne_zero`** (L38) — [n] étaleness. Grind via E1 (Weierstrass formal group).
-  - ⬜ **SEAM 2 `nsmul_eq_zero_iff_ΨSq_eval`** (L44) — x-coord division-poly formula (EDS induction).
-  - 🟡 **sub D `preΨ'_eval_eq_zero_iff_exists_non_two_torsion`** (L80) — root realization over sep-closed k. Closeable.
-  - 🟡 **sub E2 `twoTorsionKernel_card` E[2]=4** (L248) — closeable via twoTorsionPolynomial disc≠0.
-- ⬜ **K2 `geomNTorsion_rank_two_linear`** — from K1; the shared `E[n]≅ₗ(ZMod n)²` keystone.
-- ⬜ **K3 Stage-0 API refactor** — PointsOver/nTorsionOver/geomNTorsion/mapLinear, ≃+ → ≃ₗ (dm3).
+## Current endpoint
 
-## COMPONENTS (reusable, not top-level axioms)
-- ✅ **C1 invariant-factor algebra** `finite_add_comm_group_embed_zmod_sq_invariantFactors_card` —
-  committed 13265dd, fresh-olean verified [propext, Classical.choice, Quot.sound]. (A1 tail.)
-- ✅ **C2 finiteness from A6** `rational_torsion_finite_alias` — already in tree (torsion_set_finite_of_fg).
-- ⬜ **C3 WeilPairingPackage Stage-1** `full_rational_torsion_has_primitive_root` — discharges A2 modulo the package.
-- ⬜ **C4 Miller pairing construction (SEAM 3)** — tame-symbol reciprocity + nondeg (geometric, NOT card).
+The main numerical theorem and its cyclic-order input compile from source:
 
-## GRIND ORDER (next → )
-1. Close K1's 2 sub-steps (sub D, sub E2) so K1 = clean modulo only the 2 seams. ← grinding now (codex)
-2. K3 Stage-0 + K2 geomNTorsion rank-2 (from K1).
-3. A1: wire K2 + C1 + C2 → discharge rational_torsion_two_invariant_factors. (6→5)
-4. C3 + A2 Weil Stage-1; then SEAM 3 Miller; then SEAM 1 E1 formal group; then SEAM 2.
-5. A4/A5 genus restructure; A6 full Mordell-Weil; A3 Mazur core.
+- `MazurProof.mazur_cyclic_order_bound_assembled`
+- `MazurProof.rational_torsion_finite`
+- `MazurProof.mazur_torsion_bound`
+- `MazurProof.mazur_torsion_bound_ncard`
 
-## DISCHARGED ALONG THE WAY (preserve the full list — 别忘了)
-Count fluctuated (started ~12–13; once down to 5 at 8db5461; N14/16 re-split as axioms 7d2f601).
-These were custom MazurProof axioms that are now THEOREMS / removed:
-- ✅ obstruction_curve_20a4_points_degenerate (5e6a0a2)
-- ✅ N12 obstruction assembly (d9829b0)
-- ✅ N14 obstruction curve axiom (1ac9661)
-- ✅ N16 obstruction curve axiom (dac126b)
-- ✅ E20_rational_points_complete (bcf2925)
-- ✅ Z2xZ10_gives_non_degenerate — descent bridge (b57bda4)
-- ✅ Z2xZ12_gives_non_degenerate (N12 descent)
-- ✅ no_Z2_cross_Z10, no_Z2_cross_Z12 → now THEOREMS from descent (7d2f601)
-- ✅ removed dead: rational_torsion_finite (duplicate), rank_E20_eq_zero_ax (fake True) (38c6e22)
-- ✅ first_invariant_factor — PROVED (8db5461)
+Their reachable custom-axiom ledger has exactly five entries:
 
-## NOT OUR AXIOMS (upstream FLT-project scaffolding, outside MazurProof — do NOT count)
-- FLT/Assumptions/Mazur.lean: Mazur_statement (the overall Mazur theorem — the thing |T|≤16 feeds)
-- FLT/Assumptions/KnownIn1980s.lean: knownin1980s {P} : P (FLT's classical-results black box)
-- FLT/Assumptions/Odlyzko.lean: Odlyzko_statement (analytic number theory input)
+1. `MazurProof.CyclicExclusion13.C13Sextic_affine_x_is_cuspidal`
+   in `CyclicExclusion13.lean`;
+2. `MazurProof.CyclicExclusion19.no_F19_rational_solution`
+   in `CyclicExclusion19.lean`;
+3. `MazurProof.CyclicExclusion25.no_explicit_order25_obstruction`
+   in `CyclicExclusion25.lean`;
+4. `MazurProof.CyclicExclusion49.no_raw_order49_tate_obstruction`
+   in `CyclicExclusion49.lean`;
+5. `MazurProof.no_prime_order_ge_23`
+   in `CyclicOrderAssembly.lean`.
 
-## BOTTOM LINE
-6 custom axioms remain in the |T|≤16 proof (MazurProof). The keystone infra we spun off
-(n_torsion_card, geomNTorsion rank-2, invariant-factor algebra ✅, Weil pairing) exists to
-discharge A1 + A2 (and A6 feeds A1). A3/A4/A5 are separate. C1 already landed 0-axiom (13265dd).
+Apart from these five declarations, the audit reports only `propext`,
+`Classical.choice`, and `Quot.sound`.  It reports no reachable `sorryAx`.
 
-## KEYSTONE SEAM LOCATIONS (corrected 2026-06-21 — A1 wiring moved them into Torsion.lean)
-Live keystone n_torsion_card + seams now in FLT/EllipticCurve/Torsion.lean (namespace KeystoneNTorsion),
-NOT scratch/NTorsionCard.lean (removed, stale duplicate). Seam sorries:
-- SEAM 1 prePsi'_separable — Torsion.lean L75
-- SEAM 2 nsmul_eq_zero_iff_PsiSq_eval — Torsion.lean L81 (SEAM2 codex building scratch/Seam2.lean, wire in)
-- sub-D realization — Torsion.lean L117 (HARDER than first thought: needs prePsi'_n coprime Psi2Sq /
-  resultant != 0; for even n the group-theory route fails). Defer as sorryAx residual.
-Plus David untouched: n_torsion_finite L50, Module.Finite L1004, galoisRep L1065.
+## Newly discharged: order seventeen
+
+`CyclicExclusion17.no_F17_rational_solution` is now a theorem, not an axiom.
+The source proof in `TateOrder17Quotient.lean`:
+
+1. normalizes the exact Tate residual `F₁₇(b,c)`;
+2. proves all exceptional denominator factors nonzero by explicit polynomial
+   identities;
+3. maps the normalized point through three checked degree-two formulas to the
+   integral `X₀(17)` model;
+4. uses the completed four-point classification of
+   `X017RationalPoints.lean`;
+5. excludes the two remaining affine fibres by a monic quartic with no root
+   modulo three and by the nonsquareness of seventeen in `ℚ`.
+
+The theorem
+`MazurProof.TateOrder17Quotient.no_F17_rational_solution` depends only on the
+three standard logical axioms above.
+
+## Declarations present in the tree but not reachable from the endpoint
+
+These custom axioms remain in older or alternative routes, but the rebuilt
+main theorem does not depend on them:
+
+- `CyclicOrderReduction.mazur_prime_torsion_bound`;
+- `OrderReduction.mazur_cyclic_order_bound`;
+- `TorsionFinite.mordell_weil_fg`.
+
+The two tracked proof placeholders in `KubertBridgeN16.lean` are likewise not
+reachable from the current endpoint.  They must not be counted as completed
+work, but they are not part of the five-entry endpoint ledger.
+
+## Next discharge order
+
+The five remaining assumptions are independent named arithmetic inputs.
+The finite cases should be attacked before the uniform tail:
+
+1. finish the rational-point classification on the order-thirteen sextic;
+2. prove the order-nineteen Tate residual has no nondegenerate rational zero;
+3. close the explicit order-twenty-five obstruction;
+4. close the raw order-forty-nine Tate obstruction;
+5. formalize the uniform prime-order exclusion for `p ≥ 23`.
+
+Any future count must come from a fresh source rebuild of every changed
+downstream module followed by `#print axioms`; stale `.olean` files can retain
+already removed axiom dependencies.
