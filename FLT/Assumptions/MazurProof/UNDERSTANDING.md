@@ -423,6 +423,14 @@ to the required sumset cover.
 and combines `|E(ℚ)/2E(ℚ)| ≤ 2` with `|E(ℚ)[2]| = 2` to prove free rank
 zero.  These theorems depend only on Lean's standard quotient/classical
 axioms.
+`X017FourTorsion.lean` proves the exact algebraic endgame conditional on the
+uniform exponent-four statement.  If `2P=K=(0,0)`, the duplication identity
+gives `x(P)^2=289`; the negative root is impossible on the curve, and the
+positive root gives `P=T` or `P=-T`.  Combining this with the proved
+two-torsion classification shows that any point killed by four is exactly
+one of `0,K,T,-T`.  Thus the sole remaining arithmetic input for the
+rational-point classification is the two-adic good-reduction/formal-kernel
+proof that four kills every rational point.
 `X017Reduction.lean` proves by kernel-checked finite computation that the
 integral `X₀(17)` equation has three affine points over each of `𝔽₂` and
 `𝔽₃`; with the point at infinity, both good fibres have four points.  It also

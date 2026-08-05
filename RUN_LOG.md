@@ -82,6 +82,9 @@
   - `X017RankZero.lean` applies this to the rational projective `x`-height and
     exact `{0,T}` cover, proves finite generation, and then obtains free rank
     zero from `|E(ℚ)/2E(ℚ)| ≤ |E(ℚ)[2]| = 2`
+  - `X017FourTorsion.lean` closes the algebraic classification tail:
+    `2P=K` forces `(x(P)^2-289)^2=0`, hence `P=T` or `P=-T`; consequently
+    every point killed by four is one of `0,K,T,-T`
 - verification:
   - scoped compilations pass
   - the N17 two-torsion theorem, exact-sequence/rank declarations, and
@@ -92,9 +95,11 @@
   - the four-orbit height lemmas, concrete finite-generation instance, and
     N17 free-rank-zero theorem audit to exactly `propext`,
     `Classical.choice`, and `Quot.sound`
+  - the conditional four-torsion classification has the same clean axiom
+    audit
 - next N17 producers:
-  - point-level good-reduction injection, the resulting torsion bound, and
-    classification of the four rational points
+  - the two-adic good-reduction/formal-kernel proof that every rational point
+    is killed by four; the point classification then follows immediately
   - later, the level quotient and twist/kernel transport needed to consume
     the classification in the active Tate locus
 

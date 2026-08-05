@@ -37,10 +37,12 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     two-coset height-descent wrapper reducing finite generation to one fixed
     translation estimate; four-orbit symmetrization of the rational
     projective `x`-height, yielding finite generation and free rank zero;
+    classification of every point killed by four as `0,K,T,-T`;
     good-fibre point counts
     `#X₀(17)(𝔽₂)=#X₀(17)(𝔽₃)=4`.
-  - Open arithmetic atoms: good-reduction torsion injection, the torsion
-    bound, and the rational-point classification.
+  - Open arithmetic atom: the good-reduction/formal-kernel proof that every
+    rational point is killed by four; the proved conditional classification
+    then gives exactly the four rational points.
   - Open geometric atoms: the Tate `X₁(17) → X₀(17)` quotient with cusp and
     `j` control, then twist/model/kernel transport for the two noncuspidal
     fibres.

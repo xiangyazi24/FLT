@@ -44,8 +44,10 @@ coordinate translation estimate: summing it over the four translates by `T`
 is exactly `T`-invariant and still expands by a factor two under doubling.
 Together with the two-torsion count and quotient bound, this proves free rank
 zero.  The active arithmetic producer is now the torsion bound and four-point
-classification.  The later modular quotient and twist/kernel transport remain
-separate packages.
+classification: the algebraic classification of points killed by four is
+proved, leaving the good-reduction/formal-kernel argument that multiplication
+by four kills every rational point.  The later modular quotient and
+twist/kernel transport remain separate packages.
 
 ### (b) N13 concrete specialization and separatedness
 
