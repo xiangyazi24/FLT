@@ -431,6 +431,13 @@ two-torsion classification shows that any point killed by four is exactly
 one of `0,K,T,-T`.  Thus the sole remaining arithmetic input for the
 rational-point classification is the two-adic good-reduction/formal-kernel
 proof that four kills every rational point.
+`X017FormalTwoCore.lean` supplies the first half of that input on the good
+integral model.  It proves exact rational duplication formulas, shows that
+every rational point is either two-integral or has formal valuations
+`v₂(x)=-2k`, `v₂(y)=-3k`, and proves that doubling a nonzero formal point
+raises `k` by at least one.  What remains is the finite mod-two residue
+calculation putting `4P` in the formal kernel and the separatedness assembly
+that combines this with the `{0,T}` descent.
 `X017Reduction.lean` proves by kernel-checked finite computation that the
 integral `X₀(17)` equation has three affine points over each of `𝔽₂` and
 `𝔽₃`; with the point at infinity, both good fibres have four points.  It also

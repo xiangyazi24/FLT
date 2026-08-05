@@ -38,10 +38,12 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     translation estimate; four-orbit symmetrization of the rational
     projective `x`-height, yielding finite generation and free rank zero;
     classification of every point killed by four as `0,K,T,-T`;
+    two-adic integral-or-formal dichotomy and strict formal-level growth under
+    doubling on the good integral model;
     good-fibre point counts
     `#X₀(17)(𝔽₂)=#X₀(17)(𝔽₃)=4`.
-  - Open arithmetic atom: the good-reduction/formal-kernel proof that every
-    rational point is killed by four; the proved conditional classification
+  - Open arithmetic atom: prove that `4P` enters the two-adic formal kernel
+    and assemble formal separatedness; the proved conditional classification
     then gives exactly the four rational points.
   - Open geometric atoms: the Tate `X₁(17) → X₀(17)` quotient with cusp and
     `j` control, then twist/model/kernel transport for the two noncuspidal

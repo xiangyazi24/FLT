@@ -85,6 +85,9 @@
   - `X017FourTorsion.lean` closes the algebraic classification tail:
     `2P=K` forces `(x(P)^2-289)^2=0`, hence `P=T` or `P=-T`; consequently
     every point killed by four is one of `0,K,T,-T`
+  - `X017FormalTwoCore.lean` proves the explicit duplication formulas on the
+    good integral model, the integral-or-formal valuation dichotomy, and that
+    doubling a nonzero formal point raises its two-adic level by at least one
 - verification:
   - scoped compilations pass
   - the N17 two-torsion theorem, exact-sequence/rank declarations, and
@@ -97,9 +100,11 @@
     `Classical.choice`, and `Quot.sound`
   - the conditional four-torsion classification has the same clean axiom
     audit
+  - the two-adic formal core also audits to exactly Lean's standard
+    quotient/classical axioms
 - next N17 producers:
-  - the two-adic good-reduction/formal-kernel proof that every rational point
-    is killed by four; the point classification then follows immediately
+  - the mod-two residue argument placing `4P` in the formal kernel, followed
+    by formal separatedness and the uniform equation `4P=0`
   - later, the level quotient and twist/kernel transport needed to consume
     the classification in the active Tate locus
 

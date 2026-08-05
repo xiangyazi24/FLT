@@ -46,8 +46,12 @@ Together with the two-torsion count and quotient bound, this proves free rank
 zero.  The active arithmetic producer is now the torsion bound and four-point
 classification: the algebraic classification of points killed by four is
 proved, leaving the good-reduction/formal-kernel argument that multiplication
-by four kills every rational point.  The later modular quotient and
-twist/kernel transport remain separate packages.
+by four kills every rational point.  Its local core is now proved on the
+integral model: every point is two-integral or formal, and doubling strictly
+raises the level of every nonzero formal point.  The remaining arithmetic
+interface is the mod-two entry `4P` into that formal kernel and the resulting
+separatedness assembly.  The later modular quotient and twist/kernel
+transport remain separate packages.
 
 ### (b) N13 concrete specialization and separatedness
 
