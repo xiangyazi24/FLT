@@ -279,3 +279,30 @@ F₁₃(b,c) is bivariate (degree 10 in c, monic leading coeff -1; degree 7 in b
 𝔽₂, 𝔽₃, 𝔽₅: the only solution with b≠0 is the empty set. This rules out
 integer solutions via infinite descent, but rational solutions require the full
 genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
+
+## Progress Log (2026-08-05 N13 low-degree spreads)
+
+- The irreducible quadratic branch is now closed without a project axiom:
+  the finite, reciprocal, and vertical two-chart cases all prove that the
+  canonical divisorial hull is invertible.
+- `N13QuadraticFractionalSpread.lean` packages reducible and irreducible
+  quadratic graphs behind one interface: every degree-two selected graph has
+  an invertible integral fractional ideal whose generic extension is exactly
+  its Mumford graph ideal.
+- `N13DegreeOneFractionalSpread.lean` gives the analogous degree-one
+  interface.  An integral point uses the canonical divisorial hull, while an
+  escaping point uses the affine ideal of its explicit invertible two-chart
+  line.
+- The three new public spread theorems pass scoped compilation, bypass
+  scanning, and `#print axioms`; their only dependencies are `propext`,
+  `Classical.choice`, and `Quot.sound`.
+- The remaining N13 mathematical providers are a concrete
+  `N13SpreadClassifier.SpreadData`, compatibility of rational Abel classes
+  with reduction (`abel_reduces`), and separatedness of the reduced kernel.
+  In the current design, the last item reduces to constructing
+  `RationalKernelDoublingData`, including its compatible disk-pair
+  realization and integral first-jet doubling law.  Once these providers
+  exist, the final affine-cuspidality wiring is thin.
+- Earlier axiom inventories in this file describe historical snapshots and
+  must not be treated as current.  Use a fresh `#print axioms` audit of the
+  assembled theorem before reporting the remaining global Mazur boundary.
