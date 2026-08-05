@@ -716,6 +716,13 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   irreducible specialization seam.  It does not yet identify the infinity
   ideal of a horizontal closure or handle the vertical `{1,y}` recovery
   branch.
+- `N13SpecialVerticalDivisorCharts.lean` supplies the complementary literal
+  chart calculation for the canonical `{1,y}` special fibres.  The two
+  affine sheet ideals above `x=a` multiply to `(X-a)`.  Their infinity ideal
+  is `⊤` above `x=0` and `(t-1)` above `x=1`.  Both identities are derived
+  from the generalized graph-conjugation theorem, not from an ideal table.
+  A recovered vertical graph with nonconstant relation `x=a+cy` still needs
+  its analogous root-divisor packaging.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
