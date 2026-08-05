@@ -733,6 +733,13 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   the four root patterns `(0,0)`, `(0,1)`, `(1,0)`, `(1,1)` and preserves
   the doubled point in the last case.  No finite divisor table or additional
   geometric provider is used.
+- `N13ReciprocalGraphPicardRealization.lean` feeds that exact chart-pair
+  equality back into the irreducible reciprocal-horizontal recovery branch.
+  Every `ReciprocalGraphClosure` now produces complete two-fibre `Data` whose
+  generic raw ideal and oriented Picard class are the original quadratic
+  Mumford representative.  The remaining irreducible realization work is
+  confined to the finite contraction branches and the reciprocal vertical
+  branch.
 - `N13SpecialVerticalDivisorCharts.lean` supplies the complementary literal
   chart calculation for the canonical `{1,y}` special fibres.  The two
   affine sheet ideals above `x=a` multiply to `(X-a)`.  Their infinity ideal
