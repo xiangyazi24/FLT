@@ -57,16 +57,31 @@
     concrete cover `target = forwardHom(source) ∪
     (eta + forwardHom(source))`; consequently the concrete left
     exact-sequence arrow is zero and the right arrow is injective
+  - `StandardTwoIsogenyDualHom.lean` bundles the explicit standard
+    `dualPoint` formula by applying the already additive forward map to the
+    dual curve and scaling the twice quotient back by `(x/4,y/8)`
+  - the generic square-coordinate reconstruction is also proved for
+    `dualPoint`; this removes the coordinate/bundled-map seam on the source
+    quotient
+  - Q3817 was rejected after source verification: it incorrectly treated
+    `T=(17,136)` as two-torsion, assumed its vertical coordinate was zero,
+    and confused membership in an isogeny image with membership in its kernel
+  - `X017SecondCoset.lean` proves the correct translation identity for
+    `P-T`, handles the visible exceptional points, and obtains the second
+    concrete cover `source = dualHom(target) ∪ (T + dualHom(target))`
+  - the right quotient has an explicit surjection from `Bool`, so
+    `|E(ℚ)/2E(ℚ)| ≤ 2`; combining both isogeny covers further proves every
+    source point is a double or `T` plus a double
 - verification:
   - scoped compilations pass
   - the N17 two-torsion theorem, exact-sequence/rank declarations, and
     transported N17 isogeny identities, both source and target squareclass
     classifications, the generic square-coordinate preimage theorem, and the
-    first concrete coset exhaustion have clean-3 axiom audits
+    two concrete coset exhaustions and doubling quotient bound have clean-3
+    axiom audits
 - next N17 producers:
-  - the independent source quotient cover for the dual isogeny, represented
-    by zero and `T`
-  - finite generation/rank-zero classification of `X₀(17)(ℚ)`
+  - dependency-clean height infrastructure and the fixed-`T` translation
+    inequality, yielding finite generation and then rank zero
   - later, the level quotient and twist/kernel transport needed to consume
     the classification in the active Tate locus
 

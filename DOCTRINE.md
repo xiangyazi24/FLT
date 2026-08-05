@@ -36,10 +36,13 @@ to be `1` or `17`, and the nonzero target squareclass is proved to be `1` or
 `-1`.  Converting those coordinate classes into the chosen `T` and `(0,0)`
 cosets was the next explicit task; the target cover by the forward image and
 its `(0,0)` translate is now proved, so the left exact-sequence arrow is zero
-and the right arrow is injective.  The remaining independent quotient is the
-source cover by the dual image and its `T` translate.  It is followed by
-finite generation/rank zero.  The later modular quotient and twist/kernel
-transport remain separate geometric packages.
+and the right arrow is injective.  The independent source cover by the dual
+image and its `T` translate is also proved.  Consequently `E(ℚ)/2E(ℚ)` has at
+most two classes and every point is explicitly a double or `T` plus a double.
+The active arithmetic producer is now finite generation from the fixed-`T`
+height inequality; rank zero then follows from the proved two-torsion count.
+The later torsion bound, modular quotient, and twist/kernel transport remain
+separate packages.
 
 ### (b) N13 concrete specialization and separatedness
 

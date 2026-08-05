@@ -31,13 +31,15 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     nonzero target first-coordinate squareclasses restricted to `1` and `-1`;
     explicit target quotient cover by the forward-isogeny image and its
     translate by `(0,0)`, hence zero left exact-sequence arrow and injective
-    right arrow;
+    right arrow; explicit source quotient cover by the dual image and its
+    translate by `T`; source modulo doubling has at most two classes and is
+    explicitly covered by `0,T`;
     two-coset height-descent wrapper reducing finite generation to one fixed
     translation estimate; good-fibre point counts
     `#X₀(17)(𝔽₂)=#X₀(17)(𝔽₃)=4`.
-  - Open arithmetic atoms: the independent source/dual-isogeny quotient
-    cover by representatives `0,T`, finite generation, good-reduction torsion
-    injection, and the rational-point classification.
+  - Open arithmetic atoms: finite generation from the fixed-`T` height
+    inequality and dependency-clean height infrastructure; good-reduction
+    torsion injection; and the rational-point classification.
   - Open geometric atoms: the Tate `X₁(17) → X₀(17)` quotient with cusp and
     `j` control, then twist/model/kernel transport for the two noncuspidal
     fibres.

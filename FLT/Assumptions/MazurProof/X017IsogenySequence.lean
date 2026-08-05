@@ -1,13 +1,15 @@
 import FLT.Assumptions.MazurProof.X017Model
+import FLT.Assumptions.MazurProof.StandardTwoIsogenyDualHom
 
 /-!
 # The rational two-isogeny pair on the standard `X₀(17)` model
 
-The general Vélu development constructs additive homomorphisms between the
-short Weierstrass curve and its quotient.  This file transports those maps
-through the explicit source and target changes used by `X017Model`.  The
-resulting maps have exactly the standard source and target types needed by the
-two-isogeny exact sequence.
+The forward homomorphism transports the general Vélu map through the explicit
+source and target changes used by `X017Model`.  The dual homomorphism uses the
+bundled standard-coordinate dual formula: it applies the standard isogeny a
+second time and scales the twice-quotiented curve back to the source.  The
+resulting maps have exactly the types needed by the two-isogeny exact
+sequence.
 
 The distinguished point on the target is the transported Vélu kernel point.
 Its standard coordinates are `(0,0)`; in particular, it is not the point
@@ -22,6 +24,7 @@ open WeierstrassCurve
 open WeierstrassCurve.Affine
 open MazurProof.VeluTwoIsogeny
 open MazurProof.X017Model
+open MazurProof.StandardTwoIsogenyDualHom
 
 noncomputable section
 
@@ -65,24 +68,20 @@ isogeny. -/
 /-- The dual rational two-isogeny from the standard dual back to the standard
 source model. -/
 noncomputable def dualHom : Point standardDual →+ Point standard :=
-  ShortToStandard.toAddMonoidHom.comp
-    ((dualMapHom ten_is_root).comp
-      (StandardTwoIsogeny.targetEquiv ten_is_root).symm.toAddMonoidHom)
+  dualPointHom a17 b17
+
+/-- The transported dual homomorphism agrees with the explicit
+standard-coordinate dual formula. -/
+theorem dualHom_apply (Q : Point standardDual) :
+    dualHom Q = StandardTwoIsogeny.dualPoint Q := by
+  rfl
 
 /-- The transported dual isogeny composed with the transported forward
 isogeny is multiplication by two on the standard source model. -/
 theorem dual_comp_forward (P : Point standard) :
     dualHom (forwardHom P) = 2 • P := by
-  change
-    ShortToStandard
-        (dualMapHom ten_is_root
-          ((StandardTwoIsogeny.targetEquiv ten_is_root).symm
-            (StandardTwoIsogeny.targetEquiv ten_is_root
-              (veluMapHom ten_is_root (ShortToStandard.symm P))))) =
-      2 • P
-  rw [AddEquiv.symm_apply_apply, dual_comp_phi]
-  exact map_nsmul ShortToStandard 2 (ShortToStandard.symm P)
-    |>.trans (by rw [ShortToStandard.apply_symm_apply])
+  rw [dualHom_apply, forwardHom_apply,
+    StandardTwoIsogeny.dual_comp_pointMap]
 
 /-! ## The correct target-kernel representative -/
 
@@ -127,14 +126,8 @@ theorem eta_order_two : addOrderOf eta = 2 := by
 /-- The transported dual isogeny kills its distinguished target-kernel
 point. -/
 @[simp] theorem dualHom_eta : dualHom eta = 0 := by
-  change
-    ShortToStandard
-        (dualMapHom ten_is_root
-          ((StandardTwoIsogeny.targetEquiv ten_is_root).symm
-            (StandardTwoIsogeny.targetEquiv ten_is_root
-              (etaPoint ten_is_root)))) =
-      0
-  rw [AddEquiv.symm_apply_apply, dual_eta_eq_zero, map_zero]
+  rw [dualHom_apply, eta_eq_standardDualKernel]
+  rfl
 
 /-- The dual sends the visible target point `(64,0)` to the visible source
 kernel point `(0,0)`. -/

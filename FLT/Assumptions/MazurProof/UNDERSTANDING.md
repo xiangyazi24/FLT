@@ -387,8 +387,25 @@ squareclass theorem and the identity
 `x(Q+(0,0))=-256/x(Q)`.  A negative square therefore becomes a square after
 translation by the target kernel.  This proves the first full concrete
 two-coset exhaustion, makes the left exact-sequence arrow zero, and makes the
-right arrow injective.  The source quotient modulo the dual image remains a
-separate arithmetic input; the completed target cover does not imply it.
+right arrow injective.  The source quotient modulo the dual image is a
+logically separate arithmetic input; it is closed by the next layer rather
+than inferred from the completed target cover.
+`StandardTwoIsogenyDualHom.lean` closes the bundled-map seam without
+unfolding the outer short-Weierstrass construction.  Applying the already
+additive standard map to the standard dual lands on the twice quotient; the
+variable change `(x,y)↦(x/4,y/8)` scales it back to the source and is proved
+pointwise equal to `dualPoint`.  Thus the explicit dual formula is now a
+genuine additive homomorphism.  The generic preimage file also constructs a
+dual preimage of every nonzero square source coordinate.
+`X017SecondCoset.lean` uses the correct order-four point
+`T=(17,136)`.  For `x(P)=17r²` and `x(P)≠17`, the chord through `P` and
+`-T=(17,-136)` gives
+`x(P-T)=((y+8x)/(r(x-17)))²`.  The cases `x=0` and `x=17` are handled by the
+visible points `K,T,-T`.  This proves the independent source cover by the
+dual image and its `T` translate.  The quotient therefore has at most two
+elements, the source modulo doubling has at most two elements, and combining
+both isogeny covers gives the exact `{0,T}` cover modulo doubling required by
+the height descent.
 `X017HeightDescent.lean` specializes Mathlib's general descent theorem to a
 two-element representative set `{0,T}` modulo doubling.  It proves finite
 generation from Northcott, nonnegativity, the doubling lower bound, and only
