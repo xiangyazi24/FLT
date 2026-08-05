@@ -337,6 +337,11 @@ to `Y²=X(X²+30X+289)` and its standard two-isogeny dual, and an explicit
 point of exact order four.  This closes the model/visible-torsion algebra but
 does not assert the still-missing modular interpretation or rational-point
 classification.
+`X017TwoTorsion.lean` proves that the only rational points killed by two on
+the standard model are infinity and `(0,0)`, constructs an explicit
+equivalence with `Bool`, and obtains two-torsion cardinality exactly two.
+This is the sharp torsion input for the eventual `E(ℚ)/2E(ℚ)` rank-zero
+criterion.
 
 #### N13 analysis note
 F₁₃(b,c) is bivariate (degree 10 in c, monic leading coeff -1; degree 7 in b;
