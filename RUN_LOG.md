@@ -88,6 +88,13 @@
   - `X017FormalTwoCore.lean` proves the explicit duplication formulas on the
     good integral model, the integral-or-formal valuation dichotomy, and that
     doubling a nonzero formal point raises its two-adic level by at least one
+  - `X017FormalTwoReduction.lean` computes the mod-two residue dynamics of
+    the integral model, proves that four times every rational point enters the
+    formal kernel, and proves formal separatedness by strict level growth
+  - `X017RationalPoints.lean` combines formal separatedness with the exact
+    `{0,T}` cover: four times every rational point is divisible by every
+    power of two and hence vanishes; the point group is exactly
+    `⟨T⟩={0,K,T,-T}` and has cardinality four
 - verification:
   - scoped compilations pass
   - the N17 two-torsion theorem, exact-sequence/rank declarations, and
@@ -102,11 +109,14 @@
     audit
   - the two-adic formal core also audits to exactly Lean's standard
     quotient/classical axioms
+  - the mod-two entry theorem, formal separatedness, uniform exponent-four
+    theorem, four-point classification, cyclic-generation theorem, and exact
+    cardinality theorem all force-compile from source and audit to exactly
+    `propext`, `Classical.choice`, and `Quot.sound`
 - next N17 producers:
-  - the mod-two residue argument placing `4P` in the formal kernel, followed
-    by formal separatedness and the uniform equation `4P=0`
-  - later, the level quotient and twist/kernel transport needed to consume
-    the classification in the active Tate locus
+  - the level quotient with cusp and `j` control, followed by twist/model/
+    kernel transport needed to consume the completed classification in the
+    active Tate locus
 
 ## Run 2026-07-28 (N13 structural two-adic Abel chart)
 - approval: `/automode`; stop requested at the next clean node
