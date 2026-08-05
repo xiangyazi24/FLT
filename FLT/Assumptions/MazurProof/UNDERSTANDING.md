@@ -407,6 +407,13 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   ideals.  The remaining task is to equate the chartwise reduction of each
   selected integral proper line with the pair of its intended special
   divisor.
+- `N13TwoChartPicardRealization.lean` packages the resulting two-fibre
+  semantics without postulating a relative Picard functor.  Its `Data`
+  retains a proper line, an explicit oriented infinity integer, a literal
+  `EffectiveDivisorTwo`, and exact equalities for both reduced chart ideals.
+  The oriented generic class and special Abel class are then definitions.
+  Constructing `Data` for the selected corrected low-degree lines is now the
+  precise specialization producer boundary.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.

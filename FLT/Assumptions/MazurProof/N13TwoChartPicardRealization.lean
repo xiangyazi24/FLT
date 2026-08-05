@@ -1,0 +1,117 @@
+import FLT.Assumptions.MazurProof.N13SpecialDivisorCharts
+import FLT.Assumptions.MazurProof.N13AbelFiberTwoModel
+import FLT.Assumptions.MazurProof.SexticOrientedPic
+
+/-!
+# Two-fibre Picard realization of proper N13 lines
+
+Mathlib does not currently descend the two chart ideals of a `TwoChartLine`
+to a global invertible sheaf on the glued curve.  The N13 endgame needs less:
+an oriented generic fractional ideal and a literal degree-two divisor on the
+special fibre.
+
+The structure in this file retains precisely that rigorous ring-level data.
+Its two special equalities compare both reduced chart ideals with the
+canonical chart pair of one effective divisor.  The generic and special
+Picard classes are consequently definitions, rather than hypothesized class
+maps.
+-/
+
+open scoped nonZeroDivisors
+
+namespace MazurProof.N13TwoChartPicardRealization
+
+noncomputable section
+
+local instance : Fact (Nat.Prime 2) :=
+  ⟨Nat.prime_two⟩
+
+/-- Proper line data on the ordinary affine and infinity charts. -/
+abbrev Line : Type :=
+  N13IntegralInfinityPointSpread.TwoChartLine
+
+/-- The two-adic coefficient field. -/
+abbrev Q₂ : Type :=
+  N13InfinityBaseChange.Q₂
+
+/-- The good sextic N13 model over the two-adic field. -/
+abbrev Model : SexticMumford.Model Q₂ :=
+  N13Mumford.model Q₂
+
+/-- The oriented generic Picard group used by the N13 Mumford model. -/
+abbrev GenericPic : Type :=
+  SexticMumford.ConcretePic
+    Model
+    (N13Infinity.positiveInfinityOrder Q₂)
+
+/-- The set-valued special Picard model obtained from the Abel fibres. -/
+abbrev SpecialPic : Type :=
+  N13AbelFiberTwoModel.PicTwoSetModel
+
+/-- Literal degree-two effective divisors on the completed special curve. -/
+abbrev EffectiveDivisorTwo : Type :=
+  N13SymmetricSquareTwo.EffectiveDivisorTwo
+
+/-- Extension of the invertible affine ideal of a proper line to the generic
+sextic coordinate ring. -/
+def genericIdealUnit (L : Line) :
+    Units N13IntegralFractionalHull.RationalFractionalIdeal :=
+  Units.map
+    N13IntegralFractionalHull.extendFractional.toMonoidHom
+    L.affine_isUnit.unit
+
+/-- Oriented generic fractional-ideal datum of a proper line.
+
+The integer is explicit because the generic affine ideal alone cannot
+distinguish the two points at infinity or record an infinity twist. -/
+def genericRaw (L : Line) (infinityOrder : ℤ) :
+    SexticMumford.OrientedFrac Model :=
+  (genericIdealUnit L, Multiplicative.ofAdd infinityOrder)
+
+/-- Oriented generic Picard class carried by a marked proper line. -/
+def genericClass (L : Line) (infinityOrder : ℤ) :
+    GenericPic :=
+  Additive.ofMul <|
+    QuotientGroup.mk'
+      (SexticMumford.principalOriented
+        Model
+        (N13Infinity.positiveInfinityOrder Q₂)).range
+      (genericRaw L infinityOrder)
+
+/-- One proper line together with exact interpretations on both fibres.
+
+The special equalities retain both chart ideals.  Thus the special divisor
+cannot be chosen merely from the affine support while silently forgetting
+which infinity sheet or infinity multiplicity the proper line carries. -/
+structure Data where
+  charts : Line
+  infinityOrder : ℤ
+  specialDivisor : EffectiveDivisorTwo
+  special_affine :
+    (N13TwoChartSpecialRestriction.restrict charts).affineIdeal =
+      (N13SpecialDivisorCharts.ofDivisor specialDivisor).affineIdeal
+  special_infinity :
+    (N13TwoChartSpecialRestriction.restrict charts).infinityIdeal =
+      (N13SpecialDivisorCharts.ofDivisor specialDivisor).infinityIdeal
+
+namespace Data
+
+/-- The oriented generic class represented by the proper line. -/
+def toGenericPic (D : Data) : GenericPic :=
+  genericClass D.charts D.infinityOrder
+
+/-- The special Abel class represented by the same proper line after
+chartwise reduction. -/
+def toSpecialPic (D : Data) : SpecialPic :=
+  N13AbelFiberTwoModel.abel D.specialDivisor
+
+/-- Both fibre classes, retained as a pair because the present special model
+is a set quotient rather than an additive Picard group. -/
+def fibreClasses (D : Data) : GenericPic × SpecialPic :=
+  (D.toGenericPic, D.toSpecialPic)
+
+end Data
+
+end
+
+end MazurProof.N13TwoChartPicardRealization
