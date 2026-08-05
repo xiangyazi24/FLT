@@ -330,10 +330,25 @@ first coordinate zero.
 `XDelta19Descent.lean` completes the first rational-flex descent: a primitive
 integral normalization proves that `Y-(2X+4)` is always a rational cube, and
 the resulting explicit formulas prove that the dual three-isogeny is
-surjective on rational points.  The remaining N19 core is the complementary
-three-isogeny descent/rank-zero argument for this conductor-19 isogeny class;
-the quotient geometry and all Tate-chart exceptional cases are no longer
-missing.
+surjective on rational points.  `XDelta19Isogeny.lean` now bundles the
+forward map and verifies by the affine chord-and-tangent law, including its
+visible three-torsion fibre, that the dual-forward composition is
+multiplication by three.
+
+The complementary descent uses the smaller integral model
+`Y²=X³+(8X+76)²`.  `XDelta19GoodModel.lean` proves that it is exactly the
+previous scaled quotient under `s=9X+228`, `t=27Y`; its discriminant is
+`-2¹²·19³`, so it has good reduction at three.
+`XDelta19GoodIsogeny.lean` constructs its quotient
+`t²=s³-3(24s+12)²`, bundles both degree-three maps, and proves that their
+dual-forward composition is multiplication by three.  The small constant
+`12` is the decisive normalization for the remaining Eisenstein descent:
+unlike the earlier scaled equation, its quotient factorization has no
+split prime above nineteen.  What remains is the arithmetic half of this
+descent (the three cubeclasses on the good model, surjectivity on the small
+quotient, and three-adic separatedness) and the final transport back to the
+minimal quotient.  The quotient geometry, Tate-chart exceptional cases,
+both isogeny pairs, and both composition identities are no longer missing.
 
 `TateOrder17.exists_tate_parameters_of_order_seventeen_with_j` now preserves
 the original curve's `j`-invariant together with ellipticity, exact order,
