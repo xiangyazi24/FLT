@@ -296,7 +296,16 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
 - `N13LowDegreeFractionalSpread.lean` now exhausts the Padé bound
   `natDegree ≤ 2` and gives every selected graph one invertible integral
   fractional spread with the exact normalized generic Mumford ideal.
-- The four new public spread theorems pass scoped compilation, bypass
+- `N13ArbitraryLowDegreeFractionalSpread.lean` removes the Padé restriction:
+  every balanced two-adic Mumford graph, and in particular the finite graph
+  of the chosen low-degree representative of every rational Picard class,
+  has such an exact invertible affine spread.
+- The last statement is intentionally only about the finite affine graph.
+  A low-degree semirepresentative retains an integer infinity coordinate;
+  realizing that coordinate by a proper infinity-chart line is still needed
+  before this affine spread can serve as `SpreadData.exists_spread` for the
+  full oriented rational class.
+- All six public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
 - The remaining N13 mathematical providers are a concrete
