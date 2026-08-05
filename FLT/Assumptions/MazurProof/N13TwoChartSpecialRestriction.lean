@@ -123,6 +123,19 @@ structure ChartPair where
           N13SpecialCurveOverlap.InfinityOverlap)
         infinityIdeal
 
+/-- Compatible chart pairs are equal once their two chart ideals agree.
+
+The overlap field is a proposition, so proof irrelevance removes it after
+the affine and infinity ideals have been identified. -/
+@[ext] theorem ChartPair.ext
+    {L M : ChartPair}
+    (haffine : L.affineIdeal = M.affineIdeal)
+    (hinfinity : L.infinityIdeal = M.infinityIdeal) :
+    L = M := by
+  cases L
+  cases M
+  simp_all
+
 /-- Ring-level special restriction of a concrete integral two-chart line. -/
 def restrict (L : Line) : ChartPair where
   affineIdeal := affineIdeal L

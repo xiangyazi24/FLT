@@ -291,6 +291,24 @@ primitive N13 axiom.  Endpoint audits must therefore compare source and
   `mazur_torsion_bound`; the endpoint uses the clean cyclic `X₁(16)` route
   and different noncyclic exclusions.
 
+#### Exact strength of the N17 and N19 seams
+
+The active N17 and N19 axioms are stronger than the endpoint needs.  The
+proved Tate-normal-form bridges produce `b`, `c`, `b ≠ 0`, the residual
+equation `F17 b c = 0` or `F19 b c = 0`, and an elliptic Tate curve.
+Therefore the smallest honest missing theorem in each case is emptiness of
+the **nonsingular** rational Tate locus, not nonvanishing of `F17` or `F19`
+on every pair with `b ≠ 0`.  `TateOrder17` and `TateOrder19` already prove
+both directions between the residual equation and the exact order of the
+marked Tate origin under those hypotheses.
+
+`PrimeExclusion17.lean` and `PrimeExclusion19.lean` contain proved fixed
+kernel-polynomial root exclusions, but the active endpoint does not import
+them.  No source theorem maps every rational noncuspidal point of either Tate
+locus to a root of the corresponding fixed polynomial.  Those algebraic
+tails cannot replace the live axioms until a genuine universal modular-curve
+or fibre map is proved.
+
 #### N13 analysis note
 F₁₃(b,c) is bivariate (degree 10 in c, monic leading coeff -1; degree 7 in b;
 20 terms, total degree 11). The degree-7 homogeneous part is -b(b-c)⁶. Over
@@ -426,9 +444,7 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `1-t₀x` reduces to `1`, while the infinity graph reduces to the point
   selected by proper reduction.  Tensoring once with the positive-infinity
   line therefore gives exactly the canonical chart pair of
-  `s(reducedPoint, specialAnchor)`.  This completes the special-fibre
-  realization of the escaping degree-one branch; only its oriented generic
-  comparison remains before constructing full Picard `Data`.
+  `s(reducedPoint, specialAnchor)`.
 - `N13FiniteAffinePointInfinityClosure.lean` closes the finite degree-one
   special branch.  It identifies the abstract contracted infinity closure
   with the explicit weighted ideal `(1-at, v-bt³)`.  The proof shows that
@@ -438,8 +454,24 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   the two canonical point-chart cases.  After tensoring once with positive
   infinity, both reduced chart ideals equal those of
   `s(reducedPoint, specialAnchor)`.  Thus the special-fibre realization of
-  every degree-one point line is complete; its oriented generic comparison
-  is the remaining degree-one `Data` field.
+  every degree-one point line is complete.  The integral branch still needs
+  the oriented generic comparison packaged below the chart level.
+- `N13SplitQuadraticSpecialRestriction.lean` packages proper reduction of an
+  arbitrary two-adic affine point behind the same valuation case split as
+  `pointLine`.  Its two chart ideals reduce to the canonical point pair.
+  Tensoring proves literal affine- and infinity-chart equalities for every
+  split secant divisor and every repeated-root tangent divisor.  It also
+  returns a proper line and explicit special divisor whose generic affine
+  ideal is the original quadratic Mumford graph.
+- `N13EscapingPointPicardRealization.lean` closes the complete two-fibre
+  `Data` package for an escaping degree-one point.  Tensoring with the
+  positive-infinity anchor leaves the generic affine ideal unchanged.  The
+  associated affine `pointMumford` has `nInf = 0`, so the oriented exponent is
+  definitionally `-1`; the resulting `genericRaw` is literally
+  `mumfordRaw`, and the generic Picard class is exactly `classOf`.  No
+  geometric orientation theorem remains in this branch.  The integral
+  degree-one analogue and oriented quadratic comparisons remain to be
+  packaged.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
