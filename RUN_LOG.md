@@ -72,6 +72,16 @@
   - the right quotient has an explicit surjection from `Bool`, so
     `|E(ℚ)/2E(ℚ)| ≤ 2`; combining both isogeny covers further proves every
     source point is a double or `T` plus a double
+  - removed the unnecessary import of `FLT.EllipticCurve.Torsion` from the
+    proved rational projective-height development, keeping its Northcott and
+    duplication theorems independent of unrelated torsion API sorries
+  - `X017HeightDescent.lean` symmetrizes any nonnegative height over the four
+    translates by an order-four point; the result is exactly invariant under
+    translation by `T`, retains Northcott finiteness, and inherits a
+    factor-two doubling bound from the base factor-four bound
+  - `X017RankZero.lean` applies this to the rational projective `x`-height and
+    exact `{0,T}` cover, proves finite generation, and then obtains free rank
+    zero from `|E(ℚ)/2E(ℚ)| ≤ |E(ℚ)[2]| = 2`
 - verification:
   - scoped compilations pass
   - the N17 two-torsion theorem, exact-sequence/rank declarations, and
@@ -79,9 +89,12 @@
     classifications, the generic square-coordinate preimage theorem, and the
     two concrete coset exhaustions and doubling quotient bound have clean-3
     axiom audits
+  - the four-orbit height lemmas, concrete finite-generation instance, and
+    N17 free-rank-zero theorem audit to exactly `propext`,
+    `Classical.choice`, and `Quot.sound`
 - next N17 producers:
-  - dependency-clean height infrastructure and the fixed-`T` translation
-    inequality, yielding finite generation and then rank zero
+  - point-level good-reduction injection, the resulting torsion bound, and
+    classification of the four rational points
   - later, the level quotient and twist/kernel transport needed to consume
     the classification in the active Tate locus
 

@@ -39,9 +39,12 @@ its `(0,0)` translate is now proved, so the left exact-sequence arrow is zero
 and the right arrow is injective.  The independent source cover by the dual
 image and its `T` translate is also proved.  Consequently `E(ℚ)/2E(ℚ)` has at
 most two classes and every point is explicitly a double or `T` plus a double.
-The active arithmetic producer is now finite generation from the fixed-`T`
-height inequality; rank zero then follows from the proved two-torsion count.
-The later torsion bound, modular quotient, and twist/kernel transport remain
+The rational projective `x`-height now proves finite generation without a
+coordinate translation estimate: summing it over the four translates by `T`
+is exactly `T`-invariant and still expands by a factor two under doubling.
+Together with the two-torsion count and quotient bound, this proves free rank
+zero.  The active arithmetic producer is now the torsion bound and four-point
+classification.  The later modular quotient and twist/kernel transport remain
 separate packages.
 
 ### (b) N13 concrete specialization and separatedness

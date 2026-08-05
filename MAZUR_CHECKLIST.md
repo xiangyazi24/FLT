@@ -35,11 +35,12 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     translate by `T`; source modulo doubling has at most two classes and is
     explicitly covered by `0,T`;
     two-coset height-descent wrapper reducing finite generation to one fixed
-    translation estimate; good-fibre point counts
+    translation estimate; four-orbit symmetrization of the rational
+    projective `x`-height, yielding finite generation and free rank zero;
+    good-fibre point counts
     `#X₀(17)(𝔽₂)=#X₀(17)(𝔽₃)=4`.
-  - Open arithmetic atoms: finite generation from the fixed-`T` height
-    inequality and dependency-clean height infrastructure; good-reduction
-    torsion injection; and the rational-point classification.
+  - Open arithmetic atoms: good-reduction torsion injection, the torsion
+    bound, and the rational-point classification.
   - Open geometric atoms: the Tate `X₁(17) → X₀(17)` quotient with cusp and
     `j` control, then twist/model/kernel transport for the two noncuspidal
     fibres.

@@ -1,6 +1,5 @@
 import Mathlib
 import Mathlib.Order.Northcott
-import FLT.EllipticCurve.Torsion
 import scratch.A6HeightProto
 
 /-!
@@ -55,6 +54,12 @@ lemma one_le_mulHeight (x : P1Q) : 1 ≤ x.mulHeight := by
     exact le_trans hpos (le_max_left _ _)
   · have hpos : 0 < x.Z.natAbs := Int.natAbs_pos.mpr hZ
     exact le_trans hpos (le_max_right _ _)
+
+/-- The logarithmic height of a primitive projective representative is
+nonnegative because its multiplicative height is a positive integer. -/
+theorem logHeight_nonneg (x : P1Q) : 0 ≤ x.logHeight := by
+  rw [logHeight]
+  exact Real.log_nonneg (by exact_mod_cast x.one_le_mulHeight)
 
 def infinity : P1Q :=
   { X := 1

@@ -323,10 +323,11 @@ still needs three independent producers:
 
 The first package can reuse the existing Vélu two-isogeny, exact-sequence,
 Northcott, and doubling infrastructure.  Its missing arithmetic is two
-explicit squareclass/coset exhaustions, one fixed-translation height
-inequality, and prime-to-prime good-reduction torsion injection.  The latter
-point-reduction API is not present in the pinned Mathlib.  The modular
-quotient and twist/kernel transport remain the genuinely geometric N17 core.
+explicit squareclass/coset exhaustions, finite generation and rank zero, and
+prime-to-prime good-reduction torsion injection.  The squareclass/coset and
+rank-zero packages are now closed; the point-reduction API is not present in
+the pinned Mathlib.  The modular quotient and twist/kernel transport remain
+the genuinely geometric N17 core.
 `TateOrder17.exists_tate_parameters_of_order_seventeen_with_j` now preserves
 the original curve's `j`-invariant together with ellipticity, exact order,
 `b ≠ 0`, and `F17 b c = 0`, so the future quotient/fibre layer no longer has
@@ -410,14 +411,18 @@ the height descent.
 two-element representative set `{0,T}` modulo doubling.  It proves finite
 generation from Northcott, nonnegativity, the doubling lower bound, and only
 one nontrivial translation estimate, namely translation by the fixed point
-`T`.  This is a genuine reduction of the height interface, not a proof that
-the explicit `X₀(17)` height satisfies it.  The project already has a clean
-scratch proof of the general projective `x`-height Northcott and doubling
-lower bound, but that code has not yet been promoted into a dependency-clean
-production module, and the fixed-`T` translation bound remains to be proved.
-The same file now converts the concrete `TwoCosetExhaustion` witness directly
-to the sumset cover consumed by Mathlib, so the geometric coset theorem will
-feed both the exact-sequence and height layers without a second interface.
+`T`.  It also removes that coordinate estimate by summing the base height
+over the four translates by `T`.  Translation cyclically permutes the
+summands, while doubling identifies opposite translates; a factor-four
+duplication bound for the base height therefore gives a factor-two bound for
+the symmetrized height.  Since `1 < 2`, Mathlib's descent theorem applies
+directly.  The same file converts the concrete `TwoCosetExhaustion` witness
+to the required sumset cover.
+`X017RankZero.lean` instantiates this with the proved rational projective
+`x`-height Northcott and duplication theorems.  It obtains finite generation
+and combines `|E(ℚ)/2E(ℚ)| ≤ 2` with `|E(ℚ)[2]| = 2` to prove free rank
+zero.  These theorems depend only on Lean's standard quotient/classical
+axioms.
 `X017Reduction.lean` proves by kernel-checked finite computation that the
 integral `X₀(17)` equation has three affine points over each of `𝔽₂` and
 `𝔽₃`; with the point at infinity, both good fibres have four points.  It also
