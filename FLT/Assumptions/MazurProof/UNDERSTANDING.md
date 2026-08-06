@@ -745,8 +745,26 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   affine sheet ideals above `x=a` multiply to `(X-a)`.  Their infinity ideal
   is `⊤` above `x=0` and `(t-1)` above `x=1`.  Both identities are derived
   from the generalized graph-conjugation theorem, not from an ideal table.
-  A recovered vertical graph with nonconstant relation `x=a+cy` still needs
-  its analogous root-divisor packaging.
+  The same calculation now treats the base point at infinity uniformly:
+  the canonical divisor over a constant infinity coordinate `t=a` has
+  affine ideal `⊤` at `a=0`, affine ideal `(x-1)` at `a=1`, and infinity
+  ideal `(t-a)` in both cases.
+- `N13SpecialConstantInfinityVerticalGraph.lean` proves that a monic
+  quadratic vertical graph with constant relation `t=a` is forced by the
+  special curve equation to have ordinate polynomial `v²+v`; its graph
+  ideal is therefore exactly `(t-a)`.
+- `N13SpecialAffineSaturation.lean` proves the special-chart contraction
+  principle used to avoid recomputing weighted affine closures.  If `x` is
+  already a unit modulo an affine ideal, localization at the overlap loses
+  no information.  Hence two compatible chart pairs with the same infinity
+  ideal and `x`-saturated affine ideals are equal.
+- `N13IntegralInfinityVerticalGraphSpecialRestriction.lean` applies these
+  facts to the `c̄=0` reciprocal vertical branch.  Reduction of the integral
+  graph ideal is the constant special vertical ideal, and the reflected
+  reciprocal equation supplies `x`-saturation after reduction.  The whole
+  reduced two-chart line is therefore the canonical constant base fibre.
+  The remaining reciprocal vertical case is exactly `c̄=1`, where the
+  relation `t=ā+v` must be packaged as a nonconstant special divisor.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.

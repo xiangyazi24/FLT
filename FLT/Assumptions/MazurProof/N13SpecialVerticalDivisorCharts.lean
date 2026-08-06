@@ -167,30 +167,31 @@ theorem infinity_yClass_relation :
   simp only [N13SpecialInfinityChart.curvePoly]
   ring
 
-/-- At `t = 1`, the two infinity-chart sheet ideals multiply to `(t-1)`. -/
-theorem infinityPointIdeal_one_mul :
-    N13SpecialDivisorCharts.infinityPointIdeal 1 0 *
-        N13SpecialDivisorCharts.infinityPointIdeal 1 1 =
+/-- At any `F₂`-rational base coordinate `t = a`, the two infinity-chart
+sheet ideals multiply to the principal fibre ideal `(t-a)`. -/
+theorem infinityPointIdeal_mul (a : K) :
+    N13SpecialDivisorCharts.infinityPointIdeal a 0 *
+        N13SpecialDivisorCharts.infinityPointIdeal a 1 =
       Ideal.span
         ({N13SpecialInfinityChart.tClass -
-            algebraMap K[X]
-              N13SpecialDivisorCharts.SpecialInfinity (C 1)} :
+            algebraMap K[X] N13SpecialDivisorCharts.SpecialInfinity
+              (C a)} :
           Set N13SpecialDivisorCharts.SpecialInfinity) := by
   let xClassHom :
       K[X] →+* N13SpecialDivisorCharts.SpecialInfinity :=
     AdjoinRoot.of N13SpecialInfinityChart.curvePoly
   let yClass : N13SpecialDivisorCharts.SpecialInfinity :=
     N13SpecialInfinityChart.vClass
-  let p : K[X] := X - C 1
+  let p : K[X] := X - C a
   have hrhs : p ∣ -N13SpecialInfinityChart.rhsPoly := by
     have heval :
-        (-N13SpecialInfinityChart.rhsPoly).eval (1 : K) = 0 := by
-      simp [N13SpecialInfinityChart.rhsPoly]
-      change (-2 : K) = 0
-      decide
+        (-N13SpecialInfinityChart.rhsPoly).eval a = 0 := by
+      simp only [N13SpecialInfinityChart.rhsPoly, eval_neg,
+        eval_add, eval_X, eval_pow]
+      fin_cases a <;> decide
     have hdiv :
         p ∣ -N13SpecialInfinityChart.rhsPoly -
-          C ((-N13SpecialInfinityChart.rhsPoly).eval 1) :=
+          C ((-N13SpecialInfinityChart.rhsPoly).eval a) :=
       X_sub_C_dvd_sub_C_eval
     simpa [p, heval] using hdiv
   let w : K[X] := Classical.choose hrhs
@@ -205,14 +206,15 @@ theorem infinityPointIdeal_one_mul :
       w := w
       curve_eq := by simpa using hw }
   have hhEval :
-      N13SpecialInfinityChart.hPoly.eval (1 : K) = 1 := by
-    simp [N13SpecialInfinityChart.hPoly]
-    decide
+      N13SpecialInfinityChart.hPoly.eval a = 1 := by
+    simp only [N13SpecialInfinityChart.hPoly, eval_add,
+      eval_one, eval_pow, eval_X]
+    fin_cases a <;> decide
   have hhdiv :
       p ∣ N13SpecialInfinityChart.hPoly - C 1 := by
     simpa [p, hhEval] using
       (X_sub_C_dvd_sub_C_eval
-        (p := N13SpecialInfinityChart.hPoly) (a := (1 : K)))
+        (p := N13SpecialInfinityChart.hPoly) (a := a))
   obtain ⟨s, hs⟩ := hhdiv
   have hbez :
       ∃ A B C : K[X],
@@ -235,7 +237,7 @@ theorem infinityPointIdeal_one_mul :
           xClassHom yClass p 1 := by
     have heval :
         (GeneralizedGraphIdealCore.conjugateV
-          N13SpecialInfinityChart.hPoly 0).eval 1 = 1 := by
+          N13SpecialInfinityChart.hPoly 0).eval a = 1 := by
       simp [GeneralizedGraphIdealCore.conjugateV, hhEval]
     have hdiv :
         p ∣
@@ -246,7 +248,7 @@ theorem infinityPointIdeal_one_mul :
         (X_sub_C_dvd_sub_C_eval
           (p := GeneralizedGraphIdealCore.conjugateV
             N13SpecialInfinityChart.hPoly 0)
-          (a := (1 : K)))
+          (a := a))
     exact
       GeneralizedGraphIdealCore.graphIdeal_eq_of_dvd_sub
         xClassHom yClass p 1
@@ -272,6 +274,81 @@ theorem infinityPointIdeal_one_mul :
     GeneralizedGraphIdealCore.graphIdeal,
     GeneralizedGraphIdealCore.ySubClass,
     xClassHom, yClass, p, hX] using hproduct
+
+/-- At `t = 1`, the two infinity-chart sheet ideals multiply to `(t-1)`. -/
+theorem infinityPointIdeal_one_mul :
+    N13SpecialDivisorCharts.infinityPointIdeal 1 0 *
+        N13SpecialDivisorCharts.infinityPointIdeal 1 1 =
+      Ideal.span
+        ({N13SpecialInfinityChart.tClass -
+            algebraMap K[X]
+              N13SpecialDivisorCharts.SpecialInfinity (C 1)} :
+          Set N13SpecialDivisorCharts.SpecialInfinity) :=
+  infinityPointIdeal_mul 1
+
+/-- One of the two special curve points above the base point at infinity. -/
+def infinityVerticalPoint (v : K) :
+    N13SpecialDivisorCharts.CurvePoint :=
+  N13AbelFiberTwoModel.curvePointEquiv.symm
+    (Sum.inr (), v)
+
+/-- A point above the base point at infinity is absent from the ordinary
+affine chart. -/
+theorem infinityVerticalPoint_affineIdeal (v : K) :
+    (N13SpecialDivisorCharts.point
+        (infinityVerticalPoint v)).affineIdeal = ⊤ := by
+  rw [N13SpecialDivisorCharts.point.eq_def]
+  rfl
+
+/-- A point above the base point at infinity has its literal ideal at
+`t = 0`. -/
+theorem infinityVerticalPoint_infinityIdeal (v : K) :
+    (N13SpecialDivisorCharts.point
+        (infinityVerticalPoint v)).infinityIdeal =
+      N13SpecialDivisorCharts.infinityPointIdeal 0 v := by
+  rw [N13SpecialDivisorCharts.point.eq_def]
+  rfl
+
+/-- The canonical divisor above the base point at infinity is absent from
+the ordinary affine chart. -/
+theorem canonicalInfinityDivisor_affineIdeal :
+    (N13SpecialDivisorCharts.ofDivisor
+        (N13AbelFiberTwoModel.canonicalDivisor
+          (Sum.inr ()))).affineIdeal = ⊤ := by
+  rw [N13AbelFiberTwoModel.canonicalDivisor,
+    N13SpecialDivisorCharts.ofDivisor_mk]
+  change
+    (N13SpecialDivisorCharts.point
+        (infinityVerticalPoint 0)).affineIdeal *
+      (N13SpecialDivisorCharts.point
+        (infinityVerticalPoint 1)).affineIdeal =
+      ⊤
+  rw [infinityVerticalPoint_affineIdeal,
+    infinityVerticalPoint_affineIdeal]
+  simp
+
+/-- The infinity ideal of the canonical divisor above infinity is the
+principal fibre ideal `(t)`. -/
+theorem canonicalInfinityDivisor_infinityIdeal :
+    (N13SpecialDivisorCharts.ofDivisor
+        (N13AbelFiberTwoModel.canonicalDivisor
+          (Sum.inr ()))).infinityIdeal =
+      Ideal.span
+        ({N13SpecialInfinityChart.tClass} :
+          Set N13SpecialDivisorCharts.SpecialInfinity) := by
+  rw [N13AbelFiberTwoModel.canonicalDivisor,
+    N13SpecialDivisorCharts.ofDivisor_mk]
+  change
+    (N13SpecialDivisorCharts.point
+        (infinityVerticalPoint 0)).infinityIdeal *
+      (N13SpecialDivisorCharts.point
+        (infinityVerticalPoint 1)).infinityIdeal =
+      _
+  rw [infinityVerticalPoint_infinityIdeal,
+    infinityVerticalPoint_infinityIdeal,
+    infinityPointIdeal_mul]
+  congr 2
+  simp
 
 /-- A finite point above `x = 0` is absent from the infinity chart. -/
 theorem verticalPoint_zero_infinityIdeal (y : K) :
@@ -324,6 +401,55 @@ theorem canonicalDivisor_infinityIdeal (a : K) :
           N13SpecialDivisorCharts.infinityPointIdeal 1 1 =
         _
     exact infinityPointIdeal_one_mul
+
+/-- The canonical divisor above a constant infinity coordinate `t = a`.
+At `a = 0` this is the base fibre at infinity; at `a = 1` it is the finite
+fibre above `x = 1`. -/
+def constantInfinityFibreDivisor
+    (a : K) :
+    N13SpecialDivisorCharts.EffectiveDivisorTwo :=
+  if a = 0 then
+    N13AbelFiberTwoModel.canonicalDivisor (Sum.inr ())
+  else
+    N13AbelFiberTwoModel.canonicalDivisor (Sum.inl 1)
+
+/-- The affine ideal of the constant-`t` canonical fibre is unit at `t=0`
+and `(x-1)` at `t=1`. -/
+theorem constantInfinityFibreDivisor_affineIdeal (a : K) :
+    (N13SpecialDivisorCharts.ofDivisor
+        (constantInfinityFibreDivisor a)).affineIdeal =
+      if a = 0 then ⊤ else
+        Ideal.span
+          ({xClass (X - C 1)} : Set CoordinateRing) := by
+  rcases
+      N13GoodModelTwo.fixedTwo_eq_zero_or_one
+        a (ZMod.pow_card a) with rfl | rfl
+  · simp [constantInfinityFibreDivisor,
+      canonicalInfinityDivisor_affineIdeal]
+  · simp [constantInfinityFibreDivisor,
+      canonicalDivisor_affineIdeal]
+
+/-- The infinity ideal of the constant-`t` canonical fibre is the principal
+fibre ideal `(t-a)`. -/
+theorem constantInfinityFibreDivisor_infinityIdeal (a : K) :
+    (N13SpecialDivisorCharts.ofDivisor
+        (constantInfinityFibreDivisor a)).infinityIdeal =
+      Ideal.span
+        ({N13SpecialInfinityChart.tClass -
+            algebraMap K[X]
+              N13SpecialDivisorCharts.SpecialInfinity (C a)} :
+          Set N13SpecialDivisorCharts.SpecialInfinity) := by
+  rcases
+      N13GoodModelTwo.fixedTwo_eq_zero_or_one
+        a (ZMod.pow_card a) with rfl | rfl
+  · rw [constantInfinityFibreDivisor,
+      if_pos rfl, canonicalInfinityDivisor_infinityIdeal]
+    congr 2
+    simp
+  · rw [constantInfinityFibreDivisor,
+      if_neg one_ne_zero,
+      canonicalDivisor_infinityIdeal]
+    simp
 
 end
 
