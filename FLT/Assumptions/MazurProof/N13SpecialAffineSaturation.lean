@@ -38,6 +38,28 @@ def XUnitMod (I : Ideal AffineCurve) : Prop :=
   ∃ q : AffineCurve,
     1 - q * N13SpecialCurveOverlap.xClass ∈ I
 
+/-- The unit ideal trivially makes the affine coordinate invertible in the
+quotient. -/
+theorem top_xUnitMod :
+    XUnitMod (⊤ : Ideal AffineCurve) := by
+  exact ⟨0, by simp⟩
+
+/-- If the affine coordinate is invertible modulo each of two ideals, it is
+also invertible modulo their product.  The inverse witness is obtained by
+multiplying the two Bézout relations. -/
+theorem mul_xUnitMod
+    {I J : Ideal AffineCurve}
+    (hI : XUnitMod I)
+    (hJ : XUnitMod J) :
+    XUnitMod (I * J) := by
+  obtain ⟨q, hq⟩ := hI
+  obtain ⟨r, hr⟩ := hJ
+  refine
+    ⟨q + r - q * r * N13SpecialCurveOverlap.xClass, ?_⟩
+  have hprod := Ideal.mul_mem_mul hq hr
+  convert hprod using 1
+  ring
+
 /-- Multiplication by `x` can be cancelled modulo an ideal in which `x`
 is already a unit. -/
 theorem mem_of_x_mul_mem

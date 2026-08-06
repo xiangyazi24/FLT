@@ -1,6 +1,7 @@
 import FLT.Assumptions.MazurProof.N13IntegralInfinityVerticalGraphTwoChart
 import FLT.Assumptions.MazurProof.N13SpecialAffineSaturation
 import FLT.Assumptions.MazurProof.N13SpecialConstantInfinityVerticalGraph
+import FLT.Assumptions.MazurProof.N13SpecialNonconstantInfinityVerticalGraph
 
 /-!
 # Special restriction of constant vertical infinity graphs
@@ -19,6 +20,7 @@ therefore determine the full reduced two-chart pair.
 -/
 
 open Polynomial
+open scoped Sym2
 
 namespace MazurProof.N13IntegralInfinityVerticalGraphSpecialRestriction
 
@@ -118,6 +120,22 @@ theorem reduced_curve_eq_of_reduce_c_eq_zero
   simpa [N13IntegralInfinityVerticalGraphJacobian.VerticalGraph.s,
     N13IntegralInfinityReduction.reducePoly, hc] using h
 
+/-- When the slope `c` reduces to one, the reduced substitution is
+`t=ā+v`, giving the nonconstant special vertical factorization. -/
+theorem reduced_curve_eq_of_reduce_c_eq_one
+    (E : VerticalGraph)
+    (hc :
+      N13IntegralInfinityReduction.reduceBase E.c = 1) :
+    N13SpecialConstantInfinityVerticalGraph.verticalCurve
+          (C (N13IntegralInfinityReduction.reduceBase E.a) + X) =
+      N13IntegralInfinityReduction.reducePoly E.m *
+        N13IntegralInfinityReduction.reducePoly E.w := by
+  have h :=
+    congrArg N13IntegralInfinityReduction.reducePoly E.curve_eq
+  rw [reduce_verticalCurve] at h
+  simpa [N13IntegralInfinityVerticalGraphJacobian.VerticalGraph.s,
+    N13IntegralInfinityReduction.reducePoly, hc] using h
+
 /-- The reduced vertical quadratic remains monic. -/
 theorem reduced_m_monic
     (E : VerticalGraph) :
@@ -155,6 +173,26 @@ theorem map_infinityIdeal_of_reduce_c_eq_zero
       K K[X] N13IntegralInfinityReduction.SpecialRing
       (N13IntegralInfinityReduction.reduceBase E.a)).symm
 
+/-- In the unit-slope branch, reducing the integral infinity graph ideal
+gives the literal nonconstant special vertical ideal
+`(m̄(v),t-(ā+v))`. -/
+theorem map_infinityIdeal_of_reduce_c_eq_one
+    (E : VerticalGraph)
+    (hc :
+      N13IntegralInfinityReduction.reduceBase E.c = 1) :
+    Ideal.map N13IntegralInfinityReduction.reduceCoordinate E.ideal =
+      N13SpecialNonconstantInfinityVerticalGraph.verticalIdeal
+        (N13IntegralInfinityReduction.reducePoly E.m)
+        (N13IntegralInfinityReduction.reduceBase E.a) := by
+  rw [N13IntegralInfinityVerticalGraphJacobian.VerticalGraph.ideal,
+    N13SpecialNonconstantInfinityVerticalGraph.verticalIdeal,
+    Ideal.map_span, Set.image_pair]
+  simp only [map_sub, N13IntegralInfinityReduction.reduce_tClass,
+    reduce_aeval_vClass]
+  congr 2
+  simp [N13IntegralInfinityVerticalGraphJacobian.VerticalGraph.s,
+    N13IntegralInfinityReduction.reducePoly, hc]
+
 /-- The canonical constant special fibre has `x` invertible modulo its
 affine chart ideal.  At `t=0` the affine ideal is the unit ideal; at `t=1`
 the relation is `x=1`. -/
@@ -185,6 +223,53 @@ theorem constantInfinityFibre_affine_xUnitMod
           Set N13GoodCoordinateRingTwo.CoordinateRing)).neg_mem hgen
     convert hneg using 1
     simp [N13SpecialCurveOverlap.xClass]
+
+/-- One affine contribution of an infinity root makes `x` invertible:
+the root `t=0` contributes the unit ideal, while every nonzero root
+contributes the relation `x=1`. -/
+theorem rootAffineFactor_xUnitMod
+    (a z : K) :
+    N13SpecialAffineSaturation.XUnitMod
+      (if a = 0 then
+        (⊤ : Ideal N13SpecialDivisorCharts.SpecialAffine)
+      else
+        N13GoodCoordinateRingTwo.mumfordIdeal
+          (X - C 1) (C z)) := by
+  by_cases ha : a = 0
+  · simp only [ha, if_true]
+    exact N13SpecialAffineSaturation.top_xUnitMod
+  · simp only [ha, if_false]
+    refine ⟨1, ?_⟩
+    have hgen :=
+      N13GoodCoordinateRingTwo.xClass_mem_mumfordIdeal
+        (X - C (1 : K)) (C z)
+    have hneg :=
+      (N13GoodCoordinateRingTwo.mumfordIdeal
+        (X - C (1 : K)) (C z)).neg_mem hgen
+    convert hneg using 1
+    simp [N13SpecialCurveOverlap.xClass]
+
+/-- The affine ideal of the completed divisor of any monic quadratic
+special infinity graph makes `x` invertible modulo the ideal. -/
+theorem graphDivisor_affine_xUnitMod
+    (D : N13SpecialInfinityGraphDivisor.SemiMumford)
+    (hdeg : D.u.natDegree = 2) :
+    N13SpecialAffineSaturation.XUnitMod
+      (N13SpecialDivisorCharts.ofDivisor
+        (N13SpecialInfinityGraphDivisor.graphDivisor D hdeg)).affineIdeal := by
+  rw [
+    N13SpecialInfinityGraphDivisorCharts.ofDivisor_graphDivisor_affineIdeal]
+  let z := N13SpecialInfinityGraphDivisor.rootPair D hdeg
+  change
+    N13SpecialAffineSaturation.XUnitMod
+      (N13SpecialInfinityGraphDivisorCharts.rootAffineIdeal D z)
+  induction z using Sym2.ind with
+  | _ a b =>
+      rw [N13SpecialInfinityGraphDivisorCharts.rootAffineIdeal_mk]
+      exact
+        N13SpecialAffineSaturation.mul_xUnitMod
+          (rootAffineFactor_xUnitMod a (D.v.eval a))
+          (rootAffineFactor_xUnitMod b (D.v.eval b))
 
 /-- If the vertical slope reduces to zero, the complete reduced two-chart
 line is the canonical fibre over the constant special coordinate `t=ā`. -/
@@ -228,6 +313,106 @@ theorem restrict_twoChartLine_of_reduce_c_eq_zero
         (reduced_m_natDegree E hmDegree)
         (reduced_curve_eq_of_reduce_c_eq_zero E hc),
       N13SpecialVerticalDivisorCharts.constantInfinityFibreDivisor_infinityIdeal]
+
+/-- If the vertical slope reduces to one, the complete reduced two-chart
+line is the canonical completed divisor of the translated horizontal graph
+`m̄(t+ā)=0, v=t+ā`. -/
+theorem restrict_twoChartLine_of_reduce_c_eq_one
+    (u : R₂[X])
+    (E : VerticalGraph)
+    (hu : u.Monic)
+    (huDegree : u.natDegree = 2)
+    (hmDegree : E.m.natDegree = 2)
+    (huMem :
+      N13IntegralInfinityReduction.integralBaseClass u ∈ E.ideal)
+    (hc :
+      N13IntegralInfinityReduction.reduceBase E.c = 1) :
+    let mbar := N13IntegralInfinityReduction.reducePoly E.m
+    let wbar := N13IntegralInfinityReduction.reducePoly E.w
+    let abar := N13IntegralInfinityReduction.reduceBase E.a
+    let hcurve :
+        N13SpecialConstantInfinityVerticalGraph.verticalCurve
+            (C abar + X) =
+          mbar * wbar :=
+      reduced_curve_eq_of_reduce_c_eq_one E hc
+    let D :=
+      N13SpecialNonconstantInfinityVerticalGraph.horizontalGraph
+        mbar wbar abar (reduced_m_monic E) hcurve
+    let hDdeg : D.u.natDegree = 2 :=
+      N13SpecialNonconstantInfinityVerticalGraph.horizontalGraph_u_natDegree
+        mbar wbar abar (reduced_m_monic E)
+          (reduced_m_natDegree E hmDegree) hcurve
+    N13TwoChartSpecialRestriction.restrict
+        (N13IntegralInfinityVerticalGraphTwoChart.twoChartLine
+          u E hu huDegree hmDegree huMem) =
+      N13SpecialDivisorCharts.ofDivisor
+        (N13SpecialInfinityGraphDivisor.graphDivisor D hDdeg) := by
+  dsimp only
+  apply
+    N13SpecialAffineSaturation.chartPair_eq_of_infinityIdeal_eq
+  · apply
+      N13SpecialAffineSaturation.map_reduceCoordinate_xUnitMod
+    exact
+      N13IntegralInfinityVerticalGraphTwoChart.affineIdeal_xUnitMod
+        u E hu huDegree
+  · exact graphDivisor_affine_xUnitMod _ _
+  · change
+      Ideal.map N13IntegralInfinityReduction.reduceCoordinate E.ideal =
+        (N13SpecialDivisorCharts.ofDivisor
+          (N13SpecialInfinityGraphDivisor.graphDivisor _ _)).infinityIdeal
+    rw [map_infinityIdeal_of_reduce_c_eq_one E hc,
+      N13SpecialNonconstantInfinityVerticalGraph.verticalIdeal_eq_graphIdeal,
+      N13SpecialInfinityGraphDivisorCharts.ofDivisor_graphDivisor_infinityIdeal]
+    rfl
+
+/-- Every integral vertical graph line reduces to the chart pair of a
+literal effective degree-two divisor.  Over `F₂` the reduced slope is
+either zero, giving a constant fibre, or one, giving the translated
+horizontal graph divisor. -/
+theorem exists_specialDivisor
+    (u : R₂[X])
+    (E : VerticalGraph)
+    (hu : u.Monic)
+    (huDegree : u.natDegree = 2)
+    (hmDegree : E.m.natDegree = 2)
+    (huMem :
+      N13IntegralInfinityReduction.integralBaseClass u ∈ E.ideal) :
+    ∃ Δ : N13SpecialDivisorCharts.EffectiveDivisorTwo,
+      N13TwoChartSpecialRestriction.restrict
+          (N13IntegralInfinityVerticalGraphTwoChart.twoChartLine
+            u E hu huDegree hmDegree huMem) =
+        N13SpecialDivisorCharts.ofDivisor Δ := by
+  rcases
+      N13GoodModelTwo.fixedTwo_eq_zero_or_one
+        (N13IntegralInfinityReduction.reduceBase E.c)
+        (ZMod.pow_card
+          (N13IntegralInfinityReduction.reduceBase E.c)) with hc | hc
+  · refine
+      ⟨N13SpecialVerticalDivisorCharts.constantInfinityFibreDivisor
+          (N13IntegralInfinityReduction.reduceBase E.a), ?_⟩
+    exact
+      restrict_twoChartLine_of_reduce_c_eq_zero
+        u E hu huDegree hmDegree huMem hc
+  · let mbar := N13IntegralInfinityReduction.reducePoly E.m
+    let wbar := N13IntegralInfinityReduction.reducePoly E.w
+    let abar := N13IntegralInfinityReduction.reduceBase E.a
+    let hcurve :
+        N13SpecialConstantInfinityVerticalGraph.verticalCurve
+            (C abar + X) =
+          mbar * wbar :=
+      reduced_curve_eq_of_reduce_c_eq_one E hc
+    let D :=
+      N13SpecialNonconstantInfinityVerticalGraph.horizontalGraph
+        mbar wbar abar (reduced_m_monic E) hcurve
+    let hDdeg : D.u.natDegree = 2 :=
+      N13SpecialNonconstantInfinityVerticalGraph.horizontalGraph_u_natDegree
+        mbar wbar abar (reduced_m_monic E)
+          (reduced_m_natDegree E hmDegree) hcurve
+    refine
+      ⟨N13SpecialInfinityGraphDivisor.graphDivisor D hDdeg, ?_⟩
+    simpa [mbar, wbar, abar, hcurve, D, hDdeg] using
+      (restrict_twoChartLine_of_reduce_c_eq_one
+        u E hu huDegree hmDegree huMem hc)
 
 end
 

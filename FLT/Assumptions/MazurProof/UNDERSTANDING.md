@@ -757,14 +757,28 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   principle used to avoid recomputing weighted affine closures.  If `x` is
   already a unit modulo an affine ideal, localization at the overlap loses
   no information.  Hence two compatible chart pairs with the same infinity
-  ideal and `x`-saturated affine ideals are equal.
+  ideal and `x`-saturated affine ideals are equal.  The property is also
+  proved for the unit ideal and preserved by ideal products, so canonical
+  completed-root divisors satisfy it root by root.
+- `N13SpecialNonconstantInfinityVerticalGraph.lean` closes the remaining
+  special vertical geometry.  In characteristic two the relation
+  `t=a+v` is involutive, and the vertical ideal `(m(v),t-a-v)` is proved
+  equal to the horizontal graph ideal `(m(t+a),v-t-a)`.  The translated
+  polynomial remains monic quadratic and satisfies the required special
+  infinity semigraph equation.
 - `N13IntegralInfinityVerticalGraphSpecialRestriction.lean` applies these
-  facts to the `c̄=0` reciprocal vertical branch.  Reduction of the integral
-  graph ideal is the constant special vertical ideal, and the reflected
-  reciprocal equation supplies `x`-saturation after reduction.  The whole
-  reduced two-chart line is therefore the canonical constant base fibre.
-  The remaining reciprocal vertical case is exactly `c̄=1`, where the
-  relation `t=ā+v` must be packaged as a nonconstant special divisor.
+  facts to both reciprocal vertical branches.  At `c̄=0` the whole reduced
+  two-chart line is the canonical constant base fibre.  At `c̄=1` it is the
+  completed divisor of the translated horizontal graph.  Since every
+  element of `F₂` is zero or one, every integral vertical graph line now
+  reduces to the canonical chart pair of a literal effective degree-two
+  divisor.
+- `N13ReciprocalVerticalGraphPicardRealization.lean` packages the exact
+  vertical chart comparison with the contraction theorem for the generic
+  ideal.  Combined with `N13ReciprocalGraphPicardRealization.lean`, the
+  entire direct reciprocal-kernel branch now produces complete two-fibre
+  Picard data, independently of whether rank-two recovery chooses the
+  horizontal basis `{1,t}` or the vertical basis `{1,v}`.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.

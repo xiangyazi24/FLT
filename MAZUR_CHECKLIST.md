@@ -14,11 +14,12 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     split/repeated-root two-fibre Picard data; 19-element special Abel set;
     selected quotient basis; graph/disk-pair recovery; abstract classifier;
     final rational-point-to-cusp implication; complete horizontal reciprocal
-    special restriction and Picard realization; constant-slope vertical
-    reciprocal special restriction.
-  - Immediate open atoms: the finite irreducible contraction branches and
-    the nonconstant `c̄=1` vertical reciprocal branch.  The `c̄=0` vertical
-    branch is now the canonical constant base fibre on both charts.
+    special restriction and Picard realization; complete vertical reciprocal
+    special restriction for both `c̄=0` and `c̄=1`; and a combined
+    horizontal-or-vertical reciprocal Picard realization.
+  - Immediate open atom: the finite irreducible contraction branches.  The
+    entire escaping reciprocal branch now has exact canonical special
+    divisors on both charts.
   - Remaining semantic atoms: either pointwise specialization reflection on
     rational Abel classes, or the stronger concrete `SpreadData` plus
     `abel_reduces`, canonical mapped-special equality, and first-jet doubling
