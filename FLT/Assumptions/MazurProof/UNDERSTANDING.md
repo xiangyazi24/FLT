@@ -704,9 +704,10 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
 - `N13SplitQuadraticPicardRealization.lean` applies that bridge to the
   split-specialization constructors.  Every distinct-root secant and every
   repeated-root tangent now yields complete two-fibre `Data`, with a literal
-  special divisor and the exact original generic Mumford class.  The
-  irreducible quadratic branch is the remaining degree-two Picard
-  realization.
+  special divisor and the exact original generic Mumford class.  At this
+  historical stage the irreducible quadratic branch was the remaining
+  degree-two Picard realization; the later finite and reciprocal producers
+  below close it.
 - `N13SpecialGraphDivisorCharts.lean` identifies the affine chart ideal of
   every quadratic special-fibre Mumford graph with the canonical chart ideal
   of its literal root divisor.  The distinct-root case is the graph-ideal
@@ -737,9 +738,9 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   equality back into the irreducible reciprocal-horizontal recovery branch.
   Every `ReciprocalGraphClosure` now produces complete two-fibre `Data` whose
   generic raw ideal and oriented Picard class are the original quadratic
-  Mumford representative.  The remaining irreducible realization work is
-  confined to the finite contraction branches and the reciprocal vertical
-  branch.
+  Mumford representative.  At this stage the remaining irreducible
+  realization work was confined to the finite contraction branches and the
+  reciprocal vertical branch; both are closed by the later producers below.
 - `N13SpecialVerticalDivisorCharts.lean` supplies the complementary literal
   chart calculation for the canonical `{1,y}` special fibres.  The two
   affine sheet ideals above `x=a` multiply to `(X-a)`.  Their infinity ideal
@@ -779,6 +780,34 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   entire direct reciprocal-kernel branch now produces complete two-fibre
   Picard data, independently of whether rank-two recovery chooses the
   horizontal basis `{1,t}` or the vertical basis `{1,v}`.
+- `N13SpecialInfinitySaturation.lean` supplies the dual contraction principle
+  on the infinity chart.  If `t` is a unit modulo both infinity ideals, equal
+  affine ideals and overlap compatibility force equality of the complete
+  chart pairs.  The property survives reduction and is proved for every
+  special graph or canonical fibre divisor used below.
+- `N13SpecialQuadraticGraphRegularity.lean` proves that the special curve
+  coefficient `1+X²+X³` is irreducible over `F₂`.  Hence every monic
+  quadratic special graph is automatically regular, its reduced semigraph
+  retains degree two, and its affine Mumford ideal is the canonical root
+  divisor ideal.
+- `N13SpecialAffineVerticalGraph.lean` computes both finite vertical-basis
+  cases.  Slope zero is the canonical two-sheet fibre `(x-a)`; slope one is
+  carried by the characteristic-two involution `y=x+a` to a regular
+  horizontal quadratic graph, with equality of the corresponding affine
+  ideals.
+- `N13FiniteQuadraticSpecialRestriction.lean` closes the finite irreducible
+  contraction branch.  The reflected monic relation makes `t` invertible
+  modulo the source infinity closure.  The `{1,x}` basis gives a horizontal
+  graph; the `{1,y}` basis gives one of the two vertical cases.  In all three
+  cases infinity saturation upgrades the affine computation to exact
+  equality with the canonical two-chart ideals of a literal effective
+  divisor.
+- `N13QuadraticPicardRealization.lean` is the complete degree-two capstone.
+  It dispatches split secants, repeated-root tangents, finite irreducible
+  contractions, and reciprocal irreducible horizontal-or-vertical recovery.
+  Every balanced quadratic Mumford representative therefore has complete
+  two-fibre `Data`, with its exact generic raw ideal, standard oriented
+  generic Picard class, and canonical special divisor chart pair.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
@@ -810,14 +839,14 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
 - Earlier axiom inventories in this file describe historical snapshots and
   must not be treated as current.  Use a fresh `#print axioms` audit of the
   assembled theorem before reporting the remaining global Mazur boundary.
-- The source audit recovered as Q3802 confirms that the broad N13 tail is
+- The source audit recovered as Q3802 confirmed that the broad N13 tail was
   already present: the 19-element special Abel set, selected quotient basis,
   integral graph/disk-pair recovery, relation-first classifier, reduction
   injectivity from `NSeparated`, transition-square estimate, and final
-  rational-point-to-cusp implication are all proved.  The next missing
-  low-degree theorem is specifically the special restriction of an
-  irreducible quadratic proper line, with exact equalities on both charts.
-  After that, the genuine remaining producers are one concrete
+  rational-point-to-cusp implication are all proved.  Its then-missing
+  irreducible quadratic special restriction is now closed by
+  `N13FiniteQuadraticSpecialRestriction.lean` together with the reciprocal
+  producers.  The genuine remaining producers are one concrete
   relation-first `SpreadData`, `abel_reduces`, literal mapped-special equality
   for canonical translated kernel representatives, and the first-jet
   comparison for doubling.  No additional finite Jacobian group law or

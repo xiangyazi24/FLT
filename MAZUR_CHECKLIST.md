@@ -11,15 +11,13 @@ scoped builds pass, and `#print axioms` contains only `propext`,
 
 - [ ] N13 — `CyclicExclusion13.C13Sextic_affine_x_is_cuspidal`
   - Closed infrastructure: low-degree proper spreads; complete degree-one and
-    split/repeated-root two-fibre Picard data; 19-element special Abel set;
-    selected quotient basis; graph/disk-pair recovery; abstract classifier;
-    final rational-point-to-cusp implication; complete horizontal reciprocal
-    special restriction and Picard realization; complete vertical reciprocal
-    special restriction for both `c̄=0` and `c̄=1`; and a combined
-    horizontal-or-vertical reciprocal Picard realization.
-  - Immediate open atom: the finite irreducible contraction branches.  The
-    entire escaping reciprocal branch now has exact canonical special
-    divisors on both charts.
+    quadratic two-fibre Picard data, including split secants, repeated-root
+    tangents, finite irreducible contractions, and both reciprocal rank-two
+    basis branches; 19-element special Abel set; selected quotient basis;
+    graph/disk-pair recovery; abstract classifier; and the final
+    rational-point-to-cusp implication.  Every balanced degree-two Mumford
+    representative now has exact generic data and the canonical chart pair
+    of a literal effective special divisor.
   - Remaining semantic atoms: either pointwise specialization reflection on
     rational Abel classes, or the stronger concrete `SpreadData` plus
     `abel_reduces`, canonical mapped-special equality, and first-jet doubling

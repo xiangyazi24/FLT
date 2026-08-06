@@ -183,6 +183,88 @@ theorem reflect_natDegree_eq_one_add_X_mul
       rw [hcoeff, C_1]
       ring
 
+/-- Finite affine support forces the infinity coordinate `t` to be a unit
+modulo the contracted infinity closure.  A monic equation for `x` reflects
+to a relation with constant coefficient one in `t`. -/
+theorem infinityClosure_tUnitMod_of_finite
+    (I : Ideal AffineCurve)
+    (hfinite :
+      Module.Finite R₂ (AffineCurve ⧸ I)) :
+    ∃ a : InfinityCurve,
+      1 - N13IntegralInfinityChart.tClass * a ∈
+        infinityClosure I := by
+  letI : Module.Finite R₂ (AffineCurve ⧸ I) :=
+    hfinite
+  let xbar : AffineCurve ⧸ I :=
+    Ideal.Quotient.mk I
+      N13CanonicalContractionQuotient.integralX
+  obtain ⟨p, hpMonic, hpEval⟩ :=
+    IsIntegral.of_finite R₂ xbar
+  have hpMem :
+      N13GeneralizedMumfordIntegral.xClassHom p ∈ I := by
+    rw [← Ideal.Quotient.eq_zero_iff_mem]
+    change
+      Ideal.Quotient.mk I
+        (N13GeneralizedMumfordIntegral.xClass p) = 0
+    rw [← N13ConcreteGraphRecovery.quotient_aeval_integralX]
+    exact hpEval
+  let r : R₂[X] :=
+    p.reflect p.natDegree
+  have hrMem :
+      N13IntegralInfinityReduction.integralBaseClass r ∈
+        infinityClosure I := by
+    change
+      (algebraMap InfinityCurve InfinityOverlap)
+          (N13IntegralInfinityReduction.integralBaseClass r) ∈
+        Ideal.map
+          N13OrdinaryCurveOverlap.affineToInfinityOverlap I
+    have hpMap :
+        N13OrdinaryCurveOverlap.affineToInfinityOverlap
+            (N13GeneralizedMumfordIntegral.xClassHom p) ∈
+          Ideal.map
+            N13OrdinaryCurveOverlap.affineToInfinityOverlap I :=
+      Ideal.mem_map_of_mem
+        N13OrdinaryCurveOverlap.affineToInfinityOverlap hpMem
+    have hprod :
+        (algebraMap InfinityCurve InfinityOverlap)
+              (N13IntegralInfinityReduction.integralBaseClass r) *
+            N13OrdinaryCurveOverlap.xOverlap ^ p.natDegree ∈
+          Ideal.map
+            N13OrdinaryCurveOverlap.affineToInfinityOverlap I := by
+      change
+        (algebraMap InfinityCurve InfinityOverlap)
+              (N13IntegralInfinityReduction.integralBaseClass
+                (p.reflect p.natDegree)) *
+            N13OrdinaryCurveOverlap.xOverlap ^ p.natDegree ∈
+          Ideal.map
+            N13OrdinaryCurveOverlap.affineToInfinityOverlap I
+      rw [infinityReflect_mul_xPow_on_overlap p]
+      exact hpMap
+    exact
+      (Ideal.unit_mul_mem_iff_mem
+        (Ideal.map
+          N13OrdinaryCurveOverlap.affineToInfinityOverlap I)
+        (N13OrdinaryCurveOverlap.xOverlap_isUnit.pow
+          p.natDegree)).mp
+        (by simpa [mul_comm] using hprod)
+  let q : InfinityCurve :=
+    -N13IntegralInfinityReduction.integralBaseClass r.divX
+  refine ⟨q, ?_⟩
+  change
+    N13IntegralInfinityReduction.integralBaseClass
+        (p.reflect p.natDegree) ∈
+      infinityClosure I at hrMem
+  rw [reflect_natDegree_eq_one_add_X_mul p hpMonic] at hrMem
+  convert hrMem using 1
+  simp only [q, N13IntegralInfinityReduction.integralBaseClass,
+    map_add, map_mul, map_one]
+  rw [show
+    (algebraMap
+        N13IntegralInfinityReduction.IntegralBase
+        N13IntegralInfinityReduction.IntegralRing) X =
+      N13IntegralInfinityChart.tClass by rfl]
+  rw [mul_neg, sub_neg_eq_add]
+
 /-- An invertible affine divisor with finite support has an invertible
 closure on the ordinary infinity chart.
 
@@ -252,81 +334,8 @@ theorem infinityClosure_isUnit_of_finite
       FractionalIdeal.extendedHom'_apply,
       FractionalIdeal.extended_coeIdeal_eq_map] at hmap
     exact hmap
-  letI : Module.Finite R₂ (AffineCurve ⧸ I) :=
-    hfinite
-  let xbar : AffineCurve ⧸ I :=
-    Ideal.Quotient.mk I
-      N13CanonicalContractionQuotient.integralX
-  obtain ⟨p, hpMonic, hpEval⟩ :=
-    IsIntegral.of_finite R₂ xbar
-  have hpMem :
-      N13GeneralizedMumfordIntegral.xClassHom p ∈ I := by
-    rw [← Ideal.Quotient.eq_zero_iff_mem]
-    change
-      Ideal.Quotient.mk I
-        (N13GeneralizedMumfordIntegral.xClass p) = 0
-    rw [← N13ConcreteGraphRecovery.quotient_aeval_integralX]
-    exact hpEval
-  let r : R₂[X] :=
-    p.reflect p.natDegree
-  have hrMem :
-      N13IntegralInfinityReduction.integralBaseClass r ∈
-        infinityClosure I := by
-    change
-      (algebraMap InfinityCurve InfinityOverlap)
-          (N13IntegralInfinityReduction.integralBaseClass r) ∈
-        Ideal.map
-          N13OrdinaryCurveOverlap.affineToInfinityOverlap I
-    have hpMap :
-        N13OrdinaryCurveOverlap.affineToInfinityOverlap
-            (N13GeneralizedMumfordIntegral.xClassHom p) ∈
-          Ideal.map
-            N13OrdinaryCurveOverlap.affineToInfinityOverlap I :=
-      Ideal.mem_map_of_mem
-        N13OrdinaryCurveOverlap.affineToInfinityOverlap hpMem
-    have hprod :
-        (algebraMap InfinityCurve InfinityOverlap)
-              (N13IntegralInfinityReduction.integralBaseClass r) *
-            N13OrdinaryCurveOverlap.xOverlap ^ p.natDegree ∈
-          Ideal.map
-            N13OrdinaryCurveOverlap.affineToInfinityOverlap I := by
-      change
-        (algebraMap InfinityCurve InfinityOverlap)
-              (N13IntegralInfinityReduction.integralBaseClass
-                (p.reflect p.natDegree)) *
-            N13OrdinaryCurveOverlap.xOverlap ^ p.natDegree ∈
-          Ideal.map
-            N13OrdinaryCurveOverlap.affineToInfinityOverlap I
-      rw [infinityReflect_mul_xPow_on_overlap p]
-      exact hpMap
-    exact
-      (Ideal.unit_mul_mem_iff_mem
-        (Ideal.map
-          N13OrdinaryCurveOverlap.affineToInfinityOverlap I)
-        (N13OrdinaryCurveOverlap.xOverlap_isUnit.pow
-          p.natDegree)).mp
-        (by simpa [mul_comm] using hprod)
-  have hmod :
-      ∃ a : InfinityCurve,
-        1 - N13IntegralInfinityChart.tClass * a ∈
-          infinityClosure I := by
-    let q : InfinityCurve :=
-      -N13IntegralInfinityReduction.integralBaseClass r.divX
-    refine ⟨q, ?_⟩
-    change
-      N13IntegralInfinityReduction.integralBaseClass
-          (p.reflect p.natDegree) ∈
-        infinityClosure I at hrMem
-    rw [reflect_natDegree_eq_one_add_X_mul p hpMonic] at hrMem
-    convert hrMem using 1
-    simp only [q, N13IntegralInfinityReduction.integralBaseClass,
-      map_add, map_mul, map_one]
-    rw [show
-      (algebraMap
-          N13IntegralInfinityReduction.IntegralBase
-          N13IntegralInfinityReduction.IntegralRing) X =
-        N13IntegralInfinityChart.tClass by rfl]
-    rw [mul_neg, sub_neg_eq_add]
+  have hmod :=
+    infinityClosure_tUnitMod_of_finite I hfinite
   have hInfinityK :
       IsUnit
         (infinityClosure I :
