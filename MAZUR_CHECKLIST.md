@@ -17,11 +17,16 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     graph/disk-pair recovery; abstract classifier; and the final
     rational-point-to-cusp implication.  Every balanced degree-two Mumford
     representative now has exact generic data and the canonical chart pair
-    of a literal effective special divisor.
+    of a literal effective special divisor.  Both infinity points and every
+    affine rational curve point now have complete two-fibre data whose
+    generic class is the base-changed rational Abel class and whose special
+    class is the anchored proper reduction.  This makes `abel_reduces`
+    automatic for the concrete rational spread-line interface.
   - Remaining semantic atoms: either pointwise specialization reflection on
-    rational Abel classes, or the stronger concrete `SpreadData` plus
-    `abel_reduces`, canonical mapped-special equality, and first-jet doubling
-    compatibility.
+    rational Abel classes, or the stronger global spread existence and
+    `class_eq_iff` theorem for rational spread lines, followed by canonical
+    mapped-special equality and first-jet doubling compatibility for kernel
+    separatedness.
 
 - [x] N17 — `CyclicExclusion17.no_F17_rational_solution`
   - Closed infrastructure: exact-order Tate normalization with preserved

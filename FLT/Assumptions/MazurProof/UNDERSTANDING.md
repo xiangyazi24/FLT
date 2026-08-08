@@ -808,13 +808,30 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   Every balanced quadratic Mumford representative therefore has complete
   two-fibre `Data`, with its exact generic raw ideal, standard oriented
   generic Picard class, and canonical special divisor chart pair.
+- `N13InfinityPointPicardRealization.lean` supplies the two missing
+  projective degree-zero cases.  Two positive infinity lines realize the
+  identity class and the doubled special anchor, while the negative line
+  tensored with the positive anchor realizes the oriented difference of the
+  two infinity sheets.  Both cases retain literal special chart ideals.
+- `N13RationalCurvePointPicardRealization.lean` now gives every rational
+  projective curve point complete two-fibre data.  Affine points are sent to
+  the good two-adic model and split into integral and escaping branches; the
+  generic class is proved equal to the rational Abel--Jacobi class after
+  base change, and the special class is exactly the anchored class of proper
+  reduction.  Packaging these realizations as rational `SpreadLine`s makes
+  the `abel_reduces` field automatic for any concrete relation-first
+  classifier on those lines.  It is therefore no longer an independent N13
+  provider.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
-- The remaining N13 mathematical providers are a concrete
-  `N13SpreadClassifier.SpreadData`, compatibility of rational Abel classes
-  with reduction (`abel_reduces`), and separatedness of the reduced kernel.
-  In the current design, the last item reduces to constructing
+- The remaining N13 mathematical providers on the stronger classifier route
+  are global existence of a rational `SpreadLine` for every rational Picard
+  class, the `class_eq_iff` specialization/reflection theorem for those
+  lines, and separatedness of the resulting reduction kernel.  Pointwise
+  compatibility of rational Abel classes with reduction (`abel_reduces`) is
+  now supplied by the explicit curve-point realizations.  In the current
+  design, separatedness reduces to constructing
   `RationalKernelDoublingData`, including its compatible disk-pair
   realization and integral first-jet doubling law.  Once these providers
   exist, the final affine-cuspidality wiring is thin.
@@ -846,11 +863,12 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   rational-point-to-cusp implication are all proved.  Its then-missing
   irreducible quadratic special restriction is now closed by
   `N13FiniteQuadraticSpecialRestriction.lean` together with the reciprocal
-  producers.  The genuine remaining producers are one concrete
-  relation-first `SpreadData`, `abel_reduces`, literal mapped-special equality
-  for canonical translated kernel representatives, and the first-jet
-  comparison for doubling.  No additional finite Jacobian group law or
-  cardinality computation belongs on the critical path.
+  producers.  The pointwise two-fibre construction now removes
+  `abel_reduces` from that list.  The genuine remaining producers are global
+  spread existence, `class_eq_iff`, literal mapped-special equality for
+  canonical translated kernel representatives, and the first-jet comparison
+  for doubling.  No additional finite Jacobian group law or cardinality
+  computation belongs on the critical path.
 - Q3805 independently confirms an even weaker endpoint formulation: it is
   sufficient to prove, only for rational curve points, that equality of
   their anchored special Abel classes reflects equality of their rational
