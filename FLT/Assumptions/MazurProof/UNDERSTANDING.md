@@ -822,13 +822,23 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   the `abel_reduces` field automatic for any concrete relation-first
   classifier on those lines.  It is therefore no longer an independent N13
   provider.
+- `N13RationalPicardSpreadExistence.lean` closes global spread existence for
+  every rational oriented Picard class.  Normalize the class to balanced
+  Mumford degree at most two: degree zero uses the positive-infinity line,
+  degree one extracts its affine rational point and selects the integral or
+  escaping proper closure, and degree two uses the complete quadratic
+  realization.  In degrees zero and one the proper chart line and literal
+  special divisor are retained while only the independent generic infinity
+  orientation is reset.  The resulting `SpreadLine` stores the original
+  rational class literally, so it witnesses `exists_spread` for any proposed
+  reduction kernel.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
 - The remaining N13 mathematical providers on the stronger classifier route
-  are global existence of a rational `SpreadLine` for every rational Picard
-  class, the `class_eq_iff` specialization/reflection theorem for those
-  lines, and separatedness of the resulting reduction kernel.  Pointwise
+  are the `class_eq_iff` specialization/reflection theorem for the now-global
+  rational spread lines and separatedness of the resulting reduction kernel.
+  Pointwise
   compatibility of rational Abel classes with reduction (`abel_reduces`) is
   now supplied by the explicit curve-point realizations.  In the current
   design, separatedness reduces to constructing
@@ -864,8 +874,9 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   irreducible quadratic special restriction is now closed by
   `N13FiniteQuadraticSpecialRestriction.lean` together with the reciprocal
   producers.  The pointwise two-fibre construction now removes
-  `abel_reduces` from that list.  The genuine remaining producers are global
-  spread existence, `class_eq_iff`, literal mapped-special equality for
+  `abel_reduces` from that list, and balanced Mumford exhaustion now removes
+  global spread existence.  The genuine remaining producers are
+  `class_eq_iff`, literal mapped-special equality for
   canonical translated kernel representatives, and the first-jet comparison
   for doubling.  No additional finite Jacobian group law or cardinality
   computation belongs on the critical path.

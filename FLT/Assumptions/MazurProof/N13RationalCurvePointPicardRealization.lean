@@ -42,6 +42,15 @@ structure Data (P : RationalCurvePoint) where
       N13RationalPointEndgame.specialPointClass
         (N13ProperCurveReduction.reduceCurve P)
 
+/-!
+## The two points at infinity
+
+The chosen positive point at infinity is the Abel--Jacobi base point, whereas
+the negative point contributes the distinguished infinity Mumford class.  The
+existing integral chart lines realize these two classes and specialize to the
+anchor and cusp, respectively.
+-/
+
 /-- Balanced Mumford representatives are equal when their three data fields
 agree; all remaining structure fields are propositions. -/
 private theorem mumford_eq_of_u_v_nInf
@@ -100,6 +109,16 @@ def infinityMinusData : Data .infinityMinus where
     exact congrArg N13RationalPointEndgame.specialPointClass
       N13InfinityLineSpecialRestriction.specialInfinityMinusPoint_eq_specialCusp
 
+/-!
+## Affine rational points
+
+The sextic coordinates over `ℚ` are first sent to the good two-adic model by
+the completion-of-the-square coordinate change.  The valuation of `x` then
+selects one of the two proper integral chart constructions.  In either case we
+compare the resulting degree-one Mumford representative componentwise with
+the base change of the original rational point representative.
+-/
+
 /-- Two-fibre realization of an affine rational point whose two-adic first
 coordinate is integral. -/
 def integralAffineData
@@ -107,10 +126,15 @@ def integralAffineData
     (hcurve : Y ^ 2 = (N13Mumford.model ℚ).f.eval X)
     (hx : ‖N13ProperCurveReduction.ratToQ₂ X‖ ≤ 1) :
     Data (.affine X Y hcurve) := by
+  -- Rewrite the input equation in the sextic form expected by the good-model
+  -- coordinate change; this changes presentation, not the rational point.
   have hC13 : N13CurveModel.C13SexticEq X Y := by
     rw [N13CurveModel.C13SexticEq,
       ← N13Mumford.f_eval_eq_sexticF13]
     exact hcurve
+  -- The good model keeps `x` and replaces `Y` by the completed-square
+  -- ordinate.  These are the coordinates whose integrality controls the
+  -- proper reduction chart.
   let x₂ : N13ProperCurveReduction.Q₂ :=
     N13ProperCurveReduction.ratToQ₂ X
   let y₂ : N13ProperCurveReduction.Q₂ :=
@@ -118,6 +142,8 @@ def integralAffineData
       (N13GoodModelTwo.sexticToGoodY X Y)
   have hgood : N13GoodModelTwo.AffineEquation x₂ y₂ :=
     N13ProperCurveReduction.map_good_equation hC13
+  -- In the integral branch the two-adic point lifts to an integral point of
+  -- the affine spread, whose anchored line supplies both chart ideals.
   let P₂ : N13IntegralAffinePointSpread.IntegralPoint :=
     N13ProperCurveReduction.integralAffineLift x₂ y₂ hx hgood
   let R : N13TwoChartPicardRealization.Data :=
@@ -133,6 +159,9 @@ def integralAffineData
       N13InfinityBaseChange.ratToQ₂_injective
       (N13InfinityBaseChange.map_n13_f
         N13InfinityBaseChange.ratToQ₂)
+  -- Undoing the good-model ordinate change recovers the original sextic
+  -- ordinate after base change.  This identity is the only non-definitional
+  -- part of comparing the two point representatives.
   have hsexticY :
       N13IntegralAffinePointSpread.sexticY P₂ =
         N13ProperCurveReduction.ratToQ₂ Y := by
@@ -143,6 +172,8 @@ def integralAffineData
       x₂, y₂, N13IntegralAffinePointSpread.sexticY,
       N13ProperCurveReduction.ratToQ₂,
       N13GoodModelTwo.h] using hround
+  -- Equality of the affine graph polynomial `u`, ordinate polynomial `v`,
+  -- and infinity orientation identifies the entire balanced representative.
   have hu :
       targetD.u = mappedD.u := by
     simp [targetD, mappedD, sourceD,
@@ -188,6 +219,9 @@ def integralAffineData
           (N13IntegralAffinePointSpecialClass.reducedPoint P₂) =
         N13RationalPointEndgame.specialPointClass
           (N13ProperCurveReduction.reduceCurve (.affine X Y hcurve))
+    -- The total reduction function branches on the same norm condition as
+    -- this construction, so its special point is literally the integral
+    -- affine reduction already carried by `R`.
     have hreduce :
         N13ProperCurveReduction.reduceCurve (.affine X Y hcurve) =
           N13ProperCurveReduction.reduceIntegralAffine
@@ -210,10 +244,14 @@ def escapingAffineData
     (hxval :
       (N13ProperCurveReduction.ratToQ₂ X).valuation < 0) :
     Data (.affine X Y hcurve) := by
+  -- As in the integral branch, first express the rational curve equation in
+  -- the sextic presentation used by the good two-adic model.
   have hC13 : N13CurveModel.C13SexticEq X Y := by
     rw [N13CurveModel.C13SexticEq,
       ← N13Mumford.f_eval_eq_sexticF13]
     exact hcurve
+  -- The completed-square coordinates lie on the good model even though `x₂`
+  -- is outside its affine integral chart.
   let x₂ : N13ProperCurveReduction.Q₂ :=
     N13ProperCurveReduction.ratToQ₂ X
   let y₂ : N13ProperCurveReduction.Q₂ :=
@@ -235,6 +273,8 @@ def escapingAffineData
       N13InfinityBaseChange.ratToQ₂_injective
       (N13InfinityBaseChange.map_n13_f
         N13InfinityBaseChange.ratToQ₂)
+  -- The escaping-chart ordinate is defined by reversing the same coordinate
+  -- change, hence it agrees with the original rational `Y` over `ℚ₂`.
   have hpointY :
       N13EscapingDegreeOneSpread.pointY x₂ y₂ =
         N13ProperCurveReduction.ratToQ₂ Y := by
@@ -244,6 +284,8 @@ def escapingAffineData
     simpa [x₂, y₂, N13EscapingDegreeOneSpread.pointY,
       N13ProperCurveReduction.ratToQ₂,
       N13GoodModelTwo.h] using hround
+  -- The escaping line still represents the ordinary degree-one point ideal
+  -- on the generic affine chart; only its integral extension uses infinity.
   have hu : targetD.u = mappedD.u := by
     simp [targetD, mappedD, sourceD,
       N13EscapingPointPicardRealization.degreeOneMumford,
@@ -265,6 +307,9 @@ def escapingAffineData
       SexticMumford.affinePointMumford]
   have htarget : targetD = mappedD :=
     mumford_eq_of_u_v_nInf hu hv hn
+  -- Negative valuation is exactly the negation of membership in the
+  -- integral norm ball, so the global reduction function must take its
+  -- nonintegral branch.
   have hnot : ¬ ‖x₂‖ ≤ 1 := by
     intro hnorm
     have hnonneg : 0 ≤ x₂.valuation :=
@@ -314,6 +359,8 @@ def data (P : RationalCurvePoint) : Data P := by
   | infinityMinus =>
       exact infinityMinusData
   | affine X Y hcurve =>
+      -- The two-adic norm dichotomy is exhaustive and matches the two
+      -- integral models proved above.
       by_cases hx :
           ‖N13ProperCurveReduction.ratToQ₂ X‖ ≤ 1
       · exact integralAffineData X Y hcurve hx
@@ -323,6 +370,176 @@ def data (P : RationalCurvePoint) : Data P := by
             ((Padic.norm_le_one_iff_val_nonneg
               (N13ProperCurveReduction.ratToQ₂ X)).not.mp hx)
         exact escapingAffineData X Y hcurve hxval
+
+/-!
+## Literal generic ideals
+
+The preceding constructions identify generic Picard classes.  Global spread
+existence needs the stronger statement that the affine ideal itself is the
+Mumford ideal obtained by coefficient extension.  The following two lemmas
+expose that stronger invariant for the integral and escaping branches.
+-/
+
+/-- Coefficient extension of the balanced Mumford representative attached to
+a rational curve point. -/
+def mappedPointMumford (P : RationalCurvePoint) :
+    N13Mumford.Mumford N13ProperCurveReduction.Q₂ :=
+  (SexticMumford.pointMumford (N13Mumford.model ℚ) P).mapCoeffs
+    N13InfinityBaseChange.ratToQ₂
+    N13InfinityBaseChange.ratToQ₂_injective
+    (N13InfinityBaseChange.map_n13_f
+      N13InfinityBaseChange.ratToQ₂)
+
+/-- The integral affine-point realization retains the literal mapped Mumford
+ideal, not only its class in the oriented Picard quotient. -/
+theorem integralAffineData_map_affineIdeal
+    (X Y : ℚ)
+    (hcurve : Y ^ 2 = (N13Mumford.model ℚ).f.eval X)
+    (hx : ‖N13ProperCurveReduction.ratToQ₂ X‖ ≤ 1) :
+    Ideal.map
+        N13IntegralFractionalHull.integralToRational
+        (integralAffineData X Y hcurve hx).realization.charts.affineIdeal =
+      SexticMumford.mumfordIdeal
+        N13TwoChartPicardRealization.Model
+        (mappedPointMumford (.affine X Y hcurve)).u
+        (mappedPointMumford (.affine X Y hcurve)).v := by
+  -- Reconstruct exactly the good-model point used inside
+  -- `integralAffineData`; the theorem then reduces to the existing chart-line
+  -- computation for this integral lift.
+  have hC13 : N13CurveModel.C13SexticEq X Y := by
+    rw [N13CurveModel.C13SexticEq,
+      ← N13Mumford.f_eval_eq_sexticF13]
+    exact hcurve
+  let x₂ : N13ProperCurveReduction.Q₂ :=
+    N13ProperCurveReduction.ratToQ₂ X
+  let y₂ : N13ProperCurveReduction.Q₂ :=
+    N13ProperCurveReduction.ratToQ₂
+      (N13GoodModelTwo.sexticToGoodY X Y)
+  have hgood : N13GoodModelTwo.AffineEquation x₂ y₂ :=
+    N13ProperCurveReduction.map_good_equation hC13
+  let P₂ : N13IntegralAffinePointSpread.IntegralPoint :=
+    N13ProperCurveReduction.integralAffineLift x₂ y₂ hx hgood
+  -- The round-trip formula aligns the good-model ordinate with the original
+  -- sextic ordinate, allowing a literal comparison of Mumford data.
+  have hsexticY :
+      N13IntegralAffinePointSpread.sexticY P₂ =
+        N13ProperCurveReduction.ratToQ₂ Y := by
+    have hround :=
+      congrArg N13ProperCurveReduction.ratToQ₂
+        (N13GoodModelTwo.sextic_good_y_roundtrip X Y)
+    simpa [P₂, N13ProperCurveReduction.integralAffineLift,
+      x₂, y₂, N13IntegralAffinePointSpread.sexticY,
+      N13ProperCurveReduction.ratToQ₂,
+      N13GoodModelTwo.h] using hround
+  -- Compare `u`, `v`, and `nInf` rather than quotient classes: this preserves
+  -- the exact ideal needed when the line is later reoriented.
+  have htarget :
+      N13IntegralPointPicardRealization.degreeOneMumford P₂ =
+        mappedPointMumford (.affine X Y hcurve) := by
+    apply mumford_eq_of_u_v_nInf
+    · simp [N13IntegralPointPicardRealization.degreeOneMumford,
+        N13IntegralAffinePointSpread.curvePoint,
+        SexticMumford.pointMumford,
+        SexticMumford.affinePointMumford,
+        mappedPointMumford, P₂,
+        N13ProperCurveReduction.integralAffineLift, x₂]
+    · simp [N13IntegralPointPicardRealization.degreeOneMumford,
+        N13IntegralAffinePointSpread.curvePoint,
+        SexticMumford.pointMumford,
+        SexticMumford.affinePointMumford,
+        mappedPointMumford, hsexticY,
+        N13ProperCurveReduction.ratToQ₂]
+    · simp [N13IntegralPointPicardRealization.degreeOneMumford,
+        N13IntegralAffinePointSpread.curvePoint,
+        SexticMumford.pointMumford,
+        SexticMumford.affinePointMumford,
+        mappedPointMumford]
+  change
+    Ideal.map
+        N13IntegralFractionalHull.integralToRational
+        (N13FiniteAffinePointInfinityClosure.anchoredPointLine P₂).affineIdeal =
+      _
+  rw [N13IntegralPointPicardRealization.map_anchoredPointLine_affineIdeal]
+  rw [htarget]
+
+/-- The escaping affine-point realization retains the same literal mapped
+Mumford ideal on the generic affine chart. -/
+theorem escapingAffineData_map_affineIdeal
+    (X Y : ℚ)
+    (hcurve : Y ^ 2 = (N13Mumford.model ℚ).f.eval X)
+    (hxval :
+      (N13ProperCurveReduction.ratToQ₂ X).valuation < 0) :
+    Ideal.map
+        N13IntegralFractionalHull.integralToRational
+        (escapingAffineData X Y hcurve hxval).realization.charts.affineIdeal =
+      SexticMumford.mumfordIdeal
+        N13TwoChartPicardRealization.Model
+        (mappedPointMumford (.affine X Y hcurve)).u
+        (mappedPointMumford (.affine X Y hcurve)).v := by
+  -- Reconstruct the escaping good-model point appearing in
+  -- `escapingAffineData`, keeping the negative-valuation hypothesis fixed.
+  have hC13 : N13CurveModel.C13SexticEq X Y := by
+    rw [N13CurveModel.C13SexticEq,
+      ← N13Mumford.f_eval_eq_sexticF13]
+    exact hcurve
+  let x₂ : N13ProperCurveReduction.Q₂ :=
+    N13ProperCurveReduction.ratToQ₂ X
+  let y₂ : N13ProperCurveReduction.Q₂ :=
+    N13ProperCurveReduction.ratToQ₂
+      (N13GoodModelTwo.sexticToGoodY X Y)
+  have hgood : N13GoodModelTwo.AffineEquation x₂ y₂ :=
+    N13ProperCurveReduction.map_good_equation hC13
+  -- Reversing the completed-square change again identifies the escaping
+  -- point ordinate with the base-changed rational ordinate.
+  have hpointY :
+      N13EscapingDegreeOneSpread.pointY x₂ y₂ =
+        N13ProperCurveReduction.ratToQ₂ Y := by
+    have hround :=
+      congrArg N13ProperCurveReduction.ratToQ₂
+        (N13GoodModelTwo.sextic_good_y_roundtrip X Y)
+    simpa [x₂, y₂, N13EscapingDegreeOneSpread.pointY,
+      N13ProperCurveReduction.ratToQ₂,
+      N13GoodModelTwo.h] using hround
+  -- Componentwise equality shows that the generic affine ideal is unchanged
+  -- by the alternative integral chart used to close the point at infinity.
+  have htarget :
+      N13EscapingPointPicardRealization.degreeOneMumford
+          x₂ y₂ hgood =
+        mappedPointMumford (.affine X Y hcurve) := by
+    apply mumford_eq_of_u_v_nInf
+    · simp [N13EscapingPointPicardRealization.degreeOneMumford,
+        N13EscapingDegreeOneSpread.curvePoint,
+        SexticMumford.pointMumford,
+        SexticMumford.affinePointMumford,
+        mappedPointMumford, x₂]
+    · simp [N13EscapingPointPicardRealization.degreeOneMumford,
+        N13EscapingDegreeOneSpread.curvePoint,
+        SexticMumford.pointMumford,
+        SexticMumford.affinePointMumford,
+        mappedPointMumford, hpointY,
+        N13ProperCurveReduction.ratToQ₂]
+    · simp [N13EscapingPointPicardRealization.degreeOneMumford,
+        N13EscapingDegreeOneSpread.curvePoint,
+        SexticMumford.pointMumford,
+        SexticMumford.affinePointMumford,
+        mappedPointMumford]
+  change
+    Ideal.map
+        N13IntegralFractionalHull.integralToRational
+        (N13EscapingPointSpecialRestriction.anchoredPointLine
+          x₂ y₂ hxval hgood).affineIdeal =
+      _
+  rw [N13EscapingPointPicardRealization.map_anchoredPointLine_affineIdeal]
+  rw [htarget]
+
+/-!
+## Relation-first spread lines
+
+A spread line remembers the rational Picard class it represents in addition
+to its two-fibre geometric realization.  This makes the eventual reduction
+classifier a statement about equality of concrete specializations, while the
+pointwise constructions above supply Abel--Jacobi compatibility directly.
+-/
 
 /-- A relation-first spread line together with the rational generic class it
 realizes after base change to `ℚ₂`. -/
@@ -394,6 +611,9 @@ def rationalPointReductionData
   spread := spreadData kernel exists_spread class_eq_iff
   abel_reduces := by
     intro P
+    -- The canonical point line has the required generic quotient class by
+    -- construction, and `Data.special_eq` identifies its literal special
+    -- divisor with proper reduction of the same rational point.
     exact
       ⟨pointSpreadLine P, rfl, (data P).special_eq⟩
 

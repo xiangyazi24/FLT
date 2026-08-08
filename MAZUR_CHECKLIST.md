@@ -1,6 +1,6 @@
 # Mazur Endpoint Checklist
 
-Last source-rebuilt audit: 2026-08-05.
+Last source-rebuilt audit: 2026-08-08.
 
 The authoritative endpoint is `MazurProof.mazur_torsion_bound`.  A box may be
 checked only after the replacement theorem is reachable from that endpoint,
@@ -21,12 +21,13 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     affine rational curve point now have complete two-fibre data whose
     generic class is the base-changed rational Abel class and whose special
     class is the anchored proper reduction.  This makes `abel_reduces`
-    automatic for the concrete rational spread-line interface.
+    automatic for the concrete rational spread-line interface.  Balanced
+    Mumford degree exhaustion now also constructs such a spread line for
+    every rational oriented Picard class, so global `exists_spread` is proved.
   - Remaining semantic atoms: either pointwise specialization reflection on
-    rational Abel classes, or the stronger global spread existence and
-    `class_eq_iff` theorem for rational spread lines, followed by canonical
-    mapped-special equality and first-jet doubling compatibility for kernel
-    separatedness.
+    rational Abel classes, or the stronger `class_eq_iff` theorem for the
+    global rational spread lines, followed by canonical mapped-special
+    equality and first-jet doubling compatibility for kernel separatedness.
 
 - [x] N17 — `CyclicExclusion17.no_F17_rational_solution`
   - Closed infrastructure: exact-order Tate normalization with preserved
