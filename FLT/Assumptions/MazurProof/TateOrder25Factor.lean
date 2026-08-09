@@ -281,6 +281,12 @@ private lemma prePsi_14_eval (b c : ℚ) :
   simp only [G14]
   ring
 
+/-- Public order-fourteen origin evaluation used to certify that the tangent
+denominator at `7P` is nonzero on the exact order-25 locus. -/
+theorem prePsi_fourteen_eval_tate_origin (b c : ℚ) :
+    ((W b c).preΨ' 14).eval 0 = b ^ 64 * G14 b c :=
+  prePsi_14_eval b c
+
 /-! ## The compact and primitive order-25 identities -/
 
 /-- **Compact order-25 division identity at the Tate origin.**  The `25 = 2·12+1`

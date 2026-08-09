@@ -1,3 +1,27 @@
+## Run 2026-08-09 (N25 sevenfold normalization)
+
+- approval: automode continuation; no tmux names may be changed
+- starting avenue: complete the exact `7P` Tate normalization on the
+  primitive order-25 locus
+- completed:
+  - proved the Tate origin has exact additive order 25 from `F25=0`,
+    `b≠0`, and `F5≠0`
+  - exposed the order-fourteen division evaluation and proved `G14≠0`
+  - derived the tangent denominator, slope, translated coefficients, and
+    explicit parameters `B₇,C₇` at the actual point `7P`
+  - proved the remaining translated quadratic numerator `H7` is nonzero:
+    otherwise the translated origin is killed by three, forcing `21P=0`
+  - checked all five coefficients of the normalized Tate curve and verified
+    the downstream denominator-free canonical bridge
+- verification:
+  - scoped source compilations pass
+  - six new public endpoints audit to exactly `propext`,
+    `Classical.choice`, and `Quot.sound`
+- next frontier: derive the source involution/order relations or directly
+  construct invariant plane numerators and their `F25` divisibility and
+  nonvanishing certificates
+- end: clean milestone; campaign continues
+
 ## Run 2026-08-05 (source-rebuilt Mazur audit and N17 classification layer)
 
 - approval: automode continuation; ChatGPT tabs kept saturated through the

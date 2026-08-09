@@ -71,14 +71,18 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
 1. the exact quadric-cubic equations, the five rational cusp vectors, and
    elimination to a plane sextic away from the boundary;
 2. an explicit order-five automorphism preserving the model, together with
-   its basic homogeneous invariants; and
+   its basic homogeneous invariants;
 3. exhaustive projective classifications over `𝔽₂` and `𝔽₄`, showing that
-   the quadratic extension introduces no new class.
+   the quadratic extension introduces no new class; and
+4. the actual multiples `2P`, `3P`, `4P`, and `7P` of the Tate origin,
+   exact order 25 on the primitive locus, and complete Tate
+   re-normalizations at `2P` and `7P`, with all denominator factors proved
+   nonzero and all five Weierstrass coefficients checked.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25: the missing inputs are the exact
-Tate-obstruction-to-canonical-model map and a global rational-point or
-formal-immersion argument over `ℚ`.
+Tate-obstruction-to-canonical-model map, its noncuspidality certificates, and
+a global rational-point or formal-immersion argument over `ℚ`.
 
 ## Declarations present in the tree but not reachable from the endpoint
 

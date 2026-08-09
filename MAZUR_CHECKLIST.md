@@ -101,7 +101,10 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     `25.150.4.f.1`; its five rational cusp vectors; elimination to a plane
     sextic on the dense chart; an explicit order-five automorphism and basic
     invariants; exhaustive classifications over `𝔽₂` and `𝔽₄`, with no new
-    projective class over the quadratic extension.
+    projective class over the quadratic extension; explicit `2P`, `3P`,
+    `4P`, and `7P` formulas on Tate normal form; exact order 25 of the marked
+    origin on the primitive locus; and complete re-normalizations at `2P`
+    and `7P`, including proofs that every displayed denominator is nonzero.
   - Open atoms: an exact map from the nondegenerate `F₂₅` Tate locus to a
     noncuspidal point of the canonical model, and the global
     rational-point/formal-immersion argument showing that every rational

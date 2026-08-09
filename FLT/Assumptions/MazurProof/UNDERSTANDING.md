@@ -403,7 +403,15 @@ formal rational-function candidates.  The same file now proves the explicit
 multiple formulas for `3P`, `4P`, and
 `7P=(bcF6F8/F7²,-b²F6²F9/F7³)` directly from the affine group law; this
 replaces the old private scratch-only versions and supplies the actual point
-to be normalized for the involution.
+to be normalized for the involution.  It also proves that the Tate origin has
+exact additive order 25 on the primitive locus, then uses this exact order to
+exclude both remaining normalization factors.  Vanishing of `G14` would give
+`14P=0`.  Vanishing of the translated quadratic numerator `H7` would make the
+translated origin a flex, hence a point killed by three; transporting back
+would give `21P=0`.  Both contradict exact order 25.  Consequently the full
+translation and Tate scaling at `7P` is now unconditional on the primitive
+locus, with explicit parameters `B₇,C₇` and all five Weierstrass coefficients
+checked.
 `RationalPointsN25TateCanonicalBridge.lean` now supplies the
 denominator-free target-side lift
 `(x,z,w) ↦ (xD,-N,zD,wD)`.  Its cubic vanishes identically and its quadric
@@ -418,9 +426,9 @@ certificate.
 All five files pass scoped compilation.  Axiom audits of their terminal
 theorems report only `propext`, `Classical.choice`, and `Quot.sound`.
 They are not yet imported by `CyclicExclusion25`: the genuine remaining
-work is to normalize the now-constructed `7P` (`F7` is nonzero, while `G14`
-and the translated `a₂` core remain), then find
-literal invariant plane numerators `NX,NZ,NW` with a polynomial
+work is to use the completed `2P` and `7P` normalizations to derive the source
+involution/order relations, or directly find literal invariant plane
+numerators `NX,NZ,NW` with a polynomial
 certificate that their plane sextic is divisible by `F25`, prove the
 source-locus nonvanishing certificates that make the lifted point
 noncuspidal, and then supply a global rational-point or formal-immersion

@@ -49,7 +49,11 @@ private lemma pointCurveEqAddEquiv_some
   rw [WeierstrassCurve.Affine.Point.some.injEq]
   exact ⟨rfl, rfl⟩
 
-private lemma origin_three_nsmul_eq_zero_of_a2_eq_zero
+/-- On a Weierstrass equation with `a₂=a₄=a₆=0` and `a₃≠0`, the affine
+origin is a flex and hence is killed by three.  This is the algebraic
+degeneracy test used by Tate normalization when the translated quadratic
+coefficient vanishes. -/
+theorem origin_three_nsmul_eq_zero_of_a2_eq_zero
     (W : WeierstrassCurve ℚ) [W.IsElliptic]
     {h0 : WeierstrassCurve.Affine.Nonsingular W 0 0}
     (ha₂ : W.a₂ = 0) (ha₃ : W.a₃ ≠ 0)
