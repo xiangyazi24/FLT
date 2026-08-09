@@ -228,12 +228,28 @@ theorem kernel_eq
 
 The exact normalized spread of `z + rationalBasePic` supplies a proper
 integral line with the correct generic Mumford representative.  The
-remaining representative-level comparison should identify the reduction of
-the canonical contraction with the affine restriction of that actual line.
-Once this comparison is known, the global specialization relation forces
+remaining representative-level input is vertical saturation of that actual
+line.  Localization then identifies it with the canonical contraction.
+Once this equality is known, the global specialization relation forces
 the line's stored divisor to be the literal Abel-chart base divisor, whose
 affine ideal is already proved to be `specialIdeal`.
 -/
+
+/-- The affine ideal of every translated exact spread is saturated against
+all nonzero vertical scalars from `ℤ₂`.
+
+This rules out precisely the ambiguity invisible on the generic fibre: an
+integral lattice cannot differ from the canonical contraction by an extra
+vertical component or scalar twist.  The statement concerns only the
+explicit spreads selected by balanced degree exhaustion, not arbitrary
+proper spread lines. -/
+def ExactSpreadAffineVerticallySaturated
+    (kernel : AddSubgroup G) : Prop :=
+  ∀ z : kernel,
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (N13RationalPicardSpreadExistence.exactSpreadLine
+        ((z : G) +
+          N13RationalAbelChartBase.rationalBasePic)).realization.charts
 
 /-- The contraction of each mapped normalized rational representative agrees
 with the affine special restriction of its exact normalized rational spread.
@@ -260,14 +276,51 @@ def ExactNormalizedContractionMatchesSpread
           ((z : G) +
             N13RationalAbelChartBase.rationalBasePic)).realization.charts).affineIdeal
 
-/-- Construct the canonical mapped-special family from the smaller
-contraction-versus-spread comparison.
+/-- Vertical saturation of the exact spread lattice forces the canonical
+contraction comparison.
 
-The global `class_eq_iff` theorem is used only after the comparison: it sends
-the translated exact spread to the same special Abel class as the explicit
-base spread.  Regularity then identifies the stored divisor literally, and
-the special graph-divisor theorem identifies its affine ideal with the fixed
-special ideal. -/
+The raw generic equality supplies equality after inverting the nonzero
+`ℤ₂` scalars.  The existing localization theorem says that a vertically
+saturated integral ideal is recovered exactly by contraction; applying
+special reduction to that integral equality gives the displayed comparison. -/
+theorem exactNormalizedContractionMatchesSpread_of_verticalSaturated
+    (kernel : AddSubgroup G)
+    (hsaturated : ExactSpreadAffineVerticallySaturated kernel) :
+    ExactNormalizedContractionMatchesSpread kernel := by
+  intro z
+  let P : G :=
+    (z : G) + N13RationalAbelChartBase.rationalBasePic
+  have hcontract :
+      N13IntegralModelContraction.contractIdeal
+          (N13CanonicalContractionQuotient.graphIdeal
+            (N13RationalPicardSpreadExistence.mapMumford
+              (N13RationalPicardSpreadExistence.normalizedMumford P)).toSemi) =
+        (N13RationalPicardSpreadExistence.exactSpreadLine
+          P).realization.charts.affineIdeal := by
+    apply
+      N13IntegralInfinityGraphSaturation.contractIdeal_eq_of_map_eq_of_scalarSaturated
+    · exact
+        N13RationalPicardSpreadExistence.exactSpreadLine_map_affineIdeal P
+    · exact hsaturated z
+  change
+    Ideal.map N13GeneralizedMumfordReduction.reduceCoordinate
+          (N13IntegralModelContraction.contractIdeal
+            (N13CanonicalContractionQuotient.graphIdeal
+              (N13RationalPicardSpreadExistence.mapMumford
+                (N13RationalPicardSpreadExistence.normalizedMumford P)).toSemi)) =
+      Ideal.map N13GeneralizedMumfordReduction.reduceCoordinate
+        (N13RationalPicardSpreadExistence.exactSpreadLine
+          P).realization.charts.affineIdeal
+  rw [hcontract]
+
+/-- Construct the canonical mapped-special family from vertical saturation
+of the exact normalized spread lattices.
+
+The contraction comparison is first derived by localization.  The global
+`class_eq_iff` theorem is used only afterward: it sends the translated exact
+spread to the same special Abel class as the explicit base spread.  Regularity
+then identifies the stored divisor literally, and the special graph-divisor
+theorem identifies its affine ideal with the fixed special ideal. -/
 def canonicalMappedSpecialFamilyOfExactSpread
     (kernel : AddSubgroup G)
     (class_eq_iff :
@@ -276,7 +329,7 @@ def canonicalMappedSpecialFamilyOfExactSpread
             N13RationalCurvePointPicardRealization.specialClass M ↔
           N13RationalCurvePointPicardRealization.genericClass kernel L =
             N13RationalCurvePointPicardRealization.genericClass kernel M)
-    (hcontract : ExactNormalizedContractionMatchesSpread kernel) :
+    (hsaturated : ExactSpreadAffineVerticallySaturated kernel) :
     N13RationalKernelDoublingAdapter.CanonicalMappedSpecialFamily
       (Kernel kernel class_eq_iff) := by
   rw [kernel_eq kernel class_eq_iff]
@@ -295,7 +348,9 @@ def canonicalMappedSpecialFamilyOfExactSpread
               N13RationalAbelChartBase.rationalBasePic)).realization.charts).affineIdeal :=
       by
         rw [N13RationalAbelChartBase.canonicalMappedSpecialMumford_subgroup_eq_mapMumford]
-        exact hcontract z
+        exact
+          exactNormalizedContractionMatchesSpread_of_verticalSaturated
+            kernel hsaturated z
     _ = (N13SpecialDivisorCharts.ofDivisor
           (N13RationalPicardSpreadExistence.exactSpreadLine
             ((z : G) +
@@ -320,8 +375,8 @@ the same first jet as the square of the representative selected for `z`.
 Together these facts make the classifier kernel two-adically separated.
 -/
 
-/-- Equality reflection for rational spreads, contraction comparison with
-the exact normalized spreads, and first-jet doubling compatibility imply the
+/-- Equality reflection for rational spreads, vertical saturation of the
+exact normalized spreads, and first-jet doubling compatibility imply the
 primitive N13 rational-point theorem required by Mazur's bound. -/
 theorem affine_x_is_cuspidal
     (kernel : AddSubgroup G)
@@ -331,11 +386,11 @@ theorem affine_x_is_cuspidal
             N13RationalCurvePointPicardRealization.specialClass M ↔
           N13RationalCurvePointPicardRealization.genericClass kernel L =
             N13RationalCurvePointPicardRealization.genericClass kernel M)
-    (hcontract : ExactNormalizedContractionMatchesSpread kernel)
+    (hsaturated : ExactSpreadAffineVerticallySaturated kernel)
     (C :
       N13RationalKernelDoublingAdapter.FirstJetDoublingCompatibility
         (canonicalMappedSpecialFamilyOfExactSpread
-          kernel class_eq_iff hcontract).toNearBaseFamily) :
+          kernel class_eq_iff hsaturated).toNearBaseFamily) :
     ∀ X Y : ℚ, N13CurveModel.C13SexticEq X Y →
       X = 0 ∨ X = -1 := by
   -- The canonical family and first-jet comparison give separatedness of the
@@ -344,7 +399,7 @@ theorem affine_x_is_cuspidal
       N18RouteC.Separated.NSeparated
         (Kernel kernel class_eq_iff) 2 :=
     (canonicalMappedSpecialFamilyOfExactSpread
-      kernel class_eq_iff hcontract).separated C
+      kernel class_eq_iff hsaturated).separated C
   -- All other fields of rational-point reduction are supplied by the global
   -- spread and pointwise realization theorems used in `reductionData`.
   exact

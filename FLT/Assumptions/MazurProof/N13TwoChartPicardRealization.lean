@@ -30,6 +30,19 @@ local instance : Fact (Nat.Prime 2) :=
 abbrev Line : Type :=
   N13IntegralInfinityPointSpread.TwoChartLine
 
+/-- An affine integral line lattice has no component supported purely over
+the closed two-adic fibre.
+
+Equivalently, multiplication by a nonzero scalar from `ℤ₂` can be cancelled
+modulo the affine ideal.  This is the exact condition under which extension
+to the generic fibre followed by contraction recovers the original lattice. -/
+def AffineVerticallySaturated (L : Line) : Prop :=
+  ∀ (r : N13IntegralModelContraction.R₂), r ≠ 0 →
+    ∀ a : N13IntegralModelContraction.IntegralRing,
+      algebraMap N13IntegralModelContraction.R₂
+            N13IntegralModelContraction.IntegralRing r * a ∈ L.affineIdeal →
+        a ∈ L.affineIdeal
+
 /-- The two-adic coefficient field. -/
 abbrev Q₂ : Type :=
   N13InfinityBaseChange.Q₂
@@ -150,6 +163,35 @@ theorem genericRaw_eq_mumfordRaw_of_map_affineIdeal_eq
       genericIdealUnit_eq_mumfordIdealUnit_of_map_affineIdeal_eq
         L D hmap
   · rfl
+
+/-- Equality of literal oriented raw data recovers equality of the underlying
+generic affine ideals.
+
+The first component of the raw datum is an invertible fractional ideal.
+After forgetting its unit structure, injectivity of the embedding from
+ordinary ideals into fractional ideals recovers the original ideal equality.
+The infinity component is irrelevant for this projection. -/
+theorem map_affineIdeal_eq_of_genericRaw_eq_mumfordRaw
+    (L : Line) (infinityOrder : ℤ)
+    (D : SexticMumford.Mumford Model)
+    (hraw :
+      genericRaw L infinityOrder =
+        SexticMumford.mumfordRaw Model D) :
+    Ideal.map
+        N13IntegralFractionalHull.integralToRational
+        L.affineIdeal =
+      SexticMumford.mumfordIdeal Model D.u D.v := by
+  have hunit :
+      genericIdealUnit L =
+        SexticMumford.mumfordIdealUnit Model D.toSemi :=
+    congrArg Prod.fst hraw
+  have hfrac := congrArg
+    (fun I : Units N13IntegralFractionalHull.RationalFractionalIdeal =>
+      (I : N13IntegralFractionalHull.RationalFractionalIdeal))
+    hunit
+  rw [coe_genericIdealUnit,
+    SexticMumford.coe_mumfordIdealUnit] at hfrac
+  exact FractionalIdeal.coeIdeal_injective hfrac
 
 /-- Oriented generic Picard class carried by a marked proper line. -/
 def genericClass (L : Line) (infinityOrder : ℤ) :

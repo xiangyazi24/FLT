@@ -37,14 +37,14 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     injectivity of proper reduction on rational curve points, hence is a
     restatement of the rational-point classification rather than a cheaper
     bypass.  The constructive classifier route has three explicit providers:
-    `class_eq_iff` for global rational spread lines, equality between the
-    canonical contraction lattice and the special restriction lattice of the
-    corresponding exact normalized spread, and first-jet doubling
-    compatibility for the recovered representatives.  The middle comparison
-    no longer assumes that either lattice is the fixed special ideal:
-    `class_eq_iff` and the explicit base spread derive that conclusion
-    afterward.  The endpoint file proves that these three inputs imply the
-    primitive N13 theorem.
+    `class_eq_iff` for global rational spread lines, vertical-scalar
+    saturation of the affine lattices of the corresponding exact normalized
+    spreads, and first-jet doubling compatibility for the recovered
+    representatives.  Generic raw equality and localization derive the
+    canonical contraction comparison from the middle input; `class_eq_iff`
+    and the explicit base spread then derive the fixed special ideal.  The
+    endpoint file proves that these three inputs imply the primitive N13
+    theorem.
 
 - [x] N17 — `CyclicExclusion17.no_F17_rational_solution`
   - Closed infrastructure: exact-order Tate normalization with preserved

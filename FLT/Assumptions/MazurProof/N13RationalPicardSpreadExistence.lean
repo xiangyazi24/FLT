@@ -476,6 +476,26 @@ theorem exactSpreadLine_genericRaw (P : G) :
         (mapMumford (normalizedMumford P)) :=
   (Classical.choose_spec (exists_exactSpreadLine P)).2
 
+/-- The affine lattice of the selected exact spread extends to the literal
+Mumford graph ideal of the mapped rational normal form.
+
+This is the ideal-valued projection of `exactSpreadLine_genericRaw`; it is
+recorded separately because canonical contraction compares integral ideals,
+whereas the oriented raw datum also carries an independent infinity order. -/
+theorem exactSpreadLine_map_affineIdeal (P : G) :
+    Ideal.map
+        N13IntegralFractionalHull.integralToRational
+        (exactSpreadLine P).realization.charts.affineIdeal =
+      SexticMumford.mumfordIdeal Model₂
+        (mapMumford (normalizedMumford P)).u
+        (mapMumford (normalizedMumford P)).v := by
+  exact
+    N13TwoChartPicardRealization.map_affineIdeal_eq_of_genericRaw_eq_mumfordRaw
+      (exactSpreadLine P).realization.charts
+      (exactSpreadLine P).realization.infinityOrder
+      (mapMumford (normalizedMumford P))
+      (exactSpreadLine_genericRaw P)
+
 /-- Every rational oriented Picard class has a concrete rational spread line
 whose stored rational class is literally the original class. -/
 theorem exists_spreadLine (P : G) :
