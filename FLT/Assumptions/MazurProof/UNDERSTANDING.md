@@ -438,8 +438,12 @@ zero nor one there, using the raw diagonal identity
 and fourth adjoint cores reduces simultaneous vanishing to a monic degree-ten
 polynomial with no root modulo two.  Consequently the composite canonical
 coordinate vector is formally proved nonzero on every primitive Tate
-solution.  This route does not require the formerly missing birational map to the
-LMFDB degree-eleven plane.
+solution.  A second exact resultant between the source equation and the third
+canonical coordinate is `(y-1)¹²p₁₀(y)`, so that coordinate is nonzero as
+well.  It excludes cusp classes A, C, and E; the first/fourth nonvanishing pair
+excludes B and D.  Hence the composite is formally noncuspidal on the entire
+primitive Tate locus.  This route does not require the formerly missing
+birational map to the LMFDB degree-eleven plane.
 `RationalPointsN25TateCanonicalBridge.lean` now supplies the
 denominator-free target-side lift
 `(x,z,w) ↦ (xD,-N,zD,wD)`.  Its cubic vanishes identically and its quadric
@@ -458,14 +462,10 @@ separate certificate.
 
 All seven production files pass scoped compilation.  Axiom audits of their terminal
 theorems report only `propext`, `Classical.choice`, and `Quot.sound`.
-They are not yet imported by `CyclicExclusion25`: the genuine remaining
-source-side bridge work is to prove that the direct nonzero adjoint coordinate
-vector is noncuspidal on the primitive Tate locus.  The affine base-point
-resultant and its monic degree-ten obstruction are now formalized; only the
-five projective cusp fibres remain to be excluded.  Separately, N25
-still needs a global rational-point or
-formal-immersion argument proving that every rational canonical point is a
-cusp.  The older
+They are not yet imported by `CyclicExclusion25`: the source-side model bridge,
+base-point exclusion, and all five projective cusp fibres are now closed.
+N25 still needs a global rational-point or formal-immersion argument proving
+that every rational canonical point is a cusp.  The older
 `N25LecacheuxIntegrality.lean` and
 `N25LecacheuxSieve.lean` scratch experiments do not currently compile and
 do not contain the advertised final Newton-polygon theorem; they must not be

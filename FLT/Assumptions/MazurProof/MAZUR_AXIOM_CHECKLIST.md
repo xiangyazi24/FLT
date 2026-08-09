@@ -89,14 +89,15 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
 7. a direct degree-nine adjoint map from the checked Sutherland optimized
    source to the stored canonical quotient.  Its quadric and cubic pullbacks
    are again literal multiples of Sutherland's equation, and its composition
-   with the primitive Tate map is kernel-checked.
+   with the primitive Tate map is kernel-checked; exact resultant certificates
+   prove that its homogeneous vector is nonzero and avoids all five canonical
+   cusp classes.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
 directly, without needing a Sutherland-to-LMFDB plane transformation.  The
-remaining inputs are source-locus noncuspidality certificates for the now
-proved-nonzero adjoint coordinates and a global rational-point or
-formal-immersion argument over `ℚ`.
+remaining input is a global rational-point or formal-immersion argument over
+`ℚ` proving that every rational canonical point is a cusp.
 
 ## Declarations present in the tree but not reachable from the endpoint
 

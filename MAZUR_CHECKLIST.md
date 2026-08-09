@@ -115,11 +115,11 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     with exact quadric and cubic pullback certificates; and a direct
     degree-nine adjoint map from Sutherland's optimized source to the stored
     canonical model, again with exact quadric and cubic pullback certificates
-    and a checked composite map from the primitive Tate locus.
-  - Open atoms: noncuspidality of the now proved-nonzero direct canonical
-    image on the primitive Tate locus, and the global
-    rational-point/formal-immersion argument showing that every rational
-    canonical point is one of the five cusps.
+    and a checked composite map from the primitive Tate locus; exact Bezout
+    resultants proving that composite is nonzero and avoids all five canonical
+    cusp classes.
+  - Open atom: the global rational-point/formal-immersion argument showing
+    that every rational canonical point is one of the five cusps.
 
 - [ ] N49 — `CyclicExclusion49.no_raw_order49_tate_obstruction`
   - Closed infrastructure: structural `ψ₄₉` factorization bridge to the

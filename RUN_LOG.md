@@ -25,9 +25,16 @@
   two, so those two canonical coordinates cannot vanish simultaneously when
   the optimized source coordinate is not one.  The Tate canonical quadruple
   is therefore formally nonzero.
+- Formalized a second exact resultant between Sutherland's source equation and
+  the third canonical coordinate.  Its fibre polynomial is
+  `(y-1)¹² p₁₀(y)`, so the third coordinate is nonzero on the primitive Tate
+  locus.
+- Used the third coordinate to exclude cusp classes A, C, and E, and the
+  first/fourth nonvanishing pair to exclude B and D.  The direct Tate
+  canonical image is now formally noncuspidal.
 - N25 remains an endpoint axiom.  The direct model-comparison and base-point
-  seams are closed; canonical noncuspidality and the global rational-point
-  classification remain.
+  seams, including canonical noncuspidality, are closed; only the global
+  rational-point classification remains.
 - Scoped checks pass, and all four terminal bridge theorems audit to exactly
   `propext`, `Classical.choice`, and `Quot.sound`.
 

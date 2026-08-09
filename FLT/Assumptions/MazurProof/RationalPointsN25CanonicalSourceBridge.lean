@@ -18,8 +18,10 @@ verified by `ring`.  Composing with the preceding Tate-to-Sutherland bridge
 therefore gives a fully explicit map from every primitive order-25 Tate
 solution to the canonical complete intersection.
 
-The separate remaining source-side obligation is to prove that the resulting
-homogeneous vector is nonzero and is not one of the five canonical cusps.
+The resultant certificates below also prove that the resulting homogeneous
+vector is nonzero and is not one of the five canonical cusps.  The remaining
+N25 obstruction is therefore the global rational-point classification on the
+canonical quotient, not a comparison between models.
 -/
 
 namespace MazurProof.RationalPointsN25CanonicalSourceBridge
@@ -262,6 +264,377 @@ theorem sutherlandCanonicalXW_not_both_zero
       (mul_eq_zero.mp hbezout.symm).resolve_left (pow_ne_zero 7 hySub)
     exact sutherlandBasePointFiber25_ne_zero y hfiber
 
+/-! ## Exclusion of the remaining cusp fibres -/
+
+set_option maxHeartbeats 2000000 in
+set_option maxRecDepth 20000 in
+/-- Bezout coefficient multiplying Sutherland's source equation in the exact
+resultant certificate for the third canonical coordinate.  Its explicit form
+keeps the nonvanishing argument reducible to kernel-checked ring arithmetic. -/
+def sutherlandCanonicalZBezoutSource25 (x y : ℚ) : ℚ :=
+  -2 * x ^ 5 * y ^ 17
+    + 25 * x ^ 5 * y ^ 16
+    - 136 * x ^ 5 * y ^ 15
+    + 404 * x ^ 5 * y ^ 14
+    - 616 * x ^ 5 * y ^ 13
+    + 18 * x ^ 5 * y ^ 12
+    + 1983 * x ^ 5 * y ^ 11
+    - 4202 * x ^ 5 * y ^ 10
+    + 3847 * x ^ 5 * y ^ 9
+    - 72 * x ^ 5 * y ^ 8
+    - 3907 * x ^ 5 * y ^ 7
+    + 4759 * x ^ 5 * y ^ 6
+    - 3073 * x ^ 5 * y ^ 5
+    + 1232 * x ^ 5 * y ^ 4
+    - 285 * x ^ 5 * y ^ 3
+    + 31 * x ^ 5 * y ^ 2
+    + x ^ 5 * y
+    - 2 * x ^ 4 * y ^ 20
+    + 35 * x ^ 4 * y ^ 19
+    - 269 * x ^ 4 * y ^ 18
+    + 1188 * x ^ 4 * y ^ 17
+    - 3230 * x ^ 4 * y ^ 16
+    + 4983 * x ^ 4 * y ^ 15
+    - 1348 * x ^ 4 * y ^ 14
+    - 12952 * x ^ 4 * y ^ 13
+    + 33089 * x ^ 4 * y ^ 12
+    - 40446 * x ^ 4 * y ^ 11
+    + 19906 * x ^ 4 * y ^ 10
+    + 18344 * x ^ 4 * y ^ 9
+    - 46190 * x ^ 4 * y ^ 8
+    + 47684 * x ^ 4 * y ^ 7
+    - 31198 * x ^ 4 * y ^ 6
+    + 13822 * x ^ 4 * y ^ 5
+    - 4090 * x ^ 4 * y ^ 4
+    + 705 * x ^ 4 * y ^ 3
+    - 46 * x ^ 4 * y ^ 2
+    - 6 * x ^ 4 * y
+    + 2 * x ^ 3 * y ^ 21
+    - 35 * x ^ 3 * y ^ 20
+    + 269 * x ^ 3 * y ^ 19
+    - 1191 * x ^ 3 * y ^ 18
+    + 3276 * x ^ 3 * y ^ 17
+    - 5291 * x ^ 3 * y ^ 16
+    + 2526 * x ^ 3 * y ^ 15
+    + 10236 * x ^ 3 * y ^ 14
+    - 29941 * x ^ 3 * y ^ 13
+    + 42264 * x ^ 3 * y ^ 12
+    - 35382 * x ^ 3 * y ^ 11
+    + 15428 * x ^ 3 * y ^ 10
+    + 809 * x ^ 3 * y ^ 9
+    - 5045 * x ^ 3 * y ^ 8
+    + 1322 * x ^ 3 * y ^ 7
+    + 2854 * x ^ 3 * y ^ 6
+    - 3719 * x ^ 3 * y ^ 5
+    + 2359 * x ^ 3 * y ^ 4
+    - 903 * x ^ 3 * y ^ 3
+    + 201 * x ^ 3 * y ^ 2
+    - 17 * x ^ 3 * y
+    - x ^ 3
+    + 2 * x ^ 2 * y ^ 20
+    - 19 * x ^ 2 * y ^ 19
+    + 46 * x ^ 2 * y ^ 18
+    + 195 * x ^ 2 * y ^ 17
+    - 1695 * x ^ 2 * y ^ 16
+    + 5490 * x ^ 2 * y ^ 15
+    - 9269 * x ^ 2 * y ^ 14
+    + 4574 * x ^ 2 * y ^ 13
+    + 16470 * x ^ 2 * y ^ 12
+    - 46123 * x ^ 2 * y ^ 11
+    + 60164 * x ^ 2 * y ^ 10
+    - 43439 * x ^ 2 * y ^ 9
+    + 9542 * x ^ 2 * y ^ 8
+    + 15860 * x ^ 2 * y ^ 7
+    - 21757 * x ^ 2 * y ^ 6
+    + 14910 * x ^ 2 * y ^ 5
+    - 6519 * x ^ 2 * y ^ 4
+    + 1821 * x ^ 2 * y ^ 3
+    - 265 * x ^ 2 * y ^ 2
+    + 5 * x ^ 2
+    - 4 * x * y ^ 19
+    + 58 * x * y ^ 18
+    - 363 * x * y ^ 17
+    + 1249 * x * y ^ 16
+    - 2304 * x * y ^ 15
+    + 748 * x * y ^ 14
+    + 7641 * x * y ^ 13
+    - 21574 * x * y ^ 12
+    + 28200 * x * y ^ 11
+    - 13181 * x * y ^ 10
+    - 17968 * x * y ^ 9
+    + 40018 * x * y ^ 8
+    - 37195 * x * y ^ 7
+    + 19348 * x * y ^ 6
+    - 4290 * x * y ^ 5
+    - 1463 * x * y ^ 4
+    + 1570 * x * y ^ 3
+    - 596 * x * y ^ 2
+    + 115 * x * y
+    - 9 * x
+    + 2 * y ^ 18
+    - 36 * y ^ 17
+    + 275 * y ^ 16
+    - 1204 * y ^ 15
+    + 3312 * y ^ 14
+    - 5562 * y ^ 13
+    + 3816 * y ^ 12
+    + 6677 * y ^ 11
+    - 23802 * y ^ 10
+    + 35574 * y ^ 9
+    - 30990 * y ^ 8
+    + 13655 * y ^ 7
+    + 2149 * y ^ 6
+    - 7786 * y ^ 5
+    + 5898 * y ^ 4
+    - 2568 * y ^ 3
+    + 688 * y ^ 2
+    - 104 * y
+    + 6
+
+set_option maxHeartbeats 2000000 in
+set_option maxRecDepth 20000 in
+/-- Bezout coefficient multiplying the third canonical coordinate in its
+source-curve resultant certificate. -/
+def sutherlandCanonicalZBezoutCoordinate25 (x y : ℚ) : ℚ :=
+  2 * x ^ 7 * y ^ 18
+    - 25 * x ^ 7 * y ^ 17
+    + 136 * x ^ 7 * y ^ 16
+    - 404 * x ^ 7 * y ^ 15
+    + 616 * x ^ 7 * y ^ 14
+    - 18 * x ^ 7 * y ^ 13
+    - 1983 * x ^ 7 * y ^ 12
+    + 4202 * x ^ 7 * y ^ 11
+    - 3847 * x ^ 7 * y ^ 10
+    + 72 * x ^ 7 * y ^ 9
+    + 3907 * x ^ 7 * y ^ 8
+    - 4759 * x ^ 7 * y ^ 7
+    + 3073 * x ^ 7 * y ^ 6
+    - 1232 * x ^ 7 * y ^ 5
+    + 285 * x ^ 7 * y ^ 4
+    - 31 * x ^ 7 * y ^ 3
+    - x ^ 7 * y ^ 2
+    + 2 * x ^ 6 * y ^ 21
+    - 33 * x ^ 6 * y ^ 20
+    + 238 * x ^ 6 * y ^ 19
+    - 975 * x ^ 6 * y ^ 18
+    + 2393 * x ^ 6 * y ^ 17
+    - 3019 * x ^ 6 * y ^ 16
+    - 922 * x ^ 6 * y ^ 15
+    + 11639 * x ^ 6 * y ^ 14
+    - 22956 * x ^ 6 * y ^ 13
+    + 22010 * x ^ 6 * y ^ 12
+    - 4091 * x ^ 6 * y ^ 11
+    - 18500 * x ^ 6 * y ^ 10
+    + 29782 * x ^ 6 * y ^ 9
+    - 26427 * x ^ 6 * y ^ 8
+    + 15988 * x ^ 6 * y ^ 7
+    - 6768 * x ^ 6 * y ^ 6
+    + 1972 * x ^ 6 * y ^ 5
+    - 328 * x ^ 6 * y ^ 4
+    + 18 * x ^ 6 * y ^ 3
+    + 5 * x ^ 6 * y ^ 2
+    - 4 * x ^ 5 * y ^ 22
+    + 64 * x ^ 5 * y ^ 21
+    - 449 * x ^ 5 * y ^ 20
+    + 1786 * x ^ 5 * y ^ 19
+    - 4210 * x ^ 5 * y ^ 18
+    + 4829 * x ^ 5 * y ^ 17
+    + 3013 * x ^ 5 * y ^ 16
+    - 22034 * x ^ 5 * y ^ 15
+    + 39445 * x ^ 5 * y ^ 14
+    - 33219 * x ^ 5 * y ^ 13
+    + 840 * x ^ 5 * y ^ 12
+    + 29562 * x ^ 5 * y ^ 11
+    - 31574 * x ^ 5 * y ^ 10
+    + 9908 * x ^ 5 * y ^ 9
+    + 12809 * x ^ 5 * y ^ 8
+    - 21442 * x ^ 5 * y ^ 7
+    + 16810 * x ^ 5 * y ^ 6
+    - 8478 * x ^ 5 * y ^ 5
+    + 2819 * x ^ 5 * y ^ 4
+    - 569 * x ^ 5 * y ^ 3
+    + 50 * x ^ 5 * y ^ 2
+    + 2 * x ^ 5 * y
+    + 2 * x ^ 4 * y ^ 23
+    - 29 * x ^ 4 * y ^ 22
+    + 176 * x ^ 4 * y ^ 21
+    - 550 * x ^ 4 * y ^ 20
+    + 737 * x ^ 4 * y ^ 19
+    + 780 * x ^ 4 * y ^ 18
+    - 4947 * x ^ 4 * y ^ 17
+    + 7765 * x ^ 4 * y ^ 16
+    - 1073 * x ^ 4 * y ^ 15
+    - 14532 * x ^ 4 * y ^ 14
+    + 21162 * x ^ 4 * y ^ 13
+    - 3848 * x ^ 4 * y ^ 12
+    - 23818 * x ^ 4 * y ^ 11
+    + 36407 * x ^ 4 * y ^ 10
+    - 30142 * x ^ 4 * y ^ 9
+    + 17699 * x ^ 4 * y ^ 8
+    - 7846 * x ^ 4 * y ^ 7
+    + 2762 * x ^ 4 * y ^ 6
+    - 874 * x ^ 4 * y ^ 5
+    + 291 * x ^ 4 * y ^ 4
+    - 126 * x ^ 4 * y ^ 3
+    + 40 * x ^ 4 * y ^ 2
+    - 8 * x ^ 4 * y
+    - 2 * x ^ 3 * y ^ 23
+    + 33 * x ^ 3 * y ^ 22
+    - 238 * x ^ 3 * y ^ 21
+    + 987 * x ^ 3 * y ^ 20
+    - 2576 * x ^ 3 * y ^ 19
+    + 4242 * x ^ 3 * y ^ 18
+    - 3742 * x ^ 3 * y ^ 17
+    - 996 * x ^ 3 * y ^ 16
+    + 11045 * x ^ 3 * y ^ 15
+    - 29847 * x ^ 3 * y ^ 14
+    + 61011 * x ^ 3 * y ^ 13
+    - 90591 * x ^ 3 * y ^ 12
+    + 82644 * x ^ 3 * y ^ 11
+    - 21741 * x ^ 3 * y ^ 10
+    - 52029 * x ^ 3 * y ^ 9
+    + 86168 * x ^ 3 * y ^ 8
+    - 73762 * x ^ 3 * y ^ 7
+    + 43137 * x ^ 3 * y ^ 6
+    - 18533 * x ^ 3 * y ^ 5
+    + 6012 * x ^ 3 * y ^ 4
+    - 1445 * x ^ 3 * y ^ 3
+    + 234 * x ^ 3 * y ^ 2
+    - 17 * x ^ 3 * y
+    - x ^ 3
+    + 2 * x ^ 2 * y ^ 22
+    - 43 * x ^ 2 * y ^ 21
+    + 390 * x ^ 2 * y ^ 20
+    - 2009 * x ^ 2 * y ^ 19
+    + 6503 * x ^ 2 * y ^ 18
+    - 13249 * x ^ 2 * y ^ 17
+    + 13907 * x ^ 2 * y ^ 16
+    + 6721 * x ^ 2 * y ^ 15
+    - 53867 * x ^ 2 * y ^ 14
+    + 104863 * x ^ 2 * y ^ 13
+    - 123545 * x ^ 2 * y ^ 12
+    + 99694 * x ^ 2 * y ^ 11
+    - 56103 * x ^ 2 * y ^ 10
+    + 14770 * x ^ 2 * y ^ 9
+    + 17146 * x ^ 2 * y ^ 8
+    - 33764 * x ^ 2 * y ^ 7
+    + 32153 * x ^ 2 * y ^ 6
+    - 20183 * x ^ 2 * y ^ 5
+    + 8760 * x ^ 2 * y ^ 4
+    - 2592 * x ^ 2 * y ^ 3
+    + 498 * x ^ 2 * y ^ 2
+    - 55 * x ^ 2 * y
+    + 3 * x ^ 2
+    + 10 * x * y ^ 20
+    - 161 * x * y ^ 19
+    + 1163 * x * y ^ 18
+    - 4945 * x * y ^ 17
+    + 13378 * x * y ^ 16
+    - 22076 * x * y ^ 15
+    + 13681 * x * y ^ 14
+    + 32692 * x * y ^ 13
+    - 109862 * x * y ^ 12
+    + 165628 * x * y ^ 11
+    - 145183 * x * y ^ 10
+    + 56890 * x * y ^ 9
+    + 31461 * x * y ^ 8
+    - 66738 * x * y ^ 7
+    + 53749 * x * y ^ 6
+    - 26900 * x * y ^ 5
+    + 8817 * x * y ^ 4
+    - 1761 * x * y ^ 3
+    + 147 * x * y ^ 2
+    + 13 * x * y
+    - 3 * x
+    - y ^ 19
+    + 25 * y ^ 18
+    - 234 * y ^ 17
+    + 1212 * y ^ 16
+    - 3954 * y ^ 15
+    + 8298 * y ^ 14
+    - 9801 * y ^ 13
+    - 244 * y ^ 12
+    + 26039 * y ^ 11
+    - 56274 * y ^ 10
+    + 69084 * y ^ 9
+    - 54379 * y ^ 8
+    + 25492 * y ^ 7
+    - 3173 * y ^ 6
+    - 4843 * y ^ 5
+    + 4071 * y ^ 4
+    - 1661 * y ^ 3
+    + 387 * y ^ 2
+    - 45 * y
+    + 1
+
+set_option maxHeartbeats 4000000 in
+set_option maxRecDepth 20000 in
+/-- Exact resultant identity between the source equation and the third
+canonical coordinate.  Its only fibre factors are the excluded chart boundary
+`y=1` and the degree-ten polynomial with no rational root. -/
+theorem sutherlandCanonicalZ_bezout_identity25 (x y : ℚ) :
+    sutherlandCanonicalZBezoutSource25 x y * sutherlandX1Plane25 x y +
+        sutherlandCanonicalZBezoutCoordinate25 x y *
+          sutherlandCanonicalZ25 x y =
+      (y
+    - 1) ^ 12 * sutherlandBasePointFiber25 y := by
+  simp only [sutherlandCanonicalZBezoutSource25,
+    sutherlandCanonicalZBezoutCoordinate25, sutherlandX1Plane25,
+    sutherlandCanonicalZ25, sutherlandBasePointFiber25]
+  ring
+
+/-- The third canonical coordinate never vanishes on the optimized source
+away from `y=1`.  The exact resultant would otherwise force a rational root
+of the degree-ten base-point fibre polynomial. -/
+theorem sutherlandCanonicalZ25_ne_zero
+    {x y : ℚ} (hsource : sutherlandX1Plane25 x y = 0) (hy1 : y ≠ 1) :
+    sutherlandCanonicalZ25 x y ≠ 0 := by
+  intro hZ
+  have hbezout := sutherlandCanonicalZ_bezout_identity25 x y
+  rw [hsource, hZ, mul_zero, mul_zero, zero_add] at hbezout
+  have hySub : y - 1 ≠ 0 := sub_ne_zero.mpr hy1
+  have hfiber : sutherlandBasePointFiber25 y = 0 :=
+    (mul_eq_zero.mp hbezout.symm).resolve_left (pow_ne_zero 12 hySub)
+  exact sutherlandBasePointFiber25_ne_zero y hfiber
+
+/-- A homogeneous vector cannot represent any canonical cusp when its third
+coordinate is nonzero and its first and fourth coordinates do not vanish
+simultaneously.  The third coordinate excludes cusps A, C, and E, while the
+other two coordinates exclude B and D. -/
+theorem not_isCusp25_of_z_ne_zero_and_xw
+    {p : Coordinates25} (hz : p.z ≠ 0) (hxw : p.x ≠ 0 ∨ p.w ≠ 0) :
+    ¬ IsCusp25 p := by
+  intro hcusp
+  rw [isCusp25_iff] at hcusp
+  rcases hcusp with hpA | hpB | hpC | hpD | hpE
+  · rcases hpA with ⟨a, ha, hpx, hpy, hpz, hpw⟩
+    exact hz (by simpa [cusp25A] using hpz)
+  · rcases hpB with ⟨a, ha, hpx, hpy, hpz, hpw⟩
+    rcases hxw with hx | hw
+    · exact hx (by simpa [cusp25B] using hpx)
+    · exact hw (by simpa [cusp25B] using hpw)
+  · rcases hpC with ⟨a, ha, hpx, hpy, hpz, hpw⟩
+    exact hz (by simpa [cusp25C] using hpz)
+  · rcases hpD with ⟨a, ha, hpx, hpy, hpz, hpw⟩
+    rcases hxw with hx | hw
+    · exact hx (by simpa [cusp25D] using hpx)
+    · exact hw (by simpa [cusp25D] using hpw)
+  · rcases hpE with ⟨a, ha, hpx, hpy, hpz, hpw⟩
+    exact hz (by simpa [cusp25E] using hpz)
+
+/-- Every optimized source point away from the boundary `y=1` maps outside
+the five canonical cusp classes.  The source equation makes the third
+coordinate nonzero, and the base-point certificate supplies the complementary
+first/fourth nonvanishing condition. -/
+theorem sutherlandCanonicalCoordinates25_not_isCusp
+    {x y : ℚ} (hsource : sutherlandX1Plane25 x y = 0) (hy1 : y ≠ 1) :
+    ¬ IsCusp25 (sutherlandCanonicalCoordinates25 x y) := by
+  apply not_isCusp25_of_z_ne_zero_and_xw
+  · simpa [sutherlandCanonicalCoordinates25] using
+      sutherlandCanonicalZ25_ne_zero hsource hy1
+  · simpa [sutherlandCanonicalCoordinates25] using
+      sutherlandCanonicalXW_not_both_zero (x := x) hy1
+
 /-! ## Exact pullback of the canonical equations -/
 
 /-- Degree-six cofactor in the pullback of the canonical quadric. -/
@@ -468,5 +841,17 @@ theorem tateCanonicalCoordinates25_onCanonical
   apply sutherlandCanonicalCoordinates25_onCanonical
   simpa [tateSutherlandXCoordinate25, tateSutherlandYCoordinate25] using
     (tateToSutherland_on_plane hb h5 hF)
+
+/-- Every primitive order-25 Tate solution maps outside the five canonical
+cusp classes.  Both hypotheses needed by the source-side certificate follow
+from the already checked Tate-to-Sutherland comparison. -/
+theorem tateCanonicalCoordinates25_not_isCusp
+    {b c : ℚ} (hb : b ≠ 0) (h5 : TateNFDivision.F5 b c ≠ 0)
+    (hF : F25 b c = 0) :
+    ¬ IsCusp25 (tateCanonicalCoordinates25 b c) := by
+  apply sutherlandCanonicalCoordinates25_not_isCusp
+  · simpa [tateSutherlandXCoordinate25, tateSutherlandYCoordinate25] using
+      (tateToSutherland_on_plane hb h5 hF)
+  · exact tateSutherlandYCoordinate25_ne_one hb h5 hF
 
 end MazurProof.RationalPointsN25CanonicalSourceBridge

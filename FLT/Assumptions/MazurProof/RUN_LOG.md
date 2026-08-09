@@ -1142,11 +1142,17 @@
   resultant `(y-1)⁷ p₁₀(y)`.  The monic polynomial `p₁₀` has no root modulo
   two, hence no rational root.  This proves the composite Tate canonical
   quadruple is nonzero.
+- A second kernel-checked resultant between the source equation and the third
+  canonical coordinate is `(y-1)¹² p₁₀(y)`.  It proves that coordinate is
+  nonzero on the primitive Tate locus.
+- The third coordinate excludes cusp classes A, C, and E, while the
+  first/fourth nonvanishing pair excludes B and D.  Thus the direct canonical
+  Tate image is formally noncuspidal.
 - The scoped file check passes.  The direct comparison bypasses the formerly
   missing Sutherland-to-LMFDB plane transformation.
 - Axiom audits of the quadric identity, cubic identity, affine canonical map,
   and Tate composite contain exactly `propext`, `Classical.choice`, and
   `Quot.sound`.
-- The affine base-point calculation is now formalized.  Excluding the five
-  projective cusp fibres, followed by the global canonical rational-point
-  classification, is the remaining N25 work.
+- The affine base-point and projective cusp-fibre calculations are now
+  formalized.  The global canonical rational-point classification is the
+  remaining N25 work.
