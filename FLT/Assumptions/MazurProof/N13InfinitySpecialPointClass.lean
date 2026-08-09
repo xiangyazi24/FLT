@@ -112,6 +112,81 @@ theorem specialPointClass_specialAnchor_ne_canonicalClass :
     anchorPair_not_canonical
       ((N13AbelFiberTwoModel.abel_eq_canonicalClass_iff _).1 h)
 
+/-!
+## Injectivity of the anchored special Abel map
+
+Outside the canonical pencil an Abel class has a unique effective divisor of
+degree two.  Inside the pencil, the fixed positive-infinity anchor determines
+the base point and therefore forces the other point to be negative infinity.
+Thus adjoining the fixed anchor loses no information about a special curve
+point.
+-/
+
+/-- Two special curve points with the same anchored Abel class are equal.
+The only exceptional Abel fibre is the canonical pencil, and only its
+infinity fibre contains the fixed anchor. -/
+theorem specialPointClass_injective :
+    Function.Injective
+      N13RationalPointEndgame.specialPointClass := by
+  intro P Q hPQ
+  change
+    N13AbelFiberTwoModel.abel
+          s(P, N13RationalPointEndgame.specialAnchor) =
+      N13AbelFiberTwoModel.abel
+          s(Q, N13RationalPointEndgame.specialAnchor) at hPQ
+  rw [N13AbelFiberTwoModel.abel_eq_iff] at hPQ
+  rcases hPQ with hdivisor | ⟨hcanonicalP, hcanonicalQ⟩
+  · -- Equality of unordered pairs either fixes both entries or swaps the
+    -- moving point with the common anchor; both alternatives give `P = Q`.
+    rw [Sym2.eq_iff] at hdivisor
+    rcases hdivisor with hstraight | hswap
+    · exact hstraight.1
+    · exact hswap.1.trans hswap.2
+  · -- A canonical divisor containing the sheet-zero infinity anchor must
+    -- have the sheet-one infinity point as its other member.
+    have eq_infinityMinus_of_canonical
+        (T : N13RationalPointEndgame.SpecialCurvePoint)
+        (hcanonical :
+          N13AbelFiberTwoModel.IsCanonical
+            s(T, N13RationalPointEndgame.specialAnchor)) :
+        T =
+          N13SpecialCuspReduction.specialCuspEquiv
+            N13Mumford.Cusp13.infinityMinus := by
+      obtain ⟨b, hb⟩ := hcanonical
+      change
+        s(N13AbelFiberTwoModel.curvePointEquiv.symm (b, 0),
+            N13AbelFiberTwoModel.curvePointEquiv.symm (b, 1)) =
+          s(T, N13RationalPointEndgame.specialAnchor) at hb
+      rw [Sym2.eq_iff] at hb
+      rcases hb with hstraight | hswap
+      · have hsheet :=
+          congrArg
+            (fun Z => (N13AbelFiberTwoModel.curvePointEquiv Z).2)
+            hstraight.2
+        simp at hsheet
+      · have hbbase :
+            b = N13AbelFiberTwoModel.baseAtInfinity := by
+          have hcoord :=
+            congrArg N13AbelFiberTwoModel.curvePointEquiv hswap.1
+          simpa using congrArg Prod.fst hcoord
+        apply N13AbelFiberTwoModel.curvePointEquiv.injective
+        calc
+          N13AbelFiberTwoModel.curvePointEquiv T = (b, 1) := by
+            simpa using
+              congrArg N13AbelFiberTwoModel.curvePointEquiv hswap.2.symm
+          _ =
+              (N13AbelFiberTwoModel.baseAtInfinity, 1) := by
+            rw [hbbase]
+          _ =
+              N13AbelFiberTwoModel.curvePointEquiv
+                (N13SpecialCuspReduction.specialCuspEquiv
+                  N13Mumford.Cusp13.infinityMinus) := by
+            simp [N13AbelFiberTwoModel.baseAtInfinity,
+              N13SpecialCuspReduction.cuspCoordinate]
+    exact
+      (eq_infinityMinus_of_canonical P hcanonicalP).trans
+        (eq_infinityMinus_of_canonical Q hcanonicalQ).symm
+
 /-! ## Proper reduction of an escaping affine point -/
 
 /-- Proper reduction of a nonintegral affine point records the residue of

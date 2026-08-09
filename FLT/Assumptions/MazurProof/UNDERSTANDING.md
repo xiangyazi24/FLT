@@ -880,13 +880,27 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   canonical translated kernel representatives, and the first-jet comparison
   for doubling.  No additional finite Jacobian group law or cardinality
   computation belongs on the critical path.
-- Q3805 independently confirms an even weaker endpoint formulation: it is
-  sufficient to prove, only for rational curve points, that equality of
-  their anchored special Abel classes reflects equality of their rational
-  Abel--Jacobi classes.  Cusp surjectivity and rational Abel--Jacobi
-  injectivity then give affine cuspidality directly.  This pointwise
-  reflection theorem is weaker than constructing a group law on the
-  19-element special set or proving global rational Picard finiteness.  The
-  full `SpreadData` route remains useful because it also supplies the
-  separated-kernel endgame, but it must not be mistaken for the weakest
-  theorem needed by `CyclicExclusion13`.
+- `N13InfinitySpecialPointClass.specialPointClass_injective` proves that the
+  anchored special Abel map loses no special curve point.  Away from the
+  canonical pencil, equality of Abel classes gives equality of effective
+  divisors.  In the canonical pencil, a divisor containing the fixed
+  positive-infinity anchor is forced to be the infinity fibre, so its other
+  point is negative infinity.
+- This injectivity corrects the earlier interpretation of Q3805.  The
+  pointwise reflection statement is logically sufficient for the endpoint,
+  but `N13RationalPicardEndpoint.pointwiseReflection_iff_reduceCurve_injective`
+  proves that it is exactly injectivity of proper reduction on rational curve
+  points: rational Abel--Jacobi and anchored special Abel are both already
+  injective.  Since the six rational cusps reduce bijectively to all six
+  special points, this pointwise route is essentially the desired rational
+  point classification itself, not a constructive shortcut to it.
+- `N13RationalPicardEndpoint.lean` records the exact constructive endpoint.
+  Global spread existence and pointwise Abel compatibility are consumed
+  automatically.  The remaining providers are (1) `class_eq_iff` for the
+  concrete rational spread lines, (2) literal mapped-special equality for
+  the canonical balanced representative of each translated kernel class,
+  and (3) first-jet compatibility comparing the chosen representative of
+  `2z` with the square transition for `z`.  These inputs produce two-adic
+  separatedness and hence the primitive affine cuspidality theorem.  The
+  assembly and the pointwise equivalence both compile and depend only on
+  `propext`, `Classical.choice`, and `Quot.sound`.
