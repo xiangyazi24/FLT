@@ -522,6 +522,37 @@ four-conjugate norm identity at three and proves
 The newform identification and Frobenius interpretation remain explicit open
 seams.  If supplied, the bounds at two and three control complementary
 primary torsion; this corrects the earlier, insufficient single-prime plan.
+
+The direct characteristic-three curve calculation is being rebuilt with a
+structure-first proof.  A first attempt normalized the `x=1` chart and split
+the `F₈₁` search into many fixed-coordinate truth-table files.  Although those
+files could be made kernel-checkable, the method still enumerated an
+`81³` Cartesian product, consumed tens of gigabytes per certificate, and
+explained no mathematics.  That route is rejected and its generated modules
+are not production evidence.  Merely partitioning a finite search does not
+turn it into a proof worth maintaining.
+
+There are two successive structural reductions.  First, in characteristic
+three the normalized quadric is
+`Q = y²+yz-z+(z-1)w`; away from `z=1` it determines `w` uniquely.  The exact
+cleared-denominator identity reduces the cubic to
+`B(y,z)=y⁴z+yz⁴+y³z-z⁴+y³-y²+z²+z`, while the exceptional divisor
+`z=1` is handled separately.  This already changes a three-dimensional point
+search into a bivariate residual problem.  Second, over `F₈₁`, which contains
+the fifth roots of unity, diagonalizing the proved order-five automorphism
+turns the quadric into `u₂u₃=u₁u₄`.  The Segre parametrization
+`(u₁,u₂,u₃,u₄)=(ac,ad,bc,bd)` turns the cubic into a four-term
+bidegree-`(3,3)` equation.  On its dense chart, with `r=b/a`, `s=d/c`, and the
+invariant quotient parameter `t=r²s`, it has Kummer form
+`r⁵=-t²(B+ζ²t)/(1+At)`.  The intended `F₈₁` certificate therefore
+checks 81 affine quotient parameters and a finite boundary divisor, not
+`81²` or `81³` ambient tuples.  The generic elimination and Kummer identities
+must be Lean theorems; only their final one-dimensional fibre and boundary
+data may be finite certificates.  The remaining formal seams are the
+projective coordinate equivalence and the cyclic-group lemma identifying the
+size of a fifth-power fibre; the numerical certificate is not to be promoted
+to a canonical-curve point-count theorem until those bridges are present.
+
 `RationalPointsN25TwoPrimeReduction.lean` proves the remaining elementary
 endgame: if a finite cardinal divides both `2^a·71` and `3^b·71`, it divides
 `71`.  The future specialization layer therefore needs only to produce those
