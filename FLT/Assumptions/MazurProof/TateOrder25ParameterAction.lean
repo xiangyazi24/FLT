@@ -200,6 +200,262 @@ theorem two_nsmul_tateOrigin
       WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.negY]
     ring
 
+private theorem tateTriple_nonsingular
+    (b c : ℚ) [WeierstrassCurve.IsElliptic (TateOriginDivision.W b c)] :
+    WeierstrassCurve.Affine.Nonsingular
+      (TateOriginDivision.W b c) c (b - c) := by
+  apply WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+  rw [WeierstrassCurve.Affine.equation_iff]
+  simp [TateOriginDivision.W, tateNormalFormCurve]
+  ring
+
+/-- The affine point `(c,b-c)` representing `3P` on Tate normal form. -/
+def tateTriplePoint25
+    (b c : ℚ) [WeierstrassCurve.IsElliptic (TateOriginDivision.W b c)] :
+    WeierstrassCurve.Affine.Point (TateOriginDivision.W b c) :=
+  WeierstrassCurve.Affine.Point.some c (b - c)
+    (tateTriple_nonsingular b c)
+
+/-- The point `(c,b-c)` is literally the third multiple of the marked Tate
+origin. -/
+theorem three_nsmul_tateOrigin
+    (b c : ℚ) [WeierstrassCurve.IsElliptic (TateOriginDivision.W b c)]
+    (hb : b ≠ 0) :
+    (3 : ℕ) • TateOriginDivision.tateOrigin b c =
+      tateTriplePoint25 b c := by
+  rw [show (3 : ℕ) = 2 + 1 by norm_num, add_nsmul, one_nsmul,
+    two_nsmul_tateOrigin b c hb]
+  change
+    WeierstrassCurve.Affine.Point.some b (b * c) _ +
+      WeierstrassCurve.Affine.Point.some 0 0 _ = tateTriplePoint25 b c
+  rw [WeierstrassCurve.Affine.Point.add_of_X_ne hb]
+  unfold tateTriplePoint25
+  rw [WeierstrassCurve.Affine.Point.some.injEq]
+  constructor
+  · rw [WeierstrassCurve.Affine.slope_of_X_ne hb]
+    simp [TateOriginDivision.W, tateNormalFormCurve,
+      WeierstrassCurve.Affine.addX]
+    field_simp [hb]
+    ring
+  · rw [WeierstrassCurve.Affine.slope_of_X_ne hb]
+    simp [TateOriginDivision.W, tateNormalFormCurve,
+      WeierstrassCurve.Affine.addX, WeierstrassCurve.Affine.addY,
+      WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.negY]
+    field_simp [hb]
+    ring
+
+/-- Horizontal coordinate of the fourth multiple of the Tate origin. -/
+def tateFourX25 (b c : ℚ) : ℚ :=
+  b * TateNFDivision.F5 b c / c ^ 2
+
+/-- Vertical coordinate of the fourth multiple of the Tate origin. -/
+def tateFourY25 (b c : ℚ) : ℚ :=
+  -(b ^ 2 * TateNFDivision.F6 b c / c ^ 3)
+
+private theorem tateFour_nonsingular
+    (b c : ℚ) [WeierstrassCurve.IsElliptic (TateOriginDivision.W b c)]
+    (hc : c ≠ 0) :
+    WeierstrassCurve.Affine.Nonsingular
+      (TateOriginDivision.W b c) (tateFourX25 b c) (tateFourY25 b c) := by
+  apply WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+  rw [WeierstrassCurve.Affine.equation_iff]
+  simp [TateOriginDivision.W, tateNormalFormCurve, tateFourX25,
+    tateFourY25, TateNFDivision.F5, TateNFDivision.F6]
+  field_simp [hc]
+  ring
+
+/-- The explicit affine point representing `4P` on Tate normal form. -/
+def tateFourPoint25
+    (b c : ℚ) [WeierstrassCurve.IsElliptic (TateOriginDivision.W b c)]
+    (hc : c ≠ 0) :
+    WeierstrassCurve.Affine.Point (TateOriginDivision.W b c) :=
+  WeierstrassCurve.Affine.Point.some
+    (tateFourX25 b c) (tateFourY25 b c)
+    (tateFour_nonsingular b c hc)
+
+/-- The displayed point with denominators `c²,c³` is literally the fourth
+multiple of the marked Tate origin. -/
+theorem four_nsmul_tateOrigin
+    (b c : ℚ) [WeierstrassCurve.IsElliptic (TateOriginDivision.W b c)]
+    (hb : b ≠ 0) (hc : c ≠ 0) :
+    (4 : ℕ) • TateOriginDivision.tateOrigin b c =
+      tateFourPoint25 b c hc := by
+  rw [show (4 : ℕ) = 3 + 1 by norm_num, add_nsmul, one_nsmul,
+    three_nsmul_tateOrigin b c hb]
+  change
+    WeierstrassCurve.Affine.Point.some c (b - c) _ +
+      WeierstrassCurve.Affine.Point.some 0 0 _ = tateFourPoint25 b c hc
+  rw [WeierstrassCurve.Affine.Point.add_of_X_ne hc]
+  unfold tateFourPoint25
+  rw [WeierstrassCurve.Affine.Point.some.injEq]
+  constructor
+  · rw [WeierstrassCurve.Affine.slope_of_X_ne hc]
+    simp [TateOriginDivision.W, tateNormalFormCurve,
+      WeierstrassCurve.Affine.addX, tateFourX25, TateNFDivision.F5]
+    field_simp [hc]
+    ring
+  · rw [WeierstrassCurve.Affine.slope_of_X_ne hc]
+    simp [TateOriginDivision.W, tateNormalFormCurve,
+      WeierstrassCurve.Affine.addX, WeierstrassCurve.Affine.addY,
+      WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.negY,
+      tateFourY25, TateNFDivision.F6]
+    field_simp [hc]
+    ring
+
+/-- The difference between the fourth and third horizontal coordinates is
+controlled exactly by the order-seven division factor. -/
+theorem tateFourX25_sub_c
+    (b c : ℚ) (hc : c ≠ 0) :
+    tateFourX25 b c - c =
+      -(TateNFDivision.F7 b c / c ^ 2) := by
+  simp [tateFourX25, TateNFDivision.F5, TateNFDivision.F7]
+  field_simp [hc]
+  ring
+
+/-- Nonvanishing of `F7` makes the points `3P` and `4P` horizontally
+distinct, so their sum is computed by the secant branch of the group law. -/
+theorem c_ne_tateFourX25
+    (b c : ℚ) (hc : c ≠ 0) (h7 : TateNFDivision.F7 b c ≠ 0) :
+    c ≠ tateFourX25 b c := by
+  intro heq
+  have hzero : tateFourX25 b c - c = 0 := by rw [← heq]; ring
+  rw [tateFourX25_sub_c b c hc] at hzero
+  apply h7
+  field_simp [hc] at hzero
+  linarith
+
+/-- Secant slope through the explicit points `3P` and `4P`. -/
+def tateSevenSlope25 (b c : ℚ) : ℚ :=
+  (b ^ 2 * TateNFDivision.F6 b c +
+      c ^ 3 * TateNFDivision.F5 b c) /
+    (c * TateNFDivision.F7 b c)
+
+/-- Horizontal coordinate of the seventh multiple of the Tate origin. -/
+def tateSevenX25 (b c : ℚ) : ℚ :=
+  b * c * TateNFDivision.F6 b c * TateNFDivision.F8 b c /
+    TateNFDivision.F7 b c ^ 2
+
+/-- Vertical coordinate of the seventh multiple of the Tate origin. -/
+def tateSevenY25 (b c : ℚ) : ℚ :=
+  -(b ^ 2 * TateNFDivision.F6 b c ^ 2 * TateNFDivision.F9 b c /
+    TateNFDivision.F7 b c ^ 3)
+
+/-- The Mathlib secant slope between the explicit representatives of `3P`
+and `4P` reduces to the compact displayed rational function. -/
+theorem slope_three_four_eq_tateSevenSlope25
+    (b c : ℚ) (hc : c ≠ 0) (h7 : TateNFDivision.F7 b c ≠ 0) :
+    WeierstrassCurve.Affine.slope (TateOriginDivision.W b c)
+        c (tateFourX25 b c) (b - c) (tateFourY25 b c) =
+      tateSevenSlope25 b c := by
+  rw [WeierstrassCurve.Affine.slope_of_X_ne
+    (c_ne_tateFourX25 b c hc h7)]
+  simp [tateFourX25, tateFourY25, tateSevenSlope25,
+    TateNFDivision.F5, TateNFDivision.F6, TateNFDivision.F7]
+  field_simp [hc, h7]
+  ring
+
+/-- Substituting the compact secant slope into the Weierstrass addition
+formula gives the displayed horizontal coordinate of `7P`. -/
+theorem addX_three_four_eq_tateSevenX25
+    (b c : ℚ) (hc : c ≠ 0) (h7 : TateNFDivision.F7 b c ≠ 0) :
+    WeierstrassCurve.Affine.addX (TateOriginDivision.W b c)
+        c (tateFourX25 b c) (tateSevenSlope25 b c) =
+      tateSevenX25 b c := by
+  simp only [WeierstrassCurve.Affine.addX]
+  simp only [TateOriginDivision.W, tateNormalFormCurve_a₁,
+    tateNormalFormCurve_a₂]
+  simp only [sub_neg_eq_add]
+  change
+    tateSevenSlope25 b c ^ 2 +
+        (1 - c) * tateSevenSlope25 b c + b - c -
+          tateFourX25 b c =
+      tateSevenX25 b c
+  unfold tateSevenSlope25 tateSevenX25 tateFourX25
+  field_simp [hc, h7]
+  simp [TateNFDivision.F5, TateNFDivision.F6, TateNFDivision.F7,
+    TateNFDivision.F8]
+  ring
+
+/-- The corresponding vertical addition formula gives the compact
+`-b² F6² F9/F7³` coordinate. -/
+theorem addY_three_four_eq_tateSevenY25
+    (b c : ℚ) (hc : c ≠ 0) (h7 : TateNFDivision.F7 b c ≠ 0) :
+    WeierstrassCurve.Affine.addY (TateOriginDivision.W b c)
+        c (tateFourX25 b c) (b - c) (tateSevenSlope25 b c) =
+      tateSevenY25 b c := by
+  unfold WeierstrassCurve.Affine.addY
+  simp only [WeierstrassCurve.Affine.negY,
+    WeierstrassCurve.Affine.negAddY]
+  rw [addX_three_four_eq_tateSevenX25 b c hc h7]
+  simp only [TateOriginDivision.W, tateNormalFormCurve_a₁,
+    tateNormalFormCurve_a₃]
+  simp only [sub_neg_eq_add]
+  change
+    -(tateSevenSlope25 b c * (tateSevenX25 b c - c) + (b - c)) -
+        (1 - c) * tateSevenX25 b c + b =
+      tateSevenY25 b c
+  unfold tateSevenSlope25 tateSevenX25 tateSevenY25
+  field_simp [hc, h7]
+  simp [TateNFDivision.F5, TateNFDivision.F6, TateNFDivision.F7,
+    TateNFDivision.F8, TateNFDivision.F9]
+  ring
+
+private theorem tateSeven_nonsingular
+    (b c : ℚ) [WeierstrassCurve.IsElliptic (TateOriginDivision.W b c)]
+    (h7 : TateNFDivision.F7 b c ≠ 0) :
+    WeierstrassCurve.Affine.Nonsingular
+      (TateOriginDivision.W b c) (tateSevenX25 b c) (tateSevenY25 b c) := by
+  apply WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+  rw [WeierstrassCurve.Affine.equation_iff]
+  simp only [TateOriginDivision.W, tateNormalFormCurve_a₁,
+    tateNormalFormCurve_a₂, tateNormalFormCurve_a₃,
+    tateNormalFormCurve_a₄, tateNormalFormCurve_a₆, zero_mul, add_zero]
+  simp only [neg_mul]
+  change
+    tateSevenY25 b c ^ 2 +
+        (1 - c) * tateSevenX25 b c * tateSevenY25 b c +
+          -(b * tateSevenY25 b c) =
+      tateSevenX25 b c ^ 3 + -(b * tateSevenX25 b c ^ 2)
+  unfold tateSevenX25 tateSevenY25
+  field_simp [h7]
+  simp [TateNFDivision.F6, TateNFDivision.F7,
+    TateNFDivision.F8, TateNFDivision.F9]
+  ring
+
+/-- The explicit affine point representing `7P` on Tate normal form. -/
+def tateSevenPoint25
+    (b c : ℚ) [WeierstrassCurve.IsElliptic (TateOriginDivision.W b c)]
+    (h7 : TateNFDivision.F7 b c ≠ 0) :
+    WeierstrassCurve.Affine.Point (TateOriginDivision.W b c) :=
+  WeierstrassCurve.Affine.Point.some
+    (tateSevenX25 b c) (tateSevenY25 b c)
+    (tateSeven_nonsingular b c h7)
+
+/-- The compact coordinates with denominators `F7²,F7³` are literally the
+seventh multiple of the marked Tate origin. -/
+theorem seven_nsmul_tateOrigin
+    (b c : ℚ) [WeierstrassCurve.IsElliptic (TateOriginDivision.W b c)]
+    (hb : b ≠ 0) (hc : c ≠ 0)
+    (h7 : TateNFDivision.F7 b c ≠ 0) :
+    (7 : ℕ) • TateOriginDivision.tateOrigin b c =
+      tateSevenPoint25 b c h7 := by
+  rw [show (7 : ℕ) = 3 + 4 by norm_num, add_nsmul,
+    three_nsmul_tateOrigin b c hb, four_nsmul_tateOrigin b c hb hc]
+  change
+    WeierstrassCurve.Affine.Point.some c (b - c) _ +
+      WeierstrassCurve.Affine.Point.some
+        (tateFourX25 b c) (tateFourY25 b c) _ =
+      tateSevenPoint25 b c h7
+  have hx := c_ne_tateFourX25 b c hc h7
+  rw [WeierstrassCurve.Affine.Point.add_of_X_ne hx]
+  unfold tateSevenPoint25
+  rw [WeierstrassCurve.Affine.Point.some.injEq]
+  constructor
+  · rw [slope_three_four_eq_tateSevenSlope25 b c hc h7]
+    exact addX_three_four_eq_tateSevenX25 b c hc h7
+  · rw [slope_three_four_eq_tateSevenSlope25 b c hc h7]
+    exact addY_three_four_eq_tateSevenY25 b c hc h7
+
 /-- Tangent slope used after translating the doubled point `(b,bc)` to the
 origin. -/
 def tateDoubleSlope25 (b c : ℚ) : ℚ :=

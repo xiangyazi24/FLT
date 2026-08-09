@@ -1017,6 +1017,13 @@
 - For `F7`, specialized the existing compact factorization to show that
   `F7=0` would force `F8=0`, then used two small polynomial identities to
   force `c⁵=0`.  This supplies the denominator needed to construct `7P`.
+- Promoted the formerly private scratch formulas for `3P` and `4P` into the
+  production parameter-action file and reproved both against the current
+  Tate-origin group law.
+- Computed `7P=3P+4P` through the secant branch.  Its exact compact
+  coordinates are `x₇=bc F6 F8/F7²` and
+  `y₇=-b² F6² F9/F7³`; the point equation, secant slope, both addition
+  coordinates, and literal sevenfold-multiple equality are proved.
 - Verified from the affine group law that `2P=(b,bc)` for the Tate origin.
   Translating this point to the origin and applying the project's standard
   Tate scaling gives the exact parameter action
@@ -1037,8 +1044,9 @@
   canonical bridge.  The audited source-denominator, doubled-point,
   normalization, homogeneous-lift, and noncusp declarations depend exactly
   on `propext`, `Classical.choice`, and `Quot.sound`.
-- The main N25 seam remains open: the `7P` involution and its denominator
-  certificates beyond `F7`, literal invariant Tate-to-plane numerators, their
+- The main N25 seam remains open: normalization at the now-explicit `7P`,
+  including its `G14` and translated-`a₂` denominators, then literal invariant
+  Tate-to-plane numerators, their
   `F25` divisibility certificate, the four source-locus nonvanishing
   certificates,
   and the global canonical rational-point classification are still missing.
