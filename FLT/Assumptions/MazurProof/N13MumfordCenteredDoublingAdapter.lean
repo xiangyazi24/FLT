@@ -53,6 +53,83 @@ theorem centeredPic_pair_two_nsmul
           (F.pair z) := by
       rw [F.realize z]
 
+/-- The canonical disk pair recovered at `2 • z` is exactly the centered
+Mumford-group double of the pair recovered at `z`.
+
+This is representative-level wiring, not the missing Cantor coefficient
+calculation.  Additivity first identifies the centered Picard classes; the
+proved uniqueness of balanced N13 Mumford representatives then upgrades that
+class equality to literal equality of Mumford data. -/
+theorem recoveredPair_mumford_eq_centeredDouble
+    {H : AddSubgroup RationalPic}
+    (R : CanonicalMappedSpecialFamily H)
+    (z : H) :
+    N13TwoAdicAbelChartPic.DiskPair.mumford
+        (R.recoveredPair (2 • z)) =
+      2 • N13TwoAdicAbelChartPic.DiskPair.mumford
+          (R.recoveredPair z) -
+        N13TwoAdicAbelChartPic.DiskPair.mumford
+          N13TwoAdicAbelChartData.basePair := by
+  let P := R.recoveredPair z
+  let Q := R.recoveredPair (2 • z)
+  let B := N13TwoAdicAbelChartData.basePair
+  have hP :
+      N13TwoAdicAbelChartPic.DiskPair.pic P -
+          N13TwoAdicAbelChartPic.DiskPair.pic B =
+        N13TwoAdicAbelChartSection.subgroupToPic H z := by
+    simpa only [P, B,
+      N13TwoAdicAbelChartPic.DiskPair.centeredPic] using
+      R.realize_recoveredPair z
+  have hQ :
+      N13TwoAdicAbelChartPic.DiskPair.pic Q -
+          N13TwoAdicAbelChartPic.DiskPair.pic B =
+        N13TwoAdicAbelChartSection.subgroupToPic H (2 • z) := by
+    simpa only [Q, B,
+      N13TwoAdicAbelChartPic.DiskPair.centeredPic] using
+      R.realize_recoveredPair (2 • z)
+  have hcenter :
+      N13TwoAdicAbelChartPic.DiskPair.pic Q -
+          N13TwoAdicAbelChartPic.DiskPair.pic B =
+        2 • (N13TwoAdicAbelChartPic.DiskPair.pic P -
+          N13TwoAdicAbelChartPic.DiskPair.pic B) := by
+    calc
+      N13TwoAdicAbelChartPic.DiskPair.pic Q -
+          N13TwoAdicAbelChartPic.DiskPair.pic B =
+          N13TwoAdicAbelChartSection.subgroupToPic H (2 • z) := hQ
+      _ = 2 • N13TwoAdicAbelChartSection.subgroupToPic H z := by
+        exact
+          map_nsmul
+            (N13TwoAdicAbelChartSection.subgroupToPic H) 2 z
+      _ = 2 • (N13TwoAdicAbelChartPic.DiskPair.pic P -
+          N13TwoAdicAbelChartPic.DiskPair.pic B) := by rw [hP]
+  have hpic :
+      N13TwoAdicAbelChartPic.DiskPair.pic Q =
+        2 • N13TwoAdicAbelChartPic.DiskPair.pic P -
+          N13TwoAdicAbelChartPic.DiskPair.pic B := by
+    calc
+      N13TwoAdicAbelChartPic.DiskPair.pic Q =
+          (N13TwoAdicAbelChartPic.DiskPair.pic Q -
+              N13TwoAdicAbelChartPic.DiskPair.pic B) +
+            N13TwoAdicAbelChartPic.DiskPair.pic B := by abel
+      _ = 2 • (N13TwoAdicAbelChartPic.DiskPair.pic P -
+            N13TwoAdicAbelChartPic.DiskPair.pic B) +
+          N13TwoAdicAbelChartPic.DiskPair.pic B := by rw [hcenter]
+      _ = 2 • N13TwoAdicAbelChartPic.DiskPair.pic P -
+          N13TwoAdicAbelChartPic.DiskPair.pic B := by
+        simp only [two_nsmul]
+        abel
+  change
+    N13TwoAdicAbelChartPic.DiskPair.mumford Q =
+      2 • N13TwoAdicAbelChartPic.DiskPair.mumford P -
+        N13TwoAdicAbelChartPic.DiskPair.mumford B
+  apply N13SmallMumfordRigidity.classOf_injective ℚ_[2]
+  simpa only [
+      N13TwoAdicAbelChartPic.DiskPair.pic,
+      sub_eq_add_neg,
+      SexticMumford.classOf_add,
+      SexticMumford.classOf_nsmul,
+      SexticMumford.classOf_neg] using hpic
+
 namespace FirstJetDoublingCompatibility
 
 variable {H : AddSubgroup RationalPic}

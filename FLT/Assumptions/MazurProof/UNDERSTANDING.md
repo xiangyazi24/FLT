@@ -969,3 +969,11 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   classification, separatedness, or additional coordinate comparison is
   hidden in the reducer.  The three terminal declarations audit to Lean's
   standard quotient/classical axioms only.
+- `recoveredPair_mumford_eq_centeredDouble` now identifies the canonical
+  representative at `2z` with the centered double in the transported
+  Mumford group.  This is useful wiring, but the group law itself is defined
+  through canonical normal forms, so the equality does not definitionally
+  expose the coefficients of the doubled `u`-polynomial.  The remaining N13
+  arithmetic task is still to prove that coefficients one and three of
+  `P.u² - uBase * Q.u` lie in the square of the source coordinate ideal; it
+  cannot be weakened to the square of a larger joint ideal.

@@ -1049,3 +1049,14 @@
   The saturation chooser, exact-spread projection, contraction comparison,
   and public endpoint all audit to exactly `propext`, `Classical.choice`, and
   `Quot.sound`.
+
+### N13 canonical representative doubling (2026-08-08)
+
+- Proved that the canonical recovered pair at `2 • z` is literally the
+  centered Mumford-group double of the recovered pair at `z`.
+- The proof first uses additivity of the subgroup-to-Picard map and then the
+  existing uniqueness theorem for balanced N13 Mumford representatives.
+- This closes the representative-identification layer but deliberately does
+  not claim the missing first-order Cantor coefficient congruences.  The
+  targeted source check passes, and the new theorem audits to exactly
+  `propext`, `Classical.choice`, and `Quot.sound`.
