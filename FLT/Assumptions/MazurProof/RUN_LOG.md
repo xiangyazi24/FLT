@@ -1012,7 +1012,15 @@
 ### N25 denominator-free canonical lift (2026-08-08)
 
 - Proved directly from the stored 234-term primitive polynomial that
-  `F25(b,c)=0` and `b≠0` force `c≠0`.
+  `F25(b,c)=0` and `b≠0` force both `c≠0` and `F6(b,c)≠0`.  The second
+  certificate uses the exact specialization `F25(c+c²,c)=c⁵⁰`.
+- Verified from the affine group law that `2P=(b,bc)` for the Tate origin.
+  Translating this point to the origin and applying the project's standard
+  Tate scaling gives the exact parameter action
+  `B₂=bF6³/c⁸` and
+  `C₂=(c⁴+(2b+c²-c)F6)/c⁴`.
+- Checked all five Weierstrass coefficients after normalization, rather than
+  accepting the parameter formulas as unconnected rational functions.
 - Defined the polynomial homogeneous lift `(x,z,w) ↦ (xD,-N,zD,wD)` from
   the eliminated plane coordinates to the canonical four coordinates.
 - Verified by exact ring identities that the canonical cubic vanishes on
@@ -1022,9 +1030,12 @@
   canonical cusp classes.  For the polynomial lift, this reduces the
   noncuspidality obligations to nonvanishing of `x,z,D,N`; no condition on
   the plane coordinate `w` is necessary.
-- The targeted source check passes and all six new endpoint declarations
-  audit to exactly `propext`, `Classical.choice`, and `Quot.sound`.
-- The main N25 seam remains open: literal Tate-to-plane numerators, their
+- Targeted checks pass for the parameter-action file and the downstream
+  canonical bridge.  The audited source-denominator, doubled-point,
+  normalization, homogeneous-lift, and noncusp declarations depend exactly
+  on `propext`, `Classical.choice`, and `Quot.sound`.
+- The main N25 seam remains open: the `7P` involution and its denominator
+  certificates, literal invariant Tate-to-plane numerators, their
   `F25` divisibility certificate, the four source-locus nonvanishing
   certificates,
   and the global canonical rational-point classification are still missing.

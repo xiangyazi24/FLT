@@ -1,5 +1,5 @@
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientAction
-import FLT.Assumptions.MazurProof.TateOrder25Factor
+import FLT.Assumptions.MazurProof.TateOrder25ParameterAction
 
 /-!
 # Algebraic bridge from the order-25 Tate locus to the canonical model
@@ -27,22 +27,6 @@ open RationalPointsN25CanonicalPoints
 open RationalPointsN25QuotientAction
 
 noncomputable section
-
-/-! ## Elementary source-locus denominator -/
-
-set_option maxHeartbeats 2000000 in
-set_option maxRecDepth 20000 in
-/-- A primitive order-25 Tate point cannot lie on `c = 0`: after that
-specialization, the stored primitive division polynomial is exactly `b^25`. -/
-theorem c_ne_zero_of_primitive25
-    {b c : ℚ} (hb : b ≠ 0)
-    (h25 : TateOrder25Factor.F25 b c = 0) :
-    c ≠ 0 := by
-  intro hc
-  subst c
-  have hb25 : b ^ 25 = 0 := by
-    simpa [TateOrder25Factor.F25] using h25
-  exact (pow_ne_zero 25 hb) hb25
 
 /-! ## Denominator-free lift of the eliminated plane model -/
 
