@@ -105,12 +105,17 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     `4P`, and `7P` formulas on Tate normal form; exact order 25 of the marked
     origin on the primitive locus; and complete re-normalizations at `2P`
     and `7P`, including proofs that every displayed denominator is nonzero;
+    Sutherland's raw bidegree-`(10,15)` equation and optimized
+    bidegree-`(8,8)` model for `X₁(25)`; the exact pullback
+    `F25=c¹⁰(b-c)¹⁵ Fraw`; the universal raw-to-optimized polynomial
+    certificate; and proofs that both optimization denominators are nonzero
+    on the primitive Tate locus;
     the official degree-eleven LMFDB `X_{\pm1}(25)` plane model; and an
     explicit degree-six map from that source model to the canonical quotient,
     with exact quadric and cubic pullback certificates.
-  - Open atoms: an exact birational map from the nondegenerate `F₂₅` Tate
-    locus to the LMFDB source plane, noncuspidality of its canonical image, and
-    the global
+  - Open atoms: an exact birational map from the now-checked Sutherland
+    bidegree-`(8,8)` source model to the LMFDB degree-eleven source plane,
+    noncuspidality of its canonical image, and the global
     rational-point/formal-immersion argument showing that every rational
     canonical point is one of the five cusps.
 

@@ -1102,3 +1102,20 @@
   not claim the missing first-order Cantor coefficient congruences.  The
   targeted source check passes, and the new theorem audits to exactly
   `propext`, `Classical.choice`, and `Quot.sound`.
+
+### N25 Sutherland source bridge (2026-08-09)
+
+- Recorded Sutherland's raw bidegree-`(10,15)` and optimized
+  bidegree-`(8,8)` equations for `X₁(25)` in a production Lean module with
+  mathematical comments on every declaration.
+- Proved `F25=c¹⁰(b-c)¹⁵ Fraw` after the exact substitutions `r=b/c` and
+  `s=c²/(b-c)`, then separately certified the universal raw-to-optimized map.
+- Proved both optimization denominators nonzero on the primitive Tate locus
+  and exposed the unconditional affine theorem `tateToSutherland_on_plane`.
+- The scoped file check passes.  Axiom audits of all terminal comparison and
+  denominator theorems contain exactly `propext`, `Classical.choice`, and
+  `Quot.sound`.
+- The remaining N25 model seam is now precisely the birational map from this
+  checked optimized source model to the stored LMFDB degree-eleven plane,
+  followed by canonical noncuspidality and global rational-point
+  classification.

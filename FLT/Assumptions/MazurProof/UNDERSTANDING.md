@@ -412,6 +412,16 @@ would give `21P=0`.  Both contradict exact order 25.  Consequently the full
 translation and Tate scaling at `7P` is now unconditional on the primitive
 locus, with explicit parameters `B₇,C₇` and all five Weierstrass coefficients
 checked.
+`RationalPointsN25SutherlandBridge.lean` now identifies the literal Tate
+source equation with Andrew Sutherland's published affine models.  In raw
+coordinates `r=b/c` and `s=c²/(b-c)`, it proves the exact equality
+`F25=c¹⁰(b-c)¹⁵ Fraw`.  It then verifies the universal birational optimization
+to Sutherland's bidegree-`(8,8)` equation by a denominator-cleared polynomial
+identity.  The two specializations
+`Fraw(1/(2-s),s)=(s-1)²³/(2-s)¹⁰` and
+`Fraw(s²-s+1,s)=-s(s-1)²⁷` prove that both optimization denominators are
+nonzero on the primitive Tate locus.  Thus every primitive `F25` solution now
+maps, without extra hypotheses, to the checked optimized source model.
 `RationalPointsN25TateCanonicalBridge.lean` now supplies the
 denominator-free target-side lift
 `(x,z,w) ↦ (xD,-N,zD,wD)`.  Its cubic vanishes identically and its quadric
@@ -420,21 +430,21 @@ official degree-eleven LMFDB plane equation for `X_{\pm1}(25)` (label
 `25.300.12.j.1`) and an explicit four-coordinate degree-six map from that
 source model to the stored genus-four canonical model.  Its two defining
 equations are certified by the unconditional polynomial identities
-`Q(Φ) = -C F₁₁` and `K(Φ) = -W H₆ F₁₁`.  Thus the target half of
-the Tate comparison is explicit and checked; the still-missing model
-identification is the birational map from the literal `F25(b,c)=0` equation to
-this LMFDB source plane.  Because every listed cusp has a zero among its first
+`Q(Φ) = -C F₁₁` and `K(Φ) = -W H₆ F₁₁`.  Thus both ends of
+the Tate comparison are explicit and checked; the still-missing middle
+identification is the birational map from Sutherland's bidegree-`(8,8)` source
+equation to this LMFDB degree-eleven source plane.  Because every listed cusp
+has a zero among its first
 three canonical coordinates, the denominator-free sextic lift is already
 noncuspidal when `x,z,D,N` are nonzero; the plane coordinate `w` needs no
 separate certificate.
 
-All five files pass scoped compilation.  Axiom audits of their terminal
+All six files pass scoped compilation.  Axiom audits of their terminal
 theorems report only `propext`, `Classical.choice`, and `Quot.sound`.
 They are not yet imported by `CyclicExclusion25`: the genuine remaining
-model-comparison work is to identify the Tate `F25` model with the stored
-degree-eleven `X_{\pm1}(25)` plane model (equivalently, compose the completed
-`2P` and `7P` parameter actions into literal quotient coordinates), then prove
-the source-locus nonvanishing certificates that make the resulting canonical
+model-comparison work is to identify the checked Sutherland optimized source
+with the stored degree-eleven `X_{\pm1}(25)` plane model, then prove the
+source-locus nonvanishing certificates that make the resulting canonical
 point noncuspidal.  Separately, N25 still needs a global rational-point or
 formal-immersion argument proving that every rational canonical point is a
 cusp.  The older

@@ -1,3 +1,27 @@
+## Run 2026-08-09 (N25 Sutherland source bridge)
+
+- Added `RationalPointsN25SutherlandBridge.lean` with the published raw
+  bidegree-`(10,15)` and optimized bidegree-`(8,8)` equations for `X₁(25)`.
+- Proved the exact Tate-chart identity
+  `F25(b,c)=c¹⁰(b-c)¹⁵ Fraw(b/c,c²/(b-c))` by a literal ring certificate.
+- Verified Sutherland's universal raw-to-optimized map by a separate
+  bihomogeneous polynomial identity.  Splitting the comparison into these two
+  certificates avoids one much larger direct expansion.
+- Proved the two optimization denominators are nonzero on every primitive
+  Tate solution using the exact exceptional-divisor specializations
+  `(s-1)²³` and `-s(s-1)²⁷`.
+- The public theorem `tateToSutherland_on_plane` now maps the original
+  `b≠0`, `F5≠0`, `F25=0` locus directly to the optimized source equation;
+  it has no additional denominator assumptions.
+- Scoped source compilation passed.  Axiom audits of the Tate-to-raw,
+  raw-to-optimized, denominator, and public map theorems report exactly
+  `propext`, `Classical.choice`, and `Quot.sound`.
+- N25 remains an endpoint axiom.  The source-side gap is now narrowed from
+  `F25` versus LMFDB to the birational comparison between Sutherland's checked
+  bidegree-`(8,8)` equation and the LMFDB degree-eleven plane model.  After
+  that, noncuspidality and the global canonical rational-point classification
+  remain.
+
 ## Run 2026-08-09 (N25 LMFDB quotient bridge)
 
 - approval: automode continuation; no tmux names may be changed
