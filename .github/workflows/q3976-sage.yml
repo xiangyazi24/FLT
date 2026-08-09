@@ -1,0 +1,26 @@
+name: q3976-sage
+
+on:
+  push:
+    branches:
+      - chatgpt-q3976-cas
+
+permissions:
+  contents: read
+
+jobs:
+  sage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run exact Sage computation
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull sagemath/sagemath:latest
+          docker run --rm \
+            -v "$PWD:/repo" \
+            -w /repo \
+            sagemath/sagemath:latest \
+            sage scripts/q3976.sage
