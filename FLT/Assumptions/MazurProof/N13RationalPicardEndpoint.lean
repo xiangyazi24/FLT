@@ -12,10 +12,11 @@ lines.  Once that classifier kernel is represented in the two-adic Abel
 chart with the unary first-jet doubling law, the existing formal-kernel
 argument proves that every rational point of the N13 curve is cuspidal.
 
-This file performs only the final assembly.  It deliberately leaves the two
-remaining geometric statements visible in the theorem signature: equality
-reflection for spread lines, and first-order compatibility of the canonical
-near-base representatives under doubling.
+This file performs only the final assembly.  It leaves the two remaining
+geometric statements visible in the theorem signature: equality reflection
+for spread lines, and first-order compatibility of the canonical near-base
+representatives under doubling.  Vertical saturation is supplied internally
+by the same degree-exhaustion chooser that selects each exact spread.
 -/
 
 namespace MazurProof.N13RationalPicardEndpoint
@@ -228,8 +229,8 @@ theorem kernel_eq
 
 The exact normalized spread of `z + rationalBasePic` supplies a proper
 integral line with the correct generic Mumford representative.  The
-remaining representative-level input is vertical saturation of that actual
-line.  Localization then identifies it with the canonical contraction.
+the chosen line is vertically saturated by construction.  Localization then
+identifies it with the canonical contraction.
 Once this equality is known, the global specialization relation forces
 the line's stored divisor to be the literal Abel-chart base divisor, whose
 affine ideal is already proved to be `specialIdeal`.
@@ -250,6 +251,17 @@ def ExactSpreadAffineVerticallySaturated
       (N13RationalPicardSpreadExistence.exactSpreadLine
         ((z : G) +
           N13RationalAbelChartBase.rationalBasePic)).realization.charts
+
+/-- Every translated exact normalized spread is vertically saturated because
+the global chooser records saturation together with the concrete line before
+forgetting which degree branch produced it. -/
+theorem exactSpreadAffineVerticallySaturated
+    (kernel : AddSubgroup G) :
+    ExactSpreadAffineVerticallySaturated kernel := by
+  intro z
+  exact
+    N13RationalPicardSpreadExistence.exactSpreadLine_affineVerticallySaturated
+      ((z : G) + N13RationalAbelChartBase.rationalBasePic)
 
 /-- The contraction of each mapped normalized rational representative agrees
 with the affine special restriction of its exact normalized rational spread.
@@ -313,6 +325,15 @@ theorem exactNormalizedContractionMatchesSpread_of_verticalSaturated
           P).realization.charts.affineIdeal
   rw [hcontract]
 
+/-- The canonical contraction agrees with the chosen exact spread without an
+external saturation hypothesis: the required certificate is a projection of
+the exact-spread chooser itself. -/
+theorem exactNormalizedContractionMatchesSpread
+    (kernel : AddSubgroup G) :
+    ExactNormalizedContractionMatchesSpread kernel :=
+  exactNormalizedContractionMatchesSpread_of_verticalSaturated
+    kernel (exactSpreadAffineVerticallySaturated kernel)
+
 /-- Construct the canonical mapped-special family from vertical saturation
 of the exact normalized spread lattices.
 
@@ -321,7 +342,7 @@ The contraction comparison is first derived by localization.  The global
 spread to the same special Abel class as the explicit base spread.  Regularity
 then identifies the stored divisor literally, and the special graph-divisor
 theorem identifies its affine ideal with the fixed special ideal. -/
-def canonicalMappedSpecialFamilyOfExactSpread
+def canonicalMappedSpecialFamilyOfExactSpread_of_verticalSaturated
     (kernel : AddSubgroup G)
     (class_eq_iff :
       ∀ L M : SpreadLine,
@@ -365,6 +386,22 @@ def canonicalMappedSpecialFamilyOfExactSpread
     _ = N13SpecialQuotientBasis.specialIdeal :=
       N13RationalAbelChartBase.specialBaseDivisor_affineIdeal
 
+/-- Construct the canonical mapped-special family from the exact normalized
+spreads.  Their vertical saturation is now part of the proved chooser and is
+therefore not an endpoint parameter. -/
+def canonicalMappedSpecialFamilyOfExactSpread
+    (kernel : AddSubgroup G)
+    (class_eq_iff :
+      ∀ L M : SpreadLine,
+        N13RationalCurvePointPicardRealization.specialClass L =
+            N13RationalCurvePointPicardRealization.specialClass M ↔
+          N13RationalCurvePointPicardRealization.genericClass kernel L =
+            N13RationalCurvePointPicardRealization.genericClass kernel M) :
+    N13RationalKernelDoublingAdapter.CanonicalMappedSpecialFamily
+      (Kernel kernel class_eq_iff) :=
+  canonicalMappedSpecialFamilyOfExactSpread_of_verticalSaturated
+    kernel class_eq_iff (exactSpreadAffineVerticallySaturated kernel)
+
 /-!
 ## Endpoint assembly
 
@@ -375,10 +412,10 @@ the same first jet as the square of the representative selected for `z`.
 Together these facts make the classifier kernel two-adically separated.
 -/
 
-/-- Equality reflection for rational spreads, vertical saturation of the
-exact normalized spreads, and first-jet doubling compatibility imply the
-primitive N13 rational-point theorem required by Mazur's bound. -/
-theorem affine_x_is_cuspidal
+/-- Compatibility form of the endpoint for callers that already carry a
+vertical-saturation provider.  The public theorem below obtains the provider
+from the exact-spread chooser instead. -/
+theorem affine_x_is_cuspidal_of_verticalSaturated
     (kernel : AddSubgroup G)
     (class_eq_iff :
       ∀ L M : SpreadLine,
@@ -389,7 +426,7 @@ theorem affine_x_is_cuspidal
     (hsaturated : ExactSpreadAffineVerticallySaturated kernel)
     (C :
       N13RationalKernelDoublingAdapter.FirstJetDoublingCompatibility
-        (canonicalMappedSpecialFamilyOfExactSpread
+        (canonicalMappedSpecialFamilyOfExactSpread_of_verticalSaturated
           kernel class_eq_iff hsaturated).toNearBaseFamily) :
     ∀ X Y : ℚ, N13CurveModel.C13SexticEq X Y →
       X = 0 ∨ X = -1 := by
@@ -398,13 +435,36 @@ theorem affine_x_is_cuspidal
   have hseparated :
       N18RouteC.Separated.NSeparated
         (Kernel kernel class_eq_iff) 2 :=
-    (canonicalMappedSpecialFamilyOfExactSpread
+    (canonicalMappedSpecialFamilyOfExactSpread_of_verticalSaturated
       kernel class_eq_iff hsaturated).separated C
   -- All other fields of rational-point reduction are supplied by the global
   -- spread and pointwise realization theorems used in `reductionData`.
   exact
     (reductionData kernel class_eq_iff).affine_x_is_cuspidal
       hseparated
+
+/-- Equality reflection for rational spreads and first-jet doubling
+compatibility imply the primitive N13 rational-point theorem required by
+Mazur's bound.  Vertical saturation is no longer an external hypothesis. -/
+theorem affine_x_is_cuspidal
+    (kernel : AddSubgroup G)
+    (class_eq_iff :
+      ∀ L M : SpreadLine,
+        N13RationalCurvePointPicardRealization.specialClass L =
+            N13RationalCurvePointPicardRealization.specialClass M ↔
+          N13RationalCurvePointPicardRealization.genericClass kernel L =
+            N13RationalCurvePointPicardRealization.genericClass kernel M)
+    (C :
+      N13RationalKernelDoublingAdapter.FirstJetDoublingCompatibility
+        (canonicalMappedSpecialFamilyOfExactSpread
+          kernel class_eq_iff).toNearBaseFamily) :
+    ∀ X Y : ℚ, N13CurveModel.C13SexticEq X Y →
+      X = 0 ∨ X = -1 := by
+  exact
+    affine_x_is_cuspidal_of_verticalSaturated
+      kernel class_eq_iff
+      (exactSpreadAffineVerticallySaturated kernel)
+      C
 
 end
 

@@ -61,7 +61,7 @@ theorem ReciprocalGraphClosure.twoChartLine_affineVerticallySaturated
 /-- A recovered reciprocal horizontal graph realizes the original generic
 quadratic class and a literal effective degree-two divisor on the special
 fibre. -/
-theorem ReciprocalGraphClosure.exists_data
+theorem ReciprocalGraphClosure.exists_saturated_data
     {D : SexticMumford.Mumford
       N13IrreducibleQuadraticSpread.Model}
     {a b : N13IrreducibleQuadraticSpread.R₂}
@@ -86,7 +86,8 @@ theorem ReciprocalGraphClosure.exists_data
           N13IrreducibleQuadraticSpread.Model
           (N13Infinity.positiveInfinityOrder
             N13TwoChartPicardRealization.Q₂)
-          D := by
+          D ∧
+      N13TwoChartPicardRealization.AffineVerticallySaturated R.charts := by
   have huMonic : E.data.u.Monic := by
     rw [E.data_u]
     exact
@@ -150,13 +151,49 @@ theorem ReciprocalGraphClosure.exists_data
   let R :=
     N13SplitQuadraticPicardRealization.dataOfSpecialRealization
       D L Δ haffine hinfinity
-  refine ⟨R, ?_, ?_⟩
+  refine ⟨R, ?_, ?_, ?_⟩
   · exact
       N13SplitQuadraticPicardRealization.dataOfSpecialRealization_genericRaw_eq_mumfordRaw
         D L Δ haffine hinfinity hmap
   · exact
       N13SplitQuadraticPicardRealization.dataOfSpecialRealization_toGenericPic_eq_classOf
         D L Δ haffine hinfinity hmap
+  · exact
+      N13SplitQuadraticPicardRealization.dataOfSpecialRealization_affineVerticallySaturated
+        D L Δ haffine hinfinity
+        (ReciprocalGraphClosure.twoChartLine_affineVerticallySaturated E)
+
+/-- Forgetting vertical saturation recovers the original reciprocal
+horizontal realization interface. -/
+theorem ReciprocalGraphClosure.exists_data
+    {D : SexticMumford.Mumford
+      N13IrreducibleQuadraticSpread.Model}
+    {a b : N13IrreducibleQuadraticSpread.R₂}
+    (E : N13IrreducibleQuadraticSpread.ReciprocalGraphClosure D a b)
+    (hdeg : D.u.natDegree = 2)
+    (h0 : D.u.coeff 0 ≠ 0)
+    (hm :
+      (X ^ 2 +
+          C (a : N13IrreducibleQuadraticSpread.Q₂) * X +
+          C (b : N13IrreducibleQuadraticSpread.Q₂) :
+        N13IrreducibleQuadraticSpread.Q₂[X]) =
+        X ^ 2 +
+          C (D.u.coeff 1 / D.u.coeff 0) * X +
+          C ((D.u.coeff 0)⁻¹)) :
+    ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw
+          N13IrreducibleQuadraticSpread.Model D ∧
+      R.toGenericPic =
+        SexticMumford.classOf
+          N13IrreducibleQuadraticSpread.Model
+          (N13Infinity.positiveInfinityOrder
+            N13TwoChartPicardRealization.Q₂)
+          D := by
+  obtain ⟨R, hraw, hgeneric, _⟩ :=
+    ReciprocalGraphClosure.exists_saturated_data E hdeg h0 hm
+  exact ⟨R, hraw, hgeneric⟩
 
 end
 

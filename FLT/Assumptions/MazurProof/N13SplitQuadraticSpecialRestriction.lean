@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.N13FiniteAffinePointInfinityClosure
 import FLT.Assumptions.MazurProof.N13QuadraticTwoChartSpread
+import FLT.Assumptions.MazurProof.N13QuadraticTwoChartSpreadSaturation
 
 /-!
 # Special restriction of split quadratic N13 lines
@@ -153,8 +154,9 @@ generic ideal is the graph ideal and whose two special chart ideals are the
 canonical ideals of the reduced secant divisor.
 
 The special divisor is returned explicitly because its two reduced points
-depend on the valuations of the roots. -/
-theorem exists_twoChartLine_and_specialDivisor_of_distinct_split
+depend on the valuations of the roots.  The final field retains vertical
+saturation of the affine lattice. -/
+theorem exists_saturated_twoChartLine_and_specialDivisor_of_distinct_split
     (D : SexticMumford.Mumford N13QuadraticTwoChartSpread.Model)
     (hdeg : D.u.natDegree = 2)
     (x₁ x₂ : Q₂)
@@ -171,7 +173,8 @@ theorem exists_twoChartLine_and_specialDivisor_of_distinct_split
         (N13TwoChartSpecialRestriction.restrict L).affineIdeal =
           (N13SpecialDivisorCharts.ofDivisor Δ).affineIdeal ∧
         (N13TwoChartSpecialRestriction.restrict L).infinityIdeal =
-          (N13SpecialDivisorCharts.ofDivisor Δ).infinityIdeal := by
+          (N13SpecialDivisorCharts.ofDivisor Δ).infinityIdeal ∧
+        N13TwoChartPicardRealization.AffineVerticallySaturated L := by
   obtain ⟨hsextic₁, hsextic₂⟩ :=
     N13TwoChartLineTensor.mumford_eval_onCurve_of_split
       D x₁ x₂ hfactor
@@ -192,7 +195,7 @@ theorem exists_twoChartLine_and_specialDivisor_of_distinct_split
       x₁ y₁ x₂ y₂ hcurve₁ hcurve₂
   let Δ :=
     reducedPairDivisor x₁ y₁ x₂ y₂ hcurve₁ hcurve₂
-  refine ⟨L, Δ, ?_, ?_, ?_⟩
+  refine ⟨L, Δ, ?_, ?_, ?_, ?_⟩
   · dsimp only [L]
     rw [N13QuadraticTwoChartSpread.map_pairLine_affineIdeal,
       N13TwoChartLineTensor.pointY_goodY,
@@ -205,14 +208,43 @@ theorem exists_twoChartLine_and_specialDivisor_of_distinct_split
   · exact
       restrict_pairLine_infinityIdeal
         x₁ y₁ x₂ y₂ hcurve₁ hcurve₂
+  · exact
+      N13QuadraticTwoChartSpreadSaturation.pairLine_affineVerticallySaturated
+        x₁ y₁ x₂ y₂ hcurve₁ hcurve₂
+
+/-- Forgetting vertical saturation recovers the original split-special
+realization interface. -/
+theorem exists_twoChartLine_and_specialDivisor_of_distinct_split
+    (D : SexticMumford.Mumford N13QuadraticTwoChartSpread.Model)
+    (hdeg : D.u.natDegree = 2)
+    (x₁ x₂ : Q₂)
+    (hfactor : D.u = (Polynomial.X - Polynomial.C x₁) *
+      (Polynomial.X - Polynomial.C x₂))
+    (hneq : x₁ ≠ x₂) :
+    ∃ L : N13QuadraticTwoChartSpread.TwoChartLine,
+      ∃ Δ : N13SpecialDivisorCharts.EffectiveDivisorTwo,
+        Ideal.map
+            N13TwoAdicCoordinateBaseChange.integralToSextic
+            L.affineIdeal =
+          SexticMumford.mumfordIdeal
+            N13QuadraticTwoChartSpread.Model D.u D.v ∧
+        (N13TwoChartSpecialRestriction.restrict L).affineIdeal =
+          (N13SpecialDivisorCharts.ofDivisor Δ).affineIdeal ∧
+        (N13TwoChartSpecialRestriction.restrict L).infinityIdeal =
+          (N13SpecialDivisorCharts.ofDivisor Δ).infinityIdeal := by
+  obtain ⟨L, Δ, hmap, haffine, hinfinity, _⟩ :=
+    exists_saturated_twoChartLine_and_specialDivisor_of_distinct_split
+      D hdeg x₁ x₂ hfactor hneq
+  exact ⟨L, Δ, hmap, haffine, hinfinity⟩
 
 /-- A quadratic Mumford graph with a repeated root has a proper tensor-square
 line whose generic ideal is the tangent graph and whose special restriction
 is the doubled reduced point.
 
 The multiplicity is retained by the symmetric-square divisor even if the
-point changes charts after reduction. -/
-theorem exists_twoChartLine_and_specialDivisor_of_repeated_root
+point changes charts after reduction.  The final field retains vertical
+saturation of the tangent-square affine lattice. -/
+theorem exists_saturated_twoChartLine_and_specialDivisor_of_repeated_root
     (D : SexticMumford.Mumford N13QuadraticTwoChartSpread.Model)
     (x : Q₂)
     (hfactor : D.u = (Polynomial.X - Polynomial.C x) ^ 2) :
@@ -226,7 +258,8 @@ theorem exists_twoChartLine_and_specialDivisor_of_repeated_root
         (N13TwoChartSpecialRestriction.restrict L).affineIdeal =
           (N13SpecialDivisorCharts.ofDivisor Δ).affineIdeal ∧
         (N13TwoChartSpecialRestriction.restrict L).infinityIdeal =
-          (N13SpecialDivisorCharts.ofDivisor Δ).infinityIdeal := by
+          (N13SpecialDivisorCharts.ofDivisor Δ).infinityIdeal ∧
+        N13TwoChartPicardRealization.AffineVerticallySaturated L := by
   have hfactorMul :
       D.u = (Polynomial.X - Polynomial.C x) *
         (Polynomial.X - Polynomial.C x) := by
@@ -245,7 +278,7 @@ theorem exists_twoChartLine_and_specialDivisor_of_repeated_root
       x y x y hcurve hcurve
   let Δ :=
     reducedPairDivisor x y x y hcurve hcurve
-  refine ⟨L, Δ, ?_, ?_, ?_⟩
+  refine ⟨L, Δ, ?_, ?_, ?_, ?_⟩
   · dsimp only [L]
     rw [N13QuadraticTwoChartSpread.map_pairLine_affineIdeal,
       N13TwoChartLineTensor.pointY_goodY, ← pow_two,
@@ -257,6 +290,31 @@ theorem exists_twoChartLine_and_specialDivisor_of_repeated_root
   · exact
       restrict_pairLine_infinityIdeal
         x y x y hcurve hcurve
+  · exact
+      N13QuadraticTwoChartSpreadSaturation.pairLine_affineVerticallySaturated
+        x y x y hcurve hcurve
+
+/-- Forgetting vertical saturation recovers the original repeated-root
+special-realization interface. -/
+theorem exists_twoChartLine_and_specialDivisor_of_repeated_root
+    (D : SexticMumford.Mumford N13QuadraticTwoChartSpread.Model)
+    (x : Q₂)
+    (hfactor : D.u = (Polynomial.X - Polynomial.C x) ^ 2) :
+    ∃ L : N13QuadraticTwoChartSpread.TwoChartLine,
+      ∃ Δ : N13SpecialDivisorCharts.EffectiveDivisorTwo,
+        Ideal.map
+            N13TwoAdicCoordinateBaseChange.integralToSextic
+            L.affineIdeal =
+          SexticMumford.mumfordIdeal
+            N13QuadraticTwoChartSpread.Model D.u D.v ∧
+        (N13TwoChartSpecialRestriction.restrict L).affineIdeal =
+          (N13SpecialDivisorCharts.ofDivisor Δ).affineIdeal ∧
+        (N13TwoChartSpecialRestriction.restrict L).infinityIdeal =
+          (N13SpecialDivisorCharts.ofDivisor Δ).infinityIdeal := by
+  obtain ⟨L, Δ, hmap, haffine, hinfinity, _⟩ :=
+    exists_saturated_twoChartLine_and_specialDivisor_of_repeated_root
+      D x hfactor
+  exact ⟨L, Δ, hmap, haffine, hinfinity⟩
 
 end
 

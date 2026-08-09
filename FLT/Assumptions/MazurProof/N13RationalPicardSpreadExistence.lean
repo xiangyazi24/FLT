@@ -116,6 +116,17 @@ theorem reorientData_genericRaw
     N13TwoChartPicardRealization.genericRaw_eq_mumfordRaw_of_map_affineIdeal_eq
       R.charts D hmap
 
+/-- Reorientation changes only the stored generic infinity order, so it
+preserves vertical saturation of the underlying affine lattice verbatim. -/
+theorem reorientData_affineVerticallySaturated
+    (D : N13Mumford.Mumford N13InfinityBaseChange.Q₂)
+    (R : N13TwoChartPicardRealization.Data)
+    (hsaturated :
+      N13TwoChartPicardRealization.AffineVerticallySaturated R.charts) :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (reorientData D R).charts :=
+  hsaturated
+
 /-!
 ## Mumford degree zero
 
@@ -127,7 +138,7 @@ infinity line.  Only the independent infinity orientation has to be restored.
 /-- A degree-zero rational normal form is realized by the doubled positive
 infinity line, with its independent generic orientation reset to the normal
 form's infinity integer. -/
-theorem exists_data_of_natDegree_eq_zero
+theorem exists_saturated_data_of_natDegree_eq_zero
     (D : N13Mumford.Mumford ℚ)
     (hdeg : D.u.natDegree = 0) :
     ∃ R : N13TwoChartPicardRealization.Data,
@@ -139,7 +150,8 @@ theorem exists_data_of_natDegree_eq_zero
             Model₂
             (N13Infinity.positiveInfinityOrder
               N13InfinityBaseChange.Q₂)
-            (mapMumford D) := by
+            (mapMumford D) ∧
+      N13TwoChartPicardRealization.AffineVerticallySaturated R.charts := by
   -- Monicity and reducedness collapse the affine Mumford data to `(1, 0)`.
   have hu : D.u = 1 :=
     Polynomial.eq_one_of_monic_natDegree_zero D.u_monic hdeg
@@ -172,11 +184,38 @@ theorem exists_data_of_natDegree_eq_zero
         _
     rw [N13InfinityPointPicardRealization.map_infinityPlusLine_affineIdeal]
     rw [hu₂, hv₂]
+  have hsaturated :
+      N13TwoChartPicardRealization.AffineVerticallySaturated R₀.charts := by
+    change
+      N13TwoChartPicardRealization.AffineVerticallySaturated
+        N13InfinityPointPicardRealization.infinityPlusLine
+    exact
+      N13InfinityPointPicardRealization.infinityPlusLine_affineVerticallySaturated
   -- Reorientation leaves that proper line and its special divisor unchanged
   -- while restoring the original normal form's `nInf`.
-  refine ⟨reorientData (mapMumford D) R₀, ?_, ?_⟩
+  refine ⟨reorientData (mapMumford D) R₀, ?_, ?_, ?_⟩
   · exact reorientData_genericRaw (mapMumford D) R₀ hmap
   · exact reorientData_toGenericPic (mapMumford D) R₀ hmap
+  · exact reorientData_affineVerticallySaturated (mapMumford D) R₀ hsaturated
+
+/-- Compatibility projection of the degree-zero construction when only its
+two generic-fibre certificates are needed. -/
+theorem exists_data_of_natDegree_eq_zero
+    (D : N13Mumford.Mumford ℚ)
+    (hdeg : D.u.natDegree = 0) :
+    ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw Model₂ (mapMumford D) ∧
+      R.toGenericPic =
+          SexticMumford.classOf
+            Model₂
+            (N13Infinity.positiveInfinityOrder
+              N13InfinityBaseChange.Q₂)
+            (mapMumford D) := by
+  obtain ⟨R, hraw, hgeneric, _⟩ :=
+    exists_saturated_data_of_natDegree_eq_zero D hdeg
+  exact ⟨R, hraw, hgeneric⟩
 
 /-!
 ## Mumford degree one
@@ -206,7 +245,7 @@ def degreeOnePointForm
 
 /-- A degree-one rational normal form is realized by the proper line of its
 underlying affine point, with the original infinity orientation restored. -/
-theorem exists_data_of_natDegree_eq_one
+theorem exists_saturated_data_of_natDegree_eq_one
     (D : N13Mumford.Mumford ℚ)
     (hdeg : D.u.natDegree = 1) :
     ∃ R : N13TwoChartPicardRealization.Data,
@@ -218,7 +257,8 @@ theorem exists_data_of_natDegree_eq_one
             Model₂
             (N13Infinity.positiveInfinityOrder
               N13InfinityBaseChange.Q₂)
-            (mapMumford D) := by
+            (mapMumford D) ∧
+      N13TwoChartPicardRealization.AffineVerticallySaturated R.charts := by
   -- Removing only the orientation exposes the affine point encoded by the
   -- linear graph; the affine polynomials themselves are not changed.
   let D₀ := degreeOnePointForm D hdeg
@@ -285,9 +325,13 @@ theorem exists_data_of_natDegree_eq_one
           rw [hu₂, hv₂]
     -- The integral point line supplies the affine ideal; reorientation adds
     -- back the original infinity component without changing specialization.
-    refine ⟨reorientData (mapMumford D) R₀, ?_, ?_⟩
+    refine ⟨reorientData (mapMumford D) R₀, ?_, ?_, ?_⟩
     · exact reorientData_genericRaw (mapMumford D) R₀ hmap
     · exact reorientData_toGenericPic (mapMumford D) R₀ hmap
+    · apply reorientData_affineVerticallySaturated
+      exact
+        N13RationalCurvePointPicardRealization.integralAffineData_affineVerticallySaturated
+          x y hcurve hx
   · have hxval :
         (N13ProperCurveReduction.ratToQ₂ x).valuation < 0 :=
       lt_of_not_ge
@@ -318,9 +362,32 @@ theorem exists_data_of_natDegree_eq_one
             SexticMumford.mumfordIdeal
               Model₂ (mapMumford D).u (mapMumford D).v := by
           rw [hu₂, hv₂]
-    refine ⟨reorientData (mapMumford D) R₀, ?_, ?_⟩
+    refine ⟨reorientData (mapMumford D) R₀, ?_, ?_, ?_⟩
     · exact reorientData_genericRaw (mapMumford D) R₀ hmap
     · exact reorientData_toGenericPic (mapMumford D) R₀ hmap
+    · apply reorientData_affineVerticallySaturated
+      exact
+        N13RationalCurvePointPicardRealization.escapingAffineData_affineVerticallySaturated
+          x y hcurve hxval
+
+/-- Compatibility projection of the degree-one construction when vertical
+saturation is not required by the caller. -/
+theorem exists_data_of_natDegree_eq_one
+    (D : N13Mumford.Mumford ℚ)
+    (hdeg : D.u.natDegree = 1) :
+    ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw Model₂ (mapMumford D) ∧
+      R.toGenericPic =
+          SexticMumford.classOf
+            Model₂
+            (N13Infinity.positiveInfinityOrder
+              N13InfinityBaseChange.Q₂)
+            (mapMumford D) := by
+  obtain ⟨R, hraw, hgeneric, _⟩ :=
+    exists_saturated_data_of_natDegree_eq_one D hdeg
+  exact ⟨R, hraw, hgeneric⟩
 
 /-!
 ## Mumford degree two and the global exhaustion
@@ -333,6 +400,34 @@ exhaust every rational normal form.
 
 /-- A degree-two rational normal form is realized by the complete quadratic
 two-chart construction after coefficient extension. -/
+theorem exists_saturated_data_of_natDegree_eq_two
+    (D : N13Mumford.Mumford ℚ)
+    (hdeg : D.u.natDegree = 2) :
+    ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw Model₂ (mapMumford D) ∧
+      R.toGenericPic =
+          SexticMumford.classOf
+            Model₂
+            (N13Infinity.positiveInfinityOrder
+              N13InfinityBaseChange.Q₂)
+            (mapMumford D) ∧
+      N13TwoChartPicardRealization.AffineVerticallySaturated R.charts := by
+  -- Injective coefficient extension preserves the degree of the monic
+  -- quadratic polynomial, allowing direct use of the quadratic realization.
+  have hdeg₂ : (mapMumford D).u.natDegree = 2 := by
+    rw [mapMumford, SexticMumford.mapCoeffs_u,
+      Polynomial.natDegree_map_eq_of_injective
+        N13InfinityBaseChange.ratToQ₂_injective,
+      hdeg]
+  obtain ⟨R, hraw, hgeneric, hsaturated⟩ :=
+    N13QuadraticPicardRealization.exists_saturated_data
+      (mapMumford D) hdeg₂
+  exact ⟨R, hraw, hgeneric, hsaturated⟩
+
+/-- Compatibility projection of the degree-two construction when only its
+generic raw datum and Picard class are required. -/
 theorem exists_data_of_natDegree_eq_two
     (D : N13Mumford.Mumford ℚ)
     (hdeg : D.u.natDegree = 2) :
@@ -346,20 +441,40 @@ theorem exists_data_of_natDegree_eq_two
             (N13Infinity.positiveInfinityOrder
               N13InfinityBaseChange.Q₂)
             (mapMumford D) := by
-  -- Injective coefficient extension preserves the degree of the monic
-  -- quadratic polynomial, allowing direct use of the quadratic realization.
-  have hdeg₂ : (mapMumford D).u.natDegree = 2 := by
-    rw [mapMumford, SexticMumford.mapCoeffs_u,
-      Polynomial.natDegree_map_eq_of_injective
-        N13InfinityBaseChange.ratToQ₂_injective,
-      hdeg]
-  obtain ⟨R, hraw, hgeneric⟩ :=
-    N13QuadraticPicardRealization.exists_data
-      (mapMumford D) hdeg₂
+  obtain ⟨R, hraw, hgeneric, _⟩ :=
+    exists_saturated_data_of_natDegree_eq_two D hdeg
   exact ⟨R, hraw, hgeneric⟩
 
 /-- Every rational balanced Mumford representative has complete two-fibre
-Picard data after base change. -/
+Picard data after base change, together with a vertically saturated affine
+lattice for the chosen proper spread. -/
+theorem exists_saturated_data (D : N13Mumford.Mumford ℚ) :
+    ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw Model₂ (mapMumford D) ∧
+      R.toGenericPic =
+          SexticMumford.classOf
+            Model₂
+            (N13Infinity.positiveInfinityOrder
+              N13InfinityBaseChange.Q₂)
+            (mapMumford D) ∧
+      N13TwoChartPicardRealization.AffineVerticallySaturated R.charts := by
+  -- Balancedness gives `deg u ≤ 2`; arithmetic on naturals turns this bound
+  -- into the three geometric cases proved above.
+  have hbound : D.u.natDegree ≤ 2 := D.deg_u
+  have hcases :
+      D.u.natDegree = 0 ∨
+        D.u.natDegree = 1 ∨
+          D.u.natDegree = 2 := by
+    omega
+  rcases hcases with hzero | hone | htwo
+  · exact exists_saturated_data_of_natDegree_eq_zero D hzero
+  · exact exists_saturated_data_of_natDegree_eq_one D hone
+  · exact exists_saturated_data_of_natDegree_eq_two D htwo
+
+/-- Compatibility projection of global rational spread existence for callers
+that do not inspect vertical saturation. -/
 theorem exists_data (D : N13Mumford.Mumford ℚ) :
     ∃ R : N13TwoChartPicardRealization.Data,
       N13TwoChartPicardRealization.genericRaw
@@ -371,18 +486,8 @@ theorem exists_data (D : N13Mumford.Mumford ℚ) :
             (N13Infinity.positiveInfinityOrder
               N13InfinityBaseChange.Q₂)
             (mapMumford D) := by
-  -- Balancedness gives `deg u ≤ 2`; arithmetic on naturals turns this bound
-  -- into the three geometric cases proved above.
-  have hbound : D.u.natDegree ≤ 2 := D.deg_u
-  have hcases :
-      D.u.natDegree = 0 ∨
-        D.u.natDegree = 1 ∨
-          D.u.natDegree = 2 := by
-    omega
-  rcases hcases with hzero | hone | htwo
-  · exact exists_data_of_natDegree_eq_zero D hzero
-  · exact exists_data_of_natDegree_eq_one D hone
-  · exact exists_data_of_natDegree_eq_two D htwo
+  obtain ⟨R, hraw, hgeneric, _⟩ := exists_saturated_data D
+  exact ⟨R, hraw, hgeneric⟩
 
 /-!
 ## From representatives to rational Picard classes
@@ -408,17 +513,21 @@ def normalizedMumford (P : G) : N13Mumford.Mumford ℚ :=
 literally the coefficient extension of its balanced normal form.
 
 The equality is stronger than the previously exposed Picard-class equality:
-it fixes both the affine fractional ideal and the infinity orientation.  This
-is the canonical representative certificate required by any future
-vertical-twist or special-fibre comparison. -/
+it fixes both the affine fractional ideal and the infinity orientation.  The
+chosen line also retains its vertical-saturation certificate.  Together these
+are the representative data required by contraction and special-fibre
+comparison. -/
 theorem exists_exactSpreadLine (P : G) :
     ∃ L : N13RationalCurvePointPicardRealization.SpreadLine,
       L.rationalClass = P ∧
       N13TwoChartPicardRealization.genericRaw
           L.realization.charts L.realization.infinityOrder =
         SexticMumford.mumfordRaw Model₂
-          (mapMumford (normalizedMumford P)) := by
-  obtain ⟨R, hraw, hR⟩ := exists_data (normalizedMumford P)
+          (mapMumford (normalizedMumford P)) ∧
+      N13TwoChartPicardRealization.AffineVerticallySaturated
+        L.realization.charts := by
+  obtain ⟨R, hraw, hR, hsaturated⟩ :=
+    exists_saturated_data (normalizedMumford P)
   -- Naturality of `classOf` identifies the realized two-adic class with the
   -- base change of `P`; normalization is removed in the final equality.
   have hgeneric :
@@ -450,12 +559,12 @@ theorem exists_exactSpreadLine (P : G) :
   exact
     ⟨{ rationalClass := P
        realization := R
-       generic_eq := hgeneric }, rfl, hraw⟩
+       generic_eq := hgeneric }, rfl, hraw, hsaturated⟩
 
 /-- Fix one exact normalized spread for each rational Picard class.  The
-choice is made only after the representative-level existence theorem; its
-two projection lemmas below prevent later arguments from depending on how
-the witness was selected. -/
+choice is made only after the representative-level existence theorem; the
+projection lemmas below prevent later arguments from depending on how the
+witness was selected. -/
 def exactSpreadLine (P : G) :
     N13RationalCurvePointPicardRealization.SpreadLine :=
   Classical.choose (exists_exactSpreadLine P)
@@ -474,7 +583,15 @@ theorem exactSpreadLine_genericRaw (P : G) :
         (exactSpreadLine P).realization.infinityOrder =
       SexticMumford.mumfordRaw Model₂
         (mapMumford (normalizedMumford P)) :=
-  (Classical.choose_spec (exists_exactSpreadLine P)).2
+  (Classical.choose_spec (exists_exactSpreadLine P)).2.1
+
+/-- The affine lattice selected by `exactSpreadLine` is vertically saturated.
+The certificate is chosen together with the line, so no reflection from the
+localized generic ideal is involved. -/
+theorem exactSpreadLine_affineVerticallySaturated (P : G) :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (exactSpreadLine P).realization.charts :=
+  (Classical.choose_spec (exists_exactSpreadLine P)).2.2
 
 /-- The affine lattice of the selected exact spread extends to the literal
 Mumford graph ideal of the mapped rational normal form.

@@ -462,6 +462,33 @@ theorem integralAffineData_map_affineIdeal
   rw [N13IntegralPointPicardRealization.map_anchoredPointLine_affineIdeal]
   rw [htarget]
 
+/-- The rational integral-point realization retains the vertical-saturation
+certificate of its anchored integral affine line. -/
+theorem integralAffineData_affineVerticallySaturated
+    (X Y : ℚ)
+    (hcurve : Y ^ 2 = (N13Mumford.model ℚ).f.eval X)
+    (hx : ‖N13ProperCurveReduction.ratToQ₂ X‖ ≤ 1) :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (integralAffineData X Y hcurve hx).realization.charts := by
+  have hC13 : N13CurveModel.C13SexticEq X Y := by
+    rw [N13CurveModel.C13SexticEq,
+      ← N13Mumford.f_eval_eq_sexticF13]
+    exact hcurve
+  let x₂ : N13ProperCurveReduction.Q₂ :=
+    N13ProperCurveReduction.ratToQ₂ X
+  let y₂ : N13ProperCurveReduction.Q₂ :=
+    N13ProperCurveReduction.ratToQ₂
+      (N13GoodModelTwo.sexticToGoodY X Y)
+  have hgood : N13GoodModelTwo.AffineEquation x₂ y₂ :=
+    N13ProperCurveReduction.map_good_equation hC13
+  let P₂ : N13IntegralAffinePointSpread.IntegralPoint :=
+    N13ProperCurveReduction.integralAffineLift x₂ y₂ hx hgood
+  change
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (N13FiniteAffinePointInfinityClosure.anchoredPointLine P₂)
+  exact
+    N13IntegralPointPicardRealization.anchoredPointLine_affineVerticallySaturated P₂
+
 /-- The escaping affine-point realization retains the same literal mapped
 Mumford ideal on the generic affine chart. -/
 theorem escapingAffineData_map_affineIdeal
@@ -531,6 +558,34 @@ theorem escapingAffineData_map_affineIdeal
       _
   rw [N13EscapingPointPicardRealization.map_anchoredPointLine_affineIdeal]
   rw [htarget]
+
+/-- The rational escaping-point realization retains the vertical-saturation
+certificate transported from its infinity-chart point line. -/
+theorem escapingAffineData_affineVerticallySaturated
+    (X Y : ℚ)
+    (hcurve : Y ^ 2 = (N13Mumford.model ℚ).f.eval X)
+    (hxval :
+      (N13ProperCurveReduction.ratToQ₂ X).valuation < 0) :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (escapingAffineData X Y hcurve hxval).realization.charts := by
+  have hC13 : N13CurveModel.C13SexticEq X Y := by
+    rw [N13CurveModel.C13SexticEq,
+      ← N13Mumford.f_eval_eq_sexticF13]
+    exact hcurve
+  let x₂ : N13ProperCurveReduction.Q₂ :=
+    N13ProperCurveReduction.ratToQ₂ X
+  let y₂ : N13ProperCurveReduction.Q₂ :=
+    N13ProperCurveReduction.ratToQ₂
+      (N13GoodModelTwo.sexticToGoodY X Y)
+  have hgood : N13GoodModelTwo.AffineEquation x₂ y₂ :=
+    N13ProperCurveReduction.map_good_equation hC13
+  change
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (N13EscapingPointSpecialRestriction.anchoredPointLine
+        x₂ y₂ hxval hgood)
+  exact
+    N13EscapingPointPicardRealization.anchoredPointLine_affineVerticallySaturated
+      x₂ y₂ hxval hgood
 
 /-!
 ## Relation-first spread lines

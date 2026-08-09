@@ -56,6 +56,23 @@ def dataOfSpecialRealization
   special_affine := haffine
   special_infinity := hinfinity
 
+/-- Packaging a line with its special divisor does not alter its affine
+lattice, so a vertical-saturation certificate passes through definitionally. -/
+theorem dataOfSpecialRealization_affineVerticallySaturated
+    (D : SexticMumford.Mumford Model)
+    (L : Line)
+    (Δ : EffectiveDivisorTwo)
+    (haffine :
+      (N13TwoChartSpecialRestriction.restrict L).affineIdeal =
+        (N13SpecialDivisorCharts.ofDivisor Δ).affineIdeal)
+    (hinfinity :
+      (N13TwoChartSpecialRestriction.restrict L).infinityIdeal =
+        (N13SpecialDivisorCharts.ofDivisor Δ).infinityIdeal)
+    (hL : N13TwoChartPicardRealization.AffineVerticallySaturated L) :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (dataOfSpecialRealization D L Δ haffine hinfinity).charts := by
+  exact hL
+
 /-- Exact generic affine-ideal equality identifies the raw generic datum of
 `dataOfSpecialRealization` with the literal Mumford raw datum. -/
 theorem dataOfSpecialRealization_genericRaw_eq_mumfordRaw
@@ -156,6 +173,43 @@ theorem exists_data_of_distinct_split
       dataOfSpecialRealization_toGenericPic_eq_classOf
         D L Δ haffine hinfinity hmap
 
+/-- A distinct split quadratic admits complete two-fibre data whose affine
+lattice retains the saturation certificate of the explicit pair line. -/
+theorem exists_saturated_data_of_distinct_split
+    (D : SexticMumford.Mumford Model)
+    (hdeg : D.u.natDegree = 2)
+    (x₁ x₂ : N13SplitQuadraticSpecialRestriction.Q₂)
+    (hfactor :
+      D.u = (Polynomial.X - Polynomial.C x₁) *
+        (Polynomial.X - Polynomial.C x₂))
+    (hneq : x₁ ≠ x₂) :
+    ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw Model D ∧
+      R.toGenericPic =
+        SexticMumford.classOf
+          Model
+          (N13Infinity.positiveInfinityOrder
+            N13TwoChartPicardRealization.Q₂)
+          D ∧
+      N13TwoChartPicardRealization.AffineVerticallySaturated R.charts := by
+  obtain ⟨L, Δ, hmap, haffine, hinfinity, hsaturated⟩ :=
+    N13SplitQuadraticSpecialRestriction.exists_saturated_twoChartLine_and_specialDivisor_of_distinct_split
+      D hdeg x₁ x₂ hfactor hneq
+  let R :=
+    dataOfSpecialRealization D L Δ haffine hinfinity
+  refine ⟨R, ?_, ?_, ?_⟩
+  · exact
+      dataOfSpecialRealization_genericRaw_eq_mumfordRaw
+        D L Δ haffine hinfinity hmap
+  · exact
+      dataOfSpecialRealization_toGenericPic_eq_classOf
+        D L Δ haffine hinfinity hmap
+  · exact
+      dataOfSpecialRealization_affineVerticallySaturated
+        D L Δ haffine hinfinity hsaturated
+
 /-- A repeated-root quadratic Mumford graph admits complete two-fibre Picard
 data whose special divisor retains the doubled reduced point. -/
 theorem exists_data_of_repeated_root
@@ -185,6 +239,40 @@ theorem exists_data_of_repeated_root
   · exact
       dataOfSpecialRealization_toGenericPic_eq_classOf
         D L Δ haffine hinfinity hmap
+
+/-- A repeated-root quadratic admits complete two-fibre data whose tangent
+square affine lattice remains vertically saturated. -/
+theorem exists_saturated_data_of_repeated_root
+    (D : SexticMumford.Mumford Model)
+    (x : N13SplitQuadraticSpecialRestriction.Q₂)
+    (hfactor :
+      D.u = (Polynomial.X - Polynomial.C x) ^ 2) :
+    ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw Model D ∧
+      R.toGenericPic =
+        SexticMumford.classOf
+          Model
+          (N13Infinity.positiveInfinityOrder
+            N13TwoChartPicardRealization.Q₂)
+          D ∧
+      N13TwoChartPicardRealization.AffineVerticallySaturated R.charts := by
+  obtain ⟨L, Δ, hmap, haffine, hinfinity, hsaturated⟩ :=
+    N13SplitQuadraticSpecialRestriction.exists_saturated_twoChartLine_and_specialDivisor_of_repeated_root
+      D x hfactor
+  let R :=
+    dataOfSpecialRealization D L Δ haffine hinfinity
+  refine ⟨R, ?_, ?_, ?_⟩
+  · exact
+      dataOfSpecialRealization_genericRaw_eq_mumfordRaw
+        D L Δ haffine hinfinity hmap
+  · exact
+      dataOfSpecialRealization_toGenericPic_eq_classOf
+        D L Δ haffine hinfinity hmap
+  · exact
+      dataOfSpecialRealization_affineVerticallySaturated
+        D L Δ haffine hinfinity hsaturated
 
 end
 

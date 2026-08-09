@@ -52,8 +52,8 @@ theorem finiteQuadraticTwoChartLine_affineVerticallySaturated
   rfl
 
 /-- A finite irreducible quadratic contraction yields complete two-fibre
-Picard data. -/
-theorem exists_data_of_finite
+Picard data and retains vertical saturation of the canonical contraction. -/
+theorem exists_saturated_data_of_finite
     (D : SexticMumford.Mumford Model)
     (hdeg : D.u.natDegree = 2)
     (hfinite :
@@ -68,7 +68,8 @@ theorem exists_data_of_finite
         SexticMumford.classOf
           Model
           (N13Infinity.positiveInfinityOrder Q₂)
-          D := by
+          D ∧
+      N13TwoChartPicardRealization.AffineVerticallySaturated R.charts := by
   let L :=
     N13FiniteAffineTwoChart.finiteQuadraticTwoChartLine
       D.toSemi hdeg hfinite
@@ -94,16 +95,68 @@ theorem exists_data_of_finite
   let R :=
     N13SplitQuadraticPicardRealization.dataOfSpecialRealization
       D L Δ haffine hinfinity
-  refine ⟨R, ?_, ?_⟩
+  refine ⟨R, ?_, ?_, ?_⟩
   · exact
       N13SplitQuadraticPicardRealization.dataOfSpecialRealization_genericRaw_eq_mumfordRaw
           D L Δ haffine hinfinity hmap
   · exact
       N13SplitQuadraticPicardRealization.dataOfSpecialRealization_toGenericPic_eq_classOf
           D L Δ haffine hinfinity hmap
+  · exact
+      N13SplitQuadraticPicardRealization.dataOfSpecialRealization_affineVerticallySaturated
+        D L Δ haffine hinfinity
+        (finiteQuadraticTwoChartLine_affineVerticallySaturated
+          D hdeg hfinite)
+
+/-- Forgetting vertical saturation recovers the original finite-quadratic
+realization interface. -/
+theorem exists_data_of_finite
+    (D : SexticMumford.Mumford Model)
+    (hdeg : D.u.natDegree = 2)
+    (hfinite :
+      Module.Finite N13FiniteAffineTwoChart.R₂
+        (N13FiniteAffineTwoChart.AffineCurve ⧸
+          N13FiniteAffineTwoChart.finiteAffineIdeal D.toSemi)) :
+    ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw Model D ∧
+      R.toGenericPic =
+        SexticMumford.classOf
+          Model
+          (N13Infinity.positiveInfinityOrder Q₂)
+          D := by
+  obtain ⟨R, hraw, hgeneric, _⟩ :=
+    exists_saturated_data_of_finite D hdeg hfinite
+  exact ⟨R, hraw, hgeneric⟩
 
 /-- Every irreducible quadratic Mumford representative has complete
-two-fibre Picard data. -/
+two-fibre Picard data with a saturated affine lattice. -/
+theorem exists_saturated_data_of_irreducible
+    (D : SexticMumford.Mumford Model)
+    (hdeg : D.u.natDegree = 2)
+    (hirr : Irreducible D.u) :
+    ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw Model D ∧
+      R.toGenericPic =
+        SexticMumford.classOf
+          Model
+          (N13Infinity.positiveInfinityOrder Q₂)
+          D ∧
+      N13TwoChartPicardRealization.AffineVerticallySaturated R.charts := by
+  rcases
+      N13IrreducibleQuadraticFinite.contractQuotient_finite_or_integral_reciprocal
+          D hdeg hirr with
+    hfinite | ⟨h0, a, b, hm⟩
+  · exact exists_saturated_data_of_finite D hdeg hfinite
+  · exact
+      N13ReciprocalVerticalGraphPicardRealization.exists_saturated_data
+        D hdeg h0 a b hm
+
+/-- Forgetting vertical saturation recovers the original irreducible
+quadratic realization interface. -/
 theorem exists_data_of_irreducible
     (D : SexticMumford.Mumford Model)
     (hdeg : D.u.natDegree = 2)
@@ -117,19 +170,14 @@ theorem exists_data_of_irreducible
           Model
           (N13Infinity.positiveInfinityOrder Q₂)
           D := by
-  rcases
-      N13IrreducibleQuadraticFinite.contractQuotient_finite_or_integral_reciprocal
-          D hdeg hirr with
-    hfinite | ⟨h0, a, b, hm⟩
-  · exact exists_data_of_finite D hdeg hfinite
-  · exact
-      N13ReciprocalVerticalGraphPicardRealization.exists_data
-        D hdeg h0 a b hm
+  obtain ⟨R, hraw, hgeneric, _⟩ :=
+    exists_saturated_data_of_irreducible D hdeg hirr
+  exact ⟨R, hraw, hgeneric⟩
 
-/-- Every balanced quadratic Mumford representative has complete two-fibre
-Picard data, with split, tangent, finite irreducible, and reciprocal
+/-- Every balanced quadratic Mumford representative has complete saturated
+two-fibre Picard data, with split, tangent, finite irreducible, and reciprocal
 irreducible cases all represented by literal special divisors. -/
-theorem exists_data
+theorem exists_saturated_data
     (D : SexticMumford.Mumford Model)
     (hdeg : D.u.natDegree = 2) :
     ∃ R : N13TwoChartPicardRealization.Data,
@@ -140,9 +188,10 @@ theorem exists_data
         SexticMumford.classOf
           Model
           (N13Infinity.positiveInfinityOrder Q₂)
-          D := by
+          D ∧
+      N13TwoChartPicardRealization.AffineVerticallySaturated R.charts := by
   by_cases hirr : Irreducible D.u
-  · exact exists_data_of_irreducible D hdeg hirr
+  · exact exists_saturated_data_of_irreducible D hdeg hirr
   obtain ⟨c₁, c₂, hc₀, hc₁⟩ :=
     (D.u_monic.not_irreducible_iff_exists_add_mul_eq_coeff hdeg).mp
       hirr
@@ -162,7 +211,7 @@ theorem exists_data
     ring
   by_cases hneq : x₁ ≠ x₂
   · exact
-      N13SplitQuadraticPicardRealization.exists_data_of_distinct_split
+      N13SplitQuadraticPicardRealization.exists_saturated_data_of_distinct_split
         D hdeg x₁ x₂ hfactor hneq
   · have heq : x₂ = x₁ := by
       apply not_ne_iff.mp
@@ -172,8 +221,26 @@ theorem exists_data
       rw [heq] at hfactor
       simpa only [pow_two] using hfactor
     exact
-      N13SplitQuadraticPicardRealization.exists_data_of_repeated_root
+      N13SplitQuadraticPicardRealization.exists_saturated_data_of_repeated_root
         D x₁ hfactorSquare
+
+/-- Forgetting vertical saturation recovers the original complete quadratic
+realization interface. -/
+theorem exists_data
+    (D : SexticMumford.Mumford Model)
+    (hdeg : D.u.natDegree = 2) :
+    ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw Model D ∧
+      R.toGenericPic =
+        SexticMumford.classOf
+          Model
+          (N13Infinity.positiveInfinityOrder Q₂)
+          D := by
+  obtain ⟨R, hraw, hgeneric, _⟩ :=
+    exists_saturated_data D hdeg
+  exact ⟨R, hraw, hgeneric⟩
 
 end
 

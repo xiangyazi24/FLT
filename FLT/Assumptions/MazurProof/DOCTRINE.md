@@ -452,10 +452,10 @@ Terminal: axiom replaced by theorem (long-term campaign).
 
 ## Execution Order
 
-1. **NOW:** N13 — prove `class_eq_iff`, preserve the now-complete constructor
-   saturation certificates through the exact-spread chooser, and prove the
-   two canonical centered-square cross coefficients (degrees one and three)
-   modulo the moving coordinate ideal square.
+1. **NOW:** N13 — prove `class_eq_iff` and the two canonical centered-square
+   cross coefficients (degrees one and three) modulo the moving coordinate
+   ideal square.  Constructor saturation is already retained through the
+   exact-spread chooser and is no longer an endpoint input.
 2. **NEXT:** N25 — land the exact Tate-to-canonical coordinate map and then
    connect the existing mod-two geometry to the global formal-immersion
    argument.

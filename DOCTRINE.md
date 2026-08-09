@@ -55,11 +55,11 @@ followed by twist/model/kernel transport for the two noncuspidal fibres.
 
 ### (b) N13 concrete specialization and separatedness
 
-The low-degree spread algebra and the final cusp endgame are largely proved.
-The immediate missing case is irreducible-quadratic special restriction on
-both charts.  It is followed by concrete relation-first `SpreadData`,
-`abel_reduces`, canonical mapped-special equality, and first-jet doubling
-compatibility.
+The low-degree spread algebra, complete rational Picard spread existence,
+vertical saturation of every constructor, certified exact-spread choice, and
+the final cusp endgame are proved.  The endpoint now has exactly two explicit
+providers: `class_eq_iff` for concrete rational spread lines and first-jet
+doubling compatibility for the canonical recovered representatives.
 
 ### (c) N19 nonsingular Tate locus
 

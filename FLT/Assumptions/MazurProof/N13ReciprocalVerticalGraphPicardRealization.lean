@@ -52,8 +52,9 @@ theorem verticalGraph_twoChartLine_affineVerticallySaturated
       D hdeg h0 u E hu huDegree hmDegree huMem hI).symm
 
 /-- A recovered vertical reciprocal graph realizes the original generic
-quadratic class and a literal effective degree-two special divisor. -/
-theorem verticalGraph_exists_data
+quadratic class and a literal effective degree-two special divisor while
+retaining vertical saturation of its affine lattice. -/
+theorem verticalGraph_exists_saturated_data
     {D : SexticMumford.Mumford
       N13IrreducibleQuadraticSpread.Model}
     {a b : N13IrreducibleQuadraticSpread.R₂}
@@ -83,7 +84,8 @@ theorem verticalGraph_exists_data
           N13IrreducibleQuadraticSpread.Model
           (N13Infinity.positiveInfinityOrder
             N13TwoChartPicardRealization.Q₂)
-          D := by
+          D ∧
+      N13TwoChartPicardRealization.AffineVerticallySaturated R.charts := by
   let u :=
     N13ReciprocalQuadraticReflection.integralReciprocal a b
   have hu : u.Monic :=
@@ -128,17 +130,100 @@ theorem verticalGraph_exists_data
   let R :=
     N13SplitQuadraticPicardRealization.dataOfSpecialRealization
       D L Δ haffine hinfinity
-  refine ⟨R, ?_, ?_⟩
+  refine ⟨R, ?_, ?_, ?_⟩
   · exact
       N13SplitQuadraticPicardRealization.dataOfSpecialRealization_genericRaw_eq_mumfordRaw
         D L Δ haffine hinfinity hmap
   · exact
       N13SplitQuadraticPicardRealization.dataOfSpecialRealization_toGenericPic_eq_classOf
         D L Δ haffine hinfinity hmap
+  · exact
+      N13SplitQuadraticPicardRealization.dataOfSpecialRealization_affineVerticallySaturated
+        D L Δ haffine hinfinity
+        (verticalGraph_twoChartLine_affineVerticallySaturated
+          hdeg h0 u E hu huDegree hmDegree huMem hI)
 
-/-- The reciprocal direct-kernel construction admits complete two-fibre
-Picard data regardless of whether rank-two recovery chooses the horizontal
-or vertical infinity-chart basis. -/
+/-- Forgetting vertical saturation recovers the original vertical reciprocal
+realization interface. -/
+theorem verticalGraph_exists_data
+    {D : SexticMumford.Mumford
+      N13IrreducibleQuadraticSpread.Model}
+    {a b : N13IrreducibleQuadraticSpread.R₂}
+    (hdeg : D.u.natDegree = 2)
+    (h0 : D.u.coeff 0 ≠ 0)
+    (hm :
+      (X ^ 2 +
+          C (a : N13IrreducibleQuadraticSpread.Q₂) * X +
+          C (b : N13IrreducibleQuadraticSpread.Q₂) :
+        N13IrreducibleQuadraticSpread.Q₂[X]) =
+        X ^ 2 +
+          C (D.u.coeff 1 / D.u.coeff 0) * X +
+          C ((D.u.coeff 0)⁻¹))
+    (E : N13IntegralInfinityVerticalGraphJacobian.VerticalGraph)
+    (hmDegree : E.m.natDegree = 2)
+    (hI :
+      N13ReciprocalInfinityContraction.integralInfinityIdeal
+          D hdeg h0 =
+        E.ideal) :
+    ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw
+          N13IrreducibleQuadraticSpread.Model D ∧
+      R.toGenericPic =
+        SexticMumford.classOf
+          N13IrreducibleQuadraticSpread.Model
+          (N13Infinity.positiveInfinityOrder
+            N13TwoChartPicardRealization.Q₂)
+          D := by
+  obtain ⟨R, hraw, hgeneric, _⟩ :=
+    verticalGraph_exists_saturated_data
+      hdeg h0 hm E hmDegree hI
+  exact ⟨R, hraw, hgeneric⟩
+
+/-- The reciprocal direct-kernel construction admits complete saturated
+two-fibre Picard data regardless of whether rank-two recovery chooses the
+horizontal or vertical infinity-chart basis. -/
+theorem exists_saturated_data
+    (D : SexticMumford.Mumford
+      N13IrreducibleQuadraticSpread.Model)
+    (hdeg : D.u.natDegree = 2)
+    (h0 : D.u.coeff 0 ≠ 0)
+    (a b : N13IrreducibleQuadraticSpread.R₂)
+    (hm :
+      (X ^ 2 +
+          C (a : N13IrreducibleQuadraticSpread.Q₂) * X +
+          C (b : N13IrreducibleQuadraticSpread.Q₂) :
+        N13IrreducibleQuadraticSpread.Q₂[X]) =
+        X ^ 2 +
+          C (D.u.coeff 1 / D.u.coeff 0) * X +
+          C ((D.u.coeff 0)⁻¹)) :
+    ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw
+          N13IrreducibleQuadraticSpread.Model D ∧
+      R.toGenericPic =
+        SexticMumford.classOf
+          N13IrreducibleQuadraticSpread.Model
+          (N13Infinity.positiveInfinityOrder
+            N13TwoChartPicardRealization.Q₂)
+          D ∧
+      N13TwoChartPicardRealization.AffineVerticallySaturated R.charts := by
+  rcases
+      N13IrreducibleQuadraticSpread.exists_reciprocalGraphClosure_or_verticalGraph
+        D hdeg h0 a b hm with
+    hhorizontal | ⟨E, hmDegree, hI⟩
+  · obtain ⟨E⟩ := hhorizontal
+    exact
+      N13ReciprocalGraphPicardRealization.ReciprocalGraphClosure.exists_saturated_data
+        E hdeg h0 hm
+  · exact
+      verticalGraph_exists_saturated_data
+        hdeg h0 hm E hmDegree hI
+
+/-- Forgetting vertical saturation recovers the original reciprocal
+dispatcher interface. -/
 theorem exists_data
     (D : SexticMumford.Mumford
       N13IrreducibleQuadraticSpread.Model)
@@ -164,17 +249,9 @@ theorem exists_data
           (N13Infinity.positiveInfinityOrder
             N13TwoChartPicardRealization.Q₂)
           D := by
-  rcases
-      N13IrreducibleQuadraticSpread.exists_reciprocalGraphClosure_or_verticalGraph
-        D hdeg h0 a b hm with
-    hhorizontal | ⟨E, hmDegree, hI⟩
-  · obtain ⟨E⟩ := hhorizontal
-    exact
-      N13ReciprocalGraphPicardRealization.ReciprocalGraphClosure.exists_data
-        E hdeg h0 hm
-  · exact
-      verticalGraph_exists_data
-        hdeg h0 hm E hmDegree hI
+  obtain ⟨R, hraw, hgeneric, _⟩ :=
+    exists_saturated_data D hdeg h0 a b hm
+  exact ⟨R, hraw, hgeneric⟩
 
 end
 

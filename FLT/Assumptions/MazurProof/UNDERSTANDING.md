@@ -849,7 +849,9 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `Classical.choice`, and `Quot.sound`.
 - The remaining N13 mathematical providers on the stronger classifier route
   are the `class_eq_iff` specialization/reflection theorem for the now-global
-  rational spread lines and separatedness of the resulting reduction kernel.
+  rational spread lines and first-jet doubling compatibility for the canonical
+  recovered representatives.  These two inputs imply separatedness of the
+  resulting reduction kernel.
   Pointwise
   compatibility of rational Abel classes with reduction (`abel_reduces`) is
   now supplied by the explicit curve-point realizations.  In the current
@@ -865,8 +867,9 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   Those two inputs now assemble directly into
   `RationalKernelDoublingData` and hence `NSeparated`.
 - The near-base producer is reduced below direct mapped-special equality by
-  `N13RationalPicardEndpoint.ExactSpreadAffineVerticallySaturated`.  Its only
-  assertion is that the affine lattice of each exact normalized spread has no
+  `N13RationalPicardEndpoint.ExactSpreadAffineVerticallySaturated`, which is
+  now proved by the certified exact-spread chooser.  Its assertion is that the
+  affine lattice of each exact normalized spread has no
   component or scalar twist supported purely over the closed two-adic fibre.
   `exactSpreadLine_genericRaw` gives equality after vertical localization,
   and the existing contraction-uniqueness theorem upgrades it to literal
@@ -895,11 +898,12 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `N13FiniteQuadraticSpecialRestriction.lean` together with the reciprocal
   producers.  The pointwise two-fibre construction now removes
   `abel_reduces` from that list, and balanced Mumford exhaustion now removes
-  global spread existence.  The genuine remaining producers are
-  `class_eq_iff`, vertical saturation of the exact normalized spread affine
-  lattices, and the first-jet comparison for doubling.  The contraction
-  comparison is now derived.  No additional finite Jacobian group law or
-  cardinality computation belongs on the critical path.
+  global spread existence.  Vertical saturation is now carried from every
+  direct constructor through the quadratic and rational degree-exhaustion
+  choices into `exactSpreadLine`; the contraction comparison is consequently
+  a theorem.  The genuine remaining producers are only `class_eq_iff` and the
+  first-jet comparison for doubling.  No additional finite Jacobian group law
+  or cardinality computation belongs on the critical path.
 - `N13InfinitySpecialPointClass.specialPointClass_injective` proves that the
   anchored special Abel map loses no special curve point.  Away from the
   canonical pencil, equality of Abel classes gives equality of effective
@@ -915,15 +919,15 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   special points, this pointwise route is essentially the desired rational
   point classification itself, not a constructive shortcut to it.
 - `N13RationalPicardEndpoint.lean` records the exact constructive endpoint.
-  Global spread existence and pointwise Abel compatibility are consumed
-  automatically.  The remaining providers are (1) `class_eq_iff` for the
-  concrete rational spread lines, (2) vertical saturation of the affine
-  lattice of each exact normalized spread, and (3) first-jet compatibility
-  comparing the chosen representative of `2z` with the square transition for
-  `z`.  The second provider is now strictly below both the contraction
-  comparison and the former literal mapped-special field: both are derived
-  outputs.  The existing-first audit Q3893 found no supplier
-  for the third provider; its smallest honest form is the canonical Mumford
+  Global spread existence, pointwise Abel compatibility, and vertical
+  saturation of each exact normalized spread are consumed automatically.
+  The remaining providers are (1) `class_eq_iff` for the concrete rational
+  spread lines and (2) first-jet compatibility comparing the chosen
+  representative of `2z` with the square transition for `z`.  Saturation is
+  strictly below both the contraction comparison and the former literal
+  mapped-special field: both are now derived outputs.  The existing-first
+  audit Q3893 found no supplier for the second remaining provider; its
+  smallest honest form is the canonical Mumford
   `u`-deviation doubling congruence modulo the moving coordinate ideal square,
   which is equivalent to coordinate doubling rather than a weaker shortcut.
   These inputs produce two-adic separatedness and hence the primitive affine
@@ -948,9 +952,10 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   reduces scalar cancellation in their product to cancellation in the second
   ideal.  This proves that tensoring saturated two-chart lines preserves
   saturation, hence certifies `pairLine` for both split secants and coincident
-  repeated-root tangents.  All direct spread constructors are now covered;
-  only preservation of their certificates through the existential quadratic
-  and exact-spread choosers remains.
+  repeated-root tangents.  The strengthened split, repeated, reciprocal,
+  quadratic, rational degree-zero/one/two, and exact-spread existentials retain
+  these certificates.  The selected exact spread exposes saturation directly,
+  so this branch is closed without localization reflection or a new axiom.
 - `N13MumfordCenteredDoublingJet.lean` gives a denominator-free local
   calculation for the remaining first-jet producer.  It expands the centered
   Mumford square, proves the exact linearized double and the Hensel ordinate

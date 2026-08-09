@@ -141,6 +141,12 @@
   - the product theorem, tensor wrapper, point-line wrapper, and `pairLine`
     theorem pass scoped compilation and audit to exactly `propext`,
     `Classical.choice`, and `Quot.sound`
+  - threaded those saturation certificates through every split, repeated,
+    reciprocal, finite, rational degree-zero/one/two, and exact-spread chooser
+  - the selected `exactSpreadLine` now exposes vertical saturation directly;
+    the public N13 endpoint no longer accepts an external saturation provider
+  - the strengthened chooser and endpoint declarations compile and audit to
+    exactly `propext`, `Classical.choice`, and `Quot.sound`
 
 ## Run 2026-07-28 (N13 structural two-adic Abel chart)
 - approval: `/automode`; stop requested at the next clean node

@@ -36,14 +36,13 @@ scoped builds pass, and `#print axioms` contains only `propext`,
   - Remaining semantic atoms: the pointwise-reflection formulation is exactly
     injectivity of proper reduction on rational curve points, hence is a
     restatement of the rational-point classification rather than a cheaper
-    bypass.  The constructive classifier route has three explicit providers:
-    `class_eq_iff` for global rational spread lines, vertical-scalar
-    saturation of the affine lattices of the corresponding exact normalized
-    spreads, and first-jet doubling compatibility for the recovered
-    representatives.  Saturation is now proved for every current constructor,
-    including the product `pairLine` used by split secants and repeated-root
-    tangents, and still must be retained by the existential exact-spread
-    chooser.  The first-jet provider is now reduced
+    bypass.  The constructive classifier route has two explicit providers:
+    `class_eq_iff` for global rational spread lines and first-jet doubling
+    compatibility for the recovered representatives.  Vertical saturation is
+    proved for every constructor, including the product `pairLine` used by
+    split secants and repeated-root tangents, and is retained through the
+    degree-zero, degree-one, degree-two, and exact-spread choosers.  Therefore
+    it is no longer an endpoint hypothesis.  The first-jet provider is reduced
     exactly to coefficients one and three of
     `P.u² - uBase * Q.u` lying in the square of the moving coordinate ideal,
     where `P` represents `z` and `Q` represents `2z`; the denominator-free
@@ -51,8 +50,8 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     compatibility interface.  Generic raw equality and localization derive
     the canonical contraction comparison from saturation; `class_eq_iff`
     and the explicit base spread then derive the fixed special ideal.  The
-    endpoint file proves that these three inputs imply the primitive N13
-    theorem.
+    endpoint file proves that the two remaining inputs imply the primitive
+    N13 theorem.
 
 - [x] N17 — `CyclicExclusion17.no_F17_rational_solution`
   - Closed infrastructure: exact-order Tate normalization with preserved

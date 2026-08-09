@@ -1024,7 +1024,28 @@
   `1-t₀X` makes `X` a unit modulo the affine graph, so overlap contraction
   recovers the original lattice without a vertical component.
 - These results close the direct degree-zero and degree-one branches, finite
-  irreducible quadratics, and both reciprocal quadratic recoveries.  The
-  remaining constructor case is the product of point-line ideals in the
-  split and repeated-root quadratic branches, followed by certified chooser
-  wiring.
+  irreducible quadratics, and both reciprocal quadratic recoveries.
+
+### N13 product saturation and certified exact-spread choice (2026-08-08)
+
+- Used inverse fractional-ideal cancellation to prove that multiplying two
+  vertically saturated affine ideals preserves saturation when the first
+  factor is invertible in the common function field.
+- Applied this theorem to the tensor product of point lines.  The resulting
+  `pairLine_affineVerticallySaturated` theorem covers both distinct split
+  secants and coincident repeated-root tangents.
+- Strengthened the split, repeated, reciprocal horizontal and vertical,
+  finite quadratic, and unified quadratic Picard existentials to retain the
+  saturation certificate while preserving every old API as a projection.
+- Threaded the certificate through rational Mumford degree zero, the integral
+  and escaping degree-one branches, degree two, global degree exhaustion, and
+  `exists_exactSpreadLine`.  The selected `exactSpreadLine` now exposes its
+  saturation directly.
+- Derived canonical contraction comparison and the canonical mapped-special
+  family without an external saturation provider.  The public
+  `N13RationalPicardEndpoint.affine_x_is_cuspidal` signature now contains only
+  `class_eq_iff` and first-jet doubling compatibility.
+- Scoped compilation passes for the strengthened chooser and endpoint chain.
+  The saturation chooser, exact-spread projection, contraction comparison,
+  and public endpoint all audit to exactly `propext`, `Classical.choice`, and
+  `Quot.sound`.
