@@ -1009,6 +1009,21 @@
   rational-point inputs and the uniform prime tail `p ≥ 23`.  There is no
   reachable `sorryAx`.
 
+### N25 denominator-free canonical lift (2026-08-08)
+
+- Proved directly from the stored 234-term primitive polynomial that
+  `F25(b,c)=0` and `b≠0` force `c≠0`.
+- Defined the polynomial homogeneous lift `(x,z,w) ↦ (xD,-N,zD,wD)` from
+  the eliminated plane coordinates to the canonical four coordinates.
+- Verified by exact ring identities that the canonical cubic vanishes on
+  every lifted triple and that the canonical quadric evaluates to the plane
+  sextic.  Therefore every plane-sextic zero lifts without division.
+- The targeted source check passes and all four new endpoint declarations
+  audit to exactly `propext`, `Classical.choice`, and `Quot.sound`.
+- The main N25 seam remains open: literal Tate-to-plane numerators, their
+  `F25` divisibility certificate, source-locus nonvanishing certificates,
+  and the global canonical rational-point classification are still missing.
+
 ### N13 vertical saturation criteria and constructor coverage (2026-08-08)
 
 - Proved that cancellation of every nonzero `ℤ₂` scalar in an affine

@@ -393,14 +393,23 @@ and five.
 classifications over `𝔽₂` and its quadratic extension: the five special
 projective points are exactly the cusp classes, and no new class appears
 over `𝔽₄`.
+`RationalPointsN25TateCanonicalBridge.lean` now supplies the
+denominator-free target-side lift
+`(x,z,w) ↦ (xD,-N,zD,wD)`.  Its cubic vanishes identically and its quadric
+pullback is exactly the stored plane sextic.  It also proves directly from
+the literal `F25` polynomial that `c ≠ 0` on the primitive locus when
+`b ≠ 0`.  This removes division from the eventual source-to-target map but
+does not provide that map.
 
-All three files pass scoped compilation.  Axiom audits of their terminal
+All four files pass scoped compilation.  Axiom audits of their terminal
 theorems report only `propext`, `Classical.choice`, and `Quot.sound`.
 They are not yet imported by `CyclicExclusion25`: the genuine remaining
-work is an exact map from the nondegenerate `F25` Tate locus to a
-noncuspidal canonical point, followed by a global rational-point or
-formal-immersion argument proving that every rational canonical point is a
-cusp.  The older `N25LecacheuxIntegrality.lean` and
+work is to find literal plane numerators `NX,NZ,NW` with a polynomial
+certificate that their plane sextic is divisible by `F25`, prove the
+source-locus nonvanishing certificates that make the lifted point
+noncuspidal, and then supply a global rational-point or formal-immersion
+argument proving that every rational canonical point is a cusp.  The older
+`N25LecacheuxIntegrality.lean` and
 `N25LecacheuxSieve.lean` scratch experiments do not currently compile and
 do not contain the advertised final Newton-polygon theorem; they must not be
 counted as proved N25 infrastructure.
