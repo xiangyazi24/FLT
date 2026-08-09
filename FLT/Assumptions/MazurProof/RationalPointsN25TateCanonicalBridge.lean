@@ -92,6 +92,45 @@ theorem homogeneousPlaneLift25_onCanonical
   · rw [homogeneousPlaneLift25_quadric, hS]
   · exact homogeneousPlaneLift25_cubic x z w
 
+/-! ## Noncuspidality criterion for the eventual source map -/
+
+/-- A homogeneous canonical coordinate vector whose first three coordinates
+are nonzero cannot represent any of the five listed cusps: every cusp
+representative has a zero among `x,y,z`.  The statement is purely projective
+and does not require the canonical equations or a condition on `w`. -/
+theorem not_isCusp25_of_xyz_ne_zero
+    {p : Coordinates25}
+    (hx : p.x ≠ 0) (hy : p.y ≠ 0) (hz : p.z ≠ 0) :
+    ¬ IsCusp25 p := by
+  intro hp
+  rw [isCusp25_iff] at hp
+  rcases hp with hp | hp | hp | hp | hp
+  · rcases hp with ⟨a, ha, hpx, hpy, hpz, hpw⟩
+    exact hx (by simpa [cusp25A] using hpx)
+  · rcases hp with ⟨a, ha, hpx, hpy, hpz, hpw⟩
+    exact hx (by simpa [cusp25B] using hpx)
+  · rcases hp with ⟨a, ha, hpx, hpy, hpz, hpw⟩
+    exact hz (by simpa [cusp25C] using hpz)
+  · rcases hp with ⟨a, ha, hpx, hpy, hpz, hpw⟩
+    exact hx (by simpa [cusp25D] using hpx)
+  · rcases hp with ⟨a, ha, hpx, hpy, hpz, hpw⟩
+    exact hy (by simpa [cusp25E] using hpy)
+
+/-- The denominator-free lift is noncuspidal as soon as `x,z` and the two
+elimination factors `D,N` are nonzero.  No condition on the plane coordinate
+`w` is needed because the first three lifted coordinates already exclude all
+five cusp classes. -/
+theorem homogeneousPlaneLift25_not_isCusp
+    {x z w : ℚ}
+    (hx : x ≠ 0) (hz : z ≠ 0)
+    (hD : projectionDenominator25 x z w ≠ 0)
+    (hN : projectionNumerator25 x z w ≠ 0) :
+    ¬ IsCusp25 (homogeneousPlaneLift25 x z w) := by
+  apply not_isCusp25_of_xyz_ne_zero
+  · simpa [homogeneousPlaneLift25] using mul_ne_zero hx hD
+  · simpa [homogeneousPlaneLift25] using neg_ne_zero.mpr hN
+  · simpa [homogeneousPlaneLift25] using mul_ne_zero hz hD
+
 end
 
 end MazurProof.RationalPointsN25TateCanonicalBridge

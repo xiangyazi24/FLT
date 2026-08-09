@@ -1018,10 +1018,15 @@
 - Verified by exact ring identities that the canonical cubic vanishes on
   every lifted triple and that the canonical quadric evaluates to the plane
   sextic.  Therefore every plane-sextic zero lifts without division.
-- The targeted source check passes and all four new endpoint declarations
+- Proved that nonzero lifted `x,y,z` coordinates already exclude all five
+  canonical cusp classes.  For the polynomial lift, this reduces the
+  noncuspidality obligations to nonvanishing of `x,z,D,N`; no condition on
+  the plane coordinate `w` is necessary.
+- The targeted source check passes and all six new endpoint declarations
   audit to exactly `propext`, `Classical.choice`, and `Quot.sound`.
 - The main N25 seam remains open: literal Tate-to-plane numerators, their
-  `F25` divisibility certificate, source-locus nonvanishing certificates,
+  `F25` divisibility certificate, the four source-locus nonvanishing
+  certificates,
   and the global canonical rational-point classification are still missing.
 
 ### N13 vertical saturation criteria and constructor coverage (2026-08-08)

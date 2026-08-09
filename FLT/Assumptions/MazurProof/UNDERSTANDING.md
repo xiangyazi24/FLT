@@ -399,7 +399,10 @@ denominator-free target-side lift
 pullback is exactly the stored plane sextic.  It also proves directly from
 the literal `F25` polynomial that `c ≠ 0` on the primitive locus when
 `b ≠ 0`.  This removes division from the eventual source-to-target map but
-does not provide that map.
+does not provide that map.  Because every listed cusp has a zero among its
+first three canonical coordinates, the lifted point is already noncuspidal
+when `x,z,D,N` are nonzero; the plane coordinate `w` needs no separate
+certificate.
 
 All four files pass scoped compilation.  Axiom audits of their terminal
 theorems report only `propext`, `Classical.choice`, and `Quot.sound`.
