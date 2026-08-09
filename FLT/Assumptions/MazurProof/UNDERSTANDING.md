@@ -929,3 +929,19 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   These inputs produce two-adic separatedness and hence the primitive affine
   cuspidality theorem.  The assembly and the pointwise equivalence both
   compile and depend only on `propext`, `Classical.choice`, and `Quot.sound`.
+- `N13QuotientVerticalFlatness.lean` and
+  `N13TwoChartPicardRealization.lean` now identify affine vertical saturation
+  exactly with relative torsion-freeness of the quotient over `ℤ₂` and
+  expose three reusable sufficient forms: canonical contraction, unit ideal,
+  and monic integral Mumford graph.  The actual spread constructors supply
+  this property for the two infinity cases, integral affine points, finite
+  quadratic contractions, and the horizontal and vertical reciprocal graph
+  branches.  The primitive nonmonic escaping graph
+  `(1-t₀X, Y-v₀X³)` is also saturated: its monic infinity point ideal is
+  saturated, localization preserves that property, and the generator
+  `1-t₀X` supplies the `XUnitMod` witness needed to contract back exactly.
+  Thus invertibility is no longer being conflated with flatness: each covered
+  branch has a separate saturation certificate.  The unresolved constructor
+  algebra is now localized to products of point-line ideals in split or
+  tangent quadratic realizations; a uniform exact-spread theorem must then
+  preserve all certificates through the existential choice.

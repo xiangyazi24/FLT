@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.N13EscapingPointSpecialRestriction
+import FLT.Assumptions.MazurProof.N13IntegralInfinityGraphSaturation
 import FLT.Assumptions.MazurProof.N13TwoChartPicardRealization
 
 /-!
@@ -35,6 +36,131 @@ abbrev Model : SexticMumford.Model Q₂ :=
 /-- Proper two-chart lines on the integral good model. -/
 abbrev Line : Type :=
   N13TwoChartPicardRealization.Line
+
+/-- The cleared horizontal equation of an integral infinity-chart point
+makes the ordinary affine coordinate invertible modulo its affine point
+ideal.  This prevents localization at that coordinate from losing an
+affine-chart component. -/
+theorem affinePointIdeal_xUnitMod
+    (P : N13IntegralInfinityPointSpread.IntegralInfinityPoint) :
+    N13IntegralInfinityGraphSaturation.XUnitMod
+      (N13IntegralInfinityPointSpread.affinePointIdeal P) := by
+  let q : N13IntegralModelContraction.IntegralRing :=
+    N13GeneralizedMumfordIntegral.xClassHom
+      (Polynomial.C P.1.1)
+  refine ⟨q, ?_⟩
+  have hgen :
+      N13GeneralizedMumfordIntegral.xClassHom
+          (N13IntegralInfinityPointSpread.affineU P) ∈
+        N13IntegralInfinityPointSpread.affinePointIdeal P :=
+    GeneralizedGraphIdealCore.xClass_mem_graphIdeal
+      N13GeneralizedMumfordIntegral.xClassHom
+      N13GeneralizedMumfordIntegral.yClass
+      (N13IntegralInfinityPointSpread.affineU P)
+      (N13IntegralInfinityPointSpread.affineV P)
+  change
+    1 - q * N13OrdinaryCurveOverlap.xClass ∈
+      N13IntegralInfinityPointSpread.affinePointIdeal P
+  simpa only [q, N13IntegralInfinityPointSpread.affineU,
+    N13OrdinaryCurveOverlap.xClass,
+    N13GeneralizedMumfordIntegral.xClassHom_apply,
+    map_sub, map_mul, map_one] using hgen
+
+/-- The affine closure of an integral infinity-chart point is saturated by
+every nonzero two-adic scalar.
+
+The infinity point ideal is a monic graph, hence saturated.  Saturation
+survives localization to the overlap, and `affinePointIdeal_xUnitMod` shows
+that contracting from the overlap recovers the original affine ideal. -/
+theorem affinePointIdeal_scalarSaturated
+    (P : N13IntegralInfinityPointSpread.IntegralInfinityPoint)
+    (r : N13IntegralModelContraction.R₂)
+    (hr : r ≠ 0)
+    (z : N13IntegralModelContraction.IntegralRing)
+    (hz :
+      algebraMap N13IntegralModelContraction.R₂
+          N13IntegralModelContraction.IntegralRing r * z ∈
+        N13IntegralInfinityPointSpread.affinePointIdeal P) :
+    z ∈ N13IntegralInfinityPointSpread.affinePointIdeal P := by
+  let Ia := N13IntegralInfinityPointSpread.affinePointIdeal P
+  let Ii := N13IntegralInfinityPointSpread.pointIdeal P
+  let f := N13OrdinaryCurveOverlap.affineToInfinityOverlap
+  let g :
+      N13IntegralInfinityPointSpread.InfinityCurve →+*
+        N13OrdinaryCurveOverlap.InfinityOverlap :=
+    algebraMap
+      N13IntegralInfinityPointSpread.InfinityCurve
+      N13OrdinaryCurveOverlap.InfinityOverlap
+  have hoverlap : Ideal.map f Ia = Ideal.map g Ii := by
+    exact N13IntegralInfinityPointSpread.pointIdeals_agree_on_overlap P
+  have hInfinity :
+      ∀ (s : N13IntegralModelContraction.R₂), s ≠ 0 →
+        ∀ w : N13IntegralInfinityPointSpread.InfinityCurve,
+          algebraMap N13IntegralModelContraction.R₂
+                N13IntegralInfinityPointSpread.InfinityCurve s * w ∈ Ii →
+            w ∈ Ii := by
+    intro s hs w hw
+    change
+      algebraMap N13IntegralModelContraction.R₂
+            N13IntegralInfinityPointSpread.InfinityCurve s * w ∈
+        N13IntegralInfinityGraphTwoChart.infinityIdeal
+          (N13IntegralInfinityPointSpread.pointSemiGraph P) at hw
+    change
+      w ∈ N13IntegralInfinityGraphTwoChart.infinityIdeal
+        (N13IntegralInfinityPointSpread.pointSemiGraph P)
+    exact
+      N13IntegralInfinityGraphSaturation.infinityIdeal_scalarSaturated
+        (N13IntegralInfinityPointSpread.pointSemiGraph P)
+        (Polynomial.monic_X_sub_C P.1.1)
+        s hs w hw
+  have hInfinityOverlap :
+      ∀ (s : N13IntegralModelContraction.R₂), s ≠ 0 →
+        ∀ w : N13OrdinaryCurveOverlap.InfinityOverlap,
+          algebraMap N13IntegralModelContraction.R₂
+                N13OrdinaryCurveOverlap.InfinityOverlap s * w ∈
+              Ideal.map g Ii →
+            w ∈ Ideal.map g Ii := by
+    exact
+      N13IntegralInfinityGraphSaturation.scalarSaturated_map_localization
+        (R := N13IntegralModelContraction.R₂)
+        (S := N13IntegralInfinityPointSpread.InfinityCurve)
+        (T := N13OrdinaryCurveOverlap.InfinityOverlap)
+        (Submonoid.powers N13IntegralInfinityChart.tClass)
+        hInfinity
+  have hrzOverlap :
+      algebraMap N13IntegralModelContraction.R₂
+            N13OrdinaryCurveOverlap.InfinityOverlap r * f z ∈
+        Ideal.map g Ii := by
+    rw [← hoverlap]
+    have hm := Ideal.mem_map_of_mem f hz
+    simpa only [f, Ia, map_mul,
+      N13IntegralInfinityGraphSaturation.affineToInfinityOverlap_algebraMap_R₂]
+      using hm
+  have hzOverlap : f z ∈ Ideal.map g Ii :=
+    hInfinityOverlap r hr (f z) hrzOverlap
+  have hzComap : z ∈ Ideal.comap f (Ideal.map f Ia) := by
+    change f z ∈ Ideal.map f Ia
+    rw [hoverlap]
+    exact hzOverlap
+  rw [N13IntegralInfinityGraphSaturation.affineOverlapContracted_of_xUnitMod
+    (affinePointIdeal_xUnitMod P)] at hzComap
+  exact hzComap
+
+/-- The proper two-chart line of a nonintegral affine point is vertically
+saturated on its ordinary affine chart. -/
+theorem nonintegralPointLine_affineVerticallySaturated
+    (x y : Q₂)
+    (hx : x.valuation < 0)
+    (hxy : N13GoodModelTwo.AffineEquation x y) :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (N13IntegralInfinityPointSpread.nonintegralPointLine
+        x y hx hxy) := by
+  intro r hr a ha
+  exact
+    affinePointIdeal_scalarSaturated
+      (N13ProperCurveReduction.nonintegralInfinityLift
+        x y hx hxy)
+      r hr a ha
 
 /-- Algebra structure used to extend an integral fractional ideal to the
 generic sextic coordinate ring. -/
@@ -98,6 +224,19 @@ theorem restrict_anchoredPointLine_eq_ofDivisor
   · exact
       N13EscapingPointSpecialRestriction.restrict_anchoredPointLine_infinityIdeal
         x y hx hxy
+
+/-- Adjoining the positive-infinity anchor changes only the infinity chart,
+so the normalized escaping-point line retains affine vertical saturation. -/
+theorem anchoredPointLine_affineVerticallySaturated
+    (x y : Q₂)
+    (hx : x.valuation < 0)
+    (hxy : N13GoodModelTwo.AffineEquation x y) :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (N13EscapingPointSpecialRestriction.anchoredPointLine
+        x y hx hxy) := by
+  simpa [N13TwoChartPicardRealization.AffineVerticallySaturated,
+    N13EscapingPointSpecialRestriction.anchoredPointLine] using
+      nonintegralPointLine_affineVerticallySaturated x y hx hxy
 
 /-- Full two-fibre realization data for an escaping degree-one Mumford point.
 

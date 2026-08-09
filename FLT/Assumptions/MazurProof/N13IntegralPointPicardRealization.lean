@@ -39,6 +39,18 @@ abbrev degreeOneMumford
   SexticMumford.pointMumford Model
     (N13IntegralAffinePointSpread.curvePoint P)
 
+/-- The literal integral affine-point line is vertically saturated.  Its
+affine lattice is a monic generalized Mumford graph, whose quotient has the
+standard free coefficient basis. -/
+theorem integralPointTwoChartLine_affineVerticallySaturated
+    (P : IntegralPoint) :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (N13FiniteAffineTwoChart.integralPointTwoChartLine P) := by
+  apply
+    N13TwoChartPicardRealization.affineVerticallySaturated_of_affineIdeal_eq_mumfordIdeal
+      _ (N13IntegralAffinePointSpread.integralSemiGraph P)
+  rfl
+
 /-- The unanchored integral point line restricts to the canonical compatible
 chart pair of the coefficientwise reduced point. -/
 theorem restrict_integralPointTwoChartLine_eq_point
@@ -70,6 +82,16 @@ theorem restrict_anchoredPointLine_eq_ofDivisor
   · exact
       N13FiniteAffinePointInfinityClosure.restrict_anchoredPointLine_infinityIdeal
         P
+
+/-- Adding the positive-infinity anchor preserves the affine lattice, so
+the normalized degree-two integral-point line remains vertically saturated. -/
+theorem anchoredPointLine_affineVerticallySaturated
+    (P : IntegralPoint) :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (N13FiniteAffinePointInfinityClosure.anchoredPointLine P) := by
+  simpa [N13TwoChartPicardRealization.AffineVerticallySaturated,
+    N13FiniteAffinePointInfinityClosure.anchoredPointLine] using
+    integralPointTwoChartLine_affineVerticallySaturated P
 
 /-- Full two-fibre realization data for an integral affine point.
 

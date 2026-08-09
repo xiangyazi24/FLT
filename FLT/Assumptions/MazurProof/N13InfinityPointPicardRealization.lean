@@ -35,6 +35,16 @@ def infinityPlusLine : N13TwoChartPicardRealization.Line :=
     N13TwoChartLineTensor.infinityPlusLine
     N13TwoChartLineTensor.infinityPlusLine
 
+/-- The doubled positive-infinity line is vertically saturated on the
+affine chart.  Both point factors are trivial there, so their tensor product
+has the unit ideal and contains no vertical torsion. -/
+theorem infinityPlusLine_affineVerticallySaturated :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      infinityPlusLine := by
+  apply
+    N13TwoChartPicardRealization.affineVerticallySaturated_of_affineIdeal_eq_top
+  simp [infinityPlusLine]
+
 /-- The special divisor consisting of two copies of the positive anchor. -/
 def infinityPlusDivisor :
     N13TwoChartPicardRealization.EffectiveDivisorTwo :=
@@ -125,6 +135,16 @@ def infinityMinusLine : N13TwoChartPicardRealization.Line :=
   N13TwoChartLineTensor.tensor
     N13TwoChartLineTensor.infinityMinusLine
     N13TwoChartLineTensor.infinityPlusLine
+
+/-- The anchored negative-infinity line is vertically saturated on the
+affine chart.  As for the positive branch, all geometric information lives
+on the infinity chart and the affine ideal is the unit ideal. -/
+theorem infinityMinusLine_affineVerticallySaturated :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      infinityMinusLine := by
+  apply
+    N13TwoChartPicardRealization.affineVerticallySaturated_of_affineIdeal_eq_top
+  simp [infinityMinusLine]
 
 /-- The special divisor formed by the negative infinity point and the fixed
 positive anchor. -/

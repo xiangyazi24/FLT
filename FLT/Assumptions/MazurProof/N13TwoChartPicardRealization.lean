@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.N13SpecialDivisorCharts
 import FLT.Assumptions.MazurProof.N13AbelFiberTwoModel
+import FLT.Assumptions.MazurProof.N13QuotientVerticalFlatness
 import FLT.Assumptions.MazurProof.SexticOrientedPic
 
 /-!
@@ -42,6 +43,64 @@ def AffineVerticallySaturated (L : Line) : Prop :=
       algebraMap N13IntegralModelContraction.R₂
             N13IntegralModelContraction.IntegralRing r * a ∈ L.affineIdeal →
         a ∈ L.affineIdeal
+
+/-- Vertical saturation of a proper line's affine lattice is exactly
+torsion-freeness of its affine quotient over `ℤ₂`.
+
+This reformulation is useful for the explicit spread constructors: finite
+flatness or an integral quotient basis may establish the right-hand side,
+after which the localization comparison uses the left-hand side. -/
+theorem affineVerticallySaturated_iff_quotient_isTorsionFree
+    (L : Line) :
+    AffineVerticallySaturated L ↔
+      Module.IsTorsionFree N13IntegralModelContraction.R₂
+        (N13IntegralModelContraction.IntegralRing ⧸ L.affineIdeal) := by
+  exact
+    N13QuotientVerticalFlatness.scalar_saturated_iff_quotient_isTorsionFree
+      L.affineIdeal
+
+/-- A line whose affine lattice is a canonical generic-fibre contraction is
+vertically saturated. -/
+theorem affineVerticallySaturated_of_affineIdeal_eq_contractIdeal
+    (L : Line)
+    (J : Ideal N13IntegralModelContraction.RationalRing)
+    (hL :
+      L.affineIdeal =
+        N13IntegralModelContraction.contractIdeal J) :
+    AffineVerticallySaturated L := by
+  intro r hr a ha
+  rw [hL] at ha ⊢
+  exact
+    N13IntegralModelContraction.contractIdeal_vertical_saturated
+      J r hr ha
+
+/-- A line trivial on the affine chart is vertically saturated.  This covers
+the degree-zero spread, whose divisor is supported entirely at infinity. -/
+theorem affineVerticallySaturated_of_affineIdeal_eq_top
+    (L : Line) (hL : L.affineIdeal = ⊤) :
+    AffineVerticallySaturated L := by
+  simp [AffineVerticallySaturated, hL]
+
+/-- A line whose affine lattice is a monic generalized Mumford graph is
+vertically saturated because its quotient is free over the coefficient
+domain. -/
+theorem affineVerticallySaturated_of_affineIdeal_eq_mumfordIdeal
+    (L : Line)
+    (D : N13GeneralizedMumfordIntegral.SemiMumford
+      (R := N13IntegralModelContraction.R₂))
+    (hL :
+      L.affineIdeal =
+        N13GeneralizedMumfordIntegral.mumfordIdeal D.u D.v) :
+    AffineVerticallySaturated L := by
+  intro r hr a ha
+  rw [hL] at ha ⊢
+  change
+    N13GeneralizedMumfordIntegral.xClass
+          (Polynomial.C r) * a ∈
+        N13GeneralizedMumfordIntegral.mumfordIdeal D.u D.v at ha
+  exact
+    N13GeneralizedMumfordIntegral.scalar_saturated
+      D r hr a ha
 
 /-- The two-adic coefficient field. -/
 abbrev Q₂ : Type :=

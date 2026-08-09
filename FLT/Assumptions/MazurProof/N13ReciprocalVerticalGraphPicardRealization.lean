@@ -21,6 +21,36 @@ namespace MazurProof.N13ReciprocalVerticalGraphPicardRealization
 
 noncomputable section
 
+/-- A recovered vertical reciprocal graph gives a vertically saturated
+proper affine lattice.  The contraction theorem identifies that lattice
+with the canonical contraction of the original generic Mumford ideal, where
+nonzero base scalars cancel by localization. -/
+theorem verticalGraph_twoChartLine_affineVerticallySaturated
+    {D : SexticMumford.Mumford
+      N13IrreducibleQuadraticSpread.Model}
+    (hdeg : D.u.natDegree = 2)
+    (h0 : D.u.coeff 0 ≠ 0)
+    (u : N13IrreducibleQuadraticSpread.R₂[X])
+    (E : N13IntegralInfinityVerticalGraphJacobian.VerticalGraph)
+    (hu : u.Monic)
+    (huDegree : u.natDegree = 2)
+    (hmDegree : E.m.natDegree = 2)
+    (huMem :
+      N13IntegralInfinityReduction.integralBaseClass u ∈ E.ideal)
+    (hI :
+      N13ReciprocalInfinityContraction.integralInfinityIdeal
+          D hdeg h0 =
+        E.ideal) :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (N13IntegralInfinityVerticalGraphTwoChart.twoChartLine
+        u E hu huDegree hmDegree huMem) := by
+  apply
+    N13TwoChartPicardRealization.affineVerticallySaturated_of_affineIdeal_eq_contractIdeal
+      _ (N13ReciprocalInfinityContraction.genericIdeal D)
+  exact
+    (N13IntegralInfinityVerticalGraphContraction.contractIdeal_eq_affineIdeal
+      D hdeg h0 u E hu huDegree hmDegree huMem hI).symm
+
 /-- A recovered vertical reciprocal graph realizes the original generic
 quadratic class and a literal effective degree-two special divisor. -/
 theorem verticalGraph_exists_data

@@ -33,6 +33,24 @@ abbrev Q₂ :=
 abbrev Model :=
   N13TwoChartPicardRealization.Model
 
+/-- The proper line obtained from a finite quadratic graph is vertically
+saturated on the affine chart.  Its affine ideal is definitionally the
+canonical contraction of the generic Mumford graph. -/
+theorem finiteQuadraticTwoChartLine_affineVerticallySaturated
+    (D : SexticMumford.Mumford Model)
+    (hdeg : D.u.natDegree = 2)
+    (hfinite :
+      Module.Finite N13FiniteAffineTwoChart.R₂
+        (N13FiniteAffineTwoChart.AffineCurve ⧸
+          N13FiniteAffineTwoChart.finiteAffineIdeal D.toSemi)) :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (N13FiniteAffineTwoChart.finiteQuadraticTwoChartLine
+        D.toSemi hdeg hfinite) := by
+  apply
+    N13TwoChartPicardRealization.affineVerticallySaturated_of_affineIdeal_eq_contractIdeal
+      _ (N13CanonicalContractionQuotient.graphIdeal D.toSemi)
+  rfl
+
 /-- A finite irreducible quadratic contraction yields complete two-fibre
 Picard data. -/
 theorem exists_data_of_finite

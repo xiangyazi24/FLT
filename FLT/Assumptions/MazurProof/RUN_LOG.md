@@ -1008,3 +1008,23 @@
   endpoint has exactly five custom axioms: the N13, N19, N25, and N49
   rational-point inputs and the uniform prime tail `p ≥ 23`.  There is no
   reachable `sorryAx`.
+
+### N13 vertical saturation criteria and constructor coverage (2026-08-08)
+
+- Proved that cancellation of every nonzero `ℤ₂` scalar in an affine
+  ideal is equivalent to torsion-freeness of its quotient module.  This gives
+  the exact flatness formulation needed by the normalized spread endpoint.
+- Added reusable saturation constructors for canonical generic-fibre
+  contractions, the unit ideal, and monic generalized Mumford graph ideals.
+- Instantiated those constructors for both infinity lines, integral affine
+  point lines and their anchored normalizations, finite quadratic closures,
+  and both horizontal and vertical reciprocal graph recoveries.
+- Proved the nonmonic escaping-point case by transporting saturation of its
+  monic infinity-chart point ideal across the overlap.  The cleared equation
+  `1-t₀X` makes `X` a unit modulo the affine graph, so overlap contraction
+  recovers the original lattice without a vertical component.
+- These results close the direct degree-zero and degree-one branches, finite
+  irreducible quadratics, and both reciprocal quadratic recoveries.  The
+  remaining constructor case is the product of point-line ideals in the
+  split and repeated-root quadratic branches, followed by certified chooser
+  wiring.

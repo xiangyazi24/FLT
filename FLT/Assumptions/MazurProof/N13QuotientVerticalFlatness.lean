@@ -49,6 +49,38 @@ theorem quotient_isTorsionFree_of_scalar_saturated
           Ideal.Quotient.mk I a = 0
     simpa only [Algebra.smul_def] using hrz
 
+/-- Torsion-freeness of an ideal quotient recovers cancellation by every
+nonzero scalar from the base domain.
+
+Together with `quotient_isTorsionFree_of_scalar_saturated`, this identifies
+vertical saturation exactly with relative torsion-freeness of the quotient;
+there is no additional ideal-theoretic hypothesis hidden in that change of
+language. -/
+theorem scalar_saturated_of_quotient_isTorsionFree
+    (I : Ideal A)
+    (hfree : Module.IsTorsionFree R (A ⧸ I)) :
+    ∀ (r : R), r ≠ 0 →
+      ∀ a : A, algebraMap R A r * a ∈ I → a ∈ I := by
+  letI : Module.IsTorsionFree R (A ⧸ I) := hfree
+  intro r hr a ha
+  apply Ideal.Quotient.eq_zero_iff_mem.mp
+  have hzero :
+      r • Ideal.Quotient.mk I a = 0 := by
+    apply Ideal.Quotient.eq_zero_iff_mem.mpr
+    simpa only [Algebra.smul_def] using ha
+  exact (smul_eq_zero.mp hzero).resolve_left hr
+
+/-- Vertical scalar saturation is equivalent to torsion-freeness of the
+quotient module over the base domain. -/
+theorem scalar_saturated_iff_quotient_isTorsionFree
+    (I : Ideal A) :
+    (∀ (r : R), r ≠ 0 →
+        ∀ a : A, algebraMap R A r * a ∈ I → a ∈ I) ↔
+      Module.IsTorsionFree R (A ⧸ I) := by
+  constructor
+  · exact quotient_isTorsionFree_of_scalar_saturated I
+  · exact scalar_saturated_of_quotient_isTorsionFree I
+
 local instance : Fact (Nat.Prime 2) :=
   ⟨Nat.prime_two⟩
 

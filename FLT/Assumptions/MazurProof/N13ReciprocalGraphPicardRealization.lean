@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.N13IntegralInfinityGraphSpecialRestriction
+import FLT.Assumptions.MazurProof.N13IntegralInfinityGraphSaturation
 import FLT.Assumptions.MazurProof.N13IrreducibleQuadraticSpread
 import FLT.Assumptions.MazurProof.N13SplitQuadraticPicardRealization
 
@@ -18,6 +19,44 @@ open Polynomial
 namespace MazurProof.N13ReciprocalGraphPicardRealization
 
 noncomputable section
+
+/-- The proper line attached to a recovered horizontal reciprocal graph is
+vertically saturated on the affine chart.  Reflection of its monic
+quadratic infinity graph has a torsion-free integral quotient, as proved by
+the infinity-graph saturation theorem. -/
+theorem ReciprocalGraphClosure.twoChartLine_affineVerticallySaturated
+    {D : SexticMumford.Mumford
+      N13IrreducibleQuadraticSpread.Model}
+    {a b : N13IrreducibleQuadraticSpread.R₂}
+    (E : N13IrreducibleQuadraticSpread.ReciprocalGraphClosure D a b) :
+    N13TwoChartPicardRealization.AffineVerticallySaturated
+      (N13IntegralInfinityGraphTwoChart.twoChartLine
+        E.data (by
+          rw [E.data_u]
+          exact
+            (N13ReciprocalQuadraticReflection.integralReciprocal_natDegree
+              a b).le) E.v_degree E.w_degree (by
+          rw [E.data_u]
+          exact
+            (N13ReciprocalQuadraticReflection.integralReciprocal_monic
+              a b).ne_zero)) := by
+  have huMonic : E.data.u.Monic := by
+    rw [E.data_u]
+    exact
+      N13ReciprocalQuadraticReflection.integralReciprocal_monic a b
+  have huDegree : E.data.u.natDegree = 2 := by
+    rw [E.data_u]
+    exact
+      N13ReciprocalQuadraticReflection.integralReciprocal_natDegree a b
+  intro r hr z hz
+  change
+    algebraMap N13IntegralModelContraction.R₂
+        N13IntegralModelContraction.IntegralRing r * z ∈
+      N13IntegralInfinityGraphTwoChart.affineIdeal E.data at hz
+  change z ∈ N13IntegralInfinityGraphTwoChart.affineIdeal E.data
+  exact
+    N13IntegralInfinityGraphSaturation.affineIdeal_scalarSaturated
+      E.data huMonic huDegree E.v_degree r hr z hz
 
 /-- A recovered reciprocal horizontal graph realizes the original generic
 quadratic class and a literal effective degree-two divisor on the special
