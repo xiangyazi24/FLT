@@ -113,10 +113,25 @@
     theorem, four-point classification, cyclic-generation theorem, and exact
     cardinality theorem all force-compile from source and audit to exactly
     `propext`, `Classical.choice`, and `Quot.sound`
-- next N17 producers:
-  - the level quotient with cusp and `j` control, followed by twist/model/
-    kernel transport needed to consume the completed classification in the
-    active Tate locus
+- N17 endpoint closure:
+  - the level quotient, cusp and `j` control, model transport, and exact Tate
+    fibre elimination are complete; the endpoint axiom audit no longer
+    contains N17 or N19
+- current N13 first-jet milestone:
+  - exact centered-square and linearized-double polynomial identities are
+    formalized without denominators
+  - coefficients one and three of `P.u² - uBase * Q.u` modulo the moving
+    coordinate ideal square imply literal doubling of the two disk
+    coordinates
+  - the resulting adapter constructs the existing
+    `FirstJetDoublingCompatibility` structure by comparison with the proved
+    transition-square jet
+  - scoped builds pass, and the coordinate theorem, centered Picard doubling
+    lemma, and adapter audit to exactly `propext`, `Classical.choice`, and
+    `Quot.sound`
+  - the remaining first-jet arithmetic input is exactly the two stated cross
+    coefficients for the canonical recovered representatives of `z` and
+    `2z`
 
 ## Run 2026-07-28 (N13 structural two-adic Abel chart)
 - approval: `/automode`; stop requested at the next clean node

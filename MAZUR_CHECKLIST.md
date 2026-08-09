@@ -40,8 +40,15 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     `class_eq_iff` for global rational spread lines, vertical-scalar
     saturation of the affine lattices of the corresponding exact normalized
     spreads, and first-jet doubling compatibility for the recovered
-    representatives.  Generic raw equality and localization derive the
-    canonical contraction comparison from the middle input; `class_eq_iff`
+    representatives.  Saturation is proved for every current constructor
+    except the product `pairLine` branch and still must be retained by the
+    existential exact-spread chooser.  The first-jet provider is now reduced
+    exactly to coefficients one and three of
+    `P.u² - uBase * Q.u` lying in the square of the moving coordinate ideal,
+    where `P` represents `z` and `Q` represents `2z`; the denominator-free
+    centered reducer converts these two memberships into the existing
+    compatibility interface.  Generic raw equality and localization derive
+    the canonical contraction comparison from saturation; `class_eq_iff`
     and the explicit base spread then derive the fixed special ideal.  The
     endpoint file proves that these three inputs imply the primitive N13
     theorem.
@@ -120,7 +127,7 @@ scoped builds pass, and `#print axioms` contains only `propext`,
 - [x] The two tracked `KubertBridgeN16` `sorry`s are outside the endpoint
   import closure.
 - [ ] Rebuild the final endpoint and obtain a clean-3 axiom audit after all
-  six primitive boxes are checked.
+  six audited primitive cases are discharged.
 
-Scoreboard: **2 / 6 primitive endpoint axioms discharged** in the current
-source-rebuilt snapshot.
+Scoreboard: **2 of the 6 audited primitive cases discharged; 4 endpoint
+axioms remain** in the current source-rebuilt snapshot.

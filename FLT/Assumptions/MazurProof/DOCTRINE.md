@@ -1,20 +1,20 @@
-# DOCTRINE — Campaign to discharge remaining 6 axioms
+# DOCTRINE — Campaign to discharge the remaining 4 endpoint axioms
 
 ## Main Goal
 
-Eliminate ALL 6 custom axioms from `mazur_cyclic_order_bound_assembled`.
-Current status: 6 custom axioms + 3 standard (propext, Classical.choice, Quot.sound).
+Eliminate all four custom axioms still reachable from
+`mazur_cyclic_order_bound_assembled`.  The source-rebuilt audit on 2026-08-08
+found exactly four custom axioms plus the three standard principles
+`propext`, `Classical.choice`, and `Quot.sound`.
 
-## The 6 Axioms (verified Jul 26)
+## The 4 Remaining Axioms (verified Aug 8)
 
 | # | Axiom | Location | Nature |
 |---|-------|----------|--------|
 | 1 | `C13Sextic_affine_x_is_cuspidal` | CyclicExclusion13 | The standard `X₁(13)` sextic has affine x-coordinate 0 or -1 |
-| 2 | `no_F17_rational_solution` | CyclicExclusion17:21 | F₁₇(b,c)=0 has no ℚ-solution with b≠0 |
-| 3 | `no_F19_rational_solution` | CyclicExclusion19:21 | F₁₉(b,c)=0 has no ℚ-solution with b≠0 |
-| 4 | `no_prime_order_ge_23` | CyclicOrderAssembly:100 | Formal immersion on X₀(p) for p≥23 |
-| 5 | `no_explicit_order25_obstruction` | CyclicExclusion25:47 | F₂₅(b,c)=0 with b≠0 ∧ F₅≠0 impossible |
-| 6 | `no_raw_order49_tate_obstruction` | CyclicExclusion49:43 | preΨ'₄₉(0)=0 ∧ preΨ'₇(0)≠0 impossible |
+| 2 | `no_explicit_order25_obstruction` | CyclicExclusion25 | F₂₅(b,c)=0 with b≠0 ∧ F₅≠0 impossible |
+| 3 | `no_raw_order49_tate_obstruction` | CyclicExclusion49 | preΨ'₄₉(0)=0 ∧ preΨ'₇(0)≠0 impossible |
+| 4 | `no_prime_order_ge_23` | CyclicOrderAssembly | Formal immersion on X₀(p) for p≥23 |
 
 ### Cleared (complete)
 
@@ -28,6 +28,10 @@ Current status: 6 custom axioms + 3 standard (propext, Classical.choice, Quot.so
 - N15/N21/N35 fully proved (0 sorry, 0 axiom)
 - N27 fully proved (three-descent)
 - N14 fully proved (Z₂×Z₁₄ obstruction)
+- N17 fully proved by the explicit `X₀(17)` two-isogeny descent,
+  rational-point classification, and Tate quotient elimination.
+- N19 fully proved by the explicit quotient, two three-isogeny descents,
+  three-adic separatedness, and transport back to the Tate residual.
 
 ### Non-critical axioms (NOT on `mazur_cyclic_order_bound_assembled` path)
 
@@ -431,16 +435,13 @@ automorphism structure.
 
 Terminal: axiom replaced by theorem.
 
-### (d) N17/N19 → `no_F17_rational_solution` / `no_F19_rational_solution`
+### (d) N17/N19 — discharged
 
-F₁₇ and F₁₉ are irreducible over ℚ (genus 5 and 7 respectively).
-Direct Chabauty requires Jacobian rank < genus, which may not hold.
-Need Chabauty-Coleman or étale descent.
-
-Alternative: prove via modular curve theory (X₁(17), X₁(19) rational
-points are cusps by Mazur).
-
-Terminal: axiom replaced by theorem.
+Both former endpoint axioms are now theorems.  The N17 proof classifies the
+rational points of its explicit genus-one quotient by two-isogeny descent
+and a two-adic formal-kernel argument.  The N19 proof uses the explicit
+degree-three quotient, dual three-isogeny descents, and three-adic
+separatedness.  Fresh endpoint audits no longer contain either axiom.
 
 ### (e) Formal immersion → `no_prime_order_ge_23`
 
@@ -451,18 +452,23 @@ Terminal: axiom replaced by theorem (long-term campaign).
 
 ## Execution Order
 
-1. **NOW:** (c) N13 — prove the actual fake Kummer kernel/local-image theorem
-2. **NEXT:** construct the fixed special-fibre Abel map/fibre theorem, the
-   Jacobian reduction map, and the strict 2-adic formal filtration; combine
-   the packages directly into exponent 19 without Mordell--Weil finite
-   generation
-3. **THEN:** (b) N49 after an explicit Tate-to-`X₀(49)` coordinate bridge exists
-4. **LATER:** (a) N25 (needs a deep rank-zero input), (d) N17/N19, then the prime tail
-6. **LAST:** (e) formal immersion
+1. **NOW:** N13 — prove `class_eq_iff`, finish vertical saturation for the
+   product `pairLine` branch and preserve it through the exact-spread chooser,
+   and prove the two canonical centered-square cross coefficients (degrees
+   one and three) modulo the moving coordinate ideal square.
+2. **NEXT:** N25 — land the exact Tate-to-canonical coordinate map and then
+   connect the existing mod-two geometry to the global formal-immersion
+   argument.
+3. **THEN:** N49 — assemble the descent and construct the universal
+   Tate-to-`X₀(49)` map with cusp avoidance.
+4. **LAST:** prove the uniform formal-immersion/Eisenstein exclusion for
+   primes at least 23.
 
 ## Build Status
 
-- VeluTwoIsogeny: BUILDING (original code, no modifications, ~55 min)
-- CyclicOrderAssembly: PENDING (depends on VeluTwoIsogeny → CyclicExclusion20)
-- Dead code: PrimeExclusion17Bridge.lean and PrimeExclusion19Bridge.lean DELETED
-- New files: TateOrder{13,17,19}.lean, CyclicExclusion{13,17,19}.lean (0 sorry each)
+- The current endpoint source rebuild and axiom audit report exactly the four
+  custom axioms listed above and no reachable `sorryAx`.
+- The N13 endpoint assembly and its current low-degree spread, vertical
+  saturation, and centered first-jet layers pass scoped Lean checks.
+- The centered-coordinate doubling reducer and its first-jet adapter audit to
+  exactly `propext`, `Classical.choice`, and `Quot.sound`.

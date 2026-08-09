@@ -945,3 +945,16 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   algebra is now localized to products of point-line ideals in split or
   tangent quadratic realizations; a uniform exact-spread theorem must then
   preserve all certificates through the existential choice.
+- `N13MumfordCenteredDoublingJet.lean` gives a denominator-free local
+  calculation for the remaining first-jet producer.  It expands the centered
+  Mumford square, proves the exact linearized double and the Hensel ordinate
+  error, and shows that coefficients one and three of
+  `P.u² - uBase * Q.u` modulo the moving ideal square force literal doubling
+  of both disk coordinates.  `N13MumfordCenteredDoublingAdapter.lean` then
+  subtracts the already proved transition-square estimate and constructs the
+  existing `FirstJetDoublingCompatibility` package.  Thus the genuine
+  arithmetic residue is precisely those two cross-coefficient memberships
+  for the canonical recovered representatives of `z` and `2z`; no Picard
+  classification, separatedness, or additional coordinate comparison is
+  hidden in the reducer.  The three terminal declarations audit to Lean's
+  standard quotient/classical axioms only.
