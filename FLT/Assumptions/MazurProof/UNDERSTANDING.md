@@ -548,10 +548,50 @@ invariant quotient parameter `t=r²s`, it has Kummer form
 checks 81 affine quotient parameters and a finite boundary divisor, not
 `81²` or `81³` ambient tuples.  The generic elimination and Kummer identities
 must be Lean theorems; only their final one-dimensional fibre and boundary
-data may be finite certificates.  The remaining formal seams are the
-projective coordinate equivalence and the cyclic-group lemma identifying the
-size of a fifth-power fibre; the numerical certificate is not to be promoted
-to a canonical-curve point-count theorem until those bridges are present.
+data may be finite certificates.
+
+`RationalPointsN25QuotientKummerThree.lean` now closes the abstract
+fifth-power-fibre seam without enumeration.  In a cyclic group of order 80,
+the image of `x ↦ x⁵` is exactly the kernel of `x ↦ x¹⁶`: inclusion follows
+from `x⁸⁰=1`, and both subgroups have order 16.  Every nonempty fibre is
+equivalent to the five-element kernel of the fifth-power map.  Passing between
+field roots and unit-group roots therefore proves, for every 81-element field,
+that `r⁵=c` has one root when `c=0`, five roots when `c≠0` and `c¹⁶=1`,
+and no roots otherwise.  The same file now gives mutually inverse forward and
+inverse eigenbasis matrices, proves that the canonical quadric is a nonzero
+scalar times `u₂u₃-u₁u₄`, proves rank-one factorization, and derives an exact
+affine-cone equivalence between the canonical quadric-cubic intersection and
+the Segre cubic.  These are symbolic polynomial and field arguments, not
+coordinate enumeration.
+
+`RationalPointsN25QuotientF81Field.lean` closes the former finite-table
+semantic seam.  It constructs the polynomial-basis model over `ZMod 3`, proves
+the ring laws by coordinatewise `ring` identities, and uses a terminal
+80-element certificate only for the prescribed inverse `a⁷⁹`.  Transport to
+the existing `F81` table proves that its zero, one, addition, negation,
+multiplication, powers, and `f81Inv` are the operations of an actual
+characteristic-three field.  `RationalPointsN25QuotientKummerThreeF81.lean`
+then identifies the stored cyclotomic root and coefficients with the generic
+Kummer model and proves that every executable fibre size is the cardinality
+of the actual field equation.  Thus the sum 87 is now a theorem about genuine
+Kummer root fibres, not merely a table output.
+
+`RationalPointsN25QuotientKummerThreeProjective.lean` closes the Kummer
+projective bookkeeping.  Away from `r=0`, `t=r²s` gives an explicit
+equivalence between dense Segre and Kummer solutions.  The cleared Kummer
+zero fibre has two points while the dense zero fibre has one, leaving 86
+dense points.  The two boundary rulings and their corner contribute one point
+each, so the normalized `P¹×P¹` Segre curve has exactly 89 points.  The file
+also proves that the old executable normalized-point predicate over `F81` is
+literally the canonical quadric-cubic predicate in the transported field.
+
+The one remaining coordinate seam is now sharply isolated: projectivize the
+inverse eigenbasis and prove that its map from the normalized Segre charts is
+a bijection onto the first-nonzero normalized canonical points.  The affine
+linear inverse, equation compatibility, field-table semantics, and both sides
+of the count are already proved.  Until this final normalization/bijection is
+connected, 89 is a theorem for the projectively normalized Segre model but is
+not yet stated as `#C(F₈₁)=89` for the canonical normalized-point type.
 
 `RationalPointsN25TwoPrimeReduction.lean` proves the remaining elementary
 endgame: if a finite cardinal divides both `2^a·71` and `3^b·71`, it divides
