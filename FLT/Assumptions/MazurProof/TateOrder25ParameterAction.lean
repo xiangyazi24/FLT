@@ -69,6 +69,90 @@ theorem F6_ne_zero_of_primitive25
   rw [hb_formula, hc]
   norm_num
 
+/-! ## The denominator of the sevenfold point -/
+
+/-- First small polynomial identity relating the order-six and order-seven
+division factors. -/
+theorem F7_add_mul_F6 (b c : ℚ) :
+    TateNFDivision.F7 b c +
+        (b + c ^ 2) * TateNFDivision.F6 b c = -c ^ 4 := by
+  simp [TateNFDivision.F6, TateNFDivision.F7]
+  ring
+
+/-- Auxiliary polynomial for separating the order-seven and order-eight
+division factors. -/
+def F7F8Aux25 (b c : ℚ) : ℚ :=
+  b * (1 + c) - c * (1 + 2 * c)
+
+/-- Second small identity relating the order-seven and order-eight factors. -/
+theorem F8_add_two_mul_F7 (b c : ℚ) :
+    TateNFDivision.F8 b c + 2 * TateNFDivision.F7 b c =
+      -c * F7F8Aux25 b c := by
+  simp [TateNFDivision.F7, TateNFDivision.F8, F7F8Aux25]
+  ring
+
+/-- Bézout-style identity showing that `F7` and `F8` cannot vanish together
+away from `c=0`. -/
+theorem c_pow_five_identity25 (b c : ℚ) :
+    c ^ 5 =
+      (1 + c) ^ 2 * TateNFDivision.F7 b c +
+        F7F8Aux25 b c * ((1 + c) * b + c ^ 2) := by
+  simp [TateNFDivision.F7, F7F8Aux25]
+  ring
+
+/-- The order-seven division factor is nonzero on the primitive order-25
+locus.  If it vanished, the compact factorization of `F25` would force `F8`
+to vanish because `b,c,F6` are already nonzero; the two small identities
+above would then force `c^5=0`. -/
+theorem F7_ne_zero_of_primitive25
+    {b c : ℚ} (hb : b ≠ 0)
+    (h25 : TateOrder25Factor.F25 b c = 0) :
+    TateNFDivision.F7 b c ≠ 0 := by
+  have hc := c_ne_zero_of_primitive25 hb h25
+  have h6 := F6_ne_zero_of_primitive25 hb h25
+  intro h7
+  have hcompact := TateOrder25Factor.compact_bracket_factor b c
+  have hshape :
+      TateOrder25Factor.G11 b c * TateOrder25Factor.G13 b c ^ 3 -
+          b * TateOrder25Factor.G14 b c * TateOrder25Factor.G12 b c ^ 3 =
+        -(b ^ 4 * c ^ 4 * TateNFDivision.F6 b c ^ 12 *
+          TateNFDivision.F8 b c ^ 3) := by
+    simp [TateOrder25Factor.G11, TateOrder25Factor.G12,
+      TateOrder25Factor.G13, TateOrder25Factor.G14, h7]
+    ring
+  have hneg :
+      -(b ^ 4 * c ^ 4 * TateNFDivision.F6 b c ^ 12 *
+          TateNFDivision.F8 b c ^ 3) = 0 := by
+    calc
+      -(b ^ 4 * c ^ 4 * TateNFDivision.F6 b c ^ 12 *
+          TateNFDivision.F8 b c ^ 3) =
+          TateOrder25Factor.G11 b c * TateOrder25Factor.G13 b c ^ 3 -
+            b * TateOrder25Factor.G14 b c *
+              TateOrder25Factor.G12 b c ^ 3 := hshape.symm
+      _ = TateNFDivision.F5 b c * TateOrder25Factor.F25 b c := hcompact
+      _ = 0 := by rw [h25, mul_zero]
+  have hprod :
+      b ^ 4 * c ^ 4 * TateNFDivision.F6 b c ^ 12 *
+          TateNFDivision.F8 b c ^ 3 = 0 := neg_eq_zero.mp hneg
+  have hleft :
+      b ^ 4 * c ^ 4 * TateNFDivision.F6 b c ^ 12 ≠ 0 :=
+    mul_ne_zero
+      (mul_ne_zero (pow_ne_zero 4 hb) (pow_ne_zero 4 hc))
+      (pow_ne_zero 12 h6)
+  have h8pow : TateNFDivision.F8 b c ^ 3 = 0 :=
+    (mul_eq_zero.mp hprod).resolve_left hleft
+  have h8 : TateNFDivision.F8 b c = 0 := by
+    by_contra h8
+    exact (pow_ne_zero 3 h8) h8pow
+  have hU : F7F8Aux25 b c = 0 := by
+    have hrel := F8_add_two_mul_F7 b c
+    rw [h8, h7] at hrel
+    have hcu : c * F7F8Aux25 b c = 0 := by linarith
+    exact (mul_eq_zero.mp hcu).resolve_left hc
+  have hc5 := c_pow_five_identity25 b c
+  rw [h7, hU] at hc5
+  exact (pow_ne_zero 5 hc) (by simpa using hc5)
+
 /-! ## Explicit re-normalization at the doubled point -/
 
 private theorem tateDouble_nonsingular

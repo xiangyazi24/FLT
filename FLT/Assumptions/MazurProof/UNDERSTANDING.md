@@ -394,7 +394,7 @@ classifications over `𝔽₂` and its quadratic extension: the five special
 projective points are exactly the cusp classes, and no new class appears
 over `𝔽₄`.
 `TateOrder25ParameterAction.lean` proves that the primitive equation forces
-`c` and `F6` to be nonzero, verifies `2P=(b,bc)` by the affine group law,
+`c`, `F6`, and `F7` to be nonzero, verifies `2P=(b,bc)` by the affine group law,
 and derives the generator-change parameters
 `B₂=bF6³/c⁸`, `C₂=(c⁴+(2b+c²-c)F6)/c⁴` from the actual translation and
 Tate scaling.  Equality of all five Weierstrass coefficients is proved, so
@@ -414,7 +414,8 @@ certificate.
 All five files pass scoped compilation.  Axiom audits of their terminal
 theorems report only `propext`, `Classical.choice`, and `Quot.sound`.
 They are not yet imported by `CyclicExclusion25`: the genuine remaining
-work is to finish the `7P` involution and its nonzero denominators, then find
+work is to construct and normalize `7P` (the `F7` denominator is now proved;
+`G14` and the translated `a₂` core remain), then find
 literal invariant plane numerators `NX,NZ,NW` with a polynomial
 certificate that their plane sextic is divisible by `F25`, prove the
 source-locus nonvanishing certificates that make the lifted point

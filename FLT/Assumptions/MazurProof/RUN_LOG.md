@@ -1012,8 +1012,11 @@
 ### N25 denominator-free canonical lift (2026-08-08)
 
 - Proved directly from the stored 234-term primitive polynomial that
-  `F25(b,c)=0` and `b≠0` force both `c≠0` and `F6(b,c)≠0`.  The second
+  `F25(b,c)=0` and `b≠0` force `c≠0`, `F6(b,c)≠0`, and `F7(b,c)≠0`.  The second
   certificate uses the exact specialization `F25(c+c²,c)=c⁵⁰`.
+- For `F7`, specialized the existing compact factorization to show that
+  `F7=0` would force `F8=0`, then used two small polynomial identities to
+  force `c⁵=0`.  This supplies the denominator needed to construct `7P`.
 - Verified from the affine group law that `2P=(b,bc)` for the Tate origin.
   Translating this point to the origin and applying the project's standard
   Tate scaling gives the exact parameter action
@@ -1035,7 +1038,7 @@
   normalization, homogeneous-lift, and noncusp declarations depend exactly
   on `propext`, `Classical.choice`, and `Quot.sound`.
 - The main N25 seam remains open: the `7P` involution and its denominator
-  certificates, literal invariant Tate-to-plane numerators, their
+  certificates beyond `F7`, literal invariant Tate-to-plane numerators, their
   `F25` divisibility certificate, the four source-locus nonvanishing
   certificates,
   and the global canonical rational-point classification are still missing.
