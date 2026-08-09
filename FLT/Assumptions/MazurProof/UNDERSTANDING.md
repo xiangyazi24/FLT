@@ -585,11 +585,15 @@ each, so the normalized `P¹×P¹` Segre curve has exactly 89 points.  The file
 also proves that the old executable normalized-point predicate over `F81` is
 literally the canonical quadric-cubic predicate in the transported field.
 
-The one remaining coordinate seam is now sharply isolated: projectivize the
-inverse eigenbasis and prove that its map from the normalized Segre charts is
-a bijection onto the first-nonzero normalized canonical points.  The affine
-linear inverse, equation compatibility, field-table semantics, and both sides
-of the count are already proved.  Until this final normalization/bijection is
+The underlying projective coordinate equivalence is now also formalized.
+The file defines first-nonzero normalization for arbitrary nonzero
+four-vectors, proves that normalization differs only by a nonzero scalar,
+proves both eigenbasis matrices commute with scaling and preserve
+nonvanishing, and packages them as an equivalence of normalized projective
+three-space.  The remaining seam is only its restriction to the two equation
+loci: identify the normalized determinant quadric with the four normalized
+Segre charts and transport the homogeneous cubic predicate across the
+projective eigenbasis equivalence.  Until that restricted equivalence is
 connected, 89 is a theorem for the projectively normalized Segre model but is
 not yet stated as `#C(F₈₁)=89` for the canonical normalized-point type.
 

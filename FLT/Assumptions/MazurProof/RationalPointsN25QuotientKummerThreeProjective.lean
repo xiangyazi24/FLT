@@ -86,6 +86,210 @@ theorem isCanonicalNormalized25Ternary_f81_iff
   rw [canonicalQuadric25Ternary_f81_eq,
     canonicalCubic25Ternary_f81_eq, f81Operations_zero_eq]
 
+/-! ## Projectivizing the eigenbasis -/
+
+/-- The zero vector in four homogeneous field coordinates. -/
+def zeroCoordinatesThree {K : Type*} [Zero K] : Coordinates4 K :=
+  ⟨0, 0, 0, 0⟩
+
+/-- Scalar multiplication of four homogeneous coordinates. -/
+def scaleCoordinatesThree {K : Type*} [Mul K]
+    (a : K) (P : Coordinates4 K) : Coordinates4 K :=
+  ⟨a * P.x, a * P.y, a * P.z, a * P.w⟩
+
+/-- Normalize a homogeneous vector by its first nonzero coordinate.  The
+zero vector is sent to `wChart`; all uses below separately prove nonvanishing. -/
+def normalizeCoordinatesThree {K : Type*} [Field K] [DecidableEq K]
+    (P : Coordinates4 K) : NormalizedProjective4 K :=
+  if _hx : P.x ≠ 0 then
+    .xChart (P.y / P.x) (P.z / P.x) (P.w / P.x)
+  else if _hy : P.y ≠ 0 then
+    .yChart (P.z / P.y) (P.w / P.y)
+  else if _hz : P.z ≠ 0 then
+    .zChart (P.w / P.z)
+  else .wChart
+
+/-- A first-nonzero normalized projective representative is never the zero
+homogeneous vector. -/
+theorem normalizedCoordinatesThree_ne_zero
+    {K : Type*} [Field K] (P : NormalizedProjective4 K) :
+    normalizedCoordinatesThree P ≠ zeroCoordinatesThree := by
+  cases P <;> simp [normalizedCoordinatesThree, zeroCoordinatesThree,
+    Coordinates4.mk.injEq]
+
+/-- Normalizing a nonzero scalar multiple of an already normalized vector
+returns the original projective chart. -/
+theorem normalize_scale_normalized
+    {K : Type*} [Field K] [DecidableEq K]
+    (P : NormalizedProjective4 K) {a : K} (ha : a ≠ 0) :
+    normalizeCoordinatesThree
+      (scaleCoordinatesThree a (normalizedCoordinatesThree P)) = P := by
+  cases P with
+  | xChart y z w =>
+      simp [normalizeCoordinatesThree, scaleCoordinatesThree,
+        normalizedCoordinatesThree, ha]
+  | yChart z w =>
+      simp [normalizeCoordinatesThree, scaleCoordinatesThree,
+        normalizedCoordinatesThree, ha]
+  | zChart w =>
+      simp [normalizeCoordinatesThree, scaleCoordinatesThree,
+        normalizedCoordinatesThree, ha]
+  | wChart =>
+      simp [normalizeCoordinatesThree, scaleCoordinatesThree,
+        normalizedCoordinatesThree]
+
+/-- Normalization rescales every nonzero homogeneous vector by a nonzero
+field element. -/
+theorem normalizeCoordinatesThree_spec
+    {K : Type*} [Field K] [DecidableEq K] {P : Coordinates4 K}
+    (hP : P ≠ zeroCoordinatesThree) :
+    ∃ a : K, a ≠ 0 ∧
+      normalizedCoordinatesThree (normalizeCoordinatesThree P) =
+        scaleCoordinatesThree a P := by
+  by_cases hx : P.x ≠ 0
+  · refine ⟨P.x⁻¹, inv_ne_zero hx, ?_⟩
+    simp [normalizeCoordinatesThree, hx, normalizedCoordinatesThree,
+      scaleCoordinatesThree, div_eq_mul_inv, mul_comm]
+  · by_cases hy : P.y ≠ 0
+    · have hx0 : P.x = 0 := not_ne_iff.mp hx
+      refine ⟨P.y⁻¹, inv_ne_zero hy, ?_⟩
+      simp [normalizeCoordinatesThree, hy, normalizedCoordinatesThree,
+        scaleCoordinatesThree, hx0, div_eq_mul_inv, mul_comm]
+    · by_cases hz : P.z ≠ 0
+      · have hx0 : P.x = 0 := not_ne_iff.mp hx
+        have hy0 : P.y = 0 := not_ne_iff.mp hy
+        refine ⟨P.z⁻¹, inv_ne_zero hz, ?_⟩
+        simp [normalizeCoordinatesThree, hz, normalizedCoordinatesThree,
+          scaleCoordinatesThree, hx0, hy0, div_eq_mul_inv, mul_comm]
+      · have hw : P.w ≠ 0 := by
+          have hx0 : P.x = 0 := not_ne_iff.mp hx
+          have hy0 : P.y = 0 := not_ne_iff.mp hy
+          have hz0 : P.z = 0 := not_ne_iff.mp hz
+          intro hw
+          apply hP
+          rcases P with ⟨x, y, z, w⟩
+          simp only at hx0 hy0 hz0 hw
+          subst x
+          subst y
+          subst z
+          subst w
+          rfl
+        have hx0 : P.x = 0 := not_ne_iff.mp hx
+        have hy0 : P.y = 0 := not_ne_iff.mp hy
+        have hz0 : P.z = 0 := not_ne_iff.mp hz
+        refine ⟨P.w⁻¹, inv_ne_zero hw, ?_⟩
+        simp [normalizeCoordinatesThree, normalizedCoordinatesThree,
+          scaleCoordinatesThree, hx0, hy0, hz0, hw]
+
+/-- The inverse eigenbasis commutes with homogeneous scalar multiplication. -/
+theorem canonicalCoordinatesFromEigen_scale
+    {K : Type*} [Field K] (e a : K) (U : Coordinates4 K) :
+    canonicalCoordinatesFromEigen25Three e
+        (scaleCoordinatesThree a U).x (scaleCoordinatesThree a U).y
+        (scaleCoordinatesThree a U).z (scaleCoordinatesThree a U).w =
+      scaleCoordinatesThree a
+        (canonicalCoordinatesFromEigen25Three e U.x U.y U.z U.w) := by
+  rcases U with ⟨u1, u2, u3, u4⟩
+  simp only [scaleCoordinatesThree, canonicalCoordinatesFromEigen25Three,
+    Coordinates4.mk.injEq]
+  constructor
+  · ring
+  constructor
+  · ring
+  constructor <;> ring
+
+/-- The forward eigenbasis commutes with homogeneous scalar multiplication. -/
+theorem canonicalEigenCoordinates_scale
+    {K : Type*} [Field K] (e a : K) (P : Coordinates4 K) :
+    canonicalEigenCoordinates25Three e (scaleCoordinatesThree a P) =
+      scaleCoordinatesThree a (canonicalEigenCoordinates25Three e P) := by
+  rcases P with ⟨x, y, z, w⟩
+  simp only [scaleCoordinatesThree, canonicalEigenCoordinates25Three,
+    Coordinates4.mk.injEq]
+  constructor
+  · ring
+  constructor
+  · ring
+  constructor <;> ring
+
+/-- The inverse eigenbasis sends a nonzero vector to a nonzero vector. -/
+theorem canonicalCoordinatesFromEigen_ne_zero
+    {K : Type*} [Field K] [CharP K 3] {e : K}
+    (he : IsCyclotomicFive25Three e) {U : Coordinates4 K}
+    (hU : U ≠ zeroCoordinatesThree) :
+    canonicalCoordinatesFromEigen25Three e U.x U.y U.z U.w ≠
+      zeroCoordinatesThree := by
+  intro h
+  have h' := congrArg (canonicalEigenCoordinates25Three e) h
+  have hleft := canonicalEigenCoordinates_fromEigen
+    (e := e) (u₁ := U.x) (u₂ := U.y) (u₃ := U.z) (u₄ := U.w) he
+  apply hU
+  rw [hleft] at h'
+  rcases U with ⟨u1, u2, u3, u4⟩
+  simpa [zeroCoordinatesThree, canonicalEigenCoordinates25Three] using h'
+
+/-- The forward eigenbasis sends a nonzero vector to a nonzero vector. -/
+theorem canonicalEigenCoordinates_ne_zero
+    {K : Type*} [Field K] [CharP K 3] {e : K}
+    (he : IsCyclotomicFive25Three e) {P : Coordinates4 K}
+    (hP : P ≠ zeroCoordinatesThree) :
+    canonicalEigenCoordinates25Three e P ≠ zeroCoordinatesThree := by
+  intro h
+  have h' := congrArg (fun U : Coordinates4 K =>
+    canonicalCoordinatesFromEigen25Three e U.x U.y U.z U.w) h
+  have hleft := canonicalCoordinatesFromEigen_eigen (e := e) (P := P) he
+  apply hP
+  rw [hleft] at h'
+  simpa [zeroCoordinatesThree, canonicalCoordinatesFromEigen25Three] using h'
+
+/-- Apply the inverse eigenbasis and normalize the resulting canonical
+homogeneous vector. -/
+def eigenToCanonicalProjective
+    {K : Type*} [Field K] [DecidableEq K] (e : K)
+    (P : NormalizedProjective4 K) : NormalizedProjective4 K :=
+  normalizeCoordinatesThree
+    (canonicalCoordinatesFromEigen25Three e
+      (normalizedCoordinatesThree P).x (normalizedCoordinatesThree P).y
+      (normalizedCoordinatesThree P).z (normalizedCoordinatesThree P).w)
+
+/-- Apply the forward eigenbasis and normalize the resulting eigenvector. -/
+def canonicalToEigenProjective
+    {K : Type*} [Field K] [DecidableEq K] (e : K)
+    (P : NormalizedProjective4 K) : NormalizedProjective4 K :=
+  normalizeCoordinatesThree
+    (canonicalEigenCoordinates25Three e (normalizedCoordinatesThree P))
+
+/-- The mutually inverse eigenbasis matrices induce a genuine equivalence on
+first-nonzero normalized projective coordinates. -/
+def eigenCanonicalProjectiveEquiv
+    {K : Type*} [Field K] [CharP K 3] [DecidableEq K]
+    (e : K) (he : IsCyclotomicFive25Three e) :
+    NormalizedProjective4 K ≃ NormalizedProjective4 K where
+  toFun := eigenToCanonicalProjective e
+  invFun := canonicalToEigenProjective e
+  left_inv P := by
+    unfold eigenToCanonicalProjective canonicalToEigenProjective
+    let U := normalizedCoordinatesThree P
+    have hU : U ≠ zeroCoordinatesThree :=
+      normalizedCoordinatesThree_ne_zero P
+    have hV : canonicalCoordinatesFromEigen25Three e U.x U.y U.z U.w ≠
+        zeroCoordinatesThree := canonicalCoordinatesFromEigen_ne_zero he hU
+    rcases normalizeCoordinatesThree_spec hV with ⟨a, ha, hspec⟩
+    rw [hspec, canonicalEigenCoordinates_scale,
+      canonicalEigenCoordinates_fromEigen he]
+    exact normalize_scale_normalized P ha
+  right_inv P := by
+    unfold eigenToCanonicalProjective canonicalToEigenProjective
+    let V := normalizedCoordinatesThree P
+    have hV : V ≠ zeroCoordinatesThree :=
+      normalizedCoordinatesThree_ne_zero P
+    have hU : canonicalEigenCoordinates25Three e V ≠ zeroCoordinatesThree :=
+      canonicalEigenCoordinates_ne_zero he hV
+    rcases normalizeCoordinatesThree_spec hU with ⟨a, ha, hspec⟩
+    rw [hspec, canonicalCoordinatesFromEigen_scale,
+      canonicalCoordinatesFromEigen_eigen he]
+    exact normalize_scale_normalized P ha
+
 /-! ## Dense and Kummer solution types -/
 
 section Generic
