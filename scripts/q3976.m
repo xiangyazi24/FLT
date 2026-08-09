@@ -1,29 +1,45 @@
 SetColumns(0);
 Q := Rationals();
-P<b,c,v> := PolynomialRing(Q,3);
-F5 := b-c;
-F6 := b-c-c^2;
-F7 := c^3-b^2+b*c;
-F8 := 2*b^2-3*b*c-b*c^2+c^2;
+
+// Tate blow-up b = c + c^2 v, viewed as a degree-10 cover of the v-line.
+Kv<v> := FunctionField(Q);
+Pc<c> := PolynomialRing(Kv);
+bb := c+c^2*v;
+F5 := bb-c;
+F6 := bb-c-c^2;
+F7 := c^3-bb^2+bb*c;
+F8 := 2*bb^2-3*bb*c-bb*c^2+c^2;
 F9 := F5^3+c^3*F6;
-G11 := F7*F5^3-b*c*F6^3;
+G11 := F7*F5^3-bb*c*F6^3;
 G12 := c*F6*(F5^2*F8+F7^2);
-G13 := F5*F7^3+b*c*F6^3*F8;
-G14 := F7*(b*F6^2*F9-c^2*F5*F8^2);
-num25 := G11*G13^3-b*G14*G12^3;
+G13 := F5*F7^3+bb*c*F6^3*F8;
+G14 := F7*(bb*F6^2*F9-c^2*F5*F8^2);
+num25 := G11*G13^3-bb*G14*G12^3;
 assert IsDivisibleBy(num25,F5);
-F25 := ExactQuotient(num25,F5);
-print "F25_TERMS", #Terms(F25);
-print "F25_DEGREES", Degree(F25,1), Degree(F25,2), TotalDegree(F25);
-E := Evaluate(F25,[c+c^2*v,c,v]);
-k := 0;
-while IsDivisibleBy(E,c) do
-  E := ExactQuotient(E,c);
-  k +:= 1;
-end while;
-print "BLOWUP_C_POWER", k;
-print "E_TERMS", #Terms(E);
-print "E_DEGREES_C_V_TOTAL", Degree(E,2), Degree(E,3), TotalDegree(E);
-print "E_AT_C0", Evaluate(E,[0,0,v]);
-print "E_AT_V0", Evaluate(E,[0,c,0]);
-print "BLOWUP_COMPLETE";
+sub25 := ExactQuotient(num25,F5);
+assert IsDivisibleBy(sub25,c^40);
+E := ExactQuotient(sub25,c^40);
+fT := E/LeadingCoefficient(E);
+print "TATE_POLY_DEGREE_TERMS", Degree(E), #Terms(E);
+KT<ct> := FunctionField(fT);
+print "TATE_FIELD_DEGREE", Degree(KT);
+print "TATE_GENUS", Genus(KT);
+
+// LMFDB H(C,W,1), viewed as a degree-10 cover of the C-line.
+KC<C> := FunctionField(Q);
+PW<W> := PolynomialRing(KC);
+H :=
+ C^3*W^8+2*C^2*W^9+C*W^10
+ +C^4*W^6+3*C^3*W^7+2*C^2*W^8
+ -C^4*W^5-2*C^3*W^6+C*W^8
+ -C^5*W^3-3*C^4*W^4+C^3*W^5+2*C^2*W^6-2*C*W^7-W^8
+ +C^4*W^3-C^3*W^4-4*C^2*W^5-C*W^6
+ -2*C^4*W^2-C^3*W^3+2*C^2*W^4-C*W^5
+ +C^4*W+2*C^3*W^2-2*C^2*W^3+C*W^4
+ -C^3*W+2*C^2*W^2+C^3;
+fL := H/LeadingCoefficient(H);
+print "LMFDB_POLY_DEGREE_TERMS", Degree(H), #Terms(H);
+KL<wl> := FunctionField(fL);
+print "LMFDB_FIELD_DEGREE", Degree(KL);
+print "LMFDB_GENUS", Genus(KL);
+print "DEGREE10_FIELDS_COMPLETE";
