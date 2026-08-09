@@ -24,16 +24,27 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     automatic for the concrete rational spread-line interface.  Balanced
     Mumford degree exhaustion now also constructs such a spread line for
     every rational oriented Picard class, so global `exists_spread` is proved.
+    The selected exact spreads retain the literal mapped balanced Mumford raw
+    datum.  The Abel-chart base has rational sextic representative `u=X²+X`,
+    `v=2X+1`, `nInf=0` (the constant `v=1` is the wrong sheet above `x=-1`),
+    and an explicit spread reduces literally to `specialBaseDivisor`.
+    Canonical two-adic normalization of a translated rational kernel class is
+    now proved equal to the mapped rational normal form used by its exact
+    spread.
     The anchored special Abel map is now proved injective, and the exact
     endpoint assembly is recorded in `N13RationalPicardEndpoint.lean`.
   - Remaining semantic atoms: the pointwise-reflection formulation is exactly
     injectivity of proper reduction on rational curve points, hence is a
     restatement of the rational-point classification rather than a cheaper
     bypass.  The constructive classifier route has three explicit providers:
-    `class_eq_iff` for global rational spread lines, literal mapped-special
-    equality for canonical translated kernel representatives, and first-jet
-    doubling compatibility for those representatives.  The endpoint file
-    proves that these three inputs imply the primitive N13 theorem.
+    `class_eq_iff` for global rational spread lines, equality between the
+    canonical contraction lattice and the special restriction lattice of the
+    corresponding exact normalized spread, and first-jet doubling
+    compatibility for the recovered representatives.  The middle comparison
+    no longer assumes that either lattice is the fixed special ideal:
+    `class_eq_iff` and the explicit base spread derive that conclusion
+    afterward.  The endpoint file proves that these three inputs imply the
+    primitive N13 theorem.
 
 - [x] N17 — `CyclicExclusion17.no_F17_rational_solution`
   - Closed infrastructure: exact-order Tate normalization with preserved

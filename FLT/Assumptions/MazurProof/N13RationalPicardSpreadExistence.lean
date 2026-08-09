@@ -93,6 +93,29 @@ theorem reorientData_toGenericPic
     N13TwoChartPicardRealization.genericClass_eq_classOf_of_map_affineIdeal_eq
       R.charts D hmap
 
+/-- Reorientation retains the stronger representative-level equality, not
+merely equality after passage to the Picard quotient.
+
+This exact raw equality records both the mapped affine fractional ideal and
+the oriented integer at infinity.  It is the datum needed later when a
+specialization argument must compare the canonical Mumford representative
+with the actual integral two-chart line that realizes it. -/
+theorem reorientData_genericRaw
+    (D : N13Mumford.Mumford N13InfinityBaseChange.Q₂)
+    (R : N13TwoChartPicardRealization.Data)
+    (hmap :
+      Ideal.map
+          N13IntegralFractionalHull.integralToRational
+          R.charts.affineIdeal =
+        SexticMumford.mumfordIdeal Model₂ D.u D.v) :
+    N13TwoChartPicardRealization.genericRaw
+        (reorientData D R).charts
+        (reorientData D R).infinityOrder =
+      SexticMumford.mumfordRaw Model₂ D := by
+  exact
+    N13TwoChartPicardRealization.genericRaw_eq_mumfordRaw_of_map_affineIdeal_eq
+      R.charts D hmap
+
 /-!
 ## Mumford degree zero
 
@@ -108,12 +131,15 @@ theorem exists_data_of_natDegree_eq_zero
     (D : N13Mumford.Mumford ℚ)
     (hdeg : D.u.natDegree = 0) :
     ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw Model₂ (mapMumford D) ∧
       R.toGenericPic =
-        SexticMumford.classOf
-          Model₂
-          (N13Infinity.positiveInfinityOrder
-            N13InfinityBaseChange.Q₂)
-          (mapMumford D) := by
+          SexticMumford.classOf
+            Model₂
+            (N13Infinity.positiveInfinityOrder
+              N13InfinityBaseChange.Q₂)
+            (mapMumford D) := by
   -- Monicity and reducedness collapse the affine Mumford data to `(1, 0)`.
   have hu : D.u = 1 :=
     Polynomial.eq_one_of_monic_natDegree_zero D.u_monic hdeg
@@ -148,8 +174,9 @@ theorem exists_data_of_natDegree_eq_zero
     rw [hu₂, hv₂]
   -- Reorientation leaves that proper line and its special divisor unchanged
   -- while restoring the original normal form's `nInf`.
-  refine ⟨reorientData (mapMumford D) R₀, ?_⟩
-  exact reorientData_toGenericPic (mapMumford D) R₀ hmap
+  refine ⟨reorientData (mapMumford D) R₀, ?_, ?_⟩
+  · exact reorientData_genericRaw (mapMumford D) R₀ hmap
+  · exact reorientData_toGenericPic (mapMumford D) R₀ hmap
 
 /-!
 ## Mumford degree one
@@ -183,12 +210,15 @@ theorem exists_data_of_natDegree_eq_one
     (D : N13Mumford.Mumford ℚ)
     (hdeg : D.u.natDegree = 1) :
     ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw Model₂ (mapMumford D) ∧
       R.toGenericPic =
-        SexticMumford.classOf
-          Model₂
-          (N13Infinity.positiveInfinityOrder
-            N13InfinityBaseChange.Q₂)
-          (mapMumford D) := by
+          SexticMumford.classOf
+            Model₂
+            (N13Infinity.positiveInfinityOrder
+              N13InfinityBaseChange.Q₂)
+            (mapMumford D) := by
   -- Removing only the orientation exposes the affine point encoded by the
   -- linear graph; the affine polynomials themselves are not changed.
   let D₀ := degreeOnePointForm D hdeg
@@ -255,8 +285,9 @@ theorem exists_data_of_natDegree_eq_one
           rw [hu₂, hv₂]
     -- The integral point line supplies the affine ideal; reorientation adds
     -- back the original infinity component without changing specialization.
-    refine ⟨reorientData (mapMumford D) R₀, ?_⟩
-    exact reorientData_toGenericPic (mapMumford D) R₀ hmap
+    refine ⟨reorientData (mapMumford D) R₀, ?_, ?_⟩
+    · exact reorientData_genericRaw (mapMumford D) R₀ hmap
+    · exact reorientData_toGenericPic (mapMumford D) R₀ hmap
   · have hxval :
         (N13ProperCurveReduction.ratToQ₂ x).valuation < 0 :=
       lt_of_not_ge
@@ -287,8 +318,9 @@ theorem exists_data_of_natDegree_eq_one
             SexticMumford.mumfordIdeal
               Model₂ (mapMumford D).u (mapMumford D).v := by
           rw [hu₂, hv₂]
-    refine ⟨reorientData (mapMumford D) R₀, ?_⟩
-    exact reorientData_toGenericPic (mapMumford D) R₀ hmap
+    refine ⟨reorientData (mapMumford D) R₀, ?_, ?_⟩
+    · exact reorientData_genericRaw (mapMumford D) R₀ hmap
+    · exact reorientData_toGenericPic (mapMumford D) R₀ hmap
 
 /-!
 ## Mumford degree two and the global exhaustion
@@ -305,12 +337,15 @@ theorem exists_data_of_natDegree_eq_two
     (D : N13Mumford.Mumford ℚ)
     (hdeg : D.u.natDegree = 2) :
     ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw Model₂ (mapMumford D) ∧
       R.toGenericPic =
-        SexticMumford.classOf
-          Model₂
-          (N13Infinity.positiveInfinityOrder
-            N13InfinityBaseChange.Q₂)
-          (mapMumford D) := by
+          SexticMumford.classOf
+            Model₂
+            (N13Infinity.positiveInfinityOrder
+              N13InfinityBaseChange.Q₂)
+            (mapMumford D) := by
   -- Injective coefficient extension preserves the degree of the monic
   -- quadratic polynomial, allowing direct use of the quadratic realization.
   have hdeg₂ : (mapMumford D).u.natDegree = 2 := by
@@ -318,21 +353,24 @@ theorem exists_data_of_natDegree_eq_two
       Polynomial.natDegree_map_eq_of_injective
         N13InfinityBaseChange.ratToQ₂_injective,
       hdeg]
-  obtain ⟨R, _, hgeneric⟩ :=
+  obtain ⟨R, hraw, hgeneric⟩ :=
     N13QuadraticPicardRealization.exists_data
       (mapMumford D) hdeg₂
-  exact ⟨R, hgeneric⟩
+  exact ⟨R, hraw, hgeneric⟩
 
 /-- Every rational balanced Mumford representative has complete two-fibre
 Picard data after base change. -/
 theorem exists_data (D : N13Mumford.Mumford ℚ) :
     ∃ R : N13TwoChartPicardRealization.Data,
+      N13TwoChartPicardRealization.genericRaw
+          R.charts R.infinityOrder =
+        SexticMumford.mumfordRaw Model₂ (mapMumford D) ∧
       R.toGenericPic =
-        SexticMumford.classOf
-          Model₂
-          (N13Infinity.positiveInfinityOrder
-            N13InfinityBaseChange.Q₂)
-          (mapMumford D) := by
+          SexticMumford.classOf
+            Model₂
+            (N13Infinity.positiveInfinityOrder
+              N13InfinityBaseChange.Q₂)
+            (mapMumford D) := by
   -- Balancedness gives `deg u ≤ 2`; arithmetic on naturals turns this bound
   -- into the three geometric cases proved above.
   have hbound : D.u.natDegree ≤ 2 := D.deg_u
@@ -352,22 +390,35 @@ theorem exists_data (D : N13Mumford.Mumford ℚ) :
 Normalize an arbitrary oriented Picard class, realize that balanced Mumford
 representative, and transport the generic equality back through base change.
 The resulting spread line deliberately stores the original class rather than
-the chosen representative, so it witnesses every quotient kernel uniformly.
+the chosen representative.  We also retain equality of the raw oriented
+fractional ideal with the mapped normal form, since later specialization
+geometry must compare actual representatives before passing to a quotient.
 -/
 
-/-- Every rational oriented Picard class has a concrete rational spread line
-whose stored rational class is literally the original class. -/
-theorem exists_spreadLine (P : G) :
+/-- The unique balanced rational Mumford representative selected for a
+Picard class.  Naming it makes the exact generic representative carried by
+the chosen spread visible to later files. -/
+def normalizedMumford (P : G) : N13Mumford.Mumford ℚ :=
+  SexticMumford.normalize
+    Modelℚ
+    (N13Infinity.positiveInfinityOrder ℚ)
+    P
+
+/-- Every rational Picard class has a spread whose generic raw datum is
+literally the coefficient extension of its balanced normal form.
+
+The equality is stronger than the previously exposed Picard-class equality:
+it fixes both the affine fractional ideal and the infinity orientation.  This
+is the canonical representative certificate required by any future
+vertical-twist or special-fibre comparison. -/
+theorem exists_exactSpreadLine (P : G) :
     ∃ L : N13RationalCurvePointPicardRealization.SpreadLine,
-      L.rationalClass = P := by
-  -- Normalization chooses the unique balanced representative of `P` without
-  -- changing its class in the rational oriented Picard group.
-  let D : N13Mumford.Mumford ℚ :=
-    SexticMumford.normalize
-      Modelℚ
-      (N13Infinity.positiveInfinityOrder ℚ)
-      P
-  obtain ⟨R, hR⟩ := exists_data D
+      L.rationalClass = P ∧
+      N13TwoChartPicardRealization.genericRaw
+          L.realization.charts L.realization.infinityOrder =
+        SexticMumford.mumfordRaw Model₂
+          (mapMumford (normalizedMumford P)) := by
+  obtain ⟨R, hraw, hR⟩ := exists_data (normalizedMumford P)
   -- Naturality of `classOf` identifies the realized two-adic class with the
   -- base change of `P`; normalization is removed in the final equality.
   have hgeneric :
@@ -379,26 +430,58 @@ theorem exists_spreadLine (P : G) :
             Model₂
             (N13Infinity.positiveInfinityOrder
               N13InfinityBaseChange.Q₂)
-            (mapMumford D) := hR
+            (mapMumford (normalizedMumford P)) := hR
       _ =
           N13InfinityBaseChange.picMapRatToQ₂
             (SexticMumford.classOf
               Modelℚ
               (N13Infinity.positiveInfinityOrder ℚ)
-              D) := by
+              (normalizedMumford P)) := by
         exact
-          (N13InfinityBaseChange.picMapRatToQ₂_classOf D).symm
+          (N13InfinityBaseChange.picMapRatToQ₂_classOf
+            (normalizedMumford P)).symm
       _ = N13InfinityBaseChange.picMapRatToQ₂ P := by
         rw [show
           SexticMumford.classOf
               Modelℚ
               (N13Infinity.positiveInfinityOrder ℚ)
-              D = P by
-            simp [D]]
+              (normalizedMumford P) = P by
+            simp [normalizedMumford]]
   exact
     ⟨{ rationalClass := P
        realization := R
-       generic_eq := hgeneric }, rfl⟩
+       generic_eq := hgeneric }, rfl, hraw⟩
+
+/-- Fix one exact normalized spread for each rational Picard class.  The
+choice is made only after the representative-level existence theorem; its
+two projection lemmas below prevent later arguments from depending on how
+the witness was selected. -/
+def exactSpreadLine (P : G) :
+    N13RationalCurvePointPicardRealization.SpreadLine :=
+  Classical.choose (exists_exactSpreadLine P)
+
+/-- The selected exact spread still stores the rational class from which its
+balanced normal form was constructed. -/
+@[simp] theorem exactSpreadLine_rationalClass (P : G) :
+    (exactSpreadLine P).rationalClass = P :=
+  (Classical.choose_spec (exists_exactSpreadLine P)).1
+
+/-- The selected spread carries exactly the mapped balanced Mumford datum,
+including its infinity orientation. -/
+theorem exactSpreadLine_genericRaw (P : G) :
+    N13TwoChartPicardRealization.genericRaw
+        (exactSpreadLine P).realization.charts
+        (exactSpreadLine P).realization.infinityOrder =
+      SexticMumford.mumfordRaw Model₂
+        (mapMumford (normalizedMumford P)) :=
+  (Classical.choose_spec (exists_exactSpreadLine P)).2
+
+/-- Every rational oriented Picard class has a concrete rational spread line
+whose stored rational class is literally the original class. -/
+theorem exists_spreadLine (P : G) :
+    ∃ L : N13RationalCurvePointPicardRealization.SpreadLine,
+      L.rationalClass = P :=
+  ⟨exactSpreadLine P, exactSpreadLine_rationalClass P⟩
 
 /-- Consequently the global spread-existence field of the relation-first
 classifier is proved for every proposed reduction kernel. -/

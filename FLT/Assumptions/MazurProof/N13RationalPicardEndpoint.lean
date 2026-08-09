@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.N13RationalPicardSpreadExistence
 import FLT.Assumptions.MazurProof.N13RationalKernelDoublingAdapter
+import FLT.Assumptions.MazurProof.N13RationalAbelChartBase
 
 /-!
 # Exact remaining interface for the rational N13 endpoint
@@ -163,6 +164,32 @@ def reductionData
     (N13RationalPicardSpreadExistence.exists_spread kernel)
     class_eq_iff
 
+/-- On the exact normalized spreads chosen above, special equality is
+literally the coset relation of the proposed kernel.
+
+Unlike the abstract `class_eq_iff` input, these two lines carry raw generic
+data equal to the coefficient-extended balanced Mumford normal forms.  This
+specialization of the relation therefore provides the representative-level
+starting point for constructing the canonical mapped-special family. -/
+theorem exactSpreadLine_special_eq_iff_sub_mem
+    (kernel : AddSubgroup G)
+    (class_eq_iff :
+      ∀ L M : SpreadLine,
+        N13RationalCurvePointPicardRealization.specialClass L =
+            N13RationalCurvePointPicardRealization.specialClass M ↔
+          N13RationalCurvePointPicardRealization.genericClass kernel L =
+            N13RationalCurvePointPicardRealization.genericClass kernel M)
+    (P Q : G) :
+    N13RationalCurvePointPicardRealization.specialClass
+          (N13RationalPicardSpreadExistence.exactSpreadLine P) =
+        N13RationalCurvePointPicardRealization.specialClass
+          (N13RationalPicardSpreadExistence.exactSpreadLine Q) ↔
+      P - Q ∈ kernel := by
+  rw [class_eq_iff]
+  simp only [N13RationalCurvePointPicardRealization.genericClass,
+    N13RationalPicardSpreadExistence.exactSpreadLine_rationalClass]
+  exact QuotientAddGroup.eq_iff_sub_mem
+
 /-- The literal classifier kernel produced by `reductionData`.  Naming this
 subgroup keeps the two-adic representative hypotheses tied to the exact
 kernel consumed by the rational-point endpoint. -/
@@ -197,6 +224,93 @@ theorem kernel_eq
     _ = kernel := rfl
 
 /-!
+## Comparing canonical contraction with an actual rational spread
+
+The exact normalized spread of `z + rationalBasePic` supplies a proper
+integral line with the correct generic Mumford representative.  The
+remaining representative-level comparison should identify the reduction of
+the canonical contraction with the affine restriction of that actual line.
+Once this comparison is known, the global specialization relation forces
+the line's stored divisor to be the literal Abel-chart base divisor, whose
+affine ideal is already proved to be `specialIdeal`.
+-/
+
+/-- The contraction of each mapped normalized rational representative agrees
+with the affine special restriction of its exact normalized rational spread.
+
+The preceding base-change theorem identifies this Mumford datum with the
+canonical two-adic representative.  Thus this is strictly a comparison
+between two integral models of the same literal generic datum.  It does not
+assume that either side is the fixed special ideal and therefore isolates the
+remaining lattice/contraction compatibility below the former
+`CanonicalMappedSpecialFamily` input. -/
+def ExactNormalizedContractionMatchesSpread
+    (kernel : AddSubgroup G) : Prop :=
+  ∀ z : kernel,
+    Ideal.map
+        N13GeneralizedMumfordReduction.reduceCoordinate
+        (N13IntegralModelContraction.contractIdeal
+          (N13CanonicalContractionQuotient.graphIdeal
+            (N13RationalPicardSpreadExistence.mapMumford
+              (N13RationalPicardSpreadExistence.normalizedMumford
+                ((z : G) +
+                  N13RationalAbelChartBase.rationalBasePic))).toSemi)) =
+      (N13TwoChartSpecialRestriction.restrict
+        (N13RationalPicardSpreadExistence.exactSpreadLine
+          ((z : G) +
+            N13RationalAbelChartBase.rationalBasePic)).realization.charts).affineIdeal
+
+/-- Construct the canonical mapped-special family from the smaller
+contraction-versus-spread comparison.
+
+The global `class_eq_iff` theorem is used only after the comparison: it sends
+the translated exact spread to the same special Abel class as the explicit
+base spread.  Regularity then identifies the stored divisor literally, and
+the special graph-divisor theorem identifies its affine ideal with the fixed
+special ideal. -/
+def canonicalMappedSpecialFamilyOfExactSpread
+    (kernel : AddSubgroup G)
+    (class_eq_iff :
+      ∀ L M : SpreadLine,
+        N13RationalCurvePointPicardRealization.specialClass L =
+            N13RationalCurvePointPicardRealization.specialClass M ↔
+          N13RationalCurvePointPicardRealization.genericClass kernel L =
+            N13RationalCurvePointPicardRealization.genericClass kernel M)
+    (hcontract : ExactNormalizedContractionMatchesSpread kernel) :
+    N13RationalKernelDoublingAdapter.CanonicalMappedSpecialFamily
+      (Kernel kernel class_eq_iff) := by
+  rw [kernel_eq kernel class_eq_iff]
+  refine ⟨?_⟩
+  intro z
+  calc
+    Ideal.map
+          N13GeneralizedMumfordReduction.reduceCoordinate
+          (N13IntegralModelContraction.contractIdeal
+            (N13CanonicalContractionQuotient.graphIdeal
+              (N13RationalKernelDoublingAdapter.canonicalMappedSpecialMumford
+                (N13TwoAdicAbelChartSection.subgroupToPic kernel z)).toSemi)) =
+        (N13TwoChartSpecialRestriction.restrict
+          (N13RationalPicardSpreadExistence.exactSpreadLine
+            ((z : G) +
+              N13RationalAbelChartBase.rationalBasePic)).realization.charts).affineIdeal :=
+      by
+        rw [N13RationalAbelChartBase.canonicalMappedSpecialMumford_subgroup_eq_mapMumford]
+        exact hcontract z
+    _ = (N13SpecialDivisorCharts.ofDivisor
+          (N13RationalPicardSpreadExistence.exactSpreadLine
+            ((z : G) +
+              N13RationalAbelChartBase.rationalBasePic)).realization.specialDivisor).affineIdeal :=
+      (N13RationalPicardSpreadExistence.exactSpreadLine
+        ((z : G) +
+          N13RationalAbelChartBase.rationalBasePic)).realization.special_affine
+    _ = (N13SpecialDivisorCharts.ofDivisor
+          N13AbelChartBase.specialBaseDivisor).affineIdeal := by
+      rw [N13RationalAbelChartBase.exactTranslated_specialDivisor_eq_base
+        kernel class_eq_iff z]
+    _ = N13SpecialQuotientBasis.specialIdeal :=
+      N13RationalAbelChartBase.specialBaseDivisor_affineIdeal
+
+/-!
 ## Endpoint assembly
 
 Canonical mapped-special representatives recover a centered two-disk pair
@@ -206,9 +320,9 @@ the same first jet as the square of the representative selected for `z`.
 Together these facts make the classifier kernel two-adically separated.
 -/
 
-/-- Equality reflection for rational spreads, literal mapped-special
-canonical representatives, and their first-jet doubling comparison imply
-the primitive N13 rational-point theorem required by Mazur's bound. -/
+/-- Equality reflection for rational spreads, contraction comparison with
+the exact normalized spreads, and first-jet doubling compatibility imply the
+primitive N13 rational-point theorem required by Mazur's bound. -/
 theorem affine_x_is_cuspidal
     (kernel : AddSubgroup G)
     (class_eq_iff :
@@ -217,12 +331,11 @@ theorem affine_x_is_cuspidal
             N13RationalCurvePointPicardRealization.specialClass M ↔
           N13RationalCurvePointPicardRealization.genericClass kernel L =
             N13RationalCurvePointPicardRealization.genericClass kernel M)
-    (R :
-      N13RationalKernelDoublingAdapter.CanonicalMappedSpecialFamily
-        (Kernel kernel class_eq_iff))
+    (hcontract : ExactNormalizedContractionMatchesSpread kernel)
     (C :
       N13RationalKernelDoublingAdapter.FirstJetDoublingCompatibility
-        R.toNearBaseFamily) :
+        (canonicalMappedSpecialFamilyOfExactSpread
+          kernel class_eq_iff hcontract).toNearBaseFamily) :
     ∀ X Y : ℚ, N13CurveModel.C13SexticEq X Y →
       X = 0 ∨ X = -1 := by
   -- The canonical family and first-jet comparison give separatedness of the
@@ -230,7 +343,8 @@ theorem affine_x_is_cuspidal
   have hseparated :
       N18RouteC.Separated.NSeparated
         (Kernel kernel class_eq_iff) 2 :=
-    R.separated C
+    (canonicalMappedSpecialFamilyOfExactSpread
+      kernel class_eq_iff hcontract).separated C
   -- All other fields of rational-point reduction are supplied by the global
   -- spread and pointwise realization theorems used in `reductionData`.
   exact

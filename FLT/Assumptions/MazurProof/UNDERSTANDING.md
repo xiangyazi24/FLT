@@ -831,7 +831,19 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   special divisor are retained while only the independent generic infinity
   orientation is reset.  The resulting `SpreadLine` stores the original
   rational class literally, so it witnesses `exists_spread` for any proposed
-  reduction kernel.
+  reduction kernel.  The stronger `exactSpreadLine` choice also retains raw
+  generic equality with the coefficient extension of the rational balanced
+  normal form, including the infinity orientation.
+- `N13RationalAbelChartBase.lean` identifies the rational lift of the
+  nonspecial Abel-chart base.  In sextic coordinates its exact Mumford datum
+  is `u=X²+X`, `v=2X+1`, `nInf=0`; `v=1` would select the wrong sheet over
+  `x=-1`.  The tensor product of the two integral point lines gives an
+  explicit spread whose stored special divisor is literally
+  `specialBaseDivisor`, and the affine ideal of that divisor is proved equal
+  to `N13SpecialQuotientBasis.specialIdeal` through the existing quadratic
+  graph-divisor theorem.  Rational-to-two-adic normal-form compatibility also
+  proves that the canonical translated representative is exactly
+  `mapMumford (normalizedMumford (z + rationalBasePic))`.
 - All public spread theorems named above pass scoped compilation, bypass
   scanning, and `#print axioms`; their only dependencies are `propext`,
   `Classical.choice`, and `Quot.sound`.
@@ -852,11 +864,16 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   with the squared transition modulo the moving coordinate ideal squared.
   Those two inputs now assemble directly into
   `RationalKernelDoublingData` and hence `NSeparated`.
-- The near-base producer is itself reduced further in the same adapter.
-  It suffices to give each kernel class a balanced representative of the
-  translated class `z + basePic` whose canonical contraction maps literally
-  to the selected special ideal.  `exists_diskPair_class_eq` then supplies
-  the centered disk pair and the exact Picard realization automatically.
+- The near-base producer is reduced below direct mapped-special equality by
+  `N13RationalPicardEndpoint.ExactNormalizedContractionMatchesSpread`.  Its
+  only assertion is that the contraction lattice of the mapped rational
+  normal form equals the special restriction lattice of the exact spread
+  carrying that same literal generic raw datum.  It does not mention the
+  selected special ideal.  Given `class_eq_iff`, the translated spread has
+  the same special Abel class as the explicit base spread; regularity makes
+  its stored divisor literal, and the base calculation then derives the
+  fixed special ideal.  This constructs `CanonicalMappedSpecialFamily` and
+  lets `exists_diskPair_class_eq` supply the centered disk pair automatically.
 - The representative choice can now be removed entirely: use the canonical
   balanced normal form `normalize (z + basePic)`.  A
   `CanonicalMappedSpecialFamily` stores only the literal mapped-special
@@ -876,10 +893,10 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   producers.  The pointwise two-fibre construction now removes
   `abel_reduces` from that list, and balanced Mumford exhaustion now removes
   global spread existence.  The genuine remaining producers are
-  `class_eq_iff`, literal mapped-special equality for
-  canonical translated kernel representatives, and the first-jet comparison
-  for doubling.  No additional finite Jacobian group law or cardinality
-  computation belongs on the critical path.
+  `class_eq_iff`, the exact normalized contraction-versus-spread lattice
+  comparison, and the first-jet comparison for doubling.  No additional
+  finite Jacobian group law or cardinality computation belongs on the
+  critical path.
 - `N13InfinitySpecialPointClass.specialPointClass_injective` proves that the
   anchored special Abel map loses no special curve point.  Away from the
   canonical pencil, equality of Abel classes gives equality of effective
@@ -897,10 +914,15 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
 - `N13RationalPicardEndpoint.lean` records the exact constructive endpoint.
   Global spread existence and pointwise Abel compatibility are consumed
   automatically.  The remaining providers are (1) `class_eq_iff` for the
-  concrete rational spread lines, (2) literal mapped-special equality for
-  the canonical balanced representative of each translated kernel class,
-  and (3) first-jet compatibility comparing the chosen representative of
-  `2z` with the square transition for `z`.  These inputs produce two-adic
-  separatedness and hence the primitive affine cuspidality theorem.  The
-  assembly and the pointwise equivalence both compile and depend only on
-  `propext`, `Classical.choice`, and `Quot.sound`.
+  concrete rational spread lines, (2) equality of the canonical contraction
+  lattice with the actual special restriction lattice of the exact normalized
+  spread, and (3) first-jet compatibility comparing the chosen representative
+  of `2z` with the square transition for `z`.  The second provider is now
+  strictly below the former literal mapped-special field: the fixed special
+  ideal is a derived output.  The existing-first audit Q3893 found no supplier
+  for the third provider; its smallest honest form is the canonical Mumford
+  `u`-deviation doubling congruence modulo the moving coordinate ideal square,
+  which is equivalent to coordinate doubling rather than a weaker shortcut.
+  These inputs produce two-adic separatedness and hence the primitive affine
+  cuspidality theorem.  The assembly and the pointwise equivalence both
+  compile and depend only on `propext`, `Classical.choice`, and `Quot.sound`.
