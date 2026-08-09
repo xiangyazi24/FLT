@@ -941,10 +941,16 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   saturated, localization preserves that property, and the generator
   `1-t₀X` supplies the `XUnitMod` witness needed to contract back exactly.
   Thus invertibility is no longer being conflated with flatness: each covered
-  branch has a separate saturation certificate.  The unresolved constructor
-  algebra is now localized to products of point-line ideals in split or
-  tangent quadratic realizations; a uniform exact-spread theorem must then
-  preserve all certificates through the existential choice.
+  branch has a separate saturation certificate.
+- `N13QuadraticTwoChartSpreadSaturation.lean` closes the product case.  If
+  two integral ideals are vertically saturated and the first is invertible
+  in the common function field, multiplying by its inverse fractional ideal
+  reduces scalar cancellation in their product to cancellation in the second
+  ideal.  This proves that tensoring saturated two-chart lines preserves
+  saturation, hence certifies `pairLine` for both split secants and coincident
+  repeated-root tangents.  All direct spread constructors are now covered;
+  only preservation of their certificates through the existential quadratic
+  and exact-spread choosers remains.
 - `N13MumfordCenteredDoublingJet.lean` gives a denominator-free local
   calculation for the remaining first-jet producer.  It expands the centered
   Mumford square, proves the exact linearized double and the Hensel ordinate

@@ -40,9 +40,10 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     `class_eq_iff` for global rational spread lines, vertical-scalar
     saturation of the affine lattices of the corresponding exact normalized
     spreads, and first-jet doubling compatibility for the recovered
-    representatives.  Saturation is proved for every current constructor
-    except the product `pairLine` branch and still must be retained by the
-    existential exact-spread chooser.  The first-jet provider is now reduced
+    representatives.  Saturation is now proved for every current constructor,
+    including the product `pairLine` used by split secants and repeated-root
+    tangents, and still must be retained by the existential exact-spread
+    chooser.  The first-jet provider is now reduced
     exactly to coefficients one and three of
     `P.u² - uBase * Q.u` lying in the square of the moving coordinate ideal,
     where `P` represents `z` and `Q` represents `2z`; the denominator-free

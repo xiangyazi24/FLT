@@ -132,6 +132,15 @@
   - the remaining first-jet arithmetic input is exactly the two stated cross
     coefficients for the canonical recovered representatives of `z` and
     `2z`
+  - proved vertical saturation of a product of saturated affine ideals when
+    the first is invertible in the common function field, using inverse
+    fractional-ideal cancellation
+  - instantiated the product theorem for valuation-independent point lines;
+    `pairLine` is vertically saturated for both split secants and coincident
+    repeated-root tangents
+  - the product theorem, tensor wrapper, point-line wrapper, and `pairLine`
+    theorem pass scoped compilation and audit to exactly `propext`,
+    `Classical.choice`, and `Quot.sound`
 
 ## Run 2026-07-28 (N13 structural two-adic Abel chart)
 - approval: `/automode`; stop requested at the next clean node
