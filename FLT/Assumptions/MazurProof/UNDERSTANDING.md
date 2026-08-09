@@ -393,6 +393,25 @@ and five.
 classifications over `𝔽₂` and its quadratic extension: the five special
 projective points are exactly the cusp classes, and no new class appears
 over `𝔽₄`.
+`RationalPointsN25QuotientWeil.lean` extends the normalized-projective
+enumeration to the first four binary extensions and proves
+`#C(𝔽₂)=5`, `#C(𝔽₄)=5`, `#C(𝔽₈)=20`, and `#C(𝔽₁₆)=29` for the canonical
+equations.  The cubic field table is certified in that file.  The quartic
+field laws are split among
+`RationalPointsN25QuotientF16Add.lean`,
+`RationalPointsN25QuotientF16Mul.lean`, and
+`RationalPointsN25QuotientF16Distrib.lean`, then assembled by
+`RationalPointsN25QuotientF16Field.f16_isBinaryFieldTable`; this closes the
+finite-field-table seam without `native_decide`.
+`RationalPointsN25QuotientSmoothF2.lean` verifies four exact chartwise
+Bézout identities for the quadric, cubic, and six two-by-two Jacobian minors.
+Its terminal theorem excludes the resulting singularity predicate over every
+field of characteristic two, hence in particular over an algebraic closure.
+`RationalPointsN25QuotientZeta.lean` converts the four counts through Newton's
+identities into the reciprocal polynomial
+`1+2T+2T²+5T³+11T⁴+10T⁵+8T⁶+16T⁷+16T⁸` and proves that it evaluates to
+`71` at one.  It deliberately does not identify that polynomial with the
+curve's zeta numerator or identify `71` with a Jacobian cardinality.
 `TateOrder25ParameterAction.lean` proves that the primitive equation forces
 `c`, `F6`, and `F7` to be nonzero, verifies `2P=(b,bc)` by the affine group law,
 and derives the generator-change parameters
@@ -460,12 +479,51 @@ three canonical coordinates, the denominator-free sextic lift is already
 noncuspidal when `x,z,D,N` are nonzero; the plane coordinate `w` needs no
 separate certificate.
 
-All seven production files pass scoped compilation.  Axiom audits of their terminal
-theorems report only `propext`, `Classical.choice`, and `Quot.sound`.
-They are not yet imported by `CyclicExclusion25`: the source-side model bridge,
-base-point exclusion, and all five projective cusp fibres are now closed.
-N25 still needs a global rational-point or formal-immersion argument proving
-that every rational canonical point is a cusp.  The older
+All production files above pass scoped compilation.  Axiom audits of the
+finite-field laws, point counts, Bézout certificates, smoothness-predicate
+consequence, and polynomial calculation report only `propext`,
+`Classical.choice`, and `Quot.sound`.  They are not yet imported by
+`CyclicExclusion25`: the source-side model bridge, base-point exclusion, all
+five projective cusp fibres, and the raw finite-field arithmetic are closed.
+
+The remaining N25 route has three honest geometric/arithmetic layers.  First,
+the explicit characteristic-two Jacobian-minor certificate must be connected
+to a smooth proper genus-four reduction and the Weil functional equation,
+yielding `#Jac(C)(𝔽₂)=71` from the checked polynomial.  Second, one needs a
+global statement making `Jac(C)(ℚ)` finite and a two-prime specialization
+argument controlling every torsion prime; reduction at two alone does not
+exclude rational two-primary torsion.  The current candidates use either the
+degree-two map from `X₁(25)` to the quotient or the level-25 newform factor,
+whose external source statements are audited below but whose
+pullback/newform infrastructure is not yet formalized.  Third, Abel--Jacobi
+injectivity must turn the
+resulting Jacobian information into the classification that every rational
+canonical point is one of the five cusps.  None of these layers is hidden in
+the polynomial theorem.
+
+The primary-source audit now fixes the external target precisely.  The
+corrected arXiv v2 of Derickx--Etropolski--van Hoeij--Morrow--Zureick-Brown,
+*Sporadic cubic torsion*, Theorem 3.1 places `25` in the unconditional
+rank-zero range for `J₁(N)(ℚ)`.  Theorem 4.13 and Corollary 4.14 identify the
+full rational group with the rational cuspidal subgroup at this level, and
+Table 2 gives the single invariant factor `[227555]` (equal to
+`5·71·641`).  The associated computation is in
+`Sage/torsionComputations.py` of the authors' repository, audited at master
+commit `f0c6cf41e156d9d96bebd6b639e1f71208f04b6c`.  These are verified source
+facts, not yet Lean providers.  In particular, invoking them still requires a
+formal modular-curve/Jacobian quotient theorem.
+
+The smaller factor-local candidate is the exact newform orbit `25.2.d.a`:
+the LMFDB source data records dimension four, coefficient field
+`ℚ(ζ₁₀)`, and coefficients `a₂=ζ₁₀²-ζ₁₀`, `a₃=-ζ₁₀³`.
+`RationalPointsN25NewformEulerCertificate.lean` now checks the complete
+four-conjugate norm identity at three and proves
+`P₃(T)=1+T-2T²-5T³+T⁴-15T⁵-18T⁶+27T⁷+81T⁸` with `P₃(1)=71`.
+The newform identification and Frobenius interpretation remain explicit open
+seams.  If supplied, the bounds at two and three control complementary
+primary torsion; this corrects the earlier, insufficient single-prime plan.
+
+The older
 `N25LecacheuxIntegrality.lean` and
 `N25LecacheuxSieve.lean` scratch experiments do not currently compile and
 do not contain the advertised final Newton-polygon theorem; they must not be

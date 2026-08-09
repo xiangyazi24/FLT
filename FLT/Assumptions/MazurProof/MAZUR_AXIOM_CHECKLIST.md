@@ -91,13 +91,30 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
    are again literal multiples of Sutherland's equation, and its composition
    with the primitive Tate map is kernel-checked; exact resultant certificates
    prove that its homogeneous vector is nonzero and avoids all five canonical
-   cusp classes.
+   cusp classes; and
+8. complete ordinary-kernel field-table certificates for the cubic and
+   quartic binary models, together with projective counts
+   `#C(𝔽₂),...,#C(𝔽₁₆) = 5,5,20,29`; and
+9. four characteristic-two chartwise Bézout identities excluding the
+   explicit complete-intersection singularity predicate over every field,
+   plus the exact Newton/reciprocity calculation `P₂(1)=71` and the exact
+   four-conjugate level-25 polynomial calculation `P₃(1)=71`.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
 directly, without needing a Sutherland-to-LMFDB plane transformation.  The
 remaining input is a global rational-point or formal-immersion argument over
-`ℚ` proving that every rational canonical point is a cusp.
+`ℚ` proving that every rational canonical point is a cusp.  On the active
+Jacobian route this expands into explicit missing bridges: scheme-level smooth
+proper genus-four reduction, the zeta-to-Jacobian cardinality theorem, a
+second good-reduction bound controlling two-primary torsion, rational rank
+zero with torsion specialization, and the final Abel--Jacobi point
+classification.  The proposed ambient `J₁(25)` and level-25 newform routes
+are not counted at the endpoint.  The corrected primary source now verifies
+the ambient rank-zero and cyclic-order statement, and Lean checks the exact
+newform conjugate polynomial at three; the missing work is the general
+modular quotient/newform and good-reduction infrastructure connecting those
+facts to the stored canonical curve.
 
 ## Declarations present in the tree but not reachable from the endpoint
 

@@ -1,3 +1,24 @@
+## Run 2026-08-09 (N25 finite-field and Jacobian reduction route)
+
+- doctrine version: `a9c9ada7c8`
+- approval msg_id: unavailable in the Codex conversation
+- starting avenue: (a), certify the good `F_2` fibre and its first four point
+  counts, then use the resulting Weil data in the Jacobian reduction argument
+- comment discipline: every substantive Lean declaration receives an English
+  mathematical docstring recording meaning, conventions, proof idea, and role
+- end: banked complete `F_8`/`F_16` field tables and point counts
+  `5,5,20,29`; four chartwise characteristic-two Bézout smoothness
+  certificates; the Newton polynomial with `P₂(1)=71`; and the exact
+  four-conjugate level-25 polynomial with `P₃(1)=71`
+- source audit: corrected *Sporadic cubic torsion* v2, Theorems 3.1 and 4.13,
+  Corollary 4.14, and Table 2 verify externally that `J₁(25)(ℚ)` has rank zero
+  and is cyclic of order `227555`; the authors' computation repository was
+  pinned at `f0c6cf41e156d9d96bebd6b639e1f71208f04b6c`
+- final result: all new Lean terminal theorems pass scoped checks and depend
+  only on `propext`, `Classical.choice`, and `Quot.sound`; N25 remains an
+  endpoint axiom because the smooth-curve zeta/Jacobian, modular quotient or
+  newform, good-reduction specialization, and Abel--Jacobi bridges are absent
+
 ## Run 2026-08-09 (N25 direct canonical adjoint bridge)
 
 - Confirmed the local `sage` micromamba environment contains Sage 10.9 and

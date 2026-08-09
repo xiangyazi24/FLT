@@ -117,9 +117,21 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     canonical model, again with exact quadric and cubic pullback certificates
     and a checked composite map from the primitive Tate locus; exact Bezout
     resultants proving that composite is nonzero and avoids all five canonical
-    cusp classes.
-  - Open atom: the global rational-point/formal-immersion argument showing
-    that every rational canonical point is one of the five cusps.
+    cusp classes; complete kernel-checked `𝔽₈` and `𝔽₁₆` field tables and
+    projective point counts `5,5,20,29`; four chartwise Bézout certificates
+    excluding geometric singularities in characteristic two; and the exact
+    Newton/reciprocity polynomial calculation with value `P₂(1)=71`, plus the
+    exact four-conjugate level-25 polynomial at three with `P₃(1)=71`.
+  - Open atoms: connect the explicit Jacobian-minor certificates to a smooth
+    proper genus-four special fibre and the general zeta/Jacobian theorem;
+    prove `#Jac(C)(𝔽₂)=71`; obtain a second good-reduction bound to control
+    two-primary torsion; prove rational rank zero and torsion specialization;
+    and finish the Abel--Jacobi rational-point classification.  The ambient
+    `J₁(25)` rank-zero/cyclic-order statement has now been verified in the
+    corrected primary source, and the level-25 newform's exact `p=3`
+    conjugate polynomial with value `71` is kernel-checked.  Both still lack
+    the modular quotient/newform and good-reduction APIs needed to enter the
+    endpoint proof.
 
 - [ ] N49 — `CyclicExclusion49.no_raw_order49_tate_obstruction`
   - Closed infrastructure: structural `ψ₄₉` factorization bridge to the
