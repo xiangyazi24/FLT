@@ -20,12 +20,13 @@
 - Proved that the optimized Sutherland `y` coordinate is neither zero nor one
   on the primitive Tate locus.  The `y=1` case reduces to `r=s`, and the exact
   raw diagonal specialization is `r⁴(r-1)¹⁷`.
-- Exact affine base-locus elimination gives only `(0,1)` and `(1,1)` over
-  `ℚ`; the other algebraic candidates satisfy a monic degree-ten polynomial
-  with no root modulo two.  Formalizing this base-point/cusp exclusion remains
-  the immediate source-side task.
-- N25 remains an endpoint axiom.  The direct model-comparison seam is closed;
-  canonical nonzeroness/noncuspidality and the global rational-point
+- Formalized a Bezout resultant for the first and fourth adjoint cores.  Its
+  only residual factor is a monic degree-ten polynomial with no root modulo
+  two, so those two canonical coordinates cannot vanish simultaneously when
+  the optimized source coordinate is not one.  The Tate canonical quadruple
+  is therefore formally nonzero.
+- N25 remains an endpoint axiom.  The direct model-comparison and base-point
+  seams are closed; canonical noncuspidality and the global rational-point
   classification remain.
 - Scoped checks pass, and all four terminal bridge theorems audit to exactly
   `propext`, `Classical.choice`, and `Quot.sound`.

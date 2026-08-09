@@ -116,8 +116,8 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     degree-nine adjoint map from Sutherland's optimized source to the stored
     canonical model, again with exact quadric and cubic pullback certificates
     and a checked composite map from the primitive Tate locus.
-  - Open atoms: nonzeroness and noncuspidality of the direct canonical image
-    on the primitive Tate locus, and the global
+  - Open atoms: noncuspidality of the now proved-nonzero direct canonical
+    image on the primitive Tate locus, and the global
     rational-point/formal-immersion argument showing that every rational
     canonical point is one of the five cusps.
 

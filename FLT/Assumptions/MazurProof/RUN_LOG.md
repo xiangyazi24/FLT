@@ -1138,13 +1138,15 @@
 - The same file proves that the optimized `y` coordinate is nonzero and not
   one on every primitive Tate solution; the latter uses the raw diagonal
   identity `Fraw(r,r)=r⁴(r-1)¹⁷`.
+- A kernel-checked Bezout identity for the first and fourth adjoint cores has
+  resultant `(y-1)⁷ p₁₀(y)`.  The monic polynomial `p₁₀` has no root modulo
+  two, hence no rational root.  This proves the composite Tate canonical
+  quadruple is nonzero.
 - The scoped file check passes.  The direct comparison bypasses the formerly
   missing Sutherland-to-LMFDB plane transformation.
 - Axiom audits of the quadric identity, cubic identity, affine canonical map,
   and Tate composite contain exactly `propext`, `Classical.choice`, and
   `Quot.sound`.
-- Exact affine elimination reduces every rational base point to `(0,1)` or
-  `(1,1)` after excluding a monic degree-ten polynomial with no root modulo
-  two.  Turning that calculation into Lean nonzeroness/noncuspidality
-  certificates, followed by the global canonical rational-point
+- The affine base-point calculation is now formalized.  Excluding the five
+  projective cusp fibres, followed by the global canonical rational-point
   classification, is the remaining N25 work.

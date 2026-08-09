@@ -94,9 +94,9 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
 directly, without needing a Sutherland-to-LMFDB plane transformation.  The
-remaining inputs are source-locus nonzeroness/noncuspidality certificates for
-the adjoint coordinates and a global rational-point or formal-immersion
-argument over `ℚ`.
+remaining inputs are source-locus noncuspidality certificates for the now
+proved-nonzero adjoint coordinates and a global rational-point or
+formal-immersion argument over `ℚ`.
 
 ## Declarations present in the tree but not reachable from the endpoint
 

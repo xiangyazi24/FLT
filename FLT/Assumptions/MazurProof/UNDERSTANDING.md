@@ -434,7 +434,11 @@ identities for both the quadric and cubic and exposes the composite theorem
 `tateCanonicalCoordinates25_onCanonical` on the original primitive Tate
 locus.  It also proves that the optimized source `y` coordinate is neither
 zero nor one there, using the raw diagonal identity
-`Fraw(r,r)=r⁴(r-1)¹⁷`.  This route does not require the formerly missing birational map to the
+`Fraw(r,r)=r⁴(r-1)¹⁷`.  A kernel-checked Bezout resultant between the first
+and fourth adjoint cores reduces simultaneous vanishing to a monic degree-ten
+polynomial with no root modulo two.  Consequently the composite canonical
+coordinate vector is formally proved nonzero on every primitive Tate
+solution.  This route does not require the formerly missing birational map to the
 LMFDB degree-eleven plane.
 `RationalPointsN25TateCanonicalBridge.lean` now supplies the
 denominator-free target-side lift
@@ -455,11 +459,10 @@ separate certificate.
 All seven production files pass scoped compilation.  Axiom audits of their terminal
 theorems report only `propext`, `Classical.choice`, and `Quot.sound`.
 They are not yet imported by `CyclicExclusion25`: the genuine remaining
-source-side bridge work is to prove that the direct adjoint coordinate vector
-is nonzero and noncuspidal on the primitive Tate locus.  Exact Singular
-elimination shows that every rational affine base point is forced into
-`(x,y)=(0,1)` or `(1,1)` after excluding a monic degree-ten polynomial with no
-root modulo two; these certificates are not yet formalized.  Separately, N25
+source-side bridge work is to prove that the direct nonzero adjoint coordinate
+vector is noncuspidal on the primitive Tate locus.  The affine base-point
+resultant and its monic degree-ten obstruction are now formalized; only the
+five projective cusp fibres remain to be excluded.  Separately, N25
 still needs a global rational-point or
 formal-immersion argument proving that every rational canonical point is a
 cusp.  The older
