@@ -16,9 +16,15 @@ quadruple `(xD,-N,zD,wD)` then lies on the cubic identically, while its quadric
 value is exactly the plane sextic.  Thus any future polynomial map from the
 Tate parameters to the plane sextic will lift without division.
 
-This file does not assert the missing source-to-plane map or the rational-point
-classification.  Those require explicit numerators on `F25 = 0` together with
-nonvanishing certificates excluding the five cusps.
+The file also records the exact degree-six quotient map from the official
+LMFDB singular plane model of `X_{\pm 1}(25)` (label `25.300.12.j.1`) to the
+stored genus-four canonical model.  Its quadric and cubic pullbacks are literal
+multiples of the degree-eleven source equation.  This closes the target half of
+the comparison: the remaining model-identification problem is the birational
+map from the Tate equation `F25(b,c)=0` to this degree-eleven plane model.
+
+No rational-point classification is asserted here.  The eventual Tate bridge
+will additionally need nonvanishing certificates excluding the five cusps.
 -/
 
 namespace MazurProof.RationalPointsN25TateCanonicalBridge
@@ -75,6 +81,121 @@ theorem homogeneousPlaneLift25_onCanonical
   constructor
   · rw [homogeneousPlaneLift25_quadric, hS]
   · exact homogeneousPlaneLift25_cubic x z w
+
+/-! ## The explicit quotient of the LMFDB `X_{\pm 1}(25)` plane model
+
+The source coordinates below are ordered as `[C:W:S]`, matching the LMFDB
+projection from its genus-twelve canonical model.  Solving the canonical
+quadrics on the chart `S = 1`, substituting the published linear quotient map,
+and clearing its common denominator gives the four homogeneous sextics below.
+The two pullback identities are independent `ring` certificates, so subsequent
+formal arguments do not depend on that elimination computation.
+-/
+
+/-- The homogeneous degree-eleven singular plane model of `X_{\pm 1}(25)` used
+by LMFDB label `25.300.12.j.1`, in source coordinates `[C:W:S]`. -/
+def lmfdbX1Plane25 (C W S : ℚ) : ℚ :=
+  -(C ^ 5 * S ^ 3 * W ^ 3) + C ^ 4 * S ^ 6 * W -
+    2 * C ^ 4 * S ^ 5 * W ^ 2 + C ^ 4 * S ^ 4 * W ^ 3 -
+    3 * C ^ 4 * S ^ 3 * W ^ 4 - C ^ 4 * S ^ 2 * W ^ 5 +
+    C ^ 4 * S * W ^ 6 + C ^ 3 * S ^ 8 - C ^ 3 * S ^ 7 * W +
+    2 * C ^ 3 * S ^ 6 * W ^ 2 - C ^ 3 * S ^ 5 * W ^ 3 -
+    C ^ 3 * S ^ 4 * W ^ 4 + C ^ 3 * S ^ 3 * W ^ 5 -
+    2 * C ^ 3 * S ^ 2 * W ^ 6 + 3 * C ^ 3 * S * W ^ 7 +
+    C ^ 3 * W ^ 8 + 2 * C ^ 2 * S ^ 7 * W ^ 2 -
+    2 * C ^ 2 * S ^ 6 * W ^ 3 + 2 * C ^ 2 * S ^ 5 * W ^ 4 -
+    4 * C ^ 2 * S ^ 4 * W ^ 5 + 2 * C ^ 2 * S ^ 3 * W ^ 6 +
+    2 * C ^ 2 * S * W ^ 8 + 2 * C ^ 2 * W ^ 9 +
+    C * S ^ 6 * W ^ 4 - C * S ^ 5 * W ^ 5 - C * S ^ 4 * W ^ 6 -
+    2 * C * S ^ 3 * W ^ 7 + C * S ^ 2 * W ^ 8 + C * W ^ 10 -
+    S ^ 3 * W ^ 8
+
+/-- First homogeneous coordinate of the degree-two quotient from the LMFDB
+`X_{\pm 1}(25)` plane model to the genus-four canonical model. -/
+def lmfdbQuotientX25 (C W S : ℚ) : ℚ :=
+  -(C ^ 3 * S ^ 2 * W) + C ^ 3 * S * W ^ 2 - C ^ 2 * S ^ 4 +
+    C ^ 2 * S ^ 3 * W - C ^ 2 * S ^ 2 * W ^ 2 +
+    C ^ 2 * S * W ^ 3 + C ^ 2 * W ^ 4 - C * S ^ 3 * W ^ 2 +
+    C * S ^ 2 * W ^ 3 - C * S * W ^ 4 + C * W ^ 5
+
+/-- Second homogeneous coordinate of the degree-two quotient from the LMFDB
+`X_{\pm 1}(25)` plane model to the genus-four canonical model. -/
+def lmfdbQuotientY25 (C W S : ℚ) : ℚ :=
+  -(C ^ 3 * S ^ 2 * W) + C ^ 2 * S ^ 3 * W - C ^ 2 * S * W ^ 3 +
+    2 * C * S ^ 2 * W ^ 3 - C * S * W ^ 4 - C * W ^ 5 +
+    S * W ^ 5 - W ^ 6
+
+/-- Third homogeneous coordinate of the degree-two quotient from the LMFDB
+`X_{\pm 1}(25)` plane model to the genus-four canonical model. -/
+def lmfdbQuotientZ25 (C W S : ℚ) : ℚ :=
+  -(C ^ 2 * S ^ 4) - C ^ 2 * S ^ 2 * W ^ 2 + C ^ 2 * S * W ^ 3 -
+    C * S ^ 3 * W ^ 2 + C * S * W ^ 4 + C * W ^ 5 + W ^ 6
+
+/-- Fourth homogeneous coordinate of the degree-two quotient from the LMFDB
+`X_{\pm 1}(25)` plane model to the genus-four canonical model. -/
+def lmfdbQuotientW25 (C W S : ℚ) : ℚ :=
+  -(C ^ 3 * S ^ 2 * W) - C ^ 2 * S ^ 4 + C ^ 2 * S ^ 3 * W +
+    C ^ 2 * W ^ 4 - 2 * C * S ^ 3 * W ^ 2 +
+    2 * C * S ^ 2 * W ^ 3 + C * W ^ 5 - S ^ 2 * W ^ 4 +
+    S * W ^ 5
+
+/-- The four degree-six quotient coordinates packaged in the canonical ambient
+coordinate structure. -/
+def lmfdbQuotientCoordinates25 (C W S : ℚ) : Coordinates25 :=
+  ⟨lmfdbQuotientX25 C W S, lmfdbQuotientY25 C W S,
+    lmfdbQuotientZ25 C W S, lmfdbQuotientW25 C W S⟩
+
+/-- Degree-six cofactor left after pulling back the canonical cubic along the
+LMFDB quotient coordinates. -/
+def lmfdbQuotientCubicCofactor25 (C W S : ℚ) : ℚ :=
+  C ^ 4 * S ^ 2 - C ^ 4 * S * W - C ^ 3 * S ^ 3 +
+    C ^ 3 * S ^ 2 * W - C ^ 3 * W ^ 3 - C ^ 2 * S ^ 3 * W -
+    C ^ 2 * S ^ 2 * W ^ 2 + 3 * C ^ 2 * S * W ^ 3 -
+    2 * C * S ^ 2 * W ^ 3 + C * S * W ^ 4 + 2 * C * W ^ 5 -
+    S * W ^ 5 + W ^ 6
+
+set_option maxHeartbeats 1000000 in
+/-- The canonical quadric pulls back to `-C` times the degree-eleven source
+equation.  This is an unconditional polynomial identity in three variables. -/
+theorem lmfdbQuotientCoordinates25_quadric (C W S : ℚ) :
+    canonicalQuadric25
+        (lmfdbQuotientCoordinates25 C W S).x
+        (lmfdbQuotientCoordinates25 C W S).y
+        (lmfdbQuotientCoordinates25 C W S).z
+        (lmfdbQuotientCoordinates25 C W S).w =
+      -C * lmfdbX1Plane25 C W S := by
+  simp only [lmfdbQuotientCoordinates25, lmfdbQuotientX25,
+    lmfdbQuotientY25, lmfdbQuotientZ25, lmfdbQuotientW25,
+    lmfdbX1Plane25, canonicalQuadric25]
+  ring
+
+set_option maxHeartbeats 2000000 in
+/-- The canonical cubic pulls back to the source equation times the displayed
+degree-seven cofactor `-W * H₆`.  This is an unconditional polynomial
+identity and therefore remains valid at every exceptional chart point. -/
+theorem lmfdbQuotientCoordinates25_cubic (C W S : ℚ) :
+    canonicalCubic25
+        (lmfdbQuotientCoordinates25 C W S).x
+        (lmfdbQuotientCoordinates25 C W S).y
+        (lmfdbQuotientCoordinates25 C W S).z
+        (lmfdbQuotientCoordinates25 C W S).w =
+      -(W * lmfdbQuotientCubicCofactor25 C W S *
+        lmfdbX1Plane25 C W S) := by
+  simp only [lmfdbQuotientCoordinates25, lmfdbQuotientX25,
+    lmfdbQuotientY25, lmfdbQuotientZ25, lmfdbQuotientW25,
+    lmfdbQuotientCubicCofactor25, lmfdbX1Plane25, canonicalCubic25]
+  ring
+
+/-- Every zero of the LMFDB `X_{\pm 1}(25)` plane equation maps to the stored
+canonical quadric-cubic intersection.  Nonzeroness of the four homogeneous
+coordinates is deliberately kept as a separate source-side obligation. -/
+theorem lmfdbQuotientCoordinates25_onCanonical
+    {C W S : ℚ} (hsource : lmfdbX1Plane25 C W S = 0) :
+    OnCanonical25 (lmfdbQuotientCoordinates25 C W S) := by
+  constructor
+  · rw [lmfdbQuotientCoordinates25_quadric, hsource, mul_zero]
+  · rw [lmfdbQuotientCoordinates25_cubic, hsource]
+    ring
 
 /-! ## Noncuspidality criterion for the eventual source map -/
 

@@ -104,9 +104,13 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     projective class over the quadratic extension; explicit `2P`, `3P`,
     `4P`, and `7P` formulas on Tate normal form; exact order 25 of the marked
     origin on the primitive locus; and complete re-normalizations at `2P`
-    and `7P`, including proofs that every displayed denominator is nonzero.
-  - Open atoms: an exact map from the nondegenerate `F₂₅` Tate locus to a
-    noncuspidal point of the canonical model, and the global
+    and `7P`, including proofs that every displayed denominator is nonzero;
+    the official degree-eleven LMFDB `X_{\pm1}(25)` plane model; and an
+    explicit degree-six map from that source model to the canonical quotient,
+    with exact quadric and cubic pullback certificates.
+  - Open atoms: an exact birational map from the nondegenerate `F₂₅` Tate
+    locus to the LMFDB source plane, noncuspidality of its canonical image, and
+    the global
     rational-point/formal-immersion argument showing that every rational
     canonical point is one of the five cusps.
 

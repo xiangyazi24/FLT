@@ -1,3 +1,28 @@
+## Run 2026-08-09 (N25 LMFDB quotient bridge)
+
+- approval: automode continuation; no tmux names may be changed
+- starting avenue: close the target half of the Tate-to-canonical model
+  comparison using the official `X_{\pm1}(25)` source model
+- completed:
+  - recorded the homogeneous degree-eleven LMFDB plane equation for
+    `25.300.12.j.1` in source coordinates `[C:W:S]`
+  - solved the published genus-twelve canonical quadrics on `S=1`, composed
+    the published linear degree-two quotient, and homogenized the resulting
+    four degree-six coordinates
+  - proved exact pullback identities `Q(Φ)=-C F₁₁` and
+    `K(Φ)=-W H₆ F₁₁`, hence every source-plane zero maps to the stored
+    canonical complete intersection
+- verification:
+  - all 45 source canonical quadrics have zero remainder modulo the affine
+    degree-eleven plane equation in an independent exact SymPy audit
+  - scoped Lean compilation passes
+  - the three new public theorems audit to exactly `propext`,
+    `Classical.choice`, and `Quot.sound`
+- next frontier: compute and certify the birational transformation from the
+  Tate `F25(b,c)=0` model to the LMFDB degree-eleven source plane, then prove
+  the canonical image is noncuspidal
+- end: clean bounded milestone; campaign continues
+
 ## Run 2026-08-09 (N25 sevenfold normalization)
 
 - approval: automode continuation; no tmux names may be changed

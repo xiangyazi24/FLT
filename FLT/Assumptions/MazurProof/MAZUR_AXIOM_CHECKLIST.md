@@ -77,12 +77,16 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
 4. the actual multiples `2P`, `3P`, `4P`, and `7P` of the Tate origin,
    exact order 25 on the primitive locus, and complete Tate
    re-normalizations at `2P` and `7P`, with all denominator factors proved
-   nonzero and all five Weierstrass coefficients checked.
+   nonzero and all five Weierstrass coefficients checked; and
+5. the official degree-eleven LMFDB plane model for `X_{\pm1}(25)` together
+   with an explicit degree-six map to the stored canonical quotient, whose
+   quadric and cubic pullbacks are literal multiples of the source equation.
 
 These theorems compile and depend only on the three standard logical axioms.
-They do not yet discharge N25: the missing inputs are the exact
-Tate-obstruction-to-canonical-model map, its noncuspidality certificates, and
-a global rational-point or formal-immersion argument over `ℚ`.
+They do not yet discharge N25: the missing inputs are the exact birational
+identification of the Tate `F25` model with the LMFDB source plane, the
+resulting noncuspidality certificates, and a global rational-point or
+formal-immersion argument over `ℚ`.
 
 ## Declarations present in the tree but not reachable from the endpoint
 

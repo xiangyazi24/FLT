@@ -415,24 +415,29 @@ checked.
 `RationalPointsN25TateCanonicalBridge.lean` now supplies the
 denominator-free target-side lift
 `(x,z,w) ↦ (xD,-N,zD,wD)`.  Its cubic vanishes identically and its quadric
-pullback is exactly the stored plane sextic.  It also proves directly from
-the literal `F25` polynomial that `c ≠ 0` on the primitive locus when
-`b ≠ 0`.  This removes division from the eventual source-to-target map but
-does not provide that map.  Because every listed cusp has a zero among its
-first three canonical coordinates, the lifted point is already noncuspidal
-when `x,z,D,N` are nonzero; the plane coordinate `w` needs no separate
-certificate.
+pullback is exactly the stored plane sextic.  The same file now contains the
+official degree-eleven LMFDB plane equation for `X_{\pm1}(25)` (label
+`25.300.12.j.1`) and an explicit four-coordinate degree-six map from that
+source model to the stored genus-four canonical model.  Its two defining
+equations are certified by the unconditional polynomial identities
+`Q(Φ) = -C F₁₁` and `K(Φ) = -W H₆ F₁₁`.  Thus the target half of
+the Tate comparison is explicit and checked; the still-missing model
+identification is the birational map from the literal `F25(b,c)=0` equation to
+this LMFDB source plane.  Because every listed cusp has a zero among its first
+three canonical coordinates, the denominator-free sextic lift is already
+noncuspidal when `x,z,D,N` are nonzero; the plane coordinate `w` needs no
+separate certificate.
 
 All five files pass scoped compilation.  Axiom audits of their terminal
 theorems report only `propext`, `Classical.choice`, and `Quot.sound`.
 They are not yet imported by `CyclicExclusion25`: the genuine remaining
-work is to use the completed `2P` and `7P` normalizations to derive the source
-involution/order relations, or directly find literal invariant plane
-numerators `NX,NZ,NW` with a polynomial
-certificate that their plane sextic is divisible by `F25`, prove the
-source-locus nonvanishing certificates that make the lifted point
-noncuspidal, and then supply a global rational-point or formal-immersion
-argument proving that every rational canonical point is a cusp.  The older
+model-comparison work is to identify the Tate `F25` model with the stored
+degree-eleven `X_{\pm1}(25)` plane model (equivalently, compose the completed
+`2P` and `7P` parameter actions into literal quotient coordinates), then prove
+the source-locus nonvanishing certificates that make the resulting canonical
+point noncuspidal.  Separately, N25 still needs a global rational-point or
+formal-immersion argument proving that every rational canonical point is a
+cusp.  The older
 `N25LecacheuxIntegrality.lean` and
 `N25LecacheuxSieve.lean` scratch experiments do not currently compile and
 do not contain the advertised final Newton-polygon theorem; they must not be
