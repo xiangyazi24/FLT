@@ -121,7 +121,9 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     projective point counts `5,5,20,29`; four chartwise Bézout certificates
     excluding geometric singularities in characteristic two; and the exact
     Newton/reciprocity polynomial calculation with value `P₂(1)=71`, plus the
-    exact four-conjugate level-25 polynomial at three with `P₃(1)=71`.
+    exact four-conjugate level-25 polynomial at three with `P₃(1)=71`; and the
+    abstract two-prime lemma combining `2^a·71` and `3^b·71` cardinal bounds
+    into divisibility by `71`.
   - Open atoms: connect the explicit Jacobian-minor certificates to a smooth
     proper genus-four special fibre and the general zeta/Jacobian theorem;
     prove `#Jac(C)(𝔽₂)=71`; obtain a second good-reduction bound to control

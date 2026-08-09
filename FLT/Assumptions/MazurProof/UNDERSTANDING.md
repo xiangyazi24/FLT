@@ -522,6 +522,10 @@ four-conjugate norm identity at three and proves
 The newform identification and Frobenius interpretation remain explicit open
 seams.  If supplied, the bounds at two and three control complementary
 primary torsion; this corrects the earlier, insufficient single-prime plan.
+`RationalPointsN25TwoPrimeReduction.lean` proves the remaining elementary
+endgame: if a finite cardinal divides both `2^a·71` and `3^b·71`, it divides
+`71`.  The future specialization layer therefore needs only to produce those
+two precise divisibility hypotheses.
 
 The older
 `N25LecacheuxIntegrality.lean` and

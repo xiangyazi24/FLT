@@ -40,7 +40,8 @@ The leading candidates use either the degree-two map from `X_1(25)` or its
 level-25 newform factor.  The corrected primary source has now been verified:
 `J_1(25)(Q)` has rank zero and is cyclic of order `227555`; the exact
 four-conjugate newform polynomial at three is also kernel-checked and has
-value `71` at one.  Neither route is counted at the endpoint until the
+value `71` at one.  The pure two-prime cardinal-divisibility endgame is proved
+as well.  Neither route is counted at the endpoint until the
 required modular quotient/newform, specialization, and Abel--Jacobi
 infrastructure is formalized.  Closing these seams forces every rational
 canonical point to be a cusp, contradicting the proved noncuspidality of the

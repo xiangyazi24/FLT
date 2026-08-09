@@ -1,6 +1,6 @@
 ## Run 2026-08-09 (N25 finite-field and Jacobian reduction route)
 
-- doctrine version: `a9c9ada7c8`
+- doctrine version: `9fc18f1c64`
 - approval msg_id: unavailable in the Codex conversation
 - starting avenue: (a), certify the good `F_2` fibre and its first four point
   counts, then use the resulting Weil data in the Jacobian reduction argument
@@ -9,7 +9,9 @@
 - end: banked complete `F_8`/`F_16` field tables and point counts
   `5,5,20,29`; four chartwise characteristic-two Bézout smoothness
   certificates; the Newton polynomial with `P₂(1)=71`; and the exact
-  four-conjugate level-25 polynomial with `P₃(1)=71`
+  four-conjugate level-25 polynomial with `P₃(1)=71`; the abstract two-prime
+  cardinal lemma now combines the future local bounds into divisibility by
+  `71`
 - source audit: corrected *Sporadic cubic torsion* v2, Theorems 3.1 and 4.13,
   Corollary 4.14, and Table 2 verify externally that `J₁(25)(ℚ)` has rank zero
   and is cyclic of order `227555`; the authors' computation repository was

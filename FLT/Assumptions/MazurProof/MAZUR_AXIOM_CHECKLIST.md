@@ -98,7 +98,9 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
 9. four characteristic-two chartwise Bézout identities excluding the
    explicit complete-intersection singularity predicate over every field,
    plus the exact Newton/reciprocity calculation `P₂(1)=71` and the exact
-   four-conjugate level-25 polynomial calculation `P₃(1)=71`.
+   four-conjugate level-25 polynomial calculation `P₃(1)=71`; and
+10. the pure arithmetic two-prime lemma combining local cardinal bounds
+    `2^a·71` and `3^b·71` into divisibility by `71`.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
