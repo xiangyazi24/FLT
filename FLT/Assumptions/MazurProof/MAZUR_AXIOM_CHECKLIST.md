@@ -104,7 +104,11 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
 11. the finite-group specialization bookkeeping: the kernel-range order
     formula, each local bound from a primary kernel and target order, and the
     combined conclusion that two maps with kernel orders `2^a` and `3^b` and
-    target orders `71` force the source order to divide `71`.
+    target orders `71` force the source order to divide `71`; and
+12. the degree-two pullback endgame: divisibility of the source order by `71`
+    makes doubling injective, so a pullback whose norm composite is `[2]` is
+    injective.  A combined theorem derives this directly from the two
+    reduction maps without circularly assuming pullback injectivity.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -115,7 +119,8 @@ Jacobian route this expands into explicit missing bridges: scheme-level smooth
 proper genus-four reduction, the zeta-to-Jacobian cardinality theorem, a
 second good-reduction bound controlling two-primary torsion, rational rank
 zero together with the geometric construction and primary-kernel proof for
-the reduction maps, and the final Abel--Jacobi point
+the reduction maps, construction of the Jacobian pullback and norm maps with
+their degree-two composition identity, and the final Abel--Jacobi point
 classification.  The proposed ambient `J₁(25)` and level-25 newform routes
 are not counted at the endpoint.  The corrected primary source now verifies
 the ambient rank-zero and cyclic-order statement, and Lean checks the exact

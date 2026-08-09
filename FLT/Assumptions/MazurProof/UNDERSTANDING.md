@@ -535,6 +535,16 @@ orders `71` already force the source order to divide `71`.  Thus the remaining
 specialization seam is now purely geometric: construct the maps and prove
 those kernel and special-fibre cardinality statements.
 
+`RationalPointsN25DegreeTwoPullback.lean` closes the next finite-group step
+in the degree-two quotient route.  A finite group whose order divides `71`
+has injective doubling.  Therefore any homomorphism `pull` admitting a map
+`norm` with `norm (pull x) = 2·x` is injective.  The combined terminal theorem
+first obtains the odd-order bound from the two reductions and only then
+cancels doubling; it therefore avoids the circular argument that assumes
+absence of two-torsion in order to derive that same absence.  The remaining
+input here is again genuinely geometric: construct Jacobian pullback and norm
+for the checked double cover and prove the degree-two composition formula.
+
 The older
 `N25LecacheuxIntegrality.lean` and
 `N25LecacheuxSieve.lean` scratch experiments do not currently compile and
