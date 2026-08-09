@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - chatgpt-q3976-cas
+    paths:
+      - scripts/q3976.m
+      - .github/workflows/q3976-cas.yml
 
 permissions:
   contents: read
