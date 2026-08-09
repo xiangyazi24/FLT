@@ -1119,3 +1119,32 @@
   checked optimized source model to the stored LMFDB degree-eleven plane,
   followed by canonical noncuspidality and global rational-point
   classification.
+
+### N25 direct canonical adjoint bridge (2026-08-09)
+
+- Corrected the computational inventory: the local `sage` micromamba
+  environment provides Sage 10.9 and Singular 4.4.1.
+- Singular computed the Gorenstein adjoint ideal of the degree-twelve
+  projective closure; its degree-nine component has the expected dimension 12.
+- Five exact Tate doublings give the diamond involution `⟨7⟩`.  Its pullback on
+  adjoint differentials is an exact involution with eigenspace dimensions
+  `(4,8)`.  The residual doubling action on the invariant four-space has order
+  five and is rationally conjugate to the stored canonical action.
+- Added `RationalPointsN25CanonicalSourceBridge.lean` with the resulting four
+  degree-nine coordinates.  The canonical quadric and cubic pull back to
+  explicit multiples of Sutherland's source equation, and the public Tate
+  composite maps every primitive solution to the canonical complete
+  intersection.
+- The same file proves that the optimized `y` coordinate is nonzero and not
+  one on every primitive Tate solution; the latter uses the raw diagonal
+  identity `Fraw(r,r)=r⁴(r-1)¹⁷`.
+- The scoped file check passes.  The direct comparison bypasses the formerly
+  missing Sutherland-to-LMFDB plane transformation.
+- Axiom audits of the quadric identity, cubic identity, affine canonical map,
+  and Tate composite contain exactly `propext`, `Classical.choice`, and
+  `Quot.sound`.
+- Exact affine elimination reduces every rational base point to `(0,1)` or
+  `(1,1)` after excluding a monic degree-ten polynomial with no root modulo
+  two.  Turning that calculation into Lean nonzeroness/noncuspidality
+  certificates, followed by the global canonical rational-point
+  classification, is the remaining N25 work.

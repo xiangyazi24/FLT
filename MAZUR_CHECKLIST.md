@@ -112,10 +112,12 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     on the primitive Tate locus;
     the official degree-eleven LMFDB `X_{\pm1}(25)` plane model; and an
     explicit degree-six map from that source model to the canonical quotient,
-    with exact quadric and cubic pullback certificates.
-  - Open atoms: an exact birational map from the now-checked Sutherland
-    bidegree-`(8,8)` source model to the LMFDB degree-eleven source plane,
-    noncuspidality of its canonical image, and the global
+    with exact quadric and cubic pullback certificates; and a direct
+    degree-nine adjoint map from Sutherland's optimized source to the stored
+    canonical model, again with exact quadric and cubic pullback certificates
+    and a checked composite map from the primitive Tate locus.
+  - Open atoms: nonzeroness and noncuspidality of the direct canonical image
+    on the primitive Tate locus, and the global
     rational-point/formal-immersion argument showing that every rational
     canonical point is one of the five cusps.
 

@@ -19,9 +19,10 @@ Tate parameters to the plane sextic will lift without division.
 The file also records the exact degree-six quotient map from the official
 LMFDB singular plane model of `X_{\pm 1}(25)` (label `25.300.12.j.1`) to the
 stored genus-four canonical model.  Its quadric and cubic pullbacks are literal
-multiples of the degree-eleven source equation.  This closes the target half of
-the comparison: the remaining model-identification problem is the birational
-map from the Tate equation `F25(b,c)=0` to this degree-eleven plane model.
+multiples of the degree-eleven source equation.  This closes an independent
+target half of the comparison.  The later
+`RationalPointsN25CanonicalSourceBridge` bypasses the degree-eleven plane model
+and maps the checked Sutherland source directly to the canonical model.
 
 No rational-point classification is asserted here.  The eventual Tate bridge
 will additionally need nonvanishing certificates excluding the five cusps.

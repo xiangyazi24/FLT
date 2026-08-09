@@ -422,6 +422,20 @@ identity.  The two specializations
 `Fraw(s²-s+1,s)=-s(s-1)²⁷` prove that both optimization denominators are
 nonzero on the primitive Tate locus.  Thus every primitive `F25` solution now
 maps, without extra hypotheses, to the checked optimized source model.
+`RationalPointsN25CanonicalSourceBridge.lean` closes the previously missing
+model comparison directly.  Singular's Gorenstein adjoint ideal for the
+degree-twelve projective closure has a twelve-dimensional degree-nine
+canonical space.  The exact `⟨7⟩` diamond involution on the function field has
+`(+1,-1)` dimensions `(4,8)` there; the residual doubling action identifies
+the invariant four-space with the already stored order-five canonical action.
+The resulting four degree-nine polynomials map Sutherland's optimized source
+to the stored canonical model.  Lean independently verifies literal pullback
+identities for both the quadric and cubic and exposes the composite theorem
+`tateCanonicalCoordinates25_onCanonical` on the original primitive Tate
+locus.  It also proves that the optimized source `y` coordinate is neither
+zero nor one there, using the raw diagonal identity
+`Fraw(r,r)=r⁴(r-1)¹⁷`.  This route does not require the formerly missing birational map to the
+LMFDB degree-eleven plane.
 `RationalPointsN25TateCanonicalBridge.lean` now supplies the
 denominator-free target-side lift
 `(x,z,w) ↦ (xD,-N,zD,wD)`.  Its cubic vanishes identically and its quadric
@@ -430,28 +444,35 @@ official degree-eleven LMFDB plane equation for `X_{\pm1}(25)` (label
 `25.300.12.j.1`) and an explicit four-coordinate degree-six map from that
 source model to the stored genus-four canonical model.  Its two defining
 equations are certified by the unconditional polynomial identities
-`Q(Φ) = -C F₁₁` and `K(Φ) = -W H₆ F₁₁`.  Thus both ends of
-the Tate comparison are explicit and checked; the still-missing middle
-identification is the birational map from Sutherland's bidegree-`(8,8)` source
-equation to this LMFDB degree-eleven source plane.  Because every listed cusp
+`Q(Φ) = -C F₁₁` and `K(Φ) = -W H₆ F₁₁`.  This remains an independently checked
+target-side model comparison, although the direct adjoint map above now
+bypasses its formerly missing source-plane identification.  Because every listed cusp
 has a zero among its first
 three canonical coordinates, the denominator-free sextic lift is already
 noncuspidal when `x,z,D,N` are nonzero; the plane coordinate `w` needs no
 separate certificate.
 
-All six files pass scoped compilation.  Axiom audits of their terminal
+All seven production files pass scoped compilation.  Axiom audits of their terminal
 theorems report only `propext`, `Classical.choice`, and `Quot.sound`.
 They are not yet imported by `CyclicExclusion25`: the genuine remaining
-model-comparison work is to identify the checked Sutherland optimized source
-with the stored degree-eleven `X_{\pm1}(25)` plane model, then prove the
-source-locus nonvanishing certificates that make the resulting canonical
-point noncuspidal.  Separately, N25 still needs a global rational-point or
+source-side bridge work is to prove that the direct adjoint coordinate vector
+is nonzero and noncuspidal on the primitive Tate locus.  Exact Singular
+elimination shows that every rational affine base point is forced into
+`(x,y)=(0,1)` or `(1,1)` after excluding a monic degree-ten polynomial with no
+root modulo two; these certificates are not yet formalized.  Separately, N25
+still needs a global rational-point or
 formal-immersion argument proving that every rational canonical point is a
 cusp.  The older
 `N25LecacheuxIntegrality.lean` and
 `N25LecacheuxSieve.lean` scratch experiments do not currently compile and
 do not contain the advertised final Newton-polygon theorem; they must not be
 counted as proved N25 infrastructure.
+
+The local computational inventory includes Sage 10.9 and Singular 4.4.1 in
+the `sage` micromamba environment.  Earlier notes treating those systems as
+unavailable were stale; the direct N25 adjoint computation above was performed
+with this installed environment and then reduced to kernel-checkable Lean
+polynomial identities.
 
 `X017Model.lean` now verifies the concrete genus-one equation
 `y²+xy+y=x³-x²-x-14`, its discriminant `-17⁴`, the rational variable changes

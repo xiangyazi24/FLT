@@ -1,3 +1,35 @@
+## Run 2026-08-09 (N25 direct canonical adjoint bridge)
+
+- Confirmed the local `sage` micromamba environment contains Sage 10.9 and
+  Singular 4.4.1; the earlier project inventory that treated them as absent
+  was stale.
+- Computed the Gorenstein adjoint ideal of Sutherland's degree-twelve
+  projective closure.  Its degree-nine component has dimension 12, as required
+  by the source genus.
+- Derived the diamond action `⟨7⟩` from five exact Tate doublings, verified the
+  function-field involution, and computed dimensions `(4,8)` for its invariant
+  and anti-invariant differential spaces.
+- Matched the residual order-five action on the invariant four-space with the
+  stored canonical action.  This produced four explicit degree-nine adjoint
+  coordinates mapping directly to `25.150.4.f.1`.
+- Added `RationalPointsN25CanonicalSourceBridge.lean`.  Literal `ring`
+  certificates prove that both target equations pull back to multiples of
+  Sutherland's source equation, and
+  `tateCanonicalCoordinates25_onCanonical` composes this map with the existing
+  primitive Tate-to-Sutherland bridge.
+- Proved that the optimized Sutherland `y` coordinate is neither zero nor one
+  on the primitive Tate locus.  The `y=1` case reduces to `r=s`, and the exact
+  raw diagonal specialization is `r⁴(r-1)¹⁷`.
+- Exact affine base-locus elimination gives only `(0,1)` and `(1,1)` over
+  `ℚ`; the other algebraic candidates satisfy a monic degree-ten polynomial
+  with no root modulo two.  Formalizing this base-point/cusp exclusion remains
+  the immediate source-side task.
+- N25 remains an endpoint axiom.  The direct model-comparison seam is closed;
+  canonical nonzeroness/noncuspidality and the global rational-point
+  classification remain.
+- Scoped checks pass, and all four terminal bridge theorems audit to exactly
+  `propext`, `Classical.choice`, and `Quot.sound`.
+
 ## Run 2026-08-09 (N25 Sutherland source bridge)
 
 - Added `RationalPointsN25SutherlandBridge.lean` with the published raw

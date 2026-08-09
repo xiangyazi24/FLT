@@ -84,14 +84,19 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
    primitive Tate solution; and
 6. the official degree-eleven LMFDB plane model for `X_{\pm1}(25)` together
    with an explicit degree-six map to the stored canonical quotient, whose
-   quadric and cubic pullbacks are literal multiples of the source equation.
+   quadric and cubic pullbacks are literal multiples of the source equation;
+   and
+7. a direct degree-nine adjoint map from the checked Sutherland optimized
+   source to the stored canonical quotient.  Its quadric and cubic pullbacks
+   are again literal multiples of Sutherland's equation, and its composition
+   with the primitive Tate map is kernel-checked.
 
 These theorems compile and depend only on the three standard logical axioms.
-They do not yet discharge N25: the missing inputs are the exact birational
-identification of the checked Sutherland bidegree-`(8,8)` source model with
-the LMFDB degree-eleven source plane, the resulting noncuspidality
-certificates, and a global rational-point or formal-immersion argument over
-`ℚ`.
+They do not yet discharge N25.  The model-identification seam is now closed
+directly, without needing a Sutherland-to-LMFDB plane transformation.  The
+remaining inputs are source-locus nonzeroness/noncuspidality certificates for
+the adjoint coordinates and a global rational-point or formal-immersion
+argument over `ℚ`.
 
 ## Declarations present in the tree but not reachable from the endpoint
 
