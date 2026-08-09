@@ -21,13 +21,13 @@ FT<ct> := FunctionField(E/LeadingCoefficient(E));
 B := BasisOfHolomorphicDifferentials(FT);
 assert #B eq 12;
 f := [ B[i]/B[1] : i in [1..12] ];
-prods := [ f[i]*f[j] : i in [1..12], j in [i..12] ];
+prods := &cat[[ f[i]*f[j] : j in [i..12] ] : i in [1..12] ];
 Rels := Relations(prods,k);
 print "TATE_QUADRIC_RELATION_DIMENSION", Dimension(Rels);
 assert Dimension(Rels) eq 45;
 
 P<[X]> := ProjectiveSpace(k,11);
-mons := [ X[i]*X[j] : i in [1..12], j in [i..12] ];
+mons := &cat[[ X[i]*X[j] : j in [i..12] ] : i in [1..12] ];
 QT := [ &+[ rr[n]*mons[n] : n in [1..#mons] ] : rr in Basis(Rels) ];
 CT := Curve(P,QT);
 print "TATE_CANONICAL_CURVE_BUILT", #DefiningEquations(CT);
