@@ -11,7 +11,8 @@
   certificates; the Newton polynomial with `P₂(1)=71`; and the exact
   four-conjugate level-25 polynomial with `P₃(1)=71`; the abstract two-prime
   cardinal lemma now combines the future local bounds into divisibility by
-  `71`
+  `71`; and the finite-group kernel-range layer derives those bounds from
+  reduction maps with primary kernels
 - source audit: corrected *Sporadic cubic torsion* v2, Theorems 3.1 and 4.13,
   Corollary 4.14, and Table 2 verify externally that `J₁(25)(ℚ)` has rank zero
   and is cyclic of order `227555`; the authors' computation repository was
@@ -19,7 +20,8 @@
 - final result: all new Lean terminal theorems pass scoped checks and depend
   only on `propext`, `Classical.choice`, and `Quot.sound`; N25 remains an
   endpoint axiom because the smooth-curve zeta/Jacobian, modular quotient or
-  newform, good-reduction specialization, and Abel--Jacobi bridges are absent
+  newform, geometric construction and primary-kernel control of the
+  good-reduction maps, and Abel--Jacobi bridges are absent
 
 ## Run 2026-08-09 (N25 direct canonical adjoint bridge)
 

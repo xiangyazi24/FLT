@@ -100,7 +100,11 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
    plus the exact Newton/reciprocity calculation `P₂(1)=71` and the exact
    four-conjugate level-25 polynomial calculation `P₃(1)=71`; and
 10. the pure arithmetic two-prime lemma combining local cardinal bounds
-    `2^a·71` and `3^b·71` into divisibility by `71`.
+    `2^a·71` and `3^b·71` into divisibility by `71`; and
+11. the finite-group specialization bookkeeping: the kernel-range order
+    formula, each local bound from a primary kernel and target order, and the
+    combined conclusion that two maps with kernel orders `2^a` and `3^b` and
+    target orders `71` force the source order to divide `71`.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -110,7 +114,8 @@ remaining input is a global rational-point or formal-immersion argument over
 Jacobian route this expands into explicit missing bridges: scheme-level smooth
 proper genus-four reduction, the zeta-to-Jacobian cardinality theorem, a
 second good-reduction bound controlling two-primary torsion, rational rank
-zero with torsion specialization, and the final Abel--Jacobi point
+zero together with the geometric construction and primary-kernel proof for
+the reduction maps, and the final Abel--Jacobi point
 classification.  The proposed ambient `J₁(25)` and level-25 newform routes
 are not counted at the endpoint.  The corrected primary source now verifies
 the ambient rank-zero and cyclic-order statement, and Lean checks the exact

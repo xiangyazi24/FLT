@@ -525,7 +525,15 @@ primary torsion; this corrects the earlier, insufficient single-prime plan.
 `RationalPointsN25TwoPrimeReduction.lean` proves the remaining elementary
 endgame: if a finite cardinal divides both `2^a·71` and `3^b·71`, it divides
 `71`.  The future specialization layer therefore needs only to produce those
-two precise divisibility hypotheses.
+two precise divisibility hypotheses.  The subsequent
+`RationalPointsN25ReductionCardinality.lean` closes the finite-group layer
+between specialization and those hypotheses.  For an arbitrary homomorphism
+of finite additive groups it proves the exact kernel-range order formula and
+the resulting bound by the kernel order times the target order.  In
+particular, two reduction maps with kernel orders `2^a` and `3^b` and target
+orders `71` already force the source order to divide `71`.  Thus the remaining
+specialization seam is now purely geometric: construct the maps and prove
+those kernel and special-fibre cardinality statements.
 
 The older
 `N25LecacheuxIntegrality.lean` and

@@ -123,11 +123,14 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     Newton/reciprocity polynomial calculation with value `P₂(1)=71`, plus the
     exact four-conjugate level-25 polynomial at three with `P₃(1)=71`; and the
     abstract two-prime lemma combining `2^a·71` and `3^b·71` cardinal bounds
-    into divisibility by `71`.
+    into divisibility by `71`, together with the finite-group kernel-range
+    formula deriving those bounds from reduction maps whose kernels have
+    orders `2^a` and `3^b`.
   - Open atoms: connect the explicit Jacobian-minor certificates to a smooth
     proper genus-four special fibre and the general zeta/Jacobian theorem;
     prove `#Jac(C)(𝔽₂)=71`; obtain a second good-reduction bound to control
-    two-primary torsion; prove rational rank zero and torsion specialization;
+    two-primary torsion; construct the actual good-reduction maps and prove
+    their primary-kernel properties; prove rational rank zero;
     and finish the Abel--Jacobi rational-point classification.  The ambient
     `J₁(25)` rank-zero/cyclic-order statement has now been verified in the
     corrected primary source, and the level-25 newform's exact `p=3`
