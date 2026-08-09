@@ -1,0 +1,29 @@
+name: q3976-cas
+
+on:
+  push:
+    branches:
+      - chatgpt-q3976-cas
+
+permissions:
+  contents: read
+
+jobs:
+  magma:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run exact Magma input
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            -H 'Referer: https://magma.maths.usyd.edu.au/calc/' \
+            -H 'Content-Type: application/x-www-form-urlencoded' \
+            --data-urlencode input@scripts/q3976.m \
+            https://magma.maths.usyd.edu.au/xml/calculator.xml \
+            | tee q3976-output.xml
+          echo
+          echo '===== Q3976 MAGMA XML ====='
+          cat q3976-output.xml
