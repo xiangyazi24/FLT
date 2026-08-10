@@ -1230,8 +1230,13 @@
   with the literal degreewise image in `S/(Q,C)`.  The kernel proof extracts
   the required homogeneous coefficients from an arbitrary ideal relation;
   it uses neither coefficient enumeration nor a dimension comparison.
+- Mapped the standard polynomial decomposition componentwise into the literal
+  quotient pieces and proved that this map has exactly the quotient kernel.
+  The pieces therefore form an internal direct sum.  Their multiplication is
+  degree-additive, so `S/(Q,C)` now carries its actual internal graded-algebra
+  structure and the quotient map is a surjective graded ring homomorphism.
 - The remaining canonicality seam is projective adjunction: identify the
-  literal pieces and their multiplication as the quotient grading, package
-  and sheafify the shifted resolution on `Proj`, and derive
+  resulting quotient `Proj`, package and sheafify the shifted resolution
+  there, and derive
   `ω_C ≅ O_C(1)` and identify the explicit degree-six hyperplane section
   with the canonical divisor.

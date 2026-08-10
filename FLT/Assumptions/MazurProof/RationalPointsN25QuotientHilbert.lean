@@ -1,5 +1,5 @@
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF3
-import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoQuotientGrading
+import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoGradedAlgebra
 import Mathlib.RingTheory.Polynomial.HilbertPoly
 import Mathlib.Tactic.ComputeDegree
 
@@ -17,11 +17,11 @@ five, its Hilbert polynomial is `6T - 3`, and the constant term therefore gives
 the genus candidate `1 - (-3) = 4`.
 
 The presented cokernel pieces have now been identified with the literal
-degreewise images in `S/(Q,C)`.  This is nevertheless deliberately not a
-scheme-level genus theorem: the graded resolution still has to be sheafified
-on `Proj` and compared with the scheme-theoretic Hilbert polynomial.  Mathlib
-currently has no general projective-curve genus interface supplying that
-final bridge.
+degreewise images in `S/(Q,C)` and packaged as its internal graded-algebra
+structure.  This is nevertheless deliberately not a scheme-level genus
+theorem: the graded resolution still has to be sheafified on `Proj` and
+compared with the scheme-theoretic Hilbert polynomial.  Mathlib currently has
+no general projective-curve genus interface supplying that final bridge.
 -/
 
 namespace MazurProof.RationalPointsN25QuotientHilbert

@@ -729,9 +729,12 @@ the curve convention `P(n)=deg(C)n+1-g` gives the constant-term value
 the formal Hilbert series.  The next module proves that `(Q,C)` is homogeneous,
 extracts homogeneous coefficients from every ideal relation, and applies the
 first isomorphism theorem to identify each presented cokernel with the literal
-degreewise image in `S/(Q,C)`.  What remains is the projective bridge: package
-these literal pieces and their multiplication into the quotient grading,
-sheafify the shifted resolution on `Proj`, and identify the resulting scheme-
+degreewise image in `S/(Q,C)`.  A further structural kernel argument proves
+that these images form an internal direct sum; multiplication of homogeneous
+representatives therefore installs the actual quotient `GradedAlgebra`, with
+explicit formulas for its degree projections and a surjective graded quotient
+map from `S`.  What remains is the projective bridge: construct and compare the
+resulting `Proj`, sheafify the shifted resolution, and identify the scheme-
 theoretic Hilbert polynomial with the certified one.  The local
 Mathlib source has
 general `Smooth`, `Proj`, and properness machinery, but no projective-curve
@@ -1472,8 +1475,14 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   literal image of the corresponding homogeneous polynomials in `S/(Q,C)`.
   The kernel computation takes homogeneous components of an arbitrary ideal
   representation, so it is structural rather than a dimension comparison.
+- `RationalPointsN25QuotientTwoGradedAlgebra.lean` maps the standard polynomial
+  decomposition componentwise into those literal pieces and proves that its
+  kernel is the kernel of the quotient map.  Hence canonical recomposition is
+  bijective.  Together with multiplication of homogeneous representatives,
+  this gives the quotient its actual internal `GradedAlgebra` structure and a
+  surjective graded quotient map, with explicit formulas for every projection.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
-  quotient-grading packaging, associated-graded-module sheafification, and projective
+  associated-graded-module sheafification and projective
   `Proj`/twisting-sheaf determinant theorems needed to pass from the proved
   degreewise shifted resolution to
   `ω_C ≅ O_C(-4+2+3) = O_C(1)`.
