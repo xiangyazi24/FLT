@@ -617,6 +617,24 @@ theorem chartPreSubmersive_jacobian_span (pivot : Fin 4) :
   · exact chartJacobianIdeal_two_eq_top
   · exact chartJacobianIdeal_three_eq_top
 
+/-- Each selected chart presentation has three affine variables and two
+relations, so its complete-intersection relative dimension is one. -/
+theorem chartPreSubmersive_dimension (pivot : Fin 4) (omitted : Fin 3) :
+    (chartPreSubmersive pivot omitted).dimension = 1 := by
+  rw [Algebra.Presentation.dimension]
+  rw [Nat.card_congr (finSuccAboveEquiv pivot).symm]
+  norm_num
+
+/-- Every ordinary chart quotient is locally standard smooth of relative
+dimension one over the binary coefficient field. -/
+theorem chartAffineQuotient_locallyStandardSmoothOfRelativeDimension
+    (pivot : Fin 4) :
+    RingHom.Locally (RingHom.IsStandardSmoothOfRelativeDimension 1)
+      (algebraMap k (ChartQuotient pivot)) :=
+  RingHom.Locally.isStandardSmoothOfRelativeDimension_of_jacobian_span
+    (chartPreSubmersive pivot) (chartPreSubmersive_dimension pivot)
+    (chartPreSubmersive_jacobian_span pivot)
+
 /-- Every ordinary two-equation affine chart quotient is smooth over the
 binary coefficient field. -/
 theorem chartAffineQuotient_smooth (pivot : Fin 4) :
@@ -655,5 +673,25 @@ theorem chartCoordinateRing_smooth (pivot : Fin 4) :
     RingHom.ext_zmod _ _
   rw [hRingHom] at hComp
   exact hComp
+
+/-- Relative dimension one transports through the proved equivalence from
+the ordinary affine quotient to the actual projective chart ring. -/
+theorem chartCoordinateRing_locallyStandardSmoothOfRelativeDimension
+    (pivot : Fin 4) :
+    RingHom.Locally (RingHom.IsStandardSmoothOfRelativeDimension 1)
+      (algebraMap k (ChartCoordinateRing pivot)) := by
+  have hTransport :=
+    (RingHom.locally_respectsIso
+      RingHom.isStandardSmoothOfRelativeDimension_respectsIso).left
+      (algebraMap k (ChartQuotient pivot))
+      (chartCoordinateRingEquivAffine pivot)
+      (chartAffineQuotient_locallyStandardSmoothOfRelativeDimension pivot)
+  have hRingHom :
+      (chartCoordinateRingEquivAffine pivot).toRingHom.comp
+          (algebraMap k (ChartQuotient pivot)) =
+        algebraMap k (ChartCoordinateRing pivot) :=
+    RingHom.ext_zmod _ _
+  rw [hRingHom] at hTransport
+  exact hTransport
 
 end MazurProof.RationalPointsN25QuotientTwoAffineChartsSmooth

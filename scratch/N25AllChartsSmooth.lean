@@ -8,6 +8,8 @@ This scratch entry keeps the former checkpoint path usable without duplicating
 the full structural proof.
 -/
 
+open MazurProof.RationalPointsN25QuotientTwoSmooth
+
 #check @MazurProof.RationalPointsN25QuotientTwoAffineChartsSmooth.chartCoordinateRing_smooth
 
 #print axioms MazurProof.RationalPointsN25QuotientTwoAffineChartsSmooth.chartCoordinateRing_smooth
@@ -15,3 +17,9 @@ the full structural proof.
 #check @MazurProof.RationalPointsN25QuotientTwoSmooth.canonicalProjectiveCurveToSpec_smooth
 
 #print axioms MazurProof.RationalPointsN25QuotientTwoSmooth.canonicalProjectiveCurveToSpec_smooth
+
+#check
+  @canonicalProjectiveCurveToSpec_smoothOfRelativeDimension
+
+#print axioms
+  canonicalProjectiveCurveToSpec_smoothOfRelativeDimension

@@ -1589,7 +1589,13 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   coefficient homomorphism; uniqueness of a ring homomorphism out of
   `ZMod 2` matches this with the algebra map used by the affine Jacobian
   proof.  Source-Zariski locality then proves the projective structure
-  morphism `canonicalProjectiveCurveToSpec` smooth.
+  morphism `canonicalProjectiveCurveToSpec` smooth.  The generic selected-
+  Jacobian bridge also retains presentation dimension under localization:
+  each chart has three affine variables and two relations.  Transport and
+  gluing therefore strengthen the result to
+  `SmoothOfRelativeDimension 1 canonicalProjectiveCurveToSpec`, so Mathlib
+  now recognizes the constructed projective quotient as a smooth curve over
+  `F₂`, not only as an unspecified-dimensional smooth scheme.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
   associated-graded-module sheafification and projective
   twisting-sheaf determinant theorems needed to pass from the proved

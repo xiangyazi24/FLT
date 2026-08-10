@@ -118,6 +118,31 @@ theorem coordinateChart_toSpec_smooth (i : Fin 4) :
   rw [hCoefficientMap]
   exact chartCoordinateRing_smooth i
 
+/-- On every coordinate chart, the structure morphism is smooth of relative
+dimension one.  The ring-level statement is the three-variable,
+two-equation Jacobian calculation transported to the actual Proj chart. -/
+theorem coordinateChart_toSpec_smoothOfRelativeDimension (i : Fin 4) :
+    SmoothOfRelativeDimension 1
+      ((coordinateAffineOpenCover.f i) ≫ canonicalProjectiveCurveToSpec) := by
+  change SmoothOfRelativeDimension 1
+    (Proj.awayι literalConePiece
+        (canonicalConeGradedProjection (MvPolynomial.X i))
+        (canonicalConeGradedProjection.map_mem (coordinate_isHomogeneous i))
+        (by norm_num) ≫ canonicalProjectiveCurveToSpec)
+  rw [canonicalProjectiveCurveToSpec, Proj.awayι_toSpecZero_assoc,
+    ← Spec.map_comp]
+  rw [HasRingHomProperty.Spec_iff (P := @SmoothOfRelativeDimension 1)]
+  have hCoefficientMap :
+      (CommRingCat.ofHom literalConePieceZeroRingEquiv.toRingHom ≫
+        CommRingCat.ofHom
+          (HomogeneousLocalization.fromZeroRingHom literalConePiece
+            (Submonoid.powers
+              (canonicalConeGradedProjection (MvPolynomial.X i))))).hom =
+        algebraMap k (ChartCoordinateRing i) :=
+    @RingHom.ext_zmod 2 (ChartCoordinateRing i) _ _ _
+  rw [hCoefficientMap]
+  exact chartCoordinateRing_locallyStandardSmoothOfRelativeDimension i
+
 /-- The projective quadric--cubic quotient is smooth over the binary base
 field.  This is the Zariski gluing of the four structurally proved affine
 chart statements. -/
@@ -126,5 +151,14 @@ instance canonicalProjectiveCurveToSpec_smooth :
   apply IsZariskiLocalAtSource.of_openCover coordinateAffineOpenCover.openCover
   intro i
   exact coordinateChart_toSpec_smooth i
+
+/-- The smooth projective quotient has relative dimension one over the
+binary field; in particular, the scheme-level construction is formally
+recognized as a curve rather than merely as a smooth scheme. -/
+instance canonicalProjectiveCurveToSpec_smoothOfRelativeDimension :
+    SmoothOfRelativeDimension 1 canonicalProjectiveCurveToSpec := by
+  apply IsZariskiLocalAtSource.of_openCover coordinateAffineOpenCover.openCover
+  intro i
+  exact coordinateChart_toSpec_smoothOfRelativeDimension i
 
 end MazurProof.RationalPointsN25QuotientTwoSmooth
