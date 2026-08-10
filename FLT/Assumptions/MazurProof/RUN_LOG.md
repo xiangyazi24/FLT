@@ -1219,8 +1219,15 @@
   and the quotient projection surjective.  Exactness at `R²` uses cubic
   regularity modulo the quadric to classify all syzygies structurally; the
   proof does not use coefficient enumeration or dimension equality.
-- The remaining canonicality seam is graded projective adjunction: refine the
-  proved ungraded resolution to the shifts
-  `R(-5) → R(-2) ⊕ R(-3) → R`, sheafify it on `Proj`, and derive
+- Defined the actual homogeneous pieces `S(-debt)_n` and restricted the
+  Koszul maps to
+  `S(-5)_n → S(-2)_n ⊕ S(-3)_n → S_n`.  Proved structurally that
+  multiplication by a nonzero homogeneous factor reflects homogeneity with
+  the expected degree subtraction.  This forces every ungraded syzygy
+  witness into degree `n-5` and proves the full shifted sequence exact in
+  every degree, including its cokernel presentation and surjective endpoint.
+- The remaining canonicality seam is projective adjunction: identify the
+  presented cokernel pieces with the standard grading on `S/(Q,C)`, package
+  and sheafify this resolution on `Proj`, and derive
   `ω_C ≅ O_C(1)` and identify the explicit degree-six hyperplane section
   with the canonical divisor.

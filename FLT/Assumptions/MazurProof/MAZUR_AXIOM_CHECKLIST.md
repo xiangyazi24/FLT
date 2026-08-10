@@ -157,7 +157,12 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     `r ↦ (Cr,-Qr)` and `(a,b) ↦ Qa+Cb`, injectivity on the left,
     exactness at both middle terms, and surjectivity onto the coordinate-ring
     quotient.  Every syzygy is proved to be the standard Koszul syzygy using
-    regularity, not a coefficient table or dimension argument.
+    regularity, not a coefficient table or dimension argument; and
+19. the shifted resolution in every homogeneous degree: explicit pieces
+    `S(-debt)_n`, degree-preserving restrictions of both Koszul maps, a
+    homogeneous-component cancellation theorem forcing each witness into
+    degree `n-5`, and exactness of
+    `0 → S(-5)_n → S(-2)_n ⊕ S(-3)_n → S_n → A_n^{pres} → 0`.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -169,10 +174,11 @@ proper genus-four reduction, identification of the degree-at-most-four
 closed-point effective divisors with actual geometric divisors, the
 actual principal-divisor subgroups, adjunction/canonicality for the chosen
 degree-six residual classes (with the homogeneous regular-sequence premise
-and its ungraded Koszul exactness now proved), the degree-two and degree-four
-complete-linear-system fibres, and the Riemann--Roch rank theorem needed to
-instantiate the proved class-number formula on both the characteristic-two
-and characteristic-three fibres, a second good-reduction bound controlling
+and its degreewise shifted Koszul exactness now proved), the degree-two and
+degree-four complete-linear-system fibres, and the Riemann--Roch rank theorem
+needed to instantiate the proved class-number formula on both the
+characteristic-two and characteristic-three fibres, a second good-reduction
+bound controlling
 two-primary torsion, rational rank
 zero together with the geometric construction and primary-kernel proof for
 the reduction maps, construction of the Jacobian pullback and norm maps with

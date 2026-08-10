@@ -138,7 +138,10 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     that the canonical quadric and cubic form a regular sequence; the full
     ungraded Koszul exact sequence
     `0 → R → R² → R → R/(Q,C) → 0`, with arbitrary syzygies
-    classified through regularity rather than coefficient enumeration; the
+    classified through regularity rather than coefficient enumeration; its
+    degreewise refinement
+    `0 → S(-5)_n → S(-2)_n ⊕ S(-3)_n → S_n → A_n^{pres} → 0`,
+    whose exactness follows from homogeneous-component cancellation; the
     generic divisor-zeta theorem that
     derives rationality and `P(1)=#Pic^0` from actual effective divisors and
     Riemann--Roch fibre cardinalities; locally finite closed-point gradings,
@@ -156,9 +159,10 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     formula deriving those bounds from reduction maps whose kernels have
     orders `2^a` and `3^b`; and the noncircular degree-two endgame proving
     pullback injective from those bounds and `norm ∘ pullback = [2]`.
-  - Open atoms: refine the proved ungraded Koszul resolution to shifted graded
-    modules, sheafify it on `Proj`, identify the scheme-theoretic Hilbert
-    polynomial with the certified `6T-3`, and prove projective adjunction;
+  - Open atoms: identify the presented degreewise cokernels with the standard
+    quotient grading, package and sheafify the resolution on `Proj`, identify
+    the scheme-theoretic Hilbert polynomial with the certified `6T-3`, and
+    prove projective adjunction;
     package the two Jacobian-rank
     certificates as smooth proper special fibres at two and three; identify
     the degree-at-most-four Frobenius-orbit divisor model with the actual
