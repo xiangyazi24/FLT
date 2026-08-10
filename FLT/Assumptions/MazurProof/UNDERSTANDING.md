@@ -1419,6 +1419,18 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   rings, not merely their point sets or dimensions, have the asserted
   length-two and length-three presentations.  The multiplicities are no
   longer supported only by set-theoretic factorization.
+- `RationalPointsN25QuotientTwoConormal.lean` starts the adjunction layer at
+  the strongest level supported by the current Mathlib API.  It realizes the
+  binary canonical affine cone as
+  `F_2[x,y,z,w]/(Q,C)`, proves evaluation compatibility with the stored
+  coordinate equations, proves that `Q` and `C` are homogeneous of degrees
+  two and three, computes `dQ` and `dC` in the free basis
+  `dx,dy,dz,dw`, and identifies those evaluated rows with the Jacobian rows
+  used by the geometric smoothness certificates.  Mathlib's general theorem
+  then supplies the concrete exact conormal sequence and the surjection onto
+  the quotient's Kähler differentials.  This is genuine adjunction input, but
+  the Proj/twisting-sheaf determinant step needed to conclude
+  `ω_C ≅ O_C(-4+2+3) = O_C(1)` is still absent.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
   section.  The remaining geometric seam is exact: construct principal

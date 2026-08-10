@@ -140,7 +140,13 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     principal-open layer maps the actual chart equations to the normal ideals
     and proves that each resulting ideal is exactly the kernel of its
     localized Artin evaluation.  Thus both local quotient-ring presentations
-    are fully packaged.
+    are fully packaged; and
+16. the affine-cone conormal layer for the binary canonical model: an actual
+    homogeneous coordinate quotient `F_2[x,y,z,w]/(Q,C)`, compatibility of
+    the degree-two and degree-three universal polynomials and their
+    differentials with the stored curve equations and Jacobian rows, and the
+    exact conormal sequence
+    `I/I² → B⊗Ω_A → Ω_B → 0` specialized to this quotient.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
