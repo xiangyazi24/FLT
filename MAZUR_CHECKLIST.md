@@ -128,14 +128,17 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     eigenbasis equivalence, which together prove the canonical-model counts
     `5,5,20,89` without an ambient Cartesian-product enumeration; the exact
     characteristic-three moment/Newton calculation, whose reciprocal
-    polynomial is the independently certified `P₃` and has value `71`; and the
+    polynomial is the independently certified `P₃` and has value `71`; a
+    structural, algebraic-closure-valid characteristic-three Jacobian-rank
+    proof using residual derivatives, one regular-chart Bézout identity, and
+    low-degree boundary factors; and the
     abstract two-prime lemma combining `2^a·71` and `3^b·71` cardinal bounds
     into divisibility by `71`, together with the finite-group kernel-range
     formula deriving those bounds from reduction maps whose kernels have
     orders `2^a` and `3^b`; and the noncircular degree-two endgame proving
     pullback injective from those bounds and `norm ∘ pullback = [2]`.
-  - Open atoms: connect the explicit Jacobian-minor certificates to smooth
-    proper genus-four special fibres at two and three and the general
+  - Open atoms: package the explicit Jacobian-rank certificates as smooth
+    proper genus-four special fibres at two and three and apply the general
     zeta/Jacobian theorem; prove `#Jac(C)(𝔽₂)=71` and
     `#Jac(C)(𝔽₃)=71`; construct the actual good-reduction maps and prove
     their primary-kernel properties; construct the actual Jacobian pullback

@@ -622,8 +622,21 @@ genus-four reciprocity produces
 independent four-conjugate newform certificate and has value `71` at one.
 The arithmetic second-prime calculation therefore no longer requires a
 modular quotient/newform identification.  Its remaining semantic boundary is
-geometric: certify a smooth proper genus-four fibre at three and apply a
-general curve-zeta/Jacobian theorem to conclude `#Jac(C)(F₃)=71`.
+geometric: package the explicit fibre as a smooth proper genus-four curve and
+apply a general curve-zeta/Jacobian theorem to conclude `#Jac(C)(F₃)=71`.
+
+`RationalPointsN25QuotientSmoothF3.lean` now closes the characteristic-three
+Jacobian-rank calculation over every field, hence over an algebraic closure.
+On the regular `x`-chart, two differentiated elimination identities turn the
+`yw` and `zw` minors into the two partial derivatives of the residual; an
+exact Bézout certificate forces any common residual critical point onto the
+excluded divisor `z=1`.  That divisor has its own quadratic certificate.  On
+the `y`-chart the cubic factors as `zw(1+z-w)`, and its two branches are
+excluded by explicit minors; the last two charts have a minor identically
+equal to one.  This is a symbolic chart proof with no finite-field
+enumeration.  What remains is not pointwise nonsingularity, but the Mathlib
+scheme-level packaging of this complete intersection as smooth, proper, and
+genus four, followed by the general zeta/Jacobian cardinality bridge.
 
 `RationalPointsN25TwoPrimeReduction.lean` proves the remaining elementary
 endgame: if a finite cardinal divides both `2^a·71` and `3^b·71`, it divides
