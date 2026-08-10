@@ -712,21 +712,26 @@ genus four, followed by the geometric instantiation of the proved divisor-zeta
 class-number theorem.
 
 `RationalPointsN25QuotientHilbert.lean` closes the arithmetic core of the
-genus computation without pretending to supply that scheme bridge.  The
-standard degree-two/degree-three Koszul numerator expands as
+genus computation without pretending to supply that scheme bridge.
+`RationalPointsN25QuotientTwoKoszul.lean` now supplies the exact ungraded
+resolution behind the calculation: the first map is injective, both middle
+terms are exact, and the quotient projection is surjective.  Exactness at
+`R²` uses cubic regularity modulo the quadric to prove that every syzygy is
+the standard Koszul syzygy; it is not inferred from dimensions.  The standard
+degree-two/degree-three shifted numerator expands as
 `1-T²-T³+T⁵`; Mathlib's Hilbert-polynomial formula then gives `6T-3`, and
 the curve convention `P(n)=deg(C)n+1-g` gives the constant-term value
 `g=4`.  The file also proves the eventual coefficient formula `6n-3` for
-the formal Hilbert series.  What remains is to prove that the explicit
-quadric and cubic form the required regular codimension-two projective
-subscheme and that its scheme-theoretic Hilbert polynomial is the certified
-one.  The local Mathlib source has general `Smooth`, `Proj`, and properness
-machinery, but no projective-curve genus API, no general Picard/Jacobian of a
-higher-genus curve, and no ready-made curve divisor/Riemann--Roch API.  The
-formal class-number consequence of those missing geometric objects is now
-proved in `CurveZetaClassNumber.lean`; the finite closed-point/effective-
-divisor Euler recurrence is additionally proved in
-`CurveZetaMarkedDivisors.lean`.
+the formal Hilbert series.  What remains is the genuinely graded/projective
+bridge: refine the explicit module maps to the shifts `R(-5)`, `R(-2)`, and
+`R(-3)`, sheafify them on `Proj`, and identify the resulting scheme-theoretic
+Hilbert polynomial with the certified one.  The local Mathlib source has
+general `Smooth`, `Proj`, and properness machinery, but no projective-curve
+genus API, no general Picard/Jacobian of a higher-genus curve, and no ready-
+made curve divisor/Riemann--Roch API.  The formal class-number consequence of
+those missing geometric objects is now proved in
+`CurveZetaClassNumber.lean`; the finite closed-point/effective-divisor Euler
+recurrence is additionally proved in `CurveZetaMarkedDivisors.lean`.
 
 `RationalPointsN25TwoPrimeReduction.lean` proves the remaining elementary
 endgame: if a finite cardinal divides both `2^a·71` and `3^b·71`, it divides
@@ -1440,9 +1445,16 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `RingTheory.Sequence.IsRegular`, not a dimension heuristic or an assumed
   complete-intersection label.  This closes the algebraic complete-
   intersection premise of adjunction.
+- `RationalPointsN25QuotientTwoKoszul.lean` turns that regularity theorem into
+  the explicit exact sequence
+  `0 → R → R² → R → R/(Q,C) → 0`.  The two maps are
+  `r ↦ (Cr,-Qr)` and `(a,b) ↦ Qa+Cb`; the proof classifies an arbitrary
+  syzygy using the proved non-zero-divisor property of `C` modulo `(Q)` and
+  identifies the middle range with the literal ideal `(Q,C)`.  This closes
+  the ungraded Koszul-exactness premise without coefficient enumeration.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
-  projective `Proj`/twisting-sheaf determinant theorem needed to pass from the
-  proved smooth homogeneous regular sequence of degrees two and three to
+  graded-shift/sheafification and projective `Proj`/twisting-sheaf determinant
+  theorems needed to pass from the proved explicit resolution to
   `ω_C ≅ O_C(-4+2+3) = O_C(1)`.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane

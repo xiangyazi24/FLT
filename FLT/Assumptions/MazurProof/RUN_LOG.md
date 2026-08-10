@@ -1214,7 +1214,13 @@
 - Transported the result through explicit polynomial-tower and quotient
   equivalences and proved that the original homogeneous equations `[Q,C]`
   form a `RingTheory.Sequence.IsRegular` sequence in `F_2[x,y,z,w]`.
-- The remaining canonicality seam is projective adjunction: convert this
-  smooth homogeneous regular sequence of degrees `(2,3)` into
+- Constructed the explicit Koszul maps `r ↦ (Cr,-Qr)` and
+  `(a,b) ↦ Qa+Cb`.  Proved the first injective, both middle terms exact,
+  and the quotient projection surjective.  Exactness at `R²` uses cubic
+  regularity modulo the quadric to classify all syzygies structurally; the
+  proof does not use coefficient enumeration or dimension equality.
+- The remaining canonicality seam is graded projective adjunction: refine the
+  proved ungraded resolution to the shifts
+  `R(-5) → R(-2) ⊕ R(-3) → R`, sheafify it on `Proj`, and derive
   `ω_C ≅ O_C(1)` and identify the explicit degree-six hyperplane section
   with the canonical divisor.

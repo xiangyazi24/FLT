@@ -1,24 +1,26 @@
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF3
+import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoKoszul
 import Mathlib.RingTheory.Polynomial.HilbertPoly
 import Mathlib.Tactic.ComputeDegree
 
 /-!
 # Hilbert polynomial of the level-25 quadric-cubic model
 
-A regular sequence of degrees two and three in projective three-space has
+The binary canonical equations now have a proved, explicit Koszul resolution
+at the level of ungraded modules.  The corresponding degree shifts give the
 Hilbert series
 
 `(1 - T²)(1 - T³) / (1 - T)⁴`.
 
-This file certifies the arithmetic part of that calculation.  The numerator
-has degree five, its Hilbert polynomial is `6T - 3`, and the constant term
-therefore gives the genus candidate `1 - (-3) = 4`.
+This file certifies the arithmetic of those shifts.  The numerator has degree
+five, its Hilbert polynomial is `6T - 3`, and the constant term therefore gives
+the genus candidate `1 - (-3) = 4`.
 
 This is deliberately not a scheme-level genus theorem.  Such a theorem still
-has to connect the explicit quadric and cubic to a regular codimension-two
-closed subscheme and identify its scheme-theoretic Hilbert polynomial with
-the series used here.  Mathlib currently has no general projective-curve
-genus interface supplying that final bridge.
+has to refine the explicit ungraded resolution to shifted graded modules and
+identify its sheafification on `Proj` with the projective curve's
+scheme-theoretic Hilbert polynomial.  Mathlib currently has no general
+projective-curve genus interface supplying that final bridge.
 -/
 
 namespace MazurProof.RationalPointsN25QuotientHilbert

@@ -152,7 +152,12 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     `F_2[x,z,w][y]` tower equivalence, a free rank-two quadric quotient, the
     exact multiplication matrix of the cubic class, a nonzero determinant
     certificate, and the final theorem that `[Q,C]` is a
-    `RingTheory.Sequence.IsRegular` sequence in `F_2[x,y,z,w]`.
+    `RingTheory.Sequence.IsRegular` sequence in `F_2[x,y,z,w]`; and
+18. the explicit ungraded Koszul resolution: the maps
+    `r ↦ (Cr,-Qr)` and `(a,b) ↦ Qa+Cb`, injectivity on the left,
+    exactness at both middle terms, and surjectivity onto the coordinate-ring
+    quotient.  Every syzygy is proved to be the standard Koszul syzygy using
+    regularity, not a coefficient table or dimension argument.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -164,10 +169,10 @@ proper genus-four reduction, identification of the degree-at-most-four
 closed-point effective divisors with actual geometric divisors, the
 actual principal-divisor subgroups, adjunction/canonicality for the chosen
 degree-six residual classes (with the homogeneous regular-sequence premise
-now proved), the degree-two and degree-four complete-linear-
-system fibres, and the Riemann--Roch rank theorem needed to instantiate the
-proved class-number formula on both the characteristic-two and
-characteristic-three fibres, a second good-reduction bound controlling
+and its ungraded Koszul exactness now proved), the degree-two and degree-four
+complete-linear-system fibres, and the Riemann--Roch rank theorem needed to
+instantiate the proved class-number formula on both the characteristic-two
+and characteristic-three fibres, a second good-reduction bound controlling
 two-primary torsion, rational rank
 zero together with the geometric construction and primary-kernel proof for
 the reduction maps, construction of the Jacobian pullback and norm maps with
