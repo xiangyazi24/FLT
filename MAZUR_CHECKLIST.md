@@ -159,8 +159,8 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     formula deriving those bounds from reduction maps whose kernels have
     orders `2^a` and `3^b`; and the noncircular degree-two endgame proving
     pullback injective from those bounds and `norm ∘ pullback = [2]`.
-  - Open atoms: identify the presented degreewise cokernels with the standard
-    quotient grading, package and sheafify the resolution on `Proj`, identify
+  - Open atoms: package the now-identified literal quotient pieces and their
+    multiplication into a quotient grading, sheafify the resolution on `Proj`, identify
     the scheme-theoretic Hilbert polynomial with the certified `6T-3`, and
     prove projective adjunction;
     package the two Jacobian-rank

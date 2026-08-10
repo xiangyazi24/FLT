@@ -1226,8 +1226,12 @@
   the expected degree subtraction.  This forces every ungraded syzygy
   witness into degree `n-5` and proves the full shifted sequence exact in
   every degree, including its cokernel presentation and surjective endpoint.
+- Proved that `(Q,C)` is homogeneous and identified each presented cokernel
+  with the literal degreewise image in `S/(Q,C)`.  The kernel proof extracts
+  the required homogeneous coefficients from an arbitrary ideal relation;
+  it uses neither coefficient enumeration nor a dimension comparison.
 - The remaining canonicality seam is projective adjunction: identify the
-  presented cokernel pieces with the standard grading on `S/(Q,C)`, package
-  and sheafify this resolution on `Proj`, and derive
+  literal pieces and their multiplication as the quotient grading, package
+  and sheafify the shifted resolution on `Proj`, and derive
   `ω_C ≅ O_C(1)` and identify the explicit degree-six hyperplane section
   with the canonical divisor.

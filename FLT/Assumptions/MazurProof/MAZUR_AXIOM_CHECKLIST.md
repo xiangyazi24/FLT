@@ -162,7 +162,11 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     `S(-debt)_n`, degree-preserving restrictions of both Koszul maps, a
     homogeneous-component cancellation theorem forcing each witness into
     degree `n-5`, and exactness of
-    `0 → S(-5)_n → S(-2)_n ⊕ S(-3)_n → S_n → A_n^{pres} → 0`.
+    `0 → S(-5)_n → S(-2)_n ⊕ S(-3)_n → S_n → A_n^{pres} → 0`; and
+20. the literal quotient degree pieces: homogeneity of `(Q,C)`, structural
+    extraction of the degree-`n` part of every ideal relation, equality of the
+    restricted quotient kernel with the Koszul range, and the resulting
+    canonical linear equivalence `A_n^{pres} ≃ (S/(Q,C))_n`.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -174,7 +178,8 @@ proper genus-four reduction, identification of the degree-at-most-four
 closed-point effective divisors with actual geometric divisors, the
 actual principal-divisor subgroups, adjunction/canonicality for the chosen
 degree-six residual classes (with the homogeneous regular-sequence premise
-and its degreewise shifted Koszul exactness now proved), the degree-two and
+and its degreewise shifted Koszul exactness and literal quotient-piece
+identification now proved), the degree-two and
 degree-four complete-linear-system fibres, and the Riemann--Roch rank theorem
 needed to instantiate the proved class-number formula on both the
 characteristic-two and characteristic-three fibres, a second good-reduction

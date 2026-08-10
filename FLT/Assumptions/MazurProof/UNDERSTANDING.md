@@ -726,10 +726,13 @@ used.  The standard degree-two/degree-three shifted numerator expands as
 `1-T²-T³+T⁵`; Mathlib's Hilbert-polynomial formula then gives `6T-3`, and
 the curve convention `P(n)=deg(C)n+1-g` gives the constant-term value
 `g=4`.  The file also proves the eventual coefficient formula `6n-3` for
-the formal Hilbert series.  What remains is the projective bridge: identify
-the presented degreewise cokernels with the standard grading on `S/(Q,C)`,
-package/sheafify this graded resolution on `Proj`, and identify the resulting
-scheme-theoretic Hilbert polynomial with the certified one.  The local
+the formal Hilbert series.  The next module proves that `(Q,C)` is homogeneous,
+extracts homogeneous coefficients from every ideal relation, and applies the
+first isomorphism theorem to identify each presented cokernel with the literal
+degreewise image in `S/(Q,C)`.  What remains is the projective bridge: package
+these literal pieces and their multiplication into the quotient grading,
+sheafify the shifted resolution on `Proj`, and identify the resulting scheme-
+theoretic Hilbert polynomial with the certified one.  The local
 Mathlib source has
 general `Smooth`, `Proj`, and properness machinery, but no projective-curve
 genus API, no general Picard/Jacobian of a higher-genus curve, and no ready-
@@ -1464,8 +1467,13 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   cancellation lemma forces each ungraded syzygy witness to have degree
   `n-5`, including the low-degree zero cases.  Consequently the full
   degreewise sequence is exact and its right projection is surjective.
+- `RationalPointsN25QuotientTwoQuotientGrading.lean` proves that `(Q,C)` is
+  homogeneous and identifies the presented cokernel in every degree with the
+  literal image of the corresponding homogeneous polynomials in `S/(Q,C)`.
+  The kernel computation takes homogeneous components of an arbitrary ideal
+  representation, so it is structural rather than a dimension comparison.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
-  associated-graded-module sheafification and projective
+  quotient-grading packaging, associated-graded-module sheafification, and projective
   `Proj`/twisting-sheaf determinant theorems needed to pass from the proved
   degreewise shifted resolution to
   `ω_C ≅ O_C(-4+2+3) = O_C(1)`.

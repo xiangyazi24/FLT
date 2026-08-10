@@ -1,5 +1,5 @@
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF3
-import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoGradedKoszul
+import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoQuotientGrading
 import Mathlib.RingTheory.Polynomial.HilbertPoly
 import Mathlib.Tactic.ComputeDegree
 
@@ -16,11 +16,12 @@ This file certifies the arithmetic of those shifts.  The numerator has degree
 five, its Hilbert polynomial is `6T - 3`, and the constant term therefore gives
 the genus candidate `1 - (-3) = 4`.
 
-This is deliberately not a scheme-level genus theorem.  Such a theorem still
-has to identify the presented cokernel pieces with the quotient ring's
-standard grading and sheafify the resolution on `Proj`, thereby identifying
-the projective curve's scheme-theoretic Hilbert polynomial.  Mathlib currently
-has no general projective-curve genus interface supplying that final bridge.
+The presented cokernel pieces have now been identified with the literal
+degreewise images in `S/(Q,C)`.  This is nevertheless deliberately not a
+scheme-level genus theorem: the graded resolution still has to be sheafified
+on `Proj` and compared with the scheme-theoretic Hilbert polynomial.  Mathlib
+currently has no general projective-curve genus interface supplying that
+final bridge.
 -/
 
 namespace MazurProof.RationalPointsN25QuotientHilbert
