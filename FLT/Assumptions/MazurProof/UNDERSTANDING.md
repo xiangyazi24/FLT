@@ -1552,9 +1552,17 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   unit ideal.  Hence both the ordinary quotient presentation and the actual
   degree-zero coordinate ring of `D_+(X_0)` are smooth over `F_2`.  No finite-
   field enumeration or quotient-representative computation enters the proof.
-  The next smoothness step is now precisely to extend the canonical
-  coordinate package and the same selected-presentation argument uniformly
-  to `D_+(X_i)` for all four coordinates, then glue the chart conclusions to
+- `RationalPointsN25QuotientTwoAffineCharts.lean` extends the coordinate
+  package uniformly to every `D_+(X_i)`.  Its affine variables are literally
+  indexed by `{j : Fin 4 // j ≠ i}`.  A monomial fraction is first written as
+  the product of all four ratios `X_j/X_i`; the diagonal ratio is one and is
+  erased structurally, so no chart permutations or coordinate case split are
+  needed.  Uniform dehomogenization supplies the inverse.  The same
+  equivalence carries the dehomogenized quadric-cubic ideal to the proved
+  homogeneous chart ideal, giving an ordinary two-equation quotient
+  presentation of all four actual projective charts.  The next smoothness
+  step is now only to feed the four existing projective Bezout certificates
+  through these uniform presentations, then glue the chart conclusions to
   the projective structure morphism.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
   associated-graded-module sheafification and projective
