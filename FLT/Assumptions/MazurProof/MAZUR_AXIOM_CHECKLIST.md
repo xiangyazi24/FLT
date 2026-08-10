@@ -136,8 +136,11 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     `(y^2,z)` and `(a+b+a*b,b^3)` on the required principal opens, together
     with surjective maps to the dimension-two and dimension-three Artin
     targets and extensions across those localizations.  Explicit two-sided
-    quotient-algebra equivalences now prove both exact kernels; only their
-    packaging through the principal-open quotient rings remains.
+    quotient-algebra equivalences now prove both affine exact kernels.  The
+    principal-open layer maps the actual chart equations to the normal ideals
+    and proves that each resulting ideal is exactly the kernel of its
+    localized Artin evaluation.  Thus both local quotient-ring presentations
+    are fully packaged.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -151,10 +154,8 @@ actual principal-divisor subgroups, adjunction/canonicality for the chosen
 degree-six residual classes, the degree-two and degree-four complete-linear-
 system fibres, and the Riemann--Roch rank theorem needed to instantiate the
 proved class-number formula on both the characteristic-two and
-characteristic-three fibres, packaging of the two proved binary Artin
-quotients through the principal-open localizations, a second good-reduction
-bound
-controlling two-primary torsion, rational rank
+characteristic-three fibres, a second good-reduction bound controlling
+two-primary torsion, rational rank
 zero together with the geometric construction and primary-kernel proof for
 the reduction maps, construction of the Jacobian pullback and norm maps with
 their degree-two composition identity, and the final Abel--Jacobi point

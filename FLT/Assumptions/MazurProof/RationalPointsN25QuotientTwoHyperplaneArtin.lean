@@ -158,11 +158,10 @@ theorem wChart_intersectionIdeal_eq_normalForm
 nilpotent parameter `b` of order three, explaining the multiplicity at
 `[0:1:1:0]`. -/
 theorem yzChart_intersectionIdeal_eq_normalForm
-    {R : Type*} [CommRing R] [CharP R 2] (a b : R)
+    {R : Type*} [CommRing R] (a b : R) (htwo : (2 : R) = 0)
     (hu : IsUnit (1 + b)) :
     Ideal.span {a + b + a * b, (1 + a) * b * (a + b)} =
       Ideal.span {a + b + a * b, b ^ 3} := by
-  have htwo : (2 : R) = 0 := CharP.cast_eq_zero R 2
   have hthree : (3 : R) = 1 := by linear_combination htwo
   have hfour : (4 : R) = 0 := by linear_combination 2 * htwo
   have hsix : (6 : R) = 0 := by linear_combination 3 * htwo
