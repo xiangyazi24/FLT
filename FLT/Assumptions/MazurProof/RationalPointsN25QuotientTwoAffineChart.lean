@@ -361,15 +361,43 @@ theorem xChartAffineToAway_cubic :
 
 /-- The two ordinary affine equations cutting out the N25 curve on
 `D₊(X₀)`. -/
+def xChartAffineRelation : Fin 2 → xChartAffineRing :=
+  Fin.cases xChartAffineQuadric (fun _ ↦ xChartAffineCubic)
+
+@[simp]
+theorem xChartAffineRelation_zero :
+    xChartAffineRelation 0 = xChartAffineQuadric := rfl
+
+@[simp]
+theorem xChartAffineRelation_one :
+    xChartAffineRelation 1 = xChartAffineCubic := rfl
+
+/-- The two-element relation family has exactly the expected range. -/
+theorem xChartAffineRelation_range :
+    Set.range xChartAffineRelation =
+      ({xChartAffineQuadric, xChartAffineCubic} : Set xChartAffineRing) := by
+  ext p
+  constructor
+  · rintro ⟨i, rfl⟩
+    fin_cases i <;> simp
+  · intro hp
+    rcases hp with hp | hp
+    · exact ⟨0, hp.symm⟩
+    · exact ⟨1, hp.symm⟩
+
+/-- The two ordinary affine equations cutting out the N25 curve on
+`D₊(X₀)`.  Using a relation family makes this ideal definitionally suitable
+for Mathlib's naive presentation constructor. -/
 def xChartAffineEquationIdeal : Ideal xChartAffineRing :=
-  Ideal.span {xChartAffineQuadric, xChartAffineCubic}
+  Ideal.span (Set.range xChartAffineRelation)
 
 /-- The affine coordinate equivalence carries the ordinary two-equation
 ideal exactly to the homogeneous chart ideal. -/
 theorem xChartAffineEquationIdeal_map :
     xChartAffineEquationIdeal.map xChartAffineEquivAway.toRingHom =
       chartEquationIdeal 0 := by
-  rw [xChartAffineEquationIdeal, chartEquationIdeal, Ideal.map_span]
+  rw [xChartAffineEquationIdeal, xChartAffineRelation_range,
+    chartEquationIdeal, Ideal.map_span]
   congr 1
   ext z
   simp [xChartAffineEquivAway_apply, eq_comm]

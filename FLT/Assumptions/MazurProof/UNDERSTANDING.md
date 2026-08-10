@@ -1538,10 +1538,24 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   from total degree, so it is independent of coefficient enumeration.  The
   equivalence sends the displayed affine quadric and cubic exactly to
   `Q/X_0^2` and `C/X_0^3`, yielding the literal ordinary quotient presentation
-  of the first N25 projective chart.  The next smoothness step is to extend
-  this coordinate package uniformly to all four standard opens and feed the
-  existing Jacobian-minor Bezout identities into Mathlib's submersive-
-  presentation localization criterion.
+  of the first N25 projective chart.
+- `FLT/Mathlib/RingTheory/RingHom/SmoothJacobian.lean` adds the structural
+  Mathlib-facing bridge for a finite family of selected presentations.  A
+  selected Jacobian becomes a unit after localizing at itself, and Jacobians
+  spanning the unit ideal therefore imply smoothness by target-localization
+  locality.  This theorem is independent of the N25 equations.
+- `RationalPointsN25QuotientTwoAffineSmooth.lean` applies that bridge to the
+  first chart.  Euler homogeneity rewrites the two projective minors involving
+  the removed `x` coordinate through the three affine minors.  Three naive
+  two-relation presentations select the `(z,w)`, `(y,w)`, and `(y,z)` minors;
+  the resulting Bezout identity proves that their quotient Jacobians span the
+  unit ideal.  Hence both the ordinary quotient presentation and the actual
+  degree-zero coordinate ring of `D_+(X_0)` are smooth over `F_2`.  No finite-
+  field enumeration or quotient-representative computation enters the proof.
+  The next smoothness step is now precisely to extend the canonical
+  coordinate package and the same selected-presentation argument uniformly
+  to `D_+(X_i)` for all four coordinates, then glue the chart conclusions to
+  the projective structure morphism.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
   associated-graded-module sheafification and projective
   twisting-sheaf determinant theorems needed to pass from the proved
