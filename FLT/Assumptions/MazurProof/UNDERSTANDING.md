@@ -1596,6 +1596,16 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `SmoothOfRelativeDimension 1 canonicalProjectiveCurveToSpec`, so Mathlib
   now recognizes the constructed projective quotient as a smooth curve over
   `F₂`, not only as an unspecified-dimensional smooth scheme.
+- `RationalPointsN25QuotientHilbert.lean` now connects the degreewise Koszul
+  resolution to the actual internal grading at the level of dimensions.
+  Each shifted homogeneous polynomial piece is finite-dimensional because
+  only finitely many exponent vectors have a fixed total degree; the literal
+  quotient piece is finite-dimensional through its proved cokernel
+  equivalence.  Rank-nullity on the four-term exact sequence proves the exact
+  alternating finrank identity for every degree.  The remaining Hilbert seam
+  is therefore the standard monomial-count evaluation and the comparison
+  between the graded-ring Hilbert function and the scheme-theoretic Hilbert
+  polynomial, not an unproved exactness or finiteness assertion.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
   associated-graded-module sheafification and projective
   twisting-sheaf determinant theorems needed to pass from the proved

@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF3
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoGradedAlgebra
+import Mathlib.RingTheory.Finiteness.Finsupp
 import Mathlib.RingTheory.Polynomial.HilbertPoly
 import Mathlib.Tactic.ComputeDegree
 
@@ -12,9 +13,12 @@ series
 
 `(1 - T²)(1 - T³) / (1 - T)⁴`.
 
-This file certifies the arithmetic of those shifts.  The numerator has degree
-five, its Hilbert polynomial is `6T - 3`, and the constant term therefore gives
-the genus candidate `1 - (-3) = 4`.
+This file first proves that the actual literal quotient pieces are
+finite-dimensional and that their finranks satisfy the alternating identity
+forced by the degreewise Koszul resolution.  It then certifies the arithmetic
+of those shifts.  The numerator has degree five, its Hilbert polynomial is
+`6T - 3`, and the constant term therefore gives the genus candidate
+`1 - (-3) = 4`.
 
 The presented cokernel pieces have now been identified with the literal
 degreewise images in `S/(Q,C)` and packaged as its internal graded-algebra
@@ -29,6 +33,69 @@ namespace MazurProof.RationalPointsN25QuotientHilbert
 noncomputable section
 
 open Polynomial
+open RationalPointsN25QuotientTwoGradedKoszul
+open RationalPointsN25QuotientTwoQuotientGrading
+
+/-! ## Finite-dimensionality and the actual graded Hilbert function -/
+
+/-- Every shifted homogeneous polynomial piece is finite-dimensional.  A
+degree condition leaves only finitely many exponent vectors, and the
+homogeneous submodule is the finitely supported module on that finite set. -/
+noncomputable instance shiftedPiece_finite (debt n : ℕ) :
+    Module.Finite k (shiftedPiece debt n) := by
+  by_cases hdegree : debt ≤ n
+  · rw [shiftedPiece, if_pos hdegree,
+      MvPolynomial.homogeneousSubmodule_eq_finsupp_supported]
+    let A := {d : Fin 4 →₀ ℕ | d.degree = n - debt}
+    have hA : A.Finite :=
+      (Finsupp.finite_of_degree_le (n - debt)).subset (by
+        intro d hd
+        exact le_of_eq hd)
+    letI : Finite A := hA
+    exact Module.Finite.equiv (Finsupp.supportedEquivFinsupp A).symm
+  · rw [shiftedPiece, if_neg hdegree]
+    infer_instance
+
+/-- The literal degree piece in the actual quotient ring is
+finite-dimensional, by the proved equivalence with the Koszul cokernel. -/
+noncomputable instance literalConePiece_finite (n : ℕ) :
+    Module.Finite k (literalConePiece n) :=
+  Module.Finite.equiv (canonicalConePieceLinearEquiv n)
+
+/-- Degreewise Koszul exactness gives the alternating finrank identity for
+the actual literal quotient piece.  This is the coefficient-level Hilbert
+function statement before evaluating the dimensions of the four shifted
+ambient pieces. -/
+theorem literalConePiece_finrank (n : ℕ) :
+    Module.finrank k (literalConePiece n) +
+        Module.finrank k (shiftedPiece 2 n) +
+        Module.finrank k (shiftedPiece 3 n) =
+      Module.finrank k (shiftedPiece 0 n) +
+        Module.finrank k (shiftedPiece 5 n) := by
+  have hEquiv :
+      Module.finrank k (canonicalConePiece n) =
+        Module.finrank k (literalConePiece n) :=
+    (canonicalConePieceLinearEquiv n).finrank_eq
+  have hQuotient :
+      Module.finrank k (canonicalConePiece n) +
+          Module.finrank k (LinearMap.range (gradedKoszulMiddle n)) =
+        Module.finrank k (shiftedPiece 0 n) := by
+    exact Submodule.finrank_quotient_add_finrank
+      (LinearMap.range (gradedKoszulMiddle n))
+  have hMiddle :
+      Module.finrank k (LinearMap.range (gradedKoszulMiddle n)) +
+          Module.finrank k (LinearMap.ker (gradedKoszulMiddle n)) =
+        Module.finrank k
+          (shiftedPiece 2 n × shiftedPiece 3 n) :=
+    LinearMap.finrank_range_add_finrank_ker (gradedKoszulMiddle n)
+  have hKernel :
+      Module.finrank k (LinearMap.ker (gradedKoszulMiddle n)) =
+        Module.finrank k (shiftedPiece 5 n) := by
+    rw [(gradedKoszul_exact_top_middle n).linearMap_ker_eq]
+    exact LinearMap.finrank_range_of_inj
+      (gradedKoszulTop_injective n)
+  rw [Module.finrank_prod] at hMiddle
+  omega
 
 /-! ## Complete-intersection numerator -/
 
