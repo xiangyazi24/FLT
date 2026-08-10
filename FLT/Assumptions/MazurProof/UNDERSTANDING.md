@@ -1428,12 +1428,26 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `dx,dy,dz,dw`, and identifies those evaluated rows with the Jacobian rows
   used by the geometric smoothness certificates.  Mathlib's general theorem
   then supplies the concrete exact conormal sequence and the surjection onto
-  the quotient's Kähler differentials.  This is genuine adjunction input, but
-  the Proj/twisting-sheaf determinant step needed to conclude
-  `ω_C ≅ O_C(-4+2+3) = O_C(1)` is still absent.
+  the quotient's Kähler differentials.
+- `RationalPointsN25QuotientTwoRegularSequence.lean` proves structurally that
+  the same `(Q,C)` is a regular sequence.  It separates `y`, identifies the
+  quadric quotient with the free quadratic algebra
+  `F_2[x,z,w][y]/(y^2+zy+xz+xw+zw)`, and computes the two-by-two matrix of
+  multiplication by the cubic.  Its determinant is nonzero by evaluation at
+  `(x,z,w)=(0,1,1)`, so the cubic is not a zero divisor modulo the quadric.
+  An explicit polynomial-tower and quotient equivalence transports this
+  statement back to `F_2[x,y,z,w]`; the final theorem is Mathlib's actual
+  `RingTheory.Sequence.IsRegular`, not a dimension heuristic or an assumed
+  complete-intersection label.  This closes the algebraic complete-
+  intersection premise of adjunction.
+- The remaining adjunction gap is now narrower: Mathlib still lacks the
+  projective `Proj`/twisting-sheaf determinant theorem needed to pass from the
+  proved smooth homogeneous regular sequence of degrees two and three to
+  `ω_C ≅ O_C(-4+2+3) = O_C(1)`.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
   section.  The remaining geometric seam is exact: construct principal
-  divisors, prove adjunction identifies the hyperplane section with the
-  canonical class, construct the degree-two and degree-four complete-linear-
-  system fibres, and prove the associated middle-degree Riemann--Roch ranks.
+  divisors, formalize the projective adjunction step identifying the
+  hyperplane section with the canonical class, construct the degree-two and
+  degree-four complete-linear-system fibres, and prove the associated middle-
+  degree Riemann--Roch ranks.

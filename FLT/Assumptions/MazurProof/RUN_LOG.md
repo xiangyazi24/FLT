@@ -1199,3 +1199,22 @@
 - Fixed the binary consumer's degree-one base and degree-six residual classes
   to those explicit divisors.  Adjunction/canonicality, the actual principal
   subgroup, complete-linear-system fibres, and Riemann--Roch ranks remain.
+
+### N25 binary complete-intersection algebra (2026-08-10)
+
+- Added the homogeneous affine-cone quotient and specialized Mathlib's
+  conormal exact sequence to the canonical quadric and cubic.  Their universal
+  differentials are computed in the `dx,dy,dz,dw` basis and agree after
+  evaluation with the Jacobian rows used in the smoothness certificates.
+- Separated the `y` variable and identified the quadric quotient with a free
+  rank-two algebra over `F_2[x,z,w]`.  Multiplication by the cubic class has an
+  explicit two-by-two matrix; its determinant evaluates to a nonzero element
+  at `(0,1,1)`, proving injectivity without enumeration or a dimension-only
+  argument.
+- Transported the result through explicit polynomial-tower and quotient
+  equivalences and proved that the original homogeneous equations `[Q,C]`
+  form a `RingTheory.Sequence.IsRegular` sequence in `F_2[x,y,z,w]`.
+- The remaining canonicality seam is projective adjunction: convert this
+  smooth homogeneous regular sequence of degrees `(2,3)` into
+  `ω_C ≅ O_C(1)` and identify the explicit degree-six hyperplane section
+  with the canonical divisor.

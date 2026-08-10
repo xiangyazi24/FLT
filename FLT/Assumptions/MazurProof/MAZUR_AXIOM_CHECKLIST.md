@@ -146,7 +146,13 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     the degree-two and degree-three universal polynomials and their
     differentials with the stored curve equations and Jacobian rows, and the
     exact conormal sequence
-    `I/I² → B⊗Ω_A → Ω_B → 0` specialized to this quotient.
+    `I/I² → B⊗Ω_A → Ω_B → 0` specialized to this quotient;
+    and
+17. the regular-sequence layer for the same equations: an explicit
+    `F_2[x,z,w][y]` tower equivalence, a free rank-two quadric quotient, the
+    exact multiplication matrix of the cubic class, a nonzero determinant
+    certificate, and the final theorem that `[Q,C]` is a
+    `RingTheory.Sequence.IsRegular` sequence in `F_2[x,y,z,w]`.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -157,7 +163,8 @@ Jacobian route this expands into explicit missing bridges: scheme-level smooth
 proper genus-four reduction, identification of the degree-at-most-four
 closed-point effective divisors with actual geometric divisors, the
 actual principal-divisor subgroups, adjunction/canonicality for the chosen
-degree-six residual classes, the degree-two and degree-four complete-linear-
+degree-six residual classes (with the homogeneous regular-sequence premise
+now proved), the degree-two and degree-four complete-linear-
 system fibres, and the Riemann--Roch rank theorem needed to instantiate the
 proved class-number formula on both the characteristic-two and
 characteristic-three fibres, a second good-reduction bound controlling
