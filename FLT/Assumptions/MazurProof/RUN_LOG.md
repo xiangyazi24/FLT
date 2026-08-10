@@ -1249,9 +1249,20 @@
 - Proved finite generation over the degree-zero quotient piece.  Mathlib's
   projective-spectrum theorem now makes the structure morphism proper; the
   degree-zero ring equivalence transports this to properness over `Spec F_2`.
+- Identified the kernel on every standard projective chart exactly as
+  `(Q/X_i^2,C/X_i^3)`.  The reverse inclusion is structural: a vanishing
+  fraction yields a saturated numerator relation after multiplication by a
+  power of `X_i`; the proved degreewise Koszul resolution supplies homogeneous
+  coefficients, and regrading those coefficients cancels the inverted power
+  in `Away`.  The endpoint and its two intermediate localization lemmas depend
+  only on `propext`, `Classical.choice`, and `Quot.sound`.
+- Combined chart surjectivity with the exact kernel and the first isomorphism
+  theorem.  Each quotient chart coordinate ring is now explicitly equivalent
+  to the ambient `Away` ring modulo `(Q/X_i^2,C/X_i^3)`, and the equivalence on
+  quotient classes is definitionally the canonical chart map.
 - The remaining canonicality seam is projective adjunction: identify the
-  localized chart kernels and ideal sheaf explicitly, package and sheafify the
-  shifted resolution
+  resulting chart ideals with the restriction of the closed immersion's
+  global kernel ideal sheaf, package and sheafify the shifted resolution
   there, and derive
   `ω_C ≅ O_C(1)` and identify the explicit degree-six hyperplane section
   with the canonical divisor.

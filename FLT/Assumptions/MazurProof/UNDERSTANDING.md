@@ -1507,8 +1507,21 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   over `F_2` and then over the degree-zero quotient piece.  Mathlib's projective
   properness theorem and the degree-zero ring equivalence therefore show that
   the canonical structure morphism to `Spec F_2` is proper.
+- `RationalPointsN25QuotientTwoChartIdeal.lean` identifies the affine equations
+  of that closed immersion on every standard projective chart.  It first
+  proves that `Q/X_i^2` and `C/X_i^3` vanish, then lifts an arbitrary kernel
+  fraction to a homogeneous numerator.  Localization vanishing supplies a
+  power `X_i^m`; degreewise Koszul exactness expresses
+  `X_i^m p = Qa+Cb`.  Regrading `a` and `b` as degree-zero fractions and
+  cancelling the inverted coordinate proves the exact structural formula
+  `ker(Away(S,X_i) → Away(S/(Q,C),X_i)) = (Q/X_i^2,C/X_i^3)`.
+  Surjectivity of homogeneous localization and the first isomorphism theorem
+  then package the target chart ring as the quotient by this explicit ideal,
+  with the equivalence induced pointwise by the canonical chart map.  Thus
+  the localized defining ideal and affine quotient rings are no longer open
+  premises; only their ideal-sheaf gluing remains.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
-  associated-graded-module sheafification and projective
+  ideal-sheaf gluing, associated-graded-module sheafification, and projective
   twisting-sheaf determinant theorems needed to pass from the proved
   degreewise shifted resolution to
   `ω_C ≅ O_C(-4+2+3) = O_C(1)`.

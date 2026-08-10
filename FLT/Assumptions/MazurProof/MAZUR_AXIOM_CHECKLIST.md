@@ -181,7 +181,15 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     preserves surjectivity of graded quotient maps, the canonical `Proj` map
     is a closed immersion by affine-chart gluing, the coordinate quotient is
     finitely generated over its degree-zero ring, and its structure morphism
-    to `Spec F_2` is proper.
+    to `Spec F_2` is proper; and
+24. the exact standard-chart equations: `Q/X_i^2` and `C/X_i^3` lie in every
+    affine chart kernel, localization vanishing lifts an arbitrary kernel
+    fraction to a saturated homogeneous numerator relation, degreewise Koszul
+    exactness supplies homogeneous coefficients, and cancellation of the
+    inverted coordinate proves
+    `ker(Away(S,X_i) → Away(S/(Q,C),X_i)) = (Q/X_i^2,C/X_i^3)`; chart
+    surjectivity and the first isomorphism theorem then identify the target
+    chart ring with the quotient by this explicit ideal.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -194,7 +202,8 @@ closed-point effective divisors with actual geometric divisors, the
 actual principal-divisor subgroups, adjunction/canonicality for the chosen
 degree-six residual classes (with the homogeneous regular-sequence premise
 and its degreewise shifted Koszul exactness, literal quotient-piece
-identification, and internal quotient grading now proved), the degree-two and
+identification, internal quotient grading, projective closed/proper packaging,
+and exact localized chart kernels now proved), the degree-two and
 degree-four complete-linear-system fibres, and the Riemann--Roch rank theorem
 needed to instantiate the proved class-number formula on both the
 characteristic-two and characteristic-three fibres, a second good-reduction
