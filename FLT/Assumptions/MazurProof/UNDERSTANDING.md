@@ -736,9 +736,12 @@ explicit formulas for its degree projections and a surjective graded quotient
 map from `S`.  The resulting `Proj` is now constructed, together with its
 canonical morphism to binary projective three-space, exact pullback formulas
 for projective basic opens, an identification of its degree-zero ring with
-`F_2`, and its structure morphism to `Spec F_2`.  What remains in the
-projective bridge is to prove that this morphism is the expected closed
-immersion, identify its local coordinate rings, sheafify the shifted
+`F_2`, and its structure morphism to `Spec F_2`.  Surjectivity of a graded
+ring map is now proved to survive every homogeneous localization; Zariski
+locality therefore makes this canonical morphism a closed immersion.  Finite
+generation over the degree-zero ring also makes the structure morphism proper.
+What remains in the projective bridge is to identify its local coordinate
+rings and ideal sheaf explicitly, sheafify the shifted
 resolution, and identify the scheme-theoretic Hilbert polynomial with the
 certified one.  The local
 Mathlib source has
@@ -1494,6 +1497,16 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   Koszul source vanishes there and every degree-zero homogeneous polynomial is
   constant, yielding `literalConePiece 0 ≃+* F_2` and the structure morphism
   to `Spec F_2`.
+- `FLT/Mathlib/AlgebraicGeometry/ProjectiveSpectrum/ClosedImmersion.lean`
+  proves structurally that a surjective graded map remains surjective after
+  homogeneous localization and hence induces a closed immersion on `Proj`.
+  `RationalPointsN25QuotientTwoClosedImmersion.lean` applies this theorem to
+  the canonical quotient, so the constructed projective scheme is now an
+  actual closed subscheme of binary projective three-space.
+- `RationalPointsN25QuotientTwoProper.lean` proves finite generation first
+  over `F_2` and then over the degree-zero quotient piece.  Mathlib's projective
+  properness theorem and the degree-zero ring equivalence therefore show that
+  the canonical structure morphism to `Spec F_2` is proper.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
   associated-graded-module sheafification and projective
   twisting-sheaf determinant theorems needed to pass from the proved

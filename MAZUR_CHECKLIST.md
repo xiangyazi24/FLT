@@ -159,14 +159,13 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     formula deriving those bounds from reduction maps whose kernels have
     orders `2^a` and `3^b`; and the noncircular degree-two endgame proving
     pullback injective from those bounds and `norm ∘ pullback = [2]`.
-  - Open atoms: prove that the now-constructed canonical morphism from the
-    literal quotient `Proj` to binary projective three-space is the expected
-    closed immersion, identify its affine coordinate charts, sheafify the
-    resolution there, identify
+  - Open atoms: identify the affine coordinate rings and localized ideal
+    sheaf of the now-proved closed immersion from the literal quotient `Proj`
+    to binary projective three-space, sheafify the resolution there, identify
     the scheme-theoretic Hilbert polynomial with the certified `6T-3`, and
     prove projective adjunction;
-    package the two Jacobian-rank
-    certificates as smooth proper special fibres at two and three; identify
+    package the two Jacobian-rank certificates as smooth special fibres at two
+    and three (properness of the binary `Proj` is now proved); identify
     the degree-at-most-four Frobenius-orbit divisor model with the actual
     divisors of the characteristic-three fibre while constructing the
     degree-zero, degree-two, and degree-four Picard data and proving the

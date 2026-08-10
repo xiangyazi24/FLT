@@ -1240,9 +1240,18 @@
   exact basic-open pullback formulas.  In degree zero the shifted Koszul source
   vanishes and homogeneous polynomials are constants, so the degree-zero ring
   is canonically `F_2`; this supplies the structure morphism to `Spec F_2`.
-- The remaining canonicality seam is projective adjunction: prove that the
-  canonical projective morphism is the expected closed immersion, identify
-  its affine charts, package and sheafify the shifted resolution
+- Proved a reusable homogeneous-localization theorem: a surjective graded map
+  is surjective on every projective `Away` chart.  The chart morphisms are
+  therefore affine closed immersions, and target-side Zariski locality glues
+  them into a closed immersion on `Proj`.  Applied to the canonical quotient,
+  this makes the N25 projective scheme a closed subscheme of binary
+  projective three-space.
+- Proved finite generation over the degree-zero quotient piece.  Mathlib's
+  projective-spectrum theorem now makes the structure morphism proper; the
+  degree-zero ring equivalence transports this to properness over `Spec F_2`.
+- The remaining canonicality seam is projective adjunction: identify the
+  localized chart kernels and ideal sheaf explicitly, package and sheafify the
+  shifted resolution
   there, and derive
   `ω_C ≅ O_C(1)` and identify the explicit degree-six hyperplane section
   with the canonical divisor.

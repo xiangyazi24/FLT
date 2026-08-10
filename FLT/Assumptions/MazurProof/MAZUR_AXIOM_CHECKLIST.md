@@ -176,7 +176,12 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     graded quotient map, the induced morphism from the quotient `Proj` to
     binary projective three-space, its pullback formulas on standard basic
     opens, the structural identification of the degree-zero quotient ring
-    with `F_2`, and the resulting structure morphism to `Spec F_2`.
+    with `F_2`, and the resulting structure morphism to `Spec F_2`; and
+23. the scheme-theoretic closed and proper packaging: homogeneous localization
+    preserves surjectivity of graded quotient maps, the canonical `Proj` map
+    is a closed immersion by affine-chart gluing, the coordinate quotient is
+    finitely generated over its degree-zero ring, and its structure morphism
+    to `Spec F_2` is proper.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
