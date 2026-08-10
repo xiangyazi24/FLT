@@ -1579,9 +1579,17 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   quotient ring for a `CharP 2` instance.  The three presentation Jacobians
   span the unit ideal on every chart, and smoothness transports through the
   proved equivalences to all four actual degree-zero projective chart rings.
-  The remaining smoothness step is scheme-level gluing: identify these four
-  ring statements with the localizations of the projective structure
-  morphism and invoke locality on the standard-open cover.
+- `RationalPointsN25QuotientTwoSmooth.lean` closes the scheme-level gluing
+  step.  Every positive-degree homogeneous quotient class lifts to a
+  homogeneous polynomial divisible monomial-by-monomial by some coordinate,
+  so the four coordinate classes generate the quotient irrelevant ideal.
+  Mathlib's `Proj` construction therefore supplies the corresponding four
+  affine opens as an actual cover.  On each member, `awayι_toSpecZero`
+  identifies the restricted structure morphism with the spectrum map of the
+  coefficient homomorphism; uniqueness of a ring homomorphism out of
+  `ZMod 2` matches this with the algebra map used by the affine Jacobian
+  proof.  Source-Zariski locality then proves the projective structure
+  morphism `canonicalProjectiveCurveToSpec` smooth.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
   associated-graded-module sheafification and projective
   twisting-sheaf determinant theorems needed to pass from the proved

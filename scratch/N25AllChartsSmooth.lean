@@ -1,4 +1,4 @@
-import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAffineChartsSmooth
+import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoSmooth
 
 /-!
 # N25 all-chart smoothness regression entry
@@ -11,3 +11,7 @@ the full structural proof.
 #check @MazurProof.RationalPointsN25QuotientTwoAffineChartsSmooth.chartCoordinateRing_smooth
 
 #print axioms MazurProof.RationalPointsN25QuotientTwoAffineChartsSmooth.chartCoordinateRing_smooth
+
+#check @MazurProof.RationalPointsN25QuotientTwoSmooth.canonicalProjectiveCurveToSpec_smooth
+
+#print axioms MazurProof.RationalPointsN25QuotientTwoSmooth.canonicalProjectiveCurveToSpec_smooth
