@@ -134,7 +134,10 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     low-degree boundary factors; the exact complete-intersection Hilbert
     numerator calculation
     `(1-T²)(1-T³)/(1-T)⁴`, whose Hilbert polynomial is `6T-3` and whose
-    arithmetic-genus constant is four; and the
+    arithmetic-genus constant is four; the generic divisor-zeta theorem that
+    derives rationality and `P(1)=#Pic^0` from actual effective divisors and
+    Riemann--Roch fibre cardinalities; its characteristic-three semantic
+    consumer reducing `#Pic^0=71` to the Euler-product identification; and the
     abstract two-prime lemma combining `2^a·71` and `3^b·71` cardinal bounds
     into divisibility by `71`, together with the finite-group kernel-range
     formula deriving those bounds from reduction maps whose kernels have
@@ -143,9 +146,11 @@ scoped builds pass, and `#print axioms` contains only `propext`,
   - Open atoms: connect the explicit equations to a regular codimension-two
     projective closed subscheme, identify its scheme-theoretic Hilbert
     polynomial with the certified `6T-3`, package the two Jacobian-rank
-    certificates as smooth proper special fibres at two and three, and apply
-    the general zeta/Jacobian theorem; prove `#Jac(C)(𝔽₂)=71` and
-    `#Jac(C)(𝔽₃)=71`; construct the actual good-reduction maps and prove
+    certificates as smooth proper special fibres at two and three; construct
+    the effective-divisor and degree-zero Picard types, prove the
+    Riemann--Roch fibre theorem, and identify their divisor series with the
+    certified point-count zeta series; prove `#Pic^0(C)(𝔽₂)=71` and
+    `#Pic^0(C)(𝔽₃)=71`; construct the actual good-reduction maps and prove
     their primary-kernel properties; construct the actual Jacobian pullback
     and norm maps and prove their degree-two composite; prove rational rank zero;
     and finish the Abel--Jacobi rational-point classification.  The ambient
@@ -153,7 +158,8 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     corrected primary source.  At three, the semantic curve counts now derive
     the same exact polynomial and value `71` as the newform certificate, so a
     modular quotient/newform identification is no longer needed for this
-    local cardinality route.  The smooth-proper model, general zeta/Jacobian,
+    local cardinality route.  The smooth-proper model, geometric
+    divisor/Picard/Riemann--Roch instantiation, Euler-product identification,
     and good-reduction APIs are still needed to enter the endpoint proof.
 
 - [ ] N49 — `CyclicExclusion49.no_raw_order49_tate_obstruction`

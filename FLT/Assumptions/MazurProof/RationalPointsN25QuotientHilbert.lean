@@ -66,12 +66,10 @@ theorem completeIntersectionHilbertPolynomial25 :
       hilbertPoly (X ^ 3) 4 + hilbertPoly (X ^ 5) 4 = _
   rw [show (1 : ℚ[X]) = X ^ 0 by simp]
   simp only [hilbertPoly_X_pow_succ]
-
   -- Expand the four third Pochhammer polynomials structurally.
   norm_num [preHilbertPoly, ascPochhammer, Polynomial.smul_eq_C_mul,
     Nat.factorial]
   simp only [Polynomial.C_ofNat]
-
   -- Record the two rational scalar simplifications left after normalization.
   have h18 : C (1 / 6 : ℚ) * (18 : ℚ[X]) = 3 := by
     change C (1 / 6 : ℚ) * C (18 : ℚ) = C (3 : ℚ)
@@ -81,7 +79,6 @@ theorem completeIntersectionHilbertPolynomial25 :
     change C (1 / 6 : ℚ) * C (36 : ℚ) = C (6 : ℚ)
     rw [← Polynomial.C_mul]
     norm_num
-
   -- Cancellation of the cubic and quadratic terms leaves degree one.
   ring_nf
   rw [h18]

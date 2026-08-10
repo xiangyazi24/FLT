@@ -221,7 +221,7 @@ theorem exceptional_xChart_jacobian_certificate25Three
 
 /-- The quadric on the normalized `y`-chart factors as the displayed affine
 equation. -/
-theorem yChart_quadric25Three (z w : K) [Field K] :
+theorem yChart_quadric25Three {K : Type*} [Field K] (z w : K) :
     canonicalQuadric25Three (⟨0, 1, z, w⟩ : Coordinates4 K) =
       1 + z + z * w := by
   unfold canonicalQuadric25Three
@@ -229,7 +229,7 @@ theorem yChart_quadric25Three (z w : K) [Field K] :
 
 /-- The cubic on the normalized `y`-chart is the product
 `zw(1+z-w)`, giving the two boundary branches used below. -/
-theorem yChart_cubic25Three (z w : K) [Field K] :
+theorem yChart_cubic25Three {K : Type*} [Field K] (z w : K) :
     canonicalCubic25Three (⟨0, 1, z, w⟩ : Coordinates4 K) =
       z * w * (1 + z - w) := by
   unfold canonicalCubic25Three

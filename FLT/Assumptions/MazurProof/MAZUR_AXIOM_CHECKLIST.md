@@ -108,7 +108,11 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
 12. the degree-two pullback endgame: divisibility of the source order by `71`
     makes doubling injective, so a pullback whose norm composite is `[2]` is
     injective.  A combined theorem derives this directly from the two
-    reduction maps without circularly assuming pullback injectivity.
+    reduction maps without circularly assuming pullback injectivity; and
+13. the generic divisor-count class-number theorem: actual finite effective
+    divisor types and Riemann--Roch Picard-fibre cardinalities imply formal
+    zeta rationality and `P(1)=#Pic^0`.  Its N25 specialization proves
+    `#Pic^0(F₃)=71` from the remaining closed-point Euler-product equality.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -116,7 +120,10 @@ directly, without needing a Sutherland-to-LMFDB plane transformation.  The
 remaining input is a global rational-point or formal-immersion argument over
 `ℚ` proving that every rational canonical point is a cusp.  On the active
 Jacobian route this expands into explicit missing bridges: scheme-level smooth
-proper genus-four reduction, the zeta-to-Jacobian cardinality theorem, a
+proper genus-four reduction, construction of the effective-divisor and
+degree-zero Picard types, the Riemann--Roch fibre theorem and closed-point
+Euler-product identification needed to instantiate the proved class-number
+formula, a
 second good-reduction bound controlling two-primary torsion, rational rank
 zero together with the geometric construction and primary-kernel proof for
 the reduction maps, construction of the Jacobian pullback and norm maps with
@@ -124,9 +131,11 @@ their degree-two composition identity, and the final Abel--Jacobi point
 classification.  The proposed ambient `J₁(25)` and level-25 newform routes
 are not counted at the endpoint.  The corrected primary source now verifies
 the ambient rank-zero and cyclic-order statement, and Lean checks the exact
-newform conjugate polynomial at three; the missing work is the general
-modular quotient/newform and good-reduction infrastructure connecting those
-facts to the stored canonical curve.
+newform conjugate polynomial at three.  The direct curve route no longer
+needs a modular quotient/newform identification for its local cardinality;
+the missing work is the geometric divisor/Picard/Riemann--Roch and
+good-reduction infrastructure connecting the stored canonical curve to the
+proved arithmetic interfaces.
 
 ## Declarations present in the tree but not reachable from the endpoint
 

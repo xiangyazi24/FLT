@@ -493,8 +493,10 @@ certificates must be connected to smooth proper reductions.  The standard
 complete-intersection Hilbert-series arithmetic is now certified as `6T-3`,
 but the explicit equations still have to be connected to a regular
 codimension-two projective subscheme whose scheme-theoretic Hilbert
-polynomial is that polynomial.  A general curve-zeta/Jacobian theorem must
-then turn the checked point counts into `#Jac(C)(𝔽₂)=#Jac(C)(𝔽₃)=71`.
+polynomial is that polynomial.  The formal divisor-count theorem proved below
+then turns the checked point counts into
+`#Pic^0(C)(𝔽₂)=#Pic^0(C)(𝔽₃)=71`, once its geometric interfaces are
+instantiated for the explicit fibres.
 Second, one needs a
 global statement making `Jac(C)(ℚ)` finite and a two-prime specialization
 argument controlling every torsion prime; reduction at two alone does not
@@ -629,8 +631,28 @@ independent four-conjugate newform certificate and has value `71` at one.
 The arithmetic second-prime calculation therefore no longer requires a
 modular quotient/newform identification.  Its remaining semantic boundary is
 geometric: package the explicit fibre as a smooth proper curve, connect its
-scheme-theoretic Hilbert polynomial to the certified genus-four arithmetic, and
-apply a general curve-zeta/Jacobian theorem to conclude `#Jac(C)(F₃)=71`.
+scheme-theoretic Hilbert polynomial to the certified genus-four arithmetic,
+and instantiate the divisor/Picard interfaces described below to conclude
+`#Pic^0(C)(F₃)=71`.
+
+`CurveZetaClassNumber.lean` now proves the general arithmetic core rather than
+postulating a zeta/Jacobian cardinality theorem.  For finite types of effective
+divisors and degree-zero Picard classes, a constant-fibre Riemann--Roch formula
+implies that `(1-T)(1-qT)Z(T)` is a polynomial of degree at most `2g` and that
+its value at one is exactly `#Pic^0`.  The proof partitions effective divisors
+by Picard class, uses geometric-series cardinalities for complete linear
+systems, and proves the high-degree coefficient recurrence in formal power
+series.  It has no custom axioms.
+
+`RationalPointsN25QuotientClassNumber.lean` specializes this theorem at
+`q=3`, `g=4`.  It defines the certified point-count zeta series from the
+already proved reciprocal numerator and proves that actual effective-divisor
+types, Riemann--Roch fibres, and the Euler-product series equality imply
+`#Pic^0=71`.  This makes the remaining boundary explicit rather than hiding it
+in a Jacobian-cardinality assumption: construct the actual Picard and
+effective-divisor types, prove the Riemann--Roch fibre theorem, and identify
+the effective-divisor series with the closed-point/extension-point zeta
+series.
 
 `RationalPointsN25QuotientSmoothF3.lean` now closes the characteristic-three
 Jacobian-rank calculation over every field, hence over an algebraic closure.
@@ -643,7 +665,8 @@ excluded by explicit minors; the last two charts have a minor identically
 equal to one.  This is a symbolic chart proof with no finite-field
 enumeration.  What remains is not pointwise nonsingularity, but the Mathlib
 scheme-level packaging of this complete intersection as smooth, proper, and
-genus four, followed by the general zeta/Jacobian cardinality bridge.
+genus four, followed by the geometric instantiation of the proved divisor-zeta
+class-number theorem.
 
 `RationalPointsN25QuotientHilbert.lean` closes the arithmetic core of the
 genus computation without pretending to supply that scheme bridge.  The
@@ -656,8 +679,9 @@ quadric and cubic form the required regular codimension-two projective
 subscheme and that its scheme-theoretic Hilbert polynomial is the certified
 one.  The local Mathlib source has general `Smooth`, `Proj`, and properness
 machinery, but no projective-curve genus API, no general Picard/Jacobian of a
-higher-genus curve, and no finite-field curve-zeta theorem identifying
-Jacobian cardinality with the reciprocal numerator evaluated at one.
+higher-genus curve, and no ready-made curve divisor/Riemann--Roch API.  The
+formal class-number consequence of those missing geometric objects is now
+proved in `CurveZetaClassNumber.lean`.
 
 `RationalPointsN25TwoPrimeReduction.lean` proves the remaining elementary
 endgame: if a finite cardinal divides both `2^a·71` and `3^b·71`, it divides
