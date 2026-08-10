@@ -1404,14 +1404,20 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `F_2[t]/(t^3)`, proves their dimensions, and gives surjective affine-plane
   evaluations killing both chart equations.  Since both denominators map to
   `1+t`, the evaluations are extended through the corresponding
-  `Localization.Away` rings.  What remains at this local seam is the reverse
-  kernel containment, equivalently the two quotient-algebra isomorphisms;
-  the multiplicities are no longer supported only by set-theoretic
-  factorization.
+  `Localization.Away` rings.
+- `RationalPointsN25QuotientTwoHyperplaneArtinKernel.lean` closes both
+  reverse kernel containments by explicit algebra equivalences
+  `F_2[y,z]/(y^2,z) ≃ F_2[t]/(t^2)` and
+  `F_2[a,b]/(a+b+a*b,b^3) ≃ F_2[t]/(t^3)`.  At the tripled point the proof
+  derives `a=b+b^2` by using `b^3=0` to make `1+b` a unit; it does not infer
+  injectivity from equal dimensions.  The remaining local packaging step is
+  to transport these quotient equivalences across the already constructed
+  principal-open localizations.  The multiplicities are no longer supported
+  only by set-theoretic factorization.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
   section.  The remaining local geometric seam is exact: construct principal
-  divisors, close the two Artin-target kernel equalities, prove adjunction
-  identifies the hyperplane section with the canonical class, construct the
-  degree-two and degree-four complete-linear-system fibres, and prove the
-  associated middle-degree Riemann--Roch ranks.
+  divisors, package the proved Artin quotients through the principal opens,
+  prove adjunction identifies the hyperplane section with the canonical
+  class, construct the degree-two and degree-four complete-linear-system
+  fibres, and prove the associated middle-degree Riemann--Roch ranks.
