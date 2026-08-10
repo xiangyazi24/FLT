@@ -56,17 +56,18 @@ theorem SatisfiesEulerRecurrence.unique
         rw [hsum] at hrecA
         exact mul_left_cancel₀ hn (hrecA.trans hrecB.symm)
 
-/-- The first four N25 extension-field counts force the effective-divisor
-counts `A_0,...,A_4 = 1,5,15,40,116` through the Euler recurrence.
-
-The calculation is triangular: the degree-`n` equation contains `n*A_n` and
-only previously determined effective-divisor counts on its right-hand side. -/
-theorem first_four_effective_counts_of_n25_data
+/-- If the first three extension counts are `5,5,20`, the Euler recurrence
+forces `A_0,A_1,A_2,A_3 = 1,5,15,40`.  A supplied arithmetic identity then
+records the degree-four consequence for any chosen fourth extension count.
+This separates the common triangular calculation from the two N25 fibres,
+whose fourth counts differ. -/
+theorem first_four_effective_counts_of_shared_n25_data
     (A N : ℕ → ℕ)
     (hEuler : SatisfiesEulerRecurrence A N)
     (hN1 : N 1 = 5) (hN2 : N 2 = 5)
-    (hN3 : N 3 = 20) (hN4 : N 4 = 89) :
-    A 0 = 1 ∧ A 1 = 5 ∧ A 2 = 15 ∧ A 3 = 40 ∧ A 4 = 116 := by
+    (hN3 : N 3 = 20) (n4 a4 : ℕ) (hN4 : N 4 = n4)
+    (hA4Arithmetic : 4 * a4 = 375 + n4) :
+    A 0 = 1 ∧ A 1 = 5 ∧ A 2 = 15 ∧ A 3 = 40 ∧ A 4 = a4 := by
   rcases hEuler with ⟨hA0, hrec⟩
   have hrec1 := hrec 1 (by omega)
   have hA1 : A 1 = 5 := by
@@ -81,11 +82,21 @@ theorem first_four_effective_counts_of_n25_data
     norm_num [Finset.sum_range_succ, hA0, hA1, hA2, hN1, hN2, hN3] at hrec3
     omega
   have hrec4 := hrec 4 (by omega)
-  have hA4 : A 4 = 116 := by
+  have hA4 : A 4 = a4 := by
     norm_num [Finset.sum_range_succ, hA0, hA1, hA2, hA3, hN1, hN2, hN3,
       hN4] at hrec4
     omega
   exact ⟨hA0, hA1, hA2, hA3, hA4⟩
+
+/-- The characteristic-three fourth count `89` gives `A_4 = 116`. -/
+theorem first_four_effective_counts_of_n25_data
+    (A N : ℕ → ℕ)
+    (hEuler : SatisfiesEulerRecurrence A N)
+    (hN1 : N 1 = 5) (hN2 : N 2 = 5)
+    (hN3 : N 3 = 20) (hN4 : N 4 = 89) :
+    A 0 = 1 ∧ A 1 = 5 ∧ A 2 = 15 ∧ A 3 = 40 ∧ A 4 = 116 := by
+  exact first_four_effective_counts_of_shared_n25_data A N hEuler
+    hN1 hN2 hN3 89 116 hN4 (by norm_num)
 
 /-- Only degrees two and four are needed by middle-degree Riemann--Roch for a
 genus-four curve.  This projection keeps the final N25 consumer small. -/
@@ -97,6 +108,19 @@ theorem effective_counts_two_and_four_of_n25_data
     A 2 = 15 ∧ A 4 = 116 := by
   rcases first_four_effective_counts_of_n25_data A N hEuler hN1 hN2 hN3 hN4
     with ⟨_, _, hA2, _, hA4⟩
+  exact ⟨hA2, hA4⟩
+
+/-- For the characteristic-two fourth count `29`, the same triangular
+recurrence gives `A_2 = 15` and `A_4 = 101`. -/
+theorem effective_counts_two_and_four_of_n25_binary_data
+    (A N : ℕ → ℕ)
+    (hEuler : SatisfiesEulerRecurrence A N)
+    (hN1 : N 1 = 5) (hN2 : N 2 = 5)
+    (hN3 : N 3 = 20) (hN4 : N 4 = 29) :
+    A 2 = 15 ∧ A 4 = 101 := by
+  rcases first_four_effective_counts_of_shared_n25_data A N hEuler
+    hN1 hN2 hN3 29 101 hN4 (by norm_num) with
+    ⟨_, _, hA2, _, hA4⟩
   exact ⟨hA2, hA4⟩
 
 end MazurProof.CurveZetaEulerRecurrence

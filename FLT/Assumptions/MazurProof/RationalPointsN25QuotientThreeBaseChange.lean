@@ -1,4 +1,6 @@
+import FLT.Assumptions.MazurProof.RationalPointsN25QuotientBaseChange
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThreeProjective
+import FLT.Assumptions.MazurProof.NormalizedProjectiveCurveFrobenius
 
 /-!
 # Base change for the characteristic-three canonical model
@@ -21,81 +23,8 @@ open RationalPointsN25QuotientF2
 open RationalPointsN25QuotientWeil
 open RationalPointsN25QuotientKummerThree
 open RationalPointsN25QuotientKummerThreeProjective
-
-/-! ## Coordinatewise maps -/
-
-/-- Apply a ring homomorphism to four homogeneous coordinates. -/
-def Coordinates4.map {K L : Type*} [Semiring K] [Semiring L]
-    (f : K →+* L) (P : Coordinates4 K) : Coordinates4 L :=
-  ⟨f P.x, f P.y, f P.z, f P.w⟩
-
-/-- Apply a ring homomorphism to the free coordinates in a normalized
-projective chart.  Its leading zeroes and leading one are preserved by the
-homomorphism, so the result is already normalized. -/
-def NormalizedProjective4.map {K L : Type*} [Semiring K] [Semiring L]
-    (f : K →+* L) : NormalizedProjective4 K → NormalizedProjective4 L
-  | .xChart y z w => .xChart (f y) (f z) (f w)
-  | .yChart z w => .yChart (f z) (f w)
-  | .zChart w => .zChart (f w)
-  | .wChart => .wChart
-
-@[simp]
-theorem NormalizedProjective4.map_xChart
-    {K L : Type*} [Semiring K] [Semiring L]
-    (f : K →+* L) (y z w : K) :
-    NormalizedProjective4.map f (.xChart y z w) =
-      .xChart (f y) (f z) (f w) := rfl
-
-@[simp]
-theorem NormalizedProjective4.map_yChart
-    {K L : Type*} [Semiring K] [Semiring L]
-    (f : K →+* L) (z w : K) :
-    NormalizedProjective4.map f (.yChart z w) = .yChart (f z) (f w) := rfl
-
-@[simp]
-theorem NormalizedProjective4.map_zChart
-    {K L : Type*} [Semiring K] [Semiring L]
-    (f : K →+* L) (w : K) :
-    NormalizedProjective4.map f (.zChart w) = .zChart (f w) := rfl
-
-@[simp]
-theorem NormalizedProjective4.map_wChart
-    {K L : Type*} [Semiring K] [Semiring L]
-    (f : K →+* L) :
-    NormalizedProjective4.map f (.wChart : NormalizedProjective4 K) =
-      (.wChart : NormalizedProjective4 L) := rfl
-
-/-- Mapping by the identity homomorphism does not change a normalized
-projective point. -/
-@[simp]
-theorem NormalizedProjective4.map_id
-    {K : Type*} [Semiring K] (P : NormalizedProjective4 K) :
-    NormalizedProjective4.map (RingHom.id K) P = P := by
-  cases P <;> rfl
-
-/-- Coordinatewise maps compose exactly as the underlying ring
-homomorphisms compose. -/
-theorem NormalizedProjective4.map_comp
-    {K L M : Type*} [Semiring K] [Semiring L] [Semiring M]
-    (g : L →+* M) (f : K →+* L) (P : NormalizedProjective4 K) :
-    NormalizedProjective4.map g (NormalizedProjective4.map f P) =
-      NormalizedProjective4.map (g.comp f) P := by
-  cases P <;> rfl
-
-/-- An injective coefficient map remains injective on normalized projective
-charts because the chart constructor is part of the canonical
-representative. -/
-theorem NormalizedProjective4.map_injective
-    {K L : Type*} [Semiring K] [Semiring L]
-    (f : K →+* L) (hf : Function.Injective f) :
-    Function.Injective (NormalizedProjective4.map f) := by
-  intro P Q hPQ
-  cases P <;> cases Q <;>
-    simp_all only [NormalizedProjective4.map,
-      NormalizedProjective4.xChart.injEq,
-      NormalizedProjective4.yChart.injEq,
-      NormalizedProjective4.zChart.injEq,
-      hf.eq_iff, reduceCtorEq]
+open RationalPointsN25QuotientBaseChange
+open NormalizedProjectiveCurveFrobenius
 
 /-! ## Preservation of the canonical equations -/
 
@@ -173,5 +102,13 @@ noncomputable def canonicalPointEquiv
     cases P with
     | mk P hP =>
       cases P <;> simp [canonicalPointEmbedding, NormalizedProjective4.map]
+
+/-- The characteristic-three canonical equations, packaged only with their
+coefficient-base-change law for generic Frobenius descent. -/
+def canonicalThreeModel : CurveModel where
+  IsPoint := fun K _ P => IsCanonicalNormalizedThree P
+  map_iff := by
+    intro K L _ _ f P
+    exact isCanonicalNormalizedThree_map_iff f P
 
 end MazurProof.RationalPointsN25QuotientThreeBaseChange

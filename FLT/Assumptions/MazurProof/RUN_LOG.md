@@ -1156,3 +1156,29 @@
 - The affine base-point and projective cusp-fibre calculations are now
   formalized.  The global canonical rational-point classification is the
   remaining N25 work.
+
+### N25 characteristic-two Frobenius and class-number layer (2026-08-10)
+
+- Added semantic field wrappers for the certified `F4`, `F8`, and `F16`
+  executable tables and proved chartwise equivalences between raw table points
+  and points satisfying the actual field-valued equations.
+- Added coherent prime-generic finite-field descent through a bundled
+  embedding/fixed-subfield `Realization`, followed by generic normalized-
+  projective and map-stable-curve Frobenius descent.
+- Refactored the characteristic-three orbit file to retain its public API as
+  thin wrappers around the same generic implementation.
+- Constructed the binary common-field Frobenius action over `𝔽_(2^12)` and
+  classified the four semantic extension-point types as fixed points and then
+  as exact Frobenius-orbit slots through degree four.
+- Generalized the low-degree Euler recurrence consumer so the shared counts
+  `5,5,20` can accept either fourth count.  The binary count `29` gives
+  `A₂=15`, `A₄=101`; summed middle-degree Riemann--Roch at `q=2` gives the
+  conditional conclusion `#Pic⁰=71`.
+- True Lake builds pass for both characteristic-two and characteristic-three
+  terminal consumers.  The seven critical declarations audited in this stage
+  depend only on `propext`, `Classical.choice`, and `Quot.sound`; the owned
+  source files contain no `sorry` or custom axiom.
+- The endpoint ledger remains four custom axioms.  For N25 the next real seam
+  is no longer extension-field orbit classification; it is the construction
+  of actual divisors, principal equivalence, degree-two/degree-four Picard
+  classes, and their Riemann--Roch fibre theorem on the explicit fibre.

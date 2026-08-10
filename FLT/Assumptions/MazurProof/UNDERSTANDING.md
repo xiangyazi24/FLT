@@ -1335,3 +1335,41 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   arithmetic task is still to prove that coefficients one and three of
   `P.u² - uBase * Q.u` lie in the square of the source coordinate ideal; it
   cannot be weakened to the square of a larger joint ideal.
+
+### N25 shared Frobenius descent and the binary class-number consumer (2026-08-10)
+
+- The characteristic-two executable tables are now connected to honest
+  semantic fields.  `BinaryFieldModel` installs the certified table laws as
+  field structures on wrapper carriers, and explicit chart equivalences prove
+  that the raw predicates are exactly the field-valued quadric-cubic
+  equations.  This is a semantic equation bridge, not an equivalence inferred
+  from equal point counts.
+- `FiniteFieldFrobeniusDescent.lean` now owns the prime-generic common-field
+  construction.  A `Realization` bundles the chosen embedding with the
+  equivalence onto the `p^d`-power-fixed subtype and records their pointwise
+  coherence.  Normalized-projective descent therefore cannot accidentally
+  combine two unrelated noncomputable embedding choices.
+- `NormalizedProjectiveCurveFrobenius.lean` restricts projective descent to a
+  `CurveModel` whose sole geometric law is preservation and reflection under
+  coefficient homomorphisms.  The characteristic-two and characteristic-three
+  canonical equations are thin adapters to this shared layer.  The former
+  500-line characteristic-three finite-field/descent duplication has been
+  replaced by compatibility wrappers around the generic construction.
+- The semantic binary point counts `5,5,20,29` are now realized as fixed points
+  of arithmetic Frobenius on the common field `𝔽_(2^12)`.  Exact-period
+  orbits produce an honest closed-point grading through degree four.  The
+  marked-divisor recurrence gives `A₂=15` and `A₄=101`; the already proved
+  middle Riemann--Roch counting identity then gives `#Pic⁰=71` from the actual
+  degree-two/degree-four Picard fibre and rank identities.
+- This closes the characteristic-two field-semantics and Frobenius-orbit seam,
+  but it does not yet construct the geometric Picard group or prove
+  Riemann--Roch for the explicit smooth proper fibre.  The honest next N25
+  provider is the local divisor/principal-divisor/Picard realization supplying
+  the degree-two and degree-four complete-linear-system fibres and
+  `l(D)=l(K-D)+1`.  Good-reduction maps, rational rank zero, pullback/norm, and
+  the final Abel--Jacobi classification remain downstream.
+- Real Lake builds of both characteristic-specific middle Riemann--Roch
+  consumers pass.  Axiom audits of the generic projective descent, generic
+  curve descent, the semantic `F16` count, both fixed-point realizations, and
+  both final conditional class-number consumers contain exactly `propext`,
+  `Classical.choice`, and `Quot.sound`.

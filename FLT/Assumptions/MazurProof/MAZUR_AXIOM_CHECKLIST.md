@@ -3,7 +3,7 @@
 Goal: prove `MazurProof.mazur_torsion_bound_ncard` with no custom axioms and
 no reachable `sorryAx`.
 
-Last source rebuild and `#print axioms` audit: 2026-08-05.
+Last source rebuild and `#print axioms` audit: 2026-08-10.
 
 ## Current endpoint
 
@@ -120,6 +120,11 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     equivalences by fixed-subfield descent, so the N25 consumer derives
     `#Pic⁰(F₃)=71` from only the remaining geometric Picard/Riemann--Roch
     interfaces, with no Euler recurrence or orbit-classification hypothesis.
+    The same coherent construction now works in characteristic two.  Semantic
+    field wrappers identify the certified `F4`, `F8`, and `F16` tables with the
+    actual field-valued curve equations; Frobenius over `𝔽_(2^12)` realizes
+    all four extension-point types and derives `A₂=15`, `A₄=101`, and the
+    conditional conclusion `#Pic⁰(F₂)=71` from the same geometric interfaces.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -128,10 +133,10 @@ remaining input is a global rational-point or formal-immersion argument over
 `ℚ` proving that every rational canonical point is a cusp.  On the active
 Jacobian route this expands into explicit missing bridges: scheme-level smooth
 proper genus-four reduction, identification of the degree-at-most-four
-Frobenius-orbit effective divisors with actual geometric divisors, the
+closed-point effective divisors with actual geometric divisors, the
 degree-zero, degree-two, and degree-four Picard data and Riemann--Roch fibre
-theorem needed to instantiate the proved class-number formula, the analogous
-characteristic-two orbit/Picard construction, a second good-reduction bound
+theorem needed to instantiate the proved class-number formula on both the
+characteristic-two and characteristic-three fibres, a second good-reduction bound
 controlling two-primary torsion, rational rank
 zero together with the geometric construction and primary-kernel proof for
 the reduction maps, construction of the Jacobian pullback and norm maps with

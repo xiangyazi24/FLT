@@ -1,29 +1,20 @@
 import FLT.Assumptions.MazurProof.CurveZetaFrobeniusOrbitGrading
+import FLT.Assumptions.MazurProof.NormalizedProjectiveCurveFrobenius
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientExtensionPoints
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientThreeBaseChange
-import Mathlib.FieldTheory.Finite.Extension
 
 /-!
 # Frobenius orbits for the characteristic-three N25 curve
 
-All four finite fields used by the N25 point count embed in the common field
-`𝔽_(3^12)`.  Arithmetic Frobenius on the canonical curve over that field
-has the following fixed-point interpretation:
+The characteristic-three extension fields of degrees one through four embed
+in `𝔽_(3^12)`.  This file preserves the original characteristic-specific
+API while delegating finite-field and normalized-projective descent to the
+prime-generic implementation.  The only characteristic-three input is the
+canonical quadric-cubic predicate and its coefficient-base-change law.
 
-* its `d`-th iterate fixes exactly the coordinates in `𝔽_(3^d)` for
-  `d ∈ {1,2,3,4}`;
-* normalized projective charts descend coordinate by coordinate, because the
-  canonical quadric and cubic are defined over `𝔽₃`;
-* hence field-valued curve points are exactly fixed points of the corresponding
-  Frobenius iterate.
-
-The general permutation-orbit theorem then turns those fixed points into a
-locally finite grading that is complete through degree four.  Arithmetic
-Frobenius is the inverse of the geometric convention often used for closed
-points; inverse generators have the same cyclic orbits and exact periods, so
-the choice changes only the orientation of the position coordinate.  This is
-a structural Galois-orbit proof, not a comparison of the four already known
-point cardinalities.
+Arithmetic Frobenius is used throughout.  Its inverse has the same finite
+orbits, but retaining one convention avoids an orientation mismatch between
+the fixed-point realization and the closed-point grading.
 -/
 
 namespace MazurProof.RationalPointsN25QuotientFrobeniusOrbits
@@ -35,161 +26,101 @@ open RationalPointsN25QuotientWeilThree
 open RationalPointsN25QuotientKummerThreeProjective
 open RationalPointsN25QuotientSmallThreeSemantic
 open RationalPointsN25QuotientThreeBaseChange
+open RationalPointsN25QuotientBaseChange
 open RationalPointsN25QuotientMiddleRiemannRoch
+open FiniteFieldFrobeniusDescent
+open NormalizedProjectiveCurveFrobenius
 
-/-! ## A common finite field and its distinguished subfields -/
+/-! ## Compatibility wrappers for the generic finite-field layer -/
 
-/-- The field `𝔽_(3^12)` contains the extensions of degrees one through
-four because each of those degrees divides twelve. -/
-abbrev CommonThreeField := GaloisField 3 12
+/-- The common field containing the selected characteristic-three
+extensions. -/
+abbrev CommonThreeField := CommonField 3 12
 
-/-- The finite type on the common field is chosen from its canonical
-finiteness instance. -/
-noncomputable instance commonThreeFieldFintype : Fintype CommonThreeField :=
-  Fintype.ofFinite CommonThreeField
+/-- A named finite presentation of the common field, retained for API
+compatibility.  Instance search uses the prime-generic instance. -/
+@[reducible] noncomputable def commonThreeFieldFintype :
+    Fintype CommonThreeField :=
+  inferInstance
 
-/-- Embed the canonical degree-`d` Galois field in the common degree-twelve
-field.  Divisibility of extension degrees is exactly the finite-field
-subfield criterion. -/
+/-- Embed the canonical degree-`d` Galois field in the common field. -/
 noncomputable def galoisFieldToCommon
     (d : ℕ) (hdpos : 0 < d) (hd : d ∣ 12) :
     GaloisField 3 d →ₐ[ZMod 3] CommonThreeField :=
-  (FiniteField.nonempty_algHom_of_finrank_dvd
-    (F := ZMod 3) (K := GaloisField 3 d) (L := CommonThreeField) (by
-      rw [GaloisField.finrank 3 hdpos.ne',
-        GaloisField.finrank 3 (by decide : 12 ≠ 0)]
-      exact hd)).some
+  FiniteFieldFrobeniusDescent.galoisFieldToCommon
+    3 12 d hdpos (by norm_num) hd
 
-/-- Embed any finite characteristic-three field of cardinality `3^d` into
-the common field.  The public map is a ring homomorphism so its type does not
-carry a second, potentially conflicting algebra structure on the source. -/
+/-- Embed a finite characteristic-three field of cardinality `3^d` in the
+common field. -/
 noncomputable def finiteFieldToCommon
     (K : Type*) [Field K] [Fintype K] [CharP K 3]
     (d : ℕ) (hdpos : 0 < d) (hd : d ∣ 12)
-    (hcard : Fintype.card K = 3 ^ d) : K →+* CommonThreeField := by
-  letI : Algebra (ZMod 3) K := ZMod.algebra K 3
-  exact ((galoisFieldToCommon d hdpos hd).comp
-    (GaloisField.algEquivGaloisFieldOfFintype 3 d hcard).toAlgHom).toRingHom
+    (hcard : Fintype.card K = 3 ^ d) : K →+* CommonThreeField :=
+  FiniteFieldFrobeniusDescent.finiteFieldToCommon
+    3 12 K d hdpos (by norm_num) hd hcard
 
-/-! ## The fixed subfield of an iterate of Frobenius -/
+/-- The `3^d`-power fixed subtype of the common field. -/
+abbrev PowerFixed (d : ℕ) :=
+  FiniteFieldFrobeniusDescent.PowerFixed 3 12 d
 
-/-- The roots in the common field of `X^(3^d)-X`, written as a subtype.
-They will be identified with every embedded field of cardinality `3^d`. -/
-def PowerFixed (d : ℕ) :=
-  {x : CommonThreeField // x ^ (3 ^ d) = x}
+/-- A named finite presentation of the fixed subtype, retained for API
+compatibility. -/
+@[reducible] noncomputable def powerFixedFintype (d : ℕ) :
+    Fintype (PowerFixed d) :=
+  inferInstance
 
-/-- The Frobenius-fixed subtype is finite because it injects into the common
-finite field. -/
-noncomputable instance powerFixedFintype (d : ℕ) : Fintype (PowerFixed d) :=
-  have : Finite (PowerFixed d) :=
-    Finite.of_injective Subtype.val Subtype.val_injective
-  Fintype.ofFinite (PowerFixed d)
-
-/-- The finite-field embedding lands in the `3^d`-power fixed subfield by
-the universal identity `a^(#K)=a` in a finite field. -/
+/-- The common-field embedding with its fixed-power proof attached. -/
 noncomputable def finiteFieldToPowerFixed
     (K : Type*) [Field K] [Fintype K] [CharP K 3]
     (d : ℕ) (hdpos : 0 < d) (hd : d ∣ 12)
-    (hcard : Fintype.card K = 3 ^ d) : K → PowerFixed d := by
-  intro a
-  refine ⟨finiteFieldToCommon K d hdpos hd hcard a, ?_⟩
-  rw [← hcard, ← map_pow]
-  exact congrArg (finiteFieldToCommon K d hdpos hd hcard)
-    (FiniteField.pow_card a)
+    (hcard : Fintype.card K = 3 ^ d) : K → PowerFixed d :=
+  FiniteFieldFrobeniusDescent.finiteFieldToPowerFixed
+    3 12 K d hdpos (by norm_num) hd hcard
 
-/-- The map into the power-fixed subtype is injective because its underlying
-field homomorphism is injective. -/
+/-- The fixed-power embedding is injective. -/
 theorem finiteFieldToPowerFixed_injective
     (K : Type*) [Field K] [Fintype K] [CharP K 3]
     (d : ℕ) (hdpos : 0 < d) (hd : d ∣ 12)
     (hcard : Fintype.card K = 3 ^ d) :
-    Function.Injective
-      (finiteFieldToPowerFixed K d hdpos hd hcard) := by
-  intro a b hab
-  apply (finiteFieldToCommon K d hdpos hd hcard).injective
-  exact congrArg Subtype.val hab
+    Function.Injective (finiteFieldToPowerFixed K d hdpos hd hcard) :=
+  FiniteFieldFrobeniusDescent.finiteFieldToPowerFixed_injective
+    3 12 K d hdpos (by norm_num) hd hcard
 
-/-- A positive power of three is strictly larger than one. -/
+/-- A positive power of three is not one. -/
 theorem three_pow_ne_one (d : ℕ) (hd : 0 < d) : 3 ^ d ≠ 1 := by
   exact ne_of_gt (one_lt_pow₀ (by omega) hd.ne')
 
-/-- For positive `d`, the polynomial `X^(3^d)-X` has degree `3^d`; the
-linear term cannot cancel its leading monomial. -/
+/-- Degree of the characteristic-three fixed-subfield polynomial. -/
 theorem commonPolynomial_natDegree (d : ℕ) (hd : 0 < d) :
-    (X ^ (3 ^ d) - X : CommonThreeField[X]).natDegree = 3 ^ d := by
-  calc
-    (X ^ (3 ^ d) - X : CommonThreeField[X]).natDegree =
-        (X ^ (3 ^ d) : CommonThreeField[X]).natDegree :=
-      Polynomial.natDegree_sub_eq_left_of_natDegree_lt (by
-        rw [Polynomial.natDegree_X, Polynomial.natDegree_X_pow]
-        exact one_lt_pow₀ (by omega) hd.ne')
-    _ = 3 ^ d :=
-      Polynomial.natDegree_X_pow (R := CommonThreeField) (3 ^ d)
+    (X ^ (3 ^ d) - X : CommonThreeField[X]).natDegree = 3 ^ d :=
+  FiniteFieldFrobeniusDescent.commonPolynomial_natDegree 3 12 d hd
 
-/-- The fixed-subfield polynomial is nonzero in every positive degree, as
-its computed degree is positive. -/
+/-- The fixed-subfield polynomial is nonzero in positive degree. -/
 theorem commonPolynomial_ne_zero (d : ℕ) (hd : 0 < d) :
-    (X ^ (3 ^ d) - X : CommonThreeField[X]) ≠ 0 := by
-  intro hzero
-  have hdegree := congrArg Polynomial.natDegree hzero
-  rw [commonPolynomial_natDegree d hd, Polynomial.natDegree_zero] at hdegree
-  exact (pow_pos (by norm_num : (0 : ℕ) < 3) d).ne' hdegree
+    (X ^ (3 ^ d) - X : CommonThreeField[X]) ≠ 0 :=
+  FiniteFieldFrobeniusDescent.commonPolynomial_ne_zero 3 12 d hd
 
-/-- A power-fixed element is a root of `X^(3^d)-X`.  This embedding lets the
-polynomial root bound control the size of the fixed subfield. -/
+/-- View a power-fixed element as a root of the fixed-subfield polynomial. -/
 noncomputable def powerFixedToRootSet (d : ℕ) (hd : 0 < d) :
-    PowerFixed d ↪ (X ^ (3 ^ d) - X : CommonThreeField[X]).rootSet
-      CommonThreeField where
-  toFun x := ⟨x.1, by
-    rw [Polynomial.mem_rootSet]
-    refine ⟨commonPolynomial_ne_zero d hd, ?_⟩
-    simpa [Polynomial.aeval_def] using sub_eq_zero.mpr x.2⟩
-  inj' := by
-    intro x y h
-    apply Subtype.ext
-    exact congrArg
-      (fun z : (X ^ (3 ^ d) - X : CommonThreeField[X]).rootSet
-        CommonThreeField => z.1) h
+    PowerFixed d ↪
+      (X ^ (3 ^ d) - X : CommonThreeField[X]).rootSet CommonThreeField :=
+  FiniteFieldFrobeniusDescent.powerFixedToRootSet 3 12 d hd
 
-/-- The fixed subfield has at most `3^d` elements by the root bound for
-`X^(3^d)-X`. -/
+/-- Polynomial root bounds control the size of the fixed subtype. -/
 theorem powerFixed_card_le (d : ℕ) (hd : 0 < d) :
-    Fintype.card (PowerFixed d) ≤ 3 ^ d := by
-  letI : Fintype
-      ((X ^ (3 ^ d) - X : CommonThreeField[X]).rootSet CommonThreeField) :=
-    Fintype.ofFinite _
-  calc
-    Fintype.card (PowerFixed d) ≤
-        Fintype.card
-          ((X ^ (3 ^ d) - X : CommonThreeField[X]).rootSet CommonThreeField) :=
-      Fintype.card_le_of_injective _ (powerFixedToRootSet d hd).injective
-    _ = Set.ncard
-          ((X ^ (3 ^ d) - X : CommonThreeField[X]).rootSet CommonThreeField) := by
-      exact Set.fintypeCard_eq_ncard
-        ((X ^ (3 ^ d) - X : CommonThreeField[X]).rootSet CommonThreeField)
-    _ ≤ (X ^ (3 ^ d) - X : CommonThreeField[X]).natDegree :=
-      Polynomial.ncard_rootSet_le _ _
-    _ = 3 ^ d := commonPolynomial_natDegree d hd
+    Fintype.card (PowerFixed d) ≤ 3 ^ d :=
+  FiniteFieldFrobeniusDescent.powerFixed_card_le 3 12 d hd
 
-/-- The embedded field of cardinality `3^d` exhausts the power-fixed
-subfield.  Injectivity gives the lower bound and the polynomial root bound
-gives the matching upper bound. -/
+/-- The source field is explicitly equivalent to the fixed subtype via its
+actual embedding. -/
 noncomputable def finiteFieldEquivPowerFixed
     (K : Type*) [Field K] [Fintype K] [CharP K 3]
     (d : ℕ) (hdpos : 0 < d) (hd : d ∣ 12)
-    (hcard : Fintype.card K = 3 ^ d) : K ≃ PowerFixed d := by
-  let f := finiteFieldToPowerFixed K d hdpos hd hcard
-  apply Equiv.ofBijective f
-  rw [Fintype.bijective_iff_injective_and_card]
-  refine ⟨finiteFieldToPowerFixed_injective K d hdpos hd hcard, ?_⟩
-  apply Nat.le_antisymm
-  · exact Fintype.card_le_of_injective f
-      (finiteFieldToPowerFixed_injective K d hdpos hd hcard)
-  · exact (powerFixed_card_le d hdpos).trans_eq hcard.symm
+    (hcard : Fintype.card K = 3 ^ d) : K ≃ PowerFixed d :=
+  FiniteFieldFrobeniusDescent.finiteFieldEquivPowerFixed
+    3 12 K d hdpos (by norm_num) hd hcard
 
-/-- The fixed-subfield equivalence is induced by the chosen finite-field
-embedding; it is not an arbitrary equivalence obtained from equal
-cardinalities. -/
+/-- The fixed-subfield equivalence uses the same coefficient embedding. -/
 @[simp]
 theorem finiteFieldEquivPowerFixed_apply_val
     (K : Type*) [Field K] [Fintype K] [CharP K 3]
@@ -198,106 +129,79 @@ theorem finiteFieldEquivPowerFixed_apply_val
     (finiteFieldEquivPowerFixed K d hdpos hd hcard a).1 =
       finiteFieldToCommon K d hdpos hd hcard a := rfl
 
-/-! ## Arithmetic Frobenius on the common curve -/
+/-- One coherent characteristic-three realization, coupling the common-field
+embedding with its fixed-subfield inverse. -/
+noncomputable def fieldRealization
+    (K : Type*) [Field K] [Fintype K] [CharP K 3]
+    (d : ℕ) (hdpos : 0 < d) (hd : d ∣ 12)
+    (hcard : Fintype.card K = 3 ^ d) : Realization 3 12 d K :=
+  realization 3 12 K d hdpos (by norm_num) hd hcard
 
-/-- Arithmetic Frobenius `x ↦ x³` on the common characteristic-three
-field. -/
+/-! ## Compatibility wrappers for generic Frobenius descent -/
+
+/-- Arithmetic Frobenius on the common characteristic-three field. -/
 noncomputable def commonFrobenius :
     CommonThreeField ≃ₐ[ZMod 3] CommonThreeField :=
-  FiniteField.frobeniusAlgEquivOfAlgebraic (ZMod 3) CommonThreeField
+  FiniteFieldFrobeniusDescent.commonFrobenius 3 12
 
-/-- The `d`-th iterate of arithmetic Frobenius is the `3^d`-power map. -/
+/-- The `d`-th arithmetic-Frobenius iterate is the `3^d`-power map. -/
 theorem commonFrobenius_pow_apply (d : ℕ) (x : CommonThreeField) :
-    (commonFrobenius ^ d) x = x ^ (3 ^ d) := by
-  have h := congrFun
-    (FiniteField.coe_frobeniusAlgEquivOfAlgebraic_iterate
-      (ZMod 3) CommonThreeField d) x
-  simpa [commonFrobenius, AlgEquiv.coe_pow, ZMod.card] using h
+    (commonFrobenius ^ d) x = x ^ (3 ^ d) :=
+  FiniteFieldFrobeniusDescent.commonFrobenius_pow_apply 3 12 d x
 
-/-- Canonical curve points over a field are normalized projective points
-satisfying the characteristic-three quadric and cubic. -/
-abbrev CurvePoint (K : Type*) [Field K] :=
-  {P : NormalizedProjective4 K // IsCanonicalNormalizedThree P}
+/-- Semantic canonical curve points over a characteristic-three field. -/
+abbrev CurvePoint (K : Type) [Field K] :=
+  NormalizedProjectiveCurveFrobenius.CurvePoint canonicalThreeModel K
 
-/-- The common-field curve-point type is finite because it is a subtype of
-the finite normalized projective space. -/
+/-- The common curve-point type is finite. -/
 noncomputable instance commonCurvePointFintype :
     Fintype (CurvePoint CommonThreeField) :=
   have : Finite (CurvePoint CommonThreeField) :=
     Finite.of_injective Subtype.val Subtype.val_injective
   Fintype.ofFinite (CurvePoint CommonThreeField)
 
-/-- Frobenius acts on canonical curve points by applying it to every free
-normalized projective coordinate. -/
+/-- Arithmetic Frobenius acting coordinatewise on common curve points. -/
 noncomputable def commonPointFrobenius :
     Equiv.Perm (CurvePoint CommonThreeField) :=
-  canonicalPointEquiv commonFrobenius.toRingEquiv
+  pointFrobenius canonicalThreeModel 3 12
 
-/-- Applying one map before or after its `d`-fold iterate gives the same
-`(d+1)`-fold iterate.  The lemma keeps the coordinatewise Frobenius induction
-independent of the internal representation of `Function.iterate`. -/
+/-- Compatibility name for the generic iterate-commutation lemma. -/
 theorem self_iterate_commute_apply {A : Type*}
     (f : A → A) (d : ℕ) (x : A) :
-    f (f^[d] x) = f^[d] (f x) := by
-  calc
-    f (f^[d] x) = f^[1] (f^[d] x) := rfl
-    _ = f^[1 + d] x := (Function.iterate_add_apply f 1 d x).symm
-    _ = f^[d + 1] x := by rw [Nat.add_comm]
-    _ = f^[d] (f^[1] x) := Function.iterate_add_apply f d 1 x
-    _ = f^[d] (f x) := rfl
+    f (f^[d] x) = f^[d] (f x) :=
+  NormalizedProjectiveCurveFrobenius.self_iterate_commute_apply f d x
 
-/-- Iterating point Frobenius applies the iterated field Frobenius to every
-free chart coordinate.  The proof is uniform across the four normalized
-projective charts. -/
+/-- Iterated point Frobenius is coordinatewise iterated field Frobenius. -/
 theorem commonPointFrobenius_iterate_val
     (d : ℕ) (P : CurvePoint CommonThreeField) :
     (commonPointFrobenius^[d] P).1 =
       NormalizedProjective4.map
-        (commonFrobenius ^ d).toRingEquiv.toRingHom P.1 := by
-  induction d with
-  | zero =>
-      cases P with
-      | mk P hP =>
-        cases P <;> rfl
-  | succ d ih =>
-      rw [Function.iterate_succ_apply']
-      change NormalizedProjective4.map commonFrobenius.toRingEquiv.toRingHom
-        (commonPointFrobenius^[d] P).1 =
-          NormalizedProjective4.map
-            (commonFrobenius ^ (d + 1)).toRingEquiv.toRingHom P.1
-      rw [ih]
-      cases P.1 <;>
-        simp [NormalizedProjective4.map, pow_succ,
-          self_iterate_commute_apply]
+        (commonFrobenius ^ d).toRingEquiv.toRingHom P.1 :=
+  NormalizedProjectiveCurveFrobenius.pointFrobenius_iterate_val
+    canonicalThreeModel 3 12 d P
 
-/-- Normalized projective points whose coordinates are fixed by the `d`-th
-iterate of Frobenius. -/
-def ProjectiveFrobeniusFixed (d : ℕ) :=
-  {P : NormalizedProjective4 CommonThreeField //
-    NormalizedProjective4.map
-      (commonFrobenius ^ d).toRingEquiv.toRingHom P = P}
+/-- Normalized-projective points fixed by the selected Frobenius iterate. -/
+abbrev ProjectiveFrobeniusFixed (d : ℕ) :=
+  FiniteFieldFrobeniusDescent.ProjectiveFrobeniusFixed 3 12 d
 
-/-- Every embedded element of a degree-`d` field is fixed by the `d`-th
-iterate of Frobenius on the common field. -/
+/-- Embedded source coordinates are fixed by the corresponding Frobenius
+iterate. -/
 theorem finiteFieldToCommon_frobenius_fixed
     (K : Type*) [Field K] [Fintype K] [CharP K 3]
     (d : ℕ) (hdpos : 0 < d) (hd : d ∣ 12)
     (hcard : Fintype.card K = 3 ^ d) (a : K) :
     (commonFrobenius ^ d) (finiteFieldToCommon K d hdpos hd hcard a) =
-      finiteFieldToCommon K d hdpos hd hcard a := by
-  rw [commonFrobenius_pow_apply]
-  exact (finiteFieldToPowerFixed K d hdpos hd hcard a).2
+      finiteFieldToCommon K d hdpos hd hcard a :=
+  FiniteFieldFrobeniusDescent.finiteFieldToCommon_frobenius_fixed
+    3 12 K d hdpos (by norm_num) hd hcard a
 
-/-- A coordinate fixed by the `d`-th Frobenius iterate satisfies the
-`3^d`-power equation used by `PowerFixed`. -/
+/-- A Frobenius-fixed coordinate satisfies the fixed-power equation. -/
 theorem frobenius_fixed_to_power_fixed
     (d : ℕ) (x : CommonThreeField) (hx : (commonFrobenius ^ d) x = x) :
-    x ^ (3 ^ d) = x := by
-  rw [← commonFrobenius_pow_apply]
-  exact hx
+    x ^ (3 ^ d) = x :=
+  FiniteFieldFrobeniusDescent.frobenius_fixed_to_power_fixed 3 12 d x hx
 
-/-- Descending an embedded source element through the fixed-subfield
-equivalence returns the original element. -/
+/-- Descending an embedded coordinate returns the source coordinate. -/
 theorem finiteFieldEquivPowerFixed_symm_embedding
     (K : Type*) [Field K] [Fintype K] [CharP K 3]
     (d : ℕ) (hdpos : 0 < d) (hd : d ∣ 12)
@@ -305,167 +209,46 @@ theorem finiteFieldEquivPowerFixed_symm_embedding
     (ha : finiteFieldToCommon K d hdpos hd hcard a ^ (3 ^ d) =
       finiteFieldToCommon K d hdpos hd hcard a) :
     (finiteFieldEquivPowerFixed K d hdpos hd hcard).symm
-      ⟨finiteFieldToCommon K d hdpos hd hcard a, ha⟩ = a := by
-  let E := finiteFieldEquivPowerFixed K d hdpos hd hcard
-  apply E.injective
-  rw [E.apply_symm_apply]
-  apply Subtype.ext
-  rfl
+      ⟨finiteFieldToCommon K d hdpos hd hcard a, ha⟩ = a :=
+  FiniteFieldFrobeniusDescent.finiteFieldEquivPowerFixed_symm_embedding
+    3 12 K d hdpos (by norm_num) hd hcard a ha
 
-/-- Re-embedding an element descended from the power-fixed subtype recovers
-its original common-field coordinate. -/
+/-- Re-embedding a descended fixed coordinate recovers that coordinate. -/
 theorem finiteFieldToCommon_symm_powerFixed
     (K : Type*) [Field K] [Fintype K] [CharP K 3]
     (d : ℕ) (hdpos : 0 < d) (hd : d ∣ 12)
     (hcard : Fintype.card K = 3 ^ d) (x : CommonThreeField)
     (hx : x ^ (3 ^ d) = x) :
     finiteFieldToCommon K d hdpos hd hcard
-      ((finiteFieldEquivPowerFixed K d hdpos hd hcard).symm ⟨x, hx⟩) = x := by
-  let E := finiteFieldEquivPowerFixed K d hdpos hd hcard
-  have h := congrArg Subtype.val (E.apply_symm_apply ⟨x, hx⟩)
-  exact h
+      ((finiteFieldEquivPowerFixed K d hdpos hd hcard).symm ⟨x, hx⟩) = x :=
+  FiniteFieldFrobeniusDescent.finiteFieldToCommon_symm_powerFixed
+    3 12 K d hdpos (by norm_num) hd hcard x hx
 
-/-! ## Descent of normalized projective points and curve points -/
-
-/-- Normalized projective points over a degree-`d` field are equivalent to
-the normalized common-field points fixed by the `d`-th Frobenius iterate.
-The inverse descends each free coordinate in its existing chart, so no
-projective rescaling or cardinality argument is hidden in the construction. -/
+/-- Characteristic-three projective descent, now a thin wrapper around one
+coherent generic realization. -/
 noncomputable def projectiveEquivFrobeniusFixed
     (K : Type*) [Field K] [Fintype K] [CharP K 3]
     (d : ℕ) (hdpos : 0 < d) (hd : d ∣ 12)
     (hcard : Fintype.card K = 3 ^ d) :
-    NormalizedProjective4 K ≃ ProjectiveFrobeniusFixed d where
-  toFun P := by
-    refine ⟨NormalizedProjective4.map
-      (finiteFieldToCommon K d hdpos hd hcard) P, ?_⟩
-    cases P <;>
-      simp only [NormalizedProjective4.map,
-        NormalizedProjective4.xChart.injEq,
-        NormalizedProjective4.yChart.injEq,
-        NormalizedProjective4.zChart.injEq]
-    · exact ⟨finiteFieldToCommon_frobenius_fixed K d hdpos hd hcard _,
-        finiteFieldToCommon_frobenius_fixed K d hdpos hd hcard _,
-        finiteFieldToCommon_frobenius_fixed K d hdpos hd hcard _⟩
-    · exact ⟨finiteFieldToCommon_frobenius_fixed K d hdpos hd hcard _,
-        finiteFieldToCommon_frobenius_fixed K d hdpos hd hcard _⟩
-    · exact finiteFieldToCommon_frobenius_fixed K d hdpos hd hcard _
-  invFun P := by
-    let E := finiteFieldEquivPowerFixed K d hdpos hd hcard
-    rcases P with ⟨P, hP⟩
-    cases P with
-    | xChart y z w =>
-        simp only [NormalizedProjective4.map,
-          NormalizedProjective4.xChart.injEq] at hP
-        exact .xChart
-          (E.symm ⟨y, frobenius_fixed_to_power_fixed d y hP.1⟩)
-          (E.symm ⟨z, frobenius_fixed_to_power_fixed d z hP.2.1⟩)
-          (E.symm ⟨w, frobenius_fixed_to_power_fixed d w hP.2.2⟩)
-    | yChart z w =>
-        simp only [NormalizedProjective4.map,
-          NormalizedProjective4.yChart.injEq] at hP
-        exact .yChart
-          (E.symm ⟨z, frobenius_fixed_to_power_fixed d z hP.1⟩)
-          (E.symm ⟨w, frobenius_fixed_to_power_fixed d w hP.2⟩)
-    | zChart w =>
-        simp only [NormalizedProjective4.map,
-          NormalizedProjective4.zChart.injEq] at hP
-        exact .zChart
-          (E.symm ⟨w, frobenius_fixed_to_power_fixed d w hP⟩)
-    | wChart => exact .wChart
-  left_inv P := by
-    cases P <;> simp only [NormalizedProjective4.map,
-      NormalizedProjective4.xChart.injEq,
-      NormalizedProjective4.yChart.injEq,
-      NormalizedProjective4.zChart.injEq]
-    · exact ⟨finiteFieldEquivPowerFixed_symm_embedding K d hdpos hd hcard _ _,
-        finiteFieldEquivPowerFixed_symm_embedding K d hdpos hd hcard _ _,
-        finiteFieldEquivPowerFixed_symm_embedding K d hdpos hd hcard _ _⟩
-    · exact ⟨finiteFieldEquivPowerFixed_symm_embedding K d hdpos hd hcard _ _,
-        finiteFieldEquivPowerFixed_symm_embedding K d hdpos hd hcard _ _⟩
-    · exact finiteFieldEquivPowerFixed_symm_embedding K d hdpos hd hcard _ _
-  right_inv P := by
-    apply Subtype.ext
-    rcases P with ⟨P, hP⟩
-    cases P with
-    | xChart y z w =>
-        simp only [NormalizedProjective4.map,
-          NormalizedProjective4.xChart.injEq] at hP ⊢
-        exact ⟨finiteFieldToCommon_symm_powerFixed K d hdpos hd hcard _ _,
-          finiteFieldToCommon_symm_powerFixed K d hdpos hd hcard _ _,
-          finiteFieldToCommon_symm_powerFixed K d hdpos hd hcard _ _⟩
-    | yChart z w =>
-        simp only [NormalizedProjective4.map,
-          NormalizedProjective4.yChart.injEq] at hP ⊢
-        exact ⟨finiteFieldToCommon_symm_powerFixed K d hdpos hd hcard _ _,
-          finiteFieldToCommon_symm_powerFixed K d hdpos hd hcard _ _⟩
-    | zChart w =>
-        simp only [NormalizedProjective4.map,
-          NormalizedProjective4.zChart.injEq] at hP ⊢
-        exact finiteFieldToCommon_symm_powerFixed K d hdpos hd hcard _ _
-    | wChart => rfl
+    NormalizedProjective4 K ≃ ProjectiveFrobeniusFixed d :=
+  FiniteFieldFrobeniusDescent.projectiveEquivFrobeniusFixed
+    3 12 K d (fieldRealization K d hdpos hd hcard)
 
-/-- Restricting projective fixed-field descent to the canonical equations
-identifies curve points over a degree-`d` field with common-field curve points
-fixed by the `d`-th iterate of Frobenius.  Preservation and reflection of the
-equations use their prime-field coefficients and injectivity of field maps. -/
+/-- Characteristic-three curve descent, restricted structurally from the
+generic projective equivalence. -/
 noncomputable def curvePointEquivFixedByIterate
-    (K : Type*) [Field K] [Fintype K] [CharP K 3]
+    (K : Type) [Field K] [Fintype K] [CharP K 3]
     (d : ℕ) (hdpos : 0 < d) (hd : d ∣ 12)
     (hcard : Fintype.card K = 3 ^ d) :
-    CurvePoint K ≃ FixedByIterate commonPointFrobenius d where
-  toFun P := by
-    let R := projectiveEquivFrobeniusFixed K d hdpos hd hcard P.1
-    let Q : CurvePoint CommonThreeField :=
-      ⟨R.1, by
-        rw [show R.1 = NormalizedProjective4.map
-          (finiteFieldToCommon K d hdpos hd hcard) P.1 from rfl]
-        exact (isCanonicalNormalizedThree_map_iff
-          (finiteFieldToCommon K d hdpos hd hcard) P.1).2 P.2⟩
-    refine ⟨Q, ?_⟩
-    apply Subtype.ext
-    rw [commonPointFrobenius_iterate_val]
-    exact R.2
-  invFun Q := by
-    have hraw : NormalizedProjective4.map
-        (commonFrobenius ^ d).toRingEquiv.toRingHom Q.1.1 = Q.1.1 := by
-      have h := congrArg Subtype.val Q.2
-      rw [commonPointFrobenius_iterate_val] at h
-      exact h
-    let R : ProjectiveFrobeniusFixed d := ⟨Q.1.1, hraw⟩
-    let P := (projectiveEquivFrobeniusFixed K d hdpos hd hcard).symm R
-    refine ⟨P, ?_⟩
-    apply (isCanonicalNormalizedThree_map_iff
-      (finiteFieldToCommon K d hdpos hd hcard) P).1
-    have hR := congrArg Subtype.val
-      ((projectiveEquivFrobeniusFixed K d hdpos hd hcard).apply_symm_apply R)
-    rw [show NormalizedProjective4.map
-      (finiteFieldToCommon K d hdpos hd hcard) P = R.1 from hR]
-    exact Q.1.2
-  left_inv P := by
-    apply Subtype.ext
-    let E := projectiveEquivFrobeniusFixed K d hdpos hd hcard
-    apply E.injective
-    rw [E.apply_symm_apply]
-    apply Subtype.ext
-    rfl
-  right_inv Q := by
-    apply Subtype.ext
-    apply Subtype.ext
-    let E := projectiveEquivFrobeniusFixed K d hdpos hd hcard
-    have hraw : NormalizedProjective4.map
-        (commonFrobenius ^ d).toRingEquiv.toRingHom Q.1.1 = Q.1.1 := by
-      have h := congrArg Subtype.val Q.2
-      rw [commonPointFrobenius_iterate_val] at h
-      exact h
-    let R : ProjectiveFrobeniusFixed d := ⟨Q.1.1, hraw⟩
-    simpa only [E, R] using congrArg Subtype.val (E.apply_symm_apply R)
+    CurvePoint K ≃ FixedByIterate commonPointFrobenius d :=
+  NormalizedProjectiveCurveFrobenius.curvePointEquivFixedByIterate
+    canonicalThreeModel 3 12 d K (fieldRealization K d hdpos hd hcard)
 
-/-- The curve-point equivalence maps a point by the same coordinatewise
-coefficient embedding used to construct the fixed subfield. -/
+/-- The forward curve equivalence applies the common-field coefficient
+embedding to normalized coordinates. -/
 @[simp]
 theorem curvePointEquivFixedByIterate_apply_val
-    (K : Type*) [Field K] [Fintype K] [CharP K 3]
+    (K : Type) [Field K] [Fintype K] [CharP K 3]
     (d : ℕ) (hdpos : 0 < d) (hd : d ∣ 12)
     (hcard : Fintype.card K = 3 ^ d) (P : CurvePoint K) :
     ((curvePointEquivFixedByIterate K d hdpos hd hcard P).1).1 =
@@ -474,40 +257,48 @@ theorem curvePointEquivFixedByIterate_apply_val
 
 /-! ## The four extension fields and the resulting closed-point bridge -/
 
-/-- The four semantic extension point types are the fixed points of the
-first four selected Frobenius iterates.  The cardinality equalities used here
-describe only the coefficient fields; no curve point count enters the proof. -/
+/-- The four semantic extension-point types are the fixed points of the
+first four selected Frobenius iterates.  Only coefficient-field cardinalities
+enter these realizations. -/
 noncomputable def extensionFixedPointRealization25Three :
     FixedPointRealizationOn commonPointFrobenius ExtensionIndex25Three
       ExtensionIndex25Three.exponent ExtensionIndex25Three.pointType where
   realize i := by
     cases i with
     | degreeOne =>
-        exact curvePointEquivFixedByIterate Trit 1 (by norm_num) (by norm_num)
-          (by norm_num [ternary_extension_cardinalities])
+        simpa [ExtensionIndex25Three.pointType,
+          ExtensionIndex25Three.exponent, CurvePoint, canonicalThreeModel]
+          using curvePointEquivFixedByIterate Trit 1
+            (by norm_num) (by norm_num)
+            (by norm_num [ternary_extension_cardinalities])
     | degreeTwo =>
-        exact curvePointEquivFixedByIterate F9 2 (by norm_num) (by norm_num)
-          (by norm_num [ternary_extension_cardinalities])
+        simpa [ExtensionIndex25Three.pointType,
+          ExtensionIndex25Three.exponent, CurvePoint, canonicalThreeModel]
+          using curvePointEquivFixedByIterate F9 2
+            (by norm_num) (by norm_num)
+            (by norm_num [ternary_extension_cardinalities])
     | degreeThree =>
-        exact curvePointEquivFixedByIterate F27 3 (by norm_num) (by norm_num)
-          (by norm_num [ternary_extension_cardinalities])
+        simpa [ExtensionIndex25Three.pointType,
+          ExtensionIndex25Three.exponent, CurvePoint, canonicalThreeModel]
+          using curvePointEquivFixedByIterate F27 3
+            (by norm_num) (by norm_num)
+            (by norm_num [ternary_extension_cardinalities])
     | degreeFour =>
-        exact curvePointEquivFixedByIterate F81 4 (by norm_num) (by norm_num)
-          (by norm_num [ternary_extension_cardinalities])
+        simpa [ExtensionIndex25Three.pointType,
+          ExtensionIndex25Three.exponent, CurvePoint, canonicalThreeModel]
+          using curvePointEquivFixedByIterate F81 4
+            (by norm_num) (by norm_num)
+            (by norm_num [ternary_extension_cardinalities])
   exponent_pos i := by
     cases i <;> norm_num [ExtensionIndex25Three.exponent]
 
-/-- The exact arithmetic-Frobenius orbits in `𝔽_(3^12)`, used as a closed-point
-grading through degree four.  Every orbit of degree at most four is present
-because `1,2,3,4` divide twelve; no claim is made that this finite common field
-contains the curve's closed points of all higher degrees. -/
+/-- Exact arithmetic-Frobenius orbits in the common field, used as a
+closed-point grading through degree four. -/
 noncomputable def frobeniusOrbitGrading25ThreeLE4 :=
   orbitClosedPointGrading commonPointFrobenius
 
-/-- The concrete closed-point classification through degree four.  It sends
-each semantic extension point to its exact Frobenius orbit and its unique
-position in that orbit, discharging the former geometric orbit seam in the
-middle Riemann--Roch calculation. -/
+/-- Structural classification of the four semantic extension-point types
+as exact Frobenius orbits with a position in each orbit. -/
 noncomputable def frobeniusClosedPointBridge25ThreeLE4 :
     ClosedPointBridge25ThreeLE4 frobeniusOrbitGrading25ThreeLE4 :=
   extensionFixedPointRealization25Three.pointOrbitClassification
