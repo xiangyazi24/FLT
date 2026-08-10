@@ -124,7 +124,14 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     field wrappers identify the certified `F4`, `F8`, and `F16` tables with the
     actual field-valued curve equations; Frobenius over `𝔽_(2^12)` realizes
     all four extension-point types and derives `A₂=15`, `A₄=101`, and the
-    conditional conclusion `#Pic⁰(F₂)=71` from the same geometric interfaces.
+    conditional conclusion `#Pic⁰(F₂)=71` from the same geometric interfaces;
+    and
+15. the actual divisor-class quotient layer: signed closed-point divisors,
+    their integer degree, quotient by a degree-zero principal subgroup, and
+    literal `Pic^n` fibres.  The binary `x=0` hyperplane section is now the
+    explicit degree-six divisor
+    `2[0:0:0:1]+[0:0:1:0]+3[0:1:1:0]`, and the final binary consumer fixes
+    both this residual class and an explicit degree-one base class.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -134,9 +141,11 @@ remaining input is a global rational-point or formal-immersion argument over
 Jacobian route this expands into explicit missing bridges: scheme-level smooth
 proper genus-four reduction, identification of the degree-at-most-four
 closed-point effective divisors with actual geometric divisors, the
-degree-zero, degree-two, and degree-four Picard data and Riemann--Roch fibre
-theorem needed to instantiate the proved class-number formula on both the
-characteristic-two and characteristic-three fibres, a second good-reduction bound
+actual principal-divisor subgroups, adjunction/canonicality for the chosen
+degree-six residual classes, the degree-two and degree-four complete-linear-
+system fibres, and the Riemann--Roch rank theorem needed to instantiate the
+proved class-number formula on both the characteristic-two and
+characteristic-three fibres, a second good-reduction bound
 controlling two-primary torsion, rational rank
 zero together with the geometric construction and primary-kernel proof for
 the reduction maps, construction of the Jacobian pullback and norm maps with

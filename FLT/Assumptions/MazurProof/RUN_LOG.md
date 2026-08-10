@@ -1182,3 +1182,20 @@
   is no longer extension-field orbit classification; it is the construction
   of actual divisors, principal equivalence, degree-two/degree-four Picard
   classes, and their Riemann--Roch fibre theorem on the explicit fibre.
+
+### N25 divisor quotient and explicit binary residual class (2026-08-10)
+
+- Added signed closed-point divisors, the degree homomorphism, divisor classes
+  modulo a supplied principal subgroup, and actual `Pic^n` degree fibres.
+- Proved effective-divisor class maps, degree translation, the degree-six
+  residual equivalence `Pic^4 ≃ Pic^2`, and the exact-kernel/surjective
+  normal-form certificate for a future computable Picard reduction.
+- Specialized both middle Riemann--Roch consumers to the actual divisor-class
+  quotient rather than arbitrary finite Picard proxy types.
+- In characteristic two, proved the `x=0` cubic factorization and all three
+  restricted-quadric identities, realized the three supporting rational
+  points as Frobenius closed points, and constructed the effective divisor
+  `2[0:0:0:1] + [0:0:1:0] + 3[0:1:1:0]` of degree six.
+- Fixed the binary consumer's degree-one base and degree-six residual classes
+  to those explicit divisors.  Adjunction/canonicality, the actual principal
+  subgroup, complete-linear-system fibres, and Riemann--Roch ranks remain.

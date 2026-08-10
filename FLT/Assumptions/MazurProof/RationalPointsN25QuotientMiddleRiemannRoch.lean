@@ -202,4 +202,68 @@ theorem picardZero_card_eq_seventy_one_of_frobenius_and_middle_rr
     frobeniusClosedPointBridge25ThreeLE4 classFour classTwo residual
     rankFour rankTwo hFourFiber hTwoFiber hRR hPicard
 
+/-- The characteristic-three class-number conclusion on the actual divisor
+class quotient of the Frobenius closed-point grading.
+
+The principal subgroup and the degree-one and canonical classes are explicit
+geometric inputs.  All Picard degrees are fibres of one descended degree map,
+so this theorem cannot be instantiated with unrelated finite proxy types. -/
+theorem picardZero_card_eq_seventy_one_of_three_divisorPicard
+    (Principal : AddSubgroup frobeniusOrbitGrading25ThreeLE4.Divisor)
+    (hPrincipal :
+      Principal ≤ frobeniusOrbitGrading25ThreeLE4.divisorDegree.ker)
+    (base canonical :
+      frobeniusOrbitGrading25ThreeLE4.DivisorClass Principal)
+    (hbase :
+      frobeniusOrbitGrading25ThreeLE4.classDegree Principal hPrincipal base = 1)
+    (hcanonical :
+      frobeniusOrbitGrading25ThreeLE4.classDegree Principal hPrincipal
+        canonical = 6)
+    [Fintype
+      (frobeniusOrbitGrading25ThreeLE4.PicDegree Principal hPrincipal 0)]
+    (rankFour :
+      frobeniusOrbitGrading25ThreeLE4.PicDegree Principal hPrincipal 4 → ℕ)
+    (rankTwo :
+      frobeniusOrbitGrading25ThreeLE4.PicDegree Principal hPrincipal 2 → ℕ)
+    (hFourFiber : ∀ c,
+      Nat.card {D : frobeniusOrbitGrading25ThreeLE4.EffDivOfDegree 4 //
+        frobeniusOrbitGrading25ThreeLE4.effectiveClass
+          Principal hPrincipal 4 D = c} =
+        linearSystemCard 3 (rankFour c))
+    (hTwoFiber : ∀ c,
+      Nat.card {D : frobeniusOrbitGrading25ThreeLE4.EffDivOfDegree 2 //
+        frobeniusOrbitGrading25ThreeLE4.effectiveClass
+          Principal hPrincipal 2 D = c} =
+        linearSystemCard 3 (rankTwo c))
+    (hRR : ∀ c,
+      rankFour c = rankTwo
+        (frobeniusOrbitGrading25ThreeLE4.residualDegreeFourTwo
+          Principal hPrincipal canonical hcanonical c) + 1) :
+    Fintype.card
+      (frobeniusOrbitGrading25ThreeLE4.PicDegree Principal hPrincipal 0) = 71 := by
+  classical
+  letI : Fintype
+      (frobeniusOrbitGrading25ThreeLE4.PicDegree Principal hPrincipal 4) :=
+    Fintype.ofEquiv
+      (frobeniusOrbitGrading25ThreeLE4.PicDegree Principal hPrincipal 0)
+      (frobeniusOrbitGrading25ThreeLE4.picDegreeEquivZero
+        Principal hPrincipal base hbase 4).symm
+  exact picardZero_card_eq_seventy_one_of_frobenius_and_middle_rr
+    (PicZero :=
+      frobeniusOrbitGrading25ThreeLE4.PicDegree Principal hPrincipal 0)
+    (PicFour :=
+      frobeniusOrbitGrading25ThreeLE4.PicDegree Principal hPrincipal 4)
+    (PicTwo :=
+      frobeniusOrbitGrading25ThreeLE4.PicDegree Principal hPrincipal 2)
+    (frobeniusOrbitGrading25ThreeLE4.effectiveClass
+      Principal hPrincipal 4)
+    (frobeniusOrbitGrading25ThreeLE4.effectiveClass
+      Principal hPrincipal 2)
+    (frobeniusOrbitGrading25ThreeLE4.residualDegreeFourTwo
+      Principal hPrincipal canonical hcanonical)
+    rankFour rankTwo hFourFiber hTwoFiber hRR
+    (Fintype.card_congr
+      (frobeniusOrbitGrading25ThreeLE4.picDegreeEquivZero
+        Principal hPrincipal base hbase 4))
+
 end MazurProof.RationalPointsN25QuotientMiddleRiemannRoch

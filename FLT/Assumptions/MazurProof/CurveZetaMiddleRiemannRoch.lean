@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.CurveZetaClassNumber
+import FLT.Assumptions.MazurProof.CurveDivisorPicard
 
 /-!
 # The middle-degree Riemann--Roch class-number identity
@@ -122,5 +123,59 @@ theorem effective_card_middle_degree_picardZero
     q hHighFiber hLowFiber hRR
   rw [hPicard] at h
   simpa only [Nat.card_eq_fintype_card, add_comm] using h
+
+/-! ## The genus-four identity on the actual divisor-class quotient -/
+
+/-- The middle-degree count specialized to the divisor class group built from
+closed points and a degree-zero principal-divisor subgroup.
+
+Unlike `effective_card_middle_degree_picardZero`, this theorem does not allow
+unrelated finite types to stand in for `Pic^0`, `Pic^2`, and `Pic^4`.  All
+three are fibres of the descended degree map on one quotient group.  A
+degree-one base class supplies `Pic^4 ≃ Pic^0`, while a degree-six canonical
+class supplies the residual equivalence `Pic^4 ≃ Pic^2`.  The remaining fibre
+and rank hypotheses are exactly the geometric complete-linear-system and
+Riemann--Roch statements. -/
+theorem effective_card_genus_four_divisorPicard
+    (C : CurveZetaEffectiveDivisors.ClosedPointGrading)
+    (Principal : AddSubgroup C.Divisor)
+    (hPrincipal : Principal ≤ C.divisorDegree.ker)
+    (base canonical : C.DivisorClass Principal)
+    (hbase : C.classDegree Principal hPrincipal base = 1)
+    (hcanonical : C.classDegree Principal hPrincipal canonical = 6)
+    [Fintype (C.PicDegree Principal hPrincipal 0)]
+    (rankFour : C.PicDegree Principal hPrincipal 4 → ℕ)
+    (rankTwo : C.PicDegree Principal hPrincipal 2 → ℕ)
+    (q : ℕ)
+    (hFourFiber : ∀ c,
+      Nat.card {D : C.EffDivOfDegree 4 //
+        C.effectiveClass Principal hPrincipal 4 D = c} =
+          linearSystemCard q (rankFour c))
+    (hTwoFiber : ∀ c,
+      Nat.card {D : C.EffDivOfDegree 2 //
+        C.effectiveClass Principal hPrincipal 2 D = c} =
+          linearSystemCard q (rankTwo c))
+    (hRR : ∀ c,
+      rankFour c =
+        rankTwo (C.residualDegreeFourTwo Principal hPrincipal canonical
+          hcanonical c) + 1) :
+    Nat.card (C.EffDivOfDegree 4) =
+      q * Nat.card (C.EffDivOfDegree 2) +
+        Fintype.card (C.PicDegree Principal hPrincipal 0) := by
+  classical
+  letI : Fintype (C.EffDivOfDegree 4) := Fintype.ofFinite _
+  letI : Fintype (C.EffDivOfDegree 2) := Fintype.ofFinite _
+  letI : Fintype (C.PicDegree Principal hPrincipal 4) :=
+    Fintype.ofEquiv (C.PicDegree Principal hPrincipal 0)
+      (C.picDegreeEquivZero Principal hPrincipal base hbase 4).symm
+  have hMiddle := effective_card_middle_degree_picardZero
+    (PicZero := C.PicDegree Principal hPrincipal 0)
+    (C.effectiveClass Principal hPrincipal 4)
+    (C.effectiveClass Principal hPrincipal 2)
+    (C.residualDegreeFourTwo Principal hPrincipal canonical hcanonical)
+    rankFour rankTwo q hFourFiber hTwoFiber hRR
+    (Fintype.card_congr
+      (C.picDegreeEquivZero Principal hPrincipal base hbase 4))
+  simpa only [Nat.card_eq_fintype_card] using hMiddle
 
 end MazurProof.CurveZetaMiddleRiemannRoch

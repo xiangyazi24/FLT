@@ -1373,3 +1373,32 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   curve descent, the semantic `F16` count, both fixed-point realizations, and
   both final conditional class-number consumers contain exactly `propext`,
   `Classical.choice`, and `Quot.sound`.
+
+### N25 actual divisor-class quotient and binary hyperplane section (2026-08-10)
+
+- `CurveDivisorPicard.lean` extends the closed-point grading to signed
+  integer divisors and an integer degree homomorphism.  Given an actual
+  principal-divisor subgroup and its degree-zero theorem, divisor degree now
+  descends to the quotient and `Pic^n` is defined as its literal degree fibre.
+- Effective divisors map to these quotient fibres with their degrees proved.
+  Translation by a degree-one class gives `Pic^n ≃ Pic^0`; a degree-six class
+  gives the genus-four residual equivalence `Pic^4 ≃ Pic^2` by `D ↦ K-D`.
+  The middle Riemann--Roch consumers for both residue characteristics now have
+  specializations to this one quotient, so unrelated finite proxy types can
+  no longer masquerade as the three Picard degrees.
+- A computable normal-form map is accepted only after proving that its kernel
+  is exactly the principal subgroup and that it is surjective.  Those two
+  structural certificates produce an additive equivalence from the quotient;
+  its finite cardinality is then a consequence rather than an input.
+- In characteristic two, the hyperplane `x=0` makes the canonical cubic
+  factor as `z*w*(y+z+w)`.  Exact restriction identities for the quadric give
+  the multiplicity pattern
+  `2[0:0:0:1] + [0:0:1:0] + 3[0:1:1:0]`.
+  All three points are realized as degree-one Frobenius closed points, and the
+  displayed effective divisor is proved to have degree six.
+- The characteristic-two terminal consumer now fixes its base class to
+  `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
+  section.  The remaining local geometric seam is exact: construct principal
+  divisors, prove adjunction identifies the hyperplane section with the
+  canonical class, construct the degree-two and degree-four complete-linear-
+  system fibres, and prove the associated middle-degree Riemann--Roch ranks.

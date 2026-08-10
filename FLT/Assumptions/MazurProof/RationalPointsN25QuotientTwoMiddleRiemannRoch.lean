@@ -1,6 +1,7 @@
 import FLT.Assumptions.MazurProof.CurveZetaEulerRecurrence
 import FLT.Assumptions.MazurProof.CurveZetaMiddleRiemannRoch
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoFrobeniusOrbits
+import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoCanonicalDivisor
 
 /-!
 # The characteristic-two middle Riemann--Roch class-number route
@@ -26,6 +27,7 @@ open CurveZetaEulerRecurrence
 open CurveZetaMiddleRiemannRoch
 open CurveZetaPointOrbitClassification
 open RationalPointsN25QuotientTwoFrobeniusOrbits
+open RationalPointsN25QuotientTwoCanonicalDivisor
 
 namespace ClosedPointBridge25TwoLE4
 
@@ -147,5 +149,114 @@ theorem picardZero_card_eq_seventy_one_of_two_frobenius_and_middle_rr
     frobeniusOrbitGrading25TwoLE4 frobeniusClosedPointBridge25TwoLE4
     classFour classTwo residual rankFour rankTwo hFourFiber hTwoFiber hRR
     hPicard
+
+/-- The characteristic-two class-number conclusion on the actual divisor
+class quotient of the Frobenius closed-point grading.
+
+The principal subgroup, its degree-zero theorem, and the chosen base and
+canonical classes are now visible geometric inputs.  In particular, no
+arbitrary finite type can be substituted for a Picard degree.  The only
+remaining deep hypotheses are the two complete-linear-system fibre formulas
+and the genus-four Riemann--Roch rank identity. -/
+theorem picardZero_card_eq_seventy_one_of_two_divisorPicard
+    (Principal : AddSubgroup frobeniusOrbitGrading25TwoLE4.Divisor)
+    (hPrincipal :
+      Principal ≤ frobeniusOrbitGrading25TwoLE4.divisorDegree.ker)
+    (base canonical :
+      frobeniusOrbitGrading25TwoLE4.DivisorClass Principal)
+    (hbase :
+      frobeniusOrbitGrading25TwoLE4.classDegree Principal hPrincipal base = 1)
+    (hcanonical :
+      frobeniusOrbitGrading25TwoLE4.classDegree Principal hPrincipal
+        canonical = 6)
+    [Fintype
+      (frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 0)]
+    (rankFour :
+      frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 4 → ℕ)
+    (rankTwo :
+      frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 2 → ℕ)
+    (hFourFiber : ∀ c,
+      Nat.card {D : frobeniusOrbitGrading25TwoLE4.EffDivOfDegree 4 //
+        frobeniusOrbitGrading25TwoLE4.effectiveClass
+          Principal hPrincipal 4 D = c} =
+        CurveZetaClassNumber.linearSystemCard 2 (rankFour c))
+    (hTwoFiber : ∀ c,
+      Nat.card {D : frobeniusOrbitGrading25TwoLE4.EffDivOfDegree 2 //
+        frobeniusOrbitGrading25TwoLE4.effectiveClass
+          Principal hPrincipal 2 D = c} =
+        CurveZetaClassNumber.linearSystemCard 2 (rankTwo c))
+    (hRR : ∀ c,
+      rankFour c = rankTwo
+        (frobeniusOrbitGrading25TwoLE4.residualDegreeFourTwo
+          Principal hPrincipal canonical hcanonical c) + 1) :
+    Fintype.card
+      (frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 0) = 71 := by
+  classical
+  letI : Fintype
+      (frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 4) :=
+    Fintype.ofEquiv
+      (frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 0)
+      (frobeniusOrbitGrading25TwoLE4.picDegreeEquivZero
+        Principal hPrincipal base hbase 4).symm
+  exact picardZero_card_eq_seventy_one_of_two_frobenius_and_middle_rr
+    (PicZero :=
+      frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 0)
+    (PicFour :=
+      frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 4)
+    (PicTwo :=
+      frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 2)
+    (frobeniusOrbitGrading25TwoLE4.effectiveClass
+      Principal hPrincipal 4)
+    (frobeniusOrbitGrading25TwoLE4.effectiveClass
+      Principal hPrincipal 2)
+    (frobeniusOrbitGrading25TwoLE4.residualDegreeFourTwo
+      Principal hPrincipal canonical hcanonical)
+    rankFour rankTwo hFourFiber hTwoFiber hRR
+    (Fintype.card_congr
+      (frobeniusOrbitGrading25TwoLE4.picDegreeEquivZero
+        Principal hPrincipal base hbase 4))
+
+/-- The characteristic-two consumer with the degree-one base and degree-six
+residual class fixed to the explicit `x=0` hyperplane section.
+
+After this specialization, the remaining concrete geometry is sharply
+localized: construct the principal-divisor subgroup, prove finiteness of its
+degree-zero quotient, identify complete-linear-system fibres, and prove the
+Riemann--Roch rank identity for the displayed hyperplane residual. -/
+theorem picardZero_card_eq_seventy_one_of_two_hyperplane_rr
+    (Principal : AddSubgroup frobeniusOrbitGrading25TwoLE4.Divisor)
+    (hPrincipal :
+      Principal ≤ frobeniusOrbitGrading25TwoLE4.divisorDegree.ker)
+    [Fintype
+      (frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 0)]
+    (rankFour :
+      frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 4 → ℕ)
+    (rankTwo :
+      frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 2 → ℕ)
+    (hFourFiber : ∀ c,
+      Nat.card {D : frobeniusOrbitGrading25TwoLE4.EffDivOfDegree 4 //
+        frobeniusOrbitGrading25TwoLE4.effectiveClass
+          Principal hPrincipal 4 D = c} =
+        CurveZetaClassNumber.linearSystemCard 2 (rankFour c))
+    (hTwoFiber : ∀ c,
+      Nat.card {D : frobeniusOrbitGrading25TwoLE4.EffDivOfDegree 2 //
+        frobeniusOrbitGrading25TwoLE4.effectiveClass
+          Principal hPrincipal 2 D = c} =
+        CurveZetaClassNumber.linearSystemCard 2 (rankTwo c))
+    (hRR : ∀ c,
+      rankFour c = rankTwo
+        (frobeniusOrbitGrading25TwoLE4.residualDegreeFourTwo
+          Principal hPrincipal
+          (hyperplaneSectionClass Principal hPrincipal)
+          (hyperplaneSectionClass_degree Principal hPrincipal) c) + 1) :
+    Fintype.card
+      (frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 0) = 71 := by
+  exact picardZero_card_eq_seventy_one_of_two_divisorPicard
+    Principal hPrincipal
+    (basePointClass Principal hPrincipal)
+    (hyperplaneSectionClass Principal hPrincipal)
+    (basePointClass_degree Principal hPrincipal)
+    (hyperplaneSectionClass_degree Principal hPrincipal)
+    rankFour rankTwo hFourFiber hTwoFiber hRR
 
 end MazurProof.RationalPointsN25QuotientMiddleRiemannRoch
