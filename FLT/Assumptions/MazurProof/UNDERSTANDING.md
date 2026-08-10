@@ -672,15 +672,30 @@ coefficient is independent of the temporary coefficient cutoff.
 `CurveZetaMiddleRiemannRoch.lean` supplies the shorter genus-four consumer:
 summed degree-four Riemann--Roch gives `A_4 = 3 A_2 + #Pic^0`.
 `RationalPointsN25QuotientMiddleRiemannRoch.lean` now combines this with the
-proved marked-divisor recurrence.  Once the four semantic extension-point
-types are classified by closed points and Frobenius positions, their checked
-cardinalities force `A_2=15` and `A_4=116`, hence `#Pic^0(F₃)=71`.  The
-classification is isolated in `CurveZetaPointOrbitClassification.lean` as a
-family of equivalences and contains no point-count equations or hidden Euler
-recurrence.  Thus the remaining characteristic-three inputs are genuinely
-geometric: construct the curve's closed-point grading and those four orbit
-classifications, then instantiate the degree-two/degree-four Picard fibres
-and Riemann--Roch residual equivalence.
+proved marked-divisor recurrence.  `CurveZetaFrobeniusOrbitGrading.lean`
+constructs exact-period orbit classes for an arbitrary finite permutation and
+proves structurally that fixed points of its `k`-th iterate are intrinsic
+degree-`k` ghost slots.  `RationalPointsN25QuotientThreeBaseChange.lean`
+proves that normalized canonical curve points commute with coefficient-field
+maps.  Finally,
+`RationalPointsN25QuotientFrobeniusOrbits.lean` embeds the four semantic
+fields in `𝔽_(3^12)`, identifies each degree-`d` field with the actual roots of
+`X^(3^d)-X` by an embedding plus the polynomial root bound, descends fixed
+normalized projective coordinates chart by chart, and constructs the four
+required curve-point/Frobenius-fixed-point equivalences.  No curve point
+cardinality is used in these equivalences.
+
+The common finite field contains every orbit of degree at most four because
+`1,2,3,4` divide twelve; it is not claimed to contain closed points of all
+higher degrees.  The resulting grading is therefore named and consumed as a
+degree-at-most-four model.  The concrete middle Riemann--Roch theorem now has
+no orbit-classification input: the checked counts force `A_2=15` and
+`A_4=116` directly from this Frobenius grading.  Its remaining inputs are the
+degree-two/degree-four Picard class maps, complete-linear-system fibre
+cardinalities, the residual equivalence, genus-four Riemann--Roch, and the
+identification of these orbit-defined effective divisors with the actual
+divisors of the smooth projective curve.  The new declarations compile and
+their axiom audits contain only `propext`, `Classical.choice`, and `Quot.sound`.
 
 `RationalPointsN25QuotientSmoothF3.lean` now closes the characteristic-three
 Jacobian-rank calculation over every field, hence over an algebraic closure.

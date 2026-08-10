@@ -140,9 +140,12 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     structurally finite fixed-degree effective divisors, and the marked-
     divisor equivalence proving the Euler recurrence without assuming it;
     the summed middle-degree identity `A₄=3A₂+#Pic⁰`; its
-    characteristic-three consumer deriving `#Pic⁰=71` from only four
-    point-orbit classification equivalences and the Picard/Riemann--Roch
-    interfaces; and the
+    characteristic-three consumer deriving `#Pic⁰=71`; a structural
+    arithmetic-Frobenius action on the canonical curve over `𝔽_(3^12)`,
+    fixed-subfield descent for the four semantic extension fields, and exact
+    orbit/position equivalences that discharge the consumer's former
+    point-orbit classification input through degree four; the remaining
+    Picard/Riemann--Roch interfaces; and the
     abstract two-prime lemma combining `2^a·71` and `3^b·71` cardinal bounds
     into divisibility by `71`, together with the finite-group kernel-range
     formula deriving those bounds from reduction maps whose kernels have
@@ -151,11 +154,12 @@ scoped builds pass, and `#print axioms` contains only `propext`,
   - Open atoms: connect the explicit equations to a regular codimension-two
     projective closed subscheme, identify its scheme-theoretic Hilbert
     polynomial with the certified `6T-3`, package the two Jacobian-rank
-    certificates as smooth proper special fibres at two and three; construct
-    the curve's locally finite closed-point grading and classify its first
-    four Frobenius orbits against the certified semantic extension-point
-    types; construct the degree-zero, degree-two, and degree-four Picard data
-    and prove the Riemann--Roch fibre theorem; prove `#Pic^0(C)(𝔽₂)=71` and
+    certificates as smooth proper special fibres at two and three; identify
+    the degree-at-most-four Frobenius-orbit divisor model with the actual
+    divisors of the characteristic-three fibre while constructing the
+    degree-zero, degree-two, and degree-four Picard data and proving the
+    Riemann--Roch fibre theorem; construct the analogous characteristic-two
+    orbit/Picard data; prove `#Pic^0(C)(𝔽₂)=71` and
     `#Pic^0(C)(𝔽₃)=71`; construct the actual good-reduction maps and prove
     their primary-kernel properties; construct the actual Jacobian pullback
     and norm maps and prove their degree-two composite; prove rational rank zero;

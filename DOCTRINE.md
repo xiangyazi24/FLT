@@ -36,10 +36,15 @@ At three, the semantic `F₃,F₉,F₂₇,F₈₁` point types have certified co
 `5,5,20,89`.  Locally finite closed points now construct finite
 fixed-degree effective divisors, a marked-divisor equivalence proves the
 Euler recurrence, and middle-degree Riemann--Roch reduces the local order
-`71` to four point-orbit classifications plus the geometric Picard data.
-The remaining local seam is therefore to package smooth proper genus-four
-special fibres, construct their closed-point/Frobenius-orbit and
-Picard/Riemann--Roch interfaces, and obtain both local Picard cardinalities.
+`71` to geometric Picard data.  Arithmetic Frobenius on the canonical curve
+over `F_(3^12)` and fixed-subfield descent now prove all four required
+point-orbit classifications through degree four.  This finite common field
+is used only for those degrees, not as a model of closed points of arbitrary
+degree.  The remaining local seam is therefore to package smooth proper
+genus-four special fibres, identify the orbit-defined effective divisors
+with their actual geometric divisors, construct the Picard/Riemann--Roch
+interfaces, repeat the orbit construction in characteristic two, and obtain
+both local Picard cardinalities.
 The global seam needs rational rank zero and two good reductions: reduction
 at two alone does not exclude two-primary torsion.
 The leading candidates use either the degree-two map from `X_1(25)` or its

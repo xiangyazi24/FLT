@@ -1,3 +1,29 @@
+## Run 2026-08-10 (N25 characteristic-three Frobenius orbit classification)
+
+- doctrine version: four endpoint axioms; N25 finite-field/Jacobian route
+- approval: continuing autonomous Mazur proof work
+- starting avenue: replace the four semantic point-orbit equivalence inputs
+  in the characteristic-three class-number calculation by actual arithmetic
+  Frobenius and fixed-subfield descent
+- result:
+  - constructed exact-period orbit classes and the structural equivalence
+    between fixed points of an iterate and degree-indexed ghost slots
+  - proved normalized canonical N25 points commute with field embeddings
+  - embedded `F₃,F₉,F₂₇,F₈₁` into `F_(3^12)` and identified each image with
+    the roots of `X^(3^d)-X` using the polynomial root bound
+  - descended Frobenius-fixed projective coordinates chart by chart and
+    obtained all four curve-point/orbit equivalences without using point
+    cardinalities
+  - removed the orbit-classification parameter from the concrete theorem
+    deriving `#Pic⁰(F₃)=71`
+- semantic boundary: the common field realizes every orbit through degree
+  four only; it does not model closed points of arbitrary degree
+- axiom audit: the new Frobenius, descent, orbit, and class-number declarations
+  depend only on `propext`, `Classical.choice`, and `Quot.sound`
+- remaining N25 local seam: actual geometric divisor/Picard/Riemann--Roch
+  realization in characteristic three and the analogous construction in
+  characteristic two
+
 ## Run 2026-08-09 23:35 (N25 marked-divisor Euler recurrence)
 
 - doctrine version: `773f882e9c`

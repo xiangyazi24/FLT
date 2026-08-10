@@ -1,7 +1,6 @@
 import FLT.Assumptions.MazurProof.CurveZetaEulerRecurrence
 import FLT.Assumptions.MazurProof.CurveZetaMiddleRiemannRoch
-import FLT.Assumptions.MazurProof.CurveZetaPointOrbitClassification
-import FLT.Assumptions.MazurProof.RationalPointsN25QuotientZetaThree
+import FLT.Assumptions.MazurProof.RationalPointsN25QuotientFrobeniusOrbits
 
 /-!
 # The short N25 class-number route through middle-degree Riemann--Roch
@@ -32,75 +31,7 @@ open RationalPointsN25QuotientWeilThree
 open RationalPointsN25QuotientKummerThreeProjective
 open RationalPointsN25QuotientSmallThreeSemantic
 open RationalPointsN25QuotientZetaThree
-
-/-! ## The actual first four extension-field point counts -/
-
-/-- The semantic N25 point-count sequence through degree four.  Later values
-are deliberately left at zero because the middle Riemann--Roch consumer never
-uses them. -/
-noncomputable def extensionPointCount25Three : ℕ → ℕ
-  | 1 => Nat.card {P : NormalizedProjective4 Trit // IsCanonicalNormalizedThree P}
-  | 2 => Nat.card {P : NormalizedProjective4 F9 // IsCanonicalNormalizedThree P}
-  | 3 => Nat.card {P : NormalizedProjective4 F27 // IsCanonicalNormalizedThree P}
-  | 4 => Nat.card {P : NormalizedProjective4 F81 // IsCanonicalNormalizedThree P}
-  | _ => 0
-
-/-- The characteristic-three ground-field count is five. -/
-theorem extensionPointCount25Three_one : extensionPointCount25Three 1 = 5 := by
-  exact f3_canonical_normalized_three_card
-
-/-- The quadratic-extension count is five. -/
-theorem extensionPointCount25Three_two : extensionPointCount25Three 2 = 5 := by
-  exact f9_canonical_normalized_three_card
-
-/-- The cubic-extension count is twenty. -/
-theorem extensionPointCount25Three_three : extensionPointCount25Three 3 = 20 := by
-  exact f27_canonical_normalized_three_card
-
-/-- The quartic-extension count is eighty-nine. -/
-theorem extensionPointCount25Three_four : extensionPointCount25Three 4 = 89 := by
-  exact f81_canonical_normalized_three_card
-
-/-! ## Closed-point classification of the four semantic point types -/
-
-/-- The four extension degrees used by the genus-four class-number
-calculation. -/
-inductive ExtensionIndex25Three
-  | degreeOne
-  | degreeTwo
-  | degreeThree
-  | degreeFour
-
-namespace ExtensionIndex25Three
-
-/-- The exponent `k` in `𝔽_(3^k)` represented by an extension index. -/
-def exponent : ExtensionIndex25Three → ℕ
-  | degreeOne => 1
-  | degreeTwo => 2
-  | degreeThree => 3
-  | degreeFour => 4
-
-/-- The existing semantic normalized-projective point type at each selected
-extension degree. -/
-def pointType : ExtensionIndex25Three → Type
-  | degreeOne =>
-      {P : NormalizedProjective4 Trit // IsCanonicalNormalizedThree P}
-  | degreeTwo =>
-      {P : NormalizedProjective4 F9 // IsCanonicalNormalizedThree P}
-  | degreeThree =>
-      {P : NormalizedProjective4 F27 // IsCanonicalNormalizedThree P}
-  | degreeFour =>
-      {P : NormalizedProjective4 F81 // IsCanonicalNormalizedThree P}
-
-end ExtensionIndex25Three
-
-/-- The sole geometric closed-point input needed through extension degree
-four.  Its fields classify semantic points by closed points and Frobenius
-positions; it contains no point-count equations or Euler recurrence. -/
-abbrev ClosedPointBridge25ThreeLE4
-    (C : CurveZetaEffectiveDivisors.ClosedPointGrading) :=
-  PointOrbitClassificationOn C ExtensionIndex25Three
-    ExtensionIndex25Three.exponent ExtensionIndex25Three.pointType
+open RationalPointsN25QuotientFrobeniusOrbits
 
 namespace ClosedPointBridge25ThreeLE4
 
@@ -241,5 +172,34 @@ theorem picardZero_card_eq_seventy_one_of_closed_points_and_middle_rr
       Nat.card_eq_fintype_card] using hA4
   rw [hA2', hA4'] at hMiddle
   omega
+
+/-- The characteristic-three N25 class-number calculation after Frobenius
+orbit geometry has been discharged.
+
+Arithmetic Frobenius on the canonical curve over `𝔽_(3^12)` supplies the
+closed-point grading and classifies the semantic points over the first four
+extensions.  Consequently the only remaining inputs are the actual
+degree-two and degree-four Picard classes, their complete-linear-system
+fibres, and genus-four Riemann--Roch. -/
+theorem picardZero_card_eq_seventy_one_of_frobenius_and_middle_rr
+    {PicZero PicFour PicTwo : Type*}
+    [Fintype PicZero] [Fintype PicFour]
+    (classFour : frobeniusOrbitGrading25ThreeLE4.EffDivOfDegree 4 → PicFour)
+    (classTwo : frobeniusOrbitGrading25ThreeLE4.EffDivOfDegree 2 → PicTwo)
+    (residual : PicFour ≃ PicTwo)
+    (rankFour : PicFour → ℕ) (rankTwo : PicTwo → ℕ)
+    (hFourFiber : ∀ c,
+      Nat.card {D : frobeniusOrbitGrading25ThreeLE4.EffDivOfDegree 4 //
+        classFour D = c} = linearSystemCard 3 (rankFour c))
+    (hTwoFiber : ∀ c,
+      Nat.card {D : frobeniusOrbitGrading25ThreeLE4.EffDivOfDegree 2 //
+        classTwo D = c} = linearSystemCard 3 (rankTwo c))
+    (hRR : ∀ c, rankFour c = rankTwo (residual c) + 1)
+    (hPicard : Fintype.card PicFour = Fintype.card PicZero) :
+    Fintype.card PicZero = 71 := by
+  exact picardZero_card_eq_seventy_one_of_closed_points_and_middle_rr
+    frobeniusOrbitGrading25ThreeLE4
+    frobeniusClosedPointBridge25ThreeLE4 classFour classTwo residual
+    rankFour rankTwo hFourFiber hTwoFiber hRR hPicard
 
 end MazurProof.RationalPointsN25QuotientMiddleRiemannRoch
