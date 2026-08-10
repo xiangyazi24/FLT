@@ -131,7 +131,12 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     literal `Pic^n` fibres.  The binary `x=0` hyperplane section is now the
     explicit degree-six divisor
     `2[0:0:0:1]+[0:0:1:0]+3[0:1:1:0]`, and the final binary consumer fixes
-    both this residual class and an explicit degree-one base class.
+    both this residual class and an explicit degree-one base class.  Its two
+    nonreduced local factors now have exact ideal normal forms
+    `(y^2,z)` and `(a+b+a*b,b^3)` on the required principal opens, together
+    with surjective maps to the dimension-two and dimension-three Artin
+    targets and extensions across those localizations.  Exact reverse-kernel
+    containment is still open.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -145,7 +150,8 @@ actual principal-divisor subgroups, adjunction/canonicality for the chosen
 degree-six residual classes, the degree-two and degree-four complete-linear-
 system fibres, and the Riemann--Roch rank theorem needed to instantiate the
 proved class-number formula on both the characteristic-two and
-characteristic-three fibres, a second good-reduction bound
+characteristic-three fibres, completion of the two binary local Artin
+quotient isomorphisms, a second good-reduction bound
 controlling two-primary torsion, rational rank
 zero together with the geometric construction and primary-kernel proof for
 the reduction maps, construction of the Jacobian pullback and norm maps with

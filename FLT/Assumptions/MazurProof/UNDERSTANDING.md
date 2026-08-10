@@ -1396,9 +1396,22 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `2[0:0:0:1] + [0:0:1:0] + 3[0:1:1:0]`.
   All three points are realized as degree-one Frobenius closed points, and the
   displayed effective divisor is proved to have degree six.
+- `RationalPointsN25QuotientTwoHyperplaneArtin.lean` now proves the
+  scheme-local algebra behind the two nonreduced multiplicities.  On
+  `D(y+z+1)` the `w=1` chart ideal is exactly `(y^2,z)`; on `D(1+b)` the
+  translated `y=1` chart ideal is exactly `(a+b+a*b,b^3)`.  The file constructs
+  the length-two and length-three Artin targets `F_2[t]/(t^2)` and
+  `F_2[t]/(t^3)`, proves their dimensions, and gives surjective affine-plane
+  evaluations killing both chart equations.  Since both denominators map to
+  `1+t`, the evaluations are extended through the corresponding
+  `Localization.Away` rings.  What remains at this local seam is the reverse
+  kernel containment, equivalently the two quotient-algebra isomorphisms;
+  the multiplicities are no longer supported only by set-theoretic
+  factorization.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
   section.  The remaining local geometric seam is exact: construct principal
-  divisors, prove adjunction identifies the hyperplane section with the
-  canonical class, construct the degree-two and degree-four complete-linear-
-  system fibres, and prove the associated middle-degree Riemann--Roch ranks.
+  divisors, close the two Artin-target kernel equalities, prove adjunction
+  identifies the hyperplane section with the canonical class, construct the
+  degree-two and degree-four complete-linear-system fibres, and prove the
+  associated middle-degree Riemann--Roch ranks.
