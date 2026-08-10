@@ -1560,10 +1560,28 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   needed.  Uniform dehomogenization supplies the inverse.  The same
   equivalence carries the dehomogenized quadric-cubic ideal to the proved
   homogeneous chart ideal, giving an ordinary two-equation quotient
-  presentation of all four actual projective charts.  The next smoothness
-  step is now only to feed the four existing projective Bezout certificates
-  through these uniform presentations, then glue the chart conclusions to
-  the projective structure morphism.
+  presentation of all four actual projective charts.
+- `RationalPointsN25QuotientTwoStructuralJacobian.lean` supplies the uniform
+  derivative layer without chartwise expansion.  It proves by polynomial
+  induction that setting `X_i=1` commutes with partial differentiation in
+  every non-pivot coordinate.  Mathlib's homogeneous Euler identity then
+  controls all ambient two-by-two Jacobian minors in the source ring
+  `F_2[x,y,z,w]`.  Naturality lemmas carry the coordinate equations, gradient
+  minors, and the four stored Bezout certificates through arbitrary ring
+  homomorphisms.
+- `RationalPointsN25QuotientTwoAffineChartsSmooth.lean` applies that layer to
+  all four ordinary chart quotients.  Three selected two-relation
+  presentations give the three free-coordinate minors.  A finite lemma only
+  identifies unordered coordinate-label pairs; Euler's identity removes the
+  normalized pivot column.  The Bezout certificates are instantiated in the
+  source polynomial ring and only then mapped to each quotient, so the proof
+  neither expands derivatives chart by chart nor asks the possibly zero
+  quotient ring for a `CharP 2` instance.  The three presentation Jacobians
+  span the unit ideal on every chart, and smoothness transports through the
+  proved equivalences to all four actual degree-zero projective chart rings.
+  The remaining smoothness step is scheme-level gluing: identify these four
+  ring statements with the localizations of the projective structure
+  morphism and invoke locality on the standard-open cover.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
   associated-graded-module sheafification and projective
   twisting-sheaf determinant theorems needed to pass from the proved
