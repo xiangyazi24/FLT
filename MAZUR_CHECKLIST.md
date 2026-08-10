@@ -136,8 +136,13 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     `(1-T²)(1-T³)/(1-T)⁴`, whose Hilbert polynomial is `6T-3` and whose
     arithmetic-genus constant is four; the generic divisor-zeta theorem that
     derives rationality and `P(1)=#Pic^0` from actual effective divisors and
-    Riemann--Roch fibre cardinalities; its characteristic-three semantic
-    consumer reducing `#Pic^0=71` to the Euler-product identification; and the
+    Riemann--Roch fibre cardinalities; locally finite closed-point gradings,
+    structurally finite fixed-degree effective divisors, and the marked-
+    divisor equivalence proving the Euler recurrence without assuming it;
+    the summed middle-degree identity `A₄=3A₂+#Pic⁰`; its
+    characteristic-three consumer deriving `#Pic⁰=71` from only four
+    point-orbit classification equivalences and the Picard/Riemann--Roch
+    interfaces; and the
     abstract two-prime lemma combining `2^a·71` and `3^b·71` cardinal bounds
     into divisibility by `71`, together with the finite-group kernel-range
     formula deriving those bounds from reduction maps whose kernels have
@@ -147,9 +152,10 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     projective closed subscheme, identify its scheme-theoretic Hilbert
     polynomial with the certified `6T-3`, package the two Jacobian-rank
     certificates as smooth proper special fibres at two and three; construct
-    the effective-divisor and degree-zero Picard types, prove the
-    Riemann--Roch fibre theorem, and identify their divisor series with the
-    certified point-count zeta series; prove `#Pic^0(C)(𝔽₂)=71` and
+    the curve's locally finite closed-point grading and classify its first
+    four Frobenius orbits against the certified semantic extension-point
+    types; construct the degree-zero, degree-two, and degree-four Picard data
+    and prove the Riemann--Roch fibre theorem; prove `#Pic^0(C)(𝔽₂)=71` and
     `#Pic^0(C)(𝔽₃)=71`; construct the actual good-reduction maps and prove
     their primary-kernel properties; construct the actual Jacobian pullback
     and norm maps and prove their degree-two composite; prove rational rank zero;
@@ -159,8 +165,8 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     the same exact polynomial and value `71` as the newform certificate, so a
     modular quotient/newform identification is no longer needed for this
     local cardinality route.  The smooth-proper model, geometric
-    divisor/Picard/Riemann--Roch instantiation, Euler-product identification,
-    and good-reduction APIs are still needed to enter the endpoint proof.
+    closed-point/orbit and Picard/Riemann--Roch instantiations, and the
+    good-reduction APIs are still needed to enter the endpoint proof.
 
 - [ ] N49 — `CyclicExclusion49.no_raw_order49_tate_obstruction`
   - Closed infrastructure: structural `ψ₄₉` factorization bridge to the

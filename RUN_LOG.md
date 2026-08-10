@@ -1,3 +1,27 @@
+## Run 2026-08-09 23:35 (N25 marked-divisor Euler recurrence)
+
+- doctrine version: `773f882e9c`
+- approval: automode continuation; no tmux names may be changed
+- starting avenue: replace the remaining N25 Euler-recurrence hypothesis by
+  an explicit finite marked-divisor double count
+- completed:
+  - constructed locally finite positive-degree closed points and proved
+    fixed-degree effective divisors finite by bounded support and multiplicity
+  - proved the marked-divisor removal/reinsertion equivalence and the exact
+    ghost convolution `n A_n = ∑_(k=1)^n N_k A_(n-k)`
+  - proved cutoff-independence of ghost slots and discharged the reusable
+    `SatisfiesEulerRecurrence` interface
+  - proved the summed middle-degree identity `A₄=3A₂+#Pic⁰`
+  - added the N25 consumer deriving `#Pic⁰(F₃)=71` from four semantic
+    point-orbit equivalences plus the geometric Picard/Riemann--Roch data
+- verification: scoped Lake target builds pass; all audited declarations
+  depend only on `propext`, `Classical.choice`, and `Quot.sound`; bypass scan
+  is empty
+- end: clean bounded milestone; campaign continues
+- final result: the Euler recurrence is no longer an N25 hypothesis; the
+  remaining local geometric seams are closed-point/Frobenius-orbit
+  classification and Picard/Riemann--Roch instantiation
+
 ## Run 2026-08-09 (N25 finite-field and Jacobian reduction route)
 
 - doctrine version: `9fc18f1c64`

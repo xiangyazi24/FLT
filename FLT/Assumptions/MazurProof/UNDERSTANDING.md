@@ -654,6 +654,34 @@ effective-divisor types, prove the Riemann--Roch fibre theorem, and identify
 the effective-divisor series with the closed-point/extension-point zeta
 series.
 
+The former Euler-product seam has now been replaced by an explicit finite
+double count.  `CurveZetaEffectiveDivisors.lean` packages locally finite
+positive-degree closed points and constructs effective divisors as finitely
+supported multiplicity functions; bounded support and bounded multiplicity
+prove that every fixed-degree divisor type is finite.
+`CurveZetaMarkedDivisors.lean` marks a closed-point occurrence, its removal
+level, and one residue-degree position.  Removing the marked copies is an
+explicit equivalence, and grouping its return data by removed degree proves
+
+`n A_n = ∑_(k=1)^n N_k A_(n-k)`
+
+without formal logarithms, coefficient division, enumeration, or a
+recurrence hypothesis.  A second explicit equivalence proves that the ghost
+coefficient is independent of the temporary coefficient cutoff.
+
+`CurveZetaMiddleRiemannRoch.lean` supplies the shorter genus-four consumer:
+summed degree-four Riemann--Roch gives `A_4 = 3 A_2 + #Pic^0`.
+`RationalPointsN25QuotientMiddleRiemannRoch.lean` now combines this with the
+proved marked-divisor recurrence.  Once the four semantic extension-point
+types are classified by closed points and Frobenius positions, their checked
+cardinalities force `A_2=15` and `A_4=116`, hence `#Pic^0(F₃)=71`.  The
+classification is isolated in `CurveZetaPointOrbitClassification.lean` as a
+family of equivalences and contains no point-count equations or hidden Euler
+recurrence.  Thus the remaining characteristic-three inputs are genuinely
+geometric: construct the curve's closed-point grading and those four orbit
+classifications, then instantiate the degree-two/degree-four Picard fibres
+and Riemann--Roch residual equivalence.
+
 `RationalPointsN25QuotientSmoothF3.lean` now closes the characteristic-three
 Jacobian-rank calculation over every field, hence over an algebraic closure.
 On the regular `x`-chart, two differentiated elimination identities turn the
@@ -681,7 +709,9 @@ one.  The local Mathlib source has general `Smooth`, `Proj`, and properness
 machinery, but no projective-curve genus API, no general Picard/Jacobian of a
 higher-genus curve, and no ready-made curve divisor/Riemann--Roch API.  The
 formal class-number consequence of those missing geometric objects is now
-proved in `CurveZetaClassNumber.lean`.
+proved in `CurveZetaClassNumber.lean`; the finite closed-point/effective-
+divisor Euler recurrence is additionally proved in
+`CurveZetaMarkedDivisors.lean`.
 
 `RationalPointsN25TwoPrimeReduction.lean` proves the remaining elementary
 endgame: if a finite cardinal divides both `2^a·71` and `3^b·71`, it divides

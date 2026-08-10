@@ -32,10 +32,16 @@ The complete executable field tables and projective counts over
 identities exclude the explicit complete-intersection singularity predicate
 over every characteristic-two field.  Newton's identities and genus-four
 reciprocity give the exact candidate Weil numerator, with value `71` at one.
-The remaining geometric seam is to connect these explicit certificates to a
-smooth proper genus-four special fibre and the general theorem
-`#Jac(C)(F_2)=P(1)`.  The global seam needs rational rank zero and two good
-reductions: reduction at two alone does not exclude two-primary torsion.
+At three, the semantic `F₃,F₉,F₂₇,F₈₁` point types have certified counts
+`5,5,20,89`.  Locally finite closed points now construct finite
+fixed-degree effective divisors, a marked-divisor equivalence proves the
+Euler recurrence, and middle-degree Riemann--Roch reduces the local order
+`71` to four point-orbit classifications plus the geometric Picard data.
+The remaining local seam is therefore to package smooth proper genus-four
+special fibres, construct their closed-point/Frobenius-orbit and
+Picard/Riemann--Roch interfaces, and obtain both local Picard cardinalities.
+The global seam needs rational rank zero and two good reductions: reduction
+at two alone does not exclude two-primary torsion.
 The leading candidates use either the degree-two map from `X_1(25)` or its
 level-25 newform factor.  The corrected primary source has now been verified:
 `J_1(25)(Q)` has rank zero and is cyclic of order `227555`; the exact
@@ -45,9 +51,9 @@ as well, including the kernel-range formula that derives each local bound
 from a finite reduction map with primary kernel.  These bounds also prove
 that doubling is injective; consequently a degree-two Jacobian pullback is
 injective once its norm-pullback composite is identified with `[2]`.  Neither
-route is counted at the endpoint until the
-required modular quotient/newform, specialization, and Abel--Jacobi
-infrastructure is formalized.  Closing these seams forces every rational
+route is counted at the endpoint until the required specialization,
+closed-point/Picard, pullback/norm, and Abel--Jacobi infrastructure is
+formalized.  Closing these seams forces every rational
 canonical point to be a cusp, contradicting the proved noncuspidality of the
 primitive Tate image.
 

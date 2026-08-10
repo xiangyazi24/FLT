@@ -111,8 +111,14 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     reduction maps without circularly assuming pullback injectivity; and
 13. the generic divisor-count class-number theorem: actual finite effective
     divisor types and Riemann--Roch Picard-fibre cardinalities imply formal
-    zeta rationality and `P(1)=#Pic^0`.  Its N25 specialization proves
-    `#Pic^0(F₃)=71` from the remaining closed-point Euler-product equality.
+    zeta rationality and `P(1)=#Pic^0`; and
+14. the structural closed-point layer: locally finite positive-degree closed
+    points give finite fixed-degree effective-divisor types, a marked-divisor
+    equivalence proves the Euler recurrence, and summed middle-degree
+    Riemann--Roch gives `A₄=3A₂+#Pic⁰`.  Its N25 consumer derives
+    `#Pic⁰(F₃)=71` from four point-orbit classification equivalences and
+    the geometric Picard/Riemann--Roch interfaces, with no Euler recurrence
+    hypothesis.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -120,10 +126,10 @@ directly, without needing a Sutherland-to-LMFDB plane transformation.  The
 remaining input is a global rational-point or formal-immersion argument over
 `ℚ` proving that every rational canonical point is a cusp.  On the active
 Jacobian route this expands into explicit missing bridges: scheme-level smooth
-proper genus-four reduction, construction of the effective-divisor and
-degree-zero Picard types, the Riemann--Roch fibre theorem and closed-point
-Euler-product identification needed to instantiate the proved class-number
-formula, a
+proper genus-four reduction, construction of its locally finite closed-point
+grading and the first four extension-point/Frobenius-orbit classifications,
+the degree-zero, degree-two, and degree-four Picard data and Riemann--Roch
+fibre theorem needed to instantiate the proved class-number formula, a
 second good-reduction bound controlling two-primary torsion, rational rank
 zero together with the geometric construction and primary-kernel proof for
 the reduction maps, construction of the Jacobian pullback and norm maps with
@@ -133,7 +139,7 @@ are not counted at the endpoint.  The corrected primary source now verifies
 the ambient rank-zero and cyclic-order statement, and Lean checks the exact
 newform conjugate polynomial at three.  The direct curve route no longer
 needs a modular quotient/newform identification for its local cardinality;
-the missing work is the geometric divisor/Picard/Riemann--Roch and
+the missing work is the geometric closed-point/Picard/Riemann--Roch and
 good-reduction infrastructure connecting the stored canonical curve to the
 proved arithmetic interfaces.
 
