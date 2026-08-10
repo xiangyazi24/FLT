@@ -147,7 +147,9 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     `Spec F_2`; and the exact standard-chart kernel identities
     `ker(Away(S,X_i) → Away(S/(Q,C),X_i)) = (Q/X_i^2,C/X_i^3)`, proved by
     saturated homogeneous Koszul relations rather than expansion, together
-    with the induced explicit quotient-ring equivalences; the
+    with the induced explicit quotient-ring equivalences and identification
+    of these ideals as the standard-chart restrictions of the closed
+    immersion's global kernel ideal sheaf; the
     generic divisor-zeta theorem that
     derives rationality and `P(1)=#Pic^0` from actual effective divisors and
     Riemann--Roch fibre cardinalities; locally finite closed-point gradings,
@@ -165,9 +167,8 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     formula deriving those bounds from reduction maps whose kernels have
     orders `2^a` and `3^b`; and the noncircular degree-two endgame proving
     pullback injective from those bounds and `norm ∘ pullback = [2]`.
-  - Open atoms: identify the now-explicit affine chart ideals with the
-    restrictions of the closed immersion's global kernel ideal sheaf,
-    sheafify the resolution there, identify
+  - Open atoms: construct the conormal/Koszul morphisms of sheaves, prove their
+    exactness on the now-explicit standard affine cover, identify
     the scheme-theoretic Hilbert polynomial with the certified `6T-3`, and
     prove projective adjunction;
     package the two Jacobian-rank certificates as smooth special fibres at two

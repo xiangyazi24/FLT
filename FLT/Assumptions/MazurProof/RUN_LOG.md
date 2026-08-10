@@ -1260,9 +1260,13 @@
   theorem.  Each quotient chart coordinate ring is now explicitly equivalent
   to the ambient `Away` ring modulo `(Q/X_i^2,C/X_i^3)`, and the equivalence on
   quotient classes is definitionally the canonical chart map.
+- Identified these chart ideals with the restrictions of the global kernel
+  ideal sheaf `canonicalProjectiveCurveMap.ker`.  The proof transports each
+  affine-open section kernel through Mathlib's canonical
+  `Away ≃ Γ(D_+(X_i),O)` isomorphism and uses the exact `Proj` functoriality
+  square.  Both endpoints pass the standard-three axiom audit.
 - The remaining canonicality seam is projective adjunction: identify the
-  resulting chart ideals with the restriction of the closed immersion's
-  global kernel ideal sheaf, package and sheafify the shifted resolution
-  there, and derive
+  conormal/Koszul maps with morphisms of sheaves, prove exactness on the
+  standard affine cover, and derive
   `ω_C ≅ O_C(1)` and identify the explicit degree-six hyperplane section
   with the canonical divisor.

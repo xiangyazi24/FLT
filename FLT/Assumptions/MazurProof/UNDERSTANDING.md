@@ -1520,8 +1520,18 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   with the equivalence induced pointwise by the canonical chart map.  Thus
   the localized defining ideal and affine quotient rings are no longer open
   premises; only their ideal-sheaf gluing remains.
+- `RationalPointsN25QuotientTwoIdealSheaf.lean` closes that gluing seam against
+  Mathlib's actual global object.  Functoriality of `Proj` identifies the
+  section map on `D_+(X_i)` with the localized graded quotient, while the
+  target `Away`-to-sections map is injective because it is an isomorphism.
+  Consequently, pulling back the restriction of
+  `canonicalProjectiveCurveMap.ker` along
+  `Away(S,X_i) ≃ Γ(D_+(X_i),O)` gives exactly
+  `(Q/X_i^2,C/X_i^3)` on all four standard charts.  The local ideals are now
+  proved to be restrictions of the single global kernel ideal sheaf rather
+  than a parallel chartwise construction.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
-  ideal-sheaf gluing, associated-graded-module sheafification, and projective
+  associated-graded-module sheafification and projective
   twisting-sheaf determinant theorems needed to pass from the proved
   degreewise shifted resolution to
   `ω_C ≅ O_C(-4+2+3) = O_C(1)`.
