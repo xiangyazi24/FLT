@@ -194,7 +194,14 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     the canonical `Away ≃ Γ(D_+(X_i),O)` isomorphisms identify the
     restriction of `canonicalProjectiveCurveMap.ker` on every standard affine
     open with `(Q/X_i^2,C/X_i^3)`.  Thus the explicit local equations are
-    restrictions of Mathlib's single global kernel ideal sheaf.
+    restrictions of Mathlib's single global kernel ideal sheaf; and
+26. the first ordinary affine presentation: the structural coordinate-ratio
+    map identifies `Away(S,X_0)` with
+    `F_2[X_1/X_0,X_2/X_0,X_3/X_0]`.  Homogeneous-localization generation
+    reduces surjectivity to cancellation in one monomial fraction.  Under
+    this equivalence the chart ideal is exactly the span of the displayed
+    dehomogenized quadric and cubic, so the actual quotient chart ring is the
+    corresponding ordinary three-variable complete-intersection quotient.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -209,7 +216,8 @@ degree-six residual classes (with the homogeneous regular-sequence premise
 and its degreewise shifted Koszul exactness, literal quotient-piece
 identification, internal quotient grading, projective closed/proper packaging,
 exact localized chart kernels, quotient-ring presentations, and their global
-kernel ideal-sheaf identification now proved), the degree-two and
+kernel ideal-sheaf identification, together with the ordinary `X_0=1` affine
+presentation now proved), the degree-two and
 degree-four complete-linear-system fibres, and the Riemann--Roch rank theorem
 needed to instantiate the proved class-number formula on both the
 characteristic-two and characteristic-three fibres, a second good-reduction

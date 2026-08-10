@@ -1265,6 +1265,14 @@
   affine-open section kernel through Mathlib's canonical
   `Away ≃ Γ(D_+(X_i),O)` isomorphism and uses the exact `Proj` functoriality
   square.  Both endpoints pass the standard-three axiom audit.
+- Identified the ambient chart `D_+(X_0)` structurally with affine
+  three-space by the coordinate ratios `X_1/X_0`, `X_2/X_0`, and `X_3/X_0`.
+  Dehomogenization is the explicit inverse.  Surjectivity uses Mathlib's
+  homogeneous-localization generating theorem and one symbolic
+  monomial-fraction cancellation, not coefficient or field-element
+  enumeration.  Transporting `(Q/X_0^2,C/X_0^3)` through this equivalence
+  gives the ordinary displayed quadric-cubic ideal and an explicit quotient
+  equivalence for the actual N25 chart ring.
 - The remaining canonicality seam is projective adjunction: identify the
   conormal/Koszul maps with morphisms of sheaves, prove exactness on the
   standard affine cover, and derive

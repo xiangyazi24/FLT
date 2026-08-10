@@ -1530,6 +1530,18 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `(Q/X_i^2,C/X_i^3)` on all four standard charts.  The local ideals are now
   proved to be restrictions of the single global kernel ideal sheaf rather
   than a parallel chartwise construction.
+- `RationalPointsN25QuotientTwoAffineChart.lean` supplies the missing ordinary
+  coordinates on `D_+(X_0)`.  The three-variable polynomial ring maps each
+  affine variable to `X_{j+1}/X_0`; setting `X_0=1` gives its inverse.  The
+  proof that every homogeneous fraction lies in the image invokes
+  `Away.adjoin_mk_prod_pow_eq_top` and proves the required monomial identity
+  from total degree, so it is independent of coefficient enumeration.  The
+  equivalence sends the displayed affine quadric and cubic exactly to
+  `Q/X_0^2` and `C/X_0^3`, yielding the literal ordinary quotient presentation
+  of the first N25 projective chart.  The next smoothness step is to extend
+  this coordinate package uniformly to all four standard opens and feed the
+  existing Jacobian-minor Bezout identities into Mathlib's submersive-
+  presentation localization criterion.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
   associated-graded-module sheafification and projective
   twisting-sheaf determinant theorems needed to pass from the proved
