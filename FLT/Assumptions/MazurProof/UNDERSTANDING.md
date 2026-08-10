@@ -1602,10 +1602,13 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   only finitely many exponent vectors have a fixed total degree; the literal
   quotient piece is finite-dimensional through its proved cokernel
   equivalence.  Rank-nullity on the four-term exact sequence proves the exact
-  alternating finrank identity for every degree.  The remaining Hilbert seam
-  is therefore the standard monomial-count evaluation and the comparison
-  between the graded-ring Hilbert function and the scheme-theoretic Hilbert
-  polynomial, not an unproved exactness or finiteness assertion.
+  alternating finrank identity for every degree.  A structural stars-and-bars
+  argument then evaluates every shifted piece, proving that the literal
+  quotient finrank equals the complete-intersection Hilbert-series coefficient
+  in every degree and is `6n-3` above the degree-five numerator bound.  The
+  only remaining Hilbert seam is now the scheme-theoretic comparison between
+  this graded coordinate-ring Hilbert function and the `Proj` Hilbert
+  polynomial.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
   associated-graded-module sheafification and projective
   twisting-sheaf determinant theorems needed to pass from the proved

@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF3
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoGradedAlgebra
+import Mathlib.Algebra.Order.Antidiag.FinsuppEquiv
 import Mathlib.RingTheory.Finiteness.Finsupp
 import Mathlib.RingTheory.Polynomial.HilbertPoly
 import Mathlib.Tactic.ComputeDegree
@@ -55,6 +56,57 @@ noncomputable instance shiftedPiece_finite (debt n : ℕ) :
     exact Module.Finite.equiv (Finsupp.supportedEquivFinsupp A).symm
   · rw [shiftedPiece, if_neg hdegree]
     infer_instance
+
+/-- A degree-`n` piece of `S(-debt)` has the stars-and-bars dimension for
+monomials of degree `n-debt` in four variables, and vanishes below the shift. -/
+theorem shiftedPiece_finrank (debt n : ℕ) :
+    Module.finrank k (shiftedPiece debt n) =
+      if debt ≤ n then (n - debt + 3).choose 3 else 0 := by
+  by_cases hdegree : debt ≤ n
+  · rw [shiftedPiece, if_pos hdegree,
+      MvPolynomial.homogeneousSubmodule_eq_finsupp_supported]
+    let A := {d : Fin 4 →₀ ℕ | d.degree = n - debt}
+    have hA : A.Finite :=
+      (Finsupp.finite_of_degree_le (n - debt)).subset (by
+        intro d hd
+        exact le_of_eq hd)
+    letI : Finite A := hA
+    letI : Fintype A := Fintype.ofFinite A
+    change Module.finrank k (Finsupp.supported k k A) = _
+    rw [(Finsupp.supportedEquivFinsupp A).finrank_eq,
+      Module.finrank_finsupp_self, if_pos hdegree]
+    have hAeq :
+        A = (Finset.finsuppAntidiag (Finset.univ : Finset (Fin 4))
+          (n - debt) : Set (Fin 4 →₀ ℕ)) := by
+      ext d
+      simp only [A, Set.mem_setOf_eq, Finset.mem_coe,
+        Finset.mem_finsuppAntidiag, Finset.subset_univ, and_true]
+      change (∑ i ∈ d.support, d i) = n - debt ↔
+        (∑ i : Fin 4, d i) = n - debt
+      have hsum : (∑ i ∈ d.support, d i) = ∑ i : Fin 4, d i := by
+        apply Finset.sum_subset (Finset.subset_univ d.support)
+        intro i _ hi
+        exact Finsupp.notMem_support_iff.mp hi
+      rw [hsum]
+    have hFintypeCard : Fintype.card A =
+        (Finset.finsuppAntidiag (Finset.univ : Finset (Fin 4))
+          (n - debt)).card := by
+      calc
+        Fintype.card A = Fintype.card
+            (Finset.finsuppAntidiag (Finset.univ : Finset (Fin 4))
+              (n - debt)) :=
+          Fintype.card_congr (Equiv.setCongr hAeq)
+        _ = _ := Fintype.card_coe _
+    rw [hFintypeCard]
+    have hcard := Finset.card_finsuppAntidiag_nat_eq_choose
+      (s := (Finset.univ : Finset (Fin 4))) (n - debt)
+    simp only [Finset.card_univ, Fintype.card_fin] at hcard
+    rw [hcard]
+    rw [show 4 + (n - debt) - 1 = n - debt + 3 by omega]
+    exact Nat.choose_symm
+      (n := n - debt + 3) (k := 3) (by omega)
+  · rw [shiftedPiece, if_neg hdegree, if_neg hdegree]
+    simp
 
 /-- The literal degree piece in the actual quotient ring is
 finite-dimensional, by the proved equivalence with the Koszul cokernel. -/
@@ -112,6 +164,44 @@ theorem completeIntersectionHilbertNumerator25_expanded :
   simp only [completeIntersectionHilbertNumerator25]
   ring
 
+/-- In every degree, the finrank of the literal piece of the actual quotient
+ring is exactly the corresponding coefficient of the complete-intersection
+Hilbert series.  The proof combines Koszul rank-nullity with the structural
+monomial count for each shifted ambient piece. -/
+theorem literalConePiece_finrank_eq_hilbertSeries_coeff (n : ℕ) :
+    (Module.finrank k (literalConePiece n) : ℚ) =
+      (completeIntersectionHilbertNumerator25 *
+        PowerSeries.invOneSubPow ℚ 4 : PowerSeries ℚ).coeff n := by
+  have hrank := literalConePiece_finrank n
+  rw [shiftedPiece_finrank, shiftedPiece_finrank,
+    shiftedPiece_finrank, shiftedPiece_finrank] at hrank
+  rw [completeIntersectionHilbertNumerator25_expanded]
+  push_cast
+  change _ = PowerSeries.coeff n
+    (((1 : PowerSeries ℚ) - PowerSeries.X ^ 2 - PowerSeries.X ^ 3 +
+      PowerSeries.X ^ 5) * (PowerSeries.invOneSubPow ℚ 4).val)
+  rw [add_mul, sub_mul, sub_mul, map_add, map_sub, map_sub]
+  simp only [one_mul]
+  rw [PowerSeries.coeff_X_pow_mul', PowerSeries.coeff_X_pow_mul',
+    PowerSeries.coeff_X_pow_mul']
+  simp only [PowerSeries.invOneSubPow_val_succ_eq_mk_add_choose,
+    PowerSeries.coeff_mk]
+  simp only [Nat.zero_le, if_true, Nat.sub_zero] at hrank
+  have hrankQ :
+      (Module.finrank k (literalConePiece n) : ℚ) +
+          (if 2 ≤ n then ((3 + (n - 2)).choose 3 : ℚ) else 0) +
+          (if 3 ≤ n then ((3 + (n - 3)).choose 3 : ℚ) else 0) =
+        ((3 + n).choose 3 : ℚ) +
+          (if 5 ≤ n then ((3 + (n - 5)).choose 3 : ℚ) else 0) := by
+    exact_mod_cast (show
+      Module.finrank k (literalConePiece n) +
+          (if 2 ≤ n then (3 + (n - 2)).choose 3 else 0) +
+          (if 3 ≤ n then (3 + (n - 3)).choose 3 else 0) =
+        (3 + n).choose 3 +
+          (if 5 ≤ n then (3 + (n - 5)).choose 3 else 0) by
+      simpa [Nat.add_comm] using hrank)
+  linarith
+
 /-- The top shift in the complete-intersection numerator is five. -/
 theorem completeIntersectionHilbertNumerator25_natDegree :
     completeIntersectionHilbertNumerator25.natDegree = 5 := by
@@ -168,6 +258,15 @@ theorem completeIntersectionHilbertSeries25_eventually
   rw [coeff_mul_invOneSubPow_eq_hilbertPoly_eval 4 hn,
     completeIntersectionHilbertPolynomial25]
   simp
+
+/-- Above the degree-five numerator bound, the actual quotient piece has
+dimension `6n-3`.  Thus the graded coordinate ring itself, not merely a
+formal candidate series, has the expected eventual Hilbert function. -/
+theorem literalConePiece_finrank_eventually
+    (n : ℕ) (hn : completeIntersectionHilbertNumerator25.natDegree < n) :
+    (Module.finrank k (literalConePiece n) : ℚ) = 6 * (n : ℚ) - 3 := by
+  rw [literalConePiece_finrank_eq_hilbertSeries_coeff]
+  exact completeIntersectionHilbertSeries25_eventually n hn
 
 /-- The constant term of `6T-3` gives arithmetic genus four under the standard
 curve convention `P(n)=deg(C)n+1-g`.  This theorem certifies only that final
