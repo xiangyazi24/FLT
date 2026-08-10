@@ -1235,8 +1235,14 @@
   The pieces therefore form an internal direct sum.  Their multiplication is
   degree-additive, so `S/(Q,C)` now carries its actual internal graded-algebra
   structure and the quotient map is a surjective graded ring homomorphism.
-- The remaining canonicality seam is projective adjunction: identify the
-  resulting quotient `Proj`, package and sheafify the shifted resolution
+- Constructed the actual quotient `Proj` and its canonical morphism to binary
+  projective three-space.  Proved the required irrelevant-ideal inclusion and
+  exact basic-open pullback formulas.  In degree zero the shifted Koszul source
+  vanishes and homogeneous polynomials are constants, so the degree-zero ring
+  is canonically `F_2`; this supplies the structure morphism to `Spec F_2`.
+- The remaining canonicality seam is projective adjunction: prove that the
+  canonical projective morphism is the expected closed immersion, identify
+  its affine charts, package and sheafify the shifted resolution
   there, and derive
   `ω_C ≅ O_C(1)` and identify the explicit degree-six hyperplane section
   with the canonical divisor.

@@ -171,7 +171,12 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     polynomial decomposition, equality of its kernel with the quotient kernel,
     bijectivity of canonical recomposition, multiplicative closure of literal
     pieces, the resulting `GradedAlgebra`, and the surjective graded quotient
-    map from `S`.
+    map from `S`; and
+22. the actual projective quotient: the irrelevant-ideal inclusion for the
+    graded quotient map, the induced morphism from the quotient `Proj` to
+    binary projective three-space, its pullback formulas on standard basic
+    opens, the structural identification of the degree-zero quotient ring
+    with `F_2`, and the resulting structure morphism to `Spec F_2`.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed

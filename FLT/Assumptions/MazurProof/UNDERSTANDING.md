@@ -733,9 +733,14 @@ degreewise image in `S/(Q,C)`.  A further structural kernel argument proves
 that these images form an internal direct sum; multiplication of homogeneous
 representatives therefore installs the actual quotient `GradedAlgebra`, with
 explicit formulas for its degree projections and a surjective graded quotient
-map from `S`.  What remains is the projective bridge: construct and compare the
-resulting `Proj`, sheafify the shifted resolution, and identify the scheme-
-theoretic Hilbert polynomial with the certified one.  The local
+map from `S`.  The resulting `Proj` is now constructed, together with its
+canonical morphism to binary projective three-space, exact pullback formulas
+for projective basic opens, an identification of its degree-zero ring with
+`F_2`, and its structure morphism to `Spec F_2`.  What remains in the
+projective bridge is to prove that this morphism is the expected closed
+immersion, identify its local coordinate rings, sheafify the shifted
+resolution, and identify the scheme-theoretic Hilbert polynomial with the
+certified one.  The local
 Mathlib source has
 general `Smooth`, `Proj`, and properness machinery, but no projective-curve
 genus API, no general Picard/Jacobian of a higher-genus curve, and no ready-
@@ -1481,9 +1486,17 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   bijective.  Together with multiplication of homogeneous representatives,
   this gives the quotient its actual internal `GradedAlgebra` structure and a
   surjective graded quotient map, with explicit formulas for every projection.
+- `RationalPointsN25QuotientTwoProj.lean` proves the irrelevant-ideal
+  hypothesis for that graded quotient map and constructs the actual
+  projective quotient and its canonical morphism to binary projective
+  three-space.  Standard projective basic opens pull back to the corresponding
+  quotient basic opens.  A structural degree-zero argument shows that the
+  Koszul source vanishes there and every degree-zero homogeneous polynomial is
+  constant, yielding `literalConePiece 0 ≃+* F_2` and the structure morphism
+  to `Spec F_2`.
 - The remaining adjunction gap is now narrower: Mathlib still lacks the
   associated-graded-module sheafification and projective
-  `Proj`/twisting-sheaf determinant theorems needed to pass from the proved
+  twisting-sheaf determinant theorems needed to pass from the proved
   degreewise shifted resolution to
   `ω_C ≅ O_C(-4+2+3) = O_C(1)`.
 - The characteristic-two terminal consumer now fixes its base class to
