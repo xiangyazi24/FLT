@@ -590,12 +590,40 @@ The file defines first-nonzero normalization for arbitrary nonzero
 four-vectors, proves that normalization differs only by a nonzero scalar,
 proves both eigenbasis matrices commute with scaling and preserve
 nonvanishing, and packages them as an equivalence of normalized projective
-three-space.  The remaining seam is only its restriction to the two equation
-loci: identify the normalized determinant quadric with the four normalized
-Segre charts and transport the homogeneous cubic predicate across the
-projective eigenbasis equivalence.  Until that restricted equivalence is
-connected, 89 is a theorem for the projectively normalized Segre model but is
-not yet stated as `#C(F₈₁)=89` for the canonical normalized-point type.
+three-space.  Its restriction to the equation loci is now closed as well.
+The four normalized Segre charts are proved equivalent to the normalized
+determinant quadric by an explicit chartwise inverse.  Homogeneity of the
+quadric and cubic then shows that first-nonzero normalization preserves their
+zero loci, while the nonzero eigenbasis scalars identify the Segre cubic with
+the canonical cubic.  The resulting subtype equivalence proves both the
+actual field-valued and legacy executable statements
+`#C(F₈₁)=89`.  Thus the characteristic-three fourth-extension point count is
+now a theorem about the stored canonical quadric-cubic model, not only about
+its Segre parameter space.
+
+`RationalPointsN25QuotientSmallThreeFields.lean` and
+`RationalPointsN25QuotientSmallThreeSemantic.lean` close the first three
+extension-field semantics without returning to ambient enumeration.  The
+quadratic and cubic tables are actual fields: their ring laws are symbolic
+polynomial identities over the transported trit field, while finite
+calculation is confined to the 8 and 26 nonzero inverse laws.  A single
+chartwise equivalence then identifies the normalized canonical curve with the
+five pieces of the existing linear-elimination count.  On `z≠1` the quadric
+reconstructs `w` uniquely; the exceptional divisor and boundary charts are
+literal summands.  Consequently the executable values are now semantic
+canonical-model counts
+`#C(F₃)=5`, `#C(F₉)=5`, and `#C(F₂₇)=20`.
+
+`RationalPointsN25QuotientZetaThree.lean` combines those counts with the
+already semantic `#C(F₈₁)=89`.  The resulting power sums are
+`(-1,5,8,-7)`, Newton's identities force coefficients `(1,-2,-5,1)`, and
+genus-four reciprocity produces
+`1+T-2T²-5T³+T⁴-15T⁵-18T⁶+27T⁷+81T⁸`.  This is proved equal to the
+independent four-conjugate newform certificate and has value `71` at one.
+The arithmetic second-prime calculation therefore no longer requires a
+modular quotient/newform identification.  Its remaining semantic boundary is
+geometric: certify a smooth proper genus-four fibre at three and apply a
+general curve-zeta/Jacobian theorem to conclude `#Jac(C)(F₃)=71`.
 
 `RationalPointsN25TwoPrimeReduction.lean` proves the remaining elementary
 endgame: if a finite cardinal divides both `2^a·71` and `3^b·71`, it divides

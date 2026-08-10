@@ -121,24 +121,32 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     projective point counts `5,5,20,29`; four chartwise Bézout certificates
     excluding geometric singularities in characteristic two; and the exact
     Newton/reciprocity polynomial calculation with value `P₂(1)=71`, plus the
-    exact four-conjugate level-25 polynomial at three with `P₃(1)=71`; and the
+    exact four-conjugate level-25 polynomial at three with `P₃(1)=71`; the
+    characteristic-three Kummer reduction, actual `F3`, `F9`, `F27`, and
+    `F81` field semantics, a chartwise linear-elimination equivalence for the
+    first three extensions, normalized Segre count, and restricted projective
+    eigenbasis equivalence, which together prove the canonical-model counts
+    `5,5,20,89` without an ambient Cartesian-product enumeration; the exact
+    characteristic-three moment/Newton calculation, whose reciprocal
+    polynomial is the independently certified `P₃` and has value `71`; and the
     abstract two-prime lemma combining `2^a·71` and `3^b·71` cardinal bounds
     into divisibility by `71`, together with the finite-group kernel-range
     formula deriving those bounds from reduction maps whose kernels have
     orders `2^a` and `3^b`; and the noncircular degree-two endgame proving
     pullback injective from those bounds and `norm ∘ pullback = [2]`.
-  - Open atoms: connect the explicit Jacobian-minor certificates to a smooth
-    proper genus-four special fibre and the general zeta/Jacobian theorem;
-    prove `#Jac(C)(𝔽₂)=71`; obtain a second good-reduction bound to control
-    two-primary torsion; construct the actual good-reduction maps and prove
+  - Open atoms: connect the explicit Jacobian-minor certificates to smooth
+    proper genus-four special fibres at two and three and the general
+    zeta/Jacobian theorem; prove `#Jac(C)(𝔽₂)=71` and
+    `#Jac(C)(𝔽₃)=71`; construct the actual good-reduction maps and prove
     their primary-kernel properties; construct the actual Jacobian pullback
     and norm maps and prove their degree-two composite; prove rational rank zero;
     and finish the Abel--Jacobi rational-point classification.  The ambient
     `J₁(25)` rank-zero/cyclic-order statement has now been verified in the
-    corrected primary source, and the level-25 newform's exact `p=3`
-    conjugate polynomial with value `71` is kernel-checked.  Both still lack
-    the modular quotient/newform and good-reduction APIs needed to enter the
-    endpoint proof.
+    corrected primary source.  At three, the semantic curve counts now derive
+    the same exact polynomial and value `71` as the newform certificate, so a
+    modular quotient/newform identification is no longer needed for this
+    local cardinality route.  The smooth-proper model, general zeta/Jacobian,
+    and good-reduction APIs are still needed to enter the endpoint proof.
 
 - [ ] N49 — `CyclicExclusion49.no_raw_order49_tate_obstruction`
   - Closed infrastructure: structural `ψ₄₉` factorization bridge to the

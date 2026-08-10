@@ -339,4 +339,96 @@ theorem f81Inv_eq_inv (a : F81) : f81Inv a = a⁻¹ := by
     _ = f81EquivF81Z (a⁻¹) :=
       (map_inv₀ f81EquivF81Z.ringEquiv a).symm
 
+/-! ## The executable prime-field table as an actual field
+
+The same coordinate transport used above also gives the three-element
+coefficient table its semantic field structure.  Exposing this small base
+field lets the quadratic and cubic extension tables inherit symbolic ring
+proofs instead of re-enumerating their algebraic laws.
+-/
+
+/-- The field structure on executable trits, transported from `ZMod 3`. -/
+instance tritField : Field Trit := tritEquivF3Z.field
+
+/-- The table zero is the zero of the transported prime field. -/
+theorem f3Operations_zero_eq : f3Operations.zero = (0 : Trit) := by
+  apply tritEquivF3Z.injective
+  calc
+    tritEquivF3Z f3Operations.zero = (0 : F3Z) := rfl
+    _ = tritEquivF3Z (0 : Trit) := by
+      simpa only [Equiv.ringEquiv_apply] using
+        (map_zero tritEquivF3Z.ringEquiv).symm
+
+/-- The table one is the one of the transported prime field. -/
+theorem f3Operations_one_eq : f3Operations.one = (1 : Trit) := by
+  apply tritEquivF3Z.injective
+  calc
+    tritEquivF3Z f3Operations.one = (1 : F3Z) := rfl
+    _ = tritEquivF3Z (1 : Trit) := by
+      simpa only [Equiv.ringEquiv_apply] using
+        (map_one tritEquivF3Z.ringEquiv).symm
+
+/-- Executable trit addition is transported field addition. -/
+theorem f3Operations_add_eq (a b : Trit) :
+    f3Operations.add a b = a + b := by
+  change tritAdd a b = a + b
+  apply tritEquivF3Z.injective
+  calc
+    tritEquivF3Z (tritAdd a b) = tritEquivF3Z a + tritEquivF3Z b :=
+      tritEquivF3Z_map_add a b
+    _ = tritEquivF3Z (a + b) := by
+      simpa only [Equiv.ringEquiv_apply] using
+        (map_add tritEquivF3Z.ringEquiv a b).symm
+
+/-- Executable trit negation is transported field negation. -/
+theorem f3Operations_neg_eq (a : Trit) : f3Operations.neg a = -a := by
+  change tritNeg a = -a
+  apply tritEquivF3Z.injective
+  calc
+    tritEquivF3Z (tritNeg a) = -tritEquivF3Z a := tritEquivF3Z_map_neg a
+    _ = tritEquivF3Z (-a) := by
+      simpa only [Equiv.ringEquiv_apply] using
+        (map_neg tritEquivF3Z.ringEquiv a).symm
+
+/-- Executable trit multiplication is transported field multiplication. -/
+theorem f3Operations_mul_eq (a b : Trit) :
+    f3Operations.mul a b = a * b := by
+  change tritMul a b = a * b
+  apply tritEquivF3Z.injective
+  calc
+    tritEquivF3Z (tritMul a b) = tritEquivF3Z a * tritEquivF3Z b :=
+      tritEquivF3Z_map_mul a b
+    _ = tritEquivF3Z (a * b) := by
+      simpa only [Equiv.ringEquiv_apply] using
+        (map_mul tritEquivF3Z.ringEquiv a b).symm
+
+/-! The extension tables are written directly with `tritAdd`, `tritNeg`, and
+`tritMul`, rather than through the record projections above.  The following
+bridges expose the same semantic comparison in exactly that syntactic form,
+so polynomial identities over `F9` and `F27` can be proved symbolically. -/
+
+/-- The constructor used as the table zero is the transported field zero. -/
+@[simp] theorem trit_zero_eq_zero : Trit.zero = (0 : Trit) :=
+  f3Operations_zero_eq
+
+/-- The constructor used as the table one is the transported field one. -/
+@[simp] theorem trit_one_eq_one : Trit.one = (1 : Trit) :=
+  f3Operations_one_eq
+
+/-- Direct trit addition agrees with addition in the transported field. -/
+@[simp] theorem tritAdd_eq_add (a b : Trit) : tritAdd a b = a + b :=
+  f3Operations_add_eq a b
+
+/-- Direct trit negation agrees with negation in the transported field. -/
+@[simp] theorem tritNeg_eq_neg (a : Trit) : tritNeg a = -a :=
+  f3Operations_neg_eq a
+
+/-- Direct trit multiplication agrees with multiplication in the transported field. -/
+@[simp] theorem tritMul_eq_mul (a b : Trit) : tritMul a b = a * b :=
+  f3Operations_mul_eq a b
+
+/-- The transported trit field has characteristic three. -/
+instance tritCharP : CharP Trit 3 :=
+  tritEquivF3Z.ringEquiv.toRingHom.charP tritEquivF3Z.injective 3
+
 end MazurProof.RationalPointsN25QuotientWeilThree

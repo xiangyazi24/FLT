@@ -602,6 +602,322 @@ theorem f81_segre_solutions_card :
       simp
     _ = 89 := by norm_num
 
+/-! ## Restricting the projective eigenbasis to the curve
+
+The preceding count lives naturally on the four normalized charts of
+`P¹ × P¹`.  This final structural layer identifies those charts with the
+normalized determinant quadric in eigen-coordinates, restricts the
+projective eigenbasis equivalence to the cubic equation, and thereby
+transports the count to the stored canonical quadric-cubic model.
+-/
+
+section CanonicalRestriction
+
+variable {K : Type*} [Field K] [CharP K 3] [DecidableEq K]
+
+/-- The four Segre charts as normalized eigen-coordinates.  They are the
+rank-one matrices `(ac,ad;bc,bd)` after normalizing the first nonzero entry
+of the two projective factors. -/
+def normalizedSegreEigenPoint :
+    NormalizedSegrePoint K → NormalizedProjective4 K
+  | .dense r s => .xChart s r (r * s)
+  | .leftBoundary s => .zChart s
+  | .rightBoundary r => .yChart 0 r
+  | .corner => .wChart
+
+/-- The determinant equation `u₂u₃=u₁u₄` on a first-nonzero normalized
+eigenvector.  This is the diagonalized canonical quadric. -/
+def IsNormalizedEigenQuadric (P : NormalizedProjective4 K) : Prop :=
+  let U := normalizedCoordinatesThree P
+  U.y * U.z - U.x * U.w = 0
+
+/-- The normalized Segre charts parametrize the normalized determinant
+quadric bijectively.  The inverse reads off the dense chart, then the two
+boundary rulings, with the determinant equation removing the redundant
+coordinate in each case. -/
+def normalizedSegreEquivEigenQuadric :
+    NormalizedSegrePoint K ≃
+      {P : NormalizedProjective4 K // IsNormalizedEigenQuadric P} where
+  toFun p := by
+    refine ⟨normalizedSegreEigenPoint p, ?_⟩
+    cases p <;>
+      simp [normalizedSegreEigenPoint, IsNormalizedEigenQuadric,
+        normalizedCoordinatesThree]
+    all_goals ring
+  invFun P := by
+    rcases P with ⟨P, hP⟩
+    cases P with
+    | xChart y z w => exact .dense z y
+    | yChart z w => exact .rightBoundary w
+    | zChart w => exact .leftBoundary w
+    | wChart => exact .corner
+  left_inv p := by
+    cases p <;> rfl
+  right_inv P := by
+    rcases P with ⟨P, hP⟩
+    apply Subtype.ext
+    cases P with
+    | xChart y z w =>
+        change y * z - 1 * w = 0 at hP
+        simp only [normalizedSegreEigenPoint]
+        congr
+        linear_combination hP
+    | yChart z w =>
+        change 1 * z - 0 * w = 0 at hP
+        have hz : z = 0 := by simpa using hP
+        subst z
+        rfl
+    | zChart w => rfl
+    | wChart => rfl
+
+omit [CharP K 3] [DecidableEq K] in
+/-- Scaling a homogeneous vector multiplies the canonical quadric by the
+square of the scalar.  This is the projective invariance needed after
+first-nonzero normalization. -/
+theorem canonicalQuadric25Three_scale (a : K) (P : Coordinates4 K) :
+    canonicalQuadric25Three (scaleCoordinatesThree a P) =
+      a ^ 2 * canonicalQuadric25Three P := by
+  rcases P with ⟨x, y, z, w⟩
+  simp only [scaleCoordinatesThree, canonicalQuadric25Three]
+  ring
+
+omit [CharP K 3] [DecidableEq K] in
+/-- Scaling a homogeneous vector multiplies the canonical cubic by the
+cube of the scalar.  Hence its zero locus is unchanged by projective
+normalization through a nonzero scalar. -/
+theorem canonicalCubic25Three_scale (a : K) (P : Coordinates4 K) :
+    canonicalCubic25Three (scaleCoordinatesThree a P) =
+      a ^ 3 * canonicalCubic25Three P := by
+  rcases P with ⟨x, y, z, w⟩
+  simp only [scaleCoordinatesThree, canonicalCubic25Three]
+  ring
+
+/-- The curve in normalized eigen-coordinates: the determinant quadric
+together with the canonical cubic pulled back through the inverse
+eigenbasis. -/
+def IsNormalizedEigenCurve (e : K)
+    (P : NormalizedProjective4 K) : Prop :=
+  let U := normalizedCoordinatesThree P
+  U.y * U.z - U.x * U.w = 0 ∧
+    canonicalCubic25Three
+      (canonicalCoordinatesFromEigen25Three e U.x U.y U.z U.w) = 0
+
+/-- Projectivizing the inverse eigenbasis transports the determinant-cubic
+curve exactly to the normalized canonical quadric-cubic intersection.
+The only scalars introduced are the nonzero normalization scalar, the
+nonzero quadric multiplier, and their homogeneous powers. -/
+theorem isNormalizedEigenCurve_iff_canonical
+    (e : K) (he : IsCyclotomicFive25Three e)
+    (P : NormalizedProjective4 K) :
+    IsNormalizedEigenCurve e P ↔
+      IsCanonicalNormalizedThree (eigenToCanonicalProjective e P) := by
+  let U := normalizedCoordinatesThree P
+  let V := canonicalCoordinatesFromEigen25Three e U.x U.y U.z U.w
+  have hU : U ≠ zeroCoordinatesThree :=
+    normalizedCoordinatesThree_ne_zero P
+  have hV : V ≠ zeroCoordinatesThree :=
+    canonicalCoordinatesFromEigen_ne_zero he hU
+  rcases normalizeCoordinatesThree_spec hV with ⟨a, ha, hspec⟩
+  have hcoords :
+      normalizedCoordinatesThree (eigenToCanonicalProjective e P) =
+        scaleCoordinatesThree a V := by
+    exact hspec
+  have hquad :
+      canonicalQuadric25Three
+          (normalizedCoordinatesThree (eigenToCanonicalProjective e P)) = 0 ↔
+        U.y * U.z - U.x * U.w = 0 := by
+    rw [hcoords, canonicalQuadric25Three_scale,
+      canonicalQuadric25_fromEigen he]
+    simp [ha, canonicalSegreQuadricScalar25Three_ne_zero he]
+  have hcubic :
+      canonicalCubic25Three
+          (normalizedCoordinatesThree (eigenToCanonicalProjective e P)) = 0 ↔
+        canonicalCubic25Three V = 0 := by
+    rw [hcoords, canonicalCubic25Three_scale]
+    simp [ha]
+  unfold IsNormalizedEigenCurve IsCanonicalNormalizedThree
+  change (U.y * U.z - U.x * U.w = 0 ∧ canonicalCubic25Three V = 0) ↔ _
+  rw [hquad, hcubic]
+
+omit [DecidableEq K] in
+/-- On every rank-one eigenvector, vanishing of the pulled-back canonical
+cubic is equivalent to vanishing of the four-term Segre cubic.  The
+comparison scalar `e³+1` is nonzero on the fifth-cyclotomic locus. -/
+theorem canonicalCubic25_fromEigen_eq_zero_iff_segre
+    {e a b c d : K} (he : IsCyclotomicFive25Three e) :
+    canonicalCubic25Three
+        (canonicalCoordinatesFromEigen25Three e
+          (a * c) (a * d) (b * c) (b * d)) = 0 ↔
+      canonicalSegreCubic25Three e a b c d = 0 := by
+  have h := canonicalCubic25_segre
+    (e := e) (a := a) (b := b) (c := c) (d := d) he
+  change canonicalCubic25Three
+      (canonicalCoordinatesFromEigen25Three e
+        (a * c) (a * d) (b * c) (b * d)) =
+    (e ^ 3 + 1) * canonicalSegreCubic25Three e a b c d at h
+  rw [h]
+  simp [cyclotomicFive25Three_cubicScalar_ne_zero he]
+
+omit [DecidableEq K] in
+/-- The normalized four-chart Segre curve is exactly the determinant-cubic
+curve in normalized eigen-coordinates.  Each chart is a rank-one matrix;
+the determinant vanishes identically and the preceding scalar comparison
+handles the cubic. -/
+theorem isNormalizedSegreCurve_iff_eigenCurve
+    {e : K} (he : IsCyclotomicFive25Three e)
+    (p : NormalizedSegrePoint K) :
+    IsNormalizedSegreCurve e p ↔
+      IsNormalizedEigenCurve e (normalizedSegreEigenPoint p) := by
+  cases p with
+  | dense r s =>
+      have hc := canonicalCubic25_fromEigen_eq_zero_iff_segre
+        (e := e) (a := 1) (b := r) (c := 1) (d := s) he
+      change canonicalSegreCubic25Three e 1 r 1 s = 0 ↔
+        s * r - 1 * (r * s) = 0 ∧
+          canonicalCubic25Three
+            (canonicalCoordinatesFromEigen25Three e 1 s r (r * s)) = 0
+      constructor
+      · intro h
+        exact ⟨by ring, by simpa using hc.mpr h⟩
+      · intro h
+        exact hc.mp (by simpa using h.2)
+  | leftBoundary s =>
+      have hc := canonicalCubic25_fromEigen_eq_zero_iff_segre
+        (e := e) (a := 0) (b := 1) (c := 1) (d := s) he
+      change canonicalSegreCubic25Three e 0 1 1 s = 0 ↔
+        0 * 1 - 0 * s = 0 ∧
+          canonicalCubic25Three
+            (canonicalCoordinatesFromEigen25Three e 0 0 1 s) = 0
+      constructor
+      · intro h
+        exact ⟨by ring, by simpa using hc.mpr h⟩
+      · intro h
+        exact hc.mp (by simpa using h.2)
+  | rightBoundary r =>
+      have hc := canonicalCubic25_fromEigen_eq_zero_iff_segre
+        (e := e) (a := 1) (b := r) (c := 0) (d := 1) he
+      change canonicalSegreCubic25Three e 1 r 0 1 = 0 ↔
+        1 * 0 - 0 * r = 0 ∧
+          canonicalCubic25Three
+            (canonicalCoordinatesFromEigen25Three e 0 1 0 r) = 0
+      constructor
+      · intro h
+        exact ⟨by ring, by simpa using hc.mpr h⟩
+      · intro h
+        exact hc.mp (by simpa using h.2)
+  | corner =>
+      have hc := canonicalCubic25_fromEigen_eq_zero_iff_segre
+        (e := e) (a := 0) (b := 1) (c := 0) (d := 1) he
+      change canonicalSegreCubic25Three e 0 1 0 1 = 0 ↔
+        0 * 0 - 0 * 1 = 0 ∧
+          canonicalCubic25Three
+            (canonicalCoordinatesFromEigen25Three e 0 0 0 1) = 0
+      constructor
+      · intro h
+        exact ⟨by ring, by simpa using hc.mpr h⟩
+      · intro h
+        exact hc.mp (by simpa using h.2)
+
+/-- The pulled-back canonical cubic on normalized eigen-coordinates.  It is
+kept separate here because the determinant equation is already stored in
+the subtype produced by the Segre-quadric equivalence. -/
+def IsNormalizedEigenCubic (e : K)
+    (P : NormalizedProjective4 K) : Prop :=
+  let U := normalizedCoordinatesThree P
+  canonicalCubic25Three
+    (canonicalCoordinatesFromEigen25Three e U.x U.y U.z U.w) = 0
+
+/-- Inside the determinant quadric, the four-term Segre cubic cuts out the
+same locus as the pulled-back canonical cubic. -/
+def segreSolutionsEquivEigenQuadricCubic
+    {e : K} (he : IsCyclotomicFive25Three e) :
+    SegreSolutions e ≃
+      {Q : {P : NormalizedProjective4 K // IsNormalizedEigenQuadric P} //
+        IsNormalizedEigenCubic e Q.1} :=
+  normalizedSegreEquivEigenQuadric.subtypeEquiv (fun p => by
+    change IsNormalizedSegreCurve e p ↔
+      IsNormalizedEigenCubic e (normalizedSegreEigenPoint p)
+    have h := isNormalizedSegreCurve_iff_eigenCurve he p
+    constructor
+    · intro hp
+      exact (h.mp hp).2
+    · intro hc
+      exact h.mpr ⟨(normalizedSegreEquivEigenQuadric p).2, hc⟩)
+
+/-- Flatten the nested “point on the quadric, then on the cubic” subtype to
+the conjunction defining the normalized eigen-coordinate curve. -/
+def eigenQuadricCubicEquivEigenCurve (e : K) :
+    {Q : {P : NormalizedProjective4 K // IsNormalizedEigenQuadric P} //
+        IsNormalizedEigenCubic e Q.1} ≃
+      {P : NormalizedProjective4 K // IsNormalizedEigenCurve e P} where
+  toFun Q := ⟨Q.1.1, Q.1.2, Q.2⟩
+  invFun P := ⟨⟨P.1, P.2.1⟩, P.2.2⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+/-- The normalized Segre curve and the normalized eigen-coordinate curve are
+equivalent as finite types, not merely related by a surjection. -/
+def segreSolutionsEquivEigenCurve
+    {e : K} (he : IsCyclotomicFive25Three e) :
+    SegreSolutions e ≃
+      {P : NormalizedProjective4 K // IsNormalizedEigenCurve e P} :=
+  (segreSolutionsEquivEigenQuadricCubic he).trans
+    (eigenQuadricCubicEquivEigenCurve e)
+
+/-- Restrict the projective eigenbasis equivalence to the curve equations.
+Homogeneity ensures that first-nonzero renormalization preserves both loci. -/
+def eigenCurveEquivCanonicalCurve
+    (e : K) (he : IsCyclotomicFive25Three e) :
+    {P : NormalizedProjective4 K // IsNormalizedEigenCurve e P} ≃
+      {P : NormalizedProjective4 K // IsCanonicalNormalizedThree P} :=
+  (eigenCanonicalProjectiveEquiv e he).subtypeEquiv
+    (isNormalizedEigenCurve_iff_canonical e he)
+
+/-- Composite structural equivalence from the normalized `P¹ × P¹` Segre
+model to the canonical normalized quadric-cubic model. -/
+def segreSolutionsEquivCanonicalCurve
+    (e : K) (he : IsCyclotomicFive25Three e) :
+    SegreSolutions e ≃
+      {P : NormalizedProjective4 K // IsCanonicalNormalizedThree P} :=
+  (segreSolutionsEquivEigenCurve he).trans
+    (eigenCurveEquivCanonicalCurve e he)
+
+end CanonicalRestriction
+
+/-- The canonical normalized genus-four model has exactly 89 points over
+`F81`, transported from the structural Kummer-Segre count. -/
+theorem f81_canonical_normalized_three_card :
+    Nat.card {P : NormalizedProjective4 F81 // IsCanonicalNormalizedThree P} =
+      89 := by
+  calc
+    Nat.card {P : NormalizedProjective4 F81 // IsCanonicalNormalizedThree P} =
+        Nat.card (SegreSolutions f81FifthRoot25) :=
+      Nat.card_congr
+        (segreSolutionsEquivCanonicalCurve
+          f81FifthRoot25 f81FifthRoot25_isCyclotomic).symm
+    _ = 89 := f81_segre_solutions_card
+
+/-- The executable ternary-table predicate and the actual field-valued
+canonical predicate define equivalent point types over `F81`. -/
+def f81ExecutableCanonicalEquivActual :
+    {P : NormalizedProjective4 F81 //
+      IsCanonicalNormalized25Ternary f81Operations P} ≃
+    {P : NormalizedProjective4 F81 // IsCanonicalNormalizedThree P} :=
+  Equiv.subtypeEquivRight isCanonicalNormalized25Ternary_f81_iff
+
+/-- The legacy executable normalized-point predicate therefore also has
+exactly 89 solutions; this statement contains no ambient point enumeration. -/
+theorem f81_canonical_normalized_ternary_card :
+    Nat.card {P : NormalizedProjective4 F81 //
+      IsCanonicalNormalized25Ternary f81Operations P} = 89 := by
+  calc
+    Nat.card {P : NormalizedProjective4 F81 //
+        IsCanonicalNormalized25Ternary f81Operations P} =
+        Nat.card {P : NormalizedProjective4 F81 //
+          IsCanonicalNormalizedThree P} :=
+      Nat.card_congr f81ExecutableCanonicalEquivActual
+    _ = 89 := f81_canonical_normalized_three_card
+
 end
 
 
