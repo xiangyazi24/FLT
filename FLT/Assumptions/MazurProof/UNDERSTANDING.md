@@ -481,15 +481,21 @@ separate certificate.
 
 All production files above pass scoped compilation.  Axiom audits of the
 finite-field laws, point counts, Bézout certificates, smoothness-predicate
-consequence, and polynomial calculation report only `propext`,
+consequence, Hilbert-polynomial calculation, and Frobenius-polynomial
+calculation report only `propext`,
 `Classical.choice`, and `Quot.sound`.  They are not yet imported by
 `CyclicExclusion25`: the source-side model bridge, base-point exclusion, all
 five projective cusp fibres, and the raw finite-field arithmetic are closed.
 
 The remaining N25 route has three honest geometric/arithmetic layers.  First,
-the explicit characteristic-two Jacobian-minor certificate must be connected
-to a smooth proper genus-four reduction and the Weil functional equation,
-yielding `#Jac(C)(𝔽₂)=71` from the checked polynomial.  Second, one needs a
+the explicit characteristic-two and characteristic-three Jacobian-minor
+certificates must be connected to smooth proper reductions.  The standard
+complete-intersection Hilbert-series arithmetic is now certified as `6T-3`,
+but the explicit equations still have to be connected to a regular
+codimension-two projective subscheme whose scheme-theoretic Hilbert
+polynomial is that polynomial.  A general curve-zeta/Jacobian theorem must
+then turn the checked point counts into `#Jac(C)(𝔽₂)=#Jac(C)(𝔽₃)=71`.
+Second, one needs a
 global statement making `Jac(C)(ℚ)` finite and a two-prime specialization
 argument controlling every torsion prime; reduction at two alone does not
 exclude rational two-primary torsion.  The current candidates use either the
@@ -622,7 +628,8 @@ genus-four reciprocity produces
 independent four-conjugate newform certificate and has value `71` at one.
 The arithmetic second-prime calculation therefore no longer requires a
 modular quotient/newform identification.  Its remaining semantic boundary is
-geometric: package the explicit fibre as a smooth proper genus-four curve and
+geometric: package the explicit fibre as a smooth proper curve, connect its
+scheme-theoretic Hilbert polynomial to the certified genus-four arithmetic, and
 apply a general curve-zeta/Jacobian theorem to conclude `#Jac(C)(F₃)=71`.
 
 `RationalPointsN25QuotientSmoothF3.lean` now closes the characteristic-three
@@ -637,6 +644,20 @@ equal to one.  This is a symbolic chart proof with no finite-field
 enumeration.  What remains is not pointwise nonsingularity, but the Mathlib
 scheme-level packaging of this complete intersection as smooth, proper, and
 genus four, followed by the general zeta/Jacobian cardinality bridge.
+
+`RationalPointsN25QuotientHilbert.lean` closes the arithmetic core of the
+genus computation without pretending to supply that scheme bridge.  The
+standard degree-two/degree-three Koszul numerator expands as
+`1-T²-T³+T⁵`; Mathlib's Hilbert-polynomial formula then gives `6T-3`, and
+the curve convention `P(n)=deg(C)n+1-g` gives the constant-term value
+`g=4`.  The file also proves the eventual coefficient formula `6n-3` for
+the formal Hilbert series.  What remains is to prove that the explicit
+quadric and cubic form the required regular codimension-two projective
+subscheme and that its scheme-theoretic Hilbert polynomial is the certified
+one.  The local Mathlib source has general `Smooth`, `Proj`, and properness
+machinery, but no projective-curve genus API, no general Picard/Jacobian of a
+higher-genus curve, and no finite-field curve-zeta theorem identifying
+Jacobian cardinality with the reciprocal numerator evaluated at one.
 
 `RationalPointsN25TwoPrimeReduction.lean` proves the remaining elementary
 endgame: if a finite cardinal divides both `2^a·71` and `3^b·71`, it divides

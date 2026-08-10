@@ -131,15 +131,20 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     polynomial is the independently certified `P₃` and has value `71`; a
     structural, algebraic-closure-valid characteristic-three Jacobian-rank
     proof using residual derivatives, one regular-chart Bézout identity, and
-    low-degree boundary factors; and the
+    low-degree boundary factors; the exact complete-intersection Hilbert
+    numerator calculation
+    `(1-T²)(1-T³)/(1-T)⁴`, whose Hilbert polynomial is `6T-3` and whose
+    arithmetic-genus constant is four; and the
     abstract two-prime lemma combining `2^a·71` and `3^b·71` cardinal bounds
     into divisibility by `71`, together with the finite-group kernel-range
     formula deriving those bounds from reduction maps whose kernels have
     orders `2^a` and `3^b`; and the noncircular degree-two endgame proving
     pullback injective from those bounds and `norm ∘ pullback = [2]`.
-  - Open atoms: package the explicit Jacobian-rank certificates as smooth
-    proper genus-four special fibres at two and three and apply the general
-    zeta/Jacobian theorem; prove `#Jac(C)(𝔽₂)=71` and
+  - Open atoms: connect the explicit equations to a regular codimension-two
+    projective closed subscheme, identify its scheme-theoretic Hilbert
+    polynomial with the certified `6T-3`, package the two Jacobian-rank
+    certificates as smooth proper special fibres at two and three, and apply
+    the general zeta/Jacobian theorem; prove `#Jac(C)(𝔽₂)=71` and
     `#Jac(C)(𝔽₃)=71`; construct the actual good-reduction maps and prove
     their primary-kernel properties; construct the actual Jacobian pullback
     and norm maps and prove their degree-two composite; prove rational rank zero;

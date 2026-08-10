@@ -1,4 +1,4 @@
-import FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF3
+import FLT.Assumptions.MazurProof.RationalPointsN25QuotientHilbert
 import FLT.Assumptions.MazurProof.RationalPointsN25NewformEulerCertificate
 
 /-!
