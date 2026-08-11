@@ -1,6 +1,7 @@
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingDescent
 import Mathlib.CategoryTheory.Limits.Shapes.Equalizers
 import Mathlib.CategoryTheory.Limits.Shapes.Products
+import Mathlib.CategoryTheory.Limits.Shapes.Pullback.Mono
 
 /-!
 # Čech gluing of the N25 twisting module sheaf
@@ -92,6 +93,24 @@ theorem coordinateOverlap_isPullback (i j : Fin 4) :
   · rfl
   · simp
   · simp
+
+/-- On a self-overlap the two maps to the repeated chart coincide. -/
+theorem coordinateOverlapToLeft_self_eq_right (i : Fin 4) :
+    coordinateOverlapToLeft i i = coordinateOverlapToRight i i := by
+  unfold coordinateOverlapToLeft coordinateOverlapToRight
+  rw [coordinateChosenPullback_self_p₁_eq_p₂]
+
+/-- The projection from a chart's self-intersection back to that chart is an
+isomorphism: it is the pullback of a monomorphism along itself, transported
+through the chosen affine overlap isomorphism. -/
+noncomputable instance coordinateOverlapToLeftSelfIsIso (i : Fin 4) :
+    IsIso (coordinateOverlapToLeft i i) := by
+  haveI : IsIso (coordinateChosenPullback i i).p₁ := by
+    change IsIso (pullback.fst
+      (coordinateChartMap i) (coordinateChartMap i))
+    infer_instance
+  unfold coordinateOverlapToLeft
+  infer_instance
 
 /-! ## Open base change on the coordinate intersections
 
@@ -532,7 +551,10 @@ def coordinatePairToTripleIso12 (d : ℤ) (i j l : Fin 4) :
     (Scheme.Modules.restrictFunctor (coordinateTripleTo12 i j l)).obj
         (coordinateOverlapTwistModule d i j) ≅
       coordinateTripleTwistModule d i j l :=
-  Scheme.Modules.restrictUnitIso (coordinateTripleTo12 i j l)
+  (Scheme.Modules.restrictFunctor (coordinateTripleTo12 i j l)).mapIso
+      (coordinateOverlapTwistUnitIso d i j) ≪≫
+    Scheme.Modules.restrictUnitIso (coordinateTripleTo12 i j l) ≪≫
+    (coordinateTripleTwistUnitIso d i j l).symm
 
 /-- Restricting the `(j,l)` overlap's free rank-one sheaf gives the same
 triple-overlap sheaf. -/
@@ -540,7 +562,10 @@ def coordinatePairToTripleIso23 (d : ℤ) (i j l : Fin 4) :
     (Scheme.Modules.restrictFunctor (coordinateTripleTo23 i j l)).obj
         (coordinateOverlapTwistModule d j l) ≅
       coordinateTripleTwistModule d i j l :=
-  Scheme.Modules.restrictUnitIso (coordinateTripleTo23 i j l)
+  (Scheme.Modules.restrictFunctor (coordinateTripleTo23 i j l)).mapIso
+      (coordinateOverlapTwistUnitIso d j l) ≪≫
+    Scheme.Modules.restrictUnitIso (coordinateTripleTo23 i j l) ≪≫
+    (coordinateTripleTwistUnitIso d i j l).symm
 
 /-- Restricting the `(i,l)` overlap's free rank-one sheaf gives the same
 triple-overlap sheaf. -/
@@ -548,7 +573,10 @@ def coordinatePairToTripleIso13 (d : ℤ) (i j l : Fin 4) :
     (Scheme.Modules.restrictFunctor (coordinateTripleTo13 i j l)).obj
         (coordinateOverlapTwistModule d i l) ≅
       coordinateTripleTwistModule d i j l :=
-  Scheme.Modules.restrictUnitIso (coordinateTripleTo13 i j l)
+  (Scheme.Modules.restrictFunctor (coordinateTripleTo13 i j l)).mapIso
+      (coordinateOverlapTwistUnitIso d i l) ≪≫
+    Scheme.Modules.restrictUnitIso (coordinateTripleTo13 i j l) ≪≫
+    (coordinateTripleTwistUnitIso d i j l).symm
 
 set_option maxHeartbeats 800000 in
 -- Unfolding the three nested homogeneous localizations is expensive even
@@ -891,5 +919,637 @@ def coordinateLocalReconstruction (d : ℤ) (k : Fin 4) :
         (twistCechSource d) :=
   Pi.lift (fun i : Fin 4 ↦ coordinateLocalReconstructionHom d k i) ≫
     (restrictedTwistCechSourceIso d k).inv
+
+/-! ## Compatibility of reconstructed local families
+
+The following lemmas normalize the two routes from a chart to a triple
+overlap.  They keep base change, adjunction, unit trivializations, and the
+coordinate cocycle as separate mathematical steps.
+-/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Explicit unit trivializations compose along the first pair-to-triple
+route. -/
+theorem coordinateUnitRoute12 (d : ℤ) (k i j : Fin 4) :
+    Scheme.Modules.iteratedRestrictionHom
+        (coordinateTripleTo12 k i j) (coordinateOverlapToLeft k i)
+        (coordinateTripleToFirstChart k i j) rfl
+        (coordinateLocalTwistModule d k)
+        (coordinateOverlapTwistModule d k i)
+        (coordinateTripleTwistModule d k i j)
+        (coordinateRestrictLeftIso d k i).hom
+        (coordinatePairToTripleIso12 d k i j).hom =
+      (Scheme.Modules.restrictFunctor
+          (coordinateTripleToFirstChart k i j)).map
+          (coordinateLocalTwistUnitIso d k).hom ≫
+        (Scheme.Modules.restrictUnitIso
+          (coordinateTripleToFirstChart k i j)).hom ≫
+        (coordinateTripleTwistUnitIso d k i j).inv := by
+  simpa only [coordinateRestrictLeftIso,
+    coordinatePairToTripleIso12, Iso.trans_hom,
+    Iso.symm_hom, Functor.mapIso_hom, Category.assoc] using
+    (Scheme.Modules.iteratedRestrictionHom_of_unit
+      (q := coordinateTripleTo12 k i j)
+      (a := coordinateOverlapToLeft k i)
+      (g := coordinateTripleToFirstChart k i j)
+      rfl
+      (coordinateLocalTwistModule d k)
+      (coordinateOverlapTwistModule d k i)
+      (coordinateTripleTwistModule d k i j)
+      (coordinateLocalTwistUnitIso d k)
+      (coordinateOverlapTwistUnitIso d k i)
+      (coordinateTripleTwistUnitIso d k i j))
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Explicit unit trivializations also compose along the direct
+first-to-third pair route to the same canonical triple-open map. -/
+theorem coordinateUnitRoute13 (d : ℤ) (k i j : Fin 4) :
+    Scheme.Modules.iteratedRestrictionHom
+        (coordinateTripleTo13 k i j) (coordinateOverlapToLeft k j)
+        (coordinateTripleToFirstChart k i j)
+        (coordinateTripleTo13_comp_left_eq_coordinateTripleToFirstChart k i j)
+        (coordinateLocalTwistModule d k)
+        (coordinateOverlapTwistModule d k j)
+        (coordinateTripleTwistModule d k i j)
+        (coordinateRestrictLeftIso d k j).hom
+        (coordinatePairToTripleIso13 d k i j).hom =
+      (Scheme.Modules.restrictFunctor
+          (coordinateTripleToFirstChart k i j)).map
+          (coordinateLocalTwistUnitIso d k).hom ≫
+        (Scheme.Modules.restrictUnitIso
+          (coordinateTripleToFirstChart k i j)).hom ≫
+        (coordinateTripleTwistUnitIso d k i j).inv := by
+  simpa only [coordinateRestrictLeftIso,
+    coordinatePairToTripleIso13, Iso.trans_hom,
+    Iso.symm_hom, Functor.mapIso_hom, Category.assoc] using
+    (Scheme.Modules.iteratedRestrictionHom_of_unit
+      (q := coordinateTripleTo13 k i j)
+      (a := coordinateOverlapToLeft k j)
+      (g := coordinateTripleToFirstChart k i j)
+      (coordinateTripleTo13_comp_left_eq_coordinateTripleToFirstChart k i j)
+      (coordinateLocalTwistModule d k)
+      (coordinateOverlapTwistModule d k j)
+      (coordinateTripleTwistModule d k i j)
+      (coordinateLocalTwistUnitIso d k)
+      (coordinateOverlapTwistUnitIso d k j)
+      (coordinateTripleTwistUnitIso d k i j))
+
+/-- The canonical first-pair unit route remains in normal form under any
+further morphism out of the triple-overlap module. -/
+theorem coordinateUnitRoute12_comp
+    (d : ℤ) (k i j : Fin 4)
+    (K : (Spec (.of (coordinateTripleOverlapRing k i j))).Modules)
+    (u : coordinateTripleTwistModule d k i j ⟶ K) :
+    Scheme.Modules.iteratedRestrictionHom
+        (coordinateTripleTo12 k i j) (coordinateOverlapToLeft k i)
+        (coordinateTripleToFirstChart k i j) rfl
+        (coordinateLocalTwistModule d k)
+        (coordinateOverlapTwistModule d k i) K
+        (coordinateRestrictLeftIso d k i).hom
+        ((coordinatePairToTripleIso12 d k i j).hom ≫ u) =
+      ((Scheme.Modules.restrictFunctor
+          (coordinateTripleToFirstChart k i j)).map
+          (coordinateLocalTwistUnitIso d k).hom ≫
+        (Scheme.Modules.restrictUnitIso
+          (coordinateTripleToFirstChart k i j)).hom ≫
+        (coordinateTripleTwistUnitIso d k i j).inv) ≫ u := by
+  rw [Scheme.Modules.iteratedRestrictionHom_comp, coordinateUnitRoute12]
+
+/-- The direct first-to-third unit route has the analogous normal form under
+postcomposition. -/
+theorem coordinateUnitRoute13_comp
+    (d : ℤ) (k i j : Fin 4)
+    (K : (Spec (.of (coordinateTripleOverlapRing k i j))).Modules)
+    (u : coordinateTripleTwistModule d k i j ⟶ K) :
+    Scheme.Modules.iteratedRestrictionHom
+        (coordinateTripleTo13 k i j) (coordinateOverlapToLeft k j)
+        (coordinateTripleToFirstChart k i j)
+        (coordinateTripleTo13_comp_left_eq_coordinateTripleToFirstChart k i j)
+        (coordinateLocalTwistModule d k)
+        (coordinateOverlapTwistModule d k j) K
+        (coordinateRestrictLeftIso d k j).hom
+        ((coordinatePairToTripleIso13 d k i j).hom ≫ u) =
+      ((Scheme.Modules.restrictFunctor
+          (coordinateTripleToFirstChart k i j)).map
+          (coordinateLocalTwistUnitIso d k).hom ≫
+        (Scheme.Modules.restrictUnitIso
+          (coordinateTripleToFirstChart k i j)).hom ≫
+        (coordinateTripleTwistUnitIso d k i j).inv) ≫ u := by
+  rw [Scheme.Modules.iteratedRestrictionHom_comp, coordinateUnitRoute13]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The unit trivializations on the two sides of the inner `(k,i,j)`
+pullback square agree after transport to the fixed triple-overlap module. -/
+theorem coordinateUnitPullback12 (d : ℤ) (k i j : Fin 4) :
+    Scheme.Modules.pullbackRestrictionHom
+        (coordinateTripleTo23 k i j) (coordinateTripleTo12 k i j)
+        (coordinateOverlapToLeft i j) (coordinateOverlapToRight k i)
+        (coordinateTripleInner_isPullback k i j)
+        (coordinateLocalTwistModule d i)
+        (coordinateOverlapTwistModule d i j)
+        (coordinateRestrictLeftIso d i j).hom ≫
+      (coordinatePairToTripleIso23 d k i j).hom =
+    (Scheme.Modules.restrictFunctor
+        (coordinateTripleTo12 k i j)).map
+        (coordinateRestrictRightIso d k i).hom ≫
+      (coordinatePairToTripleIso12 d k i j).hom := by
+  simpa only [Scheme.Modules.unitRestrictionHom,
+    coordinateRestrictLeftIso, coordinateRestrictRightIso,
+    coordinatePairToTripleIso12, coordinatePairToTripleIso23,
+    Iso.trans_hom, Iso.symm_hom, Functor.mapIso_hom, Category.assoc] using
+    (Scheme.Modules.pullbackRestrictionHom_of_unit
+      (coordinateTripleTo23 k i j) (coordinateTripleTo12 k i j)
+      (coordinateOverlapToLeft i j) (coordinateOverlapToRight k i)
+      (coordinateTripleInner_isPullback k i j)
+      (coordinateLocalTwistModule d i)
+      (coordinateOverlapTwistModule d i j)
+      (coordinateOverlapTwistModule d k i)
+      (coordinateTripleTwistModule d k i j)
+      (coordinateLocalTwistUnitIso d i)
+      (coordinateOverlapTwistUnitIso d i j)
+      (coordinateOverlapTwistUnitIso d k i)
+      (coordinateTripleTwistUnitIso d k i j))
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The unit trivializations on the two sides of the inner `(k,j,i)`
+pullback square agree after transport to the fixed triple-overlap module. -/
+theorem coordinateUnitPullback13 (d : ℤ) (k i j : Fin 4) :
+    Scheme.Modules.pullbackRestrictionHom
+        (coordinateTripleTo23 k i j) (coordinateTripleTo13 k i j)
+        (coordinateOverlapToRight i j) (coordinateOverlapToRight k j)
+        (coordinateTripleInner13_isPullback k i j)
+        (coordinateLocalTwistModule d j)
+        (coordinateOverlapTwistModule d i j)
+        (coordinateRestrictRightIso d i j).hom ≫
+      (coordinatePairToTripleIso23 d k i j).hom =
+    (Scheme.Modules.restrictFunctor
+        (coordinateTripleTo13 k i j)).map
+        (coordinateRestrictRightIso d k j).hom ≫
+      (coordinatePairToTripleIso13 d k i j).hom := by
+  simpa only [Scheme.Modules.unitRestrictionHom, coordinateRestrictRightIso,
+    coordinatePairToTripleIso13, coordinatePairToTripleIso23,
+    Iso.trans_hom, Iso.symm_hom, Functor.mapIso_hom, Category.assoc] using
+    (Scheme.Modules.pullbackRestrictionHom_of_unit
+      (coordinateTripleTo23 k i j) (coordinateTripleTo13 k i j)
+      (coordinateOverlapToRight i j) (coordinateOverlapToRight k j)
+      (coordinateTripleInner13_isPullback k i j)
+      (coordinateLocalTwistModule d j)
+      (coordinateOverlapTwistModule d i j)
+      (coordinateOverlapTwistModule d k j)
+      (coordinateTripleTwistModule d k i j)
+      (coordinateLocalTwistUnitIso d j)
+      (coordinateOverlapTwistUnitIso d i j)
+      (coordinateOverlapTwistUnitIso d k j)
+      (coordinateTripleTwistUnitIso d k i j))
+
+/-! ## Cancellation of adjacent descent trivializations
+
+After the inner pullback square has been normalized, the right-hand
+trivialization of the first descent leg meets its inverse on the second leg.
+The following two coordinate forms expose that cancellation without unfolding
+the surrounding restriction pseudofunctors.
+-/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Along the `(k,i)` route, the right chart trivialization cancels after
+restriction to the ordered triple overlap. -/
+theorem coordinateDescentCancel12
+    (d : ℤ) (k i j : Fin 4)
+    (K : (Spec (.of (coordinateTripleOverlapRing k i j))).Modules)
+    (u : (Scheme.Modules.restrictFunctor
+        (coordinateTripleTo12 k i j)).obj
+          (coordinateOverlapTwistModule d k i) ⟶ K) :
+    Scheme.Modules.iteratedRestrictionHom
+        (coordinateTripleTo12 k i j) (coordinateOverlapToLeft k i)
+        (coordinateTripleToFirstChart k i j) rfl
+        (coordinateLocalTwistModule d k)
+        ((Scheme.Modules.restrictFunctor
+          (coordinateOverlapToRight k i)).obj
+            (coordinateLocalTwistModule d i)) K
+        (coordinateDescentIso d k i).hom
+        ((Scheme.Modules.restrictFunctor
+          (coordinateTripleTo12 k i j)).map
+            (coordinateRestrictRightIso d k i).hom ≫ u) =
+      Scheme.Modules.iteratedRestrictionHom
+        (coordinateTripleTo12 k i j) (coordinateOverlapToLeft k i)
+        (coordinateTripleToFirstChart k i j) rfl
+        (coordinateLocalTwistModule d k)
+        (coordinateOverlapTwistModule d k i) K
+        ((coordinateRestrictLeftIso d k i).hom ≫
+          (coordinateOverlapTwistIso d k i).hom) u := by
+  simpa only [coordinateDescentIso, Iso.trans_hom, Iso.symm_hom,
+    Category.assoc] using
+    (Scheme.Modules.iteratedRestrictionHom_cancel_iso
+      (coordinateTripleTo12 k i j) (coordinateOverlapToLeft k i)
+      (coordinateTripleToFirstChart k i j) rfl
+      (coordinateLocalTwistModule d k)
+      (coordinateOverlapTwistModule d k i)
+      ((Scheme.Modules.restrictFunctor
+        (coordinateOverlapToRight k i)).obj
+          (coordinateLocalTwistModule d i)) K
+      ((coordinateRestrictLeftIso d k i).hom ≫
+        (coordinateOverlapTwistIso d k i).hom)
+      (coordinateRestrictRightIso d k i) u)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Along the direct `(k,j)` route, the right chart trivialization cancels
+after restriction to the ordered triple overlap. -/
+theorem coordinateDescentCancel13
+    (d : ℤ) (k i j : Fin 4)
+    (K : (Spec (.of (coordinateTripleOverlapRing k i j))).Modules)
+    (u : (Scheme.Modules.restrictFunctor
+        (coordinateTripleTo13 k i j)).obj
+          (coordinateOverlapTwistModule d k j) ⟶ K) :
+    Scheme.Modules.iteratedRestrictionHom
+        (coordinateTripleTo13 k i j) (coordinateOverlapToLeft k j)
+        (coordinateTripleToFirstChart k i j)
+        (coordinateTripleTo13_comp_left_eq_coordinateTripleToFirstChart k i j)
+        (coordinateLocalTwistModule d k)
+        ((Scheme.Modules.restrictFunctor
+          (coordinateOverlapToRight k j)).obj
+            (coordinateLocalTwistModule d j)) K
+        (coordinateDescentIso d k j).hom
+        ((Scheme.Modules.restrictFunctor
+          (coordinateTripleTo13 k i j)).map
+            (coordinateRestrictRightIso d k j).hom ≫ u) =
+      Scheme.Modules.iteratedRestrictionHom
+        (coordinateTripleTo13 k i j) (coordinateOverlapToLeft k j)
+        (coordinateTripleToFirstChart k i j)
+        (coordinateTripleTo13_comp_left_eq_coordinateTripleToFirstChart k i j)
+        (coordinateLocalTwistModule d k)
+        (coordinateOverlapTwistModule d k j) K
+        ((coordinateRestrictLeftIso d k j).hom ≫
+          (coordinateOverlapTwistIso d k j).hom) u := by
+  simpa only [coordinateDescentIso, Iso.trans_hom, Iso.symm_hom,
+    Category.assoc] using
+    (Scheme.Modules.iteratedRestrictionHom_cancel_iso
+      (coordinateTripleTo13 k i j) (coordinateOverlapToLeft k j)
+      (coordinateTripleToFirstChart k i j)
+      (coordinateTripleTo13_comp_left_eq_coordinateTripleToFirstChart k i j)
+      (coordinateLocalTwistModule d k)
+      (coordinateOverlapTwistModule d k j)
+      ((Scheme.Modules.restrictFunctor
+        (coordinateOverlapToRight k j)).obj
+          (coordinateLocalTwistModule d j)) K
+      ((coordinateRestrictLeftIso d k j).hom ≫
+        (coordinateOverlapTwistIso d k j).hom)
+      (coordinateRestrictRightIso d k j) u)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- One pair component of the family reconstructed from chart `k` satisfies
+its Čech compatibility equation on the ordered overlap `(i,j)`.
+
+The proof pulls both extensions by zero back to the triple overlap `(k,i,j)`,
+transposes them along the smallest-open adjunction, and cancels the canonical
+unit trivializations.  What remains is precisely the coordinate transition
+cocycle proved above. -/
+theorem coordinateLocalReconstruction_pair
+    (d : ℤ) (k i j : Fin 4) :
+    coordinateLocalReconstructionHom d k i ≫
+        (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+          (pushforwardRestrictionHom
+            (coordinateOverlapToLeft i j)
+            (coordinateChartMap i)
+            (coordinateOverlapMap i j)
+            rfl
+            (coordinateLocalTwistModule d i)
+            (coordinateOverlapTwistModule d i j)
+            (coordinateRestrictLeftIso d i j ≪≫
+              coordinateOverlapTwistIso d i j)) =
+      coordinateLocalReconstructionHom d k j ≫
+        (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+          (pushforwardRestrictionHom
+            (coordinateOverlapToRight i j)
+            (coordinateChartMap j)
+            (coordinateOverlapMap i j)
+            (coordinateOverlapMap_eq_right i j)
+            (coordinateLocalTwistModule d j)
+            (coordinateOverlapTwistModule d i j)
+            (coordinateRestrictRightIso d i j)) := by
+  rw [← cancel_mono (coordinateTripleTwistBaseChangeIso d k i j).hom]
+  have hleft0 :=
+    Scheme.Modules.openBaseChange_pushforwardRestrictionHomOfHom_congr
+      (iU := coordinateChartMap k) (f := coordinateChartMap i)
+      (r := coordinateTripleTo23 k i j)
+      (q := coordinateTripleTo12 k i j)
+      (k := coordinateOverlapToLeft i j)
+      (b := coordinateOverlapToRight k i)
+      (a := coordinateOverlapToLeft k i)
+      (h := coordinateOverlapMap i j)
+      (g := coordinateTripleToFirstChart k i j)
+      rfl rfl
+      (coordinateTripleInner_isPullback k i j)
+      (coordinateOverlap_isPullback k i)
+      (coordinateTriple_isPullback k i j).flip
+      (coordinateLocalTwistModule d i)
+      (coordinateOverlapTwistModule d i j)
+      (coordinateRestrictLeftIso d i j ≪≫
+        coordinateOverlapTwistIso d i j).hom
+  have hright0 :=
+    Scheme.Modules.openBaseChange_pushforwardRestrictionHomOfHom_congr
+      (iU := coordinateChartMap k) (f := coordinateChartMap j)
+      (r := coordinateTripleTo23 k i j)
+      (q := coordinateTripleTo13 k i j)
+      (k := coordinateOverlapToRight i j)
+      (b := coordinateOverlapToRight k j)
+      (a := coordinateOverlapToLeft k j)
+      (h := coordinateOverlapMap i j)
+      (g := coordinateTripleToFirstChart k i j)
+      (coordinateOverlapMap_eq_right i j)
+      (coordinateTripleTo13_comp_left_eq_coordinateTripleToFirstChart k i j)
+      (coordinateTripleInner13_isPullback k i j)
+      (coordinateOverlap_isPullback k j)
+      (coordinateTriple_isPullback k i j).flip
+      (coordinateLocalTwistModule d j)
+      (coordinateOverlapTwistModule d i j)
+      (coordinateRestrictRightIso d i j).hom
+  dsimp only [coordinateLocalReconstructionHom,
+    coordinateTripleTwistBaseChangeIso,
+    coordinateTripleBaseChangeIso, coordinateLocalPushforwardBaseChangeIso]
+  simp only [pushforwardRestrictionHom, Iso.trans_hom,
+    Functor.mapIso_hom, Category.assoc] at hleft0 hright0 ⊢
+  slice_lhs 3 5 => rw [hleft0]
+  slice_rhs 3 5 => rw [hright0]
+  apply ((Scheme.Modules.restrictAdjunction
+    (coordinateTripleToFirstChart k i j)).homEquiv _ _).symm.injective
+  have htransposeLeft :=
+    Scheme.Modules.pushforwardRestrictionHomOfHom_transpose_comp
+      (q := coordinateTripleTo12 k i j)
+      (a := coordinateOverlapToLeft k i)
+      (g := coordinateTripleToFirstChart k i j)
+      rfl
+      (coordinateLocalTwistModule d k)
+      ((Scheme.Modules.restrictFunctor
+        (coordinateOverlapToRight k i)).obj
+          (coordinateLocalTwistModule d i))
+      ((Scheme.Modules.restrictFunctor
+        (coordinateTripleTo23 k i j)).obj
+          (coordinateOverlapTwistModule d i j))
+      (coordinateTripleTwistModule d k i j)
+      (coordinateDescentIso d k i).hom
+      (Scheme.Modules.pullbackRestrictionHom
+        (coordinateTripleTo23 k i j) (coordinateTripleTo12 k i j)
+        (coordinateOverlapToLeft i j) (coordinateOverlapToRight k i)
+        (coordinateTripleInner_isPullback k i j)
+        (coordinateLocalTwistModule d i)
+        (coordinateOverlapTwistModule d i j)
+        ((coordinateRestrictLeftIso d i j).hom ≫
+          (coordinateOverlapTwistIso d i j).hom))
+      (coordinatePairToTripleIso23 d k i j).hom
+  have htransposeRight :=
+    Scheme.Modules.pushforwardRestrictionHomOfHom_transpose_comp
+      (q := coordinateTripleTo13 k i j)
+      (a := coordinateOverlapToLeft k j)
+      (g := coordinateTripleToFirstChart k i j)
+      (coordinateTripleTo13_comp_left_eq_coordinateTripleToFirstChart k i j)
+      (coordinateLocalTwistModule d k)
+      ((Scheme.Modules.restrictFunctor
+        (coordinateOverlapToRight k j)).obj
+          (coordinateLocalTwistModule d j))
+      ((Scheme.Modules.restrictFunctor
+        (coordinateTripleTo23 k i j)).obj
+          (coordinateOverlapTwistModule d i j))
+      (coordinateTripleTwistModule d k i j)
+      (coordinateDescentIso d k j).hom
+      (Scheme.Modules.pullbackRestrictionHom
+        (coordinateTripleTo23 k i j) (coordinateTripleTo13 k i j)
+        (coordinateOverlapToRight i j) (coordinateOverlapToRight k j)
+        (coordinateTripleInner13_isPullback k i j)
+        (coordinateLocalTwistModule d j)
+        (coordinateOverlapTwistModule d i j)
+        (coordinateRestrictRightIso d i j).hom)
+      (coordinatePairToTripleIso23 d k i j).hom
+  simp only [Category.assoc] at htransposeLeft htransposeRight
+  rw [htransposeLeft, htransposeRight]
+  rw [Scheme.Modules.pullbackRestrictionHom_comp]
+  rw [← (coordinatePairToTripleIso23 d k i j).hom_inv_id_assoc
+    ((Scheme.Modules.restrictFunctor
+      (coordinateTripleTo23 k i j)).map
+        (coordinateOverlapTwistIso d i j).hom)]
+  rw [reassoc_of% coordinateUnitPullback12]
+  conv_rhs => rw [← Scheme.Modules.iteratedRestrictionHom_comp]
+  rw [coordinateUnitPullback13]
+  rw [coordinateDescentCancel12, coordinateDescentCancel13]
+  conv_lhs => rw [Scheme.Modules.iteratedRestrictionHom_middle_comp]
+  conv_rhs => rw [Scheme.Modules.iteratedRestrictionHom_middle_comp]
+  conv_lhs =>
+    rw [← (coordinatePairToTripleIso12 d k i j).hom_inv_id_assoc
+      ((Scheme.Modules.restrictFunctor
+        (coordinateTripleTo12 k i j)).map
+          (coordinateOverlapTwistIso d k i).hom ≫
+        (coordinatePairToTripleIso12 d k i j).hom ≫
+        (coordinatePairToTripleIso23 d k i j).inv ≫
+        (Scheme.Modules.restrictFunctor
+          (coordinateTripleTo23 k i j)).map
+            (coordinateOverlapTwistIso d i j).hom)]
+  conv_rhs =>
+    rw [← (coordinatePairToTripleIso13 d k i j).hom_inv_id_assoc
+      ((Scheme.Modules.restrictFunctor
+        (coordinateTripleTo13 k i j)).map
+          (coordinateOverlapTwistIso d k j).hom ≫
+        (coordinatePairToTripleIso13 d k i j).hom)]
+  rw [coordinateUnitRoute12_comp, coordinateUnitRoute13_comp]
+  simp only [Category.assoc]
+  rw [cancel_epi
+    ((Scheme.Modules.restrictFunctor
+      (coordinateTripleToFirstChart k i j)).map
+        (coordinateLocalTwistUnitIso d k).hom)]
+  rw [cancel_epi
+    (Scheme.Modules.restrictUnitIso
+      (coordinateTripleToFirstChart k i j)).hom]
+  rw [cancel_epi (coordinateTripleTwistUnitIso d k i j).inv]
+  simpa only [Category.assoc] using
+    coordinateRestrictedOverlapTwistIso_cocycle d k i j
+
+/-- The restricted overlap-product comparison intertwines each product
+projection with restriction of the corresponding global projection. -/
+@[reassoc]
+theorem restrictedTwistCechTargetIso_hom_π
+    (d : ℤ) (k : Fin 4) (p : Fin 4 × Fin 4) :
+    (restrictedTwistCechTargetIso d k).hom ≫
+        Pi.π (fun q : Fin 4 × Fin 4 ↦
+          (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+            (coordinateOverlapPushforward d q)) p =
+      (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+        (Pi.π (fun q : Fin 4 × Fin 4 ↦
+          coordinateOverlapPushforward d q) p) := by
+  exact piComparison_comp_π
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k))
+    (fun q : Fin 4 × Fin 4 ↦ coordinateOverlapPushforward d q) p
+
+/-- The product family reconstructed from chart `k` satisfies every
+restricted Čech equation, hence defines an object of the restricted
+equalizer.  Product extensionality reduces the assertion to
+`coordinateLocalReconstruction_pair` for each ordered pair. -/
+theorem coordinateLocalReconstruction_compatibility
+    (d : ℤ) (k : Fin 4) :
+    coordinateLocalReconstruction d k ≫
+        (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+          (twistCechLeft d) =
+      coordinateLocalReconstruction d k ≫
+        (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+          (twistCechRight d) := by
+  rw [← cancel_mono (restrictedTwistCechTargetIso d k).hom]
+  apply Pi.hom_ext _ _
+  intro p
+  simp only [Category.assoc]
+  rw [restrictedTwistCechTargetIso_hom_π]
+  rw [← Functor.map_comp, ← Functor.map_comp]
+  unfold twistCechLeft twistCechRight
+  rw [Pi.lift_π, Pi.lift_π]
+  rw [Functor.map_comp, Functor.map_comp]
+  unfold coordinateLocalReconstruction
+  simp only [Category.assoc]
+  rw [restrictedTwistCechSourceIso_inv_map_π_assoc,
+    restrictedTwistCechSourceIso_inv_map_π_assoc]
+  simpa only [Pi.lift_π_assoc] using
+    coordinateLocalReconstruction_pair d k p.1 p.2
+
+/-- The reconstructed compatible family, viewed as a section of the
+restriction of the global Čech equalizer to chart `k`.  The first arrow is
+the equalizer lift justified by the cocycle; the second transports it back
+through preservation of the equalizer by open restriction. -/
+def coordinateLocalToRestrictedGlobalTwist (d : ℤ) (k : Fin 4) :
+    coordinateLocalTwistModule d k ⟶
+      (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        (globalTwistModule d) :=
+  equalizer.lift (coordinateLocalReconstruction d k)
+      (coordinateLocalReconstruction_compatibility d k) ≫
+    (restrictedGlobalTwistCechIso d k).inv
+
+/-- After returning to the restricted equalizer and forgetting compatibility,
+the reconstructed section is the original product family. -/
+@[reassoc]
+theorem coordinateLocalToRestrictedGlobalTwist_comp_comparison_ι
+    (d : ℤ) (k : Fin 4) :
+    coordinateLocalToRestrictedGlobalTwist d k ≫
+        (restrictedGlobalTwistCechIso d k).hom ≫
+        equalizer.ι
+          ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (twistCechLeft d))
+          ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (twistCechRight d)) =
+      coordinateLocalReconstruction d k := by
+  unfold coordinateLocalToRestrictedGlobalTwist
+  simp only [Category.assoc, Iso.inv_hom_id_assoc, equalizer.lift_ι]
+
+/-! ## Diagonal evaluation
+
+The remaining effectivity argument begins by evaluating a reconstructed
+family back on its base chart.  This composite is automatically invertible:
+the self-intersection projection is an isomorphism, and every other factor is
+an explicitly named descent, base-change, or adjunction isomorphism.
+-/
+
+/-- Every factor in diagonal reconstruction is invertible: the self-overlap
+projection, descent transition, Beck--Chevalley comparison, and chart counit. -/
+theorem coordinateLocalReconstruction_diagonal_isIso (d : ℤ) (i : Fin 4) :
+    IsIso (coordinateLocalReconstructionHom d i i ≫
+      (Scheme.Modules.restrictAdjunction
+        (coordinateChartMap i)).counit.app
+          (coordinateLocalTwistModule d i)) := by
+  haveI : IsIso ((Scheme.Modules.restrictAdjunction
+      (coordinateOverlapToLeft i i)).unit.app
+        (coordinateLocalTwistModule d i)) :=
+    Scheme.Modules.restrictAdjunction_unit_app_isIso_of_isIso _ _
+  let eUnit := asIso ((Scheme.Modules.restrictAdjunction
+    (coordinateOverlapToLeft i i)).unit.app
+      (coordinateLocalTwistModule d i))
+  let eDescent := (Scheme.Modules.pushforward
+    (coordinateOverlapToLeft i i)).mapIso (coordinateDescentIso d i i)
+  let eBase := (coordinateLocalPushforwardBaseChangeIso d i i).symm
+  let eCounit := asIso ((Scheme.Modules.restrictAdjunction
+    (coordinateChartMap i)).counit.app
+      (coordinateLocalTwistModule d i))
+  change IsIso ((eUnit ≪≫ eDescent ≪≫ eBase ≪≫ eCounit).hom)
+  infer_instance
+
+/-- The adjoint definition of local evaluation is restriction of the global
+product projection followed by the counit of the open-immersion adjunction. -/
+theorem globalTwistModuleToLocal_eq (d : ℤ) (k : Fin 4) :
+    globalTwistModuleToLocal d k =
+      (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+          (equalizer.ι (twistCechLeft d) (twistCechRight d) ≫
+            Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward d j) k) ≫
+        (Scheme.Modules.restrictAdjunction
+          (coordinateChartMap k)).counit.app
+            (coordinateLocalTwistModule d k) := by
+  unfold globalTwistModuleToLocal
+  rw [Adjunction.homEquiv_counit]
+  rfl
+
+/-- Restriction of the global equalizer inclusion is the inclusion of the
+restricted equalizer produced by preservation of limits. -/
+@[reassoc]
+theorem restrictedGlobalTwistCechIso_hom_ι (d : ℤ) (k : Fin 4) :
+    (restrictedGlobalTwistCechIso d k).hom ≫
+        equalizer.ι
+          ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (twistCechLeft d))
+          ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (twistCechRight d)) =
+      (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+        (equalizer.ι (twistCechLeft d) (twistCechRight d)) := by
+  exact equalizerComparison_comp_π
+    (twistCechLeft d) (twistCechRight d)
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k))
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Evaluation after reconstruction reduces to the diagonal reconstructed
+component followed by the adjunction counit. -/
+theorem coordinateLocalToRestrictedGlobalTwist_comp_evaluation
+    (d : ℤ) (k : Fin 4) :
+    coordinateLocalToRestrictedGlobalTwist d k ≫
+        globalTwistModuleToLocal d k =
+      coordinateLocalReconstructionHom d k k ≫
+        (Scheme.Modules.restrictAdjunction
+          (coordinateChartMap k)).counit.app
+            (coordinateLocalTwistModule d k) := by
+  calc
+    _ = coordinateLocalToRestrictedGlobalTwist d k ≫
+          (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (equalizer.ι (twistCechLeft d) (twistCechRight d)) ≫
+          (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward d j) k) ≫
+          (Scheme.Modules.restrictAdjunction
+            (coordinateChartMap k)).counit.app
+              (coordinateLocalTwistModule d k) := by
+        rw [globalTwistModuleToLocal_eq, Functor.map_comp]
+        simp only [Category.assoc]
+    _ = coordinateLocalToRestrictedGlobalTwist d k ≫
+          (restrictedGlobalTwistCechIso d k).hom ≫
+          equalizer.ι
+            ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+              (twistCechLeft d))
+            ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+              (twistCechRight d)) ≫
+          (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward d j) k) ≫
+          (Scheme.Modules.restrictAdjunction
+            (coordinateChartMap k)).counit.app
+              (coordinateLocalTwistModule d k) := by
+        rw [← restrictedGlobalTwistCechIso_hom_ι_assoc]
+    _ = coordinateLocalReconstruction d k ≫
+          (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward d j) k) ≫
+          (Scheme.Modules.restrictAdjunction
+            (coordinateChartMap k)).counit.app
+              (coordinateLocalTwistModule d k) := by
+        rw [coordinateLocalToRestrictedGlobalTwist_comp_comparison_ι_assoc]
+    _ = _ := by
+      unfold coordinateLocalReconstruction
+      simp only [Category.assoc]
+      rw [restrictedTwistCechSourceIso_inv_map_π_assoc]
+      rw [Pi.lift_π_assoc]
+
+/-- Reconstructing from chart `k` and evaluating there is an isomorphism.
+The stronger statement that reconstruction itself is an isomorphism now
+reduces to uniqueness of compatible families from their `k`-th component. -/
+theorem coordinateLocalToRestrictedGlobalTwist_comp_evaluation_isIso
+    (d : ℤ) (k : Fin 4) :
+    IsIso (coordinateLocalToRestrictedGlobalTwist d k ≫
+      globalTwistModuleToLocal d k) := by
+  rw [coordinateLocalToRestrictedGlobalTwist_comp_evaluation]
+  exact coordinateLocalReconstruction_diagonal_isIso d k
 
 end MazurProof.RationalPointsN25QuotientTwoTwistingSheafGluing

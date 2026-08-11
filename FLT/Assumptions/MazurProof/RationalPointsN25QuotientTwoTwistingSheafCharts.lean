@@ -123,6 +123,19 @@ def coordinateTripleTwistModule (_d : ℤ) (i j l : Fin 4) :
     (ModuleCat.of (coordinateTripleOverlapRing i j l)
       (coordinateTripleOverlapRing i j l))
 
+set_option synthInstance.maxHeartbeats 100000 in
+-- The threefold homogeneous localization creates a large sheaf-composition
+-- instance, so only this canonical affine trivialization receives more search.
+/-- The triple-overlap rank-one tilde sheaf is canonically the unit module
+sheaf.  Naming this trivialization keeps the two stages of pair restriction
+explicit, so their coherence can be proved without relying on definitional
+equality between `tildeSelf` and a reflexive isomorphism. -/
+def coordinateTripleTwistUnitIso (d : ℤ) (i j l : Fin 4) :
+    coordinateTripleTwistModule d i j l ≅
+      SheafOfModules.unit
+        (Spec (.of (coordinateTripleOverlapRing i j l))).ringCatSheaf :=
+  AlgebraicGeometry.tildeSelf
+
 /-- The restricted first-to-second transition as a tilde-sheaf
 isomorphism. -/
 def coordinateTripleTwistIso12 (d : ℤ) (i j l : Fin 4) :

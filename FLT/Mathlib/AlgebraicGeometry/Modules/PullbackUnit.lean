@@ -216,6 +216,25 @@ def pullbackUnitIso :
       SheafOfModules.unit X.ringCatSheaf :=
   (restrictFunctorIsoPullback f).symm.app _ ≪≫ restrictUnitIso f
 
+/-- If an open immersion is an isomorphism, restriction followed by extension
+by zero is naturally isomorphic to the identity.  Sectionwise, the adjunction
+unit is restriction along `f '' f ⁻¹ U = U`, hence the image of an isomorphism
+of opens under the module presheaf. -/
+theorem restrictAdjunction_unit_app_isIso_of_isIso [IsIso f]
+    (M : Y.Modules) :
+    IsIso ((restrictAdjunction f).unit.app M) := by
+  rw [Hom.isIso_iff_isIso_app]
+  intro U
+  rw [restrictAdjunction_unit_app_app]
+  have h : f ''ᵁ f ⁻¹ᵁ U = U := by
+    rw [f.image_preimage_eq_opensRange_inf,
+      Scheme.Hom.opensRange_of_isIso, top_inf_eq]
+  have hhom : homOfLE (f.image_preimage_le U) = eqToHom h :=
+    Subsingleton.elim _ _
+  rw [hhom]
+  change IsIso (M.presheaf.map (eqToIso h).hom.op)
+  infer_instance
+
 /-! ## Open base change for module sheaves
 
 For a cartesian square of open immersions, restricting a direct image across
@@ -391,6 +410,20 @@ def pullbackRestrictionHom (Hk : IsPullback r q k b)
     (restrictFunctorComp r k).hom.app F ≫
     (restrictFunctor r).map e
 
+set_option backward.isDefEq.respectTransparency false in
+/-- Restricting a composite coefficient morphism through a cartesian open
+square is the pulled-back first morphism followed by the restricted second
+morphism. -/
+theorem pullbackRestrictionHom_comp (Hk : IsPullback r q k b)
+    (F : X.Modules) (G K : V.Modules)
+    (e : (restrictFunctor k).obj F ⟶ G) (u : G ⟶ K) :
+    pullbackRestrictionHom r q k b Hk F K (e ≫ u) =
+      pullbackRestrictionHom r q k b Hk F G e ≫
+        (restrictFunctor r).map u := by
+  unfold pullbackRestrictionHom
+  rw [Functor.map_comp]
+  rfl
+
 set_option maxHeartbeats 800000 in
 -- Sectionwise normalization exposes several nested pseudofunctorial maps.
 set_option backward.isDefEq.respectTransparency false in
@@ -517,6 +550,86 @@ def iteratedRestrictionHom (hq : q ≫ a = g)
     (restrictFunctorComp q a).hom.app F ≫
     (restrictFunctor q).map e₁ ≫ e₂
 
+/-- Postcomposition on the smallest open commutes with the construction of
+an iterated restriction map. -/
+theorem iteratedRestrictionHom_comp (hq : q ≫ a = g)
+    (F : U.Modules) (H : P.Modules) (K L : Q.Modules)
+    (e₁ : (restrictFunctor a).obj F ⟶ H)
+    (e₂ : (restrictFunctor q).obj H ⟶ K) (u : K ⟶ L) :
+    iteratedRestrictionHom q a g hq F H L e₁ (e₂ ≫ u) =
+      iteratedRestrictionHom q a g hq F H K e₁ e₂ ≫ u := by
+  unfold iteratedRestrictionHom
+  simp only [Category.assoc]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- An intermediate isomorphism followed by its restricted inverse data
+cancels inside an iterated restriction.  This is the categorical step that
+removes a chart trivialization after two adjacent descent legs are pasted. -/
+theorem iteratedRestrictionHom_cancel_iso (hq : q ≫ a = g)
+    (F : U.Modules) (H H' : P.Modules) (K : Q.Modules)
+    (e₁ : (restrictFunctor a).obj F ⟶ H)
+    (e : H' ≅ H) (e₂ : (restrictFunctor q).obj H ⟶ K) :
+    iteratedRestrictionHom q a g hq F H' K
+        (e₁ ≫ e.inv) ((restrictFunctor q).map e.hom ≫ e₂) =
+      iteratedRestrictionHom q a g hq F H K e₁ e₂ := by
+  unfold iteratedRestrictionHom
+  simp_rw [Functor.map_comp]
+  simp only [Category.assoc]
+  rw [← (restrictFunctor q).map_comp_assoc e.inv e.hom,
+    Iso.inv_hom_id]
+  have hmapid : (restrictFunctor q).map (𝟙 H) = 𝟙 _ :=
+    (restrictFunctor q).map_id H
+  rw [hmapid, Category.id_comp]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- A coefficient morphism on the intermediate open may be moved from the
+first leg to its restricted action on the second leg. -/
+theorem iteratedRestrictionHom_middle_comp (hq : q ≫ a = g)
+    (F : U.Modules) (H H' : P.Modules) (K : Q.Modules)
+    (e₁ : (restrictFunctor a).obj F ⟶ H)
+    (u : H ⟶ H') (e₂ : (restrictFunctor q).obj H' ⟶ K) :
+    iteratedRestrictionHom q a g hq F H' K (e₁ ≫ u) e₂ =
+      iteratedRestrictionHom q a g hq F H K e₁
+        ((restrictFunctor q).map u ≫ e₂) := by
+  unfold iteratedRestrictionHom
+  simp_rw [Functor.map_comp]
+  simp only [Category.assoc]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The restriction morphism between two chosen trivializations of the unit
+module.  Naming this composite prevents pseudofunctoriality proofs from
+re-expanding all three factors at each use site. -/
+def unitRestrictionHom (F : U.Modules) (H : P.Modules)
+    (eF : F ≅ SheafOfModules.unit U.ringCatSheaf)
+    (eH : H ≅ SheafOfModules.unit P.ringCatSheaf) :
+    (restrictFunctor a).obj F ⟶ H :=
+  (restrictFunctor a).map eF.hom ≫
+    (restrictUnitIso a).hom ≫ eH.inv
+
+/-- Reversing an equality of open immersions turns the forward restriction
+comparison into the inverse comparison. -/
+theorem restrictFunctorCongr_symm_hom_app_eq_inv
+    {f g : Q ⟶ U} (hfg : f = g)
+    [IsOpenImmersion f] [IsOpenImmersion g] (F : U.Modules) :
+    (restrictFunctorCongr hfg.symm).hom.app F =
+      (restrictFunctorCongr hfg).inv.app F := by
+  apply hom_ext
+  intro W
+  simp only [restrictFunctorCongr_hom_app_app,
+    restrictFunctorCongr_inv_app_app]
+
+/-- The restriction comparison attached to a reflexive equality is the
+identity comparison. -/
+theorem restrictFunctorCongr_refl_inv_app
+    (f : Q ⟶ U) [IsOpenImmersion f] (F : U.Modules) :
+    (restrictFunctorCongr (rfl : f = f)).inv.app F = 𝟙 _ := by
+  apply hom_ext
+  intro W
+  rw [restrictFunctorCongr_inv_app_app, Hom.id_app]
+  change F.presheaf.map _ = 𝟙 (F.presheaf.obj (Opposite.op (f ''ᵁ W)))
+  rw [← F.presheaf.map_id]
+  congr 1
+
 set_option backward.isDefEq.respectTransparency false in
 /-- Successive canonical trivializations of the restricted unit module agree
 with the canonical trivialization for the composite open immersion.  The proof
@@ -615,6 +728,55 @@ theorem iteratedRestrictionHom_of_unit (hq : q ≫ a = g)
         (restrictUnitIso g).hom := by
     simpa only [iteratedRestrictionHom] using restrictUnitIso_comp q a g hq
   slice_lhs 2 5 => rw [hunit]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Canonical unit trivializations commute around a cartesian square of open
+immersions.  After cancelling the comparison for the upper composite, both
+routes are iterated restrictions of the same ambient unit module, so
+`iteratedRestrictionHom_of_unit` identifies each with the canonical map for
+the common composite open. -/
+theorem pullbackRestrictionHom_of_unit
+    {V X : Scheme} (r : Q ⟶ V) (q : Q ⟶ P)
+    (k : V ⟶ X) (b : P ⟶ X)
+    [IsOpenImmersion r] [IsOpenImmersion q]
+    [IsOpenImmersion k] [IsOpenImmersion b]
+    (Hsq : IsPullback r q k b)
+    (F : X.Modules) (G : V.Modules) (H : P.Modules) (K : Q.Modules)
+    (eF : F ≅ SheafOfModules.unit X.ringCatSheaf)
+    (eG : G ≅ SheafOfModules.unit V.ringCatSheaf)
+    (eH : H ≅ SheafOfModules.unit P.ringCatSheaf)
+    (eK : K ≅ SheafOfModules.unit Q.ringCatSheaf) :
+    pullbackRestrictionHom r q k b Hsq F G
+          (unitRestrictionHom k F G eF eG) ≫
+        unitRestrictionHom r G K eG eK =
+      (restrictFunctor q).map
+          (unitRestrictionHom b F H eF eH) ≫
+        unitRestrictionHom q H K eH eK := by
+  rw [← cancel_epi ((restrictFunctorComp q b).hom.app F)]
+  unfold pullbackRestrictionHom
+  simp only [Category.assoc]
+  rw [Iso.hom_inv_id_app_assoc]
+  rw [restrictFunctorCongr_symm_hom_app_eq_inv Hsq.w]
+  rw [← Category.id_comp ((restrictFunctorComp q b).hom.app F)]
+  rw [← restrictFunctorCongr_refl_inv_app (q ≫ b) F]
+  change
+    iteratedRestrictionHom r k (q ≫ b) Hsq.w F G K
+        (unitRestrictionHom k F G eF eG)
+        (unitRestrictionHom r G K eG eK) =
+      iteratedRestrictionHom q b (q ≫ b) rfl F H K
+        (unitRestrictionHom b F H eF eH)
+        (unitRestrictionHom q H K eH eK)
+  calc
+    _ = (restrictFunctor (q ≫ b)).map eF.hom ≫
+          (restrictUnitIso (q ≫ b)).hom ≫ eK.inv := by
+      simpa only [unitRestrictionHom] using
+        (iteratedRestrictionHom_of_unit
+          r k (q ≫ b) Hsq.w F G K eF eG eK)
+    _ = _ := by
+      symm
+      simpa only [unitRestrictionHom] using
+        (iteratedRestrictionHom_of_unit
+          q b (q ≫ b) rfl F H K eF eH eK)
 
 set_option maxHeartbeats 800000 in
 -- The mate calculation normalizes both adjunctions on every open subset.
