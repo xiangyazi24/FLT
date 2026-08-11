@@ -1681,6 +1681,19 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   next step is to glue these local sheaves into global rank-one modules and
   promote the proved chartwise determinant/adjunction identity to a sheaf
   isomorphism.
+- `RationalPointsN25QuotientTwoTwistingDescent.lean` connects those explicit
+  affine overlaps to the categorical geometry required by descent.  The
+  pullback of any two coordinate-chart maps is identified with the affine
+  spectrum of the degree-zero localization away from `x_i x_j`; both
+  pullback projections are proved to be the expected localization maps.  The
+  same objects are packaged as Mathlib `ChosenPullback`s.  Thus the next
+  formal seam is no longer pair-overlap geometry: it is the construction of
+  compatible chosen triple pullbacks, followed by a genuine module-sheaf
+  descent object.  Mathlib's 2026 descent-data framework supplies the shape
+  and coherence language, but no existing theorem has yet been found that
+  proves the scheme-module pseudofunctor is a stack; global effectivity must
+  therefore either establish that instance or construct the glued sheaf
+  directly.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
   section.  The remaining geometric seam is exact: construct principal
