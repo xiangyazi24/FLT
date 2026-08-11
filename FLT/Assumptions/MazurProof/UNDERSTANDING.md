@@ -1599,12 +1599,19 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   specialization proves both complete Koszul squares on every ordered pair
   overlap: `O(-5) → O(-2) ⊕ O(-3)` and
   `O(-2) ⊕ O(-3) → O`.
+- `RationalPointsN25QuotientTwoKoszulSheafTransition.lean` transports this
+  statement to actual module sheaves.  The reusable
+  `restrictUnitIso_conjugate_tildeMul` theorem proves that restriction of a
+  scalar tilde morphism along an affine open immersion maps the scalar through
+  the ring homomorphism.  Consequently, each of the four left/right quadric
+  and cubic restrictions is the expected overlap multiplier, and both full
+  Koszul overlap squares commute after affine tilde.
 - The already effective `globalTwistModule` construction lives on the quotient
   curve, not on ambient projective three-space, so it cannot be reused as the
   ambient Koszul terms by definitional sleight of hand.  What remains is to
-  effectivize the analogous ambient twist descent, transport the proved
-  overlap squares through affine tilde and categorical pullback, and glue the
-  ambient Koszul resolution.
+  effectivize the analogous ambient twist descent, use the proved restriction
+  comparisons to define its global morphisms, and glue the ambient Koszul
+  resolution.
 - `RationalPointsN25QuotientTwoIdealSheaf.lean` closes that gluing seam against
   Mathlib's actual global object.  Functoriality of `Proj` identifies the
   section map on `D_+(X_i)` with the localized graded quotient, while the

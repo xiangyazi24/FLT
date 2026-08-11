@@ -155,7 +155,9 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     that affine module sheafification preserves exactness; both full Koszul
     differential squares on every ordered ambient chart overlap, obtained from
     the generic compatibility of homogeneous multiplication with negative
-    twist transitions; and identification
+    twist transitions; their realization as actual affine-tilde module-sheaf
+    squares, including the four restriction comparisons for the quadric and
+    cubic multipliers from both charts; and identification
     of these ideals as the
     standard-chart restrictions of the closed immersion's global kernel
     ideal sheaf; and uniform structural ordinary affine presentations of all
@@ -186,9 +188,9 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     resulting global module sheaf restricts to a free rank-one module on
     every standard chart.
   - Open atoms: construct the effective ambient projective twists (the existing
-    effective twist descent is on the quotient curve), transport the proved
-    algebraic overlap squares through affine tilde and categorical pullback,
-    and glue the resulting morphisms and exact sequence; identify
+    effective twist descent is on the quotient curve), use the proved overlap
+    restriction comparisons to build the global Koszul morphisms, and glue the
+    resulting exact sequence; identify
     the scheme-theoretic Hilbert polynomial with the certified `6T-3`, and
     prove projective adjunction;
     package the characteristic-three Jacobian-rank certificate as a smooth

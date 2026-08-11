@@ -139,6 +139,73 @@ theorem tildeMap_toOpen_apply {R : CommRingCat} {M N : ModuleCat R}
   exact ConcreteCategory.congr_hom (tilde.toOpen_map_app g U) x
 
 set_option maxHeartbeats 800000 in
+-- The affine tilde adjunction and both unit-sheaf comparisons are unfolded
+-- only to test the global generator `1`, but this still creates a large term.
+/-- Conjugating a tilde morphism given by scalar multiplication through the
+unit-sheaf restriction comparison maps the scalar along the affine ring
+homomorphism.  This is the noninvertible analogue of the transition-unit
+comparison below and is the base-change identity needed for homogeneous
+equations such as projective Koszul differentials. -/
+theorem restrictUnitIso_conjugate_tildeMul {R S : CommRingCat}
+    (g : R ⟶ S) [IsOpenImmersion (Spec.map g)] (r : R) :
+    (restrictUnitIso (Spec.map g)).inv ≫
+        (restrictFunctor (Spec.map g)).map
+          ((tilde.functor R).map
+            (ModuleCat.ofHom (LinearMap.lsmul R R r))) ≫
+        (restrictUnitIso (Spec.map g)).hom =
+      (tilde.functor S).map
+        (ModuleCat.ofHom (LinearMap.lsmul S S (g r))) := by
+  apply ((tilde.adjunction (R := S)).homEquiv
+    (ModuleCat.of S S) (tilde (ModuleCat.of S S))).injective
+  simp only [Adjunction.homEquiv_apply]
+  change (tilde.toTildeΓNatIso (R := S)).hom.app _ ≫ _ =
+    (tilde.toTildeΓNatIso (R := S)).hom.app _ ≫ _
+  apply ModuleCat.hom_ext
+  change
+    (((tilde.toTildeΓNatIso (R := S)).hom.app (ModuleCat.of S S) ≫
+      (moduleSpecΓFunctor (R := S)).map
+        ((restrictUnitIso (Spec.map g)).inv ≫
+          (restrictFunctor (Spec.map g)).map
+            ((tilde.functor R).map
+              (ModuleCat.ofHom (LinearMap.lsmul R R r))) ≫
+          (restrictUnitIso (Spec.map g)).hom)).hom :
+      S →ₗ[S] (moduleSpecΓFunctor (R := S)).obj
+        (tilde (ModuleCat.of S S))) =
+    (((tilde.toTildeΓNatIso (R := S)).hom.app (ModuleCat.of S S) ≫
+      (moduleSpecΓFunctor (R := S)).map
+        ((tilde.functor S).map
+          (ModuleCat.ofHom (LinearMap.lsmul S S (g r))))).hom :
+      S →ₗ[S] (moduleSpecΓFunctor (R := S)).obj
+        (tilde (ModuleCat.of S S)))
+  apply LinearMap.ext_ring (R := S) (S := S)
+  change (((restrictUnitIso (Spec.map g)).inv.app ⊤ ≫
+      ((restrictFunctor (Spec.map g)).map
+        ((tilde.functor R).map
+          (ModuleCat.ofHom (LinearMap.lsmul R R r)))).app ⊤ ≫
+      (restrictUnitIso (Spec.map g)).hom.app ⊤)
+        ((tilde.isoTop (R := S) (ModuleCat.of S S)).hom 1)) =
+    (((tilde.functor S).map
+      (ModuleCat.ofHom (LinearMap.lsmul S S (g r)))).app ⊤)
+      ((tilde.isoTop (R := S) (ModuleCat.of S S)).hom 1)
+  simp only [CategoryTheory.comp_apply]
+  change ((Spec.map g).appIso ⊤).hom
+      ((((tilde.functor R).map
+        (ModuleCat.ofHom (LinearMap.lsmul R R r))).app
+          ((Spec.map g) ''ᵁ ⊤))
+        (((Spec.map g).appIso ⊤).inv
+          ((tilde.isoTop (R := S) (ModuleCat.of S S)).hom 1))) =
+    (((tilde.functor S).map
+      (ModuleCat.ofHom (LinearMap.lsmul S S (g r)))).app ⊤)
+      ((tilde.isoTop (R := S) (ModuleCat.of S S)).hom 1)
+  dsimp [tilde.isoTop]
+  have hOne := specMap_appIso_inv_tildeSelf_toOpen_apply g ⊤ (1 : R)
+  simp only [map_one] at hOne
+  erw [hOne, tildeMap_toOpen_apply,
+    specMap_appIso_hom_tildeSelf_toOpen_apply, tildeMap_toOpen_apply]
+  congr 1
+  simp
+
+set_option maxHeartbeats 800000 in
 -- Expanding the affine tilde adjunction and both unit-sheaf comparisons is
 -- expensive for definitional equality, although the proof checks one generator.
 /-- Conjugating a rank-one tilde transition by the unit-sheaf restriction
