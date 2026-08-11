@@ -45,12 +45,25 @@ def coordinateChartMap (i : Fin 4) :
   Proj.awayι literalConePiece (coordinateClass i)
     (coordinateClass_mem_degreeOne i) (by norm_num)
 
+/-- Every standard coordinate-chart map is an open immersion. -/
+instance coordinateChartMapIsOpenImmersion (i : Fin 4) :
+    IsOpenImmersion (coordinateChartMap i) := by
+  dsimp [coordinateChartMap]
+  infer_instance
+
 /-- Every integral twist is locally the free rank-one module sheaf.  The
 integer controls gluing and does not change the local affine module. -/
 def coordinateLocalTwistModule (_d : ℤ) (i : Fin 4) :
     (coordinateChartScheme i).Modules :=
   AlgebraicGeometry.tilde
     (ModuleCat.of (coordinateChartRing i) (coordinateChartRing i))
+
+/-- The local affine model of every twist is canonically the unit module
+sheaf on its coordinate chart. -/
+def coordinateLocalTwistUnitIso (d : ℤ) (i : Fin 4) :
+    coordinateLocalTwistModule d i ≅
+      SheafOfModules.unit (coordinateChartScheme i).ringCatSheaf :=
+  AlgebraicGeometry.tildeSelf
 
 /-! ## Pair-overlap transition sheaves -/
 
@@ -64,6 +77,18 @@ def coordinateOverlapTwistModule (_d : ℤ) (i j : Fin 4) :
   AlgebraicGeometry.tilde
     (ModuleCat.of (coordinateOverlapRing i j) (coordinateOverlapRing i j))
 
+set_option synthInstance.maxHeartbeats 100000 in
+-- The explicit homogeneous localization makes the sheaf-composition
+-- instance large after unfolding, so this declaration receives a local
+-- typeclass-search budget rather than changing the file-wide setting.
+/-- The affine pair-overlap model of every twist is canonically the unit
+module sheaf on that overlap. -/
+def coordinateOverlapTwistUnitIso (d : ℤ) (i j : Fin 4) :
+    coordinateOverlapTwistModule d i j ≅
+      SheafOfModules.unit
+        (Spec (.of (coordinateOverlapRing i j))).ringCatSheaf :=
+  AlgebraicGeometry.tildeSelf
+
 /-- The overlap transition lifted from modules to their affine tilde
 sheaves. -/
 def coordinateOverlapTwistIso (d : ℤ) (i j : Fin 4) :
@@ -71,6 +96,19 @@ def coordinateOverlapTwistIso (d : ℤ) (i j : Fin 4) :
   (AlgebraicGeometry.tilde.functor (.of (coordinateOverlapRing i j))).mapIso
     (Away.ratioPowerTransition literalConePiece
       (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j) d).toModuleIso
+
+/-- On the self-overlap of a coordinate chart, the tilde-sheaf transition is
+the identity.  This lifts the algebraic identity `x_i / x_i = 1` through the
+affine tilde functor. -/
+theorem coordinateOverlapTwistIso_self (d : ℤ) (i : Fin 4) :
+    (coordinateOverlapTwistIso d i i).hom = 𝟙 _ := by
+  change (AlgebraicGeometry.tilde.functor
+      (.of (coordinateOverlapRing i i))).map
+        (Away.ratioPowerTransition literalConePiece
+          (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne i) d).toModuleIso.hom =
+      𝟙 _
+  rw [Away.ratioPowerTransition_self]
+  exact AlgebraicGeometry.tilde.map_id
 
 /-! ## Triple-overlap sheaf cocycle -/
 

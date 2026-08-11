@@ -5,6 +5,7 @@ import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoConormalGrading
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingTransition
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingSheafCharts
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingDescent
+import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingSheafGluing
 
 /-!
 # A concrete degree-six hyperplane section in characteristic two

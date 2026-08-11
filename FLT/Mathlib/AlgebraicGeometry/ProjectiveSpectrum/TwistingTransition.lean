@@ -45,6 +45,20 @@ def degreeOneRatioInv {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) :
   HomogeneousLocalization.Away.mk 𝒜 (SetLike.mul_mem_graded hf hg) 1
     (f ^ 2) (by simpa using SetLike.pow_mem_graded 2 hf)
 
+/-- On the self-overlap of a degree-one chart, the chart ratio `f/f` is
+the unit element.  Although both sides are represented using the localization
+away from `f²`, this is the structural identity needed by descent rather than
+a simplification specific to any chosen coordinate. -/
+theorem degreeOneRatio_self {f : A} (hf : f ∈ 𝒜 1) :
+    degreeOneRatio 𝒜 hf hf = 1 := by
+  ext
+  simp only [degreeOneRatio, HomogeneousLocalization.Away.val_mk,
+    HomogeneousLocalization.val_one]
+  rw [← Localization.mk_one]
+  rw [Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+  refine ⟨1, ?_⟩
+  simp [pow_two]
+
 /-- The two chart ratios are inverse in the overlap ring. -/
 theorem degreeOneRatio_mul_inv {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) :
     degreeOneRatio 𝒜 hf hg * degreeOneRatioInv 𝒜 hf hg = 1 := by
@@ -69,6 +83,12 @@ def degreeOneRatioUnit {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) :
       degreeOneRatioInv 𝒜 hf hg * degreeOneRatio 𝒜 hf hg =
           degreeOneRatio 𝒜 hf hg * degreeOneRatioInv 𝒜 hf hg := mul_comm _ _
       _ = 1 := degreeOneRatio_mul_inv 𝒜 hf hg
+
+/-- The unit-valued transition on a self-overlap is the identity unit. -/
+theorem degreeOneRatioUnit_self {f : A} (hf : f ∈ 𝒜 1) :
+    degreeOneRatioUnit 𝒜 hf hf = 1 := by
+  apply Units.ext
+  exact degreeOneRatio_self 𝒜 hf
 
 /-- Changing from the `f`-trivialization to the `g`-trivialization of the
 negative twist by `debt` multiplies by `(g/f)^debt`. -/
@@ -271,6 +291,17 @@ def ratioPowerTransition {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1)
       HomogeneousLocalization.Away 𝒜 (f * g) :=
   DistribMulAction.toLinearEquiv (HomogeneousLocalization.Away 𝒜 (f * g))
     (HomogeneousLocalization.Away 𝒜 (f * g)) ((degreeOneRatioUnit 𝒜 hf hg) ^ d)
+
+/-- Every integral twist transition restricts to the identity on a
+self-overlap.  This is the rank-one module form of `degreeOneRatioUnit_self`
+and supplies the identity axiom of the ensuing descent datum. -/
+theorem ratioPowerTransition_self {f : A} (hf : f ∈ 𝒜 1) (d : ℤ) :
+    ratioPowerTransition 𝒜 hf hf d = LinearEquiv.refl _ _ := by
+  apply LinearEquiv.ext
+  intro x
+  change (degreeOneRatioUnit 𝒜 hf hf) ^ d • x = x
+  rw [degreeOneRatioUnit_self]
+  simp
 
 /-- The first pair transition after restriction to the ordered triple
 overlap. -/

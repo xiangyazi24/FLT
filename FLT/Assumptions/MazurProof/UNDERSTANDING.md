@@ -1686,14 +1686,33 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   pullback of any two coordinate-chart maps is identified with the affine
   spectrum of the degree-zero localization away from `x_i x_j`; both
   pullback projections are proved to be the expected localization maps.  The
-  same objects are packaged as Mathlib `ChosenPullback`s.  Thus the next
-  formal seam is no longer pair-overlap geometry: it is the construction of
-  compatible chosen triple pullbacks, followed by a genuine module-sheaf
-  descent object.  Mathlib's 2026 descent-data framework supplies the shape
-  and coherence language, but no existing theorem has yet been found that
-  proves the scheme-module pseudofunctor is a stack; global effectivity must
-  therefore either establish that instance or construct the glued sheaf
-  directly.
+  same objects are packaged as Mathlib `ChosenPullback`s, and compatible
+  threefold wide pullbacks are supplied from nested categorical pullbacks.
+  `FLT/Mathlib/AlgebraicGeometry/Modules/PullbackUnit.lean` proves the generic
+  missing comparison saying that the unit module sheaf pulls back along an
+  open immersion to the unit sheaf.  This transports each explicit affine
+  transition to the exact pair-overlap morphism expected by Mathlib's 2026
+  `DescentData'` API.  The ratio transition on a self-overlap is now proved
+  structurally to be the identity, through the ring, unit, module, tilde,
+  and categorical-overlap layers.  Completing `DescentData'` directly would
+  still require substantial pseudofunctor unit and associativity bookkeeping;
+  no stack-effectivity theorem for scheme modules has been found in the
+  pinned Mathlib.
+- `RationalPointsN25QuotientTwoTwistingSheafGluing.lean` avoids treating that
+  bookkeeping as a new axiom.  It realizes the explicit affine pair overlaps
+  as the actual intersections of chart open immersions, identifies both
+  restricted local twist sheaves with the explicit free rank-one overlap
+  sheaf, and inserts the proved coordinate-ratio transition between them.
+  The standard Čech equalizer
+  `Eq (∏ i, j_i* F_i ⇉ ∏ i j, j_ij* F_ij)` is then formed inside the category
+  of module sheaves on the canonical projective curve.  The resulting
+  `globalTwistModule d` is an honest global module sheaf and its pair-overlap
+  compatibility is kernel-checked.  What remains before calling it `O(d)` is
+  the effectivity theorem identifying its restriction to each of the four
+  charts with the corresponding local free rank-one module.  That theorem
+  must use the already-proved triple-overlap cocycle and the proved standard
+  coordinate cover; local freeness has not been inferred merely from the
+  equalizer definition.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
   section.  The remaining geometric seam is exact: construct principal

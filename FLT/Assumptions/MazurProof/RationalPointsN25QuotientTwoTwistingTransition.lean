@@ -43,6 +43,12 @@ def coordinateRatioUnit (i j : Fin 4) :
   Away.degreeOneRatioUnit literalConePiece
     (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
 
+/-- The transition unit from a coordinate chart to itself is the identity. -/
+theorem coordinateRatioUnit_self (i : Fin 4) :
+    coordinateRatioUnit i i = 1 :=
+  Away.degreeOneRatioUnit_self literalConePiece
+    (coordinateClass_mem_degreeOne i)
+
 /-- The change of trivialization for the negative twist by `debt` between
 the `i`th and `j`th coordinate charts. -/
 def negativeTwistCoordinateTransition (debt : ℕ) (i j : Fin 4) :
