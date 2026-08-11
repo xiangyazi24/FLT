@@ -1665,6 +1665,8 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   twisting-sheaf determinant theorems needed to carry this decomposition to
   `Proj` and conclude `ω_C ≅ O_C(-4+2+3) = O_C(1)`.  The degree-one affine
   chart transition units and their cocycle are no longer part of that gap;
+  the unit cocycle is proved uniformly for every integral power, so the same
+  descent datum covers all `O(d)` occurring in adjunction.  Consequently,
   the next step is to glue the corresponding rank-one module sheaves and
   promote the proved chartwise determinant/adjunction identity to a sheaf
   isomorphism.

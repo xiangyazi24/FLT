@@ -103,4 +103,24 @@ theorem coordinateRatio_restricted_cocycle (i j l : Fin 4) :
     (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
     (coordinateClass_mem_degreeOne l)
 
+/-- Every integral power of the N25 coordinate transition units satisfies
+the restricted Čech cocycle.  This simultaneously covers all positive and
+negative twists used in adjunction. -/
+theorem coordinateTwistUnit_restricted_cocycle (i j l : Fin 4) (d : ℤ) :
+    (Units.map (Away.restrict12 literalConePiece
+        (f := coordinateClass i) (g := coordinateClass j) (h := coordinateClass l)
+        (coordinateClass_mem_degreeOne l)).toMonoidHom
+      (coordinateRatioUnit i j)) ^ d *
+    (Units.map (Away.restrict23 literalConePiece
+        (f := coordinateClass i) (g := coordinateClass j) (h := coordinateClass l)
+        (coordinateClass_mem_degreeOne i)).toMonoidHom
+      (coordinateRatioUnit j l)) ^ d =
+    (Units.map (Away.restrict13 literalConePiece
+        (f := coordinateClass i) (g := coordinateClass j) (h := coordinateClass l)
+        (coordinateClass_mem_degreeOne j)).toMonoidHom
+      (coordinateRatioUnit i l)) ^ d :=
+  Away.degreeOneRatioUnit_zpow_restricted_cocycle literalConePiece
+    (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+    (coordinateClass_mem_degreeOne l) d
+
 end MazurProof.RationalPointsN25QuotientTwoTwistingTransition

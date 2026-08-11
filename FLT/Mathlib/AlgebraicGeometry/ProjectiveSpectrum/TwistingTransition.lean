@@ -234,4 +234,29 @@ theorem degreeOneRatio_restricted_cocycle {f g h : A}
     restrict13_degreeOneRatio]
   exact degreeOneRatio_cocycle 𝒜 hf hg hh
 
+/-- The transition units themselves satisfy the restricted Čech cocycle. -/
+theorem degreeOneRatioUnit_restricted_cocycle {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) :
+    Units.map (restrict12 𝒜 (f := f) (g := g) (h := h) hh).toMonoidHom
+        (degreeOneRatioUnit 𝒜 hf hg) *
+      Units.map (restrict23 𝒜 (f := f) (g := g) (h := h) hf).toMonoidHom
+        (degreeOneRatioUnit 𝒜 hg hh) =
+    Units.map (restrict13 𝒜 (f := f) (g := g) (h := h) hg).toMonoidHom
+      (degreeOneRatioUnit 𝒜 hf hh) := by
+  apply Units.ext
+  exact degreeOneRatio_restricted_cocycle 𝒜 hf hg hh
+
+/-- Every integral power of the transition unit satisfies the same restricted
+cocycle.  Thus one theorem supplies descent data for all positive and
+negative integral twists. -/
+theorem degreeOneRatioUnit_zpow_restricted_cocycle {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) (d : ℤ) :
+    (Units.map (restrict12 𝒜 (f := f) (g := g) (h := h) hh).toMonoidHom
+        (degreeOneRatioUnit 𝒜 hf hg)) ^ d *
+      (Units.map (restrict23 𝒜 (f := f) (g := g) (h := h) hf).toMonoidHom
+        (degreeOneRatioUnit 𝒜 hg hh)) ^ d =
+    (Units.map (restrict13 𝒜 (f := f) (g := g) (h := h) hg).toMonoidHom
+      (degreeOneRatioUnit 𝒜 hf hh)) ^ d := by
+  rw [← mul_zpow, degreeOneRatioUnit_restricted_cocycle]
+
 end HomogeneousLocalization.Away
