@@ -112,14 +112,10 @@ def coordinateLocalPushforwardBaseChangeIso (d : ℤ) (k i : Fin 4) :
         ((Scheme.Modules.restrictFunctor
           (coordinateOverlapToRight k i)).obj
             (coordinateLocalTwistModule d i)) := by
-  letI := Scheme.Modules.openBaseChangeHom_isIso
+  exact Scheme.Modules.openBaseChangeIso
     (coordinateOverlapToLeft k i) (coordinateOverlapToRight k i)
     (coordinateChartMap k) (coordinateChartMap i)
     (coordinateOverlap_isPullback k i) (coordinateLocalTwistModule d i)
-  exact asIso (Scheme.Modules.openBaseChangeHom
-    (coordinateOverlapToLeft k i) (coordinateOverlapToRight k i)
-    (coordinateChartMap k) (coordinateChartMap i)
-    (coordinateOverlap_isPullback k i) (coordinateLocalTwistModule d i))
 
 /-! ## Restriction of local twists to pair overlaps -/
 
@@ -445,6 +441,91 @@ theorem coordinateTriple_isPullback (k i j : Fin 4) :
     (coordinateTripleInner_isPullback k i j).paste_vert
       (coordinateOverlap_isPullback k i).flip
 
+/-- The two localization routes from the ordered triple overlap to its third
+chart agree.  On affine rings this is associativity of homogeneous
+localization; the proof compares the two maps on a common fraction
+representative. -/
+theorem coordinateTripleTo23_comp_right_eq_coordinateTripleTo13_comp_right
+    (k i j : Fin 4) :
+    coordinateTripleTo23 k i j ≫ coordinateOverlapToRight i j =
+      coordinateTripleTo13 k i j ≫ coordinateOverlapToRight k j := by
+  dsimp [coordinateOverlapToRight]
+  rw [coordinateChosenPullbackIso_inv_p₂ i j,
+    coordinateChosenPullbackIso_inv_p₂ k j]
+  dsimp [coordinateTripleTo23, coordinateTripleTo13, Away.restrict23,
+    Away.restrict13]
+  rw [← Spec.map_comp, ← Spec.map_comp]
+  congr 1
+  apply CommRingCat.hom_ext
+  apply RingHom.ext
+  intro x
+  change
+    Away.restrict23 literalConePiece (coordinateClass_mem_degreeOne k)
+        (awayMap literalConePiece (coordinateClass_mem_degreeOne i)
+          (mul_comm _ _) x) =
+      Away.restrict13 literalConePiece (coordinateClass_mem_degreeOne i)
+        (awayMap literalConePiece (coordinateClass_mem_degreeOne k)
+          (mul_comm _ _) x)
+  obtain ⟨q, a, ha, rfl⟩ := HomogeneousLocalization.Away.mk_surjective
+    literalConePiece (coordinateClass_mem_degreeOne j) x
+  simp only [Away.restrict23, Away.restrict13]
+  rw [HomogeneousLocalization.awayMap_mk,
+    HomogeneousLocalization.awayMap_mk,
+    HomogeneousLocalization.awayMap_mk,
+    HomogeneousLocalization.awayMap_mk]
+  apply (HomogeneousLocalization.ext_iff_val _ _).2
+  simp only [HomogeneousLocalization.Away.val_mk]
+  congr 1
+  ring
+
+/-- The route through the `(k,j)` pair overlap gives the same map from the
+triple overlap to chart `k` as the route through `(k,i)`.  Monicity of the
+chart inclusion reduces the assertion to the two pair-overlap pullback
+conditions and the affine localization identity above. -/
+theorem coordinateTripleTo13_comp_left_eq_coordinateTripleToFirstChart
+    (k i j : Fin 4) :
+    coordinateTripleTo13 k i j ≫ coordinateOverlapToLeft k j =
+      coordinateTripleToFirstChart k i j := by
+  rw [← cancel_mono (coordinateChartMap k)]
+  simp only [Category.assoc]
+  calc
+    coordinateTripleTo13 k i j ≫ coordinateOverlapToLeft k j ≫
+          coordinateChartMap k =
+        coordinateTripleTo13 k i j ≫ coordinateOverlapMap k j := rfl
+    _ = coordinateTripleTo13 k i j ≫ coordinateOverlapToRight k j ≫
+          coordinateChartMap j := by
+      rw [coordinateOverlapMap_eq_right]
+    _ = coordinateTripleTo23 k i j ≫ coordinateOverlapToRight i j ≫
+          coordinateChartMap j := by
+      slice_lhs 1 2 =>
+        rw [← coordinateTripleTo23_comp_right_eq_coordinateTripleTo13_comp_right]
+      rw [Category.assoc]
+    _ = coordinateTripleTo23 k i j ≫ coordinateOverlapMap i j := by
+      rw [coordinateOverlapMap_eq_right]
+    _ = coordinateTripleToFirstChart k i j ≫ coordinateChartMap k :=
+      (coordinateTriple_isPullback k i j).w
+
+/-- The alternative inner square through the `(k,j)` overlap is cartesian.
+It is obtained by cancelling the cartesian outer `(k,j)` chart square from
+the already cartesian triple-overlap square.  This supplies the second
+factorization needed to compare Čech reconstruction paths. -/
+theorem coordinateTripleInner13_isPullback (k i j : Fin 4) :
+    IsPullback (coordinateTripleTo23 k i j)
+      (coordinateTripleTo13 k i j)
+      (coordinateOverlapToRight i j) (coordinateOverlapToRight k j) := by
+  have hTotal : IsPullback (coordinateTripleTo23 k i j)
+      (coordinateTripleTo13 k i j ≫ coordinateOverlapToLeft k j)
+      (coordinateOverlapToRight i j ≫ coordinateChartMap j)
+      (coordinateChartMap k) := by
+    simpa only [
+      coordinateTripleTo13_comp_left_eq_coordinateTripleToFirstChart,
+      coordinateOverlapMap_eq_right] using
+      coordinateTriple_isPullback k i j
+  exact hTotal.of_bot
+    (coordinateTripleTo23_comp_right_eq_coordinateTripleTo13_comp_right
+      k i j)
+    (coordinateOverlap_isPullback k j).flip
+
 /-- Restricting the `(i,j)` overlap's free rank-one sheaf gives the free
 rank-one sheaf on the ordered triple overlap. -/
 def coordinatePairToTripleIso12 (d : ℤ) (i j l : Fin 4) :
@@ -618,11 +699,8 @@ def pushforwardRestrictionHom {V U X : Scheme}
     (e : (Scheme.Modules.restrictFunctor k).obj F ≅ G) :
     (Scheme.Modules.pushforward j).obj F ⟶
       (Scheme.Modules.pushforward h).obj G :=
-  (Scheme.Modules.pushforward j).map
-      ((Scheme.Modules.restrictAdjunction k).unit.app F ≫
-        (Scheme.Modules.pushforward k).map e.hom) ≫
-    (Scheme.Modules.pushforwardComp k j).hom.app G ≫
-    (Scheme.Modules.pushforwardCongr hk).hom.app G
+  Scheme.Modules.pushforwardRestrictionHomOfHom
+    (f := j) (k := k) (h := h) hk F G e.hom
 
 /-- The local chart sheaf, extended by zero to the projective curve. -/
 abbrev coordinateLocalPushforward (d : ℤ) (i : Fin 4) :
@@ -648,14 +726,10 @@ def coordinateTripleBaseChangeIso (k i j : Fin 4)
       (Scheme.Modules.pushforward (coordinateTripleToFirstChart k i j)).obj
         ((Scheme.Modules.restrictFunctor
           (coordinateTripleTo23 k i j)).obj M) := by
-  letI := Scheme.Modules.openBaseChangeHom_isIso
+  exact Scheme.Modules.openBaseChangeIso
     (coordinateTripleToFirstChart k i j) (coordinateTripleTo23 k i j)
     (coordinateChartMap k) (coordinateOverlapMap i j)
     (coordinateTriple_isPullback k i j).flip M
-  exact asIso (Scheme.Modules.openBaseChangeHom
-    (coordinateTripleToFirstChart k i j) (coordinateTripleTo23 k i j)
-    (coordinateChartMap k) (coordinateOverlapMap i j)
-    (coordinateTriple_isPullback k i j).flip M)
 
 /-- For the twisting sheaves, triple-overlap base change is transported to
 the fixed free rank-one module used by the explicit cocycle theorem. -/

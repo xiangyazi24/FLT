@@ -265,6 +265,25 @@ def openBaseChangeHom (H : IsPullback f' iX iU f) (M : X.Modules) :
     (openBaseChangeRestrictedHom f' iX iU f H M)
 
 set_option backward.isDefEq.respectTransparency false in
+/-- On an open `W`, the Beck--Chevalley map is the presheaf restriction
+along the equality of opens supplied by the cartesian square.  Exposing this
+component is useful when checking coherence of iterated open base change. -/
+@[simp]
+theorem openBaseChangeHom_app (H : IsPullback f' iX iU f)
+    (M : X.Modules) (W : U.Opens) :
+    (openBaseChangeHom f' iX iU f H M).app W =
+      (M.presheaf.mapIso
+        (eqToIso
+          (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W)).op).hom := by
+  rw [openBaseChangeHom, Adjunction.homEquiv_unit, Hom.comp_app,
+    pushforward_map_app, restrictAdjunction_unit_app_app]
+  dsimp [openBaseChangeRestrictedHom]
+  rw [restrict_map, pushforward_obj_presheaf_map]
+  rw [← Functor.map_comp, ← Functor.map_comp, ← Functor.map_comp,
+    ← Functor.map_comp]
+  congr 1
+
+set_option backward.isDefEq.respectTransparency false in
 /-- Open base change for module sheaves is invertible.  On an open subset of
 `U`, its component is the restriction map along the equality between the two
 pullback descriptions of the corresponding open subset of `X`. -/
@@ -289,6 +308,423 @@ theorem openBaseChangeHom_isIso (H : IsPullback f' iX iU f)
     congr 1
   rw [hW]
   infer_instance
+
+/-- The Beck--Chevalley isomorphism for a cartesian square of open
+immersions. -/
+def openBaseChangeIso (H : IsPullback f' iX iU f) (M : X.Modules) :
+    (restrictFunctor iU).obj ((pushforward f).obj M) ≅
+      (pushforward f').obj ((restrictFunctor iX).obj M) := by
+  letI := openBaseChangeHom_isIso f' iX iU f H M
+  exact asIso (openBaseChangeHom f' iX iU f H M)
+
+@[simp]
+theorem openBaseChangeIso_hom (H : IsPullback f' iX iU f)
+    (M : X.Modules) :
+    (openBaseChangeIso f' iX iU f H M).hom =
+      openBaseChangeHom f' iX iU f H M := by
+  dsimp [openBaseChangeIso]
+
+/-- The Beck--Chevalley isomorphism is natural in the module on the pulled
+back corner.  Sectionwise, the square is exactly the naturality square for
+the underlying presheaf morphism and the equality of opens supplied by the
+cartesian square. -/
+theorem openBaseChangeIso_hom_naturality (H : IsPullback f' iX iU f)
+    {M N : X.Modules} (phi : M ⟶ N) :
+    (restrictFunctor iU).map ((pushforward f).map phi) ≫
+        (openBaseChangeIso f' iX iU f H N).hom =
+      (openBaseChangeIso f' iX iU f H M).hom ≫
+        (pushforward f').map ((restrictFunctor iX).map phi) := by
+  apply hom_ext
+  intro W
+  simp only [Hom.comp_app, restrictFunctor_map_app, pushforward_map_app,
+    openBaseChangeIso_hom, openBaseChangeHom_app]
+  exact (phi.mapPresheaf.naturality _).symm
+
+/-- The inverse Beck--Chevalley isomorphism is sectionwise the inverse
+restriction along the open-set equality supplied by the pullback square. -/
+@[simp]
+theorem openBaseChangeIso_inv_app (H : IsPullback f' iX iU f)
+    (M : X.Modules) (W : U.Opens) :
+    (openBaseChangeIso f' iX iU f H M).inv.app W =
+      (M.presheaf.mapIso
+        (eqToIso
+          (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W)).op).inv := by
+  rw [← cancel_epi ((openBaseChangeIso f' iX iU f H M).hom.app W)]
+  rw [← Hom.comp_app]
+  simp only [Iso.hom_inv_id, Hom.id_app]
+  rw [openBaseChangeIso_hom, openBaseChangeHom_app]
+  exact (M.presheaf.mapIso
+    (eqToIso
+      (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W)).op).hom_inv_id.symm
+
+/-! ## Extension by zero and pasted base change -/
+
+variable {Q V : Scheme} (r : Q ⟶ V) (q : Q ⟶ P)
+  (k : V ⟶ X) (b : P ⟶ X) (a : P ⟶ U)
+  (h : V ⟶ Y)
+  [IsOpenImmersion r] [IsOpenImmersion q] [IsOpenImmersion k]
+  [IsOpenImmersion b] [IsOpenImmersion a] [IsOpenImmersion h]
+
+/-- Extend a morphism from the restriction to a smaller open by zero on the
+ambient scheme.  The equality `hk` records the chosen name for the composite
+open immersion, so callers may use a geometrically meaningful map rather than
+the raw expression `k ≫ f`. -/
+def pushforwardRestrictionHomOfHom (hk : k ≫ f = h)
+    (F : X.Modules) (G : V.Modules)
+    (e : (restrictFunctor k).obj F ⟶ G) :
+    (pushforward f).obj F ⟶ (pushforward h).obj G :=
+  (pushforward f).map
+      ((restrictAdjunction k).unit.app F ≫ (pushforward k).map e) ≫
+    (pushforwardComp k f).hom.app G ≫
+    (pushforwardCongr hk).hom.app G
+
+/-- Pull a coefficient comparison through the inner cartesian square in a
+vertically pasted pair of open squares.  The comparison first identifies the
+two iterated restrictions and then restricts the original morphism. -/
+def pullbackRestrictionHom (Hk : IsPullback r q k b)
+    (F : X.Modules) (G : V.Modules)
+    (e : (restrictFunctor k).obj F ⟶ G) :
+    (restrictFunctor q).obj ((restrictFunctor b).obj F) ⟶
+      (restrictFunctor r).obj G :=
+  (restrictFunctorComp q b).inv.app F ≫
+    (restrictFunctorCongr Hk.w.symm).hom.app F ≫
+    (restrictFunctorComp r k).hom.app F ≫
+    (restrictFunctor r).map e
+
+set_option maxHeartbeats 800000 in
+-- Sectionwise normalization exposes several nested pseudofunctorial maps.
+set_option backward.isDefEq.respectTransparency false in
+/-- Open base change carries extension by zero from a smaller open to
+extension by zero from its pullback.  This is the vertical-pasting coherence
+law for the explicit Beck--Chevalley isomorphism above.
+
+The proof is sectionwise.  After removing the pseudofunctorial identity maps,
+the only nontrivial step is naturality of `e`; all remaining maps between open
+subsets agree because the category of opens is thin. -/
+theorem openBaseChange_pushforwardRestrictionHomOfHom
+    (hk : k ≫ f = h) (Hk : IsPullback r q k b)
+    (Hf : IsPullback a b iU f)
+    (Ht : IsPullback (q ≫ a) r iU h)
+    (F : X.Modules) (G : V.Modules)
+    (e : (restrictFunctor k).obj F ⟶ G) :
+    (openBaseChangeIso a b iU f Hf F).inv ≫
+        (restrictFunctor iU).map
+          (pushforwardRestrictionHomOfHom
+            (f := f) (k := k) (h := h) hk F G e) ≫
+        (openBaseChangeIso (q ≫ a) r iU h Ht G).hom =
+      pushforwardRestrictionHomOfHom
+        (f := a) (k := q) (h := q ≫ a) rfl
+        ((restrictFunctor b).obj F) ((restrictFunctor r).obj G)
+        (pullbackRestrictionHom
+          (r := r) (q := q) (k := k) (b := b) Hk F G e) := by
+  apply hom_ext
+  intro W
+  dsimp [pushforwardRestrictionHomOfHom, pullbackRestrictionHom]
+  simp only [openBaseChangeIso_hom, openBaseChangeHom_app,
+    openBaseChangeIso_inv_app, Functor.mapIso_hom, Functor.mapIso_inv]
+  rw [restrict_map]
+  have hOuter : b ''ᵁ a ⁻¹ᵁ W = f ⁻¹ᵁ iU ''ᵁ W :=
+    IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback Hf W
+  have hMiddle : r ''ᵁ q ⁻¹ᵁ a ⁻¹ᵁ W =
+      k ⁻¹ᵁ f ⁻¹ᵁ iU ''ᵁ W := by
+    rw [IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback
+      Hk.flip (a ⁻¹ᵁ W), hOuter]
+  let t : r ''ᵁ q ⁻¹ᵁ a ⁻¹ᵁ W ⟶
+      k ⁻¹ᵁ f ⁻¹ᵁ iU ''ᵁ W := eqToHom hMiddle
+  -- Combine the restriction maps contributed by base change and by the
+  -- pseudofunctorial comparison before invoking naturality.
+  slice_lhs 1 2 => rw [← Functor.map_comp]
+  slice_rhs 1 4 =>
+    rw [← Functor.map_comp, ← Functor.map_comp, ← Functor.map_comp]
+  slice_lhs 2 3 => erw [Category.comp_id]
+  slice_lhs 3 4 => rw [← G.presheaf.map_comp]
+  slice_rhs 2 3 => erw [Category.comp_id]
+  rw [((restrictFunctor r).obj G).presheaf.map_id]
+  slice_rhs 2 3 => erw [Category.comp_id]
+  let s : k ''ᵁ (k ⁻¹ᵁ f ⁻¹ᵁ iU ''ᵁ W) ⟶
+      b ''ᵁ a ⁻¹ᵁ W :=
+    homOfLE (by
+      rw [hOuter]
+      exact k.image_preimage_le (f ⁻¹ᵁ iU ''ᵁ W))
+  calc
+    _ = F.presheaf.map s.op ≫
+          e.app (k ⁻¹ᵁ f ⁻¹ᵁ iU ''ᵁ W) ≫
+          G.presheaf.map t.op := by
+      congr 1
+    _ = F.presheaf.map s.op ≫
+          ((restrictFunctor k).obj F).presheaf.map t.op ≫
+          e.app (r ''ᵁ q ⁻¹ᵁ a ⁻¹ᵁ W) := by
+      congr 1
+      exact (e.mapPresheaf.naturality t.op).symm
+    _ = F.presheaf.map
+          (s.op ≫ ((k.opensFunctor).map t).op) ≫
+          e.app (r ''ᵁ q ⁻¹ᵁ a ⁻¹ᵁ W) := by
+      rw [restrict_map]
+      slice_lhs 1 2 => rw [← F.presheaf.map_comp]
+    _ = _ := by
+      congr 1
+
+/-- Version of `openBaseChange_pushforwardRestrictionHomOfHom` in which the
+map from the pulled-back smaller open to the base chart has a chosen name.
+This is useful when two factorizations of a triple intersection define the
+same geometric open immersion but are not definitionally equal. -/
+theorem openBaseChange_pushforwardRestrictionHomOfHom_congr
+    (g : Q ⟶ U) [IsOpenImmersion g]
+    (hk : k ≫ f = h) (hq : q ≫ a = g)
+    (Hk : IsPullback r q k b) (Hf : IsPullback a b iU f)
+    (Ht : IsPullback g r iU h)
+    (F : X.Modules) (G : V.Modules)
+    (e : (restrictFunctor k).obj F ⟶ G) :
+    (openBaseChangeIso a b iU f Hf F).inv ≫
+        (restrictFunctor iU).map
+          (pushforwardRestrictionHomOfHom
+            (f := f) (k := k) (h := h) hk F G e) ≫
+        (openBaseChangeIso g r iU h Ht G).hom =
+      pushforwardRestrictionHomOfHom
+        (f := a) (k := q) (h := g) hq
+        ((restrictFunctor b).obj F) ((restrictFunctor r).obj G)
+        (pullbackRestrictionHom
+          (r := r) (q := q) (k := k) (b := b) Hk F G e) := by
+  subst g
+  simpa only using
+    openBaseChange_pushforwardRestrictionHomOfHom
+      (r := r) (q := q) (k := k) (b := b) (a := a)
+      (iU := iU) (f := f) (h := h) hk Hk Hf Ht F G e
+
+/-! ## Composition of extension by zero
+
+Two successive coefficient restrictions through open immersions determine one
+restriction morphism on the smallest open.  Under the restriction--pushforward
+adjunction, this composite is exactly the transpose of the two corresponding
+extension-by-zero morphisms.  This comparison lets Čech descent calculations
+return from pushforwards on an ambient chart to coefficient maps on a multiple
+intersection, where cocycle identities live.
+-/
+
+variable {Q P U : Scheme} (q : Q ⟶ P) (a : P ⟶ U) (g : Q ⟶ U)
+  [IsOpenImmersion q] [IsOpenImmersion a] [IsOpenImmersion g]
+
+/-- The coefficient morphism obtained by restricting successively through
+`P ⊆ U` and `Q ⊆ P`.  The equality `hq` identifies their composite with the
+chosen geometric name `g : Q ⟶ U`, so the result can be compared across
+different factorizations of the same multiple intersection. -/
+def iteratedRestrictionHom (hq : q ≫ a = g)
+    (F : U.Modules) (H : P.Modules) (K : Q.Modules)
+    (e₁ : (restrictFunctor a).obj F ⟶ H)
+    (e₂ : (restrictFunctor q).obj H ⟶ K) :
+    (restrictFunctor g).obj F ⟶ K :=
+  (restrictFunctorCongr hq).inv.app F ≫
+    (restrictFunctorComp q a).hom.app F ≫
+    (restrictFunctor q).map e₁ ≫ e₂
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Successive canonical trivializations of the restricted unit module agree
+with the canonical trivialization for the composite open immersion.  The proof
+is the sectionwise composition law for the structure-sheaf isomorphisms of
+open immersions; thinness of the category of opens removes the bookkeeping
+equalities introduced by the restriction pseudofunctor. -/
+theorem restrictUnitIso_comp (hq : q ≫ a = g) :
+    iteratedRestrictionHom q a g hq
+        (SheafOfModules.unit U.ringCatSheaf)
+        (SheafOfModules.unit P.ringCatSheaf)
+        (SheafOfModules.unit Q.ringCatSheaf)
+        (restrictUnitIso a).hom (restrictUnitIso q).hom =
+      (restrictUnitIso g).hom := by
+  subst g
+  apply hom_ext
+  intro W
+  apply ConcreteCategory.hom_ext
+  intro x
+  unfold iteratedRestrictionHom
+  simp only [Hom.comp_app, restrictFunctorCongr_inv_app_app,
+    restrictFunctorComp_hom_app_app, restrictFunctor_map_app]
+  conv_rhs => erw [restrictUnitIso_hom_app_apply]
+  rw [Scheme.Hom.comp_appIso]
+  simp only [Iso.trans_hom, Functor.mapIso_hom,
+    CategoryTheory.comp_apply]
+  conv_lhs => erw [restrictUnitIso_hom_app_apply]
+  rw [(ConcreteCategory.bijective_of_isIso
+    (q.appIso W).hom).injective.eq_iff]
+  erw [restrictUnitIso_hom_app_apply]
+  rw [(ConcreteCategory.bijective_of_isIso
+    (a.appIso (q ''ᵁ W)).hom).injective.eq_iff]
+  rw [← CategoryTheory.comp_apply]
+  erw [← (Scheme.Modules.presheaf
+    (SheafOfModules.unit U.ringCatSheaf)).map_comp]
+  dsimp only [Scheme.Modules.presheaf, SheafOfModules.unit,
+    PresheafOfModules.unit]
+  convert rfl using 1
+  all_goals first
+    | apply Subsingleton.elim
+    | change (U.presheaf.map _).hom x = (U.presheaf.map _).hom x
+      congr 1
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Iterated restriction is invariant under replacing its three coefficient
+modules by chosen trivializations of the unit module.  Naturality moves the
+ambient trivialization through the restriction pseudofunctor, the intermediate
+trivialization cancels with its inverse, and `restrictUnitIso_comp` identifies
+the remaining canonical unit maps.  This packages the bookkeeping surrounding
+a transition map without hiding that transition's mathematical content. -/
+theorem iteratedRestrictionHom_of_unit (hq : q ≫ a = g)
+    (F : U.Modules) (H : P.Modules) (K : Q.Modules)
+    (eF : F ≅ SheafOfModules.unit U.ringCatSheaf)
+    (eH : H ≅ SheafOfModules.unit P.ringCatSheaf)
+    (eK : K ≅ SheafOfModules.unit Q.ringCatSheaf) :
+    iteratedRestrictionHom q a g hq F H K
+        ((restrictFunctor a).map eF.hom ≫
+          (restrictUnitIso a).hom ≫ eH.inv)
+        ((restrictFunctor q).map eH.hom ≫
+          (restrictUnitIso q).hom ≫ eK.inv) =
+      (restrictFunctor g).map eF.hom ≫
+        (restrictUnitIso g).hom ≫ eK.inv := by
+  unfold iteratedRestrictionHom
+  simp_rw [Functor.map_comp]
+  simp only [Category.assoc]
+  rw [← (restrictFunctor q).map_comp_assoc eH.inv eH.hom,
+    Iso.inv_hom_id]
+  have hmapid : (restrictFunctor q).map
+      (𝟙 (SheafOfModules.unit P.ringCatSheaf)) = 𝟙 _ :=
+    (restrictFunctor q).map_id _
+  rw [hmapid, Category.id_comp]
+  have hcompNat :
+      (restrictFunctorComp q a).hom.app F ≫
+          (restrictFunctor q).map ((restrictFunctor a).map eF.hom) =
+        (restrictFunctor (q ≫ a)).map eF.hom ≫
+          (restrictFunctorComp q a).hom.app
+            (SheafOfModules.unit U.ringCatSheaf) :=
+    ((restrictFunctorComp q a).hom.naturality eF.hom).symm
+  have hcongrNat :
+      (restrictFunctorCongr hq).inv.app F ≫
+          (restrictFunctor (q ≫ a)).map eF.hom =
+        (restrictFunctor g).map eF.hom ≫
+          (restrictFunctorCongr hq).inv.app
+            (SheafOfModules.unit U.ringCatSheaf) :=
+    ((restrictFunctorCongr hq).inv.naturality eF.hom).symm
+  slice_lhs 2 3 =>
+    rw [hcompNat]
+  slice_lhs 1 2 =>
+    rw [hcongrNat]
+  have hunit :
+      (restrictFunctorCongr hq).inv.app
+            (SheafOfModules.unit U.ringCatSheaf) ≫
+          (restrictFunctorComp q a).hom.app
+            (SheafOfModules.unit U.ringCatSheaf) ≫
+          (restrictFunctor q).map (restrictUnitIso a).hom ≫
+          (restrictUnitIso q).hom =
+        (restrictUnitIso g).hom := by
+    simpa only [iteratedRestrictionHom] using restrictUnitIso_comp q a g hq
+  slice_lhs 2 5 => rw [hunit]
+
+set_option maxHeartbeats 800000 in
+-- The mate calculation normalizes both adjunctions on every open subset.
+set_option backward.isDefEq.respectTransparency false in
+/-- Taking the adjoint of two successive extension-by-zero maps recovers the
+successive restriction morphism on the smallest open.  Sectionwise, the proof
+uses naturality of the two coefficient maps; every remaining comparison is an
+equality between inclusions of open subsets.  This is the mate identity needed
+to turn a pasted base-change calculation into a Čech cocycle calculation. -/
+theorem pushforwardRestrictionHomOfHom_transpose
+    (hq : q ≫ a = g)
+    (F : U.Modules) (H : P.Modules) (K : Q.Modules)
+    (e₁ : (restrictFunctor a).obj F ⟶ H)
+    (e₂ : (restrictFunctor q).obj H ⟶ K) :
+    ((restrictAdjunction g).homEquiv F K).symm
+        ((restrictAdjunction a).unit.app F ≫
+          (pushforward a).map e₁ ≫
+          pushforwardRestrictionHomOfHom
+            (f := a) (k := q) (h := g) hq H K e₂) =
+      iteratedRestrictionHom q a g hq F H K e₁ e₂ := by
+  subst g
+  rw [Adjunction.homEquiv_counit]
+  apply hom_ext
+  intro W
+  dsimp [pushforwardRestrictionHomOfHom, iteratedRestrictionHom]
+  slice_lhs 4 5 => erw [Category.comp_id]
+  slice_lhs 5 6 => rw [← K.presheaf.map_comp]
+  slice_rhs 1 2 => rw [← F.presheaf.map_comp]
+  have hQ : q ⁻¹ᵁ a ⁻¹ᵁ (q ≫ a) ''ᵁ W = W := by
+    simpa only [Scheme.Hom.comp_preimage] using
+      (q ≫ a).preimage_image_eq W
+  have hP : a ⁻¹ᵁ (q ≫ a) ''ᵁ W = q ''ᵁ W := by
+    calc
+      a ⁻¹ᵁ (q ≫ a) ''ᵁ W = a ⁻¹ᵁ a ''ᵁ q ''ᵁ W := by
+        rw [Scheme.Hom.comp_image]
+      _ = q ''ᵁ W := a.preimage_image_eq (q ''ᵁ W)
+  let tP : q ''ᵁ W ⟶ a ⁻¹ᵁ (q ≫ a) ''ᵁ W := eqToHom hP.symm
+  let tQ : q ⁻¹ᵁ a ⁻¹ᵁ (q ≫ a) ''ᵁ W ⟶ W := eqToHom hQ
+  let tQi : W ⟶ q ⁻¹ᵁ a ⁻¹ᵁ (q ≫ a) ''ᵁ W := eqToHom hQ.symm
+  let s : a ''ᵁ (a ⁻¹ᵁ (q ≫ a) ''ᵁ W) ⟶ (q ≫ a) ''ᵁ W :=
+    homOfLE (a.image_preimage_le ((q ≫ a) ''ᵁ W))
+  have hK : K.presheaf.map tQ.op ≫ K.presheaf.map tQi.op = 𝟙 _ := by
+    rw [← K.presheaf.map_comp]
+    have ht : tQ.op ≫ tQi.op = 𝟙 _ := Subsingleton.elim _ _
+    rw [ht, K.presheaf.map_id]
+  calc
+    _ = F.presheaf.map s.op ≫
+          e₁.app (a ⁻¹ᵁ (q ≫ a) ''ᵁ W) ≫
+          H.presheaf.map
+            (tP.op ≫ ((q.opensFunctor).map tQ).op) ≫
+          e₂.app (q ⁻¹ᵁ a ⁻¹ᵁ (q ≫ a) ''ᵁ W) ≫
+          K.presheaf.map tQi.op := by
+      congr 5
+    _ = F.presheaf.map s.op ≫
+          e₁.app (a ⁻¹ᵁ (q ≫ a) ''ᵁ W) ≫
+          H.presheaf.map tP.op ≫
+          (((restrictFunctor q).obj H).presheaf.map tQ.op ≫
+            e₂.app (q ⁻¹ᵁ a ⁻¹ᵁ (q ≫ a) ''ᵁ W)) ≫
+          K.presheaf.map tQi.op := by
+      rw [H.presheaf.map_comp, ← restrict_map H q tQ]
+      simp only [Category.assoc]
+    _ = F.presheaf.map s.op ≫
+          e₁.app (a ⁻¹ᵁ (q ≫ a) ''ᵁ W) ≫
+          H.presheaf.map tP.op ≫
+          (e₂.app W ≫ K.presheaf.map tQ.op) ≫
+          K.presheaf.map tQi.op := by
+      simpa only [Category.assoc, mapPresheaf_app] using congrArg
+        (fun z => F.presheaf.map s.op ≫
+          e₁.app (a ⁻¹ᵁ (q ≫ a) ''ᵁ W) ≫
+          H.presheaf.map tP.op ≫ z ≫ K.presheaf.map tQi.op)
+        (e₂.mapPresheaf.naturality tQ.op)
+    _ = F.presheaf.map s.op ≫
+          e₁.app (a ⁻¹ᵁ (q ≫ a) ''ᵁ W) ≫
+          H.presheaf.map tP.op ≫ e₂.app W := by
+      rw [Category.assoc, hK, Category.comp_id]
+    _ = F.presheaf.map s.op ≫
+          (((restrictFunctor a).obj F).presheaf.map tP.op ≫
+            e₁.app (q ''ᵁ W)) ≫ e₂.app W := by
+      simpa only [Category.assoc, mapPresheaf_app] using congrArg
+        (fun z => F.presheaf.map s.op ≫ z ≫ e₂.app W)
+        (e₁.mapPresheaf.naturality tP.op).symm
+    _ = F.presheaf.map
+          (s.op ≫ ((a.opensFunctor).map tP).op) ≫
+          e₁.app (q ''ᵁ W) ≫ e₂.app W := by
+      rw [restrict_map]
+      slice_lhs 1 2 => rw [← F.presheaf.map_comp]
+      rw [Category.assoc]
+    _ = _ := by
+      apply congrArg (fun z => z ≫ e₁.app (q ''ᵁ W) ≫ e₂.app W)
+      congr 1
+
+/-- Naturality of the mate identity with respect to a further coefficient
+morphism on the smallest open.  It allows a Čech transition isomorphism to
+remain attached while the two extension-by-zero maps are transposed back to
+their iterated restriction. -/
+theorem pushforwardRestrictionHomOfHom_transpose_comp
+    (hq : q ≫ a = g)
+    (F : U.Modules) (H : P.Modules) (K L : Q.Modules)
+    (e₁ : (restrictFunctor a).obj F ⟶ H)
+    (e₂ : (restrictFunctor q).obj H ⟶ K)
+    (u : K ⟶ L) :
+    ((restrictAdjunction g).homEquiv F L).symm
+        (((restrictAdjunction a).unit.app F ≫
+          (pushforward a).map e₁ ≫
+          pushforwardRestrictionHomOfHom
+            (f := a) (k := q) (h := g) hq H K e₂) ≫
+          (pushforward g).map u) =
+      iteratedRestrictionHom q a g hq F H K e₁ e₂ ≫ u := by
+  rw [Adjunction.homEquiv_naturality_right_symm,
+    pushforwardRestrictionHomOfHom_transpose]
 
 /-! ## Limits under restriction
 
