@@ -3,6 +3,7 @@ import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoFrobeniusOrbits
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoHyperplaneArtinLocal
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoConormalGrading
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingTransition
+import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoTwistingSheafCharts
 
 /-!
 # A concrete degree-six hyperplane section in characteristic two

@@ -1670,8 +1670,15 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   these powers is also packaged as a linear equivalence and then as a
   `ModuleCat` isomorphism of free rank-one modules on each overlap; after
   restriction to a triple overlap, their categorical composition is proved
-  equal to the direct transition.  Consequently, the next step is to glue
-  these local free modules into rank-one module sheaves and
+  equal to the direct transition.
+- `RationalPointsN25QuotientTwoTwistingSheafCharts.lean` lifts this descent
+  datum into actual local sheaves of modules.  Each coordinate chart is the
+  affine `Spec` of its homogeneous-away ring, and every integral twist is
+  modeled there by the affine tilde sheaf of a free rank-one module.  Pair
+  transitions and their restrictions to ordered triple overlaps are mapped
+  through the tilde functor; functoriality upgrades the module cocycle to a
+  categorical cocycle of local module-sheaf isomorphisms.  Consequently, the
+  next step is to glue these local sheaves into global rank-one modules and
   promote the proved chartwise determinant/adjunction identity to a sheaf
   isomorphism.
 - The characteristic-two terminal consumer now fixes its base class to
