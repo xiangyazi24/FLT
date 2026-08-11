@@ -150,7 +150,10 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     with the induced explicit quotient-ring equivalences; the full local
     Koszul resolutions on all four ambient standard charts, whose middle
     exactness is obtained uniformly from homogeneous numerators and the
-    degreewise Koszul theorem; and identification of these ideals as the
+    degreewise Koszul theorem; exactness of both overlapping three-term
+    complexes after affine tilde, proved through the generic stalkwise theorem
+    that affine module sheafification preserves exactness; and identification
+    of these ideals as the
     standard-chart restrictions of the closed immersion's global kernel
     ideal sheaf; and uniform structural ordinary affine presentations of all
     four `D_+(X_i)` as three-variable polynomial rings, carrying each
@@ -179,9 +182,9 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     compatible families are determined by one chart component, and the
     resulting global module sheaf restricts to a free rank-one module on
     every standard chart.
-  - Open atoms: send the explicit chart Koszul differentials through affine
-    tilde, glue the resulting morphisms on ambient projective space, and
-    transport the proved chartwise exactness to sheaf exactness; identify
+  - Open atoms: identify the sheafified chart Koszul terms with the effective
+    projective twists, prove overlap compatibility, and glue the resulting
+    morphisms and exact sequence on ambient projective space; identify
     the scheme-theoretic Hilbert polynomial with the certified `6T-3`, and
     prove projective adjunction;
     package the characteristic-three Jacobian-rank certificate as a smooth

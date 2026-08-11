@@ -1579,9 +1579,21 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   is cancelled in the ambient polynomial domain, and degreewise Koszul
   exactness supplies a homogeneous witness of exactly the degree needed to
   descend back to the chart.  This closes the algebraic exactness on the
-  standard affine cover.  What remains is categorical: apply affine tilde to
-  these maps, glue the ambient-chart morphisms, and transport the local
-  exactness statement to the resulting module sheaves.
+  standard affine cover.
+- `FLT/Mathlib/AlgebraicGeometry/Modules/TildeExact.lean` proves the missing
+  reusable categorical theorem that affine tilde preserves exact short
+  complexes.  The proof forgets to abelian-group sheaves, checks exactness on
+  stalks, identifies the actual stalk map of `tilde.map` with the canonical
+  localized linear map by germ naturality and denominator cancellation, and
+  invokes exactness of module localization.  It does not assume an unproved
+  quasi-coherent-sheaf exactness API.
+- `RationalPointsN25QuotientTwoChartKoszulSheaf.lean` packages the two
+  overlapping three-term pieces of the four-term chart Koszul resolution and
+  applies this theorem.  Hence the actual affine-tilde module-sheaf morphisms
+  are exact on every one of the four ambient standard charts.  The remaining
+  categorical step is global: compare these local free sheaves and arrows with
+  the effective projective twists, prove overlap compatibility, and glue the
+  ambient Koszul resolution on projective three-space.
 - `RationalPointsN25QuotientTwoIdealSheaf.lean` closes that gluing seam against
   Mathlib's actual global object.  Functoriality of `Proj` identifies the
   section map on `D_+(X_i)` with the localized graded quotient, while the
