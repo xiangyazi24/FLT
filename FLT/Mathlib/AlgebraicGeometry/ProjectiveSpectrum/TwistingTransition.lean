@@ -77,6 +77,55 @@ def negativeTwistTransition {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1)
   DistribMulAction.toLinearEquiv (HomogeneousLocalization.Away 𝒜 (f * g))
     (HomogeneousLocalization.Away 𝒜 (f * g)) ((degreeOneRatioUnit 𝒜 hf hg) ^ debt)
 
+/-- A positive twist uses the inverse chart ratio: changing from the
+`f`-trivialization to the `g`-trivialization multiplies by `(f/g)^credit`. -/
+def positiveTwistTransition {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1)
+    (credit : ℕ) :
+    HomogeneousLocalization.Away 𝒜 (f * g) ≃ₗ[HomogeneousLocalization.Away 𝒜 (f * g)]
+      HomogeneousLocalization.Away 𝒜 (f * g) :=
+  DistribMulAction.toLinearEquiv (HomogeneousLocalization.Away 𝒜 (f * g))
+    (HomogeneousLocalization.Away 𝒜 (f * g))
+    (((degreeOneRatioUnit 𝒜 hf hg)⁻¹) ^ credit)
+
+/-- Tensoring two negative twists adds their degree debts. -/
+theorem negativeTwistTransition_add {f g : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (a b : ℕ) :
+    (negativeTwistTransition 𝒜 hf hg a).trans
+        (negativeTwistTransition 𝒜 hf hg b) =
+      negativeTwistTransition 𝒜 hf hg (a + b) := by
+  apply LinearEquiv.ext
+  intro x
+  change ((degreeOneRatioUnit 𝒜 hf hg) ^ b) •
+      ((degreeOneRatioUnit 𝒜 hf hg) ^ a) • x =
+    ((degreeOneRatioUnit 𝒜 hf hg) ^ (a + b)) • x
+  rw [← mul_smul, ← pow_add, add_comm]
+
+/-- For equations of degrees two and three, the product of the two conormal
+transition factors is the negative-twist factor of degree five. -/
+theorem degreeTwoThreeDetTransition {f g : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) :
+    (degreeOneRatioUnit 𝒜 hf hg) ^ 2 *
+        (degreeOneRatioUnit 𝒜 hf hg) ^ 3 =
+      (degreeOneRatioUnit 𝒜 hf hg) ^ 5 := by
+  rw [← pow_add]
+
+/-- The local transition calculation behind adjunction for a `(2,3)`
+complete intersection in projective three-space:
+`O(-4) ⊗ det(O(-2) ⊕ O(-3))⁻¹ = O(1)`. -/
+theorem degreeTwoThreeAdjunctionTransition {f g : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) :
+    (negativeTwistTransition 𝒜 hf hg 4).trans
+        (positiveTwistTransition 𝒜 hf hg 5) =
+      positiveTwistTransition 𝒜 hf hg 1 := by
+  apply LinearEquiv.ext
+  intro x
+  change (((degreeOneRatioUnit 𝒜 hf hg)⁻¹) ^ 5) •
+      ((degreeOneRatioUnit 𝒜 hf hg) ^ 4) • x =
+    (((degreeOneRatioUnit 𝒜 hf hg)⁻¹) ^ 1) • x
+  rw [← mul_smul]
+  congr 1
+  simp [pow_succ, mul_assoc]
+
 /-! ## The triple-overlap cocycle -/
 
 /-- The ratio `g/f` represented on the ordered triple overlap

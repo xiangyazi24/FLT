@@ -1510,7 +1510,11 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   ordered triple overlap satisfy `(g/f)(h/g)=h/f` by a kernel-checked
   localization calculation.  The N25 specialization proves that all four
   quotient coordinate classes have degree one and instantiates these units,
-  twist transitions, and cocycles on its standard projective charts.
+  twist transitions, and cocycles on its standard projective charts.  The
+  transition arithmetic also proves that the determinant of the conormal
+  shifts has debt `2+3=5` and that combining its dual with the ambient
+  canonical debt four gives precisely the positive twist by one, chart by
+  chart.
 - `RationalPointsN25QuotientTwoGradedKoszul.lean` defines
   `shiftedPiece debt n = S(-debt)_n`, proves that multiplication by a
   degree-`d` polynomial maps `S(-(e+d))_n` into `S(-e)_n`, and constructs the
@@ -1658,7 +1662,8 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `Proj` and conclude `ω_C ≅ O_C(-4+2+3) = O_C(1)`.  The degree-one affine
   chart transition units and their cocycle are no longer part of that gap;
   the next step is to glue the corresponding rank-one module sheaves and
-  identify tensor products and determinants from these explicit transitions.
+  promote the proved chartwise determinant/adjunction identity to a sheaf
+  isomorphism.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
   section.  The remaining geometric seam is exact: construct principal

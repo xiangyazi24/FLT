@@ -51,6 +51,26 @@ def negativeTwistCoordinateTransition (debt : ℕ) (i j : Fin 4) :
   Away.negativeTwistTransition literalConePiece
     (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j) debt
 
+/-- On each coordinate overlap, the determinant of the degree-two and
+degree-three conormal transitions is the degree-five negative twist. -/
+theorem coordinateConormalDetTransition (i j : Fin 4) :
+    coordinateRatioUnit i j ^ 2 * coordinateRatioUnit i j ^ 3 =
+      coordinateRatioUnit i j ^ 5 :=
+  Away.degreeTwoThreeDetTransition literalConePiece
+    (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+
+/-- The chartwise adjunction transition is exactly that of the positive
+twist by one. -/
+theorem coordinateAdjunctionTransition (i j : Fin 4) :
+    (Away.negativeTwistTransition literalConePiece
+        (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j) 4).trans
+      (Away.positiveTwistTransition literalConePiece
+        (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j) 5) =
+    Away.positiveTwistTransition literalConePiece
+      (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j) 1 :=
+  Away.degreeTwoThreeAdjunctionTransition literalConePiece
+    (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+
 /-- The N25 coordinate transition ratios satisfy the multiplicative cocycle
 identity on every ordered triple overlap. -/
 theorem coordinateRatio_cocycle (i j l : Fin 4) :
