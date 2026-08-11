@@ -1489,9 +1489,12 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   in conormal degrees two and three.  Mathlib constructs the direct ground-
   field and quotient-ring actions on `I/I²` through different quotient
   paths; the file proves their compatibility on cotangent representatives
-  rather than installing an unjustified global scalar-tower instance.  Thus
-  the grading shifts are now kernel-checked, although internal directness and
-  recomposition of the conormal pieces remain to be packaged.
+  rather than installing an unjustified global scalar-tower instance.  An
+  explicit reindexing of the quotient decomposition shifts the two coefficient
+  families by two and three, zips them degreewise, and transports them through
+  the conormal equivalence.  The inverse is proved to be literal recomposition,
+  so the pieces form an internal direct sum and supply a
+  `DirectSum.Decomposition` of `I/I²`.
 - `RationalPointsN25QuotientTwoGradedKoszul.lean` defines
   `shiftedPiece debt n = S(-debt)_n`, proves that multiplication by a
   degree-`d` polynomial maps `S(-(e+d))_n` into `S(-e)_n`, and constructs the
@@ -1632,12 +1635,11 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   polynomial.
 - The remaining adjunction gap is now narrower: the conormal module is free
   on the actual equation classes, and its shifted degree pieces, homogeneous
-  scalar action, and generator degrees are explicit.  The next algebraic
-  step is to prove those pieces form an internal direct sum and install the
-  corresponding `DirectSum.Decomposition`.  Beyond that, Mathlib still lacks
-  the associated graded-module sheafification and projective twisting-sheaf
-  determinant theorems needed to carry this decomposition to `Proj` and conclude
-  `ω_C ≅ O_C(-4+2+3) = O_C(1)`.
+  scalar action, generator degrees, internal direct sum, and canonical
+  decomposition are explicit.  The remaining step is geometric: Mathlib still
+  lacks the associated graded-module sheafification and projective
+  twisting-sheaf determinant theorems needed to carry this decomposition to
+  `Proj` and conclude `ω_C ≅ O_C(-4+2+3) = O_C(1)`.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
   section.  The remaining geometric seam is exact: construct principal
