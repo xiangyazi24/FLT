@@ -1508,7 +1508,11 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   explicit inverse `f/g`, and packages multiplication by `(g/f)^d` as the
   transition equivalence for a negative twist.  The three ratios on an
   ordered triple overlap satisfy `(g/f)(h/g)=h/f` by a kernel-checked
-  localization calculation.  The N25 specialization proves that all four
+  localization calculation.  Explicit `awayMap` restrictions from each
+  pair overlap to the same ordered triple overlap are constructed and proved
+  to send the pairwise ratios to those representatives, so this is now an
+  actual Čech cocycle rather than three unrelated equalities in a convenient
+  ring.  The N25 specialization proves that all four
   quotient coordinate classes have degree one and instantiates these units,
   twist transitions, and cocycles on its standard projective charts.  The
   transition arithmetic also proves that the determinant of the conormal

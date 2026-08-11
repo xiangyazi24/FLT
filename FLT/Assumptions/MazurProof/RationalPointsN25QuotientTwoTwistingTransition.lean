@@ -87,4 +87,20 @@ theorem coordinateRatio_cocycle (i j l : Fin 4) :
     (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
     (coordinateClass_mem_degreeOne l)
 
+/-- The pairwise N25 coordinate ratios satisfy the genuine Čech cocycle after
+restriction to the common ordered triple overlap. -/
+theorem coordinateRatio_restricted_cocycle (i j l : Fin 4) :
+    Away.restrict12 literalConePiece (coordinateClass_mem_degreeOne l)
+        (Away.degreeOneRatio literalConePiece
+          (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)) *
+      Away.restrict23 literalConePiece (coordinateClass_mem_degreeOne i)
+        (Away.degreeOneRatio literalConePiece
+          (coordinateClass_mem_degreeOne j) (coordinateClass_mem_degreeOne l)) =
+    Away.restrict13 literalConePiece (coordinateClass_mem_degreeOne j)
+      (Away.degreeOneRatio literalConePiece
+        (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne l)) :=
+  Away.degreeOneRatio_restricted_cocycle literalConePiece
+    (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+    (coordinateClass_mem_degreeOne l)
+
 end MazurProof.RationalPointsN25QuotientTwoTwistingTransition

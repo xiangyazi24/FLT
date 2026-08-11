@@ -173,4 +173,65 @@ theorem degreeOneRatio_cocycle {f g h : A}
   simp
   ring
 
+/-! ## Restriction from pair overlaps to a common triple overlap -/
+
+/-- Restrict the `fg` overlap ring to the ordered triple overlap `fgh`. -/
+def restrict12 {f g h : A} (hh : h ∈ 𝒜 1) :
+    HomogeneousLocalization.Away 𝒜 (f * g) →+*
+      HomogeneousLocalization.Away 𝒜 ((f * g) * h) :=
+  HomogeneousLocalization.awayMap 𝒜 hh rfl
+
+/-- Restrict the `gh` overlap ring to the same ordered triple overlap. -/
+def restrict23 {f g h : A} (hf : f ∈ 𝒜 1) :
+    HomogeneousLocalization.Away 𝒜 (g * h) →+*
+      HomogeneousLocalization.Away 𝒜 ((f * g) * h) :=
+  HomogeneousLocalization.awayMap 𝒜 hf (by ring)
+
+/-- Restrict the `fh` overlap ring to the same ordered triple overlap. -/
+def restrict13 {f g h : A} (hg : g ∈ 𝒜 1) :
+    HomogeneousLocalization.Away 𝒜 (f * h) →+*
+      HomogeneousLocalization.Away 𝒜 ((f * g) * h) :=
+  HomogeneousLocalization.awayMap 𝒜 hg (by ring)
+
+/-- Restricting `g/f` from the first pair overlap gives its explicit
+representative on the triple overlap. -/
+theorem restrict12_degreeOneRatio {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) :
+    restrict12 𝒜 hh (degreeOneRatio 𝒜 hf hg) =
+      degreeOneRatio12 𝒜 hf hg hh := by
+  rw [restrict12, degreeOneRatio, degreeOneRatio12,
+    HomogeneousLocalization.awayMap_mk]
+  simp only [pow_one]
+
+/-- Restricting `h/g` from the second pair overlap gives its explicit
+representative on the triple overlap. -/
+theorem restrict23_degreeOneRatio {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) :
+    restrict23 𝒜 hf (degreeOneRatio 𝒜 hg hh) =
+      degreeOneRatio23 𝒜 hf hg hh := by
+  rw [restrict23, degreeOneRatio, degreeOneRatio23,
+    HomogeneousLocalization.awayMap_mk]
+  simp only [pow_one]
+
+/-- Restricting `h/f` from the third pair overlap gives its explicit
+representative on the triple overlap. -/
+theorem restrict13_degreeOneRatio {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) :
+    restrict13 𝒜 hg (degreeOneRatio 𝒜 hf hh) =
+      degreeOneRatio13 𝒜 hf hg hh := by
+  rw [restrict13, degreeOneRatio, degreeOneRatio13,
+    HomogeneousLocalization.awayMap_mk]
+  simp only [pow_one]
+
+/-- The pairwise transition ratios satisfy the Čech cocycle after all three
+are restricted to a common triple overlap. -/
+theorem degreeOneRatio_restricted_cocycle {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) :
+    restrict12 𝒜 hh (degreeOneRatio 𝒜 hf hg) *
+        restrict23 𝒜 hf (degreeOneRatio 𝒜 hg hh) =
+      restrict13 𝒜 hg (degreeOneRatio 𝒜 hf hh) := by
+  rw [restrict12_degreeOneRatio, restrict23_degreeOneRatio,
+    restrict13_degreeOneRatio]
+  exact degreeOneRatio_cocycle 𝒜 hf hg hh
+
 end HomogeneousLocalization.Away
