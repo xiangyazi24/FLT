@@ -1,3 +1,4 @@
+import Mathlib.Algebra.Category.ModuleCat.Basic
 import Mathlib.RingTheory.GradedAlgebra.HomogeneousLocalization
 
 /-!
@@ -20,6 +21,7 @@ noncomputable section
 
 open DirectSum
 open Graded
+open CategoryTheory
 
 universe u
 
@@ -258,5 +260,108 @@ theorem degreeOneRatioUnit_zpow_restricted_cocycle {f g h : A}
     (Units.map (restrict13 𝒜 (f := f) (g := g) (h := h) hg).toMonoidHom
       (degreeOneRatioUnit 𝒜 hf hh)) ^ d := by
   rw [← mul_zpow, degreeOneRatioUnit_restricted_cocycle]
+
+/-! ## Rank-one module descent isomorphisms -/
+
+/-- An integral power of the chart ratio gives a linear transition on a pair
+overlap.  Exponent `d` corresponds to the transition of `O(-d)`. -/
+def ratioPowerTransition {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1)
+    (d : ℤ) :
+    HomogeneousLocalization.Away 𝒜 (f * g) ≃ₗ[HomogeneousLocalization.Away 𝒜 (f * g)]
+      HomogeneousLocalization.Away 𝒜 (f * g) :=
+  DistribMulAction.toLinearEquiv (HomogeneousLocalization.Away 𝒜 (f * g))
+    (HomogeneousLocalization.Away 𝒜 (f * g)) ((degreeOneRatioUnit 𝒜 hf hg) ^ d)
+
+/-- The first pair transition after restriction to the ordered triple
+overlap. -/
+def ratioPowerTransition12 {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) (d : ℤ) :
+    HomogeneousLocalization.Away 𝒜 ((f * g) * h) ≃ₗ[
+      HomogeneousLocalization.Away 𝒜 ((f * g) * h)]
+      HomogeneousLocalization.Away 𝒜 ((f * g) * h) :=
+  DistribMulAction.toLinearEquiv _ _
+    ((Units.map (restrict12 𝒜 (f := f) (g := g) (h := h) hh).toMonoidHom
+      (degreeOneRatioUnit 𝒜 hf hg)) ^ d)
+
+/-- The second pair transition after restriction to the ordered triple
+overlap. -/
+def ratioPowerTransition23 {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) (d : ℤ) :
+    HomogeneousLocalization.Away 𝒜 ((f * g) * h) ≃ₗ[
+      HomogeneousLocalization.Away 𝒜 ((f * g) * h)]
+      HomogeneousLocalization.Away 𝒜 ((f * g) * h) :=
+  DistribMulAction.toLinearEquiv _ _
+    ((Units.map (restrict23 𝒜 (f := f) (g := g) (h := h) hf).toMonoidHom
+      (degreeOneRatioUnit 𝒜 hg hh)) ^ d)
+
+/-- The direct first-to-third transition after restriction to the ordered
+triple overlap. -/
+def ratioPowerTransition13 {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) (d : ℤ) :
+    HomogeneousLocalization.Away 𝒜 ((f * g) * h) ≃ₗ[
+      HomogeneousLocalization.Away 𝒜 ((f * g) * h)]
+      HomogeneousLocalization.Away 𝒜 ((f * g) * h) :=
+  DistribMulAction.toLinearEquiv _ _
+    ((Units.map (restrict13 𝒜 (f := f) (g := g) (h := h) hg).toMonoidHom
+      (degreeOneRatioUnit 𝒜 hf hh)) ^ d)
+
+/-- The restricted linear transition equivalences satisfy the descent
+cocycle: the first-to-second map followed by the second-to-third map is the
+first-to-third map. -/
+theorem ratioPowerTransition_cocycle {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) (d : ℤ) :
+    (ratioPowerTransition12 𝒜 hf hg hh d).trans
+        (ratioPowerTransition23 𝒜 hf hg hh d) =
+      ratioPowerTransition13 𝒜 hf hg hh d := by
+  apply LinearEquiv.ext
+  intro x
+  change (Units.map (restrict23 𝒜 (f := f) (g := g) (h := h) hf).toMonoidHom
+      (degreeOneRatioUnit 𝒜 hg hh)) ^ d •
+    (Units.map (restrict12 𝒜 (f := f) (g := g) (h := h) hh).toMonoidHom
+      (degreeOneRatioUnit 𝒜 hf hg)) ^ d • x =
+    (Units.map (restrict13 𝒜 (f := f) (g := g) (h := h) hg).toMonoidHom
+      (degreeOneRatioUnit 𝒜 hf hh)) ^ d • x
+  rw [← mul_smul]
+  apply congrArg (fun u : (HomogeneousLocalization.Away 𝒜 ((f * g) * h))ˣ ↦ u • x)
+  calc
+    (Units.map (restrict23 𝒜 (f := f) (g := g) (h := h) hf).toMonoidHom
+          (degreeOneRatioUnit 𝒜 hg hh)) ^ d *
+        (Units.map (restrict12 𝒜 (f := f) (g := g) (h := h) hh).toMonoidHom
+          (degreeOneRatioUnit 𝒜 hf hg)) ^ d =
+      (Units.map (restrict12 𝒜 (f := f) (g := g) (h := h) hh).toMonoidHom
+          (degreeOneRatioUnit 𝒜 hf hg)) ^ d *
+        (Units.map (restrict23 𝒜 (f := f) (g := g) (h := h) hf).toMonoidHom
+          (degreeOneRatioUnit 𝒜 hg hh)) ^ d := mul_comm _ _
+    _ = _ := degreeOneRatioUnit_zpow_restricted_cocycle 𝒜 hf hg hh d
+
+/-- The first restricted transition as an isomorphism of free rank-one
+modules over the triple-overlap ring. -/
+def ratioPowerModuleIso12 {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) (d : ℤ) :=
+  (ratioPowerTransition12 𝒜 hf hg hh d).toModuleIso
+
+/-- The second restricted transition as an isomorphism of free rank-one
+modules over the triple-overlap ring. -/
+def ratioPowerModuleIso23 {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) (d : ℤ) :=
+  (ratioPowerTransition23 𝒜 hf hg hh d).toModuleIso
+
+/-- The direct restricted transition as an isomorphism of free rank-one
+modules over the triple-overlap ring. -/
+def ratioPowerModuleIso13 {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) (d : ℤ) :=
+  (ratioPowerTransition13 𝒜 hf hg hh d).toModuleIso
+
+/-- The rank-one module isomorphisms satisfy the categorical descent
+cocycle on every ordered triple overlap. -/
+theorem ratioPowerModuleIso_cocycle {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) (d : ℤ) :
+    (ratioPowerModuleIso12 𝒜 hf hg hh d).hom ≫
+        (ratioPowerModuleIso23 𝒜 hf hg hh d).hom =
+      (ratioPowerModuleIso13 𝒜 hf hg hh d).hom := by
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  exact LinearEquiv.congr_fun (ratioPowerTransition_cocycle 𝒜 hf hg hh d) x
 
 end HomogeneousLocalization.Away

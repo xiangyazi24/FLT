@@ -1666,8 +1666,12 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `Proj` and conclude `ω_C ≅ O_C(-4+2+3) = O_C(1)`.  The degree-one affine
   chart transition units and their cocycle are no longer part of that gap;
   the unit cocycle is proved uniformly for every integral power, so the same
-  descent datum covers all `O(d)` occurring in adjunction.  Consequently,
-  the next step is to glue the corresponding rank-one module sheaves and
+  descent datum covers all `O(d)` occurring in adjunction.  Multiplication by
+  these powers is also packaged as a linear equivalence and then as a
+  `ModuleCat` isomorphism of free rank-one modules on each overlap; after
+  restriction to a triple overlap, their categorical composition is proved
+  equal to the direct transition.  Consequently, the next step is to glue
+  these local free modules into rank-one module sheaves and
   promote the proved chartwise determinant/adjunction identity to a sheaf
   isomorphism.
 - The characteristic-two terminal consumer now fixes its base class to

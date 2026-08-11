@@ -21,6 +21,7 @@ open RationalPointsN25QuotientTwoKoszul
 open RationalPointsN25QuotientTwoQuotientGrading
 open RationalPointsN25QuotientTwoProj
 open HomogeneousLocalization
+open CategoryTheory
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
@@ -120,6 +121,23 @@ theorem coordinateTwistUnit_restricted_cocycle (i j l : Fin 4) (d : ℤ) :
         (coordinateClass_mem_degreeOne j)).toMonoidHom
       (coordinateRatioUnit i l)) ^ d :=
   Away.degreeOneRatioUnit_zpow_restricted_cocycle literalConePiece
+    (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+    (coordinateClass_mem_degreeOne l) d
+
+/-- The free rank-one module transition isomorphisms for the integral twist
+of exponent `d` satisfy the categorical descent cocycle on N25 coordinate
+triple overlaps. -/
+theorem coordinateTwistModuleIso_cocycle (i j l : Fin 4) (d : ℤ) :
+    (Away.ratioPowerModuleIso12 literalConePiece
+        (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+        (coordinateClass_mem_degreeOne l) d).hom ≫
+      (Away.ratioPowerModuleIso23 literalConePiece
+        (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+        (coordinateClass_mem_degreeOne l) d).hom =
+    (Away.ratioPowerModuleIso13 literalConePiece
+      (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+      (coordinateClass_mem_degreeOne l) d).hom :=
+  Away.ratioPowerModuleIso_cocycle literalConePiece
     (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
     (coordinateClass_mem_degreeOne l) d
 
