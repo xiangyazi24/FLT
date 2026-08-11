@@ -1609,9 +1609,14 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
 - The already effective `globalTwistModule` construction lives on the quotient
   curve, not on ambient projective three-space, so it cannot be reused as the
   ambient Koszul terms by definitional sleight of hand.  What remains is to
-  effectivize the analogous ambient twist descent, use the proved restriction
-  comparisons to define its global morphisms, and glue the ambient Koszul
-  resolution.
+  use the separate ambient construction rather than that quotient object.
+- `RationalPointsN25QuotientTwoAmbientTwistingSheafCharts.lean` now supplies
+  that ambient local descent datum: free rank-one tilde modules on all four
+  projective-space charts, integer-power transitions on pair overlaps, and the
+  actual module-sheaf cocycle on triple overlaps.  What remains is global
+  effectivity of this ambient datum, followed by construction of the global
+  Koszul morphisms from the proved restriction comparisons and gluing of the
+  exact sequence.
 - `RationalPointsN25QuotientTwoIdealSheaf.lean` closes that gluing seam against
   Mathlib's actual global object.  Functoriality of `Proj` identifies the
   section map on `D_+(X_i)` with the localized graded quotient, while the
