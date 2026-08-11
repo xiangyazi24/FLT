@@ -15,7 +15,7 @@ the explicit restriction functor and then for the ordinary pullback functor.
 
 noncomputable section
 
-open CategoryTheory
+open CategoryTheory CategoryTheory.Limits
 
 namespace AlgebraicGeometry.Scheme.Modules
 
@@ -215,5 +215,109 @@ def pullbackUnitIso :
     (pullback f).obj (SheafOfModules.unit Y.ringCatSheaf) ≅
       SheafOfModules.unit X.ringCatSheaf :=
   (restrictFunctorIsoPullback f).symm.app _ ≪≫ restrictUnitIso f
+
+/-! ## Open base change for module sheaves
+
+For a cartesian square of open immersions, restricting a direct image across
+one side agrees with taking the direct image of the restriction across the
+opposite side.  This is the Beck--Chevalley isomorphism needed to evaluate a
+Čech equalizer on one member of an open cover.
+
+The comparison is constructed as the mate of the square under the
+restriction--direct-image adjunction.  Its proof is sectionwise: the pullback
+hypothesis identifies the two open subsets on which the original sheaf is
+evaluated, so every component is a presheaf restriction along an equality.
+-/
+
+variable {P U X Y : Scheme} (f' : P ⟶ U) (iX : P ⟶ X)
+  (iU : U ⟶ Y) (f : X ⟶ Y)
+  [IsOpenImmersion f'] [IsOpenImmersion iX] [IsOpenImmersion iU]
+  [IsOpenImmersion f]
+
+/-- Restriction of a module-sheaf morphism is evaluated on the image of the
+chosen open subset.  This exposes the sectionwise form used in the base-change
+calculation below. -/
+@[simp]
+lemma restrictFunctor_map_app {A B : Y.Modules} (g : A ⟶ B)
+    (V : U.Opens) :
+    ((restrictFunctor iU).map g).app V = g.app (iU ''ᵁ V) :=
+  rfl
+
+/-- The restricted Beck--Chevalley comparison on the pullback open.  It
+combines functoriality of restriction, commutativity of the square, and the
+counit identifying the restriction of an open direct image with its source. -/
+def openBaseChangeRestrictedHom (H : IsPullback f' iX iU f)
+    (M : X.Modules) :
+    (restrictFunctor f').obj
+        ((restrictFunctor iU).obj ((pushforward f).obj M)) ⟶
+      (restrictFunctor iX).obj M :=
+  (restrictFunctorComp f' iU).inv.app ((pushforward f).obj M) ≫
+    (restrictFunctorCongr H.w).hom.app ((pushforward f).obj M) ≫
+    (restrictFunctorComp iX f).hom.app ((pushforward f).obj M) ≫
+    (restrictFunctor iX).map ((restrictAdjunction f).counit.app M)
+
+/-- The open base-change morphism is the adjoint transpose of the comparison
+after restriction to the cartesian intersection. -/
+def openBaseChangeHom (H : IsPullback f' iX iU f) (M : X.Modules) :
+    (restrictFunctor iU).obj ((pushforward f).obj M) ⟶
+      (pushforward f').obj ((restrictFunctor iX).obj M) :=
+  (restrictAdjunction f').homEquiv _ _
+    (openBaseChangeRestrictedHom f' iX iU f H M)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Open base change for module sheaves is invertible.  On an open subset of
+`U`, its component is the restriction map along the equality between the two
+pullback descriptions of the corresponding open subset of `X`. -/
+theorem openBaseChangeHom_isIso (H : IsPullback f' iX iU f)
+    (M : X.Modules) :
+    IsIso (openBaseChangeHom f' iX iU f H M) := by
+  rw [Hom.isIso_iff_isIso_app]
+  intro W
+  let eW :
+      Γ((restrictFunctor iU).obj ((pushforward f).obj M), W) ≅
+        Γ((pushforward f').obj ((restrictFunctor iX).obj M), W) :=
+    M.presheaf.mapIso
+      (eqToIso
+        (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W)).op
+  have hW : (openBaseChangeHom f' iX iU f H M).app W = eW.hom := by
+    rw [openBaseChangeHom, Adjunction.homEquiv_unit, Hom.comp_app,
+      pushforward_map_app, restrictAdjunction_unit_app_app]
+    dsimp [openBaseChangeRestrictedHom, eW]
+    rw [restrict_map, pushforward_obj_presheaf_map]
+    rw [← Functor.map_comp, ← Functor.map_comp, ← Functor.map_comp,
+      ← Functor.map_comp]
+    congr 1
+  rw [hW]
+  infer_instance
+
+/-! ## Limits under restriction
+
+Restriction along an open immersion is computed by evaluating the original
+sheaf on image opens and then restricting scalars along the structure-sheaf
+isomorphism.  Both operations preserve limits.  Consequently restriction
+preserves every limit available in the module-sheaf category, including the
+products and equalizers occurring in a Čech construction.
+-/
+
+/-- Restriction of module sheaves along an open immersion preserves limits.
+The proof reflects a proposed limit through the fully faithful forgetful
+functor and checks it on every open subset, where it becomes evaluation
+followed by restriction of scalars. -/
+noncomputable instance restrictFunctorPreservesLimit {J : Type} [Category J]
+    (K : J ⥤ Y.Modules) [HasLimit K] :
+    PreservesLimit K (restrictFunctor f) := by
+  apply preservesLimit_of_preserves_limit_cone (limit.isLimit K)
+  apply isLimitOfReflects (SheafOfModules.forget X.ringCatSheaf)
+  apply PresheafOfModules.evaluationJointlyReflectsLimits
+  intro V
+  change IsLimit
+    ((ModuleCat.restrictScalars (f.appIso V.unop).inv.hom).mapCone
+      ((SheafOfModules.evaluation Y.ringCatSheaf
+        (.op (f ''ᵁ V.unop))).mapCone (limit.cone K)))
+  exact isLimitOfPreserves
+    (ModuleCat.restrictScalars (f.appIso V.unop).inv.hom)
+    (isLimitOfPreserves
+      (SheafOfModules.evaluation Y.ringCatSheaf
+        (.op (f ''ᵁ V.unop))) (limit.isLimit K))
 
 end AlgebraicGeometry.Scheme.Modules

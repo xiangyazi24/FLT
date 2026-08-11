@@ -78,6 +78,49 @@ theorem coordinateOverlapMap_eq_right (i j : Fin 4) :
   simp only [Category.assoc]
   rw [(coordinateChosenPullback i j).condition]
 
+/-- The explicit affine overlap, with its two localization maps, is the
+cartesian intersection of the corresponding coordinate charts.  This is the
+geometric square used by open base change below. -/
+theorem coordinateOverlap_isPullback (i j : Fin 4) :
+    IsPullback (coordinateOverlapToLeft i j)
+      (coordinateOverlapToRight i j)
+      (coordinateChartMap i) (coordinateChartMap j) := by
+  refine (coordinateChosenPullback i j).isPullback.of_iso'
+    (coordinateChosenPullbackIso i j).symm (Iso.refl _) (Iso.refl _)
+      (Iso.refl _) ?_ ?_ ?_ ?_
+  · rfl
+  · rfl
+  · simp
+  · simp
+
+/-! ## Open base change on the coordinate intersections
+
+Restricting an extension-by-zero from chart `i` to chart `k` is the direct
+image from their intersection into chart `k`.  This geometric conversion is
+the key structural step in solving the restricted Čech equalizer: after it,
+all its factors are sheaves on actual intersections inside one fixed chart.
+-/
+
+/-- Beck--Chevalley identifies the restriction to chart `k` of the local
+sheaf extended from chart `i` with the pushforward from the pair intersection
+`U_k ∩ U_i`. -/
+def coordinateLocalPushforwardBaseChangeIso (d : ℤ) (k i : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        ((Scheme.Modules.pushforward (coordinateChartMap i)).obj
+          (coordinateLocalTwistModule d i)) ≅
+      (Scheme.Modules.pushforward (coordinateOverlapToLeft k i)).obj
+        ((Scheme.Modules.restrictFunctor
+          (coordinateOverlapToRight k i)).obj
+            (coordinateLocalTwistModule d i)) := by
+  letI := Scheme.Modules.openBaseChangeHom_isIso
+    (coordinateOverlapToLeft k i) (coordinateOverlapToRight k i)
+    (coordinateChartMap k) (coordinateChartMap i)
+    (coordinateOverlap_isPullback k i) (coordinateLocalTwistModule d i)
+  exact asIso (Scheme.Modules.openBaseChangeHom
+    (coordinateOverlapToLeft k i) (coordinateOverlapToRight k i)
+    (coordinateChartMap k) (coordinateChartMap i)
+    (coordinateOverlap_isPullback k i) (coordinateLocalTwistModule d i))
+
 /-! ## Restriction of local twists to pair overlaps -/
 
 /-- Restricting the local twist from the first chart gives the explicit
@@ -453,5 +496,100 @@ theorem globalTwistModule_compatibility (d : ℤ) :
     equalizer.ι (twistCechLeft d) (twistCechRight d) ≫ twistCechLeft d =
       equalizer.ι (twistCechLeft d) (twistCechRight d) ≫ twistCechRight d :=
   equalizer.condition _ _
+
+/-! ## Restriction to a coordinate chart
+
+Open base change and preservation of limits put the restriction of the global
+Čech equalizer into a form that can be solved on one fixed chart.  A local
+section on chart `k` determines its representative on every chart `i` by
+restricting to `U_k ∩ U_i` and applying the descent transition.  The remaining
+effectivity equation is exactly the triple-overlap cocycle for this family.
+-/
+
+/-- Evaluation of a compatible global family in the `i`-th chart.  The map is
+the adjoint of the equalizer inclusion followed by the `i`-th product
+projection, so it extracts precisely the local representative of a glued
+section. -/
+def globalTwistModuleToLocal (d : ℤ) (i : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap i)).obj
+        (globalTwistModule d) ⟶ coordinateLocalTwistModule d i :=
+  ((Scheme.Modules.restrictAdjunction (coordinateChartMap i)).homEquiv
+      (globalTwistModule d) (coordinateLocalTwistModule d i))
+    |>.symm (equalizer.ι (twistCechLeft d) (twistCechRight d) ≫
+      Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward d j) i)
+
+/-- Restriction carries the product of extended local sheaves to the product
+of their restrictions on the fixed chart. -/
+def restrictedTwistCechSourceIso (d : ℤ) (k : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        (twistCechSource d) ≅
+      ∏ᶜ fun i : Fin 4 ↦
+        (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+          (coordinateLocalPushforward d i) :=
+  PreservesProduct.iso
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k))
+    (fun i : Fin 4 ↦ coordinateLocalPushforward d i)
+
+/-- The inverse product comparison followed by a restricted projection is the
+corresponding projection from the product of restricted factors. -/
+@[reassoc (attr := simp)]
+theorem restrictedTwistCechSourceIso_inv_map_π (d : ℤ) (k i : Fin 4) :
+    (restrictedTwistCechSourceIso d k).inv ≫
+        (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+          (Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward d j) i) =
+      Pi.π (fun j : Fin 4 ↦
+        (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+          (coordinateLocalPushforward d j)) i := by
+  rw [← piComparison_comp_π]
+  exact (restrictedTwistCechSourceIso d k).inv_hom_id_assoc _
+
+/-- Restriction similarly carries the overlap product to the product of its
+restricted overlap factors. -/
+def restrictedTwistCechTargetIso (d : ℤ) (k : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        (twistCechTarget d) ≅
+      ∏ᶜ fun p : Fin 4 × Fin 4 ↦
+        (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+          (coordinateOverlapPushforward d p) :=
+  PreservesProduct.iso
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k))
+    (fun p : Fin 4 × Fin 4 ↦ coordinateOverlapPushforward d p)
+
+/-- Restriction of the global Čech equalizer is the equalizer of the two
+restricted Čech arrows. -/
+def restrictedGlobalTwistCechIso (d : ℤ) (k : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        (globalTwistModule d) ≅
+      equalizer
+        ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+          (twistCechLeft d))
+        ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+          (twistCechRight d)) :=
+  PreservesEqualizer.iso
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k))
+    (twistCechLeft d) (twistCechRight d)
+
+/-- A section on chart `k` determines its representative in the `i`-th
+extended chart factor: restrict it to `U_k ∩ U_i`, transport by the descent
+transition, push it forward inside `U_k`, and invert open base change. -/
+def coordinateLocalReconstructionHom (d : ℤ) (k i : Fin 4) :
+    coordinateLocalTwistModule d k ⟶
+      (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        (coordinateLocalPushforward d i) :=
+  (Scheme.Modules.restrictAdjunction
+      (coordinateOverlapToLeft k i)).unit.app
+        (coordinateLocalTwistModule d k) ≫
+    (Scheme.Modules.pushforward (coordinateOverlapToLeft k i)).map
+      (coordinateDescentIso d k i).hom ≫
+    (coordinateLocalPushforwardBaseChangeIso d k i).inv
+
+/-- The representatives reconstructed from chart `k`, assembled into the
+restricted product of all four local extension-by-zero factors. -/
+def coordinateLocalReconstruction (d : ℤ) (k : Fin 4) :
+    coordinateLocalTwistModule d k ⟶
+      (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        (twistCechSource d) :=
+  Pi.lift (fun i : Fin 4 ↦ coordinateLocalReconstructionHom d k i) ≫
+    (restrictedTwistCechSourceIso d k).inv
 
 end MazurProof.RationalPointsN25QuotientTwoTwistingSheafGluing

@@ -1721,7 +1721,20 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   charts with the corresponding local free rank-one module.  That theorem
   must use the already-proved triple-overlap cocycle and the proved standard
   coordinate cover; local freeness has not been inferred merely from the
-  equalizer definition.
+  equalizer definition.  The generic infrastructure for this final step is
+  now present in `PullbackUnit.lean`: a sectionwise Beck--Chevalley theorem
+  proves open base change for module sheaves, and restriction along an open
+  immersion is proved to preserve all available limits by evaluation on image
+  opens followed by restriction of scalars.  Consequently the global
+  equalizer and both products can be restricted without an axiom.  On each
+  fixed chart `k`, `coordinateLocalReconstructionHom` now builds the `i`-th
+  representative from a section on `k` by the unit for `U_k ∩ U_i`, the
+  transition `g_ki`, and inverse base change; these representatives are
+  assembled by `coordinateLocalReconstruction`.  The precise remaining
+  equation is that this family equalizes every ordered pair `(i,j)`.  After
+  cancelling product comparisons it is exactly the sheaf-level identity
+  `g_ki · g_ij = g_kj` on the triple intersection, not a finite chart
+  enumeration or a missing existence axiom.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
   section.  The remaining geometric seam is exact: construct principal
