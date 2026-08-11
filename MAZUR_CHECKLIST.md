@@ -170,6 +170,12 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     formula deriving those bounds from reduction maps whose kernels have
     orders `2^a` and `3^b`; and the noncircular degree-two endgame proving
     pullback injective from those bounds and `norm ∘ pullback = [2]`.
+    The four-chart twisting-sheaf construction is now also effective: the
+    explicit pair and triple transition maps satisfy the Čech cocycle, the
+    reconstructed local family factors through the restricted equalizer,
+    compatible families are determined by one chart component, and the
+    resulting global module sheaf restricts to a free rank-one module on
+    every standard chart.
   - Open atoms: construct the conormal/Koszul morphisms of sheaves, prove their
     exactness on the now-explicit standard affine cover, identify
     the scheme-theoretic Hilbert polynomial with the certified `6T-3`, and

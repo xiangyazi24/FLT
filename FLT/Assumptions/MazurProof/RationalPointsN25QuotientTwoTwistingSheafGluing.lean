@@ -1552,4 +1552,298 @@ theorem coordinateLocalToRestrictedGlobalTwist_comp_evaluation_isIso
   rw [coordinateLocalToRestrictedGlobalTwist_comp_evaluation]
   exact coordinateLocalReconstruction_diagonal_isIso d k
 
+/-! ## Uniqueness and effectivity of compatible families
+
+On the fixed chart `k`, the right Čech leg for `(k,i)` is invertible:
+the triple overlap `(k,k,i)` is the self-pullback of the pair overlap.
+Consequently every compatible family is determined by its `k`-th
+component, which upgrades reconstruction to an isomorphism.
+-/
+
+/-- The right leg of the restricted Čech equation at `(k,i)`. -/
+def coordinateRestrictedCechRightHom (d : ℤ) (k i : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        (coordinateLocalPushforward d i) ⟶
+      (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        (coordinateOverlapPushforward d (k, i)) :=
+  (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+    (pushforwardRestrictionHom
+      (coordinateOverlapToRight k i)
+      (coordinateChartMap i)
+      (coordinateOverlapMap k i)
+      (coordinateOverlapMap_eq_right k i)
+      (coordinateLocalTwistModule d i)
+      (coordinateOverlapTwistModule d k i)
+      (coordinateRestrictRightIso d k i))
+
+/-- The left leg of the restricted Čech equation at `(k,i)`. -/
+def coordinateRestrictedCechLeftHom (d : ℤ) (k i : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        (coordinateLocalPushforward d k) ⟶
+      (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        (coordinateOverlapPushforward d (k, i)) :=
+  (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+    (pushforwardRestrictionHom
+      (coordinateOverlapToLeft k i)
+      (coordinateChartMap k)
+      (coordinateOverlapMap k i)
+      rfl
+      (coordinateLocalTwistModule d k)
+      (coordinateOverlapTwistModule d k i)
+      (coordinateRestrictLeftIso d k i ≪≫
+        coordinateOverlapTwistIso d k i))
+
+/-- The restricted equalizer condition projected to `(k,i)` says that its
+`k`-th and `i`-th components agree after the two corresponding Čech legs. -/
+@[reassoc]
+theorem restrictedEqualizer_condition_component
+    (d : ℤ) (k i : Fin 4) :
+    equalizer.ι
+          ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (twistCechLeft d))
+          ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (twistCechRight d)) ≫
+        (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+          (Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward d j) k) ≫
+        coordinateRestrictedCechLeftHom d k i =
+      equalizer.ι
+          ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (twistCechLeft d))
+          ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (twistCechRight d)) ≫
+        (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+          (Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward d j) i) ≫
+        coordinateRestrictedCechRightHom d k i := by
+  have h := congrArg
+    (fun z => z ≫
+      (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+        (Pi.π (fun p : Fin 4 × Fin 4 ↦
+          coordinateOverlapPushforward d p) (k, i)))
+    (equalizer.condition
+      ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+        (twistCechLeft d))
+      ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+        (twistCechRight d)))
+  simp only [Category.assoc, ← Functor.map_comp] at h
+  unfold twistCechLeft twistCechRight at h
+  rw [Pi.lift_π, Pi.lift_π] at h
+  rw [Functor.map_comp, Functor.map_comp] at h
+  exact h
+
+/-- The explicit triple overlap `(k,k,i)` maps isomorphically to the pair
+overlap `(k,i)`, since it is the self-pullback of an open immersion. -/
+instance coordinateTripleTo13SelfIsIso (k i : Fin 4) :
+    IsIso (coordinateTripleTo13 k k i) :=
+  (coordinateTripleInner13_isPullback k k i).isIso_snd_iso_of_mono
+
+/-- After base change, the right Čech leg is extension by zero along the
+isomorphism from `(k,k,i)` to `(k,i)`, so it is invertible. -/
+theorem coordinateRestrictedCechRightHom_isIso
+    (d : ℤ) (k i : Fin 4) :
+    IsIso (coordinateRestrictedCechRightHom d k i) := by
+  let e := Scheme.Modules.pullbackRestrictionHom
+    (coordinateTripleTo23 k k i) (coordinateTripleTo13 k k i)
+    (coordinateOverlapToRight k i) (coordinateOverlapToRight k i)
+    (coordinateTripleInner13_isPullback k k i)
+    (coordinateLocalTwistModule d i)
+    (coordinateOverlapTwistModule d k i)
+    (coordinateRestrictRightIso d k i).hom
+  haveI : IsIso e := by
+    let eIso :=
+      (Scheme.Modules.restrictFunctorComp
+          (coordinateTripleTo13 k k i)
+          (coordinateOverlapToRight k i)).symm.app
+            (coordinateLocalTwistModule d i) ≪≫
+        (Scheme.Modules.restrictFunctorCongr
+          (coordinateTripleInner13_isPullback k k i).w.symm).app
+            (coordinateLocalTwistModule d i) ≪≫
+        (Scheme.Modules.restrictFunctorComp
+          (coordinateTripleTo23 k k i)
+          (coordinateOverlapToRight k i)).app
+            (coordinateLocalTwistModule d i) ≪≫
+        (Scheme.Modules.restrictFunctor
+          (coordinateTripleTo23 k k i)).mapIso
+            (coordinateRestrictRightIso d k i)
+    change IsIso eIso.hom
+    infer_instance
+  haveI : IsIso ((Scheme.Modules.restrictAdjunction
+      (coordinateTripleTo13 k k i)).unit.app
+        ((Scheme.Modules.restrictFunctor
+          (coordinateOverlapToRight k i)).obj
+            (coordinateLocalTwistModule d i))) :=
+    Scheme.Modules.restrictAdjunction_unit_app_isIso_of_isIso _ _
+  let rhs := Scheme.Modules.pushforwardRestrictionHomOfHom
+    (coordinateOverlapToLeft k i) (coordinateTripleTo13 k k i)
+    (coordinateTripleToFirstChart k k i)
+    (coordinateTripleTo13_comp_left_eq_coordinateTripleToFirstChart k k i)
+    ((Scheme.Modules.restrictFunctor
+      (coordinateOverlapToRight k i)).obj
+        (coordinateLocalTwistModule d i))
+    ((Scheme.Modules.restrictFunctor
+      (coordinateTripleTo23 k k i)).obj
+        (coordinateOverlapTwistModule d k i)) e
+  haveI : IsIso rhs := by
+    let innerIso := asIso ((Scheme.Modules.restrictAdjunction
+        (coordinateTripleTo13 k k i)).unit.app
+          ((Scheme.Modules.restrictFunctor
+            (coordinateOverlapToRight k i)).obj
+              (coordinateLocalTwistModule d i))) ≪≫
+      (Scheme.Modules.pushforward
+        (coordinateTripleTo13 k k i)).mapIso (asIso e)
+    let rhsIso :=
+      (Scheme.Modules.pushforward
+        (coordinateOverlapToLeft k i)).mapIso innerIso ≪≫
+      (Scheme.Modules.pushforwardComp
+        (coordinateTripleTo13 k k i)
+        (coordinateOverlapToLeft k i)).app
+          ((Scheme.Modules.restrictFunctor
+            (coordinateTripleTo23 k k i)).obj
+              (coordinateOverlapTwistModule d k i)) ≪≫
+      (Scheme.Modules.pushforwardCongr
+        (coordinateTripleTo13_comp_left_eq_coordinateTripleToFirstChart
+          k k i)).app
+          ((Scheme.Modules.restrictFunctor
+            (coordinateTripleTo23 k k i)).obj
+              (coordinateOverlapTwistModule d k i))
+    change IsIso rhsIso.hom
+    infer_instance
+  have h :=
+    Scheme.Modules.openBaseChange_pushforwardRestrictionHomOfHom_congr
+      (iU := coordinateChartMap k) (f := coordinateChartMap i)
+      (r := coordinateTripleTo23 k k i)
+      (q := coordinateTripleTo13 k k i)
+      (k := coordinateOverlapToRight k i)
+      (b := coordinateOverlapToRight k i)
+      (a := coordinateOverlapToLeft k i)
+      (h := coordinateOverlapMap k i)
+      (g := coordinateTripleToFirstChart k k i)
+      (coordinateOverlapMap_eq_right k i)
+      (coordinateTripleTo13_comp_left_eq_coordinateTripleToFirstChart k k i)
+      (coordinateTripleInner13_isPullback k k i)
+      (coordinateOverlap_isPullback k i)
+      (coordinateTriple_isPullback k k i).flip
+      (coordinateLocalTwistModule d i)
+      (coordinateOverlapTwistModule d k i)
+      (coordinateRestrictRightIso d k i).hom
+  change
+    (coordinateLocalPushforwardBaseChangeIso d k i).inv ≫
+        coordinateRestrictedCechRightHom d k i ≫
+        (coordinateTripleBaseChangeIso k k i
+          (coordinateOverlapTwistModule d k i)).hom = rhs at h
+  rw [← isIso_comp_left_iff
+    (coordinateLocalPushforwardBaseChangeIso d k i).inv]
+  rw [← isIso_comp_right_iff _
+    (coordinateTripleBaseChangeIso k k i
+      (coordinateOverlapTwistModule d k i)).hom]
+  rw [Category.assoc, h]
+  infer_instance
+
+/-- The restricted source-product comparison intertwines its projections
+with the restricted global product projections. -/
+@[reassoc]
+theorem restrictedTwistCechSourceIso_hom_π
+    (d : ℤ) (k i : Fin 4) :
+    (restrictedTwistCechSourceIso d k).hom ≫
+        Pi.π (fun j : Fin 4 ↦
+          (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+            (coordinateLocalPushforward d j)) i =
+      (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+        (Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward d j) i) := by
+  exact piComparison_comp_π
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k))
+    (fun j : Fin 4 ↦ coordinateLocalPushforward d j) i
+
+set_option backward.isDefEq.respectTransparency false in
+/-- A compatible restricted family is determined by its component on chart
+`k`.  The `(k,i)` equalizer equation recovers every other component because
+its right Čech leg is an isomorphism. -/
+theorem globalTwistModuleToLocal_mono (d : ℤ) (k : Fin 4) :
+    Mono (globalTwistModuleToLocal d k) := by
+  constructor
+  intro Z u v huv
+  have hk :
+      u ≫ (restrictedGlobalTwistCechIso d k).hom ≫
+          equalizer.ι
+            ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+              (twistCechLeft d))
+            ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+              (twistCechRight d)) ≫
+          (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward d j) k) =
+        v ≫ (restrictedGlobalTwistCechIso d k).hom ≫
+          equalizer.ι
+            ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+              (twistCechLeft d))
+            ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+              (twistCechRight d)) ≫
+          (Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+            (Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward d j) k) := by
+    rw [globalTwistModuleToLocal_eq, Functor.map_comp] at huv
+    simp only [Category.assoc] at huv ⊢
+    have hc := congrArg
+      (fun z => z ≫ inv
+        ((Scheme.Modules.restrictAdjunction
+          (coordinateChartMap k)).counit.app
+            (coordinateLocalTwistModule d k))) huv
+    simp only [Category.assoc] at hc
+    rw [IsIso.hom_inv_id] at hc
+    simp only [Category.comp_id] at hc
+    simpa only [restrictedGlobalTwistCechIso_hom_ι_assoc] using hc
+  rw [← cancel_mono (restrictedGlobalTwistCechIso d k).hom]
+  rw [← cancel_mono
+    (equalizer.ι
+      ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+        (twistCechLeft d))
+      ((Scheme.Modules.restrictFunctor (coordinateChartMap k)).map
+        (twistCechRight d)))]
+  rw [← cancel_mono (restrictedTwistCechSourceIso d k).hom]
+  apply Pi.hom_ext _ _
+  intro i
+  simp only [Category.assoc]
+  rw [restrictedTwistCechSourceIso_hom_π]
+  letI := coordinateRestrictedCechRightHom_isIso d k i
+  rw [← cancel_mono (coordinateRestrictedCechRightHom d k i)]
+  simp only [Category.assoc]
+  rw [← restrictedEqualizer_condition_component]
+  simpa only [Category.assoc] using congrArg
+    (fun z => z ≫ coordinateRestrictedCechLeftHom d k i) hk
+
+/-- Reconstruction is an isomorphism.  Its composite with evaluation is
+already invertible, while uniqueness makes evaluation monic; these two facts
+give an explicit two-sided inverse to reconstruction. -/
+theorem coordinateLocalToRestrictedGlobalTwist_isIso
+    (d : ℤ) (k : Fin 4) :
+    IsIso (coordinateLocalToRestrictedGlobalTwist d k) := by
+  letI : Mono (globalTwistModuleToLocal d k) :=
+    globalTwistModuleToLocal_mono d k
+  letI : IsIso (coordinateLocalToRestrictedGlobalTwist d k ≫
+      globalTwistModuleToLocal d k) :=
+    coordinateLocalToRestrictedGlobalTwist_comp_evaluation_isIso d k
+  refine IsIso.mk ⟨globalTwistModuleToLocal d k ≫
+      inv (coordinateLocalToRestrictedGlobalTwist d k ≫
+        globalTwistModuleToLocal d k), ?_, ?_⟩
+  · rw [← Category.assoc, IsIso.hom_inv_id]
+  · rw [← cancel_mono (globalTwistModuleToLocal d k)]
+    simp only [Category.assoc]
+    rw [IsIso.inv_hom_id]
+    simp only [Category.comp_id, Category.id_comp]
+
+/-- Restriction of the global Čech equalizer to chart `k` recovers the local
+twisting module used to define the descent datum. -/
+def globalTwistModuleLocalIso (d : ℤ) (k : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        (globalTwistModule d) ≅ coordinateLocalTwistModule d k := by
+  letI := coordinateLocalToRestrictedGlobalTwist_isIso d k
+  exact (asIso (coordinateLocalToRestrictedGlobalTwist d k)).symm
+
+/-- On every standard coordinate chart, the global twisting module is free
+of rank one.  This is the local effectivity statement needed to use the Čech
+equalizer as an invertible sheaf rather than merely a global module sheaf. -/
+def globalTwistModuleLocalUnitIso (d : ℤ) (k : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        (globalTwistModule d) ≅
+      SheafOfModules.unit (coordinateChartScheme k).ringCatSheaf :=
+  globalTwistModuleLocalIso d k ≪≫ coordinateLocalTwistUnitIso d k
+
+
 end MazurProof.RationalPointsN25QuotientTwoTwistingSheafGluing
