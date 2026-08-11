@@ -1567,7 +1567,21 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   then package the target chart ring as the quotient by this explicit ideal,
   with the equivalence induced pointwise by the canonical chart map.  Thus
   the localized defining ideal and affine quotient rings are no longer open
-  premises; only their ideal-sheaf gluing remains.
+  premises; they provide the local input for the global ideal-sheaf
+  comparison below.
+- `RationalPointsN25QuotientTwoChartKoszul.lean` constructs the complete
+  affine Koszul complex on every ambient standard chart.  Its differentials
+  are multiplication by the actual degree-zero equations
+  `Q/X_i^2` and `C/X_i^3`, and its cokernel is the explicit curve-chart
+  quotient.  Exactness at the middle free module is proved uniformly, not by
+  expanding four affine polynomial systems: two arbitrary homogeneous
+  fractions are put over a common power of `X_i`, the remaining denominator
+  is cancelled in the ambient polynomial domain, and degreewise Koszul
+  exactness supplies a homogeneous witness of exactly the degree needed to
+  descend back to the chart.  This closes the algebraic exactness on the
+  standard affine cover.  What remains is categorical: apply affine tilde to
+  these maps, glue the ambient-chart morphisms, and transport the local
+  exactness statement to the resulting module sheaves.
 - `RationalPointsN25QuotientTwoIdealSheaf.lean` closes that gluing seam against
   Mathlib's actual global object.  Functoriality of `Proj` identifies the
   section map on `D_+(X_i)` with the localized graded quotient, while the
@@ -1666,11 +1680,11 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `Proj` and conclude `ω_C ≅ O_C(-4+2+3) = O_C(1)`.  The degree-one affine
   chart transition units and their cocycle are no longer part of that gap;
   the unit cocycle is proved uniformly for every integral power, so the same
-  descent datum covers all `O(d)` occurring in adjunction.  Multiplication by
-  these powers is also packaged as a linear equivalence and then as a
-  `ModuleCat` isomorphism of free rank-one modules on each overlap; after
-  restriction to a triple overlap, their categorical composition is proved
-  equal to the direct transition.
+  descent datum covers all `O(d)` occurring in adjunction.  Its Čech
+  equalizer is now effective on the standard cover, so each resulting global
+  twist restricts to the chosen free rank-one chart model.  The remaining
+  gap is therefore the ambient sheafified Koszul/conormal sequence and its
+  determinant comparison, not construction or local freeness of `O(d)`.
 - `RationalPointsN25QuotientTwoTwistingSheafCharts.lean` lifts this descent
   datum into actual local sheaves of modules.  Each coordinate chart is the
   affine `Spec` of its homogeneous-away ring, and every integral twist is
@@ -1678,10 +1692,10 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   transitions and their restrictions to ordered triple overlaps are mapped
   through the tilde functor; functoriality upgrades the module cocycle to a
   categorical cocycle of local module-sheaf isomorphisms.  The subsequent
-  gluing file now constructs the global module sheaf; the remaining task is
-  to prove its chart restrictions are the chosen free rank-one local models
-  and then promote the chartwise determinant/adjunction identity to a sheaf
-  isomorphism.
+  gluing file constructs the global module sheaf and proves that its chart
+  restrictions are the chosen free rank-one local models.  The remaining
+  task is to promote the chartwise determinant/adjunction identity to a
+  sheaf isomorphism.
 - `RationalPointsN25QuotientTwoTwistingDescent.lean` connects those explicit
   affine overlaps to the categorical geometry required by descent.  The
   pullback of any two coordinate-chart maps is identified with the affine
@@ -1716,37 +1730,18 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `Eq (∏ i, j_i* F_i ⇉ ∏ i j, j_ij* F_ij)` is then formed inside the category
   of module sheaves on the canonical projective curve.  The resulting
   `globalTwistModule d` is an honest global module sheaf and its pair-overlap
-  compatibility is kernel-checked.  What remains before calling it `O(d)` is
-  the effectivity theorem identifying its restriction to each of the four
-  charts with the corresponding local free rank-one module.  That theorem
-  must use the already-proved triple-overlap cocycle and the proved standard
-  coordinate cover; local freeness has not been inferred merely from the
-  equalizer definition.  The generic infrastructure for this final step is
-  now present in `PullbackUnit.lean`: a sectionwise Beck--Chevalley theorem
-  proves open base change for module sheaves, and restriction along an open
-  immersion is proved to preserve all available limits by evaluation on image
-  opens followed by restriction of scalars.  Consequently the global
-  equalizer and both products can be restricted without an axiom.  On each
-  fixed chart `k`, `coordinateLocalReconstructionHom` now builds the `i`-th
-  representative from a section on `k` by the unit for `U_k ∩ U_i`, the
-  transition `g_ki`, and inverse base change; these representatives are
-  assembled by `coordinateLocalReconstruction`.  The precise remaining
-  equation is that this family equalizes every ordered pair `(i,j)`.  The
-  geometry needed to state that equation on the already-explicit affine
-  triple overlap is now complete.  Iterated homogeneous localization is
-  proved associative as a square of affine schemes; its open ranges are
-  computed as principal opens, with the two generators shown to differ only
-  by a square and a unit.  This makes the triple overlap the cartesian
-  intersection of the two pair overlaps inside chart `i`.  Pasting that
-  square with the existing pair-intersection square proves that the same
-  explicit triple overlap is the pullback of `U_i ∩ U_j` along `U_k ⟶ X`.
-  Beck--Chevalley therefore identifies the restriction to chart `k` of every
-  pair-overlap pushforward with the pushforward of the fixed triple-overlap
-  module used by the cocycle theorem.  After cancelling product and base-
-  change comparisons, the remaining proof is now categorical mate
-  coherence for the restriction/pushforward adjunction, followed by the
-  already-proved sheaf identity `g_ki · g_ij = g_kj`; it is not a finite
-  chart enumeration or a missing existence axiom.
+  compatibility is kernel-checked.  The sectionwise Beck--Chevalley and
+  limit-preservation infrastructure in `PullbackUnit.lean` allows that
+  equalizer to be restricted to a fixed chart.  The explicit reconstruction
+  from one chart component is proved to satisfy every ordered-pair relation;
+  conversely, an equalizing family is determined by that component.  These
+  inverse maps give `coordinateLocalToRestrictedGlobalTwist_isIso` and the
+  packaged isomorphisms `globalTwistModuleLocalIso` and
+  `globalTwistModuleLocalUnitIso`.  Hence `globalTwistModule d` restricts to
+  a free rank-one module sheaf on all four standard charts.  Twist
+  effectivity and local freeness are closed without a new axiom; the next
+  geometric work must connect the ambient Koszul/conormal morphisms to these
+  effective twists.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
   section.  The remaining geometric seam is exact: construct principal

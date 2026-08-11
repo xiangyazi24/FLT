@@ -147,12 +147,15 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     `Spec F_2`; and the exact standard-chart kernel identities
     `ker(Away(S,X_i) → Away(S/(Q,C),X_i)) = (Q/X_i^2,C/X_i^3)`, proved by
     saturated homogeneous Koszul relations rather than expansion, together
-    with the induced explicit quotient-ring equivalences and identification
-    of these ideals as the standard-chart restrictions of the closed
-    immersion's global kernel ideal sheaf; and the structural ordinary
-    affine presentation of `D_+(X_0)` as a three-variable polynomial ring,
-    carrying its two-equation ideal and actual quotient chart ring to the
-    displayed dehomogenized quadric-cubic quotient; the
+    with the induced explicit quotient-ring equivalences; the full local
+    Koszul resolutions on all four ambient standard charts, whose middle
+    exactness is obtained uniformly from homogeneous numerators and the
+    degreewise Koszul theorem; and identification of these ideals as the
+    standard-chart restrictions of the closed immersion's global kernel
+    ideal sheaf; and uniform structural ordinary affine presentations of all
+    four `D_+(X_i)` as three-variable polynomial rings, carrying each
+    two-equation ideal and actual quotient chart ring to its displayed
+    dehomogenized quadric-cubic quotient; the
     generic divisor-zeta theorem that
     derives rationality and `P(1)=#Pic^0` from actual effective divisors and
     Riemann--Roch fibre cardinalities; locally finite closed-point gradings,
@@ -176,14 +179,14 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     compatible families are determined by one chart component, and the
     resulting global module sheaf restricts to a free rank-one module on
     every standard chart.
-  - Open atoms: construct the conormal/Koszul morphisms of sheaves, prove their
-    exactness on the now-explicit standard affine cover, identify
+  - Open atoms: send the explicit chart Koszul differentials through affine
+    tilde, glue the resulting morphisms on ambient projective space, and
+    transport the proved chartwise exactness to sheaf exactness; identify
     the scheme-theoretic Hilbert polynomial with the certified `6T-3`, and
     prove projective adjunction;
-    extend the ordinary affine-coordinate presentation from `D_+(X_0)` to
-    the other three standard opens and package the two Jacobian-rank
-    certificates as smooth special fibres at two and three (properness of the
-    binary `Proj` is now proved); identify
+    package the characteristic-three Jacobian-rank certificate as a smooth
+    proper special fibre (the binary `Proj` is already proved smooth, proper,
+    and of relative dimension one); identify
     the degree-at-most-four Frobenius-orbit divisor model with the actual
     divisors of the characteristic-three fibre while constructing the
     degree-zero, degree-two, and degree-four Picard data and proving the
