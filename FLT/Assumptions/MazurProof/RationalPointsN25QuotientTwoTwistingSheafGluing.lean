@@ -252,6 +252,199 @@ instance coordinateTripleTo13IsOpenImmersion (i j l : Fin 4) :
         (coordinateClass_mem_degreeOne l))
       (coordinateClass_mem_degreeOne j) : coordinateOverlapRing i l)
 
+/-! ## Triple overlaps as geometric pullbacks -/
+
+/-- The triple overlap mapped to chart `k` through the `(k,i)` pair
+intersection. -/
+def coordinateTripleToFirstChart (k i j : Fin 4) :
+    Spec (.of (coordinateTripleOverlapRing k i j)) ⟶
+      coordinateChartScheme k :=
+  coordinateTripleTo12 k i j ≫ coordinateOverlapToLeft k i
+
+/-- The triple-overlap map to its first chart is an open immersion because
+it is a composite of localization opens. -/
+instance coordinateTripleToFirstChartIsOpenImmersion (k i j : Fin 4) :
+    IsOpenImmersion (coordinateTripleToFirstChart k i j) := by
+  dsimp [coordinateTripleToFirstChart]
+  infer_instance
+
+/-- A pair overlap is open in the projective curve through either chart. -/
+instance coordinateOverlapMapIsOpenImmersion (i j : Fin 4) :
+    IsOpenImmersion (coordinateOverlapMap i j) := by
+  dsimp [coordinateOverlapMap]
+  infer_instance
+
+/-- In chart `i`, the overlap with chart `j` is the principal open where
+the degree-zero ratio `x_j/x_i` is nonzero. -/
+theorem coordinateOverlapToLeft_opensRange (i j : Fin 4) :
+    (coordinateOverlapToLeft i j).opensRange =
+      PrimeSpectrum.basicOpen
+        (Away.isLocalizationElem (coordinateClass_mem_degreeOne i)
+          (coordinateClass_mem_degreeOne j)) := by
+  letI := (awayMap literalConePiece (f := coordinateClass i)
+    (coordinateClass_mem_degreeOne j) rfl).toAlgebra
+  letI : IsLocalization.Away
+      (Away.isLocalizationElem (coordinateClass_mem_degreeOne i)
+        (coordinateClass_mem_degreeOne j))
+      (coordinateOverlapRing i j) :=
+    Away.isLocalization_mul (coordinateClass_mem_degreeOne i)
+      (coordinateClass_mem_degreeOne j) rfl (by norm_num)
+  apply TopologicalSpace.Opens.ext
+  rw [Scheme.Hom.coe_opensRange]
+  have hmap : coordinateOverlapToLeft i j =
+      Spec.map (CommRingCat.ofHom (algebraMap
+        (coordinateChartRing i) (coordinateOverlapRing i j))) := by
+    dsimp [coordinateOverlapToLeft]
+    exact coordinateChosenPullbackIso_inv_p₁ i j
+  rw [hmap]
+  exact PrimeSpectrum.localization_away_comap_range
+    (coordinateOverlapRing i j) _
+
+/-- Within the `(k,i)` overlap, imposing `x_j ≠ 0` gives the ordered
+triple overlap. -/
+theorem coordinateTripleTo12_opensRange (k i j : Fin 4) :
+    (coordinateTripleTo12 k i j).opensRange =
+      PrimeSpectrum.basicOpen
+        (Away.isLocalizationElem
+          (SetLike.mul_mem_graded (coordinateClass_mem_degreeOne k)
+            (coordinateClass_mem_degreeOne i))
+          (coordinateClass_mem_degreeOne j)) := by
+  letI := (Away.restrict12 literalConePiece
+    (f := coordinateClass k) (g := coordinateClass i)
+    (h := coordinateClass j) (coordinateClass_mem_degreeOne j)).toAlgebra
+  letI : IsLocalization.Away
+      (Away.isLocalizationElem
+        (SetLike.mul_mem_graded (coordinateClass_mem_degreeOne k)
+          (coordinateClass_mem_degreeOne i))
+        (coordinateClass_mem_degreeOne j))
+      (coordinateTripleOverlapRing k i j) :=
+    Away.isLocalization_mul
+      (SetLike.mul_mem_graded (coordinateClass_mem_degreeOne k)
+        (coordinateClass_mem_degreeOne i))
+      (coordinateClass_mem_degreeOne j) rfl (by norm_num)
+  apply TopologicalSpace.Opens.ext
+  rw [Scheme.Hom.coe_opensRange]
+  change Set.range (PrimeSpectrum.comap (algebraMap
+      (coordinateOverlapRing k i) (coordinateTripleOverlapRing k i j))) = _
+  exact PrimeSpectrum.localization_away_comap_range
+    (coordinateTripleOverlapRing k i j) _
+
+/-- The two iterated localization maps from the triple overlap to chart `i`
+agree.  This is the affine associativity statement underlying the geometric
+triple intersection. -/
+theorem coordinateTripleTo12_comp_right_eq_coordinateTripleTo23_comp_left
+    (k i j : Fin 4) :
+    coordinateTripleTo12 k i j ≫ coordinateOverlapToRight k i =
+      coordinateTripleTo23 k i j ≫ coordinateOverlapToLeft i j := by
+  dsimp [coordinateOverlapToRight, coordinateOverlapToLeft]
+  rw [coordinateChosenPullbackIso_inv_p₂,
+    coordinateChosenPullbackIso_inv_p₁]
+  dsimp [coordinateTripleTo12, coordinateTripleTo23, Away.restrict12,
+    Away.restrict23]
+  rw [← Spec.map_comp, ← Spec.map_comp]
+  congr 1
+  apply CommRingCat.hom_ext
+  apply RingHom.ext
+  intro x
+  change
+    Away.restrict12 literalConePiece (coordinateClass_mem_degreeOne j)
+        (awayMap literalConePiece (coordinateClass_mem_degreeOne k)
+          (mul_comm _ _) x) =
+      Away.restrict23 literalConePiece (coordinateClass_mem_degreeOne k)
+        (awayMap literalConePiece (coordinateClass_mem_degreeOne j) rfl x)
+  obtain ⟨q, a, ha, rfl⟩ := HomogeneousLocalization.Away.mk_surjective
+    literalConePiece (coordinateClass_mem_degreeOne i) x
+  simp only [Away.restrict12, Away.restrict23]
+  rw [HomogeneousLocalization.awayMap_mk,
+    HomogeneousLocalization.awayMap_mk,
+    HomogeneousLocalization.awayMap_mk,
+    HomogeneousLocalization.awayMap_mk]
+  apply (HomogeneousLocalization.ext_iff_val _ _).2
+  simp only [HomogeneousLocalization.Away.val_mk]
+  congr 1
+  ring
+
+/-- Inside chart `i`, the triple overlap is the cartesian intersection of
+the `(k,i)` and `(i,j)` pair overlaps. -/
+theorem coordinateTripleInner_isPullback (k i j : Fin 4) :
+    IsPullback (coordinateTripleTo23 k i j)
+      (coordinateTripleTo12 k i j)
+      (coordinateOverlapToLeft i j) (coordinateOverlapToRight k i) := by
+  refine IsOpenImmersion.isPullback _ _ _ _
+    (coordinateTripleTo12_comp_right_eq_coordinateTripleTo23_comp_left k i j)
+    ?_
+  guard_target =
+    coordinateOverlapToRight k i ⁻¹ᵁ
+        (coordinateOverlapToLeft i j).opensRange =
+      (coordinateTripleTo12 k i j).opensRange
+  rw [coordinateOverlapToLeft_opensRange,
+    coordinateTripleTo12_opensRange]
+  letI := (awayMap literalConePiece (f := coordinateClass i)
+    (coordinateClass_mem_degreeOne k) (mul_comm _ _)).toAlgebra
+  have hmap : coordinateOverlapToRight k i =
+      Spec.map (CommRingCat.ofHom (algebraMap
+        (coordinateChartRing i) (coordinateOverlapRing k i))) := by
+    dsimp [coordinateOverlapToRight]
+    exact coordinateChosenPullbackIso_inv_p₂ k i
+  rw [hmap]
+  change PrimeSpectrum.basicOpen
+      (awayMap literalConePiece (coordinateClass_mem_degreeOne k)
+        (mul_comm _ _)
+        (Away.isLocalizationElem (coordinateClass_mem_degreeOne i)
+          (coordinateClass_mem_degreeOne j))) = _
+  let a : coordinateOverlapRing k i :=
+    awayMap literalConePiece (coordinateClass_mem_degreeOne k)
+      (mul_comm _ _)
+      (Away.isLocalizationElem (coordinateClass_mem_degreeOne i)
+        (coordinateClass_mem_degreeOne j))
+  let b : coordinateOverlapRing k i :=
+    Away.isLocalizationElem
+      (SetLike.mul_mem_graded (coordinateClass_mem_degreeOne k)
+        (coordinateClass_mem_degreeOne i))
+      (coordinateClass_mem_degreeOne j)
+  let u : (coordinateOverlapRing k i)ˣ :=
+    Away.degreeOneRatioUnit literalConePiece
+      (coordinateClass_mem_degreeOne k) (coordinateClass_mem_degreeOne i)
+  change PrimeSpectrum.basicOpen a = PrimeSpectrum.basicOpen b
+  have hab : b = a ^ 2 * (u : coordinateOverlapRing k i) := by
+    apply (HomogeneousLocalization.ext_iff_val _ _).2
+    simp only [a, b, u, Away.isLocalizationElem,
+      Away.degreeOneRatioUnit, Away.degreeOneRatio,
+      HomogeneousLocalization.awayMap_mk,
+      HomogeneousLocalization.val_mul, HomogeneousLocalization.val_pow,
+      HomogeneousLocalization.Away.val_mk, Localization.mk_pow,
+      Localization.mk_mul]
+    rw [Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+    refine ⟨1, ?_⟩
+    simp
+    ring
+  rw [hab, PrimeSpectrum.basicOpen_mul,
+    PrimeSpectrum.basicOpen_pow _ 2 (by norm_num)]
+  have hu : PrimeSpectrum.basicOpen (u : coordinateOverlapRing k i) = ⊤ := by
+    apply TopologicalSpace.Opens.ext
+    ext p
+    simp only [SetLike.mem_coe, PrimeSpectrum.mem_basicOpen,
+      TopologicalSpace.Opens.mem_top]
+    constructor
+    · intro
+      trivial
+    · intro
+      exact Ideal.notMem_of_isUnit p.asIdeal (Units.isUnit u)
+  rw [hu]
+  simp
+
+/-- The ordered triple overlap is the pullback of the pair overlap
+`U_i ∩ U_j` along the chart inclusion `U_k ⟶ X`.  It is obtained by
+pasting the affine intersection square inside `U_i` with the cartesian
+square defining `U_k ∩ U_i`. -/
+theorem coordinateTriple_isPullback (k i j : Fin 4) :
+    IsPullback (coordinateTripleTo23 k i j)
+      (coordinateTripleToFirstChart k i j)
+      (coordinateOverlapMap i j) (coordinateChartMap k) := by
+  simpa only [coordinateTripleToFirstChart, coordinateOverlapMap] using
+    (coordinateTripleInner_isPullback k i j).paste_vert
+      (coordinateOverlap_isPullback k i).flip
+
 /-- Restricting the `(i,j)` overlap's free rank-one sheaf gives the free
 rank-one sheaf on the ordered triple overlap. -/
 def coordinatePairToTripleIso12 (d : ℤ) (i j l : Fin 4) :
@@ -443,6 +636,39 @@ abbrev coordinateOverlapPushforward (d : ℤ) (p : Fin 4 × Fin 4) :
     CanonicalProjectiveCurve25Two.Modules :=
   (Scheme.Modules.pushforward (coordinateOverlapMap p.1 p.2)).obj
     (coordinateOverlapTwistModule d p.1 p.2)
+
+/-! ## Base change from pair overlaps to triple overlaps -/
+
+/-- Open base change along `U_k ⟶ X` identifies a pair-overlap
+pushforward with the pushforward from the explicit triple overlap. -/
+def coordinateTripleBaseChangeIso (k i j : Fin 4)
+    (M : (Spec (.of (coordinateOverlapRing i j))).Modules) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        ((Scheme.Modules.pushforward (coordinateOverlapMap i j)).obj M) ≅
+      (Scheme.Modules.pushforward (coordinateTripleToFirstChart k i j)).obj
+        ((Scheme.Modules.restrictFunctor
+          (coordinateTripleTo23 k i j)).obj M) := by
+  letI := Scheme.Modules.openBaseChangeHom_isIso
+    (coordinateTripleToFirstChart k i j) (coordinateTripleTo23 k i j)
+    (coordinateChartMap k) (coordinateOverlapMap i j)
+    (coordinateTriple_isPullback k i j).flip M
+  exact asIso (Scheme.Modules.openBaseChangeHom
+    (coordinateTripleToFirstChart k i j) (coordinateTripleTo23 k i j)
+    (coordinateChartMap k) (coordinateOverlapMap i j)
+    (coordinateTriple_isPullback k i j).flip M)
+
+/-- For the twisting sheaves, triple-overlap base change is transported to
+the fixed free rank-one module used by the explicit cocycle theorem. -/
+def coordinateTripleTwistBaseChangeIso (d : ℤ) (k i j : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
+        (coordinateOverlapPushforward d (i, j)) ≅
+      (Scheme.Modules.pushforward (coordinateTripleToFirstChart k i j)).obj
+        (coordinateTripleTwistModule d k i j) :=
+  coordinateTripleBaseChangeIso k i j
+      (coordinateOverlapTwistModule d i j) ≪≫
+    (Scheme.Modules.pushforward
+      (coordinateTripleToFirstChart k i j)).mapIso
+        (coordinatePairToTripleIso23 d k i j)
 
 /-- Product of the four local chart sheaves after extension to the whole
 projective curve. -/

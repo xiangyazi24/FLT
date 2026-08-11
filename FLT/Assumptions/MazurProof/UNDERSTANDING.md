@@ -1731,10 +1731,22 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   representative from a section on `k` by the unit for `U_k ∩ U_i`, the
   transition `g_ki`, and inverse base change; these representatives are
   assembled by `coordinateLocalReconstruction`.  The precise remaining
-  equation is that this family equalizes every ordered pair `(i,j)`.  After
-  cancelling product comparisons it is exactly the sheaf-level identity
-  `g_ki · g_ij = g_kj` on the triple intersection, not a finite chart
-  enumeration or a missing existence axiom.
+  equation is that this family equalizes every ordered pair `(i,j)`.  The
+  geometry needed to state that equation on the already-explicit affine
+  triple overlap is now complete.  Iterated homogeneous localization is
+  proved associative as a square of affine schemes; its open ranges are
+  computed as principal opens, with the two generators shown to differ only
+  by a square and a unit.  This makes the triple overlap the cartesian
+  intersection of the two pair overlaps inside chart `i`.  Pasting that
+  square with the existing pair-intersection square proves that the same
+  explicit triple overlap is the pullback of `U_i ∩ U_j` along `U_k ⟶ X`.
+  Beck--Chevalley therefore identifies the restriction to chart `k` of every
+  pair-overlap pushforward with the pushforward of the fixed triple-overlap
+  module used by the cocycle theorem.  After cancelling product and base-
+  change comparisons, the remaining proof is now categorical mate
+  coherence for the restriction/pushforward adjunction, followed by the
+  already-proved sheaf identity `g_ki · g_ij = g_kj`; it is not a finite
+  chart enumeration or a missing existence axiom.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
   section.  The remaining geometric seam is exact: construct principal
