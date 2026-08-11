@@ -1677,9 +1677,10 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   modeled there by the affine tilde sheaf of a free rank-one module.  Pair
   transitions and their restrictions to ordered triple overlaps are mapped
   through the tilde functor; functoriality upgrades the module cocycle to a
-  categorical cocycle of local module-sheaf isomorphisms.  Consequently, the
-  next step is to glue these local sheaves into global rank-one modules and
-  promote the proved chartwise determinant/adjunction identity to a sheaf
+  categorical cocycle of local module-sheaf isomorphisms.  The subsequent
+  gluing file now constructs the global module sheaf; the remaining task is
+  to prove its chart restrictions are the chosen free rank-one local models
+  and then promote the chartwise determinant/adjunction identity to a sheaf
   isomorphism.
 - `RationalPointsN25QuotientTwoTwistingDescent.lean` connects those explicit
   affine overlaps to the categorical geometry required by descent.  The
@@ -1690,19 +1691,27 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   threefold wide pullbacks are supplied from nested categorical pullbacks.
   `FLT/Mathlib/AlgebraicGeometry/Modules/PullbackUnit.lean` proves the generic
   missing comparison saying that the unit module sheaf pulls back along an
-  open immersion to the unit sheaf.  This transports each explicit affine
-  transition to the exact pair-overlap morphism expected by Mathlib's 2026
-  `DescentData'` API.  The ratio transition on a self-overlap is now proved
-  structurally to be the identity, through the ring, unit, module, tilde,
-  and categorical-overlap layers.  Completing `DescentData'` directly would
-  still require substantial pseudofunctor unit and associativity bookkeeping;
-  no stack-effectivity theorem for scheme modules has been found in the
-  pinned Mathlib.
+  open immersion to the unit sheaf.  It now also proves the affine-generator
+  naturality of `tilde.toOpen` and the generic conjugation theorem saying that
+  restriction sends multiplication by a unit to multiplication by its image.
+  This transports each explicit affine transition to the exact pair-overlap
+  morphism expected by Mathlib's 2026 `DescentData'` API.  The ratio transition
+  on a self-overlap is proved structurally to be the identity, through the
+  ring, unit, module, tilde, and categorical-overlap layers.  Completing
+  `DescentData'` directly would still require substantial pseudofunctor unit
+  and associativity bookkeeping; no stack-effectivity theorem for scheme
+  modules has been found in the pinned Mathlib.
 - `RationalPointsN25QuotientTwoTwistingSheafGluing.lean` avoids treating that
   bookkeeping as a new axiom.  It realizes the explicit affine pair overlaps
   as the actual intersections of chart open immersions, identifies both
   restricted local twist sheaves with the explicit free rank-one overlap
   sheaf, and inserts the proved coordinate-ratio transition between them.
+  The three pair-to-triple localization maps are now explicit open
+  immersions.  Restricting and conjugating each pair transition is proved to
+  equal its corresponding triple transition, and these three equalities are
+  combined with the algebraic ratio identity to give the actual Čech cocycle
+  on every ordered triple intersection.  Thus the cocycle used by the gluing
+  construction is no longer only a parallel calculation on affine rings.
   The standard Čech equalizer
   `Eq (∏ i, j_i* F_i ⇉ ∏ i j, j_ij* F_ij)` is then formed inside the category
   of module sheaves on the canonical projective curve.  The resulting

@@ -27,8 +27,11 @@ noncomputable section
 namespace MazurProof.RationalPointsN25QuotientTwoTwistingSheafGluing
 
 open RationalPointsN25QuotientTwoProj
+open RationalPointsN25QuotientTwoQuotientGrading
+open RationalPointsN25QuotientTwoTwistingTransition
 open RationalPointsN25QuotientTwoTwistingSheafCharts
 open RationalPointsN25QuotientTwoTwistingDescent
+open HomogeneousLocalization
 open AlgebraicGeometry
 open CategoryTheory
 open CategoryTheory.Limits
@@ -109,6 +112,261 @@ def coordinateDescentIso (d : ℤ) (i j : Fin 4) :
   coordinateRestrictLeftIso d i j ≪≫
     coordinateOverlapTwistIso d i j ≪≫
     (coordinateRestrictRightIso d i j).symm
+
+/-! ## Restriction from pair overlaps to triple overlaps -/
+
+/-- Restrict the `(i,j)` affine overlap to the ordered triple overlap
+`(i,j,l)`. -/
+def coordinateTripleTo12 (i j l : Fin 4) :
+    Spec (.of (coordinateTripleOverlapRing i j l)) ⟶
+      Spec (.of (coordinateOverlapRing i j)) :=
+  Spec.map (CommRingCat.ofHom
+    (Away.restrict12 literalConePiece (coordinateClass_mem_degreeOne l)))
+
+/-- Restrict the `(j,l)` affine overlap to the same ordered triple overlap. -/
+def coordinateTripleTo23 (i j l : Fin 4) :
+    Spec (.of (coordinateTripleOverlapRing i j l)) ⟶
+      Spec (.of (coordinateOverlapRing j l)) :=
+  Spec.map (CommRingCat.ofHom
+    (Away.restrict23 literalConePiece (coordinateClass_mem_degreeOne i)))
+
+/-- Restrict the `(i,l)` affine overlap to the same ordered triple overlap. -/
+def coordinateTripleTo13 (i j l : Fin 4) :
+    Spec (.of (coordinateTripleOverlapRing i j l)) ⟶
+      Spec (.of (coordinateOverlapRing i l)) :=
+  Spec.map (CommRingCat.ofHom
+    (Away.restrict13 literalConePiece (coordinateClass_mem_degreeOne j)))
+
+/-- The first pair-to-triple localization is an open immersion. -/
+instance coordinateTripleTo12IsOpenImmersion (i j l : Fin 4) :
+    IsOpenImmersion (coordinateTripleTo12 i j l) := by
+  letI := (Away.restrict12 literalConePiece
+    (f := coordinateClass i) (g := coordinateClass j) (h := coordinateClass l)
+    (coordinateClass_mem_degreeOne l)).toAlgebra
+  letI : IsLocalization.Away
+      (Away.isLocalizationElem
+        (SetLike.mul_mem_graded (coordinateClass_mem_degreeOne i)
+          (coordinateClass_mem_degreeOne j))
+        (coordinateClass_mem_degreeOne l))
+      (coordinateTripleOverlapRing i j l) :=
+    Away.isLocalization_mul
+      (SetLike.mul_mem_graded (coordinateClass_mem_degreeOne i)
+        (coordinateClass_mem_degreeOne j))
+      (coordinateClass_mem_degreeOne l) rfl (by norm_num)
+  change IsOpenImmersion
+    (Spec.map (CommRingCat.ofHom (algebraMap _ _)))
+  exact IsOpenImmersion.of_isLocalization
+    (Away.isLocalizationElem
+      (SetLike.mul_mem_graded (coordinateClass_mem_degreeOne i)
+        (coordinateClass_mem_degreeOne j))
+      (coordinateClass_mem_degreeOne l) : coordinateOverlapRing i j)
+
+/-- The second pair-to-triple localization is an open immersion. -/
+instance coordinateTripleTo23IsOpenImmersion (i j l : Fin 4) :
+    IsOpenImmersion (coordinateTripleTo23 i j l) := by
+  letI := (Away.restrict23 literalConePiece
+    (f := coordinateClass i) (g := coordinateClass j) (h := coordinateClass l)
+    (coordinateClass_mem_degreeOne i)).toAlgebra
+  letI : IsLocalization.Away
+      (Away.isLocalizationElem
+        (SetLike.mul_mem_graded (coordinateClass_mem_degreeOne j)
+          (coordinateClass_mem_degreeOne l))
+        (coordinateClass_mem_degreeOne i))
+      (coordinateTripleOverlapRing i j l) :=
+    Away.isLocalization_mul
+      (SetLike.mul_mem_graded (coordinateClass_mem_degreeOne j)
+        (coordinateClass_mem_degreeOne l))
+      (coordinateClass_mem_degreeOne i) (by ring) (by norm_num)
+  change IsOpenImmersion
+    (Spec.map (CommRingCat.ofHom (algebraMap _ _)))
+  exact IsOpenImmersion.of_isLocalization
+    (Away.isLocalizationElem
+      (SetLike.mul_mem_graded (coordinateClass_mem_degreeOne j)
+        (coordinateClass_mem_degreeOne l))
+      (coordinateClass_mem_degreeOne i) : coordinateOverlapRing j l)
+
+/-- The direct first-to-third pair localization is an open immersion. -/
+instance coordinateTripleTo13IsOpenImmersion (i j l : Fin 4) :
+    IsOpenImmersion (coordinateTripleTo13 i j l) := by
+  letI := (Away.restrict13 literalConePiece
+    (f := coordinateClass i) (g := coordinateClass j) (h := coordinateClass l)
+    (coordinateClass_mem_degreeOne j)).toAlgebra
+  letI : IsLocalization.Away
+      (Away.isLocalizationElem
+        (SetLike.mul_mem_graded (coordinateClass_mem_degreeOne i)
+          (coordinateClass_mem_degreeOne l))
+        (coordinateClass_mem_degreeOne j))
+      (coordinateTripleOverlapRing i j l) :=
+    Away.isLocalization_mul
+      (SetLike.mul_mem_graded (coordinateClass_mem_degreeOne i)
+        (coordinateClass_mem_degreeOne l))
+      (coordinateClass_mem_degreeOne j) (by ring) (by norm_num)
+  change IsOpenImmersion
+    (Spec.map (CommRingCat.ofHom (algebraMap _ _)))
+  exact IsOpenImmersion.of_isLocalization
+    (Away.isLocalizationElem
+      (SetLike.mul_mem_graded (coordinateClass_mem_degreeOne i)
+        (coordinateClass_mem_degreeOne l))
+      (coordinateClass_mem_degreeOne j) : coordinateOverlapRing i l)
+
+/-- Restricting the `(i,j)` overlap's free rank-one sheaf gives the free
+rank-one sheaf on the ordered triple overlap. -/
+def coordinatePairToTripleIso12 (d : ℤ) (i j l : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateTripleTo12 i j l)).obj
+        (coordinateOverlapTwistModule d i j) ≅
+      coordinateTripleTwistModule d i j l :=
+  Scheme.Modules.restrictUnitIso (coordinateTripleTo12 i j l)
+
+/-- Restricting the `(j,l)` overlap's free rank-one sheaf gives the same
+triple-overlap sheaf. -/
+def coordinatePairToTripleIso23 (d : ℤ) (i j l : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateTripleTo23 i j l)).obj
+        (coordinateOverlapTwistModule d j l) ≅
+      coordinateTripleTwistModule d i j l :=
+  Scheme.Modules.restrictUnitIso (coordinateTripleTo23 i j l)
+
+/-- Restricting the `(i,l)` overlap's free rank-one sheaf gives the same
+triple-overlap sheaf. -/
+def coordinatePairToTripleIso13 (d : ℤ) (i j l : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateTripleTo13 i j l)).obj
+        (coordinateOverlapTwistModule d i l) ≅
+      coordinateTripleTwistModule d i j l :=
+  Scheme.Modules.restrictUnitIso (coordinateTripleTo13 i j l)
+
+set_option maxHeartbeats 800000 in
+-- Unfolding the three nested homogeneous localizations is expensive even
+-- though the proof is a direct application of the generic affine lemma.
+/-- Transporting the `(i,j)` transition through restriction to `(i,j,l)`
+gives the first explicit triple-overlap transition. -/
+theorem coordinateOverlapTwistIso_restrict12 (d : ℤ) (i j l : Fin 4) :
+    (coordinatePairToTripleIso12 d i j l).inv ≫
+        (Scheme.Modules.restrictFunctor (coordinateTripleTo12 i j l)).map
+          (coordinateOverlapTwistIso d i j).hom ≫
+        (coordinatePairToTripleIso12 d i j l).hom =
+      (coordinateTripleTwistIso12 d i j l).hom := by
+  letI : IsOpenImmersion
+      (Spec.map (CommRingCat.ofHom
+        (Away.restrict12 literalConePiece
+          (coordinateClass_mem_degreeOne l)))) := by
+    change IsOpenImmersion (coordinateTripleTo12 i j l)
+    infer_instance
+  dsimp [coordinatePairToTripleIso12, coordinateOverlapTwistIso,
+    coordinateTripleTwistIso12, Away.ratioPowerModuleIso12,
+    Away.ratioPowerTransition, Away.ratioPowerTransition12,
+    coordinateTripleTo12, coordinateTripleTwistModule,
+    coordinateOverlapTwistModule]
+  erw [Scheme.Modules.restrictUnitIso_conjugate_tildeUnit
+    (CommRingCat.ofHom
+      (Away.restrict12 literalConePiece
+        (coordinateClass_mem_degreeOne l)))
+    ((Away.degreeOneRatioUnit literalConePiece
+      (coordinateClass_mem_degreeOne i)
+      (coordinateClass_mem_degreeOne j)) ^ d)]
+  change ((AlgebraicGeometry.tilde.functor
+      (.of (coordinateTripleOverlapRing i j l))).mapIso _).hom = _
+  congr 1
+  congr 1
+  congr 1
+  congr 1
+  simp only [map_zpow]
+  rfl
+
+set_option maxHeartbeats 800000 in
+-- Unfolding the three nested homogeneous localizations is expensive even
+-- though the proof is a direct application of the generic affine lemma.
+/-- Transporting the `(j,l)` transition through restriction to `(i,j,l)`
+gives the second explicit triple-overlap transition. -/
+theorem coordinateOverlapTwistIso_restrict23 (d : ℤ) (i j l : Fin 4) :
+    (coordinatePairToTripleIso23 d i j l).inv ≫
+        (Scheme.Modules.restrictFunctor (coordinateTripleTo23 i j l)).map
+          (coordinateOverlapTwistIso d j l).hom ≫
+        (coordinatePairToTripleIso23 d i j l).hom =
+      (coordinateTripleTwistIso23 d i j l).hom := by
+  letI : IsOpenImmersion
+      (Spec.map (CommRingCat.ofHom
+        (Away.restrict23 literalConePiece
+          (coordinateClass_mem_degreeOne i)))) := by
+    change IsOpenImmersion (coordinateTripleTo23 i j l)
+    infer_instance
+  dsimp [coordinatePairToTripleIso23, coordinateOverlapTwistIso,
+    coordinateTripleTwistIso23, Away.ratioPowerModuleIso23,
+    Away.ratioPowerTransition, Away.ratioPowerTransition23,
+    coordinateTripleTo23, coordinateTripleTwistModule,
+    coordinateOverlapTwistModule]
+  erw [Scheme.Modules.restrictUnitIso_conjugate_tildeUnit
+    (CommRingCat.ofHom
+      (Away.restrict23 literalConePiece
+        (coordinateClass_mem_degreeOne i)))
+    ((Away.degreeOneRatioUnit literalConePiece
+      (coordinateClass_mem_degreeOne j)
+      (coordinateClass_mem_degreeOne l)) ^ d)]
+  change ((AlgebraicGeometry.tilde.functor
+      (.of (coordinateTripleOverlapRing i j l))).mapIso _).hom = _
+  congr 1
+  congr 1
+  congr 1
+  congr 1
+  simp only [map_zpow]
+  rfl
+
+set_option maxHeartbeats 800000 in
+-- Unfolding the three nested homogeneous localizations is expensive even
+-- though the proof is a direct application of the generic affine lemma.
+/-- Transporting the direct `(i,l)` transition through restriction to
+`(i,j,l)` gives the explicit first-to-third triple-overlap transition. -/
+theorem coordinateOverlapTwistIso_restrict13 (d : ℤ) (i j l : Fin 4) :
+    (coordinatePairToTripleIso13 d i j l).inv ≫
+        (Scheme.Modules.restrictFunctor (coordinateTripleTo13 i j l)).map
+          (coordinateOverlapTwistIso d i l).hom ≫
+        (coordinatePairToTripleIso13 d i j l).hom =
+      (coordinateTripleTwistIso13 d i j l).hom := by
+  letI : IsOpenImmersion
+      (Spec.map (CommRingCat.ofHom
+        (Away.restrict13 literalConePiece
+          (coordinateClass_mem_degreeOne j)))) := by
+    change IsOpenImmersion (coordinateTripleTo13 i j l)
+    infer_instance
+  dsimp [coordinatePairToTripleIso13, coordinateOverlapTwistIso,
+    coordinateTripleTwistIso13, Away.ratioPowerModuleIso13,
+    Away.ratioPowerTransition, Away.ratioPowerTransition13,
+    coordinateTripleTo13, coordinateTripleTwistModule,
+    coordinateOverlapTwistModule]
+  erw [Scheme.Modules.restrictUnitIso_conjugate_tildeUnit
+    (CommRingCat.ofHom
+      (Away.restrict13 literalConePiece
+        (coordinateClass_mem_degreeOne j)))
+    ((Away.degreeOneRatioUnit literalConePiece
+      (coordinateClass_mem_degreeOne i)
+      (coordinateClass_mem_degreeOne l)) ^ d)]
+  change ((AlgebraicGeometry.tilde.functor
+      (.of (coordinateTripleOverlapRing i j l))).mapIso _).hom = _
+  congr 1
+  congr 1
+  congr 1
+  congr 1
+  simp only [map_zpow]
+  rfl
+
+/-- The three restricted pair-overlap transitions satisfy the actual Čech
+cocycle on the explicit ordered triple overlap. -/
+theorem coordinateRestrictedOverlapTwistIso_cocycle
+    (d : ℤ) (i j l : Fin 4) :
+    ((coordinatePairToTripleIso12 d i j l).inv ≫
+          (Scheme.Modules.restrictFunctor (coordinateTripleTo12 i j l)).map
+            (coordinateOverlapTwistIso d i j).hom ≫
+          (coordinatePairToTripleIso12 d i j l).hom) ≫
+        ((coordinatePairToTripleIso23 d i j l).inv ≫
+          (Scheme.Modules.restrictFunctor (coordinateTripleTo23 i j l)).map
+            (coordinateOverlapTwistIso d j l).hom ≫
+          (coordinatePairToTripleIso23 d i j l).hom) =
+      (coordinatePairToTripleIso13 d i j l).inv ≫
+        (Scheme.Modules.restrictFunctor (coordinateTripleTo13 i j l)).map
+          (coordinateOverlapTwistIso d i l).hom ≫
+        (coordinatePairToTripleIso13 d i j l).hom := by
+  rw [coordinateOverlapTwistIso_restrict12,
+    coordinateOverlapTwistIso_restrict23,
+    coordinateOverlapTwistIso_restrict13]
+  exact coordinateTripleTwistIso_cocycle d i j l
 
 /-! ## Pushforward maps and the Čech equalizer -/
 
