@@ -152,7 +152,10 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     exactness is obtained uniformly from homogeneous numerators and the
     degreewise Koszul theorem; exactness of both overlapping three-term
     complexes after affine tilde, proved through the generic stalkwise theorem
-    that affine module sheafification preserves exactness; and identification
+    that affine module sheafification preserves exactness; both full Koszul
+    differential squares on every ordered ambient chart overlap, obtained from
+    the generic compatibility of homogeneous multiplication with negative
+    twist transitions; and identification
     of these ideals as the
     standard-chart restrictions of the closed immersion's global kernel
     ideal sheaf; and uniform structural ordinary affine presentations of all
@@ -182,9 +185,10 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     compatible families are determined by one chart component, and the
     resulting global module sheaf restricts to a free rank-one module on
     every standard chart.
-  - Open atoms: identify the sheafified chart Koszul terms with the effective
-    projective twists, prove overlap compatibility, and glue the resulting
-    morphisms and exact sequence on ambient projective space; identify
+  - Open atoms: construct the effective ambient projective twists (the existing
+    effective twist descent is on the quotient curve), transport the proved
+    algebraic overlap squares through affine tilde and categorical pullback,
+    and glue the resulting morphisms and exact sequence; identify
     the scheme-theoretic Hilbert polynomial with the certified `6T-3`, and
     prove projective adjunction;
     package the characteristic-three Jacobian-rank certificate as a smooth

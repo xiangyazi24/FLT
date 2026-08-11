@@ -1591,9 +1591,20 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   overlapping three-term pieces of the four-term chart Koszul resolution and
   applies this theorem.  Hence the actual affine-tilde module-sheaf morphisms
   are exact on every one of the four ambient standard charts.  The remaining
-  categorical step is global: compare these local free sheaves and arrows with
-  the effective projective twists, prove overlap compatibility, and glue the
-  ambient Koszul resolution on projective three-space.
+  categorical step is global.
+- `RationalPointsN25QuotientTwoKoszulTransition.lean` closes the algebraic
+  overlap calculation for that global step.  The generic theorem in
+  `TwistingTransition.lean` proves that multiplication by a degree-`e`
+  homogeneous element intertwines `O(-(d+e))` and `O(-d)` transitions.  Its
+  specialization proves both complete Koszul squares on every ordered pair
+  overlap: `O(-5) → O(-2) ⊕ O(-3)` and
+  `O(-2) ⊕ O(-3) → O`.
+- The already effective `globalTwistModule` construction lives on the quotient
+  curve, not on ambient projective three-space, so it cannot be reused as the
+  ambient Koszul terms by definitional sleight of hand.  What remains is to
+  effectivize the analogous ambient twist descent, transport the proved
+  overlap squares through affine tilde and categorical pullback, and glue the
+  ambient Koszul resolution.
 - `RationalPointsN25QuotientTwoIdealSheaf.lean` closes that gluing seam against
   Mathlib's actual global object.  Functoriality of `Proj` identifies the
   section map on `D_+(X_i)` with the localized graded quotient, while the

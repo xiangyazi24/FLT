@@ -99,6 +99,85 @@ def negativeTwistTransition {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1)
   DistribMulAction.toLinearEquiv (HomogeneousLocalization.Away 𝒜 (f * g))
     (HomogeneousLocalization.Away 𝒜 (f * g)) ((degreeOneRatioUnit 𝒜 hf hg) ^ debt)
 
+/-! ## Homogeneous multiplication between negative twists -/
+
+/-- Restriction of the chart-`f` expression `p/f^e` to the overlap
+`D₊(f) ∩ D₊(g)`.  The homogeneous element `p` has degree `e`. -/
+def homogeneousElementLeft {f g p : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (e : ℕ) (hp : p ∈ 𝒜 e) :
+    HomogeneousLocalization.Away 𝒜 (f * g) :=
+  HomogeneousLocalization.awayMap 𝒜 hg rfl
+    (HomogeneousLocalization.Away.mk 𝒜 hf e p (by simpa using hp))
+
+/-- Restriction of the chart-`g` expression `p/g^e` to the same overlap.
+Both expressions land in the fixed ordered overlap ring away from `f * g`. -/
+def homogeneousElementRight {f g p : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (e : ℕ) (hp : p ∈ 𝒜 e) :
+    HomogeneousLocalization.Away 𝒜 (f * g) :=
+  HomogeneousLocalization.awayMap 𝒜 hf (mul_comm f g)
+    (HomogeneousLocalization.Away.mk 𝒜 hg e p (by simpa using hp))
+
+/-- The two local expressions of a degree-`e` homogeneous element differ by
+the `e`-th power of the coordinate transition ratio:
+`p/f^e = (g/f)^e (p/g^e)`. -/
+theorem homogeneousElementLeft_eq_ratio_mul_right {f g p : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (e : ℕ) (hp : p ∈ 𝒜 e) :
+    homogeneousElementLeft 𝒜 hf hg e hp =
+      (degreeOneRatioUnit 𝒜 hf hg :
+        HomogeneousLocalization.Away 𝒜 (f * g)) ^ e *
+        homogeneousElementRight 𝒜 hf hg e hp := by
+  apply HomogeneousLocalization.val_injective
+  simp only [homogeneousElementLeft, homogeneousElementRight,
+    HomogeneousLocalization.awayMap_mk, HomogeneousLocalization.val_mul,
+    HomogeneousLocalization.val_pow, HomogeneousLocalization.Away.val_mk,
+    degreeOneRatioUnit, degreeOneRatio, Units.val_mk,
+    Localization.mk_pow, Localization.mk_mul]
+  rw [Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+  refine ⟨1, ?_⟩
+  simp only [OneMemClass.coe_one, one_mul, Submonoid.coe_mul]
+  simp only [SubmonoidClass.coe_pow]
+  simp only [pow_succ]
+  ring_nf
+
+/-- Multiplication by the chart-`f` expression of a homogeneous element. -/
+def homogeneousMulLeft {f g p : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (e : ℕ) (hp : p ∈ 𝒜 e) :
+    HomogeneousLocalization.Away 𝒜 (f * g) →ₗ[
+      HomogeneousLocalization.Away 𝒜 (f * g)]
+        HomogeneousLocalization.Away 𝒜 (f * g) :=
+  LinearMap.lsmul _ _ (homogeneousElementLeft 𝒜 hf hg e hp)
+
+/-- Multiplication by the chart-`g` expression of a homogeneous element. -/
+def homogeneousMulRight {f g p : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (e : ℕ) (hp : p ∈ 𝒜 e) :
+    HomogeneousLocalization.Away 𝒜 (f * g) →ₗ[
+      HomogeneousLocalization.Away 𝒜 (f * g)]
+        HomogeneousLocalization.Away 𝒜 (f * g) :=
+  LinearMap.lsmul _ _ (homogeneousElementRight 𝒜 hf hg e hp)
+
+/-- A degree-`e` homogeneous multiplier intertwines the transition of
+`O(-(d+e))` with the transition of `O(-d)`.  This is the generic overlap
+square used to glue homogeneous matrices into morphisms of twisting sheaves. -/
+theorem homogeneousMul_comp_negativeTwistTransition {f g p : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (d e : ℕ) (hp : p ∈ 𝒜 e) :
+    (homogeneousMulRight 𝒜 hf hg e hp).comp
+        (negativeTwistTransition 𝒜 hf hg (d + e)).toLinearMap =
+      (negativeTwistTransition 𝒜 hf hg d).toLinearMap.comp
+        (homogeneousMulLeft 𝒜 hf hg e hp) := by
+  apply LinearMap.ext
+  intro x
+  simp only [LinearMap.comp_apply, homogeneousMulLeft, homogeneousMulRight,
+    LinearMap.lsmul_apply, negativeTwistTransition]
+  change homogeneousElementRight 𝒜 hf hg e hp *
+      ((degreeOneRatioUnit 𝒜 hf hg :
+        HomogeneousLocalization.Away 𝒜 (f * g)) ^ (d + e) * x) =
+    (degreeOneRatioUnit 𝒜 hf hg :
+      HomogeneousLocalization.Away 𝒜 (f * g)) ^ d *
+      (homogeneousElementLeft 𝒜 hf hg e hp * x)
+  rw [homogeneousElementLeft_eq_ratio_mul_right]
+  rw [pow_add]
+  ring
+
 /-- A positive twist uses the inverse chart ratio: changing from the
 `f`-trivialization to the `g`-trivialization multiplies by `(f/g)^credit`. -/
 def positiveTwistTransition {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1)
