@@ -1,0 +1,127 @@
+import Mathlib.RingTheory.GradedAlgebra.HomogeneousLocalization
+
+/-!
+# Transition units for twists on degree-one projective charts
+
+Let `f` and `g` be homogeneous elements of degree one.  On the overlap
+`D₊(f) ∩ D₊(g) = D₊(fg)`, the fraction `g/f` has degree zero and is a unit.
+This file constructs that unit directly in Mathlib's
+`HomogeneousLocalization.Away` and proves its inverse and triple-overlap
+cocycle identities.
+
+For a negatively shifted graded module `A(-d)`, changing from the
+`f`-trivialization to the `g`-trivialization multiplies by `(g/f)^d`.
+`negativeTwistTransition` packages this multiplication as a linear
+equivalence.  These are the algebraic transition data required to glue the
+projective twisting sheaf on a degree-one affine cover.
+-/
+
+noncomputable section
+
+open DirectSum
+open Graded
+
+universe u
+
+namespace HomogeneousLocalization.Away
+
+variable {A σ : Type u} [CommRing A] [SetLike σ A]
+variable [AddSubgroupClass σ A]
+variable (𝒜 : ℕ → σ) [GradedRing 𝒜]
+
+/-- On the overlap of two degree-one projective charts, this homogeneous
+fraction represents the transition ratio `g/f`.  The numerator `g²` and
+denominator `fg` have the same degree. -/
+def degreeOneRatio {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) :
+    HomogeneousLocalization.Away 𝒜 (f * g) :=
+  HomogeneousLocalization.Away.mk 𝒜 (SetLike.mul_mem_graded hf hg) 1
+    (g ^ 2) (by simpa using SetLike.pow_mem_graded 2 hg)
+
+/-- The reverse ratio `f/g`, represented in the same overlap ring. -/
+def degreeOneRatioInv {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) :
+    HomogeneousLocalization.Away 𝒜 (f * g) :=
+  HomogeneousLocalization.Away.mk 𝒜 (SetLike.mul_mem_graded hf hg) 1
+    (f ^ 2) (by simpa using SetLike.pow_mem_graded 2 hf)
+
+/-- The two chart ratios are inverse in the overlap ring. -/
+theorem degreeOneRatio_mul_inv {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) :
+    degreeOneRatio 𝒜 hf hg * degreeOneRatioInv 𝒜 hf hg = 1 := by
+  ext
+  simp only [degreeOneRatio, degreeOneRatioInv,
+    HomogeneousLocalization.val_mul, HomogeneousLocalization.Away.val_mk,
+    Localization.mk_mul, HomogeneousLocalization.val_one]
+  rw [← Localization.mk_one]
+  rw [Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+  refine ⟨1, ?_⟩
+  simp
+  ring
+
+/-- The chart ratio as a unit of the overlap ring. -/
+def degreeOneRatioUnit {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) :
+    (HomogeneousLocalization.Away 𝒜 (f * g))ˣ where
+  val := degreeOneRatio 𝒜 hf hg
+  inv := degreeOneRatioInv 𝒜 hf hg
+  val_inv := degreeOneRatio_mul_inv 𝒜 hf hg
+  inv_val := by
+    calc
+      degreeOneRatioInv 𝒜 hf hg * degreeOneRatio 𝒜 hf hg =
+          degreeOneRatio 𝒜 hf hg * degreeOneRatioInv 𝒜 hf hg := mul_comm _ _
+      _ = 1 := degreeOneRatio_mul_inv 𝒜 hf hg
+
+/-- Changing from the `f`-trivialization to the `g`-trivialization of the
+negative twist by `debt` multiplies by `(g/f)^debt`. -/
+def negativeTwistTransition {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1)
+    (debt : ℕ) :
+    HomogeneousLocalization.Away 𝒜 (f * g) ≃ₗ[HomogeneousLocalization.Away 𝒜 (f * g)]
+      HomogeneousLocalization.Away 𝒜 (f * g) :=
+  DistribMulAction.toLinearEquiv (HomogeneousLocalization.Away 𝒜 (f * g))
+    (HomogeneousLocalization.Away 𝒜 (f * g)) ((degreeOneRatioUnit 𝒜 hf hg) ^ debt)
+
+/-! ## The triple-overlap cocycle -/
+
+/-- The ratio `g/f` represented on the ordered triple overlap
+`D₊(fgh)`. -/
+def degreeOneRatio12 {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) :
+    HomogeneousLocalization.Away 𝒜 ((f * g) * h) :=
+  HomogeneousLocalization.Away.mk 𝒜
+    (SetLike.mul_mem_graded (SetLike.mul_mem_graded hf hg) hh) 1
+    (g ^ 2 * h) (by
+      simpa using SetLike.mul_mem_graded (SetLike.pow_mem_graded 2 hg) hh)
+
+/-- The ratio `h/g` represented on the ordered triple overlap
+`D₊(fgh)`. -/
+def degreeOneRatio23 {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) :
+    HomogeneousLocalization.Away 𝒜 ((f * g) * h) :=
+  HomogeneousLocalization.Away.mk 𝒜
+    (SetLike.mul_mem_graded (SetLike.mul_mem_graded hf hg) hh) 1
+    (h ^ 2 * f) (by
+      simpa using SetLike.mul_mem_graded (SetLike.pow_mem_graded 2 hh) hf)
+
+/-- The ratio `h/f` represented on the ordered triple overlap
+`D₊(fgh)`. -/
+def degreeOneRatio13 {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) :
+    HomogeneousLocalization.Away 𝒜 ((f * g) * h) :=
+  HomogeneousLocalization.Away.mk 𝒜
+    (SetLike.mul_mem_graded (SetLike.mul_mem_graded hf hg) hh) 1
+    (h ^ 2 * g) (by
+      simpa using SetLike.mul_mem_graded (SetLike.pow_mem_graded 2 hh) hg)
+
+/-- Degree-one chart ratios satisfy the multiplicative cocycle identity on a
+triple overlap: `(g/f) * (h/g) = h/f`. -/
+theorem degreeOneRatio_cocycle {f g h : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (hh : h ∈ 𝒜 1) :
+    degreeOneRatio12 𝒜 hf hg hh * degreeOneRatio23 𝒜 hf hg hh =
+      degreeOneRatio13 𝒜 hf hg hh := by
+  ext
+  simp only [degreeOneRatio12, degreeOneRatio23, degreeOneRatio13,
+    HomogeneousLocalization.val_mul, HomogeneousLocalization.Away.val_mk,
+    Localization.mk_mul]
+  rw [Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+  refine ⟨1, ?_⟩
+  simp
+  ring
+
+end HomogeneousLocalization.Away

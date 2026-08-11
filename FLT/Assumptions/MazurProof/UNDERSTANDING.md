@@ -1501,6 +1501,16 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   and recomposition maps.  Each shifted coefficient family is itself now a
   graded `B`-module with a canonical decomposition, yielding the direct
   `B`-linear formula `I/I² ≃ B(-2) ⊕ B(-3)` in the external direct-sum model.
+- `FLT/Mathlib/AlgebraicGeometry/ProjectiveSpectrum/TwistingTransition.lean`
+  begins the missing projective twisting API at its algebraic core.  For any
+  two degree-one homogeneous chart equations `f,g`, it constructs the overlap
+  unit `g/f` inside Mathlib's degree-zero homogeneous localization, proves its
+  explicit inverse `f/g`, and packages multiplication by `(g/f)^d` as the
+  transition equivalence for a negative twist.  The three ratios on an
+  ordered triple overlap satisfy `(g/f)(h/g)=h/f` by a kernel-checked
+  localization calculation.  The N25 specialization proves that all four
+  quotient coordinate classes have degree one and instantiates these units,
+  twist transitions, and cocycles on its standard projective charts.
 - `RationalPointsN25QuotientTwoGradedKoszul.lean` defines
   `shiftedPiece debt n = S(-debt)_n`, proves that multiplication by a
   degree-`d` polynomial maps `S(-(e+d))_n` into `S(-e)_n`, and constructs the
@@ -1645,7 +1655,10 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   decomposition are explicit.  The remaining step is geometric: Mathlib still
   lacks the associated graded-module sheafification and projective
   twisting-sheaf determinant theorems needed to carry this decomposition to
-  `Proj` and conclude `ω_C ≅ O_C(-4+2+3) = O_C(1)`.
+  `Proj` and conclude `ω_C ≅ O_C(-4+2+3) = O_C(1)`.  The degree-one affine
+  chart transition units and their cocycle are no longer part of that gap;
+  the next step is to glue the corresponding rank-one module sheaves and
+  identify tensor products and determinants from these explicit transitions.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
   section.  The remaining geometric seam is exact: construct principal
