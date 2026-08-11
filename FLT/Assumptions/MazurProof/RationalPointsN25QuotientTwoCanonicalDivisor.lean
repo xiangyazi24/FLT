@@ -1,7 +1,7 @@
 import FLT.Assumptions.MazurProof.CurveDivisorPicard
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoFrobeniusOrbits
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoHyperplaneArtinLocal
-import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoRegularSequence
+import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoConormalBasis
 
 /-!
 # A concrete degree-six hyperplane section in characteristic two

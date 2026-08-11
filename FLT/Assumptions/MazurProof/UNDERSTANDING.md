@@ -1471,6 +1471,16 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   syzygy using the proved non-zero-divisor property of `C` modulo `(Q)` and
   identifies the middle range with the literal ideal `(Q,C)`.  This closes
   the ungraded Koszul-exactness premise without coefficient enumeration.
+- `RationalPointsN25QuotientTwoConormalBasis.lean` now proves the actual
+  complete-intersection conormal module formula at the affine-cone level:
+  the classes of `Q` and `C` induce an `S/(Q,C)`-linear equivalence
+  `(S/(Q,C))² ≃ I/I²`, hence concrete finite and free instances.  For
+  injectivity, a relation modulo `I²` is corrected by coefficients already
+  in `I`; the residual relation is then forced by the proved Koszul
+  exactness to be `(Cr,-Qr)`.  Thus the two conormal generators are genuinely
+  independent over the quotient, rather than merely a chosen generating
+  pair.  This is the algebraic source of the future graded formula
+  `I/I² ≅ O_C(-2) ⊕ O_C(-3)`.
 - `RationalPointsN25QuotientTwoGradedKoszul.lean` defines
   `shiftedPiece debt n = S(-debt)_n`, proves that multiplication by a
   degree-`d` polynomial maps `S(-(e+d))_n` into `S(-e)_n`, and constructs the
@@ -1609,10 +1619,11 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   only remaining Hilbert seam is now the scheme-theoretic comparison between
   this graded coordinate-ring Hilbert function and the `Proj` Hilbert
   polynomial.
-- The remaining adjunction gap is now narrower: Mathlib still lacks the
-  associated-graded-module sheafification and projective
-  twisting-sheaf determinant theorems needed to pass from the proved
-  degreewise shifted resolution to
+- The remaining adjunction gap is now narrower: the conormal module is
+  already proved free on the actual equation classes, but Mathlib still lacks
+  the associated graded-module sheafification and projective twisting-sheaf
+  determinant theorems needed to preserve their degrees two and three on
+  `Proj` and conclude
   `ω_C ≅ O_C(-4+2+3) = O_C(1)`.
 - The characteristic-two terminal consumer now fixes its base class to
   `[0:0:0:1]` and its residual class to this explicit degree-six hyperplane
