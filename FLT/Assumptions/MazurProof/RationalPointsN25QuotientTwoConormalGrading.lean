@@ -459,4 +459,32 @@ noncomputable instance conormalPiece_decomposition :
     rw [← conormalDecomposeEquiv_symm]
     exact conormalDecomposeEquiv.apply_symm_apply x
 
+/-! ## The packaged graded-module equivalence -/
+
+/-- The conormal module is `B`-linearly equivalent to the external direct sum
+of its homogeneous pieces.
+
+The target carries Mathlib's module structure induced from the graded scalar
+action.  This is the algebraic graded-module form of
+`I/I² ≅ B(-2) ⊕ B(-3)`; it retains the shift information that the earlier
+ungraded `B²` equivalence discards. -/
+def conormalGradedLinearEquiv :
+    @LinearEquiv B B _ _ (RingHom.id B) (RingHom.id B) _ _
+      I.Cotangent ConormalDirectSum _ _ _
+      (GradedModule.isModule literalConePiece conormalPiece) :=
+  GradedModule.linearEquiv literalConePiece conormalPiece
+
+/-- The packaged graded-module equivalence uses the explicit shifted
+decomposition constructed above. -/
+theorem conormalGradedLinearEquiv_apply (x : I.Cotangent) :
+    conormalGradedLinearEquiv x = conormalDecomposeEquiv x := by
+  rfl
+
+/-- The inverse graded-module equivalence is literal recomposition of the
+homogeneous conormal pieces. -/
+theorem conormalGradedLinearEquiv_symm_apply (x : ConormalDirectSum) :
+    conormalGradedLinearEquiv.symm x =
+      DirectSum.coeLinearMap conormalPiece x := by
+  rfl
+
 end MazurProof.RationalPointsN25QuotientTwoConormalGrading

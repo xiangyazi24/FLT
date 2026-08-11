@@ -1494,7 +1494,11 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   families by two and three, zips them degreewise, and transports them through
   the conormal equivalence.  The inverse is proved to be literal recomposition,
   so the pieces form an internal direct sum and supply a
-  `DirectSum.Decomposition` of `I/I²`.
+  `DirectSum.Decomposition` of `I/I²`.  Mathlib's standard
+  `GradedModule.linearEquiv` then packages these data as a genuine `B`-linear
+  equivalence from `I/I²` to the external direct sum of its homogeneous
+  pieces; its underlying maps are definitionally the explicit decomposition
+  and recomposition maps.
 - `RationalPointsN25QuotientTwoGradedKoszul.lean` defines
   `shiftedPiece debt n = S(-debt)_n`, proves that multiplication by a
   degree-`d` polynomial maps `S(-(e+d))_n` into `S(-e)_n`, and constructs the
