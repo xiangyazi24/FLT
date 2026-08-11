@@ -244,6 +244,56 @@ def shiftedLinearEquiv (debt : ℕ) :
     left_inv := fun x ↦ LinearMap.congr_fun (coe_shiftedDecompose debt) x
     right_inv := fun x ↦ LinearMap.congr_fun (shiftedDecompose_coe debt) x }
 
+/-! ## Shifted pieces as graded modules -/
+
+/-- Multiplication by a degree-`i` quotient class sends a coefficient shifted
+by `debt` in total degree `j` to total degree `i+j`. -/
+theorem smul_mem_shiftedLiteralPiece (debt : ℕ) {i j : ℕ} {r m : B}
+    (hr : r ∈ literalConePiece i) (hm : m ∈ shiftedLiteralPiece debt j) :
+    r • m ∈ shiftedLiteralPiece debt (i + j) := by
+  rw [smul_eq_mul]
+  by_cases hj : debt ≤ j
+  · rw [shiftedLiteralPiece, if_pos hj] at hm
+    rw [shiftedLiteralPiece, if_pos (le_add_of_le_right hj)]
+    have hdeg : i + (j - debt) = i + j - debt := by omega
+    rw [← hdeg]
+    exact mul_mem_literalConePiece hr hm
+  · rw [shiftedLiteralPiece, if_neg hj, Submodule.mem_bot] at hm
+    rw [hm, mul_zero]
+    exact Submodule.zero_mem _
+
+/-- The quotient grading acts homogeneously on every upward-shifted family of
+coefficient pieces. -/
+noncomputable instance shiftedLiteralPiece_gradedSMul (debt : ℕ) :
+    SetLike.GradedSMul literalConePiece (shiftedLiteralPiece debt) where
+  smul_mem := fun _ _ _ _ hr hm ↦ smul_mem_shiftedLiteralPiece debt hr hm
+
+/-- Reindexing the quotient decomposition supplies a decomposition for each
+shifted family of coefficient pieces. -/
+noncomputable instance shiftedLiteralPiece_decomposition (debt : ℕ) :
+    DirectSum.Decomposition (shiftedLiteralPiece debt) where
+  decompose' := shiftedLinearEquiv debt
+  left_inv x := (shiftedLinearEquiv debt).symm_apply_apply x
+  right_inv x := (shiftedLinearEquiv debt).apply_symm_apply x
+
+/-- The external direct sum of shifted pieces carries its canonical module
+structure over the graded quotient ring. -/
+noncomputable instance shiftedDirectSumModule (debt : ℕ) :
+    Module B (ShiftedDirectSum debt) :=
+  GradedModule.isModule literalConePiece (shiftedLiteralPiece debt)
+
+/-- A shifted external direct sum is the quotient ring with its grading
+reindexed upward by `debt`. -/
+def shiftedGradedLinearEquiv (debt : ℕ) :
+    B ≃ₗ[B] ShiftedDirectSum debt :=
+  GradedModule.linearEquiv literalConePiece (shiftedLiteralPiece debt)
+
+/-- The underlying function of the graded shift equivalence is the explicit
+shifted homogeneous decomposition. -/
+theorem shiftedGradedLinearEquiv_apply (debt : ℕ) (x : B) :
+    shiftedGradedLinearEquiv debt x = shiftedLinearEquiv debt x := by
+  rfl
+
 /-! ## Combining the two equation shifts -/
 
 /-- The direct sum whose `n`th component is the product of the two shifted
@@ -461,6 +511,12 @@ noncomputable instance conormalPiece_decomposition :
 
 /-! ## The packaged graded-module equivalence -/
 
+/-- The external direct sum of conormal pieces carries its canonical module
+structure over the graded quotient ring. -/
+noncomputable instance conormalDirectSumModule :
+    Module B ConormalDirectSum :=
+  GradedModule.isModule literalConePiece conormalPiece
+
 /-- The conormal module is `B`-linearly equivalent to the external direct sum
 of its homogeneous pieces.
 
@@ -469,9 +525,7 @@ action.  This is the algebraic graded-module form of
 `I/I² ≅ B(-2) ⊕ B(-3)`; it retains the shift information that the earlier
 ungraded `B²` equivalence discards. -/
 def conormalGradedLinearEquiv :
-    @LinearEquiv B B _ _ (RingHom.id B) (RingHom.id B) _ _
-      I.Cotangent ConormalDirectSum _ _ _
-      (GradedModule.isModule literalConePiece conormalPiece) :=
+    I.Cotangent ≃ₗ[B] ConormalDirectSum :=
   GradedModule.linearEquiv literalConePiece conormalPiece
 
 /-- The packaged graded-module equivalence uses the explicit shifted
@@ -486,5 +540,12 @@ theorem conormalGradedLinearEquiv_symm_apply (x : ConormalDirectSum) :
     conormalGradedLinearEquiv.symm x =
       DirectSum.coeLinearMap conormalPiece x := by
   rfl
+
+/-- The conormal module is explicitly the direct sum of the quotient ring
+shifted by the degrees of the quadric and cubic equations. -/
+def conormalShiftedGradedLinearEquiv :
+    I.Cotangent ≃ₗ[B] (ShiftedDirectSum 2 × ShiftedDirectSum 3) :=
+  conormalLinearEquiv.symm.trans <|
+    (shiftedGradedLinearEquiv 2).prodCongr (shiftedGradedLinearEquiv 3)
 
 end MazurProof.RationalPointsN25QuotientTwoConormalGrading

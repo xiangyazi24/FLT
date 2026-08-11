@@ -1498,7 +1498,9 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `GradedModule.linearEquiv` then packages these data as a genuine `B`-linear
   equivalence from `I/I²` to the external direct sum of its homogeneous
   pieces; its underlying maps are definitionally the explicit decomposition
-  and recomposition maps.
+  and recomposition maps.  Each shifted coefficient family is itself now a
+  graded `B`-module with a canonical decomposition, yielding the direct
+  `B`-linear formula `I/I² ≃ B(-2) ⊕ B(-3)` in the external direct-sum model.
 - `RationalPointsN25QuotientTwoGradedKoszul.lean` defines
   `shiftedPiece debt n = S(-debt)_n`, proves that multiplication by a
   degree-`d` polynomial maps `S(-(e+d))_n` into `S(-e)_n`, and constructs the
