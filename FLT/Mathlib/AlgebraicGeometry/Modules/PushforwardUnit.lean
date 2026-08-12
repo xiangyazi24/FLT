@@ -38,6 +38,78 @@ theorem unitToPushforwardUnit_app_apply (U : Y.Opens) (a : Γ(Y, U)) :
     Hom.app (unitToPushforwardUnit f) U a = f.app U a :=
   rfl
 
+/-! ## The structure map as an adjunction unit
+
+For arbitrary coefficients the pullback--pushforward adjunction unit is the
+canonical map into the direct image of the pullback.  When the coefficient is
+the structure module, the canonical comparison `f^* O_Y ≅ O_X` identifies
+that unit with `unitToPushforwardUnit`.  The conjugation lemma below records
+the same statement after choosing any local rank-one trivialization.
+-/
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Under the pullback--pushforward adjunction, the canonical pullback
+comparison of structure modules transposes to the structure-module map. -/
+theorem pullbackPushforwardAdjunction_unit_comp_pullbackUnitIsoOfScheme :
+    (pullbackPushforwardAdjunction f).unit.app
+          (SheafOfModules.unit Y.ringCatSheaf) ≫
+        (pushforward f).map (pullbackUnitIsoOfScheme f).hom =
+      unitToPushforwardUnit f := by
+  change
+    (SheafOfModules.pullbackPushforwardAdjunction
+      f.toRingCatSheafHom).unit.app
+        (SheafOfModules.unit Y.ringCatSheaf) ≫
+      (SheafOfModules.pushforward f.toRingCatSheafHom).map
+        (SheafOfModules.pullbackObjUnitToUnit f.toRingCatSheafHom) =
+    SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom
+  calc
+    _ = ((SheafOfModules.pullbackPushforwardAdjunction
+          f.toRingCatSheafHom).homEquiv _ _)
+        (SheafOfModules.pullbackObjUnitToUnit
+          f.toRingCatSheafHom) :=
+      (Adjunction.homEquiv_unit
+        (SheafOfModules.pullbackPushforwardAdjunction
+          f.toRingCatSheafHom) _ _ _).symm
+    _ = _ :=
+      SheafOfModules.pullbackPushforwardAdjunction_homEquiv_pullbackObjUnitToUnit
+        f.toRingCatSheafHom
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- A local trivialization of a coefficient module conjugates its adjunction
+unit to the canonical structure-module map. -/
+theorem pullbackPushforwardAdjunction_unit_conjugate_unit
+    (M : Y.Modules)
+    (e : M ≅ SheafOfModules.unit Y.ringCatSheaf) :
+    e.hom ≫ unitToPushforwardUnit f =
+      (pullbackPushforwardAdjunction f).unit.app M ≫
+        (pushforward f).map
+          ((pullback f).map e.hom ≫
+            (pullbackUnitIsoOfScheme f).hom) := by
+  symm
+  calc
+    _ = ((pullbackPushforwardAdjunction f).unit.app M ≫
+          (pushforward f).map ((pullback f).map e.hom)) ≫
+        (pushforward f).map (pullbackUnitIsoOfScheme f).hom := by
+      rw [Functor.map_comp, Category.assoc]
+    _ = (e.hom ≫
+          (pullbackPushforwardAdjunction f).unit.app
+            (SheafOfModules.unit Y.ringCatSheaf)) ≫
+        (pushforward f).map (pullbackUnitIsoOfScheme f).hom := by
+      exact congrArg
+        (fun z => z ≫
+          (pushforward f).map (pullbackUnitIsoOfScheme f).hom)
+        (Adjunction.unit_naturality
+          (pullbackPushforwardAdjunction f) e.hom)
+    _ = e.hom ≫
+        ((pullbackPushforwardAdjunction f).unit.app
+            (SheafOfModules.unit Y.ringCatSheaf) ≫
+          (pushforward f).map (pullbackUnitIsoOfScheme f).hom) :=
+      Category.assoc _ _ _
+    _ = _ := by
+      rw [pullbackPushforwardAdjunction_unit_comp_pullbackUnitIsoOfScheme]
+
 /-- A closed immersion makes the ambient structure module surject locally
 onto the direct image of the source structure module.  Affine opens form a
 basis, and the defining section map of a closed immersion is surjective on

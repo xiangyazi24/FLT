@@ -1866,12 +1866,17 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   criterion prove global exactness.  The 8597-job target build passes, and
   fresh axiom audits of multiplier commutativity and both exactness theorems
   contain only `propext`, `Classical.choice`, and `Quot.sound`.
-- This shifted result is structural infrastructure, not another finite
-  coefficient calculation and not a discharge of the N25 endpoint axiom.
-  In particular `d = -1` supplies the ambient resolution whose terminal
-  quotient should be `i_* O_C(1)`.  The immediate geometric seam is to
-  identify `Q_d` with the direct image of the corresponding effective curve
-  twist, at least for `d = -1`, before using it in adjunction.
+- `RationalPointsN25QuotientTwoAmbientKoszulPullback.lean` closes the shifted
+  terminal comparison for every integer debt.  A generic arbitrary-scheme
+  theorem proves `g^* O_Y ≅ O_X`; iterated adjunction mates construct
+  pullback Beck--Chevalley from the already verified direct-image comparison.
+  The global adjunction unit restricts on every standard chart to the affine
+  closed-immersion structure map.  Local Koszul exactness, restriction--stalk
+  descent, and a direct sheaf-level epimorphism proof make this unit a
+  cokernel of the shifted middle map.  Hence
+  `Q_d ≅ i_* i^* O(-d)` for all `d`, and `d = -1` gives the actual
+  hyperplane twist `i_* i^* O(1)`.  The target build and fresh axiom audits
+  pass with only `propext`, `Classical.choice`, and `Quot.sound`.
 - This comparison does not by itself discharge the N25 endpoint axiom.  The
   next canonical-geometry seam is the determinant/adjunction step: connect
   the proved conormal basis and ambient resolution to the effective twists,

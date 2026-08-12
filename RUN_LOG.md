@@ -918,3 +918,27 @@
 - next attack: specialize `d = -1` and identify its terminal quotient with
   `i_* O_C(1)`, then feed that effective hyperplane twist into the
   determinant/adjunction seam
+
+## Run 2026-08-12 (automode: shifted N25 geometric quotient)
+
+- approval: Xiang's explicit instruction to continue the Mazur proof and use
+  ChatGPT to save local model usage
+- ChatGPT bridge: the canonical script still reports no channel registered
+  for the `flt` window; no tmux name was changed and no unrelated project
+  channel was borrowed
+- result: `RationalPointsN25QuotientTwoAmbientKoszulPullback.lean` identifies
+  every categorical shifted quotient `Q_d` with the genuine geometric target
+  `i_* i^* O(-d)`; in particular `Q_{-1} ≅ i_* i^* O(1)`
+- proof shape: arbitrary-scheme pullback of the structure module; pullback
+  Beck--Chevalley derived by iterated mates; chartwise conjugation of the
+  global adjunction unit to the affine closed-immersion structure map; local
+  Koszul exactness; restriction--stalk descent; sheaf-level epimorphism and
+  cokernel uniqueness
+- verification: the 8598-job target build passed, and fresh axiom audits of
+  the generic pullback/base-change layer, global exactness, cokernel witness,
+  quotient comparison, and final `IsIso` instance contain only `propext`,
+  `Classical.choice`, and `Quot.sound`
+- endpoint ledger: unchanged at four custom axioms; next attack is the
+  determinant/adjunction identification `ω_C ≅ i^* O(1)`
+- endpoint verification: a fresh 8775-job rebuild of `MazurEndpointAudit`
+  reports exactly those four custom axioms and no `sorryAx`

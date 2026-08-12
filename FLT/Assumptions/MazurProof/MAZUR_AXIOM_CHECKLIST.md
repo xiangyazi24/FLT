@@ -3,7 +3,7 @@
 Goal: prove `MazurProof.mazur_torsion_bound_ncard` with no custom axioms and
 no reachable `sorryAx`.
 
-Last source rebuild and `#print axioms` audit: 2026-08-11.
+Last source rebuild and `#print axioms` audit: 2026-08-12.
 
 ## Current endpoint
 
@@ -211,8 +211,15 @@ genus-four quotient `25.150.4.f.1`.  The N25 files prove:
     canonically the ambient structure module, each localized equation maps
     to zero on the projective quotient, the four chart identities imply the
     global composite is zero, and the resulting map
-    `coker → i_* O_C` is an epimorphism.  The exact remaining terminal seam is
-    to prove this comparison monic.
+    `coker → i_* O_C` is an epimorphism.  Chartwise geometric exactness and
+    restriction--stalk descent now also prove this comparison monic, so
+    cokernel uniqueness identifies it as an isomorphism; and
+29. the full shifted geometric comparison: for every integer `d`, arbitrary-
+    scheme pullback preserves the structure module, iterated mates provide
+    pullback Beck--Chevalley, and the shifted adjunction unit is a cokernel of
+    the middle Koszul map.  Consequently
+    `Q_d ≅ i_* i^* O(-d)`, including the required hyperplane case
+    `Q_{-1} ≅ i_* i^* O(1)`.
 
 These theorems compile and depend only on the three standard logical axioms.
 They do not yet discharge N25.  The model-identification seam is now closed
@@ -222,8 +229,7 @@ remaining input is a global rational-point or formal-immersion argument over
 Jacobian route this expands into explicit missing bridges: scheme-level smooth
 proper genus-four reduction, identification of the degree-at-most-four
 closed-point effective divisors with actual geometric divisors, the
-actual principal-divisor subgroups, the monomorphism half of the ambient
-Koszul terminal comparison, adjunction/canonicality for the chosen
+actual principal-divisor subgroups, adjunction/canonicality for the chosen
 degree-six residual classes (with the homogeneous regular-sequence premise
 and its degreewise shifted Koszul exactness, literal quotient-piece
 identification, internal quotient grading, projective closed/proper packaging,

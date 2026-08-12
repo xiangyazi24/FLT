@@ -6,7 +6,7 @@ Replace every custom axiom reachable from `MazurProof.mazur_torsion_bound` so
 its rebuilt `#print axioms` output contains only `propext`,
 `Classical.choice`, and `Quot.sound`.
 
-## Source-rebuilt state (2026-08-11)
+## Source-rebuilt state (2026-08-12)
 
 The endpoint has no reachable `sorryAx` and depends on exactly four custom
 axioms:
@@ -76,24 +76,23 @@ instance.
 This result is infrastructure, not a discharge of the N25 endpoint axiom.
 The ambient Koszul construction has also been shifted uniformly: for every
 integer debt `d`, the global sequence
-`O(-(d+5)) → O(-(d+2)) ⊕ O(-(d+3)) → O(-d) → Q_d`
-is now verified exact by normalized Cech descent and the affine
-regular-sequence complex.  The special case `d = -1` is the resolution
-needed to reach the hyperplane twist.  Its remaining geometric task is to
-identify `Q_{-1}` with `i_* O_C(1)`; no reduction in the four endpoint axioms
-is claimed yet.
+`O(-(d+5)) → O(-(d+2)) ⊕ O(-(d+3)) → O(-d) → i_* i^* O(-d)`
+is now verified exact.  Pullback Beck--Chevalley is derived structurally by
+iterated mates, and the adjunction unit is compared chartwise with the affine
+closed-immersion structure map.  Restriction--stalk descent and cokernel
+uniqueness then identify the former categorical quotient `Q_d` with
+`i_* i^* O(-d)` for every `d`.  In particular `Q_{-1}` is the actual
+hyperplane twist on the curve.  This closes the shifted terminal comparison;
+it does not yet reduce the four endpoint axioms.
 
 The next ranked canonical-geometry attacks are:
 
-1. identify the shifted terminal quotient `Q_{-1}` with the direct image of
-   the effective curve twist `O_C(1)` by the same chartwise quotient and
-   restriction--stalk method used at debt zero;
-2. connect the proved conormal basis and shifted ambient Koszul resolution to a
+1. connect the proved conormal basis and shifted ambient Koszul resolution to a
    determinant/adjunction comparison on the effective twists;
-3. identify the resulting canonical module of the complete-intersection
+2. identify the resulting canonical module of the complete-intersection
    curve with the already glued degree-one twist `O_C(1)` chartwise and then
    globally;
-4. use that canonical hyperplane class to construct the actual residual
+3. use that canonical hyperplane class to construct the actual residual
    divisor and complete-linear-system fibres required by the middle-degree
    Riemann--Roch consumer.
 

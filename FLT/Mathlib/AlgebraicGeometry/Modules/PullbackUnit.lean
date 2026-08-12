@@ -1,4 +1,6 @@
 import Mathlib.AlgebraicGeometry.Modules.Tilde
+import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
+import Mathlib.CategoryTheory.Adjunction.Mates
 
 /-!
 # Pullback of the unit module sheaf along an open immersion
@@ -15,7 +17,9 @@ the explicit restriction functor and then for the ordinary pullback functor.
 
 noncomputable section
 
-open CategoryTheory CategoryTheory.Limits
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Functor
+  CategoryTheory.NatTrans CategoryTheory.TwoSquare
+  CategoryTheory.Adjunction CategoryTheory.Category
 
 namespace AlgebraicGeometry.Scheme.Modules
 
@@ -433,6 +437,161 @@ theorem verticalOpenBaseChangeIso_hom_app_apply
         (eqToHom
           (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W)).op x :=
   rfl
+
+/-! ## Adjoint form of vertical-open base change
+
+The sectionwise direct-image comparison above has a more conceptual source.
+The two composites of direct-image functors around the pullback square are
+canonically isomorphic.  Taking mates first under the two open-restriction
+adjunctions recovers `verticalOpenBaseChangeIso`; taking mates a second time
+under the horizontal pullback adjunctions produces an isomorphism between the
+two composite pullback functors.  The iterated-mates theorem proves that these
+constructions agree.  This packages the Beck--Chevalley compatibility needed
+for arbitrary coefficient modules, not only for the structure module.
+-/
+
+/-- The canonical comparison between the two composite direct images around
+a cartesian square with vertical open immersions. -/
+def verticalOpenPushforwardCompositeIso
+    (H : IsPullback f' iX iU f) :
+    pushforward iX ⋙ pushforward f ≅
+      pushforward f' ⋙ pushforward iU :=
+  pushforwardComp iX f ≪≫
+    pushforwardCongr H.w.symm ≪≫
+    (pushforwardComp f' iU).symm
+
+/-- Direct-image base change written as the inverse mate of the composite
+pushforward comparison under the two open-restriction adjunctions. -/
+def verticalOpenBaseChangeMateSquare
+    (H : IsPullback f' iX iU f) :
+    TwoSquare (pushforward f) (restrictFunctor iX)
+      (restrictFunctor iU) (pushforward f') :=
+  (mateEquiv (restrictAdjunction iX) (restrictAdjunction iU)).symm
+    (TwoSquare.mk _ _ _ _
+      (verticalOpenPushforwardCompositeIso f' iX iU f H).hom)
+
+set_option maxHeartbeats 800000 in
+-- The proof expands only open restriction and direct image.  It then compares
+-- the two resulting restrictions of the original presheaf section.
+/-- The mate description of direct-image base change agrees componentwise
+with the sectionwise Beck--Chevalley isomorphism. -/
+theorem verticalOpenBaseChangeMateSquare_app
+    (H : IsPullback f' iX iU f) (M : X.Modules) :
+    (verticalOpenBaseChangeMateSquare f' iX iU f H).app M =
+      (verticalOpenBaseChangeIso f' iX iU f H M).hom := by
+  apply hom_ext
+  intro W
+  apply ConcreteCategory.hom_ext
+  intro x
+  simp only [verticalOpenBaseChangeMateSquare,
+    verticalOpenPushforwardCompositeIso, mateEquiv_symm_apply,
+    id_obj, comp_app, leftUnitor_inv_app,
+    rightUnitor_hom_app, Functor.whiskerRight_app,
+    Functor.whiskerLeft_app, associator_hom_app,
+    associator_inv_app,
+    NatTrans.comp_app, Functor.comp_map, Iso.trans_hom,
+    Hom.comp_app, CategoryTheory.comp_apply]
+  change M.presheaf.map _
+      (M.presheaf.map _ (M.presheaf.map _ x)) =
+    M.presheaf.map _ x
+  rw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply,
+    ← M.presheaf.map_comp, ← M.presheaf.map_comp]
+  congr 1
+
+/-- Pullback base change obtained from uniqueness of the two composite left
+adjoints to the canonically isomorphic composite direct images. -/
+def verticalOpenPullbackBaseChangeIso
+    (H : IsPullback f' iX iU f) :
+    restrictFunctor iU ⋙ pullback f' ≅
+      pullback f ⋙ restrictFunctor iX :=
+  (conjugateIsoEquiv
+    ((pullbackPushforwardAdjunction f).comp (restrictAdjunction iX))
+    ((restrictAdjunction iU).comp (pullbackPushforwardAdjunction f'))).symm
+      (verticalOpenPushforwardCompositeIso f' iX iU f H)
+
+/-- The pullback comparison regarded as a square between the horizontal
+pullback functors. -/
+def verticalOpenPullbackBaseChangeSquare
+    (H : IsPullback f' iX iU f) :
+    TwoSquare (restrictFunctor iU) (pullback f) (pullback f')
+      (restrictFunctor iX) :=
+  TwoSquare.mk _ _ _ _
+    (verticalOpenPullbackBaseChangeIso f' iX iU f H).hom
+
+set_option maxHeartbeats 800000 in
+-- Injectivity of the second mates equivalence reduces the proof to the
+-- iterated-mates theorem and the defining conjugate isomorphism.
+/-- The right mate of the adjoint-uniqueness pullback comparison is the
+sectionwise vertical-open direct-image base-change map. -/
+theorem verticalOpenPullbackBaseChangeSquare_mate_app
+    (H : IsPullback f' iX iU f) (M : X.Modules) :
+    (mateEquiv (pullbackPushforwardAdjunction f)
+      (pullbackPushforwardAdjunction f')
+      (verticalOpenPullbackBaseChangeSquare f' iX iU f H)).app M =
+        (verticalOpenBaseChangeIso f' iX iU f H M).hom := by
+  have hBC := verticalOpenBaseChangeMateSquare_app f' iX iU f H M
+  rw [← hBC]
+  have hsquare :
+      mateEquiv (pullbackPushforwardAdjunction f)
+          (pullbackPushforwardAdjunction f')
+          (verticalOpenPullbackBaseChangeSquare f' iX iU f H) =
+        verticalOpenBaseChangeMateSquare f' iX iU f H := by
+    apply (mateEquiv (restrictAdjunction iX)
+      (restrictAdjunction iU)).injective
+    change
+      (mateEquiv (restrictAdjunction iX) (restrictAdjunction iU)
+        (mateEquiv (pullbackPushforwardAdjunction f)
+          (pullbackPushforwardAdjunction f')
+          (verticalOpenPullbackBaseChangeSquare f' iX iU f H))).natTrans =
+      (mateEquiv (restrictAdjunction iX) (restrictAdjunction iU)
+        (verticalOpenBaseChangeMateSquare f' iX iU f H)).natTrans
+    rw [iterated_mateEquiv_conjugateEquiv]
+    rw [verticalOpenBaseChangeMateSquare,
+      (mateEquiv (restrictAdjunction iX)
+        (restrictAdjunction iU)).apply_symm_apply]
+    change
+      (conjugateEquiv
+        ((pullbackPushforwardAdjunction f).comp (restrictAdjunction iX))
+        ((restrictAdjunction iU).comp (pullbackPushforwardAdjunction f')))
+          (verticalOpenPullbackBaseChangeIso f' iX iU f H).hom =
+        (verticalOpenPushforwardCompositeIso f' iX iU f H).hom
+    rw [verticalOpenPullbackBaseChangeIso,
+      ← conjugateIsoEquiv_apply_hom]
+    exact (conjugateIsoEquiv
+      ((pullbackPushforwardAdjunction f).comp (restrictAdjunction iX))
+      ((restrictAdjunction iU).comp
+        (pullbackPushforwardAdjunction f'))).apply_symm_apply
+          (verticalOpenPushforwardCompositeIso f' iX iU f H) |>
+            congrArg Iso.hom
+  exact congrArg (fun z => z.app M) hsquare
+
+/-- The adjunction unit for horizontal pullback commutes with vertical-open
+base change.  This is the unit identity for the mates comparison above. -/
+theorem pullbackPushforwardAdjunction_unit_verticalOpenBaseChange
+    (H : IsPullback f' iX iU f) (M : Y.Modules) :
+    (restrictFunctor iU).map
+          ((pullbackPushforwardAdjunction f).unit.app M) ≫
+        (verticalOpenBaseChangeIso f' iX iU f H
+          ((pullback f).obj M)).hom =
+      (pullbackPushforwardAdjunction f').unit.app
+          ((restrictFunctor iU).obj M) ≫
+        (pushforward f').map
+          ((verticalOpenPullbackBaseChangeIso f' iX iU f H).hom.app M) := by
+  have h := unit_mateEquiv
+    (pullbackPushforwardAdjunction f)
+    (pullbackPushforwardAdjunction f')
+    (verticalOpenPullbackBaseChangeSquare f' iX iU f H) M
+  rw [verticalOpenPullbackBaseChangeSquare_mate_app] at h
+  change
+    (restrictFunctor iU).map
+          ((pullbackPushforwardAdjunction f).unit.app M) ≫
+        (verticalOpenBaseChangeIso f' iX iU f H
+          ((pullback f).obj M)).hom =
+      (pullbackPushforwardAdjunction f').unit.app
+          ((restrictFunctor iU).obj M) ≫
+        (pushforward f').map
+          ((verticalOpenPullbackBaseChangeIso f' iX iU f H).hom.app M) at h
+  exact h
 
 /-! ## Open base change for module sheaves
 
@@ -1209,5 +1368,130 @@ noncomputable instance restrictFunctorPreservesLimit {J : Type} [Category J]
     (isLimitOfPreserves
       (SheafOfModules.evaluation Y.ringCatSheaf
         (.op (f ''ᵁ V.unop))) (limit.isLimit K))
+
+/-! ## Pullback of the unit along an arbitrary scheme morphism
+
+The site-theoretic pullback API proves that the unit module is preserved when
+the underlying functor is final. A scheme morphism need not satisfy that
+hypothesis on its entire category of opens. Nevertheless its direct image
+does preserve global sections: a compatible family is determined by its
+value on the top open, and the inverse image of the top open is top. This
+supplies the missing scheme-specific proof that `g^* O_Y = O_X`.
+-/
+
+variable {X' Y' : Scheme}
+
+/-- A compatible family of module sections is determined by its value on the
+top open. -/
+def sectionsTopEquiv (M : X'.Modules) : M.sections ≃ Γ(M, ⊤) where
+  toFun s := s.val (.op ⊤)
+  invFun x :=
+    ⟨fun U => M.presheaf.map (homOfLE (le_top : U.unop ≤ ⊤)).op x,
+      fun {U V} g => by
+        change M.presheaf.map g
+            (M.presheaf.map (homOfLE (le_top : U.unop ≤ ⊤)).op x) =
+          M.presheaf.map (homOfLE (le_top : V.unop ≤ ⊤)).op x
+        erw [← ConcreteCategory.comp_apply, ← M.presheaf.map_comp]
+        congr 1⟩
+  left_inv s := by
+    ext U
+    change M.presheaf.map (homOfLE (le_top : U.unop ≤ ⊤)).op
+        (s.val (.op ⊤)) = s.val U
+    exact s.property (homOfLE (le_top : U.unop ≤ ⊤)).op
+  right_inv x := by
+    change M.presheaf.map
+      (homOfLE (le_top : (⊤ : X'.Opens) ≤ ⊤)).op x = x
+    rw [Subsingleton.elim (homOfLE _) (𝟙 _)]
+    simpa using congrArg (fun q => q x) (M.presheaf.map_id (.op ⊤))
+
+/-- Direct image along a scheme morphism preserves global sections. The
+proof uses the restriction from the top open to `g ⁻¹(⊤)`, which is an
+isomorphism because these opens are equal. -/
+theorem bijective_pushforwardSections_of_scheme
+    (M : X'.Modules) (g : X' ⟶ Y') :
+    Function.Bijective
+      (SheafOfModules.pushforwardSections g.toRingCatSheafHom (M := M)) := by
+  have htop : g ⁻¹ᵁ (⊤ : Y'.Opens) = (⊤ : X'.Opens) := by simp
+  let r : Γ(M, ⊤) ⟶ Γ(M, g ⁻¹ᵁ (⊤ : Y'.Opens)) :=
+    M.presheaf.map
+      (homOfLE (le_top : g ⁻¹ᵁ (⊤ : Y'.Opens) ≤ (⊤ : X'.Opens))).op
+  haveI : IsIso r := by
+    have hr : (homOfLE
+        (le_top : g ⁻¹ᵁ (⊤ : Y'.Opens) ≤ (⊤ : X'.Opens))) =
+        (eqToIso htop).hom := Subsingleton.elim _ _
+    dsimp only [r]
+    rw [hr]
+    infer_instance
+  constructor
+  · intro s t hst
+    apply (sectionsTopEquiv M).injective
+    apply (ConcreteCategory.bijective_of_isIso r).1
+    have h := congrFun (congrArg Subtype.val hst) (.op (⊤ : Y'.Opens))
+    change s.val (.op (g ⁻¹ᵁ (⊤ : Y'.Opens))) =
+      t.val (.op (g ⁻¹ᵁ (⊤ : Y'.Opens))) at h
+    change M.presheaf.map
+        (homOfLE (le_top : g ⁻¹ᵁ (⊤ : Y'.Opens) ≤ (⊤ : X'.Opens))).op
+          (s.val (.op ⊤)) =
+      M.presheaf.map
+        (homOfLE (le_top : g ⁻¹ᵁ (⊤ : Y'.Opens) ≤ (⊤ : X'.Opens))).op
+          (t.val (.op ⊤))
+    exact (s.property (homOfLE
+      (le_top : g ⁻¹ᵁ (⊤ : Y'.Opens) ≤ (⊤ : X'.Opens))).op).trans
+        (h.trans (t.property (homOfLE
+          (le_top : g ⁻¹ᵁ (⊤ : Y'.Opens) ≤ (⊤ : X'.Opens))).op).symm)
+  · intro t
+    let x : Γ(M, ⊤) := inv r (t.val (.op (⊤ : Y'.Opens)))
+    let s := (sectionsTopEquiv M).symm x
+    refine ⟨s, ?_⟩
+    apply (sectionsTopEquiv ((pushforward g).obj M)).injective
+    change s.val (.op (g ⁻¹ᵁ (⊤ : Y'.Opens))) =
+      t.val (.op (⊤ : Y'.Opens))
+    have hs : s.val (.op (⊤ : X'.Opens)) = x :=
+      (sectionsTopEquiv M).apply_symm_apply x
+    have hx : r x = t.val (.op (⊤ : Y'.Opens)) := by
+      dsimp only [x]
+      rw [← ConcreteCategory.comp_apply, IsIso.inv_hom_id]
+      rfl
+    change M.presheaf.map
+        (homOfLE (le_top : g ⁻¹ᵁ (⊤ : Y'.Opens) ≤ (⊤ : X'.Opens))).op x =
+      t.val (.op (⊤ : Y'.Opens)) at hx
+    exact (s.property (homOfLE
+      (le_top : g ⁻¹ᵁ (⊤ : Y'.Opens) ≤ (⊤ : X'.Opens))).op).symm.trans
+        ((congrArg (M.presheaf.map
+          (homOfLE
+            (le_top : g ⁻¹ᵁ (⊤ : Y'.Opens) ≤ (⊤ : X'.Opens))).op) hs).trans hx)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The canonical morphism from the pullback of the target structure module
+to the source structure module is invertible for every scheme morphism. -/
+theorem pullbackObjUnitToUnit_isIso_of_scheme (g : X' ⟶ Y') :
+    IsIso (SheafOfModules.pullbackObjUnitToUnit
+      g.toRingCatSheafHom) := by
+  rw [isIso_iff_coyoneda_map_bijective]
+  intro N
+  rw [← ((SheafOfModules.pullbackPushforwardAdjunction
+      g.toRingCatSheafHom).homEquiv _ _).bijective.of_comp_iff',
+    ← (SheafOfModules.unitHomEquiv _).bijective.of_comp_iff']
+  convert! (bijective_pushforwardSections_of_scheme N g).comp
+    (SheafOfModules.unitHomEquiv _).bijective
+  ext q : 1
+  dsimp
+  rw [SheafOfModules.pushforwardSections_unitHomEquiv,
+    EmbeddingLike.apply_eq_iff_eq,
+    Adjunction.homEquiv_naturality_right,
+    SheafOfModules.pullbackPushforwardAdjunction_homEquiv_pullbackObjUnitToUnit]
+
+/-- The scheme-specific isomorphism `g^* O_Y ≅ O_X`, valid without an
+open-immersion hypothesis. -/
+def pullbackUnitIsoOfScheme (g : X' ⟶ Y') :
+    (pullback g).obj (SheafOfModules.unit Y'.ringCatSheaf) ≅
+      SheafOfModules.unit X'.ringCatSheaf := by
+  let h := SheafOfModules.pullbackObjUnitToUnit
+    g.toRingCatSheafHom
+  let ih : IsIso h := by
+    dsimp only [h]
+    exact pullbackObjUnitToUnit_isIso_of_scheme g
+  exact @asIso _ _ _ _ h ih
 
 end AlgebraicGeometry.Scheme.Modules
