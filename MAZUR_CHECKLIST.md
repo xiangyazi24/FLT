@@ -188,11 +188,20 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     reconstructed local family factors through the restricted equalizer,
     compatible families are determined by one chart component, and the
     resulting global module sheaf restricts to a free rank-one module on
-    every standard chart.
-  - Open atoms: prove effectivity of the ambient projective-twist descent datum
-    (the existing effective descent is on the quotient curve), use the proved
-    overlap restriction comparisons to build the global Koszul morphisms, and
-    glue the resulting exact sequence; identify
+    every standard chart.  The separate ambient `P^3` descent datum is now
+    effective as well.  Compatible chartwise morphisms descend functorially;
+    applying this to multiplication by the quadric and cubic constructs the
+    global complex
+    `O(-5) → O(-2) ⊕ O(-3) → O`.  Its left short complex is exact:
+    restriction is identified with the already verified affine Koszul complex
+    on each coordinate chart, and stalk exactness is lifted through the
+    four-coordinate open cover.  Its categorical cokernel supplies an exact
+    right short complex, so the full four-term ambient Koszul resolution is
+    now formalized up to identification of the terminal cokernel with the
+    curve's pushed-forward structure sheaf.
+  - Open atoms: identify the terminal global Koszul cokernel with the direct
+    image of the projective quotient's structure sheaf, then use the resulting
+    geometric resolution to identify
     the scheme-theoretic Hilbert polynomial with the certified `6T-3`, and
     prove projective adjunction;
     package the characteristic-three Jacobian-rank certificate as a smooth

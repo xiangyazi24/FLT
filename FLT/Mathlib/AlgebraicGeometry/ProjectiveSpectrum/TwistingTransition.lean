@@ -371,6 +371,31 @@ def ratioPowerTransition {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1)
   DistribMulAction.toLinearEquiv (HomogeneousLocalization.Away 𝒜 (f * g))
     (HomogeneousLocalization.Away 𝒜 (f * g)) ((degreeOneRatioUnit 𝒜 hf hg) ^ d)
 
+/-- Integer-degree version of homogeneous multiplier compatibility.  An
+element of degree `e` maps the integral twist with transition exponent
+`d + e` to the twist with exponent `d`.  Unlike the natural-number theorem,
+this statement also applies to positive projective twists. -/
+theorem homogeneousMul_comp_ratioPowerTransition {f g p : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (d : ℤ) (e : ℕ) (hp : p ∈ 𝒜 e) :
+    (homogeneousMulRight 𝒜 hf hg e hp).comp
+        (ratioPowerTransition 𝒜 hf hg (d + e)).toLinearMap =
+      (ratioPowerTransition 𝒜 hf hg d).toLinearMap.comp
+        (homogeneousMulLeft 𝒜 hf hg e hp) := by
+  apply LinearMap.ext
+  intro x
+  simp only [LinearMap.comp_apply, homogeneousMulLeft, homogeneousMulRight,
+    LinearMap.lsmul_apply, ratioPowerTransition]
+  change homogeneousElementRight 𝒜 hf hg e hp •
+      ((degreeOneRatioUnit 𝒜 hf hg) ^ (d + e) • x) =
+    (degreeOneRatioUnit 𝒜 hf hg) ^ d •
+      (homogeneousElementLeft 𝒜 hf hg e hp • x)
+  simp only [Units.smul_def, Algebra.smul_def]
+  rw [homogeneousElementLeft_eq_ratio_mul_right]
+  rw [zpow_add, zpow_natCast]
+  norm_cast
+  simp only [Algebra.algebraMap_self_apply, Units.val_mul]
+  ring
+
 /-- Every integral twist transition restricts to the identity on a
 self-overlap.  This is the rank-one module form of `degreeOneRatioUnit_self`
 and supplies the identity axiom of the ensuing descent datum. -/

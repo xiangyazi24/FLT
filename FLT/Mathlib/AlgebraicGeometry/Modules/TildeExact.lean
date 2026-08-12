@@ -134,16 +134,18 @@ theorem tilde_stalkMap_eq_localization {M N : ModuleCat R}
 set_option synthInstance.maxHeartbeats 100000 in
 -- The nested forgetful and stalk functors require deeper instance synthesis
 -- than the default budget, independently of the mathematical proof terms.
-/-- Affine module sheafification preserves exactness.  Equivalently, the tilde
-functor from `R`-modules to module sheaves on `Spec R` is exact on every short
-complex. -/
-theorem tilde_map_exact (S : ShortComplex (ModuleCat R)) (hS : S.Exact) :
-    (S.map (tilde.functor R)).Exact := by
-  let F := SheafOfModules.toSheaf (Spec R).ringCatSheaf
-  letI : F.Additive := inferInstance
-  letI : F.PreservesZeroMorphisms :=
-    CategoryTheory.Functor.preservesZeroMorphisms_of_additive F
-  apply F.reflects_exact_of_faithful
+/-- After forgetting the scalar action, affine tilde sends an exact module
+complex to an exact complex of abelian-group sheaves.  Keeping this stronger
+form separate is useful for local-to-global arguments, where stalk exactness
+is transported across an open immersion. -/
+theorem tilde_map_toSheaf_exact (S : ShortComplex (ModuleCat R))
+    (hS : S.Exact) :
+    let F := SheafOfModules.toSheaf (Spec R).ringCatSheaf
+    letI : F.Additive := inferInstance
+    (@CategoryTheory.ShortComplex.map _ _ _ _ _ _
+      (S.map (tilde.functor R)) F
+      (CategoryTheory.Functor.preservesZeroMorphisms_of_additive F)).Exact := by
+  dsimp only
   apply (TopCat.Sheaf.exact_iff_stalkFunctor_map_exact _).2
   intro x
   rw [ShortComplex.ab_exact_iff_function_exact]
@@ -171,5 +173,19 @@ theorem tilde_map_exact (S : ShortComplex (ModuleCat R)) (hS : S.Exact) :
       fun z ↦ IsLocalizedModule.map x.asIdeal.primeCompl
         (tilde.toStalk S.X₂ x).hom (tilde.toStalk S.X₃ x).hom S.g.hom z
     exact tilde_stalkMap_eq_localization R S.g x
+
+set_option synthInstance.maxHeartbeats 100000 in
+-- Reflecting through the faithful scalar-forgetful functor is categorical;
+-- the larger budget is needed only to synthesize the nested functor data.
+/-- Affine module sheafification preserves exactness.  Equivalently, the tilde
+functor from `R`-modules to module sheaves on `Spec R` is exact on every short
+complex. -/
+theorem tilde_map_exact (S : ShortComplex (ModuleCat R)) (hS : S.Exact) :
+    (S.map (tilde.functor R)).Exact := by
+  let F := SheafOfModules.toSheaf (Spec R).ringCatSheaf
+  letI : F.Additive := inferInstance
+  letI : F.PreservesZeroMorphisms :=
+    CategoryTheory.Functor.preservesZeroMorphisms_of_additive F
+  exact F.reflects_exact_of_faithful _ (tilde_map_toSheaf_exact R S hS)
 
 end AlgebraicGeometry

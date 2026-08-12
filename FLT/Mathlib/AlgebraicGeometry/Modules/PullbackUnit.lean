@@ -464,6 +464,99 @@ def pushforwardRestrictionHomOfHom (hk : k ≫ f = h)
     (pushforwardComp k f).hom.app G ≫
     (pushforwardCongr hk).hom.app G
 
+set_option backward.isDefEq.respectTransparency false in
+/-- Extension by zero of a restriction morphism is natural in both its
+source and target coefficients.  Thus a commuting square on the smaller open
+induces the corresponding commuting square after both sheaves are pushed to
+the ambient scheme.  This is the functorial bridge used to descend compatible
+local morphisms through a Cech equalizer. -/
+theorem pushforwardRestrictionHomOfHom_naturality (hk : k ≫ f = h)
+    {F₁ F₂ : X.Modules} {G₁ G₂ : V.Modules}
+    (u₁ : (restrictFunctor k).obj F₁ ⟶ G₁)
+    (u₂ : (restrictFunctor k).obj F₂ ⟶ G₂)
+    (a : F₁ ⟶ F₂) (b : G₁ ⟶ G₂)
+    (w : (restrictFunctor k).map a ≫ u₂ = u₁ ≫ b) :
+    (pushforward f).map a ≫
+        pushforwardRestrictionHomOfHom (f := f) (k := k) (h := h)
+          hk F₂ G₂ u₂ =
+      pushforwardRestrictionHomOfHom (f := f) (k := k) (h := h)
+          hk F₁ G₁ u₁ ≫
+        (pushforward h).map b := by
+  subst h
+  have hlocal :
+      a ≫ ((restrictAdjunction k).unit.app F₂ ≫
+          (pushforward k).map u₂) =
+        (restrictAdjunction k).unit.app F₁ ≫
+          ((pushforward k).map u₁ ≫ (pushforward k).map b) := by
+    calc
+      _ = (restrictAdjunction k).unit.app F₁ ≫
+          (pushforward k).map ((restrictFunctor k).map a) ≫
+            (pushforward k).map u₂ := by
+        simpa only [Functor.id_map, Functor.comp_map] using
+          (restrictAdjunction k).unit.naturality_assoc a
+            ((pushforward k).map u₂)
+      _ = (restrictAdjunction k).unit.app F₁ ≫
+          (pushforward k).map ((restrictFunctor k).map a ≫ u₂) := by
+        rw [Functor.map_comp]
+      _ = (restrictAdjunction k).unit.app F₁ ≫
+          (pushforward k).map (u₁ ≫ b) := by rw [w]
+      _ = _ := by rw [Functor.map_comp]
+  have hfront :
+      (pushforward f).map a ≫
+          (pushforward f).map ((restrictAdjunction k).unit.app F₂ ≫
+            (pushforward k).map u₂) =
+        (pushforward f).map ((restrictAdjunction k).unit.app F₁ ≫
+            (pushforward k).map u₁) ≫
+          (pushforward f).map ((pushforward k).map b) := by
+    calc
+      _ = (pushforward f).map
+          (a ≫ ((restrictAdjunction k).unit.app F₂ ≫
+            (pushforward k).map u₂)) := (Functor.map_comp _ _ _).symm
+      _ = (pushforward f).map
+          ((restrictAdjunction k).unit.app F₁ ≫
+            ((pushforward k).map u₁ ≫ (pushforward k).map b)) :=
+        congrArg (fun z => (pushforward f).map z) hlocal
+      _ = _ := by rw [← Category.assoc, Functor.map_comp]
+  unfold pushforwardRestrictionHomOfHom
+  simp only [Category.assoc]
+  have hstep :
+      (pushforward f).map a ≫
+          (pushforward f).map ((restrictAdjunction k).unit.app F₂ ≫
+            (pushforward k).map u₂) ≫
+          (pushforwardComp k f).hom.app G₂ ≫
+          (pushforwardCongr rfl).hom.app G₂ =
+        (pushforward f).map ((restrictAdjunction k).unit.app F₁ ≫
+            (pushforward k).map u₁) ≫
+          (pushforward f).map ((pushforward k).map b) ≫
+          (pushforwardComp k f).hom.app G₂ ≫
+          (pushforwardCongr rfl).hom.app G₂ := by
+    simpa only [Category.assoc] using congrArg
+      (fun z => z ≫ (pushforwardComp k f).hom.app G₂ ≫
+        (pushforwardCongr rfl).hom.app G₂) hfront
+  have htail :
+      (pushforward f).map ((pushforward k).map b) ≫
+          (pushforwardComp k f).hom.app G₂ ≫
+          (pushforwardCongr rfl).hom.app G₂ =
+        (pushforwardComp k f).hom.app G₁ ≫
+          (pushforwardCongr rfl).hom.app G₁ ≫
+          (pushforward (k ≫ f)).map b := by
+    calc
+      _ = (pushforwardComp k f).hom.app G₁ ≫
+          (pushforward (k ≫ f)).map b ≫
+          (pushforwardCongr rfl).hom.app G₂ :=
+        (pushforwardComp k f).hom.naturality_assoc
+          b
+          ((pushforwardCongr rfl).hom.app G₂)
+      _ = _ := by
+        rw [(pushforwardCongr rfl).hom.naturality]
+  calc
+    _ = (pushforward f).map ((restrictAdjunction k).unit.app F₁ ≫
+          (pushforward k).map u₁) ≫
+        ((pushforward f).map ((pushforward k).map b) ≫
+          (pushforwardComp k f).hom.app G₂ ≫
+          (pushforwardCongr rfl).hom.app G₂) := hstep
+    _ = _ := by rw [htail]
+
 /-- Pull a coefficient comparison through the inner cartesian square in a
 vertically pasted pair of open squares.  The comparison first identifies the
 two iterated restrictions and then restricts the original morphism. -/

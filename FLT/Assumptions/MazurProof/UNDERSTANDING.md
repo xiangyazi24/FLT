@@ -1784,3 +1784,50 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   hyperplane section with the canonical class, construct the degree-two and
   degree-four complete-linear-system fibres, and prove the associated middle-
   degree Riemann--Roch ranks.
+
+### Active N25 ambient Koszul run (2026-08-11)
+
+- Goal: construct the ambient `P^3` twisting sheaves effectively, descend the
+  chartwise Koszul differentials to global morphisms, and recover their exact
+  sequence from the already proved local exactness.
+- Avenue (a), active: retarget the verified quotient-curve Cech equalizer and
+  reconstruction proof to the ambient four-chart cover, reusing the ambient
+  pair/triple transition and restriction theorems already in the tree.
+  Success means an ambient global twist whose restriction to every chart is
+  the chosen free rank-one model; failure means a precise ambient analogue of
+  one of the curve-only geometric lemmas is proved impossible to instantiate.
+- Avenue (b): factor the common Cech-effectivity argument out of the existing
+  quotient-curve proof and instantiate the generic theorem for both covers.
+  This is preferred only if direct retargeting exposes substantial duplicated
+  categorical bookkeeping rather than merely renamed geometric inputs.
+- Avenue (c): use Mathlib's categorical descent interface directly if current
+  source inspection finds an effective-descent theorem for module sheaves.
+  The pinned source has not supplied such a theorem so far, so this remains a
+  fallback rather than an assumption.
+- Final fallback: glue the four ambient twists and Koszul maps sectionwise on
+  the explicit standard cover, while retaining the same kernel-checked Cech
+  compatibility and local exactness criteria.
+- Run record: started 2026-08-11 13:10 CDT from commit `052d96bca1`, approved
+  by the conversation instruction `继续`; starting avenue (a).  The inherited
+  understanding hash was
+  `2baf4e6764ac25984e99bb2b71e01aca76338cb50d2faca15c71e92197caeb30`.
+- Avenue (a) succeeded.  The ambient four-chart Cech equalizer is effective,
+  and literal chart evaluation is an isomorphism.  A generic naturality
+  theorem proves that every descended morphism restricts to its defining
+  chartwise morphism; the degree-two and degree-three homogeneous
+  multipliers therefore descend to global quadric and cubic maps between the
+  effective twists.
+- `RationalPointsN25QuotientTwoAmbientKoszulGlobal.lean` now constructs
+  `O(-5) → O(-2) ⊕ O(-3) → O`, proves its composite zero from
+  commutativity of the two global multipliers, and proves exactness at the
+  middle term.  The proof is structural: restriction preserves the product,
+  each restricted differential is conjugate to the affine Koszul
+  differential, the four coordinate basic opens cover `Proj`, and exactness
+  is checked on stalks using restriction--stalk compatibility.  No finite
+  enumeration or coefficient expansion is used.
+- The categorical cokernel of the global equation map supplies the terminal
+  object and proves exactness at `O`, giving the complete four-term ambient
+  Koszul resolution.  The next precise seam is geometric rather than
+  homological: identify that cokernel with the direct image of the structure
+  sheaf of the closed projective quotient, using the already proved chart
+  kernel identities and quotient-ring equivalences.
