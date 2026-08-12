@@ -1827,7 +1827,26 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   enumeration or coefficient expansion is used.
 - The categorical cokernel of the global equation map supplies the terminal
   object and proves exactness at `O`, giving the complete four-term ambient
-  Koszul resolution.  The next precise seam is geometric rather than
-  homological: identify that cokernel with the direct image of the structure
-  sheaf of the closed projective quotient, using the already proved chart
-  kernel identities and quotient-ring equivalences.
+  Koszul resolution.
+- `RationalPointsN25QuotientTwoAmbientKoszulGeometry.lean` proves the required
+  normalization `O(0) ≅ O` for the actual descended zero twist and constructs
+  the epimorphism from the terminal twist to the direct image of the quotient
+  curve's structure module.  This uses the closed-immersion section map, not
+  a surrogate quotient module.
+- `RationalPointsN25QuotientTwoAmbientKoszulQuotient.lean` proves the
+  surjective half of the geometric terminal identification.  On every
+  coordinate chart, the localized quadric and cubic vanish under the actual
+  quotient chart map.  The proof transports this fact through the projective
+  chart square, the affine tilde adjunction, the zero-twist normalization,
+  and restriction--stalk comparison.  The resulting global composite
+  `O(-2) ⊕ O(-3) → O → i_* O_C` is zero, so the geometric map descends to a
+  canonical epimorphism `coker → i_* O_C`.
+- The chart square between the quotient chart, ambient chart, quotient curve,
+  and ambient projective space is now formally cartesian.  Mathlib's existing
+  module-sheaf `openBaseChangeIso` requires all four arrows to be open
+  immersions and therefore cannot be applied to the closed horizontal chart
+  map.  The next precise seam is to prove the comparison monic, either by a
+  general open-restriction/direct-image base-change lemma for an arbitrary
+  horizontal morphism or directly from the already proved chart kernel and
+  quotient-ring equivalences.  No additional axiom is justified by this API
+  gap.

@@ -197,10 +197,15 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     on each coordinate chart, and stalk exactness is lifted through the
     four-coordinate open cover.  Its categorical cokernel supplies an exact
     right short complex, so the full four-term ambient Koszul resolution is
-    now formalized up to identification of the terminal cokernel with the
-    curve's pushed-forward structure sheaf.
-  - Open atoms: identify the terminal global Koszul cokernel with the direct
-    image of the projective quotient's structure sheaf, then use the resulting
+    now formalized.  The degree-zero twist is canonically the ambient
+    structure module.  The geometric map to the curve's pushed-forward
+    structure sheaf kills both equations on all four charts and hence
+    globally, so it descends to a canonical epimorphism from the terminal
+    cokernel.  Thus only injectivity of this comparison, not its construction
+    or surjectivity, remains in the terminal identification.
+  - Open atoms: prove the canonical terminal comparison monic, equivalently
+    identify the terminal global Koszul cokernel with the direct image of the
+    projective quotient's structure sheaf; then use the resulting
     geometric resolution to identify
     the scheme-theoretic Hilbert polynomial with the certified `6T-3`, and
     prove projective adjunction;
