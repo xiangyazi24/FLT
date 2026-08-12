@@ -64,6 +64,70 @@ theorem unitToPushforwardUnit_epi [IsClosedImmersion f] :
   apply (cancel_epi (F.map (unitToPushforwardUnit f))).mp
   simpa only [← F.map_comp] using congrArg F.map hgh
 
+/-! ## The structure map under vertical-open base change
+
+Consider a cartesian square whose vertical maps are open immersions.  The
+Beck--Chevalley isomorphism from `PullbackUnit` identifies restriction of a
+horizontal direct image with the direct image of the opposite restriction.
+For structure modules this identification carries the restricted canonical
+map to the canonical map along the upper horizontal arrow.  This naturality
+statement is what lets a global closed immersion be tested on affine charts.
+-/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The canonical structure-module map is stable under Beck--Chevalley base
+change through a cartesian square with open vertical arrows.  Sectionwise,
+the ring maps around the square carry the multiplicative generator `1`
+compatibly; the pullback equality only transports it between equal opens. -/
+theorem unitToPushforwardUnit_verticalOpenBaseChange
+    {P U X Y : Scheme} (f' : P ⟶ U) (iX : P ⟶ X)
+    (iU : U ⟶ Y) (f : X ⟶ Y)
+    [IsOpenImmersion iX] [IsOpenImmersion iU]
+    (H : IsPullback f' iX iU f) :
+    (restrictUnitIso iU).inv ≫
+        (restrictFunctor iU).map (unitToPushforwardUnit f) ≫
+        (verticalOpenBaseChangeIso f' iX iU f H
+          (SheafOfModules.unit X.ringCatSheaf)).hom ≫
+        (pushforward f').map (restrictUnitIso iX).hom =
+      unitToPushforwardUnit f' := by
+  apply hom_ext
+  intro W
+  apply ConcreteCategory.hom_ext
+  intro r
+  simp only [Hom.comp_app, CategoryTheory.comp_apply,
+    restrictUnitIso_inv_app_apply, restrictFunctor_map_app,
+    unitToPushforwardUnit_app_apply,
+    verticalOpenBaseChangeIso_hom_app_apply,
+    pushforward_map_app]
+  let e : Γ(X, f ⁻¹ᵁ iU ''ᵁ W) ≅ Γ(P, f' ⁻¹ᵁ W) :=
+    X.presheaf.mapIso
+        (eqToIso
+          (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W)).op ≪≫
+      iX.appIso _
+  have hcoeff :
+      (iU.appIso W).inv ≫ f.app _ = f'.app W ≫ e.inv := by
+    rw [Iso.inv_comp_eq, ← Category.assoc, Iso.eq_comp_inv]
+    simp only [Scheme.Hom.app_eq_appLE, Iso.trans_hom,
+      Functor.mapIso_hom, Iso.op_hom, eqToIso.hom, eqToHom_op,
+      Scheme.Hom.appIso_hom', Scheme.Hom.map_appLE,
+      Scheme.Hom.appLE_comp_appLE, H.w, e]
+  have hmaps :
+      (iU.appIso W).inv ≫ f.app _ ≫
+          X.presheaf.map
+            (eqToHom
+              (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback
+                H W)).op ≫
+          (iX.appIso (f' ⁻¹ᵁ W)).hom =
+        f'.app W := by
+    calc
+      _ = ((iU.appIso W).inv ≫ f.app _) ≫ e.hom := by
+        simp only [e, Iso.trans_hom, Functor.mapIso_hom, Iso.op_hom,
+          eqToIso.hom, eqToHom_op, Category.assoc]
+      _ = (f'.app W ≫ e.inv) ≫ e.hom :=
+        congrArg (fun q => q ≫ e.hom) hcoeff
+      _ = f'.app W := by simp
+  exact ConcreteCategory.congr_hom hmaps r
+
 set_option backward.isDefEq.respectTransparency false in
 /-- The structure-sheaf comparison for an open immersion factors its section
 map through restriction to the image and the canonical open-set isomorphism.

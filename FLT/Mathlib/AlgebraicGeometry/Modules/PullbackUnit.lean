@@ -302,6 +302,138 @@ theorem restrictAdjunction_unit_app_isIso_of_isIso [IsIso f]
   change IsIso (M.presheaf.map (eqToIso h).hom.op)
   infer_instance
 
+/-! ## Base change across vertical open immersions
+
+For direct images, the useful open base-change square only needs its vertical
+arrows to be open immersions.  The horizontal arrows may be arbitrary.  On an
+open `W` in the upper-right scheme, both sides evaluate the original module
+on the two opens
+
+`f ⁻¹ (iU '' W)` and `iX '' (f' ⁻¹ W)`.
+
+The pullback hypothesis identifies these opens.  The construction below
+packages restriction along that equality as a linear equivalence and then as
+an isomorphism of module sheaves.  Keeping this sectionwise description
+explicit avoids imposing a false open-immersion hypothesis on a horizontal
+closed immersion.
+-/
+
+variable {P U X Y : Scheme} (f' : P ⟶ U) (iX : P ⟶ X)
+  (iU : U ⟶ Y) (f : X ⟶ Y)
+  [IsOpenImmersion iX] [IsOpenImmersion iU]
+
+/-- The component of vertical-open base change on an open `W`.  Linearity is
+the ringed-space compatibility of the pullback square: after transporting
+sections across the equality of opens, the two ways of mapping a coefficient
+from `Γ(U,W)` into the original structure sheaf coincide. -/
+def verticalOpenBaseChangeApp (H : IsPullback f' iX iU f)
+    (M : X.Modules) (W : U.Opens) :
+    Γ((restrictFunctor iU).obj ((pushforward f).obj M), W) ≃ₗ[Γ(U, W)]
+      Γ((pushforward f').obj ((restrictFunctor iX).obj M), W) where
+  toFun := M.presheaf.map
+    (eqToHom
+      (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W)).op
+  invFun := M.presheaf.map
+    (eqToHom
+      (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W).symm).op
+  left_inv x := by
+    rw [← ConcreteCategory.comp_apply, ← M.presheaf.map_comp]
+    simpa using congrArg (fun q => q x) (M.presheaf.map_id _)
+  right_inv x := by
+    rw [← ConcreteCategory.comp_apply, ← M.presheaf.map_comp]
+    simpa using congrArg (fun q => q x) (M.presheaf.map_id _)
+  map_add' x y := map_add _ _ _
+  map_smul' r x := by
+    change M.presheaf.map _
+        (f.app (iU ''ᵁ W) ((iU.appIso W).inv r) •
+          (show Γ(M, f ⁻¹ᵁ iU ''ᵁ W) from x)) =
+      (iX.appIso (f' ⁻¹ᵁ W)).inv (f'.app W r) •
+        (show Γ(M, iX ''ᵁ f' ⁻¹ᵁ W) from
+          M.presheaf.map _ (show Γ(M, f ⁻¹ᵁ iU ''ᵁ W) from x))
+    rw [M.map_smul]
+    congr 1
+    let e : Γ(X, f ⁻¹ᵁ iU ''ᵁ W) ≅ Γ(P, f' ⁻¹ᵁ W) :=
+      X.presheaf.mapIso
+        (eqToIso
+          (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W)).op ≪≫
+        iX.appIso _
+    have hcoeff :
+        (iU.appIso W).inv ≫ f.app _ = f'.app W ≫ e.inv := by
+      rw [Iso.inv_comp_eq, ← Category.assoc, Iso.eq_comp_inv]
+      simp only [Scheme.Hom.app_eq_appLE, Iso.trans_hom,
+        Functor.mapIso_hom, Iso.op_hom, eqToIso.hom, eqToHom_op,
+        Scheme.Hom.appIso_hom', Scheme.Hom.map_appLE,
+        Scheme.Hom.appLE_comp_appLE, H.w, e]
+    have hcoeff' :
+        (iU.appIso W).inv ≫ f.app _ ≫
+            X.presheaf.map
+              (eqToHom
+                (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback
+                  H W)).op =
+          f'.app W ≫ (iX.appIso (f' ⁻¹ᵁ W)).inv := by
+      calc
+        _ = (f'.app W ≫ e.inv) ≫
+              X.presheaf.map
+                (eqToHom
+                  (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback
+                    H W)).op := by
+          rw [← Category.assoc]
+          exact congrArg (fun q => q ≫ X.presheaf.map
+            (eqToHom
+              (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback
+                H W)).op) hcoeff
+        _ = _ := by
+          simp only [e, Iso.trans_inv, Category.assoc]
+          change f'.app W ≫ (iX.appIso (f' ⁻¹ᵁ W)).inv ≫
+              (X.presheaf.mapIso
+                (eqToIso
+                  (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback
+                    H W)).op).inv ≫
+              (X.presheaf.mapIso
+                (eqToIso
+                  (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback
+                    H W)).op).hom =
+            f'.app W ≫ (iX.appIso (f' ⁻¹ᵁ W)).inv
+          simp
+    exact ConcreteCategory.congr_hom hcoeff' r
+
+/-- Beck--Chevalley base change for a cartesian square whose vertical arrows
+are open immersions.  Unlike `openBaseChangeIso` below, this statement allows
+arbitrary horizontal morphisms, including the closed immersions occurring in
+affine charts of projective subschemes. -/
+def verticalOpenBaseChangeIso (H : IsPullback f' iX iU f)
+    (M : X.Modules) :
+    (restrictFunctor iU).obj ((pushforward f).obj M) ≅
+      (pushforward f').obj ((restrictFunctor iX).obj M) :=
+  (SheafOfModules.fullyFaithfulForget U.ringCatSheaf).preimageIso <|
+    PresheafOfModules.isoMk
+      (fun W => (verticalOpenBaseChangeApp f' iX iU f H M W.unop).toModuleIso)
+      (fun {V W} g => by
+        apply ModuleCat.hom_ext
+        ext x
+        change M.presheaf.map _
+            (M.presheaf.map _
+              (show Γ(M, f ⁻¹ᵁ iU ''ᵁ V.unop) from x)) =
+          M.presheaf.map _
+            (M.presheaf.map _
+              (show Γ(M, f ⁻¹ᵁ iU ''ᵁ V.unop) from x))
+        rw [← ConcreteCategory.comp_apply, ← ConcreteCategory.comp_apply]
+        rw [← M.presheaf.map_comp, ← M.presheaf.map_comp]
+        congr 1)
+
+/-- The vertical-open base-change isomorphism acts by the canonical
+restriction across the pullback equality of opens. -/
+@[simp]
+theorem verticalOpenBaseChangeIso_hom_app_apply
+    (H : IsPullback f' iX iU f) (M : X.Modules)
+    (W : U.Opens)
+    (x : Γ((restrictFunctor iU).obj ((pushforward f).obj M), W)) :
+    (verticalOpenBaseChangeIso f' iX iU f H M).hom.app W x =
+      M.presheaf.map
+        (eqToHom
+          (IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W)).op x :=
+  rfl
+
 /-! ## Open base change for module sheaves
 
 For a cartesian square of open immersions, restricting a direct image across

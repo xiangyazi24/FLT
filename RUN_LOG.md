@@ -866,3 +866,34 @@
 - ChatGPT: Q45-48 all connector-timed-out, waiting for git-drop
 - end: <pending>
 - final result: <pending>
+
+## Run 2026-08-11 23:29 (automode: N25 Koszul comparison)
+
+- doctrine hash: `d40ba62f830c145d68fdc2b7570a2f5f87cd00be57342f9cbc4035ca9191e513`
+- approval: Xiang's explicit instruction to continue autonomously and use ChatGPT
+- starting avenue: (a) vertical-open restriction/direct-image base change,
+  followed by chartwise detection of the canonical comparison kernel
+- fallback: direct affine-chart kernel vanishing through the proved quotient
+  equivalences and affine tilde fully faithfulness
+- ChatGPT bridge at launch: the `flt` group reported no registered channels;
+  local proof work continues while bridge health is checked without changing
+  any tmux session or window name
+- terminal condition: construct and audit an `IsIso` instance for
+  `ambientGlobalKoszulQuotientToCurve`, or record a verified Mathlib/API
+  obstruction together with the next concrete attack vector
+- result: the terminal condition is met.  A generic vertical-open
+  Beck--Chevalley isomorphism and its structure-map naturality identify the
+  restricted curve target on each affine chart.  The explicit equation
+  quotient sheaf is identified with that target via affine global sections,
+  the local geometric right Koszul complex is exact, and restriction--stalk
+  descent proves global geometric exactness.  Cokernel uniqueness gives
+  `ambientGlobalKoszulQuotientIsoCurve` and an `IsIso` instance for the
+  canonical comparison.
+- ChatGPT bridge remained unavailable because the `flt` group had no
+  registered channels; no tmux names were changed and no unrelated channel
+  was borrowed.
+- verification: the 8596-job Lake target build and 4011-job repository-wide
+  build passed.  Fresh axiom audits of the base-change theorem,
+  quotient-target compatibility, local/global geometric exactness,
+  comparison equality, and `IsIso` instance contain only `propext`,
+  `Classical.choice`, and `Quot.sound`.

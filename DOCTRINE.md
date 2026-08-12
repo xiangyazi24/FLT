@@ -6,7 +6,7 @@ Replace every custom axiom reachable from `MazurProof.mazur_torsion_bound` so
 its rebuilt `#print axioms` output contains only `propext`,
 `Classical.choice`, and `Quot.sound`.
 
-## Source-rebuilt state (2026-08-09)
+## Source-rebuilt state (2026-08-11)
 
 The endpoint has no reachable `sorryAx` and depends on exactly four custom
 axioms:
@@ -61,6 +61,29 @@ closed-point/Picard, pullback/norm, and Abel--Jacobi infrastructure is
 formalized.  Closing these seams forces every rational
 canonical point to be a cusp, contradicting the proved noncuspidality of the
 primitive Tate image.
+
+The ambient Koszul-to-curve seam is closed.  Vertical-open Beck--Chevalley
+base change now permits arbitrary horizontal morphisms, so it applies to the
+closed curve immersion.  On each standard chart the explicit equation
+quotient sheaf is identified with the direct image of the affine curve chart,
+and the quotient projection is identified with the structure-module map.
+Affine Koszul exactness therefore gives exactness of the geometric right
+complex locally; restriction--stalk descent gives global exactness.  The
+categorical Koszul quotient and `i_* O_C` are consequently two cokernels of
+the same differential, and the canonical comparison has a verified `IsIso`
+instance.
+
+This result is infrastructure, not a discharge of the N25 endpoint axiom.
+The next ranked canonical-geometry attacks are:
+
+1. connect the proved conormal basis and ambient Koszul resolution to a
+   determinant/adjunction comparison on the effective twists;
+2. identify the resulting canonical module of the complete-intersection
+   curve with the already glued degree-one twist `O_C(1)` chartwise and then
+   globally;
+3. use that canonical hyperplane class to construct the actual residual
+   divisor and complete-linear-system fibres required by the middle-degree
+   Riemann--Roch consumer.
 
 ### (b) N13 concrete specialization and separatedness
 

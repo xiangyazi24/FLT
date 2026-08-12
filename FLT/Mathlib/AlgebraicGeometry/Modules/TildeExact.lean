@@ -188,4 +188,52 @@ theorem tilde_map_exact (S : ShortComplex (ModuleCat R)) (hS : S.Exact) :
     CategoryTheory.Functor.preservesZeroMorphisms_of_additive F
   exact F.reflects_exact_of_faithful _ (tilde_map_toSheaf_exact R S hS)
 
+/-! ## Recovering exactness from affine global sections
+
+The counit `Γ(M)^~ ⟶ M` need not be invertible for an arbitrary module
+sheaf.  When the three terms of a short complex are each supplied with an
+isomorphism of this form, exactness can be checked on global sections.  This
+is the categorical form needed for affine direct images: their global
+sections give the algebraic quotient, while localizingness makes the counit
+an isomorphism.
+-/
+
+/-- The affine global-section functor is a right adjoint, hence preserves the
+zero object and zero morphisms.  The instance is kept explicit because
+Mathlib does not register the right-adjoint structure of
+`moduleSpecΓFunctor` globally. -/
+@[implicit_reducible]
+private noncomputable def moduleSpecGammaPreservesZeroMorphisms :
+    (moduleSpecΓFunctor (R := R)).PreservesZeroMorphisms := by
+  letI : (moduleSpecΓFunctor (R := R)).IsRightAdjoint :=
+    (tilde.adjunction (R := R)).isRightAdjoint
+  exact Functor.preservesZeroMorphisms_of_preserves_terminal_object
+
+/-- A short complex of module sheaves on `Spec R` is exact if its global
+section complex is exact and each term is identified with the tilde sheaf of
+its global sections.  Naturality of the three chosen isomorphisms is stated
+only on the two differentials, which is exactly the data of an isomorphism
+of short complexes. -/
+theorem exact_of_tildeGamma_exact
+    (S : ShortComplex (Spec R).Modules)
+    (e₁ : tilde ((moduleSpecΓFunctor (R := R)).obj S.X₁) ≅ S.X₁)
+    (e₂ : tilde ((moduleSpecΓFunctor (R := R)).obj S.X₂) ≅ S.X₂)
+    (e₃ : tilde ((moduleSpecΓFunctor (R := R)).obj S.X₃) ≅ S.X₃)
+    (hf : (tilde.functor R).map
+          ((moduleSpecΓFunctor (R := R)).map S.f) ≫ e₂.hom =
+        e₁.hom ≫ S.f)
+    (hg : (tilde.functor R).map
+          ((moduleSpecΓFunctor (R := R)).map S.g) ≫ e₃.hom =
+        e₂.hom ≫ S.g)
+    (hS : letI := moduleSpecGammaPreservesZeroMorphisms R
+      (S.map (moduleSpecΓFunctor (R := R))).Exact) :
+    S.Exact := by
+  letI := moduleSpecGammaPreservesZeroMorphisms R
+  have hTilde := tilde_map_exact R
+    (S.map (moduleSpecΓFunctor (R := R))) hS
+  let e :
+      (S.map (moduleSpecΓFunctor (R := R))).map (tilde.functor R) ≅ S :=
+    ShortComplex.isoMk e₁ e₂ e₃ hf.symm hg.symm
+  exact (ShortComplex.exact_iff_of_iso e).mp hTilde
+
 end AlgebraicGeometry

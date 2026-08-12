@@ -1833,20 +1833,32 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   the epimorphism from the terminal twist to the direct image of the quotient
   curve's structure module.  This uses the closed-immersion section map, not
   a surrogate quotient module.
-- `RationalPointsN25QuotientTwoAmbientKoszulQuotient.lean` proves the
-  surjective half of the geometric terminal identification.  On every
-  coordinate chart, the localized quadric and cubic vanish under the actual
-  quotient chart map.  The proof transports this fact through the projective
-  chart square, the affine tilde adjunction, the zero-twist normalization,
-  and restriction--stalk comparison.  The resulting global composite
-  `O(-2) ⊕ O(-3) → O → i_* O_C` is zero, so the geometric map descends to a
-  canonical epimorphism `coker → i_* O_C`.
-- The chart square between the quotient chart, ambient chart, quotient curve,
-  and ambient projective space is now formally cartesian.  Mathlib's existing
-  module-sheaf `openBaseChangeIso` requires all four arrows to be open
-  immersions and therefore cannot be applied to the closed horizontal chart
-  map.  The next precise seam is to prove the comparison monic, either by a
-  general open-restriction/direct-image base-change lemma for an arbitrary
-  horizontal morphism or directly from the already proved chart kernel and
-  quotient-ring equivalences.  No additional axiom is justified by this API
-  gap.
+- `RationalPointsN25QuotientTwoAmbientKoszulQuotient.lean` now closes the
+  complete geometric terminal identification.  The reusable
+  `verticalOpenBaseChangeIso` permits arbitrary horizontal morphisms in a
+  cartesian square with open vertical arrows, and its structure-map
+  compatibility applies directly to the closed curve immersion.  On each
+  coordinate chart, affine global sections identify the explicit equation
+  quotient with the direct image of the quotient-chart structure module; the
+  tilde adjunction proves that the sheafified quotient projection is exactly
+  the affine structure map.
+- The right affine Koszul complex is consequently isomorphic to a geometric
+  complex ending in the affine curve target.  Its exactness is transported
+  through that isomorphism, then descended over the four standard charts by
+  restriction--stalk compatibility.  Thus
+  `O(-2) ⊕ O(-3) → O → i_* O_C` is globally exact.  Since the last arrow is
+  epic, `i_* O_C` and the categorical Koszul quotient are cokernels of the
+  same middle differential.  The canonical comparison
+  `ambientGlobalKoszulQuotientToCurve` now has an `IsIso` instance; the former
+  missing-monomorphism seam is closed without a new axiom.
+- A true target build completed all 8596 jobs and the repository-wide build
+  completed all 4011 configured jobs.  Fresh `#print axioms` checks
+  for the base-change naturality, chart quotient compatibility, local and
+  global geometric exactness, comparison equality, and final `IsIso` instance
+  report only `propext`, `Classical.choice`, and `Quot.sound`.
+- This comparison does not by itself discharge the N25 endpoint axiom.  The
+  next canonical-geometry seam is the determinant/adjunction step: connect
+  the proved conormal basis and ambient resolution to the effective twists,
+  identify the curve's canonical module with the glued `O_C(1)`, and then
+  supply the actual residual divisor and complete-linear-system fibres used
+  by the middle-degree Riemann--Roch argument.
