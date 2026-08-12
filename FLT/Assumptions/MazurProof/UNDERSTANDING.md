@@ -1856,6 +1856,22 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   for the base-change naturality, chart quotient compatibility, local and
   global geometric exactness, comparison equality, and final `IsIso` instance
   report only `propext`, `Classical.choice`, and `Quot.sound`.
+- `RationalPointsN25QuotientTwoAmbientKoszulShifted.lean` now upgrades this
+  fixed degree-zero resolution to every integer debt `d`.  It constructs the
+  exact sequence
+  `O(-(d+5)) → O(-(d+2)) ⊕ O(-(d+3)) → O(-d) → Q_d`
+  by descending the quadric and cubic maps at their normalized debts.  The
+  local shifted complex is literally the same free rank-one affine Koszul
+  complex; restriction to the four coordinate charts and the stalk
+  criterion prove global exactness.  The 8597-job target build passes, and
+  fresh axiom audits of multiplier commutativity and both exactness theorems
+  contain only `propext`, `Classical.choice`, and `Quot.sound`.
+- This shifted result is structural infrastructure, not another finite
+  coefficient calculation and not a discharge of the N25 endpoint axiom.
+  In particular `d = -1` supplies the ambient resolution whose terminal
+  quotient should be `i_* O_C(1)`.  The immediate geometric seam is to
+  identify `Q_d` with the direct image of the corresponding effective curve
+  twist, at least for `d = -1`, before using it in adjunction.
 - This comparison does not by itself discharge the N25 endpoint axiom.  The
   next canonical-geometry seam is the determinant/adjunction step: connect
   the proved conormal basis and ambient resolution to the effective twists,

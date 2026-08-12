@@ -897,3 +897,24 @@
   quotient-target compatibility, local/global geometric exactness,
   comparison equality, and `IsIso` instance contain only `propext`,
   `Classical.choice`, and `Quot.sound`.
+
+## Run 2026-08-12 (automode: shifted N25 ambient Koszul resolution)
+
+- approval: Xiang's explicit instruction to continue the Mazur proof and use
+  ChatGPT where available
+- ChatGPT bridge: the `flt` group still reports no registered channel; no
+  tmux name was changed and no unrelated project channel was borrowed
+- result: `RationalPointsN25QuotientTwoAmbientKoszulShifted.lean` constructs
+  the normalized shifted quadric--cubic Koszul sequence for every integer
+  debt `d` and proves exactness at both middle and terminal terms
+- proof shape: direct Cech descent at debts `d+5`, `d+2`, `d+3`, and `d`;
+  comparison with the affine regular-sequence complex on each coordinate
+  chart; global descent through restriction and stalks; categorical cokernel
+  at the terminal term
+- verification: the 8597-job target build passed.  Fresh `#print axioms`
+  checks for global multiplier commutativity, global left exactness, and
+  global right exactness contain only `propext`, `Classical.choice`, and
+  `Quot.sound`.
+- next attack: specialize `d = -1` and identify its terminal quotient with
+  `i_* O_C(1)`, then feed that effective hyperplane twist into the
+  determinant/adjunction seam

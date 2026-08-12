@@ -74,14 +74,26 @@ the same differential, and the canonical comparison has a verified `IsIso`
 instance.
 
 This result is infrastructure, not a discharge of the N25 endpoint axiom.
+The ambient Koszul construction has also been shifted uniformly: for every
+integer debt `d`, the global sequence
+`O(-(d+5)) → O(-(d+2)) ⊕ O(-(d+3)) → O(-d) → Q_d`
+is now verified exact by normalized Cech descent and the affine
+regular-sequence complex.  The special case `d = -1` is the resolution
+needed to reach the hyperplane twist.  Its remaining geometric task is to
+identify `Q_{-1}` with `i_* O_C(1)`; no reduction in the four endpoint axioms
+is claimed yet.
+
 The next ranked canonical-geometry attacks are:
 
-1. connect the proved conormal basis and ambient Koszul resolution to a
+1. identify the shifted terminal quotient `Q_{-1}` with the direct image of
+   the effective curve twist `O_C(1)` by the same chartwise quotient and
+   restriction--stalk method used at debt zero;
+2. connect the proved conormal basis and shifted ambient Koszul resolution to a
    determinant/adjunction comparison on the effective twists;
-2. identify the resulting canonical module of the complete-intersection
+3. identify the resulting canonical module of the complete-intersection
    curve with the already glued degree-one twist `O_C(1)` chartwise and then
    globally;
-3. use that canonical hyperplane class to construct the actual residual
+4. use that canonical hyperplane class to construct the actual residual
    divisor and complete-linear-system fibres required by the middle-degree
    Riemann--Roch consumer.
 
