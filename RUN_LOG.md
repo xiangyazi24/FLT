@@ -5,8 +5,19 @@
 - starting avenue: (c) N49 explicit rational-point obstruction + (b) N13 wiring
 - ChatGPT: saturate all 6 tabs with N49/N13/p≥23 research
 - banked: RationalPointsN49.lean (preΨ'_7 factorization, 0 sorry)
-- end: <fill in>
-- final result: <fill in>
+- end: 2026-08-18 ~10:30
+- final result:
+  - 5 commits on ai-scratch (6a12efb..eefed37)
+  - RationalPointsN49.lean: preΨ'_7(0) factorization (0 sorry)
+  - RationalPointsN49Composition.lean: 7P composition framework (1 sorry)
+  - N49_PROOF_PLAN.md: complete proof strategy with Newton polygon
+  - FLT_MAZUR_STATUS.md: complete axiom inventory
+  - 8 ChatGPT answers archived (Q5265-Q5284)
+  - N49 proof path fully mapped: 6/9 bihomogeneous charts excluded,
+    Newton polygon has 13 vertices, 11 valuation rays need iterated
+    refinement (finite computation, delegable to Wolfram)
+  - N13 wiring confirmed as most tractable axiom (Q5270)
+  - p≥23 confirmed no shortcut (Q5269)
 
 ## Run 2026-08-10 (N25 characteristic-three Frobenius orbit classification)
 
