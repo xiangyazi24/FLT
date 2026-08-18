@@ -85,3 +85,30 @@ The v_2 depends on (Δi, Δj):
 - n49_integer.py: Z[b,c] computation for face coefficients over Z
 - n49_verify.py: Verification of above-face monomials and near-face analysis
 - n49_multiprime.py: Multi-prime CRT + full Newton polygon computation
+
+## Update: Q5293 confirms local approach is BLOCKED
+
+ChatGPT Q5293 (independent verification) confirms:
+- The 7 binomial Newton polygon edges are **Hensel-liftable** at p=2
+- Each lifts to a genuine Q_2-point of exact order 49 on a nonsingular curve
+- Only the cyclotomic face (slope 3/2, Φ_7 quotient) provides local obstruction
+- **No amount of p-adic refinement can close Chart #2**
+
+### Why the cyclotomic face works but binomial faces don't
+
+The 7-term face at slope 3/2 (edge (26,129)→(38,111)) is the image of the
+cyclotomic polynomial Φ_7(T) = 1+T+T^2+T^3+T^4+T^5+T^6 under the projection
+of H_49 / F_7. At T=1: Φ_7(1) = 7 ≡ 1 mod 2 (nonzero). This is the ONLY
+face whose initial form doesn't vanish mod 2.
+
+The binomial faces (h₁·m₁ - h₂·m₂ with h₁=+1, h₂=-1) always vanish at
+(u,v)=(1,1): |+1-1|=0 mod 2. And the Hensel derivative is nonzero, so they lift.
+
+### Revised strategy
+
+The N49 proof requires **global input**. Three options:
+1. **Modular curve X_1(49)(Q) = cusps** via Jacobian rank-0 + Chabauty
+2. **Descent on the composition curve** using preΨ'_7(x(7P)) = 0
+3. **Mordell-Weil sieve** using the 8 locally-closed charts + global J structure
+
+ChatGPT Q5294 dispatched for genus computation and composition-identity approach.
