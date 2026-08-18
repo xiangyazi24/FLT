@@ -47,6 +47,24 @@ theorem n13_class_eq_iff :
           N13RationalCurvePointPicardRealization.genericClass n13Kernel M := by
   sorry
 
+/-- FirstJetDoublingCompatibility for trivial kernel: for z : ⊥, the quantifier
+ranges over {0}, and the cross-coefficient polynomial at z=0 vanishes
+(pair(0) = basePair by SmallMumfordRigidity, so u₀² - u_base·u₀ = 0). -/
+private theorem n13_first_jet_compat :
+    N13RationalKernelDoublingAdapter.FirstJetDoublingCompatibility
+      (N13RationalPicardEndpoint.canonicalMappedSpecialFamilyOfExactSpread
+        n13Kernel n13_class_eq_iff).toNearBaseFamily := by
+  sorry
+
+/-- The N13 rational-point theorem, modulo class_eq_iff.
+Once class_eq_iff is proved, this replaces the axiom
+C13Sextic_affine_x_is_cuspidal. -/
+theorem n13_affine_x_is_cuspidal :
+    ∀ X Y : ℚ, N13CurveModel.C13SexticEq X Y →
+      X = 0 ∨ X = -1 :=
+  N13RationalPicardEndpoint.affine_x_is_cuspidal
+    n13Kernel n13_class_eq_iff n13_first_jet_compat
+
 end
 
 end MazurProof.N13DischargeWiring
