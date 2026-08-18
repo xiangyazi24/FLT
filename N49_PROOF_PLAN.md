@@ -54,3 +54,24 @@ h_{0,0}=h_{0,147}=h_{98,147}=0). CRT cannot close Chart #2.
    Requires J_1(49)(Q) = 0 and Chabauty/descent.
 
 ### ChatGPT Q5293 dispatched for structural shortcut.
+
+## Update: X_0(49) route (Q5294) — the correct global approach
+
+### Key facts
+- X_0(49) has genus 1 = elliptic curve E: y² + xy = x³ - x² - 2x - 1 (49a1)
+- E(Q) = {O, (2,-1)} ≅ Z/2 (rank 0, torsion Z/2)
+- Both rational points are cusps
+- X_1(49) → X_0(49) by forgetting the generator
+- Noncuspidal X_1(49) point → noncuspidal X_0(49) point → contradiction
+
+### Required for Lean formalization
+1. **Explicit map** (b,c) → (x,y) ∈ X_0(49) (via Vélu quotient E/⟨P⟩)
+2. **Rank-0 proof** E(Q) = Z/2 (by 2-descent on 49a1)
+3. **Cuspidality** Both points {O,(2,-1)} are cusps; noncusp Tate params map elsewhere
+
+### Genus comparison
+- X_1(49) has genus 69 (Q5294)
+- X_0(49) has genus 1 (elliptic curve!)
+- The quotient map has degree [Γ_0(49):Γ_1(49)] = φ(49)/2 = 21
+
+### Q5297 dispatched for explicit map computation.
