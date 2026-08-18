@@ -18,6 +18,12 @@
     refinement (finite computation, delegable to Wolfram)
   - N13 wiring confirmed as most tractable axiom (Q5270)
   - p≥23 confirmed no shortcut (Q5269)
+  - H_49(t,t) = -t^157 (diagonal is a pure monomial, excludes b=c)
+  - H_49 mod 2 computed via Sage: 1603 terms, min total degree 98
+  - Second-stage Newton analysis: degree-99 terms dominate after diagonal
+    blow-up (Q5285 correction). Q5288 (corrected computation) pending.
+  - RationalPointsN49Composition.lean: 7P coordinates + composition (1 sorry)
+  - ChatGPT: 12 questions dispatched (Q5265-Q5288), 11 answers received
 
 ## Run 2026-08-10 (N25 characteristic-three Frobenius orbit classification)
 
