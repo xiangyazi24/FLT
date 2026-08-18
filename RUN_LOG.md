@@ -1,3 +1,20 @@
+## Run 2026-08-18 17:00 (Newton polygon + wiring campaign)
+
+- doctrine version: four endpoint axioms; N49/N13 focus
+- starting avenue: N49 Newton polygon analysis + N13 wiring
+- end: ongoing
+- final result:
+  - 7 commits on ai-scratch (dab52c1..60e3858)
+  - N49: H_49 fully computed (3526 terms), 8/9 charts closed at p=2
+  - N49: Q5293 confirms local approach BLOCKED (genuine Q₂ points exist)
+  - N49: Q5294 identifies X_0(49)=49a1 route (genus 1, E(Q)=Z/2)
+  - N13: h₁/h₃ gap trivially closed for kernel=⊥
+  - N13: |J(F_5)|=19 computed (Jacobian isomorphism at p=5)
+  - N13: N13DischargeWiring.lean builds (8836 jobs, 2 sorry)
+  - N13: n13_affine_x_is_cuspidal matches axiom type
+  - Remaining: class_eq_iff (J(Q)→J(F_2) injectivity)
+  - ChatGPT: Q5293-Q5298 dispatched (3 answered, 3 pending)
+
 ## Run 2026-08-18 (N49 + N13 axiom closure, ChatGPT-as-workhorse)
 
 - doctrine version: four endpoint axioms; N49/N13 focus
