@@ -1,54 +1,73 @@
-# Mazur Proof Status — 2026-08-18 (updated)
+# Mazur Proof Status — 2026-08-18 (v2, after Newton polygon analysis)
 
 ## Overall: `mazur_cyclic_order_bound_assembled` in CyclicOrderAssembly.lean
 
 Theorem proved modulo 4 endpoint axioms (+ 5 dead-code sorries).
 Mordell-Weil (`mordell_weil_fg`) intentionally kept.
 
-## Banked this session
+## Axiom 1: `C13Sextic_affine_x_is_cuspidal` — N13
 
-- `RationalPointsN49.lean` (94 lines, 0 sorry): proves preΨ'_7(0) = b^16*(c³+bc-b²)
-- `FLT_MAZUR_STATUS.md`: this file
-- ChatGPT Q5265 (N49 factorization), Q5267 (N49 chart lemma), Q5269 (p≥23 strategy), Q5270 (N13 local proof)
+**Status: 1 sorry remaining (class_eq_iff)**
 
-## Remaining Axioms + Consolidated Strategy
+- 283 sorry-free files provide full infrastructure (Picard group, Abel-Jacobi, Mumford coordinates, etc.)
+- N13DischargeWiring.lean written: wires endpoint with kernel = ⊥
+- **h₁/h₃ gap CLOSED**: For trivial kernel, z ranges only over {0}; at z=0, F.pair(0) = basePair (by SmallMumfordRigidity), so cross-coefficient polynomial = 0
+- **class_eq_iff GAP**: Injectivity of the specialization map on J(Q) = Z/19Z at p=2
 
-### 1. `C13Sextic_affine_x_is_cuspidal` — N13
-- **Verdict (Q5270)**: Local mod-p arguments are fundamentally incomplete. The MW sieve needs J(Q)→J(F₅) injectivity (rank-0 proof). Wiring the existing 283-file infrastructure is LESS work than building MW sieve from scratch.
-- **Concrete gap**: N13MumfordCenteredDoublingAdapter (line 160) constructs FirstJetDoublingCompatibility from h₁,h₃. This file is never imported. Need to instantiate kernel, class_eq_iff, and verify h₁/h₃ for the specific curve.
-- **Next step**: Understand the NearBaseFamily interface and what h₁/h₃ require concretely.
+### Proof of class_eq_iff (mathematical argument, not yet formalized)
+- Kernel of J(Q) → J(F_2) is a 2-group (Néron model / formal group theory)
+- J(Q) = Z/19Z has no 2-torsion (19 is odd)
+- Therefore kernel = {0}, map is injective
+- Alternative: |J(F_5)| = 19 = |J(Q)|, so J(Q) ≅ J(F_5) directly (but infrastructure uses p=2)
 
-### 2. `no_explicit_order25_obstruction` — N25
-- **Status**: Active development (172 Aug commits). Don't touch.
-- **Architecture**: Koszul resolution + twisting sheaves + Frobenius orbits. The ambient Koszul-to-curve seam is closed. Remaining: Picard/Riemann-Roch, canonical geometry, global rank-zero.
+### Computed Jacobian orders
+| p | |C(F_p)| | |J(F_p)| | 19 divides? |
+|---|---------|---------|-------------|
+| 3 | 6 | 3 | No |
+| 5 | 6 | **19** | **Yes (exactly!)** |
+| 7 | 8 | 57 = 3·19 | Yes |
+| 11 | 12 | 133 = 7·19 | Yes |
 
-### 3. `no_raw_order49_tate_obstruction` — N49
-- **Key facts (Q5265)**: preΨ'_49(0) = b^800 · F_7 · H_49 (3526 terms). Condition reduces to H_49(b,c)=0 with b≠0.
-- **Verdict (Q5267)**: Tate scaling cannot normalize b (a₂=a₃ forces λ=1). Bihomogenize H_49, check 9 parity charts mod 2. Affine charts give 0,1,1,1. Five infinity charts need edge coefficients. The (0,0) chart is provably ZERO — needs Newton-face argument.
-- **Verdict (Q5269)**: Pure local obstructions are impossible for any order (split Tate curves). The polynomial approach is the right one.
-- **Sign check**: H_49 is NOT sign-definite (changes sign between (1,1) and (1,2)). Real roots exist but appear irrational.
-- **Next step**: Compute edge coefficients h_{0,147}, h_{98,0}, h_{98,147} of H_49 mod 2.
+## Axiom 2: `no_explicit_order25_obstruction` — N25
 
-### 4. `no_prime_order_ge_23` — p≥23
-- **Verdict (Q5269)**: No shortcut exists. The formal-immersion/Eisenstein-ideal argument is the ONLY viable route. Faltings doesn't enumerate. Local obstructions are impossible. Merel-Oesterlé gives a uniform bound but is even deeper.
-- **Architecture needed**: cusp specialization + abelian quotient A_p + MW control on A_p(Q) + formal immersion at cusp + noncuspidality contradiction.
-- **Status**: Hardest axiom. No infrastructure exists yet.
+**Status: Active development (172+ commits). Don't touch.**
 
-### 5. `mordell_weil_fg` — Mordell-Weil
-- **Status**: Intentionally kept as axiom. Standard.
+Architecture: Koszul resolution + twisting sheaves + Frobenius orbits. Ambient Koszul-to-curve seam is closed.
+
+## Axiom 3: `no_raw_order49_tate_obstruction` — N49
+
+**Status: Local approach BLOCKED. 8/9 charts closed, global argument needed.**
+
+### Bihomogeneous parity analysis (p=2)
+- 6/9 charts excluded by direct mod-2 evaluation
+- Chart #1 excluded by Newton face (face sum odd)
+- Chart #5 excluded by Newton face (face sum odd)
+- Chart #2: genuine Q₂-points exist (Q5293 verified Hensel-liftable)
+
+### Newton polygon of H_49
+- 9 vertices, all with coefficient ±1 (alternating sign)
+- Cyclotomic face (slope 3/2, 7 terms = Φ_7 quotient) locally obstructed (Φ_7(1)=7≡1 mod 2)
+- 7 binomial faces: Hensel-liftable, corresponding to genuine order-49 2-adic points
+- Multi-prime CRT {2,3,5}: same 3 charts zero at every prime (structural)
+
+### Computed H_49 data
+- 3526 terms over Z, 1603 terms mod 2
+- Edges: left=c^133, top=b^7, right=-1
+- H_49(t,t) = -t^157 (diagonal pure monomial)
+- 10 monomials above the original face (including (2,144) with h=-1)
+
+### Required: global argument
+Options: modular curve X_1(49)(Q)=cusps, descent on composition curve, MW sieve
+
+## Axiom 4: `no_prime_order_ge_23` — p≥23
+
+**Status: Hardest axiom. No infrastructure. Needs formal immersion/Eisenstein ideal.**
 
 ## Dead-Code Sorries (5)
-
 All confirmed dead — not transitively used by the assembled theorem.
-| File | Line | Why dead |
-|------|------|----------|
-| N18AddCongr.lean | 303 | Wired version exists independently |
-| KubertBridgeN16.lean | 342, 361 | DescentBridgeN16 uses different path |
-| N18GoodModelZParam.lean | 42, 44 | File not imported by anything |
 
-## Priority Ranking
-
-1. **N13 wiring** — most concrete, infrastructure exists, Q5270 recommends this over MW sieve
-2. **N49 edge computation** — needs H_49 edge coefficients + Newton-face, could close with ~5 more ChatGPT rounds
-3. **N25** — actively developed, don't duplicate
-4. **p≥23** — needs formal immersion, very hard, long-term
+## Priority
+1. **N13**: Single sorry (class_eq_iff), mathematical argument known
+2. **N49**: Needs strategy revision (local→global)
+3. **N25**: Active development
+4. **p≥23**: Long-term
