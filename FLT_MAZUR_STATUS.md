@@ -71,3 +71,17 @@ All confirmed dead — not transitively used by the assembled theorem.
 2. **N49**: Needs strategy revision (local→global)
 3. **N25**: Active development
 4. **p≥23**: Long-term
+
+## Key Discovery: Circularity Break Path for N13
+
+The code routes class_eq_iff → canonical family → GeometricData → Chart → NSeparated.
+But GeometricData's ingredients are ALL independent of class_eq_iff:
+- pair : K → DiskPair (from Abel chart section, independent)
+- pair_zero (trivial)
+- pair_injective (from SmallMumfordRigidity, independent)
+- law : PolynomialLaw (from N13TwoAdicAbelChartLaw, independent)
+
+Direct path: GeometricData(independent) → Chart → Chart.separated → NSeparated K 2
+Then: TwoSurjective(proved) + NSeparated + |J₂|=19 → reduction_injective → class_eq_iff
+
+The circularity is code routing, not mathematics.
