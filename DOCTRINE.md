@@ -96,13 +96,21 @@ The next ranked canonical-geometry attacks are:
    divisor and complete-linear-system fibres required by the middle-degree
    Riemann--Roch consumer.
 
-### (b) N13 concrete specialization and separatedness
+### (b) N13 concrete specialization and separatedness — ACTIVE
 
-The low-degree spread algebra, complete rational Picard spread existence,
-vertical saturation of every constructor, certified exact-spread choice, and
-the final cusp endgame are proved.  The endpoint now has exactly two explicit
-providers: `class_eq_iff` for concrete rational spread lines and first-jet
-doubling compatibility for the canonical recovered representatives.
+**Status:** 1 sorry (n13_class_eq_iff in N13DischargeWiring.lean).
+TrivialKernelFamily proves CanonicalMappedSpecialFamily + NSeparated ⊥ 2
+WITHOUT class_eq_iff.  FirstJetDoublingCompatibility also proved without it.
+
+**Attack plan:**
+1. Build direct CompatibleReduction using classify := specialClass ∘ exactSpreadLine
+2. Prove classify_abel by showing pointSpreadLine and exactSpreadLine
+   agree on specialClass (both vertically saturated + same generic → same contraction
+   → same special affine ideal → overlap_eq forces infinity match → same divisor).
+3. Prove classifier exact (injective) via |G|=|SpecialSet|=19.
+4. Use trivialKernel_separated for the endpoint.
+
+**Key infrastructure gap:** overlap_eq + affine ideal → full ChartPair → divisor.
 
 ### (c) N49 explicit rational-point obstruction
 
