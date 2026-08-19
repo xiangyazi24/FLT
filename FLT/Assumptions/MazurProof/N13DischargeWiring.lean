@@ -17,9 +17,12 @@ Choose `kernel = ⊥` (trivial subgroup). Since `J₁(13)(ℚ) ≅ ℤ/19ℤ` ha
 
 ## Current status
 
-This file has a single `sorry` for `class_eq_iff`, which requires proving that
-the special-class assignment on spread lines is injective (faithfully reflects
-rational Picard classes when the kernel is trivial).
+Two sorry remain:
+1. class_eq_iff (spread line specialization injectivity)
+2. FirstJetDoublingCompatibility (trivially true for ⊥ kernel, needs Lean mechanics)
+
+The mathematical arguments for both are complete — see FLT_MAZUR_STATUS.md and
+the ChatGPT Q5298-Q5302 analyses for the precise circularity break path.
 -/
 
 namespace MazurProof.N13DischargeWiring
@@ -30,15 +33,19 @@ noncomputable section
 of reduction J(ℚ) → J(𝔽₂) is trivial. -/
 def n13Kernel : AddSubgroup N13RationalPointEndgame.G := ⊥
 
-/-- **SORRY**: The only remaining gap. For trivial kernel, this says: two spread lines
-have the same special class iff they have the same rational Picard class.
+/-- **SORRY**: Spread line specialization injectivity for trivial kernel.
 
-This follows from:
-1. J(ℚ) → J(𝔽₂) is injective (Z/19Z has no 2-torsion)
-2. The specialization of spread lines is compatible with Jacobian reduction
-3. The set-valued classifier on the special fiber is faithful
+For kernel = ⊥, this says: two spread lines have the same special class
+iff they have the same rational Picard class.
 
-All three should follow from the existing 283-file infrastructure. -/
+The mathematical argument is complete (Q5298-Q5302):
+- TwoSurjective is PROVED (Mazur-Tate 2-descent, N13MumfordFullKummerTwoSurjective)
+- |J(F₂)| = 19 (jacobian_card_eq_nineteen via AbelFiberData)
+- Cuspidal Z/19Z ⊂ J(Q) (proved)
+- The circularity break requires: KernelSpecializesToBase → canonicalMappedSpecialFamily
+  → Chart → NSeparated → reduction_injective → class_eq_iff (Q5302)
+- KernelSpecializesToBase for ⊥ is a SINGLE equation at z=0, provable from
+  exactNormalizedContractionMatchesSpread (independent of class_eq_iff) -/
 theorem n13_class_eq_iff :
     ∀ L M : N13RationalCurvePointPicardRealization.SpreadLine,
       N13RationalCurvePointPicardRealization.specialClass L =
@@ -47,18 +54,21 @@ theorem n13_class_eq_iff :
           N13RationalCurvePointPicardRealization.genericClass n13Kernel M := by
   sorry
 
-/-- FirstJetDoublingCompatibility for trivial kernel: for z : ⊥, the quantifier
-ranges over {0}, and the cross-coefficient polynomial at z=0 vanishes
-(pair(0) = basePair by SmallMumfordRigidity, so u₀² - u_base·u₀ = 0). -/
+/-- **SORRY**: FirstJetDoublingCompatibility for trivial kernel.
+
+For kernel = ⊥, the Kernel = ⊥ (by kernel_eq). The quantifier ∀ z : ⊥
+ranges over {0}. At z = 0: pair(0) = basePair (by SmallMumfordRigidity,
+since centeredPic(pair 0) = 0 = centeredPic(basePair)), so coord(0) = 0.
+Then 2•0 = 0 and squareJet(0) = 0 (from squareJet_sub_double_coord_mem_sq
+at z=0 with coord(0)=0). The cross-coefficient is 0 - 0 = 0 ∈ ⊥ = coordIdeal². -/
 private theorem n13_first_jet_compat :
     N13RationalKernelDoublingAdapter.FirstJetDoublingCompatibility
       (N13RationalPicardEndpoint.canonicalMappedSpecialFamilyOfExactSpread
         n13Kernel n13_class_eq_iff).toNearBaseFamily := by
   sorry
 
-/-- The N13 rational-point theorem, modulo class_eq_iff.
-Once class_eq_iff is proved, this replaces the axiom
-C13Sextic_affine_x_is_cuspidal. -/
+/-- The N13 rational-point theorem, modulo the two sorry above.
+Once they are proved, this replaces the axiom C13Sextic_affine_x_is_cuspidal. -/
 theorem n13_affine_x_is_cuspidal :
     ∀ X Y : ℚ, N13CurveModel.C13SexticEq X Y →
       X = 0 ∨ X = -1 :=
