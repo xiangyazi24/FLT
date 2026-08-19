@@ -9,10 +9,14 @@ Mordell-Weil (`mordell_weil_fg`) intentionally kept.
 
 **Status: 1 sorry remaining (class_eq_iff)**
 
-- 283 sorry-free files provide full infrastructure (Picard group, Abel-Jacobi, Mumford coordinates, etc.)
+- 284 sorry-free files provide full infrastructure (Picard group, Abel-Jacobi, Mumford coordinates, etc.)
 - N13DischargeWiring.lean written: wires endpoint with kernel = ⊥
-- **h₁/h₃ gap CLOSED**: For trivial kernel, z ranges only over {0}; at z=0, F.pair(0) = basePair (by SmallMumfordRigidity), so cross-coefficient polynomial = 0
-- **class_eq_iff GAP**: Injectivity of the specialization map on J(Q) = Z/19Z at p=2
+- **FirstJetDoublingCompatibility PROVED**: z=0, pair(0)=basePair, coord=0, trivial
+- **CanonicalMappedSpecialFamily ⊥ PROVED WITHOUT class_eq_iff** (N13TrivialKernelFamily.lean):
+  baseLine saturation retract → contraction = baseLine.affineIdeal → reduce = specialIdeal
+- **class_eq_iff GAP**: well-definedness of specialization for arbitrary SpreadLines.
+  Affine ideal matches via contraction retract for saturated Lines.
+  Infinity ideal matching via overlap_eq is the genuinely unproved piece.
 
 ### Proof of class_eq_iff (mathematical argument, not yet formalized)
 - Kernel of J(Q) → J(F_2) is a 2-group (Néron model / formal group theory)

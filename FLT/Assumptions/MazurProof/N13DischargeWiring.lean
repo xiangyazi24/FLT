@@ -18,12 +18,16 @@ Choose `kernel = ⊥` (trivial subgroup). Since `J₁(13)(ℚ) ≅ ℤ/19ℤ` ha
 
 ## Current status
 
-Two sorry remain:
-1. class_eq_iff (spread line specialization injectivity)
-2. FirstJetDoublingCompatibility (trivially true for ⊥ kernel, needs Lean mechanics)
+One sorry remains:
+1. class_eq_iff (specialization well-definedness + injectivity for ALL SpreadLines)
+   Gap: the (←) direction requires showing that two Data objects with the same
+   toGenericPic have the same toSpecialPic. For vertically saturated Lines, the
+   affine ideal matches (contraction retract). The infinity ideal matching via
+   overlap_eq is the genuinely unproved piece.
 
-The mathematical arguments for both are complete — see FLT_MAZUR_STATUS.md and
-the ChatGPT Q5298-Q5302 analyses for the precise circularity break path.
+FirstJetDoublingCompatibility was proved directly: z ranges over Kernel (= ⊥
+by kernel_eq), so z = 0; pair(0) = basePair by centeredPic injectivity;
+coord 0 = 0; coordIdeal = ⊥; everything zero.
 -/
 
 namespace MazurProof.N13DischargeWiring

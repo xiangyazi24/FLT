@@ -1,3 +1,19 @@
+## Run 2026-08-19 — N13 class_eq_iff circularity break
+
+- doctrine version: four endpoint axioms (DOCTRINE.md)
+- starting avenue: (a) Direct CanonicalMappedSpecialFamily for ⊥ via baseLine saturation
+- end: 2026-08-19
+- final result:
+  - 2 sorry → 1 sorry in N13DischargeWiring.lean
+  - N13TrivialKernelFamily.lean: CanonicalMappedSpecialFamily ⊥ WITHOUT class_eq_iff (0 sorry)
+  - FirstJetDoublingCompatibility PROVED (z=0, coord=0, trivial)
+  - NSeparated ⊥ 2 PROVED (from family + FJDC)
+  - REMAINING: class_eq_iff (well-definedness of specialization for ALL SpreadLines)
+  - GAP ANALYSIS: affine ideal matching works via contraction retract for saturated Lines;
+    infinity ideal matching via overlap_eq is unproved. Fork investigation confirmed no
+    existing theorem connects toSpecialPic to toGenericPic for arbitrary Data objects.
+  - Two commits: 4b16178 (family+FJDC), 7c8b2b0 (wiring FJDC elimination)
+
 ## Run 2026-08-18 17:00 (Newton polygon + wiring campaign)
 
 - doctrine version: four endpoint axioms; N49/N13 focus
