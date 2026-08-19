@@ -103,7 +103,7 @@ private theorem n13_first_jet_compat :
     rw [hspan, Ideal.bot_mul, hcoord, Pi.zero_apply, add_zero, sub_zero] at h
     simpa using h
 
-/-- The N13 rational-point theorem, modulo the two sorry above.
+/-- The N13 rational-point theorem, modulo the class_eq_iff sorry above.
 Once they are proved, this replaces the axiom C13Sextic_affine_x_is_cuspidal. -/
 theorem n13_affine_x_is_cuspidal :
     ∀ X Y : ℚ, N13CurveModel.C13SexticEq X Y →
