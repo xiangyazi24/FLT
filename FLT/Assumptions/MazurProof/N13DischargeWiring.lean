@@ -1,6 +1,7 @@
 import FLT.Assumptions.MazurProof.N13RationalPicardEndpoint
 import FLT.Assumptions.MazurProof.N13MumfordCenteredDoublingAdapter
 import FLT.Assumptions.MazurProof.CyclicExclusion13
+import FLT.Assumptions.MazurProof.N13TrivialKernelFamily
 
 /-!
 # N13 axiom discharge — wiring attempt
@@ -64,8 +65,39 @@ at z=0 with coord(0)=0). The cross-coefficient is 0 - 0 = 0 ∈ ⊥ = coordIdeal
 private theorem n13_first_jet_compat :
     N13RationalKernelDoublingAdapter.FirstJetDoublingCompatibility
       (N13RationalPicardEndpoint.canonicalMappedSpecialFamilyOfExactSpread
-        n13Kernel n13_class_eq_iff).toNearBaseFamily := by
-  sorry
+        n13Kernel n13_class_eq_iff).toNearBaseFamily where
+  compare := by
+    intro z i
+    let F := (N13RationalPicardEndpoint.canonicalMappedSpecialFamilyOfExactSpread
+      n13Kernel n13_class_eq_iff).toNearBaseFamily
+    have hker : N13RationalPicardEndpoint.Kernel n13Kernel n13_class_eq_iff = n13Kernel :=
+      N13RationalPicardEndpoint.kernel_eq n13Kernel n13_class_eq_iff
+    have hz0 : (z : N13RationalPointEndgame.G) = 0 := by
+      apply AddSubgroup.mem_bot.mp
+      exact hker.le z.property
+    have hpair : F.pair z = N13TwoAdicAbelChartData.basePair := by
+      apply N13TwoAdicAbelChartPic.DiskPair.centeredPic_injective
+      have hreal := N13RationalKernelDoublingAdapter.NearBaseFamily.realize F z
+      simp only [N13TwoAdicAbelChartSection.subgroupToPic, AddMonoidHom.comp_apply,
+        AddSubgroup.coe_subtype, hz0, map_zero,
+        N13TwoAdicAbelChartPic.DiskPair.centeredPic_basePair] at hreal ⊢
+      exact hreal
+    have hcoord : F.coord z = 0 := by
+      show N13TwoAdicAbelChartData.DiskPair.coord (F.pair z) = 0
+      rw [hpair, N13TwoAdicAbelChartData.DiskPair.coord_basePair]
+    have hspan : N13TwoAdicKernelChart.coordIdeal F.coord z =
+        (⊥ : Ideal N13TwoAdicKernelChart.R₂) := by
+      rw [N13TwoAdicKernelChart.coordIdeal, hcoord, Ideal.span_eq_bot]
+      intro x hx; obtain ⟨j, rfl⟩ := hx; exact Pi.zero_apply j
+    rw [hspan, Ideal.bot_mul]
+    have h2z : (2 • z : N13RationalPicardEndpoint.Kernel n13Kernel n13_class_eq_iff) = z := by
+      ext; show 2 • (z : N13RationalPointEndgame.G) = z
+      rw [hz0]; simp [two_nsmul]
+    rw [h2z, hcoord, Pi.zero_apply]
+    have h := N13RationalKernelDoublingAdapter.NearBaseFamily.squareJet_sub_double_coord_mem_sq
+      F z i
+    rw [hspan, Ideal.bot_mul, hcoord, Pi.zero_apply, add_zero, sub_zero] at h
+    simpa using h
 
 /-- The N13 rational-point theorem, modulo the two sorry above.
 Once they are proved, this replaces the axiom C13Sextic_affine_x_is_cuspidal. -/
