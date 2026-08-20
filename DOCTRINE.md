@@ -62,6 +62,33 @@ formalized.  Closing these seams forces every rational
 canonical point to be a cusp, contradicting the proved noncuspidality of the
 primitive Tate image.
 
+The characteristic-two function-field foundation is now explicit.  The
+`w = 1` canonical complete intersection projects to a monic plane sextic
+over `F₂[z]`; specialization at `z = 1` and a certified quartic
+irreducibility argument prove that its coordinate ring is a domain.  The
+division-free elimination identities construct both directions of the
+projection after inverting `D = xz + x + z`, with inverse coordinate
+`y = (x²+xz+z²+z)/D`.  The resulting equivalence
+`P[D⁻¹] ≃ C_w[D⁻¹]` is source-built and clean-3 audited.
+
+The whole canonical chart is now proved integral.  In the separated
+presentation `F₂[z][x]`, the denominator `D=(z+1)x+z` is prime and the
+numerator `N=x²+zx+z²+z` is nonzero modulo `(D)`.  A reusable elementary
+quotient-swap lemma turns regularity of `N` modulo `D` into regularity of
+`D` modulo the monic quadric and cubic equations.  Explicit variable,
+quotient, and tower equivalences transport this statement back to the
+canonical `w=1` chart.  Thus localization at `D` is injective; the already
+integral plane principal open proves `IsDomain C_w`.  This removes the
+possible hidden `D`-torsion or boundary component and makes the explicit
+principal-open equivalence a sound foundation for the common function
+field.
+
+The next missing layer is divisor theory on that integral chart: height-one
+valuations, principal divisors, and the bridge to class-indexed
+Riemann--Roch fibres.  Mathlib currently has no turnkey
+curve-divisor/product-formula API, so this must be built from the available
+commutative-algebra interfaces.
+
 The ambient Koszul-to-curve seam is closed.  Vertical-open Beck--Chevalley
 base change now permits arbitrary horizontal morphisms, so it applies to the
 closed curve immersion.  On each standard chart the explicit equation
@@ -87,14 +114,12 @@ it does not yet reduce the four endpoint axioms.
 
 The next ranked canonical-geometry attacks are:
 
-1. connect the proved conormal basis and shifted ambient Koszul resolution to a
-   determinant/adjunction comparison on the effective twists;
-2. identify the resulting canonical module of the complete-intersection
-   curve with the already glued degree-one twist `O_C(1)` chartwise and then
-   globally;
-3. use that canonical hyperplane class to construct the actual residual
-   divisor and complete-linear-system fibres required by the middle-degree
-   Riemann--Roch consumer.
+1. build the missing height-one valuation/principal-divisor layer on the
+   proved integral chart, including the common-function-field interface
+   needed by the class-indexed middle-degree Riemann--Roch consumer;
+2. connect the proved conormal basis and shifted ambient Koszul
+   resolution to the determinant/adjunction identification
+   `ω_C ≅ O_C(1)`.
 
 ### (b) N13 concrete specialization and separatedness — ACTIVE
 

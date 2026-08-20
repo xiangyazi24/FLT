@@ -1002,3 +1002,113 @@
   determinant/adjunction identification `ω_C ≅ i^* O(1)`
 - endpoint verification: a fresh 8775-job rebuild of `MazurEndpointAudit`
   reports exactly those four custom axioms and no `sorryAx`
+
+## Run 2026-08-20 00:37 CDT
+
+- doctrine version: `249e693f40fb196f4ccffd84002152949059b328`
+- approval msg_id: unavailable in the Codex conversation
+- starting avenue: (a), continue the N25 canonical-geometry route from the
+  verified shifted geometric quotient `Q_{-1} ≅ i_* i^* O(1)` to the
+  adjunction identification `ω_C ≅ i^* O(1)` and its Riemann--Roch consumer
+- ChatGPT role: use all live `flt*` channels as the design/API/feasibility
+  workhorse; verify every returned theorem chain against the checked-out
+  source and fresh Lake builds
+- result: constructed an explicit integral plane-sextic model on the
+  characteristic-two `w = 1` chart.  The nested polynomial is monic and
+  irreducible (specialization to `x⁴+x+1`), so its `AdjoinRoot` coordinate
+  ring is a domain with a fraction field.
+- result: proved the exact characteristic-two elimination/reconstruction
+  identities for `D=xz+x+z` and `N=x²+xz+z²+z`, constructed the forward
+  plane-to-canonical chart map, and constructed the reverse map with
+  `y=N/D` after localizing.
+- result: proved both compositions and banked the ring equivalence
+  `PlaneCoordinateRing[D⁻¹] ≃+* ChartQuotient(3)[D⁻¹]` in
+  `RationalPointsN25QuotientTwoPlaneChartLocalization.lean`.
+- ChatGPT: rolling Q5322--Q5393 campaign audited the adjunction/Riemann--Roch
+  route, rejected several vacuous coordinate-transition and Hilbert-count
+  shortcuts, supplied the reconstruction syzygy and the `D = 0` Gröbner
+  certificate.  The syzygy and certificate were independently checked;
+  several proposed Mathlib names were rejected against local source.  Q5393
+  delivered only a 50-byte header and was not re-dispatched over the tab.
+- verified next route: localizing alone does not prove the canonical chart is
+  a domain.  The independently verified Gröbner basis
+  `{x+z³+z², y²+yz, z⁴+z²+z}` makes the boundary quotient
+  eight-dimensional; formalizing this finiteness is the next dense-open
+  integrality step before function-field divisors.
+- verification: target build of the new localization module passed (8586
+  jobs), followed by a repository-wide 4011-job build.  Fresh axiom audits of
+  irreducibility, elimination, both localized inverse identities, and the
+  ring equivalence contain only `propext`, `Classical.choice`, and
+  `Quot.sound`.
+- end: 2026-08-20 (localized plane/canonical equivalence banked)
+- final result: the N25 endpoint axiom remains, but the first honest integral
+  function-field model and its explicit common principal open are now proved;
+  no endpoint axiom was repackaged or weakened.
+
+## Run 2026-08-20 (N25 plane-chart boundary finiteness)
+
+- approval: Xiang's explicit instruction to continue the FLT project and use
+  ChatGPT as the workhorse
+- starting avenue: formalize the verified `D = 0` Gröbner certificate and
+  make the boundary quotient finite over `F₂`
+- result: added
+  `RationalPointsN25QuotientTwoPlaneChartBoundary.lean`.  Three exact
+  characteristic-two polynomial certificates prove
+  `x+z³+z²=0`, `y²+yz=0`, and `z⁴+z²+z=0` in the boundary quotient.
+- result: constructed a two-stage monic `AdjoinRoot` tower, first of degree
+  four in `z` and then of degree two in `y`; explicit coordinate lifts prove
+  that its algebra map to the boundary is surjective.  The resulting theorem
+  `canonicalWChartBoundary_moduleFinite` proves
+  `Module.Finite (ZMod 2) (ChartQuotient(3)/(D))` structurally.
+- ChatGPT: Q5421 and Q5423 were read and independently audited.  Their useful
+  parts guided the monic-tower organization and isolated the true next seam;
+  invalid quotient-direction and specialization suggestions were discarded.
+  Q5422 and Q5424 delivered only 248-byte and 344-byte Notion headers, so no
+  mathematical or API claim was taken from them and neither question was
+  silently re-dispatched.
+- verification: strict single-file checking, the 8587-job target build, and
+  the repository-wide 4011-job build passed.  Fresh axiom audits of all three
+  elimination relations, tower surjectivity, and boundary finiteness contain
+  only `propext`, `Classical.choice`, and `Quot.sound`; the bypass scan is
+  clean.
+- verified next route: boundary finiteness is not itself a proof that `D` is
+  regular.  A local symbolic saturation check gives `(q,c):D∞=(q,c)`; the
+  next bankable theorem is the source-level colon identity or an equivalent
+  injectivity proof, followed by integrality of the whole canonical chart.
+- final result: the N25 endpoint axiom remains unchanged; the finite-boundary
+  prerequisite for the dense-open integrality argument is now formalized.
+
+## Run 2026-08-20 (N25 canonical plane-chart integrality)
+
+- approval: Xiang's explicit instruction to continue the FLT project and use
+  ChatGPT as the workhorse
+- starting avenue: replace the remaining colon/saturation seam by a direct
+  source-level proof that the projection denominator is regular on the whole
+  canonical `w = 1` chart
+- result: added
+  `RationalPointsN25QuotientTwoPlaneChartDomain.lean`.  In the separated ring
+  `F₂[z][x]`, the linear denominator `D=(z+1)x+z` is prime and the monic
+  numerator `N=x²+zx+z²+z` is nonzero modulo `(D)`.
+- result: proved a reusable elementary quotient-swap lemma for regular
+  elements.  Together with freeness of a monic `AdjoinRoot` extension, it
+  proves `D` regular modulo the chart's quadric and cubic equations.
+- result: explicit affine-variable, polynomial-tower, and double-quotient
+  equivalences identify that presentation with `ChartQuotient 3` and carry
+  its denominator to the intrinsic canonical denominator.  Consequently the
+  canonical localization map is injective and `canonicalWChart_isDomain`
+  proves `IsDomain (ChartQuotient 3)`.
+- ChatGPT: Q5481 supplied the useful elementary quotient-swap organization;
+  its quotient constructor details were corrected against the local Mathlib
+  API and rebuilt.  Q5491 contained inaccurate signatures and was rejected.
+  Q5483, Q5495, and Q5498 delivered only short headers or an uncompiled
+  admission, so no claim from them was used.
+- verification: the 8588-job module target and repository-wide 4011-job
+  default build passed.  Fresh axiom audits of primality, numerator
+  nonvanishing, quotient regularity, canonical denominator regularity,
+  localization injectivity, and final chart integrality contain only
+  `propext`, `Classical.choice`, and `Quot.sound`; the bypass scan and
+  `git diff --check` are clean.
+- final result: the possible hidden `D`-torsion/component is eliminated and
+  the common principal-open model now connects integral domains.  The N25
+  endpoint axiom remains unchanged; the next route is the height-one
+  valuation/principal-divisor interface needed for Riemann--Roch.
