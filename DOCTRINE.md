@@ -73,17 +73,21 @@ projection after inverting `D = xz + x + z`, with inverse coordinate
 
 This is a birational principal-open bridge, not yet a proof that the whole
 canonical chart is integral: localization could hide `D`-torsion or an
-extra component in `V(D)`.  An independently checked characteristic-two
-Gröbner certificate gives
-`F₂[x,y,z]/(q,c,D)` dimension eight, with leading relations
-`x+z³+z²`, `y²+yz`, and `z⁴+z²+z`.  The next algebraic milestone is
-to formalize this finite boundary quotient and combine it with the proved
-smoothness and a formal equidimensionality argument to make `D` a
-non-zero-divisor; injectivity into the domain localization will then give
-`IsDomain C_w` and
-the honest function-field identification.  Only after that promotion do
-principal divisors and class-indexed Riemann--Roch fibres become available;
-Mathlib currently has no turnkey curve-divisor/product-formula API.
+extra component in `V(D)`.  The characteristic-two Gröbner certificate is
+now formalized on the boundary quotient.  Exact integral identities prove
+the three leading relations `x+z³+z²`, `y²+yz`, and `z⁴+z²+z`.  A tower
+adjoining first the monic quartic root `z` and then the monic quadratic root
+`y` maps surjectively to `C_w/(D)`, proving source-built
+`Module.Finite F₂ (C_w/(D))` without enumerating field elements.
+
+Boundary finiteness alone does not make `D` a non-zero-divisor.  The next
+algebraic milestone is the colon identity `(q,c):D=(q,c)`, either by a
+formal Gröbner reduction or by combining complete-intersection
+equidimensionality with the proved smoothness.  That injectivity, together
+with the domain localization, will give `IsDomain C_w` and the honest
+function-field identification.  Only after that promotion do principal
+divisors and class-indexed Riemann--Roch fibres become available; Mathlib
+currently has no turnkey curve-divisor/product-formula API.
 
 The ambient Koszul-to-curve seam is closed.  Vertical-open Beck--Chevalley
 base change now permits arbitrary horizontal morphisms, so it applies to the
@@ -110,8 +114,8 @@ it does not yet reduce the four endpoint axioms.
 
 The next ranked canonical-geometry attacks are:
 
-1. formalize the eight-dimensional `D = 0` boundary quotient and promote the
-   principal-open equivalence to integrality and a common function field;
+1. prove `(q,c):D=(q,c)` and promote the principal-open equivalence to
+   integrality and a common function field;
 2. build the missing height-one valuation/principal-divisor layer needed by
    the class-indexed middle-degree Riemann--Roch consumer;
 3. in parallel, connect the proved conormal basis and shifted ambient Koszul

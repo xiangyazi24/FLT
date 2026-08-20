@@ -984,3 +984,36 @@
 - final result: the N25 endpoint axiom remains, but the first honest integral
   function-field model and its explicit common principal open are now proved;
   no endpoint axiom was repackaged or weakened.
+
+## Run 2026-08-20 (N25 plane-chart boundary finiteness)
+
+- approval: Xiang's explicit instruction to continue the FLT project and use
+  ChatGPT as the workhorse
+- starting avenue: formalize the verified `D = 0` Gröbner certificate and
+  make the boundary quotient finite over `F₂`
+- result: added
+  `RationalPointsN25QuotientTwoPlaneChartBoundary.lean`.  Three exact
+  characteristic-two polynomial certificates prove
+  `x+z³+z²=0`, `y²+yz=0`, and `z⁴+z²+z=0` in the boundary quotient.
+- result: constructed a two-stage monic `AdjoinRoot` tower, first of degree
+  four in `z` and then of degree two in `y`; explicit coordinate lifts prove
+  that its algebra map to the boundary is surjective.  The resulting theorem
+  `canonicalWChartBoundary_moduleFinite` proves
+  `Module.Finite (ZMod 2) (ChartQuotient(3)/(D))` structurally.
+- ChatGPT: Q5421 and Q5423 were read and independently audited.  Their useful
+  parts guided the monic-tower organization and isolated the true next seam;
+  invalid quotient-direction and specialization suggestions were discarded.
+  Q5422 and Q5424 delivered only 248-byte and 344-byte Notion headers, so no
+  mathematical or API claim was taken from them and neither question was
+  silently re-dispatched.
+- verification: strict single-file checking, the 8587-job target build, and
+  the repository-wide 4011-job build passed.  Fresh axiom audits of all three
+  elimination relations, tower surjectivity, and boundary finiteness contain
+  only `propext`, `Classical.choice`, and `Quot.sound`; the bypass scan is
+  clean.
+- verified next route: boundary finiteness is not itself a proof that `D` is
+  regular.  A local symbolic saturation check gives `(q,c):D∞=(q,c)`; the
+  next bankable theorem is the source-level colon identity or an equivalent
+  injectivity proof, followed by integrality of the whole canonical chart.
+- final result: the N25 endpoint axiom remains unchanged; the finite-boundary
+  prerequisite for the dense-open integrality argument is now formalized.
