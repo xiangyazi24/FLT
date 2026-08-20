@@ -1017,3 +1017,38 @@
   injectivity proof, followed by integrality of the whole canonical chart.
 - final result: the N25 endpoint axiom remains unchanged; the finite-boundary
   prerequisite for the dense-open integrality argument is now formalized.
+
+## Run 2026-08-20 (N25 canonical plane-chart integrality)
+
+- approval: Xiang's explicit instruction to continue the FLT project and use
+  ChatGPT as the workhorse
+- starting avenue: replace the remaining colon/saturation seam by a direct
+  source-level proof that the projection denominator is regular on the whole
+  canonical `w = 1` chart
+- result: added
+  `RationalPointsN25QuotientTwoPlaneChartDomain.lean`.  In the separated ring
+  `F₂[z][x]`, the linear denominator `D=(z+1)x+z` is prime and the monic
+  numerator `N=x²+zx+z²+z` is nonzero modulo `(D)`.
+- result: proved a reusable elementary quotient-swap lemma for regular
+  elements.  Together with freeness of a monic `AdjoinRoot` extension, it
+  proves `D` regular modulo the chart's quadric and cubic equations.
+- result: explicit affine-variable, polynomial-tower, and double-quotient
+  equivalences identify that presentation with `ChartQuotient 3` and carry
+  its denominator to the intrinsic canonical denominator.  Consequently the
+  canonical localization map is injective and `canonicalWChart_isDomain`
+  proves `IsDomain (ChartQuotient 3)`.
+- ChatGPT: Q5481 supplied the useful elementary quotient-swap organization;
+  its quotient constructor details were corrected against the local Mathlib
+  API and rebuilt.  Q5491 contained inaccurate signatures and was rejected.
+  Q5483, Q5495, and Q5498 delivered only short headers or an uncompiled
+  admission, so no claim from them was used.
+- verification: the 8588-job module target and repository-wide 4011-job
+  default build passed.  Fresh axiom audits of primality, numerator
+  nonvanishing, quotient regularity, canonical denominator regularity,
+  localization injectivity, and final chart integrality contain only
+  `propext`, `Classical.choice`, and `Quot.sound`; the bypass scan and
+  `git diff --check` are clean.
+- final result: the possible hidden `D`-torsion/component is eliminated and
+  the common principal-open model now connects integral domains.  The N25
+  endpoint axiom remains unchanged; the next route is the height-one
+  valuation/principal-divisor interface needed for Riemann--Roch.

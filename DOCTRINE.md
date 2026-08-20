@@ -71,23 +71,23 @@ projection after inverting `D = xz + x + z`, with inverse coordinate
 `y = (x²+xz+z²+z)/D`.  The resulting equivalence
 `P[D⁻¹] ≃ C_w[D⁻¹]` is source-built and clean-3 audited.
 
-This is a birational principal-open bridge, not yet a proof that the whole
-canonical chart is integral: localization could hide `D`-torsion or an
-extra component in `V(D)`.  The characteristic-two Gröbner certificate is
-now formalized on the boundary quotient.  Exact integral identities prove
-the three leading relations `x+z³+z²`, `y²+yz`, and `z⁴+z²+z`.  A tower
-adjoining first the monic quartic root `z` and then the monic quadratic root
-`y` maps surjectively to `C_w/(D)`, proving source-built
-`Module.Finite F₂ (C_w/(D))` without enumerating field elements.
+The whole canonical chart is now proved integral.  In the separated
+presentation `F₂[z][x]`, the denominator `D=(z+1)x+z` is prime and the
+numerator `N=x²+zx+z²+z` is nonzero modulo `(D)`.  A reusable elementary
+quotient-swap lemma turns regularity of `N` modulo `D` into regularity of
+`D` modulo the monic quadric and cubic equations.  Explicit variable,
+quotient, and tower equivalences transport this statement back to the
+canonical `w=1` chart.  Thus localization at `D` is injective; the already
+integral plane principal open proves `IsDomain C_w`.  This removes the
+possible hidden `D`-torsion or boundary component and makes the explicit
+principal-open equivalence a sound foundation for the common function
+field.
 
-Boundary finiteness alone does not make `D` a non-zero-divisor.  The next
-algebraic milestone is the colon identity `(q,c):D=(q,c)`, either by a
-formal Gröbner reduction or by combining complete-intersection
-equidimensionality with the proved smoothness.  That injectivity, together
-with the domain localization, will give `IsDomain C_w` and the honest
-function-field identification.  Only after that promotion do principal
-divisors and class-indexed Riemann--Roch fibres become available; Mathlib
-currently has no turnkey curve-divisor/product-formula API.
+The next missing layer is divisor theory on that integral chart: height-one
+valuations, principal divisors, and the bridge to class-indexed
+Riemann--Roch fibres.  Mathlib currently has no turnkey
+curve-divisor/product-formula API, so this must be built from the available
+commutative-algebra interfaces.
 
 The ambient Koszul-to-curve seam is closed.  Vertical-open Beck--Chevalley
 base change now permits arbitrary horizontal morphisms, so it applies to the
@@ -114,11 +114,10 @@ it does not yet reduce the four endpoint axioms.
 
 The next ranked canonical-geometry attacks are:
 
-1. prove `(q,c):D=(q,c)` and promote the principal-open equivalence to
-   integrality and a common function field;
-2. build the missing height-one valuation/principal-divisor layer needed by
-   the class-indexed middle-degree Riemann--Roch consumer;
-3. in parallel, connect the proved conormal basis and shifted ambient Koszul
+1. build the missing height-one valuation/principal-divisor layer on the
+   proved integral chart, including the common-function-field interface
+   needed by the class-indexed middle-degree Riemann--Roch consumer;
+2. connect the proved conormal basis and shifted ambient Koszul
    resolution to the determinant/adjunction identification
    `ω_C ≅ O_C(1)`.
 
