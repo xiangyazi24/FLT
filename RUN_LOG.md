@@ -942,3 +942,45 @@
   determinant/adjunction identification `ω_C ≅ i^* O(1)`
 - endpoint verification: a fresh 8775-job rebuild of `MazurEndpointAudit`
   reports exactly those four custom axioms and no `sorryAx`
+
+## Run 2026-08-20 00:37 CDT
+
+- doctrine version: `249e693f40fb196f4ccffd84002152949059b328`
+- approval msg_id: unavailable in the Codex conversation
+- starting avenue: (a), continue the N25 canonical-geometry route from the
+  verified shifted geometric quotient `Q_{-1} ≅ i_* i^* O(1)` to the
+  adjunction identification `ω_C ≅ i^* O(1)` and its Riemann--Roch consumer
+- ChatGPT role: use all live `flt*` channels as the design/API/feasibility
+  workhorse; verify every returned theorem chain against the checked-out
+  source and fresh Lake builds
+- result: constructed an explicit integral plane-sextic model on the
+  characteristic-two `w = 1` chart.  The nested polynomial is monic and
+  irreducible (specialization to `x⁴+x+1`), so its `AdjoinRoot` coordinate
+  ring is a domain with a fraction field.
+- result: proved the exact characteristic-two elimination/reconstruction
+  identities for `D=xz+x+z` and `N=x²+xz+z²+z`, constructed the forward
+  plane-to-canonical chart map, and constructed the reverse map with
+  `y=N/D` after localizing.
+- result: proved both compositions and banked the ring equivalence
+  `PlaneCoordinateRing[D⁻¹] ≃+* ChartQuotient(3)[D⁻¹]` in
+  `RationalPointsN25QuotientTwoPlaneChartLocalization.lean`.
+- ChatGPT: rolling Q5322--Q5393 campaign audited the adjunction/Riemann--Roch
+  route, rejected several vacuous coordinate-transition and Hilbert-count
+  shortcuts, supplied the reconstruction syzygy and the `D = 0` Gröbner
+  certificate.  The syzygy and certificate were independently checked;
+  several proposed Mathlib names were rejected against local source.  Q5393
+  delivered only a 50-byte header and was not re-dispatched over the tab.
+- verified next route: localizing alone does not prove the canonical chart is
+  a domain.  The independently verified Gröbner basis
+  `{x+z³+z², y²+yz, z⁴+z²+z}` makes the boundary quotient
+  eight-dimensional; formalizing this finiteness is the next dense-open
+  integrality step before function-field divisors.
+- verification: target build of the new localization module passed (8586
+  jobs), followed by a repository-wide 4011-job build.  Fresh axiom audits of
+  irreducibility, elimination, both localized inverse identities, and the
+  ring equivalence contain only `propext`, `Classical.choice`, and
+  `Quot.sound`.
+- end: 2026-08-20 (localized plane/canonical equivalence banked)
+- final result: the N25 endpoint axiom remains, but the first honest integral
+  function-field model and its explicit common principal open are now proved;
+  no endpoint axiom was repackaged or weakened.
