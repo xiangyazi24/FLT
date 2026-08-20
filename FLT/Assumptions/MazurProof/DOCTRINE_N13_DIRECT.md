@@ -1,127 +1,132 @@
-# DOCTRINE — N13DirectEndpoint: Close 2 remaining sorry
+# DOCTRINE — N13 endpoint: specialization group homomorphism route
 
 ## Main Goal
 
-Prove `classify_injective` and `classify_abel` in N13DirectEndpoint.lean,
-eliminating the last 2 sorry in the N13 endpoint and making the
-rational-point theorem `n13_affine_x_is_cuspidal` unconditional.
+Prove `n13_affine_x_is_cuspidal` (the N13 rational-point theorem) by
+constructing the specialization of J₁(13) as a group homomorphism and
+using the existing NSeparated + TwoSurjective infrastructure.
 
-## The 2 Sorry
+## Key Discovery (this session)
 
-### classify_injective (line 54)
-```lean
-theorem classify_injective : Function.Injective classify
-```
-Where `classify g = specialClass (exactSpreadLine g)`.
+**class_eq_iff and classify_abel are UNPROVABLE** as currently stated.
 
-**Mathematical content:** The specialization map G → SpecialSet is injective.
-G has 19 elements (rational Picard classes of J₁(13)).
-SpecialSet has 19 elements (PicTwoSetModel = special Abel classes).
-Both have cardinality 19, so injectivity = surjectivity = bijectivity.
+ChatGPT Q5318 confirms: two integral models (spread lines) with the same
+generic Picard class can have DIFFERENT special classes, differing by
+vertical divisors. Therefore:
+- N13DischargeWiring's `n13_class_eq_iff` sorry is unprovable
+- N13DirectEndpoint's `classify_abel` is unprovable for the
+  `Classical.choose`-based classify function
 
-**Route:** Since both sets have the same finite cardinality 19, injective ↔ surjective.
-We need a surjectivity or injectivity argument. Options:
-(a) Finite.injective_iff_surjective: show classify is surjective (every special class
-    is hit by some rational class via exactSpreadLine).
-(b) Direct: show if classify g₁ = classify g₂ then g₁ = g₂.
-    Two spread lines with same specialClass → same Mumford data after normalization
-    (normalize_eq_of_class) → same rationalClass.
-(c) Use the existing trivialKernel_separated / NSeparated infrastructure: the kernel
-    of the reduction map is trivial, hence the map is injective.
+The correct mathematical route uses the **Néron model specialization**
+on the Jacobian, which is a GROUP HOMOMORPHISM with pro-2 kernel.
 
-### classify_abel (line 61)
-```lean
-theorem classify_abel (P : RationalCurvePoint) :
-    classify (rationalAbel P) = specialPointClass (reduceCurve P)
-```
+## Architecture
 
-**Mathematical content:** The specialization of a rational curve point's
-Abel class (via exactSpreadLine) agrees with the special Abel class of its
-proper reduction.
+### New file: N13SpecializationGroupHom.lean
+Constructs:
+- `J₂ := ConcretePic (model (ZMod 2)) O` with AddCommGroup
+- `specialize : G →+ J₂` (group homomorphism)
+- `AbelFiberData J₂` (19 elements, right fiber structure)
+- `FormalKernelData specialize.ker` (pro-2 kernel)
+- `specialize_injective` (from Data.reduction_injective)
 
-**Route:** We know `pointSpreadLine P` satisfies this — its `special_eq`
-says `toSpecialPic = specialPointClass (reduceCurve P)`. We also know
-`exactSpreadLine (rationalAbel P)` has `rationalClass = rationalAbel P`.
-Both spread lines have the same rationalClass. Need to show they have the
-same specialClass. This requires showing that specialClass depends only
-on the rationalClass, which is exactly what class_eq_iff says — but
-class_eq_iff was declared unprovable for arbitrary SpreadLines.
-
-However, for the EXACT spread lines used here (exactSpreadLine and
-pointSpreadLine), both are constructed from the SAME normalized Mumford
-representative (normalize_eq_of_class), so their realizations share the
-same Mumford data, hence the same specialDivisor and specialClass.
+### Modified N13DirectEndpoint.lean
+Uses `specialize` to prove `PointwiseReflection`:
+- Given `reduceCurve P = reduceCurve Q`:
+  - `specialize (rationalAbel P) = specialize (rationalAbel Q)`
+    (via Abel-Jacobi compatibility with the specialization)
+  - By `specialize_injective`: `rationalAbel P = rationalAbel Q`
 
 ## Avenues
 
-### (a) classify_injective via Finite cardinality argument
+### (a) Group homomorphism via ideal reduction — MAIN AVENUE
 
-Both G and SpecialSet have exactly 19 elements.
-`classify : G → SpecialSet` between two Fin-19-equivalent types.
-Prove surjectivity (every special class is in the image) or use
-`Finite.injective_iff_surjective` to reduce injectivity to surjectivity.
+The oriented Picard group `ConcretePic M O` is:
+```
+Additive (OrientedFrac M ⧸ (principalOriented M O).range)
+```
+where `OrientedFrac M = InvFrac M × Multiplicative ℤ`.
 
-Surjectivity route: For every s : SpecialSet, there exists a SpreadLine L
-with specialClass L = s. The existing `exists_exactSpreadLine` gives a
-spread for every G element. If classify is the composition
-G →(exactSpreadLine) SpreadLine →(specialClass) SpecialSet,
-and G has 19 elements and SpecialSet has 19 elements, then classify is
-injective iff bijective.
+Define the ideal-level reduction:
+```
+reduceOrientedFrac : OrientedFrac ModelQ₂ →* OrientedFrac ModelF₂
+reduceOrientedFrac (I, n) = (reduce I, n)
+```
+This sends principals to principals (reduction is a ring hom), so it
+descends to a group homomorphism on the quotient.
 
-Actually, the cardinality argument is: any injective function from a finite
-set to a set of the same cardinality is bijective, and conversely any
-surjective function from a finite set to a set of the same cardinality is
-injective. So we could:
-- Show classify is surjective → done (Finite.injective_iff_surjective)
-- OR show |image classify| = 19
+Key lemmas needed:
+1. The ideal reduction `InvFrac ModelQ₂ → InvFrac ModelF₂` is well-defined
+   (invertible fractional ideals reduce to invertible fractional ideals)
+2. The model equation is invariant under reduction (coefficients are 0,1)
+3. The coordinate ring hom `CoordinateRing ModelQ₂ → CoordinateRing ModelF₂`
+   exists (from the integral model)
+4. Principal ideals reduce to principal ideals
+5. The infinity order is preserved
 
-**Terminal:** Either prove surjectivity or find a counterexample showing
-classify is not surjective (contradicting the mathematical content).
+Terminal: group homomorphism constructed and its kernel has pro-2 structure.
 
-### (b) classify_injective via existing separation infrastructure
+### (b) Direct Abel-Jacobi compatibility for curve points
 
-The existing `trivialKernel_separated` + `NSeparated` infrastructure
-shows that the kernel of the reduction map is trivial. The reduction map
-goes G → G/ker → SpecialSet. If ker = ⊥ (trivial), then G ≅ G/ker → SpecialSet
-is injective.
+For the specific curve-point spread lines (`pointSpreadLine`), the
+specialization DOES agree with `specialPointClass ∘ reduceCurve`:
+- `pointSpreadLine P` is constructed from the actual rational point
+- Its specialDivisor is `s(reducedPoint P, anchor)`
+- The specialization of `rationalAbel P` via the group hom should agree
 
-Need to connect `classify` to the existing reduction framework. The
-`reductionData` constructor builds a `CompatibleReduction` from spread data
-+ class_eq_iff. But we're trying to avoid class_eq_iff.
+This uses: `reduceMumford (pointMumford P) = pointMumford (reduceCurve P)`
+(the Mumford of a reduced point is the reduction of the Mumford).
 
-Can we build a different path that uses NSeparated directly?
+Terminal: `specialize (rationalAbel P) = specialPointClass (reduceCurve P)`.
 
-**Terminal:** Either connect or show the existing framework requires class_eq_iff.
+### (c) AbelFiberData for J₂
 
-### (c) classify_abel via Mumford normalization
+Show `J₂ = ConcretePic (model (ZMod 2)) O` has the right 19-element
+fiber structure. This should follow from the existing `picTwoSetModel_card`
+once we establish `J₂ ≅ PicTwoSetModel`.
 
-Key insight from handoff: both exactSpreadLine and pointSpreadLine
-for the same rationalClass use the same normalized Mumford representative.
-normalize_eq_of_class ensures identical affine ideals and specialDivisors.
+The equivalence: both are the 19-element degree-2 Picard group of the
+special fiber curve. The NormalFormData gives `Mumford (model F₂) ≃ J₂`,
+and `PicTwoSetModel` is a quotient of `Sym2 CurvePoint`.
 
-Chain: same rationalClass → same normalizedMumford → same mapMumford →
-same genericRaw → same affine ideal → (saturation) → same integral model →
-same specialDivisor → same toSpecialPic → same specialClass.
+Terminal: `AbelFiberData J₂`.
 
-Need to verify each step in the existing infrastructure.
+### (d) FormalKernelData for the kernel
 
-**Terminal:** Complete chain or identify a gap where two different integral
-models with the same generic Mumford can have different special classes.
+The kernel of `specialize` consists of elements of G that reduce to 0.
+The formal-kernel data requires:
+- A filtration by 2-adic valuation
+- Odd-multiplication preserves the valuation
 
-### (d) classify_abel via direct ReducesTo
+For the N13 good model, the formal group at 2 has a standard filtration.
+The existing `N13TrivialKernelFamily` infrastructure provides `NSeparated`
+for the trivial kernel, which may suffice.
 
-The existing `abel_reduces` in `rationalPointReductionData` proves exactly
-`ReducesTo (rationalAbel P) (specialPointClass (reduceCurve P))` using
-`pointSpreadLine P`. If we can show that `classify` agrees with the
-`classify` of ANY SpreadData that has the same specialClass function,
-we might be able to transfer the result.
-
-But this requires class_eq_iff for the SpreadData construction.
-
-**Terminal:** Either find a class_eq_iff-free path or identify the dependency.
+Terminal: `FormalKernelData specialize.ker`.
 
 ## Execution Order
 
-1. START with (c) — classify_abel via Mumford normalization
-2. IN PARALLEL: dispatch ChatGPT to analyze (a) — finite cardinality route for classify_injective
-3. THEN: attempt (a) or (b) for classify_injective based on what (c) reveals
+1. **NOW**: Avenue (a) — define the group homomorphism
+   (Most infrastructure-heavy but the core mathematical step)
+2. Avenue (b) — connect specialize to reduceCurve
+3. Avenue (c) — AbelFiberData
+4. Avenue (d) — FormalKernelData
+5. Assembly — construct the Data, get injectivity, prove PointwiseReflection
+
+## Proved so far
+
+- `normalizedMumford_rationalAbel_eq_pointMumford` — the normalized
+  Mumford of a curve point's Abel class IS the point Mumford
+  (N13DirectEndpointProof.lean, compiles, committed)
+- `J₂` has AddCommGroup structure (from NormalFormData at K = ZMod 2)
+- `G` has AddCommGroup structure (from NormalFormData at K = ℚ₂)
+
+## Key insight from ChatGPT Q5318
+
+> The exact theorem is: Pic(X) → Pic(X_η) has kernel generated by
+> vertical Cartier divisors. There is no general injectivity theorem
+> for Picard groups of regular models.
+>
+> For good reduction, the specialization kernel of the Jacobian is a
+> p-group, and that is the theorem that proves the desired 19-torsion
+> injectivity at p=2.
