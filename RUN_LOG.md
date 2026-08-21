@@ -1146,3 +1146,36 @@
 - final result: the N25 endpoint axiom remains unchanged; the local
   ambient-to-curve twist restriction seam is closed without `sorry`, new
   axioms, or `native_decide`.
+
+## Run 2026-08-20 (N25 global ambient/curve twist comparison)
+
+- approval: Xiang's explicit instruction to continue the autonomous Mazur
+  campaign, use ChatGPT proactively, verify locally, build, audit, and commit
+- starting avenue: lift the four chartwise ambient-to-curve twist maps through
+  the curve Čech equalizer and prove that the global lift is an isomorphism
+- result: added
+  `RationalPointsN25QuotientTwoAmbientTwistGlobalComparison.lean`.  Reusable
+  two-square Beck--Chevalley coherence lemmas identify the inverse base-change
+  component with the restriction unit and handle the congruence between the
+  named right overlap and its iterated-restriction presentation.
+- result: both ordered overlap restrictions of every chart map are normalized
+  to the ambient transition pair.  Their compatibility constructs
+  `curvePullbackTwistToCechSource`, which lifts uniquely to
+  `curvePullbackTwistToGlobalTwist` through the existing equalizer.
+- result: the lift restricts on every standard chart to the verified local
+  isomorphism.  Restriction--stalk compatibility and the four-chart cover prove
+  `curvePullbackTwistToGlobalTwist_isIso`, yielding the packaged global
+  isomorphism `curvePullbackTwistGlobalIso`.
+- ChatGPT: Q5814 was dispatched through `ask-gpt.py` for an independent API and
+  route audit.  All connectors timed out while the tab could still be running,
+  so it was not re-dispatched and no mathematical or API claim from it was
+  used.
+- verification: strict single-file checking, the 8608-job module target, and
+  the repository-wide 4011-job build passed.  Fresh axiom audits of the generic
+  base-change congruence and unit laws, Čech compatibility, global `IsIso`, and
+  packaged isomorphism contain only `propext`, `Classical.choice`, and
+  `Quot.sound`; the bypass scan is clean.
+- final result: `[MZ-N25-CECH-COMPARE]` is closed without `sorry`, new axioms,
+  or `native_decide`.  The four endpoint axioms remain unchanged; the ready
+  N25 frontier is the determinant/adjunction bridge `ω_C ≅ O_C(1)` followed by
+  the explicit divisor and middle-degree Riemann--Roch interfaces.

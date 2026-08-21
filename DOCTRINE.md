@@ -120,8 +120,14 @@ comparison `g^* O_{Spec R} ≅ O_{Spec S}` is proved natural with respect to
 rank-one unit scalars.  Consequently the ambient and curve overlap
 transitions commute after pullback, and every standard chart has a canonical
 isomorphism from the actual restricted ambient twist to the local curve
-twist.  The next bounded seam is to lift these chart maps through the
-existing Čech equalizer and prove the resulting global map is an isomorphism.
+twist.  These chart maps now lift through the existing Čech equalizer.  Their
+two overlap projections agree by the verified Beck--Chevalley unit laws,
+including the congruence between the named right restriction and its
+composite presentation.  The lift is an isomorphism because its restriction
+to every standard chart is an isomorphism, checked on stalks.  Thus the actual
+pullback of the ambient hyperplane twist is globally identified with the
+effective curve-side twist; `[MZ-N25-CECH-COMPARE]` is closed without changing
+the four endpoint axioms.
 
 The next ranked canonical-geometry attacks are:
 
@@ -129,7 +135,7 @@ The next ranked canonical-geometry attacks are:
    proved integral chart, including the common-function-field interface
    needed by the class-indexed middle-degree Riemann--Roch consumer;
 2. connect the proved conormal basis and shifted ambient Koszul
-   resolution, via the completed ambient/curve twist restriction comparison,
+   resolution, via the proved global ambient/curve twist comparison,
    to the determinant/adjunction identification `ω_C ≅ O_C(1)`.
 
 ### (b) N13 concrete specialization and separatedness — ACTIVE

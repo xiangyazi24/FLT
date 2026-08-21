@@ -1883,3 +1883,22 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   identify the curve's canonical module with the glued `O_C(1)`, and then
   supply the actual residual divisor and complete-linear-system fibres used
   by the middle-degree Riemann--Roch argument.
+
+### N25 global ambient/curve twist comparison (2026-08-20)
+
+- `RationalPointsN25QuotientTwoAmbientTwistGlobalComparison.lean` closes the
+  Čech comparison seam.  The chartwise ambient-to-curve twist isomorphisms are
+  first normalized against both ordered overlap projections.  The left law is
+  the inverse Beck--Chevalley unit formula; the right law additionally uses a
+  functorial congruence between the named right restriction and the iterated
+  open-restriction composite.
+- The normalized chart maps form a compatible family into `twistCechSource`,
+  hence lift uniquely through `globalTwistModule`.  The resulting morphism
+  restricts on every coordinate chart to the previously proved local
+  isomorphism.  Since the four coordinate opens cover the curve, a stalkwise
+  argument proves the global morphism is an isomorphism and packages it as
+  `curvePullbackTwistGlobalIso`.
+- The generic base-change coherence lemmas and the final global isomorphism
+  audit with only `propext`, `Classical.choice`, and `Quot.sound`.  No endpoint
+  axiom is removed: the next dependency is the determinant/adjunction bridge
+  from the conormal and shifted Koszul data to `ω_C ≅ O_C(1)`.

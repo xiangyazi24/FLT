@@ -67,10 +67,11 @@ remaining Newton faces still require independent certificates.
 
 ## Ready frontier
 
-1. **`[MZ-N25-CECH-COMPARE]`.** The ambient Koszul/pullback foundation is
-   compiled.  The active file has proof bodies for the generic two-square
-   base-change laws; the remaining obligations are local overlap normalization
-   and equality of the two Čech arrows.
+1. **`[MZ-N25-PICARD-RR]`.** `[MZ-N25-CECH-COMPARE]` is proved: the pulled-back
+   ambient hyperplane twist and the effective curve Čech twist are globally
+   isomorphic.  The next canonical-geometry seam is to transport the conormal
+   and shifted Koszul data through this isomorphism and prove the determinant/
+   adjunction identification `ω_C ≅ O_C(1)`.
 2. **`[MZ-N13-SPECIALIZE]`.** The curve model, rational Abel map, special point
    classifier, cardinality 19, and normalized Mumford comparison are present.
    The next sound object is a genuine specialization group homomorphism, not
@@ -96,8 +97,7 @@ three does not make `[MZ-GOAL]` unconditional.
 On the active N25 route, the current internal cut is
 
 ```text
-{ [MZ-N25-CECH-COMPARE],
-  [MZ-N25-PICARD-RR],
+{ [MZ-N25-PICARD-RR],
   good-reduction/rank-zero/pullback-norm bridges inside
     [MZ-N25-ABEL-JACOBI] }.
 ```
@@ -112,7 +112,7 @@ not additional members of the endpoint cut.
 |---|---|---|
 | N13 specialization homomorphism | active | Construct characteristic-two Picard group law, specialization, Abel compatibility, and prime-to-two injectivity |
 | N13 arbitrary `class_eq_iff` | refuted | False for arbitrary spread lines because vertical divisors can change the special class |
-| N25 ambient/Čech comparison | active | Identify the two curve twists globally from their four chart comparisons |
+| N25 ambient/Čech comparison | proved | The equalizer lift is globally invertible by the four-chart stalk cover |
 | N25 Picard/Riemann–Roch route | active, downstream | Turn finite-field divisor counts and Koszul geometry into actual Picard fibres and rational-point classification |
 | N49 composition identity | active, narrow | Rewrites `preΨ'₄₉(0)` through the order-seven data; does not itself exclude solutions |
 | N49 parity/Newton analysis | conditional | Six charts excluded; three Newton faces and their coefficient certificates remain |
@@ -132,11 +132,10 @@ not additional members of the endpoint cut.
 
 Dependency order for new work:
 
-1. Close and compile
-   `RationalPointsN25QuotientTwoAmbientTwistGlobalComparison.lean` without
-   `trace_state`, `sorry`, or new axioms.
-2. Export the resulting curve-twist comparison to the N25 canonical divisor
-   and Riemann–Roch layer.
+1. Export `curvePullbackTwistGlobalIso` to the conormal determinant and prove
+   the N25 adjunction identification `ω_C ≅ O_C(1)`.
+2. Connect that canonical twist to the explicit hyperplane section and the
+   class-indexed middle-degree Riemann--Roch fibres.
 3. For N13, replace the false `class_eq_iff` route with a separately named
    specialization group homomorphism and prove Abel–Jacobi compatibility before
    wiring `CyclicExclusion13`.
@@ -151,14 +150,14 @@ printed axiom list with `[MZ-AUDIT-FOUR-CUT]`.
 
 ## Next questions
 
-1. **`RM-N25-01` for `[MZ-N25-CECH-COMPARE]`:** What exact equality identifies
-   the inverse vertical-open pullback base-change component with
-   `pullbackRestrictionHom`?  Acceptance: a reusable, compiled lemma closes
-   `curvePullbackTwistLocalIso_restrict_left` without unfolding affine sheaves.
-2. **`RM-N25-02` for `[MZ-N25-CECH-COMPARE]`:** Can the right-overlap theorem be
-   obtained by the same typed substitutions and then combined with
-   `curvePullbackTwistOverlapIso_transition`?  Acceptance: the full file builds
-   with zero `trace_state`, `sorry`, and custom axioms.
+1. **`RM-N25-03` for `[MZ-N25-PICARD-RR]`:** Which existing dualizing-module or
+   regular-immersion interface exposes the determinant of the proved rank-two
+   conormal basis?  Acceptance: a compiled adjunction isomorphism identifies
+   the canonical module with `curvePullbackTwistGlobalIso` at degree one.
+2. **`RM-N25-04` for `[MZ-N25-PICARD-RR]`:** How should the explicit degree-six
+   hyperplane section be connected to that canonical module without assuming
+   divisor theory?  Acceptance: a checked section/divisor bridge supplies the
+   canonical class consumed by the middle-degree Riemann--Roch fibres.
 3. **`RM-N13-01` for `[MZ-N13-SPECIALIZE]`:** Which concrete finite model should
    carry the characteristic-two group law, and what checked map from the
    rational Picard quotient descends to it?  Acceptance: a compiled additive
