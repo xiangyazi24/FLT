@@ -46,6 +46,8 @@ theorems still consume `[MZ-N25]` and `[MZ-N49]` respectively.
   → [MZ-N25-CECH-COMPARE]
   → [MZ-N25-ADJUNCTION-DESCENT]
   → [MZ-N25-AFFINE-CANONICAL]
+  → [MZ-N25-CHART-CANONICAL]
+  → [MZ-N25-OVERLAP-LOCALIZATION]
   → [MZ-N25-PICARD-RR]
   → [MZ-N25-ABEL-JACOBI]
   → [MZ-N25]
@@ -75,10 +77,13 @@ remaining Newton faces still require independent certificates.
    the actual ambient-canonical/inverse-conormal transition is globally that
    twist.  `[MZ-N25-AFFINE-CANONICAL]` now constructs the actual Kähler
    differential module on each ordinary chart and proves it is free of rank
-   one via the unimodular Jacobian cross product.  The remaining seam is to
-   compare those residue bases after localization to each ordered overlap and
-   prove their change of basis is the already verified exponent `-1`
-   transition, yielding `ω_C ≅ O_C(1)`.
+   one via the unimodular Jacobian cross product.
+   `[MZ-N25-CHART-CANONICAL]` transports these modules and their residue
+   coordinates to the actual degree-zero homogeneous projective chart rings.
+   `[MZ-N25-OVERLAP-LOCALIZATION]` localizes both actual chart coordinates to
+   every ordered overlap and packages their change of basis as an explicit
+   unit.  The remaining seam is to identify that unit with the already
+   verified exponent `-1` transition, yielding `ω_C ≅ O_C(1)`.
 2. **`[MZ-N13-SPECIALIZE]`.** The curve model, rational Abel map, special point
    classifier, cardinality 19, and normalized Mumford comparison are present.
    The next sound object is a genuine specialization group homomorphism, not
@@ -122,6 +127,8 @@ not additional members of the endpoint cut.
 | N25 ambient/Čech comparison | proved | The equalizer lift is globally invertible by the four-chart stalk cover |
 | N25 adjunction transition descent | proved | The `4 + (-5) = -1` composite defines the same global equalizer as the effective hyperplane twist |
 | N25 affine canonical differentials | proved | Each actual affine Kähler module is explicitly equivalent to its chart ring via the unimodular Jacobian residue |
+| N25 homogeneous chart canonical differentials | proved | The Kähler equivalences and residue coordinates are transported to all four actual degree-zero projective chart rings |
+| N25 overlap localization | proved | Both actual chart residue coordinates are localized to every ordered overlap and their rank-one transition is packaged as an explicit unit |
 | N25 Picard/Riemann–Roch route | active, downstream | Turn finite-field divisor counts and Koszul geometry into actual Picard fibres and rational-point classification |
 | N49 composition identity | active, narrow | Rewrites `preΨ'₄₉(0)` through the order-seven data; does not itself exclude solutions |
 | N49 parity/Newton analysis | conditional | Six charts excluded; three Newton faces and their coefficient certificates remain |
@@ -141,9 +148,8 @@ not additional members of the endpoint cut.
 
 Dependency order for new work:
 
-1. Base-change the explicit affine Kähler equivalences to the ordered chart
-   overlaps and prove that the two residue bases differ by
-   `coordinateAdjunctionOverlapIso`.
+1. Prove that `coordinateOverlapResidueUnit` is the exponent `-1`
+   coordinate-ratio unit represented by `coordinateAdjunctionOverlapIso`.
 2. Compose that local identification with
    `adjunctionTransitionLineIsoCurvePullback` to prove `ω_C ≅ O_C(1)`.
 3. Connect that canonical twist to the explicit hyperplane section and the
@@ -162,10 +168,10 @@ printed axiom list with `[MZ-AUDIT-FOUR-CUT]`.
 
 ## Next questions
 
-1. **`RM-N25-03` for `[MZ-N25-PICARD-RR]`:** Base-change the proved singleton
-   bases `chartKaehlerDifferentialBasis` from both sides of every ordered
-   coordinate overlap and calculate their exact ratio.  Acceptance: the
-   induced overlap automorphism is proved equal to
+1. **`RM-N25-03` for `[MZ-N25-PICARD-RR]`:** Calculate the explicit unit
+   `coordinateOverlapResidueUnit` obtained by comparing the two localized
+   actual residue coordinates.  Acceptance: the induced overlap automorphism
+   is proved equal to
    `coordinateAdjunctionOverlapIso` (equivalently exponent `-1`), so the four
    actual Kähler modules descend to `adjunctionTransitionLine` with no carried
    adjunction hypothesis.

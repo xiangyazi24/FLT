@@ -1265,3 +1265,53 @@
   as actual Kähler differentials.  The remaining adjunction seam is the
   ordered-overlap base-change calculation proving their ratio is the already
   verified exponent `-1` transition.
+
+## Run 2026-08-21 (N25 homogeneous chart canonical differentials)
+
+- doctrine version: `8b3a36ac87fa766acde538b13596aae63e3074269d021ae206eeaefb2edd8336`
+- approval: Xiang's instruction to continue the current task autonomously,
+  retain ChatGPT as a mathematical workhorse, and verify every result locally
+- starting avenue: remove the remaining distinction between the ordinary
+  affine quotient presentations carrying the residue bases and the actual
+  degree-zero homogeneous coordinate rings used by projective descent
+- result: added `FLT/Mathlib/RingTheory/Kaehler/AlgEquiv.lean`.  A bijective
+  algebra map is proved to induce a bijection on relative Kähler
+  differentials by computing the kernel through the standard finitely
+  supported presentation.  Algebra equivalences are then packaged as
+  semilinear equivalences of their differential modules.
+- result: added
+  `RationalPointsN25QuotientTwoCanonicalDifferentialCharts.lean`.  The four
+  existing affine-to-homogeneous ring equivalences are upgraded to algebra
+  equivalences over `ZMod 2`, and the explicit rank-one Kähler equivalences
+  are transported to the actual rings of the projective charts.
+- result: proved that the transported coordinate functional applied to a
+  transported affine differential is exactly the affine Jacobian residue
+  coordinate mapped through the chart algebra equivalence.  This pins the
+  actual singleton bases to the computed residues and rules out an unrelated
+  choice of local generator.
+- result: added `FLT/Mathlib/RingTheory/Kaehler/FormallyEtale.lean`, which
+  base-changes a chosen Kähler coordinate through a formally étale algebra and
+  computes its value on the image of a source differential.
+- result: added
+  `RationalPointsN25QuotientTwoCanonicalDifferentialOverlaps.lean`.  It
+  explicitly casts the propositionally equal homogeneous denominators,
+  factors both ordered-overlap projections through genuine `Away`
+  localizations, and transports both actual chart residue coordinates to the
+  same overlap Kähler module.
+- result: the induced rank-one change of coordinate is multiplication by the
+  explicit unit `coordinateOverlapResidueUnit`.  The remaining adjunction seam
+  is therefore the equality of this unit with the established exponent `-1`
+  coordinate-ratio unit.
+- ChatGPT: Q5910 was checked again only through the configured git-drop
+  branch.  No drop was present; the request was not re-sent and no unverified
+  external claim entered the proof.
+- verification: strict source checks for all four new modules pass, and their
+  module targets produced `.olean` files.  Fresh axiom audits of the generic
+  bijection, semilinear and formally étale transports, actual chart and
+  overlap Kähler equivalences, coordinate comparisons, transition formula,
+  and transition unit report exactly `propext`, `Classical.choice`, and
+  `Quot.sound`.
+- end: `[MZ-N25-CHART-CANONICAL]` and
+  `[MZ-N25-OVERLAP-LOCALIZATION]` proved
+- final result: only the explicit equality between the localized residue
+  transition unit and the existing exponent `-1` adjunction unit remains.

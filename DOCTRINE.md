@@ -147,10 +147,18 @@ generate the unit ideal.  Dot product with this cross product therefore has
 kernel equal to the span of the two relation gradients.  Comparing that
 functional with the presentation cotangent sequence constructs an explicit
 linear equivalence `Ω¹_{B/k} ≃ B` and a singleton basis for the actual Kähler
-differentials.  This is `[MZ-N25-AFFINE-CANONICAL]`.  The remaining projective
-step is no longer construction of a local canonical object: it is the precise
-base-change comparison showing that these four residue bases transform by the
-already verified exponent `-1` overlap map.
+differentials.  This is `[MZ-N25-AFFINE-CANONICAL]`.  Those equivalences have
+now also been transported across the proved algebra equivalences to the actual
+degree-zero homogeneous coordinate rings of all four projective charts.  The
+transported coordinate functionals are proved to be exactly the affine
+Jacobian residues followed by the chart equivalences; this is
+`[MZ-N25-CHART-CANONICAL]`.  Both chart coordinates have now been localized
+to every ordered overlap through the actual homogeneous chart projections.
+Their change of basis is an explicit unit
+`coordinateOverlapResidueUnit`; this is
+`[MZ-N25-OVERLAP-LOCALIZATION]`.  The remaining projective step is the single
+unit identity equating this residue transition with the already verified
+exponent `-1` coordinate-ratio unit.
 
 The next ranked canonical-geometry attacks are:
 

@@ -1949,3 +1949,43 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   exact seam is to compare the two base-changed residue bases on every ordered
   chart overlap and prove that their ratio is the already constructed
   `coordinateAdjunctionOverlapIso`, i.e. exponent `-1`.
+
+### N25 canonical differentials on homogeneous charts (2026-08-21)
+
+- `FLT/Mathlib/RingTheory/Kaehler/AlgEquiv.lean` proves that a bijective
+  algebra map induces a bijection on relative Kähler differentials.  Its
+  `mapAlgEquiv` packages the result as the semilinear equivalence required
+  when the source and target coefficient rings differ.
+- `RationalPointsN25QuotientTwoCanonicalDifferentialCharts.lean` upgrades the
+  existing ring equivalence between each ordinary quotient and its actual
+  degree-zero homogeneous chart ring to an algebra equivalence over `ZMod 2`.
+  Transporting through `mapAlgEquiv` gives
+  `chartCoordinateKaehlerDifferentialEquiv : Ω¹_{B_i/k} ≃ B_i` on the
+  actual ring of `D₊(X_i)`.
+- The comparison theorem
+  `chartCoordinateKaehlerDifferentialEquiv_mapAlgEquiv` proves that the new
+  coordinate functional is the affine Jacobian residue coordinate followed
+  by the chart algebra equivalence.  Thus the transported singleton basis is
+  tied to the previously computed residue, rather than being an unrelated
+  choice of free basis.
+- This closes `[MZ-N25-CHART-CANONICAL]`.  The remaining adjunction seam starts
+  directly on the actual projective chart rings: localize their singleton
+  bases to each ordered overlap and compute the change of basis as
+  `coordinateAdjunctionOverlapIso`.
+
+### N25 canonical differentials on ordered overlaps (2026-08-21)
+
+- `FLT/Mathlib/RingTheory/Kaehler/FormallyEtale.lean` constructs the canonical
+  base change of a chosen Kähler-differential coordinate through a formally
+  étale algebra and proves its value on differentials coming from the source.
+- `RationalPointsN25QuotientTwoCanonicalDifferentialOverlaps.lean` explicitly
+  identifies the propositionally equal denominators used by the canonical
+  chart and overlap presentations.  Each ordered overlap projection is then
+  factored as that ring equivalence followed by an `Away` localization.
+- Formal étaleness composes along this factorization, so the residue
+  coordinates from both chart rings give linear equivalences from the same
+  overlap Kähler module to its coefficient ring.  Their comparison is
+  multiplication by the explicit unit `coordinateOverlapResidueUnit`.
+- This closes `[MZ-N25-OVERLAP-LOCALIZATION]`.  The remaining adjunction seam
+  is the concrete equality between this unit and the existing degree-one
+  coordinate-ratio unit to exponent `-1`.

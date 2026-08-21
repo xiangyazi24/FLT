@@ -211,10 +211,15 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     now explicitly free of rank one.  The generator is characterized by the
     unimodular cross-product residue functional, whose kernel is proved equal
     to the cotangent-complex range.
-  - Open atoms: base-change those four Kähler bases to the ordered coordinate
-    overlaps and prove their ratio is the verified adjunction transition,
-    thereby descending the actual canonical differentials and proving
-    `ω_C ≅ O_C(1)`;
+  - These rank-one modules and their residue coordinates are now transported
+    to the actual degree-zero homogeneous coordinate rings of all four
+    projective charts through the proved chart algebra equivalences.
+  - Both actual chart residue coordinates are now localized to every ordered
+    overlap, and their rank-one transition is packaged as the explicit unit
+    `coordinateOverlapResidueUnit`.
+  - Open atoms: prove this unit is the verified exponent `-1` adjunction
+    transition, thereby descending the actual canonical differentials and
+    proving `ω_C ≅ O_C(1)`;
     use the geometric resolution to identify the scheme-theoretic Hilbert
     polynomial with the certified `6T-3`;
     package the characteristic-three Jacobian-rank certificate as a smooth
