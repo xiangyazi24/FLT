@@ -1,0 +1,31 @@
+Command:
+  lake build FLT.Assumptions.MazurProof.MazurEndpointAudit
+  lake env lean FLT/Assumptions/MazurProof/MazurEndpointAudit.lean
+
+Host: uisai2
+Date: 2026-08-20
+
+Build result:
+  Build completed successfully (8775 jobs).
+
+Lean output:
+  'MazurProof.mazur_torsion_bound' depends on axioms: [propext,
+   Classical.choice,
+   MazurProof.no_prime_order_ge_23,
+   Quot.sound,
+   MazurProof.CyclicExclusion13.C13Sextic_affine_x_is_cuspidal,
+   MazurProof.CyclicExclusion25.no_explicit_order25_obstruction,
+   MazurProof.CyclicExclusion49.no_raw_order49_tate_obstruction]
+
+Interpretation:
+  The endpoint has exactly four reachable custom axioms and no reachable
+  `sorryAx`.  `propext`, `Classical.choice`, and `Quot.sound` are the standard
+  logical principles allowed by the project audit.
+
+Directory-wide source scan:
+  7 actual custom `axiom` declarations:
+    - 4 reachable endpoint seams listed above;
+    - 3 unreachable legacy-route declarations in CyclicOrderReduction.lean,
+      OrderReduction.lean, and TorsionFinite.lean.
+  12 literal proof placeholders matching a source line beginning with `sorry`.
+  None of those 12 placeholders is reachable from the audited endpoint.

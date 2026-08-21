@@ -1,0 +1,28 @@
+{"id":"EDGE-AUDIT-GOAL","type":"tests","from":"MZ-AUDIT-FOUR-CUT","to":"MZ-GOAL","witness":{"source":"SRC-AUDIT-20260820"}}
+{"id":"EDGE-STRUCTURE-GOAL","type":"implies","from":"MZ-STRUCTURE-BACKBONE","to":"MZ-GOAL","witness":{"source":"SRC-AUDIT-20260820","substitution":"cyclic-order input := MZ-CYCLIC-ASSEMBLY"}}
+{"id":"EDGE-CYCLIC-STRUCTURE","type":"depends-on","from":"MZ-STRUCTURE-BACKBONE","to":"MZ-CYCLIC-ASSEMBLY","witness":{"source":"SRC-AUDIT-20260820"}}
+{"id":"EDGE-N13-CYCLIC","type":"depends-on","from":"MZ-CYCLIC-ASSEMBLY","to":"MZ-N13","witness":{"source":"SRC-CYCLIC-ASSEMBLY","declaration":"no_order_13_prime"}}
+{"id":"EDGE-N25-CYCLIC","type":"depends-on","from":"MZ-CYCLIC-ASSEMBLY","to":"MZ-N25","witness":{"source":"SRC-CYCLIC-ASSEMBLY","declaration":"no_order_25"}}
+{"id":"EDGE-N49-CYCLIC","type":"depends-on","from":"MZ-CYCLIC-ASSEMBLY","to":"MZ-N49","witness":{"source":"SRC-CYCLIC-ASSEMBLY","declaration":"no_order_49"}}
+{"id":"EDGE-TAIL-CYCLIC","type":"depends-on","from":"MZ-CYCLIC-ASSEMBLY","to":"MZ-TAIL23","witness":{"source":"SRC-CYCLIC-ASSEMBLY","declaration":"mazur_prime_torsion_bound_sub"}}
+{"id":"EDGE-COMP14-CYCLIC","type":"supports","from":"MZ-COMP-14","to":"MZ-CYCLIC-ASSEMBLY","witness":{"source":"SRC-CYCLIC-ASSEMBLY"}}
+{"id":"EDGE-COMP15-CYCLIC","type":"supports","from":"MZ-COMP-15","to":"MZ-CYCLIC-ASSEMBLY","witness":{"source":"SRC-CYCLIC-ASSEMBLY"}}
+{"id":"EDGE-COMP16-CYCLIC","type":"supports","from":"MZ-COMP-16","to":"MZ-CYCLIC-ASSEMBLY","witness":{"source":"SRC-CYCLIC-ASSEMBLY"}}
+{"id":"EDGE-COMP18-CYCLIC","type":"supports","from":"MZ-COMP-18","to":"MZ-CYCLIC-ASSEMBLY","witness":{"source":"SRC-CYCLIC-ASSEMBLY"}}
+{"id":"EDGE-COMP20-CYCLIC","type":"supports","from":"MZ-COMP-20","to":"MZ-CYCLIC-ASSEMBLY","witness":{"source":"SRC-CYCLIC-ASSEMBLY"}}
+{"id":"EDGE-COMP21-CYCLIC","type":"supports","from":"MZ-COMP-21","to":"MZ-CYCLIC-ASSEMBLY","witness":{"source":"SRC-CYCLIC-ASSEMBLY"}}
+{"id":"EDGE-COMP24-CYCLIC","type":"supports","from":"MZ-COMP-24","to":"MZ-CYCLIC-ASSEMBLY","witness":{"source":"SRC-CYCLIC-ASSEMBLY"}}
+{"id":"EDGE-COMP27-CYCLIC","type":"supports","from":"MZ-COMP-27","to":"MZ-CYCLIC-ASSEMBLY","witness":{"source":"SRC-CYCLIC-ASSEMBLY"}}
+{"id":"EDGE-COMP35-CYCLIC","type":"supports","from":"MZ-COMP-35","to":"MZ-CYCLIC-ASSEMBLY","witness":{"source":"SRC-CYCLIC-ASSEMBLY"}}
+{"id":"EDGE-PRIME11-CYCLIC","type":"supports","from":"MZ-PRIME-11","to":"MZ-CYCLIC-ASSEMBLY","witness":{"source":"SRC-CYCLIC-ASSEMBLY"}}
+{"id":"EDGE-PRIME17-CYCLIC","type":"supports","from":"MZ-PRIME-17","to":"MZ-CYCLIC-ASSEMBLY","witness":{"source":"SRC-CYCLIC-ASSEMBLY"}}
+{"id":"EDGE-PRIME19-CYCLIC","type":"supports","from":"MZ-PRIME-19","to":"MZ-CYCLIC-ASSEMBLY","witness":{"source":"SRC-CYCLIC-ASSEMBLY"}}
+{"id":"EDGE-N13-SPECIALIZE-N13","type":"implies","from":"MZ-N13-SPECIALIZE","to":"MZ-N13","witness":{"source":"SRC-N13-DIRECT-ENDPOINT","substitution":"classify := specialization composed with the special Abel classifier"}}
+{"id":"EDGE-N13-CLASS-SCOPES-SPECIALIZE","type":"scopes","from":"MZ-N13-CLASS-EQ","to":"MZ-N13-SPECIALIZE","witness":{"source":"SRC-N13-DIRECT-DOCTRINE","scope":"The counterexample forbids replacing genuine specialization by arbitrary spread-line specialClass, but leaves the specialization-hom route open."}}
+{"id":"EDGE-N25-KOSZUL-CECH","type":"supports","from":"MZ-N25-KOSZUL-CURVE","to":"MZ-N25-CECH-COMPARE","witness":{"source":"SRC-N25-KOSZUL-PULLBACK"}}
+{"id":"EDGE-N25-CECH-RR","type":"supports","from":"MZ-N25-CECH-COMPARE","to":"MZ-N25-PICARD-RR","witness":{"source":"SRC-AXIOM-CHECKLIST-20260812","scope":"Supplies the curve-side twist/canonicality comparison used by the Riemann–Roch package."}}
+{"id":"EDGE-N25-RR-AJ","type":"depends-on","from":"MZ-N25-ABEL-JACOBI","to":"MZ-N25-PICARD-RR","witness":{"source":"SRC-AXIOM-CHECKLIST-20260812"}}
+{"id":"EDGE-N25-AJ-N25","type":"implies","from":"MZ-N25-ABEL-JACOBI","to":"MZ-N25","witness":{"source":"SRC-AXIOM-CHECKLIST-20260812","substitution":"primitive Tate point maps to a noncuspidal canonical point"}}
+{"id":"EDGE-N49-COMPOSE-NEWTON","type":"supports","from":"MZ-N49-COMPOSE","to":"MZ-N49-NEWTON","witness":{"source":"SRC-N49-PLAN-20260818","scope":"Computational reformulation only; no exclusion follows without arithmetic."}}
+{"id":"EDGE-N49-NEWTON-N49","type":"supports","from":"MZ-N49-NEWTON","to":"MZ-N49","witness":{"source":"SRC-N49-PLAN-20260818","scope":"Would cover the planned 2-adic parity attack only after all charts are certified."}}
+{"id":"EDGE-OLD-ROADMAP-SUPERSEDED","type":"supersedes","from":"MZ-AUDIT-FOUR-CUT","to":"MZ-OLD-ROADMAP","witness":{"source":"SRC-AUDIT-20260820"}}
