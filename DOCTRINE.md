@@ -112,14 +112,25 @@ uniqueness then identify the former categorical quotient `Q_d` with
 hyperplane twist on the curve.  This closes the shifted terminal comparison;
 it does not yet reduce the four endpoint axioms.
 
+The local restriction of that ambient twist is now identified with the
+curve-side Čech model.  The graded quotient maps every degree-one coordinate
+ratio, including arbitrary integral powers, to the corresponding curve
+ratio.  For an arbitrary affine map `Spec S → Spec R`, the canonical
+comparison `g^* O_{Spec R} ≅ O_{Spec S}` is proved natural with respect to
+rank-one unit scalars.  Consequently the ambient and curve overlap
+transitions commute after pullback, and every standard chart has a canonical
+isomorphism from the actual restricted ambient twist to the local curve
+twist.  The next bounded seam is to lift these chart maps through the
+existing Čech equalizer and prove the resulting global map is an isomorphism.
+
 The next ranked canonical-geometry attacks are:
 
 1. build the missing height-one valuation/principal-divisor layer on the
    proved integral chart, including the common-function-field interface
    needed by the class-indexed middle-degree Riemann--Roch consumer;
 2. connect the proved conormal basis and shifted ambient Koszul
-   resolution to the determinant/adjunction identification
-   `ω_C ≅ O_C(1)`.
+   resolution, via the completed ambient/curve twist restriction comparison,
+   to the determinant/adjunction identification `ω_C ≅ O_C(1)`.
 
 ### (b) N13 concrete specialization and separatedness — ACTIVE
 

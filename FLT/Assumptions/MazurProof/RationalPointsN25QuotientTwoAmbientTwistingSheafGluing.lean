@@ -849,6 +849,57 @@ def globalTwistModuleToLocal (d : ℤ) (i : Fin 4) :
     |>.symm (equalizer.ι (twistCechLeft d) (twistCechRight d) ≫
       Pi.π (fun j : Fin 4 ↦ ambientLocalPushforward d j) i)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Literal Čech evaluation satisfies the transition equation on every
+ordered ambient pair overlap.  Transposition reduces the assertion to one
+component of the defining equalizer equation. -/
+theorem globalTwistModuleToLocal_pair_compatibility
+    (d : ℤ) (i j : Fin 4) :
+    Scheme.Modules.iteratedRestrictionHom
+        (ambientOverlapToLeft i j) (ambientChartMap i)
+        (ambientOverlapMap i j) rfl
+        (globalTwistModule d) (ambientLocalTwistModule d i)
+        (ambientOverlapTwistModule d i j)
+        (globalTwistModuleToLocal d i)
+        (ambientRestrictLeftIso d i j ≪≫
+          ambientOverlapTwistIso d i j).hom =
+      Scheme.Modules.iteratedRestrictionHom
+        (ambientOverlapToRight i j) (ambientChartMap j)
+        (ambientOverlapMap i j) (ambientOverlapMap_eq_right i j)
+        (globalTwistModule d) (ambientLocalTwistModule d j)
+        (ambientOverlapTwistModule d i j)
+        (globalTwistModuleToLocal d j)
+        (ambientRestrictRightIso d i j).hom := by
+  have h := congrArg
+    (fun z => z ≫ Pi.π
+      (fun p : Fin 4 × Fin 4 ↦ ambientOverlapPushforward d p) (i, j))
+    (globalTwistModule_compatibility d)
+  simp only [twistCechLeft, twistCechRight, Category.assoc,
+    Pi.lift_π] at h
+  have heval (k : Fin 4) :
+      (Scheme.Modules.restrictAdjunction
+          (ambientChartMap k)).unit.app (globalTwistModule d) ≫
+        (Scheme.Modules.pushforward (ambientChartMap k)).map
+          (globalTwistModuleToLocal d k) =
+      equalizer.ι (twistCechLeft d) (twistCechRight d) ≫
+        Pi.π (fun l : Fin 4 ↦ ambientLocalPushforward d l) k := by
+    change ((Scheme.Modules.restrictAdjunction
+      (ambientChartMap k)).homEquiv
+        (globalTwistModule d) (ambientLocalTwistModule d k))
+          (globalTwistModuleToLocal d k) = _
+    unfold globalTwistModuleToLocal
+    exact Equiv.apply_symm_apply _ _
+  rw [← Scheme.Modules.pushforwardRestrictionHomOfHom_transpose,
+    ← Scheme.Modules.pushforwardRestrictionHomOfHom_transpose]
+  simp only [← Category.assoc]
+  rw [heval i, heval j]
+  exact congrArg
+    ((Scheme.Modules.restrictAdjunction
+      (ambientOverlapMap i j)).homEquiv
+        (globalTwistModule d)
+        (ambientOverlapTwistModule d i j)).symm h
+
 /-- Restriction carries the product of extended local sheaves to the product
 of their restrictions on the fixed chart. -/
 def restrictedTwistCechSourceIso (d : ℤ) (k : Fin 4) :

@@ -1112,3 +1112,37 @@
   the common principal-open model now connects integral domains.  The N25
   endpoint axiom remains unchanged; the next route is the height-one
   valuation/principal-divisor interface needed for Riemann--Roch.
+
+## Run 2026-08-20 (N25 ambient twist restriction)
+
+- approval: Xiang's explicit instruction to restore the current FLT proof
+  campaign and keep all ChatGPT bridge tabs occupied
+- repository recovery: verified `/home/xhuan5/repos/flt-ai` as the active Git
+  worktree, preserved the local N13 and N25 edits, merged the three current
+  N25 plane-chart commits from `xiang/ai-scratch`, and pushed merge commit
+  `7133cc401b` without touching the unrelated untracked worktree files
+- result: normalized both ambient and curve Čech evaluations around the
+  forward equalizer map and proved that the degree-one coordinate ratio is
+  preserved under graded base change
+- result: proved affine structure-sheaf naturality for scalar automorphisms
+  under arbitrary `Spec.map`, then used it to prove that the pulled-back
+  ambient overlap transition equals the curve overlap transition
+- result: banked `curvePullbackTwistOverlapIso` and
+  `curvePullbackTwistChartIso`, identifying the actual ambient restriction
+  with the curve-side rank-one twist model on every overlap and chart
+- ChatGPT: Q5672--Q5704 were rolled across all live tabs.  Q5672 correctly
+  supported the forward equalizer normalization; several later replies could
+  not access the local worktree and were treated only as route audits, with
+  every API claim checked locally.  Q5671 suffered connector timeout and was
+  not re-dispatched over the still-running tab.
+- verification: the 8603-job target build passed.  Fresh axiom audits of the
+  affine generator naturality, pullback scalar naturality, ratio transition,
+  and overlap compatibility contain only `propext`, `Classical.choice`, and
+  `Quot.sound`; the bypass scan and `git diff --check` are clean.
+- verified next route: construct the chartwise adjunction-unit map into
+  `twistCechSource`, prove its two overlap projections agree using the new
+  transition theorem, lift through `globalTwistModule`, and prove the lift is
+  an isomorphism.
+- final result: the N25 endpoint axiom remains unchanged; the local
+  ambient-to-curve twist restriction seam is closed without `sorry`, new
+  axioms, or `native_decide`.

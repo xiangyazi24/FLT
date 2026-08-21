@@ -846,6 +846,58 @@ def globalTwistModuleToLocal (d : ℤ) (i : Fin 4) :
     |>.symm (equalizer.ι (twistCechLeft d) (twistCechRight d) ≫
       Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward d j) i)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Literal Čech evaluation satisfies the transition equation on every
+ordered pair overlap.  Transposing both iterated restriction maps turns the
+claim back into the corresponding component of the defining equalizer
+equation. -/
+theorem globalTwistModuleToLocal_pair_compatibility
+    (d : ℤ) (i j : Fin 4) :
+    Scheme.Modules.iteratedRestrictionHom
+        (coordinateOverlapToLeft i j) (coordinateChartMap i)
+        (coordinateOverlapMap i j) rfl
+        (globalTwistModule d) (coordinateLocalTwistModule d i)
+        (coordinateOverlapTwistModule d i j)
+        (globalTwistModuleToLocal d i)
+        (coordinateRestrictLeftIso d i j ≪≫
+          coordinateOverlapTwistIso d i j).hom =
+      Scheme.Modules.iteratedRestrictionHom
+        (coordinateOverlapToRight i j) (coordinateChartMap j)
+        (coordinateOverlapMap i j) (coordinateOverlapMap_eq_right i j)
+        (globalTwistModule d) (coordinateLocalTwistModule d j)
+        (coordinateOverlapTwistModule d i j)
+        (globalTwistModuleToLocal d j)
+        (coordinateRestrictRightIso d i j).hom := by
+  have h := congrArg
+    (fun z => z ≫ Pi.π
+      (fun p : Fin 4 × Fin 4 ↦ coordinateOverlapPushforward d p) (i, j))
+    (globalTwistModule_compatibility d)
+  simp only [twistCechLeft, twistCechRight, Category.assoc,
+    Pi.lift_π] at h
+  have heval (k : Fin 4) :
+      (Scheme.Modules.restrictAdjunction
+          (coordinateChartMap k)).unit.app (globalTwistModule d) ≫
+        (Scheme.Modules.pushforward (coordinateChartMap k)).map
+          (globalTwistModuleToLocal d k) =
+      equalizer.ι (twistCechLeft d) (twistCechRight d) ≫
+        Pi.π (fun l : Fin 4 ↦ coordinateLocalPushforward d l) k := by
+    change ((Scheme.Modules.restrictAdjunction
+      (coordinateChartMap k)).homEquiv
+        (globalTwistModule d) (coordinateLocalTwistModule d k))
+          (globalTwistModuleToLocal d k) = _
+    unfold globalTwistModuleToLocal
+    exact Equiv.apply_symm_apply _ _
+  rw [← Scheme.Modules.pushforwardRestrictionHomOfHom_transpose,
+    ← Scheme.Modules.pushforwardRestrictionHomOfHom_transpose]
+  simp only [← Category.assoc]
+  rw [heval i, heval j]
+  exact congrArg
+    ((Scheme.Modules.restrictAdjunction
+      (coordinateOverlapMap i j)).homEquiv
+        (globalTwistModule d)
+        (coordinateOverlapTwistModule d i j)).symm h
+
 /-- Restriction carries the product of extended local sheaves to the product
 of their restrictions on the fixed chart. -/
 def restrictedTwistCechSourceIso (d : ℤ) (k : Fin 4) :
@@ -1828,13 +1880,26 @@ theorem coordinateLocalToRestrictedGlobalTwist_isIso
     rw [IsIso.inv_hom_id]
     simp only [Category.comp_id, Category.id_comp]
 
+/-- Evaluation itself is invertible.  Reconstruction is invertible and its
+composite with evaluation is the invertible diagonal self-overlap
+identification, so two-out-of-three gives this claim. -/
+theorem globalTwistModuleToLocal_isIso (d : ℤ) (k : Fin 4) :
+    IsIso (globalTwistModuleToLocal d k) := by
+  letI := coordinateLocalToRestrictedGlobalTwist_isIso d k
+  letI := coordinateLocalToRestrictedGlobalTwist_comp_evaluation_isIso d k
+  exact IsIso.of_isIso_comp_left
+    (coordinateLocalToRestrictedGlobalTwist d k)
+    (globalTwistModuleToLocal d k)
+
 /-- Restriction of the global Čech equalizer to chart `k` recovers the local
-twisting module used to define the descent datum. -/
+twisting module used to define the descent datum.  We use literal evaluation
+as the comparison, so descended morphisms satisfy chartwise naturality
+without an additional diagonal normalization. -/
 def globalTwistModuleLocalIso (d : ℤ) (k : Fin 4) :
     (Scheme.Modules.restrictFunctor (coordinateChartMap k)).obj
         (globalTwistModule d) ≅ coordinateLocalTwistModule d k := by
-  letI := coordinateLocalToRestrictedGlobalTwist_isIso d k
-  exact (asIso (coordinateLocalToRestrictedGlobalTwist d k)).symm
+  letI := globalTwistModuleToLocal_isIso d k
+  exact asIso (globalTwistModuleToLocal d k)
 
 /-- On every standard coordinate chart, the global twisting module is free
 of rank one.  This is the local effectivity statement needed to use the Čech

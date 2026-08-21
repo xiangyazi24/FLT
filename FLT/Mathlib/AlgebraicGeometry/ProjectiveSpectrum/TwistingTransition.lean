@@ -39,6 +39,29 @@ def degreeOneRatio {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) :
   HomogeneousLocalization.Away.mk 𝒜 (SetLike.mul_mem_graded hf hg) 1
     (g ^ 2) (by simpa using SetLike.pow_mem_graded 2 hg)
 
+section Map
+
+variable {B τ : Type u} [CommRing B] [SetLike τ B]
+variable [AddSubgroupClass τ B]
+variable {piecesA : ℕ → σ} {piecesB : ℕ → τ}
+variable [GradedRing piecesA] [GradedRing piecesB]
+
+/-- A graded ring map carries the degree-one ratio on an ordered pair
+overlap to the corresponding ratio after base change.  The result is stated
+with heterogeneous equality because the target localization is indexed by
+`f.map * g.map`, whereas `Away.map` is indexed by the propositionally equal
+image of `f * g`. -/
+theorem map_degreeOneRatio_heq {f g : A} (φ : piecesA →+*ᵍ piecesB)
+    (hf : f ∈ piecesA 1) (hg : g ∈ piecesA 1) :
+    HomogeneousLocalization.Away.map φ (f * g)
+        (degreeOneRatio piecesA hf hg) ≍
+      degreeOneRatio piecesB (map_mem φ hf) (map_mem φ hg) := by
+  rw [degreeOneRatio, HomogeneousLocalization.Away.map_mk,
+    degreeOneRatio]
+  congr 1 <;> simp
+
+end Map
+
 /-- The reverse ratio `f/g`, represented in the same overlap ring. -/
 def degreeOneRatioInv {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) :
     HomogeneousLocalization.Away 𝒜 (f * g) :=
