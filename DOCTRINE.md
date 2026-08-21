@@ -139,11 +139,25 @@ claim that a dualizing sheaf has been constructed.  The remaining adjunction
 seam is to construct the canonical/dualizing object and prove that its local
 trivializations carry exactly this verified composite transition.
 
+The first half of that remaining seam is now concrete.  On every ordinary
+affine curve chart, the two equation gradients have a unimodular cross product:
+the three components are exactly the selected Jacobian minors, up to the
+alternating middle sign, and the existing smoothness certificate makes them
+generate the unit ideal.  Dot product with this cross product therefore has
+kernel equal to the span of the two relation gradients.  Comparing that
+functional with the presentation cotangent sequence constructs an explicit
+linear equivalence `Ω¹_{B/k} ≃ B` and a singleton basis for the actual Kähler
+differentials.  This is `[MZ-N25-AFFINE-CANONICAL]`.  The remaining projective
+step is no longer construction of a local canonical object: it is the precise
+base-change comparison showing that these four residue bases transform by the
+already verified exponent `-1` overlap map.
+
 The next ranked canonical-geometry attacks are:
 
-1. construct the canonical/dualizing object from the smooth complete-
-   intersection data and identify its chart transitions with the proved
-   adjunction descent line, yielding `ω_C ≅ O_C(1)`;
+1. localize the proved Kähler-differential bases to each ordered coordinate
+   overlap and prove their change of basis is
+   `coordinateAdjunctionOverlapIso`; then descend them to the proved
+   adjunction transition line, yielding `ω_C ≅ O_C(1)`;
 2. build the missing height-one valuation/principal-divisor layer on the
    proved integral chart, including the common-function-field interface
    needed by the class-indexed middle-degree Riemann--Roch consumer.

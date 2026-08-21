@@ -1215,3 +1215,53 @@
   adjunction is closed without defining a dualizing sheaf to be `O_C(1)`.
   The remaining seam is to construct the canonical/dualizing object and prove
   that its local trivializations induce this verified descent datum.
+
+## Run 2026-08-21 (N25 affine canonical differentials)
+
+- doctrine version: `8b3a36ac87fa766acde538b13596aae63e3074269d021ae206eeaefb2edd8336`
+- approval: Xiang's explicit instruction to continue the current task
+  autonomously, use ChatGPT for hard mathematical and design questions, verify
+  locally, and preserve the repository comment discipline
+- starting avenue: construct an honest local canonical object from the smooth
+  affine complete-intersection presentations, rather than naming the already
+  known twist as a dualizing sheaf
+- result: added the generic commutative-ring theorem
+  `LinearMap.ker_crossProductFunctional`.  If two rows in `R^3` have a
+  unimodular cross product, dot product with that vector is surjective and its
+  kernel is exactly the span of the rows.  The proof uses the vector
+  triple-product identities and requires no field or domain hypothesis.
+- result: added
+  `RationalPointsN25QuotientTwoAffineCanonicalDifferentials.lean`.  On every
+  standard chart it identifies the cross-product components of the affine
+  quadric and cubic gradients with the three selected Jacobians, including
+  the alternating middle sign, and converts the existing unit-ideal
+  smoothness certificate into an explicit Bézout vector.
+- result: reindexed the actual presentation cotangent-space basis by the three
+  non-pivot coordinates, proved that the two relation classes span the
+  conormal module, and proved their differential coordinates are exactly the
+  two Jacobian rows.  Exactness of the cotangent sequence then shows that the
+  pulled-back residue functional and the projection to `Ω¹_{B/k}` have the
+  same kernel.
+- result: the first isomorphism theorem constructs
+  `chartKaehlerDifferentialEquiv : Ω¹_{B/k} ≃ₗ[B] B`, characterizes its
+  value on every ambient differential class, and supplies the singleton basis
+  `chartKaehlerDifferentialBasis` for each ordinary affine curve chart.
+- ChatGPT: dispatched Q5910 through the canonical `ask-gpt.py` bridge for an
+  independent derivation of the residue-basis overlap power.  The request was
+  accepted by `flt10` and remained `processing`; no authoritative git-drop was
+  available during this run, it was not re-dispatched, and no ChatGPT claim
+  was used in the proofs.
+- verification: the strict single-file check and the 8585-job module target
+  pass, as does the repository-wide 4011-job build.  Fresh axiom audits of the
+  generic kernel theorem, Jacobian span and kernel identities, cotangent
+  coordinate comparison, conormal spanning, common-kernel theorem, final
+  Kähler equivalence, its computation rule, and the free-module theorem all
+  report exactly `propext`, `Classical.choice`, and `Quot.sound`.  The bypass,
+  long-line, whitespace, and comment scans are clean.  The source-rebuilt
+  8775-job endpoint audit still reports exactly the four established custom
+  axioms and no `sorryAx`.
+- end: `[MZ-N25-AFFINE-CANONICAL]` proved
+- final result: the four local canonical modules and residue bases now exist
+  as actual Kähler differentials.  The remaining adjunction seam is the
+  ordered-overlap base-change calculation proving their ratio is the already
+  verified exponent `-1` transition.

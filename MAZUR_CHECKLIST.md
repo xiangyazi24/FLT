@@ -207,9 +207,14 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     twist.  The adjunction composite transition `4 + (-5) = -1` has also been
     descended through its own equalizer and identified with the actual
     hyperplane twist on the curve.
-  - Open atoms: construct the canonical/dualizing object from the smooth
-    complete-intersection data and prove that its chart trivializations carry
-    the verified adjunction transition, thereby proving `ω_C ≅ O_C(1)`;
+  - The actual Kähler differential module on each ordinary affine chart is
+    now explicitly free of rank one.  The generator is characterized by the
+    unimodular cross-product residue functional, whose kernel is proved equal
+    to the cotangent-complex range.
+  - Open atoms: base-change those four Kähler bases to the ordered coordinate
+    overlaps and prove their ratio is the verified adjunction transition,
+    thereby descending the actual canonical differentials and proving
+    `ω_C ≅ O_C(1)`;
     use the geometric resolution to identify the scheme-theoretic Hilbert
     polynomial with the certified `6T-3`;
     package the characteristic-three Jacobian-rank certificate as a smooth

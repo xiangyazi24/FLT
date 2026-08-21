@@ -1,6 +1,6 @@
 # Mazur torsion proof: claim-level research map
 
-Last verified: 2026-08-20 on `uisai2`.
+Last verified: 2026-08-21 on `uisai2`.
 
 This is the human projection of `research-map/{sources,claims,edges}.jsonl`.
 Its scope is the dependency closure of `MazurProof.mazur_torsion_bound` and the
@@ -45,6 +45,7 @@ theorems still consume `[MZ-N25]` and `[MZ-N49]` respectively.
 [MZ-N25-KOSZUL-CURVE]
   → [MZ-N25-CECH-COMPARE]
   → [MZ-N25-ADJUNCTION-DESCENT]
+  → [MZ-N25-AFFINE-CANONICAL]
   → [MZ-N25-PICARD-RR]
   → [MZ-N25-ABEL-JACOBI]
   → [MZ-N25]
@@ -72,9 +73,12 @@ remaining Newton faces still require independent certificates.
    ambient hyperplane twist and the effective curve Čech twist are globally
    isomorphic.  `[MZ-N25-ADJUNCTION-DESCENT]` is also proved: the line glued by
    the actual ambient-canonical/inverse-conormal transition is globally that
-   twist.  The remaining canonical-geometry seam is to construct the
-   canonical/dualizing object and prove that its local trivializations induce
-   this transition, yielding `ω_C ≅ O_C(1)`.
+   twist.  `[MZ-N25-AFFINE-CANONICAL]` now constructs the actual Kähler
+   differential module on each ordinary chart and proves it is free of rank
+   one via the unimodular Jacobian cross product.  The remaining seam is to
+   compare those residue bases after localization to each ordered overlap and
+   prove their change of basis is the already verified exponent `-1`
+   transition, yielding `ω_C ≅ O_C(1)`.
 2. **`[MZ-N13-SPECIALIZE]`.** The curve model, rational Abel map, special point
    classifier, cardinality 19, and normalized Mumford comparison are present.
    The next sound object is a genuine specialization group homomorphism, not
@@ -117,6 +121,7 @@ not additional members of the endpoint cut.
 | N13 arbitrary `class_eq_iff` | refuted | False for arbitrary spread lines because vertical divisors can change the special class |
 | N25 ambient/Čech comparison | proved | The equalizer lift is globally invertible by the four-chart stalk cover |
 | N25 adjunction transition descent | proved | The `4 + (-5) = -1` composite defines the same global equalizer as the effective hyperplane twist |
+| N25 affine canonical differentials | proved | Each actual affine Kähler module is explicitly equivalent to its chart ring via the unimodular Jacobian residue |
 | N25 Picard/Riemann–Roch route | active, downstream | Turn finite-field divisor counts and Koszul geometry into actual Picard fibres and rational-point classification |
 | N49 composition identity | active, narrow | Rewrites `preΨ'₄₉(0)` through the order-seven data; does not itself exclude solutions |
 | N49 parity/Newton analysis | conditional | Six charts excluded; three Newton faces and their coefficient certificates remain |
@@ -136,8 +141,8 @@ not additional members of the endpoint cut.
 
 Dependency order for new work:
 
-1. Construct the N25 canonical/dualizing object from the smooth complete-
-   intersection data and prove that its local transition is
+1. Base-change the explicit affine Kähler equivalences to the ordered chart
+   overlaps and prove that the two residue bases differ by
    `coordinateAdjunctionOverlapIso`.
 2. Compose that local identification with
    `adjunctionTransitionLineIsoCurvePullback` to prove `ω_C ≅ O_C(1)`.
@@ -157,12 +162,13 @@ printed axiom list with `[MZ-AUDIT-FOUR-CUT]`.
 
 ## Next questions
 
-1. **`RM-N25-03` for `[MZ-N25-PICARD-RR]`:** Construct the weakest honest
-   canonical/dualizing object available from the smooth complete-intersection
-   and Kähler/conormal data; the current pinned tree has no directly named
-   dualizing-sheaf interface.  Acceptance: its four local trivializations are
-   constructed and their overlap map is proved equal to
-   `coordinateAdjunctionOverlapIso`, with no carried adjunction hypothesis.
+1. **`RM-N25-03` for `[MZ-N25-PICARD-RR]`:** Base-change the proved singleton
+   bases `chartKaehlerDifferentialBasis` from both sides of every ordered
+   coordinate overlap and calculate their exact ratio.  Acceptance: the
+   induced overlap automorphism is proved equal to
+   `coordinateAdjunctionOverlapIso` (equivalently exponent `-1`), so the four
+   actual Kähler modules descend to `adjunctionTransitionLine` with no carried
+   adjunction hypothesis.
 2. **`RM-N25-04` for `[MZ-N25-PICARD-RR]`:** How should the explicit degree-six
    hyperplane section be connected to that canonical module without assuming
    divisor theory?  Acceptance: a checked section/divisor bridge supplies the

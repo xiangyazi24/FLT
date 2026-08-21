@@ -1921,3 +1921,31 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   canonical/dualizing object from the smooth complete-intersection data,
   followed by a proof that its local trivializations have the already verified
   `coordinateAdjunctionOverlapIso` transition.
+
+### N25 affine canonical differentials (2026-08-21)
+
+- `FLT/Mathlib/LinearAlgebra/UnimodularCrossProduct.lean` proves the generic
+  algebraic lemma needed by the complete intersection: if `a × b` pairs to
+  one with some vector, then dot product with `a × b` is surjective and its
+  kernel is exactly `span {a,b}`.  The reverse inclusion uses the two vector
+  triple-product identities and is valid over an arbitrary commutative ring.
+- `RationalPointsN25QuotientTwoAffineCanonicalDifferentials.lean` identifies
+  the three components of the cross product of the affine quadric and cubic
+  gradient rows with the three selected presentation Jacobians, with the
+  expected alternating sign in the middle component.  The existing chart
+  smoothness certificates therefore supply a Bézout vector pairing to one.
+- Reindexing the presentation's base-changed polynomial differential basis
+  gives coordinates in `B^3`.  The two defining conormal classes span, their
+  cotangent-complex images have coordinates equal to the two Jacobian rows,
+  and exactness identifies their span with the kernel of the projection to
+  `Ω¹_{B/k}`.
+- The Jacobian residue functional has the same kernel and is also surjective.
+  The first isomorphism theorem consequently constructs
+  `chartKaehlerDifferentialEquiv : Ω¹_{B/k} ≃ₗ[B] B`, proves its value
+  on every ambient differential class, and supplies the singleton basis
+  `chartKaehlerDifferentialBasis` for each of the four actual affine chart
+  quotients.
+- This closes `[MZ-N25-AFFINE-CANONICAL]`, not projective adjunction.  The next
+  exact seam is to compare the two base-changed residue bases on every ordered
+  chart overlap and prove that their ratio is the already constructed
+  `coordinateAdjunctionOverlapIso`, i.e. exponent `-1`.
