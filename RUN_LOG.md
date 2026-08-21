@@ -1506,3 +1506,61 @@
 - final result: the global differential Čech object is now assembled from
   canonical Kähler restriction maps.  The next ranked seam is to compare it
   with the sheafification of the same-site relative Kähler presheaf.
+
+## Run 2026-08-21 (N25 same-site relative differential foundation)
+
+- doctrine version: `f190152f1f945b544e296d88c786643800c21802adb09c9e79578ae72105ed70`
+- approval: Xiang's instruction to continue the autonomous FLT campaign,
+  keep ChatGPT occupied on hard mathematical and design questions, verify
+  locally, audit, record progress, and commit appropriate milestones
+- starting avenue: construct the same-site relative Kähler presheaf and
+  connect its chart and overlap evaluations to the canonical affine Kähler
+  data
+- result: added a generic constant-base natural transformation on the small
+  Zariski site for any morphism `X ⟶ Spec K`.  Its naturality is proved at the
+  stable `Scheme.Hom.appLE_map` boundary without unfolding the structure
+  sheaf implementation.
+- result: packaged the universal property of Mathlib's objectwise relative
+  differential presheaf as an equivalence between module-presheaf morphisms
+  and compatible relative derivations.
+- result: instantiated the construction for the binary N25 canonical curve,
+  named its relative differential presheaf, its associated module sheaf, and
+  the canonical sheafification-unit morphism.  This resolves the former base
+  category mismatch between the CommRingCat structure presheaf and the
+  curve's RingCat module sheaf.
+- result: composed the sheafification adjunction with the Kähler universal
+  property.  Morphisms from the associated differential sheaf to any curve
+  module sheaf now form an explicit equivalence with compatible same-site
+  relative derivations, with a named inverse constructor and universal
+  associated-sheaf derivation.
+- result: on all four standard charts, transported the geometric base map
+  through the open-immersion section isomorphism and `ΓSpecIso`, then proved
+  it equals the affine `ZMod 2` algebra map by uniqueness of ring homomorphisms
+  out of `ZMod 2`.
+- result: specialized both canonical ordered-overlap restriction calculations
+  to universal Kähler generators.  Each leg sends `d(x)` to the differential
+  of the corresponding localized chart section, which is the exact local
+  compatibility needed to build the Čech-valued derivation.
+- ChatGPT: Q6068--Q6070 and Q6072--Q6073 independently selected objectwise
+  chart evaluation before global sheaf comparison.  Q6074 identified the
+  useful `appLE_map` transparency boundary, Q6077 independently proposed the
+  `ZMod 2` uniqueness proof, and Q6080 exposed the module-base and local
+  naturality obligations.  Q6084 independently confirmed the final
+  composition of the Kähler and sheafification Hom equivalences.  Several
+  displayed snippets had reversed arrows, schematic names, or nonexistent
+  convenience APIs; those were discarded, and every retained claim was
+  reconstructed from the pinned local source.
+- verification: strict source compilation passes for both new production
+  files.  The generic module's 2344-job build and the N25 module's 8621-job
+  build pass.  Fresh axiom audits of the constant-base map, universal Hom
+  equivalence, sheafification unit, chart base-map comparison, and both
+  overlap generator formulas report exactly `propext`, `Classical.choice`,
+  and `Quot.sound`; bypass, long-line, whitespace, and comment scans are
+  clean.
+- end: `[MZ-N25-RELATIVE-DIFFERENTIAL-BASE]` proved
+- final result: the intrinsic same-site relative differential object now
+  exists in the same module-sheaf category as the canonical Čech equalizer,
+  and its affine base maps and overlap generator restrictions match the
+  already verified canonical Kähler data.  The next seam is the compatible
+  derivation into the Čech equalizer and the local-isomorphism proof for its
+  sheafified transpose.

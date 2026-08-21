@@ -193,10 +193,16 @@ dualizing sheaf.
 
 The next ranked canonical-geometry attacks are:
 
-1. construct the same-site relative Kähler presheaf for the constant-base
-   morphism, compare its chart and overlap evaluations with the canonical
-   affine tilde data, and prove that its sheafification is the canonical
-   Kähler Čech equalizer;
+1. continue the same-site relative Kähler comparison.  The constant-base
+   morphism, its objectwise relative differential presheaf, its associated
+   module sheaf, and the sheafification unit are now explicit.  On every
+   standard chart the transported base map is proved to be the canonical
+   binary-field algebra map, and both canonical overlap restrictions are
+   proved to carry universal differentials to universal differentials.
+   The remaining step is to construct the compatible derivation into the
+   canonical Kähler Čech equalizer, transpose it through the universal and
+   sheafification adjunctions, and prove the resulting map locally invertible
+   on the four standard charts;
 2. build the missing height-one valuation/principal-divisor layer on the
    proved integral chart, including the common-function-field interface
    needed by the class-indexed middle-degree Riemann--Roch consumer.
