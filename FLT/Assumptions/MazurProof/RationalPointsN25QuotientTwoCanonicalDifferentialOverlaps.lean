@@ -57,6 +57,27 @@ def coordinateChartToRightOverlapRingHom (i j : Fin 4) :
     (coordinateClass_mem_degreeOne i) (mul_comm _ _)).comp
       (chartCoordinateRingCastEquiv j).toRingHom
 
+/-- The binary coefficient algebra on a homogeneous chart is the transported
+algebra used by its explicit Kahler differential coordinate. -/
+noncomputable instance coordinateChartRingAlgebra (i : Fin 4) :
+    Algebra k (ChartCoordinateRing i) :=
+  RationalPointsN25QuotientTwoAffineChartsSmooth.chartCoordinateRingAlgebra i
+
+noncomputable instance coordinateChartRingSMul (i : Fin 4) :
+    SMul k (ChartCoordinateRing i) :=
+  (RationalPointsN25QuotientTwoAffineChartsSmooth.chartCoordinateRingAlgebra i).toSMul
+
+/-- The coefficient algebra on an ordered overlap is oriented through its
+first chart projection. -/
+noncomputable instance coordinateOverlapRingAlgebra (i j : Fin 4) :
+    Algebra k (coordinateOverlapRing i j) :=
+  ((coordinateChartToLeftOverlapRingHom i j).comp
+      (algebraMap k (ChartCoordinateRing i))).toAlgebra
+
+noncomputable instance coordinateOverlapRingSMul (i j : Fin 4) :
+    SMul k (coordinateOverlapRing i j) :=
+  (coordinateOverlapRingAlgebra i j).toSMul
+
 /-- An ordinary affine variable becomes the same chart ratio used as the
 localization parameter in the homogeneous presentation. -/
 theorem chartCoordinateRingEquivAffine_X_eq_isLocalizationElem
@@ -179,6 +200,100 @@ theorem coordinateChartToRightOverlapRingHom_chartMap
   rw [chartCoordinateRingEquivAffine_chartMap j n p (by simpa using hp)]
   rfl
 
+/-- The normalized ambient coordinate `X_t/X_i` on the first chart, viewed
+on the ordered overlap. -/
+def coordinateOverlapLeftCoordinate (i j t : Fin 4) :
+    coordinateOverlapRing i j :=
+  Away.homogeneousElementLeft literalConePiece
+    (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j) 1
+    (coordinateClass_mem_degreeOne t)
+
+/-- The normalized ambient coordinate `X_t/X_j` on the second chart, viewed
+on the same ordered overlap. -/
+def coordinateOverlapRightCoordinate (i j t : Fin 4) :
+    coordinateOverlapRing i j :=
+  Away.homogeneousElementRight literalConePiece
+    (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j) 1
+    (coordinateClass_mem_degreeOne t)
+
+/-- The pivot-normalized coordinate on the second chart is one. -/
+theorem coordinateOverlapRightCoordinate_pivot (i j : Fin 4) :
+    coordinateOverlapRightCoordinate i j j = 1 := by
+  unfold coordinateOverlapRightCoordinate
+  rw [← coordinateChartToRightOverlapRingHom_chartMap i j 1
+    (MvPolynomial.X j) (MvPolynomial.isHomogeneous_X (ZMod 2) j)]
+  simp
+
+/-- The second ambient coordinate normalized on the first chart is the
+basic overlap ratio `X_j/X_i`. -/
+theorem coordinateOverlapLeftCoordinate_second (i j : Fin 4) :
+    coordinateOverlapLeftCoordinate i j j =
+      Away.degreeOneRatio literalConePiece
+        (coordinateClass_mem_degreeOne i)
+        (coordinateClass_mem_degreeOne j) := by
+  apply HomogeneousLocalization.val_injective
+  simp [coordinateOverlapLeftCoordinate,
+    Away.homogeneousElementLeft, Away.degreeOneRatio, pow_two]
+
+/-- The first ambient coordinate normalized on the second chart is the
+inverse overlap ratio `X_i/X_j`. -/
+theorem coordinateOverlapRightCoordinate_first (i j : Fin 4) :
+    coordinateOverlapRightCoordinate i j i =
+      Away.degreeOneRatioInv literalConePiece
+        (coordinateClass_mem_degreeOne i)
+        (coordinateClass_mem_degreeOne j) := by
+  apply HomogeneousLocalization.val_injective
+  simp [coordinateOverlapRightCoordinate,
+    Away.homogeneousElementRight, Away.degreeOneRatioInv, pow_two]
+
+/-- Normalized ambient coordinates on the two charts differ by the basic
+coordinate ratio `X_j/X_i`. -/
+theorem coordinateOverlapCoordinate_transition (i j t : Fin 4) :
+    coordinateOverlapLeftCoordinate i j t =
+      (coordinateRatioUnit i j : coordinateOverlapRing i j) *
+        coordinateOverlapRightCoordinate i j t := by
+  simpa only [coordinateOverlapLeftCoordinate,
+    coordinateOverlapRightCoordinate, coordinateRatioUnit, pow_one] using
+      Away.homogeneousElementLeft_eq_ratio_mul_right literalConePiece
+        (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j) 1
+        (coordinateClass_mem_degreeOne t)
+
+/-- A non-pivot affine coordinate from the first chart maps to its normalized
+homogeneous coordinate on the overlap. -/
+theorem coordinateChartToLeftOverlapRingHom_affineCoordinate
+    (i j : Fin 4) (r : Fin 3) :
+    coordinateChartToLeftOverlapRingHom i j
+        (chartCoordinateRingEquivAffine i
+          (algebraMap (AffineChart i) (ChartQuotient i)
+            (MvPolynomial.X (affineCoordinate i r)))) =
+      coordinateOverlapLeftCoordinate i j (i.succAbove r) := by
+  rw [← dehomogenizedVariable_succAbove]
+  rw [← ambientDehomogenize_X]
+  change coordinateChartToLeftOverlapRingHom i j
+      (chartCoordinateRingEquivAffine i
+        (chartMap i (MvPolynomial.X (i.succAbove r)))) = _
+  exact coordinateChartToLeftOverlapRingHom_chartMap i j 1
+    (MvPolynomial.X (i.succAbove r))
+    (MvPolynomial.isHomogeneous_X (ZMod 2) (i.succAbove r))
+
+/-- A non-pivot affine coordinate from the second chart maps to its normalized
+homogeneous coordinate on the overlap. -/
+theorem coordinateChartToRightOverlapRingHom_affineCoordinate
+    (i j : Fin 4) (r : Fin 3) :
+    coordinateChartToRightOverlapRingHom i j
+        (chartCoordinateRingEquivAffine j
+          (algebraMap (AffineChart j) (ChartQuotient j)
+            (MvPolynomial.X (affineCoordinate j r)))) =
+      coordinateOverlapRightCoordinate i j (j.succAbove r) := by
+  rw [← dehomogenizedVariable_succAbove]
+  rw [← ambientDehomogenize_X]
+  change coordinateChartToRightOverlapRingHom i j
+      (chartCoordinateRingEquivAffine j
+        (chartMap j (MvPolynomial.X (j.succAbove r)))) = _
+  exact coordinateChartToRightOverlapRingHom_chartMap i j 1
+    (MvPolynomial.X (j.succAbove r))
+    (MvPolynomial.isHomogeneous_X (ZMod 2) (j.succAbove r))
+
 /-- The two chart restrictions of a degree-`n` homogeneous polynomial differ
 by the `n`th power of the projective coordinate ratio. -/
 theorem coordinateChartMap_transition
@@ -209,6 +324,109 @@ theorem ambientPolynomialMinor_chartTransition
   simpa [standardConePiece, MvPolynomial.mem_homogeneousSubmodule] using
     ambientPolynomialMinor_isHomogeneous a b
 
+/-- The left-chart expression of an ambient Jacobian minor on an ordered
+overlap. -/
+def coordinateOverlapLeftMinor (i j a b : Fin 4) :
+    coordinateOverlapRing i j :=
+  coordinateChartToLeftOverlapRingHom i j
+    (chartCoordinateRingEquivAffine i
+      (chartMap i (ambientPolynomialMinor a b)))
+
+/-- The right-chart expression of an ambient Jacobian minor on the same
+ordered overlap. -/
+def coordinateOverlapRightMinor (i j a b : Fin 4) :
+    coordinateOverlapRing i j :=
+  coordinateChartToRightOverlapRingHom i j
+    (chartCoordinateRingEquivAffine j
+      (chartMap j (ambientPolynomialMinor a b)))
+
+/-- A right-chart minor with repeated columns vanishes. -/
+@[simp]
+theorem coordinateOverlapRightMinor_self (i j a : Fin 4) :
+    coordinateOverlapRightMinor i j a a = 0 := by
+  simp [coordinateOverlapRightMinor]
+
+/-- Ambient minors have cubic weight between their left and right overlap
+expressions. -/
+theorem coordinateOverlapMinor_transition (i j a b : Fin 4) :
+    coordinateOverlapLeftMinor i j a b =
+      (coordinateRatioUnit i j : coordinateOverlapRing i j) ^ 3 *
+        coordinateOverlapRightMinor i j a b := by
+  exact ambientPolynomialMinor_chartTransition i j a b
+
+/-- Euler's minor syzygy remains zero after restriction through the second
+chart to an ordered overlap. -/
+theorem coordinateOverlapRight_weighted_minor_sum_zero
+    (i j a : Fin 4) :
+    ∑ t : Fin 4, coordinateOverlapRightCoordinate i j t *
+        coordinateOverlapRightMinor i j t a = 0 := by
+  have h := congrArg
+    (fun x : ChartQuotient j ↦ coordinateChartToRightOverlapRingHom i j
+      (chartCoordinateRingEquivAffine j x))
+    (chartMap_weighted_minor_sum_zero j a)
+  simp only [map_sum, map_mul, map_zero] at h
+  have hcoordinate (t : Fin 4) :
+      coordinateChartToRightOverlapRingHom i j
+          (chartCoordinateRingEquivAffine j
+            (chartMap j (MvPolynomial.X t))) =
+        coordinateOverlapRightCoordinate i j t := by
+    simpa only [coordinateOverlapRightCoordinate] using
+      coordinateChartToRightOverlapRingHom_chartMap i j 1
+        (MvPolynomial.X t) (MvPolynomial.isHomogeneous_X (ZMod 2) t)
+  simp_rw [hcoordinate] at h
+  simpa only [coordinateOverlapRightMinor] using h
+
+/-- For four distinct coordinate labels, Euler's syzygy expresses the minor
+through the chart pivot as the sum of the other two nonzero terms. -/
+theorem coordinateOverlapRight_minor_euler_three
+    (i j t l : Fin 4)
+    (hij : i ≠ j) (hit : i ≠ t) (hil : i ≠ l)
+    (hjt : j ≠ t) (hjl : j ≠ l) (htl : t ≠ l) :
+    coordinateOverlapRightMinor i j j l =
+      coordinateOverlapRightCoordinate i j i *
+          coordinateOverlapRightMinor i j i l +
+        coordinateOverlapRightCoordinate i j t *
+          coordinateOverlapRightMinor i j t l := by
+  have hsum := coordinateOverlapRight_weighted_minor_sum_zero i j l
+  have huniv : Finset.univ = {i, j, t, l} := by
+    ext s
+    simp
+    omega
+  rw [huniv] at hsum
+  simp [hij, hit, hil, hjt, hjl, htl,
+    coordinateOverlapRightCoordinate_pivot] at hsum
+  have hsum' :
+      coordinateOverlapRightMinor i j j l +
+          (coordinateOverlapRightCoordinate i j i *
+              coordinateOverlapRightMinor i j i l +
+            coordinateOverlapRightCoordinate i j t *
+              coordinateOverlapRightMinor i j t l) = 0 := by
+    calc
+      _ = coordinateOverlapRightCoordinate i j i *
+            coordinateOverlapRightMinor i j i l +
+          (coordinateOverlapRightMinor i j j l +
+            coordinateOverlapRightCoordinate i j t *
+              coordinateOverlapRightMinor i j t l) := by ring
+      _ = 0 := hsum
+  have hrest := eq_neg_of_add_eq_zero_left hsum'
+  have hneg (x : coordinateOverlapRing i j) : -x = x := by
+    have htwo : (2 : coordinateOverlapRing i j) = 0 := by
+      calc
+        (2 : coordinateOverlapRing i j) =
+            algebraMap k (coordinateOverlapRing i j) (2 : k) :=
+          (map_natCast (algebraMap k (coordinateOverlapRing i j)) 2).symm
+        _ = algebraMap k (coordinateOverlapRing i j) 0 := by
+          exact congrArg (algebraMap k (coordinateOverlapRing i j))
+            (CharP.cast_eq_zero k 2)
+        _ = 0 := map_zero _
+    have hx : x + x = 0 := by
+      calc
+        x + x = (2 : coordinateOverlapRing i j) * x := by ring
+        _ = 0 := by rw [htwo, zero_mul]
+    exact (eq_neg_of_add_eq_zero_left hx).symm
+  rw [hneg] at hrest
+  exact hrest
+
 /-- The cross component selected by omitting the other chart pivot has cubic
 transition weight between the two affine Jacobian presentations. -/
 theorem chartJacobianCross_chartTransition
@@ -227,27 +445,6 @@ theorem chartJacobianCross_chartTransition
   rw [← ambientPolynomialMinor_complementary_chart_pair i j hji]
   apply ambientPolynomialMinor_chartTransition
 
-/-- The binary coefficient algebra on a homogeneous chart is the transported
-algebra used by its explicit Kahler differential coordinate. -/
-noncomputable instance coordinateChartRingAlgebra (i : Fin 4) :
-    Algebra k (ChartCoordinateRing i) :=
-  RationalPointsN25QuotientTwoAffineChartsSmooth.chartCoordinateRingAlgebra i
-
-noncomputable instance coordinateChartRingSMul (i : Fin 4) :
-    SMul k (ChartCoordinateRing i) :=
-  (RationalPointsN25QuotientTwoAffineChartsSmooth.chartCoordinateRingAlgebra i).toSMul
-
-/-- The coefficient algebra on an ordered overlap is oriented through its
-first chart projection. -/
-noncomputable instance coordinateOverlapRingAlgebra (i j : Fin 4) :
-    Algebra k (coordinateOverlapRing i j) :=
-  ((coordinateChartToLeftOverlapRingHom i j).comp
-      (algebraMap k (ChartCoordinateRing i))).toAlgebra
-
-noncomputable instance coordinateOverlapRingSMul (i j : Fin 4) :
-    SMul k (coordinateOverlapRing i j) :=
-  (coordinateOverlapRingAlgebra i j).toSMul
-
 /-- The residue coordinate from the first chart, localized to an ordered
 pair overlap. -/
 def coordinateOverlapLeftKaehlerDifferentialEquiv (i j : Fin 4) :
@@ -255,6 +452,8 @@ def coordinateOverlapLeftKaehlerDifferentialEquiv (i j : Fin 4) :
       coordinateOverlapRing i j := by
   letI : Algebra (ChartCoordinateRing i) (coordinateOverlapRing i j) :=
     (coordinateChartToLeftOverlapRingHom i j).toAlgebra
+  letI : SMul (ChartCoordinateRing i) (coordinateOverlapRing i j) :=
+    ((coordinateChartToLeftOverlapRingHom i j).toAlgebra).toSMul
   letI : IsLocalization.Away
       (Away.isLocalizationElem (coordinateClass_mem_degreeOne i)
         (coordinateClass_mem_degreeOne j))
@@ -278,6 +477,8 @@ def coordinateOverlapRightKaehlerDifferentialEquiv (i j : Fin 4) :
       coordinateOverlapRing i j := by
   letI : Algebra (ChartCoordinateRing j) (coordinateOverlapRing i j) :=
     (coordinateChartToRightOverlapRingHom i j).toAlgebra
+  letI : SMul (ChartCoordinateRing j) (coordinateOverlapRing i j) :=
+    ((coordinateChartToRightOverlapRingHom i j).toAlgebra).toSMul
   letI : IsLocalization.Away
       (Away.isLocalizationElem (coordinateClass_mem_degreeOne j)
         (coordinateClass_mem_degreeOne i))
@@ -299,6 +500,8 @@ def coordinateOverlapLeftKaehlerDifferentialMap (i j : Fin 4) :
     Ω[ChartCoordinateRing i⁄k] → Ω[coordinateOverlapRing i j⁄k] := fun x ↦ by
   letI : Algebra (ChartCoordinateRing i) (coordinateOverlapRing i j) :=
     (coordinateChartToLeftOverlapRingHom i j).toAlgebra
+  letI : SMul (ChartCoordinateRing i) (coordinateOverlapRing i j) :=
+    ((coordinateChartToLeftOverlapRingHom i j).toAlgebra).toSMul
   letI : IsScalarTower k (ChartCoordinateRing i) (coordinateOverlapRing i j) :=
     IsScalarTower.of_algebraMap_eq' rfl
   exact KaehlerDifferential.map k k
@@ -314,6 +517,8 @@ theorem coordinateOverlapLeftKaehlerDifferentialMap_D
         (coordinateChartToLeftOverlapRingHom i j x) := by
   letI : Algebra (ChartCoordinateRing i) (coordinateOverlapRing i j) :=
     (coordinateChartToLeftOverlapRingHom i j).toAlgebra
+  letI : SMul (ChartCoordinateRing i) (coordinateOverlapRing i j) :=
+    ((coordinateChartToLeftOverlapRingHom i j).toAlgebra).toSMul
   letI : IsScalarTower k (ChartCoordinateRing i) (coordinateOverlapRing i j) :=
     IsScalarTower.of_algebraMap_eq' rfl
   change KaehlerDifferential.map k k
@@ -332,6 +537,8 @@ theorem coordinateOverlapLeftKaehlerDifferentialEquiv_map
         (chartCoordinateKaehlerDifferentialEquiv i x) := by
   letI : Algebra (ChartCoordinateRing i) (coordinateOverlapRing i j) :=
     (coordinateChartToLeftOverlapRingHom i j).toAlgebra
+  letI : SMul (ChartCoordinateRing i) (coordinateOverlapRing i j) :=
+    ((coordinateChartToLeftOverlapRingHom i j).toAlgebra).toSMul
   letI : IsLocalization.Away
       (Away.isLocalizationElem (coordinateClass_mem_degreeOne i)
         (coordinateClass_mem_degreeOne j))
@@ -353,6 +560,8 @@ def coordinateOverlapRightKaehlerDifferentialMap (i j : Fin 4) :
     Ω[ChartCoordinateRing j⁄k] → Ω[coordinateOverlapRing i j⁄k] := fun x ↦ by
   letI : Algebra (ChartCoordinateRing j) (coordinateOverlapRing i j) :=
     (coordinateChartToRightOverlapRingHom i j).toAlgebra
+  letI : SMul (ChartCoordinateRing j) (coordinateOverlapRing i j) :=
+    ((coordinateChartToRightOverlapRingHom i j).toAlgebra).toSMul
   letI : IsScalarTower k (ChartCoordinateRing j) (coordinateOverlapRing i j) :=
     IsScalarTower.of_algebraMap_eq' (RingHom.ext_zmod _ _)
   exact KaehlerDifferential.map k k
@@ -368,6 +577,8 @@ theorem coordinateOverlapRightKaehlerDifferentialMap_D
         (coordinateChartToRightOverlapRingHom i j x) := by
   letI : Algebra (ChartCoordinateRing j) (coordinateOverlapRing i j) :=
     (coordinateChartToRightOverlapRingHom i j).toAlgebra
+  letI : SMul (ChartCoordinateRing j) (coordinateOverlapRing i j) :=
+    ((coordinateChartToRightOverlapRingHom i j).toAlgebra).toSMul
   letI : IsScalarTower k (ChartCoordinateRing j) (coordinateOverlapRing i j) :=
     IsScalarTower.of_algebraMap_eq' (RingHom.ext_zmod _ _)
   change KaehlerDifferential.map k k
@@ -386,6 +597,8 @@ theorem coordinateOverlapRightKaehlerDifferentialEquiv_map
         (chartCoordinateKaehlerDifferentialEquiv j x) := by
   letI : Algebra (ChartCoordinateRing j) (coordinateOverlapRing i j) :=
     (coordinateChartToRightOverlapRingHom i j).toAlgebra
+  letI : SMul (ChartCoordinateRing j) (coordinateOverlapRing i j) :=
+    ((coordinateChartToRightOverlapRingHom i j).toAlgebra).toSMul
   letI : IsLocalization.Away
       (Away.isLocalizationElem (coordinateClass_mem_degreeOne j)
         (coordinateClass_mem_degreeOne i))
@@ -401,6 +614,36 @@ theorem coordinateOverlapRightKaehlerDifferentialEquiv_map
     IsScalarTower.of_algebraMap_eq' (RingHom.ext_zmod _ _)
   exact KaehlerDifferential.coordinateEquivOfFormallyEtale_map
     (chartCoordinateKaehlerDifferentialEquiv j) x
+
+/-- The first residue of a normalized ambient-coordinate differential is
+the corresponding localized component of the first chart's Jacobian cross. -/
+theorem coordinateOverlapLeftKaehlerDifferentialEquiv_D_coordinate
+    (i j : Fin 4) (r : Fin 3) :
+    coordinateOverlapLeftKaehlerDifferentialEquiv i j
+        (KaehlerDifferential.D k (coordinateOverlapRing i j)
+          (coordinateOverlapLeftCoordinate i j (i.succAbove r))) =
+      coordinateChartToLeftOverlapRingHom i j
+        (chartCoordinateRingEquivAffine i
+          (chartJacobianCross i r)) := by
+  rw [← coordinateChartToLeftOverlapRingHom_affineCoordinate]
+  rw [← coordinateOverlapLeftKaehlerDifferentialMap_D]
+  rw [coordinateOverlapLeftKaehlerDifferentialEquiv_map]
+  rw [chartCoordinateKaehlerDifferentialEquiv_D_affineCoordinate]
+
+/-- The second residue of a normalized ambient-coordinate differential is
+the corresponding localized component of the second chart's Jacobian cross. -/
+theorem coordinateOverlapRightKaehlerDifferentialEquiv_D_coordinate
+    (i j : Fin 4) (r : Fin 3) :
+    coordinateOverlapRightKaehlerDifferentialEquiv i j
+        (KaehlerDifferential.D k (coordinateOverlapRing i j)
+          (coordinateOverlapRightCoordinate i j (j.succAbove r))) =
+      coordinateChartToRightOverlapRingHom i j
+        (chartCoordinateRingEquivAffine j
+          (chartJacobianCross j r)) := by
+  rw [← coordinateChartToRightOverlapRingHom_affineCoordinate]
+  rw [← coordinateOverlapRightKaehlerDifferentialMap_D]
+  rw [coordinateOverlapRightKaehlerDifferentialEquiv_map]
+  rw [chartCoordinateKaehlerDifferentialEquiv_D_affineCoordinate]
 
 /-- The left overlap residue of `d(X_j/X_i)` reduces to the corresponding
 chart residue before localization. -/
@@ -567,6 +810,279 @@ theorem coordinateOverlapResidues_D_ratio_linearTransition
   rw [hright]
   ring
 
+/-- For four distinct ambient labels, the cubic minor transition and Euler
+syzygy reduce the residue transition of a coordinate differential to weight
+one. -/
+theorem coordinateOverlapResidues_D_coordinate_linearTransition_of_distinct
+    (i j t l : Fin 4)
+    (hji : j ≠ i) (hit : i ≠ t) (hil : i ≠ l)
+    (hjt : j ≠ t) (hjl : j ≠ l) (htl : t ≠ l)
+    (r : Fin 3) (hrt : i.succAbove r = t) :
+    coordinateOverlapLeftKaehlerDifferentialEquiv i j
+        (KaehlerDifferential.D k (coordinateOverlapRing i j)
+          (coordinateOverlapLeftCoordinate i j t)) =
+      (coordinateRatioUnit i j : coordinateOverlapRing i j) *
+        coordinateOverlapRightKaehlerDifferentialEquiv i j
+          (KaehlerDifferential.D k (coordinateOverlapRing i j)
+            (coordinateOverlapLeftCoordinate i j t)) := by
+  let u := Away.degreeOneRatio literalConePiece
+    (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+  let v := Away.degreeOneRatioInv literalConePiece
+    (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+  let w := coordinateOverlapRightCoordinate i j t
+  let rt : Fin 3 := (finSuccAboveEquiv j).symm ⟨t, hjt.symm⟩
+  let ri : Fin 3 := (finSuccAboveEquiv j).symm ⟨i, hji.symm⟩
+  have hunit : (coordinateRatioUnit i j : coordinateOverlapRing i j) = u := by
+    rfl
+  have hjrt : j.succAbove rt = t := by
+    exact congrArg Subtype.val
+      ((finSuccAboveEquiv j).apply_symm_apply ⟨t, hjt.symm⟩)
+  have hjri : j.succAbove ri = i := by
+    exact congrArg Subtype.val
+      ((finSuccAboveEquiv j).apply_symm_apply ⟨i, hji.symm⟩)
+  have hleft :
+      coordinateOverlapLeftKaehlerDifferentialEquiv i j
+          (KaehlerDifferential.D k (coordinateOverlapRing i j)
+            (coordinateOverlapLeftCoordinate i j t)) =
+        u ^ 3 * coordinateOverlapRightMinor i j j l := by
+    rw [← hrt, coordinateOverlapLeftKaehlerDifferentialEquiv_D_coordinate]
+    rw [chartJacobianCross_eq_chartMap_minor_of_complement
+      i r j l hji hil.symm (by simpa only [hrt] using hjt)
+        (by simpa only [hrt] using htl.symm) hjl]
+    exact coordinateOverlapMinor_transition i j j l
+  have hright_w :
+      coordinateOverlapRightKaehlerDifferentialEquiv i j
+          (KaehlerDifferential.D k (coordinateOverlapRing i j) w) =
+        coordinateOverlapRightMinor i j i l := by
+    rw [show w = coordinateOverlapRightCoordinate i j (j.succAbove rt) by
+      rw [hjrt]]
+    rw [coordinateOverlapRightKaehlerDifferentialEquiv_D_coordinate]
+    rw [chartJacobianCross_eq_chartMap_minor_of_complement
+      j rt i l hji.symm hjl.symm (by simpa [hjrt] using hit)
+        (by simpa [hjrt] using htl.symm) hil]
+    rfl
+  have hright_v :
+      coordinateOverlapRightKaehlerDifferentialEquiv i j
+          (KaehlerDifferential.D k (coordinateOverlapRing i j) v) =
+        coordinateOverlapRightMinor i j t l := by
+    rw [show v = coordinateOverlapRightCoordinate i j (j.succAbove ri) by
+      rw [hjri, coordinateOverlapRightCoordinate_first]]
+    rw [coordinateOverlapRightKaehlerDifferentialEquiv_D_coordinate]
+    rw [chartJacobianCross_eq_chartMap_minor_of_complement
+      j ri t l hjt.symm hjl.symm (by simpa [hjri] using hit.symm)
+        (by simpa [hjri] using hil.symm) htl]
+    rfl
+  have hright_u :
+      coordinateOverlapRightKaehlerDifferentialEquiv i j
+          (KaehlerDifferential.D k (coordinateOverlapRing i j) u) =
+        u ^ 2 * coordinateOverlapRightMinor i j t l := by
+    rw [coordinateOverlap_D_ratio_eq_sq_smul_D_ratioInv]
+    rw [map_smul, smul_eq_mul, hright_v]
+  have hright :
+      coordinateOverlapRightKaehlerDifferentialEquiv i j
+          (KaehlerDifferential.D k (coordinateOverlapRing i j)
+            (coordinateOverlapLeftCoordinate i j t)) =
+        u * coordinateOverlapRightMinor i j i l +
+          w * u ^ 2 * coordinateOverlapRightMinor i j t l := by
+    rw [coordinateOverlapCoordinate_transition, hunit]
+    rw [Derivation.leibniz, map_add, map_smul, map_smul,
+      smul_eq_mul, smul_eq_mul, hright_w, hright_u]
+    change u * coordinateOverlapRightMinor i j i l +
+        w * (u ^ 2 * coordinateOverlapRightMinor i j t l) = _
+    ring
+  have heuler :
+      coordinateOverlapRightMinor i j j l =
+        v * coordinateOverlapRightMinor i j i l +
+          w * coordinateOverlapRightMinor i j t l := by
+    simpa only [coordinateOverlapRightCoordinate_first] using
+      coordinateOverlapRight_minor_euler_three i j t l hji.symm hit hil hjt hjl htl
+  have huv : u * v = 1 :=
+    Away.degreeOneRatio_mul_inv literalConePiece
+      (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+  have hcube : u ^ 3 * v = u ^ 2 := by
+    calc
+      u ^ 3 * v = u ^ 2 * (u * v) := by ring
+      _ = u ^ 2 := by rw [huv, mul_one]
+  rw [hunit]
+  change coordinateOverlapLeftKaehlerDifferentialEquiv i j
+      (KaehlerDifferential.D k (coordinateOverlapRing i j)
+        (coordinateOverlapLeftCoordinate i j t)) =
+    u * coordinateOverlapRightKaehlerDifferentialEquiv i j
+      (KaehlerDifferential.D k (coordinateOverlapRing i j)
+        (coordinateOverlapLeftCoordinate i j t))
+  rw [hleft, hright, heuler]
+  rw [mul_add, ← mul_assoc, hcube]
+  ring
+
+/-- Every affine-coordinate differential on a nontrivial first chart overlap
+has the adjunction transition weight `X_j/X_i`. -/
+theorem coordinateOverlapResidues_D_coordinate_linearTransition
+    (i j : Fin 4) (hji : j ≠ i) (r : Fin 3) :
+    coordinateOverlapLeftKaehlerDifferentialEquiv i j
+        (KaehlerDifferential.D k (coordinateOverlapRing i j)
+          (coordinateOverlapLeftCoordinate i j (i.succAbove r))) =
+      (coordinateRatioUnit i j : coordinateOverlapRing i j) *
+        coordinateOverlapRightKaehlerDifferentialEquiv i j
+          (KaehlerDifferential.D k (coordinateOverlapRing i j)
+            (coordinateOverlapLeftCoordinate i j (i.succAbove r))) := by
+  by_cases hjt : j = i.succAbove r
+  · rw [← hjt, coordinateOverlapLeftCoordinate_second]
+    exact coordinateOverlapResidues_D_ratio_linearTransition i j hji
+  · let t := i.succAbove r
+    let a := i.succAbove (r.succAbove (0 : Fin 2))
+    let b := i.succAbove (r.succAbove (1 : Fin 2))
+    have hit : i ≠ t := (i.succAbove_ne r).symm
+    have hai : a ≠ i := i.succAbove_ne _
+    have hbi : b ≠ i := i.succAbove_ne _
+    have hat : a ≠ t := by
+      intro h
+      apply r.succAbove_ne 0
+      exact i.succAbove_right_injective h
+    have hbt : b ≠ t := by
+      intro h
+      apply r.succAbove_ne 1
+      exact i.succAbove_right_injective h
+    have hab : a ≠ b := by
+      intro h
+      have h' := i.succAbove_right_injective h
+      have h'' := r.succAbove_right_injective h'
+      norm_num at h''
+    have hjab : j = a ∨ j = b := by
+      omega
+    rcases hjab with hja | hjb
+    · subst j
+      exact coordinateOverlapResidues_D_coordinate_linearTransition_of_distinct
+        i a t b hai hit hbi.symm hat hab hbt.symm r rfl
+    · subst j
+      exact coordinateOverlapResidues_D_coordinate_linearTransition_of_distinct
+        i b t a hbi hit hai.symm hbt hab.symm hat.symm r rfl
+
+/-! ## A nonvanishing overlap generator -/
+
+/-- The Bezout-normalized differential on the ordered overlap.  Its three
+terms avoid choosing a nonvanishing Jacobian minor. -/
+def coordinateOverlapLeftBezoutDifferential (i j : Fin 4) :
+    Ω[coordinateOverlapRing i j⁄k] :=
+  ∑ r : Fin 3,
+    coordinateChartToLeftOverlapRingHom i j
+        (chartCoordinateRingEquivAffine i
+          (chartJacobianBezoutVector i r)) •
+      KaehlerDifferential.D k (coordinateOverlapRing i j)
+        (coordinateOverlapLeftCoordinate i j (i.succAbove r))
+
+/-- The first residue coordinate sends the localized Bezout differential to
+one; in particular this differential is a genuine basis generator. -/
+theorem coordinateOverlapLeftKaehlerDifferentialEquiv_bezoutDifferential
+    (i j : Fin 4) :
+    coordinateOverlapLeftKaehlerDifferentialEquiv i j
+        (coordinateOverlapLeftBezoutDifferential i j) = 1 := by
+  have hdot := congrArg
+    ((coordinateChartToLeftOverlapRingHom i j).comp
+      (chartCoordinateRingEquivAffine i).toRingHom)
+    (chartJacobianBezoutVector_dot i)
+  simp only [dotProduct, map_sum, map_mul, map_one] at hdot
+  rw [coordinateOverlapLeftBezoutDifferential, map_sum]
+  simp_rw [map_smul, smul_eq_mul,
+    coordinateOverlapLeftKaehlerDifferentialEquiv_D_coordinate]
+  exact hdot
+
+/-- On a nontrivial overlap, the second residue of the first chart's
+Bezout-normalized differential is the inverse coordinate ratio. -/
+theorem coordinateOverlapRightKaehlerDifferentialEquiv_bezoutDifferential
+    (i j : Fin 4) (hji : j ≠ i) :
+    coordinateOverlapRightKaehlerDifferentialEquiv i j
+        (coordinateOverlapLeftBezoutDifferential i j) =
+      Away.degreeOneRatioInv literalConePiece
+        (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j) := by
+  let u := Away.degreeOneRatio literalConePiece
+    (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+  let v := Away.degreeOneRatioInv literalConePiece
+    (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+  have huv : u * v = 1 :=
+    Away.degreeOneRatio_mul_inv literalConePiece
+      (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+  have hvu : v * u = 1 := by
+    calc
+      v * u = u * v := mul_comm _ _
+      _ = 1 := huv
+  have hright_coordinate (r : Fin 3) :
+      coordinateOverlapRightKaehlerDifferentialEquiv i j
+          (KaehlerDifferential.D k (coordinateOverlapRing i j)
+            (coordinateOverlapLeftCoordinate i j (i.succAbove r))) =
+        v * coordinateChartToLeftOverlapRingHom i j
+          (chartCoordinateRingEquivAffine i (chartJacobianCross i r)) := by
+    have htransition :=
+      coordinateOverlapResidues_D_coordinate_linearTransition i j hji r
+    have hunit : (coordinateRatioUnit i j : coordinateOverlapRing i j) = u := by
+      rfl
+    rw [hunit] at htransition
+    calc
+      coordinateOverlapRightKaehlerDifferentialEquiv i j
+          (KaehlerDifferential.D k (coordinateOverlapRing i j)
+            (coordinateOverlapLeftCoordinate i j (i.succAbove r))) =
+          1 * coordinateOverlapRightKaehlerDifferentialEquiv i j
+            (KaehlerDifferential.D k (coordinateOverlapRing i j)
+              (coordinateOverlapLeftCoordinate i j (i.succAbove r))) := by
+            rw [one_mul]
+      _ = (v * u) * coordinateOverlapRightKaehlerDifferentialEquiv i j
+            (KaehlerDifferential.D k (coordinateOverlapRing i j)
+              (coordinateOverlapLeftCoordinate i j (i.succAbove r))) := by
+            rw [hvu]
+      _ = v * (u * coordinateOverlapRightKaehlerDifferentialEquiv i j
+            (KaehlerDifferential.D k (coordinateOverlapRing i j)
+              (coordinateOverlapLeftCoordinate i j (i.succAbove r)))) := by ring
+      _ = v * coordinateOverlapLeftKaehlerDifferentialEquiv i j
+            (KaehlerDifferential.D k (coordinateOverlapRing i j)
+              (coordinateOverlapLeftCoordinate i j (i.succAbove r))) := by
+            rw [htransition]
+      _ = v * coordinateChartToLeftOverlapRingHom i j
+            (chartCoordinateRingEquivAffine i
+              (chartJacobianCross i r)) := by
+            rw [coordinateOverlapLeftKaehlerDifferentialEquiv_D_coordinate]
+  have hdot := congrArg
+    ((coordinateChartToLeftOverlapRingHom i j).comp
+      (chartCoordinateRingEquivAffine i).toRingHom)
+    (chartJacobianBezoutVector_dot i)
+  simp only [dotProduct, map_sum, map_mul, map_one] at hdot
+  change (∑ r : Fin 3,
+      coordinateChartToLeftOverlapRingHom i j
+          (chartCoordinateRingEquivAffine i
+            (chartJacobianBezoutVector i r)) *
+        coordinateChartToLeftOverlapRingHom i j
+          (chartCoordinateRingEquivAffine i (chartJacobianCross i r))) = 1 at hdot
+  change coordinateOverlapRightKaehlerDifferentialEquiv i j
+      (coordinateOverlapLeftBezoutDifferential i j) = v
+  rw [coordinateOverlapLeftBezoutDifferential, map_sum]
+  simp_rw [map_smul, smul_eq_mul, hright_coordinate]
+  calc
+    ∑ r : Fin 3,
+        coordinateChartToLeftOverlapRingHom i j
+            (chartCoordinateRingEquivAffine i
+              (chartJacobianBezoutVector i r)) *
+          (v * coordinateChartToLeftOverlapRingHom i j
+            (chartCoordinateRingEquivAffine i (chartJacobianCross i r))) =
+        v * ∑ r : Fin 3,
+          coordinateChartToLeftOverlapRingHom i j
+              (chartCoordinateRingEquivAffine i
+                (chartJacobianBezoutVector i r)) *
+            coordinateChartToLeftOverlapRingHom i j
+              (chartCoordinateRingEquivAffine i (chartJacobianCross i r)) := by
+          rw [Finset.mul_sum]
+          apply Finset.sum_congr rfl
+          intro r _
+          ring
+    _ = v * 1 := by rw [hdot]
+    _ = v := by rw [mul_one]
+
+/-- The two residue coordinates coincide when both sides use the same
+projective chart. -/
+theorem coordinateOverlapKaehlerDifferentialEquiv_self (i : Fin 4) :
+    coordinateOverlapRightKaehlerDifferentialEquiv i i =
+      coordinateOverlapLeftKaehlerDifferentialEquiv i i := by
+  unfold coordinateOverlapRightKaehlerDifferentialEquiv
+  unfold coordinateOverlapLeftKaehlerDifferentialEquiv
+  rfl
+
 /-! ## The remaining overlap unit -/
 
 /-- Change from the residue coordinate induced by the first chart to the
@@ -577,11 +1093,53 @@ def coordinateOverlapResidueTransition (i j : Fin 4) :
   (coordinateOverlapLeftKaehlerDifferentialEquiv i j).symm.trans
     (coordinateOverlapRightKaehlerDifferentialEquiv i j)
 
+/-- A chart's residue coordinate has the identity transition to itself. -/
+theorem coordinateOverlapResidueTransition_self (i : Fin 4) :
+    coordinateOverlapResidueTransition i i = LinearEquiv.refl _ _ := by
+  rw [coordinateOverlapResidueTransition,
+    coordinateOverlapKaehlerDifferentialEquiv_self]
+  exact LinearEquiv.symm_trans_self _
+
 /-- The scalar that remains to be identified with the adjunction coordinate
 ratio is the image of one under the residue-coordinate transition. -/
 def coordinateOverlapResidueScalar (i j : Fin 4) :
     coordinateOverlapRing i j :=
   coordinateOverlapResidueTransition i j 1
+
+@[simp]
+theorem coordinateOverlapResidueScalar_self (i : Fin 4) :
+    coordinateOverlapResidueScalar i i = 1 := by
+  rw [coordinateOverlapResidueScalar,
+    coordinateOverlapResidueTransition_self]
+  rfl
+
+/-- The transition scalar is the second residue of the first chart's Bezout
+generator.  This replaces cancellation of a single possibly vanishing minor
+by evaluation on a certified unit-residue differential. -/
+theorem coordinateOverlapResidueScalar_eq_right_bezoutDifferential
+    (i j : Fin 4) :
+    coordinateOverlapResidueScalar i j =
+      coordinateOverlapRightKaehlerDifferentialEquiv i j
+        (coordinateOverlapLeftBezoutDifferential i j) := by
+  have hgenerator :
+      (coordinateOverlapLeftKaehlerDifferentialEquiv i j).symm 1 =
+        coordinateOverlapLeftBezoutDifferential i j := by
+    apply (coordinateOverlapLeftKaehlerDifferentialEquiv i j).injective
+    rw [(coordinateOverlapLeftKaehlerDifferentialEquiv i j).apply_symm_apply]
+    exact (coordinateOverlapLeftKaehlerDifferentialEquiv_bezoutDifferential i j).symm
+  rw [coordinateOverlapResidueScalar, coordinateOverlapResidueTransition,
+    LinearEquiv.trans_apply, hgenerator]
+
+/-- On a nontrivial ordered overlap, changing from the first residue
+coordinate to the second multiplies by `X_i/X_j`. -/
+theorem coordinateOverlapResidueScalar_eq_ratioInv
+    (i j : Fin 4) (hji : j ≠ i) :
+    coordinateOverlapResidueScalar i j =
+      Away.degreeOneRatioInv literalConePiece
+        (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j) := by
+  rw [coordinateOverlapResidueScalar_eq_right_bezoutDifferential]
+  exact coordinateOverlapRightKaehlerDifferentialEquiv_bezoutDifferential
+    i j hji
 
 /-- Since the overlap module has rank one, the full residue transition is
 multiplication by its value at one. -/
@@ -612,5 +1170,33 @@ def coordinateOverlapResidueUnit (i j : Fin 4) :
   inv_val := by
     rw [← coordinateOverlapResidueTransition_apply]
     exact (coordinateOverlapResidueTransition i j).apply_symm_apply 1
+
+@[simp]
+theorem coordinateOverlapResidueUnit_self (i : Fin 4) :
+    coordinateOverlapResidueUnit i i = 1 := by
+  apply Units.ext
+  exact coordinateOverlapResidueScalar_self i
+
+/-- Away from self-overlaps, the residue-coordinate transition is the
+inverse of the projective coordinate-ratio transition. -/
+theorem coordinateOverlapResidueUnit_eq_inv_coordinateRatioUnit_of_ne
+    (i j : Fin 4) (hji : j ≠ i) :
+    coordinateOverlapResidueUnit i j = (coordinateRatioUnit i j)⁻¹ := by
+  apply Units.ext
+  change coordinateOverlapResidueScalar i j =
+    Away.degreeOneRatioInv literalConePiece
+      (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j)
+  exact coordinateOverlapResidueScalar_eq_ratioInv i j hji
+
+/-- On every ordered coordinate overlap, the residue transition realizes the
+inverse degree-one projective transition predicted by adjunction. -/
+theorem coordinateOverlapResidueUnit_eq_inv_coordinateRatioUnit
+    (i j : Fin 4) :
+    coordinateOverlapResidueUnit i j = (coordinateRatioUnit i j)⁻¹ := by
+  by_cases hji : j = i
+  · subst j
+    rw [coordinateOverlapResidueUnit_self, coordinateRatioUnit_self, inv_one]
+  · exact coordinateOverlapResidueUnit_eq_inv_coordinateRatioUnit_of_ne
+      i j hji
 
 end MazurProof.RationalPointsN25QuotientTwoCanonicalDifferentialOverlaps

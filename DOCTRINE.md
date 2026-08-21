@@ -163,17 +163,22 @@ homogeneous of degree three; complementary chart omissions select the same
 minor, so its two chart expressions differ by the cube of the coordinate
 ratio.  The Leibniz identity for inverse ratios then reduces this cube to the
 single ratio factor predicted by adjunction on the differential of the chart
-ratio.  The remaining projective step is to extend that equality from this
-one differential to a spanning family, using the proved unimodularity of the
-three Jacobian minors, and thereby identify the full residue transition unit
-with the established exponent `-1` coordinate-ratio unit.
+ratio.  The equality now extends to all three affine-coordinate differentials:
+for the two non-ratio coordinates, the weighted Euler minor syzygy supplies
+the missing relation without cancelling any individual minor.  A Bezout
+combination of the three differentials has first residue one, and its second
+residue is the inverse coordinate ratio.  The full transition unit is
+therefore the established exponent `-1` coordinate-ratio unit on every
+ordered overlap, including self-overlaps.  This closes
+`[MZ-N25-RESIDUE-UNIT]`.
 
 The next ranked canonical-geometry attacks are:
 
-1. localize the proved Kähler-differential bases to each ordered coordinate
-   overlap and prove their change of basis is
-   `coordinateAdjunctionOverlapIso`; then descend them to the proved
-   adjunction transition line, yielding `ω_C ≅ O_C(1)`;
+1. apply affine tilde to the actual chart Kähler modules and residue
+   equivalences, build their ordered-overlap Čech diagram, and compare its
+   equalizer with the proved adjunction transition line; local effectiveness
+   must identify its restriction with the actual differential module before
+   concluding `ω_C ≅ O_C(1)`;
 2. build the missing height-one valuation/principal-divisor layer on the
    proved integral chart, including the common-function-field interface
    needed by the class-indexed middle-degree Riemann--Roch consumer.

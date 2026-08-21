@@ -1364,3 +1364,51 @@
   this equality to a spanning differential family via the already proved
   unimodular Jacobian-cross certificate; no cancellation of a potentially
   vanishing individual minor is assumed.
+
+## Run 2026-08-21 (N25 full residue transition unit)
+
+- doctrine version: `ae54d6386238edaa718564c9f3989c48395736ba95a36434e41f03fae67e6642`
+- approval: Xiang's instruction to continue the autonomous FLT campaign,
+  keep ChatGPT occupied on hard design questions, verify locally, audit, and
+  commit concrete progress
+- starting avenue: extend the proved ratio-differential seam to a spanning
+  family and identify the full localized Kähler-residue transition unit
+- result: extracted the homogeneous Euler minor syzygy and proved its
+  right-chart localization.  For four distinct ambient labels it expresses
+  the pivot minor by the two remaining minors in characteristic two.
+- result: proved the residue transition formula on every affine-coordinate
+  differential.  The ratio coordinate uses the inverse-ratio derivative;
+  each other coordinate uses Leibniz, the cubic homogeneous minor transition,
+  and the Euler syzygy.  The proof never cancels a Jacobian minor.
+- result: defined the overlap differential as the Bezout combination of all
+  three coordinate differentials.  Its first residue is one by the existing
+  unimodular Jacobian-cross certificate, while its second residue is exactly
+  `X_i/X_j`.  Hence the transition scalar and transition unit are the inverse
+  coordinate-ratio scalar and unit.
+- result: normalized the self-overlap separately.  The two localized residue
+  equivalences unfold to the same equivalence, so the self transition is the
+  identity; the unit theorem now holds for every ordered chart pair.
+- verification correction: Lake's cache initially replayed stale artifacts
+  while the newly edited source still contained errors.  Strict source
+  compilation exposed and fixed the `Fin 4` complement argument, missing
+  namespace import, coordinate unfolding, characteristic-two Euler
+  rearrangement, local `Algebra`/`SMul` instance diamonds, and self-overlap
+  proof.  The four edited sources now pass strict checks.
+- ChatGPT: Q5913 supplied an independent Euler-minor/Bezout architecture and
+  correctly predicted the final exponent one; Q5918 independently checked
+  the exact commutative-ring calculation and its single explicit use of
+  `u*v=1`.  Both were used only as design audits and every identity was
+  reconstructed in Lean.  Q5922, Q5924, and Q5927 seeded the next honest
+  affine-tilde/Čech descent layer; all API claims remain subject to local grep
+  and compilation.
+- verification: strict source checks for the affine smoothness, affine
+  canonical differential, homogeneous chart, and overlap files pass.  Fresh
+  axiom audits of the complement-minor theorem, Euler-minor theorem, full
+  generator transition, normalized second residue, and final unit identity
+  report exactly `propext`, `Classical.choice`, and `Quot.sound`; the bypass
+  and whitespace scans are clean.
+- end: `[MZ-N25-RESIDUE-UNIT]` proved
+- final result: the actual localized Kähler bases now carry exactly the
+  previously verified exponent `-1` adjunction cocycle.  The next avenue is
+  to apply affine tilde to these actual modules, compare the resulting Čech
+  diagram with the existing twist diagram, and prove local effectiveness.

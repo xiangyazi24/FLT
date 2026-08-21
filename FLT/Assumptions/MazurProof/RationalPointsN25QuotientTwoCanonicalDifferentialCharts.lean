@@ -21,6 +21,7 @@ open RationalPointsN25QuotientTwoAffineCharts
 open RationalPointsN25QuotientTwoAffineChartsSmooth
 open RationalPointsN25QuotientTwoAffineCanonicalDifferentials
 open RationalPointsN25QuotientTwoGradedKoszul
+open RationalPointsN25QuotientTwoStructuralJacobian
 
 /-- The proved ring equivalence from the ordinary affine presentation to an
 actual homogeneous chart respects the binary coefficient algebra. -/
@@ -66,6 +67,58 @@ theorem chartCoordinateKaehlerDifferentialEquiv_mapAlgEquiv
           (KaehlerDifferential.mapAlgEquiv e x))) = _
   rw [LinearEquiv.symm_apply_apply]
   rfl
+
+/-- On the actual homogeneous chart, the differential of a normalized
+ambient coordinate has the transported Jacobian-cross residue. -/
+theorem chartCoordinateKaehlerDifferentialEquiv_D_affineCoordinate
+    (pivot : Fin 4) (r : Fin 3) :
+    chartCoordinateKaehlerDifferentialEquiv pivot
+        (KaehlerDifferential.D k (ChartCoordinateRing pivot)
+          (chartCoordinateRingEquivAffine pivot
+            (algebraMap (AffineChart pivot) (ChartQuotient pivot)
+              (MvPolynomial.X (affineCoordinate pivot r))))) =
+      chartCoordinateRingEquivAffine pivot
+        (chartJacobianCross pivot r) := by
+  let e := chartCoordinateRingAlgEquivAffine pivot
+  letI := RingHomInvPair.of_ringEquiv e.toRingEquiv
+  letI := RingHomInvPair.symm
+    (↑e.toRingEquiv : ChartQuotient pivot →+* ChartCoordinateRing pivot)
+    (e.toRingEquiv.symm : ChartCoordinateRing pivot →+* ChartQuotient pivot)
+  change chartCoordinateKaehlerDifferentialEquiv pivot
+      (KaehlerDifferential.D k (ChartCoordinateRing pivot)
+        (e (algebraMap (AffineChart pivot) (ChartQuotient pivot)
+          (MvPolynomial.X (affineCoordinate pivot r))))) =
+    e (chartJacobianCross pivot r)
+  rw [← KaehlerDifferential.mapAlgEquiv_D e,
+    chartCoordinateKaehlerDifferentialEquiv_mapAlgEquiv,
+    chartKaehlerDifferentialEquiv_D_coordinate]
+
+/-- Transport the Bezout differential generator from the ordinary affine
+presentation to the actual homogeneous chart. -/
+def chartCoordinateKaehlerBezoutDifferential (pivot : Fin 4) :
+    Ω[ChartCoordinateRing pivot⁄k] := by
+  let e := chartCoordinateRingAlgEquivAffine pivot
+  letI := RingHomInvPair.of_ringEquiv e.toRingEquiv
+  letI := RingHomInvPair.symm
+    (↑e.toRingEquiv : ChartQuotient pivot →+* ChartCoordinateRing pivot)
+    (e.toRingEquiv.symm : ChartCoordinateRing pivot →+* ChartQuotient pivot)
+  exact KaehlerDifferential.mapAlgEquiv e
+    (chartKaehlerBezoutDifferential pivot)
+
+/-- The transported Bezout differential has residue coordinate one. -/
+theorem chartCoordinateKaehlerDifferentialEquiv_bezoutDifferential
+    (pivot : Fin 4) :
+    chartCoordinateKaehlerDifferentialEquiv pivot
+        (chartCoordinateKaehlerBezoutDifferential pivot) = 1 := by
+  let e := chartCoordinateRingAlgEquivAffine pivot
+  letI := RingHomInvPair.of_ringEquiv e.toRingEquiv
+  letI := RingHomInvPair.symm
+    (↑e.toRingEquiv : ChartQuotient pivot →+* ChartCoordinateRing pivot)
+    (e.toRingEquiv.symm : ChartCoordinateRing pivot →+* ChartQuotient pivot)
+  rw [chartCoordinateKaehlerBezoutDifferential,
+    chartCoordinateKaehlerDifferentialEquiv_mapAlgEquiv,
+    chartKaehlerDifferentialEquiv_bezoutDifferential]
+  exact map_one e
 
 /-- A singleton basis of differentials on each actual projective chart. -/
 def chartCoordinateKaehlerDifferentialBasis (pivot : Fin 4) :

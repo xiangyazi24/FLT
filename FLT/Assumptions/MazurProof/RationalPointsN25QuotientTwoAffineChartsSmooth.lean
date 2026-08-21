@@ -286,6 +286,27 @@ theorem free_polynomial_minor_mem (pivot a b : Fin 4)
     rw [ambientPolynomialMinor_comm]
     exact selected_polynomial_minor_mem pivot omitted
 
+/-- On every quotient chart, Euler's characteristic-two identity makes the
+coordinate-weighted sum of the four minors vanish.  Keeping the full sum
+avoids choosing a complementary coordinate until a later geometric use. -/
+theorem chartMap_weighted_minor_sum_zero (pivot a : Fin 4) :
+    ∑ t : Fin 4,
+        chartMap pivot (MvPolynomial.X t) *
+          chartMap pivot (ambientPolynomialMinor t a) = 0 := by
+  calc
+    ∑ t : Fin 4,
+        chartMap pivot (MvPolynomial.X t) *
+          chartMap pivot (ambientPolynomialMinor t a) =
+        chartMap pivot
+          (∑ t : Fin 4,
+            MvPolynomial.X t * ambientPolynomialMinor t a) := by
+          simp
+    _ = chartMap pivot
+          (MvPolynomial.pderiv a canonicalQuadricPolynomial25Two *
+            canonicalCubicPolynomial25Two) := by
+          rw [ambientPolynomialMinor_weighted_sum_charTwo]
+    _ = 0 := by simp
+
 /-- Euler's identity removes a minor containing the normalized pivot.  The
 argument is performed in the source polynomial ring and then mapped, so the
 quotient need not synthesize a characteristic instance. -/
@@ -295,23 +316,7 @@ theorem pivot_polynomial_minor_mem (pivot a : Fin 4) :
   by_cases ha : a = pivot
   · subst a
     simp
-  · have hsum :
-        ∑ t : Fin 4,
-            chartMap pivot (MvPolynomial.X t) *
-              chartMap pivot (ambientPolynomialMinor t a) = 0 := by
-      calc
-        ∑ t : Fin 4,
-            chartMap pivot (MvPolynomial.X t) *
-              chartMap pivot (ambientPolynomialMinor t a) =
-            chartMap pivot
-              (∑ t : Fin 4,
-                MvPolynomial.X t * ambientPolynomialMinor t a) := by
-              simp
-        _ = chartMap pivot
-              (MvPolynomial.pderiv a canonicalQuadricPolynomial25Two *
-                canonicalCubicPolynomial25Two) := by
-              rw [ambientPolynomialMinor_weighted_sum_charTwo]
-        _ = 0 := by simp
+  · have hsum := chartMap_weighted_minor_sum_zero pivot a
     rw [← Finset.sum_erase_add _ _ (Finset.mem_univ pivot),
       chartMap_X_pivot, one_mul] at hsum
     have hfree :
