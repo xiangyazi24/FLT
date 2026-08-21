@@ -118,15 +118,7 @@ theorem coordinateCurveChart_square_isPullback (i : Fin 4) :
     IsPullback (coordinateLocalCurveMap i) (coordinateChartMap i)
       (RationalPointsN25QuotientTwoAmbientTwistingDescent.ambientChartMap i)
       canonicalProjectiveCurveMap := by
-  have hi : canonicalConeGradedProjection (MvPolynomial.X i) =
-      coordinateClass i := rfl
-  convert curveChart_square_isPullback i using 1
-  · change Spec (.of (Away literalConePiece (coordinateClass i))) =
-      Spec (.of (Away literalConePiece
-        (canonicalConeGradedProjection (MvPolynomial.X i))))
-    rw [← hi]
-  · rfl
-  · rfl
+  convert curveChart_square_isPullback i using 1 <;> rfl
 
 /-- The ambient pullback twist normalized on the chart object used by the
 curve-side Čech construction. -/

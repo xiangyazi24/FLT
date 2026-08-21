@@ -177,12 +177,26 @@ proved equal, as a sheaf isomorphism, to the existing exponent `-1` twist
 transition.  Thus the local differential and effective `O_C(1)` descent data
 have a fixed common orientation; this is `[MZ-N25-AFFINE-TILDE]`.
 
+The ordered-overlap restriction maps are now canonical rather than
+frame-defined.  Restriction of affine tilde along each principal open is
+constructed from the localized top-section universal property and formally
+étale base change.  Its action on localization generators is the functorial
+map on Kähler differentials.  A separate calculation shows that these
+canonical isomorphisms equal the residue-frame presentations on both overlap
+legs.  Consequently the actual Kähler Čech arrows use canonical restriction
+maps, while the residue frames only prove their comparison with the exponent
+`-1` twist diagram.  The resulting Čech equalizer is globally isomorphic to
+the effective `O_C(1)` twist and the pulled-back ambient hyperplane twist;
+this is `[MZ-N25-CANONICAL-CECH]`.  This does not yet identify the equalizer
+with the sheafification of the scheme-relative Kähler presheaf or with a
+dualizing sheaf.
+
 The next ranked canonical-geometry attacks are:
 
-1. build the actual Kähler ordered-overlap Čech source, target, and restriction
-   arrows from the affine tilde objects, compare their equalizer with the
-   proved adjunction transition line, and prove local effectiveness before
-   concluding `ω_C ≅ O_C(1)`;
+1. construct the same-site relative Kähler presheaf for the constant-base
+   morphism, compare its chart and overlap evaluations with the canonical
+   affine tilde data, and prove that its sheafification is the canonical
+   Kähler Čech equalizer;
 2. build the missing height-one valuation/principal-divisor layer on the
    proved integral chart, including the common-function-field interface
    needed by the class-indexed middle-degree Riemann--Roch consumer.

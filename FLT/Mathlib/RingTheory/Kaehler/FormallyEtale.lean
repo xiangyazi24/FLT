@@ -44,4 +44,23 @@ theorem coordinateEquivOfFormallyEtale_map
   rw [h]
   simp [Algebra.smul_def]
 
+/-- The formally étale base-change equivalence expressed through a chosen
+coordinate on the source and its induced coordinate on the target. -/
+def coordinateBaseChangeEquiv [Algebra.FormallyEtale S T]
+    (e : Ω[S⁄R] ≃ₗ[S] S) :
+    TensorProduct S T Ω[S⁄R] ≃ₗ[T] Ω[T⁄R] :=
+  (TensorProduct.AlgebraTensorModule.congr (LinearEquiv.refl T T) e).trans
+    ((TensorProduct.AlgebraTensorModule.rid S T T).trans
+      (coordinateEquivOfFormallyEtale e).symm)
+
+/-- Canonical formally étale base change agrees with the construction through
+any chosen coordinate. -/
+theorem tensorKaehlerEquivOfFormallyEtale_eq_coordinateBaseChange
+    [Algebra.FormallyEtale S T] (e : Ω[S⁄R] ≃ₗ[S] S) :
+    tensorKaehlerEquivOfFormallyEtale R S T =
+      coordinateBaseChangeEquiv e := by
+  apply LinearEquiv.ext
+  intro z
+  simp [coordinateBaseChangeEquiv, coordinateEquivOfFormallyEtale]
+
 end KaehlerDifferential

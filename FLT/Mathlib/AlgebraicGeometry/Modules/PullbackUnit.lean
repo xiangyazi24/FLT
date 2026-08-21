@@ -142,6 +142,64 @@ theorem tildeMap_toOpen_apply {R : CommRingCat} {M N : ModuleCat R}
       (tilde.toOpen N U) (g x) := by
   exact ConcreteCategory.congr_hom (tilde.toOpen_map_app g U) x
 
+/-- After affine normalization, the top component of the unit-restriction
+comparison acts by the defining ring homomorphism. -/
+theorem restrictUnitIso_specMap_top_apply {R S : CommRingCat} (g : R ⟶ S)
+    [IsOpenImmersion (Spec.map g)] (s : R) :
+    (Scheme.ΓSpecIso S).hom
+      ((restrictUnitIso (Spec.map g)).hom.app
+        (⊤ : (Spec S).Opens)
+        (algebraMap R
+          Γ(Spec R, (Spec.map g) ''ᵁ (⊤ : (Spec S).Opens)) s)) =
+      g s := by
+  have hscalar :
+      algebraMap R
+          Γ(Spec R, (Spec.map g) ''ᵁ (⊤ : (Spec S).Opens)) s =
+        (Spec R).presheaf.map
+          (homOfLE
+            (show (Spec.map g) ''ᵁ (⊤ : (Spec S).Opens) ≤ ⊤
+              from le_top)).op
+          ((Scheme.ΓSpecIso R).inv s) := by
+    have h := ConcreteCategory.congr_hom
+      (Scheme.toOpen_eq R
+        ((Spec.map g) ''ᵁ (⊤ : (Spec S).Opens))) s
+    change algebraMap R
+        Γ(Spec R, (Spec.map g) ''ᵁ (⊤ : (Spec S).Opens)) s =
+      (Spec R).presheaf.map
+        (homOfLE
+          (show (Spec.map g) ''ᵁ (⊤ : (Spec S).Opens) ≤ ⊤
+            from le_top)).op
+        ((Scheme.ΓSpecIso R).inv s) at h
+    exact h
+  have htop :
+      (Spec R).presheaf.map
+          (homOfLE
+            (show (Spec.map g) ''ᵁ (⊤ : (Spec S).Opens) ≤ ⊤
+              from le_top)).op ≫
+        ((Spec.map g).appIso (⊤ : (Spec S).Opens)).hom =
+      (Spec.map g).appTop := by
+    rw [(Spec.map g).appIso_hom']
+    rw [(Spec.map g).map_appLE]
+    simp [Scheme.Hom.appLE]
+  have htop_apply (x : Γ(Spec R, ⊤)) :
+      ((Spec.map g).appIso (⊤ : (Spec S).Opens)).hom
+          ((Spec R).presheaf.map
+            (homOfLE
+              (show (Spec.map g) ''ᵁ (⊤ : (Spec S).Opens) ≤ ⊤
+                from le_top)).op x) =
+        (Spec.map g).appTop x := by
+    simpa only [CategoryTheory.comp_apply] using
+      ConcreteCategory.congr_hom htop x
+  rw [restrictUnitIso_hom_app_apply, hscalar, htop_apply]
+  have h := ConcreteCategory.congr_hom
+    (Scheme.ΓSpecIso_naturality g)
+    ((Scheme.ΓSpecIso R).inv s)
+  change (Scheme.ΓSpecIso S).hom
+      ((Spec.map g).appTop ((Scheme.ΓSpecIso R).inv s)) =
+    g ((Scheme.ΓSpecIso R).hom ((Scheme.ΓSpecIso R).inv s)) at h
+  rw [Iso.inv_hom_id_apply] at h
+  exact h
+
 set_option maxHeartbeats 800000 in
 -- The affine tilde adjunction and both unit-sheaf comparisons are unfolded
 -- only to test the global generator `1`, but this still creates a large term.
@@ -1080,6 +1138,30 @@ theorem restrictFunctorCongr_refl_inv_app
   change F.presheaf.map _ = 𝟙 (F.presheaf.obj (Opposite.op (f ''ᵁ W)))
   rw [← F.presheaf.map_id]
   congr 1
+
+/-- The forward restriction comparison attached to a reflexive equality is
+the identity comparison. -/
+theorem restrictFunctorCongr_refl_hom_app
+    (f : Q ⟶ U) [IsOpenImmersion f] (F : U.Modules) :
+    (restrictFunctorCongr (rfl : f = f)).hom.app F = 𝟙 _ := by
+  rw [restrictFunctorCongr_symm_hom_app_eq_inv (rfl : f = f)]
+  exact restrictFunctorCongr_refl_inv_app f F
+
+/-- Transporting a framed unit restriction along an equality of open
+immersions gives the framed restriction for the geometric name of the map. -/
+theorem restrictFrameIso_congr {f g : Q ⟶ U}
+    [IsOpenImmersion f] [IsOpenImmersion g] (h : f = g)
+    (F : U.Modules)
+    (e : F ≅ SheafOfModules.unit U.ringCatSheaf) :
+    (restrictFunctorCongr h).app F ≪≫
+        (restrictFunctor g).mapIso e ≪≫ restrictUnitIso g =
+      (restrictFunctor f).mapIso e ≪≫ restrictUnitIso f := by
+  subst g
+  have hrefl : (restrictFunctorCongr (rfl : f = f)).app F =
+      Iso.refl _ := by
+    apply Iso.ext
+    exact restrictFunctorCongr_refl_hom_app f F
+  rw [hrefl, Iso.refl_trans]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Successive canonical trivializations of the restricted unit module agree

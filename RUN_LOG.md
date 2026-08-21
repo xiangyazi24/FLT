@@ -1454,3 +1454,55 @@
   residue frames.  The next avenue is to assemble the actual Kähler Čech
   source, target, and restriction arrows and compare their equalizer with the
   existing twist equalizer.
+
+## Run 2026-08-21 (N25 canonical Kähler Čech restrictions)
+
+- doctrine version: `ce381aa6b94cef856ae1446ccf50c717e9d6f7c631f268e10343b26d8635edae`
+- approval: Xiang's instruction to continue the autonomous FLT campaign,
+  keep ChatGPT occupied on hard mathematical and design questions, verify
+  locally, audit, record progress, and commit appropriate milestones
+- starting avenue: replace the residue-frame-defined overlap restrictions in
+  the actual Kähler Čech diagram by canonical localization and formally étale
+  base-change isomorphisms
+- result: added basis-free affine-tilde infrastructure.  Morphisms from a
+  counit-recovered affine module sheaf are determined by normalized top
+  sections, Away restriction top sections satisfy the localized-module
+  universal property, and restriction framed by arbitrary source and target
+  affine coordinates has an explicit generator formula.
+- result: constructed canonical left and right restriction isomorphisms from
+  the actual chart Kähler tilde sheaves to the actual overlap Kähler tilde
+  sheaves.  Their normalized top-section maps send every chart differential
+  to the functorial Kähler differential on the overlap.
+- result: proved the explicit residue-frame restrictions have the same
+  generator formula.  `IsBaseChange.algHom_ext` upgrades equality on the
+  localization generators to equality on all top sections, and affine
+  `fromTildeΓ` faithfulness upgrades this to equality of the full canonical
+  and residue-frame sheaf isomorphisms on both overlap legs.
+- result: proved restriction-frame transport is coherent under equality of
+  named open immersions.  The public Čech restrictions now refer to the
+  canonical isomorphisms; the former residue-frame definitions remain under
+  explicit names and are used only through proved comparison theorems.
+- result: rebuilt the existing Čech-arrow comparison and equalizer
+  equivalences without changing their downstream interface.  The canonical
+  Kähler Čech equalizer is therefore isomorphic to the effective `O_C(1)`
+  twist, the adjunction transition line, and the pulled-back ambient
+  hyperplane twist.  No claim that it is already a dualizing sheaf or the
+  sheafification of the relative Kähler presheaf is made.
+- ChatGPT: Q6039 supplied the useful performance boundary of separating the
+  rank-one restriction calculation from the N25 specialization.  Q6040--Q6042
+  independently audited the base-change extensionality, right-leg symmetry,
+  and public-name refactor.  Connector-visible answers could not inspect the
+  local commit, so all placeholder names and source-level assertions were
+  discarded; the implemented lemmas were derived from local source and
+  compiled before use.
+- verification: strict source checks pass for every changed Lean file.  The
+  8619-job canonical Čech module build and repository-wide 4011-job build
+  pass.  Fresh axiom audits of the generic frame-coherence and generator
+  lemmas, both canonical/frame Spec equalities, both named geometric
+  equalities, both Čech-arrow comparisons, and the final global isomorphisms
+  report exactly `propext`, `Classical.choice`, and `Quot.sound`.  Bypass and
+  whitespace scans are clean.
+- end: `[MZ-N25-CANONICAL-CECH]` proved
+- final result: the global differential Čech object is now assembled from
+  canonical Kähler restriction maps.  The next ranked seam is to compare it
+  with the sheafification of the same-site relative Kähler presheaf.

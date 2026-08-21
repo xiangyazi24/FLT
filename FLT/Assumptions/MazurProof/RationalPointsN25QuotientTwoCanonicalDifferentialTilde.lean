@@ -40,13 +40,20 @@ abbrev chartCoordinateKaehlerDifferentialSheaf (i : Fin 4) :
     (ModuleCat.of (ChartCoordinateRing i) Ω[ChartCoordinateRing i⁄k])
 
 /-- The Jacobian residue coordinate trivializes the actual chart differential
-sheaf as a rank-one module sheaf. -/
+sheaf as the rank-one tilde module used by the twist descent. -/
+def chartCoordinateKaehlerDifferentialTildeIso (i : Fin 4) :
+    chartCoordinateKaehlerDifferentialSheaf i ≅
+      coordinateLocalTwistModule (-1) i :=
+  (AlgebraicGeometry.tilde.functor (.of (ChartCoordinateRing i))).mapIso
+    (chartCoordinateKaehlerDifferentialEquiv i).toModuleIso
+
+/-- The chart residue frame followed by the canonical rank-one frame gives a
+unit-sheaf trivialization of the actual differential sheaf. -/
 def chartCoordinateKaehlerDifferentialUnitIso (i : Fin 4) :
     chartCoordinateKaehlerDifferentialSheaf i ≅
       SheafOfModules.unit (coordinateChartScheme i).ringCatSheaf :=
-  (AlgebraicGeometry.tilde.functor (.of (ChartCoordinateRing i))).mapIso
-      (chartCoordinateKaehlerDifferentialEquiv i).toModuleIso ≪≫
-    AlgebraicGeometry.tildeSelf
+  chartCoordinateKaehlerDifferentialTildeIso i ≪≫
+    coordinateLocalTwistUnitIso (-1) i
 
 /-- The affine tilde sheaf of relative Kähler differentials on an ordered
 coordinate overlap. -/
