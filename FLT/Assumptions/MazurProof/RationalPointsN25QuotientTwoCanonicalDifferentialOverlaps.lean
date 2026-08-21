@@ -1199,4 +1199,21 @@ theorem coordinateOverlapResidueUnit_eq_inv_coordinateRatioUnit
   · exact coordinateOverlapResidueUnit_eq_inv_coordinateRatioUnit_of_ne
       i j hji
 
+/-- The full residue-coordinate transition is the integral twist transition
+of exponent `-1`, not merely multiplication by an abstract unit. -/
+theorem coordinateOverlapResidueTransition_eq_ratioPowerTransition
+    (i j : Fin 4) :
+    coordinateOverlapResidueTransition i j =
+      Away.ratioPowerTransition literalConePiece
+        (coordinateClass_mem_degreeOne i) (coordinateClass_mem_degreeOne j) (-1) := by
+  apply LinearEquiv.ext
+  intro x
+  rw [coordinateOverlapResidueTransition_apply]
+  change x * (coordinateOverlapResidueUnit i j : coordinateOverlapRing i j) = _
+  rw [coordinateOverlapResidueUnit_eq_inv_coordinateRatioUnit]
+  simp only [Away.ratioPowerTransition, zpow_neg_one]
+  change x * (↑((coordinateRatioUnit i j)⁻¹) : coordinateOverlapRing i j) =
+    (↑((coordinateRatioUnit i j)⁻¹) : coordinateOverlapRing i j) * x
+  rw [mul_comm]
+
 end MazurProof.RationalPointsN25QuotientTwoCanonicalDifferentialOverlaps

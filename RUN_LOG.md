@@ -1412,3 +1412,45 @@
   previously verified exponent `-1` adjunction cocycle.  The next avenue is
   to apply affine tilde to these actual modules, compare the resulting Čech
   diagram with the existing twist diagram, and prove local effectiveness.
+
+## Run 2026-08-21 (N25 actual Kähler affine tilde)
+
+- doctrine version: `d8930d608ca93a5e70193bd64bdce8199c2312e55b1b72561ce71330965139b5`
+- approval: Xiang's instruction to continue the autonomous FLT campaign,
+  keep ChatGPT occupied on hard mathematical and design questions, verify
+  locally, audit, and commit concrete progress
+- starting avenue: lift the actual chart and overlap Kähler modules and their
+  residue coordinates through affine tilde, while fixing the overlap
+  orientation before constructing a Čech equalizer
+- result: strengthened the residue-unit theorem to an equality of full linear
+  equivalences.  The change from the first residue frame to the second is
+  exactly `Away.ratioPowerTransition` at internal exponent `-1`, hence the
+  geometric positive twist `O(1)` transition.
+- result: defined the affine tilde sheaves of the actual Kähler modules on all
+  four charts and every ordered pair overlap.  The chart residue and both
+  ordered-overlap residues induce explicit isomorphisms to rank-one tilde
+  modules and their unit sheaves via `LinearEquiv.toModuleIso`,
+  `Functor.mapIso`, and `tildeSelf`.
+- result: proved that affine tilde carries the full residue transition to the
+  existing `coordinateOverlapTwistIso (-1)`.  The right residue tilde frame is
+  the left residue tilde frame followed by this twist isomorphism, giving the
+  exact commuting-square orientation required by the next Čech comparison.
+- ChatGPT: Q5935 and Q5939 supplied independent audits of the covariant tilde
+  API and the affine `Spec` construction; Q5936 and Q5938 identified the
+  strongest useful overlap orientation certificate; Q5940 independently
+  confirmed that no inverse isomorphism is needed and that internal exponent
+  `-1` denotes geometric `O(1)`.  All usable claims were checked against the
+  local source, and the proposed obsolete `chartTilde` route from Q5934 was
+  rejected after local inspection.
+- verification: strict source compilation of the modified overlap file and
+  the new affine-tilde file passes.  The 8596-job module build passes.  Fresh
+  axiom audits of the full linear transition, its affine-tilde image, the
+  functorial frame factorization, and the final overlap frame theorem report
+  exactly `propext`, `Classical.choice`, and `Quot.sound`; the bypass and
+  whitespace scans are clean.
+- end: `[MZ-N25-AFFINE-TILDE]` proved
+- final result: the actual local Kähler sheaves and the effective `O_C(1)`
+  twist now have identical ordered-overlap transition isomorphisms under the
+  residue frames.  The next avenue is to assemble the actual Kähler Čech
+  source, target, and restriction arrows and compare their equalizer with the
+  existing twist equalizer.

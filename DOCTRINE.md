@@ -170,14 +170,18 @@ combination of the three differentials has first residue one, and its second
 residue is the inverse coordinate ratio.  The full transition unit is
 therefore the established exponent `-1` coordinate-ratio unit on every
 ordered overlap, including self-overlaps.  This closes
-`[MZ-N25-RESIDUE-UNIT]`.
+`[MZ-N25-RESIDUE-UNIT]`.  Affine tilde has now been applied to the actual
+Kähler modules on every chart and ordered overlap.  The residue equivalences
+give actual module-sheaf trivializations, and their ordered-overlap change is
+proved equal, as a sheaf isomorphism, to the existing exponent `-1` twist
+transition.  Thus the local differential and effective `O_C(1)` descent data
+have a fixed common orientation; this is `[MZ-N25-AFFINE-TILDE]`.
 
 The next ranked canonical-geometry attacks are:
 
-1. apply affine tilde to the actual chart Kähler modules and residue
-   equivalences, build their ordered-overlap Čech diagram, and compare its
-   equalizer with the proved adjunction transition line; local effectiveness
-   must identify its restriction with the actual differential module before
+1. build the actual Kähler ordered-overlap Čech source, target, and restriction
+   arrows from the affine tilde objects, compare their equalizer with the
+   proved adjunction transition line, and prove local effectiveness before
    concluding `ω_C ≅ O_C(1)`;
 2. build the missing height-one valuation/principal-divisor layer on the
    proved integral chart, including the common-function-field interface
