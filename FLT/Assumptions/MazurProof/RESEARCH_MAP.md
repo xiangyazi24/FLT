@@ -44,6 +44,7 @@ theorems still consume `[MZ-N25]` and `[MZ-N49]` respectively.
 
 [MZ-N25-KOSZUL-CURVE]
   → [MZ-N25-CECH-COMPARE]
+  → [MZ-N25-ADJUNCTION-DESCENT]
   → [MZ-N25-PICARD-RR]
   → [MZ-N25-ABEL-JACOBI]
   → [MZ-N25]
@@ -69,9 +70,11 @@ remaining Newton faces still require independent certificates.
 
 1. **`[MZ-N25-PICARD-RR]`.** `[MZ-N25-CECH-COMPARE]` is proved: the pulled-back
    ambient hyperplane twist and the effective curve Čech twist are globally
-   isomorphic.  The next canonical-geometry seam is to transport the conormal
-   and shifted Koszul data through this isomorphism and prove the determinant/
-   adjunction identification `ω_C ≅ O_C(1)`.
+   isomorphic.  `[MZ-N25-ADJUNCTION-DESCENT]` is also proved: the line glued by
+   the actual ambient-canonical/inverse-conormal transition is globally that
+   twist.  The remaining canonical-geometry seam is to construct the
+   canonical/dualizing object and prove that its local trivializations induce
+   this transition, yielding `ω_C ≅ O_C(1)`.
 2. **`[MZ-N13-SPECIALIZE]`.** The curve model, rational Abel map, special point
    classifier, cardinality 19, and normalized Mumford comparison are present.
    The next sound object is a genuine specialization group homomorphism, not
@@ -113,6 +116,7 @@ not additional members of the endpoint cut.
 | N13 specialization homomorphism | active | Construct characteristic-two Picard group law, specialization, Abel compatibility, and prime-to-two injectivity |
 | N13 arbitrary `class_eq_iff` | refuted | False for arbitrary spread lines because vertical divisors can change the special class |
 | N25 ambient/Čech comparison | proved | The equalizer lift is globally invertible by the four-chart stalk cover |
+| N25 adjunction transition descent | proved | The `4 + (-5) = -1` composite defines the same global equalizer as the effective hyperplane twist |
 | N25 Picard/Riemann–Roch route | active, downstream | Turn finite-field divisor counts and Koszul geometry into actual Picard fibres and rational-point classification |
 | N49 composition identity | active, narrow | Rewrites `preΨ'₄₉(0)` through the order-seven data; does not itself exclude solutions |
 | N49 parity/Newton analysis | conditional | Six charts excluded; three Newton faces and their coefficient certificates remain |
@@ -132,16 +136,19 @@ not additional members of the endpoint cut.
 
 Dependency order for new work:
 
-1. Export `curvePullbackTwistGlobalIso` to the conormal determinant and prove
-   the N25 adjunction identification `ω_C ≅ O_C(1)`.
-2. Connect that canonical twist to the explicit hyperplane section and the
+1. Construct the N25 canonical/dualizing object from the smooth complete-
+   intersection data and prove that its local transition is
+   `coordinateAdjunctionOverlapIso`.
+2. Compose that local identification with
+   `adjunctionTransitionLineIsoCurvePullback` to prove `ω_C ≅ O_C(1)`.
+3. Connect that canonical twist to the explicit hyperplane section and the
    class-indexed middle-degree Riemann--Roch fibres.
-3. For N13, replace the false `class_eq_iff` route with a separately named
+4. For N13, replace the false `class_eq_iff` route with a separately named
    specialization group homomorphism and prove Abel–Jacobi compatibility before
    wiring `CyclicExclusion13`.
-4. For N49, prove the composition identity, formalize every edge coefficient,
+5. For N49, prove the composition identity, formalize every edge coefficient,
    and close all three Newton faces before wiring `CyclicExclusion49`.
-5. Keep the uniform tail as an explicit obligation until its actual package is
+6. Keep the uniform tail as an explicit obligation until its actual package is
    present and audited; do not hide it behind a renamed axiom.
 
 After every endpoint change, rebuild
@@ -150,10 +157,12 @@ printed axiom list with `[MZ-AUDIT-FOUR-CUT]`.
 
 ## Next questions
 
-1. **`RM-N25-03` for `[MZ-N25-PICARD-RR]`:** Which existing dualizing-module or
-   regular-immersion interface exposes the determinant of the proved rank-two
-   conormal basis?  Acceptance: a compiled adjunction isomorphism identifies
-   the canonical module with `curvePullbackTwistGlobalIso` at degree one.
+1. **`RM-N25-03` for `[MZ-N25-PICARD-RR]`:** Construct the weakest honest
+   canonical/dualizing object available from the smooth complete-intersection
+   and Kähler/conormal data; the current pinned tree has no directly named
+   dualizing-sheaf interface.  Acceptance: its four local trivializations are
+   constructed and their overlap map is proved equal to
+   `coordinateAdjunctionOverlapIso`, with no carried adjunction hypothesis.
 2. **`RM-N25-04` for `[MZ-N25-PICARD-RR]`:** How should the explicit degree-six
    hyperplane section be connected to that canonical module without assuming
    divisor theory?  Acceptance: a checked section/divisor bridge supplies the

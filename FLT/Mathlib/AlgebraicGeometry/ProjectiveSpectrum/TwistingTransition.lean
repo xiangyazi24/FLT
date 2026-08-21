@@ -394,6 +394,21 @@ def ratioPowerTransition {f g : A} (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1)
   DistribMulAction.toLinearEquiv (HomogeneousLocalization.Away 𝒜 (f * g))
     (HomogeneousLocalization.Away 𝒜 (f * g)) ((degreeOneRatioUnit 𝒜 hf hg) ^ d)
 
+/-- Composing two rank-one transition functions adds their integral twist
+exponents.  This is the transition-function form of tensoring two line
+bundles, stated without requiring a tensor-product API for module sheaves. -/
+theorem ratioPowerTransition_trans {f g : A}
+    (hf : f ∈ 𝒜 1) (hg : g ∈ 𝒜 1) (a b : ℤ) :
+    (ratioPowerTransition 𝒜 hf hg a).trans
+        (ratioPowerTransition 𝒜 hf hg b) =
+      ratioPowerTransition 𝒜 hf hg (a + b) := by
+  apply LinearEquiv.ext
+  intro x
+  change (degreeOneRatioUnit 𝒜 hf hg) ^ b •
+      ((degreeOneRatioUnit 𝒜 hf hg) ^ a • x) =
+    (degreeOneRatioUnit 𝒜 hf hg) ^ (a + b) • x
+  rw [← mul_smul, ← zpow_add, add_comm]
+
 /-- Integer-degree version of homogeneous multiplier compatibility.  An
 element of degree `e` maps the integral twist with transition exponent
 `d + e` to the twist with exponent `d`.  Unlike the natural-number theorem,

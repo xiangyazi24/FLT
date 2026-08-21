@@ -1,6 +1,6 @@
 # Mazur Endpoint Checklist
 
-Last source-rebuilt audit: 2026-08-08.
+Last source-rebuilt audit: 2026-08-21.
 
 The authoritative endpoint is `MazurProof.mazur_torsion_bound`.  A box may be
 checked only after the replacement theorem is reachable from that endpoint,
@@ -201,14 +201,17 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     structure module.  The geometric map to the curve's pushed-forward
     structure sheaf kills both equations on all four charts and hence
     globally, so it descends to a canonical epimorphism from the terminal
-    cokernel.  Thus only injectivity of this comparison, not its construction
-    or surjectivity, remains in the terminal identification.
-  - Open atoms: prove the canonical terminal comparison monic, equivalently
-    identify the terminal global Koszul cokernel with the direct image of the
-    projective quotient's structure sheaf; then use the resulting
-    geometric resolution to identify
-    the scheme-theoretic Hilbert polynomial with the certified `6T-3`, and
-    prove projective adjunction;
+    cokernel.  Local geometric Koszul exactness and cokernel uniqueness now
+    prove that comparison is an isomorphism for every shift.  The pullback of
+    each ambient twist is globally identified with the effective curve Čech
+    twist.  The adjunction composite transition `4 + (-5) = -1` has also been
+    descended through its own equalizer and identified with the actual
+    hyperplane twist on the curve.
+  - Open atoms: construct the canonical/dualizing object from the smooth
+    complete-intersection data and prove that its chart trivializations carry
+    the verified adjunction transition, thereby proving `ω_C ≅ O_C(1)`;
+    use the geometric resolution to identify the scheme-theoretic Hilbert
+    polynomial with the certified `6T-3`;
     package the characteristic-three Jacobian-rank certificate as a smooth
     proper special fibre (the binary `Proj` is already proved smooth, proper,
     and of relative dimension one); identify

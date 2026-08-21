@@ -1902,3 +1902,22 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   audit with only `propext`, `Classical.choice`, and `Quot.sound`.  No endpoint
   axiom is removed: the next dependency is the determinant/adjunction bridge
   from the conormal and shifted Koszul data to `ω_C ≅ O_C(1)`.
+
+### N25 adjunction transition descent (2026-08-21)
+
+- `RationalPointsN25QuotientTwoAdjunctionDescent.lean` separates the part of
+  adjunction already determined by transition functions from the still-open
+  construction of a dualizing object.  In the integer-exponent convention,
+  the ambient canonical factor is `4`, the inverse determinant of the
+  degree-two and degree-three conormal factors is `-5`, and their composite is
+  `-1`, the transition exponent of `O_C(1)`.
+- The file constructs `adjunctionCechLeft` using that composite overlap
+  automorphism and proves it equals `twistCechLeft (-1)`.  Consequently its
+  equalizer `adjunctionTransitionLine` is globally isomorphic to both
+  `globalTwistModule (-1)` and the actual pullback `curvePullbackTwist (-1)`;
+  its restriction to every standard chart is the unit module sheaf.
+- This result does not define `ω_C` to be the answer and does not close
+  projective adjunction.  The remaining exact seam is a construction of the
+  canonical/dualizing object from the smooth complete-intersection data,
+  followed by a proof that its local trivializations have the already verified
+  `coordinateAdjunctionOverlapIso` transition.

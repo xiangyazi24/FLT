@@ -1179,3 +1179,39 @@
   or `native_decide`.  The four endpoint axioms remain unchanged; the ready
   N25 frontier is the determinant/adjunction bridge `ω_C ≅ O_C(1)` followed by
   the explicit divisor and middle-degree Riemann--Roch interfaces.
+
+## Run 2026-08-21 (N25 adjunction descent)
+
+- doctrine version: `7274fc9b6d11efe825eef6851ae5f8cfe972dfde6798701cfd1a677f622c2e14`
+- approval: Xiang's explicit instruction to continue the current task
+  autonomously and keep using ChatGPT for hard mathematical and design work
+- starting avenue: promote the proved chartwise `(2,3)` adjunction transition
+  to a global Čech comparison tied to the effective curve twist
+- result: added the generic theorem `ratioPowerTransition_trans`, proving that
+  composition of rank-one transition functions adds integral exponents
+- result: added
+  `RationalPointsN25QuotientTwoAdjunctionDescent.lean`.  It identifies the
+  existing ambient-canonical/inverse-conormal calculation with the exponent
+  identity `4 + (-5) = -1`, lifts it through affine tilde, and constructs the
+  resulting Čech arrow and equalizer.
+- result: proved that the adjunction Čech arrow is literally
+  `twistCechLeft (-1)`.  The transition-defined line is therefore globally
+  isomorphic to `globalTwistModule (-1)`, to the actual pullback of the ambient
+  hyperplane twist, and locally to the unit module on every standard chart.
+- ChatGPT: Q5814 still has no git-drop and was not re-dispatched.  A new
+  independent adjunction-design request through the canonical `ask-gpt.py`
+  exited before dispatch because the current `flt` window has no configured
+  channel; it produced no Q number or answer, and no claim from ChatGPT was
+  used.
+- verification: strict single-file checking, the 8609-job module target, and
+  the repository-wide 4011-job build passed.  Fresh axiom audits of exponent
+  composition, the transition identity, the Čech-arrow equality, both global
+  isomorphisms, and the local trivialization contain only `propext`,
+  `Classical.choice`, and `Quot.sound`; the bypass and whitespace scans are
+  clean.  The source-rebuilt 8775-job endpoint audit still reports exactly the
+  four established custom axioms and no `sorryAx`.
+- end: `[MZ-N25-ADJUNCTION-DESCENT]` proved
+- final result: the transition-function prerequisite for projective
+  adjunction is closed without defining a dualizing sheaf to be `O_C(1)`.
+  The remaining seam is to construct the canonical/dualizing object and prove
+  that its local trivializations induce this verified descent datum.

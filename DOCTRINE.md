@@ -129,14 +129,24 @@ pullback of the ambient hyperplane twist is globally identified with the
 effective curve-side twist; `[MZ-N25-CECH-COMPARE]` is closed without changing
 the four endpoint axioms.
 
+The transition-theoretic part of adjunction is now global.  The composite of
+the ambient canonical exponent `4` with the inverse conormal-determinant
+exponent `-5` defines its own Čech equalizer.  Its first gluing arrow is proved
+equal to the exponent `-1` arrow, so this transition-defined line is globally
+isomorphic both to the effective `O_C(1)` twist and to the pullback of the
+ambient hyperplane twist.  This is `[MZ-N25-ADJUNCTION-DESCENT]`; it does not
+claim that a dualizing sheaf has been constructed.  The remaining adjunction
+seam is to construct the canonical/dualizing object and prove that its local
+trivializations carry exactly this verified composite transition.
+
 The next ranked canonical-geometry attacks are:
 
-1. build the missing height-one valuation/principal-divisor layer on the
+1. construct the canonical/dualizing object from the smooth complete-
+   intersection data and identify its chart transitions with the proved
+   adjunction descent line, yielding `ω_C ≅ O_C(1)`;
+2. build the missing height-one valuation/principal-divisor layer on the
    proved integral chart, including the common-function-field interface
-   needed by the class-indexed middle-degree Riemann--Roch consumer;
-2. connect the proved conormal basis and shifted ambient Koszul
-   resolution, via the proved global ambient/curve twist comparison,
-   to the determinant/adjunction identification `ω_C ≅ O_C(1)`.
+   needed by the class-indexed middle-degree Riemann--Roch consumer.
 
 ### (b) N13 concrete specialization and separatedness — ACTIVE
 
