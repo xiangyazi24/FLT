@@ -202,7 +202,9 @@ The next ranked canonical-geometry attacks are:
    The remaining step is to construct the compatible derivation into the
    canonical Kähler Čech equalizer, transpose it through the universal and
    sheafification adjunctions, and prove the resulting map locally invertible
-   on the four standard charts;
+   on the four standard charts.  A generic stalkwise theorem now upgrades
+   isomorphy on every member of an arbitrary open cover to global isomorphy,
+   so this final step no longer requires repeating the stalk argument;
 2. build the missing height-one valuation/principal-divisor layer on the
    proved integral chart, including the common-function-field interface
    needed by the class-indexed middle-degree Riemann--Roch consumer.

@@ -1541,6 +1541,12 @@
   to universal Kähler generators.  Each leg sends `d(x)` to the differential
   of the corresponding localized chart section, which is the exact local
   compatibility needed to build the Čech-valued derivation.
+- result: extracted the stalk argument used by the earlier ambient-twist
+  comparison into a universe-polymorphic theorem: a module-sheaf morphism
+  whose restrictions are isomorphisms on every member of an open cover is
+  globally an isomorphism.  The ambient-twist proof now applies this theorem
+  directly, validating the generic interface on the N25 affine cover and
+  removing its duplicated stalk construction.
 - ChatGPT: Q6068--Q6070 and Q6072--Q6073 independently selected objectwise
   chart evaluation before global sheaf comparison.  Q6074 identified the
   useful `appLE_map` transparency boundary, Q6077 independently proposed the
@@ -1550,13 +1556,15 @@
   displayed snippets had reversed arrows, schematic names, or nonexistent
   convenience APIs; those were discarded, and every retained claim was
   reconstructed from the pinned local source.
-- verification: strict source compilation passes for both new production
-  files.  The generic module's 2344-job build and the N25 module's 8621-job
-  build pass.  Fresh axiom audits of the constant-base map, universal Hom
+- verification: strict source compilation passes for all new and refactored
+  production files.  The generic relative-differential module's 2344-job
+  build, the restriction-cover module's 2542-job build, and the N25 module's
+  8621-job build pass.  Fresh axiom audits of the constant-base map, universal Hom
   equivalence, sheafification unit, chart base-map comparison, and both
   overlap generator formulas report exactly `propext`, `Classical.choice`,
-  and `Quot.sound`; bypass, long-line, whitespace, and comment scans are
-  clean.
+  and `Quot.sound`.  The generic cover isomorphism criterion and the
+  refactored ambient-twist application have the same clean-3 audit; bypass,
+  long-line, whitespace, and comment scans are clean.
 - end: `[MZ-N25-RELATIVE-DIFFERENTIAL-BASE]` proved
 - final result: the intrinsic same-site relative differential object now
   exists in the same module-sheaf category as the canonical Čech equalizer,

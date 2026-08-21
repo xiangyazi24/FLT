@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoAmbientTwistRestriction
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoSmooth
+import FLT.Mathlib.AlgebraicGeometry.Modules.RestrictionCover
 
 /-!
 # Identifying the ambient and Čech twists on the canonical curve
@@ -1048,63 +1049,14 @@ theorem curvePullbackTwistToGlobalTwist_restrict_isIso
       (curvePullbackTwistToGlobalTwist d))
     (globalTwistModuleToLocal d i)
 
-set_option synthInstance.maxHeartbeats 200000 in
--- Stalkwise isomorphy uses the coordinate cover and several transported
--- module instances simultaneously.
 /-- The pullback of the ambient projective twist is the effective curve-side
 Čech twist.  Isomorphy is checked on stalks after choosing a coordinate
 chart containing each point. -/
 theorem curvePullbackTwistToGlobalTwist_isIso (d : ℤ) :
     IsIso (curvePullbackTwistToGlobalTwist d) := by
-  let F := SheafOfModules.toSheaf
-    CanonicalProjectiveCurve25Two.ringCatSheaf
-  have hStalk (x : CanonicalProjectiveCurve25Two) :
-      IsIso
-        ((Scheme.Modules.toPresheaf CanonicalProjectiveCurve25Two ⋙
-          TopCat.Presheaf.stalkFunctor AddCommGrpCat x).map
-            (curvePullbackTwistToGlobalTwist d)) := by
-    let i := coordinateAffineOpenCover.idx x
-    have hx := coordinateAffineOpenCover.covers x
-    change x ∈ Set.range (coordinateChartMap i) at hx
-    obtain ⟨y, hy⟩ := hx
-    let G := Scheme.Modules.toPresheaf (coordinateChartScheme i) ⋙
-      TopCat.Presheaf.stalkFunctor AddCommGrpCat y
-    have hRestrictedStalk : IsIso
-        ((Scheme.Modules.restrictFunctor (coordinateChartMap i) ⋙ G).map
-          (curvePullbackTwistToGlobalTwist d)) := by
-      change IsIso (G.map
-        ((Scheme.Modules.restrictFunctor (coordinateChartMap i)).map
-          (curvePullbackTwistToGlobalTwist d)))
-      letI := curvePullbackTwistToGlobalTwist_restrict_isIso d i
-      infer_instance
-    have hCurveStalk : IsIso
-        ((Scheme.Modules.toPresheaf CanonicalProjectiveCurve25Two ⋙
-          TopCat.Presheaf.stalkFunctor AddCommGrpCat
-            (coordinateChartMap i y)).map
-              (curvePullbackTwistToGlobalTwist d)) :=
-      (CategoryTheory.NatIso.isIso_map_iff
-        (Scheme.Modules.restrictStalkNatIso (coordinateChartMap i) y)
-          (curvePullbackTwistToGlobalTwist d)).mp hRestrictedStalk
-    exact hy ▸ hCurveStalk
-  have hUnderlyingStalk (x : CanonicalProjectiveCurve25Two) :
-      IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat x).map
-        (F.map (curvePullbackTwistToGlobalTwist d)).hom) := by
-    change IsIso
-      ((Scheme.Modules.toPresheaf CanonicalProjectiveCurve25Two ⋙
-        TopCat.Presheaf.stalkFunctor AddCommGrpCat x).map
-          (curvePullbackTwistToGlobalTwist d))
-    exact hStalk x
-  letI : ∀ x : CanonicalProjectiveCurve25Two,
-      IsIso ((TopCat.Presheaf.stalkFunctor AddCommGrpCat x).map
-        (F.map (curvePullbackTwistToGlobalTwist d)).hom) := hUnderlyingStalk
-  haveI hUnderlying : IsIso (F.map (curvePullbackTwistToGlobalTwist d)) :=
-    TopCat.Presheaf.isIso_of_stalkFunctor_map_iso
-      (F.map (curvePullbackTwistToGlobalTwist d))
-  apply Scheme.Modules.Hom.isIso_iff_isIso_app.mpr
-  intro U
-  change IsIso
-    ((F.map (curvePullbackTwistToGlobalTwist d)).hom.app (.op U))
-  infer_instance
+  apply Scheme.Modules.isIso_of_restrict_openCover
+    coordinateAffineOpenCover.openCover
+  exact curvePullbackTwistToGlobalTwist_restrict_isIso d
 
 /-- The canonical global identification between the two constructions of
 the twist on the canonical curve. -/
