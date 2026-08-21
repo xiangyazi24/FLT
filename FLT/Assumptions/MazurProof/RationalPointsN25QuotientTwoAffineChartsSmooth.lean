@@ -24,9 +24,12 @@ open RationalPointsN25QuotientSmoothF2
 open RationalPointsN25QuotientTwoConormal
 open RationalPointsN25QuotientTwoGradedKoszul
 open RationalPointsN25QuotientTwoQuotientGrading
+open RationalPointsN25QuotientTwoChartIdeal
 open RationalPointsN25QuotientTwoAffineCharts
 open RationalPointsN25QuotientTwoStructuralJacobian
 open HomogeneousLocalization
+
+attribute [local instance] MvPolynomial.gradedAlgebra
 
 /-- The ordinary complete-intersection coordinate ring on `D₊(X pivot)`. -/
 abbrev ChartQuotient (pivot : Fin 4) :=
@@ -37,6 +40,24 @@ then reduced modulo the two affine equations. -/
 def chartMap (pivot : Fin 4) : S →+* ChartQuotient pivot :=
   (algebraMap (AffineChart pivot) (ChartQuotient pivot)).comp
     (ambientDehomogenize pivot)
+
+/-- The affine-to-homogeneous chart equivalence sends a dehomogenized
+homogeneous polynomial to its canonical homogeneous fraction. -/
+theorem chartCoordinateRingEquivAffine_chartMap
+    (pivot : Fin 4) (n : ℕ) (p : S)
+    (hp : p ∈ standardConePiece (n • (1 : ℕ))) :
+    chartCoordinateRingEquivAffine pivot (chartMap pivot p) =
+      Away.mk literalConePiece
+        (canonicalConeGradedProjection.map_mem (coordinate_isHomogeneous pivot)) n
+        (canonicalConeGradedProjection p)
+        (canonicalConeGradedProjection.map_mem hp) := by
+  change chartCoordinateRingEquivAffine pivot
+      (Ideal.Quotient.mk (chartAffineEquationIdeal pivot)
+        (ambientDehomogenize pivot p)) = _
+  rw [chartCoordinateRingEquivAffine_mk,
+    standardChartEquiv_ambientDehomogenize]
+  · rw [canonicalConeChartMap, Away.map_mk]
+  · exact hp
 
 /-- After omitting one of the three free coordinate positions, these are the
 two ambient coordinate labels used as Jacobian columns. -/

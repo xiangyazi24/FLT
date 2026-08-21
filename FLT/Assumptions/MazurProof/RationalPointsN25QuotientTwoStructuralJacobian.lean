@@ -88,6 +88,19 @@ def ambientPolynomialMinor (a b : Fin 4) : S :=
     MvPolynomial.pderiv b canonicalQuadricPolynomial25Two *
       MvPolynomial.pderiv a canonicalCubicPolynomial25Two
 
+/-- Every ambient Jacobian minor has the cubic degree dictated by the
+quadric-cubic complete intersection. -/
+theorem ambientPolynomialMinor_isHomogeneous (a b : Fin 4) :
+    (ambientPolynomialMinor a b).IsHomogeneous 3 := by
+  unfold ambientPolynomialMinor
+  have hq (t : Fin 4) :
+      (MvPolynomial.pderiv t canonicalQuadricPolynomial25Two).IsHomogeneous 1 := by
+    simpa using canonicalQuadricPolynomial25Two_isHomogeneous.pderiv
+  have hc (t : Fin 4) :
+      (MvPolynomial.pderiv t canonicalCubicPolynomial25Two).IsHomogeneous 2 := by
+    simpa using canonicalCubicPolynomial25Two_isHomogeneous.pderiv
+  exact (hq a).mul (hc b) |>.sub ((hq b).mul (hc a))
+
 /-- The coordinate-form Jacobian minor used by the geometric Bézout
 certificates.  Its orientation agrees with `ambientPolynomialMinor`. -/
 def ambientJacobianMinor {K : Type*} [CommRing K]
@@ -300,6 +313,72 @@ theorem ambientPolynomialMinor_comm (a b : Fin 4) :
     ambientPolynomialMinor a b = ambientPolynomialMinor b a := by
   rw [ambientPolynomialMinor_swap]
   exact CharTwo.neg_eq _
+
+/-- Omitting chart pivots `i` and `j` in either order selects the same
+complementary ambient Jacobian minor. -/
+theorem ambientPolynomialMinor_complementary_chart_pair
+    (i j : Fin 4) (hji : j ≠ i) :
+    ambientPolynomialMinor
+        (i.succAbove
+          (((finSuccAboveEquiv i).symm ⟨j, hji⟩).succAbove 0))
+        (i.succAbove
+          (((finSuccAboveEquiv i).symm ⟨j, hji⟩).succAbove 1)) =
+      ambientPolynomialMinor
+        (j.succAbove
+          (((finSuccAboveEquiv j).symm ⟨i, hji.symm⟩).succAbove 0))
+        (j.succAbove
+          (((finSuccAboveEquiv j).symm ⟨i, hji.symm⟩).succAbove 1)) := by
+  let ri := (finSuccAboveEquiv i).symm ⟨j, hji⟩
+  let rj := (finSuccAboveEquiv j).symm ⟨i, hji.symm⟩
+  let a := i.succAbove (ri.succAbove 0)
+  let b := i.succAbove (ri.succAbove 1)
+  let c := j.succAbove (rj.succAbove 0)
+  let d := j.succAbove (rj.succAbove 1)
+  have hri : i.succAbove ri = j :=
+    congrArg Subtype.val ((finSuccAboveEquiv i).apply_symm_apply ⟨j, hji⟩)
+  have hrj : j.succAbove rj = i :=
+    congrArg Subtype.val ((finSuccAboveEquiv j).apply_symm_apply ⟨i, hji.symm⟩)
+  have hai : a ≠ i := i.succAbove_ne _
+  have hbi : b ≠ i := i.succAbove_ne _
+  have hcj : c ≠ j := j.succAbove_ne _
+  have hdj : d ≠ j := j.succAbove_ne _
+  have haj : a ≠ j := by
+    intro h
+    apply ri.succAbove_ne 0
+    apply i.succAbove_right_injective
+    exact h.trans hri.symm
+  have hbj : b ≠ j := by
+    intro h
+    apply ri.succAbove_ne 1
+    apply i.succAbove_right_injective
+    exact h.trans hri.symm
+  have hci : c ≠ i := by
+    intro h
+    apply rj.succAbove_ne 0
+    apply j.succAbove_right_injective
+    exact h.trans hrj.symm
+  have hdi : d ≠ i := by
+    intro h
+    apply rj.succAbove_ne 1
+    apply j.succAbove_right_injective
+    exact h.trans hrj.symm
+  have hab : a ≠ b := by
+    intro h
+    have h' := i.succAbove_right_injective h
+    have h'' := ri.succAbove_right_injective h'
+    norm_num at h''
+  have hcd : c ≠ d := by
+    intro h
+    have h' := j.succAbove_right_injective h
+    have h'' := rj.succAbove_right_injective h'
+    norm_num at h''
+  have hpairs : (a = c ∧ b = d) ∨ (a = d ∧ b = c) := by
+    omega
+  change ambientPolynomialMinor a b = ambientPolynomialMinor c d
+  rcases hpairs with ⟨hac, hbd⟩ | ⟨had, hbc⟩
+  · rw [hac, hbd]
+  · rw [had, hbc]
+    exact ambientPolynomialMinor_comm _ _
 
 /-- A Jacobian minor with two equal columns vanishes. -/
 @[simp]

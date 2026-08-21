@@ -317,6 +317,17 @@ theorem standardChartEquiv_symm_apply (i : Fin 4) (z : StandardChart i) :
     _ = standardChartToAffine i (affineToStandardChart i p) :=
       (standardChartToAffine_affineToStandard i p).symm
 
+/-- Rehomogenizing the dehomogenization of a homogeneous polynomial recovers
+its standard-chart fraction. -/
+theorem standardChartEquiv_ambientDehomogenize
+    (i : Fin 4) (n : ℕ) (p : S)
+    (hp : p ∈ standardConePiece (n • (1 : ℕ))) :
+    standardChartEquiv i (ambientDehomogenize i p) =
+      Away.mk standardConePiece (coordinate_isHomogeneous i) n p hp := by
+  rw [← standardChartToAffine_mk i n p hp]
+  rw [← standardChartEquiv_symm_apply]
+  exact (standardChartEquiv i).apply_symm_apply _
+
 /-! ## Uniform affine equations and quotient chart rings -/
 
 /-- The canonical quadric after setting the distinguished chart coordinate
@@ -415,5 +426,15 @@ noncomputable def chartCoordinateRingEquivAffine (i : Fin 4) :
   (Ideal.quotientEquiv (chartAffineEquationIdeal i) (chartEquationIdeal i)
       (standardChartEquiv i) (chartAffineEquationIdeal_map i).symm).trans
     (chartCoordinateRingEquiv i)
+
+/-- The affine chart equivalence is induced by polynomial substitution into
+the standard chart followed by the canonical quotient chart map. -/
+@[simp]
+theorem chartCoordinateRingEquivAffine_mk (i : Fin 4) (p : AffineChart i) :
+    chartCoordinateRingEquivAffine i
+        (Ideal.Quotient.mk (chartAffineEquationIdeal i) p) =
+      canonicalConeChartMap i (standardChartEquiv i p) := by
+  rw [chartCoordinateRingEquivAffine, RingEquiv.trans_apply,
+    Ideal.quotientEquiv_mk, chartCoordinateRingEquiv_mk]
 
 end MazurProof.RationalPointsN25QuotientTwoAffineCharts

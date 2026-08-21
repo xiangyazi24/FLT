@@ -156,9 +156,17 @@ Jacobian residues followed by the chart equivalences; this is
 to every ordered overlap through the actual homogeneous chart projections.
 Their change of basis is an explicit unit
 `coordinateOverlapResidueUnit`; this is
-`[MZ-N25-OVERLAP-LOCALIZATION]`.  The remaining projective step is the single
-unit identity equating this residue transition with the already verified
-exponent `-1` coordinate-ratio unit.
+`[MZ-N25-OVERLAP-LOCALIZATION]`.  The affine localization parameter is now
+identified with the homogeneous coordinate ratio, and its residue is the
+corresponding localized ambient Jacobian minor.  Each ambient minor is proved
+homogeneous of degree three; complementary chart omissions select the same
+minor, so its two chart expressions differ by the cube of the coordinate
+ratio.  The Leibniz identity for inverse ratios then reduces this cube to the
+single ratio factor predicted by adjunction on the differential of the chart
+ratio.  The remaining projective step is to extend that equality from this
+one differential to a spanning family, using the proved unimodularity of the
+three Jacobian minors, and thereby identify the full residue transition unit
+with the established exponent `-1` coordinate-ratio unit.
 
 The next ranked canonical-geometry attacks are:
 

@@ -27,8 +27,8 @@ attribute [local instance] MvPolynomial.gradedAlgebra
 
 /-- The image of the `i`th projective coordinate in the canonical quotient
 ring. -/
-def coordinateClass (i : Fin 4) : CanonicalConeRing25Two :=
-  canonicalConeProjection (MvPolynomial.X i)
+abbrev coordinateClass (i : Fin 4) : CanonicalConeRing25Two :=
+  canonicalConeGradedProjection (MvPolynomial.X i)
 
 /-- Every quotient coordinate class remains homogeneous of degree one. -/
 theorem coordinateClass_mem_degreeOne (i : Fin 4) :

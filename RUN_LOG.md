@@ -1315,3 +1315,52 @@
   `[MZ-N25-OVERLAP-LOCALIZATION]` proved
 - final result: only the explicit equality between the localized residue
   transition unit and the existing exponent `-1` adjunction unit remains.
+
+## Run 2026-08-21 (N25 residue-minor overlap transition)
+
+- doctrine version: `ae54d6386238edaa718564c9f3989c48395736ba95a36434e41f03fae67e6642`
+- approval: Xiang's instruction to continue the current task autonomously,
+  retain ChatGPT as the workhorse for hard design questions, and verify every
+  proposed identity locally
+- starting avenue: compute the actual overlap change of the localized
+  Kähler-residue coordinates and reduce it to homogeneous Jacobian minors
+- result: made the coordinate class definition reducibly identical to the
+  graded quotient image.  This removes the proposition-only denominator cast
+  and lets the actual projective chart ring map directly to the ordered
+  localization without a redundant formally étale identity stage.
+- result: proved that dehomogenizing and then rehomogenizing a homogeneous
+  polynomial gives its canonical chart fraction, and identified every affine
+  Jacobian cross component uniformly with the chart image of an ambient
+  polynomial minor.
+- result: proved every ambient Jacobian minor homogeneous of degree three.
+  The two ways of omitting an ordered pair of chart pivots select the same
+  complementary minor; the proof uses only injectivity of `Fin.succAbove`,
+  the four-coordinate pigeonhole constraint, and symmetry of minors in
+  characteristic two.
+- result: proved the general homogeneous chart transition and specialized it
+  to the selected Jacobian crosses.  Consequently the left residue of
+  `d(X_j/X_i)` equals the cube of `X_j/X_i` times the right residue of
+  `d(X_i/X_j)`.
+- result: derived from the universal Leibniz rule that
+  `d(X_j/X_i) = (X_j/X_i)^2 d(X_i/X_j)` in characteristic two.  Combining
+  this with the cubic minor transition proves the predicted single-ratio
+  relation between the two residue evaluations on `d(X_j/X_i)`.
+- ChatGPT: Q5910 was checked only through its configured git-drop branch; no
+  drop exists and it was not re-dispatched.  A separate cast/naturality design
+  audit through canonical `ask-gpt.py` failed before dispatch because the
+  current `flt` window has no configured channel, so it produced no Q number
+  or answer and no external claim entered the proof.
+- verification: strict codegen checks, the 8595-job overlap module target,
+  and the repository-wide 4011-job build pass.  Fresh axiom audits of the
+  homogeneous rehomogenization, minor homogeneity and complementary-pair
+  identity, chart cross formula, generic and specialized overlap transitions,
+  inverse-ratio differential formula, and final linear residue relation all
+  report exactly `propext`, `Classical.choice`, and `Quot.sound`.  The bypass,
+  long-line, whitespace, and comment scans are clean.  The source-rebuilt
+  8775-job endpoint audit still reports exactly the four established custom
+  axioms and no `sorryAx`.
+- final result: the expected exponent `-1` has now been derived on the chart
+  ratio differential itself.  The remaining unit identity requires extending
+  this equality to a spanning differential family via the already proved
+  unimodular Jacobian-cross certificate; no cancellation of a potentially
+  vanishing individual minor is assumed.
