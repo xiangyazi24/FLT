@@ -1359,6 +1359,18 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   arithmetic task is still to prove that coefficients one and three of
   `P.u² - uBase * Q.u` lie in the square of the source coordinate ideal; it
   cannot be weakened to the square of a larger joint ideal.
+- `N13SpreadLineCounterexample.lean` proves that the former all-spread
+  `class_eq_iff` target is false.  `SpreadLine` permits the stored generic
+  infinity orientation to be changed independently of its two-chart line and
+  special divisor.  Reorienting the negative-infinity data to the generic
+  zero representative gives the same rational class as the positive-infinity
+  line, while their special classes are respectively the canonical class and
+  the distinct anchored class.  Both affine ideals are the unit ideal, so
+  vertical saturation or affine contraction cannot remove this defect.  The
+  next N13 interface must restrict to coherent spreads whose infinity
+  orientation is carried by the actual chart geometry, or specialize only
+  the canonical exact-spread chooser.  Work on the impossible unrestricted
+  theorem is no longer on the critical path.
 
 ### N25 shared Frobenius descent and the binary class-number consumer (2026-08-10)
 
@@ -2036,8 +2048,20 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   section isomorphism as `coordinateChartRestrictedRelativeDerivation`; its
   universal transpose maps the affine objectwise relative differentials to
   the restricted global sheaf, with a proved formula on every universal
-  differential.  The remaining source-side locality seam is to prove this map
-  locally bijective.  Sheafification uniqueness then compares the restricted
-  global sheaf with the affine sheafification, and the generic affine
-  isomorphism plus the existing coverwise criterion finish the global Kähler
-  identification.
+  differential.
+- Transport across each chart section-ring isomorphism is bijective on every
+  open.  The restricted global sheafification unit is locally injective and
+  locally surjective, so sheafification uniqueness constructs an explicit
+  isomorphism from the restricted global relative differential sheaf to the
+  affine sheafification.
+- The canonical chart comparison is proved equal to this uniqueness
+  isomorphism followed by the affine comparison with the tilde sheaf.  It is
+  therefore an isomorphism on every standard chart.  The coordinate cover
+  criterion proves that
+  `canonicalRelativeDifferentialsToGlobalKaehler` is globally an isomorphism.
+  Combining it with `globalKaehlerDifferentialIsoCurvePullback` identifies the
+  scheme-relative differential sheaf with the existing effective curve
+  hyperplane twist.  This closes
+  `[MZ-N25-RELATIVE-DIFFERENTIAL-GLOBAL]` without defining a dualizing sheaf
+  or discharging the N25 rational-point endpoint.  The next consumer is the
+  height-one divisor/Picard/Riemann--Roch layer.

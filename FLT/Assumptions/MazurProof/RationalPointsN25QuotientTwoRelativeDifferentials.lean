@@ -5,6 +5,7 @@ import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
 import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
 import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Equalizers
 import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Products
+import Mathlib.CategoryTheory.Sites.PreservesLocallyBijective
 
 /-!
 # Same-site relative differentials of the N25 canonical curve
@@ -35,6 +36,7 @@ open RationalPointsN25QuotientTwoTwistingSheafCharts
 open RationalPointsN25QuotientTwoTwistingSheafGluing
 open RationalPointsN25QuotientTwoQuotientGrading
 open RationalPointsN25QuotientTwoTwistingTransition
+open RationalPointsN25QuotientTwoSmooth
 open AlgebraicGeometry
 open CategoryTheory
 open CategoryTheory.Limits
@@ -402,6 +404,568 @@ theorem coordinateChartRelativeDifferentialsToRestrictedSheaf_app_d
   have h := congrArg (fun d ↦ d.d x)
     (coordinateChartRelativeDifferentialsToRestrictedSheaf_fac i)
   exact h
+
+/-! ## Locality of relative differentials under chart restriction -/
+
+/-- The global objectwise relative differentials viewed on a standard chart
+through its open-immersion section isomorphisms. -/
+noncomputable def coordinateChartRestrictedRelativeDifferentialsPresheaf (i : Fin 4) :=
+  letI alpha : (coordinateChartScheme i).presheaf ⟶
+      (coordinateChartMap i).opensFunctor.op ⋙
+        CanonicalProjectiveCurve25Two.presheaf :=
+    { app U := ((coordinateChartMap i).appIso U.unop).inv
+      naturality := fun _ _ h ↦
+        Scheme.Hom.appIso_inv_naturality (coordinateChartMap i) h }
+  (PresheafOfModules.pushforward
+    (F := (coordinateChartMap i).opensFunctor)
+    (CategoryTheory.Functor.whiskerRight alpha
+      (forget₂ CommRingCat RingCat))).obj
+        canonicalRelativeDifferentialsPresheaf
+
+/-- The base square inducing the Kähler transport on a chart, with the
+identity on the binary ground ring made explicit. -/
+theorem coordinateChartRelativeDifferentialsPresheafTransport_square
+    (i : Fin 4) (U : (coordinateChartScheme i).Opensᵒᵖ) :
+    𝟙 (CommRingCat.of k) ≫ canonicalCurveConstBaseMap.app
+        (.op (coordinateChartMap i ''ᵁ U.unop)) =
+      (affineConstBaseMap (.of k)
+        (.of (ChartCoordinateRing i))).app U ≫
+          ((coordinateChartMap i).appIso U.unop).inv := by
+  rw [Category.id_comp]
+  exact (coordinateChart_appIso_inv_base_compat i U).symm
+
+set_option maxHeartbeats 800000 in
+-- Explicit maps keep dependent module inference from unfolding the chart presheaves.
+set_option backward.isDefEq.respectTransparency false in
+/-- The sectionwise Kähler map induced by a chart section-ring isomorphism. -/
+def coordinateChartRelativeDifferentialsPresheafTransportApp (i : Fin 4)
+    (U : (coordinateChartScheme i).Opensᵒᵖ) :
+    CommRingCat.KaehlerDifferential
+        ((affineConstBaseMap (.of k)
+          (.of (ChartCoordinateRing i))).app U) ⟶
+      (ModuleCat.restrictScalars
+        ((coordinateChartMap i).appIso U.unop).inv.hom).obj
+          (CommRingCat.KaehlerDifferential
+            (canonicalCurveConstBaseMap.app
+              (.op (coordinateChartMap i ''ᵁ U.unop)))) :=
+  CommRingCat.KaehlerDifferential.map
+    (f := (affineConstBaseMap (.of k)
+      (.of (ChartCoordinateRing i))).app U)
+    (f' := canonicalCurveConstBaseMap.app
+      (.op (coordinateChartMap i ''ᵁ U.unop)))
+    (g := 𝟙 (CommRingCat.of k))
+    (g' := ((coordinateChartMap i).appIso U.unop).inv)
+    (coordinateChartRelativeDifferentialsPresheafTransport_square i U)
+
+@[simp]
+theorem coordinateChartRelativeDifferentialsPresheafTransportApp_d
+    (i : Fin 4) (U : (coordinateChartScheme i).Opensᵒᵖ)
+    (x : (coordinateChartScheme i).presheaf.obj U) :
+    coordinateChartRelativeDifferentialsPresheafTransportApp i U
+        (CommRingCat.KaehlerDifferential.d x) =
+      CommRingCat.KaehlerDifferential.d
+        (((coordinateChartMap i).appIso U.unop).inv x) := by
+  exact CommRingCat.KaehlerDifferential.map_d
+    (coordinateChartRelativeDifferentialsPresheafTransport_square i U) x
+
+/-- Restriction in the affine objectwise differential presheaf sends `d x`
+to the differential of the restricted section. -/
+theorem coordinateChartAffineRelativeDifferentialsPresheaf_map_d
+    (i : Fin 4) {U V : (coordinateChartScheme i).Opensᵒᵖ} (h : U ⟶ V)
+    (x : (coordinateChartScheme i).presheaf.obj U) :
+    (affineRelativeDifferentialsPresheaf (.of k)
+      (.of (ChartCoordinateRing i))).map h
+        (CommRingCat.KaehlerDifferential.d x) =
+      CommRingCat.KaehlerDifferential.d
+        ((coordinateChartScheme i).presheaf.map h x) := by
+  exact relativeDifferentials'_map_d
+    (affineConstBaseMap (.of k) (.of (ChartCoordinateRing i))) h x
+
+/-- Restriction in the global objectwise differential presheaf sends `d x`
+to the differential of the restricted section. -/
+theorem canonicalRelativeDifferentialsPresheaf_map_d
+    {U V : CanonicalProjectiveCurve25Two.Opensᵒᵖ} (h : U ⟶ V)
+    (x : CanonicalProjectiveCurve25Two.presheaf.obj U) :
+    canonicalRelativeDifferentialsPresheaf.map h
+        (CommRingCat.KaehlerDifferential.d x) =
+      CommRingCat.KaehlerDifferential.d
+        (CanonicalProjectiveCurve25Two.presheaf.map h x) := by
+  exact relativeDifferentials'_map_d canonicalCurveConstBaseMap h x
+
+set_option maxHeartbeats 800000 in
+-- Naturality normalizes the dependent Kähler restriction maps on generators.
+/-- The sectionwise Kähler transports commute with restriction on universal
+differentials. -/
+theorem coordinateChartRelativeDifferentialsPresheafTransportApp_naturality_apply
+    (i : Fin 4) {U V : (coordinateChartScheme i).Opensᵒᵖ} (h : U ⟶ V)
+    (x : (coordinateChartScheme i).presheaf.obj U) :
+    coordinateChartRelativeDifferentialsPresheafTransportApp i V
+        ((affineRelativeDifferentialsPresheaf (.of k)
+          (.of (ChartCoordinateRing i))).map h
+            (CommRingCat.KaehlerDifferential.d x)) =
+      canonicalRelativeDifferentialsPresheaf.map
+        ((coordinateChartMap i).opensFunctor.op.map h)
+          (coordinateChartRelativeDifferentialsPresheafTransportApp i U
+            (CommRingCat.KaehlerDifferential.d x)) := by
+  rw [coordinateChartRelativeDifferentialsPresheafTransportApp_d]
+  rw [coordinateChartAffineRelativeDifferentialsPresheaf_map_d]
+  rw [coordinateChartRelativeDifferentialsPresheafTransportApp_d]
+  erw [canonicalRelativeDifferentialsPresheaf_map_d]
+  congr 1
+  exact CategoryTheory.congr_fun
+    (Scheme.Hom.appIso_inv_naturality (coordinateChartMap i) h) x
+
+/-- Transport of objectwise relative differentials across the section-ring
+isomorphisms of a standard chart. -/
+def coordinateChartRelativeDifferentialsPresheafTransport (i : Fin 4) :
+    affineRelativeDifferentialsPresheaf (.of k)
+        (.of (ChartCoordinateRing i)) ⟶
+      coordinateChartRestrictedRelativeDifferentialsPresheaf i where
+  app U := by
+    change CommRingCat.KaehlerDifferential
+        ((affineConstBaseMap (.of k)
+          (.of (ChartCoordinateRing i))).app U) ⟶
+      (ModuleCat.restrictScalars
+        ((coordinateChartMap i).appIso U.unop).inv.hom).obj
+          (CommRingCat.KaehlerDifferential
+            (canonicalCurveConstBaseMap.app
+              (.op (coordinateChartMap i ''ᵁ U.unop))))
+    exact coordinateChartRelativeDifferentialsPresheafTransportApp i U
+  naturality {U V} h := by
+    apply CommRingCat.KaehlerDifferential.ext
+    intro x
+    change coordinateChartRelativeDifferentialsPresheafTransportApp i V
+        ((affineRelativeDifferentialsPresheaf (.of k)
+          (.of (ChartCoordinateRing i))).map h
+            (CommRingCat.KaehlerDifferential.d x)) =
+      canonicalRelativeDifferentialsPresheaf.map
+        ((coordinateChartMap i).opensFunctor.op.map h)
+          (coordinateChartRelativeDifferentialsPresheafTransportApp i U
+            (CommRingCat.KaehlerDifferential.d x))
+    exact
+      coordinateChartRelativeDifferentialsPresheafTransportApp_naturality_apply i h x
+
+@[simp]
+theorem coordinateChartRelativeDifferentialsPresheafTransport_app_d
+    (i : Fin 4) (U : (coordinateChartScheme i).Opensᵒᵖ)
+    (x : (coordinateChartScheme i).presheaf.obj U) :
+    (coordinateChartRelativeDifferentialsPresheafTransport i).app U
+        (CommRingCat.KaehlerDifferential.d x) =
+      CommRingCat.KaehlerDifferential.d
+        (((coordinateChartMap i).appIso U.unop).inv x) := by
+  exact coordinateChartRelativeDifferentialsPresheafTransportApp_d i U x
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Transport across a chart section isomorphism is bijective on every open. -/
+theorem coordinateChartRelativeDifferentialsPresheafTransport_app_bijective
+    (i : Fin 4) (U : (coordinateChartScheme i).Opensᵒᵖ) :
+    Function.Bijective
+      ((coordinateChartRelativeDifferentialsPresheafTransport i).app U) := by
+  let A := (coordinateChartScheme i).presheaf.obj U
+  let B := CanonicalProjectiveCurve25Two.presheaf.obj
+    (.op (coordinateChartMap i ''ᵁ U.unop))
+  let e := (coordinateChartMap i).appIso U.unop
+  letI : Algebra k A :=
+    ((affineConstBaseMap (.of k) (.of (ChartCoordinateRing i))).app U).hom.toAlgebra
+  letI : Algebra k B :=
+    (canonicalCurveConstBaseMap.app
+      (.op (coordinateChartMap i ''ᵁ U.unop))).hom.toAlgebra
+  letI : Algebra A B := e.inv.hom.toAlgebra
+  letI : IsScalarTower k A B :=
+    IsScalarTower.of_algebraMap_eq'
+      (congrArg CommRingCat.Hom.hom
+        (coordinateChart_appIso_inv_base_compat i U).symm)
+  change Function.Bijective (KaehlerDifferential.map k k A B)
+  exact KaehlerDifferential.map_bijective_of_bijective
+    (ConcreteCategory.bijective_of_isIso e.inv)
+
+noncomputable local instance
+    coordinateChartRelativeDifferentialsPresheafTransport_isLocallyInjective
+    (i : Fin 4) :
+    Presheaf.IsLocallyInjective
+      (Opens.grothendieckTopology (coordinateChartScheme i))
+      ((PresheafOfModules.toPresheaf
+        (coordinateChartScheme i).ringCatSheaf.obj).map
+          (coordinateChartRelativeDifferentialsPresheafTransport i)) := by
+  apply Presheaf.isLocallyInjective_of_injective
+  intro U
+  exact
+    (coordinateChartRelativeDifferentialsPresheafTransport_app_bijective i U).injective
+
+noncomputable local instance
+    coordinateChartRelativeDifferentialsPresheafTransport_isLocallySurjective
+    (i : Fin 4) :
+    Presheaf.IsLocallySurjective
+      (Opens.grothendieckTopology (coordinateChartScheme i))
+      ((PresheafOfModules.toPresheaf
+        (coordinateChartScheme i).ringCatSheaf.obj).map
+          (coordinateChartRelativeDifferentialsPresheafTransport i)) := by
+  apply Presheaf.isLocallySurjective_of_surjective
+  intro U
+  exact
+    (coordinateChartRelativeDifferentialsPresheafTransport_app_bijective i U).surjective
+
+set_option maxHeartbeats 800000 in
+-- The unit is expressed sectionwise to control dependent ring isomorphisms.
+/-- Restriction of the global sheafification unit to a standard chart. -/
+def coordinateChartRestrictedRelativeDifferentialsToSheaf (i : Fin 4) :
+    coordinateChartRestrictedRelativeDifferentialsPresheaf i ⟶
+      ((Scheme.Modules.restrictFunctor (coordinateChartMap i)).obj
+        canonicalRelativeDifferentialsSheaf).val where
+  app U := (ModuleCat.restrictScalars
+    ((coordinateChartMap i).appIso U.unop).inv.hom).map
+      (canonicalRelativeDifferentialsToSheaf.app
+        (.op (coordinateChartMap i ''ᵁ U.unop)))
+  naturality {U V} h := by
+    ext x
+    exact CategoryTheory.congr_fun
+      (canonicalRelativeDifferentialsToSheaf.naturality
+        ((coordinateChartMap i).opensFunctor.op.map h)) x
+
+@[simp]
+theorem coordinateChartRestrictedRelativeDifferentialsToSheaf_app
+    (i : Fin 4) (U : (coordinateChartScheme i).Opensᵒᵖ)
+    (x : CommRingCat.KaehlerDifferential
+      (canonicalCurveConstBaseMap.app
+        (.op (coordinateChartMap i ''ᵁ U.unop)))) :
+    (coordinateChartRestrictedRelativeDifferentialsToSheaf i).app U x =
+      canonicalRelativeDifferentialsToSheaf.app
+        (.op (coordinateChartMap i ''ᵁ U.unop)) x := rfl
+
+/-- The chart transpose factors as section-ring transport followed by the
+restricted global sheafification unit. -/
+theorem coordinateChartRelativeDifferentialsToRestrictedSheaf_factor
+    (i : Fin 4) :
+    coordinateChartRelativeDifferentialsPresheafTransport i ≫
+        coordinateChartRestrictedRelativeDifferentialsToSheaf i =
+      coordinateChartRelativeDifferentialsToRestrictedSheaf i := by
+  apply PresheafOfModules.hom_ext
+  intro U
+  rw [PresheafOfModules.comp_app]
+  apply CommRingCat.KaehlerDifferential.ext
+  intro x
+  change (coordinateChartRestrictedRelativeDifferentialsToSheaf i).app U
+      (coordinateChartRelativeDifferentialsPresheafTransportApp i U
+        (CommRingCat.KaehlerDifferential.d x)) =
+    (coordinateChartRelativeDifferentialsToRestrictedSheaf i).app U
+      (CommRingCat.KaehlerDifferential.d x)
+  rw [coordinateChartRelativeDifferentialsPresheafTransportApp_d,
+    coordinateChartRestrictedRelativeDifferentialsToSheaf_app,
+    coordinateChartRelativeDifferentialsToRestrictedSheaf_app_d]
+  rfl
+
+noncomputable local instance coordinateChartOpensFunctorIsCocontinuous
+    (i : Fin 4) :
+    (coordinateChartMap i).opensFunctor.IsCocontinuous
+      (Opens.grothendieckTopology (coordinateChartScheme i))
+      (Opens.grothendieckTopology CanonicalProjectiveCurve25Two) where
+  cover_lift {U} {S} hS x hx := by
+    let f := coordinateChartMap i
+    obtain ⟨V, g, hg, hfxV⟩ := hS (f x) ⟨x, hx, rfl⟩
+    let W : (coordinateChartScheme i).Opens :=
+      (TopologicalSpace.Opens.map f.base).obj V
+    have hWU : W ≤ U := by
+      intro z hz
+      obtain ⟨z', hz', hzz'⟩ := g.le hz
+      exact (f.isOpenEmbedding.injective hzz') ▸ hz'
+    let h : W ⟶ U := homOfLE hWU
+    refine ⟨W, h, ?_, hfxV⟩
+    change S (f.opensFunctor.map h)
+    have himage : f ''ᵁ W ≤ V := by
+      rintro _ ⟨z, hz, rfl⟩
+      exact hz
+    have hdown := S.downward_closed hg (homOfLE himage)
+    simpa only [Subsingleton.elim (homOfLE himage ≫ g) (f.opensFunctor.map h)] using hdown
+
+noncomputable local instance canonicalRelativeDifferentialsToSheaf_isLocallyInjective :
+    Presheaf.IsLocallyInjective
+      (Opens.grothendieckTopology CanonicalProjectiveCurve25Two)
+      ((PresheafOfModules.toPresheaf
+        CanonicalProjectiveCurve25Two.ringCatSheaf.obj).map
+          canonicalRelativeDifferentialsToSheaf) := by
+  change Presheaf.IsLocallyInjective
+    (Opens.grothendieckTopology CanonicalProjectiveCurve25Two)
+    (CategoryTheory.toSheafify
+      (Opens.grothendieckTopology CanonicalProjectiveCurve25Two)
+      canonicalRelativeDifferentialsPresheaf.presheaf)
+  infer_instance
+
+noncomputable local instance canonicalRelativeDifferentialsToSheaf_isLocallySurjective :
+    Presheaf.IsLocallySurjective
+      (Opens.grothendieckTopology CanonicalProjectiveCurve25Two)
+      ((PresheafOfModules.toPresheaf
+        CanonicalProjectiveCurve25Two.ringCatSheaf.obj).map
+          canonicalRelativeDifferentialsToSheaf) := by
+  change Presheaf.IsLocallySurjective
+    (Opens.grothendieckTopology CanonicalProjectiveCurve25Two)
+    (CategoryTheory.toSheafify
+      (Opens.grothendieckTopology CanonicalProjectiveCurve25Two)
+      canonicalRelativeDifferentialsPresheaf.presheaf)
+  infer_instance
+
+noncomputable local instance
+    coordinateChartRestrictedRelativeDifferentialsToSheaf_isLocallyInjective
+    (i : Fin 4) :
+    Presheaf.IsLocallyInjective
+      (Opens.grothendieckTopology (coordinateChartScheme i))
+      ((PresheafOfModules.toPresheaf
+        (coordinateChartScheme i).ringCatSheaf.obj).map
+          (coordinateChartRestrictedRelativeDifferentialsToSheaf i)) := by
+  let g := (PresheafOfModules.toPresheaf
+    CanonicalProjectiveCurve25Two.ringCatSheaf.obj).map
+      canonicalRelativeDifferentialsToSheaf
+  change Presheaf.IsLocallyInjective
+    (Opens.grothendieckTopology (coordinateChartScheme i))
+    (Functor.whiskerLeft (coordinateChartMap i).opensFunctor.op g)
+  exact Presheaf.isLocallyInjective_whisker
+    (Opens.grothendieckTopology (coordinateChartScheme i))
+    (Opens.grothendieckTopology CanonicalProjectiveCurve25Two)
+    (coordinateChartMap i).opensFunctor g
+
+noncomputable local instance
+    coordinateChartRestrictedRelativeDifferentialsToSheaf_isLocallySurjective
+    (i : Fin 4) :
+    Presheaf.IsLocallySurjective
+      (Opens.grothendieckTopology (coordinateChartScheme i))
+      ((PresheafOfModules.toPresheaf
+        (coordinateChartScheme i).ringCatSheaf.obj).map
+          (coordinateChartRestrictedRelativeDifferentialsToSheaf i)) := by
+  let g := (PresheafOfModules.toPresheaf
+    CanonicalProjectiveCurve25Two.ringCatSheaf.obj).map
+      canonicalRelativeDifferentialsToSheaf
+  change Presheaf.IsLocallySurjective
+    (Opens.grothendieckTopology (coordinateChartScheme i))
+    (Functor.whiskerLeft (coordinateChartMap i).opensFunctor.op g)
+  exact Presheaf.isLocallySurjective_whisker
+    (Opens.grothendieckTopology (coordinateChartScheme i))
+    (Opens.grothendieckTopology CanonicalProjectiveCurve25Two)
+    (coordinateChartMap i).opensFunctor g
+
+noncomputable instance
+    coordinateChartRelativeDifferentialsToRestrictedSheaf_isLocallyInjective
+    (i : Fin 4) :
+    Presheaf.IsLocallyInjective
+      (Opens.grothendieckTopology (coordinateChartScheme i))
+      ((PresheafOfModules.toPresheaf
+        (coordinateChartScheme i).ringCatSheaf.obj).map
+          (coordinateChartRelativeDifferentialsToRestrictedSheaf i)) := by
+  have hfac := congrArg
+    (fun f => (PresheafOfModules.toPresheaf
+      (coordinateChartScheme i).ringCatSheaf.obj).map f)
+    (coordinateChartRelativeDifferentialsToRestrictedSheaf_factor i)
+  rw [← hfac]
+  change Presheaf.IsLocallyInjective
+    (Opens.grothendieckTopology (coordinateChartScheme i))
+    (((PresheafOfModules.toPresheaf
+      (coordinateChartScheme i).ringCatSheaf.obj).map
+        (coordinateChartRelativeDifferentialsPresheafTransport i)) ≫
+      (PresheafOfModules.toPresheaf
+        (coordinateChartScheme i).ringCatSheaf.obj).map
+          (coordinateChartRestrictedRelativeDifferentialsToSheaf i))
+  infer_instance
+
+noncomputable instance
+    coordinateChartRelativeDifferentialsToRestrictedSheaf_isLocallySurjective
+    (i : Fin 4) :
+    Presheaf.IsLocallySurjective
+      (Opens.grothendieckTopology (coordinateChartScheme i))
+      ((PresheafOfModules.toPresheaf
+        (coordinateChartScheme i).ringCatSheaf.obj).map
+          (coordinateChartRelativeDifferentialsToRestrictedSheaf i)) := by
+  have hfac := congrArg
+    (fun f => (PresheafOfModules.toPresheaf
+      (coordinateChartScheme i).ringCatSheaf.obj).map f)
+    (coordinateChartRelativeDifferentialsToRestrictedSheaf_factor i)
+  rw [← hfac]
+  change Presheaf.IsLocallySurjective
+    (Opens.grothendieckTopology (coordinateChartScheme i))
+    (((PresheafOfModules.toPresheaf
+      (coordinateChartScheme i).ringCatSheaf.obj).map
+        (coordinateChartRelativeDifferentialsPresheafTransport i)) ≫
+      (PresheafOfModules.toPresheaf
+        (coordinateChartScheme i).ringCatSheaf.obj).map
+          (coordinateChartRestrictedRelativeDifferentialsToSheaf i))
+  infer_instance
+
+section
+
+/-- The affine sheafification unit for relative differentials on a standard
+coordinate chart. -/
+def coordinateChartAffineRelativeDifferentialsToSheaf (i : Fin 4) :
+    affineRelativeDifferentialsPresheaf (.of k)
+        (.of (ChartCoordinateRing i)) ⟶
+      (affineRelativeDifferentialsSheaf (.of k)
+        (.of (ChartCoordinateRing i))).val :=
+  (PresheafOfModules.sheafificationAdjunction
+    (𝟙 (coordinateChartScheme i).ringCatSheaf.obj)).unit.app
+      (affineRelativeDifferentialsPresheaf (.of k)
+        (.of (ChartCoordinateRing i)))
+
+noncomputable local instance
+    coordinateChartAffineRelativeDifferentialsToSheaf_isLocallyInjective
+    (i : Fin 4) :
+    PresheafOfModules.IsLocallyInjective
+      (Opens.grothendieckTopology (coordinateChartScheme i))
+      (coordinateChartAffineRelativeDifferentialsToSheaf i) := by
+  change Presheaf.IsLocallyInjective
+    (Opens.grothendieckTopology (coordinateChartScheme i))
+    ((PresheafOfModules.toPresheaf
+      (coordinateChartScheme i).ringCatSheaf.obj).map
+        (coordinateChartAffineRelativeDifferentialsToSheaf i))
+  change Presheaf.IsLocallyInjective
+    (Opens.grothendieckTopology (coordinateChartScheme i))
+    (CategoryTheory.toSheafify
+      (Opens.grothendieckTopology (coordinateChartScheme i))
+      (affineRelativeDifferentialsPresheaf (.of k)
+        (.of (ChartCoordinateRing i))).presheaf)
+  infer_instance
+
+noncomputable local instance
+    coordinateChartAffineRelativeDifferentialsToSheaf_isLocallySurjective
+    (i : Fin 4) :
+    PresheafOfModules.IsLocallySurjective
+      (Opens.grothendieckTopology (coordinateChartScheme i))
+      (coordinateChartAffineRelativeDifferentialsToSheaf i) := by
+  change Presheaf.IsLocallySurjective
+    (Opens.grothendieckTopology (coordinateChartScheme i))
+    ((PresheafOfModules.toPresheaf
+      (coordinateChartScheme i).ringCatSheaf.obj).map
+        (coordinateChartAffineRelativeDifferentialsToSheaf i))
+  change Presheaf.IsLocallySurjective
+    (Opens.grothendieckTopology (coordinateChartScheme i))
+    (CategoryTheory.toSheafify
+      (Opens.grothendieckTopology (coordinateChartScheme i))
+      (affineRelativeDifferentialsPresheaf (.of k)
+        (.of (ChartCoordinateRing i))).presheaf)
+  infer_instance
+
+noncomputable local instance
+    coordinateChartRelativeDifferentialsToRestrictedSheaf_module_isLocallyInjective
+    (i : Fin 4) :
+    PresheafOfModules.IsLocallyInjective
+      (Opens.grothendieckTopology (coordinateChartScheme i))
+      (coordinateChartRelativeDifferentialsToRestrictedSheaf i) := by
+  change Presheaf.IsLocallyInjective
+    (Opens.grothendieckTopology (coordinateChartScheme i))
+    ((PresheafOfModules.toPresheaf
+      (coordinateChartScheme i).ringCatSheaf.obj).map
+        (coordinateChartRelativeDifferentialsToRestrictedSheaf i))
+  exact
+    coordinateChartRelativeDifferentialsToRestrictedSheaf_isLocallyInjective i
+
+noncomputable local instance
+    coordinateChartRelativeDifferentialsToRestrictedSheaf_module_isLocallySurjective
+    (i : Fin 4) :
+    PresheafOfModules.IsLocallySurjective
+      (Opens.grothendieckTopology (coordinateChartScheme i))
+      (coordinateChartRelativeDifferentialsToRestrictedSheaf i) := by
+  change Presheaf.IsLocallySurjective
+    (Opens.grothendieckTopology (coordinateChartScheme i))
+    ((PresheafOfModules.toPresheaf
+      (coordinateChartScheme i).ringCatSheaf.obj).map
+        (coordinateChartRelativeDifferentialsToRestrictedSheaf i))
+  exact
+    coordinateChartRelativeDifferentialsToRestrictedSheaf_isLocallySurjective i
+
+set_option synthInstance.maxHeartbeats 200000 in
+-- Sheafification uniqueness synthesizes the site-local equivalence.
+/-- The unique map from the restricted global relative differential sheaf to
+the affine sheafification which identifies their universal sections. -/
+def coordinateChartRestrictedRelativeDifferentialsToAffineSheaf
+    (i : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap i)).obj
+        canonicalRelativeDifferentialsSheaf ⟶
+      affineRelativeDifferentialsSheaf (.of k)
+        (.of (ChartCoordinateRing i)) :=
+  ⟨(PresheafOfModules.homEquivOfIsLocallyBijective
+      (f := coordinateChartRelativeDifferentialsToRestrictedSheaf i)
+      (affineRelativeDifferentialsSheaf (.of k)
+        (.of (ChartCoordinateRing i))).isSheaf).symm
+    (coordinateChartAffineRelativeDifferentialsToSheaf i)⟩
+
+set_option synthInstance.maxHeartbeats 200000 in
+-- Sheafification uniqueness synthesizes the site-local equivalence.
+/-- The inverse comparison is the unique map carrying the affine
+sheafification unit to the restricted global transpose. -/
+def coordinateChartAffineRelativeDifferentialsToRestrictedSheaf
+    (i : Fin 4) :
+    affineRelativeDifferentialsSheaf (.of k)
+        (.of (ChartCoordinateRing i)) ⟶
+      (Scheme.Modules.restrictFunctor (coordinateChartMap i)).obj
+        canonicalRelativeDifferentialsSheaf :=
+  ⟨(PresheafOfModules.homEquivOfIsLocallyBijective
+      (f := coordinateChartAffineRelativeDifferentialsToSheaf i)
+      ((Scheme.Modules.restrictFunctor (coordinateChartMap i)).obj
+        canonicalRelativeDifferentialsSheaf).isSheaf).symm
+    (coordinateChartRelativeDifferentialsToRestrictedSheaf i)⟩
+
+set_option synthInstance.maxHeartbeats 200000 in
+-- The factorization uses the site-local sheafification equivalence.
+@[reassoc]
+theorem coordinateChartRelativeDifferentialsToRestrictedSheaf_comp_toAffine
+    (i : Fin 4) :
+    coordinateChartRelativeDifferentialsToRestrictedSheaf i ≫
+      (coordinateChartRestrictedRelativeDifferentialsToAffineSheaf i).val =
+        coordinateChartAffineRelativeDifferentialsToSheaf i := by
+  exact (PresheafOfModules.homEquivOfIsLocallyBijective
+    (f := coordinateChartRelativeDifferentialsToRestrictedSheaf i)
+    (affineRelativeDifferentialsSheaf (.of k)
+      (.of (ChartCoordinateRing i))).isSheaf).apply_symm_apply _
+
+set_option synthInstance.maxHeartbeats 200000 in
+-- The factorization uses the site-local sheafification equivalence.
+@[reassoc]
+theorem coordinateChartAffineRelativeDifferentialsToSheaf_comp_toRestricted
+    (i : Fin 4) :
+    coordinateChartAffineRelativeDifferentialsToSheaf i ≫
+      (coordinateChartAffineRelativeDifferentialsToRestrictedSheaf i).val =
+        coordinateChartRelativeDifferentialsToRestrictedSheaf i := by
+  exact (PresheafOfModules.homEquivOfIsLocallyBijective
+    (f := coordinateChartAffineRelativeDifferentialsToSheaf i)
+    ((Scheme.Modules.restrictFunctor (coordinateChartMap i)).obj
+      canonicalRelativeDifferentialsSheaf).isSheaf).apply_symm_apply _
+
+set_option synthInstance.maxHeartbeats 200000 in
+-- The inverse laws use uniqueness for both sheafification units.
+/-- On every standard chart, the restricted global relative differential
+sheaf is the affine sheafification. -/
+def coordinateChartRestrictedRelativeDifferentialsSheafIso (i : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap i)).obj
+        canonicalRelativeDifferentialsSheaf ≅
+      affineRelativeDifferentialsSheaf (.of k)
+        (.of (ChartCoordinateRing i)) where
+  hom := coordinateChartRestrictedRelativeDifferentialsToAffineSheaf i
+  inv := coordinateChartAffineRelativeDifferentialsToRestrictedSheaf i
+  hom_inv_id := by
+    apply SheafOfModules.hom_ext
+    apply (PresheafOfModules.homEquivOfIsLocallyBijective
+      (f := coordinateChartRelativeDifferentialsToRestrictedSheaf i)
+      ((Scheme.Modules.restrictFunctor (coordinateChartMap i)).obj
+        canonicalRelativeDifferentialsSheaf).isSheaf).injective
+    change coordinateChartRelativeDifferentialsToRestrictedSheaf i ≫
+        ((coordinateChartRestrictedRelativeDifferentialsToAffineSheaf i).val ≫
+          (coordinateChartAffineRelativeDifferentialsToRestrictedSheaf i).val) =
+      coordinateChartRelativeDifferentialsToRestrictedSheaf i ≫ 𝟙 _
+    rw [← Category.assoc,
+      coordinateChartRelativeDifferentialsToRestrictedSheaf_comp_toAffine,
+      coordinateChartAffineRelativeDifferentialsToSheaf_comp_toRestricted,
+      Category.comp_id]
+  inv_hom_id := by
+    apply SheafOfModules.hom_ext
+    apply (PresheafOfModules.homEquivOfIsLocallyBijective
+      (f := coordinateChartAffineRelativeDifferentialsToSheaf i)
+      (affineRelativeDifferentialsSheaf (.of k)
+        (.of (ChartCoordinateRing i))).isSheaf).injective
+    change coordinateChartAffineRelativeDifferentialsToSheaf i ≫
+        ((coordinateChartAffineRelativeDifferentialsToRestrictedSheaf i).val ≫
+          (coordinateChartRestrictedRelativeDifferentialsToAffineSheaf i).val) =
+      coordinateChartAffineRelativeDifferentialsToSheaf i ≫ 𝟙 _
+    rw [← Category.assoc,
+      coordinateChartAffineRelativeDifferentialsToSheaf_comp_toRestricted,
+      coordinateChartRelativeDifferentialsToRestrictedSheaf_comp_toAffine,
+      Category.comp_id]
+
+end
 
 set_option maxHeartbeats 800000 in
 -- The pushforward module action unfolds through the chart open immersion.
@@ -1555,5 +2119,192 @@ theorem canonicalRelativeDifferentialsToGlobalKaehler_restrict_isIso_iff
     ((Scheme.Modules.restrictFunctor (coordinateChartMap i)).map
       canonicalRelativeDifferentialsToGlobalKaehler)
     (globalKaehlerDifferentialLocalIso i).hom).symm
+
+section
+
+attribute [local instance]
+  coordinateChartAffineRelativeDifferentialsToSheaf_isLocallyInjective
+  coordinateChartAffineRelativeDifferentialsToSheaf_isLocallySurjective
+  coordinateChartRelativeDifferentialsToRestrictedSheaf_module_isLocallyInjective
+  coordinateChartRelativeDifferentialsToRestrictedSheaf_module_isLocallySurjective
+
+/-- The affine sheafification unit followed by the affine comparison is the
+original objectwise comparison to the tilde sheaf. -/
+theorem coordinateChartAffineRelativeDifferentialsToSheaf_comp_toTilde
+    (i : Fin 4) :
+    coordinateChartAffineRelativeDifferentialsToSheaf i ≫
+        (SheafOfModules.forget
+          (coordinateChartScheme i).ringCatSheaf).map
+            (affineRelativeDifferentialsSheafToTilde
+              (.of k) (.of (ChartCoordinateRing i))) =
+      affineRelativeDifferentialsToTilde
+        (.of k) (.of (ChartCoordinateRing i)) := by
+  change PresheafOfModules.sheafificationHomEquiv
+      (𝟙 (coordinateChartScheme i).ringCatSheaf.obj)
+        (affineRelativeDifferentialsSheafToTilde
+          (.of k) (.of (ChartCoordinateRing i))) = _
+  unfold affineRelativeDifferentialsSheafToTilde
+  exact Equiv.apply_symm_apply _ _
+
+/-- The canonical chart morphism carries the sheafified universal derivation
+to the chart derivation that defines it. -/
+@[simp]
+theorem canonicalRelativeDifferentialsToChart_app_derivation_d
+    (i : Fin 4) (U : CanonicalProjectiveCurve25Two.Opensᵒᵖ)
+    (x : CanonicalProjectiveCurve25Two.presheaf.obj U) :
+    (canonicalRelativeDifferentialsToChart i).app U.unop
+        (canonicalRelativeDifferentialsSheafDerivation.d x) =
+      (coordinateChartDerivation i).d x := by
+  have h := congrArg (fun d => d.d x)
+    (canonicalRelativeDifferentialsSheafHomEquivDerivation_homOfDerivation
+      (coordinateKaehlerLocalPushforward i) (coordinateChartDerivation i))
+  change (canonicalRelativeDifferentialsSheafHomOfDerivation
+      (coordinateKaehlerLocalPushforward i)
+        (coordinateChartDerivation i)).app U.unop
+      (canonicalRelativeDifferentialsSheafDerivation.d x) =
+    (coordinateChartDerivation i).d x at h
+  exact h
+
+set_option maxHeartbeats 800000 in
+-- The chart counit crosses the dependent open-image and preimage identifications.
+/-- Restricting the extended chart derivation along the chart counit recovers
+the original affine universal derivation. -/
+theorem coordinateChartDerivation_counit_app_inv
+    (i : Fin 4) (U : (coordinateChartScheme i).Opensᵒᵖ)
+    (x : (coordinateChartScheme i).presheaf.obj U) :
+    ((Scheme.Modules.restrictAdjunction
+      (coordinateChartMap i)).counit.app
+        (chartCoordinateKaehlerDifferentialSheaf i)).app U.unop
+      ((coordinateChartDerivation i).d
+        (((coordinateChartMap i).appIso U.unop).inv x)) =
+    (affineUniversalDerivation
+      (.of k) (.of (ChartCoordinateRing i))).d x := by
+  rw [Scheme.Modules.restrictAdjunction_counit_app_app]
+  simp only [coordinateChartDerivation,
+    ModuleCat.Derivation.precomp, ModuleCat.Derivation.d,
+    ModuleCat.Derivation.mk]
+  let D := affineUniversalDerivation
+    (.of k) (.of (ChartCoordinateRing i))
+  let h := (eqToHom
+    ((coordinateChartMap i).preimage_image_eq U.unop).symm).op
+  calc
+    _ = D.d ((coordinateChartScheme i).presheaf.map h
+        ((coordinateChartMap i).app
+          (coordinateChartMap i ''ᵁ U.unop)
+            (((coordinateChartMap i).appIso U.unop).inv x))) :=
+      (PresheafOfModules.Derivation.d_map D h _).symm
+    _ = D.d (((Scheme.Modules.restrictUnitIso
+        (coordinateChartMap i)).hom.app U.unop)
+          (((coordinateChartMap i).appIso U.unop).inv x)) :=
+      congrArg (fun z => D.d z)
+        ((CategoryTheory.congr_fun
+          (Scheme.Hom.appIso_hom (coordinateChartMap i) U.unop)
+            (((coordinateChartMap i).appIso U.unop).inv x)).symm.trans
+          (Scheme.Modules.restrictUnitIso_hom_app_apply
+            (coordinateChartMap i) U.unop
+              (((coordinateChartMap i).appIso U.unop).inv x)).symm)
+    _ = D.d (((coordinateChartMap i).appIso U.unop).hom
+        (((coordinateChartMap i).appIso U.unop).inv x)) :=
+      congrArg (fun z => D.d z)
+        (Scheme.Modules.restrictUnitIso_hom_app_apply
+          (coordinateChartMap i) U.unop
+            (((coordinateChartMap i).appIso U.unop).inv x))
+    _ = D.d x := congrArg (fun z => D.d z)
+      (Iso.inv_hom_id_apply ((coordinateChartMap i).appIso U.unop) x)
+
+set_option maxHeartbeats 800000 in
+-- The comparison traverses the two sheafification adjunctions on generators.
+/-- The canonical local chart comparison identifies the transported global
+sheafification unit with the affine comparison to the tilde sheaf. -/
+theorem coordinateChartRelativeDifferentialsToRestrictedSheaf_comp_localChart
+    (i : Fin 4) :
+    coordinateChartRelativeDifferentialsToRestrictedSheaf i ≫
+        (SheafOfModules.forget
+          (coordinateChartScheme i).ringCatSheaf).map
+            (canonicalRelativeDifferentialsToLocalChart i) =
+      coordinateChartAffineRelativeDifferentialsToSheaf i ≫
+        (SheafOfModules.forget
+          (coordinateChartScheme i).ringCatSheaf).map
+            (affineRelativeDifferentialsSheafToTilde
+              (.of k) (.of (ChartCoordinateRing i))) := by
+  rw [coordinateChartAffineRelativeDifferentialsToSheaf_comp_toTilde]
+  apply PresheafOfModules.hom_ext
+  intro U
+  rw [PresheafOfModules.comp_app]
+  apply CommRingCat.KaehlerDifferential.ext
+  intro x
+  change ((SheafOfModules.forget
+      (coordinateChartScheme i).ringCatSheaf).map
+        (canonicalRelativeDifferentialsToLocalChart i)).app U
+      ((coordinateChartRelativeDifferentialsToRestrictedSheaf i).app U
+        (CommRingCat.KaehlerDifferential.d x)) =
+    (affineRelativeDifferentialsToTilde
+      (.of k) (.of (ChartCoordinateRing i))).app U
+        (CommRingCat.KaehlerDifferential.d x)
+  rw [coordinateChartRelativeDifferentialsToRestrictedSheaf_app_d]
+  unfold canonicalRelativeDifferentialsToLocalChart
+  change ((Scheme.Modules.restrictAdjunction
+      (coordinateChartMap i)).counit.app
+        (chartCoordinateKaehlerDifferentialSheaf i)).app U.unop
+      ((canonicalRelativeDifferentialsToChart i).app
+        (coordinateChartMap i ''ᵁ U.unop)
+          (canonicalRelativeDifferentialsSheafDerivation.d
+            (((coordinateChartMap i).appIso U.unop).inv x))) =
+    (affineRelativeDifferentialsToTilde
+      (.of k) (.of (ChartCoordinateRing i))).app U
+        (CommRingCat.KaehlerDifferential.d x)
+  rw [canonicalRelativeDifferentialsToChart_app_derivation_d]
+  rw [affineRelativeDifferentialsToTilde_app_d]
+  exact coordinateChartDerivation_counit_app_inv i U x
+
+set_option synthInstance.maxHeartbeats 200000 in
+-- Uniqueness synthesizes the site-local equivalence for the chart unit.
+/-- The canonical chart comparison is the sheafification-uniqueness
+isomorphism followed by the affine comparison to the tilde sheaf. -/
+theorem canonicalRelativeDifferentialsToLocalChart_eq
+    (i : Fin 4) :
+    canonicalRelativeDifferentialsToLocalChart i =
+      (coordinateChartRestrictedRelativeDifferentialsSheafIso i).hom ≫
+        affineRelativeDifferentialsSheafToTilde
+          (.of k) (.of (ChartCoordinateRing i)) := by
+  apply (SheafOfModules.forget
+    (coordinateChartScheme i).ringCatSheaf).map_injective
+  apply (PresheafOfModules.homEquivOfIsLocallyBijective
+    (f := coordinateChartRelativeDifferentialsToRestrictedSheaf i)
+    (chartCoordinateKaehlerDifferentialSheaf i).isSheaf).injective
+  change coordinateChartRelativeDifferentialsToRestrictedSheaf i ≫
+      (SheafOfModules.forget
+        (coordinateChartScheme i).ringCatSheaf).map
+          (canonicalRelativeDifferentialsToLocalChart i) =
+    coordinateChartRelativeDifferentialsToRestrictedSheaf i ≫
+      (SheafOfModules.forget
+        (coordinateChartScheme i).ringCatSheaf).map
+          ((coordinateChartRestrictedRelativeDifferentialsSheafIso i).hom ≫
+            affineRelativeDifferentialsSheafToTilde
+              (.of k) (.of (ChartCoordinateRing i)))
+  rw [coordinateChartRelativeDifferentialsToRestrictedSheaf_comp_localChart]
+  rw [Functor.map_comp]
+  change _ = coordinateChartRelativeDifferentialsToRestrictedSheaf i ≫
+    (coordinateChartRestrictedRelativeDifferentialsToAffineSheaf i).val ≫ _
+  rw [coordinateChartRelativeDifferentialsToRestrictedSheaf_comp_toAffine_assoc]
+
+noncomputable instance canonicalRelativeDifferentialsToLocalChart_isIso
+    (i : Fin 4) :
+    IsIso (canonicalRelativeDifferentialsToLocalChart i) := by
+  rw [canonicalRelativeDifferentialsToLocalChart_eq]
+  infer_instance
+
+noncomputable instance canonicalRelativeDifferentialsToGlobalKaehler_isIso :
+    IsIso canonicalRelativeDifferentialsToGlobalKaehler := by
+  apply Scheme.Modules.isIso_of_restrict_openCover
+    coordinateAffineOpenCover.openCover
+  intro i
+  change IsIso
+    ((Scheme.Modules.restrictFunctor (coordinateChartMap i)).map
+      canonicalRelativeDifferentialsToGlobalKaehler)
+  rw [canonicalRelativeDifferentialsToGlobalKaehler_restrict_isIso_iff]
+  infer_instance
+
+end
 
 end MazurProof.RationalPointsN25QuotientTwoRelativeDifferentials

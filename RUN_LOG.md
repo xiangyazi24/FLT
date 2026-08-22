@@ -1881,3 +1881,72 @@
   derivation, its universal transpose, and its generator formula report only
   `propext`, `Classical.choice`, and `Quot.sound`.
 - end: `[MZ-N25-RESTRICTED-RELATIVE-DERIVATION]` proved
+
+## Run 2026-08-22 (N25 global relative differential comparison)
+
+- doctrine version: `4877a8b8571fc2fff2ade0c23ff3d442d3699b7abed02ce848765d6588776936`
+- starting avenue: prove the restricted global relative-differential unit
+  locally bijective, identify it with affine sheafification, and close the
+  chart-to-global isomorphism argument
+- result: constructed the sectionwise Kähler transport induced by every
+  chart section-ring isomorphism and proved it bijective on every open.  Its
+  factorization through the restricted global sheafification unit proves the
+  latter locally injective and locally surjective.
+- result: sheafification uniqueness gives the explicit chart isomorphism
+  `coordinateChartRestrictedRelativeDifferentialsSheafIso`.  Both inverse
+  laws are proved from the two locally bijective universal properties.
+- result: proved on universal differential generators that the canonical
+  chart comparison equals this uniqueness isomorphism followed by the affine
+  comparison to the tilde sheaf.  Hence every
+  `canonicalRelativeDifferentialsToLocalChart` is an isomorphism.
+- result: the four coordinate opens cover the canonical curve, so the
+  existing coverwise criterion proves
+  `canonicalRelativeDifferentialsToGlobalKaehler_isIso`.  The same-site
+  relative differential sheaf is therefore globally identified with the
+  canonical Kähler Čech object and, through the existing global Čech
+  comparison, with the effective hyperplane twist.
+- ChatGPT: Q6174--Q6203 supplied independent route and API audits.  The
+  sheafification-uniqueness route was retained; suggestions that conflated
+  the affine sheafification with its tilde target were corrected against the
+  pinned source before formalization.
+- verification: direct compilation of the complete N25 relative-differential
+  file passes.  The 8623-job target build passes without a new unscoped-option
+  warning.  Bypass and whitespace scans are clean.  Fresh axiom audits of the
+  component bijectivity, restricted-unit factorization, chart sheafification
+  isomorphism, counit calculation, local triangle, local factorization, and
+  global `IsIso` instance report exactly `propext`, `Classical.choice`, and
+  `Quot.sound`.
+- end: `[MZ-N25-RELATIVE-DIFFERENTIAL-GLOBAL]` proved
+- final result: the N25 scheme-relative differential sheaf is now the proved
+  curve hyperplane twist.  The remaining endpoint work begins at the
+  divisor/Picard/Riemann--Roch consumer, not at sheaf restriction or Čech
+  compatibility.
+
+## Run 2026-08-22 (N13 spread-line interface counterexample)
+
+- doctrine version: `4877a8b8571fc2fff2ade0c23ff3d442d3699b7abed02ce848765d6588776936`
+- starting avenue: audit the remaining unrestricted `n13_class_eq_iff` after
+  closing the N25 relative-differential comparison
+- result: formalized `negativeZeroData` by retaining the complete
+  negative-infinity two-chart geometry and special divisor while resetting
+  only its independently stored generic orientation to the identity Mumford
+  representative.
+- result: packaged positive- and negative-infinity spread lines with the same
+  stored rational class `0`.  Their generic classes modulo the trivial kernel
+  are equal, but their special classes are distinct by the existing anchored
+  and canonical infinity-class computations.
+- consequence: `exists_same_generic_bottom_distinct_special` formally refutes
+  the all-`SpreadLine` reverse implication required by the current
+  `n13_class_eq_iff`.  The next route must use a coherent spread subtype or
+  the canonical exact-spread chooser; additional affine saturation cannot
+  fix an infinity-chart mismatch.
+- ChatGPT: Q6198 identified the candidate interface defect and explicit
+  infinity-line construction.  Every theorem name and equality was checked
+  against the local source, and the counterexample was independently
+  elaborated and compiled.
+- verification: direct source compilation, the 8807-job target build, and the
+  repository-wide 4011-job build pass.  Fresh axiom audits of the affine-ideal
+  equality, generic reorientation, special-class inequality, and existential
+  counterexample report exactly `propext`, `Classical.choice`, and
+  `Quot.sound`.
+- end: `[MZ-N13-SPREADLINE-COUNTEREXAMPLE]` proved

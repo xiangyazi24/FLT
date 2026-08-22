@@ -193,7 +193,8 @@ dualizing sheaf.
 
 The next ranked canonical-geometry attacks are:
 
-1. continue the same-site relative Kähler comparison.  The constant-base
+1. use the completed same-site relative Kähler comparison in divisor theory.
+   The constant-base
    morphism, its objectwise relative differential presheaf, its associated
    module sheaf, and the sheafification unit are now explicit.  On every
    standard chart the transported base map is proved to be the canonical
@@ -235,35 +236,52 @@ The next ranked canonical-geometry attacks are:
    now also been transported through each chart's open-immersion section
    isomorphism, and its universal transpose defines a morphism from the affine
    objectwise relative differential presheaf to the restricted global sheaf;
-   its formula on universal differentials is proved.  The next exact seam is
-   to prove this morphism locally injective and locally surjective, hence that
-   the restricted global sheaf is another sheafification of the affine
-   presheaf.  Uniqueness then identifies it with the affine sheafification
-   just proved invertible and intertwines the two universal derivations.  This
-   makes all four local comparisons isomorphisms; then coverwise isomorphism
-   detection proves the global comparison invertible.  A
-   generic stalkwise theorem now upgrades
-   isomorphy on every member of an arbitrary open cover to global isomorphy,
-   so this final step no longer requires repeating the stalk argument;
+   its formula on universal differentials is proved.  Section-ring transport
+   is bijective on every open, and the restricted sheafification unit is
+   locally injective and locally surjective.  Sheafification uniqueness now
+   gives an explicit isomorphism between the restricted global sheaf and the
+   affine sheafification on every chart.  The canonical local comparison is
+   proved equal to this isomorphism followed by the affine tilde comparison,
+   so all four local comparisons are isomorphisms.  The open-cover criterion
+   then proves that `canonicalRelativeDifferentialsToGlobalKaehler` is an
+   isomorphism.  Together with the existing Čech-to-twist isomorphism, this
+   identifies the scheme-relative differential sheaf with the effective
+   curve hyperplane twist and closes `[MZ-N25-RELATIVE-DIFFERENTIAL-GLOBAL]`.
+   It does not construct a dualizing sheaf or discharge the N25 endpoint.
+   The next exact seam is to feed this line-bundle identification into the
+   height-one divisor, Picard, and middle-degree Riemann--Roch interfaces;
 2. build the missing height-one valuation/principal-divisor layer on the
    proved integral chart, including the common-function-field interface
    needed by the class-indexed middle-degree Riemann--Roch consumer.
 
 ### (b) N13 concrete specialization and separatedness — ACTIVE
 
-**Status:** 1 sorry (n13_class_eq_iff in N13DischargeWiring.lean).
-TrivialKernelFamily proves CanonicalMappedSpecialFamily + NSeparated ⊥ 2
-WITHOUT class_eq_iff.  FirstJetDoublingCompatibility also proved without it.
+**Status:** the remaining `n13_class_eq_iff` in `N13DischargeWiring.lean`
+is false as typed.  `N13SpreadLineCounterexample` constructs two spread lines
+with the same generic class modulo `⊥` and distinct special classes.  The
+counterexample uses the positive-infinity line and the negative-infinity line
+whose independent generic orientation is reset to zero; both have saturated
+affine geometry, so affine saturation cannot repair the statement.
+`TrivialKernelFamily` still proves `CanonicalMappedSpecialFamily` and
+`NSeparated ⊥ 2` without `class_eq_iff`, and first-jet doubling compatibility
+is also proved without it.
 
 **Attack plan:**
-1. Build direct CompatibleReduction using classify := specialClass ∘ exactSpreadLine
-2. Prove classify_abel by showing pointSpreadLine and exactSpreadLine
-   agree on specialClass (both vertically saturated + same generic → same contraction
-   → same special affine ideal → overlap_eq forces infinity match → same divisor).
-3. Prove classifier exact (injective) via |G|=|SpecialSet|=19.
-4. Use trivialKernel_separated for the endpoint.
+1. Remove the impossible all-`SpreadLine` interface from the endpoint route.
+   Either restrict it to a coherent subtype tying `infinityOrder` to the
+   actual infinity-chart factor, or use only the canonical `exactSpreadLine`
+   chooser.
+2. Prove specialization compatibility for the coherent/canonical carrier;
+   affine contraction alone is insufficient because the two infinity sheets
+   have the same affine ideal.
+3. Prove the resulting specialization map injective, using its certified
+   19-element source and target only after surjectivity or a concrete
+   representative table is connected.
+4. Feed that injectivity into the existing pointwise-reflection endpoint and
+   the already proved trivial-kernel separatedness.
 
-**Key infrastructure gap:** overlap_eq + affine ideal → full ChartPair → divisor.
+**Key infrastructure gap:** a specialization carrier whose generic infinity
+orientation is realized by its actual two-chart geometry.
 
 ### (c) N49 explicit rational-point obstruction
 
