@@ -216,9 +216,17 @@ The next ranked canonical-geometry attacks are:
    preimage open and then applies the supplied coefficient morphism.  Thus
    each overlap leg has been reduced to the local equality saying that the
    canonical Kähler restriction carries the affine universal derivation to
-   the direct overlap derivation; the differential generator identities and
-   localization extensionality are already available.  After both overlap
-   legs are identified with the direct derivation, transpose the descended
+   the direct overlap derivation.  A generic theorem now proves that a
+   full-site affine derivation is determined by its top component, using
+   localization extensionality on basic opens and sheaf locality.  The first
+   chart derivation has also been transported through the open-immersion
+   section isomorphism and canonical Kähler base change to a genuine
+   full-site derivation on the overlap.  Its Leibniz law, base vanishing, and
+   restriction naturality are proved.  The next exact seam is to identify its
+   normalized top component with the direct overlap derivation using the
+   existing localization-generator formula, then apply affine-top
+   extensionality and repeat symmetrically for the second chart.  After both
+   overlap legs are identified with the direct derivation, transpose the descended
    derivation through the universal and sheafification adjunctions and prove
    the resulting map locally invertible on the four standard charts.  A
    generic stalkwise theorem now upgrades

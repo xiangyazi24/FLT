@@ -401,6 +401,144 @@ def coordinateOverlapDerivation (i j : Fin 4) :
           (affineUniversalDerivation (.of k)
             (.of (coordinateOverlapRing i j))) _ _)
 
+/-! ## Transported affine derivations on ordered overlaps -/
+
+/-- The affine structure map of the first overlap projection respects the
+binary base after the open-immersion section isomorphism. -/
+theorem coordinateOverlapLeft_appIso_inv_base_compat (i j : Fin 4)
+    (U : (Spec (.of (coordinateOverlapRing i j))).Opensᵒᵖ) :
+    (affineConstBaseMap (.of k) (.of (coordinateOverlapRing i j))).app U ≫
+        ((Spec.map (CommRingCat.ofHom
+          (coordinateChartToLeftOverlapRingHom i j))).appIso U.unop).inv =
+      (affineConstBaseMap (.of k) (.of (ChartCoordinateRing i))).app
+        (.op (Spec.map (CommRingCat.ofHom
+          (coordinateChartToLeftOverlapRingHom i j)) ''ᵁ U.unop)) := by
+  apply CommRingCat.hom_ext
+  exact @RingHom.ext_zmod 2 _ _ _ _
+
+set_option maxHeartbeats 800000 in
+-- Naturality crosses the open-immersion section isomorphism and restricted module sheaf.
+set_option backward.isDefEq.respectTransparency false in
+/-- Transporting the affine universal derivation through the first overlap
+projection commutes with restriction of sections. -/
+theorem coordinateOverlapLeftTransportedDerivation_naturality (i j : Fin 4)
+    {U V : (Spec (.of (coordinateOverlapRing i j))).Opensᵒᵖ}
+    (h : U ⟶ V)
+    (x : (Spec (.of (coordinateOverlapRing i j))).presheaf.obj U) :
+    (coordinateKaehlerRestrictLeftSpecCanonicalIso i j).hom.app V.unop
+          ((affineUniversalDerivation (.of k)
+            (.of (ChartCoordinateRing i))).d
+              (((Spec.map (CommRingCat.ofHom
+                (coordinateChartToLeftOverlapRingHom i j))).appIso
+                  V.unop).inv
+                    ((Spec (.of (coordinateOverlapRing i j))).presheaf.map h x))) =
+      ((coordinateOverlapKaehlerDifferentialSheaf i j).val.map h).hom
+        ((coordinateKaehlerRestrictLeftSpecCanonicalIso i j).hom.app U.unop
+          ((affineUniversalDerivation (.of k)
+            (.of (ChartCoordinateRing i))).d
+              (((Spec.map (CommRingCat.ofHom
+                (coordinateChartToLeftOverlapRingHom i j))).appIso
+                  U.unop).inv x))) := by
+  let g := Spec.map (CommRingCat.ofHom
+    (coordinateChartToLeftOverlapRingHom i j))
+  let E := (coordinateKaehlerRestrictLeftSpecCanonicalIso i j).hom
+  let D := affineUniversalDerivation (.of k)
+    (.of (ChartCoordinateRing i))
+  calc
+    _ = E.app V.unop
+        (D.d ((coordinateChartScheme i).presheaf.map
+          (g.opensFunctor.op.map h)
+            ((g.appIso U.unop).inv x))) := by
+      congr 2
+      exact CategoryTheory.congr_fun
+        (Scheme.Hom.appIso_inv_naturality g h) x
+    _ = E.app V.unop
+        (((chartCoordinateKaehlerDifferentialSheaf i).val.map
+          (g.opensFunctor.op.map h)).hom
+            (D.d ((g.appIso U.unop).inv x))) := by
+      exact congrArg (fun z ↦ E.app V.unop z)
+        (PresheafOfModules.Derivation.d_map D
+          (g.opensFunctor.op.map h) ((g.appIso U.unop).inv x))
+    _ = _ := by
+      exact PresheafOfModules.naturality_apply E.val h
+        (D.d ((g.appIso U.unop).inv x))
+
+set_option maxHeartbeats 800000 in
+-- The Leibniz law compares scalar actions before and after canonical Kähler base change.
+set_option backward.isDefEq.respectTransparency false in
+/-- The first chart universal derivation transported to the ordered overlap
+through the open-immersion section isomorphism and canonical Kähler base
+change. -/
+def coordinateOverlapLeftTransportedDerivation (i j : Fin 4) :
+    (coordinateOverlapKaehlerDifferentialSheaf i j).val.Derivation'
+      (affineConstBaseMap (.of k) (.of (coordinateOverlapRing i j))) :=
+  PresheafOfModules.Derivation'.mk
+    (fun U ↦
+      let g := Spec.map (CommRingCat.ofHom
+        (coordinateChartToLeftOverlapRingHom i j))
+      let D := (affineUniversalDerivation (.of k)
+        (.of (ChartCoordinateRing i))).app (.op (g ''ᵁ U.unop))
+      ModuleCat.Derivation.mk
+        (fun x ↦
+          (coordinateKaehlerRestrictLeftSpecCanonicalIso i j).hom.app U.unop
+            (D.d ((g.appIso U.unop).inv x)))
+        (by simp [D])
+        (by
+          intro x y
+          let E := (coordinateKaehlerRestrictLeftSpecCanonicalIso i j).hom
+          let e := E.app U.unop
+          let N := ((Scheme.Modules.restrictFunctor g).obj
+            (chartCoordinateKaehlerDifferentialSheaf i)).val.obj U
+          let P := (coordinateOverlapKaehlerDifferentialSheaf i j).val.obj U
+          let a := (g.appIso U.unop).inv x
+          let b := (g.appIso U.unop).inv y
+          have hd := D.d_mul ((g.appIso U.unop).inv x)
+            ((g.appIso U.unop).inv y)
+          change (show N from D.d (a * b)) =
+            x • (show N from D.d b) + y • (show N from D.d a) at hd
+          rw [map_mul]
+          change (show P from e (show N from D.d (a * b))) =
+            x • (show P from e (show N from D.d b)) +
+              y • (show P from e (show N from D.d a))
+          calc
+            _ = e (x • (show N from D.d b) +
+                y • (show N from D.d a)) := congrArg e hd
+            _ = e (x • (show N from D.d b)) +
+                e (y • (show N from D.d a)) := e.hom.map_add _ _
+            _ = _ := congrArg₂ (fun s t ↦ s + t)
+              (E.app_smul x (show N from D.d b))
+              (E.app_smul y (show N from D.d a)))
+        (by
+          intro r
+          have hb := CategoryTheory.congr_fun
+            (coordinateOverlapLeft_appIso_inv_base_compat i j U) r
+          change ((g.appIso U.unop).inv
+              ((affineConstBaseMap (.of k)
+                (.of (coordinateOverlapRing i j))).app U r)) =
+            (affineConstBaseMap (.of k)
+              (.of (ChartCoordinateRing i))).app
+                (.op (g ''ᵁ U.unop)) r at hb
+          change (coordinateKaehlerRestrictLeftSpecCanonicalIso i j).hom.app
+              U.unop (D.d _) = 0
+          calc
+            _ = (coordinateKaehlerRestrictLeftSpecCanonicalIso i j).hom.app
+                U.unop
+                (D.d ((affineConstBaseMap (.of k)
+                  (.of (ChartCoordinateRing i))).app
+                    (.op (g ''ᵁ U.unop)) r)) := congrArg
+                      (fun z ↦
+                        (coordinateKaehlerRestrictLeftSpecCanonicalIso
+                          i j).hom.app U.unop (D.d z)) hb
+            _ = (coordinateKaehlerRestrictLeftSpecCanonicalIso i j).hom.app
+                U.unop 0 := congrArg
+                  (fun z ↦
+                    (coordinateKaehlerRestrictLeftSpecCanonicalIso
+                      i j).hom.app U.unop z) (D.d_map r)
+            _ = 0 := map_zero _))
+    (by
+      intro U V h x
+      exact coordinateOverlapLeftTransportedDerivation_naturality i j h x)
+
 /-! ## Universal differentials on ordered overlaps -/
 
 /-- The canonical first-chart restriction sends a universal differential to

@@ -481,6 +481,61 @@ def affineConstBaseMap :
     rfl
 
 set_option backward.isDefEq.respectTransparency false in
+/-- A relative derivation on an affine scheme with values in a module sheaf
+is determined by its component on the whole affine scheme.  On a principal
+open, localization extensionality reduces equality to global sections; the
+sheaf condition then extends the equality to arbitrary opens. -/
+theorem PresheafOfModules.Derivation'.ext_of_affine_top
+    (M : (Spec R).Modules)
+    (d₁ d₂ : M.val.Derivation' (affineConstBaseMap k R))
+    (h : ∀ x : (Spec R).presheaf.obj (.op (⊤ : (Spec R).Opens)),
+      d₁.d x = d₂.d x) :
+    d₁ = d₂ := by
+  apply PresheafOfModules.Derivation.ext
+  funext U
+  apply AddMonoidHom.ext
+  intro x
+  apply TopCat.Presheaf.IsSheaf.section_ext M.2
+  intro p hp
+  obtain ⟨_, ⟨_, ⟨f, rfl⟩, rfl⟩, hpV, hVU⟩ :=
+    PrimeSpectrum.isBasis_basic_opens.exists_subset_of_mem_open hp U.unop.2
+  refine ⟨PrimeSpectrum.basicOpen f, hVU, hpV, ?_⟩
+  change (M.val.map (homOfLE hVU).op).hom (d₁.d x) =
+    (M.val.map (homOfLE hVU).op).hom (d₂.d x)
+  erw [← PresheafOfModules.Derivation.d_map d₁ (homOfLE hVU).op x,
+    ← PresheafOfModules.Derivation.d_map d₂ (homOfLE hVU).op x]
+  have hb : d₁.app (.op (PrimeSpectrum.basicOpen f)) =
+      d₂.app (.op (PrimeSpectrum.basicOpen f)) := by
+    let T := (structureSheafInType R R).obj.obj
+      (.op (PrimeSpectrum.basicOpen f))
+    let N := M.val.obj (.op (PrimeSpectrum.basicOpen f))
+    letI : Algebra k T :=
+      ((algebraMap R T).comp (algebraMap k R)).toAlgebra
+    letI : IsScalarTower k R T := .of_algebraMap_eq fun _ => rfl
+    letI : Module k N := Module.compHom N (algebraMap k T)
+    letI : IsScalarTower k T N := .of_algebraMap_smul fun _ _ => rfl
+    apply AlgebraicGeometry.Derivation.ext_of_isLocalization
+      (k := k) (R := R) (T := T) (N := N)
+      (Submonoid.powers (show R from f))
+    intro r
+    let rt : (Spec R).presheaf.obj (.op (⊤ : (Spec R).Opens)) :=
+      StructureSheaf.toOpenₗ R R ⊤ r
+    change d₁.d ((Spec R).presheaf.map
+        (homOfLE (show PrimeSpectrum.basicOpen f ≤ ⊤ from le_top)).op rt) =
+      d₂.d ((Spec R).presheaf.map
+        (homOfLE (show PrimeSpectrum.basicOpen f ≤ ⊤ from le_top)).op rt)
+    erw [PresheafOfModules.Derivation.d_map d₁
+        (homOfLE le_top).op rt,
+      PresheafOfModules.Derivation.d_map d₂
+        (homOfLE le_top).op rt]
+    have hrt : d₁.d rt = d₂.d rt := by
+      exact h rt
+    exact congrArg (fun z ↦ (M.val.map (homOfLE le_top).op).hom z) hrt
+  change (d₁.app (.op (PrimeSpectrum.basicOpen f))).d _ =
+    (d₂.app (.op (PrimeSpectrum.basicOpen f))).d _
+  rw [hb]
+
+set_option backward.isDefEq.respectTransparency false in
 /-- The affine universal derivation as a derivation of module presheaves. -/
 def affineUniversalDerivation :
     (tilde (ModuleCat.of R (KaehlerDifferential k R))).val.Derivation'
@@ -517,6 +572,45 @@ theorem affineUniversalDerivation_apply
     (affineUniversalDerivation k R).d x =
       (rawAffineUniversalDerivationSheafHom k R).app U x :=
   rfl
+
+set_option backward.isDefEq.respectTransparency false in
+/-- On affine global sections, the sheaf derivation is the usual universal
+differential under the canonical tilde section map. -/
+theorem affineUniversalDerivation_top_toOpen (r : R) :
+    (affineUniversalDerivation k R).d
+        (StructureSheaf.toOpenₗ R R ⊤ r) =
+      StructureSheaf.toOpenₗ R (KaehlerDifferential k R) ⊤
+        (KaehlerDifferential.D k R r) := by
+  change (rawAffineUniversalDerivationSheafHom k R).app (.op ⊤)
+      (StructureSheaf.toOpenₗ R R ⊤ r) = _
+  erw [← PrimeSpectrum.basicOpen_one]
+  rw [rawAffineUniversalDerivationSheafHom_app_basicOpen]
+  change basicOpenDerivationAddHom k R 1
+      (StructureSheaf.toOpenₗ R R (PrimeSpectrum.basicOpen 1) r) = _
+  exact basicOpenDerivationAddHom_toOpen k R 1 r
+
+set_option maxHeartbeats 800000 in
+-- Normalization crosses the dependent sheaf and affine-tilde section identifications.
+set_option backward.isDefEq.respectTransparency false in
+/-- Normalizing top sections identifies the affine sheaf derivation with the
+ordinary universal Kähler derivation. -/
+theorem affineUniversalDerivation_normalizedTop (r : R) :
+    (tilde.isoTop (ModuleCat.of R (KaehlerDifferential k R))).inv
+        ((affineUniversalDerivation k R).d ((Scheme.ΓSpecIso R).inv r)) =
+      KaehlerDifferential.D k R r := by
+  change (tilde.isoTop (ModuleCat.of R (KaehlerDifferential k R))).inv
+      ((affineUniversalDerivation k R).d
+        (StructureSheaf.toOpenₗ R R ⊤ r)) = _
+  calc
+    _ = (tilde.isoTop (ModuleCat.of R
+          (KaehlerDifferential k R))).inv
+        (StructureSheaf.toOpenₗ R (KaehlerDifferential k R) ⊤
+          (KaehlerDifferential.D k R r)) := congrArg
+            (fun z ↦ (tilde.isoTop (ModuleCat.of R
+              (KaehlerDifferential k R))).inv z)
+            (affineUniversalDerivation_top_toOpen k R r)
+    _ = _ := Iso.hom_inv_id_apply
+      (tilde.isoTop (ModuleCat.of R (KaehlerDifferential k R))) _
 
 end AlgebraicGeometry
 

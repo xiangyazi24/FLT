@@ -1695,3 +1695,39 @@
 - end: `[MZ-PUSHFORWARD-RESTRICTION-APP]` proved
 - final result: the remaining N25 overlap seam is purely local affine Kähler
   naturality under the two chart localizations.
+
+## Run 2026-08-21 (first transported overlap derivation)
+
+- doctrine version: `a06df5dfe4a8341212ec2dbb95a3246e72dce6d1066ceec681c7d969a1afc00c`
+- approval: Xiang's instruction to continue, finish the current local work,
+  use ChatGPT as the mathematical workhorse, and stop at a clean opportunity
+- starting avenue: package the first chart localization as a genuine
+  full-site derivation on the ordered overlap, then reduce its equality with
+  the intrinsic overlap derivation to affine global sections
+- result: added `PresheafOfModules.Derivation'.ext_of_affine_top`.  Equality
+  on top sections propagates to every principal open by localization
+  extensionality and then to arbitrary opens by sheaf locality.
+- result: proved both raw and normalized top-section formulas for the affine
+  universal derivation.  These expose the ordinary Kähler differential under
+  `StructureSheaf.toOpenₗ` and `tilde.isoTop`.
+- result: constructed `coordinateOverlapLeftTransportedDerivation` on the
+  full overlap site.  Its binary-base compatibility, Leibniz rule across the
+  canonical Kähler base-change isomorphism, and restriction naturality are
+  all proved without `sorry` or new axioms.
+- exact residual: identify the transported derivation's normalized top
+  component with `affineUniversalDerivation` using the existing localization
+  generator theorem; affine-top extensionality then gives the first component
+  equality, after which the right component is symmetric.
+- ChatGPT: Q6161 and Q6162 still have no git-drop and were not re-sent.  A new
+  independent design request through canonical `ask-gpt.py` failed before
+  dispatch because the current `flt` window had no configured channel; it
+  produced no Q number and no unverified claim entered the proof.
+- verification: strict source checks pass for both changed Lean files; the
+  8623-job N25 target and repository-wide 4011-job build pass.  Fresh axiom
+  audits of affine-top extensionality, both top normalization formulas, base
+  compatibility, transported naturality, and the transported derivation
+  report exactly `propext`, `Classical.choice`, and `Quot.sound`.
+- end: clean intermediate N25 checkpoint
+- final result: the first overlap leg is now represented by two full-site
+  derivations in the same affine target, with only their normalized top
+  equality still open.

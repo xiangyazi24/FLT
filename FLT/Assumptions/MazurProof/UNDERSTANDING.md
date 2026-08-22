@@ -1989,3 +1989,25 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
 - This closes `[MZ-N25-OVERLAP-LOCALIZATION]`.  The remaining adjunction seam
   is the concrete equality between this unit and the existing degree-one
   coordinate-ratio unit to exponent `-1`.
+
+### N25 transported overlap derivation (2026-08-21)
+
+- `PresheafOfModules.Derivation'.ext_of_affine_top` proves that two relative
+  derivations into a module sheaf on `Spec R` agree globally once they agree
+  on the whole affine scheme.  The proof first applies localization
+  extensionality on every principal open and then the sheaf condition on an
+  arbitrary open.
+- The affine universal derivation is now normalized explicitly on global
+  sections: `affineUniversalDerivation_top_toOpen` identifies its value on a
+  ring element with the tilde section of its universal differential, and
+  `affineUniversalDerivation_normalizedTop` removes the tilde coordinate.
+- `coordinateOverlapLeftTransportedDerivation` transports the first chart's
+  universal derivation through the overlap open immersion and the canonical
+  Kähler restriction isomorphism.  It is a derivation on the full small
+  Zariski site, not only a top-section calculation; its restriction
+  naturality and scalar actions are kernel-checked.
+- This is an intermediate node rather than the overlap compatibility theorem.
+  The remaining first-leg statement is equality of the transported and direct
+  overlap derivations.  It is reduced to their normalized top components and
+  the existing localization-generator identity; the second leg is the
+  symmetric construction.
