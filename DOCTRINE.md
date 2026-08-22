@@ -211,8 +211,12 @@ The next ranked canonical-geometry attacks are:
    direct ordered-overlap derivations.  The remaining local compatibility is
    now the equality between each chart derivation followed by the canonical
    extension-by-zero restriction map and the corresponding direct overlap
-   derivation.  Its unresolved interface is the sectionwise formula for
-   `pushforwardRestrictionHom`; the differential generator identities and
+   derivation.  The sectionwise formula for `pushforwardRestrictionHom` is
+   now proved generically: extension by zero first restricts sections to the
+   preimage open and then applies the supplied coefficient morphism.  Thus
+   each overlap leg has been reduced to the local equality saying that the
+   canonical Kähler restriction carries the affine universal derivation to
+   the direct overlap derivation; the differential generator identities and
    localization extensionality are already available.  After both overlap
    legs are identified with the direct derivation, transpose the descended
    derivation through the universal and sheafification adjunctions and prove

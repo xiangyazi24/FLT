@@ -1670,3 +1670,28 @@
   `pushforwardRestrictionHom` composite equals the corresponding direct
   overlap derivation, first by extracting its sectionwise transpose formula
   and then applying the already proved Kähler generator identities.
+
+## Run 2026-08-21 (extension-by-zero section formula)
+
+- doctrine version: `a06df5dfe4a8341212ec2dbb95a3246e72dce6d1066ceec681c7d969a1afc00c`
+- starting avenue: expose the exact section map hidden inside
+  `pushforwardRestrictionHomOfHom` so that the chart-to-overlap derivation
+  comparison no longer unfolds an adjunction and two pushforward isomorphisms
+- result: proved the generic named-composite formula.  On an open `W`, the
+  extension-by-zero morphism restricts a source section along
+  `k.image_preimage_le (f ⁻¹ᵁ W)` and then applies the supplied morphism on
+  `k ⁻¹ᵁ f ⁻¹ᵁ W`; the pushforward-composition and congruence maps
+  normalize away.
+- N25 reduction: applying the formula to the first Čech leg reduces the
+  desired derivation equality to the local statement that
+  `coordinateKaehlerRestrictLeftIso` carries the restricted affine universal
+  derivation to `coordinateOverlapDerivation`.  No global product,
+  equalizer, or extension-by-zero plumbing remains in that component goal.
+- ChatGPT: Q6167 was given the full local definition and asked for this exact
+  formula, but its network capture contained only delivery metadata.  The
+  proof was derived from the pinned component lemmas
+  `restrictAdjunction_unit_app_app`, `pushforwardComp_hom_app_app`, and
+  `pushforwardCongr_hom_app_app`, then verified locally.
+- end: `[MZ-PUSHFORWARD-RESTRICTION-APP]` proved
+- final result: the remaining N25 overlap seam is purely local affine Kähler
+  naturality under the two chart localizations.

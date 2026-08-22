@@ -813,6 +813,23 @@ def pushforwardRestrictionHomOfHom (hk : k ≫ f = h)
     (pushforwardComp k f).hom.app G ≫
     (pushforwardCongr hk).hom.app G
 
+omit [IsOpenImmersion f] in
+set_option backward.isDefEq.respectTransparency false in
+/-- For a named composite, extension by zero restricts sections to the
+smaller open and then applies the supplied coefficient morphism. -/
+@[simp]
+theorem pushforwardRestrictionHomOfHom_app_rfl
+    (F : X.Modules) (G : V.Modules)
+    (e : (restrictFunctor k).obj F ⟶ G) (W : Y.Opens) :
+    (pushforwardRestrictionHomOfHom
+      (f := f) (k := k) (h := k ≫ f) rfl F G e).app W =
+      F.presheaf.map
+          (homOfLE (k.image_preimage_le (f ⁻¹ᵁ W))).op ≫
+        e.app (k ⁻¹ᵁ f ⁻¹ᵁ W) := by
+  unfold pushforwardRestrictionHomOfHom
+  simp [Hom.comp_app]
+  rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- Extension by zero of a restriction morphism is natural in both its
 source and target coefficients.  Thus a commuting square on the smaller open
