@@ -1572,3 +1572,50 @@
   already verified canonical Kähler data.  The next seam is the compatible
   derivation into the Čech equalizer and the local-isomorphism proof for its
   sheafified transpose.
+
+## Run 2026-08-21 (N25 Čech-valued derivation descent)
+
+- doctrine version: `a9c0fa47eaca65c9e076afca99cf410e5751fd75d2e80a4e90c590a643cea540`
+- approval: Xiang's instruction to continue the autonomous FLT campaign,
+  use ChatGPT as the workhorse for hard mathematical and design questions,
+  verify locally, audit, record progress, and commit appropriate milestones
+- starting avenue: assemble compatible chart-valued same-site derivations
+  into the actual canonical Kähler Čech equalizer without assuming that the
+  sheaf-forgetful functor preserves its chosen limits definitionally
+- result: added generic product and equalizer constructors for compatible
+  presheaf-valued relative derivations.  Both constructors are obtained from
+  the objectwise Kähler universal property, and their projection formulas are
+  proved as equalities of full derivations.
+- result: made the preservation comparison explicit for the finite product of
+  four pushed-forward chart Kähler sheaves.  A family of chart derivations now
+  defines a derivation into the actual sheaf Čech source, and postcomposition
+  with each sheaf projection recovers the corresponding family member.
+- result: made the parallel-pair preservation comparison explicit for the
+  canonical Čech equalizer.  Any family whose two overlap composites agree
+  now descends to a derivation into `globalKaehlerDifferentialModule`, and
+  postcomposition with the equalizer inclusion recovers the Čech-source
+  derivation.
+- source correction: the forgetful functor preserves the relevant limits but
+  its preserved cone is not definitionally the chosen presheaf product or
+  equalizer.  Direct rewriting was rejected; the production construction uses
+  `PreservesProduct.iso` and `PreservesEqualizer.iso`, with the transparency
+  workaround scoped only to the two projection proofs.
+- ChatGPT: Q6102--Q6123 independently audited product/equalizer descent,
+  sheafification direction, dense-basis isomorphism detection, and affine
+  tilde localization.  The product/equalizer architecture and the exact
+  `TopCat.Sheaf.isIso_iff_isIso_basis` boundary survived local verification.
+  Claims that FLT lacked the canonical restriction wrapper, that derivation
+  postcomposition was not definitional, or that basis data alone fed the
+  sheafification Hom equivalence were disproved by local source and discarded.
+- verification: strict source compilation passes for the generic relative
+  differential file and the N25 specialization.  The targeted 8622-job build
+  passes.  Fresh axiom audits of all four generic derivation declarations and
+  all six N25 product/equalizer comparison and descent declarations report
+  exactly `propext`, `Classical.choice`, and `Quot.sound`.
+- end: `[MZ-N25-CECH-DERIVATION-DESCENT]` proved
+- final result: no global Čech limit plumbing remains.  The next obligation is
+  exactly the four full-open chart derivations and their overlap equality.
+  Local source inspection identifies a concrete route: view the structure and
+  tilde sheaves as fixed-base module sheaves, extend basic-open localization
+  derivations with `restrictHomEquivHom`, and prove the derivation laws on the
+  basic-open basis before pushing them to the canonical curve.

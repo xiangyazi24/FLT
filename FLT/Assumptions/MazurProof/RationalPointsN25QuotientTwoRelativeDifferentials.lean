@@ -1,6 +1,9 @@
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoCanonicalDifferentialCech
 import FLT.Mathlib.AlgebraicGeometry.Modules.RelativeDifferentials
 import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
+import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
+import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Equalizers
+import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Products
 
 /-!
 # Same-site relative differentials of the N25 canonical curve
@@ -24,10 +27,12 @@ open RationalPointsN25QuotientTwoAffineChartsSmooth
 open RationalPointsN25QuotientTwoGradedKoszul
 open RationalPointsN25QuotientTwoCanonicalDifferentialOverlaps
 open RationalPointsN25QuotientTwoCanonicalDifferentialRestriction
+open RationalPointsN25QuotientTwoCanonicalDifferentialCech
 open RationalPointsN25QuotientTwoProj
 open RationalPointsN25QuotientTwoTwistingSheafCharts
 open AlgebraicGeometry
 open CategoryTheory
+open CategoryTheory.Limits
 open PresheafOfModules.DifferentialsConstruction
 
 /-- The constant binary-base map on the small Zariski site of the canonical
@@ -102,6 +107,138 @@ theorem canonicalRelativeDifferentialsSheafHomEquivDerivation_homOfDerivation
     canonicalRelativeDifferentialsSheafHomEquivDerivation F
         (canonicalRelativeDifferentialsSheafHomOfDerivation F d) = d :=
   (canonicalRelativeDifferentialsSheafHomEquivDerivation F).apply_symm_apply d
+
+/-! ## Descent of chart derivations through the canonical Čech equalizer -/
+
+/-- The underlying module presheaf of a sheaf on the canonical curve. -/
+abbrev canonicalModulePresheaf
+    (F : CanonicalProjectiveCurve25Two.Modules) :=
+  (SheafOfModules.forget.{0}
+    CanonicalProjectiveCurve25Two.ringCatSheaf).obj F
+
+noncomputable local instance : PreservesLimit
+    (Discrete.functor
+      (fun i : Fin 4 => coordinateKaehlerLocalPushforward i))
+    (SheafOfModules.forget.{0}
+      CanonicalProjectiveCurve25Two.ringCatSheaf) :=
+  (SheafOfModules.forgetPreservesLimitsOfShape
+    (Discrete (Fin 4))
+    CanonicalProjectiveCurve25Two.ringCatSheaf).preservesLimit
+
+/-- Forgetting the sheaf product gives the product of the forgotten chart
+modules. -/
+def canonicalKaehlerPiComparisonIso :
+    canonicalModulePresheaf kaehlerCechSource ≅
+      ∏ᶜ fun i : Fin 4 => canonicalModulePresheaf
+        (coordinateKaehlerLocalPushforward i) :=
+  PreservesProduct.iso
+    (SheafOfModules.forget.{0}
+      CanonicalProjectiveCurve25Two.ringCatSheaf)
+    (fun i : Fin 4 => coordinateKaehlerLocalPushforward i)
+
+/-- A family of chart derivations determines a derivation into the source of
+the canonical Čech equalizer. -/
+def kaehlerCechSourceDerivation
+    (d : ∀ i : Fin 4,
+      (canonicalModulePresheaf
+        (coordinateKaehlerLocalPushforward i)).Derivation'
+          canonicalCurveConstBaseMap) :
+    (canonicalModulePresheaf kaehlerCechSource).Derivation'
+      canonicalCurveConstBaseMap :=
+  (PresheafOfModules.Derivation'.pi
+      (fun i : Fin 4 => canonicalModulePresheaf
+        (coordinateKaehlerLocalPushforward i)) d).postcomp
+    canonicalKaehlerPiComparisonIso.inv
+
+set_option backward.isDefEq.respectTransparency false in
+@[simp]
+theorem kaehlerCechSourceDerivation_postcomp_π
+    (d : ∀ i : Fin 4,
+      (canonicalModulePresheaf
+        (coordinateKaehlerLocalPushforward i)).Derivation'
+          canonicalCurveConstBaseMap) (i : Fin 4) :
+    (kaehlerCechSourceDerivation d).postcomp
+        ((SheafOfModules.forget.{0}
+          CanonicalProjectiveCurve25Two.ringCatSheaf).map
+            (CategoryTheory.Limits.Pi.π
+              (fun i : Fin 4 => coordinateKaehlerLocalPushforward i) i)) =
+      d i := by
+  unfold kaehlerCechSourceDerivation
+  rw [PresheafOfModules.Derivation'.postcomp_comp]
+  rw [← piComparison_comp_π]
+  rw [← PreservesProduct.iso_hom]
+  unfold canonicalKaehlerPiComparisonIso
+  rw [Iso.inv_hom_id_assoc]
+  exact PresheafOfModules.Derivation'.pi_postcomp_π _ d i
+
+noncomputable local instance : PreservesLimit
+    (parallelPair kaehlerCechLeft kaehlerCechRight)
+    (SheafOfModules.forget.{0}
+      CanonicalProjectiveCurve25Two.ringCatSheaf) :=
+  (SheafOfModules.forgetPreservesLimitsOfShape
+    WalkingParallelPair
+    CanonicalProjectiveCurve25Two.ringCatSheaf).preservesLimit
+
+/-- Forgetting the sheaf equalizer gives the equalizer of the forgotten
+Čech arrows. -/
+def canonicalKaehlerEqualizerComparisonIso :
+    canonicalModulePresheaf globalKaehlerDifferentialModule ≅
+      equalizer
+        ((SheafOfModules.forget.{0}
+          CanonicalProjectiveCurve25Two.ringCatSheaf).map kaehlerCechLeft)
+        ((SheafOfModules.forget.{0}
+          CanonicalProjectiveCurve25Two.ringCatSheaf).map kaehlerCechRight) :=
+  PreservesEqualizer.iso
+    (SheafOfModules.forget.{0}
+      CanonicalProjectiveCurve25Two.ringCatSheaf)
+    kaehlerCechLeft kaehlerCechRight
+
+/-- A compatible family of chart derivations descends through the canonical
+sheaf Čech equalizer. -/
+def globalKaehlerDifferentialDerivation
+    (d : ∀ i : Fin 4,
+      (canonicalModulePresheaf
+        (coordinateKaehlerLocalPushforward i)).Derivation'
+          canonicalCurveConstBaseMap)
+    (h : (kaehlerCechSourceDerivation d).postcomp
+          ((SheafOfModules.forget.{0}
+            CanonicalProjectiveCurve25Two.ringCatSheaf).map kaehlerCechLeft) =
+        (kaehlerCechSourceDerivation d).postcomp
+          ((SheafOfModules.forget.{0}
+            CanonicalProjectiveCurve25Two.ringCatSheaf).map kaehlerCechRight)) :
+    (canonicalModulePresheaf globalKaehlerDifferentialModule).Derivation'
+      canonicalCurveConstBaseMap :=
+  (PresheafOfModules.Derivation'.equalizerLift
+      (kaehlerCechSourceDerivation d)
+      ((SheafOfModules.forget.{0}
+        CanonicalProjectiveCurve25Two.ringCatSheaf).map kaehlerCechLeft)
+      ((SheafOfModules.forget.{0}
+        CanonicalProjectiveCurve25Two.ringCatSheaf).map kaehlerCechRight) h).postcomp
+    canonicalKaehlerEqualizerComparisonIso.inv
+
+set_option backward.isDefEq.respectTransparency false in
+@[simp]
+theorem globalKaehlerDifferentialDerivation_postcomp_ι
+    (d : ∀ i : Fin 4,
+      (canonicalModulePresheaf
+        (coordinateKaehlerLocalPushforward i)).Derivation'
+          canonicalCurveConstBaseMap)
+    (h : (kaehlerCechSourceDerivation d).postcomp
+          ((SheafOfModules.forget.{0}
+            CanonicalProjectiveCurve25Two.ringCatSheaf).map kaehlerCechLeft) =
+        (kaehlerCechSourceDerivation d).postcomp
+          ((SheafOfModules.forget.{0}
+            CanonicalProjectiveCurve25Two.ringCatSheaf).map kaehlerCechRight)) :
+    (globalKaehlerDifferentialDerivation d h).postcomp
+        ((SheafOfModules.forget.{0}
+          CanonicalProjectiveCurve25Two.ringCatSheaf).map
+            (equalizer.ι kaehlerCechLeft kaehlerCechRight)) =
+      kaehlerCechSourceDerivation d := by
+  unfold globalKaehlerDifferentialDerivation
+  rw [PresheafOfModules.Derivation'.postcomp_comp]
+  unfold canonicalKaehlerEqualizerComparisonIso
+  rw [PreservesEqualizer.iso_inv_ι]
+  exact PresheafOfModules.Derivation'.equalizerLift_postcomp_ι _ _ _ _
 
 @[simp]
 theorem canonicalRelativeDifferentialsPresheaf_obj

@@ -1,4 +1,5 @@
 import Mathlib.Algebra.Category.ModuleCat.Differentials.Presheaf
+import Mathlib.Algebra.Category.ModuleCat.Presheaf.Limits
 import Mathlib.AlgebraicGeometry.Scheme
 
 /-!
@@ -65,3 +66,72 @@ noncomputable def homEquiv (φ : S ⟶ R)
   right_inv d := (isUniversal' φ).fac d
 
 end PresheafOfModules.DifferentialsConstruction
+
+namespace PresheafOfModules.Derivation'
+
+open CategoryTheory.Limits
+
+universe u vD uD
+
+variable {D : Type uD} [Category.{vD} D]
+variable {S R : Dᵒᵖ ⥤ CommRingCat.{u}}
+variable {φ : S ⟶ R}
+
+@[simp]
+theorem postcomp_comp
+    {M N P : PresheafOfModules.{u}
+      (R ⋙ forget₂ CommRingCat RingCat)}
+    (d : M.Derivation' φ) (f : M ⟶ N) (g : N ⟶ P) :
+    (d.postcomp f).postcomp g = d.postcomp (f ≫ g) := by
+  rfl
+
+/-- The product derivation records a compatible family of relative
+derivations in one product-valued derivation. -/
+noncomputable def pi {ι : Type u}
+    (M : ι → PresheafOfModules.{u}
+      (R ⋙ forget₂ CommRingCat RingCat))
+    (d : ∀ i, (M i).Derivation' φ) :
+    (∏ᶜ M).Derivation' φ :=
+  (DifferentialsConstruction.derivation' φ).postcomp
+    (Limits.Pi.lift fun i =>
+      (DifferentialsConstruction.isUniversal' φ).desc (d i))
+
+@[simp]
+theorem pi_postcomp_π {ι : Type u}
+    (M : ι → PresheafOfModules.{u}
+      (R ⋙ forget₂ CommRingCat RingCat))
+    (d : ∀ i, (M i).Derivation' φ) (i : ι) :
+    (pi M d).postcomp (Limits.Pi.π M i) = d i := by
+  unfold pi
+  rw [postcomp_comp, Limits.Pi.lift_π]
+  exact (DifferentialsConstruction.isUniversal' φ).fac (d i)
+
+/-- A relative derivation satisfying two parallel module equations lifts to
+the corresponding equalizer-valued derivation. -/
+noncomputable def equalizerLift
+    {M N : PresheafOfModules.{u}
+      (R ⋙ forget₂ CommRingCat RingCat)}
+    (d : M.Derivation' φ) (f g : M ⟶ N)
+    (h : d.postcomp f = d.postcomp g) :
+    (equalizer f g).Derivation' φ :=
+  (DifferentialsConstruction.derivation' φ).postcomp
+    (equalizer.lift
+      ((DifferentialsConstruction.isUniversal' φ).desc d)
+      (by
+        apply (DifferentialsConstruction.isUniversal' φ).postcomp_injective
+        rw [← postcomp_comp, ← postcomp_comp]
+        rw [(DifferentialsConstruction.isUniversal' φ).fac d]
+        exact h))
+
+@[simp]
+theorem equalizerLift_postcomp_ι
+    {M N : PresheafOfModules.{u}
+      (R ⋙ forget₂ CommRingCat RingCat)}
+    (d : M.Derivation' φ) (f g : M ⟶ N)
+    (h : d.postcomp f = d.postcomp g) :
+    (equalizerLift d f g h).postcomp (equalizer.ι f g) = d := by
+  unfold equalizerLift
+  rw [postcomp_comp, equalizer.lift_ι]
+  exact (DifferentialsConstruction.isUniversal' φ).fac d
+
+end PresheafOfModules.Derivation'

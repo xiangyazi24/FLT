@@ -199,9 +199,19 @@ The next ranked canonical-geometry attacks are:
    standard chart the transported base map is proved to be the canonical
    binary-field algebra map, and both canonical overlap restrictions are
    proved to carry universal differentials to universal differentials.
-   The remaining step is to construct the compatible derivation into the
-   canonical Kähler Čech equalizer, transpose it through the universal and
-   sheafification adjunctions, and prove the resulting map locally invertible
+   Generic product and equalizer constructors now assemble any compatible
+   family of chart-valued same-site derivations into a derivation valued in
+   the actual canonical Kähler Čech equalizer.  The comparison is transported
+   through the non-definitional product and equalizer preservation
+   isomorphisms of the sheaf-forgetful functor, and both projection formulas
+   are proved.  The remaining construction is therefore sharply local: build
+   the full-open derivation into each pushed-forward affine tilde sheaf and
+   prove the already generator-checked overlap compatibility.  The current
+   attack transports the basic-open localization derivations through the
+   fixed-base module-sheaf restriction equivalence, then proves Leibniz and
+   base vanishing by the basic-open sheaf basis.  Once these four derivations
+   exist, transpose the descended derivation through the universal and
+   sheafification adjunctions and prove the resulting map locally invertible
    on the four standard charts.  A generic stalkwise theorem now upgrades
    isomorphy on every member of an arbitrary open cover to global isomorphy,
    so this final step no longer requires repeating the stalk argument;
