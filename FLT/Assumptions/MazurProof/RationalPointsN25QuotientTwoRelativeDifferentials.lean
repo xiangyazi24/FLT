@@ -2305,6 +2305,20 @@ noncomputable instance canonicalRelativeDifferentialsToGlobalKaehler_isIso :
   rw [canonicalRelativeDifferentialsToGlobalKaehler_restrict_isIso_iff]
   infer_instance
 
+/-- The scheme-relative differential sheaf is the descended canonical
+Kähler Čech object. -/
+noncomputable def canonicalRelativeDifferentialsIsoGlobalKaehler :
+    canonicalRelativeDifferentialsSheaf ≅ globalKaehlerDifferentialModule :=
+  asIso canonicalRelativeDifferentialsToGlobalKaehler
+
+/-- The scheme-relative differential sheaf is the effective hyperplane twist
+on the canonical curve. -/
+noncomputable def canonicalRelativeDifferentialsIsoCurvePullback :
+    canonicalRelativeDifferentialsSheaf ≅
+      RationalPointsN25QuotientTwoAmbientKoszulPullback.curvePullbackTwist (-1) :=
+  canonicalRelativeDifferentialsIsoGlobalKaehler ≪≫
+    globalKaehlerDifferentialIsoCurvePullback
+
 end
 
 end MazurProof.RationalPointsN25QuotientTwoRelativeDifferentials

@@ -2059,8 +2059,9 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   therefore an isomorphism on every standard chart.  The coordinate cover
   criterion proves that
   `canonicalRelativeDifferentialsToGlobalKaehler` is globally an isomorphism.
-  Combining it with `globalKaehlerDifferentialIsoCurvePullback` identifies the
-  scheme-relative differential sheaf with the existing effective curve
+  The named composite `canonicalRelativeDifferentialsIsoCurvePullback`
+  combines it with `globalKaehlerDifferentialIsoCurvePullback` and identifies
+  the scheme-relative differential sheaf with the existing effective curve
   hyperplane twist.  This closes
   `[MZ-N25-RELATIVE-DIFFERENTIAL-GLOBAL]` without defining a dualizing sheaf
   or discharging the N25 rational-point endpoint.  The next consumer is the

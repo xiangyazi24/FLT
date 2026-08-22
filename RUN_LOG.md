@@ -1904,7 +1904,8 @@
   `canonicalRelativeDifferentialsToGlobalKaehler_isIso`.  The same-site
   relative differential sheaf is therefore globally identified with the
   canonical Kähler Čech object and, through the existing global Čech
-  comparison, with the effective hyperplane twist.
+  comparison, with the effective hyperplane twist.  The latter identification
+  is exported directly as `canonicalRelativeDifferentialsIsoCurvePullback`.
 - ChatGPT: Q6174--Q6203 supplied independent route and API audits.  The
   sheafification-uniqueness route was retained; suggestions that conflated
   the affine sheafification with its tilde target were corrected against the

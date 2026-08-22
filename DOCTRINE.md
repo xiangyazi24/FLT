@@ -244,9 +244,10 @@ The next ranked canonical-geometry attacks are:
    proved equal to this isomorphism followed by the affine tilde comparison,
    so all four local comparisons are isomorphisms.  The open-cover criterion
    then proves that `canonicalRelativeDifferentialsToGlobalKaehler` is an
-   isomorphism.  Together with the existing Čech-to-twist isomorphism, this
-   identifies the scheme-relative differential sheaf with the effective
-   curve hyperplane twist and closes `[MZ-N25-RELATIVE-DIFFERENTIAL-GLOBAL]`.
+   isomorphism.  Composing with the existing Čech-to-twist isomorphism gives
+   the named `canonicalRelativeDifferentialsIsoCurvePullback`, identifying the
+   scheme-relative differential sheaf with the effective curve hyperplane
+   twist and closing `[MZ-N25-RELATIVE-DIFFERENTIAL-GLOBAL]`.
    It does not construct a dualizing sheaf or discharge the N25 endpoint.
    The next exact seam is to feed this line-bundle identification into the
    height-one divisor, Picard, and middle-degree Riemann--Roch interfaces;
