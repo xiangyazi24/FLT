@@ -204,15 +204,20 @@ The next ranked canonical-geometry attacks are:
    the actual canonical Kähler Čech equalizer.  The comparison is transported
    through the non-definitional product and equalizer preservation
    isomorphisms of the sheaf-forgetful functor, and both projection formulas
-   are proved.  The remaining construction is therefore sharply local: build
-   the full-open derivation into each pushed-forward affine tilde sheaf and
-   prove the already generator-checked overlap compatibility.  The current
-   attack transports the basic-open localization derivations through the
-   fixed-base module-sheaf restriction equivalence, then proves Leibniz and
-   base vanishing by the basic-open sheaf basis.  Once these four derivations
-   exist, transpose the descended derivation through the universal and
-   sheafification adjunctions and prove the resulting map locally invertible
-   on the four standard charts.  A generic stalkwise theorem now upgrades
+   are proved.  A generic affine construction now extends the universal
+   Kähler derivation from principal opens to the full small Zariski site and
+   packages precomposition along a commutative square of ring maps.  It gives
+   all four pushed-forward chart derivations and, independently, the sixteen
+   direct ordered-overlap derivations.  The remaining local compatibility is
+   now the equality between each chart derivation followed by the canonical
+   extension-by-zero restriction map and the corresponding direct overlap
+   derivation.  Its unresolved interface is the sectionwise formula for
+   `pushforwardRestrictionHom`; the differential generator identities and
+   localization extensionality are already available.  After both overlap
+   legs are identified with the direct derivation, transpose the descended
+   derivation through the universal and sheafification adjunctions and prove
+   the resulting map locally invertible on the four standard charts.  A
+   generic stalkwise theorem now upgrades
    isomorphy on every member of an arbitrary open cover to global isomorphy,
    so this final step no longer requires repeating the stalk argument;
 2. build the missing height-one valuation/principal-divisor layer on the

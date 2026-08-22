@@ -1619,3 +1619,54 @@
   tilde sheaves as fixed-base module sheaves, extend basic-open localization
   derivations with `restrictHomEquivHom`, and prove the derivation laws on the
   basic-open basis before pushing them to the canonical curve.
+
+## Run 2026-08-21 (N25 full-site affine derivations)
+
+- doctrine version: `64ee1a5d220465f7352b063f683b92d2d864d6c8a228c219d546899e9abdeb69`
+- approval: Xiang's instruction to continue the autonomous FLT campaign,
+  use ChatGPT as the workhorse for hard mathematical and design questions,
+  verify locally, audit, record progress, and commit appropriate milestones
+- starting avenue: construct the four chart derivations required by the
+  canonical Kähler Čech descent theorem and isolate their overlap comparison
+- result: added the affine universal Kähler derivation on the full small
+  Zariski site.  Principal-open derivations are obtained by formally étale
+  Kähler base change, their restriction naturality is proved by localization
+  extensionality, and sheaf locality extends Leibniz and base-constant
+  vanishing from the principal-open basis to arbitrary opens.
+- result: added `ModuleCat.Derivation.precomp`, which transports a relative
+  derivation through a commutative square of ring maps while restricting the
+  target scalars.  This removes the expensive definitional expansion of the
+  pushed-forward module action from the N25 chart construction.
+- result: constructed all four `coordinateChartDerivation`s as genuine
+  compatible same-site derivations into the pushed-forward affine Kähler
+  sheaves.  The binary base-square equality on every open follows from
+  uniqueness of ring homomorphisms out of `ZMod 2`; presheaf naturality is
+  proved from scheme-map naturality and the affine derivation restriction law.
+- result: constructed the sixteen `coordinateOverlapDerivation`s directly
+  from the affine universal derivation on each ordered overlap.  These provide
+  a fixed common target for proving that the left and right canonical Čech
+  restrictions agree.
+- source correction: a direct `simp` proof of the chart Leibniz and base laws
+  exceeded the elaborator budget, and a proposed rewrite through a chart-image
+  `appLE` used the wrong source open.  Both were rejected.  The compiled proof
+  instead uses the generic precomposition square; no overlap equality or
+  transpose is claimed yet.
+- ChatGPT: Q6156, Q6158, Q6159, and Q6160 suggested the localization and
+  generator architecture.  Local checking rejected several schematic API
+  names and the one-line overlap extensionality shortcut.  Q6161--Q6163 were
+  asked for the exact extension-by-zero component formula and overlap proof;
+  Q6163 explicitly lacked checkout access and supplied no usable code.  The
+  surviving architecture was reconstructed from the pinned local source and
+  compiled declaration by declaration.
+- verification: strict source checks pass for the generic affine differential
+  file and the N25 specialization.  The targeted 8623-job N25 module build
+  passes.  Fresh axiom audits of derivation precomposition, localization
+  extensionality, the full-site affine derivation, both base-square packages,
+  and the chart and overlap derivations report no axioms beyond `propext`,
+  `Classical.choice`, and `Quot.sound`.
+- end: `[MZ-N25-FULL-SITE-DERIVATIONS]` proved
+- final result: the chart and direct-overlap derivation families now exist on
+  arbitrary opens.  The next exact seam is to prove each canonical
+  `pushforwardRestrictionHom` composite equals the corresponding direct
+  overlap derivation, first by extracting its sectionwise transpose formula
+  and then applying the already proved Kähler generator identities.

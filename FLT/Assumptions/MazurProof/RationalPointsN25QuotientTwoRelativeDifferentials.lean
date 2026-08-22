@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoCanonicalDifferentialCech
+import FLT.Mathlib.AlgebraicGeometry.Modules.AffineDifferentials
 import FLT.Mathlib.AlgebraicGeometry.Modules.RelativeDifferentials
 import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
 import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
@@ -24,12 +25,14 @@ noncomputable section
 namespace MazurProof.RationalPointsN25QuotientTwoRelativeDifferentials
 
 open RationalPointsN25QuotientTwoAffineChartsSmooth
+open RationalPointsN25QuotientTwoCanonicalDifferentialTilde
 open RationalPointsN25QuotientTwoGradedKoszul
 open RationalPointsN25QuotientTwoCanonicalDifferentialOverlaps
 open RationalPointsN25QuotientTwoCanonicalDifferentialRestriction
 open RationalPointsN25QuotientTwoCanonicalDifferentialCech
 open RationalPointsN25QuotientTwoProj
 open RationalPointsN25QuotientTwoTwistingSheafCharts
+open RationalPointsN25QuotientTwoTwistingSheafGluing
 open AlgebraicGeometry
 open CategoryTheory
 open CategoryTheory.Limits
@@ -270,6 +273,133 @@ theorem canonicalCurveChartBaseMap_eq_algebraMap (i : Fin 4) :
       CommRingCat.ofHom (algebraMap k (coordinateChartRing i)) := by
   apply CommRingCat.hom_ext
   exact @RingHom.ext_zmod 2 (coordinateChartRing i) _ _ _
+
+/-! ## Chart derivations -/
+
+/-- Pulling a binary constant from the canonical curve to a standard chart
+agrees with the affine algebra structure on every open. -/
+theorem coordinateChart_base_compat (i : Fin 4)
+    (U : CanonicalProjectiveCurve25Two.Opensᵒᵖ) (r : k) :
+    (coordinateChartMap i).app U.unop
+        (canonicalCurveConstBaseMap.app U r) =
+      (affineConstBaseMap (.of k) (.of (ChartCoordinateRing i))).app
+        (.op (coordinateChartMap i ⁻¹ᵁ U.unop)) r := by
+  rw [← CommRingCat.comp_apply]
+  exact DFunLike.congr_fun
+    (@RingHom.ext_zmod 2
+      ((coordinateChartScheme i).presheaf.obj
+        (.op (coordinateChartMap i ⁻¹ᵁ U.unop))) _ _ _) r
+
+/-- The chart pullback square for constants, packaged as an equality of
+ring morphisms for precomposition of relative derivations. -/
+theorem coordinateChart_base_compat_hom (i : Fin 4)
+    (U : CanonicalProjectiveCurve25Two.Opensᵒᵖ) :
+    canonicalCurveConstBaseMap.app U ≫
+        (coordinateChartMap i).app U.unop =
+      (affineConstBaseMap (.of k) (.of (ChartCoordinateRing i))).app
+        (.op (coordinateChartMap i ⁻¹ᵁ U.unop)) := by
+  apply CommRingCat.hom_ext
+  ext r
+  exact coordinateChart_base_compat i U r
+
+set_option maxHeartbeats 800000 in
+-- The pushforward module action unfolds through the chart open immersion.
+set_option backward.isDefEq.respectTransparency false in
+/-- The universal affine derivation on a standard chart, extended by zero
+through the chart open immersion to the canonical curve. -/
+def coordinateChartDerivation (i : Fin 4) :
+    (canonicalModulePresheaf
+      (coordinateKaehlerLocalPushforward i)).Derivation'
+        canonicalCurveConstBaseMap :=
+  PresheafOfModules.Derivation'.mk
+    (fun U => ModuleCat.Derivation.precomp
+      ((affineUniversalDerivation (.of k)
+        (.of (ChartCoordinateRing i))).app
+          (.op (coordinateChartMap i ⁻¹ᵁ U.unop)))
+      ((coordinateChartMap i).app U.unop)
+      (coordinateChart_base_compat_hom i U))
+    (by
+      intro U V h x
+      dsimp only [ModuleCat.Derivation.precomp]
+      change (affineUniversalDerivation (.of k)
+          (.of (ChartCoordinateRing i))).d
+          ((coordinateChartMap i).app V.unop
+            (CanonicalProjectiveCurve25Two.presheaf.map h x)) =
+        (chartCoordinateKaehlerDifferentialSheaf i).presheaf.map
+          (((TopologicalSpace.Opens.map
+            (coordinateChartMap i).base).map h.unop).op)
+          ((affineUniversalDerivation (.of k)
+            (.of (ChartCoordinateRing i))).d
+            ((coordinateChartMap i).app U.unop x))
+      calc
+        _ = (affineUniversalDerivation (.of k)
+              (.of (ChartCoordinateRing i))).d
+              ((coordinateChartScheme i).presheaf.map
+                (((TopologicalSpace.Opens.map
+                  (coordinateChartMap i).base).map h.unop).op)
+                ((coordinateChartMap i).app U.unop x)) := by
+            congr 1
+            exact CategoryTheory.congr_fun
+              ((coordinateChartMap i).naturality h) x
+        _ = _ := PresheafOfModules.Derivation.d_map
+          (affineUniversalDerivation (.of k)
+            (.of (ChartCoordinateRing i))) _ _)
+
+/-- The binary base map pulled to an ordered overlap agrees with its affine
+base map, as an equality suitable for derivation precomposition. -/
+theorem coordinateOverlap_base_compat_hom (i j : Fin 4)
+    (U : CanonicalProjectiveCurve25Two.Opensᵒᵖ) :
+    canonicalCurveConstBaseMap.app U ≫
+        (coordinateOverlapMap i j).app U.unop =
+      (affineConstBaseMap (.of k) (.of (coordinateOverlapRing i j))).app
+        (.op (coordinateOverlapMap i j ⁻¹ᵁ U.unop)) := by
+  apply CommRingCat.hom_ext
+  exact @RingHom.ext_zmod 2
+    ((Spec (.of (coordinateOverlapRing i j))).presheaf.obj
+      (.op (coordinateOverlapMap i j ⁻¹ᵁ U.unop))) _ _ _
+
+set_option maxHeartbeats 800000 in
+-- The pushforward module action unfolds through the ordered overlap map.
+set_option backward.isDefEq.respectTransparency false in
+/-- The universal affine derivation on an ordered overlap, extended by zero
+to the canonical curve. -/
+def coordinateOverlapDerivation (i j : Fin 4) :
+    (canonicalModulePresheaf
+      (coordinateKaehlerOverlapPushforward (i, j))).Derivation'
+        canonicalCurveConstBaseMap :=
+  PresheafOfModules.Derivation'.mk
+    (fun U => ModuleCat.Derivation.precomp
+      ((affineUniversalDerivation (.of k)
+        (.of (coordinateOverlapRing i j))).app
+          (.op (coordinateOverlapMap i j ⁻¹ᵁ U.unop)))
+      ((coordinateOverlapMap i j).app U.unop)
+      (coordinateOverlap_base_compat_hom i j U))
+    (by
+      intro U V h x
+      dsimp only [ModuleCat.Derivation.precomp]
+      change (affineUniversalDerivation (.of k)
+          (.of (coordinateOverlapRing i j))).d
+          ((coordinateOverlapMap i j).app V.unop
+            (CanonicalProjectiveCurve25Two.presheaf.map h x)) =
+        (coordinateOverlapKaehlerDifferentialSheaf i j).presheaf.map
+          (((TopologicalSpace.Opens.map
+            (coordinateOverlapMap i j).base).map h.unop).op)
+          ((affineUniversalDerivation (.of k)
+            (.of (coordinateOverlapRing i j))).d
+            ((coordinateOverlapMap i j).app U.unop x))
+      calc
+        _ = (affineUniversalDerivation (.of k)
+              (.of (coordinateOverlapRing i j))).d
+              ((Spec (.of (coordinateOverlapRing i j))).presheaf.map
+                (((TopologicalSpace.Opens.map
+                  (coordinateOverlapMap i j).base).map h.unop).op)
+                ((coordinateOverlapMap i j).app U.unop x)) := by
+            congr 1
+            exact CategoryTheory.congr_fun
+              ((coordinateOverlapMap i j).naturality h) x
+        _ = _ := PresheafOfModules.Derivation.d_map
+          (affineUniversalDerivation (.of k)
+            (.of (coordinateOverlapRing i j))) _ _)
 
 /-! ## Universal differentials on ordered overlaps -/
 
