@@ -231,13 +231,17 @@ The next ranked canonical-geometry attacks are:
    injectivity and surjectivity then prove that its sheafification is an
    isomorphism.  For the N25 charts, the adjunct of the named local comparison
    is proved to be exactly the universal morphism represented by the extended
-   affine derivation.  The next exact seam is the remaining source-side
-   locality theorem: restriction of the global relative-differential
-   sheafification along an open chart agrees, compatibly with the universal
-   derivation, with the affine sheafification just proved invertible.  This
-   identifies all four local comparisons with the generic affine isomorphism;
-   then coverwise isomorphism detection proves the global comparison
-   invertible.  A
+   affine derivation.  The global sheafification's universal derivation has
+   now also been transported through each chart's open-immersion section
+   isomorphism, and its universal transpose defines a morphism from the affine
+   objectwise relative differential presheaf to the restricted global sheaf;
+   its formula on universal differentials is proved.  The next exact seam is
+   to prove this morphism locally injective and locally surjective, hence that
+   the restricted global sheaf is another sheafification of the affine
+   presheaf.  Uniqueness then identifies it with the affine sheafification
+   just proved invertible and intertwines the two universal derivations.  This
+   makes all four local comparisons isomorphisms; then coverwise isomorphism
+   detection proves the global comparison invertible.  A
    generic stalkwise theorem now upgrades
    isomorphy on every member of an arbitrary open cover to global isomorphy,
    so this final step no longer requires repeating the stalk argument;

@@ -314,6 +314,95 @@ theorem coordinateChart_base_compat_hom (i : Fin 4)
   ext r
   exact coordinateChart_base_compat i U r
 
+/-! ## Restriction of the global relative differential sheaf to a chart -/
+
+/-- The open-immersion section isomorphism transports the affine base map to
+the global constant base map. -/
+theorem coordinateChart_appIso_inv_base_compat (i : Fin 4)
+    (U : (coordinateChartScheme i).Opensᵒᵖ) :
+    (affineConstBaseMap (.of k)
+        (.of (ChartCoordinateRing i))).app U ≫
+      ((coordinateChartMap i).appIso U.unop).inv =
+    canonicalCurveConstBaseMap.app
+      (.op (coordinateChartMap i ''ᵁ U.unop)) := by
+  apply CommRingCat.hom_ext
+  exact @RingHom.ext_zmod 2 _ _ _ _
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The transported global derivation commutes with restriction inside a
+standard affine chart. -/
+theorem coordinateChartRestrictedRelativeDerivation_naturality (i : Fin 4)
+    {U V : (coordinateChartScheme i).Opensᵒᵖ} (h : U ⟶ V)
+    (x : (coordinateChartScheme i).presheaf.obj U) :
+    canonicalRelativeDifferentialsSheafDerivation.d
+        (((coordinateChartMap i).appIso V.unop).inv
+          ((coordinateChartScheme i).presheaf.map h x)) =
+      (canonicalRelativeDifferentialsSheaf.presheaf.map
+        ((coordinateChartMap i).opensFunctor.op.map h))
+          (canonicalRelativeDifferentialsSheafDerivation.d
+            (((coordinateChartMap i).appIso U.unop).inv x)) := by
+  calc
+    _ = canonicalRelativeDifferentialsSheafDerivation.d
+        (CanonicalProjectiveCurve25Two.presheaf.map
+          ((coordinateChartMap i).opensFunctor.op.map h)
+            (((coordinateChartMap i).appIso U.unop).inv x)) := by
+      congr 1
+      exact CategoryTheory.congr_fun
+        (Scheme.Hom.appIso_inv_naturality (coordinateChartMap i) h) x
+    _ = _ := PresheafOfModules.Derivation.d_map
+      canonicalRelativeDifferentialsSheafDerivation _ _
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The global universal relative derivation transported to a standard affine
+chart through the open-immersion section isomorphism. -/
+def coordinateChartRestrictedRelativeDerivation (i : Fin 4) :
+    ((Scheme.Modules.restrictFunctor (coordinateChartMap i)).obj
+      canonicalRelativeDifferentialsSheaf).val.Derivation'
+        (affineConstBaseMap (.of k) (.of (ChartCoordinateRing i))) :=
+  PresheafOfModules.Derivation'.mk
+    (fun U => ModuleCat.Derivation.precomp
+      (canonicalRelativeDifferentialsSheafDerivation.app
+        (.op (coordinateChartMap i ''ᵁ U.unop)))
+      ((coordinateChartMap i).appIso U.unop).inv
+      (coordinateChart_appIso_inv_base_compat i U))
+    (by
+      intro U V h x
+      exact coordinateChartRestrictedRelativeDerivation_naturality i h x)
+
+/-- The affine relative differential presheaf maps to the restriction of the
+global relative differential sheaf through the transported derivation. -/
+def coordinateChartRelativeDifferentialsToRestrictedSheaf (i : Fin 4) :
+    affineRelativeDifferentialsPresheaf (.of k)
+        (.of (ChartCoordinateRing i)) ⟶
+      ((Scheme.Modules.restrictFunctor (coordinateChartMap i)).obj
+        canonicalRelativeDifferentialsSheaf).val :=
+  (isUniversal'
+    (affineConstBaseMap (.of k) (.of (ChartCoordinateRing i)))).desc
+      (coordinateChartRestrictedRelativeDerivation i)
+
+@[simp]
+theorem coordinateChartRelativeDifferentialsToRestrictedSheaf_fac
+    (i : Fin 4) :
+    (derivation'
+      (affineConstBaseMap (.of k)
+        (.of (ChartCoordinateRing i)))).postcomp
+          (coordinateChartRelativeDifferentialsToRestrictedSheaf i) =
+      coordinateChartRestrictedRelativeDerivation i := by
+  exact (isUniversal'
+    (affineConstBaseMap (.of k) (.of (ChartCoordinateRing i)))).fac _
+
+@[simp]
+theorem coordinateChartRelativeDifferentialsToRestrictedSheaf_app_d
+    (i : Fin 4) (U : (coordinateChartScheme i).Opensᵒᵖ)
+    (x : (coordinateChartScheme i).presheaf.obj U) :
+    (coordinateChartRelativeDifferentialsToRestrictedSheaf i).app U
+        (CommRingCat.KaehlerDifferential.d x) =
+      canonicalRelativeDifferentialsSheafDerivation.d
+        (((coordinateChartMap i).appIso U.unop).inv x) := by
+  have h := congrArg (fun d ↦ d.d x)
+    (coordinateChartRelativeDifferentialsToRestrictedSheaf_fac i)
+  exact h
+
 set_option maxHeartbeats 800000 in
 -- The pushforward module action unfolds through the chart open immersion.
 set_option backward.isDefEq.respectTransparency false in

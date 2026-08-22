@@ -1852,3 +1852,32 @@
   isomorphism seam is isolated to restriction compatibility of the source
   sheafification, with its required universal-derivation equation already
   proved.
+
+## Run 2026-08-22 (restricted global derivation on N25 charts)
+
+- doctrine version: `4877a8b8571fc2fff2ade0c23ff3d442d3699b7abed02ce848765d6588776936`
+- starting avenue: continue immediately past the affine-sheafification
+  milestone and construct the source-side chart restriction map needed by
+  sheafification uniqueness
+- result: proved that each chart's open-immersion section isomorphism carries
+  its affine binary-base map to the global constant base map.  Transporting
+  `canonicalRelativeDifferentialsSheafDerivation` through this isomorphism
+  gives `coordinateChartRestrictedRelativeDerivation`, a derivation on the
+  full small Zariski site of the affine chart with values in the restriction
+  of the global relative differential sheaf.
+- result: proved restriction naturality of the transported derivation on
+  arbitrary chart opens.  Its universal transpose is the named morphism
+  `coordinateChartRelativeDifferentialsToRestrictedSheaf` from affine
+  objectwise relative differentials to the restricted global sheaf, and its
+  action on every universal differential is explicit.
+- exact residual: prove the named morphism locally injective and locally
+  surjective.  It will then exhibit the restricted global sheaf as a
+  sheafification of the affine presheaf, so the generic affine isomorphism and
+  sheafification uniqueness identify the N25 chart-local comparison as an
+  isomorphism.
+- verification: the standalone construction probe and the complete N25
+  source file compile.  The 8623-job N25 target build passes.  Fresh axiom
+  audits of base compatibility, restriction naturality, the transported
+  derivation, its universal transpose, and its generator formula report only
+  `propext`, `Classical.choice`, and `Quot.sound`.
+- end: `[MZ-N25-RESTRICTED-RELATIVE-DERIVATION]` proved

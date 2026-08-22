@@ -2032,8 +2032,12 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   this comparison into an isomorphism without adding an axiom.
 - The N25 chart comparison's presheaf adjunct is proved exactly equal to the
   universal morphism represented by `coordinateChartDerivation`.  The
-  remaining seam is source-side locality: compare restriction of the global
-  relative-differential sheafification with the affine sheafification in a way
-  compatible with these universal derivations.  Once this comparison is
-  constructed, the generic affine isomorphism and the existing coverwise
-  isomorphism criterion finish the global Kähler identification.
+  global sheafification derivation is now transported through the chart
+  section isomorphism as `coordinateChartRestrictedRelativeDerivation`; its
+  universal transpose maps the affine objectwise relative differentials to
+  the restricted global sheaf, with a proved formula on every universal
+  differential.  The remaining source-side locality seam is to prove this map
+  locally bijective.  Sheafification uniqueness then compares the restricted
+  global sheaf with the affine sheafification, and the generic affine
+  isomorphism plus the existing coverwise criterion finish the global Kähler
+  identification.
