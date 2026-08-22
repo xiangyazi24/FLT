@@ -2011,3 +2011,29 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   overlap derivations.  It is reduced to their normalized top components and
   the existing localization-generator identity; the second leg is the
   symmetric construction.
+
+### N25 relative differential Čech comparison (2026-08-22)
+
+- Both transported chart derivations are now identified with the direct
+  ordered-overlap derivations on the full small Zariski site.  The four chart
+  derivations therefore satisfy the two canonical Čech arrows and descend to
+  `globalKaehlerDifferentialModule`.
+- Transposing the descended derivation through the objectwise Kähler and
+  sheafification universal properties constructs
+  `canonicalRelativeDifferentialsToGlobalKaehler`.  Its composite with every
+  chart projection is the corresponding universal chart comparison.
+- Literal restriction of the Čech equalizer followed by the open-immersion
+  counit is proved equal to `globalKaehlerDifferentialLocalIso`.  Thus the
+  restricted global comparison is invertible exactly when the chart-local
+  comparison is invertible.
+- Generically on `Spec R`, the objectwise relative-differential comparison
+  with `Ω[R/k]^~` is an isomorphism on every principal open.  The principal
+  opens give local injectivity and local surjectivity, so sheafification turns
+  this comparison into an isomorphism without adding an axiom.
+- The N25 chart comparison's presheaf adjunct is proved exactly equal to the
+  universal morphism represented by `coordinateChartDerivation`.  The
+  remaining seam is source-side locality: compare restriction of the global
+  relative-differential sheafification with the affine sheafification in a way
+  compatible with these universal derivations.  Once this comparison is
+  constructed, the generic affine isomorphism and the existing coverwise
+  isomorphism criterion finish the global Kähler identification.

@@ -85,6 +85,14 @@ theorem postcomp_comp
     (d.postcomp f).postcomp g = d.postcomp (f ≫ g) := by
   rfl
 
+@[simp]
+theorem postcomp_id
+    {M : PresheafOfModules.{u}
+      (R ⋙ forget₂ CommRingCat RingCat)}
+    (d : M.Derivation' φ) :
+    d.postcomp (𝟙 M) = d := by
+  rfl
+
 /-- The product derivation records a compatible family of relative
 derivations in one product-valued derivation. -/
 noncomputable def pi {ι : Type u}
@@ -105,6 +113,26 @@ theorem pi_postcomp_π {ι : Type u}
   unfold pi
   rw [postcomp_comp, Limits.Pi.lift_π]
   exact (DifferentialsConstruction.isUniversal' φ).fac (d i)
+
+/-- Product-valued derivations are equal when all their projected
+derivations are equal. -/
+theorem pi_ext {ι : Type u}
+    (M : ι → PresheafOfModules.{u}
+      (R ⋙ forget₂ CommRingCat RingCat))
+    {d₁ d₂ : (∏ᶜ M).Derivation' φ}
+    (h : ∀ i, d₁.postcomp (Limits.Pi.π M i) =
+      d₂.postcomp (Limits.Pi.π M i)) :
+    d₁ = d₂ := by
+  let e := DifferentialsConstruction.homEquiv φ (∏ᶜ M)
+  apply e.symm.injective
+  apply Limits.Pi.hom_ext
+  intro i
+  apply (DifferentialsConstruction.isUniversal' φ).postcomp_injective
+  rw [← postcomp_comp, ← postcomp_comp]
+  change (e (e.symm d₁)).postcomp (Limits.Pi.π M i) =
+    (e (e.symm d₂)).postcomp (Limits.Pi.π M i)
+  rw [e.apply_symm_apply, e.apply_symm_apply]
+  exact h i
 
 /-- A relative derivation satisfying two parallel module equations lifts to
 the corresponding equalizer-valued derivation. -/

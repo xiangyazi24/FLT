@@ -208,27 +208,36 @@ The next ranked canonical-geometry attacks are:
    Kähler derivation from principal opens to the full small Zariski site and
    packages precomposition along a commutative square of ring maps.  It gives
    all four pushed-forward chart derivations and, independently, the sixteen
-   direct ordered-overlap derivations.  The remaining local compatibility is
-   now the equality between each chart derivation followed by the canonical
-   extension-by-zero restriction map and the corresponding direct overlap
-   derivation.  The sectionwise formula for `pushforwardRestrictionHom` is
-   now proved generically: extension by zero first restricts sections to the
-   preimage open and then applies the supplied coefficient morphism.  Thus
-   each overlap leg has been reduced to the local equality saying that the
-   canonical Kähler restriction carries the affine universal derivation to
-   the direct overlap derivation.  A generic theorem now proves that a
+   direct ordered-overlap derivations.  The sectionwise formula for
+   `pushforwardRestrictionHom` is now proved for arbitrary named composites:
+   extension by zero first restricts sections, applies the coefficient map,
+   and transports across the chosen equality of composite immersions.  A
+   generic theorem proves that a
    full-site affine derivation is determined by its top component, using
-   localization extensionality on basic opens and sheaf locality.  The first
-   chart derivation has also been transported through the open-immersion
-   section isomorphism and canonical Kähler base change to a genuine
-   full-site derivation on the overlap.  Its Leibniz law, base vanishing, and
-   restriction naturality are proved.  The next exact seam is to identify its
-   normalized top component with the direct overlap derivation using the
-   existing localization-generator formula, then apply affine-top
-   extensionality and repeat symmetrically for the second chart.  After both
-   overlap legs are identified with the direct derivation, transpose the descended
-   derivation through the universal and sheafification adjunctions and prove
-   the resulting map locally invertible on the four standard charts.  A
+   localization extensionality on basic opens and sheaf locality.  Both chart
+   derivations have now been transported through their open-immersion section
+   isomorphisms and canonical Kähler base changes.  Localization extensionality
+   identifies both transported derivations with the direct overlap derivation
+   on the full site, including the dependent transport attached to the named
+   right composite.  Hence the four chart derivations satisfy the two Čech
+   arrows, descend to the global Kähler equalizer, and transpose through the
+   universal and sheafification adjunctions to a canonical comparison map.
+   Its composite with every Čech chart projection is the corresponding
+   universal affine chart comparison.  Literal Čech evaluation is now proved
+   equal to `globalKaehlerDifferentialLocalIso`, so restriction of the global
+   comparison is equivalent to the single chart-local comparison.  On an
+   arbitrary affine spectrum, the objectwise relative-differential comparison
+   with tilde is explicitly identified on every principal open; local
+   injectivity and surjectivity then prove that its sheafification is an
+   isomorphism.  For the N25 charts, the adjunct of the named local comparison
+   is proved to be exactly the universal morphism represented by the extended
+   affine derivation.  The next exact seam is the remaining source-side
+   locality theorem: restriction of the global relative-differential
+   sheafification along an open chart agrees, compatibly with the universal
+   derivation, with the affine sheafification just proved invertible.  This
+   identifies all four local comparisons with the generic affine isomorphism;
+   then coverwise isomorphism detection proves the global comparison
+   invertible.  A
    generic stalkwise theorem now upgrades
    isomorphy on every member of an arbitrary open cover to global isomorphy,
    so this final step no longer requires repeating the stalk argument;

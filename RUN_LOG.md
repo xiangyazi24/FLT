@@ -1731,3 +1731,124 @@
 - final result: the first overlap leg is now represented by two full-site
   derivations in the same affine target, with only their normalized top
   equality still open.
+
+## Run 2026-08-22 (N25 Čech compatibility and canonical transpose)
+
+- doctrine version: `ea8bb2c0ffecd2412e40d9ae534d2850f72dd96372318ef45af5e31611474b4e`
+- approval: Xiang's instruction to continue autonomously from the latest
+  verified checkpoint, use ChatGPT as the workhorse when available, verify
+  locally, and continue past individual item boundaries
+- starting avenue: close the normalized transported-derivation equality,
+  prove both full extension-by-zero overlap comparisons, and feed them into
+  the already constructed Čech derivation descent
+- result: normalized top sections of both transported overlap derivations
+  agree with the ordinary Kähler universal derivation on all localized chart
+  generators.  Localization extensionality and affine-top extensionality then
+  identify both full-site transported derivations with
+  `affineUniversalDerivation` on every ordered overlap.
+- result: proved the first chart extension-by-zero composite equals the direct
+  overlap derivation on arbitrary ambient opens.  The proof reduces all
+  section transports to `Scheme.Hom.appLE_appIso_inv`, rather than unfolding
+  the structure sheaf or assuming a top-section formula on general opens.
+- generic infrastructure: strengthened the extension-by-zero component
+  formula to an arbitrary named composite.  Its last factor is the presheaf
+  transport induced by the equality between the literal composite and its
+  chosen name.  Also added identity postcomposition and product extensionality
+  lemmas for relative derivations.
+- result: proved the second chart extension-by-zero composite equals the same
+  direct overlap derivation.  This closes the dependent right-composite seam:
+  the proof explicitly transports between the literal and named preimage
+  opens, applies naturality of the canonical Kähler comparison, and collapses
+  the three affine restriction maps before using `appLE_appIso_inv`.
+- result: the four chart derivations now satisfy the two canonical Čech
+  arrows.  They descend to a derivation valued in
+  `globalKaehlerDifferentialModule`, and the relative-differential universal
+  property transposes it to the canonical morphism
+  `canonicalRelativeDifferentialsToGlobalKaehler`.
+- result: postcomposition of the descended derivation with every Čech chart
+  projection recovers the corresponding affine universal derivation.  By
+  naturality of the sheafification/Kähler Hom equivalence, the canonical
+  morphism followed by each chart projection is exactly the named universal
+  chart comparison.
+- next exact seam: prove the four universal chart comparisons are isomorphisms
+  after restriction to their standard charts, using localization of Kähler
+  differentials on the principal-open basis.  A local probe further isolated
+  the target-side obligation to the categorical identity between literal
+  Čech evaluation and `globalKaehlerDifferentialLocalIso`.
+- ChatGPT: the canonical bridge was queried again for an independent audit of
+  the local-isomorphism route, but the `flt` window still had no configured
+  channel and the request failed before dispatch.  No external claim was used.
+- verification: direct source compilation passes for the generic pullback,
+  generic relative-differential, and full N25 relative-differential files.
+  Both left and right component theorems and the global compatibility theorem
+  were separately developed in scratch files that compile with exit code
+  zero.  Bypass and whitespace scans are clean.  The fresh axiom audit and
+  repository build are recorded below once completed.
+- end: `[MZ-N25-RELATIVE-CECH-COMPATIBILITY]` proved
+- final result: the same-site relative differential sheaf now has a canonical
+  morphism to the actual global Kähler Čech equalizer, with all four chart
+  composites identified.  Only the local-isomorphism proof remains before
+  the two sheaves are globally identified.
+
+## Run 2026-08-22 (affine sheafification and N25 local reduction)
+
+- doctrine version: `a64549f5adb5e19a4af71ab643c0b0cd52b9d8e9b233ab778063cfa02a3dae79`
+- approval: Xiang's instruction to continue autonomously past the previous
+  item boundary, keep ChatGPT as a workhorse, and verify every result locally
+- starting avenue: close the target-side literal Čech evaluation and prove
+  the chart-local comparison invertible from affine localization of Kähler
+  differentials
+- result: defined the literal chart evaluation of
+  `globalKaehlerDifferentialModule` and proved it equals
+  `globalKaehlerDifferentialLocalIso.hom`.  The proof maps the source
+  equalizer/projection identity through restriction and cancels the local
+  residue isomorphism using counit naturality.
+- result: restriction of
+  `canonicalRelativeDifferentialsToGlobalKaehler`, followed by the local Čech
+  isomorphism, is exactly `canonicalRelativeDifferentialsToLocalChart`.
+  Since the second factor is an isomorphism, invertibility of the restricted
+  global comparison is now equivalent to invertibility of this one affine
+  chart morphism.
+- generic infrastructure: on `Spec R`, constructed the objectwise relative
+  differential comparison with `KaehlerDifferential k R` tilde.  Formal
+  étaleness and module localization give an explicit isomorphism on every
+  principal open, and the comparison is proved equal to that isomorphism on
+  universal differential generators.
+- generic infrastructure: upgraded the principal-open calculation to an
+  `IsIso` instance after sheafification.  The underlying presheaf morphism is
+  locally injective and locally surjective because every point has a
+  principal-open neighbourhood on which the component is bijective.
+  `GrothendieckTopology.W_iff` and the sheafification adjunction then give the
+  sheaf isomorphism.
+- N25 compatibility: proved that the presheaf adjunct of every named chart
+  comparison is exactly the universal descent of `coordinateChartDerivation`.
+  Equivalently, composing the global sheafification unit with the chart
+  comparison gives that objectwise universal morphism.  This fixes the
+  compatibility condition required by the remaining restriction/locality
+  comparison.
+- exact residual: construct the source-side locality isomorphism between the
+  restriction of `canonicalRelativeDifferentialsSheaf` to a standard chart
+  and `affineRelativeDifferentialsSheaf` for its coordinate ring, and prove it
+  intertwines the two universal derivations.  The new generic affine `IsIso`
+  instance then proves all four local comparisons invertible, after which the
+  existing coverwise criterion proves the global comparison invertible.
+- ChatGPT: Q6168, Q6169, and Q6170 independently audited the literal local
+  evaluation and categorical cancellation route.  Their source-equality plus
+  restricted-functor mapping architecture was checked against the pinned
+  checkout and compiled.  Three follow-up batches asking for the affine
+  sheafification and restriction-locality APIs failed before dispatch because
+  the `flt` bridge reported no ready channels; no unavailable answer was used.
+- verification: direct source compilation passes for both the generic affine
+  differential file and the full N25 relative-differential file.  The
+  8623-job N25 target build and repository-wide 4011-job build pass.
+  Whitespace and bypass scans are clean.  Fresh axiom audits of the affine
+  presheaf comparison, its principal-open formula, its sheafified `IsIso`
+  instance, literal Čech evaluation, the global and chart comparisons, both
+  adjunct formulas, and the local reduction report exactly `propext`,
+  `Classical.choice`, and `Quot.sound`.
+- end: `[MZ-N25-AFFINE-SHEAFIFICATION]` proved
+- final result: the target-side local Čech plumbing and the generic affine
+  Kähler sheafification theorem are closed.  The remaining N25 local
+  isomorphism seam is isolated to restriction compatibility of the source
+  sheafification, with its required universal-derivation equation already
+  proved.

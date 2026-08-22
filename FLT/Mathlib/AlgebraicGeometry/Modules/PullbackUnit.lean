@@ -830,6 +830,23 @@ theorem pushforwardRestrictionHomOfHom_app_rfl
   simp [Hom.comp_app]
   rfl
 
+omit [IsOpenImmersion f] [IsOpenImmersion h] in
+set_option backward.isDefEq.respectTransparency false in
+/-- For a named composite, the section formula includes the final transport
+from the literal composite preimage to the chosen target preimage. -/
+theorem pushforwardRestrictionHomOfHom_app (hk : k ≫ f = h)
+    (F : X.Modules) (G : V.Modules)
+    (e : (restrictFunctor k).obj F ⟶ G) (W : Y.Opens) :
+    (pushforwardRestrictionHomOfHom
+      (f := f) (k := k) (h := h) hk F G e).app W =
+      F.presheaf.map
+          (homOfLE (k.image_preimage_le (f ⁻¹ᵁ W))).op ≫
+        e.app (k ⁻¹ᵁ f ⁻¹ᵁ W) ≫
+        G.presheaf.map (eqToHom (hk ▸ rfl)).op := by
+  unfold pushforwardRestrictionHomOfHom
+  simp [Hom.comp_app]
+  rfl
+
 set_option backward.isDefEq.respectTransparency false in
 /-- Extension by zero of a restriction morphism is natural in both its
 source and target coefficients.  Thus a commuting square on the smaller open

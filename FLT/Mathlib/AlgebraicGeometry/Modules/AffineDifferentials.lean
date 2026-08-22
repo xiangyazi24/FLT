@@ -1,5 +1,6 @@
 import Mathlib.AlgebraicGeometry.Modules.Tilde
 import Mathlib.Algebra.Category.ModuleCat.Differentials.Presheaf
+import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
 import Mathlib.RingTheory.Etale.Kaehler
 
 /-!
@@ -536,6 +537,47 @@ theorem PresheafOfModules.Derivation'.ext_of_affine_top
   rw [hb]
 
 set_option backward.isDefEq.respectTransparency false in
+theorem normalizedTop_smul (M : ModuleCat.{u} R) (r : R)
+    (z : Γ(tilde M, (⊤ : (Spec R).Opens))) :
+    (tilde.isoTop M).inv ((Scheme.ΓSpecIso R).inv r • z) =
+      r • (tilde.isoTop M).inv z := by
+  have hz : (Scheme.ΓSpecIso R).inv r • z = r • z := by
+    rw [Scheme.Modules.smul_Spec_def]
+    have htop : (TopologicalSpace.Opens.leTop
+          (⊤ : (Spec R).Opens)).op =
+        𝟙 (Opposite.op (⊤ : (Spec R).Opens)) := Subsingleton.elim _ _
+    rw [htop, CategoryTheory.Functor.map_id]
+    rfl
+  rw [hz, map_smul]
+
+set_option maxHeartbeats 800000 in
+-- The affine section isomorphisms transport both scalar actions in the Leibniz law.
+set_option backward.isDefEq.respectTransparency false in
+/-- Normalize the top component of an affine sheaf derivation to an ordinary
+derivation of its coordinate ring. -/
+def normalizedTopDerivation (M : ModuleCat.{u} R)
+    (d : (tilde M).val.Derivation' (affineConstBaseMap k R)) :
+    M.Derivation (CommRingCat.ofHom (algebraMap k R)) :=
+  ModuleCat.Derivation.mk
+    (fun r => (tilde.isoTop M).inv (d.d ((Scheme.ΓSpecIso R).inv r)))
+    (by simp)
+    (by
+      intro x y
+      rw [map_mul, PresheafOfModules.Derivation.d_mul]
+      rw [map_add]
+      exact congrArg₂ (fun a b => a + b)
+        (normalizedTop_smul R M x
+          (d.d ((Scheme.ΓSpecIso R).inv y)))
+        (normalizedTop_smul R M y
+          (d.d ((Scheme.ΓSpecIso R).inv x))))
+    (by
+      intro a
+      have hd := d.d_app (X := .op (⊤ : (Spec R).Opens)) a
+      change d.d ((Scheme.ΓSpecIso R).inv (algebraMap k R a)) = 0 at hd
+      have := congrArg (fun z => (tilde.isoTop M).inv z) hd
+      simpa using this)
+
+set_option backward.isDefEq.respectTransparency false in
 /-- The affine universal derivation as a derivation of module presheaves. -/
 def affineUniversalDerivation :
     (tilde (ModuleCat.of R (KaehlerDifferential k R))).val.Derivation'
@@ -611,6 +653,171 @@ theorem affineUniversalDerivation_normalizedTop (r : R) :
             (affineUniversalDerivation_top_toOpen k R r)
     _ = _ := Iso.hom_inv_id_apply
       (tilde.isoTop (ModuleCat.of R (KaehlerDifferential k R))) _
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The affine universal derivation commutes with the canonical section map
+on every open. -/
+theorem affineUniversalDerivation_toOpen
+    (U : (Spec R).Opens) (r : R) :
+    (affineUniversalDerivation k R).d
+        ((tilde.toOpen (ModuleCat.of R R) U) r) =
+      (tilde.toOpen (ModuleCat.of R (KaehlerDifferential k R)) U)
+        (KaehlerDifferential.D k R r) := by
+  let h : U ⟶ (⊤ : (Spec R).Opens) := homOfLE le_top
+  change (affineUniversalDerivation k R).d
+      ((Spec R).presheaf.map h.op ((Scheme.ΓSpecIso R).inv r)) = _
+  calc
+    _ = ((tilde (ModuleCat.of R (KaehlerDifferential k R))).val.map h.op).hom
+        ((affineUniversalDerivation k R).d ((Scheme.ΓSpecIso R).inv r)) :=
+      PresheafOfModules.Derivation.d_map (affineUniversalDerivation k R) h.op _
+    _ = ((tilde (ModuleCat.of R (KaehlerDifferential k R))).val.map h.op).hom
+        ((tilde.toOpen (ModuleCat.of R (KaehlerDifferential k R)) ⊤)
+          (KaehlerDifferential.D k R r)) := by
+      congr 1
+      exact affineUniversalDerivation_top_toOpen k R r
+    _ = _ := ConcreteCategory.congr_hom
+      (tilde.toOpen_res (ModuleCat.of R (KaehlerDifferential k R)) ⊤ U h)
+      (KaehlerDifferential.D k R r)
+
+/-! ## Comparison with objectwise relative differentials -/
+
+/-- The objectwise relative differential presheaf on an affine spectrum. -/
+abbrev affineRelativeDifferentialsPresheaf :=
+  PresheafOfModules.DifferentialsConstruction.relativeDifferentials'
+    (affineConstBaseMap k R)
+
+/-- The universal affine derivation induces the canonical comparison from
+objectwise relative differentials to the affine tilde differential sheaf.
+Sheafifying this morphism is the affine local model for scheme-relative
+differentials. -/
+def affineRelativeDifferentialsToTilde :
+    affineRelativeDifferentialsPresheaf k R ⟶
+      (tilde (ModuleCat.of R (KaehlerDifferential k R))).val :=
+  (PresheafOfModules.DifferentialsConstruction.isUniversal'
+    (affineConstBaseMap k R)).desc (affineUniversalDerivation k R)
+
+@[simp]
+theorem affineRelativeDifferentialsToTilde_fac :
+    (PresheafOfModules.DifferentialsConstruction.derivation'
+      (affineConstBaseMap k R)).postcomp
+        (affineRelativeDifferentialsToTilde k R) =
+      affineUniversalDerivation k R := by
+  exact (PresheafOfModules.DifferentialsConstruction.isUniversal'
+    (affineConstBaseMap k R)).fac _
+
+@[simp]
+theorem affineRelativeDifferentialsToTilde_app_d
+    (U : (Spec R).Opensᵒᵖ) (x : (Spec R).presheaf.obj U) :
+    (affineRelativeDifferentialsToTilde k R).app U
+        (CommRingCat.KaehlerDifferential.d x) =
+      (affineUniversalDerivation k R).d x := by
+  have h := congrArg (fun d ↦ d.d x)
+    (affineRelativeDifferentialsToTilde_fac k R)
+  exact h
+
+/-- On a principal open, formal étaleness and module localization identify
+objectwise relative differentials with affine tilde sections. -/
+def affineBasicOpenRelativeDifferentialsIso (f : R) :
+    (affineRelativeDifferentialsPresheaf k R).obj
+        (.op (PrimeSpectrum.basicOpen f)) ≅
+      (tilde (ModuleCat.of R (KaehlerDifferential k R))).val.obj
+        (.op (PrimeSpectrum.basicOpen f)) := by
+  let U : Opens (PrimeSpectrum.Top R) := PrimeSpectrum.basicOpen f
+  let T := (structureSheafInType R R).obj.obj (.op U)
+  let M := KaehlerDifferential k R
+  let N := (structureSheafInType R M).obj.obj (.op U)
+  letI : Algebra k T :=
+    ((algebraMap R T).comp (algebraMap k R)).toAlgebra
+  letI : IsScalarTower k R T := .of_algebraMap_eq fun _ => rfl
+  letI : Algebra.FormallyEtale R T :=
+    Algebra.FormallyEtale.of_isLocalization (.powers f)
+  let e₁ : T ⊗[R] M ≃ₗ[T] KaehlerDifferential k T :=
+    KaehlerDifferential.tensorKaehlerEquivOfFormallyEtale k R T
+  let e₂ : T ⊗[R] M ≃ₗ[T] N :=
+    (IsLocalizedModule.isBaseChange (.powers f) T
+      (StructureSheaf.toOpenₗ R M U)).equiv
+  exact (e₁.symm.trans e₂).toModuleIso
+
+set_option maxHeartbeats 800000 in
+-- Unfolding both localization equivalences crosses several dependent module structures.
+set_option backward.isDefEq.respectTransparency false in
+/-- The affine comparison on a principal open is the explicit localization
+isomorphism.  Equality is checked on universal differentials. -/
+theorem affineRelativeDifferentialsToTilde_app_basicOpen (f : R) :
+    (affineRelativeDifferentialsToTilde k R).app
+        (.op (PrimeSpectrum.basicOpen f)) =
+      (affineBasicOpenRelativeDifferentialsIso k R f).hom := by
+  apply CommRingCat.KaehlerDifferential.ext
+  intro x
+  erw [affineRelativeDifferentialsToTilde_app_d]
+  rw [affineUniversalDerivation_apply]
+  rw [rawAffineUniversalDerivationSheafHom_app_basicOpen]
+  rfl
+
+/-- The sheafification of objectwise relative differentials on an affine
+spectrum. -/
+abbrev affineRelativeDifferentialsSheaf : (Spec R).Modules :=
+  (PresheafOfModules.sheafification
+    (𝟙 (Spec R).ringCatSheaf.obj)).obj
+      (affineRelativeDifferentialsPresheaf k R)
+
+/-- The canonical affine comparison after sheafification. -/
+def affineRelativeDifferentialsSheafToTilde :
+    affineRelativeDifferentialsSheaf k R ⟶
+      tilde (ModuleCat.of R (KaehlerDifferential k R)) :=
+  (PresheafOfModules.sheafificationHomEquiv
+    (𝟙 (Spec R).ringCatSheaf.obj)).symm
+      (affineRelativeDifferentialsToTilde k R)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The affine sheafified comparison is an isomorphism because the original
+comparison is an isomorphism on the principal-open basis. -/
+instance affineRelativeDifferentialsSheafToTilde_isIso :
+    IsIso (affineRelativeDifferentialsSheafToTilde k R) := by
+  let Q := (PresheafOfModules.toPresheaf
+    (Spec R).ringCatSheaf.obj).obj
+      (tilde (ModuleCat.of R (KaehlerDifferential k R))).val
+  let g := (PresheafOfModules.toPresheaf
+    (Spec R).ringCatSheaf.obj).map
+      (affineRelativeDifferentialsToTilde k R)
+  have hBij (f : R) : Function.Bijective
+      (g.app (.op (PrimeSpectrum.basicOpen f))) := by
+    change Function.Bijective
+      ((affineRelativeDifferentialsToTilde k R).app
+        (.op (PrimeSpectrum.basicOpen f)))
+    rw [affineRelativeDifferentialsToTilde_app_basicOpen]
+    exact ConcreteCategory.bijective_of_isIso _
+  letI : Presheaf.IsLocallyInjective
+      (Opens.grothendieckTopology (Spec R)) g :=
+    { equalizerSieve_mem := by
+        intro U x y h p hp
+        obtain ⟨_, ⟨_, ⟨f, rfl⟩, rfl⟩, hpV, hVU⟩ :=
+          PrimeSpectrum.isBasis_basic_opens.exists_subset_of_mem_open hp U.unop.2
+        let i : PrimeSpectrum.basicOpen f ⟶ U.unop := homOfLE hVU
+        refine ⟨PrimeSpectrum.basicOpen f, i, ?_, hpV⟩
+        apply (hBij f).injective
+        simpa only [NatTrans.naturality_apply] using
+          congrArg (fun z ↦ Q.map i.op z) h }
+  letI : Presheaf.IsLocallySurjective
+      (Opens.grothendieckTopology (Spec R)) g :=
+    { imageSieve_mem := by
+        intro U s p hp
+        obtain ⟨_, ⟨_, ⟨f, rfl⟩, rfl⟩, hpV, hVU⟩ :=
+          PrimeSpectrum.isBasis_basic_opens.exists_subset_of_mem_open hp U.2
+        let i : PrimeSpectrum.basicOpen f ⟶ U := homOfLE hVU
+        refine ⟨PrimeSpectrum.basicOpen f, i, ?_, hpV⟩
+        exact (hBij f).surjective (Q.map i.op s) }
+  have hgW : (Opens.grothendieckTopology (Spec R)).W g :=
+    (Opens.grothendieckTopology (Spec R)).W_of_isLocallyBijective g
+  letI : IsIso ((presheafToSheaf
+      (Opens.grothendieckTopology (Spec R)) AddCommGrpCat).map g) :=
+    ((Opens.grothendieckTopology (Spec R)).W_iff g).mp hgW
+  rw [← isIso_iff_of_reflects_iso _ (SheafOfModules.toSheaf
+    (Spec R).ringCatSheaf)]
+  dsimp only [affineRelativeDifferentialsSheafToTilde]
+  rw [PresheafOfModules.toSheaf_map_sheafificationHomEquiv_symm]
+  rw [Adjunction.homEquiv_counit]
+  infer_instance
 
 end AlgebraicGeometry
 

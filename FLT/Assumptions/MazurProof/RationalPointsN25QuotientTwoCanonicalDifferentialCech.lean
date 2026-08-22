@@ -375,6 +375,105 @@ def globalKaehlerDifferentialLocalIso (i : Fin 4) :
     globalTwistModuleLocalIso (-1) i ≪≫
     (chartCoordinateKaehlerDifferentialTildeIso i).symm
 
+/-- Literal evaluation of the Kähler Čech equalizer on a standard chart:
+restrict the chart projection and then apply the open-immersion counit. -/
+def globalKaehlerDifferentialToLocal (i : Fin 4) :
+    (Scheme.Modules.restrictFunctor (coordinateChartMap i)).obj
+        globalKaehlerDifferentialModule ⟶
+      chartCoordinateKaehlerDifferentialSheaf i :=
+  (Scheme.Modules.restrictFunctor (coordinateChartMap i)).map
+      (equalizer.ι kaehlerCechLeft kaehlerCechRight ≫
+        Pi.π (fun j : Fin 4 ↦ coordinateKaehlerLocalPushforward j) i) ≫
+    (Scheme.Modules.restrictAdjunction
+      (coordinateChartMap i)).counit.app
+        (chartCoordinateKaehlerDifferentialSheaf i)
+
+/-- Literal Čech evaluation is the local effectiveness isomorphism.  The
+proof first compares the equalizer projections before restriction and then
+uses naturality of the open-immersion counit to cancel the residue frame. -/
+theorem globalKaehlerDifferentialToLocal_eq (i : Fin 4) :
+    globalKaehlerDifferentialToLocal i =
+      (globalKaehlerDifferentialLocalIso i).hom := by
+  unfold globalKaehlerDifferentialToLocal
+  unfold globalKaehlerDifferentialLocalIso
+  simp only [Iso.trans_hom, Functor.mapIso_hom, Category.assoc,
+    Functor.map_comp]
+  change _ = (Scheme.Modules.restrictFunctor
+      (coordinateChartMap i)).map globalKaehlerDifferentialToTwist ≫
+        (globalTwistModuleLocalIso (-1) i).hom ≫
+          (chartCoordinateKaehlerDifferentialTildeIso i).inv
+  have hlocal : (globalTwistModuleLocalIso (-1) i).hom =
+      globalTwistModuleToLocal (-1) i := rfl
+  rw [hlocal, globalTwistModuleToLocal_eq]
+  simp only [Functor.map_comp, Category.assoc]
+  have hEqualizer :
+      globalKaehlerDifferentialToTwist ≫
+          equalizer.ι (twistCechLeft (-1)) (twistCechRight (-1)) =
+        equalizer.ι kaehlerCechLeft kaehlerCechRight ≫
+          kaehlerCechSourceIsoTwist.hom := by
+    unfold globalKaehlerDifferentialToTwist
+    exact equalizer.lift_ι _ _
+  have hProjection :
+      kaehlerCechSourceIsoTwist.hom ≫
+          Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward (-1) j) i =
+        Pi.π (fun j : Fin 4 ↦ coordinateKaehlerLocalPushforward j) i ≫
+          (Scheme.Modules.pushforward (coordinateChartMap i)).map
+            (chartCoordinateKaehlerDifferentialTildeIso i).hom := by
+    unfold kaehlerCechSourceIsoTwist
+    exact Pi.mapIso_hom_π _ i
+  have hSource :
+      globalKaehlerDifferentialToTwist ≫
+          equalizer.ι (twistCechLeft (-1)) (twistCechRight (-1)) ≫
+          Pi.π (fun j : Fin 4 ↦ coordinateLocalPushforward (-1) j) i =
+        equalizer.ι kaehlerCechLeft kaehlerCechRight ≫
+          Pi.π (fun j : Fin 4 ↦ coordinateKaehlerLocalPushforward j) i ≫
+          (Scheme.Modules.pushforward (coordinateChartMap i)).map
+            (chartCoordinateKaehlerDifferentialTildeIso i).hom := by
+    rw [← Category.assoc, hEqualizer, Category.assoc, hProjection]
+  have hSourceMapped := congrArg
+    (Scheme.Modules.restrictFunctor (coordinateChartMap i)).map hSource
+  simp only [Functor.map_comp] at hSourceMapped
+  have hCounit :
+      (Scheme.Modules.restrictFunctor (coordinateChartMap i)).map
+            ((Scheme.Modules.pushforward (coordinateChartMap i)).map
+              (chartCoordinateKaehlerDifferentialTildeIso i).hom) ≫
+          (Scheme.Modules.restrictAdjunction
+            (coordinateChartMap i)).counit.app
+              (coordinateLocalTwistModule (-1) i) ≫
+          (chartCoordinateKaehlerDifferentialTildeIso i).inv =
+        (Scheme.Modules.restrictAdjunction
+          (coordinateChartMap i)).counit.app
+            (chartCoordinateKaehlerDifferentialSheaf i) := by
+    rw [Adjunction.counit_naturality_assoc]
+    simp
+  calc
+    _ = (Scheme.Modules.restrictFunctor (coordinateChartMap i)).map
+          (equalizer.ι kaehlerCechLeft kaehlerCechRight) ≫
+        (Scheme.Modules.restrictFunctor (coordinateChartMap i)).map
+          (Pi.π (fun j : Fin 4 ↦ coordinateKaehlerLocalPushforward j) i) ≫
+        (Scheme.Modules.restrictFunctor (coordinateChartMap i)).map
+          ((Scheme.Modules.pushforward (coordinateChartMap i)).map
+            (chartCoordinateKaehlerDifferentialTildeIso i).hom) ≫
+        (Scheme.Modules.restrictAdjunction
+          (coordinateChartMap i)).counit.app
+            (coordinateLocalTwistModule (-1) i) ≫
+        (chartCoordinateKaehlerDifferentialTildeIso i).inv := by
+      simpa only [Category.assoc] using congrArg
+        (fun q ↦
+          (Scheme.Modules.restrictFunctor (coordinateChartMap i)).map
+              (equalizer.ι kaehlerCechLeft kaehlerCechRight) ≫
+            (Scheme.Modules.restrictFunctor (coordinateChartMap i)).map
+              (Pi.π (fun j : Fin 4 ↦ coordinateKaehlerLocalPushforward j) i) ≫ q)
+        hCounit.symm
+    _ = _ := by
+      simpa only [Category.assoc] using congrArg
+        (fun q ↦ q ≫
+          (Scheme.Modules.restrictAdjunction
+            (coordinateChartMap i)).counit.app
+              (coordinateLocalTwistModule (-1) i) ≫
+          (chartCoordinateKaehlerDifferentialTildeIso i).inv)
+        hSourceMapped.symm
+
 /-- The local effectiveness isomorphism followed by the Jacobian residue
 frame trivializes the descended differential object on every chart. -/
 def globalKaehlerDifferentialLocalUnitIso (i : Fin 4) :
