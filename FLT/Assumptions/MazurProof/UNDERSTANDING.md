@@ -2101,8 +2101,22 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   section spaces into complete-linear-system fibre cardinalities.  The N25
   binary consumer can therefore take geometric projectivization equivalences
   and finite-field dimensions instead of assuming bare fibre counts.
+- `RationalPointsN25QuotientTwoClosedPointEvaluation.lean` constructs the
+  actual evaluation homomorphism from every canonical pivot chart quotient
+  to the point's finite coordinate field.  It proves compatibility with
+  homogeneous dehomogenization, annihilation of both chart equations,
+  Frobenius equivariance, and equality of Frobenius-conjugate kernels.  Each
+  kernel is therefore a prime; its quotient is canonically the finite
+  coordinate-generated range and is a field.
+- `RationalPointsN25QuotientTwoClosedPointPrime.lean` places the four chart
+  rings in one finite product.  The evaluation prime on the pivot factor
+  becomes a prime of this fixed product ring, is invariant under every
+  Frobenius iterate, and descends through the exact-period orbit quotient.
+  The descended prime is proved to lie on the factor selected by
+  `fullClosedPointPivot`; no representative-dependent chart choice remains.
 - The next exact seam is global principal divisors on
-  `fullClosedPointGrading25Two`: compare affine height-one primes and stalk
-  orders with degreewise Frobenius orbit classes, account for infinity, and
+  `fullClosedPointGrading25Two`: prove these chart kernels nonzero and height
+  one, identify the finite residue-field degree with the exact orbit degree,
+  compare primes and stalk orders on overlaps, account for infinity, and
   prove the product formula/degree-zero theorem before instantiating Picard
   and Riemann--Roch.

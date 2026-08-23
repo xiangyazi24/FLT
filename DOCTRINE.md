@@ -92,13 +92,17 @@ field.
 The affine Dedekind-domain divisor layer is now explicit: fractional ideals
 map to finitely supported height-one-prime divisors, the map is multiplicative
 and injective on nonzero ideals, and nonzero rational functions define an
-additive principal-divisor map into this affine carrier.  This is not yet the
-projective curve divisor theory.  The next missing layer is the bridge from
-height-one primes and local orders on the affine charts to the full
-degreewise Frobenius closed-point grading, together with the points at
-infinity and the projective product formula.  Mathlib currently has no
-turnkey curve-divisor/product-formula API, so the comparison must be built
-from the available commutative-algebra interfaces.
+additive principal-divisor map into this affine carrier.  Canonical normalized
+points now evaluate on their pivot chart quotient; evaluation is Frobenius
+equivariant, its kernel is Frobenius invariant, and exact-period orbit classes
+descend to primes in the product of the four chart rings.  The kernel quotient
+is canonically the finite coordinate-generated subring of the ambient finite
+field and hence is itself a field.  This is not yet the projective curve
+divisor theory: nonzeroness/height one, equality of residue degree with exact
+Frobenius period, chart overlap identification, points at infinity, and the
+projective product formula remain.  Mathlib currently has no turnkey
+curve-divisor/product-formula API, so the comparison must be built from the
+available commutative-algebra interfaces.
 
 The ambient Koszul-to-curve seam is closed.  Vertical-open Beck--Chevalley
 base change now permits arbitrary horizontal morphisms, so it applies to the

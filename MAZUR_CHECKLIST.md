@@ -221,11 +221,14 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     transition, the actual scheme-relative differential sheaf is globally
     identified with the effective `O_C(1)` twist, and the binary point counts
     through degree four have been transported to a full degreewise
-    exact-Frobenius closed-point grading.  Affine Dedekind divisors and the
-    three local hyperplane quotient `F₂`-module lengths `2,1,3` are also
-    formalized.
-  - Open atoms: compare affine height-one primes and stalk orders with the
-    full Frobenius closed-point grading, add the points at infinity, and prove
+    exact-Frobenius closed-point grading.  Affine Dedekind divisors, canonical
+    point evaluation on every pivot chart quotient, Frobenius-invariant
+    evaluation kernels, descent of those kernels to full orbit classes, the
+    resulting finite residue fields, and the three local hyperplane quotient
+    `F₂`-module lengths `2,1,3` are also formalized.
+  - Open atoms: prove the descended chart kernels nonzero and height one,
+    identify their residue degrees with exact Frobenius periods, compare
+    chart overlap primes and stalk orders, add the points at infinity, and prove
     the projective product formula/degree-zero principal-divisor theorem;
     use the geometric resolution to identify the scheme-theoretic Hilbert
     polynomial with the certified `6T-3`;

@@ -2015,3 +2015,44 @@
   `propext`, `Classical.choice`, and `Quot.sound`.
 - end: `[MZ-N25-FULL-CLOSED-POINTS]` and
   `[MZ-N25-AFFINE-DIVISOR-FIRST-ATOMS]` proved
+
+## Run 2026-08-22 (N25 Frobenius closed points to affine chart primes)
+
+- doctrine version: `abc391991483845d125301317010784dc6e6a9de669f7e6ad54a36cdda5b439c`
+- starting avenue: continue the full binary closed-point milestone by
+  constructing evaluation on the canonical pivot chart, proving Frobenius
+  invariance of its kernel, and descending that kernel through exact-period
+  orbit classes
+- result: `RationalPointsN25QuotientTwoClosedPointEvaluation.lean` evaluates
+  normalized homogeneous coordinates and the three affine chart variables,
+  proves compatibility with dehomogenization, proves both canonical chart
+  equations vanish, and descends evaluation through the explicit two-equation
+  chart quotient.
+- result: chart evaluation is equivariant under arithmetic Frobenius.  Its
+  kernel and associated prime-spectrum point are invariant under every
+  Frobenius iterate.  The quotient by the evaluation kernel is canonically
+  equivalent to the coordinate-generated range in the ambient finite field;
+  it is finite and is a field.
+- result: `RationalPointsN25QuotientTwoClosedPointPrime.lean` uses the product
+  of the four affine chart rings as a fixed target.  Each geometric point
+  defines the product-ring prime coming from its canonical pivot factor.
+  Frobenius invariance proves this prime constant on `SameExactOrbit`, so it
+  descends to every positive-degree member of
+  `fullClosedPointGrading25Two`.  The descended prime is proved to lie on the
+  factor selected by `fullClosedPointPivot`.
+- exact residual: prove the chart evaluation kernel nonzero and height one,
+  and prove that its finite residue-field degree equals the point's least
+  Frobenius period.  Then identify overlap primes and local orders, add the
+  boundary points, and establish the projective degree-zero product formula.
+- ChatGPT: Q6269 returned only a DOM refusal and supplied no mathematical
+  content.  A new high-value request for the dependent orbit-to-chart-prime
+  descent was attempted after the local kernel theorem, but every configured
+  channel was still recovering; the bridge reported no ready channel.  The
+  fixed chart-product construction was developed and verified locally.
+- verification: strict direct compilation passes for both new modules.  The
+  integrated 8815-job build, including the endpoint audit, passes.  The
+  endpoint axiom list is unchanged.  Fresh axiom audits of quotient
+  Frobenius equivariance, the finite residue-field theorem, product-ring
+  Frobenius equivariance, exact-orbit descent, and pivot-factor support report
+  exactly `propext`, `Classical.choice`, and `Quot.sound`.
+- end: `[MZ-N25-CLOSED-POINT-CHART-PRIME]` proved
