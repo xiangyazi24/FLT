@@ -97,10 +97,13 @@ points now evaluate on their pivot chart quotient; evaluation is Frobenius
 equivariant, its kernel is Frobenius invariant, and exact-period orbit classes
 descend to primes in the product of the four chart rings.  The kernel quotient
 is canonically the finite coordinate-generated subring of the ambient finite
-field and hence is itself a field.  This is not yet the projective curve
-divisor theory: nonzeroness/height one, equality of residue degree with exact
-Frobenius period, chart overlap identification, points at infinity, and the
-projective product formula remain.  Mathlib currently has no turnkey
+field and hence is itself a field.  The coordinate field degree is now proved
+equal to the point's exact Frobenius period, so every full degree-`d` closed
+point has residue cardinality exactly `2^d`, and its descended product-ring
+prime is maximal.  This is not yet the projective curve divisor theory:
+nonzeroness/height one of the selected chart kernel, chart overlap
+identification, points at infinity, and the projective product formula remain.
+Mathlib currently has no turnkey
 curve-divisor/product-formula API, so the comparison must be built from the
 available commutative-algebra interfaces.
 

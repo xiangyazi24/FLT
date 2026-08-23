@@ -2056,3 +2056,32 @@
   Frobenius equivariance, exact-orbit descent, and pivot-factor support report
   exactly `propext`, `Classical.choice`, and `Quot.sound`.
 - end: `[MZ-N25-CLOSED-POINT-CHART-PRIME]` proved
+
+## Run 2026-08-22 (N25 closed-point residue degree)
+
+- starting avenue: identify the chart-evaluation residue field intrinsically
+  and compare its binary degree with the exact arithmetic-Frobenius period
+- result: `RationalPointsN25QuotientTwoClosedPointResidueDegree.lean`
+  packages the evaluation range as an intermediate coordinate field.  Every
+  normalized projective coordinate lies in it, and Frobenius to its extension
+  degree fixes every element and hence the point.
+- result: exact periodicity makes the point period divide the coordinate-field
+  degree, while the intermediate-field tower makes that degree divide the
+  ambient degree.  Since the ambient field is chosen in the exact-period
+  degree, mutual divisibility proves equality.
+- result: the pivot-chart residue, the canonical chart-product residue, and
+  the representative-independent full closed-point residue all have
+  cardinality exactly `2^d` in degree `d`.  The chart evaluation kernel and
+  the descended product-ring prime are maximal.
+- exact residual: prove the selected chart kernel nonzero and height one,
+  compare the same point and valuation order across chart overlaps, add the
+  boundary points, and prove the projective degree-zero product formula.
+- ChatGPT: the high-value residue-degree request found no ready bridge channel;
+  the bridge was still recovering, so it was not repeatedly resubmitted.  The
+  intermediate-field argument was developed and checked locally.
+- verification: strict direct compilation and the integrated 8816-job build,
+  including the endpoint audit, pass.  Fresh axiom audits of coordinate-degree
+  equality, exact residue cardinality, full closed-point residue cardinality,
+  and both maximality theorems report exactly `propext`, `Classical.choice`,
+  and `Quot.sound`.  The endpoint axiom list is unchanged.
+- end: `[MZ-N25-CLOSED-POINT-RESIDUE-DEGREE]` proved

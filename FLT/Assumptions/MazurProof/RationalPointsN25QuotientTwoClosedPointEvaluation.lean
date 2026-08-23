@@ -194,6 +194,18 @@ theorem chartQuotientEval_mk
       chartPointAffineEval i P f := by
   rfl
 
+/-- Chart evaluation as an algebra homomorphism over the binary prime
+field. -/
+def chartQuotientEvalAlgHom
+    {K : Type} [Field K] [Algebra (ZMod 2) K]
+    (i : Fin 4) (P : CurvePointOnChart i K) :
+    ChartQuotient i →ₐ[ZMod 2] K where
+  __ := chartQuotientEval i P
+  commutes' r := by
+    change chartPointAffineEval i P (MvPolynomial.C r) =
+      algebraMap (ZMod 2) K r
+    simp [chartPointAffineEval]
+
 /-! ## Frobenius compatibility -/
 
 /-- Arithmetic Frobenius preserves the selected affine chart. -/
@@ -311,6 +323,15 @@ theorem chartPointResidue_isField
   letI : (RingHom.ker (chartQuotientEval i P)).IsPrime :=
     RingHom.ker_isPrime (chartQuotientEval i P)
   exact Finite.isField_of_domain (ChartPointResidue i P)
+
+/-- Evaluation at a point over a finite field cuts out a maximal ideal on
+its affine chart. -/
+theorem chartPointPrime_isMaximal
+    {K : Type} [Field K] [Algebra (ZMod 2) K] [Finite K]
+    (i : Fin 4) (P : CurvePointOnChart i K) :
+    (chartPointPrime i P).asIdeal.IsMaximal :=
+  Ideal.Quotient.maximal_of_isField _
+    (chartPointResidue_isField i P)
 
 /-- Frobenius-conjugate points induce the same affine prime. -/
 @[simp]

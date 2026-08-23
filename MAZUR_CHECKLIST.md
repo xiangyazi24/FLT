@@ -224,12 +224,13 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     exact-Frobenius closed-point grading.  Affine Dedekind divisors, canonical
     point evaluation on every pivot chart quotient, Frobenius-invariant
     evaluation kernels, descent of those kernels to full orbit classes, the
-    resulting finite residue fields, and the three local hyperplane quotient
-    `F₂`-module lengths `2,1,3` are also formalized.
+    resulting finite residue fields, equality of every residue degree with its
+    exact Frobenius period, maximality of the descended product-ring primes,
+    and the three local hyperplane quotient `F₂`-module lengths `2,1,3` are
+    also formalized.
   - Open atoms: prove the descended chart kernels nonzero and height one,
-    identify their residue degrees with exact Frobenius periods, compare
-    chart overlap primes and stalk orders, add the points at infinity, and prove
-    the projective product formula/degree-zero principal-divisor theorem;
+    compare chart overlap primes and stalk orders, add the points at infinity,
+    and prove the projective product formula/degree-zero principal-divisor theorem;
     use the geometric resolution to identify the scheme-theoretic Hilbert
     polynomial with the certified `6T-3`;
     package the characteristic-three Jacobian-rank certificate as a smooth

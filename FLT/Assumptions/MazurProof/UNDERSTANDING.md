@@ -2114,9 +2114,16 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   Frobenius iterate, and descends through the exact-period orbit quotient.
   The descended prime is proved to lie on the factor selected by
   `fullClosedPointPivot`; no representative-dependent chart choice remains.
+- `RationalPointsN25QuotientTwoClosedPointResidueDegree.lean` identifies the
+  pivot-chart evaluation range with the intermediate coordinate field.  The
+  finite-field cardinality theorem shows that Frobenius to the coordinate
+  field degree fixes every normalized coordinate; exact periodicity and the
+  ambient extension tower then force that degree to equal the point's least
+  Frobenius period.  Thus every full degree-`d` closed point has residue
+  cardinality exactly `2^d`, and both the chart evaluation kernel and the
+  descended product-ring prime are maximal.
 - The next exact seam is global principal divisors on
   `fullClosedPointGrading25Two`: prove these chart kernels nonzero and height
-  one, identify the finite residue-field degree with the exact orbit degree,
-  compare primes and stalk orders on overlaps, account for infinity, and
-  prove the product formula/degree-zero theorem before instantiating Picard
-  and Riemann--Roch.
+  one, compare primes and stalk orders on overlaps, account for infinity, and
+  prove the product formula/degree-zero theorem before instantiating Picard and
+  Riemann--Roch.
