@@ -217,9 +217,16 @@ scoped builds pass, and `#print axioms` contains only `propext`,
   - Both actual chart residue coordinates are now localized to every ordered
     overlap, and their rank-one transition is packaged as the explicit unit
     `coordinateOverlapResidueUnit`.
-  - Open atoms: prove this unit is the verified exponent `-1` adjunction
-    transition, thereby descending the actual canonical differentials and
-    proving `ω_C ≅ O_C(1)`;
+  - The overlap unit is now proved to be the verified exponent `-1`
+    transition, the actual scheme-relative differential sheaf is globally
+    identified with the effective `O_C(1)` twist, and the binary point counts
+    through degree four have been transported to a full degreewise
+    exact-Frobenius closed-point grading.  Affine Dedekind divisors and the
+    three local hyperplane quotient `F₂`-module lengths `2,1,3` are also
+    formalized.
+  - Open atoms: compare affine height-one primes and stalk orders with the
+    full Frobenius closed-point grading, add the points at infinity, and prove
+    the projective product formula/degree-zero principal-divisor theorem;
     use the geometric resolution to identify the scheme-theoretic Hilbert
     polynomial with the certified `6T-3`;
     package the characteristic-three Jacobian-rank certificate as a smooth
@@ -228,8 +235,9 @@ scoped builds pass, and `#print axioms` contains only `propext`,
     the degree-at-most-four Frobenius-orbit divisor model with the actual
     divisors of the characteristic-three fibre while constructing the
     degree-zero, degree-two, and degree-four Picard data and proving the
-    Riemann--Roch fibre theorem; construct the analogous characteristic-two
-    orbit/Picard data; prove `#Pic^0(C)(𝔽₂)=71` and
+    Riemann--Roch fibre theorem; instantiate the characteristic-two Picard
+    and complete-linear-system data on its full grading; prove
+    `#Pic^0(C)(𝔽₂)=71` and
     `#Pic^0(C)(𝔽₃)=71`; construct the actual good-reduction maps and prove
     their primary-kernel properties; construct the actual Jacobian pullback
     and norm maps and prove their degree-two composite; prove rational rank zero;

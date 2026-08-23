@@ -2066,3 +2066,43 @@ genus-2 Chabauty argument (X₁(13) has Jacobian of rank 0, MW ≅ ℤ/19ℤ).
   `[MZ-N25-RELATIVE-DIFFERENTIAL-GLOBAL]` without defining a dualizing sheaf
   or discharging the N25 rational-point endpoint.  The next consumer is the
   height-one divisor/Picard/Riemann--Roch layer.
+
+### N25 full binary closed-point grading and first divisor atoms (2026-08-22)
+
+- `RationalPointsN25QuotientTwoFullClosedPoints.lean` replaces the bounded
+  common-field carrier by a locally finite grading in every positive residue
+  degree.  Degree `d` is the quotient of exact-period-`d` curve points over
+  `CommonField 2 d` by their arithmetic-Frobenius orbit relation.
+- For every positive `d ∣ 12`, the coherent coefficient embedding into
+  `CommonField 2 12` commutes with Frobenius and preserves least periods.
+  It therefore induces an equivalence on exact-period points and then on
+  orbit classes.  The resulting degree-one through degree-four equivalences
+  transport the existing semantic fixed-point classification through the
+  intrinsic ghost slots.  `fullClosedPointBridge25TwoLE4` supplies the point
+  counts `5,5,20,29` to the full grading without using cardinality equality
+  as a substitute for the orbit comparison.
+- `RationalPointsN25QuotientTwoMiddleRiemannRoch.lean` now exports the binary
+  `#Pic^0 = 71` consumer on this full grading.  Its remaining inputs are still
+  the actual divisor-class quotient, complete linear systems, residual
+  duality, and Riemann--Roch; the theorem does not manufacture those inputs.
+- `CurveDedekindDivisor.lean` packages Mathlib's Dedekind factorization as an
+  affine height-one-prime divisor map for nonzero fractional ideals and an
+  additive principal-divisor map from `Kˣ`.  It is intentionally not called
+  a global projective divisor map: the chart-prime/closed-point comparison,
+  points at infinity, and projective product formula are not yet proved.
+- `RationalPointsN25QuotientTwoHyperplaneArtinLocal.lean` now includes the
+  reduced `Z` point as well as the former `W` and `YZ` Artin presentations.
+  The three localized quotient rings are respectively equivalent to binary
+  vector spaces of dimensions `2`, `1`, and `3`, and their `F₂`-module
+  lengths are proved to be `2`, `1`, and `3`.  These statements are not yet
+  local-ring or stalk intersection lengths; that scalar/localization bridge
+  remains explicit work.
+- `CurveZetaMiddleRiemannRoch.lean` converts projectivizations of finite
+  section spaces into complete-linear-system fibre cardinalities.  The N25
+  binary consumer can therefore take geometric projectivization equivalences
+  and finite-field dimensions instead of assuming bare fibre counts.
+- The next exact seam is global principal divisors on
+  `fullClosedPointGrading25Two`: compare affine height-one primes and stalk
+  orders with degreewise Frobenius orbit classes, account for infinity, and
+  prove the product formula/degree-zero theorem before instantiating Picard
+  and Riemann--Roch.

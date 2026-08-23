@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.CurveZetaEffectiveDivisors
+import FLT.Assumptions.MazurProof.CurveDedekindDivisor
 
 /-!
 # Divisor classes from graded closed points

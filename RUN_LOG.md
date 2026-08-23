@@ -1951,3 +1951,67 @@
   counterexample report exactly `propext`, `Classical.choice`, and
   `Quot.sound`.
 - end: `[MZ-N13-SPREADLINE-COUNTEREXAMPLE]` proved
+
+## Run 2026-08-22 (N25 full binary closed points and divisor interfaces)
+
+- doctrine version: `abc391991483845d125301317010784dc6e6a9de669f7e6ad54a36cdda5b439c`
+- approval: Xiang's instruction to continue the autonomous FLT campaign,
+  keep ChatGPT saturated on hard mathematical/design questions, verify every
+  claim locally, and continue past individual item boundaries
+- starting avenue: consume the completed binary differential-sheaf
+  comparison at the divisor/Picard/Riemann--Roch frontier without treating
+  the fixed common field as a global closed-point carrier
+- result: `RationalPointsN25QuotientTwoFullClosedPoints.lean` constructs a
+  locally finite closed-point grading in every degree from exact-period
+  arithmetic-Frobenius orbits over `CommonField 2 d`.  Coherent embeddings
+  into the degree-twelve field commute with Frobenius, preserve minimal
+  periods, descend through the exact-orbit quotient, and give structural
+  equivalences with the former common-field grading in degrees one through
+  four.  The semantic point-count bridge is transported through bounded
+  atoms and intrinsic ghost slots to the full grading.
+- result: `RationalPointsN25QuotientTwoClosedPointChart.lean` defines the
+  first-nonzero-coordinate pivot of a normalized projective point and proves
+  it invariant under base change, Frobenius, and every Frobenius iterate.
+  The pivot descends to positive-degree full closed-point orbits and defines
+  the four canonical pivot strata needed for the point-to-chart-prime map.
+- result: the binary middle-degree consumer now derives `#Pic^0 = 71` on the
+  full degreewise grading.  `CurveZetaMiddleRiemannRoch.lean` also converts
+  complete-linear-system/projectivization equivalences and finite section
+  dimensions into the required fibre-cardinality formula, so a bare fibre
+  count need not be assumed.
+- result: `CurveDedekindDivisor.lean` packages Dedekind fractional-ideal
+  factorization as affine height-one-prime divisors.  The divisor map is
+  multiplicative and injective on nonzero fractional ideals, and principal
+  fractional ideals give an additive map from `Kˣ`.  This remains explicitly
+  affine: no points at infinity or projective product formula are claimed.
+- result: `RationalPointsN25QuotientTwoHyperplaneArtinLocal.lean` adds the
+  reduced `Z` quotient and proves the three explicit localized quotients have
+  `F₂`-module lengths `2`, `1`, and `3`.  The new generic
+  `CurveLocalIntersectionLength.lean` exposes the residue-field-length-one
+  hypothesis required to convert a ground-field quotient length into a
+  local-ring length; the present three results are not mislabeled as stalk
+  intersection multiplicities.
+- exact residual: construct `chartQuotientEval` on each canonical pivot,
+  prove Frobenius invariance of its kernel, descend the kernel to a nonzero
+  height-one chart prime, and prove its residue degree equals the orbit
+  degree.  Then pull back `FractionalIdeal.count` to a finitely supported
+  global principal-divisor coefficient map, add the boundary points, and
+  prove the genuine projective degree-zero product formula.
+- ChatGPT: Q6250 and Q6251 independently rejected the bounded common-field
+  grading as a global divisor carrier and found no pinned turnkey projective
+  divisor/Riemann--Roch API.  Q6256 audited the exact length transport.  Q6258
+  supplied the degreewise field/orbit comparison architecture, which was
+  corrected and compiled locally.  Q6264 identified the canonical pivot and
+  point-to-chart-prime route; Q6265 isolated the AtPrime quotient and residue
+  field factor needed before the Artin lengths become local orders.  Q6260
+  failed all connectors and was not used.  All accepted API claims were
+  checked against the pinned source before formalization.
+- verification: direct strict compilation passes for the canonical-pivot,
+  full closed-point, generic local-length, Artin-local, projectivization, and
+  middle-Riemann--Roch modules.  The integrated 8608-job target build passes.
+  Fresh axiom audits of Frobenius semiconjugacy, orbit-class equivalence, the
+  full closed-point bridge, the full-grading `71` consumer, the affine
+  principal-divisor map, and all three `F₂`-length theorems report exactly
+  `propext`, `Classical.choice`, and `Quot.sound`.
+- end: `[MZ-N25-FULL-CLOSED-POINTS]` and
+  `[MZ-N25-AFFINE-DIVISOR-FIRST-ATOMS]` proved

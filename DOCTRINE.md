@@ -40,11 +40,17 @@ Euler recurrence, and middle-degree Riemann--Roch reduces the local order
 over `F_(3^12)` and fixed-subfield descent now prove all four required
 point-orbit classifications through degree four.  This finite common field
 is used only for those degrees, not as a model of closed points of arbitrary
-degree.  The remaining local seam is therefore to package smooth proper
-genus-four special fibres, identify the orbit-defined effective divisors
-with their actual geometric divisors, construct the Picard/Riemann--Roch
-interfaces, repeat the orbit construction in characteristic two, and obtain
-both local Picard cardinalities.
+degree.  In characteristic two, the full degreewise carrier is now built
+instead from exact-period Frobenius orbits over `F_(2^d)` for every positive
+degree `d`.  Coherent field embeddings preserve least periods and descend to
+orbit-class equivalences, so this full grading agrees structurally with the
+former common-field grading through degrees one to four and inherits the
+verified semantic point-count bridge.  The binary class-number consumer now
+runs on this full grading.  The remaining local seam is therefore to identify
+these orbit-defined closed points with scheme points, construct the global
+principal-divisor/Picard and complete-linear-system interfaces, prove the
+geometric Riemann--Roch input, and build the analogous full carrier in
+characteristic three before obtaining both local Picard cardinalities.
 The global seam needs rational rank zero and two good reductions: reduction
 at two alone does not exclude two-primary torsion.
 The leading candidates use either the degree-two map from `X_1(25)` or its
@@ -83,11 +89,16 @@ possible hidden `D`-torsion or boundary component and makes the explicit
 principal-open equivalence a sound foundation for the common function
 field.
 
-The next missing layer is divisor theory on that integral chart: height-one
-valuations, principal divisors, and the bridge to class-indexed
-Riemann--Roch fibres.  Mathlib currently has no turnkey
-curve-divisor/product-formula API, so this must be built from the available
-commutative-algebra interfaces.
+The affine Dedekind-domain divisor layer is now explicit: fractional ideals
+map to finitely supported height-one-prime divisors, the map is multiplicative
+and injective on nonzero ideals, and nonzero rational functions define an
+additive principal-divisor map into this affine carrier.  This is not yet the
+projective curve divisor theory.  The next missing layer is the bridge from
+height-one primes and local orders on the affine charts to the full
+degreewise Frobenius closed-point grading, together with the points at
+infinity and the projective product formula.  Mathlib currently has no
+turnkey curve-divisor/product-formula API, so the comparison must be built
+from the available commutative-algebra interfaces.
 
 The ambient Koszul-to-curve seam is closed.  Vertical-open Beck--Chevalley
 base change now permits arbitrary horizontal morphisms, so it applies to the
@@ -249,11 +260,14 @@ The next ranked canonical-geometry attacks are:
    scheme-relative differential sheaf with the effective curve hyperplane
    twist and closing `[MZ-N25-RELATIVE-DIFFERENTIAL-GLOBAL]`.
    It does not construct a dualizing sheaf or discharge the N25 endpoint.
-   The next exact seam is to feed this line-bundle identification into the
-   height-one divisor, Picard, and middle-degree Riemann--Roch interfaces;
-2. build the missing height-one valuation/principal-divisor layer on the
-   proved integral chart, including the common-function-field interface
-   needed by the class-indexed middle-degree Riemann--Roch consumer.
+   The line-bundle identification is now consumed by projectivization-based
+   complete-linear-system interfaces, but their geometric section-space
+   realizations remain to be supplied;
+2. extend the new affine Dedekind principal-divisor map to the projective
+   curve: identify chart height-one primes with the full degreewise
+   Frobenius closed points, add the missing points at infinity, prove the
+   product formula/degree-zero theorem, and feed that subgroup into the
+   full-grading Picard and middle-degree Riemann--Roch consumer.
 
 ### (b) N13 concrete specialization and separatedness — ACTIVE
 

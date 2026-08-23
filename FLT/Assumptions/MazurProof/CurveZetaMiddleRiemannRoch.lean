@@ -1,5 +1,6 @@
 import FLT.Assumptions.MazurProof.CurveZetaClassNumber
 import FLT.Assumptions.MazurProof.CurveDivisorPicard
+import Mathlib.LinearAlgebra.Projectivization.Cardinality
 
 /-!
 # The middle-degree Riemann--Roch class-number identity
@@ -29,6 +30,7 @@ namespace MazurProof.CurveZetaMiddleRiemannRoch
 
 open CurveZetaClassNumber
 open scoped BigOperators
+open scoped LinearAlgebra.Projectivization
 
 /-! ## Finite fibre partitions -/
 
@@ -54,6 +56,30 @@ theorem linearSystemCard_succ (q r : ℕ) :
     linearSystemCard q (r + 1) = 1 + q * linearSystemCard q r := by
   simp only [linearSystemCard, geom_sum_succ]
   omega
+
+/-- The abstract cardinal `linearSystemCard q r` is the number of lines in
+an `r`-dimensional vector space over a field with `q` elements.  This is the
+linear-algebra bridge used when a geometric complete linear system has been
+identified with nonzero global sections modulo scalar multiplication. -/
+theorem projectivization_card_eq_linearSystemCard
+    {k V : Type*} [Field k] [Finite k] [AddCommGroup V] [Module k V]
+    (q r : ℕ) (hq : Nat.card k = q) (hr : Module.finrank k V = r) :
+    Nat.card (ℙ k V) = linearSystemCard q r := by
+  rw [Projectivization.card_of_finrank k V hr]
+  simp only [linearSystemCard, hq]
+
+/-- A geometric identification of the effective divisors in one Picard fibre
+with the projectivization of its section space supplies exactly the fibre
+cardinality required by the middle-degree Riemann--Roch count. -/
+theorem fiber_card_eq_linearSystemCard_of_equiv_projectivization
+    {Effective Pic k V : Type*}
+    [Field k] [Finite k] [AddCommGroup V] [Module k V]
+    (classMap : Effective → Pic) (c : Pic)
+    (sections : {D : Effective // classMap D = c} ≃ ℙ k V)
+    (q r : ℕ) (hq : Nat.card k = q) (hr : Module.finrank k V = r) :
+    Nat.card {D : Effective // classMap D = c} = linearSystemCard q r := by
+  rw [Nat.card_congr sections]
+  exact projectivization_card_eq_linearSystemCard q r hq hr
 
 /-! ## Summed middle-degree Riemann--Roch -/
 
@@ -95,6 +121,41 @@ theorem effective_card_middle_degree
   rw [card_eq_sum_fiber_card classLow]
   simp_rw [hLowFiber]
   simp only [Nat.cast_id]
+
+/-- The middle-degree count with complete linear systems supplied as actual
+projectivizations of section spaces.  This removes the independent fibre-cardinality
+hypotheses: their geometric-series cardinalities follow from finite-dimensional
+linear algebra over the ground field. -/
+theorem effective_card_middle_degree_of_projectivizations
+    {k PicHigh PicLow EffectiveHigh EffectiveLow : Type*}
+    [Field k] [Finite k]
+    [Fintype PicHigh] [Finite EffectiveHigh] [Finite EffectiveLow]
+    (classHigh : EffectiveHigh → PicHigh)
+    (classLow : EffectiveLow → PicLow)
+    (residual : PicHigh ≃ PicLow)
+    (SectionsHigh : PicHigh → Type*) (SectionsLow : PicLow → Type*)
+    [∀ c, AddCommGroup (SectionsHigh c)] [∀ c, Module k (SectionsHigh c)]
+    [∀ c, AddCommGroup (SectionsLow c)] [∀ c, Module k (SectionsLow c)]
+    (completeHigh : ∀ c,
+      {D : EffectiveHigh // classHigh D = c} ≃ ℙ k (SectionsHigh c))
+    (completeLow : ∀ c,
+      {D : EffectiveLow // classLow D = c} ≃ ℙ k (SectionsLow c))
+    (q : ℕ) (hq : Nat.card k = q)
+    (hRR : ∀ c,
+      Module.finrank k (SectionsHigh c) =
+        Module.finrank k (SectionsLow (residual c)) + 1) :
+    Nat.card EffectiveHigh =
+      Fintype.card PicHigh + q * Nat.card EffectiveLow := by
+  apply effective_card_middle_degree classHigh classLow residual
+    (fun c ↦ Module.finrank k (SectionsHigh c))
+    (fun c ↦ Module.finrank k (SectionsLow c)) q
+  · intro c
+    exact fiber_card_eq_linearSystemCard_of_equiv_projectivization
+      classHigh c (completeHigh c) q (Module.finrank k (SectionsHigh c)) hq rfl
+  · intro c
+    exact fiber_card_eq_linearSystemCard_of_equiv_projectivization
+      classLow c (completeLow c) q (Module.finrank k (SectionsLow c)) hq rfl
+  · exact hRR
 
 /-- Translating degree-`g` Picard classes to degree zero turns the middle
 Riemann--Roch count into the usual class-number identity.  For N25 the inputs

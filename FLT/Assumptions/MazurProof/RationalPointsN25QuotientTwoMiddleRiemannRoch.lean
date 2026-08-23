@@ -1,6 +1,6 @@
 import FLT.Assumptions.MazurProof.CurveZetaEulerRecurrence
 import FLT.Assumptions.MazurProof.CurveZetaMiddleRiemannRoch
-import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoFrobeniusOrbits
+import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoFullClosedPoints
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoCanonicalDivisor
 
 /-!
@@ -27,7 +27,9 @@ open CurveZetaEulerRecurrence
 open CurveZetaMiddleRiemannRoch
 open CurveZetaPointOrbitClassification
 open RationalPointsN25QuotientTwoFrobeniusOrbits
+open RationalPointsN25QuotientTwoFullClosedPoints
 open RationalPointsN25QuotientTwoCanonicalDivisor
+open scoped LinearAlgebra.Projectivization
 
 namespace ClosedPointBridge25TwoLE4
 
@@ -150,6 +152,33 @@ theorem picardZero_card_eq_seventy_one_of_two_frobenius_and_middle_rr
     classFour classTwo residual rankFour rankTwo hFourFiber hTwoFiber hRR
     hPicard
 
+/-- The binary N25 class-number conclusion on the full degreewise
+closed-point grading.  Unlike the common degree-twelve carrier, this grading
+contains closed points in every residue degree and can therefore support the
+eventual global divisor theory. -/
+theorem picardZero_card_eq_seventy_one_of_two_full_closed_points_and_middle_rr
+    {PicZero PicFour PicTwo : Type*}
+    [Fintype PicZero] [Fintype PicFour]
+    (classFour : fullClosedPointGrading25Two.EffDivOfDegree 4 → PicFour)
+    (classTwo : fullClosedPointGrading25Two.EffDivOfDegree 2 → PicTwo)
+    (residual : PicFour ≃ PicTwo)
+    (rankFour : PicFour → ℕ) (rankTwo : PicTwo → ℕ)
+    (hFourFiber : ∀ c,
+      Nat.card {D : fullClosedPointGrading25Two.EffDivOfDegree 4 //
+        classFour D = c} =
+          CurveZetaClassNumber.linearSystemCard 2 (rankFour c))
+    (hTwoFiber : ∀ c,
+      Nat.card {D : fullClosedPointGrading25Two.EffDivOfDegree 2 //
+        classTwo D = c} =
+          CurveZetaClassNumber.linearSystemCard 2 (rankTwo c))
+    (hRR : ∀ c, rankFour c = rankTwo (residual c) + 1)
+    (hPicard : Fintype.card PicFour = Fintype.card PicZero) :
+    Fintype.card PicZero = 71 := by
+  exact picardZero_card_eq_seventy_one_of_two_closed_points_and_middle_rr
+    fullClosedPointGrading25Two fullClosedPointBridge25TwoLE4
+    classFour classTwo residual rankFour rankTwo hFourFiber hTwoFiber hRR
+    hPicard
+
 /-- The characteristic-two class-number conclusion on the actual divisor
 class quotient of the Frobenius closed-point grading.
 
@@ -258,5 +287,55 @@ theorem picardZero_card_eq_seventy_one_of_two_hyperplane_rr
     (basePointClass_degree Principal hPrincipal)
     (hyperplaneSectionClass_degree Principal hPrincipal)
     rankFour rankTwo hFourFiber hTwoFiber hRR
+
+/-- The binary hyperplane consumer with complete linear systems presented as
+projectivizations of their section spaces.  The cardinality of each fibre is
+therefore a theorem of finite-field linear algebra rather than a separate
+geometric hypothesis. -/
+theorem picardZero_card_eq_seventy_one_of_two_hyperplane_sections
+    (Principal : AddSubgroup frobeniusOrbitGrading25TwoLE4.Divisor)
+    (hPrincipal :
+      Principal ≤ frobeniusOrbitGrading25TwoLE4.divisorDegree.ker)
+    [Fintype
+      (frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 0)]
+    (SectionsFour :
+      frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 4 → Type*)
+    (SectionsTwo :
+      frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 2 → Type*)
+    [∀ c, AddCommGroup (SectionsFour c)]
+    [∀ c, Module (ZMod 2) (SectionsFour c)]
+    [∀ c, AddCommGroup (SectionsTwo c)]
+    [∀ c, Module (ZMod 2) (SectionsTwo c)]
+    (completeFour : ∀ c,
+      {D : frobeniusOrbitGrading25TwoLE4.EffDivOfDegree 4 //
+        frobeniusOrbitGrading25TwoLE4.effectiveClass
+          Principal hPrincipal 4 D = c} ≃ ℙ (ZMod 2) (SectionsFour c))
+    (completeTwo : ∀ c,
+      {D : frobeniusOrbitGrading25TwoLE4.EffDivOfDegree 2 //
+        frobeniusOrbitGrading25TwoLE4.effectiveClass
+          Principal hPrincipal 2 D = c} ≃ ℙ (ZMod 2) (SectionsTwo c))
+    (hRR : ∀ c,
+      Module.finrank (ZMod 2) (SectionsFour c) =
+        Module.finrank (ZMod 2)
+          (SectionsTwo
+            (frobeniusOrbitGrading25TwoLE4.residualDegreeFourTwo
+              Principal hPrincipal
+              (hyperplaneSectionClass Principal hPrincipal)
+              (hyperplaneSectionClass_degree Principal hPrincipal) c)) + 1) :
+    Fintype.card
+      (frobeniusOrbitGrading25TwoLE4.PicDegree Principal hPrincipal 0) = 71 := by
+  apply picardZero_card_eq_seventy_one_of_two_hyperplane_rr
+    Principal hPrincipal
+    (fun c ↦ Module.finrank (ZMod 2) (SectionsFour c))
+    (fun c ↦ Module.finrank (ZMod 2) (SectionsTwo c))
+  · intro c
+    exact fiber_card_eq_linearSystemCard_of_equiv_projectivization
+      _ c (completeFour c) 2 (Module.finrank (ZMod 2) (SectionsFour c))
+      (by simp) rfl
+  · intro c
+    exact fiber_card_eq_linearSystemCard_of_equiv_projectivization
+      _ c (completeTwo c) 2 (Module.finrank (ZMod 2) (SectionsTwo c))
+      (by simp) rfl
+  · exact hRR
 
 end MazurProof.RationalPointsN25QuotientMiddleRiemannRoch
