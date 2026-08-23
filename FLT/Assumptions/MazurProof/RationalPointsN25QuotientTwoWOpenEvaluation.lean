@@ -36,6 +36,17 @@ structure CurvePointOnWOpen (K : Type) [Field K] where
   point : CurvePoint canonicalTwoModel K
   w_ne_zero : (normalizedCoordinates25 point.1).w ≠ 0
 
+/-- Points of the `W` open are equal when their underlying curve points are
+equal; the nonvanishing field is proof-irrelevant. -/
+@[ext]
+theorem CurvePointOnWOpen.ext
+    {K : Type} [Field K] {P Q : CurvePointOnWOpen K}
+    (h : P.point = Q.point) : P = Q := by
+  cases P
+  cases Q
+  cases h
+  rfl
+
 /-- The fixed affine coordinate ring used for the `W != 0` open. -/
 abbrev WChartQuotient := ChartQuotient (3 : Fin 4)
 

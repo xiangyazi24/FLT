@@ -2138,3 +2138,38 @@
   exact-period W-open capstones report exactly `propext`, `Classical.choice`,
   and `Quot.sound`.
 - end: `[MZ-N25-W-OPEN-CLOSED-POINTS]` proved
+
+## Run 2026-08-22 (N25 W-boundary and orbit-prime descent)
+
+- doctrine version: `4933cf95ecd6429af1ad50995ab78087b2f7068e194c1de530f085746e62df66`
+- starting avenue: descend fixed-`W` evaluation kernels from exact-period
+  representatives to full closed points and close the complementary boundary
+  support without conflating residue degree with local intersection length
+- result: `RationalPointsN25QuotientTwoWBoundaryClosedPoints.lean` proves that
+  the geometric `W = 0` locus consists exactly of `[1:0:0:0]`,
+  `[0:1:1:0]`, and `[0:0:1:0]` over every characteristic-two field.  Each is
+  Frobenius fixed, so an exact-period point on the boundary has degree one;
+  all three prime-field points are packaged as degree-one atoms of the full
+  closed-point grading.
+- result: `RationalPointsN25QuotientTwoWOpenOrbitPrime.lean` proves that
+  Frobenius-related exact-period representatives have equal fixed-chart
+  evaluation kernels.  Quotient descent therefore attaches a
+  representative-independent nonzero height-one maximal ideal to every
+  full closed point of degree greater than one, and its residue ring has
+  cardinality exactly `2^d` in degree `d`.
+- correction: the `W = 0` boundary has three rational support points, not
+  two.  The point `[1:0:0:0]` is absent only from the separate `x = 0`
+  hyperplane section.  Existing `x = 0` lengths therefore cannot be reused
+  as `W = 0` local orders.
+- ChatGPT: Q6304 independently detected the third boundary point and its
+  degree-one status; both claims were derived and compiled locally.  Q6310,
+  Q6311, and Q6312 are auditing the predicted `W = 0` local lengths, the
+  global carrier, and the full boundary/open partition respectively.
+- verification: strict source compilation and the integrated 8633-job target
+  build pass.  Fresh axiom audits of boundary classification, exact-period
+  exclusion, orbit-kernel invariance, descended height one, and exact residue
+  cardinality report exactly `propext`, `Classical.choice`, and `Quot.sound`.
+- exact residual: formalize the `W = 0` local lengths, assemble open primes
+  and the three boundary atoms in one projective divisor carrier, compare
+  local orders, and prove the projective degree-zero product formula.
+- end: `[MZ-N25-W-BOUNDARY-ORBIT-PRIMES]` proved

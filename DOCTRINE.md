@@ -100,9 +100,11 @@ is canonically the finite coordinate-generated subring of the ambient finite
 field and hence is itself a field.  The coordinate field degree is now proved
 equal to the point's exact Frobenius period, so every full degree-`d` closed
 point has residue cardinality exactly `2^d`, and its descended product-ring
-prime is maximal.  This is not yet the projective curve divisor theory:
-nonzeroness/height one of the selected chart kernel, chart overlap
-identification, points at infinity, and the projective product formula remain.
+prime is maximal.  On the fixed integral `W` chart, all positive-degree
+closed points away from `W = 0` now have nonzero height-one maximal kernels;
+Frobenius invariance descends those kernels through exact-orbit classes.
+This is not yet the projective curve divisor theory: local order comparison,
+the global carrier, and the projective product formula remain.
 Mathlib currently has no turnkey
 curve-divisor/product-formula API, so the comparison must be built from the
 available commutative-algebra interfaces.
@@ -123,11 +125,18 @@ the field tower gives the opposite divisibility.  Thus the evaluation range
 has cardinality `2^d`, and the Kähler witness `b^(2^d)-b` proves its kernel
 nonzero without a domain hypothesis on the source.  Consequently every
 positive-degree closed point on `W ≠ 0` now gives a verified nonzero
-height-one maximal ideal with exact residue degree.  The remaining
-closed-point support seam is the complementary `W = 0` boundary, followed by
-the global projective divisor carrier, overlap/order comparison, and product
-formula; boundary intersection lengths must remain distinct from residue
-degrees.
+height-one maximal ideal with exact residue degree.  This construction is
+representative-independent: Frobenius-related exact-period points have equal
+evaluation kernels, so the prime and residue ring are defined directly on
+the full closed-point orbit.  The complementary `W = 0` boundary is exactly
+the three prime-field points `[1:0:0:0]`, `[0:1:1:0]`, and `[0:0:1:0]`.
+Every boundary point is Frobenius fixed, hence an exact-period boundary point
+has degree one; all three points are now packaged as atoms of the full
+closed-point grading.  The remaining seam is to identify the `W = 0`
+hyperplane local orders (predicted multiplicities `3,1,2` at these three
+points), assemble the global projective divisor carrier, compare orders on
+overlaps, and prove the product formula.  These intersection multiplicities
+remain logically distinct from the already proved residue degrees.
 
 The ambient Koszul-to-curve seam is closed.  Vertical-open Beck--Chevalley
 base change now permits arbitrary horizontal morphisms, so it applies to the
