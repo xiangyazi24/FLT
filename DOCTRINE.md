@@ -107,6 +107,28 @@ Mathlib currently has no turnkey
 curve-divisor/product-formula API, so the comparison must be built from the
 available commutative-algebra interfaces.
 
+The closed-point comparison now uses the single integral `w = 1` chart
+rather than requiring integrality of all four canonical-pivot charts.  Its
+plane principal open has dimension at most one by integral extension from
+`F₂[z]`, while its finite projection boundary is zero-dimensional; hence the
+whole chart has dimension at most one.  The rational point `[0:0:0:1]`
+shows that this chart is not a field, so all of its maximal ideals are
+nonzero and have height one.  Every projective curve point with `W ≠ 0`
+now evaluates on this fixed chart after division by its canonical
+representative's `W` coordinate.  The evaluation is natural under
+coefficient-field equivalences and Frobenius.  For an exact-period degree-`d`
+point, the three `W`-ratios generate a field of binary degree exactly `d`:
+fixing the ratios fixes the first-nonzero normalized representative, while
+the field tower gives the opposite divisibility.  Thus the evaluation range
+has cardinality `2^d`, and the Kähler witness `b^(2^d)-b` proves its kernel
+nonzero without a domain hypothesis on the source.  Consequently every
+positive-degree closed point on `W ≠ 0` now gives a verified nonzero
+height-one maximal ideal with exact residue degree.  The remaining
+closed-point support seam is the complementary `W = 0` boundary, followed by
+the global projective divisor carrier, overlap/order comparison, and product
+formula; boundary intersection lengths must remain distinct from residue
+degrees.
+
 The ambient Koszul-to-curve seam is closed.  Vertical-open Beck--Chevalley
 base change now permits arbitrary horizontal morphisms, so it applies to the
 closed curve immersion.  On each standard chart the explicit equation

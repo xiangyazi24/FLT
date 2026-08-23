@@ -2085,3 +2085,56 @@
   and both maximality theorems report exactly `propext`, `Classical.choice`,
   and `Quot.sound`.  The endpoint axiom list is unchanged.
 - end: `[MZ-N25-CLOSED-POINT-RESIDUE-DEGREE]` proved
+
+## Run 2026-08-22 (N25 fixed W-open closed-point primes)
+
+- starting avenue: avoid proving all four canonical-pivot chart rings
+  integral by sending every projective point with `W ≠ 0` to the already
+  integral `w = 1` chart, and prove exact residue degree and height there
+- result: `RationalPointsN25QuotientTwoPlaneChartDimension.lean` proves the
+  plane principal open has dimension at most one by integral extension from
+  `F₂[z]`; the finite projection boundary is zero-dimensional, so every
+  maximal ideal of the full integral `w = 1` chart has height at most one and
+  every nonzero prime has height exactly one.
+- result: `RationalPointsN25QuotientTwoClosedPointKernelNonzero.lean` packages
+  the Frobenius/Kähler argument generically.  A rank-one equivalence
+  `Ω¹_{B/F₂} ≃ B` supplies `b` with `db ≠ 0`; for a finite evaluation
+  range of cardinality `2^d`, `b^(2^d)-b` is nonzero but lies in the kernel.
+  Applied to every positive exact-period canonical-pivot point, this proves
+  its chart evaluation kernel nonzero without assuming that chart is a
+  domain.
+- result: `RationalPointsN25QuotientTwoWOpenEvaluation.lean` defines points on
+  the geometric open `W ≠ 0`, divides their canonical normalized coordinates
+  by `W`, verifies the homogeneous equations after scaling, and factors
+  evaluation through the fixed quotient `ChartQuotient 3`.  Coefficient-field
+  equivalences preserve both the normalized ratios and the evaluation kernel.
+- result: `RationalPointsN25QuotientTwoWOpenResidueDegree.lean` proves that
+  fixing all `W`-ratios fixes the underlying first-nonzero normalized point.
+  Exact period and the finite-field tower then force the ratio coordinate
+  field degree to equal `d`, so the fixed-chart evaluation range has exactly
+  `2^d` elements.
+- result: `RationalPointsN25QuotientTwoPlaneChartClosedPoints.lean` uses
+  `[0:0:0:1]` to prove the integral `w = 1` chart is not a field.  Hence every
+  maximal ideal is nonzero and height one.  Every finite-field `W`-open point
+  defines such a maximal ideal, and every positive exact-period point has the
+  combined exact residue-cardinality, nonzero-kernel, maximality, and
+  height-one interface.
+- exact residual: classify the complementary `W = 0` closed points and attach
+  the already proved hyperplane local lengths without confusing intersection
+  multiplicity with residue degree.  Then build the projective divisor
+  carrier, compare local orders across overlaps, and prove the degree-zero
+  product formula.
+- ChatGPT: Q6286 ruled out a turnkey smooth-dimension-one height API; Q6287
+  identified the hidden-component obstruction to treating all four charts as
+  domains; Q6288 and Q6291 supplied the Kähler/Frobenius kernel witness; Q6296
+  supplied the fixed `W`-open evaluation architecture; Q6303 independently
+  confirmed the exact-period ratio-field route.  All accepted API claims were
+  compiled against the pinned local source.  Q6293 and Q6295 had not landed;
+  Q6304 was dispatched for the complementary `W = 0` support classification.
+- verification: strict direct compilation passes for all five new modules.
+  The integrated 8631-job target build passes.  Fresh axiom audits of
+  field-equivalence kernel invariance, ratio period detection, exact range
+  cardinality, the generic Kähler kernel theorem, chart height one, and both
+  exact-period W-open capstones report exactly `propext`, `Classical.choice`,
+  and `Quot.sound`.
+- end: `[MZ-N25-W-OPEN-CLOSED-POINTS]` proved
