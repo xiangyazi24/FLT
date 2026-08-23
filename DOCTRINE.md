@@ -133,10 +133,20 @@ the three prime-field points `[1:0:0:0]`, `[0:1:1:0]`, and `[0:0:1:0]`.
 Every boundary point is Frobenius fixed, hence an exact-period boundary point
 has degree one; all three points are now packaged as atoms of the full
 closed-point grading.  The remaining seam is to identify the `W = 0`
-hyperplane local orders (predicted multiplicities `3,1,2` at these three
-points), assemble the global projective divisor carrier, compare orders on
-overlaps, and prove the product formula.  These intersection multiplicities
-remain logically distinct from the already proved residue degrees.
+hyperplane local orders, assemble the global projective divisor carrier,
+compare orders on overlaps, and prove the product formula.  The finite local
+algebra is now explicit: isolating affine equation quotients at `X`, `YZ`,
+and `Z` are respectively `F₂[t]/(t³)`, `F₂`, and `F₂[t]/(t²)`, with
+ground-field lengths `3,1,2`.  These coefficients form a degree-six effective
+cycle on the full grading.  They are not yet called stalk intersection
+orders: that requires the explicit equivalence between each curve local-ring
+quotient by the `W` germ and the corresponding Artin quotient.  Degree-one
+closed orbits are now equivalent to prime-field points, and every full atom
+is either one of the three boundary atoms or carries fixed-`W` nonzero
+height-one maximal-prime data with exact residue cardinality.  The remaining
+global-carrier seam additionally requires injectivity of the nonboundary
+closed-point-to-chart-prime map, followed by stalk order comparison and the
+projective product formula.
 
 The ambient Koszul-to-curve seam is closed.  Vertical-open Beck--Chevalley
 base change now permits arbitrary horizontal morphisms, so it applies to the

@@ -2173,3 +2173,45 @@
   and the three boundary atoms in one projective divisor carrier, compare
   local orders, and prove the projective degree-zero product formula.
 - end: `[MZ-N25-W-BOUNDARY-ORBIT-PRIMES]` proved
+
+## Run 2026-08-22 (N25 W-boundary Artin factors and full partition)
+
+- doctrine version: `fca89e932ff541a5cf19104900057ced281bc2e72d10751f8044253a5ea3a25a`
+- starting avenue: compute all three `W = 0` scheme-theoretic factors and
+  extend the fixed-chart prime interface across the two degree-one points on
+  `W != 0`
+- result: `RationalPointsN25QuotientTwoWBoundaryArtinLocal.lean` gives exact
+  principal-open equation-quotient presentations at the three boundary
+  points.  At `X=[1:0:0:0]` the quotient is `F₂[t]/(t³)`; at
+  `Z=[0:0:1:0]` it is `F₂[t]/(t²)`; at `YZ=[0:1:1:0]` it is `F₂`.
+  Their ground-field lengths are `3,2,1`, and the associated full-grading
+  effective cycle has degree six.
+- result: the degree-one orbit map is proved bijective, giving an equivalence
+  between semantic `F₂` curve points and full degree-one closed points.  The
+  three boundary atoms are pairwise distinct.
+- result: `RationalPointsN25QuotientTwoClosedPointPartition.lean` defines the
+  nonboundary atom subtype.  Every such atom, including degree one, carries
+  a nonzero height-one maximal ideal on the integral `w = 1` chart whose
+  residue cardinality is exactly `2^d`; every full atom is therefore boundary
+  or has this chart-prime certificate.
+- semantic boundary: the numbers `3,2,1` are presently proved as lengths of
+  explicit affine/principal-open equation quotients.  They will become honest
+  local intersection orders only after constructing the curve-stalk quotient
+  equivalences.  They remain distinct from the residue degree, which is one
+  at all three boundary points.
+- ChatGPT: Q6310 independently derived and checked the three Artin factors.
+  Q6311 separated the global Finsupp carrier from the product formula.  Q6312
+  caught the two missing degree-one `W`-open atoms and supplied the total
+  partition architecture.  Q6314 found the explicit quartic finite-map/norm
+  route to the product formula.  Q6317 isolated the precise remaining stalk
+  equivalence needed before the Artin lengths can be called local orders.
+  Every used declaration and proof was checked locally.
+- verification: strict source compilation and the integrated 8635-job target
+  build pass.  Fresh axiom audits of degree-one orbit bijectivity, all three
+  Artin lengths, the degree-six cycle, and the total atom partition report
+  exactly `propext`, `Classical.choice`, and `Quot.sound`.
+- exact residual: prove injectivity of the nonboundary atom-to-chart-prime
+  map, construct `O_{C,P}/(W)` equivalences with the three Artin factors, and
+  use the finite quartic `z`-map/norm calculation to prove the projective
+  degree-zero product formula.
+- end: `[MZ-N25-W-BOUNDARY-ARTIN-PARTITION]` proved
