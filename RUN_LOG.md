@@ -2215,3 +2215,41 @@
   use the finite quartic `z`-map/norm calculation to prove the projective
   degree-zero product formula.
 - end: `[MZ-N25-W-BOUNDARY-ARTIN-PARTITION]` proved
+
+## Run 2026-08-22 (N25 actual X-boundary quotient and W-open prime injectivity)
+
+- doctrine version: `bef1fbdaec5f6f35a404c2b6f512a969c0e3d6d6f001c31bffd57956c1f48910`
+- starting avenue: replace the isolated boundary equation calculation by an
+  actual curve-chart quotient and prove that the representative-independent
+  fixed-`W` prime separates all nonboundary closed-point atoms
+- result: `RationalPointsN25QuotientTwoWBoundaryChartArtin.lean` computes the
+  quotient of the actual `X != 0` curve chart by `W/X`.  The curve relations
+  give `Z/X = (Y/X)^2` and `(Y/X)^3 = 0`; explicit inverse algebra maps identify
+  the quotient with `F₂[t]/(t³)`, so its `F₂`-length is three.
+- result: `RationalPointsN25QuotientTwoWOpenOrbitPrimeInjective.lean` proves
+  that exact-period fixed-chart evaluations are surjective.  Equal kernels
+  therefore differ by a finite-field automorphism, hence by a Frobenius
+  power; equality of the three `W`-normalized coordinates recovers the exact
+  Frobenius orbit.  Residue cardinality recovers the degree, and a separate
+  `F₂` argument handles degree one, yielding injectivity of
+  `fullNonBoundaryPrimeIdeal` on every nonboundary full atom.
+- semantic boundary: the actual `X`-chart quotient is now verified, but the
+  localization map from the stalk at `[1:0:0:0]` and its kernel still have to
+  be constructed before the length-three result is recorded as a local
+  intersection order.  The analogous actual-chart quotient and localization
+  statements at the length-two `Z` point and length-one `YZ` point also remain.
+- ChatGPT: Q6325 and Q6333 supplied the equal-kernel/Frobenius separation
+  architecture; Q6335 audited the degree-one seam after it had been proved
+  locally.  Q6334 supplied the direct `IsLocalization.liftAlgHom` kernel route
+  for the next X-stalk quotient.  Q6339 assigned the remaining Artin factors
+  incorrectly and was rejected against the compiled local factor theorems;
+  Q6340 was dispatched with the corrected targets.
+- verification: strict direct compilation passes for both new modules, and
+  the 8637-job target build passes.  Fresh axiom audits of the actual X-chart
+  equivalence and length, exact-orbit kernel separation, and uniform
+  nonboundary-prime injectivity report exactly `propext`,
+  `Classical.choice`, and `Quot.sound`.
+- exact residual: construct the three curve-stalk quotients by the germs of
+  `W`, prove their Artin equivalences and local lengths, then assemble the
+  global divisor carrier and prove the projective degree-zero product formula.
+- end: `[MZ-N25-W-CHART-PRIME-INJECTIVITY]` proved
