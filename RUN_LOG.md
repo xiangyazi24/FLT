@@ -2253,3 +2253,37 @@
   `W`, prove their Artin equivalences and local lengths, then assemble the
   global divisor carrier and prove the projective degree-zero product formula.
 - end: `[MZ-N25-W-CHART-PRIME-INJECTIVITY]` proved
+
+## Run 2026-08-24 (N25 X-boundary local order)
+
+- doctrine version: `bef1fbdaec5f6f35a404c2b6f512a969c0e3d6d6f001c31bffd57956c1f48910`
+- starting avenue: extend the actual `X`-chart quotient by `W/X` across the
+  localization at the rational point `[1:0:0:0]`, identify the exact kernel,
+  and convert the Artin-factor dimension into local-ring length
+- result: `RationalPointsN25QuotientTwoWBoundaryXLocal.lean` constructs the
+  origin evaluation prime in `ChartQuotient 0`, proves it maximal, and shows
+  that every denominator outside it becomes a unit after quotienting by
+  `W/X`.  A generic localization-kernel theorem identifies the induced
+  kernel with the extended principal ideal.
+- result: the quotient of the actual point local ring by the germ of `W/X`
+  is algebra-equivalent to `F₂[t]/(t³)`.  Localization preserves the
+  degree-one residue field; scalar restriction therefore converts the
+  already computed `F₂`-length three into local-ring length three.
+- semantic endpoint: `xWGerm_ord_eq_three` proves
+  `Ring.ord XLocalRing xWGerm = 3`, so the previously formal Artin length is
+  now the genuine order/intersection multiplicity of `W = 0` at
+  `[1:0:0:0]`.
+- ChatGPT: Q6334 supplied the direct localization-lift kernel architecture,
+  and Q6338 identified `Ring.ord` plus residue-degree scalar restriction as
+  the semantic endpoint.  After usage recovery the local ChatGPT bridge
+  reported no ready `flt` channels, so verification and completion continued
+  locally without duplicate submissions.
+- verification: strict direct compilation passes.  Fresh axiom audits of the
+  point evaluation, localized Artin equivalence, both field and local-ring
+  length statements, and `Ring.ord` endpoint report exactly `propext`,
+  `Classical.choice`, and `Quot.sound`.
+- exact residual: prove the length-two order at `[0:0:1:0]` and length-one
+  order at `[0:1:1:0]`, then assemble the boundary divisor with the injective
+  nonboundary prime carrier and prove the projective degree-zero product
+  formula.
+- end: `[MZ-N25-X-LOCAL-ORDER]` proved
