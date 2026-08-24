@@ -8,9 +8,8 @@ private noncomputable def residueKerCotangentEquiv
     (O : Type*) [CommRing O] [IsLocalRing O] :
     (RingHom.ker (algebraMap O (IsLocalRing.ResidueField O))).Cotangent
       ≃ₗ[O] IsLocalRing.CotangentSpace O := by
-  simpa only [IsLocalRing.ResidueField.algebraMap_eq,
-    IsLocalRing.ker_residue] using
-    (LinearEquiv.refl O (IsLocalRing.CotangentSpace O))
+  rw [IsLocalRing.ResidueField.algebraMap_eq,
+    IsLocalRing.ker_residue]
 
 private noncomputable def conormalMap
     (k O κ : Type*)
