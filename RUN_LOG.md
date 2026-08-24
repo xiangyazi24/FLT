@@ -2468,3 +2468,35 @@
   `F₂[z]`-model with the full closed-point grading and combine the norm
   degree with the already proved infinity pole cycle of total degree four.
 - end: `[MZ-N25-QUARTIC-FUNCTION-FIELD]` proved
+
+## Run 2026-08-24 (N25 finite-place normalization and exact prime norm)
+
+- doctrine version: `bef1fbdaec5f6f35a404c2b6f512a969c0e3d6d6f001c31bffd57956c1f48910`
+- starting avenue: construct the integral closure of `F₂[z]` in the
+  concrete plane function field and recover the exact relative-norm exponent
+  without assuming that the imperfect field `F₂(z)` is perfect
+- result: `RationalPointsN25QuotientTwoPlaneNormalization.lean` defines the
+  finite-place normalization, proves it finite over `F₂[z]`, and packages
+  maximal-prime contraction and lies-over data.  The relative ideal norm is
+  first identified as an unspecified power of the contracted base prime.
+- result: a generic separable replacement for Mathlib's
+  `Ideal.relNorm_eq_pow_of_isMaximal` is proved.  Separability of the original
+  fraction-field extension passes to its normal closure; algebraic closedness
+  supplies normality, hence a Galois normal closure.  Reconstructing the
+  finite and Dedekind instances used in Mathlib's proof yields the exact
+  exponent `inertiaDeg` without the library theorem's stronger
+  `PerfectField` assumption.
+- N25 specialization: the explicit separable quartic equivalence transports
+  separability to the canonical fraction-ring types.  Consequently every
+  maximal finite place `P` satisfies
+  `relNorm(P) = (P ∩ F₂[z])^(inertiaDeg(P ∩ F₂[z], P))`.
+- verification: strict source and import-level `.olean` compilation pass.
+  Fresh axiom audits of the separable normal-closure construction, the exact
+  generic norm theorem, the normalization instances, separability transport,
+  and both N25 norm formulas report exactly `propext`, `Classical.choice`,
+  and `Quot.sound`.
+- exact residual: identify the normalization's maximal ideals with the
+  nonboundary closed-point primes of the smooth `W = 1` chart, transport
+  inertia degrees to the already certified residue degrees, and assemble the
+  finite and three infinite orders into the projective product formula.
+- end: `[MZ-N25-SEPARABLE-RELNORM]` proved
