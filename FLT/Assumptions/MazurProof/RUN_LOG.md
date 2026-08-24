@@ -1278,3 +1278,33 @@
   standard affine cover, and derive
   `ω_C ≅ O_C(1)` and identify the explicit degree-six hyperplane section
   with the canonical divisor.
+
+### N25 W-chart closed-point completeness (2026-08-24)
+
+- Constructed a canonical normalized projective point from every affine
+  solution on the fixed `W = 1` chart.  The proof handles all four possible
+  first-nonzero-coordinate representatives and proves that normalization at
+  `W` recovers the prescribed affine coordinates.
+- For every maximal ideal of the fixed chart ring, proved its residue field
+  finite over `F_2`, identified it with the canonical field `F_(2^d)`, and
+  extracted the three coordinate images.  The quotient relations prove the
+  canonical quadric and cubic equations, so these images define a genuine
+  point of the projective curve on `W != 0`.
+- Proved that evaluation at this reconstructed point is exactly the quotient
+  map followed by the finite-field equivalence.  It is surjective and its
+  kernel is the original maximal ideal.
+- Proved exact Frobenius period `d` without a coordinate-subfield cardinality
+  detour.  If the `n`th iterate fixes the point, evaluation compatibility and
+  surjectivity force the `n`th field Frobenius to be the identity; the order
+  theorem for finite-field Frobenius gives `d | n`.  Conversely, the `d`th
+  iterate is the identity.
+- Handled degree one by transporting the point through
+  `GaloisField.equivZmodP`; degrees greater than one descend directly to an
+  exact Frobenius orbit.  This proves that every maximal chart ideal comes
+  from a unique nonboundary full closed-point atom.
+- Packaged the result as an equivalence between nonboundary atoms and maximal
+  ideals of the fixed chart, and proved that the maximal-ideal residue degree
+  equals the Frobenius atom degree.
+- Strict source checks and the 4011-job full build pass.  The four exported
+  endpoints have the standard axiom set `propext`, `Classical.choice`, and
+  `Quot.sound`.
