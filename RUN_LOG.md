@@ -2535,3 +2535,28 @@
   nonboundary chart prime with its already certified closed-point degree,
   then sum finite orders and combine them with the three infinity orders.
 - end: `[MZ-N25-W-NORMALIZATION-RELNORM]` proved
+
+## Run 2026-08-24 (N25 closed-point inertia-degree bridge)
+
+- starting avenue: compare the certified residue cardinality of each
+  nonboundary closed-point prime with the cardinality formula defining its
+  inertia degree over the contracted `F₂[z]` prime
+- result: `RationalPointsN25QuotientTwoWChartClosedPointDegree.lean` defines
+  the degree of a contracted base prime as the `F₂`-dimension of its residue
+  field.  For every maximal chart ideal, its residue cardinality is the base
+  residue cardinality raised to the inertia degree, while the base residue
+  cardinality is `2` raised to that prime degree.
+- semantic endpoint: for every nonboundary full closed-point atom `A`, the
+  product
+  `basePrimeDegree(A) * inertiaDeg(A)` is exactly the Frobenius-orbit degree
+  of `A`.  Thus the relative ideal norm now carries exactly the same degree
+  weight as the full closed-point grading.
+- verification: strict source compilation and the integrated 8640-job target
+  build pass.  Fresh axiom audits of both residue-cardinality formulas and
+  the degree-product theorem report exactly `propext`, `Classical.choice`,
+  and `Quot.sound`.
+- exact residual: prove that every maximal ideal of the canonical chart is
+  represented by a nonboundary Frobenius closed-point atom, then transfer the
+  affine principal-ideal factorization to the full grading and add the three
+  boundary valuations.
+- end: `[MZ-N25-W-CLOSED-POINT-DEGREE]` proved
