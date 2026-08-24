@@ -1,0 +1,101 @@
+✔ [8563/8564] Built Mathlib (3.5s)
+✖ [8564/8564] Building scratch.Q6373Check (29s)
+trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/bin/lean /home/runner/work/FLT/FLT/scratch/Q6373Check.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q6373Check.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q6373Check.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q6373Check.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q6373Check.setup.json --json
+error: scratch/Q6373Check.lean:52:0: cannot find synthesization order for instance torsionFreeRzW with type
+  ∀ (W : Type u_1) (L : Type u_2) [inst : CommRing W] [inst_1 : Field L] [inst_2 : Algebra Rz W] [inst_3 : Algebra Rz L]
+    [inst_4 : Algebra W L] [IsScalarTower Rz W L] [IsIntegralClosure W Rz L] [IsTorsionFree Rz L], IsTorsionFree Rz W
+all remaining arguments have metavariables:
+  Field ?L
+  @Algebra Rz ?L Polynomial.commSemiring Field.toSemifield.toDivisionSemiring.toSemiring
+  @Algebra W ?L CommRing.toCommSemiring Field.toSemifield.toDivisionSemiring.toSemiring
+  @IsScalarTower Rz W ?L inst✝⁵.toSMul Algebra.toSMul Algebra.toSMul
+  @IsIntegralClosure W Rz ?L Polynomial.commRing CommRing.toCommSemiring Field.toCommRing ?inst✝ ?inst✝¹
+  @IsTorsionFree Rz ?L Polynomial.semiring Field.toSemifield.toDivisionSemiring.toAddCommMonoid Algebra.toModule
+error: scratch/Q6373Check.lean:55:0: cannot find synthesization order for instance dedekindW with type
+  ∀ (W : Type u_1) (L : Type u_2) [inst : CommRing W] [IsDomain W] [inst_2 : Field L] [inst_3 : Algebra Rz W]
+    [inst_4 : Algebra Rz L] [inst_5 : Algebra W L] [IsScalarTower Rz W L] [IsIntegralClosure W Rz L]
+    [inst_8 : IsTorsionFree Rz L] [inst_9 : Algebra (RatFunc k₂) L] [IsScalarTower Rz (RatFunc k₂) L]
+    [Algebra.IsSeparable (RatFunc k₂) L] [FiniteDimensional K L], IsDedekindDomain W
+all remaining arguments have metavariables:
+  Field ?L
+  @Algebra Rz ?L Polynomial.commSemiring Field.toSemifield.toDivisionSemiring.toSemiring
+  @Algebra W ?L CommRing.toCommSemiring Field.toSemifield.toDivisionSemiring.toSemiring
+  @IsScalarTower Rz W ?L inst✝⁹.toSMul Algebra.toSMul Algebra.toSMul
+  @IsIntegralClosure W Rz ?L Polynomial.commRing CommRing.toCommSemiring Field.toCommRing ?inst✝ ?inst✝¹
+  @IsTorsionFree Rz ?L Polynomial.semiring Field.toSemifield.toDivisionSemiring.toAddCommMonoid Algebra.toModule
+  @Algebra (RatFunc k₂) ?L Field.toSemifield.toCommSemiring Field.toSemifield.toDivisionSemiring.toSemiring
+  @IsScalarTower Rz (RatFunc k₂) ?L RatFunc.instSMulOfFractionRingPolynomial Algebra.toSMul Algebra.toSMul
+  @Algebra.IsSeparable (RatFunc k₂) ?L (RatFunc.instCommRing k₂) Field.toDivisionRing.toRing ?inst✝
+  @FiniteDimensional K ?L OreLocalization.instDivisionRingNonZeroDivisors Field.toDivisionRing.toAddCommGroup
+    Algebra.toModule
+error: scratch/Q6373Check.lean:59:4: failed to synthesize
+  Algebra K (FractionRing W)
+(deterministic) timeout at `typeclass`, maximum number of heartbeats (20000) has been reached
+
+Note: Use `set_option synthInstance.maxHeartbeats <num>` to set the limit.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: scratch/Q6373Check.lean:63:9: failed to synthesize
+  Algebra K (FractionRing W)
+(deterministic) timeout at `typeclass`, maximum number of heartbeats (20000) has been reached
+
+Note: Use `set_option synthInstance.maxHeartbeats <num>` to set the limit.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: scratch/Q6373Check.lean:65:2: No goals to be solved
+info: scratch/Q6373Check.lean:68:0: FractionRing.liftAlgebra Rz L
+info: scratch/Q6373Check.lean:69:0: FractionRing.instIsScalarTower Rz L
+info: scratch/Q6373Check.lean:70:0: separableKL L
+error: scratch/Q6373Check.lean:71:0: failed to synthesize
+  IsTorsionFree Rz W
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: scratch/Q6373Check.lean:72:0: failed to synthesize
+  IsDedekindDomain W
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: scratch/Q6373Check.lean:73:0: failed to synthesize
+  Algebra K (FractionRing W)
+(deterministic) timeout at `typeclass`, maximum number of heartbeats (20000) has been reached
+
+Note: Use `set_option synthInstance.maxHeartbeats <num>` to set the limit.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: scratch/Q6373Check.lean:74:7: failed to synthesize
+  SMul K (FractionRing W)
+(deterministic) timeout at `typeclass`, maximum number of heartbeats (20000) has been reached
+
+Note: Use `set_option synthInstance.maxHeartbeats <num>` to set the limit.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: scratch/Q6373Check.lean:75:7: failed to synthesize
+  Algebra K (FractionRing W)
+(deterministic) timeout at `typeclass`, maximum number of heartbeats (20000) has been reached
+
+Note: Use `set_option synthInstance.maxHeartbeats <num>` to set the limit.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: scratch/Q6373Check.lean:82:8: failed to synthesize instance of type class
+  IsIntegrallyClosed W
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+error: scratch/Q6373Check.lean:84:4: failed to synthesize instance of type class
+  IsIntegrallyClosed W
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+error: Lean exited with code 1
+Some required targets logged failures:
+- scratch.Q6373Check
+error: build failed
+
+EXIT_STATUS=1
