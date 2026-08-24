@@ -2341,3 +2341,31 @@
   join it to the injective nonboundary prime parametrization and prove the
   projective degree-zero product formula.
 - end: `[MZ-N25-Z-LOCAL-ORDER]` proved
+
+## Run 2026-08-24 (N25 global W-boundary divisor carrier)
+
+- doctrine version: `bef1fbdaec5f6f35a404c2b6f512a969c0e3d6d6f001c31bffd57956c1f48910`
+- starting avenue: replace the formal coefficients of the existing
+  degree-six boundary cycle by the genuine local orders and identify its
+  finite carrier inside the full closed-point grading
+- result: `RationalPointsN25QuotientTwoWBoundaryLocalDivisor.lean` proves
+  that the coefficients at the X, YZ, and Z atoms are respectively the
+  orders of `W/X`, `W/Y`, and `W/Z` in the three actual point local rings.
+  A tag-indexed theorem packages all three comparisons uniformly.
+- result: a full atom has nonzero coefficient in
+  `wBoundaryHyperplaneDivisor` exactly when it is one of the three classified
+  boundary atoms.  Consequently the `Finsupp` support is exactly the image
+  of `FullBoundaryTag25Two`; there are no additional carrier terms.
+- semantic boundary: this closes the effective zero divisor of the
+  homogeneous section `W`.  It does not yet prove the degree-zero product
+  formula for arbitrary rational functions; that requires the affine
+  Dedekind divisor and the three infinity valuations to be compared in one
+  common function field.
+- verification: strict source and import-level `.olean` compilation pass.
+  Fresh axiom audits of all three coefficient/order comparisons, their
+  uniform tagged form, the nonzero-carrier characterization, and support
+  equality report exactly `propext`, `Classical.choice`, and `Quot.sound`.
+- exact residual: compute the pole orders of the affine projection
+  `Z/W` at X, YZ, and Z, then construct the finite quartic norm bridge that
+  balances the affine principal divisor against those infinity places.
+- end: `[MZ-N25-W-BOUNDARY-LOCAL-DIVISOR]` proved
