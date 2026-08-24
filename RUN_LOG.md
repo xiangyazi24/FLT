@@ -2287,3 +2287,28 @@
   nonboundary prime carrier and prove the projective degree-zero product
   formula.
 - end: `[MZ-N25-X-LOCAL-ORDER]` proved
+
+## Run 2026-08-24 (N25 YZ-boundary local order)
+
+- starting avenue: compute the actual `Y != 0` chart quotient by `W/Y` and
+  apply the verified localization-kernel interface at `[0:1:1:0]`
+- result: `RationalPointsN25QuotientTwoWBoundaryYZChartArtin.lean` derives
+  the dehomogenized relations in the actual curve chart.  After `W/Y = 0`,
+  the cubic gives `(X/Y)(Z/Y) = 0` and the quadric then forces `Z/Y = 1`;
+  hence `X/Y = 0`.  Explicit inverse algebra maps identify the quotient with
+  `F₂`, of `F₂`-length one.
+- result: `RationalPointsN25QuotientTwoWBoundaryYZLocal.lean` defines the
+  corresponding evaluation prime, proves it maximal, extends the boundary
+  quotient to `Localization.AtPrime`, and identifies its kernel with the
+  principal germ ideal.  The local quotient is `F₂`.
+- semantic endpoint: residue degree one and scalar restriction give local
+  length one, and `yzWGerm_ord_eq_one` proves that the order of `W` at
+  `[0:1:1:0]` is one.
+- verification: both new modules compile strictly.  Fresh axiom audits of
+  both chart and local equivalences, both length endpoints, and `Ring.ord`
+  report exactly `propext`, `Classical.choice`, and `Quot.sound`.
+- exact residual: in the standard `Z` chart the boundary quotient contains
+  both the length-two `Z` component and the length-one `YZ` component.  Use
+  the fact that `Y/Z + 1` is invertible at Z to isolate the double Artin
+  factor and prove the final boundary order before global assembly.
+- end: `[MZ-N25-YZ-LOCAL-ORDER]` proved
