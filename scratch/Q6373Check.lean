@@ -61,7 +61,8 @@ private theorem installationProbe
 
   -- Pin this algebra explicitly. Asking typeclass search to discover it can
   -- revisit the Rz-W-FractionRing W tower and time out.
-  letI : Algebra K (FractionRing W) := FractionRing.liftAlgebra
+  letI : Algebra K (FractionRing W) :=
+    FractionRing.liftAlgebra Rz (FractionRing W)
 
   letI : Algebra.IsSeparable K (FractionRing W) := by
     let eK : RatFunc k₂ ≃ₐ[Rz] K := lowerFractionEquiv
@@ -79,9 +80,8 @@ private theorem installationProbe
   trivial
 
 private theorem directNormProbe
-    (W : Type*) [CommRing W] [IsDomain W]
+    (W : Type*) [CommRing W]
     [Algebra Rz W]
-    [IsIntegrallyClosed W]
     [IsDedekindDomain W]
     [Module.Finite Rz W]
     [Module.IsTorsionFree Rz W]
