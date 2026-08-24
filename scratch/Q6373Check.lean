@@ -32,50 +32,60 @@ private theorem separable_K_L
   ext x
   exact IsFractionRing.algEquiv_commutes eK eL x
 
-section WChart
-
-variable (W L : Type*)
-  [CommRing W] [IsDomain W] [Field L]
-  [Algebra Rz W] [Algebra Rz L] [Algebra W L]
-  [IsScalarTower Rz W L]
-  [IsFractionRing W L]
-  [IsIntegralClosure W Rz L]
-  [Module.IsTorsionFree Rz L]
-  [Algebra (RatFunc k₂) L]
-  [IsScalarTower Rz (RatFunc k₂) L]
-  [Algebra.IsSeparable (RatFunc k₂) L]
-  [FiniteDimensional K L]
-
-private local instance separableKL : Algebra.IsSeparable K L :=
-  separable_K_L L
-
-private local instance torsionFreeRzW : Module.IsTorsionFree Rz W :=
+private theorem torsionFree_Rz_W
+    (W L : Type*)
+    [CommRing W] [Field L]
+    [Algebra Rz W] [Algebra Rz L] [Algebra W L]
+    [IsScalarTower Rz W L]
+    [IsIntegralClosure W Rz L]
+    [Module.IsTorsionFree Rz L] :
+    Module.IsTorsionFree Rz W :=
   IsIntegralClosure.isTorsionFree Rz L
 
-private local instance dedekindW : IsDedekindDomain W :=
-  IsIntegralClosure.isDedekindDomain Rz K L W
+private theorem installationProbe
+    (W L : Type*)
+    [CommRing W] [IsDomain W] [Field L]
+    [Algebra Rz W] [Algebra Rz L] [Algebra W L]
+    [IsScalarTower Rz W L]
+    [IsFractionRing W L]
+    [IsIntegralClosure W Rz L]
+    [Module.IsTorsionFree Rz L]
+    [Algebra (RatFunc k₂) L]
+    [IsScalarTower Rz (RatFunc k₂) L]
+    [Algebra.IsSeparable (RatFunc k₂) L]
+    [FiniteDimensional K L] : True := by
+  letI : Algebra.IsSeparable K L := separable_K_L L
+  letI : Module.IsTorsionFree Rz W := torsionFree_Rz_W W L
+  letI : IsDedekindDomain W :=
+    IsIntegralClosure.isDedekindDomain Rz K L W
 
-private local instance separableFractionRings :
-    Algebra.IsSeparable K (FractionRing W) := by
-  let eK : RatFunc k₂ ≃ₐ[Rz] K := lowerFractionEquiv
-  let eW : L ≃ₐ[W] FractionRing W :=
-    (FractionRing.algEquiv W L).symm
-  refine Algebra.IsSeparable.of_equiv_equiv
-    eK.toRingEquiv eW.toRingEquiv ?_
-  ext x
-  exact IsFractionRing.algEquiv_commutes eK eW x
+  -- Pin this algebra explicitly. Asking typeclass search to discover it can
+  -- revisit the Rz-W-FractionRing W tower and time out.
+  letI : Algebra K (FractionRing W) := FractionRing.liftAlgebra
 
-#synth Algebra K L
-#synth IsScalarTower Rz K L
-#synth Algebra.IsSeparable K L
-#synth Module.IsTorsionFree Rz W
-#synth IsDedekindDomain W
-#synth Algebra K (FractionRing W)
-#synth IsScalarTower Rz K (FractionRing W)
-#synth Algebra.IsSeparable K (FractionRing W)
+  letI : Algebra.IsSeparable K (FractionRing W) := by
+    let eK : RatFunc k₂ ≃ₐ[Rz] K := lowerFractionEquiv
+    let eW : L ≃ₐ[W] FractionRing W :=
+      (FractionRing.algEquiv W L).symm
+    refine Algebra.IsSeparable.of_equiv_equiv
+      eK.toRingEquiv eW.toRingEquiv ?_
+    ext x
+    exact IsFractionRing.algEquiv_commutes eK eW x
+
+  have : Module.IsTorsionFree Rz W := inferInstance
+  have : IsDedekindDomain W := inferInstance
+  have : Algebra.IsSeparable K L := inferInstance
+  have : Algebra.IsSeparable K (FractionRing W) := inferInstance
+  trivial
 
 private theorem directNormProbe
+    (W : Type*) [CommRing W] [IsDomain W]
+    [Algebra Rz W]
+    [IsIntegrallyClosed W]
+    [IsDedekindDomain W]
     [Module.Finite Rz W]
+    [Module.IsTorsionFree Rz W]
+    [Algebra.IsSeparable K (FractionRing W)]
     (hFormula :
       ∀ (P : Ideal W) (p : Ideal Rz)
         [P.LiesOver p] [P.IsMaximal] [p.IsMaximal],
@@ -88,7 +98,5 @@ private theorem directNormProbe
     change (P.comap (algebraMap Rz W)).IsMaximal
     exact Ideal.isMaximal_comap_of_isIntegral_of_isMaximal P
   exact hFormula P (P.under Rz)
-
-end WChart
 
 end Q6373Check
