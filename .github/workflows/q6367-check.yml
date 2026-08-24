@@ -1,0 +1,39 @@
+name: Q6367 Lean check
+
+on:
+  push:
+    branches: [q6367-check]
+    paths-ignore:
+      - scratch/Q6367-errors.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q6367-check
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+      - name: Check Q6367 source and persist diagnostics
+        shell: bash
+        run: |
+          set +e
+          lake build scratch.Q6367Check > scratch/Q6367-errors.txt 2>&1
+          status=$?
+          printf '\nEXIT_STATUS=%s\n' "$status" >> scratch/Q6367-errors.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scratch/Q6367-errors.txt
+          git commit -m 'Capture Q6367 Lean diagnostics [skip ci]' || true
+          git push origin HEAD:q6367-check
+          exit "$status"
