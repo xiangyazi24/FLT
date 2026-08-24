@@ -58,12 +58,10 @@ private theorem installationProbe
   letI : Module.IsTorsionFree Rz W := torsionFree_Rz_W W L
   letI : IsDedekindDomain W :=
     IsIntegralClosure.isDedekindDomain Rz K L W
-
   -- Pin this algebra explicitly. Asking typeclass search to discover it can
   -- revisit the Rz-W-FractionRing W tower and time out.
   letI : Algebra K (FractionRing W) :=
     FractionRing.liftAlgebra Rz (FractionRing W)
-
   letI : Algebra.IsSeparable K (FractionRing W) := by
     let eK : RatFunc k₂ ≃ₐ[Rz] K := lowerFractionEquiv
     let eW : L ≃ₐ[W] FractionRing W :=
@@ -72,7 +70,6 @@ private theorem installationProbe
       eK.toRingEquiv eW.toRingEquiv ?_
     ext x
     exact IsFractionRing.algEquiv_commutes eK eW x
-
   have : Module.IsTorsionFree Rz W := inferInstance
   have : IsDedekindDomain W := inferInstance
   have : Algebra.IsSeparable K L := inferInstance
