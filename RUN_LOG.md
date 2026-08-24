@@ -2440,3 +2440,31 @@
   existing `PlaneFunctionField`, identify it with the separable quartic
   `AdjoinRoot`, and expose the norm of the projection function.
 - end: `[MZ-N25-SEPARABLE-QUARTIC]` proved
+
+## Run 2026-08-24 (N25 quartic function-field identification)
+
+- doctrine version: `bef1fbdaec5f6f35a404c2b6f512a969c0e3d6d6f001c31bffd57956c1f48910`
+- starting avenue: put the already constructed fraction field of the
+  integral plane chart over `F₂(z)` and compare it to the explicit separable
+  quartic by the universal property of `AdjoinRoot`
+- result: `RationalPointsN25QuotientTwoPlaneQuarticFunctionField.lean`
+  installs the faithful `F₂[z]` action and the compatible lifted `F₂(z)`
+  algebra structure.  Fraction-ring base change and the monic power basis
+  prove that the concrete plane function field has degree four.
+- result: the plane `x` coordinate is a root of the mapped quartic.  The
+  resulting algebra homomorphism from the generic quartic field is injective
+  because it is a field homomorphism and surjective because its source and
+  target both have dimension four.  This yields an explicit `F₂(z)`-algebra
+  equivalence carrying the generic root to the existing plane coordinate.
+- semantic endpoint: finite dimensionality and separability transfer to the
+  concrete plane function field.  The plane coordinate `z = Z/W` is exactly
+  the image of `RatFunc.X`, so its field norm is
+  `RatFunc.X ^ 4` by `Algebra.norm_algebraMap`.
+- verification: strict source and import-level `.olean` compilation pass.
+  Fresh axiom audits of the dimension, coordinate identification, root map,
+  algebra equivalence, separability transfer, and norm formula report
+  exactly `propext`, `Classical.choice`, and `Quot.sound`.
+- exact residual: compare finite-place orders in the normalized
+  `F₂[z]`-model with the full closed-point grading and combine the norm
+  degree with the already proved infinity pole cycle of total degree four.
+- end: `[MZ-N25-QUARTIC-FUNCTION-FIELD]` proved
