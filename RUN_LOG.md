@@ -2312,3 +2312,32 @@
   the fact that `Y/Z + 1` is invertible at Z to isolate the double Artin
   factor and prove the final boundary order before global assembly.
 - end: `[MZ-N25-YZ-LOCAL-ORDER]` proved
+
+## Run 2026-08-24 (N25 Z-boundary local order)
+
+- doctrine version: `bef1fbdaec5f6f35a404c2b6f512a969c0e3d6d6f001c31bffd57956c1f48910`
+- starting avenue: localize the actual `Z != 0` curve chart at
+  `[0:0:1:0]` and remove the other boundary component by proving that
+  `Y/Z + 1` is a unit there
+- result: `RationalPointsN25QuotientTwoWBoundaryZLocal.lean` constructs the
+  point evaluation prime and its localization, extends the map to the double
+  Artin algebra, and factors it through the quotient by the germ of `W/Z`.
+  In the local quotient the chart equations give
+  `(Y/Z)^2 ((Y/Z) + 1) = 0`; localization makes the second factor a unit,
+  hence `(Y/Z)^2 = 0` and `X/Z = Y/Z`.
+- result: explicit inverse algebra maps identify the actual local quotient
+  with `F₂[t]/(t²)`.  Its `F₂`-length is two, the point residue extension
+  has degree one, and scalar restriction gives local-ring length two.
+- semantic endpoint: `zWGerm_ord_eq_two` proves that the order of `W` at
+  `[0:0:1:0]` is two.  Together with the previously verified X and YZ
+  calculations, all three genuine boundary orders are now `3,2,1`, of total
+  degree six.
+- verification: strict source compilation and an import-level `.olean`
+  compilation pass.  Fresh axiom audits of the localized Artin equivalence,
+  both length statements, and `Ring.ord` report exactly `propext`,
+  `Classical.choice`, and `Quot.sound`.
+- exact residual: package the three local orders into the global boundary
+  carrier, prove that no other boundary primes occur in that carrier, then
+  join it to the injective nonboundary prime parametrization and prove the
+  projective degree-zero product formula.
+- end: `[MZ-N25-Z-LOCAL-ORDER]` proved
