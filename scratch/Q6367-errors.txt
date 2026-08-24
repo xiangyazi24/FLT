@@ -1,5 +1,4 @@
-✔ [8563/8564] Built Mathlib (3.2s)
-✔ [8564/8564] Built scratch.Q6367Check (4.7s)
-Build completed successfully (8564 jobs).
+✔ [1928/1928] Built scratch.Q6367Check (2.3s)
+Build completed successfully (1928 jobs).
 
 EXIT_STATUS=0
