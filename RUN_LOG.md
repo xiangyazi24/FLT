@@ -2408,3 +2408,35 @@
   separability and degree four, and then connect affine Dedekind counts and
   the three infinity orders through the field norm.
 - end: `[MZ-N25-FULL-W-ORDER-Z-POLES]` proved
+
+## Run 2026-08-24 (N25 separable quartic generic fiber)
+
+- doctrine version: `bef1fbdaec5f6f35a404c2b6f512a969c0e3d6d6f001c31bffd57956c1f48910`
+- starting avenue: pass the monic irreducible plane polynomial from
+  `F₂[z]` to `F₂(z)` and expose the finite separable extension needed for
+  the projection norm
+- result: `RationalPointsN25QuotientTwoPlaneQuarticSeparable.lean` proves
+  that the outer degree is four and computes the formal derivative.  Its
+  nonzero `X⁴` specialization shows that the derivative is nonzero over
+  `F₂[z]`, and injectivity of the fraction map transports this fact to
+  `F₂(z)`.
+- result: Gauss's lemma transports the already proved irreducibility to the
+  rational function field.  The mapped quartic is therefore separable, and
+  its `AdjoinRoot` is a field of `F₂(z)`-dimension four.
+- semantic endpoint: the adjoined generic root is separable.  Since it
+  generates the whole `AdjoinRoot`, the generic quartic field is a separable
+  extension of `F₂(z)`; this is registered as an actual
+  `Algebra.IsSeparable` instance rather than retained as a polynomial-only
+  fact.
+- ChatGPT: Q6348 independently confirmed the X-local dual-number quotient
+  and the resulting simple pole of `Z/W` at X.  Q6350--Q6352 are auditing
+  the extension comparison and the first norm interface while all three
+  bridge tabs remain occupied.
+- verification: strict source and import-level `.olean` compilation pass.
+  Fresh axiom audits of the degree, derivative, irreducibility, polynomial
+  separability, field dimension, root separability, and extension instance
+  report exactly `propext`, `Classical.choice`, and `Quot.sound`.
+- exact residual: construct the compatible `F₂(z)`-algebra structure on the
+  existing `PlaneFunctionField`, identify it with the separable quartic
+  `AdjoinRoot`, and expose the norm of the projection function.
+- end: `[MZ-N25-SEPARABLE-QUARTIC]` proved
