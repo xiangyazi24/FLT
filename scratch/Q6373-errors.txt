@@ -1,31 +1,23 @@
-✔ [8563/8564] Built Mathlib (3.2s)
-✖ [8564/8564] Building scratch.Q6373Check (5.6s)
-trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/bin/lean /home/runner/work/FLT/FLT/scratch/Q6373Check.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q6373Check.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q6373Check.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q6373Check.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q6373Check.setup.json --json
-error: scratch/Q6373Check.lean:64:39: Type mismatch
-  FractionRing.liftAlgebra
-has type
-  (R : Type ?u.69) →
-    [inst : CommRing R] →
-      (K : Type ?u.68) → [inst_1 : Field K] → [inst_2 : Algebra R K] → [FaithfulSMul R K] → Algebra (FractionRing R) K
-but is expected to have type
-  Algebra K (FractionRing W)
-error: scratch/Q6373Check.lean:73:10: failed to synthesize instance of type class
-  IsScalarTower Rz K (FractionRing W)
+✔ [8563/8564] Built Mathlib (3.5s)
+⚠ [8564/8564] Built scratch.Q6373Check (7.4s)
+warning: scratch/Q6373Check.lean:61:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                                  ↓
+  ⏎    IsIntegralClosure.isDedekindDomain Rz K L W⏎⏎  -- Pin this algebra explicitly. Asking typeclass search to discover it can⏎
 
-Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
-warning: scratch/Q6373Check.lean:81:16: Overlapping instance parameters in `directNormProbe`:
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/Q6373Check.lean:66:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                                   ↓
+  ⏎    FractionRing.liftAlgebra Rz (FractionRing W)⏎⏎  letI : Algebra.IsSeparable K (FractionRing W) := by⏎
 
-⚠️ `[IsDomain
-   W]` and `[IsDedekindDomain
-   W]` each imply `[Nontrivial W]`, `[IsLeftCancelMulZero W]`, and `[IsRightCancelMulZero W]`.
-💡️ Of these, `[IsDomain W]` may be removed.
-⚠️ `[IsIntegrallyClosed W]` and `[IsDedekindDomain W]` each imply `[IsIntegralClosure W W (FractionRing W)]`.
-💡️ Of these, `[IsIntegrallyClosed W]` may be removed.
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/Q6373Check.lean:75:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                                     ↓
+  ⏎    exact IsFractionRing.algEquiv_commutes eK eW x⏎⏎  have : Module.IsTorsionFree Rz W := inferInstance⏎
 
-Note: This linter can be disabled with `set_option linter.overlappingInstances false`
-error: Lean exited with code 1
-Some required targets logged failures:
-- scratch.Q6373Check
-error: build failed
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+Build completed successfully (8564 jobs).
 
-EXIT_STATUS=1
+EXIT_STATUS=0
