@@ -1,4 +1,5 @@
-import Mathlib
+import Mathlib.RingTheory.Localization.AtPrime.Basic
+import Mathlib.RingTheory.Smooth.Basic
 
 open scoped TensorProduct
 
