@@ -5,6 +5,8 @@ on:
     branches: [q6367-check]
     paths-ignore:
       - scratch/Q6367-errors.txt
+  pull_request:
+    branches: [ai-scratch]
   workflow_dispatch:
 
 permissions:
@@ -32,7 +34,7 @@ jobs:
           status=$?
           printf '\nEXIT_STATUS=%s\n' "$status" >> scratch/Q6367-errors.txt
           git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git config user.email 41898282+users.noreply.github.com
           git add scratch/Q6367-errors.txt
           git commit -m 'Capture Q6367 Lean diagnostics [skip ci]' || true
           git push origin HEAD:q6367-check
