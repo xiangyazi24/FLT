@@ -2500,3 +2500,38 @@
   inertia degrees to the already certified residue degrees, and assemble the
   finite and three infinite orders into the projective product formula.
 - end: `[MZ-N25-SEPARABLE-RELNORM]` proved
+
+## Run 2026-08-24 (N25 intrinsic W-chart normalization and prime norm)
+
+- doctrine version: `bef1fbdaec5f6f35a404c2b6f512a969c0e3d6d6f001c31bffd57956c1f48910`
+- starting avenue: prove normality directly on the canonical `W = 1` chart,
+  rather than transporting the finite-place model through an unproved ring
+  identification
+- result: `RationalPointsN25QuotientTwoWChartNormalization.lean` proves that
+  the chart is finite and integral over `F₂[z]` and that its embedding in the
+  plane function field exhibits that field as its fraction field.  At every
+  maximal ideal, formal smoothness injects the cotangent space into the
+  residue-field base change of the rank-one Kähler differential module.
+  Nonfieldness forces cotangent dimension one, so every maximal localization
+  is a DVR and the chart is integrally closed.
+- result: the chart is therefore the integral closure of `F₂[z]` in the plane
+  function field.  The canonical integral-closure equivalence identifies it
+  with `PlaneNormalization` as an `F₂[z]`-algebra.
+- result: quartic separability is transported through the canonical fraction
+  fields.  This supplies torsion-freeness and the Dedekind-domain instance for
+  the chart, and every maximal chart ideal `P` now satisfies the direct norm
+  formula
+  `relNorm(P) = (P ∩ F₂[z])^(inertiaDeg(P ∩ F₂[z], P))`.
+- ChatGPT: Q6359 and Q6367 isolated the dependent conormal-map bottleneck and
+  the current-pin residue-kernel rewrite; the proposed architecture was
+  corrected and verified locally.  Q6361 supplied the integral-closure seam,
+  and Q6365 identified the shortest direct relative-norm route.
+- verification: strict source compilation and the integrated 8635-job target
+  build pass.  Fresh axiom audits of local and global normality, the integral
+  closure and normalization equivalence, both separability transports, the
+  Dedekind instance, and the direct norm theorem report exactly `propext`,
+  `Classical.choice`, and `Quot.sound`.
+- exact residual: identify the inertia-degree/base-prime-degree product of a
+  nonboundary chart prime with its already certified closed-point degree,
+  then sum finite orders and combine them with the three infinity orders.
+- end: `[MZ-N25-W-NORMALIZATION-RELNORM]` proved
