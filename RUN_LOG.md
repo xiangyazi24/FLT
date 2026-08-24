@@ -2369,3 +2369,42 @@
   `Z/W` at X, YZ, and Z, then construct the finite quartic norm bridge that
   balances the affine principal divisor against those infinity places.
 - end: `[MZ-N25-W-BOUNDARY-LOCAL-DIVISOR]` proved
+
+## Run 2026-08-24 (N25 full W-order function and z-projection poles)
+
+- doctrine version: `bef1fbdaec5f6f35a404c2b6f512a969c0e3d6d6f001c31bffd57956c1f48910`
+- starting avenue: strengthen the three-point boundary carrier to a
+  pointwise local-order statement on every full atom, then compute the
+  numerator orders needed for the affine projection `Z/W`
+- result: `RationalPointsN25QuotientTwoWBoundaryLocalDivisor.lean` now
+  defines `fullWLocalOrder`.  At the three boundary atoms it uses the three
+  actual point-local-ring orders; at every complementary atom it localizes
+  the fixed `W != 0` chart and uses the genuine order of the trivialization
+  `W/W = 1`, which is zero.  The coefficient of
+  `wBoundaryHyperplaneDivisor` equals this local order pointwise on the full
+  closed-point carrier.
+- result: `RationalPointsN25QuotientTwoZProjectionXLocal.lean` computes the
+  actual X-local quotient by `Z/X`.  The relations and invertibility of
+  `Y/X + 1` identify it with `F₂[t]/(t²)`, giving
+  `Ring.ord XLocalRing xZGerm = 2`.  At YZ, `Z/Y` evaluates to one and is a
+  local unit; at Z, `Z/Z = 1`.  Thus the pole multiplicities of `Z/W` at
+  X, YZ, and Z are `1,1,2`, with total four.
+- interface: the X- and Y-chart coordinate declarations and evaluation
+  lemmas needed by the new local proof are now public; their existing
+  definitions and semantics are unchanged.
+- ChatGPT: Q6347 correctly separated the actual order function from the
+  explicit three-term `Finsupp` and identified the `W/W=1` unit calculation
+  as the missing off-boundary case.  That recommendation was implemented and
+  checked locally.  Q6348--Q6350 are independently auditing the X-local
+  calculation, the dependent full-order definition, and the first quartic
+  norm seam.
+- verification: strict source and import-level `.olean` compilation pass.
+  The integrated 4011-job `lake build` passes.  Fresh axiom audits of the
+  double-Artin equivalence, all numerator and pole-order statements, the
+  open-chart zero order, and the full pointwise coefficient theorem report
+  exactly `propext`, `Classical.choice`, and `Quot.sound`; the numerical
+  pole-total theorem is axiom-free.
+- exact residual: formalize the quartic extension of `F₂(z)`, prove its
+  separability and degree four, and then connect affine Dedekind counts and
+  the three infinity orders through the field norm.
+- end: `[MZ-N25-FULL-W-ORDER-Z-POLES]` proved

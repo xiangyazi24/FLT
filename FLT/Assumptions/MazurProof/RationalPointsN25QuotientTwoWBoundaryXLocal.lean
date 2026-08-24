@@ -79,6 +79,14 @@ local instance : xPrime.IsPrime := xPrime_isMaximal.isPrime
   simp [xChartEval, xAffineEvalAlg, xAffineEval, xW, chartMap,
     ambientDehomogenize, dehomogenizedVariable]
 
+@[simp] theorem xChartEval_xY : xChartEval xY = 0 := by
+  simp [xChartEval, xAffineEvalAlg, xAffineEval, xY, chartMap,
+    ambientDehomogenize, dehomogenizedVariable]
+
+@[simp] theorem xChartEval_xZ : xChartEval xZ = 0 := by
+  simp [xChartEval, xAffineEvalAlg, xAffineEval, xZ, chartMap,
+    ambientDehomogenize, dehomogenizedVariable]
+
 theorem xWIdeal_le_xPrime : xWIdeal ≤ xPrime := by
   rw [xWIdeal, Ideal.span_le]
   intro z hz

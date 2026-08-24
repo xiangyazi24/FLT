@@ -32,7 +32,8 @@ local notation "k₂" => ZMod 2
 abbrev YChartRing := ChartQuotient (1 : Fin 4)
 
 private def yX : YChartRing := chartMap 1 (MvPolynomial.X 0)
-private def yZ : YChartRing := chartMap 1 (MvPolynomial.X 2)
+/-- The `Z/Y` coordinate in the actual `Y`-chart curve ring. -/
+def yZ : YChartRing := chartMap 1 (MvPolynomial.X 2)
 /-- The restriction `W/Y` of the homogeneous coordinate `W`. -/
 def yzW : YChartRing := chartMap 1 (MvPolynomial.X 3)
 
@@ -211,6 +212,11 @@ noncomputable def yzBoundaryAlgEquivF2 : YZBoundaryRing ≃ₐ[k₂] k₂ :=
   AlgEquiv.ofAlgHom yzBoundaryToF2 f2ToYZBoundary
     yzBoundaryToF2_comp_f2ToYZBoundary
     f2ToYZBoundary_comp_yzBoundaryToF2
+
+@[simp]
+theorem yzBoundaryAlgEquivF2_mk_yZ :
+    yzBoundaryAlgEquivF2 (Ideal.Quotient.mk yzWIdeal yZ) = 1 :=
+  yzBoundaryToF2_qZ
 
 /-- The actual `Y`-chart boundary quotient has `F₂`-length one. -/
 theorem yzBoundaryRing_f2_length :

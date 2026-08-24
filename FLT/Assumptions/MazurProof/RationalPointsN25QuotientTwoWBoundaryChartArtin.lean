@@ -29,9 +29,9 @@ open RationalPointsN25QuotientTwoConormal
 abbrev XChartRing := ChartQuotient (0 : Fin 4)
 
 /-- The `Y/X` coordinate in the actual `X`-chart curve ring. -/
-private def xY : XChartRing := chartMap 0 (MvPolynomial.X 1)
+def xY : XChartRing := chartMap 0 (MvPolynomial.X 1)
 /-- The `Z/X` coordinate in the actual `X`-chart curve ring. -/
-private def xZ : XChartRing := chartMap 0 (MvPolynomial.X 2)
+def xZ : XChartRing := chartMap 0 (MvPolynomial.X 2)
 /-- The restriction `W/X` of the homogeneous coordinate `W` to `D₊(X)`. -/
 def xW : XChartRing := chartMap 0 (MvPolynomial.X 3)
 

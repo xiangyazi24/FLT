@@ -128,4 +128,73 @@ theorem wBoundaryHyperplaneDivisor_support :
   · rintro ⟨tag, rfl⟩
     cases tag <;> simp [IsFullBoundaryAtom, fullBoundaryAtomOfTag]
 
+/-! ## Pointwise order on the full closed-point carrier -/
+
+/-- On the fixed `W != 0` chart, the section `W` is trivialized by `W/W=1`,
+so its genuine local order at every nonboundary chart prime is zero. -/
+noncomputable def wOpenTrivializedLocalOrder
+    (A : FullNonBoundaryAtom25Two) : WithTop ℕ := by
+  let D := fullNonBoundaryPrimeData A
+  letI : D.ideal.IsMaximal := D.isMaximal
+  letI : D.ideal.IsPrime := D.isMaximal.isPrime
+  letI : CommRing (Localization.AtPrime D.ideal) :=
+    OreLocalization.instCommRing
+  exact Ring.ord (Localization.AtPrime D.ideal) 1
+
+@[simp]
+theorem wOpenTrivializedLocalOrder_eq_zero
+    (A : FullNonBoundaryAtom25Two) :
+    wOpenTrivializedLocalOrder A = 0 := by
+  simp [wOpenTrivializedLocalOrder]
+  rfl
+
+/-- The genuine local order of the section `W`, using the appropriate local
+chart at each full closed-point atom. -/
+noncomputable def fullWLocalOrder (A : FullAtom25Two) : WithTop ℕ :=
+  if hX : A = fullBoundaryAtomX then
+    Ring.ord XLocalRing xWGerm
+  else if hYZ : A = fullBoundaryAtomYZ then
+    Ring.ord YZLocalRing yzWGerm
+  else if hZ : A = fullBoundaryAtomZ then
+    Ring.ord ZLocalRing zWGerm
+  else
+    wOpenTrivializedLocalOrder ⟨A, by
+      intro hboundary
+      rcases hboundary with h | h | h
+      · exact hX h
+      · exact hYZ h
+      · exact hZ h⟩
+
+/-- Pointwise on every full closed-point atom, the global effective cycle
+has coefficient equal to the genuine local order of `W` in the chart that
+contains that point. -/
+theorem wBoundaryHyperplaneDivisor_apply_eq_fullWLocalOrder
+    (A : FullAtom25Two) :
+    (wBoundaryHyperplaneDivisor A : WithTop ℕ) = fullWLocalOrder A := by
+  classical
+  by_cases hX : A = fullBoundaryAtomX
+  · subst A
+    simp [fullWLocalOrder, xWGerm_ord_eq_three]
+    rfl
+  by_cases hYZ : A = fullBoundaryAtomYZ
+  · subst A
+    simp [fullWLocalOrder, hX, yzWGerm_ord_eq_one]
+    rfl
+  by_cases hZ : A = fullBoundaryAtomZ
+  · subst A
+    simp [fullWLocalOrder, hX, hYZ, zWGerm_ord_eq_two]
+    rfl
+  have hnb : ¬ IsFullBoundaryAtom A := by
+    intro hboundary
+    rcases hboundary with h | h | h
+    · exact hX h
+    · exact hYZ h
+    · exact hZ h
+  have hdivzero : wBoundaryHyperplaneDivisor A = 0 := by
+    apply Classical.byContradiction
+    intro hne
+    exact hnb ((wBoundaryHyperplaneDivisor_ne_zero_iff A).mp hne)
+  rw [hdivzero]
+  simp [fullWLocalOrder, hX, hYZ, hZ]
+
 end MazurProof.RationalPointsN25QuotientTwoWBoundaryLocalDivisor

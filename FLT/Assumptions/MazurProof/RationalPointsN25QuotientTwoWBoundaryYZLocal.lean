@@ -29,6 +29,10 @@ private noncomputable def yzBoundaryQuot :
 noncomputable def yzPointEval : YChartRing →ₐ[k₂] k₂ :=
   yzBoundaryAlgEquivF2.toAlgHom.comp yzBoundaryQuot
 
+@[simp]
+theorem yzPointEval_yZ : yzPointEval yZ = 1 := by
+  simp [yzPointEval, yzBoundaryQuot]
+
 theorem yzPointEval_surjective : Function.Surjective yzPointEval := by
   intro c
   refine ⟨algebraMap k₂ YChartRing c, ?_⟩
