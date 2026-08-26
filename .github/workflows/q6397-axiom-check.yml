@@ -1,0 +1,43 @@
+name: Q6397 endpoint axiom print
+
+on:
+  push:
+    branches: [q6397-axiom-check]
+    paths-ignore:
+      - scratch/Q6397-endpoint-axioms.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q6397-axiom-check
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+      - name: Print N25 endpoint axioms
+        shell: bash
+        run: |
+          set +e
+          {
+            printf 'BASE_AI_SCRATCH=%s\n' '69ef7a5341a648087fcc6b1bcb523d5205716381'
+            printf 'AUDIT_HEAD=%s\n' "$(git rev-parse HEAD)"
+            lake build scratch.Q6397EndpointAxioms
+            lean_status=$?
+            printf 'EXIT_STATUS=%s\n' "$lean_status"
+          } > scratch/Q6397-endpoint-axioms.txt 2>&1
+          git config user.name github-actions[bot]
+          git config user.email 41898282+users.noreply.github.com
+          git add scratch/Q6397-endpoint-axioms.txt
+          git commit -m 'Capture Q6397 endpoint axioms [skip ci]' || true
+          git push origin HEAD:q6397-axiom-check
+          exit "$lean_status"

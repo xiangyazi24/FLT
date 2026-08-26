@@ -1,0 +1,4 @@
+import FLT.Assumptions.MazurProof.CyclicExclusion25
+
+#print axioms MazurProof.CyclicExclusion25.no_explicit_order25_obstruction
+#print axioms MazurProof.CyclicExclusion25.no_rational_point_of_order_25
