@@ -1,0 +1,51 @@
+name: Q6397 N25 source and axiom audit
+
+on:
+  push:
+    branches: [q6397-check]
+    paths-ignore:
+      - scratch/Q6397-audit.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q6397-check
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+      - name: Search N25 source and run Lean axiom audit
+        shell: bash
+        run: |
+          set +e
+          {
+            printf 'HEAD=%s\n' "$(git rev-parse HEAD)"
+            echo '=== N25 source declarations mentioning cusp or rational-point classification ==='
+            grep -RInE '^(axiom|theorem|def|abbrev) .*([Cc]usp|rational_point|noncuspidal|non_cusp)|no_explicit_order25_obstruction' \
+              FLT/Assumptions/MazurProof/RationalPointsN25*.lean \
+              FLT/Assumptions/MazurProof/CyclicExclusion25.lean || true
+            echo '=== Exact global-classification and endpoint-symbol search ==='
+            grep -RInE 'canonical_point_with_zero_coordinate_is_cusp|all_coordinates_ne_zero_of_not_cusp|noncuspidal_point_to_plane_sextic|no_explicit_order25_obstruction|IsCanonicalCusp25|IsCusp25' \
+              FLT/Assumptions/MazurProof/RationalPointsN25*.lean \
+              FLT/Assumptions/MazurProof/CyclicExclusion25.lean || true
+            echo '=== Lean build and #print axioms ==='
+            lake build scratch.Q6397Audit
+            lean_status=$?
+            printf 'EXIT_STATUS=%s\n' "$lean_status"
+          } > scratch/Q6397-audit.txt 2>&1
+          git config user.name github-actions[bot]
+          git config user.email 41898282+users.noreply.github.com
+          git add scratch/Q6397-audit.txt
+          git commit -m 'Capture Q6397 N25 source and axiom audit [skip ci]' || true
+          git push origin HEAD:q6397-check
+          exit "$lean_status"
