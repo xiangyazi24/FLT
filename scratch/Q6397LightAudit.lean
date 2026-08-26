@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientF2
+import FLT.Assumptions.MazurProof.RationalPointsN25QuotientAction
 
 namespace Q6397LightAudit
 
