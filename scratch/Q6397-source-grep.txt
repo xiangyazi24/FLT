@@ -1,0 +1,498 @@
+BASE_AI_SCRATCH=69ef7a5341a648087fcc6b1bcb523d5205716381
+AUDIT_HEAD=f3a6a2e1748c43d1f1c045c2a623a383aab7e587
+=== Every declaration/reference using the canonical cusp predicates or endpoint axiom ===
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:606:    ¬ IsCusp25 p := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:631:    ¬ IsCusp25 (sutherlandCanonicalCoordinates25 x y) := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:851:    ¬ IsCusp25 (tateCanonicalCoordinates25 b c) := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:116:def IsCanonicalCusp25F2 (P : Coordinates4 F2) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:123:private instance decidableIsCanonicalCusp25F2 :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:124:    DecidablePred IsCanonicalCusp25F2 := fun P => by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:125:  unfold IsCanonicalCusp25F2 ProjectivelyEqual4F2
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:137:    ∀ P : Coordinates4 F2, IsCanonicalPoint25F2 P ↔ IsCanonicalCusp25F2 P := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:244:def IsCanonicalCusp25F4 (P : Coordinates4 F4) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:251:private instance decidableIsCanonicalCusp25F4 :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:252:    DecidablePred IsCanonicalCusp25F4 := fun P => by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:253:  unfold IsCanonicalCusp25F4 ProjectivelyEqual4F4
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:270:    ∀ P : Coordinates4 F4, IsCanonicalPoint25F4 P ↔ IsCanonicalCusp25F4 P := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:125:def IsCanonicalCusp25 (x y z w : ℚ) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:137:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:147:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:157:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:168:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:179:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:249:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:279:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:311:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:358:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:391:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:404:    (hncusp : ¬ IsCanonicalCusp25 x y z w) :
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:432:    (hncusp : ¬ IsCanonicalCusp25 x y z w) :
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:469:    (hncusp : ¬ IsCanonicalCusp25 x y z w) :
+FLT/Assumptions/MazurProof/RationalPointsN25TateCanonicalBridge.lean:210:    ¬ IsCusp25 p := by
+FLT/Assumptions/MazurProof/RationalPointsN25TateCanonicalBridge.lean:234:    ¬ IsCusp25 (homogeneousPlaneLift25 x z w) := by
+FLT/Assumptions/MazurProof/CyclicExclusion25.lean:47:axiom no_explicit_order25_obstruction : ¬ ExplicitOrder25Obstruction
+FLT/Assumptions/MazurProof/CyclicExclusion25.lean:53:  exact no_explicit_order25_obstruction
+FLT/Assumptions/MazurProof/CyclicOrderAssembly.lean:49:  is `no_explicit_order25_obstruction`, the rational-point exclusion for that
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:307:def IsCusp25 (p : Coordinates25) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:308:  IsCanonicalCusp25 p.x p.y p.z p.w
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:310:/-- The displayed disjunction in `IsCanonicalCusp25` is exactly the five
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:313:    IsCusp25 p ↔
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:322:theorem tau25_isCusp {p : Coordinates25} (hp : IsCusp25 p) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:323:    IsCusp25 (tau25 p) := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:339:    IsCusp25 (tau25 p) ↔ IsCusp25 p := by
+=== Every theorem declaration mentioning N25 canonical/rational/cusp/dense-torus language ===
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:28:def canonicalQuadric25 (x y z w : ℚ) : ℚ :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:32:def canonicalCubic25 (x y z w : ℚ) : ℚ :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:46:def canonicalPlaneSextic25 (x z w : ℚ) : ℚ :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:59:theorem canonicalCubic25_eq_linear (x y z w : ℚ) :
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:66:theorem canonical_elimination_identity25 (x y z w : ℚ) :
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:79:theorem canonical_point_projects_to_plane_sextic {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:88:theorem plane_sextic_lifts_to_canonical {x z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:105:theorem recoveredY25_eq_of_canonical {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:125:def IsCanonicalCusp25 (x y z w : ℚ) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:244:theorem canonical_point_w_zero_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:274:theorem canonical_point_z_zero_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:306:theorem canonical_point_x_zero_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:353:theorem canonical_point_y_zero_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:386:theorem canonical_point_with_zero_coordinate_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:400:theorem all_coordinates_ne_zero_of_not_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:428:theorem projectionDenominator25_ne_zero_of_not_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:465:theorem noncuspidal_point_to_plane_sextic {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:38:def sutherlandCanonicalXCore25 (x y : ℚ) : ℚ :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:47:def sutherlandCanonicalX25 (x y : ℚ) : ℚ :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:52:def sutherlandCanonicalY25 (x y : ℚ) : ℚ :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:64:def sutherlandCanonicalZ25 (x y : ℚ) : ℚ :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:76:def sutherlandCanonicalWCore25 (x y : ℚ) : ℚ :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:86:def sutherlandCanonicalW25 (x y : ℚ) : ℚ :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:91:def sutherlandCanonicalCoordinates25 (x y : ℚ) : Coordinates25 :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:236:theorem sutherlandCanonicalXW_not_both_zero
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:274:def sutherlandCanonicalZBezoutSource25 (x y : ℚ) : ℚ :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:398:def sutherlandCanonicalZBezoutCoordinate25 (x y : ℚ) : ℚ :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:575:theorem sutherlandCanonicalZ_bezout_identity25 (x y : ℚ) :
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:589:theorem sutherlandCanonicalZ25_ne_zero
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:604:theorem not_isCusp25_of_z_ne_zero_and_xw
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:629:theorem sutherlandCanonicalCoordinates25_not_isCusp
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:641:def sutherlandCanonicalQuadricCofactor25 (x y : ℚ) : ℚ :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:651:theorem sutherlandCanonicalCoordinates25_quadric (x y : ℚ) :
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:669:def sutherlandCanonicalCubicCofactor25 (x y : ℚ) : ℚ :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:703:theorem sutherlandCanonicalCoordinates25_cubic (x y : ℚ) :
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:721:theorem sutherlandCanonicalCoordinates25_onCanonical
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:808:def tateCanonicalCoordinates25 (b c : ℚ) : Coordinates25 :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:816:theorem tateCanonicalCoordinates25_nonzero
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:837:theorem tateCanonicalCoordinates25_onCanonical
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:848:theorem tateCanonicalCoordinates25_not_isCusp
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:168:def OnCanonical25 (p : Coordinates25) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:173:theorem canonicalQuadric25_tau25 (p : Coordinates25) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:181:theorem canonicalCubic25_tau25 (p : Coordinates25) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:189:theorem tau25_onCanonical {p : Coordinates25} (hp : OnCanonical25 p) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:199:theorem onCanonical25_tau25_iff (p : Coordinates25) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:212:def canonicalTauEquiv25 :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:226:def cusp25A : Coordinates25 := ⟨0, 0, 0, 1⟩
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:229:def cusp25B : Coordinates25 := ⟨0, -1, 1, 0⟩
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:232:def cusp25C : Coordinates25 := ⟨1, 1, 0, 1⟩
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:235:def cusp25D : Coordinates25 := ⟨0, 0, 1, 0⟩
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:238:def cusp25E : Coordinates25 := ⟨1, 0, 0, 0⟩
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:241:theorem canonical_cusps_on_model :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:249:theorem tau25_cuspA_to_cuspB :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:254:theorem tau25_cuspB_to_cuspC : tau25 cusp25B = cusp25C := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:258:theorem tau25_cuspC_to_cuspD :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:263:theorem tau25_cuspD_to_cuspE : tau25 cusp25D = cusp25E := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:267:theorem tau25_cuspE_to_cuspA : tau25 cusp25E = cusp25A := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:277:theorem tau25_cuspA_projective :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:283:theorem tau25_cuspB_projective :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:289:theorem tau25_cuspC_projective :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:295:theorem tau25_cuspD_projective :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:301:theorem tau25_cuspE_projective :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:307:def IsCusp25 (p : Coordinates25) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:312:theorem isCusp25_iff (p : Coordinates25) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:322:theorem tau25_isCusp {p : Coordinates25} (hp : IsCusp25 p) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:338:theorem isCusp25_tau25_iff (p : Coordinates25) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:448:theorem canonicalQuadric25_eq_neg_cyclicAdjacent (p : Coordinates25) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:531:theorem canonicalQuadric25_scale (a : ℚ) (p : Coordinates25) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:564:theorem basicInvariantMap25_of_onCanonical {p : Coordinates25}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean:180:def IsCanonicalNormalizedTwo {K : Type*} [Field K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean:230:theorem isCanonicalNormalizedTwo_iff_table
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean:295:def CanonicalNormalizedPieces (R : Type*) [DecidableEq R]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean:307:def canonicalNormalizedEquivPieces
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean:348:theorem canonicalWChart_table
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean:361:theorem canonicalNormalized_card_eq_chart_sum
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean:380:theorem semanticF2_canonical_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean:390:theorem rawF4_canonical_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean:398:theorem rawF8_canonical_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean:410:theorem rawF16_canonical_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean:418:theorem semanticF4_canonical_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean:425:theorem semanticF8_canonical_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientBinaryFieldSemantics.lean:432:theorem semanticF16_canonical_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:38:def canonicalQuadric25Over {R : Type*} [CommRing R] (P : Coordinates4 R) : R :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:42:def canonicalCubic25Over {R : Type*} [CommRing R] (P : Coordinates4 R) : R :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:49:theorem canonicalQuadric25Over_rat_eq_source :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:58:theorem canonicalCubic25Over_rat_eq_source :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:89:def canonicalQuadric25F2 (P : Coordinates4 F2) : F2 :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:94:def canonicalCubic25F2 (P : Coordinates4 F2) : F2 :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:99:def IsCanonicalPoint25F2 (P : Coordinates4 F2) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:109:def cusp0001F2 : Coordinates4 F2 := ⟨0, 0, 0, 1⟩
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:110:def cusp0m110F2 : Coordinates4 F2 := ⟨0, -1, 1, 0⟩
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:111:def cusp1101F2 : Coordinates4 F2 := ⟨1, 1, 0, 1⟩
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:112:def cusp0010F2 : Coordinates4 F2 := ⟨0, 0, 1, 0⟩
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:113:def cusp1000F2 : Coordinates4 F2 := ⟨1, 0, 0, 0⟩
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:116:def IsCanonicalCusp25F2 (P : Coordinates4 F2) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:136:theorem canonical_point25F2_iff_cusp :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:142:def canonicalPoints25F2 : Finset (Coordinates4 F2) :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:146:theorem canonicalPoints25F2_card : canonicalPoints25F2.card = 5 := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:209:def canonicalQuadric25F4 (P : Coordinates4 F4) : F4 :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:218:def canonicalCubic25F4 (P : Coordinates4 F4) : F4 :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:234:def IsCanonicalPoint25F4 (P : Coordinates4 F4) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:244:def IsCanonicalCusp25F4 (P : Coordinates4 F4) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:258:theorem canonical_equations_embed_f2 :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:269:theorem canonical_point25F4_iff_cusp :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:276:theorem canonical_point25F4_descends_to_f2 :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:43:def canonicalQuadric25Three (P : Coordinates4 K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:48:def canonicalCubic25Three (P : Coordinates4 K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:64:def canonicalSegreCubic25Three (e a b c d : K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:77:def canonicalCoordinatesFromEigen25Three
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:100:def canonicalEigenCoordinates25Three (e : K)
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:116:def canonicalSegreCoordinates25Three (e a b c d : K) : Coordinates4 K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:125:theorem canonicalEigenCoordinates_fromEigen {e u₁ u₂ u₃ u₄ : K}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:164:theorem canonicalCoordinatesFromEigen_eigen {e : K} {P : Coordinates4 K}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:206:def canonicalEigenCoordinateEquiv25Three (e : K)
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:217:theorem canonicalEigenCoordinates_segre {e a b c d : K}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:226:def canonicalSegreQuadricScalar25Three (e : K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:233:theorem canonicalSegreQuadricScalar25Three_ne_zero {e : K}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:251:theorem canonicalQuadric25_fromEigen {e u₁ u₂ u₃ u₄ : K}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:320:theorem exists_canonicalSegreCoordinates_of_quadric_eq_zero
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:347:theorem canonicalQuadric25_segre_eq_zero {e a b c d : K}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:360:theorem canonicalCubic25_segre {e a b c d : K}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:451:theorem canonicalCurve_eq_zero_iff_exists_segre
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:540:def canonicalDenseSegreCubic25Three (e r s : K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:545:theorem denseSegre_at_zero {e s : K}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:553:def canonicalKummerPolynomial25Three (e r t : K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:559:def canonicalKummerDenominator25Three (e t : K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:564:def canonicalKummerNumerator25Three (e t : K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:569:def canonicalKummerTarget25Three (e t : K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:579:theorem canonicalKummer_eq_zero_iff_fifthPower_eq_target
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:595:theorem denseSegre_to_kummer_identity (e r s : K) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:605:theorem denseSegre_eq_zero_iff_kummer
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:830:def canonicalKummerFiberSizeField81
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:846:theorem canonicalKummerFiber_card_field81
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:42:def IsCanonicalNormalizedThree {K : Type*} [Field K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:55:theorem canonicalQuadric25Ternary_f81_eq (P : Coordinates4 F81) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:68:theorem canonicalCubic25Ternary_f81_eq (P : Coordinates4 F81) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:79:theorem isCanonicalNormalized25Ternary_f81_iff
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:185:theorem canonicalCoordinatesFromEigen_scale
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:202:theorem canonicalEigenCoordinates_scale
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:216:theorem canonicalCoordinatesFromEigen_ne_zero
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:232:theorem canonicalEigenCoordinates_ne_zero
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:247:def eigenToCanonicalProjective
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:256:def canonicalToEigenProjective
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:264:def eigenCanonicalProjectiveEquiv
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:328:def densePartitionEquiv (e : K) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:358:def denseZeroEquivUnit {e : K} (he : IsCyclotomicFive25Three e) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:399:def denseNonzeroEquivKummerNonzero (e : K) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:550:theorem f81_dense_solutions_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:677:theorem canonicalQuadric25Three_scale (a : K) (P : Coordinates4 K) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:688:theorem canonicalCubic25Three_scale (a : K) (P : Coordinates4 K) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:709:theorem isNormalizedEigenCurve_iff_canonical
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:746:theorem canonicalCubic25_fromEigen_eq_zero_iff_segre
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:869:def eigenCurveEquivCanonicalCurve
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:878:def segreSolutionsEquivCanonicalCurve
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:889:theorem f81_canonical_normalized_three_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:902:def f81ExecutableCanonicalEquivActual :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:910:theorem f81_canonical_normalized_ternary_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:46:theorem canonicalResidualX25Ternary_field_eq
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:64:theorem canonicalQuadric25Ternary_field_eq
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:74:theorem canonicalCubic25Ternary_field_eq
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:83:theorem isCanonicalNormalized25Ternary_field_iff
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:98:def canonicalRegularW25Three {K : Type*} [Field K] (y z : K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:103:theorem canonicalQuadricX_regularW_eq_zero
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:113:theorem isCanonicalNormalizedThree_xChart_iff
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:133:theorem isCanonicalNormalizedThree_regular_iff
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:144:theorem canonicalRegularW25Three_eq_of_quadric
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:158:abbrev CanonicalStructuredSolutions25Three
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:166:theorem mem_canonicalRegularPairs25Three_field_iff
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:179:theorem mem_canonicalExceptionalPairs25Three_field_iff
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:191:theorem mem_canonicalYChartPairs25Three_field_iff
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:201:theorem mem_canonicalZChartValues25Three_field_iff
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:212:theorem isCanonicalNormalizedThree_wChart
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:222:def canonicalCurveToStructured25Three
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:249:def structuredToCanonicalCurve25Three
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:270:theorem structuredToCanonicalCurve25Three_leftInverse
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:299:theorem canonicalCurveToStructured25Three_leftInverse
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:327:def canonicalCurveEquivStructured25Three
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:338:theorem canonicalStructuredPointCount25Three_field_eq_card
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:378:theorem f3_canonical_normalized_three_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:386:theorem f9_canonical_normalized_three_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:394:theorem f27_canonical_normalized_three_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF2.lean:26:def canonicalQuadric25CharTwo {K : Type*} [CommRing K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF2.lean:31:def canonicalCubic25CharTwo {K : Type*} [CommRing K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF2.lean:38:def canonicalQuadricGradient25CharTwo {K : Type*} [CommRing K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF2.lean:43:def canonicalCubicGradient25CharTwo {K : Type*} [CommRing K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF2.lean:60:def canonicalJacobianMinors25CharTwo {K : Type*} [CommRing K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF2.lean:73:def IsCanonicalSingular25CharTwo {K : Type*} [CommRing K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF3.lean:38:def canonicalQuadricGradient25Three {K : Type*} [CommRing K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF3.lean:47:def canonicalCubicGradient25Three {K : Type*} [CommRing K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF3.lean:67:def canonicalJacobianMinors25Three {K : Type*} [CommRing K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF3.lean:81:def IsCanonicalSingular25Three {K : Type*} [Field K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF3.lean:93:def canonicalResidualYDerivative25Three {K : Type*} [CommRing K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmoothF3.lean:99:def canonicalResidualZDerivative25Three {K : Type*} [CommRing K]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientThreeBaseChange.lean:41:theorem map_canonicalQuadric25Three
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientThreeBaseChange.lean:50:theorem map_canonicalCubic25Three
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientThreeBaseChange.lean:60:theorem isCanonicalNormalizedThree_map_iff
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientThreeBaseChange.lean:77:def canonicalPointEmbedding
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientThreeBaseChange.lean:108:def canonicalThreeModel : CurveModel where
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAffineSmooth.lean:146:def xChartUniversalMinors : CanonicalJacobianMinors25 xChartAffineRing :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientKoszulQuotient.lean:88:theorem curveChartMap_comp_canonicalProjectiveCurveMap (i : Fin 4) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientKoszulQuotient.lean:123:theorem canonicalProjectiveCurveMap_app_chartGenerator_eq_zero
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientTwistRestriction.lean:161:def canonicalConeOverlapMap (i j : Fin 4) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientTwistRestriction.lean:173:theorem canonicalConeOverlapMap_comp_left (i j : Fin 4) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientTwistRestriction.lean:200:theorem canonicalConeOverlapMap_comp_right (i j : Fin 4) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientTwistRestriction.lean:361:theorem canonicalConeOverlapMap_degreeOneRatio (i j : Fin 4) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientTwistRestriction.lean:373:theorem canonicalConeOverlapMap_degreeOneRatioUnit (i j : Fin 4) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoAmbientTwistRestriction.lean:386:theorem canonicalConeOverlapMap_ratioPowerTransition
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoBaseChange.lean:36:theorem map_canonicalQuadric25Binary
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoBaseChange.lean:45:theorem map_canonicalCubic25Binary
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoBaseChange.lean:55:theorem isCanonicalNormalizedTwo_map_iff
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoBaseChange.lean:77:def canonicalPointEmbeddingTwo
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoBaseChange.lean:110:def canonicalTwoModel : CurveModel where
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoChartIdeal.lean:50:def canonicalConeChartMap (i : Fin 4) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoChartIdeal.lean:57:theorem canonicalConeGradedProjection_quadric_eq_zero :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoChartIdeal.lean:64:theorem canonicalConeGradedProjection_cubic_eq_zero :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoChartIdeal.lean:72:theorem canonicalConeChartMap_dehomogenizedQuadric_eq_zero (i : Fin 4) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoChartIdeal.lean:82:theorem canonicalConeChartMap_dehomogenizedCubic_eq_zero (i : Fin 4) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoChartIdeal.lean:231:theorem canonicalConeChartMap_surjective (i : Fin 4) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:32:def canonicalQuadricPolynomial25Two : BinaryHomogeneousRing :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:40:def canonicalCubicPolynomial25Two : BinaryHomogeneousRing :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:50:theorem canonicalQuadricPolynomial25Two_isHomogeneous :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:66:theorem canonicalCubicPolynomial25Two_isHomogeneous :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:88:def canonicalCurveIdeal25Two : Ideal BinaryHomogeneousRing :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:92:abbrev CanonicalConeRing25Two :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:96:theorem canonicalCone_algebraMap_surjective :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:102:theorem canonicalCone_algebraMap_ker :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:113:theorem eval_canonicalQuadricPolynomial25Two
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:123:theorem eval_canonicalCubicPolynomial25Two
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:233:theorem canonicalCone_conormal_exact :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:245:theorem canonicalCone_mapBaseChange_surjective :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormalBasis.lean:32:abbrev I := canonicalCurveIdeal25Two
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormalBasis.lean:35:abbrev B := CanonicalConeRing25Two
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoGradedAlgebra.lean:154:theorem mul_mem_literalConePiece {i j : ℕ} {x y : CanonicalConeRing25Two}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoGradedAlgebra.lean:180:def canonicalConeGradedProjection :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoGradedAlgebra.lean:189:theorem canonicalConeGradedProjection_surjective :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoGradedAlgebra.lean:197:theorem decompose_canonicalConeProjection (p : S) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoGradedAlgebra.lean:206:theorem decompose_canonicalConeProjection_apply (p : S) (n : ℕ) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoGradedKoszul.lean:287:abbrev canonicalConePiece (n : ℕ) :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoIdealSheaf.lean:85:theorem canonicalProjectiveCurveMap_ker_coordinateChart (i : Fin 4) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoKoszul.lean:34:def canonicalConeProjection : R →ₗ[R] CanonicalConeRing25Two :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoKoszul.lean:56:theorem canonicalConeProjection_apply (r : R) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoKoszul.lean:147:theorem canonicalConeProjection_surjective :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBoundary.lean:48:def canonicalWChartBoundaryIdeal : Ideal W :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBoundary.lean:53:abbrev CanonicalWChartBoundary :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBoundary.lean:57:def canonicalWChartToBoundary : W →+* CanonicalWChartBoundary :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBoundary.lean:61:def boundaryX : CanonicalWChartBoundary :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBoundary.lean:64:def boundaryY : CanonicalWChartBoundary :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBoundary.lean:67:def boundaryZ : CanonicalWChartBoundary :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBoundary.lean:72:theorem boundary_two_eq_zero : (2 : CanonicalWChartBoundary) = 0 := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBoundary.lean:206:def boundaryZToBoundary : BoundaryZAlgebra →ₐ[k] CanonicalWChartBoundary :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBoundary.lean:294:def affineToBoundary : AffineChart 3 →ₐ[k] CanonicalWChartBoundary :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBoundary.lean:377:theorem canonicalWChartBoundary_moduleFinite :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:63:def canonicalWChartPoint : Coordinates4 (ChartQuotient 3) :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:66:def canonicalWChartX : ChartQuotient 3 := canonicalWChartPoint.x
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:67:def canonicalWChartY : ChartQuotient 3 := canonicalWChartPoint.y
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:68:def canonicalWChartZ : ChartQuotient 3 := canonicalWChartPoint.z
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:70:theorem canonicalWChartPoint_w : canonicalWChartPoint.w = 1 := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:81:theorem wChartPoint_eq_canonicalWChartPoint :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:89:def zPolynomialToCanonicalWChart : k[X] →+* ChartQuotient 3 :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:92:theorem planeSexticPolynomial_eval_canonicalWChart :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:106:def planeCoordinateRingToCanonicalWChart :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:112:theorem planeCoordinateRingToCanonicalWChart_root :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:118:theorem planeCoordinateRingToCanonicalWChart_planeX :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:123:theorem planeCoordinateRingToCanonicalWChart_planeZ :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:129:def canonicalWChartProjectionDenominator : ChartQuotient 3 :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:133:def canonicalWChartProjectionNumerator : ChartQuotient 3 :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:137:theorem planeCoordinateRingToCanonicalWChart_denominator :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartBridge.lean:144:theorem planeCoordinateRingToCanonicalWChart_numerator :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartDomain.lean:557:def canonicalWChartTowerEquiv :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartDomain.lean:586:theorem canonicalWChartTowerEquiv_mk (p : AffineChart 3) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartDomain.lean:599:theorem canonicalWChartX_eq_mk :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartDomain.lean:609:theorem canonicalWChartZ_eq_mk :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartDomain.lean:619:theorem canonicalWChartTowerEquiv_denominator :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartDomain.lean:636:theorem canonicalWChartProjectionDenominator_isRegular :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartDomain.lean:710:theorem canonicalWChartToDOpen_injective :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:32:abbrev CanonicalWChartDOpen :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:36:def planeToCanonicalWChartDOpen :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:49:def planeDOpenToCanonicalWChartDOpen :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:55:theorem planeDOpenToCanonicalWChartDOpen_algebraMap
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:128:theorem planeDOpenToCanonicalWChartDOpen_x :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:134:theorem planeDOpenToCanonicalWChartDOpen_z :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:140:theorem planeDOpenToCanonicalWChartDOpen_denominator :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:147:theorem planeDOpenToCanonicalWChartDOpen_numerator :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:155:theorem canonicalWChartDenominator_mul_y :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:172:theorem planeDOpenToCanonicalWChartDOpen_y :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:189:def planeDOpenCanonicalPoint :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:202:theorem planeDOpenCanonicalPoint_cubic :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:213:theorem planeDOpenCanonicalPoint_quadric :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:230:def canonicalWChartAffineVariableToPlaneDOpen
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:236:def canonicalWChartAffinePolynomialToPlaneDOpen :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:241:theorem canonicalWChartAffinePolynomialToPlaneDOpen_quadric :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:251:theorem canonicalWChartAffinePolynomialToPlaneDOpen_cubic :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:271:def canonicalWChartToPlaneDOpen : ChartQuotient 3 →+* PlaneDOpen :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:277:theorem canonicalWChartToPlaneDOpen_mk (p : AffineChart 3) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:284:theorem canonicalWChartToPlaneDOpen_x :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:294:theorem canonicalWChartToPlaneDOpen_y :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:304:theorem canonicalWChartToPlaneDOpen_z :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:314:theorem canonicalWChartToPlaneDOpen_denominator :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:319:theorem canonicalDenominator_mapsToUnit :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:326:def canonicalWChartDOpenToPlaneDOpen :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:332:theorem canonicalWChartDOpenToPlaneDOpen_algebraMap
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:341:theorem canonicalWChartDOpenToPlaneDOpen_comp_planeDOpenToCanonicalWChartDOpen :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:377:theorem planeDOpenToCanonicalWChartDOpen_comp_canonicalWChartDOpenToPlaneDOpen :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:453:theorem planeDOpenEquivCanonicalWChartDOpen_apply (p : PlaneDOpen) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneChartLocalization.lean:459:theorem planeDOpenEquivCanonicalWChartDOpen_symm_apply
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneFunctionField.lean:214:theorem canonicalQuadric_wChart
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneFunctionField.lean:225:theorem canonicalCubic_wChart
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneFunctionField.lean:237:theorem denominator_sq_mul_canonicalQuadric_of_two_eq_zero
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneFunctionField.lean:257:theorem denominator_sq_mul_canonicalQuadric
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneFunctionField.lean:299:theorem planeSexticPolynomial_eval_eq_zero_of_canonical
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoProj.lean:33:theorem canonicalCone_irrelevant_le_map :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoProj.lean:121:abbrev CanonicalProjectiveCurve25Two : Scheme :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoProj.lean:132:def canonicalProjectiveCurveMap :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoProj.lean:139:def canonicalProjectiveCurveToSpec :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoProj.lean:149:theorem canonicalProjectiveCurveMap_preimage_basicOpen (s : S) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoProj.lean:160:theorem canonicalProjectiveCurveMap_preimage_coordinate (i : Fin 4) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoQuotientGrading.lean:30:theorem canonicalCurveIdeal25Two_isHomogeneous :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoQuotientGrading.lean:181:theorem canonicalConePieceLinearEquiv_mk (n : ℕ) (p : shiftedPiece 0 n) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:387:theorem canonicalQuadricPolynomial25Two_ne_zero :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:396:theorem canonicalQuadricPolynomial25Two_isSMulRegular :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:402:theorem canonicalQuadricCubicIdeal_ne_top :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:428:theorem canonicalQuadricCubic_isRegular :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoSmooth.lean:44:theorem canonicalCone_irrelevant_le_coordinate_span :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:122:theorem map_canonicalQuadric_coordinates
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:131:theorem map_canonicalCubic_coordinates
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:151:theorem map_canonicalJacobianMinors_xy
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:160:theorem map_canonicalJacobianMinors_xz
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:169:theorem map_canonicalJacobianMinors_xw
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:178:theorem map_canonicalJacobianMinors_yz
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:187:theorem map_canonicalJacobianMinors_yw
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:196:theorem map_canonicalJacobianMinors_zw
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:205:theorem map_pderiv_canonicalQuadric
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:217:theorem map_pderiv_canonicalCubic
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:239:theorem map_canonicalQuadric
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:248:theorem map_canonicalCubic
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoTwistingSheafGluing.lean:777:abbrev twistCechSource (d : ℤ) : CanonicalProjectiveCurve25Two.Modules :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoTwistingSheafGluing.lean:782:abbrev twistCechTarget (d : ℤ) : CanonicalProjectiveCurve25Two.Modules :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoTwistingSheafGluing.lean:817:def globalTwistModule (d : ℤ) : CanonicalProjectiveCurve25Two.Modules :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoTwistingTransition.lean:30:def coordinateClass (i : Fin 4) : CanonicalConeRing25Two :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:244:def canonicalQuadric25Binary {R : Type*} (O : BinaryRingOperations R)
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:254:def canonicalCubic25Binary {R : Type*} (O : BinaryRingOperations R)
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:271:def IsCanonicalNormalized25 {R : Type*} [DecidableEq R]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:285:def canonicalNormalizedPoints25F4 : Finset (NormalizedProjective4 F4) :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:289:theorem canonicalNormalizedPoints25F4_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:296:def canonicalXChartFiber25F8 (y : F8) : Finset (F8 × F8) :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:308:theorem canonicalXChartFiber25F8_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:317:def canonicalYChartPoints25F8 : Finset (F8 × F8) :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:322:theorem canonicalYChartPoints25F8_card : canonicalYChartPoints25F8.card = 1 := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:326:def canonicalZChartPoints25F8 : Finset F8 :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:331:theorem canonicalZChartPoints25F8_card : canonicalZChartPoints25F8.card = 1 := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:336:def canonicalProjectivePointCount25F8 : Nat :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:341:theorem canonicalProjectivePointCount25F8_eq :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:352:def canonicalXChartFiber25F16 (y : F16) : Finset (F16 × F16) :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:453:theorem canonicalXChartFiber25F16_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:491:def canonicalYChartPoints25F16 : Finset (F16 × F16) :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:496:theorem canonicalYChartPoints25F16_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:501:def canonicalZChartPoints25F16 : Finset F16 :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:506:theorem canonicalZChartPoints25F16_card :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:512:theorem canonicalWChartPoint25F16 :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:519:def canonicalProjectivePointCount25F16 : Nat :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:526:theorem canonicalProjectivePointCount25F16_eq :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:537:def canonicalQuadricGradient25F2 (P : Coordinates4 F2) : Coordinates4 F2 :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:541:def canonicalCubicGradient25F2 (P : Coordinates4 F2) : Coordinates4 F2 :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:550:def canonicalJacobianMinors25F2 (P : Coordinates4 F2) : List F2 :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:562:def HasFullCanonicalJacobianRank25F2 (P : Coordinates4 F2) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:573:theorem canonical_point25F2_has_full_jacobian_rank :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeDefs.lean:228:def canonicalQuadric25Ternary {R : Type*} (O : TernaryRingOperations R)
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeDefs.lean:236:def canonicalCubic25Ternary {R : Type*} (O : TernaryRingOperations R)
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeDefs.lean:251:def IsCanonicalNormalized25Ternary {R : Type*} [DecidableEq R]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:40:def canonicalQuadricX25Three (y z w : K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:44:def canonicalCubicX25Three (y z w : K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:49:def canonicalResidualX25Three (y z : K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:55:def canonicalEliminationMultiplierX25Three (y z w : K) : K :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:65:theorem canonical_elimination_identity25Three (y z w : K) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:83:theorem canonicalCubicX25Three_eq_zero_iff_residual
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:107:def canonicalResidualX25Ternary {R : Type*}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:122:def canonicalRegularPairs25Three {R : Type*} [Fintype R] [DecidableEq R]
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:129:def canonicalExceptionalPairs25Three
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:137:def canonicalYChartPairs25Three
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:144:def canonicalZChartValues25Three
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:153:def canonicalStructuredPointCount25Three
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:163:theorem canonicalStructuredParts25F3 :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:171:theorem canonicalStructuredPointCount25F3_eq :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:178:theorem canonicalStructuredParts25F9 :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:187:theorem canonicalStructuredPointCount25F9_eq :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:194:theorem canonicalStructuredParts25F27 :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:204:theorem canonicalStructuredPointCount25F27_eq :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientZeta.lean:34:def N₁ : ℤ := canonicalPoints25F2.card
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientZeta.lean:37:def N₂ : ℤ := canonicalNormalizedPoints25F4.card
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientZeta.lean:40:def N₃ : ℤ := canonicalProjectivePointCount25F8
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientZeta.lean:43:def N₄ : ℤ := canonicalProjectivePointCount25F16
+FLT/Assumptions/MazurProof/RationalPointsN25TateCanonicalBridge.lean:79:theorem homogeneousPlaneLift25_onCanonical
+FLT/Assumptions/MazurProof/RationalPointsN25TateCanonicalBridge.lean:193:theorem lmfdbQuotientCoordinates25_onCanonical
+FLT/Assumptions/MazurProof/RationalPointsN25TateCanonicalBridge.lean:207:theorem not_isCusp25_of_xyz_ne_zero
+FLT/Assumptions/MazurProof/RationalPointsN25TateCanonicalBridge.lean:229:theorem homogeneousPlaneLift25_not_isCusp
+FLT/Assumptions/MazurProof/CyclicExclusion25.lean:49:theorem no_rational_point_of_order_25
+=== Exact canonical-equation theorem declarations across the full tree ===
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:387:theorem canonicalQuadricPolynomial25Two_ne_zero :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:396:theorem canonicalQuadricPolynomial25Two_isSMulRegular :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:402:theorem canonicalQuadricCubicIdeal_ne_top :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:428:theorem canonicalQuadricCubic_isRegular :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:55:theorem canonicalQuadric25Ternary_f81_eq (P : Coordinates4 F81) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:68:theorem canonicalCubic25Ternary_f81_eq (P : Coordinates4 F81) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:185:theorem canonicalCoordinatesFromEigen_scale
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:216:theorem canonicalCoordinatesFromEigen_ne_zero
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:677:theorem canonicalQuadric25Three_scale (a : K) (P : Coordinates4 K) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:688:theorem canonicalCubic25Three_scale (a : K) (P : Coordinates4 K) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThreeProjective.lean:746:theorem canonicalCubic25_fromEigen_eq_zero_iff_segre
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:164:theorem canonicalCoordinatesFromEigen_eigen {e : K} {P : Coordinates4 K}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:251:theorem canonicalQuadric25_fromEigen {e u₁ u₂ u₃ u₄ : K}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:347:theorem canonicalQuadric25_segre_eq_zero {e a b c d : K}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:360:theorem canonicalCubic25_segre {e a b c d : K}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:49:theorem canonicalQuadric25Over_rat_eq_source :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:58:theorem canonicalCubic25Over_rat_eq_source :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:136:theorem canonical_point25F2_iff_cusp :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:146:theorem canonicalPoints25F2_card : canonicalPoints25F2.card = 5 := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:269:theorem canonical_point25F4_iff_cusp :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:276:theorem canonical_point25F4_descends_to_f2 :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientThreeBaseChange.lean:41:theorem map_canonicalQuadric25Three
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientThreeBaseChange.lean:50:theorem map_canonicalCubic25Three
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:59:theorem canonicalCubic25_eq_linear (x y z w : ℚ) :
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:79:theorem canonical_point_projects_to_plane_sextic {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:244:theorem canonical_point_w_zero_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:274:theorem canonical_point_z_zero_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:306:theorem canonical_point_x_zero_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:353:theorem canonical_point_y_zero_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:386:theorem canonical_point_with_zero_coordinate_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:64:theorem canonicalQuadric25Ternary_field_eq
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:74:theorem canonicalCubic25Ternary_field_eq
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientSmallThreeSemantic.lean:103:theorem canonicalQuadricX_regularW_eq_zero
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneFunctionField.lean:214:theorem canonicalQuadric_wChart
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneFunctionField.lean:225:theorem canonicalCubic_wChart
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneFunctionField.lean:237:theorem denominator_sq_mul_canonicalQuadric_of_two_eq_zero
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoPlaneFunctionField.lean:257:theorem denominator_sq_mul_canonicalQuadric
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:122:theorem map_canonicalQuadric_coordinates
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:131:theorem map_canonicalCubic_coordinates
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:205:theorem map_pderiv_canonicalQuadric
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:217:theorem map_pderiv_canonicalCubic
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:239:theorem map_canonicalQuadric
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoStructuralJacobian.lean:248:theorem map_canonicalCubic
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:573:theorem canonical_point25F2_has_full_jacobian_rank :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:173:theorem canonicalQuadric25_tau25 (p : Coordinates25) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:181:theorem canonicalCubic25_tau25 (p : Coordinates25) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:241:theorem canonical_cusps_on_model :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:448:theorem canonicalQuadric25_eq_neg_cyclicAdjacent (p : Coordinates25) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:531:theorem canonicalQuadric25_scale (a : ℚ) (p : Coordinates25) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:50:theorem canonicalQuadricPolynomial25Two_isHomogeneous :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:66:theorem canonicalCubicPolynomial25Two_isHomogeneous :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:113:theorem eval_canonicalQuadricPolynomial25Two
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoConormal.lean:123:theorem eval_canonicalCubicPolynomial25Two
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoBaseChange.lean:36:theorem map_canonicalQuadric25Binary
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoBaseChange.lean:45:theorem map_canonicalCubic25Binary
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeilThreeLinear.lean:83:theorem canonicalCubicX25Three_eq_zero_iff_residual
+=== Literal proof gaps in N25 production sources ===
+FLT/Assumptions/MazurProof/CyclicExclusion25.lean:47:axiom no_explicit_order25_obstruction : ¬ ExplicitOrder25Obstruction
