@@ -1,0 +1,44 @@
+name: Q6397 N25 full source grep
+
+on:
+  push:
+    branches: [q6397-grep-check]
+    paths-ignore:
+      - scratch/Q6397-source-grep.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  grep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q6397-grep-check
+      - name: Search every Lean source file for N25 rational-point classifiers
+        shell: bash
+        run: |
+          {
+            printf 'BASE_AI_SCRATCH=%s\n' '69ef7a5341a648087fcc6b1bcb523d5205716381'
+            printf 'AUDIT_HEAD=%s\n' "$(git rev-parse HEAD)"
+            echo '=== Every declaration/reference using the canonical cusp predicates or endpoint axiom ==='
+            grep -RInE 'IsCanonicalCusp25|IsCusp25|no_explicit_order25_obstruction' FLT --include='*.lean' || true
+            echo '=== Every theorem declaration mentioning N25 canonical/rational/cusp/dense-torus language ==='
+            grep -RInE '^(theorem|lemma|axiom|def|abbrev).*([Cc]anonical|[Cc]usp|rational|dense|torus|plane_sextic)' \
+              FLT/Assumptions/MazurProof/RationalPointsN25*.lean \
+              FLT/Assumptions/MazurProof/CyclicExclusion25.lean || true
+            echo '=== Exact canonical-equation theorem declarations across the full tree ==='
+            grep -RInE '^(theorem|lemma).*canonical(Quadric|Cubic|_point|Point|Coordinates|_nonzero|.*cusp|.*Cusp)' \
+              FLT --include='*.lean' || true
+            echo '=== Literal proof gaps in N25 production sources ==='
+            grep -RInE '^[[:space:]]*(sorry|axiom)[[:space:]]' \
+              FLT/Assumptions/MazurProof/RationalPointsN25*.lean \
+              FLT/Assumptions/MazurProof/CyclicExclusion25.lean || true
+          } > scratch/Q6397-source-grep.txt
+          git config user.name github-actions[bot]
+          git config user.email 41898282+users.noreply.github.com
+          git add scratch/Q6397-source-grep.txt
+          git commit -m 'Capture Q6397 N25 full source grep [skip ci]'
+          git push origin HEAD:q6397-grep-check
