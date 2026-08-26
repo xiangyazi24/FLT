@@ -1,0 +1,2496 @@
+BASE_AI_SCRATCH=69ef7a5341a648087fcc6b1bcb523d5205716381
+AUDIT_HEAD=6c7d5e00d07e3303e8fc8c68b8e3d6d40620094b
+=== All Lean references to the rational cusp predicates ===
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:606:    ¬ IsCusp25 p := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:631:    ¬ IsCusp25 (sutherlandCanonicalCoordinates25 x y) := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:851:    ¬ IsCusp25 (tateCanonicalCoordinates25 b c) := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:116:def IsCanonicalCusp25F2 (P : Coordinates4 F2) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:123:private instance decidableIsCanonicalCusp25F2 :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:124:    DecidablePred IsCanonicalCusp25F2 := fun P => by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:125:  unfold IsCanonicalCusp25F2 ProjectivelyEqual4F2
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:137:    ∀ P : Coordinates4 F2, IsCanonicalPoint25F2 P ↔ IsCanonicalCusp25F2 P := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:244:def IsCanonicalCusp25F4 (P : Coordinates4 F4) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:251:private instance decidableIsCanonicalCusp25F4 :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:252:    DecidablePred IsCanonicalCusp25F4 := fun P => by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:253:  unfold IsCanonicalCusp25F4 ProjectivelyEqual4F4
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientF2.lean:270:    ∀ P : Coordinates4 F4, IsCanonicalPoint25F4 P ↔ IsCanonicalCusp25F4 P := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:125:def IsCanonicalCusp25 (x y z w : ℚ) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:137:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:147:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:157:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:168:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:179:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:249:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:279:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:311:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:358:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:391:    IsCanonicalCusp25 x y z w := by
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:404:    (hncusp : ¬ IsCanonicalCusp25 x y z w) :
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:432:    (hncusp : ¬ IsCanonicalCusp25 x y z w) :
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:469:    (hncusp : ¬ IsCanonicalCusp25 x y z w) :
+FLT/Assumptions/MazurProof/RationalPointsN25TateCanonicalBridge.lean:210:    ¬ IsCusp25 p := by
+FLT/Assumptions/MazurProof/RationalPointsN25TateCanonicalBridge.lean:234:    ¬ IsCusp25 (homogeneousPlaneLift25 x z w) := by
+FLT/Assumptions/MazurProof/CyclicExclusion25.lean:47:axiom no_explicit_order25_obstruction : ¬ ExplicitOrder25Obstruction
+FLT/Assumptions/MazurProof/CyclicExclusion25.lean:53:  exact no_explicit_order25_obstruction
+FLT/Assumptions/MazurProof/CyclicOrderAssembly.lean:49:  is `no_explicit_order25_obstruction`, the rational-point exclusion for that
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:307:def IsCusp25 (p : Coordinates25) : Prop :=
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:308:  IsCanonicalCusp25 p.x p.y p.z p.w
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:310:/-- The displayed disjunction in `IsCanonicalCusp25` is exactly the five
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:313:    IsCusp25 p ↔
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:322:theorem tau25_isCusp {p : Coordinates25} (hp : IsCusp25 p) :
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:323:    IsCusp25 (tau25 p) := by
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientAction.lean:339:    IsCusp25 (tau25 p) ↔ IsCusp25 p := by
+=== Candidate all-point classification names ===
+FLT/Assumptions/MazurProof/ObstructionCurve.lean:405:list as all rational points is proved below from the explicit 2-isogeny to the
+FLT/Assumptions/MazurProof/X017FormalTwoReduction.lean:15:Thus four times every rational point belongs to the two-adic formal kernel.
+FLT/Assumptions/MazurProof/X017FormalTwoReduction.lean:391:/-- Four times every rational point on the good integral model belongs to
+FLT/Assumptions/MazurProof/N13RationalPointEndgame.lean:14:six cusps cover the special curve, every rational curve point has the same
+FLT/Assumptions/MazurProof/N13RationalPointEndgame.lean:104:/-- A separated exact classifier makes every rational point of the
+FLT/Assumptions/MazurProof/CyclicExclusion11.lean:499:/-- Every rational affine point on `11a3` is one of its four affine cusps. -/
+FLT/Assumptions/MazurProof/X017RationalPoints.lean:9:of two.  On the integral good model, four times every rational point is
+FLT/Assumptions/MazurProof/X017RationalPoints.lean:11:through the explicit model equivalence proves `4P=0` for every rational point.
+FLT/Assumptions/MazurProof/N13RationalPicardEndpoint.lean:13:argument proves that every rational point of the N13 curve is cuspidal.
+FLT/Assumptions/MazurProof/N13RationalPicardEndpoint.lean:78:/-- Pointwise reflection already classifies every rational projective point
+FLT/Assumptions/MazurProof/RationalPointsN27CM.lean:159:/-- Every affine rational point on `y²+y=x³` is one of the two cusps. -/
+FLT/Assumptions/MazurProof/RationalPointsN15C0.lean:18:seven standard affine rational points on this curve are cuspidal: none can be
+FLT/Assumptions/MazurProof/XDelta19GoodIsogeny.lean:162:every affine rational point of the quotient. -/
+FLT/Assumptions/MazurProof/XDelta19GoodIsogeny.lean:433:is multiplication by three on every rational point of the good model. -/
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:243:/-- Every rational canonical point on the hyperplane `w = 0` is a cusp. -/
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:244:theorem canonical_point_w_zero_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:273:/-- Every rational canonical point on the hyperplane `z = 0` is a cusp. -/
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:274:theorem canonical_point_z_zero_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:305:/-- Every rational canonical point on the hyperplane `x = 0` is a cusp. -/
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:306:theorem canonical_point_x_zero_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:345:/-- Every rational canonical point on the hyperplane `y = 0` is a cusp.
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:353:theorem canonical_point_y_zero_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:361:  · exact canonical_point_w_zero_is_cusp hnz hQ hC hw
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:386:theorem canonical_point_with_zero_coordinate_is_cusp {x y z w : ℚ}
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:393:  · exact canonical_point_x_zero_is_cusp hnz hQ hC hx
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:394:  · exact canonical_point_y_zero_is_cusp hnz hQ hC hy
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:395:  · exact canonical_point_z_zero_is_cusp hnz hQ hC hz
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:396:  · exact canonical_point_w_zero_is_cusp hnz hQ hC hw
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:408:    exact hncusp (canonical_point_with_zero_coordinate_is_cusp hnz hQ hC (Or.inl hx))
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:411:    exact hncusp (canonical_point_with_zero_coordinate_is_cusp hnz hQ hC (Or.inr (Or.inl hy)))
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:415:      (canonical_point_with_zero_coordinate_is_cusp hnz hQ hC (Or.inr (Or.inr (Or.inl hz))))
+FLT/Assumptions/MazurProof/RationalPointsN25CanonicalPoints.lean:418:      (canonical_point_with_zero_coordinate_is_cusp hnz hQ hC (Or.inr (Or.inr (Or.inr hw))))
+FLT/Assumptions/MazurProof/TateOrder18.lean:300:additionally *transports* a chosen rational 2-torsion point `T` along the same
+FLT/Assumptions/MazurProof/XDelta19Isogeny.lean:291:is multiplication by three on every rational point of the short model. -/
+FLT/Assumptions/MazurProof/RationalPointsN15IsogenyHom.lean:1008:/-- The explicit forward two-isogeny is additive on all rational points. -/
+FLT/Assumptions/MazurProof/RationalPointsN15IsogenyHom.lean:1530:/-- The explicit dual two-isogeny is additive on all rational points. -/
+FLT/Assumptions/MazurProof/RationalPointsN11.lean:11:The only remaining arithmetic input is that every rational affine point on
+FLT/Assumptions/MazurProof/XDelta19GoodWeakDescent.lean:10:dual-forward composition then show that every rational point is a
+FLT/Assumptions/MazurProof/RationalPointsN18.lean:147:/-- Conversely, every noncuspidal rational point on `G18 = 0` gives a
+FLT/Assumptions/MazurProof/XDelta19GoodRationalPoints.lean:11:The three-adic formal filtration then kills six times every rational point.
+FLT/Assumptions/MazurProof/XDelta19GoodRationalPoints.lean:12:This curve has no rational two-torsion, so every rational point is already
+FLT/Assumptions/MazurProof/XDelta19GoodRationalPoints.lean:55:absence of rational two-torsion force every rational point to be killed by
+FLT/Assumptions/MazurProof/RationalPointsN18Descent.lean:9:every noncuspidal rational point into the interval `0 < U < 1`.  It then clears
+FLT/Assumptions/MazurProof/X017FourTorsion.lean:6:Once a separate arithmetic argument proves that every rational point is
+FLT/Assumptions/MazurProof/CyclicOrderAssembly.lean:22:`mazur_cyclic_order_bound_assembled`: every rational point of an elliptic curve
+FLT/Assumptions/MazurProof/RationalPointsN25QuotientWeil.lean:22:The final section also checks that every *rational* point of the special fibre
+FLT/Assumptions/MazurProof/CyclicExclusion35.lean:11:Geometrically this is a non-cuspidal rational point on the fiber product
+FLT/Assumptions/MazurProof/XDelta19GoodFormalCore.lean:12:formal kernel for every rational point `P`; the factor six is the order of
+FLT/Assumptions/MazurProof/XDelta19GoodFormalReduction.lean:15:is formal for every rational point.
+FLT/Assumptions/MazurProof/N18GoodModelAssembly.lean:3034:theorem all_rational_points_are_cusps :
+FLT/Assumptions/MazurProof/N18GoodModelAssembly.lean:3036:  MazurProof.N18RouteC.Block7.all_rational_points_are_cusps
+FLT/Assumptions/MazurProof/N18GoodModelAssembly.lean:3047:noncuspidal rational point, whereas Block 7 says that every rational point is
+FLT/Assumptions/MazurProof/N18GoodModelAssembly.lean:3079:  exact hnot (all_rational_points_are_cusps P)
+FLT/Assumptions/MazurProof/N13DegreeOneGraphPoint.lean:107:literally the balanced graph of a rational affine curve point. -/
+FLT/Assumptions/MazurProof/N13RationalCurvePointPicardRealization.lean:7:# Two-fibre Picard realization of every rational N13 curve point
+FLT/Assumptions/MazurProof/N13RationalCurvePointPicardRealization.lean:608:/-- The spread line canonically attached to a rational curve point. -/
+FLT/Assumptions/MazurProof/CyclicExclusion13.lean:33:/-- The arithmetic core: every rational point on the optimized model of
+=== Lean build and #print axioms ===
+⚠ [8563/8593] Built scratch.WardSomos (4.6s)
+warning: scratch/WardSomos.lean:23:65: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: scratch/WardSomos.lean:27:84: 'ring' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+warning: scratch/WardSomos.lean:27:84: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+warning: scratch/WardSomos.lean:31:81: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: scratch/WardSomos.lean:35:74: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: scratch/WardSomos.lean:55:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/WardSomos.lean:63:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/WardSomos.lean:80:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/WardSomos.lean:84:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/WardSomos.lean:89:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/WardSomos.lean:97:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/WardSomos.lean:122:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/WardSomos.lean:126:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/WardSomos.lean:131:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/WardSomos.lean:136:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/WardSomos.lean:143:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/WardSomos.lean:156:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+✔ [8564/8593] Built Mathlib (4.5s)
+✔ [8565/8593] Built scratch.WardConservation (3.3s)
+⚠ [8566/8593] Built scratch.PsiSomos (4.0s)
+warning: scratch/PsiSomos.lean:8:12: please avoid 'open (scoped) Classical' statements: this can hide theorem statements which would be better stated with explicit decidability statements.
+Instead, use `open Classical in` for definitions or instances, the `classical` tactic for proofs.
+For theorem statements, either add missing decidability assumptions or use `open Classical in`.
+
+Note: This linter can be disabled with `set_option linter.style.openClassical false`
+warning: scratch/PsiSomos.lean:39:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/PsiSomos.lean:53:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/PsiSomos.lean:66:47: This simp argument is unused:
+  Int.even_add
+
+Hint: Omit it from the simp argument list.
+  simp ̵[̵I̵n̵t̵.̵e̵v̵e̵n̵_̵a̵d̵d̵]̵
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/PsiSomos.lean:67:47: This simp argument is unused:
+  Int.even_sub
+
+Hint: Omit it from the simp argument list.
+  simp ̵[̵I̵n̵t̵.̵e̵v̵e̵n̵_̵s̵u̵b̵]̵
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/PsiSomos.lean:58:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+✔ [8567/8593] Built FLT.Assumptions.MazurProof.RationalPointsN25TwoPrimeReduction (6.6s)
+✔ [8568/8593] Built FLT.Assumptions.MazurProof.RationalPointsN25CanonicalPoints (14s)
+✔ [8569/8593] Built FLT.Assumptions.MazurProof.TorsionDefs (10s)
+✔ [8570/8593] Built scratch.TateZ2xZ10 (13s)
+⚠ [8571/8593] Built scratch.WardInvariant (6.6s)
+warning: scratch/WardInvariant.lean:65:26: `Int.le_induction` has been deprecated: Use `Int.leInduction` instead
+warning: scratch/WardInvariant.lean:92:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+⚠ [8572/8593] Built scratch.KeystoneLadder (19s)
+warning: scratch/KeystoneLadder.lean:5:0: Unscoped option maxHeartbeats is not allowed:
+Please scope this to individual declarations, as in
+```
+set_option maxHeartbeats in
+-- comment explaining why this is necessary
+example : ... := ...
+```
+
+Note: This linter can be disabled with `set_option linter.style.setOption false`
+warning: scratch/KeystoneLadder.lean:37:0: `same_refl` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:40:0: `same_mk_iff` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:64:0: `xRep_zero` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:67:0: `xRep_some` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:70:0: `xRep_some_X` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:73:0: `xRep_some_Z` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:76:0: `xInf_X` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:77:0: `xInf_Z` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:78:0: `xAff_X` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:79:0: `xAff_Z` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:81:0: `xRep_neg_some_same` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:87:0: `xRep_neg_same` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:107:0: `delta_eq_zero_of_same` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:161:0: `some_ext_of_xy_eq` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:191:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 2000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: scratch/KeystoneLadder.lean:290:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 2000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: scratch/KeystoneLadder.lean:307:0: `p1_toVec_xInf` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:310:0: `p1_toVec_xAff` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:313:0: `xRep_toVec_eq_point_xRep` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:324:0: `mk_vec` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:336:0: `refl` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:340:0: `smul_right` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:347:0: `symm` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:353:0: `trans` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:361:0: `second_eq_zero_of_same_infty` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:366:0: `second_ne_zero_of_same_affine` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:373:0: `sameP1Vec_of_P1_same` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:459:0: `deltaVec_smul_smul` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:464:0: `sumNumVec_smul_smul` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:472:8: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: scratch/KeystoneLadder.lean:469:0: `diffAddVec_smul_smul_smul` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:478:0: `diffAddVec_congr` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:504:4: `simp [hδ, hδ']` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: scratch/KeystoneLadder.lean:505:4: `refine ⟨a ^ 2 * b ^ 2 * d, mul_ne_zero (mul_ne_zero (pow_ne_zero 2 ha) (pow_ne_zero 2 hb)) hd, ?_⟩` uses `⊢`!
+warning: scratch/KeystoneLadder.lean:504:4: `simp [hδ, hδ']` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: scratch/KeystoneLadder.lean:507:4: `exact diffAddVec_smul_smul_smul (E := E) A B D a b d` uses `⊢`!
+warning: scratch/KeystoneLadder.lean:509:0: `dupNumH_smul` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:514:0: `dupDenH_smul` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:523:8: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: scratch/KeystoneLadder.lean:519:0: `doubleVec_congr` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:527:0: `dupDenH_eq_Yder_sq` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:537:0: `dupNumH_eq_polynomialX_sq_of_Yder_zero` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:583:26: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: scratch/KeystoneLadder.lean:574:0: `dupNumH_ne_zero_of_Yder_zero` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:686:0: `deltaVec_point_xRep_eq` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:691:0: `xRep_X_eq_point_xRep_zero` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:695:0: `xRep_Z_eq_point_xRep_one` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:732:12: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: scratch/KeystoneLadder.lean:713:0: `point_xRep_eq_of_deltaVec_zero` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:735:0: `deltaVec_eq_zero_of_scaled` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:746:0: `deltaVec_ne_zero_of_scaled` does not use the following hypothesis in its type:
+  • [DecidableEq k] (#3)
+
+Consider removing this hypothesis and using `classical` in the proof instead. For terms, consider using `open scoped Classical in` at the term level (not the command level).
+
+Note: This linter can be disabled with `set_option linter.unusedDecidableInType false`
+warning: scratch/KeystoneLadder.lean:822:4: `simp [hδ]` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: scratch/KeystoneLadder.lean:828:4: `have hadd : (m • P) + ((m + 1) • P) = (2 * m + 1) • P :=
+  by
+  rw [add_comm]
+  exact adjacent_add_nsmul P m` uses `⊢`!
+warning: scratch/KeystoneLadder.lean:822:4: `simp [hδ]` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: scratch/KeystoneLadder.lean:832:4: `have hgeom' :
+  SameP1Vec (((2 * m + 1) • P).xRep) (diffAddVec E (m • P).xRep ((m + 1) • P).xRep ((m • P) - ((m + 1) • P)).xRep) := by
+  simpa [hadd] using hgeom` uses `⊢`!
+warning: scratch/KeystoneLadder.lean:822:4: `simp [hδ]` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: scratch/KeystoneLadder.lean:845:4: `exact SameP1Vec.trans hgeom' (diffAddVec_congr (E := E) hA hB hDsub)` uses `⊢`!
+⚠ [8573/8593] Built scratch.KeystoneDoubling (3.9s)
+warning: scratch/KeystoneDoubling.lean:10:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDoubling.lean:52:60: This simp argument is unused:
+  eval_ofNat
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, eval_add, eval_mul, eval_pow, eval_C,̵ ̵e̵v̵a̵l̵_̵o̵f̵N̵a̵t̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+✔ [8574/8593] Built FLT.Assumptions.MazurProof.RationalPointsN25ReductionCardinality (7.6s)
+✔ [8575/8593] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientAction (11s)
+✔ [8576/8593] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF2 (27s)
+⚠ [8577/8593] Built scratch.PsiInvariant (8.6s)
+warning: scratch/PsiInvariant.lean:42:47: This simp argument is unused:
+  Int.even_add
+
+Hint: Omit it from the simp argument list.
+  simp ̵[̵I̵n̵t̵.̵e̵v̵e̵n̵_̵a̵d̵d̵]̵
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/PsiInvariant.lean:43:47: This simp argument is unused:
+  Int.even_sub
+
+Hint: Omit it from the simp argument list.
+  simp ̵[̵I̵n̵t̵.̵e̵v̵e̵n̵_̵s̵u̵b̵]̵
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/PsiInvariant.lean:46:31: This simp argument is unused:
+  map_sub
+
+Hint: Omit it from the simp argument list.
+  simp only [map_mul, map_add, map_s̵u̵b̵,̵ ̵m̵a̵p_̵p̵ow, mk_ψ_eq, ep2, em2, ep1, em1,
+  ̵  ̵ ̵ ̵hm, if_true, if_false,
+  ̲  ̲ ̲ ̲not_true, not_false_iff, mul_one] at hMk
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/PsiInvariant.lean:47:37: This simp argument is unused:
+  not_false_iff
+
+Hint: Omit it from the simp argument list.
+  simp only [map_mul, map_add, map_sub, map_pow, mk_ψ_eq, ep2, em2, ep1, em1,
+  ̵  ̵ ̵ ̵hm, if_true, if_false,
+  ̲  ̲ ̲ ̲not_true, n̵o̵t̵_̵f̵a̵l̵s̵e̵_̵i̵f̵f̵,̵ ̵mul_one] at hMk
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/PsiInvariant.lean:53:40: This simp argument is unused:
+  map_one
+
+Hint: Omit it from the simp argument list.
+  simp only [map_mul, map_add, map_pow, m̵a̵p_̵o̵n̵e̵,̵ ̵p̵reΨInvN, preΨInvD, if_pos hm, one_mul]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/PsiInvariant.lean:53:80: This simp argument is unused:
+  one_mul
+
+Hint: Omit it from the simp argument list.
+  simp only [map_mul, map_add, map_pow, map_one, preΨInvN, preΨInvD, if_pos hm,̵ ̵o̵n̵e̵_̵m̵u̵l̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/PsiInvariant.lean:63:47: This simp argument is unused:
+  Int.even_add
+
+Hint: Omit it from the simp argument list.
+  simp ̵[̵I̵n̵t̵.̵e̵v̵e̵n̵_̵a̵d̵d̵]̵
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/PsiInvariant.lean:64:47: This simp argument is unused:
+  Int.even_sub
+
+Hint: Omit it from the simp argument list.
+  simp ̵[̵I̵n̵t̵.̵e̵v̵e̵n̵_̵s̵u̵b̵]̵
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/PsiInvariant.lean:67:31: This simp argument is unused:
+  map_sub
+
+Hint: Omit it from the simp argument list.
+  simp only [map_mul, map_add, map_s̵u̵b̵,̵ ̵m̵a̵p_̵p̵ow, mk_ψ_eq, ep2, em2, ep1, em1,
+  ̵  ̵ ̵ ̵hm, if_true, if_false,
+  ̲  ̲ ̲ ̲not_true, not_false_iff, mul_one] at hMk
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/PsiInvariant.lean:68:27: This simp argument is unused:
+  not_true
+
+Hint: Omit it from the simp argument list.
+  simp only [map_mul, map_add, map_sub, map_pow, mk_ψ_eq, ep2, em2, ep1, em1,
+  ̵  ̵ ̵ ̵hm, if_true, if_false,
+  ̲ n̵o̵t̵_̵t̵r̵u̵e̵,̵  ̲ ̲not_false_iff, mul_one] at hMk
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/PsiInvariant.lean:73:40: This simp argument is unused:
+  map_one
+
+Hint: Omit it from the simp argument list.
+  simp only [map_mul, map_add, map_pow, m̵a̵p_̵o̵n̵e̵,̵ ̵p̵reΨInvN, preΨInvD, if_neg hm, one_mul]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+✔ [8578/8593] Built FLT.Assumptions.MazurProof.RationalPointsN25DegreeTwoPullback (9.2s)
+⚠ [8579/8593] Built scratch.TateZ2xZ10Reduction (40s)
+warning: scratch/TateZ2xZ10Reduction.lean:596:4: `simp [tateNormalFormCurve, WeierstrassCurve.Affine.addX]` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: scratch/TateZ2xZ10Reduction.lean:596:4: Try this:
+  [apply] simp only [WeierstrassCurve.Affine.addX, neg_mul, sub_zero, tateNormalFormCurve_a₁, tateNormalFormCurve_a₂,
+    sub_neg_eq_add]
+info: scratch/TateZ2xZ10Reduction.lean:597:4: `unfold tateX5` uses `⊢`!
+warning: scratch/TateZ2xZ10Reduction.lean:601:4: `simp [tateNormalFormCurve, WeierstrassCurve.Affine.addX,
+      WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negAddY,
+      WeierstrassCurve.Affine.negY]` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: scratch/TateZ2xZ10Reduction.lean:601:4: Try this:
+  [apply] simp only [neg_mul, sub_zero]
+info: scratch/TateZ2xZ10Reduction.lean:604:4: `unfold tateY5` uses `⊢`!
+✔ [8580/8593] Built FLT.Assumptions.MazurProof.TateNFDivision (68s)
+✔ [8581/8593] Built FLT.Assumptions.MazurProof.TateNormalFormBridge (15s)
+⚠ [8582/8593] Built scratch.KeystoneDoublingCert (34s)
+warning: scratch/KeystoneDoublingCert.lean:10:0: Unscoped option maxHeartbeats is not allowed:
+Please scope this to individual declarations, as in
+```
+set_option maxHeartbeats in
+-- comment explaining why this is necessary
+example : ... := ...
+```
+
+Note: This linter can be disabled with `set_option linter.style.setOption false`
+warning: scratch/KeystoneDoublingCert.lean:23:8: automatically included section variable(s) unused in theorem `_private.scratch.KeystoneDoublingCert.0.WeierstrassCurve.bRel_poly`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: scratch/KeystoneDoublingCert.lean:56:8: automatically included section variable(s) unused in theorem `_private.scratch.KeystoneDoublingCert.0.WeierstrassCurve.preΨ_2m_add_one_even`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+info: scratch/KeystoneDoublingCert.lean:70:24: Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+warning: scratch/KeystoneDoublingCert.lean:63:8: automatically included section variable(s) unused in theorem `_private.scratch.KeystoneDoublingCert.0.WeierstrassCurve.preΨ_2m_sub_one_even`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: scratch/KeystoneDoublingCert.lean:72:8: automatically included section variable(s) unused in theorem `_private.scratch.KeystoneDoublingCert.0.WeierstrassCurve.preΨ_2m_add_one_odd`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+info: scratch/KeystoneDoublingCert.lean:86:24: Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+warning: scratch/KeystoneDoublingCert.lean:79:8: automatically included section variable(s) unused in theorem `_private.scratch.KeystoneDoublingCert.0.WeierstrassCurve.preΨ_2m_sub_one_odd`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: scratch/KeystoneDoublingCert.lean:116:35: This simp argument is unused:
+  d4
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d̵4̵,̵ ̵ell, rho0, hm, h2m,
+  ̲  ̲ ̲ ̲ ̲ ̲if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:116:54: This simp argument is unused:
+  h2m
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h̵2̵m̵,̵ ̵if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:116:68: This simp argument is unused:
+  if_false
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, i̵f̵_̵f̵a̵l̵s̵e̵,̵ ̵ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:116:78: This simp argument is unused:
+  ite_true
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, i̵t̵e̵_̵t̵r̵u̵e̵,̵ ̵ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:116:88: This simp argument is unused:
+  ite_false
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, i̵t̵e̵_̵f̵a̵l̵s̵e̵,̵ ̵mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:116:146: This simp argument is unused:
+  map_add
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲m̵a̵p̵_̵a̵d̵d̵,̵ ̵map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:116:164: This simp argument is unused:
+  Polynomial.C_mul
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵m̵u̵l̵,̵ ̵Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:116:182: This simp argument is unused:
+  Polynomial.C_add
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵a̵d̵d̵,̵ ̵Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:116:200: This simp argument is unused:
+  Polynomial.C_sub
+
+Hint: Omit it from the simp argument list.
+  s̵i̵m̵p̵ ̵o̵n̵l̵y̵ ̵[̵d̵u̵p̵D̵e̵n̵P̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Φ̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵S̵q̵,̵
+  ̵ ̵ ̵ ̵ ̵ ̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵₂̵S̵q̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵₃̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵p̵r̵e̵Ψ̵₄̵,̵
+  ̵ ̵ ̵ ̵ ̵ ̵ ̵P̵m̵2̵,̵ ̵P̵m̵1̵,̵ ̵P̵0̵,̵ ̵P̵1̵,̵ ̵P̵2̵,̵ ̵s̵,̵ ̵c̵3̵,̵ ̵d̵4̵,̵ ̵e̵l̵l̵,̵ ̵r̵h̵o̵0̵,̵ ̵h̵m̵,̵ ̵h̵2̵m̵,̵ ̵i̵f̵_̵t̵r̵u̵e̵,̵ ̵i̵f̵_̵f̵a̵l̵s̵e̵,̵ ̵i̵t̵e̵_̵t̵r̵u̵e̵,̵ ̵i̵t̵e̵_̵f̵a̵l̵s̵e̵,̵ ̵m̵u̵l̵_̵o̵n̵e̵,̵ ̵o̵n̵e̵_̵m̵u̵l̵,̵ ̵m̵a̵p̵_̵m̵u̵l̵,̵ ̵m̵a̵p̵_̵o̵f̵N̵a̵t̵,̵ ̵m̵a̵p̵_̵p̵o̵w̵,̵ ̵m̵a̵p̵_̵a̵d̵d̵,̵ ̵m̵a̵p̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵m̵u̵l̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵a̵d̵d̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵p̵o̵w̵]̵s̲i̲m̲p̲ ̲o̲n̲l̲y̲ ̲[̲d̲u̲p̲D̲e̲n̲P̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Φ̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Ψ̲S̲q̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Ψ̲₂̲S̲q̲,̲
+  ̲ ̲ ̲ ̲ ̲ ̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Ψ̲₃̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲p̲r̲e̲Ψ̲₄̲,̲ ̲P̲m̲2̲,̲ ̲P̲m̲1̲,̲ ̲P̲0̲,̲ ̲P̲1̲,̲ ̲P̲2̲,̲ ̲s̲,̲ ̲c̲3̲,̲ ̲d̲4̲,̲ ̲e̲l̲l̲,̲ ̲r̲h̲o̲0̲,̲ ̲h̲m̲,̲
+  ̲ ̲ ̲ ̲ ̲ ̲ ̲h̲2̲m̲,̲ ̲i̲f̲_̲t̲r̲u̲e̲,̲ ̲i̲f̲_̲f̲a̲l̲s̲e̲,̲ ̲i̲t̲e̲_̲t̲r̲u̲e̲,̲ ̲i̲t̲e̲_̲f̲a̲l̲s̲e̲,̲ ̲m̲u̲l̲_̲o̲n̲e̲,̲ ̲o̲n̲e̲_̲m̲u̲l̲,̲ ̲m̲a̲p̲_̲m̲u̲l̲,̲ ̲m̲a̲p̲_̲o̲f̲N̲a̲t̲,̲ ̲m̲a̲p̲_̲p̲o̲w̲,̲
+  ̲ ̲ ̲ ̲ ̲ ̲ ̲m̲a̲p̲_̲a̲d̲d̲,̲ ̲m̲a̲p̲_̲s̲u̲b̲,̲ ̲P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲m̲u̲l̲,̲ ̲P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲a̲d̲d̲,̲ ̲P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲p̲o̲w̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:116:218: This simp argument is unused:
+  Polynomial.C_pow
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, Polynomial.C_add, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵p̵o̵w̵]̵P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲s̲u̲b̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:116:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDoublingCert.lean:159:35: This simp argument is unused:
+  d4
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d̵4̵,̵ ̵eta, rho1, hm, h2m,
+  ̲  ̲ ̲ ̲ ̲ ̲if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:159:68: This simp argument is unused:
+  if_false
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, i̵f̵_̵f̵a̵l̵s̵e̵,̵ ̵ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:159:78: This simp argument is unused:
+  ite_true
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, i̵t̵e̵_̵t̵r̵u̵e̵,̵ ̵ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:159:88: This simp argument is unused:
+  ite_false
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, i̵t̵e̵_̵f̵a̵l̵s̵e̵,̵ ̵mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:159:146: This simp argument is unused:
+  map_add
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲m̵a̵p̵_̵a̵d̵d̵,̵ ̵map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:159:164: This simp argument is unused:
+  Polynomial.C_mul
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵m̵u̵l̵,̵ ̵Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:159:182: This simp argument is unused:
+  Polynomial.C_add
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵a̵d̵d̵,̵ ̵Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:159:200: This simp argument is unused:
+  Polynomial.C_sub
+
+Hint: Omit it from the simp argument list.
+  s̵i̵m̵p̵ ̵o̵n̵l̵y̵ ̵[̵d̵u̵p̵N̵u̵m̵P̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Φ̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵S̵q̵,̵
+  ̵ ̵ ̵ ̵ ̵ ̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵₂̵S̵q̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵₃̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵p̵r̵e̵Ψ̵₄̵,̵
+  ̵ ̵ ̵ ̵ ̵ ̵ ̵P̵m̵2̵,̵ ̵P̵m̵1̵,̵ ̵P̵0̵,̵ ̵P̵1̵,̵ ̵P̵2̵,̵ ̵s̵,̵ ̵c̵3̵,̵ ̵d̵4̵,̵ ̵e̵t̵a̵,̵ ̵r̵h̵o̵1̵,̵ ̵h̵m̵,̵ ̵h̵2̵m̵,̵ ̵i̵f̵_̵t̵r̵u̵e̵,̵ ̵i̵f̵_̵f̵a̵l̵s̵e̵,̵ ̵i̵t̵e̵_̵t̵r̵u̵e̵,̵ ̵i̵t̵e̵_̵f̵a̵l̵s̵e̵,̵ ̵m̵u̵l̵_̵o̵n̵e̵,̵ ̵o̵n̵e̵_̵m̵u̵l̵,̵ ̵m̵a̵p̵_̵m̵u̵l̵,̵ ̵m̵a̵p̵_̵o̵f̵N̵a̵t̵,̵ ̵m̵a̵p̵_̵p̵o̵w̵,̵ ̵m̵a̵p̵_̵a̵d̵d̵,̵ ̵m̵a̵p̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵m̵u̵l̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵a̵d̵d̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵p̵o̵w̵]̵s̲i̲m̲p̲ ̲o̲n̲l̲y̲ ̲[̲d̲u̲p̲N̲u̲m̲P̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Φ̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Ψ̲S̲q̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Ψ̲₂̲S̲q̲,̲
+  ̲ ̲ ̲ ̲ ̲ ̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Ψ̲₃̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲p̲r̲e̲Ψ̲₄̲,̲ ̲P̲m̲2̲,̲ ̲P̲m̲1̲,̲ ̲P̲0̲,̲ ̲P̲1̲,̲ ̲P̲2̲,̲ ̲s̲,̲ ̲c̲3̲,̲ ̲d̲4̲,̲ ̲e̲t̲a̲,̲ ̲r̲h̲o̲1̲,̲ ̲h̲m̲,̲
+  ̲ ̲ ̲ ̲ ̲ ̲ ̲h̲2̲m̲,̲ ̲i̲f̲_̲t̲r̲u̲e̲,̲ ̲i̲f̲_̲f̲a̲l̲s̲e̲,̲ ̲i̲t̲e̲_̲t̲r̲u̲e̲,̲ ̲i̲t̲e̲_̲f̲a̲l̲s̲e̲,̲ ̲m̲u̲l̲_̲o̲n̲e̲,̲ ̲o̲n̲e̲_̲m̲u̲l̲,̲ ̲m̲a̲p̲_̲m̲u̲l̲,̲ ̲m̲a̲p̲_̲o̲f̲N̲a̲t̲,̲ ̲m̲a̲p̲_̲p̲o̲w̲,̲
+  ̲ ̲ ̲ ̲ ̲ ̲ ̲m̲a̲p̲_̲a̲d̲d̲,̲ ̲m̲a̲p̲_̲s̲u̲b̲,̲ ̲P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲m̲u̲l̲,̲ ̲P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲a̲d̲d̲,̲ ̲P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲p̲o̲w̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:159:218: This simp argument is unused:
+  Polynomial.C_pow
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, Polynomial.C_add, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵p̵o̵w̵]̵P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲s̲u̲b̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:159:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDoublingCert.lean:197:35: This simp argument is unused:
+  d4
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d̵4̵,̵ ̵ell, rho0, hm, h2m,
+  ̲  ̲ ̲ ̲ ̲ ̲if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:197:54: This simp argument is unused:
+  h2m
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h̵2̵m̵,̵ ̵if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:197:59: This simp argument is unused:
+  if_true
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, i̵f̵_̵t̵r̵u̵e̵,̵ ̵if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:197:78: This simp argument is unused:
+  ite_true
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, i̵t̵e̵_̵t̵r̵u̵e̵,̵ ̵ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:197:88: This simp argument is unused:
+  ite_false
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, i̵t̵e̵_̵f̵a̵l̵s̵e̵,̵ ̵mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:197:146: This simp argument is unused:
+  map_add
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲m̵a̵p̵_̵a̵d̵d̵,̵ ̵map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:197:164: This simp argument is unused:
+  Polynomial.C_mul
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵m̵u̵l̵,̵ ̵Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:197:182: This simp argument is unused:
+  Polynomial.C_add
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵a̵d̵d̵,̵ ̵Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:197:200: This simp argument is unused:
+  Polynomial.C_sub
+
+Hint: Omit it from the simp argument list.
+  s̵i̵m̵p̵ ̵o̵n̵l̵y̵ ̵[̵d̵u̵p̵D̵e̵n̵P̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Φ̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵S̵q̵,̵
+  ̵ ̵ ̵ ̵ ̵ ̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵₂̵S̵q̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵₃̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵p̵r̵e̵Ψ̵₄̵,̵
+  ̵ ̵ ̵ ̵ ̵ ̵ ̵P̵m̵2̵,̵ ̵P̵m̵1̵,̵ ̵P̵0̵,̵ ̵P̵1̵,̵ ̵P̵2̵,̵ ̵s̵,̵ ̵c̵3̵,̵ ̵d̵4̵,̵ ̵e̵l̵l̵,̵ ̵r̵h̵o̵0̵,̵ ̵h̵m̵,̵ ̵h̵2̵m̵,̵ ̵i̵f̵_̵t̵r̵u̵e̵,̵ ̵i̵f̵_̵f̵a̵l̵s̵e̵,̵ ̵i̵t̵e̵_̵t̵r̵u̵e̵,̵ ̵i̵t̵e̵_̵f̵a̵l̵s̵e̵,̵ ̵m̵u̵l̵_̵o̵n̵e̵,̵ ̵o̵n̵e̵_̵m̵u̵l̵,̵ ̵m̵a̵p̵_̵m̵u̵l̵,̵ ̵m̵a̵p̵_̵o̵f̵N̵a̵t̵,̵ ̵m̵a̵p̵_̵p̵o̵w̵,̵ ̵m̵a̵p̵_̵a̵d̵d̵,̵ ̵m̵a̵p̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵m̵u̵l̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵a̵d̵d̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵p̵o̵w̵]̵s̲i̲m̲p̲ ̲o̲n̲l̲y̲ ̲[̲d̲u̲p̲D̲e̲n̲P̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Φ̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Ψ̲S̲q̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Ψ̲₂̲S̲q̲,̲
+  ̲ ̲ ̲ ̲ ̲ ̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Ψ̲₃̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲p̲r̲e̲Ψ̲₄̲,̲ ̲P̲m̲2̲,̲ ̲P̲m̲1̲,̲ ̲P̲0̲,̲ ̲P̲1̲,̲ ̲P̲2̲,̲ ̲s̲,̲ ̲c̲3̲,̲ ̲d̲4̲,̲ ̲e̲l̲l̲,̲ ̲r̲h̲o̲0̲,̲ ̲h̲m̲,̲
+  ̲ ̲ ̲ ̲ ̲ ̲ ̲h̲2̲m̲,̲ ̲i̲f̲_̲t̲r̲u̲e̲,̲ ̲i̲f̲_̲f̲a̲l̲s̲e̲,̲ ̲i̲t̲e̲_̲t̲r̲u̲e̲,̲ ̲i̲t̲e̲_̲f̲a̲l̲s̲e̲,̲ ̲m̲u̲l̲_̲o̲n̲e̲,̲ ̲o̲n̲e̲_̲m̲u̲l̲,̲ ̲m̲a̲p̲_̲m̲u̲l̲,̲ ̲m̲a̲p̲_̲o̲f̲N̲a̲t̲,̲ ̲m̲a̲p̲_̲p̲o̲w̲,̲
+  ̲ ̲ ̲ ̲ ̲ ̲ ̲m̲a̲p̲_̲a̲d̲d̲,̲ ̲m̲a̲p̲_̲s̲u̲b̲,̲ ̲P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲m̲u̲l̲,̲ ̲P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲a̲d̲d̲,̲ ̲P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲p̲o̲w̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:197:218: This simp argument is unused:
+  Polynomial.C_pow
+
+Hint: Omit it from the simp argument list.
+  simp only [dupDenP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, ell, rho0, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, Polynomial.C_add, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵p̵o̵w̵]̵P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲s̲u̲b̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:197:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDoublingCert.lean:240:35: This simp argument is unused:
+  d4
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d̵4̵,̵ ̵eta, rho1, hm, h2m,
+  ̲  ̲ ̲ ̲ ̲ ̲if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:240:78: This simp argument is unused:
+  ite_true
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, i̵t̵e̵_̵t̵r̵u̵e̵,̵ ̵ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:240:88: This simp argument is unused:
+  ite_false
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, i̵t̵e̵_̵f̵a̵l̵s̵e̵,̵ ̵mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:240:146: This simp argument is unused:
+  map_add
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲m̵a̵p̵_̵a̵d̵d̵,̵ ̵map_sub, Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:240:164: This simp argument is unused:
+  Polynomial.C_mul
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵m̵u̵l̵,̵ ̵Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:240:182: This simp argument is unused:
+  Polynomial.C_add
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵a̵d̵d̵,̵ ̵Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:240:200: This simp argument is unused:
+  Polynomial.C_sub
+
+Hint: Omit it from the simp argument list.
+  s̵i̵m̵p̵ ̵o̵n̵l̵y̵ ̵[̵d̵u̵p̵N̵u̵m̵P̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Φ̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵S̵q̵,̵
+  ̵ ̵ ̵ ̵ ̵ ̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵₂̵S̵q̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵₃̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵p̵r̵e̵Ψ̵₄̵,̵
+  ̵ ̵ ̵ ̵ ̵ ̵ ̵P̵m̵2̵,̵ ̵P̵m̵1̵,̵ ̵P̵0̵,̵ ̵P̵1̵,̵ ̵P̵2̵,̵ ̵s̵,̵ ̵c̵3̵,̵ ̵d̵4̵,̵ ̵e̵t̵a̵,̵ ̵r̵h̵o̵1̵,̵ ̵h̵m̵,̵ ̵h̵2̵m̵,̵ ̵i̵f̵_̵t̵r̵u̵e̵,̵ ̵i̵f̵_̵f̵a̵l̵s̵e̵,̵ ̵i̵t̵e̵_̵t̵r̵u̵e̵,̵ ̵i̵t̵e̵_̵f̵a̵l̵s̵e̵,̵ ̵m̵u̵l̵_̵o̵n̵e̵,̵ ̵o̵n̵e̵_̵m̵u̵l̵,̵ ̵m̵a̵p̵_̵m̵u̵l̵,̵ ̵m̵a̵p̵_̵o̵f̵N̵a̵t̵,̵ ̵m̵a̵p̵_̵p̵o̵w̵,̵ ̵m̵a̵p̵_̵a̵d̵d̵,̵ ̵m̵a̵p̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵m̵u̵l̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵a̵d̵d̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵p̵o̵w̵]̵s̲i̲m̲p̲ ̲o̲n̲l̲y̲ ̲[̲d̲u̲p̲N̲u̲m̲P̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Φ̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Ψ̲S̲q̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Ψ̲₂̲S̲q̲,̲
+  ̲ ̲ ̲ ̲ ̲ ̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲Ψ̲₃̲,̲ ̲W̲e̲i̲e̲r̲s̲t̲r̲a̲s̲s̲C̲u̲r̲v̲e̲.̲p̲r̲e̲Ψ̲₄̲,̲ ̲P̲m̲2̲,̲ ̲P̲m̲1̲,̲ ̲P̲0̲,̲ ̲P̲1̲,̲ ̲P̲2̲,̲ ̲s̲,̲ ̲c̲3̲,̲ ̲d̲4̲,̲ ̲e̲t̲a̲,̲ ̲r̲h̲o̲1̲,̲ ̲h̲m̲,̲
+  ̲ ̲ ̲ ̲ ̲ ̲ ̲h̲2̲m̲,̲ ̲i̲f̲_̲t̲r̲u̲e̲,̲ ̲i̲f̲_̲f̲a̲l̲s̲e̲,̲ ̲i̲t̲e̲_̲t̲r̲u̲e̲,̲ ̲i̲t̲e̲_̲f̲a̲l̲s̲e̲,̲ ̲m̲u̲l̲_̲o̲n̲e̲,̲ ̲o̲n̲e̲_̲m̲u̲l̲,̲ ̲m̲a̲p̲_̲m̲u̲l̲,̲ ̲m̲a̲p̲_̲o̲f̲N̲a̲t̲,̲ ̲m̲a̲p̲_̲p̲o̲w̲,̲
+  ̲ ̲ ̲ ̲ ̲ ̲ ̲m̲a̲p̲_̲a̲d̲d̲,̲ ̲m̲a̲p̲_̲s̲u̲b̲,̲ ̲P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲m̲u̲l̲,̲ ̲P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲a̲d̲d̲,̲ ̲P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲p̲o̲w̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:240:218: This simp argument is unused:
+  Polynomial.C_pow
+
+Hint: Omit it from the simp argument list.
+  simp only [dupNumP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq, WeierstrassCurve.Ψ₂Sq,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, Pm2, Pm1, P0, P1, P2, s, c3, d4, eta, rho1, hm,
+  ̲  ̲ ̲ ̲ ̲ ̲h2m, if_true, if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, Polynomial.C_mul, Polynomial.C_add, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵p̵o̵w̵]̵P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲s̲u̲b̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDoublingCert.lean:240:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+⚠ [8583/8593] Built scratch.KeystoneDiffAddCert (32s)
+warning: scratch/KeystoneDiffAddCert.lean:19:0: Unscoped option maxHeartbeats is not allowed:
+Please scope this to individual declarations, as in
+```
+set_option maxHeartbeats in
+-- comment explaining why this is necessary
+example : ... := ...
+```
+
+Note: This linter can be disabled with `set_option linter.style.setOption false`
+warning: scratch/KeystoneDiffAddCert.lean:29:43: Variable name `W` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: scratch/KeystoneDiffAddCert.lean:40:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:44:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:48:7: automatically included section variable(s) unused in theorem `WeierstrassCurve.deltaP_eval`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: scratch/KeystoneDiffAddCert.lean:53:7: automatically included section variable(s) unused in theorem `WeierstrassCurve.sumNumP_eval`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: scratch/KeystoneDiffAddCert.lean:62:7: automatically included section variable(s) unused in theorem `WeierstrassCurve.diffAddNumP_eval`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: scratch/KeystoneDiffAddCert.lean:68:7: automatically included section variable(s) unused in theorem `WeierstrassCurve.diffAddDenP_eval`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: scratch/KeystoneDiffAddCert.lean:72:8: automatically included section variable(s) unused in theorem `_private.scratch.KeystoneDiffAddCert.0.WeierstrassCurve.bRel_poly`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: scratch/KeystoneDiffAddCert.lean:94:8: automatically included section variable(s) unused in theorem `_private.scratch.KeystoneDiffAddCert.0.WeierstrassCurve.preΨ_2m_add_one_even`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: scratch/KeystoneDiffAddCert.lean:99:8: automatically included section variable(s) unused in theorem `_private.scratch.KeystoneDiffAddCert.0.WeierstrassCurve.preΨ_2m_add_one_odd`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: scratch/KeystoneDiffAddCert.lean:104:8: automatically included section variable(s) unused in theorem `_private.scratch.KeystoneDiffAddCert.0.WeierstrassCurve.preΨ_2m_even`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: scratch/KeystoneDiffAddCert.lean:109:8: automatically included section variable(s) unused in theorem `_private.scratch.KeystoneDiffAddCert.0.WeierstrassCurve.preΨ_2m_add_two`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: scratch/KeystoneDiffAddCert.lean:120:7: automatically included section variable(s) unused in theorem `WeierstrassCurve.ΨSq_two_mul_add_one`:
+  [IsDomain R]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [IsDomain R] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: scratch/KeystoneDiffAddCert.lean:124:42: This simp argument is unused:
+  Int.even_add_one
+
+Hint: Omit it from the simp argument list.
+  simp [I̵n̵t̵.̵e̵v̵e̵n̵_̵a̵d̵d̵_̵o̵n̵e̵,̵ ̵hm]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:145:40: This simp argument is unused:
+  Int.even_add_one
+
+Hint: Omit it from the simp argument list.
+  simp [I̵n̵t̵.̵e̵v̵e̵n̵_̵a̵d̵d̵_̵o̵n̵e̵,̵ ̵hm]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:157:34: This simp argument is unused:
+  ite_true
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, i̵t̵e̵_̵t̵r̵u̵e̵,̵ ̵ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add, map_sub,
+        Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:157:44: This simp argument is unused:
+  ite_false
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, ite_true, i̵t̵e̵_̵f̵a̵l̵s̵e̵,̵ ̵mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add, map_sub,
+        Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:158:35: This simp argument is unused:
+  map_add
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, m̵a̵p̵_̵a̵d̵d̵,̵ ̵map_sub,
+        Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:159:6: This simp argument is unused:
+  Polynomial.C_mul
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵m̵u̵l̵,̵ ̵Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:159:24: This simp argument is unused:
+  Polynomial.C_add
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵a̵d̵d̵,̵ ̵Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:159:42: This simp argument is unused:
+  Polynomial.C_sub
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:159:60: This simp argument is unused:
+  Polynomial.C_pow
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵p̵o̵w̵]̵P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲s̲u̲b̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:161:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:162:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:163:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:164:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:165:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:166:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:167:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:168:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:169:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:170:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:171:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:172:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:173:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:178:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:179:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:180:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:181:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:182:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:183:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:184:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:185:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:186:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:187:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:188:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:189:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:190:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:191:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:205:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:206:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:209:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:211:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:212:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:238:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:239:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:240:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:241:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:242:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:243:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:244:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:245:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:246:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:247:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:248:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:249:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:250:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:251:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:252:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:253:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:254:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:261:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:262:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:263:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:265:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:266:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:267:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:268:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:269:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:270:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:271:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:272:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:273:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:274:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:275:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:276:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:277:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:278:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:279:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:280:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:281:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:282:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:283:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:284:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:285:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:286:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:287:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:288:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:325:34: This simp argument is unused:
+  ite_true
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, i̵t̵e̵_̵t̵r̵u̵e̵,̵ ̵ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add, map_sub,
+        Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:325:44: This simp argument is unused:
+  ite_false
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, ite_true, i̵t̵e̵_̵f̵a̵l̵s̵e̵,̵ ̵mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add, map_sub,
+        Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:326:35: This simp argument is unused:
+  map_add
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, m̵a̵p̵_̵a̵d̵d̵,̵ ̵map_sub,
+        Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:327:6: This simp argument is unused:
+  Polynomial.C_mul
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵m̵u̵l̵,̵ ̵Polynomial.C_add, Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:327:24: This simp argument is unused:
+  Polynomial.C_add
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵a̵d̵d̵,̵ ̵Polynomial.C_sub, Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:327:42: This simp argument is unused:
+  Polynomial.C_sub
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵Polynomial.C_pow]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:327:60: This simp argument is unused:
+  Polynomial.C_pow
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddNumP, sumNumP, deltaP, WeierstrassCurve.Φ, WeierstrassCurve.ΨSq,
+        WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄,
+        show (m + 1 + 1 : ℤ) = m + 2 by ring, show (m + 1 - 1 : ℤ) = m by ring, hm, hm1, if_true,
+  ̲  ̲ ̲ ̲ ̲ ̲if_false, ite_true, ite_false, mul_one, one_mul, map_mul, map_ofNat, map_pow, map_add,
+  ̲  ̲ ̲ ̲ ̲ ̲map_sub, Polynomial.C_mul, Polynomial.C_add, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵p̵o̵w̵]̵P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲s̲u̲b̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneDiffAddCert.lean:329:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:330:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:331:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:332:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:333:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:334:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:335:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:336:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:337:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:338:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:339:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:340:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:341:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:346:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:347:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:348:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:349:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:350:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:351:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:352:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:353:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:354:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:355:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:356:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:357:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:358:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:359:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:373:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:374:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:377:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:379:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:380:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:390:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:391:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:392:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:393:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:394:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:395:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:396:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:397:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:398:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:399:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:400:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:401:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:402:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:403:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:404:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:405:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:406:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:408:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:409:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:410:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:412:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:413:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:414:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:415:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:416:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:417:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:418:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:419:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:420:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:421:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:422:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:423:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:424:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:425:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:426:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:427:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:428:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:429:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:430:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:431:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:432:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:433:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:434:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneDiffAddCert.lean:435:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+⚠ [8584/8593] Built scratch.KeystoneResultantCerts (3816s)
+warning: scratch/KeystoneResultantCerts.lean:15:0: Unscoped option maxHeartbeats is not allowed:
+Please scope this to individual declarations, as in
+```
+set_option maxHeartbeats in
+-- comment explaining why this is necessary
+example : ... := ...
+```
+
+Note: This linter can be disabled with `set_option linter.style.setOption false`
+warning: scratch/KeystoneResultantCerts.lean:100:62: This simp argument is unused:
+  map_one
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.Δ,
+  ̵  ̵ ̵ ̵ ̵ ̵map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, m̵a̵p̵_̵o̵n̵e̵,̵
+  ̵ ̵ ̵ ̵ ̵ ̵ ̵Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub,
+  ̲  ̲ ̲ ̲ ̲ ̲Polynomial.C_pow,
+  ̵  ̵ ̵ ̵ ̵ ̵Polynomial.C_neg, Polynomial.C_1]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:101:6: This simp argument is unused:
+  Polynomial.C_mul
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.Δ, map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, map_one, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵m̵u̵l̵,̵ ̵Polynomial.C_add, Polynomial.C_sub,
+  ̲  ̲ ̲ ̲ ̲ ̲Polynomial.C_pow, Polynomial.C_neg, Polynomial.C_1]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:101:24: This simp argument is unused:
+  Polynomial.C_add
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.Δ, map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, map_one, Polynomial.C_mul, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵a̵d̵d̵,̵ ̵Polynomial.C_sub,
+  ̲  ̲ ̲ ̲ ̲ ̲Polynomial.C_pow, Polynomial.C_neg, Polynomial.C_1]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:101:42: This simp argument is unused:
+  Polynomial.C_sub
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.Δ, map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, map_one, Polynomial.C_mul, Polynomial.C_add,
+  ̲  ̲ ̲ ̲ ̲ ̲P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵Polynomial.C_pow, Polynomial.C_neg, Polynomial.C_1]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:101:60: This simp argument is unused:
+  Polynomial.C_pow
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.Δ, map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, map_one, Polynomial.C_mul, Polynomial.C_add,
+  ̲  ̲ ̲ ̲ ̲ ̲Polynomial.C_sub, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵p̵o̵w̵,̵Polynomial.C_neg, Polynomial.C_1]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:102:6: This simp argument is unused:
+  Polynomial.C_neg
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.Δ, map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, map_one, Polynomial.C_mul, Polynomial.C_add,
+  ̲  ̲ ̲ ̲ ̲ ̲Polynomial.C_sub, Polynomial.C_pow, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵n̵e̵g̵,̵ ̵Polynomial.C_1]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:102:24: This simp argument is unused:
+  Polynomial.C_1
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₂Sq, WeierstrassCurve.Ψ₃, WeierstrassCurve.Δ, map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, map_one, Polynomial.C_mul, Polynomial.C_add,
+  ̲  ̲ ̲ ̲ ̲ ̲Polynomial.C_sub, Polynomial.C_pow, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵n̵e̵g̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵1̵]̵P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲n̲e̲g̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:118:23: This simp argument is unused:
+  zero_mul
+
+Hint: Omit it from the simp argument list.
+  simp only [eval_add, eval_mul, eval_C, eval_pow, eval_sub, eval_neg, eval_ofNat, eval_X,
+  ̵  ̵ ̵ ̵hs, hc3,
+  ̲ m̵u̵l̵_̵z̵e̵r̵o̵,̵  ̲ ̲m̲u̲l̲_̲zero_̵m̵u̵l̵, add_zero] at hb
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:562:62: This simp argument is unused:
+  map_one
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, WeierstrassCurve.Δ,
+  ̵  ̵ ̵ ̵ ̵ ̵map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, m̵a̵p̵_̵o̵n̵e̵,̵
+  ̵ ̵ ̵ ̵ ̵ ̵ ̵Polynomial.C_mul, Polynomial.C_add, Polynomial.C_sub,
+  ̲  ̲ ̲ ̲ ̲ ̲Polynomial.C_pow,
+  ̵  ̵ ̵ ̵ ̵ ̵Polynomial.C_neg, Polynomial.C_1]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:563:6: This simp argument is unused:
+  Polynomial.C_mul
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, WeierstrassCurve.Δ,
+  ̵  ̵ ̵ ̵ ̵ ̵map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, map_one,
+  ̵  ̵ ̵ ̵ ̵ ̵Polynomial.C_m̵u̵l̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵al̵.̵C̵_̵a̵dd, Polynomial.C_sub,
+  ̲  ̲ ̲ ̲ ̲ ̲Polynomial.C_pow,
+  ̵  ̵ ̵ ̵ ̵ ̵Polynomial.C_neg, Polynomial.C_1]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:563:24: This simp argument is unused:
+  Polynomial.C_add
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, WeierstrassCurve.Δ,
+  ̵  ̵ ̵ ̵ ̵ ̵map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, map_one,
+  ̵  ̵ ̵ ̵ ̵ ̵Polynomial.C_mul, Polynomial.C_a̵d̵d̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵sub,
+  ̲  ̲ ̲ ̲ ̲ ̲Polynomial.C_pow,
+  ̵  ̵ ̵ ̵ ̵ ̵Polynomial.C_neg, Polynomial.C_1]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:563:42: This simp argument is unused:
+  Polynomial.C_sub
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, WeierstrassCurve.Δ, map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, map_one, Polynomial.C_mul, Polynomial.C_add,
+  ̲  ̲ ̲ ̲ ̲ ̲P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵s̵u̵b̵,̵ ̵Polynomial.C_pow, Polynomial.C_neg, Polynomial.C_1]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:563:60: This simp argument is unused:
+  Polynomial.C_pow
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, WeierstrassCurve.Δ, map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, map_one, Polynomial.C_mul, Polynomial.C_add,
+  ̲  ̲ ̲ ̲ ̲ ̲Polynomial.C_sub, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵p̵o̵w̵,̵Polynomial.C_neg, Polynomial.C_1]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:564:6: This simp argument is unused:
+  Polynomial.C_neg
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, WeierstrassCurve.Δ, map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, map_one, Polynomial.C_mul, Polynomial.C_add,
+  ̲  ̲ ̲ ̲ ̲ ̲Polynomial.C_sub, Polynomial.C_pow, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵n̵e̵g̵,̵ ̵Polynomial.C_1]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:564:24: This simp argument is unused:
+  Polynomial.C_1
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.Ψ₃, WeierstrassCurve.preΨ₄, WeierstrassCurve.Δ, map_neg, map_mul,
+  ̲  ̲ ̲ ̲ ̲ ̲map_add, map_sub, map_pow, map_ofNat, map_one, Polynomial.C_mul, Polynomial.C_add,
+  ̲  ̲ ̲ ̲ ̲ ̲Polynomial.C_sub, Polynomial.C_pow, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵n̵e̵g̵,̵ ̵P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵C̵_̵1̵]̵P̲o̲l̲y̲n̲o̲m̲i̲a̲l̲.̲C̲_̲n̲e̲g̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneResultantCerts.lean:624:38: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: scratch/KeystoneResultantCerts.lean:628:24: This simp argument is unused:
+  zero_mul
+
+Hint: Omit it from the simp argument list.
+  simp only [eval_add, eval_mul, eval_C, eval_pow, eval_sub, eval_neg, eval_ofNat, eval_X,
+  ̵  ̵ ̵ ̵hc3, hd4,
+  ̲ m̵u̵l̵_̵z̵e̵r̵o̵,̵  ̲ ̲m̲u̲l̲_̲zero_̵m̵u̵l̵, add_zero] at hb
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [8585/8593] Built scratch.KeystoneCoprimality (8.5s)
+warning: scratch/KeystoneCoprimality.lean:13:0: Unscoped option maxHeartbeats is not allowed:
+Please scope this to individual declarations, as in
+```
+set_option maxHeartbeats in
+-- comment explaining why this is necessary
+example : ... := ...
+```
+
+Note: This linter can be disabled with `set_option linter.style.setOption false`
+warning: scratch/KeystoneCoprimality.lean:22:2: `@[expose]` has no effect; this declaration would be exposed by default
+warning: scratch/KeystoneCoprimality.lean:23:2: `@[expose]` has no effect; this declaration would be exposed by default
+warning: scratch/KeystoneCoprimality.lean:24:2: `@[expose]` has no effect; this declaration would be exposed by default
+warning: scratch/KeystoneCoprimality.lean:34:46: This simp argument is unused:
+  eval_add
+
+Hint: Omit it from the simp argument list.
+  simp only [pe, sx, c3x, eval_mul, eval_sub, e̵v̵a̵l̵_̵a̵d̵d̵,̵ ̵eval_pow, apply_ite (fun p : k[X] => p.eval x),
+  ̲  ̲ ̲ ̲eval_one] at this ⊢
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneCoprimality.lean:38:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneCoprimality.lean:82:26: `Int.le_induction` has been deprecated: Use `Int.leInduction` instead
+warning: scratch/KeystoneCoprimality.lean:128:41: This simp argument is unused:
+  eval_add
+
+Hint: Omit it from the simp argument list.
+  simp only [pe, sx, eval_mul, eval_sub, e̵v̵a̵l̵_̵a̵d̵d̵,̵ ̵eval_pow, apply_ite (fun p : k[X] => p.eval x),
+  ̲  ̲ ̲ ̲eval_one] at h ⊢
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneCoprimality.lean:138:37: This simp argument is unused:
+  eval_add
+
+Hint: Omit it from the simp argument list.
+  simp only [pe, eval_mul, eval_sub, eval_a̵d̵d̵,̵ ̵e̵v̵a̵l̵_̵pow] at h ⊢
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneCoprimality.lean:195:10: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: scratch/KeystoneCoprimality.lean:199:35: Try `simp at h` instead of `simpa using h`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: scratch/KeystoneCoprimality.lean:206:35: Try `simp at h` instead of `simpa using h`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: scratch/KeystoneCoprimality.lean:358:14: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: scratch/KeystoneCoprimality.lean:400:6: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: scratch/KeystoneCoprimality.lean:411:5: Variable name `h4` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: scratch/KeystoneCoprimality.lean:618:6: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: scratch/KeystoneCoprimality.lean:502:5: Variable name `h4` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: scratch/KeystoneCoprimality.lean:642:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                    ↓
+  ⏎  rintro ⟨hΦ, hΨ⟩⏎⏎  have hpe_sq : (pe W x (2 * m + 1)) ^ 2 = 0 := by⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneCoprimality.lean:646:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                                                  ↓
+  ⏎  have hpe : pe W x (2 * m + 1) = 0 := sq_eq_zero_iff.mp hpe_sq⏎⏎  by_cases hs : sx W x = 0⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneCoprimality.lean:651:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                        ↓
+  ⏎      m.not_even_two_mul_add_one) hpe⏎⏎  · have hΦformula := Φ_eval_odd (W := W) (x := x) (m := m)⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneCoprimality.lean:653:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                                              ↓
+  ⏎  · have hΦformula := Φ_eval_odd (W := W) (x := x) (m := m)⏎⏎    have hprod_sx :⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneCoprimality.lean:662:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                        ↓
+  ⏎      exact neg_eq_zero.mp hzero.symm⏎⏎    have hprod :⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneCoprimality.lean:666:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                                   ↓
+  ⏎      (mul_eq_zero.mp hprod_sx).resolve_right hs⏎⏎    rcases mul_eq_zero.mp hprod with hnext | hprev⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneCoprimality.lean:695:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                              ↓
+  ⏎    simpa [pe] using h.symm⏎⏎  have hΨ := congrArg (fun p : Polynomial k => p.eval x) (W.ΨSq_even m)⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneCoprimality.lean:722:43: 'ring' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+warning: scratch/KeystoneCoprimality.lean:722:43: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+warning: scratch/KeystoneCoprimality.lean:749:6: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+warning: scratch/KeystoneCoprimality.lean:751:6: try 'simp' instead of 'simpa'
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+⚠ [8586/8593] Built scratch.KeystoneSameP1 (7.3s)
+warning: scratch/KeystoneSameP1.lean:10:12: please avoid 'open (scoped) Classical' statements: this can hide theorem statements which would be better stated with explicit decidability statements.
+Instead, use `open Classical in` for definitions or instances, the `classical` tactic for proofs.
+For theorem statements, either add missing decidability assumptions or use `open Classical in`.
+
+Note: This linter can be disabled with `set_option linter.style.openClassical false`
+warning: scratch/KeystoneSameP1.lean:60:60: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+warning: scratch/KeystoneSameP1.lean:60:60: 'ring' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+warning: scratch/KeystoneSameP1.lean:68:71: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+warning: scratch/KeystoneSameP1.lean:68:71: 'ring' tactic does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+warning: scratch/KeystoneSameP1.lean:79:4: This simp argument is unused:
+  WeierstrassCurve.Φ_one
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.sumNumP_eval, sumNumVec, xPair, X, Z,
+  ̵  ̵ ̵ ̵WeierstrassCurve.baseChange,
+  ̲  ̲ ̲ ̲WeierstrassCurve.map_b₂, WeierstrassCurve.map_b₄,
+  ̵  ̵ ̵ ̵WeierstrassCurve.map_b₆,
+  ̲  ̲ ̲ ̲Algebra.algebraMap_self_apply,
+  ̵  ̵ ̵ ̵WeierstrassCurve.Φ̵_̵o̵n̵e̵,̵ ̵W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵ΨSq_one, Polynomial.eval_X, Polynomial.eval_one,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneSameP1.lean:79:28: This simp argument is unused:
+  WeierstrassCurve.ΨSq_one
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.sumNumP_eval, sumNumVec, xPair, X, Z,
+  ̵  ̵ ̵ ̵WeierstrassCurve.baseChange,
+  ̲  ̲ ̲ ̲WeierstrassCurve.map_b₂, WeierstrassCurve.map_b₄,
+  ̵  ̵ ̵ ̵WeierstrassCurve.map_b₆,
+  ̲  ̲ ̲ ̲Algebra.algebraMap_self_apply,
+  ̵  ̵ ̵ ̵WeierstrassCurve.Φ_one, W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵S̵q̵_̵o̵n̵e̵,̵ ̵Polynomial.eval_X, Polynomial.eval_one,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneSameP1.lean:79:54: This simp argument is unused:
+  Polynomial.eval_X
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.sumNumP_eval, sumNumVec, xPair, X, Z, WeierstrassCurve.baseChange,
+  ̲  ̲ ̲ ̲WeierstrassCurve.map_b₂, WeierstrassCurve.map_b₄, WeierstrassCurve.map_b₆,
+  ̲  ̲ ̲ ̲Algebra.algebraMap_self_apply, WeierstrassCurve.Φ_one, WeierstrassCurve.ΨSq_one,
+  ̲  ̲ ̲ ̲P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵e̵v̵a̵l̵_̵X̵,̵ ̵Polynomial.eval_one, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneSameP1.lean:79:73: This simp argument is unused:
+  Polynomial.eval_one
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.sumNumP_eval, sumNumVec, xPair, X, Z, WeierstrassCurve.baseChange,
+  ̲  ̲ ̲ ̲WeierstrassCurve.map_b₂, WeierstrassCurve.map_b₄, WeierstrassCurve.map_b₆,
+  ̲  ̲ ̲ ̲Algebra.algebraMap_self_apply, WeierstrassCurve.Φ_one, WeierstrassCurve.ΨSq_one,
+  ̲  ̲ ̲ ̲Polynomial.eval_X, P̵o̵l̵y̵n̵o̵m̵i̵a̵l̵.̵e̵v̵a̵l̵_̵o̵n̵e̵,̵Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneSameP1.lean:80:47: This simp argument is unused:
+  Matrix.head_cons
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.sumNumP_eval, sumNumVec, xPair, X, Z, WeierstrassCurve.baseChange,
+  ̲  ̲ ̲ ̲WeierstrassCurve.map_b₂, WeierstrassCurve.map_b₄, WeierstrassCurve.map_b₆,
+  ̲  ̲ ̲ ̲Algebra.algebraMap_self_apply, WeierstrassCurve.Φ_one, WeierstrassCurve.ΨSq_one,
+  ̲  ̲ ̲ ̲Polynomial.eval_X, Polynomial.eval_one, Matrix.cons_val_zero, M̵a̵t̵r̵i̵x̵.̵c̵o̵n̵s̵_̵v̵a̵l̵_̵o̵n̵e̵,̵ ̵M̵a̵t̵r̵i̵x̵.̵h̵e̵a̵d̵_̵c̵o̵n̵s̵]̵M̲a̲t̲r̲i̲x̲.̲c̲o̲n̲s̲_̲v̲a̲l̲_̲o̲n̲e̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneSameP1.lean:95:47: This simp argument is unused:
+  Matrix.head_cons
+
+Hint: Omit it from the simp argument list.
+  simp only [WeierstrassCurve.diffAddNumP_eval, WeierstrassCurve.sumNumP_eval,
+      WeierstrassCurve.deltaP_eval, diffAddVec, sumNumVec, deltaVec, xPair, X, Z,
+      WeierstrassCurve.baseChange, WeierstrassCurve.map_b₂, WeierstrassCurve.map_b₄,
+      WeierstrassCurve.map_b₆, Algebra.algebraMap_self_apply,
+  ̵  ̵ ̵ ̵WeierstrassCurve.Φ_one,
+  ̲  ̲ ̲ ̲WeierstrassCurve.ΨSq_one, Polynomial.eval_X, Polynomial.eval_one, ̲M̲a̲t̲r̲i̲x̲.̲c̲o̲n̲s̲_̲v̲a̲l̲_̲z̲e̲r̲o̲,̲
+      Matrix.cons_val_z̵e̵r̵o,̵ ̵M̵a̵t̵r̵i̵x̵.̵c̵o̵ns̵_̵v̵a̵l̵_̵o̵n̵e,̵ ̵M̵a̵t̵r̵i̵x̵.̵h̵e̵a̵d̵_̵c̵o̵n̵s̵]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneSameP1.lean:106:39: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: scratch/KeystoneSameP1.lean:110:46: Variable name `h4` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: scratch/KeystoneSameP1.lean:110:65: Variable name `hψ_ne` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: scratch/KeystoneSameP1.lean:110:102: Variable name `hc3` is not explicitly referenced.
+
+The binding can be removed (if unused) or named `_` (if used implicitly).
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+warning: scratch/KeystoneSameP1.lean:110:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneSameP1.lean:119:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneSameP1.lean:133:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+warning: scratch/KeystoneSameP1.lean:162:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                             ↓
+  ⏎  · simp only [diffAddOrInfVec, if_pos hδ]⏎⏎    have hΨzero : (W.ΨSq (2 * m + 1)).eval x = 0 := by⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneSameP1.lean:170:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                ↓
+  ⏎        _ = 0 := by simp [hδ]⏎⏎    refine ⟨(W.Φ (2 * m + 1)).eval x, hΦinf hδ, ?_⟩⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneSameP1.lean:174:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                                    ↓
+  ⏎    fin_cases i <;> simp [xPair, xInfVec, hΨzero]⏎⏎  · simp only [diffAddOrInfVec, if_neg hδ]⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneSameP1.lean:176:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                             ↓
+  ⏎  · simp only [diffAddOrInfVec, if_neg hδ]⏎⏎    have hΨDen :⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneSameP1.lean:183:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                                  ↓
+  ⏎        (W := W) (m := m) (x := x) h4 hψ_ne hc3⏎⏎    have hDenNe :⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneSameP1.lean:189:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                               ↓
+  ⏎      exact pow_ne_zero 2 hδ⏎⏎    have hProjEval :⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneSameP1.lean:199:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                                  ↓
+  ⏎        (W := W) (m := m) (x := x) h4 hψ_ne hc3⏎⏎    have hΦNum :⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneSameP1.lean:222:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                       ↓
+  ⏎                ring⏎⏎    have hXcoord :⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneSameP1.lean:229:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                                                        ↓
+  ⏎        (diffAddNumP_eval_xPair_succ_left (W := W) (m := m) (x := x))⏎⏎    have hZcoord :⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneSameP1.lean:236:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                                                         ↓
+  ⏎        (diffAddVec_Z_xPair_succ_left (W := W) (m := m) (x := x)).symm⏎⏎    refine ⟨1, one_ne_zero, ?_⟩⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+info: scratch/KeystoneSameP1.lean:286:51: Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+info: scratch/KeystoneSameP1.lean:286:51: Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+warning: scratch/KeystoneSameP1.lean:285:56: This simp argument is unused:
+  Matrix.cons_val_zero
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddVec, sumNumVec, deltaVec, X, Z, M̵a̵t̵r̵i̵x̵.̵c̵o̵n̵s̵_̵v̵a̵l̵_̵z̵e̵r̵o̵,̵Matrix.cons_val_one, Matrix.head_cons]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneSameP1.lean:286:8: This simp argument is unused:
+  Matrix.cons_val_one
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddVec, sumNumVec, deltaVec, X, Z, Matrix.cons_val_zero, M̵a̵t̵r̵i̵x̵.̵c̵o̵n̵s̵_̵v̵a̵l̵_̵o̵n̵e̵,̵ ̵Matrix.head_cons]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneSameP1.lean:286:29: This simp argument is unused:
+  Matrix.head_cons
+
+Hint: Omit it from the simp argument list.
+  simp only [diffAddVec, sumNumVec, deltaVec, X, Z, Matrix.cons_val_zero, M̵a̵t̵r̵i̵x̵.̵c̵o̵n̵s̵_̵v̵a̵l̵_̵o̵n̵e̵,̵ ̵M̵a̵t̵r̵i̵x̵.̵h̵e̵a̵d̵_̵c̵o̵n̵s̵]̵M̲a̲t̲r̲i̲x̲.̲c̲o̲n̲s̲_̲v̲a̲l̲_̲o̲n̲e̲]̲
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+⚠ [8587/8593] Built scratch.KeystoneEDS (92s)
+warning: scratch/KeystoneEDS.lean:10:12: please avoid 'open (scoped) Classical' statements: this can hide theorem statements which would be better stated with explicit decidability statements.
+Instead, use `open Classical in` for definitions or instances, the `classical` tactic for proofs.
+For theorem statements, either add missing decidability assumptions or use `open Classical in`.
+
+Note: This linter can be disabled with `set_option linter.style.openClassical false`
+warning: scratch/KeystoneEDS.lean:52:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                                       ↓
+  ⏎        (W := W) (x := x) (h4 := h4) (m := (m : ℤ)))⏎⏎  have h2m_ne : xPair W ((2 * m : ℕ) : ℤ) x ≠ 0 := by⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneEDS.lean:57:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                ↓
+  ⏎    simpa using h2m_no_common⏎⏎  have h2m1_no_common :⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneEDS.lean:64:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                                       ↓
+  ⏎        (W := W) (x := x) (h4 := h4) (m := (m : ℤ)))⏎⏎  have h2m1_ne : xPair W ((2 * m + 1 : ℕ) : ℤ) x ≠ 0 := by⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneEDS.lean:69:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                                 ↓
+  ⏎    simpa using h2m1_no_common⏎⏎  have hdouble_int :⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneEDS.lean:78:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                       ↓
+  ⏎        h4 hψ_ne hc3⏎⏎  have hdouble :⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneEDS.lean:84:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                              ↓
+  ⏎    simpa using hdouble_int⏎⏎  have hdiff_int :⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneEDS.lean:96:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                       ↓
+  ⏎        h4 hψ_ne hc3⏎⏎  have hdiff :⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneEDS.lean:105:0: Please, write a comment here or remove this line, but do not place empty lines within commands!
+Context:
+                            ↓
+  ⏎    simpa using hdiff_int⏎⏎  exact ⟨h2m_ne, hdouble, h2m1_ne, hdiff⟩⏎
+
+Note: This linter can be disabled with `set_option linter.style.emptyLine false`
+warning: scratch/KeystoneEDS.lean:279:10: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: scratch/KeystoneEDS.lean:300:42: This simp argument is unused:
+  WeierstrassCurve.Ψ₂Sq
+
+Hint: Omit it from the simp argument list.
+  simp [A, B, XOnly.deltaVec, XOnly.doubleVec, XOnly.dupNumH, XOnly.dupDenH, XOnly.xAffVec,
+  ̲  ̲ ̲ ̲ ̲ ̲WeierstrassCurve.Ψ₃, W̵e̵i̵e̵r̵s̵t̵r̵a̵s̵s̵C̵u̵r̵v̵e̵.̵Ψ̵₂̵S̵q̵,̵WeierstrassCurve.baseChange]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: scratch/KeystoneEDS.lean:307:4: `simp [hδ]` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: scratch/KeystoneEDS.lean:317:4: `refine
+  SameP1Vec.mk_vec (u := XOnly.xInfVec) (v := xPair W (3 : ℤ) x) (c := (W.Φ (3 : ℤ)).eval x) hfirst ?_ ?_` uses `⊢`!
+warning: scratch/KeystoneEDS.lean:322:4: `simp [hδ]` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: scratch/KeystoneEDS.lean:323:4: `refine
+  SameP1Vec.mk_vec (u := XOnly.diffAddVec (W⁄k) A B A) (v := xPair W (3 : ℤ) x) (c := 1) one_ne_zero ?_ ?_` uses `⊢`!
+✔ [8588/8593] Built FLT.Assumptions.MazurProof.TateOriginDivision (12s)
+✔ [8589/8593] Built FLT.Assumptions.MazurProof.TateOrder25Factor (191s)
+✔ [8590/8593] Built FLT.Assumptions.MazurProof.CyclicExclusion25 (4.0s)
+⚠ [8591/8593] Built FLT.Assumptions.MazurProof.RationalPointsN25SutherlandBridge (418s)
+warning: FLT/Assumptions/MazurProof/RationalPointsN25SutherlandBridge.lean:81:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 1000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25SutherlandBridge.lean:123:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 1000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25SutherlandBridge.lean:139:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 1000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25SutherlandBridge.lean:148:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 1000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25SutherlandBridge.lean:257:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 1000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25SutherlandBridge.lean:315:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 1000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25SutherlandBridge.lean:323:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 2000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25SutherlandBridge.lean:385:2: `simp [F25] at hF` is a flexible tactic modifying `hF`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: FLT/Assumptions/MazurProof/RationalPointsN25SutherlandBridge.lean:386:2: `exact hb hF` uses `hF`!
+⚠ [8592/8593] Built FLT.Assumptions.MazurProof.RationalPointsN25CanonicalSourceBridge (230s)
+warning: FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:120:4: `simp [sutherlandBasePointFiberPoly25, Polynomial.aeval_def]` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:120:4: Try this:
+  [apply] simp only [Nat.reduceAdd, Fin.zero_eta, Fin.isValue, ne_eq]
+info: FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:120:68: `decide` uses `⊢`!
+warning: FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:120:4: `simp [sutherlandBasePointFiberPoly25, Polynomial.aeval_def]` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:120:4: Try this:
+  [apply] simp only [Nat.reduceAdd, Fin.mk_one, Fin.isValue, ne_eq]
+info: FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:120:68: `decide` uses `⊢`!
+warning: FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:220:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 2000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:269:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 2000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:394:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 2000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:570:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 4000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:648:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 2000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25CanonicalSourceBridge.lean:700:0: Please, add a comment explaining the need for modifying the maxHeartbeat limit, as in
+set_option maxHeartbeats 4000000 in
+-- reason for change
+...
+
+Note: This linter can be disabled with `set_option linter.style.maxHeartbeats false`
+⚠ [8593/8593] Built scratch.Q6397CoreAudit (4.0s)
+info: scratch/Q6397CoreAudit.lean:73:0: 'MazurProof.RationalPointsN25CanonicalPoints.canonical_point_with_zero_coordinate_is_cusp' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+warning: scratch/Q6397CoreAudit.lean:73:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+info: scratch/Q6397CoreAudit.lean:74:0: 'MazurProof.RationalPointsN25CanonicalPoints.all_coordinates_ne_zero_of_not_cusp' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: scratch/Q6397CoreAudit.lean:75:0: 'MazurProof.RationalPointsN25CanonicalPoints.noncuspidal_point_to_plane_sextic' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: scratch/Q6397CoreAudit.lean:76:0: 'MazurProof.RationalPointsN25CanonicalSourceBridge.tateCanonicalCoordinates25_nonzero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: scratch/Q6397CoreAudit.lean:77:0: 'MazurProof.RationalPointsN25CanonicalSourceBridge.tateCanonicalCoordinates25_onCanonical' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+warning: scratch/Q6397CoreAudit.lean:77:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+info: scratch/Q6397CoreAudit.lean:78:0: 'MazurProof.RationalPointsN25CanonicalSourceBridge.tateCanonicalCoordinates25_not_isCusp' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+warning: scratch/Q6397CoreAudit.lean:78:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+info: scratch/Q6397CoreAudit.lean:79:0: 'MazurProof.RationalPointsN25QuotientF2.canonical_point25F2_iff_cusp' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: scratch/Q6397CoreAudit.lean:80:0: 'MazurProof.RationalPointsN25ReductionCardinality.natCard_dvd_seventy_one_of_two_reductions' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+warning: scratch/Q6397CoreAudit.lean:80:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+info: scratch/Q6397CoreAudit.lean:81:0: 'MazurProof.RationalPointsN25DegreeTwoPullback.pull_injective_of_two_reductions_and_norm_comp_eq_two' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+warning: scratch/Q6397CoreAudit.lean:81:100: This line exceeds the 100 character limit, please shorten it!
+
+Note: This linter can be disabled with `set_option linter.style.longLine false`
+info: scratch/Q6397CoreAudit.lean:82:0: 'Q6397Audit.canonical_classification_of_no_dense_torus' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: scratch/Q6397CoreAudit.lean:83:0: 'Q6397Audit.no_explicit_order25_obstruction_of_canonical_classification' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: scratch/Q6397CoreAudit.lean:84:0: 'Q6397Audit.no_explicit_order25_obstruction_of_no_dense_torus' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: scratch/Q6397CoreAudit.lean:85:0: 'MazurProof.CyclicExclusion25.no_explicit_order25_obstruction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ MazurProof.CyclicExclusion25.no_explicit_order25_obstruction]
+info: scratch/Q6397CoreAudit.lean:86:0: 'MazurProof.CyclicExclusion25.no_rational_point_of_order_25' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ MazurProof.CyclicExclusion25.no_explicit_order25_obstruction]
+Build completed successfully (8593 jobs).
+EXIT_STATUS=0
