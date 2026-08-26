@@ -1,0 +1,48 @@
+name: Q6397 core N25 audit
+
+on:
+  push:
+    branches: [q6397-core-check]
+    paths-ignore:
+      - scratch/Q6397-core-audit.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q6397-core-check
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+      - name: Search complete Lean tree and build exact endgame seam
+        shell: bash
+        run: |
+          set +e
+          {
+            printf 'BASE_AI_SCRATCH=%s\n' '69ef7a5341a648087fcc6b1bcb523d5205716381'
+            printf 'AUDIT_HEAD=%s\n' "$(git rev-parse HEAD)"
+            echo '=== All Lean references to the rational cusp predicates ==='
+            grep -RInE 'IsCanonicalCusp25|IsCusp25|no_explicit_order25_obstruction' FLT --include='*.lean' || true
+            echo '=== Candidate all-point classification names ==='
+            grep -RInE 'every.*rational.*point|all.*rational.*point|canonical.*point.*is.*cusp|rational.*point.*is.*cusp|nonzero.*point.*cusp' FLT --include='*.lean' || true
+            echo '=== Lean build and #print axioms ==='
+            lake build scratch.Q6397CoreAudit
+            lean_status=$?
+            printf 'EXIT_STATUS=%s\n' "$lean_status"
+          } > scratch/Q6397-core-audit.txt 2>&1
+          git config user.name github-actions[bot]
+          git config user.email 41898282+users.noreply.github.com
+          git add scratch/Q6397-core-audit.txt
+          git commit -m 'Capture Q6397 core N25 audit [skip ci]' || true
+          git push origin HEAD:q6397-core-check
+          exit "$lean_status"
