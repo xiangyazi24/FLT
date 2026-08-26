@@ -1,40 +1,25 @@
 BASE_AI_SCRATCH=69ef7a5341a648087fcc6b1bcb523d5205716381
-AUDIT_HEAD=ef41efd61470838f5eb8112ac0f593f9ff3fc692
-✔ [8563/8566] Built Mathlib (2.0s)
-✔ [8564/8566] Built FLT.Assumptions.MazurProof.RationalPointsN25CanonicalPoints (5.9s)
-✔ [8565/8566] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF2 (10s)
-✖ [8566/8566] Building scratch.Q6397LightAudit (2.6s)
-trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/bin/lean /home/runner/work/FLT/FLT/scratch/Q6397LightAudit.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q6397LightAudit.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q6397LightAudit.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q6397LightAudit.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q6397LightAudit.setup.json --json
-error: scratch/Q6397LightAudit.lean:6:5: unknown namespace `MazurProof.RationalPointsN25QuotientAction`
-error: scratch/Q6397LightAudit.lean:10:8: Unknown identifier `Coordinates25`
-error: scratch/Q6397LightAudit.lean:11:4: Unknown identifier `OnCanonical25`
-error: scratch/Q6397LightAudit.lean:18:10: Unknown identifier `Coordinates25`
-
-Note: It is not possible to treat `Coordinates25` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-error: scratch/Q6397LightAudit.lean:19:6: Unknown identifier `OnCanonical25`
-
-Note: It is not possible to treat `OnCanonical25` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-error: scratch/Q6397LightAudit.lean:21:6: Unknown identifier `IsCusp25`
-
-Note: It is not possible to treat `IsCusp25` as an implicitly bound variable here because the `autoImplicit` option is set to `false`.
-info: scratch/Q6397LightAudit.lean:40:0: 'MazurProof.RationalPointsN25CanonicalPoints.canonical_point_with_zero_coordinate_is_cusp' depends on axioms: [propext,
+AUDIT_HEAD=b27395a8f86df147b7fafc76c82dba6e4c2e2d90
+✔ [8563/8567] Built Mathlib (2.9s)
+✔ [8564/8567] Built FLT.Assumptions.MazurProof.RationalPointsN25CanonicalPoints (5.8s)
+✔ [8565/8567] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientAction (5.3s)
+✔ [8566/8567] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF2 (11s)
+⚠ [8567/8567] Built scratch.Q6397LightAudit (3.1s)
+info: scratch/Q6397LightAudit.lean:41:0: 'MazurProof.RationalPointsN25CanonicalPoints.canonical_point_with_zero_coordinate_is_cusp' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
-warning: scratch/Q6397LightAudit.lean:40:100: This line exceeds the 100 character limit, please shorten it!
+warning: scratch/Q6397LightAudit.lean:41:100: This line exceeds the 100 character limit, please shorten it!
 
 Note: This linter can be disabled with `set_option linter.style.longLine false`
-info: scratch/Q6397LightAudit.lean:41:0: 'MazurProof.RationalPointsN25CanonicalPoints.all_coordinates_ne_zero_of_not_cusp' depends on axioms: [propext,
+info: scratch/Q6397LightAudit.lean:42:0: 'MazurProof.RationalPointsN25CanonicalPoints.all_coordinates_ne_zero_of_not_cusp' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
-info: scratch/Q6397LightAudit.lean:42:0: 'MazurProof.RationalPointsN25CanonicalPoints.noncuspidal_point_to_plane_sextic' depends on axioms: [propext,
+info: scratch/Q6397LightAudit.lean:43:0: 'MazurProof.RationalPointsN25CanonicalPoints.noncuspidal_point_to_plane_sextic' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
-info: scratch/Q6397LightAudit.lean:43:0: 'MazurProof.RationalPointsN25QuotientF2.canonical_point25F2_iff_cusp' depends on axioms: [propext,
+info: scratch/Q6397LightAudit.lean:44:0: 'MazurProof.RationalPointsN25QuotientF2.canonical_point25F2_iff_cusp' depends on axioms: [propext,
  Classical.choice,
  Quot.sound]
-info: scratch/Q6397LightAudit.lean:44:0: 'Q6397LightAudit.canonical_classification_of_no_dense_torus' does not depend on any axioms
-error: Lean exited with code 1
-Some required targets logged failures:
-- scratch.Q6397LightAudit
-error: build failed
-EXIT_STATUS=1
+info: scratch/Q6397LightAudit.lean:45:0: 'Q6397LightAudit.canonical_classification_of_no_dense_torus' depends on axioms: [propext, Classical.choice, Quot.sound]
+Build completed successfully (8567 jobs).
+EXIT_STATUS=0
