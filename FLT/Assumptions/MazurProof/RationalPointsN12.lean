@@ -2018,46 +2018,35 @@ theorem nonAxisSignedResidual_center_product_cases {m n b r s : ℤ}
         pythagoreanQuarticCenter m n = a ^ 2 + 3 * c ^ 2 ∨
         pythagoreanQuarticCenter m n = -(a ^ 2 + 3 * c ^ 2)) := by
   rcases hres with
-    ⟨_hmn_nonzero, _hcop, _hpar, _hb, hr, hs, hrs, _hgcd_one, hsigned⟩
-  have hcenter : pythagoreanQuarticCenter m n = r + s := by
-    nlinarith [hr, hs]
+    ⟨_, _, _, _, hcL, hcR, hrs, _, hsigned⟩
+  have hcenter : pythagoreanQuarticCenter m n = r + s := by linarith
   rcases hsigned with hthree | hone
   · rcases hthree with ⟨a, c, hpos | hneg⟩
-    · rcases hpos with ⟨hrc, hsc⟩
-      refine ⟨a, c, ?_, Or.inl ?_⟩
+    · rcases hpos with ⟨hrval, hsval⟩
+      refine ⟨a, c, ?_, ?_⟩
       · have hsquares : (a * c) ^ 2 = (m * n) ^ 2 := by
-          rw [hrc, hsc] at hrs
-          ring_nf at hrs ⊢
-          nlinarith
+          rw [hrval, hsval] at hrs; ring_nf at hrs ⊢; nlinarith
         exact eq_or_eq_neg_of_sq_eq_sq (a * c) (m * n) hsquares
-      · rw [hcenter, hrc, hsc]
-    · rcases hneg with ⟨hrc, hsc⟩
-      refine ⟨a, c, ?_, Or.inr (Or.inl ?_)⟩
+      · exact Or.inl (by rw [hcenter, hrval, hsval])
+    · rcases hneg with ⟨hrval, hsval⟩
+      refine ⟨a, c, ?_, ?_⟩
       · have hsquares : (a * c) ^ 2 = (m * n) ^ 2 := by
-          rw [hrc, hsc] at hrs
-          ring_nf at hrs ⊢
-          nlinarith
+          rw [hrval, hsval] at hrs; ring_nf at hrs ⊢; nlinarith
         exact eq_or_eq_neg_of_sq_eq_sq (a * c) (m * n) hsquares
-      · rw [hcenter, hrc, hsc]
-        ring
+      · exact Or.inr (Or.inl (by rw [hcenter, hrval, hsval]; ring))
   · rcases hone with ⟨a, c, hpos | hneg⟩
-    · rcases hpos with ⟨hrc, hsc⟩
-      refine ⟨a, c, ?_, Or.inr (Or.inr (Or.inl ?_))⟩
+    · rcases hpos with ⟨hrval, hsval⟩
+      refine ⟨a, c, ?_, ?_⟩
       · have hsquares : (a * c) ^ 2 = (m * n) ^ 2 := by
-          rw [hrc, hsc] at hrs
-          ring_nf at hrs ⊢
-          nlinarith
+          rw [hrval, hsval] at hrs; ring_nf at hrs ⊢; nlinarith
         exact eq_or_eq_neg_of_sq_eq_sq (a * c) (m * n) hsquares
-      · rw [hcenter, hrc, hsc]
-    · rcases hneg with ⟨hrc, hsc⟩
-      refine ⟨a, c, ?_, Or.inr (Or.inr (Or.inr ?_))⟩
+      · exact Or.inr (Or.inr (Or.inl (by rw [hcenter, hrval, hsval])))
+    · rcases hneg with ⟨hrval, hsval⟩
+      refine ⟨a, c, ?_, ?_⟩
       · have hsquares : (a * c) ^ 2 = (m * n) ^ 2 := by
-          rw [hrc, hsc] at hrs
-          ring_nf at hrs ⊢
-          nlinarith
+          rw [hrval, hsval] at hrs; ring_nf at hrs ⊢; nlinarith
         exact eq_or_eq_neg_of_sq_eq_sq (a * c) (m * n) hsquares
-      · rw [hcenter, hrc, hsc]
-        ring
+      · exact Or.inr (Or.inr (Or.inr (by rw [hcenter, hrval, hsval]; ring)))
 
 theorem center_three_positive_factor_identity {m n a c : ℤ}
     (hH : pythagoreanQuarticCenter m n = 3 * a ^ 2 + c ^ 2)
@@ -3513,41 +3502,34 @@ theorem quarticA_odd_odd_divided_pythagorean_identity {u v Z : ℤ}
 
 theorem quarticAOddOddDividedTriplePrimitive :
     QuarticAOddOddDividedTriplePrimitiveTheorem := by
-  intro u v Z hcop _huv0 huodd hvodd hA
+  intro u v Z hcop huv0 huodd hvodd hA
   apply int_gcd_eq_one_of_no_common_prime
-  intro p hp hpZdiv hpv2
-  let C : ℤ := (u ^ 2 + v ^ 2) / 2
-  have hpt : (Z / 2) ^ 2 + (v ^ 2) ^ 2 = C ^ 2 := by
-    dsimp [C]
-    exact quarticA_odd_odd_divided_pythagorean_identity huodd hvodd hA
-  have hpZdiv_sq : (p : ℤ) ∣ (Z / 2) ^ 2 :=
-    dvd_pow hpZdiv (by norm_num : 2 ≠ 0)
-  have hpv4 : (p : ℤ) ∣ (v ^ 2) ^ 2 :=
-    dvd_pow hpv2 (by norm_num : 2 ≠ 0)
-  have hpC_sq : (p : ℤ) ∣ C ^ 2 := by
-    have hsum : (p : ℤ) ∣ (Z / 2) ^ 2 + (v ^ 2) ^ 2 :=
-      dvd_add hpZdiv_sq hpv4
-    simpa [hpt] using hsum
-  have hpC : (p : ℤ) ∣ C :=
-    int_natPrime_dvd_of_dvd_sq hp hpC_sq
-  have htwoC : 2 * C = u ^ 2 + v ^ 2 := by
-    dsimp [C]
-    exact two_mul_ediv_two_sq_add_sq_of_odd huodd hvodd
-  have hp_sum : (p : ℤ) ∣ u ^ 2 + v ^ 2 := by
-    simpa [htwoC] using dvd_mul_of_dvd_right hpC (2 : ℤ)
-  have hpu2 : (p : ℤ) ∣ u ^ 2 := by
-    have hsub : (p : ℤ) ∣ (u ^ 2 + v ^ 2) - v ^ 2 :=
-      dvd_sub hp_sum hpv2
-    simpa using hsub
-  have hpu : (p : ℤ) ∣ u :=
-    int_natPrime_dvd_of_dvd_sq hp hpu2
-  have hpv : (p : ℤ) ∣ v :=
-    int_natPrime_dvd_of_dvd_sq hp hpv2
-  have hpdvd_gcd : p ∣ Int.gcd u v := by
-    exact Int.dvd_gcd hpu hpv
-  have hpdvd_one : p ∣ 1 := by
-    simpa [hcop] using hpdvd_gcd
-  exact hp.not_dvd_one hpdvd_one
+  intro p hp hpZ2 hpv2
+  have hpv : (p : ℤ) ∣ v := int_natPrime_dvd_of_dvd_sq hp hpv2
+  have hpZprime : Prime (p : ℤ) := Int.prime_iff_natAbs_prime.mpr (by simpa using hp)
+  by_cases hp2 : p = 2
+  · subst hp2; exact (int_not_two_dvd_of_odd hvodd) hpv
+  · have hpnot2 := odd_nat_prime_int_not_dvd_two hp hp2
+    have hpu : ¬ (p : ℤ) ∣ u := by
+      intro hpu
+      have hpg : (p : ℤ) ∣ ((Int.gcd u v : ℕ) : ℤ) := Int.dvd_coe_gcd hpu hpv
+      rw [hcop] at hpg; exact hpZprime.not_dvd_one hpg
+    have h2Z : (2 : ℤ) ∣ Z :=
+      quarticA_two_dvd_left_of_pythagorean_even_hyp
+        (quarticA_pythagoreanTriple hA) (quarticA_odd_odd_two_dvd_sum_sq huodd hvodd)
+    have hpZfull : (p : ℤ) ∣ Z := by
+      have h := dvd_mul_of_dvd_left hpZ2 (2 : ℤ)
+      rwa [Int.ediv_mul_cancel h2Z] at h
+    have hpZsq : (p : ℤ) ∣ Z ^ 2 := dvd_pow hpZfull (by norm_num : 2 ≠ 0)
+    dsimp [QuarticA] at hA
+    have hpRHS : (p : ℤ) ∣ (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2) := by rwa [← hA]
+    have hpdiff : (p : ℤ) ∣ v ^ 2 * (2 * u ^ 2 - 3 * v ^ 2) := dvd_mul_of_dvd_left hpv2 _
+    have hpu4 : (p : ℤ) ∣ u ^ 4 := by
+      have h := dvd_sub hpRHS hpdiff
+      have heq : (u ^ 2 - v ^ 2) * (u ^ 2 + 3 * v ^ 2) -
+          v ^ 2 * (2 * u ^ 2 - 3 * v ^ 2) = u ^ 4 := by ring
+      rwa [heq] at h
+    exact hpu (hpZprime.dvd_of_dvd_pow hpu4)
 
 def QuarticAOddOddRSDataOfPrimitiveDividedTripleTheorem : Prop :=
   ∀ {u v Z : ℤ},
@@ -4807,45 +4789,37 @@ theorem quarticB_half_factors_coprime {u v a b : ℤ}
     (ha : 3 * u ^ 2 - v ^ 2 = 2 * a)
     (hb : u ^ 2 + v ^ 2 = 2 * b) :
     Int.gcd a b = 1 := by
-  let gN : ℕ := Int.gcd a b
-  let g : ℤ := (gN : ℤ)
-  have hgA : g ∣ a := by simpa [g, gN] using Int.gcd_dvd_left a b
-  have hgB : g ∣ b := by simpa [g, gN] using Int.gcd_dvd_right a b
-  have hgOdd : ¬ (2 : ℤ) ∣ g := by
-    intro h2g
-    exact (int_not_two_dvd_of_odd haOdd) (h2g.trans hgA)
-  have hgcdg2 : Int.gcd g 2 = 1 := by
-    apply gcd_eq_one_of_dvd_four_of_odd_left
-    · exact (Int.gcd_dvd_right g 2).trans (show ((2 : ℕ) : ℤ) ∣ (4 : ℤ) by norm_num)
-    · exact hgOdd
-  have hgu2Two : g ∣ 2 * u ^ 2 := by
-    have hsum : g ∣ a + b := dvd_add hgA hgB
-    convert hsum using 1
-    nlinarith
-  have hgv2Two : g ∣ 2 * v ^ 2 := by
-    have hlin : g ∣ 3 * b - a := dvd_sub (dvd_mul_of_dvd_right hgB 3) hgA
-    convert hlin using 1
-    nlinarith
-  have hgu2 : g ∣ u ^ 2 :=
-    Int.dvd_of_dvd_mul_left_of_gcd_one
-      (by simpa [mul_comm] using hgu2Two) hgcdg2
-  have hgv2 : g ∣ v ^ 2 :=
-    Int.dvd_of_dvd_mul_left_of_gcd_one
-      (by simpa [mul_comm] using hgv2Two) hgcdg2
-  have hcopUV2 : Int.gcd (u ^ 2) (v ^ 2) = 1 := by
-    have huv : IsCoprime u v := Int.isCoprime_iff_gcd_eq_one.mpr hcop
-    exact Int.isCoprime_iff_gcd_eq_one.mp ((huv.pow_left).pow_right)
-  have hgOneDvd : g ∣ (1 : ℤ) := by
-    have hggcd : g ∣ ((Int.gcd (u ^ 2) (v ^ 2) : ℕ) : ℤ) :=
-      Int.dvd_coe_gcd hgu2 hgv2
-    simpa [hcopUV2] using hggcd
-  have hgN_eq_one : gN = 1 := by
-    have hgOneDvd' : (gN : ℤ) ∣ (1 : ℤ) := by
-      simpa [g] using hgOneDvd
-    have hgN_dvd_one : gN ∣ 1 := by
-      exact_mod_cast hgOneDvd'
-    exact Nat.eq_one_of_dvd_one hgN_dvd_one
-  simpa [gN] using hgN_eq_one
+  apply int_gcd_eq_one_of_no_common_prime
+  intro p hp hpa hpb
+  have hpZprime : Prime (p : ℤ) := Int.prime_iff_natAbs_prime.mpr (by simpa using hp)
+  by_cases hp2 : p = 2
+  · subst hp2; exact (int_not_two_dvd_of_odd haOdd) hpa
+  · have hpnot2 := odd_nat_prime_int_not_dvd_two hp hp2
+    have hpf1 : (p : ℤ) ∣ 3 * u ^ 2 - v ^ 2 := by
+      rw [ha]; exact dvd_mul_of_dvd_right hpa 2
+    have hpf2 : (p : ℤ) ∣ u ^ 2 + v ^ 2 := by
+      rw [hb]; exact dvd_mul_of_dvd_right hpb 2
+    have hp4u2 : (p : ℤ) ∣ (2 * u) ^ 2 := by
+      have := dvd_add hpf1 hpf2
+      have heq : 3 * u ^ 2 - v ^ 2 + (u ^ 2 + v ^ 2) = (2 * u) ^ 2 := by ring
+      rwa [heq] at this
+    have hp2u : (p : ℤ) ∣ 2 * u := int_natPrime_dvd_of_dvd_sq hp hp4u2
+    have hpu : (p : ℤ) ∣ u := by
+      rcases hpZprime.dvd_or_dvd hp2u with h2 | hu
+      · exact absurd h2 hpnot2
+      · exact hu
+    have hp4v2 : (p : ℤ) ∣ (2 * v) ^ 2 := by
+      have h3f2 : (p : ℤ) ∣ 3 * (u ^ 2 + v ^ 2) := dvd_mul_of_dvd_right hpf2 3
+      have := dvd_sub h3f2 hpf1
+      have heq : 3 * (u ^ 2 + v ^ 2) - (3 * u ^ 2 - v ^ 2) = (2 * v) ^ 2 := by ring
+      rwa [heq] at this
+    have hp2v : (p : ℤ) ∣ 2 * v := int_natPrime_dvd_of_dvd_sq hp hp4v2
+    have hpv : (p : ℤ) ∣ v := by
+      rcases hpZprime.dvd_or_dvd hp2v with h2 | hv
+      · exact absurd h2 hpnot2
+      · exact hv
+    have hpg : (p : ℤ) ∣ ((Int.gcd u v : ℕ) : ℤ) := Int.dvd_coe_gcd hpu hpv
+    rw [hcop] at hpg; exact hpZprime.not_dvd_one hpg
 
 theorem even_of_sq_eq_four_mul {Z t : ℤ}
     (h : Z ^ 2 = 4 * t) :
