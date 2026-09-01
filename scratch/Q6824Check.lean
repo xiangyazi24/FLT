@@ -32,18 +32,17 @@ section EvaluationAlgebra
 variable (S : Type*) [CommRing S] [Algebra ℚ S]
 variable (u : S)
 
-local instance evaluationAlgebra : Algebra R S :=
-  (Polynomial.eval₂RingHom (algebraMap ℚ S) u).toAlgebra
-
-example : algebraMap R S Polynomial.X = u := by
-  rfl
-
-local instance evaluationScalarTower : IsScalarTower ℚ R S :=
-  IsScalarTower.of_algebraMap_eq' <| by
-    ext q
-    simp [R, RingHom.algebraMap_toAlgebra]
-
-example : IsScalarTower ℚ R S := inferInstance
+example : True := by
+  letI : Algebra R S :=
+    (Polynomial.eval₂RingHom (algebraMap ℚ S) u).toAlgebra
+  have hX : algebraMap R S Polynomial.X = u := by
+    rfl
+  letI : IsScalarTower ℚ R S :=
+    IsScalarTower.of_algebraMap_eq' <| by
+      ext q
+      simp [RingHom.algebraMap_toAlgebra]
+  have _ : IsScalarTower ℚ R S := inferInstance
+  exact True.intro
 
 end EvaluationAlgebra
 
