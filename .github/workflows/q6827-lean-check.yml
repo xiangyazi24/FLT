@@ -27,13 +27,13 @@ jobs:
         shell: bash
         run: |
           set +e
-          lake env lean Q6827Check.lean > Q6827Compiler.log 2>&1
+          lake env lean Q6827Check.lean > Q6827Compiler.txt 2>&1
           status=$?
-          cat Q6827Compiler.log
+          cat Q6827Compiler.txt
           if [ "$status" -ne 0 ]; then
             git config user.name github-actions[bot]
             git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-            git add Q6827Compiler.log
+            git add -f Q6827Compiler.txt
             git commit -m "Record Q6827 compiler diagnostics [skip ci]"
             git push
           fi
