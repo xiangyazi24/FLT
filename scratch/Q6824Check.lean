@@ -37,7 +37,7 @@ theorem liesOver_span_X_of_mem
     P.LiesOver p := by
   rw [Ideal.liesOver_iff]
   refine Ideal.IsMaximal.eq_of_le p_isMaximal
-    (Ideal.comap_ne_top _ P.ne_top) ?_
+    (Ideal.comap_ne_top _ (inferInstance : P.IsMaximal).ne_top) ?_
   rw [Ideal.span_singleton_le_iff_mem, Ideal.mem_comap, huX]
   exact hu
 
