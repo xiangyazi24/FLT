@@ -71,48 +71,40 @@ private theorem inertiaDeg'_eq_one_of_residueAlgEquiv
   rw [hbase, htop] at htower
   simpa using htower
 
-variable
-  (infinityBoundaryXResidueAlgEquiv :
-    (InfinityChart ⧸ infinityBoundaryXIdeal) ≃ₐ[ℚ] ℚ)
-  (infinityBoundaryYResidueAlgEquiv :
-    (InfinityChart ⧸ infinityBoundaryYIdeal) ≃ₐ[ℚ] ℚ)
-  (infinityBoundaryZResidueAlgEquiv :
-    (InfinityChart ⧸ infinityBoundaryZIdeal) ≃ₐ[ℚ] ℚ)
-
-@[simp] theorem infinityBoundaryX_inertiaDeg' :
+@[simp] theorem infinityBoundaryX_inertiaDeg'_test
+    (eX : (InfinityChart ⧸ infinityBoundaryXIdeal) ≃ₐ[ℚ] ℚ) :
     basePrime.asIdeal.inertiaDeg' infinityBoundaryXIdeal = 1 :=
-  inertiaDeg'_eq_one_of_residueAlgEquiv
-    infinityBoundaryXIdeal infinityBoundaryXResidueAlgEquiv
+  inertiaDeg'_eq_one_of_residueAlgEquiv infinityBoundaryXIdeal eX
 
-@[simp] theorem infinityBoundaryY_inertiaDeg' :
+@[simp] theorem infinityBoundaryY_inertiaDeg'_test
+    (eY : (InfinityChart ⧸ infinityBoundaryYIdeal) ≃ₐ[ℚ] ℚ) :
     basePrime.asIdeal.inertiaDeg' infinityBoundaryYIdeal = 1 :=
-  inertiaDeg'_eq_one_of_residueAlgEquiv
-    infinityBoundaryYIdeal infinityBoundaryYResidueAlgEquiv
+  inertiaDeg'_eq_one_of_residueAlgEquiv infinityBoundaryYIdeal eY
 
-@[simp] theorem infinityBoundaryZ_inertiaDeg' :
+@[simp] theorem infinityBoundaryZ_inertiaDeg'_test
+    (eZ : (InfinityChart ⧸ infinityBoundaryZIdeal) ≃ₐ[ℚ] ℚ) :
     basePrime.asIdeal.inertiaDeg' infinityBoundaryZIdeal = 1 :=
-  inertiaDeg'_eq_one_of_residueAlgEquiv
-    infinityBoundaryZIdeal infinityBoundaryZResidueAlgEquiv
+  inertiaDeg'_eq_one_of_residueAlgEquiv infinityBoundaryZIdeal eZ
 
-@[simp] theorem infinityBoundaryX_inertiaDeg :
+@[simp] theorem infinityBoundaryX_inertiaDeg_test
+    (eX : (InfinityChart ⧸ infinityBoundaryXIdeal) ≃ₐ[ℚ] ℚ) :
     infinityBoundaryXIdeal.inertiaDeg InfinityParameterRing = 1 := by
   rw [← Ideal.inertiaDeg'_eq_inertiaDeg
     basePrime.asIdeal infinityBoundaryXIdeal]
-  exact infinityBoundaryX_inertiaDeg'
-    infinityBoundaryXResidueAlgEquiv
+  exact infinityBoundaryX_inertiaDeg'_test eX
 
-@[simp] theorem infinityBoundaryY_inertiaDeg :
+@[simp] theorem infinityBoundaryY_inertiaDeg_test
+    (eY : (InfinityChart ⧸ infinityBoundaryYIdeal) ≃ₐ[ℚ] ℚ) :
     infinityBoundaryYIdeal.inertiaDeg InfinityParameterRing = 1 := by
   rw [← Ideal.inertiaDeg'_eq_inertiaDeg
     basePrime.asIdeal infinityBoundaryYIdeal]
-  exact infinityBoundaryY_inertiaDeg'
-    infinityBoundaryYResidueAlgEquiv
+  exact infinityBoundaryY_inertiaDeg'_test eY
 
-@[simp] theorem infinityBoundaryZ_inertiaDeg :
+@[simp] theorem infinityBoundaryZ_inertiaDeg_test
+    (eZ : (InfinityChart ⧸ infinityBoundaryZIdeal) ≃ₐ[ℚ] ℚ) :
     infinityBoundaryZIdeal.inertiaDeg InfinityParameterRing = 1 := by
   rw [← Ideal.inertiaDeg'_eq_inertiaDeg
     basePrime.asIdeal infinityBoundaryZIdeal]
-  exact infinityBoundaryZ_inertiaDeg'
-    infinityBoundaryZResidueAlgEquiv
+  exact infinityBoundaryZ_inertiaDeg'_test eZ
 
 end Q6822Check
