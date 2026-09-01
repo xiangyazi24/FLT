@@ -6,17 +6,21 @@ open scoped BigOperators
 
 namespace Q6827Check
 
-private def fin3Enum {α : Type*} (x0 x1 x2 : α) : Fin 3 → α :=
-  Fin.cases x0 (Fin.cases x1 (fun _ => x2))
+private def fin3Enum {α : Type*} (x0 x1 x2 : α) (i : Fin 3) : α :=
+  if i = 0 then x0 else if i = 1 then x1 else x2
 
 private theorem fin3Enum_bijective {α : Type*}
     (x0 x1 x2 : α)
     (h01 : x0 ≠ x1) (h02 : x0 ≠ x2) (h12 : x1 ≠ x2)
     (hcover : ∀ x : α, x = x0 ∨ x = x1 ∨ x = x2) :
     Function.Bijective (fin3Enum x0 x1 x2) := by
+  have h10 : x1 ≠ x0 := Ne.symm h01
+  have h20 : x2 ≠ x0 := Ne.symm h02
+  have h21 : x2 ≠ x1 := Ne.symm h12
   constructor
   · intro i j hij
-    fin_cases i <;> fin_cases j <;> simp_all [fin3Enum]
+    fin_cases i <;> fin_cases j <;>
+      simp [fin3Enum, h01, h10, h02, h20, h12, h21] at hij ⊢
   · intro x
     rcases hcover x with h | h | h
     · exact ⟨0, by simpa [fin3Enum] using h.symm⟩
@@ -43,9 +47,9 @@ noncomputable def primesOverEquivFin3
     (hclass : ∀ Q : p.primesOver B,
       Q.1 = PX ∨ Q.1 = PY ∨ Q.1 = PZ) :
     p.primesOver B ≃ Fin 3 := by
-  let qX : p.primesOver B := Ideal.primesOver.mk PX
-  let qY : p.primesOver B := Ideal.primesOver.mk PY
-  let qZ : p.primesOver B := Ideal.primesOver.mk PZ
+  let qX : p.primesOver B := Ideal.primesOver.mk p PX
+  let qY : p.primesOver B := Ideal.primesOver.mk p PY
+  let qZ : p.primesOver B := Ideal.primesOver.mk p PZ
   have hqXY : qX ≠ qY := by
     intro h
     exact hXY (by
@@ -96,12 +100,12 @@ theorem sum_primesOver_eq_three
       Q.1 = PX ∨ Q.1 = PY ∨ Q.1 = PZ)
     (f : p.primesOver B → M) :
     (∑ Q : p.primesOver B, f Q) =
-      f (Ideal.primesOver.mk PX) +
-        f (Ideal.primesOver.mk PY) +
-        f (Ideal.primesOver.mk PZ) := by
-  let qX : p.primesOver B := Ideal.primesOver.mk PX
-  let qY : p.primesOver B := Ideal.primesOver.mk PY
-  let qZ : p.primesOver B := Ideal.primesOver.mk PZ
+      f (Ideal.primesOver.mk p PX) +
+        f (Ideal.primesOver.mk p PY) +
+        f (Ideal.primesOver.mk p PZ) := by
+  let qX : p.primesOver B := Ideal.primesOver.mk p PX
+  let qY : p.primesOver B := Ideal.primesOver.mk p PY
+  let qZ : p.primesOver B := Ideal.primesOver.mk p PZ
   have hqXY : qX ≠ qY := by
     intro h
     exact hXY (by
@@ -133,9 +137,9 @@ theorem sum_primesOver_eq_three
   let e : Fin 3 ≃ p.primesOver B :=
     Equiv.ofBijective (fin3Enum qX qY qZ)
       (fin3Enum_bijective qX qY qZ hqXY hqXZ hqYZ hcover)
-  have he0 : e (0 : Fin 3) = qX := by rfl
-  have he1 : e (1 : Fin 3) = qY := by rfl
-  have he2 : e (2 : Fin 3) = qZ := by rfl
+  have he0 : e (0 : Fin 3) = qX := by simp [e, fin3Enum]
+  have he1 : e (1 : Fin 3) = qY := by simp [e, fin3Enum]
+  have he2 : e (2 : Fin 3) = qZ := by simp [e, fin3Enum]
   calc
     (∑ Q : p.primesOver B, f Q) =
         ∑ i : Fin 3, f (e i) := by
@@ -144,9 +148,9 @@ theorem sum_primesOver_eq_three
         simp
       · intro Q hQ
         simp
-    _ = f (Ideal.primesOver.mk PX) +
-          f (Ideal.primesOver.mk PY) +
-          f (Ideal.primesOver.mk PZ) := by
+    _ = f (Ideal.primesOver.mk p PX) +
+          f (Ideal.primesOver.mk p PY) +
+          f (Ideal.primesOver.mk p PZ) := by
       rw [Fin.sum_univ_three, he0, he1, he2]
       rfl
 
