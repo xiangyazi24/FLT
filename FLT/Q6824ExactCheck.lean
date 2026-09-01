@@ -74,18 +74,21 @@ private theorem inertiaDeg'_eq_one_of_residueAlgEquiv
 production boundary-fibre module. -/
 
 noncomputable def infinityBoundaryXResidueAlgEquiv :
-    (InfinityChart ⧸ infinityBoundaryXIdeal) ≃ₐ[ℚ] ℚ := by
-  simpa [InfinityChart, infinityBoundaryXIdeal] using
+    (InfinityChart ⧸ infinityBoundaryXIdeal) ≃ₐ[ℚ] ℚ :=
+  (Ideal.quotientEquivAlgOfEq ℚ (by
+      simp [infinityBoundaryXIdeal])).trans
     (AlgEquiv.quotientBot ℚ ℚ)
 
 noncomputable def infinityBoundaryYResidueAlgEquiv :
-    (InfinityChart ⧸ infinityBoundaryYIdeal) ≃ₐ[ℚ] ℚ := by
-  simpa [InfinityChart, infinityBoundaryYIdeal] using
+    (InfinityChart ⧸ infinityBoundaryYIdeal) ≃ₐ[ℚ] ℚ :=
+  (Ideal.quotientEquivAlgOfEq ℚ (by
+      simp [infinityBoundaryYIdeal])).trans
     (AlgEquiv.quotientBot ℚ ℚ)
 
 noncomputable def infinityBoundaryZResidueAlgEquiv :
-    (InfinityChart ⧸ infinityBoundaryZIdeal) ≃ₐ[ℚ] ℚ := by
-  simpa [InfinityChart, infinityBoundaryZIdeal] using
+    (InfinityChart ⧸ infinityBoundaryZIdeal) ≃ₐ[ℚ] ℚ :=
+  (Ideal.quotientEquivAlgOfEq ℚ (by
+      simp [infinityBoundaryZIdeal])).trans
     (AlgEquiv.quotientBot ℚ ℚ)
 
 @[simp] theorem infinityBoundaryX_inertiaDeg' :
