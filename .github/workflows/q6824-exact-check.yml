@@ -1,0 +1,38 @@
+name: Q6824 exact-interface check
+
+on:
+  push:
+    branches: [q6824-exact-check]
+    paths-ignore:
+      - FLT/Q6824Exact-output.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q6824-exact-check
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+      - name: Build and capture diagnostics
+        shell: bash
+        run: |
+          set +e
+          lake build FLT.Q6824ExactCheck > FLT/Q6824Exact-output.txt 2>&1
+          status=$?
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add FLT/Q6824Exact-output.txt
+          git commit -m 'Capture Q6824 exact diagnostics [skip ci]' || true
+          git push origin HEAD:q6824-exact-check
+          exit "$status"
