@@ -1,0 +1,38 @@
+name: Q6824 current-pin check
+
+on:
+  push:
+    branches: [q6824-v432-check]
+    paths-ignore:
+      - scratch/Q6824V432-output.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q6824-v432-check
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+      - name: Build and capture diagnostics
+        shell: bash
+        run: |
+          set +e
+          lake build scratch.Q6824V432Check > scratch/Q6824V432-output.txt 2>&1
+          status=$?
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scratch/Q6824V432-output.txt
+          git commit -m 'Capture Q6824 current-pin diagnostics [skip ci]' || true
+          git push origin HEAD:q6824-v432-check
+          exit "$status"
