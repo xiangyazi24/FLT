@@ -1,0 +1,38 @@
+name: Q6822 current-pin check
+
+on:
+  push:
+    branches: [q6822-check]
+    paths-ignore:
+      - Q6822-output.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: q6822-check
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+      - name: Build the Q6822 check and capture diagnostics
+        shell: bash
+        run: |
+          set +e
+          lake build FLT.Q6822Check > Q6822-output.txt 2>&1
+          status=$?
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add Q6822-output.txt
+          git commit -m 'Capture Q6822 current-pin diagnostics [skip ci]' || true
+          git push origin HEAD:q6822-check
+          exit "$status"
