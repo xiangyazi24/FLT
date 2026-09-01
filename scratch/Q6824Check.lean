@@ -21,9 +21,9 @@ instance p_isMaximal : p.IsMaximal := by
       (Polynomial.irreducible_X_sub_C (0 : ℚ)))
 
 /-- The residue field of `ℚ[X]` at `(X)` is canonically `ℚ`. -/
-noncomputable def baseResidueAlgEquiv : (R ⧸ p) ≃ₐ[ℚ] ℚ := by
-  dsimp [R, p]
-  simpa using (Polynomial.quotientSpanXSubCAlgEquiv (0 : ℚ))
+noncomputable def baseResidueAlgEquiv : (R ⧸ p) ≃ₐ[ℚ] ℚ :=
+  (Ideal.quotientEquivAlgOfEq ℚ (by simp [R, p])).trans
+    (Polynomial.quotientSpanXSubCAlgEquiv (0 : ℚ))
 
 attribute [local instance] Ideal.Quotient.field
 
