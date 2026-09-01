@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - q6827-lean-check-7771eae9
+    paths:
+      - Q6827Check.lean
+      - .github/workflows/q6827-lean-check.yml
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   check:
@@ -20,5 +23,18 @@ jobs:
           build: false
           test: false
           lint: false
-      - name: Check Q6827
-        run: lake env lean Q6827Check.lean
+      - name: Check Q6827 and retain diagnostics
+        shell: bash
+        run: |
+          set +e
+          lake env lean Q6827Check.lean > Q6827Compiler.log 2>&1
+          status=$?
+          cat Q6827Compiler.log
+          if [ "$status" -ne 0 ]; then
+            git config user.name github-actions[bot]
+            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+            git add Q6827Compiler.log
+            git commit -m "Record Q6827 compiler diagnostics [skip ci]"
+            git push
+          fi
+          exit "$status"
