@@ -1,0 +1,1 @@
+Q6827Check.lean:155:6: error: No goals to be solved
