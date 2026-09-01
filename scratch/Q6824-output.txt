@@ -1,51 +1,24 @@
 ✖ [2304/2304] Building scratch.Q6824Check (2.5s)
 trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/bin/lean /home/runner/work/FLT/FLT/scratch/Q6824Check.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q6824Check.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/scratch/Q6824Check.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q6824Check.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/scratch/Q6824Check.setup.json --json
-error: scratch/Q6824Check.lean:35:0: This instance has 1 argument that cannot be inferred using typeclass synthesis. Specifically
+error: scratch/Q6824Check.lean:39:4: Tactic `rfl` failed: The left-hand side
+  (algebraMap R S) X
+is not definitionally equal to the right-hand side
+  u
 
-  argument 4: `(u : S)`
-
-These arguments are not instance-implicit and appear neither in another instance-implicit argument nor the return type, so they cannot be inferred using typeclass synthesis.
-error: scratch/Q6824Check.lean:38:10: failed to synthesize instance of type class
-  Algebra R S
-
-Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
-error: scratch/Q6824Check.lean:41:39: failed to synthesize instance of type class
-  SMul R S
-
-Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
-error: scratch/Q6824Check.lean:42:37: unsolved goals
 S : Type u_1
 inst✝¹ : CommRing S
 inst✝ : Algebra ℚ S
 u : S
-q : ?m.6
-⊢ (algebraMap ?m.6 ?m.8) q = (algebraMap ?m.7 ?m.8) ((algebraMap ?m.6 ?m.7) q)
-warning: scratch/Q6824Check.lean:44:10: This simp argument is unused:
-  R
-
-Hint: Omit it from the simp argument list.
-  simp [R,̵ ̵R̵ingHom.algebraMap_toAlgebra]
-
-Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-warning: scratch/Q6824Check.lean:44:13: This simp argument is unused:
-  RingHom.algebraMap_toAlgebra
-
-Hint: Omit it from the simp argument list.
-  simp [R,̵ ̵R̵i̵n̵g̵H̵o̵m̵.̵a̵l̵g̵e̵b̵r̵a̵M̵a̵p̵_̵t̵o̵A̵l̵g̵e̵b̵r̵a̵]
-
-Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
-error: scratch/Q6824Check.lean:46:10: failed to synthesize instance of type class
-  SMul R S
-
-Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
-warning: scratch/Q6824Check.lean:54:0: automatically included section variable(s) unused in theorem `Q6824Check.liesOver_span_X_of_mem`:
+this : Algebra R S := (eval₂RingHom (algebraMap ℚ S) u).toAlgebra
+⊢ (algebraMap R S) X = u
+warning: scratch/Q6824Check.lean:53:0: automatically included section variable(s) unused in theorem `Q6824Check.liesOver_span_X_of_mem`:
   [Algebra ℚ S]
   [IsScalarTower ℚ R S]
 consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
   omit [Algebra ℚ S] [IsScalarTower ℚ R S] in theorem ...
 
 Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
-warning: scratch/Q6824Check.lean:67:0: automatically included section variable(s) unused in theorem `Q6824Check.inertiaDeg_eq_one_of_residueAlgEquiv`:
+warning: scratch/Q6824Check.lean:66:0: automatically included section variable(s) unused in theorem `Q6824Check.inertiaDeg_eq_one_of_residueAlgEquiv`:
   [IsScalarTower ℚ R S]
   [P.IsMaximal]
 consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
