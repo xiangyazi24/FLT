@@ -29,6 +29,18 @@ attribute [local instance] Ideal.Quotient.field
 
 variable {S : Type*} [CommRing S]
 variable [Algebra R S] [Algebra ℚ S] [IsScalarTower ℚ R S]
+
+/-- A maximal ideal containing the image of `X` lies over `(X)`. -/
+theorem liesOver_span_X_of_mem
+    (u : S) (huX : algebraMap R S Polynomial.X = u)
+    (P : Ideal S) [P.IsMaximal] (hu : u ∈ P) :
+    P.LiesOver p := by
+  rw [Ideal.liesOver_iff]
+  refine Ideal.IsMaximal.eq_of_le p_isMaximal
+    (Ideal.comap_ne_top _ P.ne_top) ?_
+  rw [Ideal.span_singleton_le_iff_mem, Ideal.mem_comap, huX]
+  exact hu
+
 variable (P : Ideal S) [P.IsMaximal] [P.LiesOver p]
 
 /-- Any maximal point above `(X)` whose residue field is `ℚ` has inertia degree one. -/
