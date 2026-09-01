@@ -1,32 +1,4 @@
-✔ [2513/2514] Built FLT.Q6822Check (1.9s)
-✖ [2514/2514] Building FLT.Q6824ExactCheck (2.7s)
-trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.32.0-rc1/bin/lean /home/runner/work/FLT/FLT/FLT/Q6824ExactCheck.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/FLT/Q6824ExactCheck.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/FLT/Q6824ExactCheck.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/FLT/Q6824ExactCheck.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/FLT/Q6824ExactCheck.setup.json --json
+✔ [2513/2514] Built FLT.Q6822Check (1.0s)
+⚠ [2514/2514] Built FLT.Q6824ExactCheck (2.7s)
 warning: FLT/Q6824ExactCheck.lean:60:6: `Ideal.inertiaDeg_algebraMap` has been deprecated: Use `Ideal.inertiaDeg'_algebraMap` instead
-error: FLT/Q6824ExactCheck.lean:85:27: Unknown identifier `infinityBoundaryXResidueAlgEquiv`
-error: FLT/Q6824ExactCheck.lean:90:27: Unknown identifier `infinityBoundaryYResidueAlgEquiv`
-error: FLT/Q6824ExactCheck.lean:95:27: Unknown identifier `infinityBoundaryZResidueAlgEquiv`
-error: FLT/Q6824ExactCheck.lean:101:8: Function expected at
-  infinityBoundaryX_inertiaDeg'
-but this term has type
-  basePrime.asIdeal.inertiaDeg' infinityBoundaryXIdeal = 1
-
-Note: Expected a function because this term is being applied to the argument
-  infinityBoundaryXResidueAlgEquiv
-error: FLT/Q6824ExactCheck.lean:108:8: Function expected at
-  infinityBoundaryY_inertiaDeg'
-but this term has type
-  basePrime.asIdeal.inertiaDeg' infinityBoundaryYIdeal = 1
-
-Note: Expected a function because this term is being applied to the argument
-  infinityBoundaryYResidueAlgEquiv
-error: FLT/Q6824ExactCheck.lean:115:8: Function expected at
-  infinityBoundaryZ_inertiaDeg'
-but this term has type
-  basePrime.asIdeal.inertiaDeg' infinityBoundaryZIdeal = 1
-
-Note: Expected a function because this term is being applied to the argument
-  infinityBoundaryZResidueAlgEquiv
-error: Lean exited with code 1
-Some required targets logged failures:
-- FLT.Q6824ExactCheck
-error: build failed
+Build completed successfully (2514 jobs).
