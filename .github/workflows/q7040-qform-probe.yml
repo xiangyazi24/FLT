@@ -1,0 +1,20 @@
+name: Q7040 q-form probe
+
+on:
+  push:
+    branches:
+      - q7040-check-9aacfa22
+    paths:
+      - 'review/q7040_qform_probe.cpp'
+      - '.github/workflows/q7040-qform-probe.yml'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile probe
+        run: g++ -O3 -std=c++20 review/q7040_qform_probe.cpp -o /tmp/q7040_probe
+      - name: Run H=10000 probe
+        run: /tmp/q7040_probe 10000
