@@ -75,7 +75,7 @@ int main(int argc,char**argv){
       long double ns=(rp-rm)/sq5;
       long double ms=(phip*rm-phim*rp)/sq5;
       long long m0=std::llround(ms), n0=std::llround(ns);
-      long double delta=std::max(std::fabsl(ms-m0),std::fabsl(ns-n0));
+      long double delta=std::max(std::fabs(ms-m0),std::fabs(ns-n0));
       bool ex=false; long double bestrel=1e300L; long long bm=m0,bn=n0;
       for(long long dm=-2;dm<=2;dm++) for(long long dn=-2;dn<=2;dn++){
         long long m=m0+dm,n=n0+dn;
@@ -83,7 +83,7 @@ int main(int argc,char**argv){
         if(p.a==A && p.b==C) ex=true;
         long double xp=(long double)m+(long double)n*phip;
         long double xm=(long double)m+(long double)n*phim;
-        long double rel=std::max(std::fabsl(std::pow(xp,5)-qp)/qp,std::fabsl(std::pow(xm,5)-qm)/qm);
+        long double rel=std::max(std::fabs(std::pow(xp,5)-qp)/qp,std::fabs(std::pow(xm,5)-qm)/qm);
         if(rel<bestrel){bestrel=rel;bm=m;bn=n;}
       }
       for(int j=0;j<4;j++) if(idx_for(a,b,j)){
