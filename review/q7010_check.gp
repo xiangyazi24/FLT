@@ -74,7 +74,16 @@ forpair(a,b)= {
   print("alpha_i/alpha_1 global5=",vector(3,j,global5(al[j+1]/al[1])));
   print("alpha_1 global5=",global5(al[1]));
   print("W local5=",local5(W)," global5=",global5(W));
+  print("W ideal factorization=",idealfactor(nf,W));
 }
 forpair(1,5); forpair(2,5); forpair(1,25);
+
+print("\nCHECK only norm-filter candidate t=0");
+a=0;b=1; al=vector(4,i,a-b*beta[i]); W=Wab(a,b);
+print("vpi(alpha)=",vector(4,i,idealval(nf,al[i],pr5)));
+print("c(alpha)=",vector(4,i,coord(al[i])));
+print("W local5=",local5(W)," global5=",global5(W));
+print("W / ((-5)^5*z^4)=",lift(W/((-5)^5*z^4)));
+print("W ideal factorization=",idealfactor(nf,W));
 
 print("\nDONE");
