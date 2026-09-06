@@ -1,0 +1,13 @@
+name: q7021-qform
+on:
+  push:
+    branches: [q7021-check-4e2ed2ac]
+jobs:
+  scan:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build scanner
+        run: g++ -O3 -std=c++20 review/q7021_qform_scan.cpp -o /tmp/q7021_scan
+      - name: Complete scan through 10000
+        run: /tmp/q7021_scan 10000
