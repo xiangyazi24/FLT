@@ -19,23 +19,24 @@ print("vpi(pi)=",idealval(nf,pi5,pr5)," vpi(5)=",idealval(nf,5,pr5)," vpi(s)=",i
 print("beta=",vector(4,i,lift(beta[i])));
 print("vpi(beta)=",vector(4,i,idealval(nf,beta[i],pr5)));
 
+showpair(i,j)={
+  my(d=beta[j]-beta[i], vp, u, ui);
+  vp=idealval(nf,d,pr5); u=d/pi5^vp; ui=1/u;
+  print("pair=",i-1,",",j-1," k=",vp," d=",lift(d)," u=",lift(u)," u_inv=",lift(ui)," u*u_inv=",lift(u*ui)," NormK(u)=",nfeltnorm(nf,u));
+};
 print("\nBRANCH_DIFFERENCES beta_j-beta_i, i<j");
-pairs=[[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]];
-for(k=1,#pairs,
-  i=pairs[k][1]; j=pairs[k][2];
-  d=beta[j]-beta[i]; vp=idealval(nf,d,pr5); u=d/pi5^vp; ui=1/u;
-  print("pair=",i-1,",",j-1," k=",vp,
-    " d=",lift(d)," u=",lift(u)," u_inv=",lift(ui),
-    " u*u_inv=",lift(u*ui)," Norm(u)=",nfeltnorm(nf,u));
-);
+showpair(1,2); showpair(1,3); showpair(1,4); showpair(2,3); showpair(2,4); showpair(3,4);
 
 print("\nUNIT_GROUP_CERTIFICATE");
+print("bnfcertify=",bnfcertify(bnf));
 print("class_number=",bnf.no);
 print("regulator=",bnf.reg);
+print("2logphi=",2*log((1+sqrt(5))/2)," regulator_minus_2logphi=",bnf.reg-2*log((1+sqrt(5))/2));
 print("torsion=",bnf.tu);
 print("fundamental_units=",bnf.fu);
-print("phi=",lift(phi)," minpoly(phi)=",minpoly(phi)," Norm(phi)=",nfeltnorm(nf,phi));
-print("eps=",lift(eps)," Norm(eps)=",nfeltnorm(nf,eps));
+mp= minpoly(phi);
+print("phi=",lift(phi)," minpoly(phi)=",mp," real_subfield_norm(phi)=",polcoef(mp,0)," absolute_NormK(phi)=",nfeltnorm(nf,phi));
+print("eps=",lift(eps)," absolute_NormK(eps)=",nfeltnorm(nf,eps));
 print("eps/(-z^3*phi)=",lift(eps/(-z^3*phi)));
 print("z^2*eps=",lift(z^2*eps)," -phi=",lift(-phi));
 print("eps_inv=",lift(1/eps)," eps*eps_inv=",lift(eps*(1/eps)));
@@ -55,21 +56,16 @@ kv = Mod([2,1,0,0,0,0]~,5);
 print("M=",lift(M));
 print("T6=",lift(T6));
 print("T6*k=",lift(T6*kv)," k=",lift(kv));
-fixed6=List();
-for(a0=0,4,for(a1=0,4,for(a2=0,4,for(b0=0,4,for(b1=0,4,for(b2=0,4,
-  v=Mod([a0,a1,a2,b0,b1,b2]~,5); if(T6*v==v,listput(fixed6,lift(v)));
-))))));
-print("T6_FIXED_COUNT=",#fixed6);
-print("T6_FIXED_VECTORS=",Vec(fixed6));
+D6=T6-matid(6);
+print("rank(T6-I)=",matrank(D6));
+print("ker(T6-I)=",lift(matker(D6)));
+print("fixed_line_vectors=",vector(5,c,lift(Mod(c-1,5)*kv)));
 print("MU=",lift(MU)," det(MU-I)=",lift(matdet(MU-matid(2))));
-fixed2=List();
-for(a0=0,4,for(a1=0,4,v=Mod([a0,a1]~,5); if(MU*v==v,listput(fixed2,lift(v)))));
-print("MU_FIXED_COUNT=",#fixed2);
-print("MU_FIXED_VECTORS=",Vec(fixed2));
+print("rank(MU-I)=",matrank(MU-matid(2))," ker(MU-I)=",lift(matker(MU-matid(2))));
 
 print("\nPI_VALUATION_BRANCHES");
 branch(a,b,label)={
-  al=vector(4,i,a-b*beta[i]);
+  my(al=vector(4,i,a-b*beta[i]));
   print(label," a=",a," b=",b," vpi(alpha)=",vector(4,i,idealval(nf,al[i],pr5)));
 };
 branch(1,5,"5|b");
@@ -79,4 +75,4 @@ branch(2,1,"5nmidab");
 print("\nWEIGHT_CLEARING");
 print("weights=",e," sum_weights=",sum(i=1,4,e[i]));
 print("b^10/(b^2)^5 symbolic exponent check: 10-2*5=",10-2*5);
-print("DONE");
+print("DONE_CLEAN");
