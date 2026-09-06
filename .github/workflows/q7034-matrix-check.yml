@@ -1,0 +1,13 @@
+name: q7034-matrix-check
+on:
+  push:
+    branches: [q7034-check-c9e53082]
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build exact checker
+        run: g++ -O2 -std=c++20 review/q7034_matrix_check.cpp -o /tmp/q7034_check
+      - name: Run exact checker
+        run: /tmp/q7034_check
