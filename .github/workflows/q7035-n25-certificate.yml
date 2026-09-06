@@ -1,0 +1,18 @@
+name: Q7035 N25 exact certificate
+
+on:
+  push:
+    branches:
+      - q7035-check-da736300
+    paths:
+      - 'review/q7035_n25_certificate.py'
+      - '.github/workflows/q7035-n25-certificate.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run exact integer checker
+        run: python3 review/q7035_n25_certificate.py
