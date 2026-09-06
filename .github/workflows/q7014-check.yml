@@ -1,0 +1,17 @@
+name: q7014-check
+on:
+  push:
+    branches: [q7014-check-63574ba5]
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PARI/GP
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pari-gp
+      - name: Run Q7014 deep lemma certificate
+        run: gp -q review/q7014_deep_lemmas.gp
