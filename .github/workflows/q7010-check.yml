@@ -13,6 +13,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pari-gp python3-numpy
+      - name: Run Q7010 cusp checker
+        run: python3 review/q7010_cusps.py
       - name: Run Q7010 exact local checker
         run: gp -q review/q7010_check.gp
       - name: Run Q7010 bounded global search
