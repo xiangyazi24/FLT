@@ -6,6 +6,7 @@ on:
       - q7040-check-9aacfa22
     paths:
       - 'review/q7040_qform_probe.cpp'
+      - 'review/q7040_qform_local_probe.cpp'
       - '.github/workflows/q7040-qform-probe.yml'
   workflow_dispatch:
 
@@ -14,7 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Compile probe
-        run: g++ -O3 -std=c++20 review/q7040_qform_probe.cpp -o /tmp/q7040_probe
+      - name: Compile probes
+        run: |
+          g++ -O3 -std=c++20 review/q7040_qform_probe.cpp -o /tmp/q7040_probe
+          g++ -O3 -std=c++20 review/q7040_qform_local_probe.cpp -o /tmp/q7040_local
       - name: Run H=10000 probe
         run: /tmp/q7040_probe 10000
+      - name: Run local obstruction probe
+        run: /tmp/q7040_local
