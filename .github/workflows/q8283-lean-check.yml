@@ -17,6 +17,63 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+      - name: Install explicit degree-preserving AtomLE transport
+        shell: bash
+        run: |
+          file=FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean
+          start=$(grep -n '^noncomputable def atomLEEquivCommon12ToFull' "$file" | cut -d: -f1)
+          finish=$(grep -n '^set_option maxHeartbeats 1000000 in' "$file" | cut -d: -f1)
+          test -n "$start"
+          test -n "$finish"
+          test "$start" -lt "$finish"
+          {
+            head -n $((start - 1)) "$file"
+            cat <<'LEAN'
+          noncomputable def atomLEEquivCommon12ToFull
+              (k : ℕ) (hk : k ≤ 4) :
+              frobeniusOrbitGrading25ThreeLE4.AtomLE k ≃
+                fullClosedPointGrading25Three.AtomLE k where
+            toFun x := by
+              let d : Fin (k + 1) :=
+                ⟨x.1.1, by
+                  simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using
+                    Nat.lt_succ_of_le x.2⟩
+              refine
+                ⟨⟨x.1.1,
+                    closedPointEquivCommon12ToFullLE k hk d x.1.2⟩, ?_⟩
+              simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using x.2
+            invFun x := by
+              let d : Fin (k + 1) :=
+                ⟨x.1.1, by
+                  simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using
+                    Nat.lt_succ_of_le x.2⟩
+              refine
+                ⟨⟨x.1.1,
+                    (closedPointEquivCommon12ToFullLE k hk d).symm x.1.2⟩, ?_⟩
+              simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using x.2
+            left_inv x := by
+              apply Subtype.ext
+              apply Sigma.ext
+              · rfl
+              · exact
+                  (closedPointEquivCommon12ToFullLE k hk
+                    ⟨x.1.1, by
+                      simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using
+                        Nat.lt_succ_of_le x.2⟩).symm_apply_apply x.1.2
+            right_inv x := by
+              apply Subtype.ext
+              apply Sigma.ext
+              · rfl
+              · exact
+                  (closedPointEquivCommon12ToFullLE k hk
+                    ⟨x.1.1, by
+                      simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using
+                        Nat.lt_succ_of_le x.2⟩).apply_symm_apply x.1.2
+
+          LEAN
+            tail -n +"$finish" "$file"
+          } > "$file.tmp"
+          mv "$file.tmp" "$file"
       - name: Set up Lean
         uses: leanprover/lean-action@v1
         with:
@@ -26,56 +83,6 @@ jobs:
       - name: Build structurally patched Q8280 candidate and retain diagnostics
         shell: bash
         run: |
-          git apply <<'PATCH'
-          diff --git a/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean b/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean
-          --- a/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean
-          +++ b/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean
-          @@ -270,7 +270,39 @@ noncomputable def atomLEEquivCommon12ToFull
-               (k : ℕ) (hk : k ≤ 4) :
-               frobeniusOrbitGrading25ThreeLE4.AtomLE k ≃
-          -      fullClosedPointGrading25Three.AtomLE k :=
-          -  (frobeniusOrbitGrading25ThreeLE4.atomLEEquivSigma k).trans
-          -    ((Equiv.sigmaCongrRight fun d =>
-          -      closedPointEquivCommon12ToFullLE k hk d).trans
-          -        (fullClosedPointGrading25Three.atomLEEquivSigma k).symm)
-          +      fullClosedPointGrading25Three.AtomLE k where
-          +  toFun x := by
-          +    let d : Fin (k + 1) :=
-          +      ⟨x.1.1, by
-          +        simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using
-          +          Nat.lt_succ_of_le x.2⟩
-          +    refine
-          +      ⟨⟨x.1.1,
-          +          closedPointEquivCommon12ToFullLE k hk d x.1.2⟩, ?_⟩
-          +    simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using x.2
-          +  invFun x := by
-          +    let d : Fin (k + 1) :=
-          +      ⟨x.1.1, by
-          +        simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using
-          +          Nat.lt_succ_of_le x.2⟩
-          +    refine
-          +      ⟨⟨x.1.1,
-          +          (closedPointEquivCommon12ToFullLE k hk d).symm x.1.2⟩, ?_⟩
-          +    simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using x.2
-          +  left_inv x := by
-          +    apply Subtype.ext
-          +    apply Sigma.ext
-          +    · rfl
-          +    · exact
-          +        (closedPointEquivCommon12ToFullLE k hk
-          +          ⟨x.1.1, by
-          +            simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using
-          +              Nat.lt_succ_of_le x.2⟩).symm_apply_apply x.1.2
-          +  right_inv x := by
-          +    apply Subtype.ext
-          +    apply Sigma.ext
-          +    · rfl
-          +    · exact
-          +        (closedPointEquivCommon12ToFullLE k hk
-          +          ⟨x.1.1, by
-          +            simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using
-          +              Nat.lt_succ_of_le x.2⟩).apply_symm_apply x.1.2
-          PATCH
           set +e
           lake build FLT.Assumptions.MazurProof.N25F_ThreeFullClosedPointBridge > Q8283Compiler.txt 2>&1
           status=$?
