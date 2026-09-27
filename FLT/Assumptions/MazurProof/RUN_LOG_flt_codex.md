@@ -140,3 +140,48 @@ Read Q8265 answer `2f36c341`. Its bridge construction is based on the earlier ca
 ## Q8261 carrier audit answer (2026-09-27)
 
 Read Q8261 answer `e89b8a56`. It confirms the `d + 1` characteristic-three carrier shape and suggests more explicit elaboration in the subtype-finiteness proof. The current `N25F_Next.lean` was already built locally (`Build completed successfully (8581 jobs)`), and the answer could not compile this checkout. No code was changed; the suggested proof-style rewrite is unnecessary for the compiled source.
+
+## Characteristic-three descent and closed-point bridge (2026-09-27)
+
+Reviewed the returned Q8286/Q8287 static audits. Q8286's recovered Q8279 source consistently uses the actual `CommonField 3 (d + 1)` carrier, supports the degreewise fixed-field/orbit route, and does not claim compilation. Q8287 independently confirms the generic fixed-point equivalence uses the stored coefficient embedding. Both distinguish this point-set bridge from the actual Picard/Riemann--Roch conclusion. Q8285's source review found no current consumer requiring a scheme-level canonical/Kähler line; it identifies the F3 affine-chart Jacobian unit-ideal theorem as the next geometric interface, using `normalized_projective_point_not_singular`.
+
+Q8283's task ledger reported a Drive drop, but the discovered full document ID resolves to a document containing only `ANSWER Q8283 4cdbd2fd` (24 bytes); `get_document`, text fetch, and revision inspection found no audit body. No Q8283 claim or code was integrated. An initial Q8288 dispatch created a ledger row but no bridge task; `/api/status` showed no matching in-flight ID. The same source-grounded recursion-depth prompt was then submitted successfully as Q8289.
+
+Added `N25F_ThreeDegreeDescent.lean`, separating the coherent realization of `CommonField 3 (d + 1)` and the equivalence with the common-field Frobenius fixed-point subtype. The module retains the fixed-point value and periodicity projections. Q8291's static source audit found no name, type, or API correction.
+
+Targeted build:
+
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ThreeDegreeDescent
+```
+
+Result: `Build completed successfully (8603 jobs).`
+
+Axiom check (`lake env lean /home/xhuan5/tmp/flt-ai/codex-20260927-n25/probes/n25_three_degree_descent_axioms.lean`):
+
+```text
+degreeToCommonFixedEquiv depends on [propext, Classical.choice, Quot.sound]
+degreeToCommonFixedEquiv_val depends on [propext, Classical.choice, Quot.sound]
+degreeToCommonFixedEquiv_periodic depends on [propext, Classical.choice, Quot.sound]
+```
+
+The first targeted build of `N25F_ThreeFullClosedPointBridge.lean` failed at the concrete `rfl` degree equalities and inverse-law `change` steps with maximum-recursion-depth errors. Q8289 proposed transporting exact ghost slots through an abstract grading equivalence via `Equiv.sigmaCongr` and `Equiv.cast`; this keeps quotient-backed closed-point fibers opaque during dependent transport. Split the fixed-field declarations into the new descent module, removed the unnecessary direct middle-Riemann--Roch import from the structural bridge, and replaced the concrete proof-erasing transport with that generic helper.
+
+Targeted build:
+
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ThreeFullClosedPointBridge
+```
+
+Result: `Build completed successfully (8604 jobs).`
+
+Axiom check (`lake env lean /home/xhuan5/tmp/flt-ai/codex-20260927-n25/probes/n25_three_closed_point_bridge_axioms.lean`):
+
+```text
+degreeCurvePointEmbeddingToCommon12_minimalPeriod depends on [propext, Classical.choice, Quot.sound]
+orbitClassEquivDegreeToCommon12 depends on [propext, Classical.choice, Quot.sound]
+exactGhostSlotEquivCommon12ToFull depends on [propext, Classical.choice, Quot.sound]
+fullClosedPointBridge25ThreeLE4 depends on [propext, Classical.choice, Quot.sound]
+```
+
+This closes the degree-at-most-four point-set classification bridge over the full characteristic-three carrier. It does not yet construct arbitrary rational-function projective divisors or discharge the actual Picard/Riemann--Roch inputs. Q8282's local `Ring.ord` bridge remains in flight. A source audit of Q8285's proposed characteristic-three polynomial derivative interface was dispatched for the next chart-Jacobian step.
