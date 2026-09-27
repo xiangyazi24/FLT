@@ -1,0 +1,116 @@
+✔ [8563/8607] Built FLT.Assumptions.MazurProof.CurveDedekindDivisor (2.6s)
+✔ [8564/8607] Built Mathlib (2.7s)
+✔ [8565/8607] Built FLT.Assumptions.MazurProof.CurveZetaEulerRecurrence (6.5s)
+✔ [8566/8607] Built FLT.Assumptions.MazurProof.CurveZetaEffectiveDivisors (6.6s)
+✔ [8567/8607] Built FLT.Assumptions.MazurProof.CurveZetaClassNumber (7.0s)
+✔ [8568/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25CanonicalPoints (9.4s)
+✔ [8569/8607] Built FLT.Assumptions.MazurProof.CurveDivisorPicard (6.7s)
+✔ [8570/8607] Built FLT.Assumptions.MazurProof.CurveZetaMarkedDivisors (10s)
+✔ [8571/8607] Built FLT.Assumptions.MazurProof.CurveZetaMiddleRiemannRoch (4.9s)
+✔ [8572/8607] Built FLT.Assumptions.MazurProof.CurveZetaPointOrbitClassification (3.6s)
+✔ [8573/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF2 (12s)
+⚠ [8574/8607] Built FLT.Assumptions.MazurProof.CurveZetaFrobeniusOrbitGrading (3.8s)
+warning: FLT/Assumptions/MazurProof/CurveZetaFrobeniusOrbitGrading.lean:124:0: `orbitClassFinite` does not use the following hypothesis in its type:
+  • [Fintype X] (#2)
+
+Consider replacing this hypothesis with the corresponding instance of `Finite` and using `Fintype.ofFinite` in the proof, or removing it entirely.
+
+Note: This linter can be disabled with `set_option linter.unusedFintypeInType false`
+warning: FLT/Assumptions/MazurProof/CurveZetaFrobeniusOrbitGrading.lean:229:0: `orbitClosedFinite` does not use the following hypothesis in its type:
+  • [Fintype Y] (#2)
+
+Consider replacing this hypothesis with the corresponding instance of `Finite` and using `Fintype.ofFinite` in the proof, or removing it entirely.
+
+Note: This linter can be disabled with `set_option linter.unusedFintypeInType false`
+✔ [8575/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeil (37s)
+✔ [8576/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeilThreeDefs (5.7s)
+✔ [8577/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF2 (7.1s)
+✔ [8578/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientBaseChange (5.1s)
+✔ [8579/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF16Add (13s)
+⚠ [8580/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF16Distrib (26s)
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientF16Distrib.lean:28:2: Unscoped option maxHeartbeats is not allowed:
+Please scope this to individual declarations, as in
+```
+set_option maxHeartbeats in
+-- comment explaining why this is necessary
+example : ... := ...
+```
+
+Note: This linter can be disabled with `set_option linter.style.setOption false`
+✔ [8581/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeilThreeLinear (26s)
+⚠ [8582/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF16Mul (36s)
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientF16Mul.lean:27:2: Unscoped option maxHeartbeats is not allowed:
+Please scope this to individual declarations, as in
+```
+set_option maxHeartbeats in
+-- comment explaining why this is necessary
+example : ... := ...
+```
+
+Note: This linter can be disabled with `set_option linter.style.setOption false`
+✔ [8583/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoConormal (8.1s)
+⚠ [8584/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThree (35s)
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:421:0: automatically included section variable(s) unused in theorem `MazurProof.RationalPointsN25QuotientKummerThree.cyclotomicFive25Three_ne_zero`:
+  [CharP K 3]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharP K 3] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:535:0: automatically included section variable(s) unused in theorem `MazurProof.RationalPointsN25QuotientKummerThree.segre_boundary_corner`:
+  [CharP K 3]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharP K 3] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:595:0: automatically included section variable(s) unused in theorem `MazurProof.RationalPointsN25QuotientKummerThree.denseSegre_to_kummer_identity`:
+  [CharP K 3]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharP K 3] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:624:0: automatically included section variable(s) unused in theorem `MazurProof.RationalPointsN25QuotientKummerThree.kummer_at_zero`:
+  [CharP K 3]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharP K 3] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+✔ [8585/8607] Built FLT.Assumptions.MazurProof.FiniteFieldFrobeniusDescent (6.8s)
+✔ [8586/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF16Field (5.6s)
+✔ [8587/8607] Built FLT.Assumptions.MazurProof.NormalizedProjectiveCurveFrobenius (6.9s)
+✔ [8588/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientZeta (7.0s)
+⚠ [8589/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoRegularSequence (9.6s)
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:238:4: `simp` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:238:4: Try this:
+  [apply] simp only [map_neg, map_pow, map_sub, map_mul, coeff_add, coeff_neg, mul_coeff_zero, coeff_sub, coeff_C_zero,
+    coeff_X_zero, mul_zero, add_zero, Nat.reduceAdd, Fin.zero_eta, Fin.isValue, Fin.mk_one, Matrix.of_apply,
+    Matrix.cons_val', Matrix.cons_val_one, Matrix.cons_val_fin_one, Matrix.cons_val_zero, neg_inj]
+info: FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:239:4: `rw [← map_pow]` uses `⊢`!
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:247:4: `simp` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:247:4: Try this:
+  [apply] simp only [map_neg, map_pow, map_sub, map_mul, coeff_add, coeff_neg, coeff_mul_X, coeff_sub, coeff_C_zero,
+    mul_coeff_zero, Nat.reduceAdd, Fin.mk_one, Fin.isValue, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_one,
+    Matrix.cons_val_fin_one, add_eq_right, neg_eq_zero]
+info: FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:248:4: `rw [← map_pow]` uses `⊢`!
+✔ [8590/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25NewformEulerCertificate (4.9s)
+✔ [8591/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoKoszul (5.3s)
+✔ [8592/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoGradedKoszul (4.9s)
+✔ [8593/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF81Field (43s)
+✔ [8594/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoQuotientGrading (6.9s)
+✔ [8595/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmallThreeFields (5.0s)
+✔ [8596/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoGradedAlgebra (7.0s)
+✔ [8597/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThreeF81 (23s)
+✔ [8598/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThreeProjective (4.8s)
+✔ [8599/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientThreeBaseChange (4.2s)
+✔ [8600/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmallThreeSemantic (4.9s)
+✔ [8601/8607] Built FLT.Assumptions.MazurProof.N25F_Next (3.3s)
+✔ [8602/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF3 (4.8s)
+✔ [8603/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientHilbert (4.7s)
+✔ [8604/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientZetaThree (3.6s)
+✔ [8605/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientExtensionPoints (3.3s)
+✔ [8606/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientFrobeniusOrbits (3.6s)
+✔ [8607/8607] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientMiddleRiemannRoch (3.6s)
+Build completed successfully (8607 jobs).
