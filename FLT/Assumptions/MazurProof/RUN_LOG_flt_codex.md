@@ -224,3 +224,19 @@ MazurProof.N25F_ChartLocalOrder.nonBoundaryPrincipalDivisor_apply_eq_localFracti
 No new assumptions or proof placeholders were introduced. Q8317 (task `8b31e017`, flt31) requests the characteristic-three formal-Jacobian bridge; Q8318 (`4bc8b98a`, flt11) requests the affine-chart Jacobian bridge; Q8319 (`64b75224`, flt12) requests the function-unit criterion for local order; Q8320 (`ea7f28bc`, auto-queued on flt31 while the group was saturated) requests the projective principal-divisor degree-zero bridge. All four remain pending.
 
 Q8304 (task `625d9bb3`, flt32) remains in processing for the characteristic-three effective-divisor counts. Q8305 (answer `99407791`, task `d4097b8c`, flt11) returned the physical-degree point decomposition module and is awaiting source review/build. Q8309 (task `aa11ce53`, flt14) remains in processing on the boundary function-field/local-order bridge. Q8311 (answer `3b6948d4`, task `b278330b`, flt12) returned the weighted projective-divisor degree split module and is awaiting source review/build.
+
+## Projective divisor degree split (2026-09-27)
+
+Read the returned Q8311 weighted projective-divisor degree module (`/tmp/gpt/flt/Q8311.md`, task `b278330b`). Materialized it as `N25F_ProjectiveDivisorDegree.lean`. The first targeted build failed in the single-add calculation and the explicit transported-degree formula. Q8321 (task `b874bd3b`, prompt `/tmp/q_flt_n25_projective_degree_compile.txt`) supplied exact proof repairs; Q8316 independently warned about the unrestricted simp site in `splitDegree_apply_components`.
+
+Applied the product-projection rewrites after `hsplit`, replaced the definitional `simp [splitDegree, D]` with `rfl`, and composed the final component equalities directly. Targeted build:
+
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ProjectiveDivisorDegree
+```
+
+Result: `Build completed successfully (8639 jobs)`. Full output: `/tmp/n25_projective_divisor_degree_build2.log`.
+
+Axiom probe: `lake env lean /home/xhuan5/tmp/flt-ai/codex-20260927-n25/probes/n25_projective_divisor_degree_axioms.lean` printed only `[propext, Classical.choice, Quot.sound]` for the exported degree definitions and theorems, including `divisorDegree_eq_boundary_add_chart` and `splitDegree_apply`.
+
+Q8312's source-only review confirms Q8303's earlier prime-instance placement is the required prerequisite for the support criterion and recommends no further change to that theorem. Q8308's source-only review finds no semantic patch needed for the additive local-order hom wrapper. Q8323 independently confirms the proposed Q8322 `Subtype.ext_iff.mp hPQ` repair is type-correct, without claiming a local build.
