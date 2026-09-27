@@ -63,3 +63,28 @@ Result: `Build completed successfully (8581 jobs).`
 Q8262 arrived through the Drive fallback. Its proposed `globalCanonicalDifferentialModule25Two` duplicates work already present in this checkout: `globalKaehlerDifferentialModule` is the equalizer of the chart and overlap Kähler differential sheaves, and `globalKaehlerDifferentialIsoTwist`, `globalKaehlerDifferentialIsoAdjunctionTransitionLine`, and `globalKaehlerDifferentialIsoCurvePullback` are already defined in `RationalPointsN25QuotientTwoCanonicalDifferentialCech.lean`. No Q8262 code was integrated.
 
 At the latest bridge check, worker `mbp` was online and tabs `flt11`–`flt14` were idle, but each reported `connector_state = disconnected`, no conversation URL, and no recent channel heartbeat (`last_seen_s = 0`). The bridge's safe allocator therefore cannot currently dispatch to those tabs. Existing work on `flt31`/`flt33` remains in flight or queued while worker `uisai2` is offline. No new GPT request was sent into this unhealthy state.
+
+## Follow-up: affine principal divisor on the nonboundary carrier (2026-09-27)
+
+Re-read Q8252 from `/tmp/flt_Q8252.md` (answer commit `9a376da6c3b516f5d59fc152053518a09cb594d1`). It gives a sound abstract package assuming finite support and local additivity, but does not construct the local orders for arbitrary rational functions or prove the projective product formula. No Q8252 code was copied into the development.
+
+Added `N25F_NonBoundaryPrincipalDivisor.lean`. It upgrades the existing nonboundary-atom/maximal-ideal equivalence to `IsDedekindDomain.HeightOneSpectrum WChartQuotient`, identifies the residue degree, and reindexes the existing affine `CurveDedekindDivisor.principalDivisor` onto the nonboundary full-atom subtype. It does not claim boundary coefficients or the full projective degree-zero theorem.
+
+Targeted build:
+
+```text
+lake build FLT.Assumptions.MazurProof.N25F_NonBoundaryPrincipalDivisor
+```
+
+Result: `Build completed successfully (8642 jobs).`
+
+Axiom check (`lake env lean /tmp/n25_nonboundary_axioms.lean`):
+
+```text
+fullNonBoundaryAtomEquivHeightOne depends on [propext, Classical.choice, Quot.sound]
+residueDegree_fullNonBoundaryAtomEquivHeightOne depends on [propext, Classical.choice, Quot.sound]
+nonBoundaryPrincipalDivisor depends on [propext, Classical.choice, Quot.sound]
+nonBoundaryPrincipalDivisor_apply depends on [propext, Classical.choice, Quot.sound]
+```
+
+Bridge correction: the coordinator identified `http://127.0.0.1:18801` as the live endpoint. This shell inherits tmux window `dm`, so the exact command without a window override reports no `dm` channels. Setting `ASK_WINDOW=flt` selects the FLT group while leaving tab selection automatic. Q8278 (prompt `/tmp/q_flt_n25_atom_sum_equiv.txt`, task `b274ca6c`) was submitted to flt14; Q8279 (prompt `/tmp/q_flt_n25_three_bridge_followup.txt`, task `98bb2434`) was queued to flt14 after the four live flt tabs became busy. Both use GDrive delivery; their answer logs are `/tmp/ans_flt_n25_atom_sum_equiv_18801.txt` and `/tmp/ans_flt_n25_three_bridge_followup_18801.txt`.
