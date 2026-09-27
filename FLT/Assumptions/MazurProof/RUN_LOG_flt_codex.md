@@ -135,3 +135,8 @@ Q8282 asks for the local `Ring.ord` interpretation of affine principal-divisor c
 ## Q8265 answer review (2026-09-27)
 
 Read Q8265 answer `2f36c341`. Its bridge construction is based on the earlier carrier index `CommonField 3 d`; the current committed `N25F_Next.lean` uses `CommonField 3 (d + 1)`. Q8265 therefore does not typecheck against the current carrier as written. Q8280 supplies the corresponding current-index construction and Q8283 is auditing that code against the checkout. No Q8265 code was integrated.
+
+
+## Q8261 carrier audit answer (2026-09-27)
+
+Read Q8261 answer `e89b8a56`. It confirms the `d + 1` characteristic-three carrier shape and suggests more explicit elaboration in the subtype-finiteness proof. The current `N25F_Next.lean` was already built locally (`Build completed successfully (8581 jobs)`), and the answer could not compile this checkout. No code was changed; the suggested proof-style rewrite is unnecessary for the compiled source.
