@@ -105,3 +105,28 @@ Inspection of `~/repos/ask-gpt-git/scripts/ask-gpt.py` showed its project auto-p
 Q8280 (current-source prompt `/home/xhuan5/tmp/flt-ai/codex-20260927-n25/scripts/q_flt_n25_three_bridge_current.txt`, task `eb777156`) was dispatched to flt13 and entered processing. During routing, the bridge automatically moved older Q8264 and Q8265 work off stale flt31: Q8264's atom-sum task was processing on flt11, and Q8265's characteristic-three bridge task remained queued there. Consequently Q8278 repeats Q8264, and Q8279 repeats Q8265 with an outdated premise. Q8280 is the grounded current-source bridge task. Do not treat these overlapping prompts as independent results; verify each answer against the current checkout before integration.
 
 Coordinator correction (lane-card rule 5): ask-gpt auto-push to Xiang’s `xiang` fork is intended to provide current source to ChatGPT; never push to `origin` and never force-push, and do not set `ASK_NO_PUSH=1`.
+
+
+## Q8264/Q8266 review and projective divisor carrier split (2026-09-27)
+
+Read Q8264 (answer `947acbcc`) and Q8266 (answer `b4697292`). Q8264 supplied the boundary/nonboundary atom partition and induced signed-divisor Finsupp equivalence. Its suggested module reused `N25F_Next.lean`, already occupied by the characteristic-three carrier, and opened a namespace absent from the current source. Adapted it into `N25F_ProjectiveDivisorSplit.lean`, used the current `RationalPointsN25QuotientTwoWOpenPrimeSurjective` namespace, and opened the boundary-closed-point namespace. Removed unused imports of `CurveDivisorPicard` and `RationalPointsN25QuotientTwoWBoundaryLocalDivisor`; the latter first caused an unrelated typeclass-heartbeat timeout while compiling `WBoundaryXLocal`.
+
+Targeted build:
+
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ProjectiveDivisorSplit
+```
+
+Result: `Build completed successfully (8638 jobs).`
+
+Axiom check (`lake env lean /home/xhuan5/tmp/flt-ai/codex-20260927-n25/probes/n25_projective_split_axioms.lean`):
+
+```text
+boundaryNonBoundaryEquivFullAtom depends on [propext, Classical.choice, Quot.sound]
+fullAtomEquivBoundaryNonBoundary depends on [propext, Classical.choice, Quot.sound]
+fullDivisorEquivBoundaryCoefficientsChart depends on [propext, Classical.choice, Quot.sound]
+```
+
+Q8266 packages the existing `wBoundaryHyperplaneDivisor`, its already-proved degree-six certificate, pointwise `fullWLocalOrder` coefficients, and support. Its proposed unique-existence wrapper was not integrated; it does not advance the arbitrary-rational-function divisor bridge and was not compiled.
+
+Q8282 asks for the local `Ring.ord` interpretation of affine principal-divisor coefficients; submitted to flt14, task `96aab523`, processing. ask-gpt auto-pushed three commits through the intended `xiang` remote at `HEAD=f9c36f9107`; no push to `origin` or history rewrite occurred. Q8283 requests a source audit of the Q8280 characteristic-three bridge answer; submitted to flt13, task `892c159b`, processing. Q8263 reported connector-delivery failure; no resend was made. At the latest check flt11 remained connected with one task processing, and no Q8263 answer file had appeared.
