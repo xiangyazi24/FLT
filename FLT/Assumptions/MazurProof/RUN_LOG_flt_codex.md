@@ -103,3 +103,5 @@ Inspection of `~/repos/ask-gpt-git/scripts/ask-gpt.py` showed its project auto-p
 ### Live-tab queue rotation after Q8279
 
 Q8280 (current-source prompt `/home/xhuan5/tmp/flt-ai/codex-20260927-n25/scripts/q_flt_n25_three_bridge_current.txt`, task `eb777156`) was dispatched to flt13 and entered processing. During routing, the bridge automatically moved older Q8264 and Q8265 work off stale flt31: Q8264's atom-sum task was processing on flt11, and Q8265's characteristic-three bridge task remained queued there. Consequently Q8278 repeats Q8264, and Q8279 repeats Q8265 with an outdated premise. Q8280 is the grounded current-source bridge task. Do not treat these overlapping prompts as independent results; verify each answer against the current checkout before integration.
+
+Coordinator correction (lane-card rule 5): ask-gpt auto-push to Xiang’s `xiang` fork is intended to provide current source to ChatGPT; never push to `origin` and never force-push, and do not set `ASK_NO_PUSH=1`.
