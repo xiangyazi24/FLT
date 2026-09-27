@@ -256,3 +256,23 @@ Axiom probe: `lake env lean /home/xhuan5/tmp/flt-ai/codex-20260927-n25/probes/n2
 Q8330 (answer `57221e1c`, task `22c865a5`) independently audited Q8324's proposed formal-Jacobian repairs. It found the evaluated-numeral bridge and all six `Fin 4` comparisons type-correct at source level, with no statement or polynomial change, but did not run Lean. It noted the abbreviated compiler excerpt did not establish Q8324's claimed unused-`h2` diagnostic and that the original `hzero` binders already infer `Fin 4`; the replacement `by decide` proofs remain the substantive fix. The patch still needs local application and a targeted build.
 
 Current compile/audit tasks: Q8329 (task `f60f302d`, prompt `/tmp/q_flt_n25_chart_local_unit_compile.txt`) requests a repair for `N25F_ChartLocalUnitCriterion`; Q8331 (task `71b9c6f9`, prompt `/tmp/q_flt_n25_projective_degree_repair_audit.txt`) audits Q8321's projective-degree proof repairs; Q8334 (task `2640dff1`, prompt `/tmp/q_flt_n25_projective_degree_semantic_audit.txt`) audits the degree formula's mathematical meaning. Q8325/Q8326 remain the independent affine-Jacobian and chart-unit source audits. These requests use the auto-allocator with no pinned tab.
+
+## Characteristic-three formal Jacobian bridge (2026-09-27)
+
+Q8317's returned code for `N25F_ThreeFormalJacobianBridge.lean` was materialized. Its prompt had one transcription error in a prose gradient component; the source module itself retains the existing `-P.z - P.w` component. The first targeted build exposed the polynomial-evaluation image of `2` and closed `Fin 4` comparison goals. Q8324 (task `14bdb2cb`) supplied a local evaluated-numeral equality and `by decide` comparisons; Q8330 (answer `57221e1c`) independently checked the correction against the supplied source and diagnostics. Applied those proof-only changes without changing equations, gradients, or theorem statements.
+
+Targeted build:
+
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ThreeFormalJacobianBridge
+```
+
+Result: `Build completed successfully (8576 jobs)`. Full output: `/tmp/n25_three_formal_jacobian_build2.log`.
+
+Axiom probe: `lake env lean /home/xhuan5/tmp/flt-ai/codex-20260927-n25/probes/n25_three_formal_jacobian_axioms.lean` printed only `[propext, Classical.choice, Quot.sound]` for all exported derivative, formal-minor, and normalized-point nonvanishing declarations.
+
+Read Q8328 (answer `54fa41f5`), an X-boundary function-field comparison analysis. It gives the coordinate-transition orientation and identifies a real obstruction to mapping the W/X overlap localization into `XLocalRing`, since the overlap inverts `xW` while the local germ has order three and is not a unit. It explicitly lacks current-checkout evidence and does not prove the desired fraction-field equivalence. Its warning that order three alone does not establish `xWGerm ≠ 0` is retained. No Q8328 code was integrated.
+
+Q8332 (answer `47051de4`) source-audited the Q8318 affine-chart Jacobian proposal. It identifies four coordinate-equation evaluation wrappers whose binders must be `[Field K]`, matching the current exported equation definitions, and recommends no broad refactor or added characteristic hypothesis. It did not build the module; the proposed module has not yet been materialized.
+
+Current-source follow-ups from Q8328: Q8337 (task `475e88b3`, prompt `/tmp/q_flt_n25_x_boundary_prelim_current_audit.txt`) checks the overlap-to-local obstruction against the complete current X/W chart files; Q8338 (task `d45ba8c6`, prompt `/tmp/q_flt_n25_xwgerm_ne_zero.txt`) asks for a proof or exact blocker for `xWGerm ≠ 0`; Q8339 (task `e0696012`, prompt `/tmp/q_flt_n25_xchart_w_nonzero.txt`) checks the `[1:1:0:1]` witness for `xW ≠ 0` in the X-chart quotient. All were sent through the automatic FLT allocator without a pinned channel. Q8329 (task `f60f302d`) remains processing on the local-unit module repair; Q8331 (task `71b9c6f9`) remains pending on the projective-degree proof audit; Q8334 (task `2640dff1`) is in artifact grace-poll after terminal completion; Q8335 (task `3e41b06c`) remains pending on the physical-degree compiler mismatch follow-up. No task was resent.
