@@ -30,7 +30,7 @@ jobs:
           diff --git a/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean b/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean
           --- a/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean
           +++ b/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean
-          @@ -270,14 +270,49 @@ noncomputable def atomLEEquivCommon12ToFull
+          @@ -270,7 +270,39 @@ noncomputable def atomLEEquivCommon12ToFull
                (k : ℕ) (hk : k ≤ 4) :
                frobeniusOrbitGrading25ThreeLE4.AtomLE k ≃
           -      fullClosedPointGrading25Three.AtomLE k :=
@@ -75,11 +75,6 @@ jobs:
           +          ⟨x.1.1, by
           +            simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using
           +              Nat.lt_succ_of_le x.2⟩).apply_symm_apply x.1.2
-          
-           set_option maxHeartbeats 1000000 in
-          -set_option maxRecDepth 100000 in
-          +set_option maxRecDepth 100000 in
-           noncomputable def exactGhostSlotEquivCommon12ToFull
           PATCH
           set +e
           lake build FLT.Assumptions.MazurProof.N25F_ThreeFullClosedPointBridge > Q8283Compiler.txt 2>&1
