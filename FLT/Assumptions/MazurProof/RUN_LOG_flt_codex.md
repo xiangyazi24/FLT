@@ -276,3 +276,25 @@ Read Q8328 (answer `54fa41f5`), an X-boundary function-field comparison analysis
 Q8332 (answer `47051de4`) source-audited the Q8318 affine-chart Jacobian proposal. It identifies four coordinate-equation evaluation wrappers whose binders must be `[Field K]`, matching the current exported equation definitions, and recommends no broad refactor or added characteristic hypothesis. It did not build the module; the proposed module has not yet been materialized.
 
 Current-source follow-ups from Q8328: Q8337 (task `475e88b3`, prompt `/tmp/q_flt_n25_x_boundary_prelim_current_audit.txt`) checks the overlap-to-local obstruction against the complete current X/W chart files; Q8338 (task `d45ba8c6`, prompt `/tmp/q_flt_n25_xwgerm_ne_zero.txt`) asks for a proof or exact blocker for `xWGerm ≠ 0`; Q8339 (task `e0696012`, prompt `/tmp/q_flt_n25_xchart_w_nonzero.txt`) checks the `[1:1:0:1]` witness for `xW ≠ 0` in the X-chart quotient. All were sent through the automatic FLT allocator without a pinned channel. Q8329 (task `f60f302d`) remains processing on the local-unit module repair; Q8331 (task `71b9c6f9`) remains pending on the projective-degree proof audit; Q8334 (task `2640dff1`) is in artifact grace-poll after terminal completion; Q8335 (task `3e41b06c`) remains pending on the physical-degree compiler mismatch follow-up. No task was resent.
+
+## Latest FLT frontier updates (2026-09-27)
+
+Q8347 (`/tmp/q_flt_n25_three_boundary_point_classification.txt`) returned a field-generic classification of characteristic-three normalized curve points with `w = 0`. The source definitions in `RationalPointsN25QuotientKummerThree.lean` and `RationalPointsN25QuotientKummerThreeProjective.lean` were checked locally. Materialized the proof as `N25F_ThreeBoundaryPointClassification.lean`; Q8350 was dispatched as an independent source/API audit and was still processing at build time.
+
+Targeted build:
+
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ThreeBoundaryPointClassification
+```
+
+Result: `Build completed successfully (8572 jobs)`. Full output: `/tmp/n25_three_boundary_point_classification_build.log`.
+
+Axiom probe: `lake env lean /tmp/n25_three_boundary_point_classification_axioms.lean` printed:
+
+```text
+'MazurProof.N25F_ThreeBoundaryPointClassification.boundary_point_eq_three_cases' depends on axioms: [propext, Classical.choice, Quot.sound]
+```
+
+Read Q8341 and Q8343 audits for `N25F_ChartLocalUnitCriterion`. Applied the explicit prime argument, made the `FractionRing.algEquiv` call reducible, and corrected the localization witness destructuring to the flat triple. The targeted build still fails at `chartFractionRingEquiv`: Lean selects different `CommSemiring` and `Algebra` instances for the inferred equivalence. Full output: `/tmp/n25_chart_local_unit_build2.log`. Q8351 (`/tmp/q_flt_n25_chart_fraction_equiv_instances.txt`, task `2f6e0ef3`) requests a direct repair for the exact compiler error; Q8352 (`/tmp/q_flt_n25_chart_fraction_equiv_alt_construction.txt`, task `39f40f68`) independently asks for an explicit-instance or localization-equivalence construction. Both were still processing at log time.
+
+Q8344 (`/tmp/q_flt_n25_three_wchart_d_regular.txt`) returned a proposed full-quotient regularity module in `/tmp/gpt/flt/Q8344.md`; it is source-only and has not yet been materialized or built. Q8345 (`/tmp/q_flt_n25_three_wopen_residue_degree.txt`) and Q8348 (`/tmp/q_flt_n25_three_xboundary_artin_equiv.txt`) remain in flight. No answer was treated as a successful build without local verification.
