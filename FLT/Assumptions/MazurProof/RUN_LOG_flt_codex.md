@@ -78,7 +78,7 @@ lake build FLT.Assumptions.MazurProof.N25F_NonBoundaryPrincipalDivisor
 
 Result: `Build completed successfully (8642 jobs).`
 
-Axiom check (`lake env lean /tmp/n25_nonboundary_axioms.lean`):
+Axiom check (`lake env lean /home/xhuan5/tmp/flt-ai/codex-20260927-n25/probes/n25_nonboundary_axioms.lean`):
 
 ```text
 fullNonBoundaryAtomEquivHeightOne depends on [propext, Classical.choice, Quot.sound]
@@ -88,3 +88,10 @@ nonBoundaryPrincipalDivisor_apply depends on [propext, Classical.choice, Quot.so
 ```
 
 Bridge correction: the coordinator identified `http://127.0.0.1:18801` as the live endpoint. This shell inherits tmux window `dm`, so the exact command without a window override reports no `dm` channels. Setting `ASK_WINDOW=flt` selects the FLT group while leaving tab selection automatic. Q8278 (prompt `/tmp/q_flt_n25_atom_sum_equiv.txt`, task `b274ca6c`) was submitted to flt14; Q8279 (prompt `/tmp/q_flt_n25_three_bridge_followup.txt`, task `98bb2434`) was queued to flt14 after the four live flt tabs became busy. Both use GDrive delivery; their answer logs are `/tmp/ans_flt_n25_atom_sum_equiv_18801.txt` and `/tmp/ans_flt_n25_three_bridge_followup_18801.txt`.
+
+
+### Run-directory and prompt freshness corrections
+
+The axiom probe and an unsubmitted revised bridge prompt are stored under `/home/xhuan5/tmp/flt-ai/codex-20260927-n25/`, following the uisai2 scratch-path rule. The probe was rerun from there with `TMPDIR` set to the run directory and exited 0 with the same four standard-axiom results.
+
+Q8279 uses the older `/tmp/q_flt_n25_three_bridge_followup.txt`, which says the characteristic-three full carrier is not defined. That premise predates `N25F_Next.lean` and is false in the current checkout. Do not integrate its proposed carrier construction; check any API observations against the current source. A corrected, current-source prompt is prepared at `/home/xhuan5/tmp/flt-ai/codex-20260927-n25/scripts/q_flt_n25_three_bridge_current.txt` and has not been submitted.
