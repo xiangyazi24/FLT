@@ -23,11 +23,64 @@ jobs:
           build: false
           test: false
           lint: false
-      - name: Build minimally patched Q8280 candidate and retain diagnostics
+      - name: Build structurally patched Q8280 candidate and retain diagnostics
         shell: bash
         run: |
-          sed -i 's/set_option maxRecDepth 100000 in/set_option maxRecDepth 1000000 in/' \
-            FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean
+          git apply <<'PATCH'
+          diff --git a/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean b/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean
+          --- a/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean
+          +++ b/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean
+          @@ -270,14 +270,49 @@ noncomputable def atomLEEquivCommon12ToFull
+               (k : ℕ) (hk : k ≤ 4) :
+               frobeniusOrbitGrading25ThreeLE4.AtomLE k ≃
+          -      fullClosedPointGrading25Three.AtomLE k :=
+          -  (frobeniusOrbitGrading25ThreeLE4.atomLEEquivSigma k).trans
+          -    ((Equiv.sigmaCongrRight fun d =>
+          -      closedPointEquivCommon12ToFullLE k hk d).trans
+          -        (fullClosedPointGrading25Three.atomLEEquivSigma k).symm)
+          +      fullClosedPointGrading25Three.AtomLE k where
+          +  toFun x := by
+          +    let d : Fin (k + 1) :=
+          +      ⟨x.1.1, by
+          +        simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using
+          +          Nat.lt_succ_of_le x.2⟩
+          +    refine
+          +      ⟨⟨x.1.1,
+          +          closedPointEquivCommon12ToFullLE k hk d x.1.2⟩, ?_⟩
+          +    simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using x.2
+          +  invFun x := by
+          +    let d : Fin (k + 1) :=
+          +      ⟨x.1.1, by
+          +        simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using
+          +          Nat.lt_succ_of_le x.2⟩
+          +    refine
+          +      ⟨⟨x.1.1,
+          +          (closedPointEquivCommon12ToFullLE k hk d).symm x.1.2⟩, ?_⟩
+          +    simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using x.2
+          +  left_inv x := by
+          +    apply Subtype.ext
+          +    apply Sigma.ext
+          +    · rfl
+          +    · exact
+          +        (closedPointEquivCommon12ToFullLE k hk
+          +          ⟨x.1.1, by
+          +            simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using
+          +              Nat.lt_succ_of_le x.2⟩).symm_apply_apply x.1.2
+          +  right_inv x := by
+          +    apply Subtype.ext
+          +    apply Sigma.ext
+          +    · rfl
+          +    · exact
+          +        (closedPointEquivCommon12ToFullLE k hk
+          +          ⟨x.1.1, by
+          +            simpa [CurveZetaEffectiveDivisors.ClosedPointGrading.atomDegree] using
+          +              Nat.lt_succ_of_le x.2⟩).apply_symm_apply x.1.2
+          
+           set_option maxHeartbeats 1000000 in
+          -set_option maxRecDepth 100000 in
+          +set_option maxRecDepth 100000 in
+           noncomputable def exactGhostSlotEquivCommon12ToFull
+          PATCH
           set +e
           lake build FLT.Assumptions.MazurProof.N25F_ThreeFullClosedPointBridge > Q8283Compiler.txt 2>&1
           status=$?
@@ -36,7 +89,7 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add -f Q8283Compiler.txt
           if ! git diff --cached --quiet; then
-            git commit -m "Record Q8283 patched build result [skip ci]"
+            git commit -m "Record Q8283 structural-patch build result [skip ci]"
             git push
           fi
           exit "$status"
