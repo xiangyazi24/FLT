@@ -74,24 +74,41 @@ jobs:
             tail -n +"$finish" "$file"
           } > "$file.tmp"
           mv "$file.tmp" "$file"
+
+          frontier=$(grep -n '^set_option maxHeartbeats 1000000 in' "$file" | cut -d: -f1)
+          head -n $((frontier - 1)) "$file" > FLT/Assumptions/MazurProof/Q8283_AtomTest.lean
+          printf '\nend MazurProof.N25F_ThreeFullClosedPoints\n' >> \
+            FLT/Assumptions/MazurProof/Q8283_AtomTest.lean
       - name: Set up Lean
         uses: leanprover/lean-action@v1
         with:
           build: false
           test: false
           lint: false
-      - name: Build structurally patched Q8280 candidate and retain diagnostics
+      - name: Compile isolated AtomLE frontier
         shell: bash
         run: |
           set +e
-          lake build FLT.Assumptions.MazurProof.N25F_ThreeFullClosedPointBridge > Q8283Compiler.txt 2>&1
-          status=$?
-          cat Q8283Compiler.txt
+          lake build \
+            FLT.Assumptions.MazurProof.N25F_Next \
+            FLT.Assumptions.MazurProof.RationalPointsN25QuotientFrobeniusOrbits \
+            FLT.Assumptions.MazurProof.RationalPointsN25QuotientMiddleRiemannRoch \
+            > Q8283AtomCompiler.txt 2>&1
+          dep_status=$?
+          if [ "$dep_status" -eq 0 ]; then
+            timeout 240s lake env lean \
+              FLT/Assumptions/MazurProof/Q8283_AtomTest.lean \
+              >> Q8283AtomCompiler.txt 2>&1
+            status=$?
+          else
+            status=$dep_status
+          fi
+          cat Q8283AtomCompiler.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add -f Q8283Compiler.txt
+          git add -f Q8283AtomCompiler.txt
           if ! git diff --cached --quiet; then
-            git commit -m "Record Q8283 structural-patch build result [skip ci]"
+            git commit -m "Record Q8283 isolated AtomLE result [skip ci]"
             git push
           fi
           exit "$status"
