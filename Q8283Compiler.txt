@@ -1,0 +1,16 @@
+FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean:1:0: error: unknown module prefix 'FLT'
+
+No directory 'FLT' or file 'FLT.olean' in the search path entries:
+/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean
+/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean
+/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean
+/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean
+/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean
+/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean
+/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean
+/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean
+/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean
+/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean
+/home/runner/work/FLT/FLT/.lake/build/lib/lean
+/home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/lib/lean
+/home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/lib/lean
