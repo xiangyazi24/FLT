@@ -23,18 +23,18 @@ jobs:
           build: false
           test: false
           lint: false
-      - name: Compile Q8280 candidate and retain diagnostics
+      - name: Build Q8280 candidate and retain diagnostics
         shell: bash
         run: |
           set +e
-          lake env lean FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean > Q8283Compiler.txt 2>&1
+          lake build FLT.Assumptions.MazurProof.N25F_ThreeFullClosedPointBridge > Q8283Compiler.txt 2>&1
           status=$?
           cat Q8283Compiler.txt
-          if [ "$status" -ne 0 ]; then
-            git config user.name github-actions[bot]
-            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-            git add -f Q8283Compiler.txt
-            git commit -m "Record Q8283 compiler diagnostics [skip ci]"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -f Q8283Compiler.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Record Q8283 build result [skip ci]"
             git push
           fi
           exit "$status"
