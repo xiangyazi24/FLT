@@ -23,9 +23,11 @@ jobs:
           build: false
           test: false
           lint: false
-      - name: Build Q8280 candidate and retain diagnostics
+      - name: Build minimally patched Q8280 candidate and retain diagnostics
         shell: bash
         run: |
+          sed -i 's/set_option maxRecDepth 100000 in/set_option maxRecDepth 1000000 in/' \
+            FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean
           set +e
           lake build FLT.Assumptions.MazurProof.N25F_ThreeFullClosedPointBridge > Q8283Compiler.txt 2>&1
           status=$?
@@ -34,7 +36,7 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add -f Q8283Compiler.txt
           if ! git diff --cached --quiet; then
-            git commit -m "Record Q8283 build result [skip ci]"
+            git commit -m "Record Q8283 patched build result [skip ci]"
             git push
           fi
           exit "$status"
