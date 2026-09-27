@@ -1,0 +1,40 @@
+name: Q8283 Lean check
+
+on:
+  push:
+    branches:
+      - q8283-check-4cdbd2fd
+    paths:
+      - FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean
+      - .github/workflows/q8283-lean-check.yml
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+      - name: Set up Lean
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+          lint: false
+      - name: Compile Q8280 candidate and retain diagnostics
+        shell: bash
+        run: |
+          set +e
+          lake env lean FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean > Q8283Compiler.txt 2>&1
+          status=$?
+          cat Q8283Compiler.txt
+          if [ "$status" -ne 0 ]; then
+            git config user.name github-actions[bot]
+            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+            git add -f Q8283Compiler.txt
+            git commit -m "Record Q8283 compiler diagnostics [skip ci]"
+            git push
+          fi
+          exit "$status"
