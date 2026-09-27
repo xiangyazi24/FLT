@@ -95,3 +95,7 @@ Bridge correction: the coordinator identified `http://127.0.0.1:18801` as the li
 The axiom probe and an unsubmitted revised bridge prompt are stored under `/home/xhuan5/tmp/flt-ai/codex-20260927-n25/`, following the uisai2 scratch-path rule. The probe was rerun from there with `TMPDIR` set to the run directory and exited 0 with the same four standard-axiom results.
 
 Q8279 uses the older `/tmp/q_flt_n25_three_bridge_followup.txt`, which says the characteristic-three full carrier is not defined. That premise predates `N25F_Next.lean` and is false in the current checkout. Do not integrate its proposed carrier construction; check any API observations against the current source. A corrected, current-source prompt is prepared at `/home/xhuan5/tmp/flt-ai/codex-20260927-n25/scripts/q_flt_n25_three_bridge_current.txt` and has not been submitted.
+
+### Auto-push during ChatGPT dispatch
+
+Inspection of `~/repos/ask-gpt-git/scripts/ask-gpt.py` showed its project auto-push path at lines 1611–1632: with a git-drop target, it pushes commits ahead of upstream unless `ASK_NO_PUSH=1`. Q8280 was launched without that guard, and the script reported `auto-pushed 2 commits (HEAD=30974b90e5)`. `git ls-remote xiang refs/heads/verify-sorry-restore` confirmed the remote branch now matches `30974b90e593c09cad9ce27c380f6294c17762ce`; the two pushed commits are `b95d04fb97` and `30974b90e5`. This conflicts with the lane card's no-push rule. No remote history rewrite was attempted. Future ChatGPT dispatches must include `ASK_NO_PUSH=1`.
