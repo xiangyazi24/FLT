@@ -1,16 +1,133 @@
-FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean:1:0: error: unknown module prefix 'FLT'
+✔ [8563/8608] Built FLT.Assumptions.MazurProof.CurveDedekindDivisor (2.2s)
+✔ [8564/8608] Built Mathlib (3.7s)
+✔ [8565/8608] Built FLT.Assumptions.MazurProof.CurveZetaEffectiveDivisors (8.0s)
+✔ [8566/8608] Built FLT.Assumptions.MazurProof.CurveZetaEulerRecurrence (9.6s)
+✔ [8567/8608] Built FLT.Assumptions.MazurProof.CurveZetaClassNumber (12s)
+✔ [8568/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25CanonicalPoints (13s)
+✔ [8569/8608] Built FLT.Assumptions.MazurProof.CurveDivisorPicard (8.4s)
+✔ [8570/8608] Built FLT.Assumptions.MazurProof.CurveZetaMarkedDivisors (14s)
+✔ [8571/8608] Built FLT.Assumptions.MazurProof.CurveZetaMiddleRiemannRoch (7.2s)
+✔ [8572/8608] Built FLT.Assumptions.MazurProof.CurveZetaPointOrbitClassification (4.5s)
+✔ [8573/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF2 (19s)
+⚠ [8574/8608] Built FLT.Assumptions.MazurProof.CurveZetaFrobeniusOrbitGrading (5.2s)
+warning: FLT/Assumptions/MazurProof/CurveZetaFrobeniusOrbitGrading.lean:124:0: `orbitClassFinite` does not use the following hypothesis in its type:
+  • [Fintype X] (#2)
 
-No directory 'FLT' or file 'FLT.olean' in the search path entries:
-/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean
-/home/runner/work/FLT/FLT/.lake/build/lib/lean
-/home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/lib/lean
-/home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/lib/lean
+Consider replacing this hypothesis with the corresponding instance of `Finite` and using `Fintype.ofFinite` in the proof, or removing it entirely.
+
+Note: This linter can be disabled with `set_option linter.unusedFintypeInType false`
+warning: FLT/Assumptions/MazurProof/CurveZetaFrobeniusOrbitGrading.lean:229:0: `orbitClosedFinite` does not use the following hypothesis in its type:
+  • [Fintype Y] (#2)
+
+Consider replacing this hypothesis with the corresponding instance of `Finite` and using `Fintype.ofFinite` in the proof, or removing it entirely.
+
+Note: This linter can be disabled with `set_option linter.unusedFintypeInType false`
+✔ [8575/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeil (57s)
+✔ [8576/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF2 (11s)
+✔ [8577/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeilThreeDefs (7.5s)
+✔ [8578/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF16Add (21s)
+✔ [8579/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientBaseChange (6.9s)
+✔ [8580/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoConormal (12s)
+⚠ [8581/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF16Distrib (38s)
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientF16Distrib.lean:28:2: Unscoped option maxHeartbeats is not allowed:
+Please scope this to individual declarations, as in
+```
+set_option maxHeartbeats in
+-- comment explaining why this is necessary
+example : ... := ...
+```
+
+Note: This linter can be disabled with `set_option linter.style.setOption false`
+⚠ [8582/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF16Mul (57s)
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientF16Mul.lean:27:2: Unscoped option maxHeartbeats is not allowed:
+Please scope this to individual declarations, as in
+```
+set_option maxHeartbeats in
+-- comment explaining why this is necessary
+example : ... := ...
+```
+
+Note: This linter can be disabled with `set_option linter.style.setOption false`
+✔ [8583/8608] Built FLT.Assumptions.MazurProof.FiniteFieldFrobeniusDescent (9.5s)
+✔ [8584/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeilThreeLinear (41s)
+✔ [8585/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF16Field (8.8s)
+⚠ [8586/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoRegularSequence (15s)
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:238:4: `simp` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:238:4: Try this:
+  [apply] simp only [map_neg, map_pow, map_sub, map_mul, coeff_add, coeff_neg, mul_coeff_zero, coeff_sub, coeff_C_zero,
+    coeff_X_zero, mul_zero, add_zero, Nat.reduceAdd, Fin.zero_eta, Fin.isValue, Fin.mk_one, Matrix.of_apply,
+    Matrix.cons_val', Matrix.cons_val_one, Matrix.cons_val_fin_one, Matrix.cons_val_zero, neg_inj]
+info: FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:239:4: `rw [← map_pow]` uses `⊢`!
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:247:4: `simp` is a flexible tactic modifying `⊢`. Try `simp?` and use the suggested `simp only [...]`. Alternatively, use `suffices` to explicitly state the simplified form.
+
+Note: This linter can be disabled with `set_option linter.flexible false`
+info: FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:247:4: Try this:
+  [apply] simp only [map_neg, map_pow, map_sub, map_mul, coeff_add, coeff_neg, coeff_mul_X, coeff_sub, coeff_C_zero,
+    mul_coeff_zero, Nat.reduceAdd, Fin.mk_one, Fin.isValue, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_one,
+    Matrix.cons_val_fin_one, add_eq_right, neg_eq_zero]
+info: FLT/Assumptions/MazurProof/RationalPointsN25QuotientTwoRegularSequence.lean:248:4: `rw [← map_pow]` uses `⊢`!
+✔ [8587/8608] Built FLT.Assumptions.MazurProof.NormalizedProjectiveCurveFrobenius (10s)
+✔ [8588/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientZeta (8.7s)
+⚠ [8589/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThree (58s)
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:421:0: automatically included section variable(s) unused in theorem `MazurProof.RationalPointsN25QuotientKummerThree.cyclotomicFive25Three_ne_zero`:
+  [CharP K 3]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharP K 3] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:535:0: automatically included section variable(s) unused in theorem `MazurProof.RationalPointsN25QuotientKummerThree.segre_boundary_corner`:
+  [CharP K 3]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharP K 3] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:595:0: automatically included section variable(s) unused in theorem `MazurProof.RationalPointsN25QuotientKummerThree.denseSegre_to_kummer_identity`:
+  [CharP K 3]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharP K 3] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: FLT/Assumptions/MazurProof/RationalPointsN25QuotientKummerThree.lean:624:0: automatically included section variable(s) unused in theorem `MazurProof.RationalPointsN25QuotientKummerThree.kummer_at_zero`:
+  [CharP K 3]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharP K 3] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+✔ [8590/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoKoszul (7.7s)
+✔ [8591/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25NewformEulerCertificate (8.5s)
+✔ [8592/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoGradedKoszul (9.0s)
+✔ [8593/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientF81Field (68s)
+✔ [8594/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoQuotientGrading (8.4s)
+✔ [8595/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmallThreeFields (8.9s)
+✔ [8596/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientTwoGradedAlgebra (14s)
+✔ [8597/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThreeF81 (35s)
+✔ [8598/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThreeProjective (7.2s)
+✔ [8599/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientThreeBaseChange (6.3s)
+✔ [8600/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmallThreeSemantic (7.6s)
+✔ [8601/8608] Built FLT.Assumptions.MazurProof.N25F_Next (4.6s)
+✔ [8602/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientSmoothF3 (7.3s)
+✔ [8603/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientHilbert (7.2s)
+✔ [8604/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientZetaThree (5.2s)
+✔ [8605/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientExtensionPoints (4.7s)
+✔ [8606/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientFrobeniusOrbits (5.4s)
+✔ [8607/8608] Built FLT.Assumptions.MazurProof.RationalPointsN25QuotientMiddleRiemannRoch (5.2s)
+✖ [8608/8608] Building FLT.Assumptions.MazurProof.N25F_ThreeFullClosedPointBridge (8.6s)
+trace: .> LEAN_PATH=/home/runner/work/FLT/FLT/.lake/packages/Cli/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/batteries/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/Qq/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/aesop/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/importGraph/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/plausible/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/mathlib/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/packages/checkdecls/.lake/build/lib/lean:/home/runner/work/FLT/FLT/.lake/build/lib/lean /home/runner/.elan/toolchains/leanprover--lean4---v4.31.0-rc2/bin/lean /home/runner/work/FLT/FLT/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean -o /home/runner/work/FLT/FLT/.lake/build/lib/lean/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.olean -i /home/runner/work/FLT/FLT/.lake/build/lib/lean/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.ilean -c /home/runner/work/FLT/FLT/.lake/build/ir/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.c --setup /home/runner/work/FLT/FLT/.lake/build/ir/FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.setup.json --json
+error: FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean:294:6: maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+error: FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean:308:6: maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+error: FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean:319:4: maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+error: FLT/Assumptions/MazurProof/N25F_ThreeFullClosedPointBridge.lean:328:4: maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+error: Lean exited with code 1
+Some required targets logged failures:
+- FLT.Assumptions.MazurProof.N25F_ThreeFullClosedPointBridge
+error: build failed
