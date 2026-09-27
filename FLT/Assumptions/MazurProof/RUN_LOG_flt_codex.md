@@ -130,3 +130,8 @@ fullDivisorEquivBoundaryCoefficientsChart depends on [propext, Classical.choice,
 Q8266 packages the existing `wBoundaryHyperplaneDivisor`, its already-proved degree-six certificate, pointwise `fullWLocalOrder` coefficients, and support. Its proposed unique-existence wrapper was not integrated; it does not advance the arbitrary-rational-function divisor bridge and was not compiled.
 
 Q8282 asks for the local `Ring.ord` interpretation of affine principal-divisor coefficients; submitted to flt14, task `96aab523`, processing. ask-gpt auto-pushed three commits through the intended `xiang` remote at `HEAD=f9c36f9107`; no push to `origin` or history rewrite occurred. Q8283 requests a source audit of the Q8280 characteristic-three bridge answer; submitted to flt13, task `892c159b`, processing. Q8263 reported connector-delivery failure; no resend was made. At the latest check flt11 remained connected with one task processing, and no Q8263 answer file had appeared.
+
+
+## Q8265 answer review (2026-09-27)
+
+Read Q8265 answer `2f36c341`. Its bridge construction is based on the earlier carrier index `CommonField 3 d`; the current committed `N25F_Next.lean` uses `CommonField 3 (d + 1)`. Q8265 therefore does not typecheck against the current carrier as written. Q8280 supplies the corresponding current-index construction and Q8283 is auditing that code against the checkout. No Q8265 code was integrated.
