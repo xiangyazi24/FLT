@@ -240,3 +240,19 @@ Result: `Build completed successfully (8639 jobs)`. Full output: `/tmp/n25_proje
 Axiom probe: `lake env lean /home/xhuan5/tmp/flt-ai/codex-20260927-n25/probes/n25_projective_divisor_degree_axioms.lean` printed only `[propext, Classical.choice, Quot.sound]` for the exported degree definitions and theorems, including `divisorDegree_eq_boundary_add_chart` and `splitDegree_apply`.
 
 Q8312's source-only review confirms Q8303's earlier prime-instance placement is the required prerequisite for the support criterion and recommends no further change to that theorem. Q8308's source-only review finds no semantic patch needed for the additive local-order hom wrapper. Q8323 independently confirms the proposed Q8322 `Subtype.ext_iff.mp hPQ` repair is type-correct, without claiming a local build.
+
+## Physical-degree decomposition and formal-Jacobian repair review (2026-09-27)
+
+Materialized Q8305 (answer `99407791`, task `d4097b8c`) as `N25F_ThreePhysicalDegreeDecomposition.lean`. Q8322 (task `05e71cea`) proposed `Subtype.ext_iff.mp hPQ` for the injectivity branch. The targeted build rejected that one-line term: its result did not unfold through `exactPeriodicPointToAmbientThree` to the fixed-point embedding equality required by injectivity. Q8323 (answer `6072e474`) statically endorsed the one-line term but did not build this local source. Replaced the ambiguous projection with Q8322's explicitly typed `congrArg` on the target exact-period subtype. The targeted build then passed:
+
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ThreePhysicalDegreeDecomposition
+```
+
+Result: `Build completed successfully (8582 jobs)`. Full output: `/tmp/n25_three_physical_degree_build3.log`.
+
+Axiom probe: `lake env lean /home/xhuan5/tmp/flt-ai/codex-20260927-n25/probes/n25_three_physical_degree_axioms.lean` printed only `[propext, Classical.choice, Quot.sound]` for the exported physical-field, point-embedding, exact-period, and closed-slot equivalences. Q8335 (task `3e41b06c`, prompt `/tmp/q_flt_n25_three_physical_degree_compile2.txt`) was sent with the exact failed diagnostic and the explicit fallback for follow-up; it remained pending when the successful build was recorded.
+
+Q8330 (answer `57221e1c`, task `22c865a5`) independently audited Q8324's proposed formal-Jacobian repairs. It found the evaluated-numeral bridge and all six `Fin 4` comparisons type-correct at source level, with no statement or polynomial change, but did not run Lean. It noted the abbreviated compiler excerpt did not establish Q8324's claimed unused-`h2` diagnostic and that the original `hzero` binders already infer `Fin 4`; the replacement `by decide` proofs remain the substantive fix. The patch still needs local application and a targeted build.
+
+Current compile/audit tasks: Q8329 (task `f60f302d`, prompt `/tmp/q_flt_n25_chart_local_unit_compile.txt`) requests a repair for `N25F_ChartLocalUnitCriterion`; Q8331 (task `71b9c6f9`, prompt `/tmp/q_flt_n25_projective_degree_repair_audit.txt`) audits Q8321's projective-degree proof repairs; Q8334 (task `2640dff1`, prompt `/tmp/q_flt_n25_projective_degree_semantic_audit.txt`) audits the degree formula's mathematical meaning. Q8325/Q8326 remain the independent affine-Jacobian and chart-unit source audits. These requests use the auto-allocator with no pinned tab.
