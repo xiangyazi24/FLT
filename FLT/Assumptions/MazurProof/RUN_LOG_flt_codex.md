@@ -185,3 +185,42 @@ fullClosedPointBridge25ThreeLE4 depends on [propext, Classical.choice, Quot.soun
 ```
 
 This closes the degree-at-most-four point-set classification bridge over the full characteristic-three carrier. It does not yet construct arbitrary rational-function projective divisors or discharge the actual Picard/Riemann--Roch inputs. Q8282's local `Ring.ord` bridge remains in flight. A source audit of Q8285's proposed characteristic-three polynomial derivative interface was dispatched for the next chart-Jacobian step.
+
+## Nonboundary chart local order (2026-09-27)
+
+Q8282 returned a 503-line proposed `N25F_ChartLocalOrder.lean`; Q8290's static audit confirmed the valuation sign, ramification direction, and cited Mathlib interfaces, and identified `ChartLocalRing25Two`'s local-prime instance as a likely elaboration risk. Materialized the draft at `FLT/Assumptions/MazurProof/N25F_ChartLocalOrder.lean`.
+
+Targeted build:
+
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ChartLocalOrder
+```
+
+Result: failed. The first error is failure to synthesize `(fullNonBoundaryPrimeIdeal A).IsPrime` at the `Localization.AtPrime` alias (line 35); dependent ring/algebra instance failures cascade through the local-order declarations. The build log is `/tmp/n25_chart_local_order_build.log`. Q8290 was source-only and did not compile the module. A compile-fix question was prepared at `/tmp/q_flt_n25_chart_local_order_compile.txt`; all live FLT tabs were occupied at the latest status check, so it has not been dispatched or assigned a Q number. No axioms were checked because the module does not build.
+
+## Nonboundary chart-local order follow-up (2026-09-27)
+
+The earlier failure record above is superseded by the successful repair below. Q8303 (answer `9e513d25`, task `bb82cd40`, tab flt13) supplied three source-level changes to `N25F_ChartLocalOrder.lean`: install the indexed prime instance before `ChartLocalRing25Two`, move the local `P.IsPrime` instance before defining `O := Localization.AtPrime P`, and normalize the valuation through the canonical DVR maximal ideal. The current checkout uses Mathlib revision `96fd0fff3b8837985ae21dd02e712cb5df72ec05`; Q8310's source-only audit (answer `2ea1177c`) could not read this local module and raised a conditional classical-scope concern. The exact local module compiled successfully, so that concern required no source change. Its alternate-revision ramification warning was not applied to this pinned checkout.
+
+Q8306 (answer `c8b84bdb`, task `8c3267cd`, tab flt14) supplied an additive hom wrapper around `localFractionOrder`. Q8307 (answer `7257b92f`, task `c6047a82`, tab flt33) supplied the criterion `localElementOrder A a = 0 ↔ a ∉ fullNonBoundaryPrimeIdeal A` for nonzero `a`. Both blocks were appended. The first build after appending exposed a missing namespace open for `fullNonBoundaryPrimeIdeal`; after adding that open, the targeted build passed.
+
+Targeted build:
+
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ChartLocalOrder
+```
+
+Result: `Build completed successfully (8643 jobs)`. Full output is `/tmp/n25_chart_local_order_build4.log`.
+
+Axiom probe: `lake env lean /tmp/n25_chart_local_order_axioms.lean`:
+
+```text
+MazurProof.N25F_ChartLocalOrder.globalFactorCount_eq_localElementOrder depends on [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_ChartLocalOrder.localElementOrder_eq_zero_iff_not_mem depends on [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_ChartLocalOrder.localFractionOrderHom depends on [propext, Classical.choice, Quot.sound]
+MazurProof.N25F_ChartLocalOrder.nonBoundaryPrincipalDivisor_apply_eq_localFractionOrder depends on [propext, Classical.choice, Quot.sound]
+```
+
+No new assumptions or proof placeholders were introduced. Q8317 (task `8b31e017`, flt31) requests the characteristic-three formal-Jacobian bridge; Q8318 (`4bc8b98a`, flt11) requests the affine-chart Jacobian bridge; Q8319 (`64b75224`, flt12) requests the function-unit criterion for local order; Q8320 (`ea7f28bc`, auto-queued on flt31 while the group was saturated) requests the projective principal-divisor degree-zero bridge. All four remain pending.
+
+Q8304 (task `625d9bb3`, flt32) remains in processing for the characteristic-three effective-divisor counts. Q8305 (answer `99407791`, task `d4097b8c`, flt11) returned the physical-degree point decomposition module and is awaiting source review/build. Q8309 (task `aa11ce53`, flt14) remains in processing on the boundary function-field/local-order bridge. Q8311 (answer `3b6948d4`, task `b278330b`, flt12) returned the weighted projective-divisor degree split module and is awaiting source review/build.
