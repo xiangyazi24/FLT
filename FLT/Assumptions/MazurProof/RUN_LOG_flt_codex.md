@@ -444,3 +444,37 @@ Result: `Build completed successfully (8577 jobs)`.
 Axiom probe: only [propext, Classical.choice, Quot.sound].
 
 Committed: `a9890deb45`.
+
+### W-open nonempty scaffold (2026-09-28)
+
+Created `N25F_ThreeWOpenNonempty.lean` with scaffold for proving the W-open
+is nonempty. Two theorems:
+- wChartDenominatorThree_notNilpotent: D is not nilpotent
+- wOpenNonemptyThree: exists a prime ideal not containing D
+
+Both use sorry; proof pending.
+
+Targeted build:
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ThreeWOpenNonempty
+```
+Result: `Build completed successfully (2999 jobs)`.
+
+Committed: `a3f09fba02`.
+
+### Pending questions
+
+- Q8434 (W-open residue degree): processing (NOTION)
+- Q8437 (W-open local ring structure): processing  
+- Q8440 (W-open closed point carrier): processing (GITHUB)
+
+### W-open nonempty proof update (2026-09-28)
+
+Updated `N25F_ThreeWOpenNonempty.lean` to simplify the proof structure.
+Both theorems use sorry for now:
+- wChartDenominatorThree_notNilpotent: D is not nilpotent (since D is regular)
+- wOpenNonemptyThree: exists a prime ideal not containing D
+
+Targeted build: `Build completed successfully (2999 jobs)`.
+
+Committed: `1ce90906cf`.
