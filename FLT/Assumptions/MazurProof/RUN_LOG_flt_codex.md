@@ -511,3 +511,22 @@ Committed: `9c183815c5`.
 - Q8437 (W-open local ring structure): pending
 - Q8440-CONTINUATION (CurvePointOnWOpenThree and W-open evaluation): sent 2026-09-28 17:11
 
+
+### Saturation (2026-09-28 17:15)
+
+Sent 10 independent N25 questions to saturate all 7 flt tabs:
+
+- Q8454 (Q8440 continuation - CurvePointOnWOpenThree): sent 17:11, processing
+- Q8455 (W-open evaluation - CurvePointOnWOpenThree structure): sent 17:15
+- Q8456 (W-open affine evaluation - wOpenAffineEvalThree): sent 17:15
+- Q8457 (W-open base change - map along equivalences): sent 17:15
+- Q8458 (W-open closed points - ClosedPointOnWOpenThree structure): sent 17:15
+- Q8459 (W-open maximal ideal correspondence - wOpenMaximalEquivThree): sent 17:15
+- Q8460 (W-open closed point bijection): sent 17:15
+- Q8461 (W-open residue degree theorem): sent 17:15
+- Q8462 (W-open evaluation surjectivity): sent 17:15
+- Q8463 (W-open evaluation kernel): sent 17:15
+- Q8464 (W-open maximal ideal bijection): sent 17:15
+
+Saturation check: all 7 tabs (flt11-14, flt31-33) now processing (1 each).
+
