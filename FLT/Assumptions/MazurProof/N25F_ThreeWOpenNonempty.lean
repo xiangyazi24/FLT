@@ -24,6 +24,7 @@ open N25F_ThreeWChartDRegular
 This implies the W-open is nonempty (there exists a prime ideal not containing D). -/
 theorem wChartDenominatorThree_notNilpotent :
     ¬ IsNilpotent wChartDenominatorThree := by
+  -- D is regular (a non-zero-divisor), hence not nilpotent
   sorry
 
 /-- The W-open is nonempty: there exists a prime ideal in the W-chart quotient
