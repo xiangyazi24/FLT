@@ -298,3 +298,99 @@ Axiom probe: `lake env lean /tmp/n25_three_boundary_point_classification_axioms.
 Read Q8341 and Q8343 audits for `N25F_ChartLocalUnitCriterion`. Applied the explicit prime argument, made the `FractionRing.algEquiv` call reducible, and corrected the localization witness destructuring to the flat triple. The targeted build still fails at `chartFractionRingEquiv`: Lean selects different `CommSemiring` and `Algebra` instances for the inferred equivalence. Full output: `/tmp/n25_chart_local_unit_build2.log`. Q8351 (`/tmp/q_flt_n25_chart_fraction_equiv_instances.txt`, task `2f6e0ef3`) requests a direct repair for the exact compiler error; Q8352 (`/tmp/q_flt_n25_chart_fraction_equiv_alt_construction.txt`, task `39f40f68`) independently asks for an explicit-instance or localization-equivalence construction. Both were still processing at log time.
 
 Q8344 (`/tmp/q_flt_n25_three_wchart_d_regular.txt`) returned a proposed full-quotient regularity module in `/tmp/gpt/flt/Q8344.md`; it is source-only and has not yet been materialized or built. Q8345 (`/tmp/q_flt_n25_three_wopen_residue_degree.txt`) and Q8348 (`/tmp/q_flt_n25_three_xboundary_artin_equiv.txt`) remain in flight. No answer was treated as a successful build without local verification.
+
+## Fraction-ring equivalence and live-tab follow-up (2026-09-27)
+
+Read Q8354's cold source audit of the Q8345 characteristic-three W-open ratio-field degree proof. It found no mathematical blocker in the audited candidate and confirmed that the reverse-divisibility step needs both `m ∣ d` and the separate exact-period direction `d ∣ m`. This was a source-only audit: it did not build or certify a local copy, and no Q8345 code was integrated from this answer.
+
+Applied Q8351's direct `IsLocalization.algEquiv` body to the untracked `N25F_ChartLocalUnitCriterion.lean` candidate and ran:
+
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ChartLocalUnitCriterion
+```
+
+Result: failed at `chartFractionRingEquiv` because Lean could not synthesize `IsLocalization (ChartLocalRing25Two A)⁰ (FractionRing (ChartLocalRing25Two A))`. The preceding `FractionRing.algEquiv` attempt had a distinct source-algebra instance mismatch, recorded above. Q8352's longer construction remains an unbuilt candidate. Q8362 (task `fbde6cee`, auto-assigned flt12) now requests the smallest exact repair against the current checkout and this compiler error; it is still pending. No declaration or statement was weakened.
+
+The bridge status showed the FLT group saturated after Q8362 was submitted: all seven live channels report one processing task each. No tab was pinned.
+
+Q8316's GitHub answer was fetched from the ask-gpt-git `origin/scratch` branch and read at commit `0a8bd2dcc5b31612d94fa4b7f864c9d6cf7b2522`. Its identified simp feedback in `splitDegree_apply_components` is already removed locally: that component equality uses `rfl`, and the target module's successful build is recorded above. No further project edit was needed.
+
+## Graded cone Hilbert-function module and follow-up tasks (2026-09-27)
+
+Materialized Q8360's proposed module as `N25F_GradedConePieceHilbert.lean`; source scan found no `sorry`, `axiom`, `admit`, or `native_decide`. First targeted build:
+
+```text
+lake build FLT.Assumptions.MazurProof.N25F_GradedConePieceHilbert
+```
+
+Result: failed. The strict/weak `shiftedPiece` branches did not reduce to their homogeneous-submodule/zero forms at the finrank goal, and the proof used unknown name `Submodule.finrank_bot`. Full output: `/tmp/n25_graded_cone_piece_hilbert_build.log`. No theorem statement was changed and the module is not reported as compiled.
+
+Sent independent follow-ups through the FLT auto-allocator: Q8368 (flt11, task `a09f0406`) asks for the source-grounded multiplication map and injectivity from an explicit regular-element hypothesis; Q8370 (flt31, task `a8c3bd5d`) asks for the finite-dimensional cokernel formula from an injective degree-shift map; Q8369 (flt14, task `bbd1a3d6`) audits the exact Q8360 build errors and supplies proof-only repairs. Q8372 (flt33, task `a6c8f876`) and Q8373 (flt32, task `8c583ac9`) investigate the X- and Z-boundary homogeneous-section comparisons into the common field. All were sent without pinning a tab.
+
+
+### Q8360 follow-up: mathematical audit and second build (2026-09-27)
+
+Read Q8364 and Q8363 as independent source-level audits of the Q8360 Hilbert calculation. Both confirm the additive Koszul dimension identity and the guarded shifts; Q8364 independently derives `H(0)=1`, `H(1)=4`, and `H(n)=6n-3` for `n≥2`, including the regular-sequence premise for the displayed quadric and cubic. Q8363 found no source/API defect in the candidate but did not run Lean. Neither audit is treated as build evidence.
+
+Read Q8375's audit of the Q8369 proof-only patch. It confirms the intended `change`/`split_ifs` repair and root-level `finrank_bot` name at source level, without running Lean. Applied patch's second targeted build:
+
+```text
+lake build FLT.Assumptions.MazurProof.N25F_GradedConePieceHilbert
+```
+
+Result: failed. The explicit `change` in `shiftedPiece_finrank_eq` exposes a conditional subtype for which Lean cannot synthesize `AddCommMonoid`; the Euler-balance proof's final `omega` also cannot identify finrank expressions elaborated once over alias `k` and once over `ZMod 2`. Full output: `/tmp/n25_graded_cone_piece_hilbert_build2.log`. No theorem statement was changed. Q8379 now requests exact local repairs for these two diagnostics.
+
+Q8365 was read as a scope-limited audit of the monomial-count and choose-count portion only; it did not build the module or check later blocks. Its audited portion agrees with the checked source.
+
+## FLT TASK 02 takeover (2026-09-28)
+
+Took over from Codex (out of quota until 2026-10-03). Q8382 commit 0c85ef91 not found in repo history; the chatgpt-drop branch does not exist on either remote.
+
+### Current state assessment
+
+Both previously blocking modules now build successfully (already committed in HEAD):
+
+1. **N25F_ChartLocalUnitCriterion.lean** (commit 3f9e048102): Builds with only standard axioms
+2. **N25F_GradedConePieceHilbert.lean** (commit aacda638ac): Builds with only standard axioms
+
+### ChatGPT questions dispatched
+
+- Q8432 (task 5502618d, flt31): Chart local unit criterion fix - arrived via GDrive (1KJFlI5ZJ88T)
+- Q8433 (task 76367ee2, flt32): Hilbert function fix - still processing (NOTION)
+
+Both questions were dispatched with ASK_WINDOW=flt to the FLT tab group.
+
+### Q8344 integration: W-chart D regularity (2026-09-28)
+
+Materialized Q8344 (answer 29d8d624) as `N25F_ThreeWChartDRegular.lean`. Proves
+`wChartDenominatorThree` is regular (non-zero-divisor) in the full quotient, not
+just after localization. Uses polynomial tower equivalence and regular-sequence swap.
+
+Targeted build:
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ThreeWChartDRegular
+```
+Result: `Build completed successfully (2998 jobs)`.
+
+Axiom probe:
+```text
+wChartDenominatorThree_isRegular depends on [propext, Classical.choice, Quot.sound]
+wChartDenominatorThree_mem_nonZeroDivisors depends on [propext, Classical.choice, Quot.sound]
+```
+
+Committed: `653b72076d`.
+
+### New questions dispatched
+
+- Q8434 (W-open residue degree): For closed points in the W-open, prove residue
+  degree equals physical degree.
+- Q8435 (X-boundary Artin equivalence): Prove local ring at X-boundary point is
+  Artinian (maximal ideal nilpotent).
+
+Both dispatched to FLT tab group via ASK_WINDOW=flt.
+
+### Q8433 review (2026-09-28)
+
+Q8433 (answer eba88bc5) arrived with a proposed repair for N25F_GradedConePieceHilbert.lean.
+The module already builds successfully (commit aacda638ac), so no repair was applied.
+Per coordinator instruction: skip simplifications of modules that already build.
