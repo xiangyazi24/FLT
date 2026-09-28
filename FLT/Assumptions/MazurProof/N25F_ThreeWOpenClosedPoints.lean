@@ -199,4 +199,217 @@ theorem normalizeAtWThree_normalizedWOpenPointThree
   simp only [scaleCoordinatesThree, wOpenChartPointThree, mul_one,
     ← mul_assoc, inv_mul_cancel₀ ha, one_mul]
 
+/-! ## Affine evaluation on the characteristic-three W-chart -/
+
+/-- The canonical coefficient homomorphism from the prime field
+`ZMod 3` to any ring of characteristic three. -/
+def charThreeCoefficientHom
+    {K : Type*} [Ring K] [CharP K 3] :
+    ZMod 3 →+* K :=
+  ZMod.castHom (dvd_refl 3) K
+
+/-- Forget the W-coordinate of a homogeneous coordinate vector.
+The three entries are indexed in the same order as
+`WChartAmbientThree = MvPolynomial (Fin 3) (ZMod 3)`:
+0 = X, 1 = Y, 2 = Z. -/
+def affineCoordinatesThree
+    {K : Type*} (P : Coordinates4 K) : Fin 3 → K :=
+  ![P.x, P.y, P.z]
+
+/-- Evaluate the literal characteristic-three W-chart polynomial ring at
+the W = 1 representative of a W-open curve point. -/
+def wOpenAffineEvalThree
+    {K : Type} [Field K] [CharP K 3]
+    (P : CurvePointOnWOpenThree K) :
+    WChartAmbientThree →+* K :=
+  MvPolynomial.eval₂Hom
+    (charThreeCoefficientHom (K := K))
+    (affineCoordinatesThree (wOpenCoordinatesThree P))
+
+@[simp]
+theorem wOpenAffineEvalThree_X
+    {K : Type} [Field K] [CharP K 3]
+    (P : CurvePointOnWOpenThree K) (j : Fin 3) :
+    wOpenAffineEvalThree P (MvPolynomial.X j) =
+      affineCoordinatesThree (wOpenCoordinatesThree P) j := by
+  simp [wOpenAffineEvalThree]
+
+/-- The W-chart quadric vanishes at every W-open curve point. -/
+@[simp]
+theorem wOpenAffineEvalThree_quadric
+    {K : Type} [Field K] [CharP K 3]
+    (P : CurvePointOnWOpenThree K) :
+    wOpenAffineEvalThree P wChartQuadricThree = 0 := by
+  have hP : IsCanonicalNormalizedThree P.point.1 := P.point.2
+  have hQ :
+      canonicalQuadric25Three (wOpenCoordinatesThree P) = 0 := by
+    change canonicalQuadric25Three
+      (scaleCoordinatesThree
+        ((normalizedCoordinatesThree P.point.1).w)⁻¹
+        (normalizedCoordinatesThree P.point.1)) = 0
+    rw [canonicalQuadric25Three_scale, hP.1, mul_zero]
+  simpa [wOpenAffineEvalThree, wChartQuadricThree,
+    affineCoordinatesThree, canonicalQuadric25Three] using hQ
+
+/-- The W-chart cubic vanishes at every W-open curve point. -/
+@[simp]
+theorem wOpenAffineEvalThree_cubic
+    {K : Type} [Field K] [CharP K 3]
+    (P : CurvePointOnWOpenThree K) :
+    wOpenAffineEvalThree P wChartCubicThree = 0 := by
+  have hP : IsCanonicalNormalizedThree P.point.1 := P.point.2
+  have hC :
+      canonicalCubic25Three (wOpenCoordinatesThree P) = 0 := by
+    change canonicalCubic25Three
+      (scaleCoordinatesThree
+        ((normalizedCoordinatesThree P.point.1).w)⁻¹
+        (normalizedCoordinatesThree P.point.1)) = 0
+    rw [canonicalCubic25Three_scale, hP.2, mul_zero]
+  simpa [wOpenAffineEvalThree, wChartCubicThree,
+    affineCoordinatesThree, canonicalCubic25Three] using hC
+
+/-- Both defining W-chart equations lie in the kernel of affine
+point evaluation. -/
+theorem wChartEquationIdealThree_le_ker_wOpenAffineEvalThree
+    {K : Type} [Field K] [CharP K 3]
+    (P : CurvePointOnWOpenThree K) :
+    wChartEquationIdealThree ≤
+      RingHom.ker (wOpenAffineEvalThree P) := by
+  rw [wChartEquationIdealThree, Ideal.span_le]
+  intro f hf
+  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hf
+  rcases hf with rfl | rfl
+  · exact RingHom.mem_ker.mpr (wOpenAffineEvalThree_quadric P)
+  · exact RingHom.mem_ker.mpr (wOpenAffineEvalThree_cubic P)
+
+/-- Affine evaluation descends to the actual W-chart quotient. -/
+def wOpenChartQuotientEvalThree
+    {K : Type} [Field K] [CharP K 3]
+    (P : CurvePointOnWOpenThree K) :
+    WChartQuotientThree →+* K :=
+  Ideal.Quotient.lift wChartEquationIdealThree
+    (wOpenAffineEvalThree P)
+    (wChartEquationIdealThree_le_ker_wOpenAffineEvalThree P)
+
+@[simp]
+theorem wOpenChartQuotientEvalThree_mk
+    {K : Type} [Field K] [CharP K 3]
+    (P : CurvePointOnWOpenThree K)
+    (f : WChartAmbientThree) :
+    wOpenChartQuotientEvalThree P
+        (Ideal.Quotient.mk wChartEquationIdealThree f) =
+      wOpenAffineEvalThree P f := by
+  rfl
+
+/-!
+The target field has a canonical `ZMod 3`-algebra structure coming from
+`charThreeCoefficientHom`.  Keeping this instance local avoids adding a
+new algebra hypothesis to every evaluation theorem.
+-/
+local instance charThreeAlgebra
+    {K : Type} [Field K] [CharP K 3] :
+    Algebra (ZMod 3) K :=
+  (charThreeCoefficientHom (K := K)).toAlgebra
+
+/-! ## The three affine coordinate classes -/
+
+/-- The class of the affine X-coordinate in the W-chart quotient. -/
+def wChartXThree : WChartQuotientThree :=
+  Ideal.Quotient.mk wChartEquationIdealThree
+    (MvPolynomial.X (0 : Fin 3))
+
+/-- The class of the affine Y-coordinate in the W-chart quotient. -/
+def wChartYThree : WChartQuotientThree :=
+  Ideal.Quotient.mk wChartEquationIdealThree
+    (MvPolynomial.X (1 : Fin 3))
+
+/-- The class of the affine Z-coordinate in the W-chart quotient. -/
+def wChartZThree : WChartQuotientThree :=
+  Ideal.Quotient.mk wChartEquationIdealThree
+    (MvPolynomial.X (2 : Fin 3))
+
+@[simp]
+theorem wOpenChartQuotientEvalThree_X
+    {K : Type} [Field K] [CharP K 3]
+    (P : CurvePointOnWOpenThree K) :
+    wOpenChartQuotientEvalThree P wChartXThree =
+      (wOpenCoordinatesThree P).x := by
+  rw [wChartXThree, wOpenChartQuotientEvalThree_mk,
+    wOpenAffineEvalThree_X]
+  simp [affineCoordinatesThree]
+
+@[simp]
+theorem wOpenChartQuotientEvalThree_Y
+    {K : Type} [Field K] [CharP K 3]
+    (P : CurvePointOnWOpenThree K) :
+    wOpenChartQuotientEvalThree P wChartYThree =
+      (wOpenCoordinatesThree P).y := by
+  rw [wChartYThree, wOpenChartQuotientEvalThree_mk,
+    wOpenAffineEvalThree_X]
+  simp [affineCoordinatesThree]
+
+@[simp]
+theorem wOpenChartQuotientEvalThree_Z
+    {K : Type} [Field K] [CharP K 3]
+    (P : CurvePointOnWOpenThree K) :
+    wOpenChartQuotientEvalThree P wChartZThree =
+      (wOpenCoordinatesThree P).z := by
+  rw [wChartZThree, wOpenChartQuotientEvalThree_mk,
+    wOpenAffineEvalThree_X]
+  simp [affineCoordinatesThree]
+
+/-! ## The denominator under evaluation -/
+
+/-- Evaluation of the affine denominator is the homogeneous degree-two
+denominator evaluated on the W = 1 representative. -/
+@[simp]
+theorem wOpenChartQuotientEvalThree_denominator
+    {K : Type} [Field K] [CharP K 3]
+    (P : CurvePointOnWOpenThree K) :
+    wOpenChartQuotientEvalThree P wChartDenominatorThree =
+      projectiveWChartDenominatorThree (wOpenCoordinatesThree P) := by
+  rw [wChartDenominatorThree, wOpenChartQuotientEvalThree_mk]
+  simp [wOpenAffineEvalThree, affineCoordinatesThree,
+    projectiveWChartDenominatorThree]
+
+/-- Nonvanishing of the evaluated affine denominator is exactly
+projective nonvanishing of the homogeneous denominator on the original
+normalized point. -/
+theorem wOpenChartQuotientEvalThree_denominator_ne_zero_iff
+    {K : Type} [Field K] [CharP K 3]
+    (P : CurvePointOnWOpenThree K) :
+    wOpenChartQuotientEvalThree P wChartDenominatorThree ≠ 0 ↔
+      projectiveWChartDenominatorThree
+        (normalizedCoordinatesThree P.point.1) ≠ 0 := by
+  rw [wOpenChartQuotientEvalThree_denominator]
+  change
+    projectiveWChartDenominatorThree
+        (scaleCoordinatesThree
+          ((normalizedCoordinatesThree P.point.1).w)⁻¹
+          (normalizedCoordinatesThree P.point.1)) ≠ 0 ↔
+      projectiveWChartDenominatorThree
+        (normalizedCoordinatesThree P.point.1) ≠ 0
+  rw [projectiveWChartDenominatorThree_scale]
+  simp [P.w_ne_zero]
+
+/-- The evaluation kernel avoids the affine denominator exactly when the
+corresponding projective homogeneous denominator is nonzero. -/
+theorem wChartDenominatorThree_notMem_evalKernel_iff
+    {K : Type} [Field K] [CharP K 3]
+    (P : CurvePointOnWOpenThree K) :
+    wChartDenominatorThree ∉
+        RingHom.ker (wOpenChartQuotientEvalThree P) ↔
+      projectiveWChartDenominatorThree
+        (normalizedCoordinatesThree P.point.1) ≠ 0 := by
+  calc
+    wChartDenominatorThree ∉
+        RingHom.ker (wOpenChartQuotientEvalThree P) ↔
+      wOpenChartQuotientEvalThree P wChartDenominatorThree ≠ 0 :=
+        wChartDenominatorThree_notMem_ker_iff
+          (wOpenChartQuotientEvalThree P)
+    _ ↔
+      projectiveWChartDenominatorThree
+        (normalizedCoordinatesThree P.point.1) ≠ 0 :=
+      wOpenChartQuotientEvalThree_denominator_ne_zero_iff P
+
 end MazurProof.N25F_ThreeWOpenClosedPoints
