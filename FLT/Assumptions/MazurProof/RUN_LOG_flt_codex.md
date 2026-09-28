@@ -394,3 +394,53 @@ Both dispatched to FLT tab group via ASK_WINDOW=flt.
 Q8433 (answer eba88bc5) arrived with a proposed repair for N25F_GradedConePieceHilbert.lean.
 The module already builds successfully (commit aacda638ac), so no repair was applied.
 Per coordinator instruction: skip simplifications of modules that already build.
+
+### Q8436 integration: W-open prime equivalence (2026-09-28)
+
+Materialized Q8436 (answer fd996105) as `N25F_ThreeWOpenPrimeEquiv.lean`.
+Proves prime ideals in the D-localization correspond to prime ideals in the
+W-chart quotient that do not contain D.
+
+Targeted build:
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ThreeWOpenPrimeEquiv
+```
+Result: `Build completed successfully (2999 jobs)`.
+
+Axiom probe:
+```text
+wOpenPrimeEquivThree depends on [propext, Classical.choice, Quot.sound]
+wChartDLocalizationThree_algebraMap_injective depends on [propext, Classical.choice, Quot.sound]
+```
+
+Committed: `61922777df`.
+
+### Pending questions
+
+- Q8434 (W-open residue degree): processing
+- Q8435 (X-boundary Artin equivalence): processing
+- Q8437 (W-open local ring structure): processing
+
+### Q8435 review: X-boundary Artin diagnostic (2026-09-28)
+
+Q8435 (answer 6fb804e2) is a diagnostic answer explaining that the original
+question was based on a misunderstanding. The curve local ring at a smooth
+point is a DVR, not Artinian. The correct Artinian object is the quotient
+by the boundary germ.
+
+Materialized as `N25F_ThreeBoundaryDiagnostic.lean` with:
+- cuspCThree: the point [1:1:0:1] in characteristic three
+- cuspCThree_on_curve: proof it lies on the canonical curve
+- cuspCThree_w_div_x_eq_one: W/X = 1 at this point
+- dvr_not_artinian: a DVR cannot be Artinian
+- quotient_span_singleton_finiteLength: the correct finite-length statement
+
+Targeted build:
+```text
+lake build FLT.Assumptions.MazurProof.N25F_ThreeBoundaryDiagnostic
+```
+Result: `Build completed successfully (8577 jobs)`.
+
+Axiom probe: only [propext, Classical.choice, Quot.sound].
+
+Committed: `a9890deb45`.
