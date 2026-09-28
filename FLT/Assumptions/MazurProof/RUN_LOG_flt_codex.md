@@ -478,3 +478,36 @@ Both theorems use sorry for now:
 Targeted build: `Build completed successfully (2999 jobs)`.
 
 Committed: `1ce90906cf`.
+
+### W-open nonempty complete (2026-09-28)
+
+Completed `N25F_ThreeWOpenNonempty.lean` following `flt-hint-wopen.md`:
+- `instance : Nontrivial WChartQuotientThree`: proved via evaluation map at [1,1,0] to ZMod 3
+- `wChartDenominatorThree_notNilpotent`: D is not nilpotent (uses `wChartDenominatorThree_isRegular`)
+- `wOpenNonemptyThree`: exists prime ideal not containing D
+
+Targeted build: `Build completed successfully (8579 jobs)`.
+Axioms: [propext, Classical.choice, Quot.sound].
+
+Committed: `fce51093ed`.
+
+### N25F_ThreeWOpenClosedPoints scaffold (Q8440 split, 2026-09-28)
+
+Split Q8440 (1661 lines) into manageable sections. First section integrated:
+- `projectiveWChartDenominatorThree`: homogeneous form of affine denominator D = x*z - x*w + z*w
+- `projectiveWChartDenominatorThree_scale`: scales by a^2
+- `projectiveWChartDenominatorThree_map`: commutes with ring homs
+- `projectiveWChartDenominatorThree_eq_zero_of_w_eq_zero`: W=0 implies D=0 (uses boundary_point_eq_three_cases)
+- `w_ne_zero_of_projectiveWChartDenominatorThree_ne_zero`: D!=0 implies W!=0
+
+Targeted build: `Build completed successfully (8586 jobs)`.
+Axioms: [propext, Classical.choice, Quot.sound].
+
+Committed: `9c183815c5`.
+
+### Questions in flight
+
+- Q8434 (W-open residue degree): pending
+- Q8437 (W-open local ring structure): pending
+- Q8440-CONTINUATION (CurvePointOnWOpenThree and W-open evaluation): sent 2026-09-28 17:11
+
