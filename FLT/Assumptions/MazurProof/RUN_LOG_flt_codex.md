@@ -530,3 +530,39 @@ Sent 10 independent N25 questions to saturate all 7 flt tabs:
 
 Saturation check: all 7 tabs (flt11-14, flt31-33) now processing (1 each).
 
+
+### Q8463 integration (2026-09-28 17:20)
+
+Integrated Q8463 into N25F_ThreeWOpenClosedPoints.lean:
+- CurvePointOnWOpenThree: canonical curve point with W ≠ 0
+- normalizeAtWThree: rescale by W inverse
+- wOpenCoordinatesThree: W = 1 representative
+- wOpenChartPointThree: homogenize affine coordinates
+- normalizedWOpenPointThree: normalize affine W-chart point
+- 14 theorems for normalization identities
+
+Targeted build: `Build completed successfully (8586 jobs)`.
+
+Committed: `18e02ae8dc`.
+
+### Q8465 integration (2026-09-28 17:20)
+
+Created N25F_ThreeWOpenMaximalEquiv.lean from Q8465:
+- WChartMaximalAvoidingDThree: maximal ideals avoiding D
+- wOpenMaximalEquivThree: order iso via IsLocalization.orderIsoOfMaximal
+- wOpenMaximalEquivThree_apply_val/symm_apply_val: contraction/extension
+- wOpenMaximalEquivThree_commutes_with_contraction: compatibility with prime correspondence
+
+Targeted build: `Build completed successfully (3000 jobs)`.
+
+Committed: `856b48407e`.
+
+### New questions sent (2026-09-28 17:20)
+
+Sent Q8466-Q8470 to replace answered Q8463/Q8465:
+- Q8466: W-open affine evaluation
+- Q8467: W-open base change
+- Q8468: W-open closed points structure
+- Q8469: W-open evaluation surjectivity
+- Q8470: W-open evaluation kernel
+
