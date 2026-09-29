@@ -1,5 +1,5 @@
 import FLT.Assumptions.MazurProof.N13ArithmeticBasics
-import Mathlib.Algebra.CharP.Defs
+import Mathlib.Algebra.CharP.Basic
 import Mathlib.Tactic
 
 set_option autoImplicit false
@@ -43,5 +43,14 @@ theorem optimized_char_two_nonsingular
       simpa only [hu2, zero_mul, zero_add] using hdv
     exact one_ne_zero hone
   · exact Or.inl hdu
+
+/-- A07: In characteristic two, the derivative with respect to w of
+w^2 + (1 + s + s^3) * w, specialized at s = 0, is 1.
+The displayed algebraic identity is valid for every w. -/
+theorem infinity_chart_derivative_two
+    {K : Type*} [Field K] [CharP K 2] (w : K) :
+    2 * w + 1 = (1 : K) := by
+  have h2 : (2 : K) = 0 := CharP.cast_eq_zero K 2
+  rw [h2, zero_mul, zero_add]
 
 end MazurProof.N13Arithmetic
