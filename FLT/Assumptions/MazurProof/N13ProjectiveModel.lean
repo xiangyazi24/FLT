@@ -1,11 +1,59 @@
 import FLT.Assumptions.MazurProof.N13ArithmeticBasics
 import Mathlib.Algebra.CharP.Basic
+import Mathlib.Data.Fintype.Fin
 import Mathlib.Tactic
 
 set_option autoImplicit false
 set_option relaxedAutoImplicit false
 
 namespace MazurProof.N13Arithmetic
+
+/-- Rational affine points on the sextic model. -/
+abbrev AffinePoint13 :=
+  {xy : ℚ × ℚ // N13CurveModel.C13SexticEq xy.1 xy.2}
+
+/-- The point encoding specified in the N13 arithmetic interface. -/
+abbrev Point13 := AffinePoint13 ⊕ Bool
+
+/-- Include an affine point in the projective point encoding. -/
+def affine13 (X Y : ℚ) (h : N13CurveModel.C13SexticEq X Y) : Point13 :=
+  Sum.inl ⟨(X, Y), h⟩
+
+/-- The first infinity tag. -/
+def O : Point13 := Sum.inr false
+
+/-- The second infinity tag. -/
+def T : Point13 := Sum.inr true
+
+/-- Sextic point (0,-1); optimized point (-1,-1). -/
+def D : Point13 :=
+  affine13 0 (-1)
+    (N13CurveModel.affine_cusp_mem (Or.inl rfl) (Or.inr rfl))
+
+/-- Sextic point (-1,1); optimized point (0,0). -/
+def A : Point13 :=
+  affine13 (-1) 1
+    (N13CurveModel.affine_cusp_mem (Or.inr rfl) (Or.inl rfl))
+
+/-- Sextic point (-1,-1); optimized point (0,-1). -/
+def B : Point13 :=
+  affine13 (-1) (-1)
+    (N13CurveModel.affine_cusp_mem (Or.inr rfl) (Or.inr rfl))
+
+/-- Sextic point (0,1); optimized point (-1,0). -/
+def C : Point13 :=
+  affine13 0 1
+    (N13CurveModel.affine_cusp_mem (Or.inl rfl) (Or.inl rfl))
+
+/-- The six cusps, in the required order [O,T,D,A,B,C]. -/
+def cusp13 (i : Fin 6) : Point13 :=
+  match i.val with
+  | 0 => O
+  | 1 => T
+  | 2 => D
+  | 3 => A
+  | 4 => B
+  | _ => C
 
 /-- An integer polynomial certificate for the characteristic-two affine
 Jacobian calculation. This identity itself holds in every commutative ring.
@@ -52,5 +100,10 @@ theorem infinity_chart_derivative_two
     2 * w + 1 = (1 : K) := by
   have h2 : (2 : K) = 0 := CharP.cast_eq_zero K 2
   rw [h2, zero_mul, zero_add]
+
+/-- A08: the six displayed cusps are pairwise distinct. -/
+theorem cusp13_injective : Function.Injective cusp13 := by
+  intro i j
+  fin_cases i <;> fin_cases j <;> decide
 
 end MazurProof.N13Arithmetic
