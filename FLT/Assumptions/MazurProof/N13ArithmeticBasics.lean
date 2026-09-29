@@ -10,6 +10,10 @@ noncomputable section
 
 namespace MazurProof.N13Arithmetic
 
+/-- The optimized N13 affine equation over a commutative coefficient ring. -/
+def OptEquation13 {K : Type*} [CommRing K] (u v : K) : Prop :=
+  v ^ 2 + (u ^ 3 + u ^ 2 + 1) * v = u ^ 2 + u
+
 /-- The polynomial defining the standard sextic model of X₁(13). -/
 def F13 (K : Type*) [CommRing K] : Polynomial K :=
   Polynomial.X ^ 6 + 4 * Polynomial.X ^ 5 +
