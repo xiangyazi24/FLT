@@ -147,6 +147,67 @@ Reviewed the returned Q8286/Q8287 static audits. Q8286's recovered Q8279 source 
 
 Q8283's task ledger reported a Drive drop, but the discovered full document ID resolves to a document containing only `ANSWER Q8283 4cdbd2fd` (24 bytes); `get_document`, text fetch, and revision inspection found no audit body. No Q8283 claim or code was integrated. An initial Q8288 dispatch created a ledger row but no bridge task; `/api/status` showed no matching in-flight ID. The same source-grounded recursion-depth prompt was then submitted successfully as Q8289.
 
+## FLT-TASK-03: switch to p=13 (2026-09-28)
+
+Following flt-task-03.md: complete current N25 file, then switch to p=13 arithmetic route.
+
+### Q8482 integration (N25 closed point structure)
+
+Integrated Q8482 into `N25F_ThreeWOpenClosedPoints.lean`:
+- Added `IsCommonField` metadata class for finite fields of cardinality p^d
+- Added `FrobeniusExactPeriod` predicate for exact Frobenius period
+- Added `ClosedPointOnWOpenThree` structure (W ≠ 0, not restricted to D ≠ 0)
+- Added `closedPointMaximalIdealThree`: evaluation kernel
+- Added `closedPointMaximalIdealThree_isMaximal`: unconditional maximality
+- Added denominator avoidance theorems (iff versions + conditional)
+- Added `ClosedPointOnWDenominatorOpenThree` subtype for D ≠ 0 points
+- Added `wOriginThree` counterexample: [0:0:0:1] has D = 0
+- Proved `not_forall_wChartDenominatorThree_notIn_closedPointMaximalIdealThree`
+
+The unconditional denominator avoidance theorem is FALSE; the point [0:0:0:1] is a counterexample.
+The corrected structure requires the hypothesis `projectiveWChartDenominatorThree (normalizedCoordinatesThree C.P.point.1) ≠ 0`.
+
+Build: `lake build FLT.Assumptions.MazurProof.N25F_ThreeWOpenClosedPoints` → success (8587 jobs)
+Commit: `61cf05e80c`
+
+### Q8470 Block A integration (p=13 arithmetic basics)
+
+Following Q8470-cb98d538.md §5 "Dependency-ordered lemma queue", Block A:
+- Created `N13ArithmeticBasics.lean` with A01 and A02
+- A01: `sexticF13_norm_identity`: f(x) = A(x)² + 4B(x)², norm from Q(i)
+- A02: `sexticF13_pos`: no rational branch points (f(x) > 0 for all x in Q)
+
+The norm identity is the input to Poonen-Schaefer Thm 11.3 for even-degree 2-descent kernel correctness.
+
+Build: `lake build FLT.Assumptions.MazurProof.N13ArithmeticBasics` → success (8567 jobs)
+Axioms: standard Mathlib tactics (ring, norm_num), no sorryAx
+Commit: `fed5288e9b`
+
+### Next steps
+
+Per flt-task-03.md:
+1. The coordinator already sent A03-A08 to ChatGPT; answers appear in chatgpt-answers/
+2. Integrate each into the file named in the plan, build + commit after each
+3. For Block B onward: send ONE question per lemma using template ~/tmp/flt-coordinator/c13/A03.txt
+4. Keep all 7 flt tabs busy
+5. Before writing "proved": verify no sorryAx via #print axioms
+
+### A01-A03 integration (2026-09-28)
+
+Integrated Q8488 (A03) into N13ArithmeticBasics.lean:
+- F13: polynomial defining the standard sextic model of X_1(13)
+- F13_eval (A03): polynomial evaluation agrees with sexticF13
+- sexticF13_norm_identity (A01): f(x) = A(x)² + 4B(x)², norm from Q(i)
+- sexticF13_pos (A02): no rational branch points (f(x) > 0 for all x in Q)
+
+Build: success (8567 jobs)
+Commit: 51d75772d3
+
+A04 (F13_coprime_derivative from Q8489) deferred: the Bézout certificate proof requires
+careful polynomial derivative computation. The certificate is:
+  A * F13 + B * F13' = 21632
+with explicit polynomials A and B. Will retry with corrected proof tactics.
+
 Added `N25F_ThreeDegreeDescent.lean`, separating the coherent realization of `CommonField 3 (d + 1)` and the equivalence with the common-field Frobenius fixed-point subtype. The module retains the fixed-point value and periodicity projections. Q8291's static source audit found no name, type, or API correction.
 
 Targeted build:
