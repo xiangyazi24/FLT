@@ -14,6 +14,10 @@ namespace MazurProof.N13Arithmetic
 def OptEquation13 {K : Type*} [CommRing K] (u v : K) : Prop :=
   v ^ 2 + (u ^ 3 + u ^ 2 + 1) * v = u ^ 2 + u
 
+/-- Affine solutions together with the two distinct infinity tags. -/
+def OptPoint13 (K : Type*) [Field K] :=
+  {uv : K × K // OptEquation13 uv.1 uv.2} ⊕ Bool
+
 /-- The polynomial defining the standard sextic model of X₁(13). -/
 def F13 (K : Type*) [CommRing K] : Polynomial K :=
   Polynomial.X ^ 6 + 4 * Polynomial.X ^ 5 +
