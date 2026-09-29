@@ -1,12 +1,28 @@
 import FLT.Assumptions.MazurProof.N13CurveModel
+import Mathlib.Algebra.Polynomial.Eval.Defs
 import Mathlib.Tactic
 
 set_option autoImplicit false
 set_option relaxedAutoImplicit false
 
+noncomputable section
+
 namespace MazurProof.N13Arithmetic
 
-/-- The sextic is a norm from the quadratic extension obtained by adjoining i. -/
+/-- The polynomial defining the standard sextic model of X₁(13). -/
+def F13 (K : Type*) [CommRing K] : Polynomial K :=
+  Polynomial.X ^ 6 + 4 * Polynomial.X ^ 5 +
+    6 * Polynomial.X ^ 4 + 2 * Polynomial.X ^ 3 +
+    Polynomial.X ^ 2 + 2 * Polynomial.X + 1
+
+/-- A03: polynomial evaluation agrees with the existing rational sextic. -/
+theorem F13_eval (x : ℚ) :
+    (F13 ℚ).eval x = N13CurveModel.sexticF13 x := by
+  simp only [F13, N13CurveModel.sexticF13,
+    Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_pow,
+    Polynomial.eval_X, Polynomial.eval_ofNat, Polynomial.eval_one]
+
+/-- A01: The sextic is a norm from the quadratic extension obtained by adjoining i. -/
 theorem sexticF13_norm_identity (x : ℚ) :
     N13CurveModel.sexticF13 x =
       (x ^ 3 + 2 * x ^ 2 - x - 1) ^ 2 +
@@ -14,7 +30,7 @@ theorem sexticF13_norm_identity (x : ℚ) :
   unfold N13CurveModel.sexticF13
   ring
 
-/-- In particular, no rational affine point is a hyperelliptic branch point. -/
+/-- A02: In particular, no rational affine point is a hyperelliptic branch point. -/
 theorem sexticF13_pos (x : ℚ) :
     0 < N13CurveModel.sexticF13 x := by
   by_cases h : x * (x + 1) = 0
