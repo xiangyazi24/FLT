@@ -1,13 +1,21 @@
 import FLT.Assumptions.MazurProof.N25F_ThreeWOpenPrimeEquiv
 import FLT.Assumptions.MazurProof.N25F_ThreeBoundaryPointClassification
 import FLT.Assumptions.MazurProof.N25F_ThreeWOpenNonempty
+import FLT.Assumptions.MazurProof.N25F_ThreeWOpenMaximalEquiv
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientKummerThreeProjective
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientF2
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientWeil
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientThreeBaseChange
 import FLT.Assumptions.MazurProof.RationalPointsN25QuotientBaseChange
 import FLT.Assumptions.MazurProof.NormalizedProjectiveCurveFrobenius
+import Mathlib.Algebra.MvPolynomial.Eval
+import Mathlib.Data.ZMod.Basic
+import Mathlib.Dynamics.PeriodicPts.Defs
+import Mathlib.FieldTheory.Finite.Basic
+import Mathlib.RingTheory.Ideal.Quotient.Operations
+import Mathlib.RingTheory.IntegralDomain
 import Mathlib.RingTheory.Jacobson.Ring
+import Mathlib.Tactic
 
 set_option autoImplicit false
 set_option relaxedAutoImplicit false
@@ -411,5 +419,203 @@ theorem wChartDenominatorThree_notMem_evalKernel_iff
       projectiveWChartDenominatorThree
         (normalizedCoordinatesThree P.point.1) ≠ 0 :=
       wOpenChartQuotientEvalThree_denominator_ne_zero_iff P
+
+/-- The homogeneous denominator has degree two. -/
+theorem wOpenDenominator_eq_scaled_projectiveDenominator
+    {K : Type} [Field K]
+    (P : CurvePointOnWOpenThree K) :
+    projectiveWChartDenominatorThree (wOpenCoordinatesThree P) =
+      ((normalizedCoordinatesThree P.point.1).w)⁻¹ ^ 2 *
+        projectiveWChartDenominatorThree
+          (normalizedCoordinatesThree P.point.1) := by
+  exact projectiveWChartDenominatorThree_scale
+    ((normalizedCoordinatesThree P.point.1).w)⁻¹
+    (normalizedCoordinatesThree P.point.1)
+
+/-! ## Exact finite-field and exact-period metadata -/
+
+/-- NEW metadata class: characteristic p and cardinality p^d.
+No choice of isomorphism, evaluation property, or geometric open condition
+is included in this class. -/
+class IsCommonField (p d : ℕ) (K : Type*)
+    [Field K] [Fintype K] : Prop where
+  charP : CharP K p
+  card_eq : Fintype.card K = p ^ d
+
+/-- Exact arithmetic-Frobenius period on the actual curve-point carrier.
+The map is the existing curve-point embedding for a ↦ a^3. -/
+def FrobeniusExactPeriod
+    {K : Type} [Field K] [CharP K 3]
+    (d : ℕ) (P : CurvePoint canonicalThreeModel K) : Prop :=
+  Function.minimalPeriod
+    (fun Q : CurvePoint canonicalThreeModel K =>
+      curvePointEmbedding canonicalThreeModel (frobenius K 3) Q) P = d
+
+/-- A finite-field presentation of an exact-period closed point on W ≠ 0.
+It is NOT restricted to the smaller denominator open. -/
+structure ClosedPointOnWOpenThree where
+  d : ℕ
+  K : Type
+  [fieldK : Field K]
+  [fintypeK : Fintype K]
+  [isCommonFieldK : IsCommonField 3 d K]
+  P : CurvePointOnWOpenThree K
+  exact_period :
+    @FrobeniusExactPeriod K fieldK isCommonFieldK.charP d P.point
+
+attribute [instance] ClosedPointOnWOpenThree.fieldK
+attribute [instance] ClosedPointOnWOpenThree.fintypeK
+attribute [instance] ClosedPointOnWOpenThree.isCommonFieldK
+
+/-- The characteristic instance uses this particular stored field
+realization; no unresolved degree metavariable is introduced. -/
+instance closedPointCharPThree (C : ClosedPointOnWOpenThree) :
+    CharP C.K 3 :=
+  C.isCommonFieldK.charP
+
+/-- The ideal attached to the represented closed point is its actual
+evaluation kernel. -/
+def closedPointMaximalIdealThree (C : ClosedPointOnWOpenThree) :
+    Ideal WChartQuotientThree :=
+  RingHom.ker (wOpenChartQuotientEvalThree C.P)
+
+/-! ## Maximality does not require surjectivity onto the chosen field -/
+
+/-- A homomorphism to a finite field has maximal kernel, even when its
+image is a proper subfield of the chosen target. -/
+theorem ker_isMaximal_of_finiteFieldThree
+    {R K : Type*} [CommRing R] [Field K] [Finite K]
+    (f : R →+* K) : (RingHom.ker f).IsMaximal := by
+  letI : (RingHom.ker f).IsPrime := RingHom.ker_isPrime f
+  letI : Finite (R ⧸ RingHom.ker f) :=
+    Finite.of_injective (RingHom.kerLift f) (RingHom.kerLift_injective f)
+  exact Ideal.Quotient.maximal_of_isField (RingHom.ker f)
+    (Finite.isField_of_domain (R ⧸ RingHom.ker f))
+
+/-- This conclusion holds for every record of the requested shape. -/
+theorem closedPointMaximalIdealThree_isMaximal
+    (C : ClosedPointOnWOpenThree) :
+    (closedPointMaximalIdealThree C).IsMaximal := by
+  exact ker_isMaximal_of_finiteFieldThree
+    (wOpenChartQuotientEvalThree C.P)
+
+/-! ## Exact denominator-avoidance criterion -/
+
+/-- Avoidance is exactly nonvanishing on the W = 1 representative. -/
+theorem wChartDenominatorThree_notIn_closedPointMaximalIdealThree_iff
+    (C : ClosedPointOnWOpenThree) :
+    wChartDenominatorThree ∉ closedPointMaximalIdealThree C ↔
+      projectiveWChartDenominatorThree (wOpenCoordinatesThree C.P) ≠ 0 := by
+  change wOpenChartQuotientEvalThree C.P wChartDenominatorThree ≠ 0 ↔ _
+  rw [wOpenChartQuotientEvalThree_denominator]
+
+/-- Equivalently, avoidance is nonvanishing of the homogeneous denominator
+on the original normalized-projective representative. -/
+theorem wChartDenominatorThree_notIn_closedPointMaximalIdealThree_iff_projective
+    (C : ClosedPointOnWOpenThree) :
+    wChartDenominatorThree ∉ closedPointMaximalIdealThree C ↔
+      projectiveWChartDenominatorThree
+        (normalizedCoordinatesThree C.P.point.1) ≠ 0 := by
+  rw [wChartDenominatorThree_notIn_closedPointMaximalIdealThree_iff,
+    wOpenDenominator_eq_scaled_projectiveDenominator]
+  have ha : ((normalizedCoordinatesThree C.P.point.1).w)⁻¹ ^ 2 ≠ 0 :=
+    pow_ne_zero 2 (inv_ne_zero C.P.w_ne_zero)
+  constructor
+  · intro h hD
+    apply h
+    rw [hD, mul_zero]
+  · intro hD
+    exact mul_ne_zero ha hD
+
+/-- The requested name, with the necessary geometric hypothesis explicit.
+Removing hD makes the statement false; see the counterexample below. -/
+theorem wChartDenominatorThree_notIn_closedPointMaximalIdealThree
+    (C : ClosedPointOnWOpenThree)
+    (hD : projectiveWChartDenominatorThree
+      (normalizedCoordinatesThree C.P.point.1) ≠ 0) :
+    wChartDenominatorThree ∉ closedPointMaximalIdealThree C :=
+  (wChartDenominatorThree_notIn_closedPointMaximalIdealThree_iff_projective C).2 hD
+
+/-- Closed-point presentations on the genuinely smaller denominator open.
+This condition is geometric, not a renamed maximal-ideal assertion. -/
+abbrev ClosedPointOnWDenominatorOpenThree :=
+  {C : ClosedPointOnWOpenThree //
+    projectiveWChartDenominatorThree
+      (normalizedCoordinatesThree C.P.point.1) ≠ 0}
+
+/-- On the denominator-open carrier the avoidance conclusion is
+unconditional, because the required open condition is actually stored. -/
+theorem ClosedPointOnWDenominatorOpenThree.denominator_not_mem
+    (C : ClosedPointOnWDenominatorOpenThree) :
+    wChartDenominatorThree ∉ closedPointMaximalIdealThree C.1 :=
+  wChartDenominatorThree_notIn_closedPointMaximalIdealThree C.1 C.2
+
+/-- The direct connection to the existing maximal-ideals-avoiding-D carrier. -/
+def closedPointMaximalIdealAvoidingDThree
+    (C : ClosedPointOnWDenominatorOpenThree) : WChartMaximalAvoidingDThree :=
+  ⟨closedPointMaximalIdealThree C.1,
+    closedPointMaximalIdealThree_isMaximal C.1,
+    C.denominator_not_mem⟩
+
+/-- The corresponding maximal ideal of the actual D-localization. -/
+def closedPointLocalizationMaximalIdealThree
+    (C : ClosedPointOnWDenominatorOpenThree) :
+    {m : Ideal WChartDLocalizationThree // m.IsMaximal} :=
+  wOpenMaximalEquivThree.symm (closedPointMaximalIdealAvoidingDThree C)
+
+/-! ## A degree-one counterexample to unconditional denominator avoidance -/
+
+/-- The actual rational curve point [0:0:0:1]. -/
+def wOriginThree : CurvePointOnWOpenThree (ZMod 3) where
+  point :=
+    ⟨NormalizedProjective4.wChart, by
+      change IsCanonicalNormalizedThree
+        (NormalizedProjective4.wChart : NormalizedProjective4 (ZMod 3))
+      simp [IsCanonicalNormalizedThree, normalizedCoordinatesThree,
+        canonicalQuadric25Three, canonicalCubic25Three]⟩
+  w_ne_zero := by
+    change (1 : ZMod 3) ≠ 0
+    exact one_ne_zero
+
+/-- The wChart constructor is fixed by every coefficient-field
+endomorphism, so this point has exact Frobenius period one. -/
+theorem wOriginThree_exactPeriod :
+    FrobeniusExactPeriod 1 wOriginThree.point := by
+  unfold FrobeniusExactPeriod
+  apply Function.minimalPeriod_eq_one_iff_isFixedPt.mpr
+  apply Subtype.ext
+  rfl
+
+/-- This is a record with precisely the requested finite-field and
+exact-period data, but without an additional denominator-open condition. -/
+def wOriginClosedPointThree : ClosedPointOnWOpenThree where
+  d := 1
+  K := ZMod 3
+  fieldK := inferInstance
+  fintypeK := inferInstance
+  isCommonFieldK :=
+    { charP := inferInstance
+      card_eq := by simp }
+  P := wOriginThree
+  exact_period := wOriginThree_exactPeriod
+
+/-- D lies in the maximal ideal of this exact-period-one W-open point. -/
+theorem wOriginClosedPointThree_denominator_mem :
+    wChartDenominatorThree ∈
+      closedPointMaximalIdealThree wOriginClosedPointThree := by
+  change wOpenChartQuotientEvalThree wOriginThree
+    wChartDenominatorThree = 0
+  rw [wOpenChartQuotientEvalThree_denominator]
+  simp [wOriginThree, wOpenCoordinatesThree, normalizeAtWThree,
+    normalizedCoordinatesThree, scaleCoordinatesThree,
+    projectiveWChartDenominatorThree]
+
+/-- Formal rejection of the requested unconditional final theorem. -/
+theorem not_forall_wChartDenominatorThree_notIn_closedPointMaximalIdealThree :
+    ¬ ∀ C : ClosedPointOnWOpenThree,
+      wChartDenominatorThree ∉ closedPointMaximalIdealThree C := by
+  intro h
+  exact h wOriginClosedPointThree
+    wOriginClosedPointThree_denominator_mem
 
 end MazurProof.N25F_ThreeWOpenClosedPoints
