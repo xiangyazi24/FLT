@@ -1,4 +1,5 @@
 import FLT.Assumptions.MazurProof.N13CurveModel
+import Mathlib.Algebra.Polynomial.Basic
 import Mathlib.Algebra.Polynomial.Eval.Defs
 import Mathlib.Tactic
 
@@ -14,6 +15,14 @@ def F13 (K : Type*) [CommRing K] : Polynomial K :=
   Polynomial.X ^ 6 + 4 * Polynomial.X ^ 5 +
     6 * Polynomial.X ^ 4 + 2 * Polynomial.X ^ 3 +
     Polynomial.X ^ 2 + 2 * Polynomial.X + 1
+
+/-- The cubic occurring in the sum-of-squares identity for F13. -/
+def A13 (K : Type*) [CommRing K] : Polynomial K :=
+  Polynomial.X ^ 3 + 2 * Polynomial.X ^ 2 - Polynomial.X - 1
+
+/-- The quadratic occurring in the sum-of-squares identity for F13. -/
+def B13 (K : Type*) [CommRing K] : Polynomial K :=
+  Polynomial.X * (Polynomial.X + 1)
 
 /-- A03: polynomial evaluation agrees with the existing rational sextic. -/
 theorem F13_eval (x : ℚ) :
@@ -46,5 +55,33 @@ theorem sexticF13_pos (x : ℚ) :
     have hB : 0 < (x * (x + 1)) ^ 2 :=
       sq_pos_of_ne_zero h
     nlinarith
+
+/-- A05: Over a commutative ring containing a square root of -1, the sextic
+factors as the product of the two indicated cubics. -/
+theorem F13_quadratic_factorization
+    {K : Type*} [CommRing K] (i : K) (hi : i ^ 2 = -1) :
+    F13 K =
+      (A13 K + Polynomial.C (2 * i) * B13 K) *
+      (A13 K - Polynomial.C (2 * i) * B13 K) := by
+  have hsq : (2 * i) ^ 2 = (-4 : K) := by
+    calc
+      (2 * i) ^ 2 = 4 * i ^ 2 := by ring
+      _ = -4 := by
+        rw [hi]
+        ring
+  have hC : (Polynomial.C (2 * i) : Polynomial K) ^ 2 = -4 := by
+    simpa only [Polynomial.C_pow, map_neg, Polynomial.C_ofNat] using
+      congrArg (fun a : K => (Polynomial.C a : Polynomial K)) hsq
+  calc
+    F13 K = A13 K ^ 2 + 4 * B13 K ^ 2 := by
+      unfold F13 A13 B13
+      ring
+    _ = A13 K ^ 2 -
+        (Polynomial.C (2 * i) : Polynomial K) ^ 2 * B13 K ^ 2 := by
+      rw [hC]
+      ring
+    _ = (A13 K + Polynomial.C (2 * i) * B13 K) *
+        (A13 K - Polynomial.C (2 * i) * B13 K) := by
+      ring
 
 end MazurProof.N13Arithmetic
