@@ -526,7 +526,7 @@ Committed: `a3f09fba02`.
 ### Pending questions
 
 - Q8434 (W-open residue degree): processing (NOTION)
-- Q8437 (W-open local ring structure): processing  
+- Q8437 (W-open local ring structure): processing
 - Q8440 (W-open closed point carrier): processing (GITHUB)
 
 ### W-open nonempty proof update (2026-09-28)
@@ -626,4 +626,123 @@ Sent Q8466-Q8470 to replace answered Q8463/Q8465:
 - Q8468: W-open closed points structure
 - Q8469: W-open evaluation surjectivity
 - Q8470: W-open evaluation kernel
+
+## FLT-20260930-01 execution (2026-09-30)
+
+### Step 1: N13FiniteCounts build
+
+Started N13FiniteCounts build in background:
+```
+nohup lake build FLT.Assumptions.MazurProof.N13FiniteCounts 2>&1 | tail -5 > ~/tmp/b_n13fc.txt 2>&1 &
+```
+Build running (PID 1343993, restarted after initial slow start).
+
+### Step 2: B01 integration (Q8503)
+
+Created N13Jacobian.lean with B01 (AJ13_injective) from Q8503-eab6add0.md:
+- AffinePoint13: rational affine points on sextic model
+- Point13: affine points plus two infinity tags (O=infinityPlus, T=infinityMinus)
+- point13EquivCurvePoint: equivalence to SexticMumford.CurvePoint
+- J13: ConcretePic Q (oriented fractional-ideal presentation)
+- AJ13: Abel-Jacobi map with O as base point
+- AJ13_injective: B01 theorem (reuses N13MumfordAbelJacobi.abelJacobi_injective)
+- AJ13_infinityPlus: base point maps to identity
+
+Build started in background: `lake build FLT.Assumptions.MazurProof.N13Jacobian`
+
+### Step 3: B03 integration (Q8637)
+
+Integrated B03 (divisor_uPlusOne13) from Q8637-1d6f51ab.md into N13Jacobian.lean:
+- RatFun13, AffineDiv13, Div13: divisor carrier types
+- pt13: point divisor map
+- ratDiv13: principal divisor of rational function
+- uPlusOneFn13: function u+1 = -X
+- divisor_uPlusOne13: ratDiv13 uPlusOneFn13 = pt13 C + pt13 D - pt13 O - pt13 T
+
+Build running in background.
+
+### ChatGPT questions dispatched
+
+- Q8637 (B03): sent, answer received
+- Q8638 (B06): sent, answer received
+- Q8639 (C06): sent, answer received
+- Q8640 (C07): sent, answer received
+- Q8644 (C08): answer received
+- Q8646 (D04): answer received
+- Q8648 (D05): answer received (GIT-DROP)
+- Q8651 (D12): answer received
+
+New questions sent:
+- Q8652-Q8655 (D16, D18, D19, E02): sent via c13_ask.sh
+- Q8656 (E07): sent via c13_ask.sh
+
+### D16 (Q8652) gap log
+
+Verdict: **No complete proof at commit 6576b87985**.
+
+The D16 statement requires concrete objects (`r2_13`, `Code13`, `code13`, `M2_13`, `loc2`, `JAt2`, `deltaAt2`) that do not exist at this commit. More importantly, the naive three-row matrix implementation is **mathematically unsound** for the fake square-class target.
+
+Key obstruction: `N13GaussianRamifiedNormalization.globalPi_sq` proves `pi^2 = 2 * (-zeta)`, hence `zeta * pi^2 = 2` (since `zeta^2 = -1`). Therefore the fake square class of `zeta` in `L*/(L*^2 * Q*)` is the identity. But `candidateDlog 1 0 0 0 = 1`, so the constant-coordinate row does NOT descend to the fake square-class quotient.
+
+The correct first-jet invariant after ramified normalization gives only two rows:
+- `[0,0,1,1]` (c + d = 0)
+- `[0,1,1,1]` (b + c + d = 0)
+
+These annihilate the two explicit relation vectors: `zeta` relation `(1,0,0,0)` and `survivor` relation `(0,0,1,1)`.
+
+The missing theorem is the local Q_2 Mumford/Kummer normalization bridge (generalizing `N13GaussianLowDegreeNormalization` from `Q[X]` to `Q_2[X]`). Once that exists, D16 can be proved by:
+1. Unpack `h` to a local Jacobian class
+2. Obtain a normalized zero-dlog candidate
+3. Apply `local_row2_firstJet_core13`
+4. Identify the two resulting equations with certified rows of `M2_13`
+
+The finite core lemma `local_row2_firstJet_core13` can be proved now (no sorry/axiom), but it deliberately does not pretend the local-Jacobian premise has been converted to the existential normalization hypothesis.
+
+### Build status (2026-09-30)
+
+N13Jacobian build running (PID 1425223, ~15 minutes elapsed).
+N13FiniteCounts build running (restarted in background).
+
+Per coordinator instruction: do NOT kill builds (kill -9 forbidden; host is slow, builds take 30-60 min).
+
+### Answers received and pending integration
+
+- Q8637 (B03): divisor_uPlusOne13 - integrated into N13Jacobian.lean
+- Q8638 (B06): sigma13_cusps - pending (requires N13ProjectiveModel.lean)
+- Q8644 (C08): card_J19 - gap (J3 not defined; needs C05/C06 first)
+- Q8645 (D02): normalized_root_field_equiv13 - pending
+- Q8646 (D04): discr_L13 = -10816 - pending
+- Q8648 (D05): no_small_prime_ideal13 - pending
+- Q8649 (D09): units_mod_squares13 - pending
+- Q8651 (D12): delta13_unramified - pending
+- Q8652 (D16): GAP - no complete proof at current commit (naive 3-row matrix unsound)
+- Q8653 (D18): relation_columns_zero13 - statement correct, pending integration
+- Q8654 (D19): descent_matrix_elimination13 - statement correct, 2-adic rows alone suffice
+- Q8655 (E02): depth2_top_iff - statement correct, pending integration
+- Q8657 (D14): global_code_complete13 - statement correct, pending integration (proves n13=4)
+- Q8662 (D15): delta13_basechange2 - gap (local fake-Kummer objects not defined)
+- Q8663: D18 analysis - confirms D18 needs relation-column soundness theorem
+- Q8664 (E07): nineteen_into_kernel2 - statement correct, needs C07 (card_J2=19) first
+- Q8667 (E09): received, pending
+- Q8669 (E14): received, pending
+- Q8670 (F03): received, pending
+
+### ChatGPT tabs status
+
+Only flt11/flt14 working (flt12/13 broken per coordinator).
+All codes sent (F03 was last).
+
+### Integration status (2026-09-30)
+
+Per coordinator instruction: WAIT for N13Interface consolidation question before integrating D-block answers (L13/J13/Kummer13 defined differently in 6 answers).
+
+### N13Jacobian build status
+
+N13Jacobian.lean build completed successfully (8599 jobs, 25s) at 2026-09-30 07:XX.
+
+Fixed issues:
+1. Linter error: removed empty line within `by` block at line 326
+2. Duplicate declarations: removed Point13, O, T, C, D from N13Jacobian.lean (they're in N13ProjectiveModel.lean)
+
+B01 (AJ13_injective) and B03 (divisor_uPlusOne13) are now integrated and built.
 
