@@ -746,3 +746,43 @@ Fixed issues:
 
 B01 (AJ13_injective) and B03 (divisor_uPlusOne13) are now integrated and built.
 
+Committed: 0af80112ae (verified axiom-clean by coordinator)
+
+## FLT-20260930-02: Route change (2026-09-30)
+
+Per coordinator: STOP C06, C07, C08, D15, D16 and descent-certificate matrices.
+New route: Q8677 §5, steps R01-R18 (reuse rational Mumford Picard group, global Kummer triviality).
+
+### R04 integration (Q8679)
+
+Created N13CoherentSpecialization.lean with R04 exactSpecialClass:
+- Maps each rational Picard class to the special class of its fixed coherent exact normalized spread
+- Uses N13RationalPicardSpreadExistence.exactSpreadLine and N13RationalCurvePointPicardRealization.specialClass
+
+Build: 8807 jobs, 25s
+
+Committed: 81d654be06
+
+## FLT-20260930-03: Route decision (2026-09-30)
+
+Per coordinator verification: Q8677 route is FLAWED at exactSpreadLine.
+The counterexample (Q8682) is REAL: infinityPlusData.reorientData keeps the
+special divisor, so the degree-zero branch does not preserve specialization coherence.
+
+DECISION: Do NOT integrate R05, R06, R07, R08 (and old R09). These steps depend
+on exactSpreadLine coherence which does not hold.
+
+### R09 counterexample integration (Q8682)
+
+Created N13CoherentPointReduction.lean with verified file:
+- pointSpreadLine_specialClass_rationalAbel: pointwise R09 theorem (corrected)
+- Counterexample showing exactSpreadLine is not specialization-coherent
+
+Build: 8807 jobs, linter warnings only
+
+Committed: TBD
+
+Pending: Option B repair from ChatGPT (~/tmp/flt-coordinator/sprint/ans_optionB.txt)
+
+✔ [8570/8570] Built FLT.Assumptions.MazurProof.N13SpecialAbelCode (24s)
+Build completed successfully (8570 jobs).
