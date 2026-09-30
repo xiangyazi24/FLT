@@ -790,3 +790,16 @@ Build completed successfully (8570 jobs).
 ### 2026-09-30 coordinator sprint: Q8717 A03-A07 done (N13SpecialAbelCodeQuotient.lean)
 - divisorCode_eq_iff_abelRel (A03/A04; finite separation dcodeBP_separates by decide on Sym2 (BasePoint x K)), picCode (A05), picCode_injective/picCode_bijective (A06), specialTranslateCode + picCode_specialTranslateCode, _zero, _add (A07).
 - lake build OK; #print axioms all [propext, Classical.choice, Quot.sound]. Remaining on this route: B00 chooser repair, B03 specialization additivity.
+
+### 2026-09-30 15:45 (coordinator sprint fork) — nInf = 2 witness audit; cusp relation C + A
+- Q8689's DegreeZeroTwoWitness fixes the special divisor to inverseInfinityDivisor = s(zeroMinus, negOneMinus) = D + B.
+  With the proved AJ13 D + AJ13 B = 3 • AJ13 T (anchor O = infinityPlus, reference divisor 2O as in infinityPlusData /
+  infinityMinusData), D + B - 2O ~ 3(T - O), while the nInf = 2 class is O - T. So D + B is the WRONG special divisor
+  (would need 4(T - O) ~ 0). Q8689 guessed D + B from an assumed relation D + B = -T that is false.
+- Correct pair: the hyperelliptic conjugates C = (0,1) = zeroPlus, A = (-1,1) = negOnePlus. New file N13CuspCARelation.lean
+  proves AJ13 C + AJ13 A = -AJ13 T (via div(Y + s) = C + A + T - 3O); axioms standard only.
+- Remaining for the witness (not done): (1) a saturated two-chart Data for the split quadratic u = X(X+1), v = 1 over Q2
+  (N13SplitQuadraticPicardRealization.exists_saturated_data_of_distinct_split gives it, but its special divisor Δ is
+  existential: need Δ = s(sp zeroPlus, sp negOnePlus), i.e. injectivity/computation of ofDivisor on this chart pair);
+  (2) its generic class = classOf oppositeInfinityMumford in GenericPic: transport AJ13_C_add_A_eq_neg_T through
+  N13InfinityBaseChange.picMapRatToQ2 and identify classOf oppositeInfinityMumford with -(image of AJ13 T).
