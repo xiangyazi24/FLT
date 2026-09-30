@@ -786,3 +786,7 @@ Pending: Option B repair from ChatGPT (~/tmp/flt-coordinator/sprint/ans_optionB.
 
 ✔ [8570/8570] Built FLT.Assumptions.MazurProof.N13SpecialAbelCode (24s)
 Build completed successfully (8570 jobs).
+
+### 2026-09-30 coordinator sprint: Q8717 A03-A07 done (N13SpecialAbelCodeQuotient.lean)
+- divisorCode_eq_iff_abelRel (A03/A04; finite separation dcodeBP_separates by decide on Sym2 (BasePoint x K)), picCode (A05), picCode_injective/picCode_bijective (A06), specialTranslateCode + picCode_specialTranslateCode, _zero, _add (A07).
+- lake build OK; #print axioms all [propext, Classical.choice, Quot.sound]. Remaining on this route: B00 chooser repair, B03 specialization additivity.
