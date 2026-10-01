@@ -803,3 +803,8 @@ Build completed successfully (8570 jobs).
   existential: need Δ = s(sp zeroPlus, sp negOnePlus), i.e. injectivity/computation of ofDivisor on this chart pair);
   (2) its generic class = classOf oppositeInfinityMumford in GenericPic: transport AJ13_C_add_A_eq_neg_T through
   N13InfinityBaseChange.picMapRatToQ2 and identify classOf oppositeInfinityMumford with -(image of AJ13 T).
+
+### 2026-09-30 20:35 coordinator sprint: nInf=2 witness, piece 1
+N13InverseInfinityData.lean: reducedPairDivisor_inverseInfinity — the literal reduced special divisor of the split quadratic
+u = X(X+1), v = 1 (roots 0, -1; good ordinates goodY 0 1 = 0, goodY (-1) 1 = 1) is s(specialCuspEquiv zeroPlus,
+specialCuspEquiv negOnePlus) = C + A. Build OK; axioms standard. Piece 2 (generic class = oppositeInfinityMumford class) open.
